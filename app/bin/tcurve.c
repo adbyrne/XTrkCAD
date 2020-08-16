@@ -271,7 +271,7 @@ static void DrawCurveDescription(
 		Translate(&end0,xx->pos,a0,xx->radius);
 		Translate(&end1,xx->pos,a0+a1,xx->radius);
 		off = xx->radius-(cos(D2R(a1/2))*xx->radius);
-		sprintf( message, "L %0.3f A %0.3f O %0.3f", FindDistance(end0,end1),FindAngle(end1,end0), off);
+		sprintf( message, "L %s A %0.3f O %s", FormatDistance(FindDistance(end0,end1)),FindAngle(end1,end0), FormatDistance(off));
 		DrawDimLine( d, end0, end1, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
 	}
 }

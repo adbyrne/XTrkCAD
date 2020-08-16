@@ -392,7 +392,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 					ClrTrkBits( trk, TB_SELECTED );
 				if (!doRedraw)
 					SetTrkBits( trk, TB_SELREDRAW );
-					DrawTrackAndEndPts( trk, wDrawColorBlack );
+				DrawTrackAndEndPts( trk, wDrawColorBlack );
 			}
 		}
 	}

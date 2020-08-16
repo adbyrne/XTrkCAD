@@ -278,13 +278,7 @@ static void DrawStraightDescription(
 		wDrawColor color )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	wFont_p fp;
-	coOrd pos, p0, p1;
-	DIST_T elev0, elev1, dist, grade=0, sep=0;
-	BOOL_T elevValid;
 	ANGLE_T a;
-
-
 
 	if (layoutLabels == 0)
 		return;
@@ -299,7 +293,7 @@ static void DrawStraightDescription(
 	DrawLine(d,end0,end0off,0,color);
 	Translate(&end1off,end1,a+90,2*trackGauge);
 	DrawLine(d,end1,end1off,0,color);
-	sprintf( message, "L %0.3f A %0.3f", FindDistance(end0,end1),FindAngle(end0,end1));
+	sprintf( message, "L %s A %0.3f", FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1));
 	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
 
 }

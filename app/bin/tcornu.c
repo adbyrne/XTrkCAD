@@ -219,9 +219,48 @@ static void DrawCornuDescription(
     pos.y += xx->cornuData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
 
-    sprintf( message, _("Cornu: len=%0.2f min_rad=%0.2f"),
-						xx->cornuData.length, (xx->cornuData.minCurveRadius>=10000.00)?0.0:xx->cornuData.minCurveRadius);
-    DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
+    sprintf( message, _("Cornu: L %s A %0.3f trk_len=%s min_rad=%s"),
+    		FormatDistance(FindDistance(xx->cornuData.pos[0], xx->cornuData.pos[1])),
+    		FindAngle(xx->cornuData.pos[0], xx->cornuData.pos[1]),
+			FormatDistance(xx->cornuData.length),
+			FormatDistance((xx->cornuData.minCurveRadius>=10000.00)?0.0:xx->cornuData.minCurveRadius));
+    DrawDimLine( d, xx->cornuData.pos[0], xx->cornuData.pos[1], message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+#define CORNU_DESC_LENGTH 6.0;
+    double division;
+    division = xx->cornuData.length/CORNU_DESC_LENGTH;
+    division = ceil(division);
+    DIST_T dist = xx->cornuData.length/division;
+    traverseTrack_t tt;
+    tt.trk = trk;
+    tt.angle = xx->cornuData.a[0]+180.0;
+    tt.pos = xx->cornuData.pos[0];
+    dynArr_t pos_array;
+    pos_array.max = 0;
+    pos_array.cnt = 0;
+    pos_array.ptr = NULL;
+    DYNARR_SET(coOrd,pos_array,division+2);
+    DYNARR_N(coOrd,pos_array,0) = tt.pos;
+    for (int i=0;i<pos_array.cnt-1;i++) {
+    	tt.dist = dist;
+    	TraverseTrack(&tt,&dist);
+    	if (tt.trk != trk) {
+    		DYNARR_N(coOrd,pos_array,i+1) = xx->cornuData.pos[1];
+    		break;
+    	}
+    	DYNARR_N(coOrd,pos_array,i+1) = tt.pos;
+    }
+    message[0]='\0';
+    for (int i=0;i<pos_array.cnt;i++) {
+    	REORIGIN(DYNARR_N(coOrd,pos_array,i),DYNARR_N(coOrd,pos_array,i),NormalizeAngle(xx->cornuData.a[0]+180.0),xx->cornuData.pos[0]);
+    	sprintf( message, _("%s[%0.3f,%0.3f]\n"),message,PutDim(DYNARR_N(coOrd,pos_array,i).x),PutDim(DYNARR_N(coOrd,pos_array,i).y));
+    }
+    DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,0.0);
+    if (pos_array.ptr)
+    	MyFree(pos_array.ptr);
+    pos_array.ptr = 0;
+    pos_array.max = 0;
+    pos_array.cnt = 0;
 }
 
 

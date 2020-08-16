@@ -760,6 +760,40 @@ EXPORT coOrd GetJointSegEndPos(
 	return p1;
 }
 
+static void DrawJointDescription(
+		track_p trk,
+		drawCmd_p d,
+		wDrawColor color )
+{
+	struct extraData *xx = GetTrkExtraData(trk);
+	wFont_p fp;
+	coOrd pos, p0, p1;
+	DIST_T elev0, elev1, dist, grade=0, sep=0;
+	BOOL_T elevValid;
+	ANGLE_T a;
+
+
+
+	if (layoutLabels == 0)
+		return;
+	if ((labelEnable&LABELENABLE_TRKDESC)==0)
+		return;
+
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*trackGauge);
+	DrawLine(d,end0,end0off,0,color);
+	Translate(&end1off,end1,a+90,2*trackGauge);
+	DrawLine(d,end1,end1off,0,color);
+
+	sprintf( message, "Joint: L %s A %0.3f, l0 %s l1 %s R %s L %s",
+			FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1),
+			FormatDistance(xx->l0), FormatDistance(xx->l1), FormatDistance(xx->R), FormatDistance(xx->L));
+	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+}
+
 
 EXPORT void DrawJointTrack(
 		drawCmd_p d,
@@ -833,6 +867,13 @@ LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
 	}
 	DrawEndPt( d, trk, ep0, color );
 	DrawEndPt( d, trk, ep1, color );
+	if (((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
+		   (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+		   labelScale >= d->scale &&
+		   ( GetTrkBits( trk ) & TB_HIDEDESC ) == 0 ) {
+		  DrawJointDescription( trk, d, color );
+	}
+
 }
 
 
