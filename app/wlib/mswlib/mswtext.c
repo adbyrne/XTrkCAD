@@ -58,8 +58,6 @@ struct wText_t {
     HANDLE hText;
 };
 
-BOOL_T textPrintAbort = FALSE;
-
 
 void wTextClear(
     wText_p b)
@@ -223,7 +221,7 @@ BOOL_T wTextPrint(
 
         if (++currentLine > linesPerPage) {
             IOStatus = EndPage(hDc);
-            if (IOStatus < 0 || textPrintAbort) {
+            if (IOStatus < 0 ) {
                 break;
             }
             StartPage(hDc);
@@ -231,7 +229,7 @@ BOOL_T wTextPrint(
 		}
     }
 
-    if (IOStatus >= 0 && !textPrintAbort) {
+    if (IOStatus >= 0 ) {
         EndPage(hDc);
         EndDoc(hDc);
     }

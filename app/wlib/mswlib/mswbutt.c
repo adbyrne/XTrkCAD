@@ -27,7 +27,6 @@
 #include <commdlg.h>
 #include <math.h>
 #include "mswint.h"
-int kludge12 = 0;
 
 /** Macros for button repeat timers */
 #define REPEAT_STAGE0_DELAY 500

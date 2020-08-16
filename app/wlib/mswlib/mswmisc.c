@@ -69,7 +69,6 @@ char * mswStrdup(const char *);
  * EXPORTED VARIABLES
  */
 
-long debugWindow = 0;
 HINSTANCE mswHInst;
 HWND mswHWnd = (HWND)0;
 
@@ -77,7 +76,6 @@ const char *mswDrawWindowClassName = "DRAWWINDOW";
 char mswTmpBuff[1024];
 int mswEditHeight;
 int mswAllowBalloonHelp = TRUE;
-int mswGroupStyle;
 HFONT mswOldTextFont;
 HFONT mswLabelFont;
 long mswThickFont = 1;
@@ -131,8 +129,8 @@ static int mResizeBorderH;
 static int mMenuH;
 static int screenWidth = 0, screenHeight = 0;
 
-wWin_p mswWin = NULL;
-wWin_p winFirst, winLast;
+static wWin_p mswWin = NULL;
+static wWin_p winFirst, winLast;
 
 static long count51 = 0;
 
@@ -160,7 +158,7 @@ static DWORD dwCookie;
 typedef struct {
     wControl_p b;
 } controlMap_t;
-dynArr_t controlMap_da;
+static dynArr_t controlMap_da;
 #define controlMap(N) DYNARR_N(controlMap_t,controlMap_da,N)
 
 
@@ -177,7 +175,7 @@ static FILE * helpStrF;
 #endif
 static int inMainWndProc = FALSE;
 
-int newHelp = 1;
+static int newHelp = 1;
 
 static wBool_t mswWinBlockEnabled = TRUE;
 
@@ -187,7 +185,7 @@ static int dumpControls;
 extern char *userLocale;
 
 // list of supported fileformats for image files
-char * filterImageFiles[] = { N_("All image files"),
+static char * filterImageFiles[] = { N_("All image files"),
 							"*.gif;*.jpg;*.jpeg;*.png;*.tif;*.tiff",
 							N_("GIF files (*.gif)"),
 							"*.gif",
@@ -1077,7 +1075,7 @@ static wAccelKey_e translateExtKey(UINT wParam)
 }
 
 
-long notModKey;
+static long notModKey;
 int mswTranslateAccelerator(
     HWND hWnd,
     LPMSG pMsg)

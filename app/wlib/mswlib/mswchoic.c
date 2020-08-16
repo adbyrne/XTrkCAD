@@ -15,8 +15,8 @@
  *****************************************************************************
  */
 
-int CHOICE_HEIGHT=(17);
-int CHOICE_MIN_WIDTH=25;
+#define CHOICE_HEIGHT (17)
+#define CHOICE_MIN_WIDTH (25)
 
 static XWNDPROC oldChoiceItemProc = NULL;
 static XWNDPROC newChoiceItemProc;

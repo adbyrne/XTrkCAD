@@ -18,12 +18,12 @@
  */
 
 
-struct wDraw_t print_d;
+static struct wDraw_t print_d;
 
 #ifdef WIN32
-struct tagPDA printDlg;
+static struct tagPDA printDlg;
 #else
-struct tagPD printDlg;
+static struct tagPD printDlg;
 #endif
 static int printStatus = FALSE;
 static DOCINFO docInfo;
@@ -255,8 +255,8 @@ HDC mswGetPrinterDC( void )
 
 
 static wBool_t printAbort = FALSE;
-HWND hAbortDlgWnd;
-FARPROC lpAbortDlg, lpAbortProc;
+static HWND hAbortDlgWnd;
+static FARPROC lpAbortDlg, lpAbortProc;
 static int pageNumber;
 
 int FAR PASCAL mswAbortDlg( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
