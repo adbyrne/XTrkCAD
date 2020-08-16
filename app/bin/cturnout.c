@@ -297,7 +297,9 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 	return(ret);
 }
 
-
+/*
+ * Check Paths will assume new-P or old-P order is possible and doesn't not change it
+ */
 EXPORT wIndex_t CheckPaths(
 		wIndex_t segCnt,
 		trkSeg_p segs,
@@ -307,32 +309,35 @@ EXPORT wIndex_t CheckPaths(
 	int pc, ps;
 	PATHPTR_T pp = 0;
 	int inx;
-	static dynArr_t segMap_da;
+
 	int segInx[2], segEp[2];
 	int segTrkLast = -1;
 	
 	// Check that each track segment is on at least one path
+	// Note - In new-P the tracks may be preceded by draws (or interspersed by them)
 	int suppressCheckPaths = log_suppressCheckPaths > 0 ? logTable(log_suppressCheckPaths).level : 0;
 	if ( suppressCheckPaths == 0 ) {
-		char trkSegInx = 0;
 		for ( int inx = 0; inx<segCnt; inx++ ) {
 			if ( IsSegTrack( &segs[inx] ) ) {
-				trkSegInx++;
 				PATHPTR_T cp = paths;
 				while ( *cp ) {
-					// path is: 'N' 'A' 'M' 'E' 0 1 2 0 3 4 0 0
-					// skip name
-					for ( ; *cp; cp++ );
-					cp++;
+					// 0-9 are x00 to x09 or the negative equivalent (backwards)
+					// Pathlist is: Path00Path000
+					// Path is: NAME01203400
+					for ( ; *cp; cp++ );  //Skip Name
+					cp++; //Skip 0 after name
 					// check each path component 
-					for ( ; cp[0] || cp[1];  cp++ )
-						if ( abs(*cp) == trkSegInx )
-							 break;
+					for ( ; cp[0] || cp[1];  cp++ ) {  //keeps going even if there are two or more parts
+						if (!cp[0]) continue;   //ignore the 0 between parts of the same PATH!!
+						GetSegInxEP( cp[0], &segInx[0], &segEp[0] ); //GetSegInxEP subtracts one to match inx
+						if ( segInx[0] == inx ) break;  //Found it!
+					}
 					if ( *cp )	// we broke early
-						break;
-					cp += 2;; // Skip 2nd 0
+						break;  // get out - we found it
+					cp++;
+					cp++;  // Go to next path - past two 0s
 				}
-				if ( !*cp ) {	// we looked and didn't find
+				if ( !*cp ) {	// we looked through all the paths and didn't find it
 					InputError( "Track segment %d not on Path",  FALSE, inx+1 );
 					return -1;;
 				}
@@ -340,70 +345,24 @@ EXPORT wIndex_t CheckPaths(
 		}
 	}
 
-typedef struct {
-	trkSeg_p seg;
-	int indx;
-} segMap_t, * segMap_p;
-
-#define segMap(N) DYNARR_N( segMap_t, segMap_da, N )
-	segMap_p sg;
-	DYNARR_RESET( segMap_t, segMap_da );
-	// Don't reshuffle segs, but build an offset map instead just of the tracks
-	// Use the map to set up the paths to point at the correct segs in the Turnout
-	for ( inx=0; inx<segCnt; inx++ ) {
-		if ( IsSegTrack(&segs[inx]) ) {
-			DYNARR_APPEND( segMap_t, segMap_da, 10 );
-			sg = &DYNARR_LAST(segMap_t,segMap_da);
-			sg->seg = &segs[inx];
-			sg->indx = inx;
-		}
-	}
-
 	for ( pc=0,pp=paths; *pp; pp+=2,pc++ ) {
 		for ( ps=0,pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++,ps++ ) {
-#ifdef LATER
-			if (*pp >= '0' && *pp <= '9')
-				*pp -= '0';
-			else if (*pp >= 'A' && *pp <= 'Z')
-				*pp -= 'A' - 10;
-			if (*pp < 0 || *pp > segCnt) {
-				InputError( _("Turnout path[%d:%d] out of bounds: %d"),
-						FALSE, pc, ps, *pp);
-				return -1;
-			}
-#endif
-			//Rewrite the Path to point to the nth Track seg using the Map
 			int old_inx;
 			EPINX_T old_EP;
 			if (pp[0]!=0 && ps==0) {  // First or only one
-				GetSegInxEP( pp[0], &old_inx, &old_EP );
-				if (old_inx<0 || old_inx>= segMap_da.cnt) {
-					InputError( _("Turnout path[%d] %d is not a valid track segment"),
-						FALSE, pc, ps );
-					return -1;
-				}
-				SetSegInxEP( &pp[0], DYNARR_N(segMap_t,segMap_da,old_inx).indx, old_EP);
 			}
 			if (pp[0]!=0 && pp[1]!=0 ) {
-				//Rewrite the Path to point to the nth Track seg using the Map
-				GetSegInxEP( pp[1], &old_inx, &old_EP );
-				if (old_inx<0 || old_inx>= segMap_da.cnt) {
-					InputError( _("Turnout path[%d] %d is not a valid track segment"),
-						FALSE, pc, ps );
-					return -1;
-				}
-				SetSegInxEP( &pp[1], DYNARR_N(segMap_t,segMap_da,old_inx).indx, old_EP);
 				/* check connectivity */
 				DIST_T d;
 				GetSegInxEP( pp[0], &segInx[0], &segEp[0] );
 				GetSegInxEP( pp[1], &segInx[1], &segEp[1] );
 				if ( !IsSegTrack( &segs[segInx[0]] ) ) {
-					InputError( _("Turnout path[%d] %d is not a track segment"),
+					InputError( _("CheckPath: Turnout path[%d] %d is not a track segment"),
 						FALSE, pc, pp[0] );
 					return -1;
 				}
 				if ( !IsSegTrack( &segs[segInx[1]] ) ) {
-					InputError( _("Turnout path[%d] %d is not a track segment"),
+					InputError( _("CheckPath: Turnout path[%d] %d is not a track segment"),
 						FALSE, pc, pp[1] );
 					return -1;
 				}
@@ -411,7 +370,7 @@ typedef struct {
 				coOrd p1 = GetSegEndPt( &segs[segInx[1]], segEp[1], FALSE, NULL );
 				d = FindDistance(p0,p1);
 				if (d > MIN_TURNOUT_SEG_CONNECT_DIST) {
-					InputError( _("Turnout path[%d] %d-%d not connected: %0.3f P0(%f,%f) P1(%f,%f)"),
+					InputError( _("CheckPath: Turnout path[%d] %d-%d not connected: %0.3f P0(%f,%f) P1(%f,%f)"),
 						FALSE, pc, pp[0], pp[1], d, p0.x, p0.y, p1.x, p1.y );
 					return -1;
 				}
