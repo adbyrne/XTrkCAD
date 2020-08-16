@@ -76,7 +76,8 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Split Track} - the \f{Split Track} (\K{cmdSplitTrack}) command can be used in one of two ways;
+\dd \f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or draw objects (\K{cmdSplitDraw}). 
+The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \lcont{
 
@@ -1672,12 +1673,15 @@ Notes:
 
 \rule
 
+\S{cmdSplit} Split Commands
 
-\S{cmdSplitTrack} Split Track
+There are two split commands, \K{cmdSplitTrack} and \K{cmdSplitDraw}. 
+
+\S2{cmdSplitTrack} Split Track
 
 \G{png.d/bsplit.png}
 
-The \f{Split} command provides several functions. It can be used to disconnect the joint between two sections of connected track, to divide a section of track into two pieces at a selected point or to place block gaps at an existing joint.
+The \f{Split Track} command provides several functions. It can be used to disconnect the joint between two sections of connected track, to divide a section of track into two pieces at a selected point or to place block gaps at an existing joint.
 
 Until a split point is selected, the split point under the cursor will have a blue marker and if it is near a connected end a blue "X" will indicate that a split will occur.
 
@@ -1739,11 +1743,11 @@ For detail about;
 \rule
 
 
-\S2{splitDivide} Divide Track
+\S3{splitDivide} Divide Track
 
 Dividing a section of flex track into two connected pieces;
 
-\n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
+\n Click the \f{Split Track} button (\G{png.d/bsplit.png}) to activate the \f{Split Track} command.
 
 \n Place the mouse pointer over the point on the track where the it should be divided. A blue anchor bar across the track under the cursor will indicate the current split point. Then \e{Left-Click}.
 
@@ -1751,7 +1755,7 @@ Dividing a section of flex track into two connected pieces;
 
 \lcont{\u000}
 
-\dd When the \f{Split} command completes, a connected joint will appear in the track at the point of selection. To split and disconnect at a point, execute the \f{Split} track command twice. The first command will split the track, the second command will disconnect it.
+\dd When the \f{Split Track} command completes, a connected joint will appear in the track at the point of selection. To split and disconnect at a point, execute the \f{Split} track command twice. The first command will split the track, the second command will disconnect it.
 
 \u000
 
@@ -1786,7 +1790,7 @@ For detail about;
 \rule
 
 
-\S2{splitBlockGap} Adding \i{Block Gaps}
+\S3{splitBlockGap} Adding \i{Block Gaps}
 
 The \f{Split} command can be used to add block gaps (\K{generalTerms}) at the point where two track endpoints join. Block gaps are drawn as a thick line and can be placed in either of the rails or both if total isolation is required.
 
@@ -1839,3 +1843,12 @@ For detail about;
 \dd Dividing a section of track into two connected pieces see \K{splitDivide}.
 
 \rule
+
+\S2{cmdSplitDraw} Split a Draw Object
+
+The \f{Split Draw} command can be used to split an open-ended draw object (Straight Line, Curved Line, PolyLine) it will also split a Circle Line into two draw parts.
+
+Until a split point is selected, the split point under the cursor will have a blue marker. 
+
+If the object being split is a PolyLine, the split will either result in a Straight Line and a PolyLine or two PolyLines depending on where the split is along the line. (PolyLines must always have at least 2 segments).
+
