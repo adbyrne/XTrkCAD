@@ -170,6 +170,9 @@ struct wButton_t {
     wButtonCallBack_p action;
     int busy;
     int recursion;
+    long timer_id;
+    int timer_count;
+    int timer_state;
 };
 
 /* color.c */

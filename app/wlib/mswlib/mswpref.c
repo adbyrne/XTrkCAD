@@ -125,7 +125,8 @@ typedef struct {
 		BOOL_T dirty;
 		char * val;
 		} prefs_t;
-dynArr_t prefs_da;
+
+static dynArr_t prefs_da;
 #define prefs(N) DYNARR_N(prefs_t,prefs_da,N)
 
 void wPrefSetString( const char * section, const char * name, const char * sval )

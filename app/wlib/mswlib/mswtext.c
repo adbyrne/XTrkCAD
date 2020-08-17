@@ -58,19 +58,13 @@ struct wText_t {
     HANDLE hText;
 };
 
-BOOL_T textPrintAbort = FALSE;
-
 
 void wTextClear(
     wText_p b)
 {
     long rc;
     rc = SendMessage(b->hWnd, EM_SETREADONLY, 0, 0L);
-#ifdef WIN32
     rc = SendMessage(b->hWnd, EM_SETSEL, 0, -1);
-#else
-    rc = SendMessage(b->hWnd, EM_SETSEL, 1, MAKELONG(0, -1));
-#endif
     rc = SendMessage(b->hWnd, WM_CLEAR, 0, 0L);
 
     if (b->option&BO_READONLY) {
@@ -223,7 +217,7 @@ BOOL_T wTextPrint(
 
         if (++currentLine > linesPerPage) {
             IOStatus = EndPage(hDc);
-            if (IOStatus < 0 || textPrintAbort) {
+            if (IOStatus < 0 ) {
                 break;
             }
             StartPage(hDc);
@@ -231,7 +225,7 @@ BOOL_T wTextPrint(
 		}
     }
 
-    if (IOStatus >= 0 && !textPrintAbort) {
+    if (IOStatus >= 0 ) {
         EndPage(hDc);
         EndDoc(hDc);
     }
@@ -422,10 +416,6 @@ wText_p wTextCreate(
         mswFail("CreateWindow(TEXT)");
         return b;
     }
-
-#ifdef CONTROL3D
-    Ctl3dSubclassCtl(b->hWnd);
-#endif
 
     if (option & BT_FIXEDFONT) {
         if (fixedTextFont == (HFONT)0) {

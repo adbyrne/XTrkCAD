@@ -285,6 +285,7 @@ void wDestroySplash( void );
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
 #define BO_ENTER    (1L<<10)
+#define BO_REPEAT   (1L<<11)
 
 wPos_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -594,7 +595,7 @@ void wDrawShowBackground(   wDraw_p, wPos_t pos_x, wPos_t pos_y, wPos_t width, w
 void wInitializeFonts();
 void wSelectFont(		const char * );
 wFontSize_t wSelectedFontSize(	void );
-void wSetSelectionFontSize(wFontSize_t);
+void wSetSelectedFontSize(wFontSize_t size);
 #define F_TIMES	(1)
 #define F_HELV	(2)
 wFont_p wStandardFont(		int, wBool_t, wBool_t );

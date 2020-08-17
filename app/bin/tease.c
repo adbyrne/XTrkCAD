@@ -527,7 +527,7 @@ static descData_t jointDesc[] = {
 /*L0*/	{ DESC_DIM, N_("l0"), &jointData.l0 },
 /*L1*/	{ DESC_DIM, N_("l1"), &jointData.l1 },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &jointData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &jointData.pivot },
+/*PV*/	{ DESC_PIVOT, N_("Lock"), &jointData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &jointData.layerNumber },
 		{ DESC_NULL } };
 

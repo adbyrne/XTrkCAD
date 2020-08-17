@@ -27,7 +27,15 @@
 #include <commdlg.h>
 #include <math.h>
 #include "mswint.h"
-int kludge12 = 0;
+
+/** Macros for button repeat timers */
+#define REPEAT_STAGE0_DELAY 500
+#define REPEAT_STAGE1_DELAY 150
+#define REPEAT_STAGE2_DELAY 75
+#define STOP_TIMER (-1)
+#define INITIAL_WAIT (0)
+#define SLOW_REPEATS (1)
+#define FAST_REPEATS (2)
 
 /*
  *****************************************************************************
@@ -45,6 +53,9 @@ struct wButton_t {
 		wBool_t busy;
 		wBool_t selected;
 		wIcon_p icon;
+		long timer_id;
+		int timer_count;
+		int timer_state;
 		};
 
 
@@ -204,14 +215,22 @@ static void buttDrawIcon(
 }
 
 void wButtonSetBusy(
-		wButton_p b,
-		int value )
+    wButton_p b,
+    int value)
 {
-	b->busy = value;
-	if (!value)
-		b->selected = FALSE;
-	/*SendMessage( b->hWnd, BM_SETSTATE, (WPARAM)value, 0L );*/
-	InvalidateRgn( b->hWnd, NULL, FALSE );
+    b->busy = value;
+    if (!value) {
+        b->selected = FALSE;
+    }
+
+    // in case a timer is associated with the button, kill it
+    if (b->timer_id) {
+        KillTimer(b->hWnd, b->timer_id);
+        b->timer_id = 0;
+        b->timer_state = STOP_TIMER;
+    }
+
+    InvalidateRgn(b->hWnd, NULL, FALSE);
 }
 
 
@@ -226,6 +245,60 @@ void wButtonSetLabel(
 		b->icon = (wIcon_p)label;
 	}
 	InvalidateRgn( b->hWnd, NULL, FALSE );
+}
+
+/**
+ * Button timer: handle timer events for buttons. These are used for 
+ * auto-repeating presses. Three phases used are
+ * - initial delay before repetitions begin  
+ * - slow repeats for a few cycles  
+ * - fast repeats therafter  
+ * - stop timer
+ *
+ * \param  hWnd	    Handle of the window, unused
+ * \param  message  The message, unused
+ * \param  timer    The timer id is the wlib widget .
+ * \param  timepast The timepast, unused
+  */
+
+void CALLBACK buttTimer(HWND hWnd, UINT message, UINT_PTR timer,
+                        DWORD timepast)
+{
+    wButton_p b = (wButton_p)timer;
+    if (b->timer_id == 0) {
+        b->timer_state = STOP_TIMER;
+        return ;
+    }
+
+    /* Autorepeat state machine */
+    switch (b->timer_state) {
+    case INITIAL_WAIT:
+        b->timer_state = SLOW_REPEATS;
+        b->timer_count = 0;
+        KillTimer(hWnd, (UINT_PTR)b);
+        SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE1_DELAY, buttTimer);
+        break;
+    case SLOW_REPEATS: /* Enable slow auto-repeat */
+        if (b->timer_count++ > 10) {
+            /* Start fast auto-repeat */
+            b->timer_state = FAST_REPEATS;
+            KillTimer(hWnd, (UINT_PTR)b);
+            SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE2_DELAY, buttTimer);
+        }
+        break;
+    case FAST_REPEATS:
+        break;
+    case STOP_TIMER:
+    default:
+        KillTimer(hWnd, (UINT_PTR)b);
+        b->timer_id = 0;
+        return;
+        break;
+    }
+    if (b->action) {
+        b->action(b->data);
+    }
+    return;
 }
 				   
 
@@ -264,7 +337,6 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			return TRUE;
 		}
 		break;
-
 	}
 	return DefWindowProc( hWnd, message, wParam, lParam );
 }
@@ -283,11 +355,8 @@ LRESULT CALLBACK pushButt(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
+
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wButton_p b = (wButton_p)mswMapIndex( inx );
 	PAINTSTRUCT ps;
 
@@ -320,9 +389,20 @@ LRESULT CALLBACK pushButt(
 			InvalidateRect( b->hWnd, NULL, TRUE );
 		return 0L;
 		break;
-	case WM_LBUTTONUP:
-		/* don't know why but this solves a problem with color selection */
-		Sleep( 0 );
+	case WM_LBUTTONDOWN:
+		if (b->option&BO_REPEAT) {
+			SetTimer(hWnd, (UINT_PTR)b,REPEAT_STAGE0_DELAY,buttTimer);
+			b->timer_state = INITIAL_WAIT;
+			b->timer_id = (UINT_PTR)b;
+		}
+		break;
+   case WM_LBUTTONUP:
+	   /* don't know why but this solves a problem with color selection */
+	    Sleep( 0 );
+		if (b->timer_id)
+			KillTimer(hWnd, (UINT_PTR)b);
+		b->timer_id = 0;
+		b->timer_state = STOP_TIMER;
 		break;
 	}
 	return CallWindowProc( oldButtProc, hWnd, message, wParam, lParam );

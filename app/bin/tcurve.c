@@ -374,7 +374,7 @@ static descData_t crvDesc[] = {
 /*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &crvData.angle0 },
 /*A2*/	{ DESC_ANGLE, N_("CW Angle"), &crvData.angle1 },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &crvData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &crvData.pivot },
+/*PV*/	{ DESC_PIVOT, N_("Lock"), &crvData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &crvData.layerNumber },
 		{ DESC_NULL } };
 

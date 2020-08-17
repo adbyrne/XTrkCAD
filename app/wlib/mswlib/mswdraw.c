@@ -29,11 +29,7 @@
 #include <math.h>
 #include <winuser.h>
 
-#ifdef WIN32
 #define wFont_t tagLOGFONTA
-#else
-#define wFont_t tagLOGFONT
-#endif
 
 #include "misc.h"
 #include "mswint.h"
@@ -50,8 +46,6 @@ wBool_t wDrawDoTempDraw = TRUE;
 
 static wBool_t initted = FALSE;
 
-long wDebugFont;
-
 static FARPROC oldDrawProc;
 
 
@@ -61,7 +55,7 @@ static long clrOp = 0xbb0226;
 
 #define CENTERMARK_LENGTH 6
 
-bool bDrawMainBM = 0;
+static bool bDrawMainBM = 0;
 
 #ifdef SLOW
 static wPos_t XPIX2INCH( wDraw_p d, int ix )
@@ -1392,7 +1386,7 @@ struct wDrawBitMap_t {
 		wDrawColor color;
 		HBITMAP bm;
 		};
-wDrawBitMap_p bmRoot = NULL;
+static wDrawBitMap_p bmRoot = NULL;
 
 
 void wDrawBitMap(
@@ -1484,7 +1478,7 @@ wDrawBitMap_p wDrawBitMapCreate(
  *****************************************************************************
  */
 
-int doSetFocus = 1;
+static int doSetFocus = 1;
 
 long FAR PASCAL XEXPORT mswDrawPush(
 		HWND hWnd,
@@ -1492,11 +1486,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		UINT wParam,
 		LONG lParam )
 {
-#ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wDraw_p b;
 	short int ix, iy;
 	wPos_t x, y;
@@ -1799,7 +1789,7 @@ static callBacks_t drawCallBacks = {
 		drawDoneProc,
 		(messageCallback_p)drawMsgProc };
 
-wDraw_p drawList = NULL;
+static wDraw_p drawList = NULL;
 
 
 void mswRedrawAll( void )

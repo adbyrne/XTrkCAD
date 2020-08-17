@@ -1159,7 +1159,6 @@ BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]) {
 
 }
 
-
 static BOOL_T MakeParallelBezier(
 		track_p trk,
 		coOrd pos,
@@ -1172,17 +1171,19 @@ static BOOL_T MakeParallelBezier(
 {
 	struct extraData * xx = GetTrkExtraData(trk);
     coOrd np[4], p;
-    ANGLE_T a,a2;
+    ANGLE_T a0, a1,a2,a3;
 
 	//Produce bezier that is translated parallel to the existing Bezier
     // - not a precise result if the bezier end angles are not in the same general direction.
     // The expectation is that the user will have to adjust it - unless and until we produce
     // a new algo to adjust the control points to be parallel to the endpoints.
     
-    a = FindAngle(xx->bezierData.pos[0],xx->bezierData.pos[3]);
+    a0 = xx->bezierData.a0;
+    a1 = xx->bezierData.a1;
     p = pos;
     DistanceBezier(trk, &p);
-    a2 = NormalizeAngle(FindAngle(pos,p)-a);
+    a2 = NormalizeAngle(FindAngle(pos,p)-a0);
+    a2 = NormalizeAngle(FindAngle(pos,p)-a0);
     //find parallel move x and y for points
     for (int i =0; i<4;i++) {
     	np[i] = xx->bezierData.pos[i];
@@ -1190,15 +1191,15 @@ static BOOL_T MakeParallelBezier(
     sep = sep+factor/xx->bezierData.minCurveRadius;
     // Adjust sep based on radius and factor
     if ( a2 > 180 ) {
-        Translate(&np[0],np[0],a+90,sep);
-        Translate(&np[1],np[1],a+90,sep);
-        Translate(&np[2],np[2],a+90,sep);
-        Translate(&np[3],np[3],a+90,sep);
+        Translate(&np[0],np[0],a0+90,sep);
+        Translate(&np[1],np[1],a0+90,sep);
+        Translate(&np[2],np[2],a1-90,sep);
+        Translate(&np[3],np[3],a1-90,sep);
     } else {
-        Translate(&np[0],np[0],a-90,sep);
-        Translate(&np[1],np[1],a-90,sep);
-        Translate(&np[2],np[2],a-90,sep);
-        Translate(&np[3],np[3],a-90,sep);
+        Translate(&np[0],np[0],a0-90,sep);
+        Translate(&np[1],np[1],a0-90,sep);
+        Translate(&np[2],np[2],a1+90,sep);
+        Translate(&np[3],np[3],a1+90,sep);
     }
 
 	if ( newTrkR ) {
@@ -1217,7 +1218,7 @@ static BOOL_T MakeParallelBezier(
 		tempSegs(0).bezSegs.max = 0;
 		tempSegs(0).bezSegs.cnt = 0;
 		for (int i=0;i<4;i++) tempSegs(0).u.b.pos[i] = np[i];
-		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),TRUE);
+		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),track);
 	}
 	if ( p0R ) *p0R = np[0];
 	if ( p1R ) *p1R = np[1];
@@ -1307,7 +1308,7 @@ static trackCmd_t bezlinCmds = {
 		NULL,
 		NULL,
 		NULL,
-		NULL,
+		MakeParallelBezier,
 		NULL,
 		RebuildBezier,
 		NULL,

@@ -854,7 +854,7 @@ static void DrawRegistrationMarks( drawCmd_p d )
 	long x, y, delta, divisor;
 	coOrd p0, p1, qq, q0, q1;
 	POS_T len;
-	char msg[10];
+	char msg[STR_SIZE];
 	wFont_p fp;
 	wFontSize_t fs;
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );

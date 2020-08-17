@@ -150,7 +150,7 @@ static void CreateSquareAnchor(coOrd p) {
 
 BOOL_T FindTempNear(drawContext_t *context, coOrd *p) {
 	if (context->State == 2) {
-		if (context->Op >= OP_CURVE1 && context->Op <= OP_CURVE4) {
+		if ((context->Op >= OP_CURVE1) && (context->Op <= OP_CURVE4)) {
 			if (context->ArcData.type == curveTypeCurve) {
 				ANGLE_T a = FindAngle(context->ArcData.curvePos,*p);
 				if (IsClose(FindDistance(context->ArcData.curvePos,*p)-context->ArcData.curveRadius) &&
@@ -162,7 +162,7 @@ BOOL_T FindTempNear(drawContext_t *context, coOrd *p) {
 				if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
 					return TRUE;
 			}
-		} else if ( context->Op >=OP_LINE && context->Op <= OP_BENCH) {
+		} else if ( (context->Op >=OP_LINE) && (context->Op <= OP_BENCH)) {
 			if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
 				return TRUE;
 		}
@@ -294,9 +294,10 @@ STATUS_T DrawGeomMouse(
 		return C_CONTINUE;
 
 	case wActionMove:
-		if (context->State == 0 || context->State ==2 ) {
+		if (context->State == 0 || context->State ==2 ||
+		   ( context->State ==1 && (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE))) {
 			DYNARR_RESET( trkSeg_t, anchors_da );
-			switch (context->Op) {  	//Snap pos to nearest line if this is end and just shift is depressed for lines and some curves
+			switch (context->Op) {  	//Snap pos to nearest line for lines and some curves
 				case OP_CURVE1:
 				case OP_CURVE2:
 				case OP_CURVE3:
@@ -377,7 +378,6 @@ STATUS_T DrawGeomMouse(
 
 		switch (context->Op) {
 		case OP_LINE:
-		case OP_DIMLINE:
 		case OP_BENCH:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			switch (context->Op) {
@@ -396,6 +396,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs_da.cnt = 0;
 			context->message( _("Drag to next point, +Shift to lock to object, +Ctrl to lock to 90deg") );
 			break;
+		case OP_DIMLINE:
 		case OP_TBLEDGE:
 			OnTableEdgeEndPt( NULL, &pos );
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
@@ -497,26 +498,23 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		coOrd p = pos;
+		BOOL_T found = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
 			(context->Op == OP_CURVE4 && context->State != 2) ||
 			(context->Op == OP_LINE) ||
-			(context->Op == OP_BENCH) ||
+			(context->Op == OP_BENCH) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
 			if (( (MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
 
 				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos))))
-					pos = p;
+					pos1 = p;
+					found = TRUE;
 					if ((MyGetKeyState() & WKEY_CTRL)==0)
-						CreateEndAnchor(pos,TRUE);
-			}
-		} else if (context->Op == OP_DIMLINE) {
-			if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos)))) {
-				pos = p;
-				if ((MyGetKeyState() & WKEY_CTRL)==0)
-					CreateEndAnchor(pos,TRUE);
+						CreateEndAnchor(pos1,TRUE);
 			}
 		}
+		if (!found) SnapPos(&pos);
 
 		pos1 = pos;
 
@@ -527,7 +525,7 @@ STATUS_T DrawGeomMouse(
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
+			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) {
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(pos0, pos);
 				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
@@ -555,7 +553,7 @@ STATUS_T DrawGeomMouse(
 		case OP_POLY:
 		case OP_FILLPOLY:
 		case OP_POLYLINE:
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
+			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) {
 				coOrd last_point = zero;
 				ANGLE_T last_angle, initial_angle;
 				if (tempSegs_da.cnt == 1) {
@@ -609,7 +607,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
-				pos0x = pos;
+				pos0x = pos1;
 				CreateCurve( C_MOVE, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
 			} else {
 				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
@@ -688,6 +686,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLUp:
 		lastValid = FALSE;
 		createTrack = FALSE;
+		found = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
 			(context->Op == OP_CURVE3 && context->State != 0) ||
@@ -696,45 +695,67 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_BENCH) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )) {
 			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
-				coOrd p = pos1;
-				track_p t;
-				if ((t=OnTrack(&p,FALSE,FALSE))) {
-					pos1 = p;
-					if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )){
-					} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||  context->Op == OP_BENCH ) {
-
-						tempSegs(0).u.l.pos[1] = p;
-					} else {
-						PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
-						if (context->ArcData.type == curveTypeStraight) {
-							DYNARR_RESET(trkSeg_t,tempSegs_da);
-							DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-							tempSegs(0).type = SEG_STRLIN;
-							tempSegs(0).u.l.pos[0] = pos0;
-							tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
-							tempSegs_da.cnt = 1;
-						} else if (context->ArcData.type == curveTypeNone) {
-							DYNARR_RESET(trkSeg_t,tempSegs_da);
-						} else if (context->ArcData.type == curveTypeCurve) {
-							DYNARR_RESET(trkSeg_t,tempSegs_da);
-							DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-							tempSegs(0).type = SEG_CRVLIN;
-							tempSegs(0).u.c.center = context->ArcData.curvePos;
-							tempSegs(0).u.c.radius = context->ArcData.curveRadius;
-							tempSegs(0).u.c.a0 = context->ArcData.a0;
-							tempSegs(0).u.c.a1 = context->ArcData.a1;
-							tempSegs_da.cnt = 1;
+				if ((MyGetKeyState() & WKEY_CTRL)==0) {               //But not if CTRL
+					coOrd p = pos1;
+					track_p t;
+					if ((t=OnTrack(&p,FALSE,FALSE))) {
+						pos1 = p;
+						if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )){
+						} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||  context->Op == OP_BENCH ) {
+							tempSegs(0).u.l.pos[1] = p;
+							found = TRUE;
+						} else {
+							PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
+							found = TRUE;
+							if (context->ArcData.type == curveTypeStraight) {
+								DYNARR_RESET(trkSeg_t,tempSegs_da);
+								DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+								tempSegs(0).type = SEG_STRLIN;
+								tempSegs(0).u.l.pos[0] = pos0;
+								tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
+								tempSegs_da.cnt = 1;
+							} else if (context->ArcData.type == curveTypeNone) {
+								DYNARR_RESET(trkSeg_t,tempSegs_da);
+							} else if (context->ArcData.type == curveTypeCurve) {
+								DYNARR_RESET(trkSeg_t,tempSegs_da);
+								DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+								tempSegs(0).type = SEG_CRVLIN;
+								tempSegs(0).u.c.center = context->ArcData.curvePos;
+								tempSegs(0).u.c.radius = context->ArcData.curveRadius;
+								tempSegs(0).u.c.a0 = context->ArcData.a0;
+								tempSegs(0).u.c.a1 = context->ArcData.a1;
+								tempSegs_da.cnt = 1;
+							}
 						}
 					}
-
 				}
 			}
 		}
+		if (!found) SnapPos(&pos1);
 		switch ( context->Op ) {
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
 		case OP_TBLEDGE:
+			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) {
+				//Snap to Right-Angle from previous or from 0
+				DIST_T l = FindDistance(pos0, pos);
+				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
+				int quad = (int)((angle2 + 45.0) / 90.0);
+				if (tempSegs_da.cnt != 1 && (quad == 2)) {
+					pos1 = pos0;
+				} else if (quad == 1 || quad == 3) {
+					if (tempSegs_da.cnt != 1)
+						l = fabs(l*cos(D2R(((quad==1)?line_angle+90.0:line_angle-90.0)-FindAngle(pos,pos0))));
+					Translate( &pos1, pos0, NormalizeAngle(quad==1?line_angle+90.0:line_angle-90.0), l );
+				} else {
+					if (tempSegs_da.cnt != 1)
+						l = fabs(l*cos(D2R(((quad==0||quad==4)?line_angle:line_angle+180.0)-FindAngle(pos,pos0))));
+					Translate( &pos1, pos0, NormalizeAngle((quad==0||quad==4)?line_angle:line_angle+180.0), l );
+				}
+				CreateLineAnchor(pos1,pos0);
+				tempSegs(0).u.l.pos[1] = pos1;
+			}
 			lastValid = TRUE;
 			lastPos = pos1;
 			context->length = FindDistance(pos1,pos0);
@@ -1345,7 +1366,7 @@ STATUS_T DrawGeomPolyModify(
 					next_inx = first_inx+1;
 				}
 				//Lock to 90 degrees first/last point
-				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
 					ANGLE_T last_angle,next_angle;
 					coOrd last_point,next_point;
 					if (first_inx == 0) {
@@ -1483,20 +1504,20 @@ STATUS_T DrawGeomPolyModify(
 				InfoMessage("Move Origin Mode: Place Origin, p for Points, Enter or Esc");
 				return C_CONTINUE;
 			}
-			if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) || (prev_inx>=1 && prev_inx<=points_da.cnt-2)) &&
+			if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) ||
+				((tempSegs(0).u.p.polyType == POLYLINE) && (prev_inx>=1) && (prev_inx<=points_da.cnt-2)) ) &&
 					((action>>8 == 's') || (action>>8 == 'v') || (action>>8 == 'r')))  {
 				switch(action>>8) {
 				case 's':
 					points(context->prev_inx).pt_type = wPolyLineSmooth;
-					break;
+					return C_CONTINUE;
 				case 'v':
 					points(context->prev_inx).pt_type = wPolyLineStraight;
-					break;
+					return C_CONTINUE;
 				case 'r':
 					points(context->prev_inx).pt_type = wPolyLineRound;
-					break;
-				default:
 					return C_CONTINUE;
+				default:;
 				}
 			}
 			if ((action>>8 == 'g') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == POLYLINE) ) {

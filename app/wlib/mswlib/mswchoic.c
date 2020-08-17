@@ -15,8 +15,8 @@
  *****************************************************************************
  */
 
-int CHOICE_HEIGHT=(17);
-int CHOICE_MIN_WIDTH=25;
+#define CHOICE_HEIGHT (17)
+#define CHOICE_MIN_WIDTH (25)
 
 static XWNDPROC oldChoiceItemProc = NULL;
 static XWNDPROC newChoiceItemProc;
@@ -145,11 +145,7 @@ long FAR PASCAL _export pushChoiceItem(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 
 	wControl_p b = mswMapIndex( inx );
 

@@ -261,7 +261,7 @@ typedef struct {
 		wAccelKey_e key;
 		void * data;
 		} acclTable_t, *acclTable_p;
-dynArr_t acclTable_da;
+static dynArr_t acclTable_da;
 #define acclTable(N) DYNARR_N( acclTable_t, acclTable_da, N )
 
 
