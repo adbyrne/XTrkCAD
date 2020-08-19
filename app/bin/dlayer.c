@@ -78,6 +78,7 @@ typedef struct {
     BOOL_T button_off;					/**< hide button */
     long objCount;						/**< number of objects on layer */
     dynArr_t layerLinkList;				/**< other layers that show/hide with this one */
+    char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
 } layer_t;
 
 static layer_t layers[NUM_LAYERS];
@@ -288,6 +289,10 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
         NoticeMessage(MSG_LAYER_SEL_FROZEN, _("Ok"), NULL);
         wListSetIndex(setLayerL, curLayer);
         return;
+    }
+
+    if (layers[inx].settingsName[0]) {
+    	DoSettingsRead(1,&layers[inx].settingsName, NULL);
     }
 
     curLayer = newLayer;
@@ -514,6 +519,7 @@ static char *onMapLabels[] = { "", NULL };
 static char *moduleLabels[] = { "", NULL };
 static char *layerColorLabels[] = { "", NULL };
 static paramIntegerRange_t i0_20 = { 0, NUM_BUTTONS };
+static paramListData_t layerUiListData = { 10, 370, 0 };
 
 static paramData_t layerPLs[] = {
 #define I_LIST	(0)
@@ -536,10 +542,12 @@ static paramData_t layerPLs[] = {
 	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("No Button"), BC_HORZ|BC_NOBORDER },
 #define I_layerLinkList (9)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
-#define I_COUNT (10)
+#define I_SETTINGS (10)
+	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX| PDO_DLGNOLABELALIGN, (void*) 250 },
+#define I_COUNT (11)
     { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), N_("Count"), BO_READONLY },
     { PD_MESSAGE, N_("Personal Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
-    { PD_BUTTON, (void*)DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
+    { PD_BUTTON, (void*)DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
     { PD_BUTTON, (void*)DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, (void *)ENUMLAYER_SAVE },
     { PD_BUTTON, (void*)DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, (void *)ENUMLAYER_CLEAR },
     { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
@@ -547,7 +555,44 @@ static paramData_t layerPLs[] = {
 
 static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
 
+/**
+ * Reload the listbox showing the current catalog
+ */
+
+static
+void LoadFileListLoad(CatalogEntry *catalog)
+{
+    CatalogEntry *currentEntry = catalog->next;
+    DynString description;
+    DynStringMalloc(&description, STR_SHORT_SIZE);
+
+    wControlShow((wControl_p)I_layerLoad, FALSE);
+    wListClear(I_layerLoad);
+
+    while (currentEntry != currentEntry->next) {
+        for (unsigned int i=0;i<currentEntry->files;i++) {
+        	DynStringClear(&description);
+			DynStringCatCStr(&description,
+							 currentEntry->contents) ;
+
+			wListAddValue(I_layerLoad,
+						  DynStringToCStr(&description),
+						  NULL,
+						  (void*)currentEntry->fullFileName[i]);
+        }
+
+        currentEntry = currentEntry->next;
+    }
+
+    wControlShow((wControl_p)I_layerLoad, TRUE);
+
+    DynStringFree(&description);
+
+}
+
 #define layerL	((wList_p)layerPLs[I_LIST].control)
+
+#define layerS  ((wList_p)layerPLs[I_SETTINGS].control)
 
 void GetLayerLinkString(int inx,char * list) {
 
@@ -624,6 +669,10 @@ void LoadLayerLists(void)
 
     if (layerL) {
         wListClear(layerL);
+    }
+
+    if (layerS) {
+    	wListClear(layerS);
     }
 
     /* add all layers to both lists */
@@ -1253,6 +1302,86 @@ static void LayerDlgUpdate(
     }
 }
 
+/**
+ * Scan opened directory for the next settings file
+ *
+ * \param dir IN opened directory handle
+ * \param dirName IN name of directory
+ * \param fileName OUT fully qualified filename
+ *
+ * \return TRUE if file found, FALSE if not
+ */
+
+static bool
+GetNextSettingsFile(DIR *dir, const char *dirName, char **fileName)
+{
+    bool done = false;
+    bool res = false;
+
+    /*
+    * get all files from the directory
+    */
+    while (!done) {
+        struct stat fileState;
+        struct dirent *ent;
+
+        ent = readdir(dir);
+
+        if (ent) {
+            if (!XtcStricmp(FindFileExtension(ent->d_name), "xsp")) {
+                /* create full file name and get the state for that file */
+                MakeFullpath(fileName, dirName, ent->d_name, NULL);
+
+                if (stat(*fileName, &fileState) == -1) {
+                    fprintf(stderr, "Error getting file state for %s\n", *fileName);
+                    continue;
+                }
+
+                /* ignore any directories */
+                if (!(fileState.st_mode & S_IFDIR)) {
+                    done = true;
+                    res = true;
+                }
+            }
+        } else {
+            done = true;
+            res = false;
+        }
+    }
+    return (res);
+}
+
+
+/*
+ * Get all the settings files in the working directory
+ */
+
+static CatalogEntry *
+ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
+{
+    DIR *d;
+    CatalogEntry *newEntry = catalog;
+
+    d = opendir(dirName);
+    if (d) {
+        char *fileName = NULL;
+
+        while (GetNextSettingsFile(d, dirName, &fileName)) {
+            CatalogEntry *existingEntry;
+            char *contents = strrchr(fileName,'/');
+			newEntry = InsertInOrder(catalog,contents);
+               UpdateCatalogEntry(newEntry, fileName, contents);
+            free(contents);
+            free(fileName);
+            fileName = NULL;
+        }
+        closedir(d);
+    }
+
+    return (newEntry);
+}
+
+static CatalogEntry * settingsCatalog;
 
 static void DoLayer(void * junk)
 {
@@ -1260,6 +1389,8 @@ static void DoLayer(void * junk)
         layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
                                    LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
     }
+    settingsCatalog = InitCatalog();
+    ScanSettingsDirectory(settingsCatalog, wGetAppWorkDir());
 
     /* set the globals to the values for the current layer */
     UpdateLayerDlg();
@@ -1269,9 +1400,10 @@ static void DoLayer(void * junk)
 }
 
 
+
 BOOL_T ReadLayers(char * line)
 {
-    char * name, *layerLinkList;
+    char * name, *layerLinkList, *layerSettingsName;
     int inx, visible, frozen, color, onMap, module, dontUseColor, ColorFlags, button_off;
     unsigned long rgb;
 
@@ -1307,6 +1439,13 @@ BOOL_T ReadLayers(char * line)
     	}
     	PutLayerListArray(inx,layerLinkList);
     	return TRUE;
+    }
+
+    if (strncmp(line, "SET", 3) == 0) {
+    	if (!GetArgs(line+3, "dq", &inx, &layerSettingsName)) {
+    		return FALSE;
+    	}
+    	strcpy(layers[inx].settingsName,layerSettingsName);
     }
 
     /* get the properties for a layer from the file and update the layer accordingly */
@@ -1419,6 +1558,8 @@ BOOL_T WriteLayers(FILE * f)
     	GetLayerLinkString(inx,layerLinkList);
     	if (IsLayerConfigured(inx) && strlen(layerLinkList)>0)
     		fprintf(f, "LAYERS LINK %u \"%s\"\n",inx,layerLinkList);
+    	if (IsLayerConfigured(inx) && layers[inx].settingsName[0])
+    		fprintf(f, "LAYERS SET %u \"%s\"\n",inx, layers[inx].settingsName);
     }
     return TRUE;
 }
