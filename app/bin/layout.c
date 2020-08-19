@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdbool.h>
 #include <string.h>
 #include <dynstring.h>
 
@@ -307,6 +308,7 @@ int GetLayoutBackGroundScreen()
 	return (thisLayout.props.backgroundScreen);
 }
 
+
 /****************************************************************************
 *
 * Layout Dialog
@@ -343,7 +345,7 @@ static paramData_p layout_p;
 static paramGroup_t * layout_pg_p;
 static wBool_t file_changed;
 
-EXPORT BOOL_T haveBackground = FALSE;
+bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
 char * noname = "";
@@ -361,6 +363,11 @@ int GetLayoutBackGroundVisible()
 	return(backgroundVisible);
 }
 
+bool HasBackGround()
+{
+	return(haveBackground);
+}
+
 /*****************************************
 * Try to load the background image file
 */
@@ -373,6 +380,7 @@ LoadBackGroundImage(void)
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
 		return FALSE;
 	}
+	
 	return TRUE;
 }
 
@@ -450,6 +458,7 @@ static void ImageFileClear( void * junk)
 	SetName();
 	wControlActive((wControl_p)backgroundB, FALSE);
 	file_changed = TRUE;
+	haveBackground = false;
 	ParamLoadControl(layout_pg_p, 8);
 	MainRedraw();
 }
@@ -692,16 +701,18 @@ LayoutBackGroundInit(BOOL_T clear) {
 	}
 	char * str = GetLayoutBackGroundFullPath();
 	if (str && str[0]) {
-		if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
+        haveBackground = true;
+        if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
 			SetLayoutBackGroundFullPath(noname);
 			SetLayoutBackGroundPos(zero);
 			SetLayoutBackGroundAngle(0.0);
 			SetLayoutBackGroundScreen(0);
 			SetLayoutBackGroundSize(0.0);
 			LayoutBackGroundSave();
+            haveBackground = false;
 		}
 	} else {
+		haveBackground = false;
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
-
 }

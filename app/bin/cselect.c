@@ -1073,6 +1073,19 @@ static void RescaleDlgOk(
 	
 	rescaleToInx = GetScaleInx( rescaleToScaleInx, rescaleToGaugeInx );
 	DoSelectedTracks( RescaleDoIt );
+
+	// rescale the background if it exists and the layout is resized
+	if (HasBackGround() && ratio != 1.0) {
+		coOrd pos = GetLayoutBackGroundPos();
+		double size = GetLayoutBackGroundSize();
+		pos.x = ratio * pos.x + rescaleShift.x;
+		pos.y = ratio * pos.y + rescaleShift.y;
+		SetLayoutBackGroundPos(pos);
+
+		size *= ratio;
+		SetLayoutBackGroundSize(size);
+	}
+	DoRedraw();
 	wHide( rescalePG.win );
 }
 
