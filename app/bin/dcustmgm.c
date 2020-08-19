@@ -42,6 +42,9 @@
 #include "track.h"
 #include "wlib.h"
 #include "include/paramfilelist.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif
 
 static void CustomEdit( void * action );
 static void CustomDelete( void * action );
@@ -236,8 +239,17 @@ static int CustomDoExport(
 
 	oldLocale = SaveLocale("C");
 
-	if ( rc == -1 )
-		fprintf( customMgmF, "CONTENTS %s\n", custMgmContentsStr );
+	if (rc == -1)
+	{
+	#ifdef WINDOWS
+	    char *contents = MyStrdup(custMgmContentsStr);
+	    contents = Convert2UTF8(contents);
+	    fprintf(customMgmF, "CONTENTS %s\n", contents);
+		MyFree(contents);
+	#else
+	    fprintf(customMgmF, "CONTENTS %s\n", custMgmContentsStr);
+	#endif // WINDOWS
+	}
 
 	cnt = wListGetCount( (wList_p)customPLs[0].control );
 	for ( inx=0; inx<cnt; inx++ ) {
@@ -268,7 +280,7 @@ static int CustomDoExport(
 static void CustomExport( void * junk )
 {
 	if ( customMgmExport_fs == NULL )
-		customMgmExport_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Move To XTP"),
+		customMgmExport_fs = wFilSelCreate( mainW, FS_UPDATE, 0, _("Move To XTP"),
 				_("Parameter File (*.xtp)|*.xtp"), CustomDoExport, NULL );
 	wFilSelect( customMgmExport_fs, GetCurrentPath(CUSTOMPATHKEY));
 }
@@ -364,8 +376,7 @@ static void CustMgmChange( long changes )
 {
 	if (changes) {
 		if (changed) {
-			changed = 1;
-			checkPtMark = 1;
+			changed = checkPtMark = 1;
 		}
 	}
 	if ((changes&CHANGE_PARAMS) == 0 ||
@@ -381,7 +392,7 @@ static void DoCustomMgr( void * junk )
     int i = 0;
     
 	if (customPG.win == NULL) {
-		ParamCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
+		ParamCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone, wHide, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
         while(customTypes[ i ] != NULL) {
             wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control), customTypes[ i++ ], NULL, NULL );
         } 

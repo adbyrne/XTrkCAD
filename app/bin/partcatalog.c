@@ -21,7 +21,9 @@
 
 #include <assert.h>
 #include <ctype.h>
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include <search.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -33,20 +35,25 @@
 
 #ifdef WINDOWS
     #include "include/dirent.h"
+#else
+	#include <dirent.h>
 #endif
-
+#include "fileio.h"
 #include "misc.h"
 #include "include/paramfile.h"
 #include "include/partcatalog.h"
 #include "paths.h"
+#include "include/stringxtc.h"
+#include "include/utf8convert.h"
 
 #if _MSC_VER > 1300
-    #define stricmp _stricmp
     #define strnicmp _strnicmp
     #define strdup _strdup
 #endif
 
 #define PUNCTUATION "+-*/.,&%=#"
+
+
 
 /**
  * Create and initialize the linked list for the catalog entries
@@ -60,12 +67,14 @@ InitCatalog(void)
     CatalogEntry *head;
     CatalogEntry *tail;
 
-    /* allocate two pseudo nodes for beginnung and end of list */
+    /* allocate two pseudo nodes for beginning and end of list */
     head = (CatalogEntry *)malloc(sizeof(CatalogEntry));
     tail = (CatalogEntry *)malloc(sizeof(CatalogEntry));
 
     head->next = tail;
     tail->next = tail;
+
+
 
     return (head);
 }
@@ -111,7 +120,7 @@ CountCatalogEntries(CatalogEntry *listHeader)
 }
 
 /**
- * Empty a catalog. All nodes including their allocated memory are freed. On
+ * Empty a catalog. All data nodes including their allocated memory are freed. On
  *
  * \param listHeader IN the list
  */
@@ -136,22 +145,47 @@ EmptyCatalog(CatalogEntry *listHeader)
 }
 
 /**
- * Get the existing list element for a content
+ * Find the position in the list and add
  *
  * \param listHeader IN start of list
- * \param contents IN  contents to search
+ * \param contents IN  contents to include
  *
  * \return CatalogEntry if found, NULL otherwise
  */
 
 static CatalogEntry *
-IsExistingContents(CatalogEntry *listHeader, const char *contents)
+InsertInOrder(CatalogEntry *listHeader, const char *contents)
+{
+    CatalogEntry *currentEntry = listHeader;
+
+    while (currentEntry->next != currentEntry->next->next) {
+    	CatalogEntry *nextEntry = currentEntry->next;
+        if (XtcStricmp(nextEntry->contents, contents)>0) {
+            return InsertIntoCatalogAfter(currentEntry);
+        }
+        currentEntry = nextEntry;
+    }
+    return InsertIntoCatalogAfter(currentEntry);
+}
+/**
+ * Get the existing list element for a content
+ *
+ * \param listHeader IN start of list
+ * \param contents IN  contents to search
+ * \param Do we log error messages or not
+ *
+ * \return CatalogEntry if found, NULL otherwise
+ */
+
+static CatalogEntry *
+IsExistingContents(CatalogEntry *listHeader, const char *contents, BOOL_T silent)
 {
     CatalogEntry *currentEntry = listHeader->next;
 
     while (currentEntry != currentEntry->next) {
-        if (!stricmp(currentEntry->contents, contents)) {
-            printf("%s already exists in %s\n", contents, currentEntry->fullFileName[0]);
+        if (!XtcStricmp(currentEntry->contents, contents)) {
+        	if (!silent)
+        		printf("%s already exists in %s\n", contents, currentEntry->fullFileName[0]);
             return (currentEntry);
         }
         currentEntry = currentEntry->next;
@@ -232,7 +266,7 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
         ent = readdir(dir);
 
         if (ent) {
-            if (!stricmp(FindFileExtension(ent->d_name), "xtp")) {
+            if (!XtcStricmp(FindFileExtension(ent->d_name), "xtp")) {
                 /* create full file name and get the state for that file */
                 MakeFullpath(fileName, dirName, ent->d_name, NULL);
 
@@ -266,23 +300,26 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
  */
 
 static CatalogEntry *
-ScanDirectory(CatalogEntry *insertAfter, const char *dirName)
+ScanDirectory(CatalogEntry *catalog, const char *dirName)
 {
     DIR *d;
+    CatalogEntry *newEntry = catalog;
 
     d = opendir(dirName);
     if (d) {
         char *fileName = NULL;
 
         while (GetNextParameterFile(d, dirName, &fileName)) {
-            CatalogEntry *newEntry;
+            CatalogEntry *existingEntry;
             char *contents = GetParameterFileContent(fileName);
-            if ((newEntry = IsExistingContents(insertAfter, contents))) {
-                printf("Update existing parameter file %s\n", fileName);
+            if ((existingEntry = IsExistingContents(catalog, contents,FALSE))) {
+                printf("Duplicate CONTENTS record in parameter file %s\n", fileName);
+                if (strcmp(existingEntry->fullFileName[existingEntry->files-1],fileName))
+                	UpdateCatalogEntry(existingEntry, fileName, contents);
             } else {
-                newEntry = InsertIntoCatalogAfter(insertAfter);
+                newEntry = InsertInOrder(catalog,contents);
+                UpdateCatalogEntry(newEntry, fileName, contents);
             }
-            UpdateCatalogEntry(newEntry, fileName, contents);
             free(contents);
             free(fileName);
             fileName = NULL;
@@ -290,7 +327,7 @@ ScanDirectory(CatalogEntry *insertAfter, const char *dirName)
         closedir(d);
     }
 
-    return (insertAfter);
+    return (newEntry);
 }
 
 /**
@@ -302,19 +339,21 @@ ScanDirectory(CatalogEntry *insertAfter, const char *dirName)
  */
 
 static int
-CompareIndex(const IndexEntry *entry1, const IndexEntry *entry2)
+CompareIndex(const void *entry1, const void *entry2)
 {
-    return (strcmp(entry1->keyWord, entry2->keyWord));
+	IndexEntry index1 = *(IndexEntry *)entry1;
+	IndexEntry index2 = *(IndexEntry *)entry2;
+    return (strcoll(index1.keyWord, index2.keyWord));
 }
 
 /*!
  * Filter keywords. Current rules:
  *	- single character string that only consist of a punctuation char
- * 
+ *
  * \param word IN keyword
  * \return true if any rule applies, false otherwise
  */
- 
+
 bool
 FilterKeyword(char *word)
 {
@@ -326,14 +365,15 @@ FilterKeyword(char *word)
 
 /**
  * Create the keyword index from a list of parameter files
- * 
+ *
  * \param catalog IN list of parameter files
  * \param index IN index table to be filled
+ * \param pointer IN/OUT array of words that are indexed
  * \param capacityOfIndex IN total maximum of keywords
  * \return number of indexed keywords
  */
 static unsigned
-CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index,
+CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, void** words_array,
                     unsigned capacityOfIndex)
 {
     CatalogEntry *currentEntry = catalog->next;
@@ -348,6 +388,8 @@ CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index,
     }
 
     wordList = malloc((totalMemory + 1) * sizeof(char));
+    *words_array = (void*)wordList;
+
     wordListPtr = wordList;
     currentEntry = catalog->next;
 
@@ -368,7 +410,7 @@ CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index,
 				index[wordCount].keyWord = wordListPtr;
 				wordListPtr += strlen(word) + 1;
 				wordCount++;
-				if (wordCount > capacityOfIndex) {
+				if (wordCount >= capacityOfIndex) {
 					AbortProg("Too many keywords were used!", NULL);
 				}
 			}
@@ -400,7 +442,7 @@ static int SearchInIndex(IndexEntry arr[], int l, int r, char *key)
 {
     if (r >= l) {
         int mid = l + (r - l) / 2;
-        int res = stricmp(key, arr[mid].keyWord);
+        int res = XtcStricmp(key, arr[mid].keyWord);
 
         // If the element is present at the middle itself
         if (!res) {
@@ -452,6 +494,22 @@ int InsertSorted(CatalogEntry *arr[], int n, CatalogEntry *key, int capacity)
 }
 
 /**
+ * Comparison function for CatalogEntries used by qsort()
+ *
+ * \param entry1 IN
+ * \param entry2 IN
+ * \return per C runtime conventions
+ */
+
+static int
+CompareResults(const void *entry1, const void *entry2)
+{
+	CatalogEntry * index1 = *(CatalogEntry **)entry1;
+	CatalogEntry * index2 = *(CatalogEntry **)entry2;
+    return (strcoll(index1->contents, index2->contents));
+}
+
+/**
  * Search the index for a keyword. The index is assumed to be sorted. So after one entry
  * is found, neighboring entries up and down are checked as well. The total result set
  * is placed into an array and returned. This array has to be free'd by the caller.
@@ -460,15 +518,28 @@ int InsertSorted(CatalogEntry *arr[], int n, CatalogEntry *key, int capacity)
  * \param length IN number of entries index
  * \param search IN search string
  * \param resultCount OUT count of found entries
- * \return array of found entries, NULL if none found
+ * \return array of found catalog entries, NULL if none found
  */
+
+static int findAll = 1;
 
 unsigned int
 FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
 {
-    CatalogEntry **result = NULL;
+    CatalogEntry **result;  //Array of pointers to Catalog Entries
     int found;
     int foundElements = 0;
+    *entries = NULL;
+
+    //Get all the entries back for generic search or if "generic find"
+    if (findAll || !search || (search[0] == '*') || (search[0] == '\0')) {
+    	result = malloc((length) * sizeof(CatalogEntry *));
+    	for (int i = 0; i < length; i++) {
+			result[i] = index[i].value;
+		}
+    	*entries = result;
+    	return length;
+    }
 
     found = SearchInIndex(index, 0, length, search);
 
@@ -477,11 +548,11 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
         int upper = found;
         int i;
 
-        while (lower > 0 && !stricmp(index[lower-1].keyWord, search)) {
+        while (lower > 0 && !XtcStricmp(index[lower-1].keyWord, search)) {
             lower--;
         }
 
-        while (upper < length - 1 && !stricmp(index[upper + 1].keyWord, search)) {
+        while (upper < length - 1 && !XtcStricmp(index[upper + 1].keyWord, search)) {
             upper++;
         }
 
@@ -490,8 +561,10 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
         result = malloc((foundElements) * sizeof(CatalogEntry *));
 
         for (i = 0; i < foundElements; i++) {
-            InsertSorted(result, i, index[lower + i].value, foundElements);
+            result[i] = index[i+lower].value;
         }
+
+        qsort((void*)result, foundElements, sizeof(void *), CompareResults);
 
         *entries = result;
     }
@@ -529,7 +602,7 @@ InitLibrary(void)
  */
 
 bool
-GetTrackFiles(TrackLibrary *trackLib, unsigned char *directory)
+GetTrackFiles(TrackLibrary *trackLib, char *directory)
 {
     ScanDirectory(trackLib->catalog, directory);
     trackLib->trackTypeCount = CountCatalogEntries(trackLib->catalog);
@@ -561,7 +634,7 @@ int GetParameterFileInfo(
         CatalogEntry *newEntry;
         char *contents = GetParameterFileContent(fileName[i]);
 
-        if (!(newEntry = IsExistingContents(catalog, contents))) {
+        if (!(newEntry = IsExistingContents(catalog, contents,TRUE))) {
             newEntry = InsertIntoCatalogAfter(catalog);
         }
         UpdateCatalogEntry(newEntry, fileName[i], contents);
@@ -585,10 +658,24 @@ CreateLibraryIndex(TrackLibrary *trackLib)
                                        ESTIMATED_CONTENTS_WORDS);
 
     trackLib->wordCount = CreateContentsIndex(trackLib->catalog, trackLib->index,
+    					  &trackLib->words_array,
                           ESTIMATED_CONTENTS_WORDS * trackLib->trackTypeCount);
 
     return (trackLib->wordCount);
 }
+
+void
+DeleteLibraryIndex(TrackLibrary *trackLib)
+{
+	free(trackLib->index);
+	trackLib->index = NULL;
+
+	free(trackLib->words_array);
+
+	trackLib->wordCount = 0;
+
+}
+
 
 /**
  * Create the library and index of parameter files in a given directory.
@@ -613,8 +700,44 @@ CreateLibrary(char *directory)
     return (library);
 }
 
+void
+DeleteLibrary(TrackLibrary* library)
+{
+	DeleteLibraryIndex(library);
+
+
+	free(library);
+}
+
+// Case insensitive comparison
+char* stristr( const char* haystack, const char* needle )
+{
+	int c = tolower((unsigned char)*needle);
+	    if (c == '\0')
+	        return (char *)haystack;
+	    for (; *haystack; haystack++) {
+	        if (tolower((unsigned char)*haystack) == c) {
+	            for (size_t i = 0;;) {
+	                if (needle[++i] == '\0')
+	                    return (char *)haystack;
+	                if (tolower((unsigned char)haystack[i]) != tolower((unsigned char)needle[i]))
+	                    break;
+	            }
+	        }
+	    }
+	    return NULL;
+}
+
 /**
- * Search the library for a single keyword and return the result list
+ * Search the library for a keyword string and return the result list
+ *
+ * First the index is searched for the first word and then each "hit" is matched
+ * to the entire search string
+ *
+ * Null, Blank and "*" match all entries
+ *
+ *  The list is de-duped of repeat of filenames as the same file might appear in
+ *  more than once
  *
  * \param library IN the library
  * \param searchExpression	IN keyword to search for
@@ -626,23 +749,59 @@ SearchLibrary(TrackLibrary *library, char *searchExpression,
               CatalogEntry *resultEntries)
 {
     CatalogEntry **entries;
+    CatalogEntry * newEntry = resultEntries;
     unsigned entryCount;
+
+    char * word;
+
+    word = strdup(searchExpression);
+
+    //word = strtok(word," \t");
 
     if (library->index == NULL || library->wordCount == 0) {
         return (0);
     }
-    entryCount = FindWord(library->index, library->wordCount, searchExpression,
+    entryCount = FindWord(library->index, library->wordCount, word,
                           &entries);
+    int count= 0;
     if (entryCount) {
         unsigned int i = 0;
         while (i < entryCount) {
-            CatalogEntry *newEntry = InsertIntoCatalogAfter(resultEntries);
-            UpdateCatalogEntry(newEntry, entries[i]->fullFileName[(entries[i]->files - 1)],
-                               entries[i]->contents);
+        	char * match;
+        	//Check if entire String Matches
+        	if (!searchExpression || !word || (word[0] == '*') || (word[0] == '\0') ||
+        		(match = stristr(entries[i]->contents,searchExpression))) {
+				CatalogEntry * existingEntry;
+				existingEntry = IsExistingContents(resultEntries, entries[i]->contents, TRUE);
+				//Same FileName already in one of the entries?
+				BOOL_T found = FALSE;
+				if (existingEntry) {
+					for (unsigned int j=0;j<existingEntry->files;j++) {
+						if (!strcmp(existingEntry->fullFileName[j],entries[i]->fullFileName[entries[i]->files-1])) {
+							found=TRUE;
+							break;
+						}
+					}
+					if (found == TRUE ) {
+						i++;
+						continue;
+					}
+					UpdateCatalogEntry(existingEntry, entries[i]->fullFileName[(entries[i]->files- 1)],
+												   entries[i]->contents);
+				} else {
+					newEntry = InsertInOrder(resultEntries,entries[i]->contents);
+					UpdateCatalogEntry(newEntry, entries[i]->fullFileName[(entries[i]->files- 1)],
+						   entries[i]->contents);
+				}
+				count++;
+        	}
             i++;
         }
     }
-    return (entryCount);
+    free(word);
+    if (entries)
+    	free(entries);    //Clean-up after search
+    return (count);
 }
 
 /**
@@ -666,11 +825,14 @@ GetParameterFileContent(char *file)
 			char buffer[512];
 			if (fgets(buffer, sizeof(buffer), fh)) {
 				char *ptr = strtok(buffer, " \t");
-
-				if (!stricmp(ptr, CONTENTSCOMMAND)) {
+				if (!XtcStricmp(ptr, CONTENTSCOMMAND)) {
 					/* if found, store the rest of the line and the filename	*/
-					ptr = strtok(NULL, "\t\n");
+					ptr = ptr+strlen(CONTENTSCOMMAND)+1;
+					ptr = strtok(ptr, "\r\n");
 					result = strdup(ptr);
+#ifdef WINDOWS
+					ConvertUTF8ToSystem(result);
+#endif // WINDOWS
 					found = true;
 				}
 			} else {

@@ -17,7 +17,7 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
-\dd \G{png.d/main1.png}
+\dd \G{png.d/maintagged.png}
 
 \u000
 
@@ -86,6 +86,17 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 \u000
 
 \dd Manipulate track and other objects
+The toolbar buttons size can be adjusted using a User Preference in the .ini or .rc file 
+(on Windows or Mac/Linux) in the xtrkcad directory.  
+If running Linux or Mac
+a line \c{"Preference.LargeIcons: 1.5"} can be added. The scale value can be from 1.0 to 2.0 only.
+The corresponding configuration Windows would be
+
+\c        [Preference]
+\c           LargeIcons=1.5
+
+\e{Note} The configuration file uses the language specific definitions for the decimal separator.
+Eg. in Germany, where the comma is used,  the correct value would be\c{LargeIcons=1,5}.
 
 \u000
 
@@ -117,7 +128,26 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
-\dd The center of the \f{Main Canvas} can be moved to be at the cursor in \f{Select}, \f{Modify} and \f{Pan/Zoom} using the "@" key.
+\dd The center of the \f{Main Canvas} can be moved (Panned) using the; 
+
+\lcont{
+
+\b ARROW Keys
+
+\b Left-Click and drag in \K{cmdZoom} 
+
+\b "@" key in \f{Select}, \f{Modify} and \f{Pan/Zoom}.
+
+\b Mouse Wheel - adding \e{Shift} key or the \e{Mouse Middle Button} will Pan the screen. adding \e{Ctrl} as well makes up Pan left and down Pan right.
+
+\b Horizontal Mouse Wheel - adding \e{Shift} or the \e{Mouse Middle Button} will Pan the screen left and Right (if available)
+
+\b Scroll Left and Right - if the scroll left and right guestures are mapped to the trackpad by the operating system, with \e{Shift} depressed the screen will Pan.
+
+}
+
+\dd The \f{Main Canvas} can be panned so that the area beyond the room boundaries is shown (the \f{grey} area).  The \f{Constrain Drawing Area to Room Boundaries} option on the \f{Display} (\K{cmdDisplay}) dialog under the \f{Options} (\K{optionM}) menu forces the \f{Main Canvas} stop panning once the room boundary is reached.
+Holding the \e{Control} key while panning will invert the value of this setting. 
 
 \u000
 
@@ -133,11 +163,15 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \b PAGE UP and PAGE DOWN keys
 
-\b \K{cmdPan} button on the \f{Tool-bar}
+\b \f{Pan/Zoom} \K{cmdPan} button on the \f{Tool-bar}
 
-\f{Note:} If The scale 1::1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
+\f{Note:} If The scale 1:1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
 
 }
+
+\dd When \f{Zooming}, the Main Canvas will retain the center of the display if 
+\f{Constrain Drawing Area to Room Boundaries} is not set.
+Otherwise, as much of the room as possible is displayed, and any \f{grey} area will be to the right and above the room.
 
 \u000
  
@@ -146,6 +180,10 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 \u000
 
 \dd The ARROW keys move the \f{Canvas} left, right, up or down by half a screen. If Shift is used together with the arrow keys, the movement will be 1/20th of screen in the selected direction.
+
+\u000
+
+\dd In many commands, the result that will result from clicking the mouse is shown by \e{anchors} which highlight the track object or feature in blue that will be affected as the mouse is dragged over the canvas and becomes close enough to select it.
 
 \u000
 
@@ -247,6 +285,10 @@ Instead of using the menus or the buttons on the \f{Tool-bar} (\K{mainW}), most 
 \u000
 
 \dd The \c{ESCAPE} key cancels the current command.  All selected tracks are unselected.  The \f{Properties} (\K{cmdDescribe}) or \f{Select} (\K{cmdSelect}) command becomes the current command.
+
+\u000
+
+\dd The \c{F1} key opens the Help page for the currently selected command. \c{Shift+F1} opens the Contents Help Page.
 
 \u000
 
@@ -649,7 +691,7 @@ Note Dialog
 
 }
 
-\b Pop-up menu of Hot Bar contents - \e{Right-Click}
+\b Pop-up menu of Hot Bar categories - \e{Right-Click}
 
 \u000
 
@@ -828,25 +870,33 @@ Note Dialog
 
 \e{Select Command}
 
+The \e{Select} command actions are affected by the mode selected in \f{Options->Command->Select}.  
+Note - Objects in a Module Layer are selected and deselected as a group.
+
 \dt \e{Left-Click}
  
-\dd Selects one object, deselects all objects if clicked off all objects.
+\dd Single Item Mode -> Selects one object at a time, deselects other objects. 
+Add Item Mode -> Adds unselected objects, deselects if the object is already selected.
+If the click is on an area without objects and \f{SelectZero} is set, all objects are deselected.
 
 \dt \e{Shift-Left-Click} 
 
-\dd Selects all connected tracks to the one clicked on up to the next selected item in each direction.
+\dd Selects all connected tracks from the one clicked up to the next selected item in each direction.
 
 \dt \e{Ctrl+Left-Click} 
 
-\dd Adds an object to the selection.
+\dd Single Item Mode -> Adds an object to the selection, deselects if the object is already selected. 
+Add Item Mode -> Selects just this item and deselects other objects.
+If the click is on an area without objects and \f{SelectZero} is set, all objects are deselected.
 
 \dt \e{Double-Left-Click} 
 
-\dd Opens modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Describe.
+\dd Opens Modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Describe.
 
 \dt \e{Left+Drag} 
 
-\dd Selects all objects in an rubber-banded area and deselects all others.
+\dd Single Item Mode -> Selects all objects in an rubber-banded area and deselects all others. 
+Add Item Mode -> Adds items in the rubber-banded area.  
 
 \dt \e{Shift+Left-Drag} 
 
@@ -858,11 +908,11 @@ Note Dialog
 
 \dt \e{Right-Click} 
 
-\dd Displays a pop-up menu of context commands (in Select, Move, Modify and Rotate commands) if in a selected area.
+\dd Displays a pop-up menu of context commands (in Select, Move, Modify and Rotate commands). If some track is selected, the menu has operations to perform on it, if not, it will have a command context menu.
 
 \dt \e{Shift+Right-Click} 
 
-\dd Displays a pop-up menu of commands.
+\dd Displays a pop-up menu of commands.  Displays the other context menu than Right-Click.
 
 \dt \e{Right+Drag} 
 
@@ -870,7 +920,7 @@ Note Dialog
 
 \dt \e{Rotate Wheel} 
 
-\dd Zooms drawing area in and out.
+\dd Zooms drawing area in and out.  Modern computers with Trackpads often map this guesture to two-finger drag.
 
 \e{When Moving and Rotating} ( Placing Turnouts and Structures, Moving the Print and Snap Grids, ... ):
 
@@ -945,7 +995,7 @@ The Shortcut key for each command is listed after the command name.
 \u000
 
 
-\dt Elevation Command (\K{cmdElev}) - \e{Ctrl+Shift+E}
+\dt Elevation Command (\K{cmdElevation}) - \e{Ctrl+Shift+E}
 
 \dd Choose endpoint - \e{Left-Click}
 
@@ -1086,6 +1136,10 @@ The Shortcut key for each command is listed after the command name.
 
 \u000
 
+\dt Angle Command (\K{cmdAngle})
+
+\dd Position Protractor - \e{Left-Drag}
+
 
 \dt Select Command (\K{cmdSelect}) - \e{Ctrl+E}
 
@@ -1101,25 +1155,12 @@ The Shortcut key for each command is listed after the command name.
 
 }
 
-\dd Unselect all objects within the highlighted area - \e{Right+Drag}
 
 \dd Rotate selected objects - \e{Ctrl+Left-Drag}
 
 \lcont{
 
 \b in increments of 15\u00B0 - \e{Ctrl+Shift+Left+Drag}
-
-}
-
-\dd Select (or unselect) the object - \e{Left-Click} - note clicking on an area without tracks deselects all tracks
-
-\dd Select all objects
-
-\lcont{
-
-\b connected to object - \e{Shift+Left+Click}
-
-\b within the highlighted area - \e{Left+Drag}
 
 }
 

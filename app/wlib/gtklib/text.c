@@ -130,7 +130,7 @@ void wTextAppend(wText_p bt,
  * Get the text from a text buffer in system codepage
  * The caller is responsible for free'ing the allocated storage.
  *
- * \todo handling of return from gtkConvertOutput can be improved
+ * Dont convert from UTF8
  *
  * \param bt IN the text widget
  * \return    pointer to the converted text
@@ -149,8 +149,8 @@ static char *wlibGetText(wText_p bt)
     tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
     gtk_text_buffer_get_bounds(tb, &ti1, &ti2);
     cp = gtk_text_buffer_get_text(tb, &ti1, &ti2, FALSE);
-    cp1 = wlibConvertOutput(cp);
-    res = strdup(cp1);
+    //cp1 = wlibConvertOutput(cp);
+    res = strdup(cp);
     g_free(cp);
     return res;
 }

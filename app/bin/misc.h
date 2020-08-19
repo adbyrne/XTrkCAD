@@ -44,6 +44,7 @@ typedef void (*addButtonCallBack_t)(void*);
 #define STR_SIZE		(256)
 #define STR_SHORT_SIZE	(80)
 #define STR_LONG_SIZE	(1024)
+#define STR_HUGE_SIZE	(10240)
 
 #define CAST_AWAY_CONST (char*)
 
@@ -68,15 +69,17 @@ extern long hideSelectionWindow;
 extern long labelWhen;
 extern long labelScale;
 extern long labelEnable;
-extern long colorLayers;
+extern long colorTrack;
+extern long colorDraw;
 extern long carHotbarModeInx;
 extern DIST_T minLength;
 extern DIST_T connectDistance;
 extern ANGLE_T connectAngle;
 extern long twoRailScale;
 extern long mapScale;
-extern long zoomCorner;
+extern long constrainMain;
 extern long checkPtInterval;
+extern long autosaveChkPoints;
 extern long liveMap;
 extern long preSelect;
 extern long hideTrainsInTunnels;
@@ -91,8 +94,11 @@ extern DIST_T curScaleRatio;
 extern char * curScaleName;
 extern int enumerateMaxDescLen;
 extern long enableBalloonHelp;
+extern long showFlexTrack;
 extern long hotBarLabels;
 extern long rightClickMode;
+extern long selectMode;
+extern long selectZero;
 extern void * commandContext;
 extern coOrd cmdMenuPos;
 #define MODE_DESIGN		(0)
@@ -138,6 +144,10 @@ extern long programMode;
 #define C_WDOWN			wActionWheelDown
 #define C_LDOUBLE       wActionLDownDouble
 #define C_MODKEY        wActionModKey
+#define C_SCROLLUP	    wActionScrollUp
+#define C_SCROLLDOWN    wActionScrollDown
+#define C_SCROLLLEFT	wActionScrollLeft
+#define C_SCROLLRIGHT   wActionScrollRight
 #define C_INIT			(wActionLast+1)
 #define C_START			(wActionLast+2)
 #define C_REDRAW		(wActionLast+3)
@@ -183,7 +193,7 @@ extern wPos_t DlgSepFrmBottom;
 extern wWin_p mainW;
 extern wPos_t toolbarHeight;
 extern wIndex_t changed;
-extern char message[STR_LONG_SIZE];
+extern char message[STR_HUGE_SIZE];
 extern REGION_T curRegion;
 extern long paramVersion;
 extern coOrd zero;
@@ -229,6 +239,7 @@ void FileIsChanged(void);
 char * ConvertFromEscapedText(const char * text);
 char * ConvertToEscapedText(const char * text);
 
+int MagneticSnap( int state );
 void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );
@@ -237,6 +248,7 @@ void SelectFont();
 
 void CheckRoomSize( BOOL_T );
 const char * GetBalloonHelpStr( char* );
+const char * GetCurCommandName( void );
 void EnableCommands( void );
 void Reset( void );
 wIndex_t GetCurrentCommand(void);
@@ -298,13 +310,15 @@ typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );
 
+wBool_t CheckHelpTopicExists(const char * topic);
+
 /* foreign externs */
 extern drawCmd_t mapD;
 extern STATUS_T CmdEnumerate( wAction_t, coOrd );
 
-wIndex_t modifyCmdInx;
-wIndex_t joinCmdInx;
-wIndex_t tunnelCmdInx;
+extern wIndex_t modifyCmdInx;
+extern wIndex_t joinCmdInx;
+extern wIndex_t tunnelCmdInx;
 
 /* ctodesgn.c */
 void InitNewTurn( wMenu_p m );
@@ -319,7 +333,7 @@ STATUS_T ModifyRuler( wAction_t, coOrd );
 /* dialogs */
 void OutputBitMap( void );
 
-wDrawColor snapGridColor;
+extern wDrawColor snapGridColor;
 
 addButtonCallBack_t ColorInit( void );
 addButtonCallBack_t PrefInit( void );
@@ -341,9 +355,8 @@ void InitSnapGridButtons( void );
 void SnapGridEnable( void );
 void SnapGridShow( void );
 void MapWindowShow( int state );
-wMenuToggle_p snapGridEnableMI;
-wMenuToggle_p snapGridShowMI;
-wMenuToggle_p mapShowMI;
+extern wMenuToggle_p snapGridEnableMI;
+extern wMenuToggle_p snapGridShowMI;
 
 void ScaleLengthEnd( void );
 void EnumerateList( long, FLOAT_T, char * );
@@ -352,10 +365,9 @@ void EnumerateEnd(void);
 
 /* cnote.c */
 void DoNote( void );
-char * ReadMultilineText(size_t textLength);
 BOOL_T WriteMainNote( FILE * );
 
-void ReadMainNote(char * line);
+BOOL_T ReadMainNote(char * line);
 
 /* dbench.c */
 long GetBenchData( long, long );
@@ -374,7 +386,7 @@ long BenchOutputOption( long );
 DIST_T BenchGetWidth( long );
 
 /* dcustmgm.c */
-FILE * customMgmF;
+extern FILE * customMgmF;
 #define CUSTMGM_DO_COPYTO		(1)
 #define CUSTMGM_CAN_EDIT		(2)
 #define CUSTMGM_DO_EDIT			(3)
@@ -435,4 +447,6 @@ void SensorMgmLoad ( void );
 void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
+
+
 #endif

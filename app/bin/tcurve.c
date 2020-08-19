@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
 #include "ccurve.h"
 #include "cjoin.h"
@@ -285,6 +286,7 @@ STATUS_T CurveDescriptionMove(
 
 	switch (action) {
 	case C_DOWN:
+		DrawCurveDescription( trk, &mainD, wDrawColorWhite );
 	case C_MOVE:
 	case C_UP:
 		editMode = TRUE;
@@ -293,8 +295,6 @@ STATUS_T CurveDescriptionMove(
 			xx->descriptionOff.x = (pos.x-xx->pos.x);
 			xx->descriptionOff.y = (pos.y-xx->pos.y);
 			p1 = pos;
-			if (action != C_UP)
-				DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
 		} else {
 			p1 = pos;
 			GetCurveAngles( &a0, &a1, trk );
@@ -321,14 +321,16 @@ STATUS_T CurveDescriptionMove(
 			a = a0 + (0.5 * a1);
 			PointOnCircle( &p0, xx->pos, xx->radius/2, a );
 		}
-		if (action == C_UP) editMode = FALSE;
-		MainRedraw();
-		MapRedraw();
+		if (action == C_UP) {
+			editMode = FALSE;
+			DrawCurveDescription( trk, &mainD, wDrawColorBlack );
+		}
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
 		if (editMode) {
-			DrawLine( &tempD, p1, p0, 0, wDrawColorBlack );
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
+			DrawCurveDescription( trk, &tempD, wDrawColorBlue );
 		}
 		break;
 		
@@ -372,7 +374,7 @@ static descData_t crvDesc[] = {
 /*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &crvData.angle0 },
 /*A2*/	{ DESC_ANGLE, N_("CW Angle"), &crvData.angle1 },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &crvData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &crvData.pivot },
+/*PV*/	{ DESC_PIVOT, N_("Lock"), &crvData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &crvData.layerNumber },
 		{ DESC_NULL } };
 
@@ -664,13 +666,8 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	ANGLE_T a0, a1;
 	track_p tt = t;
-	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
-
-	if (GetTrkWidth(t) == 2)
-		widthOptions |= DTS_THICK2;
-	if ((GetTrkWidth(t) == 3) || (d->options & DC_THICK))
-		widthOptions |= DTS_THICK3;
 	GetCurveAngles( &a0, &a1, t );
 	if (xx->circle) {
 		tt = NULL;
@@ -679,24 +676,18 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 		a0 = 0.0;
 		a1 = 360.0;
 	}
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
+	if (     ((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
 		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 		 labelScale >= d->scale &&
 		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawCurveDescription( t, d, color );
 	}
-	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
-	else widthOptions &=~DTS_BRIDGE;
 
 	DrawCurvedTrack( d, xx->pos, xx->radius, a0, a1,
 				GetTrkEndPos(t,0), GetTrkEndPos(t,1),
-				t, GetTrkGauge(t), color, widthOptions );
-	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
-		 (d->options&DC_QUICK) == 0 &&
-		 (!IsCurveCircle(t)) ) {
-		DrawEndPt( d, t, 0, color );
-		DrawEndPt( d, t, 1, color );
-	}
+				t, color, widthOptions );
+	DrawEndPt( d, t, 0, color );
+	DrawEndPt( d, t, 1, color );
 }
 
 static void DeleteCurve( track_p t )
@@ -717,11 +708,11 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 		xx->helixTurns, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
-	rc &= fprintf(f, "\tEND\n" )>0;
+	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
 
-static void ReadCurve( char * line )
+static BOOL_T ReadCurve( char * line )
 {
 	struct extraData *xx;
 	track_p t;
@@ -734,34 +725,45 @@ static void ReadCurve( char * line )
 	wIndex_t layer;
 	long options;
 	char * cp = NULL;
+	long helixTurns = 0;
+	coOrd descriptionOff = { 0.0, 0.0 };
 
 	if (!GetArgs( line+6, paramVersion<3?"dXZsdpYfc":paramVersion<9?"dLl00sdpYfc":"dLl00sdpffc", 
 		&index, &layer, &options, scale, &visible, &p, &elev, &r, &cp ) ) {
-		return;
+		return FALSE;
 	}
+	if (cp) {
+		if ( !GetArgs( cp, "lp", &helixTurns, &descriptionOff ) )
+			return FALSE;
+	}
+	if ( !ReadSegs() )
+		return FALSE;
 	t = NewTrack( index, T_CURVE, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
-	SetTrkVisible(t, visible&2);
-	SetTrkNoTies(t, visible&4);
-	SetTrkBridge(t, visible&8);
+	xx->helixTurns = helixTurns;
+	xx->descriptionOff = descriptionOff;
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(t, visible!=0);
+		SetTrkNoTies(t, FALSE);
+		SetTrkBridge(t, FALSE);
+	} else {
+		SetTrkVisible(t, visible&2);
+		SetTrkNoTies(t, visible&4);
+		SetTrkBridge(t, visible&8);
+	}
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&3));
 	xx->pos = p;
 	xx->radius = r;
-	xx->helixTurns = 0;
-	xx->descriptionOff.x = xx->descriptionOff.y = 0.0;
-	if (cp) {
-		GetArgs( cp, "lp", &xx->helixTurns, &xx->descriptionOff );
-	}
 	if ( ( ( options & 0x80 ) != 0 ) == ( xx->helixTurns > 0 ) ) 
 		SetTrkBits(t,TB_HIDEDESC);
-	ReadSegs();
 	SetEndPts(t,2);
 	if (GetTrkEndAngle( t, 0 ) == 270.0 &&
 		GetTrkEndAngle( t, 1 ) == 90.0 )
 		xx->circle = TRUE;
 	ComputeCurveBoundingBox( t, xx );
+	return TRUE;
 }
 
 static void MoveCurve( track_p trk, coOrd orig )
@@ -998,6 +1000,8 @@ static BOOL_T MergeCurve(
 	if ( xx0->helixTurns > 0 ||
 		 xx1->helixTurns > 0 )
 		return FALSE;
+	if (GetTrkType(trk0) != GetTrkType(trk1))
+		return FALSE;
 	d = FindDistance( xx0->pos, xx1->pos );
 	d += fabs( xx0->radius - xx1->radius );
 	if ( d > connectDistance )
@@ -1009,6 +1013,8 @@ static BOOL_T MergeCurve(
 	UndoStart( _("Merge Curves"), "MergeCurve( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndrawNewTrack( trk0 );
+	if (GetTrkEndTrk(trk0,ep0) == trk1)
+		DisconnectTracks( trk0, ep0, trk1, ep1);
 	trk2 = GetTrkEndTrk( trk1, 1-ep1 );
 	if (trk2) {
 		ep2 = GetEndPtConnectedToMe( trk2, trk1 );
@@ -1212,32 +1218,25 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 		ErrorMessage( MSG_CANT_EXTEND_HELIX );
 		return FALSE;
 	}
+	if (inx == PARAMS_NODES) return FALSE;
 	params->len = params->arcR * params->arcA1 *2.0*M_PI/360.0;
 	if (xx->helixTurns > 0)
 		params->len += (xx->helixTurns-(xx->circle?1:0)) * xx->radius * 2.0 * M_PI;
 	params->helixTurns = xx->helixTurns;
-	if ( inx == PARAMS_PARALLEL ) {
-		params->ep = 0;
-		if (xx->helixTurns > 0) {
-			params->arcA0 = 0.0;
-			params->arcA1 = 360.0;
-		}
+	params->circleOrHelix = FALSE;
+	if ( IsCurveCircle( trk ) ) {
+		params->ep = PickArcEndPt( params->arcP, /*Dj.inp[0].*/pos, pos );
+		params->angle = params->track_angle;
+		params->circleOrHelix = TRUE;
+		return TRUE;
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN)  ) {
+		params->ep = PickEndPoint(pos, trk);
 	} else {
-		params->circleOrHelix = FALSE;
-		if ( IsCurveCircle( trk ) ) {
-			params->ep = PickArcEndPt( params->arcP, /*Dj.inp[0].*/pos, pos );
-			params->angle = params->track_angle;
-			params->circleOrHelix = TRUE;
-			return TRUE;
-		} else if (inx == PARAMS_CORNU ) {
-			params->ep = PickEndPoint(pos, trk);
-		} else {
-			params->ep = PickUnconnectedEndPointSilent( pos, trk );
-		}
-		if (params->ep == -1)
-			return FALSE;
-		params->angle = GetTrkEndAngle(trk,params->ep); ;
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	}
+	if (params->ep == -1)
+		return FALSE;
+	params->angle = GetTrkEndAngle(trk,params->ep); ;
 	return TRUE;
 }
 
@@ -1293,6 +1292,8 @@ static BOOL_T QueryCurve( track_p trk, int query )
 		if ((xx->helixTurns >0) || xx->circle) return TRUE;
 		return FALSE;
 		break;
+	case Q_NODRAWENDPT:
+		return xx->circle;
 	default:
 		return FALSE;
 	}
@@ -1373,6 +1374,19 @@ static BOOL_T MakeParallelCurve(
 }
 
 
+static wBool_t CompareCurve( track_cp trk1, track_cp trk2 )
+{
+	struct extraData * ed1 = GetTrkExtraData( trk1 );
+	struct extraData * ed2 = GetTrkExtraData( trk2 );
+	char * cp = message+strlen(message);
+	REGRESS_CHECK_POS( "POS", ed1, ed2, pos )
+	REGRESS_CHECK_DIST( "RADIUS", ed1, ed2, radius )
+	REGRESS_CHECK_INT( "CIRCLE", ed1, ed2, circle )
+	REGRESS_CHECK_INT( "TURNS", ed1, ed2, helixTurns )
+	REGRESS_CHECK_POS( "DESCOFF", ed1, ed2, descriptionOff );
+	return TRUE;
+}
+
 static trackCmd_t curveCmds = {
 		"CURVE",
 		DrawCurve,
@@ -1402,7 +1416,13 @@ static trackCmd_t curveCmds = {
 		NULL,
 		NULL,
 		NULL,
-		MakeParallelCurve };
+		MakeParallelCurve,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareCurve };
 
 
 EXPORT void CurveSegProc(
@@ -1651,7 +1671,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 		d0 = FindDistance( pos0, pos1 )/2.0;
 		Rotate( &pos2, pos1, -a0 );
 		pos2.x -= pos1.x;
-		if ( fabs(pos2.x) < 0.01 )
+		if ( fabs(pos2.x) < 0.005 )
 			break;
 		d2 = sqrt( d0*d0 + pos2.x*pos2.x )/2.0; 
 		r = d2*d2*2.0/pos2.x;

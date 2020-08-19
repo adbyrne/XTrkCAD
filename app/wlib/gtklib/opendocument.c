@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "gtkint.h"
 #include "i18n.h"
@@ -54,7 +55,7 @@
 static char *
 ExtendPath(void)
 {
-    char *path = getenv("PATH");
+    char *path = strdup(getenv("PATH"));
     DynString newPath;
     DynStringMalloc(&newPath, 16);
 
@@ -109,6 +110,7 @@ unsigned wOpenFileExternal(char * filename)
            currentPath,
            TRUE);
 
+    free(currentPath);
     DynStringFree(&commandLine);
     
     return(rc==0);

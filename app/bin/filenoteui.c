@@ -37,7 +37,7 @@
 #include "note.h"
 #include "param.h"
 #include "paths.h"
-#include "stringxtc.h"
+#include "include/stringxtc.h"
 #include "track.h"
 #include "wlib.h"
 

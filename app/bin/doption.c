@@ -35,6 +35,7 @@ static paramIntegerRange_t i1_64 = { 1, 64 };
 static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
 static paramIntegerRange_t i0_10000 = { 0, 10000 };
+static paramIntegerRange_t i0_99 = { 0, 99};
 static paramIntegerRange_t i1_1000 = { 1, 1000 };
 static paramIntegerRange_t i10_1000 = { 10, 1000 };
 static paramIntegerRange_t i10_100 = { 10, 100 };
@@ -43,15 +44,16 @@ static paramFloatRange_t r1_10 = { 1, 10 };
 static paramFloatRange_t r1_1000 = { 1, 1000 };
 static paramFloatRange_t r0_180 = { 0, 180 };
 
-static long colorTrack;
-static long colorDraw;
-
 static void UpdatePrefD( void );
 static void UpdateMeasureFmt(void);
+static void UpdateAutoSaveInterval(long);
+static void UpdateChkPtInterval(long);
 
 static wIndex_t distanceFormatInx;
 
 EXPORT long enableBalloonHelp = 1;
+
+EXPORT long showFlexTrack = 1;
 
 long GetChanges( paramGroup_p pg )
 {
@@ -65,21 +67,18 @@ long GetChanges( paramGroup_p pg )
 	return changes;
 }
 
+static paramGroup_t prefPG;
+
+
 
 static void OptionDlgUpdate(
 		paramGroup_p pg,
 		int inx,
 		void * valueP )
 {
-	int quickMoveOld;
 	if ( inx < 0 ) return;
 	if ( pg->paramPtr[inx].valueP == &enableBalloonHelp ) {
 		wEnableBalloonHelp((wBool_t)*(long*)valueP);
-	} else if ( pg->paramPtr[inx].valueP == &quickMove ) {
-		quickMoveOld = (int)quickMove;
-		quickMove = *(long*)valueP;
-		UpdateQuickMove(NULL);
-		quickMove = quickMoveOld;
 	} else {
 		if (pg->paramPtr[inx].valueP == &units) {
 			UpdatePrefD();
@@ -87,13 +86,27 @@ static void OptionDlgUpdate(
 		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
 			UpdateMeasureFmt();
 		}
-		if (pg->paramPtr[inx].valueP == &colorTrack) {
-			if (colorTrack == 1) colorLayers |= 1;
-			else colorLayers &= ~1;
+		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
+			DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
 		}
-		if (pg->paramPtr[inx].valueP == &colorDraw) {
-			if (colorDraw == 1 ) colorLayers |= 2;
-			else colorLayers &= ~2;
+		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
+			checkPtInterval = *(long *)valueP;
+			if (checkPtInterval == 0 ) {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning off AutoSave") );
+				UpdateAutoSaveInterval(0);
+			} else {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+			}
+		}
+		if (pg->paramPtr[inx].valueP == &autosaveChkPoints) {
+			autosaveChkPoints = *(long *)valueP;
+			if (checkPtInterval == 0 && autosaveChkPoints>0 ) {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning on CheckPointing") );
+				UpdateChkPtInterval(10);
+			} else {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+			}
+
 		}
 	}
 }
@@ -102,7 +115,6 @@ static void OptionDlgCancel(
 		wWin_p win )
 {
 	wEnableBalloonHelp( (int)enableBalloonHelp );
-	UpdateQuickMove(NULL);
 	wHide( win );
 }
 
@@ -128,7 +140,7 @@ static char * colorTrackLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * colorDrawLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * liveMapLabels[] = { N_("Live Map"), NULL };
 static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
-static char * zoomCornerLabels[] = {N_("Zoom keeps lower corner in view"), NULL};
+static char * constrainMainLabels[] = {N_("Constrain Drawing Area to Room boundaries"), NULL};
 
 extern long trainPause;
 
@@ -144,7 +156,7 @@ static paramData_t displayPLs[] = {
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
-	{ PD_TOGGLE, &zoomCorner, "zoom-corner", PDO_NOPSHUPD, zoomCornerLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },
@@ -193,10 +205,6 @@ static void DoDisplay( void * junk )
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Part Number"), NULL, (void*)0x0321 );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Partno/Item"), NULL, (void*)0x4321 );
 	}
-	if (colorLayers&1) colorTrack = 1;
-	else colorTrack = 0;
-	if (colorLayers&2) colorDraw = 1;
-	else colorTrack = 0;
 
 	ParamLoadControls( &displayPG );
 	wShow( displayW );
@@ -224,13 +232,9 @@ EXPORT addButtonCallBack_t DisplayInit( void )
 
 static wWin_p cmdoptW;
 
-static char * moveQlabels[] = {
-		N_("Normal"),
-		N_("Simple"),
-		N_("End-Points"),
-		NULL };
-		
 static char * preSelectLabels[] = { N_("Properties"), N_("Select"), NULL };
+static char * selectLabels[] = { N_("Single item selected, +Ctrl Add to selection"), N_("Add to selection, +Ctrl Single item selected"), NULL };
+static char * selectZeroLabels[] = { N_("Deselect all on select nothing"), NULL };
 
 #ifdef HIDESELECTIONWINDOW
 static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };
@@ -238,16 +242,15 @@ static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };
 static char * rightClickLabels[] = {N_("Normal: Command List, Shift: Command Options"), N_("Normal: Command Options, Shift: Command List"), NULL };
 
 EXPORT paramData_t cmdoptPLs[] = {
-	{ PD_RADIO, &quickMove, "move-quick", PDO_NOPSHUPD, moveQlabels, N_("Draw Moving Tracks"), BC_HORZ },
 	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, preSelectLabels, N_("Default Command"), BC_HORZ },
 #ifdef HIDESELECTIONWINDOW
 	{ PD_TOGGLE, &hideSelectionWindow, PDO_NOPSHUPD, hideSelectionWindowLabels, N_("Hide Selection Window"), BC_HORZ },
 #endif
-	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 }
+	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 },
+	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, selectLabels, N_("Select Mode"), 0},
+	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, selectZeroLabels, "", 0 }
 	};
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD|PGO_PREFMISC, cmdoptPLs, sizeof cmdoptPLs/sizeof cmdoptPLs[0] };
-
-EXPORT paramData_p moveQuickPD = &cmdoptPLs[0];
 
 static void CmdoptOk( void * junk )
 {
@@ -295,6 +298,7 @@ static long displayUnits;
 static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
 static char * enableBalloonHelpLabels[] = { N_("Balloon Help"), NULL };
+static char * enableFlexTrackLabels[] = { N_("Show FlexTrack in HotBar"), NULL };
 static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
 static paramData_t prefPLs[] = {
@@ -308,10 +312,14 @@ static paramData_t prefPLs[] = {
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
 	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORZ},
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point") },
+#define I_CHKPT		(13)
+	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point Frequency") },
+#define I_AUTOSAVE		(14)
+	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD|PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
 	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
 	};
 static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, sizeof prefPLs/sizeof prefPLs[0] };
@@ -362,6 +370,20 @@ static dstFmts_t metricDstFmts[] = {
 		{ NULL, 0 },
 		{ NULL, 0 } };
 static dstFmts_t *dstFmts[] = { englishDstFmts, metricDstFmts };
+
+void UpdateAutoSaveInterval(long value)
+{
+	autosaveChkPoints = value;
+	ParamLoadControl(&prefPG, I_AUTOSAVE);
+	ParamLoadControl(&prefPG, I_CHKPT);
+}
+
+void UpdateChkPtInterval(long value)
+{
+	checkPtInterval = value;
+	ParamLoadControl(&prefPG, I_AUTOSAVE);
+	ParamLoadControl(&prefPG, I_CHKPT);
+}
 
 /**
  * Load the selection list for number formats with the appropriate list of variants.

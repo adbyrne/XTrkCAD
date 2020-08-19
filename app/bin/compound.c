@@ -336,7 +336,7 @@ void DrawCompoundDescription(
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-	if ( (d->options&DC_GROUP) )
+	if ( (d->options&DC_SIMPLE) )
 		return;
 		if ( xx->special == TOpier ) {
 			desc = xx->u.pier.name;
@@ -398,6 +398,7 @@ STATUS_T CompoundDescriptionMove(
 	case C_DOWN:
 		editMode = TRUE;
 		REORIGIN( p0, xx->descriptionOrig, xx->angle, xx->orig )
+		DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
 
 	case C_MOVE:
 	case C_UP:
@@ -411,13 +412,15 @@ STATUS_T CompoundDescriptionMove(
 		if (action == C_UP) {
 			editMode = FALSE;
 		}
-		MainRedraw();
-		MapRedraw();
+		if ( action == C_UP ) {
+			DrawCompoundDescription( trk, &mainD, color );
+		}
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 		break;
 	case C_REDRAW:
 		if (editMode) {
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+			DrawCompoundDescription( trk, &tempD, wDrawColorBlue );
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
 		}
 	}
 
@@ -582,7 +585,11 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	BOOL_T titleChanged, flipped, ungrouped, split;
 	char * newTitle;
 
-	if ( inx == -1 ) {
+	switch ( inx ) {
+	case -1:
+	case MN:
+	case NM:
+	case PN:
 		titleChanged = FALSE;
 		ParseCompoundTitle( xtitle(xx), &mP, &mL, &nP, &nL, &pP, &pL );
 		if (mP == NULL) mP = "";
@@ -659,7 +666,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		GetBoundingBox( trk, &hi, &lo );
 		if ( labelScale >= mainD.scale &&
 			 !OFF_MAIND( lo, hi ) ) {
-			DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
+			DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
 		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
 		if (xx->title) MyFree(xx->title);
@@ -669,7 +676,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		xx->split = split;
 		if ( labelScale >= mainD.scale &&
 			 !OFF_MAIND( lo, hi ) ) {
-			DrawCompoundDescription( trk, &tempD, GetTrkColor(trk,&tempD) );
+			DrawCompoundDescription( trk, &mainD, GetTrkColor(trk,&tempD) );
 		}
 		return;
 	}
@@ -687,14 +694,12 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	case A1:
 	case A2:
 	case A3:
-		if (inx==E3) ep=3;
-		else if (inx==E2) ep=2;
-		else if (inx==E1) ep=1;
+		if (inx==A3) ep=3;
+		else if (inx==A2) ep=2;
+		else if (inx==A1) ep=1;
 		else ep=0;
-		RotateTrack( trk, xx->orig, NormalizeAngle( compoundData.endAngle[ep]-xx->angle ) );
+		RotateTrack( trk, GetTrkEndPos(trk,ep), NormalizeAngle( compoundData.endAngle[ep]-GetTrkEndAngle(trk,ep) ) );
 		ComputeCompoundBoundingBox( trk );
-		compoundData.angle = xx->angle;
-		compoundDesc[AN].mode |= DESC_CHANGE;
 		break;
 	case AN:
 		orig = xx->orig;
@@ -779,6 +784,10 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 				  compoundDesc[i*(E1-E0)+C0].mode |= DESC_CHANGE;
 			}
 		}
+		compoundData.orig = xx->orig;
+		compoundDesc[OR].mode |= DESC_CHANGE;
+		compoundData.angle = xx->angle;
+		compoundDesc[AN].mode |= DESC_CHANGE;
     	break;
     case LT:
     	xx->lineType = compoundData.linetype;
@@ -928,6 +937,8 @@ void DescribeCompound(
 		}
 		compoundDesc[GR].mode = DESC_RO;
 	}
+	if ( compoundData.epCnt == 2 )
+		compoundData.length = GetTrkLength( trk, 0, 1 );
 	if ( compoundData.length > minLength && compoundData.epCnt > 1)
 		compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
 	else
@@ -947,6 +958,8 @@ void DescribeCompound(
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), NULL, (void*)2 );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
 		wListSetIndex( (wList_p)compoundDesc[LT].control0, compoundData.linetype );
 	}
 
@@ -1003,7 +1016,7 @@ BOOL_T WriteCompound(
 	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				GetTrkTypeName(t),
 				GetTrkIndex(t), GetTrkLayer(t), options, position, lineType,
-				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0),
+				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
 				xx->orig.x, xx->orig.y, xx->angle,
 				PutTitle(xtitle(xx)) )>0;
 	for (ep=0; ep<epCnt; ep++ )
@@ -1051,6 +1064,12 @@ EXPORT void SetCompoundLineType( track_p trk, int width ) {
 		break;
 	case 4:
 		xx->lineType = DRAWLINEDASHDOTDOT;
+		break;
+	case 5:
+		xx->lineType = DRAWLINECENTER;
+		break;
+	case 6:
+		xx->lineType = DRAWLINEPHANTOM;
 		break;
 	}
 }
@@ -1117,7 +1136,7 @@ EXPORT track_p NewCompound(
 }
 
 
-void ReadCompound(
+BOOL_T ReadCompound(
 		char * line,
 		TRKTYP_T trkType )
 {
@@ -1140,21 +1159,22 @@ void ReadCompound(
 	if (paramVersion<3) {
 		if ( !GetArgs( line, "dXsdpfq",
 			&index, &layer, scale, &visible, &orig, &angle, &title ) )
-			return;
+			return FALSE;
 	} else if (paramVersion <= 5 && trkType == T_STRUCTURE) {
 		if ( !GetArgs( line, "dL00sdpfq",
 			&index, &layer, scale, &visible, &orig, &angle, &title ) )
-			return;
+			return FALSE;
 	} else {
 		if ( !GetArgs( line, paramVersion<9?"dLlldsdpYfq":"dLlldsdpffq",
 			&index, &layer, &options, &position, &lineType, scale, &visible, &orig, &elev, &angle, &title ) )
-			return;
+			return FALSE;
 	}
 	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE)
 		strcpy( scale, curScaleName );
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	pathCnt = 0;
-	ReadSegs();
+	if ( !ReadSegs() )
+		return FALSE;
 	path = pathPtr;
 	if ( tempEndPts_da.cnt > 0 && pathCnt <= 1 ) {
 		pathCnt = 10;
@@ -1171,9 +1191,15 @@ void ReadCompound(
 	}
 	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL, NULL, pathCnt, (char *)path, tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );
-	SetTrkVisible(trk, visible&2);
-	SetTrkNoTies(trk, visible&4);
-	SetTrkBridge(trk, visible&8);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+		SetTrkNoTies(trk, FALSE);
+		SetTrkBridge(trk, FALSE);
+	} else {
+		SetTrkVisible(trk, visible&2);
+		SetTrkNoTies(trk, visible&4);
+		SetTrkBridge(trk, visible&8);
+	}
 	SetTrkScale(trk, LookupScale( scale ));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
@@ -1190,16 +1216,19 @@ void ReadCompound(
 	if (tempSpecial[0] != '\0') {
 		if (strncmp( tempSpecial, ADJUSTABLE, strlen(ADJUSTABLE) ) == 0) {
 			xx->special = TOadjustable;
-			GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
-						&xx->u.adjustable.minD, &xx->u.adjustable.maxD );
+			if ( !GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
+						&xx->u.adjustable.minD, &xx->u.adjustable.maxD ) )
+				return FALSE;
 
 		} else if (strncmp( tempSpecial, PIER, strlen(PIER) ) == 0) {
 			xx->special = TOpier;
-			GetArgs( tempSpecial+strlen(PIER), "fq",
-						&xx->u.pier.height, &xx->u.pier.name );
+			if ( !GetArgs( tempSpecial+strlen(PIER), "fq",
+						&xx->u.pier.height, &xx->u.pier.name ) )
+				return FALSE;
 
 		} else {
 			InputError("Unknown special case", TRUE);
+			return FALSE;
 		}
 	}
 	if (pathCnt > 0) {
@@ -1214,7 +1243,7 @@ void ReadCompound(
 		}
 	}
 	xx->pathCurr = path;
-
+	return TRUE;
 }
 
 void MoveCompound(
@@ -1293,12 +1322,12 @@ void FlipCompound(
 					 mP && strcmp( mP, mfg ) == 0 && nP && pP ) {
 					if ( strcmp( nP, descL ) == 0 && strcmp( pP, partL ) == 0 ) {
 						sprintf( message, "%s\t%s\t%s", mfg, descR, partR );
-						xx->title = strdup( message );
+						xx->title = MyStrdup( message );
 						return;
 					}
 					if ( strcmp( nP, descR ) == 0 && strcmp( pP, partR ) == 0 ) {
 						sprintf( message, "%s\t%s\t%s", mfg, descL, partL );
-						xx->title = strdup( message );
+						xx->title = MyStrdup( message );
 						return;
 					}
 				}

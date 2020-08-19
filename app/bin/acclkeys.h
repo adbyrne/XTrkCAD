@@ -55,6 +55,7 @@
 #define ACCL_CONNECT	(WCTL+WSHIFT+'j')
 #define ACCL_HELIX		(WCTL+WSHIFT+'h')
 #define ACCL_SPLIT		(WCTL+WSHIFT+'s')
+#define ACCL_SPLITDRAW  (0)
 #define ACCL_ELEVATION	(WCTL+WSHIFT+'e')
 #define ACCL_PROFILE	(WCTL+WSHIFT+'f')
 #define ACCL_DELETE		(WCTL+'d')
@@ -89,6 +90,7 @@
 #define ACCL_ABOVE		(WCTL+WSHIFT+'b')
 #define ACCL_BELOW		(WCTL+WSHIFT+'w')
 #define ACCL_RULER		(0)
+#define ACCL_ANGLE      (0)
 
 /* fileM */
 #define ACCL_NEW		(WCTL+'n')
@@ -111,6 +113,7 @@
 #define ACCL_COPY		(WCTL+'c')
 #define ACCL_CUT		(WCTL+'x')
 #define ACCL_PASTE		(WCTL+'v')
+#define ACCL_CLONE      (0)
 #define ACCL_SELECTALL	(WCTL+WSHIFT+'a')
 #define ACCL_DESELECTALL	(0)
 #define ACCL_THIN		(WCTL+'1')

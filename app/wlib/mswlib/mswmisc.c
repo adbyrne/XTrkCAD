@@ -69,7 +69,6 @@ char * mswStrdup(const char *);
  * EXPORTED VARIABLES
  */
 
-long debugWindow = 0;
 HINSTANCE mswHInst;
 HWND mswHWnd = (HWND)0;
 
@@ -77,11 +76,12 @@ const char *mswDrawWindowClassName = "DRAWWINDOW";
 char mswTmpBuff[1024];
 int mswEditHeight;
 int mswAllowBalloonHelp = TRUE;
-int mswGroupStyle;
 HFONT mswOldTextFont;
 HFONT mswLabelFont;
 long mswThickFont = 1;
 double mswScale = 1.0;
+
+double scaleIcon = 1.0;				   /**< Scaling factor for toolbar icons */
 
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
@@ -129,8 +129,8 @@ static int mResizeBorderH;
 static int mMenuH;
 static int screenWidth = 0, screenHeight = 0;
 
-wWin_p mswWin = NULL;
-wWin_p winFirst, winLast;
+static wWin_p mswWin = NULL;
+static wWin_p winFirst, winLast;
 
 static long count51 = 0;
 
@@ -158,7 +158,7 @@ static DWORD dwCookie;
 typedef struct {
     wControl_p b;
 } controlMap_t;
-dynArr_t controlMap_da;
+static dynArr_t controlMap_da;
 #define controlMap(N) DYNARR_N(controlMap_t,controlMap_da,N)
 
 
@@ -175,7 +175,7 @@ static FILE * helpStrF;
 #endif
 static int inMainWndProc = FALSE;
 
-int newHelp = 1;
+static int newHelp = 1;
 
 static wBool_t mswWinBlockEnabled = TRUE;
 
@@ -185,7 +185,7 @@ static int dumpControls;
 extern char *userLocale;
 
 // list of supported fileformats for image files
-char * filterImageFiles[] = { N_("All image files"),
+static char * filterImageFiles[] = { N_("All image files"),
 							"*.gif;*.jpg;*.jpeg;*.png;*.tif;*.tiff",
 							N_("GIF files (*.gif)"),
 							"*.gif",
@@ -865,6 +865,10 @@ wWin_p wWinMainCreate(
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
 
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
+	if (scaleIcon < 1.0) scaleIcon = 1.0;
+	if (scaleIcon > 2.0) scaleIcon = 2.0;
+
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",
                         WS_OVERLAPPEDWINDOW, labelStr, winProc, x, y, data,
@@ -1071,7 +1075,7 @@ static wAccelKey_e translateExtKey(UINT wParam)
 }
 
 
-long notModKey;
+static long notModKey;
 int mswTranslateAccelerator(
     HWND hWnd,
     LPMSG pMsg)
@@ -2148,12 +2152,22 @@ int wNotice3(
     }
 }
 
+/**
+ * Show help text for the given topic. 
+ *
+ * \param  topic The topic. if NULL the index page is shown.
+ */
 
 void wHelp(
     const char * topic)
 {
     char *pszHelpTopic;
     HWND hwndHelp;
+	char *theTopic = "index";
+
+	if (topic) {
+		theTopic = topic;
+	}
 
     if (!helpInitted) {
         HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
@@ -2162,9 +2176,9 @@ void wHelp(
 
     /*	             "c:\\help.chm::/intro.htm>mainwin", */
     /* attention: always adapt constant value (10) to needed number of formatting characters */
-    pszHelpTopic = malloc(strlen(helpFile) + strlen(topic) + 10);
+    pszHelpTopic = malloc(strlen(helpFile) + strlen(theTopic) + 10);
     assert(pszHelpTopic != NULL);
-    sprintf(pszHelpTopic, "/%s.html", topic);
+    sprintf(pszHelpTopic, "/%s.html", theTopic);
     hwndHelp = HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOPIC,
                         (DWORD_PTR)pszHelpTopic);
 
@@ -2174,6 +2188,8 @@ void wHelp(
 
     free(pszHelpTopic);
 }
+
+
 
 
 void doHelpMenu(void * context)
@@ -2200,6 +2216,13 @@ void doHelpMenu(void * context)
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD)&ftsQuery);
         break;
 
+
+    case 3: /*Context*/
+    	const char * topic;
+    	topic = GetCurCommandName();
+    	wHelp(topic);
+    	break;
+
     default:
         return;
     }
@@ -2207,11 +2230,16 @@ void doHelpMenu(void * context)
     helpInitted = TRUE;
 }
 
+void wDoAccelHelp(wAccelKey_e key, void * context) {
+	doHelpMenu(context);
+}
+
 void wMenuAddHelp(
     wMenu_p m)
 {
-    wMenuPushCreate(m, NULL, "&Contents", 0, doHelpMenu, (void*)1);
-    wMenuPushCreate(m, NULL, "&Search for Help on...", 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, _("&Contents"), 0, doHelpMenu, (void*)1);
+    wMenuPushCreate(m, NULL, _("&Search for Help on..."), 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, _("Co&mmand Context Help"), 0, doHelpMenu, (void*)3);
 }
 
 
@@ -2762,22 +2790,6 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DRAWITEM:
     case WM_COMMAND:
     case WM_MEASUREITEM:
-    case WM_NOTVALID:
-        if (WCMD_PARAM_ID == IDM_DOHELP) {
-            b = getControlFromCursor(hWnd, NULL);
-            closeBalloonHelp();
-
-            if (!b) {
-                return 0L;
-            }
-
-            if (b->helpStr) {
-                wHelp(b->helpStr);
-            }
-
-            return 0L;
-        }
-
         closeBalloonHelp();
 
         if (WCMD_PARAM_ID < CONTROL_BASE || WCMD_PARAM_ID > (WPARAM)controlMap_da.cnt) {
@@ -3059,48 +3071,48 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0L;
 
     case WM_SETCURSOR:
-        /*if (any buttons down)
-        	break;*/
-        wSetCursor(NULL, curCursor);
+		if (hWnd == mswHWnd)
+			wSetCursor(NULL, curCursor);
 
-        if (!mswAllowBalloonHelp) {
-            break;
-        }
+		if (!mswAllowBalloonHelp) {
+			break;
+		}
 
-        if (IsIconic(mswHWnd)) {
-            break;
-        }
+		if (IsIconic(mswHWnd)) {
+			break;
+		}
 
-        b = getControlFromCursor(hWnd, NULL);
+		b = getControlFromCursor(hWnd, NULL);
 
-        if (b == balloonControlButton) {
-            break;
-        }
+		if (b == balloonControlButton) {
+			break;
+		}
 
-        if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
-                                         (!b) || b->type == B_DRAW || b->helpStr == NULL) {
-            closeBalloonHelp();
-            break;
-        }
+		if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
+			(!b) || b->type == B_DRAW || b->helpStr == NULL) {
+			closeBalloonHelp();
+			break;
+		}
 
-        if (b != balloonHelpButton) {
-            closeBalloonHelp();
-        }
+		if (b != balloonHelpButton) {
+			closeBalloonHelp();
+		}
 
-        if (balloonHelpState != balloonHelpIdle) {
-            break;
-        }
+		if (balloonHelpState != balloonHelpIdle) {
+			break;
+		}
 
-        balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
-                                    balloonHelpTimeOut, NULL);
+		balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
+			balloonHelpTimeOut, NULL);
 
-        if (balloonHelpTimer == (UINT)0) {
-            break;
-        }
+		if (balloonHelpTimer == (UINT)0) {
+			break;
+		}
 
-        balloonHelpState = balloonHelpWait;
-        balloonHelpButton = b;
-        break;
+		balloonHelpState = balloonHelpWait;
+		balloonHelpButton = b;
+		break;
+
 
     case WM_SYSCOMMAND:
         inx = GetWindowWord(hWnd, 0);

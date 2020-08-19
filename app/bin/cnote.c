@@ -27,6 +27,7 @@
 #include "i18n.h"
 #include "misc.h"
 #include "param.h"
+#include "include/utf8convert.h"
 
 static char * mainText = NULL;
 static wWin_p noteW;
@@ -66,7 +67,7 @@ void DoNote(void)
 {
     if (noteW == NULL) {
         noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
-                                  NULL, FALSE, NULL, F_RESIZE, NULL);
+                                  wHide, FALSE, NULL, F_NOTTRANSIENT|F_RESIZE, NULL);
     }
 
     wTextClear(noteT);
@@ -76,83 +77,67 @@ void DoNote(void)
     wShow(noteW);
 }
 
-/**
- * Read the text for a note. Lines are read from the input file
- * until either the maximum length is reached or the END statement is 
- * found.
- * 
- * \todo Handle premature end as an error
- * 
- * \param textLength
- * \return pointer to string, has to be myfree'd by caller
- */
- 
-char *
-ReadMultilineText(size_t textLength)
-{
-	char *string;
-	DynString noteText;
-	DynStringMalloc(&noteText, 0);
-	size_t charsRead = 0;
-	char *line;
-
-	line = GetNextLine();
-
-	while (strcmp(line, "    END")) {
-		DynStringCatCStr(&noteText, line);
-		DynStringCatCStr(&noteText, "\n");
-		line = GetNextLine();
-	}
-	charsRead = DynStringSize(&noteText);
-	if (charsRead > textLength+1) {				// Cope with trailing '/n' and only care if larger
-		if (!(InputError("Expected note length: %d read: %d",
-			TRUE, textLength, charsRead)))		//If TRUE, carry on
-			exit(1);
-	}
-	string = MyStrdup(DynStringToCStr(&noteText));
-	string[strlen(string) - 1] = '\0';
-
-	DynStringFree(&noteText);
-	return(string);
-}
-
 
 BOOL_T WriteMainNote(FILE* f)
 {
     BOOL_T rc = TRUE;
+	char *noteText = mainText;
 
-    if (mainText && *mainText) {
-        rc &= fprintf(f, "NOTE MAIN 0 0 0 0 %lu\n", strlen(mainText))>0;
-        rc &= fprintf(f, "%s", mainText)>0;
-        rc &= fprintf(f, "\n    END\n")>0;
+	if (noteText && *noteText) {
+#ifdef WINDOWS
+		char *out = NULL;
+		if (RequiresConvToUTF8(mainText)) {
+			unsigned cnt = strlen(mainText) * 2 + 1;
+			out = MyMalloc(cnt);
+			wSystemToUTF8(mainText, out, cnt);
+			noteText = out;
+		}
+#endif // WINDOWS
+
+
+	char * sText = ConvertToEscapedText( noteText );
+        rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
+	MyFree( sText );
+
+#ifdef WINDOWS
+		if (out) {
+			MyFree(out);
+		}
+#endif // WINDOWS
     }
-
     return rc;
 }
 
 /**
  * Read the layout main note
- * 
+ *
  * \param line complete NOTE statement
  */
- 
-void ReadMainNote(char *line)
-{
-    size_t size;
 
-    if (!GetArgs(line + 9, paramVersion < 3 ? "d" : "0000d", &size)) {
-        return;
+BOOL_T ReadMainNote(char *line)
+{
+    long size;
+    char * sNote = NULL;
+
+    if (!GetArgs(line + 9,
+	paramVersion < 3 ? "l" :
+	paramVersion < 12 ? "0000l":
+	"0000lq", &size, &sNote)) {
+        return FALSE;
     }
 
     if (mainText) {
         MyFree(mainText);
     }
 
-	mainText = ReadMultilineText(size);
+    if ( paramVersion < 12 )
+	mainText = ReadMultilineText();
+    else
+	mainText = sNote;
+    return TRUE;
 }
 
 void InitCmdNote()
 {
     ParamRegister(&notePG);
 }
-

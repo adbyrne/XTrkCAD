@@ -25,7 +25,7 @@
 #include <stdbool.h>
 #include "track.h"
 
-#define URLMAXIMUMLENGTH (2048)
+#define URLMAXIMUMLENGTH (512)
 #define PATHMAXIMUMLENGTH (2048)
 #define TITLEMAXIMUMLENGTH (81)
 
@@ -37,7 +37,7 @@ enum noteCommands {
 	OP_NOTETEXT,
 	OP_NOTELINK,
 	OP_NOTEFILE
-} noteOperations;
+};
 
 /** hold the data for the note */
 struct extraDataNote {

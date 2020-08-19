@@ -78,8 +78,6 @@ struct ligature_Tag {
  * metrics are read in.
  */
 
-font_info *all_fonts;
-
 struct font_info_Tag {
     font_info *next;
     /*
@@ -117,6 +115,8 @@ struct font_info_Tag {
     float stemh;
     float italicangle;
 };
+
+font_info *all_fonts;
 
 /*
  * This structure holds the information about how a font is used

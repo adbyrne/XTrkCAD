@@ -37,9 +37,6 @@
 	#define W_OK (2)
 	#define access	_access
 	#include <windows.h>
-	//#if _MSC_VER >=1400
-	//	#define strdup _strdup
-	//#endif
 #endif
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -72,6 +69,11 @@
 #include "track.h"
 #include "utility.h"
 #include "version.h"
+#include "dynstring.h"
+
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 
 
 /*#define TIME_READTRACKFILE*/
@@ -81,12 +83,15 @@
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
+EXPORT wMenuList_p fileList_ml;
 
 EXPORT char * clipBoardN;
-
+static coOrd paste_offset, cursor_offset;
 
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
+
+
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -161,7 +166,7 @@ RestoreLocale( char * locale )
 EXPORT FILE * paramFile = NULL;
 char *paramFileName;
 EXPORT wIndex_t paramLineNum = 0;
-EXPORT char paramLine[STR_LONG_SIZE];
+EXPORT char paramLine[STR_HUGE_SIZE];
 EXPORT char * curContents;
 EXPORT char * curSubContents;
 
@@ -189,7 +194,12 @@ EXPORT char * GetNextLine( void )
 		return NULL;
 	}
 	if (fgets( paramLine, sizeof paramLine, paramFile ) == NULL) {
-		AbortProg( "Permature EOF on %s", paramFileName );
+		sprintf( message, "INPUT ERROR: premature EOF on %s", paramFileName );
+		wNoticeEx( NT_ERROR, message, _("Ok"), NULL );
+		if ( paramFile ) {
+			fclose( paramFile );
+			paramFile = NULL;
+		}
 	}
 	Stripcr( paramLine );
 	ParamCheckSumLine( paramLine );
@@ -230,9 +240,14 @@ EXPORT int InputError(
 	}
 	strcat( mp, _("\nDo you want to continue?") );
 	if (!(ret = wNoticeEx( NT_ERROR, message, _("Continue"), _("Stop") ))) {
-		if ( paramFile )
+		if ( paramFile ) {
 			fclose(paramFile);
-		paramFile = NULL;
+			paramFile = NULL;
+		}
+		if ( paramFileName ) {
+			free( paramFileName );
+			paramFileName = NULL;
+		}
 	}
 	return ret;
 }
@@ -247,6 +262,7 @@ EXPORT void SyntaxError(
 		TRUE, event, actual, expected );
 }
 
+
 /**
  * Parse a line in XTrackCAD's file format
  *
@@ -254,6 +270,24 @@ EXPORT void SyntaxError(
  * \param format IN ???
  *
  * \return FALSE in case of parsing error, TRUE on success
+ * In the error case, InputError had been called which may have closed the input file (paramFile)
+ *
+ * format chars are:
+ * 0 - read a number and discard
+ * X - no read, *pi = 0
+ * Y - no read, *pf = 0L
+ * Z - no read, *pl = 0.0
+ * L - *pi = number
+ * d - *pi = number
+ * w - *pf = read a width
+ * u - *pul = number
+ * l - *pl = number
+ * f - *pf = number
+ * z - *pf = 0.0
+ * p - *pp = ( number, number ) a coOrd
+ * s - *ps = string
+ * q - *ps = quoted string
+ * c - *qp = position of next non-space char or NULL
  */
 
 EXPORT BOOL_T GetArgs(
@@ -262,7 +296,6 @@ EXPORT BOOL_T GetArgs(
 		... )
 {
 	char * cp, * cq;
-	int argNo;
 	long * pl;
 	unsigned long *pul;
 	int * pi;
@@ -272,25 +305,24 @@ EXPORT BOOL_T GetArgs(
 	char ** qp;
 	va_list ap;
 	char *oldLocale = NULL;
+	char * sError = NULL;
 
 	oldLocale = SaveLocale("C");
 
 	cp = line;
 	va_start( ap, format );
-	for (argNo=1;*format;argNo++,format++) {
+	for ( ; sError==NULL && *format; format++ ) {
 		while (isspace((unsigned char)*cp)) cp++;
 		if (!*cp && strchr( "XZYzc", *format ) == NULL ) {
-			RestoreLocale(oldLocale);
-			InputError( "Arg %d: EOL unexpected", TRUE, argNo );
-			return FALSE;
+			sError = "EOL unexpected";
+			break;
 		}
 		switch (*format) {
 		case '0':
 			(void)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -310,9 +342,8 @@ EXPORT BOOL_T GetArgs(
 			pi = va_arg( ap, int * );
 			*pi = (int)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -320,9 +351,8 @@ EXPORT BOOL_T GetArgs(
 			pi = va_arg( ap, int * );
 			*pi = (int)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -330,9 +360,8 @@ EXPORT BOOL_T GetArgs(
 			pf = va_arg( ap, FLOAT_T * );
 			*pf = (FLOAT_T)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			if (*cq == '.')
 				*pf = strtod( cp, &cq );
@@ -344,9 +373,8 @@ EXPORT BOOL_T GetArgs(
 			pul = va_arg( ap, unsigned long * );
 			*pul = strtoul( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -354,9 +382,8 @@ EXPORT BOOL_T GetArgs(
 			pl = va_arg( ap, long * );
 			*pl = strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -364,43 +391,27 @@ EXPORT BOOL_T GetArgs(
 			pf = va_arg( ap, FLOAT_T * );
 			*pf = strtod( cp, &cq );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected float", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected float";
+				break;
 			}
 			cp = cq;
 			break;
 		case 'z':
 			pf = va_arg( ap, FLOAT_T * );
-#ifdef LATER
-			if ( paramVersion >= 9 ) {
-				*pf = strtod( cp, &cq );
-				if (cp == cq) {
-					RestoreLocale(oldLocale);
-					InputError( "Arg %d: expected float", TRUE, argNo );
-					return FALSE;
-				}
-				cp = cq;
-			} else {
-				*pf = 0.0;
-			}
-#endif
 			*pf = 0.0;
 			break;
 		case 'p':
 			pp = va_arg( ap, coOrd * );
 			p.x = strtod( cp, &cq );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected float", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected float";
+				break;
 			}
 			cp = cq;
 			p.y = strtod( cp, &cq );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected float", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected float";
+				break;
 			}
 			cp = cq;
 			*pp = p;
@@ -442,7 +453,10 @@ EXPORT BOOL_T GetArgs(
 			} else {
 				message[0] = '\0';
 			}
-			*qp = (char*)MyStrdup(message);
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(message);
+#endif
+			*qp = (char*)ConvertFromEscapedText(message);
 			break;
 		case 'c':
 			qp = va_arg( ap, char * * );
@@ -453,13 +467,75 @@ EXPORT BOOL_T GetArgs(
 				*qp = NULL;
 			break;
 		default:
-			AbortProg( "getArgs: bad format char" );
+			AbortProg( "getArgs: bad format char: %c", *format );
 		}
 	}
 	va_end( ap );
 	RestoreLocale(oldLocale);
+	if ( sError ) {
+		InputError( sError, TRUE, cp );
+		return FALSE;
+	}
 	return TRUE;
 }
+
+
+
+wBool_t IsEND( char * sEnd )
+{
+	char * cp;
+	wBool_t bAllowNakedENDs = paramVersion < 12;
+	for( cp = paramLine; *cp && (isspace( *cp ) || *cp == '\t'); cp++ );
+	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 )
+		cp += strlen( sEnd );
+	else if ( bAllowNakedENDs && strncmp( cp, "END", 3 ) == 0 )
+		cp += 3;
+	else
+		return FALSE;
+	for ( ; *cp && isspace( *cp ); cp++ );
+	if ( *cp != '\0' )
+		return FALSE;
+	return TRUE;
+}
+
+
+/**
+ * Read the text for a note/car. Lines are read from the input file
+ * until the END statement is found.
+ *
+ * \todo Handle premature end as an error
+ *
+ * \return pointer to string, has to be myfree'd by caller
+ */
+
+char *
+ReadMultilineText()
+{
+	char *string;
+	DynString noteText;
+	DynStringMalloc(&noteText, 0);
+	char *line;
+
+	line = GetNextLine();
+
+	while ( !IsEND("END") ) {
+		DynStringCatCStr(&noteText, line);
+		DynStringCatCStr(&noteText, "\n");
+		line = GetNextLine();
+	}
+	string = MyStrdup(DynStringToCStr(&noteText));
+	string[strlen(string) - 1] = '\0';
+
+#ifdef WINDOWS
+	if (wIsUTF8(string)) {
+		ConvertUTF8ToSystem(string);
+	}
+#endif // WINDOWS
+
+	DynStringFree(&noteText);
+	return(string);
+}
+
 
 EXPORT wBool_t ParseRoomSize(
 		char * s,
@@ -489,23 +565,37 @@ EXPORT wBool_t ParseRoomSize(
 	return FALSE;
 }
 
-
+/**
+ * Parameter file parser definitions
+ *
+ * \param [IN] name command
+ * \param [IN] proc function for reading the parameter definition
+ * \param [IN] delete if not NULL function for freeing the definition
+ */
 EXPORT void AddParam(
 		char * name,
-		readParam_t proc )
+		readParam_t proc)
 {
 	DYNARR_APPEND( paramProc_t, paramProc_da, 10 );
 	paramProc(paramProc_da.cnt-1).name = name;
 	paramProc(paramProc_da.cnt-1).proc = proc;
 }
 
-
-
 EXPORT char * PutTitle( char * cp )
 {
-	static char title[STR_SIZE];
-	char * tp = title;
-	while (*cp && (tp-title)<=(sizeof title)-3) {
+	static char *title;
+	char * tp;
+	unsigned cnt = strlen(cp) * 2 + 3;		// add 3 for quotes and terminating \0
+
+	if (!title) {
+		title = MyMalloc(cnt);
+	} else {
+		title = MyRealloc(title, cnt);
+	}
+
+	tp = title;
+
+	while (*cp ) {
 		if (*cp == '\"') {
 			*tp++ = '\"';
 			*tp++ = '\"';
@@ -517,6 +607,16 @@ EXPORT char * PutTitle( char * cp )
 	if ( *cp )
 		NoticeMessage( _("putTitle: title too long: %s"), _("Ok"), NULL, title );
 	*tp = '\0';
+
+#ifdef WINDOWS
+	if(RequiresConvToUTF8(title)) {
+		char *out = MyMalloc(cnt);
+		wSystemToUTF8(title, out, cnt);
+		strcpy(title, out);
+		MyFree(out);
+	}
+#endif // WINDOWS
+
 	return title;
 }
 
@@ -561,6 +661,7 @@ static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeo
 
 static char * checkPtFileName1;
 static char * checkPtFileName2;
+static char * checkPtFileNameBackup;
 
 /** Read the layout design.
  *
@@ -605,8 +706,12 @@ static BOOL_T ReadTrackFile(
 
 	InfoMessage("0");
 	count = 0;
+	int skipLines = 0;
+	BOOL_T skip = FALSE;
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;
+		BOOL_T old_skip = skip;
+		skip = FALSE;
 		if (count%10 == 0) {
 			InfoMessage( "%d", count );
 			wFlush();
@@ -626,8 +731,8 @@ static BOOL_T ReadTrackFile(
 		}
 
 		if (ReadTrack( paramLine )) {
-
-		} else if (strncmp( paramLine, "END", 3 ) == 0) {
+			continue;
+		} else if (IsEND( END_TRK_FILE ) ) {
 			break;
 		} else if (strncmp( paramLine, "VERSION ", 8 ) == 0) {
 			paramVersion = strtol( paramLine+8, &cp, 10 );
@@ -649,8 +754,14 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 7);
+#endif // WINDOWS
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 7);
+#endif // WINDOWS
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {
@@ -674,8 +785,17 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "LAYERS ", 7 ) == 0) {
 			ReadLayers( paramLine+7 );
 		} else {
-			if( !(ret = InputError( "unknown command", TRUE )))
-				break;
+			if (!old_skip) {
+				if (InputError(_("Unknown layout file object - skip until next good object?"), TRUE)) {   //OK to carry on
+					/* SKIP until next main line we recognize */
+					skip = TRUE;
+					skipLines++;
+					continue;
+				} else {
+					break;    //Close File
+				}
+			} else skip = TRUE;
+			skipLines++;
 		}
 	}
 
@@ -687,22 +807,17 @@ static BOOL_T ReadTrackFile(
 	if( ret ) {
 		if (!noSetCurDir)
 			SetCurrentPath( LAYOUTPATHKEY, fileName );
-
-		if (full) {
-//			SetCurrentPath(LAYOUTPATHKEY, pathName);
-			SetLayoutFullPath(pathName);
-			//strcpy(curPathName, pathName);
-			//curFileName = &curPathName[fileName-pathName];
-			SetWindowTitle();
-		}
 	}
+
+	 if (skipLines>0)
+		 NoticeMessage( MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
 
 	RestoreLocale( oldLocale );
 
 	paramFile = NULL;
 
 	free(paramFileName);
-	paramFileName = NULL;
+    paramFileName = NULL;
 	InfoMessage( "%d", count );
 	return ret;
 }
@@ -720,7 +835,7 @@ int LoadTracks(
 	char *extOfFile;
 
 	assert( fileName != NULL );
-	assert( cnt == 1 ); 
+	assert( cnt == 1 );
 
 	if ( ! bExample )
 		SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
@@ -740,13 +855,13 @@ int LoadTracks(
 	nameOfFile = FindFilename( fileName[ 0 ] );
 
  /*
-  * Support zipped filetype 
+  * Support zipped filetype
   */
 	extOfFile = FindFileExtension( nameOfFile);
 
 	BOOL_T zipped = FALSE;
 	BOOL_T loadXTC = TRUE;
-	char * full_path = fileName[0];
+	char * full_path = strdup(fileName[0]);
 
 	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
 
@@ -775,7 +890,7 @@ int LoadTracks(
 			    fseek(f, 0, SEEK_SET);
 			    manifest = malloc(length + 1);
 			    if (manifest) {
-			        fread(manifest, 1, length, f);
+			        size_t siz = fread(manifest, 1, length, f);
 			        manifest[length] = '\0';
 			    }
 			    fclose(f);
@@ -795,6 +910,8 @@ int LoadTracks(
 				free(manifest);
 			}
 
+			free(full_path);
+			full_path = NULL;
 			// If no manifest value use same name as the archive
 			if (arch_file && arch_file[0])
 			{
@@ -823,7 +940,9 @@ int LoadTracks(
 
 		free(zip_input);
 
+
 	}
+
 	if ( bExample )
 		bReadOnly = TRUE;
 	else if ( access( fileName[0], W_OK ) == -1 )
@@ -831,20 +950,22 @@ int LoadTracks(
 	else
 		bReadOnly = FALSE;
 
-	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
+	char *copyOfFileName = MyStrdup(fileName[0]);
 
-		if (zipped) {  //Put back to zipped extension - change back title and path
-			nameOfFile = FindFilename( fileName[0]);
-			extOfFile = FindFileExtension( fileName[0]);
-			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
-			SetLayoutFullPath(fileName[0]);
-			SetWindowTitle();
-			free(full_path);
-			full_path = fileName[0];
+	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
+
+		nameOfFile = NULL;
+		extOfFile = NULL;
+		SetCurrentPath( LAYOUTPATHKEY, copyOfFileName );
+		SetLayoutFullPath(copyOfFileName);
+		SetWindowTitle();
+
+		if ( ! bExample && (nameOfFile != NULL) ) {
+			char * copyFile = strdup(fileName[0]);
+			char * listName = FindFilename(strdup(fileName[0]));  //Make sure the list name is new
+			wMenuListAdd( fileList_ml, 0, listName, copyFile );
 		}
 
-		if ( ! bExample )
-			wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
 
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
@@ -858,6 +979,11 @@ int LoadTracks(
 		LoadLayerLists();
 		LayerSetCounts();
 	}
+
+	MyFree(copyOfFileName);
+	free(full_path);
+	full_path = NULL;
+
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
@@ -869,7 +995,7 @@ int LoadTracks(
  * path.
  * \param index IN ignored
  * \param label IN ignored
- * \param data IN path and filename 
+ * \param data IN path and filename
  */
 
 EXPORT void DoFileList(
@@ -914,8 +1040,8 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
-	rc &= WriteTracks( f );
-	rc &= fprintf(f, "END\n")>0;
+	rc &= WriteTracks( f, TRUE );
+	rc &= fprintf(f, "%s\n", END_TRK_FILE)>0;
 	if ( !rc )
 		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName );
 	fclose(f);
@@ -1039,7 +1165,7 @@ static int SaveTracks(
 		char * manifest_file;
 
 		MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
-		
+
 		FILE *fp = fopen(manifest_file, "wb");
 		if (fp != NULL)
 		{
@@ -1086,8 +1212,9 @@ EXPORT void DoSave( doSaveCallBack_p after )
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+		changed = checkPtMark = 1;
 	} else {
-		char *temp = GetLayoutFullPath(); 
+		char *temp = GetLayoutFullPath();
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
@@ -1101,6 +1228,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	changed = checkPtMark = 1;
 	SetWindowTitle();
 	SaveState();
 }
@@ -1112,6 +1240,8 @@ EXPORT void DoLoad( void )
 			sSourceFilePattern, LoadTracks, NULL );
 	bExample = FALSE;
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	paste_offset = zero;
+	cursor_offset = zero;
 	SaveState();
 }
 
@@ -1129,10 +1259,19 @@ EXPORT void DoExamples( void )
 	SaveState();
 }
 
+static wIndex_t generations_count = 0;
+wIndex_t max_generations_count = 10;
+static char sCheckPointBF[STR_LONG_SIZE];
+
 
 EXPORT void DoCheckPoint( void )
 {
 	int rc;
+
+	if (!checkPtFileNameBackup || (changed <= checkPtInterval+1)) {
+		sprintf(sCheckPointBF,"%s00.bkp",GetLayoutFilename());
+		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
+	}
 
 	if (checkPointingW == NULL) {
 		ParamRegister( &checkPointingPG );
@@ -1144,19 +1283,35 @@ EXPORT void DoCheckPoint( void )
 
 	/* could the check point file be written ok? */
 	if( rc ) {
-		/* yes, delete the backup copy of the checkpoint file */
-		remove( checkPtFileName2 );
+		/* yes, archive/delete the backup copy of the checkpoint file */
+		if (checkPtFileNameBackup) {
+			char * spot = strrchr(checkPtFileNameBackup,'.');
+			if (spot && spot>checkPtFileNameBackup+3) {
+				spot[-2]=generations_count/10+'0';
+				spot[-1]=generations_count%10+'0';
+			}
+			generations_count++;
+			if (((autosaveChkPoints == 0) && (generations_count > 5)) ||
+			    ((autosaveChkPoints > 0) && (generations_count > autosaveChkPoints)) ) {
+				generations_count = 0;
+			}
+			remove( checkPtFileNameBackup);
+			rename( checkPtFileName2, checkPtFileNameBackup );
+		} else {
+			remove(checkPtFileName2);
+		}
 	} else {
 		/* no, rename the backup copy back to the checkpoint file name */
 		rename( checkPtFileName2, checkPtFileName1 );
 	}
+
 	//wHide( checkPointingW );
 	wShow( mainW );
 }
 
 /**
  * Remove all temporary files before exiting. When the program terminates
- * normally through the exit choice, files and directories that were created 
+ * normally through the exit choice, files and directories that were created
  * temporarily are removed: xtrkcad.ckp
  *
  * \param none
@@ -1168,8 +1323,13 @@ EXPORT void CleanupFiles( void )
 {
 	char *tempDir;
 
-	if( checkPtFileName1 )
+	if( checkPtFileName1 ) {
+		if (checkPtFileNameBackup) {
+			remove( checkPtFileNameBackup );
+			rename( checkPtFileName1, checkPtFileNameBackup );
+		}
 		remove( checkPtFileName1 );
+	}
 
 	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
 		tempDir = GetZipDirectoryName(i);
@@ -1181,7 +1341,7 @@ EXPORT void CleanupFiles( void )
 }
 
 /**
- * Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly
+ * Check for existence of checkpoint file. Existence of a checkpoint file means that XTrkCAD was not properly
  * terminated.
  *
  * \param none
@@ -1206,11 +1366,13 @@ EXPORT int ExistsCheckpoint( void )
 /**
  * Load checkpoint file
  *
+ * \param if TRUE reuse old filename
+ * \param filename returned
  * \return TRUE if exists, FALSE otherwise
  *
  */
 
-EXPORT int LoadCheckpoint( void )
+EXPORT int LoadCheckpoint( BOOL_T sameName )
 {
 	char *search;
 
@@ -1222,21 +1384,34 @@ EXPORT int LoadCheckpoint( void )
 
 	if (ReadTrackFile( search, search + strlen(search) - strlen( sCheckPointF ), TRUE, TRUE, TRUE )) {
 		ResolveIndex();
+		LayoutBackGroundInit(FALSE);    //Get Prior BackGround
+		LayoutBackGroundSave();		    //Save Background Values
+
+		if (sameName) {
+			long iExample;
+			char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
+			bExample = (iExample == 1);
+			if (initialFile && strlen(initialFile)) {
+				SetCurrentPath( LAYOUTPATHKEY, initialFile );
+				SetLayoutFullPath(initialFile);
+			}
+		} else SetLayoutFullPath("");
 
 		RecomputeElevations();
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
-	}
+	} else SetLayoutFullPath("");
 
 	Reset();
 	UndoResume();
 
 	wSetCursor( mainD.d, defaultCursor );
 
-	SetLayoutFullPath("");
+
 	SetWindowTitle();
-	changed = TRUE;
+	checkPtMark = changed = 1;
 	free( search );
 	return TRUE;
 }
@@ -1259,8 +1434,6 @@ static int importAsModule;
  * Import Layout Dialog
  *
  */
-
-
 
 static int ImportTracks(
 		int cnt,
@@ -1293,7 +1466,7 @@ static int ImportTracks(
 	UndoStart( _("Import Tracks"), "importTracks" );
 	useCurrentLayer = TRUE;
 	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
-	ImportEnd();
+	ImportEnd(zero, TRUE, FALSE);
 	if (importAsModule) SetLayerModule(layer,TRUE);
 	useCurrentLayer = FALSE;
 	SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
@@ -1301,7 +1474,6 @@ static int ImportTracks(
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
 	paramVersion = paramVersionOld;
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	return TRUE;
@@ -1309,7 +1481,7 @@ static int ImportTracks(
 
 EXPORT void DoImport( void * type )
 {
-	importAsModule = (int)type;
+	importAsModule = (int)(long)type;
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );
@@ -1352,8 +1524,9 @@ static int DoExportTracks(
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
-	ExportTracks( f );
-	fprintf(f, "END\n");
+	coOrd offset;
+	ExportTracks( f , &offset);
+	fprintf(f, "%s\n", END_TRK_FILE);
 	fclose(f);
 
 	RestoreLocale( oldLocale );
@@ -1379,7 +1552,6 @@ EXPORT void DoExport( void )
 }
 
 
-
 EXPORT BOOL_T EditCopy( void )
 {
 	FILE * f;
@@ -1401,10 +1573,11 @@ EXPORT BOOL_T EditCopy( void )
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
-	ExportTracks(f);
-	fprintf(f, "END\n");
+	ExportTracks(f, &paste_offset);
+	fprintf(f, "%s\n", END_TRK_FILE );
 	RestoreLocale(oldLocale);
 	fclose(f);
+
 	return TRUE;
 }
 
@@ -1417,6 +1590,7 @@ EXPORT BOOL_T EditCut( void )
 	return TRUE;
 }
 
+
 /**
  * Paste clipboard content. XTrackCAD uses a disk file as clipboard replacement. This file is read and the
  * content is inserted.
@@ -1424,8 +1598,9 @@ EXPORT BOOL_T EditCut( void )
  * \return    TRUE if success, FALSE on error (file not found)
  */
 
-EXPORT BOOL_T EditPaste( void )
+BOOL_T EditPastePlace( wBool_t inPlace )
 {
+
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
 
@@ -1434,6 +1609,13 @@ EXPORT BOOL_T EditPaste( void )
 	wSetCursor( mainD.d, wCursorWait );
 	Reset();
 	SetAllTrackSelect( FALSE );
+
+	double offset = 20*mainD.scale/mainD.dpi;
+
+	paste_offset.x += offset;
+	paste_offset.y += offset;
+
+
 	ImportStart();
 	UndoStart( _("Paste"), "paste" );
 	useCurrentLayer = TRUE;
@@ -1441,19 +1623,33 @@ EXPORT BOOL_T EditPaste( void )
 		NoticeMessage( MSG_CANT_PASTE, _("Continue"), NULL );
 		rc = FALSE;
 	}
-	ImportEnd();
+	if (inPlace)
+		ImportEnd(paste_offset, FALSE, TRUE);
+	else
+		ImportEnd(zero, FALSE, FALSE);
 	useCurrentLayer = FALSE;
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	UpdateAllElevations();
 	RestoreLocale(oldLocale);
+
 	return rc;
 }
+
+EXPORT BOOL_T EditPaste( void) {
+	return EditPastePlace(FALSE);
+}
 
+EXPORT BOOL_T EditClone( void ) {
+	BOOL_T rc = TRUE;
+	if (!EditCopy()) return FALSE;
+	if (!EditPastePlace(TRUE)) return FALSE;
+	return rc;
+}
+
 /*****************************************************************************
  *
  * INITIALIZATION
@@ -1472,6 +1668,3 @@ EXPORT void FileInit( void )
 		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
 
 }
-
-
-

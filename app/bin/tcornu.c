@@ -136,8 +136,8 @@ EXPORT char * CreateSegPathList(track_p trk) {
 	char * cp = "\0\0";
 	if (GetTrkType(trk) != T_CORNU) return cp;
 	struct extraData *xx = GetTrkExtraData(trk);
-	if (xx->cornuData.cornuPath) free(xx->cornuData.cornuPath);
-	xx->cornuData.cornuPath = malloc(xx->cornuData.arcSegs.cnt+2);
+	if (xx->cornuData.cornuPath) MyFree(xx->cornuData.cornuPath);
+	xx->cornuData.cornuPath = MyMalloc(xx->cornuData.arcSegs.cnt+2);
 	int j= 0;
 	for (int i = 0;i<xx->cornuData.arcSegs.cnt;i++,j++) {
 		xx->cornuData.cornuPath[j] = i+1;
@@ -233,7 +233,6 @@ STATUS_T CornuDescriptionMove(
 	struct extraData *xx = GetTrkExtraData(trk);
 	static coOrd p0,p1;
 	static BOOL_T editState;
-	wDrawColor color;
 
 	if (GetTrkType(trk) != T_CORNU) return C_TERMINATE;
 
@@ -242,24 +241,25 @@ STATUS_T CornuDescriptionMove(
 
 	switch (action) {
 	case C_DOWN:
+		DrawCornuDescription( trk, &mainD, wDrawColorWhite );
 	case C_MOVE:
 	case C_UP:
 		editState = TRUE;
 		p1 = pos;
-		color = GetTrkColor( trk, &mainD );
         xx->cornuData.descriptionOff.x = pos.x - p0.x;
         xx->cornuData.descriptionOff.y = pos.y - p0.y;
-        DrawCornuDescription( trk, &mainD, color );
         if (action == C_UP) {
         	editState = FALSE;
+		wDrawColor color = GetTrkColor( trk, &mainD );
+	        DrawCornuDescription( trk, &mainD, color );
         }
-		MainRedraw();
-		MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
-		if (editState)
-			DrawLine( &mainD, p1, p0, 0, wDrawColorBlack );
+		if (editState) {
+		        DrawCornuDescription( trk, &tempD, wDrawColorBlue );
+			DrawLine( &tempD, p1, p0, 0, wDrawColorBlue );
+		}
 		break;
 		
 	}
@@ -527,34 +527,16 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
-
-	if (GetTrkWidth(t) == 2)
-		widthOptions |= DTS_THICK2;
-	if ((GetTrkWidth(t) == 3) || (d->options & DC_THICK))
-		widthOptions |= DTS_THICK3;
-	
-
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
+	if ( ((d->options&DC_SIMPLE)==0) &&
 		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 		 labelScale >= d->scale &&
 		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawCornuDescription( t, d, color );
 	}
 	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
-		else widthOptions &=~DTS_BRIDGE;
-	if ( tieDrawMode!=TIEDRAWMODE_NONE &&
-			 d!=&mapD &&
-			 (d->options&DC_TIES)!=0 &&
-			 d->scale<scale2rail/2 )
-		DrawSegsO(d,t,zero,0.0,xx->cornuData.arcSegs.ptr,xx->cornuData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions|DTS_TIES);
-	else
-		DrawSegsO(d,t,zero,0.0,xx->cornuData.arcSegs.ptr,xx->cornuData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
-	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
-		 (d->options&DC_QUICK) == 0 ) {
-		DrawEndPt( d, t, 0, color );
-		DrawEndPt( d, t, 1, color );
-	}
+	DrawSegsO(d,t,zero,0.0,xx->cornuData.arcSegs.ptr,xx->cornuData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
+	DrawEndPt( d, t, 0, color );
+	DrawEndPt( d, t, 1, color );
 }
 
 void FreeSubSegs(trkSeg_t* s) {
@@ -607,11 +589,10 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 			rc &= WriteEndPt( f, t, 1 );
 		}
 	rc &= WriteSegs( f, xx->cornuData.arcSegs.cnt, xx->cornuData.arcSegs.ptr );
-	//rc &= fprintf(f, "\tEND\n" )>0;
 	return rc;
 }
 
-static void ReadCornu( char * line )
+static BOOL_T ReadCornu( char * line )
 {
 	struct extraData *xx;
 	track_p t;
@@ -627,8 +608,10 @@ static void ReadCornu( char * line )
 
 	if (!GetArgs( line+6, "dLl00sdpffppffp",
 		&index, &layer, &options, scale, &visible, &p0, &a0, &r0, &c0, &p1, &a1, &r1, &c1 ) ) {
-		return;
+		return FALSE;
 	}
+	if ( !ReadSegs() )
+		return FALSE;
 	t = NewTrack( index, T_CORNU, 0, sizeof *xx );
 
 	xx = GetTrkExtraData(t);
@@ -648,10 +631,10 @@ static void ReadCornu( char * line )
     xx->cornuData.c[1] = c1;
     xx->cornuData.r[1] = r1;
     xx->cornuData.descriptionOff.x = xx->cornuData.descriptionOff.y = 0.0;
-    ReadSegs();
     FixUpCornu0(xx->cornuData.pos,xx->cornuData.c,xx->cornuData.a, xx->cornuData.r, xx);
     ComputeCornuBoundingBox(t,xx);
 	SetEndPts(t,2);
+	return TRUE;
 }
 
 static void MoveCornu( track_p trk, coOrd orig )
@@ -872,8 +855,8 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
 
 	*leftover = trk1;
-	*ep0 = ep;    		//Which end is for new on pos?
-	*ep1 = 1-ep;		//Which end is for old trk?
+	*ep0 = 1-ep;    		//Which end is for new on pos?
+	*ep1 = ep;		//Which end is for old trk?
 
 	return TRUE;
 }
@@ -882,10 +865,12 @@ BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	track_p trk2;
 	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
 		struct extraData *xx = GetTrkExtraData(*trk);
-		if (trk2) DeleteTrack(trk2,TRUE);
+		if (trk2) {
+			UndrawNewTrack( trk2 );
+			DeleteTrack(trk2,TRUE);
+		}
 		SetTrkEndPoint( *trk, *ep, *ep?xx->cornuData.pos[1]:xx->cornuData.pos[0], *ep?xx->cornuData.a[1]:xx->cornuData.a[0] );
-		MainRedraw();
-		MapRedraw();
+		DrawNewTrack( *trk );
 		return TRUE;
 	}
 	return FALSE;
@@ -1087,8 +1072,6 @@ static BOOL_T MergeCornu(
 	}
 	DrawNewTrack( trk3 );
 	UndoEnd();
-	MainRedraw();
-	MapRedraw();
 
 	return TRUE;
 }
@@ -1200,13 +1183,16 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->cornuCenter[i] = xx->cornuData.c[i];
 	}
 	params->len = xx->cornuData.length;
-	if ( inx == PARAMS_PARALLEL ) {
-			params->ep = 0;
-	} else if (inx == PARAMS_CORNU) {
+	if ( inx == PARAMS_NODES ) {
+		return FALSE;
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN) ) {
 		params->ep = PickEndPoint( pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
+
 	}
+	if (params->ep == -1) return FALSE;
+
 	if (params->ep>=0) {
 		params->angle = GetTrkEndAngle(trk,params->ep);
 	}
@@ -1340,13 +1326,13 @@ static BOOL_T MakeParallelCornu(
     BOOL_T above = FALSE;
     if ( diff_a < 180 ) above = TRUE; //Above track
     if (xx->cornuData.a[0] <180) above = !above;
-    DIST_T sep0 = sep+(xx->cornuData.r[0]!=0?fabs(factor/xx->cornuData.r[0]):0);
-    DIST_T sep1 = sep+(xx->cornuData.r[1]!=0?fabs(factor/xx->cornuData.r[1]):0);
+    DIST_T sep0 = sep+((xx->cornuData.r[0]!=0.0)?fabs(factor/xx->cornuData.r[0]):0);
+    DIST_T sep1 = sep+((xx->cornuData.r[1]!=0.0)?fabs(factor/xx->cornuData.r[1]):0);
     Translate(&np[0],xx->cornuData.pos[0],xx->cornuData.a[0]+(above?90:-90),sep0);
     Translate(&np[1],xx->cornuData.pos[1],xx->cornuData.a[1]+(above?-90:90),sep1);
     na[0]=xx->cornuData.a[0];
     na[1]=xx->cornuData.a[1];
-    if (xx->cornuData.r[0]) {
+    if (xx->cornuData.r[0] != 0.0) {
        //Find angle between center and end angle of track
        ANGLE_T ea0 =
         	   NormalizeAngle(FindAngle(xx->cornuData.c[0],xx->cornuData.pos[0])-xx->cornuData.a[0]);
@@ -1354,18 +1340,18 @@ static BOOL_T MakeParallelCornu(
         	nr[0]=xx->cornuData.r[0]+(above?sep0:-sep0);           //Needs adjustment
         	nc[0]=xx->cornuData.c[0];
      } else {
-        	nr[0] = 0;
+        	nr[0] = 0.0;
         	nc[0] = zero;
      }
 
-     if (xx->cornuData.r[1]) {
+     if (xx->cornuData.r[1] != 0.0) {
         	ANGLE_T ea1 =
         			NormalizeAngle(FindAngle(xx->cornuData.c[1],xx->cornuData.pos[1])-xx->cornuData.a[1]);
         	if (ea1<180) sep1 = -sep1;
         	nr[1]=xx->cornuData.r[1]+(above?sep1:-sep1);            //Needs adjustment
         	nc[1]=xx->cornuData.c[1];
      } else {
-        	nr[1] = 0;
+        	nr[1] = 0.0;
         	nc[1] = zero;
      }
 
@@ -1405,6 +1391,24 @@ static BOOL_T MakeParallelCornu(
 					seg->color = wDrawColorBlack;
 					seg->width = 0;
 				}
+				if (seg->type == SEG_BEZTRK) {
+					for (int j=0;j<seg->bezSegs.cnt;j++) {
+						trkSeg_p bseg = &(((trkSeg_t *)seg->bezSegs.ptr)[j]);
+						if (bseg->type == SEG_STRTRK) {
+							bseg->type = SEG_STRLIN;
+							bseg->color = wDrawColorBlack;
+							bseg->width = 0;
+						}
+						if (bseg->type == SEG_CRVTRK) {
+							bseg->type = SEG_CRVLIN;
+							bseg->color = wDrawColorBlack;
+							bseg->width = 0;
+						}
+					}
+					seg->type = SEG_BEZLIN;
+					seg->color = wDrawColorBlack;
+					seg->width = 0;
+				}
 			}
 		}
 	}
@@ -1416,10 +1420,12 @@ static BOOL_T MakeParallelCornu(
 static BOOL_T TrimCornu( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center ) {
 	UndoModify(trk);
 	if (dist>0.0 && dist<minLength) {
+		UndrawNewTrack( trk );
 		DeleteTrack(trk, TRUE);
 		return FALSE;
 	} else {
 		struct extraData *xx;
+		UndrawNewTrack( trk );
 		xx = GetTrkExtraData(trk);
 		xx->cornuData.a[ep] = angle;
 		xx->cornuData.c[ep] = center;
@@ -1427,9 +1433,8 @@ static BOOL_T TrimCornu( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANG
 		xx->cornuData.pos[ep] = endpos;
 		RebuildCornu(trk);
 		SetTrkEndPoint(trk, ep, xx->cornuData.pos[ep], xx->cornuData.a[ep]);
+		DrawNewTrack( trk );
 	}
-	MainRedraw();
-	MapRedraw();
 	return TRUE;
 }
 
@@ -1452,8 +1457,29 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 	return TRUE;
 }
 
-EXPORT
 
+static wBool_t CompareCornu( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos[0]", xx1, xx2, cornuData.pos[0] )
+	REGRESS_CHECK_POS( "Pos[1]", xx1, xx2, cornuData.pos[1] )
+	REGRESS_CHECK_POS( "C[0]", xx1, xx2, cornuData.c[0] )
+	REGRESS_CHECK_POS( "C[1]", xx1, xx2, cornuData.c[1] )
+	REGRESS_CHECK_ANGLE( "A[0]", xx1, xx2, cornuData.a[0] )
+	REGRESS_CHECK_ANGLE( "A[1]", xx1, xx2, cornuData.a[1] )
+	REGRESS_CHECK_DIST( "R[0]", xx1, xx2, cornuData.r[0] )
+	REGRESS_CHECK_DIST( "R[1]", xx1, xx2, cornuData.r[1] )
+	REGRESS_CHECK_DIST( "MinCurveRadius", xx1, xx2, cornuData.minCurveRadius )
+	REGRESS_CHECK_DIST( "MaxRateofChange", xx1, xx2, cornuData.maxRateofChange )
+	REGRESS_CHECK_DIST( "Length", xx1, xx2, cornuData.length )
+	REGRESS_CHECK_ANGLE( "WindingAngle", xx1, xx2, cornuData.windingAngle )
+	// CHECK arcSegs
+	REGRESS_CHECK_POS( "DescOff", xx1, xx2, cornuData.descriptionOff )
+	// CHECK cornuPath
+	return TRUE;
+}
 
 static trackCmd_t cornuCmds = {
 		"CORNU",
@@ -1486,7 +1512,11 @@ static trackCmd_t cornuCmds = {
 		NULL,
 		MakeParallelCornu,
 		NULL,
-		RebuildCornu
+		RebuildCornu,
+		NULL,
+		NULL,
+		NULL,
+		CompareCornu
 		};
 
 

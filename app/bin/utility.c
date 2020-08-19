@@ -217,6 +217,115 @@ void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle,
 }
 
 
+/* Find Arc Intersection
+ * Given two circles described by centers and radius (C1, R1) (C2, R2) Find the zero, one or two intersection points
+ *
+ */
+BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radius1, coOrd center2, DIST_T radius2) {
+	double d,a,h;
+
+	d = sqrt((center2.x-center1.x)*(center2.x-center1.x)+(center2.y-center1.y)*(center2.y-center1.y));
+	if (d >(radius1+radius2)) return FALSE; 		//Too far apart
+	if (d<fabs(radius1-radius2)) return FALSE;  	//Inside each other
+	if ((d == 0) && (radius1 == radius2)) return FALSE;  // Coincident and the same
+	a=((radius1*radius1)-(radius2*radius2)+(d*d))/(2*d);
+	if ((radius1*radius1)<(a*a)) return FALSE;
+	h = sqrt((radius1*radius1)-(a*a));
+
+	coOrd center_c;
+	center_c.x = center1.x+a*(center2.x - center1.x)/d;
+	center_c.y = center1.y+a*(center2.y - center1.y)/d;
+
+	(*Pc).x = center_c.x+h*(center2.y-center1.y)/d;
+	(*Pc).y = center_c.y-h*(center2.x-center1.x)/d;
+	(*Pc2).x = center_c.x-h*(center2.y-center1.y)/d;
+	(*Pc2).y = center_c.y+h*(center2.x-center1.x)/d;
+
+	return TRUE;
+}
+
+/*
+ * Find Intersections between a line and a circle
+ *
+ * |c-x|^2 = r^2
+ *
+ * 𝑥(𝑡)=𝑎+𝑡𝑏
+ *
+ * where 𝑎 is a point and 𝑏 is a vector.
+ *
+ * For a point on this line to satisfy the equation, you need to have
+ *
+ * (𝑡𝑏+(𝑎−𝑐))⋅(𝑡𝑏+(𝑎−𝑐))=𝑟^2
+ *
+ * which is a quadratic in 𝑡:
+ * |b|^2*t^2 + 2(a-c).bt +(|a-c|^2-r^2) = 0
+ *
+ * whose solutions are
+ *
+ * t = (-2(a-c).b +/- SQRT([2(a-c).b]^2 - 4|b|^2(|a-c|^2-r^2)) / 2|b|^2
+ *
+ */
+
+double VectorLength (coOrd v) {
+	return sqrt(v.x*v.x+v.y+v.y);
+}
+double VectorDot (coOrd v1, coOrd v2) {
+	return (v1.x*v2.x+ v1.y*v2.y);
+}
+coOrd VectorSubtract (coOrd v1, coOrd v2) {
+	coOrd result;
+	result.x = v1.x-v2.x;
+	result.y = v1.y-v2.y;
+	return result;
+}
+coOrd VectorAdd (coOrd v1, coOrd v2) {
+	coOrd result;
+	result.x = v1.x+v2.x;
+	result.y = v1.y+v2.y;
+	return result;
+}
+
+BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2, coOrd c, DIST_T radius,
+                                        coOrd point1, coOrd point2 )
+{
+    double dx, dy, cx, cy, A, B, C, det, t;
+
+    dx = point2.x - point1.x;
+    dy = point2.y - point1.y;
+
+    cx = c.x;
+    cy = c.y;
+
+    A = dx * dx + dy * dy;
+    B = 2 * (dx * (point1.x - cx) + dy * (point1.x - cy));
+    C = (point1.x - cx) * (point1.x - cx) + (point1.y - cy) * (point1.y - cy) - radius * radius;
+
+    det = B * B - 4 * A * C;
+    if ((A <= 0.0000001) || (det < 0))
+    {
+    	return FALSE;
+    }
+    else if (det == 0)
+    {
+        // One solution.
+        t = -B / (2 * A);
+        (*intersection1).x = point1.x + t * dx;
+        (*intersection1).y = point1.y + t * dy;
+        intersection2 = intersection1;
+        return TRUE;
+    }
+    else
+    {
+        // Two solutions.
+        t = (float)((-B + sqrt(det)) / (2 * A));
+        (*intersection1).x = point1.x + t * dx;
+        (*intersection1).y = point1.y + t * dy;
+        t = (float)((-B - sqrt(det)) / (2 * A));
+        (*intersection2).x = point1.x + t * dx;
+        (*intersection2).y = point1.y + t * dy;
+        return TRUE;
+    }
+}
 
 /* Find intersection:
    Given 2 lines each described by a point and angle (P0,A0) (P1,A1)
@@ -489,6 +598,7 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 #ifndef WINDOWS
 	else
 		fprintf(stderr, "intersectBox bogus\n" );
+		getchar();
 #endif
 }
 

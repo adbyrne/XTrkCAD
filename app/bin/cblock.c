@@ -61,6 +61,10 @@
 #include "trackx.h"
 #include "utility.h"
 
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
+
 EXPORT TRKTYP_T T_BLOCK = -1;
 
 static int log_block = 0;
@@ -257,7 +261,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 		*str = tolower((unsigned char)*str);
 		str++;
 	}
-	sprintf( str, _("(%d): Layer=%d %s"),
+	sprintf( str, _("(%d): Layer=%u %s"),
 		GetTrkIndex(trk), GetTrkLayer(trk)+1, message );
 	blockData.name[0] = '\0';
 	strncat(blockData.name,xx->name,STR_SHORT_SIZE-1);
@@ -387,19 +391,25 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(t);
+	char *blockName = MyStrdup(xx->name);
+
+#ifdef WINDOWS
+	blockName = Convert2UTF8(blockName);
+#endif // WINDOWS
 
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
-		GetTrkIndex(t), xx->name, xx->script)>0;
+		GetTrkIndex(t), blockName, xx->script)>0;
 	for (iTrack = 0; iTrack < xx->numTracks && rc; iTrack++) {
                 if ((&(xx->trackList))[iTrack].t == NULL) continue;
 		rc &= fprintf(f, "\tTRK %d\n",
 				GetTrkIndex((&(xx->trackList))[iTrack].t))>0;
 	}
-	rc &= fprintf( f, "\tEND\n" )>0;
+	rc &= fprintf( f, "\t%s\n", END_BLOCK )>0;
+	MyFree(blockName);
 	return rc;
 }
 
-static void ReadBlock ( char * line )
+static BOOL_T ReadBlock ( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
@@ -413,19 +423,24 @@ static void ReadBlock ( char * line )
 
 	LOG( log_block, 1, ("*** ReadBlock: line is '%s'\n",line))
 	if (!GetArgs(line+6,"dqq",&index,&name,&script)) {
-		return;
+		return FALSE;
 	}
+
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
+
 	DYNARR_RESET( btrackinfo_p , blockTrk_da );
 	while ( (cp = GetNextLine()) != NULL ) {
-		while (isspace((unsigned char)*cp)) cp++;
-		if ( strncmp( cp, "END", 3 ) == 0 ) {
+		if ( IsEND( END_BLOCK ) ) {
 			break;
 		}
+		while (isspace((unsigned char)*cp)) cp++;
 		if ( *cp == '\n' || *cp == '#' ) {
 			continue;
 		}
 		if ( strncmp( cp, "TRK", 3 ) == 0 ) {
-			if (!GetArgs(cp+4,"d",&trkindex)) return;
+			if (!GetArgs(cp+4,"d",&trkindex)) return FALSE;
 			/*trk = FindTrack(trkindex);*/
 			DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
 			blockTrk(blockTrk_da.cnt-1).i = trkindex;
@@ -458,6 +473,7 @@ static void ReadBlock ( char * line )
 		tracklist(iTrack).t = NULL;  			// Not resolved yet!! //
 	}
 	blockDebug(trk);
+	return TRUE;
 }
 
 EXPORT void ResolveBlockTrack ( track_p trk )
@@ -847,7 +863,7 @@ static void DrawBlockTrackHilite( void )
 	w = (wPos_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 

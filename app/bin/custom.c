@@ -67,8 +67,9 @@ char * sTurnoutDesignerW = NULL;
 char * sAboutProd = NULL;
 
 char * sCustomF = product ".cus";
-char * sCheckPointF = product ".ckp";
-char * sCheckPoint1F = product ".ck1";
+char * sCheckPointF = product Version ".ckp";
+char * sCheckPoint1F = product Version ".ck1";
+
 char * sClipboardF = product ".clp";
 char * sParamQF = product ".xtq";
 char * sUndoF = product ".und";

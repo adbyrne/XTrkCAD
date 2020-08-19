@@ -125,17 +125,24 @@ struct wDraw_t {
 		double DPI;
 		wDrawRedrawCallBack_p drawRepaint;
 		wDrawActionCallBack_p action;
-		HBITMAP hBm;
+		HBITMAP hBmMain;
+		HBITMAP hBmTemp;
+		HBITMAP hBmOld;
 		HPEN hPen;
 		HBRUSH hBrush;
 		wDraw_p drawNext;
-		HBITMAP hBmOld;
 		wBool_t hasPalette;
 		int paletteClock;
 		HBITMAP hBmBackup;
 		HDC hDcBackup;
 		HBITMAP hBmBackupOld;
 		void *background;
+		wBool_t bTempMode;
+		wBool_t bCopiedMain;
+
+		wPos_t lastX;
+		wPos_t lastY;
+
 		};
 
 extern HINSTANCE mswHInst;
@@ -151,6 +158,7 @@ extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 extern long mswThickFont;
 extern double mswScale;
+extern double scaleIcon;
 
 DWORD mswGetBaseStyle( wWin_p );
 char * mswStrdup( const char * );
@@ -195,3 +203,4 @@ void mswDrawIcon( HDC, int, int, wIcon_p, int, COLORREF, COLORREF );
 
 /* gwin32.c*/
 char *g_win32_getlocale (void);
+

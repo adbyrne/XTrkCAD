@@ -53,18 +53,27 @@
 #include "layout.h"
 
 static void DrawRoomWalls( wBool_t );
-EXPORT void DrawMarkers( void );
-static void ConstraintOrig( coOrd *, coOrd, int );
+static void DrawMarkers( void );
+static void ConstraintOrig( coOrd *, coOrd, int, int );
+static void DoMouse( wAction_t action, coOrd pos );
+static void DDrawPoly(
+		drawCmd_p d,
+		int cnt,
+		coOrd * pts,
+		int * types,
+		wDrawColor color,
+		wDrawWidth width,
+		int fill,
+		int open );
+static void DrawMapBoundingBox( BOOL_T set );
+static void DrawTicks( drawCmd_p d, coOrd size );
 
-static int log_pan = 0;
+EXPORT int log_pan = 0;
 static int log_zoom = 0;
 static int log_mouse = 0;
-
-static BOOL_T hideBox = FALSE;
+static int log_redraw = 0;
 
 static wFontSize_t drawMaxTextFontSize = 100;
-
-extern long zoomCorner; 
 
 /****************************************************************************
  *
@@ -81,6 +90,7 @@ EXPORT BOOL_T drawEnable = TRUE;
 EXPORT long currRedraw = 0;
 
 EXPORT coOrd panCenter;
+EXPORT coOrd menuPos;
 
 EXPORT wDrawColor drawColorBlack;
 EXPORT wDrawColor drawColorWhite;
@@ -88,7 +98,8 @@ EXPORT wDrawColor drawColorRed;
 EXPORT wDrawColor drawColorBlue;
 EXPORT wDrawColor drawColorGreen;
 EXPORT wDrawColor drawColorAqua;
-EXPORT wDrawColor drawColorBlueHighlight;
+EXPORT wDrawColor drawColorPreviewSelected;
+EXPORT wDrawColor drawColorPreviewUnselected;
 EXPORT wDrawColor drawColorPowderedBlue;
 EXPORT wDrawColor drawColorPurple;
 EXPORT wDrawColor drawColorGold;
@@ -116,6 +127,7 @@ static wPos_t infoHeight;
 static wPos_t textHeight;
 EXPORT wWin_p mapW;
 EXPORT BOOL_T mapVisible;
+EXPORT BOOL_T magneticSnap;
 
 EXPORT wDrawColor markerColor;
 EXPORT wDrawColor borderColor;
@@ -169,6 +181,8 @@ static struct {
 		double value;
 		wMenuRadio_p pdRadio;
 		wMenuRadio_p btRadio;
+		wMenuRadio_p ctxRadio1;
+		wMenuRadio_p panRadio;
 		} zoomList[] = {
 				{ "1:10", 1.0 / 10.0 },
 				{ "1:9", 1.0 / 9.0 },
@@ -316,6 +330,11 @@ static void DDrawLine(
 			lineOpt = wDrawLineDashDot;
 		else if (opt == DC_DASHDOTDOT)
 			lineOpt = wDrawLineDashDotDot;
+		else if(opt == DC_CENTER)
+			lineOpt = wDrawLineCenter;
+		else if (opt == DC_PHANTOM)
+			lineOpt = wDrawLinePhantom;
+
 	if (drawEnable) {
 		wDrawLine( d->d, x0, y0, x1, y1,
 				width,
@@ -397,6 +416,10 @@ static void DDrawArc(
 		lineOpt = wDrawLineDashDot;
 	else if (opt == DC_DASHDOTDOT)
 		lineOpt = wDrawLineDashDotDot;
+	else if(opt == DC_CENTER)
+		lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)
+		lineOpt = wDrawLinePhantom;
     if (drawEnable)
     {
         wDrawArc(d->d, x, y, (wPos_t)(rr), angle0, angle1, drawCenter,
@@ -418,9 +441,29 @@ static void DDrawString(
 	wPos_t x, y;
 	if (d == &mapD && !mapVisible)
 		return;
-	fontSize /= d->scale;
 	d->CoOrd2Pix(d,p,&x,&y);
-	wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
+	if ( color == wDrawColorWhite ) {
+		wPos_t width, height, descent, ascent;
+		coOrd pos[4], size;
+		double scale = 1.0;
+		wDrawGetTextSize( &width, &height, &descent, &ascent, d->d, s, fp, fontSize );
+		pos[0] = p;
+		size.x = SCALEX(mainD,width)*scale;
+		size.y = SCALEY(mainD,height)*scale;
+		pos[1].x = p.x+size.x;
+		pos[1].y = p.y;
+		pos[2].x = p.x+size.x;
+		pos[2].y = p.y+size.y;
+		pos[3].x = p.x;
+		pos[3].y = p.y+size.y;
+		Rotate( &pos[1], pos[0], a );
+		Rotate( &pos[2], pos[0], a );
+		Rotate( &pos[3], pos[0], a );
+		DDrawPoly( d, 4, pos, NULL, color, 0, 1, 0 );
+	} else {
+		fontSize /= d->scale;
+		wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
+	}
 }
 
 
@@ -463,6 +506,10 @@ static void DDrawPoly(
 		lineOpt = wDrawLineDashDot;
 	else if (opt == DC_DASHDOTDOT)
 		lineOpt = wDrawLineDashDotDot;
+	else if(opt == DC_CENTER)
+		lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)
+		lineOpt = wDrawLinePhantom;
 	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, lineOpt, (wDrawOpts)d->funcs->options, fill, open );
 }
 
@@ -511,10 +558,10 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 	w = (wPos_t)((s.x/d->scale)*d->dpi+0.5);
 	h = (wPos_t)((s.y/d->scale)*d->dpi+0.5);
 	d->CoOrd2Pix(d,p,&x,&y);
-	if ((d == &mapD) || add)
-		wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp );
+	if ( add )
+		wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp|wDrawOptTransparent );
 	else
-		wDrawFilledRectangle( d->d, x, y, w, h, selectedColor, wDrawOptTemp );
+		wDrawFilledRectangle( d->d, x, y, w, h, selectedColor, wDrawOptTemp|wDrawOptTransparent );
 
 }
 
@@ -533,7 +580,10 @@ EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 	for (i=0; i<cnt; i++) {
 		d->CoOrd2Pix(d,p[i],&q[i][0],&q[i][1]);
 	}
-	wDrawPolygon( d->d, q, NULL, cnt, wDrawColorBlack, 0, 0, wDrawOptTemp, 1, 0 );
+	static wDrawColor color = 0;
+	if ( color == 0 )
+		color = wDrawColorGray( 70 );
+	wDrawPolygon( d->d, q, NULL, cnt, color, 0, 0, wDrawOptTemp|wDrawOptTransparent, 1, 0 );
 }
 
 
@@ -553,7 +603,7 @@ EXPORT void DrawMultiString(
 	char * cp1;
 	POS_T lineH, lineW;
 	coOrd size, textsize, posl, orig;
-	POS_T descent;
+	POS_T descent, ascent;
 	char *line;
 
 	if (!text || !*text) {
@@ -561,9 +611,9 @@ EXPORT void DrawMultiString(
 	}
 	line = malloc(strlen(text) + 1);
 
-	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent);
-	POS_T ascent = textsize.y-descent;
-	lineH = ascent+descent*1.5;
+	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent, &ascent);
+	//POS_T ascent = textsize.y-descent;
+	lineH = (ascent+descent)*1.0;
 	size.x = 0.0;
 	size.y = 0.0;
 	orig.x = pos.x;
@@ -574,7 +624,7 @@ EXPORT void DrawMultiString(
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
 		*cp = '\0';
-		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent);
+		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent, &ascent);
 		lineW = textsize.x;
 		if (lineW>size.x)
 			size.x = lineW;
@@ -598,7 +648,7 @@ EXPORT void DrawMultiString(
 		hi->y = orig.y+ascent;
 	}
 	if (boxed && (d != &mapD)) {
-		int bw=5, bh=4, br=2, bb=2;
+		int bw=2, bh=2, br=1, bb=1;
 		size.x += bw*d->scale/d->dpi;
 		size.y = fabs(orig.y-posl.y)+bh*d->scale/d->dpi;
 		size.y += descent+ascent;
@@ -630,24 +680,25 @@ EXPORT void DrawBoxedString(
 		ANGLE_T a )
 {
 	coOrd size, p[4], p0=pos, p1, p2;
-	static int bw=5, bh=4, br=2, bb=2;
+	static int bw=2, bh=2, br=1, bb=1;
 	static double arrowScale = 0.5;
 	unsigned long options = d->options;
-	POS_T descent;
+	POS_T descent, ascent;
 	/*DrawMultiString( d, pos, text, fp, fs, color, a, &lo, &hi );*/
 	if ( fs < 2*d->scale )
 		return;
 #ifndef WINDOWS
 	if ( ( d->options & DC_PRINT) != 0 ) {
 		double scale = ((FLOAT_T)fs)/((FLOAT_T)drawMaxTextFontSize)/72.0;
-		wPos_t w, h, d;
-		wDrawGetTextSize( &w, &h, &d, mainD.d, text, fp, drawMaxTextFontSize );
+		wPos_t w, h, d, a;
+		wDrawGetTextSize( &w, &h, &d, &a, mainD.d, text, fp, drawMaxTextFontSize );
 		size.x = w*scale;
 		size.y = h*scale;
 		descent = d*scale;
+		ascent = a*scale;
 	} else
 #endif
-		DrawTextSize2( &mainD, text, fp, fs, TRUE, &size, &descent );
+		DrawTextSize2( &mainD, text, fp, fs, TRUE, &size, &descent, &ascent );
 #ifdef WINDOWS
 	/*h -= 15;*/
 #endif
@@ -659,10 +710,9 @@ EXPORT void DrawBoxedString(
 	}
 	size.x += bw*d->scale/d->dpi;
 	size.y += bh*d->scale/d->dpi;
-	size.y += descent;
 	p[0] = p0;
 	p[0].x -= br*d->scale/d->dpi;
-	p[0].y -= bb*d->scale/d->dpi+descent;
+	p[0].y -= (bb*d->scale/d->dpi+descent);
 	p[1].y = p[0].y;
 	p[2].y = p[3].y = p[0].y + size.y;
 	p[1].x = p[2].x = p[0].x + size.x;
@@ -678,10 +728,12 @@ EXPORT void DrawBoxedString(
 		DrawLine( d, p1, p2, 0, color );
 		Translate( &p1, p2, a-150, size.y*0.7*arrowScale );
 		DrawLine( d, p1, p2, 0, color );
+		/* no break */
 	case BOX_BOX:
 		DrawLine( d, p[1], p[2], 0, color );
 		DrawLine( d, p[2], p[3], 0, color );
 		DrawLine( d, p[3], p[0], 0, color );
+		/* no break */
 	case BOX_UNDERLINE:
 		DrawLine( d, p[0], p[1], 0, color );
 		DrawString( d, p0, 0.0, text, fp, fs, color );
@@ -689,7 +741,7 @@ EXPORT void DrawBoxedString(
 	case BOX_INVERT:
 		DrawPoly( d, 4, p, NULL, color, 0, 1, 0);
 		if ( color != wDrawColorWhite )
-			DrawString( d, p0, 0.0, text, fp, fs, wDrawColorWhite );
+			DrawString( d, p0, 0.0, text, fp, fs, wDrawColorGray( 94 ) );
 		break;
 	case BOX_BACKGROUND:
 		DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, 1, 0 );
@@ -707,9 +759,10 @@ EXPORT void DrawTextSize2(
 		wFontSize_t fs,
 		BOOL_T relative,
 		coOrd * size,
-		POS_T * descent )
+		POS_T * descent,
+		POS_T * ascent)
 {
-	wPos_t w, h, d;
+	wPos_t w, h, d, a;
 	FLOAT_T scale = 1.0;
 	if ( relative )
 		fs /= dp->scale;
@@ -717,14 +770,16 @@ EXPORT void DrawTextSize2(
 		scale = ((FLOAT_T)fs)/((FLOAT_T)drawMaxTextFontSize);
 		fs = drawMaxTextFontSize;
 	}
-	wDrawGetTextSize( &w, &h, &d, dp->d, text, fp, fs );
+	wDrawGetTextSize( &w, &h, &d, &a, dp->d, text, fp, fs );
 	size->x = SCALEX(mainD,w)*scale;
 	size->y = SCALEY(mainD,h)*scale;
 	*descent = SCALEY(mainD,d)*scale;
+	*ascent = SCALEY(mainD,a)*scale;
 	if ( relative ) {
 		size->x *= dp->scale;
 		size->y *= dp->scale;
 		*descent *= dp->scale;
+		*ascent *=dp->scale;
 	}
 /*	printf( "DTS2(\"%s\",%0.3f,%d) = (w%d,h%d,d%d) *%0.3f x%0.3f y%0.3f %0.3f\n", text, fs, relative, w, h, d, scale, size->x, size->y, *descent );*/
 }
@@ -737,8 +792,8 @@ EXPORT void DrawTextSize(
 		BOOL_T relative,
 		coOrd * size )
 {
-	POS_T descent;
-	DrawTextSize2( dp, text, fp, fs, relative, size, &descent );
+	POS_T descent, ascent;
+	DrawTextSize2( dp, text, fp, fs, relative, size, &descent, &ascent );
 }
 
 EXPORT void DrawMultiLineTextSize(
@@ -750,15 +805,14 @@ EXPORT void DrawMultiLineTextSize(
 		coOrd * size,
 		coOrd * lastline )
 {
-	POS_T descent, lineW, lineH;
+	POS_T descent, ascent, lineW, lineH;
 	coOrd textsize, blocksize;
 
 	char *cp;
 	char *line = malloc(strlen(text) + 1);
 
-	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent);
-	POS_T ascent = textsize.y-descent;
-	lineH = ascent+descent*1.5;
+	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent, &ascent);
+	lineH = (ascent+descent)*1.0;
 	blocksize.x = 0;
 	blocksize.y = 0;
 	lastline->x = 0;
@@ -769,7 +823,7 @@ EXPORT void DrawMultiLineTextSize(
 			*cp++ = *text++;
 		*cp = '\0';
 		blocksize.y += lineH;
-		DrawTextSize2( &mainD, line, fp, fs, TRUE, &textsize, &descent);
+		DrawTextSize2( &mainD, line, fp, fs, TRUE, &textsize, &descent, &ascent);
 		lineW = textsize.x;
 		if (lineW>blocksize.x)
 			blocksize.x = lineW;
@@ -895,7 +949,7 @@ static void TempSegPoly(
 	tempSegs(tempSegs_da.cnt-1).u.p.pts = (pts_t *)MyMalloc(cnt*sizeof(pts_t));
 	for (int i=0;i<=cnt-1;i++) {
 		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt = pts[i];
-		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_GROUP)?types[i]:wPolyLineStraight;
+		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_SIMPLE)==0?types[i]:wPolyLineStraight;
 	}
 
 }
@@ -964,10 +1018,10 @@ EXPORT drawCmd_t mainD = {
 		NULL, &screenDrawFuncs, DC_TICKS, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix };
 
 EXPORT drawCmd_t tempD = {
-		NULL, &tempDrawFuncs, DC_TICKS|DC_SIMPLE, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix };
+		NULL, &tempDrawFuncs, DC_TICKS, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix };
 
 EXPORT drawCmd_t mapD = {
-		NULL, &screenDrawFuncs, 0, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix };
+		NULL, &screenDrawFuncs, DC_SIMPLE, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix };
 
 
 /*****************************************************************************
@@ -978,7 +1032,6 @@ EXPORT drawCmd_t mapD = {
 
 
 static wPos_t info_yb_offset = 2;
-static wPos_t info_ym_offset = 3;
 static wPos_t six = 2;
 static wPos_t info_xm_offset = 2;
 static wPos_t messageOrControlX = 0;
@@ -1141,15 +1194,12 @@ EXPORT void InfoCount( wIndex_t count )
 
 EXPORT void InfoPos( coOrd pos )
 {
-	DrawMarkers();
 	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
 	wStatusSetValue( infoD.posX_m, message );
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wStatusSetValue( infoD.posY_m, message );
 	
-	MainRedraw();
 	oldMarker = pos;
-	DrawMarkers();
 }
 
 static wControl_p deferSubstituteControls[NUM_INFOCTL+1];
@@ -1223,7 +1273,7 @@ static void ChangeMapScale( BOOL_T reset )
 	h = (wPos_t)fh;
 	if (reset) {
 		wGetDisplaySize( &dw, &dh );
-		wSetGeometry(mapW, 50, dw/2, 50, dh/2, w, h, mapD.size.x/mapD.size.y);
+		wSetGeometry(mapW, 50, dw, 50, dh, -1, -1, mapD.size.x/mapD.size.y);
 		wWinSetSize( mapW, w+DlgSepLeft+DlgSepRight, h+DlgSepTop+DlgSepBottom);
 	}
 	wDrawSetSize( mapD.d, w, h, NULL );
@@ -1240,12 +1290,10 @@ EXPORT BOOL_T SetRoomSize( coOrd size )
 		 mapD.size.y == size.y )
 		return TRUE;
 	mapD.size = size;
+	SetLayoutRoomSize(size);
 	if ( mapW == NULL)
 		return TRUE;
 	ChangeMapScale(TRUE);
-	ConstraintOrig( &mainD.orig, mainD.size, TRUE );
-	tempD.orig = mainD.orig;
-	/*MainRedraw();*/
 	wPrefSetFloat( "draw", "roomsizeX", mapD.size.x );
 	wPrefSetFloat( "draw", "roomsizeY", mapD.size.y );
 	return TRUE;
@@ -1258,13 +1306,12 @@ EXPORT void GetRoomSize( coOrd * froomSize )
 }
 
 
-EXPORT void MapRedraw()
+static void MapRedraw()
 {
 	if (inPlaybackQuit)
 		return;
-#ifdef VERBOSE
-lprintf("MapRedraw\n");
-#endif
+	static int cMR = 0;
+	LOG( log_redraw, 2, ( "MapRedraw: %d\n", cMR++ ) );
 	if (!mapVisible)
 		return;
 	if (delayUpdate)
@@ -1272,8 +1319,7 @@ lprintf("MapRedraw\n");
 	//wSetCursor( mapD.d, wCursorWait );
 	wDrawClear( mapD.d );
 	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
-	if (!hideBox)
-		DrawMapBoundingBox( TRUE );
+	DrawMapBoundingBox( TRUE );
 	//wSetCursor( mapD.d, defaultCursor );
 	wDrawDelayUpdate( mapD.d, FALSE );
 }
@@ -1325,25 +1371,107 @@ EXPORT void SetMainSize( void )
 	tempD.size = mainD.size;
 }
 
+// Hack to switch between TempRedraw and MainRedraw
+extern wBool_t wDrawDoTempDraw;
 
+/* Update temp_surface after executing a command
+ */
+EXPORT void TempRedraw( void ) {
+
+	static int cTR = 0;
+	LOG( log_redraw, 2, ( "TempRedraw: %d\n", cTR++ ) );
+if (wDrawDoTempDraw == FALSE) {
+	// Remove this after windows supports GTK
+	MainRedraw(); // TempRedraw - windows
+} else {
+	wDrawDelayUpdate( tempD.d, TRUE );
+	wDrawSetTempMode( tempD.d, TRUE );
+	DrawMarkers();
+	DoCurCommand( C_REDRAW, zero );
+	RulerRedraw( FALSE );
+	RedrawPlaybackCursor();              //If in playback
+	wDrawSetTempMode( tempD.d, FALSE );
+	wDrawDelayUpdate( tempD.d, FALSE );
+}
+}
+
+/*
+* Redraw contents on main window
+*/
 EXPORT void MainRedraw( void )
+{
+	coOrd orig, size;
+
+	static int cMR = 0;
+	LOG( log_redraw, 1, ( "MainRedraw: %d\n", cMR++ ) );
+	if (delayUpdate)
+	wDrawDelayUpdate( mainD.d, TRUE );
+
+	wDrawClear( mainD.d );
+
+	//mainD.d->option = 0;
+	//mainD.options = 0;
+	mainD.funcs->options = 0;		//Force MainD back from Temp
+
+	orig = mainD.orig;
+	size = mainD.size;
+	orig.x -= LBORDER/mainD.dpi*mainD.scale;
+	orig.y -= BBORDER/mainD.dpi*mainD.scale;
+	wPos_t back_x,back_y;
+	coOrd back_pos = GetLayoutBackGroundPos();
+	back_x = (wPos_t)((back_pos.x-orig.x)/mainD.scale*mainD.dpi);
+	back_y = (wPos_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
+	wPos_t back_width = (wPos_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
+
+	DrawRoomWalls( TRUE );
+	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
+		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
+	}
+	orig = mainD.orig;
+	size = mainD.size;
+	orig.x -= RBORDER/mainD.dpi*mainD.scale;
+	orig.y -= BBORDER/mainD.dpi*mainD.scale;
+	size.x += (RBORDER+LBORDER)/mainD.dpi*mainD.scale;
+	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
+	DrawTracks( &mainD, mainD.scale, orig, size );
+
+	DrawRoomWalls( FALSE );
+	currRedraw++;
+	DrawSnapGrid( &mainD, mapD.size, TRUE );
+
+	//wSetCursor( mainD.d, defaultCursor );
+	InfoScale();
+	// The remainder is from TempRedraw
+	wDrawSetTempMode( tempD.d, TRUE );
+	DrawMarkers();
+	DoCurCommand( C_REDRAW, zero );
+	RulerRedraw( FALSE );
+	RedrawPlaybackCursor();              //If in playback
+	wDrawSetTempMode( tempD.d, FALSE );
+	wDrawDelayUpdate( mainD.d, FALSE );
+}
+
+/*
+* Layout main window in response to Pan/Zoom
+*
+* \param bRedraw Redraw mainD
+* \param bNoBorder Don't allow mainD.orig to go negative
+*/
+EXPORT void MainLayout(
+	wBool_t bRedraw,
+	wBool_t bNoBorder )
 {
 #ifdef LATER
    wPos_t ww, hh;
    DIST_T w, h;
 #endif
 
-	coOrd orig, size;
 	DIST_T t1;
 	if (inPlaybackQuit)
 		return;
-#ifdef VERBOSE
-lprintf("mainRedraw\n");
-#endif
+	static int cML = 0;
+	LOG( log_redraw, 1, ( "MainLayout: %d\n", cML++ ) );
 
-	//wSetCursor( mainD.d, wCursorWait );
-	if (delayUpdate)
-	wDrawDelayUpdate( mainD.d, TRUE );
 #ifdef LATER
 	wDrawGetSize( mainD.d, &ww, &hh );
 	w = ww/mainD.dpi;
@@ -1372,45 +1500,32 @@ lprintf("mainRedraw\n");
 			pixelBins /= 2.0;
 		}
 	}
-	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
+	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder, FALSE );
 	tempD.orig = mainD.orig;
-	wDrawClear( mainD.d );
+	tempD.size = mainD.size;
+	mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+	mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+	DrawMapBoundingBox( TRUE );
 
-	//mainD.d->option = 0;
-	//mainD.options = 0;
-	mainD.funcs->options = 0;		//Force MainD back from Temp
+	if ( bRedraw )
+		MainRedraw();
 
-	orig = mainD.orig;
-	size = mainD.size;
-	orig.x -= LBORDER/mainD.dpi*mainD.scale;
-	orig.y -= BBORDER/mainD.dpi*mainD.scale;
-	wPos_t back_x,back_y;
-	coOrd back_pos = GetLayoutBackGroundPos();
-	back_x = (wPos_t)((back_pos.x-orig.x)/mainD.scale*mainD.dpi);
-	back_y = (wPos_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
-	wPos_t back_width = (wPos_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
-
-	DrawRoomWalls( TRUE );
-	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
-		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
+	if ( bRedraw && wDrawDoTempDraw ) { // Temporary until mswlib supports TempDraw
+		wAction_t action = wActionMove;
+		coOrd pos;
+		if ( mouseState == mouseLeft )
+			action = wActionLDrag;
+		if ( mouseState == mouseRight )
+			action = wActionRDrag;
+		mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
+		// Prevent recursion if curCommand calls MainLayout when action if a Move or Drag
+		// ie CmdPan
+		static int iRecursion = 0;
+		iRecursion++;
+		if ( iRecursion == 1 )
+			DoMouse( action, pos );
+		iRecursion--;
 	}
-	DrawRoomWalls( FALSE );
-	currRedraw++;
-	DrawSnapGrid( &tempD, mapD.size, TRUE );
-	orig = mainD.orig;
-	size = mainD.size;
-	orig.x -= RBORDER/mainD.dpi*mainD.scale;
-	orig.y -= BBORDER/mainD.dpi*mainD.scale;
-	size.x += (RBORDER+LBORDER)/mainD.dpi*mainD.scale;
-	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
-	DrawTracks( &mainD, mainD.scale, orig, size );
-	RulerRedraw( FALSE );
-	DoCurCommand( C_REDRAW, zero );
-	DrawMarkers();
-	//wSetCursor( mainD.d, defaultCursor );
-	InfoScale();
-	RedrawPlaybackCursor();              //If in playback
-	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
 /**
@@ -1428,7 +1543,6 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 	case wResize_e:
 		if (mainD.d == NULL)
 			return;
-		if (refresh) DrawMapBoundingBox( FALSE );
 		wWinGetSize( mainW, &width, &height );
 		LayoutToolBar(refresh);
 		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
@@ -1436,13 +1550,11 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			wDrawSetSize( mainD.d, width-20, height, refresh );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
-			ConstraintOrig( &mainD.orig, mainD.size, TRUE );
-			tempD.orig = mainD.orig;
 			SetInfoBar();
-			if (!refresh) {
-				MainRedraw();
-				MapRedraw();
-			} else DrawMapBoundingBox( TRUE );
+			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
 			wPrefSetInteger( "draw", "mainwidth", width );
 			wPrefSetInteger( "draw", "mainheight", height );
 		} else	DrawMapBoundingBox( TRUE );
@@ -1486,7 +1598,7 @@ EXPORT void DoRedraw( void )
 #endif
 #endif
 	MapRedraw();
-	MainRedraw();
+	MainRedraw(); // DoRedraw
 #ifdef WINDOWS
 #ifndef WIN32
 	if (profRedraw)
@@ -1520,13 +1632,13 @@ static void DrawRoomWalls( wBool_t drawBackground )
 		mainD.CoOrd2Pix(&mainD,end,&p2,&p3);
 		p2 -= p0;
 		p3 -= p1;
-		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorGrey80, wDrawOptTemp );
+		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorGrey80, 0 );
 
 		mainD.CoOrd2Pix(&mainD,zero,&p0,&p1);
 		mainD.CoOrd2Pix(&mainD,mapD.size,&p2,&p3);
 		p2 -= p0;
 		p3 -= p1;
-		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorWhite, wDrawOptOpaque);
+		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorWhite, 0 );
 
 	} else {
 
@@ -1545,13 +1657,13 @@ static void DrawRoomWalls( wBool_t drawBackground )
 }
 
 
-EXPORT void DrawMarkers( void )
+static void DrawMarkers( void )
 {
 	wPos_t x, y;
 	mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
-	wDrawLine( mainD.d, 0, y, (wPos_t)LBORDER, y,
+	wDrawLine( tempD.d, 0, y, (wPos_t)LBORDER, y,
 				0, wDrawLineSolid, markerColor, wDrawOptTemp );
-	wDrawLine( mainD.d, x, 0, x, (wPos_t)BBORDER,
+	wDrawLine( tempD.d, x, 0, x, (wPos_t)BBORDER,
 				0, wDrawLineSolid, markerColor, wDrawOptTemp );
 }
 
@@ -1574,7 +1686,7 @@ EXPORT void DrawRuler(
 	wPos_t len;
 	int digit;
 	char quote;
-	char message[10];
+	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
 	long mm, mm0, mm1, power;
@@ -1585,13 +1697,11 @@ EXPORT void DrawRuler(
 	int fraction, incr, firstFraction, lastFraction;
 	int majorLength;
 	coOrd p0, p1;
-	FLOAT_T sin_aa;
 
 	a = FindAngle( pos0, pos1 );
 	Translate( &pos0, pos0, a, offset );
 	Translate( &pos1, pos1, a, offset );
 	aa = NormalizeAngle(a+(tickSide==0?+90:-90));
-	sin_aa = sin(D2R(aa));
 
 	end = FindDistance( pos0, pos1 );
 	if (end < 0.1)
@@ -1646,19 +1756,21 @@ EXPORT void DrawRuler(
 						if (mm%100 != 0) {
 							sprintf(message, "%ld", mm/10%10 );
 							fs = rulerFontSize*2/3;
-							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
-							Translate( &p0, p0, 225, fs*d->scale/72.0 );
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 							//p0.x = p1.x+4*dxn/10*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						} else {
 							sprintf(message, "%0.1f", mm/1000.0 );
 							fs = rulerFontSize;
-							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
-							Translate( &p0, p0, 225, 1.5*fs*d->scale/72.0 );
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, 1.5*fs*d->scale/mainD.dpi );
 							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
 						d->CoOrd2Pix( d, p0, &x0, &y0 );
+						if (x0<0) x0 = 0;
+						if (y0<0) y0 = 0;
 						wDrawString( d->d, x0, y0, d->angle, message, rulerFp,
 										fs, color, (wDrawOpts)d->funcs->options );
 					}
@@ -1724,10 +1836,12 @@ EXPORT void DrawRuler(
 			if (fraction == 0) {
 				if ( (number == TRUE && d->scale<40) || (digit==0)) {
 					if (inch % 12 == 0 || d->scale <= 2) {
-						Translate( &p0, p0, aa, majorLength*d->scale/72.0 );
-						Translate( &p0, p0, 225, fs*d->scale/72.0 );
+						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
+						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 						sprintf(message, "%d%c", digit, quote );
 						d->CoOrd2Pix( d, p0, &x0, &y0 );
+						if (x0<0) x0 = 0;
+						if (y0<0) y0 = 0;
 						wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
 					}
 				}
@@ -1739,19 +1853,21 @@ EXPORT void DrawRuler(
 }
 
 
-EXPORT void DrawTicks( drawCmd_p d, coOrd size )
+static void DrawTicks( drawCmd_p d, coOrd size )
 {
 	coOrd p0, p1;
 	DIST_T offset;
 
 	offset = 0.0;
 
-	if ( d->orig.x<0.0 ) {
+	double blank_zone = 40*d->scale/72.0;
+
+	if ( d->orig.x<0.0-blank_zone ) {
 		 p0.y = 0.0; p1.y = mapD.size.y;
 		 p0.x = p1.x = 0.0;
 		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
 	}
-	if (d->orig.x+d->size.x>mapD.size.x) {
+	if (d->orig.x+d->size.x>mapD.size.x+blank_zone) {
 		 p0.y = 0.0; p1.y = mapD.size.y;
 		 p0.x = p1.x = mapD.size.x;
 		 DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
@@ -1765,12 +1881,12 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 
 	offset = 0.0;
 
-	if ( d->orig.y<0.0 ) {
+	if ( d->orig.y<0.0-blank_zone) {
 		p0.x = 0.0; p1.x = mapD.size.x;
 		p0.y = p1.y = 0.0;
 		DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
 	}
-	if (d->orig.y+d->size.y>mapD.size.y) {
+	if (d->orig.y+d->size.y>mapD.size.y+blank_zone) {
 		 p0.x = 0.0; p1.x = mapD.size.x;
 		 p0.y = p1.y = mapD.size.y;
 		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
@@ -1792,58 +1908,74 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 EXPORT coOrd mainCenter;
 
 
-EXPORT void DrawMapBoundingBox( BOOL_T set )
+static void DrawMapBoundingBox( BOOL_T set )
 {
 	if (mainD.d == NULL || mapD.d == NULL)
 		return;
-	DrawHilight( &mapD, mainD.orig, mainD.size, FALSE );
+	wDrawSetTempMode( mapD.d, TRUE );
+	DrawHilight( &mapD, mainD.orig, mainD.size, TRUE );
+	wDrawSetTempMode( mapD.d, FALSE );
 }
 
 
-static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bounds  )
+static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder, wBool_t round  )
 {
 LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
 				size.x, size.y ) )
 
-	coOrd bound;
-	bound.x = size.x/2;
-	bound.y = size.y/2;
-	if ((orig->x+size.x) > (mapD.size.x+(bounds?0:bound.x))) {
-		orig->x = mapD.size.x-size.x+(bounds?0:bound.x);
-		orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
+	coOrd bound = zero;
+
+    if ( !bNoBorder ) {
+		bound.x = size.x/2;
+		bound.y = size.y/2;
 	}
-	if (orig->x < (0-(bounds?0:bound.x)))
-		orig->x = 0-(bounds?0:bound.x);
 
-	if ((orig->y+size.y) > (mapD.size.y+(bounds?0:bound.y)) ) {
-		orig->y = mapD.size.y-size.y+(bounds?0:bound.y);
-		orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
 
-	}
-	if (orig->y < (0-(bounds?0:bound.y)))
-		orig->y = 0-(bounds?0:bound.y);
 
-	if (mainD.scale >= 1.0) {
-		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
-			orig->y = floor(orig->y*4)/4;
-		} else {
-			orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
-			orig->y = floor(orig->y*2.54*2)/(2.54*2);
+	if (orig->x > 0.0) {
+		if ((orig->x+size.x) > (mapD.size.x+bound.x)) {
+			orig->x = mapD.size.x-size.x+bound.x;
+			//orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
 		}
-	} else {
-		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
-			orig->y = floor(orig->y*64)/64;
+	}
+
+	if (orig->x < (0-bound.x))
+				orig->x = 0-bound.x;
+
+	if (orig->y > 0.0) {
+		if ((orig->y+size.y) > (mapD.size.y+bound.y) ) {
+			orig->y = mapD.size.y-size.y+bound.y;
+			//orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
+
+		}
+	}
+
+	if (orig->y < (0-bound.y))
+				orig->y = 0-bound.y;
+
+	if (round) {
+		if (mainD.scale >= 1.0) {
+			if (units == UNITS_ENGLISH) {
+				orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
+				orig->y = floor(orig->y*4)/4;
+			} else {
+				orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
+				orig->y = floor(orig->y*2.54*2)/(2.54*2);
+			}
 		} else {
-			orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
-			orig->y = floor(orig->y*25.4*2)/(25.4*2);
+			if (units == UNITS_ENGLISH) {
+				orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
+				orig->y = floor(orig->y*64)/64;
+			} else {
+				orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
+				orig->y = floor(orig->y*25.4*2)/(25.4*2);
+			}
 		}
 	}
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
-LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
+	LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
 }
 
 /**
@@ -1851,18 +1983,29 @@ LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
  * 
  * \param IN zoomM			Menu to which radio button is added
  * \param IN zoomSubM	Second menu to which radio button is added, ignored if NULL
+ * \param IN ctxMenu1
+ * \param IN ctxMenu2
  *
  */
 
-EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
+EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1, wMenu_p panMenu )
 {
 	int inx;
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		if( zoomList[ inx ].value >= 1.0 ) {
-			zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+		if( (zoomList[ inx ].value >= 1.0 && zoomList[ inx ].value<=10 ) ||
+				 (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value))))
+				{
+			if (zoomM)
+				zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
 			if( zoomSubM )
 				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+			if (panMenu)
+				zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+		}
+		if ((zoomList[inx].value >=1.0 && zoomList[inx].value <= 10.0) || (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value)))) {
+			if (ctxMenu1)
+				zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
 		}
 	}
 }
@@ -1881,11 +2024,14 @@ static void SetZoomRadio( DIST_T scale )
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
 		if( curScale == zoomList[inx].value ) {
-		
-			wMenuRadioSetActive( zoomList[inx].btRadio );		
+			if (zoomList[inx].btRadio)
+				wMenuRadioSetActive( zoomList[inx].btRadio );
 			if( zoomList[inx].pdRadio )
 				wMenuRadioSetActive( zoomList[inx].pdRadio );
-
+			if (zoomList[inx].ctxRadio1)
+				wMenuRadioSetActive( zoomList[inx].ctxRadio1 );
+			if (zoomList[inx].panRadio)
+				wMenuRadioSetActive( zoomList[inx].panRadio );
 			/* activate / deactivate zoom buttons when appropriate */				
 			wControlLinkedActive( (wControl_p)zoomUpB, ( inx != 0 ) );
 			wControlLinkedActive( (wControl_p)zoomDownB, ( inx < (sizeof zoomList/sizeof zoomList[0] - 1)));			
@@ -1955,21 +2101,10 @@ static void DoNewScale( DIST_T scale )
 	SetZoomRadio( scale ); 
 	InfoScale();
 	SetMainSize(); 
-	if (zoomCorner) {
-		mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-		mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-	} else {
-		mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
-		mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
-	}
-	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
-	MainRedraw();
-	tempD.orig = mainD.orig;
+	PanHere( (void*)1 );
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
-	/*SetFont(0);*/
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
-	MapRedraw();
 	if (recordF) {
 		fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
 						mainD.scale, mainD.orig.x, mainD.orig.y );
@@ -1988,6 +2123,7 @@ EXPORT void DoZoomUp( void * mode )
 	long newScale;
 	int i;
 	
+	LOG( log_zoom, 2, ( "DoZoomUp KS:%x\n", MyGetKeyState() ) );
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0) {
 		i = ScaleInx( mainD.scale );
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
@@ -2000,7 +2136,7 @@ EXPORT void DoZoomUp( void * mode )
 				if (mainD.scale <=1.0) 
 					InfoMessage(_("Macro Zoom Mode"));
 				else
-					InfoMessage(_(""));
+					InfoMessage("");
 				DoNewScale( zoomList[ i - 1 ].value );	
 				
 			} else InfoMessage("Minimum Macro Zoom");
@@ -2017,6 +2153,22 @@ EXPORT void DoZoomUp( void * mode )
 	}
 }
 
+EXPORT void DoZoomExtents( void * mode) {
+
+	DIST_T scale_x, scale_y;
+	scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
+	scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+	if (scale_x<scale_y)
+		scale_x = scale_y;
+	scale_x = ceil(scale_x);
+	if (scale_x < 1) scale_x = 1;
+	if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+	mainD.orig = zero;
+	DoNewScale(scale_x);
+	MainLayout(TRUE,TRUE);
+
+}
+
 
 /**
  * User selected zoom out, via mouse wheel, button or pulldown.
@@ -2029,11 +2181,12 @@ EXPORT void DoZoomDown( void  * mode)
 	long newScale;
 	int i;
 	
+	LOG( log_zoom, 2, ( "DoZoomDown KS:%x\n", MyGetKeyState() ) );
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
 		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
-			InfoMessage(_(""));
+			InfoMessage("");
 			DoNewScale( zoomList[ i + 1 ].value );
 		} else
 			InfoMessage(_("At Maximum Zoom Out"));
@@ -2087,24 +2240,104 @@ EXPORT void CoOrd2Pix(
 	*y = (wPos_t)((pos.y-d->orig.y)/d->scale*d->dpi);
 }
 
+/*
+* Position mainD based on panCenter
+* \param mode control effect of constrainMain and CTRL key
+*
+* mode:
+*  - 0: constrain if constrainMain==1 or CTRL is pressed
+*  - 1: same as 0, but ignore CTRL
+*  - 2: same as 0, plus liveMap
+*  - 3: Take position from menuPos
+*/
 EXPORT void PanHere(void * mode) {
+	if ( 3 == (long)mode) {
+		panCenter = menuPos;
+		LOG( log_pan, 2, ( "MCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+	}
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
-	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
-	mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-	mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-	MainRedraw();
-	MapRedraw();
+	wBool_t bNoBorder = (constrainMain != 0);
+	if ( 1 != (long)mode )
+		if ( (MyGetKeyState()&WKEY_CTRL)!= 0 )
+			bNoBorder = !bNoBorder;
+	wBool_t bLiveMap = TRUE;
+	if ( 2 == (long)mode )
+		bLiveMap = liveMap;
+
+	MainLayout( bLiveMap, bNoBorder ); // PanHere
+}
+
+
+static void DoPanKeyAction( wAction_t action )
+{
+	switch ((wAccelKey_e)(action>>8)) {
+	case wAccelKey_Del:
+		SelectDelete();
+		return;
+#ifndef WINDOWS
+	case wAccelKey_Pgdn:
+		DoZoomUp(NULL);
+		break;
+	case wAccelKey_Pgup:
+		DoZoomDown(NULL);
+		break;
+#endif
+	case wAccelKey_Right:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
+		else
+			panCenter.x += mainD.size.x/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	case wAccelKey_Left:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.x -= 0.25*mainD.scale;
+		else
+			panCenter.x -= mainD.size.x/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	case wAccelKey_Up:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.y += 0.25*mainD.scale;
+		else
+			panCenter.y += mainD.size.y/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	case wAccelKey_Down:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.y -= 0.25*mainD.scale;
+		else
+			panCenter.y -= mainD.size.y/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	default:
+		return;
+	}
 }
 
 
 static void DoMapPan( wAction_t action, coOrd pos )
 {
 	static coOrd mapOrig;
-	static coOrd oldOrig, newOrig;
-	static coOrd size, newSize;
+	static coOrd size;
 	static DIST_T xscale, yscale;
-	static DIST_T mainWidth,mainHeight;
 	static enum { noPan, movePan, resizePan } mode = noPan;
 	wPos_t x, y;
 
@@ -2115,35 +2348,22 @@ static void DoMapPan( wAction_t action, coOrd pos )
 			mode = movePan;
 		else
 			break;
-		mapOrig = pos;
-		size = mainD.size;
-		newOrig = oldOrig = mainD.orig;
-LOG( log_pan, 1, ( "ORIG = [ %0.3f, %0.3f ]\n", mapOrig.x, mapOrig.y ) )
-		break;
 	case C_MOVE:
 		if ( mode != movePan )
 			break;
-LOG( log_pan, 2, ( "NEW = [ %0.3f, %0.3f ] \n", pos.x, pos.y ) )
-		newOrig.x = oldOrig.x + pos.x-mapOrig.x;
-		newOrig.y = oldOrig.y + pos.y-mapOrig.y;
-		ConstraintOrig( &newOrig, mainD.size, FALSE );
-		tempD.orig = mainD.orig = newOrig;
-		if (liveMap) {
-			MainRedraw();
-		}
-		MapRedraw();
+//		mainD.orig.x = pos.x - mainD.size.x/2.0;
+//		mainD.orig.y = pos.y - mainD.size.y/2.0;
+		panCenter = pos;
+LOG( log_pan, 1, ( "%s = [ %0.3f, %0.3f ]\n", action == C_DOWN? "START":"MOVE", mainD.orig.x, mainD.orig.y ) )
+		PanHere( (void*)2 );
 		break;
 	case C_UP:
 		if ( mode != movePan )
 			break;
-		tempD.orig = mainD.orig = newOrig;
-		mainCenter.x = newOrig.x + mainD.size.x/2.0;
-		mainCenter.y = newOrig.y + mainD.size.y/2.0;
-		if (!liveMap)
-			MainRedraw();
-LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
+		panCenter = pos;
+		PanHere( (void*)0 );
+LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", mainD.orig.x, mainD.orig.y ) )
 		mode = noPan;
-		MapRedraw();
 		break;
 
 	case C_RDOWN:
@@ -2152,15 +2372,11 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 		else
 			break;
 		mapOrig = pos;
-		oldOrig = newOrig = mainD.orig;
-		size.x = mainD.size.x/mainD.scale;							//How big screen?
+		size.x = mainD.size.x/mainD.scale;  //How big screen?
 		size.y = mainD.size.y/mainD.scale;
 		xscale = mainD.scale; //start at current
-		newOrig.x -= size.x/2.0;
-		newOrig.y -= size.y/2.0;
-		hideBox = TRUE;
-		MapRedraw();
-		hideBox = FALSE;
+		panCenter = pos;
+LOG( log_pan, 1, ( "START %0.3fx%0.3f %0.3f+%0.3f\n", mapOrig.x, mapOrig.y, size.x, size.y ) )
 		break;
 
 	case C_RMOVE:
@@ -2174,13 +2390,9 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			pos.y = 0;
 		if (pos.y > mapD.size.y)
 			pos.y = mapD.size.y;
-		coOrd sizeMap;
 
-		sizeMap.x = pos.x - mapOrig.x;
-		sizeMap.y = pos.y - mapOrig.y;
-
-		xscale = fabs(sizeMap.x/size.x);
-		yscale = fabs(sizeMap.y/size.y);
+		xscale = fabs((pos.x-mapOrig.x)*2.0/size.x);
+		yscale = fabs((pos.y-mapOrig.y)*2.0/size.y);
 		if (xscale < yscale)
 			xscale = yscale;
 		xscale = ceil( xscale );
@@ -2190,96 +2402,30 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 		if (xscale > 64)
 			xscale = 64;
 
-		newSize.x = fabs(sizeMap.x/xscale);
-		newSize.y = fabs(sizeMap.y/xscale);
-
-		newOrig = mapOrig;
-		if (sizeMap.x<0)
-			newOrig.x += sizeMap.x;
-		if (sizeMap.y<0)
-			newOrig.y += sizeMap.y;
-		tempD.size = mainD.size = newSize;
-		tempD.orig = mainD.orig = newOrig;
-		hideBox = TRUE;
-		MapRedraw();
-		hideBox = FALSE;
-		DrawHilight( &mapD, mapOrig, sizeMap, FALSE );
-		if (liveMap) MainRedraw();
-
+		mainD.size.x = size.x * xscale;
+		mainD.size.y = size.y * xscale;
+		mainD.orig.x = mapOrig.x - mainD.size.x / 2.0;
+		mainD.orig.y = mapOrig.y - mainD.size.y / 2.0;
+		tempD.scale = mainD.scale = xscale;
+		PanHere( (void*)2 );
+LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale, mainD.orig.x, mainD.orig.y, mainD.size.x, mainD.size.y ) )
+		InfoScale();
 	    break;
 
 	case C_RUP:
 		if ( mode != resizePan )
 			break;
-		tempD.size = mainD.size = newSize;
-		tempD.orig = mainD.orig = newOrig;
-		mainCenter.x = newOrig.x+newSize.x/2;
-		mainCenter.y = newOrig.y+newSize.y/2;
 		DoNewScale( xscale );
 		mode = noPan;
 		break;
 
-		case wActionExtKey:
-			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-			switch ((wAccelKey_e)(action>>8)) {
-#ifndef WINDOWS
-			case wAccelKey_Pgdn:
-				DoZoomUp(NULL);
-				return;
-			case wAccelKey_Pgup:
-				DoZoomDown(NULL);
-				return;
-			case wAccelKey_F5:
-				MainRedraw();
-				MapRedraw();
-				return;
-#endif
-			case wAccelKey_Right:
+	case wActionExtKey:
+		mainD.CoOrd2Pix(&mainD,pos,&x,&y);
+		DoPanKeyAction( action );
+		mainD.Pix2CoOrd( &mainD, x, y, &pos );
+		InfoPos( pos );
+		return;
 
-				mainD.orig.x += mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-				break;
-			case wAccelKey_Left:
-
-				mainD.orig.x -= mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-
-				break;
-			case wAccelKey_Up:
-
-				mainD.orig.y += mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-
-				break;
-                    
-			case wAccelKey_Down:
-
-				mainD.orig.y -= mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-
-				break;
-			default:
-				return;
-			}
-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-			InfoPos( pos );
-			return;
 	default:
 		return;
 	}
@@ -2330,6 +2476,31 @@ GetMousePosition( int *x, int *y )
 	}
 }
 
+coOrd minIncrementSizes() {
+	double x,y;
+	if (mainD.scale >= 1.0) {
+		if (units == UNITS_ENGLISH) {
+			x = 0.25;   //>1:1 = 1/4 inch
+			y = 0.25;
+		} else {
+			x = 1/(2.54*2);  //>1:1 = 0.5 cm
+			y = 1/(2.54*2);
+		}
+	} else {
+		if (units == UNITS_ENGLISH) {
+			x = 1/64;   //<1:1 = 1/64 inch
+			y = 1/64;
+		} else {
+			x = 1/(25.4*2);  //>1:1 = 0.5 mm
+			y = 1/(25.4*2);
+		}
+	}
+	coOrd ret;
+	ret.x = x*1.5;
+	ret.y = y*1.5;
+	return ret;
+}
+
 static void DoMouse( wAction_t action, coOrd pos )
 {
 
@@ -2342,6 +2513,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 	if (recordF) {
 		RecordMouse( "MOUSE", action, pos.x, pos.y );
 	}
+
+
 
 	switch (action&0xFF) {
 	case C_UP:
@@ -2390,6 +2563,12 @@ static void DoMouse( wAction_t action, coOrd pos )
 	if ( deferSubstituteControls[0] )
 		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels );
 
+//	panCenter.y = mainD.orig.y + mainD.size.y/2;
+//	panCenter.x = mainD.orig.x + mainD.size.x/2;
+//printf( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y );
+
+	coOrd min = minIncrementSizes();
+
 	switch ( action&0xFF ) {
 		case C_DOWN:
 		case C_RDOWN:
@@ -2403,80 +2582,17 @@ static void DoMouse( wAction_t action, coOrd pos )
 		case wActionExtKey:
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
 			if ((MyGetKeyState() &
-					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) break;  //Allow SHIFT+CTRL for Move
+					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL) &&
+				( action>>8 == wAccelKey_Up ||
+				  action>>8 == wAccelKey_Down ||
+				  action>>8 == wAccelKey_Left ||
+				  action>>8 == wAccelKey_Right ))
+				break;  //Allow SHIFT+CTRL for Move
 			if (((action>>8)&0xFF) == wAccelKey_LineFeed) {
 				action = C_TEXT+((int)(0x0A<<8));
 				break;
 			}
-			switch ((wAccelKey_e)(action>>8)) {
-			case wAccelKey_Del:
-				SelectDelete();
-				return;
-#ifndef WINDOWS
-			case wAccelKey_Pgdn:
-				DoZoomUp(NULL);
-				break;
-			case wAccelKey_Pgup:
-				DoZoomDown(NULL);
-				break;
-#endif
-			case wAccelKey_Right:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
-				else
-					mainD.orig.x += mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-
-				break;
-			case wAccelKey_Left:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.x -= 0.25*mainD.scale;
-				else
-					mainD.orig.x -= mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-
-				break;
-			case wAccelKey_Up:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.y += 0.25*mainD.scale;
-				else
-					mainD.orig.y += mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL));
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-
-				break;
-			case wAccelKey_Down:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.y -= 0.25*mainD.scale;
-				else
-					mainD.orig.y -= mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
-				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				MainRedraw();
-				MapRedraw();
-
-				break;
-			default:
-				return;
-			}
-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-			InfoPos( pos );
+			DoPanKeyAction( action );
 			return;
 		case C_TEXT:
 			if ((action>>8) == 0x0D) {
@@ -2499,6 +2615,26 @@ static void DoMouse( wAction_t action, coOrd pos )
 			break;
 		case C_WDOWN:
 			DoZoomDown((void *)1L);
+			break;
+		case C_SCROLLUP:
+			panCenter.y = panCenter.y + ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
+			break;
+		case C_SCROLLDOWN:
+			panCenter.y = panCenter.y - ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
+			break;
+		case C_SCROLLLEFT:
+			panCenter.x = panCenter.x - ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
+			break;
+		case C_SCROLLRIGHT:
+			panCenter.x = panCenter.x + ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
 			break;
 		default:
 			NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );
@@ -2578,16 +2714,13 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 							}
 						}
 					}
-					ConstraintOrig( &orig, mainD.size, TRUE );
-					if ( orig.x != mainD.orig.x || orig.y != mainD.orig.y ) {
-						//DrawMapBoundingBox( FALSE );
-						mainD.orig = orig;
-						MainRedraw();
-						MapRedraw();
-						/*DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );*/
-						//DrawMapBoundingBox( TRUE );
-						wFlush();
-					}
+					mainD.orig = orig;
+					panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+					panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+					LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+					MainLayout( TRUE, TRUE ); // DoMouseW: autopan
+					tempD.orig = mainD.orig;
+					wFlush();
 				}
 			}
 			lastX = x;
@@ -2595,8 +2728,21 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 		}
 	}
 	mainD.Pix2CoOrd( &mainD, x, y, &pos );
-	mousePositionx = x;
-	mousePositiony = y;
+	switch (action & 0xFF) {
+	case wActionMove:
+	case wActionLDown:
+	case wActionLDrag:
+	case wActionLUp:
+	case wActionRDown:
+	case wActionRDrag:
+	case wActionRUp:
+	case wActionLDownDouble:
+		mousePositionx = x;
+		mousePositiony = y;
+		break;
+	default:
+		break;
+	}
 
 	DoMouse( action, pos );
 }
@@ -2636,7 +2782,7 @@ static wBool_t PlaybackKey( char * line )
 	if (rc != 3) {
 		SyntaxError( "MOUSE", rc, 3 );
 	} else {
-		action = action||c<<8;
+		action = action|c<<8;
 		PlaybackMouse( DoMouse, &mainD, (wAction_t)action, pos, wDrawColorBlack );
 	}
 	return TRUE;
@@ -2663,10 +2809,8 @@ static void MapDlgUpdate(
 		case wResize_e:
 			if (mapD.d == NULL)
 				return;
-			DrawMapBoundingBox( FALSE );
 			wWinGetSize( mapW, &width, &height );
 			if (height >= 100) {
-				//wDrawSetSize( mapD.d, width, height);
 				wControlSetPos( (wControl_p)mapD.d, 0, 0 );
 				double scaleX = (mapD.size.x/((width-DlgSepLeft-DlgSepRight-10)/mapD.dpi));
 				double scaleY = (mapD.size.y/((height-DlgSepTop-DlgSepBottom-10)/mapD.dpi));
@@ -2684,13 +2828,10 @@ static void MapDlgUpdate(
 				ChangeMapScale(FALSE);
 
 				if (mapVisible) {
-					//MapWindowShow(TRUE);
 					MapRedraw();
-					DrawMapBoundingBox( TRUE );
 				}
 				wPrefSetInteger( "draw", "mapscale", (long)mapD.scale );
 			}
-			DrawMapBoundingBox( TRUE );
 			break;
 		case -1:
 			MapWindowShow( FALSE );
@@ -2704,13 +2845,19 @@ static void MapDlgUpdate(
 static void DrawChange( long changes )
 {
 	if (changes & CHANGE_MAIN) {
-		MainRedraw();
-		MapRedraw();
+		MainLayout( TRUE, FALSE ); // DrawChange: CHANGE_MAIN
 	}
 	if (changes &CHANGE_UNITS)
 		SetInfoBar();
 	if (changes & CHANGE_MAP)
 		MapResize();
+}
+
+
+static void MainLayoutCB(
+	wDraw_p bd, void * pContex, wPos_t px, wPos_t py )
+{
+	MainLayout( TRUE, FALSE );
 }
 
 
@@ -2726,7 +2873,7 @@ EXPORT void DrawInit( int initialZoom )
 	if ( h <= 0 ) h = 1;
 	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS|BD_MODKEYS,
 												w, h, &mainD,
-				(wDrawRedrawCallBack_p)MainRedraw, DoMousew );
+				(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
 
 	if (initialZoom == 0) {
 		WDOUBLE_T tmpR;
@@ -2752,6 +2899,8 @@ EXPORT void DrawInit( int initialZoom )
 	tempD.dpi = mainD.dpi;
 
 	SetMainSize();
+	panCenter.x = mainD.size.x/2 +mainD.orig.x;
+	panCenter.y = mainD.size.y/2 +mainD.orig.y;
 	mapD.scale = mapScale;
 	/*w = (wPos_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	/*h = (wPos_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
@@ -2762,6 +2911,7 @@ EXPORT void DrawInit( int initialZoom )
 	log_pan = LogFindIndex( "pan" );
 	log_zoom = LogFindIndex( "zoom" );
 	log_mouse = LogFindIndex( "mouse" );
+	log_redraw = LogFindIndex( "redraw" );
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
 	AddPlaybackProc( "KEY ", (playbackProc_p)PlaybackKey, NULL );
 
@@ -2803,7 +2953,7 @@ static STATUS_T CmdPan(
 	case C_START:
 		start_pos = zero;
         panmode = NONE;
-        InfoMessage(_("Left-Drag to Pan, CTRL+Left-Drag to Zoom, 0 to set Origin to zero, 1-9 to Zoom#, e to set to Extents"));
+        InfoMessage(_("Left-Drag to pan, Ctrl+Left-Drag to zoom, 0 to set origin to zero, 1-9 to zoom#, e to set to extents"));
         wSetCursor(mainD.d,wCursorSizeAll);
 		 break;
 	case C_DOWN:
@@ -2817,7 +2967,7 @@ static STATUS_T CmdPan(
 			start_pos = pos;
 			base = pos;
 			size = zero;
-			InfoMessage(_("Zoom Mode - drag Area to Zoom"));
+			InfoMessage(_("Zoom Mode - drag area to zoom"));
 		}
 		break;
 	case C_MOVE:
@@ -2838,18 +2988,14 @@ static STATUS_T CmdPan(
 				}
 				if ((fabs(pos.x-start_pos.x) > min_inc) || (fabs(pos.y-start_pos.y) > min_inc)) {
 					coOrd oldOrig = mainD.orig;
-					DrawMapBoundingBox( TRUE );
 					mainD.orig.x -= (pos.x - start_pos.x);
 					mainD.orig.y -= (pos.y - start_pos.y);
-					ConstraintOrig( &mainD.orig, mainD.size, FALSE );
-					tempD.orig = mainD.orig;
-					mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-					mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-					DrawMapBoundingBox( TRUE );
+					if ((MyGetKeyState()&WKEY_SHIFT) != 0)
+						ConstraintOrig(&mainD.orig,mainD.size,TRUE,FALSE);
 					if ((oldOrig.x == mainD.orig.x) && (oldOrig.y == mainD.orig.y))
 						InfoMessage(_("Can't move any further in that direction"));
 					else
-					    InfoMessage(_("Left Click to Pan, Right Click to Zoom, 'o' for Origin, 'e' for Extents"));
+					    InfoMessage(_("Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"));
 				}
 			}
 		else if (panmode == ZOOM) {
@@ -2865,14 +3011,14 @@ static STATUS_T CmdPan(
 				base.y = pos.y;
 			}
 		}
-		MainRedraw();
+		panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+		panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+		PanHere( (void*)0 );
 		break;
 	case C_UP:
 		if (panmode == ZOOM) {
 			scale_x = size.x/mainD.size.x*mainD.scale;
 			scale_y = size.y/mainD.size.y*mainD.scale;
-
-			DIST_T oldScale = mainD.scale;
 
 			if (scale_x<scale_y)
 					scale_x = scale_y;
@@ -2882,19 +3028,18 @@ static STATUS_T CmdPan(
 			if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
 			if (scale_x < MIN_MAIN_MACRO) scale_x = MIN_MAIN_MACRO;
 
-			mainCenter.x = base.x + size.x/2.0;  //Put center for scale in center of square
-			mainCenter.y = base.y + size.y/2.0;
 			mainD.orig.x = base.x;
 			mainD.orig.y = base.y;
 
 			panmode = NONE;
 			InfoMessage(_("Left Drag to Pan, +CTRL to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
 			DoNewScale(scale_x);
-			MapRedraw();
 			break;
 		} else if (panmode == PAN) {
+			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			panmode = NONE;
-			MapRedraw();
 		}
 		break;
 	case C_REDRAW:
@@ -2911,42 +3056,20 @@ static STATUS_T CmdPan(
 		panmode = NONE;
 
 		if ((action>>8) == 'e') {     //"e"
-			scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
-			scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
-			if (scale_x<scale_y)
-				scale_x = scale_y;
-			scale_x = ceil(scale_x);
-			if (scale_x < 1) scale_x = 1;
-			if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
-			mainD.orig = zero;
-			mainCenter.x = mainD.orig.x + mapD.size.x/2.0;
-			mainCenter.y = mainD.orig.y + mapD.size.y/2.0;
-			DoNewScale(scale_x);
-			ConstraintOrig( &mainD.orig, mainD.size, TRUE );
-			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-			MapRedraw();
-			MainRedraw();
+			DoZoomExtents(0);
 		} else if (((action>>8) == '0') || ((action>>8) == 'o')) {     //"0" or "o"
 			mainD.orig = zero;
-			ConstraintOrig( &mainD.orig, mainD.size, FALSE);
-			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-			MapRedraw();
-			MainRedraw();
+			panCenter.x = mainD.size.x/2.0;
+			panCenter.y = mainD.size.y/2.0;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			MainLayout( TRUE, TRUE ); // CmdPan C_TEXT '0' 'o'
 		} else if ((action>>8) >= '1' && (action>>8) <= '9') {         //"1" to "9"
 			scale_x = (action>>8)&0x0F;
 			DoNewScale(scale_x);
-			MapRedraw();
-			MainRedraw();
-		} else if ((action>>8) == '@') {								// "@"
-			mainD.orig.x = pos.x - mainD.size.x/2.0;
-			mainD.orig.y = pos.y - mainD.size.y/2.0;
-			ConstraintOrig( &mainD.orig, mainD.size, FALSE);
-			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
-			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-			MapRedraw();
-			MainRedraw();
+		} else if ((action>>8) == 'c') {				// "c"
+			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere( (void*)0 ); // CmdPan C_TEXT 'c'
 		}
 
 		if ((action>>8) == 0x0D) {
@@ -2958,7 +3081,7 @@ static STATUS_T CmdPan(
 		}
 		break;
 	case C_CMDMENU:
-		panCenter = pos;
+		menuPos = pos;
 		wMenuPopupShow( panPopupM );
 		return C_CONTINUE;
 		break;
@@ -2969,7 +3092,7 @@ static STATUS_T CmdPan(
 static wMenuPush_p zoomExtents,panOrig,panHere;
 static wMenuPush_p zoomLvl1,zoomLvl2,zoomLvl3,zoomLvl4,zoomLvl5,zoomLvl6,zoomLvl7,zoomLvl8,zoomLvl9;
 
-void panMenuEnter(int key) {
+EXPORT void PanMenuEnter(int key) {
 	int action;
 	action = C_TEXT;
 	action |= key<<8;
@@ -2989,20 +3112,22 @@ EXPORT void InitCmdPan( wMenu_p menu )
 EXPORT void InitCmdPan2( wMenu_p menu )
 {
 	panPopupM = MenuRegister( "Pan Options" );
-	wMenuPushCreate(panPopupM, "cmdSelectMode", GetBalloonHelpStr(_("cmdSelectMode")), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr(_("cmdDescribeMode")), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
-	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr(_("cmdModifyMode")), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
+	wMenuPushCreate(panPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
+	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
+	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
 	wMenuSeparatorCreate(panPopupM);
-	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom To Extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
-	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');
-	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::2 - '2'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '2');
-	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::3 - '3'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '3');
-	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::4 - '4'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '4');
-	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::5 - '5'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '5');
-	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::6 - '6'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '6');
-	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::7 - '7'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '7');
-	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
-	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
-	panOrig = wMenuPushCreate( panPopupM, "", _("Pan To Origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
-	panHere = wMenuPushCreate( panPopupM, "", _("Pan Center Here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
+	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'e');
+	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '1');
+	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '2');
+	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '3');
+	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '4');
+	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '5');
+	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '6');
+	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '7');
+	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '8');
+	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '9');
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
+	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
+	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
+	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - 'c'"), 0, (wMenuCallBack_p)PanHere, (void*) 3);
 }

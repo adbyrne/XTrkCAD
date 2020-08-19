@@ -45,8 +45,13 @@
 #include "cbezier.h"
 #include "misc.h"
 
+dynArr_t tempSegs_da;
+dynArr_t tempEndPts_da;
+char tempCustom[4096];
+
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
 
+dynArr_t tempSegs_da;
 
 
 /*****************************************
@@ -1296,12 +1301,14 @@ static toDesignSchema_t * LoadSegs(
 	wIndex_t segCnt;
 	ANGLE_T angle0, angle1, angle2, angle3;
 	trkSeg_p segPtr;
+#ifndef MKTURNOUT
 	struct {
 		coOrd pos[10];
 		coOrd center[10];
 		DIST_T radius[10];
 		DIST_T angle[10];
 	} cornuData;
+#endif
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	angle0 = newTurnAngle0;
@@ -2592,7 +2599,7 @@ static void NewTurnPrint(
 						newTurnout_d.size.y/2.0 );
 				DrawStraightTrack( &newTurnout_d, pos, p0,
 						tempEndPts(ep).angle+270.0,
-						NULL, newTurnTrackGauge, wDrawColorBlack, 0 );
+						NULL, wDrawColorBlack, 0 );
 			}
 
 			if ( !wPrintPageEnd( newTurnout_d.d ) )
@@ -3201,7 +3208,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 #include <stdio.h>
 #include <stdarg.h>
 
-char message[1024];
+char message[STR_HUGE_SIZE];
 char * curScaleName;
 double trackGauge;
 long units = 0;
@@ -3373,7 +3380,7 @@ EXPORT BOOL_T WriteSegs(
 			break;
 		}
 	}
-	rc &= fprintf( f, "\tEND\n" )>0;
+	rc &= fprintf( f, "\t%s\n", END_SEGS )>0;
 	return rc;
 }
 
@@ -3704,7 +3711,7 @@ int main ( int argc, char * argv[] )
 		}
 		fprintf( stdout, "\tA 16711680 0 %0.6f 0.000000 0.000000 0.000000 360.000000\n", radius2 );
 		fprintf( stdout, "\tA 16711680 0 %0.6f 0.000000 0.000000 0.000000 360.000000\n", radius );
-		fprintf( stdout, "\tEND\n" );
+		fprintf( stdout, "\t%s\n", END_SEGS );
 		break;
 	default:
 		fprintf( stderr, "Invalid command: %s\n", argv[-1] );

@@ -1560,6 +1560,15 @@ EXPORT void ParamMenuPush( void * dp )
 static void ParamColorSelectPush( void * dp, wDrawColor dc )
 {
 	paramData_p p = (paramData_p)dp;
+	long rgb = wDrawGetRGB( dc );
+	while ( dc == drawColorPreviewSelected || dc == drawColorPreviewUnselected ) {
+		// The user picked a special color, tweak it
+		rgb -= 1; // Make it very close but different
+		if ( ( rgb & 0xFF ) == 0 )
+			// Ran out of room - bail
+			break;
+		dc = wDrawFindColor( rgb );
+	}
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, wDrawGetRGB(dc) );
 		fflush( recordF );
@@ -2573,8 +2582,8 @@ static void ParamDlgProc(
 			DefaultProc( win, wClose_e, data );
 		break;
 	case wResize_e:
-		if (((pg->winOption & F_RESIZE) != 0) && pg->changeProc)
-			pg->changeProc(pg, wResize_e, refresh);
+		if (win == mapW)
+			pg->changeProc(pg, wResize_e, NULL);
 		else
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		break;

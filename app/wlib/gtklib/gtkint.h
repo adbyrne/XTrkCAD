@@ -32,7 +32,9 @@
 #define strcasecmp _stricmp
 #endif
 
+#ifndef MISC_H
 #include "dynarr.h"
+#endif
 
 #define BORDERSIZE	(4)
 #define LABEL_OFFSET	(3)
@@ -40,12 +42,14 @@
 
 extern wWin_p gtkMainW;
 
+#ifdef CURSOR_SURFACE
 typedef struct {
 		cairo_surface_t* surface;
 		wPos_t width;
 		wPos_t height;
 		wBool_t show;
 } wCursorSurface_t, * wSurface_p;
+#endif
 
 
 typedef enum {
@@ -77,7 +81,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * widget; \
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
-		wCursorSurface_t cursor_surface; \
+		/* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/ \
 		wBool_t outline; \
 		void * data;
 
@@ -166,6 +170,9 @@ struct wButton_t {
     wButtonCallBack_p action;
     int busy;
     int recursion;
+    long timer_id;
+    int timer_count;
+    int timer_state;
 };
 
 /* color.c */
@@ -267,7 +274,7 @@ struct wDraw_t {
 
 		GdkPixmap * pixmap;
 		GdkPixmap * pixmapBackup;
-
+		cairo_surface_t * temp_surface;
 
 		double dpi;
 
@@ -287,6 +294,8 @@ struct wDraw_t {
 		cairo_t *printContext;
 		cairo_surface_t *curPrintSurface;
 		GdkPixbuf * background;
+
+		wBool_t bTempMode;
 		};
 
 void WlibApplySettings(GtkPrintOperation *op);

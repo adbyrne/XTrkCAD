@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cundo.h"
 #include "custom.h"
@@ -32,6 +33,7 @@
 #include "note.h"
 #include "param.h"
 #include "track.h"
+#include "include/utf8convert.h"
 #include "utility.h"
 
 extern BOOL_T inDescribeCmd;
@@ -100,10 +102,12 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
     if (d->scale >= 16) {
         return;
     }
-	if ((d->funcs->options & wDrawOptTemp)) {
+	if ((d->options & DC_SIMPLE)) {
 		//while the icon is moved, draw a square
+		//because CmdMove draws all selected object into tempSeg and
+		//tempSegDrawFuncs doesn't have a BitMap drawing func
 		DIST_T dist;
-		dist = 0.1*d->scale;
+		dist = 0.1*mainD.scale;
 		p[0].x = p[1].x = xx->pos.x - dist;
 		p[2].x = p[3].x = xx->pos.x + dist;
 		p[1].y = p[2].y = xx->pos.y - dist;
@@ -196,7 +200,7 @@ CommonCancelNote(track_p trk)
 	}
 }
 
-static void 
+static void
 CommonUpdateNote(track_p trk, int inx, struct extraDataNote *noteData )
 {
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
@@ -213,7 +217,6 @@ CommonUpdateNote(track_p trk, int inx, struct extraDataNote *noteData )
 		CommonCancelNote(trk);
 		break;
 	}
-	MainRedraw();
 }
 
 
@@ -221,7 +224,7 @@ void UpdateFile(struct extraDataNote *noteUIData, int inx,  BOOL_T needUndoStart
 {
 	track_p trk = noteUIData->trk;
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
-	
+
 	switch (inx) {
 	case OR_NOTE:
 	case LY_NOTE:
@@ -244,7 +247,7 @@ void UpdateFile(struct extraDataNote *noteUIData, int inx,  BOOL_T needUndoStart
 		//free(result);
 	}
 		break;
-	
+
 	default:
 		break;
 	}
@@ -291,7 +294,7 @@ void UpdateText(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart)
 	default:
 		break;
 	}
-	changed = TRUE;
+	changed++;
 }
 
 /**
@@ -300,7 +303,7 @@ void UpdateText(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart)
  * no marker is used for backwards compatibility
  *
  * \param command IN the note's command code
- * \return a pointer to the marker string. 
+ * \return a pointer to the marker string.
  */
 
 static char *
@@ -323,47 +326,53 @@ GetNoteMarker(enum noteCommands command )
 
 /**
  * Write the note to file. Handles the complete syntax for a note statement
- * 
+ *
  * \param t IN pointer to the note track element
  * \param f IN file handle for writing
  * \return TRUE for success
  */
-  
+
 static BOOL_T WriteNote(track_p t, FILE * f)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
     BOOL_T rc = TRUE;
-	DynString noteText;
-	char *marker;
 
-	DynStringMalloc(&noteText, 16);
-	marker = GetNoteMarker(xx->op);
+	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d", GetTrkIndex(t),
+		GetTrkLayer(t),
+		xx->pos.x, xx->pos.y, xx->op )>0;
 
+	char *s[2] = { NULL, NULL };
 	switch (xx->op) {
 	case OP_NOTETEXT:
-		DynStringPrintf(&noteText, "%s", xx->noteData.text);
+		s[0]=ConvertToEscapedText( xx->noteData.text );
 		break;
 	case OP_NOTELINK:
-		DynStringPrintf(&noteText, "%s %s", xx->noteData.linkData.url, xx->noteData.linkData.title);
+		s[0]=ConvertToEscapedText( xx->noteData.linkData.url );
+		s[1]=ConvertToEscapedText( xx->noteData.linkData.title );
 		break;
 	case OP_NOTEFILE:
-		DynStringPrintf(&noteText, "\"%s\" %s", xx->noteData.fileData.path, xx->noteData.fileData.title);
+		s[0]=ConvertToEscapedText( xx->noteData.fileData.path );
+		s[1]=ConvertToEscapedText( xx->noteData.fileData.title );
 		break;
 	default:
-		break;
+		AbortProg( "WriteNote: %d", xx->op );
 	}
-
-	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d\n", GetTrkIndex(t),
-		GetTrkLayer(t),
-		xx->pos.x, xx->pos.y, (int)(DynStringSize( &noteText ) + strlen(marker))) > 0;
-
-	if (*marker) {
-		rc &= fprintf(f, "%s", marker) > 0;
+#ifdef WINDOWS
+	for ( int inx = 0; inx < 2; inx++ ) {
+		if ( RequiresConvToUTF8( s[inx] ) ) {
+			wSystemToUTF8 ( s[inx], message, sizeof message );
+			MyFree( s[inx] );
+			s[inx] = MyStrdup( message );
+		}
 	}
-
-	rc &= fprintf(f, "%s", DynStringToCStr(&noteText)) > 0;
-    rc &= fprintf(f, "\n    END\n") > 0;
-    DynStringFree(&noteText);
+#endif
+	rc &= fprintf( f, " \"%s\"", s[0] )>0;
+	MyFree(s[0]);
+	if ( s[1] ) {
+		rc &= fprintf( f, " \"%s\"", s[1] )>0;
+		MyFree( s[1] );
+	}
+	rc &= fprintf( f, "\n" )>0;
 	
 	return rc;
 }
@@ -374,7 +383,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
  * \param line
  */
 
-static void
+static BOOL_T
 ReadTrackNote(char *line)
 {
     track_p t;
@@ -387,19 +396,67 @@ ReadTrackNote(char *line)
     DIST_T elev;
 	char *noteText;
 	enum noteCommands noteType;
+	char * sText;
 
-    if (!GetArgs(line + 5, paramVersion < 3 ? "XXpYd" : paramVersion < 9 ?
-                 "dL00pYd" : "dL00pfd",
-                 &index, &layer, &pos, &elev, &size)) {
-        return;
+    if (!GetArgs(line + 5, paramVersion < 3 ? "XXpYdc" : paramVersion < 9 ?
+                 "dL00pYdc" : "dL00pfdc",
+                 &index, &layer, &pos, &elev, &size, &cp)) {
+        return FALSE;
     }
 
-	noteText = MyMalloc(size + 1);
+	if ( paramVersion >= 12 ) {
+		noteType = size;
+		t = NewNote(index, pos, noteType);
+   		SetTrkLayer(t, layer);
+	   
+   		xx = (struct extraDataNote *)GetTrkExtraData(t);
+		switch (noteType) {
+		case OP_NOTETEXT:
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return FALSE;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.text = sText;
+			break;
+		case OP_NOTELINK:
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return FALSE;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.linkData.url = sText;
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return FALSE;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.linkData.title = sText;
+			break;
+		case OP_NOTEFILE:
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return FALSE;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.fileData.path = sText;
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return FALSE;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.fileData.title = sText;
+			xx->noteData.fileData.inArchive = FALSE;
+			break;
+		default:
+			AbortProg( "ReadNote: %d", noteType );
+		}
+	} else {
+	noteText = ReadMultilineText();
 
-	fread(noteText, sizeof(char), size, paramFile);
 	noteType = OP_NOTETEXT;
 
-	if( !strncmp(noteText, DELIMITER, strlen( DELIMITER )) && 
+	if( !strncmp(noteText, DELIMITER, strlen( DELIMITER )) &&
 		!strncmp(noteText + strlen(DELIMITER) + 1, DELIMITER, strlen(DELIMITER)) &&
 			noteText[strlen(DELIMITER)] - '0' > 0 &&
 			noteText[strlen(DELIMITER)] - '0' <= OP_NOTEFILE)
@@ -433,18 +490,11 @@ ReadTrackNote(char *line)
 		xx->noteData.fileData.inArchive = FALSE;
 		break;
 	}
-	}
-	
-	fgetc(paramFile);
-	
-	cp = GetNextLine();
-	
-	if (strcmp(cp, "    END")) {
-		InputError(_("Expected END statement not found!"),
-				TRUE );
-		exit(1);
+
 	}
     MyFree(noteText);
+    }
+	return TRUE;
 }
 
 /**
@@ -453,13 +503,13 @@ ReadTrackNote(char *line)
  * \param line IN complete line with NOTE statement
  */
 
-static void
+static BOOL_T
 ReadNote(char * line)
 {
     if (strncmp(line, "NOTE MAIN", 9) == 0) {
-        ReadMainNote(line);
+        return ReadMainNote(line);
     } else {
-        ReadTrackNote(line);
+        return ReadTrackNote(line);
     }
 }
 
@@ -522,6 +572,17 @@ static BOOL_T QueryNote( track_p trk, int query )
 	return FALSE;
 }
 
+static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
+{
+	struct extraDataNote *xx1 = (struct extraDataNote *)GetTrkExtraData( trk1 );
+	struct extraDataNote *xx2 = (struct extraDataNote *)GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
+	REGRESS_CHECK_INT( "Layer", xx1, xx2, layer )
+	REGRESS_CHECK_INT( "Op", xx1, xx2, op )
+	return TRUE;
+}
+
 static trackCmd_t noteCmds = {
     "NOTE",
     DrawNote,
@@ -556,7 +617,8 @@ static trackCmd_t noteCmds = {
 	NULL,       /*rebuildSegs*/
 	NULL,       /*replayData*/
 	NULL,       /*storeData*/
-	ActivateNote
+	ActivateNote,
+	CompareNote
 };
 
 /*****************************************************************************
@@ -580,18 +642,15 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     case C_DOWN:
         state_on = TRUE;
         oldPos = pos;
-        MainRedraw();
         return C_CONTINUE;
 
     case C_MOVE:
         oldPos = pos;
-        MainRedraw();
         return C_CONTINUE;
 
     case C_UP:
         UndoStart(_("New Note"), "New Note");
         state_on = FALSE;
-        MainRedraw();
         trk = NewNote(-1, pos, curNoteType );
 		inDescribeCmd = TRUE;
         DrawNewTrack(trk);
@@ -629,7 +688,6 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     case C_CANCEL:
         DescribeCancel();
         state_on = FALSE;
-        MainRedraw();
         return C_CONTINUE;
     }
 

@@ -11,6 +11,8 @@
 #define FILE_SEP_CHAR "/"
 #endif
 
+#include <stdbool.h>
+
 #ifdef USE_SIMPLE_GETTEXT
 char *bindtextdomain( char *domainname, char *dirname );
 char *bind_textdomain_codeset(char *domainname, char *codeset );
@@ -19,6 +21,11 @@ char *gettext( const char *msgid );
 
 char *g_win32_getlocale (void);
 #endif
+
+// conversion routines to and from UTF-8
+bool wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength);
+bool wUTF8ToSystem(const char *inString, char *outString, unsigned outStringLength);
+bool wIsUTF8(const char * string);
 
 /*
  * Interface types
@@ -148,6 +155,7 @@ wBool_t wNotice(		const char *, const char *, const char * );
 int wNotice3(			const char *, const char *, const char *, const char * );
 void wHelp(			const char * );
 
+
 #define NT_INFORMATION 1
 #define NT_WARNING	   2
 #define NT_ERROR	   4
@@ -236,6 +244,7 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void * );
 #define F_HIDE		(1L<<13)
 #define F_MAXIMIZE  (1L<<14)
 #define F_RESTRICT  (1L<<15)
+#define F_NOTTRANSIENT (1L<<16)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );
@@ -276,6 +285,7 @@ void wDestroySplash( void );
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
 #define BO_ENTER    (1L<<10)
+#define BO_REPEAT   (1L<<11)
 
 wPos_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -455,12 +465,16 @@ void wTextSetPosition(		wText_p bt, int pos );
 typedef int wDrawOpts;
 #define wDrawOptTemp	(1<<0)
 #define wDrawOptNoClip	(1<<1)
-#define wDrawOptCursor  (1<<2)
-#define wDrawOptCursorClr (1<<3)
-#define wDrawOptCursorRmv (1<<4)
-#define wDrawOptCursorQuit (1<<5)
-#define wDrawOutlineFont (1<<11)
-#define wDrawOptOpaque   (1<<12)
+#define wDrawOptTransparent  (1<<2)
+#define wDrawOutlineFont (1<<3)
+#ifdef CURSOR_SURFACE
+#define wDrawOptCursor  (1<<4)
+#define wDrawOptCursorClr (1<<5)
+#define wDrawOptCursorClr (1<<6)
+#define wDrawOptCursorRmv (1<<7)
+#define wDrawOptCursorQuit (1<<8)
+#define wDrawOptOpaque   (1<<9)
+#endif
 
 
 typedef enum {
@@ -468,7 +482,9 @@ typedef enum {
 	wDrawLineDash,
 	wDrawLineDot,
 	wDrawLineDashDot,
-	wDrawLineDashDotDot}
+	wDrawLineDashDotDot,
+	wDrawLineCenter,
+	wDrawLinePhantom}
 		wDrawLineType_e;
 
 typedef enum {
@@ -491,7 +507,11 @@ typedef int wAction_t;
 #define wActionWheelDown (11)
 #define wActionLDownDouble (12)
 #define wActionModKey (13)
-#define wActionLast		wActionModKey
+#define wActionScrollUp (14)
+#define wActionScrollDown (15)
+#define wActionScrollLeft (16)
+#define wActionScrollRight (17)
+#define wActionLast		wActionScrollRight
 
 
 #define wRGB(R,G,B)\
@@ -534,9 +554,11 @@ void wDrawPolygon(	wDraw_p, wPos_t [][2], wPolyLine_e [], wIndex_t, wDrawColor, 
 				wDrawOpts, int, int );
 void wDrawFilledCircle(		wDraw_p, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 
-void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFont_p,
+void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFont_p,
 				wFontSize_t );
 void wDrawClear(		wDraw_p );
+void wDrawClearTemp(		wDraw_p );
+wBool_t wDrawSetTempMode(	wDraw_p, wBool_t );
 
 void wDrawDelayUpdate(		wDraw_p, wBool_t );
 void wDrawClip(			wDraw_p, wPos_t, wPos_t, wPos_t, wPos_t );
@@ -573,7 +595,7 @@ void wDrawShowBackground(   wDraw_p, wPos_t pos_x, wPos_t pos_y, wPos_t width, w
 void wInitializeFonts();
 void wSelectFont(		const char * );
 wFontSize_t wSelectedFontSize(	void );
-void wSetSelectionFontSize(int);
+void wSetSelectedFontSize(wFontSize_t size);
 #define F_TIMES	(1)
 #define F_HELV	(2)
 wFont_p wStandardFont(		int, wBool_t, wBool_t );
@@ -584,22 +606,19 @@ wFont_p wStandardFont(		int, wBool_t, wBool_t );
  * Printing
  */
 
-typedef void (*wAddPrinterCallBack_p)( const char *, const char * );
-typedef void (*wAddMarginCallBack_p)( const char *, double, double, double, double );
-typedef void (*wAddFontAliasCallBack_p)( const char *, const char * );
 typedef void (*wPrintSetupCallBack_p)( wBool_t );
 
 wBool_t wPrintInit(		void );
 void wPrintSetup(		wPrintSetupCallBack_p );
-void wPrintSetCallBacks(	wAddPrinterCallBack_p, wAddMarginCallBack_p, wAddFontAliasCallBack_p );
+void wPrintGetMargins(		double *, double *, double *, double * );
 void wPrintGetPageSize(		double *, double * );
-void wPrintGetPhysSize(		double *, double * );
 wBool_t wPrintDocStart(		const char *, int, int * );
 wDraw_p wPrintPageStart(	void );
 wBool_t wPrintPageEnd(		wDraw_p );
 void wPrintDocEnd(		void );
 wBool_t wPrintQuit(		void );
 void wPrintClip(		wPos_t, wPos_t, wPos_t, wPos_t );
+const char * wPrintGetName(	void );
 
 
 /*------------------------------------------------------------------------------
@@ -649,6 +668,8 @@ typedef enum {
 	wModKey_Shift,
 	wModKey_Ctrl }
 	wModKey_e;
+
+void wDoAccelHelp( wAccelKey_e key, void * );
 
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
@@ -770,4 +791,11 @@ wPos_t wStatusGetHeight(long flags);
 
 void wStatusSetValue(wStatus_p b, const char * arg);
 void wStatusSetWidth(wStatus_p b, wPos_t width);
+
+/*-------------------------------------------------------------------------------
+ * User Preferences
+ */
+
+#define PREFSECTION "Preference"
+#define LARGEICON   "LargeIcons"
 #endif

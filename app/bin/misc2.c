@@ -53,6 +53,7 @@
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;
+EXPORT long autosaveChkPoints = 2;
 
 EXPORT DIST_T curScaleRatio;
 EXPORT char * curScaleName;
@@ -60,8 +61,9 @@ EXPORT DIST_T trackGauge;
 EXPORT long labelScale = 8;
 EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
 EXPORT long labelWhen = 2;
-EXPORT long colorLayers = 0;
-EXPORT long zoomCorner = 0;
+EXPORT long colorTrack = 0;
+EXPORT long colorDraw = 0;
+EXPORT long constrainMain = 0;
 EXPORT long hideSelectionWindow = 0;
 EXPORT long angleSystem = 0;
 EXPORT DIST_T minLength = 0.1;
@@ -463,7 +465,9 @@ SetScale( SCALEINX_T newScaleInx )
 
 	SetScaleDescGauge((SCALEINX_T)newScaleInx);
 
-	wPrefSetString( "misc", "scale", curScaleName );
+
+	if (!inPlayback)
+		wPrefSetString( "misc", "scale", curScaleName );
 
 	// now load the minimum radius for the newly selected scale
 	LoadLayoutMinRadiusPref(curScaleName, curScale->R[0]);

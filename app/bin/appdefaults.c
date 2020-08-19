@@ -84,6 +84,8 @@ static char *GetParamPrototype(struct appDefault *ptrDefault,
 struct appDefault xtcDefaults[] = {
 	{ "DialogItem.cmdopt-preselect", 0, INTEGERCONSTANT,{ .intValue = 1 } },       /**< default command is select */
     { "DialogItem.cmdopt-rightclickmode", 0, INTEGERCONSTANT,{ .intValue = 1 } },	/**< swap default to context */
+	{ "DialogItem.cmdopt-selectmode", 0, INTEGERCONSTANT,{ .intValue = 0 } },		/**< 'Only' mode               */
+	{ "DialogItem.cmdopt-selectzero", 0, INTEGERCONSTANT,{ .intValue = 1 } },		/**< 'On' mode               */
 	{ "DialogItem.grid-horzenable", 0, INTEGERCONSTANT, { .intValue = 0 }},
 	{ "DialogItem.grid-vertenable", 0, INTEGERCONSTANT,{ .intValue = 0 } },
 	{ "DialogItem.pref-dstfmt", 0, INTEGERFUNCTION,{ .intFunction = GetLocalDistanceFormat } },	/**< number format for distances */

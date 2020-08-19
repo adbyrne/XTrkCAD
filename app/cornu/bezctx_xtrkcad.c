@@ -41,6 +41,7 @@ typedef struct {
     BOOL_T is_open;
     BOOL_T has_NAN;
     BOOL_T draw_spots;
+    DIST_T spot_size;
     coOrd last_pos;						// For moveTo
     int ends[2];						//Start and End knot number
 
@@ -168,9 +169,9 @@ static void
 	 	 seg->type=SEG_FILCRCL;
 	 	 seg->u.c.center.x = bc->last_pos.x;
 	 	 seg->u.c.center.y = bc->last_pos.y;
-	 	 seg->u.c.radius = 0.125;
+	 	 seg->u.c.radius = bc->spot_size;
 	 	 seg->width = 0.0;
-	 	 seg->color = wDrawColorBlack;
+	 	 seg->color = wDrawColorGrey40;
 	 }
 
 }
@@ -187,7 +188,7 @@ bezctx_xtrkcad_mark_knot(bezctx *z, int knot_idx) {
 
 
 bezctx *
-new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots) {
+new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots, DIST_T spot_size) {
 
     bezctx_xtrkcad *result = znew(bezctx_xtrkcad, 1);
 
@@ -203,6 +204,7 @@ new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots) {
     result->is_open = FALSE;
     result->has_NAN = FALSE;
     result->draw_spots = spots;
+    result->spot_size = spot_size;
     result->track = TRUE;
 
     result->segsArray->cnt =0;

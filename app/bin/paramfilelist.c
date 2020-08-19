@@ -30,6 +30,7 @@
 
 #include "common.h"
 #include "compound.h"
+#include "ctrain.h"
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
@@ -41,11 +42,12 @@
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 
+
 dynArr_t paramFileInfo_da;
 
 int curParamFileIndex = PARAM_DEMO;
 
-static int log_paramFile;
+static int log_params;
 
 static char * customPath;
 static char * customPathBak;
@@ -59,6 +61,8 @@ int GetParamFileCount()
 {
     return (paramFileInfo_da.cnt);
 }
+
+
 
 
 /**
@@ -172,7 +176,7 @@ void LoadParamFileList(void)
     }
 
     for (fileNo = 1; ; fileNo++) {
-        const char *fileName;
+        char *fileName;
         const char * contents;
         enum paramFileState structState = PARAMFILE_UNLOADED;
 
@@ -187,6 +191,14 @@ void LoadParamFileList(void)
         if (fileName == NULL || *fileName == '\0') {
             NoticeMessage(MSG_PRMFIL_NO_MAP, _("Ok"), NULL, contents);
             continue;
+        }
+        char * share;
+
+        // Rewire to the latest system level
+        if ((share= strstr(fileName,"/share/xtrkcad/params/"))) {
+        	share += strlen("/share/xtrkcad/params/");
+        	MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
+        	wPrefSetString("Parameter File Map", contents, fileName);
         }
 
         ReadParamFile(fileName);
@@ -295,8 +307,6 @@ int LoadParamFile(
     wIndex_t inx;
     int i = 0;
 
-    wBool_t redrawList = FALSE;
-
     assert(fileName != NULL);
     assert(files > 0);
 
@@ -313,7 +323,6 @@ int LoadParamFile(
             if (paramFileInfo(inx).valid &&
                     strcmp(paramFileInfo(inx).contents, curContents) == 0) {
                 paramFileInfo(inx).valid = FALSE;
-                redrawList = TRUE;
                 break;
             }
         }
@@ -321,36 +330,13 @@ int LoadParamFile(
         wPrefSetString("Parameter File Map", curContents,
                        paramFileInfo(curParamFileIndex).name);
     }
-    SetParamFileDir(fileName[i - 1]);
+    //Only set the ParamFileDir if not the system directory
+    if (!strstr(fileName[i-1],"/share/xtrkcad/params/"))
+    	SetParamFileDir(fileName[i - 1]);
     curParamFileIndex = PARAM_CUSTOM;
     DoChangeNotification(CHANGE_PARAMS);
     return TRUE;
 }
-
-/**
- * Set the directory for parameter files, either the installation as default or the user setting.
- *
- */
-
-
-void
-ParamFileListConfirmChange(void)
-{
-    wIndex_t fileInx;
-    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
-        paramFileInfo(fileInx).deletedShadow = paramFileInfo(fileInx).deleted;
-    }
-}
-
-void
-ParamFileListCancelChange(void)
-{
-    wIndex_t fileInx;
-    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
-        paramFileInfo(fileInx).deleted = paramFileInfo(fileInx).deletedShadow;
-    }
-}
-
 
 static void ReadCustom(void)
 {
@@ -421,7 +407,7 @@ addButtonCallBack_t ParamFilesInit(void)
  */
 BOOL_T ParamFileListInit(void)
 {
-    log_paramFile = LogFindIndex("paramFile");
+    log_params = LogFindIndex("params");
 
 	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
@@ -437,4 +423,74 @@ BOOL_T ParamFileListInit(void)
 
     return TRUE;
 
+}
+
+/**
+ * Deletes all parameter types described by index
+ *
+ * \param  index Zero-based index of the.
+ */
+
+static void
+DeleteAllParamTypes(int index)
+{
+
+	DeleteTurnoutParams(index);
+	DeleteCarProto(index);
+	DeleteCarPart(index);
+	DeleteStructures(index);
+}
+
+
+/**
+ * Unload parameter file: all parameter definitions from this file are deleted
+ * from memory. Strings allocated to store the filename and contents 
+ * description are free'd as well. 
+ * In order to keep the overall data structures consistent, the file info
+ * structure is not removed from the array but flagged as garbage
+ *
+ * \param  fileIndex Zero-based index of the file.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+
+bool
+UnloadParamFile(wIndex_t fileIndex)
+{
+    paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
+	
+	DeleteAllParamTypes(fileIndex);
+	
+    MyFree(paramFileI->name);
+    MyFree(paramFileI->contents);
+
+    paramFileI->valid = FALSE;
+
+    for (int i = 0; i < paramFileInfo_da.cnt; i++) {
+        LOG1(log_params, ("UnloadParamFiles: = %s: %d\n", paramFileInfo(i).contents,
+                          paramFileInfo(i).trackState))
+    }
+
+    return (true);
+}
+
+/**
+ * Reload parameter file
+ *
+ * \param  index Zero-based index of the paramFileInfo struct.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+
+bool
+ReloadParamFile(wIndex_t index)
+{
+	paramFileInfo_p paramFileI = &paramFileInfo(index);
+	
+	DeleteAllParamTypes(index);
+	MyFree(paramFileI->contents);
+
+	ReloadDeletedParamFile(index);
+
+	return(true);
 }
