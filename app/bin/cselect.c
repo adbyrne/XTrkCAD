@@ -149,6 +149,15 @@ void static CreateRotateAnchor(coOrd pos) {
 		Translate(&head,pos,j*120,d*2);
 		CreateArrowAnchor(head,NormalizeAngle((j*120)+90),d);
 	}
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).width = d/8;
+	anchors(i).u.c.center = pos;
+	anchors(i).u.c.a0 = 180.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d/16;
+	anchors(i).color = wDrawColorAqua;
 	wSetCursor(mainD.d,wCursorNone);
 }
 
@@ -2227,10 +2236,10 @@ static STATUS_T CmdRotate(
 			if ( state == 0 )
 				break;
 			if ( rotateAlignState != 2 ) {
-				DIST_T width = mainD.scale*0.5;
+				DIST_T width = tempD.scale*0.15;
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
 				if (drawnAngle) {
-					DrawLine( &tempD, orig_base, orig, (wDrawWidth)width, wDrawColorBlue );
+					DrawLine( &tempD, orig_base, orig, width/2, wDrawColorBlue );
 					ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
 
 					DIST_T dist = FindDistance(orig,base);
