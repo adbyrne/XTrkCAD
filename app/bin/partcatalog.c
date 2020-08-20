@@ -304,7 +304,7 @@ FilterKeyword(char *word)
     }
 
     for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
-        if (!stricmp(word, stopwords+i)) {
+        if (!XtcStricmp(word, stopwords+i)) {
             return (true);
         }
     }
@@ -329,16 +329,16 @@ StandardizeSpelling(char *word)
     char *p = strchr(word, '-');
     // remove the word 'scale' from combinations like N-scale
     if (p) {
-        if (!stricmp(p+1, "scale")) {
+        if (!XtcStricmp(p+1, "scale")) {
             *p = '\0';
         }
     }
 
-    if (!strnicmp(word, "h0", 2)) {
+    if (!strncasecmp(word, "h0", 2)) {
         strncpy(word, "ho", 2);
     }
 
-    if (!strnicmp(word, "00", 2)) {
+    if (!strncasecmp(word, "00", 2)) {
         strncpy(word, "oo", 2);
     }
 
