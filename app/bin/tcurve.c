@@ -273,7 +273,15 @@ static void DrawCurveDescription(
 		off = xx->radius-(cos(D2R(a1/2))*xx->radius);
 		sprintf( message, "L %s A %0.3f O %s", FormatDistance(FindDistance(end0,end1)),FindAngle(end1,end0), FormatDistance(off));
 		DrawDimLine( d, end0, end1, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+		coOrd details_pos;
+
+		details_pos.x = (end1.x - end0.x)*0.5+end0.x;
+		details_pos.y = (end1.y - end0.y)*0.5+end0.y - descriptionFontSize/d->dpi;
+
+		if ((labelEnable&LABELENABLE_DETAILS)!=0) AddTrkDetails(d, trk, details_pos, a1/180.0*M_PI*xx->radius, color);
 	}
+
 }
 
 

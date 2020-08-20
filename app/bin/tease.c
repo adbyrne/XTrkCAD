@@ -792,6 +792,11 @@ static void DrawJointDescription(
 			FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1),
 			FormatDistance(xx->l0), FormatDistance(xx->l1), FormatDistance(xx->R), FormatDistance(xx->L));
 	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+
+	if ((labelEnable&LABELENABLE_DETAILS)!=0) AddTrkDetails(d, trk, pos, xx->L, color);
+
+
 }
 
 
@@ -907,8 +912,11 @@ static BOOL_T WriteJoint(
 {
 	struct extraData * xx = GetTrkExtraData(t);
 	BOOL_T rc = TRUE;
+	long options = (long)GetTrkWidth(t);
+	if ( ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) )
+			options |= 0x80;
 	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f\n",
-		GetTrkIndex(t), GetTrkLayer(t), (long)GetTrkWidth(t),
+		GetTrkIndex(t), GetTrkLayer(t), options,
 		GetTrkScaleName(t), GetTrkVisible(t), xx->l0, xx->l1, xx->R, xx->L,
 		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle )>0;
 	rc &= WriteEndPt( f, t, 0 );
@@ -952,6 +960,8 @@ static BOOL_T ReadJoint(
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
+	if ( ( ( options & 0x80 ) != 0 ) )
+		SetTrkBits(trk,TB_HIDEDESC);
 	*xx = e;
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
@@ -1344,6 +1354,8 @@ static BOOL_T QueryJoint( track_p trk, int query )
 			UndoStart( _("Split Easement Curve"), "queryJoint T%d Scurve", GetTrkIndex(trk) );
 			SplitTrack( trk, xx->pos, 0, &trk1, FALSE );
 		}
+		return TRUE;
+	case Q_HAS_DESC:
 		return TRUE;
 	default:
 		return FALSE;

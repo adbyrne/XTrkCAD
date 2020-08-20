@@ -686,6 +686,7 @@ BOOL_T ReplayTrackData(track_p, void *, long);
 DIST_T GetFlexLength( track_p, EPINX_T, coOrd * );
 void LabelLengths( drawCmd_p, track_p, wDrawColor );
 DIST_T GetTrkLength( track_p, EPINX_T, EPINX_T );
+void AddTrkDetails(drawCmd_p d, track_p trk, coOrd pos, DIST_T length, wDrawColor color);
 
 void SelectAbove( void );
 void SelectBelow( void );

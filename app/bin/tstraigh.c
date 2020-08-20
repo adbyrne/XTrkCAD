@@ -272,6 +272,7 @@ static DIST_T DistanceStraight( track_p t, coOrd * p )
 	return LineDistance( p, GetTrkEndPos(t,0), GetTrkEndPos(t,1) );
 }
 
+
 static void DrawStraightDescription(
 		track_p trk,
 		drawCmd_p d,
@@ -293,8 +294,16 @@ static void DrawStraightDescription(
 	DrawLine(d,end0,end0off,0,color);
 	Translate(&end1off,end1,a+90,2*trackGauge);
 	DrawLine(d,end1,end1off,0,color);
-	sprintf( message, "L %s A %0.3f", FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1));
+	sprintf( message, "L%s A%0.3f",
+			FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1));
 	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+	coOrd details_pos;
+
+	details_pos.x = (end1off.x - end0off.x)/4 + end0off.x;
+	details_pos.y = (end1off.y - end0off.y)/4 + end0off.y;
+
+	if ((labelEnable&LABELENABLE_DETAILS)!=0) AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
 
 }
 

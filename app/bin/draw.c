@@ -713,10 +713,10 @@ EXPORT void DrawBoxedString(
 	size.x += bw*d->scale/d->dpi;
 	size.y += bh*d->scale/d->dpi;
 	p[0] = p0;
-	p[0].x -= br*d->scale/d->dpi;
-	p[0].y -= (bb*d->scale/d->dpi+descent-(style==BOX_BOX?-ascent:0));
+	p[0].x -= br*d->scale/d->dpi;          	//Top of box
+	p[0].y += (bb*d->scale/d->dpi+ascent);
 	p[1].y = p[0].y;
-	p[2].y = p[3].y = p[0].y +descent-(style==BOX_BOX?-size.y:size.y);
+	p[2].y = p[3].y = p[0].y-size.y-descent;  //Bottom of box
 	p[1].x = p[2].x = p[0].x + size.x;
 	p[3].x = p[0].x;
 	d->options &= ~DC_DASH;
