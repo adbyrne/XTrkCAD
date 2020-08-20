@@ -451,6 +451,7 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 							break;
 			case wCursorNone:
 				gdkcursor = gdk_cursor_new(GDK_BLANK_CURSOR);
+							break;
 			case wCursorNormal:
 			default:
 				//gdkcursor = gdk_cursor_new_from_name (display,"default");
