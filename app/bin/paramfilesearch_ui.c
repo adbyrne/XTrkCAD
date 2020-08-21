@@ -47,7 +47,7 @@ static Catalog *currentCat;					/**< catalog being shown    */
 static struct wFilSel_t *searchUi_fs;		/**< searchdialog for parameter files */
 
 static void SearchUiBrowse(void *junk);
-static void SearchUiDefault(void * junk);
+static void SearchUiDefault(void);
 static void SearchUiApply(wWin_p junk);
 static void SearchUiSelectAll(void *junk);
 static void SearchUiDoSearch(void *junk);
@@ -83,6 +83,7 @@ static paramData_t searchUiPLs[] = {
 };
 
 #define SEARCHBUTTON ((wButton_p)searchUiPLs[I_SEARCHBUTTON].control)
+#define CLEARBUTTON ((wButton_p)searchUiPLs[I_CLEARBUTTON].control)
 #define RESULTLIST	 ((wList_p)searchUiPLs[I_RESULTLIST].control)
 #define APPLYBUTTON  ((wButton_p)searchUiPLs[I_APPLYBUTTON].control)
 #define SELECTALLBUTTON  ((wButton_p)searchUiPLs[I_SELECTALLBUTTON].control)
@@ -158,27 +159,20 @@ static void SearchUiBrowse(void * junk)
  * Reload just the system files into the searchable set
  */
 
-static void SearchUiDefault(void * junk)
+static void SearchUiDefault()
 {
-    if (!catalogFileBrowse) {
-        catalogFileBrowse = InitCatalog();
-    } else {
-        CatalogDiscard(catalogFileBrowse);
-    }
-
-    if (trackLibrary) {
-        DiscardLibrary(trackLibrary);
-    }
-
-    char * parms_path;
-
-    MakeFullpath(&parms_path, wGetAppLibDir(), "params", NULL);
-
-    trackLibrary = CreateLibrary(parms_path);
+	DynString dsSummary;
 
     SearchFileListLoad(trackLibrary->catalog);  //Start with system files
+	wStringSetValue(QUERYSTRING, "");
 
-    free(parms_path);
+	wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
+	DynStringMalloc(&dsSummary, 16);
+	DynStringPrintf(&dsSummary, _("%u parameter files in library."), CountCatalogEntries(trackLibrary->catalog));
+	wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
+	DynStringFree(&dsSummary);
+
+	wControlActive((wControl_p)CLEARBUTTON, FALSE);
 }
 
 /**
@@ -278,30 +272,35 @@ static void SearchUiDoSearch(void * ptr)
     } else {
         catalogFileBrowse = InitCatalog();
     }
-    result = SearchLibrary(trackLibrary, search, currentResults);
 
+	if (search[0]) {
+		result = SearchLibrary(trackLibrary, search, currentResults);
 
-    if (result) {
-        DynString hitsMessage;
-        char *statistics;
-        DynStringMalloc(&hitsMessage, 16);
-        DynStringPrintf(&hitsMessage, _("%d parameter files found."), result);
-        wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
-        DynStringFree(&hitsMessage);
+		if (result) {
+			DynString hitsMessage;
+			char *statistics;
+			DynStringMalloc(&hitsMessage, 16);
+			DynStringPrintf(&hitsMessage, _("%d parameter files found."), result);
+			wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
+			DynStringFree(&hitsMessage);
 
-        statistics = SearchStatistics(currentResults);
-        wMessageSetValue(SEARCHSTAT, statistics);
-        MyFree(statistics);
+			statistics = SearchStatistics(currentResults);
+			wMessageSetValue(SEARCHSTAT, statistics);
+			MyFree(statistics);
 
-        SearchFileListLoad(&(currentResults->subCatalog));
-        SearchDiscardResult(currentResults);
-    } else {
-        wListClear(RESULTLIST);
-        wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
-        wMessageSetValue(MESSAGETEXT, _("No matches found."));
-    }
+			SearchFileListLoad(&(currentResults->subCatalog));
+			SearchDiscardResult(currentResults);
+			wControlActive((wControl_p)CLEARBUTTON, TRUE);
+		} else {
+			wListClear(RESULTLIST);
+			wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
+			wMessageSetValue(MESSAGETEXT, _("No matches found."));
+		}
 
-    MyFree((void *)currentResults);
+		MyFree((void *)currentResults);
+	} else {
+		SearchUiDefault();
+	}
 }
 
 /**
@@ -313,10 +312,7 @@ static void SearchUiDoSearch(void * ptr)
 static void
 SearchUiClearFilter(void *ptr)
 {
-    wStringSetValue(QUERYSTRING, "");
-    wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
-    wMessageSetValue(SEARCHSTAT, "");
-    SearchFileListLoad(trackLibrary->catalog);
+	SearchUiDefault();
 }
 
 /**
@@ -459,10 +455,7 @@ void DoSearchParams(void * junk)
         wMessageSetValue(MESSAGETEXT,
                          _("No system parameter files found, search is disabled."));
     } else {
-        wStringSetValue(QUERYSTRING, "");
-
-        SearchFileListLoad(trackLibrary->catalog);  //Start with system files
-
+		SearchUiDefault();
     }
 
     wShow(searchUiW);
