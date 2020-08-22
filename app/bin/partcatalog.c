@@ -807,7 +807,7 @@ unsigned countWords(char *str)
     while (*str) {
         // If next character is a separator, set the
         // state as FALSE
-        if (*str == ' ' || *str == '\n' || *str == '\t') {
+        if (*str == ' ' || *str == '\n' || *str == '\t' || *str == '\r' || *str == '/') {
             state = FALSE;
         }
 
