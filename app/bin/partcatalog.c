@@ -223,7 +223,7 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
  * \return
  */
 
-static CatalogEntry *
+EXPORT CatalogEntry *
 CreateCatalog()
 {
     CatalogEntry *catalog = InitCatalog();

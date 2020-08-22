@@ -65,6 +65,7 @@ unsigned CreateLibraryIndex(TrackLibrary *trackLib);
 unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
 unsigned CountCatalogEntries(CatalogEntry *listHeader);
 void EmptyCatalog(CatalogEntry *listHeader);
+CatalogEntry * CreateCatalog();
 unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
 bool FilterKeyword(char *word);
 CatalogEntry * InsertInOrder(CatalogEntry *listHeader, const char *contents);

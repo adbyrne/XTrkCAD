@@ -90,6 +90,8 @@ typedef struct {
 static layer_t layers[NUM_LAYERS];
 static layer_t *layers_save = NULL;
 
+static CatalogEntry * settingsCatalog;
+
 
 static int oldColorMap[][3] = {
     { 255, 255, 255 },		/* White */
@@ -505,6 +507,7 @@ static  wDrawColor layerColorTab[COUNT(layerRawColorTab)];
 static wWin_p layerW;
 static char layerName[STR_SHORT_SIZE];
 static char layerLinkList[STR_LONG_SIZE];
+static char settingsName[STR_SHORT_SIZE];
 static wDrawColor layerColor;
 static long layerUseColor = TRUE;
 static long layerVisible = TRUE;
@@ -549,9 +552,9 @@ static paramData_t layerPLs[] = {
 #define I_LINKLIST (9)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (10)
-	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX| PDO_DLGNOLABELALIGN, (void*) 250 },
+	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, (void*) 250, N_("Settings") },
 #define I_COUNT (11)
-    { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), N_("Count"), BO_READONLY },
+    { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, (void *)370 },
     { PD_MESSAGE, N_("Personal Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
     { PD_BUTTON, (void*)DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
     { PD_BUTTON, (void*)DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, (void *)ENUMLAYER_SAVE },
@@ -560,6 +563,7 @@ static paramData_t layerPLs[] = {
 };
 
 #define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
+#define MESSAGETEXT ((wMessage_p)layerPLs[I_COUNT].control)
 
 static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
 
@@ -577,6 +581,10 @@ void LoadFileListLoad(CatalogEntry *catalog)
     wControlShow((wControl_p)settingsListL, FALSE);
     wListClear(settingsListL);
 
+    int currset = 0;
+
+    wListAddValue(settingsListL," ",NULL," ");
+
     while (currentEntry != currentEntry->next) {
         for (unsigned int i=0;i<currentEntry->files;i++) {
         	DynStringClear(&description);
@@ -587,10 +595,13 @@ void LoadFileListLoad(CatalogEntry *catalog)
 						  DynStringToCStr(&description),
 						  NULL,
 						  (void*)currentEntry->fullFileName[i]);
+			if (strcmp(currentEntry->contents,settingsName)==0) currset = i;
         }
 
         currentEntry = currentEntry->next;
     }
+
+    wListSetIndex(settingsListL,currset);
 
     wControlShow((wControl_p)settingsListL, TRUE);
 
@@ -683,6 +694,7 @@ void LoadLayerLists(void)
     	wListClear(layerS);
     }
 
+
     /* add all layers to both lists */
     for (inx=0; inx<NUM_LAYERS; inx++) {
         char *layerLabel;
@@ -699,9 +711,6 @@ void LoadLayerLists(void)
     /* set current layer to selected */
     wListSetIndex(setLayerL, curLayer);
 
-    if (layerL) {
-        wListSetIndex(layerL, curLayer);
-    }
 }
 
 /**
@@ -757,19 +766,24 @@ UpdateLayerDlg()
     layerColor = layers[curLayer].color;
     layerUseColor = layers[curLayer].useColor;
     layerNoButton = layers[curLayer].button_off;
-     strcpy(layerName, layers[curLayer].name);
-     GetLayerLinkString(curLayer,layerLinkList);
+    strcpy(layerName, layers[curLayer].name);
+    strcpy(settingsName, layers[curLayer].settingsName);
+    GetLayerLinkString(curLayer,layerLinkList);
 
     layerCurrent = curLayer;
     /* now re-load the layer list boxes */
     LoadLayerLists();
-    sprintf(message, "%ld", layers[curLayer].objCount);
-    ParamLoadMessage(&layerPG, I_COUNT, message);
+
 
     /* force update of the 'manage layers' dialogbox */
     if (layerL) {
         ParamLoadControls(&layerPG);
     }
+
+    if (layerS) LoadFileListLoad(settingsCatalog);
+
+    sprintf(message, "Object Count: %ld", layers[curLayer].objCount);
+    if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
 
     /* finally show the layer buttons with balloon text */
     for (inx = 0; inx < NUM_BUTTONS; inx++) {
@@ -1078,6 +1092,7 @@ static void LayerUpdate(void)
             layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap ||
 			layers[(int)layerCurrent].module != (BOOL_T)layerModule ||
 			layers[(int)layerCurrent].button_off != (BOOL_T)layerNoButton ||
+			strcmp(layers[(int)layerCurrent].settingsName,settingsName) ||
 			strcmp(oldLinkList,layerLinkList)) {
         changed++;
         SetWindowTitle();
@@ -1090,6 +1105,7 @@ static void LayerUpdate(void)
         wListSetValues(layerL, layerCurrent, layerFormattedName, NULL, NULL);
         free(layerFormattedName);
     }
+
 
     layerFormattedName = FormatLayerName(layerCurrent);
     wListSetValues(setLayerL, layerCurrent, layerFormattedName, NULL, NULL);
@@ -1127,6 +1143,7 @@ static void LayerUpdate(void)
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
     layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
     layers[(int)layerCurrent].module = (BOOL_T)layerModule;
+    strcpy(layers[(int)layerCurrent].settingsName,settingsName);
 
     PutLayerListArray((int)layerCurrent,layerLinkList);
 
@@ -1155,6 +1172,7 @@ static void LayerSelect(
 
     layerCurrent = (unsigned int)inx;
     strcpy(layerName, layers[inx].name);
+    strcpy(settingsName, layers[inx].settingsName);
     layerVisible = layers[inx].visible;
     layerFrozen = layers[inx].frozen;
     layerOnMap = layers[inx].onMap;
@@ -1166,6 +1184,8 @@ static void LayerSelect(
     GetLayerLinkString(inx,layerLinkList);
     ParamLoadMessage(&layerPG, I_COUNT, message);
     ParamLoadControls(&layerPG);
+
+    if (layerS) LoadFileListLoad(settingsCatalog);
 }
 
 void ResetLayers(void)
@@ -1180,6 +1200,7 @@ void ResetLayers(void)
         layers[inx].module = FALSE;
         layers[inx].button_off = FALSE;
         layers[inx].objCount = 0;
+        strcpy(layers[inx].settingsName,"");
         DYNARR_RESET(int,layers[inx].layerLinkList);
         SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
 
@@ -1203,6 +1224,7 @@ void ResetLayers(void)
     layerColor = layers[0].color;
     layerUseColor = TRUE;
     strcpy(layerName, layers[0].name);
+    strcpy(settingsName, layers[0].settingsName);
 
     LoadLayerLists();
 
@@ -1219,6 +1241,10 @@ void SaveLayers(void)
 
     if (layers_save == NULL) {
         abort();
+    }
+
+    for (int i=0;i<NUM_LAYERS;i++) {
+    	layers[i].settingsName[0] = '\0';
     }
 
     memcpy(layers_save, layers, NUM_LAYERS * sizeof layers[0]);
@@ -1307,6 +1333,13 @@ static void LayerDlgUpdate(
     case I_MAP:
         layerRedrawMap = TRUE;
         break;
+
+    case I_SETTINGS:
+    	if (strcmp((char*)wListGetItemContext(settingsListL,(wIndex_t)*(long*)valueP)," ")==0)
+    		settingsName[0] = '\0';
+    	else
+    		strcpy(settingsName,(char*)wListGetItemContext(settingsListL,(wIndex_t)*(long*)valueP));
+    	break;
     }
 }
 
@@ -1336,7 +1369,7 @@ GetNextSettingsFile(DIR *dir, const char *dirName, char **fileName)
         ent = readdir(dir);
 
         if (ent) {
-            if (!XtcStricmp(FindFileExtension(ent->d_name), "xsp")) {
+            if (!XtcStricmp(FindFileExtension(ent->d_name), "xset")) {
                 /* create full file name and get the state for that file */
                 MakeFullpath(fileName, dirName, ent->d_name, NULL);
 
@@ -1369,6 +1402,7 @@ ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
 {
     DIR *d;
     CatalogEntry *newEntry = catalog;
+    char contents[STR_SHORT_SIZE];
 
     d = opendir(dirName);
     if (d) {
@@ -1376,10 +1410,14 @@ ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
 
         while (GetNextSettingsFile(d, dirName, &fileName)) {
             CatalogEntry *existingEntry;
-            char *contents = strrchr(fileName,'/');
+            char *contents_start = strrchr(fileName,'/');
+            if (contents_start[0] == '/') contents_start++;
+            char *contents_end = strchr(contents_start,'.');
+            if (contents_end[0] == '.') contents_end[0] = '\0';
+            strcpy(contents,contents_start);
+            contents_end[0] = '.';
 			newEntry = InsertInOrder(catalog,contents);
-               UpdateCatalogEntry(newEntry, fileName, contents);
-            free(contents);
+            UpdateCatalogEntry(newEntry, fileName, contents);
             free(fileName);
             fileName = NULL;
         }
@@ -1389,16 +1427,17 @@ ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
     return (newEntry);
 }
 
-static CatalogEntry * settingsCatalog;
-
 static void DoLayer(void * junk)
 {
     if (layerW == NULL) {
         layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
                                    LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
     }
-    settingsCatalog = InitCatalog();
+
+    if (settingsCatalog) EmptyCatalog(settingsCatalog);
+    else settingsCatalog = CreateCatalog();
     ScanSettingsDirectory(settingsCatalog, wGetAppWorkDir());
+
 
     /* set the globals to the values for the current layer */
     UpdateLayerDlg();
