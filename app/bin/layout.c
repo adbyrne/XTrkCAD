@@ -713,7 +713,7 @@ LayoutBackGroundInit(BOOL_T clear) {
 
 }
 
-static int DoSettingsRead(
+EXPORT int DoSettingsRead(
 		int files,
 		char ** fileName,
 		void * data )

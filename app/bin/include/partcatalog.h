@@ -67,4 +67,6 @@ unsigned CountCatalogEntries(CatalogEntry *listHeader);
 void EmptyCatalog(CatalogEntry *listHeader);
 unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
 bool FilterKeyword(char *word);
+CatalogEntry * InsertInOrder(CatalogEntry *listHeader, const char *contents);
+void UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents);
 #endif // !HAVE_TRACKCATALOG_H

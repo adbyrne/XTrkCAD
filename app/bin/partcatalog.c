@@ -153,7 +153,7 @@ EmptyCatalog(CatalogEntry *listHeader)
  * \return CatalogEntry if found, NULL otherwise
  */
 
-static CatalogEntry *
+EXPORT CatalogEntry *
 InsertInOrder(CatalogEntry *listHeader, const char *contents)
 {
     CatalogEntry *currentEntry = listHeader;
@@ -203,7 +203,7 @@ IsExistingContents(CatalogEntry *listHeader, const char *contents, BOOL_T silent
  * \param contents contents description
  */
 
-static void
+EXPORT void
 UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
 {
     if (!entry->contents) {

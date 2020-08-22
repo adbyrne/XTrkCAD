@@ -44,7 +44,7 @@ void SetLayoutBackGroundPos(coOrd pos);
 void SetLayoutBackGroundAngle(ANGLE_T angle);
 void SetLayoutBackGroundScreen(int screen);
 
-void DoSettingsRead(int files,char ** fileName,void * data );
+int DoSettingsRead(int files, char ** fileName, void * data );
 
 char *GetLayoutFullPath(void);
 char *GetLayoutFilename(void);

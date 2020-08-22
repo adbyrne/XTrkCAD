@@ -23,9 +23,13 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
 
 #include "custom.h"
+#include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
@@ -33,6 +37,8 @@
 #include "messages.h"
 #include "param.h"
 #include "track.h"
+#include "include/partcatalog.h"
+#include "include/stringxtc.h"
 
 /*****************************************************************************
  *
@@ -292,7 +298,7 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
     }
 
     if (layers[inx].settingsName[0]) {
-    	DoSettingsRead(1,&layers[inx].settingsName, NULL);
+    	DoSettingsRead(1,(char **)&layers[inx].settingsName, NULL);
     }
 
     curLayer = newLayer;
@@ -540,7 +546,7 @@ static paramData_t layerPLs[] = {
 	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORZ|BC_NOBORDER },
 #define I_BUT   (8)
 	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("No Button"), BC_HORZ|BC_NOBORDER },
-#define I_layerLinkList (9)
+#define I_LINKLIST (9)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (10)
 	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX| PDO_DLGNOLABELALIGN, (void*) 250 },
@@ -552,6 +558,8 @@ static paramData_t layerPLs[] = {
     { PD_BUTTON, (void*)DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, (void *)ENUMLAYER_CLEAR },
     { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
 };
+
+#define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
 
 static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
 
@@ -566,8 +574,8 @@ void LoadFileListLoad(CatalogEntry *catalog)
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
 
-    wControlShow((wControl_p)I_layerLoad, FALSE);
-    wListClear(I_layerLoad);
+    wControlShow((wControl_p)settingsListL, FALSE);
+    wListClear(settingsListL);
 
     while (currentEntry != currentEntry->next) {
         for (unsigned int i=0;i<currentEntry->files;i++) {
@@ -575,7 +583,7 @@ void LoadFileListLoad(CatalogEntry *catalog)
 			DynStringCatCStr(&description,
 							 currentEntry->contents) ;
 
-			wListAddValue(I_layerLoad,
+			wListAddValue(settingsListL,
 						  DynStringToCStr(&description),
 						  NULL,
 						  (void*)currentEntry->fullFileName[i]);
@@ -584,7 +592,7 @@ void LoadFileListLoad(CatalogEntry *catalog)
         currentEntry = currentEntry->next;
     }
 
-    wControlShow((wControl_p)I_layerLoad, TRUE);
+    wControlShow((wControl_p)settingsListL, TRUE);
 
     DynStringFree(&description);
 
