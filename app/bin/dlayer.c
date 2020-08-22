@@ -57,6 +57,7 @@
 #define LAYERPREF_COLOR "color"
 #define LAYERPREF_FLAGS "flags"
 #define LAYERPREF_LIST "list"
+#define LAYERPREF_SETTINGS "settings"
 
 unsigned int curLayer;
 long layerCount = 10;
@@ -299,8 +300,10 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
         return;
     }
 
-    if (layers[inx].settingsName[0]) {
-    	DoSettingsRead(1,(char **)&layers[inx].settingsName, NULL);
+    if (layers[inx].settingsName[0] && strcmp(layers[inx].settingsName," ")!=0) {
+    	char *array[1];
+    	array[0] = layers[inx].settingsName;
+    	DoSettingsRead(1,array, NULL);
     }
 
     curLayer = newLayer;
@@ -572,7 +575,7 @@ static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof lay
  */
 
 static
-void LoadFileListLoad(CatalogEntry *catalog)
+void LoadFileListLoad(CatalogEntry *catalog, char * name)
 {
     CatalogEntry *currentEntry = catalog->next;
     DynString description;
@@ -583,21 +586,20 @@ void LoadFileListLoad(CatalogEntry *catalog)
 
     int currset = 0;
 
+    int i = 0;
+
     wListAddValue(settingsListL," ",NULL," ");
 
     while (currentEntry != currentEntry->next) {
-        for (unsigned int i=0;i<currentEntry->files;i++) {
-        	DynStringClear(&description);
-			DynStringCatCStr(&description,
-							 currentEntry->contents) ;
-
-			wListAddValue(settingsListL,
-						  DynStringToCStr(&description),
-						  NULL,
-						  (void*)currentEntry->fullFileName[i]);
-			if (strcmp(currentEntry->contents,settingsName)==0) currset = i;
-        }
-
+    	i++;
+		DynStringClear(&description);
+		DynStringCatCStr(&description,
+						 currentEntry->contents) ;
+		wListAddValue(settingsListL,
+					  DynStringToCStr(&description),
+					  NULL,
+					  (void*)currentEntry->fullFileName[0]);
+		if (strcmp(currentEntry->fullFileName[0],name)==0) currset = i;
         currentEntry = currentEntry->next;
     }
 
@@ -780,7 +782,7 @@ UpdateLayerDlg()
         ParamLoadControls(&layerPG);
     }
 
-    if (layerS) LoadFileListLoad(settingsCatalog);
+    if (layerS) LoadFileListLoad(settingsCatalog,settingsName);
 
     sprintf(message, "Object Count: %ld", layers[curLayer].objCount);
     if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
@@ -895,6 +897,11 @@ LayerPrefSave(void)
             	sprintf(buffer, LAYERPREF_LIST ".%0u", inx);
             	GetLayerLinkString(inx,links);
             	wPrefSetString(LAYERPREF_SECTION, buffer, links);
+
+            	if (settingsName[0] && strcmp(settingsName," ")!=0) {
+            		sprintf(buffer, LAYERPREF_SETTINGS ".%0u", inx);
+            		wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].settingsName);
+            	}
             }
 
             /* extend the list of layers that are set up via the preferences */
@@ -970,6 +977,13 @@ LayerPrefLoad(void)
             } else {
             	listValue[0] = '\0';
             	PutLayerListArray(inx,listValue);
+            }
+            sprintf(layerOption, LAYERPREF_SETTINGS ".%d", inx);
+            layerValue = wPrefGetString(LAYERPREF_SECTION,layerOption);
+            if (layerValue) {
+            	strcpy(layers[inx].settingsName,layerValue);
+            } else {
+            	layers[inx].settingsName[0] = '\0';
             }
 
             prefString = strtok(NULL, ",");
@@ -1185,7 +1199,7 @@ static void LayerSelect(
     ParamLoadMessage(&layerPG, I_COUNT, message);
     ParamLoadControls(&layerPG);
 
-    if (layerS) LoadFileListLoad(settingsCatalog);
+    if (layerS) LoadFileListLoad(settingsCatalog,settingsName);
 }
 
 void ResetLayers(void)
