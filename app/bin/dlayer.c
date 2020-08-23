@@ -1438,6 +1438,11 @@ static CatalogEntry *
 ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
 {
     DIR *d;
+#if defined(WINDOWS)
+	#define PATH_SEPARATOR '\\'
+#else
+	#define PATH_SEPARATOR '/'
+#endif
     CatalogEntry *newEntry = catalog;
     char contents[STR_SHORT_SIZE];
 
@@ -1447,7 +1452,7 @@ ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
 
         while (GetNextSettingsFile(d, dirName, &fileName)) {
             CatalogEntry *existingEntry;
-            char *contents_start = strrchr(fileName,'/');
+            char *contents_start = strrchr(fileName,PATH_SEPARATOR);
             if (contents_start[0] == '/') contents_start++;
             char *contents_end = strchr(contents_start,'.');
             if (contents_end[0] == '.') contents_end[0] = '\0';
