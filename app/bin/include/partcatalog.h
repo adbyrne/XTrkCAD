@@ -88,15 +88,13 @@ typedef struct sSearchResult SearchResult;
 Catalog *InitCatalog(void);
 ParameterLib *InitLibrary(void);
 ParameterLib *CreateLibrary(char *directory);
-void DiscardLibrary(ParameterLib *tracklib);
+void DestroyLibrary(ParameterLib *tracklib);
 bool CreateCatalogFromDir(ParameterLib *trackLib, char *directory);
-int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(ParameterLib *trackLib);
-unsigned SearchLibrary(ParameterLib *library, char *searchExpression,
-                       SearchResult *totalResult);
+unsigned SearchLibrary(ParameterLib *library, char *searchExpression, SearchResult *totalResult);
 char *SearchStatistics(SearchResult *result);
 void SearchDiscardResult(SearchResult *res);
 unsigned CountCatalogEntries(Catalog *catalog);
-void CatalogDiscard(Catalog *catalog);
+void DiscardCatalog(ParameterLib *library);
 bool FilterKeyword(char *word);
 #endif // !HAVE_TRACKCATALOG_H

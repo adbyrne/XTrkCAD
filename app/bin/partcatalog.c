@@ -580,39 +580,6 @@ DiscardCatalog(ParameterLib *library)
 
 }
 
-/**
- * Add a list of parameters files to a catalog. This function is
- * called when the user selects files in the file selector.
- *
- * \param files IN count of files
- * \param fileName IN array of filenames
- * \param data IN pointer to the catalog
- * \return alwqys TRUE
- */
-
-int GetParameterFileInfo(
-    int files,
-    char ** fileName,
-    void * data)
-{
-    Catalog *catalog = (Catalog *)data;
-
-    assert(fileName != NULL);
-    assert(files > 0);
-    assert(data != NULL);
-
-    for (int i = 0; i < files; i++) {
-        CatalogEntry *newEntry;
-        char *contents = GetParameterFileContent(fileName[i]);
-        ///[TODO] try to find out what should happen here
-        if (!(newEntry = IsExistingContents(catalog, contents,TRUE))) {
-            newEntry = InsertIntoCatalogAfter(catalog->head);
-        }
-        UpdateCatalogEntry(newEntry, fileName[i], contents);
-        free(contents);
-    }
-    return (TRUE);
-}
 
 /**
  * Create the search index from the contents description for the whole

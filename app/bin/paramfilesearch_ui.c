@@ -38,15 +38,12 @@
 #include "directory.h"
 #include "wlib.h"
 
-static Catalog *catalogFileBrowse;			/**< current search results */
 static ParameterLib *trackLibrary;			/**< Track Library          */
 static Catalog *currentCat;					/**< catalog being shown    */
+static SearchResult *currentSearch;			/**< current search results */
 
 /* define the search / browse dialog */
 
-static struct wFilSel_t *searchUi_fs;		/**< searchdialog for parameter files */
-
-static void SearchUiBrowse(void *junk);
 static void SearchUiDefault(void);
 static void SearchUiApply(wWin_p junk);
 static void SearchUiSelectAll(void *junk);
@@ -140,20 +137,6 @@ void SearchFileListLoad(Catalog *catalog)
 
     currentCat = catalog;
 }
-
-/**
- * Find parameter files using the file selector
- *
- * \param junk
- */
-
-static void SearchUiBrowse(void * junk)
-{
-    wFilSelect(searchUi_fs, GetParamFileDir());
-
-    return;
-}
-
 
 /**
  * Reload just the system files into the searchable set
@@ -267,11 +250,10 @@ static void SearchUiDoSearch(void * ptr)
 
     search = StringTrim(searchUiQuery);
 
-    if (catalogFileBrowse) {
-        CatalogDiscard(catalogFileBrowse);
-    } else {
-        catalogFileBrowse = InitCatalog();
-    }
+    if (currentSearch) {
+		SearchDiscardResult(currentSearch);
+		MyFree((void *)currentSearch);
+    } 
 
 	if (search[0]) {
 		result = SearchLibrary(trackLibrary, search, currentResults);
@@ -289,7 +271,7 @@ static void SearchUiDoSearch(void * ptr)
 			MyFree(statistics);
 
 			SearchFileListLoad(&(currentResults->subCatalog));
-			SearchDiscardResult(currentResults);
+//			SearchDiscardResult(currentResults);
 			wControlActive((wControl_p)CLEARBUTTON, TRUE);
 		} else {
 			wListClear(RESULTLIST);
@@ -297,7 +279,7 @@ static void SearchUiDoSearch(void * ptr)
 			wMessageSetValue(MESSAGETEXT, _("No matches found."));
 		}
 
-		MyFree((void *)currentResults);
+//		MyFree((void *)currentResults);
 	} else {
 		SearchUiDefault();
 	}
@@ -421,7 +403,6 @@ GetParamsPath()
 void DoSearchParams(void * junk)
 {
     if (searchUiW == NULL) {
-        catalogFileBrowse = InitCatalog();
 
         //Make the Find menu bound to the System Library initially
         char *paramsDir = GetParamsPath();
@@ -440,10 +421,6 @@ void DoSearchParams(void * junk)
 
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
-
-        searchUi_fs = wFilSelCreate(searchUiW, FS_LOAD, FS_MULTIPLEFILES,
-                                    _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), GetParameterFileInfo,
-                                    (void *)catalogFileBrowse);
     }
 
     ParamLoadControls(&searchUiPG);
