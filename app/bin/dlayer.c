@@ -289,6 +289,7 @@ static void FlipLayer(unsigned int layer)
     RedrawLayer(layer, TRUE);
 }
 
+static char lastSettings[STR_SHORT_SIZE];
 void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg)
 {
@@ -300,10 +301,19 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
         return;
     }
 
-    if (layers[inx].settingsName[0] && strcmp(layers[inx].settingsName," ")!=0) {
-    	char *array[1];
-    	array[0] = layers[inx].settingsName;
-    	DoSettingsRead(1,array, NULL);
+    char *array[1];
+    if (!layers[inx].settingsName[0] || strcmp(layers[inx].settingsName," ")==0) {
+    	if (lastSettings[0]) {
+    		DoSettingsRead(1,NULL, NULL);
+    	}
+    	lastSettings[0] = '\0';
+    } else {
+    	if (strcmp(layers[inx].settingsName,lastSettings)!=0) {
+    		if (!lastSettings[0]) wPrefFlush("");  // Save Last Settings for no settings file
+    		array[0] = layers[inx].settingsName;
+    		DoSettingsRead(1,array, NULL);
+    	}
+    	strcpy(lastSettings,layers[inx].settingsName);
     }
 
     curLayer = newLayer;
@@ -555,10 +565,10 @@ static paramData_t layerPLs[] = {
 #define I_LINKLIST (9)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (10)
-	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, (void*) 250, N_("Settings") },
+	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, (void*) 250, N_("Settings when Current") },
 #define I_COUNT (11)
     { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, (void *)370 },
-    { PD_MESSAGE, N_("Personal Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
+    { PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
     { PD_BUTTON, (void*)DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
     { PD_BUTTON, (void*)DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, (void *)ENUMLAYER_SAVE },
     { PD_BUTTON, (void*)DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, (void *)ENUMLAYER_CLEAR },
@@ -575,7 +585,7 @@ static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof lay
  */
 
 static
-void LoadFileListLoad(CatalogEntry *catalog, char * name)
+int LoadFileListLoad(CatalogEntry *catalog, char * name)
 {
     CatalogEntry *currentEntry = catalog->next;
     DynString description;
@@ -603,11 +613,15 @@ void LoadFileListLoad(CatalogEntry *catalog, char * name)
         currentEntry = currentEntry->next;
     }
 
+
     wListSetIndex(settingsListL,currset);
 
     wControlShow((wControl_p)settingsListL, TRUE);
 
     DynStringFree(&description);
+
+    if (currset == 0 && strcmp(" ",name)!=0) return FALSE;
+    return TRUE;
 
 }
 
@@ -782,7 +796,10 @@ UpdateLayerDlg()
         ParamLoadControls(&layerPG);
     }
 
-    if (layerS) LoadFileListLoad(settingsCatalog,settingsName);
+    if (layerS) {
+    	if (!LoadFileListLoad(settingsCatalog,settingsName))
+    		layers[curLayer].settingsName[0] = '\0';
+    }
 
     sprintf(message, "Object Count: %ld", layers[curLayer].objCount);
     if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
@@ -1199,7 +1216,13 @@ static void LayerSelect(
     ParamLoadMessage(&layerPG, I_COUNT, message);
     ParamLoadControls(&layerPG);
 
-    if (layerS) LoadFileListLoad(settingsCatalog,settingsName);
+    if (layerS) {
+    	if (!LoadFileListLoad(settingsCatalog,settingsName)) {
+    		settingsName[0] = '\0';
+    		layers[inx].settingsName[0] = '\0';
+    	}
+
+    }
 }
 
 void ResetLayers(void)
@@ -1507,6 +1530,7 @@ BOOL_T ReadLayers(char * line)
     		return FALSE;
     	}
     	strcpy(layers[inx].settingsName,layerSettingsName);
+    	return TRUE;
     }
 
     /* get the properties for a layer from the file and update the layer accordingly */

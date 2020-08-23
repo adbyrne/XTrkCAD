@@ -391,6 +391,9 @@ The \f{Linked Layers} text box can contain a comma-delimited set of layer number
 
 You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
 
+The \f{Load Settings} specifies a settings file in the working directory that is loaded when this layer is made current. Only the values contained in the file will be set.
+If this name is blank the default values (those in use when any layer that has no settings value) will be reloaded. 
+
 The \f{Count} field displays the number of objects in the selected Layer.
 
 The \f{Save} button stores layer attributes in the \c{xtrkcad.ini} file so they may be loaded into an existing or new file. Once saved and unless reset to \e{XTrackCAD} \f{Default}, modified layer information is applied to each new file.
