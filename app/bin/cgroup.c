@@ -219,7 +219,7 @@ EXPORT void UngroupCompound(
 
 LOG( log_group, 1, ( "Ungroup( T%d )\n", GetTrkIndex(trk) ) );
 	epCnt = GetTrkEndPtCnt(trk);
-	for ( segCnt=0; segCnt<xx->segCnt&&IsSegTrack(&xx->segs[segCnt]); segCnt++ );
+	segCnt = xx->segCnt;
 	ASSERT( (epCnt==0) == (segCnt==0) );
 	turnoutChanged = FALSE;
 	if ( epCnt > 0 ) {
@@ -262,6 +262,10 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				segInx1 = FindEP( tempEndPts_da.cnt, &tempEndPts(0), pos );
 				if ( segInx1 >= 0 ) {
 					segInx1 += segCnt;
+					if ( segInx1 >= refCount_da.cnt ) {
+						InputError( "Invalid segInx1 %d", TRUE, segInx1 );
+						return;
+					}
 					refCount(segInx1)++;
 				} else {
 					DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
@@ -275,6 +279,10 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				segEP1 = 0;
 				while ( cp[0] ) {
 					GetSegInxEP( cp[0], &segInx, &segEP );
+					if ( segInx1 >= refCount_da.cnt ) {
+						InputError( "Invalid segInx1 %d", TRUE, segInx1 );
+						return;
+					}
 					refCount(segInx)++;
 					if ( refCount(segInx) > refCount(segInx1) )
 						AddMergePt( segInx, segEP );
@@ -491,6 +499,8 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 	 */
 	for ( segInx=0; segInx<segCnt; segInx++ ) {
 		if ( refCount(segInx) >= 0 ) continue;
+		if ( ! IsSegTrack( xx->segs+segInx ) )
+			continue;
 		SegProc( SEGPROC_NEWTRACK, xx->segs+segInx, &segProcData );
 		SetTrkScale( segProcData.newTrack.trk, GetTrkScale(trk) );
 		SetTrkBits( segProcData.newTrack.trk, TB_SELECTED );
@@ -566,7 +576,8 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				mp->trk = NULL;
 			}
 		} else {
-			DrawNewTrack( segTrack(segInx).trk );
+			if ( segTrack(segInx).trk )
+				DrawNewTrack( segTrack(segInx).trk );
 		}
 	}
 	wDrawDelayUpdate( mainD.d, FALSE );
