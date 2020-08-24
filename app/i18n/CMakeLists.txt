@@ -6,6 +6,7 @@ SET(XTRKCAD_LOCALE_IDS
 	fi
 	fr_FR
 	pt_BR
+	ru
 	)
 
 # Misc variables

@@ -35,6 +35,7 @@ struct wString_t {
 		char * valueP;
 		wIndex_t valueL;
 		wStringCallBack_p action;
+		wBool_t enter_pressed;	/**< flag if enter was pressed */
 		};
 
 #ifdef LATER
@@ -58,7 +59,7 @@ struct wFloat_t {
 
 static XWNDPROC oldEditProc = NULL;
 static XWNDPROC newEditProc;
-static void triggerString( wControl_p b );
+static void triggerString( wString_p b );
 #ifdef LATER
 static void triggerInteger( wControl_p b );
 static void triggerFloat( wControl_p b );
@@ -73,7 +74,7 @@ long FAR PASCAL _export pushEdit(
 {
 
 	long inx = GetWindowLong( hWnd, GWL_ID );
-	wControl_p b = mswMapIndex(inx);
+	wString_p b = (wString_p)mswMapIndex(inx);
 
 	switch (message)
 	{
@@ -169,19 +170,21 @@ static char *getString(wString_p bs)
  */
 
 static void triggerString(
-    wControl_p b)
+    wString_p b)
 {
-    wString_p bs = (wString_p)b;
+	const char *output = "\n";
 
-    char *enteredString = getString(bs);
+    char *enteredString = getString(b);
     if (enteredString)
     {
-        if (bs->valueP) {
-            strcpy(bs->valueP, enteredString);
+        if (b->valueP) {
+            strcpy(b->valueP, enteredString);
         }
-		if (bs->action) {
-            bs->action(enteredString, bs->data);
+		if (b->action) {
+			b->enter_pressed = TRUE;
+			b->action(output, b->data);
         }
+
 		free(enteredString);
 	}
 }
