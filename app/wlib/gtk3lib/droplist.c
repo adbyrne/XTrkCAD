@@ -441,9 +441,8 @@ wList_p wDropListCreate(
                                         	LISTCOL_TEXT);
 
     // combo's style
-    GtkCssProvider * provider = gtk_css_provider_get_default();
-    GtkStyleContext * context;
-    context = gtk_widget_get_style_context (GTK_WIDGET (b->widget));
+    GtkCssProvider * provider = gtk_css_provider_new ();
+    GtkStyleContext * context = gtk_widget_get_style_context (GTK_WIDGET (b->widget));
     static const char style[] = """#mycombo GtkComboBox { -GtkComboBox-appears-as-list: 1; } """;
     gtk_css_provider_load_from_data(provider,style,-1,NULL);
     gtk_style_context_add_provider(context,

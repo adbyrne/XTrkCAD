@@ -359,7 +359,7 @@ wBool_t wPrefGetIntegerBasic(
                                   section,
                                   name,
                                   &error );
-    if(error && error->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND || value == def ) {
+    if((error && (error->code == G_KEY_FILE_ERROR_KEY_NOT_FOUND)) || value == def ) {
         *res = def;
         return( FALSE );
     } else {

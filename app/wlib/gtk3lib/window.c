@@ -624,7 +624,7 @@ static gint window_delete_event(
         }
 
     if (win->winProc) {
-        win->winProc(win, wClose_e, win->data);
+        win->winProc(win, wClose_e, NULL, win->data);
 
         if (win != gtkMainW) {
             wWinShow(win, FALSE);
@@ -653,7 +653,7 @@ static int resizeTime(wWin_p win) {
 		return FALSE;						//Stop Timer and don't resize
 	}
 	if (win->busy==FALSE && win->winProc) {   //Always drive once
-	    win->winProc(win, wResize_e, win->data);
+	    win->winProc(win, wResize_e, NULL, win->data);
 	    win->resizeW = win->w;					//Remember this one
 	    win->resizeH = win->h;
 	}
@@ -681,7 +681,7 @@ static int window_configure_event(
     	win->realX = 0;
     	win->realY = 0;
     	if (win->busy==FALSE && win->winProc)
-    		    win->winProc(win, wResize_e, win->data);
+    		    win->winProc(win, wResize_e, NULL, win->data);
     	return FALSE;
     }
 
@@ -755,7 +755,7 @@ gboolean window_state_event(
     }
 
     if (win->busy==FALSE && win->winProc) {
-        win->winProc(win, wState_e, win->data);
+        win->winProc(win, wState_e, NULL, win->data);
     }
 
     return TRUE;
@@ -1409,7 +1409,7 @@ void wExit(
     wPrefFlush();
 
     if (gtkMainW && gtkMainW->winProc != NULL) {
-        gtkMainW->winProc(gtkMainW, wQuit_e, gtkMainW->data);
+        gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);
     }
 
     exit(rc);
