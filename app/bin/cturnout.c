@@ -870,7 +870,7 @@ EXPORT EPINX_T TurnoutPickEndPt(
 		track_p trk )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	wIndex_t segCnt, segInx, segInx0;
+	wIndex_t segInx, segInx0;
 	EPINX_T segEP;
 	PATHPTR_T cp, cq, pps[2];
 	coOrd pos;
@@ -879,8 +879,7 @@ EXPORT EPINX_T TurnoutPickEndPt(
 	EPINX_T ep, epCnt, eps[2];
 	BOOL_T unique_eps[2];
 
-	for ( segCnt=0; segCnt<xx->segCnt && IsSegTrack(&xx->segs[segCnt]); segCnt++ );
-	DistanceSegs( xx->orig, xx->angle, segCnt, xx->segs, &epPos, &segInx0 );
+	DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, &epPos, &segInx0 );
 	Rotate( &epPos, xx->orig, xx->angle );
 	epPos.x -= xx->orig.x;
 	epPos.y -= xx->orig.y;

@@ -210,6 +210,8 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		onTrackInSplit = TRUE;
 		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayerSilent( trk0 )) {
 			ep0 = PickEndPoint( pos, trk0 );
+			if ( ep0 < 0 )
+				break;
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
 				CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
 			} else if (QueryTrack(trk0,Q_IS_TURNOUT)) {
