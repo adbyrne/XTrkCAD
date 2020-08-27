@@ -1368,6 +1368,8 @@ static BOOL_T ReadDraw( char * header )
 		return FALSE;
 	if (tempSegs_da.cnt == 1) {
 		trk = MakeDrawFromSeg1( index, orig, angle, &tempSegs(0) );
+		xx = GetTrkExtraData(trk);
+		xx->lineType = lineType;
 		SetTrkLayer( trk, layer );
 	} else {
 		trk = NewTrack( index, T_DRAW, 0, sizeof *xx + (tempSegs_da.cnt-1) * sizeof *(trkSeg_p)0 );
