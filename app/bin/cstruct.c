@@ -162,6 +162,25 @@ StructureDelete(void *structure)
 	MyFree(to->title);
 	MyFree(to->segs);
 
+	if (to->special) {
+		switch(to->special) {
+		case TOpier:
+			MyFree(to->u.pier.name);
+			to->u.pier.name = NULL;
+			break;
+		case TOpierInfo:
+			for(int pierInx=0;pierInx<to->u.pierInfo.cnt;pierInx++) {
+				if (to->u.pierInfo.info[pierInx].name)
+					MyFree(to->u.pierInfo.info[pierInx].name);
+				to->u.pierInfo.info[pierInx].name = NULL;
+			}
+			MyFree(to->u.pierInfo.info);
+			to->u.pierInfo.cnt = 0;
+			break;
+		default:;
+		}
+	}
+
 	MyFree(to);
 	return(TRUE);
 }
