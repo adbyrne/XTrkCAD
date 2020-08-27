@@ -62,7 +62,24 @@ int GetParamFileCount()
     return (paramFileInfo_da.cnt);
 }
 
+/**
+ * Show parameter file  error message
+ *
+ * \param [in,out] file If non-null, the file.
+ */
 
+static void
+ReadParamError(char *file)
+{
+	DynString error_msg;
+	DynStringMalloc(&error_msg, 100);
+	DynStringPrintf(&error_msg,
+		_("The parameter file: %s could not be found and was probably deleted or moved. "
+			"The file is removed from the active parameter file list."),
+		file);
+	wNoticeEx(NT_ERROR, DynStringToCStr(&error_msg), "OK", NULL);
+	DynStringFree(&error_msg);
+}
 
 
 /**
@@ -206,27 +223,29 @@ void LoadParamFileList(void)
         	wPrefSetString("Parameter File Map", contents, fileName);
         }
 
-        ReadParamFile(fileName);
+		if (ReadParamFile(fileName) >= 0) {
 
-        if (curContents == NULL) {
-            curContents = curSubContents = MyStrdup(contents);
-        }
-        paramFileInfo(curParamFileIndex).contents = curContents;
-        if (favoriteList && fileNo == favoriteList[nextFavorite]) {
-            DynString topic;
-            long deleted;
-            DynStringMalloc(&topic, 16);
-            DynStringPrintf(&topic, FAVORITEDELETED, fileNo);
+			if (curContents == NULL) {
+				curContents = curSubContents = MyStrdup(contents);
+			}
+			paramFileInfo(curParamFileIndex).contents = curContents;
+			if (favoriteList && fileNo == favoriteList[nextFavorite]) {
+				DynString topic;
+				long deleted;
+				DynStringMalloc(&topic, 16);
+				DynStringPrintf(&topic, FAVORITEDELETED, fileNo);
 
-            wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &deleted, 0L);
-            paramFileInfo(curParamFileIndex).favorite = TRUE;
-            paramFileInfo(curParamFileIndex).deleted = deleted;
-            if (nextFavorite < favorites - 1) {
-                nextFavorite++;
-            }
-            DynStringFree(&topic);
-        }
-
+				wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &deleted, 0L);
+				paramFileInfo(curParamFileIndex).favorite = TRUE;
+				paramFileInfo(curParamFileIndex).deleted = deleted;
+				if (nextFavorite < favorites - 1) {
+					nextFavorite++;
+				}
+				DynStringFree(&topic);
+			}
+		} else {
+			ReadParamError(fileName);
+		}
     }
     curParamFileIndex = PARAM_CUSTOM;
     if (updated) {
@@ -285,6 +304,8 @@ UpdateParamFileList(void)
     }
 }
 
+
+
 /**
  * Load the selected parameter files. This is a callback executed when the file selection dialog
  * is closed.
@@ -322,18 +343,21 @@ int LoadParamFile(
         curContents = curSubContents = NULL;
 
         newIndex = ReadParamFile(fileName[i]);
+		if (newIndex >= 0) {
+			// in case the contents is already present, make invalid
+			for (inx = 0; inx < newIndex; inx++) {
+				if (paramFileInfo(inx).valid &&
+					strcmp(paramFileInfo(inx).contents, curContents) == 0) {
+					paramFileInfo(inx).valid = FALSE;
+					break;
+				}
+			}
 
-        // in case the contents is already present, make invalid
-        for (inx = 0; inx < newIndex; inx++) {
-            if (paramFileInfo(inx).valid &&
-                    strcmp(paramFileInfo(inx).contents, curContents) == 0) {
-                paramFileInfo(inx).valid = FALSE;
-                break;
-            }
-        }
-
-        wPrefSetString("Parameter File Map", curContents,
-                       paramFileInfo(curParamFileIndex).name);
+			wPrefSetString("Parameter File Map", curContents,
+				paramFileInfo(curParamFileIndex).name);
+		} else {
+			ReadParamError(fileName[i]);
+		}
     }
     //Only set the ParamFileDir if not the system directory
     if (!strstr(fileName[i-1],"/share/xtrkcad/params/"))
