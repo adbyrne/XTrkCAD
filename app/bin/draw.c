@@ -1427,6 +1427,8 @@ EXPORT void MainRedraw( void )
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
 	}
+	DrawSnapGrid( &mainD, mapD.size, TRUE );
+
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER/mainD.dpi*mainD.scale;
@@ -1435,9 +1437,9 @@ EXPORT void MainRedraw( void )
 	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
 	DrawTracks( &mainD, mainD.scale, orig, size );
 
-	DrawRoomWalls( FALSE );
+	DrawRoomWalls( FALSE );  //No background, just rulers
+
 	currRedraw++;
-	DrawSnapGrid( &mainD, mapD.size, TRUE );
 
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
