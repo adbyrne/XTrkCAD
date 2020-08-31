@@ -341,6 +341,7 @@ STATUS_T DrawGeomMouse(
 			segCnt = 0;
 			anchors_da.cnt = 0;
 			context->State = 0;
+			TryCheckPoint();
 		}
 		context->Started = TRUE;
 		line_angle = 90.0;

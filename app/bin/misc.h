@@ -251,6 +251,7 @@ const char * GetBalloonHelpStr( char* );
 const char * GetCurCommandName( void );
 void EnableCommands( void );
 void Reset( void );
+void TryCheckPoint( void );
 wIndex_t GetCurrentCommand(void);
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
