@@ -212,33 +212,33 @@ static paramGroup_t aboutPG = { "about", 0, aboutPLs, sizeof aboutPLs/sizeof abo
  *	Create and show the About window.
  */
 
-void CreateAboutW( void *ptr )
+void CreateAboutW(void *ptr)
 {
 	char *copyright = sAboutProd;
-	
-	if( !aboutW ) {
-		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap( xtc_xpm );
-		ParamRegister( &aboutPG );
-		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, wHide, FALSE, NULL, F_TOP|F_CENTER, NULL );
-		ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
-		wTextAppend( COPYRIGHT_T, DESCRIPTION );
-		wTextAppend( COPYRIGHT_T, "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards." );
-		wTextAppend( COPYRIGHT_T, "\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)");
+
+	if (!aboutW) {
+		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_xpm);
+		ParamRegister(&aboutPG);
+		aboutW = ParamCreateDialog(&aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, wHide, FALSE, NULL, F_TOP | F_CENTER, NULL);
+		ParamLoadMessage(&aboutPG, I_ABOUTVERSION, sAboutProd);
+		wTextAppend(COPYRIGHT_T, DESCRIPTION);
+		wTextAppend(COPYRIGHT_T, "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards.");
+		wTextAppend(COPYRIGHT_T, "\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)");
 		wTextAppend(COPYRIGHT_T, "\nSome icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License.");
-		wTextAppend( COPYRIGHT_T, "\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Daniel Luis Spagnol" );
-		wTextAppend( COPYRIGHT_T, "\nParameter Files by: Ralph Boyd, Dwayne Ward" );
+		wTextAppend(COPYRIGHT_T, "\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Daniel Luis Spagnol");
+		wTextAppend(COPYRIGHT_T, "\nParameter Files by: Ralph Boyd, Dwayne Ward");
 #ifdef WINDOWS
 		wTextAppend(COPYRIGHT_T, "\n");
 		wTextAppend(COPYRIGHT_T, FreeImage_GetCopyrightMessage());
 #endif
-		wTextAppend( COPYRIGHT_T, "\nCornu Algorithm and Implementation by: Raph Levien");
-		wTextAppend( COPYRIGHT_T, "\nuthash Copyright notice:" );
-		wTextAppend( COPYRIGHT_T, "\nCopyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/");
-		wTextAppend( COPYRIGHT_T, "\nAll rights reserved.");
-	} 
-		
-	wShow( aboutW );
-}	
+		wTextAppend(COPYRIGHT_T, "\nCornu Algorithm and Implementation by: Raph Levien");
+		wTextAppend(COPYRIGHT_T, "\nuthash, utlist Copyright notice:");
+		wTextAppend(COPYRIGHT_T, "\nCopyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/");
+		wTextAppend(COPYRIGHT_T, "\nAll rights reserved.");
+	}
+
+	wShow(aboutW);
+}
 
 /*--------------------------------------------------------------------*/
 

@@ -6,10 +6,12 @@
 	typedef struct {
 		char * name;				/** < name of parameter file */
 		char * contents;
-		bool deleted;
-		bool valid;					/** < FALSE for dropped file */
+		int deleted;
+		int deletedShadow;
+		int valid;					/** < FALSE for dropped file */
 		bool favorite;
 		enum paramFileState trackState;
+		enum paramFileState structureState;
 	} paramFileInfo_t;
 	typedef paramFileInfo_t * paramFileInfo_p;
 
@@ -18,12 +20,15 @@
 	char *GetParamFileDir(void);
 	void SetParamFileDir(char *fullPath);
 	void LoadParamFileList(void);
-	BOOL_T ReadDefaultParams(const char * dirName);
+	//BOOL_T ReadDefaultParams(const char * dirName);
 	void SaveParamFileList(void);
 	int GetParamFileCount();
 	void UpdateParamFileList(void);
 	void ParamFilesChange(long changes);
 	int LoadParamFile(int files, char ** fileName, void * data);
+//	void InitializeParamDir(void);
+	void ParamFileListConfirmChange(void);
+	void ParamFileListCancelChange(void);
 	BOOL_T ParamFileListInit(void);
 
 	void SearchUiOk(void * junk);
