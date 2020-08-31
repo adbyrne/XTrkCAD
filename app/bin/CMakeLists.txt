@@ -117,6 +117,7 @@ SET(SOURCES
 	filenoteui.c
 	i18n.c
 	layout.c
+	levenshtein.c
 	linknoteui.c
 	lprintf.c
 	macro.c
@@ -164,6 +165,7 @@ set (SOURCES
 	include/dirent.h
 	include/paramfile.h
 	include/paramfilelist.h
+	include/partcatalog.h
 )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
