@@ -673,7 +673,7 @@ static void ChkRevert(void)
         if (rc) {
             /* load the file */
             char *filename = GetLayoutFullPath();
-            LoadTracks(1, &filename, NULL);
+            LoadTracks(1, &filename, (void*)1);   //Keep background
         }
     }
 }
@@ -1032,6 +1032,23 @@ EXPORT wIndex_t GetCurrentCommand() {
 
 static wIndex_t autosave_count = 0;
 
+EXPORT void TryCheckPoint() {
+	if (checkPtInterval > 0
+				&& changed >= checkPtMark + (wIndex_t) checkPtInterval
+				&& !inPlayback) {
+			DoCheckPoint();
+			checkPtMark = changed;
+
+			autosave_count++;
+
+			if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
+				DoSave(NULL);
+				InfoMessage(_("File AutoSaved"));
+				autosave_count = 0;
+			}
+		}
+}
+
 EXPORT void Reset(void) {
 	if (recordF) {
 		fprintf(recordF, "RESET\n");
@@ -1052,22 +1069,8 @@ EXPORT void Reset(void) {
 				(wButton_p) buttonList[commandList[curCommand].buttInx].control,
 				TRUE);
 	tempSegs_da.cnt = 0;
-	if (checkPtInterval > 0
-			&& changed >= checkPtMark + (wIndex_t) checkPtInterval
-			&& !inPlayback) {
-		DoCheckPoint();
-		checkPtMark = changed;
 
-		autosave_count++;
-
-		if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
-			DoSave(NULL);
-			InfoMessage(_("File AutoSaved"));
-			autosave_count = 0;
-		}
-	}
-
-
+	TryCheckPoint();
 
 	ClrAllTrkBits( TB_UNDRAWN );
 	DoRedraw(); // Reset
@@ -1238,6 +1241,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}
+		//Make sure we checkpoint even sticky commands
+		TryCheckPoint();
 		LOG(log_command, 1,
 				( "COMMAND START %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_START, pos);
@@ -3090,7 +3095,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	resumeWork = FALSE;
 	if (ExistsCheckpoint()) {
 		resumeWork = OfferCheckpoint();
-		MainRedraw();
 	}
 
 	if (!resumeWork) {
@@ -3101,15 +3105,17 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
 			bExample = (iExample == 1);
 		}
-
 		if (initialFile && strlen(initialFile)) {
-			DoFileList(0, NULL, initialFile);   //Will load Background values, if archive
+			DoFileList(0, "1", initialFile);   //Will load Background values, if archive, leave
 			if (onStartup == 1)
 				LayoutBackGroundInit(TRUE);     //Wipe Out Prior Background
 			else
 				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
-		}
+		} else
+			LayoutBackGroundInit(TRUE);     // If onStartup==1 and no initial file - Wipe Out Prior Background
+
 	}
+	MainRedraw();
 	inMainW = FALSE;
 	return mainW;
 }

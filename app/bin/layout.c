@@ -476,7 +476,7 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
-	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
+	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
