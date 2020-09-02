@@ -91,7 +91,7 @@ typedef struct {
 static layer_t layers[NUM_LAYERS];
 static layer_t *layers_save = NULL;
 
-static CatalogEntry * settingsCatalog;
+static Catalog * settingsCatalog;
 
 
 static int oldColorMap[][3] = {
@@ -585,9 +585,9 @@ static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof lay
  */
 
 static
-int LoadFileListLoad(CatalogEntry *catalog, char * name)
+int LoadFileListLoad(Catalog *catalog, char * name)
 {
-    CatalogEntry *currentEntry = catalog->next;
+    CatalogEntry *currentEntry = catalog->head;
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
 
@@ -1435,7 +1435,7 @@ GetNextSettingsFile(DIR *dir, const char *dirName, char **fileName)
  */
 
 static CatalogEntry *
-ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
+ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 {
     DIR *d;
 #if defined(WINDOWS)
@@ -1443,7 +1443,7 @@ ScanSettingsDirectory(CatalogEntry *catalog, const char *dirName)
 #else
 	#define PATH_SEPARATOR '/'
 #endif
-    CatalogEntry *newEntry = catalog;
+    CatalogEntry *newEntry = catalog->head;
     char contents[STR_SHORT_SIZE];
 
     d = opendir(dirName);
@@ -1476,8 +1476,8 @@ static void DoLayer(void * junk)
                                    LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
     }
 
-    if (settingsCatalog) EmptyCatalog(settingsCatalog);
-    else settingsCatalog = CreateCatalog();
+    if (settingsCatalog) CatalogDiscard(settingsCatalog);
+    else settingsCatalog = InitCatalog();
     ScanSettingsDirectory(settingsCatalog, wGetAppWorkDir());
 
 
