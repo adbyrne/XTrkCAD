@@ -307,14 +307,14 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 				elev = GetElevation(trk);
 				dist = GetTrkLength(trk,ep,-1);
 				if (dist>0.1)
-					sprintf( message, "%0.1f%%", fabs(round((elev-elevX)/dist)*1000.0)/10.0 );
+					sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
 				else
 					sprintf( message, _("Undefined") );
 				if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
 					elev = GetElevation(trk1);
 					dist = GetTrkLength(trk1,ep1,-1);
 					if (dist>0.1)
-						sprintf( message+strlen(message), " - %0.1f%%", fabs(round((elev-elevX)/dist)*1000.0)/10.0 );
+						sprintf( message+strlen(message), " - %0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
 					else
 						sprintf( message+strlen(message), " - %s", _("Undefined") );
 				}

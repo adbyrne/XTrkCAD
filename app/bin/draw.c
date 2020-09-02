@@ -872,6 +872,8 @@ static void TempSegLine(
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE)
 		tempSegs(tempSegs_da.cnt-1).width = 0;
+	else if (width<0)
+		tempSegs(tempSegs_da.cnt-1).width = width;
 	else
 		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
 	tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = p0;
@@ -894,6 +896,8 @@ static void TempSegArc(
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE)
 		tempSegs(tempSegs_da.cnt-1).width = 0;
+	else if (width<0)
+		tempSegs(tempSegs_da.cnt-1).width = width;
 	else
 		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
 	tempSegs(tempSegs_da.cnt-1).u.c.center = p;
@@ -940,6 +944,8 @@ static void TempSegPoly(
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE)
 		tempSegs(tempSegs_da.cnt-1).width = 0;
+	else if (width<0)
+		tempSegs(tempSegs_da.cnt-1).width = width;
 	else
 		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
 	tempSegs(tempSegs_da.cnt-1).u.p.polyType = open?POLYLINE:FREEFORM;
@@ -1427,6 +1433,8 @@ EXPORT void MainRedraw( void )
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
 	}
+	DrawSnapGrid( &mainD, mapD.size, TRUE );
+
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER/mainD.dpi*mainD.scale;
@@ -1435,9 +1443,9 @@ EXPORT void MainRedraw( void )
 	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
 	DrawTracks( &mainD, mainD.scale, orig, size );
 
-	DrawRoomWalls( FALSE );
+	DrawRoomWalls( FALSE );  //No background, just rulers
+
 	currRedraw++;
-	DrawSnapGrid( &mainD, mapD.size, TRUE );
 
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();

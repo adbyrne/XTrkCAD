@@ -54,6 +54,9 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \G{png.d/mdrawcircles.png}
 
+Before a Circle is drawn its line width and color can be set. For Filled Circles, the color can be set.
+The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
 \f{Circles} and \f{Filled Circles} are created by selecting either the center position or a point on the edge of the circle and dragging to specify the radius.
 
 \dd \K{cmdDrawCircleTangent}. Draw a Circle from the Edge.
@@ -107,6 +110,9 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 \S{cmdDrawCurves} Curved Lines
 
 \G{png.d/mdrawcurve.png}
+
+Before a Curved Line is created, its width and color can be set. 
+The \f{Curved Line Width} or \f{Bezier Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
 
 \f{Curved Lines} are created in the same manner as curved tracks.
 
@@ -314,7 +320,6 @@ Shapes are drawn by:
 \u000
 
 
-
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \c{Space} or \c{Return} or by selecting a new operation.
 
 The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \c{Space} or \c{Return} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
@@ -327,6 +332,9 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 \S2{cmdDrawBox} Draw Box
 
 \G{png.d/dbox.png}
+
+Before the box is drawn, the line width and color can be specified. 
+The \f{Box Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
 
 \f{Boxes} are created by selecting one corner and dragging the opposite corner.
 
@@ -348,6 +356,9 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 
 \G{png.d/dpoly.png}
 
+Before the polygon is started the line width and color can be set. 
+The \f{PolyGon Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
 \f{Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
 When using \c{Left-drag}, the node will be positioned when you release the button.
 
@@ -368,9 +379,11 @@ On the first polygon side this will be at a multiple of 90 degrees to the axes. 
 
 \rule
 
-\S2{cmdDrawFilledPolygon} Drae Filled Polygon
+\S2{cmdDrawFilledPolygon} Draw Filled Polygon
 
 \G{png.d/dfilbox.png}
+
+Before the Polygon is started, the fill color can be set.
 
 \f{Filled Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
 When using \c{Left-drag}, the node will be positioned when you release the button.
@@ -399,6 +412,9 @@ On the first polygon side this will be at a multiple of 90 degrees to the axes. 
 \S2{cmdDrawPolyline} Draw PolyLine
 
 \G{png.d/dpolyline} 
+
+Before the polygon is started the line width and color can be set. 
+The \f{Polyline Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
 
 \f{PolyLines} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
 When using \c{left-drag}, the node will be positioned when you release the button.
@@ -452,7 +468,10 @@ Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.
 
 \S2{cmdDrawLine} Draw Straight Line
 
-\G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
+\G{png.d/dline.png} 
+
+Creates a \f{Straight Line} of specified color and width.
+The \f{Straight Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
 
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
 
@@ -461,6 +480,8 @@ before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by se
 
 With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
 If it is diabled, it will onlt snap if \e{Shift} is held.
+
+The \f{Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
 
 \rule
 

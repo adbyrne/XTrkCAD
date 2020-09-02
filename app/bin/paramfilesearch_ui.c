@@ -2,7 +2,7 @@
  * Parameter File Search Dialog
  */
 
-/*  XTrkCad - Model Railroad CAD
+/*  XTrackCAD - Model Railroad CAD
  *  Copyright (C) 2019 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -36,22 +36,19 @@
 #include "include/paramfilelist.h"
 #include "fileio.h"
 #include "directory.h"
+#include "wlib.h"
 
-#include "bitmaps/magnifier.xpm"
-
-static CatalogEntry *catalogFileBrowse;		/**< current search results */
-static TrackLibrary *trackLibrary;			/**< Track Library          */
-static CatalogEntry *currentCat;			/**< catalog being shown    */
+static ParameterLib *trackLibrary;			/**< Track Library          */
+static Catalog *currentCat;					/**< catalog being shown    */
+static SearchResult *currentSearch;			/**< current search results */
 
 /* define the search / browse dialog */
 
-static struct wFilSel_t *searchUi_fs;		/**< searchdialog for parameter files */
-
-static void SearchUiBrowse(void *junk);
-static void SearchUiDefault(void * junk);
+static void SearchUiDefault(void);
 static void SearchUiApply(wWin_p junk);
 static void SearchUiSelectAll(void *junk);
 static void SearchUiDoSearch(void *junk);
+static void SearchUiClearFilter(void *ptr);
 
 static long searchUiMode = 0;
 static paramListData_t searchUiListData = { 10, 370, 0 };
@@ -59,30 +56,37 @@ static paramListData_t searchUiListData = { 10, 370, 0 };
 static char searchUiQuery[MAXQUERYLENGTH];
 static char * searchUiLabels[] = { N_("Show File Names"), NULL };
 
+#define QUERYPROMPTSTRING "Enter at least one search word"
+
 static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
-    { PD_STRING, searchUiQuery, "query", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)(340), "", 0, 0, MAXQUERYLENGTH-1 },
+    { PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGRESIZE, (void*)(340), "", 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
     { PD_BUTTON, (void*)SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
-#define I_MESSAGE (2)
-    { PD_MESSAGE, N_("Enter at least one search word"), NULL, PDO_DLGBOXEND, (void *)370 },
-#define I_RESULTLIST	(3)
+#define I_CLEARBUTTON (2)
+    { PD_BUTTON, (void*)SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
+#define I_MESSAGE (3)
+    { PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, (void *)370 },
+#define I_STATISTICS (4)
+    { PD_MESSAGE, "", NULL, PDO_DLGBOXEND, (void *)370 },
+#define I_RESULTLIST	(5)
     {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
-#define I_MODETOGGLE	(4)
+#define I_MODETOGGLE	(6)
     {	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_APPLYBUTTON	(5)
+#define I_APPLYBUTTON	(7)
     {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
-#define I_SELECTALLBUTTON (6)
+#define I_SELECTALLBUTTON (8)
     {	PD_BUTTON, (void*)SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
-	{	PD_BUTTON, (void*)SearchUiDefault, "default", 0, NULL, N_("Reload Library") },
 };
 
 #define SEARCHBUTTON ((wButton_p)searchUiPLs[I_SEARCHBUTTON].control)
+#define CLEARBUTTON ((wButton_p)searchUiPLs[I_CLEARBUTTON].control)
 #define RESULTLIST	 ((wList_p)searchUiPLs[I_RESULTLIST].control)
 #define APPLYBUTTON  ((wButton_p)searchUiPLs[I_APPLYBUTTON].control)
 #define SELECTALLBUTTON  ((wButton_p)searchUiPLs[I_SELECTALLBUTTON].control)
 #define MESSAGETEXT ((wMessage_p)searchUiPLs[I_MESSAGE].control)
 #define QUERYSTRING ((wString_p)searchUiPLs[I_QUERYSTRING].control)
+#define SEARCHSTAT ((wMessage_p)searchUiPLs[I_STATISTICS].control)
 
 static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
 static wWin_p searchUiW;
@@ -91,35 +95,38 @@ static wWin_p searchUiW;
 #define PARAMDIRECTORY "paramdir"
 
 /**
- * Reload the listbox showing the current catalog
+ * Reload the listbox showing the current catalog. The catalog is either the system
+ * default library catalog or a search result
+ *
+ * \param [in] catalog the current catalog.
  */
 
 static
-void SearchFileListLoad(CatalogEntry *catalog)
+void SearchFileListLoad(Catalog *catalog)
+
 {
-    CatalogEntry *currentEntry = catalog->next;
+    CatalogEntry *head = catalog->head;
+    CatalogEntry *catalogEntry;
+
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
 
     wControlShow((wControl_p)RESULTLIST, FALSE);
     wListClear(RESULTLIST);
 
-    while (currentEntry != currentEntry->next) {
-        for (unsigned int i=0;i<currentEntry->files;i++) {
-        	DynStringClear(&description);
-			DynStringCatCStr(&description,
-							 ((!searchUiMode) && currentEntry->contents) ?
-							 currentEntry->contents :
-							 currentEntry->fullFileName[i]);
+    DL_FOREACH(head, catalogEntry) {
+        for (unsigned int i=0; i<catalogEntry->files; i++) {
+            DynStringClear(&description);
+            DynStringCatCStr(&description,
+                             ((!searchUiMode) && catalogEntry->contents) ?
+                             catalogEntry->contents :
+                             catalogEntry->fullFileName[i]);
 
-			wListAddValue(RESULTLIST,
-						  DynStringToCStr(&description),
-						  NULL,
-						  //		indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
-						  (void*)currentEntry->fullFileName[i]);
+            wListAddValue(RESULTLIST,
+                          DynStringToCStr(&description),
+                          NULL,
+                          (void*)catalogEntry->fullFileName[i]);
         }
-
-        currentEntry = currentEntry->next;
     }
 
     wControlShow((wControl_p)RESULTLIST, TRUE);
@@ -132,50 +139,23 @@ void SearchFileListLoad(CatalogEntry *catalog)
 }
 
 /**
- * Find parameter files using the file selector
- *
- * \param junk
- */
-
-static void SearchUiBrowse(void * junk)
-{
-
-	//EmptyCatalog(catalogFileBrowse);
-
-    wFilSelect(searchUi_fs, GetParamFileDir());
-
-    //SearchFileListLoad(catalogFileBrowse);
-
-    return;
-}
-
-
-/**
  * Reload just the system files into the searchable set
  */
 
-static void SearchUiDefault(void * junk)
+static void SearchUiDefault()
 {
+	DynString dsSummary;
 
-	if (!catalogFileBrowse)
-		catalogFileBrowse = InitCatalog();
-	else {
-		EmptyCatalog(catalogFileBrowse);
-	}
+    SearchFileListLoad(trackLibrary->catalog);  //Start with system files
+	wStringSetValue(QUERYSTRING, "");
 
-	if (trackLibrary)
-		DeleteLibrary(trackLibrary);
+	wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
+	DynStringMalloc(&dsSummary, 16);
+	DynStringPrintf(&dsSummary, _("%u parameter files in library."), CountCatalogEntries(trackLibrary->catalog));
+	wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
+	DynStringFree(&dsSummary);
 
-	char * parms_path;
-
-	MakeFullpath(&parms_path, wGetAppLibDir(), "params", NULL);
-
-	trackLibrary = CreateLibrary(parms_path);
-
-	SearchFileListLoad(trackLibrary->catalog);  //Start with system files
-
-	free(parms_path);
-
+	wControlActive((wControl_p)CLEARBUTTON, FALSE);
 }
 
 /**
@@ -185,12 +165,12 @@ static void SearchUiDefault(void * junk)
 void static
 SearchUILoadResults(void)
 {
-    char **fileNames;
     int files = wListGetSelectedCount(RESULTLIST);
-    int found = 0;
 
     if (files) {
-        fileNames = malloc(sizeof(char *)*files);
+        char **fileNames;
+        int found = 0;
+        fileNames = MyMalloc(sizeof(char *)*files);
         if (!fileNames) {
             AbortProg("Couldn't allocate memory for result list: %s (%d)", __FILE__,
                       __LINE__, NULL);
@@ -198,12 +178,12 @@ SearchUILoadResults(void)
 
         for (int inx = 0; found < files; inx++) {
             if (wListGetItemSelected(RESULTLIST, inx)) {
-            	fileNames[found++] = (char *)wListGetItemContext(RESULTLIST, inx);
+                fileNames[found++] = (char *)wListGetItemContext(RESULTLIST, inx);
             }
         }
 
         LoadParamFile(files, fileNames, NULL);
-        free(fileNames);
+        MyFree(fileNames);
         SearchUiOk((void *) 0);
     }
 
@@ -227,62 +207,91 @@ static void UpdateSearchUiButton(void)
     wControlActive((wControl_p)SELECTALLBUTTON, cnt > 0);
 }
 
-// Return a pointer to the (shifted) trimmed string
+/**
+ * Return a pointer to the (shifted) trimmed string
+ *
+ * \param [in,out] s If non-null, a char to process.
+ *
+ * \returns pointer to the trimmed string
+ */
+
 char * StringTrim(char *s)
 {
-  char *original = s;
-  size_t len = 0;
+    char *original = s;
+    size_t len = 0;
 
-  while (isspace((unsigned char) *s)) {
-    s++;
-  }
-  if (*s) {
-    char *p = s;
-    while (*p) p++;
-    while (isspace((unsigned char) *(--p)));
-    p[1] = '\0';
-    len = (size_t) (p - s + 1);
-  }
+    while (isspace((unsigned char) *s)) {
+        s++;
+    }
+    if (*s) {
+        char *p = s;
+        while (*p) {
+            p++;
+        }
+        while (isspace((unsigned char) *(--p)));
+        p[1] = '\0';
+        len = (size_t)(p - s + 1);
+    }
 
-  return (s == original) ? s : memmove(original, s, len + 1);
+    return (s == original) ? s : memmove(original, s, len + 1);
 }
 
 /**
  * Perform the search. If successful, the results are loaded into the list
  *
- * \param ptr INignored
+ * \param [in,out] ptr ignored.
  */
 
 static void SearchUiDoSearch(void * ptr)
 {
     unsigned result;
-
+    SearchResult *currentResults = MyMalloc(sizeof(SearchResult));
     char * search;
 
     search = StringTrim(searchUiQuery);
 
-    if (catalogFileBrowse) {
-    	EmptyCatalog(catalogFileBrowse);
-    } else
-    	catalogFileBrowse = InitCatalog();
+    if (currentSearch) {
+		SearchDiscardResult(currentSearch);
+		MyFree((void *)currentSearch);
+    } 
 
-    result = SearchLibrary(trackLibrary, search, catalogFileBrowse);
+	if (search[0]) {
+		result = SearchLibrary(trackLibrary, search, currentResults);
 
-    if (result) {
-        DynString hitsMessage;
-        DynStringMalloc(&hitsMessage, 16);
-        DynStringPrintf(&hitsMessage, _("%d parameter files found."), result);
-        wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
-        DynStringFree(&hitsMessage);
+		if (result) {
+			DynString hitsMessage;
+			char *statistics;
+			DynStringMalloc(&hitsMessage, 16);
+			DynStringPrintf(&hitsMessage, _("%d parameter files found."), result);
+			wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
+			DynStringFree(&hitsMessage);
 
-        SearchFileListLoad(catalogFileBrowse);
+			statistics = SearchStatistics(currentResults);
+			wMessageSetValue(SEARCHSTAT, statistics);
+			MyFree(statistics);
 
-    } else {
+			SearchFileListLoad(&(currentResults->subCatalog));
+			wControlActive((wControl_p)CLEARBUTTON, TRUE);
+		} else {
+			wListClear(RESULTLIST);
+			wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
+			wMessageSetValue(MESSAGETEXT, _("No matches found."));
+		}
+	} else {
+		SearchUiDefault();
+	}
+}
 
-        wListClear(RESULTLIST);
-        wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
-        wMessageSetValue(MESSAGETEXT, _("No matches found."));
-    }
+/**
+ * Clear the current filter
+ *
+ * \param [in,out] ptr ignored
+ */
+
+static void
+SearchUiClearFilter(void *ptr)
+{
+	SearchUiDefault();
 }
 
 /**
@@ -323,7 +332,7 @@ static void SearchUiApply(wWin_p junk)
 }
 
 /**
- * Event handling for the Search dialog. If the 'X' decoration is pressed the 
+ * Event handling for the Search dialog. If the 'X' decoration is pressed the
  * dialog window is closed.
  *
  * \param pg IN ignored
@@ -337,20 +346,26 @@ static void SearchUiDlgUpdate(
     void * valueP)
 {
     switch (inx) {
+    case I_QUERYSTRING:
+    	if (pg->paramPtr[inx].enter_pressed) {
+    		strcpy( searchUiQuery, wStringGetValue((wString_p)pg->paramPtr[inx].control) );
+    		SearchUiDoSearch(NULL);
+    	}
+    	break;
     case I_RESULTLIST:
         UpdateSearchUiButton();
         break;
     case I_MODETOGGLE:
         SearchFileListLoad(currentCat);
         break;
-	case -1:
-		SearchUiOk(valueP);
-		break;
+    case -1:
+        SearchUiOk(valueP);
+        break;
     }
 }
 
 /**
- * Get the system default directory for parameter files. First step is to 
+ * Get the system default directory for parameter files. First step is to
  * check the configuration file for a user specific setting. If that is not
  * found, the diretory is based derived from the installation directory.
  * The returned string has to be free'd() when no longer needed.
@@ -361,17 +376,21 @@ static void SearchUiDlgUpdate(
 static char *
 GetParamsPath()
 {
-	char * params_path;
-	char *params_pref;
-	params_pref = wPrefGetString(FILESECTION, PARAMDIRECTORY);
+    char * params_path;
+    char *params_pref;
+    params_pref = wPrefGetString(FILESECTION, PARAMDIRECTORY);
 
-	if (!params_pref) {
-		MakeFullpath(&params_path, wGetAppLibDir(), "params", NULL);
-	} else {
-		params_path = strdup(params_pref);
-	}
-	return(params_path);
+    if (!params_pref) {
+        MakeFullpath(&params_path, wGetAppLibDir(), "params", NULL);
+    } else {
+        params_path = strdup(params_pref);
+    }
+    return (params_path);
 }
+
+#include "bitmaps/funnel.xpm"
+#include "bitmaps/funnelclear.xpm"
+
 /**
  * Create and open the search dialog.
  *
@@ -381,29 +400,24 @@ GetParamsPath()
 void DoSearchParams(void * junk)
 {
     if (searchUiW == NULL) {
-        catalogFileBrowse = InitCatalog();
 
         //Make the Find menu bound to the System Library initially
-		char *paramsDir = GetParamsPath();
+        char *paramsDir = GetParamsPath();
         trackLibrary = CreateLibrary(paramsDir);
-		free(paramsDir);
+        free(paramsDir);
 
-        searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(magnifier_xpm);
+        searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(funnel_xpm);
+        searchUiPLs[I_CLEARBUTTON].winLabel = (char *)wIconCreatePixMap(
+                funnelclear_xpm);
 
         ParamRegister(&searchUiPG);
 
         searchUiW = ParamCreateDialog(&searchUiPG,
                                       MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, wHide,
                                       TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
-		if (trackLibrary) {
-			SearchFileListLoad(trackLibrary->catalog);  //Start with system files
-		}
+
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
-
-        searchUi_fs = wFilSelCreate(searchUiW, FS_LOAD, FS_MULTIPLEFILES,
-                                    _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), GetParameterFileInfo,
-                                    (void *)catalogFileBrowse);
     }
 
     ParamLoadControls(&searchUiPG);
@@ -415,11 +429,9 @@ void DoSearchParams(void * junk)
         wMessageSetValue(MESSAGETEXT,
                          _("No system parameter files found, search is disabled."));
     } else {
-        wStringSetValue(QUERYSTRING, "");
-
-        SearchFileListLoad(trackLibrary->catalog);  //Start with system files
-
+		SearchUiDefault();
     }
+
     wShow(searchUiW);
 }
 

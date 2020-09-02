@@ -23,6 +23,7 @@
 #ifndef HAVE_LAYOUT_H
 #define HAVE_LAYOUT_H
 
+#include <stdbool.h>
 #include "common.h"
 #include "misc.h"
 
@@ -63,6 +64,7 @@ coOrd GetLayoutBackGroundPos(void);
 ANGLE_T GetLayoutBackGroundAngle(void);
 int GetLayoutBackGroundScreen(void);
 int GetLayoutBackGroundVisible(void);
+bool HasBackGround(void);
 void LayoutBackGroundInit(BOOL_T clear);
 void LayoutBackGroundLoad(void);
 void LayoutBackGroundSave(void);

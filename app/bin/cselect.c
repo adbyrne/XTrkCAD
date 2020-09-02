@@ -53,6 +53,8 @@
 
 #define SETMOVEMODE "MOVEMODE"
 
+#define defaultCursor wCursorCross
+
 EXPORT wIndex_t selectCmdInx;
 EXPORT wIndex_t moveCmdInx;
 EXPORT wIndex_t rotateCmdInx;
@@ -128,6 +130,7 @@ void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len) {
 		anchors(i).u.l.pos[0] = pos;
 		Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a-135),len);
 		anchors(i).color = wDrawColorBlue;
+		wSetCursor(mainD.d,wCursorNone);
 }
 
 void static CreateRotateAnchor(coOrd pos) {
@@ -146,6 +149,16 @@ void static CreateRotateAnchor(coOrd pos) {
 		Translate(&head,pos,j*120,d*2);
 		CreateArrowAnchor(head,NormalizeAngle((j*120)+90),d);
 	}
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).width = d/8;
+	anchors(i).u.c.center = pos;
+	anchors(i).u.c.a0 = 180.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d/16;
+	anchors(i).color = wDrawColorAqua;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 void static CreateModifyAnchor(coOrd pos) {
@@ -168,6 +181,7 @@ void static CreateModifyAnchor(coOrd pos) {
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).u.c.radius = d;
 	anchors(i).color = wDrawColorPowderedBlue;
+	wSetCursor(mainD.d,wCursorNone);
 
 }
 
@@ -193,6 +207,7 @@ void CreateDescribeAnchor(coOrd pos) {
 		Translate(&anchors(i).u.l.pos[1],pos,180.0,d*1.5);
 		anchors(i).color = wDrawColorPowderedBlue;
 	}
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 void CreateActivateAnchor(coOrd pos) {
@@ -218,6 +233,7 @@ void CreateActivateAnchor(coOrd pos) {
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).u.c.radius = d;
 	anchors(i).color = wDrawColorPowderedBlue;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 void static CreateMoveAnchor(coOrd pos) {
@@ -225,6 +241,7 @@ void static CreateMoveAnchor(coOrd pos) {
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,wDrawColorBlue);
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 void CreateEndAnchor(coOrd p, wBool_t lock) {
@@ -1073,6 +1090,19 @@ static void RescaleDlgOk(
 	
 	rescaleToInx = GetScaleInx( rescaleToScaleInx, rescaleToGaugeInx );
 	DoSelectedTracks( RescaleDoIt );
+
+	// rescale the background if it exists and the layout is resized
+	if (HasBackGround() && ratio != 1.0) {
+		coOrd pos = GetLayoutBackGroundPos();
+		double size = GetLayoutBackGroundSize();
+		pos.x = ratio * pos.x + rescaleShift.x;
+		pos.y = ratio * pos.y + rescaleShift.y;
+		SetLayoutBackGroundPos(pos);
+
+		size *= ratio;
+		SetLayoutBackGroundSize(size);
+	}
+	DoRedraw();
 	wHide( rescalePG.win );
 }
 
@@ -2206,10 +2236,10 @@ static STATUS_T CmdRotate(
 			if ( state == 0 )
 				break;
 			if ( rotateAlignState != 2 ) {
-				DIST_T width = mainD.scale*0.5;
+				DIST_T width = tempD.scale*0.15;
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
 				if (drawnAngle) {
-					DrawLine( &tempD, orig_base, orig, (wDrawWidth)width, wDrawColorBlue );
+					DrawLine( &tempD, orig_base, orig, width/2, wDrawColorBlue );
 					ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
 
 					DIST_T dist = FindDistance(orig,base);
@@ -2987,12 +3017,13 @@ static STATUS_T CmdSelect(
 						CreateModifyAnchor(pos);
 						showMode = SHOWMODIFY;
 					} else {
-						if (QueryTrack(ht,Q_IS_ACTIVATEABLE))
+						if (QueryTrack(ht,Q_IS_ACTIVATEABLE)) {
 							CreateActivateAnchor(pos);
 							showMode = SHOWACTIVATE;
+						} else wSetCursor(mainD.d,defaultCursor);
 					}
-				}
-			}
+				} else wSetCursor(mainD.d,defaultCursor);
+			} else wSetCursor(mainD.d,defaultCursor);
 		}
 		break;
 
@@ -3282,6 +3313,7 @@ static STATUS_T CmdSelect(
 	case C_FINISH:
 		if (doingMove) UndoEnd();
 		doingDouble = FALSE;
+		wSetCursor(mainD.d,defaultCursor);
 		break;
 	default:
 		if (doingDouble) return CallModify(action, pos);
