@@ -590,7 +590,10 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	coOrd off;
 	switch ( inx ) {
 	case LW:
-		segPtr->width = drawData.lineWidth/mainD.dpi;
+		if (drawData.lineWidth<0)
+			segPtr->width = drawData.lineWidth;
+		else
+			segPtr->width = drawData.lineWidth/mainD.dpi;
 		break;
 	case CO:
 		segPtr->color = drawData.color;
@@ -1064,7 +1067,10 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawData.color = segPtr->color;
 	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
-	drawData.lineWidth = (long)floor(segPtr->width*mainD.dpi+0.5);
+	if (drawData.lineWidth<0)
+		drawData.lineWidth = (long)segPtr->width;
+	else
+		drawData.lineWidth = (long)floor(segPtr->width*mainD.dpi+0.5);
 	drawDesc[LW].mode = 0;
 	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
@@ -1424,7 +1430,7 @@ static drawModContext_t drawModCmdContext = {
 
 static BOOL_T infoSubst = FALSE;
 
-static paramIntegerRange_t i0_100 = { 0, 100, 25 };
+static paramIntegerRange_t i100_100 = { -100, 100, 25 };  //Allow negative numbers
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r10000_10000 = {-10000, 10000};
@@ -2476,7 +2482,7 @@ static wDrawColor benchColor;
 
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
-	{ PD_LONG, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &i0_100, N_("Line Width") },
+	{ PD_LONG, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &i100_100, N_("Line Width") },
 #define drawColorPD				(drawPLs[1])
 	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchColorPD		(drawPLs[2])

@@ -1217,7 +1217,7 @@ Some fields are used by multiple types of objects - these are listed below
 \dt Line Width
 
 \dd The width of the line for a line, curve or unfilled object can be set. 0 means a pixel width at all scales.
-Other values are the width of the line in scale units.
+Other values are the width of the line in scale units. If the value is negative, it is the absolute value of pixels wide at all scales.
 
 \dt Lock
 
