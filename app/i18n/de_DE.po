@@ -12287,7 +12287,7 @@ msgstr ""
 
 #: ../../../../build/work/app/i18n/custmsg.h:483
 msgid " \n"
-msgstr " \\n"
+msgstr " \n"
 
 #. i18n:
 #. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:39
