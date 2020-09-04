@@ -1,0 +1,26 @@
+#!/bin/sh
+INSTALLDIR=/usr/local/share/xtrkcad
+
+# mimetype for .xtc files is application/x-xtrkcad
+xdg-mime install --novendor ${INSTALLDIR}/applications/xtrkcad.xml
+
+# default handler for application/x-xtrkcad is xtrkcad
+xdg-mime default ${INSTALLDIR}/applications/xtrkcad.desktop application/x-xtrkcad
+
+# add XTrkCad to system menu
+xdg-desktop-menu install --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+
+# set file brower icon
+xdg-icon-resource install --context mimetypes --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png application-x-xtrkcad
+
+# set icon for desktop
+xdg-icon-resource install --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png xtrkcad
+
+# set desktop command
+xdg-desktop-icon install --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+
+if [ -f ${HOME}/Desktop/xtrkcad.desktop ] ; then
+	chmod 755 ${HOME}/Desktop/xtrkcad.desktop
+fi
+
+exit 0 
