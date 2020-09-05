@@ -41,6 +41,13 @@ A large font has been selected. Large fonts (or changing fonts sizes) may take a
 Refer to \k{cmdText} for detail.
 END
 
+#cdraw.c
+MESSAGE MSG_TEXT_TOO_LONG
+The entered text was too long for the text object. It was truncated.
+HELP
+Text objects are limited to about 10k characters.
+END
+
 # ctodesgn.c
 MESSAGE MSG_TODSGN_DESC_NONBLANK
 All description fields present in the Turnout
