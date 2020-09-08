@@ -180,7 +180,7 @@ static void DrawBezierDescription(
 				FormatDistance(xx->bezierData.length), FormatDistance(xx->bezierData.minCurveRadius>10000?0.0:xx->bezierData.minCurveRadius));
     DrawDimLine( d, xx->bezierData.pos[0], xx->bezierData.pos[3], message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
 
-    if ((labelEnable&LABELENABLE_DETAILS)!=0)
+    if (GetTrkBits( trk ) & TB_DETAILDESC)
     	AddTrkDetails(d, trk, pos, xx->bezierData.length, color);
 
 }

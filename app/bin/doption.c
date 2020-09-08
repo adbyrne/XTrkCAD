@@ -95,7 +95,7 @@ static char * drawEndPtLabels3[] = { N_("None"), N_("Turnouts"), N_("All"), NULL
 static char * drawEndPtUnconnectedSize[] = { N_("Normal"), N_("Thick"), N_("Exception"), NULL };
 static char * tiedrawLabels[] = { N_("None"), N_("Outline"), N_("Solid"), NULL };
 static char * drawCenterCircle[] = { N_("Off"), N_("On"), NULL };
-static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), N_("Extra Track Details"), NULL };
+static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
 static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
 static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
 static char * colorTrackLabels[] = { N_("Object"), N_("Layer"), NULL };
@@ -157,11 +157,6 @@ static void OptionDlgUpdate(
 	} else {
 		if (pg->paramPtr[inx].valueP == &labelEnable) {
 			long new_labels = wRadioGetValue( (wChoice_p)pg->paramPtr[inx].control );
-			if ((labelEnable&LABELENABLE_TRKDESC) && !(new_labels&LABELENABLE_TRKDESC))
-				new_labels &= ~LABELENABLE_DETAILS;		//Track Desc off -> turns off details
-			if (new_labels&LABELENABLE_DETAILS) 	{		//Make sure Trk Details on as well
-				new_labels |= LABELENABLE_TRKDESC;
-			}
 			labelEnable = new_labels;
 			ParamLoadControl(&displayPG,labelSelect);
 		}

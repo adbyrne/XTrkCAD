@@ -760,6 +760,34 @@ EXPORT coOrd GetJointSegEndPos(
 	return p1;
 }
 
+DIST_T JointDescriptionDistance(
+		coOrd pos,
+		track_p trk,
+		coOrd * dpos,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
+{
+	struct extraData *xx = GetTrkExtraData(trk);
+	coOrd p1;
+	if (hidden) *hidden = FALSE;
+	if ( GetTrkType( trk ) != T_EASEMENT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
+		return 100000;
+
+	ANGLE_T a;
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*trackGauge);
+	Translate(&end1off,end1,a+90,2*trackGauge);
+
+	p1.x = (end1off.x - end0off.x)/2 + end0off.x ;
+	p1.y = (end1off.y - end0off.y)/2 + end0off.y ;
+
+	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
+	*dpos = p1;
+	return FindDistance( p1, pos );
+}
 static void DrawJointDescription(
 		track_p trk,
 		drawCmd_p d,
@@ -776,7 +804,7 @@ static void DrawJointDescription(
 
 	if (layoutLabels == 0)
 		return;
-	if ((labelEnable&LABELENABLE_TRKDESC)==0)
+	if ((labelEnable&LABELENABLE_TRKDESC)==0 )
 		return;
 
 	coOrd end0, end0off, end1, end1off;
@@ -788,13 +816,16 @@ static void DrawJointDescription(
 	Translate(&end1off,end1,a+90,2*trackGauge);
 	DrawLine(d,end1,end1off,0,color);
 
+
 	sprintf( message, "Joint: L %s A %0.3f, l0 %s l1 %s R %s L %s",
 			FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1),
 			FormatDistance(xx->l0), FormatDistance(xx->l1), FormatDistance(xx->R), FormatDistance(xx->L));
 	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
 
+	pos.x = (end1.x-end0.x)/4+end0.x;
+	pos.y = (end1.y-end0.y)/4+end0.y;
 
-	if ((labelEnable&LABELENABLE_DETAILS)!=0) AddTrkDetails(d, trk, pos, xx->L, color);
+	if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, end0, FindDistance(end0,end1), color);
 
 
 }

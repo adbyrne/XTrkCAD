@@ -3469,7 +3469,7 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length, wDra
 		if (dist1 > 0 || tt.trk != trk || IsClose(FindDistance(tt.pos,GetTrkEndPos(trk,1)))) {
 			DYNARR_N(pos_angle_t,pos_array,i).pos = GetTrkEndPos(trk,1);
 			DYNARR_N(pos_angle_t,pos_array,i).angle = GetTrkEndAngle(trk,1);
-			pos_array.cnt = i+1;
+			pos_array.cnt = i;
 			break;
 		}
 		DYNARR_N(pos_angle_t,pos_array,i).pos = tt.pos;
@@ -3478,9 +3478,9 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length, wDra
 	message[0]='\0';
 	for (int i=0;i<pos_array.cnt;i++) {
 		if (i==pos_array.cnt-1)
-			sprintf( message, _("%s[%0.3f,%0.3f] A%0.3f"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
+			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
 		else
-			sprintf( message, _("%s[%0.3f,%0.3f] A%0.3f\n"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle);
+			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f\n"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle);
 	}
 	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,0.0);

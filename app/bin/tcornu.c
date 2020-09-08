@@ -230,7 +230,7 @@ static void DrawCornuDescription(
 			FormatDistance((xx->cornuData.minCurveRadius>=10000.00)?0.0:xx->cornuData.minCurveRadius));
     DrawDimLine( d, xx->cornuData.pos[0], xx->cornuData.pos[1], message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
 
-    if ((labelEnable&LABELENABLE_DETAILS)!=0) AddTrkDetails(d, trk, pos, xx->cornuData.length, color);
+    if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, pos, xx->cornuData.length, color);
 
 }
 

@@ -1094,7 +1094,7 @@ Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{En
 
 \G{png.d/bmovedes.png}
 
-This command is used to move Elevation, Grade, Station (\K{cmdElevation}), Curved Track (\K{cmdCurve}), Bezier, Cornu, Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
+This command is used to enable and move Elevation, Grade, Station (\K{cmdElevation}), Straight Track (\K{cmdStraight}), Curved Track (\K{cmdCurve}), Bezier (\K{cmdBezier}, Cornu (\K{cmdCornu}), Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
 
 The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item or the \f{Move Description} button.
 
@@ -1104,7 +1104,8 @@ Use \e{Left+Drag} to move the label to a new position and unhide if hidden. Once
 
 This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}).
 
-The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter"\f{s} will show a hidden description. There is a \f{Context Menu} Show/Hide Toggle as well.
+The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter "\f{s}" will show a hidden description. 
+The letter "\f{d}" will enable and disable detailed descriptions. There is a \f{Context Menu} Show/Hide Toggle as well.
 
 Note - existing defined elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElevation} command.
 

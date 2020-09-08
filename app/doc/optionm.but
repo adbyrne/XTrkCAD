@@ -189,7 +189,7 @@ Setting this option constrains the Main Canvas to minimize these areas (the \f{g
 
 \b \e{Lengths} - Length of flex-track attached to ends of turnouts.
 
-\b \e{Track Descriptions} - Title of each turnout and sectional track.
+\b \e{Track Descriptions} - Title of each turnout and sectional track, optional details of each piece of Flexible Track.
 
 \b \e{Track Elevations} - Computed elevations at the center of each track.
 

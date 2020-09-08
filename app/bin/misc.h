@@ -129,7 +129,6 @@ extern long programMode;
 #define LABELENABLE_ENDPT_ELEV	(1<<2)
 #define LABELENABLE_TRACK_ELEV	(1<<3)
 #define LABELENABLE_CARS		(1<<4)
-#define LABELENABLE_DETAILS     (1<<5)
 
 /*
  * Command Action
@@ -327,6 +326,11 @@ void InitNewTurn( wMenu_p m );
 
 /* cnote.c */
 void ClearNote( void );
+
+/* cprintc.c */
+coOrd GetPrintOrig();
+ANGLE_T GetPrintAngle();
+
 
 /* cruler.c */
 void RulerRedraw( BOOL_T );

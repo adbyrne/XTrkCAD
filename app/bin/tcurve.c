@@ -179,27 +179,30 @@ DIST_T CurveDescriptionDistance(
 		BOOL_T * hidden)
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	coOrd p1;
+	coOrd p0,p1,pd;
 	FLOAT_T ratio;
 	ANGLE_T a, a0, a1;
 	if (hidden) *hidden = FALSE;
-	if ( (GetTrkType( trk ) != T_CURVE )|| ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden))
+	if ( (GetTrkType( trk ) != T_CURVE ) || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden))
 		return 100000;
 	coOrd offset = xx->descriptionOff;
 	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) offset = zero;
+
 	if ( xx->helixTurns > 0 ) {
-		p1.x = xx->pos.x + offset.x;
-		p1.y = xx->pos.y + offset.y;
+		pd.x = xx->pos.x + offset.x;
+		pd.y = xx->pos.y + offset.y;
+		p0 = pd;
+		p1 = pd;
 	} else {
 		GetCurveAngles( &a0, &a1, trk );
-		ratio = ( offset.x + 1.0 ) / 2.0;
-		a = a0 + ratio * a1;
-		ratio = ( offset.y + 1.0 ) / 2.0;
-		Translate( &p1, xx->pos, a, xx->radius * ratio );
+		ratio = offset.x;
+		a = a0 + a1/2.0 + ratio * a1/ 2.0;
+		ratio = offset.y/2 + 0.5;
+		Translate( &pd, xx->pos, a, xx->radius * ratio );
 	}
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
-	*dpos = p1;
-	return FindDistance( p1, pos );
+	*dpos = pd;
+	return FindDistance( pd, pos );
 }
 
 
@@ -260,11 +263,11 @@ static void DrawCurveDescription(
 		Translate( &p1, xx->pos, 180.0, dist );
 		DrawLine( d, p0, p1, 0, color );
 		GetCurveAngles( &a0, &a1, trk );
-		ratio = ( xx->descriptionOff.x + 1.0 ) / 2.0;
-		a = a0 + ratio * a1;
+		ratio = xx->descriptionOff.x;   // 1.0 to - 1.0
+		a = ratio*a1/2.0 + a0 + a1/2.0;
 		PointOnCircle( &p0, xx->pos, xx->radius, a );
 		sprintf( message, "R %s", FormatDistance( xx->radius ) );
-		ratio = ( xx->descriptionOff.y + 1.0 ) / 2.0;
+		ratio = xx->descriptionOff.y/2 + 0.5;  // 1.0 to -1.0
 		DrawDimLine( d, xx->pos, p0, message, (wFontSize_t)descriptionFontSize, ratio, 0, color, 0x11 );
 		coOrd end0, end1;
 		DIST_T off;
@@ -279,7 +282,7 @@ static void DrawCurveDescription(
 		details_pos.x = (end1.x - end0.x)*0.5+end0.x;
 		details_pos.y = (end1.y - end0.y)*0.5+end0.y - descriptionFontSize/d->dpi;
 
-		if ((labelEnable&LABELENABLE_DETAILS)!=0) AddTrkDetails(d, trk, details_pos, a1/180.0*M_PI*xx->radius, color);
+		if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, details_pos, a1/180.0*M_PI*xx->radius, color);
 	}
 
 }
@@ -331,10 +334,9 @@ STATUS_T CurveDescriptionMove(
 				d = 0.9;
 			if ( d < 0.1 )
 				d = 0.1;
-			xx->descriptionOff.y = d * 2.0 - 1.0;
+			xx->descriptionOff.y = (d * 2.0) - 1.0;
 			GetCurveAngles( &a0, &a1, trk );
-			a = a0 + (0.5 * a1);
-			PointOnCircle( &p0, xx->pos, xx->radius/2, a );
+			PointOnCircle( &p0, xx->pos, xx->radius*d, a+a0 );
 		}
 		if (action == C_UP) {
 			editMode = FALSE;
@@ -344,7 +346,6 @@ STATUS_T CurveDescriptionMove(
 
 	case C_REDRAW:
 		if (editMode) {
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
 			DrawCurveDescription( trk, &tempD, wDrawColorBlue );
 		}
 		break;
