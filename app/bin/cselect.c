@@ -40,6 +40,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "cjoin.h"
 #include "draw.h"
 #include "misc.h"
 #include "trackx.h"
@@ -409,7 +410,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 					ClrTrkBits( trk, TB_SELECTED );
 				if (!doRedraw)
 					SetTrkBits( trk, TB_SELREDRAW );
-					DrawTrackAndEndPts( trk, wDrawColorBlack );
+				DrawTrackAndEndPts( trk, wDrawColorBlack );
 			}
 		}
 	}
@@ -2304,6 +2305,22 @@ static void QuickRotate( void* pangle )
 
 static wMenu_p moveDescM;
 static wMenuToggle_p moveDescMI;
+static wMenuToggle_p moveDetailDescMI;
+
+static void ChangeDetailedFlag( wBool_t set, void * mode )
+{
+	wDrawDelayUpdate( mainD.d, TRUE );
+	UndoStart( _("Toggle Detail"), "Modedetail( T%d )", GetTrkIndex(moveDescTrk) );
+	UndoModify( moveDescTrk );
+	UndrawNewTrack( moveDescTrk );
+	if ( ( GetTrkBits( moveDescTrk ) & TB_DETAILDESC ) == 0 ) {
+		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
+		SetTrkBits( moveDescTrk, TB_DETAILDESC );
+	} else
+		ClrTrkBits( moveDescTrk, TB_DETAILDESC );
+	DrawNewTrack( moveDescTrk );
+	wDrawDelayUpdate( mainD.d, FALSE );
+}
 
 static void ChangeDescFlag( wBool_t set, void * mode )
 {
@@ -2346,7 +2363,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 					}
 				}
 			}
-			if ( !QueryTrack( trk1, Q_HAS_DESC ) && (mode <0 || mode > 0) )
+			if ( !QueryTrack( trk1, Q_HAS_DESC ) && (*mode_o > 0) )
 				continue;
 			if ((labelEnable&LABELENABLE_TRKDESC)==0)
 				continue;
@@ -2389,15 +2406,46 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				hidden = hidden_t;
 				cpos = dpos;
 			}
+			d = StraightDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+			if (d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 5;
+				hidden = hidden_t;
+				cpos = dpos;
+			}
+			d = JointDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+			if (d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 6;
+				hidden = hidden_t;
+				cpos = dpos;
+			}
+
 		}
-		if ((trk != NULL && (trk == OnTrack(&pos, FALSE, FALSE))) ||
-			IsClose(d) || IsClose(FindDistance( pos, cpos) )) {  //Only when close to a label or the track - not anywhere on layout!
+
+		coOrd pos1 = pos;
+
+		if ((trk != NULL) && IsClose(dd) ) {
 			if (ep_o) *ep_o = ep;
 			if (mode_o) *mode_o = mode;
 			if (hidden_o) *hidden_o = hidden;
 			return trk;
+		} else {  // Return other track for description (not near to description but nearest to track)
+			if ((trk1 = OnTrack(&pos1, FALSE, FALSE))==NULL) return NULL;
+			if (!QueryTrack( trk1, Q_HAS_DESC )) return NULL;
+			if (IsClose(FindDistance(pos,pos1))) {
+				if (mode_o) *mode_o = -1;
+				if (ep_o) *ep_o = -1;
+				if (hidden_o) *hidden_o = GetTrkBits( trk1 ) & TB_HIDEDESC;
+				return trk1;
+			}
 		}
-		else return NULL;
+
+		return NULL;
 }
 
 static long moveDescMode;
@@ -2440,6 +2488,15 @@ STATUS_T CmdMoveDescription(
 			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) == 0 )
 				bChanged = TRUE;
 			SetTrkBits( moveDescTrk, TB_HIDEDESC );
+			ClrTrkBits( moveDescTrk, TB_DETAILDESC );
+		} else if (action>>8 == 'd') {				//Toggle Detailed
+			bChanged = TRUE;
+			if ((GetTrkBits( moveDescTrk ) & TB_DETAILDESC) != 0)
+				ClrTrkBits( moveDescTrk, TB_DETAILDESC);
+			else {
+				ClrTrkBits( moveDescTrk, TB_HIDEDESC );
+				SetTrkBits( moveDescTrk, TB_DETAILDESC );
+			}
 		}
 		if ( bChanged ) {
 			// We should push the draw/undraw of the description down
@@ -2455,7 +2512,7 @@ STATUS_T CmdMoveDescription(
 				InfoMessage(_("Elevation description"));
 			} else {
 				if (hidden) {
-					InfoMessage(_("Hidden description - 's' to Show"));
+					InfoMessage(_("Hidden description - 's' to Show, 'd' Details"));
 					moveDescTrk = trk;
 					moveDescPos = pos;
 				} else {
@@ -2537,8 +2594,10 @@ STATUS_T CmdMoveDescription(
 		if ( moveDescM == NULL ) {
 			moveDescM = MenuRegister( "Move Desc Toggle" );
 			moveDescMI = wMenuToggleCreate( moveDescM, "", _("Show/Hide Description"), 0, TRUE, ChangeDescFlag, NULL );
+			moveDetailDescMI = wMenuToggleCreate( moveDescM, "", _("Toggle Detailed Description"), 0, TRUE, ChangeDetailedFlag, NULL );
 		}
-		wMenuToggleSet( moveDescMI, ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 );
+		wMenuToggleSet( moveDescMI, !( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) );
+		wMenuToggleSet( moveDetailDescMI, ( GetTrkBits( moveDescTrk ) & TB_DETAILDESC ) );
 		menuPos = pos;
 		wMenuPopupShow( moveDescM );
 		break;
@@ -3348,6 +3407,7 @@ static void moveDescription( void ) {
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 	else
 		SetTrkBits( moveDescTrk, TB_HIDEDESC );
+	MainRedraw();
 }
 
 
