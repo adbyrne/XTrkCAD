@@ -73,8 +73,6 @@ static int log_zoom = 0;
 static int log_mouse = 0;
 static int log_redraw = 0;
 
-static BOOL_T hideBox = FALSE;
-
 static wFontSize_t drawMaxTextFontSize = 100;
 
 /****************************************************************************
@@ -730,10 +728,12 @@ EXPORT void DrawBoxedString(
 		DrawLine( d, p1, p2, 0, color );
 		Translate( &p1, p2, a-150, size.y*0.7*arrowScale );
 		DrawLine( d, p1, p2, 0, color );
+		/* no break */
 	case BOX_BOX:
 		DrawLine( d, p[1], p[2], 0, color );
 		DrawLine( d, p[2], p[3], 0, color );
 		DrawLine( d, p[3], p[0], 0, color );
+		/* no break */
 	case BOX_UNDERLINE:
 		DrawLine( d, p[0], p[1], 0, color );
 		DrawString( d, p0, 0.0, text, fp, fs, color );
@@ -872,6 +872,8 @@ static void TempSegLine(
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE)
 		tempSegs(tempSegs_da.cnt-1).width = 0;
+	else if (width<0)
+		tempSegs(tempSegs_da.cnt-1).width = width;
 	else
 		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
 	tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = p0;
@@ -894,6 +896,8 @@ static void TempSegArc(
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE)
 		tempSegs(tempSegs_da.cnt-1).width = 0;
+	else if (width<0)
+		tempSegs(tempSegs_da.cnt-1).width = width;
 	else
 		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
 	tempSegs(tempSegs_da.cnt-1).u.c.center = p;
@@ -940,6 +944,8 @@ static void TempSegPoly(
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE)
 		tempSegs(tempSegs_da.cnt-1).width = 0;
+	else if (width<0)
+		tempSegs(tempSegs_da.cnt-1).width = width;
 	else
 		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
 	tempSegs(tempSegs_da.cnt-1).u.p.polyType = open?POLYLINE:FREEFORM;
@@ -1032,7 +1038,6 @@ EXPORT drawCmd_t mapD = {
 
 
 static wPos_t info_yb_offset = 2;
-static wPos_t info_ym_offset = 3;
 static wPos_t six = 2;
 static wPos_t info_xm_offset = 2;
 static wPos_t messageOrControlX = 0;
@@ -1428,6 +1433,8 @@ EXPORT void MainRedraw( void )
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
 	}
+	DrawSnapGrid( &mainD, mapD.size, TRUE );
+
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER/mainD.dpi*mainD.scale;
@@ -1436,9 +1443,9 @@ EXPORT void MainRedraw( void )
 	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
 	DrawTracks( &mainD, mainD.scale, orig, size );
 
-	DrawRoomWalls( FALSE );
+	DrawRoomWalls( FALSE );  //No background, just rulers
+
 	currRedraw++;
-	DrawSnapGrid( &mainD, mapD.size, TRUE );
 
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
@@ -1698,13 +1705,11 @@ EXPORT void DrawRuler(
 	int fraction, incr, firstFraction, lastFraction;
 	int majorLength;
 	coOrd p0, p1;
-	FLOAT_T sin_aa;
 
 	a = FindAngle( pos0, pos1 );
 	Translate( &pos0, pos0, a, offset );
 	Translate( &pos1, pos1, a, offset );
 	aa = NormalizeAngle(a+(tickSide==0?+90:-90));
-	sin_aa = sin(D2R(aa));
 
 	end = FindDistance( pos0, pos1 );
 	if (end < 0.1)
@@ -2785,7 +2790,7 @@ static wBool_t PlaybackKey( char * line )
 	if (rc != 3) {
 		SyntaxError( "MOUSE", rc, 3 );
 	} else {
-		action = action||c<<8;
+		action = action|c<<8;
 		PlaybackMouse( DoMouse, &mainD, (wAction_t)action, pos, wDrawColorBlack );
 	}
 	return TRUE;
@@ -3022,8 +3027,6 @@ static STATUS_T CmdPan(
 		if (panmode == ZOOM) {
 			scale_x = size.x/mainD.size.x*mainD.scale;
 			scale_y = size.y/mainD.size.y*mainD.scale;
-
-			DIST_T oldScale = mainD.scale;
 
 			if (scale_x<scale_y)
 					scale_x = scale_y;

@@ -192,7 +192,13 @@ DeleteTurnout(void *toInfo)
 	MyFree(to->endPt);
 	MyFree(to->paths);
 	if (to->special) {
-		DYNARR_FREE(DIST_T, to->u.curved.radii);
+		switch(to->special) {
+		case TOcurved:
+			DYNARR_FREE(DIST_T, to->u.curved.radii);
+			break;
+		case TOadjustable:
+		default:;
+		}
 	}
 
 	MyFree(to);

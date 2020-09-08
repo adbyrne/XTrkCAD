@@ -1,0 +1,9 @@
+#!/bin/sh
+INSTALLDIR=/usr/local/share/xtrkcad
+
+xdg-icon-resource uninstall --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png application-x-xtrkcad
+xdg-desktop-menu uninstall ${INSTALLDIR}/applications/xtrkcad.desktop
+xdg-mime uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.xml
+xdg-desktop-icon uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+xdg-icon-resource uninstall --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png xtrkcad
+

@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
-#ifndef WIN32
-#include <print.h>
-#endif
 #include "mswint.h"
 
 /*
@@ -18,13 +15,9 @@
  */
 
 
-struct wDraw_t print_d;
+static struct wDraw_t print_d;
 
-#ifdef WIN32
-struct tagPDA printDlg;
-#else
-struct tagPD printDlg;
-#endif
+static struct tagPDA printDlg;
 static int printStatus = FALSE;
 static DOCINFO docInfo;
 static double tBorder = 0.0, rBorder = 0.0, bBorder = 0.0, lBorder = 0.0;
@@ -255,8 +248,8 @@ HDC mswGetPrinterDC( void )
 
 
 static wBool_t printAbort = FALSE;
-HWND hAbortDlgWnd;
-FARPROC lpAbortDlg, lpAbortProc;
+static HWND hAbortDlgWnd;
+static FARPROC lpAbortDlg, lpAbortProc;
 static int pageNumber;
 
 int FAR PASCAL mswAbortDlg( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )

@@ -288,9 +288,9 @@ STATUS_T DrawGeomMouse(
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		lock = FALSE;
 		if (!magneticSnap)
-			InfoMessage(_("+Shift to lock to nearby objects"));
+			InfoMessage(_("+Alt for Magnetic Snap"));
 		else
-			InfoMessage(_("+Shift to not lock to nearby objects"));
+			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -341,6 +341,7 @@ STATUS_T DrawGeomMouse(
 			segCnt = 0;
 			anchors_da.cnt = 0;
 			context->State = 0;
+			TryCheckPoint();
 		}
 		context->Started = TRUE;
 		line_angle = 90.0;
@@ -378,6 +379,7 @@ STATUS_T DrawGeomMouse(
 
 		switch (context->Op) {
 		case OP_LINE:
+		case OP_DIMLINE:
 		case OP_BENCH:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			switch (context->Op) {
@@ -394,9 +396,8 @@ STATUS_T DrawGeomMouse(
 				tempSegs(0).u.l.option = 0;
 			}
 			tempSegs_da.cnt = 0;
-			context->message( _("Drag to next point, +Shift to lock to object, +Ctrl to lock to 90deg") );
+			context->message( _("Drag next point, +Alt reverse Magnetic Snap or +Ctrl lock to 90 deg") );
 			break;
-		case OP_DIMLINE:
 		case OP_TBLEDGE:
 			OnTableEdgeEndPt( NULL, &pos );
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
@@ -405,7 +406,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).width = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale):0;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			tempSegs_da.cnt = 0;
-			context->message( _("Drag to place next end point") );
+			context->message( _("Drag next point, +Ctrl to lock to 90 degrees") );
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
@@ -490,7 +491,7 @@ STATUS_T DrawGeomMouse(
 			segPtr->u.l.pos[1] = pos;
 			context->State = 1;
 			segCnt = tempSegs_da.cnt;
-			context->message(_("+Shift - lock to close object, +Ctrl - lock to 90 deg"));
+			context->message(_("+Alt - reverse Magnetic Snap or +Ctrl - lock to 90 deg"));
 			break;
 		}
 		return C_CONTINUE;

@@ -100,7 +100,7 @@ HBITMAP mswCreateBitMap(
 	return hBitMap;
 }
 
-dynArr_t bitmap_da;
+static dynArr_t bitmap_da;
 #define controlMap(N) DYNARR_N(controlMap_t,controlMap_da,N)
 #define bitmap(N) DYNARR_N(HBITMAP,bitmap_da,N)
 

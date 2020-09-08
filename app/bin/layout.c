@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdbool.h>
 #include <string.h>
 #include <dynstring.h>
 
@@ -307,6 +308,7 @@ int GetLayoutBackGroundScreen()
 	return (thisLayout.props.backgroundScreen);
 }
 
+
 /****************************************************************************
 *
 * Layout Dialog
@@ -343,7 +345,7 @@ static paramData_p layout_p;
 static paramGroup_t * layout_pg_p;
 static wBool_t file_changed;
 
-EXPORT BOOL_T haveBackground = FALSE;
+bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
 char * noname = "";
@@ -361,6 +363,11 @@ int GetLayoutBackGroundVisible()
 	return(backgroundVisible);
 }
 
+bool HasBackGround()
+{
+	return(haveBackground);
+}
+
 /*****************************************
 * Try to load the background image file
 */
@@ -373,6 +380,7 @@ LoadBackGroundImage(void)
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
 		return FALSE;
 	}
+	
 	return TRUE;
 }
 
@@ -450,6 +458,7 @@ static void ImageFileClear( void * junk)
 	SetName();
 	wControlActive((wControl_p)backgroundB, FALSE);
 	file_changed = TRUE;
+	haveBackground = false;
 	ParamLoadControl(layout_pg_p, 8);
 	MainRedraw();
 }
@@ -467,7 +476,7 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
-	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
+	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
@@ -692,16 +701,18 @@ LayoutBackGroundInit(BOOL_T clear) {
 	}
 	char * str = GetLayoutBackGroundFullPath();
 	if (str && str[0]) {
-		if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
+        haveBackground = true;
+        if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
 			SetLayoutBackGroundFullPath(noname);
 			SetLayoutBackGroundPos(zero);
 			SetLayoutBackGroundAngle(0.0);
 			SetLayoutBackGroundScreen(0);
 			SetLayoutBackGroundSize(0.0);
 			LayoutBackGroundSave();
+            haveBackground = false;
 		}
 	} else {
+		haveBackground = false;
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
-
 }

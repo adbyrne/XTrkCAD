@@ -25,8 +25,8 @@
 #define NUM_GRAYS (16)
 #define NUM_COLORS (256)
 
-wDrawColor wDrawColorWhite = 0;
-wDrawColor wDrawColorBlack = 1;
+static wDrawColor wDrawColorWhite = 0;
+static wDrawColor wDrawColorBlack = 1;
 
 #define MAX_COLOR_DISTANCE (3)
 
@@ -44,8 +44,6 @@ static struct {
 		{ 255, 255, 255 },		/* White */
 		{	0,	 0,	  0 }		/* Black */
 		} };
-
-COLORREF mappedColors[NUM_COLORS];
 
 
 static long flipRGB( long rgb )

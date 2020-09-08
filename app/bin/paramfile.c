@@ -168,16 +168,22 @@ void SetParamFileState(int index)
 int
 ReadParamFile(const char *fileName)
 {
-	DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
-	curParamFileIndex = paramFileInfo_da.cnt - 1;
-	paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
-	paramFileInfo(curParamFileIndex).valid = TRUE;
-	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
-	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
+	bool success = ReadParams(0, NULL, fileName);
 
-	SetParamFileState(curParamFileIndex);
+	if (success) {
+		DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
+		curParamFileIndex = paramFileInfo_da.cnt - 1;
+		paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
+		paramFileInfo(curParamFileIndex).valid = TRUE;
+		paramFileInfo(curParamFileIndex).deleted = FALSE;
+		paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
-	return (curParamFileIndex);
+		SetParamFileState(curParamFileIndex);
+		return (curParamFileIndex);
+	} else {
+		// param file could not be read
+		return(-1);
+	}
 }
 
 /**
@@ -244,8 +250,8 @@ bool ReadParams(
 		/* Reset the locale settings */
 		RestoreLocale(oldLocale);
 
-		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName,
-			strerror(errno));
+		//NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName,
+		//	strerror(errno));
 
 		return FALSE;
 	}

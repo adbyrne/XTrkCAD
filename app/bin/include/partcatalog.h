@@ -1,7 +1,7 @@
 /** \file partcatalog.h
 * Manage the catalog of track parameter files
 */
-/*  XTrkCad - Model Railroad CAD
+/*  XTrackCad - Model Railroad CAD
 *  Copyright (C) 2019 Martin Fischer
 *
 *  This program is free software; you can redistribute it and/or modify
@@ -23,48 +23,78 @@
 #define HAVE_TRACKCATALOG_H
 
 #include <stdbool.h>
+#include "include/utlist.h"
 
 #define MAXFILESPERCONTENT	10					/**< count of files with the same content header */
-#define ESTIMATED_CONTENTS_WORDS 10				/**< average count of words in CONTENTS header */
 
 struct sCatalogEntry {
-    struct sCatalogEntry *next;
+    struct sCatalogEntry *next, *prev;
     unsigned files;								/**< current count of files */
     char *fullFileName[MAXFILESPERCONTENT];		/**< fully qualified file name */
     char *contents;								/**< content field of parameter file */
-    struct sCatalogEntry *indirect;               /**< pointer to another catalog entry */
 };
-
 typedef struct sCatalogEntry CatalogEntry;
 
-struct sIndexEntry {
-    CatalogEntry *value;						/**< catalog entry having the key word in contents */
-    char *keyWord;								/**< keyword */
+struct sCatalog {
+    CatalogEntry *head;							/**< The entries */
 };
+typedef struct sCatalog Catalog;
 
+
+/**
+An index entry. This struct holds a keyword pointer and an array of pointers to
+CatalogEntry
+It is managed as a linked list
+*/
+struct sIndexEntry {
+    struct sIndexEntry *next;
+    struct sIndexEntry *prev;
+    char *keyWord;								/**< keyword */
+    dynArr_t *references;						/**< references to the CatalogEntry */
+};
 typedef struct sIndexEntry IndexEntry;
 
-struct sTrackLibrary {
-    CatalogEntry *catalog;						/**< list of files cataloged */
+
+struct sParameterLib {
+    Catalog *catalog;							/**< list of files cataloged */
     IndexEntry *index;							/**< Index for lookup */
     unsigned wordCount;							/**< How many words indexed */
-    void * words_array;							/**< The array of words */
-    unsigned trackTypeCount;					/**< */
+    unsigned parameterFileCount;					/**< */
+    char *words;
+};
+typedef struct sParameterLib
+    ParameterLib;							/**< core data structure for the catalog */
+
+enum WORDSTATE {
+    SEARCHED,
+    DISCARDED,
+    NOTFOUND,
+	CLOSE,
+    STATE_COUNT
 };
 
-typedef struct sTrackLibrary
-		TrackLibrary;							/**< core data structure for the catalog */
+struct sSearchResult {
+    Catalog subCatalog;
+    unsigned totalFound;
+    unsigned words;								/**< no of words in search string */
+    struct sSingleResult {
+        char *keyWord;
+        unsigned count;
+        enum WORDSTATE state;
+    } *kw;
+};
+typedef struct sSearchResult SearchResult;
 
-CatalogEntry *InitCatalog(void);
-TrackLibrary *InitLibrary(void);
-TrackLibrary *CreateLibrary(char *directory);
-void DeleteLibrary(TrackLibrary *tracklib);
-bool GetTrackFiles(TrackLibrary *trackLib, char *directory);
-int GetParameterFileInfo(int files, char ** fileName, void * data);
-unsigned CreateLibraryIndex(TrackLibrary *trackLib);
-unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
-unsigned CountCatalogEntries(CatalogEntry *listHeader);
-void EmptyCatalog(CatalogEntry *listHeader);
-unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
+Catalog *InitCatalog(void);
+ParameterLib *InitLibrary(void);
+ParameterLib *CreateLibrary(char *directory);
+void DestroyLibrary(ParameterLib *tracklib);
+bool CreateCatalogFromDir(ParameterLib *trackLib, char *directory);
+unsigned CreateLibraryIndex(ParameterLib *trackLib);
+unsigned SearchLibrary(ParameterLib *library, char *searchExpression, SearchResult *totalResult);
+char *SearchStatistics(SearchResult *result);
+void SearchDiscardResult(SearchResult *res);
+unsigned CountCatalogEntries(Catalog *catalog);
+void DiscardCatalog(ParameterLib *library);
 bool FilterKeyword(char *word);
 #endif // !HAVE_TRACKCATALOG_H
