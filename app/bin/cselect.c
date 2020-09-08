@@ -2425,7 +2425,7 @@ STATUS_T CmdMoveDescription(
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
 			 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
-			return C_TERMINATE;
+			return C_ERROR;
 		}
 		InfoMessage( _("Select and drag a description") );
 		break;
@@ -2472,7 +2472,7 @@ STATUS_T CmdMoveDescription(
 		if (( labelWhen < 2 || mainD.scale > labelScale ) ||
 		 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
 			 	 ErrorMessage( MSG_DESC_NOT_VISIBLE );
-			return C_TERMINATE;
+			return C_ERROR;
 		 }
 		mode = moveDescMode-1;
 		trk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
@@ -2491,10 +2491,9 @@ STATUS_T CmdMoveDescription(
 	case C_UP:
 	case C_REDRAW:
 		if ( labelWhen < 2 || mainD.scale > labelScale )
-			return C_TERMINATE;
+			return C_CONTINUE;
 		if ( trk == NULL )
 			return C_CONTINUE;
-		STATUS_T status = C_ERROR;
 		if ( action == C_REDRAW ) {
 			if (mode==0) {
 				DrawEndPt2( &tempD, trk, ep, wDrawColorBlue );
