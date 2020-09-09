@@ -1462,7 +1462,7 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 				&& (programMode == MODE_TRAIN
 						|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
 				&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-						|| layerButtCnt++ <= layerCount+1)) {
+						|| layerButtCnt < layerCount)) {
 			if (currGroup != lastGroup) {
 				toolbarWidth += gap;
 				lastGroup = currGroup;

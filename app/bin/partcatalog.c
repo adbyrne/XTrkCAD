@@ -146,9 +146,15 @@ CatalogDiscard(Catalog *catalog)
     CatalogEntry *tmp;
 
     DL_FOREACH_SAFE(current, element, tmp) {
+    	MyFree(element->contents);
+    	for (unsigned int i = 0; i < element->files; i++) {
+    	    MyFree(element->fullFileName[i]);
+    	}
         DL_DELETE(current, element);
         MyFree(element);
     }
+
+    catalog->head = NULL;
 }
 
 /**

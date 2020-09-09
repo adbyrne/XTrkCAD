@@ -545,7 +545,7 @@ static paramListData_t layerUiListData = { 10, 370, 0 };
 
 static paramData_t layerPLs[] = {
 #define I_LIST	(0)
-    { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX|PDO_DLGNOLABELALIGN, (void*)250 },
+    { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX, (void*)250, N_("Select Layer:") },
 #define I_NAME	(1)
     { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
@@ -600,7 +600,7 @@ int LoadFileListLoad(Catalog *catalog, char * name)
 
     wListAddValue(settingsListL," ",NULL," ");
 
-    while (currentEntry != currentEntry->next) {
+    while (currentEntry) {
     	i++;
 		DynStringClear(&description);
 		DynStringCatCStr(&description,
@@ -726,6 +726,8 @@ void LoadLayerLists(void)
 
     /* set current layer to selected */
     wListSetIndex(setLayerL, curLayer);
+
+    if (layerL) wListSetIndex(layerL,curLayer);
 
 }
 
@@ -1540,7 +1542,7 @@ BOOL_T ReadLayers(char * line)
 
     /* get the properties for a layer from the file and update the layer accordingly */
 
-	if (!GetArgs(line, "dddduddddq", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &button_off, &ColorFlags,
+	if (!GetArgs(line, "dddduddddq", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
 			 &name)) {
 
 		return FALSE;
