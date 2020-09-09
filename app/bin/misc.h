@@ -327,6 +327,11 @@ void InitNewTurn( wMenu_p m );
 /* cnote.c */
 void ClearNote( void );
 
+/* cprintc.c */
+coOrd GetPrintOrig();
+ANGLE_T GetPrintAngle();
+
+
 /* cruler.c */
 void RulerRedraw( BOOL_T );
 STATUS_T ModifyRuler( wAction_t, coOrd );

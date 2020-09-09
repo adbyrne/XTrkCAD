@@ -1018,6 +1018,10 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if ( wTextGetModified((wText_p)drawDesc[TX].control0 )) {
 			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
 			MyFree( segPtr->u.t.string );
+			if (len>STR_HUGE_SIZE-8) {                   //Truncate string to max
+				len = STR_HUGE_SIZE-8;
+				ErrorMessage( MSG_TEXT_TOO_LONG );
+			}
 			segPtr->u.t.string = (char *)MyMalloc(len+1);
 			wTextGetText((wText_p)drawDesc[TX].control0, segPtr->u.t.string, len+1);
 			segPtr->u.t.string[len] = '\0';				//Make sure of null term

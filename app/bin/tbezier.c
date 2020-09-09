@@ -148,8 +148,8 @@ DIST_T BezierDescriptionDistance(
 
 	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) offset = zero;
 
-	p1.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/2) + offset.x;
-	p1.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/2) + offset.y;
+	p1.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/4) + offset.x;
+	p1.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/4) + offset.y;
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = p1;
 	return FindDistance( p1, pos );
@@ -169,14 +169,20 @@ static void DrawBezierDescription(
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-    pos.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/2);
-    pos.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/2);
+    pos.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/4);
+    pos.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/4);
     pos.x += xx->bezierData.descriptionOff.x;
     pos.y += xx->bezierData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
-    sprintf( message, _("Bezier: len=%0.2f min_rad=%0.2f"),
-				xx->bezierData.length, xx->bezierData.minCurveRadius>10000?0.0:xx->bezierData.minCurveRadius);
-    DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
+    sprintf( message, _("Bez: L%s A%0.3f trk_len=%s min_rad=%s"),
+    			FormatDistance(FindDistance(xx->bezierData.pos[0],xx->bezierData.pos[3])),
+				FindAngle(xx->bezierData.pos[0],xx->bezierData.pos[3]),
+				FormatDistance(xx->bezierData.length), FormatDistance(xx->bezierData.minCurveRadius>10000?0.0:xx->bezierData.minCurveRadius));
+    DrawDimLine( d, xx->bezierData.pos[0], xx->bezierData.pos[3], message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+    if (GetTrkBits( trk ) & TB_DETAILDESC)
+    	AddTrkDetails(d, trk, pos, xx->bezierData.length, color);
+
 }
 
 

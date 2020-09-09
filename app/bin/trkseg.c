@@ -1692,8 +1692,14 @@ EXPORT void DrawDimLine(
 	size.x = textsize.x/2.0;
 	size.y = textsize.y/2.0;
 	dist1 = FindDistance( zero, size );
-	if ( dist <= dist1*2 ) {
+	if ( dist <= dist1*1.5 ) {
 		DrawLine( d, p0, p1, width, color );
+		coOrd s_pos;
+		s_pos.x = (p1.x-p0.x)*0.75+p0.x;
+		s_pos.y = (p1.y-p0.y)*0.75+p0.y;
+		ANGLE_T a = FindAngle(p0,p1);
+		Translate(&s_pos,s_pos,a+90,textsize.y/2);
+		DrawString( d, s_pos, 0.0, dimP, fp, fs, color );
 		return;
 	}
 		a1 = FindAngle( zero, size );

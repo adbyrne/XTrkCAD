@@ -1987,7 +1987,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 					Da.state = NONE;
 					return C_TERMINATE;
 				}
-
+				CopyAttributes(Da.selectTrack,Da.trk[i]);
 			}
 		}
 		BOOL_T end_point[2];

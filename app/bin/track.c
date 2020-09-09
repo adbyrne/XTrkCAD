@@ -3437,3 +3437,57 @@ EXPORT void LabelLengths( drawCmd_p d, track_p trk, wDrawColor color )
 		DrawString( d, p0, 0.0, msg, fp, fs*d->scale, color );
 	}
 }
+
+EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length, wDrawColor color) {
+	#define DESC_LENGTH 6.0;
+	double division;
+	division = length/DESC_LENGTH;
+	division = ceil(division);
+	DIST_T dist = length/division, dist1;
+	traverseTrack_t tt;
+	tt.trk = trk;
+	tt.angle = GetTrkEndAngle(trk,0)+180.0;
+	tt.pos = GetTrkEndPos(trk,0);
+
+	dynArr_t pos_array;
+	pos_array.max = 0;
+	pos_array.cnt = 0;
+	pos_array.ptr = NULL;
+
+	typedef struct {
+					coOrd pos;
+					ANGLE_T angle;
+				} pos_angle_t;
+
+	DYNARR_SET(pos_angle_t,pos_array,division+1);
+	DYNARR_N(pos_angle_t,pos_array,0).pos = GetTrkEndPos(trk,0);
+	DYNARR_N(pos_angle_t,pos_array,0).angle = NormalizeAngle(GetTrkEndAngle(trk,0)+180.0);
+	for (int i=1;i<pos_array.cnt;i++) {
+		tt.dist = dist;
+		dist1 = dist;
+		TraverseTrack(&tt,&dist1);
+		if (dist1 > 0 || tt.trk != trk || IsClose(FindDistance(tt.pos,GetTrkEndPos(trk,1)))) {
+			DYNARR_N(pos_angle_t,pos_array,i).pos = GetTrkEndPos(trk,1);
+			DYNARR_N(pos_angle_t,pos_array,i).angle = GetTrkEndAngle(trk,1);
+			pos_array.cnt = i;
+			break;
+		}
+		DYNARR_N(pos_angle_t,pos_array,i).pos = tt.pos;
+		DYNARR_N(pos_angle_t,pos_array,i).angle = tt.angle;
+	}
+	message[0]='\0';
+	for (int i=0;i<pos_array.cnt;i++) {
+		if (i==pos_array.cnt-1)
+			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
+		else
+			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f\n"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle);
+	}
+	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
+	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,0.0);
+	if (pos_array.ptr)
+		MyFree(pos_array.ptr);
+	pos_array.ptr = 0;
+	pos_array.max = 0;
+	pos_array.cnt = 0;
+}
+

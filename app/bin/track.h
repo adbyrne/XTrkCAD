@@ -423,6 +423,8 @@ wBool_t CompareSegs( trkSeg_p, int, trkSeg_p, int );
 /* debug.c */
 void SetDebug( char * );
 
+
+/*Remember to add bits to trackx.h if adding here */
 #define TB_SELECTED		(1<<0)
 #define TB_VISIBLE		(1<<1)
 #define TB_PROFILEPATH	(1<<2)
@@ -435,7 +437,8 @@ void SetDebug( char * );
 #define TB_BRIDGE       (1<<9)
 #define TB_SELREDRAW	(1<<10)
 // Track has been undrawn, don't draw it on Redraw
-#define TB_UNDRAWN	(1<<11)
+#define TB_UNDRAWN		(1<<11)
+#define TB_DETAILDESC  	(1<<12)
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
@@ -686,6 +689,7 @@ BOOL_T ReplayTrackData(track_p, void *, long);
 DIST_T GetFlexLength( track_p, EPINX_T, coOrd * );
 void LabelLengths( drawCmd_p, track_p, wDrawColor );
 DIST_T GetTrkLength( track_p, EPINX_T, EPINX_T );
+void AddTrkDetails(drawCmd_p d, track_p trk, coOrd pos, DIST_T length, wDrawColor color);
 
 void SelectAbove( void );
 void SelectBelow( void );
@@ -697,6 +701,9 @@ void DrawPositionIndicators( void );
 void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
 BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd * , BOOL_T);
+
+/*tstraight.c*/
+DIST_T StraightDescriptionDistance(coOrd pos, track_p trk, coOrd * dpos, BOOL_T show_hidden, BOOL_T * hidden);
 
 /* cmisc.c */
 wIndex_t describeCmdInx;

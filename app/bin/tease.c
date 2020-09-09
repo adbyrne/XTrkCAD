@@ -760,6 +760,76 @@ EXPORT coOrd GetJointSegEndPos(
 	return p1;
 }
 
+DIST_T JointDescriptionDistance(
+		coOrd pos,
+		track_p trk,
+		coOrd * dpos,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
+{
+	struct extraData *xx = GetTrkExtraData(trk);
+	coOrd p1;
+	if (hidden) *hidden = FALSE;
+	if ( GetTrkType( trk ) != T_EASEMENT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
+		return 100000;
+
+	ANGLE_T a;
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*trackGauge);
+	Translate(&end1off,end1,a+90,2*trackGauge);
+
+	p1.x = (end1off.x - end0off.x)/2 + end0off.x ;
+	p1.y = (end1off.y - end0off.y)/2 + end0off.y ;
+
+	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
+	*dpos = p1;
+	return FindDistance( p1, pos );
+}
+static void DrawJointDescription(
+		track_p trk,
+		drawCmd_p d,
+		wDrawColor color )
+{
+	struct extraData *xx = GetTrkExtraData(trk);
+	wFont_p fp;
+	coOrd pos, p0, p1;
+	DIST_T elev0, elev1, dist, grade=0, sep=0;
+	BOOL_T elevValid;
+	ANGLE_T a;
+
+
+
+	if (layoutLabels == 0)
+		return;
+	if ((labelEnable&LABELENABLE_TRKDESC)==0 )
+		return;
+
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*trackGauge);
+	DrawLine(d,end0,end0off,0,color);
+	Translate(&end1off,end1,a+90,2*trackGauge);
+	DrawLine(d,end1,end1off,0,color);
+
+
+	sprintf( message, "Joint: L %s A %0.3f, l0 %s l1 %s R %s L %s",
+			FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1),
+			FormatDistance(xx->l0), FormatDistance(xx->l1), FormatDistance(xx->R), FormatDistance(xx->L));
+	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+	pos.x = (end1.x-end0.x)/4+end0.x;
+	pos.y = (end1.y-end0.y)/4+end0.y;
+
+	if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, end0, FindDistance(end0,end1), color);
+
+
+}
+
 
 EXPORT void DrawJointTrack(
 		drawCmd_p d,
@@ -833,6 +903,13 @@ LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
 	}
 	DrawEndPt( d, trk, ep0, color );
 	DrawEndPt( d, trk, ep1, color );
+	if (((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
+		   (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+		   labelScale >= d->scale &&
+		   ( GetTrkBits( trk ) & TB_HIDEDESC ) == 0 ) {
+		  DrawJointDescription( trk, d, color );
+	}
+
 }
 
 
@@ -866,8 +943,11 @@ static BOOL_T WriteJoint(
 {
 	struct extraData * xx = GetTrkExtraData(t);
 	BOOL_T rc = TRUE;
+	long options = (long)GetTrkWidth(t);
+	if ( ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) )
+			options |= 0x80;
 	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f\n",
-		GetTrkIndex(t), GetTrkLayer(t), (long)GetTrkWidth(t),
+		GetTrkIndex(t), GetTrkLayer(t), options,
 		GetTrkScaleName(t), GetTrkVisible(t), xx->l0, xx->l1, xx->R, xx->L,
 		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle )>0;
 	rc &= WriteEndPt( f, t, 0 );
@@ -911,6 +991,8 @@ static BOOL_T ReadJoint(
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
+	if ( ( ( options & 0x80 ) != 0 ) )
+		SetTrkBits(trk,TB_HIDEDESC);
 	*xx = e;
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
@@ -1303,6 +1385,8 @@ static BOOL_T QueryJoint( track_p trk, int query )
 			UndoStart( _("Split Easement Curve"), "queryJoint T%d Scurve", GetTrkIndex(trk) );
 			SplitTrack( trk, xx->pos, 0, &trk1, FALSE );
 		}
+		return TRUE;
+	case Q_HAS_DESC:
 		return TRUE;
 	default:
 		return FALSE;

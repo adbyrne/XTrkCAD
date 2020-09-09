@@ -223,6 +223,7 @@ The \f{Note} command allows you to
 \G{png.d/bnote.png} \G{png.d/iconnote.png} Click and drag on the Main Canvas (\K{mainW}) to place the note.
 
 When you release, the \e{Note Editor} dialog is displayed.  You can enter the note in the text area.
+Text is limited to about 10 thousand characters. 
 
 \G{png.d/notetext.png}
 

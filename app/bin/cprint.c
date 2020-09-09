@@ -57,13 +57,20 @@ static bitmap_t bm, bm0;
 #define BITMAP( BM, X, Y ) \
 		(BM).bm[ (X)-(BM).x0 + ((Y)-(BM).y0) * ((BM).x1-(BM).x0) ]
 
-struct {
+static struct {
 		coOrd size;
 		coOrd orig;
 		ANGLE_T angle;
 		} currPrintGrid, newPrintGrid;
 
 
+EXPORT coOrd GetPrintOrig() {
+	return currPrintGrid.orig;
+}
+
+EXPORT ANGLE_T GetPrintAngle() {
+	return currPrintGrid.angle;
+}
 /*
  * GUI VARS
  */
