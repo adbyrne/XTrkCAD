@@ -2871,6 +2871,13 @@ static STATUS_T SelectTrack(
 		return C_CONTINUE;
 	}
 	if (trk == NULL) return C_CONTINUE;
+	if (!CheckTrackLayerSilent( trk ) ) {
+		if (GetLayerFrozen(GetTrkLayer(trk)) ) {
+			trk = NULL;
+			InfoMessage(_("Track is in Frozen Layer"));
+			return C_CONTINUE;
+		}
+	}
 	inDescribeCmd = FALSE;
 	DescribeTrack( trk, msg, sizeof msg );
 	InfoMessage( msg );

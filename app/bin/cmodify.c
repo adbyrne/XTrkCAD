@@ -296,7 +296,7 @@ STATUS_T CmdModify(
 		if (!CheckTrackLayer( Dex.Trk ) ) {
 			Dex.Trk = NULL;
 
-			return C_CONTINUE;
+			return C_ERROR;
 		}
 		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if (QueryTrack( Dex.Trk, Q_CAN_MODIFY_CONTROL_POINTS )) { //Bezier
@@ -417,7 +417,7 @@ STATUS_T CmdModify(
 				}
 			}
 		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL)
-				&& (!(GetLayerFrozen(GetTrkLayer(t)) && GetLayerModule(GetTrkLayer(t))))
+				&& (!(GetLayerFrozen(GetTrkLayer(t)) || GetLayerModule(GetTrkLayer(t))))
 				&& (QueryTrack(t, Q_IS_DRAW ) && !QueryTrack(t, Q_IS_TEXT)) ) {
 			CreateEndAnchor(pos,FALSE);
 		}
@@ -485,7 +485,7 @@ extendTrack:
 			if (Dex.Trk) {
 				if (!CheckTrackLayer( Dex.Trk ) ) {
 					Dex.Trk = NULL;
-					return C_CONTINUE;
+					return C_ERROR;
 				}
 				trackGauge = GetTrkGauge( Dex.Trk );
 				Dex.pos00 = pos;
