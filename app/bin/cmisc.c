@@ -28,6 +28,7 @@
 #include "i18n.h"
 #include "messages.h"
 #include "param.h"
+#include "fileio.h"
 #include "track.h"
 
 EXPORT wIndex_t describeCmdInx;
@@ -569,7 +570,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     switch (action) {
     case C_START:
-        InfoMessage(_("Select track to describe"));
+        InfoMessage(_("Select track to describe +Shift for Frozen"));
         wSetCursor(mainD.d,wCursorQuestion);
         descUndoStarted = FALSE;
         trk = NULL;
@@ -577,11 +578,20 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     case wActionMove:
     	trk = OnTrack(&pos, FALSE, FALSE);
+    	if (trk && GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState() & WKEY_SHIFT)) {
+			trk = NULL;
+			return C_CONTINUE;
+		}
     	return C_CONTINUE;
 
 
     case C_DOWN:
         if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
+        	if (GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState()& WKEY_SHIFT)) {
+        		InfoMessage("Track is Frozen, Add Shift to Describe");
+        		trk = NULL;
+        		return C_CONTINUE;
+        	}
             if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
                 descUpdateFunc(descTrk, -1, descData, TRUE);
                 descTrk = NULL;

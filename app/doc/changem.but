@@ -1197,6 +1197,7 @@ The dialog can be closed with the 'X' button in the window's titlebar.
 Clicking on the \f{Properties} (Describe Mode) button cancels all active commands, closes any open dialog windows and places focus on the main window.
 
 Until an object is selected, the object under the cursor that will be selected with \e{Left-Click} is highlighted in blue.
+Objects in Frozen Layers will only be highlighted and selected if \f{Shift} is added.
 
 A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear.
 The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object.
