@@ -652,7 +652,7 @@ void PutLayerListArray(int inx, char * list) {
 		if (cp) {
 			cp[0] ='\0';
 			int i =  abs((int)strtol(list,&list,0));
-			if (i>0 && i !=inx-1) {
+			if (i>0 && i !=inx-1 && i<NUM_LAYERS) {
 				DYNARR_APPEND(int,layers[inx].layerLinkList,1);
 				DYNARR_LAST(int, layers[inx].layerLinkList) = i;
 			}
@@ -660,7 +660,7 @@ void PutLayerListArray(int inx, char * list) {
 			list = cp+1;
 		} else {
 			int i =  abs((int)strtol(list,&list,0));
-			if (i>0 && i !=inx-1) {
+			if (i>0 && i !=inx-1 && i<NUM_LAYERS) {
 				DYNARR_APPEND(int,layers[inx].layerLinkList,1);
 				DYNARR_LAST(int,layers[inx].layerLinkList) = i;
 			}

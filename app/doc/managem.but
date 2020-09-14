@@ -387,12 +387,12 @@ One way of getting a modules in is to build a library with \f{Export} and then \
 
 The \f{No Button} check-box selects if the \f{Layer} has a button to hide/show it. You may choose not to have a button if the layer is empty or if it is a sub-layer controlled by another layer.
 
-The \f{Linked Layers} text box can contain a comma-delimited set of layer numbers that will be shown and hidden along with this layer when its show/hidden state is chnaged. A blank meand no linked layers
+The \f{Linked Layers} text box can contain a semi-colon-delimited set of layer numbers that will be shown and hidden along with this layer when its show/hidden state is changed. A blank means no layers are linked. The layers can have buttons or not.
 
 You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
 
-The \f{Load Settings} specifies a settings file in the working directory that is loaded when this layer is made current. Only the values contained in the file will be set.
-If this name is blank the default values (those in use when any layer that has no settings value) will be reloaded. 
+The \f{Load Settings} specifies a settings (.xset) filename in the XTrackCAD working directory that is loaded when this layer is made current.  Only the values contained in the file will be set.
+If this name is blank the default values (all those in use when any layer that has no Load Settings file value was last used) will be reloaded (or retained). The dropbox contains all the names of files in that directory.
 
 The \f{Count} field displays the number of objects in the selected Layer.
 
