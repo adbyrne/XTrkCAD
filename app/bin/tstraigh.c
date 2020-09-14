@@ -272,6 +272,16 @@ static DIST_T DistanceStraight( track_p t, coOrd * p )
 	return LineDistance( p, GetTrkEndPos(t,0), GetTrkEndPos(t,1) );
 }
 
+STATUS_T StraightDescriptionMove(
+		track_p trk,
+		wAction_t action,
+		coOrd pos )
+{
+
+	return C_CONTINUE;
+
+}
+
 DIST_T StraightDescriptionDistance(
 		coOrd pos,
 		track_p trk,
@@ -279,7 +289,6 @@ DIST_T StraightDescriptionDistance(
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_STRAIGHT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
@@ -306,7 +315,6 @@ static void DrawStraightDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	ANGLE_T a;
 
 	if (layoutLabels == 0)

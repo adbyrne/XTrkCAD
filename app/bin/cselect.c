@@ -2350,6 +2350,8 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				continue;
 			if ( (!GetTrkVisible(trk1)) && drawTunnel==0 )
 				continue;
+			if ( GetLayerFrozen( GetTrkLayer( trk1 ) ))
+				continue;
 			if ( (labelEnable&LABELENABLE_ENDPT_ELEV)!=0 && *mode_o <= 0) {
 				for ( ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++ ) {
 					d = EndPtDescriptionDistance( pos, trk1, ep1, &dpos, FALSE, NULL );  //No hidden
@@ -2437,6 +2439,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 		} else {  // Return other track for description (not near to description but nearest to track)
 			if ((trk1 = OnTrack(&pos1, FALSE, FALSE))==NULL) return NULL;
 			if (!QueryTrack( trk1, Q_HAS_DESC )) return NULL;
+			if (GetLayerFrozen(GetTrkLayer(trk1))) return NULL;
 			if (IsClose(FindDistance(pos,pos1))) {
 				if (mode_o) *mode_o = -1;
 				if (ep_o) *ep_o = -1;
@@ -2454,7 +2457,6 @@ STATUS_T CmdMoveDescription(
 		wAction_t action,
 		coOrd pos )
 {
-	static track_p trk;
 	static EPINX_T ep;
 	static BOOL_T hidden;
 	static int mode;
@@ -2467,7 +2469,6 @@ STATUS_T CmdMoveDescription(
 	case C_START:
 		moveDescTrk = NULL;
 		moveDescPos = zero;
-		trk = NULL;
 		hidden = FALSE;
 		mode = -1;
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
@@ -2475,10 +2476,31 @@ STATUS_T CmdMoveDescription(
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_ERROR;
 		}
-		InfoMessage( _("Select and drag a description") );
-		break;
+		/* no break */
+	case wActionMove:
+			if ( labelWhen < 2 || mainD.scale > labelScale ) return C_CONTINUE;
+			mode = moveDescMode-1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
+			if ((moveDescTrk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
+				if (mode==0) {
+					InfoMessage(_("Elevation description"));
+				} else {
+					if (hidden) {
+						InfoMessage(_("Hidden description - 's' to Show, 'd' Details"));
+						moveDescPos = pos;
+					} else {
+						InfoMessage(_("Shown description - 'h' to Hide"));
+						moveDescPos = pos;
+					}
+				}
+				return C_CONTINUE;
+			} else {
+				moveDescTrk = NULL;
+			}
+			InfoMessage( _("Select and drag a description") );
+			break;
 	case C_TEXT:
 		if (!moveDescTrk) return C_CONTINUE;
+		if (mode == 0) return C_CONTINUE;
 		bChanged = FALSE;
 		if (action>>8 == 's') {
 			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) != 0 )
@@ -2499,31 +2521,8 @@ STATUS_T CmdMoveDescription(
 			}
 		}
 		if ( bChanged ) {
-			// We should push the draw/undraw of the description down
-			// but there is no clear way to do that
-			MainRedraw(); // CmdMoveDescription
+			return C_TERMINATE;
 		}
-		/*no break*/
-	case wActionMove:
-		if ( labelWhen < 2 || mainD.scale > labelScale ) return C_CONTINUE;
-		mode = moveDescMode-1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
-		if ((trk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
-			if (mode==0) {
-				InfoMessage(_("Elevation description"));
-			} else {
-				if (hidden) {
-					InfoMessage(_("Hidden description - 's' to Show, 'd' Details"));
-					moveDescTrk = trk;
-					moveDescPos = pos;
-				} else {
-					InfoMessage(_("Shown description - 'h' to Hide"));
-					moveDescTrk = trk;
-					moveDescPos = pos;
-				}
-			}
-			return C_CONTINUE;
-		}
-		InfoMessage( _("Select and drag a description") );
 		break;
 	case C_DOWN:
 		if (( labelWhen < 2 || mainD.scale > labelScale ) ||
@@ -2532,61 +2531,82 @@ STATUS_T CmdMoveDescription(
 			return C_ERROR;
 		 }
 		mode = moveDescMode-1;
-		trk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
-		if (trk == NULL )
+		moveDescTrk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
+		if (moveDescTrk == NULL )
 			return C_CONTINUE;
 		if (hidden) {
-			ClrTrkBits( trk, TB_HIDEDESC );
 			InfoMessage(_("Hidden Label - Drag to reveal"));
 		} else {
 			InfoMessage(_("Drag label"));
 		}
-		UndoStart( _("Move Label"), "Modedesc( T%d )", GetTrkIndex(trk) );
-		UndoModify( trk );
 		/* no break */
 	case C_MOVE:
+		if (moveDescTrk == NULL )
+				return C_CONTINUE;
+		UndoStart( _("Move Label"), "Modedesc( T%d )", GetTrkIndex(moveDescTrk) );
+		UndoModify( moveDescTrk );
+		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
+		hidden = FALSE;
+		/* no break */
 	case C_UP:
-	case C_REDRAW:
 		if ( labelWhen < 2 || mainD.scale > labelScale )
 			return C_CONTINUE;
-		if ( trk == NULL )
+		if ( moveDescTrk == NULL )
 			return C_CONTINUE;
-		if ( action == C_REDRAW ) {
-			if (mode==0) {
-				DrawEndPt2( &tempD, trk, ep, wDrawColorBlue );
-			} else {
-				if (hidden) {
-					DrawTrack( trk,&tempD,wDrawColorAqua);
-				} else {
-					DrawTrack( trk,&tempD,wDrawColorBlue);
-				}
-			}
-		}
+		int rc = C_CONTINUE;
 		switch (mode) {
 		case 0:
-			return EndPtDescriptionMove( trk, ep, action, pos );
+			rc = EndPtDescriptionMove( moveDescTrk, ep, action, pos );
+			break;
 		case 1:
-			return CompoundDescriptionMove( trk, action, pos );
+			rc = CompoundDescriptionMove( moveDescTrk, action, pos );
+			break;
 		case 2:
-			return CurveDescriptionMove( trk, action, pos );
+			rc = CurveDescriptionMove( moveDescTrk, action, pos );
+			break;
 		case 3:
-			return CornuDescriptionMove( trk, action, pos );
+			rc = CornuDescriptionMove( moveDescTrk, action, pos );
+			break;
 		case 4:
-			return BezierDescriptionMove( trk, action, pos );
+			rc = BezierDescriptionMove( moveDescTrk, action, pos );
+			break;
+		case 5:
+			rc = StraightDescriptionMove( moveDescTrk, action, pos);
+			break;
+		case 6:
+			rc = JointDescriptionMove( moveDescTrk, action, pos);
+			break;
 		}
 		hidden = FALSE;
 		if ( action == C_UP ) {
-			trk = NULL;
+			moveDescTrk = NULL;
 			InfoMessage(_("To Hide, use Context Menu"));
+			return C_TERMINATE;
 		}
 		break;
-
+	case C_REDRAW:
+		if ( labelWhen < 2 || mainD.scale > labelScale )
+			return C_CONTINUE;
+		if ( moveDescTrk ) {
+			if (mode==0) {
+				DrawEndPt2( &tempD, moveDescTrk, ep, wDrawColorBlue );
+			} else {
+				if (hidden) {
+					DrawTrack( moveDescTrk,&tempD,wDrawColorAqua);
+				} else {
+					DrawTrack( moveDescTrk,&tempD,wDrawColorBlue);
+				}
+			}
+		}
+		break;
 	case C_CMDMENU:
-		if (trk == NULL) {
-			moveDescTrk = OnTrack( &pos, TRUE, FALSE );
+		if (moveDescTrk != NULL && mode !=0) {
+			if ( GetLayerFrozen( GetTrkLayer( moveDescTrk ) ) ) {
+				moveDescTrk = NULL;
+				break;
+			}
 			moveDescPos = pos;
 		} else {
-			moveDescTrk = trk;
 			moveDescPos = pos;
 		}
 		if ( moveDescTrk == NULL ) break;

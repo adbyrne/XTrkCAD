@@ -704,6 +704,11 @@ BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, co
 
 /*tstraight.c*/
 DIST_T StraightDescriptionDistance(coOrd pos, track_p trk, coOrd * dpos, BOOL_T show_hidden, BOOL_T * hidden);
+STATUS_T StraightDescriptionMove(track_p trk,wAction_t action,coOrd pos );
+
+/*tease.c*/
+DIST_T JointDescriptionDistance(coOrd pos,track_p trk,coOrd * dpos,BOOL_T show_hidden,BOOL_T * hidden);
+STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 
 /* cmisc.c */
 wIndex_t describeCmdInx;
