@@ -1956,6 +1956,7 @@ STATUS_T DrawGeomModify(
 		case SEG_TBLEDGE:
 			if ( MyGetKeyState() & WKEY_CTRL )
 				OnTableEdgeEndPt( NULL, &pos );
+			/* no break */
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
@@ -2110,18 +2111,20 @@ STATUS_T DrawGeomModify(
 		return C_CONTINUE;
 	case C_MOVE:
 		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
-
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
 		if (context->state != MOD_SELECTED_PT) return C_CONTINUE;
+		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT))==0) {
+			SnapPos(&pos);
+		}
 		switch (tempSegs(0).type) {
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
 		case SEG_TBLEDGE:
-			if ( (MyGetKeyState() & WKEY_SHIFT) != 0) {
+			if ( (MyGetKeyState() & WKEY_SHIFT) != 0) {     //Shift is on same line
 				d = FindDistance( pos, tempSegs(0).u.l.pos[1-lineInx] );
 				Translate( &pos, tempSegs(0).u.l.pos[1-lineInx], segA1, d );
-			} else if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+			} else if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap )  {  //M.S. Either on or Off
 				OnTrack( &pos, FALSE, FALSE );
 				CreateEndAnchor(pos,TRUE);
 			}
@@ -2135,7 +2138,7 @@ STATUS_T DrawGeomModify(
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
 			if ( MyGetKeyState() & WKEY_CTRL )
-				OnTableEdgeEndPt( NULL, &pos );
+				OnTableEdgeEndPt( NULL, &pos );         //Snap to Table End Point with CTRL
 			/* no break */
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
@@ -2305,7 +2308,6 @@ STATUS_T DrawGeomModify(
 		}
 		return C_CONTINUE;
 	case C_UP:
-
 		if (context->rotate_state) return DrawGeomOriginMove(action, pos, context);
 
 		if (polyMode) {
