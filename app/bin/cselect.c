@@ -3109,7 +3109,7 @@ static STATUS_T CmdSelect(
 					}
 				} else wSetCursor(mainD.d,defaultCursor);
 			} else wSetCursor(mainD.d,defaultCursor);
-		}
+		} else wSetCursor(mainD.d,defaultCursor);
 		break;
 
 	case C_DOWN:

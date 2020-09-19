@@ -486,12 +486,13 @@ static void CreateCornuEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
-
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 static void CreateCornuExtendAnchor(coOrd p, ANGLE_T a, wBool_t selected) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,FALSE,wDrawColorBlue);
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 static void CreateCornuAnchor(coOrd p, wBool_t open) {
@@ -505,6 +506,7 @@ static void CreateCornuAnchor(coOrd p, wBool_t open) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 /*
@@ -1135,7 +1137,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			coOrd temp_pos = pos;
 			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,NULL))) {
 				CreateCornuAnchor(temp_pos, TRUE);
-			}
+			} else wSetCursor(mainD.d,defaultCursor);
 		}
 		return C_CONTINUE;
 

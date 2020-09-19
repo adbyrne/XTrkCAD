@@ -79,6 +79,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 static void CreateCornuAnchor(coOrd p, wBool_t lock) {
@@ -102,6 +103,7 @@ static void CreateCornuAnchor(coOrd p, wBool_t lock) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 
@@ -373,6 +375,7 @@ STATUS_T CmdModify(
 		if (modifyDrawMode) return ModifyDraw(wActionMove,pos);
 		if (modifyBezierMode) return ModifyBezier(wActionMove, pos);
 		track_p t;
+		wSetCursor(mainD.d,defaultCursor);
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayerSilent( t )) {
 			EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 			if (QueryTrack( t, Q_IS_CORNU )) {
@@ -386,6 +389,7 @@ STATUS_T CmdModify(
 				ANGLE_T a = tp.angle;
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateRadiusAnchor(pos,a,FALSE);
+				wSetCursor(mainD.d,wCursorNone);
 			} else if (QueryTrack(t,Q_CAN_EXTEND)) {
 				if (ep != -1) {
 					if (MyGetKeyState()&WKEY_CTRL) {
