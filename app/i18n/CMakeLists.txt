@@ -2,10 +2,12 @@ PROJECT(i18n)
 
 # List of the supported locales.
 SET(XTRKCAD_LOCALE_IDS
+	cy_GB
 	de_DE
 	fi
 	fr_FR
 	pt_BR
+	ru
 	)
 
 # Misc variables

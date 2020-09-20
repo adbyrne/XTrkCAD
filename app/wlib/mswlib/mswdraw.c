@@ -29,11 +29,7 @@
 #include <math.h>
 #include <winuser.h>
 
-#ifdef WIN32
 #define wFont_t tagLOGFONTA
-#else
-#define wFont_t tagLOGFONT
-#endif
 
 #include "misc.h"
 #include "mswint.h"
@@ -1490,11 +1486,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		UINT wParam,
 		LONG lParam )
 {
-#ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wDraw_p b;
 	short int ix, iy;
 	wPos_t x, y;

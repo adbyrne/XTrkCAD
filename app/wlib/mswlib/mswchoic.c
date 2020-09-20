@@ -145,11 +145,7 @@ long FAR PASCAL _export pushChoiceItem(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 
 	wControl_p b = mswMapIndex( inx );
 

@@ -6,4 +6,5 @@ Exec=xtrkcad
 Icon=xtrkcad.png
 Terminal=false
 Type=Application
-Categories=Graphics;Game
+Categories=Graphics
+

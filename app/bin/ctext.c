@@ -55,7 +55,7 @@ static struct {
 		ANGLE_T angle;
 		long size;
 		wIndex_t fontSizeInx;
-		char text[STR_LONG_SIZE];
+		char text[STR_HUGE_SIZE];
         wDrawColor color;
         BOOL_T boxed;
 		} Dt;
@@ -205,6 +205,12 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 				Dt.text[Dt.len++] = (char)c;
 				Dt.text[Dt.len] = '\000';
 			}
+		}
+		if (Dt.len>sizeof(Dt.text)-8) {
+			Dt.len=sizeof(Dt.text)-8;
+			Dt.text[Dt.len] = '\0';
+			InfoMessage("Text too long - truncated");
+			wBeep();
 		}
         DrawMultiLineTextSize( &mainD, Dt.text, NULL, Dt.size, TRUE, &size, &lastline);
 		Dt.textLen = size.x;

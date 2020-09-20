@@ -947,11 +947,7 @@ long FAR PASCAL _export pushList(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
@@ -981,11 +977,7 @@ long FAR PASCAL _export pushCombo(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
@@ -1061,10 +1053,6 @@ static wList_p listCreate(
 		mswFail("CreateWindow(LIST)");
 		return b;
 	}
-
-#ifdef CONTROL3D
-	Ctl3dSubclassCtl( b->hWnd );
-#endif
 
 	GetWindowRect( b->hWnd, &rect );
 	b->w = rect.right - rect.left;

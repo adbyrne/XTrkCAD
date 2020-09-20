@@ -251,6 +251,7 @@ const char * GetBalloonHelpStr( char* );
 const char * GetCurCommandName( void );
 void EnableCommands( void );
 void Reset( void );
+void TryCheckPoint( void );
 wIndex_t GetCurrentCommand(void);
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
@@ -325,6 +326,11 @@ void InitNewTurn( wMenu_p m );
 
 /* cnote.c */
 void ClearNote( void );
+
+/* cprintc.c */
+coOrd GetPrintOrig();
+ANGLE_T GetPrintAngle();
+
 
 /* cruler.c */
 void RulerRedraw( BOOL_T );

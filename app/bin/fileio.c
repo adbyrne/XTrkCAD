@@ -846,7 +846,8 @@ int LoadTracks(
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
-	LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden my archive
+	if (!data)
+		LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden by archive
 	UndoSuspend();
 	useCurrentLayer = FALSE;
 #ifdef TIME_READTRACKFILE
@@ -994,7 +995,7 @@ int LoadTracks(
  * Load the layout specified by data. Filename may contain a full
  * path.
  * \param index IN ignored
- * \param label IN ignored
+ * \param label IN if not NULL - during startup - set flag to not load background
  * \param data IN path and filename
  */
 
@@ -1005,9 +1006,11 @@ EXPORT void DoFileList(
 {
 	char *pathName = (char*)data;
 	bExample = FALSE;
-	LoadTracks( 1, &pathName, NULL );
+	if (label)
+		LoadTracks( 1, &pathName, (void*)1 );
+	else
+		LoadTracks( 1, &pathName, NULL );
 }
-
 
 static BOOL_T DoSaveTracks(
 		const char * fileName )
@@ -1251,7 +1254,7 @@ EXPORT void DoExamples( void )
 	if (examplesFile_fs == NULL) {
 		static wBool_t bExample = TRUE;
 		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
-			sSourceFilePattern, LoadTracks, &bExample );
+			sSourceFilePattern, LoadTracks, NULL );
 	}
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );

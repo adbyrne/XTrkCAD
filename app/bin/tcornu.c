@@ -199,6 +199,10 @@ DIST_T CornuDescriptionDistance(
 	return FindDistance( p1, pos );
 }
 
+typedef struct {
+    	coOrd pos;
+    	ANGLE_T angle;
+    } pos_angle_t;
 
 static void DrawCornuDescription(
 		track_p trk,
@@ -219,9 +223,15 @@ static void DrawCornuDescription(
     pos.y += xx->cornuData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
 
-    sprintf( message, _("Cornu: len=%0.2f min_rad=%0.2f"),
-						xx->cornuData.length, (xx->cornuData.minCurveRadius>=10000.00)?0.0:xx->cornuData.minCurveRadius);
-    DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
+    sprintf( message, _("Cornu: L %s A %0.3f trk_len=%s min_rad=%s"),
+    		FormatDistance(FindDistance(xx->cornuData.pos[0], xx->cornuData.pos[1])),
+    		FindAngle(xx->cornuData.pos[0], xx->cornuData.pos[1]),
+			FormatDistance(xx->cornuData.length),
+			FormatDistance((xx->cornuData.minCurveRadius>=10000.00)?0.0:xx->cornuData.minCurveRadius));
+    DrawDimLine( d, xx->cornuData.pos[0], xx->cornuData.pos[1], message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+    if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, pos, xx->cornuData.length, color);
+
 }
 
 

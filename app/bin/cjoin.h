@@ -48,6 +48,7 @@ void UndoJoint( track_p, EPINX_T, track_p, EPINX_T );
 void DrawJointTrack( drawCmd_p, coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T, BOOL_T, track_p, EPINX_T, EPINX_T, DIST_T, wDrawColor, long );
 DIST_T JointDistance( coOrd *, coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T );
 coOrd GetJointSegEndPos( coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T, BOOL_T, EPINX_T, ANGLE_T * );
+DIST_T JointDescriptionDistance(coOrd pos, track_p trk, coOrd * dpos, BOOL_T show_hidden, BOOL_T * hidden);
 
 #endif // !HAVE_CJOIN_H
 
