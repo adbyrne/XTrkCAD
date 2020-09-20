@@ -1578,23 +1578,13 @@ If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to 
 
 \u000
 
-\dd \e{Right-Click} - displays a pop-up menu of commands.
-
-\u000
-
-\dd \e{"?"} - displays the Property menu for the object hovered over
-
-\u000
-
-\dd \e{"@"} - moves the center of the window (i.e., Pans) to be at the cursor position
-
-\dd \e{Shift+Ctrl} plus the \e{Arrow Keys} will move the selected items a pixel at a time at the current zoom level. No autosnap will occur to permit fine tuning.
+\dd \e{Right-Click} and \e{Shift-Right-Click} - either display a pop-up menu of commands or a set of context commands for the item under the cursor depending on the setting of "Right-Click" in \K{cmdCmdopt}.
 
 \lcont{
 
 \u000
 
-\G{png.d/mselect.png} or \G{png.d/mselected.png}
+\G{png.d/mselectcmd.png} or \G{png.d/mselectcontext.png}
 
 \u000
 
@@ -1602,11 +1592,38 @@ If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to 
 
 \u000
 
-\dd Hovering over a selected object (inside the blue highlight area) with either a \e{Shift} or a \e{Ctrl} button depressed displays an anchor that shows that a Left-Drag will either Move or Rotate the selected items.
+\dd \e{Double-Click} - invokes \K{cmdModify} on the object after selecting it for eligible objects. Otherwise it acts as \e{Left-Click}.
 
 \u000
 
-\dd \e{Shift+Right-Click} (\K{cmdAcclKeys}) - displays a pop-up menu of options controlling how objects are drawn during moves and rotates (below).  If there are selected objects then additional menu items allow you to rotate the selected objects by various angles.
+\dd \e{"?"} - displays the Property menu for the object hovered over
+
+\u000
+
+\dd \e{"c"} - moves the center of the window (i.e., Pans) to be at the cursor position
+
+\u000
+
+\dd Hovering over a selected object (inside the blue highlight area) displays an anchor. The Anchor shows the actions available - 
+
+\lcont{
+
+\b If the \e{Shift} key is depressed, a "cross-arrows" anchor shows that a \K{cmdMove} will occur with \e{Left-Click}.
+
+\b If the \e{Ctrl} key is depresesed, a "rotation-circle" anchor shows that a \K{cmdRotate} will occur with \e{Left-Click}.
+
+\b With neither depressed a "target" anchor shows that a \e{Double-Click} will invoke \K{cmdModify} within Select for the object hovered over.  
+
+} 
+
+\u000
+
+\dd \e{Shift+Ctrl} plus the \e{Arrow Keys} will move the selected items a pixel at a time at the current zoom level. No autosnap will occur to permit fine tuning.
+
+\u000
+
+\dd \e{Shift+Right-Click} or \e{Right-Click} (depending on the setting of \f{Right-Click} in \K{cmdCmdopt}) - 
+Shows context menu items that allow you to perform actions on the selected item(s) including rotating them by various angles and moving them fixed amounts.
 
 \u000
 
@@ -1627,7 +1644,26 @@ Upon release of the button, all the selected tracks will be moved and aligned an
 
 \u000
 
-The following commands operate on the objects you have selected:
+\dd \e{Double-Click} - on a eligible object such as a Link Object will Activate it, and on a Modifyable object will go into Modify Mode (\K{cmdModify}) within Select. 
+
+\u000
+
+\dd \e{Right-Click} and \e{Shift-Right-Click} - either display a pop-up menu of commands or a set of context commands for the items selected depending on the setting of "Right-Click" in \K{cmdCmdopt}.
+The options effects depend on the type of object(s) selected and hovered over. 
+
+\lcont{
+\u000
+
+\G{png.d/mselectcmd.png} or \G{png.d/mselectedcontext.png}
+
+\u000
+
+}
+
+Once Objects are 
+
+
+Once objects are selected, the following commands operate on them:
 
 \b \f{Move} (\K{cmdMove}) the selected objects.
 
@@ -1647,7 +1683,7 @@ The following commands operate on the objects you have selected:
 
 \b \f{Export} (\K{cmdExport}) the selected objects.
 
-\b Creates a structure or turnout definition from \f{Grouped} (\K{cmdGroup}) objects.
+\b \f{Group} Creates a structure or turnout definition (\K{cmdGroup}) from the objects.
 
 \b \f{Rescale} (\K{cmdRescale}) the selected objects.
 
