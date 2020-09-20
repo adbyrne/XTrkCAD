@@ -46,24 +46,6 @@
  *
  */
 
-//Convert the internal path segment into the external one - which is based on the index count of only the track segments
-
-char ConvertPathSegToExternal(char signed pp, int segCnt,trkSeg_p segs) {
-
-	char signed new_pp;
-	int old_inx;
-	EPINX_T old_EP;
-	GetSegInxEP(pp,&old_inx,&old_EP);
-	int j = old_inx;
-	for (int i=0;i<old_inx;i++) {
-		if ( !IsSegTrack(&segs[i]) ) {
-			j--;
-		}
-	}
-	SetSegInxEP(&new_pp,j,old_EP);
-	return new_pp;
-
-}
 
 BOOL_T WriteCompoundPathsEndPtsSegs(
 		FILE * f,
@@ -80,7 +62,7 @@ BOOL_T WriteCompoundPathsEndPtsSegs(
 	for ( pp=paths; *pp; pp+=2 ) {
 		rc &= fprintf( f, "\tP \"%s\"", pp )>0;
 		for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ )
-			rc &= fprintf( f, " %d", ConvertPathSegToExternal(pp[0],segCnt,segs) )>0;
+			rc &= fprintf( f, " %d", pp[0] )>0;
 		rc &= fprintf( f, "\n" )>0;
 	}
 	for ( i=0; i<endPtCnt; i++ )
