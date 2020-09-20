@@ -1047,7 +1047,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			int end = Da.state==POS_1?0:1;
 			EPINX_T ep;
 			if (Da.track) {
-				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {   //Snap Track
+				if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {   //Snap Track
 					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 						ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
@@ -1066,7 +1066,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 					}
 				}
 			} else {													//Snap Bez Line to Lines
-				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+				if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 					if ((t = OnTrack(&p,FALSE, FALSE)) != NULL) {
 						if (GetClosestEndPt(t,&p)) {
 							pos = p;
@@ -1101,9 +1101,9 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if ( Da.state != POS_1 && Da.state != POS_2) return C_CONTINUE;
+		if ( Da.state != POS_1 && Da.state != POS_2) return C_CONTINUE;  //Don't snap CPs
 		if (Da.track)  {
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
 					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					if (ep != -1) {
@@ -1115,15 +1115,14 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				}
 			}
 		} else {
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				if ((t = OnTrack(&pos,FALSE, FALSE)) != NULL) {
 					CreateEndAnchor(pos,TRUE);
 				}
 			}
 		}
-		if (anchors_da.cnt)
-		return C_CONTINUE;
-			
+		if (anchors_da.cnt)	return C_CONTINUE;
+		/* no break */
 	case C_MOVE:
 		if (Da.state == POS_1) {
 			InfoMessage( _("Place 1st endpoint of Bezier - snap to %s"), Da.track?"unconnected track":"line" );

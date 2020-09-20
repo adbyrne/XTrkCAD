@@ -760,6 +760,14 @@ EXPORT coOrd GetJointSegEndPos(
 	return p1;
 }
 
+STATUS_T JointDescriptionMove(
+		track_p trk,
+		wAction_t action,
+		coOrd pos )
+{
+    return C_CONTINUE;
+}
+
 DIST_T JointDescriptionDistance(
 		coOrd pos,
 		track_p trk,
