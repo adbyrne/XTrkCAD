@@ -891,7 +891,8 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
 			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
-			wPrefGetFloat("misc", "desired_radius", &desired_radius, desired_radius);
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
 			controls[0] = joinRadPD.control;
 			controls[1] = NULL;
 			labels[0] = N_("Desired Radius");
@@ -1332,8 +1333,10 @@ errorReturn:
 		Dj.state = 0;
 		DYNARR_RESET(trkSeg_t,Dj.anchors);
 		rc = C_TERMINATE;
-		if (easementVal == 0.0)
-			wPrefSetFloat("misc", "desired_radius", desired_radius);
+		if (easementVal == 0.0) {
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefSetFloat("misc", message, desired_radius);
+		}
 		if ( (!JoinTracks( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp_pos[0],
 					trk, ep, Dj.jRes.pos[0], &Dj.jointD[0] ) ) ||
 			 (!JoinTracks( Dj.inp[1].trk, Dj.inp[1].params.ep, Dj.inp_pos[1],
