@@ -736,7 +736,7 @@ TURNOUT O "Ross	Transition Curve 11d 4.5	TR45"
 	END
 
 SUBCONTENTS Ross - Turn Tables
-TURNOUT O "Ross	18"" 7.5d Turn Table	TUTA18M/A"
+TURNOUT O "Ross	18"" 7.5d Turn Table	TUTA18M/A" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -839,7 +839,7 @@ TURNOUT O "Ross	18"" 7.5d Turn Table	TUTA18M/A"
 	L	11579568	0.046875	10.000000	-10.000000	-10.000000	-10.000000
 	L	11579568	0.046875	-10.000000	-10.000000	-10.000000	10.000000
 	END
-TURNOUT O "Ross	24"" 7.5d Turn Table	TUTA24M/A"
+TURNOUT O "Ross	24"" 7.5d Turn Table	TUTA24M/A" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -942,7 +942,7 @@ TURNOUT O "Ross	24"" 7.5d Turn Table	TUTA24M/A"
 	L	11579568	0.046875	13.000000	-13.000000	-13.000000	-13.000000
 	L	11579568	0.046875	-13.000000	-13.000000	-13.000000	13.000000
 	END
-TURNOUT O "Ross	27"" 7.5d Turn Table	TUTA27M/A"
+TURNOUT O "Ross	27"" 7.5d Turn Table	TUTA27M/A" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1045,7 +1045,7 @@ TURNOUT O "Ross	27"" 7.5d Turn Table	TUTA27M/A"
 	L	11579568	0.046875	14.500000	-14.500000	-14.500000	-14.500000
 	L	11579568	0.046875	-14.500000	-14.500000	-14.500000	14.500000
 	END
-TURNOUT O "Ross	33"" 7.5d Turn Table	TUTA33M/A"
+TURNOUT O "Ross	33"" 7.5d Turn Table	TUTA33M/A" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1150,7 +1150,7 @@ TURNOUT O "Ross	33"" 7.5d Turn Table	TUTA33M/A"
 	END
 
 SUBCONTENTS Ross - Transfer Tables
-TURNOUT O "Ross	18"" 5 Stop Transfer Table (3.5"" Trk Center)	TT185"
+TURNOUT O "Ross	18"" 5 Stop Transfer Table (3.5"" Trk Center)	TT185" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1184,7 +1184,7 @@ TURNOUT O "Ross	18"" 5 Stop Transfer Table (3.5"" Trk Center)	TT185"
 	L 0 0.046875 18.750000 -18.250000 -0.750000 -18.250000
 	L 0 0.046875 -0.750000 -18.250000 -0.750000 4.250000
 	END
-TURNOUT O "Ross	18"" 10 Stop Transfer Table (3.5"" Trk Center)	TT1810"
+TURNOUT O "Ross	18"" 10 Stop Transfer Table (3.5"" Trk Center)	TT1810" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1238,7 +1238,7 @@ TURNOUT O "Ross	18"" 10 Stop Transfer Table (3.5"" Trk Center)	TT1810"
 	L 0 0.046875 18.750000 -35.750000 -0.750000 -35.750000
 	L 0 0.046875 -0.750000 -35.750000 -0.750000 4.250000
 	END
-TURNOUT O "Ross	27"" 5 Stop Transfer Table (3.5"" Trk Center)	TT275"
+TURNOUT O "Ross	27"" 5 Stop Transfer Table (3.5"" Trk Center)	TT275" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1272,7 +1272,7 @@ TURNOUT O "Ross	27"" 5 Stop Transfer Table (3.5"" Trk Center)	TT275"
 	L 0 0.046875 27.750000 -18.250000 -0.750000 -18.250000
 	L 0 0.046875 -0.750000 -18.250000 -0.750000 4.250000
 	END
-TURNOUT O "Ross	27"" 10 Stop Transfer Table (3.5"" Trk Center)	TT2710"
+TURNOUT O "Ross	27"" 10 Stop Transfer Table (3.5"" Trk Center)	TT2710" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1326,7 +1326,7 @@ TURNOUT O "Ross	27"" 10 Stop Transfer Table (3.5"" Trk Center)	TT2710"
 	L 0 0.046875 27.750000 -35.750000 -0.750000 -35.750000
 	L 0 0.046875 -0.750000 -35.750000 -0.750000 4.250000
 	END
-TURNOUT O "Ross	36"" 5 Stop Transfer Table (3.5"" Trk Center)	TT365"
+TURNOUT O "Ross	36"" 5 Stop Transfer Table (3.5"" Trk Center)	TT365" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1360,7 +1360,7 @@ TURNOUT O "Ross	36"" 5 Stop Transfer Table (3.5"" Trk Center)	TT365"
 	L 0 0.046875 36.750000 -18.250000 -0.750000 -18.250000
 	L 0 0.046875 -0.750000 -18.250000 -0.750000 4.250000
 	END
-TURNOUT O "Ross	36"" 10 Stop Transfer Table (3.5"" Trk Center)	TT3610"
+TURNOUT O "Ross	36"" 10 Stop Transfer Table (3.5"" Trk Center)	TT3610" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1416,7 +1416,7 @@ TURNOUT O "Ross	36"" 10 Stop Transfer Table (3.5"" Trk Center)	TT3610"
 	END
 
 SUBCONTENTS Ross - Roundhouses
-TURNOUT O "Ross	33"" 6 Stall Roundhouse	RH336"
+TURNOUT O "Ross	33"" 6 Stall Roundhouse	RH336" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1479,7 +1479,7 @@ TURNOUT O "Ross	33"" 6 Stall Roundhouse	RH336"
 	L 8404992 0.100000 52.109683 40.916864 53.009634 39.744025
 	L 8404992 0.100000 51.737064 45.372187 57.216705 38.230980
 	END
-TURNOUT O "Ross	33"" 6 Stall Add-On Roundhouse	RH336A"
+TURNOUT O "Ross	33"" 6 Stall Add-On Roundhouse	RH336A" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1542,7 +1542,7 @@ TURNOUT O "Ross	33"" 6 Stall Add-On Roundhouse	RH336A"
 	L 8404992 0.100000 52.109683 40.916864 53.009634 39.744025
 	L 8404992 0.100000 51.737064 45.372187 57.216705 38.230980
 	END
-TURNOUT O "Ross	33"" 3 Stall Roundhouse	RH333"
+TURNOUT O "Ross	33"" 3 Stall Roundhouse	RH333" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -1575,7 +1575,7 @@ TURNOUT O "Ross	33"" 3 Stall Roundhouse	RH333"
 	L 8404992 0.100000 63.801276 17.860741 64.183896 16.432783
 	L 8404992 0.100000 65.16199 22.119518 67.491705 13.424935
 	END
-TURNOUT O "Ross	33"" 3 Stall Add-On Roundhouse	RH333A"
+TURNOUT O "Ross	33"" 3 Stall Add-On Roundhouse	RH333A" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3

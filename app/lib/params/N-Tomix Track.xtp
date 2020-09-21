@@ -1349,7 +1349,7 @@ TURNOUT N  "Tomix Fine Track	Deck Grider Bridge(DK Green) 5.51 140mm	3241"
 	END
 
 SUBCONTENTS Tomix N-Scale Fine Track - Turn Table
-TURNOUT N  "Tomix Fine Track	Turn Table 8.34 212mm	1631"
+TURNOUT N  "Tomix Fine Track	Turn Table 8.34 212mm	1631" 512
 # TT was designed with 212mm bridge, outside dia. is approx., 15 degree spacing
 	P "1" 1 2 3
 	P "2" 4 5 6

@@ -87,12 +87,12 @@ TURNOUT O "Bassett-Lowke O Scale	18""/457.2mm 15d Right Turnout	RTS"
 	S 0 0 0.000000 0.000000 18.000000 0.000000
 	C 0 0.000000 35.370079 0.000000 -35.370079 0.000000 15.000000
 	END
-TURNOUT O "Bassett-Lowke O Scale	Three-Way Turnout(need to find data)	TWT"
+TURNOUT O "Bassett-Lowke O Scale	Three-Way Turnout(need to find data)	TWT" 256
 #	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	Z 0 0.000000 0.000000 0.000000 0 72.000000 "Future Addition - Need to find Data"
 	END
-TURNOUT O "Bassett-Lowke O Scale	Wye Turnout(need to find data)	WYE"
+TURNOUT O "Bassett-Lowke O Scale	Wye Turnout(need to find data)	WYE" 256
 #	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	Z 0 0.000000 0.000000 0.000000 0 72.000000 "Future Addition - Need to find Data"
@@ -179,7 +179,7 @@ TURNOUT O "Bassett-Lowke O Scale	24""/609.6mm Right Parallel Turnout	RTP"
 	END
 
 SUBCONTENTS Bassett-Lowke O Scale - Crossing
-TURNOUT O "Bassett-Lowke O Scale	Long Crossing(need to find data)	DLC"
+TURNOUT O "Bassett-Lowke O Scale	Long Crossing(need to find data)	DLC" 256
 #	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	Z 0 0.000000 0.000000 0.000000 0 72.000000 "Future Addition - Need to find Data"
