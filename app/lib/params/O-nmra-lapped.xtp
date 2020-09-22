@@ -3,9 +3,8 @@ CONTENTS NMRA O 2 Rail Lapped turnouts
 #sterbejj@hotmail.com	June 6, 2007
 #Reference:  John Armstrong article MRR May 1954
 TURNOUT O "NMRA O #4 Right	Lapped #4R + #4R"
-	P "Normal" 1
-	P "Right" 2 3 4 5
-	P "Left" 6 7 8 9
+	P "P1" 2 3 4 5 0 6 7 8 9
+	P "P2" 1
 	E 0.000000 0.000000 270.000000
 	E 15.625000 -1.576999 104.250000
 	E 15.625000 0.000000 90.000000
@@ -21,9 +20,8 @@ TURNOUT O "NMRA O #4 Right	Lapped #4R + #4R"
 	S 0 0 2.5625 0.938905 0.000000 1.576999
 	END
 TURNOUT O "NMRA O #4 Left	Lapped #4L + #4L"
-	P "Normal" 1
-	P "Right" 2 3 4 5
-	P "Left" 6 7 8 9
+	P "P1" 2 3 4 5 0 6 7 8 9
+	P "P2" 1
 	E 0.000000 0.000000 270.000000
 	E 15.625000 1.576999 75.750000
 	E 15.625000 0.000000 90.000000
@@ -38,10 +36,11 @@ TURNOUT O "NMRA O #4 Left	Lapped #4L + #4L"
 	C 0 0 -30.000000 9.324114 -30.166984 346.974357 9.659273
 	S 0 0 2.5625 -0.938905 0.000000 -1.576999
 	END
-TURNOUT O "NMRA O #5 Right	Lapped #5R + #5R"
-	P "Normal" 1
-	P "Right" 2 3 4 5
-	P "Left" 6 7 8 9
+# #5 turnouts have joining angles of 2.99 which exceeds limits
+# Therefore we use the old paths
+TURNOUT O "NMRA O #5 Right	Lapped #5R + #5R" 256
+	P "P1" 2 3 4 5 0 6 7 8 9
+	P "P2" 1
 	E 0.000000 0.000000 270.000000
 	E 17.875000 0.000000 90.000000
 	E 0.000000 1.535771 281.416667
@@ -56,10 +55,9 @@ TURNOUT O "NMRA O #5 Right	Lapped #5R + #5R"
 	C 0 0 52.000000 12.236306 52.114009 183.637205 6.804034
 	S 0 0 2.8125 0.975062 0.000000 1.535771
 	END
-TURNOUT O "NMRA O #5 Left	Lapped #5L + #5L"
-	P "Normal" 1
-	P "Right" 2 3 4 5
-	P "Left" 6 7 8 9
+TURNOUT O "NMRA O #5 Left	Lapped #5L + #5L" 256
+	P "P1" 2 3 4 5 0 6 7 8 9
+	P "P2" 1
 	E 0.000000 0.000000 270.000000
 	E 17.875000 0.000000 90.000000
 	E 0.000000 -1.535771 258.583333

@@ -70,8 +70,9 @@ TURNOUT N  "Peco-80	Curved Right	SL-1734/386"
 	C 0 0.000000 18.000000 0.000137 -18.000011 19.473845 0.159155
 	END
 TURNOUT N  "Peco-80	Curved Left	SL-1735/387"
-	P "Normal" 1 2 3
-	P "Reverse" 1 4 5 6
+# fix path signs
+	P "Normal" 3 -2 1
+	P "Reverse" -1 4 5 -6
 	E 0.000000 0.000000 270.000000
 	E 6.137008 0.526772 80.185000
 	E 6.048031 1.046457 70.367000
@@ -127,7 +128,7 @@ TURNOUT N "Peco	Right Catchpoint	SL-384"
 	S 0 0.000000 1.102304 -0.016349 2.875000 -0.093750
 	END
 SUBCONTENTS Peco - Turntables
-TURNOUT N "Peco	Turn Table	NB-55"
+TURNOUT N "Peco	Turn Table	NB-55" 512
 	P "1" 1 2 3
 	P "2" 4 5 6
 	P "3" 7 8 9
