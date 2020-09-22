@@ -498,7 +498,6 @@ static void SelectOneTrack(
 			selectedTrackCount--;
 		}
 		SelectedTrackCountChange();
-		DrawTrackAndEndPts( trk, wDrawColorBlack );
 }
 
 
@@ -1231,10 +1230,10 @@ static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
 		}
 		if (color != wDrawColorWhite)
 			ClrTrkBits(trk, TB_UNDRAWN);
-		DrawTrack( trk, d, color );
 		if (color == wDrawColorWhite)
 			SetTrkBits( trk, TB_UNDRAWN );
 	}
+	MainRedraw();  //Omitting all the tracks with TB_UNDRAWN set
 	/*wDrawDelayUpdate( d->d, FALSE );*/
 }
 
