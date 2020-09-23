@@ -279,7 +279,7 @@ static void FlipLayer(unsigned int layer)
     /* Set visible on related layers other than current */
      for (int i=0;i<layers[layer].layerLinkList.cnt;i++) {
         int l = DYNARR_N(int,layers[layer].layerLinkList,i)-1;
-        if (l != curLayer) {
+        if ((l != curLayer) && (l >=0) && (l < NUM_LAYERS)) {
 			layers[l].visible = layers[layer].visible;
 			if (!layers[l].button_off)
 				wButtonSetBusy(layer_btns[l], layers[l].visible);
@@ -325,6 +325,16 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
     if (!layers[curLayer].visible) {
         FlipLayer(inx);
     }
+
+    /* Set visible on related layers other than current */
+	 for (int i=0;i<layers[curLayer].layerLinkList.cnt;i++) {
+		int l = DYNARR_N(int,layers[curLayer].layerLinkList,i)-1;
+		if (l != curLayer && l >=0 && l < NUM_LAYERS) {
+			layers[l].visible = layers[curLayer].visible;
+			if (!layers[l].button_off)
+				wButtonSetBusy(layer_btns[l], layers[l].visible);
+		}
+	}
 
     if (recordF) {
         fprintf(recordF, "SETCURRLAYER %d\n", inx);

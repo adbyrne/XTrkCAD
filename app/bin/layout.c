@@ -740,6 +740,17 @@ EXPORT int DoSettingsRead(
 		strcpy(buffer, pref);
 		DoSetScale(buffer);
 	}
+	//Get command options
+	wPrefGetInteger("DialogItem","cmdopt-preselect",&preSelect,preSelect);
+	wPrefGetInteger("DialogItem","cmdopt-rightclickmode",&rightClickMode,rightClickMode);
+	wPrefGetInteger("DialogItem","cmdopt-selectmode",&selectMode,selectMode);
+	wPrefGetInteger("DialogItem","cmdopt-selectzero",&selectZero,selectZero);
+
+	//Get Toolbar showing
+	wPrefGetInteger( "misc", "toolbarset",&toolbarSet,toolbarSet);
+
+	//Redraw the screen to reflect changes
+	MainProc( mainW, wResize_e, NULL, NULL );
 	return TRUE;
 }
 
