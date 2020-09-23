@@ -42,12 +42,101 @@
 
 /*****************************************************************************
  *
- * Misc
+ * Paths
  *
  */
 
 
-BOOL_T WriteCompoundPathsEndPtsSegs(
+EXPORT PATHPTR_T GetPaths( track_p trk )
+{
+	struct extraData * xx = GetTrkExtraData( trk );
+#ifdef NEWPATH
+	if ( xx->new_paths == NULL ) {
+		xx->new_paths = GenerateTrackPaths( trk );
+	}
+	return xx->new_paths;
+#else
+	return xx->paths;
+#endif
+}
+
+
+EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
+{
+	PATHPTR_T pp;
+	ASSERT( paths != NULL );
+	for ( pp = paths; pp[0]; pp+=2 )
+		for ( pp += strlen( (char*)pp ); pp[0] || pp[1]; pp++ );
+	return pp - paths + 1;
+}
+
+
+EXPORT void * SetPaths( track_p trk, PATHPTR_T paths )
+{
+	struct extraData * xx = GetTrkExtraData( trk );
+	wIndex_t pathLen = GetPathsLength( paths );
+#ifdef NEWPATH
+	if ( xx->saved_paths )
+		MyFree( xx->saved_paths );
+	xx->saved_paths = memdup( paths, pathLen * sizeof *xx->saved_paths );
+	xx->new_paths = NULL;
+#else
+	if ( xx->paths )
+		MyFree( xx->paths );
+	if ( paths == NULL ) {
+		// Structure, but just to be safe
+		paths = "\0\0\0";
+		pathLen = 3;
+	}
+	xx->paths = memdup( paths, pathLen * sizeof *xx->paths );
+	xx->currPath = NULL;
+#endif
+	xx->currPathIndex = 0;
+}
+
+
+EXPORT PATHPTR_T GetCurrPath( track_p trk )
+{
+	struct extraData * xx = GetTrkExtraData( trk );
+	if ( xx->currPath )
+		return xx->currPath;
+	PATHPTR_T path = GetPaths( trk );
+	for ( wIndex_t position = xx->currPathIndex;
+		position > 0 && path[0];
+		path+=2, position-- ) {
+		for ( path += strlen( (char*)path ); path[0] || path[1]; path++ );
+	}
+	if ( !path[0] ) {
+		xx->currPathIndex = 0;
+		path = GetPaths( trk );
+	}
+	xx->currPath = path;
+	return xx->currPath;
+}
+
+
+EXPORT long GetCurrPathIndex( track_p trk )
+{
+	struct extraData * xx = GetTrkExtraData( trk );
+	return xx->currPathIndex;
+}
+
+
+EXPORT void SetCurrPathIndex( track_p trk, long position )
+{
+	struct extraData * xx = GetTrkExtraData( trk );
+	xx->currPathIndex = position;
+	xx->currPath = NULL;
+}
+
+
+/*****************************************************************************
+ *
+ *
+ *
+ */
+
+EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
 		FILE * f,
 		PATHPTR_T paths,
 		wIndex_t segCnt,
@@ -475,8 +564,8 @@ DIST_T DistanceCompound(
 		p0.x -= xx->orig.x;
 		p0.y -= xx->orig.y;
 		d0 = 1000000.0;
-		path = xx->pathCurr;
-		for ( path=xx->pathCurr+strlen((char *)xx->pathCurr)+1; path[0] || path[1]; path++ ) {
+		path = GetCurrPath( t );
+		for ( path += strlen((char *)path)+1; path[0] || path[1]; path++ ) {
 			if ( path[0] != 0 ) {
 				d1 = 1000000.0;
 				GetSegInxEP( *path, &segInx, &segEP );
@@ -967,37 +1056,29 @@ BOOL_T WriteCompound(
 	long options;
 	long position = 0;
 	drawLineType_e lineType = 0;
-	PATHPTR_T path;
 	BOOL_T rc = TRUE;
 
 	options = (long)GetTrkWidth(t);
 	if (xx->handlaid)
-		options |= 0x08;
+		options |= COMPOUND_OPTION_HANDLAID;
 	if (xx->flipped)
-		options |= 0x10;
+		options |= COMPOUND_OPTION_FLIPPED;
 	if (xx->ungrouped)
-		options |= 0x20;
+		options |= COMPOUND_OPTION_UNGROUPED;
 	if (xx->split)
-		options |= 0x40;
+		options |= COMPOUND_OPTION_SPLIT;
+	if (xx->pathOverRide)
+		options |= COMPOUND_OPTION_PATH_OVERRIDE;
+	if (xx->pathNoCombine)
+		options |= COMPOUND_OPTION_PATH_NOCOMBINE;
 	if ( ( GetTrkBits( t ) & TB_HIDEDESC ) != 0 )
-		options |= 0x80;
+		options |= COMPOUND_OPTION_HIDEDESC;
 	epCnt = GetTrkEndPtCnt(t);
-	if ( epCnt > -0 ) {
-		path = xx->paths;
-		while ( path != xx->pathCurr ) {
-			path += strlen((char*)path)+1;
-			while ( path[0] || path[1] )
-				path++;
-			path += 2;
-			if ( *path == 0 )
-				break;
-			position++;
-		}
-	}
 	lineType = xx->lineType;
 	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				GetTrkTypeName(t),
-				GetTrkIndex(t), GetTrkLayer(t), options, position, lineType,
+				GetTrkIndex(t), GetTrkLayer(t), options,
+				GetCurrPathIndex(t), lineType,
 				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
 				xx->orig.x, xx->orig.y, xx->angle,
 				PutTitle(xtitle(xx)) )>0;
@@ -1016,7 +1097,7 @@ BOOL_T WriteCompound(
 		;
 	}
 	rc &= fprintf( f, "\tD %0.6f %0.6f\n", xx->descriptionOff.x, xx->descriptionOff.y )>0;
-	rc &= WriteCompoundPathsEndPtsSegs( f, xpaths(xx), xx->segCnt, xx->segs, 0, NULL );
+	rc &= WriteCompoundPathsEndPtsSegs( f, GetPaths( t ), xx->segCnt, xx->segs, 0, NULL );
 	return rc;
 }
 
@@ -1067,8 +1148,7 @@ EXPORT track_p NewCompound(
 		EPINX_T epCnt,
 		trkEndPt_t * epp,
 		DIST_T * radii,
-		int pathLen,
-		char * paths,
+		PATHPTR_T paths,
 		wIndex_t segCnt,
 		trkSeg_p segs )
 {
@@ -1089,12 +1169,7 @@ EXPORT track_p NewCompound(
 	xx->title = MyStrdup( title );
 	xx->customInfo = NULL;
 	xx->special = TOnormal;
-	if ( pathLen > 0 )
-		xx->paths = memdup( paths, pathLen );
-	else
-		xx->paths = (PATHPTR_T)"";
-	xx->pathLen = pathLen;
-	xx->pathCurr = xx->paths;
+	SetPaths( trk, paths );
 	xx->segCnt = segCnt;
 	xx->segs = memdup( segs, segCnt * sizeof *segs );
 	trkSeg_p p = xx->segs;
@@ -1159,8 +1234,9 @@ BOOL_T ReadCompound(
 		return FALSE;
 	path = pathPtr;
 	if ( tempEndPts_da.cnt > 0 && pathCnt <= 1 ) {
-		pathCnt = 10;
-		path = (PATHPTR_T)"Normal\01\0\0";
+		// A Turnout with no path: fake it
+		pathCnt = 11;
+		path = (PATHPTR_T)"Normal\01\0\0\0";
 	}
 	if (paramVersion<6 && strlen( title ) > 2) {
 		cp = strchr( title, '\t' );
@@ -1171,7 +1247,9 @@ BOOL_T ReadCompound(
 			UpdateTitleMark( title, LookupScale(scale) );
 		}
 	}
-	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL, NULL, pathCnt, (char *)path, tempSegs_da.cnt, &tempSegs(0) );
+	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL, NULL,
+			path,
+			tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
@@ -1186,13 +1264,15 @@ BOOL_T ReadCompound(
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
 	xx = GetTrkExtraData(trk);
-	xx->handlaid = (int)((options&0x08)!=0);
-	xx->flipped = (int)((options&0x10)!=0);
-	xx->ungrouped = (int)((options&0x20)!=0);
-	xx->split = (int)((options&0x40)!=0);
+	xx->handlaid = (int)((options&COMPOUND_OPTION_HANDLAID)!=0);
+	xx->flipped = (int)((options&COMPOUND_OPTION_FLIPPED)!=0);
+	xx->ungrouped = (int)((options&COMPOUND_OPTION_UNGROUPED)!=0);
+	xx->split = (int)((options&COMPOUND_OPTION_SPLIT)!=0);
+	xx->pathOverRide = (int)((options&COMPOUND_OPTION_PATH_OVERRIDE)!=0);
+	xx->pathNoCombine = (int)((options&COMPOUND_OPTION_PATH_NOCOMBINE)!=0);
 	xx->lineType = lineType;
 	xx->descriptionOff = descriptionOff;
-	if ( ( options & 0x80 ) != 0 )
+	if ( ( options & COMPOUND_OPTION_HIDEDESC ) != 0 )
 		SetTrkBits( trk, TB_HIDEDESC );
 
 	if (tempSpecial[0] != '\0') {
@@ -1213,18 +1293,7 @@ BOOL_T ReadCompound(
 			return FALSE;
 		}
 	}
-	if (pathCnt > 0) {
-		path = xx->pathCurr;
-		while ( position-- ) {
-			path += strlen((char *)path)+1;
-			while ( path[0] || path[1] )
-				path++;
-			path += 2;
-		if ( *path == 0 )
-			path = xx->paths;
-		}
-	}
-	xx->pathCurr = path;
+	SetCurrPathIndex( trk, position );
 	return TRUE;
 }
 
