@@ -2958,7 +2958,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	if ( (d->options&(DC_PRINT)) == 0 ) {
 		if (GetTrkBits(trk)&TB_PROFILEPATH)
 			return profilePathColor;
-		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk))
+		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk) && d == &tempD)
 			return selectedColor;
 	}
 	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) ) {

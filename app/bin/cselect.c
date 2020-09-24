@@ -502,7 +502,7 @@ static void SelectOneTrack(
 
 
 static void HighlightSelectedTracks(
-		track_p trk_ignore, BOOL_T box, BOOL_T invert )
+		track_p trk_ignore, BOOL_T keep, BOOL_T invert )
 {
 	track_p trk = NULL;
 	if ( selectedTrackCount == 0 )
@@ -511,7 +511,9 @@ static void HighlightSelectedTracks(
 		if (trk == trk_ignore) continue;
 	    if(GetTrkSelected(trk)) {
 	    	if (!GetLayerVisible( GetTrkLayer( trk ))) continue;
-	    	if (invert)
+	    	if (keep)
+	    		DrawTrack(trk,&tempD,selectedColor);
+	    	else if (invert)
 	    		DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
 	    	else
 	    		DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
@@ -1401,7 +1403,7 @@ static void DrawMovedTracks( void )
 	dynArr_t cornu_segs;
 
 	DrawSegs( &tempD, moveOrig, moveAngle, &tempSegs(0), tempSegs_da.cnt,
-					0.0, wDrawColorBlack );
+					0.0, selectedColor );
 
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
@@ -1435,7 +1437,7 @@ static void DrawMovedTracks( void )
 				trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
 
 				DrawSegsO(&tempD, trk, zero, 0.0, cornu_p,cornu_segs.cnt,
-						GetTrkGauge(trk), wDrawColorBlack, DTS_LEFT|DTS_RIGHT );
+						GetTrkGauge(trk), selectedColor, DTS_LEFT|DTS_RIGHT );
 			}
 
 		}
@@ -2838,7 +2840,7 @@ static BOOL_T SelectArea(
 			break;
 		//Draw to-be selected tracks versus not.
 		trk = NULL;
-		if (selectMode == 0 && add) HighlightSelectedTracks(NULL, TRUE, TRUE);
+		if (selectMode == 1 && add) HighlightSelectedTracks(NULL, TRUE, TRUE);
 		while ( TrackIterate( &trk ) ) {
 			GetBoundingBox( trk, &hi, &lo );
 			if (GetLayerVisible( GetTrkLayer( trk ) ) &&
@@ -3251,7 +3253,7 @@ static STATUS_T CmdSelect(
 
 		// If not on a track, show all tracks as going to be de-selected if selectZero on
 		if (!trk && selectZero ) {
-			HighlightSelectedTracks(NULL, TRUE, TRUE);
+			HighlightSelectedTracks(NULL, FALSE, TRUE);
 		//Handle the SHIFT+ which means SelectAllConnected case
 		} else if ( trk && !IsTrackDeleted(trk)) {
 			if ((MyGetKeyState() & WKEY_SHIFT) )
@@ -3261,9 +3263,11 @@ static STATUS_T CmdSelect(
 				//Select=Add
 				if (selectMode == 1) {
 					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {
-						//Only Highlight if adding
+						//Only Highlight if adding otherwise show already selected
 						if (!GetTrkSelected(trk))
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+						else
+							DrawTrack(trk,&tempD,selectedColor);
 					} else {
 						if (GetTrkSelected(trk))
 							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);           //Toggle
@@ -3281,6 +3285,8 @@ static STATUS_T CmdSelect(
 						//Only Highlight if adding
 						if (!GetTrkSelected(trk))
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
+						else
+							DrawTrack(trk,&tempD,selectedColor);
 					}
 				}
 			}
@@ -3291,21 +3297,22 @@ static STATUS_T CmdSelect(
 				else
 					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
 				DrawHighlightLayer(GetTrkLayer(trk));
-			} else {
-				//Select=Add
-				if (selectMode == 1) {
-					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
-						HighlightSelectedTracks(trk, TRUE, TRUE);
-					//else
-					//	HighlightSelectedTracks(trk, TRUE, FALSE);  Highlight all selected
-				//Select=Only
-				} else {
-					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL))
-						HighlightSelectedTracks(trk, TRUE, TRUE);
-					//else
-					//	HighlightSelectedTracks(trk, TRUE, TRUE); Highlight all selected
-				}
 			}
+			//Select=Add
+			if (selectMode == 1) {
+				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
+					HighlightSelectedTracks(trk, FALSE, TRUE);
+				else
+					HighlightSelectedTracks(trk, TRUE, FALSE); // Highlight all others selected
+			//Select=Only
+			} else {
+				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL))
+					HighlightSelectedTracks(trk, FALSE, TRUE);
+				else
+					HighlightSelectedTracks(trk, TRUE, FALSE); // Highlight all others selected
+			}
+		} else if (!trk ){
+			HighlightSelectedTracks(trk, TRUE, FALSE);
 		}
 		//Finally add the anchors for any actions or snaps
 		if (anchors_da.cnt) {

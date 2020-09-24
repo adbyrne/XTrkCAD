@@ -1944,7 +1944,7 @@ EXPORT void DrawSegsO(
 
 			// If we are drawing highlights for Select, don't fill just edges
 			bThick = d->options&DC_THICK;
-			if (color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected) {
+			if (&tempD == d && ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected || color == selectedColor)) {
 				bFill = FALSE;
 				bThick = TRUE;
 			}
@@ -1967,7 +1967,7 @@ EXPORT void DrawSegsO(
 
 			// If we are drawing highlights for Select, don't fill just edges
 			bThick = d->options&DC_THICK;
-			if (color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected) {
+			if (&tempD == d && (color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected || color == selectedColor)) {
 				bFill = FALSE;
 				bThick = TRUE;
 			}
