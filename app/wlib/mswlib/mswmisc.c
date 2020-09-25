@@ -1490,6 +1490,10 @@ void wSetCursor(wDraw_p win,
     case wCursorAppStart:
     	SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
         break;
+
+    case wCursorNone:
+    	SetCursor(NULL);
+    	break;
     }
 
     curCursor = cursor;
