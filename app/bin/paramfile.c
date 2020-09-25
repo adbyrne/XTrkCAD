@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "common.h"
 #include "compound.h"
@@ -159,6 +160,28 @@ void SetParamFileState(int index)
 }
 
 /**
+ * Check whether file exists and is readable
+ *
+ * \param  file The file.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+
+#define FILEMODE_READABLE  0x4 
+
+static bool
+CheckFileReadable(const char *file)
+{
+	struct stat fileStat;
+
+	if (!stat(file, &fileStat) && fileStat.st_mode & FILEMODE_READABLE) {
+			return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+
+/**
  * Read a single parameter file and update the parameter file list
  *
  * \param fileName full path for parameter file
@@ -168,15 +191,18 @@ void SetParamFileState(int index)
 int
 ReadParamFile(const char *fileName)
 {
-	DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
-	curParamFileIndex = paramFileInfo_da.cnt - 1;
-	paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
-	paramFileInfo(curParamFileIndex).valid = TRUE;
-	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
-	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
+	if (!CheckFileReadable(fileName)) {
+		return(-1);
+	} else {
+		DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
+		curParamFileIndex = paramFileInfo_da.cnt - 1;
+		paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
+		paramFileInfo(curParamFileIndex).valid = TRUE;
+		paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
+		paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
-	SetParamFileState(curParamFileIndex);
-
+		SetParamFileState(curParamFileIndex);
+	}
 	return (curParamFileIndex);
 }
 
