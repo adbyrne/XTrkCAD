@@ -1760,7 +1760,7 @@ EXPORT void DrawSegsO(
 	long option;
 	wFontSize_t fs;
 
-	wBool_t bFill;
+	wBool_t bFill,bThick;
 
 	for (i=0; i<segCnt; i++,segPtr++ ) {
 		if (color == wDrawColorBlack) {
@@ -1941,25 +1941,41 @@ EXPORT void DrawSegsO(
 			bFill = (segPtr->type == SEG_FILPOLY);
 			if ( (d->options&DC_SIMPLE) && programMode != MODE_TRAIN )
 				bFill = FALSE;
+
+			// If we are drawing highlights for Select, don't fill just edges
+			bThick = d->options&DC_THICK;
+			if (&tempD == d && ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected || color == selectedColor)) {
+				bFill = FALSE;
+				bThick = TRUE;
+			}
+
 			wDrawWidth w;
 			if (segPtr->width <0)
 				w = floor(fabs(segPtr->width)+0.5);
 			else
 				w = floor(segPtr->width*factor+0.5);
-			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (d->options&DC_THICK)?thick:w, bFill?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
+			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, bThick?thick:w, bFill?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
 			free(tempPts);
 			free(tempTypes);
+
 			break;
 		case SEG_FILCRCL:
 			REORIGIN( c, segPtr->u.c.center, angle, orig )
 			bFill = TRUE;
 			if ( (d->options&DC_SIMPLE) && programMode != MODE_TRAIN )
 				bFill = FALSE;
+
+			// If we are drawing highlights for Select, don't fill just edges
+			bThick = d->options&DC_THICK;
+			if (&tempD == d && (color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected || color == selectedColor)) {
+				bFill = FALSE;
+				bThick = TRUE;
+			}
 			if ( bFill ) {
 				DrawFillCircle( d, c, fabs(segPtr->u.c.radius), color1 );
 			} else {
 				DrawArc( d, c, fabs(segPtr->u.c.radius), 0, 360,
-						FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)0, color1 );
+						FALSE, bThick?thick:(wDrawWidth)0, color1 );
 			}
 			break;
 		}

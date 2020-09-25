@@ -899,7 +899,7 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_REDRAW:
 		if (Dst.state)
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
-				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlue );
+				curStructure->segs, curStructure->segCnt, 0.0, selectedColor );
 		if (anchors_da.cnt>0) {
 				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 			}
