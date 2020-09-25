@@ -253,7 +253,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		 */
 		DYNARR_SET( int, refCount_da, segCnt+epCnt );
 		memset( refCount_da.ptr, 0, refCount_da.cnt * sizeof *(int*)0 );
-		cp = (char *)xx->paths;
+		cp = (char *)GetPaths( trk );
 		while ( cp[0] ) {
 			cp += strlen(cp)+1;
 			while ( cp[0] ) {
@@ -322,7 +322,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		 */
 		DYNARR_SET( int, refCount_da, segCnt );
 		memset( refCount_da.ptr, -1, segCnt * sizeof *(int*)0 );
-		cp = (char *)xx->paths;
+		cp = (char *)GetPaths( trk );
 		while ( cp[0] ) {
 			cp += strlen(cp)+1;
 			while ( cp[0] ) {
@@ -480,7 +480,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		Rotate( &orig, zero, xx->angle );
 		orig.x = xx->orig.x - orig.x;
 		orig.y = xx->orig.y - orig.y;
-		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), NULL, pathPtr_da.cnt, &pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
+		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), NULL, &pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
 		xx1 = GetTrkExtraData(trk1);
 		xx1->ungrouped = TRUE;
 
@@ -513,7 +513,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 
 	/* 9: reconnect tracks
 	 */
-	cp = (char *)xx->paths;
+	cp = (char *)GetPaths( trk );
 	while ( cp[0] ) {
 		cp += strlen(cp)+1;
 		while ( cp[0] ) {
@@ -703,7 +703,7 @@ LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
 		LOG( log_group, 3, (" Flip:%s Path= Seg=%d-\n", *flip?"T":"F", *cp ) );
 		return cp;
 	}
-	cp = (char *)xx->paths;
+	cp = (char *)GetPaths( trk );
 	trkPos[0] = GetTrkEndPos(trk,ep1);
 	Rotate( &trkPos[0], xx->orig, -xx->angle );
 	trkPos[0].x -= xx->orig.x;
@@ -938,9 +938,8 @@ static BOOL_T CheckPathEndPt(
 static BOOL_T CheckForBumper(
 		track_p trk )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	char * cp;
-	cp = (char *)xx->paths;
+	cp = (char *)GetPaths( trk );
 	while ( cp[0] ) {
 		cp += strlen(cp)+1;
 		while ( cp[0] ) {
@@ -1045,7 +1044,6 @@ static void GroupOk( void * junk )
 	int pinx, pinx2, ginx, ginx2, gpinx2;
 	trkEndPt_p endPtP;
 	PATHPTR_T path;
-	int pathLen;
 	signed char pathChar;
 	char *oldLocale = NULL;
 
@@ -1534,7 +1532,6 @@ LOG( log_group, 3, ( "\n" ) );
 		DYNARR_APPEND( char, pathPtr_da, 10 );
 		pathPtr(pathPtr_da.cnt-1) = 0;
 		path = (PATHPTR_T)&pathPtr(0);
-		pathLen = pathPtr_da.cnt;
 
 		/*
 		 * 8: Copy and Reorigin Segments - Start by putting them out in the original order
@@ -1565,15 +1562,16 @@ LOG( log_group, 3, ( "\n" ) );
 
 		CheckPaths( outputSegs_da.cnt, &outputSegs(0), path );
 
-		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), NULL, TRUE );
+		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), path, tempEndPts_da.cnt, &tempEndPts(0), NULL, TRUE, 0 );
 
 		/*
 		 * 10: Write defn to xtrkcad.cus
 		 */
 		f = OpenCustom("a");
 		if (f && to) {
+			long options = 0;
 			oldLocale = SaveLocale("C");
-			rc &= fprintf( f, "TURNOUT %s \"%s\"\n", curScaleName, PutTitle(to->title) )>0;
+			rc &= fprintf( f, "TURNOUT %s \"%s\" %ld\n", curScaleName, PutTitle(to->title), options )>0;
 			rc &= WriteCompoundPathsEndPtsSegs( f, path, outputSegs_da.cnt, &outputSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
 		}
 		if ( groupReplace ) {
@@ -1603,7 +1601,7 @@ LOG( log_group, 3, ( "\n" ) );
 					trackCount--;
 				}
 			}
-			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, pathLen, (char *)path, outputSegs_da.cnt, &outputSegs(0) );
+			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, path, outputSegs_da.cnt, &outputSegs(0) );
 
 			SetTrkVisible( trk, TRUE );
 			for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
@@ -1641,7 +1639,7 @@ LOG( log_group, 3, ( "\n" ) );
 			}
 			orig.x = - orig.x;
 			orig.y = - orig.y;
-			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, 0, "", tempSegs_da.cnt, &tempSegs(0) );
+			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, (PATHPTR_T)"", tempSegs_da.cnt, &tempSegs(0) );
 			SetTrkVisible( trk, TRUE );
 			DrawNewTrack( trk );
 			EnableCommands();

@@ -102,7 +102,7 @@ TURNOUT HO "Fleischmann-Profi	Curve 788mm 7.5°	6139"
 	E 4.049395 0.265411 82.500000
 	C 0 0.000000 -31.023622 0.000000 31.023622 172.500000 7.500000
 	END
-TURNOUT HO "Fleischmann-Modell	Large Turntable	6154"
+TURNOUT HO "Fleischmann-Modell	Large Turntable	6154" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -250,7 +250,7 @@ TURNOUT HO "Fleischmann-Modell	Large Turntable	6154"
 	A 16711680 0 8.956693 0.000000 0.000000 0.000000 360.000000
 	A 16711680 0 6.102362 0.000000 0.000000 0.000000 360.000000
 	END
-TURNOUT HO "Fleischmann-Modell	Small Turntable	6154"
+TURNOUT HO "Fleischmann-Modell	Small Turntable	6154" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3

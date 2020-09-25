@@ -749,7 +749,7 @@ END
 
 
 SUBCONTENTS Atlas N-Scale Structures - Turn Table
-TURNOUT N  "Atlas	Turn Table	2790"
+TURNOUT N  "Atlas	Turn Table	2790" 512
 # TT was designed with 7.5in bridge, 8.5in outside dia., 15 degree spacing
 	P "1" 1 2 3
 	P "2" 4 5 6

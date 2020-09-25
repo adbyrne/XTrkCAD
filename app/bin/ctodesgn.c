@@ -1286,8 +1286,7 @@ BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T ra
 
 static toDesignSchema_t * LoadSegs(
 		toDesignDesc_t * dp,
-		wBool_t loadPoints,
-		wIndex_t * pathLenP )
+		wBool_t loadPoints )
 {
 	wIndex_t s;
 	int i, p, p0, p1;
@@ -2429,11 +2428,8 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 	AddRoadbed();
 
 #ifndef MKTURNOUT
-	if ( (pathLen=CheckPaths( segCnt, &tempSegs(0), pp->paths )) < 0 )
+	if ( CheckPaths( segCnt, &tempSegs(0), pp->paths ) < 0 )
 		return NULL;
-
-	if (pathLenP)
-		*pathLenP = pathLen;
 #endif
 	return pp;
 }
@@ -2474,7 +2470,7 @@ static void NewTurnPrint(
 		{ 0.0, 0.0 },
 		Pix2CoOrd, CoOrd2Pix };
 
-	if ((pp=LoadSegs( curDesign, TRUE, NULL )) == NULL)
+	if ((pp=LoadSegs( curDesign, TRUE )) == NULL)
 		return;
 	if (includeNontrackSegments && customTurnout1)
 		CopyNonTracks( customTurnout1 );
@@ -2615,7 +2611,6 @@ static void NewTurnOk( void * context )
 {
 	FILE * f;
 	toDesignSchema_t * pp;
-	wIndex_t pathLen;
 	int i;
 	BOOL_T foundR=FALSE;
 	char * cp;
@@ -2627,7 +2622,7 @@ static void NewTurnOk( void * context )
 	char * customInfoP;
 	char *oldLocale = NULL;
 
-	if ((pp=LoadSegs( curDesign, TRUE, &pathLen )) == NULL)
+	if ((pp=LoadSegs( curDesign, TRUE )) == NULL)
 		return;
 
 	if ( (curDesign->strCnt >= 1 && newTurnLeftDesc[0] == 0) ||
@@ -2710,7 +2705,7 @@ static void NewTurnOk( void * context )
 	 }
 
 	to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), radii, FALSE );
+						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), radii, FALSE, 0 );
 	to->customInfo = customInfoP;
 #endif
 	if (f) {
@@ -2729,7 +2724,7 @@ static void NewTurnOk( void * context )
 		points[3].y = - points[3].y;
 		points[4].y = - points[4].y;
 		radii[0] = - radii[0];
-		LoadSegs( curDesign, FALSE, &pathLen );
+		LoadSegs( curDesign, FALSE );
 		tempEndPts(2).pos.y = - tempEndPts(2).pos.y;
 		tempEndPts(2).angle = 180.0 - tempEndPts(2).angle;
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc, newTurnRightPartno );
@@ -2740,7 +2735,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE, 0 );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2774,7 +2769,7 @@ static void NewTurnOk( void * context )
 		angles[4] = -angles[4];
 		angles[5] = -angles[5];
 		angles[6] = -angles[6];
-		LoadSegs( curDesign, FALSE, &pathLen );
+		LoadSegs( curDesign, FALSE );
 		tempEndPts(1).pos.y = - tempEndPts(1).pos.y;
 		tempEndPts(1).angle = 180.0 - tempEndPts(1).angle;
 		tempEndPts(2).pos.y = - tempEndPts(2).pos.y;
@@ -2787,7 +2782,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE, 0 );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2989,7 +2984,6 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	int i;
 	toDesignDesc_t * dp;
 	char * type, * name, *cp, *mfg, *descL, *partL, *descR, *partR;
-	wIndex_t pathLen;
 	long rgb;
 	trkSeg_p sp0, sp1;
 	BOOL_T segsDiff;
@@ -3054,7 +3048,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 
 	segsDiff = FALSE;
 	if ( to ) {
-		LoadSegs( dp, TRUE, &pathLen );
+		LoadSegs( dp, TRUE );
 		segsDiff = FALSE;
 		if ( to->segCnt == tempSegs_da.cnt ) {
 			for ( sp0=to->segs,sp1=&tempSegs(0); (!segsDiff) && sp0<&to->segs[to->segCnt]; sp0++,sp1++ ) {
@@ -3112,7 +3106,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 			radii[0] = - radii[0];
 			radii[1] = - radii[1];
 		}
-		LoadSegs( dp, FALSE, &pathLen );
+		LoadSegs( dp, FALSE );
 		if ( dp->type==NTO_REGULAR ) {
 			points[2].y = - points[2].y;
 			radii[0] = - radii[0];

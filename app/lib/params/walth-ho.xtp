@@ -1736,7 +1736,7 @@ STRUCTURE HO "Walthers	Machine Shop	933-2902"
 
 
 SUBCONTENTS Walthers Cornerstone HO Structures - Turn Tables
-TURNOUT HO  "Walthers	130' Turn Table	933-2829"
+TURNOUT HO  "Walthers	130' Turn Table	933-2829" 512
 # TT was designed with 18.875" bridge, 19.125" outside dia., 10 degree spacing
 	P "1" 1 2 3
 	P "2" 4 5 6
@@ -1870,7 +1870,7 @@ TURNOUT HO  "Walthers	130' Turn Table	933-2829"
 	A 11579568 0.053333 9.437500 0.000000 0.000000 0.000000 360.000000
 	G 11579568 0.000000 0.053333 0.000000 0.000000 0
 	END
-TURNOUT HO  "Walthers	90' Turn Table	933-2840"
+TURNOUT HO  "Walthers	90' Turn Table	933-2840" 512
 # TT was designed with 12.5" bridge, 13.75" outside dia., 10 degree spacing
 	P "1" 1 2 3
 	P "2" 4 5 6
@@ -1965,8 +1965,8 @@ TURNOUT HO  "Walthers	90' Turn Table	933-2840"
 	S 0 0 -6.155048 -1.085301 -6.770553 -1.193831
 #90/270
 	S 0 0 6.875000 0.000000 6.250000 0.000000
-	S 0 0 6.250000 0.000000 -6.875000 0.000000
-	S 0 0 -6.875000 0.000000 -6.2500000 0.000000
+	S 0 0 6.250000 0.000000 -6.250000 0.000000
+	S 0 0 -6.250000 0.000000 -6.8750000 0.000000
 #100/280
 	S 0 0 6.770553 -1.193831 6.155048 -1.085301
 	S 16777215 0 6.155048 -1.085301 -6.155048 1.085301
@@ -2005,7 +2005,7 @@ TURNOUT HO  "Walthers	90' Turn Table	933-2840"
 	G 11579568 0.000000 0.053333 0.000000 0.000000 0
 	END
 
-TURNOUT HO "Walthers	Transfer Table	933-2968"
+TURNOUT HO "Walthers	Transfer Table	933-2968" 512
 # TT was designed with 2.1875" Bridge position spacing table has 48 programmable positions
 	P "P1" 1
 	P "P2" 2
