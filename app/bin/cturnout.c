@@ -404,7 +404,7 @@ static BOOL_T ReadTurnoutParam(
 	if ( !GetArgs( firstLine+8, "sqc", scale, &title, &cp ) )
 		return FALSE;
 	if ( cp != NULL )
-		if ( !GetArgs( cp, "l", &options ) )
+		if ( !GetArgs( (char*)cp, "l", &options ) )
 			return FALSE;
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	pathCnt = 0;
