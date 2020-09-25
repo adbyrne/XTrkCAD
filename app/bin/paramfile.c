@@ -29,6 +29,12 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#ifdef WINDOWS
+#include <io.h>
+#else 
+#include <unistd.h>
+#endif
+
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
@@ -166,15 +172,17 @@ void SetParamFileState(int index)
  *
  * \returns True if it succeeds, false if it fails.
  */
-
-#define FILEMODE_READABLE  0x4 
+ 
+#ifdef WINDOWS
+#define R_OK 0x4
+#endif
 
 static bool
 CheckFileReadable(const char *file)
 {
 	struct stat fileStat;
 
-	if (!stat(file, &fileStat) && fileStat.st_mode & FILEMODE_READABLE) {
+	if(!access( file, R_OK )) {
 			return TRUE;
 	} else {
 		return FALSE;
