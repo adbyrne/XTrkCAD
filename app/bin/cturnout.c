@@ -38,6 +38,7 @@
 #include "layout.h"
 #include "messages.h"
 #include "param.h"
+#include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
 #include "trackx.h"
@@ -2837,18 +2838,19 @@ LOG( log_turnout, 1, ( "RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		return C_CONTINUE;
 
 	case C_REDRAW:
+		wSetCursor(mainD.d,defaultCursor);
 		if (Dto.state) {
 			DrawSegs( &tempD, Dto.pos, Dto.angle,
 				curTurnout->segs, curTurnout->segCnt, trackGauge, selectedColor );
 		}
 		if (anchors_da.cnt>0) {
 			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			wSetCursor(mainD.d,wCursorNone);
 		}
 		if (Dto.state == 2)
 			DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlue );
 		return C_CONTINUE;
 
-	case C_CANCEL:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dto.state = 0;
 		Dto.trk = NULL;

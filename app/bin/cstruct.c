@@ -33,6 +33,7 @@
 #include "layout.h"
 #include "messages.h"
 #include "param.h"
+#include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
 #include "utility.h"
@@ -897,11 +898,13 @@ EXPORT STATUS_T CmdStructureAction(
 		return C_CONTINUE;
 
 	case C_REDRAW:
+		wSetCursor(mainD.d,defaultCursor);
 		if (Dst.state)
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
 				curStructure->segs, curStructure->segCnt, 0.0, selectedColor );
 		if (anchors_da.cnt>0) {
 				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+				wSetCursor(mainD.d,wCursorNone);
 			}
 		if (Dst.state == 2)
 			DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );

@@ -493,10 +493,13 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		InfoMessage( "" );
 		return C_TERMINATE;
 	case C_REDRAW:
+		wSetCursor(mainD.d,defaultCursor);
 		DoElevHilight( NULL );
 		HilightSelectedEndPt( TRUE, elevTrk, elevEp );
-		if (anchors_da.cnt)
+		if (anchors_da.cnt) {
 					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+					wSetCursor(mainD.d,wCursorNone);
+		}
 		CmdMoveDescription( action, pos );
 		return C_CONTINUE;
 	}
