@@ -31,6 +31,7 @@
 
 #ifdef WINDOWS
 #include <io.h>
+#define access _access
 #else 
 #include <unistd.h>
 #endif
@@ -180,8 +181,6 @@ void SetParamFileState(int index)
 static bool
 CheckFileReadable(const char *file)
 {
-	struct stat fileStat;
-
 	if(!access( file, R_OK )) {
 			return TRUE;
 	} else {

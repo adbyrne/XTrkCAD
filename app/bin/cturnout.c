@@ -318,7 +318,6 @@ EXPORT wIndex_t CheckPaths(
 	if ((segCnt == 0) || !segs) return -1;
 	int pc, ps;
 	PATHPTR_T pp = 0;
-	int inx;
 
 	int segInx[2], segEp[2];
 	int segTrkLast = -1;
@@ -357,8 +356,6 @@ EXPORT wIndex_t CheckPaths(
 
 	for ( pc=0,pp=paths; *pp; pp+=2,pc++ ) {
 		for ( ps=0,pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++,ps++ ) {
-			int old_inx;
-			EPINX_T old_EP;
 			if (pp[0]!=0 && ps==0) {  // First or only one
 			}
 			if (pp[0]!=0 && pp[1]!=0 ) {
@@ -1799,7 +1796,6 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 		ANGLE_T *angleR )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	PATHPTR_T path;
 	traverseTrack_t trvtrk;
 	DIST_T dist;
 

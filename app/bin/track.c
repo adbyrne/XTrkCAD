@@ -3459,7 +3459,7 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length, wDra
 					ANGLE_T angle;
 				} pos_angle_t;
 
-	DYNARR_SET(pos_angle_t,pos_array,division+1);
+	DYNARR_SET(pos_angle_t,pos_array,(int)division+1);
 	DYNARR_N(pos_angle_t,pos_array,0).pos = GetTrkEndPos(trk,0);
 	DYNARR_N(pos_angle_t,pos_array,0).angle = NormalizeAngle(GetTrkEndAngle(trk,0)+180.0);
 	for (int i=1;i<pos_array.cnt;i++) {

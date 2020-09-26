@@ -1177,7 +1177,7 @@ static BOOL_T MakeParallelBezier(
 {
 	struct extraData * xx = GetTrkExtraData(trk);
     coOrd np[4], p;
-    ANGLE_T a0, a1,a2,a3;
+    ANGLE_T a0, a1,a2;
 
 	//Produce bezier that is translated parallel to the existing Bezier
     // - not a precise result if the bezier end angles are not in the same general direction.
