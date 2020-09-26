@@ -37,6 +37,7 @@
 #include "drawgeom.h"
 #include "common.h"
 #include "layout.h"
+#include "cselect.h"
 
 static struct {
 		track_p Trk;

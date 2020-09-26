@@ -25,6 +25,8 @@
 #include "common.h"
 #include "track.h"
 
+#define defaultCursor wCursorCross
+
 extern wIndex_t selectCmdInx;
 extern wIndex_t moveCmdInx;
 extern wIndex_t rotateCmdInx;

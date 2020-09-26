@@ -54,8 +54,6 @@
 
 #define SETMOVEMODE "MOVEMODE"
 
-#define defaultCursor wCursorCross
-
 EXPORT wIndex_t selectCmdInx;
 EXPORT wIndex_t moveCmdInx;
 EXPORT wIndex_t rotateCmdInx;

@@ -29,6 +29,7 @@
 #include "messages.h"
 #include "param.h"
 #include "fileio.h"
+#include "cselect.h"
 #include "track.h"
 
 EXPORT wIndex_t describeCmdInx;

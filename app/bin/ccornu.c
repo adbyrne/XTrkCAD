@@ -486,13 +486,11 @@ static void CreateCornuEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
-	wSetCursor(mainD.d,wCursorNone);
 }
 
 static void CreateCornuExtendAnchor(coOrd p, ANGLE_T a, wBool_t selected) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,FALSE,wDrawColorBlue);
-	wSetCursor(mainD.d,wCursorNone);
 }
 
 static void CreateCornuAnchor(coOrd p, wBool_t open) {
@@ -506,7 +504,6 @@ static void CreateCornuAnchor(coOrd p, wBool_t open) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
-	wSetCursor(mainD.d,wCursorNone);
 }
 
 /*
@@ -1097,6 +1094,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 
 	case wActionMove:
 		if (Da.state == NONE || Da.state == PICK_POINT) {
+			wSetCursor(mainD.d,defaultCursor);
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			for(int i=0;i<2;i++) {
 				if (IsClose(FindDistance(pos,Da.pos[i]))) {
@@ -1115,6 +1113,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				d = FindDistance(DYNARR_N(coOrd,Da.mid_points,i),pos);
 				if (IsClose(d)) {
 					CreateCornuAnchor(DYNARR_N(coOrd,Da.mid_points,i),FALSE);
+					wSetCursor(mainD.d,wCursorNone);
 					return C_CONTINUE;
 				}
 			}
@@ -1123,6 +1122,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				d = FindDistance(Da.endHandle[i].end_center,pos);
 				if (IsClose(d)) {
 					CreateCornuAnchor(Da.endHandle[i].end_center, FALSE);
+					wSetCursor(mainD.d,wCursorNone);
 					return C_CONTINUE;
 				}
 			}
@@ -1131,6 +1131,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				d = FindDistance(Da.endHandle[i].end_curve,pos);
 				if (IsClose(d)) {
 					CreateCornuAnchor(Da.endHandle[i].end_curve, FALSE);
+					wSetCursor(mainD.d,wCursorNone);
 					return C_CONTINUE;
 				}
 			}
@@ -1788,6 +1789,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (anchors_da.cnt) {
 			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		}
+		if (Da.state == POINT_PICKED) wSetCursor(mainD.d,wCursorNone);
 		return C_CONTINUE;
 	case C_CANCEL:
 	case C_FINISH:
@@ -2548,6 +2550,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
     	return rc;
 
 	case C_REDRAW:
+		wSetCursor(mainD.d,defaultCursor);
 		if ( Da.state != NONE ) {
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,
 					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
@@ -2555,6 +2558,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		if (anchors_da.cnt)
 					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		if (MyGetKeyState()&WKEY_SHIFT) DrawHighlightBoxes(FALSE,FALSE,NULL);
+
+		if (Da.state == POINT_PICKED) wSetCursor(mainD.d,wCursorNone);
 
 		return C_CONTINUE;
 
