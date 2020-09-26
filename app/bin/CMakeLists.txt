@@ -163,9 +163,12 @@ endif(WIN32)
 set (SOURCES
 	${SOURCES}
 	include/dirent.h
+	include/levenshtein.h
 	include/paramfile.h
 	include/paramfilelist.h
 	include/partcatalog.h
+	include/stringxtc.h	
+	include/utlist.h
 )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
