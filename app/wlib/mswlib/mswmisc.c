@@ -2167,7 +2167,7 @@ void wHelp(
 {
     char *pszHelpTopic;
     HWND hwndHelp;
-	char *theTopic = "index";
+	const char *theTopic = "index";
 
 	if (topic) {
 		theTopic = topic;

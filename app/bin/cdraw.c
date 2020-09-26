@@ -1982,8 +1982,6 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 {
 		struct extraData * xx = GetTrkExtraData(trk);
 
-		ANGLE_T angle;
-		DIST_T rad;
 		coOrd p0,p1;
 		DIST_T d;
 
@@ -2210,7 +2208,6 @@ static BOOL_T MakeParallelDraw(
 
 	ANGLE_T angle;
 	DIST_T rad;
-	coOrd p0,p1;
 
 	DYNARR_SET(trkSeg_t, tempSegs_da, 1);
 

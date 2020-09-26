@@ -1795,9 +1795,9 @@ EXPORT void DrawSegsO(
 			case SEG_STRLIN:;
 				wDrawWidth w;
 				if (segPtr->width <0)
-					w = floor(fabs(segPtr->width)+0.5);
+					w = (int)floor(fabs(segPtr->width)+0.5);
 				else
-					w = floor(fabs(segPtr->width*factor)+0.5);
+					w = (int)floor(fabs(segPtr->width*factor)+0.5);
 				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 				break;
 			case SEG_DIMLIN:
@@ -1849,9 +1849,9 @@ EXPORT void DrawSegsO(
 			} else {
 				wDrawWidth w;
 				if (segPtr->width <0)
-					w = floor(fabs(segPtr->width)+0.5);
+					w = (int)floor(fabs(segPtr->width)+0.5);
 				else
-					w = floor(segPtr->width*factor+0.5);
+					w = (int)floor(segPtr->width*factor+0.5);
 				DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
 						FALSE, (d->options&DC_THICK)?thick:w, color1 );
 			}
@@ -1889,9 +1889,9 @@ EXPORT void DrawSegsO(
         				} else if (tempPtr->type == SEG_CRVLIN) {
         					wDrawWidth w;
         					if (tempPtr->width <0)
-        						w = floor(fabs(tempPtr->width)+0.5);
+        						w = (int)floor(fabs(tempPtr->width)+0.5);
         					else
-        						w = floor(tempPtr->width*factor+0.5);
+        						w = (int)floor(tempPtr->width*factor+0.5);
         					DrawArc( d, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1,
         							FALSE, (d->options&DC_THICK)?thick:w, color1 );
         				}
@@ -1910,9 +1910,9 @@ EXPORT void DrawSegsO(
         				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
         				wDrawWidth w;
 						if (tempPtr->width <0)
-							w = floor(fabs(tempPtr->width)+0.5);
+							w = (int)floor(fabs(tempPtr->width)+0.5);
 						else
-        				    w = floor(tempPtr->width*factor+0.5);
+        				    w = (int)floor(tempPtr->width*factor+0.5);
         				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
         				break;
             	}
@@ -1951,9 +1951,9 @@ EXPORT void DrawSegsO(
 
 			wDrawWidth w;
 			if (segPtr->width <0)
-				w = floor(fabs(segPtr->width)+0.5);
+				w = (int)floor(fabs(segPtr->width)+0.5);
 			else
-				w = floor(segPtr->width*factor+0.5);
+				w = (int)floor(segPtr->width*factor+0.5);
 			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, bThick?thick:w, bFill?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
 			free(tempPts);
 			free(tempTypes);

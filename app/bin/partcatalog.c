@@ -316,6 +316,13 @@ int KeyWordCmp(IndexEntry *a, IndexEntry *b)
     return XtcStricmp(a->keyWord, b->keyWord);
 }
 
+// wrapper function used to avoid a warning in DL_SORT()
+int KeyWordCmp2(char *a, char *b)
+{
+	return KeyWordCmp((IndexEntry *)a, (IndexEntry *)b);
+}
+
+
 /**
  * Standardize spelling: remove some typical spelling problems. It is assumed that the word
  * has already been converted to lower case
@@ -413,7 +420,7 @@ CreateKeywordIndex(ParameterLib *library)
     }
     *wordListPtr = '\0';
 
-    DL_SORT(index, KeyWordCmp);
+    DL_SORT(index, KeyWordCmp2);
 
     library->index = index;
     library->words = wordList;

@@ -252,8 +252,6 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 	track_p trk0, trk1;
 	EPINX_T ep0;
 	int oldTrackCount;
-	int inx, mode, quad;
-	ANGLE_T angle;
 
 	switch (action) {
 	case C_START:

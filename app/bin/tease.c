@@ -802,10 +802,8 @@ static void DrawJointDescription(
 		wDrawColor color )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	wFont_p fp;
-	coOrd pos, p0, p1;
-	DIST_T elev0, elev1, dist, grade=0, sep=0;
-	BOOL_T elevValid;
+	coOrd pos;
+	DIST_T grade=0, sep=0;
 	ANGLE_T a;
 
 

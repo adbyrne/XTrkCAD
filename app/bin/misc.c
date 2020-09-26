@@ -1954,7 +1954,7 @@ static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void *);
 
-static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80.0 };
+static paramFloatRange_t rn360_360 = { -360.0, 360.0, (wPos_t)80.0 };
 static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE,
 		&rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
