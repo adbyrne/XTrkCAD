@@ -101,7 +101,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
-	EPINX_T ep0;
+	EPINX_T ep0 = 0;
 	int oldTrackCount;
 	int inx, mode, quad;
 	ANGLE_T angle;
@@ -250,7 +250,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
-	EPINX_T ep0;
+	EPINX_T ep0 = 0;
 	int oldTrackCount;
 	int inx, mode, quad;
 	ANGLE_T angle;
