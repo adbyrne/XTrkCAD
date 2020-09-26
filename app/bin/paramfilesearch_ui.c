@@ -248,6 +248,7 @@ static void SearchUiDoSearch(void * ptr)
     SearchResult *currentResults = MyMalloc(sizeof(SearchResult));
     char * search;
 
+	wStringGetValue((wString_p)searchUiPG.paramPtr[I_QUERYSTRING].control);
     search = StringTrim(searchUiQuery);
 
     if (currentSearch) {

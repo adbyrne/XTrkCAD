@@ -311,19 +311,11 @@ FilterKeyword(char *word)
     return (false);
 }
 
-int KeyWordCmp(IndexEntry *a, IndexEntry *b)
+int KeyWordCmp(void *a, void *b)
 {
-    return XtcStricmp(a->keyWord, b->keyWord);
+    return XtcStricmp(((IndexEntry *)a)->keyWord,((IndexEntry *)b)->keyWord);
 }
 
-#ifdef WINDOWS
-// wrapper function used to avoid a warning in DL_SORT() 
-// this is a workaround needed for MSVC
-int KeyWordCmp2(char *a, char *b)
-{
-	return KeyWordCmp((IndexEntry *)a, (IndexEntry *)b);
-}
-#endif
 
 /**
  * Standardize spelling: remove some typical spelling problems. It is assumed that the word
@@ -422,11 +414,7 @@ CreateKeywordIndex(ParameterLib *library)
     }
     *wordListPtr = '\0';
 
-#ifdef WINDOWS
-    DL_SORT(index, KeyWordCmp2);
-#else
 	DL_SORT(index, KeyWordCmp);
-#endif
     library->index = index;
     library->words = wordList;
 
