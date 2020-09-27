@@ -86,6 +86,8 @@ struct sSearchResult {
 typedef struct sSearchResult SearchResult;
 
 Catalog *InitCatalog(void);
+CatalogEntry * InsertInOrder(Catalog *catalog, const char *contents);
+void UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents);
 ParameterLib *InitLibrary(void);
 ParameterLib *CreateLibrary(char *directory);
 void DestroyLibrary(ParameterLib *tracklib);
@@ -96,5 +98,6 @@ char *SearchStatistics(SearchResult *result);
 void SearchDiscardResult(SearchResult *res);
 unsigned CountCatalogEntries(Catalog *catalog);
 void DiscardCatalog(ParameterLib *library);
+EXPORT void CatalogDiscard(Catalog *catalog);
 bool FilterKeyword(char *word);
 #endif // !HAVE_TRACKCATALOG_H

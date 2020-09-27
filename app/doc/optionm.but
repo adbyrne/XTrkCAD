@@ -461,6 +461,14 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \dd \f{Units} - choose between English (inches) or Metric (centimeters) measurements.
 
+\u000
+
+\dd \f{Write Settings} - Save the current settings to a named settings file
+
+\u000
+
+\dd \f{Read Settings} - Load settings from a named settings file
+
 \rule
 
 

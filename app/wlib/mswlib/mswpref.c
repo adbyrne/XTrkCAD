@@ -150,6 +150,17 @@ void wPrefSetString( const char * section, const char * name, const char * sval 
 	p->val = mswStrdup(sval);
 }
 
+void wPrefsLoad(char * name) {
+	prefs_t *p;
+	for (int i= 0; i<prefs_da.cnt; i++) {
+		p = &prefs(i);
+		if (!name || !name[0]) name = mswProfileFile;
+		int rc = GetPrivateProfileString( p->section, p->name, "", mswTmpBuff, sizeof mswTmpBuff, name );
+		if (rc==0)
+			continue;
+		p->val = mswStrdup(mswTmpBuff);
+	}
+}
 
 char * wPrefGetStringBasic( const char * section, const char * name )
 {
@@ -161,6 +172,7 @@ char * wPrefGetStringBasic( const char * section, const char * name )
 			return p->val;
 		}
 	}
+
 	rc = GetPrivateProfileString( section, name, "", mswTmpBuff, sizeof mswTmpBuff, mswProfileFile );
 	if (rc==0)
 		return NULL;
@@ -245,15 +257,22 @@ wBool_t wPrefGetFloatBasic(
 }
 
 
-void wPrefFlush( void )
+void wPrefFlush( char * name )
 {
 	prefs_t * p;
 	
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-	  if ( p->dirty )
+	   if ( p->dirty ) {
+		  if (name && name[0])
+			WritePrivateProfileString( p->section, p->name, p->val, name );
+		  else
 		   WritePrivateProfileString( p->section, p->name, p->val, mswProfileFile );
+	   }
 	}
-	WritePrivateProfileString( NULL, NULL, NULL, mswProfileFile );
+	if (name && name[0])
+		WritePrivateProfileString( p->section, p->name, p->val, name );
+	else
+		WritePrivateProfileString( NULL, NULL, NULL, mswProfileFile );
 }
 
 

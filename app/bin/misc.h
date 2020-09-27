@@ -342,6 +342,7 @@ void OutputBitMap( void );
 extern wDrawColor snapGridColor;
 
 addButtonCallBack_t ColorInit( void );
+addButtonCallBack_t SettingsInit( void );
 addButtonCallBack_t PrefInit( void );
 addButtonCallBack_t LayoutInit( void );
 addButtonCallBack_t DisplayInit( void );

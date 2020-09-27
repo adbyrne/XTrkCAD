@@ -1189,7 +1189,7 @@ void wExit(
         }
     }
 
-    wPrefFlush();
+    wPrefFlush("");
 
     if (gtkMainW && gtkMainW->winProc != NULL) {
         gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);

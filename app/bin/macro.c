@@ -975,7 +975,7 @@ static void PlaybackSetup( void )
 	wTextClear( demoT );
 	wShow( demoW );
 	wFlush();
-	wPrefFlush();
+	wPrefFlush("");
 	wWinSetBusy( mainW, TRUE );
 	wWinSetBusy( mapW, TRUE );
 	ParamSaveAll();

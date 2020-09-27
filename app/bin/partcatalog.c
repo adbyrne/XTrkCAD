@@ -138,7 +138,7 @@ CountCatalogEntries(Catalog *catalog)
  * \param listHeader IN the list
  */
 
-void
+EXPORT void
 CatalogDiscard(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
@@ -146,9 +146,15 @@ CatalogDiscard(Catalog *catalog)
     CatalogEntry *tmp;
 
     DL_FOREACH_SAFE(current, element, tmp) {
+    	MyFree(element->contents);
+    	for (unsigned int i = 0; i < element->files; i++) {
+    	    MyFree(element->fullFileName[i]);
+    	}
         DL_DELETE(current, element);
         MyFree(element);
     }
+
+    catalog->head = NULL;
 }
 
 /**
@@ -175,7 +181,7 @@ CompareEntries(CatalogEntry *a, CatalogEntry *b)
  * \returns CatalogEntry
  */
 
-static CatalogEntry *
+EXPORT CatalogEntry *
 InsertInOrder(Catalog *catalog, const char *contents)
 {
     CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
@@ -225,7 +231,7 @@ IsExistingContents(Catalog *catalog, const char *contents, BOOL_T silent)
  * \param contents contents description
  */
 
-static void
+EXPORT void
 UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
 {
     if (!entry->contents) {
