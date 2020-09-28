@@ -1,8 +1,8 @@
-# Beta 2.1 Release Notes
+# Beta 3.0 Release Notes
 
-Welcome to the XtrackCAD V5.2.0 Beta 2.1 release! 
+Welcome to the XtrackCAD V5.2.0 Beta 3.0 release! 
 
-Beta 2.1 has very few functional enhancements and quite a lot of bug fixes since Beta 2.0. 
+Beta 3.0 has a few functional enhancements and a few bug fixes since Beta 2.1. Beta 3.0 is intended to be a predule to a GA release. We only intend to add fixes and not functional enhancements at this point.
 
 The V5.2 release started out as just some simple functional enhancements of long-standing, like background images. The idea was to punt on all UI changes to the V6 GTK3 release.  But along the way and due to some sabaticals for developers, things kept getting added and tinkered with. Finally the major UI enhancements you will see were mapped out over the last six months and so we have an incremental enhacement to the UI as well.
 
@@ -65,7 +65,7 @@ Installing the Debian package (xtrkcad-setup-5.2.0Beta2.0-1.x86_64.deb) or the R
 Super-user access will be required to install this.
 Be aware that you don't invoke any other existing *xtrkcad* installation when running the program.
 
-The debian package is new (and experimental).
+The debian package is new but better integrated, and we recommend Debian-type distro users try it first.
 
 Installing the shell archive xtrkcad-setup-5.2.0Beta2.0-1.x86_64.sh will install in the current directory.  You will be given the choice of whether to install the bin/ and share/ directories in the current directory or in a subdirectory (xtrkcad-setup-5.2.0Beta2.0-1.x86_64/).
 You must set the environment variable XTRKCADLIB to the location of the share/xtrkcad directory:

@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.0 Beta 3.0] 
+
+## Bugs
+
++ Library parameter file searching 
++ Removal of entries for missing parameter files
++ Path logic when non-track objects are below tracks
++ Better highlighting of moving filled objects
++ Selection highlighting 
++ Snap Grid for Modify Line
++ Move Description anchor fixes
++ Fix handling of frozen track - dont highlight
++ Grade calcualtions for intermediate points
++ Draw command checkpoint between invocations - improves Undo
++ Snap Grid position in draw order
++ Fix Layer button count
++ Restore Linetype on restart
++ Fix adjustable track and Pier memory leaks
++ Auto-upgrade of system parm files for Windows as well
++ Enter key support for Windows entry fields
++ DimLine snapping and editing
++ Rescale Background when Rescaling
++ Fix shortcuts in Modify Polygon
++ Fix Pan Here to be "c" and not "@" which is not available on some keyboards
++ Parallel PolyLine Points corrected
++ Bounding box for large Arcs
++ Change Pivot to Lock in Describe
++ Assorted work on Magnetic Snap for Draw objects
++ Fix Windows resize cursor
++ Pan/Zoom under View and not Change menu
++ Misordered columns on Car Inventory export
++ Contents shown for Help->Contents
++ Stop adding end-cornus to Select after Move
+
+## Added
+
++ Layer Groups
++ Layer Button Hiding
++ Settings Saving/Restoring from named .xset files
++ Cursor Suppression when internal anchor/cursor shown
++ Optional additional detail descriptions for curved tracks 
++ Welsh as a message and UI language
++ Increase Text Note Limit to 10k
++ Debian install integration
++ Updated French and German translations
++ Negative linewidths on Lines mean fixed pixels
++ Russian as a message and UI language
++ Split Draw Command
++ Parallel Line function includes Beziers
++ HotBar left/right buttons auto-repeat if held down
++ Protractor Tool
+
+## Parm Files
+
++ FastTrak O3n file
++ 3x Z scale tracks
+
+
 ## [5.2.0 Beta 2.1]
 
 ### Bugs
