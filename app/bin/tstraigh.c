@@ -322,6 +322,8 @@ static void DrawStraightDescription(
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
 
+	if ( !(GetTrkBits( trk ) & TB_DETAILDESC) ) return;
+
 	coOrd end0, end0off, end1, end1off;
 	end0 = GetTrkEndPos(trk,0);
 	end1 = GetTrkEndPos(trk,1);
