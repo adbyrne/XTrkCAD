@@ -25,7 +25,12 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifdef WINDOWS
+#include "include/dirent.h"
+#else
 #include <dirent.h>
+#endif
 
 
 #include "custom.h"
