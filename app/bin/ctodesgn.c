@@ -1816,7 +1816,7 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 					temp_p->color = wDrawColorBlack;
 					temp_p->width = 0.0;
 					temp_p->u.l.pos[0] = cornuData.pos[5];
-					temp_p->u.l.pos[1] = end_points[3];
+					temp_p->u.l.pos[1] = points[3];
 	LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 					temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
 				} else {
@@ -1860,7 +1860,7 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[7];
-				temp_p->u.l.pos[1] = end_points[1];
+				temp_p->u.l.pos[1] = points[1];
 LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
 			} else {
@@ -1902,7 +1902,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[9];
-				temp_p->u.l.pos[1] = end_points[2];
+				temp_p->u.l.pos[1] = points[2];
 LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
 			} else {
