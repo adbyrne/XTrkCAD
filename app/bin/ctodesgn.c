@@ -1895,7 +1895,7 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[1]);
+				temp_p->u.c.radius = -radii[1];  //Negative relative to left
 				if (radii[1]>0)
 					temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
 				else
@@ -2198,7 +2198,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			cornuData.radius[0] = fabs(radii[0]);
 			cornuData.radius[1] = fabs(radii[2]);
 			cornuData.radius[3] = fabs(radii[2]);
-			cornuData.radius[5] = fabs(radii[1]); /*Inner*/
+			cornuData.radius[5] = fabs(radii[1]);        /*Inner*/
 
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			trkSeg_t * temp_p, * cornu_p;
@@ -2264,7 +2264,7 @@ LogPrintf( "ctoDes1: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[0]);;
+				temp_p->u.c.radius = -radii[0];
 				if (radii[0]>0.0)
 					temp_p->u.c.a0 = FindAngle(end_centers[0],end_points[0]);
 				else
@@ -2306,7 +2306,7 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[2]);
+				temp_p->u.c.radius = -radii[2];
 				if (radii[2]>0)
 					temp_p->u.c.a0 = FindAngle(end_centers[2],points[2]);
 				else
@@ -2349,7 +2349,7 @@ LogPrintf( "ctoDes3: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[1]);
+				temp_p->u.c.radius = -radii[1];
 				if (radii[1]>0)
 					temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
 				else
