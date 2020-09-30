@@ -1502,7 +1502,7 @@ static toDesignSchema_t * LoadSegs(
 
 			for (int i=0;i<((dp->type==NTO_CORNU3WAY)?4:3);i++) {
 				if (radii[i] == 0.0) {
-					Translate(&end_points[i], points[i], 90-angles[i]+(i==0?0:180), end_length);
+					Translate(&end_points[i], points[i], NormalizeAngle(90.0-angles[i]+(i==0?0.0:180.0)), end_length);
 					end_angles[i] = angles[i];
 				} else {
 					if (((i==0) && radii[0]>0.0) || ((i==1 || i==3) && radii[i]>0.0)|| ((i==2) && radii[i]<0.0))
@@ -1619,20 +1619,18 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			int inx,subSeg;
 			wBool_t back, neg;
 
-			CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da, FALSE);
-
 			/* Override if a "Y" has zero radius at base to be a straight until the Toe
 			 * We set the start of the curve to be at the Toe position */
 			if (cornuData.radius[0] == 0.0) {
 				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
-				pos.y = 0.0;
+				pos.y = end_points[0].y;
 				angle = 90.0;
 				radius = 0.0;
 				center = zero;
 
 			} else {
-
 				/*Find Toe 1 from curve */
+				CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da, FALSE);
 
 				/*Get ToeAngle/Radius/Center for first toe */
 				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
@@ -1691,22 +1689,30 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			if (dp->type == NTO_CORNU3WAY) {
 			  	if (newTurnToeR!=newTurnToeL) {
 					/* Second Toe */
-					pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
-					pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-					angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,NULL,&back,&subSeg,&neg);
-					segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
-
-					if (segPtr->type == SEG_BEZTRK) {
-						segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
-					}
-
-					if (segPtr->type == SEG_STRTRK) {
+			  		if (cornuData.radius[0] == 0.0) {
+						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
+						pos.y = 0.0;
+						angle = 90.0;
 						radius = 0.0;
 						center = zero;
-					} else if (segPtr->type == SEG_CRVTRK) {
-						center = segPtr->u.c.center;
-						radius = fabs(segPtr->u.c.radius);
-					}
+			  		} else {
+						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
+						pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
+						angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,NULL,&back,&subSeg,&neg);
+						segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
+
+						if (segPtr->type == SEG_BEZTRK) {
+							segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
+						}
+
+						if (segPtr->type == SEG_STRTRK) {
+							radius = 0.0;
+							center = zero;
+						} else if (segPtr->type == SEG_CRVTRK) {
+							center = segPtr->u.c.center;
+							radius = fabs(segPtr->u.c.radius);
+						}
+			  		}
 					cornuData.pos[3] = pos;
 					cornuData.center[3] = center;
 					cornuData.angle[3] = angle;
@@ -1785,16 +1791,36 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 		points[0].x,points[0].y,end_points[0].x,end_points[0].y,
 		rp0.x,rp0.y,rp1.x,rp1.y);
 			}
-
-			if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
-				(cornuData.pos[0].y != cornuData.pos[1].y) )
+			//If Radius zero, just a straight to the First Toe if offset
+			if (cornuData.radius[0] == 0.0) {
+				if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
+				    (cornuData.pos[0].y != cornuData.pos[1].y)) {
+					DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+					temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+					temp_p->type = SEG_STRTRK;
+					temp_p->color = wDrawColorBlack;
+					temp_p->width = 0.0;
+					temp_p->u.l.pos[0] = cornuData.pos[0];
+					temp_p->u.l.pos[1] = cornuData.pos[1];
+				}
+			} else if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
+				       (cornuData.pos[0].y != cornuData.pos[1].y) )
 				CallCornuNoBez(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da);
+
 			Toe1Seg = tempSegs_da.cnt;
 
 			if (dp->type == NTO_CORNU3WAY) {
 				if (newTurnToeR!=newTurnToeL) {
 					/* Toe1 to Toe2 in tempSegs array */
-					if ((cornuData.pos[2].x != cornuData.pos[3].x) ||
+					if (cornuData.radius[0] == 0.0) {
+						DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+						temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+						temp_p->type = SEG_STRTRK;
+						temp_p->color = wDrawColorBlack;
+						temp_p->width = 0.0;
+						temp_p->u.l.pos[0] = cornuData.pos[2];
+						temp_p->u.l.pos[1] = cornuData.pos[3];
+					} else if ((cornuData.pos[2].x != cornuData.pos[3].x) ||
 						(cornuData.pos[2].y != cornuData.pos[3].y) )
 						CallCornuNoBez(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],&cornuData.radius[2],&cornuSegs_da);
 
