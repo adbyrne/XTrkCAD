@@ -3118,7 +3118,6 @@ static STATUS_T CmdSelect(
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch (mode) {
-		rc = C_CONTINUE;
 		case MOVE:
 			if (SelectedTracksAreFrozen() || (selectedTrackCount==0)) {
 				rc = C_TERMINATE;
