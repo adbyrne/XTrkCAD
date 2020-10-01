@@ -1498,21 +1498,32 @@ static toDesignSchema_t * LoadSegs(
 				}
 			}
 
-			DIST_T end_length = minLength/2;
+			DIST_T end_length = minLength*2;
 
 			for (int i=0;i<((dp->type==NTO_CORNU3WAY)?4:3);i++) {
 				if (radii[i] == 0.0) {
-					Translate(&end_points[i], points[i], NormalizeAngle(90.0-angles[i]+(i==0?0.0:180.0)), end_length);
+					if (i==2)
+						Translate(&end_points[i], points[i], NormalizeAngle(90.0+angles[i]+180), end_length);
+					else
+						Translate(&end_points[i], points[i], NormalizeAngle(90.0-angles[i]+(i==0?0.0:180.0)), end_length);
 					end_angles[i] = angles[i];
 				} else {
-					if (((i==0) && radii[0]>0.0) || ((i==1 || i==3) && radii[i]>0.0)|| ((i==2) && radii[i]<0.0))
-						Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
-					else
-						Translate(&end_centers[i], points[i], angles[i], fabs(radii[i]));
-					end_arcs[i] = (radii[i]>=0?1:-1)*R2D(end_length/fabs(radii[i]));
+					if (i!=2) {
+						if (((i==0) && radii[0]>0.0) || ((i==1 || i==3) && radii[i]>0.0))
+							Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
+						else
+							Translate(&end_centers[i], points[i], angles[i]+180, fabs(radii[i]));
+						end_arcs[i] = (radii[i]>=0?1:-1)*R2D(end_length/fabs(radii[i]));
+					} else {
+						if (radii[2]>0.0)
+							Translate(&end_centers[i], points[i], angles[i]+180, fabs(radii[i]));
+						else
+							Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
+						end_arcs[i] = (radii[i]>=0?-1:1)*R2D(end_length/fabs(radii[i]));
+					}
 					end_points[i] = points[i];
-					Rotate(&end_points[i],end_centers[i],((i==0||i==3)?-1:1)*end_arcs[i]);
-					end_angles[i] = angles[i]-((i==0||i==3)?-1:1)*end_arcs[i];
+					Rotate(&end_points[i],end_centers[i],end_arcs[i]);
+					end_angles[i] = angles[i]+end_arcs[i];
 				}
 LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n",
 					i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],end_angles[i],radii[i],end_arcs[i],
@@ -1851,7 +1862,7 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 					temp_p->type = SEG_CRVTRK;
 					temp_p->color = wDrawColorBlack;
 					temp_p->width = 0.0;
-					temp_p->u.c.radius = fabs(radii[3]);
+					temp_p->u.c.radius = -radii[3];   //Assumed Left
 					if (radii[3]>0)
 						temp_p->u.c.a0 = FindAngle(end_centers[3],points[3]);
 					else
@@ -1937,9 +1948,9 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[2]);
-				if (radii[2]<0)
-					temp_p->u.c.a0 = FindAngle(end_centers[2],points[2]);
+				temp_p->u.c.radius = radii[2];
+				if (radii[2]>0)
+					temp_p->u.c.a0 = FindAngle(end_centers[2],cornuData.pos[9]);
 				else
 					temp_p->u.c.a0 = FindAngle(end_centers[2],end_points[2]);
 				temp_p->u.c.a1 = fabs(end_arcs[2]);
@@ -2146,7 +2157,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 	if(dp->type == NTO_CORNU) {
 			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
 
-			DIST_T end_length = minLength/2;
+			DIST_T end_length = minLength*2;
 
 			// Adjust end_points to impose small fixed end segments
 

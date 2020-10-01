@@ -2307,7 +2307,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 			valid = TRUE;
 			if (action == C_MOVE)
 				InfoMessage( _("Curve: Length=%s Radius=%0.3f Arc=%0.3f"),
-						FormatDistance( d ), FormatDistance(tempSegs(0).u.c.radius), PutAngle( fabs(a) ) );
+						FormatDistance( d ), FormatDistance(tempSegs(0).u.c.radius), PutAngle( tempSegs(0).u.c.a1 ));
 			return C_CONTINUE;
 		} else {
 			d = FindDistance( end_pos, pos );
