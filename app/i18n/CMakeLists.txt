@@ -2,10 +2,12 @@ PROJECT(i18n)
 
 # List of the supported locales.
 SET(XTRKCAD_LOCALE_IDS
+	cy_GB
 	de_DE
 	fi
 	fr_FR
 	pt_BR
+	ru
 	)
 
 # Misc variables
@@ -125,5 +127,5 @@ ADD_EXECUTABLE(stripmsg stripmsg.c)
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
 	COMMAND stripmsg ${XTC_CUSTOM_MSG_FILES} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
-	DEPENDS stripmsg
+	DEPENDS stripmsg ${XTC_CUSTOM_MSG_FILES}
 	)

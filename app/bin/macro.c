@@ -851,6 +851,8 @@ static BOOL_T DoRegression( char * sFileName )
 		track_p to_first_save = to_first;
 		track_p* to_last_save = to_last;
 		while ( GetNextLine() ) {
+			if ( paramLine[0] == '#' )
+				continue;
 			// Read Expected track
 			to_first = NULL;
 			to_last = &to_first;
@@ -973,7 +975,7 @@ static void PlaybackSetup( void )
 	wTextClear( demoT );
 	wShow( demoW );
 	wFlush();
-	wPrefFlush();
+	wPrefFlush("");
 	wWinSetBusy( mainW, TRUE );
 	wWinSetBusy( mapW, TRUE );
 	ParamSaveAll();
@@ -1210,7 +1212,17 @@ static void Playback( void )
 				wPause( timeout );
 			}
 		} else if (strncmp( paramLine, "KEYSTATE ", 9 ) == 0 ) {
-			playbackKeyState = atoi( paramLine+9 );
+			if ( strchr( "0123456789", paramLine[9] ) ) {
+				playbackKeyState = atoi( paramLine+9 );
+			} else {
+				playbackKeyState = 0;
+				if ( strchr( paramLine+9, 'S' ) )
+					playbackKeyState |= WKEY_SHIFT;
+				if ( strchr( paramLine+9, 'C' ) )
+					playbackKeyState |= WKEY_CTRL;
+				if ( strchr( paramLine+9, 'A' ) )
+					playbackKeyState |= WKEY_ALT;
+			}
 		} else if (strncmp( paramLine, "TIMESTART", 9 ) == 0 ) {
 			playbackTimer = wGetTimer();
 		} else if (strncmp( paramLine, "TIMEEND", 7 ) == 0 ) {
@@ -1496,6 +1508,7 @@ static char * demoInitParams[] = {
 		"grid show 0",
 		"GROUP grid",
 		"misc toolbarset 65535",
+		"misc cur-turnout-ep 0",
 		"GROUP misc",
 		"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
 		"GROUP sticky",

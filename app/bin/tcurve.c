@@ -179,27 +179,30 @@ DIST_T CurveDescriptionDistance(
 		BOOL_T * hidden)
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	coOrd p1;
+	coOrd p0,p1,pd;
 	FLOAT_T ratio;
 	ANGLE_T a, a0, a1;
 	if (hidden) *hidden = FALSE;
-	if ( (GetTrkType( trk ) != T_CURVE )|| ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden))
+	if ( (GetTrkType( trk ) != T_CURVE ) || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden))
 		return 100000;
 	coOrd offset = xx->descriptionOff;
 	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) offset = zero;
+
 	if ( xx->helixTurns > 0 ) {
-		p1.x = xx->pos.x + offset.x;
-		p1.y = xx->pos.y + offset.y;
+		pd.x = xx->pos.x + offset.x;
+		pd.y = xx->pos.y + offset.y;
+		p0 = pd;
+		p1 = pd;
 	} else {
 		GetCurveAngles( &a0, &a1, trk );
-		ratio = ( offset.x + 1.0 ) / 2.0;
-		a = a0 + ratio * a1;
-		ratio = ( offset.y + 1.0 ) / 2.0;
-		Translate( &p1, xx->pos, a, xx->radius * ratio );
+		ratio = offset.x;
+		a = a0 + a1/2.0 + ratio * a1/ 2.0;
+		ratio = offset.y/2 + 0.5;
+		Translate( &pd, xx->pos, a, xx->radius * ratio );
 	}
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
-	*dpos = p1;
-	return FindDistance( p1, pos );
+	*dpos = pd;
+	return FindDistance( pd, pos );
 }
 
 
@@ -260,13 +263,28 @@ static void DrawCurveDescription(
 		Translate( &p1, xx->pos, 180.0, dist );
 		DrawLine( d, p0, p1, 0, color );
 		GetCurveAngles( &a0, &a1, trk );
-		ratio = ( xx->descriptionOff.x + 1.0 ) / 2.0;
-		a = a0 + ratio * a1;
+		ratio = xx->descriptionOff.x;   // 1.0 to - 1.0
+		a = ratio*a1/2.0 + a0 + a1/2.0;
 		PointOnCircle( &p0, xx->pos, xx->radius, a );
 		sprintf( message, "R %s", FormatDistance( xx->radius ) );
-		ratio = ( xx->descriptionOff.y + 1.0 ) / 2.0;
+		ratio = xx->descriptionOff.y/2 + 0.5;  // 1.0 to -1.0
 		DrawDimLine( d, xx->pos, p0, message, (wFontSize_t)descriptionFontSize, ratio, 0, color, 0x11 );
+		coOrd end0, end1;
+		DIST_T off;
+		Translate(&end0,xx->pos,a0,xx->radius);
+		Translate(&end1,xx->pos,a0+a1,xx->radius);
+		off = xx->radius-(cos(D2R(a1/2))*xx->radius);
+		sprintf( message, "L %s A %0.3f O %s", FormatDistance(FindDistance(end0,end1)),FindAngle(end1,end0), FormatDistance(off));
+		DrawDimLine( d, end0, end1, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+		coOrd details_pos;
+
+		details_pos.x = (end1.x - end0.x)*0.5+end0.x;
+		details_pos.y = (end1.y - end0.y)*0.5+end0.y - descriptionFontSize/d->dpi;
+
+		if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, details_pos, a1/180.0*M_PI*xx->radius, color);
 	}
+
 }
 
 
@@ -316,10 +334,9 @@ STATUS_T CurveDescriptionMove(
 				d = 0.9;
 			if ( d < 0.1 )
 				d = 0.1;
-			xx->descriptionOff.y = d * 2.0 - 1.0;
+			xx->descriptionOff.y = (d * 2.0) - 1.0;
 			GetCurveAngles( &a0, &a1, trk );
-			a = a0 + (0.5 * a1);
-			PointOnCircle( &p0, xx->pos, xx->radius/2, a );
+			PointOnCircle( &p0, xx->pos, xx->radius*d, a+a0 );
 		}
 		if (action == C_UP) {
 			editMode = FALSE;
@@ -329,7 +346,6 @@ STATUS_T CurveDescriptionMove(
 
 	case C_REDRAW:
 		if (editMode) {
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
 			DrawCurveDescription( trk, &tempD, wDrawColorBlue );
 		}
 		break;
@@ -374,7 +390,7 @@ static descData_t crvDesc[] = {
 /*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &crvData.angle0, "ccwangle" },
 /*A2*/	{ DESC_ANGLE, N_("CW Angle"), &crvData.angle1, "cwangle"},
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &crvData.grade, "grade" },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &crvData.pivot, "pivot" },
+/*PV*/	{ DESC_PIVOT, N_("Lock"), &crvData.pivot, "pivot" },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &crvData.layerNumber, "layer" },
 		{ DESC_NULL } };
 
@@ -1000,6 +1016,8 @@ static BOOL_T MergeCurve(
 	if ( xx0->helixTurns > 0 ||
 		 xx1->helixTurns > 0 )
 		return FALSE;
+	if (GetTrkType(trk0) != GetTrkType(trk1))
+		return FALSE;
 	d = FindDistance( xx0->pos, xx1->pos );
 	d += fabs( xx0->radius - xx1->radius );
 	if ( d > connectDistance )
@@ -1011,6 +1029,8 @@ static BOOL_T MergeCurve(
 	UndoStart( _("Merge Curves"), "MergeCurve( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndrawNewTrack( trk0 );
+	if (GetTrkEndTrk(trk0,ep0) == trk1)
+		DisconnectTracks( trk0, ep0, trk1, ep1);
 	trk2 = GetTrkEndTrk( trk1, 1-ep1 );
 	if (trk2) {
 		ep2 = GetEndPtConnectedToMe( trk2, trk1 );
@@ -1225,7 +1245,7 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->angle = params->track_angle;
 		params->circleOrHelix = TRUE;
 		return TRUE;
-	} else if (inx == PARAMS_CORNU ) {
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN)  ) {
 		params->ep = PickEndPoint(pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
@@ -1667,7 +1687,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 		d0 = FindDistance( pos0, pos1 )/2.0;
 		Rotate( &pos2, pos1, -a0 );
 		pos2.x -= pos1.x;
-		if ( fabs(pos2.x) < 0.01 )
+		if ( fabs(pos2.x) < 0.005 )
 			break;
 		d2 = sqrt( d0*d0 + pos2.x*pos2.x )/2.0; 
 		r = d2*d2*2.0/pos2.x;

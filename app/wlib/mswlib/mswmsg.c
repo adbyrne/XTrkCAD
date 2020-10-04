@@ -21,17 +21,12 @@
 #define SCALE_LARGE 1.6
 #define SCALE_SMALL 0.8
 
-#ifdef CONTROL3D
-static int messageHeight = 18;
-#endif
-
 struct wMessage_t {
 		WOBJ_COMMON
 		long flags;
 		const char * message;
 		};
 
-#ifndef CONTROL3D
 static void repaintMessage(
 		HWND hWnd,
 		wControl_p b )
@@ -94,7 +89,6 @@ static void repaintMessage(
 
 	ReleaseDC( hWnd, hDc );
 }
-#endif
 
 void wMessageSetValue(
 		wMessage_p b,
@@ -106,11 +100,9 @@ void wMessageSetValue(
 		b->message = mswStrdup( arg );
 	else
 		b->message = NULL;
-#ifdef CONTROL3D
-	SetWindowText( b->hWnd, arg );
-#else
+
 	repaintMessage( ((wControl_p)(b->parent))->hWnd, (wControl_p)b );
-#endif
+
 }
 
 void wMessageSetWidth(
@@ -118,10 +110,7 @@ void wMessageSetWidth(
 		wPos_t width )
 {
 	b->w = width;
-#ifdef CONTROL3D
-	SetWindowPos( b->hWnd, HWND_TOP, CW_USEDEFAULT, CW_USEDEFAULT,
-				width, messageHeight, SWP_NOMOVE );
-#endif
+
 }
 
 wPos_t wMessageGetWidth(const char *string)
@@ -131,9 +120,6 @@ wPos_t wMessageGetWidth(const char *string)
 
 wPos_t wMessageGetHeight( long flags )
 {
-#ifdef CONTROL3D
-	return messageHeight;
-#else
 	double scale = 1.0;
 
 	if( flags & BM_LARGE )
@@ -142,7 +128,7 @@ wPos_t wMessageGetHeight( long flags )
 		scale = SCALE_SMALL;
 
 	return((wPos_t)((mswEditHeight) * scale ));
-#endif
+
 }
 
 static void mswMessageSetBusy(
@@ -152,14 +138,12 @@ static void mswMessageSetBusy(
 }
 
 
-#ifndef CONTROL3D
+
 static callBacks_t messageCallBacks = {
 		repaintMessage,
 		NULL,
 		NULL,
 		mswMessageSetBusy };
-#endif
-
 
 wMessage_p wMessageCreateEx(
 		wWin_p	parent,
@@ -173,47 +157,20 @@ wMessage_p wMessageCreateEx(
 	wMessage_p b;
 	int index;
 	
-#ifdef CONTROL3D
-	RECT rect;
-#endif
-	
+
 	b = (wMessage_p)mswAlloc( parent, B_MESSAGE, NULL, sizeof *b, NULL, &index );
 	mswComputePos( (wControl_p)b, x, y );
 	b->option |= BO_READONLY;
 	b->message = mswStrdup( message );
 	b->flags = flags;
 
-#ifdef CONTROL3D
-	if ( width <= 0	 && strlen(b->message) > 0 ) {
-		width = wLabelWidth( b->message );
-	}
-		
-	b->hWnd = CreateWindow( "STATIC", NULL,
-						SS_LEFTNOWORDWRAP | WS_CHILD | WS_VISIBLE,
-						b->x, b->y,
-						width, messageHeight,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
-	if (b->hWnd == NULL) {
-		mswFail("CreateWindow(MESSAGE)");
-		return b;
-	}
-
-	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
-	SetWindowText( b->hWnd, message );
-
-	GetWindowRect( b->hWnd, &rect );
-	b->w = rect.right - rect.left;
-	b->h = rect.bottom - rect.top;
-#else
 	b->w = width;
 	b->h = wMessageGetHeight( flags ) + 1;
 
 	repaintMessage( ((wControl_p)parent)->hWnd, (wControl_p)b );
-#endif
+
 	mswAddButton( (wControl_p)b, FALSE, helpStr );
-#ifndef CONTROL3D
 	mswCallBacks[B_MESSAGE] = &messageCallBacks;
-#endif
+
 	return b;
 }

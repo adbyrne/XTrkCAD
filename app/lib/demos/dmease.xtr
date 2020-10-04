@@ -23,7 +23,7 @@ PARAMETER misc cmdEasement
 PARAMETER easement val -1.0
 BIGPAUSE
 PARAMETER easement ok
-COMMAND Join
+COMMAND JoinTrack
 STEP
 MESSAGE
 _____________________________________
@@ -147,7 +147,7 @@ We've selected sharp easements.  The minimum radius curve we can use will be 9.7
 Notice the label on the Easement button has changed to 'Sharp'.
 END
 STEP
-COMMAND Join
+COMMAND JoinTrack
 MOUSE 1 1.917 12.167
 MOUSE 2 1.917 12.167
 MOUSE 3 1.917 12.167

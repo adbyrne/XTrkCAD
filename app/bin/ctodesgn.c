@@ -45,8 +45,13 @@
 #include "cbezier.h"
 #include "misc.h"
 
+dynArr_t tempSegs_da;
+dynArr_t tempEndPts_da;
+char tempCustom[4096];
+
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
 
+dynArr_t tempSegs_da;
 
 
 /*****************************************
@@ -1281,8 +1286,7 @@ BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T ra
 
 static toDesignSchema_t * LoadSegs(
 		toDesignDesc_t * dp,
-		wBool_t loadPoints,
-		wIndex_t * pathLenP )
+		wBool_t loadPoints )
 {
 	wIndex_t s;
 	int i, p, p0, p1;
@@ -1494,21 +1498,32 @@ static toDesignSchema_t * LoadSegs(
 				}
 			}
 
-			DIST_T end_length = minLength/2;
+			DIST_T end_length = minLength*2;
 
 			for (int i=0;i<((dp->type==NTO_CORNU3WAY)?4:3);i++) {
 				if (radii[i] == 0.0) {
-					Translate(&end_points[i], points[i], 90-angles[i]+(i==0?0:180), end_length);
+					if (i==2)
+						Translate(&end_points[i], points[i], NormalizeAngle(90.0+angles[i]+180), end_length);
+					else
+						Translate(&end_points[i], points[i], NormalizeAngle(90.0-angles[i]+(i==0?0.0:180.0)), end_length);
 					end_angles[i] = angles[i];
 				} else {
-					if (((i==0) && radii[0]>0.0) || ((i==1 || i==3) && radii[i]>0.0)|| ((i==2) && radii[i]<0.0))
-						Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
-					else
-						Translate(&end_centers[i], points[i], angles[i], fabs(radii[i]));
-					end_arcs[i] = (radii[i]>=0?1:-1)*R2D(end_length/fabs(radii[i]));
+					if (i!=2) {
+						if (((i==0) && radii[0]>0.0) || ((i==1 || i==3) && radii[i]>0.0))
+							Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
+						else
+							Translate(&end_centers[i], points[i], angles[i]+180, fabs(radii[i]));
+						end_arcs[i] = (radii[i]>=0?1:-1)*R2D(end_length/fabs(radii[i]));
+					} else {
+						if (radii[2]>0.0)
+							Translate(&end_centers[i], points[i], angles[i]+180, fabs(radii[i]));
+						else
+							Translate(&end_centers[i], points[i], -angles[i], fabs(radii[i]));
+						end_arcs[i] = (radii[i]>=0?-1:1)*R2D(end_length/fabs(radii[i]));
+					}
 					end_points[i] = points[i];
-					Rotate(&end_points[i],end_centers[i],((i==0||i==3)?-1:1)*end_arcs[i]);
-					end_angles[i] = angles[i]-((i==0||i==3)?-1:1)*end_arcs[i];
+					Rotate(&end_points[i],end_centers[i],end_arcs[i]);
+					end_angles[i] = angles[i]+end_arcs[i];
 				}
 LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n",
 					i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],end_angles[i],radii[i],end_arcs[i],
@@ -1615,20 +1630,18 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			int inx,subSeg;
 			wBool_t back, neg;
 
-			CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da, FALSE);
-
 			/* Override if a "Y" has zero radius at base to be a straight until the Toe
 			 * We set the start of the curve to be at the Toe position */
 			if (cornuData.radius[0] == 0.0) {
 				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
-				pos.y = 0.0;
+				pos.y = end_points[0].y;
 				angle = 90.0;
 				radius = 0.0;
 				center = zero;
 
 			} else {
-
 				/*Find Toe 1 from curve */
+				CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da, FALSE);
 
 				/*Get ToeAngle/Radius/Center for first toe */
 				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
@@ -1687,22 +1700,30 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			if (dp->type == NTO_CORNU3WAY) {
 			  	if (newTurnToeR!=newTurnToeL) {
 					/* Second Toe */
-					pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
-					pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-					angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,NULL,&back,&subSeg,&neg);
-					segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
-
-					if (segPtr->type == SEG_BEZTRK) {
-						segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
-					}
-
-					if (segPtr->type == SEG_STRTRK) {
+			  		if (cornuData.radius[0] == 0.0) {
+						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
+						pos.y = 0.0;
+						angle = 90.0;
 						radius = 0.0;
 						center = zero;
-					} else if (segPtr->type == SEG_CRVTRK) {
-						center = segPtr->u.c.center;
-						radius = fabs(segPtr->u.c.radius);
-					}
+			  		} else {
+						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
+						pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
+						angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,NULL,&back,&subSeg,&neg);
+						segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
+
+						if (segPtr->type == SEG_BEZTRK) {
+							segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
+						}
+
+						if (segPtr->type == SEG_STRTRK) {
+							radius = 0.0;
+							center = zero;
+						} else if (segPtr->type == SEG_CRVTRK) {
+							center = segPtr->u.c.center;
+							radius = fabs(segPtr->u.c.radius);
+						}
+			  		}
 					cornuData.pos[3] = pos;
 					cornuData.center[3] = center;
 					cornuData.angle[3] = angle;
@@ -1781,16 +1802,36 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 		points[0].x,points[0].y,end_points[0].x,end_points[0].y,
 		rp0.x,rp0.y,rp1.x,rp1.y);
 			}
-
-			if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
-				(cornuData.pos[0].y != cornuData.pos[1].y) )
+			//If Radius zero, just a straight to the First Toe if offset
+			if (cornuData.radius[0] == 0.0) {
+				if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
+				    (cornuData.pos[0].y != cornuData.pos[1].y)) {
+					DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+					temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+					temp_p->type = SEG_STRTRK;
+					temp_p->color = wDrawColorBlack;
+					temp_p->width = 0.0;
+					temp_p->u.l.pos[0] = cornuData.pos[0];
+					temp_p->u.l.pos[1] = cornuData.pos[1];
+				}
+			} else if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
+				       (cornuData.pos[0].y != cornuData.pos[1].y) )
 				CallCornuNoBez(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da);
+
 			Toe1Seg = tempSegs_da.cnt;
 
 			if (dp->type == NTO_CORNU3WAY) {
 				if (newTurnToeR!=newTurnToeL) {
 					/* Toe1 to Toe2 in tempSegs array */
-					if ((cornuData.pos[2].x != cornuData.pos[3].x) ||
+					if (cornuData.radius[0] == 0.0) {
+						DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
+						temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+						temp_p->type = SEG_STRTRK;
+						temp_p->color = wDrawColorBlack;
+						temp_p->width = 0.0;
+						temp_p->u.l.pos[0] = cornuData.pos[2];
+						temp_p->u.l.pos[1] = cornuData.pos[3];
+					} else if ((cornuData.pos[2].x != cornuData.pos[3].x) ||
 						(cornuData.pos[2].y != cornuData.pos[3].y) )
 						CallCornuNoBez(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],&cornuData.radius[2],&cornuSegs_da);
 
@@ -1812,7 +1853,7 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 					temp_p->color = wDrawColorBlack;
 					temp_p->width = 0.0;
 					temp_p->u.l.pos[0] = cornuData.pos[5];
-					temp_p->u.l.pos[1] = end_points[3];
+					temp_p->u.l.pos[1] = points[3];
 	LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 					temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
 				} else {
@@ -1821,7 +1862,7 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 					temp_p->type = SEG_CRVTRK;
 					temp_p->color = wDrawColorBlack;
 					temp_p->width = 0.0;
-					temp_p->u.c.radius = fabs(radii[3]);
+					temp_p->u.c.radius = -radii[3];   //Assumed Left
 					if (radii[3]>0)
 						temp_p->u.c.a0 = FindAngle(end_centers[3],points[3]);
 					else
@@ -1856,7 +1897,7 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[7];
-				temp_p->u.l.pos[1] = end_points[1];
+				temp_p->u.l.pos[1] = points[1];
 LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
 			} else {
@@ -1865,7 +1906,7 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[1]);
+				temp_p->u.c.radius = -radii[1];  //Negative relative to left
 				if (radii[1]>0)
 					temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
 				else
@@ -1898,7 +1939,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[9];
-				temp_p->u.l.pos[1] = end_points[2];
+				temp_p->u.l.pos[1] = points[2];
 LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
 			} else {
@@ -1907,9 +1948,9 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[2]);
-				if (radii[2]<0)
-					temp_p->u.c.a0 = FindAngle(end_centers[2],points[2]);
+				temp_p->u.c.radius = radii[2];
+				if (radii[2]>0)
+					temp_p->u.c.a0 = FindAngle(end_centers[2],cornuData.pos[9]);
 				else
 					temp_p->u.c.a0 = FindAngle(end_centers[2],end_points[2]);
 				temp_p->u.c.a1 = fabs(end_arcs[2]);
@@ -2116,7 +2157,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 	if(dp->type == NTO_CORNU) {
 			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
 
-			DIST_T end_length = minLength/2;
+			DIST_T end_length = minLength*2;
 
 			// Adjust end_points to impose small fixed end segments
 
@@ -2168,7 +2209,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			cornuData.radius[0] = fabs(radii[0]);
 			cornuData.radius[1] = fabs(radii[2]);
 			cornuData.radius[3] = fabs(radii[2]);
-			cornuData.radius[5] = fabs(radii[1]); /*Inner*/
+			cornuData.radius[5] = fabs(radii[1]);        /*Inner*/
 
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			trkSeg_t * temp_p, * cornu_p;
@@ -2234,7 +2275,7 @@ LogPrintf( "ctoDes1: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[0]);;
+				temp_p->u.c.radius = -radii[0];
 				if (radii[0]>0.0)
 					temp_p->u.c.a0 = FindAngle(end_centers[0],end_points[0]);
 				else
@@ -2276,7 +2317,7 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[2]);
+				temp_p->u.c.radius = -radii[2];
 				if (radii[2]>0)
 					temp_p->u.c.a0 = FindAngle(end_centers[2],points[2]);
 				else
@@ -2319,7 +2360,7 @@ LogPrintf( "ctoDes3: P0(%f,%f) P1(%f,%f) \n",
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->width = 0.0;
-				temp_p->u.c.radius = fabs(radii[1]);
+				temp_p->u.c.radius = -radii[1];
 				if (radii[1]>0)
 					temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
 				else
@@ -2424,11 +2465,8 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 	AddRoadbed();
 
 #ifndef MKTURNOUT
-	if ( (pathLen=CheckPaths( segCnt, &tempSegs(0), pp->paths )) < 0 )
+	if ( CheckPaths( segCnt, &tempSegs(0), pp->paths ) < 0 )
 		return NULL;
-
-	if (pathLenP)
-		*pathLenP = pathLen;
 #endif
 	return pp;
 }
@@ -2469,7 +2507,7 @@ static void NewTurnPrint(
 		{ 0.0, 0.0 },
 		Pix2CoOrd, CoOrd2Pix };
 
-	if ((pp=LoadSegs( curDesign, TRUE, NULL )) == NULL)
+	if ((pp=LoadSegs( curDesign, TRUE )) == NULL)
 		return;
 	if (includeNontrackSegments && customTurnout1)
 		CopyNonTracks( customTurnout1 );
@@ -2610,7 +2648,6 @@ static void NewTurnOk( void * context )
 {
 	FILE * f;
 	toDesignSchema_t * pp;
-	wIndex_t pathLen;
 	int i;
 	BOOL_T foundR=FALSE;
 	char * cp;
@@ -2622,7 +2659,7 @@ static void NewTurnOk( void * context )
 	char * customInfoP;
 	char *oldLocale = NULL;
 
-	if ((pp=LoadSegs( curDesign, TRUE, &pathLen )) == NULL)
+	if ((pp=LoadSegs( curDesign, TRUE )) == NULL)
 		return;
 
 	if ( (curDesign->strCnt >= 1 && newTurnLeftDesc[0] == 0) ||
@@ -2705,7 +2742,7 @@ static void NewTurnOk( void * context )
 	 }
 
 	to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), radii, FALSE );
+						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), radii, FALSE, 0 );
 	to->customInfo = customInfoP;
 #endif
 	if (f) {
@@ -2724,7 +2761,7 @@ static void NewTurnOk( void * context )
 		points[3].y = - points[3].y;
 		points[4].y = - points[4].y;
 		radii[0] = - radii[0];
-		LoadSegs( curDesign, FALSE, &pathLen );
+		LoadSegs( curDesign, FALSE );
 		tempEndPts(2).pos.y = - tempEndPts(2).pos.y;
 		tempEndPts(2).angle = 180.0 - tempEndPts(2).angle;
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc, newTurnRightPartno );
@@ -2735,7 +2772,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE, 0 );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2769,7 +2806,7 @@ static void NewTurnOk( void * context )
 		angles[4] = -angles[4];
 		angles[5] = -angles[5];
 		angles[6] = -angles[6];
-		LoadSegs( curDesign, FALSE, &pathLen );
+		LoadSegs( curDesign, FALSE );
 		tempEndPts(1).pos.y = - tempEndPts(1).pos.y;
 		tempEndPts(1).angle = 180.0 - tempEndPts(1).angle;
 		tempEndPts(2).pos.y = - tempEndPts(2).pos.y;
@@ -2782,7 +2819,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE, 0 );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2984,7 +3021,6 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	int i;
 	toDesignDesc_t * dp;
 	char * type, * name, *cp, *mfg, *descL, *partL, *descR, *partR;
-	wIndex_t pathLen;
 	long rgb;
 	trkSeg_p sp0, sp1;
 	BOOL_T segsDiff;
@@ -3049,7 +3085,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 
 	segsDiff = FALSE;
 	if ( to ) {
-		LoadSegs( dp, TRUE, &pathLen );
+		LoadSegs( dp, TRUE );
 		segsDiff = FALSE;
 		if ( to->segCnt == tempSegs_da.cnt ) {
 			for ( sp0=to->segs,sp1=&tempSegs(0); (!segsDiff) && sp0<&to->segs[to->segCnt]; sp0++,sp1++ ) {
@@ -3107,7 +3143,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 			radii[0] = - radii[0];
 			radii[1] = - radii[1];
 		}
-		LoadSegs( dp, FALSE, &pathLen );
+		LoadSegs( dp, FALSE );
 		if ( dp->type==NTO_REGULAR ) {
 			points[2].y = - points[2].y;
 			radii[0] = - radii[0];

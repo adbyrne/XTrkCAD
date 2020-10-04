@@ -598,6 +598,7 @@ printf("T%d [%0.3f %0.3f %0.3f]\n", GetTrkIndex(trk1), p1.x, p1.y, a1 );
 static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift) {
 	coOrd pos = GetTrkEndPos(t,ep);
 	DIST_T d = tempD.scale*0.15;
+	DIST_T w = tempD.scale/tempD.dpi*4;
 	ANGLE_T a = GetTrkEndAngle(t,ep);
 	int i;
 	if (!shift) {
@@ -608,7 +609,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift) {
 		anchors(i).u.l.pos[0] = pos;
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
@@ -616,7 +617,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift) {
 		anchors(i).u.l.pos[0] = pos;
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 	} else {
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
@@ -626,7 +627,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift) {
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a,d);
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
@@ -635,7 +636,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift) {
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a,-d);
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 	}
 }
 
@@ -841,6 +842,7 @@ static STATUS_T CmdPull(
 		return C_CONTINUE;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( pullPopupM );
 		return C_CONTINUE;
 		break;

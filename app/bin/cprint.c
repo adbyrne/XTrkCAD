@@ -57,13 +57,20 @@ static bitmap_t bm, bm0;
 #define BITMAP( BM, X, Y ) \
 		(BM).bm[ (X)-(BM).x0 + ((Y)-(BM).y0) * ((BM).x1-(BM).x0) ]
 
-struct {
+static struct {
 		coOrd size;
 		coOrd orig;
 		ANGLE_T angle;
 		} currPrintGrid, newPrintGrid;
 
 
+EXPORT coOrd GetPrintOrig() {
+	return currPrintGrid.orig;
+}
+
+EXPORT ANGLE_T GetPrintAngle() {
+	return currPrintGrid.angle;
+}
 /*
  * GUI VARS
  */
@@ -854,7 +861,7 @@ static void DrawRegistrationMarks( drawCmd_p d )
 	long x, y, delta, divisor;
 	coOrd p0, p1, qq, q0, q1;
 	POS_T len;
-	char msg[10];
+	char msg[STR_SIZE];
 	wFont_p fp;
 	wFontSize_t fs;
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
@@ -1465,6 +1472,7 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		return C_TERMINATE;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( printGridPopupM );
 		return C_CONTINUE;
 

@@ -375,7 +375,7 @@ void wWinShow(
             gtk_window_resize(GTK_WINDOW(win->gtkwin), width+10, height+10);
         }
 
-
+        gtk_window_present(GTK_WINDOW(win->gtkwin));
 
 
         gdk_window_raise(gtk_widget_get_window(win->gtkwin));
@@ -790,7 +790,6 @@ wBool_t catch_shift_ctrl_alt_keys(
     void * data)
 {
     int state = 0;
-
     switch (event->keyval ) {
     case GDK_KEY_Shift_L:
     case GDK_KEY_Shift_R:
@@ -806,6 +805,13 @@ wBool_t catch_shift_ctrl_alt_keys(
     case GDK_KEY_Alt_R:
         state |= WKEY_ALT;
         break;
+
+    case GDK_KEY_Meta_L:
+    case GDK_KEY_Meta_R:
+	// Pressing SHIFT and then ALT generates a Meta key
+	//printf( "Meta\n" );
+        state |= WKEY_ALT;
+        break;
     }
 
     if (state != 0) {
@@ -814,10 +820,8 @@ wBool_t catch_shift_ctrl_alt_keys(
         } else {
             keyState &= ~state;
         }
-
         return TRUE;
     }
-
     return FALSE;
 }
 
@@ -937,8 +941,9 @@ static wWin_p wWinCommonCreate(
         w->gtkwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
         if (gtkMainW) {
-            gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
-                                         GTK_WINDOW(gtkMainW->gtkwin));
+        	if (!(w->option&F_NOTTRANSIENT))
+        		gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
+        									GTK_WINDOW(gtkMainW->gtkwin));
         }
     }
     getWinSize(w, nameStr);
@@ -1184,7 +1189,7 @@ void wExit(
         }
     }
 
-    wPrefFlush();
+    wPrefFlush("");
 
     if (gtkMainW && gtkMainW->winProc != NULL) {
         gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);

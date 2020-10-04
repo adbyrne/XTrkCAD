@@ -29,11 +29,7 @@
 #include <math.h>
 #include <winuser.h>
 
-#ifdef WIN32
 #define wFont_t tagLOGFONTA
-#else
-#define wFont_t tagLOGFONT
-#endif
 
 #include "misc.h"
 #include "mswint.h"
@@ -50,8 +46,6 @@ wBool_t wDrawDoTempDraw = TRUE;
 
 static wBool_t initted = FALSE;
 
-long wDebugFont;
-
 static FARPROC oldDrawProc;
 
 
@@ -61,7 +55,7 @@ static long clrOp = 0xbb0226;
 
 #define CENTERMARK_LENGTH 6
 
-bool bDrawMainBM = 0;
+static bool bDrawMainBM = 0;
 
 #ifdef SLOW
 static wPos_t XPIX2INCH( wDraw_p d, int ix )
@@ -908,9 +902,9 @@ wFontSize_t wSelectedFontSize( void )
 	return fontSize;
 }
 
-void wSetSelectedFontSize(int size)
+void wSetSelectedFontSize(wFontSize_t size)
 {
-	fontSize = (wFontSize_t)size;
+	fontSize = size;
 }
 
 /*
@@ -1392,7 +1386,7 @@ struct wDrawBitMap_t {
 		wDrawColor color;
 		HBITMAP bm;
 		};
-wDrawBitMap_p bmRoot = NULL;
+static wDrawBitMap_p bmRoot = NULL;
 
 
 void wDrawBitMap(
@@ -1484,7 +1478,7 @@ wDrawBitMap_p wDrawBitMapCreate(
  *****************************************************************************
  */
 
-int doSetFocus = 1;
+static int doSetFocus = 1;
 
 long FAR PASCAL XEXPORT mswDrawPush(
 		HWND hWnd,
@@ -1492,11 +1486,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		UINT wParam,
 		LONG lParam )
 {
-#ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wDraw_p b;
 	short int ix, iy;
 	wPos_t x, y;
@@ -1615,6 +1605,8 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		iy = HIWORD( lParam );
 		x = XPIX2INCH( b, ix );
 		y = YPIX2INCH( b, iy );
+		b->lastX = x;
+		b->lastY = y;
 		if (b->action)
 			b->action( b, b->data, action, x, y );
 		if (b->hWnd)
@@ -1636,7 +1628,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		case VK_RIGHT:	extChar = wAccelKey_Right; break;				
 		case VK_LEFT:	extChar = wAccelKey_Left; break;
 		case VK_BACK:	extChar = wAccelKey_Back; break;
-		/*case VK_F1:	extChar = wAccelKey_F1; break;*/
+		case VK_F1:		extChar = wAccelKey_F1; break;
 		case VK_F2:		extChar = wAccelKey_F2; break;
 		case VK_F3:		extChar = wAccelKey_F3; break;
 		case VK_F4:		extChar = wAccelKey_F4; break;
@@ -1651,9 +1643,9 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		}
 		if (b && b->action) {
 			if (extChar != wAccelKey_None)
-				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), 0, 0 );
+				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), b->lastX, b->lastY );
 			else
-				b->action( b, b->data, wActionText + ( wParam << 8 ), 0, 0 );
+				b->action( b, b->data, wActionText + ( wParam << 8 ), b->lastX, b->lastY );
 		}
 		return 0;
 
@@ -1737,7 +1729,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			}
 		}
 		if (b->action)
-			b->action( b, b->data, action, 0, 0 );
+			b->action( b, b->data, action, b->lastX, b->lastY );
 		return 0;
 	case WM_MOUSEHWHEEL:
 		if ( GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON)) {
@@ -1748,7 +1740,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			}
 		}
 		if (b->action)
-			b->action( b, b->data, action, 0, 0 );
+			b->action( b, b->data, action, b->lastX, b->lastY );
 		return 0;
 	}
 
@@ -1797,7 +1789,7 @@ static callBacks_t drawCallBacks = {
 		drawDoneProc,
 		(messageCallback_p)drawMsgProc };
 
-wDraw_p drawList = NULL;
+static wDraw_p drawList = NULL;
 
 
 void mswRedrawAll( void )

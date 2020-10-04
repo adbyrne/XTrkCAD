@@ -40,7 +40,7 @@ typedef struct track_t {
 		BOOL_T new:1;
 		unsigned int width:2;
 		unsigned int elevMode:2;
-		unsigned int bits:12;
+		unsigned int bits:13;
 		EPINX_T endCnt;
 		trkEndPt_p endPt;
 		struct { float x; float y; } lo, hi;

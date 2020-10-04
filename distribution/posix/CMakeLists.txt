@@ -1,6 +1,6 @@
 # Setup packaging ...
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "XTrackCAD is a CAD program for designing model railroad layouts.")
-set(CPACK_GENERATOR "RPM" "STGZ")
+set(CPACK_GENERATOR "DEB" "RPM" "STGZ")
 set(CPACK_SOURCE_GENERATOR "TGZ" "TBZ2" "ZIP")
 set(CPACK_PACKAGE_RELEASE 1)
 set(CPACK_RPM_PACKAGE_LICENSE "GPL")
@@ -28,7 +28,7 @@ set(CPACK_RPM_BUILDREQUIRES
 if(NOT XTRKCAD_USE_BROWSER)
     set(CPACK_RPM_PACKAGE_REQUIRES 
         "${CPACK_RPM_PACKAGE_REQUIRES} webkitgtk")
-    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
+#    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
 endif()
 
 # exclude these directories from the rpm
@@ -45,6 +45,46 @@ set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 )
 
 set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}////changelog.txt")
+
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+set(CPACK_DEBIAN_PACKAGE_NAME "XTrkCad")
+
+set(CPACK_DEBIAN_PACKAGE_VERSION "1:${XTRKCAD_VERSION}")
+
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "zip, xdg-utils")
+
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "xtrkcad@sillub.com")
+
+set(CPACK_PACKAGE_CONTACT "xtrkcad@sillub.com")
+
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "XTrkCad supports any scale, has libraries of popular brands of \
+turnouts and sectional track (plus you add your own easily), can \
+automatically use spiral transition curves when joining track \
+XTrkCad lets you manipulate track much like you would with actual \
+flex-track to modify, extend and join tracks and turnouts. \
+Additional features include tunnels, 'post-it' notes, on-screen \
+ruler, parts list, 99 drawing layers, undo/redo commands, \
+benchwork, 'Print to BitMap', elevations, train simulation and \
+car inventory. \
+")
+
+
+set(CPACK_DEBIAN_PACKAGE_SECTION "contrib/graphics")
+
+set(CPACK_DEBIAN_PACKAGE_COMPRESSION "gzip")
+
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "xtrkcad.org")
+
+set(CPACK_PACKAGE_EXECUTABLES "xtrkcad;XTrkCad-5.2.1-Beta")
+
+set(CPACK_CREATE_DESKTOP_LINKS "xtrkcad")
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/postinst;${CMAKE_CURRENT_SOURCE_DIR}/prerm")
 
 include(CPack)
 

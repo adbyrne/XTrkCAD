@@ -25,7 +25,7 @@
 #include "utility.h"
 
 
-dynArr_t tempEndPts_da;
+extern dynArr_t tempEndPts_da;
 #define BezSegs(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
 #define bezCmdNone 			(0)
@@ -52,5 +52,5 @@ double BezierOffsetLength(dynArr_t,double offset);
 double BezierMinRadius(coOrd[4],dynArr_t);
 void UpdateParms(wDrawColor color,long width);
 
-void addSegBezier(dynArr_t * const array_p, trkSeg_p seg);
+void addSegBezier(dynArr_t * array_p, trkSeg_p seg);
 

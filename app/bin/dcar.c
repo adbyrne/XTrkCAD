@@ -1320,7 +1320,6 @@ EXPORT BOOL_T CarItemRead(
 	long condition = 0;
 	long purchDate = 0;
 	long serviceDate = 0;
-	int len, siz;
 	carItem_p item;
 	char * cp;
 	wIndex_t layer;
@@ -4432,9 +4431,9 @@ static void CarInvDlgFind( void * junk )
 	if ( item == NULL || item->car == NULL || IsTrackDeleted(item->car) ) return;
 	CarGetPos( item->car, &pos, &angle );
 	CarSetVisible( item->car );
-	mainD.orig.x = pos.x-mainD.size.x/2;;
-	mainD.orig.y = pos.y-mainD.size.y/2;;
-	MainLayout( TRUE, TRUE );	// CarInvDlgFind
+	panCenter = pos;
+	LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+	PanHere( (void*)0 );		// CarInvDlgFind
 }
 
 
@@ -4864,6 +4863,7 @@ static int CarInvImportCsv(
 			if ( dim.truckCenter <= 0 ) dim.truckCenter = partP->dim.truckCenter;
 			if ( dim.truckCenterOffset < 0 ) dim.truckCenterOffset = partP->dim.truckCenterOffset;
 		}
+		if (dim.truckCenterOffset <0)  dim.truckCenterOffset  = 0;
 		cp = TabStringCpy( title, &tabs[M_MANUF] );
 		*cp++ = '\t';
 		cp = TabStringCpy( cp, &tabs[M_PROTO] );
@@ -5023,8 +5023,8 @@ static int CarInvExportCsv(
 		CsvFormatLong( f, item->options, "," );
 		CsvFormatFloat( f, item->dim.carLength, 3, "," );
 		CsvFormatFloat( f, item->dim.carWidth, 3, "," );
-		CsvFormatFloat( f, item->dim.truckCenterOffset, 3, ",");
 		CsvFormatFloat( f, item->dim.coupledLength, 3, "," );
+		CsvFormatFloat( f, item->dim.truckCenterOffset, 3, ",");
 		CsvFormatFloat( f, item->dim.truckCenter, 3, "," );
 		CsvFormatLong( f, wDrawGetRGB(item->color), "," );
 		CsvFormatFloat( f, item->data.purchPrice, 2, "," );

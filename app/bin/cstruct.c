@@ -33,6 +33,7 @@
 #include "layout.h"
 #include "messages.h"
 #include "param.h"
+#include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
 #include "utility.h"
@@ -136,7 +137,6 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 	else
 		to->contentsLabel = curSubContents;
 	to->endCnt = 0;
-	to->pathLen = 0;
 	to->paths = (PATHPTR_T)"";
 	if (updateList && structureListL != NULL) {
 		FormatCompoundTitle( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, to->title );
@@ -161,6 +161,25 @@ StructureDelete(void *structure)
 	turnoutInfo_t * to = (turnoutInfo_t *)structure;
 	MyFree(to->title);
 	MyFree(to->segs);
+
+	if (to->special) {
+		switch(to->special) {
+		case TOpier:
+			MyFree(to->u.pier.name);
+			to->u.pier.name = NULL;
+			break;
+		case TOpierInfo:
+			for(int pierInx=0;pierInx<to->u.pierInfo.cnt;pierInx++) {
+				if (to->u.pierInfo.info[pierInx].name)
+					MyFree(to->u.pierInfo.info[pierInx].name);
+				to->u.pierInfo.info[pierInx].name = NULL;
+			}
+			MyFree(to->u.pierInfo.info);
+			to->u.pierInfo.cnt = 0;
+			break;
+		default:;
+		}
+	}
 
 	MyFree(to);
 	return(TRUE);
@@ -705,7 +724,7 @@ static void NewStructure( void )
 	}
 	UndoStart( _("Place Structure"), "newStruct" );
 	titleLen = strlen( curStructure->title );
-	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, 0, "", curStructure->segCnt, curStructure->segs );
+	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
 	xx = GetTrkExtraData(trk);
 #ifdef LATER
 	trk = NewTrack( 0, T_STRUCTURE, 0, sizeof (*xx) + 1 );
@@ -718,8 +737,7 @@ static void NewStructure( void )
 	xx->segCnt = curStructure->segCnt;
 	memcpy( xx->segs, curStructure->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
 	xx->title = curStructure->title;
-	xx->pathLen = 0;
-	xx->paths = "";
+	SetPaths( trk, "" );
 #endif
 	switch(curStructure->special) {
 		case TOnormal:
@@ -769,8 +787,9 @@ static void StructRotate( void * pangle )
 	if (Dst.state == 0)
 		return;
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	angle /= 1000.0;
 	Dst.pos = cmdMenuPos;
-	Rotate( &Dst.pos, cmdMenuPos, angle/1000 );
+	Rotate( &Dst.pos, cmdMenuPos, angle );
 	Dst.angle += angle;
 	TempRedraw(); // StructRotate
 }
@@ -874,15 +893,18 @@ EXPORT STATUS_T CmdStructureAction(
 
 	case C_CMDMENU:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		menuPos = pos;
 		wMenuPopupShow( structPopupM );
 		return C_CONTINUE;
 
 	case C_REDRAW:
+		wSetCursor(mainD.d,defaultCursor);
 		if (Dst.state)
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
-				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlue );
+				curStructure->segs, curStructure->segCnt, 0.0, selectedColor );
 		if (anchors_da.cnt>0) {
 				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+				wSetCursor(mainD.d,wCursorNone);
 			}
 		if (Dst.state == 2)
 			DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );

@@ -71,45 +71,7 @@ static paramGroup_t prefPG;
 
 
 
-static void OptionDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
-{
-	if ( inx < 0 ) return;
-	if ( pg->paramPtr[inx].valueP == &enableBalloonHelp ) {
-		wEnableBalloonHelp((wBool_t)*(long*)valueP);
-	} else {
-		if (pg->paramPtr[inx].valueP == &units) {
-			UpdatePrefD();
-		}
-		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
-			UpdateMeasureFmt();
-		}
-		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
-			DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
-		}
-		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
-			checkPtInterval = *(long *)valueP;
-			if (checkPtInterval == 0 ) {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning off AutoSave") );
-				UpdateAutoSaveInterval(0);
-			} else {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
-			}
-		}
-		if (pg->paramPtr[inx].valueP == &autosaveChkPoints) {
-			autosaveChkPoints = *(long *)valueP;
-			if (checkPtInterval == 0 && autosaveChkPoints>0 ) {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning on CheckPointing") );
-				UpdateChkPtInterval(10);
-			} else {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
-			}
 
-		}
-	}
-}
 
 static void OptionDlgCancel(
 		wWin_p win )
@@ -140,7 +102,7 @@ static char * colorTrackLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * colorDrawLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * liveMapLabels[] = { N_("Live Map"), NULL };
 static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
-static char * zoomCornerLabels[] = {N_("Zoom keeps lower corner in view"), NULL};
+static char * constrainMainLabels[] = {N_("Constrain Drawing Area to Room boundaries"), NULL};
 
 extern long trainPause;
 
@@ -156,9 +118,10 @@ static paramData_t displayPLs[] = {
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
-	{ PD_TOGGLE, &zoomCorner, "zoom-corner", PDO_NOPSHUPD, zoomCornerLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
+#define labelSelect (12)
 	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_64, N_("Label Scale"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, (void*)(CHANGE_MAIN) },
@@ -183,15 +146,51 @@ static void DisplayOk( void * junk )
 }
 
 
-#ifdef LATER
-static void DisplayChange( long changes )
+static void OptionDlgUpdate(
+		paramGroup_p pg,
+		int inx,
+		void * valueP )
 {
-	if (changes & (CHANGE_SCALE|CHANGE_UNITS))
-		if (displayW != NULL && wWinIsVisible(displayW) )
-			ParamLoadControls( &displayPG );
-}
-#endif
+	if ( inx < 0 ) return;
+	if ( pg->paramPtr[inx].valueP == &enableBalloonHelp ) {
+		wEnableBalloonHelp((wBool_t)*(long*)valueP);
+	} else {
+		if (pg->paramPtr[inx].valueP == &labelEnable) {
+			long new_labels = wRadioGetValue( (wChoice_p)pg->paramPtr[inx].control );
+			labelEnable = new_labels;
+			ParamLoadControl(&displayPG,labelSelect);
+		}
+		if (pg->paramPtr[inx].valueP == &units) {
+			UpdatePrefD();
+		}
+		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
+			UpdateMeasureFmt();
+		}
+		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
+			DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
+		}
+		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
+			checkPtInterval = *(long *)valueP;
+			if (checkPtInterval == 0 ) {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning off AutoSave") );
+				UpdateAutoSaveInterval(0);
+			} else {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+			}
+		}
+		if (pg->paramPtr[inx].valueP == &autosaveChkPoints) {
+			autosaveChkPoints = *(long *)valueP;
+			if (checkPtInterval == 0 && autosaveChkPoints>0 ) {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning on CheckPointing") );
+				UpdateChkPtInterval(10);
+			} else {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+			}
 
+		}
+
+	}
+}
 
 static void DoDisplay( void * junk )
 {

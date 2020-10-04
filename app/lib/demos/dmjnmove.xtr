@@ -39,7 +39,7 @@ _________________________________________
 Click <Join> and Shift-Left-Click on the two End-Points.
 END
 STEP
-COMMAND Join
+COMMAND JoinTrack
 KEYSTATE 2
 MOUSE 2 14.613 7.573
 KEYSTATE 2

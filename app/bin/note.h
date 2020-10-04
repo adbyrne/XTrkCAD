@@ -37,7 +37,7 @@ enum noteCommands {
 	OP_NOTETEXT,
 	OP_NOTELINK,
 	OP_NOTEFILE
-} noteOperations;
+};
 
 /** hold the data for the note */
 struct extraDataNote {

@@ -61,6 +61,8 @@
 #endif
 #endif
 
+EXPORT char tempSpecial[4096];
+
 static int log_track = 0;
 static int log_endPt = 0;
 static int log_readTracks = 0;
@@ -187,14 +189,14 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 		}
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		if (fabs(distance) < fabs(closestDistance)) {
+		if (fabs(distance) <= fabs(closestDistance)) { //Make the last (highest) preferred
 			closestDistance = distance;
 			closestTrack = trk;
 			closestPos = p;
 		}
 	}
 	if (closestTrack && closestDistance <0 ) closestDistance = 0.0;  //Turntable was closest - inside well
-	if (closestTrack && (closestDistance <= mainD.scale*0.25 || closestDistance <= trackGauge*2.0) ) {
+	if (closestTrack && ((closestDistance <= mainD.scale*0.25) || (closestDistance <= trackGauge*2.0) )) {
 		*fp = closestPos;
 		return closestTrack;
 	}
@@ -722,7 +724,7 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 	if (trk->endCnt <= 0)
 		return -1;
 	if ( onTrackInSplit && trk->endCnt > 2 ) {
-		if (GetTrkType(trk) != T_TURNOUT)
+		if (GetTrkType(trk) == T_TURNOUT)
 			return TurnoutPickEndPt( p, trk );
 	}
 	d = FindDistance( p, trk->endPt[0].pos );
@@ -1952,9 +1954,9 @@ EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1
 	pos1 = trk1->endPt[inx1].pos;
 LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f %0.3f]\n", trk0->index, inx0, pos0.x, pos0.y, trk1->index, inx1, pos1.x, pos1.y ) )
 	d = FindDistance( pos0, pos1 );
-	a = NormalizeAngle( trk0->endPt[inx0].angle -
-						trk1->endPt[inx1].angle + 180.0 );
-	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) ) {
+	a = fabs(DifferenceBetweenAngles( trk0->endPt[inx0].angle,
+						trk1->endPt[inx1].angle + 180.0 ));
+	if (d > connectDistance || (a > connectAngle ) ) {
 		LOG( log_endPt, 1, ( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n",
 				trk0->index, inx0, trk1->index, inx1, d, a ) );
 		NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
@@ -2036,6 +2038,17 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	BOOL_T (*splitCmd)( track_p, coOrd, EPINX_T, track_p *, EPINX_T *, EPINX_T * );
 	coOrd pos0;
 
+	if (!IsTrack(trk)) {
+		if ((splitCmd = trackCmds(trk->type)->split) == NULL) return FALSE;
+		UndrawNewTrack( trk );
+	    UndoModify( trk );
+		rc = splitCmd( trk, pos, ep, leftover, &epl, &ep1 );
+		if (*leftover)
+			DrawNewTrack( *leftover );
+		DrawNewTrack( trk );
+		return rc;
+	}
+
 	trk0 = trk;
 	epl = ep;
 	epCnt = GetTrkEndPtCnt(trk);
@@ -2043,9 +2056,9 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos.x, pos.y ) )
 
 	if (((splitCmd = trackCmds(trk->type)->split) == NULL)) {
-			if (!(FindDistance( trk->endPt[ep].pos, pos) <= minLength)) {
-				ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
-				return FALSE;
+		if (!(FindDistance( trk->endPt[ep].pos, pos) <= minLength)) {
+			ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
+			return FALSE;
 		}
 	}
 	UndrawNewTrack( trk );
@@ -2064,7 +2077,6 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 		} else {
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
-		*leftover = trk2;
 		DrawNewTrack( trk );
 
 
@@ -2085,7 +2097,6 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
 		DrawNewTrack( trk );
-
 	} else {
 		/* TODO circle's don't have ep's */
 		trk2 = GetTrkEndTrk( trk, ep );
@@ -2296,7 +2307,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 			valid = TRUE;
 			if (action == C_MOVE)
 				InfoMessage( _("Curve: Length=%s Radius=%0.3f Arc=%0.3f"),
-						FormatDistance( d ), FormatDistance(tempSegs(0).u.c.radius), PutAngle( fabs(a) ) );
+						FormatDistance( d ), FormatDistance(tempSegs(0).u.c.radius), PutAngle( tempSegs(0).u.c.a1 ));
 			return C_CONTINUE;
 		} else {
 			d = FindDistance( end_pos, pos );
@@ -2947,7 +2958,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	if ( (d->options&(DC_PRINT)) == 0 ) {
 		if (GetTrkBits(trk)&TB_PROFILEPATH)
 			return profilePathColor;
-		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk))
+		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk) && d == &tempD)
 			return selectedColor;
 	}
 	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) ) {
@@ -2985,7 +2996,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 
 	if (d == &mapD && !GetLayerOnMap(curTrackLayer))
 		return;
-	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
+	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) &&
 		d != &mapD && color == wDrawColorBlack )
 		if (GetLayerUseColor((unsigned int)curTrackLayer))
 			color = GetLayerColor((unsigned int)curTrackLayer);
@@ -3426,3 +3437,57 @@ EXPORT void LabelLengths( drawCmd_p d, track_p trk, wDrawColor color )
 		DrawString( d, p0, 0.0, msg, fp, fs*d->scale, color );
 	}
 }
+
+EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length, wDrawColor color) {
+	#define DESC_LENGTH 6.0;
+	double division;
+	division = length/DESC_LENGTH;
+	division = ceil(division);
+	DIST_T dist = length/division, dist1;
+	traverseTrack_t tt;
+	tt.trk = trk;
+	tt.angle = GetTrkEndAngle(trk,0)+180.0;
+	tt.pos = GetTrkEndPos(trk,0);
+
+	dynArr_t pos_array;
+	pos_array.max = 0;
+	pos_array.cnt = 0;
+	pos_array.ptr = NULL;
+
+	typedef struct {
+					coOrd pos;
+					ANGLE_T angle;
+				} pos_angle_t;
+
+	DYNARR_SET(pos_angle_t,pos_array,(int)division+1);
+	DYNARR_N(pos_angle_t,pos_array,0).pos = GetTrkEndPos(trk,0);
+	DYNARR_N(pos_angle_t,pos_array,0).angle = NormalizeAngle(GetTrkEndAngle(trk,0)+180.0);
+	for (int i=1;i<pos_array.cnt;i++) {
+		tt.dist = dist;
+		dist1 = dist;
+		TraverseTrack(&tt,&dist1);
+		if (dist1 > 0 || tt.trk != trk || IsClose(FindDistance(tt.pos,GetTrkEndPos(trk,1)))) {
+			DYNARR_N(pos_angle_t,pos_array,i).pos = GetTrkEndPos(trk,1);
+			DYNARR_N(pos_angle_t,pos_array,i).angle = GetTrkEndAngle(trk,1);
+			pos_array.cnt = i;
+			break;
+		}
+		DYNARR_N(pos_angle_t,pos_array,i).pos = tt.pos;
+		DYNARR_N(pos_angle_t,pos_array,i).angle = tt.angle;
+	}
+	message[0]='\0';
+	for (int i=0;i<pos_array.cnt;i++) {
+		if (i==pos_array.cnt-1)
+			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
+		else
+			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f\n"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle);
+	}
+	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
+	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,0.0);
+	if (pos_array.ptr)
+		MyFree(pos_array.ptr);
+	pos_array.ptr = 0;
+	pos_array.max = 0;
+	pos_array.cnt = 0;
+}
+

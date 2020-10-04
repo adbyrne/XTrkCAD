@@ -144,6 +144,11 @@ This can be disabled in the Layer dialog for each Layer by unchecking the \f{Use
 
 \u000
 
+\dd \f{Constrain Drawing Area to Room Boundaries} - when Zooming and moving the Main Canvas (\K{mainW}) may show areas beyond the boundaries of the room.
+Setting this option constrains the Main Canvas to minimize these areas (the \f{grey} area).
+
+\u000
+
 \dd \f{Draw EndPts} - when to draw endpoints between connected track: never, only for turnouts or for all tracks.
 
 \u000
@@ -184,7 +189,7 @@ This can be disabled in the Layer dialog for each Layer by unchecking the \f{Use
 
 \b \e{Lengths} - Length of flex-track attached to ends of turnouts.
 
-\b \e{Track Descriptions} - Title of each turnout and sectional track.
+\b \e{Track Descriptions} - Title of each turnout and sectional track, optional details of each piece of Flexible Track.
 
 \b \e{Track Elevations} - Computed elevations at the center of each track.
 
@@ -455,6 +460,14 @@ This dialog controls some parameters which likely will not be changed frequently
 \u000
 
 \dd \f{Units} - choose between English (inches) or Metric (centimeters) measurements.
+
+\u000
+
+\dd \f{Write Settings} - Save the current settings to a named settings file
+
+\u000
+
+\dd \f{Read Settings} - Load settings from a named settings file
 
 \rule
 

@@ -83,6 +83,7 @@
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
+EXPORT wMenuList_p fileList_ml;
 
 EXPORT char * clipBoardN;
 static coOrd paste_offset, cursor_offset;
@@ -845,7 +846,8 @@ int LoadTracks(
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
-	LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden my archive
+	if (!data)
+		LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden by archive
 	UndoSuspend();
 	useCurrentLayer = FALSE;
 #ifdef TIME_READTRACKFILE
@@ -889,7 +891,7 @@ int LoadTracks(
 			    fseek(f, 0, SEEK_SET);
 			    manifest = malloc(length + 1);
 			    if (manifest) {
-			        fread(manifest, 1, length, f);
+			        size_t siz = fread(manifest, 1, length, f);
 			        manifest[length] = '\0';
 			    }
 			    fclose(f);
@@ -993,7 +995,7 @@ int LoadTracks(
  * Load the layout specified by data. Filename may contain a full
  * path.
  * \param index IN ignored
- * \param label IN ignored
+ * \param label IN if not NULL - during startup - set flag to not load background
  * \param data IN path and filename
  */
 
@@ -1004,9 +1006,11 @@ EXPORT void DoFileList(
 {
 	char *pathName = (char*)data;
 	bExample = FALSE;
-	LoadTracks( 1, &pathName, NULL );
+	if (label)
+		LoadTracks( 1, &pathName, (void*)1 );
+	else
+		LoadTracks( 1, &pathName, NULL );
 }
-
 
 static BOOL_T DoSaveTracks(
 		const char * fileName )
@@ -1250,7 +1254,7 @@ EXPORT void DoExamples( void )
 	if (examplesFile_fs == NULL) {
 		static wBool_t bExample = TRUE;
 		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
-			sSourceFilePattern, LoadTracks, &bExample );
+			sSourceFilePattern, LoadTracks, NULL );
 	}
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
@@ -1365,11 +1369,13 @@ EXPORT int ExistsCheckpoint( void )
 /**
  * Load checkpoint file
  *
+ * \param if TRUE reuse old filename
+ * \param filename returned
  * \return TRUE if exists, FALSE otherwise
  *
  */
 
-EXPORT int LoadCheckpoint( void )
+EXPORT int LoadCheckpoint( BOOL_T sameName )
 {
 	char *search;
 
@@ -1381,19 +1387,32 @@ EXPORT int LoadCheckpoint( void )
 
 	if (ReadTrackFile( search, search + strlen(search) - strlen( sCheckPointF ), TRUE, TRUE, TRUE )) {
 		ResolveIndex();
+		LayoutBackGroundInit(FALSE);    //Get Prior BackGround
+		LayoutBackGroundSave();		    //Save Background Values
+
+		if (sameName) {
+			long iExample;
+			char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
+			bExample = (iExample == 1);
+			if (initialFile && strlen(initialFile)) {
+				SetCurrentPath( LAYOUTPATHKEY, initialFile );
+				SetLayoutFullPath(initialFile);
+			}
+		} else SetLayoutFullPath("");
 
 		RecomputeElevations();
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
-	}
+	} else SetLayoutFullPath("");
 
 	Reset();
 	UndoResume();
 
 	wSetCursor( mainD.d, defaultCursor );
 
-	SetLayoutFullPath("");
+
 	SetWindowTitle();
 	checkPtMark = changed = 1;
 	free( search );
@@ -1458,7 +1477,6 @@ static int ImportTracks(
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
 	paramVersion = paramVersionOld;
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	return TRUE;
@@ -1616,7 +1634,6 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	UpdateAllElevations();

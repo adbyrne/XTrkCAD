@@ -73,6 +73,10 @@
 char *userLocale = NULL;
 
 extern wBalloonHelp_t balloonHelp[];
+
+static wMenuToggle_p mapShowMI;
+static wMenuToggle_p magnetsMI;
+
 #ifdef DEBUG
 #define CHECK_BALLOONHELP
 /*#define CHECK_UNUSED_BALLOONHELP*/
@@ -459,6 +463,45 @@ EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
 	return dst;
 }
 
+static char * directory;
+
+#ifdef WINDOWS
+#define F_OK (0)
+#endif
+
+EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
+
+	char * htmlFile;
+
+ 	// Check the file exits in the distro
+
+	if (!directory)
+		directory = malloc(BUFSIZ);
+
+    if (directory == NULL) return 0;
+
+     sprintf(directory, "%s/html/", wGetAppLibDir());
+
+ 	 htmlFile = malloc(strlen(directory)+strlen(topic) + 6);
+
+ 	 sprintf(htmlFile, "%s%s.html", directory, topic);
+
+ 	 if( access( htmlFile, F_OK ) == -1 ) {
+
+     	printf("Missing help topic %s\n",topic);
+
+     	free(htmlFile);
+
+     	return 0;
+
+     }
+
+ 	 free(htmlFile);
+
+ 	 return 1;
+
+}
+
 EXPORT char * BuildTrimedTitle(char * cp, char * sep, char * mfg, char * desc,
 		char * partno) {
 	cp = Strcpytrimed(cp, mfg, FALSE);
@@ -631,7 +674,7 @@ static void ChkRevert(void)
         if (rc) {
             /* load the file */
             char *filename = GetLayoutFullPath();
-            LoadTracks(1, &filename, NULL);
+            LoadTracks(1, &filename, (void*)1);   //Keep background
         }
     }
 }
@@ -678,8 +721,7 @@ EXPORT void SaveState(void) {
 			}
 		}
 	}
-	wPrefFlush();
-	LogClose();
+	wPrefFlush("");
 }
 
 /*
@@ -858,8 +900,8 @@ EXPORT void SelectFont(void) {
  *
  */
 
-#define COMMAND_MAX (170)
-#define BUTTON_MAX (170)
+#define COMMAND_MAX (180)
+#define BUTTON_MAX (180)
 #define NUM_CMDMENUS (4)
 
 static struct {
@@ -990,6 +1032,23 @@ EXPORT wIndex_t GetCurrentCommand() {
 
 static wIndex_t autosave_count = 0;
 
+EXPORT void TryCheckPoint() {
+	if (checkPtInterval > 0
+				&& changed >= checkPtMark + (wIndex_t) checkPtInterval
+				&& !inPlayback) {
+			DoCheckPoint();
+			checkPtMark = changed;
+
+			autosave_count++;
+
+			if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
+				DoSave(NULL);
+				InfoMessage(_("File AutoSaved"));
+				autosave_count = 0;
+			}
+		}
+}
+
 EXPORT void Reset(void) {
 	if (recordF) {
 		fprintf(recordF, "RESET\n");
@@ -1010,22 +1069,8 @@ EXPORT void Reset(void) {
 				(wButton_p) buttonList[commandList[curCommand].buttInx].control,
 				TRUE);
 	tempSegs_da.cnt = 0;
-	if (checkPtInterval > 0
-			&& changed >= checkPtMark + (wIndex_t) checkPtInterval
-			&& !inPlayback) {
-		DoCheckPoint();
-		checkPtMark = changed;
 
-		autosave_count++;
-
-		if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
-			DoSave(NULL);
-			InfoMessage(_("File AutoSaved"));
-			autosave_count = 0;
-		}
-	}
-
-
+	TryCheckPoint();
 
 	ClrAllTrkBits( TB_UNDRAWN );
 	DoRedraw(); // Reset
@@ -1196,6 +1241,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}
+		//Make sure we checkpoint even sticky commands
+		TryCheckPoint();
 		LOG(log_command, 1,
 				( "COMMAND START %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_START, pos);
@@ -1387,6 +1434,7 @@ EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 	static int lastGroup;
 	static wPos_t gap;
 	static int layerButtCnt;
+	static int layerButtNumber;
 	int currGroup;
 
 	if (inx == 0) {
@@ -1395,6 +1443,7 @@ EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 		gap = 5;
 		toolbarWidth = width - 20 + 5;
 		layerButtCnt = 0;
+		layerButtNumber = 0;
 		toolbarHeight = 0;
 	}
 
@@ -1449,7 +1498,7 @@ EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 				&& (programMode == MODE_TRAIN
 						|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
 				&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-						|| layerButtCnt++ <= layerCount)) {
+						|| layerButtCnt < layerCount)) {
 			if (currGroup != lastGroup) {
 				toolbarWidth += gap;
 				lastGroup = currGroup;
@@ -1467,12 +1516,21 @@ EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 				toolbarWidth = 0;
 				toolbarHeight += h + 5;
 			}
-			wControlSetPos(buttonList[inx].control, toolbarWidth,
+			if ((currGroup == BG_LAYER) && layerButtNumber>1 && GetLayerHidden(layerButtNumber-2) ) {
+				wControlShow(buttonList[inx].control, FALSE);
+				layerButtNumber++;
+			} else {
+				if (currGroup == BG_LAYER ) {
+					if (layerButtNumber>1) layerButtCnt++; // Ignore List and Background
+					layerButtNumber++;
+				}
+				wControlSetPos(buttonList[inx].control, toolbarWidth,
 					toolbarHeight - (h + 5 +offset));
-			buttonList[inx].x = toolbarWidth;
-			buttonList[inx].y = toolbarHeight - (h + 5 + offset);
-			toolbarWidth += wControlGetWidth(buttonList[inx].control);
-			wControlShow(buttonList[inx].control, TRUE);
+				buttonList[inx].x = toolbarWidth;
+				buttonList[inx].y = toolbarHeight - (h + 5 + offset);
+				toolbarWidth += wControlGetWidth(buttonList[inx].control);
+				wControlShow(buttonList[inx].control, TRUE);
+			}
 		} else {
 			wControlShow(buttonList[inx].control, FALSE);
 		}
@@ -1960,7 +2018,7 @@ static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void *);
 
-static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80.0 };
+static paramFloatRange_t rn360_360 = { -360.0, 360.0, (wPos_t)80.0 };
 static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE,
 		&rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
@@ -2423,6 +2481,7 @@ static void CreateMenus(void) {
 	/*
 	 * VIEW MENU
 	 */
+
 	zoomInM = wMenuPushCreate(viewM, "menuEdit-zoomIn", _("Zoom &In"),
 			ACCL_ZOOMIN, (wMenuCallBack_p) DoZoomUp, (void*) 1);
 	zoomSubM = wMenuMenuCreate(viewM, "menuEdit-zoomTo", _("&Zoom"));
@@ -2517,7 +2576,8 @@ static void CreateMenus(void) {
 	cmdGroup = BG_SELECT;
 	InitCmdDescribe(changeM);
 	InitCmdSelect(changeM);
-	InitCmdPan(changeM);
+	InitCmdPan(viewM);
+
 	wMenuSeparatorCreate(changeM);
 
 	cmdGroup = BG_TRKGRP;
@@ -2792,16 +2852,24 @@ static int OfferCheckpoint( void )
 
 	/* sProdName */
 	ret =
-			wNoticeEx( NT_INFORMATION,
+			wNotice3(
 					_(
 							"Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
-					_("Resume"), _("Ignore"));
-	if (ret) {
+					_("Resume"), _("Resume with New Name"), _("Ignore Checkpoint"));
+	//ret==1 Same, ret==-1 New, ret==0 Ignore
+	if (ret == 1)
+		printf(_("Reload Checkpoint Selected\n"));
+	else if (ret == -1)
+		printf(_("Reload Checkpoint With New Name Selected\n"));
+	else
+		printf(_("Ignore Checkpoint Selected\n"));
+	if (ret>=0) {
 		/* load the checkpoint file */
-		LoadCheckpoint();
+		LoadCheckpoint(ret==1);
 		ret = TRUE;
+
 	}
-	return ret;
+	return (ret>=0);
 }
 
 EXPORT wWin_p wMain(int argc, char * argv[]) {
@@ -3093,8 +3161,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
-	if (ExistsCheckpoint())
+	if (ExistsCheckpoint()) {
 		resumeWork = OfferCheckpoint();
+	}
 
 	if (!resumeWork) {
 		/* if work is not to be resumed and no filename was given on startup, load last layout */
@@ -3104,18 +3173,15 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
 			bExample = (iExample == 1);
 		}
-
 		if (initialFile && strlen(initialFile)) {
-			DoFileList(0, NULL, initialFile);   //Will load Background values, if archive
+			DoFileList(0, "1", initialFile);   //Will load Background values, if archive, leave
 			if (onStartup == 1)
 				LayoutBackGroundInit(TRUE);     //Wipe Out Prior Background
 			else
 				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
-		}
-	} else {
-		LayoutBackGroundInit(FALSE);  //Resuming get values before-hand.
-									  //Note that this may be those used with an archive (temp)
-		LayoutBackGroundSave();		  //Remove Background
+		} else
+			LayoutBackGroundInit(TRUE);     // If onStartup==1 and no initial file - Wipe Out Prior Background
+
 	}
 	programMode = MODE_DESIGN;
 	LayoutToolBar();

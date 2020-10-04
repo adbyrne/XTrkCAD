@@ -771,7 +771,26 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 
 }
 
+void AddAnchorJoin(coOrd pos, ANGLE_T angle) {
+	DIST_T d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+	trkSeg_p a = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+	a->type = SEG_CRVLIN;
+	a->width = 0;
+	a->u.c.a0 = 0.0;
+	a->u.c.a1 = 360.0;
+	a->u.c.center = pos;
+	a->u.c.radius = d/2;
+	a->color = wDrawColorBlue;
+	DYNARR_SET(trkSeg_t,Dj.anchors,Dj.anchors.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,Dj.anchors,Dj.anchors.cnt-5),pos,angle,FALSE,wDrawColorBlue);
+
+}
+
 static BOOL_T infoSubst = FALSE;
+static track_p anchor_trk;
+static coOrd anchor_pos;
+static ANGLE_T anchor_angle = 0.0;
 
 static STATUS_T CmdJoin(
 		wAction_t action,
@@ -810,11 +829,35 @@ static STATUS_T CmdJoin(
 		Dj.cornuMode = FALSE;
 		/*ParamGroupRecord( &easementPG );*/
 		infoSubst = FALSE;
+		anchor_trk = NULL;
+		if (easementVal < 0.0)
+			return CmdCornu(action, pos);
 		return C_CONTINUE;
 
 	case wActionMove:
+		anchor_trk = NULL;
+		DYNARR_RESET(rkSeg_t,Dj.anchors);
 		if ((easementVal < 0) && Dj.joinMoveState == 0 )
 			return CmdCornu(action, pos);
+		if ( Dj.state >= 2) return C_CONTINUE;
+		if ( (trk = OnTrack( &pos, FALSE, TRUE )) == NULL)
+			return C_CONTINUE;
+		if (!CheckTrackLayer( trk ) )
+			return C_CONTINUE;
+		if ((Dj.state > 0) && (trk == Dj.inp[0].trk))
+			return C_CONTINUE;
+		trackParams_t moveParams;
+		if (!GetTrackParams( PARAMS_1ST_JOIN, trk, pos, &moveParams ))
+			return C_CONTINUE;
+		ep = PickUnconnectedEndPointSilent(pos,trk);
+		if (ep <0) return C_CONTINUE;
+		if (IsClose(FindDistance(GetTrkEndPos(trk,ep),pos)))
+			anchor_angle = GetTrkEndAngle(trk,ep);
+		else
+			anchor_angle = FindAngle(pos,GetTrkEndPos(trk,ep));
+		anchor_trk = trk;
+		anchor_pos = pos;
+		AddAnchorJoin(pos,anchor_angle);
 		break;
 
 	case C_DOWN:
@@ -824,10 +867,6 @@ static STATUS_T CmdJoin(
 			Dj.cornuMode = TRUE;
 			return CmdCornu(action, pos);
 		}
-
-		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL);
-		infoSubst = FALSE;
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;
@@ -850,12 +889,10 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			if (!GetTrackParams( PARAMS_1ST_JOIN, Dj.inp[0].trk, pos, &Dj.inp[0].params ))
 				return C_CONTINUE;
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
-			if (easementVal==0.0 && desired_radius > 0.0) {
-				InfoMessage(_("Select 2nd track - desired radius %0.3f"),FormatDistance(desired_radius));
-			} else
-				InfoMessage( _("Select 2nd track") );
+			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
-			wPrefGetFloat("misc", "desired_radius", &desired_radius, desired_radius);
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
 			controls[0] = joinRadPD.control;
 			controls[1] = NULL;
 			labels[0] = N_("Desired Radius");
@@ -864,10 +901,9 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			joinRadPD.option |= PDO_NORECORD;
 			ParamLoadControls(&joinPG);
 			ParamGroupRecord(&joinPG);
-
 			return C_CONTINUE;
 		} else {
-			if ( (Dj.inp[1].trk = OnTrack( &pos, TRUE, TRUE )) == NULL)
+			if ( (Dj.inp[1].trk = OnTrack( &pos, FALSE, TRUE )) == NULL)
 				return C_CONTINUE;
 			if (!CheckTrackLayer( Dj.inp[1].trk ) )
 				return C_CONTINUE;
@@ -878,6 +914,10 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 				ErrorMessage( MSG_JOIN_SAME );
 				return C_CONTINUE;
 			}
+			if (infoSubst)
+				InfoSubstituteControls(NULL, NULL);
+			infoSubst = FALSE;
+
 			Dj.inp[1].realType = GetTrkType(Dj.inp[1].trk);
 			if ( IsCurveCircle( Dj.inp[0].trk ) )
 				Dj.inp[0].params.ep = PickArcEndPt( Dj.inp[0].params.arcP, Dj.inp[0].pos, pos );
@@ -888,20 +928,30 @@ LOG( log_join, 1, ("      2nd track %d, @[%0.3f %0.3f] EP0=%d EP1=%d\n",
 						GetTrkIndex(Dj.inp[1].trk), Dj.inp[1].pos.x, Dj.inp[1].pos.y,
 						Dj.inp[0].params.ep, Dj.inp[1].params.ep ) )
 LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
-			if ( GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != NULL) {
-				ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
-				return C_CONTINUE;
+			BOOL_T only_merge = FALSE;
+			if ( (Dj.inp[0].params.ep >=0) &&
+					(GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != NULL)) {
+				if (GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != Dj.inp[1].trk) {
+					only_merge = TRUE;
+					ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
+					return C_CONTINUE;
+				}
 			}
-			if ( Dj.inp[1].params.ep >= 0 &&
-				 GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != NULL) {
-				ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
-				return C_CONTINUE;
+			if ( (Dj.inp[1].params.ep >= 0) &&
+				 (GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != NULL)) {
+				if (GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != Dj.inp[0].trk) {
+					only_merge = TRUE;
+					ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
+					return C_CONTINUE;
+				}
 			}
 			rc = C_CONTINUE;
 			if ( MergeTracks( Dj.inp[0].trk, Dj.inp[0].params.ep,
-							  Dj.inp[1].trk, Dj.inp[1].params.ep ) )
+							  Dj.inp[1].trk, Dj.inp[1].params.ep ) ) {
 				rc = C_TERMINATE;
-			else if ( Dj.inp[0].params.ep >= 0 && Dj.inp[1].params.ep >= 0 ) {
+			} else if (only_merge) {
+				rc = C_TERMINATE;
+			} else if ( Dj.inp[0].params.ep >= 0 && Dj.inp[1].params.ep >= 0 ) {
 				if ( Dj.inp[0].params.type == curveTypeStraight &&
 					 Dj.inp[1].params.type == curveTypeStraight &&
 					 ExtendStraightToJoin( Dj.inp[0].trk, Dj.inp[0].params.ep,
@@ -1243,7 +1293,6 @@ errorReturn:
 		return C_CONTINUE;
 
 	case C_UP:
-
 		if (Dj.state == 0) {
 			if (easementVal<0 && Dj.cornuMode)
 				return CmdCornu(action, pos);
@@ -1284,8 +1333,10 @@ errorReturn:
 		Dj.state = 0;
 		DYNARR_RESET(trkSeg_t,Dj.anchors);
 		rc = C_TERMINATE;
-		if (easementVal == 0.0)
-			wPrefSetFloat("misc", "desired_radius", desired_radius);
+		if (easementVal == 0.0) {
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefSetFloat("misc", message, desired_radius);
+		}
 		if ( (!JoinTracks( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp_pos[0],
 					trk, ep, Dj.jRes.pos[0], &Dj.jointD[0] ) ) ||
 			 (!JoinTracks( Dj.inp[1].trk, Dj.inp[1].params.ep, Dj.inp_pos[1],
@@ -1344,7 +1395,7 @@ errorReturn:
 void InitCmdJoin( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
-	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join Track"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(joinline_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
 	log_join = LogFindIndex( "join" );

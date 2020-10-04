@@ -156,8 +156,9 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
             return C_CONTINUE;
         }
 
+        parRFactor = (2864.0*(double)parSepFactor)/curScaleRatio;
+
         if ((parType == PAR_TRACK) && (parSeparation == 0.0)) {
-        	parRFactor = (2864.0*(double)parSepFactor)/curScaleRatio;
             DIST_T orig_gauge = GetTrkGauge(Dpa.Trk);
             DIST_T new_gauge = GetScaleTrackGauge(GetLayoutCurScale());
             if (orig_gauge == new_gauge) {
@@ -166,7 +167,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
             }
             parSeparation = fabs(orig_gauge/2-new_gauge/2);
             parRFactor = 0.0;
-        }
+        } else if (parType != PAR_TRACK)
+        	parRFactor = 0.0;
         /* in case query has changed things (eg joint) */
         /*
          * this seems to cause problems so I commented it out
@@ -294,7 +296,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 EXPORT void InitCmdParallel( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Parallel"), "cmdParallelSetCmd", _("Parallel") );
-	AddMenuButton( menu, CmdParallel, "cmdParallel", _("Parallel Track"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)0 );
+	AddMenuButton( menu, CmdParallel, "cmdParallelTrack", _("Parallel Track"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)0 );
 	AddMenuButton( menu, CmdParallel, "cmdParallelLine", _("Parallel Line"), wIconCreatePixMap(parallel_line_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)1 );
 	ButtonGroupEnd();
 	ParamRegister( &parSepPG );
