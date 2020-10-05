@@ -1700,8 +1700,8 @@ EXPORT void DrawRuler(
 	long mm, mm0, mm1, power;
 	wPos_t x0, y0, x1, y1;
 	
-	static double lengths[16] = {
-		0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0 };
+	static double lengths[] = {
+		0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 0.0 };
 	int fraction, incr, firstFraction, lastFraction;
 	int majorLength;
 	coOrd p0, p1;
