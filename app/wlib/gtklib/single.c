@@ -76,10 +76,11 @@ void wStringSetValue(
 	// the user is editing it
 	if( !(gtk_widget_has_focus(b->widget))) {
 		if (b->hasSignal) 
-	    	gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
+			g_signal_handlers_block_matched((gpointer)b->widget,G_SIGNAL_MATCH_DATA,0,0,NULL,NULL,b);
+	    	//gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
 		gtk_entry_set_text(GTK_ENTRY(b->widget), arg);
 		if (b->hasSignal)
-			gtk_signal_handler_unblock_by_data(GTK_OBJECT(b->widget), b);
+			g_signal_handlers_unblock_matched((gpointer)b->widget, G_SIGNAL_MATCH_DATA,0,0,NULL,NULL,b);
 	}
 }
 
@@ -275,6 +276,7 @@ static void stringChanged(
  * \param 	data	IN	application data
  * \return  the created widget
  */
+static wBool_t css_loaded;
 
 wString_p wStringCreate(
     wWin_p	parent,
@@ -301,16 +303,49 @@ wString_p wStringCreate(
 	b->hasSignal = 0;
 	wlibComputePos((wControl_p)b);
 
-	// create the gtk entry field and set maximum length if desired	
-	b->widget = (GtkWidget *)gtk_entry_new();
+	if (option&BO_USETEMPLATE) {
+		b->widget = wlibWidgetFromIdWarn( parent, helpStr);
+		b->fromTemplate = TRUE;
+		/*For Grid, find the box that contains both the Label and the field */
+		if (option&BO_GRID)  {
+			b->useGrid = TRUE;
+			b->box = (GtkBox *)wlibGetWidgetFromName(b->parent,helpStr,"box",FALSE);
+			b->fixed = b->parent->fixed;
+		}
+		b->template_id = strdup(helpStr);
+		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+		b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, helpStr, "reveal", TRUE );
+	} else {
+		// create the gtk entry field and set maximum length if desired
+		b->widget = (GtkWidget *)gtk_entry_new();
+	}
 	if (b->widget == NULL) abort();
 
 	if( valueL )
 		gtk_entry_set_max_length( GTK_ENTRY( b->widget ), valueL );
-	
-	// it is assumed that the parent is a fixed layout widget and the entry can
-	// be placed at a specific position
-	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+
+	if (!b->fromTemplate){
+		// It is assumed that the parent is a fixed layout widget and the entry can
+		// be placed at a specific position if not in a template
+		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+	}
+	if (b->useGrid) {
+
+	  if (b->reveal && b->fixed) {
+		gtk_fixed_move(GTK_FIXED(b->fixed), GTK_WIDGET(b->reveal), x-45, y-5);
+		if (!css_loaded) {
+			GdkScreen * screen = gdk_screen_get_default();
+			GtkCssProvider * provider = gtk_css_provider_new();
+			GtkStyleContext * context = gtk_widget_get_style_context(GTK_WIDGET(b->fixed));
+			static const char style[] = "#parm-entry {min-height:0px } ";
+			gtk_css_provider_load_from_data(provider, style, strlen(style), NULL);
+			gtk_style_context_add_provider_for_screen(screen,
+											GTK_STYLE_PROVIDER(provider),
+											GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+			css_loaded = TRUE;
+	  	}
+	  }
+	}
 	
 	// set minimum size for widget	
 	if (width)
@@ -332,8 +367,9 @@ wString_p wStringCreate(
 		// select the text only if text is editable
 	}
 	
-	// show
-	gtk_widget_show(b->widget);
+	if (!b->useGrid)
+		gtk_widget_show(b->widget);
+
 	
 	// add the new widget to the list of created widgets
 	wlibAddButton((wControl_p)b);
@@ -345,8 +381,6 @@ wString_p wStringCreate(
 	//if (option&BO_ENTER)
 		g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
 	b->hasSignal = 1;
-		g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
-	    							G_CALLBACK(stringExposed), b);
 	
 	// set the default text	and select it to make replacing it easier
 	if (b->valueP) {
@@ -355,7 +389,7 @@ wString_p wStringCreate(
 	}
 
 	gtk_widget_add_events( b->widget, GDK_FOCUS_CHANGE_MASK );
-	g_signal_connect(GTK_OBJECT(b->widget), "focus-out-event", G_CALLBACK(killTimer), b);
+	g_signal_connect((gpointer)b->widget, "focus-out-event", G_CALLBACK(killTimer), b);
 	
 	return b;
 }

@@ -173,7 +173,7 @@ int wNotice3(
     const char * alternate)
 {
     notice_win *nw;
-    GtkWidget * vbox;
+    GtkWidget * top_grid;
     GtkWidget * hbox;
     GtkWidget * hbox1;
     GtkWidget * image;
@@ -193,41 +193,50 @@ int wNotice3(
     gtk_window_set_modal(GTK_WINDOW(nw->win), TRUE);
     gtk_window_set_type_hint(GTK_WINDOW(nw->win), GDK_WINDOW_TYPE_HINT_DIALOG);
 
-    vbox = gtk_vbox_new(FALSE, 12);
-    gtk_widget_show(vbox);
-    gtk_container_add(GTK_CONTAINER(nw->win), vbox);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
+    top_grid = gtk_grid_new();
+    gtk_widget_show(top_grid);
+    gtk_container_add(GTK_CONTAINER(nw->win), top_grid);
+    gtk_container_set_border_width(GTK_CONTAINER(top_grid), 12);
 
-    hbox = gtk_hbox_new(FALSE, 12);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+
+    //hbox = gtk_hbox_new(FALSE, 12);
+    //gtk_box_pack_start(GTK_BOX(top_grid), hbox, TRUE, TRUE, 0);
+    //gtk_widget_show(hbox);
+    hbox = gtk_grid_new();
     gtk_widget_show(hbox);
+    gtk_grid_attach (GTK_GRID (top_grid), hbox, 0, 0, 1, 1);
 
-    image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_WARNING,
+    image = gtk_image_new_from_icon_name(_("dialog-warning"),
                                      GTK_ICON_SIZE_DIALOG);
     gtk_widget_show(image);
-    gtk_box_pack_start(GTK_BOX(hbox), image, TRUE, TRUE, 0);
-    gtk_misc_set_alignment(GTK_MISC(image), 0, 0);
+    gtk_grid_attach (GTK_GRID (hbox), image, 0, 0, 1, 1);
+    //gtk_box_pack_start(GTK_BOX(hbox), image, TRUE, TRUE, 0);
+    //gtk_misc_set_alignment(GTK_MISC(image), 0, 0);
 
     /* create the text label, allow GTK to wrap and allow for markup (for future enhancements) */
     nw->label = gtk_label_new(msg);
     gtk_widget_show(nw->label);
-    gtk_box_pack_end(GTK_BOX(hbox), nw->label, TRUE, TRUE, 0);
+    gtk_grid_attach_next_to (GTK_GRID (hbox), nw->label, image, GTK_POS_RIGHT, 1, 1);
+    //gtk_box_pack_end(GTK_BOX(hbox), nw->label, TRUE, TRUE, 0);
     gtk_label_set_use_markup(GTK_LABEL(nw->label), FALSE);
     gtk_label_set_line_wrap(GTK_LABEL(nw->label), TRUE);
-    gtk_misc_set_alignment(GTK_MISC(nw->label), 0, 0);
+    //gtk_misc_set_alignment(GTK_MISC(nw->label), 0, 0);
 
     /* this hbox will include the button bar */
-    hbox1 = gtk_hbox_new(TRUE, 0);
+    hbox1 = gtk_grid_new();
     gtk_widget_show(hbox1);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, TRUE, 0);
+    gtk_grid_attach_next_to (GTK_GRID (top_grid), hbox1, hbox, GTK_POS_BOTTOM, 1, 1);
+    //gtk_box_pack_start(GTK_BOX(top_grid), hbox1, FALSE, TRUE, 0);
+    //gtk_grid_attach (GTK_GRID (top_grid), image, 0, 0, 1, 1);
 
     /* add the respective buttons */
     aff = wlibChgMnemonic((char *) affirmative);
     nw->butt[ 0 ] = gtk_button_new_with_mnemonic(aff);
     gtk_widget_show(nw->butt[ 0 ]);
-    gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 0 ], TRUE, TRUE, 0);
+    gtk_grid_attach (GTK_GRID (hbox1), nw->butt[0], 0, 0, 1, 1);
+    //gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 0 ], TRUE, TRUE, 0);
     gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 0 ]), 3);
-    g_signal_connect(GTK_OBJECT(nw->butt[0]), "clicked", G_CALLBACK(doNotice),
+    g_signal_connect(nw->butt[0], "clicked", G_CALLBACK(doNotice),
                      (void*)1);
     gtk_widget_set_can_default(nw->butt[ 0 ], TRUE);
 
@@ -235,9 +244,10 @@ int wNotice3(
         can = wlibChgMnemonic((char *) cancel);
         nw->butt[ 1 ] = gtk_button_new_with_mnemonic(can);
         gtk_widget_show(nw->butt[ 1 ]);
-        gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 1 ], TRUE, TRUE, 0);
+        gtk_grid_attach_next_to (GTK_GRID (hbox1), nw->butt[1], nw->butt[0], GTK_POS_RIGHT, 1, 1);
+        //gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 1 ], TRUE, TRUE, 0);
         gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 1 ]), 3);
-        g_signal_connect(GTK_OBJECT(nw->butt[1]), "clicked", G_CALLBACK(doNotice),
+        g_signal_connect(nw->butt[1], "clicked", G_CALLBACK(doNotice),
                          (void*)0);
         gtk_widget_set_can_default(nw->butt[ 1 ], TRUE);
 
@@ -245,9 +255,10 @@ int wNotice3(
             alt = wlibChgMnemonic((char *) alternate);
             nw->butt[ 2 ] = gtk_button_new_with_mnemonic(alt);
             gtk_widget_show(nw->butt[ 2 ]);
-            gtk_box_pack_start(GTK_BOX(hbox1), nw->butt[ 2 ], TRUE, TRUE, 0);
+            gtk_grid_attach_next_to (GTK_GRID (hbox1), nw->butt[2], nw->butt[1], GTK_POS_RIGHT, 1, 1);
+            //gtk_box_pack_start(GTK_BOX(hbox1), nw->butt[ 2 ], TRUE, TRUE, 0);
             gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 2 ]), 3);
-            g_signal_connect(GTK_OBJECT(nw->butt[2]), "clicked", G_CALLBACK(doNotice),
+            g_signal_connect(nw->butt[2], "clicked", G_CALLBACK(doNotice),
                              (void*)-1);
             gtk_widget_set_can_default(nw->butt[ 2 ], TRUE);
         }

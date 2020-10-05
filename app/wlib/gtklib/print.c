@@ -131,6 +131,7 @@ WlibApplySettings(GtkPrintOperation *op)
             // create  default print settings
             settings = gtk_print_settings_new();
         }
+
         g_error_free(err);
     }
 
@@ -404,11 +405,14 @@ static void psSetColor(
     wDrawColor color)
 {
     cairo_t *cr = psPrint_d.printContext;
-    GdkColor* const gcolor = wlibGetColor(color, TRUE);
+    GdkRGBA gcolor;
 
-    cairo_set_source_rgb(cr, gcolor->red / 65535.0,
-                         gcolor->green / 65535.0,
-                         gcolor->blue / 65535.0);
+    long tcolor = wlibGetColor(color, TRUE);
+    gcolor.red = (tcolor&0x00FF0000)>>16;
+    gcolor.green = (tcolor&0x0000FF00)>>8;
+    gcolor.blue = (tcolor&0x000000FF);
+    cairo_set_source_rgba(cr, gcolor.red , gcolor.green , gcolor.blue, 1.0 );
+
 }
 
 /**
@@ -874,6 +878,11 @@ void wPrintGetMargins(
 	if ( lMargin ) *lMargin = lBorder;
 }
 
+    WlibGetPaperSize();
+
+    *w = paperWidth -lBorder - rBorder;
+    *h = paperHeight - tBorder - bBorder;
+}
 
 /**
  * Get the paper size. The size returned is the physical size of the
@@ -970,7 +979,6 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
     cairo_surface_type_t surface_type;
     cairo_matrix_t matrix;
 
-
     printDialog = gtk_print_unix_dialog_new(title, GTK_WINDOW(gtkMainW->gtkwin));
 
     // load the settings
@@ -1047,7 +1055,7 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
         // in XTrackCAD 0,0 is top left, in cairo bottom left. This is
         // corrected via the following transformations.
         // also the translate makes sure that the drawing is rendered
-        // within the paper margin
+        // within the paper margins
 
         cairo_translate(psPrint_d.printContext, lBorder*72,  (paperHeight-bBorder)*72 );
 
@@ -1107,7 +1115,7 @@ void wPrintDocEnd(void)
     cairo_surface_finish(psPrint_d.curPrintSurface);
 
     gtk_print_job_send(curPrintJob,
-                       doPrintJobFinished,
+    		(GtkPrintJobCompleteFunc)doPrintJobFinished,
                        NULL,
                        NULL);
 

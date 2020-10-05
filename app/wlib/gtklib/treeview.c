@@ -483,13 +483,14 @@ wList_p wListCreate(
     bl->colCnt = colCnt;
     bl->colWidths = (wPos_t*)malloc(colCnt * sizeof *(wPos_t*)0);
     memcpy(bl->colWidths, colWidths, colCnt * sizeof *(wPos_t*)0);
-
-    /* create the data structure for data */
-    bl->listStore = wlibNewListStore(colCnt);
-    /* create the widget for the list store */
-    bl->treeView = wlibNewTreeView(bl->listStore,
-                                   colTitles != NULL,
-                                   option & BL_MANY);
+    
+    if( !(option & BO_USETEMPLATE )) {
+        /* create the data structure for data */
+        bl->listStore = wlibNewListStore(colCnt);
+        /* create the widget for the list store */
+        bl->treeView = wlibNewTreeView(bl->listStore,
+                                       colTitles != NULL,
+                                       option & BL_MANY);
 
 
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
@@ -499,25 +500,62 @@ wList_p wListCreate(
                                            bl,
                                            NULL);
 
-    wlibTreeViewAddColumns(bl->treeView, colCnt);
+        wlibTreeViewAddColumns(bl->treeView, colCnt);
 
     wlibAddColumnTitles(bl->treeView, colTitles);
 
-    wlibComputePos((wControl_p)bl);
+        wlibComputePos((wControl_p)bl);
 
-    bl->widget = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
+        if (!bl->widget)
+        	bl->widget = gtk_scrolled_window_new(NULL, NULL);
+
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(bl->widget),
+        gtk_container_add(GTK_CONTAINER(bl->widget),
                                           bl->treeView);
 
-    gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
+        gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
+    } else {
+        /* Always scrolled window in template */
+        bl->widget = wlibGetWidgetFromName( parent, helpStr, "scrollwindow", FALSE );
+        if (bl->widget)
+            bl->fromTemplate = TRUE;
+        bl->template_id = strdup(helpStr);
+        /* Try to find element name in Template, if not found allocate a new one */
+        bl->listStore = (GtkListStore *)wlibGetWidgetFromName( parent, helpStr, "liststore", TRUE);
+        if (!bl->listStore) {
+            bl->listStore = wlibNewListStore(colCnt);
+            bl->treeView = wlibNewTreeView(bl->listStore,
+                                           colTitles != NULL,
+                                           option & BL_MANY);
+            wlibTreeViewAddColumns(bl->treeView, colCnt);
+            wlibAddColumnTitles(bl->treeView, colTitles);
+            gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
+                                           GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+            gtk_container_add(GTK_CONTAINER(bl->widget),
+                              bl->treeView);
+        } else {
+            /* If liststore in template, treeview must exist */
+            bl->treeView = wlibGetWidgetFromName(parent, helpStr, "treeview", FALSE);
+        }
+        /* Find if this widget is inside a revealer widget which will be named with .reveal at the end */
+        bl->reveal = (GtkRevealer *)wlibGetWidgetFromName( parent, helpStr, "reveal", TRUE );
+        
+    }
+    
+    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
 
-///	g_signal_connect( GTK_OBJECT(bl->list), "resize_column", G_CALLBACK(changeListColumnWidth), bl );
-
+    gtk_tree_selection_set_select_function(sel,
+                                           changeSelection,
+                                           bl,
+                                           NULL);
+    
     gtk_widget_show_all(bl->widget);
 
-    gtk_fixed_put(GTK_FIXED(parent->widget), bl->widget, bl->realX, bl->realY);
+    if (!bl->fromTemplate) {
+    	//Only attach if not in template
+    	gtk_fixed_put(GTK_FIXED(parent->widget), bl->widget, bl->realX, bl->realY);
+    }
     wlibControlGetSize((wControl_p)bl);
 
     if (labelStr) {

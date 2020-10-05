@@ -43,9 +43,11 @@ wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName)
     GdkPixbuf *pixbuf;
     GError *error;
     gboolean res;
-    pixbuf = gdk_pixbuf_get_from_drawable(NULL, (GdkWindow*)d->pixmap, NULL, 0, 0,
-                                          0, 0, d->w, d->h);
+    int x, y, width, height, depth;
+    GtkWidget * window = gtk_widget_get_toplevel(d->widget);
 
+    pixbuf = gdk_pixbuf_get_from_window(GDK_WINDOW(window),
+                                           d->realX, d->realY, d->w, d->h);
     if (!pixbuf) {
         wNoticeEx(NT_ERROR, "WriteBitMap: pixbuf_get failed", "Ok", NULL);
         return FALSE;

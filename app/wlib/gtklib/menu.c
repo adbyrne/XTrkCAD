@@ -868,7 +868,7 @@ void wMenuToggleEnable(
  */
 
 void wMenuSetLabel( wMenu_p m, const char * labelStr) {
-	wlibSetLabel( m->widget, m->option, labelStr, &m->labelG, &m->imageG );
+	 wlibSetLabel( m->widget, m->option, labelStr, &m->labelG, &m->imageG );
 }
 
 /**
@@ -884,7 +884,7 @@ static gint pushMenu(
 	GtkWidget * widget,
 	wMenu_p m )
 {
-	gtk_menu_popup( GTK_MENU(m->menu), NULL, NULL, NULL, NULL, 0, 0 );
+	gtk_menu_popup_at_pointer( GTK_MENU(m->menu), NULL);
 	/* Tell calling code that we have handled this event; the buck
 	 * stops here. */
 	return TRUE;
@@ -918,19 +918,29 @@ wMenu_p wMenuCreate(
 	m->traceData = NULL;
 	wlibComputePos( (wControl_p)m );
 
-	m->widget = gtk_button_new();
-	g_signal_connect (GTK_OBJECT(m->widget), "clicked",
+	if (option&BO_USETEMPLATE) {
+        char name[256];
+        sprintf(name,"%s",helpStr);
+		 m->widget = wlibWidgetFromIdWarn( parent, name );
+		 if (m->widget) m->fromTemplate = TRUE;
+		 m->template_id = strdup(helpStr);
+	} else {
+		m->widget = gtk_button_new();
+	}
+	g_signal_connect (m->widget, "clicked",
 			G_CALLBACK(pushMenu), m );
 
 	m->menu = gtk_menu_new();
 
-	wMenuSetLabel( m, labelStr );
-	
-	gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
-	wlibControlGetSize( (wControl_p)m );
-	if ( m->w < 80 && (m->option&BO_ICON)==0) {
-		m->w = 80;
-		gtk_widget_set_size_request( m->widget, m->w, m->h );
+
+	if (!m->fromTemplate) {
+		wMenuSetLabel( m, labelStr );
+		gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
+		wlibControlGetSize( (wControl_p)m );
+		if ( m->w < 80 && (m->option&BO_ICON)==0) {
+			m->w = 80;
+			gtk_widget_set_size_request( m->widget, m->w, m->h );
+		}
 	}
 	gtk_widget_show( m->widget );
 	wlibAddButton( (wControl_p)m );
@@ -962,6 +972,7 @@ wMenu_p wMenuBarAdd(
 	
 	menuItem = gtk_menu_item_new_with_mnemonic( wlibConvertInput(m->labelStr) );
 	m->menu = gtk_menu_new();
+	gtk_widget_set_name(m->menu, "commands");
 	gtk_menu_item_set_submenu( GTK_MENU_ITEM(menuItem), m->menu );
 	gtk_menu_shell_append( GTK_MENU_SHELL(w->menubar), menuItem );
 	gtk_widget_show( menuItem );
@@ -1014,7 +1025,7 @@ wMenu_p wMenuPopupCreate(
 
 void wMenuPopupShow( wMenu_p mp )
 {
-	gtk_menu_popup( GTK_MENU(mp->menu), NULL, NULL, NULL, NULL, 0, 0 );
+	gtk_menu_popup_at_pointer( GTK_MENU(mp->menu), NULL );
 }
 
 

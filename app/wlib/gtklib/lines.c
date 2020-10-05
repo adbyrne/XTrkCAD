@@ -50,6 +50,41 @@ struct wLine_t {
     wLines_t * lines;
 };
 
+static dynArr_t lines_array;
+
+/**
+ * Redraw Templated window
+ */
+
+static gboolean linesTemplateRepaint(
+		GtkWidget * widget,
+		cairo_t *cr,
+		wLine_p bl
+) {
+
+	wWin_p w = bl->parent;
+
+	for (int i=0;i<lines_array.cnt;i++) {
+
+		bl = DYNARR_N(wLine_p, lines_array, i);
+
+		if(!bl->visible) continue;
+
+		cairo_set_source_rgb(cr, 0, 0, 0);
+		cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
+
+		for (int i=0; i<bl->count; i++) {
+			cairo_set_line_width(cr, bl->lines[i].width);
+			cairo_move_to(cr, bl->lines[i].x0, bl->lines[i].y0);
+			cairo_line_to(cr, bl->lines[i].x1, bl->lines[i].y1);
+			cairo_stroke(cr);
+		}
+	}
+	return TRUE;
+}
+
+
 /**
  * Perform redrawing of the lines window
  *
@@ -62,15 +97,29 @@ static void linesRepaint(wControl_p b)
     wLine_p bl = (wLine_p)(b);
     int i;
     wWin_p win = (wWin_p)(bl->parent);
-    GdkDrawable * window;
+    GdkWindow * window;
     cairo_t *cr;
 
     if (!bl->visible) {
         return;
     }
+    cairo_region_t * rect;
+    GdkDrawingContext * context;
 
-    window = gtk_widget_get_window(win->widget);
-    cr = gdk_cairo_create(window);
+    if (win->cr) {       //In draw event
+    	cr = win->cr;
+    } else {
+		window = gtk_widget_get_window(win->widget);
+		cairo_rectangle_int_t r;
+		r.width = win->w;
+		r.height = win->h;
+		r.x = win->realX;
+		r.y = win->realY;
+		rect = cairo_region_create_rectangle(&r);
+
+		context = gdk_window_begin_draw_frame(window, rect);
+		cr = gdk_drawing_context_get_cairo_context(context);
+    }
     cairo_set_source_rgb(cr, 0, 0, 0);
     cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
     cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
@@ -81,8 +130,12 @@ static void linesRepaint(wControl_p b)
         cairo_line_to(cr, bl->lines[i].x1, bl->lines[i].y1);
         cairo_stroke(cr);
     }
-
-    cairo_destroy(cr);
+    if (!win->cr) {				//In draw event
+		cairo_destroy(cr);
+		g_object_unref(rect);
+		gdk_window_end_draw_frame(window,context);
+		g_object_unref(window);
+    }
 }
 
 /**
@@ -99,6 +152,8 @@ void wlibLineShow(
 {
     bl->visible = visible;
 }
+
+static wBool_t draw_connected;
 
 /**
  * Create a window consisting of several lines
@@ -120,6 +175,11 @@ wLine_p wLineCreate(
     int i;
     linesWindow = (wLine_p)wlibAlloc(parent, B_LINES, 0, 0, labelStr,
                                     sizeof *linesWindow, NULL);
+
+    DYNARR_APPEND(wLine_p,lines_array,10);
+
+    DYNARR_N(wLine_p,lines_array,lines_array.cnt-1) = linesWindow;
+
     linesWindow->visible = TRUE;
     linesWindow->count = count;
     linesWindow->lines = lines;
@@ -143,8 +203,17 @@ wLine_p wLineCreate(
         }
     }
 
-    linesWindow->repaintProc = linesRepaint;
-    wlibAddButton((wControl_p)linesWindow);
-    linesWindow->widget = NULL;
+    if (parent->fromTemplate) {
+    		linesWindow->widget = wlibGetWidgetFromName(parent,labelStr,"draw",FALSE);
+    		if (!draw_connected) {
+    			g_signal_connect(linesWindow->widget, "draw",
+        	                    G_CALLBACK(linesTemplateRepaint), linesWindow);
+    			draw_connected = TRUE;
+    		}
+    } else {
+		linesWindow->repaintProc = linesRepaint;
+		wlibAddButton((wControl_p)linesWindow);
+		linesWindow->widget = NULL;
+    }
     return linesWindow;
 }

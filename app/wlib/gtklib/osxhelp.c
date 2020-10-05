@@ -40,7 +40,6 @@ static pid_t pidOfChild;
 static int handleOfPipe;
 extern char *wExecutableName;
 
-
 /**
  * Create the fully qualified filename for the help helper
  *
@@ -72,6 +71,7 @@ char *ChildProgramFile(char *parentProgram)
 void wHelp(const char * topic)
 {
     pid_t newPid;
+    int len;
     int status;
     const char html[] = ".html";
     static char *directory;				/**< base directory for HTML files */

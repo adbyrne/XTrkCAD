@@ -136,7 +136,7 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
     wPos_t w, h;
     wPos_t xx, yy;
     const char * msgConverted;
-    GtkRequisition size;
+    GtkRequisition min_size, nat_size;
 
     /* return if there is nothing to do */
     if (balloonVisible && balloonB == b &&
@@ -164,33 +164,47 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
         gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
         gtk_window_set_accept_focus(GTK_WINDOW( balloonF), FALSE);
             
-		GtkWidget * alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
-		gtk_alignment_set_padding( GTK_ALIGNMENT(alignment), 6, 6, 6, 6 );
+		//GtkWidget * alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
+		//gtk_alignment_set_padding( GTK_ALIGNMENT(alignment), 6, 6, 6, 6 );
 
-		gtk_container_add (GTK_CONTAINER (balloonF), alignment);
+		//gtk_container_add (GTK_CONTAINER (balloonF), alignment);
 		
-		gtk_widget_show (alignment);
+		//gtk_widget_show (alignment);
         
         balloonPI = gtk_label_new(msgConverted);
-        gtk_container_add( GTK_CONTAINER(alignment), balloonPI );
-        gtk_widget_show_all( balloonPI );
+        gtk_widget_set_halign(balloonPI, GTK_ALIGN_CENTER);
+        gtk_widget_set_valign(balloonPI, GTK_ALIGN_CENTER);
+        gtk_widget_set_hexpand(balloonPI,TRUE);
+        gtk_widget_set_vexpand(balloonPI,TRUE);
+        gtk_container_add( GTK_CONTAINER(balloonF), balloonPI );
     }
     gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
+    gtk_widget_show_all( balloonPI );
+    gtk_widget_show_all( balloonF );
 
     balloonDx = dx;
     balloonDy = dy;
     balloonB = b;
     snprintf(balloonMsg, sizeof(balloonMsg), "%s", msg);
-    gtk_widget_get_requisition(balloonPI, &size );
-    w = size.width;
-    h = size.height;
+    gtk_widget_get_preferred_size(balloonPI, &min_size, &nat_size);
+    w = nat_size.width;
+    h = nat_size.height;
 
     gtk_window_get_position( GTK_WINDOW(b->parent->gtkwin), &x, &y);
 
+
     x += b->realX + dx;
     y += b->realY + b->h - dy;
-    xx = gdk_screen_width();
-    yy = gdk_screen_height();
+
+    GdkDisplay * display = gdk_display_get_default();
+
+    GdkMonitor * monitor = gdk_display_get_monitor_at_window(display, gtk_widget_get_window(balloonF));
+
+    GdkRectangle rect;
+    gdk_monitor_get_geometry(monitor, &rect);
+
+    xx = rect.width;
+    yy = rect.height;
     if ( x < 0 ) {
         x = 0;
     } else if ( x+w > xx ) {

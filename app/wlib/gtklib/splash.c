@@ -50,9 +50,9 @@ static GtkWidget *message;	/**< window handle for progress message */
 int
 wCreateSplash(char *appName, char *appVer)
 {
-    GtkWidget *vbox;
+    GtkWidget *grid;
     GtkWidget *image;
-    GtkWidget *label;
+    GtkWidget *label, *label_temp;
     char *temp;
     char logoPath[BUFSIZ];
 
@@ -67,16 +67,19 @@ wCreateSplash(char *appName, char *appVer)
     gtk_window_set_focus_on_map(GTK_WINDOW(window), FALSE);
 #endif
 
-    vbox = gtk_vbox_new(FALSE, 0);
-    gtk_widget_show(vbox);
-    gtk_container_add(GTK_CONTAINER(window), vbox);
+    grid = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 6);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
+
+
+    gtk_widget_show(grid);
+    gtk_container_add(GTK_CONTAINER(window), grid);
 
     /* add the logo image to the top of the splash window */
     sprintf(logoPath, "%s/" LOGOFILENAME, wGetAppLibDir());
     image = gtk_image_new_from_file(logoPath);
     gtk_widget_show(image);
-    gtk_box_pack_start(GTK_BOX(vbox), image, TRUE, TRUE, 0);
-    gtk_misc_set_alignment(GTK_MISC(image), 0, 0);
+    gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 1, 1);
 
     /* put the product name into the window */
 
@@ -90,24 +93,25 @@ wCreateSplash(char *appName, char *appVer)
 
     label = gtk_label_new(temp);
     gtk_widget_show(label);
-    gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+    gtk_grid_attach_next_to(GTK_GRID(grid), label, image, GTK_POS_BOTTOM, 1, 1);
     gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_FILL);
     gtk_label_set_selectable(GTK_LABEL(label), FALSE);
     gtk_misc_set_padding(GTK_MISC(label), 6, 2);
 
     free(temp);
 
-    label = gtk_label_new("Application is starting...");
-    gtk_widget_show(label);
-    gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
-    gtk_label_set_line_wrap(GTK_LABEL(label), FALSE);
-    gtk_misc_set_padding(GTK_MISC(label), 6, 2);
+    label_temp = gtk_label_new("Application is starting...");
+    gtk_widget_show(label_temp);
+    gtk_grid_attach_next_to(GTK_GRID(grid), label_temp, label, GTK_POS_BOTTOM, 1, 1);
+    gtk_label_set_line_wrap(GTK_LABEL(label_temp), FALSE);
+
+    message = label_temp;
 #if GTK_MINOR_VERSION > 5
     gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_START);
 #endif
-    message = label;
 
     gtk_widget_show(window);
+
     return (TRUE);
 }
 

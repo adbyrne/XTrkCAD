@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -76,9 +77,11 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 	GdkScreen *screen = NULL;
 
-	int monitor;
+	GdkMonitor *monitor;
 
 	GtkWidget * toplevel = gtk_widget_get_toplevel(widget);
+
+	GdkDisplay * display = gdk_display_get_default();
 
 	if (gtk_widget_is_toplevel(GTK_WIDGET(toplevel)) &&
 		gtk_widget_get_parent_window(GTK_WIDGET(toplevel))) {
@@ -263,9 +266,10 @@ void wWinGetSize(
     wPos_t * width,		/* Returned window width */
     wPos_t * height)	/* Returned window height */
 {
-    GtkRequisition requisition;
+    GtkRequisition min_req,pref_req;
     wPos_t w, h;
-    gtk_widget_size_request(win->gtkwin, &requisition);
+    gtk_widget_get_preferred_size(win->gtkwin,&min_req,&pref_req);
+    //gtk_widget_size_request(win->gtkwin, &requisition);
     w = win->w;
     h = win->h;
 
@@ -298,14 +302,14 @@ void wWinSetSize(
 {
     win->busy = TRUE;
     win->w = width;
-   win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
+    win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
     if (win->option&F_RESIZE) {
        	gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-    	gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
+    	//gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
     }
     else {
     	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-    	gtk_widget_set_size_request(win->widget, win->w, win->h);
+    	//gtk_widget_set_size_request(win->widget, win->w, win->h);
     }
 
 
@@ -325,31 +329,24 @@ void wWinShow(
     wWin_p win,		/* Window */
     wBool_t show)		/* Command */
 {
-    //GtkRequisition min_req, pref_req;
+    GtkRequisition requisition;
 
     if (debugWindow >= 2) {
         printf("Set Show %s\n", win->labelStr?win->labelStr:"No label");
     }
 
-    if (win->widget == 0) {
-        abort();
-    }
-
-    int width, height;
+    //if (win->widget == 0) {
+    //    abort();
+    //}
 
     if (show) {
         keyState = 0;
         getPos(win);
 
-        if (!win->shown) {
-			gtk_widget_show(win->gtkwin);
-			gtk_widget_show(win->widget);
-		}
-
         if (win->option & F_AUTOSIZE) {
-        	GtkAllocation allocation;
-        	GtkRequisition requistion;
-        	gtk_widget_size_request(win->widget,&requistion);
+        	GtkRequisition min_req,pref_req;
+        	gtk_widget_get_preferred_size(win->gtkwin,&min_req,&pref_req);
+            //gtk_widget_size_request(win->gtkwin, &requisition);
 
         	width = win->w;
         	height = win->h;
@@ -367,7 +364,7 @@ void wWinShow(
 
                 if (win->option&F_MENUBAR) {
                     gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
-
+                    GtkAllocation allocation;
                     gtk_widget_get_allocation(win->menubar, &allocation);
                     win->menu_height = allocation.height;
                 }
@@ -396,6 +393,7 @@ void wWinShow(
         	gtk_window_maximize(GTK_WINDOW(win->gtkwin));
         	maximize_at_next_show = FALSE;
         }
+
     } else {
         wFlush();
         saveSize(win);
@@ -407,7 +405,7 @@ void wWinShow(
         }
 
         gtk_widget_hide(win->gtkwin);
-        gtk_widget_hide(win->widget);
+        //gtk_widget_hide(win->widget);
     }
 }
 
@@ -480,7 +478,8 @@ void wWinSetBusy(
     }
 
     if (busy) {
-        cursor = gdk_cursor_new(GDK_WATCH);
+    	GdkDisplay * display = gdk_display_get_default();
+        cursor = gdk_cursor_new_for_display(display,GDK_WATCH);
     } else {
         cursor = NULL;
     }
@@ -488,7 +487,7 @@ void wWinSetBusy(
     gdk_window_set_cursor(gtk_widget_get_window(win->gtkwin), cursor);
 
     if (cursor) {
-        gdk_cursor_unref(cursor);
+        g_object_unref(cursor);
     }
 
     gtk_widget_set_sensitive(GTK_WIDGET(win->gtkwin), busy==0);
@@ -566,6 +565,9 @@ void wWinClear(
     wPos_t width,
     wPos_t height)
 {
+	if (win->builder) {
+		wStatusClearControls(win);
+	}
 }
 
 
@@ -639,29 +641,16 @@ static gint window_delete_event(
     return (TRUE);
 }
 
-static int fixed_expose_event(
+static int draw_event(
     GtkWidget * widget,
-    GdkEventExpose * event,
-    wWin_p win)
+	cairo_t *cr,
+    wWin_p bd)
 {
-	int rc;
+	   bd->cr = cr;
+       int rc = window_redraw(bd, TRUE);
+       bd->cr = NULL;
+       return rc;
 
-    if (event->count==0) {
-        rc = window_redraw(win, TRUE);
-    } else {
-        rc = FALSE;
-    }
-    cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
-#ifdef CURSOR_SURFACE
-    if (win && win->cursor_surface.surface && win->cursor_surface.show) {
-		cairo_set_source_surface(cr,win->cursor_surface.surface,event->area.x, event->area.y);
-		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
-		cairo_rectangle(cr,event->area.x, event->area.y,
-				event->area.width, event->area.height);
-		cairo_fill(cr);
-	}
-#endif
-    return rc;
 }
 
 static int resizeTime(wWin_p win) {
@@ -698,6 +687,22 @@ static int window_configure_event(
     if (win==NULL) {
         return FALSE;
     }
+    int width,height;
+    /* For Map, call back so zoom can be set */
+    if (win->option&F_CONSTRAINRESIZE) {
+    	/* Get the latest size */
+    	gtk_window_get_size(GTK_WINDOW(win->gtkwin),&width,&height);
+    	/* No change */
+    	if ((win->w == width) && (win->h == height)) return FALSE;
+    	win->w = width;
+    	win->h = height;
+    	win->realX = 0;
+    	win->realY = 0;
+    	if (win->busy==FALSE && win->winProc)
+    		    win->winProc(win, wResize_e, NULL, win->data);
+    	return FALSE;
+    }
+
 
     if (win->option&F_RESIZE) {
         if (event->width < 10 || event->height < 10) {
@@ -719,22 +724,22 @@ static int window_configure_event(
                 win->h = MIN_WIN_HEIGHT;
             }
 
-            if (win->option&F_MENUBAR) {
-            	GtkAllocation allocation;
-            	gtk_widget_get_allocation(win->menubar, &allocation);
-            	win->menu_height= allocation.height;
-                gtk_widget_set_size_request(win->menubar, win->w-20, win->menu_height);
-            }
-            if (win->resizeTimer) {					// Already have a timer
-                 return FALSE;
-            } else {
-            	 win->resizeW = w;				//Remember where this started
-            	 win->resizeH = h;
-            	 win->timer_idle_count = 0;          //Start background timer on redraw
-            	 win->timer_busy_count = 0;
-                 win->resizeTimer = g_timeout_add(100,(GSourceFunc)resizeTime,win);   // 100ms delay
-                 return FALSE;
-            }
+
+
+            //if (win->option&F_MENUBAR) {
+            //	GtkAllocation allocation;
+            //	gtk_widget_get_allocation(win->menubar, &allocation);
+            //	win->menu_height= allocation.height;
+            //    gtk_widget_set_size_request(win->menubar, win->w-20, win->menu_height);
+            //}
+            //if (win->resizeTimer) {					// Already have a timer
+            //     return FALSE;
+            //} else {
+            //	 win->resizeW = w;				//Remember where this started
+            //	 win->resizeH = h;
+            //     win->resizeTimer = g_timeout_add(100,(GSourceFunc)resizeTime,win);   // 100ms delay
+            //     return FALSE;
+            //}
         }
     }
 
@@ -789,39 +794,50 @@ wBool_t catch_shift_ctrl_alt_keys(
     GdkEventKey *event,
     void * data)
 {
-    int state = 0;
-    switch (event->keyval ) {
-    case GDK_KEY_Shift_L:
-    case GDK_KEY_Shift_R:
-        state |= WKEY_SHIFT;
-        break;
+    int state;
+    state = 0;
+    GdkModifierType modifiers;
+    modifiers = gtk_accelerator_get_default_mod_mask();
+    /* Clear keystate */
+    keyState &= ~(WKEY_CTRL|WKEY_SHIFT|WKEY_ALT|WKEY_CMD);
 
-    case GDK_KEY_Control_L:
-    case GDK_KEY_Control_R:
-        state |= WKEY_CTRL;
-        break;
+    if ((event->state & modifiers)&GDK_CONTROL_MASK)
+    	state |= WKEY_CTRL;
+    if ((event->state & modifiers)&GDK_SHIFT_MASK)
+    	state |= WKEY_SHIFT;
+    if ((event->state & modifiers)&GDK_MOD1_MASK)
+    	state |= WKEY_ALT;
+    /* Add special key (Windows or Command) */
+    if ((event->state & modifiers)&GDK_MOD2_MASK)
+    	state |= WKEY_CMD;
 
-    case GDK_KEY_Alt_L:
-    case GDK_KEY_Alt_R:
-        state |= WKEY_ALT;
-        break;
+    //switch (event->keyval) {
+    //case GDK_KEY_Shift_L:
+    //case GDK_KEY_Shift_R:
+    //    state |= WKEY_SHIFT;
+    //    break;
 
-    case GDK_KEY_Meta_L:
-    case GDK_KEY_Meta_R:
-	// Pressing SHIFT and then ALT generates a Meta key
-	//printf( "Meta\n" );
-        state |= WKEY_ALT;
-        break;
-    }
+    //case GDK_KEY_Control_L:
+    //case GDK_KEY_Control_R:
+    //    state |= WKEY_CTRL;
+    //    break;
+
+    //case GDK_KEY_Alt_L:
+    //case GDK_KEY_Alt_R:
+    //    state |= WKEY_ALT;
+    //    break;
+    //}
 
     if (state != 0) {
         if (event->type == GDK_KEY_PRESS) {
             keyState |= state;
         } else {
-            keyState &= ~state;
+        	keyState &= ~state;
         }
+
         return TRUE;
     }
+
     return FALSE;
 }
 
@@ -860,7 +876,6 @@ static gint window_char_event(
 
 void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
 	GdkGeometry hints;
-	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
 	hints.max_width = max_width;
 	hints.min_height = min_height;
@@ -868,19 +883,14 @@ void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int 
 	hints.min_aspect = hints.max_aspect = aspect_ratio;
 	hints.base_width = base_width;
 	hints.base_height = base_height;
-	if( base_width != -1 && base_height != -1 ) {
-		hintMask |= GDK_HINT_BASE_SIZE;
-	}
-	
-	if(aspect_ratio > -1.0 ) {
-		hintMask |= GDK_HINT_ASPECT;
-	}	
 
 	gtk_window_set_geometry_hints(
 			GTK_WINDOW(win->gtkwin),
 			win->gtkwin,
 			&hints,
-			hintMask);
+			(GdkWindowHints)(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE |
+					GDK_HINT_ASPECT ));
+
 }
 
 
@@ -946,9 +956,8 @@ static wWin_p wWinCommonCreate(
         									GTK_WINDOW(gtkMainW->gtkwin));
         }
     }
-    getWinSize(w, nameStr);
     if (winType != W_MAIN) {
-            gtk_widget_set_app_paintable (w->gtkwin,TRUE);
+            getWinSize(w, nameStr);
     }
 
     if (option & F_HIDE) {
@@ -960,12 +969,13 @@ static wWin_p wWinCommonCreate(
         gtk_window_set_position(GTK_WINDOW(w->gtkwin), GTK_WIN_POS_CENTER_ON_PARENT);
     }
 
-
     w->widget = gtk_fixed_new();
 
     if (w->widget == 0) {
         abort();
     }
+
+    gtk_container_add(GTK_CONTAINER(w->gtkwin), w->widget);
 
     if (w->option&F_MENUBAR) {
         w->menubar = gtk_menu_bar_new();
@@ -977,10 +987,6 @@ static wWin_p wWinCommonCreate(
         gtk_widget_set_size_request(w->menubar, -1, w->menu_height);
     }
 
-    gtk_container_add(GTK_CONTAINER(w->gtkwin), w->widget);
-
-
-
 
     if (w->option&F_AUTOSIZE) {
         w->realX = 0;
@@ -988,8 +994,8 @@ static wWin_p wWinCommonCreate(
         w->realY = h;
         w->h = MIN_WIN_HEIGHT;
     } else if (w->origX != 0){
-        w->realX = w->origX;
-        w->realY = w->origY+h;
+        w->w = w->realX = w->origX;
+        w->h = w->realY = w->origY+h;
 
         w->default_size_x = w->w;
         w->default_size_y = w->h;
@@ -1015,14 +1021,16 @@ static wWin_p wWinCommonCreate(
 
     w->first = w->last = NULL;
     w->winProc = winProc;
+    w->data = data;
     g_signal_connect(GTK_OBJECT(w->gtkwin), "delete_event",
                      G_CALLBACK(window_delete_event), w);
-    g_signal_connect(GTK_OBJECT(w->widget), "expose_event",
-                     G_CALLBACK(fixed_expose_event), w);
-    g_signal_connect(GTK_OBJECT(w->gtkwin), "configure_event",
+    g_signal_connect(GTKOBJECT(w->widget), "draw",
+                     G_CALLBACK(draw_event), w);
+    g_signal_connect(GTKOBJECT(w->gtkwin), "configure_event",
                      G_CALLBACK(window_configure_event), w);
     g_signal_connect(GTK_OBJECT(w->gtkwin), "window-state-event",
                      G_CALLBACK(window_state_event), w);
+    g_signal_connect(w->gtkwin, "key_press_event",
     g_signal_connect(GTK_OBJECT(w->gtkwin), "key_press_event",
                      G_CALLBACK(window_char_event), w);
     g_signal_connect(GTK_OBJECT(w->gtkwin), "key_release_event",
@@ -1117,12 +1125,225 @@ wWin_p wWinMainCreate(
     wPrefGetInteger("draw", "maximized", &isMaximized, 0);
     option = option | (isMaximized?F_MAXIMIZE:0);
 
-    gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
+    if (option&F_USETEMPLATE) {
+    	gtkMainW = wlibCreateFromTemplate(
+					NULL,
+					W_MAIN,
+					x,
+					y,
+					labelStr,
+					nameStr,
+					option,
+					winProc,
+					data);
+    	if (option&F_MENUBAR) {
+    		gtkMainW->menubar = wlibWidgetFromIdWarn(gtkMainW, "main-menubar");
+    	}
+    } else {
+
+    	gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
                                 winProc, data);
+    }
 
     wDrawColorWhite = wDrawFindColor(0xFFFFFF);
     wDrawColorBlack = wDrawFindColor(0x000000);
     return gtkMainW;
+}
+
+
+
+/*
+ *  Recursively walk the tree hiding everything - this is used to reset the Describe Super Window
+ *
+ */
+void wlibHideAllReveals(GtkWidget* parent) {
+
+		if (GTK_IS_REVEALER(parent)) {
+				gtk_revealer_set_reveal_child(GTK_REVEALER(parent),FALSE);
+		}
+
+		if (GTK_IS_BIN(parent)) {
+				GtkWidget *child = gtk_bin_get_child(GTK_BIN(parent));
+				wlibHideAllReveals(child);
+				return;
+		}
+
+		if (GTK_IS_CONTAINER(parent)) {
+				GList *children = gtk_container_get_children(GTK_CONTAINER(parent));
+				if (children && children->data) {
+					do {
+					  wlibHideAllReveals((GtkWidget *)(children->data));
+					} while ((children = g_list_next(children)) != NULL);
+				}
+				if (children) {
+				    g_list_free(children);
+				}
+		}
+
+}
+
+void wlibHideAllRevealsExcept(wWin_p parent, char * id) {
+
+	GtkWidget * box = wlibGetWidgetFromName( parent, parent->template_id, "contentbox", FALSE );
+
+	if (box)
+		wlibHideAllReveals(box);
+
+	GtkRevealer * reveal = (GtkRevealer *)wlibGetWidgetFromName( parent, id, "reveal", FALSE );
+
+	if (reveal)
+		gtk_revealer_set_reveal_child(GTK_REVEALER(reveal), TRUE);
+
+	gtk_widget_queue_draw(parent->gtkwin);
+
+}
+
+/*
+ * Add extra template into window and hook up to the window under the template-id.contentbox
+ */
+
+void wlibAddTemplate(wWin_p parent,const char * nameStr,long option) {
+	 GtkWidget * reveal;
+
+	/* See if we already have it */
+	if (!wlibGetWidgetFromName( parent, nameStr, "reveal", TRUE )) {
+
+		wlibAddContentFromTemplate(parent, nameStr);
+
+		reveal = wlibGetWidgetFromName( parent, nameStr, "reveal", FALSE );
+		GtkWidget * box = wlibGetWidgetFromName( parent, parent->template_id, "contentbox", FALSE );
+
+		gtk_box_pack_start(GTK_BOX(box),reveal, FALSE, FALSE, 3);
+	} else {
+		reveal = wlibGetWidgetFromName( parent, nameStr, "reveal", FALSE );
+	}
+
+	wlibHideAllReveals(parent->gtkwin);
+
+	/* But reveal this one! */
+
+	gtk_revealer_set_reveal_child(GTK_REVEALER(reveal), TRUE);
+
+	gtk_widget_queue_draw(parent->gtkwin);
+
+}
+
+void wlibRedraw(wWin_p parent) {
+
+	GtkWidget * box = wlibGetWidgetFromName( parent, parent->template_id, "contentbox", TRUE );
+	if (box)
+		gtk_widget_show_all(box);
+	gtk_widget_queue_draw(parent->gtkwin);
+	gtk_widget_show_all(parent->gtkwin);
+
+}
+
+
+
+/**
+ * Create a window.
+ * Default width and height are replaced by values stored in the configuration
+ * file (.rc)
+ *
+ * \param parent IN parent window
+ * \param winType IN type of window
+ * \param x IN default width
+ * \param y IN default height
+ * \param labelStr IN window title
+ * \param nameStr IN name of window
+ * \param option IN misc options for placement and sizing of window
+ * \param winProc IN window procedure
+ * \param data IN additional data to pass to the window procedure
+ * \return  the newly created window
+ */
+
+wWin_p wlibCreateFromTemplate(
+    wWin_p parent,
+    int winType,
+    wPos_t x,
+    wPos_t y,
+    const char * labelStr,
+    const char * nameStr,
+    long option,
+    wWinCallBack_p winProc,
+    void * data)
+{
+    wWin_p w;
+    int h;
+
+    w=wlibDialogFromTemplate( winType, labelStr, nameStr, option, data );
+    
+    /*Find out if there is a fixed element */
+    w->fixed = GTK_FIXED(wlibGetWidgetFromName(w,nameStr,"fixed",TRUE));
+
+    if (gtkMainW) {
+        gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
+                                     GTK_WINDOW(gtkMainW->gtkwin));
+    }
+
+    if (winType != W_MAIN) {
+            getWinSize(w, nameStr);
+    }
+
+    if (option & F_HIDE) {
+        gtk_widget_hide(w->gtkwin);
+    }
+
+    /* center window on top of parent window */
+    if (option & F_CENTER) {
+        gtk_window_set_position(GTK_WINDOW(w->gtkwin), GTK_WIN_POS_CENTER_ON_PARENT);
+    }
+
+
+    if (w->option&F_AUTOSIZE) {
+        w->realX = 0;
+        w->w = 0;
+        w->realY = h;
+        w->h = 0;
+    } else if (w->origX != 0) {
+        w->w = w->realX = w->origX;
+        w->h = w->realY = w->origY+h;
+
+        w->default_size_x = w->w;
+        w->default_size_y = w->h;
+        gtk_widget_set_size_request(w->gtkwin, w->w-20, w->h);
+
+        if (w->option&F_MENUBAR) {
+            gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
+        }
+    }
+    if (w->option&F_CONSTRAINRESIZE) {
+    	w->winProc = winProc;
+    	g_signal_connect(w->gtkwin, "configure_event",
+    	         	 	 	G_CALLBACK(window_configure_event), w);
+    	w->realX = 0;
+    	w->realY = 0;
+    }
+
+    g_signal_connect(w->gtkwin, "delete_event",
+                        G_CALLBACK(window_delete_event), w);
+
+
+    w->nameStr = nameStr?strdup(nameStr):NULL;
+
+    if (labelStr) {
+        gtk_window_set_title(GTK_WINDOW(w->gtkwin), labelStr);
+    }
+
+    if (listHelpStrings) {
+        printf("WINDOW - %s\n", nameStr?nameStr:"<NULL>");
+    }
+
+    if (firstWin) {
+        lastWin->next = (wControl_p)w;
+    } else {
+        firstWin = (wControl_p)w;
+    }
+
+    lastWin = (wControl_p)w;
+      gtk_widget_show_all(w->gtkwin);
+
+    return w;
 }
 
 /**
@@ -1161,10 +1382,33 @@ wWin_p wWinPopupCreate(
         parent = gtkMainW;
     }
 
-    win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
-                           winProc, data);
+    if (!(option & F_DESCADDTEMPLATE)) {  /*Only add*/
+
+		if( option & F_USETEMPLATE ) {
+
+			win = wlibCreateFromTemplate(parent,
+									  W_POPUP,
+									  x, y,
+									  labelStr,
+									  nameStr,
+									  option,
+									  winProc,
+									  data );
+		} else {
+			win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
+							   winProc, data);
+		}
+    } else {
+    	win = parent;
+    }
+
+    if (option & F_DESCTEMPLATE) {
+    	wlibAddTemplate(win,helpStr,option);
+    }
+
     return win;
 }
+
 
 
 /**
@@ -1197,3 +1441,4 @@ void wExit(
 
     exit(rc);
 }
+

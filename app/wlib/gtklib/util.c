@@ -66,6 +66,11 @@ const char * wNames[] = {
     "BOX"
 };
 
+/* Set up flag to show backend supports templates */
+wBool_t wUITemplates(void) {
+	return TRUE;
+}
+
 
 static wBool_t reverseIcon =
 #if defined(linux)
@@ -148,23 +153,33 @@ GdkPixbuf* wlibPixbufFromXBM(
 
 int wlibAddLabel(wControl_p b, const char * labelStr)
 {
-    GtkRequisition requisition, reqwidget;
-
+    GtkRequisition min_req, nat_req, min_reqwidget, nat_reqwidget;
     if (labelStr == NULL) {
         return 0;
     }
 
-    b->label = gtk_label_new(wlibConvertInput(labelStr));
-    gtk_widget_size_request(b->label, &requisition);
-    if (b->widget)
-       	gtk_widget_size_request(b->widget, &reqwidget);
-    else
-       	reqwidget.height = requisition.height;
-    gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
-    gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label,
-                   b->realX - requisition.width - 8, b->realY + (reqwidget.height/2 - requisition.height/2));
-    gtk_widget_show(b->label);
-    return requisition.width + 8;
+    if (b->fromTemplate) {
+    	/*Find the label field in the template if there is one */
+    	b->label = wlibGetWidgetFromName( b->parent, b->template_id, "label", TRUE );
+    }
+
+    if (!b->label)
+    	b->label = gtk_label_new(wlibConvertInput(labelStr));
+
+    if (b->fromTemplate) {
+    	return 0;
+    }
+	gtk_widget_get_preferred_size(b->label, &min_req, &nat_req);
+	if (b->widget)
+		gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
+	else
+		nat_reqwidget.height = nat_req.height;
+
+	gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
+	gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label,
+			   b->realX - nat_req.width - 8, b->realY + (nat_reqwidget.height/2 - nat_req.height/2));
+	gtk_widget_show(b->label);
+    return nat_req.width + 8;
 }
 
 /**
@@ -240,7 +255,7 @@ void wlibComputePos(
     }
 
     if (b->origY >= 0) {
-        b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? w->menu_height : 0);
+        b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? MENUH : 0);
     }
     else {
         b->realY = w->lastY + (-b->origY) - 1;
@@ -256,10 +271,8 @@ void wlibComputePos(
 void wlibControlGetSize(
                         wControl_p b)
 {
-    GtkRequisition requisition;
-    gtk_widget_size_request(b->widget, &requisition);
-    b->w = requisition.width;
-    b->h = requisition.height;
+    b->w = gtk_widget_get_allocated_width(b->widget);
+    b->h = gtk_widget_get_allocated_height(b->widget);
 }
 
 /**
@@ -283,6 +296,9 @@ void wlibAddButton(
     win->last = b;
     b->next = NULL;
     b->parent = win;
+
+    if (b->fromTemplate) return;  /*Don't bother fussing with sizes */
+
     win->lastX = b->realX + b->w;
     win->lastY = b->realY + b->h;
 
@@ -388,6 +404,7 @@ void wWinTop(wWin_p win)
 
 /**
  * Set the cursor in GTK
+
  *
  * \param cursor IN
  */
@@ -403,59 +420,59 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 		switch(cursor) {
 			case wCursorAppStart:
 				//gdkcursor = gdk_cursor_new_from_name (display,"progress");
-				gdkcursor = gdk_cursor_new(GDK_WATCH);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_WATCH);
 				break;
 			case wCursorHand:
 				//gdkcursor = gdk_cursor_new_from_name (display,"pointer");
-				gdkcursor = gdk_cursor_new(GDK_HAND2);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_HAND2);
 							break;
 			case wCursorNo:
 				//gdkcursor = gdk_cursor_new_from_name (display,"not-allowed");
-				gdkcursor = gdk_cursor_new(GDK_X_CURSOR);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_X_CURSOR);
 							break;
 			case wCursorSizeAll:
 				//gdkcursor = gdk_cursor_new_from_name (display,"move");
-				gdkcursor = gdk_cursor_new(GDK_FLEUR);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_FLEUR);
 							break;
 			case wCursorSizeNESW:
 				//gdkcursor = gdk_cursor_new_from_name (display,"nesw-resize");
-				gdkcursor = gdk_cursor_new(GDK_BOTTOM_LEFT_CORNER);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_BOTTOM_LEFT_CORNER);
 							break;
 			case wCursorSizeNS:
 				//gdkcursor = gdk_cursor_new_from_name (display,"ns-resize");
-				gdkcursor = gdk_cursor_new(GDK_DOUBLE_ARROW);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_DOUBLE_ARROW);
 							break;
 			case wCursorSizeNWSE:
 				//gdkcursor = gdk_cursor_new_from_name (display,"nwse-resize");
-				gdkcursor = gdk_cursor_new(GDK_BOTTOM_RIGHT_CORNER);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_BOTTOM_RIGHT_CORNER);
 							break;
 			case wCursorSizeWE:
 				//gdkcursor = gdk_cursor_new_from_name (display,"ew-resize");
-				gdkcursor = gdk_cursor_new(GDK_SB_H_DOUBLE_ARROW);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_SB_H_DOUBLE_ARROW);
 							break;
 			case wCursorWait:
 				//gdkcursor = gdk_cursor_new_from_name (display,"wait");
-				gdkcursor = gdk_cursor_new(GDK_WATCH);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_WATCH);
 							break;
 			case wCursorIBeam:
 				//gdkcursor = gdk_cursor_new_from_name (display,"text");
-				gdkcursor = gdk_cursor_new(GDK_XTERM);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_XTERM);
 							break;
 			case wCursorCross:
 				//gdkcursor = gdk_cursor_new_from_name (display,"crosshair");
-				gdkcursor = gdk_cursor_new(GDK_TCROSS);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_TCROSS);
 							break;
 			case wCursorQuestion:
 				//gdkcursor = gdk_cursor_new_from_name (display,"help");
-				gdkcursor = gdk_cursor_new(GDK_QUESTION_ARROW);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_QUESTION_ARROW);
 							break;
 			case wCursorNone:
-				gdkcursor = gdk_cursor_new(GDK_BLANK_CURSOR);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_BLANK_CURSOR);
 							break;
 			case wCursorNormal:
 			default:
 				//gdkcursor = gdk_cursor_new_from_name (display,"default");
-				gdkcursor = gdk_cursor_new(GDK_LEFT_PTR);
+				gdkcursor = gdk_cursor_new_for_display(display,GDK_LEFT_PTR);
 							break;
 
 		}
@@ -463,6 +480,7 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 	} else gdkcursor = gdkcursors[cursor];
 
 	gdk_window_set_cursor ( gtk_widget_get_window(bd->widget), gdkcursor);
+
 }
 
 /**
@@ -484,14 +502,14 @@ const char * wMemStats(void)
 
 void wGetDisplaySize(wPos_t * w, wPos_t * h)
 {
-	GdkScreen *screen = gdk_screen_get_default();
-	guint monitor = gdk_screen_get_primary_monitor(screen);
-	GdkRectangle screen_geometry = { 0, 0, 0, 0 };
-	
-	gdk_screen_get_monitor_geometry( screen, monitor, &screen_geometry );
-	
-	*w = screen_geometry.width;
-	*h = screen_geometry.height;
+	GdkRectangle rect;
+
+	GdkDisplay * display = gdk_display_get_default();
+	GdkMonitor * monitor = gdk_display_get_primary_monitor(display);
+	gdk_monitor_get_geometry(monitor,&rect);
+
+    *w = rect.width;
+    *h = rect.height;
 }
 
 
@@ -510,6 +528,8 @@ char * wlibConvertInput(const char * inString)
     char * cq;
     int extCharCnt, inCharCnt;
 
+    if( !inString )
+        return NULL;
     /* Already UTF-8 encoded? */
     if (g_utf8_validate(inString, -1, NULL))
         /* Yes, do not double-convert */ {
@@ -663,16 +683,24 @@ struct accelData_t * wlibFindAccelKey(
     accelData_t * ad;
     int modifier = 0;
 
-    if ((event->state & GDK_SHIFT_MASK)) {
+    GdkModifierType modifiers;
+
+    modifiers = gtk_accelerator_get_default_mod_mask ();
+
+    if (((event->state & modifiers) & GDK_SHIFT_MASK)) {
         modifier |= WKEY_SHIFT;
     }
 
-    if ((event->state & GDK_CONTROL_MASK)) {
+    if ((event->state & modifiers & GDK_CONTROL_MASK)) {
         modifier |= WKEY_CTRL;
     }
 
-    if ((event->state & GDK_MOD1_MASK)) {
+    if ((event->state & modifiers & GDK_MOD1_MASK)) {
         modifier |= WKEY_ALT;
+    }
+
+    if ((event->state & modifiers & GDK_MOD2_MASK)) {
+    	modifier |= WKEY_CMD;
     }
 
     for (ad = &accelData(0); ad<&accelData(accelData_da.cnt); ad++)

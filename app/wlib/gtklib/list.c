@@ -405,8 +405,6 @@ void wListDelete(
                                       NULL,
                                       inx);
         gtk_list_store_remove(b->listStore, &iter);
-
-
         b->count--;
     }
 

@@ -4,6 +4,7 @@ file(GLOB headers *.h)
 set(sources
 	bitmap.c
 	boxes.c
+    builder.c
 	button.c
 	color.c
 	control.c
@@ -71,22 +72,27 @@ include_directories(${XTrkCAD_BINARY_DIR})
 
 add_library(xtrkcad-wlib ${headers} ${sources})
 
+# WrapBox
+target_include_directories(xtrkcad-wlib PRIVATE ${CMAKE_CURRENT_LIST_DIR}/wrapbox/)
+TARGET_LINK_LIBRARIES(xtrkcad-wlib PRIVATE wrapbox)
+
+
 # GTK 
-find_package (GTK2)
 include_directories(${GTK_INCLUDE_DIRS})
-target_link_libraries(xtrkcad-wlib ${GTK_LIBRARIES})
+target_link_libraries(xtrkcad-wlib PRIVATE ${GTK_LIBRARIES})
 
 # configure for GTK's native Unix print
+unset(GTK_UNIX_PRINT_FOUND CACHE)
 find_package (GTKUnixPrint)
 include_directories(${GTK_UNIX_PRINT_INCLUDE_DIRS})
-target_link_libraries(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
+target_link_libraries(xtrkcad-wlib PRIVATE ${GTK_UNIX_PRINT_LIBRARIES})
 
 # add dependency to webkit if configured
 if (APPLE)
 	if(NOT XTRKCAD_USE_APPLEHELP) 
 		if(NOT XTRKCAD_USE_BROWSER)
 		   include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
-	 	   target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
+    target_link_libraries(xtrkcad-wlib PRIVATE ${GTK_WEBKIT_LIBRARIES})
 		endif()
 	endif() 
 else (APPLE)

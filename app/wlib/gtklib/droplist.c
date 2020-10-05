@@ -35,6 +35,8 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+#include "eggwrapbox.h"
+
 /* define the column count for the tree model */
 #define DROPLIST_TEXTCOLUMNS 1
 
@@ -59,10 +61,12 @@ wlibDropListAddColumns(GtkWidget *dropList, int columns)
         start = 1;
     }
 
-    /* Create cell renderer. */
-    cell = gtk_cell_renderer_text_new();
+
 
     for (i = start; i < columns; i++) {
+    	/* Create cell renderer - unique for each cell. */
+    	cell = gtk_cell_renderer_text_new();
+
         /* Pack it into the droplist */
         gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(dropList), cell, TRUE);
 
@@ -235,16 +239,43 @@ wBool_t wDropListSetValues(
 }
 
 /**
- * Signal handler for the "changed"-signal in drop list.
- * Gets the selected text and determines the selected row in the tree model.
- * Or handles user entered text.
+ * Signal handler for the "changed"-signal in drop list's entry field.
+ * Get the entered text and calls the 'action' for handling of entered
+ * value.
+ * *
+ * \param entry IN entry field of the droplist
+ * \param data IN the drop list handle
+ * \return
+ */
+
+static void DropListEntryEntered(
+    GtkEntry * entry,
+    gpointer userData)
+{
+    const gchar * text;
+
+    text = gtk_entry_get_text(entry);
+
+    if (text && *text != '\0') {
+        gchar *copyOfText = g_strdup(text);
+        ((wList_p)userData)->editted = TRUE;
+        ((wList_p)userData)->action(-1, copyOfText, 1, ((wList_p)userData)->data, NULL);
+        g_free((gpointer)copyOfText);
+    } else {
+        wBeep();
+    }
+}
+
+/**
+ * Signal handler for the "changed"-signal in drop list. Gets the selected
+ * text and determines the selected row in the tree model.
  *
  * \param comboBox IN the combo_box
  * \param data IN the drop list handle
  * \return
  */
 
-static int DropListChanged(
+static int DropListSelectChild(
     GtkComboBox * comboBox,
     gpointer data)
 {
@@ -259,7 +290,10 @@ static int DropListChanged(
         return 0;
     }
 
-    /* Obtain currently selected item from combo box. */
+    bl->editted = FALSE;
+
+    /* Obtain currently selected item from combo box.
+     * If nothing is selected, do nothing. */
     if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter)) {
         GtkTreeModel *model;
 
@@ -276,7 +310,7 @@ static int DropListChanged(
         /* Obtain string from model. */
         gtk_tree_model_get(model, &iter,
                            LISTCOL_TEXT, &string,
-                           LISTCOL_DATA, (void *)&listItemP,
+                           LISTCOL_DATA, (void *)&addData,
                            -1);
         bl->editted = FALSE;
 
@@ -288,7 +322,7 @@ static int DropListChanged(
             return 0;
         const char * string1 = gtk_entry_get_text(entry);
 	if ( string1 == NULL )
-            return 0;
+        return 0;
         string = g_strdup(string1);
         bl->editted = TRUE;
     }
@@ -304,7 +338,7 @@ static int DropListChanged(
 
         /* selection changed -> callback */
         if (string && bl->action) {
-            bl->action(inx, string, 1, bl->data, listItemP?listItemP->itemData:NULL);
+            bl->action(inx, string, 1, bl->data, addData->itemData);
         }
     }
 
@@ -334,6 +368,7 @@ wlibNewDropList(GtkListStore *ls, int editable)
 
     return (widget);
 }
+
 
 /**
  * Create a drop down list. The drop down is created and intialized with the supplied values.
@@ -391,9 +426,19 @@ wList_p wDropListCreate(
         abort();
     }
 
-    // create the droplist
-    b->widget = wlibNewDropList(b->listStore,
+    if (option&BO_USETEMPLATE) {
+    	b->widget = wlibWidgetFromIdWarn( parent, helpStr );
+    	b->fromTemplate = TRUE;
+    	b->template_id = strdup(helpStr);
+    	gtk_combo_box_set_model (GTK_COMBO_BOX(b->widget),
+    	                         GTK_TREE_MODEL(b->listStore));
+    	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+    	b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, helpStr, "reveal", TRUE );
+    } else {
+    	// create the droplist
+    	b->widget = wlibNewDropList(b->listStore,
                                 option & BL_EDITABLE);
+    }
 
     if (b->widget == 0) {
         abort();
@@ -403,20 +448,41 @@ wList_p wDropListCreate(
 
     wlibDropListAddColumns(b->widget, DROPLIST_TEXTCOLUMNS);
 
-    gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
-                                        LISTCOL_TEXT);
+    if (option & BL_EDITABLE)
+    	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
+                                        	LISTCOL_TEXT);
 
     // combo's style
-    gtk_rc_parse_string("style \"my-style\" { GtkComboBox::appears-as-list = 1 } widget \"*.mycombo\" style \"my-style\"  ");
+    GtkCssProvider * provider = gtk_css_provider_new ();
+    GtkStyleContext * context = gtk_widget_get_style_context (GTK_WIDGET (b->widget));
+    static const char style[] = """#mycombo GtkComboBox { -GtkComboBox-appears-as-list: 1; } """;
+    gtk_css_provider_load_from_data(provider,style,-1,NULL);
+    gtk_style_context_add_provider(context,
+                                    GTK_STYLE_PROVIDER(provider),
+									GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    gtk_style_context_save (context);
+
+    //gtk_widget_class_set_css_name (GTK_WIDGET_CLASS(b->widget), "dropcombo");
     gtk_widget_set_name(b->widget,"mycombo");
 
-    g_signal_connect(GTK_OBJECT(b->widget), "changed",
-                     G_CALLBACK(DropListChanged), b);
+    g_signal_connect(b->widget, "changed",
+                     G_CALLBACK(DropListSelectChild), b);
+
+    if (option & BL_EDITABLE) {
+        g_signal_connect(gtk_bin_get_child(GTK_BIN(b->widget)),
+                         "changed",
+                         G_CALLBACK(DropListEntryEntered),
+                         b);
+    }
 
     gtk_widget_set_size_request(b->widget, width, -1);
 
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-    wlibControlGetSize((wControl_p)b);
+    if (option & BO_TOOLBAR) {
+    	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->toolbar), b->widget, -1, 0 );
+    } else if (!b->fromTemplate) {
+		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+		wlibControlGetSize((wControl_p)b);
+	}
 
     if (labelStr) {
         b->labelW = wlibAddLabel((wControl_p)b, labelStr);
@@ -426,6 +492,12 @@ wList_p wDropListCreate(
     wlibAddButton((wControl_p)b);
     wlibAddHelpString(b->widget, helpStr);
 
+    if (option&BO_TOOLBAR) {
+    	b->inToolbar = TRUE;
+    }
+
+
     return b;
 }
+
 
