@@ -46,7 +46,7 @@ struct wDrawBitMap_t {
 		int h;
 		int x;
 		int y;
-		const char * bits;
+		const unsigned char * bits;
 		};
 
 //struct wDraw_t {
@@ -130,18 +130,53 @@ static cairo_t* gtkDrawCreateCairoContext(
 
 	switch(lineType)
 	{
-		case wDrawLineSolid:
-		{
-			cairo_set_dash(cairo, 0, 0, 0);
-			break;
-		}
-		case wDrawLineDash:
-		{
-			double dashes[] = { 5, 3 };
-			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
-			cairo_set_dash(cairo, dashes, len_dashes, 0);
-			break;
-		}
+	case wDrawLineSolid:
+			{
+				cairo_set_dash(cairo, 0, 0, 0);
+				break;
+			}
+			case wDrawLineDash:
+			{
+				double dashes[] = { 5, 3 };
+				static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+				cairo_set_dash(cairo, dashes, len_dashes, 0);
+				break;
+			}
+			case wDrawLineDot:
+			{
+				double dashes[] = { 1, 2 };
+				static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+				cairo_set_dash(cairo, dashes, len_dashes, 0);
+				break;
+			}
+			case wDrawLineDashDot:
+			{
+				double dashes[] = { 5, 2, 1, 2 };
+				static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+				cairo_set_dash(cairo, dashes, len_dashes, 0);
+				break;
+			}
+			case wDrawLineDashDotDot:
+			{
+				double dashes[] = { 5, 2, 1, 2, 1, 2 };
+				static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+				cairo_set_dash(cairo, dashes, len_dashes, 0);
+				break;
+			}
+			case wDrawLineCenter:
+			{
+				double dashes[] = { 8, 3, 5, 3};
+				static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+				cairo_set_dash(cairo, dashes, len_dashes, 0.0);
+				break;
+			}
+			case wDrawLinePhantom:
+			{
+				double dashes[] = { 8, 3, 5, 3, 5, 3};
+				static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+				cairo_set_dash(cairo, dashes, len_dashes, 0.0);
+				break;
+			}
 	}
 	GdkRGBA gcolor;
 
@@ -149,7 +184,6 @@ static cairo_t* gtkDrawCreateCairoContext(
 	if(opts & wDrawOptTemp)
 	{
 		cairo_set_source_rgba(cairo, 255, 0, 0, 0.5);
-		//cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 	}
 	else
 	{
@@ -380,6 +414,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 		wPos_t *w,
 		wPos_t *h,
 		wPos_t *d,
+		wPos_t *a,
 		wDraw_p bd,
 		const char * s,
 		wFont_p fp,
@@ -399,7 +434,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 								 (int *) &ascent, (int *) &descent));
 
 	*w = (wPos_t) textWidth;
-	*h = (wPos_t) ascent;
+	*h = (wPos_t) textHeight;
+	*a = (wPos_t) ascent;
 	*d = (wPos_t) descent;
 
 	if (debugWindow >= 3)
@@ -569,12 +605,12 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 
 
  wDrawBitMap_p wDrawBitMapCreate(
-		wDraw_p bd,
+		 wDraw_p bd,
 		int w,
 		int h,
 		int x,
 		int y,
-		const char * fbits )
+		const unsigned char * fbits )
 {
 	wDrawBitMap_p bm;
 
@@ -694,9 +730,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 
 
  void wDrawSetSize(
-		wDraw_p bd,
-		wPos_t w,
-		wPos_t h )
+		 wDraw_p bd,
+		 wPos_t w,
+		 wPos_t h , void * redraw)
 {
 	wBool_t repaint;
 	if (bd == NULL) {
@@ -725,7 +761,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 		bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (bd->widget), CAIRO_CONTENT_COLOR, w, h);
 
 		wDrawClear( bd );
-		/*bd->redraw( bd, bd->context, w, h );*/
+		if (!redraw)
+			bd->redraw( bd, bd->context, w, h );
 	}
 	/*wRedraw( bd );*/
 	gtk_widget_queue_draw(bd->widget);

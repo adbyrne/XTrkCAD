@@ -451,19 +451,31 @@ wBool_t wPrefGetFloatBasic(
 void wPrefFlush(
 		char * name )
 {
-    gchar *tmp;
-    GError *error = NULL;
-    
-    if (!prefInitted)
-        return;
+	prefs_t * p;
+	char tmp[BUFSIZ];
+    const char *workDir;
+	FILE * prefFile;
+
+	if (!prefInitted)
+		return;
 	
-    tmp = BuildConfigFileName();
-    
-    g_key_file_save_to_file(keyFile,
-                            tmp,
-                            &error );
-    g_free( tmp );
-}   
+	workDir = wGetAppWorkDir();
+	if (name && name[0])
+		sprintf( tmp, "%s", name );
+	else
+		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+	prefFile = fopen( tmp, "w" );
+	if (prefFile == NULL)
+		return;
+
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if(p->val) {
+			fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
+		}
+	}
+	fclose( prefFile );
+}
+
 
 /**
  * Clear the preferences from memory
