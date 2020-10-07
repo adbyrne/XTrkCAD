@@ -1074,6 +1074,7 @@ static void GroupOk( void * junk )
 	 */
 	trk = NULL;
 	int InInx = -1;
+	BOOL_T hasTracks = FALSE;
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			DYNARR_APPEND( groupTrk_t, groupTrk_da, 10 );
@@ -1081,6 +1082,7 @@ static void GroupOk( void * junk )
 			groupP->trk = trk;
 			groupP->segStart = trackSegs_da.cnt;
 			groupP->totalSegStart = tempSegs_da.cnt+trackSegs_da.cnt;
+			if (IsTrack(trk)) hasTracks = TRUE;
 			if ( GetTrkType(trk) == T_TURNOUT || GetTrkType(trk) == T_STRUCTURE) {
 				xx = GetTrkExtraData(trk);
 				for ( pinx=0; pinx<xx->segCnt; pinx++ ) {
@@ -1088,7 +1090,7 @@ static void GroupOk( void * junk )
 					if ( IsSegTrack(segPtr) ) {
 						DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
 						trackSegs(trackSegs_da.cnt-1) = *segPtr;
-
+						hasTracks = TRUE;
 						RotateSegs( 1, &trackSegs(trackSegs_da.cnt-1), zero, xx->angle );
 						MoveSegs( 1, &trackSegs(trackSegs_da.cnt-1), xx->orig );
 
@@ -1114,7 +1116,7 @@ static void GroupOk( void * junk )
 				GetBezierSegmentsFromCornu(trk,&trackSegs_da,TRUE);  //Only give back Bezier - cant be undone
 
 			} else {
-
+				if (IsTrack(trk)) hasTracks=TRUE;
 				segCnt = tempSegs_da.cnt;
 				DrawTrack( trk, &groupD, wDrawColorBlack );
 				DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
@@ -1148,7 +1150,7 @@ if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 	}
 }
 
-	if ( groupTrk_da.cnt>0 ) {
+	if ( groupTrk_da.cnt>0 && hasTracks) {
 		if ( groupTrk_da.cnt > 128 ) {
 			NoticeMessage( MSG_TOOMANYSEGSINGROUP, _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );

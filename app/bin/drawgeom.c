@@ -291,12 +291,14 @@ STATUS_T DrawGeomMouse(
 			InfoMessage(_("+Alt for Magnetic Snap"));
 		else
 			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
+		wSetCursor(mainD.d,defaultCursor);
 		return C_CONTINUE;
 
 	case wActionMove:
 		if (context->State == 0 || context->State ==2 ||
 		   ( context->State ==1 && (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE))) {
 			DYNARR_RESET( trkSeg_t, anchors_da );
+			wSetCursor(mainD.d,defaultCursor);
 			switch (context->Op) {  	//Snap pos to nearest line for lines and some curves
 				case OP_CURVE1:
 				case OP_CURVE2:
@@ -314,11 +316,16 @@ STATUS_T DrawGeomMouse(
 						if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
 							if (context->Op == OP_DIMLINE ) {
 								CreateEndAnchor(p,FALSE);
-							} else if (!IsTrack(t)) CreateEndAnchor(p,FALSE);
+								wSetCursor(mainD.d,wCursorNone);
+							} else if (!IsTrack(t)) {
+								CreateEndAnchor(p,FALSE);
+								wSetCursor(mainD.d,wCursorNone);
+							}
 						} else {
 							p = pos;
 							if (FindTempNear(context,&p)) {
 								CreateEndAnchor(p,FALSE);
+								wSetCursor(mainD.d,wCursorNone);
 							}
 						}
 					}
@@ -329,6 +336,7 @@ STATUS_T DrawGeomMouse(
 		}
 		return C_CONTINUE;
 
+	case wActionRDown:
 	case wActionLDown:
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		if (context->State == 2) {
@@ -496,6 +504,7 @@ STATUS_T DrawGeomMouse(
 		}
 		return C_CONTINUE;
 
+	case wActionRDrag:
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		coOrd p = pos;
@@ -507,7 +516,6 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_BENCH) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
 			if (( (MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
-
 				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos))))
 					pos1 = p;
 					found = TRUE;
@@ -682,12 +690,15 @@ STATUS_T DrawGeomMouse(
 						FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;
 		}
+		wSetCursor(mainD.d,wCursorNone);
 		return C_CONTINUE;
 
 	case wActionLUp:
+	case wActionRUp:
 		lastValid = FALSE;
 		createTrack = FALSE;
 		found = FALSE;
+		wSetCursor(mainD.d,defaultCursor);
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
 			(context->Op == OP_CURVE3 && context->State != 0) ||
