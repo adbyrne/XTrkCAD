@@ -1124,7 +1124,7 @@ static void GroupOk( void * junk )
 				*segPtr = tempSegs( segCnt );
 
 				if ( tempSegs_da.cnt != segCnt+1  ) {
-					NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, _("Ok"), NULL );
+					NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, _("Ok"), NULL, GetTrkTypeName(trk));
 					wHide( groupW );
 					return;
 				}

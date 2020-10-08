@@ -161,9 +161,9 @@ END
 
 # cgroup.c:doGroup
 MESSAGE MSG_CANNOT_GROUP_TRACK
-Cannot Group selected track.
+Cannot Group selected track type %s.
 HELP
-Group objects are formed from Straight, Curved, Turnout or Sectional track. The selected objects include a track which is not one of these. Reselect the objects, including only track segments of these types.
+Group objects are formed from Straight, Curved, Turnout or Sectional track or Structures or Draw elements. The selected objects include an object which is not one of these. Reselect the objects, including only elements of these types.
 
 Refer to \k{cmdGroup} for detail.
 END
