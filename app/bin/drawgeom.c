@@ -507,7 +507,7 @@ STATUS_T DrawGeomMouse(
 	case wActionRDrag:
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
-		coOrd p = pos;
+		coOrd p = pos1 = pos;
 		BOOL_T found = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
@@ -522,10 +522,11 @@ STATUS_T DrawGeomMouse(
 					if ((MyGetKeyState() & WKEY_CTRL)==0)
 						CreateEndAnchor(pos1,TRUE);
 			}
+			if (!found) {
+				SnapPos(&pos);
+				pos1 = pos;
+			}
 		}
-		if (!found) SnapPos(&pos);
-
-		pos1 = pos;
 
 		switch (context->Op) {
 		case OP_TBLEDGE:
@@ -656,7 +657,7 @@ STATUS_T DrawGeomMouse(
 							FormatDistance(context->ArcData.curveRadius), context->ArcData.a1,
 							FormatDistance(context->ArcData.curveRadius*d) );
 					if (context->Op == OP_CURVE1 || context->Op == OP_CURVE4 )
-						DrawArrowHeadsArray(&anchors_da,pos,FindAngle(context->ArcData.curvePos,pos),TRUE,wDrawColorRed);
+						DrawArrowHeadsArray(&anchors_da,pos1,FindAngle(context->ArcData.curvePos,pos),TRUE,wDrawColorRed);
 					else if (context->Op == OP_CURVE2 || context->Op == OP_CURVE3 ) {
 						CreateEndAnchor(context->ArcData.pos2,FALSE);
 						DrawArrowHeadsArray(&anchors_da,context->ArcData.pos2,FindAngle(context->ArcData.curvePos,context->ArcData.pos2)+90,TRUE,wDrawColorRed);
@@ -697,77 +698,39 @@ STATUS_T DrawGeomMouse(
 	case wActionRUp:
 		lastValid = FALSE;
 		createTrack = FALSE;
-		found = FALSE;
+		//Note - pos1 is last drag point
 		wSetCursor(mainD.d,defaultCursor);
-		if ((context->Op == OP_CURVE1 && context->State == 1) ||
-			(context->Op == OP_CURVE2 && context->State == 0) ||
-			(context->Op == OP_CURVE3 && context->State != 0) ||
-			(context->Op == OP_CURVE4 && context->State != 2) ||
-			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
-			(context->Op == OP_BENCH) ||
-			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )) {
-			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
-				if ((MyGetKeyState() & WKEY_CTRL)==0) {               //But not if CTRL
-					coOrd p = pos1;
-					track_p t;
-					if ((t=OnTrack(&p,FALSE,FALSE))) {
-						pos1 = p;
-						if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )){
-						} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||  context->Op == OP_BENCH ) {
-							tempSegs(0).u.l.pos[1] = p;
-							found = TRUE;
-						} else {
-							PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
-							found = TRUE;
-							if (context->ArcData.type == curveTypeStraight) {
-								DYNARR_RESET(trkSeg_t,tempSegs_da);
-								DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-								tempSegs(0).type = SEG_STRLIN;
-								tempSegs(0).u.l.pos[0] = pos0;
-								tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
-								tempSegs_da.cnt = 1;
-							} else if (context->ArcData.type == curveTypeNone) {
-								DYNARR_RESET(trkSeg_t,tempSegs_da);
-							} else if (context->ArcData.type == curveTypeCurve) {
-								DYNARR_RESET(trkSeg_t,tempSegs_da);
-								DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-								tempSegs(0).type = SEG_CRVLIN;
-								tempSegs(0).u.c.center = context->ArcData.curvePos;
-								tempSegs(0).u.c.radius = context->ArcData.curveRadius;
-								tempSegs(0).u.c.a0 = context->ArcData.a0;
-								tempSegs(0).u.c.a1 = context->ArcData.a1;
-								tempSegs_da.cnt = 1;
-							}
-						}
-					}
-				}
+		if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )
+			|| (context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ){ ;
+		} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||  context->Op == OP_BENCH ) {
+			tempSegs(0).u.l.pos[1] = pos1;
+		} else {
+			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
+			if (context->ArcData.type == curveTypeStraight) {
+				DYNARR_RESET(trkSeg_t,tempSegs_da);
+				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+				tempSegs(0).type = SEG_STRLIN;
+				tempSegs(0).u.l.pos[0] = pos0;
+				tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
+				tempSegs_da.cnt = 1;
+			} else if (context->ArcData.type == curveTypeNone) {
+				DYNARR_RESET(trkSeg_t,tempSegs_da);
+			} else if (context->ArcData.type == curveTypeCurve) {
+				DYNARR_RESET(trkSeg_t,tempSegs_da);
+				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+				tempSegs(0).type = SEG_CRVLIN;
+				tempSegs(0).u.c.center = context->ArcData.curvePos;
+				tempSegs(0).u.c.radius = context->ArcData.curveRadius;
+				tempSegs(0).u.c.a0 = context->ArcData.a0;
+				tempSegs(0).u.c.a1 = context->ArcData.a1;
+				tempSegs_da.cnt = 1;
 			}
 		}
-		if (!found) SnapPos(&pos1);
 		switch ( context->Op ) {
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
 		case OP_TBLEDGE:
-			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) {
-				//Snap to Right-Angle from previous or from 0
-				DIST_T l = FindDistance(pos0, pos);
-				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
-				int quad = (int)((angle2 + 45.0) / 90.0);
-				if (tempSegs_da.cnt != 1 && (quad == 2)) {
-					pos1 = pos0;
-				} else if (quad == 1 || quad == 3) {
-					if (tempSegs_da.cnt != 1)
-						l = fabs(l*cos(D2R(((quad==1)?line_angle+90.0:line_angle-90.0)-FindAngle(pos,pos0))));
-					Translate( &pos1, pos0, NormalizeAngle(quad==1?line_angle+90.0:line_angle-90.0), l );
-				} else {
-					if (tempSegs_da.cnt != 1)
-						l = fabs(l*cos(D2R(((quad==0||quad==4)?line_angle:line_angle+180.0)-FindAngle(pos,pos0))));
-					Translate( &pos1, pos0, NormalizeAngle((quad==0||quad==4)?line_angle:line_angle+180.0), l );
-				}
-				CreateLineAnchor(pos1,pos0);
-				tempSegs(0).u.l.pos[1] = pos1;
-			}
 			lastValid = TRUE;
 			lastPos = pos1;
 			context->length = FindDistance(pos1,pos0);
@@ -810,6 +773,13 @@ STATUS_T DrawGeomMouse(
 				lastValid = TRUE;
 				lastPos = pos1;
 				context->State = 2;
+				if (context->Op == OP_CURVE1 || context->Op == OP_CURVE4 )
+					DrawArrowHeadsArray(&anchors_da,pos1,FindAngle(context->ArcData.curvePos,pos),TRUE,wDrawColorRed);
+				else if (context->Op == OP_CURVE2 || context->Op == OP_CURVE3 ) {
+					CreateEndAnchor(context->ArcData.pos2,FALSE);
+					DrawArrowHeadsArray(&anchors_da,context->ArcData.pos2,FindAngle(context->ArcData.curvePos,context->ArcData.pos2)+90,TRUE,wDrawColorRed);
+				}
+				CreateEndAnchor(context->ArcData.curvePos,TRUE);
 				/*drawContext = context;
 				DrawGeomOp( (void*)context->Op );*/
 			}
