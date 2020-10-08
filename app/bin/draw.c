@@ -2681,9 +2681,8 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 	wPos_t w, h;
 	static wPos_t lastX, lastY;
 	DIST_T minDist;
-
+	wDrawGetSize( mainD.d, &w, &h );
 	if ( autoPan && !inPlayback ) {
-		wDrawGetSize( mainD.d, &w, &h );
 		if ( action == wActionLDown || action == wActionRDown ||
 			 (action == wActionLDrag && mouseState == mouseLeftPending ) /*||
 			 (action == wActionRDrag && mouseState == mouseRightPending ) */ ) {
@@ -2753,6 +2752,10 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 	}
 
 	DoMouse( action, pos );
+
+	if (( x < 20 ) || ( x > w-20 ) || ( y < 20 ) || ( y > h-20 ) ) {
+		wSetCursor(mainD.d,defaultCursor);  //Add system cursor if close to edges
+	}
 }
 
 static wBool_t PlaybackMain( char * line )

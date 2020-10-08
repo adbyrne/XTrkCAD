@@ -1244,6 +1244,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 		TryCheckPoint();
 		LOG(log_command, 1,
 				( "COMMAND START %s\n", commandList[curCommand].helpKey ))
+		wSetCursor(mainD.d,defaultCursor);
 		rc = commandList[curCommand].cmdProc( C_START, pos);
 		LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
 		switch (rc) {
@@ -1398,6 +1399,7 @@ EXPORT void DoCommandB(void * data) {
 	}
 	LOG(log_command, 1,
 			( "COMMAND START %s\n", commandList[curCommand].helpKey ))
+	wSetCursor(mainD.d,defaultCursor);
 	rc = commandList[curCommand].cmdProc( C_START, pos);
 	LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
 	TempRedraw(); // DoCommandB
