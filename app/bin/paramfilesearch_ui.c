@@ -275,7 +275,7 @@ static void SearchUiDoSearch(void * ptr)
 	} else {
 		SearchUiDefault();
 	}
-	MyFree(currentResults);
+	//MyFree(currentResults);  Because SearchFileList also caches the currentResults->subCatalog address as currentCatalog for reuse.
 }
 
 /**
