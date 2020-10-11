@@ -44,7 +44,7 @@ STATUS_T CmdBezModify(track_p, wAction_t, coOrd, DIST_T);
 STATUS_T CreateBezier( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, bezMessageProc );
 DIST_T BezierDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T BezierDescriptionMove( track_p, wAction_t, coOrd );
-BOOL_T GetBezierMiddle( track_p, coOrd * );
+
 BOOL_T ConvertToArcs (coOrd[4], dynArr_t *, BOOL_T, wDrawColor, DIST_T);
 track_p NewBezierTrack(coOrd[4], trkSeg_t *, int);
 double BezierLength(coOrd[4], dynArr_t);

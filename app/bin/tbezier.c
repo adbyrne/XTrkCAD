@@ -931,6 +931,27 @@ static DIST_T GetLengthBezier( track_p trk )
 	return length;
 }
 
+EXPORT BOOL_T GetBezierMiddle( track_p trk, coOrd * pos) {
+
+	if (GetTrkType(trk) != T_BEZIER)
+		return FALSE;
+	struct extraData *xx = GetTrkExtraData(trk);
+	DIST_T length = GetLengthBezier(trk)/2;
+
+	traverseTrack_t tp;
+	tp.pos = GetTrkEndPos(trk,0);
+	tp.angle = NormalizeAngle(GetTrkEndAngle(trk,0)+180.0);
+	tp.trk = trk;
+	tp.length = length;
+
+	TraverseBezier(&tp,&length);
+
+	*pos = tp.pos;
+
+	return TRUE;
+
+}
+
 
 static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {

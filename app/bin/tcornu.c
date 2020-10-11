@@ -1154,6 +1154,27 @@ static DIST_T GetLengthCornu( track_p trk )
 	return length;
 }
 
+EXPORT BOOL_T GetCornuMiddle( track_p trk, coOrd * pos) {
+
+	if (GetTrkType(trk) != T_CORNU)
+		return FALSE;
+	struct extraData *xx = GetTrkExtraData(trk);
+	DIST_T length = GetLengthCornu(trk)/2;
+
+	traverseTrack_t tp;
+	tp.pos = GetTrkEndPos(trk,0);
+	tp.angle = NormalizeAngle(GetTrkEndAngle(trk,0)+180.0);
+	tp.trk = trk;
+	tp.length = length;
+
+	TraverseCornu(&tp,&length);
+
+	*pos = tp.pos;
+
+	return TRUE;
+
+}
+
 
 static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {

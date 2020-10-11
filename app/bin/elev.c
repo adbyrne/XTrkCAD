@@ -1303,7 +1303,7 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 		 (d->options & DC_SIMPLE) != 0 )
 		return;
 
-	if ( !GetCurveMiddle( trk, &pos ) ) {
+	if ( !GetCurveMiddle( trk, &pos ) && !GetCornuMiddle(trk, &pos)  && !GetBezierMiddle(trk, &pos)) {
 		GetBoundingBox( trk, &hi, &lo );
 		pos.x = (hi.x+lo.x)/2.0;
 		pos.y = (hi.y+lo.y)/2.0;

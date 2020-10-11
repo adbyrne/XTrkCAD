@@ -65,5 +65,6 @@ BOOL_T GetBezierSegmentsFromCornu(track_p, dynArr_t *, BOOL_T);
 
 char * CreateSegPathList(track_p trk);
 
+BOOL_T GetCornuMiddle( track_p trk, coOrd * pos);
 
 
