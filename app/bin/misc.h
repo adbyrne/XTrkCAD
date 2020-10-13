@@ -78,6 +78,7 @@ extern ANGLE_T connectAngle;
 extern long twoRailScale;
 extern long mapScale;
 extern long constrainMain;
+extern long dontHideCursor;
 extern long checkPtInterval;
 extern long autosaveChkPoints;
 extern long liveMap;

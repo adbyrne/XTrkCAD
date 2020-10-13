@@ -1434,6 +1434,8 @@ void wWinClear(
 {
 }
 
+extern long dontHideCursor;
+
 void wSetCursor(wDraw_p win,
     wCursor_t cursor)
 {
@@ -1492,7 +1494,8 @@ void wSetCursor(wDraw_p win,
         break;
 
     case wCursorNone:
-    	SetCursor(NULL);
+    	if (!dontHideCursor)
+    		SetCursor(NULL);
     	break;
     }
 

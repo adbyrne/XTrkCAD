@@ -331,6 +331,7 @@
 		{"line": "display-hideTrainsInTunnels", "contents": "Don't show trains in tunnels when tunnels are hidden" },
 		{"line": "display-unconnected-endpt", "contents": "Display unconnected endpoints of track with special marks" },
 		{"line": "display-constrainmain", "contents": "Whether the Main Drawing Area shows as much of the room as possible" },
+		{"line": "display-donthidecursor", "contents": "Don't hide system cursor when program cursors are showing" },
 		{"line": "display-ok", "contents": "" },
 		{"line": "draw-linewidth", "contents": "Width of the lines" },
 		{"line": "draw-linecolor", "contents": "Color of the lines" },

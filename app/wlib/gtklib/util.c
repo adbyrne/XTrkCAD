@@ -386,6 +386,8 @@ void wWinTop(wWin_p win)
 {
 }
 
+extern long dontHideCursor;
+
 /**
  * Set the cursor in GTK
  *
@@ -450,7 +452,8 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 				gdkcursor = gdk_cursor_new(GDK_QUESTION_ARROW);
 							break;
 			case wCursorNone:
-				gdkcursor = gdk_cursor_new(GDK_BLANK_CURSOR);
+				if (!dontHideCursor)
+					gdkcursor = gdk_cursor_new(GDK_BLANK_CURSOR);
 							break;
 			case wCursorNormal:
 			default:
