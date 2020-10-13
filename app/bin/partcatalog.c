@@ -93,7 +93,12 @@ InitCatalog(void)
 void
 DestroyCatalog(Catalog *catalog)
 {
-    MyFree(catalog);
+	CatalogEntry *entry;
+	CatalogEntry *tmp;
+	DL_FOREACH_SAFE(catalog->head, entry, tmp)
+	{
+		MyFree(entry);
+	}
 }
 
 /**

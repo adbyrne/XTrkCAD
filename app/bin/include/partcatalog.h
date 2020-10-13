@@ -86,6 +86,7 @@ struct sSearchResult {
 typedef struct sSearchResult SearchResult;
 
 Catalog *InitCatalog(void);
+void DestroyCatalog(Catalog *catalog);
 CatalogEntry * InsertInOrder(Catalog *catalog, const char *contents);
 void UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents);
 ParameterLib *InitLibrary(void);

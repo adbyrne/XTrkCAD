@@ -39,7 +39,7 @@
 #include "wlib.h"
 
 static ParameterLib *trackLibrary;			/**< Track Library          */
-static Catalog *currentCat;					/**< catalog being shown    */
+static Catalog currentCat;					/**< catalog being shown    */
 
 /* define the search / browse dialog */
 
@@ -93,6 +93,20 @@ static wWin_p searchUiW;
 #define FILESECTION "file"
 #define PARAMDIRECTORY "paramdir"
 
+
+/** 
+ * Clears the current catalog 
+ */
+  
+void
+ClearCurrentCatalog(void)
+{
+	if (currentCat.head) {
+		DestroyCatalog(&currentCat);
+		currentCat.head = NULL;
+	}
+}
+
 /**
  * Reload the listbox showing the current catalog. The catalog is either the system
  * default library catalog or a search result
@@ -133,15 +147,13 @@ void SearchFileListLoad(Catalog *catalog)
                    wListGetCount(RESULTLIST));
 
     DynStringFree(&description);
-
-    currentCat = catalog;
 }
 
 /**
  * Reload just the system files into the searchable set
  */
 
-static void SearchUiDefault()
+static void SearchUiDefault(void)
 {
 	DynString dsSummary;
 
@@ -247,6 +259,8 @@ static void SearchUiDoSearch(void * ptr)
     SearchResult *currentResults = MyMalloc(sizeof(SearchResult));
     char * search;
 
+	ClearCurrentCatalog();
+
 	strcpy(searchUiQuery, wStringGetValue((wString_p)searchUiPG.paramPtr[I_QUERYSTRING].control));
     search = StringTrim(searchUiQuery);
 
@@ -266,6 +280,7 @@ static void SearchUiDoSearch(void * ptr)
 			MyFree(statistics);
 
 			SearchFileListLoad(&(currentResults->subCatalog));
+			currentCat = currentResults->subCatalog;
 			wControlActive((wControl_p)CLEARBUTTON, TRUE);
 		} else {
 			wListClear(RESULTLIST);
@@ -275,7 +290,7 @@ static void SearchUiDoSearch(void * ptr)
 	} else {
 		SearchUiDefault();
 	}
-	//MyFree(currentResults);  Because SearchFileList also caches the currentResults->subCatalog address as currentCatalog for reuse.
+	MyFree(currentResults);  //Because SearchFileList also caches the currentResults->subCatalog address as currentCatalog for reuse.
 }
 
 /**
@@ -287,6 +302,7 @@ static void SearchUiDoSearch(void * ptr)
 static void
 SearchUiClearFilter(void *ptr)
 {
+	ClearCurrentCatalog();
 	SearchUiDefault();
 }
 
@@ -352,12 +368,23 @@ static void SearchUiDlgUpdate(
         UpdateSearchUiButton();
         break;
     case I_MODETOGGLE:
-        SearchFileListLoad(currentCat);
+		if (currentCat.head) {
+			SearchFileListLoad(&currentCat);
+		} else {
+			SearchFileListLoad(trackLibrary->catalog);
+		}
         break;
     case -1:
         SearchUiOk(valueP);
         break;
     }
+}
+
+void 
+SearchUiCancel(wWin_p window)
+{
+	ClearCurrentCatalog();
+	wHide(window);
 }
 
 /**
@@ -409,7 +436,7 @@ void DoSearchParams(void * junk)
         ParamRegister(&searchUiPG);
 
         searchUiW = ParamCreateDialog(&searchUiPG,
-                                      MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, wHide,
+                                      MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, SearchUiCancel,
                                       TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
