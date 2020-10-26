@@ -1468,7 +1468,6 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
         char *fileName = NULL;
 
         while (GetNextSettingsFile(d, dirName, &fileName)) {
-            CatalogEntry *existingEntry;
             char *contents_start = strrchr(fileName,PATH_SEPARATOR);
             if (contents_start[0] == '/') contents_start++;
             char *contents_end = strchr(contents_start,'.');
