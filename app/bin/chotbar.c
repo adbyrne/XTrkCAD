@@ -543,6 +543,7 @@ EXPORT void LayoutHotBar( void * redraw )
 		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, BD_NOCAPTURE|BD_NOFOCUS, 100, hotBarHeight, NULL, RedrawHotBar, SelectHotBar );
 		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
 		hotBarD.scale = 1.0;
+		wSetCursor(hotBarD.d,wCursorNormal);
 		initialize = TRUE;
 	}
 	buttonWidth = wControlGetWidth((wControl_p)hotBarLeftB);
