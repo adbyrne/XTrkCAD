@@ -2125,7 +2125,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 							tempSegs(0).u.p.pts[0].pt=pos;
 							tempSegs(0).u.p.pts[0].pt_type = wPolyLineStraight;
 							j = 1;
-							for (int i=polyInx+1;i<tempSegs(0).u.p.cnt;i++,j++) {
+							for (int i=polyInx+1;i<xx->segs[0].u.p.cnt;i++,j++) {
 								tempSegs(0).u.p.pts[j] = xx->segs[0].u.p.pts[i];
 								REORIGIN(tempSegs(0).u.p.pts[j].pt,tempSegs(0).u.p.pts[j].pt,xx->angle,xx->orig);
 							}
