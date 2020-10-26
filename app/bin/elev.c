@@ -22,6 +22,8 @@
 #include <math.h>
 
 #include "ccurve.h"
+#include "tbezier.h"
+#include "tcornu.h"
 #include "cundo.h"
 #include "messages.h"
 #include "param.h"
