@@ -58,6 +58,7 @@ typedef enum {
 #define PDO_MISC				(1L<<7)
 #define PDO_DRAW				(1L<<8)
 #define PDO_FILE				(1L<<9)
+#define PDO_ENTER               (1L<<10)
 
 #define PDO_STRINGLIMITLENGTH	(1L<<11)	/**< context has maximum length for string */
 #define PDO_SMALLDIM			(1L<<12)
@@ -142,6 +143,7 @@ typedef struct {
 		wControl_p control;
 		paramGroup_p group;
 		paramOldData_t oldD, demoD;
+		wBool_t enter_pressed;
 		} paramData_t, *paramData_p;
 
 

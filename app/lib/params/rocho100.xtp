@@ -1,4 +1,4 @@
-CONTENTS ModelPower/Roco HO Scale Code-100 Turnouts
+CONTENTS ModelPower/Roco HO Scale Code 100 Turnouts
 # Curved Turnout Design by Victor Bobier - 9.281250 2.562500 32.000000 11.375000 2.562500 30.000000
 TURNOUT HO "ModelPower/Roco	#6 L Curved	490-180/625-42379"
 	P "Normal" 1 6 4 5
@@ -25,7 +25,8 @@ TURNOUT HO "ModelPower/Roco	#6 R Curved	490-181/625-42381"
 	C 0 0 16.706069 2.460205 -16.706069 0.000076 30.000152
 	S 0 0 10.813338 -2.238207 11.375000 -2.562500
 	S 0 0 0.993389 0.000000 2.460271 0.000000
-	END# Straight Section Design by Victor Bobier - 18.000000
+	END
+# Straight Section Design by Victor Bobier - 18.000000
 # Double Slipswitch Design by Victor Bobier - 9.000000 12.500000 9.000000
 TURNOUT HO "ModelPower/Roco	#6 Double SlipSwitch	490-189"
 	P "Normal" 1 2 3 0 4 5 6

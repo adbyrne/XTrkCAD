@@ -6,9 +6,9 @@
 
 \H{cmdStatusbar} Status Bar
 
-The \e{Status Bar} contains:
+The \e{Status Bar} contains fields that can be modified depending on command:
 
-\dd The Line Width and Color for \e{Straight Line}, \e{Curved Line}, \e{Circle}, \e{Box} or \e{Poly Line} objects. The Line Width is specified in pixels for the current Drawing Scale. Zooming (\K{viewM}) in or out causes the lines to be drawn wider or narrower.
+\dd The Line Width and Color for \e{Straight Line}, \e{Curved Line}, \e{Circle}, \e{Polygon}, \e{Box} or \e{PolyLine} objects. The Line Width is specified in pixels for the current Drawing Scale. Zooming (\K{viewM}) in or out causes the lines to be drawn wider or narrower.
 
 \u000
 
@@ -22,9 +22,16 @@ The \e{Status Bar} contains:
 
 \dd The type, size and orientation of lumber used for \e{Bench-work} (regular rectangular, L-Girder or T-Girder).
 
+\u000
+
+\dd The seperation and radius factor for Parallel commands
 
 \u000
 
-If the \e{Ctrl} key is held down while creating or modifying lines and shapes then the cursor will be attracted to other objects.
+\dd The diameter of a Turntable
+
+\u000
+
+\dd After and add or during a Modify of a Draw object or segment, length, radius and/or relative angles are shown in modifiable fields.  These will change the dimensions of the last object when \f{Enter} or \f{Tab} is pressed or the cursor leaves the entry field.  
 
 \rule

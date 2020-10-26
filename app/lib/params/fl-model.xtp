@@ -114,7 +114,7 @@ TURNOUT HO "Fleischmann-Modell	Curve 738mm 15°	6036"
 	E 7.520018 0.990029 75.000000
 	C 0 0.000000 -29.055118 0.000000 29.055118 165.000000 15.000000
 	END
-TURNOUT HO "Fleischmann-Modell	Turntable manual	6050"
+TURNOUT HO "Fleischmann-Modell	Turntable manual	6050" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -190,7 +190,7 @@ TURNOUT HO "Fleischmann-Modell	Turntable manual	6050"
 	A 16711680 0 4.370079 0.000000 0.000000 0.000000 360.000000
 	A 16711680 0 3.248031 0.000000 0.000000 0.000000 360.000000
 	END
-TURNOUT HO "Fleischmann-Modell	Turntable manual Elec	6052"
+TURNOUT HO "Fleischmann-Modell	Turntable manual Elec	6052" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3

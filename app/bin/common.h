@@ -24,6 +24,7 @@
 #define COMMON_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifndef TRUE
 #define TRUE	(1)
@@ -46,6 +47,11 @@ typedef struct {
 		POS_T x,y;
 		} coOrd;
 
+typedef struct {
+	coOrd pt;
+	int pt_type;
+} pts_t;
+
 typedef int INT_T;
 
 typedef int BOOL_T;
@@ -60,6 +66,11 @@ typedef signed char TRKTYP_T;
 typedef int TRKINX_T;
 typedef long DEBUGF_T;
 typedef int REGION_T;
+
+enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COMPATIBLE, PARAMFILE_FIT, PARAMFILE_MAXSTATE };
+
+#define SCALE_ANY	(-2)
+#define SCALE_DEMO	(-1)
 
 typedef struct {
 		int cnt;
@@ -108,6 +119,17 @@ typedef struct {
 		} \
 		(DA).max = 0; \
 		(DA).cnt = 0; }
+#define DYNARR_REMOVE(T,DA,I) \
+		{ \
+		 { if ((DA).cnt-1 > I) { \
+				for (int i=I;i<(DA).cnt-1;i++) { \
+				(((T*)(DA).ptr)[i])= (((T*)(DA).ptr)[i+1]); \
+				} \
+			} \
+		 } \
+		if ((DA.cnt)>=I) (DA).cnt--; \
+		}
+
 
 #ifdef WINDOWS
 #define M_PI 3.14159

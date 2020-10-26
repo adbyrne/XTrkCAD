@@ -405,6 +405,8 @@ void wListDelete(
                                       NULL,
                                       inx);
         gtk_list_store_remove(b->listStore, &iter);
+
+
         b->count--;
     }
 
@@ -486,6 +488,8 @@ wIndex_t wListAddValue(
     } else {
         wlibTreeViewAddRow(b, (char *)labelStr, bm, id_p);
     }
+
+    //free(id_p->label);
 
     b->count++;
     b->recursion--;

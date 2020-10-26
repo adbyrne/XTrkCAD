@@ -21,12 +21,14 @@
  */
 
 #include <math.h>
+#include <string.h>
 
 #include "ccurve.h"
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "custom.h"
 #include "i18n.h"
+#include "fileio.h"
 #include "param.h"
 #include "track.h"
 

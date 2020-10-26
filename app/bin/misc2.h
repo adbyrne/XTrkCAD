@@ -42,7 +42,7 @@ typedef struct {
 		} logTable_t;
 extern dynArr_t logTable_da;
 #define logTable(N) DYNARR_N( logTable_t, logTable_da, N )
-time_t logClock;
+extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
 void LogSet( char *, int );
@@ -85,13 +85,20 @@ void LoadGaugeList( wList_p, SCALEDESCINX_T );
 BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
 BOOL_T DoSetScaleDesc( void );
 
-unsigned int curLayer;
-long layerCount;
+extern unsigned int curLayer;
+extern long layerCount;
+void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
+                         void * listContext, void * arg);
 wDrawColor GetLayerColor( unsigned int );
+BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
 BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
+BOOL_T GetLayerModule( unsigned int );
+BOOL_T GetLayerHidden( unsigned int);
+void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
+void SetLayerName(unsigned int layer, char* name);
 BOOL_T ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
 char * FormatLayerName(unsigned int layerNumber);
@@ -103,7 +110,7 @@ void SaveLayers( void );
 void RestoreLayers( void );
 void LoadLayerLists( void );
 addButtonCallBack_t InitLayersDialog( void );
-
+void FillLayerList(wList_p layerList);
 void Misc2Init( void );
 
 #endif

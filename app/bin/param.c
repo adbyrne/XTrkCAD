@@ -766,63 +766,100 @@ EXPORT long ParamUpdate(
 }
 
 
-EXPORT void ParamLoadData(
-		paramGroup_p pg )
+void ParamLoadData(
+    paramGroup_p pg)
 {
-	FLOAT_T floatV;
-	const char * stringV;
-	paramData_p p;
-	BOOL_T valid;
+    FLOAT_T floatV;
+    const char * stringV;
+    paramData_p p;
+    BOOL_T valid;
+    BOOL_T inRange;
 
-	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
-			continue;
-		if ( p->control == NULL || p->valueP == NULL)
-			continue;
-		switch ( p->type ) {
-		case PD_LONG:
-			stringV = wStringGetValue( (wString_p)p->control );
-			*(long*)p->valueP = atol( stringV );
-			break;
-		case PD_RADIO:
-			*(long*)p->valueP = wRadioGetValue( (wChoice_p)p->control );
-			break;
-		case PD_TOGGLE:
-			*(long*)p->valueP = wToggleGetValue( (wChoice_p)p->control );
-			break;
-		case PD_LIST:
-		case PD_DROPLIST:
-		case PD_COMBOLIST:
-			*(wIndex_t*)p->valueP = wListGetIndex( (wList_p)p->control );
-			break;
-		case PD_COLORLIST:
-			*(wDrawColor*)p->valueP = wColorSelectButtonGetColor( (wButton_p)p->control );
-			break;
-		case PD_FLOAT:
-			if (p->option & PDO_DIM) {
-				floatV = DecodeDistance( (wString_p)p->control, &valid );
-			} else {
-				floatV = DecodeFloat( (wString_p)p->control, &valid );
-				if (valid && (p->option & PDO_ANGLE) )
-					floatV = NormalizeAngle( (angleSystem==ANGLE_POLAR)?floatV:-floatV );
-			}
-			if ( valid )
-				*(FLOAT_T*)p->valueP = floatV;
-			break;
-		case PD_STRING:
-			stringV = wStringGetValue( (wString_p)p->control );
-			strcpy( (char*)p->valueP, stringV );
-			break;
-		case PD_MESSAGE:
-		case PD_BUTTON:
-		case PD_DRAW:
-		case PD_TEXT:
-		case PD_MENU:
-		case PD_MENUITEM:
-		case PD_BITMAP:
-			break;
-		}
-	}
+    for (p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++) {
+        if ((p->option&PDO_DLGIGNORE) != 0) {
+            continue;
+        }
+
+        if (p->control == NULL || p->valueP == NULL) {
+            continue;
+        }
+
+        switch (p->type) {
+            long longV;
+
+        case PD_LONG:
+            longV = atol(wStringGetValue((wString_p)p->control));
+
+            if (p->winData) {
+                inRange = (longV <= ((paramIntegerRange_t *)p->winData)->high) &&
+                          (longV >= ((paramIntegerRange_t *)p->winData)->low);
+            } else {
+                inRange = TRUE;
+            }
+
+            if (inRange) {
+                *(long*)p->valueP = longV;
+            }
+
+            break;
+
+        case PD_RADIO:
+            *(long*)p->valueP = wRadioGetValue((wChoice_p)p->control);
+            break;
+
+        case PD_TOGGLE:
+            *(long*)p->valueP = wToggleGetValue((wChoice_p)p->control);
+            break;
+
+        case PD_LIST:
+        case PD_DROPLIST:
+        case PD_COMBOLIST:
+            *(wIndex_t*)p->valueP = wListGetIndex((wList_p)p->control);
+            break;
+
+        case PD_COLORLIST:
+            *(wDrawColor*)p->valueP = wColorSelectButtonGetColor((wButton_p)p->control);
+            break;
+
+        case PD_FLOAT:
+            if (p->option & PDO_DIM) {
+                floatV = DecodeDistance((wString_p)p->control, &valid);
+            } else {
+                floatV = DecodeFloat((wString_p)p->control, &valid);
+
+                if (valid && (p->option & PDO_ANGLE)) {
+                    floatV = NormalizeAngle((angleSystem==ANGLE_POLAR)?floatV:-floatV);
+                }
+            }
+
+            if (p->winData) {
+                inRange = (floatV <= ((paramFloatRange_t *)p->winData)->high) &&
+                          (floatV >= ((paramFloatRange_t *)p->winData)->low);
+            } else {
+                inRange = TRUE;
+            }
+
+            if (valid && inRange) {
+                *(FLOAT_T*)p->valueP = floatV;
+            }
+
+            break;
+
+        case PD_STRING:
+            stringV = wStringGetValue((wString_p)p->control);
+            strcpy((char*)p->valueP, stringV);
+            break;
+
+        case PD_MESSAGE:
+        case PD_BUTTON:
+        case PD_DRAW:
+        case PD_TEXT:
+        case PD_MENU:
+        case PD_MENUITEM:
+        case PD_BITMAP:
+            break;
+        }
+    }
 }
 
 
@@ -1348,13 +1385,24 @@ static void ParamIntegerPush( const char * val, void * dp )
 	paramData_p p = (paramData_p)dp;
 	long valL;
 	char * cp;
+	const char * value;
 	paramIntegerRange_t * irangeP;
 
-	while ( isspace((unsigned char)*val)) val++;
-	valL = strtol( val, &cp, 10 );
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & BO_ENTER)) {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
+	} else {
+		p->enter_pressed = FALSE;
+		value = CAST_AWAY_CONST val;
+	}
+
+
+	while ( isspace((unsigned char)*value)) value++;
+	valL = strtol( value, &cp, 10 );
+
 
 	//wControlSetBalloon( p->control, 0, -5, NULL );
-	if ( val == cp ) {
+	if ( value == cp ) {
 		wControlSetBalloon( p->control, 0, -5, _("Invalid Number") );
 		return;
 	}
@@ -1396,7 +1444,15 @@ static void ParamFloatPush( const char * val, void * dp )
 	paramData_p p = (paramData_p)dp;
 	FLOAT_T valF;
 	BOOL_T valid;
+	const char * value;
 	paramFloatRange_t * frangeP;
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
+	} else {
+		value = val;
+		p->enter_pressed = FALSE;
+	}
 
 	if (p->option & PDO_DIM) {
 		valF = DecodeDistance( (wString_p)p->control, &valid );
@@ -1434,7 +1490,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((FLOAT_T*)(p->valueP)) = valF;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( val ))
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value ))
 		p->group->changeProc( p->group, p-p->group->paramPtr, &valF );
 }
 
@@ -1442,14 +1498,23 @@ static void ParamFloatPush( const char * val, void * dp )
 static void ParamStringPush( const char * val, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
+	const char * value;
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
 		fflush( recordF );
 	}
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
+			value = wStringGetValue((wString_p)p->control);
+			p->enter_pressed = TRUE;
+	} else {
+		p->enter_pressed = FALSE;
+		value = CAST_AWAY_CONST val;
+	}
+
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
-		strcpy( (char*)p->valueP, val );
+		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST val );
+		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST value );
 }
 
 
@@ -1495,6 +1560,15 @@ EXPORT void ParamMenuPush( void * dp )
 static void ParamColorSelectPush( void * dp, wDrawColor dc )
 {
 	paramData_p p = (paramData_p)dp;
+	long rgb = wDrawGetRGB( dc );
+	while ( dc == drawColorPreviewSelected || dc == drawColorPreviewUnselected ) {
+		// The user picked a special color, tweak it
+		rgb -= 1; // Make it very close but different
+		if ( ( rgb & 0xFF ) == 0 )
+			// Ran out of room - bail
+			break;
+		dc = wDrawFindColor( rgb );
+	}
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, wDrawGetRGB(dc) );
 		fflush( recordF );
@@ -2434,7 +2508,7 @@ SkipControl:
 				if ( group->boxs == NULL ) {
 					group->boxs = (wBox_p*)MyMalloc( boxCnt * sizeof *(wBox_p*)0 );
 					for ( box=0; box<boxCnt; box++ ) {
-						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxBelow, columnK.term.x, boxPos[box]-boxTop );
+						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxThickW, columnK.term.x, boxPos[box]-boxTop );
 						boxTop = boxPos[box] + 4;
 					}
 				} else {
@@ -2508,7 +2582,10 @@ static void ParamDlgProc(
 			DefaultProc( win, wClose_e, data );
 		break;
 	case wResize_e:
-		LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		if (win == mapW)
+			pg->changeProc(pg, wResize_e, NULL);
+		else
+			LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		break;
 	default:
 		break;
@@ -2549,6 +2626,7 @@ wWin_p ParamCreateDialog(
 	group->cancelProc = cancelProc;
 	group->layoutProc = layoutProc;
 	group->changeProc = changeProc;
+	group->winOption = winOption;
 	if ( (winOption&F_CENTER) == 0 )
 		winOption |= F_RECALLPOS;
 	if ( (winOption&F_RESIZE) != 0 )

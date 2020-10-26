@@ -135,15 +135,19 @@ static void DxfFillPoly(
     drawCmd_p d,
     int cnt,
     coOrd * pts,
-    wDrawColor color)
+	int * types,
+    wDrawColor color,
+	wDrawWidth width,
+	int fill,
+	int open )
 {
     int inx;
 
     for (inx=1; inx<cnt; inx++) {
-        DxfLine(d, pts[inx-1], pts[inx], 0, color);
+        DxfLine(d, pts[inx-1], pts[inx], width, color);
     }
-
-    DxfLine(d, pts[cnt-1], pts[0], 0, color);
+    if (!open)
+    	DxfLine(d, pts[cnt-1], pts[0], width, color);
 }
 
 static void DxfFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
@@ -192,7 +196,7 @@ static int DoExportDXFTracks(
     }
 
     oldLocale = SaveLocale("C");
-    wSetCursor(wCursorWait);
+    wSetCursor(mainD.d, wCursorWait);
     time(&clock);
  
 	DxfPrologue(&command, 10, 0.0, 0.0, mapD.size.x, mapD.size.y);
@@ -208,7 +212,7 @@ static int DoExportDXFTracks(
     fclose(dxfF);
     RestoreLocale(oldLocale);
     Reset();
-    wSetCursor(wCursorNormal);
+    wSetCursor(mainD.d, defaultCursor);
     return TRUE;
 }
 

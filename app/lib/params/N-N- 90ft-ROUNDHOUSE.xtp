@@ -1,7 +1,30 @@
 # Parameter file by Rick Uhlenkott
 CONTENTS N NP 90ft ROUNDHOUSE rdu
-TURNOUT N "SCRATCH	NP N 90' roundhouse - Lewiston, ID layout	1"
-	P "P0" 1 13 0 2 0 3 0 4 0 5 0 6 0 7 0 8 0 9 0 10 0 11 0 12 14 0 15 0 16 0 17 0 18 0 19 0 20 0 21 0 22 0 23 0 24
+TURNOUT N "SCRATCH	NP N 90' roundhouse - Lewiston, ID layout	1" 512
+#	P "P0" 1 13 0 2 0 3 0 4 0 5 0 6 0 7 0 8 0 9 0 10 0 11 0 12 14 0 15 0 16 0 17 0 18 0 19 0 20 0 21 0 22 0 23 0 24
+	P "P0" 17
+	P "P1" 2
+	P "P2" 16
+	P "P3" 15
+	P "P4" 1 13
+	P "P5" 3
+	P "P6" 4
+	P "P7" 24
+	P "P8" 5
+	P "P9" 23
+	P "P10" 6
+	P "P11" 22
+	P "P12" 7
+	P "P13" 19
+	P "P14" 8
+	P "P15" 18
+	P "P16" 12 14
+	P "P17" 9
+	P "P18" 20
+	P "P19" 11
+	P "P20" 21
+	P "P21" 10
+
 	E 0.000000 0.000000 246.054764
 	E -0.259539 1.160894 252.054857
 	E 7.749404 2.709102 54.054762

@@ -112,7 +112,7 @@ static int SaveBitmapFile(
 		 (wPos_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
 		 (wPos_t)(mapD.size.x/bitmap_d.scale*bitmap_d.dpi),
 		 (wPos_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi) );
-	wSetCursor( wCursorWait );
+	wSetCursor( mainD.d, wCursorWait );
 	InfoMessage( _("Drawing tracks to BitMap") );
 	DrawSnapGrid( &bitmap_d, mapD.size, TRUE );
 	if ( (outputBitMapTogglesV&4) )
@@ -126,7 +126,7 @@ static int SaveBitmapFile(
 		return FALSE;
 	}
 	InfoMessage( "" );
-	wSetCursor( wCursorNormal );
+	wSetCursor( mainD.d, defaultCursor );
 	wBitMapDelete( bitmap_d.d );
 	return TRUE;
 }
@@ -211,11 +211,11 @@ static void OutputBitMapOk( void * junk )
 	wHide( outputBitMapW );
 	if (bitmap_fs == NULL)
 		bitmap_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Bitmap"),
-#ifdef WINDOWS
-				_("Bitmap files|*.bmp"),
-#else
-				_("Bitmap files|*.xpm"),
-#endif
+//#ifdef WINDOWS
+//				_("Bitmap files (*.bmp)|*.bmp"),
+//#else
+				_("Bitmap files (*.png)|*.png"),
+//#endif
 				SaveBitmapFile, NULL );
 	wFilSelect( bitmap_fs, GetCurrentPath( BITMAPPATHKEY ));
 }

@@ -69,7 +69,7 @@ FindPath(const char *type)
 }
 
 /**
- * Add a path to the table. If it already exists, the value ist updated.
+ * Add a path to the table. If it already exists, the value list updated.
  *
  * \param type IN type of path
  * \param path  IN path
@@ -162,6 +162,21 @@ char *GetCurrentPath(
 }
 
 /**
+ * Convert path to forward slash
+ *
+ * \param [in,out] string If non-null, the string.
+ */
+
+void ConvertPathForward(char *string)
+{
+	char *ptr = string;
+	while ((ptr = strchr(ptr, '\\')) != NULL) {
+		ptr[0] = '/';
+		ptr++;
+	}
+}
+
+/**
 * Find the filename/extension piece in a fully qualified path
 *
 * \param path IN the full path
@@ -183,8 +198,28 @@ char *FindFilename(char *path)
 }
 
 /**
+ * Find file extension in a filename
+ *
+ * \param path IN full or partial path
+ * \return pointer to the file extension part, empty string if no extension present
+ */
+
+char *FindFileExtension(char *path) {
+	char *ext;
+	ext = strrchr(path, '.');
+
+	if (ext) {
+		ext++;
+	} else {
+		ext = path + strlen(path);
+	}
+
+	return ext;
+}
+
+/**
 * Make a full path definition from directorys and filenames. The individual pieces are
-* concatinated. Where necessary a path delimiter is added. A pointer to the resulting
+* Concatenated. Where necessary a path delimiter is added. A pointer to the resulting
 * string is returned. This memory should be free'd when no longer needed.
 * Windows: to construct an absolute path, a leading backslash has to be included after
 * the drive delimiter ':' or at the beginning of the first directory name.

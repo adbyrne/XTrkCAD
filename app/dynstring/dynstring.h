@@ -1,3 +1,4 @@
+
 /** \file dynstring.h
 * Definitions and prototypes for variable length strings
 */
@@ -60,5 +61,5 @@ void DynStringCatStr(DynString * s, const DynString * s2);
 void DynStringCatCStrs(DynString * s, ...);
 void DynStringCatStrs(DynString * s1, ...);
 void DynStringPrintf(DynString * s, const char * fmt, ...);
-
+void DynStringReset(DynString * s);
 #endif // !HAVE_DYNSTRING_H

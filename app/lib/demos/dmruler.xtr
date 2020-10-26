@@ -43,4 +43,7 @@ MESSAGE
 =========================================
 END
 STEP
+MOUSE 2 29.250 5.750
+MOUSE 4 29.250 5.750
+COMMAND Ruler
 CLEAR

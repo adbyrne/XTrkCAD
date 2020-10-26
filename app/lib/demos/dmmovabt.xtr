@@ -1,6 +1,7 @@
 VERSION 2
 DEMOINIT
 ORIG 8.000 0.000 0.000
+PARAMETER display mapscale 32
 CURVE 1 DEMO 1 24.000000 24.000000 18.000000
 	T 4 37.512875 12.108734 41.347736
 	T 3 37.546349 35.853119 138.813964
@@ -51,7 +52,7 @@ END
 STEP
 CLEAR
 MESSAGE
-You can change what portion of the layout is shown by using the 'Map' window which shows a compressed version of the entire layout.  A hilighted area of the 'Map' (in reverse video) shows what portion of the layout is displayed in the main drawing area.
+You can change what portion of the layout is shown by using the 'Map' window which shows a compressed version of the entire layout.  A hilighted area of the 'Map' (in blue highlight) shows what portion of the layout is displayed in the main drawing area.
 
 You can Left-Drag the hilighted area in the Map window to change the displayed portion of the layout.
 END

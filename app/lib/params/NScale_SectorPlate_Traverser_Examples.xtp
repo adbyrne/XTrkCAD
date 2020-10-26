@@ -1,7 +1,7 @@
 CONTENTS Generic N Scale Example of Sector Plate and Traverser
 #Examples of a Sector PLate and transverser end user will need to modify as required for their layout   
 #6" Radius with 3 positions on 15 degrees separation Length 10"
-TURNOUT N "SectorPlate	10"" Length 6"" Radius 3 pos 15 Degree	XX"
+TURNOUT N "SectorPlate	10"" Length 6"" Radius 3 pos 15 Degree	XX" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -17,7 +17,7 @@ TURNOUT N "SectorPlate	10"" Length 6"" Radius 3 pos 15 Degree	XX"
 	END
 
 #10" Length with 3 positions on 1.5" separation
-TURNOUT N "Traverser/Transfer Table	10"" Length 3 pos 1.5"" spacing	XX"
+TURNOUT N "Traverser/Transfer Table	10"" Length 3 pos 1.5"" spacing	XX" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3

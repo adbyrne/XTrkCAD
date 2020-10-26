@@ -53,7 +53,6 @@
 #define product "xtrkcad"
 #define PRODUCT "XTRKCAD"
 #define Version VERSION
-#define KEYCODE "x"
 #define PARAMKEY		(0)
 
 
@@ -68,15 +67,18 @@ char * sTurnoutDesignerW = NULL;
 char * sAboutProd = NULL;
 
 char * sCustomF = product ".cus";
-char * sCheckPointF = product ".ckp";
-char * sCheckPoint1F = product ".ck1";
+char * sCheckPointF = product Version ".ckp";
+char * sCheckPoint1F = product Version ".ck1";
+
 char * sClipboardF = product ".clp";
-char * sParamQF = product "." KEYCODE "tq";
+char * sParamQF = product ".xtq";
 char * sUndoF = product ".und";
 char * sAuditF = product ".aud";
 char * sTipF = product ".tip";
 
 char * sSourceFilePattern = NULL;
+char * sSaveFilePattern = NULL;
+char * sImageFilePattern = NULL;
 char * sImportFilePattern = NULL;
 char * sDXFFilePattern = NULL;
 char * sRecordFilePattern = NULL;
@@ -137,13 +139,14 @@ BOOL_T Initialize( void )
 	InitTrkStruct();
 	InitTrkText();
 	InitTrkDraw();
-	InitTrkNote();
+	
 	InitTrkBlock();
         InitTrkSwitchMotor();
         InitTrkSignal();
         InitTrkControl();
         InitTrkSensor();
 	InitCarDlg();
+	InitCmdNote();
 
 	memset( message, 0, sizeof message );
 	
@@ -156,7 +159,7 @@ BOOL_T Initialize( void )
 
 void InitCustom( void )
 {
-	char buf[STR_SHORT_SIZE];
+	char *buf = malloc(1024);
 
 	/* Initialize some localized strings */
 	if (sTurnoutDesignerW == NULL)
@@ -171,38 +174,60 @@ void InitCustom( void )
 	}
 	if (sSourceFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Files|*.xtc"), Product);
+		sprintf(buf, _("All %s Files (*.xtc,*.xtce)|*.xtc;*.xtce|"
+					   "%s Trackplan (*.xtc)|*.xtc|"
+					   "%s Extended Trackplan (*.xtce)|*.xtce|"
+					   "All Files (*)|*"), 
+						Product,
+						Product, 
+						Product );
 		sSourceFilePattern = strdup(buf);
+	}
+	if (sSaveFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Trackplan (*.xtc)|*.xtc|"
+					   "%s Extended Trackplan (*.xtce)|*.xtce|"
+					   "All Files (*)|*"),
+						Product,
+						Product );
+		sSaveFilePattern = strdup(buf);
+	}
+	if (sImageFilePattern == NULL)
+	{
+		sprintf(buf,_("All Files (*)|*"));
+		sImageFilePattern = strdup(buf);
 	}
 	if (sImportFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Import Files|*.%sti"), Product, KEYCODE);
+		sprintf(buf, _("%s Import Files (*.xti)|*.xti"), Product );
 		sImportFilePattern = strdup(buf);
 	}
 	if (sDXFFilePattern == NULL)
 	{
-		sDXFFilePattern = strdup(_("Data Exchange Format Files|*.dxf"));
+		sDXFFilePattern = strdup(_("Data Exchange Format Files (*.dxf)|*.dxf"));
 	}
 	if (sRecordFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Record Files|*.%str"), Product, KEYCODE);
+		sprintf(buf, _("%s Record Files (*.xtr)|*.xtr"), Product);
 		sRecordFilePattern = strdup(buf);
 	}
 	if (sNoteFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Note Files|*.not"), Product);
+		sprintf(buf, _("%s Note Files (*.not)|*.not"), Product);
 		sNoteFilePattern = strdup(buf);
 	}
 	if (sLogFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Log Files|*.log"), Product);
+		sprintf(buf, _("%s Log Files (*.log)|*.log"), Product);
 		sLogFilePattern = strdup(buf);
 	}
 	if (sPartsListFilePattern == NULL)
 	{
-		sprintf(buf, _("%s PartsList Files|*.txt"), Product);
+		sprintf(buf, _("%s PartsList Files (*.txt)|*.txt"), Product);
 		sPartsListFilePattern = strdup(buf);
 	}
+
+	free(buf);
 }
 
 

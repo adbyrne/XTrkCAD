@@ -25,11 +25,11 @@
 #include "common.h"
 #include "track.h"
 
-wIndex_t selectCmdInx;
-wIndex_t moveCmdInx;
-wIndex_t rotateCmdInx;
-long quickMove;
-BOOL_T importMove;
+#define defaultCursor wCursorCross
+
+extern wIndex_t selectCmdInx;
+extern wIndex_t moveCmdInx;
+extern wIndex_t rotateCmdInx;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
@@ -51,6 +51,6 @@ void DoRefreshCompound( void );
 void WriteSelectedTracksToTempSegs( void );
 void DoRescale( void );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
-void UpdateQuickMove( void * );
+void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
 
 #endif

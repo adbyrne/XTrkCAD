@@ -22,6 +22,7 @@
 
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
+#include <shellapi.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
@@ -30,8 +31,10 @@
 #include <stdio.h>
 #include <assert.h>
 #include <htmlhelp.h>
+#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
+#include "FreeImage.h"
 
 #if _MSC_VER > 1300
 #define stricmp _stricmp
@@ -66,7 +69,6 @@ char * mswStrdup(const char *);
  * EXPORTED VARIABLES
  */
 
-long debugWindow = 0;
 HINSTANCE mswHInst;
 HWND mswHWnd = (HWND)0;
 
@@ -74,11 +76,12 @@ const char *mswDrawWindowClassName = "DRAWWINDOW";
 char mswTmpBuff[1024];
 int mswEditHeight;
 int mswAllowBalloonHelp = TRUE;
-int mswGroupStyle;
 HFONT mswOldTextFont;
 HFONT mswLabelFont;
 long mswThickFont = 1;
 double mswScale = 1.0;
+
+double scaleIcon = 1.0;				   /**< Scaling factor for toolbar icons */
 
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
@@ -89,7 +92,12 @@ static wControl_p getControlFromCursor(HWND, wWin_p *);
  */
 
 struct wWin_t {
-    WOBJ_COMMON
+	WOBJ_COMMON
+	int validGeometry;
+	int min_width;
+	int max_width;
+	int min_height;
+	int max_height;
     wPos_t lastX, lastY;
     wPos_t padX, padY;
     wControl_p first, last;
@@ -121,8 +129,8 @@ static int mResizeBorderH;
 static int mMenuH;
 static int screenWidth = 0, screenHeight = 0;
 
-wWin_p mswWin = NULL;
-wWin_p winFirst, winLast;
+static wWin_p mswWin = NULL;
+static wWin_p winFirst, winLast;
 
 static long count51 = 0;
 
@@ -150,7 +158,7 @@ static DWORD dwCookie;
 typedef struct {
     wControl_p b;
 } controlMap_t;
-dynArr_t controlMap_da;
+static dynArr_t controlMap_da;
 #define controlMap(N) DYNARR_N(controlMap_t,controlMap_da,N)
 
 
@@ -167,7 +175,7 @@ static FILE * helpStrF;
 #endif
 static int inMainWndProc = FALSE;
 
-int newHelp = 1;
+static int newHelp = 1;
 
 static wBool_t mswWinBlockEnabled = TRUE;
 
@@ -176,7 +184,21 @@ static int dumpControls;
 
 extern char *userLocale;
 
-
+// list of supported fileformats for image files
+static char * filterImageFiles[] = { N_("All image files"),
+							"*.gif;*.jpg;*.jpeg;*.png;*.tif;*.tiff",
+							N_("GIF files (*.gif)"),
+							"*.gif",
+							N_("JPEG files (*.jpeg,*.jpg)"),
+							"*.jpg;*.jpeg",
+							N_("PNG files (*.png)"),
+							"*.png",
+							N_("TIFF files (*.tiff, *.tif)"),
+							"*.tif;*.tiff",
+							N_("All files (*)"),
+							"*",
+							};
+
 /*
  *****************************************************************************
  *
@@ -612,6 +634,35 @@ static void getSavedSizeAndPos(
 }
 
 /**
+ * Set min and max dimensions for a window. 
+ *
+ * \param min_width IN minimum width of window
+ * \param max_width IN maximum width of window
+ * \param min_height IN minimum height of window
+ * \param max_height IN maximum height of window
+ * \param base_width IN unused on Windows
+ * \param base_height IN unused on Windows
+ * \param aspect_ration IN unused on Windows
+ */
+void wSetGeometry(wWin_p win,
+	int min_width,
+	int max_width,
+	int min_height,
+	int max_height,
+	int base_width,
+	int base_height,
+	double aspect_ratio)
+{
+	win->validGeometry = TRUE;	//remember that geometry was set
+	win->min_width = min_width;
+	win->max_width = max_width;
+	win->min_height = min_height;
+	win->max_height = max_height;
+
+	return;
+}
+
+/**
  * Create a window. Retrieves the saved size and position and restores the created window accordingly.
  *
  * \param hWnd IN parent window
@@ -814,6 +865,10 @@ wWin_p wWinMainCreate(
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
 
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
+	if (scaleIcon < 1.0) scaleIcon = 1.0;
+	if (scaleIcon > 2.0) scaleIcon = 2.0;
+
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",
                         WS_OVERLAPPEDWINDOW, labelStr, winProc, x, y, data,
@@ -821,13 +876,10 @@ wWin_p wWinMainCreate(
     mswHWnd = w->hWnd;
 
     if (!mswThickFont) {
-        DWORD dw;
         SendMessage(w->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L);
         hDc = GetDC(w->hWnd);
         GetTextMetrics(hDc, &tm);
         mswEditHeight = tm.tmHeight+2;
-        dw = GetTextExtent(hDc, "AXqypj", 6);
-        mswEditHeight = HIWORD(dw)+2;
         ReleaseDC(w->hWnd, hDc);
     }
 
@@ -1023,7 +1075,7 @@ static wAccelKey_e translateExtKey(UINT wParam)
 }
 
 
-long notModKey;
+static long notModKey;
 int mswTranslateAccelerator(
     HWND hWnd,
     LPMSG pMsg)
@@ -1382,12 +1434,13 @@ void wWinClear(
 {
 }
 
-void wSetCursor(
+extern long dontHideCursor;
+
+void wSetCursor(wDraw_p win,
     wCursor_t cursor)
 {
     switch (cursor) {
     case wCursorNormal:
-    case wCursorQuestion:
     default:
         SetCursor(LoadCursor(NULL, IDC_ARROW));
         break;
@@ -1403,6 +1456,47 @@ void wSetCursor(
     case wCursorIBeam:
         SetCursor(LoadCursor(NULL, IDC_IBEAM));
         break;
+
+    case wCursorQuestion:
+    	SetCursor(LoadCursor(NULL, IDC_HELP));
+    	break;
+
+    case wCursorHand:
+       	SetCursor(LoadCursor(NULL, IDC_HAND));
+       	break;
+
+    case wCursorNo:
+       	SetCursor(LoadCursor(NULL, IDC_NO));
+       	break;
+
+    case wCursorSizeAll:
+       	SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+       	break;
+
+    case wCursorSizeNESW:
+       	SetCursor(LoadCursor(NULL, IDC_SIZENESW));
+       	break;
+
+    case wCursorSizeNWSE:
+       	SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+       	break;
+
+    case wCursorSizeNS:
+       	SetCursor(LoadCursor(NULL, IDC_SIZENS));
+       	break;
+
+    case wCursorSizeWE:
+       	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+       	break;
+
+    case wCursorAppStart:
+    	SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
+        break;
+
+    case wCursorNone:
+    	if (!dontHideCursor)
+    		SetCursor(NULL);
+    	break;
     }
 
     curCursor = cursor;
@@ -1665,7 +1759,7 @@ void wControlSetLabel(
     wControl_p b,
     const char * labelStr)
 {
-    if (b->type == B_RADIO || b->type == B_TOGGLE) {
+    if (b->type == B_RADIO ) {
         ;
     } else {
         int lab_l;
@@ -1771,13 +1865,33 @@ void wMessage(
     ReleaseDC(w->hWnd, hDc);
 }
 
+/**
+ * Open a document using an external application
+ * 
+ * \param file
+ * \return TRUE on success, FALSE on error
+ * 
+ */
+unsigned wOpenFileExternal(char *file)
+{
+	HINSTANCE res;
+
+	res = ShellExecute(mswHWnd, "open", file, NULL, NULL, SW_SHOW);
+
+	if ((int)res <= 32) {
+		wNoticeEx(NT_ERROR, "Error when opening file!", "Cancel", NULL);
+		return(FALSE);
+	}
+
+	return(TRUE);
+}
 
 void wExit(int rc)
 {
     INDEX_T inx;
     wControl_p b;
     mswPutCustomColors();
-    wPrefFlush();
+    wPrefFlush("");
 
     for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
         b = controlMap(inx).b;
@@ -2045,12 +2159,22 @@ int wNotice3(
     }
 }
 
+/**
+ * Show help text for the given topic. 
+ *
+ * \param  topic The topic. if NULL the index page is shown.
+ */
 
 void wHelp(
     const char * topic)
 {
     char *pszHelpTopic;
     HWND hwndHelp;
+	const char *theTopic = "index";
+
+	if (topic) {
+		theTopic = topic;
+	}
 
     if (!helpInitted) {
         HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
@@ -2059,9 +2183,9 @@ void wHelp(
 
     /*	             "c:\\help.chm::/intro.htm>mainwin", */
     /* attention: always adapt constant value (10) to needed number of formatting characters */
-    pszHelpTopic = malloc(strlen(helpFile) + strlen(topic) + 10);
+    pszHelpTopic = malloc(strlen(helpFile) + strlen(theTopic) + 10);
     assert(pszHelpTopic != NULL);
-    sprintf(pszHelpTopic, "/%s.html", topic);
+    sprintf(pszHelpTopic, "/%s.html", theTopic);
     hwndHelp = HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOPIC,
                         (DWORD_PTR)pszHelpTopic);
 
@@ -2071,6 +2195,8 @@ void wHelp(
 
     free(pszHelpTopic);
 }
+
+
 
 
 void doHelpMenu(void * context)
@@ -2097,6 +2223,13 @@ void doHelpMenu(void * context)
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD)&ftsQuery);
         break;
 
+
+    case 3: /*Context*/
+    	const char * topic;
+    	topic = GetCurCommandName();
+    	wHelp(topic);
+    	break;
+
     default:
         return;
     }
@@ -2104,11 +2237,16 @@ void doHelpMenu(void * context)
     helpInitted = TRUE;
 }
 
+void wDoAccelHelp(wAccelKey_e key, void * context) {
+	doHelpMenu(context);
+}
+
 void wMenuAddHelp(
     wMenu_p m)
 {
-    wMenuPushCreate(m, NULL, "&Contents", 0, doHelpMenu, (void*)1);
-    wMenuPushCreate(m, NULL, "&Search for Help on...", 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, _("&Contents"), 0, doHelpMenu, (void*)1);
+    wMenuPushCreate(m, NULL, _("&Search for Help on..."), 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, _("Co&mmand Context Help"), 0, doHelpMenu, (void*)3);
 }
 
 
@@ -2331,6 +2469,24 @@ struct wFilSel_t {
 
 #define SELECTEDFILENAME_BUFFERSIZE	(8*1024)	/**<estimated size in case all param files are selected */
 
+char *
+GetImageFileFormats(void)
+{
+	char *filter = malloc(2048);
+	char *current = filter;
+	char *message;
+
+	for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]); i += 2) {
+		message = gettext(filterImageFiles[i]);
+		strcpy(current, message);
+		current += strlen(message) + 1;
+		strcpy(current, filterImageFiles[i + 1]);
+		current += strlen(current) + 1;
+	}
+	*current = '\0';
+	return(filter);
+}
+
 /**
  * Run the file selector. After the selector is finished an array of filenames is
  * created. Each filename will be fully qualified. The array and the number of
@@ -2361,11 +2517,16 @@ int wFilSelect(
             strcmp(dirName, ".") == 0) {
         dirName = wGetUserHomeDir();
     }
-
     memset(&ofn, 0, sizeof ofn);
     ofn.lStructSize = sizeof ofn;
     ofn.hwndOwner = mswHWnd;
-    ofn.lpstrFilter = fs->extList;
+	if (fs->option == FS_PICTURES) {
+		ofn.lpstrFilter = GetImageFileFormats();
+	}
+	else {
+		ofn.lpstrFilter = fs->extList;
+	}
+
     ofn.nFilterIndex = 0;
     selFileName = malloc(SELECTEDFILENAME_BUFFERSIZE);
     memset(selFileName, '\0', SELECTEDFILENAME_BUFFERSIZE);
@@ -2604,6 +2765,23 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     wAccelKey_e extChar;
 
     switch (message) {
+	case WM_GETMINMAXINFO:
+		LPMINMAXINFO pMMI = (LPMINMAXINFO)lParam;
+		inx = GetWindowWord(hWnd, 0);
+
+		if (inx >= CONTROL_BASE && inx <= controlMap_da.cnt) {
+			w = (wWin_p)controlMap(inx - CONTROL_BASE).b;
+			if (w != NULL) {
+				if (w->validGeometry) {
+					pMMI->ptMaxTrackSize.x = w->max_width;
+					pMMI->ptMaxTrackSize.y = w->max_height;
+					pMMI->ptMinTrackSize.x = w->min_width;
+					pMMI->ptMinTrackSize.y = w->min_height;
+				}
+			}
+		}
+		return(0);
+
     case WM_MOUSEWHEEL:
         inx = GetWindowWord(hWnd, 0);
         b = getControlFromCursor(hWnd, NULL);
@@ -2619,22 +2797,6 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DRAWITEM:
     case WM_COMMAND:
     case WM_MEASUREITEM:
-    case WM_NOTVALID:
-        if (WCMD_PARAM_ID == IDM_DOHELP) {
-            b = getControlFromCursor(hWnd, NULL);
-            closeBalloonHelp();
-
-            if (!b) {
-                return 0L;
-            }
-
-            if (b->helpStr) {
-                wHelp(b->helpStr);
-            }
-
-            return 0L;
-        }
-
         closeBalloonHelp();
 
         if (WCMD_PARAM_ID < CONTROL_BASE || WCMD_PARAM_ID > (WPARAM)controlMap_da.cnt) {
@@ -2916,48 +3078,48 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0L;
 
     case WM_SETCURSOR:
-        /*if (any buttons down)
-        	break;*/
-        wSetCursor(curCursor);
+		if (hWnd == mswHWnd)
+			wSetCursor(NULL, curCursor);
 
-        if (!mswAllowBalloonHelp) {
-            break;
-        }
+		if (!mswAllowBalloonHelp) {
+			break;
+		}
 
-        if (IsIconic(mswHWnd)) {
-            break;
-        }
+		if (IsIconic(mswHWnd)) {
+			break;
+		}
 
-        b = getControlFromCursor(hWnd, NULL);
+		b = getControlFromCursor(hWnd, NULL);
 
-        if (b == balloonControlButton) {
-            break;
-        }
+		if (b == balloonControlButton) {
+			break;
+		}
 
-        if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
-                                         (!b) || b->type == B_DRAW || b->helpStr == NULL) {
-            closeBalloonHelp();
-            break;
-        }
+		if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
+			(!b) || b->type == B_DRAW || b->helpStr == NULL) {
+			closeBalloonHelp();
+			break;
+		}
 
-        if (b != balloonHelpButton) {
-            closeBalloonHelp();
-        }
+		if (b != balloonHelpButton) {
+			closeBalloonHelp();
+		}
 
-        if (balloonHelpState != balloonHelpIdle) {
-            break;
-        }
+		if (balloonHelpState != balloonHelpIdle) {
+			break;
+		}
 
-        balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
-                                    balloonHelpTimeOut, NULL);
+		balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
+			balloonHelpTimeOut, NULL);
 
-        if (balloonHelpTimer == (UINT)0) {
-            break;
-        }
+		if (balloonHelpTimer == (UINT)0) {
+			break;
+		}
 
-        balloonHelpState = balloonHelpWait;
-        balloonHelpButton = b;
-        break;
+		balloonHelpState = balloonHelpWait;
+		balloonHelpButton = b;
+		break;
+
 
     case WM_SYSCOMMAND:
         inx = GetWindowWord(hWnd, 0);
@@ -3216,13 +3378,13 @@ static BOOL InitApplication(HINSTANCE hinstCurrent)
         return FALSE;
     }
 
-    wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC;
+    wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_DBLCLKS;
     wc.lpfnWndProc = mswDrawPush;
     wc.lpszClassName = mswDrawWindowClassName;
     wc.cbWndExtra = 4;
 
     if (!RegisterClass(&wc)) {
-        mswFail("RegisterClass(drawClass)");
+		mswFail("RegisterClass(drawClass)");
         return FALSE;
     }
 
@@ -3243,8 +3405,6 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
     HDC hDc;
     char **argv;
     int argc;
-    TEXTMETRIC tm;
-    DWORD dw;
 
 	if (!hinstPrevious) {
 		if (!InitApplication(hinstCurrent)) {
@@ -3269,10 +3429,6 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
         mswScale = 1.0;
     }
 
-    GetTextMetrics(hDc, &tm);
-    mswEditHeight = tm.tmHeight + 8;
-    dw = GetTextExtent(hDc, "AXqypj", 6);
-    mswEditHeight = HIWORD(dw)+2;
     ReleaseDC(0, hDc);
     mswCreateCheckBitmaps();
     /*

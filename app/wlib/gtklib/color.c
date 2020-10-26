@@ -100,7 +100,7 @@ static colorMap_t colorMap[] = {
     { 208, 208, 208 },	/* Gray */
     { 224, 224, 224 },	/* Gray */
     { 240, 240, 240 },	/* Gray */
-    {   0,   0,   0 }	/* BlackPixel */
+    { 255, 255, 255 }	/* WhitePixel */
 };
 
 #define NUM_GRAYS (16)
@@ -125,7 +125,7 @@ wDrawColor wDrawColorGray(
 
     if (n <= 0) {
         return wDrawColorBlack;
-    } else if (n > NUM_GRAYS) {
+    } else if (n >= NUM_GRAYS) {
         return wDrawColorWhite;
     } else {
         n = (n*256)/NUM_GRAYS;
@@ -209,7 +209,7 @@ wDrawColor wDrawFindColor(
     long rgb0)
 {
     wDrawColor cc;
-    int r0, g0, b0;
+    int r0, g0, b0, r1, g1, b1;
     int d0;
     int i;
     colorMap_t tempMapValue;
@@ -231,7 +231,10 @@ wDrawColor wDrawFindColor(
         colorMap_t * cm_p;
 
         cm_p = &g_array_index(colorMap_garray, colorMap_t, i);
-        d1 = abs(r0-cm_p->red) + abs(g0-cm_p->green) + abs(b0-cm_p->blue);
+        r1 = (int)cm_p->red;
+        g1 = (int)cm_p->green;
+        b1 = (int)cm_p->blue;
+        d1 = abs(r0-r1) + abs(g0-g1) + abs(b0-b1);
 
         if (d1 == 0) {
             return i;

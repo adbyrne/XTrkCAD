@@ -11,6 +11,8 @@
 #define FILE_SEP_CHAR "/"
 #endif
 
+#include <stdbool.h>
+
 #ifdef USE_SIMPLE_GETTEXT
 char *bindtextdomain( char *domainname, char *dirname );
 char *bind_textdomain_codeset(char *domainname, char *codeset );
@@ -19,6 +21,11 @@ char *gettext( const char *msgid );
 
 char *g_win32_getlocale (void);
 #endif
+
+// conversion routines to and from UTF-8
+bool wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength);
+bool wUTF8ToSystem(const char *inString, char *outString, unsigned outStringLength);
+bool wIsUTF8(const char * string);
 
 /*
  * Interface types
@@ -148,12 +155,14 @@ wBool_t wNotice(		const char *, const char *, const char * );
 int wNotice3(			const char *, const char *, const char *, const char * );
 void wHelp(			const char * );
 
+
 #define NT_INFORMATION 1
 #define NT_WARNING	   2
 #define NT_ERROR	   4
 
 wBool_t wNoticeEx( int type, const char * msg, const char * yes, const char * no );
 
+unsigned wOpenFileExternal(char *filename);
 
 
 void wSetBalloonHelp ( wBalloonHelp_t * );
@@ -170,11 +179,21 @@ unsigned long wGetTimer(	void );
 void wExit(			int );
 
 typedef enum {	wCursorNormal,
+		wCursorNone,
+		wCursorAppStart,
+		wCursorHand,
+		wCursorNo,
+		wCursorSizeAll,
+		wCursorSizeNESW,
+		wCursorSizeNS,
+		wCursorSizeNWSE,
+		wCursorSizeWE,
 		wCursorWait,
 		wCursorIBeam,
 		wCursorCross,
 		wCursorQuestion } wCursor_t;
-void wSetCursor( wCursor_t );
+void wSetCursor( wDraw_p, wCursor_t );
+#define defaultCursor wCursorCross
 
 const char * wMemStats( void );
 
@@ -224,6 +243,8 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void * );
 #define F_CENTER	(1L<<12)
 #define F_HIDE		(1L<<13)
 #define F_MAXIMIZE  (1L<<14)
+#define F_RESTRICT  (1L<<15)
+#define F_NOTTRANSIENT (1L<<16)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );
@@ -246,6 +267,7 @@ void wMessage(			wWin_p, const char *, wBool_t );
 void wWinTop(			wWin_p );
 void wWinDoCancel(		wWin_p );
 void wWinBlockEnable(		wBool_t );
+void wSetGeometry(wWin_p, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio);
 
 int wCreateSplash( char *appName, char *appVer );
 int wSetSplashInfo( char *msg );
@@ -262,6 +284,8 @@ void wDestroySplash( void );
 #define BO_READONLY	(1L<<2)
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
+#define BO_ENTER    (1L<<10)
+#define BO_REPEAT   (1L<<11)
 
 wPos_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -290,7 +314,7 @@ void wControlLinkedActive( wControl_p b, int active );
 
 #define BS_TRIM			(1<<12)
 /* Creation CallBacks */
-typedef void (*wStringCallBack_p)( const char *, void * );
+typedef void (*wStringCallBack_p)( const char *, void *);
 wString_p wStringCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				wPos_t, char *, wIndex_t, wStringCallBack_p,
 				void * );
@@ -305,8 +329,8 @@ const char * wStringGetValue(		wString_p );
  */
 
 /* Creation CallBacks */
-typedef void (*wIntegerCallBack_p)( long, void * );
-typedef void (*wFloatCallBack_p)( double, void * );
+typedef void (*wIntegerCallBack_p)( long, void * , int);
+typedef void (*wFloatCallBack_p)( double, void * , int);
 wInteger_p wIntegerCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				wPos_t, wInteger_t, wInteger_t, wInteger_t *,
 				wIntegerCallBack_p, void * );
@@ -441,11 +465,33 @@ void wTextSetPosition(		wText_p bt, int pos );
 typedef int wDrawOpts;
 #define wDrawOptTemp	(1<<0)
 #define wDrawOptNoClip	(1<<1)
+#define wDrawOptTransparent  (1<<2)
+#define wDrawOutlineFont (1<<3)
+#ifdef CURSOR_SURFACE
+#define wDrawOptCursor  (1<<4)
+#define wDrawOptCursorClr (1<<5)
+#define wDrawOptCursorClr (1<<6)
+#define wDrawOptCursorRmv (1<<7)
+#define wDrawOptCursorQuit (1<<8)
+#define wDrawOptOpaque   (1<<9)
+#endif
+
 
 typedef enum {
 	wDrawLineSolid,
-	wDrawLineDash }
+	wDrawLineDash,
+	wDrawLineDot,
+	wDrawLineDashDot,
+	wDrawLineDashDotDot,
+	wDrawLineCenter,
+	wDrawLinePhantom}
 		wDrawLineType_e;
+
+typedef enum {
+	wPolyLineStraight,
+	wPolyLineSmooth,
+	wPolyLineRound}
+	wPolyLine_e;
 
 typedef int wAction_t;
 #define wActionMove		(1)
@@ -459,7 +505,13 @@ typedef int wAction_t;
 #define wActionExtKey		(9)
 #define wActionWheelUp (10)
 #define wActionWheelDown (11)
-#define wActionLast		wActionWheelDown
+#define wActionLDownDouble (12)
+#define wActionModKey (13)
+#define wActionScrollUp (14)
+#define wActionScrollDown (15)
+#define wActionScrollLeft (16)
+#define wActionScrollRight (17)
+#define wActionLast		wActionScrollRight
 
 
 #define wRGB(R,G,B)\
@@ -475,6 +527,7 @@ typedef void (*wDrawActionCallBack_p)(	wDraw_p, void*, wAction_t, wPos_t, wPos_t
 #define BD_DIRECT	(1L<<26)
 #define BD_NOCAPTURE (1L<<27)
 #define BD_NOFOCUS  (1L<<28)
+#define BD_MODKEYS  (1L<<29)
 
 /* Create: */
 wDraw_p wDrawCreate(		wWin_p, wPos_t, wPos_t, const char *, long,
@@ -497,13 +550,15 @@ void wDrawString(		wDraw_p, wPos_t, wPos_t, wAngle_t, const char *, wFont_p,
 		  		wFontSize_t, wDrawColor, wDrawOpts );
 void wDrawFilledRectangle(	wDraw_p, wPos_t, wPos_t, wPos_t, wPos_t,
 				wDrawColor, wDrawOpts );
-void wDrawFilledPolygon(	wDraw_p, wPos_t [][2], wIndex_t, wDrawColor,
-				wDrawOpts );
+void wDrawPolygon(	wDraw_p, wPos_t [][2], wPolyLine_e [], wIndex_t, wDrawColor, wDrawWidth, wDrawLineType_e,
+				wDrawOpts, int, int );
 void wDrawFilledCircle(		wDraw_p, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 
-void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFont_p,
+void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFont_p,
 				wFontSize_t );
 void wDrawClear(		wDraw_p );
+void wDrawClearTemp(		wDraw_p );
+wBool_t wDrawSetTempMode(	wDraw_p, wBool_t );
 
 void wDrawDelayUpdate(		wDraw_p, wBool_t );
 void wDrawClip(			wDraw_p, wPos_t, wPos_t, wPos_t, wPos_t );
@@ -518,7 +573,7 @@ void wDrawSetSize(		wDraw_p, wPos_t, wPos_t, void * );
 void wDrawGetSize(		wDraw_p, wPos_t *, wPos_t * );
 
 /* Bitmaps */
-wDrawBitMap_p wDrawBitMapCreate( wDraw_p, int, int, int, int, const char * );
+wDrawBitMap_p wDrawBitMapCreate( wDraw_p, int, int, int, int, const unsigned char * );
 void wDrawBitMap(		wDraw_p, wDrawBitMap_p, wPos_t, wPos_t,
 				wDrawColor, wDrawOpts );
 
@@ -530,6 +585,8 @@ wBool_t wBitMapWriteFile(	wDraw_p, const char * );
 void * wDrawGetContext(		wDraw_p );
 void wDrawSaveImage(		wDraw_p );
 void wDrawRestoreImage(		wDraw_p );
+int wDrawSetBackground(    wDraw_p, char * path, char ** error);
+void wDrawShowBackground(   wDraw_p, wPos_t pos_x, wPos_t pos_y, wPos_t width, wAngle_t angle, int screen);
 
 /*------------------------------------------------------------------------------
  *
@@ -538,7 +595,7 @@ void wDrawRestoreImage(		wDraw_p );
 void wInitializeFonts();
 void wSelectFont(		const char * );
 wFontSize_t wSelectedFontSize(	void );
-void wSetSelectionFontSize(int);
+void wSetSelectedFontSize(wFontSize_t size);
 #define F_TIMES	(1)
 #define F_HELV	(2)
 wFont_p wStandardFont(		int, wBool_t, wBool_t );
@@ -549,22 +606,19 @@ wFont_p wStandardFont(		int, wBool_t, wBool_t );
  * Printing
  */
 
-typedef void (*wAddPrinterCallBack_p)( const char *, const char * );
-typedef void (*wAddMarginCallBack_p)( const char *, double, double, double, double );
-typedef void (*wAddFontAliasCallBack_p)( const char *, const char * );
 typedef void (*wPrintSetupCallBack_p)( wBool_t );
 
 wBool_t wPrintInit(		void );
 void wPrintSetup(		wPrintSetupCallBack_p );
-void wPrintSetCallBacks(	wAddPrinterCallBack_p, wAddMarginCallBack_p, wAddFontAliasCallBack_p );
+void wPrintGetMargins(		double *, double *, double *, double * );
 void wPrintGetPageSize(		double *, double * );
-void wPrintGetPhysSize(		double *, double * );
 wBool_t wPrintDocStart(		const char *, int, int * );
 wDraw_p wPrintPageStart(	void );
 wBool_t wPrintPageEnd(		wDraw_p );
 void wPrintDocEnd(		void );
 wBool_t wPrintQuit(		void );
 void wPrintClip(		wPos_t, wPos_t, wPos_t, wPos_t );
+const char * wPrintGetName(	void );
 
 
 /*------------------------------------------------------------------------------
@@ -607,6 +661,15 @@ typedef enum {
     wAccelKey_Numpad_Subtract,
 	wAccelKey_LineFeed }
 	wAccelKey_e;
+
+typedef enum {
+	wModKey_None,
+	wModKey_Alt,
+	wModKey_Shift,
+	wModKey_Ctrl }
+	wModKey_e;
+
+void wDoAccelHelp( wAccelKey_e key, void * );
 
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
@@ -657,6 +720,7 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
  */
 
 #define FS_MULTIPLEFILES	1
+#define FS_PICTURES         2
 
 struct wFilSel_t;
 typedef enum {
@@ -693,6 +757,8 @@ char * wPrefGetString(const char *section, const char *name);
 char * wPrefGetStringBasic( const char *section, const char *name );
 char * wPrefGetStringExt(const char *section, const char *name);
 
+void wPrefsLoad(char * name);
+
 void wPrefSetInteger(const char *, const char *, long );
 wBool_t wPrefGetInteger(const char *section, const char *name, long *result, long defaultValue);
 wBool_t wPrefGetIntegerBasic(const char *section, const char *name, long *result, long defaultValue);
@@ -704,7 +770,7 @@ wBool_t wPrefGetFloatBasic(const char *section, const char *name, double *result
 wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result, double defaultValue);
 
 const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index, const char ** name );
-void wPrefFlush(		void );
+void wPrefFlush( char * name);
 void wPrefReset(		void );
 
 void CleanupCustom( void );
@@ -727,4 +793,11 @@ wPos_t wStatusGetHeight(long flags);
 
 void wStatusSetValue(wStatus_p b, const char * arg);
 void wStatusSetWidth(wStatus_p b, wPos_t width);
+
+/*-------------------------------------------------------------------------------
+ * User Preferences
+ */
+
+#define PREFSECTION "Preference"
+#define LARGEICON   "LargeIcons"
 #endif

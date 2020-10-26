@@ -225,7 +225,6 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
     *ascent_p  = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
     *descent_p = pango_font_metrics_get_descent(metrics) / PANGO_SCALE;
     pango_font_metrics_unref(metrics);
-    g_object_ref_sink(context);
     g_object_unref(context);
 #if WLIB_FONT_DEBUG >= 3
     fprintf(stderr, "font layout created:\n");
@@ -351,9 +350,9 @@ wFontSize_t wSelectedFontSize(void)
  * \return    describe the return value
  */
 
-void wSetSelectedFontSize(int size)
+void wSetSelectedFontSize(wFontSize_t size)
 {
-    absoluteFontSize = (wFontSize_t)size;
+    absoluteFontSize = size;
 }
 
 /**
