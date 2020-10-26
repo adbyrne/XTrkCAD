@@ -386,6 +386,8 @@ void wWinTop(wWin_p win)
 {
 }
 
+extern long dontHideCursor;
+
 /**
  * Set the cursor in GTK
  *
@@ -399,6 +401,7 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 	//GdkWindow * gdkwindow = gtk_widget_get_window(GTK_WIDGET(win->gtkwin));;
 	GdkWindow * gdkwindow = gdk_get_default_root_window();
 	GdkDisplay * display = gdk_window_get_display(gdkwindow);
+	if ((cursor == wCursorNone) && dontHideCursor) return;  //Ignore if we dont want to suppress
 	if (!gdkcursors[cursor]) {
 		switch(cursor) {
 			case wCursorAppStart:
@@ -450,7 +453,7 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 				gdkcursor = gdk_cursor_new(GDK_QUESTION_ARROW);
 							break;
 			case wCursorNone:
-				gdkcursor = gdk_cursor_new(GDK_BLANK_CURSOR);
+					gdkcursor = gdk_cursor_new(GDK_BLANK_CURSOR);
 							break;
 			case wCursorNormal:
 			default:
