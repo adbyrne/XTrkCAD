@@ -1,8 +1,8 @@
-# Beta 3.0 Release Notes
+# GA Release Notes
 
-Welcome to the XtrackCAD V5.2.0 Beta 3.0 release! 
+Welcome to the XtrackCAD V5.2.0 GA release! 
 
-Beta 3.0 has a few functional enhancements and a few bug fixes since Beta 2.1. Beta 3.0 is intended to be a predule to a GA release. We only intend to add fixes and not functional enhancements at this point.
+GA has a few high-impact bug fixes since Beta 3.0 that we have tested with the help of our users. 
 
 The V5.2 release started out as just some simple functional enhancements of long-standing, like background images. The idea was to punt on all UI changes to the V6 GTK3 release.  But along the way and due to some sabaticals for developers, things kept getting added and tinkered with. Finally the major UI enhancements you will see were mapped out over the last six months and so we have an incremental enhacement to the UI as well.
 
@@ -12,17 +12,13 @@ Martin and Dave and Adam, your volunteer developers.
 
 PS The full change log is a file in the XtrkCAD download folder as CHANGELOG.md 
 
-## Warning to Users
+The files written by XTrackCAD 5.2.0 are versioned to only be read by 5.2.0, but it can also read files from earlier versions. If you get into trouble, please reach out, we may be able to help - but always back-up.
 
-Please note - this software DOES contain bugs. Do not use it if that fact will bother you. All software contains bugs, of course, but beta software is our chance to find and remove as many of them as possible before unleashing it for all users. You, our beta test partners in this endeavor, are helping by exposing yourself to the risk of failure and then letting us know how it went. This is vital, you need to let us know when things are not happening as you would expect, or if they are (so we know someone is testing).
-
-Take backups! Please. The files written by XTrackCAD 5.2.0 are versioned to only be read by 5.2.0, but it can also read files from earlier versions. If you get into trouble, please reach out, we may be able to help - but not if you didn't back-up.
-
-We will fix important bugs you find by issuing perodic Beta updates. We may not change the code if what you would expect is impossible or would break what we are trying to achieve overall, but we promise that we will consider all your input as carefully as we can. Obviously if the program fails in some way, let us know. But also let us know when you can't work things out, or the way things seem to work seems irrational.  Exercise the Documentation as well (read the Help manual when you get stuck - there's a handy F1 shortcut to the pages for the current function now...)
+We will fix important bugs you find by issuing a dot release. 
 
 To report bugs, please use the SourceForge bugs reporting page https://sourceforge.net/p/xtrkcad-fork/bugs/
 
-To discuss the Beta, please use the user forum https://xtrackcad.groups.io/g/main/topics
+To discuss the Release, please use the user forum https://xtrackcad.groups.io/g/main/topics
 
 # Notes on V5.2 UI Philosphy 
 
@@ -42,6 +38,7 @@ PS If you can't "track" with the new Select method, you can get back "Classic" S
 
 - Options->Command->Select Add and uncheck Select None
 - Toggle Magnetic Snap Off
+- Also Options->Display->Dont suppress System Cursor
 
 # Install Notes
 
@@ -61,16 +58,16 @@ Try https://www.microsoft.com/en-US/download/details.aspx?id=48145
 
 ## Linux
 
-Installing the Debian package (xtrkcad-setup-5.2.0Beta2.0-1.x86_64.deb) or the RPM package (xtrkcad-setup-5.2.0Beta2.0-1.x86_64.rpm) will install in /usr/local/bin/ and /usr/local/share/.
+Installing the Debian package (xtrkcad-setup-5.2.0GA-1.x86_64.deb) or the RPM package (xtrkcad-setup-5.2.0Beta2.0-1.x86_64.rpm) will install in /usr/local/bin/ and /usr/local/share/.
 Super-user access will be required to install this.
 Be aware that you don't invoke any other existing *xtrkcad* installation when running the program.
 
 The debian package is new but better integrated, and we recommend Debian-type distro users try it first.
 
-Installing the shell archive xtrkcad-setup-5.2.0Beta2.0-1.x86_64.sh will install in the current directory.  You will be given the choice of whether to install the bin/ and share/ directories in the current directory or in a subdirectory (xtrkcad-setup-5.2.0Beta2.0-1.x86_64/).
+Installing the shell archive xtrkcad-setup-5.2.0GA-1.x86_64.sh will install in the current directory.  You will be given the choice of whether to install the bin/ and share/ directories in the current directory or in a subdirectory (xtrkcad-setup-5.2.0Beta2.0-1.x86_64/).
 You must set the environment variable XTRKCADLIB to the location of the share/xtrkcad directory:
 - *export XTRKCADLIB=`pwd`/share/xtrkcad* or
-- *export XTRKCADLIB=`pwd`/xtrkcad-setup-5.2.0Beta2.0-1.x86_64/share/xtrkcad*
+- *export XTRKCADLIB=`pwd`/xtrkcad-setup-5.2.0GA-1.x86_64/share/xtrkcad*
 
 To run *xtrkcad* you will need to run it from a terminal window.  For the shell archive, the installed bin/ directory must be in your path or the path to the bin/ directory must be specified.
 We're working on integrating *xtrkcad* with the menu system.
@@ -178,7 +175,7 @@ You will need to have installed the correct level of XQuartz for your level of O
 
 Once the XQuartz package has installed go to the XtrkCAD icon in Applications and double click on it. You may again be told the program is not signed. If so, again go to Systems Preferences->Security & Privacy and hit "Run Anyway".
 
-On Catalina, you will need to start the program by Right-clicking on the icon and selecting "Open".
+On Catalina, you will need to start the program for the first time by Right-clicking on the icon and selecting "Open".
 
 ## Linux ##
 

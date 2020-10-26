@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.0 GA]
+ 
+## Bugs
+
++ Abend when searching in the parmlib
++ SplitLine command places last point at origin
++ Warning-track added to add back system cursor when apporaching the edge of the drawing surface
++ Fix poistion of elevation label for Bezier and Cornu Tracks
++ Improved message when grouping with invalid track
++ Fix some snapping in draw with +Alt
++ Fix Grouping of draw objects with no tracks
+
+## Added
+
++ Option to not suppress system cursor when appliaction cursor shown
+
 ## [5.2.0 Beta 3.0] 
 
 ## Bugs
