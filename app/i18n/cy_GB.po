@@ -1,16 +1,15 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# XTRKCAD Welsh Transalation.
+# Copyright (C) 2020 XTrackCAD.org
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
 # 
 # Translators:
 # Adam J M Richards <adamjmrichards@gmail.com>, 2020
 # 
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
+"Project-Id-Version: XTrackCAD 5.2.0GA\n"
+"Report-Msgid-Bugs-To: https://sourceforge.net/p/xtrkcad-fork/bugs/\n"
 "POT-Creation-Date: 2020-10-26 17:04+0100\n"
 "PO-Revision-Date: 2020-08-27 16:39+0000\n"
 "Last-Translator: Adam J M Richards <adamjmrichards@gmail.com>, 2020\n"
