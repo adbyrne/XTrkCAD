@@ -1,16 +1,15 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# XTrackCAD German Translation.
+# Copyright (C) 2020 XTrackCAD.org
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Martin Fischer <m_fischer@users.sourceforge.net>, 2020
 # 
 # Translators:
 # Martin Fischer <m_fischer@users.sourceforge.net>, 2020
 # 
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
+"Project-Id-Version: XTrackCAD 5.2.0GA\n"
+"Report-Msgid-Bugs-To: https://sourceforge.net/p/xtrkcad-fork/bugs/\n"
 "POT-Creation-Date: 2020-10-26 17:04+0100\n"
 "PO-Revision-Date: 2020-08-27 16:39+0000\n"
 "Last-Translator: Martin Fischer <m_fischer@users.sourceforge.net>, 2020\n"
@@ -12394,7 +12393,7 @@ msgstr ""
 
 #: ../../../../build/work/app/i18n/custmsg.h:483
 msgid " \n"
-msgstr " \\n"
+msgstr " \n"
 
 #. i18n:
 #. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:39
