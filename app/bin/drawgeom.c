@@ -702,8 +702,12 @@ STATUS_T DrawGeomMouse(
 		wSetCursor(mainD.d,defaultCursor);
 		if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )
 			|| (context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ){ ;
-		} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||  context->Op == OP_BENCH ) {
+		} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||
+				   context->Op == OP_BENCH || context->Op == OP_TBLEDGE ) {
 			tempSegs(0).u.l.pos[1] = pos1;
+		} else if ((context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3) ||
+				(context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3)) {
+			;
 		} else {
 			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
 			if (context->ArcData.type == curveTypeStraight) {
