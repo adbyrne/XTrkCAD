@@ -676,6 +676,8 @@ Either the left mouse button (for changing length or creating a tangent track) o
 
 \n The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.
 
+\n The ends of a \e{Ruler} or the ends and origin of a \e{Protractor} can be dragged to new positions
+
 \n A \e{Box} or a \e{FilledBox} can be modified by selecting a corner and dragging in two dimensions, or a side and dragging it orthogonally. This modifications preserve a 4-sided rectangle.
 
 \n The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed. Control "Pins" can be added, moved or selected and removed from \e{Cornus}.

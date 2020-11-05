@@ -336,6 +336,7 @@ ANGLE_T GetPrintAngle();
 /* cruler.c */
 void RulerRedraw( BOOL_T );
 STATUS_T ModifyRuler( wAction_t, coOrd );
+STATUS_T ModifyProtractor( wAction_t, coOrd );
 
 /* dialogs */
 void OutputBitMap( void );
