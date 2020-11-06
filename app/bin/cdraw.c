@@ -507,7 +507,7 @@ static struct {
 		wIndex_t dimenSize;
 		descPivot_t pivot;
 		wIndex_t fontSizeInx;
-		char text[STR_LONG_SIZE];
+		char text[STR_HUGE_SIZE];
 		unsigned int layer;
 		wIndex_t lineType;
 		} drawData;
