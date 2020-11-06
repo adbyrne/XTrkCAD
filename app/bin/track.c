@@ -2043,8 +2043,10 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		UndrawNewTrack( trk );
 	    UndoModify( trk );
 		rc = splitCmd( trk, pos, ep, leftover, &epl, &ep1 );
-		if (*leftover)
+		if (*leftover) {
+			SetTrkLayer(*leftover,GetTrkLayer( trk ));
 			DrawNewTrack( *leftover );
+		}
 		DrawNewTrack( trk );
 		return rc;
 	}

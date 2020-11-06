@@ -65,6 +65,7 @@ static BOOL_T modifyBezierMode;
 static BOOL_T modifyCornuMode;
 static BOOL_T modifyDrawMode;
 static BOOL_T modifyRulerMode;
+static BOOL_T modifyProtractorMode;
 static BOOL_T modifyExtendMode;
 
 
@@ -272,28 +273,39 @@ STATUS_T CmdModify(
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;
 		modifyExtendMode = FALSE;
+		modifyRulerMode = FALSE;
+		modifyProtractorMode = FALSE;
 		return C_CONTINUE;
 
 	case C_DOWN:
 	case C_LDOUBLE:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (modifyProtractorMode)
+			return ModifyProtractor(C_DOWN, pos);
 		if (modifyBezierMode)
 			return ModifyBezier(C_DOWN, pos);
 		if (modifyCornuMode)
 			return ModifyCornu(C_DOWN, pos);
 		if (modifyDrawMode)
 			return ModifyDraw(C_DOWN, pos);
+
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs(1).color = wDrawColorBlack;
 		tempSegs(1).width = 0;
 		tempSegs_da.cnt = 0;
-		Dex.Trk = OnTrack( &pos, TRUE, FALSE );
+		Dex.Trk = OnTrack( &pos, FALSE, FALSE );
 		//Dex.Trk = trk;
 		if (Dex.Trk == NULL) {
-			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE )
+			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE ) {
 				modifyRulerMode = TRUE;
+			} else if (ModifyProtractor( C_DOWN, pos ) == C_CONTINUE ) {
+				modifyProtractorMode = TRUE;
+			} else {
+				InfoMessage("Not on object, or Ruler, or Protractor");
+				wBeep();
+			}
 			return C_CONTINUE;
 		}
 		if (!CheckTrackLayer( Dex.Trk ) ) {
@@ -425,12 +437,16 @@ STATUS_T CmdModify(
 				&& (!(GetLayerFrozen(GetTrkLayer(t)) || GetLayerModule(GetTrkLayer(t))))
 				&& (QueryTrack(t, Q_IS_DRAW ) && !QueryTrack(t, Q_IS_TEXT)) ) {
 			CreateEndAnchor(pos,FALSE);
+		} else {
+			ModifyRuler (wActionMove, pos);
 		}
 		return C_CONTINUE;
 
 	case C_MOVE:
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
+		if ( modifyProtractorMode )
+			return ModifyProtractor( C_MOVE, pos );
 		if (Dex.Trk == NULL)
 			return C_CONTINUE;
 		if ( modifyBezierMode )
@@ -457,6 +473,8 @@ STATUS_T CmdModify(
 			return C_CONTINUE;
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
+		if ( modifyProtractorMode)
+			return ModifyProtractor( C_UP, pos);
 		if ( modifyBezierMode )
 			return ModifyBezier( C_UP, pos);
 		if (modifyCornuMode)
@@ -481,6 +499,7 @@ extendTrack:
 		changeTrackMode = TRUE;
 		modifyExtendMode = TRUE;
 		modifyRulerMode = FALSE;
+		modifyProtractorMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;

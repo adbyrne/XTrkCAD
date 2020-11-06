@@ -398,7 +398,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	selectedTrackCount = 0;
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
-		if ((!select) || GetLayerVisible( GetTrkLayer( trk ))) {
+		if ((!select) || (GetLayerVisible( GetTrkLayer( trk )) && !GetLayerFrozen(GetTrkLayer( trk )) )) {
 			if (select)
 				selectedTrackCount++;
 			if ((GetTrkSelected(trk)!=0) != select) {
@@ -421,7 +421,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	}
 }
 
-/* Invert selected state of all visible non-module objects.
+/* Invert selected state of all visible non-module, non-frozen objects.
  *
  * \param none
  * \return none
@@ -434,7 +434,7 @@ EXPORT void InvertTrackSelect( void *ptr )
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
 		if (GetLayerVisible( GetTrkLayer( trk )) &&
-			!GetLayerModule(GetTrkLayer( trk ))) {
+			!GetLayerModule(GetTrkLayer( trk )) && !GetLayerFrozen(GetTrkLayer( trk )) ) {
 			SelectOneTrack( trk, GetTrkSelected(trk)==0 );
 		}
 	}
