@@ -58,19 +58,32 @@ Try https://www.microsoft.com/en-US/download/details.aspx?id=48145
 
 ## Linux
 
-Installing the Debian package (xtrkcad-setup-5.2.0GA-1.x86_64.deb) or the RPM package (xtrkcad-setup-5.2.0Beta2.0-1.x86_64.rpm) will install in /usr/local/bin/ and /usr/local/share/.
+Installing the Debian package (xtrkcad-setup-5.2.0GA-1.x86_64.deb) or the RPM package (xtrkcad-setup-5.2.0Beta2.0-1.x86_64.rpm) will install in /usr/bin/ and /usr/share/.
 Super-user access will be required to install this.
 Be aware that you don't invoke any other existing *xtrkcad* installation when running the program.
 
 The debian package is new but better integrated, and we recommend Debian-type distro users try it first.
+
+Note: newer versions of Ubuntu (20.04) may have installation issues:
 
 Installing the shell archive xtrkcad-setup-5.2.0GA-1.x86_64.sh will install in the current directory.  You will be given the choice of whether to install the bin/ and share/ directories in the current directory or in a subdirectory (xtrkcad-setup-5.2.0Beta2.0-1.x86_64/).
 You must set the environment variable XTRKCADLIB to the location of the share/xtrkcad directory:
 - *export XTRKCADLIB=`pwd`/share/xtrkcad* or
 - *export XTRKCADLIB=`pwd`/xtrkcad-setup-5.2.0GA-1.x86_64/share/xtrkcad*
 
+This version of XTrkCad is built using libzip4.  Newer versions of Ubuntu (20.04) have replaced libzip4 with libzip5.
+In this case the debian package will not install and if installed will not run.
+You will need to get libzip4 from
+https://ubuntu.pkgs.org/18.04/ubuntu-universe-amd64/libzip4_1.1.2-1.1_amd64.deb.html
+
+You can run *xtrkcad* by selecting it from the system menu (under Graphics), by double clicking on a *.xtc* file or by running *xtrkcad* from a command window.
 To run *xtrkcad* you will need to run it from a terminal window.  For the shell archive, the installed bin/ directory must be in your path or the path to the bin/ directory must be specified.
-We're working on integrating *xtrkcad* with the menu system.
+
+If after installation you want a *XTrackCad* icon on your desktop, run the following from a command window as a normal user (not root)
+    xdg-desktop-icon install --novendor ${INSTALLDIR}/applications/xtrkcad.desktop;
+    chmod +x ~/Desktop/xtrkcad.desktop
+where INSTALLDIR is the *xtrkcad* installion directory (usually /usr/share/xtrkcad).
+Note: this may not work on Ubuntu 20.04.
 
 *webkitgtk* is not used for displaying help.  Instead your system browser will be used.
 
@@ -179,7 +192,7 @@ On Catalina, you will need to start the program for the first time by Right-clic
 
 ## Linux ##
 
-XTrackCAD for LINUX is shipped as a RPM file and a self extracting archive.
+XTrackCAD for LINUX is shipped as a RPM file, a DEBIAN package and a self extracting archive.
 
 If you change the install package you should set the XTRKCADLIB enviroment variable 
 
@@ -191,7 +204,17 @@ env XTRKCADLIB="/usr/local/share/xtrkcad/" xtrkcad
 
 Use your operating system's package manager to install XTrackCAD.
 
+### Installing from the Debian package. ###
 
+Double click on the .deb file from the file manager which will invoke the 'Ubuntu Software' application which can be used to install XTrkCad.
+
+New versions of Ubuntu (20.04) may encounter some issues:
+
++ In some cases the default handler for .deb files is the Archive Manager instead of the Software Installer.  In which case see <https://itsfoss.com/cant-install-deb-file-ubuntu/>
++  The 'Software Install' apt complains that 'failed to install file: not supported', you need to change the default handler to gdebi.  See <https://itectec.com/ubuntu/ubuntu-problem-installing-deb-in-software-install-ubuntu-20-04/>
++ if all else fails, try this from a command window
+    sudo dpkg -i xtrkcad-setup-5.2.0Beta3.0-1.x86_64.deb
+ 
 ### Installing from the self-extracting archive. ###
 
 After downloading open a command line then as root run
@@ -256,6 +279,7 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 * Use XTRKCAD_USE_DOXYGEN to enable the production of type, function, etc.,
   documentation from the the source code. Requires doxygen if enabled.
   Enable if and only if you intend to hack on the code.
+* toggle the advanced mode ('t') and set CMAKE_C_FLAGS to '-Wpointer-sign'
 * If you made any changes, press the "c" key again to update your new
   configuration.
 * Once everything is configured to your satisfaction, press the "g" key to
@@ -330,9 +354,9 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 The following web addresses will be helpful for any questions or bug
 reports
 
-- The Yahoo!Group mailing list <http://groups.yahoo.com/projects/XTrkCad>
-- The project website for the open source development <http://www.xtrackcad.org/>
-- The official Sourceforge site <http://www.sourceforge.net/groups/xtrkcad-fork/>
+- The group mailing list <https://xtrackcad.groups.io/g/main>
+- The group Wiki <http://xtrkcad.org>
+- The official Sourceforge site <https://sourceforge.net/projects/xtrkcad-fork>
 
 Thanks for your interest in XTrackCAD.
  
