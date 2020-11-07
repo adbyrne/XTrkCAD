@@ -276,13 +276,20 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 					hi->y = pc.y + radius;
 					break;
 				}
-				if ( a0 + a1 >= 360.0 )
+
+				if ( a0 + a1 >= 360.0  )
 					hi->y = pc.y + radius;
 				if ( a0 < 90.0 && a0+a1 >= 90.0 )
 					hi->x = pc.x + radius;
-				if ( a0 < 180 && a0+a1 >= 180.0 )
+				if ( a0 > 90.0 && a0+a1 >= 450.0 )
+					hi->x = pc.x + radius;
+				if ( a0 < 180.0 && a0+a1 >= 180.0 )
+					lo->y = pc.y - radius;
+				if (a0 > 180.0 && a0+a1 >= 540.0 )
 					lo->y = pc.y - radius;
 				if ( a0 < 270.0 && a0+a1 >= 270.0 )
+					lo->x = pc.x - radius;
+				if ( a0 > 270.0 && a0+a1 >= 630.0 )
 					lo->x = pc.x - radius;
 			}
 			if ( segPtr->type == SEG_STRLIN ) {
