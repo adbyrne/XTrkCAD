@@ -1830,7 +1830,9 @@ static BOOL_T QueryDraw( track_p trk, int query )
 		if ((xx->segs[0].type == SEG_STRLIN) ||
 			(xx->segs[0].type == SEG_CRVLIN) ||
 			(xx->segs[0].type == SEG_BEZLIN) ||
-			((xx->segs[0].type == SEG_POLY) && (xx->segs[0].u.p.polyType == POLYLINE))
+			(xx->segs[0].type == SEG_FILCRCL) ||
+			(xx->segs[0].type == SEG_FILPOLY) ||
+			(xx->segs[0].type == SEG_POLY)
 		) return TRUE;
 		else return FALSE;
 	default:
@@ -1987,6 +1989,8 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 
 		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
 
+		tempSegs(0).type = -1;
+
 		switch (xx->segs[0].type) {
 			case SEG_STRLIN:
 				REORIGIN(p0,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
@@ -2000,39 +2004,49 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 				xx->segs[0].u.l.pos[0] = 1-ep?pos:p0;
 				xx->segs[0].u.l.pos[1] = 1-ep?p1:pos;
 				break;
-			case SEG_CRVLIN:;
+			case SEG_CRVLIN:
+			case SEG_FILCRCL: ;
 				coOrd c;
 				REORIGIN(c, xx->segs[0].u.c.center, xx->angle, xx->orig);
 				coOrd c0,c1;
-				Translate(&c0,c,xx->segs[0].u.c.a0+xx->angle,xx->segs[0].u.c.radius);
-				Translate(&c1,c,xx->segs[0].u.c.a1+xx->segs[0].u.c.a0+xx->angle,xx->segs[0].u.c.radius);
-				tempSegs(0).color = xx->segs[0].color;
-				tempSegs(0).width = xx->segs[0].width;
-				tempSegs_da.cnt = 1;
-				tempSegs(0).type = SEG_CRVLIN;
-				tempSegs(0).u.c.center = c;
-				tempSegs(0).u.c.radius = xx->segs[0].u.c.radius;
-				if (ep) {
-					tempSegs(0).u.c.a0 = FindAngle(c,c0);
-					tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(c,pos)-tempSegs(0).u.c.a0);
-				} else {
-					tempSegs(0).u.c.a0 = FindAngle(c,pos);
-					tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(c,c1)-tempSegs(0).u.c.a0);
-				}
-				xx->segs[0].u.c.center = c;
-				if (ep) {
-					xx->segs[0].u.c.a0 = FindAngle(c,pos);
-					xx->segs[0].u.c.a1 = NormalizeAngle(FindAngle(c,c1)-xx->segs[0].u.c.a0);
-				} else {
+				if (xx->segs[0].type == SEG_FILCRCL || xx->segs[0].u.c.a1 >= 360.0) {
+					Translate(&c0,c,FindAngle(c,pos),xx->segs[0].u.c.radius);
+					c1 = c0;
+					xx->segs[0].type = SEG_CRVLIN;
 					xx->segs[0].u.c.a0 = FindAngle(c,c0);
-					xx->segs[0].u.c.a1 = NormalizeAngle(FindAngle(c,pos)-xx->segs[0].u.c.a0);
+					xx->segs[0].u.c.a1 = 355.0;
+				} else {
+					Translate(&c0,c,xx->segs[0].u.c.a0+xx->angle,xx->segs[0].u.c.radius);
+					Translate(&c1,c,xx->segs[0].u.c.a1+xx->segs[0].u.c.a0+xx->angle,xx->segs[0].u.c.radius);
+					tempSegs(0).color = xx->segs[0].color;
+					tempSegs(0).width = xx->segs[0].width;
+					tempSegs_da.cnt = 1;
+					tempSegs(0).type = SEG_CRVLIN;
+					tempSegs(0).u.c.center = c;
+					tempSegs(0).u.c.radius = xx->segs[0].u.c.radius;
+					if (ep) {
+						tempSegs(0).u.c.a0 = FindAngle(c,c0);
+						tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(c,pos)-tempSegs(0).u.c.a0);
+					} else {
+						tempSegs(0).u.c.a0 = FindAngle(c,pos);
+						tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(c,c1)-tempSegs(0).u.c.a0);
+					}
+					xx->segs[0].u.c.center = c;
+					if (ep) {
+						xx->segs[0].u.c.a0 = FindAngle(c,pos);
+						xx->segs[0].u.c.a1 = NormalizeAngle(FindAngle(c,c1)-xx->segs[0].u.c.a0);
+					} else {
+						xx->segs[0].u.c.a0 = FindAngle(c,c0);
+						xx->segs[0].u.c.a1 = NormalizeAngle(FindAngle(c,pos)-xx->segs[0].u.c.a0);
+					}
 				}
 				break;
 			case SEG_POLY:
-				if (xx->segs[0].u.p.polyType != POLYLINE) return FALSE;
+			case SEG_FILPOLY:
 				d = 10000.0;
 				DIST_T dd;
 				BOOL_T onPoint = FALSE;
+				BOOL_T closeSeg = FALSE;
 				coOrd end;
 				int polyInx = -1;
 				for ( int inx=0; inx<xx->segs[0].u.p.cnt-1; inx++ ) {
@@ -2056,8 +2070,64 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 						} else {
 							if (!IsClose(d)) continue;
 							polyInx = inx;
+							pos = p0;
+							break;
 						}
 					}
+				}
+				//If Closed, look at closing line
+				if ( !onPoint && (xx->segs[0].u.p.polyType != POLYLINE)) {
+					coOrd pl0,pl1;
+					p0 = pos;
+					REORIGIN(pl0,xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt,xx->angle,xx->orig);
+					REORIGIN(pl1,xx->segs[0].u.p.pts[0].pt,xx->angle,xx->orig);
+					dd = LineDistance( &p0, pl0, pl1 );
+					if (d > dd) {
+						d = dd;
+						if (IsClose(d)) {
+							polyInx = xx->segs[0].u.p.cnt-1;
+							closeSeg=TRUE;
+							pos = p0;
+						}
+					}
+				}
+				//If Closed, split into a PolyLine
+				if (xx->segs[0].u.p.polyType != POLYLINE) {
+					if (!IsClose(d)) {
+						*leftover = NULL;
+						return FALSE;
+					}
+					end = pos;
+					REORIGIN(end,end,xx->angle,xx->orig);
+
+					trkSeg_t temp;  //Buffer for expanded array
+					temp.u.p.cnt = xx->segs[0].u.p.cnt + 2 - onPoint;
+					temp.u.p.pts = MyMalloc(temp.u.p.cnt*sizeof(pts_t));
+					int j = 0;
+					temp.u.p.pts[j].pt = end;
+					temp.u.p.pts[j].pt_type = wPolyLineStraight;
+					j++;
+					/* After split */
+					for (int i=polyInx+1;i<=xx->segs[0].u.p.cnt-1;i++,j++) {
+						temp.u.p.pts[j] = xx->segs[0].u.p.pts[i];
+						REORIGIN(temp.u.p.pts[j].pt,temp.u.p.pts[j].pt,xx->angle,xx->orig);
+					}
+					/* Before split */
+					for (int i=0;i<=polyInx;i++,j++) {
+						temp.u.p.pts[j] = xx->segs[0].u.p.pts[i];
+						REORIGIN(temp.u.p.pts[j].pt,temp.u.p.pts[j].pt,xx->angle,xx->orig);
+					}
+					if (!onPoint) {
+						temp.u.p.pts[temp.u.p.cnt-1].pt = end;
+					}
+					temp.u.p.pts[temp.u.p.cnt-1].pt_type = wPolyLineStraight;
+
+					//Swap Pts Array into existing track
+					MyFree(xx->segs[0].u.p.pts);
+					xx->segs[0].u.p.pts = temp.u.p.pts;
+					xx->segs[0].u.p.cnt = temp.u.p.cnt;
+					xx->segs[0].u.p.polyType = POLYLINE;
+					break;
 				}
 				//Check if on an end-point -> reject
 				if ((polyInx <= 0 || polyInx >= xx->segs[0].u.p.cnt-1) && onPoint ) {
@@ -2177,14 +2247,17 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 			default:
 				return FALSE;
 		}
-		*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+		*leftover = NULL;
+		if (tempSegs(0).type != -1) {
+			*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+			struct extraData * yy = GetTrkExtraData(*leftover);
+			yy->lineType = xx->lineType;
+		}
 		if (tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.pts)  {
 			MyFree(tempSegs(0).u.p.pts);
 			tempSegs(0).u.p.cnt = 0;
 			tempSegs(0).u.p.pts = NULL;
 		}
-		struct extraData * yy = GetTrkExtraData(trk);
-		yy->lineType = xx->lineType;
 		xx->orig = zero;
 		xx->angle = 0.0;
 		ComputeDrawBoundingBox(trk);

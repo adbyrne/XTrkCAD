@@ -1886,9 +1886,15 @@ For detail about;
 
 \S2{cmdSplitDraw} Split a Draw Object
 
-The \f{Split Draw} command can be used to split an open-ended draw object (Straight Line, Curved Line, PolyLine) it will also split a Circle Line into two draw parts.
+The \f{Split Draw} command can be used to split many draw object (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). Polygons and Circles are split into PolyLines and Curves.
 
 Until a split point is selected, the split point under the cursor will have a blue marker. 
 
 If the object being split is a PolyLine, the split will either result in a Straight Line and a PolyLine or two PolyLines depending on where the split is along the line. (PolyLines must always have at least 2 segments).
+
+If the object is a Circle, the result is an circular arc split at the point with a small gap.
+
+If the object is a Polygon, a PolyLine with two end points at the split results. 
+
+Filled Circles and Polygons will be unfilled after the split.
 
