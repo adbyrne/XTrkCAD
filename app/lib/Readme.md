@@ -194,7 +194,7 @@ On Catalina, you will need to start the program for the first time by Right-clic
 
 XTrackCAD for LINUX is shipped as a RPM file, a DEBIAN package and a self extracting archive.
 
-If you change the install package you should set the XTRKCADLIB enviroment variable 
+If you change the install location you should set the XTRKCADLIB enviroment variable 
 
 For example if the install is within the /usr/local/share/xtrkcad directory. you could use -
 
@@ -213,6 +213,7 @@ New versions of Ubuntu (20.04) may encounter some issues:
 + In some cases the default handler for .deb files is the Archive Manager instead of the Software Installer.  In which case see <https://itsfoss.com/cant-install-deb-file-ubuntu/>
 +  The 'Software Install' apt complains that 'failed to install file: not supported', you need to change the default handler to gdebi.  See <https://itectec.com/ubuntu/ubuntu-problem-installing-deb-in-software-install-ubuntu-20-04/>
 + if all else fails, try this from a command window
+
     sudo dpkg -i xtrkcad-setup-5.2.0Beta3.0-1.x86_64.deb
  
 ### Installing from the self-extracting archive. ###
@@ -255,7 +256,7 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
   "~/src/xtrkcad".
   Note that the command for read-only access to Mercurial is
 
-    hg clone http://hg.code.sf.net/p/xtrkcad-fork/xtrkcad xtrkcad-fork-xtrkcad
+    hg clone http://hg.code.sf.net/p/xtrkcad-fork/xtrkcad ~/src/xtrkcad
 
 * Move to the V5.2 branch using "hg update V5.2" or for 'default' use "hg update default"
 * Create a separate build directory; for these instructions I assume that
@@ -271,7 +272,7 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
   four options to configure: CMAKE_BUILD_TYPE, CMAKE_INSTALL_PREFIX,
   XTRKCAD_USE_GTK, and XTRKCAD_USE_GTK_CAIRO.
 * Use CMAKE_BUILD_TYPE to control the build type. Enter "Debug" for a debug
-  build, "Release" for a release build, etc.
+  build, "RelWithDebInfo" for a release build, etc.
 * Use CMAKE_INSTALL_PREFIX to control where the software will be installed.
   For this example, I assume "~/install/xtrkcad".
 * Use XTRKCAD_USE_GETTEXT to add new locales (language translations). Choose
