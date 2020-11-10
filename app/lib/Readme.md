@@ -253,15 +253,18 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 
 * Obtain the current sources from Mercurial; I assume that they are stored locally at
   "~/src/xtrkcad".
-  Note that the correct URL for read-only access to Mercurial is
-  <http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad>
-* Move to the V5.2 branch using "hg update V5.2"
+  Note that the command for read-only access to Mercurial is
+
+    hg clone http://hg.code.sf.net/p/xtrkcad-fork/xtrkcad xtrkcad-fork-xtrkcad
+
+* Move to the V5.2 branch using "hg update V5.2" or for 'default' use "hg update default"
 * Create a separate build directory; for these instructions I assume that
   your build directory is "~/build/xtrkcad".
 * Run CMake from the build directory, passing it the path to the source
   directory:
 
     $ cd ~/build/xtrkcad
+
     $ ccmake ~/src/xtrkcad
 
 * Press the "c" key to configure the build. After a few moments you will see
