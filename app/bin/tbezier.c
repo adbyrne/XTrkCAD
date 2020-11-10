@@ -883,7 +883,7 @@ static BOOL_T MergeBezier(
 			DisconnectTracks( trk1, 1-ep1, trk2, ep2 );
 		}
 	}
-	if (ep0 == 0) {
+	if (ep0 != 0) {
 		xx0->bezierData.pos[3] = xx1->bezierData.pos[3];
 		xx0->bezierData.pos[2] = xx1->bezierData.pos[2];
 	} else {
