@@ -1056,6 +1056,8 @@ static BOOL_T QueryBezier( track_p trk, int query )
 		return FALSE;
 		break;
 	case Q_FLIP_ENDPTS:
+		return GetTrkType(trk) == T_BEZIER?TRUE:FALSE;
+		break;
 	case Q_HAS_DESC:
 		return TRUE;
 		break;
