@@ -861,48 +861,7 @@ static BOOL_T MergeBezier(
 		track_p trk1,
 		EPINX_T ep1 )
 {
-	struct extraData *xx0 = GetTrkExtraData(trk0);
-	struct extraData *xx1 = GetTrkExtraData(trk1);
-	track_p trk2 = NULL;
-	EPINX_T ep2=-1;
-	BOOL_T tracks = FALSE;
-
-	if (IsTrack(trk0) && IsTrack(trk1) ) tracks = TRUE;
-	if (GetTrkType(trk0) != GetTrkType(trk1)) return FALSE;
-
-	if (ep0 == ep1)
-		return FALSE;
-    
-	UndoStart( _("Merge Bezier"), "MergeBezier( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
-	UndoModify( trk0 );
-	UndrawNewTrack( trk0 );
-	if (tracks) {
-		trk2 = GetTrkEndTrk( trk1, 1-ep1 );
-		if (trk2) {
-			ep2 = GetEndPtConnectedToMe( trk2, trk1 );
-			DisconnectTracks( trk1, 1-ep1, trk2, ep2 );
-		}
-	}
-	if (ep0 != 0) {
-		xx0->bezierData.pos[3] = xx1->bezierData.pos[3];
-		xx0->bezierData.pos[2] = xx1->bezierData.pos[2];
-	} else {
-		xx0->bezierData.pos[0] = xx1->bezierData.pos[0];
-		xx0->bezierData.pos[1] = xx1->bezierData.pos[1];
-	}
-	FixUpBezier(xx0->bezierData.pos,xx0,tracks);
-	ComputeBezierBoundingBox(trk0,xx0);
-	DeleteTrack( trk1, FALSE );
-	if (tracks && trk2) {
-		if (ep0 == 1)
-			SetTrkEndPoint( trk2, 1, xx0->bezierData.pos[0], xx0->bezierData.a0);
-		else
-			SetTrkEndPoint( trk2, 2, xx0->bezierData.pos[3], xx0->bezierData.a1);
-		ConnectTracks( trk0, ep0, trk2, ep2 );
-	}
-	DrawNewTrack( trk0 );
-
-	return TRUE;
+	return FALSE;
 }
 
 

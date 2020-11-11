@@ -336,7 +336,7 @@ For detail about;
 
 \u000
 
-\dd Using Normal Easments where tracks are either joined with a straight or a 'simple curve' \k{joinNormalEasment}, 
+\dd Using Normal Easements where tracks are either joined with a straight or a 'simple curve' \k{joinNormalEasment}, 
 e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms})
 
 \u000
@@ -350,6 +350,8 @@ e.g. one which uses a curve in a single direction as opposed to using reverse cu
 \rule
 
 \S2{joinNormalEasment} Join with Normal Easement
+
+This type of join does not work for Bezier or Cornu tracks, use Cornu Easements (\K{joinCornu}) for these tracks instead.
 
 \u000
 

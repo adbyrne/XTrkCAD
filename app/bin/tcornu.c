@@ -1014,76 +1014,7 @@ static BOOL_T MergeCornu(
 		track_p trk1,
 		EPINX_T ep1 )
 {
-	struct extraData *xx0 = GetTrkExtraData(trk0);
-	struct extraData *xx1 = GetTrkExtraData(trk1);
-	track_p trk_after,trk_before;
-	EPINX_T ep_before,ep_after=-1;
-	coOrd p[2];
-	coOrd c[2];
-	ANGLE_T a[2];
-	DIST_T r[2];
-
-
-	if (!IsTrack(trk0) || !IsTrack(trk1) ) return FALSE;
-	if (GetTrkType(trk0) != GetTrkType(trk1)) return FALSE;
-	if (GetEndPtConnectedToMe(trk0,trk1) != ep0) return FALSE;
-	if (GetEndPtConnectedToMe(trk1,trk0) != ep1) return FALSE;
-
-	if (ep0 == ep1)
-		return FALSE;
-    
-	UndoStart( _("Merge Cornu"), "MergeCornu( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
-	p[0] = xx0->cornuData.pos[0];
-	p[1] = xx1->cornuData.pos[1];
-	a[0] = xx0->cornuData.a[0];
-	a[1] = xx1->cornuData.a[1];
-	c[0] = xx0->cornuData.c[0];
-	c[1] = xx1->cornuData.c[1];
-	r[0] = xx0->cornuData.r[0];
-	r[1] = xx1->cornuData.r[1];
-	track_p trk3 = NewCornuTrack(p,c,a,r,NULL,0);
-	if (trk3==NULL) {
-		wBeep();
-		InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
-									p[0].x,p[0].y,
-									p[1].x,p[1].y,
-									c[0].x,c[0].y,
-									c[1].x,c[1].y,
-									a[0],a[1],
-									FormatDistance(r[0]),FormatDistance(r[1]));
-		UndoEnd();
-		return FALSE;
-	}
-
-	UndoModify( trk0 );
-	UndoModify( trk1 );
-	UndrawNewTrack( trk0 );
-	UndrawNewTrack( trk1 );
-	trk_after = GetTrkEndTrk( trk1, 1-ep1 );
-	if (trk_after) {
-		ep_after = GetEndPtConnectedToMe( trk_after, trk1 );
-		DisconnectTracks( trk1, 1-ep1, trk_after, ep_after );
-	}
-	trk_before = GetTrkEndTrk( trk0, 1-ep0 );
-	if (trk_before) {
-		ep_before = GetEndPtConnectedToMe( trk_before, trk0 );
-		DisconnectTracks( trk0, 1-ep1, trk_before, ep_before );
-	}
-
-	DeleteTrack( trk1, TRUE );
-	DeleteTrack( trk0, TRUE );
-	if (trk_after) {
-		SetTrkEndPoint( trk_after, ep_after, xx0->cornuData.pos[1], NormalizeAngle(xx0->cornuData.a[1]+180));
-		ConnectTracks( trk3, 1, trk_after, ep_after);
-	}
-	if (trk_before) {
-		SetTrkEndPoint( trk_before, ep_before, xx0->cornuData.pos[0], NormalizeAngle(xx0->cornuData.a[0]+180));
-		ConnectTracks( trk3, 0, trk_before, ep_before);
-	}
-	DrawNewTrack( trk3 );
-	UndoEnd();
-
-	return TRUE;
+	return FALSE;
 }
 
 BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track) {

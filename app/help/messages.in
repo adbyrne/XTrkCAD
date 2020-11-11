@@ -233,6 +233,13 @@ You are trying to \f{Join} a section of track with itself. Different tracks must
 Refer to \k{cmdJoin} for detail.
 END
 
+#cjoin.c 
+MESSAGE MSG_JOIN_NOTBEZIERORCORNU
+Cannot Join Bezier or Cornu track if Easement is not Cornu
+HELP
+You must change the Easement value to Cornu in order to join Bezier or Cornu Tracks
+END
+
 # cjoin.c
 MESSAGE MSG_SELECTED_TRACKS_PARALLEL
 Cannot Join; Selected tracks are parallel.

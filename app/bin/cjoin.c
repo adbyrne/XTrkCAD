@@ -849,6 +849,11 @@ static STATUS_T CmdJoin(
 		trackParams_t moveParams;
 		if (!GetTrackParams( PARAMS_1ST_JOIN, trk, pos, &moveParams ))
 			return C_CONTINUE;
+		if (moveParams.type == curveTypeBezier || moveParams.type == curveTypeCornu) {
+			if (!(easementVal<0)) {
+				return C_CONTINUE;
+			}
+		}
 		ep = PickUnconnectedEndPointSilent(pos,trk);
 		if (ep <0) return C_CONTINUE;
 		if (IsClose(FindDistance(GetTrkEndPos(trk,ep),pos)))
@@ -888,6 +893,12 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 						GetTrkIndex(Dj.inp[0].trk), Dj.inp[0].pos.x, Dj.inp[1].pos.y ) )
 			if (!GetTrackParams( PARAMS_1ST_JOIN, Dj.inp[0].trk, pos, &Dj.inp[0].params ))
 				return C_CONTINUE;
+			if (Dj.inp[0].params.type == curveTypeBezier || Dj.inp[0].params.type == curveTypeCornu) {
+				if (!(easementVal<0 && Dj.cornuMode)) {
+					ErrorMessage( MSG_JOIN_NOTBEZIERORCORNU);
+					return C_CONTINUE;
+				}
+			}
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
 			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
@@ -942,6 +953,12 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				if (GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != Dj.inp[0].trk) {
 					only_merge = TRUE;
 					ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
+					return C_CONTINUE;
+				}
+			}
+			if (Dj.inp[1].params.type == curveTypeBezier || Dj.inp[1].params.type == curveTypeCornu) {
+				if (!(easementVal<0 && Dj.cornuMode)) {
+					ErrorMessage( MSG_JOIN_NOTBEZIERORCORNU);
 					return C_CONTINUE;
 				}
 			}
