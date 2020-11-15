@@ -2307,7 +2307,7 @@ void startBalloonHelp(void)
                 return;
             }
 
-            balloonHelpButton->tipStr = hs = bh->value;
+            balloonHelpButton->tipStr = hs = _(bh->value);
         }
 
         if (newHelp) {

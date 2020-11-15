@@ -3053,7 +3053,7 @@ static STATUS_T CmdTurnoutHotBar(
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curTurnout->title );
 		InfoMessage( _("Place %s and draw into position"), message );
         wIndex_t listIndex = FindListItemByContext( turnoutListL, curTurnout );
-        if ( listIndex > 0 )
+        if ( listIndex >= 0 )
                 turnoutInx = listIndex;
         ParamLoadControls( &turnoutPG );
         ParamGroupRecord( &turnoutPG );

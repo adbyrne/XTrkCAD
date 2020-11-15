@@ -1096,7 +1096,7 @@ static STATUS_T CmdStructureHotBar(
 	switch (action & 0xFF) {
 
 	case C_START:
-		structureChange( CHANGE_PARAMS );
+		//structureChange( CHANGE_PARAMS );
 		if (curStructure == NULL) {
 			NoticeMessage( MSG_STRUCT_NO_STRUCTS, _("Ok"), NULL );
 			return C_TERMINATE;
@@ -1104,7 +1104,7 @@ static STATUS_T CmdStructureHotBar(
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curStructure->title );
 		InfoMessage( _("Place %s and draw into position"), message );
         wIndex_t listIndex = FindListItemByContext( structureListL, curStructure );
-        if ( listIndex > 0 )
+        if ( listIndex >= 0 )
             structureInx = listIndex;
 		ParamLoadControls( &structurePG );
 		ParamGroupRecord( &structurePG );

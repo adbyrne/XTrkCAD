@@ -3095,7 +3095,7 @@ void InitCmdTrain(wMenu_p menu)
     log_trainPlayback = LogFindIndex("trainPlayback");
     trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
     ParamRegister(&trainPG);
-    trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Train"),
+    trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
                   wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
                   NULL);
     stopI = wIconCreatePixMap(ballred);
