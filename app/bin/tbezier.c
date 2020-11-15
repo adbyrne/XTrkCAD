@@ -1601,7 +1601,7 @@ EXPORT track_p NewBezierLine( coOrd pos[4], trkSeg_t * tempsegs, int count, wDra
 {
 	struct extraData *xx;
 	track_p p;
-	p = NewTrack( 0, T_BZRLIN, 2, sizeof *xx );
+	p = NewTrack( 0, T_BZRLIN, 0, sizeof *xx );  //No endpoints
 	xx = GetTrkExtraData(p);
     xx->bezierData.pos[0] = pos[0];
     xx->bezierData.pos[1] = pos[1];
