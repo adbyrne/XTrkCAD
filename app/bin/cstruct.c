@@ -598,7 +598,7 @@ static void StructureDlgUpdate(
 	curStructure = to;
 	ShowPierL();
 	RedrawStructure();
-	ParamDialogOkActive( &structurePG, FALSE );
+	/* ParamDialogOkActive( &structurePG, FALSE ); */
 }
 
 
@@ -814,7 +814,6 @@ EXPORT STATUS_T CmdStructureAction(
 		Dst.state = 0;
 		Dst.angle = 00.0;
 		ShowPierL();
-		InfoMessage(_("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel"));
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -910,6 +909,13 @@ EXPORT STATUS_T CmdStructureAction(
 			DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );
 		return C_CONTINUE;
 
+	case C_LCLICK:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if ( curStructure == NULL ) return C_CONTINUE;
+		CmdStructureAction( C_DOWN, pos );
+	    CmdStructureAction( C_UP, pos );
+		return C_CONTINUE;
+
 	case C_CANCEL:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
@@ -954,7 +960,7 @@ static STATUS_T CmdStructure(
 
 	case C_START:
 		if (structureW == NULL) {
-			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")), _("Ok"), (paramActionOkProc)DoStructOk, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, StructureDlgUpdate );
+			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")), _("Close"), (paramActionOkProc)DoStructOk, wHide, TRUE, NULL, F_RESIZE, StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}
 		ParamDialogOkActive( &structurePG, FALSE );
@@ -1011,6 +1017,10 @@ static STATUS_T CmdStructure(
 			wShow( structureW );
 		InfoMessage( _("Left drag to move, right drag to rotate, or press Return or click Ok to finalize") );
 		return CmdStructureAction( action, pos );
+		return C_CONTINUE;
+
+	case C_LCLICK:
+		CmdStructureAction( action, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -1096,8 +1106,8 @@ static STATUS_T CmdStructureHotBar(
         wIndex_t listIndex = FindListItemByContext( structureListL, curStructure );
         if ( listIndex > 0 )
             structureInx = listIndex;
-		//ParamLoadControls( &structurePG );
-		//ParamGroupRecord( &structurePG );
+		ParamLoadControls( &structurePG );
+		ParamGroupRecord( &structurePG );
 		return CmdStructureAction( action, pos );
 
 	case wActionMove:

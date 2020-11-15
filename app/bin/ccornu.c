@@ -358,7 +358,7 @@ int createEndPoint(
 			Rotate(&cm,endHandle->end_curve,-a );
 			endHandle->mid_disp = cm.x-endHandle->end_curve.x;
 			curveData_t curveData;
-			PlotCurve(crvCmdFromCenter,pos0,endHandle->end_center, endHandle->end_curve, &curveData, FALSE);
+			PlotCurve(crvCmdFromCenter,pos0,endHandle->end_center, endHandle->end_curve, &curveData, FALSE, 0.0);
 			if (curveData.type == curveTypeStraight) {
 				coOrd pos_line[2];
 				Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)+90,trackGauge/2);

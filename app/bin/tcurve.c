@@ -1597,7 +1597,8 @@ EXPORT void PlotCurve(
 		coOrd pos1,
 		coOrd pos2,
 		curveData_t * curveData,
-		BOOL_T constrain )   //Make the Radius be in steps of radiusGranularity (1/8)
+		BOOL_T constrain,	//Make the Radius be in steps of radiusGranularity (1/8)
+		DIST_T desired_r)   //Target one radius if close
 {
 	DIST_T d0, d2, r;
 	ANGLE_T angle, a0, a1, a2;
@@ -1620,19 +1621,36 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 		} else if (a1 >= 179.0 && a1 <= 181.0) { 
 			curveData->type = curveTypeNone;
 		} else {
+			BOOL_T found = FALSE;
 			if (a1<180.0) {
 				a2 = NormalizeAngle( angle + 90.0 );
-				if (constrain)
-					curveData->curveRadius = ConstrainR( d0/sin(D2R(a1)) );
-				else
-					curveData->curveRadius = d0/sin(D2R(a1));
+				if (desired_r > 0.0) {
+					if (IsClose(fabs(d0/sin(D2R(a1))-desired_r))) {
+						curveData->curveRadius = desired_r;
+						found = TRUE;
+					}
+				}
+				if (!found) {
+					if (constrain)
+						curveData->curveRadius = ConstrainR( d0/sin(D2R(a1)) );
+					else
+						curveData->curveRadius = d0/sin(D2R(a1));
+				}
 			} else {
 				a1 -= 360.0;
 				a2 = NormalizeAngle( angle - 90.0 );
-				if (constrain)
-					curveData->curveRadius = ConstrainR( d0/sin(D2R(-a1)) );
-				else
-					curveData->curveRadius = d0/sin(D2R(-a1));
+				if (desired_r > 0.0) {
+					if (IsClose(fabs(d0/sin(D2R(-a1))-desired_r))) {
+						curveData->curveRadius = desired_r;
+						found = TRUE;
+					}
+				}
+				if (!found){
+					if (constrain)
+						curveData->curveRadius = ConstrainR( d0/sin(D2R(-a1)) );
+					else
+						curveData->curveRadius = d0/sin(D2R(-a1));
+				}
 			}
 			if (curveData->curveRadius > 1000) {
 				LOG( log_curve, 3, ( "Straight %0.3f > 1000\n", curveData->curveRadius ) )

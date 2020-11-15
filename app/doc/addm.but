@@ -171,6 +171,8 @@ For all but the Bezier Curve, two Red arrow heads will be drawn after the first 
 
 A straight track will be created if the second endpoint is lined up with the first endpoint except for Bezier tracks.
 
+The radius of the curve is designed to be in 1/8" increments unless the \e{desired radius} field is set non-zero and the radius drawn is close to that value, in which case the radius will snap to that value.
+
 If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid if they are not snapped to another object. \c{Shift} ensures that other objects will be ignored.
 
 Optionally, the curve center point and radius can be displayed for the Curve. This is enabled by the Move Label (\K{cmdMoveLabel}) command.
