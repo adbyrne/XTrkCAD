@@ -220,7 +220,8 @@ EXPORT void UngroupCompound(
 LOG( log_group, 1, ( "Ungroup( T%d )\n", GetTrkIndex(trk) ) );
 	epCnt = GetTrkEndPtCnt(trk);
 	segCnt = xx->segCnt;
-	ASSERT( (epCnt==0) == (segCnt==0) );
+	//ASSERT( (epCnt==0) == (segCnt==0) );
+	ASSERT(segCnt>0);
 	turnoutChanged = FALSE;
 	if ( epCnt > 0 ) {
 		turnoutChanged = TRUE;
