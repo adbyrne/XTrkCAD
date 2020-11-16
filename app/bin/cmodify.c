@@ -566,9 +566,9 @@ extendTrackMove:
 					Rotate(&pos,Dex.params.cornuCenter[Dex.params.ep],angle);
 				}
 			} else pos = Dex.pos00;					//Only out from end
-			PlotCurve( crvCmdFromCornu, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, FALSE );
+			PlotCurve( crvCmdFromCornu, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, FALSE, 0.0 );
 		} else
-			PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE );
+			PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE, 0.0 );
 		curveType = Dex.curveData.type;
 		if ( curveType == curveTypeStraight ) {
 			Dex.r1 = 0.0;

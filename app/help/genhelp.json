@@ -263,6 +263,7 @@
 		{"line": "contmgm-edit", "contents": "Edit the element" },
 		{"line": "contmgm-delete", "contents": "Delete the element" },
 		{"line": "contents-label", "contents": "Contents Label for new Parameter file" },
+		{"line": "curved-fixed-radius", "contents": "Desired curve radius for new track" },
 		{"line": "custmgm-inx", "contents": "List of custom designed turnouts and structures" },
 		{"line": "custmgm-edit", "contents": "Invoke designer editor" },
 		{"line": "custmgm-delete", "contents": "Remove selected entries" },

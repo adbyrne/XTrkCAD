@@ -385,7 +385,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	          end_point = getPoint(pos, t_e);  //End of trial Arc
 
 	          PlotCurve( crvCmdFromChord, start_point, end_point, mid_point,
-	        		  	  &(arc.curveData), TRUE );  //Find Arc through three points
+	        		  	  &(arc.curveData), FALSE, 0.0 );  //Find Arc through three points
 
 	          arc.start = t_s; 		//remember start
 	          arc.end = t_e;			//remember end

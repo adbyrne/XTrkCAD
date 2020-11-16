@@ -400,7 +400,7 @@ EXPORT STATUS_T CreateCurve(
 			}
 			break;
 		}
-		message( _("Drag on Red arrows to adjust curve") );
+		//message( _("Drag on Red arrows to adjust curve") );
 		return C_CONTINUE;
 
 	default:
@@ -409,7 +409,16 @@ EXPORT STATUS_T CreateCurve(
 	}
 }
 
+static DIST_T desired_radius = 0.0;
+static BOOL_T infoSubst = FALSE;
 
+static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
+static paramData_t curvePLs[] = {
+#define curveRadPD (curvePLs[0])
+#define curveRadI 0
+	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
+};
+static paramGroup_t curvePG = { "curve-fixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -417,6 +426,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
+	wControl_p controls[2];
+	char * labels[1];
 
 	switch (action) {
 
@@ -428,6 +439,9 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		segCnt = 0;
 		STATUS_T rcode;
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (curvePLs[0].control==NULL) {
+			ParamCreateControls(&curvePG, NULL);
+		}
 		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 
 	case C_DOWN:
@@ -458,6 +472,12 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return rcode;
 			//Da.pos0 = pos;
 		}
+		if (infoSubst) {
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefSetFloat("misc", message, desired_radius);
+			InfoSubstituteControls(NULL, NULL);
+		}
+		infoSubst = FALSE;
 		//This is where the user could adjust - if we allow that?
 		tempSegs_da.cnt = segCnt;
 		return C_CONTINUE;
@@ -490,8 +510,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			// SnapPos( &pos );
 			tempSegs_da.cnt = segCnt;
-			if (Da.trk) PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, FALSE );
-			else PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, TRUE );
+			if (Da.trk) PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, FALSE, desired_radius );
+			else PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, TRUE, desired_radius );
 			if (Da.curveData.type == curveTypeStraight) {
 				tempSegs(0).type = SEG_STRTRK;
 				tempSegs(0).u.l.pos[0] = Da.pos0;
@@ -514,7 +534,9 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				tempSegs(0).u.c.a1 = Da.curveData.a1;
 				tempSegs_da.cnt = 1;
 				segCnt = 1;
+
 				d = D2R(Da.curveData.a1);
+
 				if (d < 0.0)
 					d = 2*M_PI+d;
 				if ( d*Da.curveData.curveRadius > mapD.size.x+mapD.size.y ) {
@@ -532,10 +554,16 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				if (curveMode == crvCmdFromEP1 || curveMode == crvCmdFromChord)
 					DrawArrowHeadsArray(&anchors_da,pos,FindAngle(Da.curveData.curvePos,pos),TRUE,wDrawColorRed);
 				else if (curveMode == crvCmdFromTangent || curveMode == crvCmdFromCenter) {
-					CreateEndAnchor(Da.curveData.pos2,&anchors_da,FALSE);
+					if (Da.curveData.curveRadius == desired_radius)
+						CreateEndAnchor(Da.curveData.pos2,&anchors_da,TRUE);
+					else
+						CreateEndAnchor(Da.curveData.pos2,&anchors_da,FALSE);
 					DrawArrowHeadsArray(&anchors_da,Da.curveData.pos2,FindAngle(Da.curveData.curvePos,Da.curveData.pos2)+90,TRUE,wDrawColorRed);
 				}
-				CreateEndAnchor(Da.curveData.curvePos,&anchors_da,TRUE);
+				if (Da.curveData.curveRadius == desired_radius)
+					CreateEndAnchor(Da.curveData.curvePos,&anchors_da,TRUE);
+				else
+					CreateEndAnchor(Da.curveData.curvePos,&anchors_da,FALSE);
 			}
 		}
 		mainD.funcs->options = 0;
@@ -558,7 +586,19 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			tempSegs_da.cnt = 1;
 			mainD.funcs->options = 0;
 			segCnt = tempSegs_da.cnt;
-			InfoMessage( _("Drag on Red arrows to adjust curve") );
+
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
+			controls[0] = curveRadPD.control;
+			controls[1] = NULL;
+			labels[0] = N_("Desired Radius");
+			InfoSubstituteControls(controls, labels);
+			infoSubst = TRUE;
+			curveRadPD.option |= PDO_NORECORD;
+			ParamLoadControls(&curvePG);
+			ParamGroupRecord(&curvePG);
+			//InfoMessage( _("Drag on Red arrows to adjust curve") );
+
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
 			pos = Da.middle;
@@ -566,7 +606,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
-			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE );
+			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE, desired_radius );
 		}
 		mainD.funcs->options = 0;
 		tempSegs_da.cnt = 0;
@@ -590,6 +630,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
+
 			UndoStart( _("Create Curved Track"), "newCurve - curve" );
 			t = NewCurvedTrack( Da.curveData.curvePos, Da.curveData.curveRadius,
 					Da.curveData.a0, Da.curveData.a1, 0 );

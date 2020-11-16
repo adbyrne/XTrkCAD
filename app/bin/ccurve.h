@@ -51,7 +51,7 @@ typedef struct {
 typedef void (*curveMessageProc)( char *, ... );
 STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, dynArr_t *,curveMessageProc );
 int IsCurveCircle( track_p );
-void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T );
+void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T, DIST_T );
 track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
 DIST_T CurveDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T CurveDescriptionMove( track_p, wAction_t, coOrd );

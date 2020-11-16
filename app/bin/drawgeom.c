@@ -620,7 +620,7 @@ STATUS_T DrawGeomMouse(
 				pos0x = pos1;
 				CreateCurve( C_MOVE, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
 			} else {
-				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
+				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE, 0.0 );
 				tempSegs(0).color = context->Color;
 				tempSegs(0).width = width;
 				DYNARR_SET(trkSeg_t,tempSegs_da,1);
@@ -709,7 +709,7 @@ STATUS_T DrawGeomMouse(
 				(context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3)) {
 			;
 		} else {
-			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
+			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE, 0.0 );
 			if (context->ArcData.type == curveTypeStraight) {
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
