@@ -1752,13 +1752,16 @@ static BOOL_T EnumerateDraw(
 	if ( trk ) {
 		xx = GetTrkExtraData(trk);
 		if ( xx->segCnt < 1 )
-			return TRUE;
+			return FALSE;
+		BOOL_T content = FALSE;
 		for ( inx=0; inx<xx->segCnt; inx++ ) {
 			segPtr = &xx->segs[inx];
 			if ( segPtr->type == SEG_BENCH ) {
 				CountBench( segPtr->u.l.option, FindDistance( segPtr->u.l.pos[0], segPtr->u.l.pos[1] ) );
+				content = TRUE;
 			}
 		}
+		return content;
 	} else {
 		TotalBench();
 	}

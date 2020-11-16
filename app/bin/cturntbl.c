@@ -527,7 +527,9 @@ static BOOL_T EnumerateTurntable( track_p trk )
 #define turntables(N) DYNARR_N( FLOAT_T, turntables_da, N )
 	int inx;
 	char tmp[40];
+	BOOL_T content = FALSE;
 	if ( trk != NULL ) {
+		content = TRUE;
 		xx = GetTrkExtraData(trk);
 		DYNARR_APPEND( FLOAT_T, turntables_da, 10 );
 		turntables(turntables_da.cnt-1) = xx->radius*2.0;
@@ -537,12 +539,13 @@ static BOOL_T EnumerateTurntable( track_p trk )
 			enumerateMaxDescLen = inx;
 	} else {
 		for (inx=0; inx<turntables_da.cnt; inx++) {
+			content = TRUE;
 			sprintf( tmp, "Turntable, diameter %s", FormatDistance(turntables(inx)) );
 			EnumerateList( 1, 0.0, tmp );
 		}
 		DYNARR_RESET( FLOAT_T, turntables_da );
 	}
-	return TRUE;   
+	return content;
 }
 
 

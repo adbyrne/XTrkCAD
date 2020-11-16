@@ -868,14 +868,15 @@ static BOOL_T MergeBezier(
 static BOOL_T EnumerateBezier( track_p trk )
 {
 
-	if (trk != NULL) {
+	if ((trk != NULL) && (GetTrkType(trk) == T_BEZIER)) {
 		DIST_T d;
 		struct extraData *xx = GetTrkExtraData(trk);
 		d = max(BezierOffsetLength(xx->bezierData.arcSegs,-GetTrkGauge(trk)/2.0),
 				BezierOffsetLength(xx->bezierData.arcSegs,GetTrkGauge(trk)/2.0));
 		ScaleLengthIncrement( GetTrkScale(trk), d );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
 static DIST_T GetLengthBezier( track_p trk )

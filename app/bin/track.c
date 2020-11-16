@@ -259,13 +259,25 @@ EXPORT void EnumerateTracks( void )
 
 	enumerateMaxDescLen = strlen("Description");
 
+	BOOL_T content = FALSE;
+
 	TRK_ITERATE( trk ) {
 		/* 
 		 *	process track piece if none are selected (list all) or if it is one of the
 		 *	selected pieces (list only selected )
 		 */
-		if ((!selectedTrackCount || GetTrkSelected(trk)) && trackCmds(trk->type)->enumerate != NULL)
-			trackCmds(trk->type)->enumerate( trk );
+		if ((!selectedTrackCount || GetTrkSelected(trk)) && trackCmds(trk->type)->enumerate != NULL) {
+			if (trackCmds(trk->type)->enumerate( trk )==TRUE) content = TRUE;
+		}
+	}
+
+	if (content == FALSE) {
+		wBeep();
+		if (selectedTrackCount == 0)
+			InfoMessage(_("No track or structure pieces are present in layout"));
+		else
+			InfoMessage(_("No track or structure pieces are selected"));
+		return;
 	}
 
 	EnumerateStart();

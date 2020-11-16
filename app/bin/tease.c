@@ -1284,8 +1284,9 @@ static BOOL_T EnumerateJoint( track_p trk )
 {
 	if (trk != NULL) {
 		ScaleLengthIncrement( GetTrkScale(trk), GetFlexLengthJoint(trk) );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
 static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center )

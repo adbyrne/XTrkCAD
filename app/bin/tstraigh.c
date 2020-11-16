@@ -497,8 +497,9 @@ static BOOL_T EnumerateStraight( track_p trk )
 	if (trk != NULL) {
 		d = FindDistance( GetTrkEndPos( trk, 0 ), GetTrkEndPos( trk, 1 ) );
 		ScaleLengthIncrement( GetTrkScale(trk), d );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
 static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center )

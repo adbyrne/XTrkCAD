@@ -1004,8 +1004,9 @@ static BOOL_T EnumerateCornu( track_p trk )
 		d = max(CornuOffsetLength(xx->cornuData.arcSegs,-GetTrkGauge(trk)/2.0),
 				CornuOffsetLength(xx->cornuData.arcSegs,GetTrkGauge(trk)/2.0));
 		ScaleLengthIncrement( GetTrkScale(trk), d );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
 static BOOL_T MergeCornu(

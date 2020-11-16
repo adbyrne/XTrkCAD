@@ -962,8 +962,9 @@ static BOOL_T EnumerateCurve( track_p trk )
 		if (xx->helixTurns > 0)
 			d += (xx->helixTurns-(xx->circle?1:0)) * (xx->radius+(GetTrkGauge(trk)/2.0)) * 2.0 * M_PI;
 		ScaleLengthIncrement( GetTrkScale(trk), d );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
 static BOOL_T TrimCurve( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T endradius, coOrd endcenter )

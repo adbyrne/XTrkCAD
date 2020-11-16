@@ -1479,7 +1479,7 @@ BOOL_T EnumerateCompound( track_p trk )
 #endif
 		FormatCompoundTitle( listLabelsOption, xtitle(xx) );
 		if (message[0] == '\0')
-			return TRUE;
+			return FALSE;  //No content
 		for (inx = 0; inx < enumCompound_da.cnt; inx++ ) {
 			cmp =  strcmp( EnumCompound(inx).name, message );
 			if ( cmp == 0 ) {
