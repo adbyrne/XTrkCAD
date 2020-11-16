@@ -290,6 +290,7 @@ EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
 		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
 		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
+		s->tieDataValid = TRUE;
 	}
 	return &scaleInfo(si).tieData;
 }
