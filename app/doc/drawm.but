@@ -77,33 +77,33 @@ The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it i
 
 \S2{cmdDrawCircleTangent} Draw Circle from Tangent
 
-\G{png.d/dcircle2.png}
+\G{png.d/dcircle3.png}
 
-\c{Left-Drag} a point on the edge of the circle to specify the radius.
+\c{Left-Drag} a point from the edge of the circle to the center to specify the radius.
 
 \rule
 
 \S2{cmdDrawCircleCenter} Draw Circle from Center
 
-\G{png.d/dcircle3.png}
+\G{png.d/dcircle2.png}
 
-\c{Left-Drag} from the center of the circle to the edge.
+\c{Left-Drag} from the center of the circle to the edge to specify the radius.
 
 \rule
 
 \S2{cmdDrawFilledCircleTangent} Draw Filled Circle from Tangent
 
-\G{png.d/dflcrcl2.png}
+\G{png.d/dflcrcl3.png}
 
-\c{Left-Drag} from the center of the circle to the edge.
+\c{Left-Drag} from the edge of the circle to the center to specify the radius.
 
 \rule
 
 \S2{cmdDrawFilledCircleCenter} Draw Filled Circle from Center
 
-\G{png.d/dflcrcl3.png}
+\G{png.d/dflcrcl2.png}
 
-\c{Left-Drag} a point on the edge of the circle to specify the radius.
+\c{Left-Drag} a point from the center to the edge of the circle to specify the radius.
 
 \rule
 
