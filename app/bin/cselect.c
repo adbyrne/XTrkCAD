@@ -57,6 +57,7 @@
 EXPORT wIndex_t selectCmdInx;
 EXPORT wIndex_t moveCmdInx;
 EXPORT wIndex_t rotateCmdInx;
+EXPORT wIndex_t flipCmdInx;
 
 #define MAXMOVEMODE (3)
 static long moveMode = MAXMOVEMODE;
@@ -676,7 +677,12 @@ static BOOL_T doingDouble;
 
 EXPORT void SelectDelete( void )
 {
-	if (GetCurrentCommand() != selectCmdInx) return;
+	if (GetCurrentCommand() != selectCmdInx ) {
+		InfoMessage(_("Delete only works in Select Mode"));
+		wBeep();
+		return;
+	}
+
 	if (doingDouble) return;
 
 	if (SelectedTracksAreFrozen())
@@ -1877,6 +1883,7 @@ static STATUS_T CmdMove(
 			break;
 		case C_REDRAW:
 			/* DO_REDRAW */
+			HighlightSelectedTracks(NULL, TRUE, TRUE);
 			if (anchors_da.cnt)
 				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 			if ( state == 0 )
@@ -2230,6 +2237,7 @@ static STATUS_T CmdRotate(
 			}
 			break;
 		case C_REDRAW:
+			HighlightSelectedTracks(NULL, TRUE, TRUE);
 			if (anchors_da.cnt)
 				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 			/* DO_REDRAW */
@@ -2717,6 +2725,7 @@ static STATUS_T CmdFlip(
 		case C_CANCEL:
 #endif
 		case C_REDRAW:
+			HighlightSelectedTracks(NULL, TRUE, TRUE);
 			if ( state == 0 )
 				return C_CONTINUE;
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
@@ -3569,6 +3578,6 @@ EXPORT void InitCmdMove( wMenu_p menu )
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
 	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
-	/*flipCmdInx =*/ AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(flip_xpm),
+	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(flip_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }
