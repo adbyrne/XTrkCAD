@@ -477,6 +477,7 @@ static STATUS_T CmdJoinLine(
 		tempSegs_da.cnt = 0;
 		DYNARR_RESET(trkSeg_t,Dl.newLine);
 		Dl.curr_line = NULL;
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,Dl.anchors_da);
@@ -1370,12 +1371,14 @@ errorReturn:
 		return rc;
 
 	case C_CANCEL:
+		SetAllTrackSelect( FALSE );
 		if (infoSubst)
 			InfoSubstituteControls(NULL, NULL);
 		infoSubst = FALSE;
 		break;
 
 	case C_REDRAW:
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 		} else if (easementVal<0 && Dj.joinMoveState == 0)
@@ -1387,6 +1390,7 @@ errorReturn:
 
 	case C_TEXT:
 	case C_OK:
+		SetAllTrackSelect( FALSE );
 		if (easementVal<0 && Dj.cornuMode)
 			return CmdCornu(action,pos);
 		if (infoSubst)

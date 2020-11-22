@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
@@ -814,6 +815,7 @@ EXPORT STATUS_T CmdStructureAction(
 		Dst.state = 0;
 		Dst.angle = 00.0;
 		ShowPierL();
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -980,6 +982,7 @@ static STATUS_T CmdStructure(
 		InfoMessage( _("Select Structure and then drag to place"));
 		ParamLoadControls( &structurePG );
 		ParamGroupRecord( &structurePG );
+		SetAllTrackSelect( FALSE );
 		return CmdStructureAction( action, pos );
 
 	case wActionMove:

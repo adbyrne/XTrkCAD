@@ -22,6 +22,7 @@
 
 #include "cundo.h"
 #include "compound.h"
+#include "cselect.h"
 #include "i18n.h"
 #include "messages.h"
 #include "track.h"
@@ -110,6 +111,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	case C_START:
 		InfoMessage( _("Select track to split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		SetAllTrackSelect( FALSE );
 		/* no break */
 	case C_DOWN:
 	case C_MOVE:

@@ -30,6 +30,7 @@
 #define PRIVATE_EXTRADATA
 
 #include "compound.h"
+#include "cselect.h"
 #include "ctrain.h"
 #include "cundo.h"
 #include "custom.h"
@@ -2511,7 +2512,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                 DoChangeNotification(CHANGE_PARAMS);
             }
         }
-
+        SetAllTrackSelect( FALSE );
         EnableCommands();
 
         if (curTrainDlg == NULL) {

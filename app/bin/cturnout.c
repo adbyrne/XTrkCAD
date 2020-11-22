@@ -2736,6 +2736,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		Dto.trk = NULL;
 		Dto.angle = 0.0;
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -2920,6 +2921,7 @@ static STATUS_T CmdTurnout(
 		InfoMessage( _("Pick turnout and active End Point, then place on the layout"));
 		ParamLoadControls( &turnoutPG );
 		ParamGroupRecord( &turnoutPG );
+		SetAllTrackSelect( FALSE );
 		return CmdTurnoutAction( action, pos );
 
 	case wActionMove:

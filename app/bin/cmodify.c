@@ -275,6 +275,7 @@ STATUS_T CmdModify(
 		modifyExtendMode = FALSE;
 		modifyRulerMode = FALSE;
 		modifyProtractorMode = FALSE;
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case C_DOWN:

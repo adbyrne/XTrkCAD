@@ -35,6 +35,7 @@
 #include "track.h"
 #include "utility.h"
 #include "misc.h"
+#include "cselect.h"
 
 extern TRKTYP_T T_BZRLIN;
 
@@ -2641,6 +2642,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			NoticeMessage( "cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op );
 			drawCmdContext.Op = OP_LINE;
 		}
+		SetAllTrackSelect( FALSE );
 		/*DrawGeomOp( (void*)(drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
 		infoSubst = TRUE;
 		switch( drawCmdContext.Op ) {

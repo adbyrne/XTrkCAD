@@ -500,7 +500,7 @@ static void SelectOneTrack(
 }
 
 
-static void HighlightSelectedTracks(
+EXPORT void HighlightSelectedTracks(
 		track_p trk_ignore, BOOL_T keep, BOOL_T invert )
 {
 	track_p trk = NULL;
@@ -2483,6 +2483,7 @@ STATUS_T CmdMoveDescription(
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_ERROR;
 		}
+		SetAllTrackSelect( FALSE );
 		/* no break */
 	case wActionMove:
 			if ( labelWhen < 2 || mainD.scale > labelScale ) return C_CONTINUE;

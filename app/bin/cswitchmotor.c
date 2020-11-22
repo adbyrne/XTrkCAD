@@ -53,6 +53,7 @@
 #include <string.h>
 
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
@@ -592,6 +593,7 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 	switch (action & 0xFF) {
 	case C_START:
 		InfoMessage( _("Select a turnout") );
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 	case C_DOWN:
 		if ((trk = OnTrack(&pos, TRUE, TRUE )) == NULL) {

@@ -24,6 +24,7 @@
 
 #include "ccurve.h"
 #include "cstraigh.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "i18n.h"
 #include "messages.h"
@@ -104,6 +105,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         parFactorPD.option &= ~PDO_NORECORD;
         Dpa.anchor_Trk = NULL;
         tempSegs_da.cnt = 0;
+        SetAllTrackSelect( FALSE );
         return C_CONTINUE;
 
     case wActionMove:

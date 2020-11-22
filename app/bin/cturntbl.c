@@ -31,6 +31,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "cselect.h"
 
 static TRKTYP_T T_TURNTABLE = -1;
 
@@ -859,6 +860,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
 		InfoSubstituteControls( controls, labels );
+		SetAllTrackSelect( FALSE );
 		/*InfoMessage( "Place Turntable");*/
 		state = 0;
 		return C_CONTINUE;

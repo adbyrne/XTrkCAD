@@ -50,6 +50,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <string.h>
 
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
@@ -524,6 +525,7 @@ static STATUS_T CmdControl ( wAction_t action, coOrd pos )
     switch (action) {
     case C_START:
         InfoMessage(_("Place control"));
+        SetAllTrackSelect( FALSE );
         create = FALSE;
         return C_CONTINUE;
     case C_DOWN:

@@ -22,6 +22,7 @@
 #include <math.h>
 
 #include "cstraigh.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "fileio.h"
 #include "i18n.h"
@@ -75,6 +76,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.ep=-1;
 		Dl.down = FALSE;
 		InfoMessage( _("Place 1st endpoint of straight track, snap to unconnected endpoint") );
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case C_DOWN:

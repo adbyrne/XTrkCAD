@@ -31,6 +31,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "i18n.h"
+#include "cselect.h"
 
 #include "messages.h"
 #include "param.h"
@@ -442,6 +443,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (curvePLs[0].control==NULL) {
 			ParamCreateControls(&curvePG, NULL);
 		}
+		SetAllTrackSelect(FALSE);
 		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 
 	case C_DOWN:
@@ -850,6 +852,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				break;
 			}
 		}
+		SetAllTrackSelect( FALSE );
 		tempSegs_da.cnt = 0;
 		return C_CONTINUE;
 

@@ -2546,11 +2546,13 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.pos[i] = zero;
 				Da.endHandle[i].end_valid = FALSE;
 			}
+			SetAllTrackSelect( FALSE );
     	}
     	return rc;
 
 	case C_REDRAW:
 		wSetCursor(mainD.d,defaultCursor);
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if ( Da.state != NONE ) {
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,
 					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
@@ -2579,6 +2581,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			}
 			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		}
+		SetAllTrackSelect( FALSE );
 		Da.state = NONE;
 		if (infoSubst) {
 			InfoSubstituteControls( NULL, NULL );

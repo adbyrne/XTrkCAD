@@ -51,6 +51,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <string.h>
 
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
@@ -794,6 +795,7 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
     case C_START:
         InfoMessage(_("Place base of signal"));
         create = FALSE;
+        SetAllTrackSelect( FALSE );
         return C_CONTINUE;
     case C_DOWN:
         SnapPos(&pos);

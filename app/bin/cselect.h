@@ -52,5 +52,6 @@ void WriteSelectedTracksToTempSegs( void );
 void DoRescale( void );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
 void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
+void HighlightSelectedTracks(track_p trk_ignore, BOOL_T keep, BOOL_T invert );
 
 #endif

@@ -21,11 +21,13 @@
  */
 
 #include "cundo.h"
+#include "cselect.h"
 #include "fileio.h"
 #include "i18n.h"
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "misc.h"
 
 #include <math.h>
 
@@ -166,6 +168,7 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_REDRAW:
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if (An.state != AN_OFF) {
 			if (!IsClose(FindDistance(An.pos1,An.pos2))) {
 				DrawAngle( &tempD, An.pos0, An.pos1, An.pos2, wDrawColorBlack );
@@ -253,8 +256,10 @@ static struct {
 		int modifyingEnd;
 		} Dr = { DR_OFF, { 0,0 }, { 0,0 } };
 
+
 void RulerRedraw( BOOL_T demo )
 {
+	if (programMode == MODE_TRAIN) return;
 	if (Dr.state == DR_ON)
 		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, Dr.isClose?wDrawColorBlue:wDrawColorBlack );
 	if (demo) {
@@ -299,6 +304,7 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if (Dr.state == DR_ON) {
 			DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, Dr.isClose?wDrawColorBlue:wDrawColorBlack );
 		}
