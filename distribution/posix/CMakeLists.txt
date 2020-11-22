@@ -17,7 +17,7 @@ set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package.txt)
 set(CPACK_PACKAGE_VENDOR "XTrackCAD Fork Project")
 
 # common dependencies for all Linux builds
-set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2 zip zlib")
+set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2 zlib")
 
 set(CPACK_RPM_BUILDREQUIRES 
     "gcc, cmake >= 2.4.7, pkgconfig, gtk2-devel" 
@@ -54,7 +54,7 @@ set(CPACK_DEBIAN_PACKAGE_VERSION "1:${XTRKCAD_VERSION}")
 
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "zip, xdg-utils")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "xdg-utils")
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "xtrkcad@sillub.com")
 

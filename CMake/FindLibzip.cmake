@@ -39,8 +39,13 @@ else(WIN32)
     NAMES zipconf.h
     HINTS ${PC_LIBZIP_INCLUDE_DIRS})
 
+if(UNIX AND NOT APPLE)
+  find_library(LIBZIP_LIBRARY
+    NAMES libzip.a zip)
+else(UNIX AND NOT APPLE)
   find_library(LIBZIP_LIBRARY
     NAMES zip)
+endif(UNIX AND NOT APPLE)
 endif(WIN32)
 
 include(FindPackageHandleStandardArgs)

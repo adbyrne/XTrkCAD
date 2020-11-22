@@ -388,7 +388,7 @@ static paramData_t sensorEditPLs[] = {
 #define I_SENSORNAME (0)
     /*0*/ { PD_STRING, sensorEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(sensorEditName)},
 #define I_ORIGX (1)
-    /*1*/ { PD_FLOAT, &sensorEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Orgin X") }, 
+    /*1*/ { PD_FLOAT, &sensorEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") }, 
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &sensorEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_SENSORSCRIPT (3)
