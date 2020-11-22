@@ -259,6 +259,7 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 	case C_START:
 		InfoMessage( _("Select draw to split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		SetAllTrackSelect( FALSE );
 		/* no break */
 	case C_DOWN:
 	case C_MOVE:
