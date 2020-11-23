@@ -2552,6 +2552,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		wSetCursor(mainD.d,defaultCursor);
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if ( Da.state != NONE ) {
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,

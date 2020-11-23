@@ -1883,6 +1883,8 @@ static STATUS_T CmdMove(
 			break;
 		case C_REDRAW:
 			/* DO_REDRAW */
+			//Draw all existing highlight boxes only
+			DrawHighlightBoxes(FALSE, FALSE, NULL);
 			HighlightSelectedTracks(NULL, TRUE, TRUE);
 			if (anchors_da.cnt)
 				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
@@ -2237,6 +2239,7 @@ static STATUS_T CmdRotate(
 			}
 			break;
 		case C_REDRAW:
+			DrawHighlightBoxes(FALSE,FALSE,NULL);
 			HighlightSelectedTracks(NULL, TRUE, TRUE);
 			if (anchors_da.cnt)
 				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
@@ -2726,6 +2729,7 @@ static STATUS_T CmdFlip(
 		case C_CANCEL:
 #endif
 		case C_REDRAW:
+			DrawHighlightBoxes(FALSE,FALSE,NULL);
 			HighlightSelectedTracks(NULL, TRUE, TRUE);
 			if ( state == 0 )
 				return C_CONTINUE;

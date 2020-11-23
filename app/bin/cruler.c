@@ -168,6 +168,7 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if (An.state != AN_OFF) {
 			if (!IsClose(FindDistance(An.pos1,An.pos2))) {
@@ -304,6 +305,7 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if (Dr.state == DR_ON) {
 			DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, Dr.isClose?wDrawColorBlue:wDrawColorBlack );

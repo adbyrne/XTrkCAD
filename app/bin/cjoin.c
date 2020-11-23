@@ -1378,6 +1378,7 @@ errorReturn:
 		break;
 
 	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );

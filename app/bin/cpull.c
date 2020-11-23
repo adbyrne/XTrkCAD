@@ -816,6 +816,7 @@ static STATUS_T CmdPull(
 		return C_CONTINUE;
 
 	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if (anchors_da.cnt)
 					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
