@@ -301,17 +301,9 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 						!strcmp(paramScaleName, "N")) {
 						ret = PARAMFILE_FIT;
 					}
-					//O in Germany is the same gauge and a fit for O generally
-					if (!strcmp(layoutScaleName, "O(EU)") &&
-						!strcmp(paramScaleName, "O") ) {
-						ret = PARAMFILE_FIT;
-					}
-				} else {
-					//Not same gauge officially but may be close enough
-					char *layoutScaleName = GetScaleName(scaleIndex);
-					char *paramScaleName = GetScaleName(to->scaleInx);
-					//O in UK is a fit for O track generally
-					if (!strcmp(layoutScaleName, "O(Fine)") &&
+					//O in Germany or UK is the same gauge and a fit for O generally
+					if ((!strcmp(layoutScaleName, "O(EU)") ||
+						!strcmp(layoutScaleName, "O(Fine)")) &&
 						!strcmp(paramScaleName, "O") ) {
 						ret = PARAMFILE_FIT;
 					}
