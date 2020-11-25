@@ -1,9 +1,14 @@
 #!/bin/sh
 INSTALLDIR=/usr/share/xtrkcad
 
-xdg-icon-resource uninstall --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png application-x-xtrkcad
-xdg-desktop-menu uninstall ${INSTALLDIR}/applications/xtrkcad.desktop
-xdg-mime uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.xml
-xdg-desktop-icon uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
-xdg-icon-resource uninstall --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png xtrkcad
+LOGF=/tmp/xtrkcad-setup.log
+if [ -f "${LOGF}" ] ; then
+	chmod 666 ${LOGF}
+else
+	LOGF=/dev/null
+fi
+
+( su -p -c "sh ${INSTALLDIR}/xtrkcad-setup remove ${INSTALLDIR}" $SUDO_USER ) >> ${LOGF} 2>&1
+
+exit 0
 
