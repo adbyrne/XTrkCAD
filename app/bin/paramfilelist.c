@@ -360,7 +360,7 @@ int LoadParamFile(
 		}
     }
     //Only set the ParamFileDir if not the system directory
-    if (!strstr(fileName[i-1],"/share/xtrkcad/params/"))
+    if (!strstr(fileName[i-1],SHAREPARAMS))
     	SetParamFileDir(fileName[i - 1]);
     curParamFileIndex = PARAM_CUSTOM;
     DoChangeNotification(CHANGE_PARAMS);
