@@ -42,7 +42,7 @@ endif()
 	
 if(UNIX AND NOT APPLE)
     install(PROGRAMS
-        xdg-open
+        xdg-open xtrkcad-setup
         DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
         )
 	install(FILES
