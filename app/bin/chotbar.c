@@ -146,8 +146,8 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 	for ( inx=hotBarCurrStart; inx < hotBarMap_da.cnt; inx++ ) {
 		tbm = &hotBarMap(inx);
 		barScale = tbm->barScale;
-		x = tbm->x - hotBarMap(hotBarCurrStart).x + fixed_x;   //Add space for fixed at start
-		if ( x + tbm->w + fixed_x > barWidth ) {
+		x = tbm->x - hotBarMap(hotBarCurrStart).x + fixed_x;
+		if ( x + tbm->w > barWidth ) {
 			break;
 		}
 		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
@@ -177,7 +177,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 		HotBarHighlight( hotBarCurrSelect, fixed_x );
 /*	  else
 		hotBarCurrSelect = -1;*/
-	if (hotBarCurrEnd < hotBarMap_da.cnt-1)
+	if (hotBarCurrEnd < hotBarMap_da.cnt)
 		wControlActive( (wControl_p)hotBarRightB, TRUE );
 	else {
 		wButtonSetBusy(hotBarRightB, FALSE);
@@ -199,7 +199,11 @@ static void DoHotBarRight( void * data )
 	}
 	if ( inx >= hotBarMap_da.cnt )
 		inx = hotBarMap_da.cnt-1;
-	while ( inx > 1 && lastX - hotBarMap(inx-1).x <= barWidth )
+	DIST_T fixed_x = 0.0;
+	if (hotBarCurrStart>0 && hotBarMap(0).isFixed) {
+		fixed_x = hotBarMap(0).w;
+	}
+	while ( (inx > 1) && ((lastX - hotBarMap(inx-1).x) < (barWidth - fixed_x)) )
 			 inx--;
 	if ( inx != hotBarCurrStart ) {
 		hotBarCurrStart = inx;
