@@ -749,6 +749,7 @@ STATUS_T DrawGeomMouse(
 				pos0x = pos1;
 				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
 				context->message( _("Drag on Red arrows to adjust curve") );
+				context->show = FALSE;
 				return C_CONTINUE;
 			} else {
 				DYNARR_SET(trkSeg_t,tempSegs_da,1);

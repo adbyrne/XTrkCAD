@@ -2775,9 +2775,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		//if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
 		//		SnapPos( &pos );   Remove Snap at end of action - it will have been imposed in Geom if needed
 		//}
+		drawCmdContext.show = TRUE;
 		int rc = DrawGeomMouse( action, pos, &drawCmdContext);
 		// Put up text entry boxes ready for updates if the result was continue
-		if (rc == C_CONTINUE) {
+		if (rc == C_CONTINUE && drawCmdContext.show) {
 			switch( drawCmdContext.Op ) {
 			case OP_CIRCLE1:
 			case OP_CIRCLE2:
