@@ -148,6 +148,8 @@ wDrawShowBackground(wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size,
                                     FreeImage_GetHeight(bd->background),
                                     FILTER_BILINEAR,
                                     0);
+        if (tmp == NULL)
+                return;
         FreeImage_AdjustColors(tmp, screen, -screen, 1.0, FALSE);
         FREE_IMAGE_TYPE image_type = FreeImage_GetImageType(tmp);
 
