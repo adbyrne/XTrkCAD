@@ -8,7 +8,7 @@ else
 	LOGF=/dev/null
 fi
 
-( su -p -c "sh ${INSTALLDIR}/xtrkcad-setup remove ${INSTALLDIR}" $SUDO_USER ) >> ${LOGF} 2>&1
+( su -c "sh ${INSTALLDIR}/xtrkcad-setup remove ${INSTALLDIR}" -l $SUDO_USER ) >> ${LOGF} 2>&1
 
 exit 0
 
