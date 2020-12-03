@@ -1,18 +1,18 @@
 # GA Release Notes
 
-Welcome to the XtrackCAD V5.2.0 GA release! 
+Welcome to the XtrackCAD V5.2.1 GA release! 
 
-GA has a few high-impact bug fixes since Beta 3.0 that we have tested with the help of our users. 
+GA 5.2 has a few high-impact bug fixes that we have found with the help of our users. 
 
 The V5.2 release started out as just some simple functional enhancements of long-standing, like background images. The idea was to punt on all UI changes to the V6 GTK3 release.  But along the way and due to some sabaticals for developers, things kept getting added and tinkered with. Finally the major UI enhancements you will see were mapped out over the last six months and so we have an incremental enhacement to the UI as well.
 
 Enjoy!
 
-Martin and Dave and Adam, your volunteer developers.
+Dave, Martin and Adam, your volunteer developers.
 
 PS The full change log is a file in the XtrkCAD download folder as CHANGELOG.md 
 
-The files written by XTrackCAD 5.2.0 are versioned to only be read by 5.2.0, but it can also read files from earlier versions. If you get into trouble, please reach out, we may be able to help - but always back-up.
+The files written by XTrackCAD 5.2 are versioned to only be read by 5.2, but it can also read files from earlier versions. If you get into trouble, please reach out, we may be able to help - but always back-up.
 
 We will fix important bugs you find by issuing a dot release. 
 
@@ -42,7 +42,7 @@ PS If you can't "track" with the new Select method, you can get back "Classic" S
 
 ======================================================================================================
 
-# XTrackCAD 5.2.0 Version Notes#
+# XTrackCAD 5.2.1 Version Notes#
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 

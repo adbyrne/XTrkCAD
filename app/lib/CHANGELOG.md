@@ -4,6 +4,50 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.1 GA]
+
+## Bugs
+
++ Windows: fail on saving Notes
++ Fail on Selecting Notes > 72 characters long
++ Windows fail on Zooming background if memory exhausted during rescale
++ Stop curved lines showing adjustment handles too early in construction
++ Fix right-arrow function with HotBar to be active when there is only one to right
++ Windows: Reset parmlib parms when upgrading correctly
++ Highlight Boxes when using Selected outside Select
++ For commands that do not use selected, deselect all before starting, for others, highlight correctly
++ Linux: Statically link libzip
++ Highlighting for Move/Rotate/Flip 
++ Fix UnGroup and Group of Structures
++ Make Add Circle Icons match the way the constructors work
++ Optimize tie-data performance to cache results
++ Fix Bezier Lines to not have endpoints
++ Fix Add Structure from HotBar
++ Fix tooltips for command icons when i18n languages used
++ Stop Join for Bezier or Cornu Tracks if Easment not set to Cornu
++ Fix Split of Bezier tracks when curve reversed
++ Stop Flip of Bezier lines trying to move endpoints
++ Fix bounding box for almost complete circle arcs
++ Enlarge Text Buffer in Modify Notes to "Huge"
++ Set layer for split line to be same as old line
++ Dont select frozen layer objects on Select All
++ Make Mesurement Submenu appear in Context Menu
+
+
+## Added
+
++ Updated command line install on Ubuntu
++ Updated debian install
++ Fixes to O scale/gauge - 1:45 now O(EU), gauge for O(Fine) same as others
++ Install and Build Notes now link to updated Wikka
++ Alert user if Parts List used with no listable parts selected or present in layout
++ New O and G narrow-gauge scales
++ Desired radius value for constructing curved track
++ Rewritten path check code
++ SplitLine now works for Polygons and Circles (Filled or not)
++ Modify supported for Protractor to allow other usage scenarios
++ More documentation for Magnetic Snap
+
 ## [5.2.0 GA]
  
 ## Bugs
