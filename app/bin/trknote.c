@@ -336,6 +336,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
     BOOL_T rc = TRUE;
+	unsigned strings2convert = 1;
 
 	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d", GetTrkIndex(t),
 		GetTrkLayer(t),
@@ -349,16 +350,18 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	case OP_NOTELINK:
 		s[0]=ConvertToEscapedText( xx->noteData.linkData.url );
 		s[1]=ConvertToEscapedText( xx->noteData.linkData.title );
+		strings2convert = 2;
 		break;
 	case OP_NOTEFILE:
 		s[0]=ConvertToEscapedText( xx->noteData.fileData.path );
 		s[1]=ConvertToEscapedText( xx->noteData.fileData.title );
+		strings2convert = 2;
 		break;
 	default:
 		AbortProg( "WriteNote: %d", xx->op );
 	}
 #ifdef WINDOWS
-	for ( int inx = 0; inx < 2; inx++ ) {
+	for ( unsigned int inx = 0; inx < strings2convert; inx++ ) {
 		if ( RequiresConvToUTF8( s[inx] ) ) {
 			wSystemToUTF8 ( s[inx], message, sizeof message );
 			MyFree( s[inx] );
