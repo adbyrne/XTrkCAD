@@ -374,7 +374,7 @@ STATUS_T ModifyRuler(
 void InitCmdRuler( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Measurement"), "cmdMeasureSetCmd", _("Measurement") );
-	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm), LEVEL0, IC_STICKY|IC_NORESTART, ACCL_RULER, NULL );
-	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(angle_xpm), LEVEL0, IC_STICKY|IC_NORESTART, ACCL_ANGLE, NULL );
+	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
+	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(angle_xpm), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
 	ButtonGroupEnd();
 }
