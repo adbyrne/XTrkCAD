@@ -134,7 +134,7 @@ The \f{Curved Line Width} or \f{Bezier Line Width} field is a scaled dimension i
 
 \dd (\K{cmdDrawBezierCurve} \G{png.d/dbezier.png} \e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
 
-If \f{MagneticSnap} is enabled, the curve ends will snap to the nearest part of nearby Draw objects unless \e{Alt} is held.
+If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, the curve ends will snap to the nearest part of nearby Draw objects unless \e{Alt} is held.
 If it is disabled, snapping will only occure if \e{Alt} is held.
 
 The precise values of Radius and Arc Length can be set using the text boxes on the bottom rail once the mouse button is released.
@@ -150,7 +150,7 @@ To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a the radius. Hi
 \c{Left-drag} from the start of the curve and drag in the direction of the curve.  
 Then \c{left-drag} to form the curve.
 
-If the cursor is over a Draw object and \f{MagneticSnap} is on, the first position will snap to the nearest part of that object. If \e{Alt} is held the snap will be suppressed.
+If the cursor is over a Draw object and \f{MagneticSnap} (\K{cmdMagneticSnap}) is on, the first position will snap to the nearest part of that object. If \e{Alt} is held the snap will be suppressed.
 If \f{MagneticSnap} is disabled, the snap will happen if \e{Alt} is held.  The second end will act similarly.
 
 \rule
@@ -162,7 +162,7 @@ If \f{MagneticSnap} is disabled, the snap will happen if \e{Alt} is held.  The s
 Select one end of the curve and \c{left-drag} to the center.
 Then \c{left-drag} the curve around the center.
 
-The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSnap} unless \e{Alt} is held.
+The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSnap} (\K{cmdMagneticSnap}) unless \e{Alt} is held.
 To complete the command, drag on the red arrows to adjust the curve from the initial end.
 
 \rule
@@ -181,7 +181,7 @@ Select the center of the curve and \c{left-drag} to one end.
 
 \c{Left-drag} from one end of the curve to the other to form the chord of the curve.
 
-The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSnap} unless \e{Alt} is held.
+The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSnap} (\K{cmdMagneticSnap}) unless \e{Alt} is held.
 
 If the mouse is over a draw object the second position will snap to the nearst part of that object. If \e{Shift} is held the snap will be suppressed.
 
@@ -365,7 +365,7 @@ The \f{PolyGon Line Width} field is a scaled dimension in inches if >0. If 0 it 
 \f{Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
 When using \c{Left-drag}, the node will be positioned when you release the button.
 
-\dd If \f{MagneticSnap} is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
+\dd If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
 
 \dd If it is disabled, the snap will only occur if \e{Alt} is held.
 
@@ -393,7 +393,7 @@ When using \c{Left-drag}, the node will be positioned when you release the butto
 
 \dd The fill color can be adjusted using the color control at the bottom of the window
 
-\dd If \f{MagneticSnap} is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
+\dd If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
 
 \dd If it is disabled, the snap will only occur if \e{Alt} is held.
 
@@ -422,7 +422,7 @@ The \f{Polyline Line Width} field is a scaled dimension in inches if >0. If 0 it
 \f{PolyLines} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
 When using \c{left-drag}, the node will be positioned when you release the button.
 
-\dd If \f{MagneticSnap} is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
+\dd If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
 
 \dd If it is disabled, the snap will only occur if \e{Alt} is held.
 
@@ -481,7 +481,7 @@ If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative an
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
 before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation. 
 
-With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
 If it is diabled, it will onlt snap if \e{Shift} is held.
 
 The \f{Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
@@ -494,7 +494,7 @@ The \f{Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel 
 
 Creates a \f{Dimension Line} of various sizes.
 
-With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
 If it is disabled, it will onlt snap if \e{Shift} is held.
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
@@ -518,7 +518,7 @@ Creates \i\f{Bench-work} using different types and orientation of lumber.
 
 \dd When using metric units (\K{cmdPref}), a 1" x 2" is labeled 50mm x 25mm
 
-With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
 If it is diabled, it will onlt snap if \e{Shift} is held.
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
@@ -530,7 +530,7 @@ before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by se
 
 Creates a \f{Table Edge}
 
-With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
 If it is diabled, it will onlt snap if \e{Shift} is held.
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 

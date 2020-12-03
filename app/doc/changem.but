@@ -1043,7 +1043,7 @@ A move can be achieved using one of the following methods;
 
 \u000
 
-During a Move of tracks, and \f{MagneticSnap} is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
+During a Move of tracks, and \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
 This indicates that the two points will auto-join and that all the moved tracks will align to the unselected point if the Move is stopped.
 This behaviour can be suppressed with \e{Alt}. If \f{MagneticSnap} is disabled, the alignment will only occur if \e{Alt} is pressed.
 
@@ -1383,7 +1383,7 @@ Rotation can be achieved using one of the following methods;
 
 \dd Aligning the selected object with another object on the layout. See \K{rotateByAlign} for detail.
 
-During Rotation of a track, if \f{MagneticSnap} is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
+During Rotation of a track, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
 This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Rotation is stopped. This does not happen if \e{Alt} is used. 
 If \f{MagneticSnap} is disabled, the snap will only occur if \e{Alt} is held.
 Note that this also applies to \K{cmdMove}.

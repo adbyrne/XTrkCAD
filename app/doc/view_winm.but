@@ -30,7 +30,7 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
-\dd \f{Magnetic Snap On/Off} - Toggles Magnets for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
+\dd \f{Magnetic Snap On/Off} - Toggles Magnets (\K{cmdMagneticSnap}) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
 
 \u000
 
@@ -63,6 +63,24 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 \u000
 
 When zooming in or out, the corresponding highlighted area of the \f{Map Window} (\K{cmdMap}) changes size to match that which appears on the \f{Main Canvas} (\K{mainW}).
+
+\rule
+
+\S{cmdMagneticSnap} Magnetic Snap
+
+The \f{MagneticSnap} feature eases constructing and assembling tracks and draw objects by "snapping" the end of new objects to existing objects. 
+For existing track objects the point snapped to is always an open end point. 
+The snap operates when "close" to the object (a few pixels distant) and an anchor point (a blue circle) is displayed when this will occur if the mouse is clicked. 
+
+\u000
+When Adding Draw line objects, the snap point is the nearest point on the existing object. 
+A snap to the end of a line object can be selected by positioning the cursor close to the end of the line but off it, in the direction of the line. This will ensure the closest point is the end.
+
+\u000  
+The \f{MagneticSnap} feature is enabled and disabled using either the magnet icon which is part of the \f{SnapGrid} Toolbar button set, or using the View (\K{viewM}) menu.
+
+For each part of an Add or Move or Rotate operation, the current state of \f{MagneticSnap} can be temporarily inverted using the \f{Alt} key. 
+This enables snapping to be inhibited for a single part of an operation (or conversely enabled for just one part).
 
 \rule
 
