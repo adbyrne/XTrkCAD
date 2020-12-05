@@ -1,142 +1,144 @@
-CONTENTS Märklin K-Track HO-Scale
-# From 'Märklin Complete Program 1994/95 E'
+CONTENTS Mï¿½rklin K-Track HO-Scale
+# From 'Mï¿½rklin Complete Program 1994/95 E'
 
-SUBCONTENTS Märklin K-Track Straight Tracks
+SUBCONTENTS Mï¿½rklin K-Track Straight Tracks
 # Straight Section Design by Dave Bullis - 7.086614
-TURNOUT HO  "Märklin K-Track	Straight 180mm	2200"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 180mm	2200"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.086614 0.000000 90.000000
 	S 0 0 0.000000 0.000000 7.087000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 168.9mm	2206"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 168.9mm	2206"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.649606 0.000000 90.000000
 	S 0 0 0.000000 0.000000 6.650000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 217.9mm	2209"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 217.9mm	2209"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.578740 0.000000 90.000000
 	S 0 0 0.000000 0.000000 8.579000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 156mm	2207"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 156mm	2207"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.141732 0.000000 90.000000
 	S 0 0 0.000000 0.000000 6.142000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 90mm	2201"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 90mm	2201"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.543307 0.000000 90.000000
 	S 0 0 0.000000 0.000000 3.543000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 45mm	2202"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 45mm	2202"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.771654 0.000000 90.000000
 	S 0 0 0.000000 0.000000 1.772000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 41.3mm	2293"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 41.3mm	2293"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.625984 0.000000 90.000000
 	S 0 0 0.000000 0.000000 1.626000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 35.1mm	2208"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 35.1mm	2208"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.381890 0.000000 90.000000
 	S 0 0 0.000000 0.000000 1.382000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 30mm	2203"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 30mm	2203"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.181102 0.000000 90.000000
 	S 0 0 0.000000 0.000000 1.181000 0.000000
 	END
-TURNOUT HO  "Märklin K-Track	Straight 22.5mm	2204"
+TURNOUT HO  "Mï¿½rklin K-Track	Straight 22.5mm	2204"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 0.885827 0.000000 90.000000
 	S 0 0 0.000000 0.000000 0.886000 0.000000
 	END
 
-SUBCONTENTS Märklin K-Track Curve Tracks
-TURNOUT HO  "Märklin K-Track	Curved 295.4mm 45°	2210"
+SUBCONTENTS Mï¿½rklin K-Track Curve Tracks
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 295.4mm 45ï¿½	2210"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.223596 -3.406325 135.000000
 	C 0 0 11.630000 0.000000 -11.630000 0.000000 45.000000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 360mm 30°	2221"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 360mm 30ï¿½	2221"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.086614 -1.898853 120.000000
 	C 0 0 14.173000 0.000000 -14.173000 0.000000 30.000000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 360mm 15°	2223"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 360mm 15ï¿½	2223"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.668301 -0.482941 105.000000
 	C 0 0 14.173000 0.000000 -14.173000 0.000000 15.000000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 360mm 7.5°	2224"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 360mm 7.5ï¿½	2224"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.849978 -0.121254 97.500000
 	C 0 0 14.173000 0.000000 -14.173000 0.000000 7.500000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 424.6mm 30°	2231"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 424.6mm 30ï¿½	2231"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.358268 -2.239591 120.000000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 30.000000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 424.6mm 22.5°	2232"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 424.6mm 22.5ï¿½	2232"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.397141 -1.272470 112.500000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 22.500000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 424.6mm 15°	2233"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 424.6mm 15ï¿½	2233"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.326558 -0.569602 105.000000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 15.000000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 424.6mm 7.5°	2234"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 424.6mm 7.5ï¿½	2234"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.181946 -0.143012 97.500000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 7.500000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 424.6mm 3.75°	2235"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 424.6mm 3.75ï¿½	2235"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.093314 -0.035791 93.750000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 3.750000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 553.9 30°	2241"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 553.9 30ï¿½	2241"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 10.903543 -2.921596 120.000000
 	C 0 0 21.807000 0.000000 -21.807000 0.000000 30.000000
 	END
-TURNOUT HO  "Märklin K-Track	Curved 618.5 30°	2251"
+TURNOUT HO  "Mï¿½rklin K-Track	Curved 618.5 30ï¿½	2251"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 12.175197 -3.262334 120.000000
 	C 0 0 24.350000 0.000000 -24.350000 0.000000 30.000000
 	END
 
-SUBCONTENTS Märklin K-Track Turnouts
+SUBCONTENTS Mï¿½rklin K-Track Turnouts
 # Double Slipswitch Design by Dave Bullis - 6.649606 22.500000 6.649606
-TURNOUT HO  "Märklin K-Track	22.5° Double Slip	2260"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT HO  "Mï¿½rklin K-Track	22.5ï¿½ Double Slip	2260"
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 6.649606 0.000000 90.000000
 	E 0.253086 1.272347 292.500000
@@ -150,7 +152,7 @@ TURNOUT HO  "Märklin K-Track	22.5° Double Slip	2260"
 	C 0 0 10.193000 1.297000 -10.193000 0.000000 22.500000
 	C 0 0 -10.193000 5.352000 10.193000 180.000000 22.500000
 	END
-TURNOUT HO  "Märklin K-Track	Left Turnout R424.6mm	2262"
+TURNOUT HO  "Mï¿½rklin K-Track	Left Turnout R424.6mm	2262"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -159,7 +161,7 @@ TURNOUT HO  "Märklin K-Track	Left Turnout R424.6mm	2262"
 	S 0 0 0.000000 0.000000 6.650000 0.000000
 	C 0 0 -16.717000 0.000000 16.717000 157.500000 22.500000
 	END
-TURNOUT HO  "Märklin K-Track	Right Turnout R424.6mm	2263"
+TURNOUT HO  "Mï¿½rklin K-Track	Right Turnout R424.6mm	2263"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -168,7 +170,7 @@ TURNOUT HO  "Märklin K-Track	Right Turnout R424.6mm	2263"
 	S 0 0 0.000000 0.000000 6.650000 0.000000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 22.500000
 	END
-TURNOUT HO  "Märklin K-Track	Left Manual Turnout R424.6mm	2265"
+TURNOUT HO  "Mï¿½rklin K-Track	Left Manual Turnout R424.6mm	2265"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -177,7 +179,7 @@ TURNOUT HO  "Märklin K-Track	Left Manual Turnout R424.6mm	2265"
 	S 0 0 0.000000 0.000000 6.650000 0.000000
 	C 0 0 -16.717000 0.000000 16.717000 157.500000 22.500000
 	END
-TURNOUT HO  "Märklin K-Track	Right Manual Turnout R424.6mm	2266"
+TURNOUT HO  "Mï¿½rklin K-Track	Right Manual Turnout R424.6mm	2266"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -186,7 +188,7 @@ TURNOUT HO  "Märklin K-Track	Right Manual Turnout R424.6mm	2266"
 	S 0 0 0.000000 0.000000 6.650000 0.000000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 22.500000
 	END
-TURNOUT HO  "Märklin K-Track	Left Curved Turnout	2268"
+TURNOUT HO  "Mï¿½rklin K-Track	Left Curved Turnout	2268"
 	P "Normal" 1 2
 	P "Reverse" 3
 	E 0.000000 0.000000 270.000000
@@ -196,7 +198,7 @@ TURNOUT HO  "Märklin K-Track	Left Curved Turnout	2268"
 	C 0 0 -16.717000 1.866000 16.703000 152.324000 25.352000
 	C 0 0 -14.173000 0.000000 14.173000 150.000000 30.000000
 	END
-TURNOUT HO  "Märklin K-Track	Right Curved Turnout	2269"
+TURNOUT HO  "Mï¿½rklin K-Track	Right Curved Turnout	2269"
 	P "Normal" 1 2
 	P "Reverse" 3
 	E 0.000000 0.000000 270.000000
@@ -206,7 +208,7 @@ TURNOUT HO  "Märklin K-Track	Right Curved Turnout	2269"
 	C 0 0 14.173000 2.543000 -14.173000 0.000000 30.000000
 	C 0 0 14.173000 0.000000 -14.173000 0.000000 30.000000
 	END
-TURNOUT HO  "Märklin K-Track	3-Way Turnout	2270"
+TURNOUT HO  "Mï¿½rklin K-Track	3-Way Turnout	2270"
 	P "Normal" 1
 	P "Right" 2
 	P "Left" 3
@@ -218,7 +220,7 @@ TURNOUT HO  "Märklin K-Track	3-Way Turnout	2270"
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 22.500000
 	C 0 0 -16.717000 0.000000 16.717000 157.500000 22.500000
 	END
-TURNOUT HO  "Märklin K-Track	Large Left Turnout	2272"
+TURNOUT HO  "Mï¿½rklin K-Track	Large Left Turnout	2272"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -227,7 +229,7 @@ TURNOUT HO  "Märklin K-Track	Large Left Turnout	2272"
 	S 0 0 0.000000 0.000000 8.858000 0.000000
 	C 0 0 -35.528000 0.000000 35.528000 165.567000 14.433000
 	END
-TURNOUT HO  "Märklin K-Track	Large Right Turnout	2273"
+TURNOUT HO  "Mï¿½rklin K-Track	Large Right Turnout	2273"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -236,16 +238,18 @@ TURNOUT HO  "Märklin K-Track	Large Right Turnout	2273"
 	S 0 0 0.000000 0.000000 8.858000 0.000000
 	C 0 0 35.528000 0.000000 -35.528000 0.000000 14.433000
 	END
-TURNOUT HO  "Märklin K-Track	Large Curve 902.4mm	2274"
+TURNOUT HO  "Mï¿½rklin K-Track	Large Curve 902.4mm	2274"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.855363 -1.121310 104.433333
 	C 0 0 35.528000 0.000000 -35.528000 0.000000 14.433000
 	END
 # Double Slipswitch Design by Dave Bullis - 8.858268 14.433300 8.858368
-TURNOUT HO  "Märklin K-Track	Large Double Slip	2275"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT HO  "Mï¿½rklin K-Track	Large Double Slip	2275"
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 8.858268 0.000000 90.000000
 	E 0.139742 1.103986 284.433330
@@ -260,9 +264,9 @@ TURNOUT HO  "Märklin K-Track	Large Double Slip	2275"
 	C 0 0 -24.734000 7.561000 24.734000 180.000000 14.433000
 	END
 
-SUBCONTENTS Märklin K-Track Crossings
+SUBCONTENTS Mï¿½rklin K-Track Crossings
 # Crossing Design by Dave Bullis - 8.858268 14.433330 8.858268
-TURNOUT HO  "Märklin K-Track	Large 14.433 Crossing	2257"
+TURNOUT HO  "Mï¿½rklin K-Track	Large 14.433 Crossing	2257"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 8.858268 0.000000 90.000000
@@ -272,7 +276,7 @@ TURNOUT HO  "Märklin K-Track	Large 14.433 Crossing	2257"
 	S 0 0 0.140000 1.104000 8.718000 -1.104000
 	END
 # Crossing Design by Dave Bullis - 6.649606 22.500000 6.649606
-TURNOUT HO  "Märklin K-Track	22.5° Crossing	2259"
+TURNOUT HO  "Mï¿½rklin K-Track	22.5ï¿½ Crossing	2259"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.649606 0.000000 90.000000
@@ -282,7 +286,7 @@ TURNOUT HO  "Märklin K-Track	22.5° Crossing	2259"
 	S 0 0 0.253000 1.272000 6.397000 -1.272000
 	END
 # Crossing Design by Dave Bullis - 3.543307 45.000000 3.543307
-TURNOUT HO  "Märklin K-Track	45° Crossing	2258"
+TURNOUT HO  "Mï¿½rklin K-Track	45ï¿½ Crossing	2258"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 3.543307 0.000000 90.000000
@@ -292,8 +296,8 @@ TURNOUT HO  "Märklin K-Track	45° Crossing	2258"
 	S 0 0 0.519000 1.253000 3.024000 -1.253000
 	END
 
-SUBCONTENTS Märklin K-Track Mics Tracks
-TURNOUT HO "Märklin K-Track	Straight Uncoupler 90mm	2297"
+SUBCONTENTS Mï¿½rklin K-Track Mics Tracks
+TURNOUT HO "Mï¿½rklin K-Track	Straight Uncoupler 90mm	2297"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.543307 0.000000 90.000000
@@ -304,31 +308,31 @@ TURNOUT HO "Märklin K-Track	Straight Uncoupler 90mm	2297"
 		2.876640 0.080000
 		0.666667 0.080000
 	END
-TURNOUT HO "Märklin K-Track	Straight Circuit 90mm	2299"
+TURNOUT HO "Mï¿½rklin K-Track	Straight Circuit 90mm	2299"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.543307 0.000000 90.000000
 	S 0 0.000000 0.000000 0.000000 3.543307 0.000000
 	G 16711680 0.000000 0.400000 1.77000 0.000000 
 	END
-TURNOUT HO "Märklin K-Track	Curved Circuit R=360mm 15°	2229"
-	U "Curved Section" "" "Märklin K-Track" "Bogen Kontaktgleis-Schleifer" "2229" 6.581313 15.000000 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Curved Circuit R=360mm 15ï¿½	2229"
+	U "Curved Section" "" "Mï¿½rklin K-Track" "Bogen Kontaktgleis-Schleifer" "2229" 6.581313 15.000000 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.668301 -0.482941 105.000000
 	C 0 0 14.173228 0.000000 -14.173228 0.000000 15.000000
 	G 16711680 0.000000 0.400000 1.834150 -0.121254
 	END
-TURNOUT HO "Märklin K-Track	Curved Circuit R=424.6mm 15°	2239"
-	U "Curved Section" "" "Märklin K-Track" "Bogen Kontaktgleis Schleifer" "2239" 6.581313 15.000000 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Curved Circuit R=424.6mm 15ï¿½	2239"
+	U "Curved Section" "" "Mï¿½rklin K-Track" "Bogen Kontaktgleis Schleifer" "2239" 6.581313 15.000000 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.326558 -0.569602 105.000000
 	C 0 0 16.717000 0.000000 -16.717000 0.000000 15.000000
 	G 16711680 0.0000000 0.400000 2.163279 -0.143016
 	END
-TURNOUT HO "Märklin K-Track	Lighted Bumper 38mm	7389"
-	U "Straight Section" "" "Märklin K-Track" "Prellbock beleuchtet" "7389" 0.589001 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Lighted Bumper 38mm	7389"
+	U "Straight Section" "" "Mï¿½rklin K-Track" "Prellbock beleuchtet" "7389" 0.589001 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	S 0 0.000000 0.000000 0.000000 1.496063 0.000000
@@ -339,8 +343,8 @@ TURNOUT HO "Märklin K-Track	Lighted Bumper 38mm	7389"
 		0.748031 0.769333
 	G 16711680 0.000000 0.300000 0.800000 0.00000
 	END
-TURNOUT HO "Märklin K-Track	Bumper 38mm	7391"
-	U "Straight Section" "" "Märklin K-Track" "Prellbock" "7391" 0.589001 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Bumper 38mm	7391"
+	U "Straight Section" "" "Mï¿½rklin K-Track" "Prellbock" "7391" 0.589001 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	S 0 0.000000 0.000000 0.000000 1.496063 0.000000
@@ -350,8 +354,8 @@ TURNOUT HO "Märklin K-Track	Bumper 38mm	7391"
 		1.500000 0.769333
 		0.748031 0.769333
 	END
-TURNOUT HO "Märklin K-Track	Straight Feeder	2290"
-	U "Straight Section" "Dave Bullis" "Märklin K-Track" "Straight Feeder" "2290" 7.086614 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Straight Feeder	2290"
+	U "Straight Section" "Dave Bullis" "Mï¿½rklin K-Track" "Straight Feeder" "2290" 7.086614 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.086614 0.000000 90.000000
@@ -364,15 +368,15 @@ TURNOUT HO "Märklin K-Track	Straight Feeder	2290"
 	G3 0 0.000000 0.078740 3.395669 0.551181 0
 	G3 0 0.000000 0.078740 3.690945 0.551181 0
 	END
-TURNOUT HO "Märklin K-Track	Straight K to M Adapter	2291"
-	U "Straight Section" "Dave Bullis" "Märklin K-Track" "Straight K to M Adapter" "2291" 7.086614 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Straight K to M Adapter	2291"
+	U "Straight Section" "Dave Bullis" "Mï¿½rklin K-Track" "Straight K to M Adapter" "2291" 7.086614 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.086614 0.000000 90.000000
 	S 0 0.000000 0.000000 0.000000 7.086614 0.000000
 	END
-TURNOUT HO "Märklin K-Track	Straight Feeder w/ Capacitor	2292"
-	U "Straight Section" "Dave Bullis" "Märklin K-Track" "Straight Feeder w/ Capacitor" "2292" 7.086614 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Straight Feeder w/ Capacitor	2292"
+	U "Straight Section" "Dave Bullis" "Mï¿½rklin K-Track" "Straight Feeder w/ Capacitor" "2292" 7.086614 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.086614 0.000000 90.000000
@@ -389,8 +393,8 @@ TURNOUT HO "Märklin K-Track	Straight Feeder w/ Capacitor	2292"
 	L3 0 0.040000 3.248031 0.078740 0 3.838583 0.078740 0
 	L3 0 0.040000 3.248031 -0.078740 0 3.838583 -0.078740 0
 	END
-TURNOUT HO "Märklin K-Track	Contact Set	2295"
-	U "Straight Section" "Dave Bullis" "Märklin K-Track" "Contact Set" "2295" 7.086614 0.000000 0.000000 0
+TURNOUT HO "Mï¿½rklin K-Track	Contact Set	2295"
+	U "Straight Section" "Dave Bullis" "Mï¿½rklin K-Track" "Contact Set" "2295" 7.086614 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.086614 0.000000 90.000000
@@ -410,7 +414,7 @@ TURNOUT HO "Märklin K-Track	Contact Set	2295"
 	L3 0 0.040000 3.543307 0.393701 0 3.543307 -0.393701 0
 	END
 
-SUBCONTENTS Märklin K/M-Track Turntables
+SUBCONTENTS Mï¿½rklin K/M-Track Turntables
 TURNOUT HO	"Marklin	K/M-Track Turntable 12.2"" Dia 7.5d 48 Positions	7286" 512
 	P	"1"	1
 	P	"2"	2
@@ -512,13 +516,13 @@ TURNOUT HO	"Marklin	K/M-Track Turntable 12.2"" Dia 7.5d 48 Positions	7286" 512
 	A3	0	0.031250	6.102362	0.000000	0.000000	0	0.000000	360.000000
 	A3	0	0.031250	7.598425	0.000000	0.000000	0	0.000000	360.000000
 END
-TURNOUT HO "Märklin K/M-Track	Turntable Position Track 38mm	7287"
+TURNOUT HO "Mï¿½rklin K/M-Track	Turntable Position Track 38mm	7287"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.496063 0.000000 90.000000
 	S 0 0.000000 0.000000 0.000000 1.496063 0.000000
 END
-TURNOUT HO "Märklin K/M-Track	Turntable Position Dummy Track 38mm	7287"
+TURNOUT HO "Mï¿½rklin K/M-Track	Turntable Position Dummy Track 38mm	7287"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	S 16777215 0.000000 0.000000 0.000000 1.496063 0.000000

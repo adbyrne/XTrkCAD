@@ -487,8 +487,10 @@ TURNOUT HO "Tillig	Einfache Kreuzungsweiche - EKW I - 15°	85395"
 	END
 TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW I - 15°	85390"
 	U "Double Slipswitch" "" "Tillig" "Doppelkreuzungsweiche - DKW I - 15°" "85390" 8.976378 15.000000 8.976378 1.811024 0.000000 13276512
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 8.976378 0.000000 90.000000
 	E 0.152930 1.161622 285.000000
@@ -510,8 +512,10 @@ TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW I - 15°	85390"
 	END
 TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW II (Bauart Baeseler) - 15°	85391"
 	U "Double Slipswitch" "" "Tillig" "Doppelkreuzungsweiche - DKW II (Bauart Baeseler) - 15°" "85391" 10.866142 15.000000 10.866142 1.811024 0.000000 13276512
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 10.866142 0.000000 90.000000
 	E 0.185125 1.406174 285.000000
