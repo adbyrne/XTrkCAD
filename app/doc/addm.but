@@ -310,7 +310,9 @@ The helix dialog allows you to calculate these values based other parameters suc
 
 In the case where different parameters could be affected (for instance changing \e{Elevation Difference} can affect \e{Radius} or \e{Grade}) the last parameter you changed will be preserved.  If you set the \e{Grade} and then \e{Elevation Difference} then the \e{Radius} will be adjusted.
 
-Changing \e{Vertical Separation} affects \e{Turns} which must be an integer value (no fractions), and this in turn affects the \e{Vertical Separation}.  When you set \e{Vertical Separation} you are specifying the minimum separation which is adjusted upwards to the actual value.
+Changing \e{Vertical Separation} affects \e{Turns} which must be an integer value (no fractions), and this in turn affects the \e{Vertical Separation}.  When you set \e{Vertical Separation} you are specifying the minimum separation which is adjusted upwards to the actual value. 
+
+The separation is rail-head to rail-head and you need to ensure this is enough to provide clearance when track, sleepers, ballast, baseboard/benchwork is included.
 
 Note: only the \e{Radius} and \e{Turns} are used when creating the helix.  After joining the helix to other tracks, you will want to establish the heights of the endpoints at each end of the helix.  You can use the Elevation (\K{cmdElevation}) command to do this.
 
