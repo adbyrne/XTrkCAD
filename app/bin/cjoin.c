@@ -528,10 +528,18 @@ static STATUS_T CmdJoinLine(
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.polyType = POLYLINE;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyMalloc(sizeof(pts_t)*Dl.params.nodes.cnt);
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt = Dl.params.nodes.cnt;
-			//Copy in reverse as we want this point to be last
-			for (int i=0;i<Dl.params.nodes.cnt;i++) {
-				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt = DYNARR_N(coOrd,Dl.params.nodes,Dl.params.nodes.cnt-1-i);
-				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt_type = wPolyLineStraight;
+			if (Dl.params.ep) {
+				//Copy in reverse as we want this point to be last
+				for (int i=Dl.params.nodes.cnt-1,j=0;i>=0;i--,j++) {
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,i);
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
+				}
+			} else {
+				//Copy forwards to end up with this point last
+				for (int i=0; i<Dl.params.nodes.cnt;i++) {
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt = DYNARR_N(coOrd,Dl.params.nodes,i);
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt_type = wPolyLineStraight;
+				}
 			}
 			InfoMessage( _("Left click - Select second object end") );
 		} else {
@@ -563,10 +571,18 @@ static STATUS_T CmdJoinLine(
 				if (IsClose(FindDistance(Dl.inp[0].pos,Dl.inp[1].pos)))
 					join_near = TRUE;
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+Dl.params.nodes.cnt-join_near));
-				//Copy forwards as this point is first
-				for (int i=join_near;i<Dl.params.nodes.cnt;i++) {
-					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i-join_near+old_cnt].pt = DYNARR_N(coOrd,Dl.params.nodes,i);
-					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i-join_near+old_cnt].pt_type = wPolyLineStraight;
+				if (Dl.params.ep) {
+					//Copy forwards as this point is first
+					for (int i=join_near,j=old_cnt;i<Dl.params.nodes.cnt;i++,j++) {
+						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,i);
+						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
+					}
+				} else {
+					//Copy backwards as this point is last
+					for (int i=Dl.params.nodes.cnt-join_near-1,j=old_cnt;i>=0;i--,j++) {
+						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt = DYNARR_N(coOrd,Dl.params.nodes,i);
+						DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[j].pt_type = wPolyLineStraight;
+					}
 				}
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += Dl.params.nodes.cnt-join_near;
 			}

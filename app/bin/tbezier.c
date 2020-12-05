@@ -938,14 +938,16 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	}
 	if ( inx == PARAMS_NODES ) {
 		if (GetTrkType(trk) == T_BEZIER) return FALSE;
-		if (FindDistance(pos,params->bezierPoints[0]) > FindDistance(pos,params->bezierPoints[3]))
+		//Pos is the place that is the end of the curve (params->ep set to 1 if the curve starts here)
+		if (FindDistance(pos,params->bezierPoints[0]) <= FindDistance(pos,params->bezierPoints[3]))
 				params->ep = 1;
 		else params->ep = 0;
-		coOrd curr_pos = params->bezierPoints[params->ep*3];
+		coOrd curr_pos = params->bezierPoints[0];
 		BOOL_T first = TRUE;
 		DYNARR_RESET(coOrd,params->nodes);
+		// Load out the points in order from bezierPoint[0] to bezierPoint[3]
 		for (int i = 0; i<xx->bezierData.arcSegs.cnt;i++) {
-			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,params->ep?xx->bezierData.arcSegs.cnt-1-i:i);
+			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,i);
 			if (segPtr->type == SEG_STRLIN) {
 				BOOL_T eps = FindDistance(segPtr->u.l.pos[0],curr_pos)>FindDistance(segPtr->u.l.pos[1],curr_pos);
 				if (first) {
@@ -959,34 +961,39 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 				coOrd start,end;
 				Translate(&start,segPtr->u.c.center,segPtr->u.c.a0,fabs(segPtr->u.c.radius));
 				Translate(&end,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,fabs(segPtr->u.c.radius));
+				//Is this segment reversed in the curve?
 				BOOL_T back = FindDistance(start,curr_pos)>FindDistance(end,curr_pos);
 				if (segPtr->u.c.radius > 0.5) {
 					double min_angle = 360*acos(1.0-(0.1/fabs(segPtr->u.c.radius)))/M_PI;    //Error max is 0.1"
 					double number = ceil(segPtr->u.c.a1/min_angle);
 					double arc_size = segPtr->u.c.a1/number;
-					for (int j=1-first;j<=number;j++) {
-						DYNARR_APPEND(coOrd,params->nodes,1);
-						if (back == params->ep)
-							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1-(j*arc_size),fabs(segPtr->u.c.radius) );
-						else
-							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+(j*arc_size),fabs(segPtr->u.c.radius) );
+					if (back) {
+						//If back, list sub-points in reverse. If first show first position, else skip
+						for (int j=(number-(1-first));j>=0;j--) {
+							DYNARR_APPEND(coOrd,params->nodes,number);
+							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+j*arc_size,fabs(segPtr->u.c.radius) );
+						}
+					} else {
+						for (int j=(1-first);j<=number;j++) {
+							DYNARR_APPEND(coOrd,params->nodes,number);
+							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+j*arc_size,fabs(segPtr->u.c.radius) );
+						}
 					}
 					first = FALSE;
 				} else {
 					if (first) {
 						first = FALSE;
 						DYNARR_APPEND(coOrd,params->nodes,1);
-						DYNARR_LAST(coOrd,params->nodes) = start;
+						DYNARR_LAST(coOrd,params->nodes) = back?end:start;
 					}
 					DYNARR_APPEND(coOrd,params->nodes,1);
-					DYNARR_LAST(coOrd,params->nodes) = end;
-
+					DYNARR_LAST(coOrd,params->nodes) = back?start:end;
 				}
 			}
 			curr_pos = DYNARR_LAST(coOrd,params->nodes);
 		}
-		params->lineOrig = params->bezierPoints[params->ep*3];
-		params->lineEnd = params->bezierPoints[(1-params->ep)*3];
+		params->lineOrig = params->bezierPoints[params->ep?0:3];
+		params->lineEnd = params->bezierPoints[params->ep?3:0];
 		return TRUE;
 	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN)){
 		params->ep = PickEndPoint( pos, trk);
