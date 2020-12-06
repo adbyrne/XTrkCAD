@@ -76,7 +76,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or draw objects (\K{cmdSplitDraw}). 
+\dd \f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or split draw objects (\K{cmdSplitDraw}) or use a second Object to prcisely Split/Trim (\K{cmdTrimDraw}). 
 The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \lcont{
@@ -1899,4 +1899,19 @@ If the object is a Circle, the result is an circular arc split at the point with
 If the object is a Polygon, a PolyLine with two end points at the split results. 
 
 Filled Circles and Polygons will be unfilled after the split.
+
+\S2{cmdTrimDraw} Trim a Draw Object using another Draw object
+
+The \f{Trim Draw} command can be used to split many draw objects (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). Polygons and Circles are split into PolyLines and Curves.
+
+First a Trim draw object is selected. Until the trim draw object is selected, the object under the cursor will be highlit in blue. Once it is selected it will be highlit in the current Select Color. 
+
+Next points of intersection are selected, until a split point is selected, a suitable split point under the cursor will have a blue marker. 
+
+The result of the Trim is the same as a Split Draw command see - (\K{cmdSplitDraw}).
+
+To deselect the current Trim object, use the spacebar. 
+
+\rule
+
 
