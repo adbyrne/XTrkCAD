@@ -962,21 +962,23 @@ PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
 
     positionText = FormatPageNumber(x + 1, y + 1);
 
-    // even though we're printing into page_d, mainD must be used here
-    DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
+    if (strcmp(positionText,"-/-") == 0) {
+		// even though we're printing into page_d, mainD must be used here
+		DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
 
-	if (printFormat == PORTRAIT) {
-		printPosition.x = (width - textSize.x) / 2;
-		printPosition.y = (height - textSize.y) / 2;
-	} else {
-		printPosition.x = (height - textSize.x) / 2;
-		printPosition.y = (width - textSize.y) / 2;
-	}
+		if (printFormat == PORTRAIT) {
+			printPosition.x = (width - textSize.x) / 2;
+			printPosition.y = (height - textSize.y) / 2;
+		} else {
+			printPosition.x = (height - textSize.x) / 2;
+			printPosition.y = (width - textSize.y) / 2;
+		}
 
-	page_d.funcs->options |= wDrawOutlineFont;
-    DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
-               wDrawColorGray(70));
-	page_d.funcs->options &= ~wDrawOutlineFont;
+		page_d.funcs->options |= wDrawOutlineFont;
+		DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
+				   wDrawColorGray(70));
+		page_d.funcs->options &= ~wDrawOutlineFont;
+    }
 
     free(positionText);
 
@@ -999,7 +1001,9 @@ PrintNextPageNumberAt(int x, int y, coOrd position)
     wFontSize_t fs = 8.0;
 
     pageNumber = FormatPageNumber(x, y);
-    DrawString(&page_d, position, 0.0, pageNumber, fp, fs, wDrawColorBlack);
+    //Suppress garbage page numbers
+    if (strcmp(pageNumber,"-/-") == 0)
+    	DrawString(&page_d, position, 0.0, pageNumber, fp, fs, wDrawColorBlack);
     free(pageNumber);
 }
 
@@ -1160,10 +1164,10 @@ static BOOL_T PrintPage(
 				p[0].y = p[1].y = 0.0;
 				p[2].y = p[3].y = roomSize.y;
 				
-				DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, FALSE, wDrawColorBlack );
-				DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, TRUE, wDrawColorBlack );
-				DrawRuler( &print_d, p[1], p[2], 0.0, FALSE, FALSE, wDrawColorBlack );
-				DrawRuler( &print_d, p[3], p[2], 0.0, FALSE, TRUE, wDrawColorBlack );
+				DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, TRUE, wDrawColorBlack );
+				DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, FALSE, wDrawColorBlack );
+				DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, TRUE, wDrawColorBlack );
+				DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, FALSE, wDrawColorBlack );
 				if ( printRuler && currPrintGrid.angle == 0 ) {
 					if ( !printRotate ) {
 						p[2] = p[3] = print_d.orig;
