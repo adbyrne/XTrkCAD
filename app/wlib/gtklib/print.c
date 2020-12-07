@@ -793,6 +793,7 @@ void psPrintString(
 	} else {
 		PangoLayoutLine *line;
 		line = pango_layout_get_line_readonly (layout, 0);
+	        setLineType( wDrawLineSolid, 0, 0 );
 		pango_cairo_layout_line_path (cr, line);
 		cairo_stroke( cr );	
 	}
