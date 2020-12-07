@@ -964,7 +964,7 @@ PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
 
     positionText = FormatPageNumber(x, y);
 
-    if (strcmp(positionText,"-/-") != 0) {
+    if (strcmp(positionText,"(-/-)") != 0) {
 		// even though we're printing into page_d, mainD must be used here
 		DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
 
@@ -1004,7 +1004,7 @@ PrintNextPageNumberAt(int x, int y, coOrd position)
 
     pageNumber = FormatPageNumber(x, y);
     //Suppress garbage page numbers
-    if (strcmp(pageNumber,"-/-") != 0)
+    if (strcmp(pageNumber,"(-/-)") != 0)
     	DrawString(&page_d, position, 0.0, pageNumber, fp, fs, wDrawColorBlack);
     free(pageNumber);
 }
