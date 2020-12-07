@@ -608,8 +608,10 @@ TURNOUT HO "NMRA HO	#8 SingleSlip	8SS"
 SUBCONTENTS NMRA HO Scale Double Slip Turnouts
 TURNOUT HO "NMRA HO	#6 Double Slip	6DS"
 	U "Double Slipswitch" "" "NMRA HO" "#6 Double Slip" "6DS" 15.814000 9.527283 15.814000 0.000000 0.000000 0
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 15.814000 0.000000 90.000000
 	E 0.109060 1.308733 279.527283
@@ -625,8 +627,10 @@ TURNOUT HO "NMRA HO	#6 Double Slip	6DS"
 	END
 TURNOUT HO "NMRA HO	#8 Double Slip	8DS"
 	U "Double Slipswitch" "" "NMRA HO" "#8 Double Slip" "8DS" 21.922000 7.152669 21.922000 0.000000 0.000000 0
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 21.922000 0.000000 90.000000
 	E 0.085298 1.364778 277.152669

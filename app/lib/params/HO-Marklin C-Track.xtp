@@ -283,8 +283,10 @@ TURNOUT HO "Märklin C-Track	3-way Turnout 188.3mm R2=437.5mm 24.3°	24630"
 	END
 TURNOUT HO "Märklin C-Track	Double Slipswitch 188.3mm R2=437.5mm 24.3°	24624"
 	U "Double Slipswitch" "XtrkCad" "Märklin C-Track" "Double Slip" "24624" 7.413386 24.300000 7.413386
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 7.413386 0.000000 90.000000
 	E 0.328401 1.525357 294.300000

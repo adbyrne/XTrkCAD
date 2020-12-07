@@ -130,8 +130,10 @@ END
 
 SUBCONTENTS Peco Code 83 HO Slip Turnouts
 TURNOUT HO "Peco Code 83	#6 Double Slip Switch	SL-U8363"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 12.035433 0.000000 90.000000
 	E 0.082528 0.993201 279.500000
