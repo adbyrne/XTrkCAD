@@ -928,7 +928,9 @@ FormatPageNumber(int x, int y)
     char *result;
 
     DynStringMalloc(&formatted, 16);
-    if (x > 0 &&  x <= bm.x1 && y > 0 && y <= bm.y1) {
+    x -= bm.x0-1;
+    y -= bm.y0-1;
+    if (x > 0 &&  x <= bm.x1-bm.x0 && y > 0 && y <= bm.y1-bm.y0) {
         DynStringPrintf(&formatted, "(%d/%d)", x, y);
     } else {
         DynStringCatCStr(&formatted, "(-/-)");
@@ -960,9 +962,9 @@ PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
     wFont_p fp = wStandardFont(F_HELV, TRUE, FALSE);
     wFontSize_t fs = 64.0;
 
-    positionText = FormatPageNumber(x + 1, y + 1);
+    positionText = FormatPageNumber(x, y);
 
-    if (strcmp(positionText,"-/-") == 0) {
+    if (strcmp(positionText,"-/-") != 0) {
 		// even though we're printing into page_d, mainD must be used here
 		DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
 
@@ -1002,7 +1004,7 @@ PrintNextPageNumberAt(int x, int y, coOrd position)
 
     pageNumber = FormatPageNumber(x, y);
     //Suppress garbage page numbers
-    if (strcmp(pageNumber,"-/-") == 0)
+    if (strcmp(pageNumber,"-/-") != 0)
     	DrawString(&page_d, position, 0.0, pageNumber, fp, fs, wDrawColorBlack);
     free(pageNumber);
 }
@@ -1031,7 +1033,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 		p00.x = pageH / 2.0 - 20.0 / 72.0;
 		p00.y = pageW - 10.0 / 72.0;
 	}
-    PrintNextPageNumberAt(x + 1, y + 2, p00);
+    PrintNextPageNumberAt(x, y + 1, p00);
 
     // below
 	if (printFormat == PORTRAIT) {
@@ -1039,7 +1041,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 	} else {
 		p00.y = 10.0 / 72.0;
 	}
-    PrintNextPageNumberAt(x + 1, y, p00);
+    PrintNextPageNumberAt(x, y-1, p00);
 
     // right
 	if (printFormat == PORTRAIT) {
@@ -1049,7 +1051,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 		p00.y = pageW / 2 + 10.0 / 72.0;
 		p00.x = pageH - 20.0 / 72.0;
 	}
-    PrintNextPageNumberAt(x + 2, y + 1, p00);
+    PrintNextPageNumberAt(x+1, y, p00);
 
 	// left
 	if (printFormat == PORTRAIT) {
@@ -1057,7 +1059,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 	} else {
 		p00.x = 10.0 / 72.0;
 	}
-	PrintNextPageNumberAt(x, y + 1, p00);
+	PrintNextPageNumberAt(x-1, y, p00);
     return (TRUE);
 }
 
