@@ -1914,11 +1914,9 @@ The trim anchor base has an arm that indicates which side of the trimmed object 
 
 If the trimmed object is a circle or a polygon, the result will be the same as a Split (\K{cmdSplitDraw}). 
 
-Once a trim has occured, the trimming object remains selected for another trim. To leave the command use the spacebar. If \f{Sticky} is set for Split commands you will be able to select another trim object. 
+Once a trim has occured, the trimming object remains selected for another trim. 
 
-\u000
-
-Note that the precision of the trimming depends on the zoom level, zoom in for most accuracy. 
+To leave the command use the spacebar. If \e{Sticky} (\K{cmdSticky}) is set for Split commands you will be able to select another trim object. 
 
 \rule
 
