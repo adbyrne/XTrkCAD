@@ -131,7 +131,7 @@
 		{"line": "cmdSplitSetCmd", "contents": "Set Split mode" },
 		{"line": "cmdSplitTrack", "contents": "Split a track" },
 		{"line": "cmdSplitDraw", "contents": "Split a straight, curved, circle, polygon or polyline Draw Object " },
-		{"line": "cmdTrimDraw", "contents": "Split a line, circle or polygon or polyline Draw Object using a second Object" },
+		{"line": "cmdTrimDraw", "contents": "Trim a line, circle or polyline Draw Object using a second Object" },
 		{"line": "cmdSelectOrphaned", "contents": "Select stranded (unconnected) track pieces" },
 		{"line": "cmdSensor", "contents": "Create a sensor (ie. a occupancy detector or a toggle switch)" },
 		{"line": "cmdSignal", "contents": "Create a signal for train control" },

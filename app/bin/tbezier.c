@@ -1044,6 +1044,8 @@ static BOOL_T QueryBezier( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_MODIFY_CAN_SPLIT:
+		return TRUE;
+		break;
 	case Q_CORNU_CAN_MODIFY:
 		return (GetTrkType(trk) == T_BEZIER);
 	case Q_GET_NODES:

@@ -99,9 +99,25 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 	CreateSplitAnchorAngle(pos,t,end,a,FALSE);
 }
 
-static void CreateTrimAnchor(coOrd pos, track_p t, track_p s) {
+static void CreateTrimAnchorLeg(coOrd pos, ANGLE_T a, track_p t) {
+	DIST_T d = tempD.scale*0.1;
+	DIST_T w = tempD.scale/tempD.dpi*4;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.l.pos[0] = pos;
+	Translate(&anchors(i).u.l.pos[1],pos,a,GetTrkGauge(t)*2);
+	anchors(i).width = w;
+
+}
+
+static void CreateTrimAnchor(coOrd pos, track_p t, track_p s, coOrd cursor) {
 	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(s,pos,NULL,NULL));
 	CreateSplitAnchorAngle(pos,t,FALSE,a,TRUE);
+	ANGLE_T aa = FindAngle(pos,cursor);
+	ANGLE_T d = DifferenceBetweenAngles(a,aa);
+	CreateTrimAnchorLeg(pos,a+(d>0?90:-90),t);
 }
 
 static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
@@ -316,7 +332,7 @@ typedef enum {TRIM_NONE, TRIM_LINE} TrimState_e;
 
 static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 {
-	track_p trk0, trk1;
+	track_p trk0, trk1, trk2;
 	EPINX_T ep0 = 0;
 	static TrimState_e trimState;
 	static track_p trimLine;
@@ -324,9 +340,10 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 
 	switch (action&0xFF) {
 	case C_START:
-		InfoMessage( _("Select the draw object to Trim with") );
+		InfoMessage( _("Select the draw object to Trim to") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		trimState = TRIM_NONE;
+		trimLine = NULL;
 		trk = NULL;
 		SetAllTrackSelect( FALSE );
 		/* no break */
@@ -343,7 +360,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 				}
 				trimState = TRIM_LINE;
 				trimLine = trk0;
-				InfoMessage( _("Select an intersecting draw object to Split at intersect") );
+				InfoMessage( _("Select an intersecting draw object to Trim") );
 				return C_CONTINUE;
 			}
 			else return C_CONTINUE;
@@ -368,16 +385,21 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			pos1 = pos;
 		    if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 				if ( IsClose(GetTrkDistance(trk1,&pos1)*4)) {
-					pos = pos1;
 				} else return C_CONTINUE;
 			} else {
 				return C_CONTINUE;
 			}
 		} else return C_CONTINUE;
 
+		ANGLE_T a = GetAngleAtPoint(trk1,pos1,NULL,NULL);
+		if (DifferenceBetweenAngles(a-90,FindAngle(pos1,pos))>0) ep0 = 1;
+		else ep0 = 0;
+
 		UndoStart( _("Trim Draw"), "TrimDraw( T%d[%d] )", GetTrkIndex(trimLine), ep0 );
-		SplitTrack( trk1, pos, ep0, &trk1, FALSE );
+		SplitTrack( trk1, pos1, ep0, &trk2, FALSE );
+		if (trk2 ) DeleteTrack(trk2, FALSE);
 		UndoEnd();
+		MainRedraw();
 		InfoMessage( _("Select another draw object to Trim, or Space to Deselect") );
 		return C_CONTINUE;
 		break;
@@ -401,7 +423,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 				pos1 = pos;
 				if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 					if (IsClose(GetTrkDistance(trk1,&pos1)*4)) {
-						CreateTrimAnchor(pos1, trk1, trimLine);
+						CreateTrimAnchor(pos1, trk1, trimLine, pos);
 					}
 				}
 			}
@@ -422,6 +444,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		trimLine = NULL;
 		trk = NULL;
+		trimState = TRIM_NONE;
 		InfoMessage("");
 		return C_TERMINATE;
 	default: ;

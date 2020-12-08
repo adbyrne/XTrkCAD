@@ -76,7 +76,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or split draw objects (\K{cmdSplitDraw}) or use a second Object to prcisely Split/Trim (\K{cmdTrimDraw}). 
+\dd \f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or split draw objects (\K{cmdSplitDraw}) or use a second Object to Trim (\K{cmdTrimDraw}). 
 The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \lcont{
@@ -1902,15 +1902,23 @@ Filled Circles and Polygons will be unfilled after the split.
 
 \S2{cmdTrimDraw} Trim a Draw Object using another Draw object
 
-The \f{Trim Draw} command can be used to split many draw objects (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). Polygons and Circles are split into PolyLines and Curves.
+The \f{Trim Draw} command can be used to trim many draw objects (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). Polygons and Circles are split into PolyLines and Curves.
 
-First a Trim draw object is selected. Until the trim draw object is selected, the object under the cursor will be highlit in blue. Once it is selected it will be highlit in the current Select Color. 
+\n First a Trimming object (draw object) is selected with \f{Left-Click}. Until the trim draw object is selected, a draw object under the cursor will be highlit in blue. Once it is selected it will be highlit in the current Select Color. 
 
-Next points of intersection are selected, until a split point is selected, a suitable split point under the cursor will have a blue marker. 
+\n Next the point of intersection between the trim object and an object to be trimmed is selected. Until a split point is selected, a suitable split point under the cursor will have a blue trim anchor that is a T shape aligned with the trimming object.
 
-The result of the Trim is the same as a Split Draw command see - (\K{cmdSplitDraw}).
+The trim anchor base has an arm that indicates which side of the trimmed object will be deleted. A \f{Left-Click} will trim the object.
 
-To deselect the current Trim object, use the spacebar. 
+\u000
+
+If the trimmed object is a circle or a polygon, the result will be the same as a Split (\K{cmdSplitDraw}). 
+
+Once a trim has occured, the trimming object remains selected for another trim. To leave the command use the spacebar. If \f{Sticky} is set for Split commands you will be able to select another trim object. 
+
+\u000
+
+Note that the precision of the trimming depends on the zoom level, zoom in for most accuracy. 
 
 \rule
 

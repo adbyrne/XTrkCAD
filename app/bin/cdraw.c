@@ -1867,6 +1867,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 			if (xx->segs[0].u.p.polyType != POLYLINE) return FALSE;
 			REORIGIN(start,xx->segs[0].u.p.pts[0].pt,xx->angle,xx->orig);
 			REORIGIN(end,xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt,xx->angle,xx->orig);
+			params->ep = 1;
 			if (FindDistance(pos,start)>FindDistance(pos,end)) back = TRUE;
 			for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
 				DYNARR_APPEND(coOrd,params->nodes,xx->segs[0].u.p.cnt);
@@ -1883,7 +1884,10 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 		case SEG_STRLIN:;
 			REORIGIN(start,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
 			REORIGIN(end,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
-			if (FindDistance(pos,start)>FindDistance(pos,end)) back = TRUE;
+			params->ep = 1;
+			if (FindDistance(pos,start)>FindDistance(pos,end)) {
+				back = TRUE;
+			}
 			for (int i=0;i<2;i++) {
 				DYNARR_APPEND(coOrd,params->nodes,2);
 				REORIGIN(DYNARR_LAST(coOrd,params->nodes),xx->segs[0].u.l.pos[back?1-i:i],xx->angle,xx->orig);
@@ -1918,6 +1922,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 			}
 			params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
 			params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
+			params->ep = 1;
 			return TRUE;
 
 		case SEG_BEZLIN:
@@ -1990,6 +1995,8 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 
 		coOrd p0,p1;
 		DIST_T d;
+		BOOL_T polyline_trim = FALSE, new_last = FALSE;
+
 
 		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
 
@@ -2160,6 +2167,8 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 					tempSegs(0).type = SEG_STRLIN;
 					tempSegs(0).u.l.pos[0] = pos;
 					tempSegs(0).u.l.pos[1] = end;
+					polyline_trim = TRUE;
+					new_last = FALSE;
 				} else if (polyInx == xx->segs[0].u.p.cnt-2) {
 					//Between second last and last -> Trim the other end
 					end = xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt;
@@ -2181,6 +2190,8 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 					tempSegs(0).type = SEG_STRLIN;
 					tempSegs(0).u.l.pos[0] = end;
 					tempSegs(0).u.l.pos[1] = pos;
+					polyline_trim = TRUE;
+					new_last = TRUE;
 				} else {
 					//Check that new line will have >=3 spots if not -> reject
 					if (xx->segs[0].u.p.cnt >3) {
@@ -2217,6 +2228,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 						*leftover = NULL;
 						return FALSE;
 					}
+					new_last = 1-ep;
 					int new_cnt, old_cnt = xx->segs[0].u.p.cnt;
 					if (1-ep)
 						new_cnt =  polyInx + 2 - onPoint;
@@ -2242,10 +2254,10 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 							REORIGIN(newpts[j].pt,newpts[j].pt,xx->angle,xx->orig);
 						}
 					}
+
 					MyFree(xx->segs[0].u.p.pts);
 					xx->segs[0].u.p.cnt = new_cnt;
 					xx->segs[0].u.p.pts = newpts;
-
 				}
 				break;
 			default:
@@ -2261,6 +2273,12 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 			MyFree(tempSegs(0).u.p.pts);
 			tempSegs(0).u.p.cnt = 0;
 			tempSegs(0).u.p.pts = NULL;
+		}
+		if (*leftover) {
+			//PolyLine keeps the polyline and either adds at beginning or end, otherwise follows ep
+			if (ep != new_last) {
+				*leftover = trk;
+			}
 		}
 		xx->orig = zero;
 		xx->angle = 0.0;
