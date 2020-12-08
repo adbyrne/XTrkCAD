@@ -1888,17 +1888,19 @@ For detail about;
 
 \S2{cmdSplitDraw} Split a Draw Object
 
-The \f{Split Draw} command can be used to split many draw object (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). Polygons and Circles are split into PolyLines and Curves.
+The \f{Split Draw} command can be used to split many draw object (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). 
 
 Until a split point is selected, the split point under the cursor will have a blue marker. 
 
-If the object being split is a PolyLine, the split will either result in a Straight Line and a PolyLine or two PolyLines depending on where the split is along the line. (PolyLines must always have at least 2 segments).
+\n If the object being split is a Polyline, the split will either result in a Straight Line and a PolyLine or two PolyLines depending on where the split is along the line. (PolyLines must always have at least 2 segments).
 
-If the object is a Circle, the result is an circular arc split at the point with a small gap.
+\n Filled Circles and Polygons will be unfilled after the split.
 
-If the object is a Polygon, a PolyLine with two end points at the split results. 
+\n If the split object is a Circle, the result is an circular arc split at the point with a small (5 degree) gap.
 
-Filled Circles and Polygons will be unfilled after the split.
+\n If the split object is a Polygon, a PolyLine with two end points at the split results. 
+
+\rule
 
 \S2{cmdTrimDraw} Trim a Draw Object using another Draw object
 
@@ -1912,7 +1914,7 @@ The trim anchor base has an arm that indicates which side of the trimmed object 
 
 \u000
 
-If the trimmed object is a circle or a polygon, the result will be the same as a Split (\K{cmdSplitDraw}). 
+If the trimmed object is a circle or a polygon, the result will be the same as a Split (\K{cmdSplitDraw}), a 355 degree circle and an open polyline with ends at the split will result. 
 
 Once a trim has occured, the trimming object remains selected for another trim. 
 

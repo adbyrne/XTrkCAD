@@ -1995,7 +1995,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 
 		coOrd p0,p1;
 		DIST_T d;
-		BOOL_T polyline_trim = FALSE, new_last = FALSE;
+		BOOL_T polyline_trim = FALSE, new_last = ep;
 
 
 		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
@@ -2020,7 +2020,8 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 				coOrd c;
 				REORIGIN(c, xx->segs[0].u.c.center, xx->angle, xx->orig);
 				coOrd c0,c1;
-				if (xx->segs[0].type == SEG_FILCRCL || xx->segs[0].u.c.a1 >= 360.0) {
+				if (xx->segs[0].type == SEG_FILCRCL ||
+					(xx->segs[0].type == SEG_CRVLIN && xx->segs[0].u.c.a1 >= 360.0)) {
 					Translate(&c0,c,FindAngle(c,pos),xx->segs[0].u.c.radius);
 					c1 = c0;
 					xx->segs[0].type = SEG_CRVLIN;
@@ -2228,6 +2229,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 						*leftover = NULL;
 						return FALSE;
 					}
+					polyline_trim = TRUE;
 					new_last = 1-ep;
 					int new_cnt, old_cnt = xx->segs[0].u.p.cnt;
 					if (1-ep)
@@ -2254,7 +2256,6 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 							REORIGIN(newpts[j].pt,newpts[j].pt,xx->angle,xx->orig);
 						}
 					}
-
 					MyFree(xx->segs[0].u.p.pts);
 					xx->segs[0].u.p.cnt = new_cnt;
 					xx->segs[0].u.p.pts = newpts;
@@ -2268,15 +2269,16 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 			*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
 			struct extraData * yy = GetTrkExtraData(*leftover);
 			yy->lineType = xx->lineType;
+			if (tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.pts)  {
+				MyFree(tempSegs(0).u.p.pts);
+				tempSegs(0).u.p.cnt = 0;
+				tempSegs(0).u.p.pts = NULL;
+			}
 		}
-		if (tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.pts)  {
-			MyFree(tempSegs(0).u.p.pts);
-			tempSegs(0).u.p.cnt = 0;
-			tempSegs(0).u.p.pts = NULL;
-		}
+
 		if (*leftover) {
-			//PolyLine keeps the polyline and either adds at beginning or end, otherwise follows ep
-			if (ep != new_last) {
+			//Polyline sets new_last to the end of the extra
+			if (polyline_trim && (ep != new_last)) {
 				*leftover = trk;
 			}
 		}
@@ -2951,11 +2953,11 @@ static drawData_t dcurveCmds[] = {
 		{ dbezier_xpm, OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE } };
 static drawData_t dcircleCmds[] = {
 		/*{ dcircle1_xpm, OP_CIRCLE1, "Circle Fixed Radius", "Draw Fixed Radius Circle", "cmdDrawCircleFixedRadius", ACCL_DRAWCIRCLE1 },*/
-		{ dcircle2_xpm, OP_CIRCLE3, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE2 },
-		{ dcircle3_xpm, OP_CIRCLE2, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE3 },
+		{ dcircle3_xpm, OP_CIRCLE3, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE2 },
+		{ dcircle2_xpm, OP_CIRCLE2, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE3 },
 		/*{ dflcrcl1_xpm, OP_FILLCIRCLE1, "Circle Filled Fixed Radius", "Draw Fixed Radius Filled Circle", "cmdDrawFilledCircleFixedRadius", ACCL_DRAWFILLCIRCLE1 },*/
-		{ dflcrcl2_xpm, OP_FILLCIRCLE3, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE2 },
-		{ dflcrcl3_xpm, OP_FILLCIRCLE2, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE3 } };
+		{ dflcrcl3_xpm, OP_FILLCIRCLE3, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE2 },
+		{ dflcrcl2_xpm, OP_FILLCIRCLE2, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE3 } };
 static drawData_t dshapeCmds[] = {
 		{ dbox_xpm, OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX },
 		{ dfilbox_xpm, OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX },

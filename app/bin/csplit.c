@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
 #include "cundo.h"
 #include "compound.h"
 #include "cselect.h"
@@ -385,6 +386,11 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			pos1 = pos;
 		    if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 				if ( IsClose(GetTrkDistance(trk1,&pos1)*4)) {
+					//Iterate twice
+					for (int i=0; i<2;i++) {
+						GetTrkDistance(trimLine,&pos1);
+						GetTrkDistance(trk1,&pos1);
+					}
 				} else return C_CONTINUE;
 			} else {
 				return C_CONTINUE;
@@ -392,7 +398,8 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		} else return C_CONTINUE;
 
 		ANGLE_T a = GetAngleAtPoint(trk1,pos1,NULL,NULL);
-		if (DifferenceBetweenAngles(a-90,FindAngle(pos1,pos))>0) ep0 = 1;
+		ANGLE_T aa = DifferenceBetweenAngles(a,FindAngle(pos1,pos));
+		if (fabs(aa)<90 ) ep0 = 1;
 		else ep0 = 0;
 
 		UndoStart( _("Trim Draw"), "TrimDraw( T%d[%d] )", GetTrkIndex(trimLine), ep0 );
@@ -421,8 +428,14 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 					return C_CONTINUE;
 				}
 				pos1 = pos;
+				coOrd old_pos = pos1;
 				if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 					if (IsClose(GetTrkDistance(trk1,&pos1)*4)) {
+						//Iterate Twice
+						for (int i=0; i<2;i++) {
+							GetTrkDistance(trimLine,&pos1);
+							GetTrkDistance(trk1,&pos1);
+						}
 						CreateTrimAnchor(pos1, trk1, trimLine, pos);
 					}
 				}
