@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.1GA\n"
 "Report-Msgid-Bugs-To: https://sourceforge.net/p/xtrkcad-fork/bugs/\n"
-"POT-Creation-Date: 2020-12-03 07:09-0800\n"
+"POT-Creation-Date: 2020-12-07 17:02-0800\n"
 "PO-Revision-Date: 2020-08-27 16:39+0000\n"
 "Last-Translator: Adam J M Richards <adamjmrichards@gmail.com>, 2020\n"
 "Language-Team: French (https://www.transifex.com/xtrackcad/teams/112853/fr/)\n"
@@ -212,8 +212,8 @@ msgid "Segments"
 msgstr "Segments"
 
 #: ../bin/cblock.c:170 ../bin/cdraw.c:525 ../bin/cdraw.c:1447
-#: ../bin/cdraw.c:1593 ../bin/cdraw.c:2583 ../bin/cdraw.c:2811
-#: ../bin/cdraw.c:2848 ../bin/ctodesgn.c:175 ../bin/ctodesgn.c:176
+#: ../bin/cdraw.c:1593 ../bin/cdraw.c:2601 ../bin/cdraw.c:2829
+#: ../bin/cdraw.c:2866 ../bin/ctodesgn.c:175 ../bin/ctodesgn.c:176
 #: ../bin/ctodesgn.c:177 ../bin/ctodesgn.c:178 ../bin/ctodesgn.c:190
 #: ../bin/ctodesgn.c:191 ../bin/ctodesgn.c:241 ../bin/ctodesgn.c:244
 #: ../bin/ctodesgn.c:264 ../bin/ctodesgn.c:269 ../bin/ctodesgn.c:301
@@ -247,12 +247,12 @@ msgstr "Bout 2: X,Y"
 #: ../bin/cblock.c:596 ../bin/cblock.c:604 ../bin/cblock.c:674
 #: ../bin/cblock.c:795 ../bin/cblock.c:807 ../bin/cblock.c:845
 #: ../bin/ccontrol.c:206 ../bin/ccontrol.c:219 ../bin/ccontrol.c:231
-#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2642
+#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2660
 #: ../bin/cgroup.c:1065 ../bin/cgroup.c:1132 ../bin/cgroup.c:1160
 #: ../bin/cgroup.c:1210 ../bin/cgroup.c:1232 ../bin/cgroup.c:1320
 #: ../bin/cgroup.c:1698 ../bin/cnote.c:69 ../bin/compound.c:674
 #: ../bin/compound.c:689 ../bin/compound.c:722 ../bin/cprint.c:519
-#: ../bin/cprint.c:723 ../bin/cprint.c:730 ../bin/cprint.c:1254
+#: ../bin/cprint.c:723 ../bin/cprint.c:730 ../bin/cprint.c:1260
 #: ../bin/cpull.c:511 ../bin/cpull.c:526 ../bin/cpull.c:528 ../bin/cpull.c:530
 #: ../bin/cpull.c:691 ../bin/cselect.c:1092 ../bin/cselect.c:1201
 #: ../bin/cselect.c:2060 ../bin/csensor.c:195 ../bin/csensor.c:207
@@ -292,7 +292,7 @@ msgstr "Bout 2: X,Y"
 #: ../bin/paramfilelist.c:131 ../bin/paramfilelist.c:145
 #: ../bin/paramfilelist.c:209 ../bin/smalldlg.c:90 ../bin/smalldlg.c:222
 #: ../bin/tease.c:1102 ../bin/track.c:1666 ../wlib/gtklib/wpref.c:122
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:601
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:602
 msgid "Ok"
 msgstr "Ok"
 
@@ -456,11 +456,11 @@ msgstr "Voie FLEX %s"
 msgid " FLEX "
 msgstr " FLEX "
 
-#: ../bin/ccornu.c:902 ../bin/cjoin.c:948 ../bin/cmisc.c:61
+#: ../bin/ccornu.c:902 ../bin/cjoin.c:964 ../bin/cmisc.c:61
 msgid "First"
 msgstr "Premier"
 
-#: ../bin/ccornu.c:909 ../bin/cjoin.c:956
+#: ../bin/ccornu.c:909 ../bin/cjoin.c:972
 msgid "Second"
 msgstr "Second"
 
@@ -842,8 +842,8 @@ msgstr "Départ verrouillé : faites glisser la corde, longueur=%s Angle=%0.3f"
 msgid "Drag out chord length=%s angle=%0.3f"
 msgstr "Faites glisser sur la corde, longueur =%s Angle =%0.3f"
 
-#: ../bin/ccurve.c:420 ../bin/ccurve.c:596 ../bin/cjoin.c:655
-#: ../bin/cjoin.c:910
+#: ../bin/ccurve.c:420 ../bin/ccurve.c:596 ../bin/cjoin.c:671
+#: ../bin/cjoin.c:926
 msgid "Desired Radius"
 msgstr "Rayon souhaité"
 
@@ -876,8 +876,8 @@ msgid "Elevation Difference"
 msgstr "Différence d'élévation"
 
 #: ../bin/ccurve.c:708 ../bin/cdraw.c:524 ../bin/cdraw.c:1459
-#: ../bin/cdraw.c:1605 ../bin/cdraw.c:2590 ../bin/cdraw.c:2791
-#: ../bin/cdraw.c:2805 ../bin/compound.c:616 ../bin/compound.c:621
+#: ../bin/cdraw.c:1605 ../bin/cdraw.c:2608 ../bin/cdraw.c:2809
+#: ../bin/cdraw.c:2823 ../bin/compound.c:616 ../bin/compound.c:621
 #: ../bin/compound.c:626 ../bin/compound.c:631 ../bin/ctodesgn.c:185
 #: ../bin/ctodesgn.c:186 ../bin/ctodesgn.c:187 ../bin/ctodesgn.c:188
 #: ../bin/ctodesgn.c:304 ../bin/ctodesgn.c:307 ../bin/ctodesgn.c:309
@@ -980,7 +980,7 @@ msgstr "Centre de la courbe"
 msgid "Curve from Chord"
 msgstr "Corde de la courbe"
 
-#: ../bin/ccurve.c:1009 ../bin/cdraw.c:2933
+#: ../bin/ccurve.c:1009 ../bin/cdraw.c:2951
 msgid "Bezier Curve"
 msgstr "Courbe de Bezier"
 
@@ -1017,8 +1017,8 @@ msgid "Center: X,Y"
 msgstr "Centre : X,Y"
 
 #: ../bin/cdraw.c:521 ../bin/cdraw.c:543 ../bin/cdraw.c:1449
-#: ../bin/cdraw.c:1594 ../bin/cdraw.c:2588 ../bin/cdraw.c:2812
-#: ../bin/cdraw.c:2832 ../bin/cdraw.c:2836 ../bin/compound.c:614
+#: ../bin/cdraw.c:1594 ../bin/cdraw.c:2606 ../bin/cdraw.c:2830
+#: ../bin/cdraw.c:2850 ../bin/cdraw.c:2854 ../bin/compound.c:614
 #: ../bin/compound.c:619 ../bin/compound.c:624 ../bin/compound.c:629
 #: ../bin/compound.c:635 ../bin/cprint.c:162 ../bin/csignal.c:241
 #: ../bin/csignal.c:516 ../bin/ctodesgn.c:193 ../bin/ctodesgn.c:194
@@ -1047,7 +1047,7 @@ msgid "Height"
 msgstr "Hauteur"
 
 #: ../bin/cdraw.c:527 ../bin/cdraw.c:1454 ../bin/cdraw.c:1577
-#: ../bin/cdraw.c:2585 ../bin/cdraw.c:2849 ../bin/ctrain.c:187
+#: ../bin/cdraw.c:2603 ../bin/cdraw.c:2867 ../bin/ctrain.c:187
 #: ../bin/dcar.c:2233
 msgid "Width"
 msgstr "Largeur"
@@ -1073,17 +1073,17 @@ msgstr "Angle de rotation"
 msgid "Point Count"
 msgstr "Nombre de points"
 
-#: ../bin/cdraw.c:533 ../bin/cdraw.c:2563 ../bin/ctodesgn.c:207
+#: ../bin/cdraw.c:533 ../bin/cdraw.c:2581 ../bin/ctodesgn.c:207
 #: ../bin/tbezier.c:267
 msgid "Line Width"
 msgstr "Épaisseur de trait"
 
-#: ../bin/cdraw.c:534 ../bin/cdraw.c:2592 ../bin/tbezier.c:266
+#: ../bin/cdraw.c:534 ../bin/cdraw.c:2610 ../bin/tbezier.c:266
 msgid "Line Type"
 msgstr "Type de ligne"
 
-#: ../bin/cdraw.c:535 ../bin/cdraw.c:2565 ../bin/cdraw.c:2567
-#: ../bin/cdraw.c:2666 ../bin/cdraw.c:2699 ../bin/cmisc.c:127
+#: ../bin/cdraw.c:535 ../bin/cdraw.c:2583 ../bin/cdraw.c:2585
+#: ../bin/cdraw.c:2684 ../bin/cdraw.c:2717 ../bin/cmisc.c:127
 #: ../bin/ctext.c:68 ../bin/ctext.c:148 ../bin/ctodesgn.c:208
 #: ../bin/dcar.c:2229 ../bin/dlayer.c:567 ../bin/doption.c:559
 msgid "Color"
@@ -1102,7 +1102,7 @@ msgstr "Côté ouvert"
 msgid "Boxed"
 msgstr "En boîte"
 
-#: ../bin/cdraw.c:539 ../bin/cdraw.c:1128 ../bin/cdraw.c:2599
+#: ../bin/cdraw.c:539 ../bin/cdraw.c:1128 ../bin/cdraw.c:2617
 msgid "Lumber"
 msgstr "Structure"
 
@@ -1110,8 +1110,8 @@ msgstr "Structure"
 msgid "Orientation"
 msgstr "Orientation"
 
-#: ../bin/cdraw.c:541 ../bin/cdraw.c:2581
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:603
+#: ../bin/cdraw.c:541 ../bin/cdraw.c:2599
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:604
 msgid "Size"
 msgstr "Dimension"
 
@@ -1130,8 +1130,7 @@ msgstr "Texte"
 #: ../bin/cdraw.c:546 ../bin/compound.c:642 ../bin/cturntbl.c:254
 #: ../bin/doption.c:101 ../bin/doption.c:102 ../bin/tbezier.c:269
 #: ../bin/tcornu.c:319 ../bin/tcurve.c:394 ../bin/tease.c:531
-#: ../bin/tstraigh.c:93 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:681
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:682
+#: ../bin/tstraigh.c:93 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:682
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:683
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:684
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:685
@@ -1150,6 +1149,7 @@ msgstr "Texte"
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:698
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:699
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:700
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:701
 msgid "Layer"
 msgstr "Calque"
 
@@ -1157,16 +1157,16 @@ msgstr "Calque"
 msgid "Straight Line"
 msgstr "Ligne droite"
 
-#: ../bin/cdraw.c:1118 ../bin/cdraw.c:2925
+#: ../bin/cdraw.c:1118 ../bin/cdraw.c:2943
 msgid "Dimension Line"
 msgstr "Ligne de cote"
 
-#: ../bin/cdraw.c:1139 ../bin/cdraw.c:2600 ../bin/cdraw.c:2927
+#: ../bin/cdraw.c:1139 ../bin/cdraw.c:2618 ../bin/cdraw.c:2945
 msgid "Table Edge"
 msgstr "Bord de table"
 
-#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2605 ../bin/cdraw.c:2606
-#: ../bin/cdraw.c:2607
+#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2623 ../bin/cdraw.c:2624
+#: ../bin/cdraw.c:2625
 msgid "Circle"
 msgstr "Cercle"
 
@@ -1174,8 +1174,8 @@ msgstr "Cercle"
 msgid "Curved Line"
 msgstr "Ligne courbe"
 
-#: ../bin/cdraw.c:1186 ../bin/cdraw.c:2610 ../bin/cdraw.c:2611
-#: ../bin/cdraw.c:2612
+#: ../bin/cdraw.c:1186 ../bin/cdraw.c:2628 ../bin/cdraw.c:2629
+#: ../bin/cdraw.c:2630
 msgid "Filled Circle"
 msgstr "Cercle plein"
 
@@ -1183,11 +1183,11 @@ msgstr "Cercle plein"
 msgid "Rectangle"
 msgstr "Rectangle"
 
-#: ../bin/cdraw.c:1219 ../bin/cdraw.c:2616
+#: ../bin/cdraw.c:1219 ../bin/cdraw.c:2634
 msgid "Polyline"
 msgstr "Polyligne"
 
-#: ../bin/cdraw.c:1223 ../bin/cdraw.c:2609 ../bin/cdraw.c:2944
+#: ../bin/cdraw.c:1223 ../bin/cdraw.c:2627 ../bin/cdraw.c:2962
 msgid "Polygon"
 msgstr "Polygone"
 
@@ -1195,7 +1195,7 @@ msgstr "Polygone"
 msgid "Filled Rectangle"
 msgstr "Rectangle plein"
 
-#: ../bin/cdraw.c:1254 ../bin/cdraw.c:2614 ../bin/cdraw.c:2945
+#: ../bin/cdraw.c:1254 ../bin/cdraw.c:2632 ../bin/cdraw.c:2963
 msgid "Filled Polygon"
 msgstr "Polygone plein"
 
@@ -1204,17 +1204,17 @@ msgstr "Polygone plein"
 msgid "%s(%d) Layer=%d"
 msgstr "%s(%d) Calque=%d"
 
-#: ../bin/cdraw.c:1300 ../bin/cdraw.c:2669 ../bin/compound.c:1027
+#: ../bin/cdraw.c:1300 ../bin/cdraw.c:2687 ../bin/compound.c:1027
 #: ../bin/doption.c:96 ../bin/tbezier.c:464
 msgid "Solid"
 msgstr "Solide"
 
-#: ../bin/cdraw.c:1301 ../bin/cdraw.c:2671 ../bin/compound.c:1028
+#: ../bin/cdraw.c:1301 ../bin/cdraw.c:2689 ../bin/compound.c:1028
 #: ../bin/doption.c:93 ../bin/tbezier.c:465
 msgid "Dash"
 msgstr "Tiret"
 
-#: ../bin/cdraw.c:1302 ../bin/cdraw.c:2670 ../bin/compound.c:1029
+#: ../bin/cdraw.c:1302 ../bin/cdraw.c:2688 ../bin/compound.c:1029
 #: ../bin/tbezier.c:466
 msgid "Dot"
 msgstr "Pointillé"
@@ -1235,19 +1235,19 @@ msgstr "Axe"
 msgid "PhantomDot"
 msgstr "Axe invisible"
 
-#: ../bin/cdraw.c:1311 ../bin/cdraw.c:2717
+#: ../bin/cdraw.c:1311 ../bin/cdraw.c:2735
 msgid "Tiny"
 msgstr "Minuscule"
 
-#: ../bin/cdraw.c:1312 ../bin/cdraw.c:2718
+#: ../bin/cdraw.c:1312 ../bin/cdraw.c:2736
 msgid "Small"
 msgstr "Petit"
 
-#: ../bin/cdraw.c:1313 ../bin/cdraw.c:2719
+#: ../bin/cdraw.c:1313 ../bin/cdraw.c:2737
 msgid "Medium"
 msgstr "Moyen"
 
-#: ../bin/cdraw.c:1314 ../bin/cdraw.c:2720
+#: ../bin/cdraw.c:1314 ../bin/cdraw.c:2738
 msgid "Large"
 msgstr "Grand"
 
@@ -1255,7 +1255,7 @@ msgstr "Grand"
 msgid "Relative Angle"
 msgstr "Angle relatif"
 
-#: ../bin/cdraw.c:1461 ../bin/cdraw.c:1609 ../bin/cdraw.c:2806
+#: ../bin/cdraw.c:1461 ../bin/cdraw.c:1609 ../bin/cdraw.c:2824
 msgid "Arc Angle"
 msgstr "Angle de l'arc"
 
@@ -1275,309 +1275,309 @@ msgstr "Long. segmt"
 msgid "Rel Ang"
 msgstr "Angle Rel"
 
-#: ../bin/cdraw.c:2570 ../bin/cdraw.c:2572 ../bin/cdraw.c:2697
+#: ../bin/cdraw.c:2588 ../bin/cdraw.c:2590 ../bin/cdraw.c:2715
 msgid "Lumber Type"
 msgstr "Type de structure"
 
-#: ../bin/cdraw.c:2597
+#: ../bin/cdraw.c:2615
 msgid "Straight"
 msgstr "Trait"
 
-#: ../bin/cdraw.c:2598
+#: ../bin/cdraw.c:2616
 msgid "Dimension"
 msgstr "Dimension"
 
-#: ../bin/cdraw.c:2601 ../bin/cdraw.c:2602 ../bin/cdraw.c:2603
-#: ../bin/cdraw.c:2604
+#: ../bin/cdraw.c:2619 ../bin/cdraw.c:2620 ../bin/cdraw.c:2621
+#: ../bin/cdraw.c:2622
 msgid "Curved"
 msgstr "Courbe"
 
-#: ../bin/cdraw.c:2608 ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:2626 ../bin/cdraw.c:2960
 msgid "Box"
 msgstr "Boite"
 
-#: ../bin/cdraw.c:2613 ../bin/cdraw.c:2943
+#: ../bin/cdraw.c:2631 ../bin/cdraw.c:2961
 msgid "Filled Box"
 msgstr "Boîte pleine"
 
-#: ../bin/cdraw.c:2615 ../bin/tbezier.c:461
+#: ../bin/cdraw.c:2633 ../bin/tbezier.c:461
 msgid "Bezier Line"
 msgstr "Ligne Bézier"
 
-#: ../bin/cdraw.c:2664
+#: ../bin/cdraw.c:2682
 #, c-format
 msgid "%s Line Width"
 msgstr "%s épaisseur"
 
-#: ../bin/cdraw.c:2667 ../bin/dcar.c:2202 ../bin/dcar.c:4366
+#: ../bin/cdraw.c:2685 ../bin/dcar.c:2202 ../bin/dcar.c:4366
 #: ../bin/dcar.c:4371
 msgid "Type"
 msgstr "Type"
 
-#: ../bin/cdraw.c:2672
+#: ../bin/cdraw.c:2690
 msgid "Dash-Dot"
 msgstr "Tiret-point"
 
-#: ../bin/cdraw.c:2673
+#: ../bin/cdraw.c:2691
 msgid "Dash-Dot-Dot"
 msgstr "Tiret-point-point"
 
-#: ../bin/cdraw.c:2686
+#: ../bin/cdraw.c:2704
 #, c-format
 msgid "%s Color"
 msgstr "%s Couleur"
 
-#: ../bin/cdraw.c:2715
+#: ../bin/cdraw.c:2733
 msgid "Dimension Line Size"
 msgstr "Dimension des voies"
 
-#: ../bin/cdraw.c:2727
+#: ../bin/cdraw.c:2745
 msgid "Drag to create Table Edge"
 msgstr "Faites glisser pour créer un bord de table"
 
-#: ../bin/cdraw.c:2830
+#: ../bin/cdraw.c:2848
 msgid "Seg Length"
 msgstr "Longueur du segment"
 
-#: ../bin/cdraw.c:2834
+#: ../bin/cdraw.c:2852
 msgid "Rel Angle"
 msgstr "Angle Rel"
 
-#: ../bin/cdraw.c:2924
+#: ../bin/cdraw.c:2942
 msgid "Line"
 msgstr "Ligne"
 
-#: ../bin/cdraw.c:2924
+#: ../bin/cdraw.c:2942
 msgid "Draw Line"
 msgstr "Dessiner un trait"
 
-#: ../bin/cdraw.c:2925
+#: ../bin/cdraw.c:2943
 msgid "Draw Dimension Line"
 msgstr "Tracer une ligne de cote"
 
 #. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:410
-#: ../bin/cdraw.c:2926 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
+#: ../bin/cdraw.c:2944 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
 msgid "Benchwork"
 msgstr "Plan de travail"
 
-#: ../bin/cdraw.c:2926
+#: ../bin/cdraw.c:2944
 msgid "Draw Benchwork"
 msgstr "Dessinez un chassis"
 
-#: ../bin/cdraw.c:2927
+#: ../bin/cdraw.c:2945
 msgid "Draw Table Edge"
 msgstr "Dessiner un bord de Table"
 
-#: ../bin/cdraw.c:2929
+#: ../bin/cdraw.c:2947
 msgid "Curve End"
 msgstr "Fin de courbe"
 
-#: ../bin/cdraw.c:2929
+#: ../bin/cdraw.c:2947
 msgid "Draw Curve from End"
 msgstr "Dessiner une courbe depuis l'extrémité"
 
-#: ../bin/cdraw.c:2930
+#: ../bin/cdraw.c:2948
 msgid "Curve Tangent"
 msgstr "Courbe tangente"
 
-#: ../bin/cdraw.c:2930
+#: ../bin/cdraw.c:2948
 msgid "Draw Curve from Tangent"
 msgstr "Dessiner une courbe depuis la tangente"
 
-#: ../bin/cdraw.c:2931
+#: ../bin/cdraw.c:2949
 msgid "Curve Center"
 msgstr "Centre de la courbe"
 
-#: ../bin/cdraw.c:2931
+#: ../bin/cdraw.c:2949
 msgid "Draw Curve from Center"
 msgstr "Dessiner une courbe à partir du centre"
 
-#: ../bin/cdraw.c:2932
+#: ../bin/cdraw.c:2950
 msgid "Curve Chord"
 msgstr "Corde de la Courbe"
 
-#: ../bin/cdraw.c:2932
+#: ../bin/cdraw.c:2950
 msgid "Draw Curve from Chord"
 msgstr "Dessiner une courbe à partir de la corde"
 
-#: ../bin/cdraw.c:2933
+#: ../bin/cdraw.c:2951
 msgid "Draw Bezier"
 msgstr "Dessinez une Bézier"
 
-#: ../bin/cdraw.c:2936
+#: ../bin/cdraw.c:2954
 msgid "Circle Tangent"
 msgstr "Cercle tangent"
 
-#: ../bin/cdraw.c:2936
+#: ../bin/cdraw.c:2954
 msgid "Draw Circle from Tangent"
 msgstr "Dessiner un cercle à partir de la tangente"
 
-#: ../bin/cdraw.c:2937
+#: ../bin/cdraw.c:2955
 msgid "Circle Center"
 msgstr "Centre du cercle"
 
-#: ../bin/cdraw.c:2937
+#: ../bin/cdraw.c:2955
 msgid "Draw Circle from Center"
 msgstr "Tracer un cercle à partir du centre"
 
-#: ../bin/cdraw.c:2939
+#: ../bin/cdraw.c:2957
 msgid "Circle Filled Tangent"
 msgstr "Tangent à un cercle plein"
 
-#: ../bin/cdraw.c:2939
+#: ../bin/cdraw.c:2957
 msgid "Draw Filled Circle from Tangent"
 msgstr "Dessiner un cercle plein à partir de la tangente"
 
-#: ../bin/cdraw.c:2940
+#: ../bin/cdraw.c:2958
 msgid "Circle Filled Center"
 msgstr "Centre du cercle plein"
 
-#: ../bin/cdraw.c:2940
+#: ../bin/cdraw.c:2958
 msgid "Draw Filled Circle from Center"
 msgstr "Dessiner un cercle plein à partir du centre"
 
-#: ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:2960
 msgid "Draw Box"
 msgstr "Dessinez une Boite"
 
-#: ../bin/cdraw.c:2943
+#: ../bin/cdraw.c:2961
 msgid "Draw Filled Box"
 msgstr "Dessiner une boîte pleine"
 
-#: ../bin/cdraw.c:2944
+#: ../bin/cdraw.c:2962
 msgid "Draw Polygon"
 msgstr "Dessiner un polygone"
 
-#: ../bin/cdraw.c:2945
+#: ../bin/cdraw.c:2963
 msgid "Draw Filled Polygon"
 msgstr "Dessiner un polygone plein"
 
-#: ../bin/cdraw.c:2946
+#: ../bin/cdraw.c:2964
 msgid "PolyLine"
 msgstr "Polyligne"
 
-#: ../bin/cdraw.c:2946
+#: ../bin/cdraw.c:2964
 msgid "Draw PolyLine"
 msgstr "Dessiner une polyligne"
 
-#: ../bin/cdraw.c:2963
+#: ../bin/cdraw.c:2981
 msgid "Straight Objects"
 msgstr "Objets droits"
 
-#: ../bin/cdraw.c:2963
+#: ../bin/cdraw.c:2981
 msgid "Draw Straight Objects"
 msgstr "Dessiner des objets droits"
 
-#: ../bin/cdraw.c:2964
+#: ../bin/cdraw.c:2982
 msgid "Curved Lines"
 msgstr "Lignes courbes"
 
-#: ../bin/cdraw.c:2964
+#: ../bin/cdraw.c:2982
 msgid "Draw Curved Lines"
 msgstr "Tracer des voies courbes"
 
-#: ../bin/cdraw.c:2965
+#: ../bin/cdraw.c:2983
 msgid "Circle Lines"
 msgstr "Lignes circulaires"
 
-#: ../bin/cdraw.c:2965
+#: ../bin/cdraw.c:2983
 msgid "Draw Circles"
 msgstr "Dessinez des cercles"
 
-#: ../bin/cdraw.c:2966
+#: ../bin/cdraw.c:2984
 msgid "Shapes"
 msgstr "Formes"
 
-#: ../bin/cdraw.c:2966
+#: ../bin/cdraw.c:2984
 msgid "Draw Shapes"
 msgstr "Dessiner des formes"
 
-#: ../bin/cdraw.c:3254
+#: ../bin/cdraw.c:3272
 msgid "Close Polygon - 'g'"
 msgstr "Fermer le Polygone - 'g'"
 
-#: ../bin/cdraw.c:3255
+#: ../bin/cdraw.c:3273
 msgid "Make PolyLine - 'l'"
 msgstr "Créer une polyligne - 'l'"
 
-#: ../bin/cdraw.c:3256
+#: ../bin/cdraw.c:3274
 msgid "Fill Polygon - 'f'"
 msgstr "Remplir le polygone - 'f'"
 
-#: ../bin/cdraw.c:3257
+#: ../bin/cdraw.c:3275
 msgid "Empty Polygon - 'u'"
 msgstr "Polygone vide - 'u'"
 
-#: ../bin/cdraw.c:3259
+#: ../bin/cdraw.c:3277
 msgid "Points Mode - 'p'"
 msgstr "Mode Points - 'p'"
 
-#: ../bin/cdraw.c:3260
+#: ../bin/cdraw.c:3278
 msgid "Delete Selected Point - 'Del'"
 msgstr "Supprimer le point sélectionné - 'Suppr'"
 
-#: ../bin/cdraw.c:3261
+#: ../bin/cdraw.c:3279
 msgid "Vertex Point - 'v'"
 msgstr "Point du sommet - 'v'"
 
-#: ../bin/cdraw.c:3262
+#: ../bin/cdraw.c:3280
 msgid "Round Corner - 'r'"
 msgstr "Coin rond - 'r"
 
-#: ../bin/cdraw.c:3263
+#: ../bin/cdraw.c:3281
 msgid "Smooth Corner - 's'"
 msgstr "Coin lisse - 's'"
 
-#: ../bin/cdraw.c:3265 ../bin/cselect.c:3529
+#: ../bin/cdraw.c:3283 ../bin/cselect.c:3529
 msgid "LineType..."
 msgstr "Type de ligne ..."
 
-#: ../bin/cdraw.c:3266 ../bin/cselect.c:3530
+#: ../bin/cdraw.c:3284 ../bin/cselect.c:3530
 msgid "Solid Line"
 msgstr "Ligne continue"
 
-#: ../bin/cdraw.c:3267 ../bin/cselect.c:3531
+#: ../bin/cdraw.c:3285 ../bin/cselect.c:3531
 msgid "Dashed Line"
 msgstr "Ligne en tirets"
 
-#: ../bin/cdraw.c:3268 ../bin/cselect.c:3532
+#: ../bin/cdraw.c:3286 ../bin/cselect.c:3532
 msgid "Dotted Line"
 msgstr "Ligne en pointillé"
 
-#: ../bin/cdraw.c:3269
+#: ../bin/cdraw.c:3287
 msgid "Dash-Dot Line"
 msgstr "Ligne en tiret-point"
 
-#: ../bin/cdraw.c:3270
+#: ../bin/cdraw.c:3288
 msgid "Dash-Dot-Dot Line"
 msgstr "Ligne en tiret-point-point"
 
-#: ../bin/cdraw.c:3271
+#: ../bin/cdraw.c:3289
 msgid "Center-Dot Line"
 msgstr "Ligne d'axe"
 
-#: ../bin/cdraw.c:3272
+#: ../bin/cdraw.c:3290
 msgid "Phantom-Dot Line"
 msgstr "Ligne d'axe invisible"
 
-#: ../bin/cdraw.c:3274
+#: ../bin/cdraw.c:3292
 msgid "Origin Mode - 'o'"
 msgstr "Mode origine - 'o'"
 
-#: ../bin/cdraw.c:3275
+#: ../bin/cdraw.c:3293
 msgid "Reset Origin - '0'"
 msgstr "Réinitialiser l'origine - '0'"
 
-#: ../bin/cdraw.c:3276
+#: ../bin/cdraw.c:3294
 msgid "Origin to Selected - 'l'"
 msgstr "Origine de la sélection - 'l'"
 
-#: ../bin/cdraw.c:3277
+#: ../bin/cdraw.c:3295
 msgid "Origin to Middle - 'm'"
 msgstr "De l'origine au milieu - 'm'"
 
-#: ../bin/celev.c:46 ../bin/cprofile.c:1536 ../bin/csplit.c:173
-#: ../bin/csplit.c:178 ../bin/dease.c:67 ../bin/doption.c:94
+#: ../bin/celev.c:46 ../bin/cprofile.c:1536 ../bin/csplit.c:194
+#: ../bin/csplit.c:199 ../bin/dease.c:67 ../bin/doption.c:94
 #: ../bin/doption.c:96
 msgid "None"
 msgstr "Aucun"
@@ -1695,8 +1695,8 @@ msgstr "Remplacer par un nouveau groupe ?"
 #: ../bin/ctodesgn.c:199 ../bin/ctodesgn.c:2953 ../bin/cturnout.c:84
 #: ../bin/dcar.c:2194 ../bin/dcar.c:4366 ../bin/dcar.c:4371
 #: ../bin/dcmpnd.c:452 ../bin/dcustmgm.c:59
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:377
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:580
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:378
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:581
 msgid "Manufacturer"
 msgstr "Fabricant"
 
@@ -1705,7 +1705,7 @@ msgstr "Fabricant"
 #: ../bin/cturnout.c:84 ../bin/dcar.c:2210 ../bin/dcar.c:4367
 #: ../bin/dcar.c:4372 ../bin/dcmpnd.c:453 ../bin/dcustmgm.c:60
 #: ../bin/denum.c:182 ../bin/denum.c:183 ../bin/denum.c:186
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:378
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:379
 msgid "Description"
 msgstr "Description"
 
@@ -1819,78 +1819,78 @@ msgstr "sélectionnée-s"
 msgid "Left click - Select first draw object end"
 msgstr "Clic gauche - Sélectionner la première extrémité de l'objet de dessin"
 
-#: ../bin/cjoin.c:514 ../bin/cjoin.c:540
+#: ../bin/cjoin.c:514 ../bin/cjoin.c:548
 msgid "Not a line - Try again"
 msgstr "Pas de ligne - Réessayez"
 
-#: ../bin/cjoin.c:536
+#: ../bin/cjoin.c:544
 msgid "Left click - Select second object end"
 msgstr "Clic gauche - Sélectionnez la deuxième extrémité de l'objet"
 
-#: ../bin/cjoin.c:548
+#: ../bin/cjoin.c:556
 msgid "Same draw object and same endpoint - Try again"
 msgstr "Même objet du dessin et même point de fin - Réessayer"
 
-#: ../bin/cjoin.c:582
+#: ../bin/cjoin.c:598
 msgid "Create PolyLine"
 msgstr "Créer une polyligne"
 
-#: ../bin/cjoin.c:824
+#: ../bin/cjoin.c:840
 msgid "Left click - join with track"
 msgstr "Clic gauche - raccorder avec la voie"
 
-#: ../bin/cjoin.c:826
+#: ../bin/cjoin.c:842
 msgid "Left click - join with track, Shift Left click - move to join"
 msgstr ""
 "Clic gauche - raccorder avec la voie, Shift+clic gauche - déplacer pour "
 "raccorder"
 
-#: ../bin/cjoin.c:904 ../bin/cjoin.c:1321 ../bin/cjoin.c:1328
+#: ../bin/cjoin.c:920 ../bin/cjoin.c:1337 ../bin/cjoin.c:1344
 msgid "Select 2nd track"
 msgstr "Sélectionner une 2nd voie"
 
-#: ../bin/cjoin.c:1131
+#: ../bin/cjoin.c:1147
 msgid "Beyond end of 2nd track"
 msgstr "Au-delà de la fin de la 2ème voie"
 
-#: ../bin/cjoin.c:1166
+#: ../bin/cjoin.c:1182
 msgid "Beyond end of 1st track"
 msgstr "Au-delà de la fin de la 1ère voie"
 
-#: ../bin/cjoin.c:1188
+#: ../bin/cjoin.c:1204
 msgid "First Track Type not supported for non-Cornu Join"
 msgstr "La première voie ne peut être connectée que via des courbes de Cornu"
 
-#: ../bin/cjoin.c:1195
+#: ../bin/cjoin.c:1211
 msgid "First "
 msgstr "Premier "
 
-#: ../bin/cjoin.c:1220
+#: ../bin/cjoin.c:1236
 msgid "Second Track Type not supported for non-Cornu Join"
 msgstr "Deuxième type de voie non pris en charge pour un raccord non Cornu"
 
-#: ../bin/cjoin.c:1227
+#: ../bin/cjoin.c:1243
 msgid "Second "
 msgstr "Second "
 
-#: ../bin/cjoin.c:1241 ../bin/track.c:2295 ../bin/track.c:2331
+#: ../bin/cjoin.c:1257 ../bin/track.c:2295 ../bin/track.c:2331
 #: ../bin/track.c:2397
 msgid "Connecting "
 msgstr "Connecter "
 
-#: ../bin/cjoin.c:1331
+#: ../bin/cjoin.c:1347
 msgid "Join Tracks"
 msgstr "Raccorder les voies"
 
-#: ../bin/cjoin.c:1419
+#: ../bin/cjoin.c:1435
 msgid "Join"
 msgstr "Raccorder"
 
-#: ../bin/cjoin.c:1420
+#: ../bin/cjoin.c:1436
 msgid "Join Track"
 msgstr "Raccorder une voie"
 
-#: ../bin/cjoin.c:1421
+#: ../bin/cjoin.c:1437
 msgid "Join Lines"
 msgstr "Raccorder des lignes"
 
@@ -2212,7 +2212,7 @@ msgstr ""
 #: ../bin/cprint.c:723 ../bin/dbitmap.c:208 ../bin/filenoteui.c:158
 #: ../bin/misc.c:1283 ../bin/misc.c:1361 ../bin/param.c:2622
 #: ../wlib/gtklib/browserhelp.c:94
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:599
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:600
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -2220,18 +2220,18 @@ msgstr "Annuler"
 msgid "Print Margins"
 msgstr "Imprimer les marges"
 
-#: ../bin/cprint.c:1374 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2901
+#: ../bin/cprint.c:1380 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2901
 #: ../bin/denum.c:55
 msgid "Print"
 msgstr "Imprimer"
 
-#: ../bin/cprint.c:1395
+#: ../bin/cprint.c:1401
 msgid "Select pages to print, or drag to move print grid"
 msgstr ""
 "Sélectionnez ou faites glisser les pages à imprimer pour déplacer la grille "
 "d'impression"
 
-#: ../bin/cprint.c:1493
+#: ../bin/cprint.c:1499
 msgid "Print..."
 msgstr "Imprimer ..."
 
@@ -2852,59 +2852,88 @@ msgstr "Modifier la grille ..."
 msgid "Set Block Gaps"
 msgstr "Définir des points de séparation"
 
-#: ../bin/csplit.c:112
+#: ../bin/csplit.c:133
 msgid "Select track to split"
 msgstr "Sélectionnez la voie à scinder"
 
-#: ../bin/csplit.c:135
+#: ../bin/csplit.c:156
 msgid "Can't Split that Track Object"
 msgstr "On ne peut pas diviser cette voie"
 
-#: ../bin/csplit.c:143 ../bin/csplit.c:155 ../bin/csplit.c:318
+#: ../bin/csplit.c:164 ../bin/csplit.c:176 ../bin/csplit.c:464
 msgid "Split Track"
 msgstr "Segmentation de Voie"
 
-#: ../bin/csplit.c:151 ../bin/csplit.c:274
+#: ../bin/csplit.c:172 ../bin/csplit.c:295 ../bin/csplit.c:382
 msgid "Can't Split that Draw Object"
 msgstr "On ne peut pas diviser cet élément de dessin"
 
-#: ../bin/csplit.c:161
+#: ../bin/csplit.c:182
 msgid "No Track to Split"
 msgstr "Pas de voie à scinder"
 
-#: ../bin/csplit.c:174 ../bin/dbench.c:69 ../bin/dbench.c:80
+#: ../bin/csplit.c:195 ../bin/dbench.c:69 ../bin/dbench.c:80
 msgid "Left"
 msgstr "Gauche"
 
-#: ../bin/csplit.c:175 ../bin/dbench.c:70 ../bin/dbench.c:79
+#: ../bin/csplit.c:196 ../bin/dbench.c:70 ../bin/dbench.c:79
 msgid "Right"
 msgstr "Droit"
 
-#: ../bin/csplit.c:176 ../bin/csplit.c:181
+#: ../bin/csplit.c:197 ../bin/csplit.c:202
 msgid "Both"
 msgstr "Les deux"
 
-#: ../bin/csplit.c:179
+#: ../bin/csplit.c:200
 msgid "Top"
 msgstr "Haut"
 
-#: ../bin/csplit.c:180
+#: ../bin/csplit.c:201
 msgid "Bottom"
 msgstr "Bas"
 
-#: ../bin/csplit.c:260
+#: ../bin/csplit.c:281
 msgid "Select draw to split"
 msgstr "Sélectionnez le dessin à scinder"
 
-#: ../bin/csplit.c:278 ../bin/csplit.c:319
+#: ../bin/csplit.c:299 ../bin/csplit.c:465
 msgid "Split Draw"
 msgstr "Fractionner le dessin"
 
-#: ../bin/csplit.c:284
+#: ../bin/csplit.c:305
 msgid "No Draw to Split"
 msgstr "Pas de dessin à fractionner"
 
-#: ../bin/csplit.c:317
+#: ../bin/csplit.c:343
+msgid "Select the draw object to Trim to"
+msgstr "Sélectionnez l'objet de dessin à découper"
+
+#: ../bin/csplit.c:358
+msgid "Can't Trim with a Track"
+msgstr "Impossible de couper avec une piste"
+
+#: ../bin/csplit.c:363
+msgid "Select an intersecting draw object to Trim"
+msgstr "Sélectionnez un objet de dessin en intersection à ajuster"
+
+#: ../bin/csplit.c:369
+msgid "No Draw to Trim with"
+msgstr "Pas de dessin pour couper avec"
+
+#: ../bin/csplit.c:376
+msgid "Can't Split a track object"
+msgstr "Impossible de diviser un objet de piste"
+
+#: ../bin/csplit.c:398 ../bin/csplit.c:466
+msgid "Trim Draw"
+msgstr "Couper le dessin"
+
+#: ../bin/csplit.c:403
+msgid "Select another draw object to Trim, or Space to Deselect"
+msgstr ""
+"Sélectionnez un autre objet de dessin à découper ou Espace à désélectionner"
+
+#: ../bin/csplit.c:463
 msgid "Split"
 msgstr "Scinder"
 
@@ -3450,7 +3479,7 @@ msgstr "Contrôle du train %d"
 msgid "Train Control"
 msgstr "Panneau de commande"
 
-#: ../bin/ctrain.c:3099 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:152
+#: ../bin/ctrain.c:3099 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:153
 msgid "Run Trains"
 msgstr "Mode Trains"
 
@@ -3604,7 +3633,7 @@ msgstr "Annuler la trace"
 msgid "Undo: %s"
 msgstr "Annuler : %s"
 
-#: ../bin/cundo.c:539 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:163
+#: ../bin/cundo.c:539 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:164
 msgid "Undo last command"
 msgstr "Annuler la dernière commande"
 
@@ -3865,7 +3894,7 @@ msgid "Poor"
 msgstr "Mauvais"
 
 #: ../bin/dcar.c:1501 ../bin/dpricels.c:45
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:454
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:455
 msgid "Item"
 msgstr "Objet"
 
@@ -3893,9 +3922,9 @@ msgstr "Prototype"
 msgid "Part"
 msgstr "Référence"
 
-#: ../bin/dcar.c:2206 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:379
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:583
+#: ../bin/dcar.c:2206 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:380
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:584
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:585
 msgid "Part Number"
 msgstr "Référence N°"
 
@@ -3947,7 +3976,7 @@ msgstr "Longueur de l'attelage"
 msgid "Purchase Price"
 msgstr "Prix d'achat"
 
-#: ../bin/dcar.c:2253 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:241
+#: ../bin/dcar.c:2253 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:242
 msgid "Current Price"
 msgstr "Prix actuel"
 
@@ -3981,8 +4010,8 @@ msgstr "Remarques"
 msgid "Car Part"
 msgstr "Partie de véhicule"
 
-#: ../bin/dcar.c:2273 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:215
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:216
+#: ../bin/dcar.c:2273 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:216
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:217
 msgid "Car Prototype"
 msgstr "Véhicule prototype"
 
@@ -4172,7 +4201,7 @@ msgid "New Car Part"
 msgstr "Nouvelle fiche de véhicule"
 
 #: ../bin/dcar.c:4367 ../bin/dcar.c:4372
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:424
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:425
 msgid "Roadname"
 msgstr "Compagnie ferroviaire"
 
@@ -4226,7 +4255,7 @@ msgstr "Effacer"
 msgid "Export"
 msgstr "Exporter"
 
-#: ../bin/dcar.c:4408 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:600
+#: ../bin/dcar.c:4408 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:601
 msgid "List"
 msgstr "Liste"
 
@@ -5522,7 +5551,7 @@ msgstr "Suivant"
 msgid "Quit"
 msgstr "Quitter"
 
-#: ../bin/macro.c:685 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:555
+#: ../bin/macro.c:685 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:556
 msgid "Speed"
 msgstr "Vitesse"
 
@@ -5637,11 +5666,10 @@ msgstr "XTrackCAD Font"
 msgid "No balloon help for %s\n"
 msgstr "Aucune bulle d'aide pour %s\n"
 
-#: ../bin/misc.c:956 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:618
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:619
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:621
+#: ../bin/misc.c:956 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:619
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:620
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:622
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:624
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:623
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:625
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:626
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:627
@@ -5696,7 +5724,8 @@ msgstr "Aucune bulle d'aide pour %s\n"
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:676
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:677
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:678
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:680
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:679
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:681
 msgid "No Help"
 msgstr "Pas d'aide"
 
@@ -8650,462 +8679,468 @@ msgstr ""
 "polyligne"
 
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:140
+msgid "Trim a line, circle or polyline Draw Object using a second Object"
+msgstr ""
+"Découper une ligne, un cercle ou une polyligne Dessiner un objet à l'aide "
+"d'un deuxième objet"
+
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:141
 msgid "Select stranded (unconnected) track pieces"
 msgstr "Sélectionner des segments de voie isolés (non connectés)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:141
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:142
 msgid "Create a sensor (ie. a occupancy detector or a toggle switch)"
 msgstr ""
 "Créer un capteur (c.a.d. détecteur de présence ou interrupteur à bascule)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:142
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:143
 msgid "Create a signal for train control"
 msgstr "Créer un signal pour le contrôle du train"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:143
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:144
 msgid "Choose which commands are sticky"
 msgstr "Choisissez les commandes qui sont collantes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:144
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:145
 msgid "Create straight track"
 msgstr "Créer une voie droite"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:145
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:146
 msgid "Place a structure on the layout"
 msgstr "Mettre une bâtiment sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:146
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:147
 msgid "Create a switchmotor for turnout control"
 msgstr "Créer un moteur pour le contrôle d'un aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:147
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:148
 msgid "Edit a switchmotor definition"
 msgstr "Editer une définition de moteur d'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:148
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:149
 msgid "Enter text on the layout"
 msgstr "Entrer du texte sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:149
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:546
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:150
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:547
 msgid "Controls the size of the entered text"
 msgstr "Ajuste la taille du texte saisi"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:150
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:151
 msgid "Plain Text"
 msgstr "Texte simple"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:151
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:152
 msgid "Tip of the Day window"
 msgstr "Fenêtre d'astuce du jour"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:153
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:154
 msgid "Change To Run Trains Mode"
 msgstr "Passer en mode Trains"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:154
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:155
 msgid "Pause/Resume Trains"
 msgstr "Pause/Go Trains"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:155
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:156
 msgid "Place a car on the layout"
 msgstr "Mettre un véhicule sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:156
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:157
 msgid "Exit Trains"
 msgstr "Quitter \"Trains\""
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:157
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:158
 msgid "Hide/Unhide a track"
 msgstr "Masquer/afficher une voie"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:158
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:159
 msgid "Make/Unmake a track a bridge"
 msgstr "Construire/défaire une voie un pont"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:159
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:160
 msgid "Place a turnout or sectional track"
 msgstr "Placer un aiguillage ou une section de voie"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:160
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:161
 msgid "Create a new turnout definition"
 msgstr "Créer une nouvelle définition d'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:161
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:162
 msgid "Place a turntable"
 msgstr "Installer un pont tournant"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:162
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:163
 msgid "Updates old source files with 3 part titles"
 msgstr "Met à jour les anciens fichiers source avec des titres en 3 parties"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:164
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:165
 msgid "Ungroup objects"
 msgstr "Dissocier l'objet"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:165
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:166
 msgid "Draw tracks with thin lines"
 msgstr "Tracez des voies avec des voies fines"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:166
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:167
 msgid "Draw tracks with medium lines"
 msgstr "Tracez des voies avec des voies moyennes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:167
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:168
 msgid "Draw tracks with thick lines"
 msgstr "Tracez des voies avec des voies épaisses"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:168
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:169
 msgid "Change drawing scale"
 msgstr "Changer l'échelle de dessin"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:169
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:181
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:170
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:182
 msgid "Zoom in"
 msgstr "Zoom avant"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:170
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:182
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:171
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:183
 msgid "Zoom out"
 msgstr "Zoom arrière"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:171
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:172
 msgid "File Menu"
 msgstr "Menu fichier"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:172
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:173
 msgid "Save layout"
 msgstr "Enregistrer le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:173
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:174
 msgid "Save layout under a new name "
 msgstr "Enregistrer le plan sous un nouveau nom "
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:174
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:175
 msgid "New layout"
 msgstr "Nouveau plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:175
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:176
 msgid "Generate parts list"
 msgstr "Créer une liste de pièces"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:176
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:177
 msgid "Load a layout"
 msgstr "Charger un plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:177
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:178
 msgid "Exit the program"
 msgstr "Quitter le programme"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:178
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:179
 msgid "Revert to last saved state of layout plan"
 msgstr "Revenir au dernier état enregistré du plan de réseau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:179
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:180
 msgid "Edit menu"
 msgstr "Menu d'édition"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:180
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:181
 msgid "Redraw layout"
 msgstr "Redessiner le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:183
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:186
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:184
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:187
 msgid "Tools menu"
 msgstr "Menu d'outils"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:184
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:185
 msgid "View menu"
 msgstr "Afficher le menu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:185
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:186
 msgid "Toolbar configuration"
 msgstr "Configuration de la barre d'outils"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:187
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:188
 msgid "Options menu"
 msgstr "Menu d'options"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:188
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:189
 msgid "Playback/Record commands"
 msgstr "Commandes de Lecture/Enregistrement"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:189
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:190
 msgid "Window menu"
 msgstr "Menu fenêtre"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:190
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:191
 msgid "Help menu"
 msgstr "Menu d'aide"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:191
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:192
 msgid "Recent error messages and explanations"
 msgstr "Messages d'erreur récents et explications"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:192
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:193
 msgid "Move Hot Bar left"
 msgstr "Faire défiler la Barre rapide à gauche"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:193
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:194
 msgid "Move Hot Bar right"
 msgstr "Faire défiler la Barre rapide à droite"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:194
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:195
 msgid "Total track count"
 msgstr "Nombre total de voies"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:195
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:196
 msgid "X Position of cursor"
 msgstr "Position X du curseur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:196
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:197
 msgid "Y Position of cursor"
 msgstr "Position Y du curseur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:197
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:198
 msgid "Drawing scale"
 msgstr "Échelle du dessin"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:198
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:199
 msgid "Message and status line"
 msgstr "Message et ligne d'état"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:199
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:200
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:201
 msgid "Main layout canvas"
 msgstr "Zone de dessin principale"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:201
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:202
 msgid "Main drawing canvas"
 msgstr "Zone de travail principale"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:202
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:203
 msgid "Command buttons"
 msgstr "Boutons de commande"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:203
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:204
 msgid "Menus"
 msgstr "Menus"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:204
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:205
 msgid "Tile, Filename and Window Manager buttons"
 msgstr "Boutons, Nom de fichier et Gestionnaire de fenêtres"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:205
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:206
 msgid "Turnout and Structure Hot Bar"
 msgstr "Barre de sélection des aiguillages et bâtiments"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:206
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:207
 msgid "Active layer list and layer buttons"
 msgstr "Liste de calques actifs et boutons de calque"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:207
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:208
 msgid "Map window"
 msgstr "Fenêtre principale"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:208
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:209
 msgid "This is the portion of the layout shown in the Main Window canvas"
 msgstr ""
 "Il s'agit de la partie du plan affichée dans le zone de dessin de la fenêtre"
 " principale"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:209
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:210
 msgid "Raise or Lower all Selected Track"
 msgstr "Elever ou abaisser toute la voie sélectionnée"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:210
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:211
 msgid "Name of block"
 msgstr "Nom du bloc"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:211
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:212
 msgid "Script that the block will run"
 msgstr "Script d'exécution du bloc"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:212
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:213
 msgid "List of tracks in the Block"
 msgstr "Liste des voies du bloc"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:213
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:214
 msgid "Add or Update car object"
 msgstr "Ajouter ou mettre à jour un objet véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:214
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:215
 msgid "Manufacturer name"
 msgstr "Nom du fabricant"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:217
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:218
 msgid "Is the Car a Locomotive?"
 msgstr "Le véhicule est-il une locomotive?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:218
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:219
 msgid "Part Number and Description"
 msgstr "Référence N° et description"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:219
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:220
 msgid "Manufacturer Part Number"
 msgstr "Référence fabricant"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:220
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:221
 msgid "Use the Selected figure as the car image"
 msgstr "Utilisez la figure sélectionnée comme image de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:221
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:222
 msgid "Use the default figure as the car image"
 msgstr "Utilisez la figure par défaut comme image de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:222
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:223
 msgid "Optional description of the Car Part"
 msgstr "Description facultative du modèle de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:223
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:224
 msgid "Flip car image"
 msgstr "Effet miroir d'un véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:224
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:225
 msgid "Display Car Item information or reporting marks and dimensions"
 msgstr ""
 "Afficher des informations sur le véhicule ou la plaque d'immatriculation et "
 "les dimensions"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:225
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:226
 msgid "Full Roadname"
 msgstr "Nom complet de la route"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:226
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:227
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:228
 msgid "Car Type"
 msgstr "Type de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:228
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:229
 msgid "Reporting Marks (Roadname abbreviation)"
 msgstr "Sigles (abréviation du nom du réseau)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:229
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:425
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:230
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:426
 msgid "Car Number"
 msgstr "N° de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:230
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:231
 msgid "Car body Color"
 msgstr "Couleur de carrosserie"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:231
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:232
 msgid "Length of car body"
 msgstr "Longueur du chaudron"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:232
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:233
 msgid "Width of car body"
 msgstr "Largeur du chaudron"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:233
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:234
 msgid "Distance between Trucks "
 msgstr "Distance entre les bogies "
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:234
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:235
 msgid "Distance Trucks are displaced along Car"
 msgstr "Répartition des bogies le long de la voiture"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:235
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:236
 msgid "Coupler are mounted on body or truck"
 msgstr "Les attelages sont montés sur les chassis ou les bogies"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:236
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:237
 msgid "Overall Coupled Length"
 msgstr "Longueur totale couplée"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:237
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:238
 msgid "Coupler Length from end of car"
 msgstr "Longueur de l'attelage à partir du bout du véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:238
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:239
 msgid "Diagram of Car"
 msgstr "Schéma de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:239
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:240
 msgid "Item Index Number"
 msgstr "Numéro d'index de l'objet"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:240
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:241
 msgid "Original Purchase Price"
 msgstr "Prix d'achat d'origine"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:242
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:243
 msgid "Condition of car"
 msgstr "Etat du véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:243
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:244
 msgid "Original Purchase Date"
 msgstr "Date d'achat d'origine"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:244
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:245
 msgid "Last Service Date"
 msgstr "Date du dernier service"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:245
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:246
 msgid "Number of identical cars to be entered"
 msgstr "Nombre de matériels roulants identiques à inscrire"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:246
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:247
 msgid "Do all the cars have the same Number?"
 msgstr "Est-ce que toutes les matériels roulants ont le même numéro ?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:247
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:248
 msgid "Notes about the car"
 msgstr "Notes sur le véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:248
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:249
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:250
 msgid "Create a new car Part or Prototype definitions"
 msgstr "Créer une nouvelle définition de pièce ou de prototype de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:250
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:251
 msgid "Finds the selected Car Item on the layout"
 msgstr "Trouve l'article de véhicule sélectionné sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:251
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:252
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:253
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:254
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:255
 msgid "Sort the Item list"
 msgstr "Trier la liste d'articles"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:256
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:257
 msgid "Edit the selected Car Item"
 msgstr "Modifier le titre du véhicule sélectionné"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:257
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:258
 msgid "Add a new Car Item"
 msgstr "Ajouter un nouveau nom de véhicule"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:258
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:259
 msgid "Delete the selected Car Items"
 msgstr "Supprimer les wagons ou locomotives sélectionnés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:259
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:260
 msgid "Import a Car Item .csv file"
 msgstr "Importer du véhicule à partir d'un fichier .csv"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:260
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:261
 msgid "Export a Car Item .csv file"
 msgstr "Exporter un fichier Car Item .csv"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:261
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:262
 msgid "Create a text list of the Car Items"
 msgstr "Créer la liste des noms de matériels roulants"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:262
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:263
 msgid "Specifies the radius of the circle track"
 msgstr "Spécifie le rayon de la voie circulaire"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:263
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:264
 msgid "Default command is Describe or Select"
 msgstr "La commande par défaut est \"Propriétés\" ou \"Sélectionner\""
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:264
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:265
 msgid "Action to invoke on Right-Click"
 msgstr "Action à appeler lors d'un clic droit"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:265
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:266
 msgid ""
 "Replace current selection with clicked object or add clicked object to "
 "selection"
@@ -9113,215 +9148,215 @@ msgstr ""
 "Remplacer la sélection actuelle par un objet cliqué ou ajouter un objet "
 "cliqué à la sélection"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:266
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:267
 msgid "Clicking into an empty area clears selection if select mode is <add>"
 msgstr ""
 "Cliquer dans une zone vide efface la sélection si le mode de sélection est "
 "<Ajouter>"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:268
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:269
 msgid "The list of control elements"
 msgstr "La liste des éléments de contrôle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:269
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:270
 msgid "Edit the element"
 msgstr "Editer l'élément"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:270
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:271
 msgid "Delete the element"
 msgstr "Supprimer l'élément"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:271
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:272
 msgid "Contents Label for new Parameter file"
 msgstr "Contenu de l'étiquette du nouveau fichier de paramètres"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:272
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:273
 msgid "Desired curve radius for new track"
 msgstr "Rayon de courbe souhaité pour la nouvelle piste"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:273
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:274
 msgid "List of custom designed turnouts and structures"
 msgstr "Liste des aiguillages et des bâtiments conçus sur mesure"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:274
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:275
 msgid "Invoke designer editor"
 msgstr "Ouvre l'éditeur de modélisation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:275
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:276
 msgid "Remove selected entries"
 msgstr "Supprimer les entrées sélectionnées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:276
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:277
 msgid "Copy selected entries to Parameter File"
 msgstr "Copier les entrées sélectionnées dans le fichier de paramètres"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:277
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:278
 msgid "Create a New part or prototype"
 msgstr "Créer une nouvelle pièce ou un prototype"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:278
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:279
 msgid "Update custom file and close"
 msgstr "Mettre à jour le fichier personnalisé et fermer"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:279
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:280
 msgid "Executes the next step of the demo"
 msgstr "Exécute la prochaine étape de la démo"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:280
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:281
 msgid "Skip to next demo"
 msgstr "Passer à la prochaine démo"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:281
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:282
 msgid "Stops the demonstration and returns you to XTrackCAD"
 msgstr "Arrêt de la démonstration et retour à XTrackCAD"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:282
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:283
 msgid "Select speed of Playback"
 msgstr "Sélectionnez la vitesse de lecture"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:283
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:284
 msgid "This is where comments about the demo are displayed"
 msgstr "C'est là que les commentaires sur la démo sont affichés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:320
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:321
 msgid "Move the Main canvas if you drag near the edge"
 msgstr ""
 "Déplacez la zone de dessin principale lorsque vous vous approchez des bords"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:321
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:322
 msgid "Color tracks by layer or individually"
 msgstr "Couleur des voies par calque ou individuellement"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:322
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:323
 msgid "Color draw objects by layer or individually"
 msgstr "Couleur des objets dessinés par calque ou individuellement"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:323
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:324
 msgid "Controls the drawing of hidden tracks"
 msgstr "Ajuste le dessin des voies cachées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:324
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:325
 msgid "Controls the drawing of End-Points"
 msgstr "Ajuste le dessin des points d'extrémité"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:325
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:326
 msgid "How to draw track ties"
 msgstr "Comment dessiner des traverses"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:326
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:327
 msgid "Show crosshair at center of curves"
 msgstr "Afficher le réticule au centre des courbes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:327
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:328
 msgid "Drawing scale when to draw tracks with 2 rails"
 msgstr "Échelle minimale pour dessiner les voies avec 2 rails"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:328
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:329
 msgid "Drawing scale of the map window"
 msgstr "Échelle de dessin de la fenêtre de navigation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:329
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:330
 msgid "Whether the main layout is updated while dragging on the Map"
 msgstr "Mise à jour du plan de trajet lors du dessin sur la carte"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:330
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:331
 msgid "Enable labels for Turnouts, Flextrack Lengths and Elevations"
 msgstr ""
 "Afficher les étiquettes pour les aiguillages, les voies flexibles et les "
 "élévations"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:331
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:332
 msgid "When to label Turnout, Flextrack Lengths and Elevations"
 msgstr ""
 "Quand étiqueter les aiguillages, les longueurs de voie flexibles ou les "
 "mesures d'élévation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:332
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:333
 msgid "Font size for labels on layout"
 msgstr "Taille de police des étiquettes sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:333
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:334
 msgid "Label elements on the Hot Bar"
 msgstr "Éléments d'étiquetage sur la barre d'objets"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:334
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:335
 msgid "Label elements on layout"
 msgstr "Éléments d'étiquetage sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:335
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:336
 msgid "Label elements for lists"
 msgstr "Éléments d'étiquetage pour les listes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:336
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:337
 msgid "How to group cars on the Train Hot Bar"
 msgstr "Regroupement des matériels roulants dans le catalogue de pièces"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:337
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:338
 msgid "Delay (in mS) between updating train movements"
 msgstr "Intervalle de mise à jour (en ms) des mouvements de train"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:338
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:339
 msgid "Don't show trains in tunnels when tunnels are hidden"
 msgstr ""
 "Ne pas visualiser les trains dans les tunnels quand les tunnels sont cachés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:339
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:340
 msgid "Display unconnected endpoints of track with special marks"
 msgstr "Mettez en surbrillance les extrémités non connectées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:340
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:341
 msgid "Whether the Main Drawing Area shows as much of the room as possible"
 msgstr ""
 "Indiquer si la zone de dessin principale montre la plus grande partie "
 "possible de la pièce"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:341
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:342
 msgid "Don't hide system cursor when program cursors are showing"
 msgstr ""
 "Ne pas cacher le curseur du système lorsque les curseurs des programmes "
 "s'affichent"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:343
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:344
 msgid "Width of the lines"
 msgstr "Épaisseur des lignes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:344
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:345
 msgid "Color of the lines"
 msgstr "Couleur des voies"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:345
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:346
 msgid "List of types of Lumber"
 msgstr "Liste des types d'éléments de structure"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:346
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:347
 msgid "Color of Benchwork"
 msgstr "Couleur du châssis"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:347
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:348
 msgid "Orientation of Benchwork"
 msgstr "Orientation du châssis"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:348
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:349
 msgid "Size of Dimension Arrows"
 msgstr "Largeur des Flèches de cotation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:349
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:350
 msgid "This controls the sharpness of the easement curve"
 msgstr "Cela contrôle la netteté et la taille de la courbe de transition"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:350
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:351
 msgid "Minimum radius"
 msgstr "Rayon minimum"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:351
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:352
 msgid "Maximum offset"
 msgstr "Décalage maximum"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:352
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:353
 msgid "Easement length"
 msgstr "Longueur de la courbe de transition"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:353
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:354
 msgid ""
 "These radio buttons are a short-cut for Values of 0.0, 0.5, 1.0 and 2.0.  "
 "None turns Easements off"
@@ -9329,208 +9364,209 @@ msgstr ""
 "Ces boutons sont un raccourci pour les valeurs de 0.0, 0.5, 1.0 et 2.0. "
 "Aucun ne désactive les courbes de transition"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:354
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:355
 msgid "Complete easement selection"
 msgstr "Terminer la sélection des courbes de transition"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:355
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:356
 msgid "Type of elevation"
 msgstr "Type d'élévation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:356
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:357
 msgid "Height of End Point"
 msgstr "Hauteur du point de fin"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:357
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:358
 msgid "Compute elevation based on neighbors"
 msgstr "Calculer la hauteur en fonction des voies adjacentes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:358
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:359
 msgid "Compute grade based on neighbors"
 msgstr "Calculer la pente en fonction des voies adjacentes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:359
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:360
 msgid "Specify a name for an End-Point"
 msgstr "Spécifiez un nom pour un point de fin"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:361
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:362
 msgid "Print parts list"
 msgstr "Imprimer la nomenclature"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:362
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:480
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:590
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:363
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:481
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:591
 msgid "Invoke the Print Setup dialog"
 msgstr "Ouvre la boîte de dialogue Configuration d'impression"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:363
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:364
 msgid "Save parts list to file"
 msgstr "Enregistrer la nomenclature dans un fichier"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:364
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:365
 msgid "This is the list of parts for the layout"
 msgstr "Voici la liste des pièces pour ce plan de voie"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:365
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:366
 msgid "Enable prices on the Parts List"
 msgstr "Activer les prix sur la liste des pièces"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:366
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:369
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:367
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:370
 msgid "Spacing between major grid lines"
 msgstr "Espacement entre les lignes principales de la grille"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:367
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:370
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:368
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:371
 msgid "Allows the spacing to be subdivided"
 msgstr "Permet de diviser l'espacement"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:368
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:371
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:369
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:372
 msgid "Specifies if positions are snaped in this direction"
 msgstr "Activez la grille magnétique pour cette orientation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:372
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:373
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:374
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:375
 msgid "Shows the origin and angle of the grid"
 msgstr "Affiche l'origine et l'angle de la grille"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:375
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:376
 msgid "Specifies if the grid is shown"
 msgstr "Spécifie si la grille est affichée"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:376
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:377
 msgid "Completes the grid specification"
 msgstr "Enregistrer le réglage de la grille et quitter"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:380
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:381
 msgid "Number of segments in Group"
 msgstr "Nombre de segments dans le groupe"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:381
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:382
 msgid "Replace the Selected object with the new definition?"
 msgstr "Faut-il remplacer l'objet sélectionné par la nouvelle définition?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:382
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:383
 msgid "Creates a new Structure (or Turnout)"
 msgstr "Crée un nouveau bâtiment (ou aiguillage)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:383
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:384
 msgid "Elevation difference of Helix End-Points"
 msgstr "Différence d'élévation des bouts de l'hélicoïde"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:384
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:385
 msgid "Helix Radius"
 msgstr "Rayon de l'hélicoïde"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:385
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:386
 msgid "Number of turns in the helix"
 msgstr "Nombre de tours de l'hélicoïde"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:386
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:387
 msgid "Angle betweek helix entrance and exit"
 msgstr "Angle entre l'entrée et la sortie de l'hélicoïde"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:387
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:388
 msgid "Grade in helix"
 msgstr "Pente de l'hélicoïde"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:388
-msgid "Separation between helix layers"
-msgstr "Séparation entre couches hélicoïdales"
-
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:389
+msgid "Separation between helix layers including baseboard, track, etc"
+msgstr ""
+"Séparation entre les couches d'hélice, y compris la plinthe, la piste, etc."
+
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:390
 msgid "Desired curve radius between straight tracks"
 msgstr "Rayon de courbe souhaité entre les voies droites"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:390
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:391
 msgid "Layer list"
 msgstr "Liste des calques"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:391
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:392
 msgid "Layer Name"
 msgstr "Nom du calque"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:392
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:393
 msgid "Hide Layer Button on MenuBar"
 msgstr "Cacher le bouton du calque sur la barre de menu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:393
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:394
 msgid "Color of layer"
 msgstr "Couleur du calque"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:394
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:395
 msgid "Layer is drawn on Main window"
 msgstr "Le calque est dessiné dans la fenêtre principale"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:395
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:396
 msgid "Layer cannot be changed"
 msgstr "Le calque ne peut pas être modifié"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:396
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:397
 msgid "Use color for this Layer if color-by-layer is set"
 msgstr "Utiliser une couleur pour ce calque si utiliser-la-couleur est coché"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:397
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:398
 msgid "Other Layers this Layer also shows/hides"
 msgstr "Les autres calques que ce calque s'affichent/se cachent également"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:398
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:399
 msgid "Layer is a Module"
 msgstr "Le calque est un module"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:399
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:400
 msgid "Layer is drawn on Map window"
 msgstr "Le calque est dessiné dans la fenêtre de navigation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:400
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:401
 msgid "Number of layer buttons to show"
 msgstr "Nombre de boutons de calques à afficher"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:401
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:402
 msgid "Number of objects in this layer"
 msgstr "Nombre d'objets dans ce calque"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:402
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:403
 msgid "Settings File to load when this layer is made current"
 msgstr "Fichier de paramètres à charger lorsque ce calque est mis à jour"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:404
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:405
 msgid "Load layer configuration from default"
 msgstr "Charger la configuration du calque par défaut"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:405
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:406
 msgid "Save current layer configuration as default"
 msgstr "Enregistrer la configuration actuelle comme calque par défaut"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:406
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:407
 msgid "Overwrite layer configuration with system default values"
 msgstr ""
 "Réinitialiser le réglage des calques aux valeurs par défaut du système"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:407
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:408
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:409
 msgid "Specifies the size of the room (in inches or centimeters)"
 msgstr "Spécifie la taille de la pièce (en pouces ou en centimètres)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:409
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:410
 msgid "Specifies the layout Title that will appear on printouts"
 msgstr "Spécifie le titre du plan qui apparaîtra sur les impressions"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:410
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:411
 msgid "Specifies the layout Subtitle that will appear on printouts"
 msgstr "Spécifie le sous-titre du plan qui apparaîtra sur les impressions"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:411
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:412
 msgid "Specifies the Modelling Scale"
 msgstr "Spécifie l'échelle de modélisation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:412
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:413
 msgid "Specifies the rail gauge, ie. the distance between the rails"
 msgstr "Spécifie l'écartement des rails, c.à.d. la distance entre les rails"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:413
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:414
 msgid ""
 "Specifies minimum track radius (in inches or centimeters). Tracks with a "
 "smaller radius are considered exceptional."
@@ -9538,7 +9574,7 @@ msgstr ""
 "Spécifie le rayon de voie minimal (en pouces ou en centimètres). Les voies "
 "avec un rayon plus petit sont considérées comme exceptionnelles."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:414
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:415
 msgid ""
 "Specifies maximum track elevation expressed as a percent (%). Tracks with a "
 "larger elevation are considered exceptional."
@@ -9546,23 +9582,23 @@ msgstr ""
 "Spécifie l'élévation maximale de la voie exprimée en pourcentage (%). Les "
 "voies avec une élévation plus grande sont considérées comme exceptionnelles."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:415
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:416
 msgid "Select the background image"
 msgstr "Sélectionnez l'image d'arrière-plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:416
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:417
 msgid "Remove the background image"
 msgstr "Supprimer l'image de fond"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:417
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:418
 msgid "Specifies the x offset of the bottom left of the background image"
 msgstr "Spécifie le décalage x en bas à gauche de l'image d'arrière-plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:418
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:419
 msgid "Specifies the y offset of the bottom left of the background image"
 msgstr "Spécifie le décalage y en bas à gauche de l'image d'arrière-plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:419
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:420
 msgid ""
 "Specifies how large the bottom edge of the background image should be in "
 "model units"
@@ -9570,7 +9606,7 @@ msgstr ""
 "Spécifie la taille du bord inférieur de l'image d'arrière plan en unités du "
 "modèle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:420
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:421
 msgid ""
 "Specifies the screening of the background image from 0 (none) to 100% "
 "(vanishes)"
@@ -9578,19 +9614,19 @@ msgstr ""
 "Spécifie le filtrage de l'image d'arrière-plan, de 0 (aucun) à 100% "
 "(disparaît)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:421
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:422
 msgid "Specifies the rotation angle of the background image in degrees"
 msgstr "Spécifie l'angle de rotation de l'image d'arrière-plan en degrés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:422
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:423
 msgid "Write a copy of current settings to a named file"
 msgstr "Écrire une copie des paramètres actuels dans un fichier nommé"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:423
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:424
 msgid "Override current settings from a named file"
 msgstr "Remplacer les paramètres actuels d'un fichier nommé"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:426
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:427
 msgid ""
 "This is the body of the Note.  To change this select Modify from the File "
 "Menu"
@@ -9598,11 +9634,11 @@ msgstr ""
 "Ceci est le texte de la note. Pour le changer, sélectionnez «Modifier» dans "
 "le menu «Fichier»"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:428
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:429
 msgid "Specifies number of pixels per inch (or centimeter)"
 msgstr "Spécifie le nombre de pixels par pouce (ou centimètre)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:430
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:431
 msgid ""
 "Specifies whether Layout Titles, Borders or Track Centerlines are printed on"
 " the BitMap"
@@ -9610,14 +9646,14 @@ msgstr ""
 "Spécifie si les titres du plan, les bordures ou les axes des voies sont "
 "imprimés sur le BitMap"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:431
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:432
 msgid ""
 "Specifies the separation between the original track and the parallel "
 "track/line"
 msgstr ""
 "Spécifie la séparation entre la voie d'origine et la voie/ligne parallèle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:432
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:433
 msgid ""
 "Specifies the a factor that increases the seperation as the radius of the "
 "original track reduces. 0.0 means no increase."
@@ -9625,80 +9661,80 @@ msgstr ""
 "Spécifie le facteur qui augmente la séparation à mesure que le rayon de la "
 "voie d'origine diminue. 0,0 signifie aucune augmentation."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:433
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:434
 msgid "Enter your name as specified in the XTrackCAD Registration Notice"
 msgstr ""
 "Entrez votre nom comme spécifié dans la notification d'enregistrement "
 "d'XTrackCAD"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:434
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:435
 msgid "Enter the key value as specified in the XTrackCAD Registration Notice"
 msgstr ""
 "Entrez la valeur de la clé telle que spécifiée dans la notification "
 "d'enregistrement d'XTrackCAD"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:435
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:436
 msgid "Validates the name and key.  Terminates the registration command"
 msgstr "Valide le nom et la clé.  Met fin à la commande d'enregistrement"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:436
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:437
 msgid "0ï¿œ is up or to the right"
 msgstr "0 est en haut ou à droite"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:437
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:438
 msgid "Choose english (inches) or metric (centimeters)"
 msgstr "Choisissez anglais (pouces) ou métrique (cm)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:438
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:439
 msgid "How to display length measurements"
 msgstr "Comment afficher les mesures de longueur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:439
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:440
 msgid "Do not create tracks to be shorter than this value"
 msgstr "Ne créez pas de voies plus courtes que cette valeur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:440
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:441
 msgid "Maximum distance between connected end points"
 msgstr "Distance maximale entre des extrémités connectées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:441
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:442
 msgid "Minimum angle between connected End-Points"
 msgstr "Angle minimal entre les extrémités connectées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:442
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:443
 msgid "Specifies the minimum angle between tracks connected to a turntable"
 msgstr ""
 "Spécifie l'angle minimum entre les voies connectées à un pont tournant"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:443
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:444
 msgid "Trains will crash above this speed"
 msgstr "Les trains dérailleront au-dessus de cette vitesse"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:444
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:445
 msgid "Enable/Disable balloon popup help windows"
 msgstr "Activer/Désactiver les bulles d'aide contextuelles"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:445
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:446
 msgid "Enable/Disable show of flextrack on hotbar"
 msgstr "Activer/Désactiver l'affichage de la flextrack sur la barre rapide"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:446
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:447
 msgid "How far you can move the mouse before its considered a drag"
 msgstr ""
 "Jusqu'où vous pouvez déplacer la souris avant que ce soit considéré comme un"
 " glisser"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:447
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:448
 msgid "How long you can hold a mouse button down before its considered a drag"
 msgstr ""
 "Combien de temps pouvez-vous maintenir un bouton de la souris enfoncé avant "
 "que ce soit considéré comme un glisser"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:448
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:449
 msgid "Minimum distance (in pixels) between grid lines/ticks"
 msgstr "Distance minimale (en pixels) entre les lignes/marques de quadrillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:449
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:450
 msgid ""
 "Specifies the Check Point frequency; number of modifications made since the "
 "last checkpoint."
@@ -9706,425 +9742,425 @@ msgstr ""
 "Précise la fréquence des points de contrôle ; nombre de modifications "
 "apportées depuis le dernier point de contrôle."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:450
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:451
 msgid "Specifies the number of checkpoints after save before auto-saving."
 msgstr ""
 "Spécifie le nombre de points de contrôle après la sauvegarde avant la "
 "sauvegarde automatique."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:451
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:452
 msgid "Resume work on last layout or start with new layout"
 msgstr "Modifier le dernier plan de voies ou en créer un nouveau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:453
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:454
 msgid "Updated cost of current selected item"
 msgstr "Coût actualisé de l'élément actuellement sélectionné"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:455
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:456
 msgid "Selection list for prices"
 msgstr "Liste de sélection des prix"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:456
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:457
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:458
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:459
 msgid "Price of specified length of flex-track"
 msgstr "Prix d'une longueur spécifiée de voie flexible"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:460
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:461
 msgid "Controls the printing of a centerline of track cmdPrint"
 msgstr "Ajuste le dessin de l’axe des voies"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:461
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:462
 msgid "Controls the reduction (scale) of the printout"
 msgstr "Ajuste la réduction (d'échelle) pour l'impression"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:462
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:463
 msgid "Scaled page width (Scale times physical page width)"
 msgstr ""
 "Spécifiez la largeur de la page (échelle multipliée par la largeur du papier"
 " physique)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:463
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:464
 msgid "Sets page size to the maximum (based on scale and physical page size)"
 msgstr ""
 "Définit le format maximum de la page (en fonction de l'échelle et du format "
 "de papier physique)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:464
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:465
 msgid "Scaled page height (Scale times physical page height)"
 msgstr ""
 "Hauteur de page mise à l'échelle (échelle multipliée par la hauteur de page "
 "physique)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:465
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:466
 msgid "Sets scale, origin and angle for a one page printout of the layout"
 msgstr ""
 "Définit l'échelle, l'orientation et l'angle pour l'impression d'une page du "
 "plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:466
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:467
 msgid "Print page in Portrait or Landscape format"
 msgstr "Imprimer la page au format Portrait ou Paysage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:467
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:468
 msgid "Order of printing pages"
 msgstr "Ordre des pages d'impression"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:468
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:469
 msgid "Print Title, Date, Author and other information at bottom of page?"
 msgstr ""
 "Imprimer le titre, la date, l'auteur et d'autres informations en bas de page"
 " ?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:469
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:470
 msgid "Ignore unprintable page margins?"
 msgstr "Ignorer les marges non imprimables?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:470
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:471
 msgid "Print Registration Marks at 1:1?"
 msgstr "Imprimer les aides au positionnement à l'échelle 1:1 ?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:471
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:472
 msgid "Print Snap Grid?"
 msgstr "Imprimer la grille magnétique ?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:472
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:473
 msgid "Print Rulers on all page edges?"
 msgstr "Imprimer des règles sur tous les bords de page ?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:473
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:474
 msgid "Print Roadbed Outline?"
 msgstr "Imprimer le contour du ballast ?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:474
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:475
 msgid "Print Roadbed Outline"
 msgstr "Imprimer le contour du ballast"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:475
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:476
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:478
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:477
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:479
 msgid ""
 "Origin of the print grid.  This is useful if you want to reprint a set of "
 "pages"
 msgstr ""
 "Origine de la grille d'impression. Utile si certaines pages sont réimprimées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:477
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:478
 msgid "Resets the origin and angle to 0"
 msgstr "Réinitialise à 0 l'alignement et l'angle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:479
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:480
 msgid "Deselects all pages"
 msgstr "Désélectionner toutes les pages"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:481
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:482
 msgid "Print selected pages and terminates the print command"
 msgstr "Imprime les pages sélectionnées et termine la commande d'impression"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:482
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:483
 msgid "List of loaded, shown or hidden parameter files"
 msgstr "Liste des fichiers de paramètres chargés, affichés ou cachés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:483
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:484
 msgid "Show parameter files by names or descriptions"
 msgstr "Afficher les fichiers de paramètres par noms ou descriptions"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:484
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:485
 msgid "Toggle the shown status of the selected parameter file"
 msgstr "Commuter l'état affiché du fichier de paramètres sélectionné"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:485
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:486
 msgid "Find extra parameter files from the filesystem"
 msgstr ""
 "Trouver des fichiers de paramètres supplémentaires dans le système de "
 "fichiers"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:486
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:487
 msgid "Find parameter files from the system library"
 msgstr "Trouver des fichiers de paramètres dans la bibliothèque système"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:487
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:488
 msgid "Update parameter file list"
 msgstr "Mettre à jour la liste des fichiers de paramètres"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:488
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:489
 msgid "Reload parameter file from list"
 msgstr "Recharger un fichier de paramètres à partir de la liste"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:489
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:490
 msgid "Select all parameter files shown"
 msgstr "Sélectionnez tous les fichiers de paramètres affichés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:490
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:491
 msgid "Profile of specified path"
 msgstr "Profil de la voie spécifiée"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:491
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:492
 msgid "Clear the profile"
 msgstr "Effacer le profil de hauteur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:492
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:493
 msgid "Print the profile"
 msgstr "Imprimer le profil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:494
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:495
 msgid "Stop recording"
 msgstr "Arrêt d'enregistrement"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:495
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:496
 msgid "Insert a message"
 msgstr "Insérer un message"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:496
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:497
 msgid "End a message"
 msgstr "Fin du message"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:497
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:498
 msgid "Message body"
 msgstr "Corps du message"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:498
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:499
 msgid "Possible turnouts"
 msgstr "Aiguillages possibles"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:499
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:500
 msgid "Skip this turnout"
 msgstr "Ignorer cette participation"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:501
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:502
 msgid "Manufacturer of Object"
 msgstr "Marque de l'objet"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:502
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:503
 msgid "Description of Object"
 msgstr "Description d'objet"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:503
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:504
 msgid "Part Nuber of Object"
 msgstr "Référence de l'objet"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:505
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:506
 msgid "Rescale by Scale Conversion or by Ratio"
 msgstr "Redimensionner par conversion d'échelle ou rapport"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:506
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:507
 msgid "Original Scale of the selected objects"
 msgstr "Échelle d'origine des objets sélectionnés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:507
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:508
 msgid "Original Gauge of the selected objects"
 msgstr "Ecartement de voies d'origine des objets sélectionnés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:508
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:509
 msgid "New Scale of the selected objects"
 msgstr "Nouvelle échelle des objets sélectionnés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:509
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:510
 msgid "New Gauge of the selected objects"
 msgstr "Nouvel écartement de voies des objets sélectionnés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:510
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:511
 msgid "Change track dimensions to new scale"
 msgstr "Convertir les dimensions de la voie à la nouvelle échelle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:511
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:512
 msgid "Change size by this amount"
 msgstr "Changer la taille d'un facteur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:513
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:514
 msgid "Snap Grid Line and Division"
 msgstr "Grille magnétique voie et division"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:514
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:515
 msgid "X and Y position markers"
 msgstr "Repères de position X et Y"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:515
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:516
 msgid "Border rulers, room boundaries and table edges"
 msgstr "Règles de bordures,  limites de pièce et bords de table"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:516
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:517
 msgid "Primary Axis of grid rotation"
 msgstr "Axe principal de rotation de la grille"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:517
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:518
 msgid "Secondary Axis of grid rotation"
 msgstr "Axe secondaire de rotation de la grille"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:518
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:519
 msgid "Unselected tracks"
 msgstr "Voies non sélectionnées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:519
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:520
 msgid "Selected tracks"
 msgstr "Voies sélectionnées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:520
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:521
 msgid "Color of tracks on the Profile path"
 msgstr "Couleur des voies sur le profil de hauteur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:521
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:522
 msgid "Color of Exceptional tracks"
 msgstr "Couleur des voies exceptionnelles, hors limites"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:522
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:523
 msgid "Color of track ties"
 msgstr "Couleur des traverses"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:523
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:524
 msgid "Updates the colors"
 msgstr "Met à jour les couleurs"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:524
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:525
 msgid "Angle in degrees"
 msgstr "Angle en degrés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:525
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:526
 msgid "Rotate object(s) by specified amount"
 msgstr "Faire pivoter le ou les objet(s) d'un certain angle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:526
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:527
 msgid "Enter one or more words as search terms"
 msgstr "Entrez un ou plusieurs mots comme termes de recherche"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:527
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:528
 msgid "Remove the current filter and show all files"
 msgstr "Supprimer le filtre actuel et afficher tous les fichiers"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:528
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:529
 msgid "Find matching file descriptions"
 msgstr "Trouver les descriptions de fichiers correspondantes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:529
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:530
 msgid "Search results"
 msgstr "Résultats de la recherche"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:530
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:531
 msgid "Show descriptions or filenames in results"
 msgstr "Afficher les descriptions ou les noms de fichiers dans les résultats"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:531
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:532
 msgid "Add selected entries into parameter file list"
 msgstr ""
 "Ajouter les entrées sélectionnées dans la liste des fichiers de paramètres"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:532
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:533
 msgid "Select All found entries"
 msgstr "Sélectionner toutes les entrées trouvées"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:533
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:534
 msgid "Reload the system library contents for finding"
 msgstr "Recharger le contenu de la bibliothèque système pour trouver"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:534
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:535
 msgid "Choose commands to be sticky"
 msgstr "Choisissez les commandes à rendre collantes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:535
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:536
 msgid "Make the commands sticky"
 msgstr "Rendre les commandes collantes"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:536
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:537
 msgid "List of available structure"
 msgstr "Liste des bâtiments disponibles"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:537
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:538
 msgid "Diagram of the selected structure"
 msgstr "Schéma de la bâtiment sélectionnée"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:538
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:539
 msgid "Hide Selection window when placing Structure"
 msgstr "Masquer la fenêtre de sélection lors du placement de la bâtiment"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:539
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:540
 msgid "Drawing scale and size"
 msgstr "Échelle et taille du dessin"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:540
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:541
 msgid "Complete structure placement"
 msgstr "Placement complet de la bâtiment"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:541
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:542
 msgid "Choose a Pier number"
 msgstr "Choisissez un numéro de colonne"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:542
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:543
 msgid "Name of the Motor"
 msgstr "Nom du moteur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:543
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:544
 msgid "Value when switch is normal"
 msgstr "Valeur lorsque l'aiguillage est normal"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:544
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:545
 msgid "Value when the switch is reversed"
 msgstr "Valeur lorsque l'aiguillage est dévié"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:545
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:546
 msgid "Value for a positive comfirmation of switch position"
 msgstr "Valeur pour une confirmation positive de la position de l'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:547
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:548
 msgid "Useful information about the program"
 msgstr "Informations utiles sur le programme"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:548
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:549
 msgid "Show Tip of the Day every time the program starts"
 msgstr "Montrer le conseil du jour à chaque démarrage du programme"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:549
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:550
 msgid "Show the next Tip of the Day"
 msgstr "Montrer le prochain conseil du jour"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:550
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:551
 msgid "Show the previous Tip of the Day"
 msgstr "Montrer le précédent conseil du jour"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:552
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:553
 msgid "Controls which Command Buttons are displayed"
 msgstr "Afficher ou masquer les boutons de commande dans la barre d'outils"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:553
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:554
 msgid "List of Cars"
 msgstr "Liste des matériels roulants"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:554
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:555
 msgid "List of active trains"
 msgstr "Liste des trains actifs"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:556
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:557
 msgid "Train odometer"
 msgstr "Compteur de distance"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:557
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:558
 msgid "Reset odometer to 0"
 msgstr "Remise à 0"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:558
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:559
 msgid "Find train on layout"
 msgstr "Chercher le train sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:559
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:560
 msgid "Follow train around layout"
 msgstr "Suivre le train sur le plan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:560
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:561
 msgid "Flip direction at End Of Track"
 msgstr "Inverser la direction à la fin de la voie"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:561
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:562
 msgid "Change direction of train"
 msgstr "Inverser la direction du train"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:562
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:563
 msgid "Stop the train"
 msgstr "Arrêt du train"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:563
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:564
 msgid "List of available turnouts for the current scale"
 msgstr "Liste des aiguilles disponibles pour l'échelle actuelle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:564
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:565
 msgid ""
 "Diagram of the currently selected turnout.  Click on a End-Point to select "
 "the Active End-Point"
@@ -10132,141 +10168,141 @@ msgstr ""
 "Schéma de l'aiguillage actuellement sélectionné. Cliquez sur une extrémité "
 "pour sélectionner l'extrémité active"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:565
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:566
 msgid ""
 "A menu list of various type of turnouts and sectional tracks you can define"
 msgstr ""
 "Une gamme de différents types d'aiguillages et de sections de voies que vous"
 " pouvez définir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:566
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:567
 msgid "Hide Selection window when placing Turnout"
 msgstr "Masquer la fenêtre de sélection lorsque vous placez l'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:567
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:568
 msgid "The selected Active End-Point"
 msgstr "Le point de fin actif sélectionné"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:568
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:569
 msgid "Current selected turnout, (displayed in the diagram window)"
 msgstr ""
 "Aiguillage sélectionné actuellement, (affiché dans la fenêtre du diagramme)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:569
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:570
 msgid "One the End-Points that can be selected"
 msgstr "L'un des points d'extrémité pouvant être sélectionnés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:571
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:572
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:573
 msgid "Angle of the specified track to the center line of the turnout"
 msgstr "Angle de la voie spécifiée par rapport à l'axe de l'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:573
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:574
 msgid "Specifies if angles are entered as Frog Numbers or in degrees"
 msgstr ""
 "Spécifie si les angles sont entrés sous forme de N° de cœur ou en degrés"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:574
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:575
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:576
 msgid "Desciption"
 msgstr "Desciption"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:576
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:577
 msgid "Turnout description (Manuf., Size, Part Number, etc)"
 msgstr "Description de l'aiguillage (fabricant, angle, numéro de pièce, etc.)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:577
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:578
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:579
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:580
 msgid "Length from the base to the end of the specified track"
 msgstr "Longueur de la ligne de base à la fin de la voie sélectionnée"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:581
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:582
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:583
 msgid "Offset of the track End-Point from the center line of the turnout"
 msgstr ""
 "Décalage du point de fin de la voie par rapport à l'axe central de "
 "l'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:585
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:586
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:587
 msgid "Prints a full size diagram of the turnout for checking"
 msgstr ""
 "Imprime un diagramme en taille réelle de l'aiguillage pour vérification"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:587
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:588
 msgid "Color of Roadbed lines"
 msgstr "Couleur des voies de balast"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:588
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:589
 msgid "Width of Roadbed lines"
 msgstr "Largeur des lignes de ballast"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:589
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:590
 msgid "Width of Roadbed"
 msgstr "Largeur du ballast"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:591
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:592
 msgid "Closes the window and returns to the Turnout Selection window"
 msgstr "Ferme la fenêtre et retourne à la sélection d'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:592
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:593
 msgid "Specifies the diameter of the turntable"
 msgstr "Spécifie le diamètre du pont tournant"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:593
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:594
 msgid "Old Turnout title"
 msgstr "Ancien titre de l'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:594
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:595
 msgid "List of available titles"
 msgstr "Liste des titres disponibles"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:595
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:596
 msgid "Leave the Turnouts' title unchanged"
 msgstr "Laisser le titre d'aiguillage inchangé"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:596
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:597
 msgid "Invoke the Parameter Files dialog"
 msgstr "Ouvre la boîte de dialogue Fichier de paramètres"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:597
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:598
 msgid "List of available turnouts"
 msgstr "Liste des aiguillages disponibles"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:598
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:599
 msgid "Update the Turnouts' title"
 msgstr "Mettre à jour le titre des aiguillages"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:602
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:603
 msgid "Sample"
 msgstr "Exemple"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:604
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:605
 msgid "Slant"
 msgstr "Incliner"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:605
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:606
 msgid "Font selection dialog"
 msgstr "Boite de dialogue de sélection de police"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:606
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:607
 msgid "Weight"
 msgstr "Poids"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:607
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:608
 msgid "Printer Abort Window"
 msgstr "Annuler l'impression"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:608
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:609
 msgid "Print to filename"
 msgstr "Nom du fichier d'impression"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:609
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:610
 msgid "Specify Postscript font alias mapping"
 msgstr "Spécifier l'affectation des polices Postscript"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:610
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:611
 msgid ""
 "Displays the Print Setup window to change printers, orientation, paper size,"
 " etc."
@@ -10274,31 +10310,31 @@ msgstr ""
 "Affiche la fenêtre configuration de l’impression pour changer d'imprimante, "
 "d'orientation, de format du papier, etc."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:611
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:612
 msgid "Closes this dialog"
 msgstr "Ferme cette boîte de dialogue"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:612
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:613
 msgid "Page orientation"
 msgstr "Orientation de la page"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:613
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:614
 msgid "Unprintable margins"
 msgstr "Marges non imprimables"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:614
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:615
 msgid "Updates and closes this dialog"
 msgstr "Met à jour et ferme cette boîte de dialogue"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:615
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:616
 msgid "Choose paper size"
 msgstr "Choisissez le format de papier"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:616
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:617
 msgid "Choose printer"
 msgstr "Choisissez une imprimante"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:617
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:618
 msgid "Print test page"
 msgstr "Impression de la page de test"
 

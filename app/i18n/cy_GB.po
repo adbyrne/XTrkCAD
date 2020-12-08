@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TrackCAD 5.2.1GA\n"
 "Report-Msgid-Bugs-To: https://sourceforge.net/p/xtrkcad-fork/bugs/\n"
-"POT-Creation-Date: 2020-12-03 07:09-0800\n"
+"POT-Creation-Date: 2020-12-07 17:02-0800\n"
 "PO-Revision-Date: 2020-08-27 16:39+0000\n"
 "Last-Translator: Adam J M Richards <adamjmrichards@gmail.com>, 2020\n"
 "Language-Team: Welsh (https://www.transifex.com/xtrackcad/teams/112853/cy/)\n"
@@ -200,8 +200,8 @@ msgid "Segments"
 msgstr "Segmentau"
 
 #: ../bin/cblock.c:170 ../bin/cdraw.c:525 ../bin/cdraw.c:1447
-#: ../bin/cdraw.c:1593 ../bin/cdraw.c:2583 ../bin/cdraw.c:2811
-#: ../bin/cdraw.c:2848 ../bin/ctodesgn.c:175 ../bin/ctodesgn.c:176
+#: ../bin/cdraw.c:1593 ../bin/cdraw.c:2601 ../bin/cdraw.c:2829
+#: ../bin/cdraw.c:2866 ../bin/ctodesgn.c:175 ../bin/ctodesgn.c:176
 #: ../bin/ctodesgn.c:177 ../bin/ctodesgn.c:178 ../bin/ctodesgn.c:190
 #: ../bin/ctodesgn.c:191 ../bin/ctodesgn.c:241 ../bin/ctodesgn.c:244
 #: ../bin/ctodesgn.c:264 ../bin/ctodesgn.c:269 ../bin/ctodesgn.c:301
@@ -235,12 +235,12 @@ msgstr "Diwedd Rhan 2: X,Y"
 #: ../bin/cblock.c:596 ../bin/cblock.c:604 ../bin/cblock.c:674
 #: ../bin/cblock.c:795 ../bin/cblock.c:807 ../bin/cblock.c:845
 #: ../bin/ccontrol.c:206 ../bin/ccontrol.c:219 ../bin/ccontrol.c:231
-#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2642
+#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2660
 #: ../bin/cgroup.c:1065 ../bin/cgroup.c:1132 ../bin/cgroup.c:1160
 #: ../bin/cgroup.c:1210 ../bin/cgroup.c:1232 ../bin/cgroup.c:1320
 #: ../bin/cgroup.c:1698 ../bin/cnote.c:69 ../bin/compound.c:674
 #: ../bin/compound.c:689 ../bin/compound.c:722 ../bin/cprint.c:519
-#: ../bin/cprint.c:723 ../bin/cprint.c:730 ../bin/cprint.c:1254
+#: ../bin/cprint.c:723 ../bin/cprint.c:730 ../bin/cprint.c:1260
 #: ../bin/cpull.c:511 ../bin/cpull.c:526 ../bin/cpull.c:528 ../bin/cpull.c:530
 #: ../bin/cpull.c:691 ../bin/cselect.c:1092 ../bin/cselect.c:1201
 #: ../bin/cselect.c:2060 ../bin/csensor.c:195 ../bin/csensor.c:207
@@ -280,7 +280,7 @@ msgstr "Diwedd Rhan 2: X,Y"
 #: ../bin/paramfilelist.c:131 ../bin/paramfilelist.c:145
 #: ../bin/paramfilelist.c:209 ../bin/smalldlg.c:90 ../bin/smalldlg.c:222
 #: ../bin/tease.c:1102 ../bin/track.c:1666 ../wlib/gtklib/wpref.c:122
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:601
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:602
 msgid "Ok"
 msgstr "Iawn"
 
@@ -444,11 +444,11 @@ msgstr "%s Trac Hyblyg"
 msgid " FLEX "
 msgstr "FLEX"
 
-#: ../bin/ccornu.c:902 ../bin/cjoin.c:948 ../bin/cmisc.c:61
+#: ../bin/ccornu.c:902 ../bin/cjoin.c:964 ../bin/cmisc.c:61
 msgid "First"
 msgstr "Yn gyntaf"
 
-#: ../bin/ccornu.c:909 ../bin/cjoin.c:956
+#: ../bin/ccornu.c:909 ../bin/cjoin.c:972
 msgid "Second"
 msgstr "Ail"
 
@@ -810,8 +810,8 @@ msgstr "Dechreuwch dan glo: Llusgwch hyd cord=%s ongl=%0.3f"
 msgid "Drag out chord length=%s angle=%0.3f"
 msgstr "Llusgwch hyd cord=%s ongl=%0.3f"
 
-#: ../bin/ccurve.c:420 ../bin/ccurve.c:596 ../bin/cjoin.c:655
-#: ../bin/cjoin.c:910
+#: ../bin/ccurve.c:420 ../bin/ccurve.c:596 ../bin/cjoin.c:671
+#: ../bin/cjoin.c:926
 msgid "Desired Radius"
 msgstr "Radiws Dymunol"
 
@@ -844,8 +844,8 @@ msgid "Elevation Difference"
 msgstr "Gwahaniaeth drychiad"
 
 #: ../bin/ccurve.c:708 ../bin/cdraw.c:524 ../bin/cdraw.c:1459
-#: ../bin/cdraw.c:1605 ../bin/cdraw.c:2590 ../bin/cdraw.c:2791
-#: ../bin/cdraw.c:2805 ../bin/compound.c:616 ../bin/compound.c:621
+#: ../bin/cdraw.c:1605 ../bin/cdraw.c:2608 ../bin/cdraw.c:2809
+#: ../bin/cdraw.c:2823 ../bin/compound.c:616 ../bin/compound.c:621
 #: ../bin/compound.c:626 ../bin/compound.c:631 ../bin/ctodesgn.c:185
 #: ../bin/ctodesgn.c:186 ../bin/ctodesgn.c:187 ../bin/ctodesgn.c:188
 #: ../bin/ctodesgn.c:304 ../bin/ctodesgn.c:307 ../bin/ctodesgn.c:309
@@ -948,7 +948,7 @@ msgstr "Cromlin o'r canol"
 msgid "Curve from Chord"
 msgstr "Cromlin o'r cord"
 
-#: ../bin/ccurve.c:1009 ../bin/cdraw.c:2933
+#: ../bin/ccurve.c:1009 ../bin/cdraw.c:2951
 msgid "Bezier Curve"
 msgstr "Cromlin Bezier"
 
@@ -985,8 +985,8 @@ msgid "Center: X,Y"
 msgstr "Canol: X,Y"
 
 #: ../bin/cdraw.c:521 ../bin/cdraw.c:543 ../bin/cdraw.c:1449
-#: ../bin/cdraw.c:1594 ../bin/cdraw.c:2588 ../bin/cdraw.c:2812
-#: ../bin/cdraw.c:2832 ../bin/cdraw.c:2836 ../bin/compound.c:614
+#: ../bin/cdraw.c:1594 ../bin/cdraw.c:2606 ../bin/cdraw.c:2830
+#: ../bin/cdraw.c:2850 ../bin/cdraw.c:2854 ../bin/compound.c:614
 #: ../bin/compound.c:619 ../bin/compound.c:624 ../bin/compound.c:629
 #: ../bin/compound.c:635 ../bin/cprint.c:162 ../bin/csignal.c:241
 #: ../bin/csignal.c:516 ../bin/ctodesgn.c:193 ../bin/ctodesgn.c:194
@@ -1015,7 +1015,7 @@ msgid "Height"
 msgstr "Uchder"
 
 #: ../bin/cdraw.c:527 ../bin/cdraw.c:1454 ../bin/cdraw.c:1577
-#: ../bin/cdraw.c:2585 ../bin/cdraw.c:2849 ../bin/ctrain.c:187
+#: ../bin/cdraw.c:2603 ../bin/cdraw.c:2867 ../bin/ctrain.c:187
 #: ../bin/dcar.c:2233
 msgid "Width"
 msgstr "Lled"
@@ -1041,17 +1041,17 @@ msgstr "Cylchdroi ongl"
 msgid "Point Count"
 msgstr "Cyfrif Pwynt"
 
-#: ../bin/cdraw.c:533 ../bin/cdraw.c:2563 ../bin/ctodesgn.c:207
+#: ../bin/cdraw.c:533 ../bin/cdraw.c:2581 ../bin/ctodesgn.c:207
 #: ../bin/tbezier.c:267
 msgid "Line Width"
 msgstr "Lled y llinell"
 
-#: ../bin/cdraw.c:534 ../bin/cdraw.c:2592 ../bin/tbezier.c:266
+#: ../bin/cdraw.c:534 ../bin/cdraw.c:2610 ../bin/tbezier.c:266
 msgid "Line Type"
 msgstr "Math o linell"
 
-#: ../bin/cdraw.c:535 ../bin/cdraw.c:2565 ../bin/cdraw.c:2567
-#: ../bin/cdraw.c:2666 ../bin/cdraw.c:2699 ../bin/cmisc.c:127
+#: ../bin/cdraw.c:535 ../bin/cdraw.c:2583 ../bin/cdraw.c:2585
+#: ../bin/cdraw.c:2684 ../bin/cdraw.c:2717 ../bin/cmisc.c:127
 #: ../bin/ctext.c:68 ../bin/ctext.c:148 ../bin/ctodesgn.c:208
 #: ../bin/dcar.c:2229 ../bin/dlayer.c:567 ../bin/doption.c:559
 msgid "Color"
@@ -1070,7 +1070,7 @@ msgstr "Diwedd Agored"
 msgid "Boxed"
 msgstr "Bocsio"
 
-#: ../bin/cdraw.c:539 ../bin/cdraw.c:1128 ../bin/cdraw.c:2599
+#: ../bin/cdraw.c:539 ../bin/cdraw.c:1128 ../bin/cdraw.c:2617
 msgid "Lumber"
 msgstr "Pren"
 
@@ -1078,8 +1078,8 @@ msgstr "Pren"
 msgid "Orientation"
 msgstr "Cyfeiriadedd"
 
-#: ../bin/cdraw.c:541 ../bin/cdraw.c:2581
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:603
+#: ../bin/cdraw.c:541 ../bin/cdraw.c:2599
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:604
 msgid "Size"
 msgstr "Maint"
 
@@ -1098,8 +1098,7 @@ msgstr "Testun"
 #: ../bin/cdraw.c:546 ../bin/compound.c:642 ../bin/cturntbl.c:254
 #: ../bin/doption.c:101 ../bin/doption.c:102 ../bin/tbezier.c:269
 #: ../bin/tcornu.c:319 ../bin/tcurve.c:394 ../bin/tease.c:531
-#: ../bin/tstraigh.c:93 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:681
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:682
+#: ../bin/tstraigh.c:93 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:682
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:683
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:684
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:685
@@ -1118,6 +1117,7 @@ msgstr "Testun"
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:698
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:699
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:700
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:701
 msgid "Layer"
 msgstr "Haen"
 
@@ -1125,16 +1125,16 @@ msgstr "Haen"
 msgid "Straight Line"
 msgstr "Llinell syth"
 
-#: ../bin/cdraw.c:1118 ../bin/cdraw.c:2925
+#: ../bin/cdraw.c:1118 ../bin/cdraw.c:2943
 msgid "Dimension Line"
 msgstr "Llinell Dimensiwn"
 
-#: ../bin/cdraw.c:1139 ../bin/cdraw.c:2600 ../bin/cdraw.c:2927
+#: ../bin/cdraw.c:1139 ../bin/cdraw.c:2618 ../bin/cdraw.c:2945
 msgid "Table Edge"
 msgstr "Ymyl bwrdd"
 
-#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2605 ../bin/cdraw.c:2606
-#: ../bin/cdraw.c:2607
+#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2623 ../bin/cdraw.c:2624
+#: ../bin/cdraw.c:2625
 msgid "Circle"
 msgstr "Cylch"
 
@@ -1142,8 +1142,8 @@ msgstr "Cylch"
 msgid "Curved Line"
 msgstr "Llinell Grom"
 
-#: ../bin/cdraw.c:1186 ../bin/cdraw.c:2610 ../bin/cdraw.c:2611
-#: ../bin/cdraw.c:2612
+#: ../bin/cdraw.c:1186 ../bin/cdraw.c:2628 ../bin/cdraw.c:2629
+#: ../bin/cdraw.c:2630
 msgid "Filled Circle"
 msgstr "Cylch wedi'i Llenwi"
 
@@ -1151,11 +1151,11 @@ msgstr "Cylch wedi'i Llenwi"
 msgid "Rectangle"
 msgstr "Petryal"
 
-#: ../bin/cdraw.c:1219 ../bin/cdraw.c:2616
+#: ../bin/cdraw.c:1219 ../bin/cdraw.c:2634
 msgid "Polyline"
 msgstr "Polyline"
 
-#: ../bin/cdraw.c:1223 ../bin/cdraw.c:2609 ../bin/cdraw.c:2944
+#: ../bin/cdraw.c:1223 ../bin/cdraw.c:2627 ../bin/cdraw.c:2962
 msgid "Polygon"
 msgstr "Polygon"
 
@@ -1163,7 +1163,7 @@ msgstr "Polygon"
 msgid "Filled Rectangle"
 msgstr "Petryal wedi'i lenwi"
 
-#: ../bin/cdraw.c:1254 ../bin/cdraw.c:2614 ../bin/cdraw.c:2945
+#: ../bin/cdraw.c:1254 ../bin/cdraw.c:2632 ../bin/cdraw.c:2963
 msgid "Filled Polygon"
 msgstr "Polygon wedi'i Llenwi"
 
@@ -1172,17 +1172,17 @@ msgstr "Polygon wedi'i Llenwi"
 msgid "%s(%d) Layer=%d"
 msgstr "%s(%d) Haen=%d"
 
-#: ../bin/cdraw.c:1300 ../bin/cdraw.c:2669 ../bin/compound.c:1027
+#: ../bin/cdraw.c:1300 ../bin/cdraw.c:2687 ../bin/compound.c:1027
 #: ../bin/doption.c:96 ../bin/tbezier.c:464
 msgid "Solid"
 msgstr "Solet"
 
-#: ../bin/cdraw.c:1301 ../bin/cdraw.c:2671 ../bin/compound.c:1028
+#: ../bin/cdraw.c:1301 ../bin/cdraw.c:2689 ../bin/compound.c:1028
 #: ../bin/doption.c:93 ../bin/tbezier.c:465
 msgid "Dash"
 msgstr "Dash"
 
-#: ../bin/cdraw.c:1302 ../bin/cdraw.c:2670 ../bin/compound.c:1029
+#: ../bin/cdraw.c:1302 ../bin/cdraw.c:2688 ../bin/compound.c:1029
 #: ../bin/tbezier.c:466
 msgid "Dot"
 msgstr "Dot"
@@ -1203,19 +1203,19 @@ msgstr "CenterDot"
 msgid "PhantomDot"
 msgstr "PhantomDot"
 
-#: ../bin/cdraw.c:1311 ../bin/cdraw.c:2717
+#: ../bin/cdraw.c:1311 ../bin/cdraw.c:2735
 msgid "Tiny"
 msgstr "Tiny"
 
-#: ../bin/cdraw.c:1312 ../bin/cdraw.c:2718
+#: ../bin/cdraw.c:1312 ../bin/cdraw.c:2736
 msgid "Small"
 msgstr "Bach"
 
-#: ../bin/cdraw.c:1313 ../bin/cdraw.c:2719
+#: ../bin/cdraw.c:1313 ../bin/cdraw.c:2737
 msgid "Medium"
 msgstr "Canolig"
 
-#: ../bin/cdraw.c:1314 ../bin/cdraw.c:2720
+#: ../bin/cdraw.c:1314 ../bin/cdraw.c:2738
 msgid "Large"
 msgstr "Mawr"
 
@@ -1223,7 +1223,7 @@ msgstr "Mawr"
 msgid "Relative Angle"
 msgstr "Ongl gymharol"
 
-#: ../bin/cdraw.c:1461 ../bin/cdraw.c:1609 ../bin/cdraw.c:2806
+#: ../bin/cdraw.c:1461 ../bin/cdraw.c:1609 ../bin/cdraw.c:2824
 msgid "Arc Angle"
 msgstr "Ongl arc"
 
@@ -1243,309 +1243,309 @@ msgstr "Hyd Seg"
 msgid "Rel Ang"
 msgstr "Ongl Rel"
 
-#: ../bin/cdraw.c:2570 ../bin/cdraw.c:2572 ../bin/cdraw.c:2697
+#: ../bin/cdraw.c:2588 ../bin/cdraw.c:2590 ../bin/cdraw.c:2715
 msgid "Lumber Type"
 msgstr "Math o bren"
 
-#: ../bin/cdraw.c:2597
+#: ../bin/cdraw.c:2615
 msgid "Straight"
 msgstr "Syth"
 
-#: ../bin/cdraw.c:2598
+#: ../bin/cdraw.c:2616
 msgid "Dimension"
 msgstr "Dimension"
 
-#: ../bin/cdraw.c:2601 ../bin/cdraw.c:2602 ../bin/cdraw.c:2603
-#: ../bin/cdraw.c:2604
+#: ../bin/cdraw.c:2619 ../bin/cdraw.c:2620 ../bin/cdraw.c:2621
+#: ../bin/cdraw.c:2622
 msgid "Curved"
 msgstr "Grom"
 
-#: ../bin/cdraw.c:2608 ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:2626 ../bin/cdraw.c:2960
 msgid "Box"
 msgstr "Blwch"
 
-#: ../bin/cdraw.c:2613 ../bin/cdraw.c:2943
+#: ../bin/cdraw.c:2631 ../bin/cdraw.c:2961
 msgid "Filled Box"
 msgstr "Blwch wedi'i Llenwi"
 
-#: ../bin/cdraw.c:2615 ../bin/tbezier.c:461
+#: ../bin/cdraw.c:2633 ../bin/tbezier.c:461
 msgid "Bezier Line"
 msgstr "Llinell Bezier"
 
-#: ../bin/cdraw.c:2664
+#: ../bin/cdraw.c:2682
 #, c-format
 msgid "%s Line Width"
 msgstr "%s Lled Llinell"
 
-#: ../bin/cdraw.c:2667 ../bin/dcar.c:2202 ../bin/dcar.c:4366
+#: ../bin/cdraw.c:2685 ../bin/dcar.c:2202 ../bin/dcar.c:4366
 #: ../bin/dcar.c:4371
 msgid "Type"
 msgstr "Math"
 
-#: ../bin/cdraw.c:2672
+#: ../bin/cdraw.c:2690
 msgid "Dash-Dot"
 msgstr "Dash-Dot"
 
-#: ../bin/cdraw.c:2673
+#: ../bin/cdraw.c:2691
 msgid "Dash-Dot-Dot"
 msgstr "Dash-Dot-Dot"
 
-#: ../bin/cdraw.c:2686
+#: ../bin/cdraw.c:2704
 #, c-format
 msgid "%s Color"
 msgstr "%s Lliw"
 
-#: ../bin/cdraw.c:2715
+#: ../bin/cdraw.c:2733
 msgid "Dimension Line Size"
 msgstr "Maint Llinell Dimensiwn"
 
-#: ../bin/cdraw.c:2727
+#: ../bin/cdraw.c:2745
 msgid "Drag to create Table Edge"
 msgstr "Llusgwch i greu ymyl bwrdd"
 
-#: ../bin/cdraw.c:2830
+#: ../bin/cdraw.c:2848
 msgid "Seg Length"
 msgstr "Hyd seg"
 
-#: ../bin/cdraw.c:2834
+#: ../bin/cdraw.c:2852
 msgid "Rel Angle"
 msgstr "Ongl Rel"
 
-#: ../bin/cdraw.c:2924
+#: ../bin/cdraw.c:2942
 msgid "Line"
 msgstr "Linell"
 
-#: ../bin/cdraw.c:2924
+#: ../bin/cdraw.c:2942
 msgid "Draw Line"
 msgstr "Tynnu Llinell"
 
-#: ../bin/cdraw.c:2925
+#: ../bin/cdraw.c:2943
 msgid "Draw Dimension Line"
 msgstr "Tynnu Llinell Dimensiwn"
 
 #. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:410
-#: ../bin/cdraw.c:2926 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
+#: ../bin/cdraw.c:2944 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
 msgid "Benchwork"
 msgstr "Sylfaen"
 
-#: ../bin/cdraw.c:2926
+#: ../bin/cdraw.c:2944
 msgid "Draw Benchwork"
 msgstr "Tynnu Baseboard"
 
-#: ../bin/cdraw.c:2927
+#: ../bin/cdraw.c:2945
 msgid "Draw Table Edge"
 msgstr "Tynnwch ymyl bwrdd"
 
-#: ../bin/cdraw.c:2929
+#: ../bin/cdraw.c:2947
 msgid "Curve End"
 msgstr "Diwedd cromlin"
 
-#: ../bin/cdraw.c:2929
+#: ../bin/cdraw.c:2947
 msgid "Draw Curve from End"
 msgstr "Tynnwch y gromlin o'r diwedd"
 
-#: ../bin/cdraw.c:2930
+#: ../bin/cdraw.c:2948
 msgid "Curve Tangent"
 msgstr "Cyffyrddiad cromlin"
 
-#: ../bin/cdraw.c:2930
+#: ../bin/cdraw.c:2948
 msgid "Draw Curve from Tangent"
 msgstr "Tynnwch y gromlin o'r tangiad"
 
-#: ../bin/cdraw.c:2931
+#: ../bin/cdraw.c:2949
 msgid "Curve Center"
 msgstr "Canolfan gromlin"
 
-#: ../bin/cdraw.c:2931
+#: ../bin/cdraw.c:2949
 msgid "Draw Curve from Center"
 msgstr "Tynnwch y gromlin o'r canol"
 
-#: ../bin/cdraw.c:2932
+#: ../bin/cdraw.c:2950
 msgid "Curve Chord"
 msgstr "Cord cromlin"
 
-#: ../bin/cdraw.c:2932
+#: ../bin/cdraw.c:2950
 msgid "Draw Curve from Chord"
 msgstr "Tynnwch gromlin o'r cord"
 
-#: ../bin/cdraw.c:2933
+#: ../bin/cdraw.c:2951
 msgid "Draw Bezier"
 msgstr "Tynnwch gromlin Bezier"
 
-#: ../bin/cdraw.c:2936
+#: ../bin/cdraw.c:2954
 msgid "Circle Tangent"
 msgstr "Tangent Cylch"
 
-#: ../bin/cdraw.c:2936
+#: ../bin/cdraw.c:2954
 msgid "Draw Circle from Tangent"
 msgstr "Tynnwch gylch o Tangent"
 
-#: ../bin/cdraw.c:2937
+#: ../bin/cdraw.c:2955
 msgid "Circle Center"
 msgstr "Canolfan Gylch"
 
-#: ../bin/cdraw.c:2937
+#: ../bin/cdraw.c:2955
 msgid "Draw Circle from Center"
 msgstr "Tynnwch gylch o'r canol"
 
-#: ../bin/cdraw.c:2939
+#: ../bin/cdraw.c:2957
 msgid "Circle Filled Tangent"
 msgstr "Tangent Llenwi Cylch"
 
-#: ../bin/cdraw.c:2939
+#: ../bin/cdraw.c:2957
 msgid "Draw Filled Circle from Tangent"
 msgstr "Tynnwch gylch wedi'i lenwi o tangiad"
 
-#: ../bin/cdraw.c:2940
+#: ../bin/cdraw.c:2958
 msgid "Circle Filled Center"
 msgstr "Canolfan wedi'i llenwi â chylch"
 
-#: ../bin/cdraw.c:2940
+#: ../bin/cdraw.c:2958
 msgid "Draw Filled Circle from Center"
 msgstr "Tynnwch gylch wedi'i lenwi o'r canol"
 
-#: ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:2960
 msgid "Draw Box"
 msgstr "Blwch tynnu llun"
 
-#: ../bin/cdraw.c:2943
+#: ../bin/cdraw.c:2961
 msgid "Draw Filled Box"
 msgstr "Tynnu blwch wedi'i lenwi"
 
-#: ../bin/cdraw.c:2944
+#: ../bin/cdraw.c:2962
 msgid "Draw Polygon"
 msgstr "Tynnu polygon"
 
-#: ../bin/cdraw.c:2945
+#: ../bin/cdraw.c:2963
 msgid "Draw Filled Polygon"
 msgstr "Tynnu polygon wedi'i lenwi"
 
-#: ../bin/cdraw.c:2946
+#: ../bin/cdraw.c:2964
 msgid "PolyLine"
 msgstr "PolyLine"
 
-#: ../bin/cdraw.c:2946
+#: ../bin/cdraw.c:2964
 msgid "Draw PolyLine"
 msgstr "Tynnu polyline"
 
-#: ../bin/cdraw.c:2963
+#: ../bin/cdraw.c:2981
 msgid "Straight Objects"
 msgstr "Gwrthrychau syth"
 
-#: ../bin/cdraw.c:2963
+#: ../bin/cdraw.c:2981
 msgid "Draw Straight Objects"
 msgstr "Tynnwch luniau syth"
 
-#: ../bin/cdraw.c:2964
+#: ../bin/cdraw.c:2982
 msgid "Curved Lines"
 msgstr "Llinellau Crwm"
 
-#: ../bin/cdraw.c:2964
+#: ../bin/cdraw.c:2982
 msgid "Draw Curved Lines"
 msgstr "Tynnwch linellau crwm"
 
-#: ../bin/cdraw.c:2965
+#: ../bin/cdraw.c:2983
 msgid "Circle Lines"
 msgstr "Llinellau Cylch"
 
-#: ../bin/cdraw.c:2965
+#: ../bin/cdraw.c:2983
 msgid "Draw Circles"
 msgstr "Tynnu cylchoedd"
 
-#: ../bin/cdraw.c:2966
+#: ../bin/cdraw.c:2984
 msgid "Shapes"
 msgstr "Siapiau"
 
-#: ../bin/cdraw.c:2966
+#: ../bin/cdraw.c:2984
 msgid "Draw Shapes"
 msgstr "Tynnu siapiau"
 
-#: ../bin/cdraw.c:3254
+#: ../bin/cdraw.c:3272
 msgid "Close Polygon - 'g'"
 msgstr "Polygon agos - 'g'"
 
-#: ../bin/cdraw.c:3255
+#: ../bin/cdraw.c:3273
 msgid "Make PolyLine - 'l'"
 msgstr "Gwneud polyline - 'l'"
 
-#: ../bin/cdraw.c:3256
+#: ../bin/cdraw.c:3274
 msgid "Fill Polygon - 'f'"
 msgstr "Llenwch polyline - 'f'"
 
-#: ../bin/cdraw.c:3257
+#: ../bin/cdraw.c:3275
 msgid "Empty Polygon - 'u'"
 msgstr "Polyline gwag - 'u'"
 
-#: ../bin/cdraw.c:3259
+#: ../bin/cdraw.c:3277
 msgid "Points Mode - 'p'"
 msgstr "modd pwyntiau - 'p'"
 
-#: ../bin/cdraw.c:3260
+#: ../bin/cdraw.c:3278
 msgid "Delete Selected Point - 'Del'"
 msgstr "Dileu pwynt a ddewiswyd - 'Del'"
 
-#: ../bin/cdraw.c:3261
+#: ../bin/cdraw.c:3279
 msgid "Vertex Point - 'v'"
 msgstr "pwynt fertig - 'v'"
 
-#: ../bin/cdraw.c:3262
+#: ../bin/cdraw.c:3280
 msgid "Round Corner - 'r'"
 msgstr "Cornel gron - 'r'"
 
-#: ../bin/cdraw.c:3263
+#: ../bin/cdraw.c:3281
 msgid "Smooth Corner - 's'"
 msgstr "Cornel esmwyth - 's'"
 
-#: ../bin/cdraw.c:3265 ../bin/cselect.c:3529
+#: ../bin/cdraw.c:3283 ../bin/cselect.c:3529
 msgid "LineType..."
 msgstr "Math o linell ..."
 
-#: ../bin/cdraw.c:3266 ../bin/cselect.c:3530
+#: ../bin/cdraw.c:3284 ../bin/cselect.c:3530
 msgid "Solid Line"
 msgstr "Llinell solet"
 
-#: ../bin/cdraw.c:3267 ../bin/cselect.c:3531
+#: ../bin/cdraw.c:3285 ../bin/cselect.c:3531
 msgid "Dashed Line"
 msgstr "Llinell wedi'i chwalu"
 
-#: ../bin/cdraw.c:3268 ../bin/cselect.c:3532
+#: ../bin/cdraw.c:3286 ../bin/cselect.c:3532
 msgid "Dotted Line"
 msgstr "Llinell doredig"
 
-#: ../bin/cdraw.c:3269
+#: ../bin/cdraw.c:3287
 msgid "Dash-Dot Line"
 msgstr "Llinell Dash-Dot"
 
-#: ../bin/cdraw.c:3270
+#: ../bin/cdraw.c:3288
 msgid "Dash-Dot-Dot Line"
 msgstr "Llinell Dash-Dot-Dot"
 
-#: ../bin/cdraw.c:3271
+#: ../bin/cdraw.c:3289
 msgid "Center-Dot Line"
 msgstr "Llinell Center-Dot"
 
-#: ../bin/cdraw.c:3272
+#: ../bin/cdraw.c:3290
 msgid "Phantom-Dot Line"
 msgstr "Llinell ffantasi"
 
-#: ../bin/cdraw.c:3274
+#: ../bin/cdraw.c:3292
 msgid "Origin Mode - 'o'"
 msgstr "Modd Tarddiad - 'o'"
 
-#: ../bin/cdraw.c:3275
+#: ../bin/cdraw.c:3293
 msgid "Reset Origin - '0'"
 msgstr "Ailosod tarddiad - '0'"
 
-#: ../bin/cdraw.c:3276
+#: ../bin/cdraw.c:3294
 msgid "Origin to Selected - 'l'"
 msgstr "Tarddiad wedi'i ddewis - 'l'"
 
-#: ../bin/cdraw.c:3277
+#: ../bin/cdraw.c:3295
 msgid "Origin to Middle - 'm'"
 msgstr "Tarddiad i'r canol - 'm'"
 
-#: ../bin/celev.c:46 ../bin/cprofile.c:1536 ../bin/csplit.c:173
-#: ../bin/csplit.c:178 ../bin/dease.c:67 ../bin/doption.c:94
+#: ../bin/celev.c:46 ../bin/cprofile.c:1536 ../bin/csplit.c:194
+#: ../bin/csplit.c:199 ../bin/dease.c:67 ../bin/doption.c:94
 #: ../bin/doption.c:96
 msgid "None"
 msgstr "Dim"
@@ -1660,8 +1660,8 @@ msgstr "Amnewid gyda grŵp newydd?"
 #: ../bin/ctodesgn.c:199 ../bin/ctodesgn.c:2953 ../bin/cturnout.c:84
 #: ../bin/dcar.c:2194 ../bin/dcar.c:4366 ../bin/dcar.c:4371
 #: ../bin/dcmpnd.c:452 ../bin/dcustmgm.c:59
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:377
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:580
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:378
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:581
 msgid "Manufacturer"
 msgstr "Gwneuthurwr"
 
@@ -1670,7 +1670,7 @@ msgstr "Gwneuthurwr"
 #: ../bin/cturnout.c:84 ../bin/dcar.c:2210 ../bin/dcar.c:4367
 #: ../bin/dcar.c:4372 ../bin/dcmpnd.c:453 ../bin/dcustmgm.c:60
 #: ../bin/denum.c:182 ../bin/denum.c:183 ../bin/denum.c:186
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:378
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:379
 msgid "Description"
 msgstr "Disgrifiad"
 
@@ -1784,78 +1784,78 @@ msgstr "Wedi'i ddewis"
 msgid "Left click - Select first draw object end"
 msgstr "Cliciwch ar y chwith - Dewiswch ddiwedd y gwrthrych tynnu cyntaf"
 
-#: ../bin/cjoin.c:514 ../bin/cjoin.c:540
+#: ../bin/cjoin.c:514 ../bin/cjoin.c:548
 msgid "Not a line - Try again"
 msgstr "Ddim yn llinell - ceisiwch eto"
 
-#: ../bin/cjoin.c:536
+#: ../bin/cjoin.c:544
 msgid "Left click - Select second object end"
 msgstr "Cliciwch ar y chwith - Dewiswch ddiwedd yr ail wrthrych"
 
-#: ../bin/cjoin.c:548
+#: ../bin/cjoin.c:556
 msgid "Same draw object and same endpoint - Try again"
 msgstr "Yr un gwrthrych tynnu a'r un pwynt terfyn - Rhowch gynnig arall arni"
 
-#: ../bin/cjoin.c:582
+#: ../bin/cjoin.c:598
 msgid "Create PolyLine"
 msgstr "Creu polyline"
 
-#: ../bin/cjoin.c:824
+#: ../bin/cjoin.c:840
 msgid "Left click - join with track"
 msgstr "Cliciwch ar y chwith - ymunwch â'r trac"
 
-#: ../bin/cjoin.c:826
+#: ../bin/cjoin.c:842
 msgid "Left click - join with track, Shift Left click - move to join"
 msgstr ""
 "Cliciwch ar y chwith - ymunwch â'r trac, Shift Chwith cliciwch - symudwch i "
 "ymuno"
 
-#: ../bin/cjoin.c:904 ../bin/cjoin.c:1321 ../bin/cjoin.c:1328
+#: ../bin/cjoin.c:920 ../bin/cjoin.c:1337 ../bin/cjoin.c:1344
 msgid "Select 2nd track"
 msgstr "Dewiswch 2il drac"
 
-#: ../bin/cjoin.c:1131
+#: ../bin/cjoin.c:1147
 msgid "Beyond end of 2nd track"
 msgstr "Y tu hwnt i ddiwedd yr 2il drac"
 
-#: ../bin/cjoin.c:1166
+#: ../bin/cjoin.c:1182
 msgid "Beyond end of 1st track"
 msgstr "Y tu hwnt i ddiwedd y trac 1af"
 
-#: ../bin/cjoin.c:1188
+#: ../bin/cjoin.c:1204
 msgid "First Track Type not supported for non-Cornu Join"
 msgstr "Math o drac cyntaf heb ei gefnogi ar gyfer Ymuno nad yw'n Cornu"
 
-#: ../bin/cjoin.c:1195
+#: ../bin/cjoin.c:1211
 msgid "First "
 msgstr "Yn gyntaf"
 
-#: ../bin/cjoin.c:1220
+#: ../bin/cjoin.c:1236
 msgid "Second Track Type not supported for non-Cornu Join"
 msgstr "Ail fath o drac heb ei gefnogi ar gyfer ymuno nad yw'n Cornu"
 
-#: ../bin/cjoin.c:1227
+#: ../bin/cjoin.c:1243
 msgid "Second "
 msgstr "Ail"
 
-#: ../bin/cjoin.c:1241 ../bin/track.c:2295 ../bin/track.c:2331
+#: ../bin/cjoin.c:1257 ../bin/track.c:2295 ../bin/track.c:2331
 #: ../bin/track.c:2397
 msgid "Connecting "
 msgstr "Cysylltu"
 
-#: ../bin/cjoin.c:1331
+#: ../bin/cjoin.c:1347
 msgid "Join Tracks"
 msgstr "Ymunwch â thraciau"
 
-#: ../bin/cjoin.c:1419
+#: ../bin/cjoin.c:1435
 msgid "Join"
 msgstr "Ymunwch"
 
-#: ../bin/cjoin.c:1420
+#: ../bin/cjoin.c:1436
 msgid "Join Track"
 msgstr "Ymunwch â'r trac"
 
-#: ../bin/cjoin.c:1421
+#: ../bin/cjoin.c:1437
 msgid "Join Lines"
 msgstr "Ymunwch â llinellau"
 
@@ -2177,7 +2177,7 @@ msgstr ""
 #: ../bin/cprint.c:723 ../bin/dbitmap.c:208 ../bin/filenoteui.c:158
 #: ../bin/misc.c:1283 ../bin/misc.c:1361 ../bin/param.c:2622
 #: ../wlib/gtklib/browserhelp.c:94
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:599
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:600
 msgid "Cancel"
 msgstr "Canslo"
 
@@ -2185,17 +2185,17 @@ msgstr "Canslo"
 msgid "Print Margins"
 msgstr "Argraffu Ymylon"
 
-#: ../bin/cprint.c:1374 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2901
+#: ../bin/cprint.c:1380 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2901
 #: ../bin/denum.c:55
 msgid "Print"
 msgstr "Argraffu"
 
-#: ../bin/cprint.c:1395
+#: ../bin/cprint.c:1401
 msgid "Select pages to print, or drag to move print grid"
 msgstr ""
 "Dewiswch dudalennau i'w hargraffu, neu eu llusgo i symud y grid argraffu"
 
-#: ../bin/cprint.c:1493
+#: ../bin/cprint.c:1499
 msgid "Print..."
 msgstr "Argraffu..."
 
@@ -2813,59 +2813,87 @@ msgstr "Newid grid ..."
 msgid "Set Block Gaps"
 msgstr "Gosod bylchau bloc"
 
-#: ../bin/csplit.c:112
+#: ../bin/csplit.c:133
 msgid "Select track to split"
 msgstr "Dewiswch drac i'w hollti"
 
-#: ../bin/csplit.c:135
+#: ../bin/csplit.c:156
 msgid "Can't Split that Track Object"
 msgstr "Methu rhannu'r trac hwnnw"
 
-#: ../bin/csplit.c:143 ../bin/csplit.c:155 ../bin/csplit.c:318
+#: ../bin/csplit.c:164 ../bin/csplit.c:176 ../bin/csplit.c:464
 msgid "Split Track"
 msgstr "Trac hollt"
 
-#: ../bin/csplit.c:151 ../bin/csplit.c:274
+#: ../bin/csplit.c:172 ../bin/csplit.c:295 ../bin/csplit.c:382
 msgid "Can't Split that Draw Object"
 msgstr "Methu rhannu'r gwrthrych tynnu hwnnw"
 
-#: ../bin/csplit.c:161
+#: ../bin/csplit.c:182
 msgid "No Track to Split"
 msgstr "Dim Trac i'w Hollti"
 
-#: ../bin/csplit.c:174 ../bin/dbench.c:69 ../bin/dbench.c:80
+#: ../bin/csplit.c:195 ../bin/dbench.c:69 ../bin/dbench.c:80
 msgid "Left"
 msgstr "Chwith"
 
-#: ../bin/csplit.c:175 ../bin/dbench.c:70 ../bin/dbench.c:79
+#: ../bin/csplit.c:196 ../bin/dbench.c:70 ../bin/dbench.c:79
 msgid "Right"
 msgstr "Reit"
 
-#: ../bin/csplit.c:176 ../bin/csplit.c:181
+#: ../bin/csplit.c:197 ../bin/csplit.c:202
 msgid "Both"
 msgstr "Y ddau"
 
-#: ../bin/csplit.c:179
+#: ../bin/csplit.c:200
 msgid "Top"
 msgstr "Uchaf"
 
-#: ../bin/csplit.c:180
+#: ../bin/csplit.c:201
 msgid "Bottom"
 msgstr "Gwaelod"
 
-#: ../bin/csplit.c:260
+#: ../bin/csplit.c:281
 msgid "Select draw to split"
 msgstr "Dewiswch dynnu i'w rannu"
 
-#: ../bin/csplit.c:278 ../bin/csplit.c:319
+#: ../bin/csplit.c:299 ../bin/csplit.c:465
 msgid "Split Draw"
 msgstr "Tynnu Hollt"
 
-#: ../bin/csplit.c:284
+#: ../bin/csplit.c:305
 msgid "No Draw to Split"
 msgstr "Dim Tynnu i'w Hollti"
 
-#: ../bin/csplit.c:317
+#: ../bin/csplit.c:343
+msgid "Select the draw object to Trim to"
+msgstr "Dewiswch y gwrthrych tynnu i Trimio ag ef"
+
+#: ../bin/csplit.c:358
+msgid "Can't Trim with a Track"
+msgstr "Methu Trimio gyda thrac"
+
+#: ../bin/csplit.c:363
+msgid "Select an intersecting draw object to Trim"
+msgstr "Dewiswch wrthrych tynnu croestoriadol i Trim"
+
+#: ../bin/csplit.c:369
+msgid "No Draw to Trim with"
+msgstr "Dim Tynnu i Drimio gyda"
+
+#: ../bin/csplit.c:376
+msgid "Can't Split a track object"
+msgstr "Methu Rhannu gwrthrych trac"
+
+#: ../bin/csplit.c:398 ../bin/csplit.c:466
+msgid "Trim Draw"
+msgstr "Tynnu trim"
+
+#: ../bin/csplit.c:403
+msgid "Select another draw object to Trim, or Space to Deselect"
+msgstr "Dewiswch wrthrych tynnu arall i Trim, neu Space to Deselect"
+
+#: ../bin/csplit.c:463
 msgid "Split"
 msgstr "Hollti"
 
@@ -3408,7 +3436,7 @@ msgstr "Rheoli Trên %d"
 msgid "Train Control"
 msgstr "Rheoli Trên"
 
-#: ../bin/ctrain.c:3099 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:152
+#: ../bin/ctrain.c:3099 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:153
 msgid "Run Trains"
 msgstr "Rhedeg Trenau"
 
@@ -3557,7 +3585,7 @@ msgstr "Dadwneud Olrhain"
 msgid "Undo: %s"
 msgstr "Dadwneud: %s"
 
-#: ../bin/cundo.c:539 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:163
+#: ../bin/cundo.c:539 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:164
 msgid "Undo last command"
 msgstr "Dadwneud y gorchymyn olaf"
 
@@ -3818,7 +3846,7 @@ msgid "Poor"
 msgstr "Cyflwr gwael"
 
 #: ../bin/dcar.c:1501 ../bin/dpricels.c:45
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:454
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:455
 msgid "Item"
 msgstr "Eitem"
 
@@ -3846,9 +3874,9 @@ msgstr "Prototeip"
 msgid "Part"
 msgstr "Rhan"
 
-#: ../bin/dcar.c:2206 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:379
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:583
+#: ../bin/dcar.c:2206 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:380
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:584
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:585
 msgid "Part Number"
 msgstr "Rhan rhif"
 
@@ -3900,7 +3928,7 @@ msgstr "Hyd y Cwplwr"
 msgid "Purchase Price"
 msgstr "Pris Prynu"
 
-#: ../bin/dcar.c:2253 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:241
+#: ../bin/dcar.c:2253 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:242
 msgid "Current Price"
 msgstr "Pris Cyfredol"
 
@@ -3934,8 +3962,8 @@ msgstr "Nodiadau"
 msgid "Car Part"
 msgstr "Rhan Car"
 
-#: ../bin/dcar.c:2273 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:215
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:216
+#: ../bin/dcar.c:2273 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:216
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:217
 msgid "Car Prototype"
 msgstr "Prototeip Car"
 
@@ -4126,7 +4154,7 @@ msgid "New Car Part"
 msgstr "Rhan Car Newydd"
 
 #: ../bin/dcar.c:4367 ../bin/dcar.c:4372
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:424
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:425
 msgid "Roadname"
 msgstr "Enw'r Ffordd"
 
@@ -4180,7 +4208,7 @@ msgstr "Dileu"
 msgid "Export"
 msgstr "Allforio"
 
-#: ../bin/dcar.c:4408 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:600
+#: ../bin/dcar.c:4408 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:601
 msgid "List"
 msgstr "Rhestr"
 
@@ -5466,7 +5494,7 @@ msgstr "Nesaf"
 msgid "Quit"
 msgstr "Adael"
 
-#: ../bin/macro.c:685 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:555
+#: ../bin/macro.c:685 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:556
 msgid "Speed"
 msgstr "Cyflymder"
 
@@ -5581,11 +5609,10 @@ msgstr "XTrackCAD Ffont"
 msgid "No balloon help for %s\n"
 msgstr "Dim help balŵn ar gyfer %s\n"
 
-#: ../bin/misc.c:956 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:618
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:619
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:621
+#: ../bin/misc.c:956 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:619
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:620
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:622
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:624
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:623
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:625
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:626
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:627
@@ -5640,7 +5667,8 @@ msgstr "Dim help balŵn ar gyfer %s\n"
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:676
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:677
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:678
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:680
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:679
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:681
 msgid "No Help"
 msgstr "Dim Cymorth"
 
@@ -8535,457 +8563,463 @@ msgid "Split a straight, curved, circle, polygon or polyline Draw Object "
 msgstr "Rhannwch Wrthrych Tynnu syth, crwm, cylch, polygon neu polyline"
 
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:140
+msgid "Trim a line, circle or polyline Draw Object using a second Object"
+msgstr ""
+"Trimiwch linell, cylch neu polyline Gwrthrych Tynnu gan ddefnyddio ail "
+"Wrthrych"
+
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:141
 msgid "Select stranded (unconnected) track pieces"
 msgstr "Dewiswch ddarnau trac sownd (digyswllt)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:141
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:142
 msgid "Create a sensor (ie. a occupancy detector or a toggle switch)"
 msgstr "Creu synhwyrydd (h.y. synhwyrydd deiliadaeth neu switsh togl)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:142
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:143
 msgid "Create a signal for train control"
 msgstr "Creu signal ar gyfer rheoli trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:143
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:144
 msgid "Choose which commands are sticky"
 msgstr "Dewiswch pa orchmynion sy'n ludiog"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:144
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:145
 msgid "Create straight track"
 msgstr "Creu trac syth"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:145
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:146
 msgid "Place a structure on the layout"
 msgstr "Rhowch strwythur ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:146
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:147
 msgid "Create a switchmotor for turnout control"
 msgstr "Creu pwyntmotor ar gyfer rheoli pwyntiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:147
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:148
 msgid "Edit a switchmotor definition"
 msgstr "Golygu diffiniad pwynt-modur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:148
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:149
 msgid "Enter text on the layout"
 msgstr "Rhowch destun ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:149
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:546
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:150
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:547
 msgid "Controls the size of the entered text"
 msgstr "Mae'n rheoli maint y testun a gofnodwyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:150
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:151
 msgid "Plain Text"
 msgstr "Testun plaen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:151
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:152
 msgid "Tip of the Day window"
 msgstr "ffenestr blaen y dydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:153
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:154
 msgid "Change To Run Trains Mode"
 msgstr "Newid I Rhedeg Modd Trenau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:154
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:155
 msgid "Pause/Resume Trains"
 msgstr "Trenau Saib / Ail-ddechrau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:155
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:156
 msgid "Place a car on the layout"
 msgstr "Rhowch gar ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:156
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:157
 msgid "Exit Trains"
 msgstr "Trenau Ymadael"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:157
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:158
 msgid "Hide/Unhide a track"
 msgstr "Cuddio / Dad-guddio trac"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:158
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:159
 msgid "Make/Unmake a track a bridge"
 msgstr "Gwneud / Dad-wneud trac yn bont"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:159
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:160
 msgid "Place a turnout or sectional track"
 msgstr "Rhowch bwynt neu drac adrannol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:160
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:161
 msgid "Create a new turnout definition"
 msgstr "Creu diffiniad pwynt newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:161
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:162
 msgid "Place a turntable"
 msgstr "Rhowch drofwrdd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:162
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:163
 msgid "Updates old source files with 3 part titles"
 msgstr "Yn diweddaru hen ffeiliau ffynhonnell gyda theitlau 3 rhan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:164
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:165
 msgid "Ungroup objects"
 msgstr "Gwrthrychau heb grwp"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:165
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:166
 msgid "Draw tracks with thin lines"
 msgstr "Tynnwch draciau gyda llinellau tenau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:166
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:167
 msgid "Draw tracks with medium lines"
 msgstr "Tynnwch draciau gyda llinellau canolig"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:167
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:168
 msgid "Draw tracks with thick lines"
 msgstr "Tynnwch draciau gyda llinellau trwchus"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:168
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:169
 msgid "Change drawing scale"
 msgstr "Newid graddfa arlunio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:169
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:181
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:170
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:182
 msgid "Zoom in"
 msgstr "Chwyddo i mewn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:170
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:182
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:171
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:183
 msgid "Zoom out"
 msgstr "Chwyddo allan"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:171
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:172
 msgid "File Menu"
 msgstr "Dewislen Ffeil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:172
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:173
 msgid "Save layout"
 msgstr "Cadw cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:173
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:174
 msgid "Save layout under a new name "
 msgstr "Cadw cynllun o dan enw newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:174
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:175
 msgid "New layout"
 msgstr "Cynllun newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:175
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:176
 msgid "Generate parts list"
 msgstr "Cynhyrchu rhestr rhannau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:176
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:177
 msgid "Load a layout"
 msgstr "Llwythwch gynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:177
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:178
 msgid "Exit the program"
 msgstr "Ymadael â'r rhaglen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:178
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:179
 msgid "Revert to last saved state of layout plan"
 msgstr "Dychwelwch i'r cynllun cynllun cyflwr olaf a arbedwyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:179
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:180
 msgid "Edit menu"
 msgstr "Golygu dewislen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:180
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:181
 msgid "Redraw layout"
 msgstr "Cynllun ail-lunio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:183
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:186
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:184
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:187
 msgid "Tools menu"
 msgstr "Dewislen offer"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:184
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:185
 msgid "View menu"
 msgstr "Gweld y ddewislen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:185
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:186
 msgid "Toolbar configuration"
 msgstr "Cyfluniad bar offer"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:187
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:188
 msgid "Options menu"
 msgstr "Dewislen opsiynau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:188
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:189
 msgid "Playback/Record commands"
 msgstr "Gorchmynion Chwarae / Cofnodi"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:189
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:190
 msgid "Window menu"
 msgstr "Dewislen ffenestr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:190
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:191
 msgid "Help menu"
 msgstr "Dewislen help"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:191
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:192
 msgid "Recent error messages and explanations"
 msgstr "Negeseuon gwall ac esboniadau diweddar"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:192
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:193
 msgid "Move Hot Bar left"
 msgstr "Symudwch Bar Poeth i'r chwith"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:193
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:194
 msgid "Move Hot Bar right"
 msgstr "Symudwch Bar Poeth i'r dde"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:194
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:195
 msgid "Total track count"
 msgstr "Cyfanswm cyfrif y trac"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:195
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:196
 msgid "X Position of cursor"
 msgstr "X Safle cyrchwr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:196
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:197
 msgid "Y Position of cursor"
 msgstr "Y Safle cyrchwr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:197
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:198
 msgid "Drawing scale"
 msgstr "Graddfa arlunio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:198
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:199
 msgid "Message and status line"
 msgstr "Llinell neges a statws"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:199
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:200
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:201
 msgid "Main layout canvas"
 msgstr "Cynfas y prif gynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:201
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:202
 msgid "Main drawing canvas"
 msgstr "Cynfas prif lun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:202
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:203
 msgid "Command buttons"
 msgstr "Botymau gorchymyn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:203
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:204
 msgid "Menus"
 msgstr "Bwydlenni"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:204
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:205
 msgid "Tile, Filename and Window Manager buttons"
 msgstr "Botymau Rheolwr Teils, Enw Ffeil a Ffenestr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:205
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:206
 msgid "Turnout and Structure Hot Bar"
 msgstr "Bar Poeth Pwynt a Strwythur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:206
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:207
 msgid "Active layer list and layer buttons"
 msgstr "Rhestr haenau gweithredol a botymau haen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:207
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:208
 msgid "Map window"
 msgstr "Ffenestr map"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:208
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:209
 msgid "This is the portion of the layout shown in the Main Window canvas"
 msgstr "Dyma'r gyfran o'r cynllun a ddangosir yn gynfas y Brif Ffenestr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:209
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:210
 msgid "Raise or Lower all Selected Track"
 msgstr "Codi neu Gostwng yr holl Drac a Ddetholwyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:210
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:211
 msgid "Name of block"
 msgstr "Enw'r bloc"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:211
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:212
 msgid "Script that the block will run"
 msgstr "Sgript y bydd y bloc yn rhedeg"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:212
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:213
 msgid "List of tracks in the Block"
 msgstr "Rhestr o draciau yn y Bloc"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:213
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:214
 msgid "Add or Update car object"
 msgstr "Ychwanegu neu Ddiweddaru Gwrthrych Car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:214
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:215
 msgid "Manufacturer name"
 msgstr "Enw'r gwneuthurwr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:217
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:218
 msgid "Is the Car a Locomotive?"
 msgstr "A yw'r Car yn Locomotif?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:218
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:219
 msgid "Part Number and Description"
 msgstr "Rhif Rhan a Disgrifiad"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:219
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:220
 msgid "Manufacturer Part Number"
 msgstr "Gwneuthurwr Rhan Rhif"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:220
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:221
 msgid "Use the Selected figure as the car image"
 msgstr "Defnyddiwch y ffigur Dethol fel delwedd y car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:221
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:222
 msgid "Use the default figure as the car image"
 msgstr "Defnyddiwch y ffigur diofyn fel delwedd y car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:222
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:223
 msgid "Optional description of the Car Part"
 msgstr "Disgrifiad dewisol o'r Rhan Car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:223
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:224
 msgid "Flip car image"
 msgstr "Delwedd car troi"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:224
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:225
 msgid "Display Car Item information or reporting marks and dimensions"
 msgstr "Arddangos gwybodaeth Eitem Car neu farciau a dimensiynau adrodd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:225
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:226
 msgid "Full Roadname"
 msgstr "Enw Ffordd Llawn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:226
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:227
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:228
 msgid "Car Type"
 msgstr "Math o Gar"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:228
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:229
 msgid "Reporting Marks (Roadname abbreviation)"
 msgstr "Marciau Adrodd (Talfyriad Enw Ffordd)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:229
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:425
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:230
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:426
 msgid "Car Number"
 msgstr "Rhif Car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:230
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:231
 msgid "Car body Color"
 msgstr "Lliw corff car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:231
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:232
 msgid "Length of car body"
 msgstr "Hyd corff y car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:232
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:233
 msgid "Width of car body"
 msgstr "Lled corff y car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:233
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:234
 msgid "Distance between Trucks "
 msgstr "Pellter rhwng Tryciau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:234
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:235
 msgid "Distance Trucks are displaced along Car"
 msgstr "Mae Tryciau Pellter yn cael eu dadleoli ar hyd Car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:235
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:236
 msgid "Coupler are mounted on body or truck"
 msgstr "Mae cwpller wedi'u gosod ar gorff neu lori"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:236
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:237
 msgid "Overall Coupled Length"
 msgstr "Hyd Cypledig Cyffredinol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:237
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:238
 msgid "Coupler Length from end of car"
 msgstr "Hyd y cwplwr o ddiwedd y car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:238
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:239
 msgid "Diagram of Car"
 msgstr "Diagram o Gar"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:239
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:240
 msgid "Item Index Number"
 msgstr "Rhif Mynegai Eitem"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:240
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:241
 msgid "Original Purchase Price"
 msgstr "Pris Prynu Gwreiddiol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:242
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:243
 msgid "Condition of car"
 msgstr "Cyflwr y car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:243
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:244
 msgid "Original Purchase Date"
 msgstr "Dyddiad Prynu Gwreiddiol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:244
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:245
 msgid "Last Service Date"
 msgstr "Dyddiad Gwasanaeth Olaf"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:245
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:246
 msgid "Number of identical cars to be entered"
 msgstr "Nifer y ceir union yr un fath i'w nodi"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:246
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:247
 msgid "Do all the cars have the same Number?"
 msgstr "Oes gan yr holl geir yr un Rhif?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:247
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:248
 msgid "Notes about the car"
 msgstr "Nodiadau am y car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:248
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:249
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:250
 msgid "Create a new car Part or Prototype definitions"
 msgstr "Creu diffiniadau Rhan neu Brototeip car newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:250
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:251
 msgid "Finds the selected Car Item on the layout"
 msgstr "Yn dod o hyd i'r Eitem Car a ddewiswyd ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:251
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:252
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:253
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:254
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:255
 msgid "Sort the Item list"
 msgstr "Trefnwch y rhestr Eitem"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:256
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:257
 msgid "Edit the selected Car Item"
 msgstr "Golygu'r Eitem Car a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:257
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:258
 msgid "Add a new Car Item"
 msgstr "Ychwanegwch Eitem Car newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:258
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:259
 msgid "Delete the selected Car Items"
 msgstr "Dileu'r Eitemau Car a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:259
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:260
 msgid "Import a Car Item .csv file"
 msgstr "Mewnforio Eitem Car .csv ffile"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:260
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:261
 msgid "Export a Car Item .csv file"
 msgstr "Allforio Eitem Car .csv ffile"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:261
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:262
 msgid "Create a text list of the Car Items"
 msgstr "Creu rhestr destun o'r Eitemau Car"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:262
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:263
 msgid "Specifies the radius of the circle track"
 msgstr "Yn nodi radiws y trac cylch"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:263
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:264
 msgid "Default command is Describe or Select"
 msgstr "Gorchymyn diofyn yw Disgrifio neu Dewis"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:264
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:265
 msgid "Action to invoke on Right-Click"
 msgstr "Camau i weithredu ar De-gliciwch"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:265
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:266
 msgid ""
 "Replace current selection with clicked object or add clicked object to "
 "selection"
@@ -8993,206 +9027,206 @@ msgstr ""
 "Amnewid y dewis cyfredol gyda gwrthrych wedi'i glicio neu ychwanegu "
 "gwrthrych wedi'i glicio at y dewis"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:266
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:267
 msgid "Clicking into an empty area clears selection if select mode is <add>"
 msgstr ""
 "Mae clicio i mewn i ardal wag yn clirio'r dewis os yw'r modd dethol <add>"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:268
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:269
 msgid "The list of control elements"
 msgstr "Y rhestr o elfennau rheoli"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:269
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:270
 msgid "Edit the element"
 msgstr "Golygu'r elfen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:270
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:271
 msgid "Delete the element"
 msgstr "Golygu'r elfen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:271
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:272
 msgid "Contents Label for new Parameter file"
 msgstr "Label Cynnwys ar gyfer ffeil Paramedr newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:272
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:273
 msgid "Desired curve radius for new track"
 msgstr "Radiws cromlin dymunol ar gyfer trac newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:273
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:274
 msgid "List of custom designed turnouts and structures"
 msgstr "Rhestr o bwyntiau a strwythurau wedi'u cynllunio'n benodol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:274
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:275
 msgid "Invoke designer editor"
 msgstr "Galw golygydd dylunydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:275
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:276
 msgid "Remove selected entries"
 msgstr "Dileu cofnodion dethol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:276
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:277
 msgid "Copy selected entries to Parameter File"
 msgstr "Copïwch gofnodion dethol i Ffeil Paramedr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:277
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:278
 msgid "Create a New part or prototype"
 msgstr "Creu rhan neu brototeip newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:278
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:279
 msgid "Update custom file and close"
 msgstr "Diweddarwch y ffeil arfer a'i chau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:279
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:280
 msgid "Executes the next step of the demo"
 msgstr "Yn gweithredu cam nesaf y demo"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:280
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:281
 msgid "Skip to next demo"
 msgstr "Neidio i'r demo nesaf"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:281
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:282
 msgid "Stops the demonstration and returns you to XTrackCAD"
 msgstr "Yn stopio'r arddangosiad ac yn eich dychwelyd iddo XTrackCAD"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:282
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:283
 msgid "Select speed of Playback"
 msgstr "Dewiswch gyflymder Chwarae"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:283
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:284
 msgid "This is where comments about the demo are displayed"
 msgstr "Dyma lle mae sylwadau am y demo yn cael eu harddangos"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:320
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:321
 msgid "Move the Main canvas if you drag near the edge"
 msgstr "Symudwch y Prif gynfas os ydych chi'n llusgo ger yr ymyl"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:321
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:322
 msgid "Color tracks by layer or individually"
 msgstr "Llwybrau lliw yn ôl haen neu'n unigol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:322
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:323
 msgid "Color draw objects by layer or individually"
 msgstr "Lliwiwch wrthrychau lliw fesul haen neu'n unigol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:323
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:324
 msgid "Controls the drawing of hidden tracks"
 msgstr "Yn rheoli lluniadu traciau cudd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:324
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:325
 msgid "Controls the drawing of End-Points"
 msgstr "Mae'n rheoli lluniadu pwyntiau diwedd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:325
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:326
 msgid "How to draw track ties"
 msgstr "Sut i dynnu llun cysgu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:326
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:327
 msgid "Show crosshair at center of curves"
 msgstr "Dangos crosshair yng nghanol y cromliniau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:327
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:328
 msgid "Drawing scale when to draw tracks with 2 rails"
 msgstr "Graddfa dynnu pryd i dynnu traciau gyda 2 reilen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:328
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:329
 msgid "Drawing scale of the map window"
 msgstr "Graddfa dynnu ffenestr y map"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:329
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:330
 msgid "Whether the main layout is updated while dragging on the Map"
 msgstr "P'un a yw'r prif gynllun yn cael ei ddiweddaru wrth lusgo ar y Map"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:330
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:331
 msgid "Enable labels for Turnouts, Flextrack Lengths and Elevations"
 msgstr "Galluogi labeli ar gyfer Pwyntiau, Hyd Trac Hyblyg ac Drychiadau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:331
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:332
 msgid "When to label Turnout, Flextrack Lengths and Elevations"
 msgstr "Pryd i labelu Pwyntiau, Hyd Trac Flex ac Drychiadau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:332
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:333
 msgid "Font size for labels on layout"
 msgstr "Maint y ffont ar gyfer labeli ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:333
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:334
 msgid "Label elements on the Hot Bar"
 msgstr "Labelwch elfennau ar y Bar Poeth"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:334
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:335
 msgid "Label elements on layout"
 msgstr "Labelu elfennau ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:335
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:336
 msgid "Label elements for lists"
 msgstr "Labelwch elfennau ar gyfer rhestrau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:336
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:337
 msgid "How to group cars on the Train Hot Bar"
 msgstr "Sut i grwpio ceir ar y Bar Poeth Trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:337
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:338
 msgid "Delay (in mS) between updating train movements"
 msgstr "Oedi (yn msec) rhwng diweddaru symudiadau trenau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:338
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:339
 msgid "Don't show trains in tunnels when tunnels are hidden"
 msgstr "Peidiwch â dangos trenau mewn twneli pan fydd twneli wedi'u cuddio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:339
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:340
 msgid "Display unconnected endpoints of track with special marks"
 msgstr "Arddangos pwyntiau terfyn digyswllt â marciau arbennig"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:340
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:341
 msgid "Whether the Main Drawing Area shows as much of the room as possible"
 msgstr ""
 "P'un a yw'r Prif Ardal Arlunio yn dangos cymaint o'r ystafell â phosibl"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:341
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:342
 msgid "Don't hide system cursor when program cursors are showing"
 msgstr ""
 "Peidiwch â chuddio cyrchwr system pan fydd cyrchwyr rhaglenni'n dangos"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:343
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:344
 msgid "Width of the lines"
 msgstr "Lled y llinellau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:344
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:345
 msgid "Color of the lines"
 msgstr "Lliw y llinellau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:345
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:346
 msgid "List of types of Lumber"
 msgstr "Rhestr o'r mathau o bren"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:346
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:347
 msgid "Color of Benchwork"
 msgstr "Lliw y Byrddau Sylfaen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:347
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:348
 msgid "Orientation of Benchwork"
 msgstr "Cyfeiriadedd y Bwrdd Sylfaen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:348
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:349
 msgid "Size of Dimension Arrows"
 msgstr "Maint y Saethau Dimensiwn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:349
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:350
 msgid "This controls the sharpness of the easement curve"
 msgstr "Mae hyn yn rheoli miniogrwydd cromlin yr hawddfraint"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:350
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:351
 msgid "Minimum radius"
 msgstr "Radiws lleiaf"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:351
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:352
 msgid "Maximum offset"
 msgstr "Gwrthbwyso uchaf"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:352
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:353
 msgid "Easement length"
 msgstr "Hyd rhwyddineb"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:353
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:354
 msgid ""
 "These radio buttons are a short-cut for Values of 0.0, 0.5, 1.0 and 2.0.  "
 "None turns Easements off"
@@ -9200,207 +9234,207 @@ msgstr ""
 "Mae'r botymau radio hyn yn llwybr byr ar gyfer Gwerthoedd o 0.0, 0.5, 1.0 a "
 "2.0.  Nid oes yr un yn troi Rhwyddinebau i ffwrdd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:354
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:355
 msgid "Complete easement selection"
 msgstr "Dewis hawddfraint cyflawn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:355
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:356
 msgid "Type of elevation"
 msgstr "Math o ddrychiad"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:356
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:357
 msgid "Height of End Point"
 msgstr "Uchder y pwynt gorffen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:357
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:358
 msgid "Compute elevation based on neighbors"
 msgstr "Drychiad cyfrifiadurol yn seiliedig ar gymdogion"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:358
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:359
 msgid "Compute grade based on neighbors"
 msgstr "Gradd gyfrifiannu yn seiliedig ar gymdogion"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:359
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:360
 msgid "Specify a name for an End-Point"
 msgstr "Nodwch enw ar gyfer pwynt gorffen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:361
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:362
 msgid "Print parts list"
 msgstr "Argraffu rhestr rhannau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:362
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:480
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:590
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:363
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:481
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:591
 msgid "Invoke the Print Setup dialog"
 msgstr "Galw ar y ddewislen gosod Argraffu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:363
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:364
 msgid "Save parts list to file"
 msgstr "Cadw rhestr rhannau i'w ffeilio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:364
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:365
 msgid "This is the list of parts for the layout"
 msgstr "Dyma'r rhestr o rannau ar gyfer y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:365
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:366
 msgid "Enable prices on the Parts List"
 msgstr "Galluogi prisiau ar y Rhestr Rhannau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:366
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:369
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:367
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:370
 msgid "Spacing between major grid lines"
 msgstr "Bylchau rhwng prif linellau grid"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:367
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:370
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:368
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:371
 msgid "Allows the spacing to be subdivided"
 msgstr "Yn caniatáu i'r bylchau gael eu hisrannu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:368
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:371
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:369
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:372
 msgid "Specifies if positions are snaped in this direction"
 msgstr "Yn nodi a yw swyddi'n cael eu bachu i'r cyfeiriad hwn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:372
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:373
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:374
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:375
 msgid "Shows the origin and angle of the grid"
 msgstr "Yn dangos tarddiad ac ongl y grid"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:375
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:376
 msgid "Specifies if the grid is shown"
 msgstr "Yn nodi a yw'r grid yn cael ei ddangos"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:376
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:377
 msgid "Completes the grid specification"
 msgstr "Yn cwblhau manyleb y grid"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:380
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:381
 msgid "Number of segments in Group"
 msgstr "Nifer y segmentau yn y Grŵp"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:381
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:382
 msgid "Replace the Selected object with the new definition?"
 msgstr "Amnewid y gwrthrych Dethol gyda'r diffiniad newydd?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:382
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:383
 msgid "Creates a new Structure (or Turnout)"
 msgstr "Yn creu Strwythur (neu Bwynt) newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:383
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:384
 msgid "Elevation difference of Helix End-Points"
 msgstr "Gwahaniaeth drychiad pwyntiau terfyn Helix"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:384
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:385
 msgid "Helix Radius"
 msgstr "Radiws Helix"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:385
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:386
 msgid "Number of turns in the helix"
 msgstr "Nifer y troadau yn yr helics"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:386
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:387
 msgid "Angle betweek helix entrance and exit"
 msgstr "Ongl rhwng mynedfa helix ac allanfa"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:387
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:388
 msgid "Grade in helix"
 msgstr "Gradd mewn helics"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:388
-msgid "Separation between helix layers"
-msgstr "Gwahanu rhwng haenau helics"
-
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:389
+msgid "Separation between helix layers including baseboard, track, etc"
+msgstr "Gwahanu rhwng haenau helics gan gynnwys bwrdd sylfaen, trac, ac ati"
+
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:390
 msgid "Desired curve radius between straight tracks"
 msgstr "Radiws cromlin dymunol rhwng traciau syth"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:390
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:391
 msgid "Layer list"
 msgstr "Rhestr haenau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:391
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:392
 msgid "Layer Name"
 msgstr "Enw Haen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:392
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:393
 msgid "Hide Layer Button on MenuBar"
 msgstr "Cuddio Botwm Haen ar Bar Dewislen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:393
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:394
 msgid "Color of layer"
 msgstr "Lliw haen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:394
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:395
 msgid "Layer is drawn on Main window"
 msgstr "Tynnir yr haen ar y Brif ffenestr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:395
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:396
 msgid "Layer cannot be changed"
 msgstr "Ni ellir newid haen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:396
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:397
 msgid "Use color for this Layer if color-by-layer is set"
 msgstr "Defnyddiwch liw ar gyfer yr Haen hon os yw lliw-wrth-haen wedi'i osod"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:397
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:398
 msgid "Other Layers this Layer also shows/hides"
 msgstr "Haenau Eraill mae'r Haen hon hefyd yn eu dangos / cuddio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:398
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:399
 msgid "Layer is a Module"
 msgstr "Modiwl yw haen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:399
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:400
 msgid "Layer is drawn on Map window"
 msgstr "Tynnir yr haen ar ffenestr Map"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:400
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:401
 msgid "Number of layer buttons to show"
 msgstr "Nifer y botymau haen i'w dangos"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:401
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:402
 msgid "Number of objects in this layer"
 msgstr "Nifer y gwrthrychau yn yr haen hon"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:402
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:403
 msgid "Settings File to load when this layer is made current"
 msgstr "Gosodiadau Ffeil i'w lwytho pan fydd yr haen hon yn gyfredol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:404
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:405
 msgid "Load layer configuration from default"
 msgstr "Llwythwch ffurfweddiad haen yn ddiofyn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:405
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:406
 msgid "Save current layer configuration as default"
 msgstr "Cadw cyfluniad haen cyfredol yn ddiofyn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:406
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:407
 msgid "Overwrite layer configuration with system default values"
 msgstr "Gor-ysgrifennu cyfluniad haen gyda gwerthoedd diofyn system"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:407
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:408
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:409
 msgid "Specifies the size of the room (in inches or centimeters)"
 msgstr "Yn nodi maint yr ystafell (mewn modfeddi neu centimetrau)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:409
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:410
 msgid "Specifies the layout Title that will appear on printouts"
 msgstr "Yn nodi'r Teitl cynllun a fydd yn ymddangos ar allbrintiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:410
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:411
 msgid "Specifies the layout Subtitle that will appear on printouts"
 msgstr "Yn nodi'r cynllun Is-deitl a fydd yn ymddangos ar allbrintiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:411
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:412
 msgid "Specifies the Modelling Scale"
 msgstr "Yn nodi'r Raddfa Modelu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:412
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:413
 msgid "Specifies the rail gauge, ie. the distance between the rails"
 msgstr "Yn nodi'r mesurydd rheilffordd, h.y. y pellter rhwng y cledrau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:413
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:414
 msgid ""
 "Specifies minimum track radius (in inches or centimeters). Tracks with a "
 "smaller radius are considered exceptional."
@@ -9408,7 +9442,7 @@ msgstr ""
 "Yn nodi'r radiws trac lleiaf (mewn modfeddi neu centimetrau). Mae traciau â "
 "radiws llai yn cael eu hystyried yn eithriadol."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:414
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:415
 msgid ""
 "Specifies maximum track elevation expressed as a percent (%). Tracks with a "
 "larger elevation are considered exceptional."
@@ -9416,23 +9450,23 @@ msgstr ""
 "Yn nodi'r drychiad trac uchaf a fynegir fel cant (%). Mae traciau â drychiad"
 " mwy yn cael eu hystyried yn eithriadol."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:415
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:416
 msgid "Select the background image"
 msgstr "Dewiswch y ddelwedd gefndir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:416
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:417
 msgid "Remove the background image"
 msgstr "Tynnwch y ddelwedd gefndir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:417
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:418
 msgid "Specifies the x offset of the bottom left of the background image"
 msgstr "Yn nodi gwrthbwyso x gwaelod chwith y ddelwedd gefndir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:418
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:419
 msgid "Specifies the y offset of the bottom left of the background image"
 msgstr "Yn nodi gwrthbwyso y chwith isaf y ddelwedd gefndir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:419
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:420
 msgid ""
 "Specifies how large the bottom edge of the background image should be in "
 "model units"
@@ -9440,35 +9474,35 @@ msgstr ""
 "Yn nodi pa mor fawr y dylai ymyl waelod y ddelwedd gefndir fod mewn unedau "
 "model"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:420
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:421
 msgid ""
 "Specifies the screening of the background image from 0 (none) to 100% "
 "(vanishes)"
 msgstr "Yn nodi sgrinio'r ddelwedd gefndir o 0 (dim) i 100% (diflannu)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:421
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:422
 msgid "Specifies the rotation angle of the background image in degrees"
 msgstr "Yn nodi ongl cylchdroi'r ddelwedd gefndir mewn graddau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:422
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:423
 msgid "Write a copy of current settings to a named file"
 msgstr "Ysgrifennwch gopi o'r gosodiadau cyfredol i ffeil a enwir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:423
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:424
 msgid "Override current settings from a named file"
 msgstr "Diystyru gosodiadau cyfredol o ffeil a enwir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:426
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:427
 msgid ""
 "This is the body of the Note.  To change this select Modify from the File "
 "Menu"
 msgstr "Dyma gorff y Nodyn. I newid hyn, dewiswch Addasu o'r Ddewislen Ffeil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:428
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:429
 msgid "Specifies number of pixels per inch (or centimeter)"
 msgstr "Yn nodi nifer y picseli fesul modfedd (neu centimetr)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:430
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:431
 msgid ""
 "Specifies whether Layout Titles, Borders or Track Centerlines are printed on"
 " the BitMap"
@@ -9476,14 +9510,14 @@ msgstr ""
 "Yn nodi a yw Teitlau Cynllun, Ffiniau neu Track Centerlines wedi'u hargraffu"
 " ar y BitMap"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:431
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:432
 msgid ""
 "Specifies the separation between the original track and the parallel "
 "track/line"
 msgstr ""
 "Yn nodi'r gwahaniad rhwng y trac gwreiddiol a'r trac / llinell gyfochrog"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:432
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:433
 msgid ""
 "Specifies the a factor that increases the seperation as the radius of the "
 "original track reduces. 0.0 means no increase."
@@ -9491,76 +9525,76 @@ msgstr ""
 "Yn nodi'r ffactor sy'n cynyddu'r trawiad wrth i radiws y trac gwreiddiol "
 "leihau. Mae 0.0 yn golygu dim cynnydd."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:433
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:434
 msgid "Enter your name as specified in the XTrackCAD Registration Notice"
 msgstr "Rhowch eich enw fel y nodir yn Hysbysiad Cofrestru XTrackCAD"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:434
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:435
 msgid "Enter the key value as specified in the XTrackCAD Registration Notice"
 msgstr ""
 "Rhowch y gwerth allweddol fel y nodir yn Hysbysiad Cofrestru XTrackCAD"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:435
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:436
 msgid "Validates the name and key.  Terminates the registration command"
 msgstr "Yn dilysu'r enw a'r allwedd. Yn terfynu'r gorchymyn cofrestru"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:436
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:437
 msgid "0ï¿œ is up or to the right"
 msgstr "Mae 0 gradd i fyny neu i'r dde"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:437
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:438
 msgid "Choose english (inches) or metric (centimeters)"
 msgstr "Dewiswch saesneg (modfedd) neu fetrig (centimetrau)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:438
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:439
 msgid "How to display length measurements"
 msgstr "Sut i arddangos mesuriadau hyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:439
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:440
 msgid "Do not create tracks to be shorter than this value"
 msgstr "Peidiwch â chreu traciau i fod yn fyrrach na'r gwerth hwn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:440
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:441
 msgid "Maximum distance between connected end points"
 msgstr "Y pellter mwyaf rhwng pwyntiau gorffen cysylltiedig"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:441
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:442
 msgid "Minimum angle between connected End-Points"
 msgstr "Ongl leiaf rhwng pwyntiau terfyn cysylltiedig"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:442
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:443
 msgid "Specifies the minimum angle between tracks connected to a turntable"
 msgstr "Yn nodi'r ongl leiaf rhwng traciau sydd wedi'u cysylltu â throfwrdd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:443
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:444
 msgid "Trains will crash above this speed"
 msgstr "Bydd trenau'n chwalu uwchlaw'r cyflymder hwn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:444
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:445
 msgid "Enable/Disable balloon popup help windows"
 msgstr "Galluogi / Analluogi ffenestri cymorth popup balŵn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:445
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:446
 msgid "Enable/Disable show of flextrack on hotbar"
 msgstr "Galluogi / Analluogi sioe o rac fflecs ar far poeth"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:446
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:447
 msgid "How far you can move the mouse before its considered a drag"
 msgstr ""
 "Pa mor bell y gallwch chi symud y llygoden cyn iddi gael ei hystyried yn "
 "llusgo"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:447
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:448
 msgid "How long you can hold a mouse button down before its considered a drag"
 msgstr ""
 "Pa mor hir y gallwch chi ddal botwm llygoden i lawr cyn iddo gael ei "
 "ystyried yn lusgo"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:448
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:449
 msgid "Minimum distance (in pixels) between grid lines/ticks"
 msgstr "Y pellter lleiaf (mewn picseli) rhwng llinellau grid / trogod"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:449
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:450
 msgid ""
 "Specifies the Check Point frequency; number of modifications made since the "
 "last checkpoint."
@@ -9568,98 +9602,98 @@ msgstr ""
 "Yn nodi'r amledd Pwynt Gwirio; nifer yr addasiadau a wnaed ers y pwynt "
 "gwirio diwethaf."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:450
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:451
 msgid "Specifies the number of checkpoints after save before auto-saving."
 msgstr ""
 "Yn nodi nifer y pwyntiau gwirio ar ôl eu harbed cyn cynilo'n awtomatig."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:451
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:452
 msgid "Resume work on last layout or start with new layout"
 msgstr ""
 "Ail-ddechrau gwaith ar y cynllun diwethaf neu ddechrau gyda gosodiad newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:453
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:454
 msgid "Updated cost of current selected item"
 msgstr "Cost wedi'i diweddaru ar gyfer yr eitem a ddewiswyd ar hyn o bryd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:455
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:456
 msgid "Selection list for prices"
 msgstr "Rhestr ddethol ar gyfer prisiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:456
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:457
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:458
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:459
 msgid "Price of specified length of flex-track"
 msgstr "Pris hyd penodol y trac fflecs"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:460
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:461
 msgid "Controls the printing of a centerline of track cmdPrint"
 msgstr "Mae'n rheoli argraffu llinell ganol trac cmdPrint"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:461
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:462
 msgid "Controls the reduction (scale) of the printout"
 msgstr "Mae'n rheoli gostyngiad (graddfa) yr allbrint"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:462
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:463
 msgid "Scaled page width (Scale times physical page width)"
 msgstr "Lled tudalen ar raddfa (Graddfa amseroedd lled tudalen gorfforol)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:463
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:464
 msgid "Sets page size to the maximum (based on scale and physical page size)"
 msgstr ""
 "Yn gosod maint tudalen i'r eithaf (yn seiliedig ar raddfa a maint tudalen "
 "gorfforol)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:464
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:465
 msgid "Scaled page height (Scale times physical page height)"
 msgstr ""
 "Uchder tudalen ar raddfa (Amseroedd graddfa uchder corfforol y dudalen)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:465
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:466
 msgid "Sets scale, origin and angle for a one page printout of the layout"
 msgstr ""
 "Yn gosod graddfa, tarddiad ac ongl ar gyfer allbrint un dudalen o'r cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:466
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:467
 msgid "Print page in Portrait or Landscape format"
 msgstr "Argraffu tudalen ar ffurf Portread neu Dirwedd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:467
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:468
 msgid "Order of printing pages"
 msgstr "Trefn y tudalennau argraffu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:468
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:469
 msgid "Print Title, Date, Author and other information at bottom of page?"
 msgstr ""
 "Argraffu Teitl, Dyddiad, Awdur a gwybodaeth arall ar waelod y dudalen?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:469
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:470
 msgid "Ignore unprintable page margins?"
 msgstr "Anwybyddu ymylon tudalennau na ellir eu hargraffu?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:470
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:471
 msgid "Print Registration Marks at 1:1?"
 msgstr "Argraffu Marciau Cofrestru yn 1:1?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:471
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:472
 msgid "Print Snap Grid?"
 msgstr "Argraffu Grid Snap?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:472
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:473
 msgid "Print Rulers on all page edges?"
 msgstr "Argraffu Rheolwyr ar bob ymyl tudalen?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:473
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:474
 msgid "Print Roadbed Outline?"
 msgstr "Argraffu Amlinelliad Gwely Ffordd?"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:474
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:475
 msgid "Print Roadbed Outline"
 msgstr "Argraffu Amlinelliad Gwely Ffordd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:475
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:476
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:478
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:477
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:479
 msgid ""
 "Origin of the print grid.  This is useful if you want to reprint a set of "
 "pages"
@@ -9667,320 +9701,320 @@ msgstr ""
 "Tarddiad y grid argraffu. Mae hyn yn ddefnyddiol os ydych chi am ailargraffu"
 " set o dudalennau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:477
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:478
 msgid "Resets the origin and angle to 0"
 msgstr "Ailosod y tarddiad a'r ongl i 0"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:479
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:480
 msgid "Deselects all pages"
 msgstr "Yn dad-ddewis pob tudalen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:481
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:482
 msgid "Print selected pages and terminates the print command"
 msgstr "Argraffu tudalennau a ddewiswyd ac yn terfynu'r gorchymyn argraffu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:482
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:483
 msgid "List of loaded, shown or hidden parameter files"
 msgstr "Rhestr o ffeiliau paramedr wedi'u llwytho, eu dangos neu eu cuddio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:483
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:484
 msgid "Show parameter files by names or descriptions"
 msgstr "Dangos ffeiliau paramedr yn ôl enwau neu ddisgrifiadau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:484
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:485
 msgid "Toggle the shown status of the selected parameter file"
 msgstr "Toglo statws a ddangosir y ffeil baramedr a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:485
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:486
 msgid "Find extra parameter files from the filesystem"
 msgstr "Dewch o hyd i ffeiliau paramedr ychwanegol o'r system ffeiliau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:486
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:487
 msgid "Find parameter files from the system library"
 msgstr "Dewch o hyd i ffeiliau paramedr o lyfrgell y system"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:487
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:488
 msgid "Update parameter file list"
 msgstr "Diweddaru rhestr ffeiliau paramedr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:488
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:489
 msgid "Reload parameter file from list"
 msgstr "Ail-lwytho ffeil paramedr o'r rhestr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:489
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:490
 msgid "Select all parameter files shown"
 msgstr "Dewiswch yr holl ffeiliau paramedr a ddangosir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:490
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:491
 msgid "Profile of specified path"
 msgstr "Proffil llwybr penodol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:491
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:492
 msgid "Clear the profile"
 msgstr "Cliriwch y proffil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:492
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:493
 msgid "Print the profile"
 msgstr "Argraffwch y proffil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:494
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:495
 msgid "Stop recording"
 msgstr "Stopiwch recordio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:495
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:496
 msgid "Insert a message"
 msgstr "Mewnosod neges"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:496
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:497
 msgid "End a message"
 msgstr "Gorffennwch neges"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:497
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:498
 msgid "Message body"
 msgstr "Corff neges"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:498
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:499
 msgid "Possible turnouts"
 msgstr "Pwyntiau posib"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:499
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:500
 msgid "Skip this turnout"
 msgstr "Hepgor y pwynt hwn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:501
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:502
 msgid "Manufacturer of Object"
 msgstr "Gwneuthurwr Gwrthrych"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:502
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:503
 msgid "Description of Object"
 msgstr "Disgrifiad o'r Gwrthrych"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:503
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:504
 msgid "Part Nuber of Object"
 msgstr "Rhan Nifer y Gwrthrych"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:505
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:506
 msgid "Rescale by Scale Conversion or by Ratio"
 msgstr "Ail-raddfa yn ôl Trosi Graddfa neu yn ôl Cymhareb"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:506
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:507
 msgid "Original Scale of the selected objects"
 msgstr "Graddfa Wreiddiol y gwrthrychau a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:507
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:508
 msgid "Original Gauge of the selected objects"
 msgstr "Mesurydd gwreiddiol y gwrthrychau a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:508
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:509
 msgid "New Scale of the selected objects"
 msgstr "Graddfa Newydd y gwrthrychau a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:509
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:510
 msgid "New Gauge of the selected objects"
 msgstr "Mesurydd newydd o'r gwrthrychau a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:510
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:511
 msgid "Change track dimensions to new scale"
 msgstr "Newid dimensiynau'r trac i raddfa newydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:511
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:512
 msgid "Change size by this amount"
 msgstr "Newid maint yn ôl y swm hwn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:513
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:514
 msgid "Snap Grid Line and Division"
 msgstr "Llinell a Rhaniad Grid Snap"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:514
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:515
 msgid "X and Y position markers"
 msgstr "X a Y marcwyr safle"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:515
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:516
 msgid "Border rulers, room boundaries and table edges"
 msgstr "Rheolwyr ffiniau, ffiniau ystafelloedd ac ymylon bwrdd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:516
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:517
 msgid "Primary Axis of grid rotation"
 msgstr "Echel Cynradd cylchdroi'r grid"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:517
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:518
 msgid "Secondary Axis of grid rotation"
 msgstr "Echel Eilaidd cylchdroi'r grid"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:518
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:519
 msgid "Unselected tracks"
 msgstr "Traciau heb eu dethol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:519
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:520
 msgid "Selected tracks"
 msgstr "Traciau dethol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:520
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:521
 msgid "Color of tracks on the Profile path"
 msgstr "Lliw y traciau ar y llwybr Proffil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:521
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:522
 msgid "Color of Exceptional tracks"
 msgstr "Lliw y traciau eithriadol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:522
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:523
 msgid "Color of track ties"
 msgstr "Lliw y rhai sy'n cysgu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:523
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:524
 msgid "Updates the colors"
 msgstr "Yn diweddaru'r lliwiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:524
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:525
 msgid "Angle in degrees"
 msgstr "Ongl mewn graddau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:525
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:526
 msgid "Rotate object(s) by specified amount"
 msgstr "Cylchdroi gwrthrych (ion) yn ôl swm penodol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:526
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:527
 msgid "Enter one or more words as search terms"
 msgstr "Rhowch un neu fwy o eiriau fel termau chwilio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:527
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:528
 msgid "Remove the current filter and show all files"
 msgstr "Tynnwch yr hidlydd cyfredol a dangoswch yr holl ffeiliau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:528
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:529
 msgid "Find matching file descriptions"
 msgstr "Dewch o hyd i ddisgrifiadau ffeiliau sy'n cyfateb"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:529
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:530
 msgid "Search results"
 msgstr "Canlyniadau chwilio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:530
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:531
 msgid "Show descriptions or filenames in results"
 msgstr "Dangos disgrifiadau neu enwau ffeiliau mewn canlyniadau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:531
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:532
 msgid "Add selected entries into parameter file list"
 msgstr "Ychwanegwch gofnodion dethol i restr ffeiliau paramedr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:532
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:533
 msgid "Select All found entries"
 msgstr "Dewiswch Pob cofnod a ddarganfuwyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:533
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:534
 msgid "Reload the system library contents for finding"
 msgstr "Ail-lwytho cynnwys llyfrgell y system i ddod o hyd iddo"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:534
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:535
 msgid "Choose commands to be sticky"
 msgstr "Dewiswch orchmynion i fod yn ludiog"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:535
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:536
 msgid "Make the commands sticky"
 msgstr "Make the commands sticky"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:536
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:537
 msgid "List of available structure"
 msgstr "Rhestr o'r strwythurau sydd ar gael"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:537
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:538
 msgid "Diagram of the selected structure"
 msgstr "Diagram o'r strwythur a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:538
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:539
 msgid "Hide Selection window when placing Structure"
 msgstr "Cuddio ffenestr Dewis wrth osod Strwythur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:539
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:540
 msgid "Drawing scale and size"
 msgstr "Graddfa a maint lluniadu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:540
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:541
 msgid "Complete structure placement"
 msgstr "Lleoliad strwythur cyflawn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:541
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:542
 msgid "Choose a Pier number"
 msgstr "Dewiswch rif Pier"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:542
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:543
 msgid "Name of the Motor"
 msgstr "Enw'r Modur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:543
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:544
 msgid "Value when switch is normal"
 msgstr "Gwerth pan fydd y switsh yn normal"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:544
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:545
 msgid "Value when the switch is reversed"
 msgstr "Gwerth pan fydd y switsh yn cael ei wrthdroi"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:545
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:546
 msgid "Value for a positive comfirmation of switch position"
 msgstr "Gwerth am gadarnhad cadarnhaol o safle'r switsh "
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:547
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:548
 msgid "Useful information about the program"
 msgstr "Gwybodaeth ddefnyddiol am y rhaglen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:548
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:549
 msgid "Show Tip of the Day every time the program starts"
 msgstr "Dangos Tip y Dydd bob tro mae'r rhaglen yn cychwyn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:549
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:550
 msgid "Show the next Tip of the Day"
 msgstr "Dangoswch Awgrym nesaf y Dydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:550
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:551
 msgid "Show the previous Tip of the Day"
 msgstr "Dangoswch Awgrym blaenorol y Dydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:552
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:553
 msgid "Controls which Command Buttons are displayed"
 msgstr "Rheolaethau pa Botymau Gorchymyn sy'n cael eu harddangos"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:553
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:554
 msgid "List of Cars"
 msgstr "Rhestr o geir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:554
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:555
 msgid "List of active trains"
 msgstr "Rhestr o drenau actif"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:556
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:557
 msgid "Train odometer"
 msgstr "Odomedr trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:557
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:558
 msgid "Reset odometer to 0"
 msgstr "Ailosod odomedr i 0"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:558
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:559
 msgid "Find train on layout"
 msgstr "Dewch o hyd i drên ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:559
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:560
 msgid "Follow train around layout"
 msgstr "Dilynwch y trên o amgylch cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:560
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:561
 msgid "Flip direction at End Of Track"
 msgstr "Cyfeiriad troi ar ddiwedd y Trac"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:561
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:562
 msgid "Change direction of train"
 msgstr "Newid cyfeiriad y trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:562
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:563
 msgid "Stop the train"
 msgstr "Stopiwch y trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:563
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:564
 msgid "List of available turnouts for the current scale"
 msgstr ""
 "Rhestr o'r nifer a bleidleisiodd sydd ar gael ar gyfer y raddfa gyfredol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:564
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:565
 msgid ""
 "Diagram of the currently selected turnout.  Click on a End-Point to select "
 "the Active End-Point"
@@ -9988,136 +10022,136 @@ msgstr ""
 "Diagram o'r nifer a ddewiswyd ar hyn o bryd. Cliciwch ar ddiweddbwynt i "
 "ddewis y pwynt gorffen gweithredol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:565
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:566
 msgid ""
 "A menu list of various type of turnouts and sectional tracks you can define"
 msgstr ""
 "Rhestr ddewislen o wahanol fathau o bwyntiau a thraciau adrannol y gallwch "
 "eu diffinio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:566
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:567
 msgid "Hide Selection window when placing Turnout"
 msgstr "Cuddio ffenestr Dewis wrth osod pwyntiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:567
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:568
 msgid "The selected Active End-Point"
 msgstr "The selected active end-point"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:568
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:569
 msgid "Current selected turnout, (displayed in the diagram window)"
 msgstr "Pwynt dethol cyfredol, (wedi'i arddangos yn ffenestr y diagram)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:569
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:570
 msgid "One the End-Points that can be selected"
 msgstr "Un y pwyntiau gorffen y gellir eu dewis"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:571
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:572
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:573
 msgid "Angle of the specified track to the center line of the turnout"
 msgstr "Ongl y trac penodedig i linell ganol y pwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:573
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:574
 msgid "Specifies if angles are entered as Frog Numbers or in degrees"
 msgstr "Yn nodi a yw onglau yn cael eu nodi fel Rhifau Broga neu mewn graddau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:574
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:575
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:576
 msgid "Desciption"
 msgstr "Disgrifiad"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:576
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:577
 msgid "Turnout description (Manuf., Size, Part Number, etc)"
 msgstr "Disgrifiad pwynt (Manu., Maint, Rhan Rhif, ac ati)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:577
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:578
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:579
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:580
 msgid "Length from the base to the end of the specified track"
 msgstr "Hyd o'r sylfaen i ddiwedd y trac penodedig"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:581
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:582
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:583
 msgid "Offset of the track End-Point from the center line of the turnout"
 msgstr "Gwrthbwyso pwynt terfyn y trac o linell ganol y pwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:585
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:586
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:587
 msgid "Prints a full size diagram of the turnout for checking"
 msgstr "Yn argraffu diagram maint llawn o'r pwynt i'w wirio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:587
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:588
 msgid "Color of Roadbed lines"
 msgstr "Lliw y llinellau gwely ffordd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:588
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:589
 msgid "Width of Roadbed lines"
 msgstr "Lled llinellau gwely ffordd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:589
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:590
 msgid "Width of Roadbed"
 msgstr "Lled y Ffordd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:591
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:592
 msgid "Closes the window and returns to the Turnout Selection window"
 msgstr "Yn cau'r ffenestr ac yn dychwelyd i'r ffenestr Dewis Pwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:592
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:593
 msgid "Specifies the diameter of the turntable"
 msgstr "Yn nodi diamedr y trofwrdd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:593
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:594
 msgid "Old Turnout title"
 msgstr "Teitl hen bwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:594
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:595
 msgid "List of available titles"
 msgstr "Rhestr o'r teitlau sydd ar gael"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:595
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:596
 msgid "Leave the Turnouts' title unchanged"
 msgstr "Gadewch deitl y pwyntiau yn ddigyfnewid"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:596
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:597
 msgid "Invoke the Parameter Files dialog"
 msgstr "Galw ar y dialog Ffeiliau Paramedr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:597
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:598
 msgid "List of available turnouts"
 msgstr "Rhestr o'r pwyntiau sydd ar gael"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:598
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:599
 msgid "Update the Turnouts' title"
 msgstr "Diweddarwch deitl y pwyntiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:602
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:603
 msgid "Sample"
 msgstr "Sampl"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:604
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:605
 msgid "Slant"
 msgstr "Llethr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:605
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:606
 msgid "Font selection dialog"
 msgstr "Deialog dewis ffont"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:606
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:607
 msgid "Weight"
 msgstr "Pwysau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:607
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:608
 msgid "Printer Abort Window"
 msgstr "Ffenestr Erthylu Argraffydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:608
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:609
 msgid "Print to filename"
 msgstr "Argraffu i enw ffeil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:609
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:610
 msgid "Specify Postscript font alias mapping"
 msgstr "Nodwch fapio alias ffont Ôl-nodyn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:610
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:611
 msgid ""
 "Displays the Print Setup window to change printers, orientation, paper size,"
 " etc."
@@ -10125,31 +10159,31 @@ msgstr ""
 "Yn arddangos y ffenestr Gosod Print i newid argraffwyr, cyfeiriadedd, maint "
 "papur, ac ati."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:611
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:612
 msgid "Closes this dialog"
 msgstr "Yn cau'r ymgom hon"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:612
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:613
 msgid "Page orientation"
 msgstr "Cyfeiriadedd tudalen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:613
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:614
 msgid "Unprintable margins"
 msgstr "Ymylon na ellir ei argraffu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:614
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:615
 msgid "Updates and closes this dialog"
 msgstr "Yn diweddaru ac yn cau'r ymgom hon"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:615
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:616
 msgid "Choose paper size"
 msgstr "Dewiswch faint papur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:616
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:617
 msgid "Choose printer"
 msgstr "Dewiswch argraffydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:617
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:618
 msgid "Print test page"
 msgstr "Argraffu tudalen prawf"
 
