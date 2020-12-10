@@ -1519,7 +1519,9 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		}
 		b->wFactor = (double)GetDeviceCaps( b->hDc, LOGPIXELSX );
 		b->hFactor = (double)GetDeviceCaps( b->hDc, LOGPIXELSY );
-		b->DPI = 96.0; /*min( b->wFactor, b->hFactor );*/
+		double dpi;
+		wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
+		b->DPI = dpi;
 		b->hWnd = hWnd;
 		SetROP2( b->hDc, R2_WHITE );
 		Rectangle( b->hDc, 0, 0, b->w, b->h );
