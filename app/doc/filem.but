@@ -278,7 +278,8 @@ Whether tracks are printed with one or two lines (representing the center line a
 
 \u000
 
-\dd \f{Page Numbers} - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y). x is the position from left to right, y in from bottom to top, So (1/1) is the page at the bottom left.
+\dd \f{Page Numbers} - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y). 
+x is the page position from left to right, y in from bottom to top, So (1/1) is the page at the bottom left.
 As an additional aid, the numbers of the next pages are printed on each edge.
 
 \u000
@@ -376,6 +377,29 @@ The \f{Printer Setup} window contains:
 
 \dd \f{Cancel} - ends the dialog without update.
 
+\u000
+
+\e{Note} - 
+Printing uses a default of 600ppi. It scales the print and text from a default size of 72dpi. 
+This is often the expected value for a standard printer driver to work correctly, but will not work if the driver is not accurately setting the ppi available.
+To override the printer ppi you can use either the configuration file settings for print or environmental variables. 
+These values are set in the Preferences section.
+\u000
+
+\n Preferences.PrintScale - The floating point ratio of the real printer dpi to 72. 
+
+\n Preferences.PrintTextScale - The floating point ratio of the real printer text support to a dpi of 72. This value has no effect unless PrintScale is set to > 0.0.
+
+\u000
+These values can also be set using environmental variables if the configuration preference values are not set or they are set to <=0.0. 
+\u000
+
+\n XTRKCADPRINTSCALE
+
+\n XTRKCADPRINTTEXTSCALE
+
+\u000
+
 \rule
 
 \S2{MS-Windows} \i{Microsoft Windows}
@@ -440,7 +464,7 @@ To check your printer's margin:
 
 \u000
 
-\dd Enable \f{Registration Marks}
+\dd Enable \f{Registration Marks} this prints crosshairs every 6" at scale 1:1. 
 
 \u000
 

@@ -1020,28 +1020,50 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 
         /*
          * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
-         * - the user sets the environment variable XTRKCADPRINTSCALE to a value
+         * - the user either sets preferences or the environment variable XTRKCADPRINTSCALE to a value
          * and we just let the dpi default to 72ppi and set scaling to that value.
-         * And for PangoText we allow an override via variable XTRKCADPRINTTEXTSCALE
+         * And for PangoText we allow an override via preferences or variable XTRKCADPRINTTEXTSCALE
          * Note - doing this will introduce differing artifacts.
          *
          */
         char * sEnvScale = PRODUCT "PRINTSCALE";
+        char * sEnvTextScale = PRODUCT "PRINTTEXTSCALE";
+
+        scale_text = 1.0;
+        scale_adjust = 1.0;
+
+        double printScale,printTextScale;
+
+        wPrefGetFloat(PREFSECTION, PRINTSCALE, &printScale, -1.0);
+        wPrefGetFloat(PREFSECTION, PRINTTEXTSCALE, &printTextScale, -1.0);
+
+
+        //If the preferences are not set, look at environmental variables
+
+        if (printScale < 0.0 ) {
+        	if (getenv(sEnvScale) && (atof(getenv(sEnvScale)) > 0.0)) {
+        		printScale = atof(getenv(sEnvScale));
+        	}
+        }
+        if (printTextScale < 0.0 ) {
+        	if (getenv(sEnvTextScale) && (atof(getenv(sEnvTextScale)) > 0.0)) {
+        	    printTextScale = atof(getenv(sEnvTextScale));
+        	}
+        }
 
 	const char * sPrinterName = gtk_printer_get_name( selPrinter );
-        if ((strcmp(sPrinterName,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
+        if ((strcmp(sPrinterName,"Print to File") == 0) || printScale < 0.0) {
 			double p_def = 600;
 			cairo_surface_set_fallback_resolution(psPrint_d.curPrintSurface, p_def, p_def);
 			psPrint_d.dpi = p_def;
 			scale_adjust = 72/p_def;
 		} else {
-			char * sEnvTextScale = PRODUCT "PRINTTEXTSCALE";
-			if (getenv(sEnvTextScale) && (atof(getenv(sEnvTextScale)) != 0.0)) {
-				scale_text = atof(getenv(sEnvTextScale));
-			} else scale_text = 1.0;
-			if (getenv(sEnvScale) && (atof(getenv(sEnvScale)) != 0.0)) {
-				scale_adjust = atof(getenv(sEnvScale));
-			} else scale_adjust = 1.0;
+			if (printTextScale > 0.0) {
+				scale_text = printTextScale;
+			}
+			if (printScale > 0.0) {
+				scale_adjust = printScale;
+			}
 			psPrint_d.dpi = 72;
 		}
 

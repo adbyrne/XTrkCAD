@@ -168,6 +168,10 @@ Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors t
 
 \u000
 
+\e{Note} - The value of Zoom 1:1 will be set using 96 dpi as a default, it can be overriden using a Configuration Value in the Preferences section of ScreenDPI.
+
+\u000
+
 \dd The Pan function can be accessed using the Mouse Wheel with \e{Shift} of the \e{Mouse Middle Button}. Adding \e{Ctrl} as well as \e{Shift} chnages Up to Left and Down to Right. 
 Pan Left and Right can also be driven by the Horizontal Mouse Wheel (if available) or the Scroll Left/Right Guestures (if mapped by the Operating System).
 
