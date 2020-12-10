@@ -1634,7 +1634,12 @@ wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
 	bd = (wDraw_p)wlibAlloc( gtkMainW,  B_DRAW, 0, 0, NULL, sizeof *bd, NULL );
 
 	bd->lastColor = -1;
-	bd->dpi = 114.0;
+
+	double dpi;
+
+    wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
+
+	bd->dpi = dpi;
 	bd->maxW = bd->w = w;
 	bd->maxH = bd->h = h;
 
