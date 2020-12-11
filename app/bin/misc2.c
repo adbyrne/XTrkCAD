@@ -244,12 +244,16 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 }
 EXPORT DIST_T GetScaleTrackGauge( SCALEINX_T si )
 {
-	return scaleInfo(si).gauge;
+	if (si >=0 && si<scaleInfo_da.cnt)
+		return scaleInfo(si).gauge;
+	else return 1.0;
 }
 
 EXPORT DIST_T GetScaleRatio( SCALEINX_T si )
 {
-	return scaleInfo(si).ratio;
+	if (si >=0 && si<scaleInfo_da.cnt)
+		return scaleInfo(si).ratio;
+	else return 1.0;
 }
 
 EXPORT char * GetScaleName( SCALEINX_T si )

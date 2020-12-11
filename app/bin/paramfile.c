@@ -155,11 +155,14 @@ void SetParamFileState(int index)
 	enum paramFileState newState;
 	SCALEINX_T scale = GetLayoutCurScale();
 
-	for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
-		state != PARAMFILE_UNLOADED; i++) {
-		newState = (*GetCompatibility[i])(index, scale);
-		if (newState > state || newState == PARAMFILE_UNLOADED) {
-			state = newState;
+	//Set yet?
+	if (scale>=0) {
+		for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
+			state != PARAMFILE_UNLOADED; i++) {
+			newState = (*GetCompatibility[i])(index, scale);
+			if (newState > state || newState == PARAMFILE_UNLOADED) {
+				state = newState;
+			}
 		}
 	}
 

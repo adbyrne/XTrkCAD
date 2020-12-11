@@ -133,6 +133,7 @@ typedef struct btrackinfo_t {
 } btrackinfo_t, *btrackinfo_p;
 
 static dynArr_t blockTrk_da;
+
 #define blockTrk(N) DYNARR_N( btrackinfo_t , blockTrk_da, N )
 
 #define tracklist(N) (&(xx->trackList))[N]
@@ -430,7 +431,8 @@ static BOOL_T ReadBlock ( char * line )
 	ConvertUTF8ToSystem(name);
 #endif // WINDOWS
 
-	DYNARR_RESET( btrackinfo_p , blockTrk_da );
+
+	DYNARR_RESET( btrackinfo_t , blockTrk_da );
 	while ( (cp = GetNextLine()) != NULL ) {
 		if ( IsEND( END_BLOCK ) ) {
 			break;
@@ -442,8 +444,8 @@ static BOOL_T ReadBlock ( char * line )
 		if ( strncmp( cp, "TRK", 3 ) == 0 ) {
 			if (!GetArgs(cp+4,"d",&trkindex)) return FALSE;
 			/*trk = FindTrack(trkindex);*/
-			DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
-			blockTrk(blockTrk_da.cnt-1).i = trkindex;
+			DYNARR_APPEND( btrackinfo_t, blockTrk_da, 10 );
+			DYNARR_LAST( btrackinfo_t, blockTrk_da ).i = trkindex;
 		}
 	}
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
@@ -1008,6 +1010,9 @@ EXPORT void InitTrkBlock( void )
 {
 	T_BLOCK = InitObject ( &blockCmds );
 	log_block = LogFindIndex ( "block" );
+	blockTrk_da.max = 0;
+	blockTrk_da.cnt = 0;
+	blockTrk_da.ptr = NULL;
 }
 
 
