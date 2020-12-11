@@ -449,7 +449,7 @@ static BOOL_T ReadBlock ( char * line )
 		}
 	}
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
+	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
 	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
 		endPtP = &tempEndPts(ep);
 		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
@@ -1013,6 +1013,7 @@ EXPORT void InitTrkBlock( void )
 	blockTrk_da.max = 0;
 	blockTrk_da.cnt = 0;
 	blockTrk_da.ptr = NULL;
+	last_block = NULL;
 }
 
 
