@@ -349,7 +349,7 @@ bool ReadParams(
 			curSubContents = MyStrdup(paramLine + 12);
 			skip = FALSE;
 		} else if (strncmp(paramLine, "PARAM ", 6) == 0) {
-			paramVersion = strtol(paramLine + 8, &cp, 10);
+			paramVersion = strtol(paramLine + 6, &cp, 10);
 			if (cp)
 				while (*cp && isspace((unsigned char)*cp)) cp++;
 			if (paramVersion > iParamVersion) {
