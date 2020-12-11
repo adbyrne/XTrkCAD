@@ -713,6 +713,8 @@ static wWin_p winCommonCreate(
 
     if (typ == W_MAIN) {
         *pShowCmd = ((option & F_MAXIMIZE) ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL);
+    } else {
+    	*pShowCmd = SW_HIDE;    //Make sure to hide first
     }
 
     if (xx != CW_USEDEFAULT) {
