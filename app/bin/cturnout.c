@@ -1810,6 +1810,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 		AbortProg( "nextTurnoutPosition" );
 
 	SetCurrPathIndex( trk, GetCurrPathIndex( trk ) + 1 );
+	InfoMessage( _("Turnout %d Path: %s"), GetTrkIndex( trk ), GetCurrPath( trk ) );
 	if ( angleR == NULL || posR == NULL )
 		return;
 	trvtrk.trk = trk;
