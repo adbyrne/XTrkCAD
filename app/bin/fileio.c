@@ -654,11 +654,6 @@ static struct wFilSel_t * loadFile_fs = NULL;
 static struct wFilSel_t * saveFile_fs = NULL;
 static struct wFilSel_t * examplesFile_fs = NULL;
 
-static wWin_p checkPointingW;
-static paramData_t checkPointingPLs[] = {
-   {    PD_MESSAGE, N_("Check Pointing") } };
-static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeof checkPointingPLs/sizeof checkPointingPLs[0] };
-
 static char * checkPtFileName1;
 static char * checkPtFileName2;
 static char * checkPtFileNameBackup;
@@ -1276,12 +1271,8 @@ EXPORT void DoCheckPoint( void )
 		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
 	}
 
-	if (checkPointingW == NULL) {
-		ParamRegister( &checkPointingPG );
-		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle(_("Check Pointing")), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
-	}
 	rename( checkPtFileName1, checkPtFileName2 );
-	//wShow( checkPointingW );
+
 	rc = DoSaveTracks( checkPtFileName1 );
 
 	/* could the check point file be written ok? */
@@ -1308,7 +1299,6 @@ EXPORT void DoCheckPoint( void )
 		rename( checkPtFileName2, checkPtFileName1 );
 	}
 
-	//wHide( checkPointingW );
 	wShow( mainW );
 }
 
