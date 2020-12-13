@@ -316,7 +316,7 @@ TURNOUT HO "Fleischmann-Modell	Crossing 15°	6062"
 	S 0 0.000000 0.000000 0.000000 8.641732 0.000000
 	S 0 0.000000 0.147230 1.118322 8.494502 -1.118322
 	END
-TURNOUT HO "Fleischmann-Modell	DoubleSlip 15°	6065"
+TURNOUT HO "Fleischmann-Modell	DoubleSlip 15°	6065" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -334,7 +334,7 @@ TURNOUT HO "Fleischmann-Modell	DoubleSlip 15°	6065"
 	C 0 0.000000 22.967025 1.297200 -22.967025 0.000000 15.000000
 	C 0 0.000000 -22.967025 7.344532 22.967025 180.000000 15.000000
 	END
-TURNOUT HO "Fleischmann-Modell	DoubleSlip 15° Elec	6066"
+TURNOUT HO "Fleischmann-Modell	DoubleSlip 15° Elec	6066" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

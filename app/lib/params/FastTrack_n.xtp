@@ -402,7 +402,7 @@ TURNOUT N "Fast Track	#6 Left Crossover	AF-N-C-6-ME55"
 	S 0 0.000000 4.303441 0.458331 4.987898 0.632221
 	C 0 0.000000 14.885974 8.653321 -13.795422 345.745267 14.254733
 	END
-TURNOUT N "Fast Track	#6 Slip Switch	AF-N-S-6-ME55"
+TURNOUT N "Fast Track	#6 Slip Switch	AF-N-S-6-ME55" 512
 	U "Double Slipswitch" "" "Fast Track" "#6 Slip Switch" "AF-N-S-6-ME55" 5.629921 9.594068 5.629921 0.000000 0.000000 0
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6

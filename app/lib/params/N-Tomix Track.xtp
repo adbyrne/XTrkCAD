@@ -1102,7 +1102,7 @@ TURNOUT N  "Tomix Fine Track	Double Crossover	1247"
 	L 11579568 0.053333 9.523622 0.364173 9.523622 1.092520
 	L 11579568 0.053333 0.000000 1.820866 11.023622 1.820866
 	END
-TURNOUT N  "Tomix Fine Track	Double Slip 140mm-15R	1245"
+TURNOUT N  "Tomix Fine Track	Double Slip 140mm-15R	1245" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -1140,7 +1140,7 @@ TURNOUT N  "Tomix Fine Track	Double Slip 140mm-15R	1245"
 		4.062500 -1.220774 0
 		4.062500 -0.764173 0
 	END
-TURNOUT N  "Tomix Fine Track	Double Slip 140mm-15L	1246"
+TURNOUT N  "Tomix Fine Track	Double Slip 140mm-15L	1246" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

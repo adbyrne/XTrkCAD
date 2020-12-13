@@ -269,7 +269,7 @@ TURNOUT O "Ross	O96 Right-Hand	140"
 	END
 
 SUBCONTENTS Ross - Dbl-XOver and Slip Switches
-TURNOUT O "Ross	#8 Double Crossover	280"
+TURNOUT O "Ross	#8 Double Crossover	280" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 8 9 6
@@ -311,7 +311,7 @@ TURNOUT O "Ross	Double Crossover	175"
 	S 0 0.000000 14.726678 2.656766 17.113322 1.913234
 	C 0 0.000000 -42.276890 29.687584 42.276873 180.000076 17.303028
 	END
-TURNOUT O "Ross	Double-Slip	270"
+TURNOUT O "Ross	Double-Slip	270" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

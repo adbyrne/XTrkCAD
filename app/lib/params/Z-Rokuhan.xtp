@@ -424,7 +424,7 @@ TURNOUT Z  "Rokuhan	Right 55mm R127 26� Turnout	R023"
 	L 11579568 0.019685 0.000000 0.300000 2.165354 0.300000
 	A 11579568 0.019685 4.700000 0.000000 -5.000000 0.000000 26.000000
 END
-TURNOUT Z "Rokuhan	Double Slip 112.8mm Turnout	R034/35"
+TURNOUT Z "Rokuhan	Double Slip 112.8mm Turnout	R034/35" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -782,7 +782,7 @@ TURNOUT Z  "Rokuhan	Straight trim Right PC Track 110mm	R056A"
 	L 11579568 0.019685 0.000000 0.300000 4.330709 0.300000
 	L 11579568 0.019685 0.500000 -0.300000 4.330709 -0.300000
 END
-TURNOUT Z "Rokuhan	Double Slip PC Track 112.8mm Turnout	R068/69"
+TURNOUT Z "Rokuhan	Double Slip PC Track 112.8mm Turnout	R068/69" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

@@ -145,7 +145,7 @@ TURNOUT N "Fleischmann	Crossing 15°	22245"
 	S 0 0.000000 0.000000 0.000000 4.433071 0.000000
 	S 0 0.000000 0.075527 0.573682 4.357544 -0.573682
 	END
-TURNOUT N "Fleischmann	Double Slip R5 15°	22246"
+TURNOUT N "Fleischmann	Double Slip R5 15°	22246" 512
 	U "Double Slipswitch" "" "Fleischmann" "Double slip" "22246" 5.110236 15.000000 5.110236 0.000000 0.000000 0
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6

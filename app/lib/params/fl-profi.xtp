@@ -383,7 +383,7 @@ TURNOUT HO "Fleischmann-Profi	Crossing 18° Right	6163"
 	S 0 0.000000 0.000000 0.000000 7.874016 0.000000
 	S 0 0.000000 0.005475 1.277432 7.868541 -1.277432
 	END
-TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Left	6164"
+TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Left	6164" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -401,7 +401,7 @@ TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Left	6164"
 	C 0 0.000000 -17.909955 1.100350 17.909955 162.000000 18.000000
 	C 0 0.000000 17.909955 6.773666 -17.909955 342.000000 18.000000
 	END
-TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Right	6165"
+TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Right	6165" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -419,7 +419,7 @@ TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Right	6165"
 	C 0 0.000000 17.909955 1.100350 -17.909955 0.000000 18.000000
 	C 0 0.000000 -17.909955 6.773666 17.909955 180.000000 18.000000
 	END
-TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Left Elec	6166"
+TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Left Elec	6166" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -437,7 +437,7 @@ TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Left Elec	6166"
 	C 0 0.000000 -17.909955 1.100350 17.909955 162.000000 18.000000
 	C 0 0.000000 17.909955 6.773666 -17.909955 342.000000 18.000000
 	END
-TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Right Elec	6167"
+TURNOUT HO "Fleischmann-Profi	DoubleSlip 18° Right Elec	6167" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

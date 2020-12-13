@@ -159,7 +159,7 @@ TURNOUT HO "Peco	Single Slip, Insulfrog	SL-80"
 	S 0 0.000000 8.427277 -0.749392 9.696040 -1.019087
 	C 0 0.000000 34.292562 1.297233 -34.292562 0.000076 12.000152
 END
-TURNOUT HO "Peco	Double Slip, Insulfrog	SL-90"
+TURNOUT HO "Peco	Double Slip, Insulfrog	SL-90" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

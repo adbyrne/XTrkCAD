@@ -129,7 +129,7 @@ TURNOUT HO "Peco Code 83	#7 Curved Right Turnout	SL-8376/SLE-8376"
 END
 
 SUBCONTENTS Peco Code 83 HO Slip Turnouts
-TURNOUT HO "Peco Code 83	#6 Double Slip Switch	SL-U8363"
+TURNOUT HO "Peco Code 83	#6 Double Slip Switch	SL-U8363" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

@@ -119,7 +119,7 @@ TURNOUT EM "Marcway	48"" Single Slip"
 	S 0 0.000000 11.557720 -0.762329 12.842466 -0.954351
 	C 0 0.000000 69.400341 1.299246 -69.400341 0.000076 8.500152
 	END
-TURNOUT EM "Marcway	48"" Double Slip"
+TURNOUT EM "Marcway	48"" Double Slip" 512
 	U "Double Slipswitch" "" "Marcway" "48"" Double Slip" "" 12.913386 8.500000 12.913386 0.000000 0.000000 0
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6

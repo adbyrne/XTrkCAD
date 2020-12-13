@@ -130,7 +130,7 @@ TURNOUT TT "Kuehn Track	BWR Right Curve Turnout	72631"
 	C 0 0 12.637795 1.732283 -12.637795 0.000000 30.000000
 	C 0 0 12.637795 0.000000 -12.637795 0.000000 30.000000
 	END
-TURNOUT TT "Kuehn Track	DKW20 Double-Slip Turnout	72600"
+TURNOUT TT "Kuehn Track	DKW20 Double-Slip Turnout	72600" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

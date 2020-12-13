@@ -142,7 +142,7 @@ TURNOUT HO "Weinert Mein Gleis	WYE 8.6d	74403"
 END
 
 SUBCONTENTS Weinert Mein Gleis HO-Scale C75 - Slips
-TURNOUT HO "Weinert Mein Gleis	Double-Slip 8.6d	74641"
+TURNOUT HO "Weinert Mein Gleis	Double-Slip 8.6d	74641" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

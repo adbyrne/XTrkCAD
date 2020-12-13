@@ -489,7 +489,7 @@ TURNOUT HO "Fast Tracks	#10 Right Curve 60-46 Turnout	FT-10-R-60-46"
 
 
 SUBCONTENTS Fast Track HO Scale - Slips
-TURNOUT HO "Fast Tracks	#4 Slip Turnout (min length)	FT-S-4"
+TURNOUT HO "Fast Tracks	#4 Slip Turnout (min length)	FT-S-4" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -507,7 +507,7 @@ TURNOUT HO "Fast Tracks	#4 Slip Turnout (min length)	FT-S-4"
 	C 0 0.000000 19.294700 1.299227 -19.294700 0.000076 14.477676
 	C 0 0.000000 -19.294700 6.200721 19.294694 180.000076 14.477676
 	END
-TURNOUT HO "Fast Tracks	#5 Slip Turnout (min length)	FT-S-5"
+TURNOUT HO "Fast Tracks	#5 Slip Turnout (min length)	FT-S-5" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -525,7 +525,7 @@ TURNOUT HO "Fast Tracks	#5 Slip Turnout (min length)	FT-S-5"
 	C 0 0.000000 30.693984 1.299234 -30.693984 0.000076 11.537121
 	C 0 0.000000 -30.693984 7.500684 30.693976 180.000076 11.537121
 	END
-TURNOUT HO "Fast Tracks	#6 Slip Turnout (min length)	FT-S-6"
+TURNOUT HO "Fast Tracks	#6 Slip Turnout (min length)	FT-S-6" 512
 	U "Double Slipswitch" "" "Fast Tracks" "#6 Slip Turnout (min length)" "FT-S-6" 10.200000 9.594076 10.200000 0.000000 0.031250 0
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
@@ -544,7 +544,7 @@ TURNOUT HO "Fast Tracks	#6 Slip Turnout (min length)	FT-S-6"
 	C 0 0.000000 45.289320 1.299241 -45.289320 0.000076 9.594228
 	C 0 0.000000 -45.289320 8.900638 45.289310 180.000076 9.594228
 	END
-TURNOUT HO "Fast Tracks	#8 Slip Turnout (min length)	FT-S-8"
+TURNOUT HO "Fast Tracks	#8 Slip Turnout (min length)	FT-S-8" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

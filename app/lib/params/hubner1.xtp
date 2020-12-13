@@ -86,7 +86,7 @@ TURNOUT 1  "Húbner	Left 10° Crossing	T1042"
 	S 0 0 0.000000 -2.756000 31.496000 2.756000
 	END
 # Double Slipswitch Design by Dave Bullis - 31.496063 10.000000 31.981932
-TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
+TURNOUT 1  "Húbner	Right 10° Double Slip	T1024" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -104,7 +104,7 @@ TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
 	C 0 0 142.416000 3.288000 -142.416000 0.000000 10.000000
 	C 0 0 -142.416000 28.208000 142.416000 180.000000 10.000000
 	END
-TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
+TURNOUT 1  "Húbner	Right 10° Double Slip	T1024" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

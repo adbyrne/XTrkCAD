@@ -134,7 +134,7 @@ TURNOUT HO  "Märklin K-Track	Curved 618.5 30°	2251"
 
 SUBCONTENTS Märklin K-Track Turnouts
 # Double Slipswitch Design by Dave Bullis - 6.649606 22.500000 6.649606
-TURNOUT HO  "Märklin K-Track	22.5° Double Slip	2260"
+TURNOUT HO  "Märklin K-Track	22.5° Double Slip	2260" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6
@@ -245,7 +245,7 @@ TURNOUT HO  "Märklin K-Track	Large Curve 902.4mm	2274"
 	C 0 0 35.528000 0.000000 -35.528000 0.000000 14.433000
 	END
 # Double Slipswitch Design by Dave Bullis - 8.858268 14.433300 8.858368
-TURNOUT HO  "Märklin K-Track	Large Double Slip	2275"
+TURNOUT HO  "Märklin K-Track	Large Double Slip	2275" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
 	P "Slip1" 1 7 6

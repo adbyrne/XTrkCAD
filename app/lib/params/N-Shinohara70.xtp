@@ -122,7 +122,7 @@ TURNOUT N "Shinohara	#4 WYE Turnout	607"
 	C 0 0.000000 29.003880 1.923108 -29.003880 0.000076 9.300152
 	S 0 0.000000 6.610434 -0.381247 6.960000 -0.438500
 	END
-TURNOUT N "Shinohara	#6 Dbl-Slip Turnout	614"
+TURNOUT N "Shinohara	#6 Dbl-Slip Turnout	614" 512
 	U "Double Slipswitch" "" "Shinohara" "#6 Dbl-Slip Turnout" "614" 8.976378 9.300000 8.976378 0.000000 0.031250 0
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
