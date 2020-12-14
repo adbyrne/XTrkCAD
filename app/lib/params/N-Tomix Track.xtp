@@ -1143,8 +1143,8 @@ TURNOUT N  "Tomix Fine Track	Double Slip 140mm-15R	1245" 512
 TURNOUT N  "Tomix Fine Track	Double Slip 140mm-15L	1246" 512
 	P "Cross1" 1 2 3
 	P "Cross2" 4 5 6
-	P "Slip1" 1 7 6
-	P "Slip2" 4 8 3
+	P "Slip1" 1 8 6
+	P "Slip2" 4 7 3
 	E 0.000000 0.000000 270.000000
 	E 5.511811 0.000000 90.000000
 	E 0.000000 -0.738443 255.000000
