@@ -438,7 +438,8 @@ EXPORT void AddHotBarElement(
 				barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi);
 			else if (isTrack) {
 				barScale = (trackGauge>0.1)?trackGauge*24:10;
-				if (size.y >= size.x)
+				if (size.y/barScale > (double)hotBarDrawHeight/hotBarD.dpi)
+				//if (size.y >= size.x)
 				   barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi);
 			}
 		}
