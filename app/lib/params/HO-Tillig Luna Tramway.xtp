@@ -275,10 +275,15 @@ TURNOUT HO "Tillig Luna Tramway	Depot 3-Stands	87631/87632"
 	C 0 0.000000 -9.842520 16.638155 7.998031 180.000000 25.000000
 	S 0 0.000000 16.638155 -1.844488 20.797244 -1.846457
 END
-TURNOUT HO "Tillig Luna Tramway	Double-Track T-Crossing	87701"
-	P "1" 1 3 5 0 2 4 6
-	P "2" 1 7 9 0 2 8 10 
-	P "3" 11 0 12
+TURNOUT HO "Tillig Luna Tramway	Double-Track T-Crossing	87701" 256
+	P "3-5+4-6	Straight" 11 0 12
+	P "1-6+2-5	Right" 1 7 9 0 2 8 10
+#	P "1-6+2-4+3-5" 1 7 9 0 2 4 6 0 11
+#	P "1-3+2-5+4-6" 1 3 5 0 2 8 10 0 12
+	P "1-3+2-4	Left" 1 3 5 0 2 4 6
+#	P "1" 1 3 5 0 2 4 6
+#	P "2" 1 7 9 0 2 8 10 
+#	P "3" 11 0 12
 	E 0.000000 1.844488 270.000000
 	E 0.000000 0.000000 270.000000
 	E 12.157480 14.035433 0.000000
@@ -298,9 +303,13 @@ TURNOUT HO "Tillig Luna Tramway	Double-Track T-Crossing	87701"
 	S 0 0.000000 12.157480 14.001969 12.157480 -12.157480
 	S 0 0.000000 14.001969 14.001969 14.001969 -12.157480
 END
-TURNOUT HO "Tillig Luna Tramway	Double-Track Curve Crossing	87656/87657"
-	P "1" 1 3 0 2 4
-	P "2" 1 5 0 2 6 
+TURNOUT HO "Tillig Luna Tramway	Double-Track Curve Crossing	87656/87657" 256
+	P "1-5+2-6	Left" 1 5 0 2 6
+#	P "1-5+2-3" 1 5 0 2 4
+#	P "1-4+2-6" 1 3 0 2 6
+	P "1-4+2-3	Right" 1 3 0 2 4
+#	P "1" 1 3 0 2 4
+#	P "2" 1 5 0 2 6 
 	E 0.000000 1.844488 270.000000
 	E 0.000000 0.000000 270.000000
 	E 9.321995 -1.879013 130.000000
