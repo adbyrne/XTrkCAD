@@ -244,8 +244,37 @@ GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 			if (GetScaleRatio(to->scaleInx) == ratio || to->scaleInx == SCALE_ANY) {
 				ret = PARAMFILE_FIT;
 				break;
-			} 
+			}
+			// handle special cases
+			// if layout is OO or HO scale, HO/OO scale buildings are considered compatible
+			char *layoutScaleName = GetScaleName(scaleIndex);
+			char *paramScaleName = GetScaleName(to->scaleInx);
+			if (!strcmp(layoutScaleName, "OO") &&
+				!strcmp(paramScaleName, "HO")) {
+					ret = PARAMFILE_COMPATIBLE;
+					break;
+			}
+			if (!strcmp(layoutScaleName, "HO") &&
+				!strcmp(paramScaleName, "OO")) {
+					ret = PARAMFILE_COMPATIBLE;
+					break;
+			}
+			//if layout is in Japanese or British N scale, N scale is exact
+			if ((!strcmp(layoutScaleName, "N(UK)") ||
+				!strcmp(layoutScaleName, "N(JP)")) &&
+				!strcmp(paramScaleName, "N")) {
+				ret = PARAMFILE_COMPATIBLE;
+				break;
+			}
+			//O in Germany or UK is the a fit for O generally
+			if ((!strcmp(layoutScaleName, "O(EU)") ||
+				!strcmp(layoutScaleName, "O(Fine)")) &&
+				!strcmp(paramScaleName, "O") ) {
+				ret = PARAMFILE_COMPATIBLE;
+				break;
+			}
 		}
+
 	}
 	return(ret);
 }
@@ -1067,8 +1096,8 @@ static char * CmdStructureHotBarProc(
 	case HB_FULLTITLE:
 		return to->title;
 	case HB_DRAW:
-		origP->x -= to->orig.x;
-		origP->y -= to->orig.y;
+		//origP->x -= to->orig.x;
+		//origP->y -= to->orig.y;
 		DrawSegs( d, *origP, 0.0, to->segs, to->segCnt, trackGauge, wDrawColorBlack );
 		return NULL;
 	}

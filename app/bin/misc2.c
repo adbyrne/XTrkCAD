@@ -403,6 +403,30 @@ EXPORT BOOL_T CompatibleScale(
 			return TRUE;
 		if ( scaleInfo(scale1).ratio == scaleInfo(scale2).ratio )
 			return TRUE;
+		// handle special cases
+		// if layout is OO or HO scale, HO/OO scale buildings are considered compatible
+		char *ScaleName1 = GetScaleName(scale1);
+		char *ScaleName2 = GetScaleName(scale2);
+		if (!strcmp(ScaleName2, "HO") &&
+			!strcmp(ScaleName1, "OO")) {
+			return TRUE;
+		}
+		if (!strcmp(ScaleName2, "OO") &&
+			!strcmp(ScaleName1, "HO")) {
+			return TRUE;
+		}
+		//if layout is in Japanese or British N scale, N scale is exact
+		if ((!strcmp(ScaleName2, "N(UK)") ||
+			 !strcmp(ScaleName2, "N(JP)")) &&
+			 !strcmp(ScaleName1, "N")) {
+			return TRUE;
+		}
+		//O in Germany or UK is a fit for O generally
+		if ((!strcmp(ScaleName2, "O(EU)") ||
+			 !strcmp(ScaleName2, "O(Fine)")) &&
+			 !strcmp(ScaleName1, "O") ) {
+			return TRUE;
+		}
 	}
 	return FALSE;
 }
