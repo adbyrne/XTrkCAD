@@ -53,6 +53,8 @@ char tempCustom[4096];
 
 dynArr_t tempSegs_da;
 
+// Minimum Track Segment length
+#define MIN_TRACK_LENGTH (0.20)
 
 /*****************************************
  *
@@ -1366,9 +1368,9 @@ static toDesignSchema_t * LoadSegs(
 				(newTurnLen1), fabs(newTurnOff1), angle1 ) )
 				return NULL;
 			d = points[3].x - points[5].x;
-			if ( d < -0.10 )
+			if ( d < -MIN_TRACK_LENGTH )
 				pp = &Crv3Schema;
-			else if ( d > 0.10 )
+			else if ( d > MIN_TRACK_LENGTH )
 				pp = &Crv2Schema;
 			else
 				pp = &Crv1Schema;
@@ -1421,9 +1423,9 @@ static toDesignSchema_t * LoadSegs(
 			points[7].y = 0;
 			points[7].x = (newTurnLen2);
 			d = points[3].x - points[5].x;
-			if ( d < -0.10 ) {
+			if ( d < -MIN_TRACK_LENGTH ) {
 				pp = (dp->type==NTO_3WAY ? &Tri3Schema : &Wye3Schema );
-			} else if ( d > 0.10 ) {
+			} else if ( d > MIN_TRACK_LENGTH ) {
 				pp = (dp->type==NTO_3WAY ? &Tri2Schema : &Wye2Schema );
 			} else {
 				pp = (dp->type==NTO_3WAY ? &Tri1Schema : &Wye1Schema );
@@ -2143,9 +2145,9 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 		switch (dp->type) {
 		case NTO_CURVED:
 			d = points[3].x - points[5].x;
-			if ( d < -0.10 )
+			if ( d < -MIN_TRACK_LENGTH )
 				pp = &Crv3Schema;
-			else if ( d > 0.10 )
+			else if ( d > MIN_TRACK_LENGTH )
 				pp = &Crv2Schema;
 			else
 				pp = &Crv1Schema;
