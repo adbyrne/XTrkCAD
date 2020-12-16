@@ -481,7 +481,7 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 static void 
 SetScale( SCALEINX_T newScaleInx )
 {
-	if (newScaleInx < 0 && newScaleInx >= scaleInfo_da.cnt) {
+	if (newScaleInx < 0 || newScaleInx >= scaleInfo_da.cnt) {
 		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
 		return;
 	}

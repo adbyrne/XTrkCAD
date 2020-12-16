@@ -501,14 +501,9 @@ static paramData_t layoutPLs[] = {
 
 static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, sizeof layoutPLs / sizeof layoutPLs[0] };
 
-/**
-* Apply the changes entered to settings
-*
-* \param junk IN unused
-*/
 
-static void LayoutOk(void * junk)
-{
+static void ChangeLayout() {
+
     long changes;
 
     changes = GetChanges(&layoutPG);
@@ -538,6 +533,18 @@ static void LayoutOk(void * junk)
     	LayoutBackGroundSave();
     	file_changed = FALSE;
     }
+}
+
+/**
+* Apply the changes entered to settings
+*
+* \param junk IN unused
+*/
+
+static void LayoutOk(void * junk)
+{
+
+	ChangeLayout();
 
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);
@@ -780,6 +787,7 @@ static struct wFilSel_t * settingsWrite_fs;
 
 static void SettingsWrite( void  )
 {
+	ChangeLayout();
 	if ( settingsWrite_fs == NULL )
 		settingsWrite_fs  = wFilSelCreate( mainW, FS_UPDATE, 0, _("Write Settings"),
 				_("Settings File (*.xset)|*.xset"), DoSettingsWrite, NULL );
