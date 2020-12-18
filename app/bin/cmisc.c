@@ -254,20 +254,21 @@ static void DescribeUpdate(
 
     if (descTrk) {
         GetBoundingBox(descTrk, &hi, &lo);
+        if ((ddp->mode&DESC_NOREDRAW) == 0) {
+            descOrig = lo;
+            descSize = hi;
+            descOrig.x -= descBorder;
+            descOrig.y -= descBorder;
+            descSize.x -= descOrig.x-descBorder;
+            descSize.y -= descOrig.y-descBorder;
+        }
+
 
         if (OFF_D(mapD.orig, mapD.size, descOrig, descSize)) {
             ErrorMessage(MSG_MOVE_OUT_OF_BOUNDS);
         }
     }
 
-    if ((ddp->mode&DESC_NOREDRAW) == 0) {
-        descOrig = lo;
-        descSize = hi;
-        descOrig.x -= descBorder;
-        descOrig.y -= descBorder;
-        descSize.x -= descOrig.x-descBorder;
-        descSize.y -= descOrig.y-descBorder;
-    }
 
     for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
         if ((describePLs[inx].option & PDO_DLGIGNORE) != 0) {
@@ -285,6 +286,12 @@ static void DescribeUpdate(
         		continue;
         }
 
+        if (ddp->mode&DESC_RO) {
+        	wControlActive(ddp->control0, FALSE);
+        } else {
+        	wControlActive(ddp->control0, TRUE);
+        }
+
         ddp->mode &= ~DESC_CHANGE;
         if (ddp->type == DESC_POS) {			//POS Has two fields
         	if (ddp->mode&DESC_CHANGE2) {
@@ -293,6 +300,7 @@ static void DescribeUpdate(
         		ddp->mode |= DESC_CHANGE2;		//First time
         	}
         }
+
         ParamLoadControl(&describePG, inx);
     }
 }
@@ -478,7 +486,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
                 continue;
             }
 
-            ddp->mode |= ro_mode;
+            ddp->mode |= DESC_RO;
         }
 
     for (ddp=data; ddp->type != DESC_NULL; ddp++) {
@@ -490,7 +498,8 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         ddp->posy = describeW_posy;
         ddp->control0 = AssignParamToDescribeDialog(ddp, ddp->valueP, label,
                                      (ddp->type == DESC_POS?3:3));
-        wControlActive(ddp->control0, ((ddp->mode|ro_mode)&DESC_RO)==0);
+        if (ddp->type != DESC_LAYER)
+        	wControlActive(ddp->control0, (!(ddp->mode&DESC_RO)));
 
         switch (ddp->type) {
         case DESC_POS:
@@ -498,21 +507,33 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
                                          &((coOrd*)(ddp->valueP))->y,
                                          NULL,
                                          0);
-            wControlActive(ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0);
+            wControlActive(ddp->control1, (!(ddp->mode&DESC_RO)));
             break;
 
         case DESC_LAYER:
-            wListClear((wList_p)ddp->control0);  // Rebuild list on each invovation
+            wListClear((wList_p)ddp->control0);  // Rebuild list on each invocation
 
-            for (inx = 0; inx<NUM_LAYERS; inx++) {
-                char *layerFormattedName;
-                layerFormattedName = FormatLayerName(editableLayerList[inx]);
-                wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+            if (ro_mode) {
+            	char *layerFormattedName;
+            	layerFormattedName = FormatLayerName(*(int *)(ddp->valueP));
+            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
                 free(layerFormattedName);
+                *(int *)(ddp->valueP) = 0;
+                layerValue = (int *)(ddp->valueP);
+                wControlActive(ddp->control0, FALSE);
+            } else {
+				for (inx = 0; inx<NUM_LAYERS; inx++) {
+					char *layerFormattedName;
+					layerFormattedName = FormatLayerName(editableLayerList[inx]);
+					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+					free(layerFormattedName);
+				}
+
+				*(int *)(ddp->valueP) = SearchEditableLayerList(*(int *)(ddp->valueP));
+				layerValue = (int *)(ddp->valueP);
+				wControlActive(ddp->control0, TRUE);
             }
 
-            *(int *)(ddp->valueP) = SearchEditableLayerList(*(int *)(ddp->valueP));
-            layerValue = (int *)(ddp->valueP);
             break;
 
         default:
@@ -530,7 +551,8 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 static void DescChange(long changes)
 {
-    if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
+	descData_p ddp;
+	if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
         ParamLoadControls(&describePG);
     }
 }
@@ -624,7 +646,18 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
     case C_REDRAW:
 
         if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
+        	descNeedDrawHilite = TRUE;
+        	coOrd lo,hi;
+        	GetBoundingBox(descTrk,&hi,&lo);
+			descOrig = lo;
+			descSize = hi;
+			descOrig.x -= descBorder;
+			descOrig.y -= descBorder;
+			descSize.x -= descOrig.x-descBorder;
+			descSize.y -= descOrig.y-descBorder;
+
             DrawDescHilite(TRUE);
+
             if (descTrk && QueryTrack(descTrk, Q_IS_DRAW)) {
 				DrawOriginAnchor(descTrk);
 			}

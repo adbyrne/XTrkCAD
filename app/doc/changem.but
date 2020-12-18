@@ -1204,7 +1204,7 @@ Until an object is selected, the object under the cursor that will be selected w
 Objects in Frozen Layers will only be highlighted and selected if \f{Shift} is added.
 
 A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear.
-The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object.
+The properties dialog contains information pertaining to the selected objects size, position, size, color and layer as appropriate for each type of object.
 Certain values can be changed to modify the object. Some values, e.g., endpoint positions, can not be changed if, for example, a Track is joined to another Track.
 The values will take effect when \f{Enter}, \f{Tab} is pressed or the cursor leaves the entry field.
 
@@ -1212,11 +1212,14 @@ The values will take effect when \f{Enter}, \f{Tab} is pressed or the cursor lea
 
 The selected object is highlighted by a grey area.
 
-If it is a Line, Curve, Circle or Polygon object, and the rotation origin is non-zero, a large blue cross will show its position.
-
 \G{png.d/dpropertieshighlight.png}
 
-\S2{drawDescribe} Draw Object Fields
+\S2{drawDescribe} Draw Object Describe Fields
+
+\S3{drawDescribeCommon} Common Draw Object Fields
+
+If the Object is a Line, Curve, Circle or Polygon object, and the rotation origin is non-zero, a large blue cross will show its position.  
+If it is zero, the command starts with the \f{Lock Origin} field unticked and the \f{Rotate By} field greyed out.
 
 Some fields are used by multiple types of objects - these are listed below
 
@@ -1225,34 +1228,45 @@ Some fields are used by multiple types of objects - these are listed below
 \dd The width of the line for a line, curve or unfilled object can be set. 0 means a pixel width at all scales.
 Other values are the width of the line in scale units. If the value is negative, it is the absolute value of pixels wide at all scales.
 
-\dt Lock
+\dt Pivot
 
-\dd The Lock control can be set to fix in place the start, or the middle or the end, and it applies to the Length and Angular Length controls. When these are chnaged the new dimensions are applied so as to keep the locked position in place.
-
-\dt Rotation Angle
-
-\dd Some Draw objects (Polygon, Polyline, Lines, Curves, Circles) can be rotated about their rotation origin in Describe.
-After the rotation completes, the rotation angle will be set to zero, as all the points of the object will be adjusted to thier absolute position in the layout.
+\dd The Pivot control can be set to fix in place the start, or the middle or the end, and it applies to the Length, Line Angle and Angular Length controls. 
+When these are changed the new dimensions are applied so as to keep the locked position in place.
 
 \dt Rotation Origin
 
-\dd By default the rotation origin is the Layout origin \{0,0\}.
-By setting a different Rotation Origin, subsequent Rotations will be about that new point. This may be useful when using Draw objects as part of larger collections.
+\dd By default the rotation origin is the Layout origin \{0,0\}. 
+If the origin is not at the Layout origin, it will be displayed with a blue cross.
+When the origin is changed with the \f{Lock} off, the object is not moved. 
+But if the origin is changed with the \f{Lock} on, the object will be moved as well. 
+Enabling the \f{Lock To Origin} allows subsequent Rotations to be about the origin. 
+This may be especially useful when using creating larger groups of Draw objects. 
 
-\dt Lock Rotation Origin
+\dt Lock To Origin
 
-\dd For ease of use, the rotation origin can be \e{Relative} to the First Point. If this is done, altering either the First Point or the Rotation Origin will move the both values.
-This value is always set to locked if the Draw origin is non-zero when the \K{cmdDescribe} command is started but can be unset to allow repositioning of the Rotate Origin without moving the object. If the Rotate Origin is set to zero, the Object has an \e{Absolute} origin.
+\dd Locking to the rotation origin makes the distance between the First Point and the origin fixed. 
+If this is set on, altering either the First Point or the Rotation Origin will move the both values.
+This value is initially set to locked if the Draw origin is non-zero when the \K{cmdDescribe} command is started 
+but can be unset to allow repositioning of the Rotate Origin without moving the object in the layout. 
+If the Rotate Origin is set to \{0,0\}, the Object has an \e{Absolute} origin.
+
+\dt Rotate By
+
+\dd Some Draw objects (Polygon, Polyline, Lines, Curves, Circles, Text) can be rotated about their rotation origin in Describe. 
+In order to rotate them, the \f{Lock To Origin} must be enabled.
+After the rotation completes, the rotation angle will be set back to zero and all the points of the object will be adjusted to their absolute position in the layout.
+Negative values of rotation are counter-clockwise.
+Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 \dt Layer
 
-\dd The object can be moved between layers
+\dd The layer of the object. The object can be moved between layers if the layer is not frozen. Only non-frozen layers are listed as options.
 
 \dt Color
 
 \dd The color of the line or the fill can be set
 
-\S3{drawDescribeStr} Straight Line Objects
+\S3{drawDescribeStr} Straight Line Objects Describe Fields
 
 \dt End Pt 1
 
@@ -1262,13 +1276,13 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd Straight Lines have a second point, altering this, moves just that end of the line, altering its length as needed.
 
-\dt Angle
+\dt Line Angle
 
-\dd Straight Lines have an angle - this is the angle between the two points, altering this moves the ends so as to respect the Lock control setting.
+\dd Straight Lines have an angle - this is the angle between the two points, altering this moves the ends so as to respect the \f{Pivot} control setting.
 
 \dt Length
 
-\dd The Length control can add to the start or end or both of a Line object depending on the setting of the \f{Lock} control setting.
+\dd The Length control can add to the start or end or both of a Line object depending on the setting of the \f{Pivot} control setting.
 
 \S3{drawDescribeDim} Dimension Line Objects
 
@@ -1276,7 +1290,7 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd The size of the arrows and text can be set to Tine, Small, Medium or Large.
 
-\S3{drawDescribeBench} BenchWork Objects
+\S3{drawDescribeBench} BenchWork Objects Describe Fields
 
 \dt Lumber
 
@@ -1286,7 +1300,7 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd The timber can be orientated "On Edge" which will draw the smaller dimension or "Flat".
 
-\S3{drawDescribeCurve} Curved and Circle Objects
+\S3{drawDescribeCurve} Curved and Circle Objects Describe Fields
 
 \dt Center
 
@@ -1298,17 +1312,17 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dt Angular Length
 
-\dd For Curved Lines this is the length of the arc. If altered it will move the arc to respect the \f{Lock} control setting.
+\dd For Curved Lines this is the length of the arc in degrees. If altered it will move the arc to respect the \f{Pivot} control setting.
 
-\S3{drawDescribePoly} Polygon Objects
+\S3{drawDescribePoly} Polygon Objects Describe Fields 
 
 \dt Fill
 
 \dd Some draw objects (Circles, Polygons) can be filled or emptied - note that Polylines can not be filled - they have to be closed first.
 
-\dt Open
+\dt Open 
 
-\dd Polygons can be opened to become Polylines or Polylines closed to become Polygons using Describe.
+\dd Unfilled Polygons can be opened to become Polylines or Polylines closed to become Polygons. Note that PolyLines can't be filled, they have to be closed first.
 
 \dt Point Count
 
@@ -1322,18 +1336,145 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd Straight and Curved Lines, PolyLines, Polygons and Structures can be drawn with dotted, dashed, dash-dotted and dash-dot-dotted lines.
 
-\S3{drawDescribeText} Text Objects
+\S3{drawDescribeText} Text Objects Describe Fields
 
 \dt Text Angle
 
-\dd For Text objects, the Text Angle determines the angle the text is rendered at. This is independent of the rotation of the starting position which is gained from the Rotation Angle and the Rotation Origin.
+\dd For Text objects, the Text Angle determines the absolute angle the text is rendered at. 
 
-\S2{DescribeCompound} Structures, Sectional Track and Turnouts
+This will be set by itself or by rotation of the starting position about the Rotation Origin with \f{Lock to Origin} set.
+
+\S2{DescribeCompound} Structures, Sectional Track and Turnouts Describe Fields
 
 \dt Pivot
 
-\dd The Pivot fixes the point about which the Angle of Rotation will occur
+\dd The Pivot fixes the point about which the Angle of Rotation will occur to be the Start (Bottom Left) Point, the middle of the object, or End (Top Right) of the object. 
+These relative positions are calculated as though the object was rotated by zero degrees.
 
+\dt Angle
+
+\dd The Angle rotates the object about the Pivot point.
+
+\S2{DescribeTrack} Describe Track Fields
+
+\S3{trackDescribeCommon} Common Track Object Fields
+
+\dt End Pt 1
+
+\dd For the starting position (or first point) - altering this value causes the whole object to move relative to the layout origin.
+This can only be changed if the track is unconnected at that end. The elevation is shown beneath the X,Y as a read-only Z value.
+
+\dt End Pt 2
+
+\dd The end position (or second point), altering this, moves just that end of the line, altering its length as needed. 
+This can only be changed if the track is unconnected at that end. The elevation is shown beneath the X,Y as a read-only Z value.
+
+\dt Grade
+
+\dd The calculated grade between the two end-points 
+
+\dt Layer
+
+\dd The layer of the object. The object can be moved between layers if the layer is not frozen. Only non-frozen layers are listed as options.
+
+\dt Length
+
+\dd The length of the track object. This can be set for a Straight Track if it is not connected, and will respect the value of the \f{Pivot} field.
+
+\dt Pivot
+
+\dd The Pivot control can be set to fix in place the start, or the middle or the end, and it applies to the Length, Track Angle and Angular Length controls. 
+When these are changed the new dimensions are applied so as to keep the locked position in place.
+
+\S3{trackDescribeStr} Straight Track Describe Fields
+
+
+\dt Track Angle
+
+\dd The angle of the Track object. This can be set if the track is not connected. It respects the value of the \f{Pivot} field
+
+
+\S3{trackDescribeCurve} Curved Track Describe Fields
+
+\dt Center
+
+\dd The center point of the curve. The center can only be modified if both ends are unconnected.
+
+\dt Radius
+
+\dd The radius of the curve. The radius can only be modified if one end is not connected.
+
+\dt Angular Length
+
+\dd The length of the curve in degrees. Modifications respect the \f{Pivot} value and are only available if at least one end is disconnected.
+
+\dt CCW Angle
+
+\dd The Counter-Clockwise Angle (the angle from the center to the first position).  Can only be modified if the first end of the curve is not connected.
+
+\dt CW Angle
+
+\dd The ClockWise Angle (the angle from the center to the end position). Can only be modified if the second end of the curve is not connected.
+
+
+\S3{trackDescribeCornu} Cornu Track Describe Fields
+
+\dt End Angle
+
+\dd Each end has an angle which helps determine the curve shape. It can only be set if the Track is not joined at that end.
+
+\dt End Radius
+
+\dd Each end has an radius which helps determine the curve shape. It can only be set if the Track is not joined at that end.
+
+\dt End Pt
+
+\dd Each End Point has a position. It can only be set if the Track is not joined at that end.
+
+\dt Center
+
+\dd Each End shows the center of the curve of the end segment - this is a read-only field. If the radius is zero, the field will show \{0,0\}.
+
+\dt Minimum Radius 
+
+\dd This is the approximate smallest radius along the curve based on curve fitting to the Cornu.
+
+\dt Maximum Rate of Curvature 
+
+\dd The maximum rate that the radius is changing over its length based on curve fitting. 
+It gives an idea of the "sharpness" of the curve.
+
+\dt Total Winding Angle
+
+\dd The number of degrees that the curve executes - this number will rise if there are loops in the curve.
+
+\S3{trackDescribeBezier} Cornu Track Describe Fields
+
+\dt Ctl Pt
+
+\dd The positions of the two Bezier control points. These will only be adjustable if the end they control is not attached to another track.
+
+\dt End Angle
+
+\dd Each end has an angle which is set by the control arm at that end - this is a read-only field
+
+\dt End Radius
+
+\dd Each end has an radius which is driven by the curve shape - this is a read-only field
+
+\dt End Pt
+
+\dd Each End Point has a position. It can only be set if the Track is not joined at that end.
+
+\dt Center
+
+\dd Each End shows the center of the curve of the end segment - this is a read-only field. If the radius is zero, the field will show \{0,0\}.
+
+\dt Minimum Radius 
+
+\dd This is the approximate smallest radius along the curve based on curve fitting to the Bezier.
+
+\rule
 
 Most commands return to \f{Properties} mode then they terminate unless the command is sticky (\K{cmdSticky}).
 

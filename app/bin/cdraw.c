@@ -512,23 +512,21 @@ static struct {
 		unsigned int layer;
 		wIndex_t lineType;
 		} drawData;
-typedef enum { E0, E1, PP, CE, AL, A1, A2, RD, LN, HT, WT, PV, LK, OI, RA, VC, LW, LT, CO, FL, OP, BX, BE, OR, DS, TP, TA, TS, TX, LY } drawDesc_e;
+typedef enum { E0, E1, PP, CE, AL, LA, A1, A2, RD, LN, HT, WT, PV, VC, LW, LT, CO, FL, OP, BX, BE, OR, DS, TP, TA, TS, TX, LK, OI, RA, LY } drawDesc_e;
 static descData_t drawDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
 /*PP*/  { DESC_POS, N_("First Point: X,Y"), &drawData.endPt[0] },
 /*CE*/	{ DESC_POS, N_("Center: X,Y"), &drawData.center },
-/*AL*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
+/*AL*/	{ DESC_FLOAT, N_("Angular Length"), &drawData.angle },
+/*LA*/  { DESC_FLOAT, N_("Line Angle"), &drawData.angle },
 /*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &drawData.angle0 },
 /*A2*/	{ DESC_ANGLE, N_("CW Angle"), &drawData.angle1 },
 /*RD*/	{ DESC_DIM, N_("Radius"), &drawData.radius },
 /*LN*/	{ DESC_DIM, N_("Length"), &drawData.length },
 /*HT*/  { DESC_DIM, N_("Height"), &drawData.height },
 /*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width },
-/*PV*/	{ DESC_PIVOT, N_("Lock"), &drawData.pivot },
-/*LK*/  { DESC_BOXED, N_("Keep Origin Relative"), &drawData.lock_origin},
-/*OI*/  { DESC_POS, N_("Rot Origin: X,Y"), &drawData.origin },
-/*RA*/  { DESC_FLOAT, N_("Rotate Angle"), &drawData.angle },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
 /*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
 /*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth },
 /*LT*/  { DESC_LIST, N_("Line Type"), &drawData.lineType },
@@ -539,10 +537,13 @@ static descData_t drawDesc[] = {
 /*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
 /*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
 /*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize },
-/*TP*/	{ DESC_POS, N_("Origin: X,Y"), &drawData.endPt[0] },
-/*TA*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
+/*TP*/	{ DESC_POS, N_("Text Origin: X,Y"), &drawData.endPt[0] },
+/*TA*/	{ DESC_FLOAT, N_("Text Angle"), &drawData.angle },
 /*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx },
 /*TX*/	{ DESC_TEXT, N_("Text"), &drawData.text },
+/*LK*/  { DESC_BOXED, N_("Lock To Origin"), &drawData.lock_origin},
+/*OI*/  { DESC_POS, N_("Rot Origin: X,Y"), &drawData.origin },
+/*RA*/  { DESC_FLOAT, N_("Rotate By"), &drawData.rotate_angle },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &drawData.layer },
 		{ DESC_NULL } };
 static int drawSegInx;
@@ -568,7 +569,10 @@ static int drawSegInx;
  * so that the object remains at the same place as the user specifies.
  * If the edit starts with origin {0,0}, it will be set unlocked, otherwise set locked.
  *
- * AL- Angle will be set to 0.0 when the object is modified. The points of the objects will be rotated so that
+ * RA - Rotate By Angle will only be active if the Origin is locked.
+ * It will be set to 0.0 whenever the object is modified.
+ *
+ * At the end of the operations, the points of the objects will be rotated so that
  * rotated and adjusted so they don't need rotation to lie where the user left them.
  *
  */
@@ -605,61 +609,43 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			coOrd off;
 			off.x = drawData.endPt[0].x - drawData.oldE0.x;
 			off.y = drawData.endPt[0].y - drawData.oldE0.y;
-			if (drawData.lock_origin) {
-				xx->orig.x +=off.x;
-				xx->orig.y +=off.y;
-				drawDesc[OI].mode |= DESC_CHANGE;
-			} else {
-				switch(segPtr->type) {					//E0 does not alter length - translates
-					case SEG_STRLIN:
-					case SEG_DIMLIN:
-					case SEG_BENCH:
-					case SEG_TBLEDGE:
-						UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], xx->angle, xx->orig );
-						drawData.endPt[1].x = off.x+drawData.endPt[1].x;
-						drawData.endPt[1].y = off.y+drawData.endPt[1].y;
-						UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], xx->angle, xx->orig );
-						drawDesc[E1].mode |= DESC_CHANGE;
-						break;
-					case SEG_CRVLIN:
-					case SEG_FILCRCL:
-						UNREORIGIN( segPtr->u.c.center, drawData.endPt[0], xx->angle, xx->orig );
-						break;
-					case SEG_TEXT:
-						UNREORIGIN( segPtr->u.t.pos, drawData.endPt[0], xx->angle, xx->orig );
-						break;
-					case SEG_POLY:
-					case SEG_FILPOLY:
-						break;  //Note not used by POLYGONS
-					default:;
-				}
+			switch(segPtr->type) {					//E0 does not alter length - translates
+				case SEG_STRLIN:
+				case SEG_DIMLIN:
+				case SEG_BENCH:
+				case SEG_TBLEDGE:
+					UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig );
+					drawData.endPt[1].x = off.x+drawData.endPt[1].x;
+					drawData.endPt[1].y = off.y+drawData.endPt[1].y;
+					UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig );
+					drawDesc[E1].mode |= DESC_CHANGE;
+					break;
+				case SEG_CRVLIN:
+				case SEG_FILCRCL:
+					UNREORIGIN( segPtr->u.c.center, drawData.endPt[0], 0.0, xx->orig );
+					break;
+				case SEG_POLY:
+				case SEG_FILPOLY:
+					break;  //Note not used by POLYGONS
+				default:;
 			}
-		} else {												//E1 - alters length
-			off.x = drawData.endPt[1].x - drawData.oldE1.x;
-			off.y = drawData.endPt[1].y - drawData.oldE1.y;
-			drawDesc[E1].mode |= DESC_CHANGE;
-			if (drawData.lock_origin) {
-				xx->orig.x +=off.x;
-				xx->orig.y +=off.y;
-				drawDesc[OI].mode |= DESC_CHANGE;
-			} else {
-				UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], xx->angle, xx->orig );
-			}
+		} else {
+			UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig );
 		}
 		drawData.length = FindDistance( drawData.endPt[0], drawData.endPt[1] );
 		drawDesc[LN].mode |= DESC_CHANGE;
 		break;
-	case OI:
-		off.x = drawData.origin.x - drawData.oldOrigin.x;
-		off.y = drawData.origin.y - drawData.oldOrigin.y;
+	case OI: ;
+		off.x = drawData.origin.x-xx->orig.x;
+		off.y = drawData.origin.y-xx->orig.y;
 		xx->orig = drawData.origin;
-		if (!drawData.lock_origin)  {
+		if (!drawData.lock_origin)  {  //Move the points so that the object is not moved
 			switch(segPtr->type) {
 				case SEG_POLY:
 				case SEG_FILPOLY:
 					for (int i=0;i<segPtr->u.p.cnt;i++) {
-						REORIGIN(   pt, segPtr->u.p.pts[i].pt, xx->angle, drawData.oldOrigin);
-						UNREORIGIN( segPtr->u.p.pts[i].pt, pt, xx->angle, xx->orig );
+						coOrd pt;
+						UNREORIGIN( segPtr->u.p.pts[i].pt, segPtr->u.p.pts[i].pt, 0.0, off );
 					}
 				break;
 				case SEG_STRLIN:
@@ -667,50 +653,40 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				case SEG_BENCH:
 				case SEG_TBLEDGE:
 					for (int i=0;i<2;i++) {
-						UNREORIGIN( segPtr->u.l.pos[i], drawData.endPt[i], xx->angle, xx->orig );
+						UNREORIGIN( segPtr->u.l.pos[i], segPtr->u.l.pos[i], 0.0, off );
 					}
 					break;
 				case SEG_CRVLIN:
 				case SEG_FILCRCL:
-					UNREORIGIN( segPtr->u.c.center, drawData.center, xx->angle, xx->orig );
+					UNREORIGIN( segPtr->u.c.center, segPtr->u.c.center, 0.0, off );
 					break;
 				case SEG_TEXT:
-					UNREORIGIN( segPtr->u.t.pos, drawData.endPt[0], xx->angle, xx->orig );
-					break;
+					UNREORIGIN( segPtr->u.t.pos, segPtr->u.t.pos, 0.0, off );
 				default:;
 			}
 		} else {
-			drawData.endPt[0].x += off.x;
-			drawData.endPt[0].y += off.y;
 			switch(segPtr->type) {
 				case SEG_STRLIN:
 				case SEG_DIMLIN:
 				case SEG_BENCH:
 				case SEG_TBLEDGE:
+					REORIGIN( drawData.endPt[0], segPtr->u.l.pos[0], 0.0, xx->orig );
+					REORIGIN( drawData.endPt[1], segPtr->u.l.pos[1], 0.0, xx->orig );
 					drawDesc[E0].mode |= DESC_CHANGE;
-					UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], xx->angle, xx->orig );
-					drawData.endPt[1].x = off.x+drawData.endPt[1].x;
-					drawData.endPt[1].y = off.y+drawData.endPt[1].y;
-					UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], xx->angle, xx->orig );
 					drawDesc[E1].mode |= DESC_CHANGE;
 					break;
 				case SEG_CRVLIN:
 				case SEG_FILCRCL:
-					UNREORIGIN( segPtr->u.c.center, drawData.endPt[0], xx->angle, xx->orig );
-					drawDesc[E0].mode |= DESC_CHANGE;
+					REORIGIN( drawData.center, segPtr->u.c.center, 0.0, xx->orig );
+					drawDesc[CE].mode |= DESC_CHANGE;
 					break;
 				case SEG_TEXT:
-					UNREORIGIN( segPtr->u.t.pos, drawData.endPt[0], xx->angle, xx->orig );
-					drawDesc[E0].mode |= DESC_CHANGE;
+					REORIGIN( drawData.endPt[0], segPtr->u.t.pos, 0.0, xx->orig );
+					drawDesc[TP].mode |= DESC_CHANGE;
 					break;
 				case SEG_POLY:
 				case SEG_FILPOLY:
-					for (int i=0;i<segPtr->u.p.cnt;i++) {
-						REORIGIN(   pt, segPtr->u.p.pts[i].pt, xx->angle, drawData.oldOrigin);
-						pt.x += off.x;
-						pt.y += off.y;
-						UNREORIGIN( segPtr->u.p.pts[i].pt, pt, xx->angle, xx->orig );
-					}
+					REORIGIN(drawData.endPt[0], segPtr->u.p.pts[0].pt, 0.0, xx->orig);
 					drawDesc[PP].mode |= DESC_CHANGE;
 					break;
 				default:;
@@ -738,15 +714,16 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			}
 		}
 		break;
-	case RA:;
-		ANGLE_T angle = NormalizeAngle(drawData.rotate_angle);
-		switch(segPtr->type) {
+	case RA:;  //Only applies if "Lock" has been set
+		if (drawData.lock_origin) {
+			ANGLE_T angle = NormalizeAngle(drawData.rotate_angle);
+			switch(segPtr->type) {
 			case SEG_POLY:
 			case SEG_FILPOLY:
 				for (int i=0;i<segPtr->u.p.cnt;i++) {
-					REORIGIN(pt,segPtr->u.p.pts[i].pt, angle, xx->orig);
+					UNREORIGIN(pt, segPtr->u.p.pts[i].pt, angle, drawData.origin);
+					REORIGIN(segPtr->u.p.pts[i].pt, pt, 0.0, drawData.origin);
 					if (i == 0) drawData.endPt[0] = pt;
-					UNREORIGIN(segPtr->u.p.pts[i].pt, pt, 0.0, xx->orig);
 				}
 				drawDesc[PP].mode |= DESC_CHANGE;
 				break;
@@ -754,18 +731,18 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				coOrd end0, end1;
 				Translate(&end0,segPtr->u.c.center,segPtr->u.c.a0,segPtr->u.c.radius);
 				Translate(&end1,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,segPtr->u.c.radius);
-				REORIGIN(end0, end0, angle, xx->orig );
-				REORIGIN(end1, end1, angle, xx->orig );
-				REORIGIN( drawData.center,segPtr->u.c.center, angle, xx->orig );
-				drawData.angle0 = FindAngle( drawData.center, end0);
+				REORIGIN(drawData.center, segPtr->u.c.center, angle, drawData.origin);
+				REORIGIN(end0, end0, angle, drawData.origin);
+				REORIGIN(end1, end1, angle, drawData.origin);
+				segPtr->u.c.a0 = drawData.angle0 = FindAngle( drawData.center, end0);
 				drawData.angle1 = FindAngle( drawData.center, end1);
+				UNREORIGIN(segPtr->u.c.center,drawData.center,0.0,drawData.origin);
 				drawDesc[CE].mode |= DESC_CHANGE;
 				drawDesc[A1].mode |= DESC_CHANGE;
-				drawDesc[A2].mode |= DESC_CHANGE;
 				/*no break*/
 			case SEG_FILCRCL:
-				REORIGIN( drawData.center,segPtr->u.c.center, angle, xx->orig );
-				UNREORIGIN( segPtr->u.c.center, drawData.center, 0.0, xx->orig);  //Remove angle
+				REORIGIN(drawData.center, segPtr->u.c.center, angle, drawData.origin);  //Remove angle
+				UNREORIGIN(segPtr->u.c.center, drawData.center, 0.0, drawData.origin);
 				drawDesc[CE].mode |= DESC_CHANGE;
 				break;
 			case SEG_STRLIN:
@@ -773,27 +750,36 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			case SEG_BENCH:
 			case SEG_TBLEDGE:
 				for (int i=0;i<2;i++) {
-					REORIGIN( drawData.endPt[i], segPtr->u.l.pos[i], angle, xx->orig );
-					UNREORIGIN(segPtr->u.l.pos[i], drawData.endPt[i], 0.0, xx->orig );
+					REORIGIN( drawData.endPt[i], segPtr->u.l.pos[i], angle, drawData.origin );
+					UNREORIGIN( segPtr->u.l.pos[i], drawData.endPt[i], 0.0, drawData.origin );
 				}
 				drawDesc[E0].mode |= DESC_CHANGE;
 				drawDesc[E1].mode |= DESC_CHANGE;
 				break;
-			case SEG_TEXT:
-
+			case SEG_TEXT:;
+				coOrd tp;
+				REORIGIN( tp, segPtr->u.t.pos, angle, drawData.origin );
+				UNREORIGIN( segPtr->u.t.pos, tp, 0.0, drawData.origin );
+				drawData.endPt[0] = tp;
+				drawData.angle = segPtr->u.t.angle += angle;
+				drawDesc[TA].mode |= DESC_CHANGE;
+				drawDesc[TP].mode |= DESC_CHANGE;
 				break;
 			default:;
+			}
 		}
 		xx->angle = drawData.rotate_angle = 0.0;
+		if (!drawData.lock_origin) drawDesc[RA].mode = DESC_RO;
 		drawDesc[RA].mode |= DESC_CHANGE;
 		break;
-	case AL:;
-		angle = NormalizeAngle(drawData.angle);
+	case AL:  //Uses Pivot Point
+	case LA:;
+		ANGLE_T angle = NormalizeAngle(drawData.angle);
 		switch(segPtr->type) {
 			case SEG_POLY:
 			case SEG_FILPOLY:
 				break;			//Doesn't Use
-			case SEG_CRVLIN:
+			case SEG_CRVLIN:  //Uses as swept angle
 				switch ( drawData.pivot ) {
 					case DESC_PIVOT_FIRST:
 						segPtr->u.c.a1 = drawData.angle;
@@ -803,7 +789,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 					case DESC_PIVOT_SECOND:
 						segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a1+segPtr->u.c.a0-drawData.angle);
 						segPtr->u.c.a1 = drawData.angle;
-						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
+						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0 );
 						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
 						drawDesc[A1].mode |= DESC_CHANGE;
 						drawDesc[A2].mode |= DESC_CHANGE;
@@ -811,7 +797,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 					case DESC_PIVOT_MID:
 						segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1/2.0-drawData.angle/2.0);
 						segPtr->u.c.a1 = drawData.angle;
-						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
+						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0 );
 						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
 						drawDesc[A1].mode |= DESC_CHANGE;
 						drawDesc[A2].mode |= DESC_CHANGE;
@@ -826,9 +812,31 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			case SEG_DIMLIN:
 			case SEG_BENCH:
 			case SEG_TBLEDGE:
-				Translate(&drawData.endPt[1],drawData.endPt[0],angle,drawData.length);
-				UNREORIGIN(segPtr->u.l.pos[1], drawData.endPt[1], xx->angle, xx->orig );
-				drawDesc[E1].mode |= DESC_CHANGE;
+				switch ( drawData.pivot ) {
+					case DESC_PIVOT_FIRST:
+						Translate(&drawData.endPt[1],drawData.endPt[0],angle,drawData.length);
+				        UNREORIGIN(segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig );
+				        drawDesc[E1].mode |= DESC_CHANGE;
+				        break;
+					case DESC_PIVOT_MID:;
+						coOrd middle;
+						middle.x = (drawData.endPt[1].x+drawData.endPt[0].x)/2;
+						middle.y = (drawData.endPt[1].y+drawData.endPt[0].y)/2;
+						Translate(&drawData.endPt[0],middle,NormalizeAngle(angle+180),drawData.length/2);
+						Translate(&drawData.endPt[1],middle,angle,drawData.length/2);
+						UNREORIGIN(segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig );
+						UNREORIGIN(segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig );
+						drawDesc[E0].mode |= DESC_CHANGE;
+						drawDesc[E1].mode |= DESC_CHANGE;
+						break;
+					case DESC_PIVOT_SECOND:
+						Translate(&drawData.endPt[0],drawData.endPt[1],NormalizeAngle(angle+180),drawData.length);
+				        UNREORIGIN(segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig );
+						drawDesc[E0].mode |= DESC_CHANGE;
+						break;
+					default:
+						break;
+				}
 				break;
 			case SEG_TEXT:
 			    break; //Doesnt Use
@@ -838,11 +846,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	case LN:
 		if ( drawData.length <= minLength ) {
 			ErrorMessage( MSG_OBJECT_TOO_SHORT );
-			if ( segPtr->type != SEG_CRVLIN ) {
-				drawData.length = FindDistance( drawData.endPt[0], drawData.endPt[1] );
-			} else {
-				drawData.length = fabs(segPtr->u.c.radius)*2*M_PI*segPtr->u.c.a1/360.0;
-			}
+			drawData.length = fabs(segPtr->u.c.radius)*2*M_PI*segPtr->u.c.a1/360.0;
 			drawDesc[LN].mode |= DESC_CHANGE;
 			break;
 		}
@@ -850,12 +854,12 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			switch ( drawData.pivot ) {
 			case DESC_PIVOT_FIRST:
 				Translate( &drawData.endPt[1], drawData.endPt[0], drawData.angle, drawData.length );
-				UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], xx->angle, xx->orig );
+				UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig );
 				drawDesc[E1].mode |= DESC_CHANGE;
 				break;
 			case DESC_PIVOT_SECOND:
 				Translate( &drawData.endPt[0], drawData.endPt[1], drawData.angle+180.0, drawData.length );
-				UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], xx->angle, xx->orig );
+				UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig );
 				drawDesc[E0].mode |= DESC_CHANGE;
 				break;
 			case DESC_PIVOT_MID:
@@ -863,32 +867,18 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				mid.y = (drawData.endPt[0].y+drawData.endPt[1].y)/2.0;
 				Translate( &drawData.endPt[0], mid, drawData.angle+180.0, drawData.length/2.0 );
 				Translate( &drawData.endPt[1], mid, drawData.angle, drawData.length/2.0 );
-				UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], xx->angle, xx->orig );
-				UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], xx->angle, xx->orig );
+				UNREORIGIN( segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig );
+				UNREORIGIN( segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig );
 				drawDesc[E0].mode |= DESC_CHANGE;
 				drawDesc[E1].mode |= DESC_CHANGE;
 				break;
 			default:
 				break;
 			}
-		} else {
-
-			if ( drawData.angle < 0.0 || drawData.angle >= 360.0 ) {
-				ErrorMessage( MSG_CURVE_OUT_OF_RANGE );
-				drawData.angle = segPtr->u.c.a1;
-				drawDesc[AL].mode |= DESC_CHANGE;
-			} else {
-				segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1/2.0-drawData.angle/2.0);
-				segPtr->u.c.a1 = drawData.angle;
-				drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
-				drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
-				drawDesc[A1].mode |= DESC_CHANGE;
-				drawDesc[A2].mode |= DESC_CHANGE;
-			}
 		}
 		break;
 	case CE:
-		UNREORIGIN( segPtr->u.c.center, drawData.center, xx->angle, xx->orig );
+		UNREORIGIN( segPtr->u.c.center, drawData.center, 0.0, xx->orig );
 		break;
 	case RD:
 		if ( drawData.pivot == DESC_PIVOT_FIRST ) {
@@ -902,36 +892,14 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		segPtr->u.c.radius = drawData.radius;
 		drawDesc[LN].mode |= DESC_CHANGE;
 		break;
-	case A1:
-		switch ( drawData.pivot ) {
-			case DESC_PIVOT_FIRST:
-				segPtr->u.c.a1 = drawData.angle;
-				drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
-				drawDesc[A2].mode |= DESC_CHANGE;
-				break;
-			case DESC_PIVOT_SECOND:
-				segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a1+segPtr->u.c.a0-drawData.angle);
-				segPtr->u.c.a1 = drawData.angle;
-				drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
-				drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
-				drawDesc[A1].mode |= DESC_CHANGE;
-				drawDesc[A2].mode |= DESC_CHANGE;
-				break;
-			case DESC_PIVOT_MID:
-				segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1/2.0-drawData.angle/2.0);
-				segPtr->u.c.a1 = drawData.angle;
-				drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
-				drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
-				drawDesc[A1].mode |= DESC_CHANGE;
-				drawDesc[A2].mode |= DESC_CHANGE;
-				break;
-			default:
-				break;
-		}
+	case A1:  //Angle of first point of curve
+		segPtr->u.c.a0 = NormalizeAngle(drawData.angle0);
+		drawData.angle1 = NormalizeAngle(segPtr->u.c.a0+segPtr->u.c.a1);
+		drawDesc[A2].mode |= DESC_CHANGE;
 		break;
 	case A2:
-		segPtr->u.c.a0 = NormalizeAngle( drawData.angle1-segPtr->u.c.a1-xx->angle );
-		drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
+		segPtr->u.c.a0 = NormalizeAngle( drawData.angle1-segPtr->u.c.a1);
+		drawData.angle0 = NormalizeAngle( segPtr->u.c.a0 );
 		drawDesc[A1].mode |= DESC_CHANGE;
 		break;
 	case BE:
@@ -948,34 +916,24 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	case DS:
 		segPtr->u.l.option = drawData.dimenSize;
 		break;
-	case TP:
-		UNREORIGIN( segPtr->u.t.pos, drawData.endPt[0], xx->angle, xx->orig );
+	case TP:;
+		UNREORIGIN(segPtr->u.t.pos, drawData.endPt[0], 0.0, xx->orig );
 		break;
 	case PP:
 		off.x = drawData.endPt[0].x - drawData.oldE0.x;
 		off.y = drawData.endPt[0].y - drawData.oldE0.y;
-		if (drawData.lock_origin) {
-			xx->orig.x +=off.x;
-			xx->orig.y +=off.y;
-			drawData.origin = xx->orig;
-			drawDesc[OI].mode |= DESC_CHANGE;
-			drawDesc[E0].mode |= DESC_CHANGE;
-			break;
-		} else {
-			for (int i=0;i<segPtr->u.p.cnt;i++) {
-				REORIGIN( pt, segPtr->u.p.pts[i].pt, xx->angle, xx->orig );
-				pt.x += off.x;
-				pt.y += off.y;
-				if (i<5) drawData.endPt[i] = pt;
-				UNREORIGIN( segPtr->u.p.pts[i].pt, pt, 0.0, xx->orig );
+		for (int i=0;i<segPtr->u.p.cnt;i++) {
+			REORIGIN( pt, segPtr->u.p.pts[i].pt, 0.0, xx->orig );
+			pt.x += off.x;
+			pt.y += off.y;
+			if (i<5) {
+				drawData.endPt[i] = pt;
 			}
-			xx->angle = 0.0;
-			drawDesc[AL].mode |= DESC_CHANGE;
+			UNREORIGIN( segPtr->u.p.pts[i].pt, pt, 0.0, xx->orig );
 		}
 		break;
 	case TA:
-		//segPtr->u.t.angle = NormalizeAngle( drawData.angle );
-		xx->angle = NormalizeAngle( drawData.angle );
+		segPtr->u.t.angle = NormalizeAngle( drawData.angle );
 		break;
 	case TS:
 		fontSize = (long)segPtr->u.t.fontSize;
@@ -985,14 +943,22 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	case FL:
 		if (segPtr->type == SEG_POLY && drawData.open) {
 			drawData.filled = FALSE;
-			drawDesc[FL].mode |= DESC_CHANGE;
+			drawDesc[FL].mode = DESC_RO|DESC_CHANGE;
 			break;
 		}
 		if(drawData.filled) {
-			if (segPtr->type == SEG_POLY) segPtr->type = SEG_FILPOLY;
+			if (segPtr->type == SEG_POLY) {
+				segPtr->type = SEG_FILPOLY;
+				drawData.open = FALSE;
+				drawDesc[OP].mode = DESC_RO|DESC_CHANGE;
+			}
 			if (segPtr->type == SEG_CRVLIN) segPtr->type = SEG_FILCRCL;
 		} else {
-			if (segPtr->type == SEG_FILPOLY) segPtr->type = SEG_POLY;
+			if (segPtr->type == SEG_FILPOLY) {
+				segPtr->type = SEG_POLY;
+				drawData.open = FALSE;
+				drawDesc[OP].mode = DESC_CHANGE;
+			}
 			if (segPtr->type == SEG_FILCRCL) {
 				segPtr->type = SEG_CRVLIN;
 				segPtr->u.c.a0 = 0.0;
@@ -1007,9 +973,17 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			break;
 		}
 		if (drawData.open) {
-			if (segPtr->type == SEG_POLY && segPtr->u.p.polyType == FREEFORM) segPtr->u.p.polyType = POLYLINE;
+			if (segPtr->type == SEG_POLY && segPtr->u.p.polyType == FREEFORM) {
+				segPtr->u.p.polyType = POLYLINE;
+				drawData.filled = FALSE;
+				drawDesc[FL].mode = DESC_RO|DESC_CHANGE;
+			}
 		} else {
-			if (segPtr->type == SEG_POLY && segPtr->u.p.polyType == POLYLINE) segPtr->u.p.polyType = FREEFORM;
+			if (segPtr->type == SEG_POLY && segPtr->u.p.polyType == POLYLINE) {
+				segPtr->u.p.polyType = FREEFORM;
+				drawData.filled = FALSE;
+				drawDesc[FL].mode = DESC_CHANGE;
+			}
 		}
 		break;
 	case BX:
@@ -1033,6 +1007,13 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		SetTrkLayer( trk, drawData.layer);
 		break;
 	case LK:
+		if (drawData.lock_origin) {
+			drawDesc[RA].mode = 0;
+		} else {
+			drawDesc[RA].mode = DESC_RO;
+		}
+		drawData.rotate_angle = 0.0;
+		drawDesc[RA].mode |= DESC_CHANGE;
 		break;
 	case LT:
 		xx->lineType = drawData.lineType;
@@ -1042,7 +1023,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	}
 	drawData.oldE0 = drawData.endPt[0];
 	drawData.oldE1 = drawData.endPt[1];
-	drawData.oldAngle = drawData.angle;
+	drawData.oldAngle = drawData.rotate_angle;
 	drawData.oldOrigin = drawData.origin;
 	ComputeDrawBoundingBox( trk );
 	DrawNewTrack( trk );
@@ -1087,7 +1068,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	if ((xx->orig.x == 0.0) && (xx->orig.y == 0.0)) drawData.lock_origin = FALSE;
 	else drawData.lock_origin = TRUE;
 
-	drawData.rotate_angle = xx->angle;
+	drawData.rotate_angle = 0.0;
 
 	drawDesc[LK].mode = 0;
 
@@ -1101,13 +1082,19 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawData.length = FindDistance( drawData.endPt[0], drawData.endPt[1] );
 		drawData.angle = FindAngle( drawData.endPt[0], drawData.endPt[1] );
 		drawData.origin = xx->orig;
+		//Remove input Angle (if any)
+		UNREORIGIN(segPtr->u.l.pos[0], drawData.endPt[0], 0.0, xx->orig);
+		UNREORIGIN(segPtr->u.l.pos[1], drawData.endPt[1], 0.0, xx->orig);
+		xx->angle = 0.0;
 		drawDesc[LN].mode =
-		drawDesc[AL].mode =
+		drawDesc[LA].mode =
 		drawDesc[PV].mode = 0;
 		drawDesc[E0].mode =
 		drawDesc[OI].mode = 0;
 		drawDesc[E1].mode = 0;
 		drawDesc[RA].mode = 0;
+		if (!drawData.lock_origin) drawDesc[RA].mode = DESC_RO;
+		else drawDesc[RA].mode = 0;
 		switch (segPtr->type) {
 		case SEG_STRLIN:
 			title = _("Straight Line");
@@ -1147,12 +1134,16 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_CRVLIN:
 		REORIGIN( drawData.center, segPtr->u.c.center, xx->angle, xx->orig );
+		//Remove input Angle (if any)
+		UNREORIGIN(segPtr->u.c.center, drawData.center, 0.0, xx->orig);
+	    xx->angle = 0.0;
 		drawData.radius = fabs(segPtr->u.c.radius);
 		drawData.origin = xx->orig;
 		drawDesc[OI].mode = 0;
-		drawDesc[RA].mode =
 		drawDesc[CE].mode =
 		drawDesc[RD].mode = 0;
+		if (!drawData.lock_origin) drawDesc[RA].mode = DESC_RO;
+		else drawDesc[RA].mode = 0;
 		drawDesc[LT].mode = 0;
 		drawData.lineType = (wIndex_t)xx->lineType;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
@@ -1172,11 +1163,15 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_FILCRCL:
 		REORIGIN( drawData.center, segPtr->u.c.center, xx->angle, xx->orig );
+		//Remove input Angle (if any)
+		UNREORIGIN(segPtr->u.c.center, drawData.center, 0.0, xx->orig);
+	    xx->angle = 0.0;
 		drawData.radius = fabs(segPtr->u.c.radius);
 		drawData.origin = xx->orig;
 		drawDesc[OI].mode =
-		drawDesc[RA].mode =
 		drawDesc[FL].mode = 0;
+		if (!drawData.lock_origin) drawDesc[RA].mode = DESC_RO;
+		else drawDesc[RA].mode = 0;
 		drawData.filled = TRUE;
 		drawDesc[CE].mode =
 		drawDesc[RD].mode = 0;
@@ -1186,23 +1181,34 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		title = _("Filled Circle");
 		break;
 	case SEG_POLY:
+	case SEG_FILPOLY:;
+		BOOL_T filled = FALSE;
+		if (segPtr->type == SEG_FILPOLY) filled = TRUE;
 		REORIGIN(drawData.endPt[0],segPtr->u.p.pts[0].pt, xx->angle, xx->orig);
+		//Remove input Angle (if any)
+		for (int i=0;i<segPtr->u.p.cnt;i++) {
+			coOrd pt;
+			REORIGIN(pt,segPtr->u.p.pts[i].pt, xx->angle, xx->orig);
+			UNREORIGIN(segPtr->u.p.pts[i].pt, pt, 0.0, xx->orig);
+		}
+		xx->angle = 0.0;
 		drawDesc[PP].mode = 0;
 		drawData.pointCount = segPtr->u.p.cnt;
 		drawDesc[VC].mode = DESC_RO;
-		drawData.filled = FALSE;
+		drawData.filled = filled;
 		drawDesc[FL].mode = 0;
 		drawData.angle = 0.0;
-		drawDesc[RA].mode = 0;
+		if (!drawData.lock_origin) drawDesc[RA].mode = DESC_RO;
+		else drawDesc[RA].mode = 0;
 		drawData.origin = xx->orig;
 		drawDesc[OI].mode = 0;
-		drawData.open=FALSE;
-		drawDesc[OP].mode = 0;
+		drawData.open= FALSE;
+		drawDesc[OP].mode = filled?DESC_RO:0;
 		drawDesc[LT].mode = 0;
 		drawData.lineType = (wIndex_t)xx->lineType;
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
-				title = _("Rectangle");
+				title = filled?_("Filled Rectangle"):_("Rectangle");
 				drawDesc[OP].mode = DESC_IGNORE;
 				drawDesc[VC].mode = DESC_IGNORE;
 				drawData.width = FindDistance(segPtr->u.p.pts[0].pt, segPtr->u.p.pts[1].pt);
@@ -1218,57 +1224,32 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			case POLYLINE:
 				title = _("Polyline");
 				drawData.open=TRUE;
+				drawData.filled= FALSE;
+				drawDesc[FL].mode = DESC_RO;
 				break;
 			default:
-				title = _("Polygon");
-		}
-		break;
-	case SEG_FILPOLY:
-		REORIGIN(drawData.endPt[0],segPtr->u.p.pts[0].pt, xx->angle, xx->orig);
-		drawDesc[PP].mode = 0;
-		drawData.pointCount = segPtr->u.p.cnt;
-		drawDesc[VC].mode = DESC_RO;
-		drawData.filled = TRUE;
-		drawDesc[FL].mode = 0;
-		drawDesc[LW].mode = DESC_IGNORE;
-		drawData.angle = xx->angle;
-		drawDesc[RA].mode = 0;
-		drawData.origin = xx->orig;
-		drawDesc[OI].mode = DESC_RO;
-		drawData.open = FALSE;
-		switch (segPtr->u.p.polyType) {
-			case RECTANGLE:
-				title =_("Filled Rectangle");
-				drawDesc[VC].mode = DESC_IGNORE;
-				drawData.width = FindDistance(segPtr->u.p.pts[0].pt, segPtr->u.p.pts[1].pt);
-				drawDesc[WT].mode = 0;
-				drawData.height = FindDistance(segPtr->u.p.pts[0].pt, segPtr->u.p.pts[3].pt);
-				drawDesc[HT].mode = 0;
-				for(int i=0;i<4;i++) {
-					REORIGIN( drawData.endPt[i], segPtr->u.p.pts[i].pt, xx->angle, xx->orig );
-				}
-				drawDesc[E0].mode = DESC_IGNORE;
-				drawData.origin = xx->orig;
-				break;
-			default:
-				title = _("Filled Polygon");
+				title = filled?_("Filled Polygon"):_("Polygon");
 		}
 		break;
 	case SEG_TEXT:
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
-		drawData.angle = NormalizeAngle( xx->angle );
+		UNREORIGIN( segPtr->u.t.pos, drawData.endPt[0], 0.0, xx->orig );
+		xx->angle = 0.0;
+		drawData.angle = segPtr->u.t.angle;  //Text Angle
+		drawData.origin = xx->orig;
 		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
 		drawData.text[sizeof drawData.text-1] ='\0';
 		drawData.boxed = segPtr->u.t.boxed;
-		drawData.origin = xx->orig;
-		drawDesc[E0].mode =
 		drawDesc[TP].mode =
 		drawDesc[TS].mode =
 		drawDesc[TX].mode = 
 		drawDesc[TA].mode =
-		drawDesc[BX].mode =
-		drawDesc[RA].mode =
-	    drawDesc[OI].mode = 0;
+		drawDesc[LK].mode =
+		drawDesc[OI].mode =
+		drawDesc[BX].mode = 0;
+		if (!drawData.lock_origin) drawDesc[RA].mode = DESC_RO;
+		else drawDesc[RA].mode = 0;
+		drawDesc[E0].mode = DESC_IGNORE;
         drawDesc[CO].mode = 0;  /*Allow Text color setting*/
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Text");
@@ -1283,7 +1264,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 
 	drawData.oldE0 = drawData.endPt[0];
 	drawData.oldE1 = drawData.endPt[1];
-	drawData.oldAngle = drawData.angle;
+	drawData.oldAngle = drawData.rotate_angle;
 	drawData.oldOrigin = drawData.origin;
 
 
@@ -3142,13 +3123,13 @@ EXPORT track_p NewText(
 	tempSeg.type = SEG_TEXT;
 	tempSeg.color = color;
 	tempSeg.width = 0;
-	tempSeg.u.t.pos = zero;
+	tempSeg.u.t.pos = pos;
 	tempSeg.u.t.angle = angle;
 	tempSeg.u.t.fontP = NULL;
 	tempSeg.u.t.fontSize = textSize;
 	tempSeg.u.t.string = MyStrdup( text );
 	tempSeg.u.t.boxed = boxed;
-	trk = MakeDrawFromSeg1( index, pos, angle, &tempSeg );
+	trk = MakeDrawFromSeg1( index, zero, 0.0, &tempSeg );
 	return trk;
 }
 

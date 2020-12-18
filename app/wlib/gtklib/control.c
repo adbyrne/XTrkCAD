@@ -89,7 +89,17 @@ void wControlActive(
         abort();
     }
 
-    gtk_widget_set_sensitive(GTK_WIDGET(b->widget), active);
+    if (b->type == B_LIST || b->type == B_DROPLIST ) {
+
+    	gtk_widget_set_sensitive(gtk_bin_get_child(GTK_BIN(b->widget)), active);
+    	gtk_combo_box_set_button_sensitivity(GTK_COMBO_BOX(b->widget),
+    	  		active?GTK_SENSITIVITY_ON:GTK_SENSITIVITY_OFF);
+
+    } else {
+
+    	gtk_widget_set_sensitive(GTK_WIDGET(b->widget), active);
+
+    }
 }
 
 /**

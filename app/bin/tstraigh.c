@@ -87,9 +87,9 @@ static descData_t strDesc[] = {
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &strData.endPt[1] },
 /*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1] },
 /*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
-/*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
+/*AN*/	{ DESC_ANGLE, N_("Track Angle"), &strData.angle },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Lock"), &strData.pivot },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber },
 		{ DESC_NULL } };
 
@@ -172,49 +172,6 @@ static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T fin
 		strDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
 		/*return;*/
 		break;
-#ifdef LATER
-		update = UpdateDescStraight( 0, &strDesc[E0], &strDesc[E1], &strDesc[LN], &strDesc[AN], strData.pivot );
-		break;
-	case E1:
-		update = UpdateDescStraight( 1, &strDesc[E0], &strDesc[E1], &strDesc[LN], &strDesc[AN], strData.pivot );
-		break;
-	case E1:
-		strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
-		strData.angle = FindAngle( strData.endPt[0], strData.endPt[1] );
-		strDesc[1-inx].mode |= DESC_CHANGE;
-		strDesc[LN].mode |= DESC_CHANGE;
-		strDesc[AN].mode |= DESC_CHANGE;
-		break;
-	case LN:
-		if ( strData.length < minLength ) {
-			ErrorMessage( );
-			strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
-			strDesc[LN].mode |= DESC_CHANGE;
-			break;
-		}
-	case AN:
-		switch (strData.pivot) {
-		case DESC_PIVOT_FIRST:
-			Translate( &strData.endPt[1], strData.endPt[0], strData.angle, strData.length );
-			strDesc[E1].mode |= DESC_CHANGE;
-			break;
-		case DESC_PIVOT_SECOND:
-			Translate( &strData.endPt[0], strData.endPt[1], strData.angle+180.0, strData.length );
-			strDesc[E0].mode |= DESC_CHANGE;
-			break;
-		case DESC_PIVOT_MID:
-			mid.x = (strData.endPt[0].x+strData.endPt[1].x)/2.0;
-			mid.y = (strData.endPt[0].y+strData.endPt[1].y)/2.0;
-			Translate( &strData.endPt[0], mid, strData.angle+180.0, strData.length/2.0 );
-			Translate( &strData.endPt[1], mid, strData.angle, strData.length/2.0 );
-			strDesc[E0].mode |= DESC_CHANGE;
-			strDesc[E1].mode |= DESC_CHANGE;
-			break;
-		default:
-			break;
-		}
-		break;
-#endif
 	case LY:
 		SetTrkLayer( trk, strData.layerNumber);
 		break;
