@@ -800,4 +800,7 @@ void wStatusSetWidth(wStatus_p b, wPos_t width);
 
 #define PREFSECTION "Preference"
 #define LARGEICON   "LargeIcons"
+#define DPISET      "ScreenDPI"
+#define PRINTSCALE    "PrintScale"
+#define PRINTTEXTSCALE  "PrintTextScale"
 #endif
