@@ -64,6 +64,7 @@ typedef struct {
 		DIST_T width;
 		DIST_T spacing;
 		} tieData_t, *tieData_p;
+
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -82,7 +83,11 @@ BOOL_T DoSetScale( char * );
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void LoadScaleList( wList_p );
 void LoadGaugeList( wList_p, SCALEDESCINX_T );
-BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
+
+typedef enum {FIT_STRUCTURE, FIT_TURNOUT, FIT_CAR} SCALE_FIT_TYPE_T;
+typedef enum {FIT_NONE, FIT_COMPATIBLE, FIT_EXACT} SCALE_FIT_T;
+SCALE_FIT_T CompatibleScale( SCALE_FIT_TYPE_T, SCALEINX_T, SCALEINX_T );
+
 BOOL_T DoSetScaleDesc( void );
 
 extern unsigned int curLayer;

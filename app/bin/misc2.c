@@ -382,53 +382,100 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 	return si;
 }
 
+/*
+ * Evaluate the fit of a part scale1 to a definition in scale2 for a type.
+ *
+ * The rules differ by type of object.
+ *
+ * Tracks need to be the same gauge to be a fit. If they are the same scale they are exact.
+ * If the gauge is the same, but the scale is different they are compatible.
+ * There are well known exceptions where the scale is not the same but we call them exact.
+ *
+ * Structures need to be the same scale to be exact. If they are within 15% they are compatible.
+ *
+ * Cars need to be the same gauge and scale to be exact.
+ * If they are the same gauge, but within 15% of the scale they are compatible.
+ *
+ *\param type (FIT_TURNOUT,FIT_STRUCTURE,FIT_CAR)
+ *\param scale1 the input scale
+ *\param scale2 the scale to check against
+ *
+ *\return FIT_EXACT, FIT_COMPATIBLE, FIT_NONE
+ */
 
-EXPORT BOOL_T CompatibleScale(
-	BOOL_T isTurnout,
+EXPORT SCALE_FIT_T CompatibleScale(
+	SCALE_FIT_TYPE_T type,
 	SCALEINX_T scale1,
 	SCALEINX_T scale2 )
 {
 	if ( scale1 == scale2 )
-		return TRUE;
+		return FIT_EXACT;
 	if ( scale1 == SCALE_DEMO || scale2 == SCALE_DEMO )
-		return FALSE;
+		return FIT_NONE;
 	if ( scale1 == demoScaleInx || scale2 == demoScaleInx )
-		return FALSE;
-	if ( isTurnout ) {
-		if ( includeSameGaugeTurnouts &&
-			 scaleInfo(scale1).gauge == scaleInfo(scale2).gauge )
-			return TRUE;
-	} else {
+		return FIT_NONE;
+	switch(type) {
+	case FIT_TURNOUT:
 		if ( scale1 == SCALE_ANY )
-			return TRUE;
-		if ( scaleInfo(scale1).ratio == scaleInfo(scale2).ratio )
-			return TRUE;
+			return FIT_EXACT;
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge &&
+				scaleInfo(scale1).scale == scaleInfo(scale2).scale)
+			return FIT_EXACT;
 		// handle special cases
-		// if layout is OO or HO scale, HO/OO scale buildings are considered compatible
+		// if layout is OO or HO scale, HO/OO scale buildings are considered exact
 		char *ScaleName1 = GetScaleName(scale1);
 		char *ScaleName2 = GetScaleName(scale2);
-		if (!strcmp(ScaleName2, "HO") &&
-			!strcmp(ScaleName1, "OO")) {
-			return TRUE;
-		}
 		if (!strcmp(ScaleName2, "OO") &&
 			!strcmp(ScaleName1, "HO")) {
-			return TRUE;
+			return FIT_EXACT;
 		}
 		//if layout is in Japanese or British N scale, N scale is exact
 		if ((!strcmp(ScaleName2, "N(UK)") ||
 			 !strcmp(ScaleName2, "N(JP)")) &&
 			 !strcmp(ScaleName1, "N")) {
-			return TRUE;
+			return FIT_EXACT;
 		}
-		//O in Germany or UK is a fit for O generally
+		//O in Germany or UK is a exact fit for O generally
 		if ((!strcmp(ScaleName2, "O(EU)") ||
 			 !strcmp(ScaleName2, "O(Fine)")) &&
 			 !strcmp(ScaleName1, "O") ) {
-			return TRUE;
+			return FIT_EXACT;
 		}
+		//Any remain gauge equivalents are compatible -
+		// Note this seems redundant if we implement search filtering
+		if ( includeSameGaugeTurnouts &&
+			scaleInfo(scale1).gauge == scaleInfo(scale2).gauge )
+			return FIT_COMPATIBLE;
+		break;
+	case FIT_STRUCTURE:
+		if ( scale1 == SCALE_ANY )
+			return FIT_EXACT;
+		if ( scaleInfo(scale1).ratio == scaleInfo(scale2).ratio )
+			return FIT_EXACT;
+		//15% scale match is compatible for structures
+		if (scaleInfo(scale1).ratio/scaleInfo(scale2).ratio>=0.85 &&
+				scaleInfo(scale1).ratio/scaleInfo(scale2).ratio<=1.15)
+			return FIT_COMPATIBLE;
+		break;
+	case FIT_CAR:
+		if ( scale1 == SCALE_ANY )
+				return FIT_EXACT;
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge &&
+				scaleInfo(scale1).scale == scaleInfo(scale2).scale)
+				return FIT_EXACT;
+		//Same gauge and 15% scale match is compatible for cars
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge) {
+			if (scaleInfo(scale1).ratio/scaleInfo(scale2).ratio>=0.85 &&
+					scaleInfo(scale1).ratio/scaleInfo(scale2).ratio<=1.15)
+				return FIT_COMPATIBLE;
+		}
+		break;
+
+	default:;
 	}
-	return FALSE;
+
+	return FIT_NONE;
+
 }
 
 /** Split the scale and the gauge description for a given combination. Eg HOn3 will be
