@@ -240,6 +240,7 @@ EXPORT void
 UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
 {
     if (!entry->contents) {
+    	MyFree(entry->contents);
         entry->contents = MyStrdup(contents);
     }
 
