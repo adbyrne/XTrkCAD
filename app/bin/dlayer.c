@@ -1474,8 +1474,8 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
             if (contents_end[0] == '.') contents_end[0] = '\0';
             strcpy(contents,contents_start);
             contents_end[0] = '.';
-			newEntry = InsertInOrder(catalog,contents);
-            UpdateCatalogEntry(newEntry, fileName, contents);
+			newEntry = InsertInOrder(catalog,contents, NULL);
+            UpdateCatalogEntry(newEntry, fileName, contents, NULL);
             free(fileName);
             fileName = NULL;
         }
