@@ -88,6 +88,8 @@ typedef enum {FIT_STRUCTURE, FIT_TURNOUT, FIT_CAR} SCALE_FIT_TYPE_T;
 typedef enum {FIT_NONE, FIT_COMPATIBLE, FIT_EXACT} SCALE_FIT_T;
 SCALE_FIT_T CompatibleScale( SCALE_FIT_TYPE_T, SCALEINX_T, SCALEINX_T );
 
+SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * scale2);
+
 BOOL_T DoSetScaleDesc( void );
 
 extern unsigned int curLayer;
