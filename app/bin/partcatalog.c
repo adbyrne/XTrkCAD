@@ -93,17 +93,27 @@ InitCatalog(void)
 void
 DestroyCatalog(Catalog *catalog)
 {
-	CatalogEntry *entry;
-	CatalogEntry *tmp;
-	DL_FOREACH_SAFE(catalog->head, entry, tmp)
+	CatalogEntry *current = catalog->head;
+	CatalogEntry *entry = NULL;
+	CatalogEntry *tmp = NULL, *old = NULL;
+	DL_FOREACH_SAFE(current, entry, tmp)
 	{
+		//if (old) MyFree(old);
+		old = NULL;
 		for (unsigned int i = 0; i < entry->files; i++) {
 		   MyFree(entry->fullFileName[i]);
+		   entry->fullFileName[i] = NULL;
 		}
+		entry->files = 0;
 		MyFree(entry->contents);
+		entry->contents = NULL;
 		MyFree(entry->tag);
-		MyFree(entry);
+		entry->tag = NULL;
+		old = entry;
+		DL_DELETE(catalog->head,entry);
 	}
+
+	catalog->head = NULL;
 }
 
 /**
@@ -119,6 +129,7 @@ InsertIntoCatalogAfter(CatalogEntry *entry)
 {
     CatalogEntry *newEntry = (CatalogEntry *)MyMalloc(sizeof(CatalogEntry));
     newEntry->next = entry->next;
+    newEntry->prev = entry;
     entry->next = newEntry;
     newEntry->files = 0;
     newEntry->contents = NULL;
@@ -154,16 +165,22 @@ CatalogDiscard(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
     CatalogEntry *element;
-    CatalogEntry *tmp;
+    CatalogEntry *tmp,*old = NULL;
 
     DL_FOREACH_SAFE(current, element, tmp) {
+    	//if (old) MyFree(old);
+    	old = NULL;
     	MyFree(element->contents);
+    	element->contents = NULL;
     	MyFree(element->tag);
+    	element->tag = NULL;
     	for (unsigned int i = 0; i < element->files; i++) {
     	    MyFree(element->fullFileName[i]);
+    	    element->fullFileName[i] = NULL;
     	}
-        DL_DELETE(current, element);
-        MyFree(element);
+    	element->files = 0;
+        old = element;
+        DL_DELETE(catalog->head,element);
     }
 
     catalog->head = NULL;
@@ -895,10 +912,12 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                 for (int j = 0; j < entries->references->cnt; j++) {
                     CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
                     CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
-                    newEntry->contents = foundEntry->contents;
+                    newEntry->contents = MyStrdup(foundEntry->contents);
+                    newEntry->tag = MyStrdup(foundEntry->tag);
                     newEntry->files = foundEntry->files;
-                    memcpy(newEntry->fullFileName, foundEntry->fullFileName,
-                           sizeof(char *) * MAXFILESPERCONTENT);
+                    for (int i=0;i<newEntry->files;i++) {
+                    	newEntry->fullFileName[i] = MyStrdup(foundEntry->fullFileName[i]);
+                    }
 
                     DL_APPEND(results->subCatalog.head, newEntry);
                 }
@@ -912,13 +931,19 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                     for (int j = 0; j < entries->references->cnt; j++) {
                         CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
 
-                        if (foundEntry->contents == current->contents) {
+                        if (strcmp(foundEntry->contents,current->contents)==0) {
                             found = TRUE;
                             break;
                         }
                     }
                     if (!found) {
                         DL_DELETE(results->subCatalog.head, current);
+                        MyFree(current->contents);
+                        MyFree(current->tag);
+                        for (int i=0;i<current->files;i++) {
+                               MyFree(current->fullFileName[i]);
+                        }
+                        MyFree(current);
                     }
                 }
             }
