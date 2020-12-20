@@ -214,7 +214,7 @@ EXPORT STATUS_T CreateCurve(
 					}
 				}
 		    } else {
-		    	if ((t = OnTrack(&p, FALSE, FALSE)) != NULL) {
+		    	if (((t = OnTrack(&p, FALSE, FALSE)) != NULL) && IsClose(FindDistance(p,pos))) {
 		    		if (!IsTrack(t)) {
 		    			pos = p;
 		    			found = TRUE;

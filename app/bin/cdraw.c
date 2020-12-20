@@ -2781,16 +2781,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionRDown:
 	case wActionRDrag:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		if (!((MyGetKeyState() & WKEY_ALT) != magneticSnap)) {
-			SnapPos( &pos );
-		}
 		return DrawGeomMouse( action, pos, &drawCmdContext);
 	case wActionLUp:
 	case wActionRUp:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		//if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
-		//		SnapPos( &pos );   Remove Snap at end of action - it will have been imposed in Geom if needed
-		//}
 		drawCmdContext.show = TRUE;
 		int rc = DrawGeomMouse( action, pos, &drawCmdContext);
 		// Put up text entry boxes ready for updates if the result was continue

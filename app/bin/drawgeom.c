@@ -309,7 +309,8 @@ STATUS_T DrawGeomMouse(
 				case OP_BENCH:
 				case OP_POLY:
 				case OP_FILLPOLY:
-				case OP_POLYLINE:
+				case OP_POLYLINE:;
+					BOOL_T found = FALSE;
 					if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap ) {
 						coOrd p = pos;
 						track_p t;
@@ -317,18 +318,21 @@ STATUS_T DrawGeomMouse(
 							if (context->Op == OP_DIMLINE ) {
 								CreateEndAnchor(p,FALSE);
 								wSetCursor(mainD.d,wCursorNone);
+								found = TRUE;
 							} else if (!IsTrack(t)) {
 								CreateEndAnchor(p,FALSE);
 								wSetCursor(mainD.d,wCursorNone);
+								found = TRUE;
 							}
 						} else {
-							p = pos;
 							if (FindTempNear(context,&p)) {
 								CreateEndAnchor(p,FALSE);
 								wSetCursor(mainD.d,wCursorNone);
+								found = TRUE;
 							}
 						}
 					}
+					if (!found) SnapPos(&pos);
 					break;
 				default:
 					;
@@ -361,7 +365,7 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_BENCH) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
 			BOOL_T found = FALSE;
-			if (((MyGetKeyState() & WKEY_ALT) ==0) == magneticSnap ) {
+			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap ) {
 				coOrd p = pos;
 				track_p t;
 				if (((t=OnTrack(&p,FALSE,FALSE))!=NULL ) && (IsClose(FindDistance(p,pos)))) {
