@@ -805,6 +805,8 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 					default:
 						break;
 				}
+				drawData.length = 2*M_PI*segPtr->u.c.radius*segPtr->u.c.a1/360;
+				drawDesc[LN].mode = DESC_RO|DESC_CHANGE;
 				break;
 			case SEG_FILCRCL:
 				break;			//Doesn't Use
@@ -890,7 +892,8 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		}
 		drawDesc[CE].mode |= DESC_CHANGE;
 		segPtr->u.c.radius = drawData.radius;
-		drawDesc[LN].mode |= DESC_CHANGE;
+		drawData.length = 2*M_PI*segPtr->u.c.radius*(segPtr->type==SEG_CRVLIN?segPtr->u.c.a1/360:1.0);
+		drawDesc[LN].mode = DESC_RO|DESC_CHANGE;
 		break;
 	case A1:  //Angle of first point of curve
 		segPtr->u.c.a0 = NormalizeAngle(drawData.angle0);
@@ -952,7 +955,11 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_RO|DESC_CHANGE;
 			}
-			if (segPtr->type == SEG_CRVLIN) segPtr->type = SEG_FILCRCL;
+			if (segPtr->type == SEG_CRVLIN) {
+				segPtr->type = SEG_FILCRCL;
+				drawData.length = 0.0;
+				drawDesc[LN].mode = DESC_RO|DESC_CHANGE;
+			}
 		} else {
 			if (segPtr->type == SEG_FILPOLY) {
 				segPtr->type = SEG_POLY;
@@ -963,6 +970,8 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				segPtr->type = SEG_CRVLIN;
 				segPtr->u.c.a0 = 0.0;
 				segPtr->u.c.a1 = 360.0;
+				drawData.length = 2*M_PI*segPtr->u.c.radius;
+				drawDesc[LN].mode = DESC_RO|DESC_CHANGE;
 			}
 		}
 		break;
@@ -1150,10 +1159,14 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			title = _("Circle");
 			drawDesc[FL].mode = 0;
 			drawData.filled = FALSE;
+			drawDesc[LN].mode = DESC_RO;
+			drawData.length = 2*M_PI*segPtr->u.c.radius;
 		} else {
 			drawData.angle = segPtr->u.c.a1;
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
 			drawData.angle1 = NormalizeAngle( drawData.angle0+drawData.angle );
+			drawDesc[LN].mode = DESC_RO;
+			drawData.length = 2*M_PI*segPtr->u.c.radius*segPtr->u.c.a1/360;
 			drawDesc[AL].mode =
 			drawDesc[A1].mode =
 			drawDesc[A2].mode = 0;
@@ -1173,6 +1186,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		if (!drawData.lock_origin) drawDesc[RA].mode = DESC_RO;
 		else drawDesc[RA].mode = 0;
 		drawData.filled = TRUE;
+		drawData.length = 0.0;
+		drawDesc[LN].mode = DESC_RO;
 		drawDesc[CE].mode =
 		drawDesc[RD].mode = 0;
 		drawDesc[PV].mode = 0;
