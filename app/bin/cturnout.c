@@ -425,7 +425,7 @@ EXPORT turnoutInfo_t * TurnoutAdd( long mode, SCALEINX_T scale, wList_p list, co
 		to = turnoutInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
 			 to->segCnt > 0 &&
-			 CompatibleScale( FIT_TURNOUT, to->scaleInx, scale ) &&
+			 (FIT_NONE != CompatibleScale( FIT_TURNOUT, to->scaleInx, scale )) &&
 			 /*strcasecmp( to->scale, scaleName ) == 0 && */
 			 ( epCnt <= 0 || epCnt == to->endCnt ) ) {
 			if (to1==NULL)
@@ -3011,7 +3011,7 @@ EXPORT void AddHotBarTurnouts( void )
 		to = turnoutInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 				to->segCnt > 0 &&
-				CompatibleScale( FIT_TURNOUT, to->scaleInx, GetLayoutCurScale()) ) )
+				(FIT_NONE != CompatibleScale( FIT_TURNOUT, to->scaleInx, GetLayoutCurScale())) ) )
 				continue;
 		AddHotBarElement( to->contentsLabel, to->size, to->orig, TRUE, FALSE, to->barScale, to, CmdTurnoutHotBarProc );
 	}

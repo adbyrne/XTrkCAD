@@ -320,7 +320,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list, coO
 		to = structureInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
 			 to->segCnt > 0 &&
-			 CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale ) &&
+			 (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale )) &&
 			 to->segCnt != 0 ) {
 			if (to1 == NULL)
 				to1 = to;
@@ -1103,7 +1103,7 @@ EXPORT void AddHotBarStructures( void )
 		to = structureInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 			    to->segCnt > 0 &&
-			    CompatibleScale( FIT_STRUCTURE, to->scaleInx, GetLayoutCurScale()) ) )
+			    (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, GetLayoutCurScale())) ) )
 			 /*( (strcmp( to->scale, "*" ) == 0 && strcasecmp( curScaleName, "DEMO" ) != 0 ) ||
 			   strncasecmp( to->scale, curScaleName, strlen(to->scale) ) == 0 ) ) )*/
 				continue;

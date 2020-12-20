@@ -1752,7 +1752,7 @@ EXPORT int CarAvailableCount( void )
 	carItem_t * item;
 	for ( inx=0; inx < carItemHotbar_da.cnt; inx ++ ) {
 		item = carItemHotbar(inx);
-		if (!CompatibleScale( FIT_CAR, item->scaleInx, GetLayoutCurScale() ))
+		if (FIT_NONE == CompatibleScale( FIT_CAR, item->scaleInx, GetLayoutCurScale()))
 			continue;
 		cnt++;
 	}
@@ -1774,7 +1774,7 @@ EXPORT void AddHotBarCarDesc( void )
 		item1 = carItemHotbar(inx);
 		if ( item1->car && !IsTrackDeleted(item1->car) )
 			continue;
-		if (!CompatibleScale(FIT_CAR,item1->scaleInx,GetLayoutCurScale()))
+		if ( FIT_NONE == CompatibleScale(FIT_CAR,item1->scaleInx,GetLayoutCurScale()))
 			continue;
 		if ( (carHotbarModes[carHotbarModeInx]&0xF000)!=0 || ( item0 == NULL || Cmp_carHotbar( &item0, &item1 ) != 0 ) ) {
 #ifdef DESCFIX
