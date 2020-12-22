@@ -23,19 +23,19 @@ msgstr ""
 #: ../bin/archive.c:239 ../bin/archive.c:294 ../bin/archive.c:307
 #: ../bin/archive.c:315 ../bin/archive.c:365 ../bin/archive.c:400
 #: ../bin/archive.c:416 ../bin/archive.c:426 ../bin/archive.c:449
-#: ../bin/cblock.c:491 ../bin/cswitchmotor.c:476 ../bin/dbench.c:147
-#: ../bin/dcar.c:4519 ../bin/dcar.c:4705 ../bin/dcar.c:4715 ../bin/dcar.c:4763
-#: ../bin/dcar.c:4770 ../bin/dcar.c:4788 ../bin/dcar.c:4801 ../bin/dcar.c:4806
-#: ../bin/dcar.c:4835 ../bin/dcar.c:5000 ../bin/directory.c:65
+#: ../bin/cblock.c:493 ../bin/cswitchmotor.c:476 ../bin/dbench.c:147
+#: ../bin/dcar.c:4521 ../bin/dcar.c:4707 ../bin/dcar.c:4717 ../bin/dcar.c:4765
+#: ../bin/dcar.c:4772 ../bin/dcar.c:4790 ../bin/dcar.c:4803 ../bin/dcar.c:4808
+#: ../bin/dcar.c:4837 ../bin/dcar.c:5002 ../bin/directory.c:65
 #: ../bin/directory.c:100 ../bin/directory.c:107 ../bin/directory.c:138
 #: ../bin/directory.c:154 ../bin/dxfoutput.c:193 ../bin/fileio.c:242
-#: ../bin/fileio.c:699 ../bin/fileio.c:900 ../bin/fileio.c:1029
-#: ../bin/fileio.c:1096 ../bin/fileio.c:1102 ../bin/fileio.c:1178
-#: ../bin/fileio.c:1188 ../bin/fileio.c:1520 ../bin/fileio.c:1570
-#: ../bin/fileio.c:1626 ../bin/macro.c:179 ../bin/macro.c:832
+#: ../bin/fileio.c:694 ../bin/fileio.c:895 ../bin/fileio.c:1024
+#: ../bin/fileio.c:1091 ../bin/fileio.c:1097 ../bin/fileio.c:1173
+#: ../bin/fileio.c:1183 ../bin/fileio.c:1510 ../bin/fileio.c:1560
+#: ../bin/fileio.c:1616 ../bin/macro.c:179 ../bin/macro.c:832
 #: ../bin/macro.c:879 ../bin/macro.c:900 ../bin/macro.c:1045
 #: ../bin/macro.c:1062 ../bin/macro.c:1334 ../bin/param.c:2090
-#: ../bin/paramfile.c:280 ../bin/paramfilelist.c:405 ../bin/track.c:1128
+#: ../bin/paramfile.c:283 ../bin/paramfilelist.c:405 ../bin/track.c:1128
 #: ../bin/track.c:1652 ../bin/track.c:1958 ../bin/track.c:1962
 #: ../bin/track.c:1974 ../bin/track.c:2038 ../wlib/gtklib/wpref.c:251
 #: ../wlib/gtklib/wpref.c:258
@@ -180,7 +180,7 @@ msgstr "Dewiswch ben arall Bezier - cadwch at %s pen"
 msgid "Control Arm 1 is too short, try again"
 msgstr "Mae braich reoli 1 yn rhy fyr. Ceisio eto."
 
-#: ../bin/cblock.c:111 ../bin/cblock.c:123 ../bin/cblock.c:168
+#: ../bin/cblock.c:111 ../bin/cblock.c:123 ../bin/cblock.c:169
 #: ../bin/ccontrol.c:172 ../bin/ccontrol.c:426 ../bin/compound.c:638
 #: ../bin/csensor.c:164 ../bin/csensor.c:390 ../bin/csignal.c:239
 #: ../bin/csignal.c:499 ../bin/csignal.c:510 ../bin/csignal.c:536
@@ -189,7 +189,7 @@ msgstr "Mae braich reoli 1 yn rhy fyr. Ceisio eto."
 msgid "Name"
 msgstr "Enw"
 
-#: ../bin/cblock.c:112 ../bin/cblock.c:124 ../bin/cblock.c:169
+#: ../bin/cblock.c:112 ../bin/cblock.c:124 ../bin/cblock.c:170
 #: ../bin/csensor.c:166 ../bin/csensor.c:396 ../bin/csignal.c:499
 #: ../bin/csignal.c:538
 msgid "Script"
@@ -199,43 +199,43 @@ msgstr "Sgript"
 msgid "Segments"
 msgstr "Segmentau"
 
-#: ../bin/cblock.c:170 ../bin/cdraw.c:525 ../bin/cdraw.c:1447
-#: ../bin/cdraw.c:1593 ../bin/cdraw.c:2601 ../bin/cdraw.c:2829
-#: ../bin/cdraw.c:2866 ../bin/ctodesgn.c:175 ../bin/ctodesgn.c:176
-#: ../bin/ctodesgn.c:177 ../bin/ctodesgn.c:178 ../bin/ctodesgn.c:190
-#: ../bin/ctodesgn.c:191 ../bin/ctodesgn.c:241 ../bin/ctodesgn.c:244
-#: ../bin/ctodesgn.c:264 ../bin/ctodesgn.c:269 ../bin/ctodesgn.c:301
-#: ../bin/ctodesgn.c:308 ../bin/ctodesgn.c:310 ../bin/ctodesgn.c:330
-#: ../bin/ctodesgn.c:335 ../bin/ctodesgn.c:367 ../bin/ctodesgn.c:374
-#: ../bin/ctodesgn.c:375 ../bin/ctodesgn.c:396 ../bin/ctodesgn.c:399
-#: ../bin/ctodesgn.c:402 ../bin/ctodesgn.c:437 ../bin/ctodesgn.c:441
-#: ../bin/ctodesgn.c:448 ../bin/ctodesgn.c:449 ../bin/ctodesgn.c:450
-#: ../bin/ctodesgn.c:472 ../bin/ctodesgn.c:474 ../bin/ctodesgn.c:492
-#: ../bin/ctodesgn.c:494 ../bin/ctodesgn.c:513 ../bin/ctodesgn.c:515
-#: ../bin/ctodesgn.c:542 ../bin/ctodesgn.c:562 ../bin/ctodesgn.c:582
-#: ../bin/ctodesgn.c:602 ../bin/ctodesgn.c:640 ../bin/ctodesgn.c:659
-#: ../bin/ctodesgn.c:660 ../bin/ctrain.c:186 ../bin/tbezier.c:264
+#: ../bin/cblock.c:171 ../bin/cdraw.c:526 ../bin/cdraw.c:1443
+#: ../bin/cdraw.c:1589 ../bin/cdraw.c:2599 ../bin/cdraw.c:2821
+#: ../bin/cdraw.c:2858 ../bin/ctodesgn.c:177 ../bin/ctodesgn.c:178
+#: ../bin/ctodesgn.c:179 ../bin/ctodesgn.c:180 ../bin/ctodesgn.c:192
+#: ../bin/ctodesgn.c:193 ../bin/ctodesgn.c:243 ../bin/ctodesgn.c:246
+#: ../bin/ctodesgn.c:266 ../bin/ctodesgn.c:271 ../bin/ctodesgn.c:303
+#: ../bin/ctodesgn.c:310 ../bin/ctodesgn.c:312 ../bin/ctodesgn.c:332
+#: ../bin/ctodesgn.c:337 ../bin/ctodesgn.c:369 ../bin/ctodesgn.c:376
+#: ../bin/ctodesgn.c:377 ../bin/ctodesgn.c:398 ../bin/ctodesgn.c:401
+#: ../bin/ctodesgn.c:404 ../bin/ctodesgn.c:439 ../bin/ctodesgn.c:443
+#: ../bin/ctodesgn.c:450 ../bin/ctodesgn.c:451 ../bin/ctodesgn.c:452
+#: ../bin/ctodesgn.c:474 ../bin/ctodesgn.c:476 ../bin/ctodesgn.c:494
+#: ../bin/ctodesgn.c:496 ../bin/ctodesgn.c:515 ../bin/ctodesgn.c:517
+#: ../bin/ctodesgn.c:544 ../bin/ctodesgn.c:564 ../bin/ctodesgn.c:584
+#: ../bin/ctodesgn.c:604 ../bin/ctodesgn.c:642 ../bin/ctodesgn.c:661
+#: ../bin/ctodesgn.c:662 ../bin/ctrain.c:186 ../bin/tbezier.c:264
 #: ../bin/tcornu.c:317 ../bin/tcurve.c:388 ../bin/tstraigh.c:89
 msgid "Length"
 msgstr "Hyd"
 
-#: ../bin/cblock.c:171 ../bin/cdraw.c:517 ../bin/compound.c:613
+#: ../bin/cblock.c:172 ../bin/cdraw.c:517 ../bin/compound.c:613
 #: ../bin/tbezier.c:251 ../bin/tcornu.c:304 ../bin/tcurve.c:380
 #: ../bin/tease.c:519 ../bin/tstraigh.c:85
 msgid "End Pt 1: X,Y"
 msgstr "Diwedd Rhan 1: X,Y"
 
-#: ../bin/cblock.c:172 ../bin/cdraw.c:518 ../bin/compound.c:618
+#: ../bin/cblock.c:173 ../bin/cdraw.c:518 ../bin/compound.c:618
 #: ../bin/tbezier.c:258 ../bin/tcornu.c:309 ../bin/tcurve.c:382
 #: ../bin/tease.c:521 ../bin/tstraigh.c:87
 msgid "End Pt 2: X,Y"
 msgstr "Diwedd Rhan 2: X,Y"
 
-#: ../bin/cblock.c:195 ../bin/cblock.c:207 ../bin/cblock.c:575
-#: ../bin/cblock.c:596 ../bin/cblock.c:604 ../bin/cblock.c:674
-#: ../bin/cblock.c:795 ../bin/cblock.c:807 ../bin/cblock.c:845
+#: ../bin/cblock.c:196 ../bin/cblock.c:208 ../bin/cblock.c:577
+#: ../bin/cblock.c:598 ../bin/cblock.c:606 ../bin/cblock.c:676
+#: ../bin/cblock.c:797 ../bin/cblock.c:809 ../bin/cblock.c:847
 #: ../bin/ccontrol.c:206 ../bin/ccontrol.c:219 ../bin/ccontrol.c:231
-#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2660
+#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2658
 #: ../bin/cgroup.c:1065 ../bin/cgroup.c:1132 ../bin/cgroup.c:1160
 #: ../bin/cgroup.c:1210 ../bin/cgroup.c:1232 ../bin/cgroup.c:1320
 #: ../bin/cgroup.c:1698 ../bin/cnote.c:69 ../bin/compound.c:674
@@ -246,18 +246,18 @@ msgstr "Diwedd Rhan 2: X,Y"
 #: ../bin/cselect.c:2060 ../bin/csensor.c:195 ../bin/csensor.c:207
 #: ../bin/csensor.c:445 ../bin/csignal.c:268 ../bin/csignal.c:667
 #: ../bin/csignal.c:735 ../bin/csnap.c:576 ../bin/csnap.c:705
-#: ../bin/cstruct.c:974 ../bin/cstruct.c:1104 ../bin/cswitchmotor.c:251
+#: ../bin/cstruct.c:993 ../bin/cstruct.c:1123 ../bin/cswitchmotor.c:251
 #: ../bin/cswitchmotor.c:263 ../bin/cswitchmotor.c:275
 #: ../bin/cswitchmotor.c:287 ../bin/cswitchmotor.c:545
 #: ../bin/cswitchmotor.c:581 ../bin/cswitchmotor.c:716
-#: ../bin/cswitchmotor.c:747 ../bin/ctext.c:174 ../bin/ctodesgn.c:209
-#: ../bin/ctodesgn.c:1204 ../bin/ctodesgn.c:1340 ../bin/ctodesgn.c:1975
-#: ../bin/ctodesgn.c:2090 ../bin/ctodesgn.c:2389 ../bin/ctodesgn.c:2667
-#: ../bin/ctrain.c:206 ../bin/cturnout.c:2919 ../bin/cturnout.c:3058
+#: ../bin/cswitchmotor.c:747 ../bin/ctext.c:174 ../bin/ctodesgn.c:211
+#: ../bin/ctodesgn.c:1206 ../bin/ctodesgn.c:1342 ../bin/ctodesgn.c:1977
+#: ../bin/ctodesgn.c:2092 ../bin/ctodesgn.c:2391 ../bin/ctodesgn.c:2669
+#: ../bin/ctrain.c:206 ../bin/cturnout.c:2899 ../bin/cturnout.c:3038
 #: ../bin/cundo.c:161 ../bin/cundo.c:166 ../bin/dbitmap.c:68
 #: ../bin/dbitmap.c:125 ../bin/dbitmap.c:203 ../bin/dbitmap.c:238
-#: ../bin/dcar.c:3823 ../bin/dcar.c:4018 ../bin/dcar.c:4022 ../bin/dcar.c:4026
-#: ../bin/dcar.c:4031 ../bin/dcar.c:4335 ../bin/dcar.c:4443 ../bin/dcar.c:4825
+#: ../bin/dcar.c:3825 ../bin/dcar.c:4020 ../bin/dcar.c:4024 ../bin/dcar.c:4028
+#: ../bin/dcar.c:4033 ../bin/dcar.c:4337 ../bin/dcar.c:4445 ../bin/dcar.c:4827
 #: ../bin/dcmpnd.c:395 ../bin/dcmpnd.c:406 ../bin/dcmpnd.c:538
 #: ../bin/dcustmgm.c:221 ../bin/dcustmgm.c:227 ../bin/dcustmgm.c:236
 #: ../bin/dcustmgm.c:261 ../bin/dease.c:242 ../bin/dlayer.c:269
@@ -265,121 +265,121 @@ msgstr "Diwedd Rhan 2: X,Y"
 #: ../bin/dlayer.c:1128 ../bin/doption.c:200 ../bin/doption.c:276
 #: ../bin/doption.c:477 ../bin/doption.c:480 ../bin/doption.c:493
 #: ../bin/doption.c:559 ../bin/dprmfile.c:434 ../bin/draw.c:2648
-#: ../bin/fileio.c:198 ../bin/fileio.c:608 ../bin/fileio.c:743
-#: ../bin/fileio.c:745 ../bin/fileio.c:750 ../bin/fileio.c:813
-#: ../bin/fileio.c:1049 ../bin/layout.c:384 ../bin/layout.c:577
+#: ../bin/fileio.c:198 ../bin/fileio.c:608 ../bin/fileio.c:738
+#: ../bin/fileio.c:740 ../bin/fileio.c:745 ../bin/fileio.c:808
+#: ../bin/fileio.c:1044 ../bin/layout.c:384 ../bin/layout.c:584
 #: ../bin/macro.c:1158 ../bin/macro.c:1162 ../bin/macro.c:1230
 #: ../bin/macro.c:1299 ../bin/macro.c:1540 ../bin/macro.c:1558
 #: ../bin/misc.c:438 ../bin/misc.c:524 ../bin/misc.c:1866 ../bin/misc.c:1987
 #: ../bin/misc.c:1995 ../bin/misc.c:2073 ../bin/misc.c:2866 ../bin/misc.c:2875
-#: ../bin/misc.c:2895 ../bin/misc.c:2901 ../bin/misc2.c:457 ../bin/param.c:738
+#: ../bin/misc.c:2895 ../bin/misc.c:2901 ../bin/misc2.c:534 ../bin/param.c:738
 #: ../bin/param.c:1848 ../bin/param.c:1971 ../bin/param.c:1974
-#: ../bin/param.c:2097 ../bin/param.c:2103 ../bin/paramfile.c:354
-#: ../bin/paramfile.c:356 ../bin/paramfile.c:361 ../bin/paramfile.c:385
-#: ../bin/paramfile.c:411 ../bin/paramfile.c:417 ../bin/paramfilelist.c:111
+#: ../bin/param.c:2097 ../bin/param.c:2103 ../bin/paramfile.c:357
+#: ../bin/paramfile.c:359 ../bin/paramfile.c:364 ../bin/paramfile.c:388
+#: ../bin/paramfile.c:414 ../bin/paramfile.c:420 ../bin/paramfilelist.c:111
 #: ../bin/paramfilelist.c:131 ../bin/paramfilelist.c:145
 #: ../bin/paramfilelist.c:209 ../bin/smalldlg.c:90 ../bin/smalldlg.c:222
 #: ../bin/tease.c:1102 ../bin/track.c:1666 ../wlib/gtklib/wpref.c:122
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:602
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:603
 msgid "Ok"
 msgstr "Iawn"
 
-#: ../bin/cblock.c:212
+#: ../bin/cblock.c:213
 msgid "Change block"
 msgstr "Newid Bloc"
 
-#: ../bin/cblock.c:264 ../bin/cswitchmotor.c:343
+#: ../bin/cblock.c:265 ../bin/cswitchmotor.c:343
 #, c-format
 msgid "(%d): Layer=%u %s"
 msgstr "(%d): Haen=%u %s"
 
-#: ../bin/cblock.c:288 ../bin/cblock.c:1000
+#: ../bin/cblock.c:289 ../bin/cblock.c:1002
 msgid "Block"
 msgstr "Bloc"
 
-#: ../bin/cblock.c:491
+#: ../bin/cblock.c:493
 #, c-format
 msgid "resolveBlockTrack: T%d[%d]: T%d doesn't exist"
 msgstr "resolveBlockTrack: T%d[%d]: T%d ddim yn bodoli"
 
-#: ../bin/cblock.c:575 ../bin/cblock.c:807
+#: ../bin/cblock.c:577 ../bin/cblock.c:809
 msgid "Block must have a name!"
 msgstr "rhaid bod enw ar bloc"
 
-#: ../bin/cblock.c:604
+#: ../bin/cblock.c:606
 msgid "Block is discontigious!"
 msgstr "bloc yn amharchus"
 
-#: ../bin/cblock.c:609
+#: ../bin/cblock.c:611
 msgid "Create block"
 msgstr "Creu bloc"
 
-#: ../bin/cblock.c:656
+#: ../bin/cblock.c:658
 msgid "Non track object skipped!"
 msgstr "Gwrthrych heb fod yn drac"
 
-#: ../bin/cblock.c:660
+#: ../bin/cblock.c:662
 msgid "Selected track is already in a block, skipped!"
 msgstr "Trac dethol eisoes mewn bloc - wedi'i hepgor"
 
-#: ../bin/cblock.c:674
+#: ../bin/cblock.c:676
 msgid "Create Block"
 msgstr "Creu Bloc"
 
-#: ../bin/cblock.c:704 ../bin/cblock.c:736
+#: ../bin/cblock.c:706 ../bin/cblock.c:738
 msgid "Select a track"
 msgstr "Dewiswch drac"
 
-#: ../bin/cblock.c:713 ../bin/cblock.c:744
+#: ../bin/cblock.c:715 ../bin/cblock.c:746
 msgid "Not a block!"
 msgstr "Ddim yn floc!"
 
-#: ../bin/cblock.c:749
+#: ../bin/cblock.c:751
 #, c-format
 msgid "Really delete block %s?"
 msgstr "Mewn gwirionedd dileu bloc %s?"
 
-#: ../bin/cblock.c:749 ../bin/ccornu.c:2756 ../bin/ccornu.c:2969
+#: ../bin/cblock.c:751 ../bin/ccornu.c:2756 ../bin/ccornu.c:2969
 #: ../bin/cdraw.c:136 ../bin/cgroup.c:1071 ../bin/cpull.c:649
-#: ../bin/csignal.c:713 ../bin/cswitchmotor.c:672 ../bin/ctodesgn.c:2675
-#: ../bin/ctodesgn.c:3206 ../bin/ctrain.c:2510 ../bin/dbitmap.c:208
-#: ../bin/dcar.c:3969 ../bin/dcar.c:4048 ../bin/dcar.c:4132 ../bin/dcar.c:4151
-#: ../bin/dcar.c:4468 ../bin/dcar.c:4890 ../bin/dcontmgm.c:173
+#: ../bin/csignal.c:713 ../bin/cswitchmotor.c:672 ../bin/ctodesgn.c:2677
+#: ../bin/ctodesgn.c:3208 ../bin/ctrain.c:2510 ../bin/dbitmap.c:208
+#: ../bin/dcar.c:3971 ../bin/dcar.c:4050 ../bin/dcar.c:4134 ../bin/dcar.c:4153
+#: ../bin/dcar.c:4470 ../bin/dcar.c:4892 ../bin/dcontmgm.c:173
 #: ../bin/dcustmgm.c:168 ../bin/misc.c:1283 ../bin/misc.c:1290
 #: ../bin/misc.c:1361 ../bin/track.c:1668 ../bin/track.c:1765
 #: ../bin/track.c:1779
 msgid "Yes"
 msgstr "ie"
 
-#: ../bin/cblock.c:749 ../bin/ccornu.c:2756 ../bin/ccornu.c:2969
+#: ../bin/cblock.c:751 ../bin/ccornu.c:2756 ../bin/ccornu.c:2969
 #: ../bin/cdraw.c:136 ../bin/cgroup.c:1071 ../bin/cpull.c:649
-#: ../bin/csignal.c:713 ../bin/cswitchmotor.c:672 ../bin/ctodesgn.c:2675
-#: ../bin/ctodesgn.c:3206 ../bin/ctrain.c:2510 ../bin/dcar.c:3969
-#: ../bin/dcar.c:4048 ../bin/dcar.c:4132 ../bin/dcar.c:4151 ../bin/dcar.c:4468
-#: ../bin/dcar.c:4890 ../bin/dcontmgm.c:173 ../bin/dcustmgm.c:168
+#: ../bin/csignal.c:713 ../bin/cswitchmotor.c:672 ../bin/ctodesgn.c:2677
+#: ../bin/ctodesgn.c:3208 ../bin/ctrain.c:2510 ../bin/dcar.c:3971
+#: ../bin/dcar.c:4050 ../bin/dcar.c:4134 ../bin/dcar.c:4153 ../bin/dcar.c:4470
+#: ../bin/dcar.c:4892 ../bin/dcontmgm.c:173 ../bin/dcustmgm.c:168
 #: ../bin/misc.c:1283 ../bin/misc.c:1290 ../bin/misc.c:1361
 #: ../bin/track.c:1668 ../bin/track.c:1765 ../bin/track.c:1779
 msgid "No"
 msgstr "na"
 
-#: ../bin/cblock.c:750
+#: ../bin/cblock.c:752
 msgid "Delete Block"
 msgstr "Dileu bloc"
 
-#: ../bin/cblock.c:795
+#: ../bin/cblock.c:797
 #, c-format
 msgid "Deleting block %s"
 msgstr "Dileu bloc %s nawr"
 
-#: ../bin/cblock.c:811
+#: ../bin/cblock.c:813
 msgid "Modify Block"
 msgstr "Addasu bloc"
 
-#: ../bin/cblock.c:844
+#: ../bin/cblock.c:846
 msgid "Edit block"
 msgstr "Golygu bloc"
 
-#: ../bin/cblock.c:850
+#: ../bin/cblock.c:852
 #, c-format
 msgid "Edit block %d"
 msgstr "Golygu bloc %d"
@@ -821,7 +821,7 @@ msgstr "Radiws Dymunol"
 msgid "Straight Track: Length=%s Angle=%0.3f"
 msgstr "Trac Syth: Hyd=%s Ongle=%0.3f"
 
-#: ../bin/ccurve.c:530 ../bin/cmodify.c:605 ../bin/drawgeom.c:639
+#: ../bin/ccurve.c:530 ../bin/cmodify.c:605 ../bin/drawgeom.c:643
 #: ../wlib/gtklib/ixhelp.c:235
 msgid "Back"
 msgstr "Yn ôl"
@@ -843,15 +843,15 @@ msgstr "Creu trac crwm"
 msgid "Elevation Difference"
 msgstr "Gwahaniaeth drychiad"
 
-#: ../bin/ccurve.c:708 ../bin/cdraw.c:524 ../bin/cdraw.c:1459
-#: ../bin/cdraw.c:1605 ../bin/cdraw.c:2608 ../bin/cdraw.c:2809
-#: ../bin/cdraw.c:2823 ../bin/compound.c:616 ../bin/compound.c:621
-#: ../bin/compound.c:626 ../bin/compound.c:631 ../bin/ctodesgn.c:185
-#: ../bin/ctodesgn.c:186 ../bin/ctodesgn.c:187 ../bin/ctodesgn.c:188
-#: ../bin/ctodesgn.c:304 ../bin/ctodesgn.c:307 ../bin/ctodesgn.c:309
-#: ../bin/ctodesgn.c:370 ../bin/ctodesgn.c:371 ../bin/ctodesgn.c:376
-#: ../bin/ctodesgn.c:440 ../bin/ctodesgn.c:444 ../bin/ctodesgn.c:445
-#: ../bin/ctodesgn.c:451 ../bin/ctodesgn.c:620 ../bin/tbezier.c:253
+#: ../bin/ccurve.c:708 ../bin/cdraw.c:525 ../bin/cdraw.c:1455
+#: ../bin/cdraw.c:1601 ../bin/cdraw.c:2606 ../bin/cdraw.c:2801
+#: ../bin/cdraw.c:2815 ../bin/compound.c:616 ../bin/compound.c:621
+#: ../bin/compound.c:626 ../bin/compound.c:631 ../bin/ctodesgn.c:187
+#: ../bin/ctodesgn.c:188 ../bin/ctodesgn.c:189 ../bin/ctodesgn.c:190
+#: ../bin/ctodesgn.c:306 ../bin/ctodesgn.c:309 ../bin/ctodesgn.c:311
+#: ../bin/ctodesgn.c:372 ../bin/ctodesgn.c:373 ../bin/ctodesgn.c:378
+#: ../bin/ctodesgn.c:442 ../bin/ctodesgn.c:446 ../bin/ctodesgn.c:447
+#: ../bin/ctodesgn.c:453 ../bin/ctodesgn.c:622 ../bin/tbezier.c:253
 #: ../bin/tbezier.c:260 ../bin/tcornu.c:311 ../bin/tcurve.c:385
 msgid "Radius"
 msgstr "Radiws"
@@ -948,7 +948,7 @@ msgstr "Cromlin o'r canol"
 msgid "Curve from Chord"
 msgstr "Cromlin o'r cord"
 
-#: ../bin/ccurve.c:1009 ../bin/cdraw.c:2951
+#: ../bin/ccurve.c:1009 ../bin/cdraw.c:2943
 msgid "Bezier Curve"
 msgstr "Cromlin Bezier"
 
@@ -984,122 +984,115 @@ msgstr "Pwynt cyntaf: X,Y"
 msgid "Center: X,Y"
 msgstr "Canol: X,Y"
 
-#: ../bin/cdraw.c:521 ../bin/cdraw.c:543 ../bin/cdraw.c:1449
-#: ../bin/cdraw.c:1594 ../bin/cdraw.c:2606 ../bin/cdraw.c:2830
-#: ../bin/cdraw.c:2850 ../bin/cdraw.c:2854 ../bin/compound.c:614
-#: ../bin/compound.c:619 ../bin/compound.c:624 ../bin/compound.c:629
-#: ../bin/compound.c:635 ../bin/cprint.c:162 ../bin/csignal.c:241
-#: ../bin/csignal.c:516 ../bin/ctodesgn.c:193 ../bin/ctodesgn.c:194
-#: ../bin/ctodesgn.c:195 ../bin/ctodesgn.c:197 ../bin/ctodesgn.c:242
-#: ../bin/ctodesgn.c:265 ../bin/ctodesgn.c:267 ../bin/ctodesgn.c:302
-#: ../bin/ctodesgn.c:305 ../bin/ctodesgn.c:331 ../bin/ctodesgn.c:334
-#: ../bin/ctodesgn.c:368 ../bin/ctodesgn.c:373 ../bin/ctodesgn.c:397
-#: ../bin/ctodesgn.c:401 ../bin/ctodesgn.c:438 ../bin/ctodesgn.c:442
-#: ../bin/ctodesgn.c:447 ../bin/ctodesgn.c:473 ../bin/ctodesgn.c:493
-#: ../bin/ctodesgn.c:514 ../bin/ctodesgn.c:621 ../bin/ctrain.c:185
-#: ../bin/tease.c:524 ../bin/tstraigh.c:90
-msgid "Angle"
-msgstr "Ongl"
+#: ../bin/cdraw.c:521 ../bin/tcurve.c:389
+msgid "Angular Length"
+msgstr "Hyd Ongl"
 
-#: ../bin/cdraw.c:522 ../bin/tcurve.c:390
+#: ../bin/cdraw.c:522
+msgid "Line Angle"
+msgstr "Ongl Llinell"
+
+#: ../bin/cdraw.c:523 ../bin/tcurve.c:390
 msgid "CCW Angle"
 msgstr "CCW Ongle"
 
-#: ../bin/cdraw.c:523 ../bin/tcurve.c:391
+#: ../bin/cdraw.c:524 ../bin/tcurve.c:391
 msgid "CW Angle"
 msgstr "CW Ongle"
 
-#: ../bin/cdraw.c:526 ../bin/cdraw.c:1456 ../bin/cdraw.c:1578
+#: ../bin/cdraw.c:527 ../bin/cdraw.c:1452 ../bin/cdraw.c:1574
 #: ../bin/cprint.c:137
 msgid "Height"
 msgstr "Uchder"
 
-#: ../bin/cdraw.c:527 ../bin/cdraw.c:1454 ../bin/cdraw.c:1577
-#: ../bin/cdraw.c:2603 ../bin/cdraw.c:2867 ../bin/ctrain.c:187
-#: ../bin/dcar.c:2233
+#: ../bin/cdraw.c:528 ../bin/cdraw.c:1450 ../bin/cdraw.c:1573
+#: ../bin/cdraw.c:2601 ../bin/cdraw.c:2859 ../bin/ctrain.c:187
+#: ../bin/dcar.c:2235
 msgid "Width"
 msgstr "Lled"
 
-#: ../bin/cdraw.c:528 ../bin/cmisc.c:146 ../bin/tcurve.c:393
-#: ../bin/tease.c:530 ../bin/tstraigh.c:92
-msgid "Lock"
-msgstr "Clo"
-
-#: ../bin/cdraw.c:529
-msgid "Keep Origin Relative"
-msgstr "Cadwch y tarddiad yn gymharol"
+#: ../bin/cdraw.c:529 ../bin/compound.c:636 ../bin/tstraigh.c:92
+msgid "Pivot"
+msgstr "Phwysbwynt"
 
 #: ../bin/cdraw.c:530
-msgid "Rot Origin: X,Y"
-msgstr "Tarddiad cylchdro: X,Y"
-
-#: ../bin/cdraw.c:531 ../bin/cdraw.c:1463
-msgid "Rotate Angle"
-msgstr "Cylchdroi ongl"
-
-#: ../bin/cdraw.c:532
 msgid "Point Count"
 msgstr "Cyfrif Pwynt"
 
-#: ../bin/cdraw.c:533 ../bin/cdraw.c:2581 ../bin/ctodesgn.c:207
+#: ../bin/cdraw.c:531 ../bin/cdraw.c:2579 ../bin/ctodesgn.c:209
 #: ../bin/tbezier.c:267
 msgid "Line Width"
 msgstr "Lled y llinell"
 
-#: ../bin/cdraw.c:534 ../bin/cdraw.c:2610 ../bin/tbezier.c:266
+#: ../bin/cdraw.c:532 ../bin/cdraw.c:2608 ../bin/tbezier.c:266
 msgid "Line Type"
 msgstr "Math o linell"
 
-#: ../bin/cdraw.c:535 ../bin/cdraw.c:2583 ../bin/cdraw.c:2585
-#: ../bin/cdraw.c:2684 ../bin/cdraw.c:2717 ../bin/cmisc.c:127
-#: ../bin/ctext.c:68 ../bin/ctext.c:148 ../bin/ctodesgn.c:208
-#: ../bin/dcar.c:2229 ../bin/dlayer.c:567 ../bin/doption.c:559
+#: ../bin/cdraw.c:533 ../bin/cdraw.c:2581 ../bin/cdraw.c:2583
+#: ../bin/cdraw.c:2682 ../bin/cdraw.c:2715 ../bin/cmisc.c:127
+#: ../bin/ctext.c:68 ../bin/ctext.c:148 ../bin/ctodesgn.c:210
+#: ../bin/dcar.c:2231 ../bin/dlayer.c:567 ../bin/doption.c:559
 msgid "Color"
 msgstr "Lliw"
 
-#: ../bin/cdraw.c:536
+#: ../bin/cdraw.c:534
 msgid "Filled"
 msgstr "Wedi'i lenwi"
 
-#: ../bin/cdraw.c:537
+#: ../bin/cdraw.c:535
 msgid "Open End"
 msgstr "Diwedd Agored"
 
-#: ../bin/cdraw.c:538 ../bin/cmisc.c:150 ../bin/cmisc.c:151 ../bin/cmisc.c:152
+#: ../bin/cdraw.c:536 ../bin/cmisc.c:150 ../bin/cmisc.c:151 ../bin/cmisc.c:152
 #: ../bin/cmisc.c:153 ../bin/ctext.c:70 ../bin/ctext.c:149
 msgid "Boxed"
 msgstr "Bocsio"
 
-#: ../bin/cdraw.c:539 ../bin/cdraw.c:1128 ../bin/cdraw.c:2617
+#: ../bin/cdraw.c:537 ../bin/cdraw.c:1124 ../bin/cdraw.c:2615
 msgid "Lumber"
 msgstr "Pren"
 
-#: ../bin/cdraw.c:540
+#: ../bin/cdraw.c:538
 msgid "Orientation"
 msgstr "Cyfeiriadedd"
 
-#: ../bin/cdraw.c:541 ../bin/cdraw.c:2599
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:604
+#: ../bin/cdraw.c:539 ../bin/cdraw.c:2597
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:605
 msgid "Size"
 msgstr "Maint"
 
-#: ../bin/cdraw.c:542 ../bin/compound.c:634 ../bin/tease.c:523
-msgid "Origin: X,Y"
-msgstr "Tarddiad"
+#: ../bin/cdraw.c:540
+msgid "Text Origin: X,Y"
+msgstr "Tarddiad Testun: X,Y"
 
-#: ../bin/cdraw.c:544 ../bin/ctext.c:66 ../bin/ctext.c:147
+#: ../bin/cdraw.c:541
+msgid "Text Angle"
+msgstr "Ongl y Testun"
+
+#: ../bin/cdraw.c:542 ../bin/ctext.c:66 ../bin/ctext.c:147
 msgid "Font Size"
 msgstr "Maint y Ffont"
 
-#: ../bin/cdraw.c:545 ../bin/cdraw.c:1274 ../bin/ctext.c:270
+#: ../bin/cdraw.c:543 ../bin/cdraw.c:1270 ../bin/ctext.c:270
 msgid "Text"
 msgstr "Testun"
 
-#: ../bin/cdraw.c:546 ../bin/compound.c:642 ../bin/cturntbl.c:254
+#: ../bin/cdraw.c:544
+msgid "Lock To Origin"
+msgstr "Cloi i Darddiad"
+
+#: ../bin/cdraw.c:545
+msgid "Rot Origin: X,Y"
+msgstr "Tarddiad cylchdro: X,Y"
+
+#: ../bin/cdraw.c:546
+msgid "Rotate By"
+msgstr "Cylchdroi Erbyn"
+
+#: ../bin/cdraw.c:547 ../bin/compound.c:642 ../bin/cturntbl.c:254
 #: ../bin/doption.c:101 ../bin/doption.c:102 ../bin/tbezier.c:269
 #: ../bin/tcornu.c:319 ../bin/tcurve.c:394 ../bin/tease.c:531
-#: ../bin/tstraigh.c:93 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:682
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:683
+#: ../bin/tstraigh.c:93 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:683
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:684
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:685
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:686
@@ -1118,434 +1111,455 @@ msgstr "Testun"
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:699
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:700
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:701
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:702
 msgid "Layer"
 msgstr "Haen"
 
-#: ../bin/cdraw.c:1113
+#: ../bin/cdraw.c:1109
 msgid "Straight Line"
 msgstr "Llinell syth"
 
-#: ../bin/cdraw.c:1118 ../bin/cdraw.c:2943
+#: ../bin/cdraw.c:1114 ../bin/cdraw.c:2935
 msgid "Dimension Line"
 msgstr "Llinell Dimensiwn"
 
-#: ../bin/cdraw.c:1139 ../bin/cdraw.c:2618 ../bin/cdraw.c:2945
+#: ../bin/cdraw.c:1135 ../bin/cdraw.c:2616 ../bin/cdraw.c:2937
 msgid "Table Edge"
 msgstr "Ymyl bwrdd"
 
-#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2623 ../bin/cdraw.c:2624
-#: ../bin/cdraw.c:2625
+#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2621 ../bin/cdraw.c:2622
+#: ../bin/cdraw.c:2623
 msgid "Circle"
 msgstr "Cylch"
 
-#: ../bin/cdraw.c:1170
+#: ../bin/cdraw.c:1174
 msgid "Curved Line"
 msgstr "Llinell Grom"
 
-#: ../bin/cdraw.c:1186 ../bin/cdraw.c:2628 ../bin/cdraw.c:2629
-#: ../bin/cdraw.c:2630
+#: ../bin/cdraw.c:1196 ../bin/cdraw.c:2626 ../bin/cdraw.c:2627
+#: ../bin/cdraw.c:2628
 msgid "Filled Circle"
 msgstr "Cylch wedi'i Llenwi"
 
-#: ../bin/cdraw.c:1205
-msgid "Rectangle"
-msgstr "Petryal"
-
-#: ../bin/cdraw.c:1219 ../bin/cdraw.c:2634
-msgid "Polyline"
-msgstr "Polyline"
-
-#: ../bin/cdraw.c:1223 ../bin/cdraw.c:2627 ../bin/cdraw.c:2962
-msgid "Polygon"
-msgstr "Polygon"
-
-#: ../bin/cdraw.c:1241
+#: ../bin/cdraw.c:1226
 msgid "Filled Rectangle"
 msgstr "Petryal wedi'i lenwi"
 
-#: ../bin/cdraw.c:1254 ../bin/cdraw.c:2632 ../bin/cdraw.c:2963
+#: ../bin/cdraw.c:1226
+msgid "Rectangle"
+msgstr "Petryal"
+
+#: ../bin/cdraw.c:1240 ../bin/cdraw.c:2632
+msgid "Polyline"
+msgstr "Polyline"
+
+#: ../bin/cdraw.c:1246 ../bin/cdraw.c:2630 ../bin/cdraw.c:2955
 msgid "Filled Polygon"
 msgstr "Polygon wedi'i Llenwi"
 
-#: ../bin/cdraw.c:1280
+#: ../bin/cdraw.c:1246 ../bin/cdraw.c:2625 ../bin/cdraw.c:2954
+msgid "Polygon"
+msgstr "Polygon"
+
+#: ../bin/cdraw.c:1276
 #, c-format
 msgid "%s(%d) Layer=%d"
 msgstr "%s(%d) Haen=%d"
 
-#: ../bin/cdraw.c:1300 ../bin/cdraw.c:2687 ../bin/compound.c:1027
+#: ../bin/cdraw.c:1296 ../bin/cdraw.c:2685 ../bin/compound.c:1027
 #: ../bin/doption.c:96 ../bin/tbezier.c:464
 msgid "Solid"
 msgstr "Solet"
 
-#: ../bin/cdraw.c:1301 ../bin/cdraw.c:2689 ../bin/compound.c:1028
+#: ../bin/cdraw.c:1297 ../bin/cdraw.c:2687 ../bin/compound.c:1028
 #: ../bin/doption.c:93 ../bin/tbezier.c:465
 msgid "Dash"
 msgstr "Dash"
 
-#: ../bin/cdraw.c:1302 ../bin/cdraw.c:2688 ../bin/compound.c:1029
+#: ../bin/cdraw.c:1298 ../bin/cdraw.c:2686 ../bin/compound.c:1029
 #: ../bin/tbezier.c:466
 msgid "Dot"
 msgstr "Dot"
 
-#: ../bin/cdraw.c:1303 ../bin/compound.c:1030 ../bin/tbezier.c:467
+#: ../bin/cdraw.c:1299 ../bin/compound.c:1030 ../bin/tbezier.c:467
 msgid "DashDot"
 msgstr "DashDot"
 
-#: ../bin/cdraw.c:1304 ../bin/compound.c:1031 ../bin/tbezier.c:468
+#: ../bin/cdraw.c:1300 ../bin/compound.c:1031 ../bin/tbezier.c:468
 msgid "DashDotDot"
 msgstr "DashDotDot"
 
-#: ../bin/cdraw.c:1305 ../bin/compound.c:1032 ../bin/tbezier.c:469
+#: ../bin/cdraw.c:1301 ../bin/compound.c:1032 ../bin/tbezier.c:469
 msgid "CenterDot"
 msgstr "CenterDot"
 
-#: ../bin/cdraw.c:1306 ../bin/compound.c:1033 ../bin/tbezier.c:470
+#: ../bin/cdraw.c:1302 ../bin/compound.c:1033 ../bin/tbezier.c:470
 msgid "PhantomDot"
 msgstr "PhantomDot"
 
-#: ../bin/cdraw.c:1311 ../bin/cdraw.c:2735
+#: ../bin/cdraw.c:1307 ../bin/cdraw.c:2733
 msgid "Tiny"
 msgstr "Tiny"
 
-#: ../bin/cdraw.c:1312 ../bin/cdraw.c:2736
+#: ../bin/cdraw.c:1308 ../bin/cdraw.c:2734
 msgid "Small"
 msgstr "Bach"
 
-#: ../bin/cdraw.c:1313 ../bin/cdraw.c:2737
+#: ../bin/cdraw.c:1309 ../bin/cdraw.c:2735
 msgid "Medium"
 msgstr "Canolig"
 
-#: ../bin/cdraw.c:1314 ../bin/cdraw.c:2738
+#: ../bin/cdraw.c:1310 ../bin/cdraw.c:2736
 msgid "Large"
 msgstr "Mawr"
 
-#: ../bin/cdraw.c:1452
+#: ../bin/cdraw.c:1445 ../bin/cdraw.c:1590 ../bin/cdraw.c:2604
+#: ../bin/cdraw.c:2822 ../bin/cdraw.c:2842 ../bin/cdraw.c:2846
+#: ../bin/compound.c:614 ../bin/compound.c:619 ../bin/compound.c:624
+#: ../bin/compound.c:629 ../bin/compound.c:635 ../bin/cprint.c:162
+#: ../bin/csignal.c:241 ../bin/csignal.c:516 ../bin/ctodesgn.c:195
+#: ../bin/ctodesgn.c:196 ../bin/ctodesgn.c:197 ../bin/ctodesgn.c:199
+#: ../bin/ctodesgn.c:244 ../bin/ctodesgn.c:267 ../bin/ctodesgn.c:269
+#: ../bin/ctodesgn.c:304 ../bin/ctodesgn.c:307 ../bin/ctodesgn.c:333
+#: ../bin/ctodesgn.c:336 ../bin/ctodesgn.c:370 ../bin/ctodesgn.c:375
+#: ../bin/ctodesgn.c:399 ../bin/ctodesgn.c:403 ../bin/ctodesgn.c:440
+#: ../bin/ctodesgn.c:444 ../bin/ctodesgn.c:449 ../bin/ctodesgn.c:475
+#: ../bin/ctodesgn.c:495 ../bin/ctodesgn.c:516 ../bin/ctodesgn.c:623
+#: ../bin/ctrain.c:185 ../bin/tease.c:524
+msgid "Angle"
+msgstr "Ongl"
+
+#: ../bin/cdraw.c:1448
 msgid "Relative Angle"
 msgstr "Ongl gymharol"
 
-#: ../bin/cdraw.c:1461 ../bin/cdraw.c:1609 ../bin/cdraw.c:2824
+#: ../bin/cdraw.c:1457 ../bin/cdraw.c:1605 ../bin/cdraw.c:2816
 msgid "Arc Angle"
 msgstr "Ongl arc"
 
-#: ../bin/cdraw.c:1466
+#: ../bin/cdraw.c:1459
+msgid "Rotate Angle"
+msgstr "Cylchdroi ongl"
+
+#: ../bin/cdraw.c:1462
 msgid "Rot Center X"
 msgstr "Canolfan cylchdroi X"
 
-#: ../bin/cdraw.c:1468
+#: ../bin/cdraw.c:1464
 msgid "Rot Center Y"
 msgstr "Canolfan cylchdroi Y"
 
-#: ../bin/cdraw.c:1565
+#: ../bin/cdraw.c:1561
 msgid "Seg Lth"
 msgstr "Hyd Seg"
 
-#: ../bin/cdraw.c:1566
+#: ../bin/cdraw.c:1562
 msgid "Rel Ang"
 msgstr "Ongl Rel"
 
-#: ../bin/cdraw.c:2588 ../bin/cdraw.c:2590 ../bin/cdraw.c:2715
+#: ../bin/cdraw.c:2586 ../bin/cdraw.c:2588 ../bin/cdraw.c:2713
 msgid "Lumber Type"
 msgstr "Math o bren"
 
-#: ../bin/cdraw.c:2615
+#: ../bin/cdraw.c:2613
 msgid "Straight"
 msgstr "Syth"
 
-#: ../bin/cdraw.c:2616
+#: ../bin/cdraw.c:2614
 msgid "Dimension"
 msgstr "Dimension"
 
-#: ../bin/cdraw.c:2619 ../bin/cdraw.c:2620 ../bin/cdraw.c:2621
-#: ../bin/cdraw.c:2622
+#: ../bin/cdraw.c:2617 ../bin/cdraw.c:2618 ../bin/cdraw.c:2619
+#: ../bin/cdraw.c:2620
 msgid "Curved"
 msgstr "Grom"
 
-#: ../bin/cdraw.c:2626 ../bin/cdraw.c:2960
+#: ../bin/cdraw.c:2624 ../bin/cdraw.c:2952
 msgid "Box"
 msgstr "Blwch"
 
-#: ../bin/cdraw.c:2631 ../bin/cdraw.c:2961
+#: ../bin/cdraw.c:2629 ../bin/cdraw.c:2953
 msgid "Filled Box"
 msgstr "Blwch wedi'i Llenwi"
 
-#: ../bin/cdraw.c:2633 ../bin/tbezier.c:461
+#: ../bin/cdraw.c:2631 ../bin/tbezier.c:461
 msgid "Bezier Line"
 msgstr "Llinell Bezier"
 
-#: ../bin/cdraw.c:2682
+#: ../bin/cdraw.c:2680
 #, c-format
 msgid "%s Line Width"
 msgstr "%s Lled Llinell"
 
-#: ../bin/cdraw.c:2685 ../bin/dcar.c:2202 ../bin/dcar.c:4366
-#: ../bin/dcar.c:4371
+#: ../bin/cdraw.c:2683 ../bin/dcar.c:2204 ../bin/dcar.c:4368
+#: ../bin/dcar.c:4373
 msgid "Type"
 msgstr "Math"
 
-#: ../bin/cdraw.c:2690
+#: ../bin/cdraw.c:2688
 msgid "Dash-Dot"
 msgstr "Dash-Dot"
 
-#: ../bin/cdraw.c:2691
+#: ../bin/cdraw.c:2689
 msgid "Dash-Dot-Dot"
 msgstr "Dash-Dot-Dot"
 
-#: ../bin/cdraw.c:2704
+#: ../bin/cdraw.c:2702
 #, c-format
 msgid "%s Color"
 msgstr "%s Lliw"
 
-#: ../bin/cdraw.c:2733
+#: ../bin/cdraw.c:2731
 msgid "Dimension Line Size"
 msgstr "Maint Llinell Dimensiwn"
 
-#: ../bin/cdraw.c:2745
+#: ../bin/cdraw.c:2743
 msgid "Drag to create Table Edge"
 msgstr "Llusgwch i greu ymyl bwrdd"
 
-#: ../bin/cdraw.c:2848
+#: ../bin/cdraw.c:2840
 msgid "Seg Length"
 msgstr "Hyd seg"
 
-#: ../bin/cdraw.c:2852
+#: ../bin/cdraw.c:2844
 msgid "Rel Angle"
 msgstr "Ongl Rel"
 
-#: ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:2934
 msgid "Line"
 msgstr "Linell"
 
-#: ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:2934
 msgid "Draw Line"
 msgstr "Tynnu Llinell"
 
-#: ../bin/cdraw.c:2943
+#: ../bin/cdraw.c:2935
 msgid "Draw Dimension Line"
 msgstr "Tynnu Llinell Dimensiwn"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:410
-#: ../bin/cdraw.c:2944 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:429
+#: ../bin/cdraw.c:2936 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
 msgid "Benchwork"
 msgstr "Sylfaen"
 
-#: ../bin/cdraw.c:2944
+#: ../bin/cdraw.c:2936
 msgid "Draw Benchwork"
 msgstr "Tynnu Baseboard"
 
-#: ../bin/cdraw.c:2945
+#: ../bin/cdraw.c:2937
 msgid "Draw Table Edge"
 msgstr "Tynnwch ymyl bwrdd"
 
-#: ../bin/cdraw.c:2947
+#: ../bin/cdraw.c:2939
 msgid "Curve End"
 msgstr "Diwedd cromlin"
 
-#: ../bin/cdraw.c:2947
+#: ../bin/cdraw.c:2939
 msgid "Draw Curve from End"
 msgstr "Tynnwch y gromlin o'r diwedd"
 
-#: ../bin/cdraw.c:2948
+#: ../bin/cdraw.c:2940
 msgid "Curve Tangent"
 msgstr "Cyffyrddiad cromlin"
 
-#: ../bin/cdraw.c:2948
+#: ../bin/cdraw.c:2940
 msgid "Draw Curve from Tangent"
 msgstr "Tynnwch y gromlin o'r tangiad"
 
-#: ../bin/cdraw.c:2949
+#: ../bin/cdraw.c:2941
 msgid "Curve Center"
 msgstr "Canolfan gromlin"
 
-#: ../bin/cdraw.c:2949
+#: ../bin/cdraw.c:2941
 msgid "Draw Curve from Center"
 msgstr "Tynnwch y gromlin o'r canol"
 
-#: ../bin/cdraw.c:2950
+#: ../bin/cdraw.c:2942
 msgid "Curve Chord"
 msgstr "Cord cromlin"
 
-#: ../bin/cdraw.c:2950
+#: ../bin/cdraw.c:2942
 msgid "Draw Curve from Chord"
 msgstr "Tynnwch gromlin o'r cord"
 
-#: ../bin/cdraw.c:2951
+#: ../bin/cdraw.c:2943
 msgid "Draw Bezier"
 msgstr "Tynnwch gromlin Bezier"
 
-#: ../bin/cdraw.c:2954
+#: ../bin/cdraw.c:2946
 msgid "Circle Tangent"
 msgstr "Tangent Cylch"
 
-#: ../bin/cdraw.c:2954
+#: ../bin/cdraw.c:2946
 msgid "Draw Circle from Tangent"
 msgstr "Tynnwch gylch o Tangent"
 
-#: ../bin/cdraw.c:2955
+#: ../bin/cdraw.c:2947
 msgid "Circle Center"
 msgstr "Canolfan Gylch"
 
-#: ../bin/cdraw.c:2955
+#: ../bin/cdraw.c:2947
 msgid "Draw Circle from Center"
 msgstr "Tynnwch gylch o'r canol"
 
-#: ../bin/cdraw.c:2957
+#: ../bin/cdraw.c:2949
 msgid "Circle Filled Tangent"
 msgstr "Tangent Llenwi Cylch"
 
-#: ../bin/cdraw.c:2957
+#: ../bin/cdraw.c:2949
 msgid "Draw Filled Circle from Tangent"
 msgstr "Tynnwch gylch wedi'i lenwi o tangiad"
 
-#: ../bin/cdraw.c:2958
+#: ../bin/cdraw.c:2950
 msgid "Circle Filled Center"
 msgstr "Canolfan wedi'i llenwi â chylch"
 
-#: ../bin/cdraw.c:2958
+#: ../bin/cdraw.c:2950
 msgid "Draw Filled Circle from Center"
 msgstr "Tynnwch gylch wedi'i lenwi o'r canol"
 
-#: ../bin/cdraw.c:2960
+#: ../bin/cdraw.c:2952
 msgid "Draw Box"
 msgstr "Blwch tynnu llun"
 
-#: ../bin/cdraw.c:2961
+#: ../bin/cdraw.c:2953
 msgid "Draw Filled Box"
 msgstr "Tynnu blwch wedi'i lenwi"
 
-#: ../bin/cdraw.c:2962
+#: ../bin/cdraw.c:2954
 msgid "Draw Polygon"
 msgstr "Tynnu polygon"
 
-#: ../bin/cdraw.c:2963
+#: ../bin/cdraw.c:2955
 msgid "Draw Filled Polygon"
 msgstr "Tynnu polygon wedi'i lenwi"
 
-#: ../bin/cdraw.c:2964
+#: ../bin/cdraw.c:2956
 msgid "PolyLine"
 msgstr "PolyLine"
 
-#: ../bin/cdraw.c:2964
+#: ../bin/cdraw.c:2956
 msgid "Draw PolyLine"
 msgstr "Tynnu polyline"
 
-#: ../bin/cdraw.c:2981
+#: ../bin/cdraw.c:2973
 msgid "Straight Objects"
 msgstr "Gwrthrychau syth"
 
-#: ../bin/cdraw.c:2981
+#: ../bin/cdraw.c:2973
 msgid "Draw Straight Objects"
 msgstr "Tynnwch luniau syth"
 
-#: ../bin/cdraw.c:2982
+#: ../bin/cdraw.c:2974
 msgid "Curved Lines"
 msgstr "Llinellau Crwm"
 
-#: ../bin/cdraw.c:2982
+#: ../bin/cdraw.c:2974
 msgid "Draw Curved Lines"
 msgstr "Tynnwch linellau crwm"
 
-#: ../bin/cdraw.c:2983
+#: ../bin/cdraw.c:2975
 msgid "Circle Lines"
 msgstr "Llinellau Cylch"
 
-#: ../bin/cdraw.c:2983
+#: ../bin/cdraw.c:2975
 msgid "Draw Circles"
 msgstr "Tynnu cylchoedd"
 
-#: ../bin/cdraw.c:2984
+#: ../bin/cdraw.c:2976
 msgid "Shapes"
 msgstr "Siapiau"
 
-#: ../bin/cdraw.c:2984
+#: ../bin/cdraw.c:2976
 msgid "Draw Shapes"
 msgstr "Tynnu siapiau"
 
-#: ../bin/cdraw.c:3272
+#: ../bin/cdraw.c:3264
 msgid "Close Polygon - 'g'"
 msgstr "Polygon agos - 'g'"
 
-#: ../bin/cdraw.c:3273
+#: ../bin/cdraw.c:3265
 msgid "Make PolyLine - 'l'"
 msgstr "Gwneud polyline - 'l'"
 
-#: ../bin/cdraw.c:3274
+#: ../bin/cdraw.c:3266
 msgid "Fill Polygon - 'f'"
 msgstr "Llenwch polyline - 'f'"
 
-#: ../bin/cdraw.c:3275
+#: ../bin/cdraw.c:3267
 msgid "Empty Polygon - 'u'"
 msgstr "Polyline gwag - 'u'"
 
-#: ../bin/cdraw.c:3277
+#: ../bin/cdraw.c:3269
 msgid "Points Mode - 'p'"
 msgstr "modd pwyntiau - 'p'"
 
-#: ../bin/cdraw.c:3278
+#: ../bin/cdraw.c:3270
 msgid "Delete Selected Point - 'Del'"
 msgstr "Dileu pwynt a ddewiswyd - 'Del'"
 
-#: ../bin/cdraw.c:3279
+#: ../bin/cdraw.c:3271
 msgid "Vertex Point - 'v'"
 msgstr "pwynt fertig - 'v'"
 
-#: ../bin/cdraw.c:3280
+#: ../bin/cdraw.c:3272
 msgid "Round Corner - 'r'"
 msgstr "Cornel gron - 'r'"
 
-#: ../bin/cdraw.c:3281
+#: ../bin/cdraw.c:3273
 msgid "Smooth Corner - 's'"
 msgstr "Cornel esmwyth - 's'"
 
-#: ../bin/cdraw.c:3283 ../bin/cselect.c:3529
+#: ../bin/cdraw.c:3275 ../bin/cselect.c:3529
 msgid "LineType..."
 msgstr "Math o linell ..."
 
-#: ../bin/cdraw.c:3284 ../bin/cselect.c:3530
+#: ../bin/cdraw.c:3276 ../bin/cselect.c:3530
 msgid "Solid Line"
 msgstr "Llinell solet"
 
-#: ../bin/cdraw.c:3285 ../bin/cselect.c:3531
+#: ../bin/cdraw.c:3277 ../bin/cselect.c:3531
 msgid "Dashed Line"
 msgstr "Llinell wedi'i chwalu"
 
-#: ../bin/cdraw.c:3286 ../bin/cselect.c:3532
+#: ../bin/cdraw.c:3278 ../bin/cselect.c:3532
 msgid "Dotted Line"
 msgstr "Llinell doredig"
 
-#: ../bin/cdraw.c:3287
+#: ../bin/cdraw.c:3279
 msgid "Dash-Dot Line"
 msgstr "Llinell Dash-Dot"
 
-#: ../bin/cdraw.c:3288
+#: ../bin/cdraw.c:3280
 msgid "Dash-Dot-Dot Line"
 msgstr "Llinell Dash-Dot-Dot"
 
-#: ../bin/cdraw.c:3289
+#: ../bin/cdraw.c:3281
 msgid "Center-Dot Line"
 msgstr "Llinell Center-Dot"
 
-#: ../bin/cdraw.c:3290
+#: ../bin/cdraw.c:3282
 msgid "Phantom-Dot Line"
 msgstr "Llinell ffantasi"
 
-#: ../bin/cdraw.c:3292
+#: ../bin/cdraw.c:3284
 msgid "Origin Mode - 'o'"
 msgstr "Modd Tarddiad - 'o'"
 
-#: ../bin/cdraw.c:3293
+#: ../bin/cdraw.c:3285
 msgid "Reset Origin - '0'"
 msgstr "Ailosod tarddiad - '0'"
 
-#: ../bin/cdraw.c:3294
+#: ../bin/cdraw.c:3286
 msgid "Origin to Selected - 'l'"
 msgstr "Tarddiad wedi'i ddewis - 'l'"
 
-#: ../bin/cdraw.c:3295
+#: ../bin/cdraw.c:3287
 msgid "Origin to Middle - 'm'"
 msgstr "Tarddiad i'r canol - 'm'"
 
-#: ../bin/celev.c:46 ../bin/cprofile.c:1536 ../bin/csplit.c:194
-#: ../bin/csplit.c:199 ../bin/dease.c:67 ../bin/doption.c:94
+#: ../bin/celev.c:46 ../bin/cprofile.c:1536 ../bin/csplit.c:195
+#: ../bin/csplit.c:200 ../bin/dease.c:67 ../bin/doption.c:94
 #: ../bin/doption.c:96
 msgid "None"
 msgstr "Dim"
@@ -1583,10 +1597,10 @@ msgstr "Heb ei ddiffinio"
 msgid "Elevation"
 msgstr "Drychiad"
 
-#: ../bin/celev.c:378 ../bin/cmisc.c:461 ../bin/dcontmgm.c:299
+#: ../bin/celev.c:378 ../bin/cmisc.c:469 ../bin/dcontmgm.c:299
 #: ../bin/dcustmgm.c:395 ../bin/dlayer.c:1491 ../bin/dpricels.c:154
 #: ../bin/filenoteui.c:249 ../bin/linknoteui.c:182
-#: ../bin/paramfilesearch_ui.c:439 ../bin/textnoteui.c:171
+#: ../bin/paramfilesearch_ui.c:485 ../bin/textnoteui.c:171
 msgid "Done"
 msgstr "Wedi'i wneud"
 
@@ -1657,18 +1671,18 @@ msgid "Replace with new group?"
 msgstr "Amnewid gyda grŵp newydd?"
 
 #: ../bin/cgroup.c:639 ../bin/compound.c:637 ../bin/cstruct.c:71
-#: ../bin/ctodesgn.c:199 ../bin/ctodesgn.c:2953 ../bin/cturnout.c:84
-#: ../bin/dcar.c:2194 ../bin/dcar.c:4366 ../bin/dcar.c:4371
+#: ../bin/ctodesgn.c:201 ../bin/ctodesgn.c:2955 ../bin/cturnout.c:84
+#: ../bin/dcar.c:2196 ../bin/dcar.c:4368 ../bin/dcar.c:4373
 #: ../bin/dcmpnd.c:452 ../bin/dcustmgm.c:59
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:378
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:581
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:582
 msgid "Manufacturer"
 msgstr "Gwneuthurwr"
 
-#: ../bin/cgroup.c:640 ../bin/cmisc.c:461 ../bin/cstruct.c:71
-#: ../bin/ctodesgn.c:2954 ../bin/ctodesgn.c:2955 ../bin/ctrain.c:188
-#: ../bin/cturnout.c:84 ../bin/dcar.c:2210 ../bin/dcar.c:4367
-#: ../bin/dcar.c:4372 ../bin/dcmpnd.c:453 ../bin/dcustmgm.c:60
+#: ../bin/cgroup.c:640 ../bin/cmisc.c:469 ../bin/cstruct.c:71
+#: ../bin/ctodesgn.c:2956 ../bin/ctodesgn.c:2957 ../bin/ctrain.c:188
+#: ../bin/cturnout.c:84 ../bin/dcar.c:2212 ../bin/dcar.c:4369
+#: ../bin/dcar.c:4374 ../bin/dcmpnd.c:453 ../bin/dcustmgm.c:60
 #: ../bin/denum.c:182 ../bin/denum.c:183 ../bin/denum.c:186
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:379
 msgid "Description"
@@ -1867,16 +1881,20 @@ msgstr "Canol"
 msgid "End"
 msgstr "Diwedd"
 
+#: ../bin/cmisc.c:146 ../bin/tcurve.c:393 ../bin/tease.c:530
+msgid "Lock"
+msgstr "Clo"
+
 #: ../bin/cmisc.c:244 ../bin/cmodify.c:364 ../bin/compound.c:735
 #: ../bin/ctrain.c:219
 msgid "Change Track"
 msgstr "Newid trac"
 
-#: ../bin/cmisc.c:574
+#: ../bin/cmisc.c:596
 msgid "Select track to describe +Shift for Frozen"
 msgstr "Dewiswch drac i'w ddisgrifio +Shift ar gyfer rhewi"
 
-#: ../bin/cmisc.c:664 ../bin/doption.c:236
+#: ../bin/cmisc.c:697 ../bin/doption.c:236
 msgid "Properties"
 msgstr "Priodweddau"
 
@@ -1973,12 +1991,12 @@ msgstr "Pwynt Diwedd 4: X,Y"
 msgid "Z4"
 msgstr "Z4"
 
-#: ../bin/compound.c:636
-msgid "Pivot"
-msgstr "Phwysbwynt"
+#: ../bin/compound.c:634 ../bin/tease.c:523
+msgid "Origin: X,Y"
+msgstr "Tarddiad"
 
 #: ../bin/compound.c:639 ../bin/cstruct.c:71 ../bin/cturnout.c:84
-#: ../bin/dcar.c:4366 ../bin/dcar.c:4371 ../bin/dcustmgm.c:60
+#: ../bin/dcar.c:4368 ../bin/dcar.c:4373 ../bin/dcustmgm.c:60
 #: ../bin/doption.c:99 ../bin/doption.c:100
 msgid "Part No"
 msgstr "Rhif Rhan"
@@ -1987,12 +2005,12 @@ msgstr "Rhif Rhan"
 msgid "LineType"
 msgstr "Math o linell"
 
-#: ../bin/compound.c:901 ../bin/cstruct.c:965 ../bin/cstruct.c:1161
+#: ../bin/compound.c:901 ../bin/cstruct.c:984 ../bin/cstruct.c:1180
 msgid "Structure"
 msgstr "Strwythur"
 
-#: ../bin/compound.c:903 ../bin/cswitchmotor.c:229 ../bin/cturnout.c:1046
-#: ../bin/cturnout.c:2910
+#: ../bin/compound.c:903 ../bin/cswitchmotor.c:229 ../bin/cturnout.c:1024
+#: ../bin/cturnout.c:2890
 msgid "Turnout"
 msgstr "Pwynt rheilffordd"
 
@@ -2006,7 +2024,7 @@ msgid "%s (%d) Layer= %d %s"
 msgstr "%s (%d) Haen= %d %s"
 
 #: ../bin/cparalle.c:53 ../bin/cparalle.c:101 ../bin/cparalle.c:142
-#: ../bin/ctodesgn.c:543 ../bin/ctodesgn.c:563 ../bin/ctodesgn.c:583
+#: ../bin/ctodesgn.c:545 ../bin/ctodesgn.c:565 ../bin/ctodesgn.c:585
 #: ../bin/tcurve.c:387
 msgid "Separation"
 msgstr "Gwahanu"
@@ -2027,7 +2045,7 @@ msgstr "Nid yw Track / Line yn cefnogi'n gyfochrog"
 msgid "Create Parallel Track"
 msgstr "Creu trac cyfochrog"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:401
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:420
 #: ../bin/cparalle.c:300 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:82
 msgid "Parallel"
 msgstr "Cyfochrog"
@@ -2136,7 +2154,7 @@ msgid "Y"
 msgstr "Y"
 
 #: ../bin/cprint.c:161 ../bin/cprint.c:627 ../bin/cprofile.c:715
-#: ../bin/dcar.c:2214
+#: ../bin/dcar.c:2216
 msgid "Reset"
 msgstr "Ail gychwyn"
 
@@ -2177,7 +2195,7 @@ msgstr ""
 #: ../bin/cprint.c:723 ../bin/dbitmap.c:208 ../bin/filenoteui.c:158
 #: ../bin/misc.c:1283 ../bin/misc.c:1361 ../bin/param.c:2622
 #: ../wlib/gtklib/browserhelp.c:94
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:600
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:601
 msgid "Cancel"
 msgstr "Canslo"
 
@@ -2185,7 +2203,7 @@ msgstr "Canslo"
 msgid "Print Margins"
 msgstr "Argraffu Ymylon"
 
-#: ../bin/cprint.c:1380 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2901
+#: ../bin/cprint.c:1380 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2903
 #: ../bin/denum.c:55
 msgid "Print"
 msgstr "Argraffu"
@@ -2199,7 +2217,7 @@ msgstr ""
 msgid "Print..."
 msgstr "Argraffu..."
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:397
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:416
 #: ../bin/cprofile.c:614 ../bin/cprofile.c:1448 ../bin/cprofile.c:1528
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:125
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:74
@@ -2326,7 +2344,7 @@ msgstr "Cysylltu Pob Dewis - 'S'"
 msgid "Measurement"
 msgstr "Mesur"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:408
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:427
 #: ../bin/cruler.c:377 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:96
 msgid "Ruler"
 msgstr "Phren mesur"
@@ -2379,7 +2397,7 @@ msgstr "Ychwanegu Drychiadau"
 msgid "Refresh Compound"
 msgstr "Adnewyddu Cyfansawdd"
 
-#: ../bin/cselect.c:972 ../bin/dcar.c:4366 ../bin/dcar.c:4371
+#: ../bin/cselect.c:972 ../bin/dcar.c:4368 ../bin/dcar.c:4373
 #: ../bin/dcustmgm.c:60 ../bin/layout.c:476
 msgid "Scale"
 msgstr "Graddfa"
@@ -2408,7 +2426,7 @@ msgstr "I:"
 msgid "Rescale Tracks"
 msgstr "Traciau Ail-lunio"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:404
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:423
 #: ../bin/cselect.c:1201 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:88
 msgid "Rescale"
 msgstr "Ail-lunio"
@@ -2541,8 +2559,8 @@ msgstr "Mae'r trac mewn haen wedi'i rewi"
 msgid "Select track"
 msgstr "Dewiswch Trac"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:370
-#: ../bin/cselect.c:3460 ../bin/dcar.c:1672 ../bin/doption.c:236
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:389
+#: ../bin/cselect.c:3460 ../bin/dcar.c:1674 ../bin/doption.c:236
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:20
 msgid "Select"
 msgstr "Dewiswch"
@@ -2595,7 +2613,7 @@ msgstr "Torri"
 msgid "Copy"
 msgstr "Copi"
 
-#: ../bin/cselect.c:3513 ../bin/fileio.c:1623 ../bin/misc.c:2283
+#: ../bin/cselect.c:3513 ../bin/fileio.c:1613 ../bin/misc.c:2283
 msgid "Paste"
 msgstr "Gludo"
 
@@ -2671,14 +2689,14 @@ msgstr "Symud Disgrifiad"
 msgid "Move"
 msgstr "Symud"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:415
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:434
 #: ../bin/cselect.c:3584 ../bin/misc.c:1986 ../bin/misc.c:2298
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:110
 msgid "Rotate"
 msgstr "Cylchdroi"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:416
-#: ../bin/cselect.c:3586 ../bin/dcar.c:2216
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:435
+#: ../bin/cselect.c:3586 ../bin/dcar.c:2218
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:112
 msgid "Flip"
 msgstr "Gwrthdroi"
@@ -2809,91 +2827,91 @@ msgstr "Ddangos"
 msgid "Change Grid..."
 msgstr "Newid grid ..."
 
-#: ../bin/csplit.c:46
+#: ../bin/csplit.c:47
 msgid "Set Block Gaps"
 msgstr "Gosod bylchau bloc"
 
-#: ../bin/csplit.c:133
+#: ../bin/csplit.c:134
 msgid "Select track to split"
 msgstr "Dewiswch drac i'w hollti"
 
-#: ../bin/csplit.c:156
+#: ../bin/csplit.c:157
 msgid "Can't Split that Track Object"
 msgstr "Methu rhannu'r trac hwnnw"
 
-#: ../bin/csplit.c:164 ../bin/csplit.c:176 ../bin/csplit.c:464
+#: ../bin/csplit.c:165 ../bin/csplit.c:177 ../bin/csplit.c:477
 msgid "Split Track"
 msgstr "Trac hollt"
 
-#: ../bin/csplit.c:172 ../bin/csplit.c:295 ../bin/csplit.c:382
+#: ../bin/csplit.c:173 ../bin/csplit.c:296 ../bin/csplit.c:383
 msgid "Can't Split that Draw Object"
 msgstr "Methu rhannu'r gwrthrych tynnu hwnnw"
 
-#: ../bin/csplit.c:182
+#: ../bin/csplit.c:183
 msgid "No Track to Split"
 msgstr "Dim Trac i'w Hollti"
 
-#: ../bin/csplit.c:195 ../bin/dbench.c:69 ../bin/dbench.c:80
+#: ../bin/csplit.c:196 ../bin/dbench.c:69 ../bin/dbench.c:80
 msgid "Left"
 msgstr "Chwith"
 
-#: ../bin/csplit.c:196 ../bin/dbench.c:70 ../bin/dbench.c:79
+#: ../bin/csplit.c:197 ../bin/dbench.c:70 ../bin/dbench.c:79
 msgid "Right"
 msgstr "Reit"
 
-#: ../bin/csplit.c:197 ../bin/csplit.c:202
+#: ../bin/csplit.c:198 ../bin/csplit.c:203
 msgid "Both"
 msgstr "Y ddau"
 
-#: ../bin/csplit.c:200
+#: ../bin/csplit.c:201
 msgid "Top"
 msgstr "Uchaf"
 
-#: ../bin/csplit.c:201
+#: ../bin/csplit.c:202
 msgid "Bottom"
 msgstr "Gwaelod"
 
-#: ../bin/csplit.c:281
+#: ../bin/csplit.c:282
 msgid "Select draw to split"
 msgstr "Dewiswch dynnu i'w rannu"
 
-#: ../bin/csplit.c:299 ../bin/csplit.c:465
+#: ../bin/csplit.c:300 ../bin/csplit.c:478
 msgid "Split Draw"
 msgstr "Tynnu Hollt"
 
-#: ../bin/csplit.c:305
+#: ../bin/csplit.c:306
 msgid "No Draw to Split"
 msgstr "Dim Tynnu i'w Hollti"
 
-#: ../bin/csplit.c:343
+#: ../bin/csplit.c:344
 msgid "Select the draw object to Trim to"
 msgstr "Dewiswch y gwrthrych tynnu i Trimio ag ef"
 
-#: ../bin/csplit.c:358
+#: ../bin/csplit.c:359
 msgid "Can't Trim with a Track"
 msgstr "Methu Trimio gyda thrac"
 
-#: ../bin/csplit.c:363
+#: ../bin/csplit.c:364
 msgid "Select an intersecting draw object to Trim"
 msgstr "Dewiswch wrthrych tynnu croestoriadol i Trim"
 
-#: ../bin/csplit.c:369
+#: ../bin/csplit.c:370
 msgid "No Draw to Trim with"
 msgstr "Dim Tynnu i Drimio gyda"
 
-#: ../bin/csplit.c:376
+#: ../bin/csplit.c:377
 msgid "Can't Split a track object"
 msgstr "Methu Rhannu gwrthrych trac"
 
-#: ../bin/csplit.c:398 ../bin/csplit.c:466
+#: ../bin/csplit.c:405 ../bin/csplit.c:479
 msgid "Trim Draw"
 msgstr "Tynnu trim"
 
-#: ../bin/csplit.c:403
+#: ../bin/csplit.c:410
 msgid "Select another draw object to Trim, or Space to Deselect"
 msgstr "Dewiswch wrthrych tynnu arall i Trim, neu Space to Deselect"
 
-#: ../bin/csplit.c:463
+#: ../bin/csplit.c:476
 msgid "Split"
 msgstr "Hollti"
 
@@ -2910,7 +2928,7 @@ msgstr "Llusgwch i osod 2il bwynt gorffen"
 msgid "Straight Track Length=%s Angle=%0.3f"
 msgstr "Hyd Trac Syth=%s Ongle=%0.3f"
 
-#: ../bin/cstraigh.c:193 ../bin/tstraigh.c:267
+#: ../bin/cstraigh.c:193 ../bin/tstraigh.c:224
 msgid "Straight Track"
 msgstr "Trac Syth"
 
@@ -2919,44 +2937,44 @@ msgstr "Trac Syth"
 msgid "Hide"
 msgstr "Cuddio"
 
-#: ../bin/cstruct.c:469 ../bin/cstruct.c:496
+#: ../bin/cstruct.c:488 ../bin/cstruct.c:515
 msgid "Pier Number"
 msgstr "Rhif y Pier"
 
-#: ../bin/cstruct.c:581
+#: ../bin/cstruct.c:600
 #, c-format
 msgid "Scale %d:1"
 msgstr "Graddfa %d:1"
 
-#: ../bin/cstruct.c:583
+#: ../bin/cstruct.c:602
 #, c-format
 msgid "Width %s"
 msgstr "Lled %s"
 
-#: ../bin/cstruct.c:585
+#: ../bin/cstruct.c:604
 #, c-format
 msgid "Height %s"
 msgstr "Uchder %s"
 
-#: ../bin/cstruct.c:726
+#: ../bin/cstruct.c:745
 msgid "Place Structure"
 msgstr "Strwythur Lle"
 
-#: ../bin/cstruct.c:840
+#: ../bin/cstruct.c:859
 msgid "Drag to place"
 msgstr "Llusgwch i'w le"
 
-#: ../bin/cstruct.c:862
+#: ../bin/cstruct.c:881
 msgid "Drag to rotate"
 msgstr "Llusgwch i gylchdroi"
 
-#: ../bin/cstruct.c:882
+#: ../bin/cstruct.c:901
 #, c-format
 msgid "Angle = %0.3f"
 msgstr "Ongle = %0.3f"
 
-#: ../bin/cstruct.c:892 ../bin/cstruct.c:1138 ../bin/cturnout.c:2775
-#: ../bin/cturnout.c:2827 ../bin/cturnout.c:2956 ../bin/cturnout.c:3095
+#: ../bin/cstruct.c:911 ../bin/cstruct.c:1157 ../bin/cturnout.c:2754
+#: ../bin/cturnout.c:2806 ../bin/cturnout.c:2936 ../bin/cturnout.c:3075
 msgid ""
 "Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter "
 "to accept, Esc to Cancel"
@@ -2964,15 +2982,15 @@ msgstr ""
 "Llusg-Chwith i'w gosod, Ctrl + Llusg Chwith neu Llusgwch Dde i Gylchdroi, "
 "Gofod neu Fynd i dderbyn, Esc i Ganslo"
 
-#: ../bin/cstruct.c:965 ../bin/cturnout.c:2910 ../bin/param.c:2622
+#: ../bin/cstruct.c:984 ../bin/cturnout.c:2890 ../bin/param.c:2622
 msgid "Close"
 msgstr "Caewch"
 
-#: ../bin/cstruct.c:982
+#: ../bin/cstruct.c:1001
 msgid "Select Structure and then drag to place"
 msgstr "Dewiswch Strwythur ac yna llusgwch i'w le"
 
-#: ../bin/cstruct.c:1021
+#: ../bin/cstruct.c:1040
 msgid ""
 "Left drag to move, right drag to rotate, or press Return or click Ok to "
 "finalize"
@@ -2980,7 +2998,7 @@ msgstr ""
 "Llusgwch chwith i symud, llusgwch y dde i gylchdroi, neu pwyswch Return neu "
 "cliciwch Ok i gwblhau"
 
-#: ../bin/cstruct.c:1108 ../bin/cturnout.c:3062
+#: ../bin/cstruct.c:1127 ../bin/cturnout.c:3042
 #, c-format
 msgid "Place %s and draw into position"
 msgstr "LLe %s a thynnu i'w safle"
@@ -3071,288 +3089,288 @@ msgstr "Creu Testun"
 msgid "Fonts..."
 msgstr "Ffontiau..."
 
-#: ../bin/ctodesgn.c:144
+#: ../bin/ctodesgn.c:146
 msgid "Frog #"
 msgstr "Broga #"
 
-#: ../bin/ctodesgn.c:144
+#: ../bin/ctodesgn.c:146
 msgid "Degrees"
 msgstr "Graddau"
 
-#: ../bin/ctodesgn.c:145
+#: ../bin/ctodesgn.c:147
 msgid "Dual Path"
 msgstr "Llwybr deuol"
 
-#: ../bin/ctodesgn.c:145
+#: ../bin/ctodesgn.c:147
 msgid "Quad Path"
 msgstr "Llwybr cwad"
 
-#: ../bin/ctodesgn.c:180 ../bin/ctodesgn.c:181 ../bin/ctodesgn.c:182
-#: ../bin/ctodesgn.c:183 ../bin/ctodesgn.c:243 ../bin/ctodesgn.c:266
-#: ../bin/ctodesgn.c:268 ../bin/ctodesgn.c:303 ../bin/ctodesgn.c:306
-#: ../bin/ctodesgn.c:332 ../bin/ctodesgn.c:333 ../bin/ctodesgn.c:369
-#: ../bin/ctodesgn.c:372 ../bin/ctodesgn.c:398 ../bin/ctodesgn.c:400
-#: ../bin/ctodesgn.c:439 ../bin/ctodesgn.c:443 ../bin/ctodesgn.c:446
-#: ../bin/ctodesgn.c:658
+#: ../bin/ctodesgn.c:182 ../bin/ctodesgn.c:183 ../bin/ctodesgn.c:184
+#: ../bin/ctodesgn.c:185 ../bin/ctodesgn.c:245 ../bin/ctodesgn.c:268
+#: ../bin/ctodesgn.c:270 ../bin/ctodesgn.c:305 ../bin/ctodesgn.c:308
+#: ../bin/ctodesgn.c:334 ../bin/ctodesgn.c:335 ../bin/ctodesgn.c:371
+#: ../bin/ctodesgn.c:374 ../bin/ctodesgn.c:400 ../bin/ctodesgn.c:402
+#: ../bin/ctodesgn.c:441 ../bin/ctodesgn.c:445 ../bin/ctodesgn.c:448
+#: ../bin/ctodesgn.c:660
 msgid "Offset"
 msgstr "Gwrthbwyso"
 
-#: ../bin/ctodesgn.c:201 ../bin/ctodesgn.c:2948 ../bin/ctodesgn.c:2949
+#: ../bin/ctodesgn.c:203 ../bin/ctodesgn.c:2950 ../bin/ctodesgn.c:2951
 msgid "Left Description"
 msgstr "Disgrifiad Chwith"
 
-#: ../bin/ctodesgn.c:202 ../bin/ctodesgn.c:205
+#: ../bin/ctodesgn.c:204 ../bin/ctodesgn.c:207
 msgid " #"
 msgstr " #"
 
-#: ../bin/ctodesgn.c:204 ../bin/ctodesgn.c:2947
+#: ../bin/ctodesgn.c:206 ../bin/ctodesgn.c:2949
 msgid "Right Description"
 msgstr "Disgrifiad Cywir"
 
-#: ../bin/ctodesgn.c:206
+#: ../bin/ctodesgn.c:208
 msgid "Roadbed Width"
 msgstr "Lled gwely ffordd"
 
-#: ../bin/ctodesgn.c:210 ../bin/denum.c:56
+#: ../bin/ctodesgn.c:212 ../bin/denum.c:56
 msgid "Print Setup"
 msgstr "Gosodiadau Argraffu"
 
-#: ../bin/ctodesgn.c:241
+#: ../bin/ctodesgn.c:243
 msgid "Diverging Length"
 msgstr "Hyd Amrywiol"
 
-#: ../bin/ctodesgn.c:242
+#: ../bin/ctodesgn.c:244
 msgid "Diverging Angle"
 msgstr "Ongl Plymio"
 
-#: ../bin/ctodesgn.c:243
+#: ../bin/ctodesgn.c:245
 msgid "Diverging Offset"
 msgstr "Gwrthbwyso Amrywiol"
 
-#: ../bin/ctodesgn.c:244
+#: ../bin/ctodesgn.c:246
 msgid "Overall Length"
 msgstr "Hyd Cyffredinol"
 
-#: ../bin/ctodesgn.c:254
+#: ../bin/ctodesgn.c:256
 msgid "Regular Turnout"
 msgstr "Pwynt Rheolaidd"
 
-#: ../bin/ctodesgn.c:264 ../bin/ctodesgn.c:301
+#: ../bin/ctodesgn.c:266 ../bin/ctodesgn.c:303
 msgid "Inner Length"
 msgstr "Hyd Mewnol"
 
-#: ../bin/ctodesgn.c:265 ../bin/ctodesgn.c:302
+#: ../bin/ctodesgn.c:267 ../bin/ctodesgn.c:304
 msgid "Inner Angle"
 msgstr "Ongl Fewnol"
 
-#: ../bin/ctodesgn.c:266 ../bin/ctodesgn.c:303
+#: ../bin/ctodesgn.c:268 ../bin/ctodesgn.c:305
 msgid "Inner Offset"
 msgstr "Gwrthbwyso Mewnol"
 
-#: ../bin/ctodesgn.c:267 ../bin/ctodesgn.c:305
+#: ../bin/ctodesgn.c:269 ../bin/ctodesgn.c:307
 msgid "Outer Angle"
 msgstr "Ongl Allanol"
 
-#: ../bin/ctodesgn.c:268 ../bin/ctodesgn.c:306
+#: ../bin/ctodesgn.c:270 ../bin/ctodesgn.c:308
 msgid "Outer Offset"
 msgstr "Gwrthbwyso Allanol"
 
-#: ../bin/ctodesgn.c:269 ../bin/ctodesgn.c:308
+#: ../bin/ctodesgn.c:271 ../bin/ctodesgn.c:310
 msgid "Outer Length"
 msgstr "Hyd Allanol"
 
-#: ../bin/ctodesgn.c:291
+#: ../bin/ctodesgn.c:293
 msgid "Curved Turnout"
 msgstr "Pwynt Crwm"
 
-#: ../bin/ctodesgn.c:304
+#: ../bin/ctodesgn.c:306
 msgid "Inner Radius"
 msgstr "Radiws Mewnol"
 
-#: ../bin/ctodesgn.c:307
+#: ../bin/ctodesgn.c:309
 msgid "Outer Radius"
 msgstr "Radiws Allanol"
 
-#: ../bin/ctodesgn.c:309 ../bin/ctodesgn.c:376 ../bin/ctodesgn.c:451
+#: ../bin/ctodesgn.c:311 ../bin/ctodesgn.c:378 ../bin/ctodesgn.c:453
 msgid "Toe Radius"
 msgstr "Radiws bysedd traed"
 
-#: ../bin/ctodesgn.c:310 ../bin/ctodesgn.c:375
+#: ../bin/ctodesgn.c:312 ../bin/ctodesgn.c:377
 msgid "Toe Length"
 msgstr "Hyd bysedd traed"
 
-#: ../bin/ctodesgn.c:320
+#: ../bin/ctodesgn.c:322
 msgid "Cornu Curved Turnout"
 msgstr "Pwynt crwm Cornu"
 
-#: ../bin/ctodesgn.c:330 ../bin/ctodesgn.c:367 ../bin/ctodesgn.c:396
-#: ../bin/ctodesgn.c:437
+#: ../bin/ctodesgn.c:332 ../bin/ctodesgn.c:369 ../bin/ctodesgn.c:398
+#: ../bin/ctodesgn.c:439
 msgid "Left Length"
 msgstr "Hyd Chwith"
 
-#: ../bin/ctodesgn.c:331 ../bin/ctodesgn.c:368 ../bin/ctodesgn.c:397
-#: ../bin/ctodesgn.c:438
+#: ../bin/ctodesgn.c:333 ../bin/ctodesgn.c:370 ../bin/ctodesgn.c:399
+#: ../bin/ctodesgn.c:440
 msgid "Left Angle"
 msgstr "Ongle Chwith"
 
-#: ../bin/ctodesgn.c:332 ../bin/ctodesgn.c:369 ../bin/ctodesgn.c:398
-#: ../bin/ctodesgn.c:439
+#: ../bin/ctodesgn.c:334 ../bin/ctodesgn.c:371 ../bin/ctodesgn.c:400
+#: ../bin/ctodesgn.c:441
 msgid "Left Offset"
 msgstr "Gwrthbwyso Chwith"
 
-#: ../bin/ctodesgn.c:333 ../bin/ctodesgn.c:372 ../bin/ctodesgn.c:400
-#: ../bin/ctodesgn.c:446
+#: ../bin/ctodesgn.c:335 ../bin/ctodesgn.c:374 ../bin/ctodesgn.c:402
+#: ../bin/ctodesgn.c:448
 msgid "Right Offset"
 msgstr "Gwrthbwyso Iawn"
 
-#: ../bin/ctodesgn.c:334 ../bin/ctodesgn.c:373 ../bin/ctodesgn.c:401
-#: ../bin/ctodesgn.c:447
+#: ../bin/ctodesgn.c:336 ../bin/ctodesgn.c:375 ../bin/ctodesgn.c:403
+#: ../bin/ctodesgn.c:449
 msgid "Right Angle"
 msgstr "Ongl Dde"
 
-#: ../bin/ctodesgn.c:335 ../bin/ctodesgn.c:374 ../bin/ctodesgn.c:402
-#: ../bin/ctodesgn.c:448
+#: ../bin/ctodesgn.c:337 ../bin/ctodesgn.c:376 ../bin/ctodesgn.c:404
+#: ../bin/ctodesgn.c:450
 msgid "Right Length"
 msgstr "Hyd Iawn"
 
-#: ../bin/ctodesgn.c:357
+#: ../bin/ctodesgn.c:359
 msgid "Wye Turnout"
 msgstr "Pwynt Gwy"
 
-#: ../bin/ctodesgn.c:370 ../bin/ctodesgn.c:440
+#: ../bin/ctodesgn.c:372 ../bin/ctodesgn.c:442
 msgid "Left Radius"
 msgstr "Radiws Chwith"
 
-#: ../bin/ctodesgn.c:371 ../bin/ctodesgn.c:445
+#: ../bin/ctodesgn.c:373 ../bin/ctodesgn.c:447
 msgid "Right Radius"
 msgstr "Radiws Cywir"
 
-#: ../bin/ctodesgn.c:386
+#: ../bin/ctodesgn.c:388
 msgid "Cornu Wye Turnout"
 msgstr "Pwynt Gwy Cornu"
 
-#: ../bin/ctodesgn.c:427
+#: ../bin/ctodesgn.c:429
 msgid "3-way Turnout"
 msgstr "Pwynt 3-ffordd"
 
-#: ../bin/ctodesgn.c:441
+#: ../bin/ctodesgn.c:443
 msgid "Center Length"
 msgstr "Hyd y Ganolfan"
 
-#: ../bin/ctodesgn.c:442
+#: ../bin/ctodesgn.c:444
 msgid "Center Angle"
 msgstr "Ongl y Ganolfan"
 
-#: ../bin/ctodesgn.c:443 ../bin/dcar.c:2237
+#: ../bin/ctodesgn.c:445 ../bin/dcar.c:2239
 msgid "Center Offset"
 msgstr "Gwrthbwyso'r Ganolfan"
 
-#: ../bin/ctodesgn.c:444
+#: ../bin/ctodesgn.c:446
 msgid "Center Radius"
 msgstr "Radiws y Ganolfan"
 
-#: ../bin/ctodesgn.c:449
+#: ../bin/ctodesgn.c:451
 msgid "Toe Length Left"
 msgstr "Hyd y Toe Chwith"
 
-#: ../bin/ctodesgn.c:450
+#: ../bin/ctodesgn.c:452
 msgid "Toe Length Right"
 msgstr "Hyd y Toe yn iawn"
 
-#: ../bin/ctodesgn.c:462
+#: ../bin/ctodesgn.c:464
 msgid "Cornu 3-way Turnout"
 msgstr "Pwynt 3-ffordd Cornu"
 
-#: ../bin/ctodesgn.c:482
+#: ../bin/ctodesgn.c:484
 msgid "Crossing"
 msgstr "Groesfan"
 
-#: ../bin/ctodesgn.c:503
+#: ../bin/ctodesgn.c:505
 msgid "Single Slipswitch"
 msgstr "Pwynt Llithro Sengl"
 
-#: ../bin/ctodesgn.c:532
+#: ../bin/ctodesgn.c:534
 msgid "Double Slipswitch"
 msgstr "Pwynt Llithro Dwbl"
 
-#: ../bin/ctodesgn.c:552
+#: ../bin/ctodesgn.c:554
 msgid "Right Crossover"
 msgstr "Croesfan dde"
 
-#: ../bin/ctodesgn.c:572
+#: ../bin/ctodesgn.c:574
 msgid "Left Crossover"
 msgstr "Croesfan chwith"
 
-#: ../bin/ctodesgn.c:592
+#: ../bin/ctodesgn.c:594
 msgid "Double Crossover"
 msgstr "Croesfan ddwbl"
 
-#: ../bin/ctodesgn.c:610
+#: ../bin/ctodesgn.c:612
 msgid "Straight Section"
 msgstr "Adran Syth"
 
-#: ../bin/ctodesgn.c:621
+#: ../bin/ctodesgn.c:623
 msgid "Angle (Degrees)"
 msgstr "Ongl (Graddau)"
 
-#: ../bin/ctodesgn.c:629
+#: ../bin/ctodesgn.c:631
 msgid "Curved Section"
 msgstr "Adran Grom"
 
-#: ../bin/ctodesgn.c:648
+#: ../bin/ctodesgn.c:650
 msgid "Bumper Section"
 msgstr "Adran Clustogi"
 
-#: ../bin/ctodesgn.c:658 ../bin/denum.c:123 ../bin/denum.c:186
+#: ../bin/ctodesgn.c:660 ../bin/denum.c:123 ../bin/denum.c:186
 #: ../bin/denum.c:218 ../bin/denum.c:219
 msgid "Count"
 msgstr "Cyfrif"
 
-#: ../bin/ctodesgn.c:659
+#: ../bin/ctodesgn.c:661
 msgid "Radius1"
 msgstr "Radiws1"
 
-#: ../bin/ctodesgn.c:660
+#: ../bin/ctodesgn.c:662
 msgid "Radius2"
 msgstr "Radiws2"
 
-#: ../bin/ctodesgn.c:740
+#: ../bin/ctodesgn.c:742
 msgid "Turntable Section"
 msgstr "Adran Trofwrdd "
 
-#: ../bin/ctodesgn.c:2576
+#: ../bin/ctodesgn.c:2578
 #, c-format
 msgid "%s Designer"
 msgstr "%s Dylunydd"
 
-#: ../bin/ctodesgn.c:2580
+#: ../bin/ctodesgn.c:2582
 #, c-format
 msgid "%s %d x %d (of %d x %d)"
 msgstr "%s %d x %d (o %d x %d)"
 
-#: ../bin/ctodesgn.c:2580
+#: ../bin/ctodesgn.c:2582
 msgid "Page"
 msgstr "Tudalen"
 
-#: ../bin/ctodesgn.c:2588
+#: ../bin/ctodesgn.c:2590
 msgid "Frog Number"
 msgstr "Rhif broga"
 
-#: ../bin/ctodesgn.c:2901
+#: ../bin/ctodesgn.c:2903
 msgid "Turnout Designer"
 msgstr "Dylunydd Pwynt"
 
-#: ../bin/ctodesgn.c:2911
+#: ../bin/ctodesgn.c:2913
 #, c-format
 msgid "%s %s Designer"
 msgstr "%s %s Dylunydd"
 
-#: ../bin/ctrain.c:183 ../bin/dcar.c:2249 ../bin/dcar.c:4366
-#: ../bin/dcar.c:4371
+#: ../bin/ctrain.c:183 ../bin/dcar.c:2251 ../bin/dcar.c:4368
+#: ../bin/dcar.c:4373
 msgid "Index"
 msgstr "Mynegai"
 
-#: ../bin/ctrain.c:189 ../bin/dcar.c:4367
+#: ../bin/ctrain.c:189 ../bin/dcar.c:4369
 msgid "Rep Marks"
 msgstr "Marciau Cynrychiolwyr"
 
@@ -3368,7 +3386,7 @@ msgstr "Dilynwch"
 msgid "Auto Reverse"
 msgstr "Gwrthdroi Awtomatig"
 
-#: ../bin/ctrain.c:677 ../bin/dcar.c:5257
+#: ../bin/ctrain.c:677 ../bin/dcar.c:5259
 msgid "Find"
 msgstr "Chwilio"
 
@@ -3377,8 +3395,8 @@ msgstr "Chwilio"
 msgid "Forward"
 msgstr "Ymlaen"
 
-#: ../bin/ctrain.c:685 ../bin/ctrain.c:3126 ../bin/dcar.c:4705
-#: ../bin/dcar.c:4715 ../bin/dcar.c:4835 ../bin/fileio.c:242 ../bin/macro.c:92
+#: ../bin/ctrain.c:685 ../bin/ctrain.c:3126 ../bin/dcar.c:4707
+#: ../bin/dcar.c:4717 ../bin/dcar.c:4837 ../bin/fileio.c:242 ../bin/macro.c:92
 #: ../bin/macro.c:900
 msgid "Stop"
 msgstr "Stopiaf"
@@ -3476,16 +3494,16 @@ msgstr "Tynnwch y Car"
 msgid "Remove Train"
 msgstr "Tynnwch y Trên"
 
-#: ../bin/cturnout.c:97 ../bin/dcar.c:2271 ../bin/dcar.c:2275
+#: ../bin/cturnout.c:97 ../bin/dcar.c:2273 ../bin/dcar.c:2277
 msgid "New"
 msgstr "Newydd"
 
-#: ../bin/cturnout.c:374 ../bin/cturnout.c:379
+#: ../bin/cturnout.c:352 ../bin/cturnout.c:357
 #, c-format
 msgid "CheckPath: Turnout path[%d] %d is not a track segment"
 msgstr "Llwybr Talu: Llwybr pwynt[%d] %d nid yw'n segment trac"
 
-#: ../bin/cturnout.c:387
+#: ../bin/cturnout.c:365
 #, c-format
 msgid ""
 "CheckPath: Turnout path[%d] %d-%d not connected: %0.3f P0(%f,%f) P1(%f,%f)"
@@ -3493,52 +3511,57 @@ msgstr ""
 "Llwybr Talu: Llwybr pwynt[%d] %d-%d heb gysylltiad: %0.3f P0(%f,%f) "
 "P1(%f,%f)"
 
-#: ../bin/cturnout.c:430
+#: ../bin/cturnout.c:408
 msgid "Unknown special case"
 msgstr "Achos arbennig anhysbys"
 
-#: ../bin/cturnout.c:540
+#: ../bin/cturnout.c:518
 msgid "Connect Adjustable Tracks"
 msgstr "Cysylltu traciau addasadwy"
 
-#: ../bin/cturnout.c:1081
+#: ../bin/cturnout.c:1059
 msgid "splitTurnout: can't find segment"
 msgstr "Methu dod o hyd i segment"
 
-#: ../bin/cturnout.c:1532 ../bin/track.c:2284 ../bin/track.c:2390
-#: ../bin/tstraigh.c:634
+#: ../bin/cturnout.c:1510 ../bin/track.c:2284 ../bin/track.c:2390
+#: ../bin/tstraigh.c:591
 msgid "Drag to change track length"
 msgstr "Llusgwch i newid hyd trac"
 
-#: ../bin/cturnout.c:1543
+#: ../bin/cturnout.c:1521
 #, c-format
 msgid "Length=%s"
 msgstr "Hyd=%s"
 
-#: ../bin/cturnout.c:2365
+#: ../bin/cturnout.c:1791
+#, c-format
+msgid "Turnout %d Path: %s"
+msgstr "Pwynt %d Llwybr: %s"
+
+#: ../bin/cturnout.c:2344
 #, c-format
 msgid "%d connections, max distance %0.3f (%s)"
 msgstr "%d cysylltiadau, pellter mwyaf %0.3f (%s)"
 
-#: ../bin/cturnout.c:2370
+#: ../bin/cturnout.c:2349
 #, c-format
 msgid "0 connections (%s)"
 msgstr "0 cysylltiadau (%s)"
 
-#: ../bin/cturnout.c:2410
+#: ../bin/cturnout.c:2389
 msgid "Place New Turnout"
 msgstr "Rhowch bwynt newydd"
 
-#: ../bin/cturnout.c:2819
+#: ../bin/cturnout.c:2798
 #, c-format
 msgid "Angle = %0.3f (%s)"
 msgstr "Ongle = %0.3f (%s)"
 
-#: ../bin/cturnout.c:2927
+#: ../bin/cturnout.c:2907
 msgid "Pick turnout and active End Point, then place on the layout"
 msgstr "Dewis pwynt a diweddbwynt gweithredol, yna ei roi ar y cynllun"
 
-#: ../bin/cturnout.c:3122
+#: ../bin/cturnout.c:3102
 msgid "Predefined Track"
 msgstr "Trac Rhagddiffiniedig"
 
@@ -3789,7 +3812,7 @@ msgstr "Tryc"
 msgid "Body"
 msgstr "Corff"
 
-#: ../bin/dcar.c:156 ../bin/dcar.c:2701 ../bin/dcar.c:2705
+#: ../bin/dcar.c:156 ../bin/dcar.c:2703 ../bin/dcar.c:2707
 msgid "Unknown"
 msgstr "Anhysbys"
 
@@ -3821,422 +3844,422 @@ msgstr "Cerbyd Lluosog"
 msgid "Other"
 msgstr "Arall"
 
-#: ../bin/dcar.c:1183 ../bin/dcar.c:5078
+#: ../bin/dcar.c:1183 ../bin/dcar.c:5080
 msgid "N/A"
 msgstr "Amherthnasol"
 
-#: ../bin/dcar.c:1184 ../bin/dcar.c:5083
+#: ../bin/dcar.c:1184 ../bin/dcar.c:5085
 msgid "Mint"
 msgstr "Cyflwr mintys"
 
-#: ../bin/dcar.c:1185 ../bin/dcar.c:5082
+#: ../bin/dcar.c:1185 ../bin/dcar.c:5084
 msgid "Excellent"
 msgstr "Cyflwr rhagorol"
 
-#: ../bin/dcar.c:1186 ../bin/dcar.c:5081
+#: ../bin/dcar.c:1186 ../bin/dcar.c:5083
 msgid "Good"
 msgstr "Cyflwr da"
 
-#: ../bin/dcar.c:1187 ../bin/dcar.c:5080
+#: ../bin/dcar.c:1187 ../bin/dcar.c:5082
 msgid "Fair"
 msgstr "Cyflwr teg"
 
-#: ../bin/dcar.c:1188 ../bin/dcar.c:5079
+#: ../bin/dcar.c:1188 ../bin/dcar.c:5081
 msgid "Poor"
 msgstr "Cyflwr gwael"
 
-#: ../bin/dcar.c:1501 ../bin/dpricels.c:45
+#: ../bin/dcar.c:1503 ../bin/dpricels.c:45
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:455
 msgid "Item"
 msgstr "Eitem"
 
-#: ../bin/dcar.c:2173 ../wlib/gtklib/notice.c:96 ../wlib/mswlib/mswmisc.c:2102
+#: ../bin/dcar.c:2175 ../wlib/gtklib/notice.c:96 ../wlib/mswlib/mswmisc.c:2104
 msgid "Information"
 msgstr "Gwybodaeth"
 
-#: ../bin/dcar.c:2173
+#: ../bin/dcar.c:2175
 msgid "Customize"
 msgstr "Addasu"
 
-#: ../bin/dcar.c:2185
+#: ../bin/dcar.c:2187
 msgid "Sequential"
 msgstr "Dilyniannol"
 
-#: ../bin/dcar.c:2185
+#: ../bin/dcar.c:2187
 msgid "Repeated"
 msgstr "Ailadroddwyd"
 
-#: ../bin/dcar.c:2196 ../bin/dcar.c:2198 ../bin/dcar.c:5408
+#: ../bin/dcar.c:2198 ../bin/dcar.c:2200 ../bin/dcar.c:5410
 msgid "Prototype"
 msgstr "Prototeip"
 
-#: ../bin/dcar.c:2204
+#: ../bin/dcar.c:2206
 msgid "Part"
 msgstr "Rhan"
 
-#: ../bin/dcar.c:2206 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:380
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:584
+#: ../bin/dcar.c:2208 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:380
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:585
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:586
 msgid "Part Number"
 msgstr "Rhan rhif"
 
-#: ../bin/dcar.c:2208
+#: ../bin/dcar.c:2210
 msgid "Loco?"
 msgstr "Loco?"
 
-#: ../bin/dcar.c:2212 ../bin/dcar.c:4404
+#: ../bin/dcar.c:2214 ../bin/dcar.c:4406
 msgid "Import"
 msgstr "mewnforio"
 
-#: ../bin/dcar.c:2219
+#: ../bin/dcar.c:2221
 msgid "Mode"
 msgstr "Modd"
 
-#: ../bin/dcar.c:2223
+#: ../bin/dcar.c:2225
 msgid "Road"
 msgstr "Ffordd"
 
-#: ../bin/dcar.c:2225
+#: ../bin/dcar.c:2227
 msgid "Reporting Mark"
 msgstr "Marc Adrodd"
 
-#: ../bin/dcar.c:2227
+#: ../bin/dcar.c:2229
 msgid "Number"
 msgstr "Rhif"
 
-#: ../bin/dcar.c:2231
+#: ../bin/dcar.c:2233
 msgid "Car Length"
 msgstr "Hyd Car"
 
-#: ../bin/dcar.c:2235
+#: ../bin/dcar.c:2237
 msgid "Truck Centers"
 msgstr "Canolfannau Tryciau"
 
-#: ../bin/dcar.c:2239
+#: ../bin/dcar.c:2241
 msgid "Coupler Mount"
 msgstr "Ymlyniad Cwplwr"
 
-#: ../bin/dcar.c:2241
+#: ../bin/dcar.c:2243
 msgid "Coupled Length"
 msgstr "Hyd Cypledig"
 
-#: ../bin/dcar.c:2243 ../bin/dcar.c:4251
+#: ../bin/dcar.c:2245 ../bin/dcar.c:4253
 msgid "Coupler Length"
 msgstr "Hyd y Cwplwr"
 
-#: ../bin/dcar.c:2251
+#: ../bin/dcar.c:2253
 msgid "Purchase Price"
 msgstr "Pris Prynu"
 
-#: ../bin/dcar.c:2253 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:242
+#: ../bin/dcar.c:2255 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:242
 msgid "Current Price"
 msgstr "Pris Cyfredol"
 
-#: ../bin/dcar.c:2255 ../bin/dcar.c:4368 ../bin/dcar.c:4373
+#: ../bin/dcar.c:2257 ../bin/dcar.c:4370 ../bin/dcar.c:4375
 msgid "Condition"
 msgstr "Cyflwr"
 
-#: ../bin/dcar.c:2257
+#: ../bin/dcar.c:2259
 msgid "Purchase Date"
 msgstr "Dyddiad Prynu"
 
-#: ../bin/dcar.c:2259 ../bin/dcar.c:4373
+#: ../bin/dcar.c:2261 ../bin/dcar.c:4375
 msgid "Service Date"
 msgstr "Dyddiad Gwasanaeth"
 
-#: ../bin/dcar.c:2261
+#: ../bin/dcar.c:2263
 msgid "Quantity"
 msgstr "Nifer"
 
-#: ../bin/dcar.c:2263
+#: ../bin/dcar.c:2265
 msgid "Numbers"
 msgstr "Rhifau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:418
-#: ../bin/dcar.c:2265 ../bin/dcar.c:4369 ../bin/trknote.c:711
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:437
+#: ../bin/dcar.c:2267 ../bin/dcar.c:4371 ../bin/trknote.c:711
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:116
 msgid "Notes"
 msgstr "Nodiadau"
 
-#: ../bin/dcar.c:2272
+#: ../bin/dcar.c:2274
 msgid "Car Part"
 msgstr "Rhan Car"
 
-#: ../bin/dcar.c:2273 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:216
+#: ../bin/dcar.c:2275 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:216
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:217
 msgid "Car Prototype"
 msgstr "Prototeip Car"
 
-#: ../bin/dcar.c:2635 ../bin/dcar.c:2952
+#: ../bin/dcar.c:2637 ../bin/dcar.c:2954
 msgid "Undecorated"
 msgstr "Heb addurn"
 
-#: ../bin/dcar.c:2693 ../bin/dcar.c:2697 ../bin/paramfilelist.c:405
+#: ../bin/dcar.c:2695 ../bin/dcar.c:2699 ../bin/paramfilelist.c:405
 msgid "Custom"
 msgstr "Wedi'i addasu"
 
-#: ../bin/dcar.c:2862
+#: ../bin/dcar.c:2864
 msgid "Undecorated "
 msgstr "Heb addurn"
 
-#: ../bin/dcar.c:3084
+#: ../bin/dcar.c:3086
 #, c-format
 msgid "New %s Scale Car"
 msgstr "Newydd %s Car Graddfa"
 
-#: ../bin/dcar.c:3085 ../bin/dcar.c:3094 ../bin/dcar.c:3103 ../bin/dcar.c:4284
-#: ../bin/dcar.c:4400 ../bin/paramfilesearch_ui.c:76
+#: ../bin/dcar.c:3087 ../bin/dcar.c:3096 ../bin/dcar.c:3105 ../bin/dcar.c:4286
+#: ../bin/dcar.c:4402 ../bin/paramfilesearch_ui.c:85
 msgid "Add"
 msgstr "Ychwanegu"
 
-#: ../bin/dcar.c:3087
+#: ../bin/dcar.c:3089
 #, c-format
 msgid "Update %s Scale Car"
 msgstr "Diweddariad %s Car Graddfa"
 
-#: ../bin/dcar.c:3088 ../bin/dcar.c:3097 ../bin/dcar.c:3106
+#: ../bin/dcar.c:3090 ../bin/dcar.c:3099 ../bin/dcar.c:3108
 #: ../bin/dcmpnd.c:173
 msgid "Update"
 msgstr "Diweddariad"
 
-#: ../bin/dcar.c:3093
+#: ../bin/dcar.c:3095
 #, c-format
 msgid "New %s Scale Car Part"
 msgstr "Newydd %s Rhan Car Graddfa"
 
-#: ../bin/dcar.c:3096
+#: ../bin/dcar.c:3098
 #, c-format
 msgid "Update %s Scale Car Part"
 msgstr "Diweddariad %s Rhan Car Graddfa"
 
-#: ../bin/dcar.c:3102
+#: ../bin/dcar.c:3104
 msgid "New Prototype"
 msgstr "Newydd Prototeip"
 
-#: ../bin/dcar.c:3105
+#: ../bin/dcar.c:3107
 msgid "Update Prototype"
 msgstr "Diweddariad Prototeip"
 
-#: ../bin/dcar.c:3777
+#: ../bin/dcar.c:3779
 msgid "Enter a 8 digit numeric date"
 msgstr "Rhowch ddyddiad rhifol 8 digid"
 
-#: ../bin/dcar.c:3780
+#: ../bin/dcar.c:3782
 msgid "Enter a 8 digit date"
 msgstr "Rhowch ddyddiad 8 digid"
 
-#: ../bin/dcar.c:3782
+#: ../bin/dcar.c:3784
 msgid "Enter a date between 19000101 and 21991231"
 msgstr "Rhowch ddyddiad rhwng 19000101 a 21991231"
 
-#: ../bin/dcar.c:3787
+#: ../bin/dcar.c:3789
 msgid "Invalid month"
 msgstr "Mis Annilys"
 
-#: ../bin/dcar.c:3789
+#: ../bin/dcar.c:3791
 msgid "Invalid day"
 msgstr "Diwrnod Annilys"
 
-#: ../bin/dcar.c:3881
+#: ../bin/dcar.c:3883
 msgid "Enter a Prototype name"
 msgstr "Rhowch enw prototeip"
 
-#: ../bin/dcar.c:3883
+#: ../bin/dcar.c:3885
 msgid "Select or Enter a Manufacturer"
 msgstr "Dewiswch neu Rhowch wneuthurwr"
 
-#: ../bin/dcar.c:3885
+#: ../bin/dcar.c:3887
 msgid "Enter a Part Number"
 msgstr "Rhowch rif Rhan"
 
-#: ../bin/dcar.c:3887
+#: ../bin/dcar.c:3889
 msgid "Enter the Car Length"
 msgstr "Rhowch hyd y Car"
 
-#: ../bin/dcar.c:3889
+#: ../bin/dcar.c:3891
 msgid "Enter the Car Width"
 msgstr "Rhowch led y Car"
 
-#: ../bin/dcar.c:3891
+#: ../bin/dcar.c:3893
 msgid "Enter the Truck Centers"
 msgstr "Ewch i mewn i'r canolfannau tryciau"
 
-#: ../bin/dcar.c:3893
+#: ../bin/dcar.c:3895
 msgid "Truck Center Offset must be greater than 0 or 0"
 msgstr "Rhaid i Wrthbwyso Canolfan Truck fod yn fwy na 0 neu 0"
 
-#: ../bin/dcar.c:3895
+#: ../bin/dcar.c:3897
 msgid "Truck Centers must be less than Car Length"
 msgstr "Rhaid i ganolfannau tryciau fod yn llai na hyd car"
 
-#: ../bin/dcar.c:3897
+#: ../bin/dcar.c:3899
 msgid "Truck Center Offset plus Truck Centers must be less than Car Length"
 msgstr ""
 "Rhaid i Wrthbwyso Canolfan Truck ynghyd â Chanolfannau Tryciau fod yn llai "
 "na Hyd Car"
 
-#: ../bin/dcar.c:3899
+#: ../bin/dcar.c:3901
 msgid "Enter the Coupled Length or Coupler Length"
 msgstr "Rhowch y darn cypledig neu'r hyd Coupler"
 
-#: ../bin/dcar.c:3901
+#: ../bin/dcar.c:3903
 msgid "Enter the Coupled Length"
 msgstr "Rhowch y darn cypledig"
 
-#: ../bin/dcar.c:3903
+#: ../bin/dcar.c:3905
 msgid "Enter a item Index"
 msgstr "Rhowch fynegai eitemau"
 
-#: ../bin/dcar.c:3905
+#: ../bin/dcar.c:3907
 msgid "Purchase Price is not valid"
 msgstr "Nid yw'r pris prynu yn ddilys"
 
-#: ../bin/dcar.c:3907
+#: ../bin/dcar.c:3909
 msgid "Current Price is not valid"
 msgstr "Nid yw'r pris cyfredol yn ddilys"
 
-#: ../bin/dcar.c:3909
+#: ../bin/dcar.c:3911
 msgid "Purchase Date is not valid"
 msgstr "Nid yw'r Dyddiad Prynu yn ddilys"
 
-#: ../bin/dcar.c:3911
+#: ../bin/dcar.c:3913
 msgid "Service Date is not valid"
 msgstr "Nid yw'r Dyddiad Gwasanaeth yn ddilys"
 
-#: ../bin/dcar.c:3914
+#: ../bin/dcar.c:3916
 #, c-format
 msgid "Item Index %ld duplicated an existing item: updated to new value"
 msgstr ""
 "Mynegai Eitem %ld dyblygu eitem sy'n bodoli eisoes: wedi'i ddiweddaru i "
 "werth newydd"
 
-#: ../bin/dcar.c:4110
+#: ../bin/dcar.c:4112
 #, c-format
 msgid "Added %ld new Cars"
 msgstr "Wedi adio %ld ceir newydd"
 
-#: ../bin/dcar.c:4112
+#: ../bin/dcar.c:4114
 msgid "Added new Car"
 msgstr "Ychwanegwyd car newydd"
 
-#: ../bin/dcar.c:4115
+#: ../bin/dcar.c:4117
 msgid "Updated Car"
 msgstr "Car wedi'i ddiweddaru"
 
-#: ../bin/dcar.c:4118
+#: ../bin/dcar.c:4120
 msgid " and Part"
 msgstr "A rhan"
 
-#: ../bin/dcar.c:4145
+#: ../bin/dcar.c:4147
 #, c-format
 msgid "%s Part: %s %s %s %s %s %s"
 msgstr "%s Rhan: %s %s %s %s %s %s"
 
-#: ../bin/dcar.c:4145 ../bin/dcar.c:4162
+#: ../bin/dcar.c:4147 ../bin/dcar.c:4164
 msgid "Added new"
 msgstr "Ychwanegwyd newydd"
 
-#: ../bin/dcar.c:4145 ../bin/dcar.c:4162
+#: ../bin/dcar.c:4147 ../bin/dcar.c:4164
 msgid "Updated"
 msgstr "Wedi'i ddiweddaru"
 
-#: ../bin/dcar.c:4161
+#: ../bin/dcar.c:4163
 #, c-format
 msgid "%s Prototype: %s%s."
 msgstr "%s Prototeip: %s%s."
 
-#: ../bin/dcar.c:4163
+#: ../bin/dcar.c:4165
 msgid ". Enter new values or press Close"
 msgstr ". Rhowch werthoedd newydd neu pwyswch Close"
 
-#: ../bin/dcar.c:4284
+#: ../bin/dcar.c:4286
 msgid "New Car Part"
 msgstr "Rhan Car Newydd"
 
-#: ../bin/dcar.c:4367 ../bin/dcar.c:4372
+#: ../bin/dcar.c:4369 ../bin/dcar.c:4374
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:425
 msgid "Roadname"
 msgstr "Enw'r Ffordd"
 
-#: ../bin/dcar.c:4367
+#: ../bin/dcar.c:4369
 msgid "Purc Price"
 msgstr "Pris Prynu"
 
-#: ../bin/dcar.c:4368 ../bin/dcar.c:4373
+#: ../bin/dcar.c:4370 ../bin/dcar.c:4375
 msgid "Curr Price"
 msgstr "Pris Cyfredol"
 
-#: ../bin/dcar.c:4368
+#: ../bin/dcar.c:4370
 msgid "Purc Date"
 msgstr "Dyddiad Prynu"
 
-#: ../bin/dcar.c:4368
+#: ../bin/dcar.c:4370
 msgid "Srvc Date"
 msgstr "Dyddiad Gwasanaeth"
 
-#: ../bin/dcar.c:4369
+#: ../bin/dcar.c:4371
 msgid "Locat'n"
 msgstr "Lleoliad"
 
-#: ../bin/dcar.c:4372
+#: ../bin/dcar.c:4374
 msgid "RepMarks"
 msgstr "Marciau Adrodd"
 
-#: ../bin/dcar.c:4372
+#: ../bin/dcar.c:4374
 msgid "Purch Price"
 msgstr "Pris prynu"
 
-#: ../bin/dcar.c:4373
+#: ../bin/dcar.c:4375
 msgid "Purch Date"
 msgstr "Dyddiad prynu"
 
-#: ../bin/dcar.c:4390
+#: ../bin/dcar.c:4392
 msgid "Sort By"
 msgstr "Trefnu yn ôl"
 
-#: ../bin/dcar.c:4398 ../bin/dcontmgm.c:99 ../bin/dcustmgm.c:71
+#: ../bin/dcar.c:4400 ../bin/dcontmgm.c:99 ../bin/dcustmgm.c:71
 #: ../bin/dcustmgm.c:108
 msgid "Edit"
 msgstr "Golygu"
 
-#: ../bin/dcar.c:4402 ../bin/dcontmgm.c:101 ../bin/dcustmgm.c:73
+#: ../bin/dcar.c:4404 ../bin/dcontmgm.c:101 ../bin/dcustmgm.c:73
 #: ../bin/misc.c:2302
 msgid "Delete"
 msgstr "Dileu"
 
-#: ../bin/dcar.c:4406 ../bin/fileio.c:1520
+#: ../bin/dcar.c:4408 ../bin/fileio.c:1510
 msgid "Export"
 msgstr "Allforio"
 
-#: ../bin/dcar.c:4408 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:601
+#: ../bin/dcar.c:4410 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:602
 msgid "List"
 msgstr "Rhestr"
 
-#: ../bin/dcar.c:4519 ../bin/dcar.c:5257 ../bin/misc.c:2680
+#: ../bin/dcar.c:4521 ../bin/dcar.c:5259 ../bin/misc.c:2680
 msgid "Car Inventory"
 msgstr "Rhestr Car"
 
-#: ../bin/dcar.c:4639
+#: ../bin/dcar.c:4641
 msgid "List Cars"
 msgstr "Rhestrwch geir"
 
-#: ../bin/dcar.c:4763 ../bin/dcar.c:4929
+#: ../bin/dcar.c:4765 ../bin/dcar.c:4931
 msgid "Import Cars"
 msgstr "Mewnforio Ceir"
 
-#: ../bin/dcar.c:4930 ../bin/dcar.c:5053
+#: ../bin/dcar.c:4932 ../bin/dcar.c:5055
 msgid "Comma-Separated-Values (*.csv)|*.csv"
 msgstr "Gwerthoedd ar wahân coma (*.csv)|*.csv"
 
-#: ../bin/dcar.c:5000 ../bin/dcar.c:5052
+#: ../bin/dcar.c:5002 ../bin/dcar.c:5054
 msgid "Export Cars"
 msgstr "Allforio ceir"
 
-#: ../bin/dcar.c:5086
+#: ../bin/dcar.c:5088
 msgid "Layout"
 msgstr "Cynllun"
 
-#: ../bin/dcar.c:5088
+#: ../bin/dcar.c:5090
 msgid "Shelf"
 msgstr "Silff"
 
@@ -4286,7 +4309,7 @@ msgstr "Adnewyddu Pwynt / Strwythur"
 msgid "Choose a Turnout/Structure to replace:"
 msgstr "Dewiswch Bwynt / Strwythur i'w ddisodli"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:388
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:407
 #: ../bin/dcmpnd.c:407 ../bin/doption.c:94
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:56
 msgid "Turnouts"
@@ -4969,11 +4992,11 @@ msgstr "costau"
 msgid "Price List"
 msgstr "Rhestr pris"
 
-#: ../bin/dprmfile.c:73 ../bin/paramfilesearch_ui.c:56
+#: ../bin/dprmfile.c:73 ../bin/paramfilesearch_ui.c:60
 msgid "Show File Names"
 msgstr "Dangos Enwau Ffeil"
 
-#: ../bin/dprmfile.c:82 ../bin/paramfilesearch_ui.c:78
+#: ../bin/dprmfile.c:82 ../bin/paramfilesearch_ui.c:87
 msgid "Select all"
 msgstr "Dewiswch Bawb"
 
@@ -5137,92 +5160,92 @@ msgstr "+Alt ar gyfer Snap Magnetig"
 msgid "+Alt to inhibit Magnetic Snap"
 msgstr "+Alt i atal Snap Magnetig"
 
-#: ../bin/drawgeom.c:407
+#: ../bin/drawgeom.c:411
 msgid "Drag next point, +Alt reverse Magnetic Snap or +Ctrl lock to 90 deg"
 msgstr ""
 "Llusgwch y pwynt nesaf, +Alt gwrthdroi Snap Magnetig neu +Ctrl clo i 90 "
 "gradd"
 
-#: ../bin/drawgeom.c:417
+#: ../bin/drawgeom.c:421
 msgid "Drag next point, +Ctrl to lock to 90 degrees"
 msgstr "Llusgwch y pwynt nesaf, +Ctrl i gloi i 90 gradd"
 
-#: ../bin/drawgeom.c:448
+#: ../bin/drawgeom.c:452
 msgid "Drag to set radius"
 msgstr "Llusgwch i osod radiws"
 
-#: ../bin/drawgeom.c:461
+#: ../bin/drawgeom.c:465
 msgid "Drag set box size"
 msgstr "Llusgwch faint blwch gosod"
 
-#: ../bin/drawgeom.c:502
+#: ../bin/drawgeom.c:506
 msgid "+Alt - reverse Magnetic Snap or +Ctrl - lock to 90 deg"
 msgstr "+Alt - Snap Magnetig gwrthdroi neu +Ctrl - cloi i 90 gradd"
 
-#: ../bin/drawgeom.c:557 ../bin/drawgeom.c:613
+#: ../bin/drawgeom.c:561 ../bin/drawgeom.c:617
 #, c-format
 msgid "Length = %s, Angle = %0.2f"
 msgstr "Hyd = %s, Ongle = %0.2f"
 
-#: ../bin/drawgeom.c:634
+#: ../bin/drawgeom.c:638
 #, c-format
 msgid "Straight Line: Length=%s Angle=%0.3f"
 msgstr "Llinell syth: Hyd=%s Ongle=%0.3f"
 
-#: ../bin/drawgeom.c:656
+#: ../bin/drawgeom.c:660
 #, c-format
 msgid "Curved Line: Radius=%s Angle=%0.3f Length=%s"
 msgstr "Llinell Grom: Radiws=%s Ongle=%0.3f Hyd=%s"
 
-#: ../bin/drawgeom.c:680
+#: ../bin/drawgeom.c:684
 #, c-format
 msgid "Radius = %s"
 msgstr "Radiws = %s"
 
-#: ../bin/drawgeom.c:690
+#: ../bin/drawgeom.c:694
 #, c-format
 msgid "Width = %s, Height = %s"
 msgstr "Lled  = %s, Uchder = %s"
 
-#: ../bin/drawgeom.c:751
+#: ../bin/drawgeom.c:755
 msgid "Drag on Red arrows to adjust curve"
 msgstr "Llusgwch saethau coch i addasu'r gromlin"
 
-#: ../bin/drawgeom.c:1162
+#: ../bin/drawgeom.c:1166
 msgid "Select points or use context menu"
 msgstr "Dewis pwyntiau neu ddefnyddio dewislen cyd-destun"
 
-#: ../bin/drawgeom.c:1418
+#: ../bin/drawgeom.c:1422
 #, c-format
 msgid "Length = %s, Last angle = %0.2f"
 msgstr "Hyd = %s, Ongl olaf = %0.2f"
 
-#: ../bin/drawgeom.c:1572
+#: ../bin/drawgeom.c:1576
 msgid "Point Deleted"
 msgstr "Pwynt wedi'i ddileu"
 
-#: ../bin/drawgeom.c:1979
+#: ../bin/drawgeom.c:1983
 msgid "Not close to end of line"
 msgstr "Ddim yn agos at ddiwedd y llinell"
 
-#: ../bin/drawgeom.c:2032
+#: ../bin/drawgeom.c:2036
 msgid "Not close to ends or middle of mine, reselect"
 msgstr "Not close to ends or middle of line, reselect"
 
-#: ../bin/drawgeom.c:2081 ../bin/drawgeom.c:2307
+#: ../bin/drawgeom.c:2085 ../bin/drawgeom.c:2311
 msgid "Drag to Move Corner Point"
 msgstr "Llusgwch i Symud Pwynt Cornel"
 
-#: ../bin/drawgeom.c:2088
+#: ../bin/drawgeom.c:2092
 msgid "Drag to Move Edge "
 msgstr "Llusgwch i Symud Ymyl"
 
-#: ../bin/drawgeom.c:2152
+#: ../bin/drawgeom.c:2156
 #, c-format
 msgid "Length = %0.3f Angle = %0.3f"
 msgstr "Hyd = %0.3f Ongle = %0.3f"
 
-#: ../bin/drawgeom.c:2302
+#: ../bin/drawgeom.c:2306
 msgid "Drag to Move Edge"
 msgstr "Llusgwch i Symud Ymyl"
 
@@ -5251,48 +5274,44 @@ msgstr "Cynllun Trac Dienw"
 msgid " (R/O)"
 msgstr " (R/O)"
 
-#: ../bin/fileio.c:659 ../bin/fileio.c:1281
-msgid "Check Pointing"
-msgstr "Gwirio Pwyntio"
-
-#: ../bin/fileio.c:789
+#: ../bin/fileio.c:784
 msgid "Unknown layout file object - skip until next good object?"
 msgstr "Gwrthrych ffeil cynllun anhysbys - sgipiwch tan y gwrthrych da nesaf?"
 
-#: ../bin/fileio.c:1029
+#: ../bin/fileio.c:1024
 msgid "Track"
 msgstr "Trac"
 
-#: ../bin/fileio.c:1215
+#: ../bin/fileio.c:1210
 msgid "Save Tracks"
 msgstr "Arbed Traciau"
 
-#: ../bin/fileio.c:1231
+#: ../bin/fileio.c:1226
 msgid "Save Tracks As"
 msgstr "Arbed Traciau Fel"
 
-#: ../bin/fileio.c:1242
+#: ../bin/fileio.c:1237
 msgid "Open Tracks"
 msgstr "Traciau Agored"
 
-#: ../bin/fileio.c:1256
+#: ../bin/fileio.c:1251
 msgid "Example Tracks"
 msgstr "Traciau Enghreifftiol"
 
-#: ../bin/fileio.c:1464
+#: ../bin/fileio.c:1454
 #, c-format
 msgid "Module - %s"
 msgstr "Modiwl - %s"
 
-#: ../bin/fileio.c:1469 ../bin/fileio.c:1489
+#: ../bin/fileio.c:1459 ../bin/fileio.c:1479
 msgid "Import Tracks"
 msgstr "Traciau Mewnforio"
 
-#: ../bin/fileio.c:1551
+#: ../bin/fileio.c:1541
 msgid "Export Tracks"
 msgstr "Traciau Allforio"
 
-#: ../bin/fileio.c:1570
+#: ../bin/fileio.c:1560
 msgid "Clipboard"
 msgstr "Clipfwrdd"
 
@@ -5424,19 +5443,19 @@ msgstr "Ysgrifennu"
 msgid "Read"
 msgstr "Darllenwch"
 
-#: ../bin/layout.c:576
+#: ../bin/layout.c:583
 msgid "Layout Options"
 msgstr "Opsiynau Cynllun"
 
-#: ../bin/layout.c:762
+#: ../bin/layout.c:769
 msgid "Read Settings"
 msgstr "Darllenwch Gosodiadau"
 
-#: ../bin/layout.c:763 ../bin/layout.c:785
+#: ../bin/layout.c:770 ../bin/layout.c:793
 msgid "Settings File (*.xset)|*.xset"
 msgstr "Ffeil Gosodiadau (*.xset)|*.xset"
 
-#: ../bin/layout.c:784
+#: ../bin/layout.c:792
 msgid "Write Settings"
 msgstr "Ysgrifennwch Gosodiadau"
 
@@ -5494,7 +5513,7 @@ msgstr "Nesaf"
 msgid "Quit"
 msgstr "Adael"
 
-#: ../bin/macro.c:685 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:556
+#: ../bin/macro.c:685 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:557
 msgid "Speed"
 msgstr "Cyflymder"
 
@@ -5609,11 +5628,10 @@ msgstr "XTrackCAD Ffont"
 msgid "No balloon help for %s\n"
 msgstr "Dim help balŵn ar gyfer %s\n"
 
-#: ../bin/misc.c:956 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:619
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:620
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:622
+#: ../bin/misc.c:956 ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:620
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:621
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:623
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:625
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:624
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:626
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:627
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:628
@@ -5668,7 +5686,8 @@ msgstr "Dim help balŵn ar gyfer %s\n"
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:677
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:678
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:679
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:681
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:680
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:682
 msgid "No Help"
 msgstr "Dim Cymorth"
 
@@ -6291,11 +6310,11 @@ msgstr "Rhowch werth rhwng %s a %s"
 msgid "Help"
 msgstr "Help"
 
-#: ../bin/paramfile.c:280
+#: ../bin/paramfile.c:283
 msgid "Parameter"
 msgstr "Paramedr"
 
-#: ../bin/paramfile.c:378
+#: ../bin/paramfile.c:381
 msgid "Unknown param file line - skip until next good object?"
 msgstr "Llinell ffeiliau param anhysbys - sgipiwch tan y gwrthrych da nesaf?"
 
@@ -6314,42 +6333,54 @@ msgstr ""
 msgid "Updating %s"
 msgstr "Diweddaru %s"
 
-#: ../bin/paramfilesearch_ui.c:165
-#, c-format
-msgid "%u parameter files in library."
-msgstr "%u ffeiliau paramedr yn y llyfrgell."
+#: ../bin/paramfilesearch_ui.c:62
+msgid "Fit Any"
+msgstr "Ffitiwch Unrhyw"
 
-#: ../bin/paramfilesearch_ui.c:274
-#, c-format
-msgid "%d parameter files found."
-msgstr "%d ffeiliau paramedr wedi'u darganfod."
+#: ../bin/paramfilesearch_ui.c:62
+msgid "Fit Compatible"
+msgstr "Ffit Cydnaws"
 
-#: ../bin/paramfilesearch_ui.c:288
+#: ../bin/paramfilesearch_ui.c:62
+msgid "Fit Exact"
+msgstr "Ffit Union"
+
+#: ../bin/paramfilesearch_ui.c:200
+#, c-format
+msgid "%u parameter files in library. %d Fit Scale."
+msgstr "%u ffeiliau paramedr yn y llyfrgell. %d Graddfa Ffit."
+
+#: ../bin/paramfilesearch_ui.c:317
+#, c-format
+msgid "%d parameter files found. %d Fit Scale"
+msgstr "%d ffeiliau paramedr wedi'u darganfod. %d Graddfa Ffit"
+
+#: ../bin/paramfilesearch_ui.c:326
 msgid "No matches found."
 msgstr "Ni ddarganfuwyd gemau."
 
-#: ../bin/paramfilesearch_ui.c:439
+#: ../bin/paramfilesearch_ui.c:485
 msgid "Choose parameter files"
 msgstr "Dewiswch ffeiliau paramedr"
 
-#: ../bin/paramfilesearch_ui.c:453
+#: ../bin/paramfilesearch_ui.c:503
 msgid "No system parameter files found, search is disabled."
 msgstr ""
 "Ni ddarganfuwyd ffeiliau paramedr system, mae'r chwiliad wedi'i anablu."
 
-#: ../bin/partcatalog.c:719
+#: ../bin/partcatalog.c:763
 msgid "Found: "
 msgstr "Wedi'i ddarganfod:"
 
-#: ../bin/partcatalog.c:720
+#: ../bin/partcatalog.c:764
 msgid "Similar: "
 msgstr "Tebyg:"
 
-#: ../bin/partcatalog.c:721
+#: ../bin/partcatalog.c:765
 msgid "Ignored: "
 msgstr "Anwybyddwyd:"
 
-#: ../bin/partcatalog.c:722
+#: ../bin/partcatalog.c:766
 msgid "Not found: "
 msgstr "Heb ei ddarganfod:"
 
@@ -6466,10 +6497,6 @@ msgstr "Helix: troi=%ld hyd=%0.2f"
 #: ../bin/tease.c:522 ../bin/tstraigh.c:86 ../bin/tstraigh.c:88
 msgid "Z"
 msgstr "Z"
-
-#: ../bin/tcurve.c:389
-msgid "Angular Length"
-msgstr "Hyd Ongl"
 
 #: ../bin/tcurve.c:569
 #, c-format
@@ -6616,7 +6643,7 @@ msgstr "Trac pwynt y tu mewn"
 msgid "Curve: Length=%s Radius=%0.3f Arc=%0.3f"
 msgstr "Cromlin: Hyd=%s Radiws=%0.3f Arc=%0.3f"
 
-#: ../bin/track.c:2346 ../bin/track.c:2404 ../bin/tstraigh.c:648
+#: ../bin/track.c:2346 ../bin/track.c:2404 ../bin/tstraigh.c:605
 #, c-format
 msgid "Straight: Length=%s Angle=%0.3f"
 msgstr "Syth: Hyd=%s Ongle=%0.3f"
@@ -6655,7 +6682,11 @@ msgstr "Nodyn newydd"
 msgid "Add notes"
 msgstr "Ychwanegu nodiadau"
 
-#: ../bin/tstraigh.c:236
+#: ../bin/tstraigh.c:90
+msgid "Track Angle"
+msgstr "Ongl y Trac"
+
+#: ../bin/tstraigh.c:193
 #, c-format
 msgid ""
 "Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f "
@@ -6663,11 +6694,11 @@ msgid ""
 msgstr ""
 "Trac Syth(%d): Haen=%d Hyd=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"
 
-#: ../bin/tstraigh.c:561
+#: ../bin/tstraigh.c:518
 msgid "Extending Straight Track"
 msgstr "Ymestyn Trac Syth"
 
-#: ../bin/tstraigh.c:641
+#: ../bin/tstraigh.c:598
 msgid "Straight "
 msgstr "Syth"
 
@@ -6683,7 +6714,7 @@ msgstr "Ffeiliau delwedd"
 msgid "Font Select"
 msgstr "Ffont dewis"
 
-#: ../wlib/gtklib/help.c:83 ../wlib/mswlib/mswmisc.c:2247
+#: ../wlib/gtklib/help.c:83 ../wlib/mswlib/mswmisc.c:2249
 msgid "&Contents"
 msgstr "Cynnwys"
 
@@ -6703,12 +6734,12 @@ msgstr "Cynnwys"
 msgid "<Empty List>"
 msgstr "<Empty List>"
 
-#: ../wlib/gtklib/notice.c:101 ../wlib/mswlib/mswmisc.c:2107
-#: ../wlib/mswlib/mswmisc.c:2150
+#: ../wlib/gtklib/notice.c:101 ../wlib/mswlib/mswmisc.c:2109
+#: ../wlib/mswlib/mswmisc.c:2152
 msgid "Warning"
 msgstr "Rhybudd"
 
-#: ../wlib/gtklib/notice.c:106 ../wlib/mswlib/mswmisc.c:2112
+#: ../wlib/gtklib/notice.c:106 ../wlib/mswlib/mswmisc.c:2114
 msgid "Error"
 msgstr "Gwall"
 
@@ -6793,11 +6824,11 @@ msgstr "TIFF ffeiliau (*.tiff, *.tif)"
 msgid "All files (*)"
 msgstr "Pob Ffeil (*)"
 
-#: ../wlib/mswlib/mswmisc.c:2248
+#: ../wlib/mswlib/mswmisc.c:2250
 msgid "&Search for Help on..."
 msgstr "Chwilio am help ar ..."
 
-#: ../wlib/mswlib/mswmisc.c:2249
+#: ../wlib/mswlib/mswmisc.c:2251
 msgid "Co&mmand Context Help"
 msgstr "Cymorth Cyd-destun Gorchymyn"
 
@@ -8605,7 +8636,7 @@ msgid "Enter text on the layout"
 msgstr "Rhowch destun ar y cynllun"
 
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:150
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:547
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:548
 msgid "Controls the size of the entered text"
 msgstr "Mae'n rheoli maint y testun a gofnodwyd"
 
@@ -9264,7 +9295,7 @@ msgstr "Argraffu rhestr rhannau"
 
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:363
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:481
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:591
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:592
 msgid "Invoke the Print Setup dialog"
 msgstr "Galw ar y ddewislen gosod Argraffu"
 
@@ -9894,127 +9925,133 @@ msgid "Show descriptions or filenames in results"
 msgstr "Dangos disgrifiadau neu enwau ffeiliau mewn canlyniadau"
 
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:532
+msgid "Select how well the definitions must fit the current layout scale"
+msgstr ""
+"Dewiswch pa mor dda y mae'n rhaid i'r diffiniadau gyd-fynd â'r raddfa "
+"gynllun gyfredol"
+
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:533
 msgid "Add selected entries into parameter file list"
 msgstr "Ychwanegwch gofnodion dethol i restr ffeiliau paramedr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:533
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:534
 msgid "Select All found entries"
 msgstr "Dewiswch Pob cofnod a ddarganfuwyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:534
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:535
 msgid "Reload the system library contents for finding"
 msgstr "Ail-lwytho cynnwys llyfrgell y system i ddod o hyd iddo"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:535
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:536
 msgid "Choose commands to be sticky"
 msgstr "Dewiswch orchmynion i fod yn ludiog"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:536
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:537
 msgid "Make the commands sticky"
 msgstr "Make the commands sticky"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:537
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:538
 msgid "List of available structure"
 msgstr "Rhestr o'r strwythurau sydd ar gael"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:538
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:539
 msgid "Diagram of the selected structure"
 msgstr "Diagram o'r strwythur a ddewiswyd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:539
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:540
 msgid "Hide Selection window when placing Structure"
 msgstr "Cuddio ffenestr Dewis wrth osod Strwythur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:540
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:541
 msgid "Drawing scale and size"
 msgstr "Graddfa a maint lluniadu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:541
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:542
 msgid "Complete structure placement"
 msgstr "Lleoliad strwythur cyflawn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:542
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:543
 msgid "Choose a Pier number"
 msgstr "Dewiswch rif Pier"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:543
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:544
 msgid "Name of the Motor"
 msgstr "Enw'r Modur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:544
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:545
 msgid "Value when switch is normal"
 msgstr "Gwerth pan fydd y switsh yn normal"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:545
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:546
 msgid "Value when the switch is reversed"
 msgstr "Gwerth pan fydd y switsh yn cael ei wrthdroi"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:546
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:547
 msgid "Value for a positive comfirmation of switch position"
 msgstr "Gwerth am gadarnhad cadarnhaol o safle'r switsh "
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:548
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:549
 msgid "Useful information about the program"
 msgstr "Gwybodaeth ddefnyddiol am y rhaglen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:549
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:550
 msgid "Show Tip of the Day every time the program starts"
 msgstr "Dangos Tip y Dydd bob tro mae'r rhaglen yn cychwyn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:550
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:551
 msgid "Show the next Tip of the Day"
 msgstr "Dangoswch Awgrym nesaf y Dydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:551
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:552
 msgid "Show the previous Tip of the Day"
 msgstr "Dangoswch Awgrym blaenorol y Dydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:553
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:554
 msgid "Controls which Command Buttons are displayed"
 msgstr "Rheolaethau pa Botymau Gorchymyn sy'n cael eu harddangos"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:554
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:555
 msgid "List of Cars"
 msgstr "Rhestr o geir"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:555
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:556
 msgid "List of active trains"
 msgstr "Rhestr o drenau actif"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:557
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:558
 msgid "Train odometer"
 msgstr "Odomedr trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:558
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:559
 msgid "Reset odometer to 0"
 msgstr "Ailosod odomedr i 0"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:559
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:560
 msgid "Find train on layout"
 msgstr "Dewch o hyd i drên ar y cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:560
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:561
 msgid "Follow train around layout"
 msgstr "Dilynwch y trên o amgylch cynllun"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:561
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:562
 msgid "Flip direction at End Of Track"
 msgstr "Cyfeiriad troi ar ddiwedd y Trac"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:562
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:563
 msgid "Change direction of train"
 msgstr "Newid cyfeiriad y trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:563
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:564
 msgid "Stop the train"
 msgstr "Stopiwch y trên"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:564
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:565
 msgid "List of available turnouts for the current scale"
 msgstr ""
 "Rhestr o'r nifer a bleidleisiodd sydd ar gael ar gyfer y raddfa gyfredol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:565
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:566
 msgid ""
 "Diagram of the currently selected turnout.  Click on a End-Point to select "
 "the Active End-Point"
@@ -10022,136 +10059,136 @@ msgstr ""
 "Diagram o'r nifer a ddewiswyd ar hyn o bryd. Cliciwch ar ddiweddbwynt i "
 "ddewis y pwynt gorffen gweithredol"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:566
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:567
 msgid ""
 "A menu list of various type of turnouts and sectional tracks you can define"
 msgstr ""
 "Rhestr ddewislen o wahanol fathau o bwyntiau a thraciau adrannol y gallwch "
 "eu diffinio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:567
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:568
 msgid "Hide Selection window when placing Turnout"
 msgstr "Cuddio ffenestr Dewis wrth osod pwyntiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:568
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:569
 msgid "The selected Active End-Point"
 msgstr "The selected active end-point"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:569
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:570
 msgid "Current selected turnout, (displayed in the diagram window)"
 msgstr "Pwynt dethol cyfredol, (wedi'i arddangos yn ffenestr y diagram)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:570
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:571
 msgid "One the End-Points that can be selected"
 msgstr "Un y pwyntiau gorffen y gellir eu dewis"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:572
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:573
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:574
 msgid "Angle of the specified track to the center line of the turnout"
 msgstr "Ongl y trac penodedig i linell ganol y pwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:574
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:575
 msgid "Specifies if angles are entered as Frog Numbers or in degrees"
 msgstr "Yn nodi a yw onglau yn cael eu nodi fel Rhifau Broga neu mewn graddau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:575
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:576
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:577
 msgid "Desciption"
 msgstr "Disgrifiad"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:577
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:578
 msgid "Turnout description (Manuf., Size, Part Number, etc)"
 msgstr "Disgrifiad pwynt (Manu., Maint, Rhan Rhif, ac ati)"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:578
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:579
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:580
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:581
 msgid "Length from the base to the end of the specified track"
 msgstr "Hyd o'r sylfaen i ddiwedd y trac penodedig"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:582
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:583
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:584
 msgid "Offset of the track End-Point from the center line of the turnout"
 msgstr "Gwrthbwyso pwynt terfyn y trac o linell ganol y pwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:586
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:587
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:588
 msgid "Prints a full size diagram of the turnout for checking"
 msgstr "Yn argraffu diagram maint llawn o'r pwynt i'w wirio"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:588
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:589
 msgid "Color of Roadbed lines"
 msgstr "Lliw y llinellau gwely ffordd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:589
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:590
 msgid "Width of Roadbed lines"
 msgstr "Lled llinellau gwely ffordd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:590
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:591
 msgid "Width of Roadbed"
 msgstr "Lled y Ffordd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:592
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:593
 msgid "Closes the window and returns to the Turnout Selection window"
 msgstr "Yn cau'r ffenestr ac yn dychwelyd i'r ffenestr Dewis Pwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:593
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:594
 msgid "Specifies the diameter of the turntable"
 msgstr "Yn nodi diamedr y trofwrdd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:594
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:595
 msgid "Old Turnout title"
 msgstr "Teitl hen bwynt"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:595
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:596
 msgid "List of available titles"
 msgstr "Rhestr o'r teitlau sydd ar gael"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:596
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:597
 msgid "Leave the Turnouts' title unchanged"
 msgstr "Gadewch deitl y pwyntiau yn ddigyfnewid"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:597
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:598
 msgid "Invoke the Parameter Files dialog"
 msgstr "Galw ar y dialog Ffeiliau Paramedr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:598
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:599
 msgid "List of available turnouts"
 msgstr "Rhestr o'r pwyntiau sydd ar gael"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:599
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:600
 msgid "Update the Turnouts' title"
 msgstr "Diweddarwch deitl y pwyntiau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:603
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:604
 msgid "Sample"
 msgstr "Sampl"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:605
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:606
 msgid "Slant"
 msgstr "Llethr"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:606
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:607
 msgid "Font selection dialog"
 msgstr "Deialog dewis ffont"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:607
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:608
 msgid "Weight"
 msgstr "Pwysau"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:608
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:609
 msgid "Printer Abort Window"
 msgstr "Ffenestr Erthylu Argraffydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:609
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:610
 msgid "Print to filename"
 msgstr "Argraffu i enw ffeil"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:610
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:611
 msgid "Specify Postscript font alias mapping"
 msgstr "Nodwch fapio alias ffont Ôl-nodyn"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:611
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:612
 msgid ""
 "Displays the Print Setup window to change printers, orientation, paper size,"
 " etc."
@@ -10159,255 +10196,255 @@ msgstr ""
 "Yn arddangos y ffenestr Gosod Print i newid argraffwyr, cyfeiriadedd, maint "
 "papur, ac ati."
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:612
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:613
 msgid "Closes this dialog"
 msgstr "Yn cau'r ymgom hon"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:613
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:614
 msgid "Page orientation"
 msgstr "Cyfeiriadedd tudalen"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:614
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:615
 msgid "Unprintable margins"
 msgstr "Ymylon na ellir ei argraffu"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:615
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:616
 msgid "Updates and closes this dialog"
 msgstr "Yn diweddaru ac yn cau'r ymgom hon"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:616
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:617
 msgid "Choose paper size"
 msgstr "Dewiswch faint papur"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:617
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:618
 msgid "Choose printer"
 msgstr "Dewiswch argraffydd"
 
-#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:618
+#: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:619
 msgid "Print test page"
 msgstr "Argraffu tudalen prawf"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:364
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:383
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:8
 msgid "Introduction"
 msgstr "Cyflwyniad"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:365
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:384
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:10
 msgid "Mouse Actions"
 msgstr "Camau Llygoden"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:366
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:385
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:12
 msgid "Dialogs"
 msgstr "Deialogau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:367
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:386
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:14
 msgid "Moving about"
 msgstr "Symud o gwmpas"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:368
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:387
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:16
 msgid "Describe and Select"
 msgstr "Disgrifio a Dewis"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:369
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:388
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:18
 msgid "Describe"
 msgstr "Disgrifiwch"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:371
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:390
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:22
 msgid "Simple tracks"
 msgstr "Traciau syml"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:372
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:391
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:24
 msgid "Straight tracks"
 msgstr "Traciau syth"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:373
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:392
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:26
 msgid "Curved tracks"
 msgstr "Traciau crwm"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:374
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:393
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:28
 msgid "Circles"
 msgstr "Cylchoedd"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:375
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:394
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:30
 msgid "Turntables"
 msgstr "Trofyrddau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:376
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:395
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:32
 msgid "Modifying tracks"
 msgstr "Addasu traciau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:377
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:396
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:34
 msgid "Modifying end points "
 msgstr "Addasu pwyntiau gorffen"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:378
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:397
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:36
 msgid "Extending"
 msgstr "Ymestyn"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:379
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:398
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:38
 msgid "Medium and Thick Tracks"
 msgstr "Traciau Canolig a Thiubh"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:380
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:399
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:40
 msgid "Joining Tracks"
 msgstr "Ymuno Traciau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:381
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:400
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:42
 msgid "Straight to straight"
 msgstr "Syth i syth"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:382
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:401
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:44
 msgid "Curve to straight"
 msgstr "Cromlin i syth"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:383
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:402
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:46
 msgid "Circle to circle"
 msgstr "Cylchwch i gylch"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:384
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:403
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:48
 msgid "Joining to turntables"
 msgstr "Ymuno â throfyrddau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:385
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:404
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:50
 msgid "Easements"
 msgstr "Rhwyddinebau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:386
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:405
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:52
 msgid "Abutting tracks"
 msgstr "Traciau cyffiniol"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:387
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:406
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:54
 msgid "Move to Join"
 msgstr "Symud i Ymuno"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:389
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:408
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:58
 msgid "Select and Placement"
 msgstr "Dewis a Lleoli"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:390
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:409
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:60
 msgid "Building a yard throat."
 msgstr "Adeiladu gwddf iard.."
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:391
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:410
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:62
 msgid "Designing turnouts"
 msgstr "Dylunio pwyntiau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:392
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:411
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:64
 msgid "Group and Ungroup"
 msgstr "Grŵp ac Ungroup"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:393
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:412
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:66
 msgid "Triming Turnout Ends"
 msgstr "Diwedd Pwynt Trimio"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:394
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:413
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:68
 msgid "Handlaid Turnouts"
 msgstr "Pwyntiau wedi'u Llawio"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:395
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:414
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:70
 msgid "Elevations and Profile"
 msgstr "Drychiadau a Phroffil"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:396
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:415
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:72
 msgid "Elevations"
 msgstr "Drychiadau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:398
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:417
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:76
 msgid "Misc track commands"
 msgstr "Gorchmynion trac amrywiol"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:399
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:418
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:78
 msgid "Delete and Undo"
 msgstr "Dileu a Dadwneud"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:400
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:419
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:80
 msgid "Splitting and Tunnels"
 msgstr "Hollti a Thwneli"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:402
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:421
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:84
 msgid "Helix tracks"
 msgstr "Traciau Helix"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:403
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:422
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:86
 msgid "Exception Tracks"
 msgstr "Traciau Eithriad"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:405
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:424
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:90
 msgid "Connect and Tighten - a siding"
 msgstr "Cysylltu a Thynhau - seidin"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:406
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:425
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:92
 msgid "Connect and Tighten - figure-8"
 msgstr "Cysylltu a Thynhau - ffigur-8"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:407
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:426
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:94
 msgid "Other commands"
 msgstr "Gorchmynion eraill"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:409
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:428
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:98
 msgid "Table Edges"
 msgstr "Ymylon Tabl"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:411
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:430
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:102
 msgid "Dimension Lines"
 msgstr "Llinellau Dimensiwn"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:412
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:431
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:104
 msgid "Lines"
 msgstr "Llinellau"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:413
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:432
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:106
 msgid "Poly-Shapes"
 msgstr "Siapiau Poly"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:414
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:433
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:108
 msgid "Modifying Poly-Shapes"
 msgstr "Addasu Siapiau Poly"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:417
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:436
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:114
 msgid "Control Panels"
 msgstr "Paneli Rheoli"

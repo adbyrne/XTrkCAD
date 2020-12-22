@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## Bugs
 
++ Fix Bezier Line Joins when inverted
++ Fix print of page numbers
++ Invert edge rulers on Print so they show
++ Fix split of arcs and circles 
++ Block memory allocation fixes
++ Fix issue when placing wrong Turnout after Esc
++ Update Layout when changes are made in order to allow save settings properly
++ Draw parameters with negative segments properly in the HotBar
++ Fix issues with Describe for Draw Objects, seperate Angle from Rotate By, make Lock to Origin work properly
++ Remove Flex track from HotBar Popup
++ Fix display of short tracks to not expand
 + Windows: fail on saving Notes
 + Fail on Selecting Notes > 72 characters long
 + Windows fail on Zooming background if memory exhausted during rescale
@@ -36,6 +47,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## Added
 
++ Trim Draw Object Command
++ New Scales added for G and S families
++ Display Path when switching turnout 
++ Add DPI setting to allow precise sizing of 1:1 display to real world size
++ Read Only length for curved lines in Describe
++ Added control of degree of fit in Library Search to only show relevant files for current scale
++ Compatible fit for structures with similar scales
++ Compatble fit for cars with same gauge and similar scales 
++ Definitions for exact fit for some tracks that have same gauge but different scales (e.g., HO for OO).  
 + Updated command line install on Ubuntu
 + Updated debian install
 + Fixes to O scale/gauge - 1:45 now O(EU), gauge for O(Fine) same as others
@@ -47,6 +67,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + SplitLine now works for Polygons and Circles (Filled or not)
 + Modify supported for Protractor to allow other usage scenarios
 + More documentation for Magnetic Snap
+
+## Parameters
+
++ Brio Track
++ Assorted fixes to parm files
++ Double Slip Pathing correction
++ Switch Machines
++ Fn3 NMRA
++ Gn3 Aristo
++ HO Tillig Luna Tramway 
++ N RocoAtlas Code 80
++ N Tram 
++ N ScaleScenes
++ OO9 Peco
 
 ## [5.2.0 GA]
  
