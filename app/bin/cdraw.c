@@ -1444,7 +1444,7 @@ static void RotateDraw( track_p trk, coOrd orig, ANGLE_T angle )
 			case SEG_FILPOLY:
 				for (int i=0;i<segPtr->u.p.cnt;i++) {
 					coOrd pt;
-					Rotate( &segPtr->u.p.pts[i].pt, orig, angle );
+					Rotate(&segPtr->u.p.pts[i].pt, orig, angle );
 				}
 			break;
 			case SEG_STRLIN:
@@ -1458,11 +1458,11 @@ static void RotateDraw( track_p trk, coOrd orig, ANGLE_T angle )
 			case SEG_CRVLIN:
 			case SEG_FILCRCL:
 				Rotate( &segPtr->u.c.center, orig, angle );
-				segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
+				segPtr->u.c.a0 = NormalizeAngle(segPtr->u.c.a0 + angle);
 				break;
 			case SEG_TEXT:
 				Rotate( &segPtr->u.t.pos, orig, angle );
-				segPtr->u.t.angle = NormalizeAngle(segPtr->u.t.angle+angle);
+				segPtr->u.t.angle = NormalizeAngle(segPtr->u.t.angle+angle+xx->angle);
 				break;
 			default:;
 		}
@@ -1835,9 +1835,47 @@ static void FlipDraw(
 		ANGLE_T angle )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
+
+	trkSeg_p segPtr = &xx->segs[0];
+	BOOL_T reorigin = FALSE;
+	if (xx->orig.x == 0.0 && xx->orig.y == 0.0) {
+		reorigin = TRUE;
+	}
 	FlipPoint( &xx->orig, orig, angle );
 	xx->angle = NormalizeAngle( 2*angle - xx->angle + 180.0 );
 	FlipSegs( xx->segCnt, xx->segs, zero, angle );
+
+
+	if (reorigin) {
+		switch(segPtr->type) {
+			case SEG_POLY:
+			case SEG_FILPOLY:
+				for (int i=0;i<segPtr->u.p.cnt;i++) {
+					REORIGIN( segPtr->u.p.pts[i].pt, segPtr->u.p.pts[i].pt, xx->angle, xx->orig);
+				}
+			break;
+			case SEG_STRLIN:
+			case SEG_DIMLIN:
+			case SEG_BENCH:
+			case SEG_TBLEDGE:
+				for (int i=0;i<2;i++) {
+					REORIGIN( segPtr->u.l.pos[i], segPtr->u.l.pos[i], xx->angle, xx->orig);
+				}
+				break;
+			case SEG_CRVLIN:
+			case SEG_FILCRCL:
+				REORIGIN( segPtr->u.c.center, segPtr->u.c.center, xx->angle, xx->orig);
+				segPtr->u.c.a0 = NormalizeAngle(segPtr->u.c.a0 + xx->angle);
+				break;
+			case SEG_TEXT:
+				REORIGIN( segPtr->u.t.pos, segPtr->u.t.pos, xx->angle, xx->orig );
+				segPtr->u.t.angle = NormalizeAngle(segPtr->u.t.angle + xx->angle);
+				break;
+			default:;
+		}
+		xx->orig.x = 0.0, xx->orig.y = 0.0, xx->angle = 0.0;
+	}
+
 	ComputeDrawBoundingBox( trk );
 }
 
