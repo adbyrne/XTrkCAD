@@ -598,7 +598,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if (drawData.lineWidth<0)
 			segPtr->width = drawData.lineWidth;
 		else
-			segPtr->width = drawData.lineWidth/mainD.dpi;
+			segPtr->width = drawData.lineWidth/75.0;   //Replace with absolute pixel
 		break;
 	case CO:
 		segPtr->color = drawData.color;
@@ -1393,11 +1393,43 @@ static BOOL_T ReadDraw( char * header )
 }
 
 
-static void MoveDraw( track_p trk, coOrd orig )
+static void MoveDraw( track_p trk, coOrd off )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	xx->orig.x += orig.x;
-	xx->orig.y += orig.y;
+
+	trkSeg_p segPtr = &xx->segs[0];
+
+	if (xx->orig.x == 0.0 && xx->orig.y == 0.0) {   //No origin set
+		switch(segPtr->type) {
+			case SEG_POLY:
+			case SEG_FILPOLY:
+				for (int i=0;i<segPtr->u.p.cnt;i++) {
+					coOrd pt;
+					REORIGIN( segPtr->u.p.pts[i].pt, segPtr->u.p.pts[i].pt, 0.0, off );
+				}
+			break;
+			case SEG_STRLIN:
+			case SEG_DIMLIN:
+			case SEG_BENCH:
+			case SEG_TBLEDGE:
+				for (int i=0;i<2;i++) {
+					REORIGIN( segPtr->u.l.pos[i], segPtr->u.l.pos[i], 0.0, off );
+				}
+				break;
+			case SEG_CRVLIN:
+			case SEG_FILCRCL:
+				REORIGIN( segPtr->u.c.center, segPtr->u.c.center, 0.0, off );
+				break;
+			case SEG_TEXT:
+				REORIGIN( segPtr->u.t.pos, segPtr->u.t.pos, 0.0, off );
+				break;
+			default:;
+		}
+
+	} else {
+		xx->orig.x += off.x;
+		xx->orig.y += off.y;
+	}
 	ComputeDrawBoundingBox( trk );
 }
 
@@ -1405,8 +1437,39 @@ static void MoveDraw( track_p trk, coOrd orig )
 static void RotateDraw( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	Rotate( &xx->orig, orig, angle );
-	xx->angle = NormalizeAngle( xx->angle + angle );
+	trkSeg_p segPtr = &xx->segs[0];
+	if (xx->orig.x == 0.0 && xx->orig.y == 0.0) {   //No origin set
+		switch(segPtr->type) {
+			case SEG_POLY:
+			case SEG_FILPOLY:
+				for (int i=0;i<segPtr->u.p.cnt;i++) {
+					coOrd pt;
+					Rotate( &segPtr->u.p.pts[i].pt, orig, angle );
+				}
+			break;
+			case SEG_STRLIN:
+			case SEG_DIMLIN:
+			case SEG_BENCH:
+			case SEG_TBLEDGE:
+				for (int i=0;i<2;i++) {
+					Rotate( &segPtr->u.l.pos[i], orig, angle );
+				}
+				break;
+			case SEG_CRVLIN:
+			case SEG_FILCRCL:
+				Rotate( &segPtr->u.c.center, orig, angle );
+				segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
+				break;
+			case SEG_TEXT:
+				Rotate( &segPtr->u.t.pos, orig, angle );
+				segPtr->u.t.angle = NormalizeAngle(segPtr->u.t.angle+angle);
+				break;
+			default:;
+		}
+	} else {
+		Rotate( &xx->orig, orig, angle );
+		xx->angle = NormalizeAngle( xx->angle + angle );
+	}
 	ComputeDrawBoundingBox( trk );
 }
 
