@@ -253,7 +253,7 @@ EXPORT void AddHotBarCornu( void )
 	hotB.txt.u.t.boxed = TRUE;
 	hotB.txt.u.t.string = MyStrdup(_(" FLEX "));
 	hotB.txt.u.t.fontP = NULL;
-	hotB.txt.u.t.fontSize = 320.0*ratio;
+	hotB.txt.u.t.fontSize = 160*mainD.dpi/72.0*ratio;
 	hotB.txt.u.t.angle = 0.0;
 
 	char * label = MyMalloc(256);
