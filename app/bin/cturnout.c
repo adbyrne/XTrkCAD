@@ -257,7 +257,7 @@ DeleteTurnoutParams(int fileIndex)
  * 
  * If parameter scale == layout and parameter gauge == layout we have an exact fit.
  * If parameter gauge == layout we have compatible track. 
- * OO scale is special cased. If the layout is in OO scale track in HO is considered 
+ * OO, O and N scales are special cased. If the layout is in OO scale track in HO is considered
  * an exact fit in spite of scale differences.
  * 
  * \param paramFileIndex
@@ -280,34 +280,12 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 	for (i = 0; i < turnoutInfo_da.cnt && ret < PARAMFILE_FIT; i++) {
 		turnoutInfo_t *to = turnoutInfo( i );
 		if (to->paramFileIndex == paramFileIndex ) {
-			if (to->scaleInx == scaleIndex ) {
+			SCALE_FIT_T fit = CompatibleScale(FIT_TURNOUT,to->scaleInx,scaleIndex);
+			if (fit == FIT_EXACT ) {
 				ret = PARAMFILE_FIT;
 				break;
-			} else {
-				if (GetScaleTrackGauge(to->scaleInx) == gauge &&
-					ret < PARAMFILE_COMPATIBLE) {
-					ret = PARAMFILE_COMPATIBLE;
-					// handle special cases
-					// if layout is OO scale, HO scale track is considered exact
-					char *layoutScaleName = GetScaleName(scaleIndex);
-					char *paramScaleName = GetScaleName(to->scaleInx);
-					if (!strcmp(layoutScaleName, "OO") &&
-						!strcmp(paramScaleName, "HO")) {
-						ret = PARAMFILE_FIT;
-					}
-					//if layout is in Japanese or British N scale, N scale is exact
-					if ((!strcmp(layoutScaleName, "N(UK)") ||
-						!strcmp(layoutScaleName, "N(JP)")) &&
-						!strcmp(paramScaleName, "N")) {
-						ret = PARAMFILE_FIT;
-					}
-					//O in Germany or UK is the same gauge and a fit for O generally
-					if ((!strcmp(layoutScaleName, "O(EU)") ||
-						!strcmp(layoutScaleName, "O(Fine)")) &&
-						!strcmp(paramScaleName, "O") ) {
-						ret = PARAMFILE_FIT;
-					}
-				}
+			} else if (fit == FIT_COMPATIBLE) {
+				ret = PARAMFILE_COMPATIBLE;
 			}
 		}
 	}
@@ -447,7 +425,7 @@ EXPORT turnoutInfo_t * TurnoutAdd( long mode, SCALEINX_T scale, wList_p list, co
 		to = turnoutInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
 			 to->segCnt > 0 &&
-			 CompatibleScale( TRUE, to->scaleInx, scale ) &&
+			 (FIT_NONE != CompatibleScale( FIT_TURNOUT, to->scaleInx, scale )) &&
 			 /*strcasecmp( to->scale, scaleName ) == 0 && */
 			 ( epCnt <= 0 || epCnt == to->endCnt ) ) {
 			if (to1==NULL)
@@ -3033,7 +3011,7 @@ EXPORT void AddHotBarTurnouts( void )
 		to = turnoutInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 				to->segCnt > 0 &&
-				CompatibleScale( TRUE, to->scaleInx, GetLayoutCurScale()) ) )
+				(FIT_NONE != CompatibleScale( FIT_TURNOUT, to->scaleInx, GetLayoutCurScale())) ) )
 				continue;
 		AddHotBarElement( to->contentsLabel, to->size, to->orig, TRUE, FALSE, to->barScale, to, CmdTurnoutHotBarProc );
 	}

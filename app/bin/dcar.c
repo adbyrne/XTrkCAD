@@ -1269,9 +1269,8 @@ static carItem_p CarItemNew(
 }
 
 /**
- * Check the whether the parameter file has CARPARTS that are compatible
- * with the current state. For CARPARTS only the exactly identical scale
- * is accepted as compatible
+ * Check the whether the parameter file has CARPARTS that are a fit or compatible
+ * with the current state.
  * 
  * \param paramFileIndex IN the parameter file
  * \param scaleIndex IN the scale to check against
@@ -1283,6 +1282,7 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
 	DIST_T ratio = GetScaleRatio(scaleIndex);
+	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -1290,16 +1290,18 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 
 	for (i = 0; i < carPartParent_da.cnt && ret != PARAMFILE_FIT; i++) {
 		carPartParent_t *carPartParent = carPartParent( i );
-
-		if(GetScaleRatio(carPartParent->scale) == ratio ){
-			for(int j = 0; j < carPartParent->parts_da.cnt; j++ ){
+		SCALE_FIT_T fit = CompatibleScale(FIT_CAR,carPartParent->scale,scaleIndex);
+		if(fit == FIT_EXACT) {
+			for(int j = 0; j < carPartParent->parts_da.cnt; j++ ) {
 				carPart_t *carPart = carPart( carPartParent, j  );
-
 				if (carPart->paramFileIndex == paramFileIndex) {
 					ret = PARAMFILE_FIT;
 					break;
 				}
 			}
+		}
+		if (fit == FIT_COMPATIBLE) {
+			ret = PARAMFILE_COMPATIBLE;
 		}
 	}
 	return(ret);
@@ -1750,7 +1752,7 @@ EXPORT int CarAvailableCount( void )
 	carItem_t * item;
 	for ( inx=0; inx < carItemHotbar_da.cnt; inx ++ ) {
 		item = carItemHotbar(inx);
-		if ( item->scaleInx != GetLayoutCurScale())
+		if (FIT_NONE == CompatibleScale( FIT_CAR, item->scaleInx, GetLayoutCurScale()))
 			continue;
 		cnt++;
 	}
@@ -1772,7 +1774,7 @@ EXPORT void AddHotBarCarDesc( void )
 		item1 = carItemHotbar(inx);
 		if ( item1->car && !IsTrackDeleted(item1->car) )
 			continue;
-		if ( item1->scaleInx != GetLayoutCurScale())
+		if ( FIT_NONE == CompatibleScale(FIT_CAR,item1->scaleInx,GetLayoutCurScale()))
 			continue;
 		if ( (carHotbarModes[carHotbarModeInx]&0xF000)!=0 || ( item0 == NULL || Cmp_carHotbar( &item0, &item1 ) != 0 ) ) {
 #ifdef DESCFIX

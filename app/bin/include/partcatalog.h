@@ -32,6 +32,7 @@ struct sCatalogEntry {
     unsigned files;								/**< current count of files */
     char *fullFileName[MAXFILESPERCONTENT];		/**< fully qualified file name */
     char *contents;								/**< content field of parameter file */
+    char *tag;									/**< data about the file */
 };
 typedef struct sCatalogEntry CatalogEntry;
 
@@ -87,8 +88,8 @@ typedef struct sSearchResult SearchResult;
 
 Catalog *InitCatalog(void);
 void DestroyCatalog(Catalog *catalog);
-CatalogEntry * InsertInOrder(Catalog *catalog, const char *contents);
-void UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents);
+CatalogEntry * InsertInOrder(Catalog *catalog, const char *contents, const char *tag);
+void UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents, char *tag);
 ParameterLib *InitLibrary(void);
 ParameterLib *CreateLibrary(char *directory);
 void DestroyLibrary(ParameterLib *tracklib);

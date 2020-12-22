@@ -174,6 +174,17 @@ typedef struct {
 EXPORT typedef scaleInfo_t * scaleInfo_p;
 static dynArr_t scaleInfo_da;
 #define scaleInfo(N) DYNARR_N( scaleInfo_t, scaleInfo_da, N )
+
+typedef struct {
+		char *in_scales;
+		SCALE_FIT_TYPE_T type;
+		char *match_scales;
+		SCALE_FIT_T result;
+} scaleComp_t;
+EXPORT typedef scaleComp_t * scaleComp_p;
+static dynArr_t scaleCompatible_da;
+#define scaleComp(N) DYNARR_N( scaleComp_t, scaleCompatible_da, N )
+
 static tieData_t tieData_demo = {
 		96.0/160.0,
 		16.0/160.0,
@@ -382,53 +393,91 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 	return si;
 }
 
+/*
+ * Evaluate the fit of a part scale1 to a definition in scale2 for a type.
+ *
+ * The rules differ by type of object.
+ *
+ * Tracks need to be the same gauge to be a fit. If they are the same scale they are exact.
+ * If the gauge is the same, but the scale is different they are compatible.
+ * There are well known exceptions where the scale is not the same but we call them exact.
+ *
+ * Structures need to be the same scale to be exact. If they are within 15% they are compatible.
+ *
+ * Cars need to be the same gauge and scale to be exact.
+ * If they are the same gauge, but within 15% of the scale they are compatible.
+ *
+ *\param type (FIT_TURNOUT,FIT_STRUCTURE,FIT_CAR)
+ *\param scale1 the input scale
+ *\param scale2 the scale to check against
+ *
+ *\return FIT_EXACT, FIT_COMPATIBLE, FIT_NONE
+ */
 
-EXPORT BOOL_T CompatibleScale(
-	BOOL_T isTurnout,
+EXPORT SCALE_FIT_T CompatibleScale(
+	SCALE_FIT_TYPE_T type,
 	SCALEINX_T scale1,
 	SCALEINX_T scale2 )
 {
+	SCALE_FIT_T rc;
 	if ( scale1 == scale2 )
-		return TRUE;
+		return FIT_EXACT;
 	if ( scale1 == SCALE_DEMO || scale2 == SCALE_DEMO )
-		return FALSE;
+		return FIT_NONE;
 	if ( scale1 == demoScaleInx || scale2 == demoScaleInx )
-		return FALSE;
-	if ( isTurnout ) {
-		if ( includeSameGaugeTurnouts &&
-			 scaleInfo(scale1).gauge == scaleInfo(scale2).gauge )
-			return TRUE;
-	} else {
+		return FIT_NONE;
+	switch(type) {
+	case FIT_TURNOUT:
 		if ( scale1 == SCALE_ANY )
-			return TRUE;
+			return FIT_EXACT;
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge &&
+				scaleInfo(scale1).scale == scaleInfo(scale2).scale)
+			return FIT_EXACT;
+
+		rc = FindScaleCompatible(FIT_TURNOUT, scaleInfo(scale1).scale, scaleInfo(scale2).scale);
+		if (rc != FIT_NONE) return rc;
+
+		if ( includeSameGaugeTurnouts &&
+			scaleInfo(scale1).gauge == scaleInfo(scale2).gauge )
+			return FIT_COMPATIBLE;
+		break;
+	case FIT_STRUCTURE:
+		if ( scale1 == SCALE_ANY )
+			return FIT_EXACT;
 		if ( scaleInfo(scale1).ratio == scaleInfo(scale2).ratio )
-			return TRUE;
-		// handle special cases
-		// if layout is OO or HO scale, HO/OO scale buildings are considered compatible
-		char *ScaleName1 = GetScaleName(scale1);
-		char *ScaleName2 = GetScaleName(scale2);
-		if (!strcmp(ScaleName2, "HO") &&
-			!strcmp(ScaleName1, "OO")) {
-			return TRUE;
+			return FIT_EXACT;
+
+		rc = FindScaleCompatible(FIT_STRUCTURE, scaleInfo(scale1).scale, scaleInfo(scale2).scale);
+		if (rc != FIT_NONE) return rc;
+
+		//15% scale match is compatible for structures
+		if (scaleInfo(scale1).ratio/scaleInfo(scale2).ratio>=0.85 &&
+				scaleInfo(scale1).ratio/scaleInfo(scale2).ratio<=1.15)
+			return FIT_COMPATIBLE;
+		break;
+	case FIT_CAR:
+		if ( scale1 == SCALE_ANY )
+				return FIT_EXACT;
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge &&
+				scaleInfo(scale1).scale == scaleInfo(scale2).scale)
+				return FIT_EXACT;
+
+		rc = FindScaleCompatible(FIT_CAR, scaleInfo(scale1).scale, scaleInfo(scale2).scale);
+		if (rc != FIT_NONE) return rc;
+
+		//Same gauge and 15% scale match is compatible for cars
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge) {
+			if (scaleInfo(scale1).ratio/scaleInfo(scale2).ratio>=0.85 &&
+					scaleInfo(scale1).ratio/scaleInfo(scale2).ratio<=1.15)
+				return FIT_COMPATIBLE;
 		}
-		if (!strcmp(ScaleName2, "OO") &&
-			!strcmp(ScaleName1, "HO")) {
-			return TRUE;
-		}
-		//if layout is in Japanese or British N scale, N scale is exact
-		if ((!strcmp(ScaleName2, "N(UK)") ||
-			 !strcmp(ScaleName2, "N(JP)")) &&
-			 !strcmp(ScaleName1, "N")) {
-			return TRUE;
-		}
-		//O in Germany or UK is a fit for O generally
-		if ((!strcmp(ScaleName2, "O(EU)") ||
-			 !strcmp(ScaleName2, "O(Fine)")) &&
-			 !strcmp(ScaleName1, "O") ) {
-			return TRUE;
-		}
+		break;
+
+	default:;
 	}
-	return FALSE;
+
+	return FIT_NONE;
+
 }
 
 /** Split the scale and the gauge description for a given combination. Eg HOn3 will be
@@ -659,6 +708,106 @@ static BOOL_T AddScale(
 	return TRUE;
 }
 
+static BOOL_T AddScaleFit(
+		char * line) {
+	char scales[STR_SIZE], matches[STR_SIZE], type[20], result[20];
+	BOOL_T rc;
+	scaleComp_p s;
+
+	if ( (rc=sscanf( line, "SCALEFIT %s %s %s %s",
+					type, result, scales, matches )) != 4) {
+			SyntaxError( "SCALEFIT", rc, 4 );
+			return FALSE;
+		}
+	DYNARR_APPEND( scaleComp_t, scaleCompatible_da, 10 );
+	s = &scaleComp(scaleCompatible_da.cnt-1);
+	s->in_scales = MyStrdup(scales);
+	s->match_scales = MyStrdup(matches);
+	if (strcmp(type,"STRUCTURE") == 0) {
+		s->type = FIT_STRUCTURE;
+	} else if (strcmp(type,"TURNOUT")==0) {
+		s->type = FIT_TURNOUT;
+	} else if (strcmp(type,"CAR")==0) {
+		s->type = FIT_CAR;
+	} else {
+		InputError( "Invalid SCALEFIT type %s", TRUE, type );
+		return FALSE;
+	}
+	if (strcmp(result,"COMPATIBLE")==0) {
+		s->result = FIT_COMPATIBLE;
+	} else if (strcmp(result,"EXACT")==0) {
+		s->result = FIT_EXACT;
+	} else {
+		InputError( "Invalid SCALEFIT result %s", TRUE, result );
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * scale2) {
+
+	char * cp, * cq;
+
+	if (!scale1 || !scale1[0]) return FIT_NONE;
+	if (!scale2 || !scale2[0]) return FIT_NONE;
+
+	for (int i=0; i<scaleCompatible_da.cnt; i++) {
+		scaleComp_p s;
+		s = &scaleComp(i);
+		if (s->type != type) continue;
+		BOOL_T found = FALSE;
+		cp = s->in_scales;
+		//Match input scale
+		while (cp) {
+			//Next instance of needle in haystack
+			cp = strstr(cp,scale2);
+			if (!cp) break;
+			//Check that this is start of csv string
+			if (cp == s->in_scales || cp[-1] == ',') {
+				//Is this end of haystack?
+				if (strlen(cp) == strlen(scale2)) {
+					found = TRUE;
+					break;
+				}
+				//Is it the same until the next ','
+				cq=strstr(cp,",");
+				if (cq && (cq-cp == strlen(scale2))) {
+					found = TRUE;
+					break;
+				}
+				else cp=cq;
+			} else cp=strstr(cp,",");
+		}
+		if (!found) continue;
+		found = FALSE;
+		cp = s->match_scales;
+		//Match output scale
+		while (cp) {
+			//Next instance of needle in haystack
+			cp = strstr(cp,scale1);
+			if (!cp) break;
+			//Check that this is start of csv string
+			if (cp == s->match_scales || cp[-1] == ',') {
+				//Is this end of haystack?
+				if (strlen(cp) == strlen(scale1)) {
+					found = TRUE;
+					break;
+				}
+				//Is it the same until the next ','
+				cq=strstr(cp,",");
+				if (cq && (cq-cp == strlen(scale1))) {
+					found = TRUE;
+					break;
+				}
+				else cp=cq;
+			} else cp=strstr(cp,",");
+		}
+		if (!found) continue;
+		return s->result;
+	}
+	return FIT_NONE;
+}
 
 EXPORT void ScaleLengthIncrement(
 		SCALEINX_T scale,
@@ -753,6 +902,7 @@ static void ScaleChange( long changes )
 EXPORT void Misc2Init( void )
 {
 	AddParam( "SCALE ", AddScale );
+	AddParam( "SCALEFIT", AddScaleFit);
 	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );

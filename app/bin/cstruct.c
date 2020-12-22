@@ -227,6 +227,17 @@ DeleteStructures(int fileIndex)
     structureInfo_da.cnt -= cnt;
 }
 
+/**
+ * Check to find out to what extent the contents of the parameter file can be used with
+ * the current layout scale / gauge.
+ *
+ * If parameter scale == layout we have an exact fit.
+ * If parameter scale == layout scale +/15% we have compatible track.
+ *
+ * \param paramFileIndex
+ * \param scaleIndex
+ * \return
+ */
 enum paramFileState
 GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
@@ -238,40 +249,19 @@ GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 		return(PARAMFILE_UNLOADED);
 	}
 
+	//Loop over all entries until an exact fit is found if none return if compatibles were found
+
 	for (i = 0; i < structureInfo_da.cnt; i++) {
 		turnoutInfo_t *to = structureInfo(i);
 		if (to->paramFileIndex == paramFileIndex) {
-			if (GetScaleRatio(to->scaleInx) == ratio || to->scaleInx == SCALE_ANY) {
+			SCALE_FIT_T fit = CompatibleScale(FIT_STRUCTURE,to->scaleInx,scaleIndex);
+			if (fit == FIT_EXACT) {
 				ret = PARAMFILE_FIT;
 				break;
 			}
-			// handle special cases
-			// if layout is OO or HO scale, HO/OO scale buildings are considered compatible
-			char *layoutScaleName = GetScaleName(scaleIndex);
-			char *paramScaleName = GetScaleName(to->scaleInx);
-			if (!strcmp(layoutScaleName, "OO") &&
-				!strcmp(paramScaleName, "HO")) {
-					ret = PARAMFILE_COMPATIBLE;
-					break;
-			}
-			if (!strcmp(layoutScaleName, "HO") &&
-				!strcmp(paramScaleName, "OO")) {
-					ret = PARAMFILE_COMPATIBLE;
-					break;
-			}
-			//if layout is in Japanese or British N scale, N scale is exact
-			if ((!strcmp(layoutScaleName, "N(UK)") ||
-				!strcmp(layoutScaleName, "N(JP)")) &&
-				!strcmp(paramScaleName, "N")) {
+			//Within 15% of scale
+			if (fit == FIT_COMPATIBLE) {
 				ret = PARAMFILE_COMPATIBLE;
-				break;
-			}
-			//O in Germany or UK is the a fit for O generally
-			if ((!strcmp(layoutScaleName, "O(EU)") ||
-				!strcmp(layoutScaleName, "O(Fine)")) &&
-				!strcmp(paramScaleName, "O") ) {
-				ret = PARAMFILE_COMPATIBLE;
-				break;
 			}
 		}
 
@@ -330,7 +320,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list, coO
 		to = structureInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
 			 to->segCnt > 0 &&
-			 CompatibleScale( FALSE, to->scaleInx, scale ) &&
+			 (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale )) &&
 			 to->segCnt != 0 ) {
 			if (to1 == NULL)
 				to1 = to;
@@ -1113,7 +1103,7 @@ EXPORT void AddHotBarStructures( void )
 		to = structureInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 			    to->segCnt > 0 &&
-			    CompatibleScale( FALSE, to->scaleInx, GetLayoutCurScale()) ) )
+			    (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, GetLayoutCurScale())) ) )
 			 /*( (strcmp( to->scale, "*" ) == 0 && strcasecmp( curScaleName, "DEMO" ) != 0 ) ||
 			   strncasecmp( to->scale, curScaleName, strlen(to->scale) ) == 0 ) ) )*/
 				continue;

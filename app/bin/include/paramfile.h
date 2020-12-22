@@ -23,4 +23,13 @@
 
 	#define CONTENTSCOMMAND "CONTENTS"
 	char *GetParameterFileContent(char *file);
+
+	#define TURNOUTCOMMAND "TURNOUT"
+	#define STRUCTURECOMMAND "STRUCTURE"
+	#define CARCOMMAND 		"CARPART"
+	#define CARPROTOCOMMAND "CARPROTO"
+
+	char * GetParameterFileScale(char *file);
+
+
 #endif // !HAVE_PARAMFILE_H
