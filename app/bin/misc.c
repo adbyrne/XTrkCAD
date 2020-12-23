@@ -2461,7 +2461,7 @@ static void CreateMenus(void) {
 	// visibility toggle for anchors
 	// get the start value
 	long anchors_long;
-	wPrefGetInteger("misc", "anchors", (long *)&anchors_long, 1);
+	wPrefGetInteger("misc", "anchors", &anchors_long, 1);
 	magneticSnap = anchors_long ? TRUE : FALSE;
 	magnetsMI = wMenuToggleCreate(viewM, "cmdMagneticSnap", _("Enable Magnetic Snap"),
 		0, magneticSnap,

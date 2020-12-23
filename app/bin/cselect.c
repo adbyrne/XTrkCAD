@@ -2118,7 +2118,7 @@ static STATUS_T CmdRotate(
 			ANGLE_T diff_angle = 0.0;
 			base = pos;
 			drawEnable = enableMoveDraw;
-			if ( FindDistance( orig, pos ) > (20.0/75.0)*mainD.scale ) {
+			if ( FindDistance( orig, pos ) > (20.0/BASE_DPI)*mainD.scale ) {
 				ANGLE_T old_angle = angle;
 				angle = FindAngle( orig, pos );
 				if (!drawnAngle) {
@@ -2153,7 +2153,7 @@ static STATUS_T CmdRotate(
 					angle = baseAngle+diff_angle;
 				}
 				Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
-				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos)<=(60.0/75.00*mainD.scale)?FindDistance(orig,pos):60.0/75.00*mainD.scale ); //Line two
+				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos)<=(60.0/BASE_DPI*mainD.scale)?FindDistance(orig,pos):60.0/BASE_DPI*mainD.scale ); //Line two
 				SetMoveD( FALSE, orig, NormalizeAngle( angle-baseAngle ) );
 				if (((MyGetKeyState()&(WKEY_ALT)) == WKEY_ALT) != magneticSnap) {  //Just Shift
 					if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,&t2,&ep2)) {
@@ -2254,7 +2254,7 @@ static STATUS_T CmdRotate(
 					ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
 
 					DIST_T dist = FindDistance(orig,base);
-					if (dist>(60.0/75.0)*mainD.scale) dist = (60.0/75.0)*mainD.scale;
+					if (dist>(60.0/BASE_DPI)*mainD.scale) dist = (60.0/BASE_DPI)*mainD.scale;
 
 					if (direction_set) {
 						if (clockwise) {

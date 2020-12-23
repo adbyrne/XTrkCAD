@@ -1830,7 +1830,7 @@ EXPORT void DrawSegsO(
 						DrawBench( d, p0, p1, color1, color2, options, segPtr->u.l.option );
 						break;
 					case SEG_TBLEDGE:
-						DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/75.0*d->dpi+0.5) , color );
+						DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/BASE_DPI*d->dpi+0.5) , color );
 						break;
 					}
 				}
