@@ -1003,6 +1003,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 {
 	track_p t;
 	static int segCnt;
+	static BOOL_T lock;
+	static coOrd movePos;
 	STATUS_T rc = C_CONTINUE;
 	long curveMode = 0;
 	long cmd;
@@ -1047,7 +1049,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			int end = Da.state==POS_1?0:1;
 			EPINX_T ep;
 			if (Da.track) {
-				if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {   //Snap Track
+				if (lock) {
+					pos = movePos;
 					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 						ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
@@ -1066,16 +1069,9 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 					}
 				}
 			} else {													//Snap Bez Line to Lines
-				if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
-					if ((t = OnTrack(&p,FALSE, FALSE)) != NULL) {
-						if (GetClosestEndPt(t,&p)) {
-							pos = p;
-							found = TRUE;
-						}
-					}
-				}
+				if (lock)
+					pos = movePos;
 			}
-			if (!found) SnapPos( &pos );
 			if (Da.state == POS_1) {
 				Da.pos[0] = pos;
 				Da.pos[1] = pos;
@@ -1101,12 +1097,15 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		lock = FALSE;
 		if ( Da.state != POS_1 && Da.state != POS_2) return C_CONTINUE;  //Don't snap CPs
 		if (Da.track)  {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
 					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					if (ep != -1) {
+						lock = TRUE;
+						movePos = pos;
 						if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 							pos = GetTrkEndPos(t, ep);
 							CreateEndAnchor(pos,FALSE);
@@ -1118,8 +1117,15 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				if ((t = OnTrack(&pos,FALSE, FALSE)) != NULL) {
 					CreateEndAnchor(pos,TRUE);
+					lock = TRUE;
+					movePos = pos;
 				}
 			}
+		}
+		if (!lock && SnapPos(&pos)) {
+			CreateEndAnchor(pos,TRUE);
+			lock = TRUE;
+			movePos = pos;
 		}
 		if (anchors_da.cnt)	return C_CONTINUE;
 		/* no break */

@@ -68,7 +68,7 @@ When zooming in or out, the corresponding highlighted area of the \f{Map Window}
 
 \S{cmdMagneticSnap} Magnetic Snap
 
-The \f{MagneticSnap} feature eases constructing and assembling tracks and draw objects by "snapping" the end of new objects to existing objects. 
+The \f{MagneticSnap} feature eases constructing and assembling Tracks and Draw objects by "snapping" the end of new objects to existing objects. 
 For existing track objects the point snapped to is always an open end point. 
 The snap operates when "close" to the object (a few pixels distant) and an anchor point (a blue circle) is displayed when this will occur if the mouse is clicked. 
 
@@ -86,13 +86,14 @@ This enables snapping to be inhibited for a single part of an operation (or conv
 
 \S{cmdGrid} Grid Dialog
 
-The \f{Grid} dialog, displayed by \f{Change Grid} on the View (\K{viewM}) menu, specifies the origin, angle and other parameters of the Snap Grid.  The Snap Grid controls the position of the cursor during the \f{Curve} (\K{cmdCurve}), \f{Circle} (\K{cmdCircle}), \f{Modify} (\K{cmdModify}), \f{Straight} (\K{cmdStraight}), \f{Line Drawing} (\K{cmdDraw}) and \f{Turntable} (\K{cmdTurntable}) commands.
+The \f{Grid} dialog, displayed by \f{Change Grid} on the View (\K{viewM}) menu, specifies the origin, angle and other parameters of the Snap Grid.  
+The Snap Grid can sbe used to snap the position of the cursor during the \f{Curve} (\K{cmdCurve}), \f{Circle} (\K{cmdCircle}), \f{Cornu} (\K{cmdCornu}), \f{Modify} (\K{cmdModify}), \f{Straight} (\K{cmdStraight}), \f{Draw} (\K{cmdDraw}) and \f{Turntable} (\K{cmdTurntable}) commands.
 
 \G{png.d/grid.png}
 
 The \f{Grid} dialog contains controls affecting the horizontal and vertical snap grid lines.  Each dimension can be independently controlled.
 
-\dd The \f{Spacing} value specifies the distance between major grid lines, which are drawn as solid lines on the layout.
+\dd The \f{Spacing} value specifies the distance between major grid lines, which are drawn as solid lines on the layout. The value of the distance is entered in either inches or centimeters depending on the value of the \f{Units} setting in Options->Preferencecs (\K{cmdPref}) menu.
 
 \u000
 
@@ -100,7 +101,7 @@ The \f{Grid} dialog contains controls affecting the horizontal and vertical snap
 
 \u000
 
-\dd The Grid can be enabled or disabled in each dimension via the \f{Enable} check box.
+\dd The Grid can be enabled or disabled in each dimension via the \f{Enable} check box. The action of snapping is secondary to \f{Magnetic Snap} if enabled, and is suppressed if \f{Alt} is held.
 
 \u000
 

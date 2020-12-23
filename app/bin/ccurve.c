@@ -222,7 +222,7 @@ EXPORT STATUS_T CreateCurve(
 		    	}
 		    }
 			Da.down = TRUE;
-			if (!found) SnapPos( &pos );
+			if (!found && !track) SnapPos( &pos );
 			Da.lock0 = found;
 
 			if (Da.create_state == NOCURVE)
@@ -280,7 +280,7 @@ EXPORT STATUS_T CreateCurve(
 		DYNARR_RESET(trkSeg_t,*anchor_array);
 		DYNARR_APPEND(trkSeg_t,*anchor_array,1);
 		if (!Da.down) return C_CONTINUE;
-		if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {  //Shift inhibits direction lock
+		if (Da.trk && track && !(MyGetKeyState() & WKEY_SHIFT)) {  //Shift inhibits direction lock
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Da.pos0)-angle1);
 			if (mode ==crvCmdFromEP1 ) {
@@ -303,7 +303,7 @@ EXPORT STATUS_T CreateCurve(
 				DIST_T dp = FindDistance(Da.pos0, pos)*sin(D2R(angle2));
 				Translate( &pos, Da.pos0, angle1-90.0, dp );
 			}
-		} else SnapPos(&pos);
+		} else if (track) SnapPos(&pos);
 		tempSegs_da.cnt =1;
 		if (Da.trk && mode == crvCmdFromChord) {
 			tempSegs(0).type = SEG_CRVTRK;
@@ -429,10 +429,14 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	STATUS_T rc = C_CONTINUE;
 	wControl_p controls[2];
 	char * labels[1];
+	static BOOL_T lock;
+	static coOrd movePos;
+
 
 	switch (action) {
 
 	case C_START:
+		lock = FALSE;
 		curveMode = (long)commandContext;
 		Da.state = -1;
 		Da.pos0 = pos;
@@ -448,24 +452,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 	case C_DOWN:
 		if (Da.state == -1) {
-			BOOL_T found = FALSE;
-			if (curveMode != crvCmdFromCenter ) {
-				if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
-					if ((t = OnTrack(&pos,FALSE,TRUE))!=NULL) {
-					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
-					   if (ep != -1) {
-						   if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
-								wBeep();
-								InfoMessage(_("Track is different gauge"));
-								return C_CONTINUE;
-							}
-							pos = GetTrkEndPos(t, ep);
-							found = TRUE;
-					   }
-					}
-				}
-			}
-			if (!found) SnapPos( &pos );
+			if (lock) pos = movePos;
 			Da.pos0 = Da.pos1 = pos;
 			Da.state = 0;
 			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
@@ -486,6 +473,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 
 	case wActionMove:
+		lock = FALSE;
 		if ((Da.state<0) && (curveMode != crvCmdFromCenter)) {
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
@@ -495,9 +483,16 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 						if (ep != -1) {
 							pos = GetTrkEndPos(t, ep);
 							CreateEndAnchor(pos,&anchors_da,FALSE);
+							lock = TRUE;
+							movePos = pos;
 						}
 					}
 				}
+			}
+			if (!lock && SnapPos(&pos)) {
+				CreateEndAnchor(pos,&anchors_da,FALSE);
+				lock = TRUE;
+				movePos = pos;
 			}
 		}
 		return C_CONTINUE;
@@ -577,8 +572,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case C_UP:
 		if (Da.state<0) return C_CONTINUE;
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord) || (curveMode == crvCmdFromChord && !Da.trk))) {
-			SnapPos( &pos );
-			Da.pos1 = pos;
+			//SnapPos( &pos );
+			//Da.pos1 = pos;
 			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;

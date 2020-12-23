@@ -460,7 +460,7 @@ STATUS_T CmdModify(
 			goto extendTrackMove;
 		tempSegs_da.cnt = 0;
 
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		rc = ModifyTrack( Dex.Trk, C_MOVE, pos );
 		if ( rc != C_CONTINUE ) {
 			rc = C_CONTINUE;
@@ -486,7 +486,7 @@ STATUS_T CmdModify(
 
 		tempSegs_da.cnt = 0;
 
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
@@ -549,7 +549,7 @@ extendTrackMove:
 		tempSegs_da.cnt = 0;
 		Dex.valid = FALSE;
 		if (Dex.Trk == NULL) return C_CONTINUE;
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		if ( Dex.first && FindDistance( pos, Dex.pos00 ) <= minLength )
 			return C_CONTINUE;
 		Dex.first = FALSE;

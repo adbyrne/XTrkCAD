@@ -1813,7 +1813,7 @@ static STATUS_T CmdMove(
 			drawEnable = enableMoveDraw;
 			base.x = pos.x - orig.x;
 			base.y = pos.y - orig.y;
-			SnapPos( &base );
+			if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &base );
 			SetMoveD( TRUE, base, 0.0 );
 			if (((MyGetKeyState()&(WKEY_ALT)) == 0) == magneticSnap) {  // ALT
 				if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {

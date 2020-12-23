@@ -2212,6 +2212,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	track_p t = NULL;
 	cornuParm_t cp;
 
+	static BOOL_T lock;
+
 	Da.commandType = CORNU_CREATE;
 
 	Da.width = (double)lineWidth/mainD.dpi;
@@ -2222,6 +2224,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	switch (action&0xFF) {
 
 	case C_START:
+		lock = FALSE;
 		Da.cmdType = (long)commandContext;
 		Da.state = NONE;
 		Da.selectEndPoint = -1;
@@ -2302,7 +2305,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.angle[end] = GetTrkEndAngle(t,ep);
 			} else if (t == NULL) {      //end not on Track, OK for CreateCornu -> empty end point
 				pos = p;	//Reset to initial
-				SnapPos( &pos );
+				if (lock) SnapPos( &pos );  //Only snap if snapped in move
 				if (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) {
 					Da.trk[end] = NULL;
 					Da.pos[end] = pos;
@@ -2389,6 +2392,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case wActionMove:
+		lock = FALSE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != NONE && Da.state != LOC_2) return C_CONTINUE;
 		if (Da.trk[0] && Da.trk[1]) return C_CONTINUE;
@@ -2425,6 +2429,9 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateCornuEndAnchor(pos,TRUE);
 			} else CreateCornuEndAnchor(pos,TRUE);
+		} else if (SnapPos(&pos)) {
+			CreateCornuEndAnchor(pos,FALSE);
+			lock = TRUE;
 		}
 
 		return C_CONTINUE;

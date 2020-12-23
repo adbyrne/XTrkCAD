@@ -190,8 +190,8 @@ STATUS_T DrawGeomMouse(
 		drawContext_t *context)
 {
 	static int lastValid = FALSE;
-	static wBool_t lock;
-	static coOrd pos0, pos0x, pos1, lastPos;
+	static BOOL_T locked;
+	static coOrd pos0, pos0x, pos1, lastPos, movePos;
 	trkSeg_p segPtr;
 	pts_t *pts;
 	int inx;
@@ -286,32 +286,45 @@ STATUS_T DrawGeomMouse(
 		CleanSegs(&tempSegs_da);
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET( trkSeg_t, anchors_da );
-		lock = FALSE;
+		locked = FALSE;
 		if (!magneticSnap)
 			InfoMessage(_("+Alt for Magnetic Snap"));
 		else
 			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
 		wSetCursor(mainD.d,defaultCursor);
+		movePos = zero;
 		return C_CONTINUE;
 
 	case wActionMove:
-		if (context->State == 0 || context->State ==2 ||
-		   ( context->State ==1 && (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE))) {
+		locked = FALSE;
+		wSetCursor(mainD.d,defaultCursor);
+		if ((context->State == 0 &&
+				context->Op != OP_FILLCIRCLE2 && context->Op != OP_CIRCLE2) ||
+			context->State ==2 ||
+		   (context->State == 1 &&
+					(context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE))) {
 			DYNARR_RESET( trkSeg_t, anchors_da );
 			wSetCursor(mainD.d,defaultCursor);
+			BOOL_T found = FALSE;
 			switch (context->Op) {  	//Snap pos to nearest line for lines and some curves
 				case OP_CURVE1:
 				case OP_CURVE2:
 				case OP_CURVE3:
 				case OP_CURVE4:
+				case OP_CIRCLE2:
+				case OP_CIRCLE3:
+				case OP_FILLCIRCLE2:
+				case OP_FILLCIRCLE3:
 				case OP_LINE:
 				case OP_DIMLINE:
 				case OP_BENCH:
+				case OP_TBLEDGE:
+				case OP_BOX:
+				case OP_FILLBOX:
 				case OP_POLY:
 				case OP_FILLPOLY:
 				case OP_POLYLINE:;
-					BOOL_T found = FALSE;
-					if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap ) {
+					if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
 						coOrd p = pos;
 						track_p t;
 						if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
@@ -324,18 +337,21 @@ STATUS_T DrawGeomMouse(
 								wSetCursor(mainD.d,wCursorNone);
 								found = TRUE;
 							}
-						} else {
-							if (FindTempNear(context,&p)) {
-								CreateEndAnchor(p,FALSE);
-								wSetCursor(mainD.d,wCursorNone);
-								found = TRUE;
-							}
 						}
 					}
-					if (!found) SnapPos(&pos);
+					if (!found && SnapPos(&pos)) {
+						CreateEndAnchor(pos,FALSE);
+						wSetCursor(mainD.d,wCursorNone);
+						movePos = pos;
+						found = TRUE;
+					}
 					break;
 				default:
 					;
+			}
+			if (found) {
+				locked = TRUE;
+				movePos = pos;
 			}
 		}
 		return C_CONTINUE;
@@ -343,6 +359,7 @@ STATUS_T DrawGeomMouse(
 	case wActionRDown:
 	case wActionLDown:
 		DYNARR_RESET( trkSeg_t, anchors_da );
+		wSetCursor(mainD.d,defaultCursor);
 		if (context->State == 2) {
 			tempSegs_da.cnt = segCnt;
 			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE)) {
@@ -361,26 +378,15 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_CURVE2 && context->State == 0) ||
 			(context->Op == OP_CURVE3 && context->State != 0) ||
 			(context->Op == OP_CURVE4 && context->State != 2) ||
+			(context->Op == OP_CIRCLE2 && context->State != 0) ||
+			(context->Op == OP_CIRCLE3 && context->State == 0) ||
+			(context->Op == OP_FILLCIRCLE2 && context->State != 0) ||
+			(context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
 			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
-			(context->Op == OP_BENCH) ||
+			(context->Op == OP_BENCH) || (context->Op == OP_TBLEDGE) ||
+			(context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
-			BOOL_T found = FALSE;
-			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap ) {
-				coOrd p = pos;
-				track_p t;
-				if (((t=OnTrack(&p,FALSE,FALSE))!=NULL ) && (IsClose(FindDistance(p,pos)))) {
-					if (!IsTrack(t)) {
-						EPINX_T ep1,ep2;
-						line_angle = GetAngleAtPoint(t,pos,&ep1,&ep2);
-						pos = p;
-						found = TRUE;
-					} else {
-						pos = p;
-						found = TRUE;
-					}
-				}
-			}
-			if (!found) SnapPos( &pos );
+			if (locked) pos = movePos;
 		}
 		if ((context->Op == OP_CURVE1 || context->Op == OP_CURVE2 || context->Op == OP_CURVE3 || context->Op == OP_CURVE4) && context->State == 1) {
 		;
@@ -450,6 +456,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).u.c.radius = 0;
 			tempSegs(0).u.c.center = pos;
 			context->message( _("Drag to set radius") );
+			context->State = 1;
 			break;
 		case OP_FILLBOX:
 			width = 0;
@@ -512,23 +519,35 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		coOrd p = pos1 = pos;
-		BOOL_T found = FALSE;
+		BOOL_T lock = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
-			(context->Op == OP_CURVE4 && context->State != 2) ||
-			(context->Op == OP_LINE) ||
+			(context->Op == OP_CURVE4 && context->State != 1) ||
+			(context->Op == OP_CIRCLE2 && context->State != 0) ||
+			(context->Op == OP_CIRCLE3 && context->State == 0) ||
+			(context->Op == OP_FILLCIRCLE2 && context->State != 0) ||
+			(context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
+			(context->Op == OP_BOX ) ||
+			(context->Op == OP_FILLBOX ) ||
+			(context->Op == OP_LINE) || (context->Op == OP_TBLEDGE) ||
 			(context->Op == OP_BENCH) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
 			if (( (MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
-				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos))))
+				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos)))) {
 					pos1 = p;
-					found = TRUE;
-					if ((MyGetKeyState() & WKEY_CTRL)==0)
-						CreateEndAnchor(pos1,TRUE);
+					lock = TRUE;
+					if ((MyGetKeyState() & WKEY_CTRL)==0) {  //Ignore for Right-Angles
+						//CreateEndAnchor(pos1,TRUE);
+						pos = pos1;
+						lock = TRUE;
+					}
+				}
 			}
-			if (!found) {
-				SnapPos(&pos);
-				pos1 = pos;
+			if (lock == FALSE) {
+				if (SnapPos(&pos)) {
+					pos1 = pos;
+					lock = TRUE;
+				}
 			}
 		}
 
@@ -677,9 +696,16 @@ STATUS_T DrawGeomMouse(
 		case OP_CIRCLE2:
 		case OP_FILLCIRCLE2:
 			tempSegs(0).u.c.center = pos1;
-			/* no break */
+			if (context->State == 1 && lock) CreateEndAnchor(pos1, FALSE);
+			else wSetCursor(mainD.d,defaultCursor);
+			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
+			context->message( _("Radius = %s"),
+			FormatDistance(FindDistance( pos0, pos1 )) );
+			break;
 		case OP_CIRCLE3:
 		case OP_FILLCIRCLE3:
+			if (context->State == 1) CreateEndAnchor(pos0, TRUE);
+			wSetCursor(mainD.d,defaultCursor);
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
 			context->message( _("Radius = %s"),
 						FormatDistance(FindDistance( pos0, pos1 )) );
@@ -688,9 +714,10 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLBOX:
 			tempSegs_da.cnt = 4;
 			tempSegs(0).u.l.pos[1].x = tempSegs(1).u.l.pos[0].x = 
-			tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos.x;
+			tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos1.x;
 			tempSegs(1).u.l.pos[1].y = tempSegs(2).u.l.pos[0].y = 
-			tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos.y;
+			tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos1.y;
+			if (lock) CreateEndAnchor(pos1,FALSE);
 			context->message( _("Width = %s, Height = %s"),
 						FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;

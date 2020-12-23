@@ -29,6 +29,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "wlib.h"
 
 #define bigdot_width 3
 
@@ -431,12 +432,14 @@ typedef struct {
 static gridHVData grid = { { 1.0, 0, 1 },
 						   { 1.0, 0, 1 } };
 
-EXPORT void SnapPos( coOrd * pos )
+EXPORT BOOL_T SnapPos( coOrd * pos )
 {
 	coOrd p;
 	DIST_T spacing;
+	if ((MyGetKeyState() & WKEY_ALT) != 0)
+		return FALSE;
 	if ( grid.Vert.Enable == FALSE && grid.Horz.Enable == FALSE )
-		return;
+		return FALSE;
 	p = *pos;
 	p.x -= grid.Orig.x;
 	p.y -= grid.Orig.y;
@@ -460,6 +463,7 @@ EXPORT void SnapPos( coOrd * pos )
 	REORIGIN1( p, grid.Angle, grid.Orig );
 	*pos = p;
 	InfoPos( p );
+	return TRUE;
 }
 
 
