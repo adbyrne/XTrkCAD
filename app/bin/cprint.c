@@ -801,8 +801,8 @@ static void PrintSnapShot( void )
 	scaleH = 1;
 	for (i=0;i<3;i++) {
 		size = mapD.size;
-		size.x += 0.75*scaleH;
-		size.y += 0.75*scaleH;
+		size.x += 2*0.5*scaleH;
+		size.y += 2*0.5*scaleH;
 		if (printGaudy)
 			size.y += 1.0*scaleH;
 		scaleX = size.x/pageSize.x;
@@ -813,8 +813,8 @@ static void PrintSnapShot( void )
 	scaleV = 1;
 	for (i=0;i<3;i++) {
 		size = mapD.size;
-		size.x += 0.75*scaleV;
-		size.y += 0.75*scaleV;
+		size.x += 2*0.5*scaleV;
+		size.y += 2*0.5*scaleV;
 		if (printGaudy)
 			size.y += 1.0*scaleV;
 		scaleX = size.x/pageSize.y;
@@ -837,8 +837,8 @@ static void PrintSnapShot( void )
 		currPrintGrid.orig.y = maxPageSize.x-0.5*printScale;
 		currPrintGrid.angle = 90.0;
 	} else {*/
-		currPrintGrid.orig.x = -0.5*printScale;
-		currPrintGrid.orig.y = -0.5*printScale;
+		currPrintGrid.orig.x = -0.5*printScale;  //Bigger rulers
+		currPrintGrid.orig.y = -0.5*printScale;  //Bigger rules
 		currPrintGrid.angle = 0.0;
 /*    }*/
 	currPrintGrid.size = maxPageSize;
@@ -1166,10 +1166,17 @@ static BOOL_T PrintPage(
 				p[0].y = p[1].y = 0.0;
 				p[2].y = p[3].y = roomSize.y;
 				
-				DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, TRUE, wDrawColorBlack );
-				DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, FALSE, wDrawColorBlack );
-				DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, TRUE, wDrawColorBlack );
-				DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, FALSE, wDrawColorBlack );
+				BOOL_T left_clear = FALSE, right_clear = FALSE, base_clear = FALSE, top_clear = FALSE;
+
+				if (currPrintGrid.orig.x <= -0.5*printScale) left_clear = TRUE;
+				if (currPrintGrid.orig.y <= -0.5*printScale) base_clear = TRUE;
+				if (clipOrig.x + clipSize.x > roomSize.x + 0.5*printScale) right_clear = TRUE;
+				if (clipOrig.y + clipSize.y > roomSize.y + 0.5*printScale) top_clear = TRUE;
+
+				DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, !base_clear, wDrawColorBlack );
+				DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, left_clear, wDrawColorBlack );
+				DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, right_clear, wDrawColorBlack );
+				DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, !top_clear, wDrawColorBlack );
 				if ( printRuler && currPrintGrid.angle == 0 ) {
 					if ( !printRotate ) {
 						p[2] = p[3] = print_d.orig;
@@ -1187,40 +1194,40 @@ static BOOL_T PrintPage(
 						p[3].y = print_d.orig.y;
 					}
 					if ( p[2].x > 0 )
-						minP.x = p[2].x + 0.4 * print_d.scale;
+						minP.x = p[2].x + 0.5 * print_d.scale;
 					else
 						minP.x = 0.0;
 					if ( p[3].x < roomSize.x )
-						maxP.x = p[3].x - 0.2 * print_d.scale;
+						maxP.x = p[3].x - 0.5 * print_d.scale;
 					else
 						maxP.x = roomSize.x;
-					if ( p[2].y > 0 )
-						minP.y = p[2].y + 0.4 * print_d.scale;
+					if ( p[2].y > 0  )
+						minP.y = p[2].y + 0.5 * print_d.scale;
 					else
 						minP.y = 0.0;
 					if ( p[3].y < roomSize.y )
-						maxP.y = p[3].y - 0.2 * print_d.scale;
+						maxP.y = p[3].y - 0.5 * print_d.scale;
 					else
 						maxP.y = roomSize.y;
 					p[0].y = 0.0;
 					p[1].y = maxP.y - minP.y;
-					if ( p[2].x > 0 ) {
-						p[0].x = p[1].x = p[2].x + 0.4 * print_d.scale;
+					if ( p[2].x > 0.5* print_d.scale ) {
+						p[0].x = p[1].x = p[2].x + 0.5* print_d.scale;
 						DrawRuler( &print_d, p[0], p[1], minP.y, TRUE, TRUE, wDrawColorBlack );
 					}
-					if ( p[3].x < roomSize.x ) {
-						p[0].x = p[1].x = p[3].x - 0.2 * print_d.scale;
-						DrawRuler( &print_d, p[0], p[1], minP.y, FALSE, FALSE, wDrawColorBlack );
+					if ( p[3].x < roomSize.x - 0.5 * print_d.scale ) {
+						p[0].x = p[1].x = p[3].x - 0.5 * print_d.scale;
+						DrawRuler( &print_d, p[0], p[1], minP.y, TRUE, FALSE, wDrawColorBlack );
 					}
 					p[0].x = 0;
 					p[1].x = maxP.x - minP.x;
-					if ( p[2].y > 0 ) {
-						p[0].y = p[1].y = p[2].y + 0.4 * print_d.scale;
+					if ( p[2].y > 0.5 * print_d.scale ) {
+						p[0].y = p[1].y = p[2].y + 0.5 * print_d.scale;
 						DrawRuler( &print_d, p[0], p[1], minP.x, TRUE, FALSE, wDrawColorBlack );
 					}
-					if ( p[3].y < roomSize.y ) {
-						p[0].y = p[1].y = p[3].y - 0.2 * print_d.scale;
-						DrawRuler( &print_d, p[0], p[1], minP.x, FALSE, TRUE, wDrawColorBlack );
+					if ( p[3].y < roomSize.y  - 0.5 * print_d.scale) {
+						p[0].y = p[1].y = p[3].y - 0.5 * print_d.scale;
+						DrawRuler( &print_d, p[0], p[1], minP.x, TRUE, TRUE, wDrawColorBlack );
 					}
 				}
 
