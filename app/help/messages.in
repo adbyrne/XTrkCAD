@@ -617,6 +617,20 @@ HELP
 The import module function needs an empty layer to work with, but none could be found. Clear a layer and retry.
 END
 
+# dlayer.c 
+MESSAGE MSG_NO_UNFROZEN_LAYER
+No layer was found that wasn't frozen. Layer 0 is unfrozen.
+HELP
+There has to be one layer that isn't frozen, Layer 0 will be unfrozen
+END
+
+# dlayer.c 
+MESSAGE MSG_NOT_UNFROZEN_LAYER
+The current layer was defined as frozen. It is now unfrozen.
+HELP
+The current layer has to be unfrozen
+END
+
 # dcmpnd.c:refreshCompound
 MESSAGE MSG_NO_TURNOUTS_AVAILABLE
 No %s are available.

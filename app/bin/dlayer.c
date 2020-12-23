@@ -321,10 +321,21 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
     	strcpy(lastSettings,layers[inx].settingsName);
     }
 
-    curLayer = newLayer;
+    curLayer = -1;
 
-    if (!IsLayerValid(curLayer)) {
-        curLayer = 0;
+    if (!IsLayerValid(newLayer)) {
+    	for (int i = newLayer; i<NUM_LAYERS; i++) {
+    		if (!layers[i].frozen) {
+    			curLayer = i;
+    			break;
+    		}
+    	}
+
+    }
+    if (curLayer == -1) {
+    	ErrorMessage( MSG_NO_EMPTY_LAYER );
+    	layers[0].frozen = FALSE;
+    	curLayer = 0;
     }
 
     if (!layers[curLayer].visible) {
@@ -869,9 +880,20 @@ InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
     /* count the objects on each layer */
     LayerSetCounts();
 
-    /* Switch the current layer when requested */
+    /* Switch the current layer when requested or the first above not frozen*/
     if (newCurrLayer != -1) {
-        curLayer = newCurrLayer;
+    	curLayer = -1;
+    	for (int i = newCurrLayer; i< NUM_LAYERS; i++) {
+    		if (!layers[i].frozen) {
+    			curLayer = i;
+    			break;
+    		}
+    	}
+    	if (curLayer == -1) {
+    		ErrorMessage( MSG_NO_EMPTY_LAYER );
+    		layers[0].frozen = FALSE;
+    		curLayer = 0;
+    	}
     }
 }
 
@@ -1022,6 +1044,18 @@ LayerPrefLoad(void)
 
             prefString = strtok(NULL, ",");
         }
+    }
+    //Make sure curLayer not frozen
+    for (int i=curLayer; i<NUM_LAYERS; i++) {
+    	if (!layers[i].frozen)  {
+    		curLayer = i;
+    		break;
+    	}
+    }
+    if (layers[curLayer].frozen) {
+    	ErrorMessage( MSG_NO_EMPTY_LAYER );
+    	layers[0].frozen = FALSE;
+    	curLayer = 0;
     }
 }
 
@@ -1270,7 +1304,21 @@ void ResetLayers(void)
         wControlSetBalloonText((wControl_p)layer_btns[inx], _("Show/Hide Layer"));
     }
 
-    curLayer = 0;
+    curLayer = -1;
+
+    for (int i=0;i<NUM_LAYERS;i++) {
+    	if (!layers[i].frozen) {
+    		curLayer = i;
+    		break;
+    	}
+    }
+
+    if (curLayer == -1) {
+    	ErrorMessage( MSG_NO_EMPTY_LAYER );
+    	layers[0].frozen = FALSE;
+    	curLayer = 0;
+    }
+
     layerVisible = TRUE;
     layerFrozen = FALSE;
     layerOnMap = TRUE;
@@ -1524,7 +1572,13 @@ BOOL_T ReadLayers(char * line)
         curLayer = atoi(line+7);
 
         if (!IsLayerValid(curLayer)) {
+
             curLayer = 0;
+        }
+
+        if (layers[curLayer].frozen) {
+        	ErrorMessage( MSG_NOT_UNFROZEN_LAYER );
+        	layers[curLayer].frozen = FALSE;
         }
 
         if (layerL) {
