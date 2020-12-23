@@ -887,7 +887,7 @@ EXPORT STATUS_T CmdStructureAction(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curStructure == NULL ) return C_CONTINUE;
 		rot1 = pos;
-		if ( FindDistance( rot0, rot1 ) > (6.0/75.0)*mainD.scale ) {
+		if ( FindDistance( rot0, rot1 ) > (6.0/BASE_DPI)*mainD.scale ) {
 			angle = FindAngle( rot0, rot1 );
 			if (!validAngle) {
 				baseAngle = angle;

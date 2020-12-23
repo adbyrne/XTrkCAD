@@ -130,6 +130,8 @@ typedef struct {
 		if ((DA.cnt)>=I) (DA).cnt--; \
 		}
 
+// Base DotsPerInch
+#define BASE_DPI	(75.0)
 
 #ifdef WINDOWS
 #define M_PI 3.14159

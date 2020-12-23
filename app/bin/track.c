@@ -101,7 +101,7 @@ EXPORT unsigned int curTrackLayer;
 EXPORT coOrd descriptionOff;
 
 EXPORT DIST_T roadbedWidth = 0.0;
-EXPORT DIST_T roadbedLineWidth = 3.0/75.0;
+EXPORT DIST_T roadbedLineWidth = 3.0/BASE_DPI;
 
 //EXPORT DIST_T minTrackRadius;
 //EXPORT DIST_T maxTrackGrade = 5.0;
@@ -1240,15 +1240,13 @@ wBool_t IsWidthClose( DIST_T dist1, DIST_T dist2 )
 	// width is computed by pixels/dpi
 	// problem is when widths are computed on platforms with differing dpi
 	DIST_T dist = fabs( dist1 - dist2 );
-	if ( dist < 0.01 )
+	if ( dist < 0.05 )
 		return TRUE;
-#ifdef WINDOWS
-	dist1 *= 96.0/72.0;
-#else
-	dist1 *= 72.0/96.0;
-#endif
+// TODO: This assumes the demo file was written with DPI=72
+//       Note: BASE_DPI is 75 so we fudge on dist (was < 0.01)
+	dist1 *= mainD.dpi/BASE_DPI;
 	dist = fabs( dist1 - dist2 );
-	if ( dist < 0.01 )
+	if ( dist < 0.05 )
 		return TRUE;
 	return FALSE;
 }
@@ -2731,7 +2729,7 @@ EXPORT void DrawCurvedTrack(
 	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
 #ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/75.0);
+	width *= (wDrawWidth)(d->dpi/BASE_DPI);
 #else
 	if (d->options&DC_PRINT)
 		width *= 300/75;
@@ -2773,7 +2771,7 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 			a2 = a0+R2D(trackGauge*1.0/r);
 			a3 = a1-R2D(trackGauge*2.0/r);
 
-			wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/75.0);
+			wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
 			DrawArc( d, p, r+(trackGauge*1.5), a2, a3, 0, width2, color );
 
@@ -2876,7 +2874,7 @@ EXPORT void DrawStraightTrack(
 	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
 #ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/75.0);
+	width *= (wDrawWidth)(d->dpi/BASE_DPI);
 #else
 	if (d->options&DC_PRINT)
 		width *= 300/75;
@@ -2920,7 +2918,7 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 	if (trk && GetTrkBridge( trk ) ) {
 
 		coOrd pp2,pp3;
-		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/75.0);
+		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
 		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
@@ -3191,7 +3189,7 @@ EXPORT void DrawEndPt(
 		return;
 
 	// line width for the tunnel portal, make sure it is rounded correctly
-	width2 = (wDrawWidth)round((2.0 * d->dpi)/75.0);
+	width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
 	if (color == wDrawColorBlack)
 		color = normalColor;

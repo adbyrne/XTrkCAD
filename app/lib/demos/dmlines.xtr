@@ -96,7 +96,8 @@ END
 PARAMETER draw linecolor 255
 PARAMETER draw linewidth 6
 STEP
-MOUSE 2 0.747 4.800
+KEYSTATE A
+MOUSE 2 0.747 4.693
 MOUSE 4 0.693 6.560
 MOUSE 2 0.693 6.560
 MOUSE 4 1.493 7.573
@@ -198,7 +199,7 @@ Circles can be drawn by clicking on the center or edge and dragging to set the r
 Here we will drag from the Center.
 END
 STEP
-COMMAND DrawCircleCenter
+COMMAND DrawCircleTangent
 MOUSE 2 7.360 6.453
 MOUSE 4 8.533 5.920
 MESSAGE
