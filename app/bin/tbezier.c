@@ -333,7 +333,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 		SetTrkLayer( trk, bezData.layerNumber);
 		break;
 	case WI:
-		xx->bezierData.segsWidth = bezData.width/mainD.dpi;
+		xx->bezierData.segsWidth = bezData.width/75.0;
 		break;
 	case CO:
 		xx->bezierData.segsColor = bezData.color;
@@ -450,7 +450,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	bezDesc[GR].mode = DESC_RO;
     bezDesc[RA].mode = DESC_RO;
 	bezDesc[LY].mode = DESC_NOREDRAW;
-	bezData.width = (long)floor(xx->bezierData.segsWidth*mainD.dpi+0.5);
+	bezData.width = (long)floor(xx->bezierData.segsWidth*75.0+0.5);
 	bezDesc[WI].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	bezData.color = xx->bezierData.segsColor;
 	bezDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;

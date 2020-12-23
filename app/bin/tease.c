@@ -877,16 +877,6 @@ EXPORT void DrawJointTrack(
 		return;
 	}
 LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
-#ifdef LATER
-	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-
-#ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/mainD.dpi);
-#else
-	if (d->options&DC_PRINT)
-		width *= 300/75;
-#endif
-#endif
 	if (color == wDrawColorBlack)
 		color = normalColor;
 	if (!Scurve) {

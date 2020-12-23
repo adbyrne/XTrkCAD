@@ -2731,7 +2731,7 @@ EXPORT void DrawCurvedTrack(
 	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
 #ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/mainD.dpi);
+	width *= (wDrawWidth)(d->dpi/75.0);
 #else
 	if (d->options&DC_PRINT)
 		width *= 300/75;
@@ -2876,7 +2876,7 @@ EXPORT void DrawStraightTrack(
 	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
 #ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/mainD.dpi);
+	width *= (wDrawWidth)(d->dpi/75.0);
 #else
 	if (d->options&DC_PRINT)
 		width *= 300/75;
