@@ -305,7 +305,6 @@ STATUS_T DrawGeomMouse(
 					(context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE))) {
 			DYNARR_RESET( trkSeg_t, anchors_da );
 			wSetCursor(mainD.d,defaultCursor);
-			BOOL_T found = FALSE;
 			switch (context->Op) {  	//Snap pos to nearest line for lines and some curves
 				case OP_CURVE1:
 				case OP_CURVE2:
@@ -331,27 +330,25 @@ STATUS_T DrawGeomMouse(
 							if (context->Op == OP_DIMLINE ) {
 								CreateEndAnchor(p,FALSE);
 								wSetCursor(mainD.d,wCursorNone);
-								found = TRUE;
+								movePos = p;
+								locked = TRUE;
 							} else if (!IsTrack(t)) {
 								CreateEndAnchor(p,FALSE);
 								wSetCursor(mainD.d,wCursorNone);
-								found = TRUE;
+								movePos = p;
+								locked = TRUE;
 							}
 						}
 					}
-					if (!found && SnapPos(&pos)) {
+					if (!locked && SnapPos(&pos)) {
 						CreateEndAnchor(pos,FALSE);
 						wSetCursor(mainD.d,wCursorNone);
 						movePos = pos;
-						found = TRUE;
+						locked = TRUE;
 					}
 					break;
 				default:
 					;
-			}
-			if (found) {
-				locked = TRUE;
-				movePos = pos;
 			}
 		}
 		return C_CONTINUE;
@@ -423,8 +420,9 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).color = context->Color;
 			tempSegs(0).width = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale):0;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
+			tempSegs(0).u.l.option = 0;
 			tempSegs_da.cnt = 0;
-			context->message( _("Drag next point, +Ctrl to lock to 90 degrees") );
+			context->message( _("Drag next point, +Alt reverse Magnetic Snap, or +Ctrl to lock to 90 degrees") );
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
@@ -529,7 +527,7 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
 			(context->Op == OP_BOX ) ||
 			(context->Op == OP_FILLBOX ) ||
-			(context->Op == OP_LINE) || (context->Op == OP_TBLEDGE) ||
+			(context->Op == OP_LINE) ||
 			(context->Op == OP_BENCH) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
 			if (( (MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
@@ -553,7 +551,9 @@ STATUS_T DrawGeomMouse(
 
 		switch (context->Op) {
 		case OP_TBLEDGE:
-			OnTableEdgeEndPt( NULL, &pos1 );
+			if ((MyGetKeyState() & WKEY_ALT) == 0) {  //If no Alt, snap to table edge end
+				OnTableEdgeEndPt( NULL, &pos1 );
+			}
 			/* no break */
 		case OP_LINE:
 		case OP_DIMLINE:
@@ -1865,6 +1865,7 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).u.l.pos[1] = p1;
 				tempSegs(0).width = 0;
 				tempSegs_da.cnt = 1;
+				tempSegs(0).u.l.option = context->segPtr[segInx].u.l.option;
 				context->p0 = p0;
 				context->p1 = p1;
 				CreateLineAnchors(-1,p0,p1);
@@ -1988,7 +1989,7 @@ STATUS_T DrawGeomModify(
 		tempSegs(0).color = context->segPtr[segInx].color;
 		switch ( context->type ) {
 		case SEG_TBLEDGE:
-			if ( MyGetKeyState() & WKEY_CTRL )
+			if ( (MyGetKeyState() & WKEY_CTRL ) == 0)
 				OnTableEdgeEndPt( NULL, &pos );
 			/* no break */
 		case SEG_STRLIN:
@@ -2009,7 +2010,10 @@ STATUS_T DrawGeomModify(
 			if (lineInx < 0 ) {
 				InfoMessage( _("Not close to end of line"));
 			} else {
-				InfoMessage("End selected, drag to reposition");
+				if (context->type == SEG_TBLEDGE)
+					InfoMessage("End selected, drag to move +Ctl to lock to other edge end, +Shift lock to line");
+				else
+					InfoMessage("End selected, drag to reposition +Shift lock to line");
 				context->state = MOD_SELECTED_PT;
 			}
 			tempSegs(0).color = wDrawColorBlack;
@@ -2145,24 +2149,35 @@ STATUS_T DrawGeomModify(
 		UndrawNewTrack( context->trk );
 		return C_CONTINUE;
 	case C_MOVE:
+
 		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
 		if (context->state != MOD_SELECTED_PT) return C_CONTINUE;
+		BOOL_T locked = FALSE;
+		coOrd p = pos;
 		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT))==0) {
-			SnapPos(&pos);
+			if (SnapPos(&p)) locked = TRUE;
 		}
 		switch (tempSegs(0).type) {
+		case SEG_TBLEDGE:
+			if ( (MyGetKeyState() & WKEY_CTRL) == 0 ) { //Snap to Table End Point except if Ctrl
+				p = pos;
+			    if (OnTableEdgeEndPt( NULL, &p ))
+					locked = TRUE;
+			}
+			/* No Break*/
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
-		case SEG_TBLEDGE:
-			if ( (MyGetKeyState() & WKEY_SHIFT) != 0) {     //Shift is on same line
-				d = FindDistance( pos, tempSegs(0).u.l.pos[1-lineInx] );
-				Translate( &pos, tempSegs(0).u.l.pos[1-lineInx], segA1, d );
-			} else if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap )  {  //M.S. Either on or Off
-				OnTrack( &pos, FALSE, FALSE );
-				CreateEndAnchor(pos,TRUE);
-			}
+			if (!locked) {
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {     //Shift is on same line
+					d = FindDistance( pos, tempSegs(0).u.l.pos[1-lineInx] );
+					Translate( &pos, tempSegs(0).u.l.pos[1-lineInx], segA1, d );
+				} else if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap )  {  //M.S. Either on or Off
+					OnTrack( &pos, FALSE, FALSE );
+					CreateEndAnchor(pos,TRUE);
+				}
+			} else pos =p;
 			break;
 		default:
 			break;
@@ -2172,9 +2187,6 @@ STATUS_T DrawGeomModify(
 		tempSegs_da.cnt = 1;
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
-			if ( MyGetKeyState() & WKEY_CTRL )
-				OnTableEdgeEndPt( NULL, &pos );         //Snap to Table End Point with CTRL
-			/* no break */
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
