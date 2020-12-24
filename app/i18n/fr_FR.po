@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.1GA\n"
 "Report-Msgid-Bugs-To: https://sourceforge.net/p/xtrkcad-fork/bugs/\n"
-"POT-Creation-Date: 2020-12-07 17:02-0800\n"
+"POT-Creation-Date: 2020-12-24 11:06-0800\n"
 "PO-Revision-Date: 2020-08-27 16:39+0000\n"
 "Last-Translator: Adam J M Richards <adamjmrichards@gmail.com>, 2020\n"
 "Language-Team: French (https://www.transifex.com/xtrackcad/teams/112853/fr/)\n"
@@ -39,8 +39,8 @@ msgstr ""
 #: ../bin/macro.c:879 ../bin/macro.c:900 ../bin/macro.c:1045
 #: ../bin/macro.c:1062 ../bin/macro.c:1334 ../bin/param.c:2090
 #: ../bin/paramfile.c:283 ../bin/paramfilelist.c:405 ../bin/track.c:1128
-#: ../bin/track.c:1652 ../bin/track.c:1958 ../bin/track.c:1962
-#: ../bin/track.c:1974 ../bin/track.c:2038 ../wlib/gtklib/wpref.c:251
+#: ../bin/track.c:1650 ../bin/track.c:1956 ../bin/track.c:1960
+#: ../bin/track.c:1972 ../bin/track.c:2036 ../wlib/gtklib/wpref.c:251
 #: ../wlib/gtklib/wpref.c:258
 msgid "Continue"
 msgstr "Continuer"
@@ -161,34 +161,34 @@ msgstr "Modifier une Bézier terminée"
 msgid "Modify Bezier Cancelled"
 msgstr "Annuler modifier une Bézier"
 
-#: ../bin/cbezier.c:1038 ../bin/cbezier.c:1128
+#: ../bin/cbezier.c:1040 ../bin/cbezier.c:1134
 #, c-format
 msgid "Place 1st endpoint of Bezier - snap to %s"
 msgstr ""
 "Définissez le 1er point de fin de la Bézier + Maj -> accrochez à la fin de "
 "%s"
 
-#: ../bin/cbezier.c:1056 ../bin/ccornu.c:2293 ../bin/ccurve.c:206
-#: ../bin/ccurve.c:459 ../bin/cstraigh.c:93
+#: ../bin/cbezier.c:1059 ../bin/ccornu.c:2296 ../bin/ccurve.c:206
+#: ../bin/cstraigh.c:93
 msgid "Track is different gauge"
 msgstr "La voie à un écartement différent"
 
-#: ../bin/cbezier.c:1084
+#: ../bin/cbezier.c:1080
 msgid "Drag end of first control arm"
 msgstr "Faites glisser l'extrémité du premier bras de commande"
 
-#: ../bin/cbezier.c:1091
+#: ../bin/cbezier.c:1087
 msgid "Drag end of second control arm"
 msgstr "Faites glisser l'extrémité du second bras de commande"
 
-#: ../bin/cbezier.c:1132 ../bin/cbezier.c:1169
+#: ../bin/cbezier.c:1138 ../bin/cbezier.c:1175
 #, c-format
 msgid "Select other end of Bezier - snap to %s end"
 msgstr ""
 "Sélectionnez l'autre extrémité de la Bézier, accrochez la à la fin de %s en "
 "maintenant la touche Maj enfoncée"
 
-#: ../bin/cbezier.c:1164
+#: ../bin/cbezier.c:1170
 msgid "Control Arm 1 is too short, try again"
 msgstr "Le bras de commande 1 est trop court, veuillez réessayer"
 
@@ -197,7 +197,7 @@ msgstr "Le bras de commande 1 est trop court, veuillez réessayer"
 #: ../bin/csensor.c:164 ../bin/csensor.c:390 ../bin/csignal.c:239
 #: ../bin/csignal.c:499 ../bin/csignal.c:510 ../bin/csignal.c:536
 #: ../bin/cswitchmotor.c:94 ../bin/cswitchmotor.c:113
-#: ../bin/cswitchmotor.c:225 ../bin/dcontmgm.c:91 ../bin/dlayer.c:565
+#: ../bin/cswitchmotor.c:225 ../bin/dcontmgm.c:91 ../bin/dlayer.c:576
 msgid "Name"
 msgstr "Nom"
 
@@ -211,9 +211,9 @@ msgstr "Script"
 msgid "Segments"
 msgstr "Segments"
 
-#: ../bin/cblock.c:171 ../bin/cdraw.c:526 ../bin/cdraw.c:1443
-#: ../bin/cdraw.c:1589 ../bin/cdraw.c:2599 ../bin/cdraw.c:2821
-#: ../bin/cdraw.c:2858 ../bin/ctodesgn.c:177 ../bin/ctodesgn.c:178
+#: ../bin/cblock.c:171 ../bin/cdraw.c:526 ../bin/cdraw.c:1506
+#: ../bin/cdraw.c:1652 ../bin/cdraw.c:2699 ../bin/cdraw.c:2921
+#: ../bin/cdraw.c:2958 ../bin/ctodesgn.c:177 ../bin/ctodesgn.c:178
 #: ../bin/ctodesgn.c:179 ../bin/ctodesgn.c:180 ../bin/ctodesgn.c:192
 #: ../bin/ctodesgn.c:193 ../bin/ctodesgn.c:243 ../bin/ctodesgn.c:246
 #: ../bin/ctodesgn.c:266 ../bin/ctodesgn.c:271 ../bin/ctodesgn.c:303
@@ -247,17 +247,17 @@ msgstr "Bout 2: X,Y"
 #: ../bin/cblock.c:598 ../bin/cblock.c:606 ../bin/cblock.c:676
 #: ../bin/cblock.c:797 ../bin/cblock.c:809 ../bin/cblock.c:847
 #: ../bin/ccontrol.c:206 ../bin/ccontrol.c:219 ../bin/ccontrol.c:231
-#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2658
+#: ../bin/ccontrol.c:487 ../bin/cdraw.c:132 ../bin/cdraw.c:2758
 #: ../bin/cgroup.c:1065 ../bin/cgroup.c:1132 ../bin/cgroup.c:1160
 #: ../bin/cgroup.c:1210 ../bin/cgroup.c:1232 ../bin/cgroup.c:1320
 #: ../bin/cgroup.c:1698 ../bin/cnote.c:69 ../bin/compound.c:674
 #: ../bin/compound.c:689 ../bin/compound.c:722 ../bin/cprint.c:519
-#: ../bin/cprint.c:723 ../bin/cprint.c:730 ../bin/cprint.c:1260
+#: ../bin/cprint.c:723 ../bin/cprint.c:730 ../bin/cprint.c:1267
 #: ../bin/cpull.c:511 ../bin/cpull.c:526 ../bin/cpull.c:528 ../bin/cpull.c:530
 #: ../bin/cpull.c:691 ../bin/cselect.c:1092 ../bin/cselect.c:1201
 #: ../bin/cselect.c:2060 ../bin/csensor.c:195 ../bin/csensor.c:207
 #: ../bin/csensor.c:445 ../bin/csignal.c:268 ../bin/csignal.c:667
-#: ../bin/csignal.c:735 ../bin/csnap.c:576 ../bin/csnap.c:705
+#: ../bin/csignal.c:735 ../bin/csnap.c:580 ../bin/csnap.c:709
 #: ../bin/cstruct.c:993 ../bin/cstruct.c:1123 ../bin/cswitchmotor.c:251
 #: ../bin/cswitchmotor.c:263 ../bin/cswitchmotor.c:275
 #: ../bin/cswitchmotor.c:287 ../bin/cswitchmotor.c:545
@@ -273,8 +273,8 @@ msgstr "Bout 2: X,Y"
 #: ../bin/dcmpnd.c:395 ../bin/dcmpnd.c:406 ../bin/dcmpnd.c:538
 #: ../bin/dcustmgm.c:221 ../bin/dcustmgm.c:227 ../bin/dcustmgm.c:236
 #: ../bin/dcustmgm.c:261 ../bin/dease.c:242 ../bin/dlayer.c:269
-#: ../bin/dlayer.c:304 ../bin/dlayer.c:1116 ../bin/dlayer.c:1122
-#: ../bin/dlayer.c:1128 ../bin/doption.c:200 ../bin/doption.c:276
+#: ../bin/dlayer.c:304 ../bin/dlayer.c:1150 ../bin/dlayer.c:1156
+#: ../bin/dlayer.c:1162 ../bin/doption.c:200 ../bin/doption.c:276
 #: ../bin/doption.c:477 ../bin/doption.c:480 ../bin/doption.c:493
 #: ../bin/doption.c:559 ../bin/dprmfile.c:434 ../bin/draw.c:2648
 #: ../bin/fileio.c:198 ../bin/fileio.c:608 ../bin/fileio.c:738
@@ -291,7 +291,7 @@ msgstr "Bout 2: X,Y"
 #: ../bin/paramfile.c:414 ../bin/paramfile.c:420 ../bin/paramfilelist.c:111
 #: ../bin/paramfilelist.c:131 ../bin/paramfilelist.c:145
 #: ../bin/paramfilelist.c:209 ../bin/smalldlg.c:90 ../bin/smalldlg.c:222
-#: ../bin/tease.c:1102 ../bin/track.c:1666 ../wlib/gtklib/wpref.c:122
+#: ../bin/tease.c:1092 ../bin/track.c:1664 ../wlib/gtklib/wpref.c:122
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:603
 msgid "Ok"
 msgstr "Ok"
@@ -351,26 +351,26 @@ msgstr "Pas un bloc!"
 msgid "Really delete block %s?"
 msgstr "Voulez-vous vraiment supprimer le bloc %s ?"
 
-#: ../bin/cblock.c:751 ../bin/ccornu.c:2756 ../bin/ccornu.c:2969
+#: ../bin/cblock.c:751 ../bin/ccornu.c:2763 ../bin/ccornu.c:2976
 #: ../bin/cdraw.c:136 ../bin/cgroup.c:1071 ../bin/cpull.c:649
 #: ../bin/csignal.c:713 ../bin/cswitchmotor.c:672 ../bin/ctodesgn.c:2677
 #: ../bin/ctodesgn.c:3208 ../bin/ctrain.c:2510 ../bin/dbitmap.c:208
 #: ../bin/dcar.c:3971 ../bin/dcar.c:4050 ../bin/dcar.c:4134 ../bin/dcar.c:4153
 #: ../bin/dcar.c:4470 ../bin/dcar.c:4892 ../bin/dcontmgm.c:173
 #: ../bin/dcustmgm.c:168 ../bin/misc.c:1283 ../bin/misc.c:1290
-#: ../bin/misc.c:1361 ../bin/track.c:1668 ../bin/track.c:1765
-#: ../bin/track.c:1779
+#: ../bin/misc.c:1361 ../bin/track.c:1666 ../bin/track.c:1763
+#: ../bin/track.c:1777
 msgid "Yes"
 msgstr "Oui"
 
-#: ../bin/cblock.c:751 ../bin/ccornu.c:2756 ../bin/ccornu.c:2969
+#: ../bin/cblock.c:751 ../bin/ccornu.c:2763 ../bin/ccornu.c:2976
 #: ../bin/cdraw.c:136 ../bin/cgroup.c:1071 ../bin/cpull.c:649
 #: ../bin/csignal.c:713 ../bin/cswitchmotor.c:672 ../bin/ctodesgn.c:2677
 #: ../bin/ctodesgn.c:3208 ../bin/ctrain.c:2510 ../bin/dcar.c:3971
 #: ../bin/dcar.c:4050 ../bin/dcar.c:4134 ../bin/dcar.c:4153 ../bin/dcar.c:4470
 #: ../bin/dcar.c:4892 ../bin/dcontmgm.c:173 ../bin/dcustmgm.c:168
 #: ../bin/misc.c:1283 ../bin/misc.c:1290 ../bin/misc.c:1361
-#: ../bin/track.c:1668 ../bin/track.c:1765 ../bin/track.c:1779
+#: ../bin/track.c:1666 ../bin/track.c:1763 ../bin/track.c:1777
 msgid "No"
 msgstr "Non"
 
@@ -548,7 +548,7 @@ msgstr ""
 "Cornu : Rayon Min =%s Taux de changement de rayon maximal =%s Longueur =%s "
 "Arc =%s"
 
-#: ../bin/ccornu.c:1603 ../bin/ccornu.c:2274
+#: ../bin/ccornu.c:1603 ../bin/ccornu.c:2277
 msgid "Helix Already Connected"
 msgstr "Hélicoïde déjà connectée"
 
@@ -612,130 +612,130 @@ msgstr "Le bout %d de la voie est connecté et ne peut pas être ajusté"
 msgid "Modify Cornu Cancelled"
 msgstr "Annuler modifier une Cornu"
 
-#: ../bin/ccornu.c:2250
+#: ../bin/ccornu.c:2253
 msgid "Left click - Start Cornu track"
 msgstr "Commencez par une cornu en appuyant sur le bouton gauche de la souris"
 
-#: ../bin/ccornu.c:2252
+#: ../bin/ccornu.c:2255
 msgid "Left click - Place Flextrack"
 msgstr "Clic gauche - Positionner la voie flexible"
 
-#: ../bin/ccornu.c:2255
+#: ../bin/ccornu.c:2258
 msgid "Left click - join with Cornu track"
 msgstr "Clic gauche - raccorder avec une voie Cornu"
 
-#: ../bin/ccornu.c:2257
+#: ../bin/ccornu.c:2260
 msgid "Left click - join with Cornu track, Shift Left click - move to join"
 msgstr ""
 "Clic gauche - raccorder avec une voie Cornu, Maj+Clic gauche - déplacer pour"
 " raccorder"
 
-#: ../bin/ccornu.c:2288
+#: ../bin/ccornu.c:2291
 msgid "No valid open endpoint on that track"
 msgstr "Aucun point de fin non connecté sur cette voie"
 
-#: ../bin/ccornu.c:2316 ../bin/ccornu.c:2328
+#: ../bin/ccornu.c:2319 ../bin/ccornu.c:2331
 msgid "Drag arm in the direction of track"
 msgstr "Tirez le bras de commande dans la direction de la voie"
 
-#: ../bin/ccornu.c:2332
+#: ../bin/ccornu.c:2335
 msgid "No Unconnected Track End there"
 msgstr "Aucune voie non connectée ne s'arrête là"
 
-#: ../bin/ccornu.c:2343 ../bin/ccornu.c:2367
+#: ../bin/ccornu.c:2346 ../bin/ccornu.c:2370
 msgid "No Valid Track End there"
 msgstr "Aucune voie valide ne s'arrête là"
 
-#: ../bin/ccornu.c:2355
+#: ../bin/ccornu.c:2358
 msgid "Locked - Move 1st end point of Cornu track along track 1"
 msgstr ""
 "Verrouillé - Déplacer le 1er point de fin de la voie Cornu le long de la "
 "voie 1"
 
-#: ../bin/ccornu.c:2379
+#: ../bin/ccornu.c:2382
 msgid "Locked - Move 2nd end point of Cornu track along track 2"
 msgstr ""
 "Verrouillé - Déplacer le 2nd point de fin de la voie Cornu le long de la "
 "voie 2"
 
-#: ../bin/ccornu.c:2453
+#: ../bin/ccornu.c:2460
 msgid "Track can't be split - so locked to endpoint"
 msgstr ""
 "La voie ne peut pas être divisée - donc verrouillée sur son point de fin"
 
-#: ../bin/ccornu.c:2458
+#: ../bin/ccornu.c:2465
 msgid "Point not on track 1"
 msgstr "Les aiguilles ne sont pas sur la bonne voie 1"
 
-#: ../bin/ccornu.c:2496
+#: ../bin/ccornu.c:2503
 msgid "Pick other end of Cornu"
 msgstr "Choisissez l'autre extrémité de la Cornu"
 
-#: ../bin/ccornu.c:2498
+#: ../bin/ccornu.c:2505
 msgid ""
 "Select flextrack ends or anchors and drag, Enter to approve, Esc to Cancel"
 msgstr ""
 "Sélectionnez les extrémités ou les ancres de la flextrack et faites glisser,"
 " Entr. pour approuver, Ech. pour annuler"
 
-#: ../bin/ccornu.c:2502
+#: ../bin/ccornu.c:2509
 msgid "Put other end of Cornu on a track with an unconnected end point"
 msgstr ""
 "Mettre l'autre extrémité de la Cornu sur une voie avec un point de fin non "
 "connecté"
 
-#: ../bin/ccornu.c:2744 ../bin/ccornu.c:2958
+#: ../bin/ccornu.c:2751 ../bin/ccornu.c:2965
 msgid "Not on a Track"
 msgstr "Pas sur la voie"
 
-#: ../bin/ccornu.c:2752
+#: ../bin/ccornu.c:2759
 msgid "Select a Track To Convert"
 msgstr "Sélectionner une voie à convertir"
 
-#: ../bin/ccornu.c:2756
+#: ../bin/ccornu.c:2763
 msgid "Convert all Selected Tracks to Cornu Tracks?"
 msgstr "Convertir toutes les voies sélectionnées en une voie Cornu ?"
 
-#: ../bin/ccornu.c:2761
+#: ../bin/ccornu.c:2768
 msgid "Convert Cornu"
 msgstr "Convertir une Cornu"
 
-#: ../bin/ccornu.c:2913
+#: ../bin/ccornu.c:2920
 #, c-format
 msgid "Tracks Counts: %d converted %d unconvertible %d created %d deleted"
 msgstr ""
 "Nombre de voies : %d converties %d non converties %d créées %d supprimées"
 
-#: ../bin/ccornu.c:2913 ../bin/ccornu.c:3030
+#: ../bin/ccornu.c:2920 ../bin/ccornu.c:3037
 msgid "OK"
 msgstr "OK"
 
-#: ../bin/ccornu.c:2965
+#: ../bin/ccornu.c:2972
 msgid "Select a Cornu or Bezier Track To Convert to Fixed"
 msgstr "Sélectionnez une voie Cornu ou Bézier à convertir en fixe"
 
-#: ../bin/ccornu.c:2969
+#: ../bin/ccornu.c:2976
 msgid "Convert all Selected Tracks to Fixed Tracks?"
 msgstr "Convertir toutes les voies sélectionnées en voies fixes ?"
 
-#: ../bin/ccornu.c:2979
+#: ../bin/ccornu.c:2986
 msgid "Convert Bezier and Cornu"
 msgstr "Convertir des Bezier et Cornu"
 
-#: ../bin/ccornu.c:3030
+#: ../bin/ccornu.c:3037
 #, c-format
 msgid "Tracks Counts: %d converted %d unconvertible %d deleted"
 msgstr "Nombre de voies : %d converties %d non converties %d supprimées"
 
-#: ../bin/ccornu.c:3058
+#: ../bin/ccornu.c:3065
 msgid "Convert"
 msgstr "Convertir"
 
-#: ../bin/ccornu.c:3059
+#: ../bin/ccornu.c:3066
 msgid "Convert To Cornu"
 msgstr "Convertir en Cornu"
 
-#: ../bin/ccornu.c:3060
+#: ../bin/ccornu.c:3067
 msgid "Convert From Cornu"
 msgstr "Convertir depuis une Cornu"
 
@@ -842,42 +842,42 @@ msgstr "Départ verrouillé : faites glisser la corde, longueur=%s Angle=%0.3f"
 msgid "Drag out chord length=%s angle=%0.3f"
 msgstr "Faites glisser sur la corde, longueur =%s Angle =%0.3f"
 
-#: ../bin/ccurve.c:420 ../bin/ccurve.c:596 ../bin/cjoin.c:671
+#: ../bin/ccurve.c:420 ../bin/ccurve.c:591 ../bin/cjoin.c:671
 #: ../bin/cjoin.c:926
 msgid "Desired Radius"
 msgstr "Rayon souhaité"
 
-#: ../bin/ccurve.c:523 ../bin/cjoin.c:210 ../bin/cmodify.c:600
+#: ../bin/ccurve.c:518 ../bin/cjoin.c:210 ../bin/cmodify.c:600
 #: ../bin/cturntbl.c:584
 #, c-format
 msgid "Straight Track: Length=%s Angle=%0.3f"
 msgstr "Voie droite : Longueur = %s Angle =%0.3f"
 
-#: ../bin/ccurve.c:530 ../bin/cmodify.c:605 ../bin/drawgeom.c:643
+#: ../bin/ccurve.c:525 ../bin/cmodify.c:605 ../bin/drawgeom.c:663
 #: ../wlib/gtklib/ixhelp.c:235
 msgid "Back"
 msgstr "Arrière"
 
-#: ../bin/ccurve.c:551
+#: ../bin/ccurve.c:546
 #, c-format
 msgid "Curved Track: Radius=%s Angle=%0.3f Length=%s"
 msgstr "Voie courbe : Rayon = %s Angle = %0.3f Longueur = %s"
 
-#: ../bin/ccurve.c:623 ../bin/cstraigh.c:164
+#: ../bin/ccurve.c:618 ../bin/cstraigh.c:174
 msgid "Create Straight Track"
 msgstr "Créer une voie Droite"
 
-#: ../bin/ccurve.c:636
+#: ../bin/ccurve.c:631
 msgid "Create Curved Track"
 msgstr "Créer une voie courbe"
 
-#: ../bin/ccurve.c:707
+#: ../bin/ccurve.c:702
 msgid "Elevation Difference"
 msgstr "Différence d'élévation"
 
-#: ../bin/ccurve.c:708 ../bin/cdraw.c:525 ../bin/cdraw.c:1455
-#: ../bin/cdraw.c:1601 ../bin/cdraw.c:2606 ../bin/cdraw.c:2801
-#: ../bin/cdraw.c:2815 ../bin/compound.c:616 ../bin/compound.c:621
+#: ../bin/ccurve.c:703 ../bin/cdraw.c:525 ../bin/cdraw.c:1518
+#: ../bin/cdraw.c:1664 ../bin/cdraw.c:2706 ../bin/cdraw.c:2901
+#: ../bin/cdraw.c:2915 ../bin/compound.c:616 ../bin/compound.c:621
 #: ../bin/compound.c:626 ../bin/compound.c:631 ../bin/ctodesgn.c:187
 #: ../bin/ctodesgn.c:188 ../bin/ctodesgn.c:189 ../bin/ctodesgn.c:190
 #: ../bin/ctodesgn.c:306 ../bin/ctodesgn.c:309 ../bin/ctodesgn.c:311
@@ -888,119 +888,119 @@ msgstr "Différence d'élévation"
 msgid "Radius"
 msgstr "Rayon"
 
-#: ../bin/ccurve.c:709 ../bin/tcurve.c:386
+#: ../bin/ccurve.c:704 ../bin/tcurve.c:386
 msgid "Turns"
 msgstr "Tours"
 
-#: ../bin/ccurve.c:710
+#: ../bin/ccurve.c:705
 msgid "Angular Separation"
 msgstr "Séparation angulaire"
 
-#: ../bin/ccurve.c:711 ../bin/celev.c:47 ../bin/compound.c:633
+#: ../bin/ccurve.c:706 ../bin/celev.c:47 ../bin/compound.c:633
 #: ../bin/tbezier.c:265 ../bin/tcornu.c:318 ../bin/tcurve.c:392
 #: ../bin/tease.c:529 ../bin/tstraigh.c:91
 msgid "Grade"
 msgstr "Pente"
 
-#: ../bin/ccurve.c:712
+#: ../bin/ccurve.c:707
 msgid "Vertical Separation"
 msgstr "Séparation verticale"
 
-#: ../bin/ccurve.c:714
+#: ../bin/ccurve.c:709
 msgid "Total Length"
 msgstr "Longueur totale"
 
-#: ../bin/ccurve.c:790
+#: ../bin/ccurve.c:785
 #, c-format
 msgid "Total Length  %s"
 msgstr "Longueur totale  %s"
 
-#: ../bin/ccurve.c:828 ../bin/ccurve.c:1033 ../bin/tcurve.c:825
+#: ../bin/ccurve.c:823 ../bin/ccurve.c:1028 ../bin/tcurve.c:825
 msgid "Helix"
 msgstr "Hélicoïde"
 
-#: ../bin/ccurve.c:842
+#: ../bin/ccurve.c:837
 msgid "Circle Radius"
 msgstr "Rayon du cercle"
 
-#: ../bin/ccurve.c:847
+#: ../bin/ccurve.c:842
 msgid "Click on Circle Edge"
 msgstr "Cliquez sur le bord du cercle"
 
-#: ../bin/ccurve.c:851
+#: ../bin/ccurve.c:846
 msgid "Click on Circle Center"
 msgstr "Cliquez sur le centre du cercle"
 
-#: ../bin/ccurve.c:883
+#: ../bin/ccurve.c:878
 msgid "Drag to Center"
 msgstr "Glisser vers le centre"
 
-#: ../bin/ccurve.c:887
+#: ../bin/ccurve.c:882
 msgid "Drag to Edge"
 msgstr "Glisser vers le bord"
 
-#: ../bin/ccurve.c:907 ../bin/ccurve.c:911
+#: ../bin/ccurve.c:902 ../bin/ccurve.c:906
 #, c-format
 msgid "Radius=%s"
 msgstr "Rayon=%s"
 
-#: ../bin/ccurve.c:932
+#: ../bin/ccurve.c:927
 msgid "Create Helix Track"
 msgstr "Créer une voie hélicoïdale"
 
-#: ../bin/ccurve.c:947
+#: ../bin/ccurve.c:942
 msgid "Create Circle Track"
 msgstr "Créer une voie circulaire"
 
-#: ../bin/ccurve.c:1002
+#: ../bin/ccurve.c:997
 msgid "Cornu Curve"
 msgstr "Spirale de Cornu"
 
-#: ../bin/ccurve.c:1004
+#: ../bin/ccurve.c:999
 msgid "Curve Track"
 msgstr "Voie courbe"
 
-#: ../bin/ccurve.c:1004
+#: ../bin/ccurve.c:999
 msgid "Curve Tracks"
 msgstr "Voies courbes"
 
-#: ../bin/ccurve.c:1005
+#: ../bin/ccurve.c:1000
 msgid "Curve from End-Pt"
 msgstr "Point de fin de la courbe"
 
-#: ../bin/ccurve.c:1006
+#: ../bin/ccurve.c:1001
 msgid "Curve from Tangent"
 msgstr "Tangente de la courbe"
 
-#: ../bin/ccurve.c:1007
+#: ../bin/ccurve.c:1002
 msgid "Curve from Center"
 msgstr "Centre de la courbe"
 
-#: ../bin/ccurve.c:1008
+#: ../bin/ccurve.c:1003
 msgid "Curve from Chord"
 msgstr "Corde de la courbe"
 
-#: ../bin/ccurve.c:1009 ../bin/cdraw.c:2943
+#: ../bin/ccurve.c:1004 ../bin/cdraw.c:3043
 msgid "Bezier Curve"
 msgstr "Courbe de Bezier"
 
-#: ../bin/ccurve.c:1012 ../bin/tcurve.c:659
+#: ../bin/ccurve.c:1007 ../bin/tcurve.c:659
 msgid "Circle Track"
 msgstr "Voie circulaire"
 
-#: ../bin/ccurve.c:1012
+#: ../bin/ccurve.c:1007
 msgid "Circle Tracks"
 msgstr "Voies circulaires"
 
-#: ../bin/ccurve.c:1013
+#: ../bin/ccurve.c:1008
 msgid "Fixed Radius Circle"
 msgstr "Cercle de rayon fixe"
 
-#: ../bin/ccurve.c:1014
+#: ../bin/ccurve.c:1009
 msgid "Circle from Tangent"
 msgstr "Cercle à partir de la Tangente"
 
-#: ../bin/ccurve.c:1015
+#: ../bin/ccurve.c:1010
 msgid "Circle from Center"
 msgstr "Cercle autour du centre"
 
@@ -1032,13 +1032,13 @@ msgstr "Angle CCW"
 msgid "CW Angle"
 msgstr "Angle CW"
 
-#: ../bin/cdraw.c:527 ../bin/cdraw.c:1452 ../bin/cdraw.c:1574
+#: ../bin/cdraw.c:527 ../bin/cdraw.c:1515 ../bin/cdraw.c:1637
 #: ../bin/cprint.c:137
 msgid "Height"
 msgstr "Hauteur"
 
-#: ../bin/cdraw.c:528 ../bin/cdraw.c:1450 ../bin/cdraw.c:1573
-#: ../bin/cdraw.c:2601 ../bin/cdraw.c:2859 ../bin/ctrain.c:187
+#: ../bin/cdraw.c:528 ../bin/cdraw.c:1513 ../bin/cdraw.c:1636
+#: ../bin/cdraw.c:2701 ../bin/cdraw.c:2959 ../bin/ctrain.c:187
 #: ../bin/dcar.c:2235
 msgid "Width"
 msgstr "Largeur"
@@ -1051,19 +1051,19 @@ msgstr "Pivot"
 msgid "Point Count"
 msgstr "Nombre de points"
 
-#: ../bin/cdraw.c:531 ../bin/cdraw.c:2579 ../bin/ctodesgn.c:209
+#: ../bin/cdraw.c:531 ../bin/cdraw.c:2679 ../bin/ctodesgn.c:209
 #: ../bin/tbezier.c:267
 msgid "Line Width"
 msgstr "Épaisseur de trait"
 
-#: ../bin/cdraw.c:532 ../bin/cdraw.c:2608 ../bin/tbezier.c:266
+#: ../bin/cdraw.c:532 ../bin/cdraw.c:2708 ../bin/tbezier.c:266
 msgid "Line Type"
 msgstr "Type de ligne"
 
-#: ../bin/cdraw.c:533 ../bin/cdraw.c:2581 ../bin/cdraw.c:2583
-#: ../bin/cdraw.c:2682 ../bin/cdraw.c:2715 ../bin/cmisc.c:127
+#: ../bin/cdraw.c:533 ../bin/cdraw.c:2681 ../bin/cdraw.c:2683
+#: ../bin/cdraw.c:2782 ../bin/cdraw.c:2815 ../bin/cmisc.c:127
 #: ../bin/ctext.c:68 ../bin/ctext.c:148 ../bin/ctodesgn.c:210
-#: ../bin/dcar.c:2231 ../bin/dlayer.c:567 ../bin/doption.c:559
+#: ../bin/dcar.c:2231 ../bin/dlayer.c:578 ../bin/doption.c:559
 msgid "Color"
 msgstr "Couleur"
 
@@ -1080,7 +1080,7 @@ msgstr "Côté ouvert"
 msgid "Boxed"
 msgstr "En boîte"
 
-#: ../bin/cdraw.c:537 ../bin/cdraw.c:1124 ../bin/cdraw.c:2615
+#: ../bin/cdraw.c:537 ../bin/cdraw.c:1124 ../bin/cdraw.c:2715
 msgid "Lumber"
 msgstr "Structure"
 
@@ -1088,7 +1088,7 @@ msgstr "Structure"
 msgid "Orientation"
 msgstr "Orientation"
 
-#: ../bin/cdraw.c:539 ../bin/cdraw.c:2597
+#: ../bin/cdraw.c:539 ../bin/cdraw.c:2697
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:605
 msgid "Size"
 msgstr "Dimension"
@@ -1151,16 +1151,16 @@ msgstr "Calque"
 msgid "Straight Line"
 msgstr "Ligne droite"
 
-#: ../bin/cdraw.c:1114 ../bin/cdraw.c:2935
+#: ../bin/cdraw.c:1114 ../bin/cdraw.c:3035
 msgid "Dimension Line"
 msgstr "Ligne de cote"
 
-#: ../bin/cdraw.c:1135 ../bin/cdraw.c:2616 ../bin/cdraw.c:2937
+#: ../bin/cdraw.c:1135 ../bin/cdraw.c:2716 ../bin/cdraw.c:3037
 msgid "Table Edge"
 msgstr "Bord de table"
 
-#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2621 ../bin/cdraw.c:2622
-#: ../bin/cdraw.c:2623
+#: ../bin/cdraw.c:1159 ../bin/cdraw.c:2721 ../bin/cdraw.c:2722
+#: ../bin/cdraw.c:2723
 msgid "Circle"
 msgstr "Cercle"
 
@@ -1168,8 +1168,8 @@ msgstr "Cercle"
 msgid "Curved Line"
 msgstr "Ligne courbe"
 
-#: ../bin/cdraw.c:1196 ../bin/cdraw.c:2626 ../bin/cdraw.c:2627
-#: ../bin/cdraw.c:2628
+#: ../bin/cdraw.c:1196 ../bin/cdraw.c:2726 ../bin/cdraw.c:2727
+#: ../bin/cdraw.c:2728
 msgid "Filled Circle"
 msgstr "Cercle plein"
 
@@ -1181,15 +1181,15 @@ msgstr "Rectangle plein"
 msgid "Rectangle"
 msgstr "Rectangle"
 
-#: ../bin/cdraw.c:1240 ../bin/cdraw.c:2632
+#: ../bin/cdraw.c:1240 ../bin/cdraw.c:2732
 msgid "Polyline"
 msgstr "Polyligne"
 
-#: ../bin/cdraw.c:1246 ../bin/cdraw.c:2630 ../bin/cdraw.c:2955
+#: ../bin/cdraw.c:1246 ../bin/cdraw.c:2730 ../bin/cdraw.c:3055
 msgid "Filled Polygon"
 msgstr "Polygone plein"
 
-#: ../bin/cdraw.c:1246 ../bin/cdraw.c:2625 ../bin/cdraw.c:2954
+#: ../bin/cdraw.c:1246 ../bin/cdraw.c:2725 ../bin/cdraw.c:3054
 msgid "Polygon"
 msgstr "Polygone"
 
@@ -1198,17 +1198,17 @@ msgstr "Polygone"
 msgid "%s(%d) Layer=%d"
 msgstr "%s(%d) Calque=%d"
 
-#: ../bin/cdraw.c:1296 ../bin/cdraw.c:2685 ../bin/compound.c:1027
+#: ../bin/cdraw.c:1296 ../bin/cdraw.c:2785 ../bin/compound.c:1027
 #: ../bin/doption.c:96 ../bin/tbezier.c:464
 msgid "Solid"
 msgstr "Solide"
 
-#: ../bin/cdraw.c:1297 ../bin/cdraw.c:2687 ../bin/compound.c:1028
+#: ../bin/cdraw.c:1297 ../bin/cdraw.c:2787 ../bin/compound.c:1028
 #: ../bin/doption.c:93 ../bin/tbezier.c:465
 msgid "Dash"
 msgstr "Tiret"
 
-#: ../bin/cdraw.c:1298 ../bin/cdraw.c:2686 ../bin/compound.c:1029
+#: ../bin/cdraw.c:1298 ../bin/cdraw.c:2786 ../bin/compound.c:1029
 #: ../bin/tbezier.c:466
 msgid "Dot"
 msgstr "Pointillé"
@@ -1229,24 +1229,24 @@ msgstr "Axe"
 msgid "PhantomDot"
 msgstr "Axe invisible"
 
-#: ../bin/cdraw.c:1307 ../bin/cdraw.c:2733
+#: ../bin/cdraw.c:1307 ../bin/cdraw.c:2833
 msgid "Tiny"
 msgstr "Minuscule"
 
-#: ../bin/cdraw.c:1308 ../bin/cdraw.c:2734
+#: ../bin/cdraw.c:1308 ../bin/cdraw.c:2834
 msgid "Small"
 msgstr "Petit"
 
-#: ../bin/cdraw.c:1309 ../bin/cdraw.c:2735
+#: ../bin/cdraw.c:1309 ../bin/cdraw.c:2835
 msgid "Medium"
 msgstr "Moyen"
 
-#: ../bin/cdraw.c:1310 ../bin/cdraw.c:2736
+#: ../bin/cdraw.c:1310 ../bin/cdraw.c:2836
 msgid "Large"
 msgstr "Grand"
 
-#: ../bin/cdraw.c:1445 ../bin/cdraw.c:1590 ../bin/cdraw.c:2604
-#: ../bin/cdraw.c:2822 ../bin/cdraw.c:2842 ../bin/cdraw.c:2846
+#: ../bin/cdraw.c:1508 ../bin/cdraw.c:1653 ../bin/cdraw.c:2704
+#: ../bin/cdraw.c:2922 ../bin/cdraw.c:2942 ../bin/cdraw.c:2946
 #: ../bin/compound.c:614 ../bin/compound.c:619 ../bin/compound.c:624
 #: ../bin/compound.c:629 ../bin/compound.c:635 ../bin/cprint.c:162
 #: ../bin/csignal.c:241 ../bin/csignal.c:516 ../bin/ctodesgn.c:195
@@ -1261,332 +1261,332 @@ msgstr "Grand"
 msgid "Angle"
 msgstr "Angle"
 
-#: ../bin/cdraw.c:1448
+#: ../bin/cdraw.c:1511
 msgid "Relative Angle"
 msgstr "Angle relatif"
 
-#: ../bin/cdraw.c:1457 ../bin/cdraw.c:1605 ../bin/cdraw.c:2816
+#: ../bin/cdraw.c:1520 ../bin/cdraw.c:1668 ../bin/cdraw.c:2916
 msgid "Arc Angle"
 msgstr "Angle de l'arc"
 
-#: ../bin/cdraw.c:1459
+#: ../bin/cdraw.c:1522
 msgid "Rotate Angle"
 msgstr "Angle de rotation"
 
-#: ../bin/cdraw.c:1462
+#: ../bin/cdraw.c:1525
 msgid "Rot Center X"
 msgstr "Centre de rotation X"
 
-#: ../bin/cdraw.c:1464
+#: ../bin/cdraw.c:1527
 msgid "Rot Center Y"
 msgstr "Centre de rotation Y"
 
-#: ../bin/cdraw.c:1561
+#: ../bin/cdraw.c:1624
 msgid "Seg Lth"
 msgstr "Long. segmt"
 
-#: ../bin/cdraw.c:1562
+#: ../bin/cdraw.c:1625
 msgid "Rel Ang"
 msgstr "Angle Rel"
 
-#: ../bin/cdraw.c:2586 ../bin/cdraw.c:2588 ../bin/cdraw.c:2713
+#: ../bin/cdraw.c:2686 ../bin/cdraw.c:2688 ../bin/cdraw.c:2813
 msgid "Lumber Type"
 msgstr "Type de structure"
 
-#: ../bin/cdraw.c:2613
+#: ../bin/cdraw.c:2713
 msgid "Straight"
 msgstr "Trait"
 
-#: ../bin/cdraw.c:2614
+#: ../bin/cdraw.c:2714
 msgid "Dimension"
 msgstr "Dimension"
 
-#: ../bin/cdraw.c:2617 ../bin/cdraw.c:2618 ../bin/cdraw.c:2619
-#: ../bin/cdraw.c:2620
+#: ../bin/cdraw.c:2717 ../bin/cdraw.c:2718 ../bin/cdraw.c:2719
+#: ../bin/cdraw.c:2720
 msgid "Curved"
 msgstr "Courbe"
 
-#: ../bin/cdraw.c:2624 ../bin/cdraw.c:2952
+#: ../bin/cdraw.c:2724 ../bin/cdraw.c:3052
 msgid "Box"
 msgstr "Boite"
 
-#: ../bin/cdraw.c:2629 ../bin/cdraw.c:2953
+#: ../bin/cdraw.c:2729 ../bin/cdraw.c:3053
 msgid "Filled Box"
 msgstr "Boîte pleine"
 
-#: ../bin/cdraw.c:2631 ../bin/tbezier.c:461
+#: ../bin/cdraw.c:2731 ../bin/tbezier.c:461
 msgid "Bezier Line"
 msgstr "Ligne Bézier"
 
-#: ../bin/cdraw.c:2680
+#: ../bin/cdraw.c:2780
 #, c-format
 msgid "%s Line Width"
 msgstr "%s épaisseur"
 
-#: ../bin/cdraw.c:2683 ../bin/dcar.c:2204 ../bin/dcar.c:4368
+#: ../bin/cdraw.c:2783 ../bin/dcar.c:2204 ../bin/dcar.c:4368
 #: ../bin/dcar.c:4373
 msgid "Type"
 msgstr "Type"
 
-#: ../bin/cdraw.c:2688
+#: ../bin/cdraw.c:2788
 msgid "Dash-Dot"
 msgstr "Tiret-point"
 
-#: ../bin/cdraw.c:2689
+#: ../bin/cdraw.c:2789
 msgid "Dash-Dot-Dot"
 msgstr "Tiret-point-point"
 
-#: ../bin/cdraw.c:2702
+#: ../bin/cdraw.c:2802
 #, c-format
 msgid "%s Color"
 msgstr "%s Couleur"
 
-#: ../bin/cdraw.c:2731
+#: ../bin/cdraw.c:2831
 msgid "Dimension Line Size"
 msgstr "Dimension des voies"
 
-#: ../bin/cdraw.c:2743
+#: ../bin/cdraw.c:2843
 msgid "Drag to create Table Edge"
 msgstr "Faites glisser pour créer un bord de table"
 
-#: ../bin/cdraw.c:2840
+#: ../bin/cdraw.c:2940
 msgid "Seg Length"
 msgstr "Longueur du segment"
 
-#: ../bin/cdraw.c:2844
+#: ../bin/cdraw.c:2944
 msgid "Rel Angle"
 msgstr "Angle Rel"
 
-#: ../bin/cdraw.c:2934
+#: ../bin/cdraw.c:3034
 msgid "Line"
 msgstr "Ligne"
 
-#: ../bin/cdraw.c:2934
+#: ../bin/cdraw.c:3034
 msgid "Draw Line"
 msgstr "Dessiner un trait"
 
-#: ../bin/cdraw.c:2935
+#: ../bin/cdraw.c:3035
 msgid "Draw Dimension Line"
 msgstr "Tracer une ligne de cote"
 
 #. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/xtrkcad.xtq:429
-#: ../bin/cdraw.c:2936 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
+#: ../bin/cdraw.c:3036 ../../../../build/xtrkcad-old/app/i18n/custmsg.h:100
 msgid "Benchwork"
 msgstr "Plan de travail"
 
-#: ../bin/cdraw.c:2936
+#: ../bin/cdraw.c:3036
 msgid "Draw Benchwork"
 msgstr "Dessinez un chassis"
 
-#: ../bin/cdraw.c:2937
+#: ../bin/cdraw.c:3037
 msgid "Draw Table Edge"
 msgstr "Dessiner un bord de Table"
 
-#: ../bin/cdraw.c:2939
+#: ../bin/cdraw.c:3039
 msgid "Curve End"
 msgstr "Fin de courbe"
 
-#: ../bin/cdraw.c:2939
+#: ../bin/cdraw.c:3039
 msgid "Draw Curve from End"
 msgstr "Dessiner une courbe depuis l'extrémité"
 
-#: ../bin/cdraw.c:2940
+#: ../bin/cdraw.c:3040
 msgid "Curve Tangent"
 msgstr "Courbe tangente"
 
-#: ../bin/cdraw.c:2940
+#: ../bin/cdraw.c:3040
 msgid "Draw Curve from Tangent"
 msgstr "Dessiner une courbe depuis la tangente"
 
-#: ../bin/cdraw.c:2941
+#: ../bin/cdraw.c:3041
 msgid "Curve Center"
 msgstr "Centre de la courbe"
 
-#: ../bin/cdraw.c:2941
+#: ../bin/cdraw.c:3041
 msgid "Draw Curve from Center"
 msgstr "Dessiner une courbe à partir du centre"
 
-#: ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:3042
 msgid "Curve Chord"
 msgstr "Corde de la Courbe"
 
-#: ../bin/cdraw.c:2942
+#: ../bin/cdraw.c:3042
 msgid "Draw Curve from Chord"
 msgstr "Dessiner une courbe à partir de la corde"
 
-#: ../bin/cdraw.c:2943
+#: ../bin/cdraw.c:3043
 msgid "Draw Bezier"
 msgstr "Dessinez une Bézier"
 
-#: ../bin/cdraw.c:2946
-msgid "Circle Tangent"
-msgstr "Cercle tangent"
-
-#: ../bin/cdraw.c:2946
-msgid "Draw Circle from Tangent"
-msgstr "Dessiner un cercle à partir de la tangente"
-
-#: ../bin/cdraw.c:2947
+#: ../bin/cdraw.c:3046
 msgid "Circle Center"
 msgstr "Centre du cercle"
 
-#: ../bin/cdraw.c:2947
+#: ../bin/cdraw.c:3046
 msgid "Draw Circle from Center"
 msgstr "Tracer un cercle à partir du centre"
 
-#: ../bin/cdraw.c:2949
-msgid "Circle Filled Tangent"
-msgstr "Tangent à un cercle plein"
+#: ../bin/cdraw.c:3047
+msgid "Circle Tangent"
+msgstr "Cercle tangent"
 
-#: ../bin/cdraw.c:2949
-msgid "Draw Filled Circle from Tangent"
-msgstr "Dessiner un cercle plein à partir de la tangente"
+#: ../bin/cdraw.c:3047
+msgid "Draw Circle from Tangent"
+msgstr "Dessiner un cercle à partir de la tangente"
 
-#: ../bin/cdraw.c:2950
+#: ../bin/cdraw.c:3049
 msgid "Circle Filled Center"
 msgstr "Centre du cercle plein"
 
-#: ../bin/cdraw.c:2950
+#: ../bin/cdraw.c:3049
 msgid "Draw Filled Circle from Center"
 msgstr "Dessiner un cercle plein à partir du centre"
 
-#: ../bin/cdraw.c:2952
+#: ../bin/cdraw.c:3050
+msgid "Circle Filled Tangent"
+msgstr "Tangent à un cercle plein"
+
+#: ../bin/cdraw.c:3050
+msgid "Draw Filled Circle from Tangent"
+msgstr "Dessiner un cercle plein à partir de la tangente"
+
+#: ../bin/cdraw.c:3052
 msgid "Draw Box"
 msgstr "Dessinez une Boite"
 
-#: ../bin/cdraw.c:2953
+#: ../bin/cdraw.c:3053
 msgid "Draw Filled Box"
 msgstr "Dessiner une boîte pleine"
 
-#: ../bin/cdraw.c:2954
+#: ../bin/cdraw.c:3054
 msgid "Draw Polygon"
 msgstr "Dessiner un polygone"
 
-#: ../bin/cdraw.c:2955
+#: ../bin/cdraw.c:3055
 msgid "Draw Filled Polygon"
 msgstr "Dessiner un polygone plein"
 
-#: ../bin/cdraw.c:2956
+#: ../bin/cdraw.c:3056
 msgid "PolyLine"
 msgstr "Polyligne"
 
-#: ../bin/cdraw.c:2956
+#: ../bin/cdraw.c:3056
 msgid "Draw PolyLine"
 msgstr "Dessiner une polyligne"
 
-#: ../bin/cdraw.c:2973
+#: ../bin/cdraw.c:3073
 msgid "Straight Objects"
 msgstr "Objets droits"
 
-#: ../bin/cdraw.c:2973
+#: ../bin/cdraw.c:3073
 msgid "Draw Straight Objects"
 msgstr "Dessiner des objets droits"
 
-#: ../bin/cdraw.c:2974
+#: ../bin/cdraw.c:3074
 msgid "Curved Lines"
 msgstr "Lignes courbes"
 
-#: ../bin/cdraw.c:2974
+#: ../bin/cdraw.c:3074
 msgid "Draw Curved Lines"
 msgstr "Tracer des voies courbes"
 
-#: ../bin/cdraw.c:2975
+#: ../bin/cdraw.c:3075
 msgid "Circle Lines"
 msgstr "Lignes circulaires"
 
-#: ../bin/cdraw.c:2975
+#: ../bin/cdraw.c:3075
 msgid "Draw Circles"
 msgstr "Dessinez des cercles"
 
-#: ../bin/cdraw.c:2976
+#: ../bin/cdraw.c:3076
 msgid "Shapes"
 msgstr "Formes"
 
-#: ../bin/cdraw.c:2976
+#: ../bin/cdraw.c:3076
 msgid "Draw Shapes"
 msgstr "Dessiner des formes"
 
-#: ../bin/cdraw.c:3264
+#: ../bin/cdraw.c:3364
 msgid "Close Polygon - 'g'"
 msgstr "Fermer le Polygone - 'g'"
 
-#: ../bin/cdraw.c:3265
+#: ../bin/cdraw.c:3365
 msgid "Make PolyLine - 'l'"
 msgstr "Créer une polyligne - 'l'"
 
-#: ../bin/cdraw.c:3266
+#: ../bin/cdraw.c:3366
 msgid "Fill Polygon - 'f'"
 msgstr "Remplir le polygone - 'f'"
 
-#: ../bin/cdraw.c:3267
+#: ../bin/cdraw.c:3367
 msgid "Empty Polygon - 'u'"
 msgstr "Polygone vide - 'u'"
 
-#: ../bin/cdraw.c:3269
+#: ../bin/cdraw.c:3369
 msgid "Points Mode - 'p'"
 msgstr "Mode Points - 'p'"
 
-#: ../bin/cdraw.c:3270
+#: ../bin/cdraw.c:3370
 msgid "Delete Selected Point - 'Del'"
 msgstr "Supprimer le point sélectionné - 'Suppr'"
 
-#: ../bin/cdraw.c:3271
+#: ../bin/cdraw.c:3371
 msgid "Vertex Point - 'v'"
 msgstr "Point du sommet - 'v'"
 
-#: ../bin/cdraw.c:3272
+#: ../bin/cdraw.c:3372
 msgid "Round Corner - 'r'"
 msgstr "Coin rond - 'r"
 
-#: ../bin/cdraw.c:3273
+#: ../bin/cdraw.c:3373
 msgid "Smooth Corner - 's'"
 msgstr "Coin lisse - 's'"
 
-#: ../bin/cdraw.c:3275 ../bin/cselect.c:3529
+#: ../bin/cdraw.c:3375 ../bin/cselect.c:3529
 msgid "LineType..."
 msgstr "Type de ligne ..."
 
-#: ../bin/cdraw.c:3276 ../bin/cselect.c:3530
+#: ../bin/cdraw.c:3376 ../bin/cselect.c:3530
 msgid "Solid Line"
 msgstr "Ligne continue"
 
-#: ../bin/cdraw.c:3277 ../bin/cselect.c:3531
+#: ../bin/cdraw.c:3377 ../bin/cselect.c:3531
 msgid "Dashed Line"
 msgstr "Ligne en tirets"
 
-#: ../bin/cdraw.c:3278 ../bin/cselect.c:3532
+#: ../bin/cdraw.c:3378 ../bin/cselect.c:3532
 msgid "Dotted Line"
 msgstr "Ligne en pointillé"
 
-#: ../bin/cdraw.c:3279
+#: ../bin/cdraw.c:3379
 msgid "Dash-Dot Line"
 msgstr "Ligne en tiret-point"
 
-#: ../bin/cdraw.c:3280
+#: ../bin/cdraw.c:3380
 msgid "Dash-Dot-Dot Line"
 msgstr "Ligne en tiret-point-point"
 
-#: ../bin/cdraw.c:3281
+#: ../bin/cdraw.c:3381
 msgid "Center-Dot Line"
 msgstr "Ligne d'axe"
 
-#: ../bin/cdraw.c:3282
+#: ../bin/cdraw.c:3382
 msgid "Phantom-Dot Line"
 msgstr "Ligne d'axe invisible"
 
-#: ../bin/cdraw.c:3284
+#: ../bin/cdraw.c:3384
 msgid "Origin Mode - 'o'"
 msgstr "Mode origine - 'o'"
 
-#: ../bin/cdraw.c:3285
+#: ../bin/cdraw.c:3385
 msgid "Reset Origin - '0'"
 msgstr "Réinitialiser l'origine - '0'"
 
-#: ../bin/cdraw.c:3286
+#: ../bin/cdraw.c:3386
 msgid "Origin to Selected - 'l'"
 msgstr "Origine de la sélection - 'l'"
 
-#: ../bin/cdraw.c:3287
+#: ../bin/cdraw.c:3387
 msgid "Origin to Middle - 'm'"
 msgstr "De l'origine au milieu - 'm'"
 
@@ -1630,7 +1630,7 @@ msgid "Elevation"
 msgstr "Élévation"
 
 #: ../bin/celev.c:378 ../bin/cmisc.c:469 ../bin/dcontmgm.c:299
-#: ../bin/dcustmgm.c:395 ../bin/dlayer.c:1491 ../bin/dpricels.c:154
+#: ../bin/dcustmgm.c:395 ../bin/dlayer.c:1539 ../bin/dpricels.c:154
 #: ../bin/filenoteui.c:249 ../bin/linknoteui.c:182
 #: ../bin/paramfilesearch_ui.c:485 ../bin/textnoteui.c:171
 msgid "Done"
@@ -1887,8 +1887,8 @@ msgstr "Deuxième type de voie non pris en charge pour un raccord non Cornu"
 msgid "Second "
 msgstr "Second "
 
-#: ../bin/cjoin.c:1257 ../bin/track.c:2295 ../bin/track.c:2331
-#: ../bin/track.c:2397
+#: ../bin/cjoin.c:1257 ../bin/track.c:2293 ../bin/track.c:2329
+#: ../bin/track.c:2395
 msgid "Connecting "
 msgstr "Connecter "
 
@@ -2128,7 +2128,7 @@ msgstr "Numéro de page"
 msgid "Ignore Page Margins"
 msgstr "Impression sans marge"
 
-#: ../bin/cprint.c:123 ../bin/csnap.c:705 ../bin/doption.c:531
+#: ../bin/cprint.c:123 ../bin/csnap.c:709 ../bin/doption.c:531
 msgid "Snap Grid"
 msgstr "Grille magnétique"
 
@@ -2184,7 +2184,7 @@ msgstr "Marges"
 msgid "Origin: X"
 msgstr "Origine : X"
 
-#: ../bin/cprint.c:160 ../bin/csnap.c:535
+#: ../bin/cprint.c:160 ../bin/csnap.c:539
 msgid "Y"
 msgstr "Y"
 
@@ -2238,18 +2238,18 @@ msgstr "Annuler"
 msgid "Print Margins"
 msgstr "Imprimer les marges"
 
-#: ../bin/cprint.c:1380 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2903
+#: ../bin/cprint.c:1387 ../bin/cprofile.c:719 ../bin/ctodesgn.c:2903
 #: ../bin/denum.c:55
 msgid "Print"
 msgstr "Imprimer"
 
-#: ../bin/cprint.c:1401
+#: ../bin/cprint.c:1408
 msgid "Select pages to print, or drag to move print grid"
 msgstr ""
 "Sélectionnez ou faites glisser les pages à imprimer pour déplacer la grille "
 "d'impression"
 
-#: ../bin/cprint.c:1499
+#: ../bin/cprint.c:1506
 msgid "Print..."
 msgstr "Imprimer ..."
 
@@ -2830,39 +2830,39 @@ msgstr "Réglez la base du signal"
 msgid "Drag to orient signal"
 msgstr "Faites glisser pour orienter le signal"
 
-#: ../bin/csnap.c:516
+#: ../bin/csnap.c:520
 msgid "Horz"
 msgstr "Horz"
 
-#: ../bin/csnap.c:518
+#: ../bin/csnap.c:522
 msgid "Spacing"
 msgstr "Espacement"
 
-#: ../bin/csnap.c:520
+#: ../bin/csnap.c:524
 msgid "Divisions"
 msgstr "Divisions"
 
-#: ../bin/csnap.c:523
+#: ../bin/csnap.c:527
 msgid "Enable"
 msgstr "Activer"
 
-#: ../bin/csnap.c:524
+#: ../bin/csnap.c:528
 msgid "Vert"
 msgstr "Vertical"
 
-#: ../bin/csnap.c:533 ../bin/dease.c:76
+#: ../bin/csnap.c:537 ../bin/dease.c:76
 msgid "X"
 msgstr "X"
 
-#: ../bin/csnap.c:537
+#: ../bin/csnap.c:541
 msgid "A"
 msgstr "A"
 
-#: ../bin/csnap.c:540
+#: ../bin/csnap.c:544
 msgid "Show"
 msgstr "Afficher"
 
-#: ../bin/csnap.c:791
+#: ../bin/csnap.c:795
 msgid "Change Grid..."
 msgstr "Modifier la grille ..."
 
@@ -2965,12 +2965,12 @@ msgstr ""
 msgid "Drag to place 2nd end point"
 msgstr "Faites glisser pour placer la 2ème extrémité"
 
-#: ../bin/cstraigh.c:142
+#: ../bin/cstraigh.c:152
 #, c-format
 msgid "Straight Track Length=%s Angle=%0.3f"
 msgstr "Longueur de voie droite = %s Angle = %0.3f"
 
-#: ../bin/cstraigh.c:193 ../bin/tstraigh.c:224
+#: ../bin/cstraigh.c:203 ../bin/tstraigh.c:224
 msgid "Straight Track"
 msgstr "Voie droite"
 
@@ -3568,7 +3568,7 @@ msgstr "Connecter les voies ajustables"
 msgid "splitTurnout: can't find segment"
 msgstr "aiguillage fractionné : impossible de trouver le segment"
 
-#: ../bin/cturnout.c:1510 ../bin/track.c:2284 ../bin/track.c:2390
+#: ../bin/cturnout.c:1510 ../bin/track.c:2282 ../bin/track.c:2388
 #: ../bin/tstraigh.c:591
 msgid "Drag to change track length"
 msgstr "Faites glisser pour changer la longueur de la voie"
@@ -4310,7 +4310,7 @@ msgstr "Plan"
 msgid "Shelf"
 msgstr "Étagère"
 
-#: ../bin/dcmpnd.c:77 ../bin/dlayer.c:587 ../bin/misc.c:656 ../bin/misc.c:688
+#: ../bin/dcmpnd.c:77 ../bin/dlayer.c:598 ../bin/misc.c:656 ../bin/misc.c:688
 msgid "Load"
 msgstr "Charger"
 
@@ -4489,77 +4489,77 @@ msgstr "L'ensemble"
 msgid "Total"
 msgstr "Total"
 
-#: ../bin/dlayer.c:563
+#: ../bin/dlayer.c:574
 msgid "Select Layer:"
 msgstr "Sélectionner le calque :"
 
-#: ../bin/dlayer.c:569
+#: ../bin/dlayer.c:580
 msgid "Use Color"
 msgstr "Utiliser la couleur"
 
-#: ../bin/dlayer.c:571
+#: ../bin/dlayer.c:582
 msgid "Visible"
 msgstr "Visible"
 
-#: ../bin/dlayer.c:573
+#: ../bin/dlayer.c:584
 msgid "Frozen"
 msgstr "Gelé"
 
-#: ../bin/dlayer.c:575
+#: ../bin/dlayer.c:586
 msgid "On Map"
 msgstr "Sur la carte"
 
-#: ../bin/dlayer.c:577
+#: ../bin/dlayer.c:588
 msgid "Module"
 msgstr "Module"
 
-#: ../bin/dlayer.c:579
+#: ../bin/dlayer.c:590
 msgid "No Button"
 msgstr "Aucun bouton"
 
-#: ../bin/dlayer.c:581
+#: ../bin/dlayer.c:592
 msgid "Linked Layers"
 msgstr "Calques associés"
 
-#: ../bin/dlayer.c:583
+#: ../bin/dlayer.c:594
 msgid "Settings when Current"
 msgstr "Réglages en cours"
 
-#: ../bin/dlayer.c:585
+#: ../bin/dlayer.c:596
 msgid "Object Count:"
 msgstr "Nombre d'objets :"
 
-#: ../bin/dlayer.c:586
+#: ../bin/dlayer.c:597
 msgid "All Layer Preferences"
 msgstr "Préférences pour tous les calques"
 
-#: ../bin/dlayer.c:588 ../bin/macro.c:1431
+#: ../bin/dlayer.c:599 ../bin/macro.c:1431
 msgid "Save"
 msgstr "Sauver"
 
-#: ../bin/dlayer.c:589
+#: ../bin/dlayer.c:600
 msgid "Defaults"
 msgstr "Defauts"
 
-#: ../bin/dlayer.c:590
+#: ../bin/dlayer.c:601
 msgid "Number of Layer Buttons"
 msgstr "Nombre de boutons de calques"
 
-#: ../bin/dlayer.c:698 ../bin/dlayer.c:1250 ../bin/dlayer.c:1267
-#: ../bin/dlayer.c:1324
+#: ../bin/dlayer.c:709 ../bin/dlayer.c:1284 ../bin/dlayer.c:1301
+#: ../bin/dlayer.c:1372
 msgid "Main"
 msgstr "Principal"
 
-#: ../bin/dlayer.c:829 ../bin/dlayer.c:1168 ../bin/dlayer.c:1270
-#: ../bin/dlayer.c:1326 ../bin/dlayer.c:1715
+#: ../bin/dlayer.c:840 ../bin/dlayer.c:1202 ../bin/dlayer.c:1304
+#: ../bin/dlayer.c:1374 ../bin/dlayer.c:1769
 msgid "Show/Hide Layer"
 msgstr "Afficher/masquer le calque"
 
-#: ../bin/dlayer.c:1491
+#: ../bin/dlayer.c:1539
 msgid "Layers"
 msgstr "Calques"
 
-#: ../bin/dlayer.c:1702 ../bin/misc.c:2274
+#: ../bin/dlayer.c:1756 ../bin/misc.c:2274
 #: ../../../../build/xtrkcad-old/app/bin/bllnhlp.c:17
 msgid "Show/Hide Background"
 msgstr "Montrer/cacher l'image d'arrière plan"
@@ -5216,93 +5216,96 @@ msgstr "+Alt pour l'accrochage magnétique"
 msgid "+Alt to inhibit Magnetic Snap"
 msgstr "+ Alt pour inhiber l'accrochage magnétique"
 
-#: ../bin/drawgeom.c:411
+#: ../bin/drawgeom.c:414
 msgid "Drag next point, +Alt reverse Magnetic Snap or +Ctrl lock to 90 deg"
 msgstr ""
 "Faites glisser le point suivant, +Alt inverse l'accrochage magnétique ou "
 "+Ctrl verrouille à 90 degrés"
 
-#: ../bin/drawgeom.c:421
-msgid "Drag next point, +Ctrl to lock to 90 degrees"
-msgstr "Faites glisser le point suivant, +Ctrl pour verrouiller à 90 degrés"
+#: ../bin/drawgeom.c:425
+msgid ""
+"Drag next point, +Alt reverse Magnetic Snap, or +Ctrl to lock to 90 degrees"
+msgstr ""
+"Faites glisser le point suivant, +Alt inverser l'accrochage magnétique ou "
+"+Ctrl pour verrouiller à 90 degrés"
 
-#: ../bin/drawgeom.c:452
+#: ../bin/drawgeom.c:456
 msgid "Drag to set radius"
 msgstr "Faites glisser pour définir le rayon"
 
-#: ../bin/drawgeom.c:465
+#: ../bin/drawgeom.c:470
 msgid "Drag set box size"
 msgstr "Faites glisser pour définir la taille du rectangle"
 
-#: ../bin/drawgeom.c:506
+#: ../bin/drawgeom.c:511
 msgid "+Alt - reverse Magnetic Snap or +Ctrl - lock to 90 deg"
 msgstr ""
 "+Alt - inverse l'accrochage magnétique ou +Ctrl - verrouille à 90 degrés"
 
-#: ../bin/drawgeom.c:561 ../bin/drawgeom.c:617
+#: ../bin/drawgeom.c:581 ../bin/drawgeom.c:637
 #, c-format
 msgid "Length = %s, Angle = %0.2f"
 msgstr "Longueur = %s, Angle = %0.2f"
 
-#: ../bin/drawgeom.c:638
+#: ../bin/drawgeom.c:658
 #, c-format
 msgid "Straight Line: Length=%s Angle=%0.3f"
 msgstr "Ligne droite : Longueur=%s Angle=%0.3f"
 
-#: ../bin/drawgeom.c:660
+#: ../bin/drawgeom.c:680
 #, c-format
 msgid "Curved Line: Radius=%s Angle=%0.3f Length=%s"
 msgstr "Ligne courbe : Rayon = %s Angle = %0.3f Longueur = %s"
 
-#: ../bin/drawgeom.c:684
+#: ../bin/drawgeom.c:703 ../bin/drawgeom.c:711
 #, c-format
 msgid "Radius = %s"
 msgstr "Rayon = %s"
 
-#: ../bin/drawgeom.c:694
+#: ../bin/drawgeom.c:722
 #, c-format
 msgid "Width = %s, Height = %s"
 msgstr "Largeur = %s, Hauteur = %s"
 
-#: ../bin/drawgeom.c:755
+#: ../bin/drawgeom.c:783
 msgid "Drag on Red arrows to adjust curve"
 msgstr "Faites glisser les flèches rouges pour ajuster la courbe"
 
-#: ../bin/drawgeom.c:1166
+#: ../bin/drawgeom.c:1194
 msgid "Select points or use context menu"
 msgstr "Sélectionnez des points ou utilisez le menu contextuel"
 
-#: ../bin/drawgeom.c:1422
+#: ../bin/drawgeom.c:1450
 #, c-format
 msgid "Length = %s, Last angle = %0.2f"
 msgstr "Longueur = %s, Dernier angle = %0.2f"
 
-#: ../bin/drawgeom.c:1576
+#: ../bin/drawgeom.c:1604
 msgid "Point Deleted"
 msgstr "Point supprimé"
 
-#: ../bin/drawgeom.c:1983
+#: ../bin/drawgeom.c:2009
 msgid "Not close to end of line"
 msgstr "Aucun point de fin à proximité"
 
-#: ../bin/drawgeom.c:2036
+#: ../bin/drawgeom.c:2065
 msgid "Not close to ends or middle of mine, reselect"
 msgstr "Pas à une extrémité ou au milieu de la voie, resélectionnez"
 
-#: ../bin/drawgeom.c:2085 ../bin/drawgeom.c:2311
+#: ../bin/drawgeom.c:2114 ../bin/drawgeom.c:2349
 msgid "Drag to Move Corner Point"
 msgstr "Faites glisser pour déplacer le sommet"
 
-#: ../bin/drawgeom.c:2092
+#: ../bin/drawgeom.c:2121
 msgid "Drag to Move Edge "
 msgstr "Faites glisser pour déplacer le bord "
 
-#: ../bin/drawgeom.c:2156
+#: ../bin/drawgeom.c:2194
 #, c-format
 msgid "Length = %0.3f Angle = %0.3f"
 msgstr "Longueur = %0.3f angle = %0.3f"
 
-#: ../bin/drawgeom.c:2306
+#: ../bin/drawgeom.c:2344
 msgid "Drag to Move Edge"
 msgstr "Faites glisser pour déplacer le bord"
 
@@ -6631,11 +6634,11 @@ msgstr ""
 msgid "Easement Track"
 msgstr "Voie courbe de transition"
 
-#: ../bin/tease.c:1324
+#: ../bin/tease.c:1314
 msgid "Merge Easements"
 msgstr "Fusionner des courbes de transition"
 
-#: ../bin/tease.c:1392
+#: ../bin/tease.c:1382
 msgid "Split Easement Curve"
 msgstr "Courbe de transition fractionnée"
 
@@ -6665,56 +6668,56 @@ msgstr ""
 msgid "No track or structure pieces are selected"
 msgstr "Aucune piste ou pièce de structure n'est sélectionnée"
 
-#: ../bin/track.c:1341
+#: ../bin/track.c:1339
 msgid "Move Objects Above"
 msgstr "Déplacer les objets ci-dessus"
 
-#: ../bin/track.c:1361
+#: ../bin/track.c:1359
 msgid "Mode Objects Below"
 msgstr "Objets ci-dessous"
 
-#: ../bin/track.c:1652
+#: ../bin/track.c:1650
 msgid "Audit"
 msgstr "Vérification"
 
-#: ../bin/track.c:1941
+#: ../bin/track.c:1939
 #, c-format
 msgid "%d Track(s) loosened"
 msgstr "%d Voie(s) détachées"
 
-#: ../bin/track.c:1948
+#: ../bin/track.c:1946
 msgid "No tracks loosened"
 msgstr "Pas de voies détachées"
 
-#: ../bin/track.c:1958 ../bin/track.c:1962
+#: ../bin/track.c:1956 ../bin/track.c:1960
 #, c-format
 msgid "Connecting a non-track(%d) to (%d)"
 msgstr "Connecter un autre objet (%d) à une voie (%d)"
 
-#: ../bin/track.c:2017
+#: ../bin/track.c:2015
 msgid "Join Abutting Tracks"
 msgstr "Raccorder les voies adjacentes"
 
-#: ../bin/track.c:2305 ../bin/track.c:2340
+#: ../bin/track.c:2303 ../bin/track.c:2338
 msgid "Inside turnout track"
 msgstr "Voie d'aiguillage intérieure"
 
-#: ../bin/track.c:2323
+#: ../bin/track.c:2321
 #, c-format
 msgid "Curve: Length=%s Radius=%0.3f Arc=%0.3f"
 msgstr "Courbe : longueur=%s Rayon=%0.3f Arc=%0.3f"
 
-#: ../bin/track.c:2346 ../bin/track.c:2404 ../bin/tstraigh.c:605
+#: ../bin/track.c:2344 ../bin/track.c:2402 ../bin/tstraigh.c:605
 #, c-format
 msgid "Straight: Length=%s Angle=%0.3f"
 msgstr "Droit : Longueur = %s Angle = %0.3f"
 
-#: ../bin/track.c:3495
+#: ../bin/track.c:3493
 #, c-format
 msgid "%s[%0.2f,%0.2f] A%0.2f"
 msgstr "%s[%0.2f,%0.2f] A%0.2f"
 
-#: ../bin/track.c:3497
+#: ../bin/track.c:3495
 #, c-format
 msgid "%s[%0.2f,%0.2f] A%0.2f\n"
 msgstr "%s[%0.2f,%0.2f] A%0.2f\n"
@@ -7366,6 +7369,22 @@ msgstr ""
 " peut donc pas être importé"
 
 #: ../../../../build/xtrkcad-old/app/help/messages.h:74
+msgid ""
+"MSG_NO_UNFROZEN_LAYER\tNo layer was found that wasn't frozen. Layer 0 is "
+"unfrozen."
+msgstr ""
+"MSG_NO_UNFROZEN_LAYER\tAucune couche n'a été trouvée qui n'était pas gelée. "
+"La couche 0 n'est pas gelée."
+
+#: ../../../../build/xtrkcad-old/app/help/messages.h:75
+msgid ""
+"MSG_NOT_UNFROZEN_LAYER\tThe current layer was defined as frozen. It is now "
+"unfrozen."
+msgstr ""
+"MSG_NOT_UNFROZEN_LAYER\tAucune couche n'a été trouvée qui n'était pas gelée."
+" La couche 0 n'est pas gelée."
+
+#: ../../../../build/xtrkcad-old/app/help/messages.h:76
 #, c-format
 msgid ""
 "MSG_NO_TURNOUTS_AVAILABLE\tNo Turnouts|Structures are available.\tNo %s are "
@@ -7374,7 +7393,7 @@ msgstr ""
 "MSG_NO_TURNOUTS_AVAILABLE\tAucun aiguillages|bâtiments sont "
 "disponibles.\tAucun %s n'est disponible."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:75
+#: ../../../../build/xtrkcad-old/app/help/messages.h:77
 msgid ""
 "MSG_CARDESC_VALUE_ZERO\tNumeric values on the Car Description...\tNumeric values on the Car Description\n"
 "dialog must be greater than 0."
@@ -7382,11 +7401,11 @@ msgstr ""
 "MSG_CARDESC_VALUE_ZERO\tValeurs numériques de la description de véhicule…\tValeurs numériques de la description de véhicule\n"
 "Doit être supérieur à 0."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:76
+#: ../../../../build/xtrkcad-old/app/help/messages.h:78
 msgid "MSG_MOVE_OUT_OF_BOUNDS\tObject has moved beyond room boundaries."
 msgstr "MSG_MOVE_OUT_OF_BOUNDS\tL'objet a dépassé les limites de la pièce."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:77
+#: ../../../../build/xtrkcad-old/app/help/messages.h:79
 msgid ""
 "MSG_PARALLEL_SEP_GTR_0\tParallel separation must be greater than 0, or the "
 "new guage must be different than the old."
@@ -7394,7 +7413,7 @@ msgstr ""
 "MSG_PARALLEL_SEP_GTR_0\tLa séparation parallèle doit être supérieure à 0, ou"
 " le nouveau gabarit doit être différent de l'ancien."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:78
+#: ../../../../build/xtrkcad-old/app/help/messages.h:80
 msgid ""
 "MSG_CARPART_DUPNAME\tPart Number for this Manufacturer already exists....\tPart Number for this Manufacturer already exists.\n"
 "\n"
@@ -7404,7 +7423,7 @@ msgstr ""
 "\n"
 "Voulez-vous le mettre à jour?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:79
+#: ../../../../build/xtrkcad-old/app/help/messages.h:81
 #, c-format
 msgid ""
 "MSG_PLAYBACK_LISTENTRY\tPlayback: Cannot find list entry: NAME\tPlayback: "
@@ -7413,7 +7432,7 @@ msgstr ""
 "MSG_PLAYBACK_LISTENTRY\tLecture : entrée de liste introuvable : NOM\tLecture"
 " : entrée de liste introuvable : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:80
+#: ../../../../build/xtrkcad-old/app/help/messages.h:82
 #, c-format
 msgid ""
 "MSG_PLAYBACK_VERSION_UPGRADE\tPlayback file version %ld is...\tPlayback file version %ld is\n"
@@ -7424,7 +7443,7 @@ msgstr ""
 "supérieure à la version prise en charge %d\n"
 "Vous devez mettre à jour votre version de %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:81
+#: ../../../../build/xtrkcad-old/app/help/messages.h:83
 #, c-format
 msgid ""
 "MSG_DOMOUSE_BAD_OP\tPlayback: unknown action NNN\tPlayback: unknown action "
@@ -7433,23 +7452,23 @@ msgstr ""
 "MSG_DOMOUSE_BAD_OP\tLecture : action inconnue NNN\tLecture : action inconnue"
 " %d"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:82
+#: ../../../../build/xtrkcad-old/app/help/messages.h:84
 msgid "MSG_MOVE_POINTS_AWAY_CLOSE\tPoints are to close to frog; move away."
 msgstr ""
 "MSG_MOVE_POINTS_AWAY_CLOSE\tLes points sont trop proches du cœur; "
 "s'éloigner."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:83
+#: ../../../../build/xtrkcad-old/app/help/messages.h:85
 msgid "MSG_POLY_SHAPES_3_SIDES\tPoly shapes must have at least 3 sides."
 msgstr "MSG_POLY_SHAPES_3_SIDES\tLes Polyformes doivent avoir au moins 3 côtés."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:84
+#: ../../../../build/xtrkcad-old/app/help/messages.h:86
 msgid "MSG_POLY_MULTIPLE_SELECTED\tCan't delete multiple points at once"
 msgstr ""
 "MSG_POLY_MULTIPLE_SELECTED\tImpossible de supprimer plusieurs points à la "
 "fois"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:85
+#: ../../../../build/xtrkcad-old/app/help/messages.h:87
 msgid ""
 "MSG_CARPROTO_DUPNAME\tPrototype name already exists....\tPrototype name already exists.\n"
 "\n"
@@ -7459,15 +7478,15 @@ msgstr ""
 "\n"
 "Voulez-vous le mettre à jour?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:86
+#: ../../../../build/xtrkcad-old/app/help/messages.h:88
 msgid "MSG_RADIUS_GTR_0\tRadius must be greater than 0."
 msgstr "MSG_RADIUS_GTR_0\tLe rayon doit être supérieur à 0."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:87
+#: ../../../../build/xtrkcad-old/app/help/messages.h:89
 msgid "MSG_RADIUS_GTR_10000\tRadius must be less than 10000."
 msgstr "MSG_RADIUS_GTR_10000\tLe rayon doit être inférieur à 10000."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:88
+#: ../../../../build/xtrkcad-old/app/help/messages.h:90
 msgid ""
 "MSG_RADIUS_TOO_BIG\tThe Circle or Helix will not fit within the layouts room"
 " parameters (Height and Width)."
@@ -7475,7 +7494,7 @@ msgstr ""
 "MSG_RADIUS_TOO_BIG\tLe cercle ou l'hélicoïde ne rentre pas dans le plan de "
 "la pièce (hauteur et largeur)."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:89
+#: ../../../../build/xtrkcad-old/app/help/messages.h:91
 #, c-format
 msgid ""
 "MSG_RESCALE_TOO_BIG\tRescaled tracks do not fit within layouts room parameters...\tRescaled tracks do not fit within layouts room parameters\n"
@@ -7486,7 +7505,7 @@ msgstr ""
 "(Longueur et largeur). La taille requise est\n"
 "au moins %s sur %s."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:90
+#: ../../../../build/xtrkcad-old/app/help/messages.h:92
 msgid ""
 "MSG_CARIMP_MISSING_COLUMNS\tRequired column headers missing from Car Import "
 "file."
@@ -7494,7 +7513,7 @@ msgstr ""
 "MSG_CARIMP_MISSING_COLUMNS\tLes en-têtes de colonne requises sont absentes "
 "du fichier d'importation de véhicule."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:91
+#: ../../../../build/xtrkcad-old/app/help/messages.h:93
 #, c-format
 msgid ""
 "MSG_2ND_TRK_NOT_SEL_UNSEL\tSecond track must be selected|unselected\tSecond "
@@ -7503,15 +7522,15 @@ msgstr ""
 "MSG_2ND_TRK_NOT_SEL_UNSEL\t La deuxième voie peut être sélectionnée ou non\t"
 " La deuxième voie doit être %s."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:92
+#: ../../../../build/xtrkcad-old/app/help/messages.h:94
 msgid "MSG_OUT_OF_BOUNDS\tSelected page is out of bounds."
 msgstr "MSG_OUT_OF_BOUNDS\tLa page sélectionnée est hors de portée."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:93
+#: ../../../../build/xtrkcad-old/app/help/messages.h:95
 msgid "MSG_SEL_POS_FIRST\tSelect position prior to entering Text."
 msgstr "MSG_SEL_POS_FIRST\tSélectionnez la position avant de saisir du texte."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:94
+#: ../../../../build/xtrkcad-old/app/help/messages.h:96
 msgid ""
 "MSG_CARPROTO_BADSEGS\tSelected shapes must define a rectangular area ...\tSelected shapes must define a rectangular\n"
 "area with length greater than height."
@@ -7519,7 +7538,7 @@ msgstr ""
 "MSG_CARPROTO_BADSEGS\tLes formes sélectionnées doivent définir une zone rectangulaire ...\tLes formes sélectionnées doivent définir une zone rectangulaire\n"
 "zone de longueur supérieure à la hauteur."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:95
+#: ../../../../build/xtrkcad-old/app/help/messages.h:97
 msgid ""
 "MSG_TOO_FAR_APART_DIVERGE\tSelected tracks deviate too much or are too far "
 "apart from each other."
@@ -7527,21 +7546,21 @@ msgstr ""
 "MSG_TOO_FAR_APART_DIVERGE\tLes voies sélectionnées s'écartent trop ou sont "
 "trop éloignées les unes des autres."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:96
+#: ../../../../build/xtrkcad-old/app/help/messages.h:98
 msgid "MSG_COMMAND_DISABLED\tSpecified command disabled."
 msgstr "MSG_COMMAND_DISABLED\tCommande spécifiée désactivée."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:97
+#: ../../../../build/xtrkcad-old/app/help/messages.h:99
 msgid "MSG_SPLIT_POS_BTW_MERGEPTS\tSplit position between Turnout Points"
 msgstr ""
 "MSG_SPLIT_POS_BTW_MERGEPTS\tLe point de séparation est situé entre les "
 "points de l'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:98
+#: ../../../../build/xtrkcad-old/app/help/messages.h:100
 msgid "MSG_SPLIT_PATH_NOT_UNIQUE\tSplit position not on unique path"
 msgstr "MSG_SPLIT_PATH_NOT_UNIQUE\tLe point de séparation n'est pas clair"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:99
+#: ../../../../build/xtrkcad-old/app/help/messages.h:101
 #, c-format
 msgid ""
 "MSG_CARIMP_MISSING_DIMS\tThe following car has no dimensions and a...\tThe following car has no dimensions and a\n"
@@ -7558,7 +7577,7 @@ msgstr ""
 "\n"
 "Souhaitez-vous continuer à importer d'autres véhicule ?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:100
+#: ../../../../build/xtrkcad-old/app/help/messages.h:102
 #, c-format
 msgid ""
 "MSG_CARIMP_MISSING_PARTNO\tThe following car has no Part Number...\tThe following car has no Part Number\n"
@@ -7573,7 +7592,7 @@ msgstr ""
 "\n"
 "Souhaitez-vous continuer à importer d'autres matériels roulants ?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:101
+#: ../../../../build/xtrkcad-old/app/help/messages.h:103
 #, c-format
 msgid ""
 "MSG_CARIMP_IGNORED_COLUMN\tThe following column in the Car Import file will be ignored:...\tThe following column in the Car Import file will be ignored:\n"
@@ -7584,7 +7603,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:102
+#: ../../../../build/xtrkcad-old/app/help/messages.h:104
 msgid ""
 "MSG_CANT_MOVE_UNDER_TRAIN\tThe position of a turnout or turntable cannot be "
 "changed while occupied by a train."
@@ -7592,7 +7611,7 @@ msgstr ""
 "MSG_CANT_MOVE_UNDER_TRAIN\tLa position d'un aiguillage ou d'un pont tournant"
 " ne peut pas être modifiée tant qu'elle est occupée par un train."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:103
+#: ../../../../build/xtrkcad-old/app/help/messages.h:105
 msgid ""
 "MSG_STRUCT_NO_STRUCTS\tThere are no structures to choose from in the structure...\tThere are no structures to choose from in the structure\n"
 "selection list.  Please check your SCALE, select the\n"
@@ -7605,7 +7624,7 @@ msgstr ""
 "<Fichier|Fichiers de paramètres> ou créez un nouveau \n"
 "bâtiment à l’aide de la commande Grouper."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:104
+#: ../../../../build/xtrkcad-old/app/help/messages.h:106
 msgid ""
 "MSG_TURNOUT_NO_TURNOUT\tThere are no turnouts to choose from in the turnout...\tThere are no turnouts to choose from in the turnout\n"
 "selection list.  Please check your SCALE, select the\n"
@@ -7620,39 +7639,39 @@ msgstr ""
 "<Fichier|Fichiers de paramètres> pour charger un autre \n"
 "fichier de paramètres"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:105
+#: ../../../../build/xtrkcad-old/app/help/messages.h:107
 msgid "MSG_NO_UNCONN_EP\tThere are no unconnected end points for this track"
 msgstr ""
 "MSG_NO_UNCONN_EP\tIl n'y a pas de points de fin non connectés pour cette "
 "voie"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:106
+#: ../../../../build/xtrkcad-old/app/help/messages.h:108
 msgid "MSG_PULL_FEW_SECTIONS\tThere are too few sections in this loop."
 msgstr "MSG_PULL_FEW_SECTIONS\tIl y a trop peu de sections dans cette boucle."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:107
+#: ../../../../build/xtrkcad-old/app/help/messages.h:109
 msgid "MSG_NO_REDO\tThere is nothing to redo!"
 msgstr "MSG_NO_REDO\tIl n'y a rien à refaire!"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:108
+#: ../../../../build/xtrkcad-old/app/help/messages.h:110
 msgid "MSG_NO_UNDO\tThere is nothing to undo!"
 msgstr "MSG_NO_UNDO\tIl n'y a rien à défaire!"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:109
+#: ../../../../build/xtrkcad-old/app/help/messages.h:111
 msgid "MSG_TOOMANYSEGSINGROUP\tToo many segments in Group."
 msgstr "MSG_TOOMANYSEGSINGROUP\tTrop de segments dans le groupe."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:110
+#: ../../../../build/xtrkcad-old/app/help/messages.h:112
 msgid "MSG_CANNOT_CHANGE\tTrack cannot be changed."
 msgstr "MSG_CANNOT_CHANGE\tLa voie ne peut pas être modifiée."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:111
+#: ../../../../build/xtrkcad-old/app/help/messages.h:113
 msgid "MSG_POINT_INSIDE_TURNTABLE\tTrack endpoint is within turntable radius."
 msgstr ""
 "MSG_POINT_INSIDE_TURNTABLE\tLe point de fin de la voie est à l'intérieur du "
 "pont tournant."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:112
+#: ../../../../build/xtrkcad-old/app/help/messages.h:114
 msgid ""
 "MSG_MOVE_POINTS_AWAY_NO_INTERSECTION\tTrack intersection not possible; move "
 "points away from frog."
@@ -7660,7 +7679,7 @@ msgstr ""
 "MSG_MOVE_POINTS_AWAY_NO_INTERSECTION\tIntersection de la voie impossible; "
 "éloignez les points du cœur."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:113
+#: ../../../../build/xtrkcad-old/app/help/messages.h:115
 #, c-format
 msgid ""
 "MSG_TRK_TOO_SHORT\tTrack is too short by N.NNN\t%strack is too short by "
@@ -7669,7 +7688,7 @@ msgstr ""
 "MSG_TRK_TOO_SHORT\tLa voie est trop courte autour de N.NNN\tLa voie %s est "
 "trop courte de %0.3f"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:114
+#: ../../../../build/xtrkcad-old/app/help/messages.h:116
 #, c-format
 msgid ""
 "MSG_RADIUS_LSS_EASE_MIN\tTrack radius (N.NNN) is smaller than easement "
@@ -7679,19 +7698,19 @@ msgstr ""
 "de transition minimum (N.NNN).\tLe rayon de la voie (%s) est inférieur à "
 "l'arc de transition minimum (%s)."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:115
+#: ../../../../build/xtrkcad-old/app/help/messages.h:117
 msgid "MSG_CANT_MODIFY_FROZEN_TRK\tTracks in a frozen layer cannot be modified."
 msgstr ""
 "MSG_CANT_MODIFY_FROZEN_TRK\tLes voies d'un calque gelé ne peuvent pas être "
 "modifiées."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:116
+#: ../../../../build/xtrkcad-old/app/help/messages.h:118
 msgid "MSG_CANT_MODIFY_MODULE_TRK\tTracks in a module cannot be modified."
 msgstr ""
 "MSG_CANT_MODIFY_MODULE_TRK\tLes voies d'un module ne peuvent pas être "
 "modifiées."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:117
+#: ../../../../build/xtrkcad-old/app/help/messages.h:119
 msgid ""
 "MSG_SEGMENTS_DIFFER\tTurnout definition contains non-track segments....\tTurnout definition contains non-track segments.\n"
 "\n"
@@ -7701,13 +7720,13 @@ msgstr ""
 "\n"
 "Voulez-vous les inclure dans cette mise à jour ?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:118
+#: ../../../../build/xtrkcad-old/app/help/messages.h:120
 msgid "MSG_TURNTABLE_DIAM_GTR_0\tTurntable diameter must greater than 0."
 msgstr ""
 "MSG_TURNTABLE_DIAM_GTR_0\tLe diamètre du pont tournant doit être supérieur à"
 " 0."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:119
+#: ../../../../build/xtrkcad-old/app/help/messages.h:121
 #, c-format
 msgid ""
 "MSG_UNDO_ASSERT\tUndo assertion failure %s:%d...\tUndo assertion failure %s:%d\n"
@@ -7720,7 +7739,7 @@ msgstr ""
 "%s\n"
 "Signalez cette erreur à l'équipe de développement du projet XTrackCAD de SourceForge."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:120
+#: ../../../../build/xtrkcad-old/app/help/messages.h:122
 #, c-format
 msgid ""
 "MSG_PROG_CORRUPTED\tCritical file damaged!...\tCritical file damaged!\n"
@@ -7735,7 +7754,7 @@ msgstr ""
 "\n"
 "Veuillez réinstaller le logiciel."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:121
+#: ../../../../build/xtrkcad-old/app/help/messages.h:123
 #, c-format
 msgid ""
 "MSG_ENTERED_STRING_TRUNCATED\tThe entered text is too long. Maximum length "
@@ -7744,12 +7763,12 @@ msgstr ""
 "MSG_ENTERED_STRING_TRUNCATED\tLe texte saisi est trop long. La longueur "
 "maximale est %d."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:122
+#: ../../../../build/xtrkcad-old/app/help/messages.h:124
 #, c-format
 msgid "MSG_PT_IS_NOT_TRK\t[X Y] is not a track\t[%s %s] is not a track."
 msgstr "MSG_PT_IS_NOT_TRK\t[X Y] n'est pas une voie\t[%s %s] n'est pas une voie."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:123
+#: ../../../../build/xtrkcad-old/app/help/messages.h:125
 msgid ""
 "MSG_BITMAP_SIZE_WARNING\tYou have specified a large Bitmap....\tYou have specified a large Bitmap.\n"
 "\n"
@@ -7759,12 +7778,12 @@ msgstr ""
 "\n"
 "Etes-vous sur de vouloir continuer ?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:124
+#: ../../../../build/xtrkcad-old/app/help/messages.h:126
 #, c-format
 msgid "Are you sure you want to delete these %d car(s)?"
 msgstr "Êtes-vous sûr de vouloir supprimer ces %d matériel(s) roulant-s ?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:125
+#: ../../../../build/xtrkcad-old/app/help/messages.h:127
 #, c-format
 msgid ""
 "Cannot open %s file:\n"
@@ -7773,120 +7792,120 @@ msgstr ""
 "Impossible d'ouvrir le fichier %s :\n"
 "%s : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:126
+#: ../../../../build/xtrkcad-old/app/help/messages.h:128
 #, c-format
 msgid "Cannot create directory: %s - %s"
 msgstr "Impossible de créer le répertoire : %s -%s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:127
+#: ../../../../build/xtrkcad-old/app/help/messages.h:129
 #, c-format
 msgid "Cannot open directory: %s"
 msgstr "Impossible d'ouvrir le répertoire : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:128
+#: ../../../../build/xtrkcad-old/app/help/messages.h:130
 #, c-format
 msgid "Path for deletion is not a directory: %s"
 msgstr "Le chemin de suppression n'est pas un répertoire : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:129
+#: ../../../../build/xtrkcad-old/app/help/messages.h:131
 #, c-format
 msgid "Open failed for directory: %s"
 msgstr "Échec de l'ouverture du répertoire : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:130
+#: ../../../../build/xtrkcad-old/app/help/messages.h:132
 #, c-format
 msgid "Can't add directory record %s to zip - %s"
 msgstr "Impossible d'ajouter l'enregistrement du répertoire %s au zip -%s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:131
+#: ../../../../build/xtrkcad-old/app/help/messages.h:133
 #, c-format
 msgid "Can't add file record %s to zip at %s - %s"
 msgstr "Impossible d'ajouter l'enregistrement du fichier %s au zip %s - %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:132
+#: ../../../../build/xtrkcad-old/app/help/messages.h:134
 #, c-format
 msgid "Can't create zip %s - %s"
 msgstr "Impossible de créer le zip %s - %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:133
+#: ../../../../build/xtrkcad-old/app/help/messages.h:135
 #, c-format
 msgid "Close failure for zip %s - %s"
 msgstr "Échec de fermeture pour le zip %s - %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:134
+#: ../../../../build/xtrkcad-old/app/help/messages.h:136
 #, c-format
 msgid "Rename failure for zip from %s to %s - %s"
 msgstr "Échec de changement de nom pour le zip de %s à %s - %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:135
+#: ../../../../build/xtrkcad-old/app/help/messages.h:137
 #, c-format
 msgid "Open failure for zip %s - %s"
 msgstr "Échec d'ouverture du zip %s -%s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:136
+#: ../../../../build/xtrkcad-old/app/help/messages.h:138
 #, c-format
 msgid "Index failure for zip %s - %s"
 msgstr "Echec de l'index pour les zip %s - %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:137
+#: ../../../../build/xtrkcad-old/app/help/messages.h:139
 #, c-format
 msgid "Open read file failure %s %s"
 msgstr "Échec de l'ouverture du fichier pour la lecture de %s %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:138
+#: ../../../../build/xtrkcad-old/app/help/messages.h:140
 #, c-format
 msgid "Open file in zip failure %s %s"
 msgstr "Erreur lors de l'ouverture du fichier dans le zip %s %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:139
+#: ../../../../build/xtrkcad-old/app/help/messages.h:141
 #, c-format
 msgid "Unlink failed for: %s"
 msgstr "La déconnexion a échoué pour : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:140
+#: ../../../../build/xtrkcad-old/app/help/messages.h:142
 #, c-format
 msgid "Remove Directory failed for: %s"
 msgstr "Échec de la suppression du répertoire pour : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:141
+#: ../../../../build/xtrkcad-old/app/help/messages.h:143
 #, c-format
 msgid "Cannot save archive to %s from directory: %s"
 msgstr ""
 "Impossible d'enregistrer l'archive dans %s à partir du répertoire : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:142
+#: ../../../../build/xtrkcad-old/app/help/messages.h:144
 #, c-format
 msgid "Cannot save manifest file to %s"
 msgstr "Impossible d'enregistrer le fichier manifeste dans %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:143
+#: ../../../../build/xtrkcad-old/app/help/messages.h:145
 #, c-format
 msgid "Cannot open manifest file %s"
 msgstr "Impossible d'ouvrir le fichier manifeste %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:144
+#: ../../../../build/xtrkcad-old/app/help/messages.h:146
 #, c-format
 msgid "Cannot unpack file: %s for file: %s in directory: %s"
 msgstr ""
 "Impossible de décompresser le fichier : %s pour le fichier : %s dans le "
 "répertoire : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:145
+#: ../../../../build/xtrkcad-old/app/help/messages.h:147
 #, c-format
 msgid "Cannot open file %s"
 msgstr "Impossible d'ouvrir le fichier %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:146
+#: ../../../../build/xtrkcad-old/app/help/messages.h:148
 #, c-format
 msgid "Cannot copy file %s into directory %s"
 msgstr "Impossible de copier le fichier %s dans le répertoire %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:147
+#: ../../../../build/xtrkcad-old/app/help/messages.h:149
 #, c-format
 msgid "Unrecognized Option: %s"
 msgstr "Option non reconnue : %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:148
+#: ../../../../build/xtrkcad-old/app/help/messages.h:150
 #, c-format
 msgid ""
 "End-Of-Line is unexpected in a quoted field.\n"
@@ -7899,7 +7918,7 @@ msgstr ""
 "\n"
 "Voulez-vous continuer à lire le fichier?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:149
+#: ../../../../build/xtrkcad-old/app/help/messages.h:151
 #, c-format
 msgid ""
 "A comma was expected after this quoted field.\n"
@@ -7912,7 +7931,7 @@ msgstr ""
 "\n"
 "Voulez-vous continuer à charger le fichier?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:150
+#: ../../../../build/xtrkcad-old/app/help/messages.h:152
 #, c-format
 msgid ""
 "Error \\\\\"%s\\\\\" occurred while writing %s.\n"
@@ -7921,7 +7940,7 @@ msgstr ""
 "Une erreur \\\\\"%s\\\\\" s'est produite lors de l'écriture de %s.\n"
 "Veuillez vérifier l'espace disque et l'état du système."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:151
+#: ../../../../build/xtrkcad-old/app/help/messages.h:153
 #, c-format
 msgid ""
 "At least one path for the Turnout T%d does not\n"
@@ -7932,28 +7951,28 @@ msgstr ""
 "termine pas sur un bout. Une telle voie ne peut pas être groupée.\n"
 "La voie a été désélectionnée."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:152
+#: ../../../../build/xtrkcad-old/app/help/messages.h:154
 msgid "inv-pathEndTrk on Path."
 msgstr "tracé invalide de fin de voie."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:153
+#: ../../../../build/xtrkcad-old/app/help/messages.h:155
 msgid "inv-pathStartTrk on Path"
 msgstr "tracé invalide de début de voie"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:154
+#: ../../../../build/xtrkcad-old/app/help/messages.h:156
 #, c-format
 msgid "%s:%d- %s"
 msgstr "%s:%d- %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:155
+#: ../../../../build/xtrkcad-old/app/help/messages.h:157
 msgid "pathEndTrk not on Path."
 msgstr "tracé de fin de voie invalide."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:156
+#: ../../../../build/xtrkcad-old/app/help/messages.h:158
 msgid "pathStartTrk not on Path."
 msgstr "tracé invalide de début de voie."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:157
+#: ../../../../build/xtrkcad-old/app/help/messages.h:159
 msgid ""
 "The tracks cannot be connected together.\n"
 "\n"
@@ -7967,7 +7986,7 @@ msgstr ""
 "ou augmentez la valeur Angle de connexion sur\n"
 "la boîte de dialogue \"Options|Préférences\"."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:158
+#: ../../../../build/xtrkcad-old/app/help/messages.h:160
 msgid ""
 "The tracks cannot be connected together.\n"
 "\n"
@@ -7981,7 +8000,7 @@ msgstr ""
 "ou augmentez la distance de connexion et\n"
 "Valeurs d'angle dans la boîte de dialogue \"Options|Préférences\""
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:159
+#: ../../../../build/xtrkcad-old/app/help/messages.h:161
 msgid ""
 "The tracks cannot be connected together.\n"
 "\n"
@@ -7994,7 +8013,7 @@ msgstr ""
 "ou augmentez la distance de connexion sur\n"
 "la boîte de dialogue \"Options|Préférences\""
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:160
+#: ../../../../build/xtrkcad-old/app/help/messages.h:162
 msgid ""
 "The first track for the Align\n"
 "Rotate command must be Selected."
@@ -8002,7 +8021,7 @@ msgstr ""
 "Première voie pour \"Alignement\n"
 "La commande \"Rotation\" doit être sélectionnée."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:161
+#: ../../../../build/xtrkcad-old/app/help/messages.h:163
 msgid ""
 "The second track for the Align\n"
 "Rotate command must be Unselected."
@@ -8010,15 +8029,15 @@ msgstr ""
 "La deuxième voie pour l'alignement\n"
 "La commande de rotation doit être désélectionnée."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:162
+#: ../../../../build/xtrkcad-old/app/help/messages.h:164
 msgid "Too many selected tracks, drawing tracks as End Point."
 msgstr "Trop de voies sélectionnées, seuls les points de fin sont affichés."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:163
+#: ../../../../build/xtrkcad-old/app/help/messages.h:165
 msgid "Select an endpoint between two tracks."
 msgstr "Sélectionnez un point de fin entre deux voies."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:164
+#: ../../../../build/xtrkcad-old/app/help/messages.h:166
 msgid ""
 "According to values that have been entered the diverging\n"
 "track does not connect with the tangent track. Please\n"
@@ -8032,11 +8051,11 @@ msgstr ""
 "cœur ou en degrés, comme spécifié par les boutons \n"
 "radio du mode Angle."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:165
+#: ../../../../build/xtrkcad-old/app/help/messages.h:167
 msgid "Moved before the end of the turnout"
 msgstr "Déplacé avant la fin de l'aiguillage"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:166
+#: ../../../../build/xtrkcad-old/app/help/messages.h:168
 msgid ""
 "The Coupled Length must be greater than the Car Length,\n"
 "and the Coupler Length must be greater than 0."
@@ -8044,7 +8063,7 @@ msgstr ""
 "La longueur attelée doit être supérieure à la longueur du chaudron,\n"
 "et la longueur de l'attelage doit être supérieure à 0."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:167
+#: ../../../../build/xtrkcad-old/app/help/messages.h:169
 msgid ""
 "The Car Length value must be greater\n"
 "than the Car Width value."
@@ -8052,7 +8071,7 @@ msgstr ""
 "La longueur du véhicule doit \n"
 "être supérieure à sa largeur."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:168
+#: ../../../../build/xtrkcad-old/app/help/messages.h:170
 msgid ""
 "The specified Index is already in use.\n"
 "The Index will be updated to the next available value."
@@ -8060,7 +8079,7 @@ msgstr ""
 "Le numéro d'index spécifié est déjà pris.\n"
 "Le numéro d'index est mis à jour avec la valeur libre suivante."
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:169
+#: ../../../../build/xtrkcad-old/app/help/messages.h:171
 msgid ""
 "You have changed values for this object.\n"
 "\n"
@@ -8070,7 +8089,7 @@ msgstr ""
 "\n"
 "Voulez-vous vraiment fermer cette boîte de dialogue?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:170
+#: ../../../../build/xtrkcad-old/app/help/messages.h:172
 #, c-format
 msgid ""
 "File version %ld is lower than the minimum\n"
@@ -8082,7 +8101,7 @@ msgstr ""
 "devez mettre à jour votre fichier du projet \n"
 "utilisant une ancienne version de %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:171
+#: ../../../../build/xtrkcad-old/app/help/messages.h:173
 #, c-format
 msgid ""
 "File version %ld is lower than the minimum\n"
@@ -8093,7 +8112,7 @@ msgstr ""
 "de paramètres ne fonctionnera qu'avec une \n"
 "ancienne version de %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:172
+#: ../../../../build/xtrkcad-old/app/help/messages.h:174
 #, c-format
 msgid ""
 "%s cannot read the demo file:\n"
@@ -8102,16 +8121,16 @@ msgstr ""
 "%s ne peut pas lire le fichier de démonstration:\n"
 "%s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:173
+#: ../../../../build/xtrkcad-old/app/help/messages.h:175
 #, c-format
 msgid "doDemo: bad number (%d)"
 msgstr "doDemo : nombre invalide (%d)"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:174
+#: ../../../../build/xtrkcad-old/app/help/messages.h:176
 msgid "Playback TIMEEND without TIMESTART"
 msgstr "TIMEEND en lecture sans TIMESTART"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:175
+#: ../../../../build/xtrkcad-old/app/help/messages.h:177
 #, c-format
 msgid ""
 "Unknown playback command (%d)\n"
@@ -8120,7 +8139,7 @@ msgstr ""
 "Commande de lecture inconnue (%d)\n"
 "%s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:176
+#: ../../../../build/xtrkcad-old/app/help/messages.h:178
 #, c-format
 msgid ""
 "Playback file version %ld is lower than the\n"
@@ -8133,12 +8152,12 @@ msgstr ""
 "Vous devez mettre à jour votre fichier de plan \n"
 "en utilisant une ancienne version de %s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:177
+#: ../../../../build/xtrkcad-old/app/help/messages.h:179
 #, c-format
 msgid "Scale index (%d) is not valid"
 msgstr "L'indice d'échelle (%d) n'est pas valide"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:178
+#: ../../../../build/xtrkcad-old/app/help/messages.h:180
 #, c-format
 msgid ""
 "Scale %s is not valid\n"
@@ -8147,62 +8166,62 @@ msgstr ""
 "L'échelle %s n'est pas valide\n"
 "Veuillez vérifier votre fichier %s.xtq"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:179
+#: ../../../../build/xtrkcad-old/app/help/messages.h:181
 msgid "Cannot extend a helix"
 msgstr "Impossible d'étendre une hélicoïde"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:180
+#: ../../../../build/xtrkcad-old/app/help/messages.h:182
 msgid "Cannot trim a helix"
 msgstr "Impossible de couper une hélicoïde"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:181
+#: ../../../../build/xtrkcad-old/app/help/messages.h:183
 msgid "Ignore further audit notices?"
 msgstr "Ignorer les autres indications de protocole?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:182
+#: ../../../../build/xtrkcad-old/app/help/messages.h:184
 #, c-format
 msgid "%s"
 msgstr "%s"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:183
+#: ../../../../build/xtrkcad-old/app/help/messages.h:185
 msgid "Audit Abort?"
 msgstr "Abandonner la vérification ?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:184
+#: ../../../../build/xtrkcad-old/app/help/messages.h:186
 msgid "Write Audit File?"
 msgstr "Écrire un fichier journal?"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:185
+#: ../../../../build/xtrkcad-old/app/help/messages.h:187
 #, c-format
 msgid "checkTrackLength: Short track length = %0.3f"
 msgstr "vérifier la longueur de voie : longueur voie courte =%0.3f"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:186
+#: ../../../../build/xtrkcad-old/app/help/messages.h:188
 #, c-format
 msgid "checkTrackLength: unknown type: %d"
 msgstr "vérifier la longueur de voie : type inconnu :%d"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:187
+#: ../../../../build/xtrkcad-old/app/help/messages.h:189
 #, c-format
 msgid "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f"
 msgstr "connecter des voies : T%d[%d] T%d[%d] d=%0.3f a=%0.3f"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:188
+#: ../../../../build/xtrkcad-old/app/help/messages.h:190
 #, c-format
 msgid "GetAngleAtPoint: bad type(%d) for T(%d)"
 msgstr "Obtenir l'angle à un point : type incorrect (%d) pour T (%d)"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:189
+#: ../../../../build/xtrkcad-old/app/help/messages.h:191
 #, c-format
 msgid "joinTracks: invalid track type=%d"
 msgstr "raccorder des voies : type de voie non valide =%d"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:190
+#: ../../../../build/xtrkcad-old/app/help/messages.h:192
 #, c-format
 msgid "resolveIndex: T%d[%d]: T%d doesn\\\\'t exist"
 msgstr "revoir l'index : T%d[%d] : T%d n'existe\\\\ pas"
 
-#: ../../../../build/xtrkcad-old/app/help/messages.h:191
+#: ../../../../build/xtrkcad-old/app/help/messages.h:193
 msgid "Moved beyond the end of the track"
 msgstr "Déplacé au-delà de la fin de voie"
 
@@ -13007,7 +13026,7 @@ msgstr ""
 "Vous pouvez également dessiner avec différentes couleurs et épaisseurs de "
 "ligne.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:109
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:110
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:724
 msgid "Like Curved Tracks, Curved Lines can be drawn by a variety of methods.\n"
 msgstr ""
@@ -13024,12 +13043,12 @@ msgstr ""
 "l’autre pour régler l’accord de la courbe. Ensuite, nous allons faire "
 "glisser du centre pour définir la forme de la courbe.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:184
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:185
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:727
 msgid "Boxes are useful for drawing rectangular shapes.\n"
 msgstr "Les boîtes sont utiles pour dessiner des formes rectangulaires.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:194
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:195
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:729
 msgid ""
 "Circles can be drawn by clicking on the center or edge and dragging to set "
@@ -13042,14 +13061,14 @@ msgstr ""
 msgid "Here we will drag from the Center.\n"
 msgstr "Ici nous partons du centre.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:204
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:205
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:732
 msgid "Lines and Shapes can be deleted by Selecting and Deleting.\n"
 msgstr ""
 "Les lignes et les formes peuvent être supprimées par une sélection et une "
 "suppression.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:227
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines.xtr:228
 #. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmlines2.xtr:91
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:735
 msgid "We also draw Polylines and filled shapes.\n"
@@ -14081,19 +14100,21 @@ msgstr ""
 
 #. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtbledg.xtr:47
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:985
-msgid "A Table Edge is attracted to the ends of other Table Edges.\n"
+msgid ""
+"A Table Edge is attracted to the ends of other Table Edges, if you hold down"
+" the Control key.\n"
 msgstr ""
-"Un bord de plateau est attiré vers les extrémités des autres bords de "
-"plateau.\n"
+"Un bord de table est attiré par les extrémités d'autres bords de table, si "
+"vous maintenez la touche Ctrl enfoncée.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtbledg.xtr:132
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtbledg.xtr:145
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:987
 msgid "Table Edges can be modified by dragging on their ends.\n"
 msgstr ""
 "Les bords de table peuvent être modifiés en faisant glisser leurs "
 "extrémités.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtbledg.xtr:180
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtbledg.xtr:193
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:989
 msgid ""
 "If you hold down the Control key while dragging then the Table Edge will be "
@@ -14102,7 +14123,7 @@ msgstr ""
 "Si vous maintenez la touche Ctrl enfoncée tout en faisant glisser le bord de"
 " table, celui-ci sera attiré par d'autres objets.\n"
 
-#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtbledg.xtr:218
+#. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtbledg.xtr:231
 #. i18n: /Users/richardsa/src/xtrkcad-old/app/lib/demos/dmtodes.xtr:6
 #: ../../../../build/xtrkcad-old/app/i18n/custmsg.h:992
 msgid ""
