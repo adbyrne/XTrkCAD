@@ -676,7 +676,7 @@ Either the left mouse button (for changing length or creating a tangent track) o
 
 \S2{objectModify} Modifying Objects
 
-\n The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.
+\n The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Benchwork} can be dragged to new positions.
 
 \n The ends of a \e{Ruler} or the ends and origin of a \e{Protractor} can be dragged to new positions
 
@@ -731,12 +731,15 @@ For more detail about;
 \lcont{\u000}
 
 \n With the mouse pointer hovering over the endpoint of the object to be modified, \e{Left+Drag} (\K{windowTerms}) to change the length of the track segment, table edge, bench-work, dimension line or line.
+If \f{MagneticSnap} is enabled, the end will snap to any close draw object. \c{Alt} inverts the MagneticSnap setting.  If there is no nearby object and \f{SnapGrid} is enabled, the end will snap to a grid point unless \f{Alt} is added.
 
 \lcont{\u000}
 
 \e{Left+Drag}ging the endpoint of a turnout (or other sectional track) causes a straight length of flex-track to be created from the selected endpoint to the cursor.
 
-\e{Left+Drag}ging the endpoint of a \f{Table Edge} (\K{cmdDraw}) allows the endpoint to be moved to a new position. If the endpoint is moved close to another \f{Table Edge} then the endpoint will be moved to it.
+\e{Left+Drag}ging the endpoint of a \f{Table Edge} (\K{cmdDraw}) allows the endpoint to be moved to a new position. If \c{Ctrl} is added and the endpoint is moved close to another \f{Table Edge} then the endpoint will be moved to it if not, the line will be a multiple of 90 degrees.
+
+
 
 The length of a curved track can be changed to form an almost complete circle by selecting one endpoint of the curved track then dragging the cursor to the other endpoint. Going past the other endpoint creates a very small curve. Curves greater than 360\u00B0 cannot be created.
 

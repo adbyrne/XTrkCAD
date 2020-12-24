@@ -517,7 +517,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		coOrd p = pos1 = pos;
-		BOOL_T lock = FALSE;
+		BOOL_T locked = FALSE, poslocked = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
 			(context->Op == OP_CURVE4 && context->State != 1) ||
@@ -527,38 +527,39 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
 			(context->Op == OP_BOX ) ||
 			(context->Op == OP_FILLBOX ) ||
-			(context->Op == OP_LINE) ||
-			(context->Op == OP_BENCH) || (context->Op == OP_DIMLINE) ||
+			(context->Op == OP_DIMLINE ) || (context->Op == OP_TBLEDGE) ||
+			(context->Op == OP_LINE ) || (context->Op == OP_BENCH) ||
 			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
-			if (( (MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
+			if ( ( (MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
+				p = pos;
 				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos)))) {
+					poslocked = TRUE;
 					pos1 = p;
-					lock = TRUE;
-					if ((MyGetKeyState() & WKEY_CTRL)==0) {  //Ignore for Right-Angles
-						//CreateEndAnchor(pos1,TRUE);
-						pos = pos1;
-						lock = TRUE;
-					}
 				}
 			}
-			if (lock == FALSE) {
-				if (SnapPos(&pos)) {
-					pos1 = pos;
-					lock = TRUE;
+			if (!poslocked) {  //Set up poslock and pos1 for later
+				p = pos;
+				if (SnapPos(&p)) {
+					poslocked = TRUE;
+					pos1 = p;
 				}
 			}
 		}
 
 		switch (context->Op) {
 		case OP_TBLEDGE:
-			if ((MyGetKeyState() & WKEY_ALT) == 0) {  //If no Alt, snap to table edge end
-				OnTableEdgeEndPt( NULL, &pos1 );
+			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL) {  //If +Ctrl, snap to table edge end
+				p = pos;
+				if (OnTableEdgeEndPt( NULL, &p )) {
+					locked = TRUE;
+					pos1 = p;
+				}
 			}
 			/* no break */
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
-			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) {
+			if (!locked && ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL )) { //If not found already +Ctl = Right Angle
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(pos0, pos);
 				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
@@ -581,7 +582,7 @@ STATUS_T DrawGeomMouse(
 						FormatDistance(FindDistance( pos0, pos1 )),
 						PutAngle(FindAngle( pos0, pos1 )) );
 			tempSegs_da.cnt = 1;
-			if (anchors_da.cnt == 0) CreateEndAnchor(pos, FALSE);
+			if (anchors_da.cnt == 0) CreateEndAnchor(pos1, FALSE);
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
@@ -696,7 +697,7 @@ STATUS_T DrawGeomMouse(
 		case OP_CIRCLE2:
 		case OP_FILLCIRCLE2:
 			tempSegs(0).u.c.center = pos1;
-			if (context->State == 1 && lock) CreateEndAnchor(pos1, FALSE);
+			if (context->State == 1 && locked) CreateEndAnchor(pos1, FALSE);
 			else wSetCursor(mainD.d,defaultCursor);
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
 			context->message( _("Radius = %s"),
@@ -717,7 +718,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos1.x;
 			tempSegs(1).u.l.pos[1].y = tempSegs(2).u.l.pos[0].y = 
 			tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos1.y;
-			if (lock) CreateEndAnchor(pos1,FALSE);
+			if (locked) CreateEndAnchor(pos1,FALSE);
 			context->message( _("Width = %s, Height = %s"),
 						FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;
@@ -1989,9 +1990,6 @@ STATUS_T DrawGeomModify(
 		tempSegs(0).color = context->segPtr[segInx].color;
 		switch ( context->type ) {
 		case SEG_TBLEDGE:
-			if ( (MyGetKeyState() & WKEY_CTRL ) == 0)
-				OnTableEdgeEndPt( NULL, &pos );
-			/* no break */
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
@@ -2149,21 +2147,16 @@ STATUS_T DrawGeomModify(
 		UndrawNewTrack( context->trk );
 		return C_CONTINUE;
 	case C_MOVE:
-
 		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
 		if (context->state != MOD_SELECTED_PT) return C_CONTINUE;
 		BOOL_T locked = FALSE;
-		coOrd p = pos;
-		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT))==0) {
-			if (SnapPos(&p)) locked = TRUE;
-		}
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
-			if ( (MyGetKeyState() & WKEY_CTRL) == 0 ) { //Snap to Table End Point except if Ctrl
-				p = pos;
-			    if (OnTableEdgeEndPt( NULL, &p ))
+			if ( (MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) { //Special Snap to Table End Point if Ctrl
+			    if (OnTableEdgeEndPt( NULL, &pos )) {
 					locked = TRUE;
+			    }
 			}
 			/* No Break*/
 		case SEG_STRLIN:
@@ -2173,11 +2166,17 @@ STATUS_T DrawGeomModify(
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {     //Shift is on same line
 					d = FindDistance( pos, tempSegs(0).u.l.pos[1-lineInx] );
 					Translate( &pos, tempSegs(0).u.l.pos[1-lineInx], segA1, d );
+					locked = TRUE;
 				} else if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap )  {  //M.S. Either on or Off
-					OnTrack( &pos, FALSE, FALSE );
-					CreateEndAnchor(pos,TRUE);
+					if (OnTrack( &pos, FALSE, FALSE )!=NULL) {
+						CreateEndAnchor(pos,TRUE);
+						locked = TRUE;
+					}
 				}
-			} else pos =p;
+			};
+			if (!locked) {
+				if (SnapPos(&pos)) locked = TRUE;
+			}
 			break;
 		default:
 			break;

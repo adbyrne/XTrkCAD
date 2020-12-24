@@ -483,7 +483,7 @@ Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.
 Creates a \f{Straight Line} of specified color and width.
 The \f{Straight Line Width} field is a scaled dimension in 75ths of an inch if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
 
-If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
 
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
 before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation. 
@@ -505,7 +505,7 @@ With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position
 If it is disabled, it will only snap if \e{Alt} is held.  If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
 suppressed if \f{Alt} is held.
 
-If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
 before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation.
 
@@ -531,7 +531,7 @@ With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position
 If it is disabled, it will only snap if \e{Alt} is held. If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
 suppressed if \f{Alt} is held.
 
-If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
 before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation. 
 
@@ -545,7 +545,8 @@ With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position
 If it is disabled, it will only snap if \e{Alt} is held. If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
 suppressed if \f{Alt} is held.
 
-If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
+If \c{Ctrl} is held down during \c{Left+Drag} the edge will to a end point of another table edge or to a multiple of 90 degrees if that isn't available.
+
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
 before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation. 
 
