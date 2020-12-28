@@ -369,7 +369,7 @@ It is possible to apply attributes from one layout file to another using the \f{
 
 \G{png.d/dlayers.png}
 
-The drop down list at the top of the dialog selects the \f{Layer} you are interested in.  Non-empty layers are preceded by a \c{+}.
+The drop down list at the top of the dialog selects the \f{Layer} you are interested in. Frozen layers are preceeded by a \c{*}, Module layers are proceeded by a \c{m}, non-empty layers are preceded by a \c{+} and empty layers by a \c{-}.
 
 The \f{Name} edit box contains the name of the \f{Layer}.  This name is listed in the \f{Current Layer} drop down list on the \f{Tool-bar} (\K{mainW}).  Also the \f{Name} is displayed as the balloon help for the corresponding \f{Layer Button}.
 
