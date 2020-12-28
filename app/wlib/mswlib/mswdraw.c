@@ -423,9 +423,9 @@ void wDrawArc(
 		return;
 
 	p0.x = XINCH2PIX(d,px-r);
-	p0.y = YINCH2PIX(d,py+r)+1;
+	p0.y = YINCH2PIX(d,py+r);
 	p1.x = XINCH2PIX(d,px+r);
-	p1.y = YINCH2PIX(d,py-r)+1;
+	p1.y = YINCH2PIX(d,py-r);
 
 	pex = px + r * mswsin(a0);
 	pey = py + r * mswcos(a0);
