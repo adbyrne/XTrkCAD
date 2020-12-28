@@ -167,7 +167,7 @@ static void LayerPrefLoad(void);
 
 int IsLayerValid(unsigned int layer)
 {
-    return (layer <= NUM_LAYERS);
+    return (layer <= NUM_LAYERS && layer != -1);
 }
 
 BOOL_T GetLayerVisible(unsigned int layer)
@@ -321,22 +321,14 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
     	strcpy(lastSettings,layers[inx].settingsName);
     }
 
-    curLayer = -1;
 
-    if (!IsLayerValid(newLayer)) {
-    	for (int i = newLayer; i<NUM_LAYERS; i++) {
-    		if (!layers[i].frozen) {
-    			curLayer = i;
-    			break;
-    		}
-    	}
+    curLayer = newLayer;
 
+    if (!IsLayerValid(curLayer)) {
+    	curLayer = 0;							//Too big or -1
+    	layers[curLayer].frozen = FALSE;        //Make sure the layer is not frozen
     }
-    if (curLayer == -1) {
-    	ErrorMessage( MSG_NO_EMPTY_LAYER );
-    	layers[0].frozen = FALSE;
-    	curLayer = 0;
-    }
+
 
     if (!layers[curLayer].visible) {
         FlipLayer(inx);
