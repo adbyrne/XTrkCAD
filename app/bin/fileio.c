@@ -972,13 +972,14 @@ int LoadTracks(
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
-		LoadLayerLists();
 		LayerSetCounts();
 	}
 
 	MyFree(copyOfFileName);
 	free(full_path);
 	full_path = NULL;
+
+	UpdateLayerDlg(curLayer);
 
 	UndoResume();
 	Reset();
@@ -1395,7 +1396,11 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
+
 	} else SetLayoutFullPath("");
+
+	LayerSetCounts();
+	UpdateLayerDlg(curLayer);
 
 	Reset();
 	UndoResume();

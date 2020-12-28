@@ -112,6 +112,7 @@ char * FormatLayerName(unsigned int layerNumber);
 /* dlayers.c */
 void UpdateLayerLists( void );
 void DefaultLayerProperties(void);
+void UpdateLayerDlg( unsigned int );
 void ResetLayers( void );
 void SaveLayers( void );
 void RestoreLayers( void );

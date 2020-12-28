@@ -159,7 +159,7 @@ static int oldColorMap[][3] = {
 };
 
 static void DoLayerOp(void * data);
-static void UpdateLayerDlg(void);
+void UpdateLayerDlg(unsigned int);
 
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
@@ -397,7 +397,7 @@ FormatLayerName(unsigned int layerNumber)
     DynStringPrintf(&string,
                     "%2d %c %s",
                     layerNumber + 1,
-                    (layers[layerNumber].objCount > 0 ? '+' : '-'),
+					(layers[layerNumber].frozen ? '*': layers[layerNumber].module ? 'm': layers[layerNumber].objCount > 0 ? '+' : '-'),
                     layers[layerNumber].name);
     result = strdup(DynStringToCStr(&string));
     DynStringFree(&string);
@@ -774,7 +774,7 @@ static void DoLayerOp(void * data)
         break;
     }
 
-    UpdateLayerDlg();
+    UpdateLayerDlg(curLayer);   //Reset to current Layer
 
     if (layoutLayerChanged) {
         MainProc(mainW, wResize_e, NULL, NULL);
@@ -790,38 +790,39 @@ static void DoLayerOp(void * data)
  * elements to the new settings.
  */
 
-static void
-UpdateLayerDlg()
+EXPORT void UpdateLayerDlg(unsigned int layer)
 {
-    int inx;
+	int inx;
     /* update the globals for the layer dialog */
-    layerVisible = layers[curLayer].visible;
-    layerFrozen = layers[curLayer].frozen;
-    layerOnMap = layers[curLayer].onMap;
-    layerModule = layers[curLayer].module;
-    layerColor = layers[curLayer].color;
-    layerUseColor = layers[curLayer].useColor;
-    layerNoButton = layers[curLayer].button_off;
-    strcpy(layerName, layers[curLayer].name);
-    strcpy(settingsName, layers[curLayer].settingsName);
-    GetLayerLinkString(curLayer,layerLinkList);
+    layerVisible = layers[layer].visible;
+    layerFrozen = layers[layer].frozen;
+    layerOnMap = layers[layer].onMap;
+    layerModule = layers[layer].module;
+    layerColor = layers[layer].color;
+    layerUseColor = layers[layer].useColor;
+    layerNoButton = layers[layer].button_off;
+    strcpy(layerName, layers[layer].name);
+    strcpy(settingsName, layers[layer].settingsName);
+    GetLayerLinkString(layer,layerLinkList);
 
-    layerCurrent = curLayer;
+    layerCurrent = layer;
     /* now re-load the layer list boxes */
     LoadLayerLists();
 
 
+
     /* force update of the 'manage layers' dialogbox */
     if (layerL) {
+    	wListSetIndex(layerL,layer);
         ParamLoadControls(&layerPG);
     }
 
     if (layerS) {
     	if (!LoadFileListLoad(settingsCatalog,settingsName))
-    		layers[curLayer].settingsName[0] = '\0';
+    		layers[layer].settingsName[0] = '\0';
     }
 
-    sprintf(message, "Object Count: %ld", layers[curLayer].objCount);
+    sprintf(message, "Object Count: %ld", layers[layer].objCount);
     if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
 
     /* finally show the layer buttons with balloon text */
@@ -1115,7 +1116,7 @@ void
 DefaultLayerProperties(void)
 {
     InitializeLayers(LayerPrefLoad, 0);
-    UpdateLayerDlg();
+    UpdateLayerDlg(curLayer);			//Use Current Layer
 
     if (layoutLayerChanged) {
         MainProc(mainW, wResize_e, NULL, NULL);
@@ -1426,7 +1427,14 @@ static void LayerDlgUpdate(
 
     case I_MAP:
         layerRedrawMap = TRUE;
-        break;
+        /* No Break */
+    case I_VIS:
+    case I_FRZ:
+    case I_MOD:
+    case I_BUT:
+    	 LayerUpdate();
+    	 UpdateLayerDlg(layerCurrent);
+    	 break;
 
     case I_SETTINGS:
     	if (strcmp((char*)wListGetItemContext(settingsListL,(wIndex_t)*(long*)valueP)," ")==0)
@@ -1435,6 +1443,9 @@ static void LayerDlgUpdate(
     		strcpy(settingsName,(char*)wListGetItemContext(settingsListL,(wIndex_t)*(long*)valueP));
     	break;
     }
+
+
+
 }
 
 /**
@@ -1538,7 +1549,7 @@ static void DoLayer(void * junk)
 
 
     /* set the globals to the values for the current layer */
-    UpdateLayerDlg();
+    UpdateLayerDlg(curLayer);
     layerRedrawMap = FALSE;
     wShow(layerW);
     layoutLayerChanged = FALSE;
