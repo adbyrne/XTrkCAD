@@ -481,8 +481,8 @@ void wDrawArc(
 		}
 	} else {
 		if ( a0 == 0.0 && a1 == 360.0 ) {
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p0.y-1, pe.x, p1.y-1 );
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p1.y-1, pe.x, p0.y-1 );
+			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p0.y, pe.x, p1.y );
+			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p1.y, pe.x, p0.y );
 		} else {
 			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, ps.y, pe.x, pe.y );
 		}
@@ -1209,9 +1209,9 @@ void wDrawFilledCircle(
 	double dang;
 
 	p0.x = XINCH2PIX(d,x-r);
-	p0.y = YINCH2PIX(d,y+r)+1;
+	p0.y = YINCH2PIX(d,y+r);
 	p1.x = XINCH2PIX(d,x+r);
-	p1.y = YINCH2PIX(d,y-r)+1;
+	p1.y = YINCH2PIX(d,y-r);
 						   
 	setDrawBrush( d, color, opts );						  
 	if ( noNegDrawArgs > 0 && ( p0.x < 0 || p0.y < 0 ) ) {
