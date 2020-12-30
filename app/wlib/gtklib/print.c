@@ -758,7 +758,10 @@ void psPrintString(
 
     // render the string to a Pango layout
     pango_layout_set_font_description(layout, desc);
-    pango_layout_set_text(layout, s, -1);
+
+    gchar *utf8 = wlibConvertInput(s);
+
+    pango_layout_set_text(layout, utf8, -1);
     pango_layout_set_width(layout, -1);
     pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
     pango_layout_get_size(layout, &text_width, &text_height);
