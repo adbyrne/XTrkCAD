@@ -793,6 +793,7 @@ void psPrintString(
     // and show the string
     if(!(opts & wDrawOutlineFont)) {
 		pango_cairo_show_layout(cr, layout);
+		cairo_stroke( cr );
 	} else {
 		PangoLayoutLine *line;
 		line = pango_layout_get_line_readonly (layout, 0);
