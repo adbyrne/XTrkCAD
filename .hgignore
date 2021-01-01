@@ -1,6 +1,8 @@
 # hg uses this global ignore file for all tree-wide ignores
 .DS_Store
 .project
+.settings.json
+build/
 syntax: glob
 *.mo
 xtrkcad-4.2.3b.hg
