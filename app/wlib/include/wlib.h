@@ -255,6 +255,7 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void * );
 #define F_MAXIMIZE  (1L<<14)
 #define F_RESTRICT  (1L<<15)
 #define F_CONSTRAINRESIZE (1L<<19)
+#define F_NOTTRANSIENT (1L<<20)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );

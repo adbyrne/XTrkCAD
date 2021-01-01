@@ -896,7 +896,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			controls[0] = joinRadPD.control;
 			controls[1] = NULL;
 			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(controls, labels);
+			InfoSubstituteControls(controls, labels, "JoinInfo");
 			infoSubst = TRUE;
 			joinRadPD.option |= PDO_NORECORD;
 			ParamLoadControls(&joinPG);
@@ -915,7 +915,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 				return C_CONTINUE;
 			}
 			if (infoSubst)
-				InfoSubstituteControls(NULL, NULL);
+				InfoSubstituteControls(NULL, NULL, NULL);
 			infoSubst = FALSE;
 
 			Dj.inp[1].realType = GetTrkType(Dj.inp[1].trk);
@@ -1348,13 +1348,13 @@ errorReturn:
 		DrawNewTrack( Dj.inp[1].trk );
 		DrawNewTrack( trk );
 		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL);
+			InfoSubstituteControls(NULL, NULL, NULL);
 		infoSubst = FALSE;
 		return rc;
 
 	case C_CANCEL:
 		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL);
+			InfoSubstituteControls(NULL, NULL, NULL);
 		infoSubst = FALSE;
 		break;
 
@@ -1373,7 +1373,7 @@ errorReturn:
 		if (easementVal<0 && Dj.cornuMode)
 			return CmdCornu(action,pos);
 		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL);
+			InfoSubstituteControls(NULL, NULL, NULL);
 		infoSubst = FALSE;
 
 	}

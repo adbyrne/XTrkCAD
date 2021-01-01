@@ -2683,7 +2683,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             ControllerDialogSync(curTrainDlg);
         }
 
-        InfoSubstituteControls(NULL, NULL);
+        InfoSubstituteControls(NULL, NULL, NULL);
         currCar = trk0 = NULL;
         currCarItemPtr = NULL;
 
@@ -2897,7 +2897,7 @@ static BOOL_T TrainStopGoPlayback(char * line)
 static void CmdTrainExit(void * junk)
 {
     Reset();
-    InfoSubstituteControls(NULL, NULL);
+    InfoSubstituteControls(NULL, NULL, NULL);
 }
 
 

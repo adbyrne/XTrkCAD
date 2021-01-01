@@ -232,7 +232,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		if (Dt.state != POSITION_TEXT) {
 			Dt.state = POSITION_TEXT;
 		}
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != POSITION_TEXT) {
@@ -244,7 +244,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 				DrawNewTrack(t);
 			}
 		}
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		return C_TERMINATE;
 
 	case C_FINISH:

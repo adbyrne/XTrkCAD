@@ -1348,8 +1348,12 @@ static gint draw_button_event(
 	bd->lastX = OUTMAPX(bd, event->x);
 	bd->lastY = OUTMAPY(bd, event->y);
 
+	if ()
+	printf("Button Event %d %s \n",event->button, event->type == GDK_BUTTON_PRESS?"Press":"Release");
+
 	switch ( event->button ) {
 	case 1: /* left mouse button */
+	case 2: /* middle button */
 		action = event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp;
 		if (event->type==GDK_2BUTTON_PRESS) action = wActionLDownDouble;
 		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp, bd->lastX, bd->lastY );*/
@@ -1390,7 +1394,7 @@ static gint draw_motion_event(
 		state = event->state;
 	}
 
-	if (state & GDK_BUTTON1_MASK) {
+	if (state & GDK_BUTTON1_MASK || GDK_BUTTON2_MASK) {
 		action = wActionLDrag;
 	} else if (state & GDK_BUTTON3_MASK) {
 		action = wActionRDrag;

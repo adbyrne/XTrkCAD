@@ -99,7 +99,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         controls[2] = NULL;
         labels[0] = N_("Separation");
         labels[1] = N_("Radius Factor");
-        InfoSubstituteControls(controls, labels);
+        InfoSubstituteControls(controls, labels, parSepPG.nameStr);
         parSepPD.option &= ~PDO_NORECORD;
         parFactorPD.option &= ~PDO_NORECORD;
         Dpa.anchor_Trk = NULL;
@@ -139,7 +139,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         controls[2] = NULL;
         labels[0] = N_("Separation");
         labels[1] = N_("Radius factor");
-        InfoSubstituteControls(controls, labels);
+        InfoSubstituteControls(controls, labels, parSepPG.nameStr);
         ParamLoadData(&parSepPG);
         Dpa.orig = pos;
         if (parType == PAR_TRACK)
@@ -259,7 +259,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         }
         DrawNewTrack(t);
         UndoEnd();
-        InfoSubstituteControls(NULL, NULL);
+        InfoSubstituteControls(NULL, NULL, NULL);
         if (parType == PAR_TRACK)
         	sprintf(message, "parallel-separation-%s", curScaleName);
         else
@@ -282,7 +282,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
     case C_CANCEL:
         Dpa.anchor_Trk = NULL;
         tempSegs_da.cnt = 0;
-        InfoSubstituteControls(NULL, NULL);
+        InfoSubstituteControls(NULL, NULL, NULL);
         return C_TERMINATE;
 
     }

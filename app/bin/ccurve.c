@@ -797,14 +797,14 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				controls[0] = circleRadiusPLs[0].control;
 				controls[1] = NULL;
 				labels[0] = N_("Circle Radius");
-				InfoSubstituteControls(controls, labels);
+				InfoSubstituteControls(controls, labels, circleRadiusPG.nameStr);
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls(NULL, NULL);
+				InfoSubstituteControls(NULL, NULL, NULL);
 				InfoMessage(_("Click on Circle Edge"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls(NULL, NULL);
+				InfoSubstituteControls(NULL, NULL, NULL);
 				InfoMessage(_("Click on Circle Center"));
 				break;
 			}
@@ -835,11 +835,11 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				}
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls(NULL, NULL);
+				InfoSubstituteControls(NULL, NULL, NULL);
 				InfoMessage(_("Drag to Center"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls(NULL, NULL);
+				InfoSubstituteControls(NULL, NULL, NULL);
 				InfoMessage(_("Drag to Edge"));
 				break;
 			}
