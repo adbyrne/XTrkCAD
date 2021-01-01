@@ -81,7 +81,7 @@ typedef struct {
 	char * name;
 	readParam_t proc;
 } paramProc_t;
-dynArr_t paramProc_da;
+extern dynArr_t paramProc_da;
 #define paramProc(N) DYNARR_N( paramProc_t, paramProc_da, N )
 
 void Stripcr( char * );

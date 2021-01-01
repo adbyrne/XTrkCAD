@@ -52,6 +52,9 @@
 #include "utility.h"
 #include "layout.h"
 
+
+wIndex_t panCmdInx;
+
 static void DrawRoomWalls( wBool_t );
 static void DrawMarkers( void );
 static void ConstraintOrig( coOrd *, coOrd, int, int );

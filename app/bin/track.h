@@ -711,7 +711,7 @@ DIST_T JointDescriptionDistance(coOrd pos,track_p trk,coOrd * dpos,BOOL_T show_h
 STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 
 /* cmisc.c */
-wIndex_t describeCmdInx;
+extern wIndex_t describeCmdInx;
 typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)

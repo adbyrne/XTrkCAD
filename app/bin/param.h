@@ -213,7 +213,7 @@ void ParamRestoreAll( void );
 void ParamSaveAll( void );
 
 void ParamMenuPush( void * );
-int paramHiliteFast;
+extern int paramHiliteFast;
 void ParamHilite( wWin_p, wControl_p, BOOL_T );
 
 void ParamInit( void );

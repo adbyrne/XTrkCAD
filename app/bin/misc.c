@@ -70,6 +70,7 @@
 
 #define DEFAULT_SCALE ("N")
 
+
 char *userLocale = NULL;
 
 extern wBalloonHelp_t balloonHelp[];
