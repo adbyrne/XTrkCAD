@@ -547,7 +547,7 @@ No Cars are defined for the current scale.
 
 Do you want to use the Car Inventory dialog?
 HELP
-No Cars are defined for the current scale. Use the  dialog to select cars of the current scale and add them to the \f{Car Inventory}.
+No Cars are defined for the current layout scale. Either set the scale to the value of already defined cars, or use the  dialog to select cars of the current scale and add them to the \f{Car Inventory}.
 
 Refer to \k{cmdCarinv} for detail.
 END
