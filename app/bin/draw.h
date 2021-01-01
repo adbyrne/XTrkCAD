@@ -253,7 +253,7 @@ void InfoPos(coOrd);
 void InfoCount(wIndex_t);
 void SetMessage(char *);
 
-wIndex_t panCmdInx;
+extern wIndex_t panCmdInx;
 
 void InfoSubstituteControls(wControl_p *, char * *, char *);
 

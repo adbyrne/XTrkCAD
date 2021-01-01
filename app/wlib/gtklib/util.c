@@ -37,7 +37,7 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-wWin_p gtkMainW;
+extern wWin_p gtkMainW;
 
 long debugWindow = 0;
 

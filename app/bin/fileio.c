@@ -75,6 +75,7 @@
 #include "include/utf8convert.h"
 #endif // WINDOWS
 
+dynArr_t paramProc_da;
 
 /*#define TIME_READTRACKFILE*/
 

@@ -22,6 +22,8 @@
 typedef struct t1_font_Tag t1_font;
 typedef struct t1_data_Tag t1_data;
 
+font_info *all_fonts;
+
 struct t1_font_Tag {
     t1_data *data;
     size_t length1;
