@@ -1608,11 +1608,16 @@ STATUS_T DrawGeomPolyModify(
 			/* no break */
 		case C_FINISH:
 			//copy changes back into track
-			if (polyState != POLY_SELECTED) return C_TERMINATE;
+			if (polyState != POLY_SELECTED) {
+				polyState = POLY_NONE;
+				DYNARR_RESET(trkSeg_t,anchors_da);
+				DYNARR_RESET(trkSeg_t,tempSegs_da);
+				return C_TERMINATE;
+			}
 			pts_t * oldPts = context->segPtr[segInx].u.p.pts;
 			void * newPts = (pts_t*)MyMalloc( points_da.cnt * sizeof (pts_t) );
 			context->segPtr[segInx].u.p.pts = newPts;
-			context->segPtr->u.p.cnt = points_da.cnt;
+			context->segPtr[segInx].u.p.cnt = points_da.cnt;
 			context->orig = rotate_origin;
 			context->angle = rotate_angle;
 			for (int i=0; i<points_da.cnt; i++) {
@@ -1624,11 +1629,10 @@ STATUS_T DrawGeomPolyModify(
 				context->segPtr[segInx].u.p.pts[i].pt_type = points(i).pt_type;
 			}
 			MyFree(oldPts);
-			oldPts = NULL;
 			polyState = POLY_NONE;
 			DYNARR_RESET(trkSeg_t,anchors_da);
+			DYNARR_RESET(trkSeg_t,points_da);
 			DYNARR_RESET(trkSeg_t,tempSegs_da);
-			DrawNewTrack( context->trk );
 			return C_TERMINATE;
 		case C_REDRAW:
 			if (polyState == POLY_NONE) return C_CONTINUE;
@@ -2532,6 +2536,8 @@ STATUS_T DrawGeomModify(
 			DrawGeomPolyModify(action,pos,context);
 			context->segPtr[segInx].type = context->type;
 			context->segPtr[segInx].u.p.polyType = context->subtype;
+			context->state = MOD_NONE;
+			DrawNewTrack( context->trk );
 			return C_TERMINATE;
 		}
 		//copy changes back into track
@@ -2584,8 +2590,6 @@ STATUS_T DrawGeomModify(
 		context->rotate_state = FALSE;
 		context->last_inx = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		DYNARR_RESET(trkSeg_t,tempSegs_da);
-		DrawNewTrack( context->trk );
 		return C_TERMINATE;
 	case C_REDRAW:
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
@@ -2594,13 +2598,12 @@ STATUS_T DrawGeomModify(
 		DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 	case C_CANCEL:
-	case C_CONFIRM:
-	case C_TERMINATE:
 		context->state = MOD_NONE;
 		context->rotate_state = FALSE;
 		context->rot_moved = FALSE;
+		polyMode = FALSE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		DYNARR_RESET(trkSeg_t,tempSegs_da);
+		DrawNewTrack( context->trk );
 		break;
 	default:
 		;

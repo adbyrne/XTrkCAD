@@ -1738,19 +1738,19 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		xx->angle = drawModCmdContext.angle;
 		xx->orig = drawModCmdContext.orig;
 		ignoredDraw = NULL;
+		DrawNewTrack( trk );
 		ComputeDrawBoundingBox( trk );
-		DYNARR_RESET(trkSeg_t,tempSegs_da);
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		break;
-	case C_CANCEL:
 	case C_CONFIRM:
-	case C_TERMINATE:
+		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		break;
+	case C_CANCEL:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
 		drawModCmdContext.state = MOD_NONE;
-		DYNARR_RESET(trkSeg_t,tempSegs_da);
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;

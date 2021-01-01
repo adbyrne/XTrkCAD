@@ -3066,7 +3066,6 @@ static STATUS_T CmdSelect(
 		}
 	}
 
-
 	switch (action&0xFF) {
 	case C_START:
 		InfoMessage( _("Select track") );
@@ -3413,6 +3412,10 @@ static STATUS_T CmdSelect(
 		}
 		break;
 	case C_FINISH:
+		if (doingDouble) {
+			CallModify(C_OK,pos);
+			CallModify(C_FINISH,pos);
+		}
 		if (doingMove) UndoEnd();
 		doingDouble = FALSE;
 		wSetCursor(mainD.d,defaultCursor);

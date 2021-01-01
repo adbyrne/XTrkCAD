@@ -1370,6 +1370,10 @@ EXPORT void DoCommandB(void * data) {
 				( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 		commandList[curCommand].cmdProc( C_CANCEL, pos);
 		tempSegs_da.cnt = 0;
+	} else {
+		LOG(log_command, 3,
+				( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
+		rc = commandList[curCommand].cmdProc( C_FINISH, zero);
 	}
 	if (commandList[curCommand].buttInx >= 0)
 		wButtonSetBusy(
