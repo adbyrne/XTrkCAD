@@ -117,6 +117,7 @@ void DoParamFiles(void * junk);
 int LoadTracks( int cnt, char **fileName, void *data );
 
 typedef void (*doSaveCallBack_p)( void );
+void SetAutoSave(void);
 void DoSave( doSaveCallBack_p );
 void DoSaveAs( doSaveCallBack_p );
 void DoLoad( void );

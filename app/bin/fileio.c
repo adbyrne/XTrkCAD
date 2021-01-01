@@ -1202,6 +1202,15 @@ static int SaveTracks(
 	return TRUE;
 }
 
+EXPORT void SetAutoSave() {
+	if (saveFile_fs == NULL)
+		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("AutoSave Tracks As"),
+			sSourceFilePattern, SaveTracks, NULL );
+	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	changed = checkPtMark = 1;
+	SetWindowTitle();
+	SaveState();
+}
 
 EXPORT void DoSave( doSaveCallBack_p after )
 {

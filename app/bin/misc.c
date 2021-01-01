@@ -1041,7 +1041,10 @@ EXPORT void TryCheckPoint() {
 			autosave_count++;
 
 			if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
-				DoSave(NULL);
+				if ( bReadOnly || *(GetLayoutFilename()) == '\0') {
+					SetAutoSave();
+				} else
+					DoSave(NULL);
 				InfoMessage(_("File AutoSaved"));
 				autosave_count = 0;
 			}
