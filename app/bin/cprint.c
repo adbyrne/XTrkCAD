@@ -111,7 +111,7 @@ static void PrintClear( void );
 static void PrintMaxPageSize( void );
 static void SelectAllPages(void);
 static void DoPrintMargin(void);
-static bool PrintPageNumber( wPos_t x, wPos_t y, DIST_T width, DIST_T height );
+static bool PrintPageNumber( int x, int y, DIST_T width, DIST_T height );
 static bool PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH);
 
 static char * printFormatLabels[] = { N_("Portrait"), N_("Landscape"), NULL };
@@ -953,7 +953,7 @@ FormatPageNumber(int x, int y)
  */
 
 static bool
-PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
+PrintPageNumber(int x, int y, DIST_T width, DIST_T height)
 {
     coOrd printPosition;
     coOrd textSize;

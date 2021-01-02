@@ -1174,7 +1174,7 @@ static void SetInfoBar( void )
 		if (curInfoControl[0]) {
 			for ( inx=0; curInfoControl[inx]; inx++ ) {
 				x += curInfoLabelWidth[inx];
-				int y_this = ym + (textHeight/2) - (wControlGetHeight( curInfoControl[inx] )/2);
+				wPos_t y_this = ym + (textHeight/2) - (wControlGetHeight( curInfoControl[inx] )/2);
 				wControlSetPos( curInfoControl[inx], x, y_this );
 				x += wControlGetWidth( curInfoControl[inx] )+3;
 				wControlShow( curInfoControl[inx], TRUE );
@@ -1246,9 +1246,9 @@ EXPORT void InfoSubstituteControls(
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
 #ifdef WINDOWS
-		int	y_this = y + (infoHeight/2) - (textHeight / 2 );
+		wPos_t	y_this = y + (infoHeight/2) - (textHeight / 2 );
 #else
-		int	y_this = y + (infoHeight / 2) - (wControlGetHeight(controls[inx]) / 2) - 2;
+		wPos_t	y_this = y + (infoHeight / 2) - (wControlGetHeight(controls[inx]) / 2) - 2;
 #endif
 		wControlSetPos( controls[inx], x, y_this );
 		x += wControlGetWidth( controls[inx] );
@@ -1566,8 +1566,8 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
-			wPrefSetInteger( "draw", "mainwidth", width );
-			wPrefSetInteger( "draw", "mainheight", height );
+			wPrefSetInteger( "draw", "mainwidth", (int)width );
+			wPrefSetInteger( "draw", "mainheight", (int)height );
 		} else	DrawMapBoundingBox( TRUE );
 		break;
 	case wState_e:

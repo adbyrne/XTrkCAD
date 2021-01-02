@@ -481,7 +481,7 @@ void wTextSetSize(wText_p bt, wPos_t w, wPos_t h)
  * \return
  */
 
-void wTextComputeSize(wText_p bt, int rows, int cols, wPos_t *width,
+void wTextComputeSize(wText_p bt, wPos_t rows, wPos_t cols, wPos_t *width,
                       wPos_t *height)
 {
     *width = rows * 7;

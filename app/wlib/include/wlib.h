@@ -267,7 +267,7 @@ void wMessage(			wWin_p, const char *, wBool_t );
 void wWinTop(			wWin_p );
 void wWinDoCancel(		wWin_p );
 void wWinBlockEnable(		wBool_t );
-void wSetGeometry(wWin_p, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio);
+void wSetGeometry(wWin_p, wPos_t min_width, wPos_t max_width, wPos_t min_height, wPos_t max_height, wPos_t base_width, wPos_t base_height, double aspect_ratio);
 
 int wCreateSplash( char *appName, char *appVer );
 int wSetSplashInfo( char *msg );
@@ -452,7 +452,7 @@ void wTextReadFile(		wText_p, const char * );
 wBool_t wTextSave(		wText_p, const char * );
 wBool_t wTextPrint(		wText_p );
 void wTextSetSize(		wText_p, wPos_t, wPos_t );
-void wTextComputeSize(		wText_p, int, int, wPos_t *, wPos_t * );
+void wTextComputeSize(		wText_p, wPos_t, wPos_t, wPos_t *, wPos_t * );
 void wTextSetPosition(		wText_p bt, int pos );
 
 

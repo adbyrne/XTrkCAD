@@ -858,16 +858,16 @@ static gint window_char_event(
     }
 }
 
-void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
+void wSetGeometry(wWin_p win, wPos_t min_width, wPos_t max_width, wPos_t min_height, wPos_t max_height, wPos_t base_width, wPos_t base_height, double aspect_ratio ) {
 	GdkGeometry hints;
 	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
-	hints.max_width = max_width;
-	hints.min_height = min_height;
-	hints.max_height = max_height;
-	hints.min_aspect = hints.max_aspect = aspect_ratio;
-	hints.base_width = base_width;
-	hints.base_height = base_height;
+	hints.max_width = WPOS2PIX(max_width);
+	hints.min_height = WPOS2PIX(min_height);
+	hints.max_height = WPOS2PIX(max_height);
+	hints.min_aspect = hints.max_aspect = WPOS2PIX(aspect_ratio);
+	hints.base_width = WPOS2PIX(base_width);
+	hints.base_height = WPOS2PIX(base_height);
 	if( base_width != -1 && base_height != -1 ) {
 		hintMask |= GDK_HINT_BASE_SIZE;
 	}
