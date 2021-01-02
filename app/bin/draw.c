@@ -171,7 +171,7 @@ EXPORT BOOL_T inError = FALSE;
 
 typedef enum { mouseNone, mouseLeft, mouseRight, mouseLeftPending } mouseState_e;
 static mouseState_e mouseState;
-static int mousePositionx, mousePositiony;	/**< position of mouse pointer */
+static wPos_t mousePositionx, mousePositiony;	/**< position of mouse pointer */
 
 static int delayUpdate = 1;
 
@@ -275,7 +275,7 @@ if (Pix2CoOrd_interpolate) {
 	y1 = (long)(y1*bins)/bins;
 	if (x == x1) {
 		x += 1/bins/2;
-		printf ("px=%d x1=%0.6f x=%0.6f\n", px, x1, x );
+		printf ("px=%0.1f x1=%0.6f x=%0.6f\n", px, x1, x );
 	}
 	if (y == y1)
 		y += 1/bins/2;
@@ -1630,7 +1630,7 @@ EXPORT void DoRedraw( void )
 static void DrawRoomWalls( wBool_t drawBackground )
 {
 	coOrd p00, p01, p11, p10;
-	int p0,p1,p2,p3;
+	wPos_t p0,p1,p2,p3;
 
 	if (mainD.d == NULL)
 		return;
@@ -2479,7 +2479,7 @@ EXPORT void FakeDownMouseState( void )
  */
 
 void
-GetMousePosition( int *x, int *y )
+GetMousePosition( wPos_t *x, wPos_t *y )
 {
 	if( x && y ) {
 		*x = mousePositionx;
@@ -2818,7 +2818,7 @@ static void MapDlgUpdate(
 		int inx,
 		void * valueP )
 {
-	int width,height;
+	wPos_t width,height;
 	switch(inx) {
 		case wResize_e:
 			if (mapD.d == NULL)

@@ -594,6 +594,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 
 	cairo_identity_matrix(cairo);
 
+// TODO_WPOS
 	wlibFontDestroyPangoLayout(
 		wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 								 &textWidth, (int *) &textHeight,
@@ -606,7 +607,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 	*d = (wPos_t) descent;
 
 	if (debugWindow >= 3)
-		fprintf(stderr, "text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
+		fprintf(stderr, "text metrics: w=%0.1f, h=%0.1f, d=%0.1f\n", *w, *h, *d);
 
 	gtkDrawDestroyCairoContext(cairo);
 }
@@ -1162,9 +1163,9 @@ static gint draw_expose_event(
 {
 	static long cDEE = 0;
 	if ( iDrawLog )
-		printf( "draw_expose_event %ld %dx%d+%dx%d %dx%d+%dx%d\n", cDEE++,
+		printf( "draw_expose_event %ld %dx%d+%dx%d %0.1fx%0.1f+%0.1fx%0.1f\n", cDEE++,
 			event->area.x, event->area.y, event->area.width, event->area.height,
-			0, bd->w, 0, bd->h );
+			0.0, bd->w, 0.0, bd->h );
 
 	cairo_t* cairo = gdk_cairo_create (widget->window);
 	gdk_cairo_set_source_pixmap(cairo,bd->pixmap,0,0);
@@ -1310,8 +1311,9 @@ static gint draw_scroll_event(
 
 	if (action != 0) {
 		if (drawVerbose >= 2)
-			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
-		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
+			printf( "%s[%0.1fx%0.1f]\n", actionNames[action], bd->lastX, bd->lastY );
+// TODO WPOS
+		bd->action( bd, bd->context, action, bd->lastX, bd->lastY);
 	}
 
 	return TRUE;
@@ -1362,7 +1364,8 @@ static gint draw_button_event(
 	}
 	if (action != 0) {
 		if (drawVerbose >= 2)
-			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
+			printf( "%s[%0.1fx%0.1f]\n", actionNames[action], bd->lastX, bd->lastY );
+// TODO_WPOS
 		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	}
 
@@ -1403,7 +1406,8 @@ static gint draw_motion_event(
 	bd->lastX = OUTMAPX(bd, x);
 	bd->lastY = OUTMAPY(bd, y);
 	if (drawVerbose >= 2)
-		printf( "%lx: %s[%dx%d] %s\n", (long)bd, actionNames[action], bd->lastX, bd->lastY, event->is_hint?"<Hint>":"<>" );
+		printf( "%lx: %s[%0.1fx%0.1f] %s\n", (long)bd, actionNames[action], bd->lastX, bd->lastY, event->is_hint?"<Hint>":"<>" );
+// TODO_WPOS
 	bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	if (!(bd->option & BD_NOFOCUS))
 		gtk_widget_grab_focus( bd->widget );

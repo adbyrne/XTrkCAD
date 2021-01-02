@@ -170,8 +170,8 @@ static void saveSize(wWin_p win)
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
         char pos_s[20];
 
-        sprintf(pos_s, "%d %d", win->w,
-                win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0)));
+        sprintf(pos_s, "%d %d", WPOS2PIX(win->w),
+                WPOS2PIX(win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
         wPrefSetString(SECTIONWINDOWSIZE, win->nameStr, pos_s);
     }
 }
@@ -999,16 +999,18 @@ static wWin_p wWinCommonCreate(
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
         }
     }
-    int scr_w, scr_h;
+    wPos_t scr_w, scr_h;
 	wGetDisplaySize(&scr_w, &scr_h);
-	if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
-	if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
+	wPix_t pw = WPOS2PIX(scr_w);
+	wPix_t ph = WPOS2PIX(scr_h);
+	if (pw < MIN_WIN_WIDTH) pw = MIN_WIN_WIDTH+10;
+	if (ph < MIN_WIN_HEIGHT) ph = MIN_WIN_HEIGHT;
 	if (winType != W_MAIN) {
-		wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
+		wSetGeometry(w, MIN_WIN_WIDTH, pw-10, MIN_WIN_HEIGHT, ph, -1, -1, -1);
 	} else {
-		if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
-		if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
-		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
+		if (pw < MIN_WIN_WIDTH_MAIN+10) pw = MIN_WIN_WIDTH_MAIN+200;
+		if (ph < MIN_WIN_HEIGHT_MAIN+10) ph = MIN_WIN_HEIGHT_MAIN+200;
+		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, pw-10, MIN_WIN_HEIGHT_MAIN, ph-10, -1, -1, -1);
      }
 
 

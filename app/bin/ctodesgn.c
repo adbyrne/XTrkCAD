@@ -2870,7 +2870,7 @@ static void TurnDesignLayout(
 		wPos_t * w,
 		wPos_t * h )
 {
-	wPos_t inx;
+	wIndex_t inx;
 	if ( curDesign == NULL )
 		return;
 	if ( index >= I_TO_FIRST_FLOAT && index <= I_TO_LAST_FLOAT ) {

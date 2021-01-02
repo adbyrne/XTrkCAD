@@ -32,7 +32,7 @@ bool wIsUTF8(const char * string);
  */
 
 typedef long wInteger_t;
-typedef int wPos_t;
+typedef double wPos_t;
 typedef int wBool_t;
 typedef int wIndex_t;
 

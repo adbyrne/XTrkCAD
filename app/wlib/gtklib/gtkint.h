@@ -42,6 +42,10 @@
 
 extern wWin_p gtkMainW;
 
+typedef int wPix_t;
+
+#define WPOS2PIX( X ) ((wPix_t)(X))
+
 #ifdef CURSOR_SURFACE
 typedef struct {
 		cairo_surface_t* surface;

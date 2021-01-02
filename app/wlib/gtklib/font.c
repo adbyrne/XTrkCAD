@@ -177,6 +177,7 @@ static double fontFactor = 1.0;
  * \return    the created Pango layout
  */
 
+//TODO_WPOS
 PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
                                        void *cairo,
                                        wFont_p fp,
