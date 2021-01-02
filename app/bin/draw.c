@@ -53,7 +53,7 @@
 #include "layout.h"
 
 
-wIndex_t panCmdInx;
+EXPORT wIndex_t panCmdInx;
 
 static void DrawRoomWalls( wBool_t );
 static void DrawMarkers( void );

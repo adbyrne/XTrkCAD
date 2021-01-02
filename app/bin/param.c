@@ -58,7 +58,7 @@
 #include "track.h"
 #include "utility.h"
 
-int paramHiliteFast;
+EXPORT int paramHiliteFast;
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
