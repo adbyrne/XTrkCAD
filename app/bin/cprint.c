@@ -726,7 +726,7 @@ static void DoPrintMargin( void )
 		DoPrintSetup();
 	}
 	if ( printMarginWin == NULL ) {
-		wPos_t x=10, y=10;
+		int x=10, y=10;
 		printMarginWin = ParamCreateDialog( &printMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
 		if ( printMarginWin == NULL )
 			return;
