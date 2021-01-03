@@ -127,7 +127,7 @@ void wStringSetWidth(
 	int rc;
 	b->w = w;
 	rc = SetWindowPos( b->hWnd, HWND_TOP, 0, 0,
-				b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
+		WPOS2PIX(b->w), WPOS2PIX(b->h), SWP_NOMOVE|SWP_NOZORDER );
 }
 
 
@@ -266,8 +266,8 @@ wString_p wStringCreate(
 
 	b->hWnd = CreateWindowEx( WS_EX_CLIENTEDGE, "EDIT", NULL,
 						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
-						b->x, b->y,
-						width, mswEditHeight,
+						WPOS2PIX(b->x), WPOS2PIX(b->y),
+						WPOS2PIX(width), mswEditHeight,
 						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(STRING)");

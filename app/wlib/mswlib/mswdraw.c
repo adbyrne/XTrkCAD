@@ -80,7 +80,7 @@ static int XINCH2PIX( wDraw_p d, wPos_t xx )
 static int YINCH2PIX( wDraw_p d, wPos_t y )
 {
 	int iy;
-	iy = d->h-2 - (int)(y);
+	iy = WPOS2PIX(d->h)-2 - (int)(y);
 	return iy;
 }
 
@@ -106,7 +106,7 @@ static wPos_t YPIXELSTOINCH( wDraw_p d, int iy )
 	((int)(xx))
 
 #define YINCH2PIX( d, y ) \
-	(d->h-2 - (int)(y))
+	(WPOS2PIX(d->h)-2 - (int)(y))
 
 
 #define XPIXELSTOINCH( d, ix ) \
@@ -152,7 +152,7 @@ wBool_t wDrawSetTempMode(
 		HBITMAP hBmOld = SelectObject(hDcOld, bd->hBmMain);
 		SelectObject(bd->hDc, bd->hBmTemp);
 		BitBlt(bd->hDc, 0, 0,
-			bd->w, bd->h,
+			WPOS2PIX(bd->w), WPOS2PIX(bd->h),
 			hDcOld, 0, 0,
 			SRCCOPY);
 		SelectObject(hDcOld, hBmOld);
@@ -277,8 +277,8 @@ static void myInvalidateRect(
 {
 	if ( prect->top < 0 ) prect->top = 0;
 	if ( prect->left < 0 ) prect->left = 0;
-	if ( prect->bottom > d->h ) prect->bottom = d->h;
-	if ( prect->right > d->w ) prect->right = d->w;
+	if ( prect->bottom > d->h ) prect->bottom = WPOS2PIX(d->h);
+	if ( prect->right > d->w ) prect->right = WPOS2PIX(d->w);
 	InvalidateRect( d->hWnd, prect, FALSE );
 }
 
@@ -953,9 +953,9 @@ void wDrawFilledRectangle(
 		 rect.top > d->h )
 		return;
 	if ( rect.right > d->w )
-		rect.right = d->w;
+		rect.right = WPOS2PIX(d->w);
 	if ( rect.bottom > d->h )
-		rect.bottom = d->h;
+		rect.bottom = WPOS2PIX(d->h);
 	Rectangle( d->hDc, rect.left, rect.top, rect.right, rect.bottom );
 	if (d->hWnd) {
 		rect.top--;
@@ -1104,10 +1104,10 @@ void wDrawPolygon(
             nextNode = (i == cnt - 1) ? 0 : i + 1;
 
             // calculate distance to neighboring nodes
-            int prevXDistance = node[i][0] - node[prevNode][0];
-            int prevYDistance = node[i][1] - node[prevNode][1];
-            int nextXDistance = node[nextNode][0]-node[i][0];
-            int nextYDistance = node[nextNode][1]-node[i][1];
+            int prevXDistance = WPOS2PIX(node[i][0] - node[prevNode][0]);
+            int prevYDistance = WPOS2PIX(node[i][1] - node[prevNode][1]);
+            int nextXDistance = WPOS2PIX(node[nextNode][0]-node[i][0]);
+            int nextYDistance = WPOS2PIX(node[nextNode][1]-node[i][1]);
 
             // distance from node to endpoints of curve is half the line length
             endPoint0.x = (prevXDistance/2)+node[prevNode][0];
@@ -1218,7 +1218,7 @@ void wDrawFilledCircle(
 		if ( r > MAX_FILLCIRCLE_POINTS )
 			cnt = MAX_FILLCIRCLE_POINTS;
 		else if ( r > 8 )
-			cnt = r;
+			cnt = WPOS2PIX(r);
 		else
 			cnt = 8;
 		dang = 360.0/cnt;
@@ -1259,9 +1259,9 @@ void wDrawSaveImage(
 	}
 	if ( bd->hDcBackup == (HDC)0 )
 		bd->hDcBackup = CreateCompatibleDC( bd->hDc ); 
-	bd->hBmBackup = CreateCompatibleBitmap( bd->hDc, bd->w, bd->h );
+	bd->hBmBackup = CreateCompatibleBitmap( bd->hDc, WPOS2PIX(bd->w), WPOS2PIX(bd->h) );
 	bd->hBmBackupOld = SelectObject( bd->hDcBackup, bd->hBmBackup );
-	BitBlt( bd->hDcBackup, 0, 0, bd->w, bd->h, bd->hDc, 0, 0, SRCCOPY );
+	BitBlt( bd->hDcBackup, 0, 0, WPOS2PIX(bd->w), WPOS2PIX(bd->h), bd->hDc, 0, 0, SRCCOPY );
 }
 
 void wDrawRestoreImage(
@@ -1271,7 +1271,7 @@ void wDrawRestoreImage(
 		mswFail( "wDrawRestoreImage: hBmBackup == 0" );
 		return;
 	}
-	BitBlt( bd->hDc, 0, 0, bd->w, bd->h, bd->hDcBackup, 0, 0, SRCCOPY );
+	BitBlt( bd->hDc, 0, 0, WPOS2PIX(bd->w), WPOS2PIX(bd->h), bd->hDcBackup, 0, 0, SRCCOPY );
 	InvalidateRect( bd->hWnd, NULL, FALSE );
 }
 
@@ -1280,12 +1280,12 @@ void wDrawClearTemp( wDraw_p d )
 {
 	RECT rect;
 	SelectObject( d->hDc, d->hBmTemp );
-	BitBlt(d->hDc, 0, 0, d->w, d->h, d->hDc, 0, 0, WHITENESS);
+	BitBlt(d->hDc, 0, 0, WPOS2PIX(d->w), WPOS2PIX(d->h), d->hDc, 0, 0, WHITENESS);
 	if (d->hWnd) {
 		rect.top = 0;
-		rect.bottom = d->h;
+		rect.bottom = WPOS2PIX(d->h);
 		rect.left = 0;
-		rect.right = d->w;
+		rect.right = WPOS2PIX(d->w);
 		InvalidateRect( d->hWnd, &rect, FALSE );
 	}
 }
@@ -1295,7 +1295,7 @@ void wDrawClear( wDraw_p d )
 {
 	SelectObject( d->hDc, d->hBmMain );
 	// BitBlt is faster than Rectangle
-	BitBlt(d->hDc, 0, 0, d->w, d->h, d->hDc, 0, 0, WHITENESS);
+	BitBlt(d->hDc, 0, 0, WPOS2PIX(d->w), WPOS2PIX(d->h), d->hDc, 0, 0, WHITENESS);
 	wDrawClearTemp(d);
 }
 
@@ -1308,7 +1308,7 @@ void wDrawSetSize(
 	d->w = width;
 	d->h = height;
 	if (!SetWindowPos( d->hWnd, HWND_TOP, 0, 0,
-		d->w, d->h, SWP_NOMOVE|SWP_NOZORDER)) {
+		WPOS2PIX(d->w), WPOS2PIX(d->h), SWP_NOMOVE|SWP_NOZORDER)) {
 		mswFail("wDrawSetSize: SetWindowPos");
 	}
 	/*wRedraw( d );*/
@@ -1420,21 +1420,21 @@ void wDrawBitMap(
 		if ( bm->bm )
 			DeleteObject( bm->bm );
 		bm->bm = mswCreateBitMap( mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/, RGB( 255, 255, 255 ),
-				RGB( 255, 255, 255 ), bm->w, bm->h, bm->bmx );
+				RGB( 255, 255, 255 ), WPOS2PIX(bm->w), WPOS2PIX(bm->h), bm->bmx );
 		bm->color = dc;
 	}
 
 	bmDc = CreateCompatibleDC( d->hDc );
 	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	oldBm = SelectObject( bmDc, bm->bm );
-	BitBlt( d->hDc, x0, y0, bm->w, bm->h, bmDc, 0, 0, mode );
+	BitBlt( d->hDc, x0, y0, WPOS2PIX(bm->w), WPOS2PIX(bm->h), bmDc, 0, 0, mode );
 	SelectObject( bmDc, oldBm );
 	DeleteDC( bmDc );
 	if (d->hWnd) {
 	rect.top = y0-1;
-	rect.bottom = rect.top+bm->h+1;
+	rect.bottom = rect.top+ WPOS2PIX(bm->h)+1;
 	rect.left = x0-1;
-	rect.right = rect.left+bm->w+1;
+	rect.right = rect.left+ WPOS2PIX(bm->w)+1;
 	myInvalidateRect( d, &rect );
 	}
 }
@@ -1509,8 +1509,8 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			b->hBmOld = 0;
 		} else {
 			b->hDc = CreateCompatibleDC( hDc ); 
-			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
-			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmMain = CreateCompatibleBitmap( hDc, WPOS2PIX(b->w), WPOS2PIX(b->h) );
+			b->hBmTemp = CreateCompatibleBitmap( hDc, WPOS2PIX(b->w), WPOS2PIX(b->h) );
 			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
 		}
 		if (mswPalette) {
@@ -1524,10 +1524,10 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		b->DPI = dpi;
 		b->hWnd = hWnd;
 		SetROP2( b->hDc, R2_WHITE );
-		Rectangle( b->hDc, 0, 0, b->w, b->h );
+		Rectangle( b->hDc, 0, 0, WPOS2PIX(b->w), WPOS2PIX(b->h) );
 		if ( (b->option & BD_DIRECT) == 0 ) {
 			SetROP2( hDc, R2_WHITE );
-			Rectangle( hDc, 0, 0, b->w, b->h );
+			Rectangle( hDc, 0, 0, WPOS2PIX(b->w), WPOS2PIX(b->h) );
 			ReleaseDC( hWnd, hDc );
 		}
 		break;
@@ -1544,12 +1544,12 @@ long FAR PASCAL XEXPORT mswDrawPush(
 //-			DeleteObject( b->hBmOld );
 			DeleteObject( b->hBmMain );
 			DeleteObject( b->hBmTemp );
-			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
-			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmMain = CreateCompatibleBitmap( hDc, WPOS2PIX(b->w), WPOS2PIX(b->h) );
+			b->hBmTemp = CreateCompatibleBitmap( hDc, WPOS2PIX(b->w), WPOS2PIX(b->h) );
 //-			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
 			ReleaseDC( b->hWnd, hDc );
 			SetROP2( b->hDc, R2_WHITE );
-			Rectangle( b->hDc, 0, 0, b->w, b->h );
+			Rectangle( b->hDc, 0, 0, WPOS2PIX(b->w), WPOS2PIX(b->h) );
 			}
 		}
 		/*if (b->drawResize)
@@ -1863,7 +1863,7 @@ wDraw_p wDrawCreate(
 
 	d->hWnd = CreateWindow( mswDrawWindowClassName, NULL,
 				WS_CHILDWINDOW|WS_VISIBLE|WS_BORDER,
-				d->x, d->y, w, h,
+				WPOS2PIX(d->x), WPOS2PIX(d->y), WPOS2PIX(w), WPOS2PIX(h),
 				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 
 	if (d->hWnd == (HWND)0) {
@@ -1923,12 +1923,12 @@ wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateDC fails", "Ok", NULL );
 		return FALSE;
 	}
-	d->hBmMain = CreateCompatibleBitmap( hDc, d->w, d->h );
+	d->hBmMain = CreateCompatibleBitmap( hDc, WPOS2PIX(d->w), WPOS2PIX(d->h) );
 	if ( d->hBmMain == (HBITMAP)0 ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Main fails", "Ok", NULL );
 		return FALSE;
 	}
-	d->hBmTemp = CreateCompatibleBitmap( hDc, d->w, d->h );
+	d->hBmTemp = CreateCompatibleBitmap( hDc, WPOS2PIX(d->w), WPOS2PIX(d->h) );
 	if ( d->hBmTemp == (HBITMAP)0 ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Temp fails", "Ok", NULL );
 		return FALSE;

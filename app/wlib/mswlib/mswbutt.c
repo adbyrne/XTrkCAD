@@ -193,7 +193,7 @@ static void drawButton(
 	if (selected) {
 		offw++; offh++;
 	}
-	mswDrawIcon( hButtDc, offw, offh, bm, disabled, color1, color2 );
+	mswDrawIcon( hButtDc, WPOS2PIX(offw), WPOS2PIX(offh), bm, disabled, color1, color2 );
 }
 
 
@@ -457,8 +457,8 @@ wButton_p wButtonCreate(
 				mswGetBaseStyle(parent);
 	if ((b->option&BB_DEFAULT) != 0)
 		style |= BS_DEFPUSHBUTTON;
-	b->hWnd = CreateWindow( "BUTTON", labelStr, style, b->x, b->y,
-				/*CW_USEDEFAULT, CW_USEDEFAULT,*/ width, h,
+	b->hWnd = CreateWindow( "BUTTON", labelStr, style, WPOS2PIX(b->x), WPOS2PIX(b->y),
+				/*CW_USEDEFAULT, CW_USEDEFAULT,*/ WPOS2PIX(width), h,
 				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(BUTTON)");

@@ -964,7 +964,7 @@ void mswMenuMove(
 	wControl_p b;
 	b = (wControl_p)m->parent;
 	if (b && b->hWnd)
-		if (!SetWindowPos( b->hWnd, HWND_TOP, x, y,
+		if (!SetWindowPos( b->hWnd, HWND_TOP, WPOS2PIX(x), WPOS2PIX(y),
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				SWP_NOSIZE|SWP_NOZORDER))
 				mswFail("mswMenuMove");

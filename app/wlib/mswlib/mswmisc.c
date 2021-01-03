@@ -302,16 +302,16 @@ void mswRepaintLabel(HWND hWnd, wControl_p b)
         newBrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
         oldBrush = SelectObject(hDc, newBrush);
         dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, strlen(b->labelStr));
-        rect.left = b->labelX;
-        rect.top = b->labelY;
-        rect.right = b->labelX + LOWORD(dw);
-        rect.bottom = b->labelY + HIWORD(dw);
+        rect.left = WPOS2PIX(b->labelX);
+        rect.top = WPOS2PIX(b->labelY);
+        rect.right = WPOS2PIX(b->labelX) + LOWORD(dw);
+        rect.bottom = WPOS2PIX(b->labelY) + HIWORD(dw);
         FillRect(hDc, &rect, newBrush);
         DeleteObject(SelectObject(hDc, oldBrush));
         /*SetBkMode( hDc, OPAQUE );*/
         SetBkColor(hDc, GetSysColor(COLOR_BTNFACE));
 
-        if (!TextOut(hDc, b->labelX, b->labelY, b->labelStr, strlen(b->labelStr))) {
+        if (!TextOut(hDc, WPOS2PIX(b->labelX), WPOS2PIX(b->labelY), b->labelStr, strlen(b->labelStr))) {
             mswFail("Repainting text label");
         }
 
@@ -450,8 +450,8 @@ void mswAddButton(
         w->busy = TRUE;
         rect.left = 0;
         rect.top = 0;
-        rect.right = w->w+w->padX;
-        rect.bottom = w->h+w->padY;
+        rect.right = WPOS2PIX(w->w+w->padX);
+        rect.bottom = WPOS2PIX(w->h+w->padY);
         AdjustWindowRect(&rect, w->style, (w->option&F_MENUBAR)?1:0);
         rect.bottom += mFixBorderH;
 
@@ -507,8 +507,8 @@ void mswResize(
         w->busy = TRUE;
         rect.left = 0;
         rect.top = 0;
-        rect.right = w->w + w->padX;
-        rect.bottom = w->h + w->padY;
+        rect.right = WPOS2PIX(w->w + w->padX);
+        rect.bottom = WPOS2PIX(w->h + w->padY);
         AdjustWindowRect(&rect, w->style, (w->option&F_MENUBAR)?1:0);
         rect.bottom += mFixBorderH;
 
@@ -584,8 +584,8 @@ static void getSavedSizeAndPos(
         if ((option & F_RESIZE) &&
                 (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
                 (state = (int)strtol(cp, &cq, 10), cp != cq) &&  // state is not used 
-                (cp = cq, w = (wPos_t)strtod(cp, &cq), cp != cq) &&
-                (cp = cq, h = (int)strtod(cp, &cq), cp != cq)
+                (cp = cq, w = WPOS2PIX(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, h = WPOS2PIX(strtod(cp, &cq)), cp != cq)
            ) {
             if (w < 10) {
                 w = 10;
@@ -608,8 +608,8 @@ static void getSavedSizeAndPos(
         }
 
         if ((cp = wPrefGetStringBasic("msw window pos", nameStr)) &&
-                (x = (wPos_t)strtod(cp, &cq), cp != cq) &&
-                (cp = cq, y = (wPos_t)strtod(cp, &cq), cp != cq)
+                (x = WPOS2PIX(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, y = WPOS2PIX(strtod(cp, &cq)), cp != cq)
            ) {
             if (y < 0) {
                 y = 0;
@@ -645,19 +645,19 @@ static void getSavedSizeAndPos(
  * \param aspect_ration IN unused on Windows
  */
 void wSetGeometry(wWin_p win,
-	int min_width,
-	int max_width,
-	int min_height,
-	int max_height,
-	int base_width,
-	int base_height,
+	wPos_t min_width,
+	wPos_t max_width,
+	wPos_t min_height,
+	wPos_t max_height,
+	wPos_t base_width,
+	wPos_t base_height,
 	double aspect_ratio)
 {
 	win->validGeometry = TRUE;	//remember that geometry was set
-	win->min_width = min_width;
-	win->max_width = max_width;
-	win->min_height = min_height;
-	win->max_height = max_height;
+	win->min_width = WPOS2PIX(min_width);
+	win->max_width = WPOS2PIX(max_width);
+	win->min_height = WPOS2PIX(min_height);
+	win->max_height = WPOS2PIX(max_height);
 
 	return;
 }
@@ -745,12 +745,12 @@ static wWin_p winCommonCreate(
     win->style = style;
     rect.left = 0;
     rect.top = 0;
-    rect.right = win->w + win->padX;
-    rect.bottom = win->h + win->padY;
+    rect.right = WPOS2PIX(win->w + win->padX);
+    rect.bottom = WPOS2PIX(win->h + win->padY);
     AdjustWindowRect(&rect, win->style, (win->option&F_MENUBAR)?1:0);
     rect.bottom += mFixBorderH;
     win->hWnd = CreateWindow(className, labelStr, style,
-                             xx, yy,
+	                         WPOS2PIX(xx), WPOS2PIX(yy),
                              rect.right-rect.left, rect.bottom-rect.top,
                              hWnd, NULL,
                              mswHInst, NULL);
@@ -1188,8 +1188,8 @@ void wWinSetSize(wWin_p w, POS_T width, POS_T height)
     w->h = height;
     rect.left = 0;
     rect.top = 0;
-    rect.right = w->w /*+w->padX*/;
-    rect.bottom = w->h /*+w->padY*/;
+    rect.right = WPOS2PIX(w->w /*+w->padX*/);
+    rect.bottom = WPOS2PIX(w->h /*+w->padY*/);
     AdjustWindowRect(&rect, w->style, (w->option&F_MENUBAR)?1:0);
     rect.bottom += mFixBorderH;
 
@@ -1282,7 +1282,7 @@ void wWinShow(
                 y = 0;
             }
 
-            if (!SetWindowPos(win->hWnd, HWND_TOP, x, y,
+            if (!SetWindowPos(win->hWnd, HWND_TOP, WPOS2PIX(x), WPOS2PIX(y),
                               CW_USEDEFAULT, CW_USEDEFAULT,
                               SWP_NOSIZE|SWP_NOZORDER)) {
                 mswFail("wWinShow:SetWindowPos()");
@@ -1609,10 +1609,10 @@ void wControlShow(wControl_p b, BOOL_T show)
         }
     } else {
         if (b->labelStr) {
-            rc.left = b->labelX;
-            rc.right = b->x;
-            rc.top = b->labelY;
-            rc.bottom = b->labelY+b->h;
+            rc.left = WPOS2PIX(b->labelX);
+            rc.right = WPOS2PIX(b->x);
+            rc.top = WPOS2PIX(b->labelY);
+            rc.bottom = WPOS2PIX(b->labelY+b->h);
             InvalidateRect(((wControl_p)b->parent)->hWnd, &rc, TRUE);
         }
     }
@@ -1748,7 +1748,7 @@ void wControlSetPos(
         b->y = y;
 
         if (b->hWnd)
-            if (!SetWindowPos(b->hWnd, HWND_TOP, x, y,
+            if (!SetWindowPos(b->hWnd, HWND_TOP, WPOS2PIX(x), WPOS2PIX(y),
                               CW_USEDEFAULT, CW_USEDEFAULT,
                               SWP_NOSIZE|SWP_NOZORDER)) {
                 mswFail("wControlSetPos");
@@ -1821,10 +1821,10 @@ void wControlHilite(
     oldPen = SelectObject(hDc, newPen);
     oldMode = SetROP2(hDc, R2_NOTXORPEN);
 	Rectangle(hDc,
-		b->x - CONTROLHILITEWIDTH - 1,
-		b->y - CONTROLHILITEWIDTH - 1,
-		b->x + b->w + CONTROLHILITEWIDTH + 1,
-		b->y + b->h + CONTROLHILITEWIDTH + 1);
+		WPOS2PIX(b->x) - CONTROLHILITEWIDTH - 1,
+		WPOS2PIX(b->y) - CONTROLHILITEWIDTH - 1,
+		WPOS2PIX(b->x + b->w) + CONTROLHILITEWIDTH + 1,
+		WPOS2PIX(b->y + b->h) + CONTROLHILITEWIDTH + 1);
     SetROP2(hDc, oldMode);
     SelectObject(hDc, oldPen);
     DeleteObject(newPen);
@@ -1859,10 +1859,10 @@ void wMessage(
     hDc = GetDC(w->hWnd);
     oldRop = SetROP2(hDc, R2_WHITE);
     h = w->h+2;
-    Rectangle(hDc, 0, h, w->w, h);
+    Rectangle(hDc, 0, WPOS2PIX(h), WPOS2PIX(w->w), WPOS2PIX(h));
     SetROP2(hDc, oldRop);
     LABELFONTSELECT
-    TextOut(hDc, 0, h, msg, strlen(msg));
+    TextOut(hDc, 0, WPOS2PIX(h), msg, strlen(msg));
     LABELFONTRESET
     ReleaseDC(w->hWnd, hDc);
 }
@@ -2210,7 +2210,8 @@ void doHelpMenu(void * context)
         helpInitted = TRUE;
     }
 
-    switch ((int)(long)context) {
+	const char * topic;
+	switch ((int)(long)context) {
     case 1: /* Contents */
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOC, (DWORD_PTR)NULL);
         break;
@@ -2227,7 +2228,6 @@ void doHelpMenu(void * context)
 
 
     case 3: /*Context*/
-    	const char * topic;
     	topic = GetCurCommandName();
     	wHelp(topic);
     	break;
@@ -2325,7 +2325,7 @@ void startBalloonHelp(void)
 
             if (balloonHelpButton->type == B_RADIO ||
                     balloonHelpButton->type == B_TOGGLE) {
-                pt.y = balloonHelpButton->h;
+				pt.y = WPOS2PIX(balloonHelpButton->h);
             } else {
                 GetClientRect(balloonHelpButton->hWnd, &rect);
                 pt.y = rect.bottom;
@@ -2385,14 +2385,14 @@ void wControlSetBalloon(wControl_p b, wPos_t dx, wPos_t dy, const char * msg)
 
         if (b->type == B_RADIO ||
                 b->type == B_TOGGLE) {
-            pt.y = b->h;
+			pt.y = WPOS2PIX(b->h);
         } else {
             GetClientRect(b->hWnd, &rect);
             pt.y = rect.bottom;
         }
 
-        pt.x = dx;
-        pt.y -= dy;
+		pt.x = WPOS2PIX(dx);
+		pt.y -= WPOS2PIX(dy);
         ClientToScreen(b->hWnd, &pt);
 
         if (pt.x + w+2 > screenWidth) {
@@ -2766,9 +2766,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     HDC hDc;
     wAccelKey_e extChar;
 
-    switch (message) {
+	LPMINMAXINFO pMMI;
+	switch (message) {
 	case WM_GETMINMAXINFO:
-		LPMINMAXINFO pMMI = (LPMINMAXINFO)lParam;
+		pMMI = (LPMINMAXINFO)lParam;
 		inx = GetWindowWord(hWnd, 0);
 
 		if (inx >= CONTROL_BASE && inx <= controlMap_da.cnt) {

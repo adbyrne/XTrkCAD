@@ -206,8 +206,8 @@ wDrawShowBackground(wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size,
         }
 
         SetDIBitsToDevice(bd->hDc,
-                          pos_x,
-                          bd->h - pos_y - FreeImage_GetHeight(rotated),
+                          WPOS2PIX(pos_x),
+                          WPOS2PIX(bd->h) - WPOS2PIX(pos_y) - FreeImage_GetHeight(rotated),
                           FreeImage_GetWidth(rotated),
                           FreeImage_GetHeight(rotated),
                           0, 0,
