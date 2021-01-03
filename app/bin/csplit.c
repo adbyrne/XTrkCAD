@@ -371,7 +371,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			wBeep();
 			return C_TERMINATE;
 		}
-		coOrd pos1 = pos, pos2 = pos;
+		coOrd pos1 = pos;
 		if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
 			if (IsTrack(trk1)) {
 				InfoMessage(_("Can't Split a track object"));
@@ -422,13 +422,12 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			}
 		}
 		if (trimState == TRIM_LINE) {
-			coOrd pos1=pos, pos2 = pos;
+			coOrd pos1=pos;
 			if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
 				if (IsTrack(trk1)) {
 					return C_CONTINUE;
 				}
 				pos1 = pos;
-				coOrd old_pos = pos1;
 				if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 					if (IsClose(GetTrkDistance(trk1,&pos1)*4)) {
 						//Iterate Twice
