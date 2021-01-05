@@ -170,8 +170,8 @@ static void saveSize(wWin_p win)
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
         char pos_s[20];
 
-        sprintf(pos_s, "%d %d", win->w,
-                win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0)));
+        sprintf(pos_s, "%d %d", WPOS2PIX(win->w),
+                WPOS2PIX(win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
         wPrefSetString(SECTIONWINDOWSIZE, win->nameStr, pos_s);
     }
 }
@@ -858,16 +858,16 @@ static gint window_char_event(
     }
 }
 
-void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
+void wSetGeometry(wWin_p win, wPos_t min_width, wPos_t max_width, wPos_t min_height, wPos_t max_height, wPos_t base_width, wPos_t base_height, double aspect_ratio ) {
 	GdkGeometry hints;
 	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
-	hints.max_width = max_width;
-	hints.min_height = min_height;
-	hints.max_height = max_height;
-	hints.min_aspect = hints.max_aspect = aspect_ratio;
-	hints.base_width = base_width;
-	hints.base_height = base_height;
+	hints.max_width = WPOS2PIX(max_width);
+	hints.min_height = WPOS2PIX(min_height);
+	hints.max_height = WPOS2PIX(max_height);
+	hints.min_aspect = hints.max_aspect = WPOS2PIX(aspect_ratio);
+	hints.base_width = WPOS2PIX(base_width);
+	hints.base_height = WPOS2PIX(base_height);
 	if( base_width != -1 && base_height != -1 ) {
 		hintMask |= GDK_HINT_BASE_SIZE;
 	}
@@ -999,16 +999,18 @@ static wWin_p wWinCommonCreate(
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
         }
     }
-    int scr_w, scr_h;
+    wPos_t scr_w, scr_h;
 	wGetDisplaySize(&scr_w, &scr_h);
-	if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
-	if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
+	wPix_t pw = WPOS2PIX(scr_w);
+	wPix_t ph = WPOS2PIX(scr_h);
+	if (pw < MIN_WIN_WIDTH) pw = MIN_WIN_WIDTH+10;
+	if (ph < MIN_WIN_HEIGHT) ph = MIN_WIN_HEIGHT;
 	if (winType != W_MAIN) {
-		wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
+		wSetGeometry(w, MIN_WIN_WIDTH, pw-10, MIN_WIN_HEIGHT, ph, -1, -1, -1);
 	} else {
-		if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
-		if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
-		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
+		if (pw < MIN_WIN_WIDTH_MAIN+10) pw = MIN_WIN_WIDTH_MAIN+200;
+		if (ph < MIN_WIN_HEIGHT_MAIN+10) ph = MIN_WIN_HEIGHT_MAIN+200;
+		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, pw-10, MIN_WIN_HEIGHT_MAIN, ph-10, -1, -1, -1);
      }
 
 

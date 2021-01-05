@@ -1209,7 +1209,7 @@ EXPORT void ParamUpdatePrefs( void )
 				len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
 				cp = message;
 				for ( col=0; col<len; col++ ) {
-					sprintf( cp, "%d ", colWidths[col] );
+					sprintf( cp, "%0.1f ", colWidths[col] );
 					cp += strlen(cp);
 				}
 				*cp = '\0';
@@ -2174,7 +2174,7 @@ static void ParamCreateControl(
 				}
 				for ( col=0; col<listDataP->colCnt; col++ ) {
 					colRightJust[col] = listDataP->colWidths[col]<0;
-					colWidths[col] = abs(listDataP->colWidths[col]);
+					colWidths[col] = fabs(listDataP->colWidths[col]);
 				}
 				sprintf( message, "%s-%s-%s", pd->group->nameStr, pd->nameStr, "columnwidths" );
 				cp = wPrefGetString( PREFSECT, message );

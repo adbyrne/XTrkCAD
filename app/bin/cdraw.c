@@ -644,7 +644,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				case SEG_POLY:
 				case SEG_FILPOLY:
 					for (int i=0;i<segPtr->u.p.cnt;i++) {
-						coOrd pt;
 						UNREORIGIN( segPtr->u.p.pts[i].pt, segPtr->u.p.pts[i].pt, 0.0, off );
 					}
 				break;
@@ -1404,7 +1403,6 @@ static void MoveDraw( track_p trk, coOrd off )
 			case SEG_POLY:
 			case SEG_FILPOLY:
 				for (int i=0;i<segPtr->u.p.cnt;i++) {
-					coOrd pt;
 					REORIGIN( segPtr->u.p.pts[i].pt, segPtr->u.p.pts[i].pt, 0.0, off );
 				}
 			break;
@@ -1443,7 +1441,6 @@ static void RotateDraw( track_p trk, coOrd orig, ANGLE_T angle )
 			case SEG_POLY:
 			case SEG_FILPOLY:
 				for (int i=0;i<segPtr->u.p.cnt;i++) {
-					coOrd pt;
 					Rotate(&segPtr->u.p.pts[i].pt, orig, angle );
 				}
 			break;

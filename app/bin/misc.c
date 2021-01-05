@@ -701,8 +701,8 @@ EXPORT void SaveState(void) {
 	int inx;
 
 	wWinGetSize(mainW, &width, &height);
-	wPrefSetInteger("draw", "mainwidth", width);
-	wPrefSetInteger("draw", "mainheight", height);
+	wPrefSetInteger("draw", "mainwidth", (int)width);
+	wPrefSetInteger("draw", "mainheight", (int)height);
 	SaveParamFileList();
 	ParamUpdatePrefs();
 

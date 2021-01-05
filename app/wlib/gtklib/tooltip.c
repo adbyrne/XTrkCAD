@@ -132,15 +132,17 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 {
     PangoLayout * layout;
 
-    wPos_t x, y;
-    wPos_t w, h;
-    wPos_t xx, yy;
+    wPix_t x, y;
+    wPix_t w, h;
+    wPix_t xx, yy;
+    wPix_t px = WPOS2PIX(dx);
+    wPix_t py = WPOS2PIX(dy);
     const char * msgConverted;
     GtkRequisition size;
 
     /* return if there is nothing to do */
     if (balloonVisible && balloonB == b &&
-            balloonDx == dx && balloonDy == dy && msg != NULL && !balloonMsg[0])
+            balloonDx == px && balloonDy == py && msg != NULL && !balloonMsg[0])
            if (strcmp(msg,balloonMsg)==0)
       		return;
 
@@ -177,8 +179,8 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
     }
     gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
 
-    balloonDx = dx;
-    balloonDy = dy;
+    balloonDx = px;
+    balloonDy = py;
     balloonB = b;
     snprintf(balloonMsg, sizeof(balloonMsg), "%s", msg);
     gtk_widget_get_requisition(balloonPI, &size );
@@ -187,8 +189,8 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 
     gtk_window_get_position( GTK_WINDOW(b->parent->gtkwin), &x, &y);
 
-    x += b->realX + dx;
-    y += b->realY + b->h - dy;
+    x += b->realX + px;
+    y += b->realY + b->h - py;
     xx = gdk_screen_width();
     yy = gdk_screen_height();
     if ( x < 0 ) {

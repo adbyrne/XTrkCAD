@@ -39,6 +39,9 @@
 #define WSCROLL_PARAM_HWND	HIWORD(lParam)
 #endif
 
+typedef int wPix_t;
+#define WPOS2PIX(X) ((int)(X))
+
 #ifndef CAST_AWAY_CONST
 	#define CAST_AWAY_CONST (char *)
 #endif

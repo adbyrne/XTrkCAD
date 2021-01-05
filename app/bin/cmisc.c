@@ -551,7 +551,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 static void DescChange(long changes)
 {
-	descData_p ddp;
 	if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
         ParamLoadControls(&describePG);
     }
