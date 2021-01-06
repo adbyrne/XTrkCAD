@@ -538,6 +538,32 @@ ReadMultilineText()
 }
 
 
+static wBool_t ParseBlockLength(
+		char * s,
+		DIST_T * min,
+		DIST_T * max )
+{
+	char *cp;
+
+	*min = strtod( s, &cp );
+	if (cp != s) {
+		s = cp;
+		while (isspace((unsigned char)*s)) s++;
+		if ( ! *s ) {
+			*max = *min;
+			return TRUE;
+		}
+		if (strncmp(s,"MAXBLOCKLENGTH ",14) == 0) {
+			s += 14;
+			*max = strtod( s, &cp );
+			if (cp != s) {
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
 EXPORT wBool_t ParseRoomSize(
 		char * s,
 		coOrd * roomSizeRet )
@@ -704,6 +730,9 @@ static BOOL_T ReadTrackFile(
 	count = 0;
 	int skipLines = 0;
 	BOOL_T skip = FALSE;
+	// MINBLOCKLENGTH and MAXBLOCKLENGTH are optional, use these defaults
+	DoSetMinBlockLength( MINBLOCKDEFAULT );
+	DoSetMaxBlockLength( MAXBLOCKDEFAULT );
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;
 		BOOL_T old_skip = skip;
@@ -774,8 +803,12 @@ static BOOL_T ReadTrackFile(
 					break;
 			}
 		} else if (strncmp( paramLine, "MINBLOCKLENGTH ", 14 ) == 0) {
-			if ( !DoSetMinBlockLength( paramLine+14 ) ) {
-				if( !(ret = InputError( "MINBLOCKLENGTH: bad value", TRUE )))
+			DIST_T min, max;
+			if ( ParseBlockLength( paramLine+14, &min, &max ) ) {
+				DoSetMinBlockLength( min );
+				DoSetMaxBlockLength( max );
+			} else {
+				if( !(ret = InputError( "BLOCKLENGTH: bad value", TRUE )))
 					break;
 			}
 		} else if (strncmp( paramLine, "MAPSCALE ", 9 ) == 0) {
@@ -1044,7 +1077,7 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
 	if (minBlockLength > 0.0)
-		rc &= fprintf(f, "MINBLOCKLENGTH %0.1f\n", minBlockLength )>0;
+		rc &= fprintf(f, "MINBLOCKLENGTH %0.1f MAXBLOCKLENGTH %0.1f\n", minBlockLength, maxBlockLength )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );

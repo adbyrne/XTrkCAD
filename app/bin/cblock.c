@@ -2,9 +2,13 @@
  * Implement blocks: a group of trackwork with a single occupancy detector
  *  Blocks:
  *    - Connect to turnouts at each end
- *    - Have a minimum length
+ *    - Have a minimum and possibly maximum length
+ *        (max block length is for a future version)
  *      - min length saved in the layout file
- *      - may be set in options->preferences
+ *      - may be set in options->layout
+ *           "Min Block Length" and "Max Block Length"
+ *      - if length is changed the blocks are deleted and may be recreated
+ *        using the new length.
  *    - Have from 1 to 128 track segments
  *   manage->Mange Layout Control Elements "Add Missing" button
  *   to automatically create all blocks needed by the layout.
@@ -1589,20 +1593,37 @@ EXPORT BOOL_T UpdateMinBlockLength( void )
 // At a minimum a block needs to be longer than an engine length.
 // Blocks should be longer than the longest train that will be run.
 // blocks are not created that are shorter than this.
-// When length is increased, short blocks are deleted.
+// When length is changed all blocks are deleted and may be recreated 
+// with the new lemgth.
 // Length is in inches.
-EXPORT BOOL_T DoSetMinBlockLength( char * newLength )
+EXPORT BOOL_T DoSetMinBlockLength( DIST_T min )
 {
-	DIST_T newBlockLength;
-	char *cp;
-
-	newBlockLength = strtod( newLength, &cp );
-	if (cp == newLength)
+	if (min < 0.0 || min > 1000.0)
 		return FALSE;
 
-	if (newBlockLength < 0.0)
+	if (min > maxBlockLength)
+		maxBlockLength = min;
+
+	minBlockLength = min;
+	return TRUE;
+}
+
+// FUTURE FEATURE - PHIL
+// Very long blocks can be divided into sub-blocks to permit
+// multiple trains in the same long block
+// maxBlockLength is target size of sub-blocks
+// must be at least as long as minBlockLength
+// When length is changed all blocks are deleted and may be recreated 
+// with the new lemgth.
+// Length is in inches.
+EXPORT BOOL_T DoSetMaxBlockLength( DIST_T max )
+{
+	if (max > 1000.0)
 		return FALSE;
 
-	minBlockLength = newBlockLength;
+	if (max < minBlockLength)
+		max = minBlockLength;
+
+	maxBlockLength = max;
 	return TRUE;
 }

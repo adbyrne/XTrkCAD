@@ -312,7 +312,6 @@ static paramData_t prefPLs[] = {
 #define I_DSTFMT		(2)
 	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
-	{ PD_FLOAT, &minBlockLength, "minblklength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Block Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
@@ -476,13 +475,6 @@ static void PrefOk( void * junk )
 		resetValuesLow = TRUE;
 	} else if (minLength > 1.0) {
 		minLength = 1.0;
-		resetValuesHigh = TRUE;
-	}
-	if (minBlockLength < 0.0) {
-		minBlockLength = 0.0;
-		resetValuesLow = TRUE;
-	} else if (minBlockLength > 10000.0) {
-		minBlockLength = 10000.0;
 		resetValuesHigh = TRUE;
 	}
 	if ( resetValuesLow ) {

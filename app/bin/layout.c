@@ -66,6 +66,7 @@ static struct sDataLayout thisLayout = {
     NULL,
 };
 
+static paramFloatRange_t r0o1_1000 = { 0.1, 1000 };
 static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
@@ -264,6 +265,18 @@ ANGLE_T
 GetLayoutMaxTrackGrade()
 {
     return (thisLayout.props.maxTrackGrade);
+}
+
+DIST_T
+GetLayoutMinBlockLength()
+{
+    return (minBlockLength);
+}
+
+DIST_T
+GetLayoutMaxBlockLength()
+{
+    return (maxBlockLength);
 }
 
 SCALEDESCINX_T
@@ -483,15 +496,19 @@ static paramData_t layoutPLs[] = {
 	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
-#define BACKGROUNDPOSX (11)
+#define MINBLKLENGTH (11)
+    { PD_FLOAT, &minBlockLength, "minBlockLength", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r0o1_1000, N_("Min Block Length"), 0, (void *)(CHANGE_MINBLKLN) },
+#define MAXBLKLENGTH (12)
+    { PD_FLOAT, &maxBlockLength, "maxBlockLength", PDO_NOPSHUPD|PDO_DLGHORZ, &r0o1_1000, N_(" Max Block Length"), 0, (void *)(CHANGE_MAXBLKLN) },
+#define BACKGROUNDPOSX (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACKGROUND) },
-#define BACKGROUNDPOSY (12)
+#define BACKGROUNDPOSY (14)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, (void*)(CHANGE_BACKGROUND) },
-#define BACKGROUNDWIDTH (13)
+#define BACKGROUNDWIDTH (15)
 	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Size"), 0, (void*)(CHANGE_BACKGROUND) },
-#define BACKGROUNDSCREEN (14)
+#define BACKGROUNDSCREEN (16)
 	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, (void*)(CHANGE_BACKGROUND) },
-#define BACKGROUNDANGLE (15)
+#define BACKGROUNDANGLE (17)
 	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) },
 	{ PD_MESSAGE, N_("Named Settings File"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
 	{ PD_BUTTON, (void*)SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, (void *)0 },
@@ -526,6 +543,22 @@ static void ChangeLayout() {
         // now set the minimum track radius
         sprintf(prefString, "minTrackRadius-%s", curScaleName);
         wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
+    }
+
+    if (changes & CHANGE_MINBLKLN) {
+	    if (minBlockLength > 1000.0)
+		    minBlockLength = 1000.0;
+	    if (minBlockLength <= 0.0)
+		    minBlockLength = 0.0;
+	    if (minBlockLength > maxBlockLength)
+		    maxBlockLength = minBlockLength;
+    }
+
+    if (changes & CHANGE_MAXBLKLN) {
+	    if (maxBlockLength > 1000.0)
+		    maxBlockLength = 1000.0;
+	    if (minBlockLength > maxBlockLength)
+		    maxBlockLength = minBlockLength;
     }
 
     if ((changes & CHANGE_BACKGROUND) || file_changed) {
