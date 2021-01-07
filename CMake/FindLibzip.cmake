@@ -10,23 +10,43 @@
 #
 
 if(WIN32)
-  find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip
-    DOC "The directory where zip.h resides")
-  find_path( LIBZIP_INCLUDE_DIR_ZIPCONF zipconf.h
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip
-    DOC "The directory where zip.h resides")
-  find_library( LIBZIP_LIBRARY
-    NAMES zip Zip
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip
-    DOC "The libzip library")
-  find_file( LIBZIP_SHAREDLIB
-    NAMES zip.dll Zip.dll
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip)
+  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip
+      DOC "The directory where zip.h resides")
+    find_path( LIBZIP_INCLUDE_DIR_ZIPCONF zipconf.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip
+      DOC "The directory where zip.h resides")
+    find_library( LIBZIP_LIBRARY
+      NAMES zip Zip
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip
+      DOC "The libzip library")
+    find_file( LIBZIP_SHAREDLIB
+      NAMES zip.dll Zip.dll
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip)
+  else (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip
+      DOC "The directory where zip.h resides")
+    find_path( LIBZIP_INCLUDE_DIR_ZIPCONF zipconf.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip
+      DOC "The directory where zip.h resides")
+    find_library( LIBZIP_LIBRARY
+      NAMES zip Zip
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip
+      DOC "The libzip library")
+    find_file( LIBZIP_SHAREDLIB
+      NAMES zip.dll Zip.dll
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip)
+  endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_LIBZIP QUIET libzip)
