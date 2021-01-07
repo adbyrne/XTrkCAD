@@ -10,7 +10,7 @@
 #
 
 if(WIN32)
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  if (WIN64)
     find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
       PATHS
       $ENV{XTCEXTERNALROOT}/x64/libzip
@@ -28,7 +28,7 @@ if(WIN32)
       NAMES zip.dll Zip.dll
       PATHS
       $ENV{XTCEXTERNALROOT}/x64/libzip)
-  else (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  else (WIN64)
     find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
       PATHS
       $ENV{XTCEXTERNALROOT}/x86/libzip
@@ -46,7 +46,7 @@ if(WIN32)
       NAMES zip.dll Zip.dll
       PATHS
       $ENV{XTCEXTERNALROOT}/x86/libzip)
-  endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  endif (WIN64)
 else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_LIBZIP QUIET libzip)
