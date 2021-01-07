@@ -422,10 +422,10 @@ void wDrawArc(
 	if (len < 3)
 		return;
 
-	p0.x = XINCH2PIX(d,px-r);
-	p0.y = YINCH2PIX(d,py+r);
-	p1.x = XINCH2PIX(d,px+r);
-	p1.y = YINCH2PIX(d,py-r);
+	p0.x = XINCH2PIX(d,px - r);
+	p0.y = YINCH2PIX(d,py + r);
+	p1.x = XINCH2PIX(d,px + r);
+	p1.y = YINCH2PIX(d,py - r);
 
 	pex = px + r * mswsin(a0);
 	pey = py + r * mswcos(a0);
@@ -444,7 +444,7 @@ void wDrawArc(
 	if (dw == 0)
 		dw = 1;
 
-	if (r>4096) {
+	if (r > wDrawGetMaxRadius(d)) {
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -1480,13 +1480,13 @@ wDrawBitMap_p wDrawBitMapCreate(
 
 static int doSetFocus = 1;
 
-long FAR PASCAL XEXPORT mswDrawPush(
+LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		HWND hWnd,
 		UINT message,
-		UINT wParam,
-		LONG lParam )
+		WPARAM wParam,
+		LPARAM lParam )
 {
-	long inx = GetWindowLong( hWnd, GWL_ID );
+	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
 	wDraw_p b;
 	short int ix, iy;
 	wPos_t x, y;
@@ -1556,7 +1556,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			b->drawResize( b, b->size );*/
 		if (b->drawRepaint)
 			b->drawRepaint( b, b->data, 0, 0 );
-		return 0;
+		return (LRESULT)0;
 	case WM_MOUSEMOVE:
 		activeWnd = GetActiveWindow();
 		focusWnd = GetFocus();
@@ -1613,7 +1613,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			b->action( b, b->data, action, x, y );
 		if (b->hWnd)
 			UpdateWindow(b->hWnd);
-		return 0;
+		return (LRESULT)0;
 	case WM_CHAR:
 		b = (wDraw_p)mswMapIndex( inx );
 		extChar = wAccelKey_None;
@@ -1649,7 +1649,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			else
 				b->action( b, b->data, wActionText + ( wParam << 8 ), b->lastX, b->lastY );
 		}
-		return 0;
+		return (LRESULT)0;
 
 	case WM_PAINT:
 		b = (wDraw_p)mswMapIndex( inx );
@@ -1732,7 +1732,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 		}
 		if (b->action)
 			b->action( b, b->data, action, b->lastX, b->lastY );
-		return 0;
+		return (LRESULT)0;
 	case WM_MOUSEHWHEEL:
 		if ( GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON)) {
 			if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
@@ -1743,7 +1743,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 		}
 		if (b->action)
 			b->action( b, b->data, action, b->lastX, b->lastY );
-		return 0;
+		return (LRESULT)0;
 	}
 
 	return DefWindowProc( hWnd, message, wParam, lParam );

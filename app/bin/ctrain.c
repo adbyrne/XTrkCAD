@@ -89,6 +89,14 @@ struct extraData {
 #define SetProcessed( XX )				(XX)->state |= CAR_STATE_PROCESSED
 #define ClrProcessed( XX )				(XX)->state &= ~CAR_STATE_PROCESSED
 
+#define OFF_F( ORIG, SIZE, LO, HI ) \
+    ( (HI).x < (ORIG).x+((SIZE).x)*0.2 || \
+      (LO).x > (ORIG).x+((SIZE).x)*0.8 || \
+      (HI).y < (ORIG).y+((SIZE).y)*0.2 || \
+      (LO).y > (ORIG).y+((SIZE).y)*0.8 )
+#define OFF_FOLLOW( LO, HI ) \
+    OFF_F( mainD.orig, mainD.size, LO, HI )
+
 static wButton_p newcarB;
 
 static void ControllerDialogSyncAll(void);
@@ -2087,7 +2095,7 @@ static BOOL_T MoveTrain(
             }
 
             followTrain = NULL;
-        } else if (OFF_MAIND(xx->trvTrk.pos, xx->trvTrk.pos)) {
+        } else if (OFF_FOLLOW(xx->trvTrk.pos, xx->trvTrk.pos)) {
             MoveMainWindow(xx->trvTrk.pos,
                            NormalizeAngle(xx->trvTrk.angle+(xx->direction?180.0:0.0)));
             followCenter = mainCenter;

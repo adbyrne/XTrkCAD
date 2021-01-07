@@ -185,7 +185,7 @@ static LRESULT menuPush(
 				((wMenuRadio_p)m)->action(((wMenuRadio_p)m)->data);
 			break;
 		}
-		return 0L;
+		return (LRESULT)0;
 	}
 	if ( (m->parentMenu)->traceFunc ) {
 		(m->parentMenu)->traceFunc( m->parentMenu, m->labelStr, ((wMenu_p)m->parentMenu)->traceData );

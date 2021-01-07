@@ -878,7 +878,7 @@ wWin_p wWinMainCreate(
     mswHWnd = w->hWnd;
 
     if (!mswThickFont) {
-        SendMessage(w->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L);
+        SendMessage(w->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
         hDc = GetDC(w->hWnd);
         GetTextMetrics(hDc, &tm);
         mswEditHeight = tm.tmHeight+2;
@@ -2179,7 +2179,7 @@ void wHelp(
 	}
 
     if (!helpInitted) {
-        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
+        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD_PTR)&dwCookie) ;
         helpInitted = TRUE;
     }
 
@@ -2206,7 +2206,7 @@ void doHelpMenu(void * context)
     HH_FTS_QUERY ftsQuery;
 
     if (!helpInitted) {
-        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
+        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD_PTR)&dwCookie) ;
         helpInitted = TRUE;
     }
 
@@ -2757,7 +2757,8 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     int inx;
     wWin_p w;
     wControl_p b, oldW;
-    int child = ((GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD) != 0);
+    // RWS: child is never used 
+    // wIndex_t child = ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_CHILD) != 0); 
     POS_T newW, newH;
     RECT rect;
     PAINTSTRUCT ps;
@@ -2783,7 +2784,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 			}
 		}
-		return(0);
+		return (LRESULT)0;
 
     case WM_MOUSEWHEEL:
         inx = GetWindowWord(hWnd, 0);
@@ -2795,7 +2796,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 return mswCallBacks[b->type]->messageProc((wControl_p)b, hWnd,
                         message, wParam, lParam);
 
-        return (0);
+        return (LRESULT)0;
 
     case WM_DRAWITEM:
     case WM_COMMAND:
@@ -2816,10 +2817,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // draw the bitmap
             mswDrawIcon(((LPDRAWITEMSTRUCT)lParam)->hDC, 0, 0, (wIcon_p)(b->data), FALSE,
                         (COLORREF)0, (COLORREF)0);
-            return (TRUE);
+            return (LRESULT)TRUE;
         } else {
             mswSetFocus(b);
-            ret = 0L;
+            ret = 0;
 
             if (!inMainWndProc) {
                 inMainWndProc = TRUE;
@@ -2832,7 +2833,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 inMainWndProc = FALSE;
             }
 
-            return ret;
+            return (LRESULT)ret;
         }
 
     case WM_PAINT:
@@ -2854,7 +2855,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
 
             EndPaint(hWnd, &ps);
-            return 1L;
+            return (LRESULT)1;
         }
 
         break;
@@ -2975,7 +2976,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 
-            return 0L;
+            return (LRESULT)0;
 
         case 0x1B:
 
@@ -2996,7 +2997,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
 
             mswSetTrigger((wControl_p)TRIGGER_TIMER, NULL);
-            return 0L;
+            return (LRESULT)0;
 
         case 0x20:
 
@@ -3018,7 +3019,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 
-            return 0L;
+            return (LRESULT)0;
 
         case 0x09:
 
@@ -3049,12 +3050,12 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 
-            return 0L;
+            return (LRESULT)0;
         }
 
         /* Not a Draw control */
         MessageBeep(MB_ICONHAND);
-        return 0L;
+        return (LRESULT)0;
         break;
 
     case WM_ENABLE:
@@ -3078,7 +3079,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         closeBalloonHelp();
         wHelp(b->helpStr);
-        return 0L;
+        return (LRESULT)0;
 
     case WM_SETCURSOR:
 		if (hWnd == mswHWnd)
@@ -3154,7 +3155,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         wWinShow(w, FALSE);
-        return 0L;
+        return (LRESULT)0;
 
     case WM_CLOSE:
         inx = GetWindowWord(hWnd, 0);
@@ -3176,13 +3177,13 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (w->winProc(w, wClose_e, NULL, NULL));
             }
 
-            return 0L;
+            return (LRESULT)0;
         }
 
     case WM_DESTROY:
         if (hWnd == mswHWnd) {
             PostQuitMessage(0L);
-            return 0L;
+            return (LRESULT)0;
         }
 
         break;
@@ -3204,7 +3205,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             startBalloonHelp();
         }
 
-        return 0L;
+        return (LRESULT)0;
 
     case WM_MENUSELECT:
         mswAllowBalloonHelp = TRUE;
@@ -3234,7 +3235,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_PALETTECHANGED:
         if (wParam == (WPARAM)hWnd) {
-            return 0L;
+            return (LRESULT)0;
         }
 
     case WM_QUERYNEWPALETTE:
@@ -3248,7 +3249,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 InvalidateRect(hWnd, NULL, TRUE);
             }
 
-            return inx;
+            return (LRESULT)inx;
         }
 
     case WM_ACTIVATE:
@@ -3280,7 +3281,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             inMainWndProc = FALSE;
         }
 
-        return ret;
+        return (LRESULT)ret;
 
     case WM_LBUTTONDOWN:
     case WM_MOUSEMOVE:
@@ -3305,7 +3306,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             inMainWndProc = FALSE;
         }
 
-        return ret;
+        return (LRESULT)ret;
 
     default:
         ;

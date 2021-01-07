@@ -181,7 +181,7 @@ void mswSetFocus( wControl_p );
 void mswSetTrigger( wControl_p, setTriggerCallback_p );
 void mswMenuPush( wControl_p );
 void mswCreateCheckBitmaps( void );
-long FAR PASCAL XEXPORT mswDrawPush( HWND, UINT, UINT, LONG );
+LRESULT FAR PASCAL XEXPORT mswDrawPush( HWND, UINT, WPARAM, LPARAM );
 #ifdef WIN32
 DWORD GetTextExtent( HDC, CHAR *, UINT );
 #endif

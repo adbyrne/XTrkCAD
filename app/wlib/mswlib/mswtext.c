@@ -63,12 +63,12 @@ void wTextClear(
     wText_p b)
 {
     long rc;
-    rc = SendMessage(b->hWnd, EM_SETREADONLY, 0, 0L);
-    rc = SendMessage(b->hWnd, EM_SETSEL, 0, -1);
-    rc = SendMessage(b->hWnd, WM_CLEAR, 0, 0L);
+    rc = SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)0, (LPARAM)0);
+    rc = SendMessage(b->hWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1);
+    rc = SendMessage(b->hWnd, WM_CLEAR, (WPARAM)0, (LPARAM)0);
 
     if (b->option&BO_READONLY) {
-        rc = SendMessage(b->hWnd, EM_SETREADONLY, 1, 0L);
+        rc = SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
     }
 }
 
@@ -129,11 +129,11 @@ void wTextAppend(
     }
 
     if (b->option&BO_READONLY) {
-        SendMessage(b->hWnd, EM_SETREADONLY, 1, 0L);
+        SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
     }
 
 	// scroll to bottom of text box
-	SendMessage(b->hWnd, EM_LINESCROLL, 0, 10000L);
+	SendMessage(b->hWnd, EM_LINESCROLL, (WPARAM)0, (LPARAM)10000);
 }
 
 
@@ -151,11 +151,11 @@ BOOL_T wTextSave(
         return FALSE;
     }
 
-    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
+    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
 
     for (l=0; l<lc; l++) {
         *(WORD*)line = sizeof(line)-1;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (DWORD)(LPSTR)line);
+        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPSTR)line);
         line[len] = '\0';
         fprintf(f, "%s\n", line);
     }
@@ -207,12 +207,12 @@ BOOL_T wTextPrint(
     lineSpace = textMetric.tmHeight + textMetric.tmExternalLeading;
     linesPerPage = GetDeviceCaps(hDc, VERTRES) / lineSpace;
     currentLine = 1;
-    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
+    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
     IOStatus = 0;
 
     for (l=0; l<lc; l++) {
         *(WORD*)line = sizeof(line)-1;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (DWORD)(LPSTR)line);
+        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPSTR)line);
         TextOut(hDc, 0, currentLine*lineSpace, line, len);
 
         if (++currentLine > linesPerPage) {
@@ -240,7 +240,7 @@ wBool_t wTextGetModified(
     wText_p b)
 {
     int rc;
-    rc = (int)SendMessage(b->hWnd, EM_GETMODIFY, 0, 0L);
+    rc = (int)SendMessage(b->hWnd, EM_GETMODIFY, (WPARAM)0, (LPARAM)0);
     return (wBool_t)rc;
 }
 
@@ -305,7 +305,7 @@ void wTextSetReadonly(
         b->option &= ~BO_READONLY;
     }
 
-    SendMessage(b->hWnd, EM_SETREADONLY, ro, 0L);
+    SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)ro, (LPARAM)0);
 }
 
 
@@ -361,7 +361,7 @@ void wTextSetPosition(
     int pos)
 {
     long rc;
-    rc = SendMessage(bt->hWnd, EM_LINESCROLL, 0, MAKELONG(-65535, 0));
+    rc = SendMessage(bt->hWnd, EM_LINESCROLL, (WPARAM)0, (LPARAM)MAKELONG(-65535, 0));
 }
 
 static void textDoneProc(wControl_p b)
@@ -424,10 +424,10 @@ wText_p wTextCreate(
 
         SendMessage(b->hWnd, WM_SETFONT, (WPARAM)fixedTextFont, (LPARAM)MAKELONG(1, 0));
     } else 	if (!mswThickFont) {
-        SendMessage(b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L);
+        SendMessage(b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
     }
 
-    b->hText = (HANDLE)SendMessage(b->hWnd, EM_GETHANDLE, 0, 0L);
+    b->hText = (HANDLE)SendMessage(b->hWnd, EM_GETHANDLE, (WPARAM)0, (LPARAM)0);
 
     if (option & BT_CHARUNITS) {
         wPos_t w, h;
