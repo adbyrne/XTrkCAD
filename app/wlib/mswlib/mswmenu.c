@@ -964,7 +964,7 @@ void mswMenuMove(
 	wControl_p b;
 	b = (wControl_p)m->parent;
 	if (b && b->hWnd)
-		if (!SetWindowPos( b->hWnd, HWND_TOP, WPOS2PIX(x), WPOS2PIX(y),
+		if (!SetWindowPos( b->hWnd, HWND_TOP, x, y,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				SWP_NOSIZE|SWP_NOZORDER))
 				mswFail("mswMenuMove");
@@ -985,8 +985,8 @@ static void pushMenuButt(
 
 wMenu_p wMenuCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option )

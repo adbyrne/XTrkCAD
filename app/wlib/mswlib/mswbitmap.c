@@ -64,7 +64,7 @@ HBITMAP mswCreateBitMap(
 
 	hDc = GetDC( mswHWnd );
 	hButtDc = CreateCompatibleDC( hDc );
-	hBitMap = CreateCompatibleBitmap( hDc, WPOS2PIX(w), WPOS2PIX(h) );
+	hBitMap = CreateCompatibleBitmap( hDc, w, h );
 	ReleaseDC( mswHWnd, hDc );
 	hOldBitMap = SelectObject( hButtDc, hBitMap );
 	if (mswPalette) {
@@ -76,8 +76,8 @@ HBITMAP mswCreateBitMap(
 	oldBrush = SelectObject( hButtDc, newBrush );
 	rect.top = 0;
 	rect.left = 0;
-	rect.bottom = WPOS2PIX(h);
-	rect.right = WPOS2PIX(w);
+	rect.bottom = h;
+	rect.right = w;
 	FillRect( hButtDc, &rect, newBrush );
 	DeleteObject( SelectObject( hButtDc, oldBrush ) );
 
@@ -155,8 +155,8 @@ void mswDrawIcon(
 
     /* initialize bitmap header from XPM information */
     bmiInfo->bmiHeader.biSize = sizeof( bmiInfo->bmiHeader );
-    bmiInfo->bmiHeader.biWidth = WPOS2PIX(bm->w);
-    bmiInfo->bmiHeader.biHeight = WPOS2PIX(bm->h);
+    bmiInfo->bmiHeader.biWidth = bm->w;
+    bmiInfo->bmiHeader.biHeight = bm->h;
     bmiInfo->bmiHeader.biPlanes = 1;
     if( bm->type == mswIcon_bitmap )
         bmiInfo->bmiHeader.biBitCount = 1;
@@ -287,8 +287,8 @@ wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor col
 	ip->colormap[ 0 ].rgbGreen = GetGValue( color );
 	ip->colormap[ 0 ].rgbReserved = 0;	
 
-	lineLength = (((( WPOS2PIX(ip->w) + 7 ) / 8 ) + 3 ) >> 2 ) << 2;
-	ip->pixels = malloc( lineLength * WPOS2PIX(ip->h) );
+	lineLength = (((( ip->w + 7 ) / 8 ) + 3 ) >> 2 ) << 2;
+	ip->pixels = malloc( lineLength * ip->h );
 	if( !ip->pixels ) {
 		fprintf( stderr, "Couldn't allocate memory for pixel data.\n" );
 		abort();
@@ -300,7 +300,7 @@ wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor col
 	 */
 	for( i = 0; i < ip->h; i++ ) {
 		dest = ip->pixels + i * lineLength;
-		memcpy( dest, bits + ( WPOS2PIX(ip->h) - i - 1 ) * ((WPOS2PIX(ip->w) + 7) / 8), (WPOS2PIX(ip->w) + 7 ) / 8 );
+		memcpy( dest, bits + ( ip->h - i - 1 ) * ((ip->w + 7) / 8), (ip->w + 7 ) / 8 );
 
 		/*
 		 * and now, the bit order is changed, this is done via a lookup table
@@ -406,8 +406,8 @@ wIcon_p wIconCreatePixMap( char *pm[])
 
 	/* get memory for the pixel data */
 	/* dword align begin of line */
-	lineLength = ((WPOS2PIX(ip->w) + 3 ) >> 2 ) << 2;
-	ip->pixels = malloc( lineLength * WPOS2PIX(ip->h) );
+	lineLength = ((ip->w + 3 ) >> 2 ) << 2;
+	ip->pixels = malloc( lineLength * ip->h );
 	if( !ip->pixels ) {
 		fprintf( stderr, "Couldn't allocate memory for pixel data.\n" );
 		abort();
@@ -425,7 +425,7 @@ wIcon_p wIconCreatePixMap( char *pm[])
 		
 		cq = ip->pixels + lineLength * i;
 		/* get the next row */
-		cp = pm[WPOS2PIX(ip->h) - i + ip->colorcnt ];
+		cp = pm[ip->h - i + ip->colorcnt ];
 		/* for all pixels in row */
 		for( j = 0; j < ip->w; j++ ) {
 			/* get the pixel info */
@@ -500,8 +500,8 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long option, wIcon_p iconP )
 	control->option = option;
 
 	control->hWnd = CreateWindow( "STATIC", NULL,
-						style, WPOS2PIX(control->x), WPOS2PIX(control->y),
-						WPOS2PIX(iconP->w), WPOS2PIX(iconP->h),
+						style, control->x, control->y,
+						iconP->w, iconP->h,
 						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 
 	if (control->hWnd == NULL) {

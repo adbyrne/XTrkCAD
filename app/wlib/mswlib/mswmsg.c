@@ -74,11 +74,11 @@ static void repaintMessage(
 
 	rect.bottom = (long)(bm->y+( bm->h ));
 	rect.right = (long)(bm->x+( scale * bm->w ));
-	rect.top = WPOS2PIX(bm->y)+1;
-	rect.left = WPOS2PIX(bm->x);
+	rect.top = bm->y+1;
+	rect.left = bm->x;
 
 	SetBkColor( hDc, GetSysColor( COLOR_BTNFACE ) );
-	ExtTextOut( hDc, WPOS2PIX(bm->x), WPOS2PIX(bm->y) + ((WPOS2PIX(bm->h) + 2 - textMetrics.tmHeight) / 2), ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
+	ExtTextOut( hDc, bm->x, bm->y + ((bm->h + 2 - textMetrics.tmHeight) / 2), ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
 
 	if( scale != 1.0 )
 		/* in case we did create a new font earlier, delete it now */
@@ -147,10 +147,10 @@ static callBacks_t messageCallBacks = {
 
 wMessage_p wMessageCreateEx(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
-		POS_T	width,
+		wPos_t	width,
 		const char	*message,
 		long	flags )
 {

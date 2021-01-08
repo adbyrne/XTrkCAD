@@ -39,15 +39,11 @@
 #define WSCROLL_PARAM_HWND	HIWORD(lParam)
 #endif
 
-typedef int wPix_t;
-#define WPOS2PIX(X) ((int)(X))
-
 #ifndef CAST_AWAY_CONST
 	#define CAST_AWAY_CONST (char *)
 #endif
 
 #define BOOL_T wBool_t
-#define POS_T wPos_t
 #define INDEX_T wIndex_t
 #define INTEGER_T wInteger_t
 
@@ -86,10 +82,10 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		wControl_p next; \
 		wControl_p synonym; \
 		wWin_p parent; \
-		POS_T x, y; \
-		POS_T w, h; \
+		wPos_t x, y; \
+		wPos_t w, h; \
 		long option; \
-		POS_T labelX, labelY; \
+		wPos_t labelX, labelY; \
 		const char * labelStr; \
 		const char * helpStr; \
 		const char * tipStr; \
@@ -143,8 +139,8 @@ struct wDraw_t {
 		wBool_t bTempMode;
 		wBool_t bCopiedMain;
 
-		wPos_t lastX;
-		wPos_t lastY;
+		wDrawPix_t lastX;
+		wDrawPix_t lastY;
 
 		};
 

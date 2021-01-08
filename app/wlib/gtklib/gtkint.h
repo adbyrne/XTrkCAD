@@ -42,10 +42,6 @@
 
 extern wWin_p gtkMainW;
 
-typedef int wPix_t;
-
-#define WPOS2PIX( X ) ((wPix_t)(X))
-
 #ifdef CURSOR_SURFACE
 typedef struct {
 		cairo_surface_t* surface;
@@ -214,7 +210,7 @@ wList_p wDropListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, 
 /* filesel.c */
 
 /* font.c */
-PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, int *width_p, int *height_p, int *ascent_p, int *descent_p, int *baseline_p);
+PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, wDrawPix_t *width_p, wDrawPix_t *height_p, wDrawPix_t *ascent_p, wDrawPix_t *descent_p, wDrawPix_t *baseline_p);
 void wlibFontDestroyPangoLayout(PangoLayout *layout);
 const char *wlibFontTranslate(wFont_p fp);
 
@@ -304,12 +300,12 @@ struct wDraw_t {
 
 void WlibApplySettings(GtkPrintOperation *op);
 void WlibSaveSettings(GtkPrintOperation *op);
-void psPrintLine(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
-void psPrintArc(wPos_t x0, wPos_t y0, wPos_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
-void psPrintFillRectangle(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawColor color, wDrawOpts opts);
-void psPrintFillPolygon(wPos_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
-void psPrintFillCircle(wPos_t x0, wPos_t y0, wPos_t r, wDrawColor color, wDrawOpts opts);
-void psPrintString(wPos_t x, wPos_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
+void psPrintLine(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintArc(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintFillRectangle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawColor color, wDrawOpts opts);
+void psPrintFillPolygon(wDrawPix_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
+void psPrintFillCircle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, wDrawColor color, wDrawOpts opts);
+void psPrintString(wDrawPix_t x, wDrawPix_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
 static void WlibGetPaperSize(void);
 
 /* single.c */

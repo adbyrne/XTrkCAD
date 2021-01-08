@@ -318,7 +318,7 @@ void wTextSetSize(
     bt->h = height;
 
     if (!SetWindowPos(bt->hWnd, HWND_TOP, 0, 0,
-		WPOS2PIX(bt->w), WPOS2PIX(bt->h), SWP_NOMOVE|SWP_NOZORDER)) {
+		bt->w, bt->h, SWP_NOMOVE|SWP_NOZORDER)) {
         mswFail("wTextSetSize: SetWindowPos");
     }
 }
@@ -346,8 +346,8 @@ void wTextComputeSize(
 
     hDc = GetDC(bt->hWnd);
     GetTextMetrics(hDc, &metrics);
-    *w = WPOS2PIX(rows) * metrics.tmAveCharWidth + scrollV_w;
-    *h = WPOS2PIX(lines) * (metrics.tmHeight + metrics.tmExternalLeading);
+    *w = rows * metrics.tmAveCharWidth + scrollV_w;
+    *h = lines * (metrics.tmHeight + metrics.tmExternalLeading);
     ReleaseDC(bt->hWnd, hDc);
 
     if (bt->option&BT_HSCROLL) {
@@ -381,13 +381,13 @@ static callBacks_t textCallBacks = {
 
 wText_p wTextCreate(
     wWin_p	parent,
-    POS_T	x,
-    POS_T	y,
+    wPos_t	x,
+    wPos_t	y,
     const char	* helpStr,
     const char	* labelStr,
     long	option,
-    POS_T	width,
-    POS_T	height)
+    wPos_t	width,
+    wPos_t	height)
 {
     wText_p b;
     DWORD style;
@@ -408,8 +408,8 @@ wText_p wTextCreate(
     /*	  if (option & BO_READONLY)
     		style |= ES_READONLY;*/
     b->hWnd = CreateWindow("EDIT", NULL,
-                           style, WPOS2PIX(b->x), WPOS2PIX(b->y),
-		                   WPOS2PIX(width), WPOS2PIX(height),
+                           style, b->x, b->y,
+		                   width, height,
                            ((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL);
 
     if (b->hWnd == NULL) {
@@ -431,10 +431,10 @@ wText_p wTextCreate(
 
     if (option & BT_CHARUNITS) {
         wPos_t w, h;
-        wTextComputeSize(b, WPOS2PIX(width), WPOS2PIX(height), &w, &h);
+        wTextComputeSize(b, width, height, &w, &h);
 
         if (!SetWindowPos(b->hWnd, HWND_TOP, 0, 0,
-                          WPOS2PIX(w), WPOS2PIX(h), SWP_NOMOVE|SWP_NOZORDER)) {
+                          w, h, SWP_NOMOVE|SWP_NOZORDER)) {
             mswFail("wTextCreate: SetWindowPos");
         }
     }

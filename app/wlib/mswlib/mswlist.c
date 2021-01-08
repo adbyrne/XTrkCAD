@@ -81,12 +81,12 @@ void wListSetSize( wList_p bl, wPos_t w, wPos_t h )
 		y += listTitleHeight;
 	}
 	rc = SetWindowPos( bl->hWnd, HWND_TOP, 0, 0,
-		WPOS2PIX(w), WPOS2PIX(h), SWP_NOMOVE|SWP_NOZORDER);
+		w, h, SWP_NOMOVE|SWP_NOZORDER);
 	if ( bl->hScrollWnd ) {
 		if ( bl->maxWidth > bl->w ) {
 			GetClientRect( bl->hWnd, &rect );
-			rc = SetWindowPos( bl->hScrollWnd, HWND_TOP, WPOS2PIX(bl->x), WPOS2PIX(y)+rect.bottom+2,
-				WPOS2PIX(bl->w), WPOS2PIX(bl->scrollH), SWP_NOZORDER);
+			rc = SetWindowPos( bl->hScrollWnd, HWND_TOP, bl->x, y+rect.bottom+2,
+				bl->w, bl->scrollH, SWP_NOZORDER);
 			ShowWindow( bl->hScrollWnd, SW_SHOW );
 		} else {
 			ShowWindow( bl->hScrollWnd, SW_HIDE );
@@ -465,13 +465,13 @@ static void listSetPos(
 	bl->y = y1 = y;
 	if ( bl->colTitles )
 		y1 += listTitleHeight;
-	if (!SetWindowPos( b->hWnd, HWND_TOP, WPOS2PIX(x1), WPOS2PIX(y1),
+	if (!SetWindowPos( b->hWnd, HWND_TOP, x1, y1,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				SWP_NOSIZE|SWP_NOZORDER))
 				mswFail("listSetPos");
 	if ( bl->hScrollWnd && bl->maxWidth > bl->w ) {
 		GetClientRect( bl->hWnd, &rect );
-		if (!SetWindowPos( bl->hScrollWnd, HWND_TOP, WPOS2PIX(x1), WPOS2PIX(y1)+rect.bottom+2,
+		if (!SetWindowPos( bl->hScrollWnd, HWND_TOP, x1, y1+rect.bottom+2,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				SWP_NOSIZE|SWP_NOZORDER))
 				mswFail("listSetPos2");
@@ -498,11 +498,11 @@ static void listRepaintLabel(
 	if ( bl->colTitles == NULL )
 		return;
 	hDc = GetDC( hWnd );
-	start = WPOS2PIX(bl->x-bl->scrollPos)+2;
-	rc.top = WPOS2PIX(bl->y);
-	rc.bottom = WPOS2PIX(bl->y)+listTitleHeight;
-	rc.left = WPOS2PIX(bl->x)-1;
-	rc.right = WPOS2PIX(bl->x+bl->w);
+	start = bl->x-bl->scrollPos+2;
+	rc.top = bl->y;
+	rc.bottom = bl->y+listTitleHeight;
+	rc.left = bl->x-1;
+	rc.right = bl->x+bl->w;
 	hBrush = CreateSolidBrush( GetSysColor( COLOR_BTNFACE ) );
 	FillRect( hDc, &rc, hBrush );
 	SetBkColor( hDc, GetSysColor( COLOR_BTNFACE ) );
@@ -532,10 +532,10 @@ static void listRepaintLabel(
 		if ( start+colWidth >= 3 ) {
 			rc.left = start;
 			if ( rc.left < bl->x+2 )
-				rc.left = WPOS2PIX(bl->x)+2;
-			rc.right = start+ WPOS2PIX(colWidth);
-			if ( rc.right > WPOS2PIX(bl->x+bl->w)-1 )
-				rc.right = WPOS2PIX(bl->x+bl->w)-1;
+				rc.left = bl->x+2;
+			rc.right = start+ colWidth;
+			if ( rc.right > bl->x+bl->w-1 )
+				rc.right = bl->x+bl->w-1;
 			ExtTextOut( hDc, start+1, rc.top+0,
 				ETO_CLIPPED|ETO_OPAQUE, &rc,
 				*title, strlen(*title), NULL );
@@ -552,7 +552,7 @@ static void listRepaintLabel(
 			}
 		}
 		title++;
-		start += WPOS2PIX(colWidth);
+		start += colWidth;
 	}
 	SelectObject( hDc, hPen0 );
 	SelectObject( hDc, hFont );
@@ -758,7 +758,7 @@ LRESULT listProc(
 				SetBkColor( lpdis->hDC, GetSysColor( COLOR_WINDOW ) );
 			}
 			rc1 = rc;
-			rc1.left -= WPOS2PIX(bl->scrollPos);
+			rc1.left -= bl->scrollPos;
 			for ( inx=0,cp0=mswTmpBuff; inx<bl->colCnt&&cp0&&rc1.left<rc.right; inx++ ) {
 				if ( inx>=bl->colCnt-1 || (cp1=strchr(cp0,'\t')) == NULL ) {
 					len = strlen( cp0 );
@@ -768,7 +768,7 @@ LRESULT listProc(
 					cp1 ++;
 				}
 				if ( bl->colWidths ) {
-					colWidth = WPOS2PIX(bl->colWidths[inx]);
+					colWidth = bl->colWidths[inx];
 				} else {
 					colWidth = rc.right;
 				}
@@ -788,8 +788,8 @@ LRESULT listProc(
 								(ldp->bm->colormap[ 1 ]).rgbBlue );
 					mswDrawIcon( lpdis->hDC, rc1.left+2, rc.top+0, ldp->bm, 0, col, col);
 
-					rc1.left += WPOS2PIX(ldp->bm->w)+6;
-					colWidth -= WPOS2PIX(ldp->bm->w)+6;
+					rc1.left += ldp->bm->w+6;
+					colWidth -= ldp->bm->w+6;
 				}
 				if ( inx>=bl->colCnt-1 || (rc1.right = rc1.left + colWidth) > rc.right )
 					 rc1.right = rc.right;
@@ -834,7 +834,7 @@ LRESULT listProc(
 					bl->scrollPos = colWidth; 
 					break;
 				}
-				colWidth += WPOS2PIX(bl->colWidths[inx]);
+				colWidth += bl->colWidths[inx];
 			}
 			break;
 		case SB_LINERIGHT:
@@ -846,7 +846,7 @@ LRESULT listProc(
 					bl->scrollPos = colWidth+bl->colWidths[inx];
 					break;
 				}
-				colWidth += WPOS2PIX(bl->colWidths[inx]);
+				colWidth += bl->colWidths[inx];
 			}
 			break;
 		case SB_RIGHT:
@@ -1015,13 +1015,13 @@ static wList_p listCreate(
 		const char	*className,
 		long	style,
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wPos_t	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data,
@@ -1047,8 +1047,8 @@ static wList_p listCreate(
 	b->dragCol = -1;
 
 	b->hWnd = CreateWindow( className, NULL,
-				style | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), WPOS2PIX(b->x), WPOS2PIX(b->y),
-		        WPOS2PIX(width), LIST_HEIGHT*(int)number,
+				style | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x, b->y,
+		        width, LIST_HEIGHT*(int)number,
 				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(LIST)");
@@ -1086,13 +1086,13 @@ static wList_p listCreate(
 
 wList_p wListCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wPos_t	width,
 		int		colCnt,
 		wPos_t	* colWidths,
 		wBool_t * colRightJust,
@@ -1137,8 +1137,8 @@ wList_p wListCreate(
 			bl->maxWidth += bl->colWidths[i];
 		}
 		bl->hScrollWnd = CreateWindow( "ScrollBar", NULL,
-				SBS_HORZ | SBS_BOTTOMALIGN | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), WPOS2PIX(bl->x), WPOS2PIX(bl->y),
-			    WPOS2PIX(width), CW_USEDEFAULT,
+				SBS_HORZ | SBS_BOTTOMALIGN | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), bl->x, bl->y,
+			    width, CW_USEDEFAULT,
 				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 		if (bl->hScrollWnd == NULL)
 			mswFail("CreateWindow(LISTSCROLL)");
@@ -1152,13 +1152,13 @@ wList_p wListCreate(
 
 wList_p wDropListCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wPos_t	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data )
@@ -1178,13 +1178,13 @@ wList_p wDropListCreate(
 
 wList_p wComboListCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wPos_t	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data )

@@ -170,8 +170,8 @@ static void saveSize(wWin_p win)
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
         char pos_s[20];
 
-        sprintf(pos_s, "%d %d", WPOS2PIX(win->w),
-                WPOS2PIX(win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
+        sprintf(pos_s, "%ld %ld", win->w,
+                (win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
         wPrefSetString(SECTIONWINDOWSIZE, win->nameStr, pos_s);
     }
 }
@@ -862,12 +862,12 @@ void wSetGeometry(wWin_p win, wPos_t min_width, wPos_t max_width, wPos_t min_hei
 	GdkGeometry hints;
 	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
-	hints.max_width = WPOS2PIX(max_width);
-	hints.min_height = WPOS2PIX(min_height);
-	hints.max_height = WPOS2PIX(max_height);
-	hints.min_aspect = hints.max_aspect = WPOS2PIX(aspect_ratio);
-	hints.base_width = WPOS2PIX(base_width);
-	hints.base_height = WPOS2PIX(base_height);
+	hints.max_width = max_width;
+	hints.min_height = min_height;
+	hints.max_height = (max_height);
+	hints.min_aspect = hints.max_aspect = aspect_ratio;
+	hints.base_width = base_width;
+	hints.base_height = base_height;
 	if( base_width != -1 && base_height != -1 ) {
 		hintMask |= GDK_HINT_BASE_SIZE;
 	}
@@ -1001,8 +1001,8 @@ static wWin_p wWinCommonCreate(
     }
     wPos_t scr_w, scr_h;
 	wGetDisplaySize(&scr_w, &scr_h);
-	wPix_t pw = WPOS2PIX(scr_w);
-	wPix_t ph = WPOS2PIX(scr_h);
+	wPos_t pw = scr_w;
+	wPos_t ph = scr_h;
 	if (pw < MIN_WIN_WIDTH) pw = MIN_WIN_WIDTH+10;
 	if (ph < MIN_WIN_HEIGHT) ph = MIN_WIN_HEIGHT;
 	if (winType != W_MAIN) {

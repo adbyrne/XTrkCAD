@@ -77,7 +77,7 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 {
 	wPos_t x0;
 	if ( inx == 0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {
-		x0 = (wPos_t)0;
+		x0 = 0;
 		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(0).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTransparent );
 	} else if ( inx >= hotBarCurrStart && inx < hotBarCurrEnd ) {
 		x0 = (wPos_t)((hotBarMap(inx).x-hotBarMap((int)hotBarCurrStart).x + (inx>0?fixed_x:0))*hotBarD.dpi);
@@ -253,7 +253,7 @@ static void DoHotBarJump( int inx )
 }
 
 
-static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w, wPos_t h )
+static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wDrawPix_t w, wDrawPix_t h )
 {
 	int inx;
 	coOrd pos;
@@ -532,7 +532,7 @@ EXPORT void LayoutHotBar( void * redraw )
 	if (scaleicon<1.0) scaleicon=1.0;
 	if (scaleicon>2.0) scaleicon=2.0;
 	if (scaleicon>1.0) {
-		hotBarHeight *= (wPos_t)scaleicon;
+		hotBarHeight *= scaleicon;
 	}
 	if ( hotBarLabels) {
 	   hotBarHeight += wMessageGetHeight(0L);

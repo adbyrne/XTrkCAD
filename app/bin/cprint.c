@@ -423,8 +423,8 @@ static void PrintGaudyBox(
 
 
 static void PrintPlainBox(
-		wPos_t x,
-		wPos_t y,
+		int x,
+		int y,
 		coOrd *corners )
 {
 	coOrd p00, p01, p10, p11;
@@ -1155,11 +1155,11 @@ static BOOL_T PrintPage(
 					}
 				}
 				if (printRotate) {
-					wPrintClip( (wPos_t)(clipOrig.y*print_d.dpi), (wPos_t)(clipOrig.x*print_d.dpi),
-							(wPos_t)(clipSize.y*print_d.dpi), (wPos_t)(clipSize.x*print_d.dpi) );
+					wPrintClip( (clipOrig.y*print_d.dpi), (clipOrig.x*print_d.dpi),
+							(clipSize.y*print_d.dpi), (clipSize.x*print_d.dpi) );
 				} else {
-					wPrintClip( (wPos_t)(clipOrig.x*print_d.dpi), (wPos_t)(clipOrig.y*print_d.dpi),
-							(wPos_t)(clipSize.x*print_d.dpi), (wPos_t)(clipSize.y*print_d.dpi) );
+					wPrintClip( (clipOrig.x*print_d.dpi), (clipOrig.y*print_d.dpi),
+							(clipSize.x*print_d.dpi), (clipSize.y*print_d.dpi) );
 				}
 				p[0].x = p[3].x = 0.0;
 				p[1].x = p[2].x = roomSize.x;

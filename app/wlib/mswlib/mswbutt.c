@@ -86,7 +86,7 @@ static void drawButton(
 	HPEN oldPen, newPen;
 	RECT rect;
 	COLORREF color1, color2;
-	POS_T offw=5, offh=5;
+	wPos_t offw=5, offh=5;
 	TRIVERTEX        vert[2] ;
 	GRADIENT_RECT    gRect;
 
@@ -193,7 +193,7 @@ static void drawButton(
 	if (selected) {
 		offw++; offh++;
 	}
-	mswDrawIcon( hButtDc, WPOS2PIX(offw), WPOS2PIX(offh), bm, disabled, color1, color2 );
+	mswDrawIcon( hButtDc, offw, offh, bm, disabled, color1, color2 );
 }
 
 
@@ -202,7 +202,7 @@ static void buttDrawIcon(
 		HDC butt_hDc )
 {
 		wIcon_p bm = b->icon;
-		POS_T offw=5, offh=5;
+		wPos_t offw=5, offh=5;
 
 		if (b->selected || b->busy) {
 			offw++; offh++;
@@ -415,8 +415,8 @@ static callBacks_t buttonCallBacks = {
 
 wButton_p wButtonCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
@@ -457,8 +457,8 @@ wButton_p wButtonCreate(
 				mswGetBaseStyle(parent);
 	if ((b->option&BB_DEFAULT) != 0)
 		style |= BS_DEFPUSHBUTTON;
-	b->hWnd = CreateWindow( "BUTTON", labelStr, style, WPOS2PIX(b->x), WPOS2PIX(b->y),
-				/*CW_USEDEFAULT, CW_USEDEFAULT,*/ WPOS2PIX(width), h,
+	b->hWnd = CreateWindow( "BUTTON", labelStr, style, b->x, b->y,
+				/*CW_USEDEFAULT, CW_USEDEFAULT,*/ width, h,
 				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(BUTTON)");

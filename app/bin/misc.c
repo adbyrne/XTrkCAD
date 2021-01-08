@@ -1838,7 +1838,7 @@ EXPORT wMenu_p MenuRegister(char * label) {
 void MenuPlayback(char * line) {
 	char * menuName, *itemName;
 	coOrd pos;
-	wPos_t x, y;
+	wDrawPix_t x, y;
 	menuTrace_p mt;
 
 	if (!GetArgs(line, "pqq", &pos, &menuName, &itemName))

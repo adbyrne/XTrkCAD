@@ -1209,7 +1209,7 @@ EXPORT void ParamUpdatePrefs( void )
 				len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
 				cp = message;
 				for ( col=0; col<len; col++ ) {
-					sprintf( cp, "%0.1f ", colWidths[col] );
+					sprintf( cp, "%ld ", colWidths[col] );
 					cp += strlen(cp);
 				}
 				*cp = '\0';
@@ -1590,7 +1590,7 @@ static void ParamDrawRedraw( wDraw_p d, void * dp, wPos_t w, wPos_t h )
 }
 
 
-static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wPos_t w, wPos_t h )
+static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w, wDrawPix_t h )
 {
 	paramData_p p = (paramData_p)dp;
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;

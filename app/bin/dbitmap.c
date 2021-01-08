@@ -36,7 +36,7 @@ static long outputBitMapTogglesV = 3;
 static double outputBitMapDensity = 10;
 
 static struct wFilSel_t * bitmap_fs;
-static long bitmap_w, bitmap_h;
+static wPos_t bitmap_w, bitmap_h;
 static drawCmd_t bitmap_d = {
 		NULL,
 		&screenDrawFuncs,
@@ -63,7 +63,7 @@ static int SaveBitmapFile(
 
 	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] ); 
 
-	bitmap_d.d = wBitMapCreate( (wPos_t)bitmap_w, (wPos_t)bitmap_h, 8 );
+	bitmap_d.d = wBitMapCreate( bitmap_w, bitmap_h, 8 );
 	if (bitmap_d.d == (wDraw_p)0) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		return FALSE;
@@ -181,8 +181,8 @@ static void OutputBitMapComputeSize( void )
 	bitmap_d.size.x = mapD.size.x + (Lborder+Rborder)*bitmap_d.scale;
 	bitmap_d.orig.y = 0.0-Bborder*bitmap_d.scale;
 	bitmap_d.size.y = mapD.size.y + (Bborder+Tborder)*bitmap_d.scale;
-	bitmap_w = (long)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
-	bitmap_h = (long)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
+	bitmap_w = (wPos_t)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
+	bitmap_h = (wPos_t)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
 	sprintf( message, _("Bitmap : %ld by %ld pixels"), bitmap_w, bitmap_h );
 	ParamLoadMessage( &outputBitMapPG, I_MSG1, message );
 	size = bitmap_w * bitmap_h;

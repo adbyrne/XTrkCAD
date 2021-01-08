@@ -125,14 +125,14 @@ static void choiceSetPos(
 	dx = x - bc->x;
 	dy = y - bc->y;
 	if ((bc->option & BC_NOBORDER)==0)
-		SetWindowPos( bc->hBorder, HWND_TOP, WPOS2PIX(x), WPOS2PIX(y), CW_USEDEFAULT, CW_USEDEFAULT,
+		SetWindowPos( bc->hBorder, HWND_TOP, x, y, CW_USEDEFAULT, CW_USEDEFAULT,
 				SWP_NOSIZE|SWP_NOZORDER );
 
 	for (butts = (wChoiceItem_p*)bc->buttList; *butts; butts++ ) {
 		x += dx;
 		y += dy;
 		SetWindowPos( (*butts)->hWnd, HWND_TOP,
-						WPOS2PIX((*butts)->x), WPOS2PIX((*butts)->y),
+						(*butts)->x, (*butts)->y,
 						CW_USEDEFAULT, CW_USEDEFAULT,
 						SWP_NOSIZE|SWP_NOZORDER );
 	}
@@ -257,8 +257,8 @@ static callBacks_t choiceItemCallBacks = {
 static wChoice_p choiceCreate(
 		wType_e type,
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
@@ -271,7 +271,7 @@ static wChoice_p choiceCreate(
 	const char ** lp;
 	int cnt;
 	wChoiceItem_p * butts;
-	int ppx, ppy;
+	wPos_t ppx, ppy;
 	int bs;
 	HDC hDc;
 	HWND hButt;
@@ -291,8 +291,8 @@ static wChoice_p choiceCreate(
 	b->labels = labels;
 	b->labelY += 6;
 		
-	ppx = WPOS2PIX(b->x);
-	ppy = WPOS2PIX(b->y);
+	ppx = b->x;
+	ppy = b->y;
 
 	switch (b->type) {
 	case B_TOGGLE:
@@ -315,7 +315,7 @@ static wChoice_p choiceCreate(
 				mswStrdup(_((char *)*lp)), sizeof( wChoiceItem_t ), data, &index );
 			(*butts)->owner = b;
 			(*butts)->hWnd = hButt = CreateWindow( "BUTTON", (*butts)->labelStr,
-						bs | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), WPOS2PIX(b->x+pw), WPOS2PIX(b->y+ph),
+						bs | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x+pw, b->y+ph,
 						80, CHOICE_HEIGHT,
 						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 			if ( hButt == (HWND)0 ) {
@@ -379,7 +379,7 @@ static wChoice_p choiceCreate(
 
 	if ((b->option & BC_NOBORDER)==0) {
 		b->hBorder = CreateWindow( "STATIC", NULL, WS_CHILD | WS_VISIBLE | FRAME_STYLE,
-			WPOS2PIX(b->x), WPOS2PIX(b->y), pw, ph, ((wControl_p)parent)->hWnd, 0, mswHInst, NULL );
+			b->x, b->y, pw, ph, ((wControl_p)parent)->hWnd, 0, mswHInst, NULL );
 	}
 	mswAddButton( (wControl_p)b, TRUE, helpStr );
 	mswCallBacks[ B_CHOICEITEM ] = &choiceItemCallBacks;
@@ -390,8 +390,8 @@ static wChoice_p choiceCreate(
 
 wChoice_p wRadioCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
@@ -406,8 +406,8 @@ wChoice_p wRadioCreate(
 
 wChoice_p wToggleCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wPos_t	x,
+		wPos_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,

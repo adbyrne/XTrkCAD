@@ -292,7 +292,7 @@ EXPORT void DoRecord( void * context )
 static drawCmd_p playbackD = NULL;
 static wDrawBitMap_p playbackBm = NULL;
 static wDrawColor playbackColor;
-static wPos_t playbackX, playbackY;
+static wDrawPix_t playbackX, playbackY;
 static wBool_t bDoFlash = FALSE;
 static wDrawColor flashColor;
 
@@ -369,8 +369,8 @@ char * DrawBitMapToString(DrawBitMap_e dbm) {
 static void MacroDrawBitMap(
 		DrawBitMap_e dbm,
 		wDrawBitMap_p bm,
-		wPos_t x,
-		wPos_t y,
+		wDrawPix_t x,
+		wDrawPix_t y,
 		wDrawColor color )
 {
 	wDrawBitMap( playbackD->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip );
@@ -380,7 +380,7 @@ static void MacroDrawBitMap(
 }
 
 
-static void Flash( drawCmd_p d, wPos_t x, wPos_t y, wDrawColor color )
+static void Flash( drawCmd_p d, wDrawPix_t x, wDrawPix_t y, wDrawColor color )
 {
 	bDoFlash = TRUE;
 	flashColor = color;
@@ -437,9 +437,9 @@ static void MoveCursor(
 	DIST_T dist, dx, dy;
 	coOrd pos1, dpos;
 	int i, steps;
-	wPos_t x, y;
-	wPos_t x0=playbackX;
-	wPos_t y0=playbackY;
+	wDrawPix_t x, y;
+	wDrawPix_t x0=playbackX;
+	wDrawPix_t y0=playbackY;
 
 	if (d == NULL)
 		return;
@@ -461,8 +461,8 @@ static void MoveCursor(
 
 		for ( i=1; i<=steps; i++ ) {
 
-			playbackX = x0+(wPos_t)(i*dx);
-			playbackY = y0+(wPos_t)(i*dy);
+			playbackX = x0+(wDrawPix_t)(i*dx);
+			playbackY = y0+(wDrawPix_t)(i*dy);
 
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
@@ -500,7 +500,7 @@ static void PlaybackCursor(
 {
 	wDrawBitMap_p bm = playbackBm;
 	playbackD = d;
-	wPos_t x, y;
+	wDrawPix_t x, y;
 	long time0, time1;
 
 	time0 = wGetTimer();
@@ -597,8 +597,8 @@ EXPORT void PlaybackMouse(
 
 EXPORT void MovePlaybackCursor(
 		drawCmd_p d,
-		wPos_t x,
-		wPos_t y, wBool_t direct, wControl_p control)
+		wDrawPix_t x,
+		wDrawPix_t y, wBool_t direct, wControl_p control)
 {
 	coOrd pos;
 	playbackD = &tempD;

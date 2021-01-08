@@ -132,11 +132,11 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 {
     PangoLayout * layout;
 
-    wPix_t x, y;
-    wPix_t w, h;
-    wPix_t xx, yy;
-    wPix_t px = WPOS2PIX(dx);
-    wPix_t py = WPOS2PIX(dy);
+    gint x, y;
+    gint w, h;
+    wPos_t xx, yy;
+    wPos_t px = dx;
+    wPos_t py = dy;
     const char * msgConverted;
     GtkRequisition size;
 

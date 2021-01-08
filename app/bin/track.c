@@ -1495,7 +1495,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 	wIndex_t trackCountOld;
 	track_p trk;
 	coOrd pos;
-	wPos_t x, y;
+	wDrawPix_t x, y;
 	wPos_t ww, hh;
 	wBool_t offscreen = FALSE;
 
@@ -1513,10 +1513,10 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 	wDrawGetSize( mainD.d, &ww, &hh );
 
 	coOrd middle_screen;
-	wPos_t mx,my;
+	wDrawPix_t mx,my;
 
-	mx = ww/2;
-	my = hh/2;
+	mx = ww/2.0;
+	my = hh/2.0;
 
 	mainD.Pix2CoOrd( &mainD, mx, my, &middle_screen );
 
@@ -1551,7 +1551,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 	middle_object.x = offset.x + (size.x/2);
 	middle_object.y = offset.y + (size.y/2);
 
-	wPos_t ox,oy;
+	wDrawPix_t ox,oy;
 	mainD.CoOrd2Pix( &mainD, middle_object, &ox, &oy );
 
 	if ((ox<0) || (ox>ww) || (oy<0) || (oy>hh) ) offscreen = TRUE;

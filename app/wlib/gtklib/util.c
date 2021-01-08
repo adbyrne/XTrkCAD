@@ -104,14 +104,14 @@ GdkPixbuf* wlibPixbufFromXBM(
     long rgb;
     const char * bits;
 
-    wPix_t pw = WPOS2PIX(ip->w);
-    wPix_t ph = WPOS2PIX(ip->h);
+    wPos_t pw = ip->w;
+    wPos_t ph = ip->h;
 
     wb = (pw + 7) / 8;
     pixmapData = (char**) malloc((3 + ph) * sizeof *pixmapData);
     pixmapData[0] = line0;
     rgb = wDrawGetRGB(ip->color);
-    sprintf(line0, " %d %d 2 1", pw, ph);
+    sprintf(line0, " %ld %ld 2 1", pw, ph);
     sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
             rgb & 0xFF);
     pixmapData[1] = ". c None s None";

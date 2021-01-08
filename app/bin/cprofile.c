@@ -386,8 +386,8 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 
 
 
-static void ProfilePix2CoOrd(drawCmd_p, wPos_t, wPos_t, coOrd *);
-static void ProfileCoOrd2Pix(drawCmd_p, coOrd, wPos_t*, wPos_t*);
+static void ProfilePix2CoOrd(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
+static void ProfileCoOrd2Pix(drawCmd_p, coOrd, wDrawPix_t*, wDrawPix_t*);
 static drawCmd_t screenProfileD = {
     NULL,
     &screenDrawFuncs,
@@ -400,8 +400,8 @@ static drawCmd_t screenProfileD = {
 
 static void ProfilePix2CoOrd(
     drawCmd_p d,
-    wPos_t xx,
-    wPos_t yy,
+    wDrawPix_t xx,
+    wDrawPix_t yy,
     coOrd * pos)
 {
     pos->x = (xx/d->dpi+d->orig.x)/prof.scaleX;
@@ -412,12 +412,12 @@ static void ProfilePix2CoOrd(
 static void ProfileCoOrd2Pix(
     drawCmd_p d,
     coOrd pos,
-    wPos_t *xx,
-    wPos_t *yy)
+    wDrawPix_t *xx,
+    wDrawPix_t *yy)
 {
-    wPos_t x, y;
-    x = (wPos_t)((((pos.x*prof.scaleX)/d->scale-d->orig.x)*d->dpi+0.5));
-    y = (wPos_t)(((((pos.y-prof.minE)*prof.scaleY)/d->scale-d->orig.y)*d->dpi+0.5));
+    wDrawPix_t x, y;
+    x = ((((pos.x*prof.scaleX)/d->scale-d->orig.x)*d->dpi+0.5));
+    y = (((((pos.y-prof.minE)*prof.scaleY)/d->scale-d->orig.y)*d->dpi+0.5));
     if (d->angle == 0) {
         *xx = x;
         *yy = y;

@@ -727,7 +727,7 @@ static void SpeedRedraw(
     wPos_t w,
     wPos_t h)
 {
-    wPos_t y, pts[4][2];
+    wDrawPix_t y, pts[4][2];
     trainControlDlg_p dlg = (trainControlDlg_p)context;
     struct extraData * xx;
     wDrawColor drawColor;
@@ -747,7 +747,7 @@ static void SpeedRedraw(
         xx->speed = 0;
     }
 
-    y = (wPos_t)(xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
+    y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
                  +SLIDER_THICKNESS/2);
     drawColor  = wDrawFindColor(wRGB(160, 160, 160));
     pts[0][1] = pts[1][1] = y-SLIDER_THICKNESS/2;
