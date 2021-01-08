@@ -498,7 +498,7 @@ void wTextComputeSize(wText_p bt, wPos_t rows, wPos_t cols, wPos_t *width,
 
 void wTextSetPosition(wText_p bt, int pos)
 {
-    /* TODO */
+    /* TODO TextSetPosition */
 }
 
 /**
