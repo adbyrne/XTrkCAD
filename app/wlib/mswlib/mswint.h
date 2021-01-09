@@ -40,7 +40,7 @@
 #endif
 
 typedef int wPix_t;
-#define WPOS2PIX(X) ((int)(X))
+#define WPOS2PIX(X) ((int)(X>=0?X+0.5:X-0.5))
 
 #ifndef CAST_AWAY_CONST
 	#define CAST_AWAY_CONST (char *)

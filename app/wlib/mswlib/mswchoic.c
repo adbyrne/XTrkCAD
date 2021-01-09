@@ -129,8 +129,8 @@ static void choiceSetPos(
 				SWP_NOSIZE|SWP_NOZORDER );
 
 	for (butts = (wChoiceItem_p*)bc->buttList; *butts; butts++ ) {
-		x += dx;
-		y += dy;
+		(*butts)->x += dx;
+		(*butts)->y += dy;
 		SetWindowPos( (*butts)->hWnd, HWND_TOP,
 						WPOS2PIX((*butts)->x), WPOS2PIX((*butts)->y),
 						CW_USEDEFAULT, CW_USEDEFAULT,

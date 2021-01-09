@@ -1225,7 +1225,7 @@ static void blockingLoop(void)
 static void savePos(wWin_p win)
 {
     WINDOWPLACEMENT windowPlace;
-    wPos_t w, h;
+    long w, h;
     RECT rect;
 
     if (win->nameStr &&
