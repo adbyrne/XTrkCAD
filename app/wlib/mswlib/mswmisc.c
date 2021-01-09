@@ -608,8 +608,8 @@ static void getSavedSizeAndPos(
         }
 
         if ((cp = wPrefGetStringBasic("msw window pos", nameStr)) &&
-                (x = (mswInt_t)(strtod(cp, &cq)), cp != cq) &&
-                (cp = cq, y = (mswInt_t)(strtod(cp, &cq)), cp != cq)
+                (x = (wPos_t)(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, y = (wPos_t)(strtod(cp, &cq)), cp != cq)
            ) {
             if (y < 0) {
                 y = 0;

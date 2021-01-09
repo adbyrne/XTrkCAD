@@ -95,7 +95,7 @@ static wPos_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 	((wPos_t)(xx))
 
 #define YDRAWPIX2WINPIX( d, y ) \
-	((wPos_t)(d->h)-2 - ((wPos_t))(y))
+	((wPos_t)(d->h - 2 - y))
 #endif
 
 /*
@@ -1085,10 +1085,10 @@ void wDrawPolygon(
             nextNode = (i == cnt - 1) ? 0 : i + 1;
 
             // calculate distance to neighboring nodes
-            int prevXDistance = node[i][0] - node[prevNode][0];
-            int prevYDistance = node[i][1] - node[prevNode][1];
-            int nextXDistance = node[nextNode][0]-node[i][0];
-            int nextYDistance = node[nextNode][1]-node[i][1];
+            int prevXDistance = (wPos_t)(node[i][0] - node[prevNode][0]);
+            int prevYDistance = (wPos_t)(node[i][1] - node[prevNode][1]);
+            int nextXDistance = (wPos_t)(node[nextNode][0]-node[i][0]);
+            int nextYDistance = (wPos_t)(node[nextNode][1]-node[i][1]);
 
             // distance from node to endpoints of curve is half the line length
             endPoint0.x = (prevXDistance/2)+node[prevNode][0];
@@ -1199,7 +1199,7 @@ void wDrawFilledCircle(
 		if ( r > MAX_FILLCIRCLE_POINTS )
 			cnt = MAX_FILLCIRCLE_POINTS;
 		else if ( r > 8 )
-			cnt = XDRAWPIX2WINPIX(r);
+			cnt = XDRAWPIX2WINPIX(d,r);
 		else
 			cnt = 8;
 		dang = 360.0/cnt;
@@ -1401,21 +1401,21 @@ void wDrawBitMap(
 		if ( bm->bm )
 			DeleteObject( bm->bm );
 		bm->bm = mswCreateBitMap( mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/, RGB( 255, 255, 255 ),
-				RGB( 255, 255, 255 ), bm->w, bm->h, bm->bmx );
+				RGB( 255, 255, 255 ), (wPos_t)bm->w, (wPos_t)bm->h, bm->bmx );
 		bm->color = dc;
 	}
 
 	bmDc = CreateCompatibleDC( d->hDc );
 	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	oldBm = SelectObject( bmDc, bm->bm );
-	BitBlt( d->hDc, x0, y0, bm->w, bm->h, bmDc, 0, 0, mode );
+	BitBlt( d->hDc, x0, y0, (wPos_t)bm->w, (wPos_t)bm->h, bmDc, 0, 0, mode );
 	SelectObject( bmDc, oldBm );
 	DeleteDC( bmDc );
 	if (d->hWnd) {
 	rect.top = y0-1;
-	rect.bottom = rect.top+ bm->h+1;
+	rect.bottom = rect.top+ (wPos_t)bm->h+1;
 	rect.left = x0-1;
-	rect.right = rect.left+ bm->w+1;
+	rect.right = rect.left+ (wPos_t)bm->w+1;
 	myInvalidateRect( d, &rect );
 	}
 }
