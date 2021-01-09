@@ -95,7 +95,7 @@ static wPos_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 	((wPos_t)(xx))
 
 #define YDRAWPIX2WINPIX( d, y ) \
-	((wPos_t)(d->h - 2 - y))
+	(d->h - 2 - (wPos_t)(y))
 #endif
 
 /*
