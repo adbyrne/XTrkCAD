@@ -532,7 +532,7 @@ EXPORT void LayoutHotBar( void * redraw )
 	if (scaleicon<1.0) scaleicon=1.0;
 	if (scaleicon>2.0) scaleicon=2.0;
 	if (scaleicon>1.0) {
-		hotBarHeight *= scaleicon;
+		hotBarHeight = (wPos_t)(hotBarHeight*scaleicon);
 	}
 	if ( hotBarLabels) {
 	   hotBarHeight += wMessageGetHeight(0L);
