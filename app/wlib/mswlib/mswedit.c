@@ -122,12 +122,12 @@ void wStringSetValue(
 
 void wStringSetWidth(
 		wString_p b,
-		wPos_t w )
+		wWinPix_t w )
 {
 	int rc;
 	b->w = w;
 	rc = SetWindowPos( b->hWnd, HWND_TOP, 0, 0,
-		WPOS2PIX(b->w), WPOS2PIX(b->h), SWP_NOMOVE|SWP_NOZORDER );
+		b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
 }
 
 
@@ -238,12 +238,12 @@ static callBacks_t stringCallBacks = {
 
 wString_p wStringCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		char	*valueP,
 		wIndex_t valueL,
 		wStringCallBack_p action,
@@ -266,8 +266,8 @@ wString_p wStringCreate(
 
 	b->hWnd = CreateWindowEx( WS_EX_CLIENTEDGE, "EDIT", NULL,
 						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
-						WPOS2PIX(b->x), WPOS2PIX(b->y),
-						WPOS2PIX(width), mswEditHeight,
+						b->x, b->y,
+						width, mswEditHeight,
 						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(STRING)");
@@ -457,12 +457,12 @@ static callBacks_t integerCallBacks = {
 
 wInteger_p wIntegerCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		long	low,
 		long	high,
 		long	*valueP,
@@ -678,12 +678,12 @@ static callBacks_t floatCallBacks = {
 
 wFloat_p wFloatCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		double	low,
 		double	high,
 		double	*valueP,

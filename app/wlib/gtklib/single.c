@@ -93,7 +93,7 @@ void wStringSetValue(
 
 void wStringSetWidth(
     wString_p b,
-    wPos_t w) 
+    wWinPix_t w) 
 {
 	gtk_widget_set_size_request(b->widget, w, -1);
 	b->w = w;
@@ -278,12 +278,12 @@ static void stringChanged(
 
 wString_p wStringCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	 *helpStr,
     const char	 *labelStr,
     long	option,
-    wPos_t	width,
+    wWinPix_t	width,
     char	*valueP,
     wIndex_t valueL,
     wStringCallBack_p action,

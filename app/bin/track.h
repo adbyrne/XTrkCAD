@@ -732,7 +732,7 @@ typedef struct {
 		int mode;
 		wControl_p control0;
 		wControl_p control1;
-		wPos_t posy;
+		wWinPix_t posy;
 		} descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );

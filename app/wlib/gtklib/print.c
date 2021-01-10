@@ -423,8 +423,8 @@ static void psSetColor(
  */
 
 void psPrintLine(
-    wPos_t x0, wPos_t y0,
-    wPos_t x1, wPos_t y1,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
     wDrawWidth width,
     wDrawLineType_e lineType,
     wDrawColor color,
@@ -462,8 +462,8 @@ void psPrintLine(
  */
 
 void psPrintArc(
-    wPos_t x0, wPos_t y0,
-    wPos_t r,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
     double angle0,
     double angle1,
     wBool_t drawCenter,
@@ -534,8 +534,8 @@ void psPrintArc(
  */
 
 void psPrintFillRectangle(
-    wPos_t x0, wPos_t y0,
-    wPos_t x1, wPos_t y1,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
     wDrawColor color,
     wDrawOpts opts)
 {
@@ -570,7 +570,7 @@ void psPrintFillRectangle(
  */
 
 void psPrintFillPolygon(
-    wPos_t p[][2],
+    wDrawPix_t p[][2],
 	wPolyLine_e type[],
     int cnt,
     wDrawColor color,
@@ -591,7 +591,7 @@ void psPrintFillPolygon(
 
     psSetColor(color);
 
-    wPos_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
+    wDrawPix_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
 
     for (inx=0; inx<cnt; inx++) {
     	int j = inx-1;
@@ -623,7 +623,7 @@ void psPrintFillPolygon(
 		mid3[1] = (p[inx][1]-mid0[1])/2+mid0[1];
 		mid4[0] = (mid1[0]-p[inx][0])/2+p[inx][0];
 		mid4[1] = (mid1[1]-p[inx][1])/2+p[inx][1];
-		wPos_t save[2];
+		wDrawPix_t save[2];
 		if (inx==0) {
 			 if (!type || (type && type[0] == wPolyLineStraight) || open) {
 				 cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
@@ -665,8 +665,8 @@ void psPrintFillPolygon(
  */
 
 void psPrintFillCircle(
-    wPos_t x0, wPos_t y0,
-    wPos_t r,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
     wDrawColor color,
     wDrawOpts opts)
 {
@@ -710,7 +710,7 @@ void psPrintFillCircle(
  */
 
 void psPrintString(
-    wPos_t x, wPos_t y,
+    wDrawPix_t x, wDrawPix_t y,
     double a,
     char * s,
     wFont_p fp,
@@ -816,7 +816,7 @@ void psPrintString(
  * \return
  */
 
-void wPrintClip(wPos_t x, wPos_t y, wPos_t w, wPos_t h)
+void wPrintClip(wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h)
 {
     cairo_move_to(psPrint_d.printContext, x, y);
     cairo_rel_line_to(psPrint_d.printContext, w, 0);

@@ -311,14 +311,14 @@ void wTextSetReadonly(
 
 void wTextSetSize(
     wText_p bt,
-    wPos_t width,
-    wPos_t height)
+    wWinPix_t width,
+    wWinPix_t height)
 {
     bt->w = width;
     bt->h = height;
 
     if (!SetWindowPos(bt->hWnd, HWND_TOP, 0, 0,
-		WPOS2PIX(bt->w), WPOS2PIX(bt->h), SWP_NOMOVE|SWP_NOZORDER)) {
+		bt->w, bt->h, SWP_NOMOVE|SWP_NOZORDER)) {
         mswFail("wTextSetSize: SetWindowPos");
     }
 }
@@ -326,13 +326,13 @@ void wTextSetSize(
 
 void wTextComputeSize(
     wText_p bt,
-    wPos_t rows,
-    wPos_t lines,
-    wPos_t * w,
-    wPos_t * h)
+    wWinPix_t rows,
+    wWinPix_t lines,
+    wWinPix_t * w,
+    wWinPix_t * h)
 {
-    static wPos_t scrollV_w = -1;
-    static wPos_t scrollH_h = -1;
+    static wWinPix_t scrollV_w = -1;
+    static wWinPix_t scrollH_h = -1;
     HDC hDc;
     TEXTMETRIC metrics;
 
@@ -346,8 +346,8 @@ void wTextComputeSize(
 
     hDc = GetDC(bt->hWnd);
     GetTextMetrics(hDc, &metrics);
-    *w = WPOS2PIX(rows) * metrics.tmAveCharWidth + scrollV_w;
-    *h = WPOS2PIX(lines) * (metrics.tmHeight + metrics.tmExternalLeading);
+    *w = rows * metrics.tmAveCharWidth + scrollV_w;
+    *h = lines * (metrics.tmHeight + metrics.tmExternalLeading);
     ReleaseDC(bt->hWnd, hDc);
 
     if (bt->option&BT_HSCROLL) {
@@ -381,13 +381,13 @@ static callBacks_t textCallBacks = {
 
 wText_p wTextCreate(
     wWin_p	parent,
-    POS_T	x,
-    POS_T	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char	* helpStr,
     const char	* labelStr,
     long	option,
-    POS_T	width,
-    POS_T	height)
+    wWinPix_t	width,
+    wWinPix_t	height)
 {
     wText_p b;
     DWORD style;
@@ -408,8 +408,8 @@ wText_p wTextCreate(
     /*	  if (option & BO_READONLY)
     		style |= ES_READONLY;*/
     b->hWnd = CreateWindow("EDIT", NULL,
-                           style, WPOS2PIX(b->x), WPOS2PIX(b->y),
-		                   WPOS2PIX(width), WPOS2PIX(height),
+                           style, b->x, b->y,
+		                   width, height,
                            ((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL);
 
     if (b->hWnd == NULL) {
@@ -430,11 +430,11 @@ wText_p wTextCreate(
     b->hText = (HANDLE)SendMessage(b->hWnd, EM_GETHANDLE, (WPARAM)0, (LPARAM)0);
 
     if (option & BT_CHARUNITS) {
-        wPos_t w, h;
-        wTextComputeSize(b, WPOS2PIX(width), WPOS2PIX(height), &w, &h);
+        wWinPix_t w, h;
+        wTextComputeSize(b, width, height, &w, &h);
 
         if (!SetWindowPos(b->hWnd, HWND_TOP, 0, 0,
-                          WPOS2PIX(w), WPOS2PIX(h), SWP_NOMOVE|SWP_NOZORDER)) {
+                          w, h, SWP_NOMOVE|SWP_NOZORDER)) {
             mswFail("wTextCreate: SetWindowPos");
         }
     }

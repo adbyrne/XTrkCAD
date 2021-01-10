@@ -24,10 +24,12 @@
 #include <assert.h>
 #include <string.h>
 
-#include "misc.h"
+//#include "misc.h"
 
 #include "gtkint.h"
 #include "i18n.h"
+
+extern wBool_t CheckHelpTopicExists(const char * topic);
 
 #include "dynstring.h"
 

@@ -1693,13 +1693,13 @@ void DrawHighlightLayer(int layer) {
 			if (layer_lo.y > lo.y ) layer_lo.y = lo.y;
 		}
 	}
-	wPos_t margin = (wPos_t)(10.5*mainD.scale/mainD.dpi);
+	wDrawPix_t margin = (10.5*mainD.scale/mainD.dpi);
 	layer_hi.x +=margin;
 	layer_hi.y +=margin;
 	layer_lo.x -=margin;
 	layer_lo.y -=margin;
 
-	wPos_t rect[4][2];
+	wDrawPix_t rect[4][2];
 	int type[4];
 	coOrd top_left, bot_right;
 	top_left.x = layer_lo.x; top_left.y = layer_hi.y;
@@ -2996,10 +2996,10 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select, track_p not_th
 		coOrd size;
 		size.x = max.x-origin.x;
 		size.y = max.y-origin.y;
-		wPos_t w,h;
-		w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5+10);
-		h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5+10);
-		wPos_t x, y;
+		wDrawPix_t w,h;
+		w = ((size.x/mainD.scale)*mainD.dpi+0.5+10);
+		h = ((size.y/mainD.scale)*mainD.dpi+0.5+10);
+		wDrawPix_t x, y;
 		tempD.CoOrd2Pix(&tempD,origin,&x,&y);
 		wDrawFilledRectangle(tempD.d, x-5, y-5, w, h, wDrawColorPowderedBlue, wDrawOptTemp|wDrawOptTransparent);
 	}
