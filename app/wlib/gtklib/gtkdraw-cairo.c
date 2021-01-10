@@ -72,14 +72,14 @@ struct wDrawBitMap_t {
 		//GdkGC * gc;
 		//wDrawWidth lineWidth;
 		//wDrawOpts opts;
-		//wPos_t maxW;
-		//wPos_t maxH;
+		//wWinPix_t maxW;
+		//wWinPix_t maxH;
 		//unsigned long lastColor;
 		//wBool_t lastColorInverted;
 		//const char * helpStr;
 
-		//wPos_t lastX;
-		//wPos_t lastY;
+		//wWinPix_t lastX;
+		//wWinPix_t lastY;
 
 		//wBool_t delayUpdate;
 		//};
@@ -326,7 +326,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 }
 
 #ifdef CURSOR_SURFACE
-cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wPos_t height, wDrawColor color, wDrawOpts opts) {
+cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width, wWinPix_t height, wDrawColor color, wDrawOpts opts) {
 
 		cairo_t * cairo = NULL;
 
@@ -1066,8 +1066,8 @@ static void wlibDrawFilled(
 
  void wDrawSetSize(
 		wDraw_p bd,
-		wPos_t w,
-		wPos_t h , void * redraw)
+		wWinPix_t w,
+		wWinPix_t h , void * redraw)
 {
 	wBool_t repaint;
 	if (bd == NULL) {
@@ -1102,8 +1102,8 @@ static void wlibDrawFilled(
 
  void wDrawGetSize(
 		wDraw_p bd,
-		wPos_t *w,
-		wPos_t *h )
+		wWinPix_t *w,
+		wWinPix_t *h )
 {
 	if (bd->widget)
 		wlibControlGetSize( (wControl_p)bd );
@@ -1146,10 +1146,10 @@ static void wlibDrawFilled(
 		wDrawPix_t h )
 {
 	GdkRectangle rect;
-	rect.width = (wPos_t)w;
-	rect.height = (wPos_t)h;
-	rect.x = (wPos_t)INMAPX( d, x );
-	rect.y = (wPos_t)INMAPY( d, y ) - rect.height;
+	rect.width = (wWinPix_t)w;
+	rect.height = (wWinPix_t)h;
+	rect.x = (wWinPix_t)INMAPX( d, x );
+	rect.y = (wWinPix_t)INMAPY( d, y ) - rect.height;
 	gdk_gc_set_clip_rectangle( d->gc, &rect );
 
 }
@@ -1533,12 +1533,12 @@ int xw, xh, cw, ch;
 
  wDraw_p wDrawCreate(
 		wWin_p	parent,
-		wPos_t	x,
-		wPos_t	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char 	* helpStr,
 		long	option,
-		wPos_t	width,
-		wPos_t	height,
+		wWinPix_t	width,
+		wWinPix_t	height,
 		void	* context,
 		wDrawRedrawCallBack_p redraw,
 		wDrawActionCallBack_p action )
@@ -1627,7 +1627,7 @@ int xw, xh, cw, ch;
  *
 *******************************************************************************/
 
-wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
+wDraw_p wBitMapCreate(          wWinPix_t w, wWinPix_t h, int arg )
 {
 	wDraw_p bd;
 
@@ -1695,7 +1695,7 @@ int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
 
 }
 
-void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, wAngle_t angle, int screen) {
+void wDrawShowBackground( wDraw_p bd, wWinPix_t pos_x, wWinPix_t pos_y, wWinPix_t size, wAngle_t angle, int screen) {
 
 	if (bd->background) {
 		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, bd->bTempMode?wDrawOptTemp:0 );

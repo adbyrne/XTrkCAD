@@ -495,7 +495,7 @@ static char signalAspectEditScript[STR_LONG_SIZE];
 static long signalAspectEditIndex;
 
 static paramIntegerRange_t r1_3 = {1, 3};
-static wPos_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
+static wWinPix_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
 static const char * aspectListTitles[] = { N_("Name"), N_("Script") };
 static paramListData_t aspectListData = {10, 400, 2, aspectListWidths, aspectListTitles};
 

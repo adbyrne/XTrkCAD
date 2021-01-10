@@ -252,7 +252,7 @@ void mswDrawIcon(
  * \return    pointer to icon
  */
 
-wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor color )
+wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawColor color )
 {
 	int lineLength;
 	int i, j;
@@ -473,7 +473,7 @@ void wIconSetColor( wIcon_p ip, wDrawColor color )
  */
 
 void
-wIconDraw( wDraw_p d, wIcon_p bm, wPos_t x, wPos_t y )
+wIconDraw( wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y )
 {
 	mswDrawIcon( d->hDc, (int)x, (int)y, bm, FALSE, 0, 0 );
 }
@@ -489,7 +489,7 @@ wIconDraw( wDraw_p d, wIcon_p bm, wPos_t x, wPos_t y )
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long option, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long option, wIcon_p iconP )
 {
 	wBitmap_p control;
 	int index;

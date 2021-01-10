@@ -227,9 +227,9 @@ static void EasementDlgUpdate(
 static void LayoutEasementW(
 		paramData_t * pd,
 		int inx,
-		wPos_t colX,
-		wPos_t * x,
-		wPos_t * y )
+		wWinPix_t colX,
+		wWinPix_t * x,
+		wWinPix_t * y )
 {
 	if ( inx == 2 )
 		wControlSetPos( easementPLs[0].control, *x, wControlGetPosY(easementPLs[0].control) );

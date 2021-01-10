@@ -126,8 +126,8 @@ EXPORT DIST_T pixelBins = 80;
  *
  */
 
-static wPos_t infoHeight;
-static wPos_t textHeight;
+static wWinPix_t infoHeight;
+static wWinPix_t textHeight;
 EXPORT wWin_p mapW;
 EXPORT BOOL_T mapVisible;
 EXPORT BOOL_T magneticSnap;
@@ -151,10 +151,10 @@ static struct {
 		wStatus_p posX_m;
 		wStatus_p posY_m;
 		wStatus_p info_m;
-		wPos_t scale_w;
-		wPos_t count_w;
-		wPos_t pos_w;
-		wPos_t info_w;
+		wWinPix_t scale_w;
+		wWinPix_t count_w;
+		wWinPix_t pos_w;
+		wWinPix_t info_w;
 		wBox_p scale_b;
 		wBox_p count_b;
 		wBox_p posX_b;
@@ -1040,23 +1040,23 @@ EXPORT drawCmd_t mapD = {
  */
 
 
-static wPos_t info_yb_offset = 2;
-static wPos_t six = 2;
-static wPos_t info_xm_offset = 2;
-static wPos_t messageOrControlX = 0;
-static wPos_t messageOrControlY = 0;
+static wWinPix_t info_yb_offset = 2;
+static wWinPix_t six = 2;
+static wWinPix_t info_xm_offset = 2;
+static wWinPix_t messageOrControlX = 0;
+static wWinPix_t messageOrControlY = 0;
 #define NUM_INFOCTL				(4)
 static wControl_p curInfoControl[NUM_INFOCTL];
-static wPos_t curInfoLabelWidth[NUM_INFOCTL];
+static wWinPix_t curInfoLabelWidth[NUM_INFOCTL];
 
 /**
  * Determine the width of a mouse pointer position string ( coordinate plus label ).
  *
  * \return width of position string
  */
-static wPos_t GetInfoPosWidth( void )
+static wWinPix_t GetInfoPosWidth( void )
 {
-	wPos_t labelWidth;
+	wWinPix_t labelWidth;
 	
 	DIST_T dist;
 		if ( mapD.size.x > mapD.size.y )
@@ -1092,7 +1092,7 @@ static wPos_t GetInfoPosWidth( void )
 
 EXPORT void InitInfoBar( void )
 {
-	wPos_t width, height, y, yb, ym, x, boxH;
+	wWinPix_t width, height, y, yb, ym, x, boxH;
 	wWinGetSize( mainW, &width, &height );
 	infoHeight = 2 + wStatusGetHeight( COMBOBOX ) + 2 ;
 	textHeight = wStatusGetHeight(0L);
@@ -1133,7 +1133,7 @@ EXPORT void InitInfoBar( void )
 
 static void SetInfoBar( void )
 {
-	wPos_t width, height, y, yb, ym, x, boxH;
+	wWinPix_t width, height, y, yb, ym, x, boxH;
 	int inx;
 	static long oldDistanceFormat = -1;
 	long newDistanceFormat;
@@ -1174,7 +1174,7 @@ static void SetInfoBar( void )
 		if (curInfoControl[0]) {
 			for ( inx=0; curInfoControl[inx]; inx++ ) {
 				x += curInfoLabelWidth[inx];
-				wPos_t y_this = ym + (textHeight/2) - (wControlGetHeight( curInfoControl[inx] )/2);
+				wWinPix_t y_this = ym + (textHeight/2) - (wControlGetHeight( curInfoControl[inx] )/2);
 				wControlSetPos( curInfoControl[inx], x, y_this );
 				x += wControlGetWidth( curInfoControl[inx] )+3;
 				wControlShow( curInfoControl[inx], TRUE );
@@ -1218,7 +1218,7 @@ EXPORT void InfoSubstituteControls(
 		wControl_p * controls,
 		char ** labels )
 {
-	wPos_t x, y;
+	wWinPix_t x, y;
 	int inx;
 	for ( inx=0; inx<NUM_INFOCTL; inx++ ) {
 		if (curInfoControl[inx]) {
@@ -1246,9 +1246,9 @@ EXPORT void InfoSubstituteControls(
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
 #ifdef WINDOWS
-		wPos_t	y_this = y + (infoHeight/2) - (textHeight / 2 );
+		wWinPix_t	y_this = y + (infoHeight/2) - (textHeight / 2 );
 #else
-		wPos_t	y_this = y + (infoHeight / 2) - (wControlGetHeight(controls[inx]) / 2) - 2;
+		wWinPix_t	y_this = y + (infoHeight / 2) - (wControlGetHeight(controls[inx]) / 2) - 2;
 #endif
 		wControlSetPos( controls[inx], x, y_this );
 		x += wControlGetWidth( controls[inx] );
@@ -1270,16 +1270,16 @@ EXPORT void SetMessage( char * msg )
 
 static void ChangeMapScale( BOOL_T reset )
 {
-	wPos_t w, h;
-	wPos_t dw, dh;
+	wWinPix_t w, h;
+	wWinPix_t dw, dh;
 	FLOAT_T fw, fh;
 
 
     fw = (((mapD.size.x/mapD.scale)*mapD.dpi) + 0.5)+2;
     fh = (((mapD.size.y/mapD.scale)*mapD.dpi) + 0.5)+2;
 
-	w = (wPos_t)fw;
-	h = (wPos_t)fh;
+	w = (wWinPix_t)fw;
+	h = (wWinPix_t)fh;
 	if (reset) {
 		wGetDisplaySize( &dw, &dh );
 		wSetGeometry(mapW, 50, dw, 50, dh, -1, -1, mapD.size.x/mapD.size.y);
@@ -1368,7 +1368,7 @@ static void MapProc( wWin_p win, winProcEvent e, void * data )
 
 EXPORT void SetMainSize( void )
 {
-	wPos_t ww, hh;
+	wWinPix_t ww, hh;
 	DIST_T w, h;
 	wDrawGetSize( mainD.d, &ww, &hh );
 	ww -= LBORDER+RBORDER;
@@ -1426,11 +1426,11 @@ EXPORT void MainRedraw( void )
 	size = mainD.size;
 	orig.x -= LBORDER/mainD.dpi*mainD.scale;
 	orig.y -= BBORDER/mainD.dpi*mainD.scale;
-	wPos_t back_x,back_y;
+	wWinPix_t back_x,back_y;
 	coOrd back_pos = GetLayoutBackGroundPos();
-	back_x = (wPos_t)((back_pos.x-orig.x)/mainD.scale*mainD.dpi);
-	back_y = (wPos_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
-	wPos_t back_width = (wPos_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
+	back_x = (wWinPix_t)((back_pos.x-orig.x)/mainD.scale*mainD.dpi);
+	back_y = (wWinPix_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
+	wWinPix_t back_width = (wWinPix_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
 
 	DrawRoomWalls( TRUE );
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
@@ -1473,7 +1473,7 @@ EXPORT void MainLayout(
 	wBool_t bNoBorder )
 {
 #ifdef LATER
-   wPos_t ww, hh;
+   wWinPix_t ww, hh;
    DIST_T w, h;
 #endif
 
@@ -1549,7 +1549,7 @@ EXPORT void MainLayout(
 
 void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 {
-	wPos_t width, height;
+	wWinPix_t width, height;
 	switch( e ) {
 	case wResize_e:
 		if (mainD.d == NULL)
@@ -2681,7 +2681,7 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wDrawPix_t x,
 {
 	coOrd pos;
 	coOrd orig;
-	wPos_t w, h;
+	wWinPix_t w, h;
 	static wDrawPix_t lastX, lastY;
 	DIST_T minDist;
 	wDrawGetSize( mainD.d, &w, &h );
@@ -2818,7 +2818,7 @@ static void MapDlgUpdate(
 		int inx,
 		void * valueP )
 {
-	wPos_t width,height;
+	wWinPix_t width,height;
 	switch(inx) {
 		case wResize_e:
 			if (mapD.d == NULL)
@@ -2869,7 +2869,7 @@ static void DrawChange( long changes )
 
 
 static void MainLayoutCB(
-	wDraw_p bd, void * pContex, wPos_t px, wPos_t py )
+	wDraw_p bd, void * pContex, wWinPix_t px, wWinPix_t py )
 {
 	MainLayout( TRUE, FALSE );
 }
@@ -2877,7 +2877,7 @@ static void MainLayoutCB(
 
 EXPORT void DrawInit( int initialZoom )
 {
-	wPos_t w, h;
+	wWinPix_t w, h;
 
 
 	wWinGetSize( mainW, &w, &h );
@@ -2916,8 +2916,8 @@ EXPORT void DrawInit( int initialZoom )
 	panCenter.x = mainD.size.x/2 +mainD.orig.x;
 	panCenter.y = mainD.size.y/2 +mainD.orig.y;
 	mapD.scale = mapScale;
-	/*w = (wPos_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
-	/*h = (wPos_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
+	/*w = (wWinPix_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
+	/*h = (wWinPix_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	ParamRegister( &mapPG );
 	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL, FALSE, NULL, F_RESIZE, MapDlgUpdate );
 	ChangeMapScale(TRUE);

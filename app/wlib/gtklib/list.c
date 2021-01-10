@@ -433,7 +433,7 @@ void wListDelete(
 int wListGetColumnWidths(
     wList_p bl,
     int colCnt,
-    wPos_t * colWidths)
+    wWinPix_t * colWidths)
 {
     int inx;
 
@@ -517,7 +517,7 @@ wIndex_t wListAddValue(
  * \param h IN height (ignored for droplist)
  */
 
-void wListSetSize(wList_p bl, wPos_t w, wPos_t h)
+void wListSetSize(wList_p bl, wWinPix_t w, wWinPix_t h)
 {
     if (bl->type == B_DROPLIST) {
         gtk_widget_set_size_request(bl->widget, w, -1);
@@ -541,13 +541,13 @@ void wListSetSize(wList_p bl, wPos_t w, wPos_t h)
 
 wList_p wComboListCreate(
     wWin_p	parent,		/* Parent window */
-    wPos_t	x,		/* X-position */
-    wPos_t	y,		/* Y-position */
+    wWinPix_t	x,		/* X-position */
+    wWinPix_t	y,		/* Y-position */
     const char 	* helpStr,	/* Help string */
     const char	* labelStr,	/* Label */
     long	option,		/* Options */
     long	number,		/* Number of displayed list entries */
-    wPos_t	width,		/* Width */
+    wWinPix_t	width,		/* Width */
     long	*valueP,	/* Selected index */
     wListCallBack_p action,	/* Callback */
     void 	*data)		/* Context */

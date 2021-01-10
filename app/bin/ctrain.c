@@ -634,7 +634,7 @@ typedef struct {
 static trainControlDlg_t * curTrainDlg;
 
 
-static void SpeedRedraw(wDraw_p, void *, wPos_t, wPos_t);
+static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
 static void SpeedAction(wAction_t, coOrd);
 static void LocoListChangeEntry(track_p, track_p);
 static void CmdTrainExit(void *);
@@ -724,8 +724,8 @@ static wIndex_t FindLoco(
 static void SpeedRedraw(
     wDraw_p d,
     void * context,
-    wPos_t w,
-    wPos_t h)
+    wWinPix_t w,
+    wWinPix_t h)
 {
     wDrawPix_t y, pts[4][2];
     trainControlDlg_p dlg = (trainControlDlg_p)context;
@@ -2495,7 +2495,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
     EPINX_T ep0, ep1;
     int dir;
     struct extraData * xx=NULL;
-    wPos_t w, h;
+    wWinPix_t w, h;
 
     switch (action) {
     case C_START:

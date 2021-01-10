@@ -1496,7 +1496,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 	track_p trk;
 	coOrd pos;
 	wDrawPix_t x, y;
-	wPos_t ww, hh;
+	wWinPix_t ww, hh;
 	wBool_t offscreen = FALSE;
 
 	double xmin = 0.0;

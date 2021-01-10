@@ -144,17 +144,17 @@ EXPORT DIST_T easeR = 0.0;
 EXPORT DIST_T easeL = 0.0;
 EXPORT coOrd cmdMenuPos;
 
-EXPORT wPos_t DlgSepLeft = 12;
-EXPORT wPos_t DlgSepMid = 18;
-EXPORT wPos_t DlgSepRight = 12;
-EXPORT wPos_t DlgSepTop = 12;
-EXPORT wPos_t DlgSepBottom = 12;
-EXPORT wPos_t DlgSepNarrow = 6;
-EXPORT wPos_t DlgSepWide = 12;
-EXPORT wPos_t DlgSepFrmLeft = 4;
-EXPORT wPos_t DlgSepFrmRight = 4;
-EXPORT wPos_t DlgSepFrmTop = 4;
-EXPORT wPos_t DlgSepFrmBottom = 4;
+EXPORT wWinPix_t DlgSepLeft = 12;
+EXPORT wWinPix_t DlgSepMid = 18;
+EXPORT wWinPix_t DlgSepRight = 12;
+EXPORT wWinPix_t DlgSepTop = 12;
+EXPORT wWinPix_t DlgSepBottom = 12;
+EXPORT wWinPix_t DlgSepNarrow = 6;
+EXPORT wWinPix_t DlgSepWide = 12;
+EXPORT wWinPix_t DlgSepFrmLeft = 4;
+EXPORT wWinPix_t DlgSepFrmRight = 4;
+EXPORT wWinPix_t DlgSepFrmTop = 4;
+EXPORT wWinPix_t DlgSepFrmBottom = 4;
 
 static int verbose = 0;
 
@@ -166,8 +166,8 @@ static long stickyCnt = 0;
 static char * stickyLabels[33];
 #define TOOLBARSET_INIT				(0xFFFF)
 EXPORT long toolbarSet = TOOLBARSET_INIT;
-EXPORT wPos_t toolbarHeight = 0;
-static wPos_t toolbarWidth = 0;
+EXPORT wWinPix_t toolbarHeight = 0;
+static wWinPix_t toolbarWidth = 0;
 
 static wMenuList_p messageList_ml;
 static BOOL_T messageListEmpty = TRUE;
@@ -694,7 +694,7 @@ static void ChkFileList(int index, const char * label, void * data) {
  */
 
 EXPORT void SaveState(void) {
-	wPos_t width, height;
+	wWinPix_t width, height;
 	const char * fileName;
 	void * pathName;
 	char file[6];
@@ -907,7 +907,7 @@ EXPORT void SelectFont(void) {
 static struct {
 	wControl_p control;
 	wBool_t enabled;
-	wPos_t x, y;
+	wWinPix_t x, y;
 	long options;
 	int group;
 	wIndex_t cmdInx;
@@ -1437,11 +1437,11 @@ static void DoCommandBIndirect(void * cmdInxP) {
 }
 
 EXPORT void LayoutSetPos(wIndex_t inx) {
-	wPos_t w, h, offset;
-	static wPos_t toolbarRowHeight = 0;
-	static wPos_t width;
+	wWinPix_t w, h, offset;
+	static wWinPix_t toolbarRowHeight = 0;
+	static wWinPix_t width;
 	static int lastGroup;
-	static wPos_t gap;
+	static wWinPix_t gap;
 	static int layerButtCnt;
 	static int layerButtNumber;
 	int currGroup;
@@ -1606,7 +1606,7 @@ EXPORT wButton_p AddToolbarButton(char * helpStr, wIcon_p icon, long options,
 }
 
 EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
-	wPos_t cmdX, cmdY;
+	wWinPix_t cmdX, cmdY;
 
 	if (buttInx < 0 || buttInx >= buttonCnt)
 		return;
@@ -1614,7 +1614,7 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 		return;
 	cmdX = buttonList[buttInx].x + 17;
 	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-			+ (wPos_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
+			+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
 
 	MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
 	if (playbackTimer == 0) {
@@ -1768,11 +1768,11 @@ EXPORT void PlaybackCommand(char * line, wIndex_t lineNum) {
 		fprintf(stderr, "Unknown playback COMMAND command %d : %s\n", lineNum,
 				line);
 	} else {
-		wPos_t cmdX, cmdY;
+		wWinPix_t cmdX, cmdY;
 		if ((buttInx = commandList[inx].buttInx) >= 0) {
 			cmdX = buttonList[buttInx].x + 17;
 			cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-					+ (wPos_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
+					+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
 			MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
@@ -1975,7 +1975,7 @@ static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void *);
 
-static paramFloatRange_t rn360_360 = { -360.0, 360.0, (wPos_t)80.0 };
+static paramFloatRange_t rn360_360 = { -360.0, 360.0, (wWinPix_t)80.0 };
 static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE,
 		&rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
@@ -2843,8 +2843,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	char *oldLocale = NULL;
 	char buffer[STR_SIZE];
 	unsigned int i;
-	wPos_t displayWidth;
-	wPos_t displayHeight;
+	wWinPix_t displayWidth;
+	wWinPix_t displayHeight;
 
 	strcpy(buffer, sProdNameLower);
 

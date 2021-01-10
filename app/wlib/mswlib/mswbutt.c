@@ -86,7 +86,7 @@ static void drawButton(
 	HPEN oldPen, newPen;
 	RECT rect;
 	COLORREF color1, color2;
-	wPos_t offw=5, offh=5;
+	wWinPix_t offw=5, offh=5;
 	TRIVERTEX        vert[2] ;
 	GRADIENT_RECT    gRect;
 
@@ -202,7 +202,7 @@ static void buttDrawIcon(
 		HDC butt_hDc )
 {
 		wIcon_p bm = b->icon;
-		wPos_t offw=5, offh=5;
+		wWinPix_t offw=5, offh=5;
 
 		if (b->selected || b->busy) {
 			offw++; offh++;
@@ -415,12 +415,12 @@ static callBacks_t buttonCallBacks = {
 
 wButton_p wButtonCreate(
 		wWin_p	parent,
-		wPos_t	x,
-		wPos_t	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		wPos_t	width,
+		wWinPix_t	width,
 		wButtonCallBack_p action,
 		void	* data )
 {
@@ -446,11 +446,11 @@ wButton_p wButtonCreate(
 	b->selected = 0;
 	mswComputePos( (wControl_p)b, x, y );
 	if (b->option&BO_ICON) {
-		width = (wPos_t)ceil(bm->w*scaleIcon)+10;
+		width = (wWinPix_t)ceil(bm->w*scaleIcon)+10;
 		h = (int)ceil(bm->h*scaleIcon)+10;
 		b->icon = bm;
 	} else {
-		width = (wPos_t)(width*mswScale);
+		width = (wWinPix_t)(width*mswScale);
 	}
 	style = ((b->option&BO_ICON)? BS_OWNERDRAW : BS_PUSHBUTTON) |
 				WS_CHILD | WS_VISIBLE |

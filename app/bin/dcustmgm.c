@@ -55,7 +55,7 @@ static void CustomNewCar( void * action );
 static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
 static wIndex_t selectedType;
 
-static wPos_t customListWidths[] = { 18, 100, 30, 80, 220 };
+static wWinPix_t customListWidths[] = { 18, 100, 30, 80, 220 };
 static const char * customListTitles[] = { "", N_("Manufacturer"),
 	N_("Scale"), N_("Part No"), N_("Description") };
 static paramListData_t customListData = { 10, 400, 5, customListWidths, customListTitles };

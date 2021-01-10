@@ -129,11 +129,11 @@ void static CreateMoveAnchor(coOrd pos) {
 static void LayoutElevW(
 		paramData_t * pd,
 		int inx,
-		wPos_t colX,
-		wPos_t * x,
-		wPos_t * y )
+		wWinPix_t colX,
+		wWinPix_t * x,
+		wWinPix_t * y )
 {
-	static wPos_t h = 0;
+	static wWinPix_t h = 0;
 	switch ( inx ) {
 	case I_HEIGHT:
 		h = wControlGetHeight( elevationPLs[I_MODE].control )/((sizeof elevModeLabels/sizeof elevModeLabels[0])-1);

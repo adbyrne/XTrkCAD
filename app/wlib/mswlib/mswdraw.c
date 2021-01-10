@@ -58,29 +58,29 @@ static long clrOp = 0xbb0226;
 static bool bDrawMainBM = 0;
 
 #ifdef SLOW
-static wDrawPix_t XWINPIX2DRAWPIX( wDraw_p d, wPos_t ix )
+static wDrawPix_t XWINPIX2DRAWPIX( wDraw_p d, wWinPix_t ix )
 {
 	return (wDrawPix_t)ix;
 }
 
-static wDrawPix_t YWINPIX2DRAWPIX( wDraw_p d, wPos_t iy )
+static wDrawPix_t YWINPIX2DRAWPIX( wDraw_p d, wWinPix_t iy )
 {
-	wPos_t y;
+	wWinPix_t y;
 	y = (wDrawPix_t)(d->h-2-iy);
 	return y;
 }
 
-static wPos_t XDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t xx )
+static wWinPix_t XDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t xx )
 {
-	wPos_t ix;
-	ix = (wPos_t)(xx);
+	wWinPix_t ix;
+	ix = (wWinPix_t)(xx);
 	return ix;
 }
 
-static wPos_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
+static wWinPix_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 {
-	wPos_t iy;
-	iy = (d->h)-2 - (wPos_t)(y);
+	wWinPix_t iy;
+	iy = (d->h)-2 - (wWinPix_t)(y);
 	return iy;
 }
 
@@ -92,10 +92,10 @@ static wPos_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 	((wDrawPix_t)(d->h-2-iy))
 
 #define XDRAWPIX2WINPIX( d, xx ) \
-	((wPos_t)(xx))
+	((wWinPix_t)(xx))
 
 #define YDRAWPIX2WINPIX( d, y ) \
-	(d->h - 2 - (wPos_t)(y))
+	(d->h - 2 - (wWinPix_t)(y))
 #endif
 
 /*
@@ -734,7 +734,7 @@ void wDrawGetTextSize(
 		wFont_p fp,
 		double siz )
 {
-	wPos_t x, y;
+	wWinPix_t x, y;
 	HFONT newFont, prevFont;
 	DWORD extent;
 	int oldLfHeight;
@@ -1085,10 +1085,10 @@ void wDrawPolygon(
             nextNode = (i == cnt - 1) ? 0 : i + 1;
 
             // calculate distance to neighboring nodes
-            int prevXDistance = (wPos_t)(node[i][0] - node[prevNode][0]);
-            int prevYDistance = (wPos_t)(node[i][1] - node[prevNode][1]);
-            int nextXDistance = (wPos_t)(node[nextNode][0]-node[i][0]);
-            int nextYDistance = (wPos_t)(node[nextNode][1]-node[i][1]);
+            int prevXDistance = (wWinPix_t)(node[i][0] - node[prevNode][0]);
+            int prevYDistance = (wWinPix_t)(node[i][1] - node[prevNode][1]);
+            int nextXDistance = (wWinPix_t)(node[nextNode][0]-node[i][0]);
+            int nextYDistance = (wWinPix_t)(node[nextNode][1]-node[i][1]);
 
             // distance from node to endpoints of curve is half the line length
             endPoint0.x = (prevXDistance/2)+node[prevNode][0];
@@ -1283,8 +1283,8 @@ void wDrawClear( wDraw_p d )
 
 void wDrawSetSize(
 		wDraw_p d,
-		wPos_t width,
-		wPos_t height, void * redraw)
+		wWinPix_t width,
+		wWinPix_t height, void * redraw)
 {
 	d->w = width;
 	d->h = height;
@@ -1298,8 +1298,8 @@ void wDrawSetSize(
 
 void wDrawGetSize(
 		wDraw_p d,
-		wPos_t * width,
-		wPos_t * height )
+		wWinPix_t * width,
+		wWinPix_t * height )
 {
 	*width = d->w-2;
 	*height = d->h-2;
@@ -1329,7 +1329,7 @@ void wDrawClip(
 		wDrawPix_t w,
 		wDrawPix_t h )
 {
-	wPos_t ix0, iy0, ix1, iy1;
+	wWinPix_t ix0, iy0, ix1, iy1;
 	HRGN hRgnClip;
 	ix0 = XDRAWPIX2WINPIX(d,x);
 	iy0 = YDRAWPIX2WINPIX(d,y);
@@ -1401,21 +1401,21 @@ void wDrawBitMap(
 		if ( bm->bm )
 			DeleteObject( bm->bm );
 		bm->bm = mswCreateBitMap( mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/, RGB( 255, 255, 255 ),
-				RGB( 255, 255, 255 ), (wPos_t)bm->w, (wPos_t)bm->h, bm->bmx );
+				RGB( 255, 255, 255 ), (wWinPix_t)bm->w, (wWinPix_t)bm->h, bm->bmx );
 		bm->color = dc;
 	}
 
 	bmDc = CreateCompatibleDC( d->hDc );
 	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	oldBm = SelectObject( bmDc, bm->bm );
-	BitBlt( d->hDc, x0, y0, (wPos_t)bm->w, (wPos_t)bm->h, bmDc, 0, 0, mode );
+	BitBlt( d->hDc, x0, y0, (wWinPix_t)bm->w, (wWinPix_t)bm->h, bmDc, 0, 0, mode );
 	SelectObject( bmDc, oldBm );
 	DeleteDC( bmDc );
 	if (d->hWnd) {
 	rect.top = y0-1;
-	rect.bottom = rect.top+ (wPos_t)bm->h+1;
+	rect.bottom = rect.top+ (wWinPix_t)bm->h+1;
 	rect.left = x0-1;
-	rect.right = rect.left+ (wPos_t)bm->w+1;
+	rect.right = rect.left+ (wWinPix_t)bm->w+1;
 	myInvalidateRect( d, &rect );
 	}
 }
@@ -1469,7 +1469,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 {
 	long inx = GetWindowLong( hWnd, GWL_ID );
 	wDraw_p b;
-	wPos_t ix, iy;
+	wWinPix_t ix, iy;
 	wDrawPix_t x, y;
 	HDC hDc;
 	PAINTSTRUCT ps;
@@ -1814,12 +1814,12 @@ void mswRepaintAll( void )
 
 wDraw_p wDrawCreate(
 		wWin_p parent,
-		wPos_t x,
-		wPos_t y,
+		wWinPix_t x,
+		wWinPix_t y,
 		const char * helpStr,
 		long option,
-		wPos_t w,
-		wPos_t h,
+		wWinPix_t w,
+		wWinPix_t h,
 		void * data,
 		wDrawRedrawCallBack_p redrawProc,
 		wDrawActionCallBack_p action )
@@ -1882,7 +1882,7 @@ wDraw_p wDrawCreate(
  *****************************************************************************
  */
 
-wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
+wDraw_p wBitMapCreate( wWinPix_t w, wWinPix_t h, int planes )
 {
 	wDraw_p d;
 	HDC hDc;

@@ -179,20 +179,20 @@ typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
 /*
  * Windows and buttons
  */
-extern wPos_t DlgSepLeft;
-extern wPos_t DlgSepMid;
-extern wPos_t DlgSepRight;
-extern wPos_t DlgSepTop;
-extern wPos_t DlgSepBottom;
-extern wPos_t DlgSepNarrow;
-extern wPos_t DlgSepWide;
-extern wPos_t DlgSepFrmLeft;
-extern wPos_t DlgSepFrmRight;
-extern wPos_t DlgSepFrmTop;
-extern wPos_t DlgSepFrmBottom;
+extern wWinPix_t DlgSepLeft;
+extern wWinPix_t DlgSepMid;
+extern wWinPix_t DlgSepRight;
+extern wWinPix_t DlgSepTop;
+extern wWinPix_t DlgSepBottom;
+extern wWinPix_t DlgSepNarrow;
+extern wWinPix_t DlgSepWide;
+extern wWinPix_t DlgSepFrmLeft;
+extern wWinPix_t DlgSepFrmRight;
+extern wWinPix_t DlgSepFrmTop;
+extern wWinPix_t DlgSepFrmBottom;
 
 extern wWin_p mainW;
-extern wPos_t toolbarHeight;
+extern wWinPix_t toolbarHeight;
 extern wIndex_t changed;
 extern char message[STR_HUGE_SIZE];
 extern REGION_T curRegion;

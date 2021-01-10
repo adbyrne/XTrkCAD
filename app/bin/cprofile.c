@@ -438,7 +438,7 @@ static void ProfileCoOrd2Pix(
 
 static void RedrawProfileW(void)
 {
-    wPos_t ww, hh;
+    wWinPix_t ww, hh;
     coOrd size;
     int divC;
     DIST_T maxE, rngE;

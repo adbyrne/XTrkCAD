@@ -764,7 +764,7 @@ static BOOL_T snapshotMouse = FALSE;
 EXPORT void TakeSnapshot( drawCmd_t * d )
 {
 	char * cp;
-	wPos_t ix, iy;
+	wWinPix_t ix, iy;
 	if (d->dpi < 0)
 		d->dpi = mainD.dpi;
 	if (d->scale < 0)
@@ -773,8 +773,8 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 		d->orig = mainD.orig;
 	if (d->size.x < 0 || d->size.y < 0)
 		d->size = mainD.size;
-	ix = (wPos_t)(d->dpi*d->size.x/d->scale);
-	iy = (wPos_t)(d->dpi*d->size.y/d->scale);
+	ix = (wWinPix_t)(d->dpi*d->size.x/d->scale);
+	iy = (wWinPix_t)(d->dpi*d->size.y/d->scale);
 	d->d = wBitMapCreate( ix, iy, 8 );
 	if (d->d == (wDraw_p)0) {
 		return;

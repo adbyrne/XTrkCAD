@@ -115,12 +115,12 @@ static void choiceShow(
 
 static void choiceSetPos(
 		wControl_p b,
-		wPos_t x,
-		wPos_t y )
+		wWinPix_t x,
+		wWinPix_t y )
 {
 	wChoice_p bc = (wChoice_p)b;
 	wChoiceItem_p * butts;
-	wPos_t dx, dy;
+	wWinPix_t dx, dy;
 
 	dx = x - bc->x;
 	dy = y - bc->y;
@@ -257,8 +257,8 @@ static callBacks_t choiceItemCallBacks = {
 static wChoice_p choiceCreate(
 		wType_e type,
 		wWin_p	parent,
-		wPos_t	x,
-		wPos_t	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
@@ -271,7 +271,7 @@ static wChoice_p choiceCreate(
 	const char ** lp;
 	int cnt;
 	wChoiceItem_p * butts;
-	wPos_t ppx, ppy;
+	wWinPix_t ppx, ppy;
 	int bs;
 	HDC hDc;
 	HWND hButt;
@@ -390,8 +390,8 @@ static wChoice_p choiceCreate(
 
 wChoice_p wRadioCreate(
 		wWin_p	parent,
-		wPos_t	x,
-		wPos_t	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
@@ -406,8 +406,8 @@ wChoice_p wRadioCreate(
 
 wChoice_p wToggleCreate(
 		wWin_p	parent,
-		wPos_t	x,
-		wPos_t	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
