@@ -127,7 +127,7 @@ void wStringSetWidth(
 	int rc;
 	b->w = w;
 	rc = SetWindowPos( b->hWnd, HWND_TOP, 0, 0,
-		b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
+				b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
 }
 
 

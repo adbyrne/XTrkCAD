@@ -533,7 +533,7 @@ static void listRepaintLabel(
 			rc.left = start;
 			if ( rc.left < bl->x+2 )
 				rc.left = bl->x+2;
-			rc.right = start+ colWidth;
+			rc.right = start+colWidth;
 			if ( rc.right > bl->x+bl->w-1 )
 				rc.right = bl->x+bl->w-1;
 			ExtTextOut( hDc, start+1, rc.top+0,
@@ -1048,7 +1048,7 @@ static wList_p listCreate(
 
 	b->hWnd = CreateWindow( className, NULL,
 				style | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x, b->y,
-		        width, LIST_HEIGHT*(int)number,
+				width, LIST_HEIGHT*(int)number,
 				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(LIST)");
@@ -1138,7 +1138,7 @@ wList_p wListCreate(
 		}
 		bl->hScrollWnd = CreateWindow( "ScrollBar", NULL,
 				SBS_HORZ | SBS_BOTTOMALIGN | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), bl->x, bl->y,
-			    width, CW_USEDEFAULT,
+				width, CW_USEDEFAULT,
 				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 		if (bl->hScrollWnd == NULL)
 			mswFail("CreateWindow(LISTSCROLL)");

@@ -300,7 +300,7 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawCol
 	 */
 	for( i = 0; i < ip->h; i++ ) {
 		dest = ip->pixels + i * lineLength;
-		memcpy( dest, bits + ( ip->h - i - 1 ) * ((ip->w + 7) / 8), (ip->w + 7 ) / 8 );
+		memcpy( dest, bits + ( ip->h - i - 1 ) * (( ip->w + 7) / 8), ( ip->w + 7 ) / 8 );
 
 		/*
 		 * and now, the bit order is changed, this is done via a lookup table
@@ -425,7 +425,7 @@ wIcon_p wIconCreatePixMap( char *pm[])
 		
 		cq = ip->pixels + lineLength * i;
 		/* get the next row */
-		cp = pm[ip->h - i + ip->colorcnt ];
+		cp = pm[ ip->h - i + ip->colorcnt ];
 		/* for all pixels in row */
 		for( j = 0; j < ip->w; j++ ) {
 			/* get the pixel info */

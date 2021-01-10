@@ -318,7 +318,7 @@ void wTextSetSize(
     bt->h = height;
 
     if (!SetWindowPos(bt->hWnd, HWND_TOP, 0, 0,
-		bt->w, bt->h, SWP_NOMOVE|SWP_NOZORDER)) {
+                      bt->w, bt->h, SWP_NOMOVE|SWP_NOZORDER)) {
         mswFail("wTextSetSize: SetWindowPos");
     }
 }
@@ -409,7 +409,7 @@ wText_p wTextCreate(
     		style |= ES_READONLY;*/
     b->hWnd = CreateWindow("EDIT", NULL,
                            style, b->x, b->y,
-		                   width, height,
+                           width, height,
                            ((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL);
 
     if (b->hWnd == NULL) {
