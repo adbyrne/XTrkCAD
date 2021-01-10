@@ -72,10 +72,10 @@ GdkPixbuf* wlibMakePixbuf(
         pixmapData[2] = line2;
         bits = ip->bits;
 
-        for (row = 0; row<(ip->h); row++) {
-            pixmapData[row+3] = (char*)g_malloc(((ip->w+1)) * sizeof **pixmapData);
+        for (row = 0; row<ip->h; row++) {
+            pixmapData[row+3] = (char*)g_malloc((ip->w+1) * sizeof **pixmapData);
 
-            for (col = 0; col<(ip->w); col++) {
+            for (col = 0; col<ip->w; col++) {
                 if (bits[ row*wb+(col>>3) ] & (1<<(col&07))) {
                     pixmapData[row+3][col] = '#';
                 } else {
@@ -83,12 +83,12 @@ GdkPixbuf* wlibMakePixbuf(
                 }
             }
 
-            pixmapData[row+3][(ip->w)] = 0;
+            pixmapData[row+3][ip->w] = 0;
         }
 
         pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)pixmapData);
 
-        for (row = 0; row<(ip->h); row++) {
+        for (row = 0; row<ip->h; row++) {
             g_free(pixmapData[row+3]);
         }
     }
