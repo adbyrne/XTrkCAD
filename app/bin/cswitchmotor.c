@@ -759,11 +759,11 @@ static POS_T swmhiliteBorder;
 static wDrawColor swmhiliteColor = 0;
 static void DrawSWMotorTrackHilite( void )
 {
-	wPos_t x, y, w, h;
+	wDrawPix_t x, y, w, h;
 	if (swmhiliteColor==0)
 		swmhiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = ((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = ((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
 	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }

@@ -67,7 +67,7 @@ static wIndex_t structureInx;
 static long hideStructureWindow;
 static void RedrawStructure(void);
 
-static wPos_t structureListWidths[] = { 80, 80, 220 };
+static wWinPix_t structureListWidths[] = { 80, 80, 220 };
 static const char * structureListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, structureListWidths, structureListTitles };
 static const char * hideLabels[] = { N_("Hide"), NULL };
@@ -534,7 +534,7 @@ static wWin_p structureW;
 static void RescaleStructure( void )
 {
 	DIST_T xscale, yscale;
-	wPos_t ww, hh;
+	wWinPix_t ww, hh;
 	DIST_T w, h;
 	wDrawGetSize( structureD.d, &ww, &hh );
 	w = ww/structureD.dpi - 0.2;

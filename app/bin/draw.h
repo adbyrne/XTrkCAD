@@ -73,8 +73,8 @@ typedef struct {
     void (*drawFillCircle)(drawCmd_p, coOrd, DIST_T,  wDrawColor);
 } drawFuncs_t;
 
-typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wPos_t, wPos_t, coOrd *);
-typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wPos_t *, wPos_t *);
+typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
+typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wDrawPix_t *, wDrawPix_t *);
 typedef struct drawCmd_t {
     wDraw_p d;
     drawFuncs_t * funcs;
@@ -101,8 +101,8 @@ typedef struct drawCmd_t {
 #define RBORDER (9)
 #define TBORDER (8)
 
-void Pix2CoOrd(drawCmd_p, wPos_t, wPos_t, coOrd *);
-void CoOrd2Pix(drawCmd_p, coOrd, wPos_t *, wPos_t *);
+void Pix2CoOrd(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
+void CoOrd2Pix(drawCmd_p, coOrd, wDrawPix_t *, wDrawPix_t *);
 
 extern BOOL_T inError;
 extern DIST_T pixelBins;
@@ -115,7 +115,7 @@ extern drawCmd_t mapD;
 extern drawCmd_t tempD;
 #define RoomSize (mapD.size)
 extern coOrd oldMarker;
-extern wPos_t closePixels;
+extern wDrawPix_t closePixels;
 #define dragDistance	(dragPixels*mainD.scale / mainD.dpi)
 extern long dragPixels;
 extern long dragTimeout;
@@ -265,10 +265,10 @@ STATUS_T GridAction(wAction_t, coOrd, coOrd *, DIST_T *);
 
 void ResetMouseState(void);
 void FakeDownMouseState(void);
-void GetMousePosition(wPos_t  *x, wPos_t *y);
+void GetMousePosition(wDrawPix_t  *x, wDrawPix_t *y);
 void RecordMouse(char *, wAction_t, POS_T, POS_T);
 extern long playbackDelay;
-void MovePlaybackCursor(drawCmd_p, wPos_t, wPos_t, wBool_t, wControl_p);
+void MovePlaybackCursor(drawCmd_p, wDrawPix_t, wDrawPix_t, wBool_t, wControl_p);
 typedef void (*playbackProc)(wAction_t, coOrd);
 void PlaybackMouse(playbackProc, drawCmd_p, wAction_t, coOrd, wDrawColor);
 void RedrawPlaybackCursor();

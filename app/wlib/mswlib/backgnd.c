@@ -125,7 +125,7 @@ wDrawSetBackground(wDraw_p bd, char * path, char ** error)
 */
 
 void
-wDrawShowBackground(wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size,
+wDrawShowBackground(wDraw_p bd, wWinPix_t pos_x, wWinPix_t pos_y, wWinPix_t size,
                     wAngle_t angle, int screen)
 {
     if (bd->background) {
@@ -206,8 +206,8 @@ wDrawShowBackground(wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size,
         }
 
         SetDIBitsToDevice(bd->hDc,
-                          WPOS2PIX(pos_x),
-                          WPOS2PIX(bd->h) - WPOS2PIX(pos_y) - FreeImage_GetHeight(rotated),
+                          pos_x,
+                          bd->h - pos_y - FreeImage_GetHeight(rotated),
                           FreeImage_GetWidth(rotated),
                           FreeImage_GetHeight(rotated),
                           0, 0,

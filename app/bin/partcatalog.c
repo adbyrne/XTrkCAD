@@ -915,7 +915,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                     newEntry->contents = MyStrdup(foundEntry->contents);
                     newEntry->tag = MyStrdup(foundEntry->tag);
                     newEntry->files = foundEntry->files;
-                    for (int i=0;i<newEntry->files;i++) {
+                    for (unsigned int i=0;i<newEntry->files;i++) {
                     	newEntry->fullFileName[i] = MyStrdup(foundEntry->fullFileName[i]);
                     }
 
@@ -940,7 +940,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                         DL_DELETE(results->subCatalog.head, current);
                         MyFree(current->contents);
                         MyFree(current->tag);
-                        for (int i=0;i<current->files;i++) {
+                        for (unsigned int i=0;i<current->files;i++) {
                                MyFree(current->fullFileName[i]);
                         }
                         MyFree(current);

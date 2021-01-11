@@ -80,7 +80,7 @@ static void RedrawTurnout(void);
 static void SelTurnoutEndPt( wIndex_t, coOrd );
 static void HilightEndPt( void );
 
-static wPos_t turnoutListWidths[] = { 80, 80, 220 };
+static wWinPix_t turnoutListWidths[] = { 80, 80, 220 };
 static const char * turnoutListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, turnoutListWidths, turnoutListTitles };
 static const char * hideLabels[] = { N_("Hide"), NULL };
@@ -1999,7 +1999,7 @@ static wWin_p turnoutW;
 static void RescaleTurnout( void )
 {
 	DIST_T xscale, yscale;
-	wPos_t ww, hh;
+	wWinPix_t ww, hh;
 	DIST_T w, h;
 	wDrawGetSize( turnoutD.d, &ww, &hh );
 	w = ww/turnoutD.dpi;

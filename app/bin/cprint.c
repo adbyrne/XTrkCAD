@@ -423,8 +423,8 @@ static void PrintGaudyBox(
 
 
 static void PrintPlainBox(
-		wPos_t x,
-		wPos_t y,
+		int x,
+		int y,
 		coOrd *corners )
 {
 	coOrd p00, p01, p10, p11;
@@ -638,9 +638,9 @@ static int pmyoff=5;
 static void PrintMarginLayout(
 		paramData_t * pd,
 		int index,
-		wPos_t colX,
-		wPos_t * w,
-		wPos_t * h )
+		wWinPix_t colX,
+		wWinPix_t * w,
+		wWinPix_t * h )
 {
 	if ( index < I_PM_FIRST || index > (I_PM_MESSAGE) )
 		return;
@@ -648,7 +648,7 @@ static void PrintMarginLayout(
 		*h = wControlGetPosY( printMarginPLs[I_PM_FIRST+2].control ) + wControlGetHeight( printMarginPLs[I_PM_FIRST+2].control );
 		return;
 	}
-	wPos_t x0, y0;
+	wWinPix_t x0, y0;
 	x0 = (aPmLines[index-I_PM_FIRST].x0+aPmLines[index-I_PM_FIRST].x1)/2;
 	y0 = (aPmLines[index-I_PM_FIRST].y0+aPmLines[index-I_PM_FIRST].y1)/2;
 	x0 -= pmxoff;
@@ -1155,11 +1155,11 @@ static BOOL_T PrintPage(
 					}
 				}
 				if (printRotate) {
-					wPrintClip( (wPos_t)(clipOrig.y*print_d.dpi), (wPos_t)(clipOrig.x*print_d.dpi),
-							(wPos_t)(clipSize.y*print_d.dpi), (wPos_t)(clipSize.x*print_d.dpi) );
+					wPrintClip( (clipOrig.y*print_d.dpi), (clipOrig.x*print_d.dpi),
+							(clipSize.y*print_d.dpi), (clipSize.x*print_d.dpi) );
 				} else {
-					wPrintClip( (wPos_t)(clipOrig.x*print_d.dpi), (wPos_t)(clipOrig.y*print_d.dpi),
-							(wPos_t)(clipSize.x*print_d.dpi), (wPos_t)(clipSize.y*print_d.dpi) );
+					wPrintClip( (clipOrig.x*print_d.dpi), (clipOrig.y*print_d.dpi),
+							(clipSize.x*print_d.dpi), (clipSize.y*print_d.dpi) );
 				}
 				p[0].x = p[3].x = 0.0;
 				p[1].x = p[2].x = roomSize.x;

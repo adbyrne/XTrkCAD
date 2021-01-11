@@ -61,21 +61,21 @@ GdkPixbuf* wlibMakePixbuf(
         int row,col,wb;
 	    char ** pixmapData;
 
-        wb = WPOS2PIX(ip->w+7)/8;
-        pixmapData = (char**)g_malloc(WPOS2PIX(3+ip->h) * sizeof *pixmapData);
+        wb = (ip->w+7)/8;
+        pixmapData = (char**)g_malloc((3+ip->h) * sizeof *pixmapData);
         pixmapData[0] = line0;
         rgb = wDrawGetRGB(ip->color);
-        sprintf(line0, " %0.1f %0.1f 2 1", ip->w, ip->h);
+        sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
         sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb>>16)&0xFF, (rgb>>8)&0xFF,
                 rgb&0xFF);
         pixmapData[1] = ". c None s None";
         pixmapData[2] = line2;
         bits = ip->bits;
 
-        for (row = 0; row<WPOS2PIX(ip->h); row++) {
-            pixmapData[row+3] = (char*)g_malloc(WPOS2PIX((ip->w+1)) * sizeof **pixmapData);
+        for (row = 0; row<(ip->h); row++) {
+            pixmapData[row+3] = (char*)g_malloc(((ip->w+1)) * sizeof **pixmapData);
 
-            for (col = 0; col<WPOS2PIX(ip->w); col++) {
+            for (col = 0; col<(ip->w); col++) {
                 if (bits[ row*wb+(col>>3) ] & (1<<(col&07))) {
                     pixmapData[row+3][col] = '#';
                 } else {
@@ -83,12 +83,12 @@ GdkPixbuf* wlibMakePixbuf(
                 }
             }
 
-            pixmapData[row+3][WPOS2PIX(ip->w)] = 0;
+            pixmapData[row+3][(ip->w)] = 0;
         }
 
         pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)pixmapData);
 
-        for (row = 0; row<WPOS2PIX(ip->h); row++) {
+        for (row = 0; row<(ip->h); row++) {
             g_free(pixmapData[row+3]);
         }
     }

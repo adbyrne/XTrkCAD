@@ -74,11 +74,11 @@ static void repaintMessage(
 
 	rect.bottom = (long)(bm->y+( bm->h ));
 	rect.right = (long)(bm->x+( scale * bm->w ));
-	rect.top = WPOS2PIX(bm->y)+1;
-	rect.left = WPOS2PIX(bm->x);
+	rect.top = bm->y+1;
+	rect.left = bm->x;
 
 	SetBkColor( hDc, GetSysColor( COLOR_BTNFACE ) );
-	ExtTextOut( hDc, WPOS2PIX(bm->x), WPOS2PIX(bm->y) + ((WPOS2PIX(bm->h) + 2 - textMetrics.tmHeight) / 2), ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
+	ExtTextOut( hDc, bm->x, bm->y + ((bm->h + 2 - textMetrics.tmHeight) / 2), ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
 
 	if( scale != 1.0 )
 		/* in case we did create a new font earlier, delete it now */
@@ -107,18 +107,18 @@ void wMessageSetValue(
 
 void wMessageSetWidth(
 		wMessage_p b,
-		wPos_t width )
+		wWinPix_t width )
 {
 	b->w = width;
 
 }
 
-wPos_t wMessageGetWidth(const char *string)
+wWinPix_t wMessageGetWidth(const char *string)
 {
 	return(wLabelWidth(string));
 }
 
-wPos_t wMessageGetHeight( long flags )
+wWinPix_t wMessageGetHeight( long flags )
 {
 	double scale = 1.0;
 
@@ -127,7 +127,7 @@ wPos_t wMessageGetHeight( long flags )
 	if( flags & BM_SMALL )
 		scale = SCALE_SMALL;
 
-	return((wPos_t)((mswEditHeight) * scale ));
+	return((wWinPix_t)((mswEditHeight) * scale ));
 
 }
 
@@ -147,10 +147,10 @@ static callBacks_t messageCallBacks = {
 
 wMessage_p wMessageCreateEx(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
-		POS_T	width,
+		wWinPix_t	width,
 		const char	*message,
 		long	flags )
 {

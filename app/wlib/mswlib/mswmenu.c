@@ -185,7 +185,7 @@ static LRESULT menuPush(
 				((wMenuRadio_p)m)->action(((wMenuRadio_p)m)->data);
 			break;
 		}
-		return 0L;
+		return (LRESULT)0;
 	}
 	if ( (m->parentMenu)->traceFunc ) {
 		(m->parentMenu)->traceFunc( m->parentMenu, m->labelStr, ((wMenu_p)m->parentMenu)->traceData );
@@ -958,13 +958,13 @@ void wMenuToggleEnable(
 
 void mswMenuMove(
 		wMenu_p m,
-		wPos_t x,
-		wPos_t y )
+		wWinPix_t x,
+		wWinPix_t y )
 {
 	wControl_p b;
 	b = (wControl_p)m->parent;
 	if (b && b->hWnd)
-		if (!SetWindowPos( b->hWnd, HWND_TOP, WPOS2PIX(x), WPOS2PIX(y),
+		if (!SetWindowPos( b->hWnd, HWND_TOP, x, y,
 				CW_USEDEFAULT, CW_USEDEFAULT,
 				SWP_NOSIZE|SWP_NOZORDER))
 				mswFail("mswMenuMove");
@@ -985,8 +985,8 @@ static void pushMenuButt(
 
 wMenu_p wMenuCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option )

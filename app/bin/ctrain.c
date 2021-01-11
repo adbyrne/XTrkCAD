@@ -89,6 +89,14 @@ struct extraData {
 #define SetProcessed( XX )				(XX)->state |= CAR_STATE_PROCESSED
 #define ClrProcessed( XX )				(XX)->state &= ~CAR_STATE_PROCESSED
 
+#define OFF_F( ORIG, SIZE, LO, HI ) \
+    ( (HI).x < (ORIG).x+((SIZE).x)*0.2 || \
+      (LO).x > (ORIG).x+((SIZE).x)*0.8 || \
+      (HI).y < (ORIG).y+((SIZE).y)*0.2 || \
+      (LO).y > (ORIG).y+((SIZE).y)*0.8 )
+#define OFF_FOLLOW( LO, HI ) \
+    OFF_F( mainD.orig, mainD.size, LO, HI )
+
 static wButton_p newcarB;
 
 static void ControllerDialogSyncAll(void);
@@ -634,7 +642,7 @@ typedef struct {
 static trainControlDlg_t * curTrainDlg;
 
 
-static void SpeedRedraw(wDraw_p, void *, wPos_t, wPos_t);
+static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
 static void SpeedAction(wAction_t, coOrd);
 static void LocoListChangeEntry(track_p, track_p);
 static void CmdTrainExit(void *);
@@ -724,10 +732,10 @@ static wIndex_t FindLoco(
 static void SpeedRedraw(
     wDraw_p d,
     void * context,
-    wPos_t w,
-    wPos_t h)
+    wWinPix_t w,
+    wWinPix_t h)
 {
-    wPos_t y, pts[4][2];
+    wDrawPix_t y, pts[4][2];
     trainControlDlg_p dlg = (trainControlDlg_p)context;
     struct extraData * xx;
     wDrawColor drawColor;
@@ -747,7 +755,7 @@ static void SpeedRedraw(
         xx->speed = 0;
     }
 
-    y = (wPos_t)(xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
+    y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
                  +SLIDER_THICKNESS/2);
     drawColor  = wDrawFindColor(wRGB(160, 160, 160));
     pts[0][1] = pts[1][1] = y-SLIDER_THICKNESS/2;
@@ -2087,7 +2095,7 @@ static BOOL_T MoveTrain(
             }
 
             followTrain = NULL;
-        } else if (OFF_MAIND(xx->trvTrk.pos, xx->trvTrk.pos)) {
+        } else if (OFF_FOLLOW(xx->trvTrk.pos, xx->trvTrk.pos)) {
             MoveMainWindow(xx->trvTrk.pos,
                            NormalizeAngle(xx->trvTrk.angle+(xx->direction?180.0:0.0)));
             followCenter = mainCenter;
@@ -2495,7 +2503,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
     EPINX_T ep0, ep1;
     int dir;
     struct extraData * xx=NULL;
-    wPos_t w, h;
+    wWinPix_t w, h;
 
     switch (action) {
     case C_START:

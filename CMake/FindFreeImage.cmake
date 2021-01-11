@@ -12,20 +12,37 @@
 #
 
 if (WIN32)
+    if (WIN64)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		PATHS
-    $ENV{XTCEXTERNALROOT}/x86/FreeImage
+	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
 		DOC "The directory where FreeImage.h resides")
 	find_library( FREEIMAGE_LIBRARY
 		NAMES FreeImage freeimage
 		PATHS
-    $ENV{XTCEXTERNALROOT}/x86/FreeImage
+	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
 		DOC "The FreeImage library")
 	find_file( FREEIMAGE_SHAREDLIB
 		NAMES freeimage.DLL
 		PATHS
-    $ENV{XTCEXTERNALROOT}/x86/FreeImage
+	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
 	)
+    else (WIN64)
+	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
+		PATHS
+	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
+		DOC "The directory where FreeImage.h resides")
+	find_library( FREEIMAGE_LIBRARY
+		NAMES FreeImage freeimage
+		PATHS
+	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
+		DOC "The FreeImage library")
+	find_file( FREEIMAGE_SHAREDLIB
+		NAMES freeimage.DLL
+		PATHS
+	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
+	)
+    endif (WIN64)
 else (WIN32)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		/usr/include

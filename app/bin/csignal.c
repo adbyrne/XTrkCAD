@@ -495,7 +495,7 @@ static char signalAspectEditScript[STR_LONG_SIZE];
 static long signalAspectEditIndex;
 
 static paramIntegerRange_t r1_3 = {1, 3};
-static wPos_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
+static wWinPix_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
 static const char * aspectListTitles[] = { N_("Name"), N_("Script") };
 static paramListData_t aspectListData = {10, 400, 2, aspectListWidths, aspectListTitles};
 
@@ -829,11 +829,11 @@ static POS_T sighiliteBorder;
 static wDrawColor sighiliteColor = 0;
 static void DrawSignalTrackHilite( void )
 {
-	wPos_t x, y, w, h;
+	wDrawPix_t x, y, w, h;
 	if (sighiliteColor==0)
 		sighiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = ((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = ((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,sighiliteOrig,&x,&y);
 	wDrawFilledRectangle( tempD.d, x, y, w, h, sighiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
