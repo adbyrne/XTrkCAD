@@ -12,7 +12,7 @@
 #
 
 if (WIN32)
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    if (WIN64)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		PATHS
 	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
@@ -27,7 +27,7 @@ if (WIN32)
 		PATHS
 	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
 	)
-    else (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    else (WIN64)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		PATHS
 	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
@@ -42,7 +42,7 @@ if (WIN32)
 		PATHS
 	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
 	)
-    endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    endif (WIN64)
 else (WIN32)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		/usr/include

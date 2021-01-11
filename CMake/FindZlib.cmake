@@ -10,7 +10,7 @@
 #
 
 if(WIN32)
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  if (WIN64)
     find_path( ZLIB_INCLUDE_DIR zlib.h
       PATHS
       $ENV{XTCEXTERNALROOT}/x64/zlib
@@ -24,7 +24,7 @@ if(WIN32)
       NAMES zlib.dll Zlib.dll
       PATHS
       $ENV{XTCEXTERNALROOT}/x64/zlib)
-  else (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  else (WIN64)
     find_path( ZLIB_INCLUDE_DIR zlib.h
       PATHS
       $ENV{XTCEXTERNALROOT}/x86/zlib
@@ -38,7 +38,7 @@ if(WIN32)
       NAMES zlib.dll Zlib.dll
       PATHS
       $ENV{XTCEXTERNALROOT}/x86/zlib)
-  endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+  endif (WIN64)
 else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_ZLIB QUIET zlib)

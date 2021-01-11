@@ -26,16 +26,18 @@ if(UNIX)
    endif(APPLE)
 endif(UNIX)
 
-find_package(Libzip)
-find_package(Zlib)
-
 IF(WIN32)
 	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 		SET(WIN64 ON CACHE BOOL "Win x64")
 	else (CMAKE_SIZEOF_VOID_P EQUAL 8)
 		SET(WIN64 OFF CACHE BOOL "Win x86")
 	endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
-	
+ENDIF(WIN32)
+
+find_package(Libzip)
+find_package(Zlib)
+
+IF(WIN32)
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
 	SET(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 
