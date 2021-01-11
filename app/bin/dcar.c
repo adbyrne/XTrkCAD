@@ -1657,7 +1657,7 @@ EXPORT void CarItemLoadList( void * junk )
 	wIndex_t inx;
 	carItem_p item;
 	char * cp;
-	wPos_t w, h;
+	wWinPix_t w, h;
 
 	DYNARR_SET( carItem_t*, carItemHotbar_da, carItemInfo_da.cnt );
 	memcpy( carItemHotbar_da.ptr, carItemInfo_da.ptr, carItemInfo_da.cnt * sizeof item );
@@ -1692,7 +1692,7 @@ static char * CarItemHotbarProc(
 	wIndex_t inx;
 	long mode;
 	char * cp;
-	wPos_t w, h;
+	wWinPix_t w, h;
 
 	item = carItemHotbar(carItemInx);
 	if ( item == NULL )
@@ -2542,7 +2542,7 @@ static void CarDlgLoadDimsFromProto( carProto_p protoP )
 
 static void CarDlgRedraw( void )
 {
-	wPos_t w, h;
+	wWinPix_t w, h;
 	DIST_T ww, hh;
 	DIST_T scale_w, scale_h;
 	coOrd orig, pos, size;
@@ -4229,12 +4229,12 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 static void CarDlgLayout(
 		paramData_t * pd,
 		int inx,
-		wPos_t currX,
-		wPos_t *xx,
-		wPos_t *yy )
+		wWinPix_t currX,
+		wWinPix_t *xx,
+		wWinPix_t *yy )
 {
-	static wPos_t col2pos = 0;
-	wPos_t y0, y1;
+	static wWinPix_t col2pos = 0;
+	wWinPix_t y0, y1;
 
 	switch (inx) {
 	case I_CD_PROTOTYPE_STR:
@@ -4361,7 +4361,7 @@ static void CarInvDlgExportCsv( void );
 static void CarInvDlgSaveText( void );
 static void CarInvListLoad( void );
 
-static wPos_t carInvColumnWidths[] = {
+static wWinPix_t carInvColumnWidths[] = {
 		-40, 30, 100, -50, 50, 130, 120, 100,
 		-50, -50, 60, 55, 55, 40, 200 };
 static const char * carInvColumnTitles[] = {

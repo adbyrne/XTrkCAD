@@ -124,8 +124,8 @@ static void getWinSize(wWin_p win, const char * nameStr)
 
     GdkRectangle monitor_dimensions = getMonitorDimensions(GTK_WIDGET(win->gtkwin));
 
-    wPos_t maxDisplayWidth = monitor_dimensions.width-10;
-    wPos_t maxDisplayHeight = monitor_dimensions.height-50;
+    wWinPix_t maxDisplayWidth = monitor_dimensions.width-10;
+    wWinPix_t maxDisplayHeight = monitor_dimensions.height-50;
 
 
 
@@ -170,8 +170,8 @@ static void saveSize(wWin_p win)
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
         char pos_s[20];
 
-        sprintf(pos_s, "%d %d", WPOS2PIX(win->w),
-                WPOS2PIX(win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
+        sprintf(pos_s, "%ld %ld", win->w,
+                (win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
         wPrefSetString(SECTIONWINDOWSIZE, win->nameStr, pos_s);
     }
 }
@@ -260,11 +260,11 @@ static void savePos(wWin_p win)
 
 void wWinGetSize(
     wWin_p win,		/* Window */
-    wPos_t * width,		/* Returned window width */
-    wPos_t * height)	/* Returned window height */
+    wWinPix_t * width,		/* Returned window width */
+    wWinPix_t * height)	/* Returned window height */
 {
     GtkRequisition requisition;
-    wPos_t w, h;
+    wWinPix_t w, h;
     gtk_widget_size_request(win->gtkwin, &requisition);
     w = win->w;
     h = win->h;
@@ -293,8 +293,8 @@ void wWinGetSize(
 
 void wWinSetSize(
     wWin_p win,		/* Window */
-    wPos_t width,		/* Window width */
-    wPos_t height)		/* Window height */
+    wWinPix_t width,		/* Window width */
+    wWinPix_t height)		/* Window height */
 {
     win->busy = TRUE;
     win->w = width;
@@ -561,10 +561,10 @@ const char * wWinGetTitle(
 
 void wWinClear(
     wWin_p win,
-    wPos_t x,
-    wPos_t y,
-    wPos_t width,
-    wPos_t height)
+    wWinPix_t x,
+    wWinPix_t y,
+    wWinPix_t width,
+    wWinPix_t height)
 {
 }
 
@@ -858,16 +858,16 @@ static gint window_char_event(
     }
 }
 
-void wSetGeometry(wWin_p win, wPos_t min_width, wPos_t max_width, wPos_t min_height, wPos_t max_height, wPos_t base_width, wPos_t base_height, double aspect_ratio ) {
+void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio ) {
 	GdkGeometry hints;
 	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
-	hints.max_width = WPOS2PIX(max_width);
-	hints.min_height = WPOS2PIX(min_height);
-	hints.max_height = WPOS2PIX(max_height);
-	hints.min_aspect = hints.max_aspect = WPOS2PIX(aspect_ratio);
-	hints.base_width = WPOS2PIX(base_width);
-	hints.base_height = WPOS2PIX(base_height);
+	hints.max_width = max_width;
+	hints.min_height = min_height;
+	hints.max_height = (max_height);
+	hints.min_aspect = hints.max_aspect = aspect_ratio;
+	hints.base_width = base_width;
+	hints.base_height = base_height;
 	if( base_width != -1 && base_height != -1 ) {
 		hintMask |= GDK_HINT_BASE_SIZE;
 	}
@@ -913,8 +913,8 @@ void wSetGeometry(wWin_p win, wPos_t min_width, wPos_t max_width, wPos_t min_hei
 static wWin_p wWinCommonCreate(
     wWin_p parent,
     int winType,
-    wPos_t x,
-    wPos_t y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * labelStr,
     const char * nameStr,
     long option,
@@ -999,10 +999,10 @@ static wWin_p wWinCommonCreate(
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
         }
     }
-    wPos_t scr_w, scr_h;
+    wWinPix_t scr_w, scr_h;
 	wGetDisplaySize(&scr_w, &scr_h);
-	wPix_t pw = WPOS2PIX(scr_w);
-	wPix_t ph = WPOS2PIX(scr_h);
+	wWinPix_t pw = scr_w;
+	wWinPix_t ph = scr_h;
 	if (pw < MIN_WIN_WIDTH) pw = MIN_WIN_WIDTH+10;
 	if (ph < MIN_WIN_HEIGHT) ph = MIN_WIN_HEIGHT;
 	if (winType != W_MAIN) {
@@ -1094,8 +1094,8 @@ static wWin_p wWinCommonCreate(
 
 wWin_p wWinMainCreate(
     const char * name,		/* Application name */
-    wPos_t x,				/* Initial window width */
-    wPos_t y,				/* Initial window height */
+    wWinPix_t x,				/* Initial window width */
+    wWinPix_t y,				/* Initial window height */
     const char * helpStr,	/* Help topic string */
     const char * labelStr,	/* Window title */
     const char * nameStr,	/* Window name */
@@ -1144,8 +1144,8 @@ wWin_p wWinMainCreate(
 
 wWin_p wWinPopupCreate(
     wWin_p parent,
-    wPos_t x,
-    wPos_t y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * helpStr,
     const char * labelStr,
     const char * nameStr,

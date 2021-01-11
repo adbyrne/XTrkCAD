@@ -36,7 +36,7 @@ static long outputBitMapTogglesV = 3;
 static double outputBitMapDensity = 10;
 
 static struct wFilSel_t * bitmap_fs;
-static long bitmap_w, bitmap_h;
+static wWinPix_t bitmap_w, bitmap_h;
 static drawCmd_t bitmap_d = {
 		NULL,
 		&screenDrawFuncs,
@@ -63,7 +63,7 @@ static int SaveBitmapFile(
 
 	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] ); 
 
-	bitmap_d.d = wBitMapCreate( (wPos_t)bitmap_w, (wPos_t)bitmap_h, 8 );
+	bitmap_d.d = wBitMapCreate( bitmap_w, bitmap_h, 8 );
 	if (bitmap_d.d == (wDraw_p)0) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		return FALSE;
@@ -108,10 +108,10 @@ static int SaveBitmapFile(
 		DrawString( &bitmap_d, p[0], 0.0, sProdName, fp_bi, fs*bitmap_d.scale, wDrawColorBlack );
 	}
 	wDrawClip( bitmap_d.d,
-		 (wPos_t)(-bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi),
-		 (wPos_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
-		 (wPos_t)(mapD.size.x/bitmap_d.scale*bitmap_d.dpi),
-		 (wPos_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi) );
+		 (wWinPix_t)(-bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi),
+		 (wWinPix_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
+		 (wWinPix_t)(mapD.size.x/bitmap_d.scale*bitmap_d.dpi),
+		 (wWinPix_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi) );
 	wSetCursor( mainD.d, wCursorWait );
 	InfoMessage( _("Drawing tracks to BitMap") );
 	DrawSnapGrid( &bitmap_d, mapD.size, TRUE );
@@ -181,8 +181,8 @@ static void OutputBitMapComputeSize( void )
 	bitmap_d.size.x = mapD.size.x + (Lborder+Rborder)*bitmap_d.scale;
 	bitmap_d.orig.y = 0.0-Bborder*bitmap_d.scale;
 	bitmap_d.size.y = mapD.size.y + (Bborder+Tborder)*bitmap_d.scale;
-	bitmap_w = (long)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
-	bitmap_h = (long)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
+	bitmap_w = (wWinPix_t)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
+	bitmap_h = (wWinPix_t)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
 	sprintf( message, _("Bitmap : %ld by %ld pixels"), bitmap_w, bitmap_h );
 	ParamLoadMessage( &outputBitMapPG, I_MSG1, message );
 	size = bitmap_w * bitmap_h;

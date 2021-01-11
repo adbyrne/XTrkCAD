@@ -414,12 +414,12 @@ wDrawColor wColorSelectButtonGetColor(
 
 wButton_p wColorSelectButtonCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long 	option,
-    wPos_t 	width,
+    wWinPix_t 	width,
     wDrawColor *valueP,
     wColorSelectButtonCallBack_p action,
     void 	* data)

@@ -86,7 +86,7 @@ dynArr_t tempSegs_da;
 
 typedef struct {
 		struct {
-			wPos_t x, y;
+			wWinPix_t x, y;
 		} pos;
 		int index;
 		char * winLabel;
@@ -168,8 +168,8 @@ static DIST_T radii[10];
 static double angles[10];
 
 
-#define POSX(X) ((wPos_t)((X)*newTurnout_d.dpi))
-#define POSY(Y) ((wPos_t)((Y)*newTurnout_d.dpi))
+#define POSX(X) ((wWinPix_t)((X)*newTurnout_d.dpi))
+#define POSY(Y) ((wWinPix_t)((Y)*newTurnout_d.dpi))
 
 static paramData_t turnDesignPLs[] = {
 #define I_TOLENGTH			(0)
@@ -2860,15 +2860,15 @@ static void NewTurnCancel( wWin_p win )
 
 
 
-static wPos_t turnDesignWidth;
-static wPos_t turnDesignHeight;
+static wWinPix_t turnDesignWidth;
+static wWinPix_t turnDesignHeight;
 
 static void TurnDesignLayout(
 		paramData_t * pd,
 		int index,
-		wPos_t colX,
-		wPos_t * w,
-		wPos_t * h )
+		wWinPix_t colX,
+		wWinPix_t * w,
+		wWinPix_t * h )
 {
 	wIndex_t inx;
 	if ( curDesign == NULL )
@@ -2890,9 +2890,9 @@ static void TurnDesignLayout(
 
 static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 {
-	static wPos_t partnoWidth;
+	static wWinPix_t partnoWidth;
 	int inx;
-	wPos_t w, h, ctlH;
+	wWinPix_t w, h, ctlH;
 
 	if ( newTurnW == NULL ) {
 		partnoWidth = wLabelWidth( "999-99999-9999" );

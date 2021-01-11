@@ -41,9 +41,9 @@ static HWND hSplash;
 
 static LPWORD lpwAlign( LPWORD lpIn )
 {
-    ULONG ul;
+    ULONGLONG ul;
 
-    ul = (ULONG) lpIn;
+    ul = (ULONGLONG) lpIn;
     ul +=3;
     ul >>=2;
     ul <<=2;
