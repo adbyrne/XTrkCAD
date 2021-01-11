@@ -864,7 +864,7 @@ void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_
     hints.min_width = min_width;
 	hints.max_width = max_width;
 	hints.min_height = min_height;
-	hints.max_height = (max_height);
+	hints.max_height = max_height;
 	hints.min_aspect = hints.max_aspect = aspect_ratio;
 	hints.base_width = base_width;
 	hints.base_height = base_height;
@@ -1001,16 +1001,14 @@ static wWin_p wWinCommonCreate(
     }
     wWinPix_t scr_w, scr_h;
 	wGetDisplaySize(&scr_w, &scr_h);
-	wWinPix_t pw = scr_w;
-	wWinPix_t ph = scr_h;
-	if (pw < MIN_WIN_WIDTH) pw = MIN_WIN_WIDTH+10;
-	if (ph < MIN_WIN_HEIGHT) ph = MIN_WIN_HEIGHT;
+	if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
+	if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
 	if (winType != W_MAIN) {
-		wSetGeometry(w, MIN_WIN_WIDTH, pw-10, MIN_WIN_HEIGHT, ph, -1, -1, -1);
+		wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
 	} else {
-		if (pw < MIN_WIN_WIDTH_MAIN+10) pw = MIN_WIN_WIDTH_MAIN+200;
-		if (ph < MIN_WIN_HEIGHT_MAIN+10) ph = MIN_WIN_HEIGHT_MAIN+200;
-		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, pw-10, MIN_WIN_HEIGHT_MAIN, ph-10, -1, -1, -1);
+		if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
+		if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
+		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
      }
 
 

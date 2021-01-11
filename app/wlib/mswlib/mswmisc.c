@@ -750,7 +750,7 @@ static wWin_p winCommonCreate(
     AdjustWindowRect(&rect, win->style, (win->option&F_MENUBAR)?1:0);
     rect.bottom += mFixBorderH;
     win->hWnd = CreateWindow(className, labelStr, style,
-	                         xx, yy,
+                             xx, yy,
                              rect.right-rect.left, rect.bottom-rect.top,
                              hWnd, NULL,
                              mswHInst, NULL);
@@ -2211,7 +2211,7 @@ void doHelpMenu(void * context)
     }
 
 	const char * topic;
-	switch ((int)(long)context) {
+    switch ((int)(long)context) {
     case 1: /* Contents */
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOC, (DWORD_PTR)NULL);
         break;
@@ -2325,7 +2325,7 @@ void startBalloonHelp(void)
 
             if (balloonHelpButton->type == B_RADIO ||
                     balloonHelpButton->type == B_TOGGLE) {
-				pt.y = balloonHelpButton->h;
+                pt.y = balloonHelpButton->h;
             } else {
                 GetClientRect(balloonHelpButton->hWnd, &rect);
                 pt.y = rect.bottom;
@@ -2385,14 +2385,14 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
 
         if (b->type == B_RADIO ||
                 b->type == B_TOGGLE) {
-			pt.y = b->h;
+            pt.y = b->h;
         } else {
             GetClientRect(b->hWnd, &rect);
             pt.y = rect.bottom;
         }
 
-		pt.x = dx;
-		pt.y -= dy;
+        pt.x = dx;
+        pt.y -= dy;
         ClientToScreen(b->hWnd, &pt);
 
         if (pt.x + w+2 > screenWidth) {
@@ -2768,7 +2768,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     wAccelKey_e extChar;
 
 	LPMINMAXINFO pMMI;
-	switch (message) {
+    switch (message) {
 	case WM_GETMINMAXINFO:
 		pMMI = (LPMINMAXINFO)lParam;
 		inx = GetWindowWord(hWnd, 0);
