@@ -445,7 +445,7 @@ EXPORT void InvertTrackSelect( void *ptr )
 	MainRedraw(); // InvertTrackSelect
 }
 
-/* Select orphaned (ie single) track pieces.
+/* Select orphaned (ie single) track pieces (ignore frozen and module)
  *
  * \param none
  * \return none
@@ -461,7 +461,7 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 	
 	while( TrackIterate( &trk ) ) {
 		cnt = 0;
-		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk)))) {
+		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk)) && !GetLayerFrozen(GetTrkLayer(trk)))) {
 			for( ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
 				if( GetTrkEndTrk( trk, ep ) )
 					cnt++;				
@@ -521,6 +521,11 @@ EXPORT void HighlightSelectedTracks(
 
 }
 
+/*
+ * Select all tracks connected walking the tree until hitting ends or already selected tracks
+ *
+ * Ignore Frozen Tracks
+ */
 static void SelectConnectedTracks(
 		track_p trk, BOOL_T display_only )
 {
@@ -535,15 +540,17 @@ static void SelectConnectedTracks(
 		if ( inx > 0 && (selectedTrackCount == 0) && !display_only )
 			return;
 		trk = Tlist(inx);
-		if (inx!=0 && 
-			GetTrkSelected(trk)) {
-			if (display_only)
-				DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
-			continue;
-		} else if (GetTrkSelected(trk)) {
-			if (display_only)
-				DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
-			continue;
+		if (!GetLayerFrozen(GetTrkLayer(trk))) {
+			if (inx!=0 &&
+				GetTrkSelected(trk)) {
+				if (display_only)
+					DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
+				continue;
+			} else if (GetTrkSelected(trk)) {
+				if (display_only)
+					DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
+				continue;
+			}
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			trk1 = GetTrkEndTrk( trk, ep );
@@ -553,9 +560,11 @@ static void SelectConnectedTracks(
 				} else TlistAppend( trk1 );
 			}
 		}
-		if (display_only) DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
+		if (display_only && !GetLayerFrozen(GetTrkLayer(trk))) DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
 		else if (!GetTrkSelected(trk)) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
+				continue;
+			} else if (GetLayerFrozen(GetTrkLayer(trk))) {
 				continue;
 			} else {
 				SelectOneTrack( trk, TRUE );
@@ -850,9 +859,21 @@ EXPORT void SelectCurrentLayer( void )
 {
 	track_p trk;
 	trk = NULL;
+	if (GetLayerFrozen(curLayer)) return;
 	while ( TrackIterate( &trk ) ) {
-		if ((!GetTrkSelected(trk)) && GetTrkLayer(trk) == curLayer ) {
+		if ((!GetTrkSelected(trk)) && GetTrkLayer(trk) == curLayer) {
 			SelectOneTrack( trk, TRUE );
+		}
+	}
+	RedrawSelectedTracksBoundary();
+}
+
+EXPORT void DeselectLayer( unsigned int layer ) {
+	track_p trk;
+	trk = NULL;
+	while ( TrackIterate( &trk ) ) {
+		if ((GetTrkSelected(trk)) && GetTrkLayer(trk) == layer) {
+			SelectOneTrack( trk, FALSE );
 		}
 	}
 	RedrawSelectedTracksBoundary();
@@ -2813,7 +2834,9 @@ static BOOL_T SelectArea(
 					lo.x >= base.x && hi.x <= base.x+size.x &&
 					lo.y >= base.y && hi.y <= base.y+size.y) {
 					if ( (GetTrkSelected( trk )==0) == (action==C_UP) ) {
-						if (GetLayerModule(GetTrkLayer(trk))) {
+						if (GetLayerFrozen(GetTrkLayer(trk))) {
+							continue;
+						} else if (GetLayerModule(GetTrkLayer(trk))) {
 							if (add)
 								DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
 							else
@@ -2858,6 +2881,8 @@ static BOOL_T SelectArea(
 			if (GetLayerVisible( GetTrkLayer( trk ) ) &&
 				lo.x >= base.x && hi.x <= base.x+size.x &&
 				lo.y >= base.y && hi.y <= base.y+size.y) {
+				if (GetLayerFrozen(GetTrkLayer(trk)))
+					continue;
 				if (GetLayerModule(GetTrkLayer(trk))) {
 					if (add)
 						DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
@@ -3269,7 +3294,7 @@ static STATUS_T CmdSelect(
 			if ((MyGetKeyState() & WKEY_SHIFT) )
 				SelectConnectedTracks(trk, TRUE);        	 //Highlight all connected
 			//Normal case - handle track we are hovering over
-			else  {
+			else {
 				//Select=Add
 				if (selectMode == 1) {
 					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {

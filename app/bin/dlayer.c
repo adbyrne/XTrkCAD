@@ -32,7 +32,7 @@
 #include <dirent.h>
 #endif
 
-
+#include "cselect.h"
 #include "custom.h"
 #include "paths.h"
 #include "dynstring.h"
@@ -1216,6 +1216,7 @@ static void LayerUpdate(void)
 			FlipLayer(layerCurrent);
     layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
+    if (layers[(int)layerCurrent].frozen) DeselectLayer(layerCurrent);
     layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
     layers[(int)layerCurrent].module = (BOOL_T)layerModule;
     strcpy(layers[(int)layerCurrent].settingsName,settingsName);
