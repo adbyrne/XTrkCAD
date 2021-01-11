@@ -2174,7 +2174,7 @@ static void ParamCreateControl(
 				}
 				for ( col=0; col<listDataP->colCnt; col++ ) {
 					colRightJust[col] = listDataP->colWidths[col]<0;
-					colWidths[col] = (wWinPix_t)fabs(listDataP->colWidths[col]);
+					colWidths[col] = labs(listDataP->colWidths[col]);
 				}
 				sprintf( message, "%s-%s-%s", pd->group->nameStr, pd->nameStr, "columnwidths" );
 				cp = wPrefGetString( PREFSECT, message );
