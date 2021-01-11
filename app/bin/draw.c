@@ -2449,11 +2449,15 @@ LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale, mainD.ori
 }
 
 
+/*
+* IsClose
+* is distance smaller than 10 pixels at 72 DPI?
+*/
 EXPORT BOOL_T IsClose(
 		DIST_T d )
 {
 	wDrawPix_t pd;
-	pd = (wDrawPix_t)(d/mainD.scale * mainD.dpi);
+	pd = (wDrawPix_t)(d/mainD.scale * 72.0);
 	return pd <= closePixels;
 }
 
