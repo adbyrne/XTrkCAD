@@ -1172,9 +1172,9 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 				UndoJoint( trk2, ep2, trk, i );
 		}
 	}
-    CheckDeleteSwitchmotor( trk );
-    CheckDeleteBlock( trk );
-    CheckCarTraverse( trk );
+//	CheckDeleteSwitchmotor( trk );
+//	CheckDeleteBlock( trk );
+	CheckCarTraverse( trk );
 	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);

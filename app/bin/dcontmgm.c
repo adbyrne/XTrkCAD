@@ -13,7 +13,7 @@
  *  Description
  * 
  *     Control Element Mangment.  Control Elements are elements related to 
- *     layout control: Blocks (occupency detection), Switchmotors (actuators
+ *     layout control: Blocks (occupancy detection), Switchmotors (actuators
  *     to "throw" turnouts), and (eventually) signals.  These elements don't
  *     relate to "physical" items on the layout, but instead refer to the
  *     elements used by the layout control software.  These elements contain
@@ -198,7 +198,7 @@ static void ControlDelete( void * action )
 static void ControlAddMissing( void * action )
 {
 	AddMissingBlockTrack();
-	AddMissingSwitchMotor();
+//	AddMissingSwitchMotor();
 
 	wHide( controlPG.win );
 }

@@ -1,21 +1,41 @@
 /** \file cblock.c
  * Implement blocks: a group of trackwork with a single occupancy detector
  *  Blocks:
- *    - Connect to turnouts at each end
+ *    - Connect to a turnout or another block at each end
+ *      - very long blocks are divided into sub-blocks based on Max Block
+ *        Length (future).
  *    - Have a minimum and possibly maximum length
  *        (max block length is for a future version)
- *      - min length saved in the layout file
- *      - may be set in options->layout
+ *      - min max length is saved in the layout file
+ *      - may be set/changed in options->layout
  *           "Min Block Length" and "Max Block Length"
  *      - if length is changed the blocks are deleted and may be recreated
- *        using the new length.
+ *        using the new length. (future)
  *    - Have from 1 to 128 track segments
+ *    - When any segment of the block is occupied, the whole block
+ *      is occupied.
+ *   Dynamic Blocks:
+ *    - Created when the positions of the turnouts connect blocks.
+ *    - Deleted when a position is changed so that blocks are not
+ *      connected.
+ *    - When any turnout in the block is occupied all turnouts are
+ *      occupied.
+ *   Note: when a turnout is occupied, its position can't be changed.
  *   manage->Mange Layout Control Elements "Add Missing" button
- *   to automatically create all blocks needed by the layout.
+ *   to automatically create all (non dynamic) blocks needed by the
+ *   layout based on Min and Max Block Lengths.
+ *   manage->Mange Layout Control Elements "Delete Blocks" button
+ *   automatically deletes all blocks. (future)
+ *   Dynamic blocks are created and deleted when entering/exiting train
+ *   mode and when, in train mode, changing turnout positions.
  */
 /* Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.6  2021/01/10 12:00:00  pecameron
+ * Modification History: Add Dynamic Blocks.
+ * Modification History: Track block occupancy.
+ * Modification History: Prevent occupied turnout from being changed.
  * Modification History: Revision 1.5  2020/04/10 17:22:00  pecameron
  * Modification History: Revised to collect all segments in a block
  * Modification History: Revised to get the length of each block
@@ -109,7 +129,6 @@ static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
 			      wDrawColor color ) {}
 static void EditBlock( track_p trk );
 static void initBlockData( track_p trk );
-static void GetBlockSegs( track_p trk );
 
 static drawFuncs_t noDrawFuncs = {
 	0,
@@ -185,18 +204,21 @@ typedef struct blockData_t {
     //Note trackList expands - has to be last...
 } blockData_t, *blockData_p;
 
-static blockData_p GetblockData ( track_p trk )
+static blockData_p GetblockData( track_p trk )
 {
 	return (blockData_p) GetTrkExtraData(trk);
 }
 
 static BOOL_T blockSide = FALSE;
 
-static void SetBlockBoundingBox(track_p trk) {
+static void SetBlockBoundingBox( track_p trk )
+{
 	blockData_p xx = GetblockData(trk);
 	coOrd hi, lo, hit,lot;
+	int i;
+
 	GetBoundingBox((&(xx->trackList))[0].t,&hi,&lo);
-	for (int i=1;i<xx->numTracks;i++) {
+	for ( i = 1; i < xx->numTracks; i++ ) {
 		GetBoundingBox((&(xx->trackList))[i].t,&hit,&lot);
 		hi.x = max(hi.x,hit.x);
 		hi.y = max(hi.y,hit.y);
@@ -206,13 +228,14 @@ static void SetBlockBoundingBox(track_p trk) {
 	ComputeRectBoundingBox( trk, hi, lo );
 }
 
-static BOOL_T BlockDescriptionPos(track_p trk, coOrd * org1, coOrd * org2, coOrd * pos) {
+static BOOL_T BlockDescriptionPos( track_p trk, coOrd * org1, coOrd * org2, coOrd * pos )
+{
 
 	coOrd p0,p1;
 	coOrd endPos[2];
 
 	blockData_p b = GetblockData(trk);
-	if (!drawBlocksMode) return FALSE;
+	if ( ! drawBlocksMode ) return FALSE;
 	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) return FALSE;
 	if ( GetTrkType( trk ) != T_BLOCK || ( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
 		return FALSE;
@@ -237,7 +260,7 @@ void DrawBlockDescription(
 	coOrd p0,p1,p2;
 	wFont_p fp;
 	blockData_p b = GetblockData(trk);
-	if (!BlockDescriptionPos(trk, &p0, &p1, &p2)) return;
+	if ( ! BlockDescriptionPos( trk, &p0, &p1, &p2 ) ) return;
 	DrawLine(d,p0,p2,0,color);
 	DrawLine(d,p1,p2,0,color);
 
@@ -252,7 +275,7 @@ EXPORT DIST_T BlockDescriptionDistance(coOrd pos,
 {
 	blockData_p b = GetblockData(trk);
 	coOrd p0,p1,p2;
-	if (!BlockDescriptionPos(trk, &p0, &p1, &p2)) return 10000;
+	if ( ! BlockDescriptionPos( trk, &p0, &p1, &p2 ) ) return 10000;
 	return FindDistance( p2, pos );
 }
 
@@ -262,7 +285,7 @@ EXPORT STATUS_T BlockDescriptionMove(
 		coOrd pos )
 {
 	blockData_p b = GetblockData(trk);
-	if (!drawBlocksMode) return C_CONTINUE;
+	if ( ! drawBlocksMode ) return C_CONTINUE;
 	static coOrd p00, p0, p1, p2;
 	static BOOL_T editMode;
 	wDrawColor color;
@@ -270,7 +293,7 @@ EXPORT STATUS_T BlockDescriptionMove(
 	switch (action) {
 	case C_DOWN:
 		editMode = TRUE;
-		if (!BlockDescriptionPos(trk, &p0, &p1, &p2)) return C_CONTINUE;
+		if ( ! BlockDescriptionPos( trk, &p0, &p1, &p2 ) ) return C_CONTINUE;
 		p00.x = p2.x - b->description_offset.x;
 		p00.y = p2.y - b->description_offset.y;
 		/* no break */
@@ -281,7 +304,7 @@ EXPORT STATUS_T BlockDescriptionMove(
 		b->description_offset.y = (pos.y-p00.y);
 		p2.x = pos.x;
 		p2.y = pos.y;
-		if (action == C_UP) {
+		if ( action == C_UP ) {
 			editMode = FALSE;
 		}
 		// MainRedraw();
@@ -289,7 +312,7 @@ EXPORT STATUS_T BlockDescriptionMove(
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 		break;
 	case C_REDRAW:
-		if (editMode) {
+		if ( editMode ) {
 			color = drawColorPurple;
 			DrawLine( &tempD, p1, p2, 0, color);
 			DrawLine( &tempD, p0, p2, 0, color);
@@ -302,31 +325,32 @@ EXPORT STATUS_T BlockDescriptionMove(
 	return C_CONTINUE;
 }
 
-static void DrawBlock (track_p t, drawCmd_p d, wDrawColor color )
+static void DrawBlock( track_p t, drawCmd_p d, wDrawColor color )
 {
-	if (!drawBlocksMode) return;
+	if ( ! drawBlocksMode ) return;
 	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	//if (d->scale < scale2rail) return;
 	blockSide = t->index%2;
 	blockData_p b = GetblockData(t);
 	track_p trk, last_trk = NULL;
+	int i;
 
-	for (int i=0;i<b->numTracks;i++) {
+	for ( i=0; i < b->numTracks; i++ ) {
 		trk = (&(b->trackList))[i].t;
 		EPINX_T ep;
 		/* Cope with track facing the other way around */
-		if (last_trk) {
+		if ( last_trk ) {
 			EPINX_T ep = GetEndPtConnectedToMe(trk,last_trk);
 		} else {
 			/* First track */
-			if (GetTrkEndAngle(trk,0) <= 180.0) blockSide = 1-blockSide;
+			if ( GetTrkEndAngle(trk,0) <= 180.0 ) blockSide = 1-blockSide;
 			ep = 0;
 		}
 		DrawTrack(trk,d,color);
 		last_trk = trk;
 	}
 
-	if (d->scale <= labelScale)
+	if ( d->scale <= labelScale )
 		DrawBlockDescription(t,d,color,blockSide);
 }
 
@@ -346,7 +370,7 @@ static descData_t blockDesc[] = {
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &blockData.endPt[1] },
 	{ DESC_NULL } };
 
-static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )
+static void UpdateBlock( track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )
 {
 	blockData_p xx = GetblockData(trk);
 	const char * thename, *thescript;
@@ -359,12 +383,12 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 		nChanged = sChanged = changed = FALSE;
 		thename = wStringGetValue( (wString_p)blockDesc[NM].control0 );
 
-		if ( !xx->name || strcmp( thename, xx->name ) != 0 ) {
+		if ( ! xx->name || strcmp( thename, xx->name ) != 0 ) {
 			nChanged = changed = TRUE;
 			max_str = blockDesc[NM].max_string;
-			if (max_str && strlen(thename)>max_str-1) {
+			if ( max_str && strlen(thename) > max_str-1 ) {
 				newName = MyMalloc(max_str);
-				strncpy(newName, thename, max_str - 1);
+				strncpy( newName, thename, max_str - 1 );
 				newName[max_str-1] = '\0';
 				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED,
 						_("Ok"), NULL, max_str-1);
@@ -372,10 +396,10 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 		}
 
 		thescript = wStringGetValue( (wString_p)blockDesc[SC].control0 );
-		if ( !xx->script || strcmp( thescript, xx->script ) != 0 ) {
+		if ( ! xx->script || strcmp( thescript, xx->script ) != 0 ) {
 			sChanged = changed = TRUE;
 			max_str = blockDesc[SC].max_string;
-			if (max_str && strlen(thescript)>max_str-1) {
+			if ( max_str && strlen( thescript ) > max_str-1 ) {
 				newScript = MyMalloc(max_str);
 				strncpy(newScript, thescript, max_str - 1);
 				newScript[max_str-1] = '\0';
@@ -389,20 +413,20 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 			blockUndoStarted = TRUE;
 		}
 		UndoModify( trk );
-		if (nChanged) {
-			if (xx->name) MyFree(xx->name);
+		if ( nChanged ) {
+			if ( xx->name ) MyFree( xx->name );
 			xx->name = newName;
 		}
-		if (sChanged) {
-			if (xx->script) MyFree(xx->script);
+		if ( sChanged ) {
+			if ( xx->script ) MyFree( xx->script );
 			xx->script = newScript;
 		}
-		SetBlockBoundingBox(trk);
+		SetBlockBoundingBox( trk );
 		return;
 	}
 }
 
-static DIST_T DistanceBlock (track_p t, coOrd * p )
+static DIST_T DistanceBlock( track_p t, coOrd * p )
 {
 	blockData_p xx = GetblockData(t);
 	DIST_T closest, current;
@@ -410,11 +434,11 @@ static DIST_T DistanceBlock (track_p t, coOrd * p )
 	coOrd pos = *p;
 	closest = 99999.0;
 	coOrd best_pos = pos;
-	for (iTrk = 0; iTrk < xx->numTracks; iTrk++) {
+	for ( iTrk = 0; iTrk < xx->numTracks; iTrk++ ) {
 		pos = *p;
-		if ((&(xx->trackList))[iTrk].t == NULL) continue;
-		current = GetTrkDistance ((&(xx->trackList))[iTrk].t, &pos);
-		if (current < closest) {
+		if ( (&(xx->trackList))[iTrk].t == NULL ) continue;
+		current = GetTrkDistance( (&(xx->trackList))[iTrk].t, &pos );
+		if ( current < closest ) {
 			closest = current;
 			best_pos = pos;
 		}
@@ -423,7 +447,7 @@ static DIST_T DistanceBlock (track_p t, coOrd * p )
 	return closest;
 }
 
-static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
+static void DescribeBlock( track_p trk, char * str, CSIZE_T len )
 {
 	blockData_p xx = GetblockData(trk);
 	wIndex_t tcount = 0;
@@ -432,7 +456,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 
 	LOG( log_block, 1, ("*** DescribeBlock(): trk is T%d\n",GetTrkIndex(trk)))
 	FormatCompoundTitle( listLabelsOption, xx->name );
-	if (message[0] == '\0')
+	if ( message[0] == '\0' )
 		FormatCompoundTitle( listLabelsOption|LABEL_DESCR, xx->name );
 	strcpy( str, _(GetTrkTypeName( trk )) );
 	str++;
@@ -448,9 +472,9 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	strncat(blockData.script,xx->script,STR_LONG_SIZE-1);
 	blockData.length = 0;
 	BOOL_T first = TRUE;
-	for (tcount = 0; tcount < xx->numTracks; tcount++) {
-	    if ((&(xx->trackList))[tcount].t == NULL) continue;
-	    if (first) {
+	for ( tcount = 0; tcount < xx->numTracks; tcount++ ) {
+	    if ( (&(xx->trackList))[tcount].t == NULL ) continue;
+	    if ( first ) {
 	    	blockData.endPt[0] = GetTrkEndPos((&(xx->trackList))[tcount].t,0);
 	    	first = FALSE;
 	    }
@@ -468,7 +492,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 
 }
 
-static int blockDebug (track_p trk)
+static int blockDebug( track_p trk )
 {
 	wIndex_t iTrack;
 	EPINX_T epCnt, epN;
@@ -478,14 +502,14 @@ static int blockDebug (track_p trk)
 	LOG( log_block, 1, ("*** blockDebug(): T%d(%p) name = %s\n",
 				GetTrkIndex(trk), trk, xx->name))
 	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
-	for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
-                if ((&(xx->trackList))[iTrack].t == NULL) continue;
+	for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
+                if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
 		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",
 				iTrack, GetTrkIndex((&(xx->trackList))[iTrack].t)))
 		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
 	}
 	epCnt = GetTrkEndPtCnt(trk);
-	for ( epN=0; epN<epCnt;  epN++ ) {
+	for ( epN = 0; epN < epCnt; epN++ ) {
 		endPtP = &(trk->endPt[epN]);
 		LOG( log_block, 1, ("*** blockDebug(): ep[%d] pos %0.1f %0.1f "
 			"angle %0.2f track T%d options 0x%08lX\n",
@@ -497,7 +521,7 @@ static int blockDebug (track_p trk)
 }
 
 /* Prereq blockTrack_da is set to have all the tracks to check all tracks must be selected */
-static BOOL_T blockCheckContigiousPath(BOOL_T selected)
+static BOOL_T blockCheckContigiousPath( BOOL_T selected )
 {
 	EPINX_T ep, epCnt, epN;
 	int inx;
@@ -511,24 +535,24 @@ static BOOL_T blockCheckContigiousPath(BOOL_T selected)
 	int validEnds = 2;
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 
-	for ( inx=0; inx<blockTrk_da.cnt; inx++ ) {
+	for ( inx = 0; inx < blockTrk_da.cnt; inx++ ) {
 		trk = blockTrk(inx).t;
-		if (!trk) continue;                 //Ignore missing tracks
+		if ( ! trk ) continue;              //Ignore missing tracks
 		epCnt = GetTrkEndPtCnt(trk);
-		if (epCnt>2) validEnds += epCnt-2;  //Add extra ends
-		for ( ep=0; ep<epCnt; ep++ ) {
+		if ( epCnt > 2 ) validEnds += epCnt-2;  //Add extra ends
+		for ( ep = 0; ep < epCnt; ep++ ) {
 			trk1 = GetTrkEndTrk(trk,ep);
 			IsConnectedP = FALSE;
-			if ( trk1 == NULL || (selected && !GetTrkSelected(trk1)) ) {
+			if ( trk1 == NULL || ( selected && ! GetTrkSelected( trk1 ) ) ) {
 				/* boundary EP - is it connected to part of the array? */
-				for ( epN=0; epN<tempEndPts_da.cnt; epN++ ) {
+				for ( epN = 0; epN < tempEndPts_da.cnt; epN++ ) {
 					dist = FindDistance( GetTrkEndPos(trk,ep), tempEndPts(epN).pos );
 					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - tempEndPts(epN).angle + connectAngle/2.0 );
 					if ( dist < connectDistance && angle < connectAngle )
 						break;
 				}
 				/* Add to array if not found */
-				if ( epN>=tempEndPts_da.cnt ) {
+				if ( epN >= tempEndPts_da.cnt ) {
 					DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
 					endPtP = &tempEndPts(tempEndPts_da.cnt-1);
 					memset( endPtP, 0, sizeof *endPtP );
@@ -547,21 +571,21 @@ static BOOL_T blockCheckContigiousPath(BOOL_T selected)
 					endPtP->track = trk1;   //Found this one
 				}
 			} else {
-				if (trk1) IsConnectedP = TRUE;        //Not an end - at least one connection for
+				if ( trk1 ) IsConnectedP = TRUE;        //Not an end - at least one connection for
 			}
 		}
 	}
 	int openEnds = 0;
-	for (epN=0; epN<tempEndPts_da.cnt; epN++) {
+	for ( epN = 0; epN < tempEndPts_da.cnt; epN++ ) {
 		endPtP = &DYNARR_N(trkEndPt_t,tempEndPts_da,epN);
-		if (!endPtP->track) openEnds++;   //Not connected end
+		if ( ! endPtP->track ) openEnds++;   //Not connected end
 	}
-	if (openEnds>validEnds) return FALSE;  //Too many - means isolated track groups
+	if ( openEnds>validEnds ) return FALSE;  //Too many - means isolated track groups
 	return TRUE;
 }
 
 // called by FreeTrack
-static void DeleteBlock ( track_p t )
+static void DeleteBlock( track_p t )
 {
     track_p trk1;
     blockData_p xx1;
@@ -574,22 +598,22 @@ static void DeleteBlock ( track_p t )
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->script); xx->script = NULL;
 
-	if (first_block == t)
+	if ( first_block == t )
 	    first_block = xx->next_block;
 	trk1 = first_block;
 	while(trk1) {
 		xx1 = GetblockData (trk1);
-		if (xx1->next_block == t) {
+		if ( xx1->next_block == t ) {
 			xx1->next_block = xx->next_block;
 			break;
 		}
 		trk1 = xx1->next_block;
 	}
-	if (t == last_block)
+	if ( t == last_block )
 		last_block = trk1;
 }
 
-static BOOL_T WriteBlock ( track_p t, FILE * f )
+static BOOL_T WriteBlock( track_p t, FILE * f )
 {
 	BOOL_T rc = TRUE;
 	wIndex_t iTrack;
@@ -602,8 +626,8 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
 		GetTrkIndex(t), blockName, xx->script)>0;
-	for (iTrack = 0; iTrack < xx->numTracks && rc; iTrack++) {
-                if ((&(xx->trackList))[iTrack].t == NULL) continue;
+	for ( iTrack = 0; iTrack < xx->numTracks && rc; iTrack++ ) {
+                if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
 		rc &= fprintf(f, "\tTRK %d\n",
 				GetTrkIndex((&(xx->trackList))[iTrack].t))>0;
 	}
@@ -612,7 +636,37 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	return rc;
 }
 
-static BOOL_T ReadBlock ( char * line )
+// blockName - preloaded with block name
+// blockScript - preloaded with block script
+// blockLen - preloaded length of block
+// blockTrk_da - DYNARR pre loaded with list of track segments
+static track_p makeBlock( void )
+{
+	track_p trk;
+	trkEndPt_p endPtP;
+	EPINX_T ep;
+
+	LOG( log_block, 1, ("*** makeBlock(): enter\n"))
+	// Need 2 endpoints in BLOCK, save the space
+	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	for ( ep = 0; ep < 2; ep++ ) {
+		DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 2 );
+		endPtP = &tempEndPts(tempEndPts_da.cnt-1);
+		memset( endPtP, 0, sizeof *endPtP );
+	}
+
+	//LOG( log_block, 1, ("*** makeBlock: calling NewTrack\n"))
+	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
+	trk = NewTrack( 0, T_BLOCK, tempEndPts_da.cnt,
+		sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1 );
+
+	initBlockData( trk );
+	blockDebug( trk );
+
+	return trk;
+}
+
+static BOOL_T ReadBlock( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
@@ -626,7 +680,7 @@ static BOOL_T ReadBlock ( char * line )
 	BOOL_T drop_block = FALSE;
 
 	LOG( log_block, 1, ("*** ReadBlock: line is '%s'\n",line))
-	if (!GetArgs(line+6,"dqq",&index,&name,&script)) {
+	if ( ! GetArgs( line+6, "dqq", &index, &name, &script ) ) {
 		return FALSE;
 	}
 
@@ -639,9 +693,8 @@ static BOOL_T ReadBlock ( char * line )
 	LOG( log_block, 1, ("*** ReadBlock: index %d name %s script %s\n",
 		index, blockName, blockScript))
 
-	if (cp) {
+	if ( cp )
 		GetArgs( cp, "p", &description_offset );
-	}
 
 	blockLen = 0.0;
 	DYNARR_RESET( btrackinfo_t , blockTrk_da );
@@ -654,103 +707,236 @@ static BOOL_T ReadBlock ( char * line )
 			continue;
 		}
 		if ( strncmp( cp, "TRK", 3 ) == 0 ) {
-			if (!GetArgs(cp+4,"d",&trkindex)) return FALSE;
+			if ( ! GetArgs( cp+4, "d", &trkindex ) ) return FALSE;
 			trk = FindTrack(trkindex);
 			LOG( log_block, 1, ("*** ReadBlock: T%d(%p) eps %d\n",
 					trkindex, trk, GetTrkEndPtCnt(trk)))
-			if (trk) {
+			if ( trk ) {
 				DYNARR_APPEND( btrackinfo_t, blockTrk_da, 129 );
 				blockTrk(blockTrk_da.cnt-1).i = trkindex;
 				blockTrk(blockTrk_da.cnt-1).t = trk;
 			}
 			// drop block if not valid
-			if (GetTrkEndPtCnt(trk) != 2)
+			if ( GetTrkEndPtCnt(trk) != 2 )
 				drop_block = TRUE;
-			if ( trk->endPt[0].index < 0 || trk->endPt[1].index < 0)
+			if ( trk->endPt[0].index < 0 || trk->endPt[1].index < 0 )
 				drop_block = TRUE;
-			blockLen += GetTrkLength(trk, 0, 1);
+			blockLen += GetTrkLength( trk, 0, 1 );
 		}
 	}
 
 	LOG( log_block, 1, ("*** ReadBlock: T%d len %0.1f drop %d\n",
 			trkindex, blockLen, drop_block))
-	if (drop_block)
+	if ( drop_block )
 		return TRUE;
 	if ( blockLen < minBlockLength )
 		return TRUE;
 	blockLen = 0.0;
 
-	// Need 2 endpoints in BLOCK, save the space
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
-	for ( ep = 0; ep < 2; ep++) {
-		DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 2 );
-		endPtP = &tempEndPts(tempEndPts_da.cnt-1);
-		memset( endPtP, 0, sizeof *endPtP );
-	}
+	trk = makeBlock();
 
-	//LOG( log_block, 1, ("*** ReadBlock: calling NewTrack\n"))
-	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt,
-		sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
-
-	initBlockData(trk);
-	blockDebug(trk);
 	return TRUE;
+}
+
+static void pushEp( track_p trk, EPINX_T ep )
+{
+	trkEndPt_p endPtP;
+
+	DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 2 );
+	endPtP = &tempEndPts(tempEndPts_da.cnt-1);
+	memset( endPtP, 0, sizeof *endPtP );
+	endPtP->pos = GetTrkEndPos(trk,ep);
+	endPtP->angle = GetTrkEndAngle(trk,ep);
+	endPtP->track = trk;
+}
+
+static void pushDa( track_p trk )
+{
+	// Add the segment to the list
+	DYNARR_APPEND( btrackinfo_t, blockTrk_da, 129 );
+	blockTrk(blockTrk_da.cnt - 1).t = trk;
+	blockTrk(blockTrk_da.cnt - 1).i = GetTrkIndex(trk);
 }
 
 // Recursively goes from track segment to track segment until
 // a turnout or end of track is encountered. Save the endPt at
 // the turnout.
-void addSegs( track_p here, track_p from, track_p conBlock) {
+// When dynamic is set collect turnouts between two blocks.
+// Place tracks in DYNARR blockTrk_da
+// Place endpoints in tempEndPts_da
+// Place total length in blockLen
+static void addSegs( track_p here, track_p from, EPINX_T epFrom )
+{
 	EPINX_T epCnt, epN;
 	track_p epTrk;
-	trkEndPt_p endPtP;
 
-	LOG( log_block, 1, ("*** addSegs(): here T%d from T%d conBlock T%d\n",
-			GetTrkIndex(here),GetTrkIndex(from),GetTrkIndex(conBlock)))
+	LOG( log_block, 1, ("*** addSegs(): here T%d from T%d  epFrom %d\n",
+		GetTrkIndex(here),GetTrkIndex(from),epFrom))
 	if ( ! IsTrack( here ) ) return;
 
-	// See if this is a turnout
 	epCnt = GetTrkEndPtCnt(here);
-	if ( epCnt > 2 ) { // The from seg is one end of the block
-		epN = (((trkEndPt_p)from->endPt)[0].track == here)?0:1;
+	if ( here == from ) {
+		blockLen = GetTrkLength( here, 0, 1 );
+		if ( epCnt == 2 ) {
+			pushDa( here );
+			addSegs( ((from)->endPt)[0].track, here, epFrom );
+			addSegs( ((from)->endPt)[1].track, here, epFrom );
+		}
+		return;
+	}
 
+	// See if this is a turnout
+	// Check for the end of the scan. For a block its a turnout, for dynamic
+	// its a turnout with toBlock set.
+	if ( epCnt > 2 ) { // The from seg is one end of the block
 		LOG( log_block, 1, ("*** addSegs(): switch at T%d\n",GetTrkIndex(here)))
-		DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 2 );
-		endPtP = &tempEndPts(tempEndPts_da.cnt-1);
-		memset( endPtP, 0, sizeof *endPtP );
-		endPtP->pos = GetTrkEndPos(from,epN);
-		endPtP->angle = GetTrkEndAngle(from,epN);
+			epN = from->endPt[0].track == here?0:1;
+
+		pushEp( from, epFrom );
+		return;
+	}
+
+	// "here" is a segment of the block
+	// Add it to the length of the block
+	if ( epCnt == 2 ) {
+		blockLen += GetTrkLength( here, 0, 1 );
+
+		pushDa( here );
+		LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+
+		for ( epN = 0; epN < epCnt; epN++ ) {
+			epTrk = here->endPt[epN].track;
+			if ( epTrk && epTrk != from ) break;
+		}
+		addSegs( epTrk, here, epN );
+	}
+}
+
+static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
+{
+	EPINX_T epCnt, epN, ep1=ep, ep2=ep;
+	coOrd end1, end2, pos;
+
+	epCnt = GetTrkEndPtCnt(trk);
+
+	if ( epCnt == 2 ) {
+		LOG( log_block, 1, ("*** getRemoteEp(): trk T%d-%d remote %d\n",
+			GetTrkIndex(trk),ep,( ep == 0 )?1:0))
+		return ( ep == 0 )?1:0;
+	}
+	if ( epCnt > 2 ) {
+		GetTurnoutPositions( trk, &end1, &end2 );
+		for ( epN = 0; epN < epCnt; epN++ ) {
+			pos = trk->endPt[epN].pos;
+			if ( IsPosClose( pos, end1 ) ) ep1 = epN;
+			if ( IsPosClose( pos, end2 ) ) ep2 = epN;
+		}
+		LOG( log_block, 1, ("*** getRemoteEp(): trk T%d-%d ep1 %d ep2 %d\n",
+			GetTrkIndex(trk),ep,ep1,ep2))
+		if ( ep != ep1 && ep == ep2 ) return ep1;
+		if ( ep != ep2 && ep == ep1 ) return ep2;
+	}
+
+	return ep;
+}
+
+// Recursively goes from turnout to turnout until
+// a turnout with toTrack is encountered. When toBlock is encountered
+// save the endPt at the turnout.
+// Place tracks in DYNARR blockTrk_da
+// Place endpoints in tempEndPts_da
+// Place total length in blockLen
+static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
+{
+	track_p epTrk;
+	EPINX_T epCnt, epN, epR;
+
+	if ( ! IsTrack( here ) ) return;
+
+	LOG( log_block, 1, ("*** addTurnouts(): here T%d from T%d-%d\n",
+			GetTrkIndex(here),GetTrkIndex(from),epFrom))
+	epCnt = GetTrkEndPtCnt(here);
+	if ( here == from ) {
+		for ( epN = 0; epN < epCnt; epN++ ) {
+			if ( (epR = getRemoteEp( from, epN )) != epN ) break;
+		}
+		LOG( log_block, 1, ("*** addTurnouts(): adding track T%d  -- end1 %d end2 %d\n",
+				GetTrkIndex(here),epN,epR))
+		pushDa( here );
+		blockLen = 0.0;
+		if ( here->endPt[epN].toBlock  ) {
+			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
+					GetTrkIndex(here),epR))
+			pushEp( here, epN );
+		}
+		if ( ! here->endPt[epN].toTrack ) {
+			epTrk = ((trkEndPt_p)here->endPt)[epN].track;
+			addTurnouts(epTrk, here, epN);
+		}
+		if ( here->endPt[epR].toBlock ) {
+			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
+					GetTrkIndex(here),epR))
+			pushEp( here, epR );
+		}
+		if ( ! here->endPt[epR].toTrack ) {
+			epTrk = ((trkEndPt_p)here->endPt)[epR].track;
+			addTurnouts(epTrk, here, epR);
+		}
+		LOG( log_block, 1, ("*** addTurnouts(): exiting\n"))
+		return;
+	}
+
+	// Get ep connected to "from"
+	for ( epN = 0; epN < epCnt; epN++ ) {
+		epTrk = here->endPt[epN].track;
+		if ( epTrk && epTrk == from ) break;
+	}
+	LOG( log_block, 1, ("*** addTurnouts(): here T%d-%d back to T%d\n",
+				GetTrkIndex(here),epN,GetTrkIndex(from)))
+
+	epR = getRemoteEp( here, epN );
+	if ( epR == epN ) {
+		LOG( log_block, 1, ("*** addTurnouts(): endpoint open T%d-%d\n",
+			GetTrkIndex(here),epR))
+		return;
+	}
+
+	if ( epCnt > 2 && here->endPt[epR].toBlock ) {
+		LOG( log_block, 1, ("*** addTurnouts(): adding endpoint and track T%d-%d\n",
+			GetTrkIndex(here),epR))
+		pushEp( here, epR );
+		pushDa( here );
+		return;
+	}
+	// At end of scan
+	if ( epCnt > 2 && here->endPt[epR].toTrack ) {
+		LOG( log_block, 1, ("*** addTurnouts(): end of scan"))
 		return;
 	}
 
 	// "here" is a segment of the block
 	// Add it to the length of the block
 	if ( epCnt == 2 )
-		blockLen += GetTrkLength(here, 0, 1);
-	// set the back pointer
-	from->conBlock = conBlock;
+		blockLen += GetTrkLength( here, epR, epN );
 
 	// Add the segment to the list
-	DYNARR_APPEND( btrackinfo_t, blockTrk_da, 129 );
-	blockTrk(blockTrk_da.cnt - 1).t = here;
-	blockTrk(blockTrk_da.cnt - 1).i = GetTrkIndex(here);
-	LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+	LOG( log_block, 1, ("*** addTurnouts(): adding track T%d\n",GetTrkIndex(here)))
+	pushDa( here );
 
-	for ( epN=0; epN<epCnt;  epN++ ) {
-		epTrk = ((trkEndPt_p)here->endPt)[epN].track;
-		if ( !epTrk || epTrk == from ) continue;
-		addSegs(epTrk, here, conBlock);
-	}
+	epTrk = here->endPt[epR].track;
+	addTurnouts( epTrk, here, epN );
 }
 
+
 // Given any track segment in a block
-// get the set of segments that are in the block. Place in blockTrk_da
-// calculate block length
-// get block endpoints
-// if something is invalid, reset blockTrk_da
+// Get the set of segments that are in the block. Place in blockTrk_da
+// Place endpoints in tempEndPts_da
+// Place total length in blockLen
+// If something is invalid, reset blockTrk_da
 static void GetBlockSegs( track_p trk )
 {
+	LOG( log_block, 1, ("*** GetBlockSegs(): T%d\n", GetTrkIndex(trk)))
+
 	if ( ! IsTrack( trk ) ) return;
 
 	// Length of block
@@ -762,26 +948,49 @@ static void GetBlockSegs( track_p trk )
 
 	// Find all track segments between turnouts in this block
 	// trk is a track segment
-	addSegs(trk, trk, trk);
+	addSegs( trk, trk, 0 );
 
-	if (tempEndPts_da.cnt != 2) {
+	if ( tempEndPts_da.cnt != 2 ) {
 		LOG( log_block, 1, ("*** GetBlockSegs(): dead end\n"))
 		blockLen = 0.0;
 		// block ends at end-of-track
+		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 		DYNARR_RESET( btrackinfo_t, blockTrk_da );
 	}
-	if (blockLen < minBlockLength) {
+	if ( blockLen < minBlockLength ) {
 		LOG( log_block, 1, ("*** GetBlockSegs(): too short\n"))
 		blockLen = 0.0;
 		// block is too short
+		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 		DYNARR_RESET( btrackinfo_t, blockTrk_da );
 	}
 	LOG( log_block, 1, ("*** GetBlockSegs(): T%d len %6.1f segs %d\n",
 			GetTrkIndex(trk), blockLen, blockTrk_da.cnt))
 }
 
+static void GetDynamicSegs( track_p trk )
+{
+	LOG( log_block, 1, ( "*** GetDynamicSegs T%d\n", GetTrkIndex(trk)))
+
+	if ( ! IsTrack( trk ) ) return;
+
+	// Length of block
+	blockLen = 0.0;
+	// Endpoints of block
+	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	// Track segments in block
+	DYNARR_RESET( btrackinfo_t, blockTrk_da );
+
+	// Find all turnouts between two blocks
+	addTurnouts( trk, trk, 0 );
+}
+
 // The needed data is in the static areas
-void initBlockData( track_p trk )
+// tempEndPts_da - DYNARR preloaded with endpoints
+// blockName - preloaded with block name
+// blockScript - preloaded with block script
+// blockLen - preloaded length of block
+void initBlockData( track_p blk_trk )
 {
 	blockData_p xx,xx1;
 	track_p trk1;
@@ -790,57 +999,55 @@ void initBlockData( track_p trk )
 	trkEndPt_p endPtP;
 
 	// This suppresses displaying the block description
-//	SetTrkBits( trk, TB_HIDEDESC);
+	// SetTrkBits( blk_trk, TB_HIDEDESC);
 
-	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
+	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
 		endPtP = &tempEndPts(ep);
-		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
-		(trk)->endPt[ep].option = 0;
-#if 0
+		SetTrkEndPoint( blk_trk, ep, endPtP->pos, endPtP->angle );
+		(blk_trk)->endPt[ep].option = 0;
 		LOG( log_block, 1, ( "*** initBlockData(): ep[%d] pos %0.1f %0.1f"
 			" angle %0.2f track T%d options 0x%08lX\n",
-			ep, (trk)->endPt[ep].pos.x, (trk)->endPt[ep].pos.y,
-			(trk)->endPt[ep].angle,
-			(trk)->endPt[ep].track?GetTrkIndex((trk)->endPt[ep].track):0,
-			(trk)->endPt[ep].option))
-#endif
+			ep, (blk_trk)->endPt[ep].pos.x, (blk_trk)->endPt[ep].pos.y,
+			(blk_trk)->endPt[ep].angle,
+			(blk_trk)->endPt[ep].track?GetTrkIndex((blk_trk)->endPt[ep].track):0,
+			(blk_trk)->endPt[ep].option))
 	}
 
-	xx = GetblockData( trk );
-	LOG(log_block, 1, ("*** initBlockData(): T%d(%p), xx = %p\n",
-			GetTrkIndex(trk), trk, xx))
+	xx = GetblockData( blk_trk );
+	LOG(log_block, 1, ("*** initBlockData(): T%d(%p), %s xx = %p\n",
+			GetTrkIndex(blk_trk), blockName, blk_trk, xx))
 
-	xx->name = MyStrdup(blockName);
+	xx->name = MyStrdup( blockName );
 	blockName[0] = 0;
-	xx->script = MyStrdup(blockScript);
+	xx->script = MyStrdup( blockScript );
 	blockScript[0] = 0;
 	xx->blkLength = blockLen;
 	xx->IsHilite = FALSE;
 	xx->description_offset = zero;
 	trk1 = last_block;
-	if (!trk1) {
-		first_block = trk;
+	if ( ! trk1 ) {
+		first_block = blk_trk;
 	}
 	else {
 		xx1 = GetblockData(trk1);
-		xx1->next_block = trk;
+		xx1->next_block = blk_trk;
 	}
 	xx->next_block = NULL;
-	last_block = trk;
+	last_block = blk_trk;
 
 	xx->numTracks = blockTrk_da.cnt;
-	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
+	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
 		tracklist(iTrack).i = blockTrk(iTrack).i;
 		tracklist(iTrack).t = blockTrk(iTrack).t;
-		if (blockTrk(iTrack).t) {
-			blockTrk(iTrack).t->conBlock = trk;
+		if ( tracklist(iTrack).t ) {
+			tracklist(iTrack).t->conBlock = blk_trk;
 		}
-		LOG( log_block, 1, ("*** initBlockData(): copying track T%d\n",
+		LOG( log_block, 2, ("*** initBlockData(): copying track T%d\n",
 				tracklist(iTrack).i))
 	}
 }
 
-EXPORT BOOL_T ResolveBlockTrack ( track_p b_trk )
+EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
 {
     blockData_p xx;
     track_p t_trk;
@@ -849,14 +1056,15 @@ EXPORT BOOL_T ResolveBlockTrack ( track_p b_trk )
     trkEndPt_p endPtP;
     int rc =0;
     int first = -1;
-    if (GetTrkType(b_trk) != T_BLOCK) return TRUE;
+
+    if ( GetTrkType(b_trk) != T_BLOCK ) return TRUE;
     LOG( log_block, 1, ("*** ResolveBlockTrack(T%d)\n",GetTrkIndex(b_trk)))
 
-    xx = GetblockData(b_trk);
-    for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
+    xx = GetblockData( b_trk );
+    for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
 	/* For all tracks in the block, set the block pointer, conBlock, on the track.  */
-        t_trk = FindTrack(tracklist(iTrack).i);
-	if (t_trk == NULL) { // track is gone, remove reference
+        t_trk = FindTrack( tracklist(iTrack).i );
+	if ( t_trk == NULL ) { // track is gone, remove reference
 		tracklist(iTrack).i = 0;
 		continue;
 	}
@@ -872,14 +1080,14 @@ EXPORT BOOL_T ResolveBlockTrack ( track_p b_trk )
     }
     LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): first T%d: %p\n",
 		GetTrkIndex(b_trk), tracklist(first).i, tracklist(first).t))
-    if (first < 0) {
+    if ( first < 0 ) {
 	// No segs in block
         LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): No segs in block\n",
 			GetTrkIndex(b_trk)))
 	xx->numTracks = 0;
-	blockDebug(b_trk);
+	blockDebug( b_trk );
 
-	DeleteTrack(b_trk, FALSE); // calls DeleteBlock
+	DeleteTrack( b_trk, FALSE ); // calls DeleteBlock
 
 //	SetBlockBoundingBox(b_trk);
 	return FALSE;
@@ -891,36 +1099,39 @@ EXPORT BOOL_T ResolveBlockTrack ( track_p b_trk )
 	// Capture all tracks between turnouts into this block
 	// t_trk is a track segment, b_trk is the controlBlock
 	GetBlockSegs( t_trk );
+	if ( blockTrk_da.cnt <= 0 ) return FALSE;
+	if ( tempEndPts_da.cnt < 2 ) return FALSE;
+	if ( blockLen < minBlockLength ) return FALSE;
 	// when this comes back, blockTrk_da has the segment list
 
-	if (blockTrk_da.cnt == 0) {
+	if ( blockTrk_da.cnt == 0 ) {
 		LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): -No segs\n",
 				GetTrkIndex(b_trk)))
-		DeleteTrack(b_trk, FALSE);
+		DeleteTrack( b_trk, FALSE );
 
 		return FALSE;
 	}
 	xx->blkLength = 0.0;
-	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
+	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
 		LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): copying track T%d\n",
 			GetTrkIndex(b_trk), blockTrk(iTrack).i))
 		tracklist(iTrack).i = blockTrk(iTrack).i;
 		tracklist(iTrack).t = blockTrk(iTrack).t;
 		blockTrk(iTrack).t->conBlock = b_trk;
-		xx->blkLength += GetTrkLength(blockTrk(iTrack).t, 0, 1);
+		xx->blkLength += GetTrkLength( blockTrk(iTrack).t, 0, 1 );
 	}
 	xx->numTracks = blockTrk_da.cnt;
-	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
+	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
 		endPtP = &tempEndPts(ep);
 		SetTrkEndPoint( b_trk, ep, endPtP->pos, endPtP->angle );
 	}
-	blockDebug(b_trk);
+	blockDebug( b_trk );
 //	SetBlockBoundingBox(trk);
     }
 
-    if (!blockCheckContigiousPath(FALSE)) {
-    	if (NoticeMessage( _("resolveBlockTrack(T%d): is not continuous"),
-			_("Continue"), NULL, GetTrkIndex(b_trk))) {
+    if ( ! blockCheckContigiousPath( FALSE ) ) {
+    	if ( NoticeMessage( _("resolveBlockTrack(T%d): is not continuous"),
+			_("Continue"), NULL, GetTrkIndex(b_trk)) ) {
     		exit(4);
     	} else {
     		rc = 4;
@@ -932,59 +1143,98 @@ EXPORT BOOL_T ResolveBlockTrack ( track_p b_trk )
 
 // Go through all "Blocks" and refresh the segments in the block
 // Call this before entering train mode
-EXPORT void UpdateBlockTrack( void ) {
+EXPORT void UpdateBlockTrack( void )
+{
     track_p trk;
-    LOG( log_block, 1, ("*** UpdateBlockTrack\n"))
 
-    // clear all pointers
-    TRK_ITERATE(trk) {
-            trk->conBlock = NULL;
-    }
+    LOG( log_block, 1, ("*** UpdateBlockTrack -- enter\n"))
+
+    // Set turnout flags (toBlock, toTrack) as needed
+    SetTurnoutFlags();
 
     // Go through blocks and update the segments
     TRK_ITERATE(trk) {
-        if (GetTrkType(trk) == T_BLOCK) {
-            ResolveBlockTrack (trk);
+        if ( GetTrkType(trk) == T_BLOCK ) {
+            ResolveBlockTrack( trk );
 	}
     }
-
+    LOG( log_block, 1, ("*** UpdateBlockTrack -- exit\n"))
 
 }
 
-EXPORT void AddMissingBlockTrack( void ) {
+EXPORT void AddMissingBlockTrack( void )
+{
     track_p trk, b_trk;
 
-    LOG( log_block, 1, ("*** AddMissingBlockTrack()\n"))
-    UpdateBlockTrack();
+    LOG( log_block, 1, ("*** AddMissingBlockTrack() -- enter\n"))
 
     // Loop through all track segs that are not in blocks
     // Create blocks for them when they are long enough and not dead ended.
     TRK_ITERATE(trk) {
-	LOG( log_block, 1, ("*** AddMissingBlockTrack() next seg T%d\n", GetTrkIndex(trk )))
+	LOG( log_block, 1, ("*** AddMissingBlockTrack() next seg T%d isTrack %d EndPtCnt %d block %d\n",
+		GetTrkIndex(trk), IsTrack(trk), GetTrkEndPtCnt(trk), trk->conBlock != NULL))
 	// seg already in a block
 	if ( ! IsTrack(trk) ) continue;
 	if ( GetTrkEndPtCnt(trk) != 2 ) continue;
-	if ( trk->endPt[0].index < 0 || trk->endPt[1].index < 0) continue;
-	if (trk->conBlock != NULL) continue;
-	GetBlockSegs(trk);
-	if (blockTrk_da.cnt <=0 ) continue;
+	if ( trk->endPt[0].index < 0 || trk->endPt[1].index < 0 ) continue;
+	if ( trk->conBlock != NULL ) continue;
+	GetBlockSegs( trk );
+	if ( blockTrk_da.cnt <= 0 ) continue;
+	if ( tempEndPts_da.cnt < 2 ) continue;
+	if ( blockLen < minBlockLength ) continue;
 
-	if ( ! blockUndoStarted) {
+	if ( ! blockUndoStarted ) {
 	    UndoStart( _("Create block"), "Create block" );
 	    blockUndoStarted = TRUE;
 	}
 
-       	sprintf(blockName,"B%03d",blockTrk(0).i);
+       	sprintf( blockName,"B%03d",blockTrk(0).i );
 	SetTrkBits( blockTrk(0).t, TB_SELECTED );
-	b_trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt,
-		sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
-
-	initBlockData( b_trk );
+	b_trk = makeBlock();
 	ClrTrkBits( blockTrk(0).t, TB_SELECTED );
 
     }
     MainRedraw();
 }
+
+EXPORT void DeleteDynamicBlock( track_p trk )
+{
+	track_p blk = trk->conBlock;
+	blockData_p xx;
+
+	LOG( log_block, 1, ("*** DeleteDynamicBlock T%d -- enter\n", GetTrkIndex(trk)))
+
+	if ( ! blk || GetTrkType(blk) != T_BLOCK ) return;
+	xx = GetblockData(blk);
+	if ( ! xx->name || xx->name[0] != 0 ) return;
+
+//	DeleteTrack (blk, FALSE);
+	CheckDeleteBlock( blk );
+	LOG( log_block, 1, ("*** DeleteDynamicBlock T%d -- exit\n", GetTrkIndex(trk)))
+}
+
+EXPORT void CreateDynamicBlock( track_p trk )
+{
+	track_p blk_trk;
+	EPINX_T ep, epN;
+	DIST_T len;
+
+	if ( ! IsTrack( trk ) ) return;
+	if ( GetTrkEndPtCnt(trk) <= 2 ) return;
+	if ( trk->conBlock ) return;
+
+	LOG( log_block, 1, ("*** CreateDynamicBlock T%d -- enter\n", GetTrkIndex(trk)))
+
+	blockScript[0] = 0;
+	blockName[0] = 0;
+	GetDynamicSegs( trk );
+	if ( blockTrk_da.cnt <= 0 ) return;
+	if ( tempEndPts_da.cnt < 2 ) return;
+
+	blk_trk = makeBlock();
+	LOG( log_block, 1, ("*** CreateDynamicBlock T%d -- exit\n", GetTrkIndex(trk)))
+}
+
 
 static void MoveBlock (track_p trk, coOrd orig ) {}
 static void RotateBlock (track_p trk, coOrd orig, ANGLE_T angle ) {}
@@ -1041,74 +1291,82 @@ static trackCmd_t blockCmds = {
 
 
 
-static BOOL_T TrackInBlock (track_p trk, track_p blk) {
+static BOOL_T TrackInBlock( track_p trk, track_p blk )
+{
 	wIndex_t iTrack;
+
 	LOG( log_block, 1, ("*** TrackInBlock() trk %d\n", trk?trk->index:0))
 	blockData_p xx = GetblockData(blk);
-	for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
-	LOG( log_block, 1, ("*** TrackInBlock() trk %d\n", (&(xx->trackList))[iTrack].i))
-		if (trk->index == (&(xx->trackList))[iTrack].i) return TRUE;
+	for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
+		LOG( log_block, 1, ("*** TrackInBlock() trk %d\n", (&(xx->trackList))[iTrack].i))
+		if ( trk->index == (&(xx->trackList))[iTrack].i ) return TRUE;
 	}
+
 	return FALSE;
 }
 
-static track_p FindBlock (track_p trk) {
+static track_p FindBlock( track_p trk )
+{
 	track_p a_trk;
 	blockData_p xx;
-	if (GetTrkType(trk) == T_BLOCK) return trk;
-	if (!first_block) return NULL;
+
+	if ( GetTrkType(trk) == T_BLOCK ) return trk;
+	if ( ! first_block ) return NULL;
 	a_trk = first_block;
-	while (a_trk) {
-		if (!IsTrackDeleted(a_trk)) {
-			if (GetTrkType(a_trk) == T_BLOCK &&
-					TrackInBlock(trk,a_trk)) return a_trk;
+	while ( a_trk ) {
+		if ( ! IsTrackDeleted( a_trk ) ) {
+			if ( GetTrkType(a_trk) == T_BLOCK &&
+					TrackInBlock(trk,a_trk) ) return a_trk;
 		}
 		xx = GetblockData(a_trk);
 		a_trk = xx->next_block;
 	}
+
 	return NULL;
 }
 
-static track_p FindBlockByName (char *name) {
+static track_p FindBlockByName( char *name )
+{
 	track_p a_trk;
 	blockData_p xx;
+
 	a_trk = first_block;
-	while (a_trk) {
+	while ( a_trk ) {
 		xx = GetblockData(a_trk);
-		if (strcmp(xx->name, name) == 0) {
+		if ( strcmp(xx->name, name) == 0 ) {
 			return a_trk;
 		}
 		a_trk = xx->next_block;
 	}
+
 	return NULL;
 }
 
-DIST_T getBlockLen( void)
+static DIST_T getBlockLen( void )
 {
 	DIST_T totLen =0.0, len;
 	wIndex_t iTrack;
-	EPINX_T ep0, ep1;
 
-	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
-		len = GetTrkLength(blockTrk(iTrack).t, 0, 1);
+	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
+		len = GetTrkLength( blockTrk(iTrack).t, 0, 1 );
 		totLen += len;
 		LOG( log_block, 1, ("*** getBlockLen(): track T%d len %0.2f\n",
 				blockTrk(iTrack).i, len))
 	}
+
 	return totLen;
 }
 
 
-static void BlockOk ( void * junk )
+static void BlockOk( void * junk )
 {
 	blockData_p xx,xx1;
 	track_p trk,trk1;
 	wIndex_t iTrack;
 	EPINX_T ep;
-	trkEndPt_p endPtP;
 	DIST_T len;
 
-	wHide(blockPG.win);
+	wHide( blockPG.win );
 	LOG( log_block, 1, ("*** BlockOk()\n"))
 
 	ParamUpdate( &blockPG );
@@ -1130,6 +1388,8 @@ static void BlockOk ( void * junk )
 			GetBlockSegs( trk );
 		}
 	}
+	if ( tempEndPts_da.cnt < 2 ) return;
+	if ( blockLen < minBlockLength ) return;
 	LOG( log_block, 1, ("*** BlockOk(): blockTrk_da.cnt %d\n",blockTrk_da.cnt))
 
 	if ( blockTrk_da.cnt > 128 ) {
@@ -1139,9 +1399,9 @@ static void BlockOk ( void * junk )
 		return;
 	}
 
-	if ( blockTrk_da.cnt>0 ) {
+	if ( blockTrk_da.cnt > 0 ) {
 		// The length of the block must at least minBlockLength long
-		if (blockLen < minBlockLength) {
+		if ( blockLen < minBlockLength ) {
 			LOG( log_block, 1, ("*** BlockOk() len %0.2f min %0.2f\n",
 					blockLen, minBlockLength))
 			NoticeMessage( MSG_BLOCKTOOSHORT, _("Ok"), NULL );
@@ -1151,33 +1411,29 @@ static void BlockOk ( void * junk )
 		}
 
 		// Default block name is the track seg number
-		if (blockName[0] == 0)
-			sprintf(blockName,"B%03d",blockTrk(0).i);
+		if ( blockName[0] == 0 )
+			sprintf( blockName,"B%03d",blockTrk(0).i );
 		LOG( log_block, 1, ("*** BlockOk() blockName %s\n", blockName))
 
-		if (! blockUndoStarted) {
+		if ( ! blockUndoStarted ) {
 		    UndoStart( _("Create block"), "Create block" );
 		    blockUndoStarted = TRUE;
 		}
 
 		/* Create a block object */
 		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
-		trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt,
-			sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
+		trk = makeBlock();
 
-		initBlockData( trk );
+		SetBlockBoundingBox( trk );
 
-		blockDebug(trk);
-		SetBlockBoundingBox(trk);
-
-		if (blockUndoStarted) {
+		if ( blockUndoStarted ) {
 		    UndoEnd();
 		    blockUndoStarted = FALSE;
 		}
 	}
 	wHide( blockW );
 
-	if (blockUndoStarted) {
+	if ( blockUndoStarted ) {
 		UndoEnd();
 		blockUndoStarted = FALSE;
 	}
@@ -1185,25 +1441,25 @@ static void BlockOk ( void * junk )
 	Reset(); // DescOk
 }
 
-static void NewBlockDialog(track_p sel_trk)
+static void NewBlockDialog( track_p sel_trk )
 {
 	track_p trk = NULL;
 	track_p blk_trk = NULL;
 
 	LOG( log_block, 1, ("*** NewBlockDialog()\n"))
-	if (!sel_trk)
+	if ( ! sel_trk )
 		return;
 
 	LOG( log_block, 1, ("*** NewBlockDialog( T%03d )\n", GetTrkIndex(sel_trk)))
 
-	if (!IsTrack( sel_trk )) {
+	if ( ! IsTrack( sel_trk ) ) {
 		LOG( log_block, 1, ("*** NewBlockDialog( %d is not trk type )\n",
 				GetTrkType(sel_trk)))
 		NoticeMessage( _("Please select a track segment"), _("Ok"), NULL);
 		return;
 	}
 
-	if (GetTrkEndPtCnt(sel_trk) != 2) {
+	if ( GetTrkEndPtCnt(sel_trk) != 2 ) {
 		LOG( log_block, 1, ("*** NewBlockDialog( turnout )\n"))
 		NoticeMessage( _("Please select a track segment with 2 endpoints"),
 			_("Ok"), NULL);
@@ -1213,60 +1469,59 @@ static void NewBlockDialog(track_p sel_trk)
 	// Look for sel_trk in existing block
 	blockEditName[0] = 0;
 	while ( TrackIterate( &trk ) ) {
-		if (GetTrkType(trk) == T_BLOCK && TrackInBlock(sel_trk,trk)) {
-			EditBlock (trk);
+		if ( GetTrkType(trk) == T_BLOCK && TrackInBlock(sel_trk,trk) ) {
+			EditBlock ( trk );
 			wShow( blockW );
 			return;
 		}
 	}
 
-	GetBlockSegs(sel_trk);
-	if (tempEndPts_da.cnt != 2) {
+	GetBlockSegs( sel_trk );
+	if ( tempEndPts_da.cnt != 2 ) {
 		LOG( log_block, 1, ("*** NewBlockDialog(): dead end\n"))
 		NoticeMessage( _("Track is dead end"), _("Ok"), NULL);
 		return;
 	}
-	if (blockLen < minBlockLength) {
-		LOG( log_block, 1, ("*** NewBlockDialog(): too short\n"))
-		NoticeMessage( _("Block is too short"), _("Ok"), NULL);
+	if ( blockLen < minBlockLength ) {
+		LOG( log_block, 1, ("*** NewBlockDialog(): too short - %0.1f\n", blockLen))
+		NoticeMessage( _("Block is too short"), _("Ok"), NULL );
 		return;
 	}
 	if ( blockTrk_da.cnt > 128 ) {
 		LOG( log_block, 1, ("*** NewBlockDialog(): too many segments\n"))
-		NoticeMessage( _("Block has too many segments"), _("Ok"), NULL);
+		NoticeMessage( _("Block has too many segments"), _("Ok"), NULL );
 		return;
 	}
-	if (blockTrk_da.cnt <=0 ) {
+	if ( blockTrk_da.cnt <= 0 ) {
 		LOG( log_block, 1, ("*** NewBlockDialog(): da.cnt <=0\n"))
-		NoticeMessage( _("Block error"), _("Ok"), NULL);
+		NoticeMessage( _("Block error"), _("Ok"), NULL );
 		return;
 	}
 
-	if ( !blockW ) {
+	if ( ! blockW ) {
 		ParamRegister( &blockPG );
-		blockW = ParamCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")),
+		blockW = ParamCreateDialog ( &blockPG, MakeWindowTitle( _("Create Block") ),
 			       	_("Ok"), BlockOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		blockD.dpi = mainD.dpi;
 	}
-       	sprintf(blockName,"B%03d",GetTrkIndex(sel_trk));
+       	sprintf( blockName,"B%03d", GetTrkIndex(sel_trk) );
 	ParamLoadControls( &blockPG );
 	LOG( log_block, 1, ("*** NewBlockDialog( blockName %s )\n", blockName))
 	wShow( blockW );
 }
 
-EXPORT void BlockCancel(void)
+EXPORT void BlockCancel( void )
 {
-    if (blockPG.win && wWinIsVisible(blockPG.win)) {
+    if ( blockPG.win && wWinIsVisible(blockPG.win) ) {
 
         wHide(blockPG.win);
 
-        if (blockUndoStarted) {
+        if ( blockUndoStarted ) {
             UndoEnd();
             blockUndoStarted = FALSE;
         }
     }
     wSetCursor(mainD.d,defaultCursor);
-
 }
 
 static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
@@ -1290,11 +1545,11 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 
 	case C_DOWN:
            LOG( log_block, 1,("*** CmdBlockCreate(): C_DOWN\n"))
-	   if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
+	   if ( (trk = OnTrack(&pos, FALSE, FALSE) ) != NULL) {
 
 		blockBorder = mainD.scale*0.1;
 
-		if (blockBorder < trackGauge) {
+		if ( blockBorder < trackGauge ) {
 			blockBorder = trackGauge;
 		}
 		GetBoundingBox(trk, &blockSize, &blockOrig);
@@ -1321,33 +1576,48 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 }
 
 
-EXPORT void CheckDeleteBlock(track_p t)
+// Called by DeleteTrack
+EXPORT void CheckDeleteBlock( track_p t )
 {
-    track_p blk;
+    track_p blk = NULL;
     blockData_p xx;
-    LOG( log_block, 1,("*** CheckDeleteBlock( T%d )\n", GetTrkIndex(t)))
-    if (IsTrack(t)) {
+    wIndex_t iTrack;
+
+    LOG( log_block, 1,("*** CheckDeleteBlock( T%d ) %p\n", GetTrkIndex(t), t))
+    if ( IsTrack(t) ) {
         blk = FindBlock(t);
-        if (blk == NULL) {
+        if ( blk == NULL ) {
             return;
         }
     }
-    if (GetTrkType(t) == T_BLOCK)
+    if ( GetTrkType(t) == T_BLOCK )
         blk = t;
     xx = GetblockData(blk);
-    if (! xx) return;
-    NoticeMessage(_("Deleting block %s"),_("Ok"),NULL,xx->name);
-    DeleteTrack(blk,FALSE);
+    if ( ! xx ) return;
+    if ( xx->name && xx->name[0] != 0 )
+    	NoticeMessage(_("Deleting block %s"),_("Ok"),NULL,xx->name);
+
+    // Remove the conBlock links
+    for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
+	if ( (&(xx->trackList))[iTrack].t ) {
+		LOG( log_block, 1,("*** CheckDeleteBlock( T%d ) -- T%d con %p\n",
+			GetTrkIndex(t), (&(xx->trackList))[iTrack].i,
+			(&(xx->trackList))[iTrack].t->conBlock))
+            (&(xx->trackList))[iTrack].t->conBlock = NULL;
+        }
+    }
+
+    DeleteTrack (blk, FALSE);
 }
 
-static void BlockEditOk ( void * junk )
+static void BlockEditOk( void * junk )
 {
     blockData_p xx;
     track_p trk;
 
     LOG( log_block, 1, ("*** BlockEditOk()\n"))
     ParamUpdate (&blockEditPG );
-    if ( blockEditName[0]==0 ) {
+    if ( blockEditName[0] == 0 ) {
         NoticeMessage( _("Block must have a name!"), _("Ok"), NULL);
         return;
     }
@@ -1363,7 +1633,7 @@ static void BlockEditOk ( void * junk )
 }
 
 
-static void EditBlock (track_p trk)
+static void EditBlock( track_p trk )
 {
     blockData_p xx = GetblockData(trk);
     wIndex_t iTrack;
@@ -1374,15 +1644,15 @@ static void EditBlock (track_p trk)
 	strncpy(blockEditScript, xx->script, STR_LONG_SIZE - 1);
 	blockEditScript[STR_LONG_SIZE-1] = '\0';
     blockEditSegs[0] = '\0';
-    for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
-        if ((&(xx->trackList))[iTrack].t == NULL) continue;
+    for ( iTrack = 0; iTrack < xx->numTracks ; iTrack++ ) {
+        if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
         sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
-        if (needComma) strcat(blockEditSegs,", ");
+        if ( needComma ) strcat(blockEditSegs,", ");
         strcat(blockEditSegs,temp);
         needComma = TRUE;
     }
     blockEditTrack = trk;
-    if ( !blockEditW ) {
+    if ( ! blockEditW ) {
         ParamRegister( &blockEditPG );
         blockEditW = ParamCreateDialog (&blockEditPG, 
                                         MakeWindowTitle(_("Edit block")), 
@@ -1402,7 +1672,7 @@ static wDrawColor blkhiliteColor = 0;
 static void DrawBlockTrackHilite( void )
 {
 	wDrawPix_t x, y, w, h;
-	if (blkhiliteColor==0)
+	if ( blkhiliteColor == 0 )
 		blkhiliteColor = wDrawColorGray(87);
 	w = (wDrawPix_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wDrawPix_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
@@ -1412,7 +1682,7 @@ static void DrawBlockTrackHilite( void )
 }
 
 
-static int BlockMgmProc ( int cmd, void * data )
+static int BlockMgmProc( int cmd, void * data )
 {
     track_p trk = (track_p) data;
     blockData_p xx = GetblockData(trk);
@@ -1439,25 +1709,25 @@ static int BlockMgmProc ( int cmd, void * data )
         return TRUE;
         break;
     case CONTMGM_DO_HILIGHT:
-        if (!xx->IsHilite) {
+        if ( ! xx->IsHilite ) {
             blkhiliteBorder = mainD.scale*0.1;
             if ( blkhiliteBorder < trackGauge ) blkhiliteBorder = trackGauge;
             first = TRUE;
-            for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
-                if ((&(xx->trackList))[iTrack].t == NULL) continue;
+            for ( iTrack = 0; iTrack < xx->numTracks ; iTrack++ ) {
+                if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
                 GetBoundingBox( (&(xx->trackList))[iTrack].t, &tempSize, &tempOrig );
-                if (first) {
+                if ( first ) {
                     blkhiliteOrig = tempOrig;
                     blkhiliteSize = tempSize;
                     first = FALSE;
                 } else {
-                    if (tempSize.x > blkhiliteSize.x)
+                    if ( tempSize.x > blkhiliteSize.x )
                         blkhiliteSize.x = tempSize.x;
-                    if (tempSize.y > blkhiliteSize.y)
+                    if ( tempSize.y > blkhiliteSize.y )
                         blkhiliteSize.y = tempSize.y;
-                    if (tempOrig.x < blkhiliteOrig.x)
+                    if ( tempOrig.x < blkhiliteOrig.x )
                         blkhiliteOrig.x = tempOrig.x;
-                    if (tempOrig.y < blkhiliteOrig.y)
+                    if ( tempOrig.y < blkhiliteOrig.y )
                         blkhiliteOrig.y = tempOrig.y;
                 }
             }
@@ -1470,25 +1740,25 @@ static int BlockMgmProc ( int cmd, void * data )
         }
         break;
     case CONTMGM_UN_HILIGHT:
-        if (xx && xx->IsHilite) {
+        if ( xx && xx->IsHilite ) {
             blkhiliteBorder = mainD.scale*0.1;
             if ( blkhiliteBorder < trackGauge ) blkhiliteBorder = trackGauge;
             first = TRUE;
-            for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
-                if ((&(xx->trackList))[iTrack].t == NULL) continue;
+            for ( iTrack = 0; iTrack < xx->numTracks ; iTrack++ ) {
+                if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
                 GetBoundingBox( (&(xx->trackList))[iTrack].t, &tempSize, &tempOrig );
-                if (first) {
+                if ( first ) {
                     blkhiliteOrig = tempOrig;
                     blkhiliteSize = tempSize;
                     first = FALSE;
                 } else {
-                    if (tempSize.x > blkhiliteSize.x)
+                    if ( tempSize.x > blkhiliteSize.x )
                         blkhiliteSize.x = tempSize.x;
-                    if (tempSize.y > blkhiliteSize.y)
+                    if ( tempSize.y > blkhiliteSize.y )
                         blkhiliteSize.y = tempSize.y;
-                    if (tempOrig.x < blkhiliteOrig.x)
+                    if ( tempOrig.x < blkhiliteOrig.x )
                         blkhiliteOrig.x = tempOrig.x;
-                    if (tempOrig.y < blkhiliteOrig.y)
+                    if ( tempOrig.y < blkhiliteOrig.y )
                         blkhiliteOrig.y = tempOrig.y;
                 }
             }
@@ -1502,10 +1772,10 @@ static int BlockMgmProc ( int cmd, void * data )
         break;
     case CONTMGM_GET_TITLE:
         sprintf( message, "\t%s\t%0.1f\t", xx->name, xx->blkLength);
-        for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
-            if ((&(xx->trackList))[iTrack].t == NULL) continue;
+        for ( iTrack = 0; iTrack < xx->numTracks ; iTrack++ ) {
+            if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
             sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
-            if (needComma) strcat(message,", ");
+            if ( needComma ) strcat(message,", ");
             strcat(message,temp);
             needComma = TRUE;
         }
@@ -1525,11 +1795,11 @@ EXPORT void BlockMgmLoad( void )
     track_p trk;
     static wIcon_p blockI = NULL;
 
-    if ( blockI == NULL)
+    if ( blockI == NULL )
         blockI = wIconCreatePixMap( block_xpm );
 
     TRK_ITERATE(trk) {
-        if (GetTrkType(trk) != T_BLOCK) continue;
+        if ( GetTrkType(trk) != T_BLOCK ) continue;
         ContMgmLoad( blockI, BlockMgmProc, (void *)trk );
     }
 
@@ -1564,22 +1834,22 @@ EXPORT BOOL_T UpdateMinBlockLength( void )
 			minBlockLength))
 	// if min is larger, soem blocks may need to be deleted.
 	TRK_ITERATE(trk) {
-	if (GetTrkType(trk) != T_BLOCK) continue;
+	if ( GetTrkType(trk) != T_BLOCK ) continue;
 		xx = GetblockData( trk );
-		if (xx->blkLength < minBlockLength) 
+		if ( xx->blkLength < minBlockLength )
 			cntr++;
 	}
-	if (cntr) {
-		if (!NoticeMessage(
+	if ( cntr ) {
+		if ( ! NoticeMessage(
 			_("New min length is larger, is it OK to delete %d short blocks"),
 			_("Yes"),_("No"),cntr)) {
 			return TRUE;
 		}
 	}
 	TRK_ITERATE(trk) {
-	if (GetTrkType(trk) != T_BLOCK) continue;
+	if ( GetTrkType(trk) != T_BLOCK ) continue;
 		xx = GetblockData( trk );
-		if (xx->blkLength < minBlockLength) {
+		if ( xx->blkLength < minBlockLength ) {
 			LOG( log_block, 1, ("*** UpdateMinBlockLength() deleting block T%d\n",
 					GetTrkIndex(trk)))
 			DeleteTrack(trk, FALSE); // calls DeleteBlock
@@ -1598,13 +1868,14 @@ EXPORT BOOL_T UpdateMinBlockLength( void )
 // Length is in inches.
 EXPORT BOOL_T DoSetMinBlockLength( DIST_T min )
 {
-	if (min < 0.0 || min > 1000.0)
+	if ( min < 0.0 || min > 1000.0 )
 		return FALSE;
 
-	if (min > maxBlockLength)
+	if ( min > maxBlockLength )
 		maxBlockLength = min;
 
 	minBlockLength = min;
+
 	return TRUE;
 }
 
@@ -1618,12 +1889,13 @@ EXPORT BOOL_T DoSetMinBlockLength( DIST_T min )
 // Length is in inches.
 EXPORT BOOL_T DoSetMaxBlockLength( DIST_T max )
 {
-	if (max > 1000.0)
+	if ( max > 1000.0 )
 		return FALSE;
 
-	if (max < minBlockLength)
+	if ( max < minBlockLength )
 		max = minBlockLength;
 
 	maxBlockLength = max;
+
 	return TRUE;
 }

@@ -188,6 +188,10 @@ BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T
 track_p NewHandLaidTurnout( coOrd, ANGLE_T, coOrd, ANGLE_T, coOrd, ANGLE_T, ANGLE_T );
 void NextTurnoutPosition( track_p trk );
 enum paramFileState	GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+void SetTurnoutFlags( void );
+void ClearTurnoutFlags( void );
+void GetTurnoutPositions( track_p trk, coOrd * end1, coOrd * end2 );
+
 /* ctodesgn.c */
 void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );
 long ComputeTurnoutRoadbedSide( trkSeg_p, int, int, ANGLE_T, DIST_T );

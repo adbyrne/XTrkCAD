@@ -1307,9 +1307,6 @@ LOG( log_traverseTurnout, 1, ( "CheckTraverseTurnout( T%d, [%0.3f %0.3f])\n", Ge
 	pos.x -= xx->orig.x;
 	pos.y -= xx->orig.y;
 LOG( log_traverseTurnout, 1, ( "After rotation = [%0.3f %0.3f])\n", pos.x, pos.y ) )
-	if ( trk && trk->occupied > 0 ) {
-		LOG( log_traverseTurnout, 1, ( " turnout is occupied\n" ) )
-	}
 	
 #ifdef LATER
 	for ( inx=0; inx<xx->segCnt; inx++ ) {
@@ -1381,7 +1378,7 @@ static BOOL_T TraverseTurnout(
 	pos0.x -= xx->orig.x;
 	pos0.y -= xx->orig.y;
 	dist = *distR;
-	LOG( log_traverseTurnout, 1, ( "TraverseTurnout( T%d, occ %d [%0.3f %0.3f] [%0.3f %0.3f], A%0.3f, D%0.3f\n", GetTrkIndex(trk), trk->occupied, trvTrk->pos.x, trvTrk->pos.y, pos0.x, pos0.y, trvTrk->angle, *distR ) )
+	LOG( log_traverseTurnout, 1, ( "TraverseTurnout( T%d, [%0.3f %0.3f] [%0.3f %0.3f], A%0.3f, D%0.3f\n", GetTrkIndex(trk), trvTrk->pos.x, trvTrk->pos.y, pos0.x, pos0.y, trvTrk->angle, *distR ) )
 	pathCurr = 0;
 	path = GetCurrPath( trk );
 	for ( path += strlen((char*)path)+1; path[0] || path[1]; path++ ) {
@@ -1758,6 +1755,7 @@ static void DrawTurnoutPositionIndicator(
 	struct extraData * xx = GetTrkExtraData(trk);
 	PATHPTR_T path;
 	coOrd pos0, pos1;
+	wDrawColor newColor;
 
 	// Only 1 path?  Don't draw
 	path = GetPaths( trk );
@@ -1771,11 +1769,33 @@ static void DrawTurnoutPositionIndicator(
 			pos0 = MapPathPos( xx, path[1], 0 );
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
-			DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
+			newColor = trk->conBlock?drawColorGreen:color;
+			DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, newColor );
 		}
 	}
 }
 
+EXPORT void GetTurnoutPositions(
+		track_p trk,
+		coOrd * end1,
+		coOrd * end2  )
+{
+	struct extraData * xx = GetTrkExtraData(trk);
+	PATHPTR_T path;
+	coOrd pos0, pos1;
+
+	path = GetCurrPath( trk );
+	for ( path += strlen((char*)path); path[0] || path[1]; path++ ) {
+		if ( path[0] == 0 ) {
+			pos0 = MapPathPos( xx, path[1], 0 );
+		} else if ( path[1] == 0 ) {
+			pos1 = MapPathPos( xx, path[0], 1 );
+			*end1 = pos0;
+			*end2 = pos1;
+			return;
+		}
+	}
+}
 
 EXPORT void AdvanceTurnoutPositionIndicator(
 		track_p trk,
@@ -3193,3 +3213,110 @@ main( INT_T argc, char * argv[] )
 	}
 }
 #endif
+
+/**
+ * Switch Flags
+ * Switch end points can point a track segment, block, or another switch
+ * A collection of turnouts that connect two blocks are treated as a single
+ * turnout. When occupied the position can't be changed.
+ *
+ * End Point flags -
+ * toBlock - This endpoint points to a block
+ * toTrack - This endpoint points to a track
+ */
+
+// Recursively scan down a set of track segments
+// returns TRUE when:
+//  at a dead end
+//  length is longer than the minBlockLength
+// returns FALSE when turnout is encountered
+// Otherwise recursively call with the next segment.
+// The scan always starts at a turnout endpoint.
+static BOOL_T ConnectsToTurnout(track_p from, EPINX_T ep, DIST_T len)
+{
+	track_p trk;
+
+	LOG( log_turnout, 1, ("*** ConnectsToTurnout() from T%d-%d %4.1f\n",
+			GetTrkIndex(from), ep, len))
+
+	/* the end point is a dead end */
+	if ((trk = from->endPt[ep].track) == NULL)
+		return TRUE;
+
+	/* this is a turnout */
+	if ( GetTrkEndPtCnt(trk) > 2 )
+		return FALSE;
+
+	/* Is track segment a dead end? */
+	if ( GetTrkEndPtCnt(trk) == 1 ) return TRUE;
+	if ( trk->endPt[0].index < 0 || trk->endPt[1].index < 0)
+		return TRUE;
+
+	/* long enough to be a block */
+	len += GetTrkLength(trk, 0, 1);
+	if ( len > minBlockLength )
+		return TRUE;
+
+	if (trk->endPt[0].track != from)
+		return ConnectsToTurnout(trk, 0, len);
+	if (trk->endPt[1].track != from)
+		return ConnectsToTurnout(trk, 1, len);
+
+	return FALSE;
+}
+
+// Called when entering train mode to initialize turnout flags
+// toBlock - turnout ep leads to a block
+// toTrack - turnout ep does not lead to a switch
+EXPORT void SetTurnoutFlags( void )
+{
+	track_p trk;
+	EPINX_T ep;
+	DIST_T len;
+
+	LOG( log_turnout, 1, ("*** SetTurnoutFlags() -- enter\n"))
+	TRK_ITERATE(trk) {
+		if ( ! IsTrack(trk) ) continue;
+		/* turnouts have 3 or more endpoints */
+		if ( GetTrkEndPtCnt(trk) <= 2 ) continue;
+
+		LOG( log_turnout, 2, ("*** SetTurnoutFlags() turnout T%d numEp %d\n",
+			GetTrkIndex(trk ), GetTrkEndPtCnt(trk)))
+
+		for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+			if ( trk->endPt[ep].track && trk->endPt[ep].track->conBlock ) {
+				trk->endPt[ep].toBlock = TRUE;
+				trk->endPt[ep].toTrack = TRUE;
+			} else {
+				len = 0.0;
+				trk->endPt[ep].toTrack = ConnectsToTurnout(trk, ep, len);
+			}
+			LOG( log_turnout, 2, ("*** SetTurnoutFlags() turnout T%d-%d toBlock %d toTrack %d\n",
+				GetTrkIndex(trk), ep, trk->endPt[ep].toBlock, trk->endPt[ep].toTrack))
+		}
+	}
+	LOG( log_turnout, 1, ("*** SetTurnoutFlags() -- exit\n"))
+}
+
+// Called when leaving train mode to clear the turnout flags
+EXPORT void ClearTurnoutFlags( void )
+{
+	track_p trk;
+	EPINX_T ep;
+
+	LOG( log_turnout, 1, ("*** ClearTurnoutFlags() -- enter\n"))
+	TRK_ITERATE(trk) {
+		if ( ! IsTrack(trk) ) continue;
+		/* turnouts have 3 or more endpoints */
+		if ( GetTrkEndPtCnt(trk) <= 2 ) continue;
+
+		LOG( log_turnout, 2, ("*** ClearTurnoutFlags() turnout T%d numEp %d\n",
+				GetTrkIndex(trk ), GetTrkEndPtCnt(trk)))
+
+		for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+			trk->endPt[ep].toBlock = FALSE;
+		       	trk->endPt[ep].toTrack = FALSE;
+		}
+	}
+	LOG( log_turnout, 1, ("*** ClearTurnoutFlags() -- exit\n"))
+}

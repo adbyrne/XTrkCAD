@@ -238,6 +238,39 @@ static void setOccupied(void)
     MainRedraw();
 }
 
+static  BOOL_T isOccupied ( track_p trk )
+{
+	if ( ! trk ) return FALSE;
+	if ( trk->conBlock && trk->conBlock->occupied > 0 ) return TRUE;
+	if ( trk->occupied > 0 ) return TRUE;
+
+	return FALSE;
+}
+
+
+// Delete all dynamic blocks
+// When leaving train mode
+static void clearDynamicBlocks( void )
+{
+    track_p trk;
+
+    TRK_ITERATE(trk) {
+        DeleteDynamicBlock( trk );
+    }
+}
+
+// Create dynamic blocks for turnot paths that connect blocks
+// When entering train mode
+static void createDynamicBlocks( void )
+{
+    track_p trk;
+
+    TRK_ITERATE(trk) {
+        CreateDynamicBlock( trk );
+    }
+}
+
+
 // For each end of each car note the previous segment that it occupied. Find the
 // current segment and, if different, decrement the segment indicator for the
 // previous segment, increment the segment indicator for the new segment and
@@ -2650,6 +2683,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         }
 
 	UpdateBlockTrack();
+	createDynamicBlocks();
 	setOccupied();
 
         curTrainDlg->train = NULL;
@@ -2848,7 +2882,11 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                     angle1 = 0;
                 }
 
-                AdvancePositionIndicator(trk0, pos0, &pos1, &angle1);
+                if ( ! isOccupied( trk0 ) ) {
+                    DeleteDynamicBlock( trk0 );
+                    AdvancePositionIndicator(trk0, pos0, &pos1, &angle1);
+                    CreateDynamicBlock( trk0 );
+                }
 
                 if (trk1) {
                     xx->trvTrk.pos = pos1;
@@ -2953,7 +2991,9 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             wHide(curTrainDlg->win);
         }
 
-	clearOccupied();
+        clearDynamicBlocks();
+        ClearTurnoutFlags();
+        clearOccupied();
 
         MainRedraw(); // CmdTrain: Exit
         curTrainDlg->train = NULL;

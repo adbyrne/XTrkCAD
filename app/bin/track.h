@@ -213,6 +213,8 @@ typedef struct {
 		track_p prevTrack;
 		elev_t elev;
 		long option;
+		BOOL_T toBlock;   // points to a block
+		BOOL_T toTrack;   // points to a track segment
 		} trkEndPt_t, * trkEndPt_p;
 
 extern dynArr_t tempEndPts_da;
@@ -806,6 +808,8 @@ extern DIST_T BlockDescriptionDistance( coOrd, track_p);
 extern STATUS_T BlockDescriptionMove( track_p, wAction_t, coOrd);
 extern void AddMissingBlockTrack( void );
 extern void UpdateBlockTrack( void );
+extern void DeleteDynamicBlock( track_p trk );
+extern void CreateDynamicBlock( track_p trk );
 
 /* cswitchmotor.c */
 void CheckDeleteSwitchmotor( track_p t );

@@ -219,15 +219,15 @@ CTC panels, the panel elements can have their LCC event IDs automatically
 populated from the information in the XTrackCAD file, if the proper syntax is 
 observed.
 
-A LCC event id is a 64-bit number, represented as eight pairs of hexadevimal
+A LCC event id is a 64-bit number, represented as eight pairs of hexadecimal
 digits (0-9, a-f/A-F) separated by periods (.). Each pair represents one 8-bit
 byte of the event id. This event id is either produced by a sensor or logic
 element or is consumed by a control/device or a logic element.
 
-For blocks the occupency script contains a pair of LCC event ids, separated by 
-a colon (:).  The first LCC event id is produced by the occupency detector 
+For blocks the occupancy script contains a pair of LCC event ids, separated by
+a colon (:).  The first LCC event id is produced by the occupancy detector
 when the train enters the block and the second LCC event id is produced by the 
-occupency detector when the train leaves the block.
+occupancy detector when the train leaves the block.
 
 For switchmotors the point sense script contains a pair of LCC event ids, 
 separated by a colon (:).  The first LCC event id is produced by the point 
