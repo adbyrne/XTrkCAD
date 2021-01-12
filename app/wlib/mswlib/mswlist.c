@@ -27,16 +27,16 @@ struct wList_t {
 		wListCallBack_p action;
 		wBool_t editable;
 		int colCnt;
-		wPos_t * colWidths;
+		wWinPix_t * colWidths;
 		wBool_t * colRightJust;
 		const char * * colTitles;
-		wPos_t maxWidth;
-		wPos_t scrollPos;
+		wWinPix_t maxWidth;
+		wWinPix_t scrollPos;
 		HWND hScrollWnd;
-		wPos_t scrollH;
-		wPos_t dragPos;
+		wWinPix_t scrollH;
+		wWinPix_t dragPos;
 		int dragCol;
-		wPos_t dragColWidth;
+		wWinPix_t dragColWidth;
 		};
 
 
@@ -65,11 +65,11 @@ void wListClear(
 
 
 
-void wListSetSize( wList_p bl, wPos_t w, wPos_t h )
+void wListSetSize( wList_p bl, wWinPix_t w, wWinPix_t h )
 {
 	int rc;
 	RECT rect;
-	wPos_t y;
+	wWinPix_t y;
 
 	bl->w = w;
 	bl->h = h;
@@ -408,7 +408,7 @@ wIndex_t wListAddValue(
 int wListGetColumnWidths(
 		wList_p bl,
 		int colCnt,
-		wPos_t * colWidths )
+		wWinPix_t * colWidths )
 {
 	wIndex_t inx;
 
@@ -454,11 +454,11 @@ static void listShow(
 
 static void listSetPos(
 		wControl_p b,
-		wPos_t x,
-		wPos_t y )
+		wWinPix_t x,
+		wWinPix_t y )
 {
 	wList_p bl = (wList_p)b;
-	wPos_t x1, y1;
+	wWinPix_t x1, y1;
 	RECT rect;
 	
 	bl->x = x1 = x;
@@ -492,7 +492,7 @@ static void listRepaintLabel(
 	const char * * title;
 	int inx;
 	int start;
-	wPos_t colWidth;
+	wWinPix_t colWidth;
 
 	mswRepaintLabel( hWnd, b );
 	if ( bl->colTitles == NULL )
@@ -597,7 +597,8 @@ LRESULT listProc(
 	LPDRAWITEMSTRUCT lpdis;
 	RECT rc, rc1;
 	char * cp0, * cp1;
-	wPos_t colWidth, x;
+	wWinPix_t x;
+	int colWidth;
 	int nPos;
 	HFONT hFont;
 	HPEN hPen;
@@ -1014,13 +1015,13 @@ static wList_p listCreate(
 		const char	*className,
 		long	style,
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wWinPix_t	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data,
@@ -1085,15 +1086,15 @@ static wList_p listCreate(
 
 wList_p wListCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wWinPix_t	width,
 		int		colCnt,
-		wPos_t	* colWidths,
+		wWinPix_t	* colWidths,
 		wBool_t * colRightJust,
 		const char	* * colTitles,
 		long	*valueP,
@@ -1126,7 +1127,7 @@ wList_p wListCreate(
 	}	 
 	if ( colCnt > 1 ) {
 		bl->colCnt = colCnt;
-		bl->colWidths = (int*)malloc( colCnt * sizeof *bl->colWidths );
+		bl->colWidths = (wWinPix_t*)malloc( colCnt * sizeof *bl->colWidths );
 		bl->colRightJust = (wBool_t*)malloc( colCnt * sizeof *bl->colRightJust );
 		bl->colTitles = colTitles;
 		bl->maxWidth = 0;
@@ -1151,13 +1152,13 @@ wList_p wListCreate(
 
 wList_p wDropListCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wWinPix_t	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data )
@@ -1177,13 +1178,13 @@ wList_p wDropListCreate(
 
 wList_p wComboListCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		POS_T	width,
+		wWinPix_t	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data )

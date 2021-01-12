@@ -41,7 +41,7 @@ DIST_T priceListFlexLengthV;
 DIST_T priceListFlexCostV;
 
 static paramFloatRange_t priceListCostData = { 0.0, 9999.99, 80 };
-static wPos_t priceListColumnWidths[] = { -60, 200 };
+static wWinPix_t priceListColumnWidths[] = { -60, 200 };
 static const char * priceListColumnTitles[] = { N_("Price"), N_("Item") };
 static paramListData_t priceListListData = { 10, 400, 2, priceListColumnWidths, priceListColumnTitles };
 static paramFloatRange_t priceListFlexData = { 0.0, 999.99, 80 };

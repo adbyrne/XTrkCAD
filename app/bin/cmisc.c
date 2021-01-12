@@ -47,8 +47,8 @@ static POS_T descBorder;
 static wDrawColor descColor = 0;
 static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
-static wPos_t describeW_posy;
-static wPos_t describeCmdButtonEnd;
+static wWinPix_t describeW_posy;
+static wWinPix_t describeCmdButtonEnd;
 
 static wMenu_p descPopupM;
 
@@ -200,7 +200,7 @@ SearchEditableLayerList(unsigned int layer)
 
 static void DrawDescHilite(BOOL_T selected)
 {
-    wPos_t x, y, w, h;
+    wDrawPix_t x, y, w, h;
 
     if (descNeedDrawHilite == FALSE) {
         return;
@@ -210,8 +210,8 @@ static void DrawDescHilite(BOOL_T selected)
         descColor = wDrawColorGray(87);
     }
 
-    w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
-    h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
+    w = ((descSize.x/mainD.scale)*mainD.dpi+0.5);
+    h = ((descSize.y/mainD.scale)*mainD.dpi+0.5);
     mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
     wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
 }
@@ -361,7 +361,7 @@ static struct {
  */
  
 static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, char * label,
-                               wPos_t sep)
+                               wWinPix_t sep)
 {
     int inx;
 
@@ -403,12 +403,12 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
 static void DescribeLayout(
     paramData_t * pd,
     int inx,
-    wPos_t colX,
-    wPos_t * x,
-    wPos_t * y)
+    wWinPix_t colX,
+    wWinPix_t * x,
+    wWinPix_t * y)
 {
     descData_p ddp;
-    wPos_t w, h;
+    wWinPix_t w, h;
 
     if (inx < 0) {
         return;
@@ -551,7 +551,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 static void DescChange(long changes)
 {
-	descData_p ddp;
 	if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
         ParamLoadControls(&describePG);
     }

@@ -969,13 +969,13 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 					double arc_size = segPtr->u.c.a1/number;
 					if (back) {
 						//If back, list sub-points in reverse. If first show first position, else skip
-						for (int j=(number-(1-first));j>=0;j--) {
-							DYNARR_APPEND(coOrd,params->nodes,number);
+						for (int j=(((int)number)-(1-first));j>=0;j--) {
+							DYNARR_APPEND(coOrd,params->nodes,((int)number));
 							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+j*arc_size,fabs(segPtr->u.c.radius) );
 						}
 					} else {
 						for (int j=(1-first);j<=number;j++) {
-							DYNARR_APPEND(coOrd,params->nodes,number);
+							DYNARR_APPEND(coOrd,params->nodes,((int)number));
 							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+j*arc_size,fabs(segPtr->u.c.radius) );
 						}
 					}

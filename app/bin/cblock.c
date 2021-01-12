@@ -859,11 +859,11 @@ static POS_T blkhiliteBorder;
 static wDrawColor blkhiliteColor = 0;
 static void DrawBlockTrackHilite( void )
 {
-	wPos_t x, y, w, h;
+	wDrawPix_t x, y, w, h;
 	if (blkhiliteColor==0)
 		blkhiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = (wDrawPix_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = (wDrawPix_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
 	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }

@@ -958,8 +958,8 @@ void wMenuToggleEnable(
 
 void mswMenuMove(
 		wMenu_p m,
-		wPos_t x,
-		wPos_t y )
+		wWinPix_t x,
+		wWinPix_t y )
 {
 	wControl_p b;
 	b = (wControl_p)m->parent;
@@ -985,8 +985,8 @@ static void pushMenuButt(
 
 wMenu_p wMenuCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option )

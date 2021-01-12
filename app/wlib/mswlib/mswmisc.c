@@ -98,14 +98,14 @@ struct wWin_t {
 	int max_width;
 	int min_height;
 	int max_height;
-    wPos_t lastX, lastY;
-    wPos_t padX, padY;
+    wWinPix_t lastX, lastY;
+    wWinPix_t padX, padY;
     wControl_p first, last;
     wWinCallBack_p winProc;
     BOOL_T busy;
 #ifdef OWNERICON
     HBITMAP wicon_bm;
-    wPos_t wicon_w, wicon_h;
+    wWinPix_t wicon_w, wicon_h;
 #endif
     DWORD baseStyle;
     wControl_p focusChainFirst;
@@ -380,8 +380,8 @@ void * mswAlloc(
 
 void mswComputePos(
     wControl_p b,
-    wPos_t origX,
-    wPos_t origY)
+    wWinPix_t origX,
+    wWinPix_t origY)
 {
     wWin_p w = b->parent;
 
@@ -567,10 +567,10 @@ void mswSetFocus(
 static void getSavedSizeAndPos(
     long option,
     const char * nameStr,
-    wPos_t *rw,
-    wPos_t *rh,
-    wPos_t *rx,
-    wPos_t *ry,
+    wWinPix_t *rw,
+    wWinPix_t *rh,
+    wWinPix_t *rx,
+    wWinPix_t *ry,
     int *showCmd)
 {
     char *cq;
@@ -584,8 +584,8 @@ static void getSavedSizeAndPos(
         if ((option & F_RESIZE) &&
                 (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
                 (state = (int)strtol(cp, &cq, 10), cp != cq) &&  // state is not used 
-                (cp = cq, w = (wPos_t)strtod(cp, &cq), cp != cq) &&
-                (cp = cq, h = (int)strtod(cp, &cq), cp != cq)
+                (cp = cq, w = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, h = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
            ) {
             if (w < 10) {
                 w = 10;
@@ -608,8 +608,8 @@ static void getSavedSizeAndPos(
         }
 
         if ((cp = wPrefGetStringBasic("msw window pos", nameStr)) &&
-                (x = (wPos_t)strtod(cp, &cq), cp != cq) &&
-                (cp = cq, y = (wPos_t)strtod(cp, &cq), cp != cq)
+                (x = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, y = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
            ) {
             if (y < 0) {
                 y = 0;
@@ -645,12 +645,12 @@ static void getSavedSizeAndPos(
  * \param aspect_ration IN unused on Windows
  */
 void wSetGeometry(wWin_p win,
-	int min_width,
-	int max_width,
-	int min_height,
-	int max_height,
-	int base_width,
-	int base_height,
+	wWinPix_t min_width,
+	wWinPix_t max_width,
+	wWinPix_t min_height,
+	wWinPix_t max_height,
+	wWinPix_t base_width,
+	wWinPix_t base_height,
 	double aspect_ratio)
 {
 	win->validGeometry = TRUE;	//remember that geometry was set
@@ -688,15 +688,15 @@ static wWin_p winCommonCreate(
     long style,
     const char * labelStr,
     wWinCallBack_p winProc,
-    wPos_t w,
-    wPos_t h,
+    wWinPix_t w,
+    wWinPix_t h,
     void * data,
     const char * nameStr,
     int * pShowCmd)
 {
     wWin_p win;
     int index;
-    wPos_t ww, hh, xx, yy;
+    wWinPix_t ww, hh, xx, yy;
     RECT rect;
     win = (wWin_p)mswAlloc(NULL, typ, mswStrdup(labelStr), sizeof *win, data,
                            &index);
@@ -806,8 +806,8 @@ void wInitAppName(char *_appName)
 
 wWin_p wWinMainCreate(
     const char * name,
-    POS_T x,
-    POS_T y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * helpStr,
     const char * labelStr,
     const char * nameStr,
@@ -895,8 +895,8 @@ wWin_p wWinMainCreate(
 
 wWin_p wWinPopupCreate(
     wWin_p parent,
-    POS_T x,
-    POS_T y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * helpStr,
     const char * labelStr,
     const char * nameStr,
@@ -1162,14 +1162,14 @@ int mswTranslateAccelerator(
 
 
 
-void wGetDisplaySize(POS_T * width, POS_T * height)
+void wGetDisplaySize(wWinPix_t * width, wWinPix_t * height)
 {
     *width = screenWidth;
     *height = screenHeight;
 }
 
 
-void wWinGetSize(wWin_p w, POS_T * width, POS_T * height)
+void wWinGetSize(wWin_p w, wWinPix_t * width, wWinPix_t * height)
 {
     RECT rect;
     GetWindowRect(w->hWnd, &rect);
@@ -1181,7 +1181,7 @@ void wWinGetSize(wWin_p w, POS_T * width, POS_T * height)
 }
 
 
-void wWinSetSize(wWin_p w, POS_T width, POS_T height)
+void wWinSetSize(wWin_p w, wWinPix_t width, wWinPix_t height)
 {
     RECT rect;
     w->w = width;
@@ -1225,7 +1225,7 @@ static void blockingLoop(void)
 static void savePos(wWin_p win)
 {
     WINDOWPLACEMENT windowPlace;
-    wPos_t w, h;
+    wWinPix_t w, h;
     RECT rect;
 
     if (win->nameStr &&
@@ -1265,7 +1265,7 @@ void wWinShow(
     wWin_p win,
     BOOL_T show)
 {
-    wPos_t x, y;
+    wWinPix_t x, y;
     wWin_p win1;
     win->busy = TRUE;
 
@@ -1429,10 +1429,10 @@ const char * wWinGetTitle(
 
 void wWinClear(
     wWin_p win,
-    wPos_t x,
-    wPos_t y,
-    wPos_t width,
-    wPos_t height)
+    wWinPix_t x,
+    wWinPix_t y,
+    wWinPix_t width,
+    wWinPix_t height)
 {
 }
 
@@ -1674,7 +1674,7 @@ const char * wControlGetHelp(wControl_p b)
 }
 
 
-wPos_t wLabelWidth(const char * labelStr)
+wWinPix_t wLabelWidth(const char * labelStr)
 {
     int lab_l;
     HDC hDc;
@@ -1690,28 +1690,28 @@ wPos_t wLabelWidth(const char * labelStr)
 }
 
 
-wPos_t wControlGetWidth(
+wWinPix_t wControlGetWidth(
     wControl_p b)			/* Control */
 {
     return b->w;
 }
 
 
-wPos_t wControlGetHeight(
+wWinPix_t wControlGetHeight(
     wControl_p b)			/* Control */
 {
     return b->h;
 }
 
 
-wPos_t wControlGetPosX(
+wWinPix_t wControlGetPosX(
     wControl_p b)			/* Control */
 {
     return b->x;
 }
 
 
-wPos_t wControlGetPosY(
+wWinPix_t wControlGetPosY(
     wControl_p b)			/* Control */
 {
     return b->y;
@@ -1720,8 +1720,8 @@ wPos_t wControlGetPosY(
 
 void wControlSetPos(
     wControl_p b,
-    wPos_t x,
-    wPos_t y)
+    wWinPix_t x,
+    wWinPix_t y)
 {
     b->labelX = x;
     b->labelY = y+2;
@@ -1847,7 +1847,7 @@ void wMessage(
 {
     HDC hDc;
     int oldRop;
-    POS_T h;
+    wWinPix_t h;
     RECT rect;
     LABELFONTDECL
 
@@ -2210,6 +2210,7 @@ void doHelpMenu(void * context)
         helpInitted = TRUE;
     }
 
+	const char * topic;
     switch ((int)(long)context) {
     case 1: /* Contents */
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOC, (DWORD_PTR)NULL);
@@ -2227,7 +2228,6 @@ void doHelpMenu(void * context)
 
 
     case 3: /*Context*/
-    	const char * topic;
     	topic = GetCurCommandName();
     	wHelp(topic);
     	break;
@@ -2367,7 +2367,7 @@ void closeBalloonHelp(void)
 }
 
 
-void wControlSetBalloon(wControl_p b, wPos_t dx, wPos_t dy, const char * msg)
+void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * msg)
 {
     HDC hDc;
     DWORD extent;
@@ -2758,7 +2758,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     wWin_p w;
     wControl_p b, oldW;
     int child = ((GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD) != 0);
-    POS_T newW, newH;
+    wWinPix_t newW, newH;
     RECT rect;
     PAINTSTRUCT ps;
     HWND hWnd2;
@@ -2766,9 +2766,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     HDC hDc;
     wAccelKey_e extChar;
 
+	LPMINMAXINFO pMMI;
     switch (message) {
 	case WM_GETMINMAXINFO:
-		LPMINMAXINFO pMMI = (LPMINMAXINFO)lParam;
+		pMMI = (LPMINMAXINFO)lParam;
 		inx = GetWindowWord(hWnd, 0);
 
 		if (inx >= CONTROL_BASE && inx <= controlMap_da.cnt) {

@@ -44,7 +44,6 @@
 #endif
 
 #define BOOL_T wBool_t
-#define POS_T wPos_t
 #define INDEX_T wIndex_t
 #define INTEGER_T wInteger_t
 
@@ -63,7 +62,7 @@ typedef LRESULT (*messageCallback_p)( wControl_p, HWND, UINT, WPARAM, LPARAM );
 typedef void (*setTriggerCallback_p)( wControl_p b );
 typedef void (*setBusyCallback_p)( wControl_p, BOOL_T );
 typedef void (*showCallback_p)( wControl_p, BOOL_T );
-typedef void (*setPosCallback_p)( wControl_p, wPos_t, wPos_t );
+typedef void (*setPosCallback_p)( wControl_p, wWinPix_t, wWinPix_t );
 
 typedef struct {
 		repaintProcCallback_p	repaintProc;
@@ -83,10 +82,10 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		wControl_p next; \
 		wControl_p synonym; \
 		wWin_p parent; \
-		POS_T x, y; \
-		POS_T w, h; \
+		wWinPix_t x, y; \
+		wWinPix_t w, h; \
 		long option; \
-		POS_T labelX, labelY; \
+		wWinPix_t labelX, labelY; \
 		const char * labelStr; \
 		const char * helpStr; \
 		const char * tipStr; \
@@ -108,8 +107,8 @@ typedef struct {
 
 struct wIcon_t {
 		int type;
-		wPos_t w;				/**< width */
-		wPos_t h;				/**< height */
+		wWinPix_t w;				/**< width */
+		wWinPix_t h;				/**< height */
 		wDrawColor color;
 		int colorcnt;			/**< number of colors */
 		RGBQUAD *colormap;
@@ -140,8 +139,8 @@ struct wDraw_t {
 		wBool_t bTempMode;
 		wBool_t bCopiedMain;
 
-		wPos_t lastX;
-		wPos_t lastY;
+		wDrawPix_t lastX;
+		wDrawPix_t lastY;
 
 		};
 
@@ -168,7 +167,7 @@ void mswResize( wWin_p );
 wControl_p mswMapIndex( INDEX_T );
 void mswButtPush( wControl_p );
 void * mswAlloc( wWin_p, wType_e, const char *, int, void *, int * );
-void mswComputePos( wControl_p, wPos_t, wPos_t );
+void mswComputePos( wControl_p, wWinPix_t, wWinPix_t );
 void mswAddButton( wControl_p, BOOL_T, const char * );
 void mswRepaintLabel( HWND, wControl_p );
 int mswRegister( wControl_p );
@@ -186,7 +185,7 @@ void mswRedrawAll( void );
 void mswRepaintAll( void );
 HDC mswGetPrinterDC( void );
 int mswMenuAccelerator( wWin_p, long );
-void mswMenuMove( wMenu_p, wPos_t, wPos_t );
+void mswMenuMove( wMenu_p, wWinPix_t, wWinPix_t );
 void mswRegisterBitMap( HBITMAP );
 void mswFontInit( void );
 void mswInitColorPalette( void );

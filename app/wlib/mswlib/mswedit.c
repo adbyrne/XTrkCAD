@@ -122,7 +122,7 @@ void wStringSetValue(
 
 void wStringSetWidth(
 		wString_p b,
-		wPos_t w )
+		wWinPix_t w )
 {
 	int rc;
 	b->w = w;
@@ -238,12 +238,12 @@ static callBacks_t stringCallBacks = {
 
 wString_p wStringCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		char	*valueP,
 		wIndex_t valueL,
 		wStringCallBack_p action,
@@ -453,12 +453,12 @@ static callBacks_t integerCallBacks = {
 
 wInteger_p wIntegerCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		long	low,
 		long	high,
 		long	*valueP,
@@ -674,12 +674,12 @@ static callBacks_t floatCallBacks = {
 
 wFloat_p wFloatCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		double	low,
 		double	high,
 		double	*valueP,
