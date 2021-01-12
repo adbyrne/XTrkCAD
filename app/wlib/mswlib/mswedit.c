@@ -66,7 +66,7 @@ static void triggerFloat( wControl_p b );
 #endif
 
 
-long FAR PASCAL _export pushEdit(
+LRESULT FAR PASCAL _export pushEdit(
 		HWND hWnd,
 		UINT message,
 		WPARAM wParam,
@@ -83,14 +83,14 @@ long FAR PASCAL _export pushEdit(
 	        switch (wParam) {
 	        case VK_RETURN:
 	            triggerString(b);
-	            return (0L);
+	            return (LRESULT)0;
 	            break;
 	        case 0x1B:
 	        case 0x09:
 	            SetFocus(((wControl_p)(b->parent))->hWnd);
 	            SendMessage(((wControl_p)(b->parent))->hWnd, WM_CHAR,
 	                        wParam, lParam);
-	            return 0L;
+	            return (LRESULT)0;
 	        }
 	    }
 	    break;
@@ -127,7 +127,7 @@ void wStringSetWidth(
 	int rc;
 	b->w = w;
 	rc = SetWindowPos( b->hWnd, HWND_TOP, 0, 0,
-				b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
+		b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
 }
 
 
@@ -276,7 +276,7 @@ wString_p wStringCreate(
 
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
 	oldEditProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWLP_WNDPROC);
-	SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, newEditProc);
+	SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)newEditProc);
 #ifdef _OLDCODE
 	oldEditProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWL_WNDPROC );
 	SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newEditProc );

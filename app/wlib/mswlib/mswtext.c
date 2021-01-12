@@ -155,7 +155,7 @@ BOOL_T wTextSave(
 
     for (l=0; l<lc; l++) {
         *(WORD*)line = sizeof(line)-1;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPSTR)line);
+        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPARAM)line);
         line[len] = '\0';
         fprintf(f, "%s\n", line);
     }
@@ -212,7 +212,7 @@ BOOL_T wTextPrint(
 
     for (l=0; l<lc; l++) {
         *(WORD*)line = sizeof(line)-1;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPSTR)line);
+        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPARAM)line);
         TextOut(hDc, 0, currentLine*lineSpace, line, len);
 
         if (++currentLine > linesPerPage) {
