@@ -2,6 +2,7 @@
 SET(CPACK_PACKAGE_DESCRIPTION "XTrackCad is a CAD program for designing model railroad layouts.")
 SET(CPACK_PACKAGE_EXECUTABLES "xtrkcad;XTrkCAD ${XTRKCAD_VERSION}")
 IF(WIN32)
+	# Add suffix
 	IF(WIN64)
 		SET(CPACK_PACKAGE_FILE_NAME "xtrkcad-setup-x64-${XTRKCAD_VERSION}")
 	ELSE(WIN64)

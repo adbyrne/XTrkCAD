@@ -12,6 +12,7 @@
 #
 
 if (WIN32)
+    # Folders for x86/x64
     if (WIN64)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		PATHS
