@@ -53,11 +53,15 @@ extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
 extern wDrawColor exceptionColor;
+extern wDrawColor occupiedColor;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
+extern long drawOccupiedMode;
+extern long drawBlocksMode;
 extern wDrawColor tieColor;
+extern wDrawColor blockColor;
 
 
 extern TRKINX_T max_index;
@@ -206,6 +210,7 @@ typedef struct {
 		ANGLE_T angle;
 		TRKINX_T index;
 		track_p track;
+		track_p prevTrack;
 		elev_t elev;
 		long option;
 		} trkEndPt_t, * trkEndPt_p;
@@ -795,11 +800,17 @@ void AddHotBarStructures( void );
 void AddHotBarCarDesc( void );
 
 /* cblock.c */
-void CheckDeleteBlock( track_p t );
-void ResolveBlockTrack ( track_p trk );
+extern void CheckDeleteBlock( track_p t );
+extern BOOL_T ResolveBlockTrack ( track_p b_trk );
+extern DIST_T BlockDescriptionDistance( coOrd, track_p);
+extern STATUS_T BlockDescriptionMove( track_p, wAction_t, coOrd);
+extern void AddMissingBlockTrack( void );
+extern void UpdateBlockTrack( void );
+
 /* cswitchmotor.c */
 void CheckDeleteSwitchmotor( track_p t );
-void ResolveSwitchmotorTurnout ( track_p trk );
+BOOL_T ResolveSwitchmotorTurnout ( track_p trk );
+void AddMissingSwitchMotor( void );
 
 #endif
 

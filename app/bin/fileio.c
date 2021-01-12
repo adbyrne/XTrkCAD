@@ -773,6 +773,11 @@ static BOOL_T ReadTrackFile(
 				if( !(ret = InputError( "SCALE: bad value", TRUE )))
 					break;
 			}
+		} else if (strncmp( paramLine, "MINBLOCKLENGTH ", 14 ) == 0) {
+			if ( !DoSetMinBlockLength( paramLine+14 ) ) {
+				if( !(ret = InputError( "MINBLOCKLENGTH: bad value", TRUE )))
+					break;
+			}
 		} else if (strncmp( paramLine, "MAPSCALE ", 9 ) == 0) {
 			scale = atol( paramLine+9 );
 			if (scale > 1) {
@@ -1038,6 +1043,8 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "MAPSCALE %ld\n", (long)mapD.scale )>0;
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
+	if (minBlockLength > 0.0)
+		rc &= fprintf(f, "MINBLOCKLENGTH %0.1f\n", minBlockLength )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );

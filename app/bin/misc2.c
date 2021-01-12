@@ -68,6 +68,7 @@ EXPORT long dontHideCursor = 0;
 EXPORT long hideSelectionWindow = 0;
 EXPORT long angleSystem = 0;
 EXPORT DIST_T minLength = 0.1;
+EXPORT DIST_T minBlockLength = 0.0;
 EXPORT DIST_T connectDistance = 0.1;
 EXPORT ANGLE_T connectAngle = 1.0;
 EXPORT long twoRailScale = 16;

@@ -47,6 +47,8 @@ typedef struct track_t {
 		struct extraData * extraData;
 		CSIZE_T extraSize;
 		DIST_T elev;
+		INT_T occupied;
+		struct track_t *conBlock;
 		} track_t;
 
 extern track_p to_first;

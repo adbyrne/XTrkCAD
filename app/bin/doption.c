@@ -95,6 +95,8 @@ static char * drawEndPtLabels3[] = { N_("None"), N_("Turnouts"), N_("All"), NULL
 static char * drawEndPtUnconnectedSize[] = { N_("Normal"), N_("Thick"), N_("Exception"), NULL };
 static char * tiedrawLabels[] = { N_("None"), N_("Outline"), N_("Solid"), NULL };
 static char * drawCenterCircle[] = { N_("Off"), N_("On"), NULL };
+static char * drawOccupiedLabel[] = { N_("Off"), N_("Block"), N_("Segment"), NULL };
+static char * drawBlocksLabel[] = { N_("Off"), N_("On"), NULL };
 static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
 static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
 static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
@@ -117,6 +119,8 @@ static paramData_t displayPLs[] = {
 	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_RADIO, &drawOccupiedMode, "occupiedDraw", PDO_NOPSHUPD|PDO_DRAW, drawOccupiedLabel, N_("Draw Occupied Blocks"), BC_HORZ, (void*)(CHANGE_MAIN) },
+	{ PD_RADIO, &drawBlocksMode, "blockDraw", PDO_NOPSHUPD|PDO_DRAW, drawBlocksLabel, N_("Draw Blocks"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
 	{ PD_TOGGLE, &dontHideCursor, "donthidecursor", PDO_NOPSHUPD, dontHideLabels, "", BC_HORZ },
@@ -308,6 +312,7 @@ static paramData_t prefPLs[] = {
 #define I_DSTFMT		(2)
 	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
+	{ PD_FLOAT, &minBlockLength, "minblklength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Block Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
@@ -471,6 +476,13 @@ static void PrefOk( void * junk )
 		resetValuesLow = TRUE;
 	} else if (minLength > 1.0) {
 		minLength = 1.0;
+		resetValuesHigh = TRUE;
+	}
+	if (minBlockLength < 0.0) {
+		minBlockLength = 0.0;
+		resetValuesLow = TRUE;
+	} else if (minBlockLength > 10000.0) {
+		minBlockLength = 10000.0;
 		resetValuesHigh = TRUE;
 	}
 	if ( resetValuesLow ) {

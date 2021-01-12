@@ -73,6 +73,7 @@ extern long colorTrack;
 extern long colorDraw;
 extern long carHotbarModeInx;
 extern DIST_T minLength;
+extern DIST_T minBlockLength;
 extern DIST_T connectDistance;
 extern ANGLE_T connectAngle;
 extern long twoRailScale;
@@ -442,6 +443,8 @@ void AttachTrains( void );
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
 void BlockMgmLoad( void );
+BOOL_T DoSetMinBlockLength( char * newLength );
+BOOL_T UpdateMinBlockLength( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
 void SwitchmotorMgmLoad( void );

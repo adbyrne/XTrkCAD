@@ -176,6 +176,126 @@ void CarSetVisible(
     WALK_CARS_END(car, xx, dir)
 }
 
+// Clear all segment and block occupied indicators
+// When the indicator is not zero the segment is occupied.
+static void clearOccupied(void)
+{
+    track_p trk;
+    for (trk=NULL; TrackIterate(&trk);) {
+        trk->occupied = 0;
+    }
+}
+
+// Add or subtract from the occupied counter and when a
+// block is present adjust there as well.
+static void adjustOccupied ( track_p trk, int adj )
+{
+	trk->occupied += adj;
+	if (trk->conBlock)
+		trk->conBlock->occupied += adj;
+}
+
+// The segment occupied indicator maintains a count of the number
+// of car ends (trucks) on the segment. The block, when present,
+// maintains a count for all segments in the block.
+
+// When entering train mode set up the counters for all present cars.
+// Go through the cars, find the segment under each end and increment
+// its counter.
+static void setOccupied(void)
+{
+    track_p car, trk;
+    track_p temp0, temp1;
+    coOrd ep0, ep1;
+    struct extraData * xx;
+
+    for (car=NULL; TrackIterate(&car);) {
+        if (GetTrkType(car) != T_CAR) {
+            continue;
+        }
+
+        xx = GetTrkExtraData(car);
+        if (xx->trvTrk.trk) {
+            ep0 = GetTrkEndPos( car, 0);
+            if ((temp0 = OnTrack( &ep0, FALSE ,TRUE)) != NULL) {
+                adjustOccupied( temp0, 1);
+                car->endPt[0].prevTrack = temp0;
+            } else
+            	car->endPt[0].prevTrack = NULL;
+            ep1 = GetTrkEndPos( car, 1);
+            if ((temp1 = OnTrack( &ep1, FALSE ,TRUE)) != NULL) {
+                adjustOccupied( temp1, 1);
+                car->endPt[1].prevTrack = temp1;
+            } else
+                car->endPt[1].prevTrack = NULL;
+#if 0
+            LOG(log_trainMove, 1, ("setOccupied: end0 T%d (%d) end1 T%d (%d)\n",
+                (temp0)?temp0->index:-5, (temp0)?temp0->occupied:-999,
+                (temp1)?temp1->index:-5, (temp1)?temp1->occupied:-999));
+#endif
+        }
+    }
+    MainRedraw();
+}
+
+// For each end of each car note the previous segment that it occupied. Find the
+// current segment and, if different, decrement the segment indicator for the
+// previous segment, increment the segment indicator for the new segment and
+// update the previous segment to be the current segment.
+static void updateOccupied(void)
+{
+    struct extraData *xx1;
+    track_p car;
+    track_p temp0, temp1;
+    coOrd ep0, ep1;
+    BOOL_T changed;
+    for (car=NULL; TrackIterate(&car);) {
+        if (GetTrkType(car) != T_CAR) {
+            continue;
+        }
+
+        xx1 = GetTrkExtraData(car);
+        if (xx1->trvTrk.trk == NULL) {
+            continue;
+	}
+
+        ep0 = GetTrkEndPos( car, 0);
+        temp0 = OnTrack( &ep0, FALSE ,TRUE);
+        ep1 = GetTrkEndPos( car, 1);
+        temp1 = OnTrack( &ep1, FALSE ,TRUE);
+        if ( car->endPt[0].prevTrack != temp0) {
+        	if (car->endPt[0].prevTrack)
+			adjustOccupied( car->endPt[0].prevTrack, -1 );
+            if (temp0)
+		adjustOccupied( temp0, 1 );
+            car->endPt[0].prevTrack = temp0;
+            changed = TRUE;
+        }
+        if ( car->endPt[1].prevTrack != temp1) {
+        	if (car->endPt[1].prevTrack)
+			adjustOccupied( car->endPt[1].prevTrack, -1 );
+            if (temp1)
+		adjustOccupied( temp1, 1 );
+            car->endPt[1].prevTrack = temp1;
+            changed = TRUE;
+        }
+#if 0
+        LOG(log_trainMove, 1, ("R Move: end0 PT%d (%d) T%d (%d) end1 PT%d (%d) T%d (%d)\n",
+            (car->endPt[0].prevTrack)?car->endPt[0].prevTrack->index:-5,
+            (car->endPt[0].prevTrack)?car->endPt[0].prevTrack->occupied:-999,
+            (temp0)?temp1->index:-5,
+            (temp0)?temp1->occupied:-999,
+            (car->endPt[1].prevTrack)?car->endPt[1].prevTrack->index:-5,
+            (car->endPt[1].prevTrack)?car->endPt[1].prevTrack->occupied:-999,
+            (temp1)?temp1->index:-5,
+            (temp1)?temp1->occupied:-999));
+#endif
+    }
+    if (changed) {
+        MainRedraw();
+    }
+}
+
 
 static struct {
     long index;
@@ -2037,6 +2157,8 @@ static BOOL_T MoveTrain(
 
     TraverseTrack(&trvTrk, &dist1);
 
+    updateOccupied();
+
     if (dist1 > 0.0) {
         if (dist1 > dist0) {
             /*ErrorMessage( "%s no room: L%0.3f D%0.3f", CarItemNumber(xx->item), length, dist1 );*/
@@ -2527,6 +2649,9 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             curTrainDlg = CreateTrainControlDlg();
         }
 
+	UpdateBlockTrack();
+	setOccupied();
+
         curTrainDlg->train = NULL;
         wListClear((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control);
         Dtrain.state = 0;
@@ -2674,6 +2799,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         PlaceTrainInit(currCar, trk0, pos0, xx->trvTrk.angle,
                        (MyGetKeyState()&WKEY_SHIFT) == 0);
         ControllerDialogSync(curTrainDlg);
+	clearOccupied();
+	setOccupied();
         return C_CONTINUE;
 
     case C_UP:
@@ -2709,6 +2836,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             programMode = MODE_DESIGN;
 
             if ((trk0=OnTrack(&pos,FALSE,TRUE)) &&
+                    trk0->occupied == 0 &&
                     QueryTrack(trk0, Q_CAN_NEXT_POSITION) &&
                     TrainOnMovableTrack(trk0, &trk1)) {
                 if (trk1) {
@@ -2824,6 +2952,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         if (curTrainDlg->win) {
             wHide(curTrainDlg->win);
         }
+
+	clearOccupied();
 
         MainRedraw(); // CmdTrain: Exit
         curTrainDlg->train = NULL;

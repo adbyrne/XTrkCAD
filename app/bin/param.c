@@ -2134,7 +2134,7 @@ static void ParamCreateControl(
     char *cq;
 	static wMenu_p menu = NULL;
 
-	if ( ( win = pd->group->win ) == NULL )
+	if ( pd->group == NULL || ( win = pd->group->win ) == NULL )
 		win = mainW;
 
 
