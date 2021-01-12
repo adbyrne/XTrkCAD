@@ -26,6 +26,14 @@ if(UNIX)
    endif(APPLE)
 endif(UNIX)
 
+IF(WIN32)
+	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		SET(WIN64 ON CACHE BOOL "Win x64")
+	else (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		SET(WIN64 OFF CACHE BOOL "Win x86")
+	endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+ENDIF(WIN32)
+
 find_package(Libzip)
 find_package(Zlib)
 
