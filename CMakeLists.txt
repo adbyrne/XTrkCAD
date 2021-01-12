@@ -26,6 +26,7 @@ if(UNIX)
    endif(APPLE)
 endif(UNIX)
 
+# Set Win64 flag
 IF(WIN32)
 	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 		SET(WIN64 ON CACHE BOOL "Win x64")

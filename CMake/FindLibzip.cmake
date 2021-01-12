@@ -10,6 +10,7 @@
 #
 
 if(WIN32)
+  # Folders for x86/x64
   if (WIN64)
     find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
       PATHS

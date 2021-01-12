@@ -10,6 +10,7 @@
 #
 
 if(WIN32)
+  # Folders for x86/x64
   if (WIN64)
     find_path( ZLIB_INCLUDE_DIR zlib.h
       PATHS
