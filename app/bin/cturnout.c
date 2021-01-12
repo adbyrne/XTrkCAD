@@ -3227,7 +3227,7 @@ main( INT_T argc, char * argv[] )
 
 // Recursively scan down a set of track segments
 // returns TRUE when:
-//  at a dead end
+//  at a track end
 //  length is longer than the minBlockLength
 // returns FALSE when turnout is encountered
 // Otherwise recursively call with the next segment.
@@ -3239,7 +3239,7 @@ static BOOL_T ConnectsToTurnout(track_p from, EPINX_T ep, DIST_T len)
 	LOG( log_turnout, 1, ("*** ConnectsToTurnout() from T%d-%d %4.1f\n",
 			GetTrkIndex(from), ep, len))
 
-	/* the end point is a dead end */
+	/* the end point is a track end */
 	if ((trk = from->endPt[ep].track) == NULL)
 		return TRUE;
 
@@ -3247,7 +3247,7 @@ static BOOL_T ConnectsToTurnout(track_p from, EPINX_T ep, DIST_T len)
 	if ( GetTrkEndPtCnt(trk) > 2 )
 		return FALSE;
 
-	/* Is track segment a dead end? */
+	/* Is track segment a track end? */
 	if ( GetTrkEndPtCnt(trk) == 1 ) return TRUE;
 	if ( trk->endPt[0].index < 0 || trk->endPt[1].index < 0)
 		return TRUE;

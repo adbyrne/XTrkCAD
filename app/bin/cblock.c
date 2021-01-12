@@ -759,7 +759,7 @@ static void pushDa( track_p trk )
 }
 
 // Recursively goes from track segment to track segment until
-// a turnout or end of track is encountered. Save the endPt at
+// a turnout or track end is encountered. Save the endPt at
 // the turnout.
 // When dynamic is set collect turnouts between two blocks.
 // Place tracks in DYNARR blockTrk_da
@@ -951,7 +951,7 @@ static void GetBlockSegs( track_p trk )
 	addSegs( trk, trk, 0 );
 
 	if ( tempEndPts_da.cnt != 2 ) {
-		LOG( log_block, 1, ("*** GetBlockSegs(): dead end\n"))
+		LOG( log_block, 1, ("*** GetBlockSegs(): track end\n"))
 		blockLen = 0.0;
 		// block ends at end-of-track
 		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
@@ -1169,7 +1169,7 @@ EXPORT void AddMissingBlockTrack( void )
     LOG( log_block, 1, ("*** AddMissingBlockTrack() -- enter\n"))
 
     // Loop through all track segs that are not in blocks
-    // Create blocks for them when they are long enough and not dead ended.
+    // Create blocks for them when they are long enough and don't end at a track end.
     TRK_ITERATE(trk) {
 	LOG( log_block, 1, ("*** AddMissingBlockTrack() next seg T%d isTrack %d EndPtCnt %d block %d\n",
 		GetTrkIndex(trk), IsTrack(trk), GetTrkEndPtCnt(trk), trk->conBlock != NULL))
@@ -1478,8 +1478,8 @@ static void NewBlockDialog( track_p sel_trk )
 
 	GetBlockSegs( sel_trk );
 	if ( tempEndPts_da.cnt != 2 ) {
-		LOG( log_block, 1, ("*** NewBlockDialog(): dead end\n"))
-		NoticeMessage( _("Track is dead end"), _("Ok"), NULL);
+		LOG( log_block, 1, ("*** NewBlockDialog(): track end\n"))
+		NoticeMessage( _("Track is track end"), _("Ok"), NULL);
 		return;
 	}
 	if ( blockLen < minBlockLength ) {
