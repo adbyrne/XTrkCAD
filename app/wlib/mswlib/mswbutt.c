@@ -313,7 +313,7 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 	case WM_COMMAND:
 		if (bb->action /*&& !bb->busy*/) {
 			bb->action( bb->data );
-			return 0L;
+			return (LRESULT)0;
 		}
 		break;
 
@@ -325,7 +325,7 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 		mi->CtlID = wParam;
 		mi->itemWidth = (UINT)ceil(bb->w*scaleIcon);
 		mi->itemHeight = (UINT)ceil(bb->h*scaleIcon);
-		} return 0L;
+		} return (LRESULT)0;
 
 	case WM_DRAWITEM:
 		if (bb->type == B_BUTTON && (bb->option & BO_ICON) != 0) {
@@ -334,7 +334,7 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 				bb->selected = selected;
 				InvalidateRgn( bb->hWnd, NULL, FALSE );
 			}
-			return TRUE;
+			return (LRESULT)TRUE;
 		}
 		break;
 	}
@@ -366,7 +366,7 @@ LRESULT CALLBACK pushButt(
 			BeginPaint( hWnd, &ps );
 			buttDrawIcon( (wButton_p)b, ps.hdc );
 			EndPaint( hWnd, &ps );
-			return 1L;
+			return (LRESULT)1;
 		}
 		break;
 	case WM_CHAR:
@@ -387,7 +387,7 @@ LRESULT CALLBACK pushButt(
 	case WM_KILLFOCUS:
 		if ( b )
 			InvalidateRect( b->hWnd, NULL, TRUE );
-		return (LONG_PTR)0;
+		return (LRESULT)0;
 		break;
 	case WM_LBUTTONDOWN:
 		if (b->option&BO_REPEAT) {

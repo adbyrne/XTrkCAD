@@ -260,7 +260,7 @@ wBool_t wListSetValues(
 	inx = (wIndex_t)SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_INSERTSTRING:CB_INSERTSTRING,
 				(WPARAM)inx,
-		        (LPSTR)labelStr );
+		        (LPARAM)labelStr );
 	SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_SETITEMDATA:CB_SETITEMDATA,
 				(WPARAM)inx,
@@ -629,7 +629,7 @@ LRESULT listProc(
 							ldp->selected = selected;
 							if ( selected ) {
 								bl->last = inx;
-								cnt = (int)SendMessage( bl->hWnd, LB_GETTEXT, (WPARAM)bl->last, (LPSTR)mswTmpBuff );
+								cnt = (int)SendMessage( bl->hWnd, LB_GETTEXT, (WPARAM)bl->last, (LPARAM)mswTmpBuff );
 								mswTmpBuff[cnt] = '\0';
 							} else {
 								mswTmpBuff[0] = '\0';
@@ -644,7 +644,7 @@ LRESULT listProc(
 				} else {
 					bl->last = (int)SendMessage( bl->hWnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0 );
 					cnt = (int)SendMessage( bl->hWnd, LB_GETTEXT, (WPARAM)bl->last,
-										(LPSTR)mswTmpBuff );
+										(LPARAM)mswTmpBuff );
 					mswTmpBuff[cnt] = '\0';
 					if (bl->action) {
 						ldp = (listData*)SendMessage( bl->hWnd, LB_GETITEMDATA,
@@ -683,7 +683,7 @@ LRESULT listProc(
 					break;
 				if (bl->action) {
 					cnt = (int)SendMessage( bl->hWnd, CB_GETLBTEXT, 
-						(WPARAM)bl->last, (LPSTR)mswTmpBuff );
+						(WPARAM)bl->last, (LPARAM)mswTmpBuff );
 					ldp = (listData*)SendMessage( bl->hWnd, CB_GETITEMDATA,
 						(WPARAM)bl->last, (LPARAM)0 );
 					mswTmpBuff[cnt] = '\0';
@@ -711,7 +711,7 @@ LRESULT listProc(
 				bl->last = -1;
 				if (bl->action) {
 					cnt = (int)SendMessage( bl->hWnd, WM_GETTEXT, (WPARAM)sizeof mswTmpBuff,
-						(LPSTR)mswTmpBuff );
+						(LPARAM)mswTmpBuff );
 					mswTmpBuff[cnt] = '\0';
 					bl->action( -1, mswTmpBuff, 1, bl->data, NULL );
 				}
@@ -748,7 +748,7 @@ LRESULT listProc(
 				hFont = SelectObject( lpdis->hDC, mswLabelFont );
 			cnt = (int)SendMessage( lpdis->hwndItem, 
 				(bl->type==B_LIST?LB_GETTEXT:CB_GETLBTEXT),
-				(WPARAM)lpdis->itemID, (LPSTR)mswTmpBuff );
+				(WPARAM)lpdis->itemID, (LPARAM)mswTmpBuff );
 			mswTmpBuff[cnt] = '\0';
 			if ( lpdis->itemState & ODS_SELECTED ) {
 				SetTextColor( lpdis->hDC, GetSysColor( COLOR_HIGHLIGHTTEXT ) );
@@ -903,7 +903,7 @@ LRESULT listProc(
 			if ( x <= 0 )
 				break;
 		}
-		return 0L;
+		return (LRESULT)0;
 #endif
 
 	case WM_MOUSEMOVE:
@@ -1073,7 +1073,7 @@ static wList_p listCreate(
 		if (b->type == B_LIST) {
 			newListProc = MakeProcInstance((XWNDPROC)pushList, mswHInst);
 			oldListProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWLP_WNDPROC);
-			SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, newListProc);
+			SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)newListProc);
 #ifdef _OLDCODE
 			oldListProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC);
 			SetWindowLong(b->hWnd, GWL_WNDPROC, (LONG)newListProc);
@@ -1082,7 +1082,7 @@ static wList_p listCreate(
 		else {
 			newComboProc = MakeProcInstance((XWNDPROC)pushCombo, mswHInst);
 			oldComboProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWLP_WNDPROC);
-			SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, newComboProc);
+			SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)newComboProc);
 #ifdef _OLDCODE
 			oldComboProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC);
 			SetWindowLong(b->hWnd, GWL_WNDPROC, (LONG)newComboProc);
