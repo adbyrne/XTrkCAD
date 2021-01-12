@@ -495,7 +495,7 @@ static void DescribeBlock( track_p trk, char * str, CSIZE_T len )
 static int blockDebug( track_p trk )
 {
 	wIndex_t iTrack;
-	EPINX_T epCnt, epN;
+	EPINX_T epN;
 	trkEndPt_p endPtP;
 
 	blockData_p xx = GetblockData(trk);
@@ -504,12 +504,12 @@ static int blockDebug( track_p trk )
 	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
 	for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
                 if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
-		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",
-				iTrack, GetTrkIndex((&(xx->trackList))[iTrack].t)))
-		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
+		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, cnt %d",
+				iTrack, GetTrkIndex((&(xx->trackList))[iTrack].t),
+				GetTrkEndPtCnt((&(xx->trackList))[iTrack].t)))
+		LOG( log_block, 1, (", %s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
 	}
-	epCnt = GetTrkEndPtCnt(trk);
-	for ( epN = 0; epN < epCnt; epN++ ) {
+	for ( epN = 0; epN < GetTrkEndPtCnt(trk); epN++ ) {
 		endPtP = &(trk->endPt[epN]);
 		LOG( log_block, 1, ("*** blockDebug(): ep[%d] pos %0.1f %0.1f "
 			"angle %0.2f track T%d options 0x%08lX\n",
@@ -647,13 +647,6 @@ static track_p makeBlock( void )
 	EPINX_T ep;
 
 	LOG( log_block, 1, ("*** makeBlock(): enter\n"))
-	// Need 2 endpoints in BLOCK, save the space
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
-	for ( ep = 0; ep < 2; ep++ ) {
-		DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 2 );
-		endPtP = &tempEndPts(tempEndPts_da.cnt-1);
-		memset( endPtP, 0, sizeof *endPtP );
-	}
 
 	//LOG( log_block, 1, ("*** makeBlock: calling NewTrack\n"))
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
@@ -748,6 +741,9 @@ static void pushEp( track_p trk, EPINX_T ep )
 	endPtP->pos = GetTrkEndPos(trk,ep);
 	endPtP->angle = GetTrkEndAngle(trk,ep);
 	endPtP->track = trk;
+//	LOG( log_block, 1, ("*** pushEp(): trk T%d-%d, cnt %d track T%d  angle %0.1f pos %0.1f %0.1f\n",
+//		GetTrkIndex(trk),ep,tempEndPts_da.cnt,GetTrkIndex(endPtP->track),endPtP->angle,
+//		endPtP->pos.x,endPtP->pos.y))
 }
 
 static void pushDa( track_p trk )
@@ -756,6 +752,7 @@ static void pushDa( track_p trk )
 	DYNARR_APPEND( btrackinfo_t, blockTrk_da, 129 );
 	blockTrk(blockTrk_da.cnt - 1).t = trk;
 	blockTrk(blockTrk_da.cnt - 1).i = GetTrkIndex(trk);
+//	LOG( log_block, 1, ("*** pushDa(): T%d, cnt %d\n",GetTrkIndex(trk),blockTrk_da.cnt))
 }
 
 // Recursively goes from track segment to track segment until
@@ -778,6 +775,7 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	if ( here == from ) {
 		blockLen = GetTrkLength( here, 0, 1 );
 		if ( epCnt == 2 ) {
+			LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
 			pushDa( here );
 			addSegs( ((from)->endPt)[0].track, here, epFrom );
 			addSegs( ((from)->endPt)[1].track, here, epFrom );
@@ -790,9 +788,9 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	// its a turnout with toBlock set.
 	if ( epCnt > 2 ) { // The from seg is one end of the block
 		LOG( log_block, 1, ("*** addSegs(): switch at T%d\n",GetTrkIndex(here)))
-			epN = from->endPt[0].track == here?0:1;
+		epN = from->endPt[0].track == here?0:1;
 
-		pushEp( from, epFrom );
+		pushEp( from, epN );
 		return;
 	}
 
@@ -1001,10 +999,14 @@ void initBlockData( track_p blk_trk )
 	// This suppresses displaying the block description
 	// SetTrkBits( blk_trk, TB_HIDEDESC);
 
+	blk_trk->endCnt = tempEndPts_da.cnt;
 	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
 		endPtP = &tempEndPts(ep);
-		SetTrkEndPoint( blk_trk, ep, endPtP->pos, endPtP->angle );
-		(blk_trk)->endPt[ep].option = 0;
+//PHIL		SetTrkEndPoint( blk_trk, ep, endPtP->pos, endPtP->angle );
+		blk_trk->endPt[ep].track = endPtP->track;
+		blk_trk->endPt[ep].pos = endPtP->pos;
+		blk_trk->endPt[ep].angle = endPtP->angle;
+		blk_trk->endPt[ep].option = 0;
 		LOG( log_block, 1, ( "*** initBlockData(): ep[%d] pos %0.1f %0.1f"
 			" angle %0.2f track T%d options 0x%08lX\n",
 			ep, (blk_trk)->endPt[ep].pos.x, (blk_trk)->endPt[ep].pos.y,
@@ -1123,7 +1125,11 @@ EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
 	xx->numTracks = blockTrk_da.cnt;
 	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
 		endPtP = &tempEndPts(ep);
-		SetTrkEndPoint( b_trk, ep, endPtP->pos, endPtP->angle );
+//PHIL		SetTrkEndPoint( b_trk, ep, endPtP->pos, endPtP->angle );
+		b_trk->endPt[ep].track = endPtP->track;
+		b_trk->endPt[ep].pos = endPtP->pos;
+		b_trk->endPt[ep].angle = endPtP->angle;
+		b_trk->endPt[ep].option = 0;
 	}
 	blockDebug( b_trk );
 //	SetBlockBoundingBox(trk);
