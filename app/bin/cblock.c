@@ -492,16 +492,17 @@ static void DescribeBlock( track_p trk, char * str, CSIZE_T len )
 
 }
 
-static int blockDebug( track_p trk )
+static int blockDebug( track_p b_trk )
 {
 	wIndex_t iTrack;
 	EPINX_T epN;
 	trkEndPt_p endPtP;
 
-	blockData_p xx = GetblockData(trk);
+	blockData_p xx = GetblockData(b_trk);
 	LOG( log_block, 1, ("*** blockDebug(): T%d(%p) name = %s\n",
-				GetTrkIndex(trk), trk, xx->name))
+				GetTrkIndex(b_trk), b_trk, xx->name))
 	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
+	// track segments in the block
 	for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
                 if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
 		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, cnt %d",
@@ -509,12 +510,13 @@ static int blockDebug( track_p trk )
 				GetTrkEndPtCnt((&(xx->trackList))[iTrack].t)))
 		LOG( log_block, 1, (", %s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
 	}
-	for ( epN = 0; epN < GetTrkEndPtCnt(trk); epN++ ) {
-		endPtP = &(trk->endPt[epN]);
+	// endpoints for the block - prevTrack is the segment at the end of the block
+	for ( epN = 0; epN < GetTrkEndPtCnt(b_trk); epN++ ) {
+		endPtP = &(b_trk->endPt[epN]);
 		LOG( log_block, 1, ("*** blockDebug(): ep[%d] pos %0.1f %0.1f "
 			"angle %0.2f track T%d options 0x%08lX\n",
 			epN, endPtP->pos.x, endPtP->pos.y, endPtP->angle,
-			endPtP->track?GetTrkIndex(endPtP->track):0,
+			endPtP->prevTrack?GetTrkIndex(endPtP->prevTrack):0,
 			endPtP->option))
 	}
 	return(0);
@@ -558,7 +560,6 @@ static BOOL_T blockCheckContigiousPath( BOOL_T selected )
 					memset( endPtP, 0, sizeof *endPtP );
 					endPtP->pos = GetTrkEndPos(trk,ep);
 					endPtP->angle = GetTrkEndAngle(trk,ep);
-					/*endPtP->track = trk1;*/
 					/* These End Points are dummies --
 					   we don't want DeleteTrack to look at
 					   them. */
@@ -740,9 +741,9 @@ static void pushEp( track_p trk, EPINX_T ep )
 	memset( endPtP, 0, sizeof *endPtP );
 	endPtP->pos = GetTrkEndPos(trk,ep);
 	endPtP->angle = GetTrkEndAngle(trk,ep);
-	endPtP->track = trk;
+	endPtP->prevTrack = trk;
 //	LOG( log_block, 1, ("*** pushEp(): trk T%d-%d, cnt %d track T%d  angle %0.1f pos %0.1f %0.1f\n",
-//		GetTrkIndex(trk),ep,tempEndPts_da.cnt,GetTrkIndex(endPtP->track),endPtP->angle,
+//		GetTrkIndex(trk),ep,tempEndPts_da.cnt,GetTrkIndex(endPtP->prevTrack),endPtP->angle,
 //		endPtP->pos.x,endPtP->pos.y))
 }
 
@@ -988,7 +989,7 @@ static void GetDynamicSegs( track_p trk )
 // blockName - preloaded with block name
 // blockScript - preloaded with block script
 // blockLen - preloaded length of block
-void initBlockData( track_p blk_trk )
+void initBlockData( track_p b_trk )
 {
 	blockData_p xx,xx1;
 	track_p trk1;
@@ -997,27 +998,27 @@ void initBlockData( track_p blk_trk )
 	trkEndPt_p endPtP;
 
 	// This suppresses displaying the block description
-	// SetTrkBits( blk_trk, TB_HIDEDESC);
+	// SetTrkBits( b_trk, TB_HIDEDESC);
 
-	blk_trk->endCnt = tempEndPts_da.cnt;
+	b_trk->endCnt = tempEndPts_da.cnt;
 	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
 		endPtP = &tempEndPts(ep);
-//PHIL		SetTrkEndPoint( blk_trk, ep, endPtP->pos, endPtP->angle );
-		blk_trk->endPt[ep].track = endPtP->track;
-		blk_trk->endPt[ep].pos = endPtP->pos;
-		blk_trk->endPt[ep].angle = endPtP->angle;
-		blk_trk->endPt[ep].option = 0;
+//PHIL		SetTrkEndPoint( b_trk, ep, endPtP->pos, endPtP->angle );
+		b_trk->endPt[ep].prevTrack = endPtP->prevTrack;
+		b_trk->endPt[ep].pos = endPtP->pos;
+		b_trk->endPt[ep].angle = endPtP->angle;
+		b_trk->endPt[ep].option = 0;
 		LOG( log_block, 1, ( "*** initBlockData(): ep[%d] pos %0.1f %0.1f"
 			" angle %0.2f track T%d options 0x%08lX\n",
-			ep, (blk_trk)->endPt[ep].pos.x, (blk_trk)->endPt[ep].pos.y,
-			(blk_trk)->endPt[ep].angle,
-			(blk_trk)->endPt[ep].track?GetTrkIndex((blk_trk)->endPt[ep].track):0,
-			(blk_trk)->endPt[ep].option))
+			ep, (b_trk)->endPt[ep].pos.x, (b_trk)->endPt[ep].pos.y,
+			(b_trk)->endPt[ep].angle,
+			(b_trk)->endPt[ep].prevTrack?GetTrkIndex((b_trk)->endPt[ep].prevTrack):0,
+			(b_trk)->endPt[ep].option))
 	}
 
-	xx = GetblockData( blk_trk );
+	xx = GetblockData( b_trk );
 	LOG(log_block, 1, ("*** initBlockData(): T%d(%p), %s xx = %p\n",
-			GetTrkIndex(blk_trk), blockName, blk_trk, xx))
+			GetTrkIndex(b_trk), blockName, b_trk, xx))
 
 	xx->name = MyStrdup( blockName );
 	blockName[0] = 0;
@@ -1028,21 +1029,21 @@ void initBlockData( track_p blk_trk )
 	xx->description_offset = zero;
 	trk1 = last_block;
 	if ( ! trk1 ) {
-		first_block = blk_trk;
+		first_block = b_trk;
 	}
 	else {
 		xx1 = GetblockData(trk1);
-		xx1->next_block = blk_trk;
+		xx1->next_block = b_trk;
 	}
 	xx->next_block = NULL;
-	last_block = blk_trk;
+	last_block = b_trk;
 
 	xx->numTracks = blockTrk_da.cnt;
 	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
 		tracklist(iTrack).i = blockTrk(iTrack).i;
 		tracklist(iTrack).t = blockTrk(iTrack).t;
 		if ( tracklist(iTrack).t ) {
-			tracklist(iTrack).t->conBlock = blk_trk;
+			tracklist(iTrack).t->conBlock = b_trk;
 		}
 		LOG( log_block, 2, ("*** initBlockData(): copying track T%d\n",
 				tracklist(iTrack).i))
@@ -1125,8 +1126,7 @@ EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
 	xx->numTracks = blockTrk_da.cnt;
 	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
 		endPtP = &tempEndPts(ep);
-//PHIL		SetTrkEndPoint( b_trk, ep, endPtP->pos, endPtP->angle );
-		b_trk->endPt[ep].track = endPtP->track;
+		b_trk->endPt[ep].prevTrack = endPtP->prevTrack;
 		b_trk->endPt[ep].pos = endPtP->pos;
 		b_trk->endPt[ep].angle = endPtP->angle;
 		b_trk->endPt[ep].option = 0;
@@ -1613,6 +1613,8 @@ EXPORT void CheckDeleteBlock( track_p t )
         }
     }
 
+    blk->endPt[0].prevTrack = NULL;
+    blk->endPt[1].prevTrack = NULL;
     DeleteTrack (blk, FALSE);
 }
 

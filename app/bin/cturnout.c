@@ -3215,6 +3215,29 @@ main( INT_T argc, char * argv[] )
 #endif
 
 /**
+ *
+ * Paths between blocks
+ *
+ * Blocks can be connected together by following a path through one
+ * or more turnouts and occasionally short track segments. When turnouts
+ * are aligned properly to create a path through the turnouts a train can
+ * move from block to block.
+ *
+ * When turnouts are aligned to create a path between blocks the position
+ * indicator on the turnouts along the path is highlighted in green.
+ * Otherwise turnout alignment is shown in red.
+ * The usual Shift-left click is used to change turnout alignment.
+ *
+ * When a train enters a turnout and a path exists to another block, all
+ * the turnouts and segments in the path become occupied. When a path
+ * doesn't exist, just the turnout that is being entered becomes occupied.
+ *
+ * When the train is no longer on the path or turnout the path or turnout
+ * becomes unoccupied.
+ *
+ * When a turnout is occupied the turnout is locked and point alignment
+ * cannot be changed.
+ *
  * Switch Flags
  * Switch end points can point a track segment, block, or another switch
  * A collection of turnouts that connect two blocks are treated as a single
