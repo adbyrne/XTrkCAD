@@ -2017,7 +2017,6 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
 
         if (bCanSave) {
             bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
-            return bSuccess;
         }
     }
     FreeImage_Unload(dib2);
