@@ -3,22 +3,25 @@
  *  Blocks:
  *    - Connect to a turnout or another block at each end
  *      - very long blocks are divided into sub-blocks based on Max Block
- *        Length (future).
+ *        Length.
  *    - Have a minimum and possibly maximum length
- *        (max block length is for a future version)
- *      - min max length is saved in the layout file
+ *      - min and max length is saved in the layout file
  *      - may be set/changed in options->layout
  *           "Min Block Length" and "Max Block Length"
  *      - if length is changed the blocks are deleted and may be recreated
  *        using the new length. (future)
+ *    - When the block length is > 2 * maxBlockLength, the block is divided
+ *      into sub-blocks. This allows trains to follow each other down a long
+ *      block.
  *    - Have from 1 to 128 track segments
  *    - When any segment of the block is occupied, the whole block
  *      is occupied.
  *   Dynamic Blocks:
  *    - Created when the positions of the turnouts connect blocks.
+ *    - A path between blocks, when it exists, is drawn in green.
  *    - Deleted when a position is changed so that blocks are not
  *      connected.
- *    - When any turnout in the block is occupied all turnouts are
+ *    - When any turnout in the dynamic block is occupied all turnouts are
  *      occupied.
  *   Note: when a turnout is occupied, its position can't be changed.
  *   manage->Mange Layout Control Elements "Add Missing" button
@@ -727,7 +730,7 @@ static BOOL_T ReadBlock( char * line )
 		return TRUE;
 	blockLen = 0.0;
 
-	trk = makeBlock();
+	makeBlock();
 
 	return TRUE;
 }
@@ -742,7 +745,7 @@ static void pushEp( track_p trk, EPINX_T ep )
 	endPtP->pos = GetTrkEndPos(trk,ep);
 	endPtP->angle = GetTrkEndAngle(trk,ep);
 	endPtP->prevTrack = trk;
-//	LOG( log_block, 1, ("*** pushEp(): trk T%d-%d, cnt %d track T%d  angle %0.1f pos %0.1f %0.1f\n",
+//	LOG( log_block, 1, ("*** pushEp(): trk T%d-%d, cnt %d track T%d  angle %0.1f pos %0.3f %0.3f\n",
 //		GetTrkIndex(trk),ep,tempEndPts_da.cnt,GetTrkIndex(endPtP->prevTrack),endPtP->angle,
 //		endPtP->pos.x,endPtP->pos.y))
 }
@@ -784,11 +787,11 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 		return;
 	}
 
-	// See if this is a turnout
+	// See if this is a turnout or a block
 	// Check for the end of the scan. For a block its a turnout, for dynamic
 	// its a turnout with toBlock set.
-	if ( epCnt > 2 ) { // The from seg is one end of the block
-		LOG( log_block, 1, ("*** addSegs(): switch at T%d\n",GetTrkIndex(here)))
+	if ( epCnt > 2 || here->conBlock ) { // The from seg is one end of the block
+		LOG( log_block, 1, ("*** addSegs(): switch/block at T%d\n",GetTrkIndex(here)))
 		epN = from->endPt[0].track == here?0:1;
 
 		pushEp( from, epN );
@@ -932,8 +935,16 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 // Place endpoints in tempEndPts_da
 // Place total length in blockLen
 // If something is invalid, reset blockTrk_da
-static void GetBlockSegs( track_p trk )
+// If blocklen is > 2*maxBlocklen make block from tempEndPts_da[0].prevTrack
+// for maxBlockLength. If remaining len is < maxBlockLength, add rest of segs
+// to block. Adjust parameters as required.
+static void GetBlockSegs( track_p s_trk )
 {
+	DIST_T len;
+	track_p lastTrk = s_trk, trk = s_trk;
+	trkEndPt_p endPtP;
+	EPINX_T ep, lastEp;
+
 	LOG( log_block, 1, ("*** GetBlockSegs(): T%d\n", GetTrkIndex(trk)))
 
 	if ( ! IsTrack( trk ) ) return;
@@ -945,26 +956,42 @@ static void GetBlockSegs( track_p trk )
 	// Track segments in block
 	DYNARR_RESET( btrackinfo_t, blockTrk_da );
 
-	// Find all track segments between turnouts in this block
+	// Find all track segments between turnouts/blocks in this block
 	// trk is a track segment
 	addSegs( trk, trk, 0 );
 
-	if ( tempEndPts_da.cnt != 2 ) {
-		LOG( log_block, 1, ("*** GetBlockSegs(): track end\n"))
-		blockLen = 0.0;
-		// block ends at end-of-track
-		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	// make a sub-block
+	LOG( log_block, 1, ("*** GetBlockSegs(): T%d blockLen %0.1f (%0.1f)\n",
+		GetTrkIndex(trk),blockLen,2.1 * maxBlockLength))
+	if ( blockLen > ( 2.1 * maxBlockLength ) ) {
+		endPtP = &tempEndPts(0);
+		trk = endPtP->prevTrack;
+		ep = FindDistance( endPtP->pos, trk->endPt[0].pos) >
+			FindDistance( endPtP->pos, trk->endPt[1].pos) ? 0 : 1;
+		len = GetTrkLength( trk, 0, 1 );
 		DYNARR_RESET( btrackinfo_t, blockTrk_da );
-	}
-	if ( blockLen < minBlockLength ) {
-		LOG( log_block, 1, ("*** GetBlockSegs(): too short\n"))
-		blockLen = 0.0;
-		// block is too short
-		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
-		DYNARR_RESET( btrackinfo_t, blockTrk_da );
+		LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f pos (%0.3f %0.3f)\n",
+			GetTrkIndex(trk),ep,len, trk->endPt[ep].pos.x, trk->endPt[ep].pos.y))
+		while ( len <= maxBlockLength && blockLen - len >= maxBlockLength ) {
+			pushDa( trk );
+			lastTrk = trk;
+			lastEp = ep;
+			// on to the next seg...
+			trk = trk->endPt[ep].track;
+			ep = lastTrk == trk->endPt[0].track ? 1 : 0 ;
+			len += GetTrkLength( trk, 0, 1 );
+			LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f\n",
+				GetTrkIndex(trk),ep,len))
+		}
+		pushDa( trk );
+		endPtP = &tempEndPts(1);
+		endPtP->prevTrack = trk;
+		endPtP->pos = trk->endPt[lastEp].pos;
+		endPtP->angle = trk->endPt[lastEp].angle;
+		blockLen = len;
 	}
 	LOG( log_block, 1, ("*** GetBlockSegs(): T%d len %6.1f segs %d\n",
-			GetTrkIndex(trk), blockLen, blockTrk_da.cnt))
+			GetTrkIndex(s_trk), blockLen, blockTrk_da.cnt))
 }
 
 static void GetDynamicSegs( track_p trk )
@@ -1003,7 +1030,6 @@ void initBlockData( track_p b_trk )
 	b_trk->endCnt = tempEndPts_da.cnt;
 	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
 		endPtP = &tempEndPts(ep);
-//PHIL		SetTrkEndPoint( b_trk, ep, endPtP->pos, endPtP->angle );
 		b_trk->endPt[ep].prevTrack = endPtP->prevTrack;
 		b_trk->endPt[ep].pos = endPtP->pos;
 		b_trk->endPt[ep].angle = endPtP->angle;
@@ -1170,7 +1196,7 @@ EXPORT void UpdateBlockTrack( void )
 
 EXPORT void AddMissingBlockTrack( void )
 {
-    track_p trk, b_trk;
+    track_p trk;
 
     LOG( log_block, 1, ("*** AddMissingBlockTrack() -- enter\n"))
 
@@ -1196,7 +1222,7 @@ EXPORT void AddMissingBlockTrack( void )
 
        	sprintf( blockName,"B%03d",blockTrk(0).i );
 	SetTrkBits( blockTrk(0).t, TB_SELECTED );
-	b_trk = makeBlock();
+	makeBlock();
 	ClrTrkBits( blockTrk(0).t, TB_SELECTED );
 
     }
@@ -1221,7 +1247,6 @@ EXPORT void DeleteDynamicBlock( track_p trk )
 
 EXPORT void CreateDynamicBlock( track_p trk )
 {
-	track_p blk_trk;
 	EPINX_T ep, epN;
 	DIST_T len;
 
@@ -1237,7 +1262,7 @@ EXPORT void CreateDynamicBlock( track_p trk )
 	if ( blockTrk_da.cnt <= 0 ) return;
 	if ( tempEndPts_da.cnt < 2 ) return;
 
-	blk_trk = makeBlock();
+	makeBlock();
 	LOG( log_block, 1, ("*** CreateDynamicBlock T%d -- exit\n", GetTrkIndex(trk)))
 }
 
@@ -1384,58 +1409,23 @@ static void BlockOk( void * junk )
 		NoticeMessage( _("Block must have a unique name!"), _("Ok"), NULL);
 		return;
 	}
+
 	//wDrawDelayUpdate( mainD.d, TRUE );
-	/*
-	 * Collect tracks
-	 */
-	trk = NULL;
-	while ( TrackIterate( &trk ) ) {
-		if ( GetTrkSelected( trk ) ) {
-			GetBlockSegs( trk );
-		}
-	}
-	if ( tempEndPts_da.cnt < 2 ) return;
-	if ( blockLen < minBlockLength ) return;
-	LOG( log_block, 1, ("*** BlockOk(): blockTrk_da.cnt %d\n",blockTrk_da.cnt))
 
-	if ( blockTrk_da.cnt > 128 ) {
-		NoticeMessage( MSG_TOOMANYSEGSINGROUP, _("Ok"), NULL );
-		wDrawDelayUpdate( mainD.d, FALSE );
-		wHide( blockW );
-		return;
+	if ( ! blockUndoStarted ) {
+		UndoStart( _("Create block"), "Create block" );
+		blockUndoStarted = TRUE;
 	}
 
-	if ( blockTrk_da.cnt > 0 ) {
-		// The length of the block must at least minBlockLength long
-		if ( blockLen < minBlockLength ) {
-			LOG( log_block, 1, ("*** BlockOk() len %0.2f min %0.2f\n",
-					blockLen, minBlockLength))
-			NoticeMessage( MSG_BLOCKTOOSHORT, _("Ok"), NULL );
-			wDrawDelayUpdate( mainD.d, FALSE );
-			wHide( blockW );
-			return;
-		}
+	/* Create a block object */
+	LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
+	trk = makeBlock();
 
-		// Default block name is the track seg number
-		if ( blockName[0] == 0 )
-			sprintf( blockName,"B%03d",blockTrk(0).i );
-		LOG( log_block, 1, ("*** BlockOk() blockName %s\n", blockName))
+	SetBlockBoundingBox( trk );
 
-		if ( ! blockUndoStarted ) {
-		    UndoStart( _("Create block"), "Create block" );
-		    blockUndoStarted = TRUE;
-		}
-
-		/* Create a block object */
-		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
-		trk = makeBlock();
-
-		SetBlockBoundingBox( trk );
-
-		if ( blockUndoStarted ) {
-		    UndoEnd();
-		    blockUndoStarted = FALSE;
-		}
+	if ( blockUndoStarted ) {
+		UndoEnd();
+		blockUndoStarted = FALSE;
 	}
 	wHide( blockW );
 
@@ -1510,7 +1500,8 @@ static void NewBlockDialog( track_p sel_trk )
 			       	_("Ok"), BlockOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		blockD.dpi = mainD.dpi;
 	}
-       	sprintf( blockName,"B%03d", GetTrkIndex(sel_trk) );
+
+       	sprintf( blockName,"B%03d",blockTrk(0).i );
 	ParamLoadControls( &blockPG );
 	LOG( log_block, 1, ("*** NewBlockDialog( blockName %s )\n", blockName))
 	wShow( blockW );
@@ -1887,7 +1878,6 @@ EXPORT BOOL_T DoSetMinBlockLength( DIST_T min )
 	return TRUE;
 }
 
-// FUTURE FEATURE - PHIL
 // Very long blocks can be divided into sub-blocks to permit
 // multiple trains in the same long block
 // maxBlockLength is target size of sub-blocks
