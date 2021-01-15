@@ -87,6 +87,7 @@ static const char rcsid[] = "@(#) : $Id$";
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
 static void ControlAddMissing( void * action );
+static void ControlDeleteAll( void * action );
 static void ControlDone( void * action );
 static void LoadControlMgmList( void );
 static wWinPix_t controlListWidths[] = { 18, 100, 100, 150 };
@@ -103,6 +104,8 @@ static paramData_t controlPLs[] = {
     {	PD_BUTTON, (void*)ControlDelete, "delete", 0, NULL, N_("Delete") },
 #define I_CONTROLUPD		(3)
     {	PD_BUTTON, (void*)ControlAddMissing, "Add Missing", 0, NULL, N_("Add Missing") },
+#define I_CONTROLDELALL		(4)
+    {	PD_BUTTON, (void*)ControlDeleteAll, "Delete All", 0, NULL, N_("Delete All") },
   } ;
 static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
 
@@ -193,12 +196,23 @@ static void ControlDelete( void * action )
 }
 
 //
-// Automatically update controls on layout
+// Automatically add missing control elements on layout
 // Controls are associated with track segments
 static void ControlAddMissing( void * action )
 {
 	AddMissingBlockTrack();
 //	AddMissingSwitchMotor();
+
+	wHide( controlPG.win );
+}
+
+//
+// Automatically delete all control elements on layout
+// Controls are associated with track segments
+static void ControlDeleteAll( void * action )
+{
+	DeleteAllBlockTrack();
+//	DeleteAllSwitchMotor();
 
 	wHide( controlPG.win );
 }

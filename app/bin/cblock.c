@@ -137,6 +137,7 @@ static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
 			      wDrawColor color ) {}
 static void EditBlock( track_p trk );
 static void initBlockData( track_p trk );
+static BOOL_T CheckDeleteBlock( track_p t );
 
 static drawFuncs_t noDrawFuncs = {
 	0,
@@ -1275,6 +1276,22 @@ EXPORT void AddMissingBlockTrack( void )
     MainRedraw();
 }
 
+EXPORT void DeleteAllBlockTrack( void )
+{
+    track_p trk;
+
+    LOG( log_block, 1, ("*** DeleteAllBlockTrack() -- enter\n"))
+
+    // Loop through all track segs
+    TRK_ITERATE(trk) {
+	LOG( log_block, 1, ("*** DeleteAllBlockTrack() next seg T%d isTrack %d EndPtCnt %d block %d\n",
+		GetTrkIndex(trk), IsTrack(trk), GetTrkEndPtCnt(trk), trk->conBlock != NULL))
+	if ( GetTrkType(trk) == T_BLOCK ) {
+		if (CheckDeleteBlock( trk )) continue;
+	}
+    }
+}
+
 EXPORT void DeleteDynamicBlock( track_p trk )
 {
 	track_p blk = trk->conBlock;
@@ -1620,7 +1637,7 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 
 
 // Called by DeleteTrack
-EXPORT void CheckDeleteBlock( track_p t )
+static BOOL_T CheckDeleteBlock( track_p t )
 {
     track_p blk = NULL;
     blockData_p xx;
@@ -1630,22 +1647,25 @@ EXPORT void CheckDeleteBlock( track_p t )
     if ( IsTrack(t) ) {
         blk = FindBlock(t);
         if ( blk == NULL ) {
-            return;
+            return FALSE;
         }
     }
     if ( GetTrkType(t) == T_BLOCK )
         blk = t;
     xx = GetblockData(blk);
-    if ( ! xx ) return;
-    if ( xx->name && xx->name[0] != 0 )
-    	NoticeMessage(_("Deleting block %s"),_("Ok"),NULL,xx->name);
+    if ( ! xx ) return FALSE;
+    if ( xx->name && xx->name[0] != 0 ) {
+        if ( NoticeMessage(_("Deleting block %s"),_("Cancel"),_("Ok"),xx->name) ) {
+            return FALSE;
+        }
+    }
 
     // Remove the conBlock links
     for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
-	if ( (&(xx->trackList))[iTrack].t ) {
-		LOG( log_block, 1,("*** CheckDeleteBlock( T%d ) -- T%d con %p\n",
-			GetTrkIndex(t), (&(xx->trackList))[iTrack].i,
-			(&(xx->trackList))[iTrack].t->conBlock))
+        if ( (&(xx->trackList))[iTrack].t ) {
+            LOG( log_block, 1,("*** CheckDeleteBlock( T%d ) -- T%d con %p\n",
+                GetTrkIndex(t), (&(xx->trackList))[iTrack].i,
+                (&(xx->trackList))[iTrack].t->conBlock))
             (&(xx->trackList))[iTrack].t->conBlock = NULL;
         }
     }
@@ -1653,6 +1673,7 @@ EXPORT void CheckDeleteBlock( track_p t )
     blk->endPt[0].prevTrack = NULL;
     blk->endPt[1].prevTrack = NULL;
     DeleteTrack (blk, FALSE);
+    return TRUE;
 }
 
 static void BlockEditOk( void * junk )

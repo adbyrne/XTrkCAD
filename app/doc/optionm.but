@@ -379,6 +379,14 @@ It can be changed to a new local file and the next \f{Save} will rebuild the pac
 
 \u000
 
+\dd \f{Min Block Length} - specifies the minimum length of a block. This is also the maximum track segment that connects turnouts.  This is used by the \f{Add Missing} button when automatically creating blocks. If this is changed, existing blocks must be deleted and recreated.  Default 8.0 disables check.
+
+\u000
+
+\dd \f{Max Block Length} - specifies the nominal maximum length of a block. Very long blocks are divided into a set of Max Block Length blocks. This permits trains to follow each other down a long track. This is used by the \f{Add Missing} button when automatically creating blocks. If this is changed, existing blocks must be deleted and recreated.  Default 24.0 disables check.
+
+\u000
+
 \dd \f{Background Pos X, Y} - The offset of the bottom left corner of the background image from the origin (in inches or centimeters) after rotation.
 
 \u000
@@ -452,10 +460,6 @@ This dialog controls some parameters which likely will not be changed frequently
 \u000
 
 \dd \f{Min Track Length} - specifies the minimum length of a track.  Shorter tracks will not be created.
-
-\u000
-
-\dd \f{Min Block Length} - specifies the minimum length of a block.  Default 0.0 disables check.
 
 \u000
 
