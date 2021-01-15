@@ -23,9 +23,14 @@
  *      connected.
  *    - When any turnout in the dynamic block is occupied all turnouts are
  *      occupied.
- *   Note: when a turnout is occupied, its position can't be changed.
+ *    - Dynamic blocks are associated with the connected blocks.
+ *      They do not report occupancy. When a train enters a dynamic block,
+ *      the block becomes occupied. If the whole train is in the dynamic block,
+ *      the block it came from remains occupied until the train enters the
+ *      next block.
+ *   Note: when a turnout is occupied, it's position can't be changed.
  *   manage->Mange Layout Control Elements "Add Missing" button
- *   to automatically create all (non dynamic) blocks needed by the
+ *   automatically creates all (non dynamic) blocks needed by the
  *   layout based on Min and Max Block Lengths.
  *   manage->Mange Layout Control Elements "Delete Blocks" button
  *   automatically deletes all blocks. (future)
@@ -35,7 +40,7 @@
 /* Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
- * Modification History: Revision 1.6  2021/01/10 12:00:00  pecameron
+ * Modification History: Revision 1.6  2021/01/15 12:00:00  pecameron
  * Modification History: Add Dynamic Blocks.
  * Modification History: Track block occupancy.
  * Modification History: Prevent occupied turnout from being changed.
@@ -1074,6 +1079,47 @@ void initBlockData( track_p b_trk )
 		LOG( log_block, 2, ("*** initBlockData(): copying track T%d\n",
 				tracklist(iTrack).i))
 	}
+}
+
+EXPORT BOOL_T IsDynamicBlock( track_p b_trk )
+{
+	blockData_p xx;
+
+	if ( GetTrkType(b_trk) != T_BLOCK ) return TRUE;
+
+	xx = GetblockData( b_trk );
+	if ( ! xx->name || xx->name[0] != 0 ) return FALSE;
+
+	return TRUE;
+}
+
+// Get the block that trk, pos reference
+static track_p getNextBlock( track_p trk, coOrd pos )
+{
+	EPINX_T ep;
+
+	for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
+		if ( IsPosClose( trk->endPt[ep].pos, pos ) ) break;
+	}
+	trk = trk->endPt[ep].track;
+	return trk->conBlock;
+}
+
+// Given a block and a dynamic block, get the other block
+// (A dynamic block connects two blocks.)
+EXPORT track_p GetRemoteBlock( track_p b_trk, track_p db_trk )
+{
+	track_p  trk, trk0, trk1;
+	if ( ! b_trk || ! db_trk ) return NULL;
+
+	trk = IsDynamicBlock( db_trk ) ? db_trk : b_trk;
+	trk0 = getNextBlock( trk->endPt[0].prevTrack, trk->endPt[0].pos );
+	trk1 = getNextBlock( trk->endPt[1].prevTrack, trk->endPt[1].pos );
+	LOG(log_block, 1, ("*** GetRemoteBlock(): B%d, DB%d B%d\n",
+			GetTrkIndex(trk0),
+			GetTrkIndex(trk),
+			GetTrkIndex(trk1)))
+	return trk0  == trk ? trk1 : trk0;
 }
 
 EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )

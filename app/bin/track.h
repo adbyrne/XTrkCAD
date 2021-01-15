@@ -803,7 +803,9 @@ void AddHotBarCarDesc( void );
 
 /* cblock.c */
 extern void CheckDeleteBlock( track_p t );
-extern BOOL_T ResolveBlockTrack ( track_p b_trk );
+extern BOOL_T IsDynamicBlock( track_p b_trk );
+extern track_p GetRemoteBlock( track_p b_trk, track_p db_trk );
+extern BOOL_T ResolveBlockTrack( track_p b_trk );
 extern DIST_T BlockDescriptionDistance( coOrd, track_p);
 extern STATUS_T BlockDescriptionMove( track_p, wAction_t, coOrd);
 extern void AddMissingBlockTrack( void );

@@ -186,6 +186,38 @@ static void clearOccupied(void)
     }
 }
 
+// Dynamic block, while occupied, is "attached" to one of the connecting blocks.
+static void adjustDynamicOccupied ( track_p trk, track_p prevTrk )
+{
+	track_p thisBlock = trk->conBlock;
+	track_p prevBlock = prevTrk->conBlock;
+	track_p prevPrevBlock;
+
+	LOG(log_trainMove, 1, ("adjustDynamicOccupied : trk T%d B%d  prevTrk T%d prevBlk B%d\n",
+		GetTrkIndex(trk),GetTrkIndex(thisBlock),GetTrkIndex(prevTrk),GetTrkIndex(prevBlock)))
+	if ( ! thisBlock || ! prevBlock ) return;
+	if ( thisBlock == prevBlock ) return;
+
+	LOG(log_trainMove, 1, ("adjustDynamicOccupied : isDynamic trk B%d %d occ %d prevTrk B%d %d occ %d\n",
+		GetTrkIndex(thisBlock),IsDynamicBlock(thisBlock),GetTrkIndex(prevBlock),
+		thisBlock->occupied,IsDynamicBlock(prevBlock),prevBlock->occupied))
+
+	// Going into a dynamic block, attach it to the prevBlock
+	if ( IsDynamicBlock( thisBlock ) && thisBlock->occupied == 0 )
+			prevBlock->occupied++;
+
+	// Going from a dynamic block, move the attach to thisBlock
+	if ( IsDynamicBlock( prevBlock ) && thisBlock->occupied == 0 ) {
+		thisBlock->occupied++;
+		prevPrevBlock = GetRemoteBlock( thisBlock, prevBlock );
+		if ( prevPrevBlock ) prevPrevBlock->occupied--;
+	}
+
+	// Dynamic block becoming unoccupied
+	if ( IsDynamicBlock( prevBlock ) && prevBlock->occupied == 1 )
+		thisBlock->occupied--;
+}
+
 // Add or subtract from the occupied counter and when a
 // block is present adjust there as well.
 static void adjustOccupied ( track_p trk, int adj )
@@ -297,18 +329,24 @@ static void updateOccupied(void)
         ep1 = GetTrkEndPos( car, 1);
         temp1 = OnTrack( &ep1, FALSE ,TRUE);
         if ( car->endPt[0].prevTrack != temp0) {
-        	if (car->endPt[0].prevTrack)
-			adjustOccupied( car->endPt[0].prevTrack, -1 );
-            if (temp0)
-		adjustOccupied( temp0, 1 );
+            adjustDynamicOccupied( temp0, car->endPt[0].prevTrack );
+            if (car->endPt[0].prevTrack) {
+                adjustOccupied( car->endPt[0].prevTrack, -1 );
+            }
+            if (temp0) {
+                adjustOccupied( temp0, 1 );
+            }
             car->endPt[0].prevTrack = temp0;
             changed = TRUE;
         }
         if ( car->endPt[1].prevTrack != temp1) {
-        	if (car->endPt[1].prevTrack)
-			adjustOccupied( car->endPt[1].prevTrack, -1 );
-            if (temp1)
-		adjustOccupied( temp1, 1 );
+            adjustDynamicOccupied( temp1, car->endPt[1].prevTrack );
+            if (car->endPt[1].prevTrack) {
+                adjustOccupied( car->endPt[1].prevTrack, -1 );
+            }
+            if (temp1) {
+                adjustOccupied( temp1, 1 );
+            }
             car->endPt[1].prevTrack = temp1;
             changed = TRUE;
         }
