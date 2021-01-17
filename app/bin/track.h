@@ -812,6 +812,11 @@ extern void DeleteAllBlockTrack( void );
 extern void UpdateBlockTrack( void );
 extern void DeleteDynamicBlock( track_p trk );
 extern void CreateDynamicBlock( track_p trk );
+extern void ClearDynamicBlocks( void );
+extern void CreateDynamicBlocks( void );
+extern void ClearOccupied( void );
+extern BOOL_T IsOccupied ( track_p trk );
+extern void SetOccupied( void );
 
 /* cswitchmotor.c */
 void CheckDeleteSwitchmotor( track_p t );
