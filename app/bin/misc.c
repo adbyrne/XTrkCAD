@@ -3055,7 +3055,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	if (toolbarSet&(1<<BG_HOTBAR)) {
 		LayoutHotBar( NULL );
 	} else {
-		HideHotBar();
+		LayoutHotBar( NULL );   /* Must run once to set it up */
+		HideHotBar();           /* Then hide */
 	}
 	LOG1(log_init, ( "drawInit\n" ))
 	DrawInit(initialZoom);
