@@ -1552,7 +1552,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
             trkSeg_p segPtr;
             PATHPTR_T path,pathCurr;
             //Find starting seg on path (nearest to end Pt)
-	    path = GetCurrPath( trk );
+	        path = GetCurrPath( trk );
             for ( path += strlen((char*)path)+1; path[0] || path[1]; path++ ) {
                 if ( path[0] == 0 )
                     continue;

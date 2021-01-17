@@ -165,15 +165,12 @@ BOOL_T ComputeElev(
 				elev1 = GetElevation( trk1 );
 				dist1 = GetTrkLength( trk1, ep1, -1 );
 			}
-			SetTrkEndElevCachedHeight(trk1,ep1,elev1,dist1);
 			if (dist0+dist1>0.1) {
 				grade = (elev1-elev0)/(dist0+dist1);
 				elev0 += grade*dist0;
 			} else {
 				elev0 = (elev0+elev1)/2.0;
 				rc = FALSE;
-				SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
-				SetTrkEndElevCachedHeight(trk1,ep1,elev0,dist1);
 			}
 		} else {
 			grade = 0.0;
@@ -183,7 +180,7 @@ BOOL_T ComputeElev(
 	if ( elevR )
 		*elevR = elev0;
 	if ( gradeR )
-		*gradeR = grade;
+		*gradeR = fabs(grade);
 	return rc;
 }
 
