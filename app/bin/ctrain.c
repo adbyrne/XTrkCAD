@@ -89,11 +89,12 @@ struct extraData {
 #define SetProcessed( XX )				(XX)->state |= CAR_STATE_PROCESSED
 #define ClrProcessed( XX )				(XX)->state &= ~CAR_STATE_PROCESSED
 
+// Scroll the window before the train hits the edge
 #define OFF_F( ORIG, SIZE, LO, HI ) \
-    ( (HI).x < (ORIG).x+((SIZE).x)*0.2 || \
-      (LO).x > (ORIG).x+((SIZE).x)*0.8 || \
-      (HI).y < (ORIG).y+((SIZE).y)*0.2 || \
-      (LO).y > (ORIG).y+((SIZE).y)*0.8 )
+    ( ( (HI).x < (ORIG).x+((SIZE).x)*0.2 && (ORIG).x > 0.0 ) || \
+      ( (LO).x > (ORIG).x+((SIZE).x)*0.8 && (ORIG).x+(SIZE).x < mapD.size.x ) || \
+      ( (HI).y < (ORIG).y+((SIZE).y)*0.2 && (ORIG).y > 0.0 ) || \
+      ( (LO).y > (ORIG).y+((SIZE).y)*0.8 && (ORIG).y+(SIZE).y < mapD.size.y ) )
 #define OFF_FOLLOW( LO, HI ) \
     OFF_F( mainD.orig, mainD.size, LO, HI )
 
