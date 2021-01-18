@@ -337,7 +337,7 @@ static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
 			elev0 = GetTrkEndElevHeight(trk,0);
 		else {
 			if (!GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
-				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
+				if ((len = GetTrkLength( trk, 0, -1 ))<0.1) return FALSE;
 				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
 			}
 		}
@@ -345,11 +345,11 @@ static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
 			elev1 = GetTrkEndElevHeight(trk,1);
 		else {
 			if (!GetTrkEndElevCachedHeight(trk,1,&elev1,&len1)) {
-				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
-				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
+				if ((len1 = GetTrkLength( trk, 1, -1 ))<0.1) return FALSE;
+				ComputeElev( trk, 1, FALSE, &elev1, NULL, TRUE );
 			}
 		}
-		if (dist1+dist0 < 0.1) {
+		if (dist1+dist0 <= 0.1) {
 			*height = elev0;
 			return TRUE;
 		}
