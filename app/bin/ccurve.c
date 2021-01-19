@@ -223,6 +223,7 @@ EXPORT STATUS_T CreateCurve(
 		    }
 			Da.down = TRUE;
 			if (!found && !track) SnapPos( &pos );
+			if (mode == crvCmdFromCenter) SnapPos( &pos );
 			Da.lock0 = found;
 
 			if (Da.create_state == NOCURVE)
