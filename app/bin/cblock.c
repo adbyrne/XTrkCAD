@@ -502,16 +502,18 @@ static void DescribeBlock( track_p trk, char * str, CSIZE_T len )
 
 }
 
-static int blockDebug( track_p b_trk )
+static void blockDebug( track_p b_trk )
 {
 	wIndex_t iTrack;
 	EPINX_T epN;
 	trkEndPt_p endPtP;
 
+#if 1
+	return;
+#endif
 	blockData_p xx = GetblockData(b_trk);
-	LOG( log_block, 1, ("*** blockDebug(): T%d(%p) name = %s\n",
-				GetTrkIndex(b_trk), b_trk, xx->name))
-	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
+	LOG( log_block, 1, ("*** blockDebug(): T%d(%p) name = \"%s\" script = \"%s\"\n",
+			GetTrkIndex(b_trk), b_trk, xx->name,xx->script))
 	// track segments in the block
 	for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
                 if ( (&(xx->trackList))[iTrack].t == NULL ) continue;
@@ -529,7 +531,7 @@ static int blockDebug( track_p b_trk )
 			endPtP->prevTrack?GetTrkIndex(endPtP->prevTrack):0,
 			endPtP->option))
 	}
-	return(0);
+	return;
 }
 
 /* Prereq blockTrack_da is set to have all the tracks to check all tracks must be selected */
@@ -601,11 +603,9 @@ static void DeleteBlock( track_p t )
     track_p trk1;
     blockData_p xx1;
 
-	LOG( log_block, 1, ("*** DeleteBlock(T%d %p)\n", GetTrkIndex(t), t))
 	blockData_p xx = GetblockData(t);
-	LOG( log_block, 1, ("*** DeleteBlock(): index is %d\n",GetTrkIndex(t)))
-	LOG( log_block, 1, ("*** DeleteBlock(): xx = %p, xx->name = %s, xx->script = %s\n",
-                xx,xx->name,xx->script))
+	LOG( log_block, 1, ("*** DeleteBlock(T%d) xx->name = \"%s\", xx->script = \"%s\"\n",
+		GetTrkIndex(t),xx,xx->name,xx->script))
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->script); xx->script = NULL;
 
@@ -653,21 +653,21 @@ static BOOL_T WriteBlock( track_p t, FILE * f )
 // blockTrk_da - DYNARR pre loaded with list of track segments
 static track_p makeBlock( void )
 {
-	track_p trk;
+	track_p blk;
 	trkEndPt_p endPtP;
 	EPINX_T ep;
 
 	LOG( log_block, 1, ("*** makeBlock(): enter\n"))
 
-	//LOG( log_block, 1, ("*** makeBlock: calling NewTrack\n"))
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack( 0, T_BLOCK, tempEndPts_da.cnt,
+	blk = NewTrack( 0, T_BLOCK, tempEndPts_da.cnt,
 		sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1 );
+	LOG( log_block, 1, ("*** makeBlock: B%d\n",GetTrkIndex(blk)))
 
-	initBlockData( trk );
-	blockDebug( trk );
+	initBlockData( blk );
+	blockDebug( blk );
 
-	return trk;
+	return blk;
 }
 
 static BOOL_T ReadBlock( char * line )
@@ -752,9 +752,11 @@ static void pushEp( track_p trk, EPINX_T ep )
 	endPtP->pos = GetTrkEndPos(trk,ep);
 	endPtP->angle = GetTrkEndAngle(trk,ep);
 	endPtP->prevTrack = trk;
-//	LOG( log_block, 1, ("*** pushEp(): trk T%d-%d, cnt %d track T%d  angle %0.1f pos %0.3f %0.3f\n",
-//		GetTrkIndex(trk),ep,tempEndPts_da.cnt,GetTrkIndex(endPtP->prevTrack),endPtP->angle,
-//		endPtP->pos.x,endPtP->pos.y))
+#if 0
+	LOG( log_block, 1, ("*** pushEp(): trk T%d-%d, cnt %d track T%d  angle %0.1f pos %0.3f %0.3f\n",
+		GetTrkIndex(trk),ep,tempEndPts_da.cnt,GetTrkIndex(endPtP->prevTrack),endPtP->angle,
+		endPtP->pos.x,endPtP->pos.y))
+#endif
 }
 
 static void pushDa( track_p trk )
@@ -763,7 +765,9 @@ static void pushDa( track_p trk )
 	DYNARR_APPEND( btrackinfo_t, blockTrk_da, 129 );
 	blockTrk(blockTrk_da.cnt - 1).t = trk;
 	blockTrk(blockTrk_da.cnt - 1).i = GetTrkIndex(trk);
-//	LOG( log_block, 1, ("*** pushDa(): T%d, cnt %d\n",GetTrkIndex(trk),blockTrk_da.cnt))
+#if 0
+	LOG( log_block, 1, ("*** pushDa(): T%d, cnt %d\n",GetTrkIndex(trk),blockTrk_da.cnt))
+#endif
 }
 
 // Recursively goes from track segment to track segment until
@@ -778,15 +782,15 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	EPINX_T epCnt, epN;
 	track_p epTrk;
 
-	LOG( log_block, 1, ("*** addSegs(): here T%d from T%d  epFrom %d\n",
-		GetTrkIndex(here),GetTrkIndex(from),epFrom))
+//	LOG( log_block, 1, ("*** addSegs(): here T%d from T%d  epFrom %d\n",
+//		GetTrkIndex(here),GetTrkIndex(from),epFrom))
 	if ( ! IsTrack( here ) ) return;
 
 	epCnt = GetTrkEndPtCnt(here);
 	if ( here == from ) {
 		blockLen = GetTrkLength( here, 0, 1 );
 		if ( epCnt == 2 ) {
-			LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+//			LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
 			pushDa( here );
 			addSegs( ((from)->endPt)[0].track, here, epFrom );
 			addSegs( ((from)->endPt)[1].track, here, epFrom );
@@ -798,7 +802,7 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	// Check for the end of the scan. For a block its a turnout, for dynamic
 	// its a turnout with toBlock set.
 	if ( epCnt > 2 || here->conBlock ) { // The from seg is one end of the block
-		LOG( log_block, 1, ("*** addSegs(): switch/block at T%d\n",GetTrkIndex(here)))
+//		LOG( log_block, 1, ("*** addSegs(): switch/block at T%d\n",GetTrkIndex(here)))
 		epN = from->endPt[0].track == here?0:1;
 
 		pushEp( from, epN );
@@ -811,7 +815,7 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 		blockLen += GetTrkLength( here, 0, 1 );
 
 		pushDa( here );
-		LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+//		LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
 
 		for ( epN = 0; epN < epCnt; epN++ ) {
 			epTrk = here->endPt[epN].track;
@@ -829,8 +833,8 @@ static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
 	epCnt = GetTrkEndPtCnt(trk);
 
 	if ( epCnt == 2 ) {
-		LOG( log_block, 1, ("*** getRemoteEp(): trk T%d-%d remote %d\n",
-			GetTrkIndex(trk),ep,( ep == 0 )?1:0))
+//		LOG( log_block, 1, ("*** getRemoteEp(): trk T%d-%d remote %d\n",
+//			GetTrkIndex(trk),ep,( ep == 0 )?1:0))
 		return ( ep == 0 )?1:0;
 	}
 	if ( epCnt > 2 ) {
@@ -840,8 +844,8 @@ static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
 			if ( IsPosClose( pos, end1 ) ) ep1 = epN;
 			if ( IsPosClose( pos, end2 ) ) ep2 = epN;
 		}
-		LOG( log_block, 1, ("*** getRemoteEp(): trk T%d-%d ep1 %d ep2 %d\n",
-			GetTrkIndex(trk),ep,ep1,ep2))
+//		LOG( log_block, 1, ("*** getRemoteEp(): trk T%d-%d ep1 %d ep2 %d\n",
+//			GetTrkIndex(trk),ep,ep1,ep2))
 		if ( ep != ep1 && ep == ep2 ) return ep1;
 		if ( ep != ep2 && ep == ep1 ) return ep2;
 	}
@@ -869,13 +873,13 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 		for ( epN = 0; epN < epCnt; epN++ ) {
 			if ( (epR = getRemoteEp( from, epN )) != epN ) break;
 		}
-		LOG( log_block, 1, ("*** addTurnouts(): adding track T%d  -- end1 %d end2 %d\n",
-				GetTrkIndex(here),epN,epR))
+//		LOG( log_block, 1, ("*** addTurnouts(): adding track T%d  -- end1 %d end2 %d\n",
+//				GetTrkIndex(here),epN,epR))
 		pushDa( here );
 		blockLen = 0.0;
 		if ( here->endPt[epN].toBlock  ) {
-			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
-					GetTrkIndex(here),epR))
+//			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
+//					GetTrkIndex(here),epR))
 			pushEp( here, epN );
 		}
 		if ( ! here->endPt[epN].toTrack ) {
@@ -883,15 +887,15 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 			addTurnouts(epTrk, here, epN);
 		}
 		if ( here->endPt[epR].toBlock ) {
-			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
-					GetTrkIndex(here),epR))
+//			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
+//					GetTrkIndex(here),epR))
 			pushEp( here, epR );
 		}
 		if ( ! here->endPt[epR].toTrack ) {
 			epTrk = ((trkEndPt_p)here->endPt)[epR].track;
 			addTurnouts(epTrk, here, epR);
 		}
-		LOG( log_block, 1, ("*** addTurnouts(): exiting\n"))
+//		LOG( log_block, 1, ("*** addTurnouts(): exiting\n"))
 		return;
 	}
 
@@ -900,26 +904,26 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 		epTrk = here->endPt[epN].track;
 		if ( epTrk && epTrk == from ) break;
 	}
-	LOG( log_block, 1, ("*** addTurnouts(): here T%d-%d back to T%d\n",
-				GetTrkIndex(here),epN,GetTrkIndex(from)))
+//	LOG( log_block, 1, ("*** addTurnouts(): here T%d-%d back to T%d\n",
+//				GetTrkIndex(here),epN,GetTrkIndex(from)))
 
 	epR = getRemoteEp( here, epN );
 	if ( epR == epN ) {
-		LOG( log_block, 1, ("*** addTurnouts(): endpoint open T%d-%d\n",
-			GetTrkIndex(here),epR))
+//		LOG( log_block, 1, ("*** addTurnouts(): endpoint open T%d-%d\n",
+//			GetTrkIndex(here),epR))
 		return;
 	}
 
 	if ( epCnt > 2 && here->endPt[epR].toBlock ) {
-		LOG( log_block, 1, ("*** addTurnouts(): adding endpoint and track T%d-%d\n",
-			GetTrkIndex(here),epR))
+//		LOG( log_block, 1, ("*** addTurnouts(): adding endpoint and track T%d-%d\n",
+//			GetTrkIndex(here),epR))
 		pushEp( here, epR );
 		pushDa( here );
 		return;
 	}
 	// At end of scan
 	if ( epCnt > 2 && here->endPt[epR].toTrack ) {
-		LOG( log_block, 1, ("*** addTurnouts(): end of scan"))
+//		LOG( log_block, 1, ("*** addTurnouts(): end of scan"))
 		return;
 	}
 
@@ -929,7 +933,7 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 		blockLen += GetTrkLength( here, epR, epN );
 
 	// Add the segment to the list
-	LOG( log_block, 1, ("*** addTurnouts(): adding track T%d\n",GetTrkIndex(here)))
+//	LOG( log_block, 1, ("*** addTurnouts(): adding track T%d\n",GetTrkIndex(here)))
 	pushDa( here );
 
 	epTrk = here->endPt[epR].track;
@@ -968,8 +972,8 @@ static void GetBlockSegs( track_p s_trk )
 	addSegs( trk, trk, 0 );
 
 	// make a sub-block
-	LOG( log_block, 1, ("*** GetBlockSegs(): T%d blockLen %0.1f (%0.1f)\n",
-		GetTrkIndex(trk),blockLen,2.1 * maxBlockLength))
+//	LOG( log_block, 1, ("*** GetBlockSegs(): T%d blockLen %0.1f (%0.1f)\n",
+//		GetTrkIndex(trk),blockLen,2.1 * maxBlockLength))
 	if ( blockLen > ( 2.1 * maxBlockLength ) ) {
 		endPtP = &tempEndPts(0);
 		trk = endPtP->prevTrack;
@@ -977,8 +981,8 @@ static void GetBlockSegs( track_p s_trk )
 			FindDistance( endPtP->pos, trk->endPt[1].pos) ? 0 : 1;
 		len = GetTrkLength( trk, 0, 1 );
 		DYNARR_RESET( btrackinfo_t, blockTrk_da );
-		LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f pos (%0.3f %0.3f)\n",
-			GetTrkIndex(trk),ep,len, trk->endPt[ep].pos.x, trk->endPt[ep].pos.y))
+//		LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f pos (%0.3f %0.3f)\n",
+//			GetTrkIndex(trk),ep,len, trk->endPt[ep].pos.x, trk->endPt[ep].pos.y))
 		while ( len <= maxBlockLength && blockLen - len >= maxBlockLength ) {
 			pushDa( trk );
 			lastTrk = trk;
@@ -987,8 +991,8 @@ static void GetBlockSegs( track_p s_trk )
 			trk = trk->endPt[ep].track;
 			ep = lastTrk == trk->endPt[0].track ? 1 : 0 ;
 			len += GetTrkLength( trk, 0, 1 );
-			LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f\n",
-				GetTrkIndex(trk),ep,len))
+//			LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f\n",
+//				GetTrkIndex(trk),ep,len))
 		}
 		pushDa( trk );
 		endPtP = &tempEndPts(1);
@@ -997,8 +1001,8 @@ static void GetBlockSegs( track_p s_trk )
 		endPtP->angle = trk->endPt[lastEp].angle;
 		blockLen = len;
 	}
-	LOG( log_block, 1, ("*** GetBlockSegs(): T%d len %6.1f segs %d\n",
-			GetTrkIndex(s_trk), blockLen, blockTrk_da.cnt))
+//	LOG( log_block, 1, ("*** GetBlockSegs(): T%d len %6.1f segs %d\n",
+//			GetTrkIndex(s_trk), blockLen, blockTrk_da.cnt))
 }
 
 static void GetDynamicSegs( track_p trk )
@@ -1041,17 +1045,21 @@ void initBlockData( track_p b_trk )
 		b_trk->endPt[ep].pos = endPtP->pos;
 		b_trk->endPt[ep].angle = endPtP->angle;
 		b_trk->endPt[ep].option = 0;
+#if 0
 		LOG( log_block, 1, ( "*** initBlockData(): ep[%d] pos %0.1f %0.1f"
 			" angle %0.2f track T%d options 0x%08lX\n",
 			ep, (b_trk)->endPt[ep].pos.x, (b_trk)->endPt[ep].pos.y,
 			(b_trk)->endPt[ep].angle,
 			(b_trk)->endPt[ep].prevTrack?GetTrkIndex((b_trk)->endPt[ep].prevTrack):0,
 			(b_trk)->endPt[ep].option))
+#endif
 	}
 
 	xx = GetblockData( b_trk );
-	LOG(log_block, 1, ("*** initBlockData(): T%d(%p), %s xx = %p\n",
+#if 0
+	LOG(log_block, 1, ("*** initBlockData(): B%d(%p), %s xx = %p\n",
 			GetTrkIndex(b_trk), blockName, b_trk, xx))
+#endif
 
 	xx->name = MyStrdup( blockName );
 	blockName[0] = 0;
@@ -1078,16 +1086,19 @@ void initBlockData( track_p b_trk )
 		if ( tracklist(iTrack).t ) {
 			tracklist(iTrack).t->conBlock = b_trk;
 		}
+#if 0
 		LOG( log_block, 2, ("*** initBlockData(): copying track T%d\n",
 				tracklist(iTrack).i))
+#endif
 	}
 }
 
+// The type is T_BLOCK and the name is ""
 EXPORT BOOL_T IsDynamicBlock( track_p b_trk )
 {
 	blockData_p xx;
 
-	if ( GetTrkType(b_trk) != T_BLOCK ) return TRUE;
+	if ( GetTrkType(b_trk) != T_BLOCK ) return FALSE;
 
 	xx = GetblockData( b_trk );
 	if ( ! xx->name || xx->name[0] != 0 ) return FALSE;
@@ -1096,6 +1107,8 @@ EXPORT BOOL_T IsDynamicBlock( track_p b_trk )
 }
 
 // Get the block that trk, pos reference
+// blk->endPt[?].{prevTrack, pos} is the track segment and endPt of the block
+// 
 static track_p getNextBlock( track_p trk, coOrd pos )
 {
 	EPINX_T ep;
@@ -1109,19 +1122,25 @@ static track_p getNextBlock( track_p trk, coOrd pos )
 
 // Given a block and a dynamic block, get the other block
 // (A dynamic block connects two blocks.)
-EXPORT track_p GetRemoteBlock( track_p b_trk, track_p db_trk )
+// end of car is on blk
+// used to be in the dynamic block dynBlk
+EXPORT track_p GetRemoteBlock( track_p blk, track_p dynBlk )
 {
-	track_p  trk, trk0, trk1;
-	if ( ! b_trk || ! db_trk ) return NULL;
+	track_p  blk0, blk1;
+	if ( ! blk || ! dynBlk ) return NULL;
 
-	trk = IsDynamicBlock( db_trk ) ? db_trk : b_trk;
-	trk0 = getNextBlock( trk->endPt[0].prevTrack, trk->endPt[0].pos );
-	trk1 = getNextBlock( trk->endPt[1].prevTrack, trk->endPt[1].pos );
-	LOG(log_block, 1, ("*** GetRemoteBlock(): B%d, DB%d B%d\n",
-			GetTrkIndex(trk0),
-			GetTrkIndex(trk),
-			GetTrkIndex(trk1)))
-	return trk0  == trk ? trk1 : trk0;
+	if ( ! IsDynamicBlock( dynBlk ) ) return NULL;
+
+	//PHIL trk = IsDynamicBlock( dynBlk ) ? blk : dynBlk;
+	blk0 = getNextBlock( dynBlk->endPt[0].prevTrack, dynBlk->endPt[0].pos );
+	blk1 = getNextBlock( dynBlk->endPt[1].prevTrack, dynBlk->endPt[1].pos );
+#if 0
+	LOG(log_block, 1, ("*** GetRemoteBlock(): B%d, DB%d B%d - B%d\n",
+			GetTrkIndex(blk0),
+			GetTrkIndex(blk),
+			GetTrkIndex(blk1),blk0  == blk ? blk1 : blk0))
+#endif
+	return blk0  == blk ? blk1 : blk0;
 }
 
 EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
@@ -1152,15 +1171,21 @@ EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
 	}
         tracklist(iTrack).t = t_trk;
 	if ( first < 0 ) first = iTrack;
+#if 0
         LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): T%d: %p\n",
 		GetTrkIndex(b_trk), tracklist(iTrack).i,t_trk))
+#endif
     }
+#if 0
     LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): first T%d: %p\n",
 		GetTrkIndex(b_trk), tracklist(first).i, tracklist(first).t))
+#endif
     if ( first < 0 ) {
 	// No segs in block
+#if 0
         LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): No segs in block\n",
 			GetTrkIndex(b_trk)))
+#endif
 	xx->numTracks = 0;
 	blockDebug( b_trk );
 
@@ -1182,16 +1207,20 @@ EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
 	// when this comes back, blockTrk_da has the segment list
 
 	if ( blockTrk_da.cnt == 0 ) {
+#if 0
 		LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): -No segs\n",
 				GetTrkIndex(b_trk)))
+#endif
 		DeleteTrack( b_trk, FALSE );
 
 		return FALSE;
 	}
 	xx->blkLength = 0.0;
 	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
+#if 0
 		LOG( log_block, 1, ("*** ResolveBlockTrack(T%d): copying track T%d\n",
 			GetTrkIndex(b_trk), blockTrk(iTrack).i))
+#endif
 		tracklist(iTrack).i = blockTrk(iTrack).i;
 		tracklist(iTrack).t = blockTrk(iTrack).t;
 		blockTrk(iTrack).t->conBlock = b_trk;
@@ -1298,11 +1327,11 @@ EXPORT void DeleteDynamicBlock( track_p trk )
 	track_p blk = trk->conBlock;
 	blockData_p xx;
 
-	LOG( log_block, 1, ("*** DeleteDynamicBlock T%d -- enter\n", GetTrkIndex(trk)))
-
 	if ( ! blk || GetTrkType(blk) != T_BLOCK ) return;
 	xx = GetblockData(blk);
 	if ( ! xx->name || xx->name[0] != 0 ) return;
+
+	LOG( log_block, 1, ("*** DeleteDynamicBlock T%d B%d -- enter\n", GetTrkIndex(trk), GetTrkIndex(blk)))
 
 //	DeleteTrack (blk, FALSE);
 	CheckDeleteBlock( blk );
@@ -1352,8 +1381,10 @@ EXPORT void CreateDynamicBlocks( void )
     }
 }
 
-/* BLOCK OCCUPANCY */
 
+/*
+ * BLOCK OCCUPANCY
+ */
 
 // Clear all segment and block occupied indicators
 // When the indicator is not zero the segment is occupied.
@@ -1376,36 +1407,49 @@ EXPORT  BOOL_T IsOccupied ( track_p trk )
 
 
 // Dynamic block, while occupied, is "attached" to one of the connecting blocks.
+// trk is the track seg that the end of the car is on
+// prevTrk is the track seg that the end was on last
 static void adjustDynamicOccupied ( track_p trk, track_p prevTrk )
 {
 	track_p thisBlock = trk->conBlock;
 	track_p prevBlock = prevTrk->conBlock;
-	track_p prevPrevBlock;
+	track_p prevPrevBlock = NULL;
 
+#if 0
 	LOG(log_block, 1, ("adjustDynamicOccupied : trk T%d B%d  prevTrk T%d prevBlk B%d\n",
 		GetTrkIndex(trk),thisBlock?GetTrkIndex(thisBlock):0,
 		GetTrkIndex(prevTrk),prevBlock?GetTrkIndex(prevBlock):0))
+#endif
 	if ( ! thisBlock || ! prevBlock ) return;
 	if ( thisBlock == prevBlock ) return;
 
-	LOG(log_block, 1, ("adjustDynamicOccupied : isDynamic trk B%d %d occ %d prevTrk B%d %d occ %d\n",
-		GetTrkIndex(thisBlock),IsDynamicBlock(thisBlock),GetTrkIndex(prevBlock),
-		thisBlock->occupied,IsDynamicBlock(prevBlock),prevBlock->occupied))
+#if 0
+	LOG(log_block, 1, ("adjustDynamicOccupied : isDyn trk B%d dyn %d occ %d prevTrk B%d dyn %d occ %d\n",
+		GetTrkIndex(thisBlock),IsDynamicBlock(thisBlock),thisBlock->occupied,
+		GetTrkIndex(prevBlock),IsDynamicBlock(prevBlock),prevBlock->occupied))
+#endif
 
 	// Going into a dynamic block, attach it to the prevBlock
 	if ( IsDynamicBlock( thisBlock ) && thisBlock->occupied == 0 )
 			prevBlock->occupied++;
 
-	// Going from a dynamic block, move the attach to thisBlock
+	// Going from a dynamic block (prevBlock), move the attach to thisBlock
 	if ( IsDynamicBlock( prevBlock ) && thisBlock->occupied == 0 ) {
 		thisBlock->occupied++;
 		prevPrevBlock = GetRemoteBlock( thisBlock, prevBlock );
-		if ( prevPrevBlock ) prevPrevBlock->occupied--;
+		if ( prevPrevBlock && prevPrevBlock->occupied > 0 )
+			prevPrevBlock->occupied--;
 	}
 
 	// Dynamic block becoming unoccupied
 	if ( IsDynamicBlock( prevBlock ) && prevBlock->occupied == 1 )
 		thisBlock->occupied--;
+#if 0
+	LOG(log_block, 1, ("adjustDynamicOccupied :Exit trk T%d B%d occ %d prevTrk T%d prevBlk B%d occ %d prevPrev B%d occ %d\n",
+		GetTrkIndex(trk),thisBlock?GetTrkIndex(thisBlock):0,thisBlock->occupied,
+		GetTrkIndex(prevTrk),prevBlock?GetTrkIndex(prevBlock):0,prevBlock?prevBlock->occupied:-99,
+		prevPrevBlock?GetTrkIndex(prevPrevBlock):0,prevPrevBlock?prevPrevBlock->occupied:-99))
+#endif
 }
 
 // Add or subtract from the occupied counter and when a
@@ -1415,6 +1459,11 @@ static void adjustOccupied ( track_p trk, int adj )
 	trk->occupied += adj;
 	if (trk->conBlock)
 		trk->conBlock->occupied += adj;
+#if 0
+	LOG(log_block, 1, ("adjustOccupied %d : trk T%d occ %d  B%d occ %d\n",
+		adj, GetTrkIndex(trk), trk->occupied,
+		trk->conBlock?GetTrkIndex(trk->conBlock):0,trk->conBlock?trk->conBlock->occupied:0))
+#endif
 }
 
 // The segment occupied indicator maintains a count of the number
@@ -1426,10 +1475,11 @@ static void adjustOccupied ( track_p trk, int adj )
 // its counter.
 EXPORT void SetOccupied( void )
 {
-    track_p car, trk;
+    track_p car, trk, blk;
     track_p temp0, temp1;
     coOrd ep0, ep1;
 
+    LOG(log_block, 1, ("SetOccupied: -- enter\n"))
     for (car=NULL; TrackIterate(&car);) {
         if ( ! IsTrainCarOnTrk( car ) ) continue;
 
@@ -1446,10 +1496,30 @@ EXPORT void SetOccupied( void )
         } else
             car->endPt[1].prevTrack = NULL;
 #if 0
-        LOG(log_block, 1, ("setOccupied: end0 T%d (%d) end1 T%d (%d)\n",
+        LOG(log_block, 1, ("SetOccupied: end0 T%d (%d) end1 T%d (%d)\n",
             (temp0)?temp0->index:-5, (temp0)?temp0->occupied:-999,
             (temp1)?temp1->index:-5, (temp1)?temp1->occupied:-999));
 #endif
+    }
+//  LOG(log_block, 1, ("SetOccupied: -- dynamic blocks\n"))
+    for (blk=NULL; TrackIterate(&blk);) {
+        blockData_p xx;
+        if ( GetTrkType(blk) != T_BLOCK ) continue;
+        xx = GetblockData( blk );
+//      LOG(log_block, 1, ("SetOccupied: B%d -- occ %d -- %s\n",GetTrkIndex(blk),blk->occupied,xx->name))
+        if ( ! xx->name || xx->name[0] != 0 ) continue;
+
+        if ( ! IsDynamicBlock( blk ) || blk->occupied == 0 ) continue;
+//      LOG(log_block, 1, ("SetOccupied: B%d occupied %d\n", GetTrkIndex(blk), blk->occupied))
+        trk = getNextBlock( blk->endPt[0].prevTrack, blk->endPt[0].pos );
+//      LOG(log_block, 1, ("SetOccupied: B%d occupied %d\n", GetTrkIndex(trk), trk->occupied))
+        if ( trk->occupied ) {
+            trk->occupied++;
+        } else {
+            trk = getNextBlock( blk->endPt[1].prevTrack, blk->endPt[1].pos );
+//          LOG(log_block, 1, ("SetOccupied: B%d occupied %d\n", GetTrkIndex(trk), trk->occupied))
+            trk->occupied++;
+        }
     }
     MainRedraw();
 }
@@ -1494,7 +1564,7 @@ EXPORT void UpdateOccupied( void )
             changed = TRUE;
         }
 #if 0
-        LOG(log_trainMove, 1, ("R Move: end0 PT%d (%d) T%d (%d) end1 PT%d (%d) T%d (%d)\n",
+        LOG(log_block, 1, ("R Move: end0 PT%d (%d) T%d (%d) end1 PT%d (%d) T%d (%d)\n",
             (car->endPt[0].prevTrack)?car->endPt[0].prevTrack->index:-5,
             (car->endPt[0].prevTrack)?car->endPt[0].prevTrack->occupied:-999,
             (temp0)?temp1->index:-5,
@@ -1570,10 +1640,10 @@ static BOOL_T TrackInBlock( track_p trk, track_p blk )
 {
 	wIndex_t iTrack;
 
-	LOG( log_block, 1, ("*** TrackInBlock() trk %d\n", trk?trk->index:0))
+//	LOG( log_block, 1, ("*** TrackInBlock() trk %d\n", trk?trk->index:0))
 	blockData_p xx = GetblockData(blk);
 	for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
-		LOG( log_block, 1, ("*** TrackInBlock() trk %d\n", (&(xx->trackList))[iTrack].i))
+//		LOG( log_block, 1, ("*** TrackInBlock() trk %d\n", (&(xx->trackList))[iTrack].i))
 		if ( trk->index == (&(xx->trackList))[iTrack].i ) return TRUE;
 	}
 
@@ -1625,8 +1695,8 @@ static DIST_T getBlockLen( void )
 	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
 		len = GetTrkLength( blockTrk(iTrack).t, 0, 1 );
 		totLen += len;
-		LOG( log_block, 1, ("*** getBlockLen(): track T%d len %0.2f\n",
-				blockTrk(iTrack).i, len))
+//		LOG( log_block, 1, ("*** getBlockLen(): track T%d len %0.2f\n",
+//				blockTrk(iTrack).i, len))
 	}
 
 	return totLen;
@@ -1771,7 +1841,7 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 
 	trk = OnTrack(&pos, FALSE, FALSE);
 
-	//LOG( log_block, 1, ("*** CmdBlockAction(%08x,{%f,%f})\n",action,pos.x,pos.y))
+//	LOG( log_block, 1, ("*** CmdBlockAction(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
                 LOG( log_block, 1,("*** CmdBlockCreate(): C_START\n"))
@@ -1824,7 +1894,7 @@ static BOOL_T CheckDeleteBlock( track_p t )
     blockData_p xx;
     wIndex_t iTrack;
 
-    LOG( log_block, 1,("*** CheckDeleteBlock( T%d ) %p\n", GetTrkIndex(t), t))
+    LOG( log_block, 1,("*** CheckDeleteBlock( B%d ) %p\n", GetTrkIndex(t), t))
     if ( IsTrack(t) ) {
         blk = FindBlock(t);
         if ( blk == NULL ) {
@@ -1844,9 +1914,11 @@ static BOOL_T CheckDeleteBlock( track_p t )
     // Remove the conBlock links
     for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
         if ( (&(xx->trackList))[iTrack].t ) {
-            LOG( log_block, 1,("*** CheckDeleteBlock( T%d ) -- T%d con %p\n",
-                GetTrkIndex(t), (&(xx->trackList))[iTrack].i,
+#if 0
+            LOG( log_block, 1,("*** CheckDeleteBlock( B%d ) -- T%d con %p\n",
+                GetTrkIndex(blk), (&(xx->trackList))[iTrack].i,
                 (&(xx->trackList))[iTrack].t->conBlock))
+#endif
             (&(xx->trackList))[iTrack].t->conBlock = NULL;
         }
     }
