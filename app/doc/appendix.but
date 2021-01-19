@@ -247,6 +247,80 @@ or virtual track circuit in a Tower-LCC or similar device.
 \rule
 
 
+\H{controlElementBlocks} Block occupancy and the Model RR System's Dispatcher
+
+The Model RR System's Dispatcher relies on knowing which sections of track
+are occupied. The layout is divided into blocks and each block reports
+when it becomes occupied and when it becomes unocupied (as described above).
+Creating the needed blocks can be time consuming and error prone.  Hovever,
+much of the work of creating of blocks can be automated by software by applying a
+collection of rules.
+
+Creating blocks can be largely automated using these rules:
+- Blocks connect turnouts.
+- The desired length of a block is long enough to hold the maximum length
+  train.
+- There may be 1 or more turnouts, and maybe short track segments, that form
+  a logical turnout that connects two blocks.
+- Turnouts can be set to either allow trains to pass from block to block or to
+  allow trains to enter or leave from a yard or industry.
+- Very long blocks that can hold multiple trains can be divided into sub-blocks.
+- Turnouts don't have occupancy sensors or reporting. They are locically part
+  of the block the train is coming from or going to.
+- Each block has a unique name.
+
+The layout can be scanned for sections of track that connect turnouts. If the
+section is long enough a block can be automatically created. When the track is
+very long, more than one block can be created. For this to work we need to know
+the minimum block length that will result in a block being created and we need
+to know the maximum train length for dividing very long blocks into multiple
+blocks.
+
+Options->layout->"Min Block Length" and "Max Block Length" provide the needed
+lengths. These options are saved in the .xtc file. As a practical matter the
+Min Block Length, being the minimum length block, needs to be at least the
+length of an engine and longer than any connecting track that is part of a
+collection of turnouts. Also, the Max Block Length needs to be large enough
+to hold the longest train.  When track or turnouts are changed and when the
+min and/or max block lengths are changed the blocks must be deleted and
+recreated using the new layout and parameters.
+
+When trains move through the layout the dispatcher and signal controllers are
+notified when the train enters or leaves a block. Turnouts are not really
+part of blocks since they are very short compared to the block and they don't
+have occupancy sensors or report occupancy. The notifications, however, need
+to consider them. When a train enters a trunout the turnout is occupied and
+considered to be part of the block that the train is in. When the train engine
+passes through the turnout and enters the next block, the new block becomes
+occupied and the turnout is changed to be part of the new block. When the end
+of the train leaves the block and enters the turnout, the block is unoccupied,
+unless the engine has not yet enterd the block following the turnout. In this
+case the previous block remains occupied. It is important that a tain can't
+disappear into a turnout and confuse the dispatcher into thinking the track
+is clear.
+
+When a turnout is occupied, the point position is locked and can't be changed.
+When multiple turnouts connect blocks, as soon as the first turnout is entered,
+all of them are considered to be occupied and locked. They stay locked until
+the last car of the train leaves the turnouts.
+
+New block elements can be added by the Add->"Control element" pull down.
+Select a track segment and a dialog appears that permits changing the name and
+script. The set of track segments is automatically generated and can't be
+edited.
+
+The Manage->"Manage Layout Control Elements" dialog permits editing and
+deleting blocks. Select the desired block in the list and press "edit" or
+"delete".  Editing is limited to changing the block name and script.
+
+The Manage->"Manage Layout Control Elements" also has a "Add Missing" button to
+scan the layout and add all needed blocks. The "Delete All" button deletes all
+blocks.  This is usually used after changing the layout and when changing the
+"Min Block Length" or "Max Block Length" parameters.
+
+\rule
+
+
 \A{} Messages and Explanations
 
 \H{messageType} \i{Message Types}
