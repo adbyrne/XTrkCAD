@@ -2328,7 +2328,15 @@ static void QuickMove( void* pos) {
 static track_p SelectTrackByIndex(TRKINX_T ti ) {
 	track_p trk = FindTrack(ti);
 	if (trk) {
-		SelectOneTrack(trk,TRUE);
+		if (!GetLayerFrozen( GetTrkLayer( trk ) ) ) {
+			if (GetLayerModule(GetTrkLayer(trk))) {
+				DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
+			} else
+				SelectOneTrack(trk,TRUE);
+		} else {
+			InfoMessage(_("Track Frozen"));
+			trk = NULL;
+		}
 	}
 	return trk;
 }
@@ -2351,7 +2359,7 @@ static void SelectByIndex( void* string) {
 		char msg[STR_SIZE];
 		DescribeTrack( trk, msg, sizeof msg );
 		InfoMessage( msg );
-	} else {
+	} else if (!single) {
 		InfoMessage("");
 	}
 }
