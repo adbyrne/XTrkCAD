@@ -31,6 +31,19 @@
 #include "paths.h"
 #include "track.h"
 
+#ifdef WIN32
+#ifdef _WIN64
+#define BITMAPDIM 30000
+#define BITMAPSIZE 10240000000
+#else
+#define BITMAPDIM 16000
+#define BITMAPSIZE 1000000
+#endif
+#else // Not WIN
+#define BITMAPDIM 32000
+#define BITMAPSIZE 1024000000
+#endif // WIN32
+
 
 static long outputBitMapTogglesV = 3;
 static double outputBitMapDensity = 10;
@@ -123,6 +136,7 @@ static int SaveBitmapFile(
 	InfoMessage( _("Writing BitMap to file") );
 	if ( wBitMapWriteFile( bitmap_d.d, fileName[0] ) == FALSE ) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
+		wBitMapDelete( bitmap_d.d );
 		return FALSE;
 	}
 	InfoMessage( "" );
@@ -185,13 +199,15 @@ static void OutputBitMapComputeSize( void )
 	bitmap_h = (wWinPix_t)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
 	sprintf( message, _("Bitmap : %ld by %ld pixels"), bitmap_w, bitmap_h );
 	ParamLoadMessage( &outputBitMapPG, I_MSG1, message );
-	size = bitmap_w * bitmap_h;
+	size = (FLOAT_T)bitmap_w * bitmap_h;
 	if ( size < 1e4 )
 		sprintf( message, _("Approximate file size : %0.0f"), size );
 	else if ( size < 1e6 )
 		sprintf( message, _("Approximate file size : %0.1fKb"), (size+50.0)/1e3 );
-	else
+	else if ( size < 1e9 )
 		sprintf( message, _("Approximate file size : %0.1fMb"), (size+5e4)/1e6 );
+	else 
+		sprintf(message, _("Approximate file size : %0.1fGb"), (size + 5e7) / 1e9);
 	ParamLoadMessage( &outputBitMapPG, I_MSG2, message );
 }
 
@@ -199,12 +215,12 @@ static void OutputBitMapComputeSize( void )
 static void OutputBitMapOk( void * junk )
 {
 	FLOAT_T size;
-	if (bitmap_w>32000 || bitmap_h>32000) {
+	if (bitmap_w > BITMAPDIM || bitmap_h > BITMAPDIM) {
 		NoticeMessage( MSG_BITMAP_TOO_LARGE, _("Ok"), NULL );
 		return;
 	}
-	size = bitmap_w * bitmap_h;
-	if (size >= 1000000) {
+	size = (FLOAT_T)bitmap_w * bitmap_h;
+	if (size > BITMAPSIZE) {
 		if (NoticeMessage(MSG_BITMAP_SIZE_WARNING, _("Yes"), _("Cancel") )==0)
 			return;
 	}
