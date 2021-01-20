@@ -33,11 +33,11 @@
 
 #ifdef WIN32
 #ifdef _WIN64
-#define BITMAPDIM 30000
-#define BITMAPSIZE 10240000000
+#define BITMAPDIM 50000
+#define BITMAPSIZE 500e6
 #else
-#define BITMAPDIM 16000
-#define BITMAPSIZE 1000000
+#define BITMAPDIM 32000
+#define BITMAPSIZE 150e6
 #endif
 #else // Not WIN
 #define BITMAPDIM 32000
