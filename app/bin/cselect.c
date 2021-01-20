@@ -1896,7 +1896,10 @@ static STATUS_T CmdMove(
 				PanHere((void*)0);
 			}
 			if ((action>>8) == 'e') {
-				DoZoomExtents(0);
+				DoZoomExtents((void*)0);
+			}
+			if ((action>>8 == 's')) {
+				DoZoomExtents((void*)1);
 			}
 			if ((action>>8) == '0' || (action>>8 == 'o')) {
 				PanMenuEnter('o');
@@ -2253,7 +2256,10 @@ static STATUS_T CmdRotate(
 				PanHere((void*)0);
 			}
 			if ((action>>8) == 'e') {
-				DoZoomExtents(0);
+				DoZoomExtents((void*)0);
+			}
+			if ((action>>8) == 's') {
+				DoZoomExtents((void*)1);
 			}
 			if ((action>>8) == '0' || (action>>8 == 'o')) {
 				PanMenuEnter('o');
@@ -2317,6 +2323,37 @@ static void QuickMove( void* pos) {
 	UndoStart( _("Move Tracks"), "Move Tracks" );
 	MoveTracks( TRUE, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
 	wDrawDelayUpdate( mainD.d, FALSE );
+}
+
+static track_p SelectTrackByIndex(TRKINX_T ti ) {
+	track_p trk = FindTrack(ti);
+	if (trk) {
+		SelectOneTrack(trk,TRUE);
+	}
+	return trk;
+}
+
+static void SelectByIndex( void* string) {
+	SetAllTrackSelect(FALSE);
+	char * cp = (char *)string;
+	cp = strtok(cp,",");
+	BOOL_T single = TRUE;
+	track_p trk = NULL;
+	while (cp) {
+		long ti = strtol(cp,&cp,0);
+		if (ti>0)
+			trk = SelectTrackByIndex(ti);
+		cp = strtok(NULL,",");
+		if (cp) single = FALSE;
+	}
+	DoZoomExtents((void*)1);
+	if (single && trk) {
+		char msg[STR_SIZE];
+		DescribeTrack( trk, msg, sizeof msg );
+		InfoMessage( msg );
+	} else {
+		InfoMessage("");
+	}
 }
 
 static void QuickRotate( void* pangle )
@@ -3521,6 +3558,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,(wMenuCallBack_p) SelectCurrentLayer, (void *) 0);
+	AddIndexMenu( selectPopup1M, SelectByIndex);
 	wMenuSeparatorCreate( selectPopup1M );
 
 	selectPopup2M = MenuRegister( "Track Selected Menu " );
@@ -3529,8 +3567,10 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	wMenuPushCreate( selectPopup2M, "", _("Zoom to selected - 's'"), 0, (wMenuCallBack_p)DoZoomExtents, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 	wMenuSeparatorCreate( selectPopup2M );
+	AddIndexMenu( selectPopup2M, SelectByIndex);
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, (void *) 0);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0,(wMenuCallBack_p) CallPushDescribe, (void*)0);

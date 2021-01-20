@@ -1967,10 +1967,13 @@ static void ShowAddElevations(void) {
 /*--------------------------------------------------------------------*/
 
 static wWin_p rotateW;
+static wWin_p indexW;
 static wWin_p moveW;
 static double rotateValue;
+static char trackIndex[STR_LONG_SIZE];
 static coOrd moveValue;
 static rotateDialogCallBack_t rotateDialogCallBack;
+static indexDialogCallBack_t indexDialogCallBack;
 static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void *);
@@ -1980,6 +1983,12 @@ static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE
 		&rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
+
+static void IndexEnterOk(void *);
+static paramData_t indexPLs[] = { { PD_STRING, &trackIndex, "selectIndex",
+		PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)100, N_("Indexes:"), 0, 0, sizeof trackIndex } };
+static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
+		/ sizeof indexPLs[0] };
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static void MoveEnterOk(void *);
@@ -1998,6 +2007,16 @@ EXPORT void StartRotateDialog(rotateDialogCallBack_t func) {
 	wShow(rotateW);
 }
 
+EXPORT void StartIndexDialog(indexDialogCallBack_t func) {
+	if (indexW == NULL)
+		indexW = ParamCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
+				_("Ok"), IndexEnterOk, wHide, FALSE, NULL, 0, NULL);
+	ParamLoadControls(&indexPG);
+	indexDialogCallBack = func;
+	trackIndex[0] = '\0';
+	wShow(indexW);
+}
+
 EXPORT void StartMoveDialog(moveDialogCallBack_t func) {
 	if (moveW == NULL)
 		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
@@ -2012,6 +2031,12 @@ static void MoveEnterOk(void * junk) {
 	ParamLoadData(&movePG);
 	moveDialogCallBack((void*) &moveValue);
 	wHide(moveW);
+}
+
+static void IndexEnterOk(void * junk) {
+	ParamLoadData(&indexPG);
+	indexDialogCallBack((void*) trackIndex);
+	wHide(indexW);
 }
 
 static void RotateEnterOk(void * junk) {
@@ -2031,9 +2056,18 @@ static void MoveDialogInit(void) {
 	ParamRegister(&movePG);
 }
 
+static void IndexDialogInit(void) {
+	ParamRegister(&indexPG);
+}
+
 EXPORT void AddMoveMenu(wMenu_p m, moveDialogCallBack_t func) {
 	wMenuPushCreate(m, "", _("Enter Move ..."), 0,
 			(wMenuCallBack_p) StartMoveDialog, (void*) func);
+}
+
+EXPORT void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func) {
+	wMenuPushCreate(m, "", _("Enter Track Index ..."), 0,
+			(wMenuCallBack_p) StartIndexDialog, (void*) func);
 }
 
 //All values multipled by 100 to support decimal points from PD_FLOAT
@@ -3016,6 +3050,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	RotateDialogInit();
 	MoveDialogInit();
+	IndexDialogInit();
 
 	wSetSplashInfo(_("Initializing commands"));
 	LOG1(log_init, ( "paramInit\n" ))

@@ -2170,17 +2170,53 @@ EXPORT void DoZoomUp( void * mode )
 	}
 }
 
+/*
+ * Mode - 0 = Extents are Map size
+ * Mode - 1 = Extents are Selected size
+ */
 EXPORT void DoZoomExtents( void * mode) {
 
 	DIST_T scale_x, scale_y;
-	scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
-	scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+	if ( 1 == (intptr_t)mode) {
+		if ( selectedTrackCount == 0 )
+				return;
+			track_p trk = NULL;
+			coOrd bot, top;
+			BOOL_T first = TRUE;
+			while ( TrackIterate( &trk ) ) {
+			    if(GetTrkSelected(trk)) {
+			    	coOrd hi, lo;
+			    	GetBoundingBox(trk,&hi,&lo);
+			    	if (first) {
+			    		first = FALSE;
+			    		bot = lo;
+			    		top = hi;
+			    	} else {
+			    		if (lo.x < bot.x) bot.x = lo.x;
+			    		if (lo.y < bot.y) bot.y = lo.y;
+			    		if (hi.x > top.x) top.x = hi.x;
+			    		if (hi.y > top.y) top.y = hi.y;
+			    	}
+			    }
+			}
+		panCenter.x = (top.x/2)+(bot.x)/2;
+		panCenter.y = (top.y/2)+(bot.y)/2;
+		PanHere((void *)1);
+		scale_x = (top.x-bot.x)*1.5/(mainD.size.x/mainD.scale);
+		scale_y = (top.y-bot.y)*1.5/(mainD.size.y/mainD.scale);
+	} else {
+		scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
+		scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+	}
+
+
 	if (scale_x<scale_y)
 		scale_x = scale_y;
 	scale_x = ceil(scale_x);
 	if (scale_x < 1) scale_x = 1;
 	if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
-	mainD.orig = zero;
+	if (1 != (intptr_t)1)
+		mainD.orig = zero;
 	DoNewScale(scale_x);
 	MainLayout(TRUE,TRUE);
 
@@ -2268,18 +2304,18 @@ EXPORT void CoOrd2Pix(
 *  - 3: Take position from menuPos
 */
 EXPORT void PanHere(void * mode) {
-	if ( 3 == (long)mode) {
+	if ( 3 == (intptr_t)mode) {
 		panCenter = menuPos;
 		LOG( log_pan, 2, ( "MCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 	}
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
 	wBool_t bNoBorder = (constrainMain != 0);
-	if ( 1 != (long)mode )
+	if ( 1 != (intptr_t)mode )
 		if ( (MyGetKeyState()&WKEY_CTRL)!= 0 )
 			bNoBorder = !bNoBorder;
 	wBool_t bLiveMap = TRUE;
-	if ( 2 == (long)mode )
+	if ( 2 == (intptr_t)mode )
 		bLiveMap = liveMap;
 
 	MainLayout( bLiveMap, bNoBorder ); // PanHere
@@ -3080,7 +3116,9 @@ static STATUS_T CmdPan(
 		panmode = NONE;
 
 		if ((action>>8) == 'e') {     //"e"
-			DoZoomExtents(0);
+			DoZoomExtents((void*)0);
+		} else if((action>>8) == 's') {
+			DoZoomExtents((void*)1);
 		} else if (((action>>8) == '0') || ((action>>8) == 'o')) {     //"0" or "o"
 			mainD.orig = zero;
 			panCenter.x = mainD.size.x/2.0;
