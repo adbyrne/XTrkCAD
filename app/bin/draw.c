@@ -729,8 +729,11 @@ EXPORT void DrawBoxedString(
 	d->options &= ~DC_DASH;
 	switch (style) {
 	case BOX_ARROW:
+		// Reset size to actual size of the box
+		size.x = p[2].x-p[0].x;
+		size.y = p[0].y-p[2].y;
 		Translate( &p1, pos, a, size.x+size.y );
-		ClipLine( &pos, &p1, p[0], 0.0, size );
+		ClipLine( &pos, &p1, p[3], 0.0, size );
 		Translate( &p2, p1, a, size.y*arrowScale );
 		DrawLine( d, p1, p2, 0, color );
 		Translate( &p1, p2, a+150, size.y*0.7*arrowScale );
