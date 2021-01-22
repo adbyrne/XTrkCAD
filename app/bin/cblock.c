@@ -1066,12 +1066,8 @@ void initBlockData( track_p b_trk )
 #endif
 	}
 
+       	sprintf( blockName,"B%03d", GetTrkIndex( b_trk ) );
 	xx = GetblockData( b_trk );
-#if 0
-	LOG(log_block, 1, ("*** initBlockData(): B%d(%p), %s xx = %p\n",
-			GetTrkIndex(b_trk), blockName, b_trk, xx))
-#endif
-
 	xx->name = MyStrdup( blockName );
 	blockName[0] = 0;
 	xx->script = MyStrdup( blockScript );
@@ -1144,7 +1140,6 @@ EXPORT track_p GetRemoteBlock( track_p blk, track_p dynBlk )
 
 	if ( ! IsDynamicBlock( dynBlk ) ) return NULL;
 
-	//PHIL trk = IsDynamicBlock( dynBlk ) ? blk : dynBlk;
 	blk0 = getNextBlock( dynBlk->endPt[0].prevTrack, dynBlk->endPt[0].pos );
 	blk1 = getNextBlock( dynBlk->endPt[1].prevTrack, dynBlk->endPt[1].pos );
 #if 0
@@ -1311,7 +1306,6 @@ EXPORT void AddMissingBlockTrack( void )
 	}
 
 	blockScript[0] = 0;
-	sprintf( blockName,"B%03d",blockTrk(0).i );
 	SetTrkBits( blockTrk(0).t, TB_SELECTED );
 	makeBlock();
 	ClrTrkBits( blockTrk(0).t, TB_SELECTED );
@@ -1579,7 +1573,6 @@ static void verifyOccupancy ( void )
         if ( b_trk->occupied < segOcc ) {
             LOG(log_block, 1, ("verifyOccupancy: B%d \"%s\" occ %d, segs occ %d\n",
                     GetTrkIndex(b_trk), xx->name, b_trk->occupied, segOcc))
-            LOG( log_block, 1, ("*** verifyOccupancy:(): PHIL numTracks %d\n",xx->numTracks))
             for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
                 LOG(log_block, 1, ("verifyOccupancy: T%d occ %d\n",
                         tracklist(iTrack).i, tracklist(iTrack).t->occupied))
