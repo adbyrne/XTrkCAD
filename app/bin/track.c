@@ -3148,9 +3148,12 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	default:
 		return;
 	}
+	coOrd startLine = pp;
 	pp.x += elev->doff.x;
 	pp.y += elev->doff.y;
+	DrawLine( d, startLine, pp, 0, color );
 	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize, color, a );
+
 }
 
 /**
