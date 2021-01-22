@@ -2954,6 +2954,14 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         closeBalloonHelp();
 
         if (b && b->type == B_DRAW) {
+            // Change Num keypad to a special code to emulate cursor keys
+            if (wParam == VK_UP || 
+                wParam == VK_DOWN ||
+                wParam == VK_RIGHT ||
+                wParam == VK_LEFT) 
+            {
+                if ((lParam & 0x1000000) == 0) lParam |= 0x1000000;
+            }
             return SendMessage(b->hWnd, WM_CHAR, wParam, lParam);
         }
 
