@@ -428,9 +428,11 @@ void DrawCompoundDescription(
 	p0.y = p1.y+xx->orig.y;
 	p1.x += xx->orig.x + xx->descriptionOff.x;
 	p1.y += xx->orig.y + xx->descriptionOff.y;
-	DrawLine( d, p0, p1, 0, color );
+	if (FindDistance(zero,xx->descriptionOff)>descriptionFontSize*2/d->dpi) {
+		DrawLine( d, p0, p1, 0, color );
+	}
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
-	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_NONE, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
+	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_BACKGROUND, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
 
 
