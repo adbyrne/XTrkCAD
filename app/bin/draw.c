@@ -732,9 +732,26 @@ EXPORT void DrawBoxedString(
 		// Reset size to actual size of the box
 		size.x = p[2].x-p[0].x;
 		size.y = p[0].y-p[2].y;
-		Translate( &p1, pos, a, size.x+size.y );
-		ClipLine( &pos, &p1, p[3], 0.0, size );
-		Translate( &p2, p1, a, size.y*arrowScale );
+		DIST_T dl;
+		if (a<=FindAngle(pos,p[1])) {
+			dl = cos(D2R(a))*size.y/2;
+			dl = sqrt((size.x*size.x/4)+dl*dl);
+		} else if (a<=FindAngle(pos,p[2])) {
+			dl = sin(D2R(a))*size.x/2;
+			dl = sqrt((size.y*size.y/4)+dl*dl);
+		} else if (a<=FindAngle(pos,p[3])) {
+			dl = cos(D2R(a))*size.y/2;
+			dl = sqrt((size.x*size.x/4)+dl*dl);
+		} else if (a<=FindAngle(pos,p[0])) {
+			dl = sin(D2R(a))*size.x/2;
+			dl = sqrt((size.y*size.y/4)+dl*dl);
+		} else {
+			dl = cos(D2R(a))*size.y/2;
+			dl = sqrt((size.x*size.x/4)+dl*dl);
+		}
+		Translate( &p1, pos, a, dl ); //Get to box edge
+		//ClipLine( &pos, &p1, p[3], 0.0, size );
+		Translate( &p2, p1, a, 1.5*size.y*arrowScale );
 		DrawLine( d, p1, p2, 0, color );
 		Translate( &p1, p2, a+150, size.y*0.7*arrowScale );
 		DrawLine( d, p1, p2, 0, color );

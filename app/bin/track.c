@@ -3148,10 +3148,13 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	default:
 		return;
 	}
-	coOrd startLine = pp;
+	coOrd startLine = pp, endLine = pp;
 	pp.x += elev->doff.x;
 	pp.y += elev->doff.y;
-	DrawLine( d, startLine, pp, 0, color );
+	if (FindDistance(pp,startLine)>descriptionFontSize*2/d->dpi) {
+		Translate(&endLine,pp,FindAngle(pp,startLine),descriptionFontSize/d->dpi);
+		DrawLine( d, startLine, endLine, 0, color );
+	}
 	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize, color, a );
 
 }
