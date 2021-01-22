@@ -153,7 +153,7 @@ LOG( log_shortPath, 2, ( "  AddPath( T%d:%d.%d D=%0.3f B%d ) -> \n", GetTrkIndex
 	while (1) {
 		if ( ep2>=0 ) {
 			AddTrackToNode( trk, ep1, ep2, dist );
-			dist += GetTrkLength( trk, ep1, -1 ) + GetTrkLength( trk, ep2, -1 );
+			dist += GetTrkLength( trk, ep1, ep2 );
 			if ( DoShortPathFunc( func, "MATCH", SPTC_MATCH, trk, ep2, ep1, dist, data ) ) {
 				trk = NULL;
 				ep1 = -1;
