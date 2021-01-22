@@ -1498,20 +1498,37 @@ static void MoveTracks(
 			DrawSelectedTracksD( &mapD, wDrawColorWhite );
 		}
 	}
+	//Do non-Cornu first to establish new end-points
+	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
+			trk = Tlist(inx);
+			UndoModify( trk );
+			if (QueryTrack(trk, Q_IS_CORNU)) continue;
+			if (move)
+				MoveTrack( trk, base );
+			if (rotate)
+				RotateTrack( trk, orig, angle );
+			for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+				if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+						!GetTrkSelected(trk1)) {
+					ep1 = GetEndPtConnectedToMe( trk1, trk );
+					DisconnectTracks( trk, ep, trk1, ep1 );
+					DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
+				}
+			}
+	}
+	//Now do the just Cornus - to reset to where the fixed parts ended up
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
 		UndoModify( trk );
 		BOOL_T fixed_end;
 		fixed_end = FALSE;
-		if (QueryTrack(trk, Q_IS_CORNU)) {
-			for (int i=0;i<2;i++) {
-				track_p te;
-				if ((te = GetTrkEndTrk(trk,i)) && !GetTrkSelected(te)) {
-					fixed_end = TRUE;
-				}
+		if (!QueryTrack(trk, Q_IS_CORNU)) continue;
+		for (int i=0;i<2;i++) {
+			track_p te;
+			if ((te = GetTrkEndTrk(trk,i)) && !GetTrkSelected(te)) {
+				fixed_end = TRUE;
 			}
 		}
-
 	    if (!fixed_end) {
 			if (move)
 				MoveTrack( trk, base );
@@ -1526,59 +1543,57 @@ static void MoveTracks(
 				}
 			}
 	    } else {
-			if (QueryTrack(trk, Q_IS_CORNU)) {			//Cornu will be at the end of selected set
-				for (int i=0;i<2;i++) {
-					if ((trk1 = GetTrkEndTrk(trk,i)) && GetTrkSelected(trk1)) {
-						ep1 = GetEndPtConnectedToMe( trk1, trk );
-						DisconnectTracks(trk,i,trk1,ep1);
-						GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk1,ep1),&trackParms);
-						if (trackParms.type == curveTypeStraight) {
-							endRadius = 0;
-							endCenter = zero;
-						} else {
-							endRadius = trackParms.arcR;
-							endCenter = trackParms.arcP;
-						}
-						DrawTrack(trk,&mainD,wDrawColorWhite);
-						DrawTrack(trk,&mapD,wDrawColorWhite);
-						endAngle = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180);
-						if (SetCornuEndPt(trk,i,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius)) {
-							ConnectTracks(trk,i,trk1,ep1);
-							DrawTrack(trk,&mainD,wDrawColorBlack);
-							DrawTrack(trk,&mapD,wDrawColorBlack);
-						} else {
-							DeleteTrack(trk,TRUE);
-							ErrorMessage(_("Cornu too tight - it was deleted"));
-							DoRedraw(); // MoveTracks: Cornu/delete
-							continue;
-						}
-					} else if (!trk1) {									//No end track
-						DrawTrack(trk,&mainD,wDrawColorWhite);
-						DrawTrack(trk,&mapD,wDrawColorWhite);
-						GetTrackParams(PARAMS_CORNU,trk,GetTrkEndPos(trk,i),&trackParms);
-						if (move) {
-							coOrd end_pos, end_center;
-							end_pos = trackParms.cornuEnd[i];
-							end_pos.x += base.x;
-							end_pos.y += base.y;
-							end_center = trackParms.cornuCenter[i];
-							end_center.x += base.x;
-							end_center.y += base.y;
-							SetCornuEndPt(trk,i,end_pos,end_center,trackParms.cornuAngle[i],trackParms.cornuRadius[i]);
-						}
-						if (rotate) {
-							coOrd end_pos, end_center;
-							ANGLE_T end_angle;
-							end_pos = trackParms.cornuEnd[i];
-							end_center = trackParms.cornuCenter[i];
-							Rotate(&end_pos, orig, angle);
-							Rotate(&end_center, orig, angle);
-							end_angle = NormalizeAngle( trackParms.cornuAngle[i] + angle );
-							SetCornuEndPt(trk,i,end_pos,end_center,end_angle,trackParms.cornuRadius[i]);
-						}
+			for (int i=0;i<2;i++) {
+				if ((trk1 = GetTrkEndTrk(trk,i)) && GetTrkSelected(trk1)) {
+					ep1 = GetEndPtConnectedToMe( trk1, trk );
+					DisconnectTracks(trk,i,trk1,ep1);
+					GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk1,ep1),&trackParms);
+					if (trackParms.type == curveTypeStraight) {
+						endRadius = 0;
+						endCenter = zero;
+					} else {
+						endRadius = trackParms.arcR;
+						endCenter = trackParms.arcP;
+					}
+					DrawTrack(trk,&mainD,wDrawColorWhite);
+					DrawTrack(trk,&mapD,wDrawColorWhite);
+					endAngle = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180);
+					if (SetCornuEndPt(trk,i,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius)) {
+						ConnectTracks(trk,i,trk1,ep1);
 						DrawTrack(trk,&mainD,wDrawColorBlack);
 						DrawTrack(trk,&mapD,wDrawColorBlack);
+					} else {
+						DeleteTrack(trk,TRUE);
+						ErrorMessage(_("Cornu too tight - it was deleted"));
+						DoRedraw(); // MoveTracks: Cornu/delete
+						continue;
 					}
+				} else if (!trk1) {									//No end track
+					DrawTrack(trk,&mainD,wDrawColorWhite);
+					DrawTrack(trk,&mapD,wDrawColorWhite);
+					GetTrackParams(PARAMS_CORNU,trk,GetTrkEndPos(trk,i),&trackParms);
+					if (move) {
+						coOrd end_pos, end_center;
+						end_pos = trackParms.cornuEnd[i];
+						end_pos.x += base.x;
+						end_pos.y += base.y;
+						end_center = trackParms.cornuCenter[i];
+						end_center.x += base.x;
+						end_center.y += base.y;
+						SetCornuEndPt(trk,i,end_pos,end_center,trackParms.cornuAngle[i],trackParms.cornuRadius[i]);
+					}
+					if (rotate) {
+						coOrd end_pos, end_center;
+						ANGLE_T end_angle;
+						end_pos = trackParms.cornuEnd[i];
+						end_center = trackParms.cornuCenter[i];
+						Rotate(&end_pos, orig, angle);
+						Rotate(&end_center, orig, angle);
+						end_angle = NormalizeAngle( trackParms.cornuAngle[i] + angle );
+						SetCornuEndPt(trk,i,end_pos,end_center,end_angle,trackParms.cornuRadius[i]);
+					}
+					DrawTrack(trk,&mainD,wDrawColorBlack);
+					DrawTrack(trk,&mapD,wDrawColorBlack);
 				}
 			}
 	    }
