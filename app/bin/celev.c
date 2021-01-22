@@ -296,37 +296,34 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	elevModeV = radio;
 	ParamLoadControl( &elevationPG, I_MODE );
 	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
-	computedOk = TRUE;
-	if (oldElevationEvaluation || computedOk) {
-		sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0, (units==UNITS_METRIC?"cm":"\"") );
-		ParamLoadMessage( &elevationPG, I_COMPUTED, message );
-		if (gradeOk) {
-			sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
-		} else {
-			if ( EndPtIsDefinedElev(trk,ep) ) {
-				elev = GetElevation(trk);
-				dist = GetTrkLength(trk,ep,-1);
+	sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0, (units==UNITS_METRIC?"cm":"\"") );
+	ParamLoadMessage( &elevationPG, I_COMPUTED, message );
+	if (gradeOk) {
+		sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
+	} else {
+		if ( EndPtIsDefinedElev(trk,ep) ) {
+			elev = GetElevation(trk);
+			dist = GetTrkLength(trk,ep,-1);
+			if (dist>0.1)
+				sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
+			else
+				sprintf( message, _("Undefined") );
+			if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
+				elev = GetElevation(trk1);
+				dist = GetTrkLength(trk1,ep1,-1);
 				if (dist>0.1)
-					sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
+					sprintf( message+strlen(message), " - %0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
 				else
-					sprintf( message, _("Undefined") );
-				if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
-					elev = GetElevation(trk1);
-					dist = GetTrkLength(trk1,ep1,-1);
-					if (dist>0.1)
-						sprintf( message+strlen(message), " - %0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
-					else
-						sprintf( message+strlen(message), " - %s", _("Undefined") );
-				}
-			} else {
-				strcpy( message, _("Undefined") );
+					sprintf( message+strlen(message), " - %s", _("Undefined") );
 			}
+		} else {
+			strcpy( message, _("Undefined") );
 		}
-		ParamLoadMessage( &elevationPG, I_GRADE, message );
-		if ( (mode&ELEV_MASK)!=ELEV_DEF ) {
-			elevHeightV = elevX;
-			ParamLoadControl( &elevationPG, I_HEIGHT );
-		}
+	}
+	ParamLoadMessage( &elevationPG, I_GRADE, message );
+	if ( (mode&ELEV_MASK)!=ELEV_DEF ) {
+		elevHeightV = elevX;
+		ParamLoadControl( &elevationPG, I_HEIGHT );
 	}
 	wShow(elevW);
 }
@@ -340,7 +337,7 @@ static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
 			elev0 = GetTrkEndElevHeight(trk,0);
 		else {
 			if (!GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
-				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
+				if ((len = GetTrkLength( trk, 0, -1 ))<0.1) return FALSE;
 				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
 			}
 		}
@@ -348,11 +345,11 @@ static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
 			elev1 = GetTrkEndElevHeight(trk,1);
 		else {
 			if (!GetTrkEndElevCachedHeight(trk,1,&elev1,&len1)) {
-				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
-				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
+				if ((len1 = GetTrkLength( trk, 1, -1 ))<0.1) return FALSE;
+				ComputeElev( trk, 1, FALSE, &elev1, NULL, TRUE );
 			}
 		}
-		if (dist1+dist0 < 0.1) {
+		if (dist1+dist0 <= 0.1) {
 			*height = elev0;
 			return TRUE;
 		}

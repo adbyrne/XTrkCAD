@@ -1907,11 +1907,13 @@ wDraw_p wBitMapCreate( wWinPix_t w, wWinPix_t h, int planes )
 	d->hBmMain = CreateCompatibleBitmap( hDc, d->w, d->h );
 	if ( d->hBmMain == (HBITMAP)0 ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Main fails", "Ok", NULL );
+		ReleaseDC(mswHWnd, hDc);
 		return FALSE;
 	}
 	d->hBmTemp = CreateCompatibleBitmap( hDc, d->w, d->h );
 	if ( d->hBmTemp == (HBITMAP)0 ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Temp fails", "Ok", NULL );
+		ReleaseDC(mswHWnd, hDc);
 		return FALSE;
 	}
 	d->hasPalette = (GetDeviceCaps(hDc,RASTERCAPS ) & RC_PALETTE) != 0;
@@ -2017,7 +2019,6 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
 
         if (bCanSave) {
             bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
-            return bSuccess;
         }
     }
     FreeImage_Unload(dib2);

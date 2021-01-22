@@ -2537,7 +2537,7 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 	else if (trackCmds(trk->type)->getLength != NULL) {
 		d = trackCmds(trk->type)->getLength(trk);
 		if (ep1==-1)
-			d /= 2.0;
+			d = d/2.0;
 		return d;
 	} else {
 		pos0 = GetTrkEndPos(trk,ep0);
@@ -2959,16 +2959,12 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	ANGLE_T grade = 0.0;
 
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
-		if (GetTrkEndElevCachedHeight(trk,0,&elev0,&len) && GetTrkEndElevCachedHeight(trk,1,&elev1,&len1)) {
+		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
+		len = GetTrkLength( trk, 0, -1 );
+		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
+		len1 = GetTrkLength( trk, 1, -1 );
+		if (len+len1>0.1)
 			grade = fabs( (elev1-elev0)/(len+len1))*100.0;
-		} else {
-			len = GetTrkLength( trk, 0, 1 );
-			if (len>0.1) {
-				ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
-				ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
-				grade = fabs( (elev1-elev0)/len )*100.0;
-			}
-		}
 	}
 	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) != 0 )
 		return wDrawColorBlack;
@@ -3018,7 +3014,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 	if (d == &mapD && !GetLayerOnMap(curTrackLayer))
 		return;
 	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) &&
-		d != &mapD && color == wDrawColorBlack )
+		(d != &mapD) && (color == wDrawColorBlack) )
 		if (GetLayerUseColor((unsigned int)curTrackLayer))
 			color = GetLayerColor((unsigned int)curTrackLayer);
 	if ( programMode==MODE_TRAIN) {
@@ -3166,9 +3162,12 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	default:
 		return;
 	}
+	coOrd startLine = pp;
 	pp.x += elev->doff.x;
 	pp.y += elev->doff.y;
+	DrawLine( d, startLine, pp, 0, color );
 	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize, color, a );
+
 }
 
 /**

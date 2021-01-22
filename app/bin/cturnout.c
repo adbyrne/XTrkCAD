@@ -1552,7 +1552,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
             trkSeg_p segPtr;
             PATHPTR_T path,pathCurr;
             //Find starting seg on path (nearest to end Pt)
-	    path = GetCurrPath( trk );
+	        path = GetCurrPath( trk );
             for ( path += strlen((char*)path)+1; path[0] || path[1]; path++ ) {
                 if ( path[0] == 0 )
                     continue;
@@ -1578,15 +1578,9 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
             }
             params->len = d;
         } else {
-            double x, y;
-            x = 0; y = 0;
-            for (int i=0;i<epCnt; i++) {
-                coOrd cpos = GetTrkEndPos(trk,i);
-                x += cpos.x;
-                y += cpos.y;
-            }
-            params->centroid.x = x/epCnt;
-            params->centroid.y = y/epCnt;
+	    // Centroid is middle of bounding box
+	    params->centroid.x = (trk->lo.x+trk->hi.x)/2.0;
+	    params->centroid.y = (trk->lo.y+trk->hi.y)/2.0;
             params->len = FindDistance(params->centroid,pos)*2;  //Times two because it will be halved by track.c
         }
         return TRUE;

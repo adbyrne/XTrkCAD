@@ -32,7 +32,6 @@
 #include "utility.h"
 #include "string.h"
 
-EXPORT long oldElevationEvaluation = 0;
 static int log_fillElev = 0;
 static int log_dumpElev = 0;
 static BOOL_T log_fillElev_initted;
@@ -145,40 +144,6 @@ BOOL_T ComputeElev(
 	DIST_T grade;
 	DIST_T elev0, elev1, dist0, dist1;
 	BOOL_T rc = FALSE;
-if (oldElevationEvaluation) {
-	int rc0, rc1;
-	if (GetTrkEndElevMode(trk,ep) == ELEV_DEF) {
-		if (elevR)
-			*elevR = GetTrkEndElevHeight(trk,ep);
-		if (gradeR)
-			*gradeR = 0.0;
-		return TRUE;
-	}
-	rc0 = FindDefinedElev( trk, ep, 0, onpath, &elev0, &dist0 );
-	rc1 = FindDefinedElev( trk, ep, 1, onpath, &elev1, &dist1 );
-	if ( rc0 == FDE_DEF && rc1 == FDE_DEF ) {
-		if (dist0+dist1 > 0.1)
-			grade = (elev1-elev0)/(dist0+dist1);
-		else
-			grade = 0.0;
-		elev0 += grade*dist0;
-		rc = TRUE;
-	} else if ( rc0 == FDE_DEF && rc1 == FDE_END ) {
-		grade = 0.0;
-		rc = TRUE;
-	} else if ( rc1 == FDE_DEF && rc0 == FDE_END ) {
-		grade = 0.0;
-		elev0 = elev1;
-		rc = TRUE;
-	} else if ( rc0 == FDE_END && rc1 == FDE_END ) {
-		grade = 0.0;
-		elev0 = 0.0;
-		rc = TRUE;
-	} else {
-		grade = 0.0;
-		elev0 = 0.0;
-	}
-} else {
 
 	track_p trk1;
 	EPINX_T ep1;
@@ -200,28 +165,23 @@ if (oldElevationEvaluation) {
 				elev1 = GetElevation( trk1 );
 				dist1 = GetTrkLength( trk1, ep1, -1 );
 			}
-			SetTrkEndElevCachedHeight(trk1,ep1,elev1,dist1);
 			if (dist0+dist1>0.1) {
 				grade = (elev1-elev0)/(dist0+dist1);
 				elev0 += grade*dist0;
 			} else {
 				elev0 = (elev0+elev1)/2.0;
 				rc = FALSE;
-				SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
-				SetTrkEndElevCachedHeight(trk1,ep1,elev0,dist1);
 			}
 		} else {
 			grade = 0.0;
 		}
 
 	}
-}
-if ( elevR )
-	*elevR = elev0;
-if ( gradeR )
-	*gradeR = grade;
-return rc;
-
+	if ( elevR )
+		*elevR = elev0;
+	if ( gradeR )
+		*gradeR = fabs(grade);
+	return rc;
 }
 
 
