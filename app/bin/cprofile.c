@@ -742,6 +742,9 @@ static void SelProfileW(
     elev = pos.y;
 
     switch (action&0xFF) {
+    case C_START:
+    	profileUndo = FALSE;
+    	break;
     case C_DOWN:
         for (inx=0; inx<profElem_da.cnt; inx++) {
             if (dist <= profElem(inx).dist) {
