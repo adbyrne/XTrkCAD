@@ -198,7 +198,7 @@ typedef struct {
 		} u;
 		BOOL_T cacheSet;
 		double cachedElev;
-		double cachedLength;
+		double cachedGrade;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
 typedef struct {
@@ -517,8 +517,8 @@ void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
 DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
-BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *length);
-void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length);
+BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *grade);
+void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade);
 char * GetTrkEndElevStation( track_p, EPINX_T );
 #define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
 #define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
