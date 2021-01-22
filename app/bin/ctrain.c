@@ -2539,7 +2539,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         }
 
 	UpdateBlockTrack();
-	CreateDynamicBlocks();
 	SetOccupied();
 
         curTrainDlg->train = NULL;
@@ -2691,7 +2690,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         ControllerDialogSync(curTrainDlg);
         ClearDynamicBlocks();
 	ClearOccupied();
-	CreateDynamicBlocks();
 	SetOccupied();
         return C_CONTINUE;
 
@@ -2740,11 +2738,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                     angle1 = 0;
                 }
 
-                if ( ! IsOccupied( trk0 ) ) {
-                    DeleteDynamicBlock( trk0 );
+                if ( ! IsOccupied( trk0 ) )
                     AdvancePositionIndicator(trk0, pos0, &pos1, &angle1);
-                    CreateDynamicBlock( trk0 );
-                }
 
                 if (trk1) {
                     xx->trvTrk.pos = pos1;

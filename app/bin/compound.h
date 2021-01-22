@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "track.h"
+#include "math.h"
 
 typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast, TOcurved } TOspecial_e;
 
@@ -111,6 +112,7 @@ extern dynArr_t structureInfo_da;
 extern dynArr_t carDescInfo_da;
 #define turnoutInfo(N) DYNARR_N( turnoutInfo_t *, turnoutInfo_da, N )
 #define structureInfo(N) DYNARR_N( turnoutInfo_t *, structureInfo_da, N )
+#define isSame(P1,P2) fabs(P1.x-P2.x) < 0.001 && fabs(P1.y-P2.y) < 0.001
 extern turnoutInfo_t * curTurnout;
 extern turnoutInfo_t * curStructure;
 
@@ -190,7 +192,7 @@ void NextTurnoutPosition( track_p trk );
 enum paramFileState	GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 void SetTurnoutFlags( void );
 void ClearTurnoutFlags( void );
-void GetTurnoutPositions( track_p trk, coOrd * end1, coOrd * end2 );
+coOrd GetRemoteTurnoutPositions( track_p trk, coOrd pos );
 
 /* ctodesgn.c */
 void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );

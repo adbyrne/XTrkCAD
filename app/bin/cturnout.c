@@ -1775,10 +1775,8 @@ static void DrawTurnoutPositionIndicator(
 	}
 }
 
-EXPORT void GetTurnoutPositions(
-		track_p trk,
-		coOrd * end1,
-		coOrd * end2  )
+// given a trk and end pos, return other end of the path
+EXPORT coOrd GetRemoteTurnoutPositions( track_p trk, coOrd pos )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
 	PATHPTR_T path;
@@ -1790,12 +1788,13 @@ EXPORT void GetTurnoutPositions(
 			pos0 = MapPathPos( xx, path[1], 0 );
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
-			*end1 = pos0;
-			*end2 = pos1;
-			return;
+			if ( isSame( pos, pos0 ) ) return pos1;
+			if ( isSame( pos, pos1 ) ) return pos0;
 		}
 	}
+	return pos;
 }
+
 
 EXPORT void AdvanceTurnoutPositionIndicator(
 		track_p trk,
