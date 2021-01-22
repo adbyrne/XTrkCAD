@@ -409,22 +409,26 @@ void DrawCompoundDescription(
 		return;
 	if ( (d->options&DC_SIMPLE) )
 		return;
-		if ( xx->special == TOpier ) {
-			desc = xx->u.pier.name;
-		} else {
-			if ( xx->flipped )
-				layoutLabelsOption |= LABEL_FLIPPED;
-			if ( xx->ungrouped )
-				layoutLabelsOption |= LABEL_UNGROUPED;
-			if ( xx->split )
-				layoutLabelsOption |= LABEL_SPLIT;
-			FormatCompoundTitle( layoutLabelsOption, xtitle(xx) );
-			desc = message;
-		}
-		p1 = xx->descriptionOrig;
-		Rotate( &p1, zero, xx->angle );
-		p1.x += xx->orig.x + xx->descriptionOff.x;
-		p1.y += xx->orig.y + xx->descriptionOff.y;
+	if ( xx->special == TOpier ) {
+		desc = xx->u.pier.name;
+	} else {
+		if ( xx->flipped )
+			layoutLabelsOption |= LABEL_FLIPPED;
+		if ( xx->ungrouped )
+			layoutLabelsOption |= LABEL_UNGROUPED;
+		if ( xx->split )
+			layoutLabelsOption |= LABEL_SPLIT;
+		FormatCompoundTitle( layoutLabelsOption, xtitle(xx) );
+		desc = message;
+	}
+	p1 = xx->descriptionOrig;
+	Rotate( &p1, zero, xx->angle );
+	coOrd p0;
+	p0.x = p1.x+xx->orig.x;
+	p0.y = p1.y+xx->orig.y;
+	p1.x += xx->orig.x + xx->descriptionOff.x;
+	p1.y += xx->orig.y + xx->descriptionOff.y;
+	DrawLine( d, p0, p1, 0, color );
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_NONE, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }

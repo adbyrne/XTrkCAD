@@ -411,6 +411,7 @@ static track_p NewJoint(
 	static coOrd qZero = { 0.0, 0.0 };
 	ANGLE_T az0, a01, b, b01, b1, d, d1;
 	trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
+	SetTrkBits(trk, TB_HIDEDESC);					//Suppress Description for new Joint
 	SetTrkScale( trk, GetLayoutCurScale() );
 	xx = GetTrkExtraData( trk );
 	SetTrkEndPoint( trk, 0, pos0, NormalizeAngle(angle0+180.0) );

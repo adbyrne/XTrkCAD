@@ -196,8 +196,13 @@ DIST_T CurveDescriptionDistance(
 	} else {
 		GetCurveAngles( &a0, &a1, trk );
 		ratio = offset.x;
-		a = a0 + a1/2.0 + ratio * a1/ 2.0;
-		ratio = offset.y/2 + 0.5;
+		if (!IsCurveCircle( trk ))
+			a = NormalizeAngle(a0 + a1/2.0 + ratio * a1/ 2.0);
+		else
+			a = NormalizeAngle(360.0*ratio+a0);
+		ratio = 1.0-offset.y;
+		if (ratio<0.0) ratio = 0.0;
+		if (ratio>1.0) ratio = 1.0;
 		Translate( &pd, xx->pos, a, xx->radius * ratio );
 	}
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
@@ -264,18 +269,25 @@ static void DrawCurveDescription(
 		DrawLine( d, p0, p1, 0, color );
 		GetCurveAngles( &a0, &a1, trk );
 		ratio = xx->descriptionOff.x;   // 1.0 to - 1.0
-		a = ratio*a1/2.0 + a0 + a1/2.0;
+		if (! IsCurveCircle( trk ))
+			a = NormalizeAngle(ratio*a1/2.0 + a0 + a1/2.0);
+		else
+			a = NormalizeAngle(ratio*360.0+a0);
 		PointOnCircle( &p0, xx->pos, xx->radius, a );
-		sprintf( message, "R %s", FormatDistance( xx->radius ) );
-		ratio = xx->descriptionOff.y/2 + 0.5;  // 1.0 to -1.0
-		DrawDimLine( d, xx->pos, p0, message, (wFontSize_t)descriptionFontSize, ratio, 0, color, 0x11 );
 		coOrd end0, end1;
 		DIST_T off;
 		Translate(&end0,xx->pos,a0,xx->radius);
 		Translate(&end1,xx->pos,a0+a1,xx->radius);
 		off = xx->radius-(cos(D2R(a1/2))*xx->radius);
-		sprintf( message, "L %s A %0.3f O %s", FormatDistance(FindDistance(end0,end1)),FindAngle(end1,end0), FormatDistance(off));
-		DrawDimLine( d, end0, end1, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+		ratio = (1.0-xx->descriptionOff.y);
+		if (ratio < 0.1) ratio = 0.1;
+		if (ratio > 1.0) ratio = 1.0;
+		if (! IsCurveCircle(trk))
+			sprintf( message, "R %s L %s A %0.3f O %s", FormatDistance( xx->radius ),
+				FormatDistance(FindDistance(end0,end1)),FindAngle(end1,end0), FormatDistance(off));
+		else
+			sprintf( message, "R %s L %s A 360.0", FormatDistance( xx->radius ),FormatDistance(xx->radius*2*M_PI));
+		DrawDimLine( d, xx->pos, p0, message, (wFontSize_t)descriptionFontSize, ratio, 0, color, 0x11 );
 
 		coOrd details_pos;
 
@@ -327,16 +339,18 @@ STATUS_T CurveDescriptionMove(
 						a = 0.0;
 					}
 				}
+				xx->descriptionOff.x = ( a / a1 ) * 2.0 - 1.0;  // -1 to 1, 0 in middle
+			} else {
+				a = FindAngle(xx->pos,pos);
+				GetCurveAngles( &a0, &a1, trk );
+				xx->descriptionOff.x = NormalizeAngle((a - a0)/360.0);
 			}
-			xx->descriptionOff.x = ( a / a1 ) * 2.0 - 1.0;
 			d = FindDistance( xx->pos, pos ) / xx->radius;
-			if ( d > 0.9 )
-				d = 0.9;
-			if ( d < 0.1 )
-				d = 0.1;
-			xx->descriptionOff.y = (d * 2.0) - 1.0;
-			GetCurveAngles( &a0, &a1, trk );
-			PointOnCircle( &p0, xx->pos, xx->radius*d, a+a0 );
+			if ( d > 1.0 )
+				d = 1.0;
+			if ( d < 0.0 )
+				d = 0.0;
+			xx->descriptionOff.y = 1.0-d; 						//  0.1 to 0.9
 		}
 		if (action == C_UP) {
 			editMode = FALSE;
