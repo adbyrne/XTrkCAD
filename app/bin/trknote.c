@@ -97,25 +97,28 @@ static track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
-    coOrd p[4];
+    coOrd p[5];
+    int type[5];
 
-    if (d->scale >= 16) {
-        return;
-    }
-	if ((d->options & DC_SIMPLE)) {
-		//while the icon is moved, draw a square
+
+	if ((d->options & DC_SIMPLE) || mainD.scale >= 16) {
+		//while the icon is moved, draw a square with a lopped off corner
 		//because CmdMove draws all selected object into tempSeg and
 		//tempSegDrawFuncs doesn't have a BitMap drawing func
 		DIST_T dist;
-		dist = 0.1*mainD.scale;
+		dist = 0.8 + 0.1*(mainD.scale-16)/4;
 		p[0].x = p[1].x = xx->pos.x - dist;
-		p[2].x = p[3].x = xx->pos.x + dist;
+		p[2].x = p[3].x = p[4].x = xx->pos.x + dist;
 		p[1].y = p[2].y = xx->pos.y - dist;
-		p[3].y = p[0].y = xx->pos.y + dist;
-		DrawLine(d, p[0], p[1], 0, color);
-		DrawLine(d, p[1], p[2], 0, color);
-		DrawLine(d, p[2], p[3], 0, color);
-		DrawLine(d, p[3], p[0], 0, color);
+		p[3].y = p[4].y = p[0].y = xx->pos.y + dist;
+		p[3].y = p[3].y - (dist/2);
+		p[4].x = p[4].x - (dist/2);
+
+		for (int i=0;i<5;i++) {
+			type[i] = 0;
+		}
+		DrawPoly(d, 5, p, type, color, 0, FALSE, FALSE);
+		DrawPoly(d, 5, p, type, drawColorGold, 0, TRUE, FALSE);
 	} else {
 		// draw a bitmap for static object
 		wDrawBitMap_p bm;
