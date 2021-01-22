@@ -3129,11 +3129,11 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 			sprintf( message, "%0.1f%%", round(fabs(grade*100.0)*10)/10 );
 			elevStr = message;
 			a = GetTrkEndAngle( trk, ep );
-			style = BOX_ARROW;
+			style = BOX_ARROW_BACKGROUND;
 			if (grade <= -0.001)
 				a = NormalizeAngle( a+180.0 );
 			else if ( grade < 0.001 )
-				style = BOX_BOX;
+				style = BOX_BOX_BACKGROUND;
 			elev->u.height = grade;
 		} else {
 			elevStr = "????%%";

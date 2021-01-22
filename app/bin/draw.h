@@ -219,6 +219,8 @@ void DrawHilightPolygon(drawCmd_p, coOrd *, int);
 #define BOX_INVERT		(3)
 #define BOX_ARROW		(4)
 #define BOX_BACKGROUND	(5)
+#define BOX_ARROW_BACKGROUND (6)
+#define BOX_BOX_BACKGROUND (7)
 void DrawBoxedString(int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t,
                      wDrawColor, ANGLE_T);
 void DrawMultiLineTextSize(drawCmd_p dp, char * text, wFont_p fp,

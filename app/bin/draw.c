@@ -729,6 +729,7 @@ EXPORT void DrawBoxedString(
 	d->options &= ~DC_DASH;
 	switch (style) {
 	case BOX_ARROW:
+	case BOX_ARROW_BACKGROUND:
 		// Reset size to actual size of the box
 		size.x = p[2].x-p[0].x;
 		size.y = p[0].y-p[2].y;
@@ -741,7 +742,9 @@ EXPORT void DrawBoxedString(
 		DrawLine( d, p1, p2, 0, color );
 		/* no break */
 	case BOX_BOX:
-		DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, 1, 0 );  //Clear background for box and box-arrow
+	case BOX_BOX_BACKGROUND:
+		if (style == BOX_ARROW_BACKGROUND || style == BOX_BOX_BACKGROUND)
+			DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, 1, 0 );  //Clear background for box and box-arrow
 		DrawLine( d, p[1], p[2], 0, color );
 		DrawLine( d, p[2], p[3], 0, color );
 		DrawLine( d, p[3], p[0], 0, color );
