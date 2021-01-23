@@ -843,7 +843,9 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 			epTrk = here->endPt[epN].track;
 			if ( epTrk && epTrk != from ) break;
 		}
-		addSegs( epTrk, here, epN );
+		if ( epN < epCnt )
+		    addSegs( epTrk, here, epN );
+		return;
 	}
 }
 
