@@ -485,7 +485,7 @@ EXPORT BOOL_T GetArgs(
 wBool_t IsEND( char * sEnd )
 {
 	char * cp;
-	wBool_t bAllowNakedENDs = paramVersion < 12;
+	wBool_t bAllowNakedENDs = paramVersion < VERSION_NONAKEDENDS;
 	for( cp = paramLine; *cp && (isspace( *cp ) || *cp == '\t'); cp++ );
 	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 )
 		cp += strlen( sEnd );

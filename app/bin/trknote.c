@@ -410,7 +410,7 @@ ReadTrackNote(char *line)
         return FALSE;
     }
 
-	if ( paramVersion >= 12 ) {
+	if ( paramVersion >= VERSION_INLINENOTE ) {
 		noteType = size;
 		t = NewNote(index, pos, noteType);
    		SetTrkLayer(t, layer);

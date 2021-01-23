@@ -1337,7 +1337,7 @@ EXPORT BOOL_T CarItemRead(
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
 	dim.truckCenterOffset = longCenterOffset/1000.0;
-	if ( paramVersion < 12 ) {
+	if ( paramVersion < VERSION_INLINENOTE ) {
 		if ( (options&CAR_ITEM_HASNOTES) ) {
 			sNote = ReadMultilineText();
 		}

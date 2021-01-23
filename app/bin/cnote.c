@@ -121,7 +121,7 @@ BOOL_T ReadMainNote(char *line)
 
     if (!GetArgs(line + 9,
 	paramVersion < 3 ? "l" :
-	paramVersion < 12 ? "0000l":
+	paramVersion < VERSION_INLINENOTE ? "0000l":
 	"0000lq", &size, &sNote)) {
         return FALSE;
     }
@@ -130,7 +130,7 @@ BOOL_T ReadMainNote(char *line)
         MyFree(mainText);
     }
 
-    if ( paramVersion < 12 )
+    if ( paramVersion < VERSION_INLINENOTE )
 	mainText = ReadMultilineText();
     else
 	mainText = sNote;

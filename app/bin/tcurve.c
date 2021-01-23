@@ -730,7 +730,7 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 	long options;
 	BOOL_T rc = TRUE;
 	options = GetTrkWidth(t) & 0x0F;
-	if ( ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) == ( xx->helixTurns > 0 ) )
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 )
 		options |= 0x80;
 	rc &= fprintf(f, "CURVE %d %d %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n", 
 		GetTrkIndex(t), GetTrkLayer(t), (long)options,
@@ -786,8 +786,16 @@ static BOOL_T ReadCurve( char * line )
 	SetTrkWidth(t, (int)(options&3));
 	xx->pos = p;
 	xx->radius = r;
-	if ( ( ( options & 0x80 ) != 0 ) == ( xx->helixTurns > 0 ) ) 
-		SetTrkBits(t,TB_HIDEDESC);
+	if ( paramVersion < VERSION_DESCRIPTION2 ) {
+		if ( xx->helixTurns <= 0 ) {
+			// Descriptions on by default for helix, off for curves
+			SetTrkBits(t,TB_HIDEDESC);
+		}
+	} else {
+		if ( ( options & 0x80 ) != 0 ) {
+			SetTrkBits(t,TB_HIDEDESC);
+		}
+	}
 	SetEndPts(t,2);
 	if (GetTrkEndAngle( t, 0 ) == 270.0 &&
 		GetTrkEndAngle( t, 1 ) == 90.0 )

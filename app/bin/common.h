@@ -133,6 +133,14 @@ typedef struct {
 // Base DotsPerInch
 #define BASE_DPI	(75.0)
 
+// File Versions - non-backward file format changes
+// Descriptions added for Bezier, Cornu, Joint
+#define VERSION_DESCRIPTION2	(12)
+// Inline quoted text replaces multiline text in Notes and Cars
+#define VERSION_INLINENOTE	(12)
+// END is replaced by END$SEGS, END$TRK, ...
+#define VERSION_NONAKEDENDS	(12)
+
 #ifdef WINDOWS
 #define M_PI 3.14159
 #define strcasecmp _stricmp

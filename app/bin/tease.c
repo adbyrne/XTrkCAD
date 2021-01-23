@@ -988,7 +988,7 @@ static BOOL_T ReadJoint(
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
-	if ( ( ( options & 0x80 ) != 0 ) )
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) != 0 ) )
 		SetTrkBits(trk,TB_HIDEDESC);
 	*xx = e;
 	SetEndPts( trk, 2 );
