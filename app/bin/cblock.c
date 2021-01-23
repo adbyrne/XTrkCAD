@@ -885,68 +885,82 @@ static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
 static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 {
 	track_p epTrk;
-	EPINX_T epCnt, epN, epR;
+	EPINX_T epCnt, epN, epR, epTo;
 
 	if ( ! IsTrack( here ) ) return;
 
 	LOG( log_block, 1, ("*** addTurnouts(): here T%d from T%d-%d\n",
 			GetTrkIndex(here),GetTrkIndex(from),epFrom))
 	epCnt = GetTrkEndPtCnt(here);
-	if ( here == from ) {
-		for ( epN = 0; epN < epCnt; epN++ ) {
-			if ( (epR = getRemoteEp( from, epN )) != epN ) break;
-		}
-//		LOG( log_block, 1, ("*** addTurnouts(): adding track T%d  -- end1 %d end2 %d\n",
-//				GetTrkIndex(here),epN,epR))
+	if ( here == from ) { // this is a turnout, epTo is the other of the path from epFrom
+		epTo = getRemoteEp( from, epFrom );
+#if 0
+		LOG( log_block, 1, ("*** addTurnouts(): adding track T%d  -- epFrom %d epTo %d\n",
+				GetTrkIndex(here),epFrom,epTo))
+#endif
 		pushDa( here );
 		blockLen = 0.0;
-		if ( here->endPt[epN].toBlock  ) {
-//			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
-//					GetTrkIndex(here),epR))
-			pushEp( here, epN );
+		if ( here->endPt[epTo].toBlock  ) {
+#if 0
+			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
+					GetTrkIndex(here),epTo))
+#endif
+			pushEp( here, epTo );
 		}
-		if ( ! here->endPt[epN].toTrack ) {
-			epTrk = ((trkEndPt_p)here->endPt)[epN].track;
-			addTurnouts(epTrk, here, epN);
+		if ( ! here->endPt[epTo].toTrack ) { // keep going down path...
+			epTrk = ((trkEndPt_p)here->endPt)[epTo].track;
+			addTurnouts(epTrk, here, epTo);
 		}
-		if ( here->endPt[epR].toBlock ) {
-//			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
-//					GetTrkIndex(here),epR))
-			pushEp( here, epR );
+		if ( here->endPt[epFrom].toBlock ) {
+#if 0
+			LOG( log_block, 1, ("*** addTurnouts(): adding endpoint T%d-%d\n",
+					GetTrkIndex(here),epFrom))
+#endif
+			pushEp( here, epFrom );
 		}
-		if ( ! here->endPt[epR].toTrack ) {
-			epTrk = ((trkEndPt_p)here->endPt)[epR].track;
-			addTurnouts(epTrk, here, epR);
+		if ( ! here->endPt[epFrom].toTrack ) {
+			epTrk = ((trkEndPt_p)here->endPt)[epFrom].track;
+			addTurnouts(epTrk, here, epFrom);
 		}
-//		LOG( log_block, 1, ("*** addTurnouts(): exiting\n"))
+#if 0
+		LOG( log_block, 1, ("*** addTurnouts(): exiting\n"))
+#endif
 		return;
 	}
 
-	// Get ep connected to "from"
+	// Get ep in "here" connected to "from"
 	for ( epN = 0; epN < epCnt; epN++ ) {
 		epTrk = here->endPt[epN].track;
 		if ( epTrk && epTrk == from ) break;
 	}
-//	LOG( log_block, 1, ("*** addTurnouts(): here T%d-%d back to T%d\n",
-//				GetTrkIndex(here),epN,GetTrkIndex(from)))
+#if 0
+	LOG( log_block, 1, ("*** addTurnouts(): here T%d-%d back to T%d\n",
+				GetTrkIndex(here),epN,GetTrkIndex(from)))
+#endif
 
 	epR = getRemoteEp( here, epN );
 	if ( epR == epN ) {
-//		LOG( log_block, 1, ("*** addTurnouts(): endpoint open T%d-%d\n",
-//			GetTrkIndex(here),epR))
+#if 0
+		LOG( log_block, 1, ("*** addTurnouts(): endpoint open T%d-%d\n",
+			GetTrkIndex(here),epR))
+#endif
 		return;
 	}
 
 	if ( epCnt > 2 && here->endPt[epR].toBlock ) {
-//		LOG( log_block, 1, ("*** addTurnouts(): adding endpoint and track T%d-%d\n",
-//			GetTrkIndex(here),epR))
+#if 0
+		LOG( log_block, 1, ("*** addTurnouts(): adding endpoint and track T%d-%d\n",
+			GetTrkIndex(here),epR))
+#endif
 		pushEp( here, epR );
 		pushDa( here );
 		return;
 	}
 	// At end of scan
 	if ( epCnt > 2 && here->endPt[epR].toTrack ) {
-//		LOG( log_block, 1, ("*** addTurnouts(): end of scan"))
+#if 0
+		LOG( log_block, 1, ("*** addTurnouts(): end of scan"))
+#endif
 		return;
 	}
 
@@ -956,7 +970,9 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 		blockLen += GetTrkLength( here, epR, epN );
 
 	// Add the segment to the list
-//	LOG( log_block, 1, ("*** addTurnouts(): adding track T%d\n",GetTrkIndex(here)))
+#if 0
+	LOG( log_block, 1, ("*** addTurnouts(): adding track T%d\n",GetTrkIndex(here)))
+#endif
 	pushDa( here );
 
 	epTrk = here->endPt[epR].track;
@@ -1649,7 +1665,7 @@ EXPORT void UpdateOccupied( void )
         pos1 = GetTrkEndPos( car, 1);
         temp1 = OnTrack( &pos1, FALSE, TRUE);
         prev1 = car->endPt[1].prevTrack;
-#if 1
+#if 0
         if ( temp0 != prev0 || temp1 != prev1 )
             LOG(log_block, 1, ("UpdateOccupied C%d  F on T%d prev T%d  R on T%d prev T%d\n",
                     GetTrkIndex(car),GetTrkIndex(temp0),GetTrkIndex(prev0),GetTrkIndex(temp1),GetTrkIndex(prev1)))
@@ -1699,6 +1715,7 @@ EXPORT void UpdateOccupied( void )
 #endif
     }
     verifyOccupancy();
+    LOG(log_block, 1, ("UpdateOccupied() -- exit \n"))
 
     if (changed) {
         MainRedraw();

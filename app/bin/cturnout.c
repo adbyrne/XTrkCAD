@@ -1777,11 +1777,23 @@ EXPORT coOrd GetRemoteTurnoutPositions( track_p trk, coOrd pos )
 	coOrd pos0, pos1;
 
 	path = GetCurrPath( trk );
+#if 0
+	LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) %s pos %0.4f %0.4f -- isSame %d\n",
+				path, pos.x, pos.y, isSame( pos, pos)) )
+#endif
 	for ( path += strlen((char*)path); path[0] || path[1]; path++ ) {
 		if ( path[0] == 0 ) {
 			pos0 = MapPathPos( xx, path[1], 0 );
+#if 0
+			LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) path \"%s\" pos0 %0.4f %0.4f -- isSame %d \n",
+						&path[1], pos0.x, pos0.y, isSame( pos, pos0 )) )
+#endif
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
+#if 0
+			LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) path \"%s\" pos1 %0.4f %0.4f -- isSame %d \n",
+						&path[0], pos1.x, pos1.y, isSame( pos, pos1 )) )
+#endif
 			if ( isSame( pos, pos0 ) ) return pos1;
 			if ( isSame( pos, pos1 ) ) return pos0;
 		}
