@@ -733,9 +733,14 @@ EXPORT void DrawBoxedString(
 		// Reset size to actual size of the box
 		size.x = p[2].x-p[0].x;
 		size.y = p[0].y-p[2].y;
-		Translate( &p1, pos, a, sqrt(size.x*size.x+size.y*size.y) ); //Get to box edge
+		// Pick a point (p1) outside of Box in arrow direction
+		Translate( &p1, pos, a, size.x+size.y );
+		// Find point on edge of Box (p1)
+		ClipLine( &pos, &p1, p[3], 0.0, size );
+		// Draw line from edge (p1) to Arrow head (p2)
 		Translate( &p2, p1, a, size.y*arrowScale );
-		DrawLine( d, pos, p2, 0, color );
+		DrawLine( d, p1, p2, 0, color );
+		// Draw Arrow edges
 		Translate( &p1, p2, a+150, size.y*0.7*arrowScale );
 		DrawLine( d, p1, p2, 0, color );
 		Translate( &p1, p2, a-150, size.y*0.7*arrowScale );
