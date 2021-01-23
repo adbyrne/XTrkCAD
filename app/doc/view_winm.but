@@ -155,6 +155,10 @@ Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} button
 
 \u000
 
+\b Key 's' sets the zoom to show the selected set of objects and pans the window to center the highlit area.
+
+\u000
+
 \b Key '0' or 'o' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
 
 \u000

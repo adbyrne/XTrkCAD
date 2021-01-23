@@ -542,7 +542,7 @@ static BOOL_T EnumerateTurntable( track_p trk )
 		for (inx=0; inx<turntables_da.cnt; inx++) {
 			content = TRUE;
 			sprintf( tmp, "Turntable, diameter %s", FormatDistance(turntables(inx)) );
-			EnumerateList( 1, 0.0, tmp );
+			EnumerateList( 1, 0.0, tmp, NULL );
 		}
 		DYNARR_RESET( FLOAT_T, turntables_da );
 	}

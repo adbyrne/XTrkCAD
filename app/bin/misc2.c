@@ -851,7 +851,7 @@ EXPORT void ScaleLengthEnd( void )
 			if (flexLen > 0.0) {
 				count = (int)ceil( length / (flexLen/(flexUnit?2.54:1.00)));
 			}
-			EnumerateList( count, flexCost, tmp );
+			EnumerateList( count, flexCost, tmp, NULL );
 		}
 		scaleInfo(si).length = 0;
 	}

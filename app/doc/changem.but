@@ -1748,6 +1748,14 @@ If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to 
 
 \u000
 
+\b \e{"e"} sets the zoom to a value that allows all the room to be shown and moves the origin of bottom left of the window to be 0,0
+
+\u000
+
+\b \e{"s"} sets the zoom to show the selected set of objects and pans the window to center the highlit area.
+
+\u000
+
 \dd \e{"c"} - moves the center of the window (i.e., Pans) to be at the cursor position
 
 \u000

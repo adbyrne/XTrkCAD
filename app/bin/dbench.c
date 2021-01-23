@@ -413,7 +413,7 @@ EXPORT void TotalBench( void )
 		bp = &benchEnum(inx);
 		if ( bp->length > 0 ) {
 			PrintBenchLine( title, bp );
-			EnumerateList( 1, 0, title );
+			EnumerateList( 1, 0, title, NULL );
 			bp->length = 0;
 		}
 	}

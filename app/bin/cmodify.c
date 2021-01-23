@@ -752,7 +752,10 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			return C_CONTINUE;
 		}
 		if ((action>>8) == 'e') {
-			DoZoomExtents(0);
+			DoZoomExtents((void*)0);
+		}
+		if ((action>>8) == 's') {
+			DoZoomExtents((void*)1);
 		}
 		if ((action>>8) == '0' || (action>>8 == 'o')) {
 			PanMenuEnter('o');

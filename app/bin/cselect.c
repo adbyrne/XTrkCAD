@@ -1911,7 +1911,10 @@ static STATUS_T CmdMove(
 				PanHere((void*)0);
 			}
 			if ((action>>8) == 'e') {
-				DoZoomExtents(0);
+				DoZoomExtents((void*)0);
+			}
+			if ((action>>8 == 's')) {
+				DoZoomExtents((void*)1);
 			}
 			if ((action>>8) == '0' || (action>>8 == 'o')) {
 				PanMenuEnter('o');
@@ -2268,7 +2271,10 @@ static STATUS_T CmdRotate(
 				PanHere((void*)0);
 			}
 			if ((action>>8) == 'e') {
-				DoZoomExtents(0);
+				DoZoomExtents((void*)0);
+			}
+			if ((action>>8) == 's') {
+				DoZoomExtents((void*)1);
 			}
 			if ((action>>8) == '0' || (action>>8 == 'o')) {
 				PanMenuEnter('o');
@@ -2332,6 +2338,63 @@ static void QuickMove( void* pos) {
 	UndoStart( _("Move Tracks"), "Move Tracks" );
 	MoveTracks( TRUE, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
 	wDrawDelayUpdate( mainD.d, FALSE );
+}
+
+static track_p SelectTrackByIndex(TRKINX_T ti, char * message ) {
+	track_p trk = FindTrack(ti);
+	if (trk) {
+		if (!GetLayerFrozen( GetTrkLayer( trk ) ) ) {
+			if (GetLayerModule(GetTrkLayer(trk))) {
+				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+				snprintf(message, STR_LONG_SIZE, "%s %d",_("In module layer:"),GetTrkLayer(trk)+1);
+			} else {
+				if (!GetLayerVisible(GetTrkLayer(trk))) FlipLayer(GetTrkLayer(trk));
+				if (!GetTrkVisible(trk) && drawTunnel==0 ) drawTunnel = 1; //Force DRAW_TUNNEL_DASH
+				SelectOneTrack(trk,TRUE);
+			}
+		} else {
+			snprintf(message, STR_LONG_SIZE, "%s %d",_("Frozen Layer:"),GetTrkLayer(trk)+1);
+			trk = NULL;
+		}
+	} else {
+		snprintf(message, STR_LONG_SIZE, "%s",_("Not found"));
+	}
+	return trk;
+}
+
+EXPORT void SelectByIndex( void* string) {
+	char result[STR_LONG_SIZE] = "";
+	char * message;
+	SetAllTrackSelect(FALSE);
+	char * cp = (char *)string;
+	cp = strtok(cp,",");
+	BOOL_T single = TRUE;
+	track_p trk = NULL;
+	while (cp) {
+		long ti = strtol(cp,&cp,0);
+		if (ti>0) {
+			message = MyMalloc(STR_LONG_SIZE);
+			trk = SelectTrackByIndex(ti, message);
+			if (!trk || message[0]) {
+				int len = strlen(result);
+				snprintf(result+len,(sizeof(result) - len),"I:%ld %s", ti, message);
+				MyFree(message);
+			}
+		}
+		cp = strtok(NULL,",");
+		if (cp) single = FALSE;
+	}
+
+	DoZoomExtents((void*)1);
+	if (strlen(result))
+		InfoMessage(result);
+	else if (single && trk) {
+		char msg[STR_SIZE];
+		DescribeTrack( trk, msg, sizeof msg );
+		InfoMessage( msg );
+	} else if (!single) {
+		InfoMessage(_("Multiple Selected"));
+	}
 }
 
 static void QuickRotate( void* pangle )
@@ -3536,6 +3599,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,(wMenuCallBack_p) SelectCurrentLayer, (void *) 0);
+	AddIndexMenu( selectPopup1M, SelectByIndex);
 	wMenuSeparatorCreate( selectPopup1M );
 
 	selectPopup2M = MenuRegister( "Track Selected Menu " );
@@ -3544,8 +3608,11 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	wMenuPushCreate( selectPopup2M, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)DoZoomExtents, (void*) 0);
+	wMenuPushCreate( selectPopup2M, "", _("Zoom to selected - 's'"), 0, (wMenuCallBack_p)DoZoomExtents, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 	wMenuSeparatorCreate( selectPopup2M );
+	AddIndexMenu( selectPopup2M, SelectByIndex);
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, (void *) 0);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0,(wMenuCallBack_p) CallPushDescribe, (void*)0);
