@@ -657,12 +657,16 @@ static track_p makeBlock( void )
 	trkEndPt_p endPtP;
 	EPINX_T ep;
 
+#if 0
 	LOG( log_block, 1, ("*** makeBlock(): enter\n"))
+#endif
 
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
 	blk = NewTrack( 0, T_BLOCK, tempEndPts_da.cnt,
 		sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1 );
+#if 0
 	LOG( log_block, 1, ("*** makeBlock: B%d\n",GetTrkIndex(blk)))
+#endif
 
 	initBlockData( blk );
 	blockDebug( blk );
@@ -792,15 +796,19 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	EPINX_T epCnt, epN;
 	track_p epTrk;
 
-//	LOG( log_block, 1, ("*** addSegs(): here T%d from T%d  epFrom %d\n",
-//		GetTrkIndex(here),GetTrkIndex(from),epFrom))
+#if 0
+	LOG( log_block, 1, ("*** addSegs(): here T%d from T%d  epFrom %d\n",
+		here?GetTrkIndex(here):0,from?GetTrkIndex(from):0,epFrom))
+#endif
 	if ( ! IsTrack( here ) ) return;
 
 	epCnt = GetTrkEndPtCnt(here);
 	if ( here == from ) {
 		blockLen = GetTrkLength( here, 0, 1 );
 		if ( epCnt == 2 ) {
-//			LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+#if 0
+			LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+#endif
 			pushDa( here );
 			addSegs( ((from)->endPt)[0].track, here, epFrom );
 			addSegs( ((from)->endPt)[1].track, here, epFrom );
@@ -812,7 +820,9 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	// Check for the end of the scan. For a block its a turnout, for dynamic
 	// its a turnout with toBlock set.
 	if ( epCnt > 2 || here->conBlock ) { // The from seg is one end of the block
-//		LOG( log_block, 1, ("*** addSegs(): switch/block at T%d\n",GetTrkIndex(here)))
+#if 0
+		LOG( log_block, 1, ("*** addSegs(): switch/block at T%d\n",GetTrkIndex(here)))
+#endif
 		epN = from->endPt[0].track == here?0:1;
 
 		pushEp( from, epN );
@@ -825,7 +835,9 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 		blockLen += GetTrkLength( here, 0, 1 );
 
 		pushDa( here );
-//		LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+#if 0
+		LOG( log_block, 1, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
+#endif
 
 		for ( epN = 0; epN < epCnt; epN++ ) {
 			epTrk = here->endPt[epN].track;
@@ -967,7 +979,9 @@ static void GetBlockSegs( track_p s_trk )
 	trkEndPt_p endPtP;
 	EPINX_T ep, lastEp;
 
+#if 0
 	LOG( log_block, 1, ("*** GetBlockSegs(): T%d\n", GetTrkIndex(trk)))
+#endif
 
 	if ( ! IsTrack( trk ) ) return;
 
@@ -983,8 +997,10 @@ static void GetBlockSegs( track_p s_trk )
 	addSegs( trk, trk, 0 );
 
 	// make a sub-block
-//	LOG( log_block, 1, ("*** GetBlockSegs(): T%d blockLen %0.1f (%0.1f)\n",
-//		GetTrkIndex(trk),blockLen,2.1 * maxBlockLength))
+#if 0
+	LOG( log_block, 1, ("*** GetBlockSegs(): T%d blockLen %0.1f (%0.1f)\n",
+		GetTrkIndex(trk),blockLen,2.1 * maxBlockLength))
+#endif
 	if ( blockLen > ( 2.1 * maxBlockLength ) ) {
 		endPtP = &tempEndPts(0);
 		trk = endPtP->prevTrack;
@@ -992,8 +1008,10 @@ static void GetBlockSegs( track_p s_trk )
 			FindDistance( endPtP->pos, trk->endPt[1].pos) ? 0 : 1;
 		len = GetTrkLength( trk, 0, 1 );
 		DYNARR_RESET( btrackinfo_t, blockTrk_da );
-//		LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f pos (%0.3f %0.3f)\n",
-//			GetTrkIndex(trk),ep,len, trk->endPt[ep].pos.x, trk->endPt[ep].pos.y))
+#if 0
+		LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f pos (%0.3f %0.3f)\n",
+			GetTrkIndex(trk),ep,len, trk->endPt[ep].pos.x, trk->endPt[ep].pos.y))
+#endif
 		while ( len <= maxBlockLength && blockLen - len >= maxBlockLength ) {
 			pushDa( trk );
 			lastTrk = trk;
@@ -1002,8 +1020,10 @@ static void GetBlockSegs( track_p s_trk )
 			trk = trk->endPt[ep].track;
 			ep = lastTrk == trk->endPt[0].track ? 1 : 0 ;
 			len += GetTrkLength( trk, 0, 1 );
-//			LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f\n",
-//				GetTrkIndex(trk),ep,len))
+#if 0
+			LOG( log_block, 1, ("*** GetBlockSegs():     T%d-%d len %0.2f\n",
+				GetTrkIndex(trk),ep,len))
+#endif
 		}
 		pushDa( trk );
 		endPtP = &tempEndPts(1);
@@ -1012,8 +1032,10 @@ static void GetBlockSegs( track_p s_trk )
 		endPtP->angle = trk->endPt[lastEp].angle;
 		blockLen = len;
 	}
-//	LOG( log_block, 1, ("*** GetBlockSegs(): T%d len %6.1f segs %d\n",
-//			GetTrkIndex(s_trk), blockLen, blockTrk_da.cnt))
+#if 0
+	LOG( log_block, 1, ("*** GetBlockSegs(): T%d len %6.1f segs %d\n",
+			GetTrkIndex(s_trk), blockLen, blockTrk_da.cnt))
+#endif
 }
 
 static void GetDynamicSegs( track_p trk, EPINX_T ep )
@@ -1040,10 +1062,10 @@ static void GetDynamicSegs( track_p trk, EPINX_T ep )
 // blockLen - preloaded length of block
 void initBlockData( track_p b_trk )
 {
-	blockData_p xx,xx1;
-	track_p trk1;
+	blockData_p xx, xx1;
+	track_p trk, trk0, trk1;
 	wIndex_t iTrack;
-	EPINX_T ep;
+	EPINX_T ep, ep0, ep1, epB0, epB1;
 	trkEndPt_p endPtP;
 
 	// This suppresses displaying the block description
@@ -1065,6 +1087,27 @@ void initBlockData( track_p b_trk )
 			(b_trk)->endPt[ep].option))
 #endif
 	}
+	// b_trk-ep[0] connects with this segment at ep0
+	trk = b_trk->endPt[0].prevTrack;
+	epB0 = isSame( trk->endPt[0].pos, b_trk->endPt[0].pos ) ? 0 : 1;
+	trk0 = trk->endPt[epB0].track;
+	for ( ep0 = 0; ep0 < GetTrkEndPtCnt(trk); ep0++ ) {
+		if ( isSame( trk0->endPt[ep0].pos, b_trk->endPt[0].pos) ) break;
+	}
+	// b_trk-ep[1] connects with this segment at ep1
+	trk = b_trk->endPt[1].prevTrack;
+	epB1 = isSame( trk->endPt[0].pos, b_trk->endPt[1].pos ) ? 0 : 1;
+	trk1 = trk->endPt[epB1].track;
+	for ( ep1 = 0; ep1 < GetTrkEndPtCnt(trk); ep1++ ) {
+		if ( isSame( trk1->endPt[ep1].pos, b_trk->endPt[1].pos) ) break;
+	}
+
+	LOG( log_block, 1, ( "*** initBlockData: T%d-%d -- 0(T%d-%d)-B%d-(T%d-%d)1 -- T%d-%d\n",
+		GetTrkIndex(trk0),ep0,
+		GetTrkIndex(b_trk->endPt[0].prevTrack),epB0,
+		GetTrkIndex(b_trk),
+		GetTrkIndex(b_trk->endPt[1].prevTrack),epB1,
+		GetTrkIndex(trk1),ep1))
 
        	sprintf( blockName,"B%03d", GetTrkIndex( b_trk ) );
 	xx = GetblockData( b_trk );
@@ -1088,6 +1131,7 @@ void initBlockData( track_p b_trk )
 
 	xx->numTracks = blockTrk_da.cnt;
 	b_trk->occupied = 0;
+	LOG( log_block, 1, ( "*** initBlockData: B%d -- ", GetTrkIndex(b_trk)) )
 	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
 		tracklist(iTrack).i = blockTrk(iTrack).i;
 		tracklist(iTrack).t = blockTrk(iTrack).t;
@@ -1095,11 +1139,9 @@ void initBlockData( track_p b_trk )
 			tracklist(iTrack).t->conBlock = b_trk;
 			b_trk->occupied += tracklist(iTrack).t->occupied;
 		}
-#if 0
-		LOG( log_block, 2, ("*** initBlockData(): copying track T%d\n",
-				tracklist(iTrack).i))
-#endif
+		LOG( log_block, 1, ( " T%d", tracklist(iTrack).i) )
 	}
+	LOG( log_block, 1, ( "  -- blockLen %0.2f\n", blockLen) )
 }
 
 // The type is T_BLOCK and the name is ""
@@ -1288,10 +1330,13 @@ EXPORT void AddMissingBlockTrack( void )
     // Loop through all track segs that are not in blocks
     // Create blocks for them when they are long enough and don't end at a track end.
     TRK_ITERATE(trk) {
-	LOG( log_block, 1, ("*** AddMissingBlockTrack() next seg T%d isTrack %d EndPtCnt %d block %d\n",
-		GetTrkIndex(trk), IsTrack(trk), GetTrkEndPtCnt(trk), trk->conBlock != NULL))
-	// seg already in a block
 	if ( ! IsTrack(trk) ) continue;
+	LOG( log_block, 1, ("*** AddMissingBlockTrack() next seg T%d  EndPtCnt %d",
+		GetTrkIndex(trk),GetTrkEndPtCnt(trk)))
+	if ( trk->conBlock )
+		LOG( log_block, 1, ("        B%d", GetTrkIndex(trk->conBlock)))
+	LOG( log_block, 1, ("\n"))
+	// seg already in a block
 	if ( GetTrkEndPtCnt(trk) != 2 ) continue;
 	if ( trk->endPt[0].index < 0 || trk->endPt[1].index < 0 ) continue;
 	if ( trk->conBlock != NULL ) continue;
@@ -1315,6 +1360,7 @@ EXPORT void AddMissingBlockTrack( void )
 		blockUndoStarted = FALSE;
 	}
     }
+    LOG( log_block, 1, ("*** AddMissingBlockTrack() -- exit\n"))
     MainRedraw();
 }
 
