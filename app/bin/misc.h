@@ -370,7 +370,7 @@ extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
 
 void ScaleLengthEnd( void );
-void EnumerateList( long, FLOAT_T, char * );
+void EnumerateList( long, FLOAT_T, char * , char * );
 void EnumerateStart(void);
 void EnumerateEnd(void);
 

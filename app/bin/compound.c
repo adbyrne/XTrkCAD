@@ -1456,6 +1456,7 @@ typedef struct {
 		char * type;
 		char * name;
 		FLOAT_T price;
+		DynString indexes;
 		} enumCompound_t;
 static dynArr_t enumCompound_da;
 #define EnumCompound(N) DYNARR_N( enumCompound_t,enumCompound_da,N)
@@ -1466,6 +1467,7 @@ BOOL_T EnumerateCompound( track_p trk )
 	INT_T inx, inx2;
 	int cmp;
 	long listLabelsOption = listLabels;
+	char * index = MyMalloc(10);
 
 	if ( trk != NULL ) {
 		xx = GetTrkExtraData(trk);
@@ -1484,6 +1486,9 @@ BOOL_T EnumerateCompound( track_p trk )
 			cmp =  strcmp( EnumCompound(inx).name, message );
 			if ( cmp == 0 ) {
 				EnumCompound(inx).count++;
+				sprintf(index,",%d",GetTrkIndex(trk));
+				DynStringCatCStr(&(EnumCompound(inx).indexes),index);
+				MyFree(index);
 				return TRUE;
 			} else if ( cmp > 0 ) {
 				break;
@@ -1497,6 +1502,8 @@ BOOL_T EnumerateCompound( track_p trk )
 			enumerateMaxDescLen = strlen(message);
 		EnumCompound(inx).type = GetTrkTypeName( trk );
 		EnumCompound(inx).count = 1;
+		DynStringMalloc(&(EnumCompound(inx).indexes),100);
+		DynStringPrintf(&(EnumCompound(inx).indexes),"%d",GetTrkIndex(trk));
 		FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, xtitle(xx) );
 		wPrefGetFloat( "price list", message, &(EnumCompound(inx).price), 0.0 );
 	} else {
@@ -1506,12 +1513,15 @@ BOOL_T EnumerateCompound( track_p trk )
 				if (EnumCompound(inx).type[0] == *type) {
 					EnumerateList( EnumCompound(inx).count,
 						EnumCompound(inx).price,
-						EnumCompound(inx).name );
+						EnumCompound(inx).name,
+						DynStringSize(&(EnumCompound(inx).indexes))?DynStringToCStr(&(EnumCompound(inx).indexes)):NULL);
 				}
+				DynStringFree(&(EnumCompound(inx).indexes));
 			}
 		}
 		DYNARR_RESET( enumCompound_t, enumCompound_da );
 	}
+	MyFree(index);
 	return TRUE;
 }
 
