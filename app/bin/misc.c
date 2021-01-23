@@ -1985,7 +1985,7 @@ static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
 
 static void IndexEnterOk(void *);
-static paramData_t indexPLs[] = { { PD_STRING, &trackIndex, "selectIndex",
+static paramData_t indexPLs[] = { { PD_STRING, &trackIndex, "select",
 		PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)100, N_("Indexes:"), 0, 0, sizeof trackIndex } };
 static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
 		/ sizeof indexPLs[0] };
@@ -2066,7 +2066,7 @@ EXPORT void AddMoveMenu(wMenu_p m, moveDialogCallBack_t func) {
 }
 
 EXPORT void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func) {
-	wMenuPushCreate(m, "", _("Enter Track Index ..."), 0,
+	wMenuPushCreate(m, "cmdSelectIndex", _("Select Track Index ..."), 0,
 			(wMenuCallBack_p) StartIndexDialog, (void*) func);
 }
 
@@ -2334,6 +2334,10 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) SelectCurrentLayer, 0, (void *) 0);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0,
 			(void*) (wMenuCallBack_p) SetAllTrackSelect, 0, (void *) 0);
+	wMenuPushCreate(popup1M, "cmdSelectIndex", _("Select Track Index..."), 0,
+				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
+	wMenuPushCreate(popup2M, "cmdSelectIndex", _("Select Track Index..."), 0,
+				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
 	/* Modify */
 	wMenuPushCreate(popup2M, "cmdMove", _("Move"), 0,
 			(wMenuCallBack_p) DoCommandBIndirect, &moveCmdInx);
@@ -2454,6 +2458,7 @@ static void CreateMenus(void) {
 	menuPLs[menuPG.paramCnt].context = (void*)1;
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"), ACCL_SELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", _("Select Current Layer"), ACCL_SETCURLAYER, (void*)(wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L, (void*)(wMenuCallBack_p)StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"), ACCL_DESELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L, (void*)(wMenuCallBack_p)InvertTrackSelect, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", _("Select Stranded Track"), 0L, (void*)(wMenuCallBack_p)OrphanedTrackSelect, 0, (void *)0 );

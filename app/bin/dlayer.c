@@ -255,7 +255,7 @@ static void RedrawLayer( unsigned int l, BOOL_T draw )
 }
 
 
-static void FlipLayer(unsigned int layer)
+EXPORT void FlipLayer(unsigned int layer)
 {
     wBool_t visible;
 

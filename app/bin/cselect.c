@@ -2325,23 +2325,31 @@ static void QuickMove( void* pos) {
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
-static track_p SelectTrackByIndex(TRKINX_T ti ) {
+static track_p SelectTrackByIndex(TRKINX_T ti, char * message ) {
 	track_p trk = FindTrack(ti);
 	if (trk) {
 		if (!GetLayerFrozen( GetTrkLayer( trk ) ) ) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
-				DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
-			} else
+				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+				snprintf(message, STR_LONG_SIZE, "%s %d",_("In module layer:"),GetTrkLayer(trk)+1);
+			} else {
+				if (!GetLayerVisible(GetTrkLayer(trk))) FlipLayer(GetTrkLayer(trk));
+				if (!GetTrkVisible(trk) && drawTunnel==0 ) drawTunnel = 1; //Force DRAW_TUNNEL_DASH
 				SelectOneTrack(trk,TRUE);
+			}
 		} else {
-			InfoMessage(_("Track Frozen"));
+			snprintf(message, STR_LONG_SIZE, "%s %d",_("Frozen Layer:"),GetTrkLayer(trk)+1);
 			trk = NULL;
 		}
+	} else {
+		snprintf(message, STR_LONG_SIZE, "%s",_("Not found"));
 	}
 	return trk;
 }
 
-static void SelectByIndex( void* string) {
+EXPORT void SelectByIndex( void* string) {
+	char result[STR_LONG_SIZE] = "";
+	char * message;
 	SetAllTrackSelect(FALSE);
 	char * cp = (char *)string;
 	cp = strtok(cp,",");
@@ -2349,18 +2357,28 @@ static void SelectByIndex( void* string) {
 	track_p trk = NULL;
 	while (cp) {
 		long ti = strtol(cp,&cp,0);
-		if (ti>0)
-			trk = SelectTrackByIndex(ti);
+		if (ti>0) {
+			message = MyMalloc(STR_LONG_SIZE);
+			trk = SelectTrackByIndex(ti, message);
+			if (!trk || message[0]) {
+				int len = strlen(result);
+				snprintf(result+len,(sizeof(result) - len),"I:%ld %s", ti, message);
+				MyFree(message);
+			}
+		}
 		cp = strtok(NULL,",");
 		if (cp) single = FALSE;
 	}
+
 	DoZoomExtents((void*)1);
-	if (single && trk) {
+	if (strlen(result))
+		InfoMessage(result);
+	else if (single && trk) {
 		char msg[STR_SIZE];
 		DescribeTrack( trk, msg, sizeof msg );
 		InfoMessage( msg );
 	} else if (!single) {
-		InfoMessage("");
+		InfoMessage(_("Multiple Selected"));
 	}
 }
 
@@ -3575,6 +3593,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	wMenuPushCreate( selectPopup2M, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)DoZoomExtents, (void*) 0);
 	wMenuPushCreate( selectPopup2M, "", _("Zoom to selected - 's'"), 0, (wMenuCallBack_p)DoZoomExtents, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 	wMenuSeparatorCreate( selectPopup2M );
