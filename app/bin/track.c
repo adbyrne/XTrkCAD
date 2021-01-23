@@ -558,7 +558,6 @@ EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T * height
 
 EXPORT void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade)
 {
-	printf( "STEECH: T%d.%d E:%0.3f G:%0.3f\n", trk->index, e, height, grade );
 	trk->endPt[e].elev.cachedElev = height;
 	trk->endPt[e].elev.cachedGrade = grade;
 	trk->endPt[e].elev.cacheSet = TRUE;
