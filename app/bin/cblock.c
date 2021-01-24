@@ -119,6 +119,8 @@
 #include "include/utf8convert.h"
 #endif // WINDOWS
 
+static void verifyOccupancy ( void );
+
 EXPORT TRKTYP_T T_BLOCK = -1;
 
 static int log_block = 0;
@@ -1127,7 +1129,10 @@ void initBlockData( track_p b_trk )
 		GetTrkIndex(b_trk->endPt[1].prevTrack),epB1,
 		GetTrkIndex(trk1),ep1))
 
-       	sprintf( blockName,"B%03d", GetTrkIndex( b_trk ) );
+	if ( blockName[0] != 'D' )
+     		sprintf( blockName,"B%03d", GetTrkIndex( b_trk ) );
+	else
+		blockName[0] = 0; // Dynamic blocks
 	xx = GetblockData( b_trk );
 	xx->name = MyStrdup( blockName );
 	blockName[0] = 0;
@@ -1369,6 +1374,7 @@ EXPORT void AddMissingBlockTrack( void )
 	}
 
 	blockScript[0] = 0;
+	sprintf( blockName,"B%03d", GetTrkIndex( trk ) );
 	SetTrkBits( blockTrk(0).t, TB_SELECTED );
 	makeBlock();
 	ClrTrkBits( blockTrk(0).t, TB_SELECTED );
@@ -1400,9 +1406,10 @@ EXPORT void DeleteAllBlockTrack( void )
 
 static void deleteDynamicBlock( track_p trk )
 {
-	track_p blk = trk->conBlock;
+	track_p blk = NULL;
 	blockData_p xx;
 
+	if ( trk->conBlock ) blk = trk->conBlock;
 	if ( ! blk || GetTrkType(blk) != T_BLOCK ) return;
 	xx = GetblockData(blk);
 	if ( ! xx->name || xx->name[0] != 0 ) return;
@@ -1410,6 +1417,7 @@ static void deleteDynamicBlock( track_p trk )
 	LOG( log_block, 1, ("*** deleteDynamicBlock T%d B%d\n", GetTrkIndex(trk), GetTrkIndex(blk)))
 
 	CheckDeleteBlock( blk );
+//	verifyOccupancy();
 }
 
 // trk - seg being entered
@@ -1450,7 +1458,8 @@ static track_p  createDynamicBlock( track_p trk, track_p prevTrk )
 
 	// Get the turnouts in the path
 	blockScript[0] = 0;
-	blockName[0] = 0;
+	blockName[0] = 'D'; // Dynamic block gets temp name "D", will ve changed to ""
+	blockName[1] = 0;
 	GetDynamicSegs( trk, minEp ); // trk[ep] is closest to prevBlock
 	if ( tempEndPts_da.cnt < 2 ) return NULL; // doesn't end at a block
 
@@ -1469,6 +1478,7 @@ static track_p  createDynamicBlock( track_p trk, track_p prevTrk )
 	LOG( log_block, 1, ("*** createDynamicBlock T%d -- B%d -- exit\n",
 		GetTrkIndex(trk),blk?GetTrkIndex(blk):0))
 
+	verifyOccupancy();
 	return blk;
 }
 
@@ -1621,28 +1631,62 @@ EXPORT void SetOccupied( void )
 
 static void verifyOccupancy ( void )
 {
-    track_p b_trk;
+    track_p b_trk, trk, trk0, trk1;
     blockData_p xx;
-    EPINX_T segOcc, iTrack;
+    EPINX_T segOcc, iTrack, ep0, ep1, epB0, epB1;
+    EPINX_T problems = 0;
 
     TRK_ITERATE(b_trk) {
         if ( GetTrkType(b_trk) != T_BLOCK ) continue;
 
         // sum the seg occupancy
         xx = GetblockData( b_trk );
+#if 0
+	LOG(log_block, 1, ("verifyOccupancy: T%d %s --%s--\n",
+				GetTrkIndex(b_trk),GetTrkTypeName(b_trk),xx->name))
+#endif
         for ( segOcc = 0, iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
             segOcc += tracklist(iTrack).t->occupied;
         }
+
+	// b_trk-ep[0] connects with this segment at ep0
+	trk = b_trk->endPt[0].prevTrack;
+	epB0 = isSame( trk->endPt[0].pos, b_trk->endPt[0].pos ) ? 0 : 1;
+	trk0 = trk->endPt[epB0].track;
+	for ( ep0 = 0; ep0 < GetTrkEndPtCnt(trk); ep0++ ) {
+		if ( isSame( trk0->endPt[ep0].pos, b_trk->endPt[0].pos) ) break;
+	}
+	// b_trk-ep[1] connects with this segment at ep1
+	trk = b_trk->endPt[1].prevTrack;
+	epB1 = isSame( trk->endPt[0].pos, b_trk->endPt[1].pos ) ? 0 : 1;
+	trk1 = trk->endPt[epB1].track;
+	for ( ep1 = 0; ep1 < GetTrkEndPtCnt(trk); ep1++ ) {
+		if ( isSame( trk1->endPt[ep1].pos, b_trk->endPt[1].pos) ) break;
+	}
+
         // compare seg and block occupancy
         if ( b_trk->occupied < segOcc ) {
             LOG(log_block, 1, ("verifyOccupancy: B%d \"%s\" occ %d, segs occ %d\n",
                     GetTrkIndex(b_trk), xx->name, b_trk->occupied, segOcc))
+	    LOG( log_block, 1, ( "*** verifyOccupancy:  T%d-%d -- 0(T%d-%d)-B%d-(T%d-%d)1 -- T%d-%d\n",
+		GetTrkIndex(trk0),ep0,
+		GetTrkIndex(b_trk->endPt[0].prevTrack),epB0,
+		GetTrkIndex(b_trk),
+		GetTrkIndex(b_trk->endPt[1].prevTrack),epB1,
+		GetTrkIndex(trk1),ep1))
+            LOG(log_block, 1, ("verifyOccupancy:  "))
             for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
-                LOG(log_block, 1, ("verifyOccupancy: T%d occ %d\n",
+                LOG(log_block, 1, (" T%d  %d,",
                         tracklist(iTrack).i, tracklist(iTrack).t->occupied))
             }
-            NoticeMessage( _("Block occupancy error!"), _("Ok"), NULL);
+            LOG(log_block, 1, ("\n"))
+
+	    problems++;
         }
+    }
+    if ( problems ) {
+	    LOG(log_block, 1, ("verifyOccupancy: %d problems\n", problems))
+            NoticeMessage( _("Block occupancy error!"), _("Ok"), NULL);
     }
 }
 
@@ -1679,8 +1723,8 @@ EXPORT void UpdateOccupied( void )
 //            adjustDynamicOccupied( temp0, prev0 );
             if ( prev0 ) {
                 adjustOccupied( prev0, -1 );
-            if ( prev0->conBlock && prev0->conBlock->occupied == 0 )
-                deleteDynamicBlock( prev0 );
+                if ( prev0->conBlock && prev0->conBlock->occupied == 0 )
+                    deleteDynamicBlock( prev0 );
             }
             if ( temp0 ) {
                 adjustOccupied( temp0, 1 );
@@ -1695,8 +1739,8 @@ EXPORT void UpdateOccupied( void )
 //            adjustDynamicOccupied( temp1, prev1 );
             if ( prev1 ) {
                 adjustOccupied( prev1, -1 );
-            if ( prev1->conBlock && prev1->conBlock->occupied == 0 )
-                deleteDynamicBlock( prev1 );
+                if ( prev1->conBlock && prev1->conBlock->occupied == 0 )
+                    deleteDynamicBlock( prev1 );
             }
             if (temp1) {
                 adjustOccupied( temp1, 1 );
