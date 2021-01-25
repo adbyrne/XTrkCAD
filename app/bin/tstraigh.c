@@ -397,6 +397,8 @@ static BOOL_T ReadStraight( char * line )
 	SetTrkWidth( trk, (int)(options&3) );
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) != 0 ) )
+		SetTrkBits(trk,TB_HIDEDESC);
 	return TRUE;
 }
 
