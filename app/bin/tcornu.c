@@ -223,15 +223,14 @@ static void DrawCornuDescription(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	wFont_p fp;
-    coOrd dpos, epos0, epos1, offpos0, offpos1;
+    coOrd epos0, epos1, offpos0, offpos1;
 
 	if (layoutLabels == 0)
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 			return;
 
-	dpos.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/4);
-	dpos.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/4);
+
 
 	epos0 = xx->cornuData.pos[0];
 	epos1 = xx->cornuData.pos[1];
@@ -250,7 +249,13 @@ static void DrawCornuDescription(
     DrawLine(d,xx->cornuData.pos[1],offpos1,0,color);
     DrawDimLine( d, offpos0, offpos1, message, (wFontSize_t)descriptionFontSize, xx->cornuData.descriptionOff.x+0.5, 0, color, 0x00 );
 
-    if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, dpos, xx->cornuData.length, color);
+    if (GetTrkBits( trk ) & TB_DETAILDESC) {
+		coOrd details_pos;
+		details_pos.x = (offpos1.x - offpos0.x)*(xx->cornuData.descriptionOff.x+0.5) + offpos0.x;
+		details_pos.y = (offpos1.y - offpos0.y)*(xx->cornuData.descriptionOff.x+0.5) + offpos0.y-(2*descriptionFontSize/mainD.dpi);
+
+		AddTrkDetails(d, trk, details_pos, xx->cornuData.length, color);
+    }
 
 }
 

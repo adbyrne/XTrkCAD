@@ -842,10 +842,13 @@ static void DrawJointDescription(
 	DrawLine(d,end1,end1off,0,color);
 	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, xx->descriptionOff.x+0.5, 0, color, 0x00 );
 
-	pos.x = (end1.x-end0.x)/4+end0.x;
-	pos.y = (end1.y-end0.y)/4+end0.y;
+	if (GetTrkBits( trk ) & TB_DETAILDESC) {
+		coOrd details_pos;
+		details_pos.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+		details_pos.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y - (2*descriptionFontSize/mainD.dpi);
 
-	if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, end0, FindDistance(end0,end1), color);
+		AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
+	}
 
 
 }

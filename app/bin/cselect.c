@@ -2650,6 +2650,8 @@ STATUS_T CmdMoveDescription(
 		} else {
 			InfoMessage(_("Drag label"));
 		}
+		if (ep == -1 )
+			DrawTrack( moveDescTrk, &mainD, wDrawColorWhite );
 		/* no break */
 	case C_MOVE:
 		if (moveDescTrk == NULL )

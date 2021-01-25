@@ -175,14 +175,13 @@ static void DrawBezierDescription(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	wFont_p fp;
-    coOrd dpos,epos0,epos1;
+    coOrd epos0,epos1;
 
 	if (layoutLabels == 0)
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-    dpos.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/4);
-    dpos.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/4);
+
 
     epos0 = xx->bezierData.pos[0];
     epos1 = xx->bezierData.pos[3];
@@ -198,8 +197,12 @@ static void DrawBezierDescription(
     DrawLine(d,xx->bezierData.pos[3],epos1,0,color);
     DrawDimLine( d, epos0, epos1, message, (wFontSize_t)descriptionFontSize, xx->bezierData.descriptionOff.x+0.5, 0, color, 0x00 );
 
-    if (GetTrkBits( trk ) & TB_DETAILDESC)
-    	AddTrkDetails(d, trk, dpos, xx->bezierData.length, color);
+    if (GetTrkBits( trk ) & TB_DETAILDESC) {
+    	coOrd details_pos;
+        details_pos.x = (epos1.x - epos0.x)*(xx->bezierData.descriptionOff.x+0.5) + epos0.x;
+        details_pos.y = (epos1.y - epos0.y)*(xx->bezierData.descriptionOff.x+0.5) + epos0.y -(2*descriptionFontSize/mainD.dpi);
+		AddTrkDetails(d, trk, details_pos, xx->bezierData.length, color);
+    }
 
 }
 

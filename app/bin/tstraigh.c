@@ -316,12 +316,13 @@ static void DrawStraightDescription(
 
 	if ( !(GetTrkBits( trk ) & TB_DETAILDESC) ) return;
 
-	coOrd details_pos;
+	if ( GetTrkBits( trk ) & TB_DETAILDESC ) {
+		coOrd details_pos;
+		details_pos.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+		details_pos.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y-(2*descriptionFontSize/mainD.dpi);
 
-	details_pos.x = (end1off.x - end0off.x)/4 + end0off.x;
-	details_pos.y = (end1off.y - end0off.y)/4 + end0off.y;
-
-	if ( GetTrkBits( trk ) & TB_DETAILDESC ) AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
+		AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
+	}
 
 }
 
