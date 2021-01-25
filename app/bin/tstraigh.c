@@ -349,11 +349,16 @@ static void DeleteStraight( track_p t )
 static BOOL_T WriteStraight( track_p t, FILE * f )
 {
 	struct extraData *xx;
+	long options;
 	xx = GetTrkExtraData(t);
 	BOOL_T rc = TRUE;
 
+	options = GetTrkWidth(t) & 0x0F;
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
+		// 0x80 means Show Description
+		options |= 0x80;
 	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d %0.6f %0.6f\n",
-				GetTrkIndex(t), GetTrkLayer(t), (long)GetTrkWidth(t),
+				GetTrkIndex(t), GetTrkLayer(t), options,
 				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
@@ -395,9 +400,11 @@ static BOOL_T ReadStraight( char * line )
 		SetTrkBridge(trk, visible&8);
 	}
 	SetTrkLayer(trk, layer);
-	SetTrkWidth( trk, (int)(options&3) );
+	SetTrkWidth( trk, (int)(options & 0x0F) );
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) )
+		SetTrkBits(trk,TB_HIDEDESC);
 	return TRUE;
 }
 
@@ -931,6 +938,7 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 	SetTrkEndPoint( t, 1, p1, NormalizeAngle( a+180.0 ) );
 	ComputeBoundingBox( t );
 	CheckTrackLength( t );
+	SetTrkBits( t, TB_HIDEDESC );
 	return t;
 }
 
