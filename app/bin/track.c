@@ -1846,10 +1846,13 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	}
 	/*REORIGIN( pos1, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
 	pos1 = GetTrkEndPos(trk,ep);
+	coOrd tpos = pos1;
 	pos1.x += e->doff.x;
 	pos1.y += e->doff.y;
 	*dpos = pos1;
 	if (hidden) *hidden = !(e->option&ELEV_VISIBLE);
+	if (FindDistance(tpos,pos)<FindDistance( pos1, pos ))
+		return FindDistance(tpos,pos);
 	return FindDistance( pos1, pos );
 }
 

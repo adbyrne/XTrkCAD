@@ -241,7 +241,7 @@ static void DrawCornuDescription(
 
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
 
-    sprintf( message, _("Cornu: L %s A %0.3f trk_len=%s min_rad=%s"),
+    sprintf( message, _("Cornu: L %s A %0.3f L %s MinR %s"),
     		FormatDistance(FindDistance(xx->cornuData.pos[0], xx->cornuData.pos[1])),
     		FindAngle(xx->cornuData.pos[0], xx->cornuData.pos[1]),
 			FormatDistance(xx->cornuData.length),
