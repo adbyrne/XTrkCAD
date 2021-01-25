@@ -171,6 +171,8 @@ BOOL_T GetCurveMiddle( track_p trk, coOrd * pos )
 	return TRUE;
 }
 
+static DIST_T DistanceCurve( track_p t, coOrd * p );
+
 DIST_T CurveDescriptionDistance(
 		coOrd pos,
 		track_p trk,
@@ -207,6 +209,10 @@ DIST_T CurveDescriptionDistance(
 	}
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = pd;
+
+	coOrd tpos = pos;
+	if (DistanceCurve(trk, &tpos)<FindDistance(pd, pos))
+		return DistanceCurve(trk, &pos);
 	return FindDistance( pd, pos );
 }
 
