@@ -2474,6 +2474,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 					}
 				}
 			}
+			if (IsClose(dd)) break;
 			if ( !QueryTrack( trk1, Q_HAS_DESC ) && (*mode_o > 0) )
 				continue;
 			if ((labelEnable&LABELENABLE_TRKDESC)==0)
@@ -2699,12 +2700,12 @@ STATUS_T CmdMoveDescription(
 			return C_CONTINUE;
 		if ( moveDescTrk ) {
 			if (mode==0) {
-				DrawEndPt2( &tempD, moveDescTrk, ep, wDrawColorBlue );
+				DrawEndPt2( &tempD, moveDescTrk, ep, drawColorPreviewSelected );
 			} else {
 				if (hidden) {
 					DrawTrack( moveDescTrk,&tempD,wDrawColorAqua);
 				} else {
-					DrawTrack( moveDescTrk,&tempD,wDrawColorBlue);
+					DrawTrack( moveDescTrk,&tempD,drawColorPreviewSelected);
 				}
 			}
 		}
