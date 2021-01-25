@@ -188,14 +188,26 @@ DIST_T CornuDescriptionDistance(
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_CORNU || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden) )
 		return 100000;
-	
-	coOrd offset = xx->cornuData.descriptionOff;
 
-	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) offset = zero;
-	p1.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2) + offset.x;
-	p1.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2) + offset.y;
+	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) xx->cornuData.descriptionOff = zero;
+	
+	coOrd end0, end0off, end1, end1off;
+	end0 = xx->cornuData.pos[0];
+	end1 = xx->cornuData.pos[1];
+	ANGLE_T a;
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,xx->cornuData.descriptionOff.y);
+	Translate(&end1off,end1,a+90,xx->cornuData.descriptionOff.y);
+
+	p1.x = (end1off.x - end0off.x)*(xx->cornuData.descriptionOff.x+0.5) + end0off.x;
+	p1.y = (end1off.y - end0off.y)*(xx->cornuData.descriptionOff.x+0.5) + end0off.y;
+
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = p1;
+
+	coOrd tpos = pos;
+	if (DistanceCornu(trk,&tpos)<FindDistance( p1, pos ))
+		return DistanceCornu(trk,&pos);
 	return FindDistance( p1, pos );
 }
 
@@ -211,16 +223,22 @@ static void DrawCornuDescription(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	wFont_p fp;
-    coOrd pos;
+    coOrd dpos, epos0, epos1, offpos0, offpos1;
 
 	if (layoutLabels == 0)
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 			return;
-    pos.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/2);
-    pos.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/2);
-    pos.x += xx->cornuData.descriptionOff.x;
-    pos.y += xx->cornuData.descriptionOff.y;
+
+	dpos.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/4);
+	dpos.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/4);
+
+	epos0 = xx->cornuData.pos[0];
+	epos1 = xx->cornuData.pos[1];
+	ANGLE_T a = FindAngle(epos0,epos1);
+	Translate(&offpos0,epos0,a+90,xx->cornuData.descriptionOff.y);
+	Translate(&offpos1,epos1,a+90,xx->cornuData.descriptionOff.y);
+
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
 
     sprintf( message, _("Cornu: L %s A %0.3f trk_len=%s min_rad=%s"),
@@ -228,9 +246,11 @@ static void DrawCornuDescription(
     		FindAngle(xx->cornuData.pos[0], xx->cornuData.pos[1]),
 			FormatDistance(xx->cornuData.length),
 			FormatDistance((xx->cornuData.minCurveRadius>=10000.00)?0.0:xx->cornuData.minCurveRadius));
-    DrawDimLine( d, xx->cornuData.pos[0], xx->cornuData.pos[1], message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+    DrawLine(d,xx->cornuData.pos[0],offpos0,0,color);
+    DrawLine(d,xx->cornuData.pos[1],offpos1,0,color);
+    DrawDimLine( d, offpos0, offpos1, message, (wFontSize_t)descriptionFontSize, xx->cornuData.descriptionOff.x+0.5, 0, color, 0x00 );
 
-    if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, pos, xx->cornuData.length, color);
+    if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, dpos, xx->cornuData.length, color);
 
 }
 
@@ -244,35 +264,19 @@ STATUS_T CornuDescriptionMove(
 	static coOrd p0,p1;
 	static BOOL_T editState;
 
-	if (GetTrkType(trk) != T_CORNU) return C_TERMINATE;
+	if (GetTrkType(trk) != T_CORNU) return C_CONTINUE;
 
-	p0.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/2);
-	p0.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/2);
+	ANGLE_T ap;
+    coOrd end0, end0off, end1, end1off;
+    end0 = xx->cornuData.pos[0];
+	end1 = xx->cornuData.pos[1];
+	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
 
-	switch (action) {
-	case C_DOWN:
-		DrawCornuDescription( trk, &mainD, wDrawColorWhite );
-	case C_MOVE:
-	case C_UP:
-		editState = TRUE;
-		p1 = pos;
-        xx->cornuData.descriptionOff.x = pos.x - p0.x;
-        xx->cornuData.descriptionOff.y = pos.y - p0.y;
-        if (action == C_UP) {
-        	editState = FALSE;
-		wDrawColor color = GetTrkColor( trk, &mainD );
-	        DrawCornuDescription( trk, &mainD, color );
-        }
-		return action==C_UP?C_TERMINATE:C_CONTINUE;
-
-	case C_REDRAW:
-		if (editState) {
-		        DrawCornuDescription( trk, &tempD, wDrawColorBlue );
-			DrawLine( &tempD, p1, p0, 0, wDrawColorBlue );
-		}
-		break;
+	xx->cornuData.descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap));
+	xx->cornuData.descriptionOff.x = -0.5 + FindDistance(end0,pos)*cos(D2R(ap))/FindDistance(end0,end1);
+	if (xx->cornuData.descriptionOff.x > 0.5) xx->cornuData.descriptionOff.x = 0.5;
+	if (xx->cornuData.descriptionOff.x < -0.5) xx->cornuData.descriptionOff.x = -0.5;
 		
-	}
 	return C_CONTINUE;
 }
 
