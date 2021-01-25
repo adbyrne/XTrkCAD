@@ -957,7 +957,8 @@ static BOOL_T WriteJoint(
 	struct extraData * xx = GetTrkExtraData(t);
 	BOOL_T rc = TRUE;
 	long options = (long)GetTrkWidth(t);
-	if ( ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) )
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
+			// 0x80 means Show Description
 			options |= 0x80;
 	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
 		GetTrkIndex(t), GetTrkLayer(t), options,
@@ -1011,7 +1012,7 @@ static BOOL_T ReadJoint(
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
-	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) != 0 ) )
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) )
 		SetTrkBits(trk,TB_HIDEDESC);
 	*xx = e;
 	SetEndPts( trk, 2 );
