@@ -42,7 +42,6 @@ static TRKTYP_T T_STRAIGHT = -1;
 
 struct extraData {
 		coOrd descriptionOff;
-		coOrd descriptSize;
 		};
 
 
