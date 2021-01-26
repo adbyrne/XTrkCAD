@@ -467,7 +467,7 @@
 		{"line": "print-physsize", "contents": "Ignore unprintable page margins?" },
 		{"line": "print-registrationMarks", "contents": "Print Registration Marks at 1:1?" },
 		{"line": "print-grid", "contents": "Print Snap Grid?" },
-		{"line": "print-ruler", "contents": "Print Rulers on all page edges?" },
+		{"line": "print-ruler", "contents": "Print Rulers at the layout edge only, or on all page edges, or nowhere?" },
 		{"line": "print-roadbed", "contents": "Print Roadbed Outline?" },
 		{"line": "print-roadbedWidth", "contents": "Print Roadbed Outline" },
 		{"line": "print-origx", "contents": "Origin of the print grid.  This is useful if you want to reprint a set of pages" },

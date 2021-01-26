@@ -121,7 +121,7 @@ static char * printRegistrationMarksLabels[] = { N_("Registration Marks (in 1:1 
 static char * printPageNumberLabels[] = { N_("Page Numbers"), NULL };
 static char * printPhysSizeLabels[] = { N_("Ignore Page Margins"), NULL };
 static char * printGridLabels[] = { N_("Snap Grid"), NULL };
-static char * printRulerLabels[] = { N_("Rulers"), NULL };
+static char * printRulerLabels[] = { N_("Layout Edge"), N_("Every Page"), N_("None"), NULL };
 static char * printRoadbedLabels[] = { N_("Roadbed Outline"), NULL };
 static char * printCenterLineLabels[] = { N_("Centerline below Scale 1:1"), NULL };
 static paramIntegerRange_t rminScale_999 = { 1, 999, 0, PDO_NORANGECHECK_HIGH };
@@ -147,7 +147,7 @@ static paramData_t printPLs[] = {
 #define I_GRID			(11)
 /*11*/ { PD_TOGGLE, &printGrid, "grid", PDO_DLGNOLABELALIGN, printGridLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_RULER			(12)
-/*12*/ { PD_TOGGLE, &printRuler, "ruler", PDO_DLGNOLABELALIGN, printRulerLabels, NULL, BC_HORZ|BC_NOBORDER },
+/*12*/ { PD_RADIO, &printRuler, "ruler", 0, printRulerLabels, N_("Rulers:"), BC_HORZ|BC_NOBORDER },
 #define I_CENTERLINE    (13)
 /*13*/ { PD_TOGGLE, &printCenterLine, "centerLine", PDO_DLGNOLABELALIGN, printCenterLineLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_ROADBED		(14)
@@ -1173,11 +1173,13 @@ static BOOL_T PrintPage(
 				if (clipOrig.x + clipSize.x > roomSize.x + 0.5*printScale) right_clear = TRUE;
 				if (clipOrig.y + clipSize.y > roomSize.y + 0.5*printScale) top_clear = TRUE;
 
-				DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, !base_clear, wDrawColorBlack );
-				DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, left_clear, wDrawColorBlack );
-				DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, right_clear, wDrawColorBlack );
-				DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, !top_clear, wDrawColorBlack );
-				if ( printRuler && currPrintGrid.angle == 0 ) {
+				if (printRuler != 2) {    /* Not None so Edge or Every */
+					DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, !base_clear, wDrawColorBlack );
+					DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, left_clear, wDrawColorBlack );
+					DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, right_clear, wDrawColorBlack );
+					DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, !top_clear, wDrawColorBlack );
+				}
+				if ( printRuler==1 && currPrintGrid.angle == 0 ) {  /* Every Page and not rotated origin */
 					if ( !printRotate ) {
 						p[2] = p[3] = print_d.orig;
 						p[3].x += print_d.size.x;
