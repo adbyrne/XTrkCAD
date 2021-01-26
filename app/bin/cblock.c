@@ -119,7 +119,7 @@
 #include "include/utf8convert.h"
 #endif // WINDOWS
 
-static void verifyOccupancy ( void );
+static void verifyOccupancy ( BOOL_T rpt );
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
@@ -875,6 +875,8 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	}
 }
 
+// Givern a track and ep where a train is entering the track
+// return ep the train will exit the track
 static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
 {
 	EPINX_T epCnt, epN;
@@ -1154,7 +1156,7 @@ void initBlockData( track_p b_trk )
 		trk1?GetTrkIndex(trk1):0,ep1))
 
 	if ( blockName[0] != 'D' )
-     		sprintf( blockName,"B%03d", GetTrkIndex( b_trk ) );
+		sprintf( blockName,"B%03d", GetTrkIndex( b_trk ) );
 	else
 		blockName[0] = 0; // Dynamic blocks
 	xx = GetblockData( b_trk );
@@ -1257,113 +1259,113 @@ EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
 
     xx = GetblockData( b_trk );
     for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
-	/* For all tracks in the block, set the block pointer, conBlock, on the track.  */
+        /* For all tracks in the block, set the block pointer, conBlock, on the track.  */
         t_trk = FindTrack( tracklist(iTrack).i );
-	if ( t_trk == NULL ) { // track is gone, remove reference
+        if ( t_trk == NULL ) { // track is gone, remove reference
 #if 0
-    		LOG( log_block, 1, ("*** ResolveBlockTrack(B%d) T%d is gone\n",
-				GetTrkIndex(b_trk),tracklist(iTrack).i))
+            LOG( log_block, 1, ("*** ResolveBlockTrack(B%d) T%d is gone\n",
+                    GetTrkIndex(b_trk),tracklist(iTrack).i))
 #endif
-		tracklist(iTrack).i = 0;
-		continue;
-	}
-	if ( ! IsTrack( t_trk ) ) { // t_trk is not a track, remove reference
+            tracklist(iTrack).i = 0;
+            continue;
+        }
+        if ( ! IsTrack( t_trk ) ) { // t_trk is not a track, remove reference
 #if 0
-    		LOG( log_block, 1, ("*** ResolveBlockTrack(B%d) T%d is not a track\n",
-				GetTrkIndex(b_trk),GetTrkIndex(t_trk)))
+            LOG( log_block, 1, ("*** ResolveBlockTrack(B%d) T%d is not a track\n",
+                    GetTrkIndex(b_trk),GetTrkIndex(t_trk)))
 #endif
-		tracklist(iTrack).i = 0;
-        	tracklist(iTrack).t = NULL;
-		continue;
-	}
+            tracklist(iTrack).i = 0;
+            tracklist(iTrack).t = NULL;
+            continue;
+        }
         tracklist(iTrack).t = t_trk;
-	if ( t_trk->conBlock == b_trk )
-		t_trk->conBlock = NULL;
-	if ( first < 0 ) first = iTrack;
+        if ( t_trk->conBlock == b_trk )
+            t_trk->conBlock = NULL;
+        if ( first < 0 ) first = iTrack;
 #if 0
         LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): T%d: %p\n",
-		GetTrkIndex(b_trk),GetTrkIndex(t_trk),t_trk))
+                GetTrkIndex(b_trk),GetTrkIndex(t_trk),t_trk))
 #endif
     }
     if ( first < 0 ) {
-	// No segs in block
+        // No segs in block
 #if 0
         LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): No segs in block\n",
-			GetTrkIndex(b_trk)))
+                GetTrkIndex(b_trk)))
 #endif
-	xx->numTracks = 0;
-	blockDebug( b_trk );
+        xx->numTracks = 0;
+        blockDebug( b_trk );
 
-	DeleteTrack( b_trk, FALSE ); // calls DeleteBlock
+        DeleteTrack( b_trk, FALSE ); // calls DeleteBlock
 
-//	SetBlockBoundingBox(b_trk);
-	return FALSE;
+//      SetBlockBoundingBox(b_trk);
+        return FALSE;
     }
     else {
 #if 0
         LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): first T%d: %p\n",
-		GetTrkIndex(b_trk), tracklist(first).i, tracklist(first).t))
+                GetTrkIndex(b_trk), tracklist(first).i, tracklist(first).t))
 #endif
-	// This track is the first in the block
-	t_trk = tracklist(first).t;
+        // This track is the first in the block
+        t_trk = tracklist(first).t;
 
-	// Capture all tracks between turnouts into this block
-	// t_trk is a track segment, b_trk is the controlBlock
-	GetBlockSegs( t_trk );
-	if ( blockTrk_da.cnt == 0 ) {
+        // Capture all tracks between turnouts into this block
+        // t_trk is a track segment, b_trk is the controlBlock
+        GetBlockSegs( t_trk );
+        if ( blockTrk_da.cnt == 0 ) {
 #if 0
-		LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): -No segs\n",
-				GetTrkIndex(b_trk)))
+            LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): -No segs\n",
+                    GetTrkIndex(b_trk)))
 #endif
-		DeleteTrack( b_trk, FALSE );
+            DeleteTrack( b_trk, FALSE );
 
-		return FALSE;
-	}
-	if ( blockLen < minBlockLength ) {
+            return FALSE;
+        }
+        if ( blockLen < minBlockLength ) {
 #if 0
-		LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): len %0.2f < min %0.2f\n",
-				GetTrkIndex(b_trk),blockLen,minBlockLength))
+            LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): len %0.2f < min %0.2f\n",
+                    GetTrkIndex(b_trk),blockLen,minBlockLength))
 #endif
-		DeleteTrack( b_trk, FALSE );
+            DeleteTrack( b_trk, FALSE );
 
-		return FALSE;
-	}
+            return FALSE;
+        }
 
 #if 0
         LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): da.cnt %d blkLen %0.2f\n",
 		GetTrkIndex(b_trk), blockTrk_da.cnt, blockLen))
 #endif
 
-	xx->blkLength = 0.0;
-	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
+        xx->blkLength = 0.0;
+        for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
 #if 0
-		LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): copying track T%d\n",
-			GetTrkIndex(b_trk), blockTrk(iTrack).i))
+            LOG( log_block, 1, ("*** ResolveBlockTrack(B%d): copying track T%d\n",
+            GetTrkIndex(b_trk), blockTrk(iTrack).i))
 #endif
-		tracklist(iTrack).i = blockTrk(iTrack).i;
-		tracklist(iTrack).t = blockTrk(iTrack).t;
-		blockTrk(iTrack).t->conBlock = b_trk;
-		xx->blkLength += GetTrkLength( blockTrk(iTrack).t, 0, 1 );
-	}
-	xx->numTracks = blockTrk_da.cnt;
-	for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
-		endPtP = &tempEndPts(ep);
-		b_trk->endPt[ep].prevTrack = endPtP->prevTrack;
-		b_trk->endPt[ep].pos = endPtP->pos;
-		b_trk->endPt[ep].angle = endPtP->angle;
-		b_trk->endPt[ep].option = 0;
-	}
-	blockDebug( b_trk );
-//	SetBlockBoundingBox(trk);
+            tracklist(iTrack).i = blockTrk(iTrack).i;
+            tracklist(iTrack).t = blockTrk(iTrack).t;
+            blockTrk(iTrack).t->conBlock = b_trk;
+            xx->blkLength += GetTrkLength( blockTrk(iTrack).t, 0, 1 );
+        }
+        xx->numTracks = blockTrk_da.cnt;
+        for ( ep = 0; ep < tempEndPts_da.cnt; ep++ ) {
+            endPtP = &tempEndPts(ep);
+            b_trk->endPt[ep].prevTrack = endPtP->prevTrack;
+            b_trk->endPt[ep].pos = endPtP->pos;
+            b_trk->endPt[ep].angle = endPtP->angle;
+            b_trk->endPt[ep].option = 0;
+        }
+        blockDebug( b_trk );
+//      SetBlockBoundingBox(trk);
     }
 
     if ( ! blockCheckContigiousPath( FALSE ) ) {
-    	if ( NoticeMessage( _("resolveBlockTrack(B%d): is not continuous"),
-			_("Continue"), NULL, GetTrkIndex(b_trk)) ) {
-    		exit(4);
-    	} else {
-    		rc = 4;
-    	}
+        if ( NoticeMessage( _("resolveBlockTrack(B%d): is not continuous"),
+                    _("Continue"), NULL, GetTrkIndex(b_trk)) ) {
+            exit(4);
+        } else {
+            rc = 4;
+        }
     }
 
     return (rc==0);
@@ -1384,7 +1386,7 @@ EXPORT void UpdateBlockTrack( void )
     TRK_ITERATE(trk) {
         if ( GetTrkType(trk) == T_BLOCK ) {
             ResolveBlockTrack( trk );
-	}
+        }
     }
     LOG( log_block, 1, ("*** UpdateBlockTrack -- exit\n"))
 
@@ -1463,7 +1465,7 @@ static void deleteDynamicBlock( track_p trk )
 	LOG( log_block, 1, ("*** deleteDynamicBlock T%d B%d\n", GetTrkIndex(trk), GetTrkIndex(blk)))
 
 	CheckDeleteBlock( blk );
-//	verifyOccupancy();
+//	verifyOccupancy( FALSE );
 }
 
 // trk - seg being entered
@@ -1524,7 +1526,7 @@ static track_p  createDynamicBlock( track_p trk, track_p prevTrk )
 	LOG( log_block, 1, ("*** createDynamicBlock T%d -- B%d -- exit\n",
 		GetTrkIndex(trk),blk?GetTrkIndex(blk):0))
 
-	verifyOccupancy();
+	verifyOccupancy( TRUE );
 	return blk;
 }
 
@@ -1671,11 +1673,12 @@ EXPORT void SetOccupied( void )
 	if ( GetTrkEndPtCnt( temp1 ) > 2 && temp1 != temp0 )
             createDynamicBlock( temp1, temp0 );
     }
+    verifyOccupancy ( TRUE );
 
     MainRedraw();
 }
 
-static void verifyOccupancy ( void )
+static void verifyOccupancy ( BOOL_T rpt )
 {
     track_p b_trk, trk, trk0, trk1;
     blockData_p xx;
@@ -1687,39 +1690,44 @@ static void verifyOccupancy ( void )
 
         // sum the seg occupancy
         xx = GetblockData( b_trk );
-#if 0
-	LOG(log_block, 1, ("verifyOccupancy: T%d %s --%s--\n",
-				GetTrkIndex(b_trk),GetTrkTypeName(b_trk),xx->name))
-#endif
+        if (rpt ) {
+            LOG(log_block, 1, ("verifyOccupancy: T%d %s --%s--\n",
+                        GetTrkIndex(b_trk),GetTrkTypeName(b_trk),xx->name))
+	}
+
         for ( segOcc = 0, iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
             segOcc += tracklist(iTrack).t->occupied;
         }
 
-	// b_trk-ep[0] connects with this segment at ep0
-	trk = b_trk->endPt[0].prevTrack;
-	epB0 = isSame( trk->endPt[0].pos, b_trk->endPt[0].pos ) ? 0 : 1;
-	trk0 = trk->endPt[epB0].track;
-	for ( ep0 = 0; ep0 < GetTrkEndPtCnt(trk); ep0++ ) {
-		if ( isSame( trk0->endPt[ep0].pos, b_trk->endPt[0].pos) ) break;
-	}
-	// b_trk-ep[1] connects with this segment at ep1
-	trk = b_trk->endPt[1].prevTrack;
-	epB1 = isSame( trk->endPt[0].pos, b_trk->endPt[1].pos ) ? 0 : 1;
-	trk1 = trk->endPt[epB1].track;
-	for ( ep1 = 0; ep1 < GetTrkEndPtCnt(trk); ep1++ ) {
-		if ( isSame( trk1->endPt[ep1].pos, b_trk->endPt[1].pos) ) break;
-	}
+        // b_trk-ep[0] connects with this segment at ep0
+        trk = b_trk->endPt[0].prevTrack;
+        epB0 = isSame( trk->endPt[0].pos, b_trk->endPt[0].pos ) ? 0 : 1;
+        trk0 = trk->endPt[epB0].track;
+        for ( ep0 = 0; ep0 < GetTrkEndPtCnt(trk); ep0++ ) {
+            if ( isSame( trk0->endPt[ep0].pos, b_trk->endPt[0].pos) ) break;
+        }
+
+        // b_trk-ep[1] connects with this segment at ep1
+        trk = b_trk->endPt[1].prevTrack;
+        epB1 = isSame( trk->endPt[0].pos, b_trk->endPt[1].pos ) ? 0 : 1;
+        trk1 = trk->endPt[epB1].track;
+        for ( ep1 = 0; ep1 < GetTrkEndPtCnt(trk); ep1++ ) {
+            if ( isSame( trk1->endPt[ep1].pos, b_trk->endPt[1].pos) ) break;
+        }
 
         // compare seg and block occupancy
-        if ( b_trk->occupied < segOcc ) {
+        if ( b_trk->occupied < segOcc )
+            problems++;
+
+        if ( rpt || problems ) {
             LOG(log_block, 1, ("verifyOccupancy: B%d \"%s\" occ %d, segs occ %d\n",
                     GetTrkIndex(b_trk), xx->name, b_trk->occupied, segOcc))
-	    LOG( log_block, 1, ( "*** verifyOccupancy:  T%d-%d -- 0(T%d-%d)-B%d-(T%d-%d)1 -- T%d-%d\n",
-		GetTrkIndex(trk0),ep0,
-		GetTrkIndex(b_trk->endPt[0].prevTrack),epB0,
-		GetTrkIndex(b_trk),
-		GetTrkIndex(b_trk->endPt[1].prevTrack),epB1,
-		GetTrkIndex(trk1),ep1))
+            LOG( log_block, 1, ( "*** verifyOccupancy:  T%d-%d -- 0(T%d-%d)-B%d-(T%d-%d)1 -- T%d-%d\n",
+                GetTrkIndex(trk0),ep0,
+                GetTrkIndex(b_trk->endPt[0].prevTrack),epB0,
+                GetTrkIndex(b_trk),
+                GetTrkIndex(b_trk->endPt[1].prevTrack),epB1,
+                GetTrkIndex(trk1),ep1))
             LOG(log_block, 1, ("verifyOccupancy:  "))
             for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
                 LOG(log_block, 1, (" T%d  %d,",
@@ -1727,12 +1735,12 @@ static void verifyOccupancy ( void )
             }
             LOG(log_block, 1, ("\n"))
 
-	    problems++;
+            problems++;
         }
     }
     if ( problems ) {
-	    LOG(log_block, 1, ("verifyOccupancy: %d problems\n", problems))
-            NoticeMessage( _("Block occupancy error!"), _("Ok"), NULL);
+        LOG(log_block, 1, ("verifyOccupancy: %d problems\n", problems))
+        NoticeMessage( _("Block occupancy error!"), _("Ok"), NULL);
     }
 }
 
@@ -1808,7 +1816,7 @@ EXPORT void UpdateOccupied( void )
             (temp1)?temp1->occupied:-999));
 #endif
     }
-    verifyOccupancy();
+    verifyOccupancy( TRUE );
 #if 0
     LOG(log_block, 1, ("UpdateOccupied() -- exit \n"))
 #endif
