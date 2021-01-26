@@ -701,6 +701,8 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	assert ( endPt != NULL );
 	if (bWriteEndPtDirectIndex && endPt->index > 0) {
 		rc &= fprintf( f, "\tT4 %d ", endPt->index )>0;
+	} else if ( GetTrkType( trk ) == T_BLOCK ) {
+		rc &= fprintf( f, "\tT4 %d ", GetTrkIndex( endPt->prevTrack ) )>0;
 	} else if (endPt->track == NULL ||
 		( exportingTracks && !GetTrkSelected(endPt->track) ) ) {
 		rc &= fprintf( f, "\tE4 " )>0;
