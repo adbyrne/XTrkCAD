@@ -89,6 +89,7 @@ struct extraData {
 		BOOL_T Scurve;			/* T: is an S-curve */
 		coOrd pos;				/* Pos of origin */
 		ANGLE_T angle;			/* Angle of curve tangent */
+		coOrd descriptionOff;   /* Offset of description */
 		};
 
 #define xl0			extraData->l0
@@ -766,7 +767,19 @@ STATUS_T JointDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-    return C_CONTINUE;
+	struct extraData *xx = GetTrkExtraData(trk);
+	ANGLE_T ap;
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);;
+	end1 = GetTrkEndPos(trk,1);
+	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
+
+	xx->descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap));
+	xx->descriptionOff.x = -0.5 + FindDistance(end0,pos)*cos(D2R(ap))/FindDistance(end0,end1);
+	if (xx->descriptionOff.x > 0.5) xx->descriptionOff.x = 0.5;
+	if (xx->descriptionOff.x < -0.5) xx->descriptionOff.x = -0.5;
+
+	return C_CONTINUE;
 }
 
 DIST_T JointDescriptionDistance(
@@ -782,19 +795,23 @@ DIST_T JointDescriptionDistance(
 	if ( GetTrkType( trk ) != T_EASEMENT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
 		return 100000;
 
-	ANGLE_T a;
+
 	coOrd end0, end0off, end1, end1off;
 	end0 = GetTrkEndPos(trk,0);
 	end1 = GetTrkEndPos(trk,1);
-	a = FindAngle(end0,end1);
-	Translate(&end0off,end0,a+90,2*trackGauge);
-	Translate(&end1off,end1,a+90,2*trackGauge);
+	ANGLE_T a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,xx->descriptionOff.y);
+	Translate(&end1off,end1,a+90,xx->descriptionOff.y);
 
-	p1.x = (end1off.x - end0off.x)/2 + end0off.x ;
-	p1.y = (end1off.y - end0off.y)/2 + end0off.y ;
+	p1.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+	p1.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y;
 
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = p1;
+
+	coOrd tpos = pos;
+	if (DistanceJoint(trk,&tpos)<FindDistance( p1, pos ))
+		return DistanceJoint(trk,&pos);
 	return FindDistance( p1, pos );
 }
 static void DrawJointDescription(
@@ -806,9 +823,6 @@ static void DrawJointDescription(
 	coOrd pos;
 	DIST_T grade=0, sep=0;
 	ANGLE_T a;
-
-
-
 	if (layoutLabels == 0)
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0 )
@@ -818,21 +832,23 @@ static void DrawJointDescription(
 	end0 = GetTrkEndPos(trk,0);
 	end1 = GetTrkEndPos(trk,1);
 	a = FindAngle(end0,end1);
-	Translate(&end0off,end0,a+90,2*trackGauge);
-	DrawLine(d,end0,end0off,0,color);
-	Translate(&end1off,end1,a+90,2*trackGauge);
-	DrawLine(d,end1,end1off,0,color);
+	Translate(&end0off,end0,a+90,xx->descriptionOff.y);
+	Translate(&end1off,end1,a+90,xx->descriptionOff.y);
 
-
-	sprintf( message, "Joint: L %s A %0.3f, l0 %s l1 %s R %s L %s",
+	sprintf( message, "Joint: L %s A %0.3f, l0 %s l1 %s R %s L %s\n",
 			FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1),
 			FormatDistance(xx->l0), FormatDistance(xx->l1), FormatDistance(xx->R), FormatDistance(xx->L));
-	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+	DrawLine(d,end0,end0off,0,color);
+	DrawLine(d,end1,end1off,0,color);
+	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, xx->descriptionOff.x+0.5, 0, color, 0x00 );
 
-	pos.x = (end1.x-end0.x)/4+end0.x;
-	pos.y = (end1.y-end0.y)/4+end0.y;
+	if (GetTrkBits( trk ) & TB_DETAILDESC) {
+		coOrd details_pos;
+		details_pos.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+		details_pos.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y - (2*descriptionFontSize/mainD.dpi);
 
-	if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, end0, FindDistance(end0,end1), color);
+		AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
+	}
 
 
 }
@@ -941,12 +957,13 @@ static BOOL_T WriteJoint(
 	struct extraData * xx = GetTrkExtraData(t);
 	BOOL_T rc = TRUE;
 	long options = (long)GetTrkWidth(t);
-	if ( ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) )
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
+			// 0x80 means Show Description
 			options |= 0x80;
-	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f\n",
+	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
 		GetTrkIndex(t), GetTrkLayer(t), options,
 		GetTrkScaleName(t), GetTrkVisible(t), xx->l0, xx->l1, xx->R, xx->L,
-		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle )>0;
+		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
 	rc &= fprintf(f, "\t%s\n", END_SEGS )>0;
@@ -967,15 +984,22 @@ static BOOL_T ReadJoint(
 	wIndex_t layer;
 	long options;
 	DIST_T elev;
+	char * cp = NULL;
+	coOrd descriptionOff = {0.0,0.0};
 
-	if ( !GetArgs( line+6, paramVersion<3?"dXZsdffffdddpYf":paramVersion<9?"dLl00sdffffdddpYf":"dLl00sdffffdddpff",
+	if ( !GetArgs( line+6, paramVersion<3?"dXZsdffffdddpYfc":paramVersion<9?"dLl00sdffffdddpYfc":"dLl00sdffffdddpffc",
 		&index, &layer, &options, scale, &visible, &e.l0, &e.l1, &e.R, &e.L,
-		&e.flip, &e.negate, &e.Scurve, &e.pos, &elev, &e.angle) )
+		&e.flip, &e.negate, &e.Scurve, &e.pos, &elev, &e.angle, &cp) )
 		return FALSE;
+	if (cp) {
+		if (!GetArgs(cp,"p",&descriptionOff))
+			return FALSE;
+	}
 	if ( !ReadSegs() )
 		return FALSE;
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
 	xx = GetTrkExtraData(trk);
+	xx->descriptionOff = descriptionOff;
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);
@@ -988,7 +1012,7 @@ static BOOL_T ReadJoint(
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
-	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) != 0 ) )
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) )
 		SetTrkBits(trk,TB_HIDEDESC);
 	*xx = e;
 	SetEndPts( trk, 2 );

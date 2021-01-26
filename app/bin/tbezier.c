@@ -130,6 +130,7 @@ static void ComputeBezierBoundingBox( track_p trk, struct extraData * xx )
     SetBoundingBox( trk, hi, lo );
 }
 
+static DIST_T DistanceBezier( track_p t, coOrd * p );
 
 DIST_T BezierDescriptionDistance(
 		coOrd pos,
@@ -143,15 +144,26 @@ DIST_T BezierDescriptionDistance(
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_BEZIER || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
 		return 100000;
-	
-	coOrd offset = xx->bezierData.descriptionOff;
 
-	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) offset = zero;
+	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) xx->bezierData.descriptionOff = zero;
 
-	p1.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/4) + offset.x;
-	p1.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/4) + offset.y;
+	coOrd end0, end0off, end1, end1off;
+	end0 = xx->bezierData.pos[0];
+	end1 = xx->bezierData.pos[3];
+	ANGLE_T a;
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,xx->bezierData.descriptionOff.y);
+	Translate(&end1off,end1,a+90,xx->bezierData.descriptionOff.y);
+
+	p1.x = (end1off.x - end0off.x)*(xx->bezierData.descriptionOff.x+0.5) + end0off.x;
+	p1.y = (end1off.y - end0off.y)*(xx->bezierData.descriptionOff.x+0.5) + end0off.y;
+
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = p1;
+
+	coOrd tpos = pos;
+	if (DistanceBezier(trk,&tpos)<FindDistance( p1, pos ))
+		return DistanceBezier(trk,&pos);
 	return FindDistance( p1, pos );
 }
 
@@ -163,25 +175,34 @@ static void DrawBezierDescription(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	wFont_p fp;
-    coOrd pos;
+    coOrd epos0,epos1;
 
 	if (layoutLabels == 0)
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-    pos.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/4);
-    pos.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/4);
-    pos.x += xx->bezierData.descriptionOff.x;
-    pos.y += xx->bezierData.descriptionOff.y;
+
+
+    epos0 = xx->bezierData.pos[0];
+    epos1 = xx->bezierData.pos[3];
+    ANGLE_T a = FindAngle(epos0,epos1);
+    Translate(&epos0,epos0,a+90,xx->bezierData.descriptionOff.y);
+    Translate(&epos1,epos1,a+90,xx->bezierData.descriptionOff.y);
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
     sprintf( message, _("Bez: L%s A%0.3f trk_len=%s min_rad=%s"),
     			FormatDistance(FindDistance(xx->bezierData.pos[0],xx->bezierData.pos[3])),
 				FindAngle(xx->bezierData.pos[0],xx->bezierData.pos[3]),
 				FormatDistance(xx->bezierData.length), FormatDistance(xx->bezierData.minCurveRadius>10000?0.0:xx->bezierData.minCurveRadius));
-    DrawDimLine( d, xx->bezierData.pos[0], xx->bezierData.pos[3], message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+    DrawLine(d,xx->bezierData.pos[0],epos0,0,color);
+    DrawLine(d,xx->bezierData.pos[3],epos1,0,color);
+    DrawDimLine( d, epos0, epos1, message, (wFontSize_t)descriptionFontSize, xx->bezierData.descriptionOff.x+0.5, 0, color, 0x00 );
 
-    if (GetTrkBits( trk ) & TB_DETAILDESC)
-    	AddTrkDetails(d, trk, pos, xx->bezierData.length, color);
+    if (GetTrkBits( trk ) & TB_DETAILDESC) {
+    	coOrd details_pos;
+        details_pos.x = (epos1.x - epos0.x)*(xx->bezierData.descriptionOff.x+0.5) + epos0.x;
+        details_pos.y = (epos1.y - epos0.y)*(xx->bezierData.descriptionOff.x+0.5) + epos0.y -(2*descriptionFontSize/mainD.dpi);
+		AddTrkDetails(d, trk, details_pos, xx->bezierData.length, color);
+    }
 
 }
 
@@ -196,32 +217,18 @@ STATUS_T BezierDescriptionMove(
 	static BOOL_T editState = FALSE;
 
 	if (GetTrkType(trk) != T_BEZIER) return C_TERMINATE;
-	p0.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/2);
-    p0.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/2);
-	switch (action) {
-	case C_DOWN:
-		DrawBezierDescription( trk, &mainD, wDrawColorWhite );
-	case C_MOVE:
-	case C_UP:
-		editState = TRUE;
-		p1 = pos;
-        xx->bezierData.descriptionOff.x = pos.x - p0.x;
-        xx->bezierData.descriptionOff.y = pos.y - p0.y;
-        if (action == C_UP) {
-        	editState = FALSE;
-		wDrawColor color = GetTrkColor( trk, &mainD );
-		DrawBezierDescription( trk, &mainD, color );
-        }
-		return action==C_UP?C_TERMINATE:C_CONTINUE;
-	case C_REDRAW:
-		if (editState) {
-			DrawBezierDescription( trk, &tempD, wDrawColorBlue );
-			DrawLine( &tempD, p1, p0, 0, wDrawColorBlue );
-		}
-		break;
 
-		
-	}
+	ANGLE_T ap;
+	coOrd end0, end0off, end1, end1off;
+	end0 = xx->bezierData.pos[0];
+	end1 = xx->bezierData.pos[3];
+	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
+
+	xx->bezierData.descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap));
+	xx->bezierData.descriptionOff.x = -0.5 + FindDistance(end0,pos)*cos(D2R(ap))/FindDistance(end0,end1);
+	if (xx->bezierData.descriptionOff.x > 0.5) xx->bezierData.descriptionOff.x = 0.5;
+	if (xx->bezierData.descriptionOff.x < -0.5) xx->bezierData.descriptionOff.x = -0.5;
+
 	return C_CONTINUE;
 }
 

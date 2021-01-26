@@ -1101,18 +1101,66 @@ Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{En
 
 \G{png.d/bmovedes.png}
 
-This command is used to enable and move Elevation, Grade, Station (\K{cmdElevation}), Straight Track (\K{cmdStraight}), Curved Track (\K{cmdCurve}), Bezier (\K{cmdBezier}, Cornu (\K{cmdCornu}), Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
+This command is used to move Elevation, Grade, or Station (\K{cmdElevation}), and to enable/disable and move
+Straight Track (\K{cmdStraight}), Curved Track (\K{cmdCurve}), Bezier (\K{cmdBezier}, Cornu (\K{cmdCornu}), Joint (\K{cmdJoin}), Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
 
 The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item or the \f{Move Description} button.
 
-Click the \f{Move Description} button to activate the \f{Move Description} command. As the cursor passes close to an object that can display a label it will be highlighted. A dark blue indicates a label that has "Show Description" set on, a light blue set off.
+Click the \f{Move Description} button to activate the \f{Move Description} command. As the cursor passes close to an object that can display a label it will be highlighted. 
+A dark blue indicates a label that has "Show Description" set on, a teal color means it is set to hide.
 
 Use \e{Left+Drag} to move the label to a new position and unhide if hidden. Once moved, the label becomes fixed in a position relative to the object. Subsequent moves of that object will cause the label to move as well.
 
-This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}).
+This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}). 
 
-The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter "\f{s}" will show a hidden description. 
-The letter "\f{d}" will enable and disable detailed descriptions. There is a \f{Context Menu} Show/Hide Toggle as well.
+Note that labels need to be visible in the Display menu and the layout needs to be zoomed in enough to show labels for them to be moved.
+
+There are keys that control the display of description when hovering over a description or a track.
+
+\b The letter "\f{s}" when hovering over a track will show the hidden description - the teal highlight will show which tracks can have descriptions. 
+
+\b The letter "\f{h}", when hovering over the track or description, can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix, Joint or Turnout Labels. 
+
+\b The letter "\f{d}" will enable and disable a detailed description which is intended for tracklaying - it is a table of points and track angles that lie along the track path. 
+
+Using these values a curve can be constructed even for complex objects such as Bezier or Cornu.
+
+There is a \f{Context Menu} Show/Hide Toggle as well.
+
+Labels can be moved by hovering the "hot spots" or over the attached track object. \e{Left-Drag} will reposition it. Elevation labels can be selected by hovering of thier centers or the end point they refer to.
+Note that end points with elevation mode "None" are not selectable. 
+ 
+\b Cornu, Bezier, Straight and Joint (Easment) Labels can be moved along the line between the end-points and also laterally. The fields show data about the curves. 
+
+\lcont{\u000
+
+\b Cornu and Bezier Tracks show the "chord" length, its absolute angle, and the length of the track and the minimum radius. 
+To lay these variable radius curves out, the detailed description selected by \f{'d'} is suggested. 
+
+\b Joint/Easement Tracks show the "chord" length and abslute angle and easement curve constructing values of Radius and Lengths. 
+For larger easmements, the detailed position and angle description selected by \f{'d'} may be useful.
+
+\b Straight Tracks show the length and the absolute angle.
+
+}
+
+\u000
+
+\b Curve Track Labels can be moved so that the label is somewhere on a radial line from the center to a position within the arc. 
+A Curve label shows the absolute angle of the chord, its length, the Curve Radius and the deflection from the chord at the center of it. 
+This enables the curve to be laid out even if the center point of the arc is inaccesible. Note that the detailed description may also be helpful in this case.
+
+\u000
+
+\b Compound (Structure and Turnout) Labels can be moved without restriction. They show the Object's Title information. 
+
+\u000
+
+\b Elevation points labels can be moved without restriction - they show the Grade, Elevation, or Station Name as appropriate. 
+
+\u000
+
+\b The detailed description setting is not preserved in the saved layout. It is designed for use when transferring a complex part of the plan to a real layout.  
 
 Note - existing defined elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElevation} command.
 

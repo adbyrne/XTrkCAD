@@ -1846,10 +1846,13 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	}
 	/*REORIGIN( pos1, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
 	pos1 = GetTrkEndPos(trk,ep);
+	coOrd tpos = pos1;
 	pos1.x += e->doff.x;
 	pos1.y += e->doff.y;
 	*dpos = pos1;
 	if (hidden) *hidden = !(e->option&ELEV_VISIBLE);
+	if (FindDistance(tpos,pos)<FindDistance( pos1, pos ))
+		return FindDistance(tpos,pos);
 	return FindDistance( pos1, pos );
 }
 
@@ -1861,7 +1864,6 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		coOrd pos )
 {
 	static coOrd p0, p1;
-	static BOOL_T editState = FALSE;
 	elev_t *e, *e1;
 	track_p trk1;
 
@@ -1875,7 +1877,6 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		/*no break*/
 	case C_MOVE:
 	case C_UP:
-		editState = TRUE;
 		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
 		e->doff.y = (pos.y-p0.y);
@@ -1884,17 +1885,13 @@ EXPORT STATUS_T EndPtDescriptionMove(
 			e1->doff = e->doff;
 		}
 		if ( action == C_UP ) {
-			editState = FALSE;
 			wDrawColor color = GetTrkColor( trk, &mainD );
 			DrawEndElev( &mainD, trk, ep, color );
 		}
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
-		DrawEndElev( &tempD, trk, ep, wDrawColorBlue );
-		if ( editState ) {
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
-		}
+		DrawEndElev( &tempD, trk, ep, drawColorPreviewSelected );
 		break;
 	}
 	return C_CONTINUE;
@@ -3150,7 +3147,7 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	coOrd startLine = pp, endLine = pp;
 	pp.x += elev->doff.x;
 	pp.y += elev->doff.y;
-	if (FindDistance(pp,startLine)>descriptionFontSize*2/d->dpi) {
+	if (color==drawColorPreviewSelected) {
 		Translate(&endLine,pp,FindAngle(pp,startLine),descriptionFontSize/d->dpi);
 		DrawLine( d, startLine, endLine, 0, color );
 	}
