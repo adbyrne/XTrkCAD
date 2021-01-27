@@ -1935,6 +1935,8 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 EXPORT coOrd mainCenter;
 
+int iRoundConstraint = 5;
+double fPrecFactor = 1.0;
 
 static void DrawMapBoundingBox( BOOL_T set )
 {
@@ -1948,11 +1950,14 @@ static void DrawMapBoundingBox( BOOL_T set )
 
 static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder, wBool_t round  )
 {
-LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
+LOG( log_pan, 2, ( "ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
 				size.x, size.y ) )
 
 	coOrd bound = zero;
+	double fEnglishPrecision;
+	double fMetricPrecision;
+	double fPrecision;
 
     if ( !bNoBorder ) {
 		bound.x = size.x/2;
@@ -1982,7 +1987,16 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	if (orig->y < (0-bound.y))
 				orig->y = 0-bound.y;
 
-	if (round) {
+	round = iRoundConstraint;
+	if (round == 1) {
+		if (mainD.scale >= 1.0) {
+			fEnglishPrecision = 4;
+			fMetricPrecision = 2.54*2;
+		} else {
+			fEnglishPrecision = 64;
+			fMetricPrecision = 25.4*2;
+		}
+#ifdef LATER
 		if (mainD.scale >= 1.0) {
 			if (units == UNITS_ENGLISH) {
 				orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
@@ -2000,10 +2014,120 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 				orig->y = floor(orig->y*25.4*2)/(25.4*2);
 			}
 		}
+#endif
+		if ( units == UNITS_ENGLISH )
+			fPrecision = fEnglishPrecision;
+		else
+			fPrecision = fMetricPrecision;
+	} else if ( round == 2 ) {
+		if (mainD.scale >= 100.0) {
+			fEnglishPrecision = 1.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 50.0) {
+			fEnglishPrecision = 2.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 25.0) {
+			fEnglishPrecision = 4.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 12.0) {
+			fEnglishPrecision = 8.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 6.0) {
+			fEnglishPrecision = 16.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 3.0) {
+			fEnglishPrecision = 32.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 1.0) {
+			fEnglishPrecision = 64.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 0.5) {
+			fEnglishPrecision = 125.0;
+			fMetricPrecision = 2.54*2;
+		} else if (mainD.scale >= 0.2) {
+			fEnglishPrecision = 250.0;
+			fMetricPrecision = 2.54*2;
+		} else {
+			fEnglishPrecision = 1000.0;
+			fMetricPrecision = 2.54*2;
+		}
+		if ( units == UNITS_ENGLISH )
+			fPrecision = fEnglishPrecision;
+		else
+			fPrecision = fMetricPrecision;
+	} else if ( round == 3 ) {
+		if (mainD.scale < 100) {
+			fPrecision = mainD.dpi / mainD.scale;
+		}
+	} else if ( round == 4 ) {
+		if (mainD.scale < 100) {
+			fPrecision = floor(mainD.dpi / mainD.scale);
+		}
+	} else if ( round == 5 ) {
+		if (units == UNITS_ENGLISH) {
+			if (mainD.scale >= 256.0) {
+				fPrecision = 0.0625;
+			} else if (mainD.scale >= 128) {
+				fPrecision = 0.125;
+			} else if (mainD.scale >= 64.0) {
+				fPrecision = 0.25;
+			} else if (mainD.scale >= 32.0) {
+				fPrecision = 0.5;
+			} else if (mainD.scale >= 16.0) {
+				fPrecision = 1.0;
+			} else if (mainD.scale >= 8.0) {
+				fPrecision = 2.0;
+			} else if (mainD.scale >= 4.0) {
+				fPrecision = 4.0;
+			} else if (mainD.scale >= 2.0) {
+				fPrecision = 8.0;
+			} else if (mainD.scale >= 1.0) {
+				fPrecision = 16.0;
+			} else if (mainD.scale >= 0.5) {
+				fPrecision = 32.0;
+			} else if (mainD.scale >= 0.25) {
+				fPrecision = 64.0;
+			} else {
+				fPrecision = 128.0;
+			}
+		} else {
+			if (mainD.scale >= 256.0) {
+				fPrecision = 0.02;
+			} else if (mainD.scale >= 128.0) {
+				fPrecision = 0.05;
+			} else if (mainD.scale >= 64.0) {
+				fPrecision = 0.1;
+			} else if (mainD.scale >= 32.0) {
+				fPrecision = 0.2;
+			} else if (mainD.scale >= 16.0) {
+				fPrecision = 0.5;
+			} else if (mainD.scale >= 8.0) {
+				fPrecision = 1.0;
+			} else if (mainD.scale >= 4.0) {
+				fPrecision = 2.0;
+			} else if (mainD.scale >= 2.0) {
+				fPrecision = 5.0;
+			} else if (mainD.scale >= 1.0) {
+				fPrecision = 10.0;
+			} else if (mainD.scale >= 0.5) {
+				fPrecision = 10.0;
+			} else if (mainD.scale >= 0.25) {
+				fPrecision = 20.0;
+			} else {
+				fPrecision = 40.0;
+			}
+			fPrecision *= 2.54;
+		}
+		fPrecision *= fPrecFactor;
+	}
+	if ( round > 0 ) {
+		LOG( log_pan, 2, ( " Scl= %0.3f Prec=%0.3f ", mainD.scale, fPrecision ) );
+		orig->x = roundf(orig->x*fPrecision)/fPrecision;
+		orig->y = roundf(orig->y*fPrecision)/fPrecision;
 	}
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
-	LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
+	LOG( log_pan, 2, ( " = [ %0.6f %0.6f ]\n", orig->x, orig->y ) )
 }
 
 /**
