@@ -1514,6 +1514,20 @@ EXPORT void MainLayout(
 		t1 /= 2.0;
 		for ( pixelBins=0.25; pixelBins<t1; pixelBins*=2.0 );
 	} else {
+		t1 /= 2.0;
+		pixelBins = 0.127;
+		while (1) {
+			pixelBins *= 2.0;
+			if ( pixelBins >= t1 )
+				break;
+			pixelBins *= 2.0;
+			if ( pixelBins >= t1 )
+				break;
+			pixelBins *= 2.5;
+			if ( pixelBins >= t1 )
+				break;
+		}
+#ifdef LATER
 		pixelBins = 50.8;
 		if (pixelBins >= t1)
 		  while (1) {
@@ -1527,7 +1541,9 @@ EXPORT void MainLayout(
 				break;
 			pixelBins /= 2.0;
 		}
+#endif
 	}
+	LOG( log_pan, 2, ( "PixelBins=%0.6f\n", pixelBins ) );
 	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder, FALSE );
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
@@ -2119,6 +2135,64 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), WxH=%
 			fPrecision *= 2.54;
 		}
 		fPrecision *= fPrecFactor;
+	} else if ( round == 6 ) {
+		double fPixelsPerUnit;
+		if (units == UNITS_ENGLISH) {
+			if (mainD.scale >= 256.0) {
+				fPixelsPerUnit = 0.25;
+			} else if (mainD.scale >= 128) {
+				fPixelsPerUnit = 0.5;
+			} else if (mainD.scale >= 64.0) {
+				fPixelsPerUnit = 1.0;
+			} else if (mainD.scale >= 32.0) {
+				fPixelsPerUnit = 2.0;
+			} else if (mainD.scale >= 16.0) {
+				fPixelsPerUnit = 4.0;
+			} else if (mainD.scale >= 8.0) {
+				fPixelsPerUnit = 8.0;
+			} else if (mainD.scale >= 4.0) {
+				fPixelsPerUnit = 16.0;
+			} else if (mainD.scale >= 2.0) {
+				fPixelsPerUnit = 32.0;
+			} else if (mainD.scale >= 1.0) {
+				fPixelsPerUnit = 64.0;
+			} else if (mainD.scale >= 0.5) {
+				fPixelsPerUnit = 128.0;
+			} else if (mainD.scale >= 0.25) {
+				fPixelsPerUnit = 256.0;
+			} else {
+				fPixelsPerUnit = 512.0;
+			}
+		} else {
+			if (mainD.scale >= 256.0) {
+				fPixelsPerUnit = 0.1;
+			} else if (mainD.scale >= 128.0) {
+				fPixelsPerUnit = 0.2;
+			} else if (mainD.scale >= 64.0) {
+				fPixelsPerUnit = 0.5;
+			} else if (mainD.scale >= 32.0) {
+				fPixelsPerUnit = 1.0;
+			} else if (mainD.scale >= 16.0) {
+				fPixelsPerUnit = 2.0;
+			} else if (mainD.scale >= 8.0) {
+				fPixelsPerUnit = 5.0;
+			} else if (mainD.scale >= 4.0) {
+				fPixelsPerUnit = 10.0;
+			} else if (mainD.scale >= 2.0) {
+				fPixelsPerUnit = 20.0;
+			} else if (mainD.scale >= 1.0) {
+				fPixelsPerUnit = 40.0;
+			} else if (mainD.scale >= 0.5) {
+				fPixelsPerUnit = 10.0;
+			} else if (mainD.scale >= 0.25) {
+				fPixelsPerUnit = 20.0;
+			} else {
+				fPixelsPerUnit = 40.0;
+			}
+			fPixelsPerUnit *= 2.54;
+		}
+		fPixelsPerUnit *= fPrecFactor;
+		fPrecision = fPixelsPerUnit;
 	}
 	if ( round > 0 ) {
 		LOG( log_pan, 2, ( " Scl= %0.3f Prec=%0.3f ", mainD.scale, fPrecision ) );
