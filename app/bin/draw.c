@@ -1527,21 +1527,6 @@ EXPORT void MainLayout(
 			if ( pixelBins >= t1 )
 				break;
 		}
-#ifdef LATER
-		pixelBins = 50.8;
-		if (pixelBins >= t1)
-		  while (1) {
-			if ( pixelBins <= t1 )
-				break;
-			pixelBins /= 2.0;
-			if ( pixelBins <= t1 )
-				break;
-			pixelBins /= 2.5;
-			if ( pixelBins <= t1 )
-				break;
-			pixelBins /= 2.0;
-		}
-#endif
 	}
 	LOG( log_pan, 2, ( "PixelBins=%0.6f\n", pixelBins ) );
 	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder, TRUE );
@@ -1951,9 +1936,6 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 EXPORT coOrd mainCenter;
 
-// Tweak fPixelsPerUnit for testing
-double fPixelsPerUnitFactor = 1.0;
-
 static void DrawMapBoundingBox( BOOL_T set )
 {
 	if (mainD.d == NULL || mapD.d == NULL)
@@ -1971,7 +1953,6 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), WxH=%
 				size.x, size.y ) )
 
 	coOrd bound = zero;
-	double fPixelsPerUnit;
 
     if ( !bNoBorder ) {
 		bound.x = size.x/2;
@@ -2002,44 +1983,9 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), WxH=%
 				orig->y = 0-bound.y;
 
 	if (round) {
-		// Compute rounded number of pixels per unit (inch or cm)
-		if (units == UNITS_ENGLISH) {
-			if      (mainD.scale >= 256.0)fPixelsPerUnit = 0.25;
-			else if (mainD.scale >= 128.0)fPixelsPerUnit = 0.5;
-			else if (mainD.scale >= 64.0) fPixelsPerUnit = 1.0;
-			else if (mainD.scale >= 32.0) fPixelsPerUnit = 2.0;
-			else if (mainD.scale >= 16.0) fPixelsPerUnit = 4.0;
-			else if (mainD.scale >= 8.0)  fPixelsPerUnit = 8.0;
-			else if (mainD.scale >= 4.0)  fPixelsPerUnit = 16.0;
-			else if (mainD.scale >= 2.0)  fPixelsPerUnit = 32.0;
-			else if (mainD.scale >= 1.0)  fPixelsPerUnit = 64.0;
-			else if (mainD.scale >= 0.5)  fPixelsPerUnit = 128.0;
-			else if (mainD.scale >= 0.25) fPixelsPerUnit = 256.0;
-			else                          fPixelsPerUnit = 512.0;
-		} else {
-			if      (mainD.scale >= 256.0)fPixelsPerUnit = 0.1;
-			else if (mainD.scale >= 128.0)fPixelsPerUnit = 0.2;
-			else if (mainD.scale >= 64.0) fPixelsPerUnit = 0.5;
-			else if (mainD.scale >= 32.0) fPixelsPerUnit = 1.0;
-			else if (mainD.scale >= 16.0) fPixelsPerUnit = 2.0;
-			else if (mainD.scale >= 8.0)  fPixelsPerUnit = 5.0;
-			else if (mainD.scale >= 4.0)  fPixelsPerUnit = 10.0;
-			else if (mainD.scale >= 2.0)  fPixelsPerUnit = 20.0;
-			else if (mainD.scale >= 1.0)  fPixelsPerUnit = 40.0;
-			else if (mainD.scale >= 0.7)  fPixelsPerUnit = 50.0;
-			else if (mainD.scale >= 0.3)  fPixelsPerUnit = 100.0;
-			else                          fPixelsPerUnit = 200.0;
-			// Convert cm to inch
-			fPixelsPerUnit *= 2.54;
-		}
-		// Tweak for testing
-		fPixelsPerUnit *= fPixelsPerUnitFactor;
-		LOG( log_pan, 2, ( " Scl= %0.3f Prec=%0.3f ", mainD.scale, fPixelsPerUnit ) );
-		orig->x = roundf(orig->x*fPixelsPerUnit)/fPixelsPerUnit;
-		orig->y = roundf(orig->y*fPixelsPerUnit)/fPixelsPerUnit;
+		orig->x = roundf(orig->x*pixelBins)/pixelBins;
+		orig->y = roundf(orig->y*pixelBins)/pixelBins;
 	}
-	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
-	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
 	LOG( log_pan, 2, ( " = [ %0.6f %0.6f ]\n", orig->x, orig->y ) )
 }
 
