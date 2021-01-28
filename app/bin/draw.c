@@ -536,18 +536,7 @@ static void DDrawFillCircle(
 		return;
 	rr = (r / d->scale) * d->dpi + 0.5;
 	if (rr > wDrawGetMaxRadius(d->d)) {
-#ifdef LATER
-		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
-		cnt = (int)(angle1/da) + 1;
-		da = angle1 / cnt;
-		PointOnCircle( &p0, p, r, angle0 );
-		for ( i=1; i<=cnt; i++ ) {
-			angle0 += da;
-			PointOnCircle( &p1, p, r, angle0 );
-			DrawLine( d, p0, p1, width, color );
-			p0 = p1;
-		}
-#endif
+		// Circle too big
 		return;
 	}
 	d->CoOrd2Pix(d,p,&x,&y);
@@ -2102,9 +2091,7 @@ static void DoNewScale( DIST_T scale )
 
 	tempD.scale = mainD.scale = scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
-	if ( mainD.dpi == 75 ) {
-		mainD.dpi = 72.0;
-	} else if ( scale > 1.0 && scale <= 12.0 ) {
+	if ( scale > 1.0 && scale <= 12.0 ) {
 		mainD.dpi = floor( (mainD.dpi + scale/2)/scale) * scale;
 	}
 	tempD.dpi = mainD.dpi;
@@ -2945,9 +2932,7 @@ EXPORT void DrawInit( int initialZoom )
 	}
 	tempD.scale = mainD.scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
-	if ( mainD.dpi == 75 ) {
-		mainD.dpi = 72.0;
-	} else if ( mainD.scale > 1.0 && mainD.scale <= 12.0 ) {
+	if ( mainD.scale > 1.0 && mainD.scale <= 12.0 ) {
 		mainD.dpi = floor( (mainD.dpi + mainD.scale/2)/mainD.scale) * mainD.scale;
 	}
 	tempD.dpi = mainD.dpi;
