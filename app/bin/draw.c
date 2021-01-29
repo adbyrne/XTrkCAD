@@ -1707,7 +1707,7 @@ EXPORT void DrawRuler(
 	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
-	long mm, mm0, mm1, power;
+	long mm, mm0, mm1, power, skip;
 	wDrawPix_t x0, y0, x1, y1;
 	
 	static double lengths[] = {
@@ -1852,7 +1852,16 @@ EXPORT void DrawRuler(
 			if ( (opts&DO_TEMP) == 0)
 #endif
 			if (fraction == 0) {
-				if ( (number == TRUE && d->scale<40) || (digit==0)) {
+				if (d->scale <= 80) {
+					skip = 2;
+				}
+				else if (d->scale <= 120) {
+					skip = 5;
+				}
+				else {
+					skip = 10;
+				}
+				if ( (number == TRUE && d->scale <= 40) || (digit % skip == 0)) {
 					if (inch % 12 == 0 || d->scale <= 2) {
 						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
 						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
