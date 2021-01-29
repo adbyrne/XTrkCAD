@@ -536,18 +536,7 @@ static void DDrawFillCircle(
 		return;
 	rr = (r / d->scale) * d->dpi + 0.5;
 	if (rr > wDrawGetMaxRadius(d->d)) {
-#ifdef LATER
-		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
-		cnt = (int)(angle1/da) + 1;
-		da = angle1 / cnt;
-		PointOnCircle( &p0, p, r, angle0 );
-		for ( i=1; i<=cnt; i++ ) {
-			angle0 += da;
-			PointOnCircle( &p1, p, r, angle0 );
-			DrawLine( d, p0, p1, width, color );
-			p0 = p1;
-		}
-#endif
+		// Circle too big
 		return;
 	}
 	d->CoOrd2Pix(d,p,&x,&y);
@@ -1514,21 +1503,22 @@ EXPORT void MainLayout(
 		t1 /= 2.0;
 		for ( pixelBins=0.25; pixelBins<t1; pixelBins*=2.0 );
 	} else {
-		pixelBins = 50.8;
-		if (pixelBins >= t1)
-		  while (1) {
-			if ( pixelBins <= t1 )
+		t1 /= 2.0;
+		pixelBins = 0.127;
+		while (1) {
+			pixelBins *= 2.0;
+			if ( pixelBins >= t1 )
 				break;
-			pixelBins /= 2.0;
-			if ( pixelBins <= t1 )
+			pixelBins *= 2.0;
+			if ( pixelBins >= t1 )
 				break;
-			pixelBins /= 2.5;
-			if ( pixelBins <= t1 )
+			pixelBins *= 2.5;
+			if ( pixelBins >= t1 )
 				break;
-			pixelBins /= 2.0;
 		}
 	}
-	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder, FALSE );
+	LOG( log_pan, 2, ( "PixelBins=%0.6f\n", pixelBins ) );
+	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder, TRUE );
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
 	mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
@@ -1935,7 +1925,6 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 EXPORT coOrd mainCenter;
 
-
 static void DrawMapBoundingBox( BOOL_T set )
 {
 	if (mainD.d == NULL || mapD.d == NULL)
@@ -1948,7 +1937,7 @@ static void DrawMapBoundingBox( BOOL_T set )
 
 static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder, wBool_t round  )
 {
-LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
+LOG( log_pan, 2, ( "ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
 				size.x, size.y ) )
 
@@ -1983,27 +1972,10 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 				orig->y = 0-bound.y;
 
 	if (round) {
-		if (mainD.scale >= 1.0) {
-			if (units == UNITS_ENGLISH) {
-				orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
-				orig->y = floor(orig->y*4)/4;
-			} else {
-				orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
-				orig->y = floor(orig->y*2.54*2)/(2.54*2);
-			}
-		} else {
-			if (units == UNITS_ENGLISH) {
-				orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
-				orig->y = floor(orig->y*64)/64;
-			} else {
-				orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
-				orig->y = floor(orig->y*25.4*2)/(25.4*2);
-			}
-		}
+		orig->x = roundf(orig->x*pixelBins)/pixelBins;
+		orig->y = roundf(orig->y*pixelBins)/pixelBins;
 	}
-	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
-	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
-	LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
+	LOG( log_pan, 2, ( " = [ %0.6f %0.6f ]\n", orig->x, orig->y ) )
 }
 
 /**
@@ -2119,9 +2091,7 @@ static void DoNewScale( DIST_T scale )
 
 	tempD.scale = mainD.scale = scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
-	if ( mainD.dpi == 75 ) {
-		mainD.dpi = 72.0;
-	} else if ( scale > 1.0 && scale <= 12.0 ) {
+	if ( scale > 1.0 && scale <= 12.0 ) {
 		mainD.dpi = floor( (mainD.dpi + scale/2)/scale) * scale;
 	}
 	tempD.dpi = mainD.dpi;
@@ -2962,9 +2932,7 @@ EXPORT void DrawInit( int initialZoom )
 	}
 	tempD.scale = mainD.scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
-	if ( mainD.dpi == 75 ) {
-		mainD.dpi = 72.0;
-	} else if ( mainD.scale > 1.0 && mainD.scale <= 12.0 ) {
+	if ( mainD.scale > 1.0 && mainD.scale <= 12.0 ) {
 		mainD.dpi = floor( (mainD.dpi + mainD.scale/2)/mainD.scale) * mainD.scale;
 	}
 	tempD.dpi = mainD.dpi;
@@ -3062,7 +3030,7 @@ static STATUS_T CmdPan(
 					mainD.orig.x -= (pos.x - start_pos.x);
 					mainD.orig.y -= (pos.y - start_pos.y);
 					if ((MyGetKeyState()&WKEY_SHIFT) != 0)
-						ConstraintOrig(&mainD.orig,mainD.size,TRUE,FALSE);
+						ConstraintOrig(&mainD.orig,mainD.size,TRUE,TRUE);
 					if ((oldOrig.x == mainD.orig.x) && (oldOrig.y == mainD.orig.y))
 						InfoMessage(_("Can't move any further in that direction"));
 					else
