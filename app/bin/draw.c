@@ -1754,6 +1754,18 @@ EXPORT void DrawRuler(
 		} else {
 			power = 1000;
 		}
+
+		// Label interval for scale > 40
+		if (d->scale <= 200) {
+			skip = 2000;
+		}
+		else if (d->scale <= 400) {
+			skip = 5000;
+		}
+		else {
+			skip = 10000;
+		}
+
 		for ( ; power<=1000; power*=10,len+=3 ) {
 			if (power == 1000)
 				len = 10;
@@ -1766,7 +1778,7 @@ EXPORT void DrawRuler(
 					wDrawLine( d->d, x0, y0, x1, y1,
 							0, wDrawLineSolid, color, (wDrawOpts)d->funcs->options );
 
-					if (!number || (d->scale>40 && mm != 0.0))
+					if (!number || (d->scale > 40 && mm % skip != 0.0))
 						continue;
 					if ( (power>=1000) ||
 						 (d->scale<=8 && power>=100) ||
@@ -1852,6 +1864,7 @@ EXPORT void DrawRuler(
 			if ( (opts&DO_TEMP) == 0)
 #endif
 			if (fraction == 0) {
+				// Label interval for scale > 40
 				if (d->scale <= 80) {
 					skip = 2;
 				}
