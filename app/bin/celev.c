@@ -243,7 +243,6 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	int mode;
 	DIST_T elevX, grade, elev, dist;
 	long radio;
-	BOOL_T computedOk;
 	BOOL_T gradeOk = TRUE;
 	track_p trk1;
 	EPINX_T ep1;
@@ -329,7 +328,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 }
 
 static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
-	DIST_T len, len1, elev0, elev1, dist0, dist1;
+	DIST_T elev0, elev1, dist0, dist1;
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
 		if ( GetTrkLength( trk, 0, 1 ) < 0.1 )
 			return FALSE;

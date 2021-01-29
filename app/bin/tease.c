@@ -769,7 +769,7 @@ STATUS_T JointDescriptionMove(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	ANGLE_T ap;
-	coOrd end0, end0off, end1, end1off;
+	coOrd end0, end1;
 	end0 = GetTrkEndPos(trk,0);;
 	end1 = GetTrkEndPos(trk,1);
 	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
@@ -820,7 +820,6 @@ static void DrawJointDescription(
 		wDrawColor color )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	coOrd pos;
 	DIST_T grade=0, sep=0;
 	ANGLE_T a;
 	if (layoutLabels == 0)

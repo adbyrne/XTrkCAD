@@ -272,7 +272,7 @@ STATUS_T CornuDescriptionMove(
 	if (GetTrkType(trk) != T_CORNU) return C_CONTINUE;
 
 	ANGLE_T ap;
-    coOrd end0, end0off, end1, end1off;
+    coOrd end0, end1;
     end0 = xx->cornuData.pos[0];
 	end1 = xx->cornuData.pos[1];
 	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));

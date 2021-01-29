@@ -1935,7 +1935,7 @@ static void DrawMapBoundingBox( BOOL_T set )
 }
 
 
-static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder, wBool_t round  )
+static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder, wBool_t bRound  )
 {
 LOG( log_pan, 2, ( "ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
@@ -1971,9 +1971,9 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.6f, %0.6f ] RoomSize(%0.3f %0.3f), WxH=%
 	if (orig->y < (0-bound.y))
 				orig->y = 0-bound.y;
 
-	if (round) {
-		orig->x = roundf(orig->x*pixelBins)/pixelBins;
-		orig->y = roundf(orig->y*pixelBins)/pixelBins;
+	if (bRound) {
+		orig->x = round(orig->x*pixelBins)/pixelBins;
+		orig->y = round(orig->y*pixelBins)/pixelBins;
 	}
 	LOG( log_pan, 2, ( " = [ %0.6f %0.6f ]\n", orig->x, orig->y ) )
 }

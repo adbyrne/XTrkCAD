@@ -219,7 +219,7 @@ STATUS_T BezierDescriptionMove(
 	if (GetTrkType(trk) != T_BEZIER) return C_TERMINATE;
 
 	ANGLE_T ap;
-	coOrd end0, end0off, end1, end1off;
+	coOrd end0, end1;
 	end0 = xx->bezierData.pos[0];
 	end1 = xx->bezierData.pos[3];
 	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
