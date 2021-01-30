@@ -240,7 +240,7 @@ STATUS_T StraightDescriptionMove(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	ANGLE_T a,ap;
-	coOrd end0, end0off, end1, end1off;
+	coOrd end0, end1;
     end0 = GetTrkEndPos(trk,0);
     end1 = GetTrkEndPos(trk,1);
     a = FindAngle(end0,end1);
