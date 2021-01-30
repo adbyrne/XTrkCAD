@@ -21,7 +21,7 @@
 
 #include <locale.h>
 //X#include <stdio.h>
-//X#include <stdlib.h>
+#include <stdlib.h>
 
 #include "i18n.h"
 #include "wlib.h"
