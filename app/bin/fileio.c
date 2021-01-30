@@ -22,22 +22,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-//X#ifndef XINDOWS
-//X#include <unistd.h>
-//X#include <dirent.h>
-//X#include <errno.h>
-//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-//X#ifdef XINDOWS
-//X	#include <io.h>
-//X	#define W_OK (2)
-//X	#define access	_access
-//X	#include <windows.h>
-//X#endif
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <locale.h>

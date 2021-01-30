@@ -212,11 +212,6 @@ void LoadParamFileList(void)
         char * share;
 
        // Rewire to the latest system level
-//X#if defined(XINDOWS)
-//X#define SHAREPARAMS "\\share\\xtrkcad\\params\\"
-//X#else
-//X#define SHAREPARAMS "/share/xtrkcad/params/"
-//X#endif
 #define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
         if ((share= strstr(fileName,SHAREPARAMS))) {
         	share += strlen(SHAREPARAMS);

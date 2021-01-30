@@ -63,13 +63,6 @@ static const char rcsid[] = "@(#) : $Id$";
 #include <errno.h>
 #include <math.h>
 
-//X#ifdef XINDOWS
-//X#include <io.h>
-//X#define F_OK	(0)
-//X#define W_OK	(2)
-//X#define access	_access
-//X#endif
-
 #include "cundo.h"
 #include "custom.h"
 #include "i18n.h"

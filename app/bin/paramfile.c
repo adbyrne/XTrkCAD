@@ -29,13 +29,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-//X#ifdef XINDOWS
-//X#include <io.h>
-//X#define access _access
-//X#else 
-//X#include <unistd.h>
-//X#endif
-
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
@@ -49,10 +42,6 @@
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "include/utf8convert.h"
-
-//X#if _MSC_VER >1300
-//X#define stricmp( a, b ) _stricmp(a, b )
-//X#endif
 
 static long paramCheckSum;
 
@@ -177,10 +166,6 @@ void SetParamFileState(int index)
  * \returns True if it succeeds, false if it fails.
  */
  
-//X#ifdef XINDOWS
-//X#define R_OK 0x4
-//X#endif
-
 static bool
 CheckFileReadable(const char *file)
 {

@@ -22,9 +22,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-//X#ifndef XINDOWS
-//X#include <unistd.h>
-//X#endif
 #include <math.h>
 #include "common.h"
 #include "utility.h"

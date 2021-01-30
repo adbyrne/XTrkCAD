@@ -42,8 +42,6 @@
 #ifndef WINDOWS
 // Unix/Mac
 #include <dirent.h>
-//X#include <errno.h>
-//X#include <sys/time.h>
 #include <unistd.h>
 
 #define PATH_SEPARATOR "/"
@@ -52,7 +50,6 @@
 // Windows
 #include <io.h>
 #include <process.h>
-//X#include <sys/timeb.h>
 #include "include/dirent.h"
 #include "direct.h"
 #include "getopt.h"
@@ -70,7 +67,6 @@
 #define unlink(a) _unlink((a))
 #define rmdir(a) _rmdir((a))
 #define open(name, flag, mode) _open((name), (flag), (mode))
-//X#define write(file, buffer, count) _write((file),(buffer), (count))
 #define close(file) _close((file))
 #define getpid() _getpid()
 #define strcasecmp _stricmp

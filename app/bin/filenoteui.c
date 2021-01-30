@@ -22,13 +22,7 @@
 
 #include <string.h>
 #include <stdbool.h>
-//X#ifdef XINDOWS
-//X	#include <io.h>
-//X	#define access(path,mode) _access(path,mode)
-//X	#define F_OK (0) 
-//X#else
-//X	#include <unistd.h>
-//X#endif
+
 #include "custom.h"
 #include "dynstring.h"
 #include "file2uri.h"

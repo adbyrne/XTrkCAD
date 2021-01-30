@@ -26,12 +26,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-//X#ifdef XINDOWS
-//X#include "include/dirent.h"
-//X#else
-//X#include <dirent.h>
-//X#endif
-
 #include "cselect.h"
 #include "custom.h"
 #include "paths.h"
@@ -1507,11 +1501,6 @@ static CatalogEntry *
 ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 {
     DIR *d;
-//X#if defined(XINDOWS)
-//X	#define PATH_SEPARATOR '\\'
-//X#else
-//X	#define PATH_SEPARATOR '/'
-//X#endif
     CatalogEntry *newEntry = catalog->head;
     char contents[STR_SHORT_SIZE];
 

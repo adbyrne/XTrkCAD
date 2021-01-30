@@ -21,23 +21,13 @@
 
 #include <assert.h>
 #include <ctype.h>
-//X#ifdef HAVE_MALLOC_H
-//X    #include <malloc.h>
-//X#endif
 #include <search.h>
 #include <stdbool.h>
 #include <stdio.h>
-//X#include <stdlib.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
-//X#ifdef XINDOWS
-//X    #include "include/dirent.h"
-//X#else
-//X    #include <dirent.h>
-//X#endif
 #include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
@@ -51,12 +41,6 @@
 #include "include/utf8convert.h"
 #include "include/utlist.h"
 #include "utility.h"
-
-//X#if _MSC_VER > 1300
-//X    #define strnicmp _strnicmp
-//X    #define stricmp _stricmp
-//X    #define strdup _strdup
-//X#endif
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"

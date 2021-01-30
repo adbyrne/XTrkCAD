@@ -30,22 +30,6 @@
 
 #include <zip.h>
 
-//X#ifdef XINDOWS
-//X    #include "include/dirent.h"
-//X    #include <direct.h>
-//X    #include <io.h>
-//X    #include <process.h>
-//X    #define unlink(a) _unlink((a))
-//X    #define rmdir(a) _rmdir((a))
-//X    #define open(name, flag, mode) _open((name), (flag), (mode))
-//X    #define write(file, buffer, count) _write((file),(buffer), (count))
-//X    #define close(file) _close((file))
-//X    #define getpid() _getpid()
-//X#else
-//X    #include <dirent.h>
-//X    #include <unistd.h>
-//X#endif
-
 #include <wlib.h>
 #include "archive.h"
 #include "directory.h"

@@ -25,12 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-//X#ifndef XINDOWS
-//X#include <time.h>
-//X#else
-//X#include <time.h>
-//X#include <sys/timeb.h>
-//X#endif
 
 #include "custom.h"
 #include "fileio.h"

@@ -24,27 +24,11 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-//X#ifndef XINDOWS
-//X#include <unistd.h>
-//X#include <dirent.h>
-//X#include <errno.h>
-//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
-//X#ifdef XINDOWS
-//X#include <io.h>
-//X#include <windows.h>
-//X#else
-//X#include <sys/stat.h>
-//X#endif
 #include <stdarg.h>
-//X#ifndef XINDOWS
-//X#include <sys/time.h>
-//X#else
-//X#include <sys/timeb.h>
-//X#endif
 #include <locale.h>
 
 #include <stdint.h>

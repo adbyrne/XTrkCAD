@@ -52,15 +52,6 @@
 #endif
 #endif
 
-//X#ifndef XINDOWS
-//X#include <errno.h>
-//X#else
-//X// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
-//X#if ( _MSC_VER < 1900 )
-//X#define round(x) floor((x)+0.5)
-//X#endif
-//X#endif
-
 EXPORT char tempSpecial[4096];
 
 static int log_track = 0;

@@ -22,18 +22,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-//X#ifndef XINDOWS
-//X#include <unistd.h>
-//X#include <dirent.h>
-//X#endif
-//X#ifdef HAVE_MALLOC_H
-//X#include <malloc.h>
-//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdarg.h>
-
 #include <stdint.h>
 
 #include "cjoin.h"

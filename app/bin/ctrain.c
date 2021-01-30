@@ -20,9 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#ifndef XINDOWS
-//X#include <errno.h>
-//X#endif
 #include <ctype.h>
 #include <math.h>
 #include <string.h>

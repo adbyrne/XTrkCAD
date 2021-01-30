@@ -22,29 +22,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-//X#ifndef XINDOWS
-//X#include <unistd.h>
-//X#include <dirent.h>
-//X#endif
-//X#ifdef HAVE_MALLOC_H
-//X#include <malloc.h>
-//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
-//X#ifdef XINDOWS
-//X#include <io.h>
-//X#include <windows.h>
-//X#include "getopt.h"
-//X#define R_OK (02)
-//X#define access _access
-//X#if _MSC_VER >1300
-//X#define strdup _strdup
-//X#endif
-//X#else
-//X#include <sys/stat.h>
-//X#endif
 #include <locale.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -454,10 +435,6 @@ EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
 }
 
 static char * directory;
-
-//X#ifdef XINDOWS
-//X#define F_OK (0)
-//X#endif
 
 EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 

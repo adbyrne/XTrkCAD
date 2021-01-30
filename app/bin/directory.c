@@ -23,18 +23,6 @@
 #include <errno.h>
 #include <string.h>
 
-//X#ifdef XINDOWS
-//X    #include "include/dirent.h"
-//X    #include <direct.h>
-//X    #define unlink(a) _unlink((a))
-//X    #define rmdir(a) _rmdir((a))
-//X#else
-//X    #include <dirent.h>
-//X    #include <unistd.h>
-//X    #include <sys/stat.h>
-//X    #include <sys/types.h>
-//X#endif
-
 #include <wlib.h>
 #include "directory.h"
 #include "dynstring.h"
@@ -54,11 +42,7 @@ BOOL_T SafeCreateDir(const char *dir)
 {
     int err;
 
-//X#ifdef XINDOWS
-//X    err = _mkdir(dir);
-//X#else
     err = mkdir(dir, 0755);
-//X#endif
     if (err < 0) {
         if (errno != EEXIST) {
             NoticeMessage(MSG_DIR_CREATE_FAIL,

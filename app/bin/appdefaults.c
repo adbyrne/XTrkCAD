@@ -26,13 +26,7 @@
 #include <string.h>
 #include <wchar.h>
 
-//X#ifdef XINDOWS
-//X#include <Windows.h>
-//X#include <malloc.h>
-//X#endif
-
 #include "common.h"
-//X#include <windows.h>
 #include "custom.h"
 #include "fileio.h"
 #include "paths.h"
@@ -204,6 +198,7 @@ InitializeRegionCode(void)
 {
     strcpy(regionCode, "US");
 
+// TODO Move this to wlib
 #ifdef WINDOWS
     {
         LCID lcid;
