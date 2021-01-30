@@ -363,7 +363,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	default:
 		AbortProg( "WriteNote: %d", xx->op );
 	}
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	for ( unsigned int inx = 0; inx < strings2convert; inx++ ) {
 		if ( RequiresConvToUTF8( s[inx] ) ) {
 			wSystemToUTF8 ( s[inx], message, sizeof message );
@@ -420,7 +420,7 @@ ReadTrackNote(char *line)
 		case OP_NOTETEXT:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
 				return FALSE;
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.text = sText;
@@ -428,13 +428,13 @@ ReadTrackNote(char *line)
 		case OP_NOTELINK:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
 				return FALSE;
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.linkData.url = sText;
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
 				return FALSE;
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.linkData.title = sText;
@@ -442,13 +442,13 @@ ReadTrackNote(char *line)
 		case OP_NOTEFILE:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
 				return FALSE;
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.fileData.path = sText;
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
 				return FALSE;
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.fileData.title = sText;

@@ -20,14 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
+//X#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <stdarg.h>
 
-#ifdef WINDOWS
-#include <windows.h>
-#endif
+//X#ifdef XINDOWS
+//X#include <windows.h>
+//X#endif
 
 #include <wlib.h>
 #include <dynstring.h>

@@ -25,12 +25,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#ifndef WINDOWS
-#include <time.h>
-#else
-#include <time.h>
-#include <sys/timeb.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <time.h>
+//X#else
+//X#include <time.h>
+//X#include <sys/timeb.h>
+//X#endif
 
 #include "custom.h"
 #include "fileio.h"

@@ -24,14 +24,14 @@
 #include <errno.h>
 #include <string.h>
 
-#ifdef WINDOWS
-#include <io.h>
-#define F_OK	(0)
-#define W_OK	(2)
-#define access	_access
-#else
-#include <unistd.h>
-#endif
+//X#ifdef XINDOWS
+//X#include <io.h>
+//X#define F_OK	(0)
+//X#define W_OK	(2)
+//X#define access	_access
+//X#else
+//X#include <unistd.h>
+//X#endif
 
 #include "custom.h"
 #include "fileio.h"
@@ -42,7 +42,7 @@
 #include "track.h"
 #include "wlib.h"
 #include "include/paramfilelist.h"
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif
 
@@ -241,14 +241,14 @@ static int CustomDoExport(
 
 	if (rc == -1)
 	{
-	#ifdef WINDOWS
+	#ifdef UTFCONVERT
 	    char *contents = MyStrdup(custMgmContentsStr);
 	    contents = Convert2UTF8(contents);
 	    fprintf(customMgmF, "CONTENTS %s\n", contents);
 		MyFree(contents);
 	#else
 	    fprintf(customMgmF, "CONTENTS %s\n", custMgmContentsStr);
-	#endif // WINDOWS
+	#endif // UTFCONVERT
 	}
 
 	cnt = wListGetCount( (wList_p)customPLs[0].control );

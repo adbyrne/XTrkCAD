@@ -59,9 +59,9 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 #include "utility.h"
 #include "messages.h"
 
@@ -276,9 +276,9 @@ static BOOL_T WriteSensor ( track_p t, FILE * f )
     sensorData_p xx = GetsensorData(t);
 	char *sensorName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	sensorName = Convert2UTF8(sensorName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     rc &= fprintf(f, "SENSOR %d %u %s %d %0.6f %0.6f \"%s\" \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
@@ -306,9 +306,9 @@ static BOOL_T ReadSensor ( char * line )
         return FALSE;
     }
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     trk = NewTrack(index, T_SENSOR, 0, sizeof(sensorData_t));
     SetTrkVisible(trk, visible); 

@@ -22,24 +22,24 @@
  */
 
 #include <stdio.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
+//X#ifdef HAVE_MALLOC_H
+//X#include <malloc.h>
+//X#endif
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#include <FreeImage.h>
-#else
-#include <sys/stat.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <unistd.h>
+//X#include <dirent.h>
+//X#endif
+//X#ifdef XINDOWS
+//X#include <io.h>
+//X#include <windows.h>
+//X#include <FreeImage.h>
+//X#else
+//X#include <sys/stat.h>
+//X#endif
 
 #include "common.h"
 #include "custom.h"

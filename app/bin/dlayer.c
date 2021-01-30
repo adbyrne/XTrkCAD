@@ -26,11 +26,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef WINDOWS
-#include "include/dirent.h"
-#else
-#include <dirent.h>
-#endif
+//X#ifdef XINDOWS
+//X#include "include/dirent.h"
+//X#else
+//X#include <dirent.h>
+//X#endif
 
 #include "cselect.h"
 #include "custom.h"
@@ -1507,11 +1507,11 @@ static CatalogEntry *
 ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 {
     DIR *d;
-#if defined(WINDOWS)
-	#define PATH_SEPARATOR '\\'
-#else
-	#define PATH_SEPARATOR '/'
-#endif
+//X#if defined(XINDOWS)
+//X	#define PATH_SEPARATOR '\\'
+//X#else
+//X	#define PATH_SEPARATOR '/'
+//X#endif
     CatalogEntry *newEntry = catalog->head;
     char contents[STR_SHORT_SIZE];
 
@@ -1520,7 +1520,7 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
         char *fileName = NULL;
 
         while (GetNextSettingsFile(d, dirName, &fileName)) {
-            char *contents_start = strrchr(fileName,PATH_SEPARATOR);
+            char *contents_start = strrchr(fileName,PATH_SEPARATOR[0]);
             if (contents_start[0] == '/') contents_start++;
             char *contents_end = strchr(contents_start,'.');
             if (contents_end[0] == '.') contents_end[0] = '\0';

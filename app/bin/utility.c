@@ -22,9 +22,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <unistd.h>
+//X#endif
 #include <math.h>
 #include "common.h"
 #include "utility.h"

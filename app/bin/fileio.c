@@ -22,22 +22,22 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#include <errno.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <unistd.h>
+//X#include <dirent.h>
+//X#include <errno.h>
+//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#ifdef WINDOWS
-	#include <io.h>
-	#define W_OK (2)
-	#define access	_access
-	#include <windows.h>
-#endif
+//X#ifdef XINDOWS
+//X	#include <io.h>
+//X	#define W_OK (2)
+//X	#define access	_access
+//X	#include <windows.h>
+//X#endif
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <locale.h>
@@ -71,9 +71,9 @@
 #include "version.h"
 #include "dynstring.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 EXPORT dynArr_t paramProc_da;
 
@@ -454,7 +454,7 @@ EXPORT BOOL_T GetArgs(
 			} else {
 				message[0] = '\0';
 			}
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(message);
 #endif
 			*qp = (char*)ConvertFromEscapedText(message);
@@ -527,11 +527,11 @@ ReadMultilineText()
 	string = MyStrdup(DynStringToCStr(&noteText));
 	string[strlen(string) - 1] = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if (wIsUTF8(string)) {
 		ConvertUTF8ToSystem(string);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	DynStringFree(&noteText);
 	return(string);
@@ -609,14 +609,14 @@ EXPORT char * PutTitle( char * cp )
 		NoticeMessage( _("putTitle: title too long: %s"), _("Ok"), NULL, title );
 	*tp = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if(RequiresConvToUTF8(title)) {
 		char *out = MyMalloc(cnt);
 		wSystemToUTF8(title, out, cnt);
 		strcpy(title, out);
 		MyFree(out);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	return title;
 }
@@ -750,14 +750,14 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {

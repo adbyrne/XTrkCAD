@@ -61,9 +61,9 @@
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 #include "utility.h"
 #include "messages.h"
 
@@ -412,9 +412,9 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 	switchmotorData_p xx = GetswitchmotorData(t);
 	char *switchMotorName = MyStrdup(xx->name);
     
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	switchMotorName = Convert2UTF8(switchMotorName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     if (xx->turnout == NULL) 
 		return FALSE;
@@ -438,9 +438,9 @@ static BOOL_T ReadSwitchMotor ( char * line )
 	if (!GetArgs(line+12,"ddqqqq",&index,&trkindex,&name,&normal,&reverse,&pointsense)) {
 		return FALSE;
 	}
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 	trk = NewTrack(index, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
 	xx = GetswitchmotorData( trk );
 	xx->name = name;

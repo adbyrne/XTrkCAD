@@ -22,9 +22,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
+//X#ifdef HAVE_MALLOC_H
+//X#include <malloc.h>
+//X#endif
 
 #include <dynstring.h>
 #include "dxfformat.h"

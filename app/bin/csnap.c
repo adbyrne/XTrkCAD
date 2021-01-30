@@ -175,11 +175,6 @@ static void DrawGridLine(
 }
 
 
-#ifdef WINDOWS
-#define WONE (1)
-#else
-#define WONE (0)
-#endif
 
 EXPORT void DrawGrid(
 		drawCmd_p D,

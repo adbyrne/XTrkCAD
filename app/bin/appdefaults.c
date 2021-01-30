@@ -26,10 +26,10 @@
 #include <string.h>
 #include <wchar.h>
 
-#ifdef WINDOWS
-#include <Windows.h>
-#include <malloc.h>
-#endif
+//X#ifdef XINDOWS
+//X#include <Windows.h>
+//X#include <malloc.h>
+//X#endif
 
 #include "common.h"
 #include "custom.h"

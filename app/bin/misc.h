@@ -34,10 +34,10 @@
 
 typedef void (*addButtonCallBack_t)(void*);
 
-#ifdef WINDOWS
-/* suppress warning from *.bmp about conversion of int to char */
-#pragma warning( disable : 4305)
-#endif
+//X#ifdef XINDOWS
+//X/* suppress warning from *.bmp about conversion of int to char */
+//X#pragma warning( disable : 4305)
+//X#endif
 
 #define COUNT(A) (sizeof(A)/sizeof(A[0]))
 

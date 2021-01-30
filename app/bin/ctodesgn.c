@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifdef WINDOWS
-#include <stdlib.h>
-#endif
+//X#ifdef XINDOWS
+//X#include <stdlib.h>
+//X#endif
 
 #include <stdint.h>
 #include <ctype.h>

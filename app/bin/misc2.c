@@ -22,13 +22,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <unistd.h>
+//X#include <dirent.h>
+//X#endif
+//X#ifdef HAVE_MALLOC_H
+//X#include <malloc.h>
+//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>

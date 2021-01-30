@@ -23,26 +23,26 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <unistd.h>
+//X#include <dirent.h>
+//X#endif
+//X#ifdef HAVE_MALLOC_H
+//X#include <malloc.h>
+//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#define R_OK (02)
-#define access _access
-#else
-#include <sys/stat.h>
-#include <errno.h>
-#endif
+//X#ifdef XINDOWS
+//X#include <io.h>
+//X#include <windows.h>
+//X#define R_OK (02)
+//X#define access _access
+//X#else
+//X#include <sys/stat.h>
+//X#include <errno.h>
+//X#endif
 #include <stdarg.h>
 #include <locale.h>
 #include <wlib.h>

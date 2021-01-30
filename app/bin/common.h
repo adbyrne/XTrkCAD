@@ -23,8 +23,69 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+// INCLUDES
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
+
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
+#ifndef WINDOWS
+// Unix/Mac
+#include <dirent.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <unistd.h>
+
+#define PATH_SEPARATOR "/"
+
+#else
+// Windows
+#include "include/dirent.h"
+#include "direct.h"
+#include <io.h>
+#include <process.h>
+#include <sys/timeb.h>
+#include <FreeImage.h>
+#include "getopt.h"
+
+// DEFINES
+#define UTFCONVERT
+#define M_PI 3.14159
+#define F_OK (00)
+#define W_OK (02)
+#define R_OK (04)
+#define PATH_SEPARATOR "\\"
+
+// ALIASES for WINDOWS
+#define access _access
+#define unlink(a) _unlink((a))
+#define rmdir(a) _rmdir((a))
+#define open(name, flag, mode) _open((name), (flag), (mode))
+#define write(file, buffer, count) _write((file),(buffer), (count))
+#define close(file) _close((file))
+#define getpid() _getpid()
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#define mkdir( DIR, MODE ) _mkdir( (DIR) )
+#if _MSC_VER >1300
+#define strnicmp _strnicmp
+#define stricmp _stricmp
+#define strdup _strdup
+#endif
+// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
+#if ( _MSC_VER < 1900 )
+#define round(x) floor((x)+0.5)
+#endif
+
+/* suppress warning from *.bmp about conversion of int to char */
+#pragma warning( disable : 4305)
+#endif
+
 
 #ifndef TRUE
 #define TRUE	(1)
@@ -78,13 +139,7 @@ typedef struct {
 		void * ptr;
 		} dynArr_t;
 
-#if defined(WINDOWS) && ! defined(WIN32)
-#define CHECK_SIZE(T,DA) \
-		if ( (long)((DA).max) * (long)(sizeof *(T*)NULL) > 65500L ) \
-			AbortProg( "Dynamic array too large at %s:%d", __FILE__, __LINE__ );
-#else
 #define CHECK_SIZE(T,DA)
-#endif
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
@@ -141,15 +196,6 @@ typedef struct {
 // END is replaced by END$SEGS, END$TRK, ...
 #define VERSION_NONAKEDENDS	(12)
 
-#ifdef WINDOWS
-#define M_PI 3.14159
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#endif
-
-#if _MSC_VER >1300
-	#define strdup _strdup
-#endif
 
 #endif
 

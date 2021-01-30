@@ -60,9 +60,9 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 #include "utility.h"
 #include "messages.h"
 
@@ -344,9 +344,9 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
     signalData_p xx = GetsignalData(t);
 	char *signalName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	signalName = Convert2UTF8(signalName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     rc &= fprintf(f, "SIGNAL %d %u %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), 
@@ -384,9 +384,9 @@ static BOOL_T ReadSignal ( char * line )
         return FALSE;
     }
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     DYNARR_RESET( signalAspect_p, signalAspect_da );
     while ( (cp = GetNextLine()) != NULL ) {

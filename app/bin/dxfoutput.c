@@ -23,12 +23,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#ifdef WINDOWS
-  #include <io.h>
-  #include <windows.h>
-#else
-  #include <errno.h>
-#endif
+//X#ifdef XINDOWS
+//X  #include <io.h>
+//X  #include <windows.h>
+//X#else
+//X  #include <errno.h>
+//X#endif
 
 #include <xtrkcad-config.h>
 #include <locale.h>

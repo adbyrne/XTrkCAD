@@ -84,7 +84,7 @@ BOOL_T WriteMainNote(FILE* f)
 	char *noteText = mainText;
 
 	if (noteText && *noteText) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 		char *out = NULL;
 		if (RequiresConvToUTF8(mainText)) {
 			unsigned cnt = strlen(mainText) * 2 + 1;
@@ -92,18 +92,18 @@ BOOL_T WriteMainNote(FILE* f)
 			wSystemToUTF8(mainText, out, cnt);
 			noteText = out;
 		}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 
 	char * sText = ConvertToEscapedText( noteText );
         rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
 	MyFree( sText );
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 		if (out) {
 			MyFree(out);
 		}
-#endif // WINDOWS
+#endif // UTFCONVERT
     }
     return rc;
 }

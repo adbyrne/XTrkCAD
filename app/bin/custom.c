@@ -23,22 +23,22 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <unistd.h>
+//X#include <dirent.h>
+//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#else
-#include <sys/stat.h>
-#endif
+//X#ifdef XINDOWS
+//X#include <io.h>
+//X#include <windows.h>
+//X#else
+//X#include <sys/stat.h>
+//X#endif
 #include <stdarg.h>
-#include <errno.h>
+//X#include <errno.h>
 
 #include "cjoin.h"
 #include "common.h"

@@ -21,23 +21,23 @@
 
 #include <assert.h>
 #include <ctype.h>
-#ifdef HAVE_MALLOC_H
-    #include <malloc.h>
-#endif
+//X#ifdef HAVE_MALLOC_H
+//X    #include <malloc.h>
+//X#endif
 #include <search.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
+//X#include <stdlib.h>
 #include <string.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef WINDOWS
-    #include "include/dirent.h"
-#else
-    #include <dirent.h>
-#endif
+//X#ifdef XINDOWS
+//X    #include "include/dirent.h"
+//X#else
+//X    #include <dirent.h>
+//X#endif
 #include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
@@ -52,11 +52,11 @@
 #include "include/utlist.h"
 #include "utility.h"
 
-#if _MSC_VER > 1300
-    #define strnicmp _strnicmp
-    #define stricmp _stricmp
-    #define strdup _strdup
-#endif
+//X#if _MSC_VER > 1300
+//X    #define strnicmp _strnicmp
+//X    #define stricmp _stricmp
+//X    #define strdup _strdup
+//X#endif
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"
@@ -1012,9 +1012,9 @@ GetParameterFileContent(char *file)
                     ptr = ptr+strlen(CONTENTSCOMMAND)+1;
                     ptr = strtok(ptr, "\r\n");
                     result = MyStrdup(ptr);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
                     ConvertUTF8ToSystem(result);
-#endif // WINDOWS
+#endif // UTFCONVERT
                     found = true;
                 }
             } else {

@@ -104,9 +104,9 @@ void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
 
-#ifdef WINDOWS
-#define fopen( FN, MODE ) wFileOpen( FN, MODE )
-#endif
+//X#ifdef XINDOWS
+//X#define fopen( FN, MODE ) wFileOpen( FN, MODE )
+//X#endif
 
 void SetWindowTitle( void );
 char * PutTitle( char * cp );

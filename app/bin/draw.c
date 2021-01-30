@@ -24,21 +24,21 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef HAVE_MALLOC_C
-#include <malloc.h>
-#endif
+//X#ifdef HAVE_MALLOC_C
+//X#include <malloc.h>
+//X#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
 #include <stdarg.h>
 #include <sys/types.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <sys/time.h>
-#else
-#include <sys/timeb.h>
-#endif
+//X#ifndef XINDOWS
+//X#include <unistd.h>
+//X#include <sys/time.h>
+//X#else
+//X#include <sys/timeb.h>
+//X#endif
 
 #include "cselect.h"
 #include "custom.h"
@@ -1593,36 +1593,36 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 }
 
 
-#ifdef WINDOWS
-int profRedraw = 0;
-void 
-#ifndef WIN32
-_far _pascal 
-#endif
-ProfStart( void );
-void 
-#ifndef WIN32
-_far _pascal 
-#endif
-ProfStop( void );
-#endif
+//X#ifdef XINDOWS
+//Xint profRedraw = 0;
+//Xvoid 
+//X#ifndef WIN32
+//X_far _pascal 
+//X#endif
+//XProfStart( void );
+//Xvoid 
+//X#ifndef WIN32
+//X_far _pascal 
+//X#endif
+//XProfStop( void );
+//X#endif
 
 EXPORT void DoRedraw( void )
 {
-#ifdef WINDOWS
-#ifndef WIN32
-	if (profRedraw)
-		ProfStart();
-#endif
-#endif
+//X#ifdef XINDOWS
+//X#ifndef WIN32
+//X	if (profRedraw)
+//X		ProfStart();
+//X#endif
+//X#endif
 	MapRedraw();
 	MainRedraw(); // DoRedraw
-#ifdef WINDOWS
-#ifndef WIN32
-	if (profRedraw)
-		ProfStop();
-#endif
-#endif
+//X#ifdef XINDOWS
+//X#ifndef WIN32
+//X	if (profRedraw)
+//X		ProfStop();
+//X#endif
+//X#endif
 
 
 }
@@ -1847,10 +1847,10 @@ EXPORT void DrawRuler(
 				wDrawLine( d->d, x0, y0, x1, y1,
 						0, wDrawLineSolid, color,
 						(wDrawOpts)d->funcs->options );
-#ifdef KLUDGEWINDOWS
-		/* KLUDGE: can't draw invertable strings on windows */
-			if ( (opts&DO_TEMP) == 0)
-#endif
+//X#ifdef KLUDGEXINDOWS
+//X		/* KLUDGE: can't draw invertable strings on windows */
+//X			if ( (opts&DO_TEMP) == 0)
+//X#endif
 			if (fraction == 0) {
 				if ( (number == TRUE && d->scale<40) || (digit==0)) {
 					if (inch % 12 == 0 || d->scale <= 2) {
