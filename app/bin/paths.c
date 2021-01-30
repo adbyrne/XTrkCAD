@@ -20,9 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <string.h>
-#include <assert.h>
-#include <stdarg.h>
+//X#include <string.h>
+//X#include <assert.h>
+//X#include <stdarg.h>
 
 #include <wlib.h>
 #include <dynstring.h>

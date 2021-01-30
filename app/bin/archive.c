@@ -20,13 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <errno.h>
+//X#include <errno.h>
 #include <fcntl.h>
 
-#include <string.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+//X#include <string.h>
+//X#include <stdint.h>
+//X#include <sys/types.h>
+//X#include <sys/stat.h>
 
 #include <zip.h>
 

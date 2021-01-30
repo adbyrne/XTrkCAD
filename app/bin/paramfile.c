@@ -20,14 +20,14 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
+//X#include <assert.h>
+//X#include <ctype.h>
+//X#include <errno.h>
+//X#include <stdbool.h>
+//X#include <stdio.h>
+//X#include <stdlib.h>
+//X#include <string.h>
+//X#include <sys/stat.h>
 
 #include "common.h"
 #include "compound.h"

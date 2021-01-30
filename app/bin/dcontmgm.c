@@ -60,8 +60,8 @@
 
 static const char rcsid[] = "@(#) : $Id$";
 
-#include <errno.h>
-#include <math.h>
+//X#include <errno.h>
+//X#include <math.h>
 
 #include "cundo.h"
 #include "custom.h"

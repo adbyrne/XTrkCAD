@@ -20,8 +20,8 @@
  */
 
 #include <locale.h>
-#include <stdio.h>
-#include <stdlib.h>
+//X#include <stdio.h>
+//X#include <stdlib.h>
 
 #include "i18n.h"
 #include "wlib.h"

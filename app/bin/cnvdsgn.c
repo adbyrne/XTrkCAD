@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <math.h>
+//X#include <stdio.h>
+//X#include <math.h>
 #include "common.h"
 #include "utility.h"
 
-#include <string.h>
-#include <stdlib.h>
+//X#include <string.h>
+//X#include <stdlib.h>
 
 
 /*  XTrkCad - Model Railroad CAD

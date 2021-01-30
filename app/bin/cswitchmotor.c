@@ -49,8 +49,8 @@
  *
  */
 
-#include <ctype.h>
-#include <string.h>
+//X#include <ctype.h>
+//X#include <string.h>
 
 #include "compound.h"
 #include "cselect.h"

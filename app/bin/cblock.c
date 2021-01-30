@@ -46,9 +46,9 @@
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
+//X#include <ctype.h>
+//X#include <stdlib.h>
+//X#include <string.h>
 
 #include "compound.h"
 #include "cundo.h"

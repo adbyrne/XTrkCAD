@@ -20,13 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+//X#include <stdio.h>
+//X#include <string.h>
+//X#include <time.h>
 
 #include <xtrkcad-config.h>
-#include <locale.h>
-#include <assert.h>
+//X#include <locale.h>
+//X#include <assert.h>
 
 #include <dynstring.h>
 

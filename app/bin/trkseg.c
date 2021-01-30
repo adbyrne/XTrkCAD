@@ -20,17 +20,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <track.h>
-#include <time.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdarg.h>
+//X#include <track.h>
+//X#include <time.h>
+//X#include <ctype.h>
+//X#include <math.h>
+//X#include <stdarg.h>
+//
 #include "track.h"
-#include <common.h>
-#include <cbezier.h>
-#include <string.h>
+#include "common.h"
+#include "cbezier.h"
+//X#include <string.h>
 
-#include <tbezier.h>
+#include "tbezier.h"
 
 #include "cjoin.h"
 #include "fileio.h"

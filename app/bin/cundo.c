@@ -20,11 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <time.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <string.h>
+//X#include <stdlib.h>
+//X#include <time.h>
+//X#include <stdarg.h>
+//X#include <errno.h>
+//X#include <string.h>
 
 #include "cselect.h"
 #include "custom.h"

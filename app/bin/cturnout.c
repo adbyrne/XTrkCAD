@@ -20,10 +20,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
+//X#include <ctype.h>
+//X#include <math.h>
+//X#include <stdint.h>
+//X#include <string.h>
 
 #include "ccurve.h"
 #include "tbezier.h"

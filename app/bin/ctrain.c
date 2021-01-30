@@ -20,9 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
+//X#include <ctype.h>
+//X#include <math.h>
+//X#include <string.h>
 
 #define PRIVATE_EXTRADATA
 

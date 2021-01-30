@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#include <stdarg.h>
-#include <locale.h>
+//X#include <assert.h>
+//X#include <stdlib.h>
+//X#include <stdio.h>
+//X#include <math.h>
+//X#include <ctype.h>
+//X#include <string.h>
+//X#include <time.h>
+//X#include <stdarg.h>
+//X#include <locale.h>
 
-#include <stdint.h>
+//X#include <stdint.h>
 
 #include "common.h"
 #include "compound.h"

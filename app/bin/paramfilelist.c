@@ -21,12 +21,12 @@
  */
 
 
-#include <assert.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//X#include <assert.h>
+//X#include <errno.h>
+//X#include <stdbool.h>
+//X#include <stdio.h>
+//X#include <stdlib.h>
+//X#include <string.h>
 
 #include "common.h"
 #include "compound.h"

@@ -22,7 +22,7 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#include <stdio.h>
+//X#include <stdio.h>
 
 #include "common.h"
 #include "misc.h"

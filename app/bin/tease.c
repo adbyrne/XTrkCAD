@@ -60,7 +60,7 @@ For a better representation of this, build 'testjoin' and
 do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 */
 
-#include <math.h>
+//X#include <math.h>
 
 #include "common.h"
 #include "track.h"

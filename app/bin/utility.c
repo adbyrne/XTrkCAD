@@ -20,9 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+//X#include <stdlib.h>
+//X#include <stdio.h>
+//X#include <math.h>
 #include "common.h"
 #include "utility.h"
 

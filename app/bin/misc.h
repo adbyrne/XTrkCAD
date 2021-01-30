@@ -25,7 +25,7 @@
 
 #define EXPORT
 
-#include <stdio.h>
+//X#include <stdio.h>
 
 #include "acclkeys.h"
 #include "common.h"

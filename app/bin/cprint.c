@@ -20,12 +20,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <sys/types.h>
-#include <time.h>
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdbool.h>
+//X#include <sys/types.h>
+//X#include <time.h>
+//X#include <string.h>
+//X#include <ctype.h>
+//X#include <math.h>
+//X#include <stdbool.h>
 
 #include "custom.h"
 #include "dynstring.h"

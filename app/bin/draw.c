@@ -20,15 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#include <stdarg.h>
-#include <sys/types.h>
+//X#include <stdlib.h>
+//X#include <stdio.h>
+//X#include <string.h>
+//X#include <math.h>
+//X#include <ctype.h>
+//X#include <string.h>
+//X#include <time.h>
+//X#include <stdarg.h>
+//X#include <sys/types.h>
 
 #include "cselect.h"
 #include "custom.h"

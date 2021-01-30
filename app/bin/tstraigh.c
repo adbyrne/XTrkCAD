@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
+//X#include <math.h>
 
 #include "cstraigh.h"
 #include "cundo.h"

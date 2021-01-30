@@ -24,16 +24,19 @@
 #define COMMON_H
 
 // INCLUDES
-#include <stdlib.h>
-#include <stdint.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <math.h>
-#include <stdio.h>
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <locale.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -42,7 +45,7 @@
 #ifndef WINDOWS
 // Unix/Mac
 #include <dirent.h>
-#include <unistd.h>
+//#include <unistd.h>
 
 #define PATH_SEPARATOR "/"
 

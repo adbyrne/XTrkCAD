@@ -20,20 +20,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#include <ctype.h>
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <locale.h>
+//X#include <stdlib.h>
+//X#include <stdio.h>
+//X#include <math.h>
+//X#include <ctype.h>
+//X#include <string.h>
+//X#include <time.h>
+//X#include <ctype.h>
+//X#include <sys/stat.h>
+//X#include <stdarg.h>
+//X#include <locale.h>
 
-#include <stdint.h>
+//X#include <stdint.h>
 
-#include <assert.h>
+//X#include <assert.h>
 
 #include <cJSON.h>
 

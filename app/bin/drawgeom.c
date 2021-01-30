@@ -17,9 +17,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <stdarg.h>
-#include <string.h>
+//X#include <math.h>
+//X#include <stdarg.h>
+//X#include <string.h>
 
 #include "ccurve.h"
 #include "cbezier.h"

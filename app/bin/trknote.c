@@ -20,9 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdint.h>
-#include <string.h>
-#include <ctype.h>
+//X#include <stdint.h>
+//X#include <string.h>
+//X#include <ctype.h>
 
 #include "cundo.h"
 #include "custom.h"
