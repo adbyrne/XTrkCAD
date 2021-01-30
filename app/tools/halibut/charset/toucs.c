@@ -30,7 +30,7 @@ static void unicode_emit(void *ctx, long int output)
 	    outlen = 1;
 	}
     } else {
-	outval = output;
+	outval = (wchar_t)output;
 	p = &outval;
 	outlen = 1;
     }
