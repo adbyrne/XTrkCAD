@@ -1724,10 +1724,10 @@ EXPORT void DrawRuler(
 	end = FindDistance( pos0, pos1 );
 	if (end < 0.1)
 		return;
-	d_orig.x = d->orig.x - 0.001;
-	d_orig.y = d->orig.y - 0.001;
-	d_size.x = d->size.x + 0.002;
-	d_size.y = d->size.y + 0.002;
+	d_orig.x = d->orig.x - 0.1;
+	d_orig.y = d->orig.y - 0.1;
+	d_size.x = d->size.x + 0.2;
+	d_size.y = d->size.y + 0.2;
 	if (!ClipLine( &pos0, &pos1, d_orig, d->angle, d_size ))
 		return;
 
