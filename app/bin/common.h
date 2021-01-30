@@ -45,7 +45,7 @@
 #ifndef WINDOWS
 // Unix/Mac
 #include <dirent.h>
-//#include <unistd.h>
+#include <unistd.h>
 
 #define PATH_SEPARATOR "/"
 
