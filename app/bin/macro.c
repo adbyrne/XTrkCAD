@@ -103,6 +103,8 @@ static paramGroup_t recordPG = { "record", 0, recordPLs, sizeof recordPLs/sizeof
 
 
 #ifndef WINDOWS
+#include <sys/time.h>
+
 static struct timeval lastTim = {0,0};
 static void ComputePause( void )
 {
@@ -121,6 +123,8 @@ static void ComputePause( void )
 	lastTim = tim;
 }
 #else
+#include <sys/timeb.h>
+
 static struct _timeb lastTim;
 static void ComputePause( void )
 {

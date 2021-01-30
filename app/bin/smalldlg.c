@@ -52,6 +52,10 @@
 #include "smalldlg.h"
 #include "wlib.h"
 
+#ifdef WINDOWS
+#include <FreeImage.h>
+#endif
+
 extern char *sTipF;
 wWin_p aboutW;
 static wWin_p tipW;					/**< window handle for tip dialog */

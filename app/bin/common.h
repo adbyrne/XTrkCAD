@@ -27,6 +27,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <math.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <errno.h>
+#include <string.h>
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -35,22 +42,19 @@
 #ifndef WINDOWS
 // Unix/Mac
 #include <dirent.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/time.h>
+//X#include <errno.h>
+//X#include <sys/time.h>
 #include <unistd.h>
 
 #define PATH_SEPARATOR "/"
 
 #else
 // Windows
-#include "include/dirent.h"
-#include "direct.h"
 #include <io.h>
 #include <process.h>
-#include <sys/timeb.h>
-#include <FreeImage.h>
+//X#include <sys/timeb.h>
+#include "include/dirent.h"
+#include "direct.h"
 #include "getopt.h"
 
 // DEFINES
@@ -66,7 +70,7 @@
 #define unlink(a) _unlink((a))
 #define rmdir(a) _rmdir((a))
 #define open(name, flag, mode) _open((name), (flag), (mode))
-#define write(file, buffer, count) _write((file),(buffer), (count))
+//X#define write(file, buffer, count) _write((file),(buffer), (count))
 #define close(file) _close((file))
 #define getpid() _getpid()
 #define strcasecmp _stricmp

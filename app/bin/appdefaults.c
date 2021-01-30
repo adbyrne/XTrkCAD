@@ -32,6 +32,7 @@
 //X#endif
 
 #include "common.h"
+//X#include <windows.h>
 #include "custom.h"
 #include "fileio.h"
 #include "paths.h"
