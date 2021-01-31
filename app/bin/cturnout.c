@@ -1772,14 +1772,19 @@ static void DrawTurnoutPositionIndicator(
 
 		if ( path[0] == 0 ) {
 			pos0 = MapPathPos( xx, path[1], 0 );
-			seg = MapPathSeg( xx, path[1]);
-			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
+			if (tempD.scale <= 12) {
+				seg = MapPathSeg( xx, path[1]);
+				DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
+			}
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
-			//DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
-			seg = MapPathSeg( xx, path[0]);
-			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
-		} else {
+			if (tempD.scale > 12)
+			    DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
+			else {
+				seg = MapPathSeg( xx, path[0]);
+				DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
+			}
+		} else if (tempD.scale <= 12) {
 			seg = MapPathSeg( xx, path[0]);
 			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
 		}
