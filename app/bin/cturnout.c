@@ -722,6 +722,16 @@ static coOrd MapPathPos(
 
 }
 
+static trkSeg_p MapPathSeg(
+		struct extraData * xx,
+		signed char segInx) {
+
+	if ( segInx < 0 ) {
+			segInx = - segInx;
+	}
+	return xx->segs+(segInx-1);
+}
+
 
 static void DrawTurnout(
 		track_p trk,
@@ -1749,6 +1759,7 @@ static void DrawTurnoutPositionIndicator(
 	struct extraData * xx = GetTrkExtraData(trk);
 	PATHPTR_T path;
 	coOrd pos0, pos1;
+	trkSeg_p seg;
 
 	// Only 1 path?  Don't draw
 	path = GetPaths( trk );
@@ -1758,11 +1769,19 @@ static void DrawTurnoutPositionIndicator(
 
 	path = GetCurrPath( trk );
 	for ( path += strlen((char*)path); path[0] || path[1]; path++ ) {
+
 		if ( path[0] == 0 ) {
 			pos0 = MapPathPos( xx, path[1], 0 );
+			seg = MapPathSeg( xx, path[1]);
+			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
-			DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
+			//DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
+			seg = MapPathSeg( xx, path[0]);
+			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
+		} else {
+			seg = MapPathSeg( xx, path[0]);
+			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
 		}
 	}
 }
