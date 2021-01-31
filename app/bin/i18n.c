@@ -23,7 +23,7 @@
 #include <stdlib.h>
 
 #include "i18n.h"
-//X#include "wlib.h"
+#include "wlib.h"
 
 /**
  * Initialize gettext environment. By default, the language files are installed 
