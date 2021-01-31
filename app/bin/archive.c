@@ -24,7 +24,6 @@
 
 #include <zip.h>
 
-//X#include <wlib.h>
 #include "archive.h"
 #include "directory.h"
 #include "dynstring.h"

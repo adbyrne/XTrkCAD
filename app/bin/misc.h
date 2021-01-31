@@ -28,7 +28,6 @@
 #include "acclkeys.h"
 #include "common.h"
 #include "draw.h"
-//X#include "wlib.h"
 
 typedef void (*addButtonCallBack_t)(void*);
 

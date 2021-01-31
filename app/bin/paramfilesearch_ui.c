@@ -33,7 +33,6 @@
 #include "directory.h"
 #include "misc2.h"
 #include "layout.h"
-//X#include "wlib.h"
 
 static ParameterLib *trackLibrary;			/**< Track Library          */
 static Catalog currentCat;					/**< catalog being shown    */

@@ -20,8 +20,6 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
   
-//X#include <string.h>
-//X#include <stdio.h>
 #include "common.h"
 
 static char *reservedChars = "?#[]@!$&'()*+,;= ";

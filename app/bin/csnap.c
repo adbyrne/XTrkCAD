@@ -27,7 +27,6 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
-//X#include "wlib.h"
 
 #define bigdot_width 3
 

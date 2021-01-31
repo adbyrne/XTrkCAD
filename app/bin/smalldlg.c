@@ -30,7 +30,6 @@
 #include "paths.h"
 #include "param.h"
 #include "smalldlg.h"
-//X#include "wlib.h"
 
 #ifdef WINDOWS
 #include <FreeImage.h>

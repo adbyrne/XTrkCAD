@@ -26,7 +26,6 @@
 #include "custom.h"
 #include "fileio.h"
 #include "paths.h"
-//X#include "wlib.h"
 
 enum defaultTypes {
     INTEGERCONSTANT,
