@@ -1659,7 +1659,7 @@ EXPORT void DrawRuler(
 	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
-	long mm, mm0, mm1, power;
+	long mm, mm0, mm1, power, skip;
 	wDrawPix_t x0, y0, x1, y1;
 	
 	static double lengths[] = {
@@ -1676,10 +1676,10 @@ EXPORT void DrawRuler(
 	end = FindDistance( pos0, pos1 );
 	if (end < 0.1)
 		return;
-	d_orig.x = d->orig.x - 0.001;
-	d_orig.y = d->orig.y - 0.001;
-	d_size.x = d->size.x + 0.002;
-	d_size.y = d->size.y + 0.002;
+	d_orig.x = d->orig.x - 0.1;
+	d_orig.y = d->orig.y - 0.1;
+	d_size.x = d->size.x + 0.2;
+	d_size.y = d->size.y + 0.2;
 	if (!ClipLine( &pos0, &pos1, d_orig, d->angle, d_size ))
 		return;
 
@@ -1706,6 +1706,18 @@ EXPORT void DrawRuler(
 		} else {
 			power = 1000;
 		}
+
+		// Label interval for scale > 40
+		if (d->scale <= 200) {
+			skip = 2000;
+		}
+		else if (d->scale <= 400) {
+			skip = 5000;
+		}
+		else {
+			skip = 10000;
+		}
+
 		for ( ; power<=1000; power*=10,len+=3 ) {
 			if (power == 1000)
 				len = 10;
@@ -1718,7 +1730,7 @@ EXPORT void DrawRuler(
 					wDrawLine( d->d, x0, y0, x1, y1,
 							0, wDrawLineSolid, color, (wDrawOpts)d->funcs->options );
 
-					if (!number || (d->scale>40 && mm != 0.0))
+					if (!number || (d->scale > 40 && mm % skip != 0.0))
 						continue;
 					if ( (power>=1000) ||
 						 (d->scale<=8 && power>=100) ||
@@ -1800,7 +1812,17 @@ EXPORT void DrawRuler(
 						0, wDrawLineSolid, color,
 						(wDrawOpts)d->funcs->options );
 			if (fraction == 0) {
-				if ( (number == TRUE && d->scale<40) || (digit==0)) {
+				// Label interval for scale > 40
+				if (d->scale <= 80) {
+					skip = 2;
+				}
+				else if (d->scale <= 120) {
+					skip = 5;
+				}
+				else {
+					skip = 10;
+				}
+				if ( (number == TRUE && d->scale <= 40) || (digit % skip == 0)) {
 					if (inch % 12 == 0 || d->scale <= 2) {
 						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
 						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
