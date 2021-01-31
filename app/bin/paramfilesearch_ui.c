@@ -20,12 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <assert.h>
-//X#include <ctype.h>
-//X#include <stdbool.h>
-//X#include <stdint.h>
-//X#include <string.h>
-
 #include "custom.h"
 #include "dynstring.h"
 #include "i18n.h"
@@ -39,7 +33,7 @@
 #include "directory.h"
 #include "misc2.h"
 #include "layout.h"
-#include "wlib.h"
+//X#include "wlib.h"
 
 static ParameterLib *trackLibrary;			/**< Track Library          */
 static Catalog currentCat;					/**< catalog being shown    */

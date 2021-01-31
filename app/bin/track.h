@@ -23,7 +23,6 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-//X#include <string.h>
 #include "common.h"
 #include "draw.h"
 #include "misc2.h"

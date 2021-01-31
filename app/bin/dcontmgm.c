@@ -60,15 +60,12 @@
 
 static const char rcsid[] = "@(#) : $Id$";
 
-//X#include <errno.h>
-//X#include <math.h>
-
 #include "cundo.h"
 #include "custom.h"
 #include "i18n.h"
 #include "param.h"
 #include "track.h"
-#include "wlib.h"
+//X#include "wlib.h"
 
 
 /*****************************************************************************

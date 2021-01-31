@@ -20,12 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <assert.h>
-//X#include <stdbool.h>
-//X#include <stdint.h>
-//X#include <sys/types.h>
-//X#include <sys/stat.h>
-
 #include "cselect.h"
 #include "custom.h"
 #include "paths.h"

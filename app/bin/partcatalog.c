@@ -19,15 +19,6 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-//X#include <assert.h>
-//X#include <ctype.h>
-//X#include <search.h>
-//X#include <stdbool.h>
-//X#include <stdio.h>
-//X#include <string.h>
-//X#include <sys/types.h>
-//X#include <sys/stat.h>
-
 #include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"

@@ -22,8 +22,6 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
-//X#include <stdio.h>
-
 #include "common.h"
 #include "misc.h"
 

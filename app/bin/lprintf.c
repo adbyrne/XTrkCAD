@@ -20,12 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <stdarg.h>
-//X#include <stdio.h>
-//X#include <stdlib.h>
-//X#include <string.h>
-//X#include <errno.h>
-
 #include "custom.h"
 #include "fileio.h"
 #include "messages.h"

@@ -22,9 +22,7 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
-//X#include <string.h>
-
-#include <wlib.h>
+//X#include <wlib.h>
 #include "misc.h"
 #include "include/utf8convert.h"
 

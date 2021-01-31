@@ -20,10 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <ctype.h>
-//X#include <math.h>
-//X#include <string.h>
-
 #define PRIVATE_EXTRADATA
 
 #include "compound.h"

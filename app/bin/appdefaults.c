@@ -20,17 +20,13 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-//X#include <locale.h>
-//X#include <stdbool.h>
-//X#include <stdio.h>
-//X#include <string.h>
 #include <wchar.h>
 
 #include "common.h"
 #include "custom.h"
 #include "fileio.h"
 #include "paths.h"
-#include "wlib.h"
+//X#include "wlib.h"
 
 enum defaultTypes {
     INTEGERCONSTANT,

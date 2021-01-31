@@ -26,7 +26,7 @@
 #include "common.h"
 #include "draw.h"
 #include "track.h"
-#include "wlib.h"
+//X#include "wlib.h"
 
 #define OP_LINE			(0)
 #define OP_DIMLINE		(1)

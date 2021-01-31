@@ -20,9 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <string.h>
-//X#include <stdbool.h>
-
 #include "custom.h"
 #include "dynstring.h"
 #include "file2uri.h"
@@ -33,7 +30,7 @@
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "track.h"
-#include "wlib.h"
+//X#include "wlib.h"
 
 extern BOOL_T inDescribeCmd;
 

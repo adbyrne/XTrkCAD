@@ -20,11 +20,10 @@
  */
 
 #include <locale.h>
-//X#include <stdio.h>
 #include <stdlib.h>
 
 #include "i18n.h"
-#include "wlib.h"
+//X#include "wlib.h"
 
 /**
  * Initialize gettext environment. By default, the language files are installed 

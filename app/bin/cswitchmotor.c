@@ -49,9 +49,6 @@
  *
  */
 
-//X#include <ctype.h>
-//X#include <string.h>
-
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"

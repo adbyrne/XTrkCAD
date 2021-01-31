@@ -23,7 +23,7 @@
 #ifndef SMALLDLG_H
 #define SMALLDLG_H
 
-#include "wlib.h"
+//X#include "wlib.h"
 
 #define SHOWTIP_NEXTTIP (0L)
 #define SHOWTIP_PREVTIP (1L)

@@ -29,8 +29,6 @@
 #include "utility.h"
 #include "misc.h"
 
-//X#include <math.h>
-
 #define AN_OFF (0)
 #define AN_FIRST (1)
 #define AN_SECOND (2)

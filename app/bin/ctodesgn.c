@@ -21,11 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <stdint.h>
-//X#include <ctype.h>
-//X#include <math.h>
-//X#include <string.h>
-
 #include "messages.h"
 #include "ccurve.h"
 #include "compound.h"
@@ -3232,10 +3227,6 @@ EXPORT void InitNewTurn( wMenu_p m )
 
 #ifdef MKTURNOUT
 
-
-//X#include <stdlib.h>
-//X#include <stdio.h>
-//X#include <stdarg.h>
 
 char message[STR_HUGE_SIZE];
 char * curScaleName;

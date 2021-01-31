@@ -20,10 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <stdbool.h>
-//X#include <string.h>
 #include <dynstring.h>
-//X#include <assert.h>
 
 #include "custom.h"
 #include "i18n.h"
@@ -32,7 +29,7 @@
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "wlib.h"
+//X#include "wlib.h"
 #include "fileio.h"
 #include "utility.h"
 

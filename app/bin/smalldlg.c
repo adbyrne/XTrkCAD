@@ -21,11 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <stdio.h>
-//X#include <ctype.h>
-//X#include <string.h>
-//X#include <stdlib.h>
-
 #include "common.h"
 #include "custom.h"
 #include "draw.h"
@@ -35,7 +30,7 @@
 #include "paths.h"
 #include "param.h"
 #include "smalldlg.h"
-#include "wlib.h"
+//X#include "wlib.h"
 
 #ifdef WINDOWS
 #include <FreeImage.h>

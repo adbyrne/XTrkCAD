@@ -42,6 +42,8 @@
 #include <malloc.h>
 #endif
 
+#include "wlib.h"
+
 #ifndef WINDOWS
 // Unix/Mac
 #include <dirent.h>

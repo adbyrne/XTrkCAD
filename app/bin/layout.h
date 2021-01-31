@@ -23,7 +23,6 @@
 #ifndef HAVE_LAYOUT_H
 #define HAVE_LAYOUT_H
 
-//X#include <stdbool.h>
 #include "common.h"
 #include "misc.h"
 

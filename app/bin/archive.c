@@ -20,17 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//X#include <errno.h>
 #include <fcntl.h>
-
-//X#include <string.h>
-//X#include <stdint.h>
-//X#include <sys/types.h>
-//X#include <sys/stat.h>
 
 #include <zip.h>
 
-#include <wlib.h>
+//X#include <wlib.h>
 #include "archive.h"
 #include "directory.h"
 #include "dynstring.h"
