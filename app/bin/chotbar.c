@@ -22,7 +22,6 @@
 
 #include "compound.h"
 #include "fileio.h"
-//X#include "messages.h"
 #include "ccornu.h"
 #include "track.h"
 

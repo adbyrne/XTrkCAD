@@ -23,8 +23,6 @@
 #include "cselect.h"
 #include "custom.h"
 #include "fileio.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"

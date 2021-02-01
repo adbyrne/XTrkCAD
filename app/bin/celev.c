@@ -24,11 +24,9 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "param.h"
 #include "track.h"
 #include "ccurve.h"
-//X#include "utility.h"
 
 static wWin_p elevW;
 

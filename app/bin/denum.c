@@ -23,11 +23,9 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-//X#include "i18n.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-//X#include "utility.h"
 
 static wWin_p enumW;
 

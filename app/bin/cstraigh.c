@@ -24,11 +24,8 @@
 #include "cselect.h"
 #include "cundo.h"
 #include "fileio.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "param.h"
 #include "track.h"
-//X#include "utility.h"
 #include "layout.h"
 
 /*

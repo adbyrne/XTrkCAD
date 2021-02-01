@@ -21,7 +21,6 @@
 
 #include "dynstring.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "include/levenshtein.h"
 #include "misc.h"
 #include "misc2.h"
@@ -31,7 +30,6 @@
 #include "include/stringxtc.h"
 #include "include/utf8convert.h"
 #include "include/utlist.h"
-//X#include "utility.h"
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"

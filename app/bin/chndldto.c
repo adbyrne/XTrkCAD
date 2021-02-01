@@ -26,10 +26,7 @@
 #include "compound.h"
 #include "cstraigh.h"
 #include "cundo.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "track.h"
-//X#include "utility.h"
 
 #define PTRACE(X)
 

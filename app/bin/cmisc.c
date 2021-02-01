@@ -21,10 +21,7 @@
  */
 
 #include "common.h"
-//X#include "utility.h"
 #include "cundo.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "param.h"
 #include "fileio.h"
 #include "cselect.h"

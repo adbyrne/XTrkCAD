@@ -23,7 +23,6 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "misc.h"
 #include "param.h"
 #include "include/utf8convert.h"

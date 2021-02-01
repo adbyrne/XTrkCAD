@@ -23,10 +23,8 @@
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "param.h"
 #include "track.h"
-//X#include "utility.h"
 #include "misc.h"
 
 #define AN_OFF (0)

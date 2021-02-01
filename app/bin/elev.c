@@ -24,12 +24,9 @@
 #include "tbezier.h"
 #include "tcornu.h"
 #include "cundo.h"
-//X#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-//X#include "utility.h"
-//X#include "string.h"
 
 static int log_fillElev = 0;
 static int log_dumpElev = 0;

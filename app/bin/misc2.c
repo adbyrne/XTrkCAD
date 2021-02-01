@@ -26,13 +26,10 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "layout.h"
-//X#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "track.h"
-//X#include "utility.h"
 
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */

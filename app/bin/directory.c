@@ -22,8 +22,6 @@
 
 #include "directory.h"
 #include "dynstring.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "misc.h"
 
 /*****************************************************************************

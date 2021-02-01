@@ -23,14 +23,12 @@
 #include <dynstring.h>
 
 #include "custom.h"
-//X#include "i18n.h"
 #include "layout.h"
 #include "misc2.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
 #include "fileio.h"
-//X#include "utility.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 

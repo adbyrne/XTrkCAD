@@ -25,15 +25,12 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "tbezier.h"
 #include "tcornu.h"
 #include "common.h"
-//X#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-//X#include "utility.h"
 
 
 /*****************************************************************************

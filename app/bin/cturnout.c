@@ -29,15 +29,12 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "layout.h"
-//X#include "messages.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
 #include "trackx.h"
-//X#include "utility.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 

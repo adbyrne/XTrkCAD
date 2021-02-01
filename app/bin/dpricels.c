@@ -22,9 +22,7 @@
 
 #include "compound.h"
 #include "custom.h"
-//X#include "i18n.h"
 #include "layout.h"
-//X#include "messages.h"
 #include "param.h"
 #include "track.h"
 

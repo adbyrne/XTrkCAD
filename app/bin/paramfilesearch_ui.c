@@ -22,8 +22,6 @@
 
 #include "custom.h"
 #include "dynstring.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "param.h"
 #include "include/partcatalog.h"
 #include "paths.h"

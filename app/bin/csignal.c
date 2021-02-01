@@ -52,7 +52,6 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
@@ -60,8 +59,6 @@ static const char rcsid[] = "@(#) : $Id$";
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif // UTFCONVERT
-//X#include "utility.h"
-//X#include "messages.h"
 
 EXPORT TRKTYP_T T_SIGNAL = -1;
 

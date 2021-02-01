@@ -22,9 +22,7 @@
 
 #include "custom.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "layout.h"
-//X#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"

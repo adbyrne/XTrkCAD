@@ -25,14 +25,11 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "layout.h"
-//X#include "messages.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
-//X#include "utility.h"
 #include "ccurve.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;

@@ -29,13 +29,10 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "layout.h"
-//X#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-//X#include "utility.h"
 #include "misc.h"
 #include "ctrain.h"
 

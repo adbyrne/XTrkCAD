@@ -23,10 +23,7 @@
 #include "cundo.h"
 #include "compound.h"
 #include "cselect.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "track.h"
-//X#include "utility.h"
 #include "fileio.h"
 
 static wMenu_p splitPopupM[2];

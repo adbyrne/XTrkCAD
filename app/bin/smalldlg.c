@@ -25,7 +25,6 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "misc.h"
 #include "paths.h"
 #include "param.h"

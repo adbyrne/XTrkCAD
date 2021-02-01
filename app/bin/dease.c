@@ -24,7 +24,6 @@
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "custom.h"
-//X#include "i18n.h"
 #include "fileio.h"
 #include "param.h"
 #include "track.h"

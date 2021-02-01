@@ -28,16 +28,13 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "layout.h"
-//X#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
-//X#include "utility.h"
 
 #define DEFAULT_SCALE ("N")
 

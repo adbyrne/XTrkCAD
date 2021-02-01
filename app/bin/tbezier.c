@@ -41,15 +41,10 @@
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
-//X#include "utility.h"
-//X#include "i18n.h"
 #include "param.h"
-//X#include "math.h"
-//X#include "string.h"
 #include "cundo.h"
 #include "layout.h"
 #include "fileio.h"
-//X#include "assert.h"
 
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;

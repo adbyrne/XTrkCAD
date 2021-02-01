@@ -23,8 +23,6 @@
 #include "ccurve.h"
 #include "cselect.h"
 #include "custom.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "param.h"
 #include "track.h"
 

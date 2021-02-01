@@ -17,7 +17,6 @@
  */
 
 #include "common.h"
-//X#include "utility.h"
 
 #define GETMAXY \
 		if (lp->y0 > maxY) maxY = lp->y0; \

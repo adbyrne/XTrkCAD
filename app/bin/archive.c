@@ -27,8 +27,6 @@
 #include "archive.h"
 #include "directory.h"
 #include "dynstring.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "misc.h"
 #include "misc2.h"
 #include "paths.h"

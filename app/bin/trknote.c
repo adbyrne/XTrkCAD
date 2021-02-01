@@ -24,13 +24,11 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-//X#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "track.h"
 #include "include/utf8convert.h"
-//X#include "utility.h"
 
 extern BOOL_T inDescribeCmd;
 extern descData_t noteDesc[];

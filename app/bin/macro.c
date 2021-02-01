@@ -27,14 +27,11 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "misc.h"
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"
-//X#include "utility.h"
 #include "version.h"
 
 EXPORT long adjTimer;

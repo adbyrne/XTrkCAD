@@ -22,7 +22,6 @@
 
 #include "custom.h"
 #include "dynstring.h"
-//X#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"

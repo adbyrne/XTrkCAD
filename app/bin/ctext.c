@@ -22,8 +22,6 @@
 
 #include "cundo.h"
 #include "fileio.h"
-//X#include "i18n.h"
-//X#include "messages.h"
 #include "param.h"
 #include "track.h"
 #include "draw.h"
