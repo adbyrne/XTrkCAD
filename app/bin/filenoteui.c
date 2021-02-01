@@ -23,7 +23,7 @@
 #include "custom.h"
 #include "dynstring.h"
 #include "file2uri.h"
-#include "i18n.h"
+//X#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"

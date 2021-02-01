@@ -25,7 +25,7 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
+//X#include "i18n.h"
 #include "misc.h"
 #include "paths.h"
 #include "param.h"
@@ -36,7 +36,7 @@
 #endif
 
 extern char *sTipF;
-wWin_p aboutW;
+EXPORT wWin_p aboutW;
 static wWin_p tipW;					/**< window handle for tip dialog */
 
 static long showTipAtStart = 1;		/**< flag for visibility */

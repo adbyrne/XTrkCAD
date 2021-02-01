@@ -22,8 +22,8 @@
 
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
+//X#include "i18n.h"
+//X#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"

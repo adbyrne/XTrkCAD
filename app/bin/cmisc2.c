@@ -20,8 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+//X#include "i18n.h"
+#include "common.h"
 #include "track.h"
-#include "i18n.h"
 
 /*****************************************************************************
  *

@@ -24,11 +24,11 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
+//X#include "i18n.h"
 #include "param.h"
 #include "track.h"
 #include "ccurve.h"
-#include "utility.h"
+//X#include "utility.h"
 
 static wWin_p elevW;
 

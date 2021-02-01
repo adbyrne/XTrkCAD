@@ -25,7 +25,7 @@
 
 #include "draw.h"
 #include "track.h"
-#include "utility.h"
+//X#include "utility.h"
 
 typedef struct {
 		curveType_e type;

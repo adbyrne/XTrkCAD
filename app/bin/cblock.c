@@ -50,12 +50,12 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
+//X#include "i18n.h"
+//X#include "messages.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "utility.h"
+//X#include "utility.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"

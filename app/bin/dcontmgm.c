@@ -62,7 +62,7 @@ static const char rcsid[] = "@(#) : $Id$";
 
 #include "cundo.h"
 #include "custom.h"
-#include "i18n.h"
+//X#include "i18n.h"
 #include "param.h"
 #include "track.h"
 

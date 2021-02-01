@@ -99,6 +99,8 @@
 
 #define NUM_LAYERS		(99)
 
+// TYPEDEFS
+
 typedef double FLOAT_T;
 typedef double POS_T;
 typedef double DIST_T;
@@ -137,6 +139,8 @@ enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COM
 
 #define SCALE_ANY	(-2)
 #define SCALE_DEMO	(-1)
+
+// DYNARRAY
 
 typedef struct {
 		int cnt;
@@ -193,7 +197,7 @@ typedef struct {
 // Base DotsPerInch
 #define BASE_DPI	(75.0)
 
-// File Versions - non-backward file format changes
+// FILE VERSIONS - non-backward file format changes
 // Descriptions added for Bezier, Cornu, Joint
 #define VERSION_DESCRIPTION2	(12)
 // Inline quoted text replaces multiline text in Notes and Cars
@@ -201,6 +205,16 @@ typedef struct {
 // END is replaced by END$SEGS, END$TRK, ...
 #define VERSION_NONAKEDENDS	(12)
 
+// COMMON INCLUDES
+// If you add includes here, please remove them elsewhere
+
+#include "i18n.h"
+//#include "track.h"
+//#include "fileio.h"
+//#include "param.h"
+#include "messages.h"
+#include "utility.h"
+//#include "misc2.h"
 
 #endif
 

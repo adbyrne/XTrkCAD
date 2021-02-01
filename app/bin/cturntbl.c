@@ -23,11 +23,11 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
+//X#include "i18n.h"
+//X#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+//X#include "utility.h"
 #include "cselect.h"
 
 static TRKTYP_T T_TURNTABLE = -1;
