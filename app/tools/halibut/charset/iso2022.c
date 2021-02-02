@@ -964,7 +964,7 @@ static void docs_char(charset_state *state,
 static void write_to_pointer(void *ctx, long int output)
 {
     char **ptr = (char **)ctx;
-    *(*ptr)++ = output;
+    *(*ptr)++ = (char)output;
 }
 
 /*

@@ -20,18 +20,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <string.h>
-#include <time.h>
-
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "i18n.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 
 static wWin_p enumW;
 

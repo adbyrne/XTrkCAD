@@ -20,11 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "ccurve.h"
 #include "tbezier.h"
 #include "tcornu.h"
@@ -34,15 +29,12 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
 #include "trackx.h"
-#include "utility.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 

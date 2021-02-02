@@ -25,19 +25,11 @@
 
 #define EXPORT
 
-#include <stdio.h>
-
 #include "acclkeys.h"
 #include "common.h"
 #include "draw.h"
-#include "wlib.h"
 
 typedef void (*addButtonCallBack_t)(void*);
-
-#ifdef WINDOWS
-/* suppress warning from *.bmp about conversion of int to char */
-#pragma warning( disable : 4305)
-#endif
 
 #define COUNT(A) (sizeof(A)/sizeof(A[0]))
 

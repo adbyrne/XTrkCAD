@@ -20,13 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <time.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <math.h>
-#include <string.h>
-
 #include "ccurve.h"
 #include "cjoin.h"
 #include "compound.h"
@@ -36,28 +29,16 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 #include "misc.h"
 #include "ctrain.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
 #include "trackx.h"
-#endif
-#endif
-
-#ifndef WINDOWS
-#include <errno.h>
-#else
-// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
-#if ( _MSC_VER < 1900 )
-#define round(x) floor((x)+0.5)
 #endif
 #endif
 

@@ -21,11 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-
-
 #include "tbezier.h"
 #include "cjoin.h"
 #include "common.h"
@@ -33,11 +28,8 @@
 #include "cundo.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
-#include "messages.h"
 #include "include/paramfile.h"
 
 /*****************************************************************************

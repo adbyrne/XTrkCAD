@@ -20,35 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#include "getopt.h"
-#define R_OK (02)
-#define access _access
-#if _MSC_VER >1300
-#define strdup _strdup
-#endif
-#else
-#include <sys/stat.h>
-#endif
-#include <locale.h>
-#include <stdarg.h>
-#include <stdint.h>
-
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
@@ -57,16 +28,13 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
-#include "utility.h"
 
 #define DEFAULT_SCALE ("N")
 
@@ -205,11 +173,6 @@ EXPORT void * MyMalloc(long size) {
 	void * p;
 	totalMallocs++;
 	totalMalloced += size;
-#if defined(WINDOWS) && ! defined(WIN32)
-	if ( size > 65500L ) {
-		AbortProg( "mallocing > 65500 bytes" );
-	}
-#endif
 	p = malloc((size_t) size + sizeof(size_t) + 2 * sizeof(unsigned long));
 	if (p == NULL)
 		AbortProg("No memory");
@@ -232,11 +195,6 @@ EXPORT void * MyRealloc(void * old, long size) {
 		return MyMalloc(size);
 	totalReallocs++;
 	totalRealloced += size;
-#if defined(WINDOWS) && ! defined(WIN32)
-	if ( size > 65500L ) {
-		AbortProg( "reallocing > 65500 bytes" );
-	}
-#endif
 	if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
 		AbortProg("Guard0 is hosed");
 	}
@@ -365,9 +323,9 @@ EXPORT char * ConvertToEscapedText(const char * text) {
 		text_i++;
 	}
 	cout[cout_i] = '\0';
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	wSystemToUTF8(cout, cout, cnt);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	return cout;
 }
@@ -464,10 +422,6 @@ EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
 }
 
 static char * directory;
-
-#ifdef WINDOWS
-#define F_OK (0)
-#endif
 
 EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 

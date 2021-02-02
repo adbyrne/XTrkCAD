@@ -60,8 +60,6 @@ For a better representation of this, build 'testjoin' and
 do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 */
 
-#include <math.h>
-
 #include "common.h"
 #include "track.h"
 #include "tcornu.h"
@@ -71,11 +69,8 @@ do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 #include "cjoin.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
-#include "utility.h"
 
 static TRKTYP_T T_EASEMENT = -1;
 

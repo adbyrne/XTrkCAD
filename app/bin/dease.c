@@ -20,14 +20,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <string.h>
-
 #include "ccurve.h"
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "custom.h"
-#include "i18n.h"
 #include "fileio.h"
 #include "param.h"
 #include "track.h"

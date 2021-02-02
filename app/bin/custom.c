@@ -21,30 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#else
-#include <sys/stat.h>
-#endif
-#include <stdarg.h>
-#include <errno.h>
-
 #include "cjoin.h"
 #include "common.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "misc.h"
 #include "track.h"
 #include "version.h"

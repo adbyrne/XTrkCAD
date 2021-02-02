@@ -20,29 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <errno.h>
-#include <string.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define F_OK	(0)
-#define W_OK	(2)
-#define access	_access
-#else
-#include <unistd.h>
-#endif
-
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "wlib.h"
 #include "include/paramfilelist.h"
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif
 
@@ -241,14 +225,14 @@ static int CustomDoExport(
 
 	if (rc == -1)
 	{
-	#ifdef WINDOWS
+	#ifdef UTFCONVERT
 	    char *contents = MyStrdup(custMgmContentsStr);
 	    contents = Convert2UTF8(contents);
 	    fprintf(customMgmF, "CONTENTS %s\n", contents);
 		MyFree(contents);
 	#else
 	    fprintf(customMgmF, "CONTENTS %s\n", custMgmContentsStr);
-	#endif // WINDOWS
+	#endif // UTFCONVERT
 	}
 
 	cnt = wListGetCount( (wList_p)customPLs[0].control );

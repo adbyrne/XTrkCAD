@@ -20,36 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#ifdef HAVE_MALLOC_C
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#include <stdarg.h>
-#include <sys/types.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <sys/time.h>
-#else
-#include <sys/timeb.h>
-#endif
-
 #include "cselect.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "layout.h"
 
 
@@ -1593,38 +1570,10 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 }
 
 
-#ifdef WINDOWS
-int profRedraw = 0;
-void 
-#ifndef WIN32
-_far _pascal 
-#endif
-ProfStart( void );
-void 
-#ifndef WIN32
-_far _pascal 
-#endif
-ProfStop( void );
-#endif
-
 EXPORT void DoRedraw( void )
 {
-#ifdef WINDOWS
-#ifndef WIN32
-	if (profRedraw)
-		ProfStart();
-#endif
-#endif
 	MapRedraw();
 	MainRedraw(); // DoRedraw
-#ifdef WINDOWS
-#ifndef WIN32
-	if (profRedraw)
-		ProfStop();
-#endif
-#endif
-
-
 }
 
 /*****************************************************************************
@@ -1859,10 +1808,6 @@ EXPORT void DrawRuler(
 				wDrawLine( d->d, x0, y0, x1, y1,
 						0, wDrawLineSolid, color,
 						(wDrawOpts)d->funcs->options );
-#ifdef KLUDGEWINDOWS
-		/* KLUDGE: can't draw invertable strings on windows */
-			if ( (opts&DO_TEMP) == 0)
-#endif
 			if (fraction == 0) {
 				// Label interval for scale > 40
 				if (d->scale <= 80) {

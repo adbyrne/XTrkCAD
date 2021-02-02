@@ -19,18 +19,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <math.h>
 
 #include "ccurve.h"
 #include "tbezier.h"
 #include "tcornu.h"
 #include "cundo.h"
-#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
-#include "string.h"
 
 static int log_fillElev = 0;
 static int log_dumpElev = 0;

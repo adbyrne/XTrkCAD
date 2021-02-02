@@ -20,17 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <string.h>
-
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "cselect.h"
 
 static TRKTYP_T T_TURNTABLE = -1;

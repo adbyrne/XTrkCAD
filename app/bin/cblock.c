@@ -46,24 +46,17 @@
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "utility.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
@@ -394,9 +387,9 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	blockData_p xx = GetblockData(t);
 	char *blockName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	blockName = Convert2UTF8(blockName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
 		GetTrkIndex(t), blockName, xx->script)>0;
@@ -427,9 +420,9 @@ static BOOL_T ReadBlock ( char * line )
 		return FALSE;
 	}
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 
 	DYNARR_RESET( btrackinfo_t , blockTrk_da );

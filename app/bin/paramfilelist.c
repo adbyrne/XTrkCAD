@@ -21,22 +21,13 @@
  */
 
 
-#include <assert.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
@@ -212,11 +203,7 @@ void LoadParamFileList(void)
         char * share;
 
        // Rewire to the latest system level
-#if defined(WINDOWS)
-#define SHAREPARAMS "\\share\\xtrkcad\\params\\"
-#else
-#define SHAREPARAMS "/share/xtrkcad/params/"
-#endif
+#define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
         if ((share= strstr(fileName,SHAREPARAMS))) {
         	share += strlen(SHAREPARAMS);
         	MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);

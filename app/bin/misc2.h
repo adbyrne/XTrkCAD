@@ -25,7 +25,6 @@
 
 #include "common.h"
 #include "misc.h"
-#include "time.h"
 
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)

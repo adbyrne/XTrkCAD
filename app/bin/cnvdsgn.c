@@ -1,12 +1,3 @@
-#include <stdio.h>
-#include <math.h>
-#include "common.h"
-#include "utility.h"
-
-#include <string.h>
-#include <stdlib.h>
-
-
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
@@ -24,6 +15,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include "common.h"
 
 #define GETMAXY \
 		if (lp->y0 > maxY) maxY = lp->y0; \

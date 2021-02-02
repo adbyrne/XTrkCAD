@@ -20,18 +20,13 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
   
-#include <string.h>
-#include <stdbool.h>
-
 #include "custom.h"
 #include "dynstring.h"
-#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "shortentext.h"
 #include "track.h" 
-#include "wlib.h"
 
 static struct extraDataNote	noteDataInUI;
 

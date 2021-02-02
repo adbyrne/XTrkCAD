@@ -20,13 +20,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "compound.h"
 #include "fileio.h"
-#include "messages.h"
 #include "ccornu.h"
 #include "track.h"
 
