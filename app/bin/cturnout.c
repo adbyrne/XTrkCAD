@@ -714,6 +714,16 @@ static coOrd MapPathPos(
 
 }
 
+static trkSeg_p MapPathSeg(
+		struct extraData * xx,
+		signed char segInx) {
+
+	if ( segInx < 0 ) {
+			segInx = - segInx;
+	}
+	return xx->segs+(segInx-1);
+}
+
 
 static void DrawTurnout(
 		track_p trk,
@@ -1739,8 +1749,10 @@ static void DrawTurnoutPositionIndicator(
 		wDrawColor color )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	PATHPTR_T path;
+	PATHPTR_T path,path1;
 	coOrd pos0, pos1;
+	trkSeg_p seg;
+	BOOL_T multiPart = FALSE;
 
 	// Only 1 path?  Don't draw
 	path = GetPaths( trk );
@@ -1749,12 +1761,32 @@ static void DrawTurnoutPositionIndicator(
 		return;
 
 	path = GetCurrPath( trk );
+
+	//Is this a multi-part path?
+	path1 = path;
+	for ( path1 += strlen((char*)path1) + 1; path1[0]; path1++ );
+	if (path1[1] != 0) multiPart = TRUE;
+
+
 	for ( path += strlen((char*)path); path[0] || path[1]; path++ ) {
+
 		if ( path[0] == 0 ) {
 			pos0 = MapPathPos( xx, path[1], 0 );
+			if ((tempD.scale <= 10) || !multiPart) {
+				seg = MapPathSeg( xx, path[1]);
+				DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
+			}
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
-			DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
+			if ((tempD.scale > 10) && multiPart)
+			    DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
+			else {
+				seg = MapPathSeg( xx, path[0]);
+				DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
+			}
+		} else if ((tempD.scale <= 10) || !multiPart) {
+			seg = MapPathSeg( xx, path[0]);
+			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), color, DTS_CENTERONLY);
 		}
 	}
 }

@@ -707,6 +707,7 @@ static void DrawJointSegment(
 	coOrd p0, p1;
 	ANGLE_T a0, a1;
 	int cnt1;
+	wDrawWidth thick = 3;
 
 	ComputeJoinPos( l0, R, L, NULL, &a0, NULL, NULL );
 	ComputeJoinPos( l1, R, L, NULL, &a1, NULL, NULL );
@@ -720,6 +721,9 @@ static void DrawJointSegment(
 		a0 += a1;
 		ll = sqrt( sin(D2R(a0)) * 2 * R * L );
 		GetJointPos( &p1, NULL, ll, R, L, P, A, N );
+		if (widthOptions&DTS_CENTERONLY) {
+			DrawLine(d,p0,p1,thick,color);
+		}
 		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk,
 								color, widthOptions );
 		p0 = p1;

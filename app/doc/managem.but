@@ -618,7 +618,7 @@ The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{
 
 \u000
 
-\dd Turntables can be turned by using \e{Shift+Left-Click} on the endpoint you want the Turntable to move to.  To turn the Turntable 180\u00B0, \e{Shift+Left-Click} on the endpoint again.
+\dd Turntables can be turned by using \e{Shift+Left-Click} on the endpoint you want the Turntable bridge to move to.  If you click on the Turntable where there is no endpoint, the Turntable will turn to the next endpoint beyond that point in the direction of the click relative to the nearest end of the turntable bridge. To turn the Turntable 180\u00B0, \e{Shift+Left-Click} on the current endpoint again.
 
 \rule
 
