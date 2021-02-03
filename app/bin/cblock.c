@@ -1,5 +1,6 @@
 /** \file cblock.c
  * Implement blocks: a group of trackwork with a single occupancy detector
+ *  See app/doc/appendix.but "Block occupancy and the Model RR System's Dispatcher"
  *  Blocks:
  *    - Connect to a turnout or another block at each end
  *      - very long blocks are divided into sub-blocks based on Max Block
@@ -17,30 +18,29 @@
  *    - When any segment of the block is occupied, the whole block
  *      is occupied.
  *   Dynamic Blocks:
- *    - Created when the positions of the turnouts connect blocks.
- *    - A path between blocks, when it exists, is drawn in green.
- *    - Deleted when a position is changed so that blocks are not
- *      connected.
+ *    - Created when a train enters a turnout and the path through the
+ *      turnout(s) lead to another block.
+ *    - A path between blocks, when a dynamic block exists, is drawn in green.
+ *    - Deleted when the train exits the block.
  *    - When any turnout in the dynamic block is occupied all turnouts are
  *      occupied.
  *    - Dynamic blocks are associated with the connected blocks.
- *      They do not report occupancy. When a train enters a dynamic block,
- *      the block becomes occupied. If the whole train is in the dynamic block,
- *      the block it came from remains occupied until the train enters the
- *      next block.
+ *      They do not report occupancy. They do not have a name or script.
+ *      If the whole train is in the dynamic block, the block it came from
+ *      remains occupied until the train enters the next block.
  *   Note: when a turnout is occupied, it's position can't be changed.
+ *
  *   manage->Mange Layout Control Elements "Add Missing" button
  *   automatically creates all (non dynamic) blocks needed by the
  *   layout based on Min and Max Block Lengths.
+ *
  *   manage->Mange Layout Control Elements "Delete Blocks" button
- *   automatically deletes all blocks. (future)
- *   Dynamic blocks are created and deleted when entering/exiting train
- *   mode and when, in train mode, changing turnout positions.
+ *   automatically deletes all blocks.
  */
 /* Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
- * Modification History: Revision 1.6  2021/01/15 12:00:00  pecameron
+ * Modification History: Revision 1.6  2021/02/02 12:00:00  pecameron
  * Modification History: Add Dynamic Blocks.
  * Modification History: Track block occupancy.
  * Modification History: Prevent occupied turnout from being changed.
@@ -510,11 +510,8 @@ static void blockDebug( track_p b_trk )
 	EPINX_T epN;
 	trkEndPt_p endPtP;
 
-#if 1
-	return;
-#endif
 	blockData_p xx = GetblockData(b_trk);
-	LOG( log_block, 1, ("*** blockDebug(): T%d(%p) name = \"%s\" script = \"%s\"\n",
+	LOG( log_block, 1, ("*** blockDebug(): B%d(%p) name = \"%s\" script = \"%s\"\n",
 			GetTrkIndex(b_trk), b_trk, xx->name,xx->script))
 	// track segments in the block
 	for ( iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
@@ -606,8 +603,6 @@ static void DeleteBlock( track_p t )
     blockData_p xx1;
 
 	blockData_p xx = GetblockData(t);
-	LOG( log_block, 1, ("*** DeleteBlock(T%d) xx->name = \"%s\", xx->script = \"%s\"\n",
-		GetTrkIndex(t),xx,xx->name,xx->script))
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->script); xx->script = NULL;
 
@@ -658,6 +653,8 @@ static BOOL_T WriteBlock( track_p t, FILE * f )
 // blockScript - preloaded with block script
 // blockLen - preloaded length of block
 // blockTrk_da - DYNARR pre loaded with list of track segments
+// tempEndPts_da - DYNARR pre loaded with 2 endpoints of block
+//                 prevTrack is track at end of block, track is NULL.
 static track_p makeBlock( void )
 {
 	track_p blk;
@@ -676,7 +673,7 @@ static track_p makeBlock( void )
 #endif
 
 	initBlockData( blk );
-	blockDebug( blk );
+//	blockDebug( blk );
 
 	return blk;
 }
@@ -875,6 +872,20 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	}
 }
 
+// Get ep in "trk1" connected to "trk2"
+// not found -- ep == GetTrkEndPtCnt(trk1)
+static EPINX_T getEpInTrk1ToTrk2( track_p trk1, track_p trk2 )
+{
+	EPINX_T ep;
+	track_p epTrk;
+
+	for ( ep = 0; ep < GetTrkEndPtCnt(trk1); ep++ ) {
+		epTrk = trk1->endPt[ep].track;
+		if ( epTrk && epTrk == trk2 ) break;
+	}
+	return ep;
+}
+
 // Givern a track and ep where a train is entering the track
 // return ep the train will exit the track
 static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
@@ -883,6 +894,7 @@ static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
 	coOrd end1, end2;
 
 	epCnt = GetTrkEndPtCnt(trk);
+	if ( ep == epCnt ) return ep;
 
 	if ( epCnt == 2 ) {
 #if 0
@@ -922,7 +934,7 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 	LOG( log_block, 1, ("*** addTurnouts(): here T%d from T%d-%d\n",
 			GetTrkIndex(here),GetTrkIndex(from),epFrom))
 	epCnt = GetTrkEndPtCnt(here);
-	if ( here == from ) { // this is a turnout, epTo is the other of the path from epFrom
+	if ( here == from ) { // this is a turnout, epTo is the other end of the path from epFrom
 		epTo = getRemoteEp( from, epFrom );
 #if 0
 		LOG( log_block, 1, ("*** addTurnouts(): adding track T%d  -- epFrom %d epTo %d\n",
@@ -959,10 +971,7 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 	}
 
 	// Get ep in "here" connected to "from"
-	for ( epN = 0; epN < epCnt; epN++ ) {
-		epTrk = here->endPt[epN].track;
-		if ( epTrk && epTrk == from ) break;
-	}
+	epN = getEpInTrk1ToTrk2( here, from );
 #if 0
 	LOG( log_block, 1, ("*** addTurnouts(): here T%d-%d back to T%d\n",
 				GetTrkIndex(here),epN,GetTrkIndex(from)))
@@ -1088,14 +1097,14 @@ static void GetDynamicSegs( track_p trk, EPINX_T ep )
 {
 	LOG( log_block, 1, ( "*** GetDynamicSegs T%d\n", GetTrkIndex(trk)))
 
-	if ( ! IsTrack( trk ) ) return;
-
 	// Length of block
 	blockLen = 0.0;
 	// Endpoints of block
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	// Track segments in block
 	DYNARR_RESET( btrackinfo_t, blockTrk_da );
+
+	if ( ! IsTrack( trk ) ) return;
 
 	// Find all turnouts between two blocks
 	addTurnouts( trk, trk, ep );
@@ -1180,7 +1189,7 @@ void initBlockData( track_p b_trk )
 	xx->numTracks = blockTrk_da.cnt;
 	b_trk->occupied = 0;
 	blockLen = 0;
-	LOG( log_block, 1, ( "*** initBlockData: B%d -- ", GetTrkIndex(b_trk)) )
+	LOG( log_block, 1, ( "*** initBlockData: B%d --\"%s\"-- ", GetTrkIndex(b_trk),xx->name) )
 	for ( iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++ ) {
 		tracklist(iTrack).i = blockTrk(iTrack).i;
 		tracklist(iTrack).t = blockTrk(iTrack).t;
@@ -1294,7 +1303,7 @@ EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
                 GetTrkIndex(b_trk)))
 #endif
         xx->numTracks = 0;
-        blockDebug( b_trk );
+//      blockDebug( b_trk );
 
         DeleteTrack( b_trk, FALSE ); // calls DeleteBlock
 
@@ -1355,7 +1364,7 @@ EXPORT BOOL_T ResolveBlockTrack( track_p b_trk )
             b_trk->endPt[ep].angle = endPtP->angle;
             b_trk->endPt[ep].option = 0;
         }
-        blockDebug( b_trk );
+//      blockDebug( b_trk );
 //      SetBlockBoundingBox(trk);
     }
 
@@ -1457,6 +1466,7 @@ static void deleteDynamicBlock( track_p trk )
 	track_p blk = NULL;
 	blockData_p xx;
 
+//	LOG( log_block, 1, ("*** deleteDynamicBlock T%d --enter--\n", GetTrkIndex(trk)))
 	if ( trk->conBlock ) blk = trk->conBlock;
 	if ( ! blk || GetTrkType(blk) != T_BLOCK ) return;
 	xx = GetblockData(blk);
@@ -1470,46 +1480,26 @@ static void deleteDynamicBlock( track_p trk )
 
 // trk - seg being entered
 // prevTrk - coming from this track seg
-static track_p  createDynamicBlock( track_p trk, track_p prevTrk )
+static track_p  createDynamicBlock( track_p trk, EPINX_T ep )
 {
 	track_p blk = NULL;
-	EPINX_T minEp, epN;
-	coOrd bEpPos0, bEpPos1;
-	DIST_T len, minDist, dist;
 
 	if ( ! IsTrack( trk ) ) return NULL;
 	if ( GetTrkEndPtCnt(trk) <= 2 ) return NULL;  // This is not a turnout
 	if ( trk->conBlock ) return NULL; // Dynamic block already exists
-	if ( ! prevTrk->conBlock ) return NULL; // not coming from a block
 
-	LOG( log_block, 1, ("*** createDynamicBlock T%d prev T%d -- enter\n", GetTrkIndex(trk),GetTrkIndex(prevTrk)))
-
-	// Find the endpoint on trk we are entering closest to prevTrk->conBlock
-	bEpPos0 = prevTrk->conBlock->endPt[0].pos;
-	bEpPos1 = prevTrk->conBlock->endPt[1].pos;
-	minDist = FindDistance ( bEpPos0, trk->endPt[0].pos );
-	minEp   = 0;
-	for ( epN = 0; epN < GetTrkEndPtCnt(trk); epN++ ) {
-		dist = FindDistance ( bEpPos0, trk->endPt[epN].pos );
-		if ( dist < minDist ) {
-			minDist = dist;
-			minEp = epN;
-		}
-		dist = FindDistance ( bEpPos1, trk->endPt[epN].pos );
-		if ( dist < minDist ) {
-			minDist = dist;
-			minEp = epN;
-		}
-	}
-	LOG( log_block, 1, ("*** createDynamicBlock T%d-%d dist %0.4f\n",
-			GetTrkIndex(trk),minEp,minDist))
+	LOG( log_block, 1, ("*** createDynamicBlock T%d-%d -- enter\n", GetTrkIndex(trk),ep))
 
 	// Get the turnouts in the path
 	blockScript[0] = 0;
 	blockName[0] = 'D'; // Dynamic block gets temp name "D", will ve changed to ""
 	blockName[1] = 0;
-	GetDynamicSegs( trk, minEp ); // trk[ep] is closest to prevBlock
-	if ( tempEndPts_da.cnt < 2 ) return NULL; // doesn't end at a block
+	GetDynamicSegs( trk, ep ); // trk[ep] is closest to prevBlock
+	if ( tempEndPts_da.cnt < 2 ) {
+		LOG( log_block, 1, ("*** createDynamicBlock T%d epCnt %d - Must end at a block\n",
+					GetTrkIndex(trk),tempEndPts_da.cnt))
+		return NULL; // doesn't end at a block
+	}
 
 	if ( ! blockUndoStarted ) {
 		UndoStart( _("Create block"), "Create block" );
@@ -1536,9 +1526,13 @@ EXPORT void ClearDynamicBlocks( void )
 {
     track_p trk;
 
+    LOG( log_block, 1, ("*** ClearDynamicBlocks -- enter\n"))
+
     TRK_ITERATE(trk) {
         deleteDynamicBlock( trk );
     }
+
+    LOG( log_block, 1, ("*** ClearDynamicBlocks -- exit\n"))
 }
 
 
@@ -1612,13 +1606,27 @@ static void adjustDynamicOccupied ( track_p trk, track_p prevTrk )
 #endif
 }
 
+
+// The segment occupied indicator maintains a count of the number
+// of car ends (trucks) on the segment. The block, when present,
+// maintains a count for all segments in the block. Static blocks
+// are created before entering train mode. Dynamic blocks are created,
+// and exist, when turnouts are positioned to connect two static blocks
+// and a train occupies any of the turnouts.
+
 // Add or subtract from the occupied counter and when a
 // block is present adjust there as well.
-static void adjustOccupied ( track_p trk, int adj )
+// When entering or exiting turnouts create and delete dynamic blocks
+// as needed.
+static void adjustOccupied ( track_p trk, EPINX_T ep, int adj )
 {
+	if ( trk->occupied == 0 && ! trk->conBlock && GetTrkEndPtCnt(trk) > 2 && adj  > 0 )
+		createDynamicBlock( trk, ep );
 	trk->occupied += adj;
 	if (trk->conBlock)
 		trk->conBlock->occupied += adj;
+	if ( trk->conBlock && trk->conBlock->occupied == 0 && adj < 0 )
+		deleteDynamicBlock( trk );
 #if 0
 	LOG(log_block, 1, ("adjustOccupied %d : trk T%d occ %d  B%d occ %d\n",
 		adj, GetTrkIndex(trk), trk->occupied,
@@ -1626,53 +1634,33 @@ static void adjustOccupied ( track_p trk, int adj )
 #endif
 }
 
-// The segment occupied indicator maintains a count of the number
-// of car ends (trucks) on the segment. The block, when present,
-// maintains a count for all segments in the block.
-
 // When entering train mode set up the counters for all present cars.
 // Go through the cars, find the segment under each end and increment
 // its counter.
 EXPORT void SetOccupied( void )
 {
-    track_p car, trk, blk;
-    track_p temp0, temp1;
-    coOrd ep0, ep1;
+    track_p car, trk, trk0, trk1;
+    coOrd pos0, pos1;
+
 
     LOG(log_block, 1, ("SetOccupied: -- enter\n"))
+
     for (car=NULL; TrackIterate(&car);) {
         if ( ! IsTrainCarOnTrk( car ) ) continue;
 
-        ep0 = GetTrkEndPos( car, 0);
-        if ((temp0 = OnTrack( &ep0, FALSE ,TRUE)) != NULL) {
-            adjustOccupied( temp0, 1);
-            car->endPt[0].prevTrack = temp0;
-        } else
-            car->endPt[0].prevTrack = NULL;
-        ep1 = GetTrkEndPos( car, 1);
-        if ((temp1 = OnTrack( &ep1, FALSE ,TRUE)) != NULL) {
-            adjustOccupied( temp1, 1);
-            car->endPt[1].prevTrack = temp1;
-        } else
-            car->endPt[1].prevTrack = NULL;
 #if 0
-        LOG(log_block, 1, ("SetOccupied: end0 T%d (%d) end1 T%d (%d)\n",
-            (temp0)?temp0->index:-5, (temp0)?temp0->occupied:-999,
-            (temp1)?temp1->index:-5, (temp1)?temp1->occupied:-999));
+        pos0 = GetTrkEndPos( car, 0 );
+        trk0 = OnTrack( &pos0, FALSE, TRUE);
+        pos1 = GetTrkEndPos( car, 1);
+        trk1 = OnTrack( &pos1, FALSE, TRUE);
 #endif
-	// If car is in a turnout, create the dynamic block
-	if ( ! temp0 || ! temp1 ) continue;
-	if ( GetTrkEndPtCnt( temp0 ) <= 2 && GetTrkEndPtCnt( temp1 ) <= 2 ) continue;
 
-	if ( temp0 == temp1 ) { // whole car is on the turnout
-		// find the path the car is on
-	}
-
-	if ( GetTrkEndPtCnt( temp0 ) > 2 && temp1 != temp0 )
-            createDynamicBlock( temp0, temp1 );
-	if ( GetTrkEndPtCnt( temp1 ) > 2 && temp1 != temp0 )
-            createDynamicBlock( temp1, temp0 );
+	// Force occupied to be set
+	car->endPt[0].prevTrack = NULL;
+	car->endPt[1].prevTrack = NULL;
     }
+
+    UpdateOccupied();
     verifyOccupancy ( TRUE );
 
     MainRedraw();
@@ -1683,19 +1671,20 @@ static void verifyOccupancy ( BOOL_T rpt )
     track_p b_trk, trk, trk0, trk1;
     blockData_p xx;
     EPINX_T segOcc, iTrack, ep0, ep1, epB0, epB1;
-    EPINX_T problems = 0;
+    EPINX_T problems = 0, report =1;
 
     TRK_ITERATE(b_trk) {
         if ( GetTrkType(b_trk) != T_BLOCK ) continue;
 
         // sum the seg occupancy
         xx = GetblockData( b_trk );
-        if (rpt ) {
+        if (rpt  && b_trk->occupied ) {
             LOG(log_block, 1, ("verifyOccupancy: T%d %s --%s--\n",
                         GetTrkIndex(b_trk),GetTrkTypeName(b_trk),xx->name))
 	}
 
         for ( segOcc = 0, iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
+            if ( tracklist(iTrack).t->occupied < 0 ) problems++;
             segOcc += tracklist(iTrack).t->occupied;
         }
 
@@ -1718,11 +1707,13 @@ static void verifyOccupancy ( BOOL_T rpt )
         // compare seg and block occupancy
         if ( b_trk->occupied < segOcc )
             problems++;
+	if ( b_trk->occupied < 0 || segOcc < 0 )
+            problems++;
 
-        if ( rpt || problems ) {
+        if ( ( rpt && b_trk->occupied ) || problems ) {
             LOG(log_block, 1, ("verifyOccupancy: B%d \"%s\" occ %d, segs occ %d\n",
                     GetTrkIndex(b_trk), xx->name, b_trk->occupied, segOcc))
-            LOG( log_block, 1, ( "*** verifyOccupancy:  T%d-%d -- 0(T%d-%d)-B%d-(T%d-%d)1 -- T%d-%d\n",
+            LOG( log_block, 1, ( "verifyOccupancy:  T%d-%d -- 0(T%d-%d)-B%d-(T%d-%d)1 -- T%d-%d\n",
                 GetTrkIndex(trk0),ep0,
                 GetTrkIndex(b_trk->endPt[0].prevTrack),epB0,
                 GetTrkIndex(b_trk),
@@ -1734,27 +1725,136 @@ static void verifyOccupancy ( BOOL_T rpt )
                         tracklist(iTrack).i, tracklist(iTrack).t->occupied))
             }
             LOG(log_block, 1, ("\n"))
-
-            problems++;
         }
     }
     if ( problems ) {
         LOG(log_block, 1, ("verifyOccupancy: %d problems\n", problems))
-        NoticeMessage( _("Block occupancy error!"), _("Ok"), NULL);
+	if ( report ) {
+		report = 0;
+        	NoticeMessage( _("Block occupancy error!"), _("Ok"), NULL);
+	}
     }
 }
 
-// For each end of each car note the previous segment that it occupied. Find the
-// current segment and, if different, decrement the segment indicator for the
-// previous segment, increment the segment indicator for the new segment and
-// update the previous segment to be the current segment.
-// Cars may span more than 2 segments
+// here is trk of interest, next[ep point to here] is next in sequence.
+// remote end of path that starts at ep is exit from next.
+// Scan down track starting at next[ep] up to len looking for endTrk, apply adjustment along the way
+static track_p scanForTrack( track_p here, track_p next, track_p endTrk, DIST_T len, int adj )
+{
+	EPINX_T epN, epE;
+
+#if 1
+	LOG(log_block, 1, ("scanForTrack() -- T%d T%d (T%d) len %0.2f adj %d\n",
+		GetTrkIndex(here),GetTrkIndex(next),GetTrkIndex(endTrk),len,adj))
+#endif
+
+	// next[epN] points to here
+	epN = getEpInTrk1ToTrk2( next, here );
+	adjustOccupied( next, epN, adj );
+	if ( next == endTrk ) return endTrk;
+	if ( epN == GetTrkEndPtCnt(next) ) return NULL;
+	epE = getRemoteEp( next, epN );
+	if ( epE == epN ) return NULL; // turnout open
+	len += FindDistance( next->endPt[epN].pos, next->endPt[epE].pos );
+	if ( len > 0.0 ) return NULL;
+	// Keep looking...
+	return scanForTrack( next, next->endPt[epE].track, endTrk, len, adj );
+}
+
+// Occupancy for all tracks between trk0 and trk1 inclusive are adjusted by adj
+// Create and delete dynamic blocks as needed via adjustOccupied().
+static void adjustCarOccupancy( track_p trk0, EPINX_T ep0, track_p trk1, DIST_T carLen, int adj )
+{
+	EPINX_T epN;
+	DIST_T len = 0.0 - carLen;
+	track_p endTrk;
+
+#if 1
+	LOG(log_block, 1, ("adjustCarOccupancy() -- T%d T%d  d %0.2f adj %d\n",
+		GetTrkIndex(trk0),GetTrkIndex(trk1),len,adj))
+#endif
+	adjustOccupied( trk0, ep0, adj );
+
+	if ( trk0 == trk1 ) {
+		adjustOccupied( trk1, ep0, adj );
+		return;
+	}
+	for ( epN = 0; epN < GetTrkEndPtCnt(trk0); epN++ ) {
+		if ( endTrk = scanForTrack( trk0, trk0->endPt[epN].track, trk1, len, 0 ) ) {
+#if 1
+	LOG(log_block, 1, ("adjustCarOccupancy() -- T%d-%d T%d  d %0.2f adj endTrk T%d\n",
+		GetTrkIndex(trk0),epN,GetTrkIndex(trk1),len,endTrk?GetTrkIndex(endTrk):0))
+#endif
+			len = 0.0 - carLen;
+			scanForTrack( trk0, trk0->endPt[epN].track, trk1, len, adj );
+			break;
+		}
+	}
+}
+
+// Get an endpoint (path) for the track at front and back of car
+static void getCarTrkEp( track_p car, EPINX_T *epF, EPINX_T *epB )
+{
+	coOrd posF, posB;
+	track_p trkF, trkB;
+	DIST_T minDist, dist;
+	EPINX_T ep, minEp;
+
+        posF = GetTrkEndPos( car, 0 );
+        trkF = OnTrack( &posF, FALSE, TRUE);
+        posB = GetTrkEndPos( car, 1);
+        trkB = OnTrack( &posB, FALSE, TRUE);
+
+	if ( *epF <= 3 ) {
+		*epF = 0;
+	} else { // more than 3 end points, find the path the car is on
+		minDist = FindDistance ( car->endPt[0].pos, trkF->endPt[0].pos );
+		minEp   = 0;
+		for ( ep = 0; ep < GetTrkEndPtCnt(trkF); ep++ ) {
+			dist = FindDistance ( car->endPt[0].pos, trkF->endPt[ep].pos );
+			if ( dist < minDist ) {
+				minDist = dist;
+				minEp = ep;
+			}
+			dist = FindDistance ( car->endPt[1].pos, trkF->endPt[ep].pos );
+			if ( dist < minDist ) {
+				minDist = dist;
+				minEp = ep;
+			}
+		}
+		*epF = minEp;
+	}
+	if ( *epB <= 3 ) {
+		*epB = 0;
+	} else {
+		minDist = FindDistance ( car->endPt[0].pos, trkB->endPt[0].pos );
+		minEp   = 0;
+		for ( ep = 0; ep < GetTrkEndPtCnt(trkF); ep++ ) {
+			dist = FindDistance ( car->endPt[0].pos, trkB->endPt[ep].pos );
+			if ( dist < minDist ) {
+				minDist = dist;
+				minEp = ep;
+			}
+			dist = FindDistance ( car->endPt[1].pos, trkB->endPt[ep].pos );
+			if ( dist < minDist ) {
+				minDist = dist;
+				minEp = ep;
+			}
+		}
+		*epB = minEp;
+	}
+}
+
+// For each car, increment occupancy for tracks the car occupies and
+// decrement occupancy for tracks the car previously occupied.
+// Create and delete dynamic blocks as needed.
 EXPORT void UpdateOccupied( void )
 {
     track_p car;
-    track_p temp0, temp1, prev0, prev1;
+    track_p trk0, trk1, prev0, prev1;
     coOrd pos0, pos1;
-    BOOL_T changed;
+    EPINX_T ep0, ep1;
+    DIST_T len;
 #if 0
     LOG(log_block, 1, ("UpdateOccupied() -- enter \n"))
 #endif
@@ -1762,68 +1862,61 @@ EXPORT void UpdateOccupied( void )
         if ( ! IsTrainCarOnTrk( car ) ) continue;
 
         pos0 = GetTrkEndPos( car, 0 );
-        temp0 = OnTrack( &pos0, FALSE, TRUE);
+        trk0 = OnTrack( &pos0, FALSE, TRUE);
         prev0 = car->endPt[0].prevTrack;
         pos1 = GetTrkEndPos( car, 1);
-        temp1 = OnTrack( &pos1, FALSE, TRUE);
+        trk1 = OnTrack( &pos1, FALSE, TRUE);
         prev1 = car->endPt[1].prevTrack;
-#if 0
-        if ( temp0 != prev0 || temp1 != prev1 )
-            LOG(log_block, 1, ("UpdateOccupied C%d  F on T%d prev T%d  R on T%d prev T%d\n",
-                    GetTrkIndex(car),GetTrkIndex(temp0),GetTrkIndex(prev0),GetTrkIndex(temp1),GetTrkIndex(prev1)))
+	getCarTrkEp( car, &ep0, &ep1 );
+	len = FindDistance( pos0, pos1 ) * 1.2;  // length of car
+
+        prev0 = car->endPt[0].prevTrack;
+        prev1 = car->endPt[1].prevTrack;
+
+#if 1
+        LOG(log_block, 1, ("UpdateOccupied C%d =C=  F (%0.2f %0.2f) on T%d-%d prev T%d   R (%0.2f %0.2f) on T%d-%d prev T%d Len %0.2f\n",
+                GetTrkIndex(car),pos0.x,pos0.y,GetTrkIndex(trk0),ep0,prev0?GetTrkIndex(prev0):0,
+		pos1.x,pos1.y,GetTrkIndex(trk1),ep1,prev1?GetTrkIndex(prev1):0,len))
 #endif
 
-        // Front end of the car
-        if ( prev0 != temp0 ) { // On new trk seg
-            createDynamicBlock( temp0, temp1 );
-//            adjustDynamicOccupied( temp0, prev0 );
-            if ( prev0 ) {
-                adjustOccupied( prev0, -1 );
-                if ( prev0->conBlock && prev0->conBlock->occupied == 0 )
-                    deleteDynamicBlock( prev0 );
-            }
-            if ( temp0 ) {
-                adjustOccupied( temp0, 1 );
-            }
-            car->endPt[0].prevTrack = temp0;
-            changed = TRUE;
-        }
+	if ( ! prev0 || ! prev1 || trk0 == trk1 ) {
 
-        // Rear end of the car
-        if ( prev1 != temp1 ) {  // On new trk seg
-            createDynamicBlock( temp1, temp0 );
-//            adjustDynamicOccupied( temp1, prev1 );
-            if ( prev1 ) {
-                adjustOccupied( prev1, -1 );
-                if ( prev1->conBlock && prev1->conBlock->occupied == 0 )
-                    deleteDynamicBlock( prev1 );
-            }
-            if (temp1) {
-                adjustOccupied( temp1, 1 );
-            }
-            car->endPt[1].prevTrack = temp1;
-            changed = TRUE;
-        }
-#if 0
-        LOG(log_block, 1, ("R Move: end0 PT%d (%d) T%d (%d) end1 PT%d (%d) T%d (%d)\n",
-            (car->endPt[0].prevTrack)?car->endPt[0].prevTrack->index:-5,
-            (car->endPt[0].prevTrack)?car->endPt[0].prevTrack->occupied:-999,
-            (temp0)?temp1->index:-5,
-            (temp0)?temp1->occupied:-999,
-            (car->endPt[1].prevTrack)?car->endPt[1].prevTrack->index:-5,
-            (car->endPt[1].prevTrack)?car->endPt[1].prevTrack->occupied:-999,
-            (temp1)?temp1->index:-5,
-            (temp1)?temp1->occupied:-999));
+		// When no prev, this is setup so create needed dynamic blocks
+
+		createDynamicBlock( trk0, ep0 );
+	}
+
+	adjustCarOccupancy( trk0, ep0, trk1, len, 1 );
+	if ( prev0 && prev1 )
+		adjustCarOccupancy( prev0, 0 /*val not used*/, prev1, len, -1 );
+
+	car->endPt[0].prevTrack = trk0;
+	car->endPt[1].prevTrack = trk1;
+
+#if 1
+        LOG(log_block, 1, ("UpdateOccupied C%d =O=  F on T%d-%d occ %d prev T%d occ %d  R on T%d occ %d prev T%d occ %d\n",
+                GetTrkIndex(car),GetTrkIndex(trk0),ep0,trk0->occupied,
+		prev0?GetTrkIndex(prev0):0,prev0?prev0->occupied:99,
+		GetTrkIndex(trk1),trk1->occupied,
+		prev1?GetTrkIndex(prev1):0,prev1?prev1->occupied:99))
+        LOG(log_block, 1, ("UpdateOccupied C%d =O=  F on B%d occ %d prev B%d occ %d  R on B%d occ %d prev B%d occ %d\n",
+                GetTrkIndex(car),
+		trk0->conBlock?GetTrkIndex(trk0->conBlock):0,
+		trk0->conBlock?trk0->conBlock->occupied:99,
+		prev0&&prev0->conBlock?GetTrkIndex(prev0->conBlock):0,
+		prev0&&prev0->conBlock?prev0->conBlock->occupied:99,
+		trk1->conBlock?GetTrkIndex(trk1->conBlock):0,
+		trk1->conBlock?trk1->conBlock->occupied:99,
+		prev1&&prev1->conBlock?GetTrkIndex(prev1->conBlock):0,
+		prev1&&prev1->conBlock?prev1->conBlock->occupied:99))
 #endif
     }
+
     verifyOccupancy( TRUE );
+    MainRedraw();
 #if 0
-    LOG(log_block, 1, ("UpdateOccupied() -- exit \n"))
+    LOG(log_block, 1, ("UpdateOccupied() -- exit \n\n"))
 #endif
-
-    if (changed) {
-        MainRedraw();
-    }
 }
 
 
@@ -2193,7 +2286,7 @@ static void BlockEditOk( void * junk )
     xx = GetblockData( trk );
     xx->name = MyStrdup(blockEditName);
     xx->script = MyStrdup(blockEditScript);
-    blockDebug(trk);
+//  blockDebug(trk);
     UndoEnd();
     wHide( blockEditW );
 }

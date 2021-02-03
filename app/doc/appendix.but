@@ -257,13 +257,14 @@ much of the work of creating of blocks can be automated by software by applying 
 collection of rules.
 
 Creating blocks can be largely automated using these rules:
-- Blocks connect turnouts.
+- Blocks connect turnouts and/or other blocks.
 - The desired length of a block is long enough to hold the maximum length
   train.
 - There may be 1 or more turnouts, and maybe short track segments, that form
   a logical turnout that connects two blocks.
 - Turnouts can be set to either allow trains to pass from block to block or to
-  allow trains to enter or leave from a yard or industry.
+  allow trains to enter or leave from a yard or industry or be local within a yard
+  or industry.
 - Very long blocks that can hold multiple trains can be divided into sub-blocks.
 - Turnouts don't have occupancy sensors or reporting. They are locically part
   of the block the train is coming from or going to.
@@ -295,14 +296,17 @@ passes through the turnout and enters the next block, the new block becomes
 occupied and the turnout is changed to be part of the new block. When the end
 of the train leaves the block and enters the turnout, the block is unoccupied,
 unless the engine has not yet enterd the block following the turnout. In this
-case the previous block remains occupied. It is important that a tain can't
+case the previous block remains occupied. Blocks are dynamically created and
+deleted as trains enter and exit turnouts. It is important that a tain can't
 disappear into a turnout and confuse the dispatcher into thinking the track
-is clear.
+is clear. Since turnouts don't have occupancy sensors, dynamic blocks do not
+have names or scripts.
 
 When a turnout is occupied, the point position is locked and can't be changed.
 When multiple turnouts connect blocks, as soon as the first turnout is entered,
-all of them are considered to be occupied and locked. They stay locked until
-the last car of the train leaves the turnouts.
+a dynamic block is created and all of them are considered to be occupied and
+locked. They stay locked until the last car of the train leaves the turnouts
+at which point the dynamic block is deleted.
 
 New block elements can be added by the Add->"Control element" pull down.
 Select a track segment and a dialog appears that permits changing the name and
