@@ -1,7 +1,7 @@
 #include "wlib.h"
 #include "mswlib.h"
-//#include "dynarr.h"
-#include "common.h"
+#include "dynarr.h"
+//#include "common.h"
 #ifndef WIN32
 /*#define CONTROL3D*/
 #endif
@@ -11,6 +11,9 @@
 #include "ctl3d.h"
 #endif
 
+typedef struct {
+	double x, y;
+} coOrd;
 #ifdef WIN32
 #ifdef FAR
 #undef FAR

@@ -31,7 +31,7 @@
 
 #define wFont_t tagLOGFONTA
 
-#include "misc.h"
+//#include "misc.h"
 #include "mswint.h"
 #include <FreeImage.h>
 
@@ -1369,6 +1369,8 @@ struct wDrawBitMap_t {
 		};
 static wDrawBitMap_p bmRoot = NULL;
 
+extern wDrawColor drawColorWhite;
+extern wDrawColor drawColorBlack;
 
 void wDrawBitMap(
 		wDraw_p d,
@@ -1390,9 +1392,9 @@ void wDrawBitMap(
 	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
 		return;
 #endif
-	if (dc == wDrawColorWhite) {
+	if (dc == drawColorWhite) {
 		mode = clrOp;
-		dc = wDrawColorBlack;
+		dc = drawColorBlack;
 	} else {
 		mode = setOp;
 	}
