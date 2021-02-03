@@ -1794,6 +1794,10 @@ EXPORT void DrawSegsO(
 					color1 = normalColor;
 				if ( segPtr->color == wDrawColorWhite )
 					break;
+				if (options&DTS_CENTERONLY) {
+					DrawLine( d, p0, p1, thick, color1 );
+					break;
+				}
 				DrawStraightTrack( d,
 					p0, p1,
 					FindAngle(p1, p0 ),
@@ -1847,6 +1851,11 @@ EXPORT void DrawSegsO(
 				if ( segPtr->color == wDrawColorWhite )
 					break;
 				p0.x = p0.y = p1.x = p1.y = 0;
+				if (options&DTS_CENTERONLY) {
+					DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
+							FALSE, thick, color1 );
+					break;
+				}
 				DrawCurvedTrack( d,
 					c,
 					fabs(segPtr->u.c.radius),
@@ -1887,6 +1896,11 @@ EXPORT void DrawSegsO(
         					if (color1 == wDrawColorBlack)	color1 = normalColor;
         					if ( tempPtr->color == wDrawColorWhite )  break;
         					p0.x = p0.y = p1.x = p1.y = 0;
+        					if (options&DTS_CENTERONLY) {
+        						DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
+        											FALSE, thick, color1 );
+        						break;
+        					}
         					DrawCurvedTrack( d,
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
@@ -1908,6 +1922,10 @@ EXPORT void DrawSegsO(
         				if ( tempPtr->color == wDrawColorWhite ) break;
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
         				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
+        				if (options&DTS_CENTERONLY) {
+							DrawLine( d, p0, p1, thick, color1 );
+							break;
+						}
         				DrawStraightTrack( d, p0, p1,
 						FindAngle(p1, p0 ),
 						trk, color1, options );
