@@ -445,6 +445,40 @@ static BOOL_T FindTurntableEndPt(
 }
 
 
+static EPINX_T FindTurntableNextEndPt(
+		track_p trk,
+		coOrd pos) {
+
+		EPINX_T ep,epfound=-1,epCnt;
+		struct extraData * xx = GetTrkExtraData(trk);
+		ANGLE_T a = FindAngle(xx->pos,pos);
+		ANGLE_T foundangle = 370.0;
+		ANGLE_T diff = DifferenceBetweenAngles(GetTrkEndAngle(trk,xx->currEp),a);
+		BOOL_T forward = TRUE;
+		if (diff>90) {
+			forward = FALSE;
+		}
+		if (diff<0 && diff>-90) {
+		    forward = FALSE;
+		}
+		ANGLE_T currdiff, angle1;
+		for (ep=0,epCnt=GetTrkEndPtCnt(trk); ep<epCnt; ep++) {
+			if ( (GetTrkEndTrk(trk,ep)) == NULL )
+						continue;
+			angle1 = GetTrkEndAngle(trk,ep);
+			if (forward)
+				currdiff = NormalizeAngle(angle1-a);
+			else
+				currdiff = NormalizeAngle(a-angle1);
+			if (currdiff<foundangle) {
+				foundangle = currdiff;
+				epfound = ep;
+			}
+		}
+		return epfound;
+}
+
+
 
 static BOOL_T CheckTraverseTurntable(
 		track_p trk,
@@ -739,6 +773,7 @@ static void FlipTurntable(
 	ComputeBoundingBox( trk );
 }
 
+BOOL_T debug = 0;
 
 static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 {
@@ -752,6 +787,16 @@ static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 	angle = FindAngle( xx->pos, pos0 );
 	PointOnCircle( &pos1, xx->pos, xx->radius, angle+180.0 );
 	DrawLine( &tempD, pos0, pos1, 3, color );
+	if (debug) {
+		if (xx->reverse) {
+
+			Rotate(&pos1,xx->pos, 15);
+			DrawFillCircle( &tempD, pos1, 0.5, color);
+		} else {
+			Rotate(&pos0,xx->pos, 10);
+			DrawFillCircle( &tempD, pos0, 0.5, color);
+		}
+	}
 }
 
 static wBool_t CompareTurntable( track_cp trk1, track_cp trk2 )
@@ -772,31 +817,64 @@ static void AdvanceTurntablePositionIndicator(
 		coOrd * posR,
 		ANGLE_T * angleR )
 {
+
 	struct extraData * xx = GetTrkExtraData(trk);
 	EPINX_T ep;
 	ANGLE_T angle0, angle1;
-	BOOL_T reverse;
-
-	angle1 = FindAngle( xx->pos, pos );
-	if ( !FindTurntableEndPt( trk, &angle1, &ep, &reverse ) )
-		return;
+	BOOL_T reverse=FALSE, train_reversed = FALSE;
+	EPINX_T epCnt=GetTrkEndPtCnt(trk);
+	EPINX_T epbest = -1, epfound = -1;
+	coOrd inpos = *posR;
+	ANGLE_T inangle = *angleR;
 	angle0 = GetTrkEndAngle(trk,xx->currEp);
-	if ( ep == xx->currEp ) {
-		Rotate( posR, xx->pos, 180.0 );
-		if ( xx->reverse ) {
-			angle1 = angle0;
-			xx->reverse = FALSE;
-		} else {
-			angle1 = NormalizeAngle( angle0+180.0 );
-			xx->reverse = TRUE;
+	if (fabs(DifferenceBetweenAngles(angle0,*angleR))>90) train_reversed = TRUE;
+	DIST_T dd = 100000.0;
+	// If on ep, use that
+	for (ep=0; ep<epCnt; ep++) {
+		if ( (GetTrkEndTrk(trk,ep)) == NULL )
+			continue;
+		coOrd end = GetTrkEndPos(trk,ep);
+		DIST_T d = FindDistance(end,pos);
+		if (d<dd) {
+			dd = d;
+			epbest = ep;
 		}
-	} else {
-		angle1 = GetTrkEndAngle(trk,ep);
-		Rotate( posR, xx->pos, angle1-angle0 );
-		xx->reverse = FALSE;
 	}
-	*angleR = angle1;
-	xx->currEp = ep;
+	if (epbest>=0 && IsClose(dd)) {
+		epfound = epbest;
+	}
+	// Else find next track in given direction beyond current
+	if (epfound<0) {
+		epfound = FindTurntableNextEndPt( trk, pos );
+	}
+	if (epfound>=0) {
+		if (xx->currEp == epfound ) {
+			reverse = TRUE;
+			xx->reverse = !xx->reverse;
+			train_reversed = !train_reversed;
+		} else {
+			//If back end moving, flip result
+			if (fabs(DifferenceBetweenAngles(FindAngle(xx->pos,pos),GetTrkEndAngle(trk,xx->currEp)))>90) {
+				if (epfound>=0 && epfound != xx->currEp) {
+					reverse = TRUE;
+					xx->reverse = !xx->reverse;
+					train_reversed = !train_reversed;
+				}
+			}
+		}
+		xx->currEp = epfound;
+		angle1 = GetTrkEndAngle(trk,xx->currEp);
+		if (!reverse) {
+			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
+			Translate( posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
+		} else {
+			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
+			Translate(posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
+		}
+		coOrd outpos = *posR;
+		if (debug)
+			InfoMessage("AO:%0.3f PO:(%0.3f,%0.3f) AI:%0.3f PI:(%0.3f,%0.3f)",*angleR,outpos.x,outpos.y,inangle,inpos.x,inpos.y);
+	}
 }
 
 
