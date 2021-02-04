@@ -31,7 +31,6 @@
 
 #define wFont_t tagLOGFONTA
 
-#include "misc.h"
 #include "mswint.h"
 #include <FreeImage.h>
 
@@ -56,6 +55,10 @@ static long clrOp = 0xbb0226;
 #define CENTERMARK_LENGTH 6
 
 static bool bDrawMainBM = 0;
+
+typedef struct {
+	double x, y;
+} coOrd;
 
 #ifdef SLOW
 static wDrawPix_t XWINPIX2DRAWPIX( wDraw_p d, wWinPix_t ix )
@@ -1369,6 +1372,8 @@ struct wDrawBitMap_t {
 		};
 static wDrawBitMap_p bmRoot = NULL;
 
+extern wDrawColor drawColorWhite;
+extern wDrawColor drawColorBlack;
 
 void wDrawBitMap(
 		wDraw_p d,
@@ -1390,9 +1395,9 @@ void wDrawBitMap(
 	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
 		return;
 #endif
-	if (dc == wDrawColorWhite) {
+	if (dc == drawColorWhite) {
 		mode = clrOp;
-		dc = wDrawColorBlack;
+		dc = drawColorBlack;
 	} else {
 		mode = setOp;
 	}
