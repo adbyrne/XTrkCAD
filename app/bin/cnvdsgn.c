@@ -16,7 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "common.h"
+#include "utility.h"
 
 #define GETMAXY \
 		if (lp->y0 > maxY) maxY = lp->y0; \
