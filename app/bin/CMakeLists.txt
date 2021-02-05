@@ -1,6 +1,7 @@
 include( CheckSymbolExists )
 
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
+ADD_DEPENDENCIES(cnvdsgn Help)
 
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(cnvdsgn m)
