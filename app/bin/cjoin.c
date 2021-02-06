@@ -385,8 +385,8 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		}
 		if ( (Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE )) == NULL )
 			return C_CONTINUE;
-		if (Dj.joinMoveState == 0 && !CheckTrackLayer( Dj.inp[Dj.joinMoveState].trk ) )
-			return C_CONTINUE;
+		//if (Dj.joinMoveState == 0 && !CheckTrackLayer( Dj.inp[Dj.joinMoveState].trk ) )
+		//	return C_CONTINUE;
 		Dj.inp[Dj.joinMoveState].params.ep = PickUnconnectedEndPoint( pos, Dj.inp[Dj.joinMoveState].trk ); /* CHECKME */
 		if ( Dj.inp[Dj.joinMoveState].params.ep == -1 ) {
 #ifdef LATER
