@@ -25,6 +25,7 @@
 #include "cundo.h"
 #include "fileio.h"
 #include "track.h"
+#include "common-ui.h"
 
 int debugPull = 0;
 

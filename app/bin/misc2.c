@@ -30,6 +30,7 @@
 #include "misc.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */

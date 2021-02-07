@@ -32,6 +32,7 @@
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#include "common-ui.h"
 
 long programMode;
 long maxCouplingSpeed = 100;

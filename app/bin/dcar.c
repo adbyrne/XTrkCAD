@@ -28,6 +28,7 @@
 #include "param.h"
 #include "paths.h"
 #include "track.h"
+#include "common-ui.h"
 
 static int log_carList;
 static int log_carInvList;

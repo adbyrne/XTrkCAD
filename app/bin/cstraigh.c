@@ -27,6 +27,7 @@
 #include "param.h"
 #include "track.h"
 #include "layout.h"
+#include "common-ui.h"
 
 /*
  * STATE INFO

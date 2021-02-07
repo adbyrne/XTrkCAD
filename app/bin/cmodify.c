@@ -33,6 +33,7 @@
 #include "common.h"
 #include "layout.h"
 #include "cselect.h"
+#include "common-ui.h"
 
 static struct {
 		track_p Trk;

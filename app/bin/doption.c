@@ -25,6 +25,7 @@
 #include "custom.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 static paramIntegerRange_t i0_64 = { 0, 64 };
 static paramIntegerRange_t i1_64 = { 1, 64 };

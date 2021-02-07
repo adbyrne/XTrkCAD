@@ -35,6 +35,7 @@
 #include "track.h"
 #include "misc.h"
 #include "ctrain.h"
+#include "common-ui.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK

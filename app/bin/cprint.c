@@ -26,6 +26,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 #define PRINT_GAUDY		(0)
 #define PRINT_PLAIN		(1)

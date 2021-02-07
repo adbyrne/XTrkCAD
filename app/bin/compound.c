@@ -31,6 +31,7 @@
 #include "shrtpath.h"
 #include "track.h"
 #include "include/paramfile.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  *

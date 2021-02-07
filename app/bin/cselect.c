@@ -38,6 +38,7 @@
 #include "draw.h"
 #include "misc.h"
 #include "trackx.h"
+#include "common-ui.h"
 
 
 #include "bitmaps/bmendpt.xbm"

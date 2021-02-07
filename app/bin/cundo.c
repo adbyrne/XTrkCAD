@@ -27,6 +27,7 @@
 #include "track.h"
 #include "trackx.h"
 #include "cundo.h"
+#include "common-ui.h"
 
 
 /*****************************************************************************

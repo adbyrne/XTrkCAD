@@ -26,6 +26,7 @@
 #include "track.h"
 #include "draw.h"
 #include "misc.h"
+#include "common-ui.h"
 
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
 

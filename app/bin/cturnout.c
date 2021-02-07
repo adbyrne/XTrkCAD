@@ -35,6 +35,7 @@
 #include "include/paramfile.h"
 #include "track.h"
 #include "trackx.h"
+#include "common-ui.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 

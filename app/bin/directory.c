@@ -23,6 +23,7 @@
 #include "directory.h"
 #include "dynstring.h"
 #include "misc.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  * Safe Create Dir

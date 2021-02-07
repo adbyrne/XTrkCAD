@@ -28,6 +28,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 static TRKTYP_T T_CURVE = -1;
 

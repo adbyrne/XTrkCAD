@@ -41,6 +41,7 @@
 #include "track.h"
 #include "version.h"
 #include "dynstring.h"
+#include "common-ui.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"

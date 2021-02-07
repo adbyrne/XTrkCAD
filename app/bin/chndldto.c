@@ -27,6 +27,7 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "track.h"
+#include "common-ui.h"
 
 #define PTRACE(X)
 

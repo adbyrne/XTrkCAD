@@ -26,6 +26,7 @@
 #include "param.h"
 #include "track.h"
 #include "cselect.h"
+#include "common-ui.h"
 
 static TRKTYP_T T_TURNTABLE = -1;
 

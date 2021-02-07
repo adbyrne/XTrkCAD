@@ -35,6 +35,7 @@
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
+#include "common-ui.h"
 
 #define DEFAULT_SCALE ("N")
 

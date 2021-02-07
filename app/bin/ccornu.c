@@ -85,6 +85,7 @@
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
+#include "common-ui.h"
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;

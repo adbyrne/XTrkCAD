@@ -26,6 +26,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 /*******************************************************************************
  *

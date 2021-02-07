@@ -34,6 +34,7 @@
 #include "cbezier.h"
 #include "ccornu.h"
 #include "layout.h"
+#include "common-ui.h"
 
 /*
  * STATE INFO

@@ -32,6 +32,7 @@
 #include "ccornu.h"
 #include "cbezier.h"
 #include "misc.h"
+#include "common-ui.h"
 
 dynArr_t tempSegs_da;
 dynArr_t tempEndPts_da;

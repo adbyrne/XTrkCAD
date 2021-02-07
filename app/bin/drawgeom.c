@@ -25,6 +25,7 @@
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 static long drawGeomCurveMode;
 

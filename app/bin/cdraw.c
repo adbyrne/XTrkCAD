@@ -28,6 +28,7 @@
 #include "track.h"
 #include "misc.h"
 #include "cselect.h"
+#include "common-ui.h"
 
 extern TRKTYP_T T_BZRLIN;
 

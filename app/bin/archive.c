@@ -31,6 +31,7 @@
 #include "misc2.h"
 #include "paths.h"
 #include "include/utf8convert.h"
+#include "common-ui.h"
 
 int log_zip = 0;
 

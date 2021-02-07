@@ -24,6 +24,7 @@
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 #define bigdot_width 3
 

@@ -205,16 +205,17 @@ typedef struct {
 // END is replaced by END$SEGS, END$TRK, ...
 #define VERSION_NONAKEDENDS	(12)
 
+
+// ANONYMOUS TYPES
+typedef struct drawCmd_t * drawCmd_p;
+
+
 // COMMON INCLUDES
 // If you add includes here, please remove them elsewhere
 
 #include "i18n.h"
-//#include "track.h"
-//#include "fileio.h"
-//#include "param.h"
-#include "messages.h"
 #include "utility.h"
-//#include "misc2.h"
+#include "misc.h"
 
 #endif
 

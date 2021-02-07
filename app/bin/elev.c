@@ -27,6 +27,7 @@
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "common-ui.h"
 
 static int log_fillElev = 0;
 static int log_dumpElev = 0;
