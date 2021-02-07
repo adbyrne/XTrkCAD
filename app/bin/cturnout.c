@@ -3264,7 +3264,7 @@ static BOOL_T ConnectsToTurnout(track_p from, EPINX_T ep, DIST_T len)
 {
 	track_p trk;
 
-	LOG( log_turnout, 1, ("*** ConnectsToTurnout() from T%d-%d %4.1f\n",
+	LOG( log_turnout, 2, ("*** ConnectsToTurnout() from T%d-%d %4.1f\n",
 			GetTrkIndex(from), ep, len))
 
 	/* the end point is a track end */
