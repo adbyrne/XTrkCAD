@@ -804,6 +804,16 @@ int LoadTracks(
 	assert( fileName != NULL );
 	assert( cnt == 1 );
 
+	nameOfFile = FindFilename(fileName[0]);
+
+	// Make sure it exists and it is readable
+	if (access(fileName[0], R_OK) != 0)
+	{
+		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found:"));
+		wMenuListDelete(fileList_ml, nameOfFile);
+		return FALSE;
+	}
+
 	if ( ! bExample )
 		SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 	bReadOnly = bExample;
@@ -820,7 +830,6 @@ int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	time0 = wGetTimer();
 #endif
-	nameOfFile = FindFilename( fileName[ 0 ] );
 
  /*
   * Support zipped filetype
