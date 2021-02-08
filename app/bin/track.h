@@ -215,6 +215,7 @@ typedef struct {
 		long option;
 		BOOL_T toBlock;   // points to a block
 		BOOL_T toTrack;   // points to a track segment
+		BOOL_T attached;  // Dynamic block attached to block
 		} trkEndPt_t, * trkEndPt_p;
 
 extern dynArr_t tempEndPts_da;

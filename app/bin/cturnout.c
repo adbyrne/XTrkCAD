@@ -3344,6 +3344,7 @@ EXPORT void ClearTurnoutFlags( void )
 		for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
 			trk->endPt[ep].toBlock = FALSE;
 		       	trk->endPt[ep].toTrack = FALSE;
+			trk->endPt[ep].attached = FALSE;
 		}
 	}
 	LOG( log_turnout, 1, ("*** ClearTurnoutFlags() -- exit\n"))

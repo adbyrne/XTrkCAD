@@ -177,6 +177,16 @@ void CarSetVisible(
     WALK_CARS_END(car, xx, dir)
 }
 
+EXPORT  track_p TrainCarOnTrk ( track_p car, coOrd * pos )
+{
+	struct extraData * xx;
+
+	if ( GetTrkType(car) != T_CAR ) return FALSE;
+        xx = GetTrkExtraData(car);
+	*pos = xx->trvTrk.pos;
+	return xx->trvTrk.trk;
+}
+
 EXPORT  BOOL_T IsTrainCarOnTrk ( track_p car )
 {
 	struct extraData * xx;
