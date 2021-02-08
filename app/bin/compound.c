@@ -30,6 +30,7 @@
 #include "fileio.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "draw.h"
 #include "include/paramfile.h"
 #include "common-ui.h"
 

@@ -24,7 +24,7 @@
 #define COMPOUND_H
 
 #include "common.h"
-#include "track.h"
+#include "track.h" //- PATHPTR_T drawLineType_e
 
 typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast, TOcurved } TOspecial_e;
 
@@ -57,7 +57,7 @@ typedef struct turnoutInfo_t{
 		wIndex_t segCnt;
 		trkSeg_p segs;
 		wIndex_t endCnt;
-		trkEndPt_t * endPt;
+		trkEndPt_p endPt;
 		PATHPTR_T paths;
 		int paramFileIndex;
 		char * customInfo;
@@ -94,7 +94,7 @@ struct extraData {
 		PATHPTR_T currPath;
 		long currPathIndex;
 		wIndex_t segCnt;
-		trkSeg_t * segs;
+		trkSeg_p segs;
 		DIST_T * radii;
 		drawLineType_e lineType;
 		};
@@ -139,7 +139,7 @@ void SetCurrPathIndex( track_p trk, long position );
 #define FIND_TURNOUT	(1<<11)
 #define FIND_STRUCT		(1<<12)
 void FormatCompoundTitle( long, char *); 
-BOOL_T WriteCompoundPathsEndPtsSegs( FILE *, PATHPTR_T, wIndex_t, trkSeg_p, EPINX_T, trkEndPt_t *);
+BOOL_T WriteCompoundPathsEndPtsSegs( FILE *, PATHPTR_T, wIndex_t, trkSeg_p, EPINX_T, trkEndPt_p);
 void ParseCompoundTitle( char *, char **, int *, char **, int *, char **, int * );
 void FormatCompoundTitle( long, char *);
 void ComputeCompoundBoundingBox( track_p);
@@ -152,7 +152,7 @@ void DrawCompoundDescription( track_p, drawCmd_p, wDrawColor );
 DIST_T DistanceCompound( track_p, coOrd * );
 void DescribeCompound( track_p, char *, CSIZE_T );
 void DeleteCompound( track_p );
-track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_t *, DIST_T *, PATHPTR_T, wIndex_t, trkSeg_p );
+track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_p, DIST_T *, PATHPTR_T, wIndex_t, trkSeg_p );
 BOOL_T WriteCompound( track_p, FILE * );
 BOOL_T ReadCompound( char *, TRKTYP_T );
 void MoveCompound( track_p, coOrd );
@@ -180,7 +180,7 @@ BOOL_T SplitTurnoutCheck(track_p,coOrd,EPINX_T ep,track_p *,EPINX_T *,EPINX_T *,
 void GetSegInxEP( signed char, int *, EPINX_T * );
 void SetSegInxEP( signed char *, int, EPINX_T) ;
 wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
-turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T, EPINX_T, trkEndPt_t *, DIST_T *, wBool_t, long );
+turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T, EPINX_T, trkEndPt_p, DIST_T *, wBool_t, long );
 void DeleteTurnoutParams(int fileInx);
 turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
 STATUS_T CmdTurnoutAction( wAction_t, coOrd );

@@ -26,6 +26,7 @@
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"
+#include "draw.h"
 #include "cundo.h"
 #include "common-ui.h"
 

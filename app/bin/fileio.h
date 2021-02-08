@@ -23,7 +23,6 @@
 #define FILEIO_H
 
 #include "common.h"
-#include "misc.h"
 
 extern FILE * paramFile;
 extern char *paramFileName;

@@ -24,8 +24,6 @@
 #define TRACK_H
 
 #include "common.h"
-#include "draw.h"
-#include "misc2.h"
 
 extern TRKTYP_T T_NOTRACK;
 
@@ -136,13 +134,14 @@ typedef struct {
 #define Q_IS_TURNOUT                    (31)
 #define Q_GET_NODES						(32)
 
-typedef struct {
+typedef struct traverseTrack_t {
 		track_p trk;							// IN Current Track OUT Next Track
 		DIST_T length;							// IN How far to go
 		DIST_T dist;							// OUT how far left = 0 if found
 		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
 		ANGLE_T angle;							// IN/OUT - angle now
-		} traverseTrack_t, *traverseTrack_p;
+		} traverseTrack_t;
+typedef struct traverseTrack_t *traverseTrack_p;
 
 
 typedef struct {
@@ -200,14 +199,15 @@ typedef struct {
 		double cachedGrade;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
-typedef struct {
+typedef struct trkEndPt_t {
 		coOrd pos;
 		ANGLE_T angle;
 		TRKINX_T index;
 		track_p track;
 		elev_t elev;
 		long option;
-		} trkEndPt_t, * trkEndPt_p;
+		} trkEndPt_t;
+typedef struct trkEndPt_t * trkEndPt_p;
 
 extern dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
@@ -216,7 +216,7 @@ typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;
 
 
-typedef struct {
+typedef struct trkSeg_t {
 		char type;
 		wDrawColor color;
 		DIST_T width;
@@ -266,7 +266,8 @@ typedef struct {
 				PolyType_e polyType;
 			} p;
 		} u;
-		} trkSeg_t, * trkSeg_p;
+		} trkSeg_t;
+typedef struct trkSeg_t * trkSeg_p;
 
 #define SEG_STRTRK		('S')
 #define SEG_CRVTRK		('C')

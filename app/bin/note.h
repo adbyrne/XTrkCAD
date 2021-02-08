@@ -22,7 +22,7 @@
 
 #ifndef HAVE_NOTE_H
 #define HAVE_NOTE_H
-#include "track.h"
+#include "common.h"
 
 #define URLMAXIMUMLENGTH (512)
 #define PATHMAXIMUMLENGTH (2048)

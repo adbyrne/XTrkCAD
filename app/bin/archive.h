@@ -1,6 +1,5 @@
 #ifndef HAVE_ARCHIVE_H
 #define HAVE_ARCHIVE_H
-#include <zip.h>
 #include "common.h"
 
 enum ArchiveOps { ARCHIVE_READ, ARCHIVE_WRITE }; // has to be contiguous, see CleanupFiles()!

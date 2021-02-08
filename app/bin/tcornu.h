@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "common.h"
-#include "track.h"
+#include "track.h" //- extraData
 
 typedef struct {
 		coOrd pos[2];
@@ -47,8 +47,8 @@ typedef struct {
 double CornuMaxCurve(coOrd[2],ANGLE_T[2],DIST_T[2]);
 double BezierMathMinRadius(coOrd[4]);
 coOrd BezierMathFindNearestPoint(coOrd *, coOrd[4] , int );
-track_p NewCornuTrack(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], trkSeg_t * tempsegs, int count);
-DIST_T CornuDistance( coOrd *, coOrd[2], ANGLE_T[2], DIST_T[2], trkSeg_t * ,int , double * );
+track_p NewCornuTrack(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], trkSeg_p tempsegs, int count);
+DIST_T CornuDistance( coOrd *, coOrd[2], ANGLE_T[2], DIST_T[2], trkSeg_p ,int , double * );
 BOOL_T FixUpCornu(coOrd pos[2], track_p [2], EPINX_T ep[2], struct extraData* xx);
 BOOL_T FixUpCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], struct extraData* xx);
 BOOL_T GetCornuSegmentsFromTrack(track_p, trkSeg_p);

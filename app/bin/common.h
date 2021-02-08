@@ -206,8 +206,12 @@ typedef struct {
 #define VERSION_NONAKEDENDS	(12)
 
 
-// ANONYMOUS TYPES
+// FORWARD TYPE DECLS
 typedef struct drawCmd_t * drawCmd_p;
+typedef struct track_t * track_p;
+typedef struct trkSeg_t * trkSeg_p;
+typedef struct traverseTrack_t * traverseTrack_p;
+typedef struct trkEndPt_t * trkEndPt_p;
 
 
 // COMMON INCLUDES

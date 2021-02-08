@@ -21,7 +21,7 @@
  */
 
 #include "common.h"
-#include "track.h"
+#include "track.h" //- drawLineType
 
 typedef struct {
 		coOrd pos[4];
@@ -45,8 +45,8 @@ double BezierCurvature(coOrd[4], double , coOrd *);
 double BezierMaxCurve(coOrd[4]);
 double BezierMathMinRadius(coOrd[4]);
 coOrd BezierMathFindNearestPoint(coOrd *, coOrd[4] , int );
-track_p NewBezierTrack(coOrd[4], trkSeg_t * , int );
-track_p NewBezierLine(coOrd[4], trkSeg_t * , int, wDrawColor, DIST_T);
+track_p NewBezierTrack(coOrd[4], trkSeg_p , int );
+track_p NewBezierLine(coOrd[4], trkSeg_p , int, wDrawColor, DIST_T);
 DIST_T BezierMathDistance( coOrd *, coOrd[4], int , double * );
 void FixUpBezier(coOrd[4], struct extraData*, BOOL_T);
 void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);

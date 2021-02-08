@@ -24,6 +24,7 @@
 #include "fileio.h"
 #include "ccornu.h"
 #include "track.h"
+#include "draw.h"
 
 EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;
