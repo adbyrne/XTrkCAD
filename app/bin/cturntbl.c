@@ -309,7 +309,7 @@ static BOOL_T WriteTurntable( track_p t, FILE * f )
 	struct extraData *xx = GetTrkExtraData(t);
 	EPINX_T ep;
 	BOOL_T rc = TRUE;
-	int j = 0, k = 0;
+	int j = -1, k = 0;
 	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {
 		if (GetTrkEndTrk(t,ep)) j++;
 		if (ep == xx->currEp) k=j;     //Write out the curr->Ep reset to real endPts
@@ -359,6 +359,7 @@ static BOOL_T ReadTurntable( char * line )
 	xx->pos = p;
 	xx->radius = r;
 	xx->currEp = currEp;
+	if (xx->currEp > GetTrkEndPtCnt(trk)) xx->currEp = 0;
 	xx->reverse = 0;
 	ComputeTurntableBoundingBox( trk );
 	return TRUE;
