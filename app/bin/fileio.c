@@ -809,8 +809,10 @@ int LoadTracks(
 	// Make sure it exists and it is readable
 	if (access(fileName[0], R_OK) != 0)
 	{
-		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found:"));
-		wMenuListDelete(fileList_ml, nameOfFile);
+		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found"));
+		if (NoticeMessage(_("Remove entry for %s?"), _("Yes"), _("No"), nameOfFile) > 0) {
+			wMenuListDelete(fileList_ml, nameOfFile);
+		}
 		return FALSE;
 	}
 
