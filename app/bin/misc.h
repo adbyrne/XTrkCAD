@@ -25,19 +25,11 @@
 
 #define EXPORT
 
-#include <stdio.h>
-
 #include "acclkeys.h"
 #include "common.h"
 #include "draw.h"
-#include "wlib.h"
 
 typedef void (*addButtonCallBack_t)(void*);
-
-#ifdef WINDOWS
-/* suppress warning from *.bmp about conversion of int to char */
-#pragma warning( disable : 4305)
-#endif
 
 #define COUNT(A) (sizeof(A)/sizeof(A[0]))
 
@@ -213,9 +205,11 @@ extern wMenu_p popup1M, popup2M;
 #define wControlBeside( B )		(wControlGetPosX((wControl_p)(B))+wControlGetWidth((wControl_p)(B)))
 
 typedef void (*rotateDialogCallBack_t) ( void * );
+typedef void (*indexDialogCallBack_t) (void * );
 typedef void (*moveDialogCallBack_t) (void *);
 extern void AddRotateMenu( wMenu_p, rotateDialogCallBack_t );
 extern void AddMoveMenu( wMenu_p, moveDialogCallBack_t );
+extern void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func);
 extern void StartRotateDialog( rotateDialogCallBack_t );
 extern void StartMoveDialog(moveDialogCallBack_t );
 /*
@@ -370,7 +364,7 @@ extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
 
 void ScaleLengthEnd( void );
-void EnumerateList( long, FLOAT_T, char * );
+void EnumerateList( long, FLOAT_T, char * , char * );
 void EnumerateStart(void);
 void EnumerateEnd(void);
 

@@ -20,11 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "ccurve.h"
 #include "tbezier.h"
 #include "tcornu.h"
@@ -34,15 +29,12 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
 #include "trackx.h"
-#include "utility.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 
@@ -720,6 +712,16 @@ static coOrd MapPathPos(
 	REORIGIN1( pos, xx->angle, xx->orig );
 	return pos;
 
+}
+
+static trkSeg_p MapPathSeg(
+		struct extraData * xx,
+		signed char segInx) {
+
+	if ( segInx < 0 ) {
+			segInx = - segInx;
+	}
+	return xx->segs+(segInx-1);
 }
 
 
@@ -1747,9 +1749,11 @@ static void DrawTurnoutPositionIndicator(
 		wDrawColor color )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	PATHPTR_T path;
+	PATHPTR_T path,path1;
 	coOrd pos0, pos1;
 	wDrawColor newColor;
+	trkSeg_p seg;
+	BOOL_T multiPart = FALSE;
 
 	// Only 1 path?  Don't draw
 	path = GetPaths( trk );
@@ -1758,16 +1762,38 @@ static void DrawTurnoutPositionIndicator(
 		return;
 
 	path = GetCurrPath( trk );
+
+	//Is this a multi-part path?
+	path1 = path;
+	for ( path1 += strlen((char*)path1) + 1; path1[0]; path1++ );
+	if (path1[1] != 0) multiPart = TRUE;
+
+	newColor = trk->conBlock?drawColorGreen:color;
+
 	for ( path += strlen((char*)path); path[0] || path[1]; path++ ) {
+
 		if ( path[0] == 0 ) {
 			pos0 = MapPathPos( xx, path[1], 0 );
+			if ((tempD.scale <= 10) || !multiPart) {
+				seg = MapPathSeg( xx, path[1]);
+				DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), newColor, DTS_CENTERONLY);
+			}
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
-			newColor = trk->conBlock?drawColorGreen:color;
+
+			if ((tempD.scale > 10) && multiPart)
 			DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, newColor );
+			else {
+				seg = MapPathSeg( xx, path[0]);
+				DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), newColor, DTS_CENTERONLY);
+			}
+		} else if ((tempD.scale <= 10) || !multiPart) {
+			seg = MapPathSeg( xx, path[0]);
+			DrawSegsO(&tempD,trk,xx->orig,xx->angle,seg,1,GetTrkGauge(trk), newColor, DTS_CENTERONLY);
 		}
 	}
 }
+
 
 // given a trk and end pos, return other end of the path
 EXPORT coOrd GetRemoteTurnoutPositions( track_p trk, coOrd pos )

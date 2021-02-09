@@ -1,7 +1,6 @@
 #include "wlib.h"
 #include "mswlib.h"
-//#include "dynarr.h"
-#include "common.h"
+#include "dynarr.h"
 #ifndef WIN32
 /*#define CONTROL3D*/
 #endif

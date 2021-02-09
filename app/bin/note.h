@@ -22,7 +22,6 @@
 
 #ifndef HAVE_NOTE_H
 #define HAVE_NOTE_H
-#include <stdbool.h>
 #include "track.h"
 
 #define URLMAXIMUMLENGTH (512)

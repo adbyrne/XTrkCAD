@@ -20,18 +20,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <string.h>
-#include <time.h>
-
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "i18n.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 
 static wWin_p enumW;
 
@@ -44,9 +38,11 @@ static wWin_p enumW;
 
 static void DoEnumOp( void * );
 static long enableListPrices;
+static long enableListIndexes;
 
 static paramTextData_t enumTextData = { 80, 24 };
 static char * priceLabels[] = { N_("Prices"), NULL };
+static char * indexLabels[] = { N_("Indexes"), NULL };
 static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
 #define enumT			((wText_p)enumPLs[I_ENUMTEXT].control)
@@ -55,7 +51,10 @@ static paramData_t enumPLs[] = {
 	{   PD_BUTTON, (void*)DoEnumOp, "print", 0, NULL, N_("Print"), 0, (void*)ENUMOP_PRINT },
 	{   PD_BUTTON, (void*)wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
 #define I_ENUMLISTPRICE	(4)
-	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER } };
+	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER },
+#define I_ENUMLISTINDEXES  (5)
+	{   PD_TOGGLE, &enableListIndexes, "list-indexes", PDO_DLGRESETMARGIN, indexLabels, NULL, BC_HORZ|BC_NOBORDER }
+};
 static paramGroup_t enumPG = { "enum", 0, enumPLs, sizeof enumPLs/sizeof enumPLs[0] };
 
 static struct wFilSel_t * enumFile_fs;
@@ -105,7 +104,7 @@ static void EnumDlgUpdate(
 		int inx,
 		void * valueP )
 {
-	if ( inx != I_ENUMLISTPRICE ) return;
+	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) return;
 	EnumerateTracks();
 }
 
@@ -116,7 +115,8 @@ static FLOAT_T enumerateTotal;
 void EnumerateList(
 		long count,
 		FLOAT_T price,
-		char * desc )
+		char * desc,
+		char * indexes )
 {
 	char * cp;
 	int len;
@@ -134,6 +134,8 @@ void EnumerateList(
 			sprintf( cp, " | %-*s |\n", (int) max( 7, count_utf8_chars( _("Each"))), " " );
 		}
 	}
+	if (enableListIndexes && indexes)
+		sprintf( message, "%s%s -> %s \n", message, N_("Indexes"), indexes);
 	wTextAppend( enumT, message );
 }
 

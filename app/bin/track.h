@@ -23,7 +23,6 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <string.h>
 #include "common.h"
 #include "draw.h"
 #include "misc2.h"
@@ -202,7 +201,7 @@ typedef struct {
 		} u;
 		BOOL_T cacheSet;
 		double cachedElev;
-		double cachedLength;
+		double cachedGrade;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
 typedef struct {
@@ -525,8 +524,8 @@ void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
 DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
-BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *length);
-void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length);
+BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *grade);
+void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade);
 char * GetTrkEndElevStation( track_p, EPINX_T );
 #define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
 #define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
@@ -624,6 +623,7 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_DASH		(1<<8)
 #define DTS_DASHDOT		(1<<9)
 #define DTS_DASHDOTDOT  (1<<10)
+#define DTS_CENTERONLY  (1<<11)
 
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );

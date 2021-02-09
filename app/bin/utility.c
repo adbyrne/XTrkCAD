@@ -20,14 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#endif
-#include <math.h>
 #include "common.h"
-#include "utility.h"
 
 /*****************************************************************************
  *
@@ -665,7 +658,7 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 	}
 
 	/* both points without box and cannot intersect */
-	if ( (x0==x1 && y0==y1) || /* within same sector (but not the middle one) */
+	if ( (x0==x1 && y0==y1 && x0!=0 && y0!=0) || /* within same sector (but not the middle one) */
 		 (x0!=0 && x0==x1) ||  /* both right or left */
 		 (y0!=0 && y0==y1) )   /* both above or below */
 		return 0;

@@ -20,35 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdarg.h>
-
-#include <stdint.h>
-
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
@@ -853,7 +834,7 @@ EXPORT void ScaleLengthEnd( void )
 			if (flexLen > 0.0) {
 				count = (int)ceil( length / (flexLen/(flexUnit?2.54:1.00)));
 			}
-			EnumerateList( count, flexCost, tmp );
+			EnumerateList( count, flexCost, tmp, NULL );
 		}
 		scaleInfo(si).length = 0;
 	}

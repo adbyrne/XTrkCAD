@@ -23,7 +23,6 @@
 #define HAVE_CJOIN_H
 
 #include "common.h"
-#include "wlib.h"
 #include "track.h"
 
 #define E_NOTREQ		(0)

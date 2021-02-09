@@ -20,17 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <string.h>
-
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "cselect.h"
 
 static TRKTYP_T T_TURNTABLE = -1;
@@ -291,7 +285,11 @@ static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 
 	trntblData.orig = xx->pos;
 	trntblData.diameter = xx->radius*2.0;
-	trntblData.epCnt = GetTrkEndPtCnt(trk);
+	int j=0;
+	for (int i=0;i<GetTrkEndPtCnt(trk);i++) {
+		if (GetTrkEndTrk(trk,i)) j++;			//Only count if track
+	}
+	trntblData.epCnt = j;
 	trntblData.layerNumber = GetTrkLayer(trk);
 
 	trntblDesc[OR].mode =
@@ -311,11 +309,17 @@ static BOOL_T WriteTurntable( track_p t, FILE * f )
 	struct extraData *xx = GetTrkExtraData(t);
 	EPINX_T ep;
 	BOOL_T rc = TRUE;
+	int j = -1, k = 0;
+	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {
+		if (GetTrkEndTrk(t,ep)) j++;
+		if (ep == xx->currEp) k=j;     //Write out the curr->Ep reset to real endPts
+	}
 	rc &= fprintf(f, "TURNTABLE %d %d 0 0 0 %s %d %0.6f %0.6f 0 %0.6f %d\n",
 		GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), GetTrkVisible(t),
-				xx->pos.x, xx->pos.y, xx->radius, xx->currEp )>0;
-	for (ep=0; ep<GetTrkEndPtCnt(t); ep++)
-		rc &= WriteEndPt( f, t, ep );
+				xx->pos.x, xx->pos.y, xx->radius, k )>0;
+	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {
+		if (GetTrkEndTrk(t,ep))	rc &= WriteEndPt( f, t, ep );   //Only write if there is a track
+	}
 	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
@@ -355,6 +359,7 @@ static BOOL_T ReadTurntable( char * line )
 	xx->pos = p;
 	xx->radius = r;
 	xx->currEp = currEp;
+	if (xx->currEp > GetTrkEndPtCnt(trk)) xx->currEp = 0;
 	xx->reverse = 0;
 	ComputeTurntableBoundingBox( trk );
 	return TRUE;
@@ -442,6 +447,40 @@ static BOOL_T FindTurntableEndPt(
 	} else {
 		return FALSE;
 	}
+}
+
+
+static EPINX_T FindTurntableNextEndPt(
+		track_p trk,
+		coOrd pos) {
+
+		EPINX_T ep,epfound=-1,epCnt;
+		struct extraData * xx = GetTrkExtraData(trk);
+		ANGLE_T a = FindAngle(xx->pos,pos);
+		ANGLE_T foundangle = 370.0;
+		ANGLE_T diff = DifferenceBetweenAngles(GetTrkEndAngle(trk,xx->currEp),a);
+		BOOL_T forward = TRUE;
+		if (diff>90) {
+			forward = FALSE;
+		}
+		if (diff<0 && diff>-90) {
+		    forward = FALSE;
+		}
+		ANGLE_T currdiff, angle1;
+		for (ep=0,epCnt=GetTrkEndPtCnt(trk); ep<epCnt; ep++) {
+			if ( (GetTrkEndTrk(trk,ep)) == NULL )
+						continue;
+			angle1 = GetTrkEndAngle(trk,ep);
+			if (forward)
+				currdiff = NormalizeAngle(angle1-a);
+			else
+				currdiff = NormalizeAngle(a-angle1);
+			if (currdiff<foundangle) {
+				foundangle = currdiff;
+				epfound = ep;
+			}
+		}
+		return epfound;
 }
 
 
@@ -542,7 +581,7 @@ static BOOL_T EnumerateTurntable( track_p trk )
 		for (inx=0; inx<turntables_da.cnt; inx++) {
 			content = TRUE;
 			sprintf( tmp, "Turntable, diameter %s", FormatDistance(turntables(inx)) );
-			EnumerateList( 1, 0.0, tmp );
+			EnumerateList( 1, 0.0, tmp, NULL );
 		}
 		DYNARR_RESET( FLOAT_T, turntables_da );
 	}
@@ -739,6 +778,7 @@ static void FlipTurntable(
 	ComputeBoundingBox( trk );
 }
 
+BOOL_T debug = 0;
 
 static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 {
@@ -752,6 +792,16 @@ static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 	angle = FindAngle( xx->pos, pos0 );
 	PointOnCircle( &pos1, xx->pos, xx->radius, angle+180.0 );
 	DrawLine( &tempD, pos0, pos1, 3, color );
+	if (debug) {
+		if (xx->reverse) {
+
+			Rotate(&pos1,xx->pos, 15);
+			DrawFillCircle( &tempD, pos1, 0.5, color);
+		} else {
+			Rotate(&pos0,xx->pos, 10);
+			DrawFillCircle( &tempD, pos0, 0.5, color);
+		}
+	}
 }
 
 static wBool_t CompareTurntable( track_cp trk1, track_cp trk2 )
@@ -772,31 +822,64 @@ static void AdvanceTurntablePositionIndicator(
 		coOrd * posR,
 		ANGLE_T * angleR )
 {
+
 	struct extraData * xx = GetTrkExtraData(trk);
 	EPINX_T ep;
 	ANGLE_T angle0, angle1;
-	BOOL_T reverse;
-
-	angle1 = FindAngle( xx->pos, pos );
-	if ( !FindTurntableEndPt( trk, &angle1, &ep, &reverse ) )
-		return;
+	BOOL_T reverse=FALSE, train_reversed = FALSE;
+	EPINX_T epCnt=GetTrkEndPtCnt(trk);
+	EPINX_T epbest = -1, epfound = -1;
+	coOrd inpos = *posR;
+	ANGLE_T inangle = *angleR;
 	angle0 = GetTrkEndAngle(trk,xx->currEp);
-	if ( ep == xx->currEp ) {
-		Rotate( posR, xx->pos, 180.0 );
-		if ( xx->reverse ) {
-			angle1 = angle0;
-			xx->reverse = FALSE;
-		} else {
-			angle1 = NormalizeAngle( angle0+180.0 );
-			xx->reverse = TRUE;
+	if (fabs(DifferenceBetweenAngles(angle0,*angleR))>90) train_reversed = TRUE;
+	DIST_T dd = 100000.0;
+	// If on ep, use that
+	for (ep=0; ep<epCnt; ep++) {
+		if ( (GetTrkEndTrk(trk,ep)) == NULL )
+			continue;
+		coOrd end = GetTrkEndPos(trk,ep);
+		DIST_T d = FindDistance(end,pos);
+		if (d<dd) {
+			dd = d;
+			epbest = ep;
 		}
-	} else {
-		angle1 = GetTrkEndAngle(trk,ep);
-		Rotate( posR, xx->pos, angle1-angle0 );
-		xx->reverse = FALSE;
 	}
-	*angleR = angle1;
-	xx->currEp = ep;
+	if (epbest>=0 && IsClose(dd)) {
+		epfound = epbest;
+	}
+	// Else find next track in given direction beyond current
+	if (epfound<0) {
+		epfound = FindTurntableNextEndPt( trk, pos );
+	}
+	if (epfound>=0) {
+		if (xx->currEp == epfound ) {
+			reverse = TRUE;
+			xx->reverse = !xx->reverse;
+			train_reversed = !train_reversed;
+		} else {
+			//If back end moving, flip result
+			if (fabs(DifferenceBetweenAngles(FindAngle(xx->pos,pos),GetTrkEndAngle(trk,xx->currEp)))>90) {
+				if (epfound>=0 && epfound != xx->currEp) {
+					reverse = TRUE;
+					xx->reverse = !xx->reverse;
+					train_reversed = !train_reversed;
+				}
+			}
+		}
+		xx->currEp = epfound;
+		angle1 = GetTrkEndAngle(trk,xx->currEp);
+		if (!reverse) {
+			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
+			Translate( posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
+		} else {
+			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
+			Translate(posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
+		}
+		coOrd outpos = *posR;
+		if (debug)
+			InfoMessage("AO:%0.3f PO:(%0.3f,%0.3f) AI:%0.3f PI:(%0.3f,%0.3f)",*angleR,outpos.x,outpos.y,inangle,inpos.x,inpos.y);
+	}
 }
 
 

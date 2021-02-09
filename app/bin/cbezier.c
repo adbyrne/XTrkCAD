@@ -42,7 +42,7 @@
  */
 
 
-#include "track.h"
+#include "common.h"
 #include "draw.h"
 #include "ccurve.h"
 #include "cbezier.h"
@@ -50,11 +50,9 @@
 #include "cstraigh.h"
 #include "drawgeom.h"
 #include "cjoin.h"
-#include "i18n.h"
 #include "common.h"
+#include "track.h"
 #include "wcolors.h"
-#include "math.h"
-#include "utility.h"
 #include "param.h"
 #include "fileio.h"
 #include "layout.h"

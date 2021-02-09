@@ -67,6 +67,10 @@ The newly pasted parts are in \f{Selected} state and can easily be moved into pl
 
 \u000
 
+\dd \f{Select By Index} - selects object by index number (\K{cmdSelectIndex}).
+
+\u000
+
 \dd \f{Select Stranded Track} - selects all track pieces that are not connected to any other objects. This helps cleaning up a drawing after many changes have been made. 
 
 \u000
@@ -89,6 +93,17 @@ For more information on working with selected objects, see the Select (\K{cmdSel
 
 \rule
 
+\S{cmdSelectIndex} Select By Index
+
+An input window allows one or more index numbers to be entered. Multiple indexes are seperated by commas.
+
+The object can not be selected if its Layer is frozen.  
+
+If the object is part of a module layer, all objects in the layer will be selected.  
+
+If the object is a tunnel object, and the Display Tunnel option is None, it will be set to Dashed. See Display options (\K{cmdDisplay}).
+
+When an individual object is selected, its index number is displayed in the Info Message area, another source is the List Parts (\K{cmdEnum}) command with the \f{List Indexes} option. 
 
 \S{cmdAboveBelow} "Move To Front" and "Move to Back"
 

@@ -23,8 +23,74 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <stdlib.h>
+// INCLUDES
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <locale.h>
+#include <math.h>
+#include <stdarg.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
+#include "wlib.h"
+
+#ifndef WINDOWS
+// Unix/Mac
+#include <dirent.h>
+#include <unistd.h>
+
+#define PATH_SEPARATOR "/"
+
+#else
+// Windows
+#include <io.h>
+#include <process.h>
+#include "include/dirent.h"
+#include "direct.h"
+#include "getopt.h"
+
+// DEFINES
+#define UTFCONVERT
+#define M_PI 3.14159
+#define F_OK (00)
+#define W_OK (02)
+#define R_OK (04)
+#define PATH_SEPARATOR "\\"
+
+// ALIASES for WINDOWS
+#define access _access
+#define unlink(a) _unlink((a))
+#define rmdir(a) _rmdir((a))
+#define open(name, flag, mode) _open((name), (flag), (mode))
+#define close(file) _close((file))
+#define getpid() _getpid()
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#define mkdir( DIR, MODE ) _mkdir( (DIR) )
+#if _MSC_VER >1300
+#define strnicmp _strnicmp
+#define stricmp _stricmp
+#define strdup _strdup
+#endif
+// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
+#if ( _MSC_VER < 1900 )
+#define round(x) floor((x)+0.5)
+#endif
+
+/* suppress warning from *.bmp about conversion of int to char */
+#pragma warning( disable : 4305)
+#endif
+
 
 #ifndef TRUE
 #define TRUE	(1)
@@ -32,6 +98,8 @@
 #endif
 
 #define NUM_LAYERS		(99)
+
+// TYPEDEFS
 
 typedef double FLOAT_T;
 typedef double POS_T;
@@ -72,19 +140,15 @@ enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COM
 #define SCALE_ANY	(-2)
 #define SCALE_DEMO	(-1)
 
+// DYNARRAY
+
 typedef struct {
 		int cnt;
 		int max;
 		void * ptr;
 		} dynArr_t;
 
-#if defined(WINDOWS) && ! defined(WIN32)
-#define CHECK_SIZE(T,DA) \
-		if ( (long)((DA).max) * (long)(sizeof *(T*)NULL) > 65500L ) \
-			AbortProg( "Dynamic array too large at %s:%d", __FILE__, __LINE__ );
-#else
 #define CHECK_SIZE(T,DA)
-#endif
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
@@ -133,15 +197,24 @@ typedef struct {
 // Base DotsPerInch
 #define BASE_DPI	(75.0)
 
-#ifdef WINDOWS
-#define M_PI 3.14159
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#endif
+// FILE VERSIONS - non-backward file format changes
+// Descriptions added for Bezier, Cornu, Joint
+#define VERSION_DESCRIPTION2	(12)
+// Inline quoted text replaces multiline text in Notes and Cars
+#define VERSION_INLINENOTE	(12)
+// END is replaced by END$SEGS, END$TRK, ...
+#define VERSION_NONAKEDENDS	(12)
 
-#if _MSC_VER >1300
-	#define strdup _strdup
-#endif
+// COMMON INCLUDES
+// If you add includes here, please remove them elsewhere
+
+#include "i18n.h"
+//#include "track.h"
+//#include "fileio.h"
+//#include "param.h"
+#include "messages.h"
+#include "utility.h"
+//#include "misc2.h"
 
 #endif
 

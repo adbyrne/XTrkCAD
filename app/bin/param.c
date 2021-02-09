@@ -20,43 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#define R_OK (02)
-#define access _access
-#else
-#include <sys/stat.h>
-#include <errno.h>
-#endif
-#include <stdarg.h>
-#include <locale.h>
-#include <wlib.h>
-
 #include "common.h"
 #include "compound.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 
 EXPORT int paramHiliteFast;
 

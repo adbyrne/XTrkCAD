@@ -20,15 +20,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <stdbool.h>
-
 #include "custom.h"
 #include "cselect.h"
 #include "cundo.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
@@ -742,6 +737,9 @@ static void SelProfileW(
     elev = pos.y;
 
     switch (action&0xFF) {
+    case C_START:
+    	profileUndo = FALSE;
+    	break;
     case C_DOWN:
         for (inx=0; inx<profElem_da.cnt; inx++) {
             if (dist <= profElem(inx).dist) {

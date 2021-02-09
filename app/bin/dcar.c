@@ -20,26 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef WINDOWS
-#include <errno.h>
-#endif
-#include <assert.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "cselect.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 
 static int log_carList;
 static int log_carInvList;
@@ -1337,7 +1325,7 @@ EXPORT BOOL_T CarItemRead(
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
 	dim.truckCenterOffset = longCenterOffset/1000.0;
-	if ( paramVersion < 12 ) {
+	if ( paramVersion < VERSION_INLINENOTE ) {
 		if ( (options&CAR_ITEM_HASNOTES) ) {
 			sNote = ReadMultilineText();
 		}

@@ -46,6 +46,7 @@ void MoveToJoin( track_p, EPINX_T, track_p, EPINX_T );
 void MoveSelectedTracksToCurrentLayer( void );
 void SelectCurrentLayer( void );
 void DeselectLayer( unsigned int );
+void SelectByIndex( void* string);
 void ClearElevations( void );
 void AddElevations( DIST_T );
 void DoRefreshCompound( void );

@@ -31,7 +31,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <assert.h>
-#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
 

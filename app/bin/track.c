@@ -20,13 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <time.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <math.h>
-#include <string.h>
-
 #include "ccurve.h"
 #include "cjoin.h"
 #include "compound.h"
@@ -36,28 +29,16 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 #include "misc.h"
 #include "ctrain.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
 #include "trackx.h"
-#endif
-#endif
-
-#ifndef WINDOWS
-#include <errno.h>
-#else
-// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
-#if ( _MSC_VER < 1900 )
-#define round(x) floor((x)+0.5)
 #endif
 #endif
 
@@ -552,20 +533,24 @@ EXPORT DIST_T GetTrkEndElevHeight( track_p trk, EPINX_T e )
 	return trk->endPt[e].elev.u.height;
 }
 
-EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T * height, DIST_T * length)
+BOOL_T bCacheElev = TRUE;
+
+EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T * height, DIST_T * grade)
 {
+	if ( ! bCacheElev )
+		return FALSE;
 	if (trk->endPt[e].elev.cacheSet) {
 		*height = trk->endPt[e].elev.cachedElev;
-		*length = trk->endPt[e].elev.cachedLength;
+		*grade = trk->endPt[e].elev.cachedGrade;
 		return TRUE;
 	}
 	return FALSE;
 }
 
-EXPORT void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length)
+EXPORT void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade)
 {
 	trk->endPt[e].elev.cachedElev = height;
-	trk->endPt[e].elev.cachedLength = length;
+	trk->endPt[e].elev.cachedGrade = grade;
 	trk->endPt[e].elev.cacheSet = TRUE;
 }
 
@@ -1853,10 +1838,13 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	}
 	/*REORIGIN( pos1, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
 	pos1 = GetTrkEndPos(trk,ep);
+	coOrd tpos = pos1;
 	pos1.x += e->doff.x;
 	pos1.y += e->doff.y;
 	*dpos = pos1;
 	if (hidden) *hidden = !(e->option&ELEV_VISIBLE);
+	if (FindDistance(tpos,pos)<FindDistance( pos1, pos ))
+		return FindDistance(tpos,pos);
 	return FindDistance( pos1, pos );
 }
 
@@ -1868,7 +1856,6 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		coOrd pos )
 {
 	static coOrd p0, p1;
-	static BOOL_T editState = FALSE;
 	elev_t *e, *e1;
 	track_p trk1;
 
@@ -1882,7 +1869,6 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		/*no break*/
 	case C_MOVE:
 	case C_UP:
-		editState = TRUE;
 		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
 		e->doff.y = (pos.y-p0.y);
@@ -1891,17 +1877,13 @@ EXPORT STATUS_T EndPtDescriptionMove(
 			e1->doff = e->doff;
 		}
 		if ( action == C_UP ) {
-			editState = FALSE;
 			wDrawColor color = GetTrkColor( trk, &mainD );
 			DrawEndElev( &mainD, trk, ep, color );
 		}
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
-		DrawEndElev( &tempD, trk, ep, wDrawColorBlue );
-		if ( editState ) {
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
-		}
+		DrawEndElev( &tempD, trk, ep, drawColorPreviewSelected );
 		break;
 	}
 	return C_CONTINUE;
@@ -2957,16 +2939,15 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 
 EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 {
-	DIST_T len, len1, elev0, elev1;
+	DIST_T len, elev0, elev1;
 	ANGLE_T grade = 0.0;
 
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
 		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
-		len = GetTrkLength( trk, 0, -1 );
+		len = GetTrkLength( trk, 0, 1 );
 		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
-		len1 = GetTrkLength( trk, 1, -1 );
-		if (len+len1>0.1)
-			grade = fabs( (elev1-elev0)/(len+len1))*100.0;
+		if (len>0.1)
+			grade = fabs( (elev1-elev0)/len)*100.0;
 	}
 	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) != 0 )
 		return wDrawColorBlack;
@@ -3145,11 +3126,11 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 			sprintf( message, "%0.1f%%", round(fabs(grade*100.0)*10)/10 );
 			elevStr = message;
 			a = GetTrkEndAngle( trk, ep );
-			style = BOX_ARROW;
+			style = BOX_ARROW_BACKGROUND;
 			if (grade <= -0.001)
 				a = NormalizeAngle( a+180.0 );
 			else if ( grade < 0.001 )
-				style = BOX_BOX;
+				style = BOX_BOX_BACKGROUND;
 			elev->u.height = grade;
 		} else {
 			elevStr = "????%%";
@@ -3164,10 +3145,13 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	default:
 		return;
 	}
-	coOrd startLine = pp;
+	coOrd startLine = pp, endLine = pp;
 	pp.x += elev->doff.x;
 	pp.y += elev->doff.y;
-	DrawLine( d, startLine, pp, 0, color );
+	if (color==drawColorPreviewSelected) {
+		Translate(&endLine,pp,FindAngle(pp,startLine),descriptionFontSize/d->dpi);
+		DrawLine( d, startLine, endLine, 0, color );
+	}
 	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize, color, a );
 
 }

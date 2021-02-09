@@ -21,48 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#include <errno.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#else
-#include <sys/stat.h>
-#endif
-#include <stdarg.h>
-#ifndef WINDOWS
-#include <sys/time.h>
-#else
-#include <sys/timeb.h>
-#endif
-#include <locale.h>
-
-#include <stdint.h>
-
 #include "common.h"
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"
-#include "utility.h"
 #include "version.h"
 
 EXPORT long adjTimer;
@@ -103,6 +72,8 @@ static paramGroup_t recordPG = { "record", 0, recordPLs, sizeof recordPLs/sizeof
 
 
 #ifndef WINDOWS
+#include <sys/time.h>
+
 static struct timeval lastTim = {0,0};
 static void ComputePause( void )
 {
@@ -121,6 +92,8 @@ static void ComputePause( void )
 	lastTim = tim;
 }
 #else
+#include <sys/timeb.h>
+
 static struct _timeb lastTim;
 static void ComputePause( void )
 {

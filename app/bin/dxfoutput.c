@@ -20,19 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-  #include <io.h>
-  #include <windows.h>
-#else
-  #include <errno.h>
-#endif
-
 #include <xtrkcad-config.h>
-#include <locale.h>
-#include <assert.h>
 
 #include <dynstring.h>
 
@@ -40,11 +28,8 @@
 #include "custom.h"
 #include "dxfformat.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 
 static struct wFilSel_t * exportDXFFile_fs;
 

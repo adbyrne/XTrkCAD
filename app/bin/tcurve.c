@@ -20,21 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <math.h>
-#include <string.h>
-
 #include "ccurve.h"
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 
 static TRKTYP_T T_CURVE = -1;
 
@@ -171,6 +164,8 @@ BOOL_T GetCurveMiddle( track_p trk, coOrd * pos )
 	return TRUE;
 }
 
+static DIST_T DistanceCurve( track_p t, coOrd * p );
+
 DIST_T CurveDescriptionDistance(
 		coOrd pos,
 		track_p trk,
@@ -200,13 +195,17 @@ DIST_T CurveDescriptionDistance(
 			a = NormalizeAngle(a0 + a1/2.0 + ratio * a1/ 2.0);
 		else
 			a = NormalizeAngle(360.0*ratio+a0);
-		ratio = 1.0-offset.y;
+		ratio = offset.y+0.5;
 		if (ratio<0.0) ratio = 0.0;
 		if (ratio>1.0) ratio = 1.0;
 		Translate( &pd, xx->pos, a, xx->radius * ratio );
 	}
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = pd;
+
+	coOrd tpos = pos;
+	if (DistanceCurve(trk, &tpos)<FindDistance(pd, pos))
+		return DistanceCurve(trk, &pos);
 	return FindDistance( pd, pos );
 }
 
@@ -248,15 +247,17 @@ static void DrawCurveDescription(
 		}
 		fp = wStandardFont( F_TIMES, FALSE, FALSE );
 		if (elevValid)
-			sprintf( message, _("Helix: turns=%ld len=%0.2f grade=%0.1f%% sep=%0.2f"),
+			sprintf( message, _("Helix: Turns %ld L %0.2f Grade %0.1f%% Sep %0.2f"),
 				xx->helixTurns,
 				dist,
 				grade*100.0,
 				sep );
 		else
-			sprintf( message, _("Helix: turns=%ld len=%0.2f"),
+			sprintf( message, _("Helix: Turns %ld L %0.2f"),
 				xx->helixTurns,
 				dist );
+		if (color == drawColorPreviewSelected)
+			DrawLine(d,xx->pos,pos,0,color);
 		DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 	} else {
 		dist = trackGauge/2.0;
@@ -279,22 +280,23 @@ static void DrawCurveDescription(
 		Translate(&end0,xx->pos,a0,xx->radius);
 		Translate(&end1,xx->pos,a0+a1,xx->radius);
 		off = xx->radius-(cos(D2R(a1/2))*xx->radius);
-		ratio = (1.0-xx->descriptionOff.y);
-		if (ratio < 0.1) ratio = 0.1;
-		if (ratio > 1.0) ratio = 1.0;
+		ratio = xx->descriptionOff.y;
+		if (ratio < -0.5) ratio = -0.5;
+		if (ratio > 0.5) ratio = 0.5;
 		if (! IsCurveCircle(trk))
 			sprintf( message, "R %s L %s A %0.3f O %s", FormatDistance( xx->radius ),
 				FormatDistance(FindDistance(end0,end1)),FindAngle(end1,end0), FormatDistance(off));
 		else
 			sprintf( message, "R %s L %s A 360.0", FormatDistance( xx->radius ),FormatDistance(xx->radius*2*M_PI));
-		DrawDimLine( d, xx->pos, p0, message, (wFontSize_t)descriptionFontSize, ratio, 0, color, 0x11 );
+		DrawDimLine( d, xx->pos, p0, message, (wFontSize_t)descriptionFontSize, ratio+0.5, 0, color, 0x00 );
 
-		coOrd details_pos;
+		if (GetTrkBits( trk ) & TB_DETAILDESC)  {
+			coOrd details_pos;
+			details_pos.x = (p0.x - xx->pos.x)*(ratio+0.5) + xx->pos.x;
+			details_pos.y = (p0.y - xx->pos.y)*(ratio+0.5) + xx->pos.y-(2*descriptionFontSize/mainD.dpi);
 
-		details_pos.x = (end1.x - end0.x)*0.5+end0.x;
-		details_pos.y = (end1.y - end0.y)*0.5+end0.y - descriptionFontSize/d->dpi;
-
-		if (GetTrkBits( trk ) & TB_DETAILDESC) AddTrkDetails(d, trk, details_pos, a1/180.0*M_PI*xx->radius, color);
+			AddTrkDetails(d, trk, details_pos, a1/180.0*M_PI*xx->radius, color);
+		}
 	}
 
 }
@@ -307,64 +309,45 @@ STATUS_T CurveDescriptionMove(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	static coOrd p0,p1;
-	static BOOL_T editMode;
 	wDrawColor color;
 	ANGLE_T a, a0, a1;
 	DIST_T d;
 
 	p0 = xx->pos;
 
-	switch (action) {
-	case C_DOWN:
-		DrawCurveDescription( trk, &mainD, wDrawColorWhite );
-	case C_MOVE:
-	case C_UP:
-		editMode = TRUE;
-		color = GetTrkColor( trk, &mainD );
-		if ( xx->helixTurns > 0 ) {
-			xx->descriptionOff.x = (pos.x-xx->pos.x);
-			xx->descriptionOff.y = (pos.y-xx->pos.y);
-			p1 = pos;
-		} else {
-			p1 = pos;
-			GetCurveAngles( &a0, &a1, trk );
-			if ( a1 < 1 ) a1 = 1.0;
-			a = FindAngle( xx->pos, pos );
-			if ( ! IsCurveCircle( trk ) ) {
-				a = NormalizeAngle( a - a0 );
-				if ( a > a1 ) {
-					if ( a < a1 + ( 360.0 - a1 ) / 2 ) {
-						a = a1;
-					} else {
-						a = 0.0;
-					}
+	color = GetTrkColor( trk, &mainD );
+	if ( xx->helixTurns > 0 ) {
+		xx->descriptionOff.x = (pos.x-xx->pos.x);
+		xx->descriptionOff.y = (pos.y-xx->pos.y);
+		p1 = pos;
+	} else {
+		p1 = pos;
+		GetCurveAngles( &a0, &a1, trk );
+		if ( a1 < 1 ) a1 = 1.0;
+		a = FindAngle( xx->pos, pos );
+		if ( ! IsCurveCircle( trk ) ) {
+			a = NormalizeAngle( a - a0 );
+			if ( a > a1 ) {
+				if ( a < a1 + ( 360.0 - a1 ) / 2 ) {
+					a = a1;
+				} else {
+					a = 0.0;
 				}
-				xx->descriptionOff.x = ( a / a1 ) * 2.0 - 1.0;  // -1 to 1, 0 in middle
-			} else {
-				a = FindAngle(xx->pos,pos);
-				GetCurveAngles( &a0, &a1, trk );
-				xx->descriptionOff.x = NormalizeAngle((a - a0)/360.0);
 			}
-			d = FindDistance( xx->pos, pos ) / xx->radius;
-			if ( d > 1.0 )
-				d = 1.0;
-			if ( d < 0.0 )
-				d = 0.0;
-			xx->descriptionOff.y = 1.0-d; 						//  0.1 to 0.9
+			xx->descriptionOff.x = ( a / a1 ) * 2.0 - 1.0;  // -1 to 1, 0 in middle
+		} else {
+			a = FindAngle(xx->pos,pos);
+			GetCurveAngles( &a0, &a1, trk );
+			xx->descriptionOff.x = NormalizeAngle((a - a0)/360.0);
 		}
-		if (action == C_UP) {
-			editMode = FALSE;
-			DrawCurveDescription( trk, &mainD, wDrawColorBlack );
-		}
-		return action==C_UP?C_TERMINATE:C_CONTINUE;
-
-	case C_REDRAW:
-		if (editMode) {
-			DrawCurveDescription( trk, &tempD, wDrawColorBlue );
-		}
-		break;
-		
+		d = FindDistance( xx->pos, pos ) / xx->radius;
+		if ( d > 1.0 )
+			d = 1.0;
+		if ( d < 0.0 )
+			d = 0.0;
+		xx->descriptionOff.y = d-0.5; 					//  -0.5 to 0.5, 0 in the middle
 	}
+
 	return C_CONTINUE;
 }
 
@@ -730,8 +713,9 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 	long options;
 	BOOL_T rc = TRUE;
 	options = GetTrkWidth(t) & 0x0F;
-	if ( ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) == ( xx->helixTurns > 0 ) )
-		options |= 0x80;
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
+			// 0x80 means Show Description
+			options |= 0x80;
 	rc &= fprintf(f, "CURVE %d %d %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n", 
 		GetTrkIndex(t), GetTrkLayer(t), (long)options,
 		GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->pos.x, xx->pos.y, xx->radius,
@@ -786,8 +770,15 @@ static BOOL_T ReadCurve( char * line )
 	SetTrkWidth(t, (int)(options&3));
 	xx->pos = p;
 	xx->radius = r;
-	if ( ( ( options & 0x80 ) != 0 ) == ( xx->helixTurns > 0 ) ) 
-		SetTrkBits(t,TB_HIDEDESC);
+	if ( paramVersion < VERSION_DESCRIPTION2 ) {
+		if ( xx->helixTurns <= 0 ) {
+			// Descriptions on by default for helix, off for curves
+			SetTrkBits(t,TB_HIDEDESC);
+		}
+	} else {
+		if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) )
+				SetTrkBits(t,TB_HIDEDESC);
+	}
 	SetEndPts(t,2);
 	if (GetTrkEndAngle( t, 0 ) == 270.0 &&
 		GetTrkEndAngle( t, 1 ) == 90.0 )

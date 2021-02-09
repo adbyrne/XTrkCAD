@@ -100,7 +100,7 @@ wDrawSetBackground(wDraw_p bd, char * path, char ** error)
                 return (0);
             }
         } else {
-			*error = strdup(_("Image file is invalid or cannot be read."));
+			*error = _strdup(_("Image file is invalid or cannot be read."));
             return (-1);
         }
     } else {

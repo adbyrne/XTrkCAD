@@ -7,7 +7,8 @@
 
 #ifndef APP_BIN_CCORNU_H_
 #define APP_BIN_CCORNU_H_
-
+#include "common.h"
+#include "track.h"
 
 typedef void (*cornuMessageProc)( char *, ... );
 

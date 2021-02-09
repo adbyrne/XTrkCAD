@@ -24,7 +24,6 @@
 #define PARAM_H
 
 #include "common.h"
-#include "wlib.h"
 #include "draw.h"
 
 typedef struct turnoutInfo_t * turnoutInfo_p;

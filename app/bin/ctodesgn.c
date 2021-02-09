@@ -21,26 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifdef WINDOWS
-#include <stdlib.h>
-#endif
-
-#include <stdint.h>
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-#include "messages.h"
-
 #include "ccurve.h"
 #include "compound.h"
 #include "cstraigh.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "ccornu.h"
 #include "cbezier.h"
 #include "misc.h"
@@ -3236,10 +3224,6 @@ EXPORT void InitNewTurn( wMenu_p m )
 
 #ifdef MKTURNOUT
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
 
 char message[STR_HUGE_SIZE];
 char * curScaleName;

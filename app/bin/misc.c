@@ -20,35 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#include "getopt.h"
-#define R_OK (02)
-#define access _access
-#if _MSC_VER >1300
-#define strdup _strdup
-#endif
-#else
-#include <sys/stat.h>
-#endif
-#include <locale.h>
-#include <stdarg.h>
-#include <stdint.h>
-
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
@@ -57,16 +28,13 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
-#include "utility.h"
 
 #define DEFAULT_SCALE ("N")
 
@@ -205,11 +173,6 @@ EXPORT void * MyMalloc(long size) {
 	void * p;
 	totalMallocs++;
 	totalMalloced += size;
-#if defined(WINDOWS) && ! defined(WIN32)
-	if ( size > 65500L ) {
-		AbortProg( "mallocing > 65500 bytes" );
-	}
-#endif
 	p = malloc((size_t) size + sizeof(size_t) + 2 * sizeof(unsigned long));
 	if (p == NULL)
 		AbortProg("No memory");
@@ -232,11 +195,6 @@ EXPORT void * MyRealloc(void * old, long size) {
 		return MyMalloc(size);
 	totalReallocs++;
 	totalRealloced += size;
-#if defined(WINDOWS) && ! defined(WIN32)
-	if ( size > 65500L ) {
-		AbortProg( "reallocing > 65500 bytes" );
-	}
-#endif
 	if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
 		AbortProg("Guard0 is hosed");
 	}
@@ -365,9 +323,9 @@ EXPORT char * ConvertToEscapedText(const char * text) {
 		text_i++;
 	}
 	cout[cout_i] = '\0';
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	wSystemToUTF8(cout, cout, cnt);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	return cout;
 }
@@ -464,10 +422,6 @@ EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
 }
 
 static char * directory;
-
-#ifdef WINDOWS
-#define F_OK (0)
-#endif
 
 EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 
@@ -1967,10 +1921,13 @@ static void ShowAddElevations(void) {
 /*--------------------------------------------------------------------*/
 
 static wWin_p rotateW;
+static wWin_p indexW;
 static wWin_p moveW;
 static double rotateValue;
+static char trackIndex[STR_LONG_SIZE];
 static coOrd moveValue;
 static rotateDialogCallBack_t rotateDialogCallBack;
+static indexDialogCallBack_t indexDialogCallBack;
 static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void *);
@@ -1980,6 +1937,12 @@ static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE
 		&rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
+
+static void IndexEnterOk(void *);
+static paramData_t indexPLs[] = { { PD_STRING, &trackIndex, "select",
+		PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)100, N_("Indexes:"), 0, 0, sizeof trackIndex } };
+static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
+		/ sizeof indexPLs[0] };
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static void MoveEnterOk(void *);
@@ -1998,6 +1961,16 @@ EXPORT void StartRotateDialog(rotateDialogCallBack_t func) {
 	wShow(rotateW);
 }
 
+EXPORT void StartIndexDialog(indexDialogCallBack_t func) {
+	if (indexW == NULL)
+		indexW = ParamCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
+				_("Ok"), IndexEnterOk, wHide, FALSE, NULL, 0, NULL);
+	ParamLoadControls(&indexPG);
+	indexDialogCallBack = func;
+	trackIndex[0] = '\0';
+	wShow(indexW);
+}
+
 EXPORT void StartMoveDialog(moveDialogCallBack_t func) {
 	if (moveW == NULL)
 		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
@@ -2012,6 +1985,12 @@ static void MoveEnterOk(void * junk) {
 	ParamLoadData(&movePG);
 	moveDialogCallBack((void*) &moveValue);
 	wHide(moveW);
+}
+
+static void IndexEnterOk(void * junk) {
+	ParamLoadData(&indexPG);
+	indexDialogCallBack((void*) trackIndex);
+	wHide(indexW);
 }
 
 static void RotateEnterOk(void * junk) {
@@ -2031,9 +2010,18 @@ static void MoveDialogInit(void) {
 	ParamRegister(&movePG);
 }
 
+static void IndexDialogInit(void) {
+	ParamRegister(&indexPG);
+}
+
 EXPORT void AddMoveMenu(wMenu_p m, moveDialogCallBack_t func) {
 	wMenuPushCreate(m, "", _("Enter Move ..."), 0,
 			(wMenuCallBack_p) StartMoveDialog, (void*) func);
+}
+
+EXPORT void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func) {
+	wMenuPushCreate(m, "cmdSelectIndex", _("Select Track Index ..."), 0,
+			(wMenuCallBack_p) StartIndexDialog, (void*) func);
 }
 
 //All values multipled by 100 to support decimal points from PD_FLOAT
@@ -2300,6 +2288,10 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) SelectCurrentLayer, 0, (void *) 0);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0,
 			(void*) (wMenuCallBack_p) SetAllTrackSelect, 0, (void *) 0);
+	wMenuPushCreate(popup1M, "cmdSelectIndex", _("Select Track Index..."), 0,
+				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
+	wMenuPushCreate(popup2M, "cmdSelectIndex", _("Select Track Index..."), 0,
+				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
 	/* Modify */
 	wMenuPushCreate(popup2M, "cmdMove", _("Move"), 0,
 			(wMenuCallBack_p) DoCommandBIndirect, &moveCmdInx);
@@ -2420,6 +2412,7 @@ static void CreateMenus(void) {
 	menuPLs[menuPG.paramCnt].context = (void*)1;
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"), ACCL_SELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", _("Select Current Layer"), ACCL_SETCURLAYER, (void*)(wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L, (void*)(wMenuCallBack_p)StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"), ACCL_DESELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L, (void*)(wMenuCallBack_p)InvertTrackSelect, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", _("Select Stranded Track"), 0L, (void*)(wMenuCallBack_p)OrphanedTrackSelect, 0, (void *)0 );
@@ -3018,6 +3011,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	RotateDialogInit();
 	MoveDialogInit();
+	IndexDialogInit();
 
 	wSetSplashInfo(_("Initializing commands"));
 	LOG1(log_init, ( "paramInit\n" ))

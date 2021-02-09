@@ -56,9 +56,9 @@ char* CreateManifest(char* nameOfLayout, char* background,
 		char *copyOfFileName = MyStrdup(nameOfLayout);
 		cJSON* a_object = cJSON_CreateObject();
 		cJSON_AddItemToObject(manifest, "layout", a_object);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 		copyOfFileName = Convert2UTF8(copyOfFileName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 		cJSON_AddStringToObject(a_object, "name", copyOfFileName);
 		MyFree(copyOfFileName);
 
@@ -69,16 +69,16 @@ char* CreateManifest(char* nameOfLayout, char* background,
 			cJSON_AddStringToObject(b_object, "name", "background");
 
 			backg = MyStrdup(FindFilename(background));
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			backg = Convert2UTF8(backg);
 #endif
 			cJSON_AddStringToObject(b_object, "filename", backg);
 			MyFree(backg);
 			backg = MyStrdup(background);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			backg = Convert2UTF8(backg);
 			ConvertPathForward(backg);
-#endif // WINDOWS			
+#endif // UTFCONVERT			
 			cJSON_AddStringToObject(b_object, "copy-path", backg);
 			cJSON_AddStringToObject(b_object, "arch-path", dependencyDir);
 			MyFree(backg);
@@ -115,9 +115,9 @@ char* ParseManifest(char* manifest, char* zip_directory)
 	cJSON* layout = cJSON_GetObjectItemCaseSensitive(json_manifest, "layout");
 	cJSON* name = cJSON_GetObjectItemCaseSensitive(layout, "name");
 	layoutname = cJSON_GetStringValue(name);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(layoutname);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	LOG(log_zip, 1, ("Zip-Manifest %s \n", layoutname))
 #if DEBUG
@@ -136,7 +136,7 @@ char* ParseManifest(char* manifest, char* zip_directory)
 			cJSON* archpath = cJSON_GetObjectItemCaseSensitive(dependency, "arch-path");
 			file = MyStrdup(cJSON_GetStringValue(filename));
 			path = MyStrdup(cJSON_GetStringValue(archpath));
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(file);
 			ConvertUTF8ToSystem(path);
 #endif

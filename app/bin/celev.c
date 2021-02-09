@@ -19,18 +19,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <math.h>
-#include <string.h>
 
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
 #include "ccurve.h"
-#include "utility.h"
 
 static wWin_p elevW;
 
@@ -243,7 +239,6 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	int mode;
 	DIST_T elevX, grade, elev, dist;
 	long radio;
-	BOOL_T computedOk;
 	BOOL_T gradeOk = TRUE;
 	track_p trk1;
 	EPINX_T ep1;
@@ -329,33 +324,22 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 }
 
 static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
-	DIST_T len, len1, elev0, elev1, dist0, dist1;
+	DIST_T elev0, elev1, dist0, dist1;
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
+		if ( GetTrkLength( trk, 0, 1 ) < 0.1 )
+			return FALSE;
 		dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
 		dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
-		if (EndPtIsDefinedElev(trk,0))
-			elev0 = GetTrkEndElevHeight(trk,0);
-		else {
-			if (!GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
-				if ((len = GetTrkLength( trk, 0, -1 ))<0.1) return FALSE;
-				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
-			}
-		}
-		if (EndPtIsDefinedElev(trk,1))
-			elev1 = GetTrkEndElevHeight(trk,1);
-		else {
-			if (!GetTrkEndElevCachedHeight(trk,1,&elev1,&len1)) {
-				if ((len1 = GetTrkLength( trk, 1, -1 ))<0.1) return FALSE;
-				ComputeElev( trk, 1, FALSE, &elev1, NULL, TRUE );
-			}
-		}
+		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
+		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
 		if (dist1+dist0 <= 0.1) {
 			*height = elev0;
 			return TRUE;
 		}
 		*height = ((elev1-elev0)*(dist0/(dist0+dist1)))+elev0;
 		return TRUE;
-	} else if (GetTrkEndPtCnt(trk) == 1 && GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
+	} else if (GetTrkEndPtCnt(trk) == 1 && 
+		  ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE ) ) {
 		*height = elev0;
 		return TRUE;
 	}

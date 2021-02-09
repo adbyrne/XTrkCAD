@@ -100,27 +100,20 @@
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "misc.h"
 #include "track.h"
 #include "trackx.h"
-#include "utility.h"
 #include "layout.h"
 #include "ctrain.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 static void verifyOccupancy ( BOOL_T rpt );
 
@@ -632,9 +625,9 @@ static BOOL_T WriteBlock( track_p t, FILE * f )
 	blockData_p xx = GetblockData(t);
 	char *blockName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	blockName = Convert2UTF8(blockName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	// Skip Dynamic Blocks
 	if ( blockName[0] == 0 ) return TRUE;
@@ -698,9 +691,9 @@ static BOOL_T ReadBlock( char * line )
 		return FALSE;
 	}
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	strncpy(blockName, name, STR_SHORT_SIZE);
 	strncpy(blockScript, script, STR_LONG_SIZE);

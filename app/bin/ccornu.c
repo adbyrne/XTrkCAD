@@ -79,18 +79,12 @@
 #include "cstraigh.h"
 #include "drawgeom.h"
 #include "cjoin.h"
-#include "i18n.h"
 #include "common.h"
-#include "utility.h"
-#include "math.h"
 #include "param.h"
 #include "layout.h"
 #include "cundo.h"
-#include "messages.h"
 #include "cselect.h"
 #include "fileio.h"
-
-#include <stdint.h>
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;

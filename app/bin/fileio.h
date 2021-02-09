@@ -22,8 +22,6 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#include <stdio.h>
-
 #include "common.h"
 #include "misc.h"
 
@@ -103,10 +101,6 @@ void SyntaxError( char *, wIndex_t, wIndex_t );
 void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
-
-#ifdef WINDOWS
-#define fopen( FN, MODE ) wFileOpen( FN, MODE )
-#endif
 
 void SetWindowTitle( void );
 char * PutTitle( char * cp );

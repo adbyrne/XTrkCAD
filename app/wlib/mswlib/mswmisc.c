@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <htmlhelp.h>
-#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
 #include "FreeImage.h"
@@ -45,6 +44,7 @@
 #define OFN_LONGFILENAMES		0x00200000L
 
 char * mswStrdup(const char *);
+const char * GetCurCommandName(void);
 
 #define PAUSE_TIMER		(901)
 #define ALARM_TIMER		(902)

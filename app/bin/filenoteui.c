@@ -20,26 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <string.h>
-#include <stdbool.h>
-#ifdef WINDOWS
-	#include <io.h>
-	#define access(path,mode) _access(path,mode)
-	#define F_OK (0) 
-#else
-	#include <unistd.h>
-#endif
 #include "custom.h"
 #include "dynstring.h"
 #include "file2uri.h"
-#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "track.h"
-#include "wlib.h"
 
 extern BOOL_T inDescribeCmd;
 

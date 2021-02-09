@@ -20,13 +20,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdint.h>
-
 #include "common.h"
-#include "utility.h"
 #include "cundo.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "fileio.h"
 #include "cselect.h"

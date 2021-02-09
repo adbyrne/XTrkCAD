@@ -21,11 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-
-
 #include "tbezier.h"
 #include "cjoin.h"
 #include "common.h"
@@ -33,11 +28,8 @@
 #include "cundo.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
-#include "messages.h"
 #include "include/paramfile.h"
 
 /*****************************************************************************
@@ -428,11 +420,11 @@ void DrawCompoundDescription(
 	p0.y = p1.y+xx->orig.y;
 	p1.x += xx->orig.x + xx->descriptionOff.x;
 	p1.y += xx->orig.y + xx->descriptionOff.y;
-	if (FindDistance(zero,xx->descriptionOff)>descriptionFontSize*2/d->dpi) {
+	if (color == drawColorPreviewSelected) {
 		DrawLine( d, p0, p1, 0, color );
 	}
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
-	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_BACKGROUND, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
+	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_NONE, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
 
 
@@ -457,6 +449,10 @@ DIST_T CompoundDescriptionDistance(
 	p1.y += xx->orig.y + offset.y;
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = p1;
+
+	coOrd tpos = pos;
+	if (DistanceCompound(trk,&tpos)<FindDistance( p1, pos ))
+		return DistanceCompound(trk,&pos);
 	return FindDistance( p1, pos );
 }
 
@@ -1462,6 +1458,7 @@ typedef struct {
 		char * type;
 		char * name;
 		FLOAT_T price;
+		DynString indexes;
 		} enumCompound_t;
 static dynArr_t enumCompound_da;
 #define EnumCompound(N) DYNARR_N( enumCompound_t,enumCompound_da,N)
@@ -1472,6 +1469,7 @@ BOOL_T EnumerateCompound( track_p trk )
 	INT_T inx, inx2;
 	int cmp;
 	long listLabelsOption = listLabels;
+	char * index = MyMalloc(10);
 
 	if ( trk != NULL ) {
 		xx = GetTrkExtraData(trk);
@@ -1490,6 +1488,9 @@ BOOL_T EnumerateCompound( track_p trk )
 			cmp =  strcmp( EnumCompound(inx).name, message );
 			if ( cmp == 0 ) {
 				EnumCompound(inx).count++;
+				sprintf(index,",%d",GetTrkIndex(trk));
+				DynStringCatCStr(&(EnumCompound(inx).indexes),index);
+				MyFree(index);
 				return TRUE;
 			} else if ( cmp > 0 ) {
 				break;
@@ -1503,6 +1504,8 @@ BOOL_T EnumerateCompound( track_p trk )
 			enumerateMaxDescLen = strlen(message);
 		EnumCompound(inx).type = GetTrkTypeName( trk );
 		EnumCompound(inx).count = 1;
+		DynStringMalloc(&(EnumCompound(inx).indexes),100);
+		DynStringPrintf(&(EnumCompound(inx).indexes),"%d",GetTrkIndex(trk));
 		FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, xtitle(xx) );
 		wPrefGetFloat( "price list", message, &(EnumCompound(inx).price), 0.0 );
 	} else {
@@ -1512,12 +1515,15 @@ BOOL_T EnumerateCompound( track_p trk )
 				if (EnumCompound(inx).type[0] == *type) {
 					EnumerateList( EnumCompound(inx).count,
 						EnumCompound(inx).price,
-						EnumCompound(inx).name );
+						EnumCompound(inx).name,
+						DynStringSize(&(EnumCompound(inx).indexes))?DynStringToCStr(&(EnumCompound(inx).indexes)):NULL);
 				}
+				DynStringFree(&(EnumCompound(inx).indexes));
 			}
 		}
 		DYNARR_RESET( enumCompound_t, enumCompound_da );
 	}
+	MyFree(index);
 	return TRUE;
 }
 
