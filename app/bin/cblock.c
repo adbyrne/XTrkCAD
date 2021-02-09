@@ -1725,6 +1725,7 @@ static track_p scanForTrack( track_p here, track_p next, track_p endTrk, DIST_T 
 #endif
 
 	// next[epN] points to here
+	if ( ! next ) return NULL;
 	epN = getEpInTrk1ToTrk2( next, here );
 	adjustOccupied( next, epN, adj );
 	if ( next == endTrk ) return endTrk;
@@ -1902,12 +1903,14 @@ EXPORT void UpdateOccupied( void )
             while ( d > 0.0 ) {
                 trkL = trk0;
                 epL = ep0;
-                trk0 = trk0->endPt[ep0].track;
-                for ( epN = 0; epN < GetTrkEndPtCnt(trk0); epN++ ) {
-                    if ( trk0->endPt[epN].track == trkL ) break;
-                }
-                ep0 = getRemoteEp( trk0, epN );
-                d -= FindDistance( trk0->endPt[epN].pos, trk0->endPt[ep0].pos );
+                trk0 = trk0?trk0->endPt[ep0].track:NULL;
+                if ( trk0 ) {
+                    for ( epN = 0; epN < GetTrkEndPtCnt(trk0); epN++ ) {
+                        if ( trk0->endPt[epN].track == trkL ) break;
+                    }
+                    ep0 = getRemoteEp( trk0, epN );
+                    d -= FindDistance( trk0->endPt[epN].pos, trk0->endPt[ep0].pos );
+                } else break;
             }
         }
         if ( d1 < len/2.0 ) { // car end[1] is in another segment
@@ -1917,12 +1920,14 @@ EXPORT void UpdateOccupied( void )
             while ( d > 0.0 ) {
                 trkL = trk1;
                 epL = ep1;
-                trk1 = trk1->endPt[ep1].track;
-                for ( epN = 0; epN < GetTrkEndPtCnt(trk1); epN++ ) {
-                    if ( trk1->endPt[epN].track == trkL ) break;
-                }
-                ep1 = getRemoteEp( trk1, epN );
-                d -= FindDistance( trk1->endPt[epN].pos, trk1->endPt[ep1].pos );
+                trk1 = trk1?trk1->endPt[ep1].track:NULL;
+                if ( trk1 ) {
+                    for ( epN = 0; epN < GetTrkEndPtCnt(trk1); epN++ ) {
+                        if ( trk1->endPt[epN].track == trkL ) break;
+                    }
+                    ep1 = getRemoteEp( trk1, epN );
+                    d -= FindDistance( trk1->endPt[epN].pos, trk1->endPt[ep1].pos );
+                } else break;
             }
         }
 
