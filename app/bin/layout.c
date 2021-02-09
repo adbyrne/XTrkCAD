@@ -46,6 +46,8 @@ struct sLayoutProps {
     GAUGEINX_T		curGaugeInx;
     DIST_T			minTrackRadius;
     DIST_T			maxTrackGrade;
+    DIST_T			maxBlockLength;
+    DIST_T			minBlockLength;
     coOrd			roomSize;
     DynString       backgroundFileName;
     coOrd			backgroundPos;
@@ -61,7 +63,7 @@ struct sDataLayout {
 };
 
 static struct sDataLayout thisLayout = {
-    { "", "", -1, 0, 0, 0.0, 5.0, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
+    { "", "", -1, 0, 0, 0.0, 5.0, 48.0, 8.0, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
     NaS,
     NULL,
 };
@@ -150,6 +152,18 @@ void
 SetLayoutMaxTrackGrade(ANGLE_T angle)
 {
     thisLayout.props.maxTrackGrade = angle;
+}
+
+void
+SetLayoutMaxBlockLength(DIST_T len)
+{
+    thisLayout.props.maxBlockLength = len;
+}
+
+void
+SetLayoutMinBlockLength(DIST_T len)
+{
+    thisLayout.props.minBlockLength = len;
 }
 
 
@@ -270,13 +284,13 @@ GetLayoutMaxTrackGrade()
 DIST_T
 GetLayoutMinBlockLength()
 {
-    return (minBlockLength);
+    return (thisLayout.props.minBlockLength);
 }
 
 DIST_T
 GetLayoutMaxBlockLength()
 {
-    return (maxBlockLength);
+    return (thisLayout.props.maxBlockLength);
 }
 
 SCALEDESCINX_T
@@ -497,9 +511,9 @@ static paramData_t layoutPLs[] = {
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define MINBLKLENGTH (11)
-    { PD_FLOAT, &minBlockLength, "minBlockLength", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r0o1_1000, N_("Min Block Length"), 0, (void *)(CHANGE_MINBLKLN) },
+    { PD_FLOAT, &thisLayout.props.minBlockLength, "minBlockLength", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r0o1_1000, N_("Min Block Length"), 0, (void *)(CHANGE_MINBLKLN) },
 #define MAXBLKLENGTH (12)
-    { PD_FLOAT, &maxBlockLength, "maxBlockLength", PDO_NOPSHUPD|PDO_DLGHORZ, &r0o1_1000, N_(" Max Block Length"), 0, (void *)(CHANGE_MAXBLKLN) },
+    { PD_FLOAT, &thisLayout.props.maxBlockLength, "maxBlockLength", PDO_NOPSHUPD|PDO_DLGHORZ, &r0o1_1000, N_(" Max Block Length"), 0, (void *)(CHANGE_MAXBLKLN) },
 #define BACKGROUNDPOSX (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDPOSY (14)
@@ -518,7 +532,6 @@ static paramData_t layoutPLs[] = {
 
 static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, sizeof layoutPLs / sizeof layoutPLs[0] };
 
-
 static void ChangeLayout() {
 
     long changes;
@@ -536,6 +549,24 @@ static void ChangeLayout() {
         SetRoomSize(thisLayout.props.roomSize);
     }
 
+    if (changes & CHANGE_MINBLKLN) {
+        if ( HasBlocks() ) {
+            NoticeMessage( _("Blocks must be deleted before changing MinBlockSize"), _("Ok"), NULL );
+            thisLayout.props.minBlockLength = thisLayout.copyOfLayoutProps->minBlockLength;
+        } else {
+            UpdateMinBlockLength();
+        }
+    }
+
+    if (changes & CHANGE_MAXBLKLN) {
+        if ( HasBlocks() ) {
+            NoticeMessage( _("Blocks must be deleted before changing MaxBlockSize"), _("Ok"), NULL );
+            thisLayout.props.maxBlockLength = thisLayout.copyOfLayoutProps->maxBlockLength;
+        } else {
+            UpdateMaxBlockLength();
+        }
+    }
+
     DoChangeNotification(changes);
 
     if (changes & CHANGE_LIMITS) {
@@ -543,22 +574,6 @@ static void ChangeLayout() {
         // now set the minimum track radius
         sprintf(prefString, "minTrackRadius-%s", curScaleName);
         wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
-    }
-
-    if (changes & CHANGE_MINBLKLN) {
-	    if (minBlockLength > 1000.0)
-		    minBlockLength = 1000.0;
-	    if (minBlockLength <= 0.0)
-		    minBlockLength = 0.0;
-	    if (minBlockLength > maxBlockLength)
-		    maxBlockLength = minBlockLength;
-    }
-
-    if (changes & CHANGE_MAXBLKLN) {
-	    if (maxBlockLength > 1000.0)
-		    maxBlockLength = 1000.0;
-	    if (minBlockLength > maxBlockLength)
-		    maxBlockLength = minBlockLength;
     }
 
     if ((changes & CHANGE_BACKGROUND) || file_changed) {

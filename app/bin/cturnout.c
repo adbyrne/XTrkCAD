@@ -3282,7 +3282,7 @@ static BOOL_T ConnectsToTurnout(track_p from, EPINX_T ep, DIST_T len)
 
 	/* long enough to be a block */
 	len += GetTrkLength(trk, 0, 1);
-	if ( len > minBlockLength )
+	if ( len > GetLayoutMinBlockLength() )
 		return TRUE;
 
 	if (trk->endPt[0].track != from)

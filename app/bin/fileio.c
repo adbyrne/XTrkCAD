@@ -81,6 +81,12 @@ EXPORT dynArr_t paramProc_da;
 
 #define COPYBLOCKSIZE	1024
 
+#if 0
+// When .xtc file doesn't specify minBlockLength or maxBlockLength use these
+#define MINBLOCKDEFAULT   8.0
+#define MAXBLOCKDEFAULT  48.0
+#endif /*PHIL */
+
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
@@ -709,6 +715,8 @@ static BOOL_T ReadTrackFile(
 	char * cp;
 	char *oldLocale = NULL;
 	int ret = TRUE;
+	int skipLines = 0;
+	BOOL_T skip = FALSE;
 
 	oldLocale = SaveLocale( "C" );
 
@@ -728,11 +736,6 @@ static BOOL_T ReadTrackFile(
 
 	InfoMessage("0");
 	count = 0;
-	int skipLines = 0;
-	BOOL_T skip = FALSE;
-	// MINBLOCKLENGTH and MAXBLOCKLENGTH are optional, use these defaults
-	DoSetMinBlockLength( MINBLOCKDEFAULT );
-	DoSetMaxBlockLength( MAXBLOCKDEFAULT );
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;
 		BOOL_T old_skip = skip;
@@ -805,8 +808,8 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "MINBLOCKLENGTH ", 14 ) == 0) {
 			DIST_T min, max;
 			if ( ParseBlockLength( paramLine+14, &min, &max ) ) {
-				DoSetMinBlockLength( min );
-				DoSetMaxBlockLength( max );
+				SetLayoutMinBlockLength( min );
+				SetLayoutMaxBlockLength( max );
 			} else {
 				if( !(ret = InputError( "BLOCKLENGTH: bad value", TRUE )))
 					break;
@@ -1076,8 +1079,9 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "MAPSCALE %ld\n", (long)mapD.scale )>0;
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
-	if (minBlockLength > 0.0)
-		rc &= fprintf(f, "MINBLOCKLENGTH %0.1f MAXBLOCKLENGTH %0.1f\n", minBlockLength, maxBlockLength )>0;
+	if (GetLayoutMinBlockLength() > 0.0)
+		rc &= fprintf(f, "MINBLOCKLENGTH %0.2f MAXBLOCKLENGTH %0.2f\n",
+				GetLayoutMinBlockLength(), GetLayoutMaxBlockLength() )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );

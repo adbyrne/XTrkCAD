@@ -73,11 +73,6 @@ extern long colorTrack;
 extern long colorDraw;
 extern long carHotbarModeInx;
 extern DIST_T minLength;
-// When .xtc file doesn't specify minBlockLength or maxBlockLength use these
-#define MINBLOCKDEFAULT   8.0
-#define MAXBLOCKDEFAULT  48.0
-extern DIST_T minBlockLength;
-extern DIST_T maxBlockLength;
 extern DIST_T connectDistance;
 extern ANGLE_T connectAngle;
 extern long twoRailScale;
@@ -449,7 +444,9 @@ void AttachTrains( void );
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
 void BlockMgmLoad( void );
-BOOL_T UpdateMinBlockLength( void );
+BOOL_T HasBlocks( void );
+void UpdateMinBlockLength( void );
+void UpdateMaxBlockLength( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
 void SwitchmotorMgmLoad( void );

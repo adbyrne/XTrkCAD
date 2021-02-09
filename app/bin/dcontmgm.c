@@ -87,7 +87,7 @@ static const char rcsid[] = "@(#) : $Id$";
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
 static void ControlAddMissing( void * action );
-static void ControlDeleteAll( void * action );
+static void ControlDeleteAllAuto( void * action );
 static void ControlDone( void * action );
 static void LoadControlMgmList( void );
 static wWinPix_t controlListWidths[] = { 18, 100, 100, 150 };
@@ -105,7 +105,7 @@ static paramData_t controlPLs[] = {
 #define I_CONTROLUPD		(3)
     {	PD_BUTTON, (void*)ControlAddMissing, "Add Missing", 0, NULL, N_("Add Missing") },
 #define I_CONTROLDELALL		(4)
-    {	PD_BUTTON, (void*)ControlDeleteAll, "Delete All", 0, NULL, N_("Delete All") },
+    {	PD_BUTTON, (void*)ControlDeleteAllAuto, "Delete Auto", 0, NULL, N_("Delete Auto") },
   } ;
 static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
 
@@ -193,6 +193,7 @@ static void ControlDelete( void * action )
 	}
         UndoEnd();
 	DoChangeNotification( CHANGE_PARAMS );
+	MainRedraw();
 }
 
 //
@@ -200,21 +201,26 @@ static void ControlDelete( void * action )
 // Controls are associated with track segments
 static void ControlAddMissing( void * action )
 {
-	AddMissingBlockTrack();
+	if ( (NoticeMessage2( 1, _("Automatically generate missing blocks?"), _("Yes"), _("No") ) ) )
+		AddMissingBlockTrack();
 //	AddMissingSwitchMotor();
 
-	wHide( controlPG.win );
+	DoChangeNotification( CHANGE_PARAMS );
+	MainRedraw();
 }
 
 //
 // Automatically delete all control elements on layout
 // Controls are associated with track segments
-static void ControlDeleteAll( void * action )
+static void ControlDeleteAllAuto( void * action )
 {
-	DeleteAllBlockTrack();
+	if ( (NoticeMessage2( 1, _("Are you sure you want to delete the auto generated blocks?"),
+					_("Yes"), _("No") ) ) )
+		DeleteAllBlockTrack();
 //	DeleteAllSwitchMotor();
 
-	wHide( controlPG.win );
+	DoChangeNotification( CHANGE_PARAMS );
+	MainRedraw();
 }
 
 static void ControlDone( void * action )

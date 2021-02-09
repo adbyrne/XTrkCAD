@@ -277,14 +277,22 @@ the minimum block length that will result in a block being created and we need
 to know the maximum train length for dividing very long blocks into multiple
 blocks.
 
-Options->layout->"Min Block Length" and "Max Block Length" provide the needed
+Options->layout->\f{Min Block Length} and \f{Max Block Length} provide the needed
 lengths. These options are saved in the .xtc file. As a practical matter the
-Min Block Length, being the minimum length block, needs to be at least the
+\f{Min Block Length}, being the minimum length block, needs to be at least the
 length of an engine and longer than any connecting track that is part of a
-collection of turnouts. Also, the Max Block Length needs to be large enough
-to hold the longest train.  When track or turnouts are changed and when the
-min and/or max block lengths are changed the blocks must be deleted and
-recreated using the new layout and parameters.
+collection of turnouts. Also, the \f{Max Block Length} needs to be large enough
+to hold the longest train.
+
+When track or turnouts are changed existing blocks shuold be deleted and recreated
+to reflect the changed layout. The Manage->Layout_Control_Elements provides a quick
+way to create and delete blocks while working on the layout design. Once the layout
+and blocks are edited and/or saved they must be manually deleted before making changes
+to \f{MinBlockLength} or \f{MaxBlockLength}.
+
+During the layout design process blocks can be quickly created. They can be quickly
+deleted and recreated with different \f{Min Block Length} and \f{Max Block Length}
+values.
 
 When trains move through the layout the dispatcher and signal controllers are
 notified when the train enters or leaves a block. Turnouts are not really
@@ -318,9 +326,10 @@ deleting blocks. Select the desired block in the list and press "edit" or
 "delete".  Editing is limited to changing the block name and script.
 
 The Manage->"Manage Layout Control Elements" also has a "Add Missing" button to
-scan the layout and add all needed blocks. The "Delete All" button deletes all
-blocks.  This is usually used after changing the layout and when changing the
-"Min Block Length" or "Max Block Length" parameters.
+scan the layout and automatically generate all needed blocks. The "Delete Auto"
+button deletes all automatically generated blocks that have not been edited
+or saved.  All blocks must be deleted before changing the \f{Min Block Length}
+or \f{Max Block Length} parameters in options->layout.
 
 \rule
 
