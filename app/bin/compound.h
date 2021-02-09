@@ -102,6 +102,7 @@ struct extraData {
 #endif
 
 extern TRKTYP_T T_TURNOUT;
+extern TRKTYP_T T_TURNTABLE;
 extern TRKTYP_T T_STRUCTURE;
 extern TRKTYP_T T_BEZIER;
 extern TRKTYP_T T_BZRLIN;

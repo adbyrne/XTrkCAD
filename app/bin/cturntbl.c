@@ -27,7 +27,7 @@
 #include "track.h"
 #include "cselect.h"
 
-static TRKTYP_T T_TURNTABLE = -1;
+EXPORT TRKTYP_T T_TURNTABLE = -1;
 
 
 struct extraData {

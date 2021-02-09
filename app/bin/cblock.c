@@ -817,7 +817,7 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	LOG( log_block, 2, ("*** addSegs(): here T%d from T%d  epFrom %d\n",
 		here?GetTrkIndex(here):0,from?GetTrkIndex(from):0,epFrom))
 #endif
-	if ( ! IsTrack( here ) ) return;
+	if ( ! IsTrack( here ) || GetTrkType( here ) == T_TURNTABLE ) return;
 
 	epCnt = GetTrkEndPtCnt(here);
 	if ( here == from ) {
@@ -889,7 +889,7 @@ static EPINX_T getRemoteEp( track_p trk, EPINX_T ep )
 	coOrd end1, end2;
 
 	epCnt = GetTrkEndPtCnt(trk);
-	if ( ep == epCnt ) return ep;
+	if ( ep == epCnt || GetTrkType(trk) == T_TURNTABLE) return epCnt;
 
 	if ( epCnt == 2 ) {
 #if 0
@@ -1027,7 +1027,7 @@ static void GetBlockSegs( track_p s_trk )
 	if ( blockLen > ( 2.1 * GetLayoutMaxBlockLength() ) ) {
 		endPtP = &tempEndPts(0);
 		trk = endPtP->prevTrack;
-		ep = FindDistance( endPtP->pos, trk->endPt[0].pos) >
+		lastEp = ep = FindDistance( endPtP->pos, trk->endPt[0].pos) >
 			FindDistance( endPtP->pos, trk->endPt[1].pos) ? 0 : 1;
 		len = GetTrkLength( trk, 0, 1 );
 		DYNARR_RESET( btrackinfo_t, blockTrk_da );
@@ -1601,14 +1601,14 @@ static void transferAtached( track_p trk )
 // as needed.
 static void adjustOccupied ( track_p trk, EPINX_T ep, int adj )
 {
-	if ( trk->occupied == 0 && ! trk->conBlock && GetTrkEndPtCnt(trk) > 2 && adj  > 0 )
+	if ( GetTrkType( trk ) != T_TURNTABLE && trk->occupied == 0 && ! trk->conBlock && GetTrkEndPtCnt(trk) > 2 && adj  > 0 )
 		createDynamicBlock( trk, ep );
 	trk->occupied += adj;
 	if (trk->conBlock)
 		trk->conBlock->occupied += adj;
-	if ( trk->conBlock && trk->conBlock->occupied == 0 && adj < 0 )
+	if ( GetTrkType( trk ) != T_TURNTABLE && trk->conBlock && trk->conBlock->occupied == 0 && adj < 0 )
 		deleteDynamicBlock( trk );
-	if ( trk->conBlock && trk->conBlock->occupied <= 1 && adj != 0 )
+	if ( GetTrkType( trk ) != T_TURNTABLE && trk->conBlock && trk->conBlock->occupied <= 1 && adj != 0 )
 		transferAtached( trk );
 #if 0
 	LOG(log_block, 1, ("adjustOccupied %d : trk T%d occ %d  B%d occ %d\n",
@@ -1873,6 +1873,7 @@ EXPORT void UpdateOccupied( void )
     for (car=NULL; TrackIterate(&car);) {
         // trk@pos is the center of the car
         if ( ! ( trk = TrainCarOnTrk( car, &pos ) ) ) continue;
+	if ( GetTrkType(trk) == T_TURNTABLE ) continue;
 
         // OnTrack() doesn't always return the correct track get the
         // track at the center of the car and move in each direction
@@ -1904,7 +1905,7 @@ EXPORT void UpdateOccupied( void )
                 trkL = trk0;
                 epL = ep0;
                 trk0 = trk0?trk0->endPt[ep0].track:NULL;
-                if ( trk0 ) {
+                if ( trk0 && GetTrkType(trk0) != T_TURNTABLE ) {
                     for ( epN = 0; epN < GetTrkEndPtCnt(trk0); epN++ ) {
                         if ( trk0->endPt[epN].track == trkL ) break;
                     }
@@ -1921,7 +1922,7 @@ EXPORT void UpdateOccupied( void )
                 trkL = trk1;
                 epL = ep1;
                 trk1 = trk1?trk1->endPt[ep1].track:NULL;
-                if ( trk1 ) {
+                if ( trk1 && GetTrkType(trk1) != T_TURNTABLE ) {
                     for ( epN = 0; epN < GetTrkEndPtCnt(trk1); epN++ ) {
                         if ( trk1->endPt[epN].track == trkL ) break;
                     }
