@@ -924,7 +924,7 @@ static void addTurnouts( track_p here, track_p from, EPINX_T epFrom )
 	track_p epTrk;
 	EPINX_T epCnt, epN, epR, epTo;
 
-	if ( ! IsTrack( here ) ) return;
+	if ( ! IsTrack( here ) || GetTrkType( here ) == T_TURNTABLE ) return;
 
 	LOG( log_block, 2, ("*** addTurnouts(): here T%d from T%d-%d\n",
 			GetTrkIndex(here),GetTrkIndex(from),epFrom))
