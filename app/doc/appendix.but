@@ -294,6 +294,9 @@ During the layout design process blocks can be quickly created. They can be quic
 deleted and recreated with different \f{Min Block Length} and \f{Max Block Length}
 values.
 
+In train mode the occupied blocks can be highlighted by setting Options->Display
+"Draw Occupied Blocks". Whenever a block is occupied it is highlighted.
+
 When trains move through the layout the dispatcher and signal controllers are
 notified when the train enters or leaves a block. Turnouts are not really
 part of blocks since they are very short compared to the block and they don't

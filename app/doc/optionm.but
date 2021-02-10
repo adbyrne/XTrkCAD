@@ -169,6 +169,10 @@ Setting this option constrains the Main Canvas to minimize these areas (the \f{g
 
 \u000
 
+\dd \f{Draw Occupied Blocks} - enable or disable highlighting blocks when they are occupied.
+
+\u000
+
 \dd \f{Draw Tunnel} - how to draw hidden tracks (\K{cmdTunnel}), either not at all, as dashed lines or as normal solid lines (which might be faster).
 
 \u000

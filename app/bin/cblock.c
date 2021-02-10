@@ -38,6 +38,9 @@
  *
  *   manage->Mange Layout Control Elements "Delete Blocks" button
  *   automatically deletes all blocks.
+ *
+ *   Options->Display "Draw Occupied Blocks" may be set to highlight the
+ *   occupied blocks on teh layout while in train mode.
  */
 /* Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
