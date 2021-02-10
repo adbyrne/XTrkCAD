@@ -86,7 +86,6 @@ static paramData_t structurePLs[] = {
 #define I_MSGHEIGHT		(5)
 	{	PD_MESSAGE, NULL, "mess3", 0, (void*)80 } };
 static paramGroup_t structurePG = { "structure", PGO_DIALOGTEMPLATE, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
-#endif
 
 
 /****************************************

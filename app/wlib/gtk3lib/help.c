@@ -56,6 +56,10 @@ DoHelpMenu(void *data)
     return;
 }
 
+void wDoAccelHelp(wAccelKey_e key, void * context) {
+	DoHelpMenu(context);
+}
+
 /**
  * Add the entries for Help to the drop-down.
  *

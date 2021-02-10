@@ -269,6 +269,7 @@ struct wDraw_t {
 		wDrawRedrawCallBack_p redraw;
 
 		cairo_surface_t * surface;
+		cairo_surface_t * temp_surface;
 
 		wBool_t clip_set;
 		GdkRectangle rect;

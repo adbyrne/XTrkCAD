@@ -610,36 +610,36 @@ static struct {
 		} compoundData;
 typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, PV, MN, NM, PN, LT, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0] },
-/*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0] },
-/*C0*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[0] },
-/*R0*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[0] },
-/*Z0*/	{ DESC_DIM, N_("Z1"), &compoundData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &compoundData.endPt[1] },
-/*A1*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[1] },
-/*C1*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[1] },
-/*R1*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[1] },
-/*Z1*/	{ DESC_DIM, N_("Z2"), &compoundData.elev[1] },
-/*E2*/	{ DESC_POS, N_("End Pt 3: X,Y"), &compoundData.endPt[2] },
-/*A2*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[2] },
-/*C2*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[2] },
-/*R2*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[2] },
-/*Z2*/	{ DESC_DIM, N_("Z3"), &compoundData.elev[2] },
-/*E3*/	{ DESC_POS, N_("End Pt 4: X,Y"), &compoundData.endPt[3] },
-/*A3*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[3] },
-/*C3*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[3] },
-/*R3*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[3] },
-/*Z3*/	{ DESC_DIM, N_("Z4"), &compoundData.elev[3] },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade },
-/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &compoundData.orig },
-/*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &compoundData.pivot },
-/*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, sizeof(compoundData.manuf)},
-/*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, sizeof(compoundData.name) },
-/*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, sizeof(compoundData.partno)},
-/*LT*/  { DESC_LIST, N_("LineType"), &compoundData.linetype },
-/*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0], "pt1" },
+/*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0], "angle1" },
+/*C0*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[0], "center1" },
+/*R0*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[0], "radius1" },
+/*Z0*/	{ DESC_DIM, N_("Z1"), &compoundData.elev[0], "z1" },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &compoundData.endPt[1], "pt2" },
+/*A1*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[1], "angle2" },
+/*C1*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[1], "center2" },
+/*R1*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[1], "radius2" },
+/*Z1*/	{ DESC_DIM, N_("Z2"), &compoundData.elev[1], "z2" },
+/*E2*/	{ DESC_POS, N_("End Pt 3: X,Y"), &compoundData.endPt[2], "pt3" },
+/*A2*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[2], "angle3" },
+/*C2*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[2], "center3" },
+/*R2*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[2], "radius3" },
+/*Z2*/	{ DESC_DIM, N_("Z3"), &compoundData.elev[2], "z3" },
+/*E3*/	{ DESC_POS, N_("End Pt 4: X,Y"), &compoundData.endPt[3], "pt4" },
+/*A3*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[3], "angle4" },
+/*C3*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[3], "center4" },
+/*R3*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[3], "radius4" },
+/*Z3*/	{ DESC_DIM, N_("Z4"), &compoundData.elev[3], "z4" },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade, "grade" },
+/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &compoundData.orig, "origin" },
+/*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle, "angle" },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &compoundData.pivot, "pivot" },
+/*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, "manufacturer", sizeof(compoundData.manuf)},
+/*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, "name", sizeof(compoundData.name) },
+/*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, "partno", sizeof(compoundData.partno)},
+/*LT*/  { DESC_LIST, N_("LineType"), &compoundData.linetype, "linetype" },
+/*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt, "segcount" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber, "layer" },
 		{ DESC_NULL } };
 #define MAX_DESCRIBE_ENDS 4
 
@@ -1020,7 +1020,7 @@ void DescribeCompound(
 	} else
 		compoundDesc[LT].mode = DESC_IGNORE;
 
-	DoDescribe(trackType, trk, compoundDesc, UpdateCompound);
+	DoDescribe(trackType, "describe-compound", trk, compoundDesc, UpdateCompound);
 
 	if (  compoundDesc[LT].control0!=NULL) {
 		wListClear( (wList_p)compoundDesc[LT].control0 );

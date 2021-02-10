@@ -1481,7 +1481,7 @@ EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 		return;
 	}
 
-
+	wPos_t offset = 0;
 
 	if (buttonList[inx].control) {
 		if (toolbarRowHeight <= 0)
@@ -1550,7 +1550,7 @@ EXPORT void LayoutToolBar( void * data )
 	}
 
 	if (toolbarSet & (1 << BG_HOTBAR)) {
-		LayoutHotBar();
+		LayoutHotBar((void*)0);
 	} else {
 		HideHotBar();
 	}
@@ -3184,7 +3184,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	}
 	programMode = MODE_DESIGN;
-	LayoutToolBar();
+	LayoutToolBar((void*)0);
 	inMainW = FALSE;
 	return mainW;
 }
