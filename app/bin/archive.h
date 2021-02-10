@@ -6,6 +6,7 @@ enum ArchiveOps { ARCHIVE_READ, ARCHIVE_WRITE }; // has to be contiguous, see Cl
 
 extern int log_zip;
 extern const char *workingDir;
+struct zip;
 
 char *GetZipDirectoryName(enum ArchiveOps op);
 BOOL_T AddDirectoryToArchive(struct zip * za, const char * dir_path, const char * prefix);
