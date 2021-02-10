@@ -1016,10 +1016,10 @@ static paramData_t cornuModPLs[] = {
 
 #define cornuModEndAnglePD			(cornuModPLs[0])
 #define cornuModEndAngle 0
-	{ PD_FLOAT, &cornuModCmdContext.angle, "End Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("End Angle") },
+	{ PD_FLOAT, &cornuModCmdContext.angle, "EndAngle", PDO_NORECORD|BO_ENTER, &r0_360, N_("End Angle") },
 #define cornuModEndRadiusPD			(cornuModPLs[1])
 #define cornuModEndRadius           1
-	{ PD_FLOAT, &cornuModCmdContext.radius, "End Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
+	{ PD_FLOAT, &cornuModCmdContext.radius, "EndRadius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
 };
 static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, sizeof cornuModPLs/sizeof cornuModPLs[0] };
 
