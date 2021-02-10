@@ -253,13 +253,13 @@ char tmp[BUFSIZ], *np, *vp, *cp;
 
     gchar *tmp;
     GError *error = NULL;
-        
+
     prefInitted = TRUE;
 
     tmp = BuildConfigFileName();
 
     keyFile = g_key_file_new();
-        
+
     if(keyFile) {
         g_key_file_load_from_file(keyFile,
                                   tmp,
@@ -268,8 +268,8 @@ char tmp[BUFSIZ], *np, *vp, *cp;
         if( error ) {
             if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
                 g_warning ("Error loading key file: %s", error->message);
-        }    
-    }  
+        }
+    }
     g_free(tmp);
 }
 
@@ -440,6 +440,11 @@ wBool_t wPrefGetFloatBasic(
         *res= value;
         return( TRUE );
     }   
+}
+
+
+void wPrefsLoad(char * name) {
+	readPrefs();
 }
 
 /**

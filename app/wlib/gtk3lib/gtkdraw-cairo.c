@@ -697,6 +697,27 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 }
 
+ void wDrawClearTemp(wDraw_p bd) {
+ 	//Wipe out temp space with 0 alpha (transparent)
+
+ 	static long cDCT = 0;
+ 	if ( iDrawLog )
+ 		printf( "wDrawClearTemp %ld\n", cDCT++ );
+ 	cairo_t* cairo = cairo_create(bd->temp_surface);
+
+ 	cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.0);
+ 	cairo_set_operator (cairo, CAIRO_OPERATOR_SOURCE);
+ 	cairo_move_to(cairo, 0, 0);
+ 	cairo_rel_line_to(cairo, bd->w, 0);
+ 	cairo_rel_line_to(cairo, 0, bd->h);
+ 	cairo_rel_line_to(cairo, -bd->w, 0);
+ 	cairo_fill(cairo);
+ 	cairo_destroy(cairo);
+
+ 	if (bd->widget && !bd->delayUpdate)
+ 		gtk_widget_queue_draw(bd->widget);
+  }
+
 
  void wDrawClear(
 		wDraw_p bd )

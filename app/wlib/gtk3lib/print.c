@@ -258,6 +258,52 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
 
 /*****************************************************************************
  *
+ *
+ *
+ */
+
+
+static GtkPrinter * pDefaultPrinter = NULL;
+gboolean isDefaultPrinter( GtkPrinter * printer, gpointer data )
+{
+const char * pPrinterName = gtk_printer_get_name( printer );
+	if ( gtk_printer_is_default( printer ) ) {
+		pDefaultPrinter = printer;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static void getDefaultPrinter()
+{
+	pDefaultPrinter = NULL;
+	gtk_enumerate_printers( isDefaultPrinter, NULL, NULL, TRUE );
+}
+
+const char * wPrintGetName()
+{
+	static char sPrinterName[100];
+	WlibApplySettings( NULL );
+	const char * pPrinterName =
+		gtk_print_settings_get( settings, "format-for-printer" );
+	if ( pPrinterName == NULL ) {
+		getDefaultPrinter();
+		if ( pDefaultPrinter )
+			pPrinterName = gtk_printer_get_name( pDefaultPrinter );
+	}
+	if ( pPrinterName == NULL ) {
+		pPrinterName = "";
+	}
+	strncpy (sPrinterName, pPrinterName, sizeof sPrinterName - 1 );
+	sPrinterName[ sizeof sPrinterName - 1 ] = '\0';
+	for ( char * cp = sPrinterName; *cp; cp++ )
+		if ( *cp == ':' )
+			*cp = '-';
+	return sPrinterName;
+}
+
+/*****************************************************************************
+ *
  * BASIC PRINTING
  *
  */
@@ -752,6 +798,27 @@ WlibGetPaperSize(void)
  * \return
  */
 
+
+void wPrintGetMargins(
+	double * tMargin,
+	double * rMargin,
+	double * bMargin,
+	double * lMargin )
+{
+	if ( tMargin ) *tMargin = tBorder;
+	if ( rMargin ) *rMargin = rBorder;
+	if ( bMargin ) *bMargin = bBorder;
+	if ( lMargin ) *lMargin = lBorder;
+}
+
+/**
+ * Get the paper size. The size returned is the physical size of the
+ * currently selected paper.
+ * \param w OUT physical width of the paper in inches
+ * \param h OUT physical height of the paper in inches
+ * \return
+ */
+
 void wPrintGetPageSize(
     double * w,
     double * h)
@@ -767,29 +834,6 @@ void wPrintGetPageSize(
     *h = paperHeight - tBorder - bBorder;
 }
 
-/**
- * Get the paper size. The size returned is the physical size of the
- * currently selected paper.
- * \param w OUT physical width of the paper in inches
- * \param h OUT physical height of the paper in inches
- * \return
- */
-
-void wPrintGetPhysSize(
-    double * w,
-    double * h)
-{
-    // if necessary load the settings
-    if (!settings) {
-        WlibApplySettings(NULL);
-    }
-
-    WlibGetPaperSize();
-
-    *w = paperWidth;
-    *h = paperHeight;
-}
-
 /**
  * Cancel the current print job. This function is preserved here for
  * reference in case the function should be implemented again.

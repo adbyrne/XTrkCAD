@@ -878,12 +878,6 @@ void wPrintGetMargins(
 	if ( lMargin ) *lMargin = lBorder;
 }
 
-    WlibGetPaperSize();
-
-    *w = paperWidth -lBorder - rBorder;
-    *h = paperHeight - tBorder - bBorder;
-}
-
 /**
  * Get the paper size. The size returned is the physical size of the
  * currently selected paper.
@@ -903,9 +897,10 @@ void wPrintGetPageSize(
 
     WlibGetPaperSize();
 
-    *w = paperWidth;
-    *h = paperHeight;
+    *w = paperWidth -lBorder - rBorder;
+    *h = paperHeight - tBorder - bBorder;
 }
+
 
 /**
  * Cancel the current print job. This function is preserved here for

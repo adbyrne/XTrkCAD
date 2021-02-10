@@ -436,6 +436,10 @@ wBool_t wPrefGetFloatBasic(
     }   
 }
 
+void wPrefsLoad(char * name) {
+	readPrefs();
+}
+
 /**
  * Save the configuration to a file. The config parameters are held and updated in an array.
  * To make the settings persistant, this function has to be called. 
