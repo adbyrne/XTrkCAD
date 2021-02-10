@@ -1449,7 +1449,7 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.abs_angle, "Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
 #define drawModRelAnglePD			(drawModPLs[2])
 #define drawModRelAngle           2
-	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Relative Angle") },
+	{ PD_FLOAT, &drawModCmdContext.rel_angle, "RelAngle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Relative Angle") },
 #define drawModWidthPD		(drawModPLs[3])
 	{ PD_FLOAT, &drawModCmdContext.width, "Width", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
 #define drawModHeightPD		(drawModPLs[4])
@@ -1460,12 +1460,12 @@ static paramData_t drawModPLs[] = {
 #define drawModArcAnglePD		(drawModPLs[6])
 	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Arc Angle") },
 #define drawModRotAnglePD		(drawModPLs[7)
-	{ PD_FLOAT, &drawModCmdContext.rot_angle, "Rot Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
+	{ PD_FLOAT, &drawModCmdContext.rot_angle, "RotAngle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
 #define drawModRotCenterXPD		(drawModPLs[8])
 #define drawModRotCenterInx      8
-	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "Rot Center X,Y", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X") },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "RotCenterX", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X,Y") },
 #define drawModRotCenterYPD		(drawModPLs[9])
-	{ PD_FLOAT, &drawModCmdContext.rot_center.y, " ", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center Y") },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCenterY", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center Y") },
 
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };

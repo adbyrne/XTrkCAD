@@ -579,6 +579,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
      for (i=0; i<cnt; i++) {
      	points[i].x = INMAPX(bd,p[i][0]);
      	if (points[i].x < min_x) min_x = points[i].x;
+     	if (points[i].y < min_y) min_y = points[i].y;
      	if (points[i].x > max_x) max_x = points[i].x;
      	if (points[i].y > max_y) max_y = points[i].y;
      	points[i].y = INMAPY(bd,p[i][1]);
@@ -665,7 +666,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
  	}
  	gtkDrawDestroyCairoContext(cairo);
  	if (bd->widget && !bd->delayUpdate)
- 			gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),min_x,min_y,max_x-min_y,max_y-min_y);
+ 		gtk_widget_queue_draw_area(bd->widget,min_x,min_y,max_x-min_y,max_y-min_y);
 
  }
 
@@ -825,7 +826,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 				cairo_rectangle(cairo, xx-0.5, yy-0.5, 1, 1);
 				cairo_fill(cairo);
 				if ( b && b->type == B_DRAW ) {
-				    gtk_widget_queue_draw_area( b->widget, xx-1, yy-1, 3, 3 );
+				    gtk_widget_queue_draw_area( bd->widget, xx-1, yy-1, 3, 3 );
 				}
 			}
 	gtkDrawDestroyCairoContext(cairo);
