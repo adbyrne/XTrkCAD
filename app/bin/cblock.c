@@ -1031,20 +1031,25 @@ static void GetBlockSegs( track_p s_trk )
 			FindDistance( endPtP->pos, trk->endPt[1].pos) ? 0 : 1;
 		len = GetTrkLength( trk, 0, 1 );
 		DYNARR_RESET( btrackinfo_t, blockTrk_da );
-		while ( len <= GetLayoutMaxBlockLength() && blockLen - len >= GetLayoutMaxBlockLength() ) {
+		while ( len <= GetLayoutMaxBlockLength() &&
+				blockLen - len >= GetLayoutMinBlockLength() ) {
+			if ( ! trk ) break;
 			pushDa( trk );
 			lastTrk = trk;
 			lastEp = ep;
 			// on to the next seg...
 			trk = trk->endPt[ep].track;
-			ep = lastTrk == trk->endPt[0].track ? 1 : 0 ;
+			if ( ! trk ) break;
+			ep = ( lastTrk == trk->endPt[0].track ) ? 1 : 0 ;
 			len += GetTrkLength( trk, 0, 1 );
 		}
-		pushDa( trk );
-		endPtP = &tempEndPts(1);
-		endPtP->prevTrack = trk;
-		endPtP->pos = trk->endPt[lastEp].pos;
-		endPtP->angle = trk->endPt[lastEp].angle;
+		if ( trk ) {
+			pushDa( trk );
+			endPtP = &tempEndPts(1);
+			endPtP->prevTrack = trk;
+			endPtP->pos = trk->endPt[lastEp].pos;
+			endPtP->angle = trk->endPt[lastEp].angle;
+		}
 		blockLen = len;
 	}
 }
@@ -1437,18 +1442,23 @@ static track_p  createDynamicBlock( track_p trk, EPINX_T ep )
 
 	blk = makeBlock();
 
-	// Attach (increment trk->conBlock->occupied in) one abutting block
-	blkN = getNextBlock( blk->endPt[0].prevTrack, blk->endPt[0].pos );
+	if ( blk ) {
+		// Attach (increment trk->conBlock->occupied in) one abutting block
+		blkN = getNextBlock( blk->endPt[0].prevTrack, blk->endPt[0].pos );
 #if 0
-	LOG( log_block, 1, ("*** createDynamicBlock  B%d occ %d\n",GetTrkIndex(blkN),blkN->occupied))
+		LOG( log_block, 1, ("*** createDynamicBlock  B%d occ %d\n",
+				GetTrkIndex(blkN),blkN->occupied))
 #endif
-	if ( blkN->occupied > 0 ) {
-		blkN->occupied ++;
-		blk->endPt[0].attached = TRUE;
-	} else {
-		blkN = getNextBlock( blk->endPt[1].prevTrack, blk->endPt[1].pos );
-		blkN->occupied ++;
-		blk->endPt[1].attached = TRUE;
+		if ( blkN && blkN->occupied > 0 ) {
+			blkN->occupied ++;
+			blk->endPt[0].attached = TRUE;
+		} else {
+			blkN = getNextBlock( blk->endPt[1].prevTrack, blk->endPt[1].pos );
+			if ( blkN ) {
+				blkN->occupied ++;
+				blk->endPt[1].attached = TRUE;
+			}
+		}
 	}
 
 	if ( blockUndoStarted ) {
@@ -1660,7 +1670,7 @@ static void verifyOccupancy ( BOOL_T rpt )
 	}
 
         for ( segOcc = 0, iTrack = 0; iTrack < xx->numTracks; iTrack++ ) {
-            if ( tracklist(iTrack).t->occupied < 0 ) problems++;
+            if ( tracklist(iTrack).t && tracklist(iTrack).t->occupied < 0 ) problems++;
             segOcc += tracklist(iTrack).t->occupied;
         }
 
