@@ -1024,10 +1024,17 @@ static void GetBlockSegs( track_p s_trk )
 	// trk is a track segment
 	addSegs( trk, trk, 0 );
 
+#if 0
+	LOG( log_block, 2, ("*** GetBlockSegs(): T%d  eps %d, tr %d\n",
+		GetTrkIndex(trk), tempEndPts_da.cnt, blockTrk_da.cnt))
+#endif
+	if ( tempEndPts_da.cnt != 2 ) return;
+
 	// make a sub-block
 	if ( blockLen > ( 2.1 * GetLayoutMaxBlockLength() ) ) {
 		endPtP = &tempEndPts(0);
 		trk = endPtP->prevTrack;
+		if ( ! trk ) trk = endPtP->track;
 		lastEp = ep = FindDistance( endPtP->pos, trk->endPt[0].pos) >
 			FindDistance( endPtP->pos, trk->endPt[1].pos) ? 0 : 1;
 		len = GetTrkLength( trk, 0, 1 );
@@ -1925,6 +1932,7 @@ EXPORT void UpdateOccupied( void )
                 } else break;
             }
         }
+	if ( ! trk0 ) continue;
         if ( d1 < len/2.0 ) { // car end[1] is in another segment
             d = len/2.0 - d1;
             epL = ep1;
@@ -1942,6 +1950,7 @@ EXPORT void UpdateOccupied( void )
                 } else break;
             }
         }
+	if ( ! trk1 ) continue;
 
         prev0 = car->endPt[0].prevTrack;
         prev1 = car->endPt[1].prevTrack;
