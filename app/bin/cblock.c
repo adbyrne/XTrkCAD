@@ -822,7 +822,8 @@ static void addSegs( track_p here, track_p from, EPINX_T epFrom )
 	epCnt = GetTrkEndPtCnt(here);
 	if ( here == from ) {
 		blockLen = GetTrkLength( here, 0, 1 );
-		if ( epCnt == 2 ) {
+		if ( epCnt == 2 && ((from)->endPt)[0].track != here && 
+				((from)->endPt)[1].track != here ) {
 #if 0
 			LOG( log_block, 2, ("*** addSegs(): adding track T%d\n",GetTrkIndex(here)))
 #endif
