@@ -493,9 +493,9 @@ static paramData_t layoutPLs[] = {
 	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
 	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) },
-	{ PD_MESSAGE, N_("Named Settings File"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
-	{ PD_BUTTON, (void*)SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, (void *)0 },
-	{ PD_BUTTON, (void*)SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, (void *)0 }
+	{ PD_MESSAGE, N_("Named Settings File"), "settings", PDO_DLGRESETMARGIN, (void *)180 },
+	{ PD_BUTTON, (void*)SettingsWrite, "settingswrite",  PDO_DLGHORZ, 0, N_("Write"), 0, (void *)0 },
+	{ PD_BUTTON, (void*)SettingsRead, "settingsread", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, (void *)0 }
 
 };
 

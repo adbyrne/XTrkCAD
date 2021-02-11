@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="display">
@@ -18,13 +18,13 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="row_spacing">3</property>
-            <property name="column_spacing">6</property>
+            <property name="column_spacing">7</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
-                <property name="label" translatable="yes">Color Layers</property>
+                <property name="label" translatable="yes">Color Tracks</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -39,8 +39,8 @@
                 <property name="label" translatable="yes">Draw Tunnel</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
+                <property name="left_attach">2</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
             <child>
@@ -51,8 +51,8 @@
                 <property name="label" translatable="yes">Draw EndPts</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
+                <property name="left_attach">2</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
@@ -63,8 +63,8 @@
                 <property name="label" translatable="yes">Draw Unconnected EndPts</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
+                <property name="left_attach">2</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
             <child>
@@ -75,8 +75,8 @@
                 <property name="label" translatable="yes">Draw Ties</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
+                <property name="left_attach">2</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
             <child>
@@ -88,7 +88,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
             <child>
@@ -100,7 +100,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">7</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
             <child>
@@ -113,7 +113,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">11</property>
+                <property name="top_attach">5</property>
               </packing>
             </child>
             <child>
@@ -130,7 +130,6 @@
                       <object class="GtkBox" id="display-labelenable.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="orientation">vertical</property>
                         <property name="spacing">6</property>
                         <child>
                           <object class="GtkCheckButton" id="labelenable-Track-Descriptions">
@@ -217,7 +216,8 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">11</property>
+                <property name="top_attach">5</property>
+                <property name="width">3</property>
               </packing>
             </child>
             <child>
@@ -229,7 +229,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">12</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
@@ -241,7 +241,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">13</property>
+                <property name="top_attach">7</property>
               </packing>
             </child>
             <child>
@@ -253,7 +253,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">14</property>
+                <property name="top_attach">8</property>
               </packing>
             </child>
             <child>
@@ -265,7 +265,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">15</property>
+                <property name="top_attach">9</property>
               </packing>
             </child>
             <child>
@@ -277,7 +277,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">16</property>
+                <property name="top_attach">10</property>
               </packing>
             </child>
             <child>
@@ -289,7 +289,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">17</property>
+                <property name="top_attach">11</property>
               </packing>
             </child>
             <child>
@@ -300,8 +300,8 @@
                 <property name="label" translatable="yes">Train Update Delay</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">18</property>
+                <property name="left_attach">2</property>
+                <property name="top_attach">9</property>
               </packing>
             </child>
             <child>
@@ -343,8 +343,8 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">19</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">10</property>
               </packing>
             </child>
             <child>
@@ -353,8 +353,8 @@
                 <property name="can_focus">True</property>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">18</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">9</property>
               </packing>
             </child>
             <child>
@@ -364,7 +364,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">17</property>
+                <property name="top_attach">11</property>
               </packing>
             </child>
             <child>
@@ -435,7 +435,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">16</property>
+                <property name="top_attach">10</property>
               </packing>
             </child>
             <child>
@@ -505,7 +505,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">15</property>
+                <property name="top_attach">9</property>
               </packing>
             </child>
             <child>
@@ -561,7 +561,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">14</property>
+                <property name="top_attach">8</property>
               </packing>
             </child>
             <child>
@@ -571,7 +571,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">13</property>
+                <property name="top_attach">7</property>
               </packing>
             </child>
             <child>
@@ -581,7 +581,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">12</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
@@ -592,8 +592,8 @@
                 <property name="label" translatable="yes">Draw Centers</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
+                <property name="left_attach">2</property>
+                <property name="top_attach">4</property>
               </packing>
             </child>
             <child>
@@ -608,13 +608,13 @@
                     <property name="can_focus">False</property>
                     <property name="xalign">0.25</property>
                     <child>
-                      <object class="GtkBox" id="display-zoom-corner.box">
+                      <object class="GtkBox" id="display-constrainmain.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkCheckButton" id="display-zoom-corner">
-                            <property name="label" translatable="yes">Zoom keeps lower corner in view</property>
+                          <object class="GtkCheckButton" id="display-constrainmain">
+                            <property name="label" translatable="yes">Constrain drawing area to room boundaries</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -637,7 +637,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">8</property>
+                <property name="top_attach">4</property>
               </packing>
             </child>
             <child>
@@ -679,8 +679,8 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">9</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
@@ -723,8 +723,8 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">10</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">7</property>
               </packing>
             </child>
             <child>
@@ -734,7 +734,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">7</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
             <child>
@@ -744,7 +744,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">6</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
             <child>
@@ -802,8 +802,8 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">5</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">4</property>
               </packing>
             </child>
             <child>
@@ -878,8 +878,8 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">4</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
             <child>
@@ -953,8 +953,8 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">3</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
             <child>
@@ -1028,8 +1028,8 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
@@ -1103,12 +1103,12 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
+                <property name="left_attach">3</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkFrame">
+              <object class="GtkFrame" id="display-color-track.frame">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label_xalign">0</property>
@@ -1118,13 +1118,13 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox" id="display-color-layers.box">
+                      <object class="GtkBox" id="display-color-track.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">6</property>
                         <child>
-                          <object class="GtkCheckButton" id="Tracks">
-                            <property name="label" translatable="yes">Tracks</property>
+                          <object class="GtkCheckButton" id="display-color-trackObject">
+                            <property name="label" translatable="yes">Object</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -1137,8 +1137,8 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkCheckButton" id="Other">
-                            <property name="label" translatable="yes">Other</property>
+                          <object class="GtkCheckButton" id="display-color-trackLayer">
+                            <property name="label" translatable="yes">Layer</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -1162,6 +1162,128 @@
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Color Draw</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="display-color-draw-frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkAlignment">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkBox" id="display-color-draw.box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkCheckButton" id="display-color-drawObject">
+                            <property name="label" translatable="yes">Object</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="display-color-drawLayer">
+                            <property name="label" translatable="yes">Layer</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label_item">
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="display-systemcursor.frame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkAlignment">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">0.25</property>
+                    <child>
+                      <object class="GtkBox" id="display-systemcursor.box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkCheckButton" id="display-systemcursor">
+                            <property name="label" translatable="yes">Dont hide system cursor when
+program cursor is active</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="halign">start</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label_item">
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="top_attach">8</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
             <child>
               <placeholder/>
@@ -1239,6 +1361,9 @@
           </packing>
         </child>
       </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
     </child>
   </object>
 </interface>

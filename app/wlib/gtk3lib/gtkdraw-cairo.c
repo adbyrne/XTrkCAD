@@ -270,7 +270,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 	gtkDrawDestroyCairoContext(cairo);
 	if (bd->widget)
-		gtk_widget_queue_draw_area(bd->widget,x0,y0,x1-x0+1,y1-y0+1);
+		gtk_widget_queue_draw_area(bd->widget,x0>x1?x1:x0,y0>y1?y1:y0,abs(x1-x0)+1,abs(y1-y0)+1);
 
 }
 
@@ -310,7 +310,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 	if (r < 6.0/75.0) return;
 	x = INMAPX(bd,x0-r);
-	y = INMAPY(bd,y0+r);
+	y = INMAPY(bd,y0-r);
 	w = 2*r;
 	h = 2*r;
 
@@ -377,10 +377,12 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		wDrawOpts opts )
 {
 	PangoLayout *layout;
+	GdkRectangle update_rect;
 	int w;
 	int h;
 	gint ascent;
 	gint descent;
+	gint baseline;
 	double angle = -M_PI * a / 180.0;
 
 	if ( bd == &psPrint_d ) {
@@ -400,7 +402,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 	layout = wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 									  (int *) &w, (int *) &h,
-									  (int *) &ascent, (int *) &descent);
+									  (int *) &ascent, (int *) &descent, (int *) &baseline);
 
 	/* cairo does not support the old method of text removal by overwrite; force always write here and
            refresh on cancel event */
@@ -412,13 +414,32 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 	cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 1.0);
 
-	cairo_move_to( cairo, 0, -ascent );
 
+	cairo_translate( cairo, x, y );
+	cairo_rotate( cairo, angle );
+    cairo_translate( cairo, 0, -baseline);
+
+    cairo_move_to(cairo, 0, 0);
+
+    pango_cairo_update_layout(cairo, layout);
 	pango_cairo_show_layout(cairo, layout);
 	wlibFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
-	gtk_widget_queue_draw(bd->widget);
+
+	if (bd->delayUpdate || bd->widget == NULL) return;
+
+		/* recalculate the area to be updated
+		 * for simplicity sake I added plain text height ascent and descent,
+		 * mathematically correct would be to use the trigonometrical functions as well
+		 */
+		update_rect.x      = (gint) x - 2;
+		update_rect.y      = (gint) y - (gint) (baseline + descent) - 2;
+		update_rect.width  = (gint) (w * cos( angle ) + h * sin(angle))+2;
+		update_rect.height = (gint) (h * sin( angle ) + w * cos(angle))+2;
+
+		if (bd->widget && !bd->delayUpdate)
+			gtk_widget_queue_draw_area(bd->widget, update_rect.x, update_rect.y, update_rect.width, update_rect.height);
 
 }
 
@@ -436,22 +457,31 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	int textHeight;
 	int ascent;
 	int descent;
+	int baseline;
 
 	*w = 0;
 	*h = 0;
 
+	/* draw text */
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorBlack, bd->bTempMode?wDrawOptTemp:0 );
+
+	cairo_identity_matrix(cairo);
+
 	wlibFontDestroyPangoLayout(
-		wlibFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
+		wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 								 &textWidth, (int *) &textHeight,
-								 (int *) &ascent, (int *) &descent));
+								 (int *) &ascent, (int *) &descent, (int *) &baseline) );
 
 	*w = (wPos_t) textWidth;
 	*h = (wPos_t) textHeight;
 	*a = (wPos_t) ascent;
+	//*d = (wPos_t) textHeight-ascent;
 	*d = (wPos_t) descent;
 
 	if (debugWindow >= 3)
 		fprintf(stderr, "text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
+
+	gtkDrawDestroyCairoContext(cairo);
 }
 
 
@@ -539,7 +569,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_fill(cairo);
 
 	gtkDrawDestroyCairoContext(cairo);
-	gtk_widget_queue_draw(GTK_WIDGET(bd->widget));
+
+	if (bd->widget && !bd->delayUpdate)
+		gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),w>0?x:x+w,h>0?y:y+h,abs(w),abs(h));
 
 }
 
@@ -666,7 +698,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
  	}
  	gtkDrawDestroyCairoContext(cairo);
  	if (bd->widget && !bd->delayUpdate)
- 		gtk_widget_queue_draw_area(bd->widget,min_x,min_y,max_x-min_y,max_y-min_y);
+ 		gtk_widget_queue_draw_area(bd->widget,min_x,min_y,abs(max_x-min_y),abs(max_y-min_y));
 
  }
 
@@ -686,7 +718,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	}
 
 	x = INMAPX(bd,x0-r);
-	y = INMAPY(bd,y0+r);
+	y = INMAPY(bd,y0-r);
 	w = 2*r;
 	h = 2*r;
 
@@ -694,7 +726,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, 0, 2 * M_PI);
 	cairo_fill(cairo);
 	gtkDrawDestroyCairoContext(cairo);
-	gtk_widget_queue_draw(bd->widget);
+
+	if (bd->widget && !bd->delayUpdate)
+		gtk_widget_queue_draw_area(bd->widget,x,y,w,h);
 
 }
 
@@ -731,6 +765,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_rel_line_to(cairo, -bd->w, 0);
 	cairo_fill(cairo);
 	gtkDrawDestroyCairoContext(cairo);
+	gtk_widget_queue_draw(bd->widget);
 
 }
 
@@ -903,6 +938,11 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 			cairo_surface_destroy(bd->surface);
 		bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (bd->widget), CAIRO_CONTENT_COLOR, w, h);
 
+		if (bd->temp_surface)
+			cairo_surface_destroy(bd->temp_surface);
+		bd->temp_surface = gdk_window_create_similar_surface(gtk_widget_get_window (bd->widget), CAIRO_CONTENT_COLOR, w, h);
+
+
 		wDrawClear( bd );
 		if (!redraw)
 			bd->redraw( bd, bd->context, w, h );
@@ -972,6 +1012,10 @@ static gboolean draw_event(
 		wDraw_p bd)
 {
 	cairo_set_source_surface (cr, bd->surface, 0, 0);
+	cairo_set_operator(cr,CAIRO_OPERATOR_SOURCE);
+	cairo_paint (cr);
+	cairo_set_source_surface (cr, bd->temp_surface, 0, 0);
+	cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
 	cairo_paint (cr);
 	return FALSE;
 }
@@ -1237,6 +1281,7 @@ int xw, xh, cw, ch;
 	bd->context = context;
 	bd->redraw = redraw;
 	bd->action = action;
+	bd->bTempMode = FALSE;
 	wlibComputePos( (wControl_p)bd );
 
 	if (option&BO_USETEMPLATE) {
@@ -1289,6 +1334,7 @@ int xw, xh, cw, ch;
 	}
 	gtk_widget_realize( bd->widget );
 	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR, width, height);
+	bd->temp_surface = gdk_window_create_similar_surface( gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR, width, height );
 	//bd->gc = gdk_gc_new( parent->gtkwin->window );
 	//gdk_gc_copy( bd->gc, parent->gtkwin->style->base_gc[GTK_STATE_NORMAL] );
 
@@ -1377,7 +1423,7 @@ int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
 void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, wAngle_t angle, int screen) {
 
 	if (bd->background) {
-		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, 0);
+		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, bd->bTempMode?wDrawOptTemp:0 );
 		cairo_save(cairo);
 		int pixels_width = gdk_pixbuf_get_width(bd->background);
 		int pixels_height = gdk_pixbuf_get_height(bd->background);
