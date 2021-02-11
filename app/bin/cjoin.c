@@ -386,8 +386,8 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		}
 		if ( (Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE )) == NULL )
 			return C_CONTINUE;
-		if (!CheckTrackLayer( Dj.inp[Dj.joinMoveState].trk ) )
-			return C_CONTINUE;
+		// if (Dj.joinMoveState == 0 && !CheckTrackLayerSilent( Dj.inp[Dj.joinMoveState].trk ) )
+		//	return C_CONTINUE;
 		Dj.inp[Dj.joinMoveState].params.ep = PickUnconnectedEndPoint( pos, Dj.inp[Dj.joinMoveState].trk ); /* CHECKME */
 		if ( Dj.inp[Dj.joinMoveState].params.ep == -1 ) {
 #ifdef LATER
@@ -1059,6 +1059,8 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			}
 			coOrd pos1 = pos;
 			if (AdjustPosToRadius(&pos1,desired_radius+(Dj.jointD[0].x), na0, na1)) {
+				// Make sure this is initialized
+				beyond = 1.0;
 				if (Dj.inp[1].params.type == curveTypeStraight) {
 					FindPos( &off, &beyond, pos1, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 										 FindDistance(Dj.inp[1].params.lineOrig,Dj.inp[1].params.lineEnd) );

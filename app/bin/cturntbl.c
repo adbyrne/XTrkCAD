@@ -287,7 +287,11 @@ static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 
 	trntblData.orig = xx->pos;
 	trntblData.diameter = xx->radius*2.0;
-	trntblData.epCnt = GetTrkEndPtCnt(trk);
+	int j=0;
+	for (int i=0;i<GetTrkEndPtCnt(trk);i++) {
+		if (GetTrkEndTrk(trk,i)) j++;			//Only count if track
+	}
+	trntblData.epCnt = j;
 	trntblData.layerNumber = GetTrkLayer(trk);
 
 	trntblDesc[OR].mode =
@@ -307,11 +311,17 @@ static BOOL_T WriteTurntable( track_p t, FILE * f )
 	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(t, T_TURNTABLE, extraDataTurntable_t);
 	EPINX_T ep;
 	BOOL_T rc = TRUE;
+	int j = -1, k = 0;
+	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {
+		if (GetTrkEndTrk(t,ep)) j++;
+		if (ep == xx->currEp) k=j;     //Write out the curr->Ep reset to real endPts
+	}
 	rc &= fprintf(f, "TURNTABLE %d %d 0 0 0 %s %d %0.6f %0.6f 0 %0.6f %d\n",
 		GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), GetTrkVisible(t),
-				xx->pos.x, xx->pos.y, xx->radius, xx->currEp )>0;
-	for (ep=0; ep<GetTrkEndPtCnt(t); ep++)
-		rc &= WriteEndPt( f, t, ep );
+				xx->pos.x, xx->pos.y, xx->radius, k )>0;
+	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {
+		if (GetTrkEndTrk(t,ep))	rc &= WriteEndPt( f, t, ep );   //Only write if there is a track
+	}
 	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
@@ -351,6 +361,7 @@ static BOOL_T ReadTurntable( char * line )
 	xx->pos = p;
 	xx->radius = r;
 	xx->currEp = currEp;
+	if (xx->currEp > GetTrkEndPtCnt(trk)) xx->currEp = 0;
 	xx->reverse = 0;
 	ComputeTurntableBoundingBox( trk );
 	return TRUE;
