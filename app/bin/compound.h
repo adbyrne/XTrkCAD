@@ -73,8 +73,8 @@ typedef struct turnoutInfo_t{
 #define xtitle(X) \
 		(X->title)
 
-#ifndef PRIVATE_EXTRADATA
-struct extraData {
+typedef struct extraDataCompound_t {
+		extraDataBase_t base;
 		coOrd orig;
 		ANGLE_T angle;
 		BOOL_T handlaid;
@@ -97,8 +97,7 @@ struct extraData {
 		trkSeg_p segs;
 		DIST_T * radii;
 		drawLineType_e lineType;
-		};
-#endif
+		} extraDataCompound_t;
 
 extern TRKTYP_T T_TURNOUT;
 extern TRKTYP_T T_STRUCTURE;

@@ -134,6 +134,7 @@ static dynArr_t blockTrk_da;
 
 
 typedef struct blockData_t {
+    extraDataBase_t base;
     char * name;
     char * script;
     BOOL_T IsHilite;
@@ -144,7 +145,7 @@ typedef struct blockData_t {
 
 static blockData_p GetblockData ( track_p trk )
 {
-	return (blockData_p) GetTrkExtraData(trk);
+	return GET_EXTRA_DATA( trk, T_BLOCK, blockData_t );
 }
 
 static void DrawBlock (track_p t, drawCmd_p d, wDrawColor color )

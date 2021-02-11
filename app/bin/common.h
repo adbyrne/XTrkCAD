@@ -213,6 +213,16 @@ typedef struct trkSeg_t * trkSeg_p;
 typedef struct traverseTrack_t * traverseTrack_p;
 typedef struct trkEndPt_t * trkEndPt_p;
 
+// base class for extraData*_t: each of which must include this struct as the first element
+typedef struct extraDataBase_t {
+		TRKTYP_T trkType;
+	} extraDataBase_t;
+// We check if TRKTYP_T in trk, trk->extraDataBase and the code context (TRKTYP) match.
+// If TRKTYP is T_NOTRACK then we are dealing with T_TURNOUT/T_STRUCTURE or T_BEZIER/T_BEZLIN which
+// share a log of code and have the same extraData*_t structure.
+#define GET_EXTRA_DATA(TRK,TRKTYP,TYPE) \
+	((TYPE*)GetTrkExtraData( (TRK), (TRKTYP) ))
+extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
 
 // COMMON INCLUDES
 // If you add includes here, please remove them elsewhere

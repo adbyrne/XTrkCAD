@@ -36,9 +36,10 @@
 
 static TRKTYP_T T_STRAIGHT = -1;
 
-struct extraData {
+typedef struct extraDataStraight_t {
+		extraDataBase_t base;
 		coOrd descriptionOff;
-		};
+		} extraDataStraight_t;
 
 
 /****************************************
@@ -234,7 +235,7 @@ STATUS_T StraightDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
 	ANGLE_T a,ap;
 	coOrd end0, end1;
     end0 = GetTrkEndPos(trk,0);
@@ -259,11 +260,12 @@ DIST_T StraightDescriptionDistance(
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_STRAIGHT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
 		return 100000;
+
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
 	ANGLE_T a;
 	coOrd end0, end0off, end1, end1off;
 	end0 = GetTrkEndPos(trk,0);
@@ -290,7 +292,7 @@ static void DrawStraightDescription(
 		wDrawColor color )
 {
 	ANGLE_T a;
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
 
 	if (layoutLabels == 0)
 		return;
@@ -344,9 +346,8 @@ static void DeleteStraight( track_p t )
 
 static BOOL_T WriteStraight( track_p t, FILE * f )
 {
-	struct extraData *xx;
 	long options;
-	xx = GetTrkExtraData(t);
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT, extraDataStraight_t);
 	BOOL_T rc = TRUE;
 
 	options = GetTrkWidth(t) & 0x0F;
@@ -370,7 +371,7 @@ static BOOL_T ReadStraight( char * line )
 	char scale[10];
 	wIndex_t layer;
 	long options;
-	struct extraData *xx;
+	struct extraDataStraight_t *xx;
 	char * cp = NULL;
 	coOrd descriptionOff = { 0.0, 0.0 };
 
@@ -383,7 +384,7 @@ static BOOL_T ReadStraight( char * line )
 	if ( !ReadSegs() )
 		return FALSE;
 	trk = NewTrack( index, T_STRAIGHT, 0, sizeof *xx );
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
 	xx->descriptionOff = descriptionOff;
 	SetTrkScale( trk, LookupScale(scale) );
 	if ( paramVersion < 3 ) {
@@ -926,8 +927,7 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 {
 	track_p t;
 	ANGLE_T a;
-	struct extraData *xx;
-	t = NewTrack( 0, T_STRAIGHT, 2, sizeof *xx );
+	t = NewTrack( 0, T_STRAIGHT, 2, sizeof (struct extraDataStraight_t) );
 	SetTrkScale( t, GetLayoutCurScale() );
 	a = FindAngle( p1, p0 );
 	SetTrkEndPoint( t, 0, p0, a );

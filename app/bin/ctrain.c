@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#define PRIVATE_EXTRADATA
-
 #include "compound.h"
 #include "cselect.h"
 #include "ctrain.h"
@@ -45,7 +43,8 @@ static TRKTYP_T T_CAR = -1;
 
 typedef enum { ST_NotOnTrack, ST_StopManual, ST_EndOfTrack, ST_OpenTurnout, ST_NoRoom, ST_Crashed } trainStatus_e;
 
-struct extraData {
+typedef struct extraDataCar_t {
+    extraDataBase_t base;
     traverseTrack_t trvTrk;
     long            state;
     carItem_p       item;
@@ -57,7 +56,7 @@ struct extraData {
     DIST_T          distance;
     coOrd           couplerPos[2];
     unsigned int         trkLayer;
-};
+} extraDataCar_t;
 #define NOTALAYER						(127)
 
 #define CAR_STATE_IGNORED				(1L<<17)
@@ -114,7 +113,7 @@ static void PlaceCar(track_p);
 
 #define WALK_CARS_START( CAR, XX, DIR ) \
 	while (1) { \
-		(XX) = GetTrkExtraData(CAR);\
+		(XX) = GET_EXTRA_DATA(CAR, T_CAR, extraDataCar_t);\
 		{ \
 
 #define WALK_CARS_END( CAR, XX, DIR ) \
@@ -137,7 +136,7 @@ void CarGetPos(
     coOrd * posR,
     ANGLE_T * angleR)
 {
-    struct extraData * xx = GetTrkExtraData(car);
+    struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 
     if (GetTrkType(car) != T_CAR) {
         AbortProg("getCarPos");
@@ -150,7 +149,7 @@ void CarGetPos(
 void CarSetVisible(
     track_p car)
 {
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     int dir;
     dir = 0;
     WALK_CARS_START(car, xx, dir)
@@ -244,7 +243,7 @@ static void DescribeCar(
     char * str,
     CSIZE_T len)
 {
-    struct extraData *xx = GetTrkExtraData(trk);
+    struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
     char * cp;
     coOrd size;
     CarItemSize(xx->item, &size);
@@ -321,7 +320,7 @@ EXPORT void CheckCarTraverse(track_p track) {
     track_p car;
 	for (car=NULL; TrackIterate(&car);) {
         if (GetTrkType(car) == T_CAR) {
-        	struct extraData * xx = GetTrkExtraData(car);
+        	struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 			if (xx->trvTrk.trk == track) {
 				xx->trvTrk.trk=NULL;
 				xx->status = ST_NotOnTrack;
@@ -341,10 +340,10 @@ static void DrawCar(
     drawCmd_p d,
     wDrawColor color)
 {
-    struct extraData * xx = GetTrkExtraData(car);
+    struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
     int dir;
     vector_t coupler[2];
-    struct extraData * xx1;
+    struct extraDataCar_t * xx1;
     int dir1;
 
     if (drawCarEnable == FALSE) {
@@ -370,7 +369,7 @@ static void DrawCar(
         coupler[dir].pos = xx->couplerPos[dir];
 
         if ((car1 = GetTrkEndTrk(car,dir))) {
-            xx1 = GetTrkExtraData(car1);
+            xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
             dir1 = (GetTrkEndTrk(car1,0)==car)?0:1;
             coupler[dir].angle = FindAngle(xx->couplerPos[dir], xx1->couplerPos[dir1]);
         } else {
@@ -388,7 +387,7 @@ static DIST_T DistanceCar(
     track_p trk,
     coOrd * pos)
 {
-    struct extraData * xx = GetTrkExtraData(trk);
+    struct extraDataCar_t * xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
     DIST_T dist;
     coOrd pos1;
     coOrd size;
@@ -421,7 +420,7 @@ static DIST_T DistanceCar(
 static void SetCarBoundingBox(
     track_p car)
 {
-    struct extraData * xx = GetTrkExtraData(car);
+    struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
     coOrd lo, hi, p[4];
     int inx;
     coOrd size;
@@ -465,10 +464,10 @@ track_p NewCar(
     ANGLE_T angle)
 {
     track_p trk;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     trk = NewTrack(index, T_CAR, 2, sizeof(*xx));
     /*SetEndPts( trk, 0 );*/
-    xx = GetTrkExtraData(trk);
+    xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
     /*SetTrkVisible( trk, IsVisible(xx) );*/
     xx->item = item;
     xx->trvTrk.pos = pos;
@@ -484,7 +483,7 @@ track_p NewCar(
 static void DeleteCar(
     track_p trk)
 {
-    struct extraData * xx = GetTrkExtraData(trk);
+    struct extraDataCar_t * xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
     CarItemSetTrack(xx->item, NULL);
 }
 
@@ -509,7 +508,7 @@ static void MoveCar(
     track_p car,
     coOrd pos)
 {
-    struct extraData *xx = GetTrkExtraData(car);
+    struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
     xx->trvTrk.pos.x += pos.x;
     xx->trvTrk.pos.y += pos.y;
     xx->trvTrk.trk = NULL;
@@ -523,7 +522,7 @@ static void RotateCar(
     coOrd pos,
     ANGLE_T angle)
 {
-    struct extraData *xx = GetTrkExtraData(car);
+    struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
     Rotate(&xx->trvTrk.pos, pos, angle);
     xx->trvTrk.angle = NormalizeAngle(xx->trvTrk.angle + angle);
     xx->trvTrk.trk = NULL;
@@ -548,14 +547,14 @@ static BOOL_T StoreCar(
 		void **data,
 		long * len) {
 
-	struct extraData *xx = GetTrkExtraData(car);
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 	return StoreCarItem(xx->item,data,len);
 
 }
 
 static BOOL_T ReplayCar (track_p car, void *data,long len) {
 
-	struct extraData *xx = GetTrkExtraData(car);
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 	return ReplayCarItem(xx->item,data,len);
 
 }
@@ -729,7 +728,7 @@ static void SpeedRedraw(
 {
     wDrawPix_t y, pts[4][2];
     trainControlDlg_p dlg = (trainControlDlg_p)context;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     wDrawColor drawColor;
     wDrawClear(d);
 
@@ -737,7 +736,7 @@ static void SpeedRedraw(
         return;
     }
 
-    xx = GetTrkExtraData(dlg->train);
+    xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 
     if (xx->speed > MAX_SPEED) {
         xx->speed = MAX_SPEED;
@@ -779,7 +778,7 @@ static void SpeedAction(
     coOrd pos)
 {
     trainControlDlg_p dlg = curTrainDlg;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     FLOAT_T speed;
     BOOL_T startStop;
 
@@ -787,7 +786,7 @@ static void SpeedAction(
         return;
     }
 
-    xx = GetTrkExtraData(dlg->train);
+    xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 
     switch (action) {
     case C_DOWN:
@@ -842,7 +841,7 @@ static void SpeedAction(
 static void ControllerDialogSync(
     trainControlDlg_p dlg)
 {
-    struct extraData * xx=NULL;
+    struct extraDataCar_t * xx=NULL;
     wIndex_t inx;
     BOOL_T dir;
     BOOL_T followMe;
@@ -871,7 +870,7 @@ static void ControllerDialogSync(
     if (dlg->train) {
         char * statusMsg;
         DIST_T speed;
-        xx = GetTrkExtraData(dlg->train);
+        xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
         dir = xx->direction==0?0:1;
         speed = xx->speed;
         pos = xx->trvTrk.pos;
@@ -997,7 +996,7 @@ static void LocoListChangeEntry(
     track_p newLoco)
 {
     wIndex_t inx = -1;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
 
     if (curTrainDlg == NULL) {
         return;
@@ -1006,7 +1005,7 @@ static void LocoListChangeEntry(
     if (oldLoco && (inx=FindLoco(oldLoco))>=0) {
         if (newLoco) {
             locoList(inx).loco = newLoco;
-            xx = GetTrkExtraData(newLoco);
+            xx = GET_EXTRA_DATA(newLoco, T_CAR, extraDataCar_t);
             locoList(inx).running = IsOnTrack(xx) && xx->speed > 0;
             wListSetValues((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control, inx,
                            CarItemNumber(xx->item), locoList(inx).running?goI:stopI, newLoco);
@@ -1027,7 +1026,7 @@ static void LocoListChangeEntry(
         inx = locoList_da.cnt;
         DYNARR_APPEND(locoList_t, locoList_da, 10);
         locoList(inx).loco = newLoco;
-        xx = GetTrkExtraData(newLoco);
+        xx = GET_EXTRA_DATA(newLoco, T_CAR, extraDataCar_t);
         locoList(inx).running = IsOnTrack(xx) && xx->speed > 0;
         wListAddValue((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control,
                       CarItemNumber(xx->item), locoList(inx).running?goI:stopI, newLoco);
@@ -1049,7 +1048,7 @@ static void LocoListChangeEntry(
 static void LocoListInit(void)
 {
     track_p train;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     locoList_da.cnt = 0;
 
     for (train=NULL; TrackIterate(&train);) {
@@ -1057,7 +1056,7 @@ static void LocoListInit(void)
             continue;
         }
 
-        xx = GetTrkExtraData(train);
+        xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
 
         if (!CarItemIsLoco(xx->item)) {
             continue;
@@ -1084,13 +1083,13 @@ static void StopTrain(
     track_p train,
     trainStatus_e status)
 {
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
 
     if (train == NULL) {
         return;
     }
 
-    xx = GetTrkExtraData(train);
+    xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
     xx->speed = 0;
     xx->status = status;
     LocoListChangeEntry(train, train);
@@ -1134,7 +1133,7 @@ static void MoveMainWindow(
 static void SetTrainDirection(
     track_p train)
 {
-    struct extraData *xx, *xx0=GetTrkExtraData(train);
+    struct extraDataCar_t *xx, *xx0=GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
     int dir0;
     track_p car;
     car = train;
@@ -1162,7 +1161,7 @@ static void ControllerDialogUpdate(
 {
     trainControlDlg_p dlg = curTrainDlg;
     track_p train;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
 
     if (dlg == NULL) {
         return;
@@ -1189,7 +1188,7 @@ static void ControllerDialogUpdate(
         }
 
         TrainTimeEndPause();
-        xx = GetTrkExtraData(dlg->train);
+        xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
         xx->distance = 0.0;
         ParamLoadMessage(dlg->trainPGp, I_DIST, FormatDistance(xx->distance));
         ParamLoadControl(curTrainDlg->trainPGp, I_DIST);
@@ -1202,7 +1201,7 @@ static void ControllerDialogUpdate(
         }
 
         TrainTimeEndPause();
-        xx = GetTrkExtraData(dlg->train);
+        xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
         followTrain = NULL;
         dlg->followMe = FALSE;
         ParamLoadControl(curTrainDlg->trainPGp, I_FOLLOW);
@@ -1218,7 +1217,7 @@ static void ControllerDialogUpdate(
 
         if (*(long*)valueP) {
             followTrain = dlg->train;
-            xx = GetTrkExtraData(dlg->train);
+            xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 
             if (OFF_MAIND(xx->trvTrk.pos, xx->trvTrk.pos)) {
                 MoveMainWindow(xx->trvTrk.pos, xx->trvTrk.angle);
@@ -1236,7 +1235,7 @@ static void ControllerDialogUpdate(
             return;
         }
 
-        xx = GetTrkExtraData(dlg->train);
+        xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
         xx->autoReverse = *(long*)valueP!=0;
         break;
 
@@ -1245,7 +1244,7 @@ static void ControllerDialogUpdate(
             return;
         }
 
-        xx = GetTrkExtraData(dlg->train);
+        xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
         dlg->direction = xx->direction = !xx->direction;
         wButtonSetLabel((wButton_p)pg->paramPtr[I_DIR].control,
                         (dlg->direction?_("Reverse"):_("Forward")));
@@ -1324,7 +1323,7 @@ static track_p followTrain = NULL;
 static void DrawAllCars(void)
 {
     track_p car;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     coOrd size, lo, hi;
     BOOL_T drawCarEnable1 = drawCarEnable;
     drawCarEnable = TRUE;
@@ -1334,7 +1333,7 @@ static void DrawAllCars(void)
 
     for (car=NULL; TrackIterate(&car);) {
         if (GetTrkType(car) == T_CAR) {
-            xx = GetTrkExtraData(car);
+            xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
             CarItemSize(xx->item,
                         &size);   /* TODO assumes xx->trvTrk.pos is the car center */
             lo.x = xx->trvTrk.pos.x - size.x/2.0;
@@ -1358,7 +1357,7 @@ static DIST_T GetTrainLength2(
     BOOL_T * dir)
 {
     DIST_T length = 0, carLength;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     WALK_CARS_START(*car0, xx, *dir)
     carLength = CarItemCoupledLength(xx->item);
 
@@ -1384,7 +1383,7 @@ static DIST_T GetTrainLength(
 static void PlaceCar(
     track_p car)
 {
-    struct extraData *xx = GetTrkExtraData(car);
+    struct extraDataCar_t *xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
     DIST_T dists[2];
     CarItemPlace(xx->item, &xx->trvTrk, dists);
 
@@ -1416,12 +1415,12 @@ static track_p FindCar(
     coOrd pos0, pos1;
     track_p trk, trk1;
     DIST_T dist1 = 100000, dist;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     trk1 = NULL;
 
     for (trk=NULL; TrackIterate(&trk);) {
         if (GetTrkType(trk) == T_CAR) {
-            xx = GetTrkExtraData(trk);
+            xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
 
             if (IsIgnored(xx)) {
                 continue;
@@ -1451,7 +1450,7 @@ static track_p FindMasterLoco(
     track_p train,
     int * dirR)
 {
-    struct extraData *xx0;
+    struct extraDataCar_t *xx0;
     int dir;
 
     for (dir = 0; dir<2; dir++) {
@@ -1481,7 +1480,7 @@ static track_p PickMasterLoco(
     int dir)
 {
     track_p loco=NULL;
-    struct extraData *xx;
+    struct extraDataCar_t *xx;
     WALK_CARS_START(car, xx, dir)
 
     if (CarItemIsLoco(xx->item)) {
@@ -1500,7 +1499,7 @@ static track_p PickMasterLoco(
         return NULL;
     }
 
-    xx = GetTrkExtraData(loco);
+    xx = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
     SetLocoMaster(xx);
     xx->speed = 0;
     LOG(log_trainMove, 1, ("%s becomes master\n", CarItemNumber(xx->item)))
@@ -1559,12 +1558,12 @@ static void CoupleCars(
     track_p car2,
     int dir2)
 {
-    struct extraData * xx1, * xx2;
+    struct extraDataCar_t * xx1, * xx2;
     track_p loco1, loco2;
     track_p car;
     int dir;
-    xx1 = GetTrkExtraData(car1);
-    xx2 = GetTrkExtraData(car2);
+    xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
+    xx2 = GET_EXTRA_DATA(car2, T_CAR, extraDataCar_t);
 
     if (GetTrkEndTrk(car1,dir1) != NULL || GetTrkEndTrk(car2,dir2) != NULL) {
         LOG(log_trainMove, 1, ("coupleCars - already coupled\n"))
@@ -1605,8 +1604,8 @@ static void CoupleCars(
     }
 
     if ((loco1 != NULL && loco2 != NULL)) {
-        xx1 = GetTrkExtraData(loco1);
-        xx2 = GetTrkExtraData(loco2);
+        xx1 = GET_EXTRA_DATA(loco1, T_CAR, extraDataCar_t);
+        xx2 = GET_EXTRA_DATA(loco2, T_CAR, extraDataCar_t);
 
         if (xx1->speed == 0) {
             ClrLocoMaster(xx1);
@@ -1652,7 +1651,7 @@ static void PlaceCars(
     long crashSpeed,
     BOOL_T crashFlip)
 {
-    struct extraData *xx0 = GetTrkExtraData(car0), *xx;
+    struct extraDataCar_t *xx0 = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t), *xx;
     int dir;
     traverseTrack_t trvTrk;
     DIST_T length;
@@ -1716,14 +1715,14 @@ static void CrashTrain(
     BOOL_T flip)
 {
     track_p loco;
-    struct extraData *xx;
+    struct extraDataCar_t *xx;
     loco = FindMasterLoco(car,NULL);
 
     if (loco != NULL) {
         StopTrain(loco, ST_Crashed);
     }
 
-    xx = GetTrkExtraData(car);
+    xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
     xx->trvTrk = *trvTrkP;
 
     if (dir) {
@@ -1752,13 +1751,13 @@ static BOOL_T CheckCoupling(
     BOOL_T doCheckCrash)
 {
     track_p car1;
-    struct extraData *xx0, *xx1;
+    struct extraDataCar_t *xx0, *xx1;
     coOrd pos1;
     DIST_T dist0, distc, dist=100000.0;
     int dir0, dir1, dirl;
     ANGLE_T angle;
     traverseTrack_t trvTrk0, trvTrk1;
-    xx0 = xx1 = GetTrkExtraData(car0);
+    xx0 = xx1 = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t);
     /* find length of train from loco to start and end */
     dir0 = dir00;
     dist0 = GetTrainLength2(&car0, &dir0);
@@ -1776,7 +1775,7 @@ static BOOL_T CheckCoupling(
         return TRUE;
     }
 
-    xx1 = GetTrkExtraData(car1);
+    xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
 
     if (!IsOnTrack(xx1)) {
         return TRUE;
@@ -1867,7 +1866,7 @@ static BOOL_T CheckCoupling(
         xx1 = NULL;
 
         if (loco1) {
-            xx1 = GetTrkExtraData(loco1);
+            xx1 = GET_EXTRA_DATA(loco1, T_CAR, extraDataCar_t);
             speed1 = (long)xx1->speed;
 
             if (car1 == loco1) {
@@ -1909,9 +1908,9 @@ static void PlaceTrain(
     BOOL_T doCheckCoupling)
 {
     track_p car_curr;
-    struct extraData *xx0;
+    struct extraDataCar_t *xx0;
     int dir0;
-    xx0 = GetTrkExtraData(car0);
+    xx0 = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t);
     LOG(log_trainMove, 2, ("  placeTrain: %s [%0.3f %0.3f] A%0.3f",
                            CarItemNumber(xx0->item), xx0->trvTrk.pos.x, xx0->trvTrk.pos.y,
                            xx0->trvTrk.angle))
@@ -1919,7 +1918,7 @@ static void PlaceTrain(
 
     for (dir0=0; dir0<2; dir0++) {
         int dir;
-        struct extraData  *xx;
+        struct extraDataCar_t  *xx;
         car_curr = car0;
         dir = dir0;
         xx = xx0;
@@ -1956,7 +1955,7 @@ static void PlaceTrainInit(
     ANGLE_T angle0,
     BOOL_T doCheckCoupling)
 {
-    struct extraData * xx = GetTrkExtraData(car0);
+    struct extraDataCar_t * xx = GET_EXTRA_DATA(car0, T_CAR, extraDataCar_t);
     xx->trvTrk.trk = trk0;
     xx->trvTrk.dist = xx->trvTrk.length = -1;
     xx->trvTrk.pos = pos0;
@@ -1969,7 +1968,7 @@ static void FlipTrain(
     track_p train)
 {
     DIST_T d0, d1;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
 
     if (train == NULL) {
         return;
@@ -1977,7 +1976,7 @@ static void FlipTrain(
 
     d0 = GetTrainLength(train, 0);
     d1 = GetTrainLength(train, 1);
-    xx = GetTrkExtraData(train);
+    xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
     TraverseTrack2(&xx->trvTrk, d0-d1);
     FlipTraverseTrack(&xx->trvTrk);
     xx->trvTrk.length = -1;
@@ -1990,7 +1989,7 @@ static BOOL_T MoveTrain(
     long timeD)
 {
     DIST_T ips, dist0, dist1;
-    struct extraData *xx, *xx1;
+    struct extraDataCar_t *xx, *xx1;
     traverseTrack_t trvTrk;
     DIST_T length;
     track_p car1;
@@ -2001,7 +2000,7 @@ static BOOL_T MoveTrain(
         return FALSE;
     }
 
-    xx = GetTrkExtraData(train);
+    xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
 
     if (xx->speed <= 0) {
         return FALSE;
@@ -2103,14 +2102,14 @@ static BOOL_T MoveTrains(long timeD)
 {
     BOOL_T trains_moved = FALSE;
     track_p train;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
 
     for (train=NULL; TrackIterate(&train);) {
         if (GetTrkType(train) != T_CAR) {
             continue;
         }
 
-        xx = GetTrkExtraData(train);
+        xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
 
         if (!CarItemIsLoco(xx->item)) {
             continue;
@@ -2299,7 +2298,7 @@ void AttachTrains(void)
 {
     track_p car;
     track_p loco;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     coOrd pos;
     track_p trk;
     ANGLE_T angle;
@@ -2313,7 +2312,7 @@ void AttachTrains(void)
             continue;
         }
 
-        xx = GetTrkExtraData(car);
+        xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
         ClrProcessed(xx);
     }
 
@@ -2322,7 +2321,7 @@ void AttachTrains(void)
             continue;
         }
 
-        xx = GetTrkExtraData(car);
+        xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 
         if (IsProcessed(xx)) {
             continue;
@@ -2331,7 +2330,7 @@ void AttachTrains(void)
         loco = FindMasterLoco(car, NULL);
 
         if (loco != NULL) {
-            xx = GetTrkExtraData(loco);
+            xx = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
         } else {
             loco = car;
         }
@@ -2391,7 +2390,7 @@ void AttachTrains(void)
             continue;
         }
 
-        xx = GetTrkExtraData(car);
+        xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
         ClrProcessed(xx);
     }
 }
@@ -2400,7 +2399,7 @@ void AttachTrains(void)
 static void UpdateTrainAttachment(void)
 {
     track_p trk;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
 
     for (trk=NULL; TrackIterate(&trk);) {
         ClrTrkBits(trk, TB_CARATTACHED);
@@ -2408,7 +2407,7 @@ static void UpdateTrainAttachment(void)
 
     for (trk=NULL; TrackIterate(&trk);) {
         if (GetTrkType(trk) == T_CAR) {
-            xx = GetTrkExtraData(trk);
+            xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
 
             if (xx->trvTrk.trk != NULL) {
                 SetTrkBits(xx->trvTrk.trk, TB_CARATTACHED);
@@ -2423,7 +2422,7 @@ static BOOL_T TrainOnMovableTrack(
     track_p *trainR)
 {
     track_p train;
-    struct extraData * xx;
+    struct extraDataCar_t * xx;
     int dir;
 
     for (train=NULL; TrackIterate(&train);) {
@@ -2431,7 +2430,7 @@ static BOOL_T TrainOnMovableTrack(
             continue;
         }
 
-        xx = GetTrkExtraData(train);
+        xx = GET_EXTRA_DATA(train, T_CAR, extraDataCar_t);
 
         if (IsOnTrack(xx)) {
             if (xx->trvTrk.trk == trk) {
@@ -2494,7 +2493,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
     ANGLE_T angle1;
     EPINX_T ep0, ep1;
     int dir;
-    struct extraData * xx=NULL;
+    struct extraDataCar_t * xx=NULL;
     wWinPix_t w, h;
 
     switch (action) {
@@ -2569,7 +2568,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                 return C_CONTINUE;
             }
 
-            xx = GetTrkExtraData(currCar);
+            xx = GET_EXTRA_DATA(currCar, T_CAR, extraDataCar_t);
             xx->pencils = FALSE;
             dist = CarItemCoupledLength(xx->item)/2.0;
             Translate(&pos, xx->trvTrk.pos, xx->trvTrk.angle, dist);
@@ -2606,13 +2605,13 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 
             if (logTable(log_trainMove).level >= 1) {
                 if (currCar) {
-                    xx = GetTrkExtraData(currCar);
+                    xx = GET_EXTRA_DATA(currCar, T_CAR, extraDataCar_t);
                     LogPrintf("selected %s\n", CarItemNumber(xx->item));
 
                     for (dir=0; dir<2; dir++) {
                         int dir1 = dir;
                         track_p car1 = currCar;
-                        struct extraData * xx1 = GetTrkExtraData(car1);
+                        struct extraDataCar_t * xx1 = GET_EXTRA_DATA(car1, T_CAR, extraDataCar_t);
                         LogPrintf("dir=%d\n", dir1);
                         WALK_CARS_START(car1, xx1, dir1)
                         LogPrintf("  %s [%0.3f,%d]\n", CarItemNumber(xx1->item), xx1->trvTrk.angle,
@@ -2643,7 +2642,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         pos.x += delta.x;
         pos.y += delta.y;
         pos0 = pos;
-        xx = GetTrkExtraData(currCar);
+        xx = GET_EXTRA_DATA(currCar, T_CAR, extraDataCar_t);
         trk0 = OnTrack(&pos0, FALSE, TRUE);
 
         if (/*currCarItemPtr != NULL &&*/ trk0) {
@@ -2673,7 +2672,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             trk0 = FindMasterLoco(currCar, NULL);
 
             if (trk0) {
-                xx = GetTrkExtraData(trk0);
+                xx = GET_EXTRA_DATA(trk0, T_CAR, extraDataCar_t);
 
                 if (!IsOnTrack(xx) || xx->speed <= 0) {
                     StopTrain(trk0, ST_StopManual);
@@ -2704,7 +2703,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                     QueryTrack(trk0, Q_CAN_NEXT_POSITION) &&
                     TrainOnMovableTrack(trk0, &trk1)) {
                 if (trk1) {
-                    xx = GetTrkExtraData(trk1);
+                    xx = GET_EXTRA_DATA(trk1, T_CAR, extraDataCar_t);
                     pos1 = xx->trvTrk.pos;
                     angle1 = xx->trvTrk.angle;
                 } else {
@@ -2751,7 +2750,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             return C_CONTINUE;
         }
 
-        xx = GetTrkExtraData(trainFuncCar);
+        xx = GET_EXTRA_DATA(trainFuncCar, T_CAR, extraDataCar_t);
         if (xx->pencils) {
         	wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], TRUE);
         	wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], FALSE);
@@ -2769,7 +2768,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                         !IsLocoMaster(xx));
 
         if (trk0) {
-            xx = GetTrkExtraData(trk0);
+            xx = GET_EXTRA_DATA(trk0, T_CAR, extraDataCar_t);
         }
 
         wMenuPushEnable(trainPopupMI[DO_CHANGEDIR], trk0!=NULL);
@@ -2905,7 +2904,7 @@ static void CmdTrainExit(void * junk)
 static void TrainFunc(
     void * action)
 {
-    struct extraData * xx, *xx1;
+    struct extraDataCar_t * xx, *xx1;
     ANGLE_T angle;
     int dir;
     track_p loco;
@@ -2919,7 +2918,7 @@ static void TrainFunc(
         return;
     }
 
-    xx = GetTrkExtraData(trainFuncCar);
+    xx = GET_EXTRA_DATA(trainFuncCar, T_CAR, extraDataCar_t);
     angle = FindAngle(xx->trvTrk.pos, trainFuncPos);
     angle = NormalizeAngle(angle-xx->trvTrk.angle);
     dir = (angle>90&&angle<270);
@@ -3011,7 +3010,7 @@ static void TrainFunc(
         WALK_CARS_START(trainFuncCar, xx, dir)
 
         if (temp0) {
-            xx1 = GetTrkExtraData(temp0);
+            xx1 = GET_EXTRA_DATA(temp0, T_CAR, extraDataCar_t);
             temp0->deleted = TRUE;
             /*DeleteTrack( temp0, FALSE );*/
             CarItemUpdate(xx1->item);
@@ -3021,7 +3020,7 @@ static void TrainFunc(
         WALK_CARS_END(trainFuncCar, xx, dir)
 
         if (temp0) {
-            xx1 = GetTrkExtraData(temp0);
+            xx1 = GET_EXTRA_DATA(temp0, T_CAR, extraDataCar_t);
             temp0->deleted = TRUE;
             /*DeleteTrack( temp0, FALSE );*/
             CarItemUpdate(xx1->item);
@@ -3044,7 +3043,7 @@ static void TrainFunc(
                 LOG(log_trainMove, 1, ("%s gets master\n", CarItemNumber(xx->item)))
 
                 if (loco) {
-                    xx1 = GetTrkExtraData(loco);
+                    xx1 = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
                     ClrLocoMaster(xx1);
                     LOG(log_trainMove, 1, ("%s looses master\n", CarItemNumber(xx1->item)))
                     xx->speed = xx1->speed;
@@ -3061,7 +3060,7 @@ static void TrainFunc(
         loco = FindMasterLoco(trainFuncCar, NULL);
 
         if (loco) {
-            xx = GetTrkExtraData(loco);
+            xx = GET_EXTRA_DATA(loco, T_CAR, extraDataCar_t);
             xx->direction = !xx->direction;
             SetTrainDirection(loco);
             ControllerDialogSync(curTrainDlg);

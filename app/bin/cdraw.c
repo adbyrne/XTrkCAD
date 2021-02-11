@@ -148,13 +148,14 @@ EXPORT void UpdateFontSizeList(
  */
 
 
-struct extraData {
+typedef struct extraDataDraw_t {
+		extraDataBase_t base;
 		coOrd orig;
 		ANGLE_T angle;
 		drawLineType_e lineType;
 		wIndex_t segCnt;
 		trkSeg_t segs[1];
-		};
+		} extraDataDraw_t;
 
 static TRKTYP_T T_DRAW = -1;
 static track_p ignoredTableEdge;
@@ -163,7 +164,7 @@ static track_p ignoredDraw;
 
 static void ComputeDrawBoundingBox( track_p t )
 {
-	struct extraData * xx = GetTrkExtraData(t);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(t, T_DRAW, extraDataDraw_t);
 	coOrd lo, hi;
 
 	GetSegBounds( xx->orig, xx->angle, xx->segCnt, xx->segs, &lo, &hi );
@@ -179,12 +180,12 @@ static track_p MakeDrawFromSeg1(
 		ANGLE_T angle,
 		trkSeg_p sp )
 {
-	struct extraData * xx;
+	struct extraDataDraw_t * xx;
 	track_p trk;
 	if ( sp->type == ' ' )
 		return NULL;
 	trk = NewTrack( index, T_DRAW, 0, sizeof *xx );
-	xx = GetTrkExtraData( trk );
+	xx = GET_EXTRA_DATA( trk, T_DRAW, extraDataDraw_t );
 	xx->orig = pos;
 	xx->angle = angle;
 	xx->segCnt = 1;
@@ -224,10 +225,10 @@ EXPORT track_p MakePolyLineFromSegs(
 		ANGLE_T angle,
 		dynArr_t * segsArr)
 {
-	struct extraData * xx;
+	struct extraDataDraw_t * xx;
 	track_p trk;
 	trk = NewTrack( 0, T_DRAW, 0, sizeof *xx );
-	xx = GetTrkExtraData( trk );
+	xx = GET_EXTRA_DATA( trk, T_DRAW, extraDataDraw_t );
 	xx->orig = pos;
 	xx->angle = angle;
 	xx->lineType = DRAWLINESOLID;
@@ -452,7 +453,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected) {
 
 EXPORT void DrawOriginAnchor(track_p trk) {
 	if (!trk || GetTrkType(trk) != T_DRAW) return;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	if ((xx->orig.x != 0.0) || (xx->orig.y !=0.0) ) {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		CreateOriginAnchor(xx->orig,FALSE);
@@ -464,7 +465,7 @@ EXPORT void DrawOriginAnchor(track_p trk) {
 
 static DIST_T DistanceDraw( track_p t, coOrd * p )
 {
-	struct extraData * xx = GetTrkExtraData(t);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(t, T_DRAW, extraDataDraw_t);
 	if ( ignoredTableEdge == t && xx->segs[0].type == SEG_TBLEDGE )
 		return 100000.0;
 	if ( ignoredDraw == t )
@@ -571,7 +572,7 @@ static int drawSegInx;
  */
 static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t *xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	trkSeg_p segPtr;
 	coOrd mid;
 	long fontSize;
@@ -1035,7 +1036,7 @@ extern BOOL_T inDescribeCmd;
 
 static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t *xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	coOrd pos = oldMarker;
 	trkSeg_p segPtr;
 	int inx;
@@ -1310,7 +1311,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 
 static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 {
-	struct extraData * xx = GetTrkExtraData(t);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(t, T_DRAW, extraDataDraw_t);
 	unsigned long NotSolid = ~(DC_NOTSOLIDLINE);
 	d->options &= NotSolid;
 	if (xx->lineType == DRAWLINESOLID) {}
@@ -1328,7 +1329,7 @@ static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 static void DeleteDraw( track_p t )
 {
 	/* Get rid of points if specified */
-	struct extraData * xx = GetTrkExtraData(t);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(t, T_DRAW, extraDataDraw_t);
 	if (xx->segs[0].type == SEG_POLY ||
 			xx->segs[0].type == SEG_FILPOLY) {
 		MyFree(xx->segs[0].u.p.pts);
@@ -1339,7 +1340,7 @@ static void DeleteDraw( track_p t )
 
 static BOOL_T WriteDraw( track_p t, FILE * f )
 {
-	struct extraData * xx = GetTrkExtraData(t);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(t, T_DRAW, extraDataDraw_t);
 	BOOL_T rc = TRUE;
 	rc &= fprintf(f, "DRAW %d %d %d 0 0 %0.6f %0.6f 0 %0.6f\n", GetTrkIndex(t), GetTrkLayer(t),
 				xx->lineType,
@@ -1358,7 +1359,7 @@ static BOOL_T ReadDraw( char * header )
 	ANGLE_T angle;
 	wIndex_t layer;
 	int lineType;
-	struct extraData * xx;
+	struct extraDataDraw_t * xx;
 
 	if ( !GetArgs( header+5, paramVersion<3?"dXXpYf":paramVersion<9?"dLX00pYf":"dLd00pff",
 				&index, &layer, &lineType, &orig, &elev, &angle ) )
@@ -1367,13 +1368,13 @@ static BOOL_T ReadDraw( char * header )
 		return FALSE;
 	if (tempSegs_da.cnt == 1) {
 		trk = MakeDrawFromSeg1( index, orig, angle, &tempSegs(0) );
-		xx = GetTrkExtraData(trk);
+		xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 		xx->lineType = lineType;
 		SetTrkLayer( trk, layer );
 	} else {
 		trk = NewTrack( index, T_DRAW, 0, sizeof *xx + (tempSegs_da.cnt-1) * sizeof *(trkSeg_p)0 );
 		SetTrkLayer( trk, layer );
-		xx = GetTrkExtraData(trk);
+		xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 		xx->orig = orig;
 		xx->angle = angle;
 		xx->segCnt = tempSegs_da.cnt;
@@ -1387,7 +1388,7 @@ static BOOL_T ReadDraw( char * header )
 
 static void MoveDraw( track_p trk, coOrd off )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 
 	trkSeg_p segPtr = &xx->segs[0];
 
@@ -1427,7 +1428,7 @@ static void MoveDraw( track_p trk, coOrd off )
 
 static void RotateDraw( track_p trk, coOrd orig, ANGLE_T angle )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	trkSeg_p segPtr = &xx->segs[0];
 	if (xx->orig.x == 0.0 && xx->orig.y == 0.0) {   //No origin set
 		switch(segPtr->type) {
@@ -1466,7 +1467,7 @@ static void RotateDraw( track_p trk, coOrd orig, ANGLE_T angle )
 
 static void RescaleDraw( track_p trk, FLOAT_T ratio )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	xx->orig.x *= ratio;
 	xx->orig.y *= ratio;
 	RescaleSegs( xx->segCnt, xx->segs, ratio, ratio, ratio );
@@ -1534,7 +1535,7 @@ static void DrawModDlgUpdate(
 
 static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	STATUS_T rc = C_CONTINUE;
 
 	wControl_p controls[5];				//Always needs a NULL last entry
@@ -1757,7 +1758,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 
 static void UngroupDraw( track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	int inx;
 	if ( xx->segCnt <= 1 )
 		return;
@@ -1778,7 +1779,7 @@ static ANGLE_T GetAngleDraw(
 		EPINX_T * ep0,
 		EPINX_T * ep1 )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	ANGLE_T angle;
 
 	pos.x -= xx->orig.x;
@@ -1795,12 +1796,12 @@ static ANGLE_T GetAngleDraw(
 static BOOL_T EnumerateDraw(
 		track_p trk )
 {
-	struct extraData * xx;
+	struct extraDataDraw_t * xx;
 	int inx;
 	trkSeg_p segPtr;
 
 	if ( trk ) {
-		xx = GetTrkExtraData(trk);
+		xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 		if ( xx->segCnt < 1 )
 			return FALSE;
 		BOOL_T content = FALSE;
@@ -1824,7 +1825,7 @@ static void FlipDraw(
 		coOrd orig,
 		ANGLE_T angle )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 
 	trkSeg_p segPtr = &xx->segs[0];
 	BOOL_T reorigin = FALSE;
@@ -1873,7 +1874,7 @@ static BOOL_T StoreDraw(
 		void **data,
 		long * len)
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	if (xx->segs[0].type == SEG_POLY ||
 		xx->segs[0].type == SEG_FILPOLY) {
 		*data = xx->segs[0].u.p.pts;
@@ -1888,7 +1889,7 @@ static BOOL_T ReplayDraw(
 		void * data,
 		long len)
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	if (xx->segs[0].type == SEG_POLY ||
 		xx->segs[0].type == SEG_FILPOLY) {
 		xx->segs[0].u.p.pts = MyMalloc(len);
@@ -1900,7 +1901,7 @@ static BOOL_T ReplayDraw(
 
 static BOOL_T QueryDraw( track_p trk, int query )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	switch(query) {
 	case Q_IS_DRAW:
 		return TRUE;
@@ -1932,8 +1933,8 @@ static BOOL_T QueryDraw( track_p trk, int query )
 
 static wBool_t CompareDraw( track_cp trk1, track_cp trk2 )
 {
-	struct extraData *xx1 = GetTrkExtraData( trk1 );
-	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	struct extraDataDraw_t *xx1 = GET_EXTRA_DATA( trk1, T_DRAW, extraDataDraw_t );
+	struct extraDataDraw_t *xx2 = GET_EXTRA_DATA( trk2, T_DRAW, extraDataDraw_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -1943,7 +1944,7 @@ static wBool_t CompareDraw( track_cp trk1, track_cp trk2 )
 
 static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * params ) {
 
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	if (inx != PARAMS_NODES ) return FALSE;
 	DYNARR_RESET(coOrd,params->nodes);
 	BOOL_T back = FALSE;
@@ -2077,7 +2078,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 
 static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, EPINX_T * ep0, EPINX_T * ep1 )
 {
-		struct extraData * xx = GetTrkExtraData(trk);
+		struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 
 		coOrd p0,p1;
 		DIST_T d;
@@ -2353,7 +2354,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 		*leftover = NULL;
 		if (tempSegs(0).type != -1) {
 			*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
-			struct extraData * yy = GetTrkExtraData(*leftover);
+			struct extraDataDraw_t * yy = GET_EXTRA_DATA(*leftover, T_DRAW, extraDataDraw_t);
 			yy->lineType = xx->lineType;
 			if (tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.pts)  {
 				MyFree(tempSegs(0).u.p.pts);
@@ -2387,7 +2388,7 @@ static BOOL_T MakeParallelDraw(
 		BOOL_T track)
 {
 	if (track) return FALSE;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 
 	ANGLE_T angle;
 	DIST_T rad;
@@ -2414,7 +2415,7 @@ static BOOL_T MakeParallelDraw(
 			tempSegs(0).u.l.pos[1] = p1;
 			if (newTrkR) {
 				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
-				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				struct extraDataDraw_t * yy = GET_EXTRA_DATA(*newTrkR, T_DRAW, extraDataDraw_t);
 				yy->lineType = xx->lineType;
 			}
 
@@ -2441,7 +2442,7 @@ static BOOL_T MakeParallelDraw(
 			tempSegs(0).u.c.a1 = xx->segs[0].u.c.a1;
 			if (newTrkR) {
 				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
-				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				struct extraDataDraw_t * yy = GET_EXTRA_DATA(*newTrkR, T_DRAW, extraDataDraw_t);
 				yy->lineType = xx->lineType;
 			}
 			if ( p0R ) PointOnCircle( p0R, xx->segs[0].u.c.center, rad, xx->segs[0].u.c.a0 );
@@ -2505,7 +2506,7 @@ static BOOL_T MakeParallelDraw(
 			}
 			if (newTrkR) {
 				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
-				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				struct extraDataDraw_t * yy = GET_EXTRA_DATA(*newTrkR, T_DRAW, extraDataDraw_t);
 				yy->lineType = xx->lineType;
 				if (tempSegs(0).u.p.pts) MyFree(tempSegs(0).u.p.pts);
 			}
@@ -2560,14 +2561,14 @@ static trackCmd_t drawCmds = {
 EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 {
 	track_p trk1;
-	struct extraData *xx;
+	struct extraDataDraw_t *xx;
 	coOrd pos1 = *pos;
 
 	ignoredTableEdge = trk;
 	if ((trk1 = OnTrack( &pos1, FALSE, FALSE )) != NULL &&
 		 GetTrkType(trk1) == T_DRAW) {
 		ignoredTableEdge = NULL;
-		xx = GetTrkExtraData(trk1);
+		xx = GET_EXTRA_DATA(trk1, T_DRAW, extraDataDraw_t);
 		if (xx->segCnt < 1)
 			return FALSE;
 		if (xx->segs[0].type == SEG_TBLEDGE) {
@@ -2586,11 +2587,11 @@ EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 
 EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 {
-	struct extraData *xx;
+	struct extraDataDraw_t *xx;
 
 	if (GetTrkType(trk) == T_DRAW) {
 		ignoredTableEdge = NULL;
-		xx = GetTrkExtraData(trk);
+		xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 		if (xx->segCnt < 1)
 			return FALSE;
 		DIST_T dd0,dd1;
@@ -2630,7 +2631,7 @@ EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 			Rotate(&p1,xx->orig,xx->angle);
 		} else if (GetTrkType(trk) == T_BZRLIN) {
 			coOrd p0,p1;
-			xx = GetTrkExtraData(trk);
+			xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 			p0 = xx->segs[0].u.b.pos[0];
 			p1 = xx->segs[0].u.b.pos[3];
 			dd0 = FindDistance(p00,p0);
@@ -3284,7 +3285,7 @@ void MenuEnter(int key) {
 }
 
 void MenuLine(int key) {
-	struct extraData * xx = GetTrkExtraData(drawModCmdContext.trk);
+	struct extraDataDraw_t * xx = GET_EXTRA_DATA(drawModCmdContext.trk, T_DRAW, extraDataDraw_t);
 	if ( drawModCmdContext.type==SEG_STRLIN || drawModCmdContext.type==SEG_CRVLIN || drawModCmdContext.type==SEG_POLY ) {
 		switch(key) {
 		case '0':
@@ -3315,7 +3316,7 @@ void MenuLine(int key) {
 
 EXPORT void SetLineType( track_p trk, int width ) {
 	if (QueryTrack(trk, Q_IS_DRAW)) {
-		struct extraData * xx = GetTrkExtraData(trk);
+		struct extraDataDraw_t * xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 		if ( xx->segs[0].type==SEG_STRLIN || xx->segs[0].type==SEG_CRVLIN || xx->segs[0].type==SEG_POLY) {
 			switch(width) {
 			case 0:

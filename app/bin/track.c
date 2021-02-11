@@ -383,8 +383,19 @@ EXPORT EPINX_T GetTrkEndPtCnt( track_cp trk )
 	return trk->endCnt;
 }
 
-EXPORT struct extraData * GetTrkExtraData( track_cp trk )
+EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType )
 {
+//printf( "GTXD T%d TY%d\n", GetTrkIndex(trk), trkType );
+	if ( IsTrackDeleted(trk) ) {
+		// This shouldn't happen!
+		printf( "GetExtraData T%d is deleted!\n", trk->index );
+		return trk->extraData;
+	}
+#ifdef CHECK_EXTRA_DATA
+	ASSERT( trk->extraData );
+	ASSERT( trk->type == trk->extraData->trkType );
+	ASSERT( trkType == T_NOTRACK || trk->type == trkType );
+#endif
 	return trk->extraData;
 }
 
@@ -1049,7 +1060,8 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	} else
 		trk->endPt = NULL;
 	if (extraSize) {
-		trk->extraData = MyMalloc( extraSize );
+		trk->extraData = (struct extraDataBase_t*)MyMalloc( extraSize );
+		trk->extraData->trkType = type;
 	} else
 		trk->extraData = NULL;
 	trk->extraSize = extraSize;

@@ -97,7 +97,7 @@ static void UpdateTitleNext( void )
 	wIndex_t inx;
 	wIndex_t cnt;
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	updateTitleInx++;
 	if (updateTitleInx >= updateTitles_da.cnt) {
 		wHide( updateTitleW );
@@ -107,8 +107,9 @@ static void UpdateTitleNext( void )
 		trk = NULL;
 		while (TrackIterate( &trk ) ) {
 			InfoCount(cnt++);
-			if (GetTrkType(trk) == T_TURNOUT || GetTrkType(trk) == T_STRUCTURE) {
-				xx = GetTrkExtraData(trk);
+			TRKTYP_T trkType = GetTrkType(trk);
+			if (trkType == T_TURNOUT || trkType == T_STRUCTURE) {
+				xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 				for (inx=0; inx<updateTitles_da.cnt; inx++) {
 					if ( updateTitles(inx).old &&
 						 strcmp( xx->title, updateTitles(inx).old ) == 0 ) {
@@ -213,7 +214,7 @@ static BOOL_T CheckCompoundEndPoint(
 		BOOL_T flip )
 {
 	
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	coOrd pos;
 	DIST_T d;
 	ANGLE_T a, a2;
@@ -246,7 +247,6 @@ static BOOL_T RefreshCompound1(
 		track_p trk,
 		turnoutInfo_t * to )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	EPINX_T ep, epCnt;
 	BOOL_T ok;
 	BOOL_T flip = FALSE;
@@ -281,6 +281,7 @@ static BOOL_T RefreshCompound1(
 		}
 	}
 	UndoModify( trk );
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	FreeFilledDraw( xx->segCnt, xx->segs );
 	MyFree( xx->segs );
 	xx->segCnt = to->segCnt;
@@ -341,7 +342,7 @@ EXPORT BOOL_T RefreshCompound(
 		BOOL_T junk )
 {
 	TRKTYP_T trkType;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	int inx;
 	turnoutInfo_t *to;
 	SCALEINX_T scale;
@@ -356,12 +357,12 @@ EXPORT BOOL_T RefreshCompound(
 		return FALSE;
 	}
 	trkType = GetTrkType(trk);
-	xx = GetTrkExtraData(trk);
 	scale = GetTrkScale(trk);
 	if ( trkType != T_TURNOUT && trkType != T_STRUCTURE ) {
 		ClrTrkBits( trk, TB_SELECTED );
 		return TRUE;
 	}
+	xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 	refreshReturnVal = TRUE;
 	for ( inx=0; inx<refreshSpecial_da.cnt; inx++ ) {
 		if ( refreshSpecial(inx).name != NULL &&

@@ -80,6 +80,7 @@ static char sensorScript[STR_LONG_SIZE];
 #endif
 
 typedef struct sensorData_t {
+    extraDataBase_t base;
     coOrd orig;
     BOOL_T IsHilite;
     char * name;
@@ -88,7 +89,7 @@ typedef struct sensorData_t {
 
 static sensorData_p GetsensorData ( track_p trk )
 {
-    return (sensorData_p) GetTrkExtraData(trk);
+    return GET_EXTRA_DATA( trk, T_SENSOR, sensorData_t );
 }
 
 #define RADIUS 6

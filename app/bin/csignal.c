@@ -89,6 +89,7 @@ static dynArr_t signalAspect_da;
 #define signalAspect(N) DYNARR_N( signalAspect_t, signalAspect_da, N )
 
 typedef struct signalData_t {
+    extraDataBase_t base;
     coOrd orig;
     ANGLE_T angle;
     char * name;
@@ -100,7 +101,7 @@ typedef struct signalData_t {
 
 static signalData_p GetsignalData ( track_p trk )
 {
-    return (signalData_p) GetTrkExtraData(trk);
+    return GET_EXTRA_DATA( trk, T_SIGNAL, signalData_t );
 }
 
 #define BASEX 6

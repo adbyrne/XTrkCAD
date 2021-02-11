@@ -77,7 +77,8 @@ static TRKTYP_T T_EASEMENT = -1;
 
 static ANGLE_T JOINT_ANGLE_INCR = 2.0;
 
-struct extraData {
+typedef struct extraDataEase_t {
+		extraDataBase_t base;
 		DIST_T l0, l1;			/* curve start and end parameter */
 		DIST_T R, L;			/* curve control parameters */
 		BOOL_T flip;			/* T: endPt[1] - is l0 */
@@ -86,17 +87,8 @@ struct extraData {
 		coOrd pos;				/* Pos of origin */
 		ANGLE_T angle;			/* Angle of curve tangent */
 		coOrd descriptionOff;   /* Offset of description */
-		};
+		} extraDataEase_t;
 
-#define xl0			extraData->l0
-#define xl1			extraData->l1
-#define xR			extraData->R
-#define xL			extraData->L
-#define xflip		extraData->flip
-#define xnegate		extraData->negate
-#define xScurve		extraData->Scurve
-#define xpos		extraData->pos
-#define xangle		extraData->angle
 
 #define EASE_MIN_X	(0.01)
 
@@ -403,14 +395,14 @@ static track_p NewJoint(
  */
 {
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataEase_t *xx;
 	coOrd p, p0, p1, q0, q1;
 	static coOrd qZero = { 0.0, 0.0 };
 	ANGLE_T az0, a01, b, b01, b1, d, d1;
 	trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
 	SetTrkBits(trk, TB_HIDEDESC);					//Suppress Description for new Joint
 	SetTrkScale( trk, GetLayoutCurScale() );
-	xx = GetTrkExtraData( trk );
+	xx = GET_EXTRA_DATA( trk, T_EASEMENT, extraDataEase_t );
 	SetTrkEndPoint( trk, 0, pos0, NormalizeAngle(angle0+180.0) );
 	SetTrkEndPoint( trk, 1, pos1, NormalizeAngle(angle1+180.0) );
 	xx->R = R;
@@ -472,9 +464,9 @@ LOG( log_ease, 1, ( "NewJoint( [%0.3f %0.3f] A%0.3f, [%0.3f %0.3f] A%0.3f\n    B
 
 static DIST_T GetLengthJoint( track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataEase_t *xx;
 	DIST_T d0, d1;
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	d0 = JoinD( xx->l0, xx->R, xx->L );
 	d1 = JoinD( xx->l1, xx->R, xx->L );
 	if (xx->Scurve)
@@ -485,9 +477,9 @@ static DIST_T GetLengthJoint( track_p trk )
 
 static DIST_T GetFlexLengthJoint( track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataEase_t *xx;
 	DIST_T d0, d1, d3;
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	d0 = JoinD( xx->l0, xx->R+(GetTrkGauge(trk)/2.0), xx->L );
 	d1 = JoinD( xx->l1, xx->R+(GetTrkGauge(trk)/2.0), xx->L );
 	d3 = JoinD( xx->l1, xx->R-(GetTrkGauge(trk)/2.0), xx->L );
@@ -562,7 +554,7 @@ static void DescribeJoint(
  * Print some interesting info about the track.
  */
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	int fix0, fix1;
 
 	sprintf( str, _("Joint Track(%d): Layer=%d Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"), GetTrkIndex(trk),
@@ -679,7 +671,7 @@ static DIST_T DistanceJoint(
  * Determine how close (p) is to (t).
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	return JointDistance( p, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, xx->Scurve );
 }
 
@@ -767,7 +759,7 @@ STATUS_T JointDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	ANGLE_T ap;
 	coOrd end0, end1;
 	end0 = GetTrkEndPos(trk,0);;
@@ -789,13 +781,12 @@ DIST_T JointDescriptionDistance(
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_EASEMENT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
 		return 100000;
 
-
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	coOrd end0, end0off, end1, end1off;
 	end0 = GetTrkEndPos(trk,0);
 	end1 = GetTrkEndPos(trk,1);
@@ -819,7 +810,7 @@ static void DrawJointDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	DIST_T grade=0, sep=0;
 	ANGLE_T a;
 	if (layoutLabels == 0)
@@ -933,7 +924,7 @@ static void DrawJoint(
  * Draw a transition-curve.
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	long widthOptions = 0;
 
 	DrawJointTrack( d, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, xx->flip, xx->Scurve, trk, 0, 1, GetTrkGauge(trk), color, widthOptions );
@@ -953,7 +944,7 @@ static BOOL_T WriteJoint(
  * Write track data to a file (f).
  */
 {
-	struct extraData * xx = GetTrkExtraData(t);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(t, T_EASEMENT, extraDataEase_t);
 	BOOL_T rc = TRUE;
 	long options = (long)GetTrkWidth(t);
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
@@ -978,7 +969,7 @@ static BOOL_T ReadJoint(
 	track_p trk;
 	TRKINX_T index;
 	BOOL_T visible;
-	struct extraData e, *xx;
+	struct extraDataEase_t e, *xx;
 	char scale[10];
 	wIndex_t layer;
 	long options;
@@ -997,7 +988,7 @@ static BOOL_T ReadJoint(
 	if ( !ReadSegs() )
 		return FALSE;
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	xx->descriptionOff = descriptionOff;
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
@@ -1013,6 +1004,7 @@ static BOOL_T ReadJoint(
 	SetTrkWidth(trk, (int)(options&3));
 	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) )
 		SetTrkBits(trk,TB_HIDEDESC);
+	e.base.trkType = T_EASEMENT;
 	*xx = e;
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
@@ -1026,7 +1018,7 @@ static void MoveJoint(
  * Move a track.
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	xx->pos.x += orig.x;
 	xx->pos.y += orig.y;
 	ComputeBoundingBox( trk );
@@ -1040,7 +1032,7 @@ static void RotateJoint(
  * Rotate a track.
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	Rotate( &xx->pos, orig, angle );
 	xx->angle = NormalizeAngle( xx->angle+angle );
 	ComputeBoundingBox( trk );
@@ -1049,7 +1041,7 @@ static void RotateJoint(
 
 static void RescaleJoint( track_p trk, FLOAT_T ratio )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	xx->pos.x *= ratio;
 	xx->pos.y *= ratio;
 	xx->R *= ratio;
@@ -1061,7 +1053,7 @@ static void RescaleJoint( track_p trk, FLOAT_T ratio )
 
 static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * ep1 )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	DIST_T l;
 	ANGLE_T a;
 	if ( ep0 && ep1 ) {
@@ -1092,11 +1084,11 @@ static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * e
 static void SplitJointA(
 		coOrd * posR,
 		EPINX_T ep,
-		struct extraData * xx,
-		struct extraData * xx1,
+		struct extraDataEase_t * xx,
+		struct extraDataEase_t * xx1,
 		ANGLE_T * aR )
 {
-	struct extraData * xx0;
+	struct extraDataEase_t * xx0;
 	BOOL_T flip;
 	DIST_T l;
 
@@ -1150,13 +1142,13 @@ static void SplitJointA(
 
 static BOOL_T SplitJoint( track_p trk, coOrd pos, EPINX_T ep, track_p * leftover, EPINX_T *ep0, EPINX_T *ep1 )
 {
-	struct extraData *xx, *xx1;
+	struct extraDataEase_t *xx, *xx1;
 	track_p trk1;
 	ANGLE_T a;
 
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	trk1 = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-	xx1 = GetTrkExtraData(trk1);
+	xx1 = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
 	*xx1 = *xx;
 	SetTrkEndPoint( trk1, ep, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );
 	*leftover = trk1;
@@ -1271,7 +1263,7 @@ static BOOL_T TraverseJointTrack(
 		DIST_T * distR )
 {
 	track_p trk = trvTrk->trk;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	BOOL_T rc;
 	EPINX_T ep;
 	ANGLE_T angle;
@@ -1320,8 +1312,8 @@ static BOOL_T MergeJoint(
 	EPINX_T ep2=-1;
 	coOrd pos;
 	ANGLE_T a;
-	struct extraData *xx0 = GetTrkExtraData(trk0);
-	struct extraData *xx1 = GetTrkExtraData(trk1);
+	struct extraDataEase_t *xx0 = GET_EXTRA_DATA(trk0, T_EASEMENT, extraDataEase_t);
+	struct extraDataEase_t *xx1 = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
 
 	if ( ep0 == ep1 )
 		return FALSE;
@@ -1390,7 +1382,7 @@ static BOOL_T MoveEndPtJoint( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d )
 
 static BOOL_T QueryJoint( track_p trk, int query )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	track_p trk1;
 
 	switch ( query ) {
@@ -1420,7 +1412,7 @@ static void FlipJoint(
 		coOrd orig,
 		ANGLE_T angle )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	FlipPoint( &xx->pos, orig, angle );
 	xx->angle = NormalizeAngle( 2*angle - xx->angle );
 	xx->negate = !xx->negate;
@@ -1438,7 +1430,7 @@ static BOOL_T MakeParallelJoint(
 		coOrd * p1R,
 		BOOL_T track)
 {
-	struct extraData * xx = GetTrkExtraData(trk), *xx1;
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t), *xx1;
 	ANGLE_T angle, A;
 	coOrd p0, p1, P, q1, r1;
 	DIST_T d, d0;
@@ -1490,7 +1482,7 @@ static BOOL_T MakeParallelJoint(
 	if ( newTrkR ) {
 		if (track) {
 			*newTrkR = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-			xx1 = GetTrkExtraData( *newTrkR );
+			xx1 = GET_EXTRA_DATA( *newTrkR, T_EASEMENT, extraDataEase_t );
 			*xx1 = *xx;
 			xx1->angle = A;
 			xx1->R = R;
@@ -1552,8 +1544,8 @@ static BOOL_T MakeParallelJoint(
 
 static wBool_t CompareJoint( track_cp trk1, track_cp trk2 )
 {
-	struct extraData *xx1 = GetTrkExtraData( trk1 );
-	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	struct extraDataEase_t *xx1 = GET_EXTRA_DATA( trk1, T_EASEMENT, extraDataEase_t );
+	struct extraDataEase_t *xx2 = GET_EXTRA_DATA( trk2, T_EASEMENT, extraDataEase_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_DIST( "L0", xx1, xx2, l0 );
 	REGRESS_CHECK_DIST( "L1", xx1, xx2, l1 );
@@ -1612,7 +1604,7 @@ EXPORT void JointSegProc(
 	DIST_T l;
 	ANGLE_T a;
 	BOOL_T flip;
-	struct extraData * xx, xxx[2];
+	struct extraDataEase_t * xx, xxx[2];
 	coOrd p;
 	int inx;
 	EPINX_T ep0;
@@ -1686,7 +1678,7 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 
 	case SEGPROC_NEWTRACK:
 		data->newTrack.trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-		xx = GetTrkExtraData(data->newTrack.trk);
+		xx = GET_EXTRA_DATA(data->newTrack.trk, T_EASEMENT, extraDataEase_t);
 		xx->pos = segPtr->u.j.pos;
 		xx->angle = segPtr->u.j.angle;
 		xx->l0 = segPtr->u.j.l0;
@@ -1725,6 +1717,8 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 		break;
 
 	case SEGPROC_SPLIT:
+		xxx[0].base.trkType = T_EASEMENT;
+		xxx[1].base.trkType = T_EASEMENT;
 		xxx[0].pos = segPtr->u.j.pos;
 		xxx[0].angle = segPtr->u.j.angle;
 		xxx[0].l0 = segPtr->u.j.l0;
@@ -1864,12 +1858,12 @@ EXPORT void UndoJoint(
 		track_p trk1,
 		EPINX_T ep1 )
 {
-	struct extraData * xx;
+	struct extraDataEase_t * xx;
 	DIST_T d;
 
 	if ( GetTrkType(trk1) != T_EASEMENT ) 
 		return;
-	xx = GetTrkExtraData(trk1);
+	xx = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
 	if ( ep1 == 0 )
 		d = xx->L/2.0 - xx->l0;
 	else

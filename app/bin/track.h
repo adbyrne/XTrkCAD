@@ -467,7 +467,7 @@ void SetDebug( char * );
 #define GetTrkEndAngle( T, I )	((T)->endPt[I].angle)
 #define GetTrkEndOption( T, I ) ((T)->endPt[I].option)
 #define SetTrkEndOption( T, I, O )		((T)->endPt[I].option=O)
-#define GetTrkExtraData( T )	((T)->extraData)
+#define GetTrkExtraData( T, TT )	((T)->extraData)
 #define GetTrkWidth( T )		(int)((T)->width)
 #define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
 #define GetTrkBits(T)			((T)->bits)
@@ -493,7 +493,7 @@ coOrd GetTrkEndPos( track_p, EPINX_T );
 ANGLE_T GetTrkEndAngle( track_p, EPINX_T );
 long GetTrkEndOption( track_p, EPINX_T );
 long SetTrkEndOption( track_p, EPINX_T, long );
-struct extraData * GetTrkExtraData( track_p );
+struct extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
 int GetTrkWidth( track_p );
 void SetTrkWidth( track_p, int );
 int GetTrkBits( track_p );

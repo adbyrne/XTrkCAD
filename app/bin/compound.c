@@ -43,7 +43,7 @@
 
 EXPORT PATHPTR_T GetPaths( track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
 #ifdef NEWPATH
 	if ( xx->new_paths == NULL ) {
 		xx->new_paths = GenerateTrackPaths( trk );
@@ -67,7 +67,7 @@ EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
 
 EXPORT void SetPaths( track_p trk, PATHPTR_T paths )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
 	wIndex_t pathLen = GetPathsLength( paths );
 #ifdef NEWPATH
 	if ( xx->saved_paths )
@@ -91,7 +91,7 @@ EXPORT void SetPaths( track_p trk, PATHPTR_T paths )
 
 EXPORT PATHPTR_T GetCurrPath( track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
 	if ( xx->currPath )
 		return xx->currPath;
 	PATHPTR_T path = GetPaths( trk );
@@ -111,14 +111,18 @@ EXPORT PATHPTR_T GetCurrPath( track_p trk )
 
 EXPORT long GetCurrPathIndex( track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	if ( GetTrkType( trk ) != T_TURNOUT )
+		return 0;
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
 	return xx->currPathIndex;
 }
 
 
 EXPORT void SetCurrPathIndex( track_p trk, long position )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	if ( GetTrkType( trk ) != T_TURNOUT )
+		return;
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
 	xx->currPathIndex = position;
 	xx->currPath = NULL;
 }
@@ -275,10 +279,10 @@ void FormatCompoundTitle(
 void ComputeCompoundBoundingBox(
 		track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	coOrd hi, lo;
 
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 
 	GetSegBounds( xx->orig, xx->angle, xx->segCnt, xx->segs, &lo, &hi );
 	hi.x += lo.x;
@@ -355,7 +359,7 @@ EXPORT void CompoundClearDemoDefns( void )
 void SetDescriptionOrig(
 		track_p trk )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	int i, j;
 	coOrd p0, p1;
 
@@ -393,7 +397,7 @@ void DrawCompoundDescription(
 {
 	wFont_p fp;
 	coOrd p1;
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	char * desc;
 	long layoutLabelsOption = layoutLabels;
 
@@ -437,10 +441,10 @@ DIST_T CompoundDescriptionDistance(
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	if (GetTrkType(trk) != T_TURNOUT && GetTrkType(trk) != T_STRUCTURE)
 		return 100000;
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	if ( ((GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) && !show_hidden)
 		return 100000;
 	p1 = xx->descriptionOrig;
@@ -464,7 +468,7 @@ STATUS_T CompoundDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	static coOrd p0, p1;
 	static BOOL_T editMode;
 	wDrawColor color;
@@ -545,7 +549,7 @@ DIST_T DistanceCompound(
 		track_p t,
 		coOrd * p )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep;
 	DIST_T d0, d1;
 	coOrd p0, p2;
@@ -650,7 +654,7 @@ static descData_t compoundDesc[] = {
 
 static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	const char * manufS, * nameS, * partnoS;
 	char * mP, *nP, *pP;
 	int mL, nL, pL;
@@ -881,7 +885,7 @@ void DescribeCompound(
 		char * str,
 		CSIZE_T len )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	int fix;
 	EPINX_T ep, epCnt;
 	char * mP, *nP, *pP, *cnP;
@@ -1044,7 +1048,7 @@ void DescribeCompound(
 void DeleteCompound(
 		track_p t )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	FreeFilledDraw( xx->segCnt, xx->segs );
 	MyFree( xx->segs );
 	xx->segs = NULL;
@@ -1055,7 +1059,7 @@ BOOL_T WriteCompound(
 		track_p t,
 		FILE * f )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep, epCnt;
 	long options;
 	long position = 0;
@@ -1115,7 +1119,7 @@ BOOL_T WriteCompound(
  */
 
 EXPORT void SetCompoundLineType( track_p trk, int width ) {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	switch(width) {
 	case 0:
 		xx->lineType = DRAWLINESOLID;
@@ -1157,11 +1161,11 @@ EXPORT track_p NewCompound(
 		trkSeg_p segs )
 {
 	track_p trk;
-	struct extraData * xx;
+	struct extraDataCompound_t * xx;
 	EPINX_T ep;
 
 	trk = NewTrack( index, trkType, epCnt, sizeof (*xx) + 1 );
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 	xx->orig = pos;
 	xx->angle = angle;
 	xx->handlaid = FALSE;
@@ -1202,7 +1206,7 @@ BOOL_T ReadCompound(
 		TRKTYP_T trkType )
 {
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	TRKINX_T index;
 	BOOL_T visible;
 	coOrd orig;
@@ -1267,7 +1271,7 @@ BOOL_T ReadCompound(
 	SetTrkScale(trk, LookupScale( scale ));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 	xx->handlaid = (int)((options&COMPOUND_OPTION_HANDLAID)!=0);
 	xx->flipped = (int)((options&COMPOUND_OPTION_FLIPPED)!=0);
 	xx->ungrouped = (int)((options&COMPOUND_OPTION_UNGROUPED)!=0);
@@ -1305,7 +1309,7 @@ void MoveCompound(
 		track_p trk,
 		coOrd orig )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	xx->orig.x += orig.x;
 	xx->orig.y += orig.y;
 	ComputeCompoundBoundingBox( trk );
@@ -1317,7 +1321,7 @@ void RotateCompound(
 		coOrd orig,
 		ANGLE_T angle )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	Rotate( &xx->orig, orig, angle );
 	xx->angle = NormalizeAngle( xx->angle + angle );
 	Rotate( &xx->descriptionOff, zero, angle );
@@ -1329,7 +1333,7 @@ void RescaleCompound(
 		track_p trk,
 		FLOAT_T ratio )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	xx->orig.x *= ratio;
 	xx->orig.y *= ratio;
 	xx->descriptionOff.x *= ratio;
@@ -1345,7 +1349,7 @@ void FlipCompound(
 		coOrd orig,
 		ANGLE_T angle )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep, epCnt;
 	char * mP, *nP, *pP;
 	int mL, nL, pL;
@@ -1467,14 +1471,14 @@ static dynArr_t enumCompound_da;
 
 BOOL_T EnumerateCompound( track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	INT_T inx, inx2;
 	int cmp;
 	long listLabelsOption = listLabels;
 	char * index = MyMalloc(10);
 
 	if ( trk != NULL ) {
-		xx = GetTrkExtraData(trk);
+		xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 		if ( xx->flipped )
 			listLabelsOption |= LABEL_FLIPPED;
 #ifdef LATER
