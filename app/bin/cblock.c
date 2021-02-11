@@ -1200,7 +1200,17 @@ static track_p getNextBlock( track_p trk, coOrd pos )
 	for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
 		if ( IsPosClose( trk->endPt[ep].pos, pos ) ) break;
 	}
+#if 0
+	LOG(log_block, 2, ("*** getNextBlock(): T%d (%0.2f %0.2f) ep %d  ",
+			GetTrkIndex(trk),pos.x,pos.y,ep))
+#endif
 	trk = trk->endPt[ep].track;
+#if 0
+	LOG(log_block, 2, (" --- T%d (%0.2f %0.2f)  B%d\n",
+		trk?GetTrkIndex(trk):0,trk?trk->endPt[ep].pos.x:0.0,
+		trk?trk->endPt[ep].pos.y:0.0,
+		trk&&trk->conBlock?GetTrkIndex(trk->conBlock):0))
+#endif
 	return trk?trk->conBlock:NULL;
 }
 
@@ -1221,7 +1231,7 @@ EXPORT track_p GetRemoteBlock( track_p blk, track_p dynBlk )
 	LOG(log_block, 2, ("*** GetRemoteBlock(): B%d, DB%d B%d - B%d\n",
 			GetTrkIndex(blk0),
 			GetTrkIndex(blk),
-			GetTrkIndex(blk1),blk0  == blk ? blk1 : blk0))
+			GetTrkIndex(blk1),GetTrkIndex(blk0 == blk ? blk1 : blk0)))
 #endif
 	return blk0  == blk ? blk1 : blk0;
 }
@@ -1560,8 +1570,7 @@ static void transferAtached( track_p trk )
 	EPINX_T epN, epR;
 	coOrd pos;
 
-	if ( ! trk ) return;
-	blkN = trk->conBlock;
+	if ( ! trk || ! ( blkN = trk->conBlock ) ) return;
        	if ( blkN->occupied != 1 || IsDynamicBlock( blkN ) ) return;
 #if 0
 	LOG(log_block, 2, ("transferAtached()  T%d B%d\n", GetTrkIndex(trk),GetTrkIndex(blkN)))
@@ -1577,6 +1586,10 @@ static void transferAtached( track_p trk )
 
 	// Get the Dynamic block at this pos
 	blkD = getNextBlock( trk, pos );
+#if 0
+	LOG(log_block, 2, ("transferAtached()  T%d B%d D%d\n",
+		trk?GetTrkIndex(trk):0,blkN?GetTrkIndex(blkN):0,blkD?GetTrkIndex(blkD):0))
+#endif
 	if ( ! blkD || ! IsDynamicBlock( blkD ) ) return;
 
 	// Get the ep in blkD with pos
@@ -1632,7 +1645,7 @@ static void adjustOccupied ( track_p trk, EPINX_T ep, int adj )
 	if ( GetTrkType( trk ) != T_TURNTABLE && trk->conBlock && trk->conBlock->occupied <= 1 && adj != 0 )
 		transferAtached( trk );
 #if 0
-	LOG(log_block, 1, ("adjustOccupied %d : trk T%d occ %d  B%d occ %d\n",
+	LOG(log_block, 1, ("adjustOccupied adj %d : trk T%d occ %d  B%d occ %d\n",
 		adj, GetTrkIndex(trk), trk->occupied,
 		trk->conBlock?GetTrkIndex(trk->conBlock):0,trk->conBlock?trk->conBlock->occupied:0))
 #endif
@@ -1740,7 +1753,7 @@ static track_p scanForTrack( track_p here, track_p next, track_p endTrk, DIST_T 
 {
 	EPINX_T epN, epE;
 
-#if 0
+#if 1
 	LOG(log_block, 1, ("scanForTrack() -- T%d T%d (T%d) len %0.2f adj %d\n",
 		GetTrkIndex(here),GetTrkIndex(next),GetTrkIndex(endTrk),len,adj))
 #endif
@@ -1761,9 +1774,9 @@ static track_p scanForTrack( track_p here, track_p next, track_p endTrk, DIST_T 
 
 // Occupancy for all tracks between trk0 and trk1 inclusive are adjusted by adj
 // Create and delete dynamic blocks as needed via adjustOccupied().
-static void adjustCarOccupancy( track_p trk0, EPINX_T ep0, track_p trk1, DIST_T carLen, int adj )
+static void adjustCarOccupancy( track_p trk0, EPINX_T ep0a, track_p trk1, DIST_T carLen, int adj )
 {
-	EPINX_T epN;
+	EPINX_T epN, ep0 = getRemoteEp( trk0, ep0a );
 	DIST_T len = 0.0 - carLen;
 	track_p endTrk;
 
@@ -1780,8 +1793,8 @@ static void adjustCarOccupancy( track_p trk0, EPINX_T ep0, track_p trk1, DIST_T 
 	for ( epN = 0; epN < GetTrkEndPtCnt(trk0); epN++ ) {
 		if ( endTrk = scanForTrack( trk0, trk0->endPt[epN].track, trk1, len, 0 ) ) {
 #if 0
-	LOG(log_block, 2, ("adjustCarOccupancy() -- T%d-%d T%d  d %0.2f adj endTrk T%d\n",
-		GetTrkIndex(trk0),epN,GetTrkIndex(trk1),len,endTrk?GetTrkIndex(endTrk):0))
+		LOG(log_block, 2, ("adjustCarOccupancy(0) -- T%d-%d T%d  d %0.2f adj endTrk T%d\n",
+			GetTrkIndex(trk0),epN,GetTrkIndex(trk1),len,endTrk?GetTrkIndex(endTrk):0))
 #endif
 			len = 0.0 - carLen;
 			scanForTrack( trk0, trk0->endPt[epN].track, trk1, len, adj );
@@ -1843,12 +1856,22 @@ static void getCarTrkEp( track_p car, EPINX_T *epF, EPINX_T *epB )
 	}
 }
 
+static EPINX_T posToEp( track_p trk, coOrd pos ) {
+	EPINX_T ep;
+
+	for ( ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
+		if ( isSame( pos, trk->endPt[ep].pos ) ) break;
+	}
+	return ep;
+}
+
 // Given a track and position, find the end points the position is on.
 static void getPathEp( track_p trk, coOrd pos, EPINX_T *ep0, EPINX_T *ep1 )
 {
 	EPINX_T epCnt, ep, minEp;
 	coOrd posT;
 	DIST_T minDist, dist;
+	track_p blk, trkD;
 
 	epCnt = GetTrkEndPtCnt(trk);
 	if ( epCnt == 2 ) {
@@ -1858,8 +1881,27 @@ static void getPathEp( track_p trk, coOrd pos, EPINX_T *ep0, EPINX_T *ep1 )
 		*ep0 = 0;
 		posT = GetRemoteTurnoutPositions( trk, trk->endPt[0].pos ); // 1 or 2
 		*ep1 = isSame( posT, trk->endPt[1].pos )?1:2;
-	} else {
+	} else { // for slip switches and other complex turnouts need to find the path
 		*ep0 = *ep1 = epCnt;
+		if ( (blk = trk->conBlock) && IsDynamicBlock( blk ) ) {
+			// Start at the block end and look for trk
+			trkD = blk->endPt[0].prevTrack;
+			posT = blk->endPt[0].pos;
+			// ep at start of Dynamic Block
+			*ep0 = posToEp( trkD, posT );
+			if ( *ep0 != epCnt )
+				*ep1 = getRemoteEp( trkD, *ep0 );
+			if ( trkD == trk ) return;
+			posT = trkD->endPt[*ep1].pos;
+			while ( trkD != trk ) {
+				trkD = trkD->endPt[*ep1].track;
+				*ep0 = posToEp( trkD, posT );
+				if ( *ep0 != epCnt )
+					*ep1 = getRemoteEp( trkD, *ep0 );
+				posT = trkD->endPt[*ep1].pos;
+			}
+			return;
+		}
 		minEp   = 0;
 		minDist = FindDistance ( pos, trk->endPt[0].pos );
 		for ( ep = 1; ep < GetTrkEndPtCnt(trk); ep++ ) {
@@ -1890,7 +1932,7 @@ EXPORT void UpdateOccupied( void )
     EPINX_T epN, epR, epL, ep0, ep1;
     DIST_T len, d, d0, d1;
 
-    LOG(log_block, 2, ("UpdateOccupied() -- enter \n"))
+    LOG(log_block, 2, ("    UpdateOccupied() -- enter \n"))
     for (car=NULL; TrackIterate(&car);) {
         // trk@pos is the center of the car
         if ( ! ( trk = TrainCarOnTrk( car, &pos ) ) ) continue;
@@ -1904,6 +1946,11 @@ EXPORT void UpdateOccupied( void )
         prev1 = car->endPt[1].prevTrack;
         getPathEp( trk, pos, &ep0, &ep1 );
         len = FindDistance( car->endPt[0].pos, car->endPt[1].pos );  // length of car
+#if 0
+        LOG(log_block, 2, ("\n\nUpdateOccupied() C%d T%d-%d:%d len %0.2f PF%d PB%d \n",
+                GetTrkIndex(car),trk?GetTrkIndex(trk):0,ep0,ep1,len,
+		prev0?GetTrkIndex(prev0):0,prev1?GetTrkIndex(prev1):0))
+#endif
 
         // track ep nearest front (car->endPt[0].pos) of car.
         d0 = FindDistance( trk->endPt[ep0].pos, car->endPt[0].pos );
@@ -1972,7 +2019,7 @@ EXPORT void UpdateOccupied( void )
         if ( createDynamicBlock( trk1, getRemoteEp( trk1, ep1 ) ) ) changed = TRUE;
     }
 
-    adjustCarOccupancy( trk0, getRemoteEp( trk0, ep0 ), trk1, len, 1 );
+    adjustCarOccupancy( trk0, ep0, trk1, len, 1 );
     if ( prev0 && prev1 )
         adjustCarOccupancy( prev0, 0 /*val not used*/, prev1, len, -1 );
 
@@ -2001,7 +2048,7 @@ EXPORT void UpdateOccupied( void )
 //  verifyOccupancy( TRUE );
     MainRedraw();
 #if 0
-    LOG(log_block, 3, ("UpdateOccupied() -- exit \n\n"))
+    LOG(log_block, 3, ("    UpdateOccupied() -- exit \n\n"))
 #endif
 }
 

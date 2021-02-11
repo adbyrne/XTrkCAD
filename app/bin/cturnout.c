@@ -1804,8 +1804,8 @@ EXPORT coOrd GetRemoteTurnoutPositions( track_p trk, coOrd pos )
 
 	path = GetCurrPath( trk );
 #if 0
-	LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) %s pos %0.4f %0.4f -- isSame %d\n",
-				path, pos.x, pos.y, isSame( pos, pos)) )
+	LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) %s (%d) pos %0.4f %0.4f\n",
+				path, GetCurrPathIndex( trk ), pos.x, pos.y) )
 #endif
 	for ( path += strlen((char*)path); path[0] || path[1]; path++ ) {
 		if ( path[0] == 0 ) {
