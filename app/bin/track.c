@@ -49,6 +49,9 @@ static int log_track = 0;
 static int log_endPt = 0;
 static int log_readTracks = 0;
 
+// Enable trkType checks on extraData*_t
+#define CHECK_EXTRA_DATA
+
 /*****************************************************************************
  *
  * VARIABLES
