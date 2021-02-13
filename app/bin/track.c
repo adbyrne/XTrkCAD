@@ -101,6 +101,8 @@ static BOOL_T inDrawTracks;
 
 static wBool_t bWriteEndPtDirectIndex = FALSE;
 
+static wBool_t bFreeTrack = FALSE;
+
 #ifndef TRACKDEP
 
 /*****************************************************************************
@@ -390,8 +392,13 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 {
 //printf( "GTXD T%d TY%d\n", GetTrkIndex(trk), trkType );
 	if ( IsTrackDeleted(trk) ) {
-		// This shouldn't happen!
-		printf( "GetExtraData T%d is deleted!\n", trk->index );
+		// We've been called by FreeTracks() which is called from
+		// - ClearTracks to remove all tracks
+		// - DoRegression to remove expected track
+		// - UndoStart / UndoDelete
+		// Anywhere else: needs investigation
+		if ( bFreeTrack == FALSE )
+			printf( "GetExtraData T%d is deleted!\n", trk->index );
 		return trk->extraData;
 	}
 #ifdef CHECK_EXTRA_DATA
@@ -1078,12 +1085,14 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 
 EXPORT void FreeTrack( track_p trk )
 {
+	bFreeTrack = TRUE;
 	trackCmds(trk->type)->delete( trk );
 	if (trk->endPt)
 		MyFree(trk->endPt);
 	if (trk->extraData)
 		MyFree(trk->extraData);
 	MyFree(trk);
+	bFreeTrack = FALSE;
 }
 
 
