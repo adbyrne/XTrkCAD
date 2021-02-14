@@ -24,8 +24,7 @@
 #define HAVE_CTRAIN_H
 
 #include "common.h"
-#include "include/paramfile.h"
-#include "track.h"
+#include "track.h" //- traverseTrack
 
 extern wIndex_t trainCmdInx;
 

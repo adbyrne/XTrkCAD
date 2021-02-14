@@ -32,6 +32,7 @@
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
+#include "common-ui.h"
 
 
 dynArr_t paramFileInfo_da;

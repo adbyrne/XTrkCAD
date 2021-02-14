@@ -34,6 +34,7 @@
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
+#include "common-ui.h"
 
 static BOOL_T debug = 0;
 static int log_join = 0;

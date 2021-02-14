@@ -30,6 +30,8 @@
 #include "fileio.h"
 #include "paths.h"
 #include "track.h"
+#include "draw.h"
+#include "common-ui.h"
 
 static struct wFilSel_t * exportDXFFile_fs;
 

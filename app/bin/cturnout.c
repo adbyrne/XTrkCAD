@@ -35,6 +35,7 @@
 #include "include/paramfile.h"
 #include "track.h"
 #include "trackx.h"
+#include "common-ui.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 
@@ -453,7 +454,7 @@ static void ChangeAdjustableEndPt(
 		EPINX_T ep,
 		DIST_T d )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	coOrd pos;
 	trkSeg_p segPtr;
 	ANGLE_T angle = GetTrkEndAngle( trk, ep );
@@ -483,8 +484,8 @@ EXPORT BOOL_T ConnectAdjustableTracks(
 		track_p trk2,
 		EPINX_T ep2 )
 {
-	struct extraData * xx1;
-	struct extraData * xx2;
+	struct extraDataCompound_t * xx1;
+	struct extraDataCompound_t * xx2;
 	BOOL_T adj1, adj2;
 	coOrd p1, p2;
 	ANGLE_T a, a1, a2;
@@ -493,8 +494,8 @@ EXPORT BOOL_T ConnectAdjustableTracks(
 	coOrd off;
 	DIST_T beyond;
 
-	xx1 = GetTrkExtraData(trk1);
-	xx2 = GetTrkExtraData(trk2);
+	xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
+	xx2 = GET_EXTRA_DATA(trk2, T_TURNOUT, extraDataCompound_t);
 	adj1 = adj2 = FALSE;
 	if (GetTrkType(trk1) == T_TURNOUT && xx1->special == TOadjustable)
 		adj1 = TRUE;
@@ -652,7 +653,7 @@ track_p NewHandLaidTurnout(
 		ANGLE_T frogA )
 {
 	track_p trk;
-	struct extraData * xx;
+	struct extraDataCompound_t * xx;
 	trkSeg_t segs[2];
 	sprintf( message, "\tHand Laid Turnout, Angle=%0.1f\t", frogA );
 	DYNARR_SET( trkEndPt_t, tempEndPts_da, 2 );
@@ -678,7 +679,7 @@ track_p NewHandLaidTurnout(
 	segs[1].u.l.pos[0] = zero;
 	segs[1].u.l.pos[1] = p2;
 	trk = NewCompound( T_TURNOUT, 0, p0, a0, message, 3, &tempEndPts(0), NULL, (PATHPTR_T)"Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs );
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	xx->handlaid = TRUE;
 
 	return trk;
@@ -691,7 +692,7 @@ track_p NewHandLaidTurnout(
  */
 
 static coOrd MapPathPos(
-		struct extraData * xx,
+		struct extraDataCompound_t * xx,
 		signed char segInx,
 		EPINX_T ep )
 {
@@ -715,7 +716,7 @@ static coOrd MapPathPos(
 }
 
 static trkSeg_p MapPathSeg(
-		struct extraData * xx,
+		struct extraDataCompound_t * xx,
 		signed char segInx) {
 
 	if ( segInx < 0 ) {
@@ -730,7 +731,7 @@ static void DrawTurnout(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	wIndex_t i;
 	long widthOptions = 0;
 	DIST_T scale2rail;
@@ -775,7 +776,7 @@ static ANGLE_T GetAngleTurnout(
 		EPINX_T *ep0,
 		EPINX_T *ep1 )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	wIndex_t segCnt, segInx;
 	ANGLE_T angle;
 
@@ -868,7 +869,7 @@ EXPORT EPINX_T TurnoutPickEndPt(
 		coOrd epPos,
 		track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	wIndex_t segInx, segInx0;
 	EPINX_T segEP;
 	PATHPTR_T cp, cq, pps[2];
@@ -1001,7 +1002,7 @@ EXPORT BOOL_T SplitTurnoutCheck(
 			coOrd * outPos,
 			ANGLE_T * outAngle )
 	{
-	struct extraData * xx = GetTrkExtraData( trk );
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk , T_TURNOUT, extraDataCompound_t);
 	wIndex_t segInx0, segInx, segCnt;
 	EPINX_T segEP, epCnt, ep2=0, epN;
 	PATHPTR_T pp, pp1, pp2;
@@ -1293,7 +1294,7 @@ static BOOL_T CheckTraverseTurnout(
 		track_p trk,
 		coOrd pos )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	coOrd pos1;
 #ifdef LATER
 	int inx, foundInx = 0;
@@ -1364,7 +1365,7 @@ static BOOL_T TraverseTurnout(
 		DIST_T * distR )
 {
 	track_p trk = trvTrk->trk;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	coOrd pos0, pos1, pos2;
 	DIST_T d, dist;
 	PATHPTR_T path, pathCurr;
@@ -1488,12 +1489,12 @@ LOG( log_traverseTurnout, 1, ( "  -> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos
 
 static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 {
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	static EPINX_T ep;
 	static wBool_t curved;
 	DIST_T d;
 
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	if ( xx->special == TOadjustable ) {
 		switch ( action ) {
 		case C_START:
@@ -1537,8 +1538,8 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-	struct extraData *xx;
-	xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx;
+	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	params->type = curveTypeStraight;
     if (inx == PARAMS_TURNOUT) {
         params->len = 0.0;
@@ -1615,7 +1616,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		int segInx, subSegInx;
 		trkSeg_p segPtr;
 		double d = 10000;
-		struct extraData * xx = GetTrkExtraData(trk);
+		struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 		/* Get parms from that seg */
 		wBool_t back,negative;
 		coOrd segPos = pos;
@@ -1748,7 +1749,7 @@ static void DrawTurnoutPositionIndicator(
 		track_p trk,
 		wDrawColor color )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	PATHPTR_T path,path1;
 	coOrd pos0, pos1;
 	trkSeg_p seg;
@@ -1798,7 +1799,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 		coOrd *posR,
 		ANGLE_T *angleR )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	traverseTrack_t trvtrk;
 	DIST_T dist;
 
@@ -1847,7 +1848,7 @@ static BOOL_T MakeParallelTurnout(
 		BOOL_T track)
 {
 	ANGLE_T angle = GetTrkEndAngle(trk,1);
-	struct extraData *xx, *yy;
+	struct extraDataCompound_t *xx, *yy;
 	coOrd *endPts;
 	trkEndPt_p endPt;
 	int i;
@@ -1879,7 +1880,7 @@ static BOOL_T MakeParallelTurnout(
 			endPt[ 1 ].pos = endPts[ 1 ];
 			endPt[ 1 ].angle = GetTrkEndAngle( trk, 1 );
 
-			yy = GetTrkExtraData(trk);
+			yy = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 
 			DIST_T * radii = NULL;
 			if (yy->special == TOcurved) {
@@ -1893,7 +1894,7 @@ static BOOL_T MakeParallelTurnout(
 			*newTrk = NewCompound( T_TURNOUT, 0, endPt[ 0 ].pos, endPt[ 0 ].angle + 90.0,
 					yy->title, 2, endPt, radii, paths,
 					yy->segCnt, yy->segs );
-			xx = GetTrkExtraData(*newTrk);
+			xx = GET_EXTRA_DATA(*newTrk, T_TURNOUT, extraDataCompound_t);
 			xx->customInfo = yy->customInfo;
 
 			/*	if (connection((int)curTurnoutEp).trk) {
@@ -1945,8 +1946,8 @@ static BOOL_T MakeParallelTurnout(
 
 static wBool_t CompareTurnout( track_cp trk1, track_cp trk2 )
 {
-	struct extraData *xx1 = GetTrkExtraData( trk1 );
-	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	struct extraDataCompound_t *xx1 = GET_EXTRA_DATA( trk1, T_TURNOUT, extraDataCompound_t );
+	struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_TURNOUT, extraDataCompound_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -2377,7 +2378,7 @@ static void AddTurnout( void )
 {
 	track_p newTrk;
 	track_p trk, trk1;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	coOrd epPos;
 	DIST_T d;
 	ANGLE_T a, aa;
@@ -2513,7 +2514,7 @@ nextEnd:;
 	 * copy data */
 
 	newTrk = NewCompound( T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, curTurnout->paths, curTurnout->segCnt, curTurnout->segs );
-	xx = GetTrkExtraData(newTrk);
+	xx = GET_EXTRA_DATA(newTrk, T_TURNOUT, extraDataCompound_t);
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {
 		CopyAttributes( connection((int)curTurnoutEp).trk, newTrk );

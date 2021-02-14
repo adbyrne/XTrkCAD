@@ -26,6 +26,7 @@
 #include "fileio.h"
 #include "cselect.h"
 #include "track.h"
+#include "common-ui.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;

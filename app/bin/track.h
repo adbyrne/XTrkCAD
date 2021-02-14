@@ -24,8 +24,6 @@
 #define TRACK_H
 
 #include "common.h"
-#include "draw.h"
-#include "misc2.h"
 
 extern TRKTYP_T T_NOTRACK;
 
@@ -136,13 +134,14 @@ typedef struct {
 #define Q_IS_TURNOUT                    (31)
 #define Q_GET_NODES						(32)
 
-typedef struct {
+typedef struct traverseTrack_t {
 		track_p trk;							// IN Current Track OUT Next Track
 		DIST_T length;							// IN How far to go
 		DIST_T dist;							// OUT how far left = 0 if found
 		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
 		ANGLE_T angle;							// IN/OUT - angle now
-		} traverseTrack_t, *traverseTrack_p;
+		} traverseTrack_t;
+typedef struct traverseTrack_t *traverseTrack_p;
 
 
 typedef struct {
@@ -200,14 +199,15 @@ typedef struct {
 		double cachedGrade;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
-typedef struct {
+typedef struct trkEndPt_t {
 		coOrd pos;
 		ANGLE_T angle;
 		TRKINX_T index;
 		track_p track;
 		elev_t elev;
 		long option;
-		} trkEndPt_t, * trkEndPt_p;
+		} trkEndPt_t;
+typedef struct trkEndPt_t * trkEndPt_p;
 
 extern dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
@@ -216,7 +216,7 @@ typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;
 
 
-typedef struct {
+typedef struct trkSeg_t {
 		char type;
 		wDrawColor color;
 		DIST_T width;
@@ -266,7 +266,8 @@ typedef struct {
 				PolyType_e polyType;
 			} p;
 		} u;
-		} trkSeg_t, * trkSeg_p;
+		} trkSeg_t;
+typedef struct trkSeg_t * trkSeg_p;
 
 #define SEG_STRTRK		('S')
 #define SEG_CRVTRK		('C')
@@ -466,7 +467,7 @@ void SetDebug( char * );
 #define GetTrkEndAngle( T, I )	((T)->endPt[I].angle)
 #define GetTrkEndOption( T, I ) ((T)->endPt[I].option)
 #define SetTrkEndOption( T, I, O )		((T)->endPt[I].option=O)
-#define GetTrkExtraData( T )	((T)->extraData)
+#define GetTrkExtraData( T, TT )	((T)->extraData)
 #define GetTrkWidth( T )		(int)((T)->width)
 #define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
 #define GetTrkBits(T)			((T)->bits)
@@ -492,7 +493,7 @@ coOrd GetTrkEndPos( track_p, EPINX_T );
 ANGLE_T GetTrkEndAngle( track_p, EPINX_T );
 long GetTrkEndOption( track_p, EPINX_T );
 long SetTrkEndOption( track_p, EPINX_T, long );
-struct extraData * GetTrkExtraData( track_p );
+struct extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
 int GetTrkWidth( track_p );
 void SetTrkWidth( track_p, int );
 int GetTrkBits( track_p );

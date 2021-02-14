@@ -23,7 +23,6 @@
 #define CSELECT_H
 
 #include "common.h"
-#include "track.h"
 
 #define defaultCursor wCursorCross
 

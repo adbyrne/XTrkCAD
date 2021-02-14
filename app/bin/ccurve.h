@@ -23,8 +23,8 @@
 #ifndef HAVE_CCURVE_H
 #define HAVE_CCURVE_H
 
-#include "draw.h"
-#include "track.h"
+#include "common.h"
+#include "track.h" //- curveType_e
 
 typedef struct {
 		curveType_e type;

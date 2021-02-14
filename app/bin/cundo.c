@@ -26,7 +26,9 @@
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"
+#include "draw.h"
 #include "cundo.h"
+#include "common-ui.h"
 
 
 /*****************************************************************************
@@ -367,7 +369,7 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 	if (!ReadStream( stream, tempTrk.endPt, tempTrk.endCnt * sizeof tempTrk.endPt[0] ))
 		return FALSE;
 	if (tempTrk.extraSize != trk->extraSize)
-		tempTrk.extraData = MyRealloc( trk->extraData, tempTrk.extraSize );
+		tempTrk.extraData = (extraDataBase_t*)MyRealloc( trk->extraData, tempTrk.extraSize );
 	else
 		tempTrk.extraData = trk->extraData;
 	if (!ReadStream( stream, tempTrk.extraData, tempTrk.extraSize ))

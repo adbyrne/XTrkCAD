@@ -55,6 +55,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif // UTFCONVERT
@@ -80,6 +81,7 @@ static char controlOffScript[STR_LONG_SIZE];
 #endif
 
 typedef struct controlData_t {
+    extraDataBase_t base;
     coOrd orig;
     BOOL_T IsHilite;
     char * name;
@@ -89,7 +91,7 @@ typedef struct controlData_t {
 
 static controlData_p GetcontrolData ( track_p trk )
 {
-    return (controlData_p) GetTrkExtraData(trk);
+    return GET_EXTRA_DATA( trk, T_CONTROL, controlData_t );
 }
 
 #define RADIUS 6

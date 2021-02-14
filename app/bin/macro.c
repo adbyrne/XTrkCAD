@@ -33,6 +33,7 @@
 #include "track.h"
 #include "trackx.h"
 #include "version.h"
+#include "common-ui.h"
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );

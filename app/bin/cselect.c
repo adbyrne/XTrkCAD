@@ -25,7 +25,6 @@
 #include "tcornu.h"
 #include "tbezier.h"
 #include "track.h"
-#define PRIVATE_EXTRADATA
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
@@ -38,6 +37,7 @@
 #include "draw.h"
 #include "misc.h"
 #include "trackx.h"
+#include "common-ui.h"
 
 
 #include "bitmaps/bmendpt.xbm"
@@ -57,7 +57,6 @@ EXPORT wIndex_t flipCmdInx;
 static long moveMode = MAXMOVEMODE;
 static BOOL_T enableMoveDraw = TRUE;
 static BOOL_T move0B;
-struct extraData { char junk[2000]; };
 
 static wDrawBitMap_p endpt_bm;
 static wDrawBitMap_p angle_bm[4];

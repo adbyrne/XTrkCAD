@@ -22,7 +22,7 @@
 
 #ifndef HAVE_NOTE_H
 #define HAVE_NOTE_H
-#include "track.h"
+#include "common.h"
 
 #define URLMAXIMUMLENGTH (512)
 #define PATHMAXIMUMLENGTH (2048)
@@ -39,7 +39,8 @@ enum noteCommands {
 };
 
 /** hold the data for the note */
-struct extraDataNote {
+typedef struct extraDataNote_t {
+	extraDataBase_t base;
 	coOrd pos;					/**< position */
 	unsigned int layer;
 	enum noteCommands op;		/**< note type */
@@ -56,7 +57,7 @@ struct extraDataNote {
 			BOOL_T inArchive;
 		} fileData;				/**< used for file note */
 	} noteData;
-};
+} extraDataNote_t;
 
 //struct noteTextData {
 //	coOrd pos;
@@ -101,9 +102,10 @@ void NewTextNoteUI(track_p trk);
 void DescribeTextNote(track_p trk, char * str, CSIZE_T len);
 
 /* trknote.c */
+extern TRKTYP_T T_NOTE;
 void NoteStateSave(track_p trk);
 
-void UpdateFile(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart);
-void UpdateText(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart);
-void UpdateLink(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart);
+void UpdateFile(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStart);
+void UpdateText(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStart);
+void UpdateLink(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStart);
 #endif // !HAVE_NOTE_H

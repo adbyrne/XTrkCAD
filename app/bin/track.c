@@ -35,6 +35,7 @@
 #include "track.h"
 #include "misc.h"
 #include "ctrain.h"
+#include "common-ui.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -47,6 +48,9 @@ EXPORT char tempSpecial[4096];
 static int log_track = 0;
 static int log_endPt = 0;
 static int log_readTracks = 0;
+
+// Enable trkType checks on extraData*_t
+#define CHECK_EXTRA_DATA
 
 /*****************************************************************************
  *
@@ -96,6 +100,8 @@ EXPORT BOOL_T onTrackInSplit = FALSE;
 static BOOL_T inDrawTracks;
 
 static wBool_t bWriteEndPtDirectIndex = FALSE;
+
+static wBool_t bFreeTrack = FALSE;
 
 #ifndef TRACKDEP
 
@@ -382,8 +388,24 @@ EXPORT EPINX_T GetTrkEndPtCnt( track_cp trk )
 	return trk->endCnt;
 }
 
-EXPORT struct extraData * GetTrkExtraData( track_cp trk )
+EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType )
 {
+//printf( "GTXD T%d TY%d\n", GetTrkIndex(trk), trkType );
+	if ( IsTrackDeleted(trk) ) {
+		// We've been called by FreeTracks() which is called from
+		// - ClearTracks to remove all tracks
+		// - DoRegression to remove expected track
+		// - UndoStart / UndoDelete
+		// Anywhere else: needs investigation
+		if ( bFreeTrack == FALSE )
+			printf( "GetExtraData T%d is deleted!\n", trk->index );
+		return trk->extraData;
+	}
+#ifdef CHECK_EXTRA_DATA
+	ASSERT( trk->extraData );
+	ASSERT( trk->type == trk->extraData->trkType );
+	ASSERT( trkType == T_NOTRACK || trk->type == trkType );
+#endif
 	return trk->extraData;
 }
 
@@ -1048,7 +1070,8 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	} else
 		trk->endPt = NULL;
 	if (extraSize) {
-		trk->extraData = MyMalloc( extraSize );
+		trk->extraData = (struct extraDataBase_t*)MyMalloc( extraSize );
+		trk->extraData->trkType = type;
 	} else
 		trk->extraData = NULL;
 	trk->extraSize = extraSize;
@@ -1062,12 +1085,14 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 
 EXPORT void FreeTrack( track_p trk )
 {
+	bFreeTrack = TRUE;
 	trackCmds(trk->type)->delete( trk );
 	if (trk->endPt)
 		MyFree(trk->endPt);
 	if (trk->extraData)
 		MyFree(trk->extraData);
 	MyFree(trk);
+	bFreeTrack = FALSE;
 }
 
 
