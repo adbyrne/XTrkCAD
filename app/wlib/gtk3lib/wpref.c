@@ -283,6 +283,8 @@ void wPrefSetString(
     if (!prefInitted)
 	readPrefs();
 
+    if (!sval) return;
+
     g_key_file_set_string( keyFile,
                            section,
                            name,
