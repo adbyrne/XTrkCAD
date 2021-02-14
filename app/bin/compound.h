@@ -115,7 +115,7 @@ extern dynArr_t structureInfo_da;
 extern dynArr_t carDescInfo_da;
 #define turnoutInfo(N) DYNARR_N( turnoutInfo_t *, turnoutInfo_da, N )
 #define structureInfo(N) DYNARR_N( turnoutInfo_t *, structureInfo_da, N )
-#define isSame(P1,P2) fabs(P1.x-P2.x) < 0.005 && fabs(P1.y-P2.y) < 0.005
+#define isSame(P1,P2) fabs(P1.x-P2.x) < 0.015 && fabs(P1.y-P2.y) < 0.015
 extern turnoutInfo_t * curTurnout;
 extern turnoutInfo_t * curStructure;
 
