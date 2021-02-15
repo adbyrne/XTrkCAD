@@ -24,7 +24,6 @@
 #define HAVE_LAYOUT_H
 
 #include "common.h"
-#include "misc.h"
 
 
 void SetLayoutFullPath(const char *fileName);

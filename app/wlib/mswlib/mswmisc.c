@@ -2223,7 +2223,7 @@ void doHelpMenu(void * context)
         ftsQuery.fTitleOnly = FALSE;
         ftsQuery.pszSearchQuery = NULL;
         ftsQuery.pszWindow = NULL;
-        HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD)&ftsQuery);
+        HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD_PTR)&ftsQuery);
         break;
 
 

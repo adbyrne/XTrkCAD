@@ -21,7 +21,6 @@
  */
 
 #include "common.h"
-#include "track.h"
 
 
 extern dynArr_t tempEndPts_da;
@@ -45,7 +44,7 @@ DIST_T BezierDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T BezierDescriptionMove( track_p, wAction_t, coOrd );
 
 BOOL_T ConvertToArcs (coOrd[4], dynArr_t *, BOOL_T, wDrawColor, DIST_T);
-track_p NewBezierTrack(coOrd[4], trkSeg_t *, int);
+track_p NewBezierTrack(coOrd[4], trkSeg_p, int);
 double BezierLength(coOrd[4], dynArr_t);
 double BezierOffsetLength(dynArr_t,double offset);
 double BezierMinRadius(coOrd[4],dynArr_t);

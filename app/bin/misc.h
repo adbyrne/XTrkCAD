@@ -27,7 +27,6 @@
 
 #include "acclkeys.h"
 #include "common.h"
-#include "draw.h"
 
 typedef void (*addButtonCallBack_t)(void*);
 
@@ -311,7 +310,6 @@ void DoChangeNotification( long );
 wBool_t CheckHelpTopicExists(const char * topic);
 
 /* foreign externs */
-extern drawCmd_t mapD;
 extern STATUS_T CmdEnumerate( wAction_t, coOrd );
 
 extern wIndex_t modifyCmdInx;
@@ -456,5 +454,7 @@ void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
 
+
+#include "misc2.h"
 
 #endif

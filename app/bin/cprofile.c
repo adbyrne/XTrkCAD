@@ -27,6 +27,7 @@
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "common-ui.h"
 
 
 /*

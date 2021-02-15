@@ -85,6 +85,7 @@
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
+#include "common-ui.h"
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;
@@ -985,9 +986,6 @@ track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2]) {
 }
 
 
-struct extraData {
-				cornuData_t cornuData;
-		};
 
 ANGLE_T GetOpenAngle(coOrd pos[2],ANGLE_T angle[2],int moved) {
 	ANGLE_T a = FindAngle(pos[1-moved],pos[moved]);
@@ -1368,7 +1366,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 				if (((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {   //Extend end locked
 					SetUpCornuParms(&cp);
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
-					struct extraData *xx = GetTrkExtraData(Da.selectTrack);
 					if (Da.radius[sel] == 0)  {                //Straight
 						  Da.extendSeg[sel].type = SEG_STRTRK;
 						  Da.extendSeg[sel].width = 0;
@@ -1824,7 +1821,6 @@ static void cornuModDlgUpdate(
  *
  */
 STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG ) {
-	struct extraData *xx = GetTrkExtraData(trk);
 
 	Da.trackGauge = trackG;
 
@@ -1869,11 +1865,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			else Da.ep[0] = -1;
 		}
 		if (prior) {
-			struct extraData *xx0 = GetTrkExtraData(prior);
-			Da.pos[0] = xx0->cornuData.pos[ep0];              //Copy parms from FIRST CORNU trk
-			Da.radius[0] = xx0->cornuData.r[ep0];
-			Da.angle[0] = xx0->cornuData.a[ep0];
-			Da.center[0] = xx0->cornuData.c[ep0];
+			struct extraDataCornu_t *xx0 = GET_EXTRA_DATA(prior, T_CORNU, extraDataCornu_t);
+			Da.pos[0] = xx0->pos[ep0];              //Copy parms from FIRST CORNU trk
+			Da.radius[0] = xx0->r[ep0];
+			Da.angle[0] = xx0->a[ep0];
+			Da.center[0] = xx0->c[ep0];
 		}
 
 		//Move to RHS
@@ -1895,11 +1891,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		}
 
 		if (next) {
-			struct extraData *xx1 = GetTrkExtraData(next);
-			Da.pos[1] = xx1->cornuData.pos[ep1];              //Copy parms from LAST CORNU trk
-			Da.radius[1] = xx1->cornuData.r[ep1];
-			Da.angle[1] = xx1->cornuData.a[ep1];
-			Da.center[1] = xx1->cornuData.c[ep1];
+			struct extraDataCornu_t *xx1 = GET_EXTRA_DATA(next, T_CORNU, extraDataCornu_t);
+			Da.pos[1] = xx1->pos[ep1];              //Copy parms from LAST CORNU trk
+			Da.radius[1] = xx1->r[ep1];
+			Da.angle[1] = xx1->a[ep1];
+			Da.center[1] = xx1->c[ep1];
 		}
 
 		InfoMessage(_("Now Select or Add (+Shift) a Point"));
@@ -2601,12 +2597,12 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 	track_p trk_old = NULL;
 	newTracks[0] = NULL, newTracks[1] = NULL;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	if (!IsTrack(trk)) return FALSE;
-	for (int i=0; i<xx->cornuData.arcSegs.cnt;i++) {
+	for (int i=0; i<xx->arcSegs.cnt;i++) {
 		track_p bezTrack[2];
 		bezTrack[0] = NULL, bezTrack[1] = NULL;
-		trkSeg_p seg = &DYNARR_N(trkSeg_t,xx->cornuData.arcSegs,i);
+		trkSeg_p seg = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		if (seg->type == SEG_BEZTRK) {
 			DYNARR_RESET(trkSeg_t,seg->bezSegs);
 			FixUpBezierSeg(seg->u.b.pos,seg,TRUE);

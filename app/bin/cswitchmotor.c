@@ -57,6 +57,7 @@
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif // UTFCONVERT
@@ -123,6 +124,7 @@ static dynArr_t switchmotorTrk_da;
 */
 
 typedef struct switchmotorData_t {
+    extraDataBase_t base;
     char * name;
     char * normal;
     char * reverse;
@@ -137,7 +139,7 @@ static void EditSwitchMotor (track_p trk);
 
 static switchmotorData_p GetswitchmotorData ( track_p trk )
 {
-	return (switchmotorData_p) GetTrkExtraData(trk);
+	return GET_EXTRA_DATA( trk, T_SWITCHMOTOR, switchmotorData_t );
 }
 
 #if 0
@@ -155,7 +157,7 @@ static void ComputeSwitchMotorBoundingBox (track_p t)
 {
     coOrd hi, lo, p;
     switchmotorData_p data_p = GetswitchmotorData(t);
-    struct extraData *xx = GetTrkExtraData(data_p->turnout);
+    struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout, T_TURNOUT, extraDataCompound_t);
     coOrd orig = xx->orig;
     ANGLE_T angle = xx->angle;
     SCALEINX_T s = GetTrkScale(data_p->turnout);
@@ -190,7 +192,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 {
     coOrd p[switchmotorPoly_CNT];
     switchmotorData_p data_p = GetswitchmotorData(t);
-    struct extraData *xx = GetTrkExtraData(data_p->turnout);
+    struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout, T_TURNOUT, extraDataCompound_t);
     coOrd orig = xx->orig;
     ANGLE_T angle = xx->angle;
     SCALEINX_T s = GetTrkScale(data_p->turnout);

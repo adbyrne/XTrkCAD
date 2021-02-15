@@ -31,12 +31,11 @@
 #include "include/paramfile.h"
 #include "track.h"
 #include "ccurve.h"
+#include "common-ui.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
 EXPORT dynArr_t structureInfo_da;
-
-typedef struct compoundData extraData;
 
 
 static wIndex_t pierListInx;
@@ -347,7 +346,7 @@ static void DrawStructure(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_STRUCTURE, extraDataCompound_t);
 
 	d->options &= ~DC_NOTSOLIDLINE;
 	switch(xx->lineType) {
@@ -396,7 +395,7 @@ static ANGLE_T GetAngleStruct(
 		EPINX_T * ep0,
 		EPINX_T * ep1 )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 	ANGLE_T angle;
 
 	pos.x -= xx->orig.x;
@@ -424,8 +423,8 @@ static BOOL_T QueryStructure( track_p trk, int query )
 
 static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
 {
-	struct extraData *xx1 = GetTrkExtraData( trk1 );
-	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	struct extraDataCompound_t *xx1 = GET_EXTRA_DATA( trk1, T_STRUCTURE, extraDataCompound_t );
+	struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE, extraDataCompound_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -720,7 +719,7 @@ static ANGLE_T PlaceStructure(
 static void NewStructure( void )
 {
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	wIndex_t titleLen;
 	wIndex_t pierInx;
 
@@ -737,7 +736,7 @@ static void NewStructure( void )
 	UndoStart( _("Place Structure"), "newStruct" );
 	titleLen = strlen( curStructure->title );
 	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 #ifdef LATER
 	trk = NewTrack( 0, T_STRUCTURE, 0, sizeof (*xx) + 1 );
 	xx->orig = Dst.pos;

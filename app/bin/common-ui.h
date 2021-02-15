@@ -1,9 +1,9 @@
-/** \file cstraigh.h
- * Prototypes for straight track functions
+/** \file common-ui.h
+ * Defnitions of message and other UI types 
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 2005 Dave Bullis
+ *  Copyright (C) 2021 Dave Bullis
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,13 +20,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef HAVE_CSTRAIGH_H
-#define HAVE_CSTRAIGH_H
+/* Do not include this file in header (.h) files */
 
-#include "common.h"
+#ifndef COMMON_UI_H
+#define COMMON_UI_H
 
-void AdjustStraightEndPt( track_p t, EPINX_T ep, coOrd pos );
-track_p NewStraightTrack( coOrd p0, coOrd p1 );
-BOOL_T ExtendStraightToJoin( track_p, EPINX_T, track_p, EPINX_T );
+#include "messages.h"
 
-#endif // !HAVE_CSTRAIGH_H
+#endif
+

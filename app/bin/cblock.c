@@ -111,6 +111,7 @@
 #include "misc.h"
 #include "track.h"
 #include "trackx.h"
+#include "common-ui.h"
 #include "layout.h"
 #include "ctrain.h"
 
@@ -205,6 +206,7 @@ static BOOL_T blockUndoStarted;
 static DIST_T blockLen;
 
 typedef struct blockData_t {
+    extraDataBase_t base;
     char * name;
     char * script;
     BOOL_T IsHilite;
@@ -220,7 +222,7 @@ typedef struct blockData_t {
 
 static blockData_p GetblockData( track_p trk )
 {
-	return (blockData_p) GetTrkExtraData(trk);
+	return GET_EXTRA_DATA( trk, T_BLOCK, blockData_t );
 }
 
 static BOOL_T blockSide = FALSE;

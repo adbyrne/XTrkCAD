@@ -24,7 +24,9 @@
 #include "compound.h"
 #include "cselect.h"
 #include "track.h"
+#include "draw.h"
 #include "fileio.h"
+#include "common-ui.h"
 
 static wMenu_p splitPopupM[2];
 static wMenuToggle_p splitPopupMI[2][4];

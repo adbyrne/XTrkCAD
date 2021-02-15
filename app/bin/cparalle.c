@@ -27,6 +27,7 @@
 #include "param.h"
 #include "track.h"
 #include "layout.h"
+#include "common-ui.h"
 
 static struct {
 		track_p Trk;

@@ -23,7 +23,6 @@
 #define FILEIO_H
 
 #include "common.h"
-#include "misc.h"
 
 extern FILE * paramFile;
 extern char *paramFileName;
@@ -132,7 +131,7 @@ BOOL_T EditClone( void );
 
 void DoRecord( void * );
 void AddPlaybackProc( char *, playbackProc_p, void * );
-EXPORT void TakeSnapshot( drawCmd_t * );
+EXPORT void TakeSnapshot( drawCmd_p );
 void PlaybackMessage( char * );
 void DoPlayBack( void * );
 int MyGetKeyState( void );

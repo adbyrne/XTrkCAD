@@ -33,7 +33,7 @@
 extern BOOL_T inDescribeCmd;
 extern descData_t noteDesc[];
 
-static TRKTYP_T T_NOTE = -1;
+EXPORT TRKTYP_T T_NOTE = -1;
 
 static wDrawBitMap_p note_bm, link_bm, document_bm;
 
@@ -71,9 +71,9 @@ static 	coOrd posSave;
 static track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 {
     track_p t;
-    struct extraDataNote * xx;
+    struct extraDataNote_t * xx;
     t = NewTrack(index, T_NOTE, 0, sizeof *xx);
-    xx = (struct extraDataNote *)GetTrkExtraData(t);
+    xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
     xx->pos = p;
 	xx->op = command;
     SetBoundingBox(t, p, p);
@@ -90,7 +90,7 @@ static track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
     coOrd p[5];
     int type[5];
 
@@ -132,7 +132,7 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 
 static DIST_T DistanceNote(track_p t, coOrd * p)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
     DIST_T d;
     d = FindDistance(*p, xx->pos);
 
@@ -145,7 +145,7 @@ static DIST_T DistanceNote(track_p t, coOrd * p)
 
 static void DeleteNote(track_p t)
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 
 	switch (xx->op) {
 	case OP_NOTETEXT:
@@ -177,7 +177,7 @@ static void DeleteNote(track_p t)
 void
 NoteStateSave(track_p trk)
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	layerSave = GetTrkLayer(trk);
 	posSave = xx->pos;
 }
@@ -190,7 +190,7 @@ void
 CommonCancelNote(track_p trk)
 {
 	if (inDescribeCmd) {
-		struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+		struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 		xx->layer = layerSave;
 		xx->pos = posSave;
 		SetBoundingBox(trk, xx->pos, xx->pos);
@@ -198,9 +198,9 @@ CommonCancelNote(track_p trk)
 }
 
 static void
-CommonUpdateNote(track_p trk, int inx, struct extraDataNote *noteData )
+CommonUpdateNote(track_p trk, int inx, struct extraDataNote_t *noteData )
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	switch (inx) {
 	case OR_NOTE:
@@ -217,10 +217,10 @@ CommonUpdateNote(track_p trk, int inx, struct extraDataNote *noteData )
 }
 
 
-void UpdateFile(struct extraDataNote *noteUIData, int inx,  BOOL_T needUndoStart)
+void UpdateFile(struct extraDataNote_t *noteUIData, int inx,  BOOL_T needUndoStart)
 {
 	track_p trk = noteUIData->trk;
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	switch (inx) {
 	case OR_NOTE:
@@ -250,10 +250,10 @@ void UpdateFile(struct extraDataNote *noteUIData, int inx,  BOOL_T needUndoStart
 	}
 }
 
-void UpdateLink(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart)
+void UpdateLink(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStart)
 {
 	track_p trk = noteUIData->trk;
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	switch (inx) {
 	case OR_NOTE:
@@ -272,10 +272,10 @@ void UpdateLink(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart)
 	}
 }
 
-void UpdateText(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart)
+void UpdateText(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStart)
 {
 	track_p trk = noteUIData->trk;
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	switch (inx) {
 	case OR_NOTE:
@@ -331,7 +331,7 @@ GetNoteMarker(enum noteCommands command )
 
 static BOOL_T WriteNote(track_p t, FILE * f)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
     BOOL_T rc = TRUE;
 	unsigned strings2convert = 1;
 
@@ -389,7 +389,7 @@ ReadTrackNote(char *line)
     track_p t;
     int size;
     char * cp;
-    struct extraDataNote *xx;
+    struct extraDataNote_t *xx;
     wIndex_t index;
     wIndex_t layer;
     coOrd pos;
@@ -409,7 +409,7 @@ ReadTrackNote(char *line)
 		t = NewNote(index, pos, noteType);
    		SetTrkLayer(t, layer);
 	   
-   		xx = (struct extraDataNote *)GetTrkExtraData(t);
+   		xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 		switch (noteType) {
 		case OP_NOTETEXT:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
@@ -467,7 +467,7 @@ ReadTrackNote(char *line)
     t = NewNote(index, pos, noteType);
     SetTrkLayer(t, layer);
 	   
-    xx = (struct extraDataNote *)GetTrkExtraData(t);
+    xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 
 	switch (noteType) {
 	case OP_NOTETEXT:
@@ -515,7 +515,7 @@ ReadNote(char * line)
 
 static void MoveNote(track_p trk, coOrd orig)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     xx->pos.x += orig.x;
     xx->pos.y += orig.y;
     SetBoundingBox(trk, xx->pos, xx->pos);
@@ -524,14 +524,14 @@ static void MoveNote(track_p trk, coOrd orig)
 
 static void RotateNote(track_p trk, coOrd orig, ANGLE_T angle)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     Rotate(&xx->pos, orig, angle);
     SetBoundingBox(trk, xx->pos, xx->pos);
 }
 
 static void RescaleNote(track_p trk, FLOAT_T ratio)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     xx->pos.x *= ratio;
     xx->pos.y *= ratio;
 }
@@ -574,8 +574,8 @@ static BOOL_T QueryNote( track_p trk, int query )
 
 static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataNote *xx1 = (struct extraDataNote *)GetTrkExtraData( trk1 );
-	struct extraDataNote *xx2 = (struct extraDataNote *)GetTrkExtraData( trk2 );
+	struct extraDataNote_t *xx1 = GET_EXTRA_DATA( trk1, T_NOTE, extraDataNote_t );
+	struct extraDataNote_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTE, extraDataNote_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
 	REGRESS_CHECK_INT( "Layer", xx1, xx2, layer )

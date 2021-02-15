@@ -30,6 +30,7 @@
 #include "track.h"
 #include "include/partcatalog.h"
 #include "include/stringxtc.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  *

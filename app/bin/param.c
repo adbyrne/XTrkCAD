@@ -27,6 +27,7 @@
 #include "misc.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
 
 EXPORT int paramHiliteFast;
 

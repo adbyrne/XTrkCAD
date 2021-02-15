@@ -26,6 +26,7 @@
 #include "param.h"
 #include "paths.h"
 #include "track.h"
+#include "common-ui.h"
 
 #ifdef WIN32
 #ifdef _WIN64
