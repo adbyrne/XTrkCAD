@@ -192,9 +192,9 @@ The resulting track(s) will mimic the shape of the Cornu/Bezier(s) exactly. This
 
 The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. 
 
-The endpoint which you are working on is indicated with a big red dot.
+The endpoint which you are working on is indicated with a big red dot. Note that when an endpoint is selected, the Elevation Window will have focus. To select a different endpoint without closing this window, two clicks (or a double click) will be needed. The first click restores focus to the main window, the second selects the point.
 
-Moving around the layout will show you the elevation at the point indicated by a blue dot.
+Moving around the layout will show you the elevation at the point indicated by a blue dot. If \f{Magnetic Snap} is enabled without \f{Alt} or is not enabled and \f{Alt} is used, the dot will be an open-circle when snapped to a close end-point. 
 
 If you hover over a point where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
 

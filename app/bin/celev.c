@@ -412,20 +412,24 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				}
 			}
 			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
-				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
-					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
-					InfoMessage (_("Track End elevation %0.3f"), PutDim(elev0));
-				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
+			    if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
 						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
 					CreateSplitAnchor(p0,trk0);
+			   } else if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),p0)) &&
+					   (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap)) {
+					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
+					InfoMessage (_("Track End elevation %0.3f - snap End Pt"), PutDim(elev0));
+				} else if (FindDistance(GetTrkEndPos(trk0,ep0),p0)<minLength) {
+					CreateEndAnchor(p0,TRUE);
+					InfoMessage (_("Track End elevation %0.3f - over End Pt"), PutDim(elev0));
 				} else {
 					InfoMessage( _("Track Point elevation %0.3f"), PutDim(elev0));
 					CreateEndAnchor(p0,TRUE);
 				}
-			} else InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
+			} else InfoMessage( _("Click on End Pt, +Shift to split, +Ctrl to move description") );
 		} else
-			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
+			InfoMessage( _("Click on End Pt, +Shift to split, +Ctrl to move description") );
 		return C_CONTINUE;
 	case C_DOWN:
 	case C_MOVE:
@@ -447,10 +451,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		} else {
 			ep0 = PickEndPoint( p0, trk0 );
-			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
-				InfoMessage( _("Point selected!") );
-				ElevSelect( trk0, ep0 );
-			} else if ( (MyGetKeyState()&WKEY_SHIFT) ) {
+			if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 				oldTrackCount = trackCount;
 				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
@@ -460,6 +461,12 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				ElevSelect( trk0, ep0 );
 				UndoEnd();
 				elevUndo = FALSE;
+			} else if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),p0)) && (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap)) {   //Snap if close visually
+				InfoMessage( _("Point selected!") );
+				ElevSelect( trk0, ep0 );
+			} else if (FindDistance(GetTrkEndPos(trk0,ep0),p0)<minLength) {  //Close enough if closer than min track length
+				InfoMessage( _("Point selected!") );
+				ElevSelect( trk0, ep0 );
 			}
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);

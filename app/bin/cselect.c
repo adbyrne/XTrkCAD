@@ -2438,6 +2438,10 @@ static void ChangeDescFlag( wBool_t set, void * mode )
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
+/*
+ * Mode_o -1 = everything, 0 = elevations only, 1 = descriptions only
+ */
+
 track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T show_hidden, BOOL_T * hidden_o)  {
 	 	track_p trk = NULL;
 		DIST_T d, dd = 10000;
@@ -2468,7 +2472,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				}
 			}
 			if (IsClose(dd)) break;
-			if ( !QueryTrack( trk1, Q_HAS_DESC ) && (*mode_o > 0) )
+			if ( *mode_o == 0 || !QueryTrack( trk1, Q_HAS_DESC ) )
 				continue;
 			if ((labelEnable&LABELENABLE_TRKDESC)==0)
 				continue;
@@ -2588,6 +2592,10 @@ STATUS_T CmdMoveDescription(
 				if (mode==0) {
 					InfoMessage(_("Elevation description"));
 				} else {
+					if (moveDescMode == 1) {
+						moveDescTrk = NULL;
+						return C_CONTINUE;   //Ignore other tracks if only looking for elevations
+					}
 					if (hidden) {
 						InfoMessage(_("Hidden description - 's' to Show, 'd' Details"));
 						moveDescPos = pos;
