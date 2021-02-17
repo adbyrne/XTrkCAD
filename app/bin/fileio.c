@@ -669,6 +669,7 @@ static BOOL_T ReadTrackFile(
 		return FALSE;
 	}
 
+	checkPtFileNameBackup = NULL;
 	paramLineNum = 0;
 	paramFileName = strdup( fileName );
 
