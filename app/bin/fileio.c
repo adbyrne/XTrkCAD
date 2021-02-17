@@ -1190,7 +1190,9 @@ EXPORT void SetAutoSave() {
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	changed = checkPtMark = 1;
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
+
 }
 
 EXPORT void DoSave( doSaveCallBack_p after )
@@ -1207,6 +1209,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1219,6 +1222,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	changed = checkPtMark = 1;
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1231,6 +1235,7 @@ EXPORT void DoLoad( void )
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	paste_offset = zero;
 	cursor_offset = zero;
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1245,6 +1250,7 @@ EXPORT void DoExamples( void )
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
 	wFilSelect( examplesFile_fs, message );
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 

@@ -684,9 +684,8 @@ EXPORT void SaveState(void) {
  */
 static void DoQuitAfter(void) {
 	changed = 0;
+	CleanupFiles();  //Get rid of checkpoint if we quit.
 	SaveState();
-
-	CleanupFiles();
 }
 /**
  * Process shutdown request. This function is called when the user requests
