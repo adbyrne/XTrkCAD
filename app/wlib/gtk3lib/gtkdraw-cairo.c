@@ -30,19 +30,16 @@
 #include <math.h>
 
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
 
 // Trace low level drawing actions
 int iDrawLog = 0;
+long lDrawCnt = 0;
 
 #include "gtkint.h"
-#include "gdk/gdkkeysyms.h"
 
 #define gtkAddHelpString( a, b ) wlibAddHelpString( a, b )
 
 #define CENTERMARK_LENGTH (6)
-
-static long drawVerbose = 0;
 
 // Hack to do TempRedraw or MainRedraw
 // For Windows only
@@ -95,6 +92,23 @@ wBool_t wDrawSetTempMode(
 }
 
 
+static long GtkDrawSetColor(
+	cairo_t * cairo,
+	wDrawColor color,
+	GdkRGBA *gcolor )
+{
+        long tcolor = wlibGetColor(color, TRUE);
+        gcolor->red = ((tcolor&0x00FF0000)>>16)/255.0;
+        gcolor->green = ((tcolor&0x0000FF00)>>8)/255.0;
+        gcolor->blue = ((tcolor&0x000000FF))/255.0;
+        cairo_set_source_rgba(cairo, gcolor->red, gcolor->green, gcolor->blue, 1.0 );
+	if ( iDrawLog >= 3 )
+		printf( "%ld: GtkDrawGetColor( %lx: R%0.3f G%0.3f B%0.3f\n",
+			lDrawCnt++, color, gcolor->red, gcolor->green, gcolor->blue );
+	return tcolor;
+}
+
+
 static cairo_t* gtkDrawCreateCairoContext(
 		wDraw_p bd,
 		cairo_surface_t * surface,
@@ -103,6 +117,10 @@ static cairo_t* gtkDrawCreateCairoContext(
 		wDrawColor color,
 		wDrawOpts opts )
 {
+	if ( iDrawLog >= 4 )
+		printf( "%ld: gtkDrawCreateCairoContext %s %s Color:%6lx Clip:%d [%dx%d] (%d+%d)\n",
+			lDrawCnt++, bd->template_id, (opts&wDrawOptTemp)?"Temp":"Main", color, bd->clip_set,
+			bd->realX, bd->realY, bd->w, bd->h );
 	cairo_t * cairo;
 
 	if (surface)
@@ -120,6 +138,8 @@ static cairo_t* gtkDrawCreateCairoContext(
 		This is not fatal but the draw will be ineffective because the next TempRedraw() will erase the temp surface
 		before the expose event can copy (or bitblt) it
 	*/
+				if ( iDrawLog > 4 )
+					printf( "%ld: cario_create %s temp\n", lDrawCnt++, bd->template_id );
 				cairo = cairo_create(bd->temp_surface);
 			} else {
 				if ( bd->bTempMode )
@@ -131,6 +151,8 @@ static cairo_t* gtkDrawCreateCairoContext(
 		If you set a break point on the printf you'll see the offending wDraw*() call in the traceback
 		This is not fatal but could result in garbage being left on the screen if the command is cancelled.
 	*/
+				if ( iDrawLog > 4 )
+					printf( "%ld: cario_create %s main\n", lDrawCnt++, bd->template_id );
 				cairo = cairo_create(bd->surface);
 			}
 		}
@@ -191,25 +213,10 @@ static cairo_t* gtkDrawCreateCairoContext(
 				break;
 			}
 	}
-	GdkRGBA gcolor;
-
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-	if(opts & wDrawOptTemp)
-	{
-		cairo_set_source_rgba(cairo, 255, 0, 0, 0.5);
-	}
-	else
-	{
-        long tcolor = wlibGetColor(color, TRUE);
-        gcolor.red = (tcolor&0x00FF0000)>>16;
-        gcolor.green = (tcolor&0x0000FF00)>>8;
-        gcolor.blue = (tcolor&0x000000FF);
-
-        bd->lastColor = tcolor;
-
-        cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 1.0);
+	GdkRGBA gcolor;
+	bd->lastColor = GtkDrawSetColor( cairo, color, &gcolor );
         cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-    }
 
 	if (bd->clip_set) {
 		cairo_rectangle(cairo,bd->rect.x,bd->rect.y,bd->rect.width,bd->rect.height);
@@ -258,6 +265,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		psPrintLine( x0, y0, x1, y1, width, lineType, color, opts );
 		return;
 	}
+	if ( iDrawLog >= 3 )
+		printf( "%ld: wDrawLine %dx%d %dx%d\n", lDrawCnt, x0, y0, x1, y1 );
 	x0 = INMAPX(bd,x0);
 	y0 = INMAPY(bd,y0);
 	x1 = INMAPX(bd,x1);
@@ -407,13 +416,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	/* cairo does not support the old method of text removal by overwrite; force always write here and
            refresh on cancel event */
 	GdkRGBA gcolor;
-	long tcolor = wlibGetColor(color, TRUE);
-	gcolor.red = (tcolor&0x00FF0000)>>16;
-	gcolor.green = (tcolor&0x0000FF00)>>8;
-	gcolor.blue = (tcolor&0x000000FF);
-
-	cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 1.0);
-
+	GtkDrawSetColor( cairo, color, &gcolor );
 
 	cairo_translate( cairo, x, y );
 	cairo_rotate( cairo, angle );
@@ -502,12 +505,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
  			cairo_set_operator(cairo, CAIRO_OPERATOR_DIFFERENCE);
  			cairo_fill_preserve(cairo);
  		}
- 		GdkRGBA gcolor;
-		long tcolor = wlibGetColor(color, TRUE);
-		gcolor.red = (tcolor&0x00FF0000)>>16;
-		gcolor.green = (tcolor&0x0000FF00)>>8;
-		gcolor.blue = (tcolor&0x000000FF);
- 		cairo_set_source_rgba(cairo, gcolor.red , gcolor.green, gcolor.blue, 1.0);
+		GdkRGBA gcolor;
+		GtkDrawSetColor( cairo, color, &gcolor );
  		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
  		cairo_stroke_preserve(cairo);
  		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
@@ -543,15 +542,13 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_rel_line_to(cairo, 0, h);
 	cairo_rel_line_to(cairo, -w, 0);
 	cairo_rel_line_to(cairo, 0, -h);
+	wlibDrawFilled( cairo, color, opt );
+#ifdef LATER
 	cairo_set_source_rgb(cairo, 0,0,0);
 	cairo_set_operator(cairo, CAIRO_OPERATOR_DIFFERENCE);
 	cairo_fill(cairo);
 	GdkRGBA gcolor;
-	long tcolor = wlibGetColor(color, TRUE);
-	gcolor.red = (tcolor&0x00FF0000)>>16;
-	gcolor.green = (tcolor&0x0000FF00)>>8;
-	gcolor.blue = (tcolor&0x000000FF);
-	cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 1.0);
+	GtkDrawSetColor( cairo, color, &gcolor );
 	cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 	cairo_move_to(cairo, x, y);
     cairo_rel_line_to(cairo, w, 0);
@@ -567,6 +564,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_rel_line_to(cairo, -w, 0);
 	cairo_rel_line_to(cairo, 0, -h);
 	cairo_fill(cairo);
+#endif
 
 	gtkDrawDestroyCairoContext(cairo);
 
@@ -724,7 +722,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opt);
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, 0, 2 * M_PI);
-	cairo_fill(cairo);
+	wlibDrawFilled( cairo, color, opt );
+//	cairo_fill(cairo);
 	gtkDrawDestroyCairoContext(cairo);
 
 	if (bd->widget && !bd->delayUpdate)
@@ -735,9 +734,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
  void wDrawClearTemp(wDraw_p bd) {
  	//Wipe out temp space with 0 alpha (transparent)
 
- 	static long cDCT = 0;
- 	if ( iDrawLog )
- 		printf( "wDrawClearTemp %ld\n", cDCT++ );
+ 	if ( iDrawLog >= 1 )
+ 		printf( "%ld: wDrawClearTemp %s %d+%d\n", lDrawCnt++, bd->template_id, bd->w, bd->h  );
  	cairo_t* cairo = cairo_create(bd->temp_surface);
 
  	cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 0.0);
@@ -753,10 +751,11 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
  		gtk_widget_queue_draw(bd->widget);
   }
 
-
  void wDrawClear(
 		wDraw_p bd )
 {
+ 	if ( iDrawLog >= 1 )
+ 		printf( "%ld: wDrawClear %s %d+%d\n", lDrawCnt++, bd->template_id, bd->w, bd->h  );
 
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, 0);
 	cairo_move_to(cairo, 0, 0);
@@ -766,7 +765,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_fill(cairo);
 	gtkDrawDestroyCairoContext(cairo);
 	gtk_widget_queue_draw(bd->widget);
-
+	wDrawClearTemp(bd);
 }
 
  void * wDrawGetContext(
@@ -917,6 +916,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		fprintf(stderr,"resizeDraw: no client data\n");
 		return;
 	}
+	if ( iDrawLog >= 1 )
+		printf( "%ld: wDrawSetSize %d+%d %s\n", lDrawCnt, w, h, redraw?"Redraw":"" );
 	if (bd->fromTemplate && !(bd->option&BD_RESIZEABLE)) {
 		GtkAllocation alloc;
 		gtk_widget_get_allocation(bd->widget, &alloc);
@@ -936,11 +937,11 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	{
 		if (bd->surface)
 			cairo_surface_destroy(bd->surface);
-		bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (bd->widget), CAIRO_CONTENT_COLOR, w, h);
+		bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window (bd->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
 
 		if (bd->temp_surface)
 			cairo_surface_destroy(bd->temp_surface);
-		bd->temp_surface = gdk_window_create_similar_surface(gtk_widget_get_window (bd->widget), CAIRO_CONTENT_COLOR, w, h);
+		bd->temp_surface = gdk_window_create_similar_surface(gtk_widget_get_window (bd->widget), CAIRO_CONTENT_COLOR_ALPHA, w, h);
 
 
 		wDrawClear( bd );
@@ -1011,13 +1012,18 @@ static gboolean draw_event(
 		cairo_t * cr,
 		wDraw_p bd)
 {
-	cairo_set_source_surface (cr, bd->surface, 0, 0);
-	cairo_set_operator(cr,CAIRO_OPERATOR_SOURCE);
-	cairo_paint (cr);
-	cairo_set_source_surface (cr, bd->temp_surface, 0, 0);
-	cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
-	cairo_paint (cr);
-	return FALSE;
+	if ( iDrawLog >= 4 )
+		printf( "%ld: draw_event %dx%d+%dx%d\n", lDrawCnt++,
+			0, bd->w, 0, bd->h );
+	cairo_set_source_surface( cr, bd->surface, 0, 0 );
+	cairo_paint( cr );
+	cairo_set_source_surface( cr, bd->temp_surface, 0, 0 );
+	cairo_paint( cr );
+	cairo_t * cr3 = cairo_create( bd->temp_surface );
+	cairo_set_operator( cr3, CAIRO_OPERATOR_CLEAR );
+	cairo_paint( cr3 );
+	cairo_destroy( cr3 );
+	return TRUE;
 }
 
 static void
@@ -1049,13 +1055,25 @@ static gboolean draw_configure_event(
 		if (bd->surface)
 			cairo_surface_destroy (bd->surface);
 
-			bd->surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-												   CAIRO_CONTENT_COLOR,
-												   gtk_widget_get_allocated_width (widget),
-												   gtk_widget_get_allocated_height (widget));
+		bd->surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
+			CAIRO_CONTENT_COLOR_ALPHA,
+			gtk_widget_get_allocated_width (widget),
+			gtk_widget_get_allocated_height (widget));
 
 		  /* Initialize the surface to white */
-		  clear_surface (bd->surface);
+		clear_surface (bd->surface);
+
+		if (bd->temp_surface)
+			cairo_surface_destroy (bd->temp_surface);
+
+		bd->temp_surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
+			CAIRO_CONTENT_COLOR_ALPHA,
+			gtk_widget_get_allocated_width (widget),
+			gtk_widget_get_allocated_height (widget));
+
+		  /* Initialize the surface to white */
+		  clear_surface (bd->temp_surface);
+
 		  /* Kick off a full redraw to make sure we have something after resize */
 		  bd->redraw( bd, bd->context, bd->w, bd->h );
 		}
@@ -1091,8 +1109,8 @@ static gint draw_scroll_event(
 
 
 	if (action != 0) {
-		if (drawVerbose >= 2)
-			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
+		if (iDrawLog >= 3)
+			printf( "%ld: %s[%dx%d]\n", lDrawCnt++, actionNames[action], bd->lastX, bd->lastY );
 		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	}
 
@@ -1141,8 +1159,8 @@ static gint draw_button_event(
 		break;
 	}
 	if (action != 0) {
-		if (drawVerbose >= 2)
-			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
+		if (iDrawLog >= 3)
+			printf( "%ld: %s[%dx%d]\n", lDrawCnt++, actionNames[action], bd->lastX, bd->lastY );
 		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	}
 	if (!(bd->option & BD_NOFOCUS))
@@ -1181,8 +1199,8 @@ static gint draw_motion_event(
 	}
 	bd->lastX = OUTMAPX(bd, x);
 	bd->lastY = OUTMAPY(bd, y);
-	if (drawVerbose >= 2)
-		printf( "%lx: %s[%dx%d] %s\n", (long)bd, actionNames[action], bd->lastX, bd->lastY, event->is_hint?"<Hint>":"<>" );
+	if (iDrawLog >= 3)
+		printf( "%lx: %s[%dx%d] %s\n", lDrawCnt++, actionNames[action], bd->lastX, bd->lastY, event->is_hint?"<Hint>":"<>" );
 	bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	if (!(bd->option & BD_NOFOCUS))
 		gtk_widget_grab_focus( bd->widget );
@@ -1274,6 +1292,9 @@ int xw, xh, cw, ch;
 		wDrawRedrawCallBack_p redraw,
 		wDrawActionCallBack_p action )
 {
+	if ( iDrawLog >= 1 )
+		printf( "%ld wDrawCreate %s %dx%d %d+%d %lx\n",
+			lDrawCnt++, helpStr, x, y, width, height, option );
 	wDraw_p bd;
 
 	bd = (wDraw_p)wlibAlloc( parent,  B_DRAW, x, y, NULL, sizeof *bd, NULL );
@@ -1333,10 +1354,8 @@ int xw, xh, cw, ch;
 		wlibControlGetSize( (wControl_p)bd );
 	}
 	gtk_widget_realize( bd->widget );
-	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR, width, height);
-	bd->temp_surface = gdk_window_create_similar_surface( gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR, width, height );
-	//bd->gc = gdk_gc_new( parent->gtkwin->window );
-	//gdk_gc_copy( bd->gc, parent->gtkwin->style->base_gc[GTK_STATE_NORMAL] );
+	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR_ALPHA, width, height);
+	bd->temp_surface = gdk_window_create_similar_surface( gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR_ALPHA, width, height );
 
 	GdkCursor * cursor;
 	cursor = gdk_cursor_new_for_display ( gdk_display_get_default(), GDK_TCROSS );
