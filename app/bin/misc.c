@@ -2723,8 +2723,8 @@ static void CreateMenus(void) {
 			(void*) 1);
 	SetAccelKey("redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p) MainRedraw,
 			(void*) 1);
-	SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
-			(void*) 1);
+	//SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
+	//		(void*) 1);
 	SetAccelKey("copy", wAccelKey_Ins, WKEY_CTRL,
 			(wAccelKeyCallBack_p) EditCopy, 0);
 	SetAccelKey("paste", wAccelKey_Ins, WKEY_SHIFT,

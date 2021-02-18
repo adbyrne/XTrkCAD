@@ -677,18 +677,20 @@ EXPORT void SelectLineType( void* width )
 
 static BOOL_T doingDouble;
 
-EXPORT void SelectDelete( void )
+EXPORT int SelectDelete( void )
 {
 	if (GetCurrentCommand() != selectCmdInx ) {
-		InfoMessage(_("Delete only works in Select Mode"));
-		wBeep();
-		return;
+		if (GetCurrentCommand() != modifyCmdInx ) {
+			InfoMessage(_("Delete only works in Select Mode"));
+			wBeep();
+			return -1;
+		}
 	}
 
-	if (doingDouble) return;
+	if (doingDouble || (GetCurrentCommand() == modifyCmdInx)) return 1;
 
 	if (SelectedTracksAreFrozen())
-		return;
+		return 0;
 	if (selectedTrackCount>0) {
 		UndoStart( _("Delete Tracks"), "delete" );
 		wDrawDelayUpdate( mainD.d, TRUE );
@@ -703,6 +705,7 @@ EXPORT void SelectDelete( void )
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
+	return 0;
 }
 
 
@@ -1912,6 +1915,8 @@ static STATUS_T CmdMove(
 			if ((action>>8) == '0' || (action>>8 == 'o')) {
 				PanMenuEnter('o');
 			}
+			if ((action>>8) == 127 || (action>>8) == 8)
+				SelectDelete();
 			break;
 		case C_REDRAW:
 			/* DO_REDRAW */
