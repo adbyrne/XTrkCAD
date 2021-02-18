@@ -3670,7 +3670,7 @@ EXPORT void InitCmdDelete( void )
 	icon = wIconCreatePixMap( delete_xpm );
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
 #ifdef WINDOWS
-	wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)SelectDelete, NULL );
+	//wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)SelectDelete, NULL );
 #endif
 }
 
