@@ -1445,7 +1445,7 @@ STATUS_T DrawGeomPolyModify(
 							FormatDistance(FindDistance(pos_lock,last_point)),
 							PutAngle(FindAngle(pos_lock,last_point)));
 
-				}
+				} else SnapPos(pos);  //If not using CTL and snap enabled
 			}
 			context->prev_inx = first_inx;
 			coOrd diff;
