@@ -611,22 +611,23 @@ STATUS_T DrawGeomMouse(
 				}
 				CreateEndAnchor(pos,TRUE);
 				if (FindDistance(pos,last_point)>0.0) CreateLineAnchor(pos,last_point);
-			} else if (poslocked) pos = pos1;
-			//If there is any point on this line that will give a 90 degree return to the first point, show it
-			if (tempSegs_da.cnt > 1) {
-				coOrd intersect;
-				ANGLE_T an_this = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],pos);
-				if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],an_this+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],an_this)) {
-					ANGLE_T an_inter = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],intersect);
-					if (fabs(DifferenceBetweenAngles(an_inter,an_this))<90.0) {
-						CreateSquareAnchor(intersect);
-						d = FindDistance(intersect,pos);
-						if (IsClose(d)) {
-							pos = intersect;
+				//If there is any point on this line that will give a 90 degree return to the first point, show it
+				if (tempSegs_da.cnt > 1) {
+					coOrd intersect;
+					ANGLE_T an_this = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],pos);
+					if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],an_this+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],an_this)) {
+						ANGLE_T an_inter = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],intersect);
+						if (fabs(DifferenceBetweenAngles(an_inter,an_this))<90.0) {
+							CreateSquareAnchor(intersect);
+							d = FindDistance(intersect,pos);
+							if (IsClose(d)) {
+								pos = intersect;
+							}
 						}
 					}
 				}
-			}
+			} else if (poslocked) pos = pos1;
+
 			tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
 			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
 			context->message( _("Length = %s, Angle = %0.2f"),
