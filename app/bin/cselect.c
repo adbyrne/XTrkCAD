@@ -708,6 +708,15 @@ EXPORT int SelectDelete( void )
 	return 0;
 }
 
+/*
+ * Called By Windows directly with Delete Key. We first try a simple Delete, and if that doesn't work saying "In Modify" we call Modify with a Text key for Delete
+ */
+EXPORT void TrySelectDelete( void ) {
+	if(SelectDelete() == 1) {
+		CmdModify((C_TEXT+(int)(127<<8)),zero);
+	}
+}
+
 
 BOOL_T flipHiddenDoSelectRecount;
 static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
@@ -3670,7 +3679,7 @@ EXPORT void InitCmdDelete( void )
 	icon = wIconCreatePixMap( delete_xpm );
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
 #ifdef WINDOWS
-	//wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)SelectDelete, NULL );
+	wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)TrySelectDelete, NULL );
 #endif
 }
 
