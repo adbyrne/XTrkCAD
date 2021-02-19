@@ -194,13 +194,15 @@ The \f{Elevation} command changes the elevation of track endpoints. After openin
 
 The endpoint which you are working on is indicated with a big red dot. Note that when an endpoint is selected, the Elevation Window will have focus. To select a different endpoint without closing this window, two clicks (or a double click) will be needed. The first click restores focus to the main window, the second selects the point.
 
-Moving around the layout will show you the elevation at the point indicated by a blue dot. If \f{Magnetic Snap} is enabled without \f{Alt} or is not enabled and \f{Alt} is used, the dot will be an open-circle when snapped to a close end-point. 
+If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift+Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
 
-If you hover over a point where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
+Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move existing Elevation Labels if the option is set for them to be displayed and the Zoom level is adequate, Only "Defined" and "Station" endpoint labels can be moved.
 
-If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
+If you add \f{Alt}, while moving around the layout close to tracks will show you the elevation at the point indicated by a blue closed dot. 
 
-Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move Elevation Labels if both the option is set for them to be displayed and the Zoom level is correct,, Only Defined and Station endpoint labels can be moved.
+With \f{Alt} held, if you hover over a point close to where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
+
+Clicking with \f{Shift} at this point will split the track, allowing the elevation to be adjusted to provide adequate clearance.
 
 \G{png.d/celev.png}
 
