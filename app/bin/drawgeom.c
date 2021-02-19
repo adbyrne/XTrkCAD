@@ -529,6 +529,7 @@ STATUS_T DrawGeomMouse(
 				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos)))) {
 					poslocked = TRUE;
 					pos1 = p;
+
 				}
 			}
 			if (!poslocked) {  //Set up poslock and pos1 for later
@@ -610,7 +611,7 @@ STATUS_T DrawGeomMouse(
 				}
 				CreateEndAnchor(pos,TRUE);
 				if (FindDistance(pos,last_point)>0.0) CreateLineAnchor(pos,last_point);
-			}
+			} else if (poslocked) pos = pos1;
 			//If there is any point on this line that will give a 90 degree return to the first point, show it
 			if (tempSegs_da.cnt > 1) {
 				coOrd intersect;
