@@ -2692,5 +2692,7 @@ EXPORT void ParamInit( void )
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 	log_paramLayout = LogFindIndex( "paramlayout" );
-	DYNARR_RESET(paramGroup_p,paramGroups_da);
+	paramGroups_da.ptr = NULL;
+	paramGroups_da.cnt = 0;
+	paramGroups_da.max = 0;
 }
