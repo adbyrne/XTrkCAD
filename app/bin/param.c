@@ -53,7 +53,7 @@ static int log_paramLayout;
  */
 
 static char * getNumberError;
-static char decodeErrorStr[STR_SHORT_SIZE];
+static char decodeErrorStr[STR_SIZE];
 
 static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 {
@@ -271,7 +271,7 @@ EXPORT FLOAT_T DecodeFloat(
 		valF = strtod( cp1, &cp2 );
 		if ( *cp2 != 0 ) {
 			/*wStringSetHilight( strCtrl, cp2-cp0, -1 );*/
-			sprintf( decodeErrorStr, _("Invalid Number") );
+			snprintf( decodeErrorStr, sizeof(decodeErrorStr), _("Invalid Number") );
 			*validP = FALSE;
 			return 0.0;
 		}
@@ -329,7 +329,7 @@ FLOAT_T DecodeDistance(
             wStringSetValue(strCtrl, FormatDistance(valF));
         }
     } else {
-        sprintf(decodeErrorStr, "%s @ %s", _(getNumberError),
+        snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(getNumberError),
                 *cp1?cp1:_("End Of String"));
         valF =	0.0;
     }
@@ -339,8 +339,9 @@ FLOAT_T DecodeDistance(
 
 
 #define N_STRING (10)
-static char formatStrings[N_STRING][40];
-static int formatStringInx;
+static int formatStringInx;					//Index ahead in case of overwrite
+static char formatStrings[N_STRING+1][80];  //Add safety
+
 
 EXPORT char * FormatLong(
 		long valL )
@@ -1020,6 +1021,7 @@ static long ParamRestore( paramGroup_p pg )
 
 static dynArr_t paramGroups_da;
 #define paramGroups(N) DYNARR_N( paramGroup_p, paramGroups_da, N )
+static BOOL_T paramGroups_init = FALSE;
 
 
 
@@ -1032,6 +1034,8 @@ EXPORT void ParamRegister( paramGroup_p pg )
 	long rgb;
 	char prefName1[STR_SHORT_SIZE];
 	const char *prefSect2, *prefName2;
+
+	if (!paramGroups_init) ParamInit();
 
 	DYNARR_APPEND( paramGroup_p, paramGroups_da, 10 );
 	paramGroups(paramGroups_da.cnt-1) = pg;
@@ -2689,7 +2693,14 @@ EXPORT void ParamCreateControls(
 
 EXPORT void ParamInit( void )
 {
+	if (paramGroups_init) return;
+
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 	log_paramLayout = LogFindIndex( "paramlayout" );
+	paramGroups_da.cnt = 0;
+	paramGroups_da.max = 0;
+	paramGroups_da.ptr = NULL;
+	paramGroups_init = TRUE;
+
 }
