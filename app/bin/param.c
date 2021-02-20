@@ -29,7 +29,7 @@
 #include "track.h"
 #include "common-ui.h"
 
-EXPORT int paramHiliteFast;
+EXPORT int paramHiliteFast = FALSE;
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
@@ -1686,7 +1686,6 @@ EXPORT void ParamChange( paramData_p p )
 #endif
 
 
-EXPORT int paramHiliteFast = FALSE;
 EXPORT void ParamHilite(
 		wWin_p win,
 		wControl_p control,
