@@ -3278,6 +3278,11 @@ static STATUS_T CmdSelect(
 		return rc;
 		break;
 	case wActionExtKey:
+		if ((action>>8)==wAccelKey_Del) {
+			SelectDelete();
+			break;
+		}
+		/* No Break */
 	case C_RMOVE:
 	case C_MOVE:
 		if (doingDouble) {
@@ -3512,6 +3517,10 @@ static STATUS_T CmdSelect(
 	case C_TEXT:
 		if (doingDouble) {
 			return CallModify(action,pos);
+		}
+		if ((action>>8) == 127 || (action>>8) == 8) {	//Backspace or Delete key
+			SelectDelete();
+			break;
 		}
 		if ((action>>8) == 'c') {
 			panCenter = pos;
