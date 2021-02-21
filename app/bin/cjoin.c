@@ -667,7 +667,7 @@ static paramData_t joinPLs[] = {
 #define joinRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t joinPG = { "join-fixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
+static paramGroup_t joinPG = { "joinfixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
 
 
 

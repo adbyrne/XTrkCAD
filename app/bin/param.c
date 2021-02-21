@@ -1027,7 +1027,7 @@ static BOOL_T paramGroups_init = FALSE;
 
 EXPORT void ParamRegister( paramGroup_p pg )
 {
-	paramData_p p;
+	paramData_t * p;
 	const char * cp;
 	WDOUBLE_T tmpR;
 	long valL;
@@ -1039,11 +1039,12 @@ EXPORT void ParamRegister( paramGroup_p pg )
 
 	DYNARR_APPEND( paramGroup_p, paramGroups_da, 10 );
 	paramGroups(paramGroups_da.cnt-1) = pg;
-	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
+	int i;
+	for ( i=0, p=pg->paramPtr; i<(pg->paramCnt); p++, i++ ) {
 		p->group = pg;
 		if ( p->nameStr == NULL )
 			continue;
-		sprintf( prefName1, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName1, sizeof(prefName1), "%s-%s", pg->nameStr, p->nameStr );
 		if ( p->type != PD_MENUITEM ) {
 			(void)GetBalloonHelpStr( prefName1 );
 		}
@@ -1164,7 +1165,7 @@ EXPORT void ParamUpdatePrefs( void )
 			continue;
 		if ( (p->option&PDO_DLGIGNORE) != 0 )
 			continue;
-		sprintf( prefName, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName, sizeof(prefName), "%s-%s", pg->nameStr, p->nameStr );
 		switch ( p->type ) {
 		case PD_LONG:
 		case PD_RADIO:
