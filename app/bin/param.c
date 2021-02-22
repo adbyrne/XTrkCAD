@@ -1160,6 +1160,7 @@ EXPORT void ParamUpdatePrefs( void )
 
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
 	  pg = paramGroups(inx);
+	  if (pg->nameStr == NULL) continue;
 	  for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
 		if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 )
 			continue;

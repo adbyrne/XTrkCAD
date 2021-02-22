@@ -1939,7 +1939,7 @@ static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 
 static void IndexEnterOk(void *);
 static paramData_t indexPLs[] = {
-		{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, (void*)STR_SIZE-1, N_("Indexes:"), 0, 0, sizeof trackIndex } };
+		{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, (void*)STR_SIZE-1, N_("Indexes:"), 0, 0, sizeof(trackIndex) } };
 static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
 		/ sizeof indexPLs[0] };
 
