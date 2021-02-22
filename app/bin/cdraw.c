@@ -1494,28 +1494,28 @@ static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramData_t drawModPLs[] = {
 
 #define drawModLengthPD			(drawModPLs[0])
-	{ PD_FLOAT, &drawModCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &drawModCmdContext.length, "Length", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawModAnglePD			(drawModPLs[1])
-	{ PD_FLOAT, &drawModCmdContext.abs_angle, "Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
+	{ PD_FLOAT, &drawModCmdContext.abs_angle, "Angle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
 #define drawModRelAnglePD			(drawModPLs[2])
 #define drawModRelAngle           2
-	{ PD_FLOAT, &drawModCmdContext.rel_angle, "RelAngle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Relative Angle") },
+	{ PD_FLOAT, &drawModCmdContext.rel_angle, "RelAngle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r360_360, N_("Relative Angle") },
 #define drawModWidthPD		(drawModPLs[3])
-	{ PD_FLOAT, &drawModCmdContext.width, "Width", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
+	{ PD_FLOAT, &drawModCmdContext.width, "Width", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
 #define drawModHeightPD		(drawModPLs[4])
-	{ PD_FLOAT, &drawModCmdContext.height, "Height", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Height") },
+	{ PD_FLOAT, &drawModCmdContext.height, "Height", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Height") },
 #define drawModRadiusPD		(drawModPLs[5])
 #define drawModRadius           5
-	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("Radius") },
+	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("Radius") },
 #define drawModArcAnglePD		(drawModPLs[6])
-	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Arc Angle") },
+	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r360_360, N_("Arc Angle") },
 #define drawModRotAnglePD		(drawModPLs[7)
-	{ PD_FLOAT, &drawModCmdContext.rot_angle, "RotAngle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
+	{ PD_FLOAT, &drawModCmdContext.rot_angle, "RotAngle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
 #define drawModRotCenterXPD		(drawModPLs[8])
 #define drawModRotCenterInx      8
-	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "RotCenterx", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X,Y") },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "RotCenterx", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X,Y") },
 #define drawModRotCenterYPD		(drawModPLs[9])
-	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCentery", PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCentery", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
 
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };
