@@ -14,8 +14,8 @@
 #endif
 
 char * mswStrdup( const char * );
-static char appLibDirName[MAX_PATH];
-static char appWorkDirName[MAX_PATH];
+static wchar_t appLibDirName[MAX_PATH];
+static wchar_t appWorkDirName[MAX_PATH];
 
 /**
  * Get the location of the shared files (parameters, help file, etc. ): This location is
@@ -27,7 +27,7 @@ static char appWorkDirName[MAX_PATH];
 const char * wGetAppLibDir( void )
 {
 	char *cp;
-	char module_name[MAX_PATH];
+	wchar_t module_name[MAX_PATH];
 
 	if (appLibDirName[0] != '\0') {
 		return appLibDirName;
@@ -39,13 +39,15 @@ const char * wGetAppLibDir( void )
 		*cp = '\0';
 
 #ifdef XTRKCAD_CMAKE_BUILD
-	strcpy(appLibDirName, module_name);
-	strcat(appLibDirName, "\\..\\share\\xtrkcad");
+	strncpy(appLibDirName, sizeof(appLibDirName), module_name);
+	int len = sizeof(appLibDirName)-strlen(appLibDirName)-1;
+	strncat(appLibDirName, len, "\\..\\share\\xtrkcad");
 	_fullpath( appLibDirName, appLibDirName, MAX_PATH );
 	return appLibDirName;
 #endif	
 
-	strcpy(appLibDirName, module_name);
+	strncpy(appLibDirName, sizeof(appLibDirName), module_name);
+	appLibDirName[sizeof(appLibDirName)-1] = '\0';
 	return appLibDirName;
 }
 
@@ -72,11 +74,12 @@ const char * wGetAppWorkDir( void )
 		return appWorkDirName;
 	}
 	wGetAppLibDir();
-	sprintf( mswTmpBuff, "%s\\xtrkcad0.ini", appLibDirName );
+	snprintf( mswTmpBuff, sizeof(mswTmpBuff), "%s\\xtrkcad0.ini", appLibDirName );
 	rc = GetPrivateProfileString( "workdir", "path", "", appWorkDirName, sizeof appWorkDirName, mswTmpBuff );
 	if ( rc!=0 ) {
 		if ( stricmp( appWorkDirName, "installdir" ) == 0 ) {
-			strcpy( appWorkDirName, appLibDirName );
+			strncpy( appWorkDirName, sizeof(appWorkDirName), appLibDirName );
+			appWorkDirName[sizeof(appWorkDirName)-1] = '\0';
 		} else {
 			cp = &appWorkDirName[strlen(appWorkDirName)-1];
 			while (cp>appWorkDirName && *cp == '\\') *cp-- = 0;
@@ -88,7 +91,7 @@ const char * wGetAppWorkDir( void )
 			wNoticeEx( NT_ERROR, "Cannot get user's profile directory", "Exit", NULL );
 			wExit(0);
 	} else {
-		sprintf( appWorkDirName, "%s\\%s", mswTmpBuff, "XTrackCad" );
+		snprintf( appWorkDirName, sizeof(appWorkDirName), "%s\\%s", mswTmpBuff, "XTrackCad" );
 		if( !PathIsDirectory( appWorkDirName )) {
 			if( !CreateDirectory( appWorkDirName, NULL )) {
 				wNoticeEx( NT_ERROR, "Cannot create user's profile directory", "Exit", NULL );
@@ -189,7 +192,7 @@ void wPrefSetInteger( const char * section, const char * name, long lval )
 {
 	char tmp[20];
 	
-	sprintf( tmp, "%ld", lval );
+	snprintf( tmp, sizeof(tmp), "%ld", lval );
 	wPrefSetString( section, name, tmp );
 }
 
@@ -226,7 +229,7 @@ void wPrefSetFloat(
 {
 	char tmp[20];
 
-	sprintf(tmp, "%0.6f", lval );
+	snprintf(tmp, sizeof(tmp), "%0.6f", lval );
 	wPrefSetString( section, name, tmp );
 }
 
@@ -292,3 +295,4 @@ void wPrefReset(
 	}
 	prefs_da.cnt = 0;
 }
+

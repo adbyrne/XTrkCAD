@@ -358,7 +358,7 @@ char * wPrefGetStringBasic(
 {
 	char tmp[20];
 
-	sprintf(tmp, "%ld", lval );
+	snprintf(tmp, sizeof(tmp), "%ld", lval );
 	wPrefSetString( section, name, tmp );
 }
 
@@ -409,7 +409,7 @@ wBool_t wPrefGetIntegerBasic(
 {
 	char tmp[20];
 
-	sprintf(tmp, "%0.6f", lval );
+	snprintf(tmp, sizeof(tmp), "%0.6f", lval );
 	wPrefSetString( section, name, tmp );
 }
 
@@ -469,9 +469,9 @@ void wPrefFlush(
 	
 	workDir = wGetAppWorkDir();
 	if (name && name[0])
-		sprintf( tmp, "%s", name );
+		snprintf( tmp, sizeof(tmp), "%s", name );
 	else
-		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL)
 		return;

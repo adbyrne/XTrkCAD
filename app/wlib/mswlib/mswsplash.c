@@ -141,14 +141,14 @@ wCreateSplash( char *appname, char *appver )
 	char *pszBuf;
 	HBITMAP hBmp;
 	BITMAP bmp;
-	char logoPath[MAX_PATH];
+	wchar_t logoPath[MAX_PATH];
 
 	/* find the size of a dialog unit */
 	cxDlgUnit = LOWORD(GetDialogBaseUnits());
 	cyDlgUnit = HIWORD(GetDialogBaseUnits());
 
 	/* load the logo bitmap */
-	sprintf( logoPath, "%s\\logo.bmp", wGetAppLibDir());
+	snprintf( logoPath, sizeof(logoPath), "%s\\logo.bmp", wGetAppLibDir());
 	hBmp = LoadImage( mswHInst, logoPath, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_LOADFROMFILE );
 	if( !hBmp )
 		return( 0 );
@@ -267,3 +267,4 @@ wDestroySplash(void)
 	DestroyWindow( hSplash );
 	return;
 }
+
