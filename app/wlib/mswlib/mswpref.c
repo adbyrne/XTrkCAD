@@ -189,7 +189,7 @@ void wPrefSetInteger( const char * section, const char * name, long lval )
 {
 	char tmp[20];
 	
-	sprintf( tmp, "%ld", lval );
+	snprintf( tmp, sizeof(tmp), "%ld", lval );
 	wPrefSetString( section, name, tmp );
 }
 
@@ -226,7 +226,7 @@ void wPrefSetFloat(
 {
 	char tmp[20];
 
-	sprintf(tmp, "%0.6f", lval );
+	snprintf(tmp, sizeof(tmp), "%0.6f", lval );
 	wPrefSetString( section, name, tmp );
 }
 
