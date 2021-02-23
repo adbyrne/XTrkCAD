@@ -1930,7 +1930,7 @@ void wExit(int rc)
     }
 
     if (helpInitted) {
-        WinHelp(mswHWnd, helpFile, HELP_QUIT, 0L);
+        WinHelp(mswHWnd, helpFile, HELP_QUIT, (DWORD)0);
         helpInitted = FALSE;
     }
 
