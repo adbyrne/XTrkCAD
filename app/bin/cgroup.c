@@ -1615,18 +1615,18 @@ LOG( log_group, 3, ( "\n" ) );
 			EnableCommands();
 		}
 	} else {
-		CloneFilledDraw( tempSegs_da.cnt, &tempSegs(0), TRUE );
-		GetSegBounds( zero, 0, tempSegs_da.cnt, &tempSegs(0), &orig, &size );
+		CloneFilledDraw( trackSegs_da.cnt, &trackSegs(0), TRUE );
+		GetSegBounds( zero, 0, trackSegs_da.cnt, &trackSegs(0), &orig, &size );
 
 		orig.x = - orig.x-groupOriginX;  //Include orig offset
 		orig.y = - orig.y-groupOriginY;
-		MoveSegs( tempSegs_da.cnt, &tempSegs(0), orig );
-		to = CreateNewStructure( curScaleName, groupTitle, tempSegs_da.cnt, &tempSegs(0), TRUE );
+		MoveSegs( trackSegs_da.cnt, &trackSegs(0), orig );
+		to = CreateNewStructure( curScaleName, groupTitle, trackSegs_da.cnt, &trackSegs(0), TRUE );
 		f = OpenCustom("a");
 		if (f && to) {
 			oldLocale = SaveLocale("C");
 			rc &= fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName, PutTitle(groupTitle) )>0;
-			rc &= WriteSegs( f, tempSegs_da.cnt, &tempSegs(0) );
+			rc &= WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
 		}
 		if ( groupReplace ) {
 			UndoStart( _("Group Tracks"), "group" );
@@ -1640,7 +1640,7 @@ LOG( log_group, 3, ( "\n" ) );
 			}
 			orig.x = - orig.x;
 			orig.y = - orig.y;
-			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, (PATHPTR_T)"", tempSegs_da.cnt, &tempSegs(0) );
+			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, (PATHPTR_T)"", trackSegs_da.cnt, &trackSegs(0) );
 			SetTrkVisible( trk, TRUE );
 			DrawNewTrack( trk );
 			EnableCommands();
