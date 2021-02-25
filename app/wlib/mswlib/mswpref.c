@@ -269,7 +269,7 @@ void wPrefFlush( char * name )
 	   }
 	}
 	if (name && name[0])
-		WritePrivateProfileString( p->section, p->name, p->val, name );
+		WritePrivateProfileString( NULL, NULL, NULL, name );
 	else
 		WritePrivateProfileString( NULL, NULL, NULL, mswProfileFile );
 }
