@@ -261,12 +261,10 @@ void wPrefFlush( char * name )
 	prefs_t * p;
 	
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-	   if ( p->dirty ) {
-		  if (name && name[0])
+		if (name && name[0])
 			WritePrivateProfileString( p->section, p->name, p->val, name );
-		  else
+		else if (p->dirty)
 		   WritePrivateProfileString( p->section, p->name, p->val, mswProfileFile );
-	   }
 	}
 	if (name && name[0])
 		WritePrivateProfileString( NULL, NULL, NULL, name );
