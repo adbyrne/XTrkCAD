@@ -1619,6 +1619,7 @@ EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset)
 	xlat.y = - orig.y;
 	TRK_ITERATE( trk ) {
 		if ( GetTrkSelected(trk) ) {
+			if (QueryTrack(trk,Q_ISTRAIN)) continue; //Don't bother with CARs
 			MoveTrack( trk, xlat );
 			trackCmds(GetTrkType(trk))->write( trk, f );
 			MoveTrack( trk, orig );
