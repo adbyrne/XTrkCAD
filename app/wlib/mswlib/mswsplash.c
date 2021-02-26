@@ -141,7 +141,7 @@ wCreateSplash( char *appname, char *appver )
 	char *pszBuf;
 	HBITMAP hBmp;
 	BITMAP bmp;
-	wchar_t logoPath[MAX_PATH];
+	char logoPath[MAX_PATH];
 
 	/* find the size of a dialog unit */
 	cxDlgUnit = LOWORD(GetDialogBaseUnits());

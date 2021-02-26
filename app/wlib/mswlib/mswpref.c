@@ -14,8 +14,8 @@
 #endif
 
 char * mswStrdup( const char * );
-static wchar_t appLibDirName[MAX_PATH];
-static wchar_t appWorkDirName[MAX_PATH];
+static char appLibDirName[MAX_PATH];
+static char appWorkDirName[MAX_PATH];
 
 /**
  * Get the location of the shared files (parameters, help file, etc. ): This location is
@@ -27,7 +27,7 @@ static wchar_t appWorkDirName[MAX_PATH];
 const char * wGetAppLibDir( void )
 {
 	char *cp;
-	wchar_t module_name[MAX_PATH];
+	char module_name[MAX_PATH];
 
 	if (appLibDirName[0] != '\0') {
 		return appLibDirName;
@@ -39,9 +39,9 @@ const char * wGetAppLibDir( void )
 		*cp = '\0';
 
 #ifdef XTRKCAD_CMAKE_BUILD
-	strncpy(appLibDirName, sizeof(appLibDirName), module_name);
+	strncpy(appLibDirName, module_name, sizeof(appLibDirName));
 	int len = sizeof(appLibDirName)-strlen(appLibDirName)-1;
-	strncat(appLibDirName, len, "\\..\\share\\xtrkcad");
+	strncat(appLibDirName, "\\..\\share\\xtrkcad", len);
 	_fullpath( appLibDirName, appLibDirName, MAX_PATH );
 	return appLibDirName;
 #endif	
