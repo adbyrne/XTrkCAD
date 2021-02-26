@@ -218,6 +218,9 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			menuPos = pos;
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
+		case wActionExtKey:
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
 		default:
 			break;
 	}

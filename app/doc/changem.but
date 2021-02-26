@@ -902,7 +902,7 @@ When a Polygon or a PolyLine is modified, open blue circle anchors show the posi
 
 \u000
 
-\b \f{Delete} will remove a selected node.
+\b \f{Delete} or \f{Backspace} will remove a selected node.
 
 \u000
 

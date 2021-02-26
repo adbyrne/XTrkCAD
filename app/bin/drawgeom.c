@@ -1591,6 +1591,8 @@ STATUS_T DrawGeomPolyModify(
 					selected_count=0;
 					tempSegs(0).u.p.cnt = points_da.cnt;
 					context->max_inx = points_da.cnt-1;
+				} else {
+					ErrorMessage( MSG_POLY_NOTHING_SELECTED );
 				}
 				prev_inx = -1;
 				context->prev_inx = -1;
@@ -2515,6 +2517,10 @@ STATUS_T DrawGeomModify(
 					break;
 			}
 		}
+		break;
+	case wActionExtKey:
+		if ((((action>>8)&0xFF)== wAccelKey_Del) && polyMode) //Convert Del key to be BackSpace in PolyModify
+			return DrawGeomPolyModify(C_TEXT+((int)(127<<8)),pos,context);
 		break;
 	case C_TEXT:
 		if (context->rotate_state) DrawGeomOriginMove(action, pos, context);

@@ -1930,7 +1930,7 @@ void wExit(int rc)
     }
 
     if (helpInitted) {
-        WinHelp(mswHWnd, helpFile, HELP_QUIT, (DWORD_PTR)0);
+        WinHelp(mswHWnd, helpFile, HELP_QUIT, (DWORD)0);
         helpInitted = FALSE;
     }
 
@@ -2958,7 +2958,9 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == VK_UP || 
                 wParam == VK_DOWN ||
                 wParam == VK_RIGHT ||
-                wParam == VK_LEFT) 
+                wParam == VK_LEFT ||
+                wParam == VK_INSERT ||
+                wParam == VK_DELETE) 
             {
                 if ((lParam & 0x1000000) == 0) lParam |= 0x1000000;
             }
