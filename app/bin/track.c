@@ -1605,6 +1605,7 @@ EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset)
 	max_index = 0;
 	TRK_ITERATE(trk) {
 		if ( GetTrkSelected(trk) ) {
+			if (QueryTrack(trk,Q_ISTRAIN)) continue; //Don't bother with CARs
 			if (trk->lo.x < orig.x)
 				orig.x = trk->lo.x;
 			if (trk->lo.y < orig.y)
