@@ -1814,7 +1814,7 @@ static wWin_p stickyW;
 
 static void StickyOk(void *);
 static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
-		stickyLabels } };
+		(void*)stickyLabels } };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 		sizeof stickyPLs / sizeof stickyPLs[0] };
 
