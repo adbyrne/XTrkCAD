@@ -49,7 +49,7 @@
 #define OP_LAST			(OP_POLYLINE)
 
 typedef struct {
-				void (*message)( char *, ... );
+				void (*message)( const char *, ... );
 				void (*Redraw)( void );
 				drawCmd_p D;
 				long Op;
@@ -74,7 +74,7 @@ typedef enum {MOD_NONE, MOD_STARTED, MOD_SELECTED_PT, MOD_AFTER_PT,
 		MOD_ORIGIN, MOD_AFTER_ORIG } ModState_e;
 
 typedef struct {
-				void (*message)( char *, ... );
+				void (*message)( const char *, ... );
 				void (*Redraw)( void );
 				drawCmd_p D;
 				double length;

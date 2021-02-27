@@ -132,10 +132,10 @@ typedef union {
 typedef struct {
 		parameterType type;
 		void * valueP;
-		char * nameStr;
+		const char * nameStr;
 		long option;
 		void * winData;
-		char * winLabel;
+		const char * winLabel;
 		long winOption;
 		void * context;
         unsigned int max_string;

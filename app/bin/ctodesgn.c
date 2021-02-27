@@ -3234,7 +3234,7 @@ wDrawColor drawColorBlack;
 long roadbedColorRGB = 0;
 
 EXPORT void AbortProg(
-		char * msg,
+		const char * msg,
 		... )
 {
 	static BOOL_T abort2 = FALSE;
@@ -3261,7 +3261,7 @@ EXPORT char * MyStrdup( const char * str )
 }
 
 
-int NoticeMessage( char * msg, char * yes, char * no, ... )
+int NoticeMessage( const char * msg, const char * yes, const char * no, ... )
 {
 	/*fprintf( stderr, "%s\n", msg );*/
 	return 0;
@@ -3302,9 +3302,9 @@ EXPORT void ComputeCurvedSeg(
 	}
 }
 
-EXPORT char * Strcpytrimed( char * dst, char * src, BOOL_T double_quotes )
+EXPORT char * Strcpytrimed( char * dst, const char * src, BOOL_T double_quotes )
 {
-	char * cp;
+	const char * cp;
 	while (*src && isspace((unsigned char)*src) ) src++;
 	if (!*src)
 		return dst;
@@ -3320,7 +3320,7 @@ EXPORT char * Strcpytrimed( char * dst, char * src, BOOL_T double_quotes )
 }
 
 
-EXPORT char * BuildTrimedTitle( char * cp, char * sep, char * mfg, char * desc, char * partno )
+EXPORT char * BuildTrimedTitle( char * cp, const char * sep, const char * mfg, const char * desc, const char * partno )
 {
 	cp = Strcpytrimed( cp, mfg, FALSE );
 	strcpy( cp, sep );
