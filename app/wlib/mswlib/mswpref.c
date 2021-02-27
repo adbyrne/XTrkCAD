@@ -46,7 +46,7 @@ const char * wGetAppLibDir( void )
 	return appLibDirName;
 #endif	
 
-	strncpy(appLibDirName, sizeof(appLibDirName), module_name);
+	strncpy(appLibDirName, module_name, sizeof(appLibDirName));
 	appLibDirName[sizeof(appLibDirName)-1] = '\0';
 	return appLibDirName;
 }
@@ -78,7 +78,7 @@ const char * wGetAppWorkDir( void )
 	rc = GetPrivateProfileString( "workdir", "path", "", appWorkDirName, sizeof appWorkDirName, mswTmpBuff );
 	if ( rc!=0 ) {
 		if ( stricmp( appWorkDirName, "installdir" ) == 0 ) {
-			strncpy( appWorkDirName, sizeof(appWorkDirName), appLibDirName );
+			strncpy( appWorkDirName, appLibDirName, sizeof(appWorkDirName) );
 			appWorkDirName[sizeof(appWorkDirName)-1] = '\0';
 		} else {
 			cp = &appWorkDirName[strlen(appWorkDirName)-1];
