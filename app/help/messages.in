@@ -728,9 +728,9 @@ END
 
 # drawgeom.c
 MESSAGE MSG_POLY_SHAPES_3_SIDES
-Poly shapes must have at least 3 sides.
+Polygons must have at least 3 nodes.
 HELP
-Polygons and Poly Lines must have at least 3 sides. You're attempting to create a Poly shape with only 2 sides by deleting the third. 
+Polygons and Poly Lines must have at least 3 nodes. You're attempting to create a Polygon with only 2 sides or a PolyLine with one line segment. 
 END
 
 # drawgeom.c
@@ -738,6 +738,13 @@ MESSAGE MSG_POLY_MULTIPLE_SELECTED
 Can't delete multiple points at once
 HELP
 Polygons and Poly Lines points can only be deleted one at a time. 
+END
+
+# drawgeom.c
+MESSAGE MSG_POLY_NOTHING_SELECTED
+No Point on a Poly shape selected.
+HELP
+Select a Poly shape and a single point in order to be able to delete it.  
 END
 
 # dcar.c

@@ -1896,7 +1896,7 @@ static void DoAddElev(void *);
 
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { { PD_FLOAT, &addElevValueV, "value",
-		PDO_DIM, &rn1000_1000, NULL, 0 } };
+		PDO_NOPREF|PDO_DIM, &rn1000_1000, NULL, 0 } };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, sizeof addElevPLs
 		/ sizeof addElevPLs[0] };
 
@@ -1933,22 +1933,21 @@ static moveDialogCallBack_t moveDialogCallBack;
 static void RotateEnterOk(void *);
 
 static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80 };
-static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE,
-		&rn360_360, N_("Angle:") } };
+static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
 
 static void IndexEnterOk(void *);
-static paramData_t indexPLs[] = { { PD_STRING, &trackIndex, "select",
-		PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)100, N_("Indexes:"), 0, 0, sizeof trackIndex } };
+static paramData_t indexPLs[] = {
+		{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, (void*)(STR_SIZE-1), N_("Indexes:"), 0, 0, sizeof(trackIndex) } };
 static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
 		/ sizeof indexPLs[0] };
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static void MoveEnterOk(void *);
-static paramData_t movePLs[] = { { PD_FLOAT, &moveValue.x, "moveX", PDO_DIM,
-		&r_1000_1000, N_("Move X:") }, { PD_FLOAT, &moveValue.y, "moveY",
-		PDO_DIM, &r_1000_1000, N_("Move Y:") } };
+static paramData_t movePLs[] = {
+		{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:") },
+		{ PD_FLOAT, &moveValue.y, "moveY", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move Y:") } };
 static paramGroup_t movePG = { "move", 0, movePLs, sizeof movePLs
 		/ sizeof movePLs[0] };
 
@@ -2723,8 +2722,8 @@ static void CreateMenus(void) {
 			(void*) 1);
 	SetAccelKey("redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p) MainRedraw,
 			(void*) 1);
-	SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
-			(void*) 1);
+	//SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
+	//		(void*) 1);
 	SetAccelKey("copy", wAccelKey_Ins, WKEY_CTRL,
 			(wAccelKeyCallBack_p) EditCopy, 0);
 	SetAccelKey("paste", wAccelKey_Ins, WKEY_SHIFT,

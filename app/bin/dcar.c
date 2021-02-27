@@ -2240,15 +2240,15 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_ITEMINDEX          (C+0)
 	{ PD_LONG, &carDlgItemIndex, "index", PDO_NOPREF|PDO_DLGWIDE, &i1_999999999, N_("Index"), 0 },
 #define I_CD_PURPRC             (C+1)
-	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE, (void*)50, N_("Purchase Price"), 0, &carDlgPurchPrice },
+	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)50, N_("Purchase Price"), 0, &carDlgPurchPrice, sizeof(carDlgPurchPriceStr) },
 #define I_CD_CURPRC             (C+2)
-	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)50, N_("Current Price"), 0, &carDlgCurrPrice },
+	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)50, N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
 #define I_CD_COND               (C+3)
 	{ PD_DROPLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)90, N_("Condition") },
 #define I_CD_PURDAT             (C+4)
-	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE, (void*)80, N_("Purchase Date"), 0, &carDlgPurchDate },
+	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)80, N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
 #define I_CD_SRVDAT             (C+5)
-	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)80, N_("Service Date"), 0, &carDlgServiceDate },
+	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)80, N_("Service Date"), 0, &carDlgServiceDate, sizeof(carDlgServiceDateStr) },
 #define I_CD_QTY                (C+6)
 	{ PD_LONG, &carDlgQuantity, "quantity", PDO_NOPREF|PDO_DLGWIDE, &i1_9999, N_("Quantity") },
 #define I_CD_MLTNUM             (C+7)

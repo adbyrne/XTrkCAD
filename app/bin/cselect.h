@@ -40,7 +40,7 @@ void SelectBridge( void );
 void SelectTies( void );
 void SelectRecount( void );
 void SelectTrackWidth( void* );
-void SelectDelete( void );
+int SelectDelete( void );
 void MoveToJoin( track_p, EPINX_T, track_p, EPINX_T );
 void MoveSelectedTracksToCurrentLayer( void );
 void SelectCurrentLayer( void );

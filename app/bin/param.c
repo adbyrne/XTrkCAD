@@ -29,7 +29,7 @@
 #include "track.h"
 #include "common-ui.h"
 
-EXPORT int paramHiliteFast;
+EXPORT int paramHiliteFast = FALSE;
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
@@ -53,7 +53,7 @@ static int log_paramLayout;
  */
 
 static char * getNumberError;
-static char decodeErrorStr[STR_SHORT_SIZE];
+static char decodeErrorStr[STR_SIZE];
 
 static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 {
@@ -271,7 +271,7 @@ EXPORT FLOAT_T DecodeFloat(
 		valF = strtod( cp1, &cp2 );
 		if ( *cp2 != 0 ) {
 			/*wStringSetHilight( strCtrl, cp2-cp0, -1 );*/
-			sprintf( decodeErrorStr, _("Invalid Number") );
+			snprintf( decodeErrorStr, sizeof(decodeErrorStr), _("Invalid Number") );
 			*validP = FALSE;
 			return 0.0;
 		}
@@ -329,7 +329,7 @@ FLOAT_T DecodeDistance(
             wStringSetValue(strCtrl, FormatDistance(valF));
         }
     } else {
-        sprintf(decodeErrorStr, "%s @ %s", _(getNumberError),
+        snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(getNumberError),
                 *cp1?cp1:_("End Of String"));
         valF =	0.0;
     }
@@ -339,8 +339,9 @@ FLOAT_T DecodeDistance(
 
 
 #define N_STRING (10)
-static char formatStrings[N_STRING][40];
-static int formatStringInx;
+static int formatStringInx;					//Index ahead in case of overwrite
+static char formatStrings[N_STRING+1][80];  //Add safety
+
 
 EXPORT char * FormatLong(
 		long valL )
@@ -1020,12 +1021,13 @@ static long ParamRestore( paramGroup_p pg )
 
 static dynArr_t paramGroups_da;
 #define paramGroups(N) DYNARR_N( paramGroup_p, paramGroups_da, N )
+static BOOL_T paramGroups_init = FALSE;
 
 
 
 EXPORT void ParamRegister( paramGroup_p pg )
 {
-	paramData_p p;
+	paramData_t * p;
 	const char * cp;
 	WDOUBLE_T tmpR;
 	long valL;
@@ -1033,13 +1035,16 @@ EXPORT void ParamRegister( paramGroup_p pg )
 	char prefName1[STR_SHORT_SIZE];
 	const char *prefSect2, *prefName2;
 
+	if (!paramGroups_init) ParamInit();
+
 	DYNARR_APPEND( paramGroup_p, paramGroups_da, 10 );
 	paramGroups(paramGroups_da.cnt-1) = pg;
-	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
+	int i;
+	for ( i=0, p=pg->paramPtr; i<(pg->paramCnt); p++, i++ ) {
 		p->group = pg;
 		if ( p->nameStr == NULL )
 			continue;
-		sprintf( prefName1, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName1, sizeof(prefName1), "%s-%s", pg->nameStr, p->nameStr );
 		if ( p->type != PD_MENUITEM ) {
 			(void)GetBalloonHelpStr( prefName1 );
 		}
@@ -1155,12 +1160,13 @@ EXPORT void ParamUpdatePrefs( void )
 
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
 	  pg = paramGroups(inx);
+	  if (pg->nameStr == NULL) continue;
 	  for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
 		if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 )
 			continue;
 		if ( (p->option&PDO_DLGIGNORE) != 0 )
 			continue;
-		sprintf( prefName, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName, sizeof(prefName), "%s-%s", pg->nameStr, p->nameStr );
 		switch ( p->type ) {
 		case PD_LONG:
 		case PD_RADIO:
@@ -1682,7 +1688,6 @@ EXPORT void ParamChange( paramData_p p )
 #endif
 
 
-EXPORT int paramHiliteFast = FALSE;
 EXPORT void ParamHilite(
 		wWin_p win,
 		wControl_p control,
@@ -2689,10 +2694,14 @@ EXPORT void ParamCreateControls(
 
 EXPORT void ParamInit( void )
 {
+	if (paramGroups_init) return;
+
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 	log_paramLayout = LogFindIndex( "paramlayout" );
-	paramGroups_da.ptr = NULL;
 	paramGroups_da.cnt = 0;
 	paramGroups_da.max = 0;
+	paramGroups_da.ptr = NULL;
+	paramGroups_init = TRUE;
+
 }

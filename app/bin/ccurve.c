@@ -413,7 +413,7 @@ static paramData_t curvePLs[] = {
 #define curveRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t curvePG = { "curve-fixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
+static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
