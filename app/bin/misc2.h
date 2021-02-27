@@ -45,8 +45,8 @@ extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
 void LogSet( char *, int );
-int LogFindIndex( char * );
-void LogPrintf( char *, ... );
+int LogFindIndex( const char * );
+void LogPrintf( const char *, ... );
 #define LOG( DBINX, DBLVL, DBMSG ) \
 		if ( DBINX > 0 && logTable( DBINX ).level >= DBLVL ) { \
 				LogPrintf DBMSG ; \
