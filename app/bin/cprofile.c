@@ -708,7 +708,7 @@ static paramDrawData_t profileDrawData = { 300, 150, (wDrawRedrawCallBack_p)Redr
 static paramData_t profilePLs[] = {
     {	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
 #define I_PROFILEMSG			(1)
-    {	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void*)300 },
+    {	PD_MESSAGE, NULL, "profile", PDO_DLGIGNOREX, (void*)300 },
 #define I_CHANGEBUTTON 2
     {	PD_BUTTON, (void*)DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
 #define I_RESETBUTTON 3

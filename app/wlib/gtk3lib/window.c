@@ -625,11 +625,11 @@ static gint window_delete_event(
 
     if (win->winProc) {
         win->winProc(win, wClose_e, NULL, win->data);
-
-        if (win != gtkMainW) {
-            wWinShow(win, FALSE);
-        }
     }
+
+    if (win != gtkMainW) {
+		wWinShow(win, FALSE);
+	}
 
     return (TRUE);
 }
