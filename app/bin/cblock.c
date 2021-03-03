@@ -1377,7 +1377,7 @@ EXPORT void AddMissingBlockTrack( void )
     DIST_T totLen;
     EPINX_T startEp;
 
-    LOG( log_block, 1, ("*** AddMissingBlockTrack() -- enter\n"))
+    LOG( log_block, 1, ("*** AddMissingBlockTrack(1) -- enter\n"))
 
     SetupTurnouts();
 
@@ -1386,7 +1386,7 @@ EXPORT void AddMissingBlockTrack( void )
     TRK_ITERATE(trk) {
         if ( ! IsTrack(trk) ) continue;
 #if 0
-        LOG( log_block, 2, ("*** AddMissingBlockTrack() next seg T%d  EndPtCnt %d",
+        LOG( log_block, 2, ("*** AddMissingBlockTrack(2) next seg T%d  EndPtCnt %d",
                 GetTrkIndex(trk),GetTrkEndPtCnt(trk)))
         if ( trk->conBlock )
             LOG( log_block, 1, ("        B%d", GetTrkIndex(trk->conBlock)))
@@ -1402,7 +1402,7 @@ EXPORT void AddMissingBlockTrack( void )
         if ( tempEndPts_da.cnt < 2 ) continue;
         endPtP = &tempEndPts(0);
 #if 0
-        LOG( log_block, 2, ("*** AddMissingBlockTrack() T%d  blockLen %0.2f (min %0.2f max %0.2f) segs %d Start T%d\n",
+        LOG( log_block, 2, ("*** AddMissingBlockTrack(3) T%d  blockLen %0.2f (min %0.2f max %0.2f) segs %d Start T%d\n",
                 GetTrkIndex(trk),blockLen,GetLayoutMinBlockLength(),
                 GetLayoutMaxBlockLength(),blockTrk_da.cnt,GetTrkIndex(endPtP->prevTrack)))
 #endif
@@ -1410,17 +1410,18 @@ EXPORT void AddMissingBlockTrack( void )
 
         startTrk = endPtP->prevTrack;
         startEp = endPtP->trackEp;
+        totLen = blockLen;
 
         while ( totLen > 0.0 ) {
 #if 0
-            LOG( log_block, 2, ("*** AddMissingBlockTrack() T%d  totLen %0.2f Start T%d-%d\n",
+            LOG( log_block, 2, ("*** AddMissingBlockTrack(4) T%d  totLen %0.2f Start T%d-%d\n",
                     GetTrkIndex(trk),totLen,GetTrkIndex(startTrk),startEp))
 #endif
 
             // Gather segs for the block
             GetSubBlockSegs( startTrk, startEp, totLen );
 #if 0
-            LOG( log_block, 2, ("*** AddMissingBlockTrack() T%d  blockLen %0.2f eps %d segs %d\n",
+            LOG( log_block, 2, ("*** AddMissingBlockTrack(5) T%d  blockLen %0.2f eps %d segs %d\n",
                     GetTrkIndex(trk),blockLen,tempEndPts_da.cnt,blockTrk_da.cnt))
 #endif
 
@@ -1456,7 +1457,7 @@ EXPORT void AddMissingBlockTrack( void )
 #if 0
     verifyTrackOccupancy( TRUE );
 #endif
-    LOG( log_block, 1, ("*** AddMissingBlockTrack() -- exit\n"))
+    LOG( log_block, 1, ("*** AddMissingBlockTrack(6) -- exit\n"))
     MainRedraw();
 }
 
@@ -1784,7 +1785,7 @@ static void verifyOccupancy ( BOOL_T rpt, BOOL_T all )
         getDispTrkEp( b_trk, 0, &epB0, &trk0, &ep0 );
 
         // b_trk-ep[1] connects with this segment at ep1
-getDispTrkEp( b_trk, 1, &epB1, &trk1, &ep1 );
+        getDispTrkEp( b_trk, 1, &epB1, &trk1, &ep1 );
 
         // compare seg and block occupancy
         if ( ! IsDynamicBlock( b_trk ) && ( b_trk->endPt[0].attached || b_trk->endPt[1].attached ) )
