@@ -132,7 +132,7 @@ static BOOL_T inMainW = TRUE;
 
 static long stickySet = 0;
 static long stickyCnt = 0;
-static char * stickyLabels[33];
+static const char * stickyLabels[33];
 #define TOOLBARSET_INIT				(0xFFFF)
 EXPORT long toolbarSet = TOOLBARSET_INIT;
 EXPORT wWinPix_t toolbarHeight = 0;
@@ -384,7 +384,7 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 	return cout;
 }
 
-EXPORT void AbortProg(char * msg, ...) {
+EXPORT void AbortProg(const char * msg, ...) {
 	static BOOL_T abort2 = FALSE;
 	int rc;
 	va_list ap;
@@ -404,8 +404,8 @@ EXPORT void AbortProg(char * msg, ...) {
 	}
 }
 
-EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
-	char * cp;
+EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes) {
+	const char * cp;
 	while (*src && isspace((unsigned char) *src))
 		src++;
 	if (!*src)
@@ -457,8 +457,8 @@ EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 
 }
 
-EXPORT char * BuildTrimedTitle(char * cp, char * sep, char * mfg, char * desc,
-		char * partno) {
+EXPORT char * BuildTrimedTitle(char * cp, const char * sep, const char * mfg, const char * desc,
+		const char * partno) {
 	cp = Strcpytrimed(cp, mfg, FALSE);
 	strcpy(cp, sep);
 	cp += strlen(cp);
@@ -485,7 +485,7 @@ static void ShowMessageHelp(int index, const char * label, void * data) {
 	wHelp(msgKey);
 }
 
-static char * ParseMessage(char *msgSrc) {
+static const char * ParseMessage(const char *msgSrc) {
 	char *cp1 = NULL, *cp2 = NULL;
 	static char shortMsg[STR_SIZE];
 	cp1 = strchr(_(msgSrc), '\t');
@@ -512,7 +512,7 @@ static char * ParseMessage(char *msgSrc) {
 	}
 }
 
-EXPORT void InfoMessage(char * format, ...) {
+EXPORT void InfoMessage(const char * format, ...) {
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
@@ -524,7 +524,7 @@ EXPORT void InfoMessage(char * format, ...) {
 	SetMessage(message2);
 }
 
-EXPORT void ErrorMessage(char * format, ...) {
+EXPORT void ErrorMessage(const char * format, ...) {
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
@@ -536,7 +536,7 @@ EXPORT void ErrorMessage(char * format, ...) {
 	inError = TRUE;
 }
 
-EXPORT int NoticeMessage(char * format, char * yes, char * no, ...) {
+EXPORT int NoticeMessage(const char * format, const char * yes, const char * no, ...) {
 	va_list ap;
 	va_start(ap, no);
 	format = ParseMessage(format);
@@ -545,7 +545,7 @@ EXPORT int NoticeMessage(char * format, char * yes, char * no, ...) {
 	return wNotice(message2, yes, no);
 }
 
-EXPORT int NoticeMessage2(int playbackRC, char * format, char * yes, char * no,
+EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes, const char * no,
 		...) {
 	va_list ap;
 	if (inPlayback)
@@ -684,9 +684,8 @@ EXPORT void SaveState(void) {
  */
 static void DoQuitAfter(void) {
 	changed = 0;
+	CleanupFiles();  //Get rid of checkpoint if we quit.
 	SaveState();
-
-	CleanupFiles();
 }
 /**
  * Process shutdown request. This function is called when the user requests
@@ -889,7 +888,7 @@ static int commandCnt = 0;
 int * balloonHelpCnts;
 #endif
 
-EXPORT const char * GetBalloonHelpStr(char * helpKey) {
+EXPORT const char * GetBalloonHelpStr(const char * helpKey) {
 	wBalloonHelp_t * bh;
 #ifdef CHECK_UNUSED_BALLOONHELP
 	if ( balloonHelpCnts == NULL ) {
@@ -1498,8 +1497,8 @@ EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx) {
 	return commandList[cmdInx].enabled;
 }
 
-static wIndex_t AddCommand(procCommand_t cmdProc, char * helpKey,
-		char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
+static wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
+		const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
 		void * context) {
 	if (commandCnt >= COMMAND_MAX - 1) {
 		AbortProg("addCommand: too many commands");
@@ -1537,7 +1536,7 @@ EXPORT void AddToolbarControl(wControl_p control, long options) {
 	buttonCnt++;
 }
 
-EXPORT wButton_p AddToolbarButton(char * helpStr, wIcon_p icon, long options,
+EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long options,
 		wButtonCallBack_p action, void * context) {
 	wButton_p bb;
 	wIndex_t inx;
@@ -1582,13 +1581,13 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 }
 
 #include "bitmaps/openbutt.xpm"
-static char * buttonGroupMenuTitle;
-static char * buttonGroupHelpKey;
-static char * buttonGroupStickyLabel;
+static const char * buttonGroupMenuTitle;
+static const char * buttonGroupHelpKey;
+static const char * buttonGroupStickyLabel;
 static wMenu_p buttonGroupPopupM;
 
-EXPORT void ButtonGroupBegin(char * menuTitle, char * helpKey,
-		char * stickyLabel) {
+EXPORT void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
+		const char * stickyLabel) {
 	buttonGroupMenuTitle = menuTitle;
 	buttonGroupHelpKey = helpKey;
 	buttonGroupStickyLabel = stickyLabel;
@@ -1602,7 +1601,7 @@ EXPORT void ButtonGroupEnd(void) {
 }
 
 EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
-		char * helpKey, char * nameStr, wIcon_p icon, int reqLevel,
+		const char * helpKey, const char * nameStr, wIcon_p icon, int reqLevel,
 		long options, long acclKey, void * context) {
 	wIndex_t buttInx = -1;
 	wIndex_t cmdInx;
@@ -1693,8 +1692,8 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 	return cmdInx;
 }
 
-EXPORT wIndex_t InitCommand(wMenu_p menu, procCommand_t command, char * nameStr,
-		char * bits, int reqLevel, long options, long acclKey) {
+EXPORT wIndex_t InitCommand(wMenu_p menu, procCommand_t command, const char * nameStr,
+		const char * bits, int reqLevel, long options, long acclKey) {
 	char helpKey[STR_SHORT_SIZE];
 	wIcon_p icon = NULL;
 	if (bits)
@@ -1707,7 +1706,7 @@ EXPORT wIndex_t InitCommand(wMenu_p menu, procCommand_t command, char * nameStr,
 
 /*--------------------------------------------------------------------*/
 
-EXPORT void PlaybackCommand(char * line, wIndex_t lineNum) {
+EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
 	wIndex_t inx;
 	wIndex_t buttInx;
 	int len1, len2;
@@ -1778,7 +1777,7 @@ static void DoMenuTrace(wMenu_p menu, const char * label, void * data) {
 	}
 }
 
-EXPORT wMenu_p MenuRegister(char * label) {
+EXPORT wMenu_p MenuRegister(const char * label) {
 	wMenu_p m;
 	menuTrace_p mt;
 	m = wMenuPopupCreate(mainW, label);
@@ -1815,7 +1814,7 @@ static wWin_p stickyW;
 
 static void StickyOk(void *);
 static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
-		stickyLabels } };
+		(void*)stickyLabels } };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 		sizeof stickyPLs / sizeof stickyPLs[0] };
 
@@ -1897,7 +1896,7 @@ static void DoAddElev(void *);
 
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { { PD_FLOAT, &addElevValueV, "value",
-		PDO_DIM, &rn1000_1000, NULL, 0 } };
+		PDO_NOPREF|PDO_DIM, &rn1000_1000, NULL, 0 } };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, sizeof addElevPLs
 		/ sizeof addElevPLs[0] };
 
@@ -1934,22 +1933,21 @@ static moveDialogCallBack_t moveDialogCallBack;
 static void RotateEnterOk(void *);
 
 static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80 };
-static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE,
-		&rn360_360, N_("Angle:") } };
+static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
 
 static void IndexEnterOk(void *);
-static paramData_t indexPLs[] = { { PD_STRING, &trackIndex, "select",
-		PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)100, N_("Indexes:"), 0, 0, sizeof trackIndex } };
+static paramData_t indexPLs[] = {
+		{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, (void*)(STR_SIZE-1), N_("Indexes:"), 0, 0, sizeof(trackIndex) } };
 static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
 		/ sizeof indexPLs[0] };
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static void MoveEnterOk(void *);
-static paramData_t movePLs[] = { { PD_FLOAT, &moveValue.x, "moveX", PDO_DIM,
-		&r_1000_1000, N_("Move X:") }, { PD_FLOAT, &moveValue.y, "moveY",
-		PDO_DIM, &r_1000_1000, N_("Move Y:") } };
+static paramData_t movePLs[] = {
+		{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:") },
+		{ PD_FLOAT, &moveValue.y, "moveY", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move Y:") } };
 static paramGroup_t movePG = { "move", 0, movePLs, sizeof movePLs
 		/ sizeof movePLs[0] };
 
@@ -2102,7 +2100,7 @@ EXPORT void DebugInit(void) {
 }
 
 
-EXPORT void InitDebug(char * label, long * valueP) {
+EXPORT void InitDebug(const char * label, long * valueP) {
 	if (debugCnt >= sizeof debugPLs / sizeof debugPLs[0])
 		AbortProg("Too many debug flags");
 	memset(&debugPLs[debugCnt], 0, sizeof debugPLs[debugCnt]);
@@ -2116,8 +2114,8 @@ EXPORT void InitDebug(char * label, long * valueP) {
 
 void RecomputeElevations(void);
 
-static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, char * name,
-		char * label, long acclKey, void * func, long option, void * context) {
+static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
+		const char * label, long acclKey, void * func, long option, void * context) {
 	wMenuPush_p mp;
 	mp = wMenuPushCreate(m1, name, label, acclKey, ParamMenuPush,
 			&menuPLs[menuPG.paramCnt]);
@@ -2140,7 +2138,7 @@ static char * accelKeyNames[] = { "Del", "Ins", "Home", "End", "Pgup", "Pgdn",
 		"Up", "Down", "Right", "Left", "Back", "F1", "F2", "F3", "F4", "F5",
 		"F6", "F7", "F8", "F9", "F10", "F11", "F12", "NumpadAdd", "NumpadSub" };
 
-static void SetAccelKey(char * prefName, wAccelKey_e key, int mode,
+static void SetAccelKey(const char * prefName, wAccelKey_e key, int mode,
 		wAccelKeyCallBack_p func, void * context) {
 	int mode1 = 0;
 	int inx;
@@ -2724,8 +2722,8 @@ static void CreateMenus(void) {
 			(void*) 1);
 	SetAccelKey("redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p) MainRedraw,
 			(void*) 1);
-	SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
-			(void*) 1);
+	//SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
+	//		(void*) 1);
 	SetAccelKey("copy", wAccelKey_Ins, WKEY_CTRL,
 			(wAccelKeyCallBack_p) EditCopy, 0);
 	SetAccelKey("paste", wAccelKey_Ins, WKEY_SHIFT,

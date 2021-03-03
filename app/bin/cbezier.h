@@ -35,7 +35,7 @@ extern dynArr_t tempEndPts_da;
 extern wDrawColor lineColor;
 extern long lineWidth;
 
-typedef void (*bezMessageProc)( char *, ... );
+typedef void (*bezMessageProc)( const char *, ... );
 STATUS_T CmdBezCurve( wAction_t, coOrd);
 STATUS_T CmdBezModify(track_p, wAction_t, coOrd, DIST_T);
 

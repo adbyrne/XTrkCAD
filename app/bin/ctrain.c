@@ -555,6 +555,8 @@ static BOOL_T QueryCar(track_p trk, int query)
     switch (query) {
     case Q_NODRAWENDPT:
         return TRUE;
+    case Q_ISTRAIN:
+    	return TRUE;
 
     default:
         return FALSE;

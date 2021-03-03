@@ -219,14 +219,14 @@ void * MyRealloc( void *, long );
 void MyFree( void * );
 void * memdup( void *, size_t );
 char * MyStrdup( const char * );
-void AbortProg( char *, ... );
+void AbortProg( const char *, ... );
 #define ASSERT( X ) if ( !(X) ) AbortProg( "%s: %s:%d", #X, __FILE__, __LINE__ )
-char * Strcpytrimed( char *, char *, BOOL_T );
-char * BuildTrimedTitle( char *, char *, char *, char *, char * );
-void ErrorMessage( char *, ... );
-void InfoMessage( char *, ... );
-int NoticeMessage( char *, char*, char *, ... );
-int NoticeMessage2( int, char *, char*, char *, ... );
+char * Strcpytrimed( char *, const char *, BOOL_T );
+char * BuildTrimedTitle( char *, const char *, const char *, const char *, const char * );
+void ErrorMessage( const char *, ... );
+void InfoMessage( const char *, ... );
+int NoticeMessage( const char *, const char*, const char *, ... );
+int NoticeMessage2( int, const char *, const char*, const char *, ... );
 void DoQuit( void );
 
 void FileIsChanged(void);
@@ -241,7 +241,7 @@ void DefaultProc( wWin_p, winProcEvent, void * );
 void SelectFont();
 
 void CheckRoomSize( BOOL_T );
-const char * GetBalloonHelpStr( char* );
+const char * GetBalloonHelpStr( const char* );
 const char * GetCurCommandName( void );
 void EnableCommands( void );
 void Reset( void );
@@ -271,24 +271,24 @@ void LayoutToolBar( void * );
 #define IC_PLAYBACK_PUSH        (1<<16)
 #define IC_WANT_MODKEYS         (1<<17)
 #define IC_POPUP3				(1<<18)
-wIndex_t InitCommand( wMenu_p, procCommand_t, char *, char *,  int, long, long );
+wIndex_t InitCommand( wMenu_p, procCommand_t, const char *, const char *,  int, long, long );
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );
-wButton_p AddToolbarButton( char*, wIcon_p, long, wButtonCallBack_p, void * context );
+wButton_p AddToolbarButton( const char*, wIcon_p, long, wButtonCallBack_p, void * context );
 wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
-wIndex_t AddMenuButton( wMenu_p, procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
+wIndex_t AddMenuButton( wMenu_p, procCommand_t, const char*, const char*, wIcon_p, int, long, long, void* );
 void PlaybackButtonMouse( wIndex_t );
-void ButtonGroupBegin( char *, char *, char * );
+void ButtonGroupBegin( const char *, const char *, const char * );
 void ButtonGroupEnd( void );
 
 void SaveState( void );
 
-void PlaybackCommand( char *, wIndex_t );
-wMenu_p MenuRegister( char * label );
+void PlaybackCommand( const char *, wIndex_t );
+wMenu_p MenuRegister( const char * label );
 void DoCommandB( void * );
 
 extern void EnumerateTracks( void );
-void InitDebug( char *, long * );
+void InitDebug( const char *, long * );
 
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)

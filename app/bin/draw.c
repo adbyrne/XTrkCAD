@@ -2273,12 +2273,11 @@ EXPORT void PanHere(void * mode) {
 }
 
 
-static void DoPanKeyAction( wAction_t action )
+static int DoPanKeyAction( wAction_t action )
 {
-	switch ((wAccelKey_e)(action>>8)) {
+	switch ((wAccelKey_e)(action>>8)&0xFF) {
 	case wAccelKey_Del:
-		SelectDelete();
-		return;
+		return SelectDelete();
 #ifndef WINDOWS
 	case wAccelKey_Pgdn:
 		DoZoomUp(NULL);
@@ -2332,8 +2331,9 @@ static void DoPanKeyAction( wAction_t action )
 		break;
 
 	default:
-		return;
+		return 0;
 	}
+	return 0;
 }
 
 
@@ -2600,8 +2600,9 @@ static void DoMouse( wAction_t action, coOrd pos )
 				action = C_TEXT+((int)(0x0A<<8));
 				break;
 			}
-			DoPanKeyAction( action );
-			return;
+			int rc = DoPanKeyAction(action);
+			if (rc!=1) return;
+			break;
 		case C_TEXT:
 			if ((action>>8) == 0x0D) {
 				action = C_OK;
@@ -2609,6 +2610,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 				ConfirmReset( TRUE );
 				return;
 			}
+			/*no break */
 		case C_MODKEY:
 		case C_MOVE:
 		case C_UP:

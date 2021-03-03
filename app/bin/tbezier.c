@@ -272,45 +272,56 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 	BOOL_T updateEndPts;
 	EPINX_T ep;
 	ANGLE_T angle1, angle2;
+	BOOL_T is_Track = (GetTrkType(trk)==T_BEZIER);
 
 	if ( inx == -1 )
 		return;
 	updateEndPts = FALSE;
+	UndrawNewTrack( trk );
 	switch ( inx ) {
     case P0:
-        if (GetTrkEndTrk(trk,0)) break;
     	updateEndPts = TRUE;
         xx->pos[0] = bezData.pos[0];
+        xx->a0 = bezData.angle[1] = FindAngle(xx->pos[1],xx->pos[0]);
+        bezDesc[A0].mode |= DESC_CHANGE;
         bezDesc[P0].mode |= DESC_CHANGE;
         /* no break */
     case P1:
-    	if (GetTrkEndTrk(trk,0) && GetTrkEndTrk(trk,1)) break;
         updateEndPts = TRUE;
         xx->pos[3]= bezData.pos[3];
+        xx->a1 = bezData.angle[1] = FindAngle(xx->pos[2],xx->pos[3]);
+        bezDesc[A1].mode |= DESC_CHANGE;
         bezDesc[P1].mode |= DESC_CHANGE;
         break;
-    case A0:
-    case A1:
-    	break;
     case CP1:
-    	if (GetTrkEndTrk(trk,0)) {
-    		angle1 = NormalizeAngle(GetTrkEndAngle(trk,0));
-    	    angle2 = NormalizeAngle(FindAngle(bezData.pos[1], xx->pos[0])-angle1);
-    		if (angle2 > 90.0 && angle2 < 270.0)
-    		  Translate( &bezData.pos[1], xx->pos[0], angle1, -FindDistance( xx->pos[0], bezData.pos[1] )*cos(D2R(angle2)));
+    	if (is_Track) {
+			if (GetTrkEndTrk(trk,0)) {
+				angle1 = NormalizeAngle(GetTrkEndAngle(trk,0));
+				angle2 = DifferenceBetweenAngles(FindAngle(bezData.pos[1], xx->pos[0]),angle1);
+				if (fabs(angle2)<90)
+				  Translate( &bezData.pos[1], xx->pos[0], angle1, -FindDistance( xx->pos[0], bezData.pos[1] )*cos(D2R(angle2)));
+				else bezData.pos[1] = xx->pos[1];
+			}
     	}
         xx->pos[1] = bezData.pos[1];
+        xx->a0 = bezData.angle[0] = FindAngle(xx->pos[1],xx->pos[0]);
+        bezDesc[A0].mode |= DESC_CHANGE;
         bezDesc[CP1].mode |= DESC_CHANGE;
         updateEndPts = TRUE;
         break;
     case CP2:
-    	if (GetTrkEndTrk(trk,1)) {
-    	    angle1 = NormalizeAngle(GetTrkEndAngle(trk,1));
-    	    angle2 = NormalizeAngle(FindAngle(bezData.pos[2], xx->pos[3])-angle1);
-    	    if (angle2 > 90.0 && angle2 < 270.0)
-    	    Translate( &bezData.pos[2], xx->pos[3], angle1, -FindDistance( xx->pos[3], bezData.pos[0] )*cos(D2R(angle2)));
+    	if (is_Track) {
+			if (GetTrkEndTrk(trk,1)) {
+				angle1 = NormalizeAngle(GetTrkEndAngle(trk,1));
+				angle2 = DifferenceBetweenAngles(FindAngle(bezData.pos[2], xx->pos[3]),angle1);
+				if (fabs(angle2)<90)
+					Translate( &bezData.pos[2], xx->pos[3], angle1, -FindDistance( xx->pos[3], bezData.pos[2] )*cos(D2R(angle2)));
+				else bezData.pos[2] = xx->pos[2];
+			}
     	}
         xx->pos[2] = bezData.pos[2];
+        xx->a1 = bezData.angle[1] = FindAngle(xx->pos[2],xx->pos[3]);
+        bezDesc[A1].mode |= DESC_CHANGE;
         bezDesc[CP2].mode |= DESC_CHANGE;
         updateEndPts = TRUE;
         break;
@@ -348,7 +359,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 	    	bezData.radius[i] = params.arcR;
 	    	bezData.center[i] = params.arcP;
 	    }
-	if (updateEndPts) {
+	if (updateEndPts && is_Track) {
 			if ( GetTrkEndTrk(trk,0) == NULL ) {
 				SetTrkEndPoint( trk, 0, bezData.pos[0], NormalizeAngle( FindAngle(bezData.pos[1], bezData.pos[0]) ) );
 				bezData.angle[0] = GetTrkEndAngle(trk,0);
@@ -366,7 +377,6 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 				bezData.center[1] = params.arcP;
 			}
 	}
-
 	FixUpBezier(xx->pos, xx, IsTrack(trk));
 	ComputeBezierBoundingBox(trk, xx);
 	DrawNewTrack( trk );
@@ -376,7 +386,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
 	DIST_T d;
-	int fix0, fix1 = 0;
+	int fix0 = 0, fix1 = 0;
 	
 	d = xx->length;
     sprintf( str, _("Bezier %s(%d): Layer=%u MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"),
@@ -1592,6 +1602,8 @@ track_p NewBezierTrack(coOrd pos[4], trkSeg_t * tempsegs, int count)
     xx->pos[1] = pos[1];
     xx->pos[2] = pos[2];
     xx->pos[3] = pos[3];
+    xx->a0 = FindAngle(pos[1],pos[0]);
+    xx->a1 = FindAngle(pos[2],pos[3]);
     xx->segsColor = wDrawColorBlack;
     xx->segsWidth = 0;
     FixUpBezier(pos, xx, TRUE);
@@ -1614,6 +1626,8 @@ EXPORT track_p NewBezierLine( coOrd pos[4], trkSeg_t * tempsegs, int count, wDra
     xx->pos[1] = pos[1];
     xx->pos[2] = pos[2];
     xx->pos[3] = pos[3];
+    xx->a0 = FindAngle(pos[1],pos[0]);
+    xx->a1 = FindAngle(pos[2],pos[3]);
     xx->segsColor = color;
     xx->segsWidth = width;
     FixUpBezier(pos, xx, FALSE);

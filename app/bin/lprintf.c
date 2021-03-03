@@ -105,7 +105,7 @@ EXPORT void LogSet( char * name, int level )
 }
 
 
-EXPORT int LogFindIndex( char * name )
+EXPORT int LogFindIndex( const char * name )
 {
 	int inx;
 	for ( inx=0; inx<logTable_da.cnt; inx++ )
@@ -115,7 +115,7 @@ EXPORT int LogFindIndex( char * name )
 }
 
 EXPORT void LogPrintf(
-		char * format,
+		const char * format,
 		... )
 {
 	va_list ap;

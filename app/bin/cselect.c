@@ -677,18 +677,20 @@ EXPORT void SelectLineType( void* width )
 
 static BOOL_T doingDouble;
 
-EXPORT void SelectDelete( void )
+EXPORT int SelectDelete( void )
 {
 	if (GetCurrentCommand() != selectCmdInx ) {
-		InfoMessage(_("Delete only works in Select Mode"));
-		wBeep();
-		return;
+		if (GetCurrentCommand() != modifyCmdInx ) {
+			InfoMessage(_("Delete only works in Select Mode"));
+			wBeep();
+			return -1;
+		}
 	}
 
-	if (doingDouble) return;
+	if (doingDouble || (GetCurrentCommand() == modifyCmdInx)) return 1;
 
 	if (SelectedTracksAreFrozen())
-		return;
+		return 0;
 	if (selectedTrackCount>0) {
 		UndoStart( _("Delete Tracks"), "delete" );
 		wDrawDelayUpdate( mainD.d, TRUE );
@@ -702,6 +704,16 @@ EXPORT void SelectDelete( void )
 		UndoEnd();
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
+	}
+	return 0;
+}
+
+/*
+ * Called By Windows directly with Delete Key. We first try a simple Delete, and if that doesn't work saying "In Modify" we call Modify with a Text key for Delete
+ */
+EXPORT void TrySelectDelete( void ) {
+	if(SelectDelete() == 1) {
+		CmdModify((C_TEXT+(int)(127<<8)),zero);
 	}
 }
 
@@ -1912,6 +1924,8 @@ static STATUS_T CmdMove(
 			if ((action>>8) == '0' || (action>>8 == 'o')) {
 				PanMenuEnter('o');
 			}
+			if ((action>>8) == 127 || (action>>8) == 8)
+				SelectDelete();
 			break;
 		case C_REDRAW:
 			/* DO_REDRAW */
@@ -2438,6 +2452,10 @@ static void ChangeDescFlag( wBool_t set, void * mode )
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
+/*
+ * Mode_o -1 = everything, 0 = elevations only, 1 = descriptions only
+ */
+
 track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T show_hidden, BOOL_T * hidden_o)  {
 	 	track_p trk = NULL;
 		DIST_T d, dd = 10000;
@@ -2468,7 +2486,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				}
 			}
 			if (IsClose(dd)) break;
-			if ( !QueryTrack( trk1, Q_HAS_DESC ) && (*mode_o > 0) )
+			if ( *mode_o == 0 || !QueryTrack( trk1, Q_HAS_DESC ) )
 				continue;
 			if ((labelEnable&LABELENABLE_TRKDESC)==0)
 				continue;
@@ -2588,6 +2606,10 @@ STATUS_T CmdMoveDescription(
 				if (mode==0) {
 					InfoMessage(_("Elevation description"));
 				} else {
+					if (moveDescMode == 1) {
+						moveDescTrk = NULL;
+						return C_CONTINUE;   //Ignore other tracks if only looking for elevations
+					}
 					if (hidden) {
 						InfoMessage(_("Hidden description - 's' to Show, 'd' Details"));
 						moveDescPos = pos;
@@ -3256,6 +3278,11 @@ static STATUS_T CmdSelect(
 		return rc;
 		break;
 	case wActionExtKey:
+		if ((action>>8)==wAccelKey_Del) {
+			SelectDelete();
+			break;
+		}
+		/* No Break */
 	case C_RMOVE:
 	case C_MOVE:
 		if (doingDouble) {
@@ -3491,6 +3518,10 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
+		if ((action>>8) == 127 || (action>>8) == 8) {	//Backspace or Delete key
+			SelectDelete();
+			break;
+		}
 		if ((action>>8) == 'c') {
 			panCenter = pos;
 			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
@@ -3657,7 +3688,7 @@ EXPORT void InitCmdDelete( void )
 	icon = wIconCreatePixMap( delete_xpm );
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
 #ifdef WINDOWS
-	wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)SelectDelete, NULL );
+	wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)TrySelectDelete, NULL );
 #endif
 }
 

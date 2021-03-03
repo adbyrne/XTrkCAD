@@ -783,7 +783,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	track_p trk1;
     DIST_T radius = 0.0;
     coOrd center;
-    int inx;
+    int inx,subinx;
     BOOL_T track;
     track = IsTrack(trk);
     
@@ -794,17 +794,15 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     BOOL_T back, neg;
     
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
-    ANGLE_T angle = GetAngleSegs(xx->arcSegs.cnt,(trkSeg_t *)(xx->arcSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+    ANGLE_T angle = GetAngleSegs(xx->arcSegs.cnt,(trkSeg_t *)(xx->arcSegs.ptr),&pos,&inx,NULL,&back,&subinx,&neg);
 
     if (inx == -1) return FALSE;
 
     trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->arcSegs, inx);
 
-    GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
-
-    if (inx == -1) return FALSE;
-
-    segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
+    if (subinx != -1) {
+    	segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, subinx);
+    }
 
     if (segPtr->type == SEG_STRTRK) {
     	radius = 0.0;

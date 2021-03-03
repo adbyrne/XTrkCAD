@@ -39,13 +39,15 @@ const char * wGetAppLibDir( void )
 		*cp = '\0';
 
 #ifdef XTRKCAD_CMAKE_BUILD
-	strcpy(appLibDirName, module_name);
-	strcat(appLibDirName, "\\..\\share\\xtrkcad");
+	strncpy(appLibDirName, module_name, sizeof(appLibDirName));
+	int len = sizeof(appLibDirName)-strlen(appLibDirName)-1;
+	strncat(appLibDirName, "\\..\\share\\xtrkcad", len);
 	_fullpath( appLibDirName, appLibDirName, MAX_PATH );
 	return appLibDirName;
 #endif	
 
-	strcpy(appLibDirName, module_name);
+	strncpy(appLibDirName, module_name, sizeof(appLibDirName));
+	appLibDirName[sizeof(appLibDirName)-1] = '\0';
 	return appLibDirName;
 }
 
@@ -72,11 +74,12 @@ const char * wGetAppWorkDir( void )
 		return appWorkDirName;
 	}
 	wGetAppLibDir();
-	sprintf( mswTmpBuff, "%s\\xtrkcad0.ini", appLibDirName );
+	snprintf( mswTmpBuff, sizeof(mswTmpBuff), "%s\\xtrkcad0.ini", appLibDirName );
 	rc = GetPrivateProfileString( "workdir", "path", "", appWorkDirName, sizeof appWorkDirName, mswTmpBuff );
 	if ( rc!=0 ) {
 		if ( stricmp( appWorkDirName, "installdir" ) == 0 ) {
-			strcpy( appWorkDirName, appLibDirName );
+			strncpy( appWorkDirName, appLibDirName, sizeof(appWorkDirName) );
+			appWorkDirName[sizeof(appWorkDirName)-1] = '\0';
 		} else {
 			cp = &appWorkDirName[strlen(appWorkDirName)-1];
 			while (cp>appWorkDirName && *cp == '\\') *cp-- = 0;
@@ -88,7 +91,7 @@ const char * wGetAppWorkDir( void )
 			wNoticeEx( NT_ERROR, "Cannot get user's profile directory", "Exit", NULL );
 			wExit(0);
 	} else {
-		sprintf( appWorkDirName, "%s\\%s", mswTmpBuff, "XTrackCad" );
+		snprintf( appWorkDirName, sizeof(appWorkDirName), "%s\\%s", mswTmpBuff, "XTrackCad" );
 		if( !PathIsDirectory( appWorkDirName )) {
 			if( !CreateDirectory( appWorkDirName, NULL )) {
 				wNoticeEx( NT_ERROR, "Cannot create user's profile directory", "Exit", NULL );
@@ -189,7 +192,7 @@ void wPrefSetInteger( const char * section, const char * name, long lval )
 {
 	char tmp[20];
 	
-	sprintf( tmp, "%ld", lval );
+	snprintf( tmp, sizeof(tmp), "%ld", lval );
 	wPrefSetString( section, name, tmp );
 }
 
@@ -226,7 +229,7 @@ void wPrefSetFloat(
 {
 	char tmp[20];
 
-	sprintf(tmp, "%0.6f", lval );
+	snprintf(tmp, sizeof(tmp), "%0.6f", lval );
 	wPrefSetString( section, name, tmp );
 }
 
@@ -261,15 +264,13 @@ void wPrefFlush( char * name )
 	prefs_t * p;
 	
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-	   if ( p->dirty ) {
-		  if (name && name[0])
+		if (name && name[0])
 			WritePrivateProfileString( p->section, p->name, p->val, name );
-		  else
+		else if (p->dirty)
 		   WritePrivateProfileString( p->section, p->name, p->val, mswProfileFile );
-	   }
 	}
 	if (name && name[0])
-		WritePrivateProfileString( p->section, p->name, p->val, name );
+		WritePrivateProfileString( NULL, NULL, NULL, name );
 	else
 		WritePrivateProfileString( NULL, NULL, NULL, mswProfileFile );
 }
@@ -292,3 +293,4 @@ void wPrefReset(
 	}
 	prefs_da.cnt = 0;
 }
+
