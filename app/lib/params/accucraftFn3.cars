@@ -1,0 +1,88 @@
+CONTENTS=Accucraft Fn3 Scale Cars
+MANUF=Accucraft AMS
+SCALE=F
+ORDER=#RDN
+#
+# Jackson & Sharp Passenger Coach ($275.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=passenger
+COUPLERLENGTH=0.5
+PROTO=Passenger, Coach
+DESC=J&S Coach
+LENGTH=27.5
+WIDTH=5.0
+#
+PART=AM54-010BX%Bumble Bee Single Stripe%%Unlettered
+PART=AM54-010GX%Dark Green%%Unlettered
+PART=AM54-010RX%Red%%Unlettered
+#
+PART=AM54-011X%D&RGW Green%%257
+PART=AM54-011X%D&RGW Green%%281
+PART=AM54-011X%D&RGW Green%%285
+PART=AM54-011X%D&RGW Green%%302
+#
+PART=AM54-012X%RGS Red%%253
+PART=AM54-012X%RGS Red%%254
+PART=AM54-012X%RGS Red%%255
+PART=AM54-012X%RGS Red%%258
+#
+PART=AM54-013X%C&S Green%%71
+PART=AM54-013X%C&S Green%%73
+PART=AM54-013X%C&S Green%%74
+PART=AM54-013X%C&S Green%%77
+#
+PART=AM54-014X%D&RGW Red%%274
+PART=AM54-014X%D&RGW Red%%284
+PART=AM54-014X%D&RGW Red%%306
+PART=AM54-014X%D&RGW Red%%309
+#
+PART=AM54-015X%Bumble Bee Double Stripe%%280
+PART=AM54-015X%Bumble Bee Double Stripe%%306
+PART=AM54-015X%Bumble Bee Double Stripe%%320
+PART=AM54-015X%Bumble Bee Double Stripe%%284
+#
+PART=AM54-016X%Bumble Bee Single Stripe%%330
+PART=AM54-016X%Bumble Bee Single Stripe%%331
+PART=AM54-016X%Bumble Bee Single Stripe%%332
+PART=AM54-016X%Bumble Bee Single Stripe%%333
+#
+# Jackson & Sharp Combine ($275.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=passenger
+COUPLERLENGTH=0.5
+PROTO=Passenger, Combine
+DESC=J&S Combine
+LENGTH=27.5
+WIDTH=5.0
+#
+PART=AM54-020BX%Bumble Bee Yellow%%Unlettered
+PART=AM54-020BX%D&RG Green%%Unlettered
+PART=AM54-020RX%RGS Red%%Unlettered
+#
+PART=AM54-021X%D&RGW Green%%202
+PART=AM54-021X%D&RGW Green%%210
+PART=AM54-021X%D&RGW Green%%214
+PART=AM54-021X%D&RGW Green%%215
+#
+PART=AM54-022X%RGS Red%%200
+PART=AM54-022X%RGS Red%%201
+PART=AM54-022X%RGS Red%%202
+PART=AM54-022X%RGS Red%%203
+#
+PART=AM54-023X%C&S Green%%26
+PART=AM54-023X%C&S Green%%28
+PART=AM54-023X%C&S Green%%29
+PART=AM54-023X%C&S Green%%30
+#
+PART=AM54-024X%D&RGW Red%%208
+PART=AM54-024X%D&RGW Red%%209
+PART=AM54-024X%D&RGW Red%%211
+PART=AM54-024X%D&RGW Red%%212
+#
+PART=AM54-025X%Bumble Bee Double Stripe%%212
+PART=AM54-025X%Bumble Bee Double Stripe%%214
+PART=AM54-025X%Bumble Bee Double Stripe%%240
+PART=AM54-025X%Bumble Bee Double Stripe%%242
+

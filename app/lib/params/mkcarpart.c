@@ -317,10 +317,18 @@ void processFile(
 				ratio = 160.0;
 			else if ( stricmp( scale, "HO" ) == 0 )
 				ratio = 87.1;
-			else if ( stricmp( scale, "O" ) == 0 )
-				ratio = 48.0;
 			else if ( stricmp( scale, "S" ) == 0 )
 				ratio = 64.0;
+			else if (stricmp(scale, "O") == 0)
+				ratio = 48.0;
+			else if (stricmp(scale, "1") == 0)
+				ratio = 32.0;
+			else if (stricmp(scale, "A") == 0)
+				ratio = 29.0;
+			else if (stricmp(scale, "G") == 0)
+				ratio = 22.5;
+			else if (stricmp(scale, "F") == 0)
+				ratio = 20.32;
 			else {
 				fprintf( stderr, "%d: Unknown scale %s\n", lineNumber, scale );
 				ratio = 87.1;
