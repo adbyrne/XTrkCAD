@@ -1795,40 +1795,6 @@ static void DrawTurnoutPositionIndicator(
 	}
 }
 
-
-// given a trk and end pos, return other end of the path
-EXPORT coOrd GetRemoteTurnoutPositions( track_p trk, coOrd pos )
-{
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
-	PATHPTR_T path;
-	coOrd pos0, pos1;
-
-	path = GetCurrPath( trk );
-#if 0
-	LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) %s (%d) pos %0.4f %0.4f\n",
-				path, GetCurrPathIndex( trk ), pos.x, pos.y) )
-#endif
-	for ( path += strlen((char*)path); path[0] || path[1]; path++ ) {
-		if ( path[0] == 0 ) {
-			pos0 = MapPathPos( xx, path[1], 0 );
-#if 0
-			LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) path \"%s\" pos0 %0.4f %0.4f -- isSame %d \n",
-						&path[1], pos0.x, pos0.y, isSame( pos, pos0 )) )
-#endif
-		} else if ( path[1] == 0 ) {
-			pos1 = MapPathPos( xx, path[0], 1 );
-#if 0
-			LOG( log_turnout, 1, ( "GetRemoteTurnoutPositions( ) path \"%s\" pos1 %0.4f %0.4f -- isSame %d \n",
-						&path[0], pos1.x, pos1.y, isSame( pos, pos1 )) )
-#endif
-			if ( isSame( pos, pos0 ) ) return pos1;
-			if ( isSame( pos, pos1 ) ) return pos0;
-		}
-	}
-	return pos;
-}
-
-
 EXPORT void AdvanceTurnoutPositionIndicator(
 		track_p trk,
 		coOrd pos,
@@ -3375,4 +3341,175 @@ EXPORT void ClearTurnoutFlags( void )
 		}
 	}
 	LOG( log_turnout, 1, ("*** ClearTurnoutFlags() -- exit\n"))
+}
+
+
+/*
+ * Each endpoint has a vector, epPath, indexed by currPathIndex
+ * that holds the remote ep for the position. ep is the curent ep
+ * when the turnout is physically open.
+ * Extra data has pathIndex, the index of the pathCurr. Whenever pathCurr
+ * is changed, pathIndex is updated.
+ *
+ * Each endpoint has a trackEp that is the ep on the track that points
+ * to this track and ep.
+ */
+
+static void displayTurnout(track_p trk)
+{
+	struct extraDataCompound_t * xx;
+	int i;
+	EPINX_T ep;
+
+	if (/*PHIL GetTrkEndPtCnt(trk) <= 2 ||*/ GetTrkType(trk) == T_TURNTABLE ) return;
+
+	if ( GetTrkType(trk) == T_TURNOUT ) {
+		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+
+		LOG( log_turnout, 1, ("*** displayTurnout() T%d EPs %d pathCnt %d  ",
+			GetTrkIndex(trk), GetTrkEndPtCnt(trk), xx->pathCnt))
+
+		for ( i=0 ; i < xx->pathCnt ; i++ ) {
+			LOG( log_turnout, 1, ("  index %d ", i))
+			for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+				if ( ep < trk->endPt[ep].epPath[i])
+					LOG( log_turnout, 1, ("  ep %d %d",
+						ep,trk->endPt[ep].epPath[i]))
+			}
+		}
+		LOG( log_turnout, 1, ("\n"))
+	}
+
+	LOG( log_turnout, 1, ("*** displayTurnout()"))
+	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+		if ( trk->endPt[ep].track )
+			LOG( log_turnout, 1, ("  T%d-%d <> T%d-%d ",
+				GetTrkIndex(trk),ep,
+				GetTrkIndex(trk->endPt[ep].track),
+				trk->endPt[ep].trackEp))
+	}
+	LOG( log_turnout, 1, ("\n"))
+}
+
+static BOOL_T isSamePos(coOrd pos0, coOrd pos1)
+{
+	return (pos0.x + 0.015 > pos1.x) && (pos0.x - 0.015 < pos1.x) &&
+		(pos0.y + 0.015 > pos1.y) && (pos0.y - 0.015 < pos1.y);
+}
+
+static void configEndPt(track_p trk, int pathIndex, coOrd pos0, int p0, coOrd pos1)
+{
+	EPINX_T ep, ep0, ep1;
+
+	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+		if ( isSamePos(trk->endPt[ep].pos, pos0)) {
+			ep1 = ep;
+		}
+		if ( isSamePos(trk->endPt[ep].pos, pos1)) {
+			ep0 = ep;
+		}
+	}
+#if 0
+	LOG( log_turnout, 1, ("*** configEndPt() T%d  ep0 %d ep1 %d pathIndex %d\n",
+		GetTrkIndex(trk),ep0,ep1,pathIndex))
+#endif
+	trk->endPt[ep0].epPath[pathIndex] = ep1;
+	trk->endPt[ep1].epPath[pathIndex] = ep0;
+}
+
+static void SetupEpPaths( track_p trk )
+{
+	struct extraDataCompound_t * xx;
+	PATHPTR_T path;
+	int pathIndex = 0;
+	EPINX_T ep, ep1;
+	coOrd pos0, pos1;
+	track_p trk0;
+
+	if ( GetTrkEndPtCnt(trk) >= 3 ) {
+		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+		path = xx->paths;
+		while (*path) {
+			// set all EndPts at this position to open
+			for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ )
+				trk->endPt[ep].epPath[pathIndex] = ep;
+			// There can be 1 or more paths between EndPts in a complex
+			// turnout at each position
+			for ( path+=strlen((char *)path); path[0] || path[1]; path++ ) {
+				if ( path[0] == 0 ) {
+					pos0 = MapPathPos( xx, path[1], 0 );
+				} else if ( path[1] == 0 ) {
+					pos1 = MapPathPos( xx, path[0], 1 );
+					configEndPt(trk, pathIndex, pos0, path[0], pos1);
+				}
+			}
+			while ( path[0] || path[1] )
+				path++;
+			path += 2;
+			pathIndex++;
+		}
+		xx->pathCnt = pathIndex;
+	}
+
+	// For each endpoint find the back ep (endPt[i].track[ep] == trk)
+	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+		if ( ! (trk0 = trk->endPt[ep].track) ) continue;
+		for ( ep1=0; ep1 < GetTrkEndPtCnt(trk0) ; ep1++ ) {
+			if ( trk0->endPt[ep1].track == trk ) {
+				trk->endPt[ep].trackEp = ep1;
+				break;
+			}
+		}
+#if 0
+		LOG( log_turnout, 1, ("*** SetupEpPaths(): trk T%d-%d  <> T%d-%d\n",
+			GetTrkIndex(trk),ep,
+			trk->endPt[ep].track?GetTrkIndex(trk->endPt[ep].track):0,trk->endPt[ep].trackEp))
+#endif
+	}
+
+#if 0
+	displayTurnout( trk );
+#endif
+}
+
+EXPORT void SetupTurnouts( void )
+{
+	track_p trk;
+
+	TRK_ITERATE(trk) {
+		if ( ! IsTrack(trk) || GetTrkType(trk) == T_TURNTABLE ) continue;
+
+		SetupEpPaths(trk);
+	}
+}
+
+// Givern a track and ep where a train is entering the track
+// return ep the train will exit the track
+// on error return the ep count
+EXPORT EPINX_T GetRemoteEp( track_p trk, EPINX_T ep )
+{
+	struct extraDataCompound_t * xx;
+	EPINX_T epCnt, epN;
+	coOrd end1, end2;
+
+	epCnt = GetTrkEndPtCnt(trk);
+	if ( ep == epCnt || GetTrkType(trk) == T_TURNTABLE) return epCnt;
+
+	if ( epCnt == 2 ) {
+#if 0
+		LOG( log_turnout, 1, ("*** GetRemoteEp(): trk T%d-%d remote %d\n",
+			GetTrkIndex(trk),ep,( ep == 0 )?1:0))
+#endif
+		return ( ep == 0 )?1:0;
+	}
+	if ( epCnt > 2 ) {
+		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+#if 0
+	LOG( log_turnout, 1, ("*** GetRemoteEp()  T%d-%d remote %d currPathIndex %d (%s)\n",
+		GetTrkIndex(trk),ep, trk->endPt[ep].epPath[xx->currPathIndex],
+		xx->currPathIndex,xx->currPath))
+#endif
+		return trk->endPt[ep].epPath[xx->currPathIndex];
+	}
+	return epCnt;
 }

@@ -94,6 +94,7 @@ typedef struct extraDataCompound_t {
 		PATHPTR_T paths;
 		PATHPTR_T currPath;
 		long currPathIndex;
+		int pathCnt;
 		wIndex_t segCnt;
 		trkSeg_p segs;
 		DIST_T * radii;
@@ -194,7 +195,8 @@ void NextTurnoutPosition( track_p trk );
 enum paramFileState	GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 void SetTurnoutFlags( void );
 void ClearTurnoutFlags( void );
-coOrd GetRemoteTurnoutPositions( track_p trk, coOrd pos );
+void SetupTurnouts( void );
+EPINX_T GetRemoteEp( track_p trk, EPINX_T ep );
 
 /* ctodesgn.c */
 void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );
