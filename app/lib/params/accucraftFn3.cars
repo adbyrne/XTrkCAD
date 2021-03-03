@@ -3,14 +3,14 @@ MANUF=Accucraft AMS
 SCALE=F
 ORDER=#RDN
 #
-# Jackson & Sharp Passenger Coach ($275.00)
+# Jackson & Sharp Coach ($275.00)
 # STK NO.      RAILROAD
 #====================================
 TYPE=passenger
 COUPLERLENGTH=0.5
 PROTO=Passenger, Coach
-DESC=J&S Coach
-LENGTH=27.5
+DESC=Jackson & Sharp Coach
+LENGTH=25.5
 WIDTH=5.0
 #
 PART=AM54-010BX%Bumble Bee Single Stripe%%Unlettered
@@ -53,8 +53,8 @@ PART=AM54-016X%Bumble Bee Single Stripe%%333
 TYPE=passenger
 COUPLERLENGTH=0.5
 PROTO=Passenger, Combine
-DESC=J&S Combine
-LENGTH=27.5
+DESC=Jackson & Sharp Combine
+LENGTH=25.5
 WIDTH=5.0
 #
 PART=AM54-020BX%Bumble Bee Yellow%%Unlettered
@@ -85,4 +85,107 @@ PART=AM54-025X%Bumble Bee Double Stripe%%212
 PART=AM54-025X%Bumble Bee Double Stripe%%214
 PART=AM54-025X%Bumble Bee Double Stripe%%240
 PART=AM54-025X%Bumble Bee Double Stripe%%242
-
+#
+# Drop Bottom Gondola ($220.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=freight
+COUPLERLENGTH=0.5
+PROTO=Gondola, Drop Bottom
+DESC=Drop Bottom Gondola
+LENGTH=21.75
+WIDTH=5.5
+#
+PART=AM20-501X%Data Only%%Data Only 
+#
+PART=AM20-502X%D&RG Moffat Logo%%706
+PART=AM20-502X%D&RG Moffat Logo%%714
+PART=AM20-502X%D&RG Moffat Logo%%715
+PART=AM20-502X%D&RG Moffat Logo%%717
+#
+PART=AM20-503X%D&RG Moffat Logo%%721
+PART=AM20-503X%D&RG Moffat Logo%%726
+PART=AM20-503X%D&RG Moffat Logo%%728
+PART=AM20-503X%D&RG Moffat Logo%%733
+#
+PART=AM20-504X%D&RG Moffat Logo%%743
+PART=AM20-504X%D&RG Moffat Logo%%746
+PART=AM20-504X%D&RG Moffat Logo%%749
+PART=AM20-504X%D&RG Moffat Logo%%754
+#
+PART=AM20-505X%D&RGW Flying Rio Grande%%752
+PART=AM20-505X%D&RGW Flying Rio Grande%%758
+PART=AM20-505X%D&RGW Flying Rio Grande%%768
+PART=AM20-505X%D&RGW Flying Rio Grande%%771
+#
+PART=AM20-506X%D&RGW Flying Rio Grande%%778
+PART=AM20-506X%D&RGW Flying Rio Grande%%781
+PART=AM20-506X%D&RGW Flying Rio Grande%%785
+PART=AM20-506X%D&RGW Flying Rio Grande%%789
+#
+PART=AM20-507X%D&RGW Flying Rio Grande%%791
+PART=AM20-507X%D&RGW Flying Rio Grande%%794
+PART=AM20-507X%D&RGW Flying Rio Grande%%798
+PART=AM20-507X%D&RGW Flying Rio Grande%%799
+#
+# Box Car ($170.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=freight
+COUPLERLENGTH=0.5
+PROTO=Box Car
+DESC=Box Car
+LENGTH=21.75
+WIDTH=5.0
+#
+PART=AM2201-04%D&RG Moffat Logo%%3491
+PART=AM2201-05%D&RG Moffat Logo%%3522
+PART=AM2201-06%D&RG Moffat Logo%%3046
+PART=AM2201-07%D&RG Moffat Logo%%3033
+PART=AM2201-08%D&RG Moffat Logo%%3186
+PART=AM2201-09%D&RG Moffat Logo%%3337
+PART=AM2201-10%D&RG Moffat Logo%%3415
+PART=AM2201-11%D&RG Moffat Logo%%3422
+PART=AM2201-12%D&RG Moffat Logo%%3449
+PART=AM2201-13%D&RG Moffat Logo%%3471
+PART=AM2201-14%D&RG Moffat Logo%%3473
+#
+PART=AM2201-16%Southern Pacific NG%%33
+PART=AM2201-17%Southern Pacific NG%%35
+#
+PART=AM2201-19%RGS%%8509
+PART=AM2201-20%RGS%%8510
+PART=AM2201-21%RGS%%8511
+PART=AM2201-22%RGS%%8512
+#
+PART=AM2201-23%Navy Yard Harbor Red%%210
+PART=AM2201-24%Navy Yard Harbor Red%%211
+PART=AM2201-25%Navy Yard Harbor Red%%215
+PART=AM2201-26%Navy Yard Harbor Red%%218
+#
+PART=AM2201-30%D&RGW Flying Rio Grande%%3083
+PART=AM2201-31%D&RGW Flying Rio Grande%%3240
+PART=AM2201-32%D&RGW Flying Rio Grande%%3328
+PART=AM2201-33%D&RGW Flying Rio Grande%%3339
+PART=AM2201-34%D&RGW Flying Rio Grande%%3446
+PART=AM2201-35%D&RGW Flying Rio Grande%%3543
+#
+PART=AM20-202x%Pacific Coast%%1508
+PART=AM20-202x%Pacific Coast%%1516
+PART=AM20-202x%Pacific Coast%%1524
+PART=AM20-202x%Pacific Coast%%1532
+#
+PART=AM20-203x%Nevada California Oregon Railway%%01001
+PART=AM20-203x%Nevada California Oregon Railway%%01005
+PART=AM20-203x%Nevada California Oregon Railway%%01009
+PART=AM20-203x%Nevada California Oregon Railway%%01017
+#
+PART=AM20-204x%N. C. O.%%682
+PART=AM20-204x%N. C. O.%%684
+PART=AM20-204x%N. C. O.%%688
+PART=AM20-204x%N. C. O.%%695
+#
+PART=AM20-206x%Carson & Colorado%%5
+PART=AM20-206x%Carson & Colorado%%7
+PART=AM20-206x%Carson & Colorado%%9
+PART=AM20-206x%Carson & Colorado%%11
