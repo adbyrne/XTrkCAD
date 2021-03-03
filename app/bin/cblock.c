@@ -1412,7 +1412,7 @@ EXPORT void AddMissingBlockTrack( void )
         startEp = endPtP->trackEp;
         totLen = blockLen;
 
-        while ( totLen > 0.0 ) {
+        while ( totLen > 0.01 ) {
 #if 0
             LOG( log_block, 2, ("*** AddMissingBlockTrack(4) T%d  totLen %0.2f Start T%d-%d\n",
                     GetTrkIndex(trk),totLen,GetTrkIndex(startTrk),startEp))
@@ -1424,6 +1424,7 @@ EXPORT void AddMissingBlockTrack( void )
             LOG( log_block, 2, ("*** AddMissingBlockTrack(5) T%d  blockLen %0.2f eps %d segs %d\n",
                     GetTrkIndex(trk),blockLen,tempEndPts_da.cnt,blockTrk_da.cnt))
 #endif
+            if ( totLen <= 0.0 || blockLen <= 0.0 ) break;
 
             // build the block
             if ( ! blockUndoStarted ) {
