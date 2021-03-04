@@ -3399,7 +3399,7 @@ static BOOL_T isSamePos(coOrd pos0, coOrd pos1)
 
 static void configEndPt(track_p trk, int pathIndex, coOrd pos0, int p0, coOrd pos1)
 {
-	EPINX_T ep, ep0, ep1;
+	EPINX_T ep, ep0 = -1, ep1 = -1;
 
 	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
 		if ( isSamePos(trk->endPt[ep].pos, pos0)) {
@@ -3413,6 +3413,7 @@ static void configEndPt(track_p trk, int pathIndex, coOrd pos0, int p0, coOrd po
 	LOG( log_turnout, 1, ("*** configEndPt() T%d  ep0 %d ep1 %d pathIndex %d\n",
 		GetTrkIndex(trk),ep0,ep1,pathIndex))
 #endif
+	if ( ep0 == -1 || ep1 == -1 ) return;
 	trk->endPt[ep0].epPath[pathIndex] = ep1;
 	trk->endPt[ep1].epPath[pathIndex] = ep0;
 }
@@ -3429,7 +3430,7 @@ static void SetupEpPaths( track_p trk )
 	if ( GetTrkEndPtCnt(trk) >= 3 ) {
 		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 		path = xx->paths;
-		while (*path) {
+		while (*path && pathIndex < sizeof( trk->endPt[ep].epPath ) ) {
 			// set all EndPts at this position to open
 			for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ )
 				trk->endPt[ep].epPath[pathIndex] = ep;

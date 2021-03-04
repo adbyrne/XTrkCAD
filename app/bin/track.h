@@ -215,7 +215,7 @@ typedef struct trkEndPt_t {
 		BOOL_T toBlock;   // points to a block
 		BOOL_T toTrack;   // points to a track segment
 		BOOL_T attached;  // Dynamic block attached to block
-		char epPath[8];   // remote end point for pathIndex
+		char epPath[32];   // remote end point for pathIndex
 		} trkEndPt_t;
 typedef struct trkEndPt_t * trkEndPt_p;
 

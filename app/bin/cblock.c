@@ -1204,7 +1204,7 @@ EXPORT BOOL_T IsDynamicBlock( track_p blk )
 {
 	blockData_p xx;
 
-	if ( ! blk || GetTrkType(blk) != T_BLOCK || IsTrackDeleted( blk ) ) return FALSE;
+	if ( ! blk || IsTrackDeleted( blk ) || GetTrkType(blk) != T_BLOCK ) return FALSE;
 
 	xx = GetblockData( blk );
 	if ( ! xx->name || xx->name[0] != 0 ) return FALSE;
