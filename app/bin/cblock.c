@@ -1832,7 +1832,7 @@ static void adjustCarOccupancy( track_p trk0, EPINX_T ep0, track_p trk1, int adj
 	EPINX_T ep = ep0, epT;
 	int ctr = 0;
 
-	if ( ! trk0 || ! trk1 ) return;
+	if ( ! trk0 || ! trk1 || GetTrkEndPtCnt( trk0 ) < 2 || GetTrkEndPtCnt( trk1 ) < 2 ) return;
 #if 0
 	LOG(log_block, 1, ("adjustCarOccupancy: T%d-%d T%d adj %d \n",
 		GetTrkIndex(trk0),ep0,GetTrkIndex(trk1),adj))
