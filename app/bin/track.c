@@ -817,7 +817,7 @@ EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 
 EXPORT EPINX_T GetNearestEndPtConnectedToMe( track_p trk, track_p me, coOrd pos) {
 	EPINX_T ep, found = -1;
-	DIST_T d = 10000;
+	DIST_T d = DIST_INF;
 	DIST_T dd;
 		for (ep=0; ep<trk->endCnt; ep++) {
 			if (trk->endPt[ep].track == me) {
@@ -1843,11 +1843,11 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	if (hidden) *hidden = FALSE;
 	e = &trk->endPt[ep].elev;
 	if ((e->option&ELEV_MASK)==ELEV_NONE)
-		return 100000;
+		return DIST_INF;
 	if (((e->option&ELEV_VISIBLE)==0) && !show_hidden)
-		return 100000;
+		return DIST_INF;
 	if ((trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk))
-		return 100000;
+		return DIST_INF;
 	if ((e->option&ELEV_VISIBLE)==0) {					//Hidden - disregard offset
 		if (hidden) *hidden = TRUE;
 		return FindDistance( GetTrkEndPos(trk,ep), pos );

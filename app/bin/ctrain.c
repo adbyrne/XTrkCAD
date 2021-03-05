@@ -1416,7 +1416,7 @@ static track_p FindCar(
 {
     coOrd pos0, pos1;
     track_p trk, trk1;
-    DIST_T dist1 = 100000, dist;
+    DIST_T dist1 = DIST_INF, dist;
     struct extraDataCar_t * xx;
     trk1 = NULL;
 

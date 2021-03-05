@@ -36,7 +36,7 @@
 #include "fileio.h"
 #include "common-ui.h"
 
-static BOOL_T debug = 1;
+static BOOL_T debug = 0;
 static int log_join = 0;
 typedef struct {
 				curveType_e type;
@@ -1113,7 +1113,7 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			break;
 		case curveTypeStraight:
 			FindPos( &off, &beyond, pos, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
-					 100000 );
+					 DIST_INF );
 			Translate( &Dj.inp[1].pos, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 					   off.x );
 			normalAngle = NormalizeAngle( Dj.inp[1].params.angle +

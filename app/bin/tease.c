@@ -784,7 +784,7 @@ DIST_T JointDescriptionDistance(
 	coOrd p1;
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_EASEMENT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
-		return 100000;
+		return DIST_INF;
 
 	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	coOrd end0, end0off, end1, end1off;

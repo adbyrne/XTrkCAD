@@ -443,10 +443,10 @@ DIST_T CompoundDescriptionDistance(
 {
 	coOrd p1;
 	if (GetTrkType(trk) != T_TURNOUT && GetTrkType(trk) != T_STRUCTURE)
-		return 100000;
+		return DIST_INF;
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	if ( ((GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) && !show_hidden)
-		return 100000;
+		return DIST_INF;
 	p1 = xx->descriptionOrig;
 	coOrd offset = xx->descriptionOff;
 	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) offset = zero;

@@ -177,7 +177,7 @@ DIST_T CornuDescriptionDistance(
 	coOrd p1;
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_CORNU || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden) )
-		return 100000;
+		return DIST_INF;
 
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) xx->descriptionOff = zero;
@@ -911,7 +911,7 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	segProcData_t segProcData;
 	BOOL_T cornu_backwards= FALSE;
 	BOOL_T neg = FALSE;
-	DIST_T d = 10000;
+	DIST_T d = DIST_INF;
 	coOrd pos1 = trvTrk->pos, pos2 = trvTrk->pos;
 	ANGLE_T a1,a2;
 	int inx, segInx = 0;

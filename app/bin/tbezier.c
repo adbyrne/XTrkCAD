@@ -133,7 +133,7 @@ DIST_T BezierDescriptionDistance(
 	coOrd p1;
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_BEZIER || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
-		return 100000;
+		return DIST_INF;
 
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_BEZIER, extraDataBezier_t);
 	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) xx->descriptionOff = zero;
@@ -786,7 +786,7 @@ static BOOL_T TraverseBezier( traverseTrack_p trvTrk, DIST_T * distR )
 	DIST_T dist = *distR;
 	segProcData_t segProcData;
 	BOOL_T segs_backwards= FALSE;
-	DIST_T d = 10000;
+	DIST_T d = DIST_INF;
 	coOrd pos2 = trvTrk->pos;
 	ANGLE_T a1,a2;
 	int inx,segInx = 0;

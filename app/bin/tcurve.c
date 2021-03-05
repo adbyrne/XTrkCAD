@@ -177,7 +177,7 @@ DIST_T CurveDescriptionDistance(
 	ANGLE_T a, a0, a1;
 	if (hidden) *hidden = FALSE;
 	if ( (GetTrkType( trk ) != T_CURVE ) || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden))
-		return 100000;
+		return DIST_INF;
 
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	coOrd offset = xx->descriptionOff;

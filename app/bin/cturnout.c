@@ -1375,7 +1375,7 @@ static BOOL_T TraverseTurnout(
 	EPINX_T segEP;
 	segProcData_t segProcData;
 
-	d = 10000;
+	d = DIST_INF;
 	pos0 = trvTrk->pos;
 	Rotate( &pos0, xx->orig, -xx->angle );
 	pos0.x -= xx->orig.x;
@@ -1615,7 +1615,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		PATHPTR_T pathCurr = 0;
 		int segInx, subSegInx;
 		trkSeg_p segPtr;
-		double d = 10000;
+		DIST_T d = DIST_INF;
 		struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 		/* Get parms from that seg */
 		wBool_t back,negative;
@@ -2250,7 +2250,7 @@ LOG( log_turnout, 3, ( "placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 		/*InfoMessage( "Turnout(%d): Angle=%0.3f", GetTrkIndex(trk), angle );*/
 		track_p ctrk = NULL;
 		int ccnt = 0;
-		DIST_T clarge = 100000;
+		DIST_T clarge = DIST_INF;
 		for (i=0;i<curTurnout->endCnt;i++) {
 			posI = curTurnout->endPt[i].pos;
 			epPos = AddCoOrd( pos, posI, angle );
