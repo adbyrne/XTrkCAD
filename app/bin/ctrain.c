@@ -393,7 +393,7 @@ static DIST_T DistanceCar(
     coOrd size;
 
     if (IsIgnored(xx)) {
-        return 10000.0;
+        return DIST_INF;
     }
 
     CarItemSize(xx->item,
@@ -1755,7 +1755,7 @@ static BOOL_T CheckCoupling(
     track_p car1;
     struct extraDataCar_t *xx0, *xx1;
     coOrd pos1;
-    DIST_T dist0, distc, dist=100000.0;
+    DIST_T dist0, distc, dist=DIST_INF;
     int dir0, dir1, dirl;
     ANGLE_T angle;
     traverseTrack_t trvTrk0, trvTrk1;

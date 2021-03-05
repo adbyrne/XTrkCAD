@@ -407,7 +407,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 
 	bezData.length = GetLengthBezier(trk);
 	bezData.minRadius = xx->minCurveRadius;
-	if (bezData.minRadius >= 100000.00) bezData.minRadius = 0;
+	if (bezData.minRadius >= DIST_INF) bezData.minRadius = 0;
     bezData.layerNumber = GetTrkLayer(trk);
     bezData.pos[0] = xx->pos[0];
     bezData.pos[1] = xx->pos[1];
@@ -514,7 +514,7 @@ static DIST_T DistanceBezier( track_p t, coOrd * p )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataBezier_t);
 
-	DIST_T d = 100000.0;
+	DIST_T d = DIST_INF;
 	coOrd p2 = xx->pos[0];    //Set initial point
 	segProcData_t segProcData;
 	for (int i = 0;i<xx->arcSegs.cnt;i++) {
@@ -1478,7 +1478,7 @@ LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%
 
 	case SEGPROC_DISTANCE:
 
-		dd = 100000.00;   //Just find one distance
+		dd = DIST_INF;   //Just find one distance
 		p0 = data->distance.pos1;
 
 		//initialize p2 
@@ -1682,7 +1682,7 @@ extern coOrd BezierPointByParameter(coOrd p[4], double t)
  */
 extern DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double * t_value)
 {
-    DIST_T dd = 10000.0;
+    DIST_T dd = DIST_INF;
     double t = 0.0;
     coOrd pt;
     coOrd save_pt = p[0];

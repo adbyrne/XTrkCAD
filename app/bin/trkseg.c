@@ -720,7 +720,7 @@ EXPORT DIST_T DistanceSegs(
 		coOrd * pos,
 		wIndex_t * inx_ret )
 {
-	DIST_T d, dd = 100000.0, ddd;
+	DIST_T d, dd = DIST_INF, ddd;
 	coOrd p0, p1, p2, pt, lo, hi;
 	BOOL_T found = FALSE;
 	wIndex_t inx, lin;
@@ -751,7 +751,7 @@ EXPORT DIST_T DistanceSegs(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			ddd = 100000.0;
+			ddd = DIST_INF;
 			for (lin=0;lin<segPtr->u.p.cnt;lin++) {
 				pt = p0;
 				if (lin < segPtr->u.p.cnt-1 )
@@ -766,7 +766,7 @@ EXPORT DIST_T DistanceSegs(
 			break;
         case SEG_BEZTRK:
         case SEG_BEZLIN:
-        		dd = 100000.0;
+        		dd = DIST_INF;
         		pt = p0;
         		for (int i = 0;i<segPtr->bezSegs.cnt;i++) {
         			segProcData2.distance.pos1 = pt;
@@ -812,7 +812,7 @@ EXPORT DIST_T DistanceSegs(
 			dd = JointDistance( &p1, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
 			break;
 		default:
-			dd = 100000.0;
+			dd = DIST_INF;
 		}
 		if (dd < d) {
 			d = dd;

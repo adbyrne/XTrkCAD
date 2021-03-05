@@ -235,7 +235,7 @@ static void DrawCornuDescription(
     		FormatDistance(FindDistance(xx->pos[0], xx->pos[1])),
     		FindAngle(xx->pos[0], xx->pos[1]),
 			FormatDistance(xx->length),
-			FormatDistance((xx->minCurveRadius>=10000.00)?0.0:xx->minCurveRadius));
+			FormatDistance((xx->minCurveRadius>=DIST_INF)?0.0:xx->minCurveRadius));
     DrawLine(d,xx->pos[0],offpos0,0,color);
     DrawLine(d,xx->pos[1],offpos1,0,color);
     DrawDimLine( d, offpos0, offpos1, message, (wFontSize_t)descriptionFontSize, xx->descriptionOff.x+0.5, 0, color, 0x00 );
@@ -514,7 +514,7 @@ DIST_T DistanceCornu( track_p t, coOrd * p )
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	//return BezierMathDistance(p,xx->bezierData.pos,100, &s);
 
-	DIST_T d = 100000.0;
+	DIST_T d = DIST_INF;
 	coOrd p2 = xx->pos[0];    //Set initial point
 	segProcData_t segProcData;
 	for (int i = 0;i<xx->arcSegs.cnt;i++) {

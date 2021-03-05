@@ -530,7 +530,7 @@ EXPORT BOOL_T ConnectAdjustableTracks(
 		d = maxD;
 		rc = FALSE;
 	}
-	FindPos( &off, &beyond, p1, p2, a1, 10000.0 );
+	FindPos( &off, &beyond, p1, p2, a1, DIST_INF );
 	if (fabs(off.y) > connectDistance)
 		rc = FALSE;
 	if (adj1) {
@@ -783,7 +783,7 @@ static ANGLE_T GetAngleTurnout(
 	if ( ep0 && ep1 )
 		*ep0 = *ep1 = PickEndPoint( pos, trk );
 	coOrd pos0=pos;
-	double dd = 10000.0;
+	double dd = DIST_INF;
 	int found = -1;
 	//Cope with tracks not being first
 	for (segCnt =0; segCnt<xx->segCnt ; segCnt++ ) {
@@ -1545,7 +1545,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
         params->len = 0.0;
         int epCnt = GetTrkEndPtCnt(trk);
         if (epCnt < 3) {
-            double d = 10000.0;
+            double d = DIST_INF;
             params->centroid = zero;
             //calculate path length from endPt (either to end or to other end)
             segProcData_t segProcData;
@@ -2434,7 +2434,7 @@ static void AddTurnout( void )
 			(!QueryTrack(trk,Q_CANNOT_PLACE_TURNOUT)) ) {
 LOG( log_turnout, 1, ( "ep[%d] on T%d @(%0.3f %0.3f)\n",
 					i, GetTrkIndex(trk), epPos.x, epPos.y ) )
-			DIST_T dd = 10000.0;
+			DIST_T dd = DIST_INF;
 			int nearest = -1;
 			for (int j=0;j<curTurnout->endCnt;j++) {
 				if (j<i && (connection(j).trk == trk)) {
@@ -2599,10 +2599,10 @@ nextEnd:;
 			coOrd nearest_center = zero;
 			trackParams_t params;
 			maxX = 0.0;
-			DIST_T dd = 10000.0;
+			DIST_T dd = DIST_INF;
 			a = NormalizeAngle( GetTrkEndAngle(lt,le) + 180.0 );
 			for (ep=0; ep<curTurnout->endCnt; ep++) {
-				FindPos( &off, NULL, GetTrkEndPos(newTrk,ep), GetTrkEndPos(lt,le), a, 100000.0 );
+				FindPos( &off, NULL, GetTrkEndPos(newTrk,ep), GetTrkEndPos(lt,le), a, DIST_INF );
 				pos = GetTrkEndPos(newTrk,ep);
 				DIST_T d = GetTrkDistance(lt, &pos);
 				if ((d<dd) && ( d<trackGauge/2)) {

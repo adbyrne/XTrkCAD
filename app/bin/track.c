@@ -786,7 +786,7 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
-	DIST_T d=10000.0, dd;
+	DIST_T d=DIST_INF, dd;
 	coOrd pos;
 	inx = -1;
 
@@ -2520,7 +2520,7 @@ EXPORT DIST_T GetFlexLength( track_p trk0, EPINX_T ep, coOrd * pos )
 		d += dd;
 		trk = trk1;
 		ep = 1-ep1;
-		if (d>1000000.0)
+		if (d>DIST_INF)
 			break;
 	}
 	*pos = GetTrkEndPos( trk, ep );

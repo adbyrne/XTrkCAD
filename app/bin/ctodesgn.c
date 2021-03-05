@@ -891,7 +891,7 @@ BOOL_T HittestTurnoutRoadbed(
 			d -= roadbedWidth/2.0;
 		PointOnCircle( &p0, sp->u.c.center, d, a );
 	}
-	dd = 100000.0;
+	dd = DIST_INF;
 	closest = -1;
 	for (inx=0; inx<segCnt; inx++) {
 		sp = &segPtr[inx];

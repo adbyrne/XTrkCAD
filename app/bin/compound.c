@@ -562,7 +562,7 @@ DIST_T DistanceCompound(
 		d0 = DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, p, NULL );
 	} else if ( programMode != MODE_TRAIN || GetTrkEndPtCnt(t) <= 0 ) {
 		d0 = DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, p, NULL );
-		if (programMode != MODE_TRAIN && GetTrkEndPtCnt(t) > 0 && d0 < 10000.0) {
+		if (programMode != MODE_TRAIN && GetTrkEndPtCnt(t) > 0 && d0 < DIST_INF) {
 			ep = PickEndPoint( *p, t );
 			*p = GetTrkEndPos(t,ep);
 		}
@@ -571,11 +571,11 @@ DIST_T DistanceCompound(
 		Rotate( &p0, xx->orig, -xx->angle );
 		p0.x -= xx->orig.x;
 		p0.y -= xx->orig.y;
-		d0 = 1000000.0;
+		d0 = DIST_INF;
 		path = GetCurrPath( t );
 		for ( path += strlen((char *)path)+1; path[0] || path[1]; path++ ) {
 			if ( path[0] != 0 ) {
-				d1 = 1000000.0;
+				d1 = DIST_INF;
 				GetSegInxEP( *path, &segInx, &segEP );
 				segProcData.distance.pos1 = p0;
 				SegProc( SEGPROC_DISTANCE, &xx->segs[segInx], &segProcData );
@@ -585,7 +585,7 @@ DIST_T DistanceCompound(
 				}
 			}
 		}
-		if ( d0 < 1000000.0 ) {
+		if ( d0 < DIST_INF ) {
 			p2.x += xx->orig.x;
 			p2.y += xx->orig.y;
 			Rotate( &p2, xx->orig, xx->angle );

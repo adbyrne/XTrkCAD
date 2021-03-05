@@ -157,7 +157,7 @@ static void ComputeJoinPos(
 	DIST_T r;
 	coOrd pp, pc;
 	if (l==0.0)
-		r = 100000.0;
+		r = DIST_INF;
 	else
 		r = (R*L)/l;
 	pp.y = l;
