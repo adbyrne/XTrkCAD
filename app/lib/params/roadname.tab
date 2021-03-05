@@ -16,6 +16,7 @@ CN	Canadian National
 CP	Canadian Pacific
 	CPR
 	CP Rail
+C&C	Carson & Colorado
 CB&Q	Chicago Burlington & Quincy
 	Burlington
 C&O	Chesapeake & Ohio
@@ -31,6 +32,7 @@ C&EI	Chicago & Eastern Illinois
 	Chessie System
 C&O	Chesapeake & Ohio
 	Chesapeke and Ohio
+C&S	Colorado & Southern
 CRR	Clinchfield
 	Clinchfild
 CB	Cotton Belt
@@ -38,10 +40,11 @@ CB	Cotton Belt
 CR	Conrail
 CSX	CSX
 D&H	Delaware & Hudson
-DRGW	Denver & Rio Grande Western
-	D&RGW
+D&RGW	Denver & Rio Grande Western
+	D&RG
 	Rio Grande
 DT&I	Detroit Toledo & Ironton
+DSP&P	Denver, South Park & Pacific
 DM&IR	Duluth Missabe & Iron Range
 D&TH	Duluth & Two Harbors
 ERIE	Erie
@@ -72,6 +75,8 @@ MKT	Missouri-Kansas-Texas
 MP	Missouri Pacific
 	Mopac
 MON	Monon
+NCO	Nevada California Oregon Ry
+	N.C.O.
 NH	New Haven
 	NYNH&H
 NKP	Nickel Plate
@@ -92,9 +97,10 @@ PRR	Pennsylvania
 PFE	Pacific Fruit Express
 	Pacific Fruit Exp
 P&LE	Pittsburgh & Lake Erie
-RDG	Reading
 RB	Railbox
+RDG	Reading
 REA	Railway Express Agency
+RGS	Rio Grande Southern
 ROCK	Rock Island
 	RI
 SAL	Seaboard Air Line

@@ -1,7 +1,8 @@
 CONTENTS=Accucraft Fn3 Scale Cars
 MANUF=Accucraft AMS
-SCALE=F
-ORDER=#RDN
+SCALE=Fn3
+ORDER=#DRN
+# Manufacturer%Prototype%#:Part%D:Description%R:Road%Reporting Mark%Number
 #
 # Jackson & Sharp Coach ($275.00)
 # STK NO.      RAILROAD
@@ -13,39 +14,39 @@ DESC=Jackson & Sharp Coach
 LENGTH=25.5
 WIDTH=5.0
 #
-PART=AM54-010BX%Bumble Bee Single Stripe%%Unlettered
-PART=AM54-010GX%Dark Green%%Unlettered
-PART=AM54-010RX%Red%%Unlettered
+PART=AM54-010BX%Bumble Bee Single Stripe%Undec%Undec
+PART=AM54-010GX%Dark Green%Undec%Undec
+PART=AM54-010RX%Red%Undec%Undec
 #
-PART=AM54-011X%D&RGW Green%%257
-PART=AM54-011X%D&RGW Green%%281
-PART=AM54-011X%D&RGW Green%%285
-PART=AM54-011X%D&RGW Green%%302
+PART=AM54-011A%Green%D&RGW%257
+PART=AM54-011B%Green%D&RGW%281
+PART=AM54-011C%Green%D&RGW%285
+PART=AM54-011D%Green%D&RGW%302
 #
-PART=AM54-012X%RGS Red%%253
-PART=AM54-012X%RGS Red%%254
-PART=AM54-012X%RGS Red%%255
-PART=AM54-012X%RGS Red%%258
+PART=AM54-012A%Red%RGS%253
+PART=AM54-012B%Red%RGS%254
+PART=AM54-012C%Red%RGS%255
+PART=AM54-012D%Red%RGS%258
 #
-PART=AM54-013X%C&S Green%%71
-PART=AM54-013X%C&S Green%%73
-PART=AM54-013X%C&S Green%%74
-PART=AM54-013X%C&S Green%%77
+PART=AM54-013A%Green%C&S%71
+PART=AM54-013B%Green%C&S%73
+PART=AM54-013C%Green%C&S%74
+PART=AM54-013D%Green%C&S%77
 #
-PART=AM54-014X%D&RGW Red%%274
-PART=AM54-014X%D&RGW Red%%284
-PART=AM54-014X%D&RGW Red%%306
-PART=AM54-014X%D&RGW Red%%309
+PART=AM54-014A%Red%D&RGW%274
+PART=AM54-014B%Red%D&RGW%284
+PART=AM54-014C%Red%D&RGW%306
+PART=AM54-014D%Red%D&RGW%309
 #
-PART=AM54-015X%Bumble Bee Double Stripe%%280
-PART=AM54-015X%Bumble Bee Double Stripe%%306
-PART=AM54-015X%Bumble Bee Double Stripe%%320
-PART=AM54-015X%Bumble Bee Double Stripe%%284
+PART=AM54-015A%Bumble Bee Double Stripe%D&RGW%280
+PART=AM54-015B%Bumble Bee Double Stripe%D&RGW%306
+PART=AM54-015C%Bumble Bee Double Stripe%D&RGW%320
+PART=AM54-015D%Bumble Bee Double Stripe%D&RGW%284
 #
-PART=AM54-016X%Bumble Bee Single Stripe%%330
-PART=AM54-016X%Bumble Bee Single Stripe%%331
-PART=AM54-016X%Bumble Bee Single Stripe%%332
-PART=AM54-016X%Bumble Bee Single Stripe%%333
+PART=AM54-016A%Bumble Bee Single Stripe%D&RGW%330
+PART=AM54-016B%Bumble Bee Single Stripe%D&RGW%331
+PART=AM54-016C%Bumble Bee Single Stripe%D&RGW%332
+PART=AM54-016D%Bumble Bee Single Stripe%D&RGW%333
 #
 # Jackson & Sharp Combine ($275.00)
 # STK NO.      RAILROAD
@@ -57,34 +58,34 @@ DESC=Jackson & Sharp Combine
 LENGTH=25.5
 WIDTH=5.0
 #
-PART=AM54-020BX%Bumble Bee Yellow%%Unlettered
-PART=AM54-020BX%D&RG Green%%Unlettered
-PART=AM54-020RX%RGS Red%%Unlettered
+PART=AM54-020BX%Combine Bumble Bee Yellow%Undec%Undec
+PART=AM54-020BX%Combine Green%Undec%Undec
+PART=AM54-020RX%Combine Red%Undec%Undec
 #
-PART=AM54-021X%D&RGW Green%%202
-PART=AM54-021X%D&RGW Green%%210
-PART=AM54-021X%D&RGW Green%%214
-PART=AM54-021X%D&RGW Green%%215
+PART=AM54-021A%Combine Green%D&RGW%202
+PART=AM54-021B%Combine Green%D&RGW%210
+PART=AM54-021C%Combine Green%D&RGW%214
+PART=AM54-021D%Combine Green%D&RGW%215
 #
-PART=AM54-022X%RGS Red%%200
-PART=AM54-022X%RGS Red%%201
-PART=AM54-022X%RGS Red%%202
-PART=AM54-022X%RGS Red%%203
+PART=AM54-022A%Combine Red%RGS%200
+PART=AM54-022B%Combine Red%RGS%201
+PART=AM54-022C%Combine Red%RGS%202
+PART=AM54-022D%Combine Red%RGS%203
 #
-PART=AM54-023X%C&S Green%%26
-PART=AM54-023X%C&S Green%%28
-PART=AM54-023X%C&S Green%%29
-PART=AM54-023X%C&S Green%%30
+PART=AM54-023A%Combine Green%C&S%26
+PART=AM54-023B%Combine Green%C&S%28
+PART=AM54-023C%Combine Green%C&S%29
+PART=AM54-023D%Combine Green%C&S%30
 #
-PART=AM54-024X%D&RGW Red%%208
-PART=AM54-024X%D&RGW Red%%209
-PART=AM54-024X%D&RGW Red%%211
-PART=AM54-024X%D&RGW Red%%212
+PART=AM54-024A%Combine Red%D&RGW%208
+PART=AM54-024B%Combine Red%D&RGW%209
+PART=AM54-024C%Combine Red%D&RGW%211
+PART=AM54-024D%Combine Red%D&RGW%212
 #
-PART=AM54-025X%Bumble Bee Double Stripe%%212
-PART=AM54-025X%Bumble Bee Double Stripe%%214
-PART=AM54-025X%Bumble Bee Double Stripe%%240
-PART=AM54-025X%Bumble Bee Double Stripe%%242
+PART=AM54-025A%Combine Bumble Bee Double Stripe%D&RGW%212
+PART=AM54-025B%Combine Bumble Bee Double Stripe%D&RGW%214
+PART=AM54-025C%Combine Bumble Bee Double Stripe%D&RGW%240
+PART=AM54-025D%Combine Bumble Bee Double Stripe%D&RGW%242
 #
 # Drop Bottom Gondola ($220.00)
 # STK NO.      RAILROAD
@@ -96,37 +97,37 @@ DESC=Drop Bottom Gondola
 LENGTH=21.75
 WIDTH=5.5
 #
-PART=AM20-501X%Data Only%%Data Only 
+PART=AM20-501X%Data Only%Undec%Data Only
 #
-PART=AM20-502X%D&RG Moffat Logo%%706
-PART=AM20-502X%D&RG Moffat Logo%%714
-PART=AM20-502X%D&RG Moffat Logo%%715
-PART=AM20-502X%D&RG Moffat Logo%%717
+PART=AM20-502A%Moffat Logo%D&RG%706
+PART=AM20-502B%Moffat Logo%D&RG%714
+PART=AM20-502C%Moffat Logo%D&RG%715
+PART=AM20-502D%Moffat Logo%D&RG%717
 #
-PART=AM20-503X%D&RG Moffat Logo%%721
-PART=AM20-503X%D&RG Moffat Logo%%726
-PART=AM20-503X%D&RG Moffat Logo%%728
-PART=AM20-503X%D&RG Moffat Logo%%733
+PART=AM20-503A%Moffat Logo%D&RG%721
+PART=AM20-503B%Moffat Logo%D&RG%726
+PART=AM20-503C%Moffat Logo%D&RG%728
+PART=AM20-503D%Moffat Logo%D&RG%733
 #
-PART=AM20-504X%D&RG Moffat Logo%%743
-PART=AM20-504X%D&RG Moffat Logo%%746
-PART=AM20-504X%D&RG Moffat Logo%%749
-PART=AM20-504X%D&RG Moffat Logo%%754
+PART=AM20-504A%Moffat Logo%D&RG%743
+PART=AM20-504B%Moffat Logo%D&RG%746
+PART=AM20-504C%Moffat Logo%D&RG%749
+PART=AM20-504D%Moffat Logo%D&RG%754
 #
-PART=AM20-505X%D&RGW Flying Rio Grande%%752
-PART=AM20-505X%D&RGW Flying Rio Grande%%758
-PART=AM20-505X%D&RGW Flying Rio Grande%%768
-PART=AM20-505X%D&RGW Flying Rio Grande%%771
+PART=AM20-505A%Flying Rio Grande%D&RGW%752
+PART=AM20-505B%Flying Rio Grande%D&RGW%758
+PART=AM20-505C%Flying Rio Grande%D&RGW%768
+PART=AM20-505D%Flying Rio Grande%D&RGW%771
 #
-PART=AM20-506X%D&RGW Flying Rio Grande%%778
-PART=AM20-506X%D&RGW Flying Rio Grande%%781
-PART=AM20-506X%D&RGW Flying Rio Grande%%785
-PART=AM20-506X%D&RGW Flying Rio Grande%%789
+PART=AM20-506A%Flying Rio Grande%D&RGW%778
+PART=AM20-506B%Flying Rio Grande%D&RGW%781
+PART=AM20-506C%Flying Rio Grande%D&RGW%785
+PART=AM20-506D%Flying Rio Grande%D&RGW%789
 #
-PART=AM20-507X%D&RGW Flying Rio Grande%%791
-PART=AM20-507X%D&RGW Flying Rio Grande%%794
-PART=AM20-507X%D&RGW Flying Rio Grande%%798
-PART=AM20-507X%D&RGW Flying Rio Grande%%799
+PART=AM20-507A%Flying Rio Grande%D&RGW%791
+PART=AM20-507B%Flying Rio Grande%D&RGW%794
+PART=AM20-507C%Flying Rio Grande%D&RGW%798
+PART=AM20-507D%Flying Rio Grande%D&RGW%799
 #
 # Box Car ($170.00)
 # STK NO.      RAILROAD
@@ -138,54 +139,191 @@ DESC=Box Car
 LENGTH=21.75
 WIDTH=5.0
 #
-PART=AM2201-04%D&RG Moffat Logo%%3491
-PART=AM2201-05%D&RG Moffat Logo%%3522
-PART=AM2201-06%D&RG Moffat Logo%%3046
-PART=AM2201-07%D&RG Moffat Logo%%3033
-PART=AM2201-08%D&RG Moffat Logo%%3186
-PART=AM2201-09%D&RG Moffat Logo%%3337
-PART=AM2201-10%D&RG Moffat Logo%%3415
-PART=AM2201-11%D&RG Moffat Logo%%3422
-PART=AM2201-12%D&RG Moffat Logo%%3449
-PART=AM2201-13%D&RG Moffat Logo%%3471
-PART=AM2201-14%D&RG Moffat Logo%%3473
+PART=AM2201-04%Moffat Logo%D&RG%3491
+PART=AM2201-05%Moffat Logo%D&RG%3522
+PART=AM2201-06%Moffat Logo%D&RG%3046
+PART=AM2201-07%Moffat Logo%D&RG%3033
+PART=AM2201-08%Moffat Logo%D&RG%3186
+PART=AM2201-09%Moffat Logo%D&RG%3337
+PART=AM2201-10%Moffat Logo%D&RG%3415
+PART=AM2201-11%Moffat Logo%D&RG%3422
+PART=AM2201-12%Moffat Logo%D&RG%3449
+PART=AM2201-13%Moffat Logo%D&RG%3471
+PART=AM2201-14%Moffat Logo%D&RG%3473
 #
-PART=AM2201-16%Southern Pacific NG%%33
-PART=AM2201-17%Southern Pacific NG%%35
+PART=AM2201-16%%SPNG%33
+PART=AM2201-17%%SPNG%35
 #
-PART=AM2201-19%RGS%%8509
-PART=AM2201-20%RGS%%8510
-PART=AM2201-21%RGS%%8511
-PART=AM2201-22%RGS%%8512
+PART=AM2201-19%%RGS%8509
+PART=AM2201-20%%RGS%8510
+PART=AM2201-21%%RGS%8511
+PART=AM2201-22%%RGS%8512
 #
-PART=AM2201-23%Navy Yard Harbor Red%%210
-PART=AM2201-24%Navy Yard Harbor Red%%211
-PART=AM2201-25%Navy Yard Harbor Red%%215
-PART=AM2201-26%Navy Yard Harbor Red%%218
+PART=AM2201-23%Red%Navy Yard%210
+PART=AM2201-24%Red%Navy Yard%211
+PART=AM2201-25%Red%Navy Yard%215
+PART=AM2201-26%Red%Navy Yard%218
 #
-PART=AM2201-30%D&RGW Flying Rio Grande%%3083
-PART=AM2201-31%D&RGW Flying Rio Grande%%3240
-PART=AM2201-32%D&RGW Flying Rio Grande%%3328
-PART=AM2201-33%D&RGW Flying Rio Grande%%3339
-PART=AM2201-34%D&RGW Flying Rio Grande%%3446
-PART=AM2201-35%D&RGW Flying Rio Grande%%3543
+PART=AM2201-30%Flying Rio Grande%D&RGW%3083
+PART=AM2201-31%Flying Rio Grande%D&RGW%3240
+PART=AM2201-32%Flying Rio Grande%D&RGW%3328
+PART=AM2201-33%Flying Rio Grande%D&RGW%3339
+PART=AM2201-34%Flying Rio Grande%D&RGW%3446
+PART=AM2201-35%Flying Rio Grande%D&RGW%3543
 #
-PART=AM20-202x%Pacific Coast%%1508
-PART=AM20-202x%Pacific Coast%%1516
-PART=AM20-202x%Pacific Coast%%1524
-PART=AM20-202x%Pacific Coast%%1532
+PART=AM20-202A%%PCR%1508
+PART=AM20-202B%%PCR%1516
+PART=AM20-202C%%PCR%1524
+PART=AM20-202D%%PCR%1532
 #
-PART=AM20-203x%Nevada California Oregon Railway%%01001
-PART=AM20-203x%Nevada California Oregon Railway%%01005
-PART=AM20-203x%Nevada California Oregon Railway%%01009
-PART=AM20-203x%Nevada California Oregon Railway%%01017
+PART=AM20-203A%%NCORy%01001
+PART=AM20-203B%%NCORy%01005
+PART=AM20-203C%%NCORy%01009
+PART=AM20-203D%%NCORy%01017
 #
-PART=AM20-204x%N. C. O.%%682
-PART=AM20-204x%N. C. O.%%684
-PART=AM20-204x%N. C. O.%%688
-PART=AM20-204x%N. C. O.%%695
+PART=AM20-204A%%NCO%682
+PART=AM20-204B%%NCO%684
+PART=AM20-204C%%NCO%688
+PART=AM20-204D%%NCO%695
 #
-PART=AM20-206x%Carson & Colorado%%5
-PART=AM20-206x%Carson & Colorado%%7
-PART=AM20-206x%Carson & Colorado%%9
-PART=AM20-206x%Carson & Colorado%%11
+PART=AM20-206A%%C&C%5
+PART=AM20-206B%%C&C%7
+PART=AM20-206C%%C&C%9
+PART=AM20-206D%%C&C%11
+#
+# 3-Bay Hopper ($150.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=freight
+COUPLERLENGTH=0.5
+PROTO=3-Bay Hopper
+DESC=3-Bay Hopper
+LENGTH=18.38
+WIDTH=4.75
+#
+PART=AM20-301X%Black%Undec%Undec
+#
+PART=AM20-302A%Black%EBT%870
+PART=AM20-302B%Black%EBT%872
+PART=AM20-302C%Black%EBT%877
+PART=AM20-302D%Black%EBT%885
+#
+PART=AM20-303A%Black%EBT%871
+PART=AM20-303B%Black%EBT%874
+PART=AM20-303C%Black%EBT%900
+PART=AM20-303D%Black%EBT%903
+#
+PART=AM20-304A%Black%EBT%908
+PART=AM20-304B%Black%EBT%919
+PART=AM20-304C%Black%EBT%933
+PART=AM20-304D%Black%EBT%942
+#
+PART=AM20-308A%Black%EBT%920
+PART=AM20-308B%Black%EBT%922
+PART=AM20-308C%Black%EBT%935
+PART=AM20-308D%Black%EBT%946
+#
+# Tank Car ($160.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=freight
+COUPLERLENGTH=0.5
+PROTO=Tank Car
+DESC=Tank Car
+LENGTH=19.5
+WIDTH=5.0
+#
+PART=AM2208-01%Silver Data Only%Undec%Undec
+PART=AM2208-02%Black Data Only%Undec%Undec
+#
+PART=AM2208-03%Conoco Silver%%8
+PART=AM2208-04%Conoco Silver%%9
+PART=AM2208-05%Shell Oil Black%%A-12
+PART=AM2208-06%Shell Oil Black%%A-13
+PART=AM2208-07%N.C.N.G. Black%%305
+PART=AM2208-08%N.C.N.G. Black%%1003
+PART=AM2208-09%Conoco Black%%8
+PART=AM2208-10%Conoco Black%%16
+#
+PART=AM31-450A%Associated Oil Co Silver%%301
+PART=AM31-450B%Associated Oil Co Silver%%302
+PART=AM31-450C%Associated Oil Co Silver%%1003
+PART=AM31-450D%Associated Oil Co Silver%%1004
+#
+# Long Logging Car ($110.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=freight
+COUPLERLENGTH=0.5
+PROTO=Logging Car
+DESC=Logging Car
+LENGTH=23.5
+WIDTH=5.0
+#
+PART=AM32-150x%Long%Undec%Undec
+#
+PART=AM32-151A%Long Westside%WSLC%11
+PART=AM32-151B%Long Westside%WSLC%12
+PART=AM32-151C%Long Westside%WSLC%13
+PART=AM32-151D%Long Westside%WSLC%14
+#
+PART=AM32-152A%Long Westside%WSLC%15
+PART=AM32-152B%Long Westside%WSLC%16
+PART=AM32-152C%Long Westside%WSLC%17
+PART=AM32-152D%Long Westside%WSLC%18
+#
+PART=AM32-153A%Long Westside%WSLC%19
+PART=AM32-153B%Long Westside%WSLC%20
+PART=AM32-153C%Long Westside%WSLC%21
+PART=AM32-153D%Long Westside%WSLC%22
+#
+PART=AM32-154A%Long Swayne%Swayne%51
+PART=AM32-154B%Long Swayne%Swayne%52
+PART=AM32-154C%Long Swayne%Swayne%53
+PART=AM32-154D%Long Swayne%Swayne%54
+#
+PART=AM32-155A%Long Swayne%Swayne%55
+PART=AM32-155B%Long Swayne%Swayne%56
+PART=AM32-155C%Long Swayne%Swayne%57
+PART=AM32-155D%Long Swayne%Swayne%58
+#
+PART=AM32-156A%Long Swayne%Swayne%59
+PART=AM32-156B%Long Swayne%Swayne%60
+PART=AM32-156C%Long Swayne%Swayne%61
+PART=AM32-156D%Long Swayne%Swayne%62
+#
+# Short Logging Car ($100.00)
+# STK NO.      RAILROAD
+#====================================
+TYPE=freight
+COUPLERLENGTH=0.5
+PROTO=Logging Car
+DESC=Logging Car
+LENGTH=19.0
+WIDTH=5.0
+#
+PART=AM2216-01%Short%Undec%Undec
+#
+PART=AM2216-02%Short Westside%WSLC%35
+PART=AM2216-03%Short Westside%WSLC%36
+PART=AM2216-04%Short Westside%WSLC%37
+PART=AM2216-05%Short Westside%WSLC%41
+PART=AM2216-06%Short Westside%WSLC%42
+PART=AM2216-07%Short Westside%WSLC%43
+#
+PART=AM32-164A%Short Swayne%Swayne%63
+PART=AM32-164B%Short Swayne%Swayne%64
+PART=AM32-164C%Short Swayne%Swayne%65
+PART=AM32-164D%Short Swayne%Swayne%66
+#
+PART=AM32-165A%Short Swayne%Swayne%67
+PART=AM32-165B%Short Swayne%Swayne%68
+PART=AM32-165C%Short Swayne%Swayne%69
+PART=AM32-165D%Short Swayne%Swayne%70
+#
+PART=AM32-166A%Short Swayne%Swayne%71
+PART=AM32-166B%Short Swayne%Swayne%72
+PART=AM32-166C%Short Swayne%Swayne%73
+PART=AM32-166D%Short Swayne%Swayne%74
+#
+# END
