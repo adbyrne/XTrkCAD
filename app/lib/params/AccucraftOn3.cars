@@ -1,0 +1,36 @@
+CONTENTS=Accucraft On3 Scale Cars
+MANUF=Accucraft AMS
+SCALE=O
+ORDER=#RDN
+#
+# Jackson & Sharp Coach ($)
+# STK NO. % RAILROAD % ? % ROAD#
+#====================================
+TYPE=passenger
+COUPLERLENGTH=0.25
+PROTO=Passenger, Coach
+DESC=Jackson & Sharp Coach
+LENGTH=11.3
+WIDTH=2.1
+#
+PART=6103X%Bumble Bee Yellow%%Unlettered
+PART=6113X%Green
+PART=6123X%Red
+PART=6133X%D&RGW Green
+PART=6143X%RGS Red
+PART=6153X%C&S Green
+PART=6163X%D&RG Red
+PART=6173X%D&RGW Yellow Double Stripe
+#
+# Jackson & Sharp Combine ($)
+#STK NO.      RAILROAD
+#====================================
+PROTO=Passenger, Combine
+DESC=Combine
+LENGTH=11.3
+WIDTH=2.1
+#
+PART=6103X%Bumble Bee Yellow%%Unlettered
+#
+#
+## End

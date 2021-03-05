@@ -315,12 +315,20 @@ void processFile(
 			strcpy( scale, line+6 );
 			if ( stricmp( scale, "N" ) == 0 )
 				ratio = 160.0;
-			else if ( stricmp( scale, "HO" ) == 0 )
+			else if ( stricmp( scale, "HO" ) == 0 || stricmp(scale, "HOn3") == 0 )
 				ratio = 87.1;
-			else if ( stricmp( scale, "O" ) == 0 )
-				ratio = 48.0;
-			else if ( stricmp( scale, "S" ) == 0 )
+			else if ( stricmp( scale, "S" ) == 0 || stricmp(scale, "Sn3") == 0 )
 				ratio = 64.0;
+			else if ( stricmp(scale, "O") == 0 || stricmp(scale, "On3") == 0 || stricmp(scale, "On30") == 0 )
+				ratio = 48.0;
+			else if ( stricmp(scale, "1") == 0 )
+				ratio = 32.0;
+			else if ( stricmp(scale, "A") == 0 )
+				ratio = 29.0;
+			else if ( stricmp(scale, "G") == 0 )
+				ratio = 22.5;
+			else if ( stricmp(scale, "F") == 0 || stricmp(scale, "Fn2") == 0 || stricmp(scale, "Fn3") == 0 )
+				ratio = 20.32;
 			else {
 				fprintf( stderr, "%d: Unknown scale %s\n", lineNumber, scale );
 				ratio = 87.1;
