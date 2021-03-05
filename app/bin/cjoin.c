@@ -36,7 +36,7 @@
 #include "fileio.h"
 #include "common-ui.h"
 
-static BOOL_T debug = 0;
+static BOOL_T debug = 1;
 static int log_join = 0;
 typedef struct {
 				curveType_e type;
