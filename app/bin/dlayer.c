@@ -20,30 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-#include "include/dirent.h"
-#else
-#include <dirent.h>
-#endif
-
-
+#include "cselect.h"
 #include "custom.h"
 #include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
 #include "include/partcatalog.h"
 #include "include/stringxtc.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  *
@@ -255,7 +242,7 @@ static void RedrawLayer( unsigned int l, BOOL_T draw )
 }
 
 
-static void FlipLayer(unsigned int layer)
+EXPORT void FlipLayer(unsigned int layer)
 {
     wBool_t visible;
 
@@ -1216,6 +1203,7 @@ static void LayerUpdate(void)
 			FlipLayer(layerCurrent);
     layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
+    if (layers[(int)layerCurrent].frozen) DeselectLayer(layerCurrent);
     layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
     layers[(int)layerCurrent].module = (BOOL_T)layerModule;
     strcpy(layers[(int)layerCurrent].settingsName,settingsName);
@@ -1506,11 +1494,6 @@ static CatalogEntry *
 ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 {
     DIR *d;
-#if defined(WINDOWS)
-	#define PATH_SEPARATOR '\\'
-#else
-	#define PATH_SEPARATOR '/'
-#endif
     CatalogEntry *newEntry = catalog->head;
     char contents[STR_SHORT_SIZE];
 
@@ -1519,7 +1502,7 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
         char *fileName = NULL;
 
         while (GetNextSettingsFile(d, dirName, &fileName)) {
-            char *contents_start = strrchr(fileName,PATH_SEPARATOR);
+            char *contents_start = strrchr(fileName,PATH_SEPARATOR[0]);
             if (contents_start[0] == '/') contents_start++;
             char *contents_end = strchr(contents_start,'.');
             if (contents_end[0] == '.') contents_end[0] = '\0';

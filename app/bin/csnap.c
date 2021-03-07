@@ -20,16 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
-#include "wlib.h"
+#include "common-ui.h"
 
 #define bigdot_width 3
 
@@ -98,7 +93,7 @@ EXPORT void MapGrid(
 
 static DIST_T Gdx, Gdy, Ddx, Ddy;
 static coOrd GDorig;
-static wPos_t lborder, bborder;
+static wDrawPix_t lborder, bborder;
 
 void static DrawGridPoint(
 		drawCmd_p D,
@@ -109,7 +104,7 @@ void static DrawGridPoint(
 		coOrd p0,
 		BOOL_T bigdot )
 {
-	wPos_t x0, y0;
+	wDrawPix_t x0, y0;
 	POS_T x;
 	x = (p0.x*Gdx + p0.y*Gdy) + orig.x;
 	p0.y = (p0.y*Gdx - p0.x*Gdy) + orig.y;
@@ -126,10 +121,10 @@ void static DrawGridPoint(
 	if ( p0.x < 0.0 || p0.x > D->size.x ||
 		 p0.y < 0.0 || p0.y > D->size.y )
 		return;
-	x0 = (wPos_t)(p0.x*dpi+0.5) + lborder;
-	y0 = (wPos_t)(p0.y*dpi+0.5) + bborder;
+	x0 = (p0.x*dpi+0.5) + lborder;
+	y0 = (p0.y*dpi+0.5) + bborder;
 	if ( bigdot )
-		wDrawFilledCircle(D->d, x0, y0, (wPos_t)(bigdot_width+0.5)/2, Color, (wDrawOpts)D->funcs->options );
+		wDrawFilledCircle(D->d, x0, y0, (bigdot_width+0.5)/2, Color, (wDrawOpts)D->funcs->options );
 	else
 		wDrawPoint( D->d, x0, y0, Color, (wDrawOpts)D->funcs->options );
 }
@@ -145,7 +140,7 @@ static void DrawGridLine(
 		coOrd p0,
 		coOrd p1 )
 {
-	wPos_t x0, y0, x1, y1;
+	wDrawPix_t x0, y0, x1, y1;
 	POS_T x;
 	x = (p0.x*Gdx + p0.y*Gdy) + orig.x;
 	p0.y = (p0.y*Gdx - p0.x*Gdy) + orig.y;
@@ -167,19 +162,14 @@ static void DrawGridLine(
 	p1.x = x;
 	if (clip && !ClipLine( &p0, &p1, zero, 0.0, D->size ))
 		return;
-	x0 = (wPos_t)(p0.x*dpi+0.5) + lborder;
-	y0 = (wPos_t)(p0.y*dpi+0.5) + bborder;
-	x1 = (wPos_t)(p1.x*dpi+0.5) + lborder;
-	y1 = (wPos_t)(p1.y*dpi+0.5) + bborder;
+	x0 = (p0.x*dpi+0.5) + lborder;
+	y0 = (p0.y*dpi+0.5) + bborder;
+	x1 = (p1.x*dpi+0.5) + lborder;
+	y1 = (p1.y*dpi+0.5) + bborder;
 	wDrawLine( D->d, x0, y0, x1, y1, 0, wDrawLineSolid, Color, (wDrawOpts)D->funcs->options );
 }
 
 
-#ifdef WINDOWS
-#define WONE (1)
-#else
-#define WONE (0)
-#endif
 
 EXPORT void DrawGrid(
 		drawCmd_p D,

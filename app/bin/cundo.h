@@ -24,7 +24,6 @@
 #define HAVE_CUNDO_H
 
 #include "common.h"
-#include "track.h"
 
 int UndoUndo( void );
 int UndoRedo( void );

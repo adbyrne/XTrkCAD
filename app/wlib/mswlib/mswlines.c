@@ -58,7 +58,7 @@ wLine_p wLineCreate(
 {
 	wLine_p b;
 	wLines_p lp;
-	POS_T minX, maxX, minY, maxY;
+	wWinPix_t minX, maxX, minY, maxY;
 	int index;
 
 	if (count <= 0)

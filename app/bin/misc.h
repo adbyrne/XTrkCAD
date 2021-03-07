@@ -25,19 +25,10 @@
 
 #define EXPORT
 
-#include <stdio.h>
-
 #include "acclkeys.h"
 #include "common.h"
-#include "draw.h"
-#include "wlib.h"
 
 typedef void (*addButtonCallBack_t)(void*);
-
-#ifdef WINDOWS
-/* suppress warning from *.bmp about conversion of int to char */
-#pragma warning( disable : 4305)
-#endif
 
 #define COUNT(A) (sizeof(A)/sizeof(A[0]))
 
@@ -179,20 +170,20 @@ typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
 /*
  * Windows and buttons
  */
-extern wPos_t DlgSepLeft;
-extern wPos_t DlgSepMid;
-extern wPos_t DlgSepRight;
-extern wPos_t DlgSepTop;
-extern wPos_t DlgSepBottom;
-extern wPos_t DlgSepNarrow;
-extern wPos_t DlgSepWide;
-extern wPos_t DlgSepFrmLeft;
-extern wPos_t DlgSepFrmRight;
-extern wPos_t DlgSepFrmTop;
-extern wPos_t DlgSepFrmBottom;
+extern wWinPix_t DlgSepLeft;
+extern wWinPix_t DlgSepMid;
+extern wWinPix_t DlgSepRight;
+extern wWinPix_t DlgSepTop;
+extern wWinPix_t DlgSepBottom;
+extern wWinPix_t DlgSepNarrow;
+extern wWinPix_t DlgSepWide;
+extern wWinPix_t DlgSepFrmLeft;
+extern wWinPix_t DlgSepFrmRight;
+extern wWinPix_t DlgSepFrmTop;
+extern wWinPix_t DlgSepFrmBottom;
 
 extern wWin_p mainW;
-extern wPos_t toolbarHeight;
+extern wWinPix_t toolbarHeight;
 extern wIndex_t changed;
 extern char message[STR_HUGE_SIZE];
 extern REGION_T curRegion;
@@ -213,9 +204,11 @@ extern wMenu_p popup1M, popup2M;
 #define wControlBeside( B )		(wControlGetPosX((wControl_p)(B))+wControlGetWidth((wControl_p)(B)))
 
 typedef void (*rotateDialogCallBack_t) ( void * );
+typedef void (*indexDialogCallBack_t) (void * );
 typedef void (*moveDialogCallBack_t) (void *);
 extern void AddRotateMenu( wMenu_p, rotateDialogCallBack_t );
 extern void AddMoveMenu( wMenu_p, moveDialogCallBack_t );
+extern void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func);
 extern void StartRotateDialog( rotateDialogCallBack_t );
 extern void StartMoveDialog(moveDialogCallBack_t );
 /*
@@ -226,14 +219,14 @@ void * MyRealloc( void *, long );
 void MyFree( void * );
 void * memdup( void *, size_t );
 char * MyStrdup( const char * );
-void AbortProg( char *, ... );
+void AbortProg( const char *, ... );
 #define ASSERT( X ) if ( !(X) ) AbortProg( "%s: %s:%d", #X, __FILE__, __LINE__ )
-char * Strcpytrimed( char *, char *, BOOL_T );
-char * BuildTrimedTitle( char *, char *, char *, char *, char * );
-void ErrorMessage( char *, ... );
-void InfoMessage( char *, ... );
-int NoticeMessage( char *, char*, char *, ... );
-int NoticeMessage2( int, char *, char*, char *, ... );
+char * Strcpytrimed( char *, const char *, BOOL_T );
+char * BuildTrimedTitle( char *, const char *, const char *, const char *, const char * );
+void ErrorMessage( const char *, ... );
+void InfoMessage( const char *, ... );
+int NoticeMessage( const char *, const char*, const char *, ... );
+int NoticeMessage2( int, const char *, const char*, const char *, ... );
 void DoQuit( void );
 
 void FileIsChanged(void);
@@ -248,7 +241,7 @@ void DefaultProc( wWin_p, winProcEvent, void * );
 void SelectFont();
 
 void CheckRoomSize( BOOL_T );
-const char * GetBalloonHelpStr( char* );
+const char * GetBalloonHelpStr( const char* );
 const char * GetCurCommandName( void );
 void EnableCommands( void );
 void Reset( void );
@@ -278,24 +271,24 @@ void LayoutToolBar( void * );
 #define IC_PLAYBACK_PUSH        (1<<16)
 #define IC_WANT_MODKEYS         (1<<17)
 #define IC_POPUP3				(1<<18)
-wIndex_t InitCommand( wMenu_p, procCommand_t, char *, char *,  int, long, long );
+wIndex_t InitCommand( wMenu_p, procCommand_t, const char *, const char *,  int, long, long );
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );
-wButton_p AddToolbarButton( char*, wIcon_p, long, wButtonCallBack_p, void * context );
+wButton_p AddToolbarButton( const char*, wIcon_p, long, wButtonCallBack_p, void * context );
 wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
-wIndex_t AddMenuButton( wMenu_p, procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
+wIndex_t AddMenuButton( wMenu_p, procCommand_t, const char*, const char*, wIcon_p, int, long, long, void* );
 void PlaybackButtonMouse( wIndex_t );
-void ButtonGroupBegin( char *, char *, char * );
+void ButtonGroupBegin( const char *, const char *, const char * );
 void ButtonGroupEnd( void );
 
 void SaveState( void );
 
-void PlaybackCommand( char *, wIndex_t );
-wMenu_p MenuRegister( char * label );
+void PlaybackCommand( const char *, wIndex_t );
+wMenu_p MenuRegister( const char * label );
 void DoCommandB( void * );
 
 extern void EnumerateTracks( void );
-void InitDebug( char *, long * );
+void InitDebug( const char *, long * );
 
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)
@@ -307,6 +300,8 @@ void InitDebug( char *, long * );
 #define CHANGE_TOOLBAR	(1<<8)
 #define CHANGE_CMDOPT	(1<<9)
 #define CHANGE_LIMITS	(1<<10)
+#define CHANGE_MINBLKLN	(1<<11)
+#define CHANGE_MAXBLKLN	(1<<12)
 #define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
 typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
@@ -315,7 +310,6 @@ void DoChangeNotification( long );
 wBool_t CheckHelpTopicExists(const char * topic);
 
 /* foreign externs */
-extern drawCmd_t mapD;
 extern STATUS_T CmdEnumerate( wAction_t, coOrd );
 
 extern wIndex_t modifyCmdInx;
@@ -368,7 +362,7 @@ extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
 
 void ScaleLengthEnd( void );
-void EnumerateList( long, FLOAT_T, char * );
+void EnumerateList( long, FLOAT_T, char * , char * );
 void EnumerateStart(void);
 void EnumerateEnd(void);
 
@@ -442,6 +436,9 @@ void AttachTrains( void );
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
 void BlockMgmLoad( void );
+BOOL_T HasBlocks( void );
+void UpdateMinBlockLength( void );
+void UpdateMaxBlockLength( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
 void SwitchmotorMgmLoad( void );
@@ -457,5 +454,7 @@ void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
 
+
+#include "misc2.h"
 
 #endif

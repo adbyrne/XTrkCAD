@@ -21,39 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
-
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#include <FreeImage.h>
-#else
-#include <sys/stat.h>
-#endif
-
 #include "common.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "misc.h"
 #include "paths.h"
 #include "param.h"
 #include "smalldlg.h"
-#include "wlib.h"
+
+#ifdef WINDOWS
+#include <FreeImage.h>
+#endif
 
 extern char *sTipF;
-wWin_p aboutW;
+EXPORT wWin_p aboutW;
 static wWin_p tipW;					/**< window handle for tip dialog */
 
 static long showTipAtStart = 1;		/**< flag for visibility */

@@ -295,7 +295,7 @@ As an additional aid, the numbers of the next pages are printed on each edge.
 
 \u000
 
-\dd \f{Rulers} - print rulers on all edges of the page.  This option is only enabled if the \f{Angle} is \e{0.000}.
+\dd \f{Rulers} - choose to print rulers at the layout edge, or on all edges of the page, an option is only enabled if the \f{Angle} is \e{0.000}, or None - which means print no rulers.
 
 \u000
 

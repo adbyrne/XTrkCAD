@@ -27,8 +27,6 @@
 #include "common.h"
 #include "track.h"
 
-struct extraData;
-
 typedef struct track_t {
 		struct track_t *next;
 		TRKINX_T index;
@@ -44,9 +42,11 @@ typedef struct track_t {
 		EPINX_T endCnt;
 		trkEndPt_p endPt;
 		struct { float x; float y; } lo, hi;
-		struct extraData * extraData;
+		struct extraDataBase_t * extraData;
 		CSIZE_T extraSize;
 		DIST_T elev;
+		INT_T occupied;
+		struct track_t *conBlock;
 		} track_t;
 
 extern track_p to_first;

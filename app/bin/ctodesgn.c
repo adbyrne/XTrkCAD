@@ -21,29 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifdef WINDOWS
-#include <stdlib.h>
-#endif
-
-#include <stdint.h>
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-#include "messages.h"
-
 #include "ccurve.h"
 #include "compound.h"
 #include "cstraigh.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "ccornu.h"
 #include "cbezier.h"
 #include "misc.h"
+#include "common-ui.h"
 
 dynArr_t tempSegs_da;
 dynArr_t tempEndPts_da;
@@ -86,7 +75,7 @@ dynArr_t tempSegs_da;
 
 typedef struct {
 		struct {
-			wPos_t x, y;
+			wWinPix_t x, y;
 		} pos;
 		int index;
 		char * winLabel;
@@ -168,8 +157,8 @@ static DIST_T radii[10];
 static double angles[10];
 
 
-#define POSX(X) ((wPos_t)((X)*newTurnout_d.dpi))
-#define POSY(Y) ((wPos_t)((Y)*newTurnout_d.dpi))
+#define POSX(X) ((wWinPix_t)((X)*newTurnout_d.dpi))
+#define POSY(Y) ((wWinPix_t)((Y)*newTurnout_d.dpi))
 
 static paramData_t turnDesignPLs[] = {
 #define I_TOLENGTH			(0)
@@ -2860,17 +2849,17 @@ static void NewTurnCancel( wWin_p win )
 
 
 
-static wPos_t turnDesignWidth;
-static wPos_t turnDesignHeight;
+static wWinPix_t turnDesignWidth;
+static wWinPix_t turnDesignHeight;
 
 static void TurnDesignLayout(
 		paramData_t * pd,
 		int index,
-		wPos_t colX,
-		wPos_t * w,
-		wPos_t * h )
+		wWinPix_t colX,
+		wWinPix_t * w,
+		wWinPix_t * h )
 {
-	wPos_t inx;
+	wIndex_t inx;
 	if ( curDesign == NULL )
 		return;
 	if ( index >= I_TO_FIRST_FLOAT && index <= I_TO_LAST_FLOAT ) {
@@ -2890,9 +2879,9 @@ static void TurnDesignLayout(
 
 static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 {
-	static wPos_t partnoWidth;
+	static wWinPix_t partnoWidth;
 	int inx;
-	wPos_t w, h, ctlH;
+	wWinPix_t w, h, ctlH;
 
 	if ( newTurnW == NULL ) {
 		partnoWidth = wLabelWidth( "999-99999-9999" );
@@ -3237,10 +3226,6 @@ EXPORT void InitNewTurn( wMenu_p m )
 #ifdef MKTURNOUT
 
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-
 char message[STR_HUGE_SIZE];
 char * curScaleName;
 double trackGauge;
@@ -3249,7 +3234,7 @@ wDrawColor drawColorBlack;
 long roadbedColorRGB = 0;
 
 EXPORT void AbortProg(
-		char * msg,
+		const char * msg,
 		... )
 {
 	static BOOL_T abort2 = FALSE;
@@ -3276,7 +3261,7 @@ EXPORT char * MyStrdup( const char * str )
 }
 
 
-int NoticeMessage( char * msg, char * yes, char * no, ... )
+int NoticeMessage( const char * msg, const char * yes, const char * no, ... )
 {
 	/*fprintf( stderr, "%s\n", msg );*/
 	return 0;
@@ -3317,9 +3302,9 @@ EXPORT void ComputeCurvedSeg(
 	}
 }
 
-EXPORT char * Strcpytrimed( char * dst, char * src, BOOL_T double_quotes )
+EXPORT char * Strcpytrimed( char * dst, const char * src, BOOL_T double_quotes )
 {
-	char * cp;
+	const char * cp;
 	while (*src && isspace((unsigned char)*src) ) src++;
 	if (!*src)
 		return dst;
@@ -3335,7 +3320,7 @@ EXPORT char * Strcpytrimed( char * dst, char * src, BOOL_T double_quotes )
 }
 
 
-EXPORT char * BuildTrimedTitle( char * cp, char * sep, char * mfg, char * desc, char * partno )
+EXPORT char * BuildTrimedTitle( char * cp, const char * sep, const char * mfg, const char * desc, const char * partno )
 {
 	cp = Strcpytrimed( cp, mfg, FALSE );
 	strcpy( cp, sep );

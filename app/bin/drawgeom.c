@@ -17,21 +17,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <stdarg.h>
-#include <string.h>
-
 #include "ccurve.h"
 #include "cbezier.h"
 #include "compound.h"
 #include "cundo.h"
 #include "drawgeom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 static long drawGeomCurveMode;
 
@@ -535,6 +529,7 @@ STATUS_T DrawGeomMouse(
 				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos)))) {
 					poslocked = TRUE;
 					pos1 = p;
+
 				}
 			}
 			if (!poslocked) {  //Set up poslock and pos1 for later
@@ -616,22 +611,23 @@ STATUS_T DrawGeomMouse(
 				}
 				CreateEndAnchor(pos,TRUE);
 				if (FindDistance(pos,last_point)>0.0) CreateLineAnchor(pos,last_point);
-			}
-			//If there is any point on this line that will give a 90 degree return to the first point, show it
-			if (tempSegs_da.cnt > 1) {
-				coOrd intersect;
-				ANGLE_T an_this = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],pos);
-				if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],an_this+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],an_this)) {
-					ANGLE_T an_inter = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],intersect);
-					if (fabs(DifferenceBetweenAngles(an_inter,an_this))<90.0) {
-						CreateSquareAnchor(intersect);
-						d = FindDistance(intersect,pos);
-						if (IsClose(d)) {
-							pos = intersect;
+				//If there is any point on this line that will give a 90 degree return to the first point, show it
+				if (tempSegs_da.cnt > 1) {
+					coOrd intersect;
+					ANGLE_T an_this = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],pos);
+					if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],an_this+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],an_this)) {
+						ANGLE_T an_inter = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],intersect);
+						if (fabs(DifferenceBetweenAngles(an_inter,an_this))<90.0) {
+							CreateSquareAnchor(intersect);
+							d = FindDistance(intersect,pos);
+							if (IsClose(d)) {
+								pos = intersect;
+							}
 						}
 					}
 				}
-			}
+			} else if (poslocked) pos = pos1;
+
 			tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
 			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
 			context->message( _("Length = %s, Angle = %0.2f"),
@@ -1451,7 +1447,7 @@ STATUS_T DrawGeomPolyModify(
 							FormatDistance(FindDistance(pos_lock,last_point)),
 							PutAngle(FindAngle(pos_lock,last_point)));
 
-				}
+				} else SnapPos(&pos);  //If not using CTL and snap enabled
 			}
 			context->prev_inx = first_inx;
 			coOrd diff;
@@ -1595,6 +1591,8 @@ STATUS_T DrawGeomPolyModify(
 					selected_count=0;
 					tempSegs(0).u.p.cnt = points_da.cnt;
 					context->max_inx = points_da.cnt-1;
+				} else {
+					ErrorMessage( MSG_POLY_NOTHING_SELECTED );
 				}
 				prev_inx = -1;
 				context->prev_inx = -1;
@@ -2519,6 +2517,10 @@ STATUS_T DrawGeomModify(
 					break;
 			}
 		}
+		break;
+	case wActionExtKey:
+		if ((((action>>8)&0xFF)== wAccelKey_Del) && polyMode) //Convert Del key to be BackSpace in PolyModify
+			return DrawGeomPolyModify(C_TEXT+((int)(127<<8)),pos,context);
 		break;
 	case C_TEXT:
 		if (context->rotate_state) DrawGeomOriginMove(action, pos, context);

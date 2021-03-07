@@ -20,45 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#define R_OK (02)
-#define access _access
-#else
-#include <sys/stat.h>
-#include <errno.h>
-#endif
-#include <stdarg.h>
-#include <locale.h>
-#include <wlib.h>
-
 #include "common.h"
 #include "compound.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
-EXPORT int paramHiliteFast;
+EXPORT int paramHiliteFast = FALSE;
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
@@ -82,7 +53,7 @@ static int log_paramLayout;
  */
 
 static char * getNumberError;
-static char decodeErrorStr[STR_SHORT_SIZE];
+static char decodeErrorStr[STR_SIZE];
 
 static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 {
@@ -300,7 +271,7 @@ EXPORT FLOAT_T DecodeFloat(
 		valF = strtod( cp1, &cp2 );
 		if ( *cp2 != 0 ) {
 			/*wStringSetHilight( strCtrl, cp2-cp0, -1 );*/
-			sprintf( decodeErrorStr, _("Invalid Number") );
+			snprintf( decodeErrorStr, sizeof(decodeErrorStr), _("Invalid Number") );
 			*validP = FALSE;
 			return 0.0;
 		}
@@ -358,7 +329,7 @@ FLOAT_T DecodeDistance(
             wStringSetValue(strCtrl, FormatDistance(valF));
         }
     } else {
-        sprintf(decodeErrorStr, "%s @ %s", _(getNumberError),
+        snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(getNumberError),
                 *cp1?cp1:_("End Of String"));
         valF =	0.0;
     }
@@ -368,8 +339,9 @@ FLOAT_T DecodeDistance(
 
 
 #define N_STRING (10)
-static char formatStrings[N_STRING][40];
-static int formatStringInx;
+static int formatStringInx;					//Index ahead in case of overwrite
+static char formatStrings[N_STRING+1][80];  //Add safety
+
 
 EXPORT char * FormatLong(
 		long valL )
@@ -1049,12 +1021,13 @@ static long ParamRestore( paramGroup_p pg )
 
 static dynArr_t paramGroups_da;
 #define paramGroups(N) DYNARR_N( paramGroup_p, paramGroups_da, N )
+static BOOL_T paramGroups_init = FALSE;
 
 
 
 EXPORT void ParamRegister( paramGroup_p pg )
 {
-	paramData_p p;
+	paramData_t * p;
 	const char * cp;
 	WDOUBLE_T tmpR;
 	long valL;
@@ -1062,13 +1035,16 @@ EXPORT void ParamRegister( paramGroup_p pg )
 	char prefName1[STR_SHORT_SIZE];
 	const char *prefSect2, *prefName2;
 
+	if (!paramGroups_init) ParamInit();
+
 	DYNARR_APPEND( paramGroup_p, paramGroups_da, 10 );
 	paramGroups(paramGroups_da.cnt-1) = pg;
-	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
+	int i;
+	for ( i=0, p=pg->paramPtr; i<(pg->paramCnt); p++, i++ ) {
 		p->group = pg;
 		if ( p->nameStr == NULL )
 			continue;
-		sprintf( prefName1, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName1, sizeof(prefName1), "%s-%s", pg->nameStr, p->nameStr );
 		if ( p->type != PD_MENUITEM ) {
 			(void)GetBalloonHelpStr( prefName1 );
 		}
@@ -1178,18 +1154,19 @@ EXPORT void ParamUpdatePrefs( void )
 	int len;
 	int col;
 	char * cp;
-	static wPos_t * colWidths;
+	static wWinPix_t * colWidths;
 	static int maxColCnt = 0;
 	paramListData_t * listDataP;
 
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
 	  pg = paramGroups(inx);
+	  if (pg->nameStr == NULL) continue;
 	  for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
 		if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 )
 			continue;
 		if ( (p->option&PDO_DLGIGNORE) != 0 )
 			continue;
-		sprintf( prefName, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName, sizeof(prefName), "%s-%s", pg->nameStr, p->nameStr );
 		switch ( p->type ) {
 		case PD_LONG:
 		case PD_RADIO:
@@ -1201,15 +1178,15 @@ EXPORT void ParamUpdatePrefs( void )
 			if ( p->control && listDataP->colCnt > 0 ) {
 				if ( maxColCnt < listDataP->colCnt ) {
 					if ( maxColCnt == 0 )
-						colWidths = (wPos_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
+						colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
 					else
-						colWidths = (wPos_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof * colWidths );
+						colWidths = (wWinPix_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof * colWidths );
 					maxColCnt = listDataP->colCnt;
 				}
 				len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
 				cp = message;
 				for ( col=0; col<len; col++ ) {
-					sprintf( cp, "%d ", colWidths[col] );
+					sprintf( cp, "%ld ", colWidths[col] );
 					cp += strlen(cp);
 				}
 				*cp = '\0';
@@ -1581,7 +1558,7 @@ static void ParamColorSelectPush( void * dp, wDrawColor dc )
 }
 
 
-static void ParamDrawRedraw( wDraw_p d, void * dp, wPos_t w, wPos_t h )
+static void ParamDrawRedraw( wDraw_p d, void * dp, wWinPix_t w, wWinPix_t h )
 {
 	paramData_p p = (paramData_p)dp;
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;
@@ -1590,7 +1567,7 @@ static void ParamDrawRedraw( wDraw_p d, void * dp, wPos_t w, wPos_t h )
 }
 
 
-static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wPos_t w, wPos_t h )
+static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w, wDrawPix_t h )
 {
 	paramData_p p = (paramData_p)dp;
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;
@@ -1711,7 +1688,6 @@ EXPORT void ParamChange( paramData_p p )
 #endif
 
 
-EXPORT int paramHiliteFast = FALSE;
 EXPORT void ParamHilite(
 		wWin_p win,
 		wControl_p control,
@@ -2113,8 +2089,8 @@ static void ParamCheck( char * line )
 static void ParamCreateControl(
 		paramData_p pd,
 		char * helpStr,
-		wPos_t xx,
-		wPos_t yy )
+		wWinPix_t xx,
+		wWinPix_t yy )
 {
 	paramFloatRange_t * floatRangeP;
 	paramIntegerRange_t * integerRangeP;
@@ -2124,9 +2100,9 @@ static void ParamCreateControl(
 	wIcon_p iconP;
 
 	wWin_p win;
-	wPos_t w;
-	wPos_t colWidth;
-	static wPos_t *colWidths;
+	wWinPix_t w;
+	wWinPix_t colWidth;
+	static wWinPix_t *colWidths;
 	static wBool_t *colRightJust;
 	static wBool_t maxColCnt = 0;
 	int col;
@@ -2134,7 +2110,7 @@ static void ParamCreateControl(
     char *cq;
 	static wMenu_p menu = NULL;
 
-	if ( ( win = pd->group->win ) == NULL )
+	if ( pd->group == NULL || ( win = pd->group->win ) == NULL )
 		win = mainW;
 
 
@@ -2150,7 +2126,7 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
 			break;
 		case PD_STRING:
-			w = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)250;
+			w = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)250;
 			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush, pd );
 			break;
 		case PD_RADIO:
@@ -2164,23 +2140,23 @@ static void ParamCreateControl(
 			if ( listDataP->colCnt > 1 ) {
 				if ( maxColCnt < listDataP->colCnt ) {
 					if ( maxColCnt == 0 ) {
-						colWidths = (wPos_t*)MyMalloc( listDataP->colCnt * sizeof *colWidths );
+						colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof *colWidths );
 						colRightJust = (wBool_t*)MyMalloc( listDataP->colCnt * sizeof *colRightJust );
 					} else {
-						colWidths = (wPos_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof *colWidths );
+						colWidths = (wWinPix_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof *colWidths );
 						colRightJust = (wBool_t*)MyRealloc( colRightJust, listDataP->colCnt * sizeof *colRightJust );
 					}
 					maxColCnt = listDataP->colCnt;
 				}
 				for ( col=0; col<listDataP->colCnt; col++ ) {
 					colRightJust[col] = listDataP->colWidths[col]<0;
-					colWidths[col] = abs(listDataP->colWidths[col]);
+					colWidths[col] = labs(listDataP->colWidths[col]);
 				}
 				sprintf( message, "%s-%s-%s", pd->group->nameStr, pd->nameStr, "columnwidths" );
 				cp = wPrefGetString( PREFSECT, message );
 				if ( cp != NULL ) {
 				for ( col=0; col<listDataP->colCnt; col++ ) {
-					colWidth = (wPos_t)strtol( cp, &cq, 10 );
+					colWidth = (wWinPix_t)strtol( cp, &cq, 10 );
 					if ( cp == cq )
 						break;
 					colWidths[col] = colWidth;
@@ -2196,7 +2172,7 @@ static void ParamCreateControl(
 			listDataP->height = wControlGetHeight( pd->control );
 			break;
 		case PD_DROPLIST:
-			w = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)100;
+			w = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)100;
 			pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
 			break;
 		case PD_COMBOLIST:
@@ -2209,7 +2185,7 @@ static void ParamCreateControl(
             break;
 		case PD_MESSAGE:
 			if ( pd->winData != 0 )
-				w = (wPos_t)(long)pd->winData;
+				w = (wWinPix_t)(long)pd->winData;
 			else if (pd->valueP)
 				w = wLabelWidth( _(pd->valueP) );
 			else
@@ -2254,13 +2230,13 @@ static void ParamCreateControl(
 static void ParamPositionControl(
 		paramData_p pd,
 		char * helpStr,
-		wPos_t xx,
-		wPos_t yy )
+		wWinPix_t xx,
+		wWinPix_t yy )
 {
 	paramDrawData_t * drawDataP;
 	paramTextData_t * textDataP;
 	paramListData_t * listDataP;
-	wPos_t winW, winH, ctlW, ctlH;
+	wWinPix_t winW, winH, ctlW, ctlH;
 
 	if ( pd->type != PD_MENUITEM )
 		wControlSetPos( pd->control, xx, yy );
@@ -2271,7 +2247,7 @@ static void ParamPositionControl(
 		case PD_COMBOLIST:
 		case PD_DROPLIST:
 			if ( pd->type == PD_DROPLIST ) {
-				ctlW = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)100;
+				ctlW = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)100;
 				ctlH = wControlGetHeight( pd->control );
 			} else {
 				listDataP = (paramListData_t*)pd->winData;
@@ -2317,14 +2293,14 @@ static void ParamPositionControl(
 			wTextSetSize( (wText_p)pd->control, ctlW, ctlH );
 			break;
 		case PD_STRING:
-			ctlW = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)250;
+			ctlW = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)250;
 			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-ctlW);
 				wStringSetWidth( (wString_p)pd->control, ctlW );
 			}
 			break;
 		case PD_MESSAGE:
-			ctlW = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)150;
+			ctlW = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)150;
 			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-ctlW);
 				wMessageSetWidth( (wMessage_p)pd->control, ctlW );
@@ -2337,27 +2313,27 @@ static void ParamPositionControl(
 }
 
 
-typedef void (*layoutControlsProc)(paramData_p, char *, wPos_t, wPos_t );
+typedef void (*layoutControlsProc)(paramData_p, char *, wWinPix_t, wWinPix_t );
 static void LayoutControls(
 		paramGroup_p group,
 		layoutControlsProc proc,
-		wPos_t * retW,
-		wPos_t * retH )
+		wWinPix_t * retW,
+		wWinPix_t * retH )
 {
 	struct {
-		struct { wPos_t x, y; } orig, term;
+		struct { wWinPix_t x, y; } orig, term;
 	} controlK, columnK, windowK;
-	wPos_t controlSize_x;
-	wPos_t controlSize_y;
+	wWinPix_t controlSize_x;
+	wWinPix_t controlSize_y;
 	paramData_p pd;
-	wPos_t w;
+	wWinPix_t w;
 	BOOL_T hasBox;
-	wPos_t boxTop;
-	wPos_t boxPos[10];
+	wWinPix_t boxTop;
+	wWinPix_t boxPos[10];
 	int boxCnt = 0;
 	int box;
 	int inx;
-	wPos_t labelW[100];
+	wWinPix_t labelW[100];
 	int lastLabelPos, currLabelPos;
 	char helpStr[STR_SHORT_SIZE], * helpStrP;
 	BOOL_T inCmdButtons = FALSE;
@@ -2619,7 +2595,7 @@ wWin_p ParamCreateDialog(
 		paramChangeProc changeProc )
 {
 	char helpStr[STR_SHORT_SIZE];
-	wPos_t w0, h0;
+	wWinPix_t w0, h0;
 	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
@@ -2675,7 +2651,7 @@ wWin_p ParamCreateDialog(
 EXPORT void ParamLayoutDialog(
 		paramGroup_p pg )
 {
-	wPos_t w, h;
+	wWinPix_t w, h;
 	LayoutControls( pg, ParamPositionControl, &w, &h );
 	w += DlgSepRight;
 	h += DlgSepBottom;
@@ -2718,7 +2694,14 @@ EXPORT void ParamCreateControls(
 
 EXPORT void ParamInit( void )
 {
+	if (paramGroups_init) return;
+
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 	log_paramLayout = LogFindIndex( "paramlayout" );
+	paramGroups_da.cnt = 0;
+	paramGroups_da.max = 0;
+	paramGroups_da.ptr = NULL;
+	paramGroups_init = TRUE;
+
 }

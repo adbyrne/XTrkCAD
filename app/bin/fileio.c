@@ -20,32 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#include <errno.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#include <ctype.h>
-#ifdef WINDOWS
-	#include <io.h>
-	#define W_OK (2)
-	#define access	_access
-	#include <windows.h>
-#endif
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <locale.h>
-
-#include <stdint.h>
-
-#include <assert.h>
-
 #include <cJSON.h>
 
 #include "archive.h"
@@ -58,28 +32,32 @@
 #include "draw.h"
 #include "fileio.h"
 #include "fcntl.h"
-#include "i18n.h"
 #include "layout.h"
 #include "manifest.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 #include "version.h"
 #include "dynstring.h"
+#include "common-ui.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 EXPORT dynArr_t paramProc_da;
 
 /*#define TIME_READTRACKFILE*/
 
 #define COPYBLOCKSIZE	1024
+
+#if 0
+// When .xtc file doesn't specify minBlockLength or maxBlockLength use these
+#define MINBLOCKDEFAULT   8.0
+#define MAXBLOCKDEFAULT  48.0
+#endif /*PHIL */
 
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
@@ -454,7 +432,7 @@ EXPORT BOOL_T GetArgs(
 			} else {
 				message[0] = '\0';
 			}
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(message);
 #endif
 			*qp = (char*)ConvertFromEscapedText(message);
@@ -485,7 +463,7 @@ EXPORT BOOL_T GetArgs(
 wBool_t IsEND( char * sEnd )
 {
 	char * cp;
-	wBool_t bAllowNakedENDs = paramVersion < 12;
+	wBool_t bAllowNakedENDs = paramVersion < VERSION_NONAKEDENDS;
 	for( cp = paramLine; *cp && (isspace( *cp ) || *cp == '\t'); cp++ );
 	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 )
 		cp += strlen( sEnd );
@@ -527,16 +505,42 @@ ReadMultilineText()
 	string = MyStrdup(DynStringToCStr(&noteText));
 	string[strlen(string) - 1] = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if (wIsUTF8(string)) {
 		ConvertUTF8ToSystem(string);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	DynStringFree(&noteText);
 	return(string);
 }
 
+
+static wBool_t ParseBlockLength(
+		char * s,
+		DIST_T * min,
+		DIST_T * max )
+{
+	char *cp;
+
+	*min = strtod( s, &cp );
+	if (cp != s) {
+		s = cp;
+		while (isspace((unsigned char)*s)) s++;
+		if ( ! *s ) {
+			*max = *min;
+			return TRUE;
+		}
+		if (strncmp(s,"MAXBLOCKLENGTH ",14) == 0) {
+			s += 14;
+			*max = strtod( s, &cp );
+			if (cp != s) {
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
 
 EXPORT wBool_t ParseRoomSize(
 		char * s,
@@ -609,14 +613,14 @@ EXPORT char * PutTitle( char * cp )
 		NoticeMessage( _("putTitle: title too long: %s"), _("Ok"), NULL, title );
 	*tp = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if(RequiresConvToUTF8(title)) {
 		char *out = MyMalloc(cnt);
 		wSystemToUTF8(title, out, cnt);
 		strcpy(title, out);
 		MyFree(out);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	return title;
 }
@@ -683,6 +687,8 @@ static BOOL_T ReadTrackFile(
 	char * cp;
 	char *oldLocale = NULL;
 	int ret = TRUE;
+	int skipLines = 0;
+	BOOL_T skip = FALSE;
 
 	oldLocale = SaveLocale( "C" );
 
@@ -697,13 +703,12 @@ static BOOL_T ReadTrackFile(
 		return FALSE;
 	}
 
+	checkPtFileNameBackup = NULL;
 	paramLineNum = 0;
 	paramFileName = strdup( fileName );
 
 	InfoMessage("0");
 	count = 0;
-	int skipLines = 0;
-	BOOL_T skip = FALSE;
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;
 		BOOL_T old_skip = skip;
@@ -750,14 +755,14 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {
@@ -771,6 +776,15 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
 			if ( !DoSetScale( paramLine+5 ) ) {
 				if( !(ret = InputError( "SCALE: bad value", TRUE )))
+					break;
+			}
+		} else if (strncmp( paramLine, "MINBLOCKLENGTH ", 14 ) == 0) {
+			DIST_T min, max;
+			if ( ParseBlockLength( paramLine+14, &min, &max ) ) {
+				SetLayoutMinBlockLength( min );
+				SetLayoutMaxBlockLength( max );
+			} else {
+				if( !(ret = InputError( "BLOCKLENGTH: bad value", TRUE )))
 					break;
 			}
 		} else if (strncmp( paramLine, "MAPSCALE ", 9 ) == 0) {
@@ -833,6 +847,15 @@ int LoadTracks(
 	assert( fileName != NULL );
 	assert( cnt == 1 );
 
+	nameOfFile = FindFilename(fileName[0]);
+
+	// Make sure it exists and it is readable
+	if (access(fileName[0], R_OK) != 0)
+	{
+		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found"));
+		return FALSE;
+	}
+
 	if ( ! bExample )
 		SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 	bReadOnly = bExample;
@@ -849,7 +872,6 @@ int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	time0 = wGetTimer();
 #endif
-	nameOfFile = FindFilename( fileName[ 0 ] );
 
  /*
   * Support zipped filetype
@@ -1038,6 +1060,9 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "MAPSCALE %ld\n", (long)mapD.scale )>0;
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
+	if (GetLayoutMinBlockLength() > 0.0)
+		rc &= fprintf(f, "MINBLOCKLENGTH %0.2f MAXBLOCKLENGTH %0.2f\n",
+				GetLayoutMinBlockLength(), GetLayoutMaxBlockLength() )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );
@@ -1210,7 +1235,9 @@ EXPORT void SetAutoSave() {
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	changed = checkPtMark = 1;
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
+
 }
 
 EXPORT void DoSave( doSaveCallBack_p after )
@@ -1227,6 +1254,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1239,6 +1267,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	changed = checkPtMark = 1;
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1251,6 +1280,7 @@ EXPORT void DoLoad( void )
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	paste_offset = zero;
 	cursor_offset = zero;
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1265,6 +1295,7 @@ EXPORT void DoExamples( void )
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
 	wFilSelect( examplesFile_fs, message );
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 

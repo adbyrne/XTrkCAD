@@ -23,10 +23,7 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <string.h>
 #include "common.h"
-#include "draw.h"
-#include "misc2.h"
 
 extern TRKTYP_T T_NOTRACK;
 
@@ -53,11 +50,15 @@ extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
 extern wDrawColor exceptionColor;
+extern wDrawColor occupiedColor;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
+extern long drawOccupiedMode;
+extern long drawBlocksMode;
 extern wDrawColor tieColor;
+extern wDrawColor blockColor;
 
 
 extern TRKINX_T max_index;
@@ -137,13 +138,14 @@ typedef struct {
 #define Q_IS_TURNOUT                    (31)
 #define Q_GET_NODES						(32)
 
-typedef struct {
+typedef struct traverseTrack_t {
 		track_p trk;							// IN Current Track OUT Next Track
 		DIST_T length;							// IN How far to go
 		DIST_T dist;							// OUT how far left = 0 if found
 		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
 		ANGLE_T angle;							// IN/OUT - angle now
-		} traverseTrack_t, *traverseTrack_p;
+		} traverseTrack_t;
+typedef struct traverseTrack_t *traverseTrack_p;
 
 
 typedef struct {
@@ -198,17 +200,24 @@ typedef struct {
 		} u;
 		BOOL_T cacheSet;
 		double cachedElev;
-		double cachedLength;
+		double cachedGrade;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
-typedef struct {
+typedef struct trkEndPt_t {
 		coOrd pos;
 		ANGLE_T angle;
 		TRKINX_T index;
+		EPINX_T trackEp;  // track[trackEp] points here
 		track_p track;
+		track_p prevTrack;
 		elev_t elev;
 		long option;
-		} trkEndPt_t, * trkEndPt_p;
+		BOOL_T toBlock;   // points to a block
+		BOOL_T toTrack;   // points to a track segment
+		BOOL_T attached;  // Dynamic block attached to block
+		char epPath[32];   // remote end point for pathIndex
+		} trkEndPt_t;
+typedef struct trkEndPt_t * trkEndPt_p;
 
 extern dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
@@ -217,7 +226,7 @@ typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;
 
 
-typedef struct {
+typedef struct trkSeg_t {
 		char type;
 		wDrawColor color;
 		DIST_T width;
@@ -267,7 +276,8 @@ typedef struct {
 				PolyType_e polyType;
 			} p;
 		} u;
-		} trkSeg_t, * trkSeg_p;
+		} trkSeg_t;
+typedef struct trkSeg_t * trkSeg_p;
 
 #define SEG_STRTRK		('S')
 #define SEG_CRVTRK		('C')
@@ -467,7 +477,7 @@ void SetDebug( char * );
 #define GetTrkEndAngle( T, I )	((T)->endPt[I].angle)
 #define GetTrkEndOption( T, I ) ((T)->endPt[I].option)
 #define SetTrkEndOption( T, I, O )		((T)->endPt[I].option=O)
-#define GetTrkExtraData( T )	((T)->extraData)
+#define GetTrkExtraData( T, TT )	((T)->extraData)
 #define GetTrkWidth( T )		(int)((T)->width)
 #define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
 #define GetTrkBits(T)			((T)->bits)
@@ -493,7 +503,7 @@ coOrd GetTrkEndPos( track_p, EPINX_T );
 ANGLE_T GetTrkEndAngle( track_p, EPINX_T );
 long GetTrkEndOption( track_p, EPINX_T );
 long SetTrkEndOption( track_p, EPINX_T, long );
-struct extraData * GetTrkExtraData( track_p );
+struct extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
 int GetTrkWidth( track_p );
 void SetTrkWidth( track_p, int );
 int GetTrkBits( track_p );
@@ -517,8 +527,8 @@ void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
 DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
-BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *length);
-void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length);
+BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *grade);
+void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade);
 char * GetTrkEndElevStation( track_p, EPINX_T );
 #define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
 #define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
@@ -616,6 +626,7 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_DASH		(1<<8)
 #define DTS_DASHDOT		(1<<9)
 #define DTS_DASHDOTDOT  (1<<10)
+#define DTS_CENTERONLY  (1<<11)
 
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
@@ -732,7 +743,7 @@ typedef struct {
 		int mode;
 		wControl_p control0;
 		wControl_p control1;
-		wPos_t posy;
+		wWinPix_t posy;
 		} descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );
@@ -795,11 +806,23 @@ void AddHotBarStructures( void );
 void AddHotBarCarDesc( void );
 
 /* cblock.c */
-void CheckDeleteBlock( track_p t );
-void ResolveBlockTrack ( track_p trk );
+extern BOOL_T IsDynamicBlock( track_p b_trk );
+extern track_p GetRemoteBlock( track_p b_trk, track_p db_trk );
+extern BOOL_T ResolveBlockTrack( track_p b_trk );
+extern DIST_T BlockDescriptionDistance( coOrd, track_p);
+extern STATUS_T BlockDescriptionMove( track_p, wAction_t, coOrd);
+extern void AddMissingBlockTrack( void );
+extern void DeleteAllBlockTrack( void );
+extern void UpdateBlockTrack( void );
+extern void ClearDynamicBlocks( void );
+extern void ClearOccupied( void );
+extern BOOL_T IsOccupied ( track_p trk );
+extern void SetOccupied( void );
+
 /* cswitchmotor.c */
 void CheckDeleteSwitchmotor( track_p t );
-void ResolveSwitchmotorTurnout ( track_p trk );
+BOOL_T ResolveSwitchmotorTurnout ( track_p trk );
+void AddMissingSwitchMotor( void );
 
 #endif
 

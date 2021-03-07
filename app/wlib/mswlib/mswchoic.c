@@ -49,7 +49,7 @@ void wRadioSetValue(
 	butts = (wChoiceItem_p*)bc->buttList;
 	for (labels = bc->labels, cnt=0; *labels; labels++, cnt++, butts++ )
 		SendMessage( (*butts)->hWnd, BM_SETCHECK,
-				(val==cnt)?1:0, 0L );
+				(WPARAM)((val==cnt)?1:0), (LPARAM)0 );
 	bc->oldVal = val;
 	if (bc->valueP)
 		*bc->valueP = val;
@@ -74,7 +74,7 @@ void wToggleSetValue(
 	butts = (wChoiceItem_p*)bc->buttList;
 	for (labels = bc->labels, cnt=0; *labels; labels++, cnt++, butts++ )
 		SendMessage( (*butts)->hWnd, BM_SETCHECK,
-				(val & (1L<<cnt)) != 0, 0L );
+				(WPARAM)((val & (1L<<cnt)) != 0), (LPARAM)0 );
 	bc->oldVal = val;
 	if (bc->valueP)
 		*bc->valueP = val;
@@ -115,12 +115,12 @@ static void choiceShow(
 
 static void choiceSetPos(
 		wControl_p b,
-		wPos_t x,
-		wPos_t y )
+		wWinPix_t x,
+		wWinPix_t y )
 {
 	wChoice_p bc = (wChoice_p)b;
 	wChoiceItem_p * butts;
-	wPos_t dx, dy;
+	wWinPix_t dx, dy;
 
 	dx = x - bc->x;
 	dy = y - bc->y;
@@ -129,8 +129,10 @@ static void choiceSetPos(
 				SWP_NOSIZE|SWP_NOZORDER );
 
 	for (butts = (wChoiceItem_p*)bc->buttList; *butts; butts++ ) {
+		(*butts)->x += dx;
+		(*butts)->y += dy;
 		SetWindowPos( (*butts)->hWnd, HWND_TOP,
-						(*butts)->x+=dx, (*butts)->y+=dy,
+						(*butts)->x, (*butts)->y,
 						CW_USEDEFAULT, CW_USEDEFAULT,
 						SWP_NOSIZE|SWP_NOZORDER );
 	}
@@ -138,15 +140,14 @@ static void choiceSetPos(
 	bc->y = y;
 }
 
-long FAR PASCAL _export pushChoiceItem(
+LRESULT FAR PASCAL _export pushChoiceItem(
 		HWND hWnd,
 		UINT message,
-		UINT wParam,
-		LONG lParam )
+		WPARAM wParam,
+		LPARAM lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	long inx = GetWindowLong( hWnd, GWL_ID );
-
+	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
@@ -161,7 +162,7 @@ long FAR PASCAL _export pushChoiceItem(
 						wParam, lParam );
 				/*SendMessage( ((wControl_p)(b->parent))->hWnd, WM_COMMAND,
 						inx, MAKELONG( hWnd, EN_KILLFOCUS ) );*/
-				return 0L;
+				return (LRESULT)0;
 			}
 		}
 		break;
@@ -195,15 +196,15 @@ LRESULT choiceItemProc(
 						bc->oldVal ^= (1L<<num);
 					}
 					SendMessage( (*rest)->hWnd, BM_SETCHECK,
-						(bc->oldVal & (1L<<num)) != 0, 0L );
+						(WPARAM)((bc->oldVal & (1L<<num)) != 0), (LPARAM)0 );
 					break;
 	
 				case B_RADIO:
 					if (*rest != me) {
-						SendMessage( (*rest)->hWnd, BM_SETCHECK, 0, 0L );
+						SendMessage( (*rest)->hWnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0 );
 					} else {
 						bc->oldVal = rest-(wChoiceItem_p*)bc->buttList;
-						SendMessage( (*rest)->hWnd, BM_SETCHECK, 1, 0L );
+						SendMessage( (*rest)->hWnd, BM_SETCHECK, (WPARAM)1, (LPARAM)0 );
 					}
 					break;
 				}
@@ -255,8 +256,8 @@ static callBacks_t choiceItemCallBacks = {
 static wChoice_p choiceCreate(
 		wType_e type,
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
@@ -269,7 +270,7 @@ static wChoice_p choiceCreate(
 	const char ** lp;
 	int cnt;
 	wChoiceItem_p * butts;
-	int ppx, ppy;
+	wWinPix_t ppx, ppy;
 	int bs;
 	HDC hDc;
 	HWND hButt;
@@ -350,10 +351,14 @@ static wChoice_p choiceCreate(
 			}
 			mswChainFocus( (wControl_p)*butts );
 			newChoiceItemProc = MakeProcInstance( (XWNDPROC)pushChoiceItem, mswHInst );
-			oldChoiceItemProc = (XWNDPROC)GetWindowLong( (*butts)->hWnd, GWL_WNDPROC );
-			SetWindowLong( (*butts)->hWnd, GWL_WNDPROC, (LONG)newChoiceItemProc );
+			oldChoiceItemProc = (XWNDPROC)GetWindowLongPtr((*butts)->hWnd, GWLP_WNDPROC);
+			SetWindowLongPtr((*butts)->hWnd, GWLP_WNDPROC, (LPARAM)newChoiceItemProc);
+#ifdef _OLDCODE
+			oldChoiceItemProc = (XWNDPROC)GetWindowLong((*butts)->hWnd, GWL_WNDPROC);
+			SetWindowLong((*butts)->hWnd, GWL_WNDPROC, (LONG)newChoiceItemProc);
+#endif
 			if ( !mswThickFont )
-				SendMessage( (*butts)->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L ); 
+				SendMessage( (*butts)->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 	}
 	*butts = NULL;
 	switch (b->type) {
@@ -388,8 +393,8 @@ static wChoice_p choiceCreate(
 
 wChoice_p wRadioCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
@@ -404,8 +409,8 @@ wChoice_p wRadioCreate(
 
 wChoice_p wToggleCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,

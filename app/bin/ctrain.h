@@ -24,8 +24,7 @@
 #define HAVE_CTRAIN_H
 
 #include "common.h"
-#include "include/paramfile.h"
-#include "track.h"
+#include "track.h" //- traverseTrack
 
 extern wIndex_t trainCmdInx;
 
@@ -67,5 +66,8 @@ void FlipTraverseTrack( traverseTrack_p );
 void CheckCarTraverse( track_p trk);
 void DeleteCarProto(int fileIndex);
 void DeleteCarPart(int fileIndex);
+BOOL_T IsTrainCarOnTrk ( track_p car );
+track_p TrainCarOnTrk ( track_p car, coOrd *pos );
+void UpdateOccupied( void );
 
 #endif // !HAVE_CTRAIN_H

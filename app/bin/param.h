@@ -24,8 +24,7 @@
 #define PARAM_H
 
 #include "common.h"
-#include "wlib.h"
-#include "draw.h"
+#include "draw.h" //- playbackAction
 
 typedef struct turnoutInfo_t * turnoutInfo_p;
 
@@ -94,33 +93,33 @@ typedef struct paramGroup_t *paramGroup_p;
 typedef struct {
 		long low;
 		long high;
-		wPos_t width;
+		wWinPix_t width;
 		int rangechecks;
 		} paramIntegerRange_t;
 typedef struct {
 		FLOAT_T low;
 		FLOAT_T high;
-		wPos_t width;
+		wWinPix_t width;
 		int rangechecks;
 		} paramFloatRange_t;
 typedef struct {
-		wPos_t width;
-		wPos_t height;
+		wWinPix_t width;
+		wWinPix_t height;
 		wDrawRedrawCallBack_p redraw;
 		playbackProc action;
 		drawCmd_p d;
 		} paramDrawData_t;
 typedef struct {
 		wIndex_t number;
-		wPos_t width;
+		wWinPix_t width;
 		int colCnt;
-		wPos_t * colWidths;
+		wWinPix_t * colWidths;
 		const char * * colTitles;
-		wPos_t height;
+		wWinPix_t height;
 		} paramListData_t;
 typedef struct {
-		wPos_t width;
-		wPos_t height; 
+		wWinPix_t width;
+		wWinPix_t height; 
 		} paramTextData_t;
 
 typedef union {
@@ -133,10 +132,10 @@ typedef union {
 typedef struct {
 		parameterType type;
 		void * valueP;
-		char * nameStr;
+		const char * nameStr;
 		long option;
 		void * winData;
-		char * winLabel;
+		const char * winLabel;
 		long winOption;
 		void * context;
         unsigned int max_string;
@@ -160,7 +159,7 @@ typedef void (*paramGroupProc_t) ( long, long );
 #define PGO_PREFDRAWGROUP		(1<<9)
 #define PGO_PREFMISC			(1<<10)
 
-typedef void (*paramLayoutProc)( paramData_t *, int, wPos_t, wPos_t *, wPos_t * );
+typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *, wWinPix_t * );
 typedef void (*paramActionOkProc)( void * );
 typedef void (*paramActionCancelProc)( wWin_p );
 typedef void (*paramChangeProc)( paramGroup_p, int, void * );
@@ -181,8 +180,8 @@ typedef struct paramGroup_t {
 		wButton_p okB;
 		wButton_p cancelB;
 		wButton_p helpB;
-		wPos_t origW;
-		wPos_t origH;
+		wWinPix_t origW;
+		wWinPix_t origH;
 		wBox_p * boxs;
 		} paramGroup_t;
 

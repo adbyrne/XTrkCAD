@@ -25,7 +25,6 @@
 
 #include "common.h"
 #include "misc.h"
-#include "time.h"
 
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)
@@ -46,8 +45,8 @@ extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
 void LogSet( char *, int );
-int LogFindIndex( char * );
-void LogPrintf( char *, ... );
+int LogFindIndex( const char * );
+void LogPrintf( const char *, ... );
 #define LOG( DBINX, DBLVL, DBMSG ) \
 		if ( DBINX > 0 && logTable( DBINX ).level >= DBLVL ) { \
 				LogPrintf DBMSG ; \
@@ -78,7 +77,7 @@ tieData_p GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
 BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx);
 void SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
-BOOL_T DoSetScale( char * );
+BOOL_T DoSetScale( char * newScale );
 
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void LoadScaleList( wList_p );
@@ -99,6 +98,7 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 wDrawColor GetLayerColor( unsigned int );
 BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
+void FlipLayer( unsigned int);
 BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );

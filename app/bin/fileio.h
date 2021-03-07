@@ -22,10 +22,7 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#include <stdio.h>
-
 #include "common.h"
-#include "misc.h"
 
 extern FILE * paramFile;
 extern char *paramFileName;
@@ -104,10 +101,6 @@ void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
 
-#ifdef WINDOWS
-#define fopen( FN, MODE ) wFileOpen( FN, MODE )
-#endif
-
 void SetWindowTitle( void );
 char * PutTitle( char * cp );
 
@@ -138,7 +131,7 @@ BOOL_T EditClone( void );
 
 void DoRecord( void * );
 void AddPlaybackProc( char *, playbackProc_p, void * );
-EXPORT void TakeSnapshot( drawCmd_t * );
+EXPORT void TakeSnapshot( drawCmd_p );
 void PlaybackMessage( char * );
 void DoPlayBack( void * );
 int MyGetKeyState( void );

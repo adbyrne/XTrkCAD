@@ -23,9 +23,7 @@
 #ifndef HAVE_LAYOUT_H
 #define HAVE_LAYOUT_H
 
-#include <stdbool.h>
 #include "common.h"
-#include "misc.h"
 
 
 void SetLayoutFullPath(const char *fileName);
@@ -34,6 +32,8 @@ void SetLayoutTitle(char *title);
 void SetLayoutSubtitle(char *title);
 void SetLayoutMinTrackRadius(DIST_T radius);
 void SetLayoutMaxTrackGrade(ANGLE_T angle);
+void SetLayoutMinBlockLength(DIST_T len);
+void SetLayoutMaxBlockLength(DIST_T len);
 void SetLayoutRoomSize(coOrd size);
 void SetLayoutCurScale(SCALEINX_T scale);
 void SetLayoutCurScaleDesc(SCALEDESCINX_T desc);
@@ -52,6 +52,8 @@ char *GetLayoutFilename(void);
 char *GetLayoutTitle(void);
 char *GetLayoutSubtitle(void);
 DIST_T GetLayoutMinTrackRadius(void);
+DIST_T GetLayoutMinBlockLength(void);
+DIST_T GetLayoutMaxBlockLength(void);
 SCALEINX_T GetLayoutCurScale(void );
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
 //GAUGEINX_T GetLayoutCurGauge(void);

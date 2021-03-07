@@ -20,39 +20,18 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define access _access
-#else 
-#include <unistd.h>
-#endif
-
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "include/utf8convert.h"
-
-#if _MSC_VER >1300
-#define stricmp( a, b ) _stricmp(a, b )
-#endif
+#include "common-ui.h"
 
 static long paramCheckSum;
 
@@ -177,10 +156,6 @@ void SetParamFileState(int index)
  * \returns True if it succeeds, false if it fails.
  */
  
-#ifdef WINDOWS
-#define R_OK 0x4
-#endif
-
 static bool
 CheckFileReadable(const char *file)
 {
@@ -336,16 +311,16 @@ bool ReadParams(
 			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 9);
 #endif
 			curContents = MyStrdup(paramLine + 9);
 			curSubContents = curContents;
 			skip = FALSE;
 		} else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 12);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			curSubContents = MyStrdup(paramLine + 12);
 			skip = FALSE;
 		} else if (strncmp(paramLine, "PARAM ", 6) == 0) {

@@ -30,14 +30,11 @@
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "ccornu.h"
-#include "i18n.h"
-#include "utility.h"
-#include "math.h"
-#include "messages.h"
 #include "param.h"
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
+#include "common-ui.h"
 
 static BOOL_T debug = 0;
 static int log_join = 0;
@@ -389,8 +386,8 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		}
 		if ( (Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE )) == NULL )
 			return C_CONTINUE;
-		if (!CheckTrackLayer( Dj.inp[Dj.joinMoveState].trk ) )
-			return C_CONTINUE;
+		// if (Dj.joinMoveState == 0 && !CheckTrackLayerSilent( Dj.inp[Dj.joinMoveState].trk ) )
+		//	return C_CONTINUE;
 		Dj.inp[Dj.joinMoveState].params.ep = PickUnconnectedEndPoint( pos, Dj.inp[Dj.joinMoveState].trk ); /* CHECKME */
 		if ( Dj.inp[Dj.joinMoveState].params.ep == -1 ) {
 #ifdef LATER
@@ -670,7 +667,7 @@ static paramData_t joinPLs[] = {
 #define joinRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t joinPG = { "join-fixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
+static paramGroup_t joinPG = { "joinfixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
 
 
 
@@ -1062,6 +1059,8 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			}
 			coOrd pos1 = pos;
 			if (AdjustPosToRadius(&pos1,desired_radius+(Dj.jointD[0].x), na0, na1)) {
+				// Make sure this is initialized
+				beyond = 1.0;
 				if (Dj.inp[1].params.type == curveTypeStraight) {
 					FindPos( &off, &beyond, pos1, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 										 FindDistance(Dj.inp[1].params.lineOrig,Dj.inp[1].params.lineEnd) );

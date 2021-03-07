@@ -20,29 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <errno.h>
-#include <string.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define F_OK	(0)
-#define W_OK	(2)
-#define access	_access
-#else
-#include <unistd.h>
-#endif
-
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "wlib.h"
 #include "include/paramfilelist.h"
-#ifdef WINDOWS
+#include "common-ui.h"
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif
 
@@ -55,7 +40,7 @@ static void CustomNewCar( void * action );
 static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
 static wIndex_t selectedType;
 
-static wPos_t customListWidths[] = { 18, 100, 30, 80, 220 };
+static wWinPix_t customListWidths[] = { 18, 100, 30, 80, 220 };
 static const char * customListTitles[] = { "", N_("Manufacturer"),
 	N_("Scale"), N_("Part No"), N_("Description") };
 static paramListData_t customListData = { 10, 400, 5, customListWidths, customListTitles };
@@ -241,14 +226,14 @@ static int CustomDoExport(
 
 	if (rc == -1)
 	{
-	#ifdef WINDOWS
+	#ifdef UTFCONVERT
 	    char *contents = MyStrdup(custMgmContentsStr);
 	    contents = Convert2UTF8(contents);
 	    fprintf(customMgmF, "CONTENTS %s\n", contents);
 		MyFree(contents);
 	#else
 	    fprintf(customMgmF, "CONTENTS %s\n", custMgmContentsStr);
-	#endif // WINDOWS
+	#endif // UTFCONVERT
 	}
 
 	cnt = wListGetCount( (wList_p)customPLs[0].control );

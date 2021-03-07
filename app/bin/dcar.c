@@ -20,26 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef WINDOWS
-#include <errno.h>
-#endif
-#include <assert.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "cselect.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
+#include "include/paramfile.h"
+#include "common-ui.h"
 
 static int log_carList;
 static int log_carInvList;
@@ -1337,7 +1327,7 @@ EXPORT BOOL_T CarItemRead(
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
 	dim.truckCenterOffset = longCenterOffset/1000.0;
-	if ( paramVersion < 12 ) {
+	if ( paramVersion < VERSION_INLINENOTE ) {
 		if ( (options&CAR_ITEM_HASNOTES) ) {
 			sNote = ReadMultilineText();
 		}
@@ -1657,7 +1647,7 @@ EXPORT void CarItemLoadList( void * junk )
 	wIndex_t inx;
 	carItem_p item;
 	char * cp;
-	wPos_t w, h;
+	wWinPix_t w, h;
 
 	DYNARR_SET( carItem_t*, carItemHotbar_da, carItemInfo_da.cnt );
 	memcpy( carItemHotbar_da.ptr, carItemInfo_da.ptr, carItemInfo_da.cnt * sizeof item );
@@ -1692,7 +1682,7 @@ static char * CarItemHotbarProc(
 	wIndex_t inx;
 	long mode;
 	char * cp;
-	wPos_t w, h;
+	wWinPix_t w, h;
 
 	item = carItemHotbar(carItemInx);
 	if ( item == NULL )
@@ -2250,15 +2240,15 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_ITEMINDEX          (C+0)
 	{ PD_LONG, &carDlgItemIndex, "index", PDO_NOPREF|PDO_DLGWIDE, &i1_999999999, N_("Index"), 0 },
 #define I_CD_PURPRC             (C+1)
-	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE, (void*)50, N_("Purchase Price"), 0, &carDlgPurchPrice },
+	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)50, N_("Purchase Price"), 0, &carDlgPurchPrice, sizeof(carDlgPurchPriceStr) },
 #define I_CD_CURPRC             (C+2)
-	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)50, N_("Current Price"), 0, &carDlgCurrPrice },
+	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)50, N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
 #define I_CD_COND               (C+3)
 	{ PD_DROPLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)90, N_("Condition") },
 #define I_CD_PURDAT             (C+4)
-	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE, (void*)80, N_("Purchase Date"), 0, &carDlgPurchDate },
+	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)80, N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
 #define I_CD_SRVDAT             (C+5)
-	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)80, N_("Service Date"), 0, &carDlgServiceDate },
+	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)80, N_("Service Date"), 0, &carDlgServiceDate, sizeof(carDlgServiceDateStr) },
 #define I_CD_QTY                (C+6)
 	{ PD_LONG, &carDlgQuantity, "quantity", PDO_NOPREF|PDO_DLGWIDE, &i1_9999, N_("Quantity") },
 #define I_CD_MLTNUM             (C+7)
@@ -2542,7 +2532,7 @@ static void CarDlgLoadDimsFromProto( carProto_p protoP )
 
 static void CarDlgRedraw( void )
 {
-	wPos_t w, h;
+	wWinPix_t w, h;
 	DIST_T ww, hh;
 	DIST_T scale_w, scale_h;
 	coOrd orig, pos, size;
@@ -4229,12 +4219,12 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 static void CarDlgLayout(
 		paramData_t * pd,
 		int inx,
-		wPos_t currX,
-		wPos_t *xx,
-		wPos_t *yy )
+		wWinPix_t currX,
+		wWinPix_t *xx,
+		wWinPix_t *yy )
 {
-	static wPos_t col2pos = 0;
-	wPos_t y0, y1;
+	static wWinPix_t col2pos = 0;
+	wWinPix_t y0, y1;
 
 	switch (inx) {
 	case I_CD_PROTOTYPE_STR:
@@ -4361,7 +4351,7 @@ static void CarInvDlgExportCsv( void );
 static void CarInvDlgSaveText( void );
 static void CarInvListLoad( void );
 
-static wPos_t carInvColumnWidths[] = {
+static wWinPix_t carInvColumnWidths[] = {
 		-40, 30, 100, -50, 50, 130, 120, 100,
 		-50, -50, 60, 55, 55, 40, 200 };
 static const char * carInvColumnTitles[] = {

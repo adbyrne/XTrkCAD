@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-
 #include "cjoin.h"
 #include "ccurve.h"
 #include "cbezier.h"
@@ -29,15 +27,13 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "drawgeom.h"
 #include "common.h"
 #include "layout.h"
 #include "cselect.h"
+#include "common-ui.h"
 
 static struct {
 		track_p Trk;
@@ -220,6 +216,9 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			break;
 		case C_CMDMENU:
 			menuPos = pos;
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
+		case wActionExtKey:
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
 		default:
@@ -752,7 +751,10 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			return C_CONTINUE;
 		}
 		if ((action>>8) == 'e') {
-			DoZoomExtents(0);
+			DoZoomExtents((void*)0);
+		}
+		if ((action>>8) == 's') {
+			DoZoomExtents((void*)1);
 		}
 		if ((action>>8) == '0' || (action>>8 == 'o')) {
 			PanMenuEnter('o');

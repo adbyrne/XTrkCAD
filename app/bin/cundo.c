@@ -20,21 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <time.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <string.h>
-
 #include "cselect.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"
+#include "draw.h"
 #include "cundo.h"
+#include "common-ui.h"
 
 
 /*****************************************************************************
@@ -375,7 +369,7 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 	if (!ReadStream( stream, tempTrk.endPt, tempTrk.endCnt * sizeof tempTrk.endPt[0] ))
 		return FALSE;
 	if (tempTrk.extraSize != trk->extraSize)
-		tempTrk.extraData = MyRealloc( trk->extraData, tempTrk.extraSize );
+		tempTrk.extraData = (extraDataBase_t*)MyRealloc( trk->extraData, tempTrk.extraSize );
 	else
 		tempTrk.extraData = trk->extraData;
 	if (!ReadStream( stream, tempTrk.extraData, tempTrk.extraSize ))
