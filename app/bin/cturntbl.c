@@ -228,7 +228,7 @@ static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 		Translate( p, xx->pos, a, d+xx->radius );
 	} else {
 		if ( !ValidateTurntablePosition(trk) )
-			return 100000.0;
+			return DIST_INF;
 		pos0 = GetTrkEndPos(trk,xx->currEp);
 		Translate( &pos1, xx->pos, GetTrkEndAngle(trk,xx->currEp)+180.0, xx->radius );
 		LineDistance( p, pos0, pos1 );
@@ -835,7 +835,7 @@ static void AdvanceTurntablePositionIndicator(
 	ANGLE_T inangle = *angleR;
 	angle0 = GetTrkEndAngle(trk,xx->currEp);
 	if (fabs(DifferenceBetweenAngles(angle0,*angleR))>90) train_reversed = TRUE;
-	DIST_T dd = 100000.0;
+	DIST_T dd = DIST_INF;
 	// If on ep, use that
 	for (ep=0; ep<epCnt; ep++) {
 		if ( (GetTrkEndTrk(trk,ep)) == NULL )

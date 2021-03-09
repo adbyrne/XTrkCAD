@@ -2134,7 +2134,7 @@ DIST_T CornuOffsetLength(dynArr_t segs, double offset) {
 }
 
 DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
-	DIST_T r = 100000.0, rr;
+	DIST_T r = DIST_INF, rr;
 	if (segs.cnt == 0 ) return r;
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
@@ -2142,7 +2142,7 @@ DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
 			rr = fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rr = CornuMinRadius(t.u.b.pos, t.bezSegs);
-		} else rr = 100000.00;
+		} else rr = DIST_INF;
 		if (rr<r) r = rr;
 	}
 	return r;

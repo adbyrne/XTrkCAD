@@ -1203,7 +1203,7 @@ STATUS_T DrawGeomPolyModify(
 			wSetCursor(mainD.d,defaultCursor);
 			int pInx=0;
 			coOrd pm0,pm1;
-			DIST_T dm = 10000.0;
+			DIST_T dm = DIST_INF;
 			for ( int inx=0; inx<points_da.cnt; inx++ ) {
 				pm0 = pos;
 				DIST_T ddm = LineDistance( &pm0, points( inx==0?points_da.cnt-1:inx-1).pt, points(inx).pt );
@@ -1228,7 +1228,7 @@ STATUS_T DrawGeomPolyModify(
 			return C_CONTINUE;
 			break;
 		case C_DOWN:
-			d = 10000.0;
+			d = DIST_INF;
 			polyInx = -1;
 			coOrd p0;
 			double dd;
