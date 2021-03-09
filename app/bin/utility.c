@@ -238,85 +238,44 @@ BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radiu
 }
 
 /*
- * Find Intersections between a line and a circle
- *
- * |c-x|^2 = r^2
- *
- * 𝑥(𝑡)=𝑎+𝑡𝑏
- *
- * where 𝑎 is a point and 𝑏 is a vector.
- *
- * For a point on this line to satisfy the equation, you need to have
- *
- * (𝑡𝑏+(𝑎−𝑐))⋅(𝑡𝑏+(𝑎−𝑐))=𝑟^2
- *
- * which is a quadratic in 𝑡:
- * |b|^2*t^2 + 2(a-c).bt +(|a-c|^2-r^2) = 0
- *
- * whose solutions are
- *
- * t = (-2(a-c).b +/- SQRT([2(a-c).b]^2 - 4|b|^2(|a-c|^2-r^2)) / 2|b|^2
+ * Find Intersection between arc and line.
+ * First - move arc/circle and line so circle is at origin
+ * Then find nearest point on line to origin
+ * If nearest point is > radius -> no intersect
+ * If nearest point is == radius -> one point (the nearest)
+ * If nearest point is < radius -> two points
+ * Find two intersect points on secant by triangle formed between middle, center and arc point
  *
  */
-
-double VectorLength (coOrd v) {
-	return sqrt(v.x*v.x+v.y+v.y);
-}
-double VectorDot (coOrd v1, coOrd v2) {
-	return (v1.x*v2.x+ v1.y*v2.y);
-}
-coOrd VectorSubtract (coOrd v1, coOrd v2) {
-	coOrd result;
-	result.x = v1.x-v2.x;
-	result.y = v1.y-v2.y;
-	return result;
-}
-coOrd VectorAdd (coOrd v1, coOrd v2) {
-	coOrd result;
-	result.x = v1.x+v2.x;
-	result.y = v1.y+v2.y;
-	return result;
-}
-
 BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2, coOrd c, DIST_T radius,
                                         coOrd point1, coOrd point2 )
 {
-    double dx, dy, cx, cy, A, B, C, det, t;
 
-    dx = point2.x - point1.x;
-    dy = point2.y - point1.y;
+	double la, lb, lc;   //Line equation
 
-    cx = c.x;
-    cy = c.y;
+    la = point1.y - point2.y;
+    lb = point2.x - point1.x;
+    lc = (point1.x-c.x)*(point2.y-c.y) - (point2.x-c.x)*(point1.y-c.y);  //Move by c(x,y)
 
-    A = dx * dx + dy * dy;
-    B = 2 * (dx * (point1.x - cx) + dy * (point1.x - cy));
-    C = (point1.x - cx) * (point1.x - cx) + (point1.y - cy) * (point1.y - cy) - radius * radius;
+    double x0 = -la*lc/(la*la+lb*lb), y0 = -lb*lc/(la*la+lb*lb);
 
-    det = B * B - 4 * A * C;
-    if ((A <= 0.0000001) || (det < 0))
-    {
+    double dis = radius*radius*(la*la+lb*lb);
+
+    if (lc*lc > dis) {
     	return FALSE;
-    }
-    else if (det == 0)
-    {
-        // One solution.
-        t = -B / (2 * A);
-        (*intersection1).x = point1.x + t * dx;
-        (*intersection1).y = point1.y + t * dy;
-        intersection2 = intersection1;
-        return TRUE;
-    }
-    else
-    {
-        // Two solutions.
-        t = (float)((-B + sqrt(det)) / (2 * A));
-        (*intersection1).x = point1.x + t * dx;
-        (*intersection1).y = point1.y + t * dy;
-        t = (float)((-B - sqrt(det)) / (2 * A));
-        (*intersection2).x = point1.x + t * dx;
-        (*intersection2).y = point1.y + t * dy;
-        return TRUE;
+    } else if (fabs(lc*lc - dis) < EPSILON) {
+    	(*intersection1).x = x0+c.x;
+    	(*intersection1).y = y0+c.y;
+    	*intersection2 = *intersection1;
+    	return TRUE;
+    } else {
+    	double d = radius*radius - lc*lc/(la*la+lb*lb);
+    	double mult = sqrt(d/(la*la+lb*lb));
+    	(*intersection1).x = x0+lb*mult+c.x;
+    	(*intersection2).x = x0-lb*mult+c.x;
+    	(*intersection1).y = y0-la*mult+c.y;
+    	(*intersection2).y = y0+la*mult+c.y;
+    	return TRUE;
     }
 }
 
