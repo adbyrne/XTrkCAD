@@ -140,7 +140,7 @@ static DIST_T DistanceNote(track_p t, coOrd * p)
         return d;
     }
 
-    return 100000.0;
+    return DIST_INF;
 }
 
 static void DeleteNote(track_p t)

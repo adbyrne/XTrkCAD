@@ -665,7 +665,7 @@ EXPORT void DrawBoxedString(
 		return;
 #ifndef WINDOWS
 	if ( ( d->options & DC_PRINT) != 0 ) {
-		double scale = ((FLOAT_T)fs)/((FLOAT_T)drawMaxTextFontSize)/72.0;
+		double scale = ((FLOAT_T)fs)/((FLOAT_T)drawMaxTextFontSize)/mainD.dpi;
 		wDrawPix_t w, h, d, a;
 		wDrawGetTextSize( &w, &h, &d, &a, mainD.d, text, fp, drawMaxTextFontSize );
 		size.x = w*scale;
@@ -1803,7 +1803,7 @@ EXPORT void DrawRuler(
 				lastFraction = (((int)((end - lastInch)*16)) / incr) * incr;
 			for ( fraction = firstFraction; fraction<=lastFraction; fraction += incr ) {
 				Translate( &p0, orig, a, inch+fraction/16.0 );
-				Translate( &p1, p0, aa, lengths[fraction]*d->scale/72.0 );
+				Translate( &p1, p0, aa, lengths[fraction]*d->scale/mainD.dpi );
 				d->CoOrd2Pix( d, p0, &x0, &y0 );
 				d->CoOrd2Pix( d, p1, &x1, &y1 );
 				wDrawLine( d->d, x0, y0, x1, y1,
@@ -1846,7 +1846,7 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 	offset = 0.0;
 
-	double blank_zone = 40*d->scale/72.0;
+	double blank_zone = 40*d->scale/mainD.dpi;
 
 	if ( d->orig.x<0.0-blank_zone ) {
 		 p0.y = 0.0; p1.y = mapD.size.y;
@@ -2442,7 +2442,7 @@ EXPORT BOOL_T IsClose(
 		DIST_T d )
 {
 	wDrawPix_t pd;
-	pd = (wDrawPix_t)(d/mainD.scale * 72.0);
+	pd = (wDrawPix_t)(d/mainD.scale * mainD.dpi);
 	return pd <= closePixels;
 }
 

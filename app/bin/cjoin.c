@@ -98,7 +98,7 @@ LOG( log_join, 2, (
 /* 3 - cases: */
 	if (b >= 360.0-connectAngle/2.0 || b <= connectAngle/2.0) {
 /* CASE 1: antiparallel */
-		FindPos( &off, NULL, pos1, pos0, a0, 10000.0 );
+		FindPos( &off, NULL, pos1, pos0, a0, DIST_INF );
 		res->arcR = off.y/2.0;
 		res->arcA1 = 180.0;
 LOG( log_join, 3, ("JwL: parallel: off.y=%0.3f\n", off.y ) )
@@ -112,7 +112,7 @@ LOG( log_join, 3, ("JwL: parallel: off.y=%0.3f\n", off.y ) )
 		}
 	} else if (b >= 180.0-connectAngle/2.0 && b <= 180.0+connectAngle/2.0) {
 /* CASE 2: parallel, possibly colinear? */
-		FindPos( &off, &beyond, pos0, pos1, a0, 100000.0 );
+		FindPos( &off, &beyond, pos0, pos1, a0, DIST_INF );
 LOG( log_join, 3, ("JwL: colinear? off.y=%0.3f\n", off.y ) )
 		if (off.y > -connectDistance && off.y < connectDistance) {
 			res->type = curveTypeStraight;
@@ -1113,7 +1113,7 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			break;
 		case curveTypeStraight:
 			FindPos( &off, &beyond, pos, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
-					 100000 );
+					 DIST_INF );
 			Translate( &Dj.inp[1].pos, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 					   off.x );
 			normalAngle = NormalizeAngle( Dj.inp[1].params.angle +
@@ -1176,7 +1176,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 		switch ( Dj.inp[0].params.type ) {
 		case curveTypeStraight:
 			FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
-					 Dj.inp[0].params.angle, 100000.0 );
+					 Dj.inp[0].params.angle, DIST_INF );
 			if (beyond < 0.0) {
 				InfoMessage(_("Beyond end of 1st track"));
 				goto errorReturn;
@@ -1187,7 +1187,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			break;
 		case curveTypeCurve:
 			if (IsCurveCircle(Dj.inp[0].trk)) {
-				d = 10000.0;
+				d = DIST_INF;
 			} else {
 				a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
 				if (Dj.inp[0].params.ep == 0)
@@ -1219,7 +1219,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			break;
 		case curveTypeCurve:
 			if (IsCurveCircle(Dj.inp[1].trk)) {
-				d = 10000.0;
+				d = DIST_INF;
 			} else {
 				a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
 				if (Dj.inp[1].params.ep == 0)

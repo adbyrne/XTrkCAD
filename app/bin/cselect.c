@@ -2458,7 +2458,7 @@ static void ChangeDescFlag( wBool_t set, void * mode )
 
 track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T show_hidden, BOOL_T * hidden_o)  {
 	 	track_p trk = NULL;
-		DIST_T d, dd = 10000;
+		DIST_T d, dd = DIST_INF;
 		track_p trk1 = NULL;
 		EPINX_T ep1=-1, ep=-1;
 		BOOL_T hidden_t, hidden;

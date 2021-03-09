@@ -263,7 +263,7 @@ DIST_T StraightDescriptionDistance(
 	coOrd p1;
 	if (hidden) *hidden = FALSE;
 	if ( GetTrkType( trk ) != T_STRAIGHT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
-		return 100000;
+		return DIST_INF;
 
 	struct extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
 	ANGLE_T a;

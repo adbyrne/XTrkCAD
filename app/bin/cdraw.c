@@ -467,9 +467,9 @@ static DIST_T DistanceDraw( track_p t, coOrd * p )
 {
 	struct extraDataDraw_t * xx = GET_EXTRA_DATA(t, T_DRAW, extraDataDraw_t);
 	if ( ignoredTableEdge == t && xx->segs[0].type == SEG_TBLEDGE )
-		return 100000.0;
+		return DIST_INF;
 	if ( ignoredDraw == t )
-		return 100000.0;
+		return DIST_INF;
 	return DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, p, NULL );
 }
 
@@ -2142,7 +2142,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 				break;
 			case SEG_POLY:
 			case SEG_FILPOLY:
-				d = 10000.0;
+				d = DIST_INF;
 				DIST_T dd;
 				BOOL_T onPoint = FALSE;
 				BOOL_T closeSeg = FALSE;
