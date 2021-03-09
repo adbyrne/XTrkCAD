@@ -281,7 +281,7 @@ void wWinGetSize(
     }
 
     *width = w;
-    *height = h - BORDERSIZE - ((win->option&F_MENUBAR)?win->menu_height:0);
+    *height = h; //- BORDERSIZE - ((win->option&F_MENUBAR)?win->menu_height:0);
 }
 
 /**

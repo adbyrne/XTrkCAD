@@ -1563,19 +1563,32 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			return;
 		wWinGetSize( mainW, &width, &height );
 		LayoutToolBar(refresh);
-		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
-		if (height >= 0) {
-			wDrawSetSize( mainD.d, width-20, height, refresh );
-			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
-			SetMainSize();
-			SetInfoBar();
-			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
-			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
-			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
-			wPrefSetInteger( "draw", "mainwidth", width );
-			wPrefSetInteger( "draw", "mainheight", height );
-		} else	DrawMapBoundingBox( TRUE );
+        if (mainD.d->fromTemplate) {
+			if (height>=0) {
+				wDrawSetSize( mainD.d, width, height, refresh );
+				SetMainSize();
+				panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+				panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+				LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+				MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
+				wPrefSetInteger( "draw", "m {ainwidth", width );
+				wPrefSetInteger( "draw", "mainheight", height );
+			} else DrawMapBoundingBox( TRUE );
+        } else {
+        	height -= (toolbarHeight+max(infoHeight,textHeight)+10);
+        	if (height >= 0) {
+				wDrawSetSize( mainD.d, width-20, height, refresh );
+				wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
+				SetMainSize();
+				SetInfoBar();
+				panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+				panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+				LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+				MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
+				wPrefSetInteger( "draw", "mainwidth", width );
+				wPrefSetInteger( "draw", "mainheight", height );
+        	} else	DrawMapBoundingBox( TRUE );
+        }
 		break;
 	case wState_e:
 		wPrefSetInteger( "draw", "maximized", wWinIsMaximized(win) );
@@ -2887,12 +2900,21 @@ EXPORT void DrawInit( int initialZoom )
 
 	wWinGetSize( mainW, &w, &h );
 	/*LayoutToolBar();*/
-	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
-	if ( w <= 0 ) w = 1;
-	if ( h <= 0 ) h = 1;
-	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "main-maindraw", BD_TICKS|BO_USETEMPLATE,
+	if (mainW->fromTemplate) {
+		if ( w <= 0 ) w = 1;
+		if ( h <= 0 ) h = 1;
+		tempD.d = mainD.d = wDrawCreate( mainW, 0, 0, "main-maindraw", BD_TICKS|BO_USETEMPLATE,
 												w, h, &mainD,
-				(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
+												(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
+
+	} else {
+		h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
+		if ( w <= 0 ) w = 1;
+		if ( h <= 0 ) h = 1;
+		tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "main-maindraw", BD_TICKS|BO_USETEMPLATE,
+											w, h, &mainD,
+											(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
+	}
 
 	if (initialZoom == 0) {
 		WDOUBLE_T tmpR;
@@ -2941,10 +2963,6 @@ EXPORT void DrawInit( int initialZoom )
 	SetInfoBar();
 	InfoPos( zero );
 	RegisterChangeNotification( DrawChange );
-#ifdef LATER
-	wAttachAccelKey( wAccelKey_Pgup, 0, (wAccelKeyCallBack_p)doZoomUp, NULL );
-	wAttachAccelKey( wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)doZoomDown, NULL );
-#endif
 }
 
 #include "bitmaps/pan.xpm"

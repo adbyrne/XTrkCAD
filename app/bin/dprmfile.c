@@ -78,7 +78,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILTOGGLE	(1)
     {	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (2)
-	{ PD_MESSAGE, "", NULL, 0, (void *)370 },
+	{ PD_MESSAGE, "", "message", 0, (void *)370 },
     {	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 #define I_PRMFILEFAVORITE (4)
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
