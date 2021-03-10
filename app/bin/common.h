@@ -62,7 +62,6 @@
 // DEFINES
 #define UTFCONVERT
 #define M_PI 3.14159265358979323846
-#define DIST_INF 2.0E9
 
 #define F_OK (00)
 #define W_OK (02)
@@ -98,6 +97,8 @@
 #define TRUE	(1)
 #define FALSE	(0)
 #endif
+
+#define DIST_INF 2.0E9
 
 #define NUM_LAYERS		(99)
 
