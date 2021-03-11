@@ -494,13 +494,20 @@ EXPORT BOOL_T ConnectAdjustableTracks(
 	coOrd off;
 	DIST_T beyond;
 
-	xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
-	xx2 = GET_EXTRA_DATA(trk2, T_TURNOUT, extraDataCompound_t);
+	if ((GetTrkType(trk1) != T_TURNOUT) && (GetTrkType(trk2) != T_TURNOUT)) return FALSE;
+
 	adj1 = adj2 = FALSE;
-	if (GetTrkType(trk1) == T_TURNOUT && xx1->special == TOadjustable)
-		adj1 = TRUE;
-	if (GetTrkType(trk2) == T_TURNOUT && xx2->special == TOadjustable)
-		adj2 = TRUE;
+
+	if (GetTrkType(trk1) == T_TURNOUT) {
+		xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
+		if (xx1->special == TOadjustable)
+			adj1 = TRUE;
+	}
+	if (GetTrkType(trk2) == T_TURNOUT) {
+		xx2 = GET_EXTRA_DATA(trk2, T_TURNOUT, extraDataCompound_t);
+		if (xx2->special == TOadjustable)
+			adj2 = TRUE;
+	}
 	if (adj1 == FALSE && adj2 == FALSE)
 		return FALSE;
 	a1 = GetTrkEndAngle( trk1, ep1 );
