@@ -324,7 +324,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 							extension = startDelimiter + 2;
 						}
 					}
-					file = g_realloc( file, strlen(file)+strlen(extension));
+					file = g_realloc( file, strlen(file)+strlen(extension)+1);
 					strcat( file, extension );
 					free( pattern );
 				}
