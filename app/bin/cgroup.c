@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "cselect.h"
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
@@ -1602,6 +1603,7 @@ LOG( log_group, 3, ( "\n" ) );
 					trackCount--;
 				}
 			}
+			SelectRecount();
 			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, path, outputSegs_da.cnt, &outputSegs(0) );
 
 			SetTrkVisible( trk, TRUE );
@@ -1638,6 +1640,7 @@ LOG( log_group, 3, ( "\n" ) );
 					trackCount--;
 				}
 			}
+			SelectRecount();
 			orig.x = - orig.x;
 			orig.y = - orig.y;
 			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, (PATHPTR_T)"", trackSegs_da.cnt, &trackSegs(0) );
