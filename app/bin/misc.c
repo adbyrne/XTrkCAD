@@ -516,7 +516,7 @@ EXPORT void InfoMessage(const char * format, ...) {
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
-	vsprintf(message2, format, ap);
+	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
 	/*InfoSubstituteControl( NULL, NULL );*/
 	if (inError)
@@ -528,7 +528,7 @@ EXPORT void ErrorMessage(const char * format, ...) {
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
-	vsprintf(message2, format, ap);
+	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
 	InfoSubstituteControls( NULL, NULL);
 	SetMessage(message2);
@@ -540,7 +540,7 @@ EXPORT int NoticeMessage(const char * format, const char * yes, const char * no,
 	va_list ap;
 	va_start(ap, no);
 	format = ParseMessage(format);
-	vsprintf(message2, format, ap);
+	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
 	return wNotice(message2, yes, no);
 }
@@ -552,7 +552,7 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
 		return playbackRC;
 	va_start(ap, no);
 	format = ParseMessage(format);
-	vsprintf(message2, format, ap);
+	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
 	return wNoticeEx( NT_INFORMATION, message2, yes, no);
 }
@@ -3062,6 +3062,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	if (!ParamFileListInit())
 		return NULL;
+		// LOG1(log_init, ("!ParamFileListInit()\n"))
 
 	curCommand = describeCmdInx;
 	LOG1(log_init, ( "Reset\n" ))

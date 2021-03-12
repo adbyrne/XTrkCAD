@@ -9,7 +9,7 @@ ORDER=#DRN
 #====================================
 TYPE=passenger
 COUPLERLENGTH=0.5
-PROTO=Passenger, Coach
+PROTO=Jackson & Sharp Coach
 DESC=Jackson & Sharp Coach
 LENGTH=25.5
 WIDTH=5.0
@@ -53,39 +53,39 @@ PART=AM54-016D%Bumble Bee Single Stripe%D&RGW%333
 #====================================
 TYPE=passenger
 COUPLERLENGTH=0.5
-PROTO=Passenger, Combine
+PROTO=Jackson & Sharp Combine
 DESC=Jackson & Sharp Combine
 LENGTH=25.5
 WIDTH=5.0
 #
-PART=AM54-020BX%Combine Bumble Bee Yellow%Undec%Undec
-PART=AM54-020BX%Combine Green%Undec%Undec
-PART=AM54-020RX%Combine Red%Undec%Undec
+PART=AM54-020BX%Bumble Bee Yellow%Undec%Undec
+PART=AM54-020GX%Green%Undec%Undec
+PART=AM54-020RX%Red%Undec%Undec
 #
-PART=AM54-021A%Combine Green%D&RGW%202
-PART=AM54-021B%Combine Green%D&RGW%210
-PART=AM54-021C%Combine Green%D&RGW%214
-PART=AM54-021D%Combine Green%D&RGW%215
+PART=AM54-021A%Green%D&RGW%202
+PART=AM54-021B%Green%D&RGW%210
+PART=AM54-021C%Green%D&RGW%214
+PART=AM54-021D%Green%D&RGW%215
 #
-PART=AM54-022A%Combine Red%RGS%200
-PART=AM54-022B%Combine Red%RGS%201
-PART=AM54-022C%Combine Red%RGS%202
-PART=AM54-022D%Combine Red%RGS%203
+PART=AM54-022A%Red%RGS%200
+PART=AM54-022B%Red%RGS%201
+PART=AM54-022C%Red%RGS%202
+PART=AM54-022D%Red%RGS%203
 #
-PART=AM54-023A%Combine Green%C&S%26
-PART=AM54-023B%Combine Green%C&S%28
-PART=AM54-023C%Combine Green%C&S%29
-PART=AM54-023D%Combine Green%C&S%30
+PART=AM54-023A%Green%C&S%26
+PART=AM54-023B%Green%C&S%28
+PART=AM54-023C%Green%C&S%29
+PART=AM54-023D%Green%C&S%30
 #
-PART=AM54-024A%Combine Red%D&RGW%208
-PART=AM54-024B%Combine Red%D&RGW%209
-PART=AM54-024C%Combine Red%D&RGW%211
-PART=AM54-024D%Combine Red%D&RGW%212
+PART=AM54-024A%Red%D&RGW%208
+PART=AM54-024B%Red%D&RGW%209
+PART=AM54-024C%Red%D&RGW%211
+PART=AM54-024D%Red%D&RGW%212
 #
-PART=AM54-025A%Combine Bumble Bee Double Stripe%D&RGW%212
-PART=AM54-025B%Combine Bumble Bee Double Stripe%D&RGW%214
-PART=AM54-025C%Combine Bumble Bee Double Stripe%D&RGW%240
-PART=AM54-025D%Combine Bumble Bee Double Stripe%D&RGW%242
+PART=AM54-025A%Bumble Bee Double Stripe%D&RGW%212
+PART=AM54-025B%Bumble Bee Double Stripe%D&RGW%214
+PART=AM54-025C%Bumble Bee Double Stripe%D&RGW%240
+PART=AM54-025D%Bumble Bee Double Stripe%D&RGW%242
 #
 # Drop Bottom Gondola ($220.00)
 # STK NO.      RAILROAD
@@ -262,35 +262,35 @@ WIDTH=5.0
 #
 PART=AM32-150x%Long%Undec%Undec
 #
-PART=AM32-151A%Long Westside%WSLC%11
-PART=AM32-151B%Long Westside%WSLC%12
-PART=AM32-151C%Long Westside%WSLC%13
-PART=AM32-151D%Long Westside%WSLC%14
+PART=AM32-151A%Long%WSLC%11
+PART=AM32-151B%Long%WSLC%12
+PART=AM32-151C%Long%WSLC%13
+PART=AM32-151D%Long%WSLC%14
 #
-PART=AM32-152A%Long Westside%WSLC%15
-PART=AM32-152B%Long Westside%WSLC%16
-PART=AM32-152C%Long Westside%WSLC%17
-PART=AM32-152D%Long Westside%WSLC%18
+PART=AM32-152A%Long%WSLC%15
+PART=AM32-152B%Long%WSLC%16
+PART=AM32-152C%Long%WSLC%17
+PART=AM32-152D%Long%WSLC%18
 #
-PART=AM32-153A%Long Westside%WSLC%19
-PART=AM32-153B%Long Westside%WSLC%20
-PART=AM32-153C%Long Westside%WSLC%21
-PART=AM32-153D%Long Westside%WSLC%22
+PART=AM32-153A%Long%WSLC%19
+PART=AM32-153B%Long%WSLC%20
+PART=AM32-153C%Long%WSLC%21
+PART=AM32-153D%Long%WSLC%22
 #
-PART=AM32-154A%Long Swayne%Swayne%51
-PART=AM32-154B%Long Swayne%Swayne%52
-PART=AM32-154C%Long Swayne%Swayne%53
-PART=AM32-154D%Long Swayne%Swayne%54
+PART=AM32-154A%Long%Swayne%51
+PART=AM32-154B%Long%Swayne%52
+PART=AM32-154C%Long%Swayne%53
+PART=AM32-154D%Long%Swayne%54
 #
-PART=AM32-155A%Long Swayne%Swayne%55
-PART=AM32-155B%Long Swayne%Swayne%56
-PART=AM32-155C%Long Swayne%Swayne%57
-PART=AM32-155D%Long Swayne%Swayne%58
+PART=AM32-155A%Long%Swayne%55
+PART=AM32-155B%Long%Swayne%56
+PART=AM32-155C%Long%Swayne%57
+PART=AM32-155D%Long%Swayne%58
 #
-PART=AM32-156A%Long Swayne%Swayne%59
-PART=AM32-156B%Long Swayne%Swayne%60
-PART=AM32-156C%Long Swayne%Swayne%61
-PART=AM32-156D%Long Swayne%Swayne%62
+PART=AM32-156A%Long%Swayne%59
+PART=AM32-156B%Long%Swayne%60
+PART=AM32-156C%Long%Swayne%61
+PART=AM32-156D%Long%Swayne%62
 #
 # Short Logging Car ($100.00)
 # STK NO.      RAILROAD
@@ -304,26 +304,26 @@ WIDTH=5.0
 #
 PART=AM2216-01%Short%Undec%Undec
 #
-PART=AM2216-02%Short Westside%WSLC%35
-PART=AM2216-03%Short Westside%WSLC%36
-PART=AM2216-04%Short Westside%WSLC%37
-PART=AM2216-05%Short Westside%WSLC%41
-PART=AM2216-06%Short Westside%WSLC%42
-PART=AM2216-07%Short Westside%WSLC%43
+PART=AM2216-02%Short%WSLC%35
+PART=AM2216-03%Short%WSLC%36
+PART=AM2216-04%Short%WSLC%37
+PART=AM2216-05%Short%WSLC%41
+PART=AM2216-06%Short%WSLC%42
+PART=AM2216-07%Short%WSLC%43
 #
-PART=AM32-164A%Short Swayne%Swayne%63
-PART=AM32-164B%Short Swayne%Swayne%64
-PART=AM32-164C%Short Swayne%Swayne%65
-PART=AM32-164D%Short Swayne%Swayne%66
+PART=AM32-164A%Short%Swayne%63
+PART=AM32-164B%Short%Swayne%64
+PART=AM32-164C%Short%Swayne%65
+PART=AM32-164D%Short%Swayne%66
 #
-PART=AM32-165A%Short Swayne%Swayne%67
-PART=AM32-165B%Short Swayne%Swayne%68
-PART=AM32-165C%Short Swayne%Swayne%69
-PART=AM32-165D%Short Swayne%Swayne%70
+PART=AM32-165A%Short%Swayne%67
+PART=AM32-165B%Short%Swayne%68
+PART=AM32-165C%Short%Swayne%69
+PART=AM32-165D%Short%Swayne%70
 #
-PART=AM32-166A%Short Swayne%Swayne%71
-PART=AM32-166B%Short Swayne%Swayne%72
-PART=AM32-166C%Short Swayne%Swayne%73
-PART=AM32-166D%Short Swayne%Swayne%74
+PART=AM32-166A%Short%Swayne%71
+PART=AM32-166B%Short%Swayne%72
+PART=AM32-166C%Short%Swayne%73
+PART=AM32-166D%Short%Swayne%74
 #
 # END

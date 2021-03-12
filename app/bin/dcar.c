@@ -573,7 +573,7 @@ static carProto_p CarProtoLookup(
 	proto = LookupListElem( &carProto_da, desc, CmpCarProto, createMissing?sizeof *proto:0 );
 	if ( proto == NULL )
 		return NULL;
-	if ( proto->desc == NULL ) {
+	if ( createMissing && proto->desc == NULL ) {
 		proto->desc = MyStrdup(desc);
 		proto->contentsLabel = "Car Prototype";
 		proto->paramFileIndex = PARAM_LAYOUT;
@@ -587,8 +587,9 @@ static carProto_p CarProtoLookup(
 		CloneFilledDraw( proto->segCnt, proto->segPtr, FALSE );
 		GetSegBounds( zero, 0.0, proto->segCnt, proto->segPtr, &proto->orig, &proto->size );
 		carProtoListChanged = TRUE;
+		return proto;
 	}
-	return proto;
+	return NULL;
 }
 
 enum paramFileState

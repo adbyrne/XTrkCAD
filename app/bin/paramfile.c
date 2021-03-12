@@ -265,7 +265,7 @@ bool ReadParams(
 	checkSummed = FALSE;
 	BOOL_T skip = false;
 	int skipLines = 0;
-	while (paramFile && (fgets(paramLine, 256, paramFile)) != NULL) {
+	while (paramFile && (fgets(paramLine, 1024, paramFile)) != NULL) {
 		paramLineNum++;
 		Stripcr(paramLine);
 		if (strncmp(paramLine, "CHECKSUM ", 9) == 0) {
