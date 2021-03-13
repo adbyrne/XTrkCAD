@@ -581,6 +581,7 @@ EXPORT void MovePlaybackCursor(
 	if (!direct)
 		MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
 	wBool_t ret = wDrawSetTempMode( d->d, TRUE );
+	DoCurCommand( C_REDRAW, zero );
 	MacroDrawBitMap( MOVE_PLYBCK1, arrow0_bm, x, y, wDrawColorBlack );
 	MacroDrawBitMap( MOVE_PLYBCK2, arrow3_bm, x, y, rightDragColor );
 
