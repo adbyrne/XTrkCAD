@@ -62,7 +62,7 @@ void
 ConvertUTF8ToSystem(unsigned char *in)
 {
 	if (wIsUTF8(in)) {
-		unsigned cnt = strlen(in) * 2 + 1;
+		unsigned cnt = strlen(in) * 2 + 2;
 		unsigned char *out = MyMalloc(cnt);
 		wUTF8ToSystem(in, out, cnt);
 		strcpy(in, out);
