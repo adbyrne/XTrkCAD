@@ -71,7 +71,6 @@ double NormalizeAngle( double a )
 {
 	while (a<0.0) a += 360.0;
 	while (a>=360.0) a -= 360.0;
-	if ( a > 360.0-EPSILON ) a = 0.0;
 	return a;
 }
 
@@ -148,14 +147,9 @@ void Translate( coOrd *res, coOrd orig, double a, double d )
 double FindAngle( coOrd p0, coOrd p1 )
 {
 	double dx = p1.x-p0.x, dy = p1.y-p0.y;
-	if (small(dx)) {
-		if (dy >=0) return 0.0;
-		else return 180.0;
-	}
-	if (small(dy)) {
-		if (dx >=0) return 90.0;
-		else return 270.0;
-	}
+	if ( dx == 0.0 && dy == 0.0 )
+		// Avoid implementation defined behavior
+		return 0.0;
 	return R2D(atan2( dx,dy ));
 }
 
