@@ -357,8 +357,12 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 	if (!ReadStream( stream, &trk, sizeof trk ))
 		return FALSE;
 	if (needRedo) {
-		if (!WriteObject( &redoStream, op, trk ))
+		bFreeTrack = TRUE;	// Suppress message in GetTrkExtraData about accessing deleted tracks
+		if (!WriteObject( &redoStream, op, trk )) {
+			bFreeTrack = FALSE;
 			return FALSE;
+		}
+		bFreeTrack = FALSE;
 	}
 	if (!ReadStream( stream, &tempTrk, sizeof tempTrk ))
 		return FALSE;

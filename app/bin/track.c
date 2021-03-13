@@ -101,7 +101,7 @@ static BOOL_T inDrawTracks;
 
 static wBool_t bWriteEndPtDirectIndex = FALSE;
 
-static wBool_t bFreeTrack = FALSE;
+EXPORT wBool_t bFreeTrack = FALSE;
 
 #ifndef TRACKDEP
 
@@ -396,6 +396,7 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 		// - ClearTracks to remove all tracks
 		// - DoRegression to remove expected track
 		// - UndoStart / UndoDelete
+		// Or cundo.c/ReadObject when saving a possibly deleted track to Redo stream
 		// Anywhere else: needs investigation
 		if ( bFreeTrack == FALSE )
 			printf( "GetExtraData T%d is deleted!\n", trk->index );
