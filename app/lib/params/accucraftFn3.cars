@@ -93,7 +93,7 @@ PART=AM54-025D%Bumble Bee Double Stripe%D&RGW%242
 TYPE=freight
 COUPLERLENGTH=0.5
 PROTO=Gondola, Drop Bottom
-DESC=Drop Bottom Gondola
+DESC=Drop-Bottom Gondola
 LENGTH=21.75
 WIDTH=5.5
 #
@@ -228,7 +228,7 @@ PART=AM20-308D%Black%EBT%946
 #====================================
 TYPE=freight
 COUPLERLENGTH=0.5
-PROTO=Tank Car
+PROTO=Framed Tank Car
 DESC=Tank Car
 LENGTH=19.5
 WIDTH=5.0
@@ -255,7 +255,7 @@ PART=AM31-450D%Associated Oil Co Silver%%1004
 #====================================
 TYPE=freight
 COUPLERLENGTH=0.5
-PROTO=Logging Car
+PROTO=Long Logging Car
 DESC=Logging Car
 LENGTH=23.5
 WIDTH=5.0
@@ -297,7 +297,7 @@ PART=AM32-156D%Long%Swayne%62
 #====================================
 TYPE=freight
 COUPLERLENGTH=0.5
-PROTO=Logging Car
+PROTO=Short Logging Car
 DESC=Logging Car
 LENGTH=19.0
 WIDTH=5.0

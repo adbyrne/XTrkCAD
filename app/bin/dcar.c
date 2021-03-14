@@ -4075,10 +4075,10 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			}
 			if ( len > 0 ) {
 				if ( itemP->data.notes )
-					itemP->data.notes = MyRealloc( itemP->data.notes, (len+2) * sizeof(wchar_t) );
+					itemP->data.notes = MyRealloc( itemP->data.notes, len+2 );
 				else
-					itemP->data.notes = MyMalloc( (len+2) * sizeof(wchar_t) );
-				itemP->data.notes = (char*)MyMalloc( (len+2) * sizeof(wchar_t) );
+					itemP->data.notes = MyMalloc( len+2 );
+				// itemP->data.notes = (char*)MyMalloc( len+2 );
 				wTextGetText( (wText_p)carDlgPLs[I_CD_NOTES].control, itemP->data.notes, len );
 				if ( itemP->data.notes[len-1] != '\n' ) {
 					itemP->data.notes[len] = '\n';
@@ -4892,7 +4892,7 @@ static int CarInvImportCsv(
 				&dim, wDrawFindColor(color),
 				purchPrice, currPrice, condition, purchDate, srvcDate );
 		if ( tabs[M_NOTES].len > 0 ) {
-			item->data.notes = cp = MyMalloc( (tabs[M_NOTES].len+1) * sizeof(wchar_t) );
+			item->data.notes = cp = MyMalloc( (tabs[M_NOTES].len+2) );
 			for ( cq=tabs[M_NOTES].ptr,len=tabs[M_NOTES].len; *cq&&len; ) {
 				if ( strncmp( cq, "<NL>", 4 ) == 0 ) {
 					*cp++ = '\n';
