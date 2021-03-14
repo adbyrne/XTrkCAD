@@ -573,7 +573,7 @@ static carProto_p CarProtoLookup(
 	proto = LookupListElem( &carProto_da, desc, CmpCarProto, createMissing?sizeof *proto:0 );
 	if ( proto == NULL )
 		return NULL;
-	if ( createMissing && proto->desc == NULL ) {
+	if ( proto->desc == NULL ) {
 		proto->desc = MyStrdup(desc);
 		proto->contentsLabel = "Car Prototype";
 		proto->paramFileIndex = PARAM_LAYOUT;
@@ -587,9 +587,9 @@ static carProto_p CarProtoLookup(
 		CloneFilledDraw( proto->segCnt, proto->segPtr, FALSE );
 		GetSegBounds( zero, 0.0, proto->segCnt, proto->segPtr, &proto->orig, &proto->size );
 		carProtoListChanged = TRUE;
-		return proto;
+		// return proto;
 	}
-	return NULL;
+	return proto;
 }
 
 enum paramFileState
@@ -4075,10 +4075,10 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			}
 			if ( len > 0 ) {
 				if ( itemP->data.notes )
-					itemP->data.notes = MyRealloc( itemP->data.notes, len+2 );
+					itemP->data.notes = MyRealloc( itemP->data.notes, (len+2) * sizeof(wchar_t) );
 				else
-					itemP->data.notes = MyMalloc( len+2 );
-				itemP->data.notes = (char*)MyMalloc( len+2 );
+					itemP->data.notes = MyMalloc( (len+2) * sizeof(wchar_t) );
+				itemP->data.notes = (char*)MyMalloc( (len+2) * sizeof(wchar_t) );
 				wTextGetText( (wText_p)carDlgPLs[I_CD_NOTES].control, itemP->data.notes, len );
 				if ( itemP->data.notes[len-1] != '\n' ) {
 					itemP->data.notes[len] = '\n';
@@ -4892,7 +4892,7 @@ static int CarInvImportCsv(
 				&dim, wDrawFindColor(color),
 				purchPrice, currPrice, condition, purchDate, srvcDate );
 		if ( tabs[M_NOTES].len > 0 ) {
-			item->data.notes = cp = MyMalloc( tabs[M_NOTES].len+1 );
+			item->data.notes = cp = MyMalloc( (tabs[M_NOTES].len+1) * sizeof(wchar_t) );
 			for ( cq=tabs[M_NOTES].ptr,len=tabs[M_NOTES].len; *cq&&len; ) {
 				if ( strncmp( cq, "<NL>", 4 ) == 0 ) {
 					*cp++ = '\n';
