@@ -900,7 +900,7 @@ static roadnameMap_p LoadRoadnameList(
 
 	cmp_key.name = roadnameTab->ptr;
 	cmp_key.len = roadnameTab->len;
-	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof roadnameMapP );
+	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof (roadnameMap_t) );
 	if ( roadnameMapP->roadname == NULL ) {
 		roadnameMapP->roadname = TabStringDup(roadnameTab);
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
