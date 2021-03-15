@@ -37,6 +37,10 @@
 #include "track.h"
 #include "common-ui.h"
 
+#include <inttypes.h>
+
+#include <stdint.h>
+
 #define DEFAULT_SCALE ("N")
 
 
@@ -159,16 +163,85 @@ extern wBool_t wDrawDoTempDraw;
  *
  */
 
-EXPORT long totalMallocs = 0;
-EXPORT long totalMalloced = 0;
-EXPORT long totalRealloced = 0;
-EXPORT long totalReallocs = 0;
-EXPORT long totalFreeed = 0;
-EXPORT long totalFrees = 0;
+EXPORT long long totalMallocs = 0;
+EXPORT long long totalMalloced = 0;
+EXPORT long long totalRealloced = 0;
+EXPORT long long totalReallocs = 0;
+EXPORT long long totalFreeed = 0;
+EXPORT long long totalFrees = 0;
+
+static void * StorageLog;
+
+typedef struct slog_t {
+	void * storage_p;
+	size_t storage_size;
+	BOOL_T freed;
+} slog_t, * slog_p;
+
+static int StorageLogCurrent = 0;
+
+
+#define LOG_SIZE 1000000
+
 
 static unsigned long guard0 = 0xDEADBEEF;
 static unsigned long guard1 = 0xAF00BA8A;
 static int log_malloc;
+
+static void RecordMalloc(void * p, size_t size) {
+
+
+	if (!StorageLog) StorageLog = malloc(sizeof(slog_t)*LOG_SIZE);
+	slog_p log_p = StorageLog;
+	if (StorageLogCurrent<LOG_SIZE) {
+		log_p[StorageLogCurrent].storage_p = p;
+		log_p[StorageLogCurrent].storage_size = size;
+		StorageLogCurrent++;
+	} else {
+		printf("Storage Log size exceeded, wrapped\n");
+		log_p[0].storage_p = p;
+		log_p[0].storage_size = size;
+		StorageLogCurrent = 1;
+	}
+}
+
+static void RecordMyFree(void *p) {
+	slog_p log_p = StorageLog;
+	if (log_p) {
+		for (int i=0;i<StorageLogCurrent;i++) {
+			if (!log_p[i].freed && log_p[i].storage_p == p) {
+				log_p[i].freed = TRUE;
+			}
+		}
+	}
+}
+
+EXPORT BOOL_T TestMallocs() {
+	size_t oldSize;
+	long long testedMallocs = 0;
+	void * old;
+	slog_p log_p = StorageLog;
+	BOOL_T rc = TRUE;
+	if (log_p) {
+		for (int i=0;i<StorageLogCurrent;i++) {
+			if (log_p[i].freed) continue;
+			old = log_p[i].storage_p;
+			oldSize = log_p[i].storage_size;
+			if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
+				printf("Guard 0 hosed, 0x%.12" PRIxPTR "\n", (uintptr_t)old);
+			  rc = FALSE;
+			}
+			if (*(unsigned long*) ((char*) old + oldSize) != guard1) {
+				printf("Guard 1 hosed, 0x%.12" PRIxPTR "\n", (uintptr_t)old);
+				rc = FALSE;
+			}
+			testedMallocs++;
+		}
+	}
+	printf("Tested: %llu Mallocs: %llu Total Malloced: %llu Freed: %llu Total Freed: %llu \n", testedMallocs, totalMallocs, totalMalloced, totalFrees, totalFreeed);
+	return rc;
+}
+
 
 EXPORT void * MyMalloc(long size) {
 	void * p;
@@ -186,6 +259,8 @@ EXPORT void * MyMalloc(long size) {
 	p = (char*) p + sizeof(unsigned long);
 	*(unsigned long*) ((char*) p + size) = guard1;
 	memset(p, 0, (size_t )size);
+	if (extraButtons)
+		RecordMalloc(p,size);
 	return p;
 }
 
@@ -235,6 +310,8 @@ EXPORT void MyFree(void * ptr) {
 				("Free %d at %lx (%lx-%lx)\n", oldSize, (long)ptr, (long)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0), (long)((char*)ptr+oldSize+sizeof *(long*)0)))
 		totalFreeed += oldSize;
 		free((char*) ptr - sizeof *(long*) 0 - sizeof *(size_t*) 0);
+		if (extraButtons)
+			RecordMyFree(ptr);
 	}
 }
 
@@ -2050,6 +2127,9 @@ static int debugCnt = 0;
 static paramIntegerRange_t r0_100 = { 0, 100, 80 };
 static void DebugOk(void * junk);
 static paramData_t debugPLs[30];
+static paramData_t p0[] = {
+	{ PD_BUTTON, (void*)TestMallocs, "test", PDO_DLGHORZ, NULL, N_("Test Mallocs") }
+	};
 static long debug_values[30];
 static int debug_index[30];
 
@@ -2063,7 +2143,7 @@ static void DebugOk(void * junk) {
 }
 
 static void CreateDebugW(void) {
-	debugPG.paramCnt = debugCnt;
+	debugPG.paramCnt = debugCnt+1;
 	ParamRegister(&debugPG);
 	debugW = ParamCreateDialog(&debugPG, MakeWindowTitle(_("Debug")), _("Ok"),
 			DebugOk, wHide, FALSE, NULL, 0, NULL);
@@ -2073,6 +2153,7 @@ static void CreateDebugW(void) {
 EXPORT void DebugInit(void) {
 
 	if (!debugW) {
+		debugPLs[0] = p0[0];
 		BOOL_T default_line = FALSE;
 		debugCnt = 0;    //Reset to start building the dynamic dialog over again
 		int i = 0;
@@ -2092,6 +2173,7 @@ EXPORT void DebugInit(void) {
 				}
 			}
 		}
+
 		//ParamCreateControls( &debugPG, NULL );
 		CreateDebugW();
 	}
@@ -2101,14 +2183,14 @@ EXPORT void DebugInit(void) {
 
 
 EXPORT void InitDebug(const char * label, long * valueP) {
-	if (debugCnt >= sizeof debugPLs / sizeof debugPLs[0])
+	if (debugCnt+1 >= sizeof debugPLs / sizeof debugPLs[0])
 		AbortProg("Too many debug flags");
-	memset(&debugPLs[debugCnt], 0, sizeof debugPLs[debugCnt]);
-	debugPLs[debugCnt].type = PD_LONG;
-	debugPLs[debugCnt].valueP = valueP;
-	debugPLs[debugCnt].nameStr = label;
-	debugPLs[debugCnt].winData = &r0_100;
-	debugPLs[debugCnt].winLabel = label;
+	memset(&debugPLs[debugCnt+1], 0, sizeof debugPLs[debugCnt]);
+	debugPLs[debugCnt+1].type = PD_LONG;
+	debugPLs[debugCnt+1].valueP = valueP;
+	debugPLs[debugCnt+1].nameStr = label;
+	debugPLs[debugCnt+1].winData = &r0_100;
+	debugPLs[debugCnt+1].winLabel = label;
 	debugCnt++;
 }
 
