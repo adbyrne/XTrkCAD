@@ -4075,10 +4075,10 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			}
 			if ( len > 0 ) {
 				if ( itemP->data.notes )
-					itemP->data.notes = MyRealloc( itemP->data.notes, len+2 );
+					itemP->data.notes = MyRealloc( itemP->data.notes, (len+2) * sizeof(wchar_t) );
 				else
-					itemP->data.notes = MyMalloc( len+2 );
-				// itemP->data.notes = (char*)MyMalloc( len+2 );
+					itemP->data.notes = MyMalloc( (len+2) * sizeof(wchar_t) );
+				// itemP->data.notes = (char*)MyMalloc( (len+2) * sizeof(wchar_t) );
 				wTextGetText( (wText_p)carDlgPLs[I_CD_NOTES].control, itemP->data.notes, len );
 				if ( itemP->data.notes[len-1] != '\n' ) {
 					itemP->data.notes[len] = '\n';
