@@ -49,7 +49,7 @@
 
 EXPORT dynArr_t paramProc_da;
 
-/*#define TIME_READTRACKFILE*/
+/* #define TIME_READTRACKFILE */
 
 #define COPYBLOCKSIZE	1024
 
@@ -948,7 +948,7 @@ int LoadTracks(
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
 		time1 = wGetTimer();
-		printf( "time= %ld ms \n", time1-time0 );
+		LogPrintf( "time= %ld ms \n", time1-time0 );
 #endif
 		RecomputeElevations();
 		AttachTrains();
