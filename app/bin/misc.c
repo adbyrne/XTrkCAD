@@ -216,6 +216,8 @@ static void RecordMyFree(void *p) {
 	}
 }
 
+#define SLOG_FMT "0x%.12" PRIxPTR
+
 EXPORT BOOL_T TestMallocs() {
 	size_t oldSize;
 	long long testedMallocs = 0;
@@ -228,17 +230,18 @@ EXPORT BOOL_T TestMallocs() {
 			old = log_p[i].storage_p;
 			oldSize = log_p[i].storage_size;
 			if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
-				printf("Guard 0 hosed, 0x%.12" PRIxPTR "\n", (uintptr_t)old);
+				LogPrintf("Guard 0 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
 			  rc = FALSE;
 			}
 			if (*(unsigned long*) ((char*) old + oldSize) != guard1) {
-				printf("Guard 1 hosed, 0x%.12" PRIxPTR "\n", (uintptr_t)old);
+				LogPrintf("Guard 1 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
 				rc = FALSE;
 			}
 			testedMallocs++;
 		}
 	}
-	printf("Tested: %llu Mallocs: %llu Total Malloced: %llu Freed: %llu Total Freed: %llu \n", testedMallocs, totalMallocs, totalMalloced, totalFrees, totalFreeed);
+	LogPrintf("Tested: %llu Mallocs: %llu Total Malloced: %llu Freed: %llu Total Freed: %llu \n",
+			testedMallocs, totalMallocs, totalMalloced, totalFrees, totalFreeed);
 	return rc;
 }
 
@@ -252,7 +255,11 @@ EXPORT void * MyMalloc(long size) {
 		AbortProg("No memory");
 
 	LOG1(log_malloc,
-			( "Malloc(%ld) = %lx (%lx-%lx)\n", size, (long)((char*)p+sizeof (size_t) + sizeof (unsigned long)), (long)p, (long)((char*)p+size+sizeof (size_t) + 2 * sizeof(unsigned long)) ));
+			( "  Malloc(%ld) = " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
+			size, (size_t)((char*)p+sizeof (size_t) + sizeof (unsigned long)),
+			(size_t)p,
+			(size_t)((char*)p+size+sizeof (size_t) + 2 * sizeof(unsigned long))));
+
 	*(size_t*) p = (size_t) size;
 	p = (char*) p + sizeof(size_t);
 	*(unsigned long*) p = guard0;
@@ -278,7 +285,9 @@ EXPORT void * MyRealloc(void * old, long size) {
 	if (*(unsigned long*) ((char*) old + oldSize) != guard1) {
 		AbortProg("Guard1 is hosed");
 	}
-	LOG1(log_malloc, ("Realloc(%lx,%ld) was %d\n", (long)old, size, oldSize ))
+
+	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size, oldSize ))
+
 	if ((long) oldSize == size) {
 		return old;
 	}
@@ -306,8 +315,14 @@ EXPORT void MyFree(void * ptr) {
 		if (*(unsigned long*) ((char*) ptr + oldSize) != guard1) {
 			AbortProg("Guard1 is hosed");
 		}
+
 		LOG1(log_malloc,
-				("Free %d at %lx (%lx-%lx)\n", oldSize, (long)ptr, (long)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0), (long)((char*)ptr+oldSize+sizeof *(long*)0)))
+				("  Free %d at " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
+						oldSize,
+						(size_t)ptr,
+						(size_t)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0),
+						(size_t)((char*)ptr+oldSize+sizeof *(long*)0)));
+
 		totalFreeed += oldSize;
 		free((char*) ptr - sizeof *(long*) 0 - sizeof *(size_t*) 0);
 		if (extraButtons)
