@@ -38,7 +38,7 @@ static char *lastErrorMessage;		/**< store last message from FreeImage */
 static void 
 HandleFreeImageError(FREE_IMAGE_FORMAT fif, const char *message) 
 {
-	unsigned totalLength = strlen(message) + 1;
+	size_t totalLength = strlen(message) + 1;
 
 	if (fif != FIF_UNKNOWN) {
 		totalLength += strlen(FreeImage_GetFormatFromFIF(fif)) + strlen(ERRORPUNCTUATION);

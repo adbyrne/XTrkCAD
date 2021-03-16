@@ -62,7 +62,7 @@ struct wText_t {
 void wTextClear(
     wText_p b)
 {
-    long rc;
+    LRESULT rc;
     rc = SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)0, (LPARAM)0);
     rc = SendMessage(b->hWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1);
     rc = SendMessage(b->hWnd, WM_CLEAR, (WPARAM)0, (LPARAM)0);
@@ -91,7 +91,7 @@ void wTextAppend(
     char *buffer;
     char *extText;
     int textSize;
-    int len = strlen(text);
+    size_t len = strlen(text);
 
     if (!len) {
         return;
@@ -360,7 +360,7 @@ void wTextSetPosition(
     wText_p bt,
     int pos)
 {
-    long rc;
+    LRESULT rc;
     rc = SendMessage(bt->hWnd, EM_LINESCROLL, (WPARAM)0, (LPARAM)MAKELONG(-65535, 0));
 }
 
@@ -410,7 +410,7 @@ wText_p wTextCreate(
     b->hWnd = CreateWindow("EDIT", NULL,
                            style, b->x, b->y,
                            width, height,
-                           ((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL);
+                           ((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL);
 
     if (b->hWnd == NULL) {
         mswFail("CreateWindow(TEXT)");

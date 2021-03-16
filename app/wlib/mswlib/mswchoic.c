@@ -147,7 +147,7 @@ LRESULT FAR PASCAL _export pushChoiceItem(
 		LPARAM lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
@@ -191,7 +191,7 @@ LRESULT choiceItemProc(
 			for (rest = (wChoiceItem_p*)bc->buttList; *rest; rest++ ) {
 				switch (bc->type) {
 				case B_TOGGLE:
-					num = rest-(wChoiceItem_p*)bc->buttList;
+					num = (int)(rest-(wChoiceItem_p*)bc->buttList);
 					if (*rest == me) {
 						bc->oldVal ^= (1L<<num);
 					}
@@ -203,7 +203,7 @@ LRESULT choiceItemProc(
 					if (*rest != me) {
 						SendMessage( (*rest)->hWnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0 );
 					} else {
-						bc->oldVal = rest-(wChoiceItem_p*)bc->buttList;
+						bc->oldVal = (long)(rest-(wChoiceItem_p*)bc->buttList);
 						SendMessage( (*rest)->hWnd, BM_SETCHECK, (WPARAM)1, (LPARAM)0 );
 					}
 					break;
@@ -274,7 +274,7 @@ static wChoice_p choiceCreate(
 	int bs;
 	HDC hDc;
 	HWND hButt;
-	int lab_l;
+	size_t lab_l;
 	DWORD dw;
 	int w, maxW;
 	int pw, ph;
@@ -316,7 +316,7 @@ static wChoice_p choiceCreate(
 			(*butts)->hWnd = hButt = CreateWindow( "BUTTON", (*butts)->labelStr,
 						bs | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x+pw, b->y+ph,
 						80, CHOICE_HEIGHT,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+						((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 			if ( hButt == (HWND)0 ) {
 				mswFail( "choiceCreate button" );
 				return b;
@@ -331,7 +331,7 @@ static wChoice_p choiceCreate(
 			lab_l = strlen((*butts)->labelStr);
 			
 			if (!mswThickFont) {hFont = SelectObject( hDc, mswLabelFont );}
-			dw = GetTextExtent( hDc, (char *)((*butts)->labelStr), lab_l );
+			dw = GetTextExtent( hDc, (char *)((*butts)->labelStr), (UINT)lab_l );
 			if (!mswThickFont) {SelectObject( hDc, hFont );}
 		
 			w = LOWORD(dw) + CHOICE_MIN_WIDTH; 

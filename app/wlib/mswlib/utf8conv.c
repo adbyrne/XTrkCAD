@@ -43,7 +43,7 @@
 bool
 wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength)
 {
-    unsigned int cnt = 2 * (strlen(inString) + 1);
+    unsigned int cnt = 2 * (unsigned int)(strlen(inString) + 1);
     char *tempBuffer = malloc(cnt);
 
     // convert to wide character (UTF16)
@@ -81,7 +81,7 @@ wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength)
 bool
 wUTF8ToSystem(const char *inString, char *outString, unsigned outStringLength)
 {
-    unsigned int cnt = 2 * (strlen(inString) + 1);
+    unsigned int cnt = 2 * (int)(strlen(inString) + 1);
     char *tempBuffer = malloc(cnt);
 
     // convert to wide character (UTF16)

@@ -134,10 +134,10 @@ static wWin_p winFirst, winLast;
 
 static long count51 = 0;
 
-static UINT alarmTimer;
-static UINT pauseTimer;
-static UINT balloonHelpTimer = (UINT)0;
-static UINT triggerTimer;
+static UINT_PTR alarmTimer;
+static UINT_PTR pauseTimer;
+static UINT_PTR balloonHelpTimer = (UINT_PTR)0;
+static UINT_PTR triggerTimer;
 
 static UINT balloonHelpTimeOut = 500;
 static wControl_p balloonHelpButton = NULL;
@@ -249,8 +249,8 @@ static void doDumpControls(void)
         b = controlMap(inx).b;
 
         if (b) {
-            fprintf(dumpControlsF, "[%0.3d] [%x] %s %s %s\n", inx,
-                    (unsigned int)b->hWnd,
+            fprintf(dumpControlsF, "[%0.3d] [%p] %s %s %s\n", inx,
+                    b->hWnd,
                     (b->type>=0&&b->type<=B_BOX?controlNames[b->type]:"NOTYPE"),
                     (b->labelStr?b->labelStr:"<NULL>"),
                     (b->helpStr?b->helpStr:"<NULL>"));
@@ -301,7 +301,7 @@ void mswRepaintLabel(HWND hWnd, wControl_p b)
         LABELFONTSELECT
         newBrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
         oldBrush = SelectObject(hDc, newBrush);
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, strlen(b->labelStr));
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, (int)(strlen(b->labelStr)));
         rect.left = b->labelX;
         rect.top = b->labelY;
         rect.right = b->labelX + LOWORD(dw);
@@ -311,7 +311,7 @@ void mswRepaintLabel(HWND hWnd, wControl_p b)
         /*SetBkMode( hDc, OPAQUE );*/
         SetBkColor(hDc, GetSysColor(COLOR_BTNFACE));
 
-        if (!TextOut(hDc, b->labelX, b->labelY, b->labelStr, strlen(b->labelStr))) {
+        if (!TextOut(hDc, b->labelX, b->labelY, b->labelStr, (int)(strlen(b->labelStr)))) {
             mswFail("Repainting text label");
         }
 
@@ -401,14 +401,14 @@ void mswComputePos(
     b->labelY = b->y+2;
 
     if (b->labelStr) {
-        int lab_l;
+        size_t lab_l;
         HDC hDc;
         DWORD dw;
         LABELFONTDECL
         hDc = GetDC(w->hWnd);
         LABELFONTSELECT
         lab_l = strlen(b->labelStr);
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, lab_l);
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, (UINT)lab_l);
         b->labelX -= LOWORD(dw) + 5;
         LABELFONTRESET
         ReleaseDC(w->hWnd, hDc);
@@ -555,7 +555,7 @@ void mswSetFocus(
         b->parent->focusChainNext = b;
     }
 }
-
+
 /*
  ******************************************************************************
  *
@@ -1091,7 +1091,7 @@ int mswTranslateAccelerator(
         return FALSE;
     }
 
-    acclKey = pMsg->wParam;
+    acclKey = (long)pMsg->wParam;
     b = getControlFromCursor(pMsg->hwnd, &win);
 
     if (win == NULL) {
@@ -1676,14 +1676,14 @@ const char * wControlGetHelp(wControl_p b)
 
 wWinPix_t wLabelWidth(const char * labelStr)
 {
-    int lab_l;
+    size_t lab_l;
     HDC hDc;
     DWORD dw;
     LABELFONTDECL
     hDc = GetDC(mswHWnd);
     lab_l = strlen(labelStr);
     LABELFONTSELECT
-    dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, lab_l);
+    dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, (UINT)lab_l);
     LABELFONTRESET
     ReleaseDC(mswHWnd, hDc);
     return LOWORD(dw) + 5;
@@ -1727,14 +1727,14 @@ void wControlSetPos(
     b->labelY = y+2;
 
     if (b->labelStr) {
-        int lab_l;
+        size_t lab_l;
         HDC hDc;
         DWORD dw;
         LABELFONTDECL
         hDc = GetDC(b->parent->hWnd);
         LABELFONTSELECT
         lab_l = strlen(b->labelStr);
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, lab_l);
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, (UINT)lab_l);
         b->labelX -= LOWORD(dw) + 5;
         LABELFONTRESET
         ReleaseDC(b->parent->hWnd, hDc);
@@ -1764,14 +1764,14 @@ void wControlSetLabel(
     if (b->type == B_RADIO ) {
         ;
     } else {
-        int lab_l;
+        size_t lab_l;
         HDC hDc;
         DWORD dw;
         LABELFONTDECL
         hDc = GetDC(b->parent->hWnd);
         lab_l = strlen(labelStr);
         LABELFONTSELECT
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, lab_l);
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, (UINT)lab_l);
         LABELFONTRESET
         b->labelX = b->x - LOWORD(dw) - 5;
         ReleaseDC(b->parent->hWnd, hDc);
@@ -1862,7 +1862,7 @@ void wMessage(
     Rectangle(hDc, 0, h, w->w, h);
     SetROP2(hDc, oldRop);
     LABELFONTSELECT
-    TextOut(hDc, 0, h, msg, strlen(msg));
+    TextOut(hDc, 0, h, msg, (int)(strlen(msg)));
     LABELFONTRESET
     ReleaseDC(w->hWnd, hDc);
 }
@@ -1880,7 +1880,7 @@ unsigned wOpenFileExternal(char *file)
 
 	res = ShellExecute(mswHWnd, "open", file, NULL, NULL, SW_SHOW);
 
-	if ((int)res <= 32) {
+	if ((UINT_PTR)res <= 32) {
 		wNoticeEx(NT_ERROR, "Error when opening file!", "Cancel", NULL);
 		return(FALSE);
 	}
@@ -2211,7 +2211,7 @@ void doHelpMenu(void * context)
     }
 
 	const char * topic;
-    switch ((int)(long)context) {
+    switch ((int)(INT_PTR)context) {
     case 1: /* Contents */
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOC, (DWORD_PTR)NULL);
         break;
@@ -2318,7 +2318,7 @@ void startBalloonHelp(void)
             int w, h;
             hDc = GetDC(balloonHelpHWnd);
             hFont = SelectObject(hDc, mswLabelFont);
-            extent = GetTextExtent(hDc, CAST_AWAY_CONST hs, strlen(hs));
+            extent = GetTextExtent(hDc, CAST_AWAY_CONST hs, (int)(strlen(hs)));
             w = LOWORD(extent);
             h = HIWORD(extent);
             pt.x = 0;
@@ -2344,7 +2344,7 @@ void startBalloonHelp(void)
             SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
                          SWP_SHOWWINDOW|SWP_NOACTIVATE);
             SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
-            TextOut(hDc, 2, 1, hs, strlen(hs));
+            TextOut(hDc, 2, 1, hs, (int)(strlen(hs)));
             SelectObject(hDc, hFont);
             ReleaseDC(balloonHelpHWnd, hDc);
         }
@@ -2379,7 +2379,7 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
         int w, h;
         hDc = GetDC(balloonHelpHWnd);
         hFont = SelectObject(hDc, mswLabelFont);
-        extent = GetTextExtent(hDc, CAST_AWAY_CONST msg, strlen(msg));
+        extent = GetTextExtent(hDc, CAST_AWAY_CONST msg, (int)(strlen(msg)));
         w = LOWORD(extent);
         h = HIWORD(extent);
 
@@ -2406,7 +2406,7 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
         SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
                      SWP_SHOWWINDOW|SWP_NOACTIVATE);
         SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
-        TextOut(hDc, 2, 1, msg, strlen(msg));
+        TextOut(hDc, 2, 1, msg, (int)(strlen(msg)));
         SelectObject(hDc, hFont);
         ReleaseDC(balloonHelpHWnd, hDc);
         balloonHelpState = balloonHelpShow;
@@ -2620,7 +2620,7 @@ struct wFilSel_t * wFilSelCreate(
 {
     char * cp;
     struct wFilSel_t * ret;
-    int len;
+    size_t len;
     ret = (struct wFilSel_t*)malloc(sizeof *ret);
     ret->parent = parent;
     ret->mode = mode;
@@ -2678,7 +2678,7 @@ const char * wMemStats(void)
             ", Unknown Heap Status");
     return msg;
 }
-
+
 /*
  *****************************************************************************
  *
@@ -3486,5 +3486,5 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
         HtmlHelp(NULL, NULL, HH_UNINITIALIZE, (DWORD)dwCookie);
     }
 
-    return msg.wParam;
+    return (int)msg.wParam;
 }
