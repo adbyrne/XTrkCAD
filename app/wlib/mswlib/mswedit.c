@@ -73,7 +73,7 @@ LRESULT FAR PASCAL _export pushEdit(
 		LPARAM lParam )
 {
 
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wString_p b = (wString_p)mswMapIndex(inx);
 
 	switch (message)
@@ -150,7 +150,7 @@ const char * wStringGetValue(
 static char *getString(wString_p bs)
 {
     char *tmpBuffer = NULL;
-    UINT chars = SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, (LPARAM)0);
+    UINT chars = (UINT)SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, (LPARAM)0);
 
     if (chars) {
         tmpBuffer = malloc(chars > sizeof(WORD)? chars + 1 : sizeof(WORD) + 1);
@@ -268,7 +268,7 @@ wString_p wStringCreate(
 						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
 						b->x, b->y,
 						width, mswEditHeight,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+						((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(STRING)");
 		return b;

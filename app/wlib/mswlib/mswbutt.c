@@ -53,7 +53,7 @@ struct wButton_t {
 		wBool_t busy;
 		wBool_t selected;
 		wIcon_p icon;
-		long timer_id;
+		UINT_PTR timer_id;
 		int timer_count;
 		int timer_state;
 		};
@@ -322,7 +322,7 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 		if (bb->type != B_BUTTON || (bb->option & BO_ICON) == 0)
 			break;
 		mi->CtlType = ODT_BUTTON;
-		mi->CtlID = wParam;
+		mi->CtlID = (UINT)wParam;
 		mi->itemWidth = (UINT)ceil(bb->w*scaleIcon);
 		mi->itemHeight = (UINT)ceil(bb->h*scaleIcon);
 		} return (LRESULT)0;
@@ -356,7 +356,7 @@ LRESULT CALLBACK pushButt(
 {
 	/* Catch <Return> and cause focus to leave control */
 
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wButton_p b = (wButton_p)mswMapIndex( inx );
 	PAINTSTRUCT ps;
 
@@ -459,7 +459,7 @@ wButton_p wButtonCreate(
 		style |= BS_DEFPUSHBUTTON;
 	b->hWnd = CreateWindow( "BUTTON", labelStr, style, b->x, b->y,
 				/*CW_USEDEFAULT, CW_USEDEFAULT,*/ width, h,
-				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(BUTTON)");
 		return b;

@@ -40,7 +40,7 @@ const char * wGetAppLibDir( void )
 
 #ifdef XTRKCAD_CMAKE_BUILD
 	strncpy(appLibDirName, module_name, sizeof(appLibDirName));
-	int len = sizeof(appLibDirName)-strlen(appLibDirName)-1;
+	size_t len = sizeof(appLibDirName)-strlen(appLibDirName)-1;
 	strncat(appLibDirName, "\\..\\share\\xtrkcad", len);
 	_fullpath( appLibDirName, appLibDirName, MAX_PATH );
 	return appLibDirName;

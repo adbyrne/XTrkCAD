@@ -654,7 +654,7 @@ wMenu_p wMenuMenuCreate(
 	/*mm->parent = (wControl_p)m;*/
 	mm->first = mm->last = NULL;
 
-	rc = AppendMenu( m->menu, MF_STRING|MF_ENABLED|MF_POPUP, (UINT)mm->menu, mm->labelStr );
+	rc = AppendMenu( m->menu, MF_STRING|MF_ENABLED|MF_POPUP, (UINT_PTR)(mm->menu), mm->labelStr );
 
 	return mm;
 }
@@ -1040,7 +1040,7 @@ wMenu_p wMenuBarAdd(
 	m->mmtype = MM_BAR;
 	m->first = m->last = NULL;
 
-	rc = AppendMenu( menu, MF_STRING|MF_POPUP|MF_ENABLED, (UINT)m->menu, labelStr );
+	rc = AppendMenu( menu, MF_STRING|MF_POPUP|MF_ENABLED, (UINT_PTR)(m->menu), labelStr );
 
 	DrawMenuBar( ((wControl_p)w)->hWnd );
 	return m;

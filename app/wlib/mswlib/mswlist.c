@@ -538,7 +538,7 @@ static void listRepaintLabel(
 				rc.right = bl->x+bl->w-1;
 			ExtTextOut( hDc, start+1, rc.top+0,
 				ETO_CLIPPED|ETO_OPAQUE, &rc,
-				*title, strlen(*title), NULL );
+				*title, (int)(strlen(*title)), NULL );
 			if ( start-bl->x >= 3 ) {
 			SelectObject( hDc, hPen1 );
 			MoveTo( hDc, start-1, rc.top-1 );
@@ -589,7 +589,7 @@ LRESULT listProc(
 {						
 	wList_p bl = (wList_p)b;
 	int cnt, inx, selected;
-	long len;
+	size_t len;
 	listData * ldp;
 	HDC hDc;
 	LPMEASUREITEMSTRUCT lpmis;
@@ -948,7 +948,7 @@ LRESULT FAR PASCAL _export pushList(
 		LPARAM lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	wIndex_t inx = GetWindowLongPtr(hWnd, GWL_ID);
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr(hWnd, GWL_ID);
 	wControl_p b = mswMapIndex(inx);
 #ifdef OLDCODE
 	long inx = GetWindowLong( hWnd, GWL_ID );
@@ -982,7 +982,7 @@ LRESULT FAR PASCAL _export pushCombo(
 		LPARAM lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
@@ -1053,7 +1053,7 @@ static wList_p listCreate(
 	b->hWnd = CreateWindow( className, NULL,
 				style | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x, b->y,
 				width, LIST_HEIGHT*(int)number,
-				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(LIST)");
 		return b;
@@ -1152,7 +1152,7 @@ wList_p wListCreate(
 		bl->hScrollWnd = CreateWindow( "ScrollBar", NULL,
 				SBS_HORZ | SBS_BOTTOMALIGN | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), bl->x, bl->y,
 				width, CW_USEDEFAULT,
-				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 		if (bl->hScrollWnd == NULL)
 			mswFail("CreateWindow(LISTSCROLL)");
 		SetScrollRange( bl->hScrollWnd, SB_CTL, 0, 100, TRUE );

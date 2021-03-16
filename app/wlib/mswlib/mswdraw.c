@@ -751,7 +751,7 @@ void wDrawGetTextSize(
 	fp->lfWidth = 0;
 	newFont = CreateFontIndirect( fp );
 	prevFont = SelectObject( bd->hDc, newFont );
-	extent = GetTextExtent( bd->hDc, CAST_AWAY_CONST text, strlen(text) );
+	extent = GetTextExtent( bd->hDc, CAST_AWAY_CONST text, (int)(strlen(text)) );
 
 	GetTextMetrics(bd->hDc, &textMetric);
 
@@ -821,7 +821,7 @@ void wDrawString(
         if (dopts & wDrawOutlineFont) {
             HPEN oldPen;
             BeginPath(d->hDc);
-            TextOut(d->hDc, x, y, text, strlen(text));
+            TextOut(d->hDc, x, y, text, (int)strlen(text));
             EndPath(d->hDc);
 
             // Now draw outline text
@@ -835,11 +835,11 @@ void wDrawString(
 
             old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
                                                    dc));
-            TextOut(d->hDc, x, y, text, strlen(text));
+            TextOut(d->hDc, x, y, text, (int)(strlen(text)));
             SetTextColor(d->hDc, old);
         }
 
-        extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, strlen(text));
+        extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, (int)(strlen(text)));
         SelectObject(d->hDc, prevFont);
         w = LOWORD(extent);
         h = HIWORD(extent);
@@ -1472,7 +1472,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		WPARAM wParam,
 		LPARAM lParam )
 {
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wDraw_p b;
 	wWinPix_t ix, iy;
 	wDrawPix_t x, y;
@@ -1633,7 +1633,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			if (extChar != wAccelKey_None)
 				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), b->lastX, b->lastY );
 			else
-				b->action( b, b->data, wActionText + ( wParam << 8 ), b->lastX, b->lastY );
+				b->action( b, b->data, wActionText + ( (int)wParam << 8 ), b->lastX, b->lastY );
 		}
 		return (LRESULT)0;
 
@@ -1850,7 +1850,7 @@ wDraw_p wDrawCreate(
 	d->hWnd = CreateWindow( mswDrawWindowClassName, NULL,
 				WS_CHILDWINDOW|WS_VISIBLE|WS_BORDER,
 				d->x, d->y, w, h,
-				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 
 	if (d->hWnd == (HWND)0) {
 		mswFail( "CreateWindow(DRAW)" );

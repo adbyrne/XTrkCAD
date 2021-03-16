@@ -329,12 +329,13 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawCol
 wIcon_p wIconCreatePixMap( char *pm[])
 {
 	wIcon_p ip;
-	int col, r, g, b, len;
+	int col, r, g, b;
+	size_t len;
 	int width, height;
 	char buff[3];
 	char * cp, * cq, * ptr;
 	int i, j, k;
-	int lineLength;
+	size_t lineLength;
 	unsigned *keys;
 	unsigned numchars;
 	unsigned pixel;
@@ -501,7 +502,7 @@ wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long option, wIcon_p ico
 	control->hWnd = CreateWindow( "STATIC", NULL,
 						style, control->x, control->y,
 						iconP->w, iconP->h,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+						((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 
 	if (control->hWnd == NULL) {
 		mswFail("CreateWindow(BITMAP)");
