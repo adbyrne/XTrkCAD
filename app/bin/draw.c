@@ -1563,7 +1563,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			return;
 		wWinGetSize( mainW, &width, &height );
 		LayoutToolBar(refresh);
-        if (mainD.d->fromTemplate) {
+        if (wWinIsTemplated(mainW)) {
 			if (height>=0) {
 				wDrawSetSize( mainD.d, width, height, refresh );
 				SetMainSize();
@@ -2900,7 +2900,7 @@ EXPORT void DrawInit( int initialZoom )
 
 	wWinGetSize( mainW, &w, &h );
 	/*LayoutToolBar();*/
-	if (mainW->fromTemplate) {
+	if (wWinIsTemplated(mainW)) {
 		if ( w <= 0 ) w = 1;
 		if ( h <= 0 ) h = 1;
 		tempD.d = mainD.d = wDrawCreate( mainW, 0, 0, "main-maindraw", BD_TICKS|BO_USETEMPLATE,
@@ -2911,7 +2911,7 @@ EXPORT void DrawInit( int initialZoom )
 		h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
 		if ( w <= 0 ) w = 1;
 		if ( h <= 0 ) h = 1;
-		tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "main-maindraw", BD_TICKS|BO_USETEMPLATE,
+		tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "main-maindraw", BD_TICKS,
 											w, h, &mainD,
 											(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
 	}

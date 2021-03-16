@@ -253,6 +253,10 @@ static void savePos(wWin_p win)
     }
 }
 
+wBool_t wWinIsTemplated(wWin_p win) {
+	return FALSE;
+}
+
 /**
  * Returns the dimensions of <win>.
  *

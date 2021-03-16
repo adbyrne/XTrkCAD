@@ -1166,6 +1166,10 @@ void wGetDisplaySize(POS_T * width, POS_T * height)
     *height = screenHeight;
 }
 
+wBool_t wWinIsTemplated(wWin_p win) {
+	return FALSE;
+}
+
 
 void wWinGetSize(wWin_p w, POS_T * width, POS_T * height)
 {
