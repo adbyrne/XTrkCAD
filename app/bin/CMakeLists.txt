@@ -73,6 +73,8 @@ SET(SOURCES
 	cmisc.c
 	cmodify.c
 	cnote.c
+	common.h
+	common-ui.h
 	compound.c
 	cparalle.c
 	cprint.c
