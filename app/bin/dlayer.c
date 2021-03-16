@@ -1750,7 +1750,7 @@ void InitLayers(void)
             sprintf(message, "cmdLayerShow%u", i);
             layer_btns[i] = wButtonCreate(mainW, 0, 0, message,
                                           (char*)(show_layer_bmps[i]),
-                                          BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)(intptr_t)i);
+                                          BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)(uintptr_t)i);
             /* add the help text */
             wControlSetBalloonText((wControl_p)layer_btns[i], _("Show/Hide Layer"));
             /* put on toolbar */
@@ -1760,7 +1760,7 @@ void InitLayers(void)
         }
 
         layerName = FormatLayerName(i);
-        wListAddValue(setLayerL, layerName, NULL, (void*)(long)i);
+        wListAddValue(setLayerL, layerName, NULL, (void*)(uintptr_t)i);
         free(layerName);
     }
 

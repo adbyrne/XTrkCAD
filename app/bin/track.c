@@ -43,6 +43,12 @@
 #endif
 #endif
 
+#include <inttypes.h>
+
+#include <stdint.h>
+
+#define SLOG_FMT "0x%.12" PRIxPTR
+
 EXPORT char tempSpecial[4096];
 
 static int log_track = 0;
@@ -1720,7 +1726,7 @@ EXPORT void AuditTracks( char * event, ... )
 		used[i] = 0;
 	}
 	if (*to_last) {
-		sprintf( msgp, "*to_last is not NULL (%lx)", (long)*to_last );
+		sprintf( msgp, "*to_last is not NULL ("SLOG_FMT")", (uintptr_t)*to_last );
 		AuditPrint( msg );
 	}
 	TRK_ITERATE( trk ) {
@@ -1764,8 +1770,8 @@ nextEndPt:;
 		}
 		if (!trk->next) {
 			if (to_last != &trk->next) {
-				sprintf( msgp, "last track (T%d @ %lx) is not to_last (%lx)\n",
-						trk->index, (long)trk, (long)to_last );
+				sprintf( msgp, "last track (T%d @ "SLOG_FMT") is not to_last ("SLOG_FMT")\n",
+						trk->index, (uintptr_t)trk, (uintptr_t)to_last );
 				AuditPrint( msg );
 			}
 		}

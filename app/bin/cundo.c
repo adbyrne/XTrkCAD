@@ -30,6 +30,12 @@
 #include "cundo.h"
 #include "common-ui.h"
 
+#include <inttypes.h>
+
+#include <stdint.h>
+
+#define SLOG_FMT "0x%.12" PRIxPTR
+
 
 /*****************************************************************************
  *
@@ -47,10 +53,10 @@ typedef struct {
 		wIndex_t delCnt;
 		wIndex_t trackCount;
 		track_p newTrks;
-		long undoStart;
-		long undoEnd;
-		long redoStart;
-		long redoEnd;
+		uintptr_t undoStart;
+		uintptr_t undoEnd;
+		uintptr_t redoStart;
+		uintptr_t redoEnd;
 		BOOL_T needRedo;
 		track_p * oldTail;
 		track_p * newTail;
@@ -86,8 +92,8 @@ typedef streamBlocks_t *streamBlocks_p;
 typedef struct {
 		dynArr_t stream_da;
 		long startBInx;
-		long end;
-		long curr;
+		uintptr_t end;
+		uintptr_t curr;
 		} stream_t;
 typedef stream_t *stream_p;
 static stream_t undoStream;
@@ -112,7 +118,7 @@ static void DumpStream( FILE * outf, stream_p stream, char * name )
 {
 	long binx;
 	long i, j;
-	long off;
+	uintptr_t off;
 	streamBlocks_p blk;
 	int zeroCnt;
 	static char zeros[16] = { 0 };
@@ -130,22 +136,22 @@ static void DumpStream( FILE * outf, stream_p stream, char * name )
 				zeroCnt = 0;
 			}
 			if ( zeroCnt <= 1 ) {
-				fprintf( outf, "%6.6lx ", off );
+				fprintf( outf, SLOG_FMT" ", off );
 				for ( j=0; j<16; j++ ) {
 					fprintf( outf, "%2.2x ", (unsigned char)((*blk)[i+j]) );
 				}
 				fprintf( outf, "\n" );
 			} else if ( zeroCnt == 3 ) {
-				fprintf( outf, "%6.6lx .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..\n", off );
+				fprintf( outf, SLOG_FMT" .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..\n", off );
 			}
 			off += 16;
 		}
 	}
 	if ( zeroCnt > 2 )
-		fprintf( outf, "%6.6lx 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", off-16 );
+		fprintf( outf, SLOG_FMT" 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", off-16 );
 }
 
-static BOOL_T UndoFail( char * cause, long val, char * fileName, int lineNumber )
+static BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName, int lineNumber )
 {
 	int inx, cnt;
 	undoStack_p us;
@@ -161,9 +167,10 @@ static BOOL_T UndoFail( char * cause, long val, char * fileName, int lineNumber 
 		return FALSE;
 	}
 	time( &clock );
+
 	fprintf(outf, "\nUndo Assert: %s @ %s:%d (%s)\n", cause, fileName, lineNumber, ctime(&clock) );
-	fprintf(outf, "Val = %ld(%lx)\n", val, val );
-	fprintf(outf, "to_first=%lx, to_last=%lx\n", (long)to_first, (long)to_last );
+	fprintf(outf, "Val = %lld(" SLOG_FMT ")\n", (long long)val, val );
+	fprintf(outf, "to_first="SLOG_FMT", to_last="SLOG_FMT"\n", (uintptr_t)to_first, (uintptr_t)to_last );
 	fprintf(outf, "undoHead=%d, doCount=%d, undoCount=%d\n", undoHead, doCount, undoCount );
 	if (undoHead >= 0 && undoHead < UNDO_STACK_SIZE)
 		inx=undoHead;
@@ -171,15 +178,15 @@ static BOOL_T UndoFail( char * cause, long val, char * fileName, int lineNumber 
 		inx = 0;
 	for (cnt=0; cnt<UNDO_STACK_SIZE; cnt++) {
 		us = &undoStack[inx];
-		fprintf( outf, "US[%d]: M:%d N:%d D:%d TC:%d NT:%lx OT:%lx NT:%lx US:%lx UE:%lx RS:%lx RE:%lx NR:%d\n",
+		fprintf( outf, "US[%d]: M:%d N:%d D:%d TC:%d NT:"SLOG_FMT" OT:"SLOG_FMT" NT:"SLOG_FMT" US:"SLOG_FMT" UE:"SLOG_FMT" RS:"SLOG_FMT" RE:"SLOG_FMT" NR:%d\n",
 				inx, us->modCnt, us->newCnt, us->delCnt, us->trackCount,
-				(long)us->newTrks, (long)us->oldTail, (long)us->newTail,
+				(uintptr_t)us->newTrks, (uintptr_t)us->oldTail, (uintptr_t)us->newTail,
 				us->undoStart, us->undoEnd, us->redoStart, us->redoEnd, us->needRedo );
 		INC_UNDO_INX(inx);
 	}
-	fprintf( outf, "Undo: SBI:%ld E:%lx C:%lx SC:%d SM:%d\n",
+	fprintf( outf, "Undo: SBI:%ld E:"SLOG_FMT" C:"SLOG_FMT" SC:%d SM:%d\n",
 			undoStream.startBInx, undoStream.end, undoStream.curr, undoStream.stream_da.cnt, undoStream.stream_da.max );
-	fprintf( outf, "Redo: SBI:%ld E:%lx C:%lx SC:%d SM:%d\n",
+	fprintf( outf, "Redo: SBI:%ld E:"SLOG_FMT" C:"SLOG_FMT" SC:%d SM:%d\n",
 			redoStream.startBInx, redoStream.end, redoStream.curr, redoStream.stream_da.cnt, redoStream.stream_da.max );
 	DumpStream( outf, &undoStream, "undoStream" );
 	DumpStream( outf, &redoStream, "redoStream" );
@@ -196,10 +203,10 @@ BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
 	long binx, boff, brem;
 	streamBlocks_p blk;
 	if ( stream->curr+size > stream->end ) {
-		UndoFail( "Overrun on stream", (long)(stream->curr+size), __FILE__, __LINE__ );
+		UndoFail( "Overrun on stream", (uintptr_t)(stream->curr+size), __FILE__, __LINE__ );
 		return FALSE;
 	}
-LOG( log_undo, 5, ( "ReadStream( , %lx, %d ) %ld %ld %ld\n", (long)ptr, size, stream->startBInx, stream->curr, stream->end ) )
+LOG( log_undo, 5, ( "ReadStream( , "SLOG_FMT", %d ) %ld %ld %ld\n", (uintptr_t)ptr, size, stream->startBInx, stream->curr, stream->end ) )
 	binx = stream->curr/BSTREAM_SIZE;
 	boff = stream->curr%BSTREAM_SIZE;
 	stream->curr += size;
@@ -227,7 +234,7 @@ BOOL_T WriteStream( stream_p stream, void * ptr, int size )
 {
 	long binx, boff, brem;
 	streamBlocks_p blk;
-LOG( log_undo, 5, ( "WriteStream( , %lx, %d ) %ld %ld %ld\n", (long)ptr, size, stream->startBInx, stream->curr, stream->end ) )
+LOG( log_undo, 5, ( "WriteStream( , "SLOG_FMT", %d ) %ld "SLOG_FMT" "SLOG_FMT"\n", (uintptr_t)ptr, size, stream->startBInx, stream->curr, stream->end ) )
 	if (size == 0)
 		return TRUE;
 	binx = stream->end/BSTREAM_SIZE;
@@ -260,7 +267,7 @@ LOG( log_undo, 5, ( "WriteStream( , %lx, %d ) %ld %ld %ld\n", (long)ptr, size, s
 	return TRUE;
 }
 
-BOOL_T TrimStream( stream_p stream, long off )
+BOOL_T TrimStream( stream_p stream, uintptr_t off )
 {
 	long binx, cnt, inx;
 	streamBlocks_p blk;
@@ -268,7 +275,7 @@ LOG( log_undo, 3, ( "TrimStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
 	cnt = binx-stream->startBInx;
 	if (recordUndo)
-		Rprintf("Trim(%ld) %ld blocks (out of %d)\n", off, cnt, stream->stream_da.cnt);
+		Rprintf("Trim("SLOG_FMT") %ld blocks (out of %d)\n", off, cnt, stream->stream_da.cnt);
 	UASSERT( cnt >= 0 && cnt <= stream->stream_da.cnt, cnt );
 	if (cnt == 0)
 		return TRUE;
@@ -299,7 +306,7 @@ void ClearStream( stream_p stream )
 }
 
 
-BOOL_T TruncateStream( stream_p stream, long off )
+BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 {
 	long binx, boff, cnt, inx;
 	streamBlocks_p blk;
@@ -311,7 +318,7 @@ LOG( log_undo, 3, ( "TruncateStream( , %ld )\n", off ) )
 	binx -= stream->startBInx;
 	cnt = stream->stream_da.cnt-binx;
 	if (recordUndo)
-		Rprintf("Truncate(%ld) %ld blocks (out of %d)\n", off, cnt, stream->stream_da.cnt);
+		Rprintf("Truncate("SLOG_FMT") %ld blocks (out of %d)\n", off, cnt, stream->stream_da.cnt);
 	UASSERT( cnt >= 0 && cnt <= stream->stream_da.cnt, cnt );
 	if (cnt == 0)
 		return TRUE;
@@ -391,7 +398,7 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 		MyFree(tempBuff);
 	}
 	RebuildTrackSegs(&tempTrk);   //If we had an array of Segs - recreate it
-	if (recordUndo) Rprintf( "Restore T%D(%d) @ %lx\n", trk->index, tempTrk.index, (long)trk );
+	if (recordUndo) Rprintf( "Restore T%D(%d) @ "SLOG_FMT"\n", trk->index, tempTrk.index, (uintptr_t)trk );
 	tempTrk.index = trk->index;
 	tempTrk.next = trk->next;
 	if ( (tempTrk.bits&TB_CARATTACHED) != 0 )
@@ -404,7 +411,7 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 }
 
 
-static BOOL_T RedrawInStream( stream_p stream, long start, long end, BOOL_T draw )
+static BOOL_T RedrawInStream( stream_p stream, uintptr_t start, uintptr_t end, BOOL_T draw )
 {
 	char op;
 	track_p trk;
@@ -431,14 +438,14 @@ static BOOL_T RedrawInStream( stream_p stream, long start, long end, BOOL_T draw
 }
 
 
-static BOOL_T DeleteInStream( stream_p stream, long start, long end )
+static BOOL_T DeleteInStream( stream_p stream, uintptr_t start, uintptr_t end )
 {
 	char op;
 	track_p trk;
 	track_p *ptrk;
 	track_t tempTrk;
 	int delCount = 0;
-LOG( log_undo, 3, ( "DeleteInSteam( , %ld, %ld )\n", start, end ) )
+LOG( log_undo, 3, ( "DeleteInSteam( , "SLOG_FMT", "SLOG_FMT" )\n", start, end ) )
 	stream->curr = start;
 	while (stream->curr < end ) {
 		if (!ReadStream( stream, &op, sizeof op ))
@@ -453,8 +460,8 @@ LOG( log_undo, 3, ( "DeleteInSteam( , %ld, %ld )\n", start, end ) )
 			return FALSE;
 		stream->curr += Addsize;
 		if (op == DeleteOp) {
-			if (recordUndo) Rprintf( "    Free T%D(%d) @ %lx\n", trk->index, tempTrk.index, (long)trk );
-			UASSERT( IsTrackDeleted(trk), (long)trk );
+			if (recordUndo) Rprintf( "    Free T%D(%d) @ "SLOG_FMT"\n", trk->index, tempTrk.index, (uintptr_t)trk );
+			UASSERT( IsTrackDeleted(trk), (uintptr_t)trk );
 			trk->index = -1;
 			delCount++;
 		}
@@ -464,7 +471,7 @@ LOG( log_undo, 3, ( "DeleteInSteam( , %ld, %ld )\n", start, end ) )
 		for (ptrk=&to_first; *ptrk; ) {
 			if ((*ptrk)->index == -1) {
 				trk = *ptrk;
-				UASSERT( IsTrackDeleted(trk), (long)trk );
+				UASSERT( IsTrackDeleted(trk), (uintptr_t)trk );
 				*ptrk = trk->next;
 				FreeTrack(trk);
 			} else {
@@ -477,7 +484,7 @@ LOG( log_undo, 3, ( "DeleteInSteam( , %ld, %ld )\n", start, end ) )
 }
 
 
-static BOOL_T SetDeleteOpInStream( stream_p stream, long start, long end, track_p trk0 )
+static BOOL_T SetDeleteOpInStream( stream_p stream, uintptr_t start, uintptr_t end, track_p trk0 )
 {
 	char op;
 	track_p trk;
@@ -558,7 +565,7 @@ static track_p * FindParent( track_p trk, int lineNum )
 			break;
 		ptrk = &(*ptrk)->next;
 	}
-	UndoFail( "Cannot find trk on list", (long)trk, "cundo.c", lineNum );
+	UndoFail( "Cannot find trk on list", (uintptr_t)trk, "cundo.c", lineNum );
 	return NULL;
 }
 
@@ -576,12 +583,12 @@ void UndoStart(
 	int inx;
 	int usp;
 
-LOG( log_undo, 1, ( "UndoStart(%s) [%d] d:%d u:%d us:%ld\n", label, undoHead, doCount, undoCount, undoStream.end ) )
+LOG( log_undo, 1, ( "UndoStart(%s) [%d] d:%d u:%d us:"SLOG_FMT"\n", label, undoHead, doCount, undoCount, undoStream.end ) )
 	if (recordUndo) {
 		va_start( ap, format );
 		vsprintf( buff, format, ap );
 		va_end( ap );
-		Rprintf( "Start(%s)[%d] d:%d u:%d us:%ld\n", buff, undoHead, doCount, undoCount, undoStream.end );
+		Rprintf( "Start(%s)[%d] d:%d u:%d us:"SLOG_FMT"\n", buff, undoHead, doCount, undoCount, undoStream.end );
 	}
 
 	if ( undoHead >= 0 ) {
@@ -621,7 +628,7 @@ LOG( log_undo, 1, ( "UndoStart(%s) [%d] d:%d u:%d us:%ld\n", label, undoHead, do
 			us1 = &undoStack[usp];
 			if (recordUndo) Rprintf("  U[%d] N:%d\n", usp, us1->newCnt );
 			for (trk=us1->newTrks; trk; trk=next) {
-				if (recordUndo) Rprintf( "    Free T%d @ %lx\n", trk->index, (long)trk );
+				if (recordUndo) Rprintf( "    Free T%d @ "SLOG_FMT"\n", trk->index, (uintptr_t)trk );
 				/*ASSERT( IsTrackDeleted(trk) );*/
 				next = trk->next;
 				FreeTrack( trk );
@@ -665,7 +672,7 @@ BOOL_T UndoModify( track_p trk )
 	if (trk == NULL) return TRUE;
 	UASSERT(undoCount==0, undoCount);
 	UASSERT(undoHead >= 0, undoHead);
-	UASSERT(!IsTrackDeleted(trk), (long)trk);
+	UASSERT(!IsTrackDeleted(trk), (uintptr_t)trk);
 	if (trk->modified || trk->new)
 		return TRUE;
 LOG( log_undo, 2, ( "    UndoModify( T%d, E%d, X%ld )\n", trk->index, trk->endCnt, trk->extraSize ) )
@@ -673,7 +680,7 @@ LOG( log_undo, 2, ( "    UndoModify( T%d, E%d, X%ld )\n", trk->index, trk->endCn
 		needAttachTrains = TRUE;
 	us = &undoStack[undoHead];
 	if (recordUndo)
-		Rprintf( " MOD T%d @ %lx\n", trk->index, (long)trk );
+		Rprintf( " MOD T%d @ "SLOG_FMT"\n", trk->index, (uintptr_t)trk );
 	if (!WriteObject( &undoStream, ModifyOp, trk ))
 		return FALSE;
 	us->undoEnd = undoStream.end;
@@ -692,8 +699,8 @@ LOG( log_undo, 2, ( "    UndoDelete( T%d, E%d, X%ld )\n", trk->index, trk->endCn
 		needAttachTrains = TRUE;
 	us = &undoStack[undoHead];
 	if (recordUndo)
-		Rprintf( " DEL T%d @ %lx\n", trk->index, (long)trk );
-	UASSERT( !IsTrackDeleted(trk), (long)trk );
+		Rprintf( " DEL T%d @ "SLOG_FMT"\n", trk->index, (uintptr_t)trk );
+	UASSERT( !IsTrackDeleted(trk), (uintptr_t)trk );
 	if ( trk->modified ) {
 		if (!SetDeleteOpInStream( &undoStream, us->undoStart, us->undoEnd, trk ))
 			return FALSE;
@@ -708,7 +715,7 @@ LOG( log_undo, 2, ( "    UndoDelete( T%d, E%d, X%ld )\n", trk->index, trk->endCn
 		if (!(ptrk = FindParent( trk, __LINE__ )))
 			return FALSE;
 		if (trk->next == NULL) {
-			UASSERT( to_last == &(*ptrk)->next, (long)&(*ptrk)->next );
+			UASSERT( to_last == &(*ptrk)->next, (uintptr_t)&(*ptrk)->next );
 			to_last = ptrk;
 		}
 		*ptrk = trk->next;
@@ -731,7 +738,7 @@ BOOL_T UndoNew( track_p trk )
 LOG( log_undo, 2, ( "    UndoNew( T%d )\n", trk->index ) )
 	
 	if (recordUndo) 
-		Rprintf( " NEW T%d @%lx\n", trk->index, (long)trk );
+		Rprintf( " NEW T%d @"SLOG_FMT"\n", trk->index, (uintptr_t)trk );
 	UASSERT(undoCount==0, undoCount);
 	UASSERT(undoHead >= 0, undoHead);
 	us = &undoStack[undoHead];
@@ -802,8 +809,9 @@ LOG( log_undo, 1, ( "    undoUndo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	if (us->needRedo)
 		us->redoStart = us->redoEnd = redoStream.end;
 	for (trk=us->newTrks; trk; trk=trk->next ) {
-		if (recordUndo) Rprintf(" Deleting New Track T%d @ %lx\n", trk->index, (long)trk );
-		UASSERT( !IsTrackDeleted(trk), (long)trk );
+		if (recordUndo)
+			Rprintf(" Deleting New Track T%d @ "SLOG_FMT"\n", trk->index, (intptr_t)trk );
+		UASSERT( !IsTrackDeleted(trk), (intptr_t)trk );
 		trk->deleted = TRUE;
 	}
 	if (!(us->oldTail=FindParent(us->newTrks,__LINE__)))
@@ -875,14 +883,14 @@ LOG( log_undo, 1, ( "    undoRedo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	}
 
 	for (trk=us->newTrks; trk; trk=trk->next ) {
-		if (recordUndo) Rprintf(" Undeleting New Track T%d @ %lx\n", trk->index, (long)trk );
-		UASSERT( IsTrackDeleted(trk), (long)trk );
+		if (recordUndo) Rprintf(" Undeleting New Track T%d @ "SLOG_FMT"\n", trk->index, (uintptr_t)trk );
+		UASSERT( IsTrackDeleted(trk), (uintptr_t)trk );
 		trk->deleted = FALSE;
 	}
-	UASSERT( us->newTail != NULL, (long)us->newTail );
+	UASSERT( us->newTail != NULL, (uintptr_t)us->newTail );
 	*to_last = us->newTrks;
 	to_last = us->newTail;
-	UASSERT( (*to_last) == NULL, (long)*to_last );
+	UASSERT( (*to_last) == NULL, (uintptr_t)*to_last );
 	RenumberTracks();
 
 	needAttachTrains = FALSE;
