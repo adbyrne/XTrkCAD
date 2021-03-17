@@ -1806,7 +1806,6 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 		coOrd *posR,
 		ANGLE_T *angleR )
 {
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	traverseTrack_t trvtrk;
 	DIST_T dist;
 

@@ -54,8 +54,8 @@ static DIST_T GetLengthCurve( track_p );
 
 static void GetCurveAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	assert( trk != NULL );
+	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	if (xx->circle != TRUE) {
 		*a0 = NormalizeAngle( GetTrkEndAngle(trk,0) + 90 );
 		*a1 = NormalizeAngle(
@@ -215,7 +215,6 @@ static void DrawCurveDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	wFont_p fp;
 	coOrd pos, p0, p1;
 	DIST_T elev0, elev1, dist, grade=0, sep=0;
@@ -228,6 +227,7 @@ static void DrawCurveDescription(
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
 
+	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	if ( xx->helixTurns > 0 ) {
 		pos = xx->pos;
 		pos.x += xx->descriptionOff.x;
@@ -393,16 +393,15 @@ static descData_t crvDesc[] = {
 
 static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	BOOL_T updateEndPts;
 	ANGLE_T a0, a1;
 	EPINX_T ep;
-	struct extraDataCurve_t xx0;
 	FLOAT_T turns;
 
 	if ( inx == -1 )
 		return;
-	xx0 = *xx;
+	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
+	struct extraDataCurve_t xx0 = *xx;
 	updateEndPts = FALSE;
 	GetCurveAngles( &a0, &a1, trk );
 	switch ( inx ) {
@@ -553,11 +552,11 @@ static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 
 static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	ANGLE_T a0, a1;
 	DIST_T d;
 	int fix0, fix1;
 	FLOAT_T turns;
+	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 
 	GetCurveAngles( &a0, &a1, trk );
 	d = xx->radius * 2.0 * M_PI * a1 / 360.0;
@@ -662,9 +661,9 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 
 static DIST_T DistanceCurve( track_p t, coOrd * p )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 	ANGLE_T a0, a1;
 	DIST_T d;
+	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 	GetCurveAngles( &a0, &a1, t );
 	if ( xx->helixTurns > 0 ) {
 		a0 = 0.0;
@@ -676,10 +675,10 @@ static DIST_T DistanceCurve( track_p t, coOrd * p )
 
 static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 	ANGLE_T a0, a1;
 	track_p tt = t;
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
+	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 
 	GetCurveAngles( &a0, &a1, t );
 	if (xx->circle) {
@@ -1006,8 +1005,6 @@ static BOOL_T MergeCurve(
 		track_p trk1,
 		EPINX_T ep1 )
 {
-	struct extraDataCurve_t *xx0 = GET_EXTRA_DATA(trk0, T_CURVE, extraDataCurve_t);
-	struct extraDataCurve_t *xx1 = GET_EXTRA_DATA(trk1, T_CURVE, extraDataCurve_t);
 	ANGLE_T a00, a01, a10, a11;
 	DIST_T d;
 	track_p trk2;
@@ -1019,6 +1016,8 @@ static BOOL_T MergeCurve(
 	if ( IsCurveCircle(trk0) ||
 		 IsCurveCircle(trk1) )
 		return FALSE;
+	struct extraDataCurve_t *xx0 = GET_EXTRA_DATA(trk0, T_CURVE, extraDataCurve_t);
+	struct extraDataCurve_t *xx1 = GET_EXTRA_DATA(trk1, T_CURVE, extraDataCurve_t);
 	if ( xx0->helixTurns > 0 ||
 		 xx1->helixTurns > 0 )
 		return FALSE;
@@ -1223,7 +1222,6 @@ static DIST_T GetLengthCurve( track_p trk )
 
 static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	params->type = curveTypeCurve;
 	GetTrkCurveCenter( trk, &params->arcP, &params->arcR);
 	GetCurveAngles( &params->arcA0, &params->arcA1, trk );
@@ -1236,6 +1234,7 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 						FormatDistance( params->arcR ), FormatDistance( easeR ) );
 		return FALSE;
 	}
+	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	if ( inx == PARAMS_EXTEND && ( IsCurveCircle(trk) || xx->helixTurns > 0 ) ) {
 		ErrorMessage( MSG_CANT_EXTEND_HELIX );
 		return FALSE;

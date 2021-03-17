@@ -163,7 +163,6 @@ LinkEditOK(void *junk)
 static void 
 CreateEditLinkDialog(track_p trk, char *title)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	// create the dialog if necessary
     if (!linkEditW) {
@@ -184,6 +183,7 @@ CreateEditLinkDialog(track_p trk, char *title)
     wWinSetTitle(linkEditPG.win, MakeWindowTitle(title));
 
 	// initialize the dialog fields
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     noteDataInUI.pos = xx->pos;
 	noteDataInUI.layer = xx->layer;
     noteDataInUI.trk = trk;

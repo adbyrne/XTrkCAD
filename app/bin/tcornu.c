@@ -212,7 +212,6 @@ static void DrawCornuDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	wFont_p fp;
     coOrd epos0, epos1, offpos0, offpos1;
 
@@ -221,8 +220,7 @@ static void DrawCornuDescription(
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 			return;
 
-
-
+	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	epos0 = xx->pos[0];
 	epos1 = xx->pos[1];
 	ANGLE_T a = FindAngle(epos0,epos1);
@@ -322,7 +320,6 @@ static descData_t cornuDesc[] = {
 
 static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 {
-	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	BOOL_T updateEndPts;
 	EPINX_T ep;
 
@@ -331,6 +328,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		return;
 	updateEndPts = FALSE;
 	UndrawNewTrack(trk);
+	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	switch ( inx ) {
 	case P0:
 		if (GetTrkEndTrk(trk,0)) break;
@@ -534,7 +532,6 @@ DIST_T DistanceCornu( track_p t, coOrd * p )
 
 static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 {
-	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
 	if ( ((d->options&DC_SIMPLE)==0) &&
@@ -544,6 +541,7 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 		DrawCornuDescription( t, d, color );
 	}
 	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
+	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	DrawSegsO(d,t,zero,0.0,xx->arcSegs.ptr,xx->arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
 	DrawEndPt( d, t, 0, color );
 	DrawEndPt( d, t, 1, color );
@@ -577,11 +575,11 @@ static void DeleteCornu( track_p t )
 
 static BOOL_T WriteCornu( track_p t, FILE * f )
 {
-	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	long options;
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_CORNU);
 	options = GetTrkWidth(t) & 0x0F;
+	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 ) options |= 0x80;
 	rc &= fprintf(f, "%s %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
 		"CORNU",GetTrkIndex(t), GetTrkLayer(t), (long)options,
@@ -624,7 +622,6 @@ static BOOL_T ReadCornu( char * line )
 		return FALSE;
 	t = NewTrack( index, T_CORNU, 0, sizeof *xx );
 
-	xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	SetTrkVisible(t, visible&2);
 	SetTrkNoTies(t, visible&4);
 	SetTrkBridge(t, visible&8);
@@ -632,6 +629,7 @@ static BOOL_T ReadCornu( char * line )
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));
 	if ( paramVersion < VERSION_DESCRIPTION2 || ( options & 0x80 ) == 0 )  SetTrkBits(t,TB_HIDEDESC);
+	xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	xx->pos[0] = p0;
     xx->pos[1] = p1;
     xx->a[0] = a0;
@@ -872,11 +870,11 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	track_p trk2;
 	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
-		struct extraDataCornu_t *xx = GET_EXTRA_DATA(*trk, T_CORNU, extraDataCornu_t);
 		if (trk2) {
 			UndrawNewTrack( trk2 );
 			DeleteTrack(trk2,TRUE);
 		}
+		struct extraDataCornu_t *xx = GET_EXTRA_DATA(*trk, T_CORNU, extraDataCornu_t);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->pos[1]:xx->pos[0], *ep?xx->a[1]:xx->a[0] );
 		DrawNewTrack( *trk );
 		return TRUE;
@@ -906,7 +904,6 @@ static int log_traverseCornu = 0;
 static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 {
     track_p trk = trvTrk->trk;
-	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	DIST_T dist = *distR;
 	segProcData_t segProcData;
 	BOOL_T cornu_backwards= FALSE;
@@ -918,6 +915,7 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	EPINX_T ep;
 	BOOL_T back;
 LOG( log_traverseCornu, 1, ( "TravCornu-In [%0.3f %0.3f] A%0.3f D%0.3f \n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
+	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	trkSeg_p segPtr = (trkSeg_p)xx->arcSegs.ptr;
 
 	a2 = GetAngleSegs(		  						//Find correct Segment and nearest point in it
@@ -1088,7 +1086,6 @@ EXPORT BOOL_T GetCornuMiddle( track_p trk, coOrd * pos) {
 
 	if (GetTrkType(trk) != T_CORNU)
 		return FALSE;
-	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	DIST_T length = GetLengthCornu(trk)/2;
 
 	traverseTrack_t tp;
@@ -1166,7 +1163,6 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 
 static BOOL_T QueryCornu( track_p trk, int query )
 {
-	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	switch ( query ) {
 	case Q_CAN_GROUP:
 		return FALSE;
@@ -1175,9 +1171,10 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_HAS_DESC:
 		return TRUE;
 		break;
-	case Q_EXCEPTION:
+	case Q_EXCEPTION: {
+		struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 		return fabs(xx->minCurveRadius) < (GetLayoutMinTrackRadius()-EPSILON);
-		break;
+		}
 	case Q_IS_CORNU:
 		return TRUE;
 		break;
@@ -1268,7 +1265,6 @@ static BOOL_T MakeParallelCornu(
 		coOrd * p1R,
 		BOOL_T track )
 {
-	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
     coOrd np[4], p, nc[2];
     ANGLE_T atrk, diff_a, na[2];
     DIST_T nr[2];
@@ -1281,6 +1277,7 @@ static BOOL_T MakeParallelCornu(
     
     p = pos;
     DistanceCornu(trk, &p);  //Find nearest point on curve
+	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
     atrk = GetAngleSegs(xx->arcSegs.cnt,(trkSeg_t *)(xx->arcSegs.ptr),&p,NULL,NULL,NULL,NULL, NULL);
     diff_a = NormalizeAngle(FindAngle(pos,p)-atrk);  //we know it will be +/-90...
     //find parallel move x and y for points

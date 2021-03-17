@@ -810,7 +810,6 @@ static void DrawJointDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	DIST_T grade=0, sep=0;
 	ANGLE_T a;
 	if (layoutLabels == 0)
@@ -822,6 +821,7 @@ static void DrawJointDescription(
 	end0 = GetTrkEndPos(trk,0);
 	end1 = GetTrkEndPos(trk,1);
 	a = FindAngle(end0,end1);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	Translate(&end0off,end0,a+90,xx->descriptionOff.y);
 	Translate(&end1off,end1,a+90,xx->descriptionOff.y);
 
@@ -1053,9 +1053,9 @@ static void RescaleJoint( track_p trk, FLOAT_T ratio )
 
 static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * ep1 )
 {
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	DIST_T l;
 	ANGLE_T a;
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	if ( ep0 && ep1 ) {
 		if (xx->flip) {
 			*ep0 = 1;

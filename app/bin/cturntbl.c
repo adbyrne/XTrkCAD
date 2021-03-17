@@ -53,11 +53,11 @@ static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, sizeof turntab
 static BOOL_T ValidateTurntablePosition(
 		track_p trk )
 {
-	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	EPINX_T ep, epCnt = GetTrkEndPtCnt(trk);
 	
 	if ( epCnt <= 0 )
 		return FALSE;
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	ep = xx->currEp;
 	do {
 		if ( GetTrkEndTrk(trk,ep) ) {
@@ -74,8 +74,8 @@ static BOOL_T ValidateTurntablePosition(
 
 static void ComputeTurntableBoundingBox( track_p trk )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	coOrd hi, lo;
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	hi.x = xx->pos.x+xx->radius;
 	lo.x = xx->pos.x-xx->radius;
 	hi.y = xx->pos.y+xx->radius;

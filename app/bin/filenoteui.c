@@ -224,7 +224,6 @@ FileEditOK(void *junk)
 
 void CreateEditFileDialog(track_p trk, char * windowTitle)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
     if (!fileEditW) {
 	    	noteDataInUI.base.trkType = T_NOTE;
@@ -244,6 +243,7 @@ void CreateEditFileDialog(track_p trk, char * windowTitle)
 
     wWinSetTitle(fileEditPG.win, MakeWindowTitle(windowTitle));
 
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     noteDataInUI.pos = xx->pos;
 	noteDataInUI.layer = xx->layer;
     noteDataInUI.trk = trk;
