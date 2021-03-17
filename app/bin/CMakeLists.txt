@@ -125,6 +125,8 @@ SET(SOURCES
 	lprintf.c
 	macro.c
 	manifest.c
+	misc.c
+	misc.h
 	misc2.c
 	param.c
 	paramfile.c
