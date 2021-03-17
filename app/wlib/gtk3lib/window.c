@@ -250,6 +250,10 @@ static void savePos(wWin_p win)
     }
 }
 
+wBool_t wWinIsTemplated(wWin_p win) {
+	return (win->template_id !=NULL);
+}
+
 /**
  * Returns the dimensions of <win>.
  *
@@ -281,7 +285,7 @@ void wWinGetSize(
     }
 
     *width = w;
-    *height = h - BORDERSIZE - ((win->option&F_MENUBAR)?win->menu_height:0);
+    *height = h; //- BORDERSIZE - ((win->option&F_MENUBAR)?win->menu_height:0);
 }
 
 /**

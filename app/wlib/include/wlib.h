@@ -268,6 +268,7 @@ void wWinSetSmallIcon(		wWin_p, wIcon_p );
 void wWinShow(			wWin_p, wBool_t );
 wBool_t wWinIsVisible(		wWin_p );
 wBool_t wWinIsMaximized( wWin_p win);
+wBool_t wWinIsTemplated( wWin_p win);
 void wWinGetSize (		wWin_p, wPos_t *, wPos_t * );
 void wWinSetSize(		wWin_p, wPos_t, wPos_t );
 void wWinSetTitle(		wWin_p, const char * );
