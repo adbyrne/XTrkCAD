@@ -1004,8 +1004,8 @@ static BOOL_T DoSaveTracks(
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
 
-	oldLocale = SaveLocale( "C" );
 	lCLocale++;
+	oldLocale = SaveLocale( "C" );
 
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
