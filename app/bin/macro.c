@@ -984,6 +984,7 @@ static void Playback( void )
 	char * cp, * cq;
 	char *demoFileName = NULL;
 
+	lCLocale++;
 	useCurrentLayer = FALSE;
 	inPlayback = TRUE;
 	EnableButtons( FALSE );
@@ -1020,6 +1021,7 @@ static void Playback( void )
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName, strerror(errno) );
 				RestoreLocale( oldLocale );
 				inPlayback = FALSE;
+			lCLocale--;
 				return;
 			}
 			
@@ -1039,6 +1041,7 @@ static void Playback( void )
 				paramFile = NULL;
 				RestoreLocale( oldLocale );
 				inPlayback = FALSE;
+			lCLocale--;
 				return;
 			}
 			free(demoFileName);
@@ -1088,6 +1091,7 @@ static void Playback( void )
 			} else {
 				RestoreLocale( oldLocale );
 				inPlayback = FALSE;
+			lCLocale--;
 				return;
 			}
 		} else if (strncmp( paramLine, "CLEAR", 5 ) == 0) {
@@ -1106,6 +1110,7 @@ static void Playback( void )
 					EnableButtons( TRUE );
 					RestoreLocale( oldLocale );
 					inPlayback = FALSE;
+			lCLocale--;
 					return;
 				}
 				PlaybackMessage( paramLine );
@@ -1281,6 +1286,7 @@ static void Playback( void )
 			pauseDemo = FALSE;
 			RestoreLocale( oldLocale );
 			inPlayback = FALSE;
+			lCLocale--;
 			return;
 		}
 	}
@@ -1295,6 +1301,7 @@ static void Playback( void )
 	inPlayback = FALSE;
 	PlaybackQuit();
 	RestoreLocale( oldLocale );
+	lCLocale--;
 }
 
 

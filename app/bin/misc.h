@@ -449,6 +449,8 @@ void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
 
+extern long lCLocale;
+
 
 #include "misc2.h"
 

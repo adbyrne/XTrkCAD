@@ -262,6 +262,8 @@ EXPORT FLOAT_T DecodeFloat(
 		wString_p strCtrl,
 		BOOL_T * validP )
 {
+if ( lCLocale > 0 )
+printf( "DecodeFloat in CLocale\n");
 	FLOAT_T valF;
 	const char *cp0, *cp1;
     char *cp2;
@@ -288,6 +290,8 @@ FLOAT_T DecodeDistance(
     wString_p strCtrl,
     BOOL_T * validP)
 {
+if ( lCLocale > 0 )
+printf( "DecodeDistance in CLocale\n");
     FLOAT_T valF;
     char *cp0, *cp1, *cpN, c1;
     cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);

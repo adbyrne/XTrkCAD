@@ -248,6 +248,7 @@ bool ReadParams(
 
 	//LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 
+	lCLocale++;
 	oldLocale = SaveLocale("C");
 
 	paramFile = fopen(paramFileName, "r");
@@ -258,6 +259,7 @@ bool ReadParams(
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName,
 			strerror(errno));
 
+		lCLocale--;
 		return FALSE;
 	}
 	paramCheckSum = key;
@@ -291,7 +293,7 @@ bool ReadParams(
 					fclose(paramFile);
 				}
 				RestoreLocale(oldLocale);
-
+				lCLocale--;
 				return FALSE;
 			}
 			oldFile = paramFile;
@@ -299,6 +301,7 @@ bool ReadParams(
 			oldCheckSum = paramCheckSum;
 			if (!ReadParams(key, dirName, cp)) {
 				RestoreLocale(oldLocale);
+				lCLocale--;
 				return FALSE;
 			}
 			paramFile = oldFile;
@@ -370,6 +373,7 @@ bool ReadParams(
 						paramFileName = NULL;
 					}
 					RestoreLocale(oldLocale);
+					lCLocale--;
 					return FALSE;
 				}
 			}
@@ -385,6 +389,7 @@ bool ReadParams(
 				fclose(paramFile);
 			}
 			RestoreLocale(oldLocale);
+			lCLocale--;
 
 			NoticeMessage(MSG_PROG_CORRUPTED, _("Ok"), NULL, paramFileName);
 
@@ -399,6 +404,7 @@ bool ReadParams(
 	free(paramFileName);
 	paramFileName = NULL;
 	RestoreLocale(oldLocale);
+	lCLocale--;
 
 	return TRUE;
 }

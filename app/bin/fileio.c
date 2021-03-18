@@ -64,6 +64,7 @@ static coOrd paste_offset, cursor_offset;
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
 
+EXPORT long lCLocale = 0;
 
 
 #ifdef WINDOWS
@@ -111,6 +112,8 @@ SaveLocale( char *newLocale )
 
 	setlocale(LC_ALL, newLocale );
 
+	if ( lCLocale == 0 )
+		printf( "SaveLocale not TRUE\n" );
 	return( saveLocale );
 }
 
@@ -799,6 +802,7 @@ int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	long time0, time1;
 #endif
+	lCLocale++;
 	char *nameOfFile = NULL;
 
 	char *extOfFile;
@@ -812,6 +816,7 @@ int LoadTracks(
 	if (access(fileName[0], R_OK) != 0)
 	{
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found"));
+		lCLocale--;
 		return FALSE;
 	}
 
@@ -966,6 +971,7 @@ int LoadTracks(
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
+	lCLocale--;
 	return TRUE;
 }
 
@@ -999,6 +1005,7 @@ static BOOL_T DoSaveTracks(
 	char *oldLocale = NULL;
 
 	oldLocale = SaveLocale( "C" );
+	lCLocale++;
 
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
@@ -1006,6 +1013,7 @@ static BOOL_T DoSaveTracks(
 
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), fileName, strerror(errno) );
 
+		lCLocale--;
 		return FALSE;
 	}
 	wSetCursor( mainD.d, wCursorWait );
@@ -1032,6 +1040,7 @@ static BOOL_T DoSaveTracks(
 
 	checkPtMark = changed;
 	wSetCursor( mainD.d, defaultCursor );
+	lCLocale--;
 	return rc;
 }
 
