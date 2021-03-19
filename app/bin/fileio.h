@@ -144,8 +144,11 @@ void FileInit( void );
 
 BOOL_T MacroInit( void );
 
+extern long lCLocale;
 char *SaveLocale( char *newLocale );
 void RestoreLocale( char * locale );
+void SetCLocale();
+void SetUserLocal();
 
 // Parameter file search
 void DoSearchParams(void * junk);

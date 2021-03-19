@@ -49,7 +49,7 @@
 
 EXPORT dynArr_t paramProc_da;
 
-/* #define TIME_READTRACKFILE */
+#define TIME_READTRACKFILE
 
 #define COPYBLOCKSIZE	1024
 
@@ -90,6 +90,21 @@ static int Copyfile( char * fn1, char * fn2 )
 }
 #endif
 
+static char * sUserLocale = NULL;
+void SetCLocale()
+{
+	if ( sUserLocale == NULL ) {
+		sUserLocale = MyStrdup( setlocale( LC_ALL, NULL ) );
+	}
+	setlocale( LC_ALL, "C" );
+}
+
+void SetUserLocal()
+{
+	if ( sUserLocale )
+		setlocale( LC_ALL, sUserLocale );
+}
+
 /**
  * Save the old locale and set to new.
  *
@@ -100,6 +115,7 @@ static int Copyfile( char * fn1, char * fn2 )
 char *
 SaveLocale( char *newLocale )
 {
+#ifdef LATER
 	char *oldLocale;
 	char *saveLocale = NULL;
 
@@ -111,10 +127,11 @@ SaveLocale( char *newLocale )
 		saveLocale = strdup( oldLocale );
 
 	setlocale(LC_ALL, newLocale );
-
+	return( saveLocale );
+#endif
 	if ( lCLocale == 0 )
 		printf( "SaveLocale not TRUE\n" );
-	return( saveLocale );
+	return NULL;
 }
 
 /**
@@ -126,10 +143,12 @@ SaveLocale( char *newLocale )
 void
 RestoreLocale( char * locale )
 {
+#ifdef LATER
 	if( locale ) {
 		setlocale( LC_ALL, locale );
 		free( locale );
 	}
+#endif
 }
 
 
