@@ -108,9 +108,9 @@ char* ParseManifest(char* manifest, char* zip_directory)
 	char* background_file[1] = { NULL };
 	char* layoutname;
 
-	char *oldLocale = SaveLocale("C");
+	SetCLocale();
 	cJSON* json_manifest = cJSON_Parse(manifest);
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	cJSON* layout = cJSON_GetObjectItemCaseSensitive(json_manifest, "layout");
 	cJSON* name = cJSON_GetObjectItemCaseSensitive(layout, "name");

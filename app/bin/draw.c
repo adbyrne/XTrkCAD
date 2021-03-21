@@ -1310,10 +1310,12 @@ static void MapRedraw()
 	if (delayUpdate)
 	wDrawDelayUpdate( mapD.d, TRUE );
 	//wSetCursor( mapD.d, wCursorWait );
+	wBool_t bTemp = wDrawSetTempMode( mapD.d, FALSE );
 	wDrawClear( mapD.d );
 	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
 	DrawMapBoundingBox( TRUE );
 	//wSetCursor( mapD.d, defaultCursor );
+	wDrawSetTempMode( mapD.d, bTemp );
 	wDrawDelayUpdate( mapD.d, FALSE );
 }
 
@@ -1400,6 +1402,7 @@ EXPORT void MainRedraw( void )
 	if (delayUpdate)
 	wDrawDelayUpdate( mainD.d, TRUE );
 
+	wDrawSetTempMode( mainD.d, FALSE );
 	wDrawClear( mainD.d );
 
 	//mainD.d->option = 0;
@@ -1543,6 +1546,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 		LayoutToolBar(refresh);
 		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
 		if (height >= 0) {
+			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE );
 			wDrawSetSize( mainD.d, width-20, height, refresh );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
@@ -1553,6 +1557,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
 			wPrefSetInteger( "draw", "mainwidth", (int)width );
 			wPrefSetInteger( "draw", "mainheight", (int)height );
+			wDrawSetTempMode( mainD.d, bTemp );
 		} else	DrawMapBoundingBox( TRUE );
 		break;
 	case wState_e:
@@ -2763,12 +2768,11 @@ static wBool_t PlaybackMain( char * line )
 	int rc;
 	int action;
 	coOrd pos;
-	char *oldLocale = NULL;
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	rc=sscanf( line, "%d " SCANF_FLOAT_FORMAT SCANF_FLOAT_FORMAT, &action, &pos.x, &pos.y);
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	if (rc != 3) {
 		SyntaxError( "MOUSE", rc, 3 );
@@ -2783,12 +2787,11 @@ static wBool_t PlaybackKey( char * line )
 	int rc;
 	int action = C_TEXT;
 	coOrd pos;
-	char *oldLocale = NULL;
 	int c;
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 	rc=sscanf( line, "%d " SCANF_FLOAT_FORMAT SCANF_FLOAT_FORMAT, &c, &pos.x, &pos.y );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	if (rc != 3) {
 		SyntaxError( "MOUSE", rc, 3 );

@@ -190,7 +190,6 @@ static int CustomDoExport(
 	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
-	char *oldLocale = NULL;
 
 	assert( fileName != NULL );
 	assert( files == 1 );
@@ -222,7 +221,7 @@ static int CustomDoExport(
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	if (rc == -1)
 	{
@@ -245,7 +244,7 @@ static int CustomDoExport(
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
 			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName[ 0 ] );
 			fclose( customMgmF );
-			RestoreLocale(oldLocale);
+			SetUserLocale();
 			return FALSE;
 		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
@@ -255,7 +254,7 @@ static int CustomDoExport(
 		cnt--;
 	}
 	fclose( customMgmF );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	LoadParamFile( 1, fileName, NULL );
 	DoChangeNotification( CHANGE_PARAMS );
 	return TRUE;
@@ -273,18 +272,17 @@ static void CustomExport( void * junk )
 
 static void CustomDone( void * action )
 {
-	char *oldLocale = NULL;
 	FILE * f = OpenCustom("w");
 
 	if (f == NULL) {
 		wHide( customPG.win );
 		return;
 	}
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 	CompoundCustomSave(f);
 	CarCustomSave(f);
 	fclose(f);
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	wHide( customPG.win );
 }
 

@@ -1045,7 +1045,6 @@ static void GroupOk( void * junk )
 	trkEndPt_p endPtP;
 	PATHPTR_T path;
 	signed char pathChar;
-	char *oldLocale = NULL;
 
 	DYNARR_RESET( trkSeg_t, trackSegs_da );
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
@@ -1572,9 +1571,10 @@ LOG( log_group, 3, ( "\n" ) );
 		f = OpenCustom("a");
 		if (f && to) {
 			long options = 0;
-			oldLocale = SaveLocale("C");
+			SetCLocale();
 			rc &= fprintf( f, "TURNOUT %s \"%s\" %ld\n", curScaleName, PutTitle(to->title), options )>0;
 			rc &= WriteCompoundPathsEndPtsSegs( f, path, outputSegs_da.cnt, &outputSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
+			SetUserLocale();
 		}
 		if ( groupReplace ) {
 			/*
@@ -1626,9 +1626,10 @@ LOG( log_group, 3, ( "\n" ) );
 		to = CreateNewStructure( curScaleName, groupTitle, trackSegs_da.cnt, &trackSegs(0), TRUE );
 		f = OpenCustom("a");
 		if (f && to) {
-			oldLocale = SaveLocale("C");
+			SetCLocale();
 			rc &= fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName, PutTitle(groupTitle) )>0;
 			rc &= WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
+			SetUserLocale();
 		}
 		if ( groupReplace ) {
 			UndoStart( _("Group Tracks"), "group" );
@@ -1650,7 +1651,6 @@ LOG( log_group, 3, ( "\n" ) );
 		}
 	}
 	if (f) fclose(f);
-	RestoreLocale(oldLocale);
 	DoChangeNotification( CHANGE_PARAMS );
 	wHide( groupW );
 	wDrawDelayUpdate( mainD.d, FALSE );

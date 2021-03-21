@@ -71,7 +71,6 @@ int iParamVersion = PARAMVERSION;
 int iMinParamVersion = MINPARAMVERSION;
 long lParamKey = PARAMKEY;
 
-extern char *userLocale;
 
 EXPORT char * MakeWindowTitle( char * name )
 {
@@ -258,10 +257,5 @@ void CleanupCustom( void )
 	{
 		free(sPartsListFilePattern);
 		sPartsListFilePattern = NULL;
-	}
-	if (userLocale)
-	{
-		free(userLocale);
-		userLocale = NULL;
 	}
 }

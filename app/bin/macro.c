@@ -38,7 +38,6 @@
 EXPORT long adjTimer;
 static void DemoInitValues( void );
 
-extern char *userLocale;
 static int log_playbackCursor = 0;
 
 
@@ -984,7 +983,6 @@ static void Playback( void )
 	char * cp, * cq;
 	char *demoFileName = NULL;
 
-	lCLocale++;
 	useCurrentLayer = FALSE;
 	inPlayback = TRUE;
 	EnableButtons( FALSE );
@@ -994,8 +992,7 @@ static void Playback( void )
 		wWinTop( mainW );
 		demoWinOnTop = FALSE;
 	}
-	char * oldLocale = NULL;
-	oldLocale = SaveLocale( "C" );
+	SetCLocale();
 	while (TRUE) {
 		if ( ! inPlayback )
 			// User pressed Quit
@@ -1019,9 +1016,8 @@ static void Playback( void )
 			paramFile = fopen( demoFileName, "r" );
 			if ( paramFile == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName, strerror(errno) );
-				RestoreLocale( oldLocale );
 				inPlayback = FALSE;
-			lCLocale--;
+				SetUserLocale();
 				return;
 			}
 			
@@ -1039,9 +1035,8 @@ static void Playback( void )
 				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName, demoFileName );
 				fclose( paramFile );
 				paramFile = NULL;
-				RestoreLocale( oldLocale );
 				inPlayback = FALSE;
-			lCLocale--;
+				SetUserLocale();
 				return;
 			}
 			free(demoFileName);
@@ -1089,9 +1084,8 @@ static void Playback( void )
 				wPause( 1000 );
 				EnableButtons( FALSE );
 			} else {
-				RestoreLocale( oldLocale );
 				inPlayback = FALSE;
-			lCLocale--;
+				SetUserLocale();
 				return;
 			}
 		} else if (strncmp( paramLine, "CLEAR", 5 ) == 0) {
@@ -1108,9 +1102,8 @@ static void Playback( void )
 					wWinTop( demoW );
 					demoWinOnTop = TRUE;
 					EnableButtons( TRUE );
-					RestoreLocale( oldLocale );
 					inPlayback = FALSE;
-			lCLocale--;
+					SetUserLocale();
 					return;
 				}
 				PlaybackMessage( paramLine );
@@ -1284,9 +1277,8 @@ static void Playback( void )
 		if (pauseDemo) {
 			EnableButtons( TRUE );
 			pauseDemo = FALSE;
-			RestoreLocale( oldLocale );
 			inPlayback = FALSE;
-			lCLocale--;
+			SetUserLocale();
 			return;
 		}
 	}
@@ -1300,8 +1292,7 @@ static void Playback( void )
 	}
 	inPlayback = FALSE;
 	PlaybackQuit();
-	RestoreLocale( oldLocale );
-	lCLocale--;
+	SetUserLocale();
 }
 
 
@@ -1552,18 +1543,14 @@ static BOOL_T ReadDemo(
 {
 		static wMenu_p m;
 		char * cp;
-		char *oldLocale = NULL;
 		char *path;
 
 		if ( m == NULL )
 			m = demoM;
 
 		if ( strncmp( line, "DEMOGROUP ", 10 ) == 0 ) {
-			if (userLocale)
-				oldLocale = SaveLocale(userLocale);
 			m = wMenuMenuCreate( demoM, NULL, _(line+10) );
-			if (oldLocale)
-				RestoreLocale(oldLocale);
+
 		} else if ( strncmp( line, "DEMO ", 5 ) == 0 ) {
 			if (line[5] != '"')
 				goto error;
@@ -1576,14 +1563,10 @@ static BOOL_T ReadDemo(
 			if ( strlen(cp)==0 )
 				goto error;
 			DYNARR_APPEND( demoList_t, demoList_da, 10 );
-			if (userLocale)
-				oldLocale = SaveLocale(userLocale);
 			demoList( demoList_da.cnt-1 ).title = MyStrdup( _(line+6) );
 			MakeFullpath(&path, libDir, "demos", cp, NULL);
 			demoList(demoList_da.cnt - 1).fileName = path;
 			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, (void*)(intptr_t)(demoList_da.cnt-1) );
-			if (oldLocale)
-				RestoreLocale(oldLocale);
 		}
 		return TRUE;
 error:

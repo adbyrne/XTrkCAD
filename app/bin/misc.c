@@ -44,8 +44,6 @@
 #define DEFAULT_SCALE ("N")
 
 
-char *userLocale = NULL;
-
 extern wBalloonHelp_t balloonHelp[];
 
 static wMenuToggle_p mapShowMI;
@@ -2929,7 +2927,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	long oldToolbarMax;
 	long newToolbarMax;
 	char *cp;
-	char *oldLocale = NULL;
 	char buffer[STR_SIZE];
 	unsigned int i;
 	wWinPix_t displayWidth;
@@ -2944,9 +2941,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	InitGettext();
 
 	/* Save user locale */
-	oldLocale = setlocale(LC_ALL, NULL);
-	if (oldLocale)
-		userLocale = strdup(oldLocale);
+	SetCLocale();
+	SetUserLocale();
 
 	/*
 	 * ARGUMENTS

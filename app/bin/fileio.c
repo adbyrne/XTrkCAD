@@ -64,8 +64,6 @@ static coOrd paste_offset, cursor_offset;
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
 
-EXPORT long lCLocale = 0;
-
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -90,65 +88,46 @@ static int Copyfile( char * fn1, char * fn2 )
 }
 #endif
 
-static char * sUserLocale = NULL;
-void SetCLocale()
+//
+// Locale handling
+// SetCLocale is called before reading/writing any data files (.xtc, .xti, .xtq, .cus...)
+// SetUserLocale is called after
+// Calls can be nested: C, C, User, User
+// 
+static char * sUserLocale = NULL;	// current user locale
+static long lCLocale = 0;		// locale state: > 0 C locale, <= 0 user locale
+static long nCLocale = 0;		// total # of setlocals calls
+static int log_locale = 0;		// logging
+
+EXPORT void SetCLocale()
 {
 	if ( sUserLocale == NULL ) {
 		sUserLocale = MyStrdup( setlocale( LC_ALL, NULL ) );
 	}
-	setlocale( LC_ALL, "C" );
-}
-
-void SetUserLocal()
-{
-	if ( sUserLocale )
-		setlocale( LC_ALL, sUserLocale );
-}
-
-/**
- * Save the old locale and set to new.
- *
- * \param newlocale IN the new locale to set
- * \return    pointer to the old locale
- */
-
-char *
-SaveLocale( char *newLocale )
-{
-#ifdef LATER
-	char *oldLocale;
-	char *saveLocale = NULL;
-
-	/* get old locale setting */
-	oldLocale = setlocale(LC_ALL, NULL);
-
-	/* allocate memory to save */
-	if (oldLocale)
-		saveLocale = strdup( oldLocale );
-
-	setlocale(LC_ALL, newLocale );
-	return( saveLocale );
-#endif
-	if ( lCLocale == 0 )
-		printf( "SaveLocale not TRUE\n" );
-	return NULL;
-}
-
-/**
- * Restore a previously saved locale.
- *
- * \param locale IN return value from earlier call to SaveLocale
- */
-
-void
-RestoreLocale( char * locale )
-{
-#ifdef LATER
-	if( locale ) {
-		setlocale( LC_ALL, locale );
-		free( locale );
+	if ( lCLocale == 0 ) {
+		LOG( log_locale, 1, ( "Set C Locale: %ld\n", ++nCLocale ) );
+		setlocale( LC_ALL, "C" );
 	}
-#endif
+	lCLocale++;
+	if ( lCLocale > 1 ) {
+		LOG( log_locale, 3, ( "SetClocale - C! %ld\n", nCLocale) );
+	} else if ( lCLocale < 1 ) {
+		LOG( log_locale, 2, ( "SetClocale - User! %ld\n", nCLocale) );
+	}
+}
+
+EXPORT void SetUserLocale()
+{
+	if ( lCLocale == 1 ) {
+		LOG( log_locale, 1, ( "Set %s Locale: %ld\n", sUserLocale, ++nCLocale ) );
+		setlocale( LC_ALL, sUserLocale );
+	}
+	lCLocale--;
+	if ( lCLocale < 0 ) {
+		LOG( log_locale, 2, ("SetUserLocale - User! %ld\n", nCLocale) );
+	} else if ( lCLocale > 0 ) {
+		LOG( log_locale, 3, ("SetUserLocale - C! %ld\n", nCLocale) );
+	}
 }
 
 
@@ -299,10 +278,10 @@ EXPORT BOOL_T GetArgs(
 	char * ps;
 	char ** qp;
 	va_list ap;
-	char *oldLocale = NULL;
 	char * sError = NULL;
 
-	oldLocale = SaveLocale("C");
+	if ( lCLocale < 1 )
+		LOG( log_locale, 1, ( "GetArgs: not in C locale\n" ) );
 
 	cp = line;
 	va_start( ap, format );
@@ -466,7 +445,6 @@ EXPORT BOOL_T GetArgs(
 		}
 	}
 	va_end( ap );
-	RestoreLocale(oldLocale);
 	if ( sError ) {
 		InputError( sError, TRUE, cp );
 		return FALSE;
@@ -675,22 +653,16 @@ static BOOL_T ReadTrackFile(
 	coOrd roomSize;
 	long scale;
 	char * cp;
-	char *oldLocale = NULL;
 	int ret = TRUE;
-
-	oldLocale = SaveLocale( "C" );
 
 	paramFile = fopen( pathName, "r" );
 	if (paramFile == NULL) {
-		/* Reset the locale settings */
-		RestoreLocale( oldLocale );
-
 		if ( complain )
 			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, sProdName, pathName, strerror(errno) );
-
 		return FALSE;
 	}
 
+	SetCLocale();
 	checkPtFileNameBackup = NULL;
 	paramLineNum = 0;
 	paramFileName = strdup( fileName );
@@ -803,10 +775,9 @@ static BOOL_T ReadTrackFile(
 	 if (skipLines>0)
 		 NoticeMessage( MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
 
-	RestoreLocale( oldLocale );
-
 	paramFile = NULL;
 
+	SetUserLocale();
 	free(paramFileName);
     paramFileName = NULL;
 	InfoMessage( "%d", count );
@@ -821,7 +792,6 @@ int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	long time0, time1;
 #endif
-	lCLocale++;
 	char *nameOfFile = NULL;
 
 	char *extOfFile;
@@ -835,7 +805,6 @@ int LoadTracks(
 	if (access(fileName[0], R_OK) != 0)
 	{
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found"));
-		lCLocale--;
 		return FALSE;
 	}
 
@@ -990,7 +959,6 @@ int LoadTracks(
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
-	lCLocale--;
 	return TRUE;
 }
 
@@ -1021,20 +989,14 @@ static BOOL_T DoSaveTracks(
 	FILE * f;
 	time_t clock;
 	BOOL_T rc = TRUE;
-	char *oldLocale = NULL;
 
-	lCLocale++;
-	oldLocale = SaveLocale( "C" );
 
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
-		RestoreLocale( oldLocale );
-
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), fileName, strerror(errno) );
-
-		lCLocale--;
 		return FALSE;
 	}
+	SetCLocale();
 	wSetCursor( mainD.d, wCursorWait );
 	time(&clock);
 	rc &= fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) )>0;
@@ -1055,11 +1017,9 @@ static BOOL_T DoSaveTracks(
 	fclose(f);
 	bReadOnly = FALSE;
 
-	RestoreLocale( oldLocale );
-
 	checkPtMark = changed;
 	wSetCursor( mainD.d, defaultCursor );
-	lCLocale--;
+	SetUserLocale();
 	return rc;
 }
 
@@ -1169,7 +1129,7 @@ static int SaveTracks(
 			CopyDependency(background,DependencyDir);
 
 		//The details are stored into the manifest - TODO use arrays for files, locations
-		char *oldLocale = SaveLocale("C");
+		SetCLocale();
 		char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
 		char * manifest_file;
 
@@ -1183,7 +1143,7 @@ static int SaveTracks(
 		} else {
 			NoticeMessage( MSG_MANIFEST_FAIL, _("Continue"), NULL, manifest_file );
 		}
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 
 		free(manifest_file);
 		free(json_Manifest);
@@ -1529,7 +1489,6 @@ static int DoExportTracks(
 {
 	FILE * f;
 	time_t clock;
-	char *oldLocale = NULL;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );
@@ -1541,7 +1500,7 @@ static int DoExportTracks(
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	wSetCursor( mainD.d, wCursorWait );
 	time(&clock);
@@ -1552,7 +1511,7 @@ static int DoExportTracks(
 	fprintf(f, "%s\n", END_TRK_FILE);
 	fclose(f);
 
-	RestoreLocale( oldLocale );
+	SetUserLocale();
 
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
@@ -1579,7 +1538,6 @@ EXPORT BOOL_T EditCopy( void )
 {
 	FILE * f;
 	time_t clock;
-	char *oldLocale = NULL;
 
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
@@ -1591,14 +1549,14 @@ EXPORT BOOL_T EditCopy( void )
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
 	ExportTracks(f, &paste_offset);
 	fprintf(f, "%s\n", END_TRK_FILE );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	fclose(f);
 
 	return TRUE;
@@ -1625,9 +1583,6 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 {
 
 	BOOL_T rc = TRUE;
-	char *oldLocale = NULL;
-
-	oldLocale = SaveLocale("C");
 
 	wSetCursor( mainD.d, wCursorWait );
 	Reset();
@@ -1657,7 +1612,6 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	UpdateAllElevations();
-	RestoreLocale(oldLocale);
 
 	return rc;
 }
@@ -1690,4 +1644,5 @@ EXPORT void FileInit( void )
 	SetLayoutFullPath("");
 		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
 
+	log_locale = LogFindIndex( "locale" );
 }

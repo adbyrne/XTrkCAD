@@ -729,9 +729,8 @@ static BOOL_T CarProtoWrite(
 		carProto_t * proto )
 {
 	BOOL_T rc = TRUE;
-	char *oldLocale = NULL;
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	long longCenterOffset = (long)(proto->dim.truckCenterOffset*1000);
 
@@ -739,7 +738,7 @@ static BOOL_T CarProtoWrite(
 		PutTitle(proto->desc), proto->options, proto->type, proto->dim.carLength, proto->dim.carWidth, longCenterOffset, proto->dim.truckCenter, proto->dim.coupledLength )>0;
 	rc &= WriteSegs( f, proto->segCnt, proto->segPtr );
 
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	return rc;
 }
@@ -1115,11 +1114,10 @@ static BOOL_T CarPartWrite(
 		carPart_p partP )
 {
 	BOOL_T rc = TRUE;
-	char *oldLocale = NULL;
 	carPartParent_p parentP=partP->parent;
 	tabString_t tabs[7];
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	TabStringExtract( partP->title, 7, tabs );
 	sprintf( message, "%s\t%s\t%.*s\t%.*s\t%.*s\t%.*s\t%.*s",
@@ -1133,7 +1131,7 @@ static BOOL_T CarPartWrite(
 	rc &= fprintf( f, " %ld %ld %0.3f %0.3f 0 0 %0.3f %0.3f %ld\n",
 		partP->options, partP->type, partP->dim.carLength, partP->dim.carWidth, partP->dim.truckCenter, partP->dim.coupledLength, wDrawGetRGB(partP->color) )>0;
 
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	return rc;
 }
@@ -1366,10 +1364,9 @@ static BOOL_T CarItemWrite(
 	coOrd pos;
 	ANGLE_T angle;
 	BOOL_T rc = TRUE;
-	char *oldLocale = NULL;
 	long longCenterOffset = (long)(item->dim.truckCenterOffset*1000);
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	if ( item->data.notes && item->data.notes[0] )
 		options |= CAR_ITEM_HASNOTES;
@@ -1398,7 +1395,7 @@ static BOOL_T CarItemWrite(
 		rc &= fprintf( f, "\n" )>0;
 	}
 
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	return rc;
 }
@@ -3998,7 +3995,6 @@ static void CarDlgOk( void * junk )
 	carPart_p partP=NULL;
 	carProto_p protoP;
 	BOOL_T reloadRoadnameList = FALSE;
-	char *oldLocale = NULL;
 
 LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 
@@ -4043,10 +4039,10 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			partP = CarPartNew( NULL, PARAM_CUSTOM, carDlgScaleInx, title, options, typeListMap[carDlgTypeInx].value, &carDlgDim, carDlgBodyColor );
 			if ( partP != NULL ) {
 				if ( ( f = OpenCustom("a") ) ) {
-					oldLocale = SaveLocale("C");
+					SetCLocale();
 					CarPartWrite( f, partP );
 					fclose(f);
-					RestoreLocale(oldLocale);
+					SetUserLocale();
 				}
 			}
 		}
@@ -4129,10 +4125,10 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		carDlgNewPartPtr = CarPartNew( carDlgUpdatePartPtr, PARAM_CUSTOM, carDlgScaleInx, message, options, typeListMap[carDlgTypeInx].value,
 					&carDlgDim, carDlgBodyColor );
 		if ( carDlgNewPartPtr != NULL && ( f = OpenCustom("a") ) ) {
-			oldLocale = SaveLocale("C");
-				CarPartWrite( f, carDlgNewPartPtr );
-				fclose(f);
-				RestoreLocale(oldLocale);
+			SetCLocale();
+			CarPartWrite( f, carDlgNewPartPtr );
+			fclose(f);
+			SetUserLocale();
 		}
 		reloadRoadnameList = TRUE;
 		sprintf( message, _("%s Part: %s %s %s %s %s %s"), carDlgUpdatePartPtr==NULL?_("Added new"):_("Updated"), carDlgManufStr, carDlgPartnoStr, carDlgProtoStr, carDlgDescStr, carDlgRepmarkStr[ 0 ]?carDlgRepmarkStr:carDlgRoadnameStr, carDlgNumberStr );
@@ -4146,10 +4142,10 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		}
 		carDlgNewProtoPtr = CarProtoNew( carDlgUpdateProtoPtr, PARAM_CUSTOM, carDlgProtoStr, options, typeListMap[carDlgTypeInx].value, &carDlgDim, carDlgSegs_da.cnt, &carDlgSegs(0) );
 		if ( (f = OpenCustom("a") ) ) {
-			oldLocale = SaveLocale("C");
+			SetCLocale();
 			CarProtoWrite( f, carDlgNewProtoPtr );
 			fclose(f);
-			RestoreLocale(oldLocale);
+			SetUserLocale();
 		}
 		sprintf( message, _("%s Prototype: %s%s."),
 				carDlgUpdateProtoPtr==NULL?_("Added new"):_("Updated"), carDlgProtoStr,
@@ -4745,7 +4741,6 @@ static int CarInvImportCsv(
 	SCALEINX_T scale;
 	carPart_p partP;
 	int requiredCols;
-	char *oldLocale = NULL;
 
 	assert( fileName != NULL );
 	assert( files == 1 );
@@ -4757,19 +4752,19 @@ static int CarInvImportCsv(
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	if ( fgets( message, sizeof message, f ) == NULL ) {
 		NoticeMessage( MSG_CARIMP_NO_DATA, _("Continue"), NULL );
 		fclose( f );
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 		return FALSE;
 	}
 	for ( j=0; j<40; j++ ) map[j] = j;
 	numCol = ParseCsvLine( message, 40, tabs, map );
 	if ( numCol <= 0 ) {
 		fclose( f );
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 		return FALSE;
 	}
 	for ( j=0; j<40; j++ ) map[j] = -1;
@@ -4780,7 +4775,7 @@ static int CarInvImportCsv(
 				if ( map[i] >= 0 ) {
 					NoticeMessage( MSG_CARIMP_DUP_COLUMNS, _("Continue"), NULL, carCsvColumnTitles[j] );
 					fclose( f );
-					RestoreLocale(oldLocale);
+					SetUserLocale();
 					return FALSE;
 				}
 				map[i] = j;
@@ -4798,7 +4793,7 @@ static int CarInvImportCsv(
 	if ( requiredCols != 4 ) {
 		NoticeMessage( MSG_CARIMP_MISSING_COLUMNS, _("Continue"), NULL );
 		fclose( f );
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 		return FALSE;
 	}
 	while ( fgets( message, sizeof message, f ) != NULL ) {
@@ -4828,7 +4823,7 @@ static int CarInvImportCsv(
 				rc = NoticeMessage( MSG_CARIMP_MISSING_PARTNO, _("Continue"), _("Stop"), tabs[M_MANUF].ptr );
 				if ( rc <= 0 ) {
 					fclose( f );
-					RestoreLocale(oldLocale);
+					SetUserLocale();
 					return FALSE;
 				}
 				continue;
@@ -4883,7 +4878,7 @@ static int CarInvImportCsv(
 			rc = NoticeMessage( MSG_CARIMP_MISSING_DIMS, _("Yes"), _("No"), message );
 			if ( rc <= 0 ) {
 				fclose( f );
-				RestoreLocale(oldLocale);
+				SetUserLocale();
 				return FALSE;
 			}
 			continue;
@@ -4908,7 +4903,7 @@ static int CarInvImportCsv(
 		SetWindowTitle();
 	}
 	fclose( f );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	CarInvListLoad();
 	return TRUE;
 }
@@ -4982,7 +4977,6 @@ static int CarInvExportCsv(
 	long inx;
 	tabString_t tabs[7];
 	char * sp;
-	char *oldLocale = NULL;
 
 	assert( fileName != NULL );
 	assert( files == 1 );
@@ -4994,7 +4988,7 @@ static int CarInvExportCsv(
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	for ( inx=0; inx<sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0]; inx++ ) {
 		CsvFormatString( f, carCsvColumnTitles[inx], strlen(carCsvColumnTitles[inx]), inx<(sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0])-1?",":"\n" );
@@ -5031,7 +5025,7 @@ static int CarInvExportCsv(
 			CsvFormatString( f, "", strlen(""), "\n" );
 	}
 	fclose( f );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	return TRUE;
 }
 
