@@ -2970,8 +2970,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case C_OK:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
-
-		/*DrawOk( NULL );*/
+	case C_CONFIRM:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
+		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
 
 	case C_FINISH:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
