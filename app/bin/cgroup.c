@@ -1631,7 +1631,7 @@ LOG( log_group, 3, ( "\n" ) );
 			rc &= WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
 		}
 		if ( groupReplace ) {
-			UndoStart( _("Group Tracks"), "group" );
+			UndoStart( _("Group Draws"), "group" );
 			trk = NULL;
 			while ( TrackIterate( &trk ) ) {
 				if ( GetTrkSelected( trk ) ) {

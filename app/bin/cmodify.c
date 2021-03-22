@@ -172,7 +172,7 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 }
 
 /*
- * Picking a DRAW will allow point modifications until terminated with "Enter"
+ * Picking a DRAW will allow point modifications until terminated with "Enter"/"Space"
  */
 static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
@@ -191,8 +191,9 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			//Delete or '0' - continues
 			if ((action>>8 !=32) && (action >>8 !=13))
 				return ModifyTrack( Dex.Trk, action, pos );
-			//Enter/Space does not
-			if ((action>>8 !=32) && (action>>8 != 13)) return C_CONTINUE;
+			//Enter/Spac/Tab does not
+			if ((action>>8 !=32) && (action>>8 != 13) && (action>>8 != 9)) return C_CONTINUE;
+			if ((action>>8) == 9 && (MyGetKeyState()&WKEY_SHIFT)) return C_TERMINATE;
 			/*no break*/
 		case C_OK:
 			UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );

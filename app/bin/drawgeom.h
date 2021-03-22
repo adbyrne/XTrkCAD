@@ -68,6 +68,7 @@ typedef struct {
 				int Started;
 				BOOL_T Changed;
 				BOOL_T show;
+				BOOL_T UndoStarted;
 		} drawContext_t;
 
 typedef enum {MOD_NONE, MOD_STARTED, MOD_SELECTED_PT, MOD_AFTER_PT,
@@ -113,6 +114,7 @@ typedef struct {
 				wBool_t open;
 				wBool_t filled;
 				PolyType_e subtype;
+				BOOL_T UndoStarted;
 		} drawModContext_t;
 
 typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;

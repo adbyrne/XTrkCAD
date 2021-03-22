@@ -792,7 +792,7 @@ BOOL_T UndoUndo( void )
 		return FALSE;
 	}
 
-	ConfirmReset( FALSE );
+	int rc = ConfirmReset( FALSE );
 	wDrawDelayUpdate( mainD.d, TRUE );
 	us = &undoStack[undoHead];
 LOG( log_undo, 1, ( "    undoUndo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doCount, undoCount, us->newCnt, us->modCnt, us->delCnt ) )
@@ -869,7 +869,7 @@ BOOL_T UndoRedo( void )
 		return FALSE;
 	}
 
-	ConfirmReset( FALSE );
+	int rc = ConfirmReset( FALSE );
 	wDrawDelayUpdate( mainD.d, TRUE );
 	INC_UNDO_INX( undoHead );
 	us = &undoStack[undoHead];

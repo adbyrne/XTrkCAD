@@ -250,7 +250,7 @@ wIndex_t GetCurrentCommand(void);
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
-void ConfirmReset( BOOL_T );
+int ConfirmReset( BOOL_T );
 void LayoutToolBar( void * );
 #define IC_STICKY               (1<<0)
 #define IC_INITNOTSTICKY        (1<<1)

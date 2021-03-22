@@ -75,14 +75,15 @@ static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 
 
 
-static void DrawGeomOk( void )
+static void DrawGeomOk( BOOL_T started )
 {
 	track_p trk;
 	int inx;
 
 	if (tempSegs_da.cnt <= 0)
 		return;
-	UndoStart( _("Create Lines"), "newDraw" );
+	if (!started)
+		UndoStart( _("Create Lines"), "newDraw" );
 	for ( inx=0; inx<tempSegs_da.cnt; inx++ ) {
 		trk = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
 		DrawNewTrack( trk );
@@ -269,6 +270,7 @@ STATUS_T DrawGeomMouse(
 		default:
 		break;
 		}
+		context->Changed = TRUE;					//Update made
 		MainRedraw();
 		anchors_da.cnt = 0;
 		return C_CONTINUE;
@@ -287,6 +289,7 @@ STATUS_T DrawGeomMouse(
 			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
 		wSetCursor(mainD.d,defaultCursor);
 		movePos = zero;
+		context->UndoStarted = FALSE;
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -356,8 +359,9 @@ STATUS_T DrawGeomMouse(
 			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE)) {
 				EndPoly(context, segCnt, context->Op==OP_POLYLINE);
 			} else {
-				DrawGeomOk();
+				DrawGeomOk(TRUE);
 			}
+			context->UndoStarted = FALSE;
 			segCnt = 0;
 			anchors_da.cnt = 0;
 			context->State = 0;
@@ -894,13 +898,14 @@ STATUS_T DrawGeomMouse(
 			return C_CONTINUE;
 		}
 		context->Started = FALSE;
-		context->Changed = TRUE;					//Update screen shown
 		/*CheckOk();*/
 		if (context->State == 2 && IsCurCommandSticky()) {
 			segCnt = tempSegs_da.cnt;
+			UndoStart("Create Lines","Sticky Draw");
+			context->UndoStarted = TRUE;
 			return C_CONTINUE;
 		}
-		DrawGeomOk();
+		DrawGeomOk(FALSE);
 		context->State = 0;
 		context->Changed = FALSE;
 		context->message("");
@@ -908,8 +913,10 @@ STATUS_T DrawGeomMouse(
 
 	case wActionText:
 		DYNARR_RESET(trkSeg_t, anchors_da );
-		if ( ((action>>8)&0xFF) == 0x0D ||
-			 ((action>>8)&0xFF) == ' ' ) {
+		int key = (action>>8&0xFF);
+		if ( key == 0x0D ||
+			 key == ' ' ||
+			(key == 0x09  && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT))) {   //Tab continue
 			if ((context->Op == OP_POLY) || (context->Op == OP_FILLPOLY) || (context->Op == OP_POLYLINE)) {
 				tempSegs_da.cnt = segCnt;
 				//If last segment wasn't just a point, add another starting on its end
@@ -924,22 +931,30 @@ STATUS_T DrawGeomMouse(
                 DYNARR_RESET(pts_t, points_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 			} else {
-				if (context->State == 2)
+				if (context->State == 2) {
 					tempSegs_da.cnt = segCnt;
-				DrawGeomOk();
+					DrawGeomOk(context->UndoStarted);
+					context->UndoStarted = FALSE;;
+				}
 			}
+			context->State = 0;
+			segCnt = 0;
+			return C_TERMINATE;
+		} else if (key == 0x09 && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT)) {  //Tab plus shift - abandon
+			context->State = 0;
+			segCnt = 0;
+			return C_TERMINATE;
 		}
-		context->State = 0;
-		segCnt = 0;
-		return C_TERMINATE;
+		return C_CONTINUE;
+
+	case C_CONFIRM:
+		if (context->State==2 && IsCurCommandSticky()) {
+			DrawGeomOk(context->UndoStarted);
+		}
+		context->Changed = FALSE;
+		return C_CONTINUE;
 
 	case C_CANCEL:
-		if (context->Changed) {				//If the update values were shown
-			if (context->State == 2) {
-				tempSegs_da.cnt = segCnt;
-				DrawGeomOk();
-			}
-		}
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		tempSegs_da.cnt = 0;
 		context->message( "" );
@@ -1602,7 +1617,8 @@ STATUS_T DrawGeomPolyModify(
 				InfoMessage(_("Point Deleted"));
 				return C_CONTINUE;
 			}
-			if (action>>8 != 32 && action>>8 != 13) return C_CONTINUE;
+			if (action>>8 != 32 && action>>8 != 13 && action>>8 !=9) return C_CONTINUE;
+			if (action>>8 == 9 && (MyGetKeyState() & WKEY_SHIFT) != 0) return C_TERMINATE;
 			/* no break */
 		case C_FINISH:
 			//copy changes back into track
