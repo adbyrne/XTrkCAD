@@ -371,10 +371,7 @@ static void ReadCustom(void)
 
 
 /*
- * Open the file and then set the locale to "C". Old locale will be copied to
- * oldLocale. After the required file I/O is done, the caller must call
- * CloseCustom() with the same locale value that was returned in oldLocale by
- * this function.
+ * Open the custonm file
  */
 
 FILE * OpenCustom(char *mode)
@@ -426,8 +423,10 @@ BOOL_T ParamFileListInit(void)
 {
     log_params = LogFindIndex("params");
 
+    SetCLocale();
 	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
+	SetUserLocale();
         return FALSE;
     }
 
@@ -438,6 +437,7 @@ BOOL_T ParamFileListInit(void)
         ReadCustom();
     }
 
+    SetUserLocale();
     return TRUE;
 
 }

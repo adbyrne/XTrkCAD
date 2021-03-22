@@ -2648,7 +2648,6 @@ static void NewTurnOk( void * context )
 	FLOAT_T flt;
 	wIndex_t segCnt;
 	char * customInfoP;
-	char *oldLocale = NULL;
 
 	if ((pp=LoadSegs( curDesign, TRUE )) == NULL)
 		return;
@@ -2666,7 +2665,7 @@ static void NewTurnOk( void * context )
 		if ( !NoticeMessage( MSG_TODSGN_REPLACE, _("Yes"), _("No") ) )
 			return;
 	}
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 #endif
 
 	f = OpenCustom("a");
@@ -2830,7 +2829,7 @@ static void NewTurnOk( void * context )
 #ifndef MKTURNOUT
 	if (f)
 		fclose(f);
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	includeNontrackSegments = TRUE;
 	wHide( newTurnW );
 	DoChangeNotification( CHANGE_PARAMS );

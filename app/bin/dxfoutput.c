@@ -164,7 +164,6 @@ static int DoExportDXFTracks(
     void * data)
 {
     time_t clock;
-    char *oldLocale;
 	DynString command = NaS;
 	FILE * dxfF;
 
@@ -182,7 +181,7 @@ static int DoExportDXFTracks(
         return FALSE;
     }
 
-    oldLocale = SaveLocale("C");
+    SetCLocale();
     wSetCursor(mainD.d, wCursorWait);
     time(&clock);
  
@@ -197,7 +196,7 @@ static int DoExportDXFTracks(
 	fputs(DynStringToCStr(&command), dxfF);
 
     fclose(dxfF);
-    RestoreLocale(oldLocale);
+    SetUserLocale();
     Reset();
     wSetCursor(mainD.d, defaultCursor);
     return TRUE;

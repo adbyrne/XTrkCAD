@@ -449,7 +449,6 @@ void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
 
-
 #include "misc2.h"
 
 #endif
