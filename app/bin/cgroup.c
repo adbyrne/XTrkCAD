@@ -1632,7 +1632,7 @@ LOG( log_group, 3, ( "\n" ) );
 			SetUserLocale();
 		}
 		if ( groupReplace ) {
-			UndoStart( _("Group Tracks"), "group" );
+			UndoStart( _("Group Draws"), "group" );
 			trk = NULL;
 			while ( TrackIterate( &trk ) ) {
 				if ( GetTrkSelected( trk ) ) {

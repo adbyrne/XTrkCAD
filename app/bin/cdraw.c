@@ -1737,7 +1737,13 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		}
 		break;
 	case C_CONFIRM:
+	case C_OK:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		ComputeDrawBoundingBox( trk );
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
 		break;
 	case C_CANCEL:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
@@ -2970,8 +2976,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case C_OK:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
-
-		/*DrawOk( NULL );*/
+	case C_CONFIRM:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
+		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
 
 	case C_FINISH:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);

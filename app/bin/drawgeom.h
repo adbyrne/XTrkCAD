@@ -68,6 +68,7 @@ typedef struct {
 				int Started;
 				BOOL_T Changed;
 				BOOL_T show;
+				BOOL_T UndoStarted;
 		} drawContext_t;
 
 typedef enum {MOD_NONE, MOD_STARTED, MOD_SELECTED_PT, MOD_AFTER_PT,

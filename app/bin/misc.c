@@ -1314,9 +1314,12 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 	return rc;
 }
 
-EXPORT void ConfirmReset(BOOL_T retry) {
+/*
+ * \parm reset says if the user used Esc rather than undo/redo
+ */
+EXPORT int ConfirmReset(BOOL_T retry) {
 	wAction_t rc;
-	if (curCommand != describeCmdInx && curCommand != selectCmdInx) {
+	if (curCommand != describeCmdInx) {
 		LOG(log_command, 3,
 				( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_CONFIRM, zero);
@@ -1327,25 +1330,25 @@ EXPORT void ConfirmReset(BOOL_T retry) {
 						wNotice3(
 								_(
 										"Cancelling the current command will undo the changes\n"
-												"you are currently making. Do you want to update?"),
+												"you are currently making. Do you want to do the update instead?"),
 								_("Yes"), _("No"), _("Cancel"));
 			else
 				rc =
 						wNoticeEx( NT_WARNING,
 								_(
 										"Cancelling the current command will undo the changes\n"
-												"you are currently making. Do you want to update?"),
+												"you are currently making. Do you want to do the update instead?"),
 								_("Yes"), _("No"));
 			if (rc == 1) {
 				LOG(log_command, 3,
 						( "COMMAND OK %s\n", commandList[curCommand].helpKey ))
 				commandList[curCommand].cmdProc( C_OK, zero);
-				return;
+				return C_OK;
 			} else if (rc == -1) {
-				return;
+				return C_CANCEL;
 			}
 		} else if (rc == C_TERMINATE) {
-			return;
+			return C_TERMINATE;
 		}
 	}
 	if (retry) {
@@ -1356,6 +1359,7 @@ EXPORT void ConfirmReset(BOOL_T retry) {
 	LOG(log_command, 1,
 			( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_START, zero);
+	return C_CONTINUE;
 }
 
 EXPORT BOOL_T IsCurCommandSticky(void) {
