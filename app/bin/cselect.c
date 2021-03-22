@@ -3541,6 +3541,10 @@ static STATUS_T CmdSelect(
 			moveDescTrk = NULL;
 		}
 		break;
+	case C_CONFIRM:
+		if (doingDouble)
+			return CallModify(action,pos);
+		return C_CONTINUE;
 	case C_FINISH:
 		if (doingDouble) {
 			CallModify(C_OK,pos);

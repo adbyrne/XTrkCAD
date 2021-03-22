@@ -189,22 +189,22 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			break;
 		case C_TEXT:
 			//Delete or '0' - continues
-			if ((action>>8 !=32) && (action >>8 !=13))
+			if ((action>>8 !=32) && (action >>8 !=13) && (action >>8 !=9))
 				return ModifyTrack( Dex.Trk, action, pos );
-			//Enter/Spac/Tab does not
+			//Enter/Space/Tab does not
 			if ((action>>8 !=32) && (action>>8 != 13) && (action>>8 != 9)) return C_CONTINUE;
-			if ((action>>8) == 9 && (MyGetKeyState()&WKEY_SHIFT)) return C_TERMINATE;
+			if (((action>>8) == 9 && (MyGetKeyState()&WKEY_SHIFT))) return C_TERMINATE;
 			/*no break*/
 		case C_OK:
-			UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
-			UndoModify( Dex.Trk );
-			rc = ModifyTrack( Dex.Trk, C_TEXT | (13<<8), pos );
+			rc = ModifyTrack( Dex.Trk, C_OK, pos );
 			if (rc != C_CONTINUE) modifyDrawMode = FALSE;
 			UndoEnd();
 			break;
+		case C_CONFIRM:
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
 		case C_CANCEL:
 		case C_FINISH:
-		case C_CONFIRM:
 		case C_TERMINATE:
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			Dex.Trk = NULL;

@@ -1321,7 +1321,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
  */
 EXPORT int ConfirmReset(BOOL_T retry) {
 	wAction_t rc;
-	if (curCommand != describeCmdInx && curCommand != selectCmdInx) {
+	if (curCommand != describeCmdInx) {
 		LOG(log_command, 3,
 				( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_CONFIRM, zero);
@@ -1361,7 +1361,7 @@ EXPORT int ConfirmReset(BOOL_T retry) {
 	LOG(log_command, 1,
 			( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_START, zero);
-	return C_START;
+	return C_CONTINUE;
 }
 
 EXPORT BOOL_T IsCurCommandSticky(void) {

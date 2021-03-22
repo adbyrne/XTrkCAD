@@ -934,12 +934,14 @@ STATUS_T DrawGeomMouse(
 				if (context->State == 2) {
 					tempSegs_da.cnt = segCnt;
 					DrawGeomOk(context->UndoStarted);
-					context->UndoStarted = FALSE;;
+					context->UndoStarted = FALSE;
+
 				}
 			}
 			context->State = 0;
 			segCnt = 0;
-			return C_TERMINATE;
+			if (key == 0x0D) return C_CONTINUE;					//Esc - go to Reset
+			else return C_TERMINATE;							//Space/Enter/Tab - end command
 		} else if (key == 0x09 && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT)) {  //Tab plus shift - abandon
 			context->State = 0;
 			segCnt = 0;
@@ -1620,6 +1622,8 @@ STATUS_T DrawGeomPolyModify(
 			if (action>>8 != 32 && action>>8 != 13 && action>>8 !=9) return C_CONTINUE;
 			if (action>>8 == 9 && (MyGetKeyState() & WKEY_SHIFT) != 0) return C_TERMINATE;
 			/* no break */
+		case C_CONFIRM:
+		case C_OK:
 		case C_FINISH:
 			//copy changes back into track
 			if (polyState != POLY_SELECTED) {
@@ -1647,7 +1651,8 @@ STATUS_T DrawGeomPolyModify(
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			DYNARR_RESET(trkSeg_t,points_da);
 			DYNARR_RESET(trkSeg_t,tempSegs_da);
-			return C_TERMINATE;
+			if ((action&0xFF)==C_CONFIRM) return C_CONTINUE;
+			else return C_TERMINATE;
 		case C_REDRAW:
 			if (polyState == POLY_NONE) return C_CONTINUE;
 			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt,trackGauge, wDrawColorBlack);
@@ -2165,6 +2170,7 @@ STATUS_T DrawGeomModify(
 		UndrawNewTrack( context->trk );
 		return C_CONTINUE;
 	case C_MOVE:
+
 		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
 		if (context->state != MOD_SELECTED_PT) return C_CONTINUE;
@@ -2375,7 +2381,6 @@ STATUS_T DrawGeomModify(
 		return C_CONTINUE;
 	case C_UP:
 		if (context->rotate_state) return DrawGeomOriginMove(action, pos, context);
-
 		if (polyMode) {
 			int rc;
 			rc = DrawGeomPolyModify(action,pos,context);
@@ -2549,7 +2554,13 @@ STATUS_T DrawGeomModify(
 
 		if (action>>8 != 32 && action>>8 != 13) return C_CONTINUE;
 		/* no break */
+	case C_CONFIRM:
+		return C_CONTINUE;
+		/* no break*/
+	case C_OK:
 	case C_FINISH:
+		UndoStart("Modify Draw", "OK");
+		UndoModify(context->trk);
 		if (polyMode) {
 			DrawGeomPolyModify(action,pos,context);
 			context->segPtr[segInx].type = context->type;

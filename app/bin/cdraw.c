@@ -1737,7 +1737,13 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		}
 		break;
 	case C_CONFIRM:
+	case C_OK:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		ComputeDrawBoundingBox( trk );
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
 		break;
 	case C_CANCEL:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
