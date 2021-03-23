@@ -3763,10 +3763,10 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		cp = (char*)pg->paramPtr[inx].valueP;
 		if ( *cp ) {
 			valL = strtol( cp, &cq, 10 );
-			if ( cq==NULL || *cq!='\0' ) {
+			if ( cq==NULL || *cq !='\0' ) {
 				cp = N_("Enter a 8 digit numeric date (yyyymmdd)");
-			} else if ( valL != 0 ) {
-				if ( strlen(cp) != 8 ) {
+			} else {
+				if ( strlen(cp) != 8  || valL == 0) {
 					cp = N_("Enter a 8 digit numeric date (yyyymmdd)");
 				} else if ( valL < 19000101 || valL > 21991231 ) {
 					cp = N_("Enter a date between 19000101 and 21991231");
@@ -3783,16 +3783,21 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 				}
 			}
 			if ( cp ) {
-				valL = 0;
+				valL = -1;
 			}
 		} else {
 			cp = NULL;
 			valL = 0;
 		}
 		if (cp)
-			NoticeMessage(_(cp), _("Ok"), NULL);
-		// wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _(cp) );
-		*(long*)(pg->paramPtr[inx].context) = valL;
+			wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, cp );
+		else
+			wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
+
+		if (inx == I_CD_PURDAT)
+			carDlgPurchDate = valL;
+		else
+			carDlgServiceDate = valL;
 		break;
 
 	case I_CD_TYPE_LIST:
@@ -3898,9 +3903,9 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 	else if ( S_ITEM && carDlgCurrPrice < 0 )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Current Price is not valid") );
 	else if ( S_ITEM && carDlgPurchDate < 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Purchase Date is not valid") );
+		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Purchase Date is not valid - (use yyyymmdd)") );
 	else if ( S_ITEM && carDlgServiceDate < 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Service Date is not valid") );
+		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Service Date is not valid - (use yyyymmdd)" ) );
 	else if ( S_ITEM && carDlgUpdateItemPtr==NULL &&
 			( valL = carDlgItemIndex , !CheckCarDlgItemIndex(&carDlgItemIndex) ) ) {
 		sprintf( message, _("Item Index %ld duplicated an existing item: updated to new value"), valL );

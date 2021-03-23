@@ -129,7 +129,7 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \u000
 
-\dd \e{PurchPrice}, \e{CurrPrice}, \e{PurchDate} and \e{ServiceDate} - numeric values
+\dd \e{PurchPrice}, \e{CurrPrice}, \e{PurchDate} and \e{ServiceDate} - numeric values - dates are in the form yyyymmdd, where yyyy is the year, mm the month, dd the day
 
 \u000
 
