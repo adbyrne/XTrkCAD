@@ -3764,10 +3764,10 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		if ( *cp ) {
 			valL = strtol( cp, &cq, 10 );
 			if ( cq==NULL || *cq!='\0' ) {
-				cp = N_("Enter a 8 digit numeric date");
+				cp = N_("Enter a 8 digit numeric date (yyyymmdd)");
 			} else if ( valL != 0 ) {
 				if ( strlen(cp) != 8 ) {
-					cp = N_("Enter a 8 digit date");
+					cp = N_("Enter a 8 digit numeric date (yyyymmdd)");
 				} else if ( valL < 19000101 || valL > 21991231 ) {
 					cp = N_("Enter a date between 19000101 and 21991231");
 				} else {
@@ -3789,7 +3789,9 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 			cp = NULL;
 			valL = 0;
 		}
-		wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _(cp) );
+		if (cp)
+			NoticeMessage(_(cp), _("Ok"), NULL);
+		// wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _(cp) );
 		*(long*)(pg->paramPtr[inx].context) = valL;
 		break;
 
