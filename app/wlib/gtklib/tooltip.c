@@ -189,6 +189,7 @@ void wControlSetBalloon( wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * 
 
     x += b->realX + dx;
     y += b->realY + b->h - dy;
+    y += 29; // realY doesn't account for height of window title bar
     xx = gdk_screen_width();
     yy = gdk_screen_height();
     if ( x < 0 ) {
