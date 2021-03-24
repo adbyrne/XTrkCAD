@@ -175,7 +175,7 @@ static FILE * helpStrF;
 #endif
 static int inMainWndProc = FALSE;
 
-// static int newHelp = 1;
+static int newHelp = 1;
 
 static wBool_t mswWinBlockEnabled = TRUE;
 
@@ -2293,7 +2293,7 @@ void startBalloonHelp(void)
         return;
     }
 
-    if (balloonHelpHWnd && balloonHelpButton) {
+    if (balloonHelpHWnd) {  // && balloonHelpButton) {
         if (balloonHelpButton->tipStr) {
             hs = balloonHelpButton->tipStr;
         } else {
@@ -2312,9 +2312,9 @@ void startBalloonHelp(void)
             balloonHelpButton->tipStr = hs = _(bh->value);
         }
 
-        //if (newHelp) {
-        //    wControlSetBalloon(balloonHelpButton, 0, 0, hs);
-        //} else {
+        if (newHelp) {
+            wControlSetBalloon(balloonHelpButton, 0, 0, hs);
+        } else {
             int w, h;
             hDc = GetDC(balloonHelpHWnd);
             hFont = SelectObject(hDc, mswLabelFont);
@@ -2350,7 +2350,7 @@ void startBalloonHelp(void)
             TextOut(hDc, 2, 1, hs, (int)(strlen(hs)));
             SelectObject(hDc, hFont);
             ReleaseDC(balloonHelpHWnd, hDc);
-        // }
+        }
     }
 }
 
