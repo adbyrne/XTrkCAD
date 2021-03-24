@@ -190,7 +190,7 @@ void wControlSetBalloon( wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * 
     x += b->realX + dx;
     y += b->realY + b->h - dy;
 #ifdef __linux__
-    y += 29; // realY doesn't account for height of window title bar
+    y += 7; // balloon popup overlaps the control
 #endif
     xx = gdk_screen_width();
     yy = gdk_screen_height();
