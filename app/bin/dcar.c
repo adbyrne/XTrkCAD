@@ -3761,7 +3761,8 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 	case I_CD_SRVDAT:
 		carDlgChanged++;
 		cp = (char*)pg->paramPtr[inx].valueP;
-		while (cp[strlen(cp)-1] == '\n' || cp[strlen(cp)-1] == '\r' || cp[strlen(cp)-1] == ' ') cp[strlen(cp)-1] = '\0';  //Strip end space or new line or return (or both)
+
+		while (*cp && (cp[strlen(cp)-1] == '\n' || cp[strlen(cp)-1] == '\r' || cp[strlen(cp)-1] == ' ')) cp[strlen(cp)-1] = '\0';  //Strip end space or new line or return (or both)
 		if ( *cp ) {
 			valL = strtol( cp, &cq, 10 );
 			if ( cq==NULL || *cq !='\0' ) {
