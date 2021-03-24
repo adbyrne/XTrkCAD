@@ -175,7 +175,7 @@ static FILE * helpStrF;
 #endif
 static int inMainWndProc = FALSE;
 
-static int newHelp = 1;
+// static int newHelp = 1;
 
 static wBool_t mswWinBlockEnabled = TRUE;
 
@@ -2312,9 +2312,9 @@ void startBalloonHelp(void)
             balloonHelpButton->tipStr = hs = _(bh->value);
         }
 
-        if (newHelp) {
-            wControlSetBalloon(balloonHelpButton, 0, 0, hs);
-        } else {
+        //if (newHelp) {
+        //    wControlSetBalloon(balloonHelpButton, 0, 0, hs);
+        //} else {
             int w, h;
             hDc = GetDC(balloonHelpHWnd);
             hFont = SelectObject(hDc, mswLabelFont);
@@ -2323,12 +2323,15 @@ void startBalloonHelp(void)
             h = HIWORD(extent);
             pt.x = 0;
 
-            if (balloonHelpButton->type == B_RADIO ||
-                    balloonHelpButton->type == B_TOGGLE) {
-                pt.y = balloonHelpButton->h;
-            } else {
+        	if (balloonHelpButton->type == B_RADIO ||
+				balloonHelpButton->type == B_TOGGLE) {
+				pt.y = balloonHelpButton->h;
+			} else if (balloonHelpButton->type == B_DROPLIST ) {
+				GetClientRect(balloonHelpButton->hWnd, &rect);
+				pt.y = rect.bottom;
+		    } else {
                 GetClientRect(balloonHelpButton->hWnd, &rect);
-                pt.y = rect.bottom;
+                pt.y = rect.bottom + 4;
             }
 
             ClientToScreen(balloonHelpButton->hWnd, &pt);
@@ -2347,7 +2350,7 @@ void startBalloonHelp(void)
             TextOut(hDc, 2, 1, hs, (int)(strlen(hs)));
             SelectObject(hDc, hFont);
             ReleaseDC(balloonHelpHWnd, hDc);
-        }
+        // }
     }
 }
 
