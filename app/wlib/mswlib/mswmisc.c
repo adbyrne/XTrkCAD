@@ -2355,7 +2355,7 @@ void closeBalloonHelp(void)
 {
     if (balloonHelpTimer) {
         KillTimer(mswHWnd, balloonHelpTimer);
-        balloonHelpTimer = 0;
+        balloonHelpTimer = (UINT_PTR)0;
     }
 
     if (balloonHelpState == balloonHelpShow)
@@ -3126,7 +3126,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
 			balloonHelpTimeOut, NULL);
 
-		if (balloonHelpTimer == (UINT)0) {
+		if (balloonHelpTimer == (UINT_PTR)0) {
 			break;
 		}
 
@@ -3211,7 +3211,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         } else if (wParam == BALLOONHELP_TIMER) {
             KillTimer(hWnd, balloonHelpTimer);
-            balloonHelpTimer = (UINT)0;
+            balloonHelpTimer = (UINT_PTR)0;
             startBalloonHelp();
         }
 
