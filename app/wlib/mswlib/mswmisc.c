@@ -2293,7 +2293,7 @@ void startBalloonHelp(void)
         return;
     }
 
-    if (balloonHelpHWnd) {
+    if (balloonHelpHWnd && balloonHelpButton) {
         if (balloonHelpButton->tipStr) {
             hs = balloonHelpButton->tipStr;
         } else {
@@ -3069,7 +3069,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_ENABLE:
-        if (wParam == 1) {		/* WIN32??? */
+        if (wParam == (WPARAM)1) {
             hWnd2 = SetFocus(hWnd);
         }
 
@@ -3109,8 +3109,8 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 
-		if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
-			(!b) || b->type == B_DRAW || b->helpStr == NULL) {
+		if (GetActiveWindow() != hWnd || (!b) ||
+			b->type == B_DRAW || b->helpStr == NULL) {
 			closeBalloonHelp();
 			break;
 		}
