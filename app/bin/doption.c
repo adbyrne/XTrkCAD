@@ -171,19 +171,21 @@ static void OptionDlgUpdate(
 		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
 			checkPtInterval = *(long *)valueP;
 			if (checkPtInterval == 0 ) {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning off AutoSave") );
+				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, h*3/4, _("Turning off AutoSave") );
 				UpdateAutoSaveInterval(0);
 			} else {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
 			}
 		}
 		if (pg->paramPtr[inx].valueP == &autosaveChkPoints) {
 			autosaveChkPoints = *(long *)valueP;
 			if (checkPtInterval == 0 && autosaveChkPoints>0 ) {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning on CheckPointing") );
+				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -h*3/4, _("Turning on CheckPointing") );
 				UpdateChkPtInterval(10);
 			} else {
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
 			}
 
 		}

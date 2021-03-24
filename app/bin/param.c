@@ -1385,7 +1385,8 @@ static void ParamIntegerPush( const char * val, void * dp )
 
 	//wControlSetBalloon( p->control, 0, -5, NULL );
 	if ( value == cp ) {
-		wControlSetBalloon( p->control, 0, -5, _("Invalid Number") );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, _("Invalid Number") );
 		return;
 	}
 	irangeP = (paramIntegerRange_t*)p->winData;
@@ -1397,10 +1398,11 @@ static void ParamIntegerPush( const char * val, void * dp )
 			 sprintf( message, _("Enter a value < %ld"), irangeP->high );
 		else
 			 sprintf( message, _("Enter a value between %ld and %ld"), irangeP->low, irangeP->high );
-		wControlSetBalloon( p->control, 0, -5, message );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, message );
 		return;
 	}
-	wControlSetBalloon( p->control, 0, -5, NULL );
+	wControlSetBalloon( p->control, 0, 0, NULL );
 
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, valL );
@@ -1445,7 +1447,8 @@ static void ParamFloatPush( const char * val, void * dp )
 	}
 	// wControlSetBalloon( p->control, 0, -5, NULL );
 	if ( !valid ) {
-		wControlSetBalloon( p->control, 0, -5, decodeErrorStr );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, decodeErrorStr );
 		return;
 	}
 	frangeP = (paramFloatRange_t*)p->winData;
@@ -1461,10 +1464,11 @@ static void ParamFloatPush( const char * val, void * dp )
 			 sprintf( message, _("Enter a value between %s and %s"),
 				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
 				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
-		wControlSetBalloon( p->control, 0, -5, message );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, message );
 		return;
 	}
-	wControlSetBalloon( p->control, 0, -5, NULL );
+	wControlSetBalloon( p->control, 0, 0, NULL );
 
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr, valF );
