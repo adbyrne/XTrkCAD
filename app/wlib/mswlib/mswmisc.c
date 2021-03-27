@@ -1224,26 +1224,23 @@ static void blockingLoop(void)
 
 static void savePos(wWin_p win)
 {
-    WINDOWPLACEMENT windowPlace;
     wWinPix_t w, h;
     RECT rect;
 
     if (win->nameStr &&
             IsWindowVisible(win->hWnd) /*&& !IsIconic( win->hWnd )*/) {
-        windowPlace.length = sizeof windowPlace;
-        GetWindowPlacement(win->hWnd, &windowPlace);
+		GetWindowRect(win->hWnd, &rect);
 
-        if (win->option&F_RECALLPOS) {
+		if (win->option&F_RECALLPOS) {
             char posStr[20];
-            wsprintf(posStr, "%d %d",
-                     windowPlace.rcNormalPosition.left,
-                     windowPlace.rcNormalPosition.top);
-            wPrefSetString("msw window pos", win->nameStr, posStr);
+			wsprintf(posStr, "%d %d",
+				rect.left,
+				rect.top);
+			wPrefSetString("msw window pos", win->nameStr, posStr);
 
             if (win->option&F_RESIZE) {
-                GetClientRect(win->hWnd, &rect);
-                w = windowPlace.rcNormalPosition.right - windowPlace.rcNormalPosition.left;
-                h = windowPlace.rcNormalPosition.bottom - windowPlace.rcNormalPosition.top;
+				w = rect.right - rect.left;
+				h = rect.bottom - rect.top;
                 w -= mResizeBorderW*2;
                 h -= mResizeBorderH*2 + mTitleH;
 
@@ -1893,7 +1890,6 @@ void wExit(int rc)
     INDEX_T inx;
     wControl_p b;
     mswPutCustomColors();
-    wPrefFlush("");
 
     for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
         b = controlMap(inx).b;
@@ -1910,7 +1906,9 @@ void wExit(int rc)
         }
     }
 
-    for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
+	wPrefFlush("");
+
+	for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
         b = controlMap(inx).b;
 
         if (b != NULL) {
@@ -1923,7 +1921,7 @@ void wExit(int rc)
         controlMap(inx).b = NULL;
     }
 
-    deleteBitmaps();
+	deleteBitmaps();
 
     if (mswOldTextFont != (HFONT)0) {
         DeleteObject(mswOldTextFont);
@@ -2293,7 +2291,7 @@ void startBalloonHelp(void)
         return;
     }
 
-    if (balloonHelpHWnd) {  // && balloonHelpButton) {
+    if (balloonHelpHWnd) { 
         if (balloonHelpButton->tipStr) {
             hs = balloonHelpButton->tipStr;
         } else {
@@ -2314,7 +2312,8 @@ void startBalloonHelp(void)
 
         if (newHelp) {
             wControlSetBalloon(balloonHelpButton, 0, 0, hs);
-        } else {
+#ifdef OBSOLETE
+		} else {
             int w, h;
             hDc = GetDC(balloonHelpHWnd);
             hFont = SelectObject(hDc, mswLabelFont);
@@ -2350,6 +2349,7 @@ void startBalloonHelp(void)
             TextOut(hDc, 2, 1, hs, (int)(strlen(hs)));
             SelectObject(hDc, hFont);
             ReleaseDC(balloonHelpHWnd, hDc);
+#endif
         }
     }
 }
