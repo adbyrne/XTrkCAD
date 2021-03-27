@@ -161,12 +161,12 @@ extern wBool_t wDrawDoTempDraw;
  *
  */
 
-EXPORT long long totalMallocs = 0;
-EXPORT long long totalMalloced = 0;
-EXPORT long long totalRealloced = 0;
-EXPORT long long totalReallocs = 0;
-EXPORT long long totalFreeed = 0;
-EXPORT long long totalFrees = 0;
+EXPORT size_t totalMallocs = 0;
+EXPORT size_t totalMalloced = 0;
+EXPORT size_t totalRealloced = 0;
+EXPORT size_t totalReallocs = 0;
+EXPORT size_t totalFreeed = 0;
+EXPORT size_t totalFrees = 0;
 
 static void * StorageLog;
 
@@ -218,7 +218,7 @@ static void RecordMyFree(void *p) {
 
 EXPORT BOOL_T TestMallocs() {
 	size_t oldSize;
-	long long testedMallocs = 0;
+	size_t testedMallocs = 0;
 	void * old;
 	slog_p log_p = StorageLog;
 	BOOL_T rc = TRUE;
@@ -244,7 +244,7 @@ EXPORT BOOL_T TestMallocs() {
 }
 
 
-EXPORT void * MyMalloc(long size) {
+EXPORT void * MyMalloc(size_t size) {
 	void * p;
 	totalMallocs++;
 	totalMalloced += size;
@@ -269,7 +269,7 @@ EXPORT void * MyMalloc(long size) {
 	return p;
 }
 
-EXPORT void * MyRealloc(void * old, long size) {
+EXPORT void * MyRealloc(void * old, size_t size) {
 	size_t oldSize;
 	void * new;
 	if (old == NULL)

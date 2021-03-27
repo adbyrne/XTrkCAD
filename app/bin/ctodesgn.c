@@ -3246,7 +3246,7 @@ EXPORT void AbortProg(
 	abort();
 }
 
-void * MyRealloc( void * ptr, long size )
+void * MyRealloc( void * ptr, size_t size )
 {
 	return realloc( ptr, size );
 }
