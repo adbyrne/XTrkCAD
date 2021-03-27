@@ -59,7 +59,7 @@ long GetChanges( paramGroup_p pg )
 	int inx;
 	for ( changed=ParamUpdate(pg),inx=0,changes=0; changed; changed>>=1,inx++ ) {
 		if ( changed&1 )
-			changes |= (long)pg->paramPtr[inx].context;
+			changes |= VP2L(pg->paramPtr[inx].context);
 	}
 	return changes;
 }
@@ -394,7 +394,7 @@ static void LoadDstFmtList( void )
 	int inx;
 	wListClear( (wList_p)prefPLs[I_DSTFMT].control );
 	for ( inx=0; dstFmts[units][inx].name; inx++ )
-		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name), NULL, (void*)dstFmts[units][inx].fmt );
+		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name), NULL, I2VP(dstFmts[units][inx].fmt) );
 }
 
 /**

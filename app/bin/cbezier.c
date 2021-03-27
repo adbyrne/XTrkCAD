@@ -826,7 +826,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 	long cmd;
 
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
-	cmd = (long)commandContext;
+	cmd = VP2L(commandContext);
 	Da.trackGauge = trackG;
 
 	switch (action&0xFF) {
@@ -1005,7 +1005,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 	long cmd;
 	if (action>>8) {
 		cmd = action>>8;
-	} else cmd = (long)commandContext;
+	} else cmd = VP2L(commandContext);
 
 	Da.width = (double)lineWidth/mainD.dpi;
 

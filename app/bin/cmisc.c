@@ -246,7 +246,7 @@ static void DescribeUpdate(
     }
 
     UndoModify(descTrk);
-    descUpdateFunc(descTrk, ddp-descData, descData, FALSE);
+    descUpdateFunc(descTrk, (int)VP2L(ddp-descData), descData, FALSE);
 
     if (descTrk) {
         GetBoundingBox(descTrk, &hi, &lo);
@@ -512,7 +512,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
             if (ro_mode) {
             	char *layerFormattedName;
             	layerFormattedName = FormatLayerName(*(int *)(ddp->valueP));
-            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
                 free(layerFormattedName);
                 *(int *)(ddp->valueP) = 0;
                 layerValue = (int *)(ddp->valueP);
@@ -521,7 +521,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 				for (inx = 0; inx<NUM_LAYERS; inx++) {
 					char *layerFormattedName;
 					layerFormattedName = FormatLayerName(editableLayerList[inx]);
-					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
 					free(layerFormattedName);
 				}
 

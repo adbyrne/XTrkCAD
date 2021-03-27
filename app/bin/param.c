@@ -58,7 +58,7 @@ static char decodeErrorStr[STR_SIZE];
 static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 {
 	char *cp=*cpp, *cq;
-	int len;
+	size_t len;
 	*numP = 0;
 	if ( cp == NULL ) {
 		getNumberError = N_("Unexpected End Of String");
@@ -73,7 +73,7 @@ static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 	}
 	len = cq-cp;
 	if ( lenP )
-		*lenP = len;
+		*lenP = (int)len;
 	if ( len > 9 ) {
 		getNumberError = N_("Overflow");
 		return FALSE;
@@ -1155,7 +1155,7 @@ EXPORT void ParamUpdatePrefs( void )
 	paramData_p p;
 	long rgb;
 	char prefName[STR_SHORT_SIZE];
-	int len;
+	size_t len;
 	int col;
 	char * cp;
 	static wWinPix_t * colWidths;
@@ -1342,7 +1342,7 @@ static void ParamButtonPush( void * dp )
 		if ( p->valueP )
 			((wButtonCallBack_p)(p->valueP))( p->context );
 		else if ( p->group->changeProc)
-			 p->group->changeProc( p->group, p-p->group->paramPtr, NULL);
+			 p->group->changeProc( p->group, (int)(p-p->group->paramPtr), NULL);
 	}
 }
 
@@ -1358,7 +1358,7 @@ static void ParamChoicePush( long valL, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((long*)(p->valueP)) = valL;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, &valL);
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL);
 }
 
 
@@ -1411,7 +1411,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((long*)(p->valueP)) = valL;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, &valL);
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL);
 }
 
 /**
@@ -1477,7 +1477,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((FLOAT_T*)(p->valueP)) = valF;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value ))
-		p->group->changeProc( p->group, p-p->group->paramPtr, &valF );
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valF );
 }
 
 
@@ -1500,7 +1500,7 @@ static void ParamStringPush( const char * val, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST value );
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );
 }
 
 
@@ -1521,7 +1521,7 @@ static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op, void * d
 			*(wIndex_t*)(p->valueP) = inx;
 		if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc ) {
 			valL = inx;
-			p->group->changeProc( p->group, p-p->group->paramPtr, &valL );
+			p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL );
 		}
 		break;
 
@@ -1562,7 +1562,7 @@ static void ParamColorSelectPush( void * dp, wDrawColor dc )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*(wDrawColor*)(p->valueP) = dc;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc )
-		p->group->changeProc( p->group, p-p->group->paramPtr, &dc );
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &dc );
 }
 
 
@@ -1724,7 +1724,7 @@ static void ParamPlayback( char * line )
 	paramData_p p;
 	long valL;
 	FLOAT_T valF, valF1;
-	int len, len1, len2;
+	size_t len, len1, len2;
 	wIndex_t inx;
 	void * listContext, * itemContext;
 	long rgb;
@@ -1919,7 +1919,7 @@ static void ParamPlayback( char * line )
 			case PD_MENUITEM:
 				if (p->valueP) {
 					if ( (p->option&IC_PLAYBACK_PUSH) != 0 )
-						PlaybackButtonMouse( (wIndex_t)(long)p->context );
+						PlaybackButtonMouse( (wIndex_t)VP2L(p->context) );
 					((wButtonCallBack_p)(p->valueP))( p->context );
 				}
 				break;
@@ -1965,7 +1965,7 @@ static void ParamCheck( char * line )
 	paramData_p p;
 	long valL;
 	FLOAT_T valF, diffF;
-	int len, len1, len2;
+	size_t len, len1, len2;
 	wIndex_t inx;
 	void * listContext, * itemContext;
 	char * valS;
@@ -2133,7 +2133,7 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
 			break;
 		case PD_STRING:
-			w = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)250;
+			w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
 			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush, pd );
 			break;
 		case PD_RADIO:
@@ -2179,7 +2179,7 @@ static void ParamCreateControl(
 			listDataP->height = wControlGetHeight( pd->control );
 			break;
 		case PD_DROPLIST:
-			w = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)100;
+			w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
 			pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
 			break;
 		case PD_COMBOLIST:
@@ -2192,7 +2192,7 @@ static void ParamCreateControl(
             break;
 		case PD_MESSAGE:
 			if ( pd->winData != 0 )
-				w = (wWinPix_t)(long)pd->winData;
+				w = (wWinPix_t)VP2L(pd->winData);
 			else if (pd->valueP)
 				w = wLabelWidth( _(pd->valueP) );
 			else
@@ -2254,7 +2254,7 @@ static void ParamPositionControl(
 		case PD_COMBOLIST:
 		case PD_DROPLIST:
 			if ( pd->type == PD_DROPLIST ) {
-				ctlW = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)100;
+				ctlW = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
 				ctlH = wControlGetHeight( pd->control );
 			} else {
 				listDataP = (paramListData_t*)pd->winData;
@@ -2300,14 +2300,14 @@ static void ParamPositionControl(
 			wTextSetSize( (wText_p)pd->control, ctlW, ctlH );
 			break;
 		case PD_STRING:
-			ctlW = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)250;
+			ctlW = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
 			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-ctlW);
 				wStringSetWidth( (wString_p)pd->control, ctlW );
 			}
 			break;
 		case PD_MESSAGE:
-			ctlW = pd->winData?(wWinPix_t)(long)pd->winData:(wWinPix_t)150;
+			ctlW = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)150;
 			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-ctlW);
 				wMessageSetWidth( (wMessage_p)pd->control, ctlW );

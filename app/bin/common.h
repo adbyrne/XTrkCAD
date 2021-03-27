@@ -92,6 +92,9 @@
 #pragma warning( disable : 4305)
 #endif
 
+#define VP2L(VAL) ((long)(intptr_t)(VAL))
+#define I2VP(VAL) ((void*)(intptr_t)(VAL))
+
 
 #ifndef TRUE
 #define TRUE	(1)

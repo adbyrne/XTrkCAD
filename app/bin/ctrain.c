@@ -2925,7 +2925,7 @@ static void TrainFunc(
     angle = NormalizeAngle(angle-xx->trvTrk.angle);
     dir = (angle>90&&angle<270);
 
-    switch ((int)(long)action) {
+    switch (VP2L(action)) {
     case DO_UNCOUPLE:
         if (GetTrkEndTrk(trainFuncCar,dir)) {
             UncoupleCars(trainFuncCar, GetTrkEndTrk(trainFuncCar,dir));

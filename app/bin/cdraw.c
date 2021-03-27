@@ -29,7 +29,6 @@
 #include "misc.h"
 #include "cselect.h"
 #include "common-ui.h"
-
 extern TRKTYP_T T_BZRLIN;
 
 static wMenu_p drawModDelMI;
@@ -76,17 +75,17 @@ EXPORT void LoadFontSizeList(
 			(curFontSize < fontSizeList[inx]))
 		{
 			sprintf(message, "%ld", curFontSize);
-			curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
+			curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
 		}
 		sprintf(message, "%ld", fontSizeList[inx]);
-		inx1 = wListAddValue(list, message, NULL, (void*)fontSizeList[inx]);
+		inx1 = wListAddValue(list, message, NULL, I2VP(fontSizeList[inx]));
 		if (curFontSize == fontSizeList[inx])
 			curInx = inx1;
 	}
 	if (curFontSize > fontSizeList[(sizeof fontSizeList / sizeof fontSizeList[0]) - 1])
 	{
 		sprintf(message, "%ld", curFontSize);
-		curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
+		curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
 	}
 	wListSetIndex(list, curInx);
 	wFlush();
@@ -116,7 +115,7 @@ EXPORT void UpdateFontSizeList(
 	long fontSize;
 
 	if ( listInx >= 0 ) {
-		*fontSizeR = (long)wListGetItemContext( list, listInx );
+		*fontSizeR = VP2L( wListGetItemContext( list, listInx ));
 	} else {
 		wListGetValues( list, message, sizeof message, NULL, NULL );
 		if ( message[0] != '\0' ) {
@@ -899,15 +898,15 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		drawDesc[A1].mode |= DESC_CHANGE;
 		break;
 	case BE:
-		BenchUpdateOrientationList( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), (wList_p)drawDesc[OR].control0 );
+		BenchUpdateOrientationList( VP2L( wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
 		if ( drawData.benchOrient < wListGetCount( (wList_p)drawDesc[OR].control0 ) )
 			wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
 		else
 			drawData.benchOrient = 0;
-		segPtr->u.l.option = GetBenchData( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case OR:
-		segPtr->u.l.option = GetBenchData( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case DS:
 		segPtr->u.l.option = drawData.dimenSize;
@@ -1281,7 +1280,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	if ( segPtr->type==SEG_BENCH && drawDesc[BE].control0!=NULL && drawDesc[OR].control0!=NULL) {
 		BenchLoadLists( (wList_p)drawDesc[BE].control0, (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[BE].control0, drawData.benchChoice );
-		BenchUpdateOrientationList( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), (wList_p)drawDesc[OR].control0 );
+		BenchUpdateOrientationList( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
 	}
 	if ( (segPtr->type==SEG_STRLIN || segPtr->type==SEG_CRVLIN || segPtr->type==SEG_POLY) && drawDesc[LT].control0!=NULL) {
@@ -2750,7 +2749,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		drawBenchChoicePD.option |= PDO_NORECORD;
 		drawBenchOrientPD.option |= PDO_NORECORD;
 		drawDimArrowSizePD.option |= PDO_NORECORD;
-		drawCmdContext.Op = (wIndex_t)(long)commandContext;
+		drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
 		if ( drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST ) {
 			NoticeMessage( "cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op );
 			drawCmdContext.Op = OP_LINE;
@@ -2814,7 +2813,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				BenchLoadLists( (wList_p)drawBenchChoicePD.control, (wList_p)drawBenchOrientPD.control );
 
 			ParamLoadControls( &drawPG );
-			BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice ), (wList_p)drawBenchOrientPD.control );
+			BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice )), (wList_p)drawBenchOrientPD.control );
 			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
 			InfoSubstituteControls( controls, labels );
 			drawBenchColorPD.option &= ~PDO_NORECORD;
@@ -2855,7 +2854,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			return CmdBezCurve(act2, pos);
 		}
 		if ( drawCmdContext.Op == OP_BENCH ) {
-			drawCmdContext.benchOption = GetBenchData( (long)wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice ), benchOrient );
+			drawCmdContext.benchOption = GetBenchData( VP2L(wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice )), benchOrient );
 			drawCmdContext.Color = benchColor;
 
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
@@ -3150,7 +3149,7 @@ static void DrawDlgUpdate(
 	}
 
 	if ( inx >= 0 && pg->paramPtr[inx].valueP == &benchChoice )
-		BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP ), (wList_p)drawBenchOrientPD.control );
+		BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP )), (wList_p)drawBenchOrientPD.control );
 }
 
 EXPORT void InitCmdDraw( wMenu_p menu )

@@ -720,7 +720,6 @@ static void NewStructure( void )
 {
 	track_p trk;
 	struct extraDataCompound_t *xx;
-	wIndex_t titleLen;
 	wIndex_t pierInx;
 
 	if (curStructure->segCnt < 1) {
@@ -734,7 +733,6 @@ static void NewStructure( void )
 		return;
 	}
 	UndoStart( _("Place Structure"), "newStruct" );
-	titleLen = strlen( curStructure->title );
 	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
 	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 #ifdef LATER
@@ -797,7 +795,7 @@ static void StructRotate( void * pangle )
 {
 	if (Dst.state == 0)
 		return;
-	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	ANGLE_T angle = (ANGLE_T)VP2L(pangle);
 	angle /= 1000.0;
 	Dst.pos = cmdMenuPos;
 	Rotate( &Dst.pos, cmdMenuPos, angle );

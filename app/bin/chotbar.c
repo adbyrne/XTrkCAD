@@ -398,7 +398,7 @@ static BOOL_T HotBarSelectPlayback( char * line )
 
 static void HotbarJump( int inx, const char * name, void * arg )
 {
-	hotBarCurrStart = (int)(long)arg;
+	hotBarCurrStart = (int)VP2L(arg);
 	RedrawHotBar( hotBarD.d, NULL, 0, 0 );
 }
 

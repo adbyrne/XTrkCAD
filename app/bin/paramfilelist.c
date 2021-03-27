@@ -288,7 +288,7 @@ void
 UpdateParamFileList(void)
 {
     for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
-        SetParamFileState(i);
+        SetParamFileState((int)i);
     }
 }
 

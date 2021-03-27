@@ -132,7 +132,7 @@ static void DumpStream( FILE * outf, stream_p stream, char * name )
 				zeroCnt++;
 			} else {
 				if ( zeroCnt == 2 )
-					 fprintf( outf, "%6.6lx 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", off-16 );
+					 fprintf( outf, "%6.6lx 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n", (unsigned long)off-16 );
 				zeroCnt = 0;
 			}
 			if ( zeroCnt <= 1 ) {
@@ -200,7 +200,7 @@ static BOOL_T UndoFail( char * cause, uintptr_t val, char * fileName, int lineNu
 
 BOOL_T ReadStream( stream_t * stream, void * ptr, int size )
 {
-	long binx, boff, brem;
+	size_t binx, boff, brem;
 	streamBlocks_p blk;
 	if ( stream->curr+size > stream->end ) {
 		UndoFail( "Overrun on stream", (uintptr_t)(stream->curr+size), __FILE__, __LINE__ );
@@ -232,7 +232,7 @@ LOG( log_undo, 5, ( "ReadStream( , "SLOG_FMT", %d ) %ld %ld %ld\n", (uintptr_t)p
 
 BOOL_T WriteStream( stream_p stream, void * ptr, int size )
 {
-	long binx, boff, brem;
+	size_t binx, boff, brem;
 	streamBlocks_p blk;
 LOG( log_undo, 5, ( "WriteStream( , "SLOG_FMT", %d ) %ld "SLOG_FMT" "SLOG_FMT"\n", (uintptr_t)ptr, size, stream->startBInx, stream->curr, stream->end ) )
 	if (size == 0)
@@ -255,7 +255,7 @@ LOG( log_undo, 5, ( "WriteStream( , "SLOG_FMT", %d ) %ld "SLOG_FMT" "SLOG_FMT"\n
 		if (size > brem) {
 			memcpy( &(*blk)[boff], ptr, (size_t)brem );
 			ptr = (char*)ptr + brem;
-			size -= (size_t)brem;
+			size -= (int)brem;
 			binx++;
 			boff = 0;
 			brem = BSTREAM_SIZE;
@@ -269,7 +269,7 @@ LOG( log_undo, 5, ( "WriteStream( , "SLOG_FMT", %d ) %ld "SLOG_FMT" "SLOG_FMT"\n
 
 BOOL_T TrimStream( stream_p stream, uintptr_t off )
 {
-	long binx, cnt, inx;
+	size_t binx, cnt, inx;
 	streamBlocks_p blk;
 LOG( log_undo, 3, ( "TrimStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
@@ -286,7 +286,7 @@ LOG( log_undo, 3, ( "TrimStream( , %ld )\n", off ) )
 	for (inx=cnt; inx<stream->stream_da.cnt; inx++ ) {
 		DYNARR_N( streamBlocks_p, stream->stream_da, inx-cnt ) = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 	}
-	stream->startBInx = binx;
+	stream->startBInx =(long)binx;
 	stream->stream_da.cnt -= (wIndex_t)cnt;
 	UASSERT( stream->stream_da.cnt >= 0, stream->stream_da.cnt );
 	return TRUE;
@@ -302,13 +302,14 @@ void ClearStream( stream_p stream )
 		MyFree( blk );
 	}
 	stream->stream_da.cnt = 0;
-	stream->startBInx = stream->end = stream->curr = 0;
+	stream->startBInx = 0;
+	stream->end = stream->curr = 0;
 }
 
 
 BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 {
-	long binx, boff, cnt, inx;
+	size_t binx, boff, cnt, inx;
 	streamBlocks_p blk;
 LOG( log_undo, 3, ( "TruncateStream( , %ld )\n", off ) )
 	binx = off/BSTREAM_SIZE;
@@ -489,7 +490,7 @@ static BOOL_T SetDeleteOpInStream( stream_p stream, uintptr_t start, uintptr_t e
 	char op;
 	track_p trk;
 	track_t tempTrk;
-	long binx, boff;
+	size_t binx, boff;
 	streamBlocks_p blk;
 
 	stream->curr = start;

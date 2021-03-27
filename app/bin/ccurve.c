@@ -431,7 +431,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 	case C_START:
 		lock = FALSE;
-		curveMode = (long)commandContext;
+		curveMode = VP2L(commandContext);
 		Da.state = -1;
 		Da.pos0 = pos;
 		tempSegs_da.cnt = 0;
@@ -965,7 +965,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 static STATUS_T CmdCircle( wAction_t action, coOrd pos )
 {
 	if ( action == C_START ) {
-		circleMode = (long)commandContext;
+		circleMode = VP2L(commandContext);
 	}
 	return CmdCircleCommon( action, pos, FALSE );
 }

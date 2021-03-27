@@ -85,9 +85,9 @@ BOOL_T WriteMainNote(FILE* f)
 #ifdef UTFCONVERT
 		char *out = NULL;
 		if (RequiresConvToUTF8(mainText)) {
-			unsigned cnt = strlen(mainText) * 2 + 1;
+			size_t cnt = strlen(mainText) * 2 + 1;
 			out = MyMalloc(cnt);
-			wSystemToUTF8(mainText, out, cnt);
+			wSystemToUTF8(mainText, out, (unsigned int)cnt);
 			noteText = out;
 		}
 #endif // UTFCONVERT

@@ -171,7 +171,7 @@ EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
 				sprintf( cp, "%ld\"x%ld\"", bt->width, height );
 			else
 				sprintf( cp, "%ldmm x %ldmm", height*25, bt->width*25 );
-			wListAddValue( choiceL, message, NULL, (void*)benchData );
+			wListAddValue( choiceL, message, NULL, I2VP(benchData) );
 		}
 	}
 	BenchUpdateOrientationList( benchType(0).type<<24, orientL );
@@ -379,9 +379,9 @@ EXPORT void CountBench(
 	bp->length = length;
 foundBenchEnum:
 	PrintBenchLine( message, bp );
-	iwidth = strlen(message);
-	if ( iwidth > enumerateMaxDescLen)
-		enumerateMaxDescLen = (int)iwidth;
+	size_t width = strlen(message);
+	if ( width > enumerateMaxDescLen)
+		enumerateMaxDescLen = (int)width;
 }
 
 static int Cmp_benchEnum(

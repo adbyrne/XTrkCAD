@@ -68,7 +68,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
     char * labels[3];
     static DIST_T parRFactor;
 
-    parType = (long)commandContext;
+    parType = VP2L(commandContext);
 
     switch (action&0xFF) {
 

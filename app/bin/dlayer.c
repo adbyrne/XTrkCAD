@@ -747,7 +747,7 @@ void LoadLayerLists(void)
 
 static void DoLayerOp(void * data)
 {
-    switch ((long)data) {
+    switch (VP2L(data)) {
     case ENUMLAYER_CLEAR:
         InitializeLayers(LayerSystemDefaults, -1);
         break;
@@ -838,7 +838,7 @@ FillLayerList( wList_p listLayers)
 	for (int inx = 0; inx < NUM_LAYERS; inx++) {
 		char *layerFormattedName;
 		layerFormattedName = FormatLayerName(inx);
-		wListAddValue((wList_p)listLayers, layerFormattedName, NULL, (void*)(long)inx);
+		wListAddValue((wList_p)listLayers, layerFormattedName, NULL, I2VP(inx));
 		free(layerFormattedName);
 	}
 

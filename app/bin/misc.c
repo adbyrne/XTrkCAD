@@ -373,7 +373,7 @@ EXPORT char * ConvertToEscapedText(const char * text) {
 		}
 		text_i++;
 	}
-	unsigned cnt = strlen(text) + 1 + add;
+	size_t cnt = strlen(text) + 1 + add;
 #ifdef WINDOWS
 	cnt *= 2;
 #endif
@@ -415,7 +415,7 @@ EXPORT char * ConvertToEscapedText(const char * text) {
 	}
 	cout[cout_i] = '\0';
 #ifdef UTFCONVERT
-	wSystemToUTF8(cout, cout, cnt);
+	wSystemToUTF8(cout, cout, (unsigned int)cnt);
 #endif // UTFCONVERT
 
 	return cout;
@@ -1376,7 +1376,7 @@ EXPORT void ResetIfNotSticky(void) {
 }
 
 EXPORT void DoCommandB(void * data) {
-	wIndex_t inx = (wIndex_t) (long) data;
+	wIndex_t inx = (wIndex_t)VP2L(data);
 	STATUS_T rc;
 	static coOrd pos = { 0, 0 };
 	static int inDoCommandB = FALSE;
@@ -1801,9 +1801,9 @@ EXPORT wIndex_t InitCommand(wMenu_p menu, procCommand_t command, const char * na
 /*--------------------------------------------------------------------*/
 
 EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
-	wIndex_t inx;
+	size_t inx;
 	wIndex_t buttInx;
-	int len1, len2;
+	size_t len1, len2;
 	len1 = strlen(line + 8);
 	for (inx = 0; inx < commandCnt; inx++) {
 		len2 = strlen(commandList[inx].helpKey + 3);
@@ -1946,7 +1946,7 @@ static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOO
 		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
 static void ToolbarAction(wBool_t set, void * data) {
-	long mask = (long) data;
+	long mask = VP2L(data);
 	if (set)
 		toolbarSet |= mask;
 	else
@@ -1977,7 +1977,7 @@ static void CreateToolbarM(wMenu_p toolbarM) {
 	for (inx = 0; inx < cnt; inx++, masks++, labels++) {
 		set = (toolbarSet & *masks) != 0;
 		wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
-				ToolbarAction, (void*) *masks);
+				ToolbarAction, I2VP(*masks));
 	}
 }
 
@@ -2089,9 +2089,9 @@ static void IndexEnterOk(void * junk) {
 static void RotateEnterOk(void * junk) {
 	ParamLoadData(&rotatePG);
 	if (angleSystem == ANGLE_POLAR)
-		rotateDialogCallBack((void*) (long)(rotateValue*1000));
+		rotateDialogCallBack(I2VP((long)(rotateValue * 1000)));
 	else
-		rotateDialogCallBack((void*) (long)(-rotateValue*1000));
+		rotateDialogCallBack(I2VP((long)(-rotateValue * 1000)));
 	wHide(rotateW);
 }
 

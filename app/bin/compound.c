@@ -61,7 +61,7 @@ EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
 	ASSERT( paths != NULL );
 	for ( pp = paths; pp[0]; pp+=2 )
 		for ( pp += strlen( (char*)pp ); pp[0] || pp[1]; pp++ );
-	return pp - paths + 1;
+	return (wIndex_t)(pp - paths + 1);
 }
 
 
@@ -170,7 +170,7 @@ EXPORT void ParseCompoundTitle(
 		int * partnoL )
 {
 	char * cp1, *cp2;
-	int len;
+	size_t len;
 	*manufP = *nameP = *partnoP = NULL;
 	*manufL = *nameL = *partnoL = 0;
 	len = strlen( title );
@@ -180,17 +180,17 @@ EXPORT void ParseCompoundTitle(
 		if ( cp2 ) {
 			cp2++;
 			*partnoP = cp2;
-			*partnoL = title+len-cp2;
+			*partnoL = (int)(title+len-cp2);
 			len = cp2-title-1;
 		}
 		cp1++;
 		*nameP = cp1;
-		*nameL = title+len-cp1;
+		*nameL = (int)(title+len-cp1);
 		*manufP = title;
-		*manufL = cp1-title-1;
+		*manufL = (int)(cp1-title-1);
 	} else {
 		*nameP = title;
-		*nameL = len;
+		*nameL = (int)len;
 	}
 }
 
@@ -200,7 +200,7 @@ void FormatCompoundTitle(
 		char * title )
 {
 	char *cp1, *cp2=NULL, *cq;
-	int len;
+	size_t len;
 	FLOAT_T price;
 	BOOL_T needSep;
 	cq = message;
@@ -1507,7 +1507,7 @@ BOOL_T EnumerateCompound( track_p trk )
 			EnumCompound(inx2) = EnumCompound(inx2-1);
 		EnumCompound(inx).name = MyStrdup( message );
 		if (strlen(message) > (size_t)enumerateMaxDescLen)
-			enumerateMaxDescLen = strlen(message);
+			enumerateMaxDescLen = (int)strlen(message);
 		EnumCompound(inx).type = GetTrkTypeName( trk );
 		EnumCompound(inx).count = 1;
 		DynStringMalloc(&(EnumCompound(inx).indexes),100);

@@ -134,10 +134,10 @@ static void TabStringExtract(
 		if ( next )
 			 next = strchr( string, '\t' );
 		if ( next ) {
-			tabs[inx].len = next-string;
+			tabs[inx].len = (int)(next-string);
 			string = next+1;
 		} else {
-			tabs[inx].len = strlen( string );
+			tabs[inx].len = (int)strlen( string );
 			string += tabs[inx].len;
 		}
 	}
@@ -173,8 +173,8 @@ static int TabStringCmp(
 		char * src,
 		tabString_t * tab )
 {
-	int srclen = strlen(src);
-	int len = srclen;
+	size_t srclen = strlen(src);
+	size_t len = srclen;
 	int rc;
 	if ( len > tab->len )
 		len = tab->len;
@@ -1546,7 +1546,7 @@ static void CarItemHotbarUpdate(
 		carItemInx = (wIndex_t)*(long*)data;
 		if ( carItemInx < 0 )
 			return;
-		carItemInx = (wIndex_t)(long)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carItemInx );
+		carItemInx = (wIndex_t)VP2L(wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carItemInx ));
 		item = carItemHotbar(carItemInx);
 		if ( item != NULL )
 			currCarItemPtr = item;
@@ -1675,7 +1675,7 @@ static char * CarItemHotbarProc(
 		drawCmd_p d,
 		coOrd * origP )
 {
-	wIndex_t carItemInx = (wIndex_t)(long)data;
+	wIndex_t carItemInx = (wIndex_t)VP2L(data);
 	carItem_p item;
 	wIndex_t inx;
 	long mode;
@@ -3387,9 +3387,9 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			carDlgScaleInx = carDlgUpdatePartPtr->parent->scale;
 			TabStringExtract( carDlgUpdatePartPtr->title, 7, tabs );
 			tabs[T_MANUF].ptr = carDlgUpdatePartPtr->parent->manuf;
-			tabs[T_MANUF].len = strlen(carDlgUpdatePartPtr->parent->manuf);
+			tabs[T_MANUF].len = (int)strlen(carDlgUpdatePartPtr->parent->manuf);
 			tabs[T_PROTO].ptr = carDlgUpdatePartPtr->parent->proto;
-			tabs[T_PROTO].len = strlen(carDlgUpdatePartPtr->parent->proto);
+			tabs[T_PROTO].len = (int)strlen(carDlgUpdatePartPtr->parent->proto);
 			CarDlgLoadLists( FALSE, tabs, carDlgScaleInx );
 			CarDlgLoadPart( carDlgUpdatePartPtr );
 			RELOAD_LISTS;
@@ -3531,7 +3531,7 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 
 	case I_CD_PROTOKIND_LIST:
 		carDlgChanged++;
-		carDlgTypeInx = (int)(long)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carDlgKindInx );
+		carDlgTypeInx = (int)VP2L(wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carDlgKindInx ));
 		if ( S_PART || (currState==S_ItemEnter) ) {
 			CarDlgLoadProtoList( NULL, 0, FALSE );
 		} else {
@@ -3584,7 +3584,7 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		} else {
 			wListGetValues( (wList_p)pg->paramPtr[I_CD_ROADNAME_LIST].control, carDlgRoadnameStr, sizeof carDlgRoadnameStr, NULL, NULL );
 			cmp_key.name = carDlgRoadnameStr;
-			cmp_key.len = strlen(carDlgRoadnameStr);
+			cmp_key.len = (int)strlen(carDlgRoadnameStr);
 			roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, 0 );
 		}
 		if ( roadnameMapP ) {
@@ -4042,7 +4042,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		sprintf( title, "%s\t%s\t%s\t%s\t%s\t%s\t%s", carDlgManufStr, carDlgProtoStr, carDlgDescStr, carDlgPartnoStr, carDlgRoadnameStr, carDlgRepmarkStr, carDlgNumberStr );
 		partP = NULL;
 		if ( ( carDlgManufInx < 0 || carDlgPartnoInx < 0 ) && carDlgPartnoStr[0] ) {
-			partP = CarPartFind( carDlgManufStr, strlen(carDlgManufStr), carDlgPartnoStr, strlen(carDlgPartnoStr), carDlgScaleInx );
+			partP = CarPartFind( carDlgManufStr, (int)strlen(carDlgManufStr), carDlgPartnoStr, (int)strlen(carDlgPartnoStr), carDlgScaleInx );
 			if ( partP != NULL &&
 				 NoticeMessage( MSG_CARPART_DUPNAME, _("Yes"), _("No") ) <= 0 )
 				return;
@@ -4126,7 +4126,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			carDlgRepmarkStr[0] = '\0';
 		}
 		if ( carDlgUpdatePartPtr==NULL ) {
-			partP = CarPartFind( carDlgManufStr, strlen(carDlgManufStr), carDlgPartnoStr, strlen(carDlgPartnoStr), carDlgScaleInx );
+			partP = CarPartFind( carDlgManufStr, (int)strlen(carDlgManufStr), carDlgPartnoStr, (int)strlen(carDlgPartnoStr), carDlgScaleInx );
 			if ( partP != NULL &&
 				 NoticeMessage( MSG_CARPART_DUPNAME, _("Yes"), _("No") ) <= 0 )
 				return;
@@ -4164,9 +4164,9 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 
 	if ( reloadRoadnameList ) {
 		tabs[0].ptr = carDlgRoadnameStr;
-		tabs[0].len = strlen(carDlgRoadnameStr);
+		tabs[0].len = (int)strlen(carDlgRoadnameStr);
 		tabs[1].ptr = carDlgRepmarkStr;
-		tabs[1].len = strlen(carDlgRepmarkStr);
+		tabs[1].len = (int)strlen(carDlgRepmarkStr);
 		LoadRoadnameList( &tabs[0], &tabs[1] );
 		CarDlgLoadRoadnameList();
 		ParamLoadControl( &carDlgPG, I_CD_ROADNAME_LIST );
@@ -4294,13 +4294,13 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 		roadnameMapChanged = TRUE;
 
 		for ( inx=0; inx<N_CONDLISTMAP; inx++ )
-			wListAddValue( (wList_p)carDlgPLs[I_CD_COND].control, _(condListMap[inx].name), NULL, (void*)condListMap[inx].value );
+			wListAddValue( (wList_p)carDlgPLs[I_CD_COND].control, _(condListMap[inx].name), NULL, I2VP(condListMap[inx].value) );
 
 		for ( inx=0; inx<N_TYPELISTMAP; inx++ )
-			wListAddValue( (wList_p)carDlgPLs[I_CD_TYPE_LIST].control, _(typeListMap[inx].name), NULL, (void*)typeListMap[inx].value );
+			wListAddValue( (wList_p)carDlgPLs[I_CD_TYPE_LIST].control, _(typeListMap[inx].name), NULL, I2VP(typeListMap[inx].value) );
 
 		for ( inx=0; inx<N_TYPELISTMAP; inx++ )
-			wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[inx].name), NULL, (void*)typeListMap[inx].value );
+			wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[inx].name), NULL, I2VP(typeListMap[inx].value) );
 
 		wTextSetReadonly( (wText_p)carDlgPLs[I_CD_NOTES].control, FALSE );
 	}
@@ -4524,9 +4524,9 @@ static int CarInvSaveText(
 		item = carItemInfo(inx);
 		TabStringExtract( item->title, 7, tabs );
 		sprintf( message, "%ld", item->index );
-		width = strlen( message );
+		width = (int)strlen( message );
 		if ( width > widths[0] ) widths[0] = width;
-		width = strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 + tabs[T_PART].len;
+		width = (int)strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 + tabs[T_PART].len;
 		if ( width > widths[1] ) widths[1] = width;
 		if ( tabs[T_PROTO].len > widths[2] ) widths[2] = tabs[T_PROTO].len;
 		width = tabs[T_REPMARK].len + tabs[T_NUMBER].len;
@@ -4536,14 +4536,14 @@ static int CarInvSaveText(
 		if ( item->data.purchDate > 0 ) widths[4] = 8;
 		if ( item->data.purchPrice > 0 ) {
 			sprintf( message, "%0.2f", item->data.purchPrice );
-			width = strlen(message);
+			width = (int)strlen(message);
 			if ( width > widths[5] ) widths[5] = width;
 		}
 		if ( item->data.condition != 0 )
 			widths[6] = 5;
 		if ( item->data.currPrice > 0 ) {
 			sprintf( message, "%0.2f", item->data.currPrice );
-			width = strlen(message);
+			width = (int)strlen(message);
 			if ( width > widths[7] ) widths[7] = width;
 		}
 		if ( item->data.serviceDate > 0 ) widths[8] = 8;
@@ -4613,9 +4613,9 @@ static int CarInvSaveText(
 			while ( 1 ) {
 				cp1 = strchr( cp0, '\n' );
 				if ( cp1 ) {
-					len = cp1-cp0;
+					len = (int)(cp1-cp0);
 				} else {
-					len = strlen( cp0 );
+					len = (int)strlen( cp0 );
 					if ( len == 0 )
 						break;
 				}
@@ -4714,11 +4714,11 @@ static int ParseCsvLine(
 				rc = NoticeMessage( MSG_CARIMP_MISSING_COMMA, _("Continue"), _("Stop"), ptr );
 				return (rc<1)?-1:elem;
 			}
-			len = cq-ptr;
+			len = (int)(cq-ptr);
 		} else {
 			ptr = cp;
 			while ( *cp && *cp != ',' ) { cp++; }
-			len = cp-ptr;
+			len = (int)(cp-ptr);
 		}
 		if ( map[elem] >= 0 ) {
 		   tabs[map[elem]].ptr = ptr;
@@ -5001,14 +5001,14 @@ static int CarInvExportCsv(
 	SetCLocale();
 
 	for ( inx=0; inx<sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0]; inx++ ) {
-		CsvFormatString( f, carCsvColumnTitles[inx], strlen(carCsvColumnTitles[inx]), inx<(sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0])-1?",":"\n" );
+		CsvFormatString( f, carCsvColumnTitles[inx], (int)strlen(carCsvColumnTitles[inx]), inx<(sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0])-1?",":"\n" );
 	}
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ ) {
 		item = carItemInfo( inx );
 		TabStringExtract( item->title, 7, tabs );
 		CsvFormatLong( f, item->index, "," );
 		sp = GetScaleName(item->scaleInx);
-		CsvFormatString( f, sp, strlen(sp), "," );
+		CsvFormatString( f, sp, (int)strlen(sp), "," );
 		CsvFormatString( f, tabs[T_MANUF].ptr, tabs[T_MANUF].len, "," );
 		CsvFormatLong( f, item->type, "," );
 		CsvFormatString( f, tabs[T_PART].ptr, tabs[T_PART].len, "," );
@@ -5030,9 +5030,9 @@ static int CarInvExportCsv(
 		CsvFormatLong( f, item->data.purchDate, "," );
 		CsvFormatLong( f, item->data.serviceDate, "," );
 		if ( item->data.notes )
-			CsvFormatString( f, item->data.notes, strlen(item->data.notes), "\n" );
+			CsvFormatString( f, item->data.notes, (int)strlen(item->data.notes), "\n" );
 		else
-			CsvFormatString( f, "", strlen(""), "\n" );
+			CsvFormatString( f, "", (int)strlen(""), "\n" );
 	}
 	fclose( f );
 	SetUserLocale();

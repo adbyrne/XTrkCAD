@@ -1972,7 +1972,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			static char pathChar[512];
 			if (dp->type == NTO_CORNU3WAY) {
 				strcpy(pathChar,"Normal");  /* Also resets array */
-				pathLen = strlen(pathChar)+1;
+				pathLen = (wIndex_t)strlen(pathChar)+1;
 				for (uint8_t i=0;i<CenterEndSeg;i++) {
 					pathChar[pathLen] = i+1;
 					pathLen++;
@@ -1982,10 +1982,10 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				pathChar[pathLen] = 0;
 				pathLen++;
 				sprintf(&pathChar[pathLen],"%s","Left");
-				pathLen += strlen(&pathChar[pathLen])+1;
+				pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
 			} else {
 				strcpy(pathChar,"Left");
-				pathLen = strlen(pathChar)+1;
+				pathLen = (wIndex_t)strlen(pathChar)+1;
 			}
 			for (uint8_t i=0;i<Toe1Seg;i++) {
 				pathChar[pathLen] = i+1;
@@ -2009,7 +2009,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			pathLen++;
 
 			sprintf(&pathChar[pathLen],"%s","Right");
-			pathLen += strlen(&pathChar[pathLen])+1;
+			pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
 
 			for (uint8_t i=0;i<Toe1Seg;i++) {
 				pathChar[pathLen] = i+1;
@@ -2384,7 +2384,7 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			static char pathChar[512];
 			strcpy(pathChar,"Normal");  /* Also resets array */
 
-			pathLen = strlen(pathChar)+1;
+			pathLen = (wIndex_t)strlen(pathChar)+1;
 
 			for (uint8_t i=0;i<OuterEndSeg;i++) {
 				pathChar[pathLen] = i+1;
@@ -2397,7 +2397,7 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 
 			sprintf(&pathChar[pathLen],"%s","Reverse");
 
-			pathLen += strlen(&pathChar[pathLen])+1;
+			pathLen += (wIndex_t)strlen(&pathChar[pathLen])+1;
 			for (uint8_t i=0;i<ToeSeg;i++) {
 				pathChar[pathLen] = i+1;
 				pathLen++;
@@ -2420,7 +2420,7 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 
 	if (!( (dp->type== NTO_CORNU) || (dp->type == NTO_CORNUWYE) || (dp->type == NTO_CORNU3WAY))) {
 		segOrder = pp->segOrder;
-		segCnt = strlen( segOrder );
+		segCnt = (wIndex_t)strlen( segOrder );
 		if (segCnt%3 != 0)
 			AbortProg( dp->label );
 		segCnt /= 3;

@@ -107,7 +107,7 @@ static void CreateTipW( void )
 				*cp++ = '\n';
 				
 				/* read a line */	
-				if (!fgets( cp, (sizeof buff) - (cp-buff), tipF )) {
+				if (!fgets( cp, (int)((sizeof buff) - (cp-buff)), tipF )) {
 					return;
 				}
 	

@@ -1041,7 +1041,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 	wControl_p controls[5];				//Always needs a NULL last entry
 	char * labels[4];
 
-	Da.cmdType = (long)commandContext;
+	Da.cmdType = VP2L(commandContext);
 
 
 	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED) return C_CONTINUE;
@@ -2215,7 +2215,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_START:
 		lock = FALSE;
-		Da.cmdType = (long)commandContext;
+		Da.cmdType = VP2L(commandContext);
 		Da.state = NONE;
 		Da.selectEndPoint = -1;
 		Da.selectMidPoint = -1;

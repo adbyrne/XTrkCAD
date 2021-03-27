@@ -639,7 +639,7 @@ EXPORT void SelectTrackWidth( void* width )
 		if (GetTrkSelected(trk)) {
 			DrawTrackAndEndPts( trk, wDrawColorWhite );
 			UndoModify( trk );
-			SetTrkWidth( trk, (int)(long)width );
+			SetTrkWidth( trk, (int)VP2L(width) );
 			DrawTrackAndEndPts( trk, wDrawColorBlack );
 		}
 	}
@@ -663,11 +663,11 @@ EXPORT void SelectLineType( void* width )
 		if (GetTrkSelected(trk)) {
 			UndoModify( trk );
 			if (QueryTrack(trk, Q_CAN_MODIFY_CONTROL_POINTS))
-				SetBezierLineType(trk, (int) (long) width);
+				SetBezierLineType(trk, (int)VP2L(width));
 			else if (QueryTrack(trk, Q_IS_DRAW))
-				SetLineType( trk, (int)(long)width );
+				SetLineType( trk, (int)VP2L(width) );
 			else if (QueryTrack(trk, Q_IS_STRUCTURE)) {
-				SetCompoundLineType(trk, (int)(long)width);
+				SetCompoundLineType(trk, (int)VP2L(width));
 			}
 		}
 	}
@@ -2383,7 +2383,7 @@ EXPORT void SelectByIndex( void* string) {
 			message = MyMalloc(STR_LONG_SIZE);
 			trk = SelectTrackByIndex(ti, message);
 			if (!trk || message[0]) {
-				int len = strlen(result);
+				size_t len = strlen(result);
 				snprintf(result+len,(sizeof(result) - len),"I:%ld %s", ti, message);
 				MyFree(message);
 			}
@@ -2406,7 +2406,7 @@ EXPORT void SelectByIndex( void* string) {
 
 static void QuickRotate( void* pangle )
 {
-	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	ANGLE_T angle = (ANGLE_T)VP2L(pangle);
 	DYNARR_RESET(track_p,auto_select_da);
 	if ( SelectedTracksAreFrozen() )
 		return;
@@ -2583,7 +2583,7 @@ STATUS_T CmdMoveDescription(
 	static int mode;
 	BOOL_T bChanged;
 
-	moveDescMode = (long)commandContext;   //Context 0 = everything, 1 means elevations, 2 means descriptions
+	moveDescMode = VP2L(commandContext);   //Context 0 = everything, 1 means elevations, 2 means descriptions
 
 	bChanged = FALSE;
 	switch (action&0xFF) {

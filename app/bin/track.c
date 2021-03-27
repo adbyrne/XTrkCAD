@@ -250,7 +250,7 @@ EXPORT void EnumerateTracks( void )
 	track_p trk;
 	TRKINX_T inx;
 
-	enumerateMaxDescLen = strlen("Description");
+	enumerateMaxDescLen = (int)strlen("Description");
 
 	BOOL_T content = FALSE;
 

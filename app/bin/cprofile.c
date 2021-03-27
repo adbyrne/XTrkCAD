@@ -1384,7 +1384,7 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
 
 static void ProfileSubCommand(wBool_t set, void* pcmd)
 {
-    long cmd = (long)pcmd;
+    long cmd = VP2L(pcmd);
     int mode;
     coOrd pos = oldMarker;
     DIST_T elev;

@@ -181,7 +181,7 @@ static void DoRecordButton( void * context )
 	char * cp;
 	int len;
 
-	switch( (int)(long)context ){
+	switch( (int)VP2L(context) ){
 	case 0: /* Stop */
 		fprintf( recordF, "CLEAR\nMESSAGE\n");
 		fprintf( recordF, N_("End of Playback.  Hit Step to exit\n"));
@@ -977,7 +977,7 @@ static void Playback( void )
 	wIndex_t inx;
 	long timeout;
 	static enum { pauseCmd, mouseCmd, otherCmd } thisCmd, lastCmd;
-	int len;
+	size_t len;
 	static wBool_t demoWinOnTop = FALSE;
 	coOrd roomSize;
 	char * cp, * cq;
@@ -1324,7 +1324,7 @@ static int StartPlayback( int cnt, char **pathName, void * context )
 
 static void DoDemoButton( void * command )
 {
-	switch( (int)(long)command ) {
+	switch( VP2L(command) ) {
 	case 0:
 		/* step */
 		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
@@ -1526,7 +1526,7 @@ static void DoDemo( void * demoNumber )
 	if (demoW == NULL)
 		CreateDemoW();
 	wButtonSetLabel( demoNext, _("Next") );
-	curDemo = (int)(long)demoNumber;
+	curDemo = (int)VP2L(demoNumber);
 	if ( curDemo < 0 || curDemo >= demoList_da.cnt ) {
 		NoticeMessage( MSG_DEMO_BAD_NUM, _("Ok"), NULL, curDemo );
 		return;

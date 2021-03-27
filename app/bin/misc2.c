@@ -591,7 +591,7 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	DIST_T ratio;
 	BOOL_T found;
 	char buf[ 80 ];
-	int len;
+	size_t len;
 
 	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
 		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
@@ -796,7 +796,7 @@ EXPORT void ScaleLengthIncrement(
 		DIST_T length )
 {
 	char * cp;
-	int len;
+	size_t len;
 	if (scaleInfo(scale).length == 0.0) {
 		if (units == UNITS_METRIC)
 			cp = "999.99m SCALE Flex Track";
@@ -804,7 +804,7 @@ EXPORT void ScaleLengthIncrement(
 			cp = "999' 11\" SCALE Flex Track";
 		len = strlen( cp )+1;
 		if (len > enumerateMaxDescLen)
-			enumerateMaxDescLen = len;
+			enumerateMaxDescLen = (int)len;
 	}
 	scaleInfo(scale).length += length;
 }
@@ -812,7 +812,7 @@ EXPORT void ScaleLengthIncrement(
 EXPORT void ScaleLengthEnd( void )
 {
 	wIndex_t si;
-	int count;
+	size_t count;
 	DIST_T length;
 	char tmp[STR_SIZE];
 	FLOAT_T flexLen;
@@ -833,7 +833,7 @@ EXPORT void ScaleLengthEnd( void )
 			if (flexLen > 0.0) {
 				count = (int)ceil( length / (flexLen/(flexUnit?2.54:1.00)));
 			}
-			EnumerateList( count, flexCost, tmp, NULL );
+			EnumerateList( (long)count, flexCost, tmp, NULL );
 		}
 		scaleInfo(si).length = 0;
 	}

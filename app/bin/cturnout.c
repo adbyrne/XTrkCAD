@@ -363,7 +363,7 @@ EXPORT wIndex_t CheckPaths(
 
 		}
 	}
-	return pp-paths+1;
+	return (wIndex_t)(pp-paths+1);
 }
 
 
@@ -2390,7 +2390,6 @@ static void AddTurnout( void )
 	ANGLE_T a, aa;
 	EPINX_T ep0, ep1, epx, epy;
 	wIndex_t i,j;
-	wIndex_t titleLen;
 	typedef struct {
 		track_p trk;
 		EPINX_T ep;
@@ -2412,7 +2411,6 @@ static void AddTurnout( void )
 	}
 
 	UndoStart( _("Place New Turnout"), "addTurnout" );
-	titleLen = strlen( curTurnout->title );
 
 	DYNARR_SET( trkEndPt_t, tempEndPts_da, curTurnout->endCnt );
 	DYNARR_SET( junk_t, connection_da, curTurnout->endCnt );
@@ -2666,7 +2664,7 @@ static void TurnoutRotate( void * pangle )
 {
 	if (Dto.state == 0)
 		return;
-	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	ANGLE_T angle = (ANGLE_T)VP2L(pangle);
 	angle /= 1000.0;
 	Dto.pos = cmdMenuPos;
 	Rotate( &Dto.pos, cmdMenuPos, angle );

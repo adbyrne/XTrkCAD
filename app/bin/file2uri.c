@@ -49,7 +49,7 @@ File2URI(char *fileName, unsigned resultLen, char *resultBuffer)
 
 	}
 	*currentDest = '\0';
-	return(strlen(resultBuffer));
+	return((unsigned)strlen(resultBuffer));
 }
 
 unsigned 
@@ -77,5 +77,5 @@ URI2File(char *encodedFileName, unsigned resultLen, char *resultBuffer)
 		}
 	}
 	*currentDest = '\0';
-	return(strlen(resultBuffer));
+	return((unsigned)strlen(resultBuffer));
 }

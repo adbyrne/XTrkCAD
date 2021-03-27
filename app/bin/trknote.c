@@ -636,7 +636,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     switch (action) {
     case C_START:
         InfoMessage(_("Place a note on the layout"));
-		curNoteType = (long)commandContext;
+		curNoteType = VP2L(commandContext);
         return C_CONTINUE;
 
     case C_DOWN:

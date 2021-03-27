@@ -85,7 +85,7 @@ static int DoEnumSave(
 static void DoEnumOp(
 		void * data )
 {
-	switch( (int)(long)data ) {
+	switch( VP2L(data) ) {
 	case ENUMOP_SAVE:
 		wFilSelect( enumFile_fs, GetCurrentPath(PARTLISTPATHKEY) );
 		break;
@@ -119,7 +119,7 @@ void EnumerateList(
 		char * indexes )
 {
 	char * cp;
-	int len;
+	size_t len;
 	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
@@ -212,7 +212,7 @@ void EnumerateStart(void)
 
 void EnumerateEnd(void)
 {
-	int len;
+	size_t len;
 	char * cp;
 	ScaleLengthEnd();
 	

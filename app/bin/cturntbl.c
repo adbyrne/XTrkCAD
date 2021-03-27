@@ -567,7 +567,7 @@ static BOOL_T EnumerateTurntable( track_p trk )
 	struct extraDataTurntable_t *xx;
 	static dynArr_t turntables_da;
 #define turntables(N) DYNARR_N( FLOAT_T, turntables_da, N )
-	int inx;
+	size_t inx;
 	char tmp[40];
 	BOOL_T content = FALSE;
 	if ( trk != NULL ) {
@@ -577,8 +577,8 @@ static BOOL_T EnumerateTurntable( track_p trk )
 		turntables(turntables_da.cnt-1) = xx->radius*2.0;
 		sprintf( tmp, "Turntable, diameter %s", FormatDistance(turntables(turntables_da.cnt-1)) );
 		inx = strlen( tmp );
-		if ( inx > (int)enumerateMaxDescLen )
-			enumerateMaxDescLen = inx;
+		if ( inx > enumerateMaxDescLen )
+			enumerateMaxDescLen = (int)inx;
 	} else {
 		for (inx=0; inx<turntables_da.cnt; inx++) {
 			content = TRUE;

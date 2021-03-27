@@ -38,7 +38,7 @@ static dynArr_t anchors_da;
 
 static void ChangeSplitEPMode( wBool_t set, void * mode )
 {
-	long imode = (long)mode;
+	long imode = VP2L(mode);
 	long option;
 	int inx0, inx;
 

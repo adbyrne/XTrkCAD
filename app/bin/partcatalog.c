@@ -383,7 +383,7 @@ CreateKeywordIndex(ParameterLib *library)
 {
     CatalogEntry *listOfEntries = library->catalog->head;
     CatalogEntry *curParamFile;
-    unsigned totalMemory = 0;
+    size_t totalMemory = 0;
     size_t wordCount = 0;
     char *wordList;
     char *wordListPtr;
@@ -445,7 +445,7 @@ CreateKeywordIndex(ParameterLib *library)
         LOG1(log_params, ("Index Entry: <%s> Count: %d\n", existingEntry->keyWord,
                           existingEntry->references->cnt));
     }
-    return (wordCount);
+    return (unsigned)(wordCount);
 }
 
 /**

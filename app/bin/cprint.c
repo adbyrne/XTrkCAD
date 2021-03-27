@@ -1309,7 +1309,7 @@ static void DoResetGrid( void )
 
 static void PrintGridRotate( void * pangle )
 {
-	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	ANGLE_T angle = (ANGLE_T)VP2L(pangle);
 	currPrintGrid.orig = cmdMenuPos;
 	currPrintGrid.angle += angle/1000;
 	newPrintGrid = currPrintGrid;

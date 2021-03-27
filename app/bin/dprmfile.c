@@ -124,7 +124,7 @@ void
 SortParamFileList(size_t cnt,  dynArr_t *files, int *list)
 {
     for (size_t i = 0; i < cnt; i++) {
-        list[i] = i;
+        list[i] = (int)i;
     }
 
     sortFiles = files;
@@ -207,7 +207,7 @@ static void UpdateParamFileButton(void)
     for (inx=0; inx<cnt; inx++) {
         if (wListGetItemSelected((wList_p)paramFileL, inx)) {
             // if item is selected, get status
-            fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+            fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
             if (fileInx < 0 || fileInx >= GetParamFileCount()) {
                 return;
@@ -237,7 +237,7 @@ UpdateParamFileProperties( bool newState)
     // walk through the whole list box
     for (inx = 0; inx < cnt; inx++) {
         if (wListGetItemSelected((wList_p)paramFileL, inx)) {
-            fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+            fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
             SetParamFileFavorite(fileInx, newState);
         }
     }
@@ -277,7 +277,7 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 
 	for (inx = 0; inx < cnt; inx++) {
 		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
-			fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
 			switch (paramFileChange) {
 			case PARAMFILE_UNLOAD:
