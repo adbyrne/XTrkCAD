@@ -660,7 +660,7 @@ static char * trainAutoReverseLabels[] = { N_("Auto Reverse"), NULL };
 static paramData_t trainPLs[] = {
 #define I_LIST				(0)
 #ifdef WINDOWS
-    /*0*/ { PD_DROPLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, I2VP(120, NULL, 0 },
+    /*0*/ { PD_DROPLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, I2VP(120), NULL, 0 },
 #else
     /*0*/ { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, &listData, NULL, 0 },
 #endif
