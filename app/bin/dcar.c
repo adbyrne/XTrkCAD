@@ -3796,7 +3796,6 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 			wControlSetBalloon( pg->paramPtr[inx].control, 0, -h*3/4, cp );
 		} else
 			wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
-
 		if (inx == I_CD_PURDAT)
 			carDlgPurchDate = valL;
 		else
@@ -4008,6 +4007,8 @@ static void CarDlgOk( void * junk )
 
 LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 
+	ParamUpdate(&carDlgPG);
+
 	/*ParamUpdate( &carDlgPG );*/
 	if ( carDlgDim.carLength <= 0.0 ||
 		 carDlgDim.carWidth <= 0.0 ||
@@ -4017,7 +4018,8 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		NoticeMessage( MSG_CARDESC_VALUE_ZERO, _("Ok"), NULL );
 		return;
 	}
-	if ( carDlgDim.carLength <= carDlgDim.carWidth ) {
+	if ( carDlgDim.carLength <= carDlgDim.carWidth ||
+		 carDlgDim.truckCenter >= carDlgDim.carLength ) {
 		NoticeMessage( MSG_CARDESC_BAD_DIM_VALUE, _("Ok"), NULL );
 		return;
 	}
@@ -4031,6 +4033,8 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		ParamLoadControl( &carDlgPG, I_CD_ITEMINDEX );
 		return;
 	}
+
+	if ( S_ITEM && (carDlgPurchDate<0 || carDlgServiceDate<0 || carDlgPurchPrice <0 || carDlgCurrPrice<0)) return;
 
 	if ( (!S_PROTO) && carDlgCouplerMount != 0 )
 		options |= CAR_DESC_COUPLER_MODE_BODY;
@@ -4056,6 +4060,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 				}
 			}
 		}
+		if (carDlgPurchDate <0 )
 		if ( carDlgUpdateItemPtr!=NULL ) {
 			carDlgQuantity = 1;
 		}
