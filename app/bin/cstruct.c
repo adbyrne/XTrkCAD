@@ -72,11 +72,11 @@ static paramData_t structurePLs[] = {
 #define I_HIDE	(2)
 	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(void*)hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 },
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGWIDTH		(4)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 },
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 } };
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) } };
 static paramGroup_t structurePG = { "structure", 0, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
 
 
@@ -476,7 +476,7 @@ static trackCmd_t structureCmds = {
 		CompareStruct };
 
 static paramData_t pierPLs[] = {
-	{	PD_DROPLIST, &pierListInx, "inx", 0, (void*)50, N_("Pier Number") } };
+	{	PD_DROPLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") } };
 static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
 #define pierL ((wList_p)pierPLs[0].control)
 
@@ -1062,7 +1062,7 @@ static char * CmdStructureHotBarProc(
 	case HB_SELECT:
 		CmdStructureAction( C_FINISH, zero );
 		curStructure = to;
-		DoCommandB( (void*)(intptr_t)structureHotBarCmdInx );
+		DoCommandB( I2VP(structureHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );

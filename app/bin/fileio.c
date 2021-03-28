@@ -978,7 +978,7 @@ EXPORT void DoFileList(
 	char *pathName = (char*)data;
 	bExample = FALSE;
 	if (label)
-		LoadTracks( 1, &pathName, (void*)1 );
+		LoadTracks( 1, &pathName, I2VP(1));
 	else
 		LoadTracks( 1, &pathName, NULL );
 }
@@ -1457,7 +1457,7 @@ static int ImportTracks(
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
 	paramVersion = paramVersionOld;
-	DoCommandB( (void*)(intptr_t)selectCmdInx );
+	DoCommandB( I2VP(selectCmdInx) );
 	SelectRecount();
 	return TRUE;
 }
@@ -1609,7 +1609,7 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
-	DoCommandB( (void*)(intptr_t)selectCmdInx );
+	DoCommandB( I2VP(selectCmdInx) );
 	SelectRecount();
 	UpdateAllElevations();
 

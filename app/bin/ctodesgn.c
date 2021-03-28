@@ -2886,7 +2886,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		partnoWidth = wLabelWidth( "999-99999-9999" );
 		turnDesignPLs[I_TOLDESC+1].winData =
 		turnDesignPLs[I_TORDESC+1].winData =
-			(void*)(intptr_t)partnoWidth;
+			I2VP(partnoWidth);
 		partnoWidth += wLabelWidth( " # " );
 		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"), NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK, NULL );
 		for ( inx=0; inx<(sizeof designDescs/sizeof designDescs[0]); inx++ ) {

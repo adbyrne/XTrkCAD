@@ -292,7 +292,7 @@ static char *
 GetParamFullPath(struct appDefault *ptrDefault, void *additionalData)
 {
     char *str;
-    MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, (void *)0);
+    MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, I2VP(0));
     return str;
 }
 

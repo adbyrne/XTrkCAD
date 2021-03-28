@@ -160,14 +160,14 @@ static void SetEasement(
 static void EasementOk( void )
 {
 	ParamLoadData( &easementPG );
-	SetEasement( easementVal, (void*)FALSE );
+	SetEasement( easementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
 
 
 static void EasementCancel( void )
 {
-	SetEasement( easementVal = oldEasementVal, (void*)FALSE );
+	SetEasement( easementVal = oldEasementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
 
@@ -200,7 +200,7 @@ static void EasementSel(
 		val = 0.0;
 		break;
 	}
-	SetEasement( val, (void*)FALSE );
+	SetEasement( val, I2VP(FALSE) );
 }
 
 
@@ -211,7 +211,7 @@ static void EasementDlgUpdate(
 {
 	switch (inx) {
 	case I_EASEVAL:
-		SetEasement( *(FLOAT_T*)valueP, (void*)1 );
+		SetEasement( *(FLOAT_T*)valueP, I2VP(1) );
 		break;
 	case I_EASESEL:
 		EasementSel( *(long*)valueP );
@@ -236,11 +236,11 @@ static void DoEasement( void * junk )
 {
 	if (easementW == NULL) {
 		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
-		SetEasement( easementVal, (void*)TRUE );
+		SetEasement( easementVal, I2VP(TRUE) );
 	}
 	oldEasementVal = easementVal;
 	wShow( easementW );
-	SetEasement( easementVal, (void*)TRUE );
+	SetEasement( easementVal, I2VP(TRUE) );
 }
 
 
@@ -251,7 +251,7 @@ static void EasementChange( long changes )
 {
 	if (changes&(CHANGE_SCALE|CHANGE_UNITS)) {
 		GetScaleEasementValues( Rvalues, Lvalues );
-		SetEasement( easementVal, (void*)TRUE );
+		SetEasement( easementVal, I2VP(TRUE) );
 	}
 }
 

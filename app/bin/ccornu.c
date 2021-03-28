@@ -189,7 +189,7 @@ static char * CmdCornuHotBarProc(
 	case HB_SELECT:
 		CmdCornu( C_CANCEL, zero );
 		curCornu = trkseg;
-		DoCommandB( (void*)(intptr_t)cornuHotBarCmdInx );
+		DoCommandB( I2VP(cornuHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
 		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
@@ -2698,7 +2698,7 @@ static STATUS_T cmdCornuCreate(
 		/* no break */
 	case C_START:
 		createState = 0;
-		commandContext = (void *)cornuCmdHotBar;
+		commandContext = I2VP(cornuCmdHotBar);
 		rc = CmdCornu(C_START, pos);
 		Da.prevSelected = -1;
 		Da.selectEndHandle = -1;

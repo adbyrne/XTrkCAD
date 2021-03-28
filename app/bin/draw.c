@@ -2072,7 +2072,7 @@ static void DoNewScale( DIST_T scale )
 	SetZoomRadio( scale ); 
 	InfoScale();
 	SetMainSize(); 
-	PanHere( (void*)1 );
+	PanHere( I2VP(1) );
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
@@ -2131,7 +2131,7 @@ EXPORT void DoZoomUp( void * mode )
 EXPORT void DoZoomExtents( void * mode) {
 
 	DIST_T scale_x, scale_y;
-	if ( 1 == (intptr_t)mode) {
+	if ( 1 == VP2L(mode) ) {
 		if ( selectedTrackCount == 0 )
 				return;
 			track_p trk = NULL;
@@ -2155,7 +2155,7 @@ EXPORT void DoZoomExtents( void * mode) {
 			}
 		panCenter.x = (top.x/2)+(bot.x)/2;
 		panCenter.y = (top.y/2)+(bot.y)/2;
-		PanHere((void *)1);
+		PanHere(I2VP(1));
 		scale_x = (top.x-bot.x)*1.5/(mainD.size.x/mainD.scale);
 		scale_y = (top.y-bot.y)*1.5/(mainD.size.y/mainD.scale);
 	} else {
@@ -2169,7 +2169,7 @@ EXPORT void DoZoomExtents( void * mode) {
 	scale_x = ceil(scale_x);
 	if (scale_x < 1) scale_x = 1;
 	if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
-	if (1 != (intptr_t)1)
+	if (1 != VP2L(1))
 		mainD.orig = zero;
 	DoNewScale(scale_x);
 	MainLayout(TRUE,TRUE);
@@ -2258,18 +2258,18 @@ EXPORT void CoOrd2Pix(
 *  - 3: Take position from menuPos
 */
 EXPORT void PanHere(void * mode) {
-	if ( 3 == (intptr_t)mode) {
+	if ( 3 == VP2L(mode ) ) {
 		panCenter = menuPos;
 		LOG( log_pan, 2, ( "MCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 	}
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
 	wBool_t bNoBorder = (constrainMain != 0);
-	if ( 1 != (intptr_t)mode )
+	if ( 1 != VP2L(mode) )
 		if ( (MyGetKeyState()&WKEY_CTRL)!= 0 )
 			bNoBorder = !bNoBorder;
 	wBool_t bLiveMap = TRUE;
-	if ( 2 == (intptr_t)mode )
+	if ( 2 == VP2L(mode) )
 		bLiveMap = liveMap;
 
 	MainLayout( bLiveMap, bNoBorder ); // PanHere
@@ -2297,7 +2297,7 @@ static int DoPanKeyAction( wAction_t action )
 		else
 			panCenter.x += mainD.size.x/2;
 		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-		PanHere((void*)0);
+		PanHere(I2VP(0));
 		break;
 
 	case wAccelKey_Left:
@@ -2308,7 +2308,7 @@ static int DoPanKeyAction( wAction_t action )
 		else
 			panCenter.x -= mainD.size.x/2;
 		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-		PanHere((void*)0);
+		PanHere(I2VP(0));
 		break;
 
 	case wAccelKey_Up:
@@ -2319,7 +2319,7 @@ static int DoPanKeyAction( wAction_t action )
 		else
 			panCenter.y += mainD.size.y/2;
 		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-		PanHere((void*)0);
+		PanHere(I2VP(0));
 		break;
 
 	case wAccelKey_Down:
@@ -2330,7 +2330,7 @@ static int DoPanKeyAction( wAction_t action )
 		else
 			panCenter.y -= mainD.size.y/2;
 		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-		PanHere((void*)0);
+		PanHere(I2VP(0));
 		break;
 
 	default:
@@ -2362,13 +2362,13 @@ static void DoMapPan( wAction_t action, coOrd pos )
 //		mainD.orig.y = pos.y - mainD.size.y/2.0;
 		panCenter = pos;
 LOG( log_pan, 1, ( "%s = [ %0.3f, %0.3f ]\n", action == C_DOWN? "START":"MOVE", mainD.orig.x, mainD.orig.y ) )
-		PanHere( (void*)2 );
+		PanHere( I2VP(2));
 		break;
 	case C_UP:
 		if ( mode != movePan )
 			break;
 		panCenter = pos;
-		PanHere( (void*)0 );
+		PanHere( I2VP(0));
 LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", mainD.orig.x, mainD.orig.y ) )
 		mode = noPan;
 		break;
@@ -2414,7 +2414,7 @@ LOG( log_pan, 1, ( "START %0.3fx%0.3f %0.3f+%0.3f\n", mapOrig.x, mapOrig.y, size
 		mainD.orig.x = mapOrig.x - mainD.size.x / 2.0;
 		mainD.orig.y = mapOrig.y - mainD.size.y / 2.0;
 		tempD.scale = mainD.scale = xscale;
-		PanHere( (void*)2 );
+		PanHere( I2VP(2));
 LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale, mainD.orig.x, mainD.orig.y, mainD.size.x, mainD.size.y ) )
 		InfoScale();
 	    break;
@@ -2624,30 +2624,30 @@ static void DoMouse( wAction_t action, coOrd pos )
 			/*DrawTempTrack();*/
 			break;
 		case C_WUP:
-			DoZoomUp((void *)1L);			
+			DoZoomUp(I2VP(1L));			
 			break;
 		case C_WDOWN:
-			DoZoomDown((void *)1L);
+			DoZoomDown(I2VP(1L));
 			break;
 		case C_SCROLLUP:
 			panCenter.y = panCenter.y + ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			PanHere((void*)1);
+			PanHere(I2VP(1));
 			break;
 		case C_SCROLLDOWN:
 			panCenter.y = panCenter.y - ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			PanHere((void*)1);
+			PanHere(I2VP(1));
 			break;
 		case C_SCROLLLEFT:
 			panCenter.x = panCenter.x - ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			PanHere((void*)1);
+			PanHere(I2VP(1));
 			break;
 		case C_SCROLLRIGHT:
 			panCenter.x = panCenter.x + ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			PanHere((void*)1);
+			PanHere(I2VP(1));
 			break;
 		default:
 			NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );
@@ -3025,7 +3025,7 @@ static STATUS_T CmdPan(
 		}
 		panCenter.x = mainD.orig.x + mainD.size.x/2.0;
 		panCenter.y = mainD.orig.y + mainD.size.y/2.0;
-		PanHere( (void*)0 );
+		PanHere( I2VP(0));
 		break;
 	case C_UP:
 		if (panmode == ZOOM) {
@@ -3068,9 +3068,9 @@ static STATUS_T CmdPan(
 		panmode = NONE;
 
 		if ((action>>8) == 'e') {     //"e"
-			DoZoomExtents((void*)0);
+			DoZoomExtents(I2VP(0));
 		} else if((action>>8) == 's') {
-			DoZoomExtents((void*)1);
+			DoZoomExtents(I2VP(1));
 		} else if (((action>>8) == '0') || ((action>>8) == 'o')) {     //"0" or "o"
 			mainD.orig = zero;
 			panCenter.x = mainD.size.x/2.0;
@@ -3083,7 +3083,7 @@ static STATUS_T CmdPan(
 		} else if ((action>>8) == 'c') {				// "c"
 			panCenter = pos;
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			PanHere( (void*)0 ); // CmdPan C_TEXT 'c'
+			PanHere( I2VP(0)); // CmdPan C_TEXT 'c'
 		}
 
 		if ((action>>8) == 0x0D) {
@@ -3126,22 +3126,22 @@ EXPORT void InitCmdPan( wMenu_p menu )
 EXPORT void InitCmdPan2( wMenu_p menu )
 {
 	panPopupM = MenuRegister( "Pan Options" );
-	wMenuPushCreate(panPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
-	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
+	wMenuPushCreate(panPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, I2VP(selectCmdInx));
+	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, I2VP(describeCmdInx));
+	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
 	wMenuSeparatorCreate(panPopupM);
-	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'e');
-	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '1');
-	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '2');
-	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '3');
-	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '4');
-	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '5');
-	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '6');
-	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '7');
-	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '8');
-	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '9');
-	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
+	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( 'e'));
+	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '1'));
+	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '2'));
+	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '3'));
+	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '4'));
+	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '5'));
+	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '6'));
+	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '7'));
+	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '8'));
+	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '9'));
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( 'o'));
 	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
-	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - 'c'"), 0, (wMenuCallBack_p)PanHere, (void*) 3);
+	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - 'c'"), 0, (wMenuCallBack_p)PanHere, I2VP( 3));
 }

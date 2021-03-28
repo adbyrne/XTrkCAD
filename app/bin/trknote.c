@@ -712,7 +712,7 @@ void InitTrkNote(wMenu_p menu)
 
 		nt = noteTypes + i;
 		icon = wIconCreatePixMap(nt->xpm);
-		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, (void *)(intptr_t)nt->OP);
+		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, I2VP(nt->OP));
 	}
 	ButtonGroupEnd();
 

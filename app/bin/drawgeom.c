@@ -818,7 +818,7 @@ STATUS_T DrawGeomMouse(
 				}
 				CreateEndAnchor(context->ArcData.curvePos,TRUE);
 				/*drawContext = context;
-				DrawGeomOp( (void*)context->Op );*/
+				DrawGeomOp( I2VP(context->Op) );*/
 			}
 			break;
 		case OP_CIRCLE1:
@@ -848,7 +848,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).u.p.polyType = RECTANGLE;
 			tempSegs_da.cnt = 1;
 			/*drawContext = context;
-			DrawGeomOp( (void*)context->Op );*/
+			DrawGeomOp( I2VP(context->Op) );*/
 			context->length = FindDistance(pts[0].pt,pts[1].pt);
 			context->width = FindDistance(pts[3].pt,pts[0].pt);
 			context->State = 2;

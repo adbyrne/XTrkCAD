@@ -383,13 +383,13 @@ static char sensorEditScript[STR_LONG_SIZE];
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t sensorEditPLs[] = {
 #define I_SENSORNAME (0)
-    /*0*/ { PD_STRING, sensorEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(sensorEditName)},
+    /*0*/ { PD_STRING, sensorEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(sensorEditName)},
 #define I_ORIGX (1)
     /*1*/ { PD_FLOAT, &sensorEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") }, 
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &sensorEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_SENSORSCRIPT (3)
-    /*3*/ { PD_STRING, sensorEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(sensorEditScript)},
+    /*3*/ { PD_STRING, sensorEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Script"), 0, 0, sizeof(sensorEditScript)},
 };
 
 static paramGroup_t sensorEditPG = { "sensorEdit", 0, sensorEditPLs, sizeof sensorEditPLs/sizeof sensorEditPLs[0] };

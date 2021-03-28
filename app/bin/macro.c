@@ -58,13 +58,13 @@ static paramTextData_t recordTextData = { 50, 16 };
 static paramData_t recordPLs[] = {
 #define I_RECSTOP		(0)
 #define recStopB		((wButton_p)recordPLs[I_RECSTOP].control)
-	{   PD_BUTTON, (void*)DoRecordButton, "stop", PDO_NORECORD, NULL, N_("Stop"), 0, (void*)0 },
+	{   PD_BUTTON, (void*)DoRecordButton, "stop", PDO_NORECORD, NULL, N_("Stop"), 0, I2VP(0) },
 #define I_RECMESSAGE	(1)
 #define recMsgB ((wButton_p)recordPLs[I_RECMESSAGE].control)
-	{   PD_BUTTON, (void*)DoRecordButton, "message", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Message"), 0, (void*)2 },
+	{   PD_BUTTON, (void*)DoRecordButton, "message", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Message"), 0, I2VP(2) },
 #define I_RECEND		(2)
 #define recEndB ((wButton_p)recordPLs[I_RECEND].control)
-	{   PD_BUTTON, (void*)DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), BO_DISABLED, (void*)4 },
+	{   PD_BUTTON, (void*)DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), BO_DISABLED, I2VP(4) },
 #define I_RECTEXT		(3)
 #define recordT			((wText_p)recordPLs[I_RECTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY} };
@@ -647,16 +647,16 @@ static paramTextData_t demoTextData = { 50, 16 };
 static paramData_t demoPLs[] = {
 #define I_DEMOSTEP		(0)
 #define demoStep		((wButton_p)demoPLs[I_DEMOSTEP].control)
-	{   PD_BUTTON, (void*)DoDemoButton, "step", PDO_NORECORD, NULL, N_("Step"), BB_DEFAULT, (void*)0 },
+	{   PD_BUTTON, (void*)DoDemoButton, "step", PDO_NORECORD, NULL, N_("Step"), BB_DEFAULT, I2VP(0) },
 #define I_DEMONEXT		(1)
 #define demoNext		((wButton_p)demoPLs[I_DEMONEXT].control)
-	{   PD_BUTTON, (void*)DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Next"), 0, (void*)1 },
+	{   PD_BUTTON, (void*)DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Next"), 0, I2VP(1) },
 #define I_DEMOQUIT		(2)
 #define demoQuit		((wButton_p)demoPLs[I_DEMOQUIT].control)
-	{   PD_BUTTON, (void*)DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, (void*)3 },
+	{   PD_BUTTON, (void*)DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, I2VP(3) },
 #define I_DEMOSPEED		(3)
 #define demoSpeedL		((wList_p)demoPLs[I_DEMOSPEED].control)
-	{   PD_DROPLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, (void*)80, N_("Speed") },
+	{   PD_DROPLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), N_("Speed") },
 #define I_DEMOTEXT		(4)
 #define demoT			((wText_p)demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY} };
@@ -1386,12 +1386,12 @@ static void CreateDemoW( void )
 	char * title = MakeWindowTitle(_("Demo"));
 	demoW = ParamCreateDialog( &demoPG, title, NULL, NULL, NULL, FALSE, NULL, F_RESIZE, DemoDlgUpdate );
 
-	wListAddValue( demoSpeedL, _("Slowest"), NULL, (void*)0 );
-	wListAddValue( demoSpeedL, _("Slow"), NULL, (void*)1 );
-	wListAddValue( demoSpeedL, _("Normal"), NULL, (void*)2 );
-	wListAddValue( demoSpeedL, _("Fast"), NULL, (void*)3 );
-	wListAddValue( demoSpeedL, _("Faster"), NULL, (void*)4 );
-	wListAddValue( demoSpeedL, _("Fastest"), NULL, (void*)5 );
+	wListAddValue( demoSpeedL, _("Slowest"), NULL, I2VP(0) );
+	wListAddValue( demoSpeedL, _("Slow"), NULL, I2VP(1) );
+	wListAddValue( demoSpeedL, _("Normal"), NULL, I2VP(2) );
+	wListAddValue( demoSpeedL, _("Fast"), NULL, I2VP(3) );
+	wListAddValue( demoSpeedL, _("Faster"), NULL, I2VP(4) );
+	wListAddValue( demoSpeedL, _("Fastest"), NULL, I2VP(5) );
 	wListSetIndex( demoSpeedL, (wIndex_t)playbackSpeed );
 	playbackFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, title, sRecordFilePattern, StartPlayback, NULL );
 }
@@ -1566,7 +1566,7 @@ static BOOL_T ReadDemo(
 			demoList( demoList_da.cnt-1 ).title = MyStrdup( _(line+6) );
 			MakeFullpath(&path, libDir, "demos", cp, NULL);
 			demoList(demoList_da.cnt - 1).fileName = path;
-			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, (void*)(intptr_t)(demoList_da.cnt-1) );
+			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, I2VP(demoList_da.cnt-1) );
 		}
 		return TRUE;
 error:

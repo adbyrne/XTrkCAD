@@ -425,7 +425,7 @@ EXPORT void AddHotBarElement(
 	coOrd textsize;
 
 		if ( contentsLabel && strncmp(contentsLabel, curContentsLabel, sizeof curContentsLabel) != 0 && !isFixed ) {
-			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, (void*)(intptr_t)hotBarMap_da.cnt );
+			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
 			strncpy( curContentsLabel, contentsLabel, sizeof curContentsLabel );
 		}
 

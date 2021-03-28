@@ -704,7 +704,7 @@ static paramDrawData_t profileDrawData = { 300, 150, (wDrawRedrawCallBack_p)Redr
 static paramData_t profilePLs[] = {
     {	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
 #define I_PROFILEMSG			(1)
-    {	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void*)300 },
+    {	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(300) },
 #define I_CHANGEBUTTON 2
     {	PD_BUTTON, (void*)DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
 #define I_RESETBUTTON 3
@@ -1529,10 +1529,10 @@ EXPORT void InitCmdProfile(wMenu_p menu)
                   ACCL_PROFILE, NULL);
     profilePopupM = MenuRegister("Profile Mode");
     profilePopupToggles[0] = wMenuToggleCreate(profilePopupM, "", _("Define"), 0,
-                             FALSE, ProfileSubCommand, (void*)0);
+                             FALSE, ProfileSubCommand, I2VP(0));
     profilePopupToggles[1] = wMenuToggleCreate(profilePopupM, "", _("Ignore"), 0,
-                             FALSE, ProfileSubCommand, (void*)1);
+                             FALSE, ProfileSubCommand, I2VP(1));
     profilePopupToggles[2] = wMenuToggleCreate(profilePopupM, "", _("None"), 0,
-                             FALSE, ProfileSubCommand, (void*)2);
+                             FALSE, ProfileSubCommand, I2VP(2));
     RegisterChangeNotification(ProfileChange);
 }

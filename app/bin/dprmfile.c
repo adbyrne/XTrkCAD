@@ -71,7 +71,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILTOGGLE	(1)
     {	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (2)
-	{ PD_MESSAGE, "", NULL, 0, (void *)370 },
+	{ PD_MESSAGE, "", NULL, 0, I2VP(370) },
     {	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 #define I_PRMFILEFAVORITE (4)
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
@@ -161,7 +161,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
             wListAddValue(paramFileL,
                           DynStringToCStr(&description),
                           indicatorIcons[ paramFileInfo.favorite ][paramFileInfo.trackState],
-                          (void*)(intptr_t)sortedIndex[i]);
+                          I2VP(sortedIndex[i]));
 
 			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents, paramFileInfo.trackState))
         }
@@ -213,7 +213,7 @@ static void UpdateParamFileButton(void)
                 return;
             }
             if (!IsParamFileFavorite(fileInx)) {
-                paramFilePLs[I_PRMFILEFAVORITE].context = (void *)TRUE;
+                paramFilePLs[I_PRMFILEFAVORITE].context = I2VP(TRUE);
             }
         }
     }

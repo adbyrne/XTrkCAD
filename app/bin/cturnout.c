@@ -3006,7 +3006,7 @@ static char * CmdTurnoutHotBarProc(
 	case HB_SELECT:		/* new element is selected */
 		CmdTurnoutAction( C_FINISH, zero ); 		/* finish current operation */
 		curTurnout = to;
-		DoCommandB( (void*)(intptr_t)turnoutHotBarCmdInx ); /* continue with new turnout / structure */
+		DoCommandB( I2VP(turnoutHotBarCmdInx) ); /* continue with new turnout / structure */
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );

@@ -1595,7 +1595,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 	// Pan screen if needed to center of new
 	if (offscreen) {
 		panCenter = middle_object;
-		PanHere((void*)0);
+		PanHere(I2VP(0));
 	}
 }
 
