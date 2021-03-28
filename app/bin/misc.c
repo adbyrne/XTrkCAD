@@ -2436,6 +2436,7 @@ static void CreateMenus(void) {
 
 	wControlActive((wControl_p) undoB, FALSE);
 	wControlActive((wControl_p) redoB, FALSE);
+	InitCmdUndo();
 
 	/*
 	 * FILE MENU
