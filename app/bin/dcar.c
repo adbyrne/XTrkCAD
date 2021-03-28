@@ -4036,6 +4036,12 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 
 	if ( S_ITEM && (carDlgPurchDate<0 || carDlgServiceDate<0 || carDlgPurchPrice <0 || carDlgCurrPrice<0)) return;
 
+	if ( S_PROTO && carDlgProtoStr[0] == '\0' ) return;
+
+	if ( S_PART && (carDlgManufStr[0] == '\0' || carDlgPartnoStr[0] == '\0')) return;
+
+	if ( S_ITEM && carDlgItemIndex <= 0 ) return;
+
 	if ( (!S_PROTO) && carDlgCouplerMount != 0 )
 		options |= CAR_DESC_COUPLER_MODE_BODY;
 	if ( carDlgIsLoco == 1 )
