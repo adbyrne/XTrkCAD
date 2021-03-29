@@ -4066,7 +4066,6 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 				}
 			}
 		}
-		if (carDlgPurchDate <0 )
 		if ( carDlgUpdateItemPtr!=NULL ) {
 			carDlgQuantity = 1;
 		}
