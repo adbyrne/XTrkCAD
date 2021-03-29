@@ -175,8 +175,6 @@ static FILE * helpStrF;
 #endif
 static int inMainWndProc = FALSE;
 
-static int newHelp = 1;
-
 static wBool_t mswWinBlockEnabled = TRUE;
 
 static FILE * dumpControlsF;
@@ -578,8 +576,25 @@ static void getSavedSizeAndPos(
 
     if ((option&F_RECALLPOS) && nameStr) {
         int x, y, w, h;
+		int xadj, yadj;
         const char *cp;
         int state;
+
+		w = h = 0;
+		xadj = 1;
+		yadj = mTitleH + 1;
+		if (option & F_RESIZE) {
+			xadj += mResizeBorderW * 2;
+			yadj += mResizeBorderH * 2;
+		}
+		else
+		{
+			xadj += mFixBorderW * 2;
+			yadj += mFixBorderH * 2;
+		}
+		//if (option & F_MENUBAR) {
+		//	yadj += mMenuH;
+		//}
 
         if ((option & F_RESIZE) &&
                 (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
@@ -595,12 +610,12 @@ static void getSavedSizeAndPos(
                 h = 10;
             }
 
-            if (w > screenWidth) {
-                w = screenWidth;
+            if (w > screenWidth - xadj) {
+                w = screenWidth - xadj;
             }
 
-            if (h > screenHeight) {
-                h = screenHeight;
+            if (h > screenHeight - yadj) {
+                h = screenHeight - yadj;
             }
 
             *rw = w;
@@ -619,12 +634,12 @@ static void getSavedSizeAndPos(
                 x = 0;
             }
 
-            if (y > screenHeight-40) {
-                y = screenHeight-40;
+            if (y + h > screenHeight - yadj) {
+                y = screenHeight - yadj - h;
             }
 
-            if (x > screenWidth-40) {
-                x = screenWidth-40;
+            if (x + w > screenWidth - xadj) {
+                x = screenWidth - xadj - w;
             }
 
             *rx = x;
@@ -887,8 +902,6 @@ wWin_p wWinMainCreate(
 
     ShowWindow(w->hWnd, showCmd);
     UpdateWindow(w->hWnd);
-    GetWindowRect(w->hWnd, &rect);
-    GetClientRect(w->hWnd, &rect);
     w->busy = FALSE;
     return w;
 }
@@ -1239,15 +1252,9 @@ static void savePos(wWin_p win)
 			wPrefSetString("msw window pos", win->nameStr, posStr);
 
             if (win->option&F_RESIZE) {
+				GetClientRect(win->hWnd, &rect);
 				w = rect.right - rect.left;
 				h = rect.bottom - rect.top;
-                w -= mResizeBorderW*2;
-                h -= mResizeBorderH*2 + mTitleH;
-
-                if (win->option&F_MENUBAR) {
-                    h -= mMenuH;
-                }
-
                 wsprintf(posStr, "%d %d %d",
                          0,						// unused
                          w, h);
@@ -2310,47 +2317,7 @@ void startBalloonHelp(void)
             balloonHelpButton->tipStr = hs = _(bh->value);
         }
 
-        if (newHelp) {
-            wControlSetBalloon(balloonHelpButton, 0, 0, hs);
-#ifdef OBSOLETE
-		} else {
-            int w, h;
-            hDc = GetDC(balloonHelpHWnd);
-            hFont = SelectObject(hDc, mswLabelFont);
-            extent = GetTextExtent(hDc, CAST_AWAY_CONST hs, (int)(strlen(hs)));
-            w = LOWORD(extent);
-            h = HIWORD(extent);
-            pt.x = 0;
-
-        	if (balloonHelpButton->type == B_RADIO ||
-				balloonHelpButton->type == B_TOGGLE) {
-				pt.y = balloonHelpButton->h;
-			} else if (balloonHelpButton->type == B_DROPLIST ) {
-				GetClientRect(balloonHelpButton->hWnd, &rect);
-				pt.y = rect.bottom;
-		    } else {
-                GetClientRect(balloonHelpButton->hWnd, &rect);
-                pt.y = rect.bottom + 4;
-            }
-
-            ClientToScreen(balloonHelpButton->hWnd, &pt);
-
-            if (pt.x + w+2 > screenWidth) {
-                pt.x = screenWidth-(w+2);
-            }
-
-            if (pt.x < 0) {
-                pt.x = 0;
-            }
-
-            SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
-                         SWP_SHOWWINDOW|SWP_NOACTIVATE);
-            SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
-            TextOut(hDc, 2, 1, hs, (int)(strlen(hs)));
-            SelectObject(hDc, hFont);
-            ReleaseDC(balloonHelpHWnd, hDc);
-#endif
-        }
+        wControlSetBalloon(balloonHelpButton, 0, 0, hs);
     }
 }
 
@@ -3436,9 +3403,9 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
     mResizeBorderW = GetSystemMetrics(SM_CXFRAME);
     mResizeBorderH = GetSystemMetrics(SM_CYFRAME);
     mMenuH = GetSystemMetrics(SM_CYMENU) + 1;
-    screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    screenHeight = GetSystemMetrics(SM_CYSCREEN);
-    mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
+	screenWidth = GetSystemMetrics(SM_CXFULLSCREEN);
+	screenHeight = GetSystemMetrics(SM_CYFULLSCREEN);
+	mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
     hDc = GetDC(0);
     mswScale = GetDeviceCaps(hDc, LOGPIXELSX) / 96.0;
 
