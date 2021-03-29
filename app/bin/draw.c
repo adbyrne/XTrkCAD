@@ -2169,7 +2169,7 @@ EXPORT void DoZoomExtents( void * mode) {
 	scale_x = ceil(scale_x);
 	if (scale_x < 1) scale_x = 1;
 	if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
-	if (1 != VP2L(1))
+	if (1 != (intptr_t)1)
 		mainD.orig = zero;
 	DoNewScale(scale_x);
 	MainLayout(TRUE,TRUE);
