@@ -38,7 +38,7 @@ static dynArr_t anchors_da;
 
 static void ChangeSplitEPMode( wBool_t set, void * mode )
 {
-	long imode = (long)mode;
+	long imode = VP2L(mode);
 	long option;
 	int inx0, inx;
 
@@ -190,15 +190,15 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		if ( splitPopupM[0] == NULL ) {
 			splitPopupM[0] = MenuRegister( "End Point Mode R-L" );
-			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", _("None"), 0, TRUE, ChangeSplitEPMode, (void*)0 );
-			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", _("Left"), 0, FALSE, ChangeSplitEPMode, (void*)1 );
-			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", _("Right"), 0, FALSE, ChangeSplitEPMode, (void*)2 );
-			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", _("Both"), 0, FALSE, ChangeSplitEPMode, (void*)3 );
+			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", _("None"), 0, TRUE, ChangeSplitEPMode, I2VP(0) );
+			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", _("Left"), 0, FALSE, ChangeSplitEPMode, I2VP(1) );
+			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", _("Right"), 0, FALSE, ChangeSplitEPMode, I2VP(2) );
+			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", _("Both"), 0, FALSE, ChangeSplitEPMode, I2VP(3) );
 			splitPopupM[1] = MenuRegister( "End Point Mode T-B" );
-			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", _("None"), 0, TRUE, ChangeSplitEPMode, (void*)0 );
-			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", _("Top"), 0, FALSE, ChangeSplitEPMode, (void*)1 );
-			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", _("Bottom"), 0, FALSE, ChangeSplitEPMode, (void*)2 );
-			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", _("Both"), 0, FALSE, ChangeSplitEPMode, (void*)3 );
+			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", _("None"), 0, TRUE, ChangeSplitEPMode, I2VP(0) );
+			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", _("Top"), 0, FALSE, ChangeSplitEPMode, I2VP(1) );
+			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", _("Bottom"), 0, FALSE, ChangeSplitEPMode, I2VP(2) );
+			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", _("Both"), 0, FALSE, ChangeSplitEPMode, I2VP(3) );
 		}
 		splitTrkEP[0] = PickEndPoint( pos, splitTrkTrk[0] );
 		angle = NormalizeAngle(GetTrkEndAngle( splitTrkTrk[0], splitTrkEP[0] ));

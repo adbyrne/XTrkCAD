@@ -550,9 +550,9 @@ static paramListData_t layerUiListData = { 10, 370, 0 };
 
 static paramData_t layerPLs[] = {
 #define I_LIST	(0)
-    { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX, (void*)250, N_("Select Layer:") },
+    { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
 #define I_NAME	(1)
-    { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Name"), 0, 0, sizeof(layerName) },
+    { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(250-54), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
     { PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
 #define I_USE_COLOR (3)
@@ -568,15 +568,15 @@ static paramData_t layerPLs[] = {
 #define I_BUT   (8)
 	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("No Button"), BC_HORZ|BC_NOBORDER },
 #define I_LINKLIST (9)
-	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
+	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (10)
-	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, (void*) 250, N_("Settings when Current") },
+	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP( 250), N_("Settings when Current") },
 #define I_COUNT (11)
-    { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, (void *)370 },
-    { PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
-    { PD_BUTTON, (void*)DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
-    { PD_BUTTON, (void*)DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, (void *)ENUMLAYER_SAVE },
-    { PD_BUTTON, (void*)DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, (void *)ENUMLAYER_CLEAR },
+    { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, I2VP(370) },
+    { PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+    { PD_BUTTON, (void*)DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
+    { PD_BUTTON, (void*)DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
+    { PD_BUTTON, (void*)DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
     { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
 };
 
@@ -747,7 +747,7 @@ void LoadLayerLists(void)
 
 static void DoLayerOp(void * data)
 {
-    switch ((long)data) {
+    switch (VP2L(data)) {
     case ENUMLAYER_CLEAR:
         InitializeLayers(LayerSystemDefaults, -1);
         break;
@@ -838,7 +838,7 @@ FillLayerList( wList_p listLayers)
 	for (int inx = 0; inx < NUM_LAYERS; inx++) {
 		char *layerFormattedName;
 		layerFormattedName = FormatLayerName(inx);
-		wListAddValue((wList_p)listLayers, layerFormattedName, NULL, (void*)(long)inx);
+		wListAddValue((wList_p)listLayers, layerFormattedName, NULL, I2VP(inx));
 		free(layerFormattedName);
 	}
 
@@ -1750,7 +1750,7 @@ void InitLayers(void)
             sprintf(message, "cmdLayerShow%u", i);
             layer_btns[i] = wButtonCreate(mainW, 0, 0, message,
                                           (char*)(show_layer_bmps[i]),
-                                          BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)(uintptr_t)i);
+                                          BO_ICON, 0, (wButtonCallBack_p)FlipLayer, I2VP(i) );
             /* add the help text */
             wControlSetBalloonText((wControl_p)layer_btns[i], _("Show/Hide Layer"));
             /* put on toolbar */
@@ -1760,7 +1760,7 @@ void InitLayers(void)
         }
 
         layerName = FormatLayerName(i);
-        wListAddValue(setLayerL, layerName, NULL, (void*)(uintptr_t)i);
+        wListAddValue(setLayerL, layerName, NULL, I2VP(i));
         free(layerName);
     }
 

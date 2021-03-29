@@ -59,7 +59,7 @@ long GetChanges( paramGroup_p pg )
 	int inx;
 	for ( changed=ParamUpdate(pg),inx=0,changes=0; changed; changed>>=1,inx++ ) {
 		if ( changed&1 )
-			changes |= (long)pg->paramPtr[inx].context;
+			changes |= VP2L(pg->paramPtr[inx].context);
 	}
 	return changes;
 }
@@ -107,29 +107,29 @@ extern long trainPause;
 
 
 static paramData_t displayPLs[] = {
-	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, colorTrackLabels, N_("Color Track"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &colorDraw, "color-draw", PDO_NOPSHUPD|PDO_DRAW, colorDrawLabels, N_("Color Draw"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
+	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, colorTrackLabels, N_("Color Track"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &colorDraw, "color-draw", PDO_NOPSHUPD|PDO_DRAW, colorDrawLabels, N_("Color Draw"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, I2VP(CHANGE_MAP) },
 	{ PD_TOGGLE, &dontHideCursor, "donthidecursor", PDO_NOPSHUPD, dontHideLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
 #define labelSelect (12)
-	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_64, N_("Label Scale"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, (void*)(CHANGE_TOOLBAR) },
-	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, (void*)(CHANGE_PARAMS) },
+	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_64, N_("Label Scale"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, I2VP(CHANGE_TOOLBAR) },
+	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, I2VP(CHANGE_PARAMS) },
 /* ATTENTION: update the define below if you add entries above */
 #define I_HOTBARLABELS	(19)
-	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, (void*)250, N_("Car Labels"), 0, (void*)CHANGE_SCALE },
+	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, I2VP(250), N_("Car Labels"), 0, I2VP(CHANGE_SCALE) },
 	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
 	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORZ }
  };
@@ -197,13 +197,13 @@ static void DoDisplay( void * junk )
 {
 	if (displayW == NULL) {
 		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")), _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL, (void*)0x0002 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"), NULL, (void*)0x0012 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Part Number"), NULL, (void*)0x0312 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Partno/Item"), NULL, (void*)0x4312 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"), NULL, (void*)0x0021 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Part Number"), NULL, (void*)0x0321 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Partno/Item"), NULL, (void*)0x4321 );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL, I2VP(0x0002) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"), NULL, I2VP(0x0012) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Part Number"), NULL, I2VP(0x0312) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Partno/Item"), NULL, I2VP(0x4312) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"), NULL, I2VP(0x0021) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Part Number"), NULL, I2VP(0x0321) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Partno/Item"), NULL, I2VP(0x4321) );
 	}
 
 	ParamLoadControls( &displayPG );
@@ -303,9 +303,9 @@ static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"),
 
 static paramData_t prefPLs[] = {
 	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
-	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
+	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
 #define I_DSTFMT		(2)
-	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
+	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, I2VP(150), N_("Length Format"), 0, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
@@ -394,7 +394,7 @@ static void LoadDstFmtList( void )
 	int inx;
 	wListClear( (wList_p)prefPLs[I_DSTFMT].control );
 	for ( inx=0; dstFmts[units][inx].name; inx++ )
-		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name), NULL, (void*)dstFmts[units][inx].fmt );
+		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name), NULL, I2VP(dstFmts[units][inx].fmt) );
 }
 
 /**
@@ -527,16 +527,16 @@ EXPORT long GetDistanceFormat( void )
 static wWin_p colorW;
 
 static paramData_t colorPLs[] = {
-	{ PD_COLORLIST, &snapGridColor, "snapgrid", PDO_NOPSHUPD, NULL, N_("Snap Grid"), 0, (void*)(CHANGE_GRID) },
-	{ PD_COLORLIST, &markerColor, "marker", PDO_NOPSHUPD, NULL, N_("Marker"), 0, (void*)(CHANGE_GRID) },
-	{ PD_COLORLIST, &borderColor, "border", PDO_NOPSHUPD, NULL, N_("Border"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_COLORLIST, &snapGridColor, "snapgrid", PDO_NOPSHUPD, NULL, N_("Snap Grid"), 0, I2VP(CHANGE_GRID) },
+	{ PD_COLORLIST, &markerColor, "marker", PDO_NOPSHUPD, NULL, N_("Marker"), 0, I2VP(CHANGE_GRID) },
+	{ PD_COLORLIST, &borderColor, "border", PDO_NOPSHUPD, NULL, N_("Border"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &crossMajorColor, "crossmajor", PDO_NOPSHUPD, NULL, N_("Primary Axis"), 0, 0 },
 	{ PD_COLORLIST, &crossMinorColor, "crossminor", PDO_NOPSHUPD, NULL, N_("Secondary Axis"), 0, 0 },
-	{ PD_COLORLIST, &normalColor, "normal", PDO_NOPSHUPD, NULL, N_("Normal Track"), 0, (void*)(CHANGE_MAIN|CHANGE_PARAMS) },
-	{ PD_COLORLIST, &selectedColor, "selected", PDO_NOPSHUPD, NULL, N_("Selected Track"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, N_("Profile Path"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, N_("Exception Track"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, N_("Track Ties"), 0, (void*)(CHANGE_MAIN) } };
+	{ PD_COLORLIST, &normalColor, "normal", PDO_NOPSHUPD, NULL, N_("Normal Track"), 0, I2VP(CHANGE_MAIN|CHANGE_PARAMS) },
+	{ PD_COLORLIST, &selectedColor, "selected", PDO_NOPSHUPD, NULL, N_("Selected Track"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, N_("Profile Path"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, N_("Exception Track"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, N_("Track Ties"), 0, I2VP(CHANGE_MAIN) } };
 static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP, colorPLs, sizeof colorPLs/sizeof colorPLs[0] };
 
 

@@ -49,11 +49,11 @@ static paramData_t elevationPLs[] = {
 #define I_HEIGHT			(1)
 	{ PD_FLOAT, &elevHeightV, "value", PDO_DIM|PDO_DLGNEWCOLUMN, &r_1000_1000 },
 #define I_COMPUTED			(2)
-	{ PD_MESSAGE, NULL, "computed", 0, (void*)80 },
+	{ PD_MESSAGE, NULL, "computed", 0, I2VP(80) },
 #define I_GRADE			(3)
-	{ PD_MESSAGE, NULL, "grade", 0, (void*)80 },
+	{ PD_MESSAGE, NULL, "grade", 0, I2VP(80) },
 #define I_STATION			(4)
-	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, (void*)200, NULL, 0, 0, sizeof(elevStationV)} };
+	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(200), NULL, 0, 0, sizeof(elevStationV)} };
 static paramGroup_t elevationPG = { "elev", 0, elevationPLs, sizeof elevationPLs/sizeof elevationPLs[0] };
 
 static dynArr_t anchors_da;
@@ -377,7 +377,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (MyGetKeyState()&WKEY_CTRL) {
-			commandContext = (void*) 1;        //Just end points
+			commandContext = I2VP(1);        //Just end points
 			CmdMoveDescription( action, pos );
 			return C_CONTINUE;
 		}
@@ -434,7 +434,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case C_MOVE:
 	case C_UP:
 		if (MyGetKeyState()&WKEY_CTRL) {
-			commandContext = (void*) 1;        //Just end points
+			commandContext = I2VP(1);        //Just end points
 			CmdMoveDescription( action, pos );
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			elevTrk = NULL;

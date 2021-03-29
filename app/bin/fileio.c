@@ -558,7 +558,7 @@ EXPORT char * PutTitle( char * cp )
 {
 	static char *title;
 	char * tp;
-	unsigned cnt = strlen(cp) * 2 + 3;		// add 3 for quotes and terminating \0
+	size_t cnt = strlen(cp) * 2 + 3;		// add 3 for quotes and terminating \0
 
 	if (!title) {
 		title = MyMalloc(cnt);
@@ -584,7 +584,7 @@ EXPORT char * PutTitle( char * cp )
 #ifdef UTFCONVERT
 	if(RequiresConvToUTF8(title)) {
 		char *out = MyMalloc(cnt);
-		wSystemToUTF8(title, out, cnt);
+		wSystemToUTF8(title, out, (unsigned int)cnt);
 		strcpy(title, out);
 		MyFree(out);
 	}
@@ -978,7 +978,7 @@ EXPORT void DoFileList(
 	char *pathName = (char*)data;
 	bExample = FALSE;
 	if (label)
-		LoadTracks( 1, &pathName, (void*)1 );
+		LoadTracks( 1, &pathName, I2VP(1));
 	else
 		LoadTracks( 1, &pathName, NULL );
 }
@@ -1457,14 +1457,14 @@ static int ImportTracks(
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
 	paramVersion = paramVersionOld;
-	DoCommandB( (void*)(intptr_t)selectCmdInx );
+	DoCommandB( I2VP(selectCmdInx) );
 	SelectRecount();
 	return TRUE;
 }
 
 EXPORT void DoImport( void * type )
 {
-	importAsModule = (int)(long)type;
+	importAsModule = (int)VP2L(type);
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );
@@ -1609,7 +1609,7 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
-	DoCommandB( (void*)(intptr_t)selectCmdInx );
+	DoCommandB( I2VP(selectCmdInx) );
 	SelectRecount();
 	UpdateAllElevations();
 

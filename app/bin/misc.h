@@ -214,8 +214,8 @@ extern void StartMoveDialog(moveDialogCallBack_t );
 /*
  * Safe Memory etc
  */
-void * MyMalloc( long );
-void * MyRealloc( void *, long );
+void * MyMalloc( size_t );
+void * MyRealloc( void *, size_t );
 void MyFree( void * );
 void * memdup( void *, size_t );
 char * MyStrdup( const char * );

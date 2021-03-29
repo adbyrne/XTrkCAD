@@ -47,8 +47,8 @@ static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
 #define enumT			((wText_p)enumPLs[I_ENUMTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &enumTextData, NULL, BT_CHARUNITS|BT_FIXEDFONT },
-	{   PD_BUTTON, (void*)DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, (void*)ENUMOP_SAVE },
-	{   PD_BUTTON, (void*)DoEnumOp, "print", 0, NULL, N_("Print"), 0, (void*)ENUMOP_PRINT },
+	{   PD_BUTTON, (void*)DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, I2VP(ENUMOP_SAVE) },
+	{   PD_BUTTON, (void*)DoEnumOp, "print", 0, NULL, N_("Print"), 0, I2VP(ENUMOP_PRINT) },
 	{   PD_BUTTON, (void*)wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
 #define I_ENUMLISTPRICE	(4)
 	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER },
@@ -85,7 +85,7 @@ static int DoEnumSave(
 static void DoEnumOp(
 		void * data )
 {
-	switch( (int)(long)data ) {
+	switch( VP2L(data) ) {
 	case ENUMOP_SAVE:
 		wFilSelect( enumFile_fs, GetCurrentPath(PARTLISTPATHKEY) );
 		break;
@@ -119,7 +119,7 @@ void EnumerateList(
 		char * indexes )
 {
 	char * cp;
-	int len;
+	size_t len;
 	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
@@ -212,7 +212,7 @@ void EnumerateStart(void)
 
 void EnumerateEnd(void)
 {
-	int len;
+	size_t len;
 	char * cp;
 	ScaleLengthEnd();
 	

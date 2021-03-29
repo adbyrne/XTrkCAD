@@ -468,13 +468,13 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 		DoDescribe( _("Bezier Line"), trk, bezDesc, UpdateBezier );
 		if (bezDesc[LT].control0!=NULL) {
 			wListClear( (wList_p)bezDesc[LT].control0 );
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("Solid"), NULL, (void*)0 );
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dash"), NULL, (void*)1 );
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dot"), NULL, (void*)2 );
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("CenterDot"), NULL, (void*)5);
-			wListAddValue( (wList_p)bezDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("Solid"), NULL, I2VP(0));
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dash"), NULL, I2VP(1));
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dot"), NULL, I2VP(2));
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDot"), NULL, I2VP(3));
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4));
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("CenterDot"), NULL, I2VP(5));
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6));
 			wListSetIndex( (wList_p)bezDesc[LT].control0, bezData.lineType );
 		}
 	}

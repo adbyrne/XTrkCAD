@@ -134,10 +134,10 @@ static void TabStringExtract(
 		if ( next )
 			 next = strchr( string, '\t' );
 		if ( next ) {
-			tabs[inx].len = next-string;
+			tabs[inx].len = (int)(next-string);
 			string = next+1;
 		} else {
-			tabs[inx].len = strlen( string );
+			tabs[inx].len = (int)strlen( string );
 			string += tabs[inx].len;
 		}
 	}
@@ -173,8 +173,8 @@ static int TabStringCmp(
 		char * src,
 		tabString_t * tab )
 {
-	int srclen = strlen(src);
-	int len = srclen;
+	size_t srclen = strlen(src);
+	size_t len = srclen;
 	int rc;
 	if ( len > tab->len )
 		len = tab->len;
@@ -1488,7 +1488,7 @@ static long carHotbarModes[] = { 0x0002, 0x0012, 0x0312, 0x4312, 0x0021, 0x0321,
 static long carHotbarContents[] = { 0x0005, 0x0002, 0x0012, 0x0012, 0x0001, 0x0021, 0x0021 };
 static long newCarInx;
 static paramData_t newCarPLs[] = {
-	{ PD_DROPLIST, &newCarInx, "index", PDO_DLGWIDE, (void*)400, N_("Item") } };
+	{ PD_DROPLIST, &newCarInx, "index", PDO_DLGWIDE, I2VP(400), N_("Item") } };
 static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, sizeof newCarPLs/sizeof newCarPLs[0] };
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
@@ -1546,7 +1546,7 @@ static void CarItemHotbarUpdate(
 		carItemInx = (wIndex_t)*(long*)data;
 		if ( carItemInx < 0 )
 			return;
-		carItemInx = (wIndex_t)(long)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carItemInx );
+		carItemInx = (wIndex_t)VP2L(wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carItemInx ));
 		item = carItemHotbar(carItemInx);
 		if ( item != NULL )
 			currCarItemPtr = item;
@@ -1655,7 +1655,7 @@ EXPORT void CarItemLoadList( void * junk )
 		if ( item->car && !IsTrackDeleted(item->car) )
 			continue;
 		cp = CarItemDescribe( item, 0, NULL );
-		wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, (void*)(intptr_t)inx );
+		wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, I2VP(inx) );
 	}
 	/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 	wListSetIndex( (wList_p)newCarPLs[0].control, 0 );
@@ -1675,7 +1675,7 @@ static char * CarItemHotbarProc(
 		drawCmd_p d,
 		coOrd * origP )
 {
-	wIndex_t carItemInx = (wIndex_t)(long)data;
+	wIndex_t carItemInx = (wIndex_t)VP2L(data);
 	carItem_p item;
 	wIndex_t inx;
 	long mode;
@@ -1698,11 +1698,11 @@ static char * CarItemHotbarProc(
 				if ( item->car && !IsTrackDeleted(item->car) )
 					continue;
 				cp = CarItemDescribe( item, mode, NULL );
-				wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, (void*)(intptr_t)inx );
+				wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, I2VP(inx) );
 			}
 			/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 			wListSetIndex( (wList_p)newCarPLs[0].control, 0 );
-			cp = CarItemHotbarProc( HB_BARTITLE, (void*)(intptr_t)carItemInx, NULL, NULL );
+			cp = CarItemHotbarProc( HB_BARTITLE, I2VP(carItemInx), NULL, NULL );
 			strncpy( newCarLabel1, cp, sizeof newCarLabel1 );
 			ParamLoadControls( &newCarPG );
 			ParamGroupRecord( &newCarPG );
@@ -1772,7 +1772,7 @@ EXPORT void AddHotBarCarDesc( void )
 			orig = zero;
 			size.x = item1->dim.carLength;
 			size.y = item1->dim.carWidth;
-			AddHotBarElement( FormatCarTitle( item1, carHotbarContents[carHotbarModeInx] ), size, orig, FALSE, FALSE, (60.0*12.0/curScaleRatio), (void*)(intptr_t)inx, CarItemHotbarProc );
+			AddHotBarElement( FormatCarTitle( item1, carHotbarContents[carHotbarModeInx] ), size, orig, FALSE, FALSE, (60.0*12.0/curScaleRatio), I2VP(inx), CarItemHotbarProc );
 		}
 		item0 = item1;
 	}
@@ -2181,23 +2181,23 @@ static void CarDlgNewProto( void );
 static paramData_t carDlgPLs[] = {
 #define A                       (0)
 #define I_CD_MANUF_LIST         (A+0)
-	{ PD_DROPLIST, &carDlgManufInx, "manuf", PDO_NOPREF, (void*)350, N_("Manufacturer"), BL_EDITABLE },
+	{ PD_DROPLIST, &carDlgManufInx, "manuf", PDO_NOPREF, I2VP(350), N_("Manufacturer"), BL_EDITABLE },
 #define I_CD_PROTOTYPE_STR      (A+1)
-	{ PD_STRING, &carDlgProtoStr, "prototype", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Prototype"), 0, 0, sizeof(carDlgProtoStr)},
+	{ PD_STRING, &carDlgProtoStr, "prototype", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Prototype"), 0, 0, sizeof(carDlgProtoStr)},
 #define I_CD_PROTOKIND_LIST     (A+2)
-	{ PD_DROPLIST, &carDlgKindInx, "protokind-list", PDO_NOPREF, (void*)125, N_("Prototype"), 0 },
+	{ PD_DROPLIST, &carDlgKindInx, "protokind-list", PDO_NOPREF, I2VP(125), N_("Prototype"), 0 },
 #define I_CD_PROTOTYPE_LIST     (A+3)
-	{ PD_DROPLIST, &carDlgProtoInx, "prototype-list", PDO_NOPREF|PDO_DLGHORZ, (void*)(225-3), NULL, 0 },
+	{ PD_DROPLIST, &carDlgProtoInx, "prototype-list", PDO_NOPREF|PDO_DLGHORZ, I2VP(225-3), NULL, 0 },
 #define I_CD_TYPE_LIST          (A+4)
-	{ PD_DROPLIST, &carDlgTypeInx, "type", PDO_NOPREF, (void*)350, N_("Type"), 0 },
+	{ PD_DROPLIST, &carDlgTypeInx, "type", PDO_NOPREF, I2VP(350), N_("Type"), 0 },
 #define I_CD_PARTNO_LIST        (A+5)
-	{ PD_DROPLIST, &carDlgPartnoInx, "partno-list", PDO_NOPREF, (void*)350, N_("Part"), BL_EDITABLE },
+	{ PD_DROPLIST, &carDlgPartnoInx, "partno-list", PDO_NOPREF, I2VP(350), N_("Part"), BL_EDITABLE },
 #define I_CD_PARTNO_STR         (A+6)
-	{ PD_STRING, &carDlgPartnoStr, "partno", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Part Number"), 0, 0, sizeof(carDlgPartnoStr)},
+	{ PD_STRING, &carDlgPartnoStr, "partno", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Part Number"), 0, 0, sizeof(carDlgPartnoStr)},
 #define I_CD_ISLOCO             (A+7)
 	{ PD_TOGGLE, &carDlgIsLoco, "isLoco", PDO_NOPREF|PDO_DLGWIDE, isLocoLabels, N_("Loco?"), BC_HORZ|BC_NOBORDER },
 #define I_CD_DESC_STR           (A+8)
-	{ PD_STRING, &carDlgDescStr, "desc", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Description"), 0, 0, sizeof(carDlgDescStr)},
+	{ PD_STRING, &carDlgDescStr, "desc", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Description"), 0, 0, sizeof(carDlgDescStr)},
 #define I_CD_IMPORT             (A+9)
 	{ PD_BUTTON, NULL, "import", 0, 0, N_("Import") },
 #define I_CD_RESET              (A+10)
@@ -2210,11 +2210,11 @@ static paramData_t carDlgPLs[] = {
 
 #define B                       (A+13)
 #define I_CD_ROADNAME_LIST      (B+0)
-	{ PD_DROPLIST, &carDlgRoadnameInx, "road", PDO_NOPREF|PDO_DLGWIDE, (void*)350, N_("Road"), BL_EDITABLE },
+	{ PD_DROPLIST, &carDlgRoadnameInx, "road", PDO_NOPREF|PDO_DLGWIDE, I2VP(350), N_("Road"), BL_EDITABLE },
 #define I_CD_REPMARK            (B+1)
-	{ PD_STRING, carDlgRepmarkStr, "repmark", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)60, N_("Reporting Mark"), 0, 0, sizeof(carDlgRepmarkStr)},
+	{ PD_STRING, carDlgRepmarkStr, "repmark", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(60), N_("Reporting Mark"), 0, 0, sizeof(carDlgRepmarkStr)},
 #define I_CD_NUMBER             (B+2)
-	{ PD_STRING, carDlgNumberStr, "number", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)80, N_("Number"), 0, 0, sizeof(carDlgNumberStr)},
+	{ PD_STRING, carDlgNumberStr, "number", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(80), N_("Number"), 0, 0, sizeof(carDlgNumberStr)},
 #define I_CD_BODYCOLOR          (B+3)
 	{ PD_COLORLIST, &carDlgBodyColor, "bodyColor", PDO_DLGWIDE|PDO_DLGHORZ, NULL, N_("Color") },
 #define I_CD_CARLENGTH          (B+4)
@@ -2238,15 +2238,15 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_ITEMINDEX          (C+0)
 	{ PD_LONG, &carDlgItemIndex, "index", PDO_NOPREF|PDO_DLGWIDE, &i1_999999999, N_("Index"), 0 },
 #define I_CD_PURPRC             (C+1)
-	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)50, N_("Purchase Price"), 0, &carDlgPurchPrice, sizeof(carDlgPurchPriceStr) },
+	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, I2VP(50), N_("Purchase Price"), 0, &carDlgPurchPrice, sizeof(carDlgPurchPriceStr) },
 #define I_CD_CURPRC             (C+2)
-	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)50, N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
+	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(50), N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
 #define I_CD_COND               (C+3)
-	{ PD_DROPLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)90, N_("Condition") },
+	{ PD_DROPLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, I2VP(90), N_("Condition") },
 #define I_CD_PURDAT             (C+4)
-	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)80, N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
+	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, I2VP(80), N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
 #define I_CD_SRVDAT             (C+5)
-	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)80, N_("Service Date"), 0, &carDlgServiceDate, sizeof(carDlgServiceDateStr) },
+	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, I2VP(80), N_("Service Date"), 0, &carDlgServiceDate, sizeof(carDlgServiceDateStr) },
 #define I_CD_QTY                (C+6)
 	{ PD_LONG, &carDlgQuantity, "quantity", PDO_NOPREF|PDO_DLGWIDE, &i1_9999, N_("Quantity") },
 #define I_CD_MLTNUM             (C+7)
@@ -2256,13 +2256,13 @@ static paramData_t carDlgPLs[] = {
 
 #define D                       (C+9)
 #define I_CD_MSG                (D+0)
-	{ PD_MESSAGE, NULL, NULL, PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND, (void*)450 },
+	{ PD_MESSAGE, NULL, NULL, PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND, I2VP(450) },
 #define I_CD_NEW                (D+1)
-	{ PD_MENU, NULL, "new-menu", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, (void*)0 },
-	{ PD_MENUITEM, (void*)CarDlgNewDesc, "new-part-mi", 0, NULL, N_("Car Part"), 0, (void*)0 },
-	{ PD_MENUITEM, (void*)CarDlgNewProto, "new-proto-mi", 0, NULL, N_("Car Prototype"), 0, (void*)0 },
+	{ PD_MENU, NULL, "new-menu", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, I2VP(0) },
+	{ PD_MENUITEM, (void*)CarDlgNewDesc, "new-part-mi", 0, NULL, N_("Car Part"), 0, I2VP(0) },
+	{ PD_MENUITEM, (void*)CarDlgNewProto, "new-proto-mi", 0, NULL, N_("Car Prototype"), 0, I2VP(0) },
 #define I_CD_NEWPROTO           (D+4)
-	{ PD_BUTTON, (void*)CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, (void*)0 } };
+	{ PD_BUTTON, (void*)CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, I2VP(0) } };
 
 static paramGroup_t carDlgPG = { "carpart", 0, carDlgPLs, sizeof carDlgPLs/sizeof carDlgPLs[0] };
 
@@ -2815,7 +2815,7 @@ LOG( log_carDlgList, 4, ( "    loading typelist\n" ) )
 	wListClear( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control );
 	for ( currTypeInx=0; currTypeInx<N_TYPELISTMAP; currTypeInx++ ) {
 		if ( typeCount[currTypeInx] > 0 ) {
-			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[currTypeInx].name), NULL, (void*)(intptr_t)currTypeInx );
+			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[currTypeInx].name), NULL, I2VP(currTypeInx) );
 			if ( currTypeInx == listTypeInx ) {
 LOG( log_carDlgList, 4, ( "        current = %d\n", listInx ) )
 				carDlgKindInx = listInx;
@@ -3387,9 +3387,9 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			carDlgScaleInx = carDlgUpdatePartPtr->parent->scale;
 			TabStringExtract( carDlgUpdatePartPtr->title, 7, tabs );
 			tabs[T_MANUF].ptr = carDlgUpdatePartPtr->parent->manuf;
-			tabs[T_MANUF].len = strlen(carDlgUpdatePartPtr->parent->manuf);
+			tabs[T_MANUF].len = (int)strlen(carDlgUpdatePartPtr->parent->manuf);
 			tabs[T_PROTO].ptr = carDlgUpdatePartPtr->parent->proto;
-			tabs[T_PROTO].len = strlen(carDlgUpdatePartPtr->parent->proto);
+			tabs[T_PROTO].len = (int)strlen(carDlgUpdatePartPtr->parent->proto);
 			CarDlgLoadLists( FALSE, tabs, carDlgScaleInx );
 			CarDlgLoadPart( carDlgUpdatePartPtr );
 			RELOAD_LISTS;
@@ -3531,7 +3531,7 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 
 	case I_CD_PROTOKIND_LIST:
 		carDlgChanged++;
-		carDlgTypeInx = (int)(long)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carDlgKindInx );
+		carDlgTypeInx = (int)VP2L(wListGetItemContext( (wList_p)pg->paramPtr[inx].control, carDlgKindInx ));
 		if ( S_PART || (currState==S_ItemEnter) ) {
 			CarDlgLoadProtoList( NULL, 0, FALSE );
 		} else {
@@ -3584,7 +3584,7 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		} else {
 			wListGetValues( (wList_p)pg->paramPtr[I_CD_ROADNAME_LIST].control, carDlgRoadnameStr, sizeof carDlgRoadnameStr, NULL, NULL );
 			cmp_key.name = carDlgRoadnameStr;
-			cmp_key.len = strlen(carDlgRoadnameStr);
+			cmp_key.len = (int)strlen(carDlgRoadnameStr);
 			roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, 0 );
 		}
 		if ( roadnameMapP ) {
@@ -4052,7 +4052,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		sprintf( title, "%s\t%s\t%s\t%s\t%s\t%s\t%s", carDlgManufStr, carDlgProtoStr, carDlgDescStr, carDlgPartnoStr, carDlgRoadnameStr, carDlgRepmarkStr, carDlgNumberStr );
 		partP = NULL;
 		if ( ( carDlgManufInx < 0 || carDlgPartnoInx < 0 ) && carDlgPartnoStr[0] ) {
-			partP = CarPartFind( carDlgManufStr, strlen(carDlgManufStr), carDlgPartnoStr, strlen(carDlgPartnoStr), carDlgScaleInx );
+			partP = CarPartFind( carDlgManufStr, (int)strlen(carDlgManufStr), carDlgPartnoStr, (int)strlen(carDlgPartnoStr), carDlgScaleInx );
 			if ( partP != NULL &&
 				 NoticeMessage( MSG_CARPART_DUPNAME, _("Yes"), _("No") ) <= 0 )
 				return;
@@ -4137,7 +4137,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			carDlgRepmarkStr[0] = '\0';
 		}
 		if ( carDlgUpdatePartPtr==NULL ) {
-			partP = CarPartFind( carDlgManufStr, strlen(carDlgManufStr), carDlgPartnoStr, strlen(carDlgPartnoStr), carDlgScaleInx );
+			partP = CarPartFind( carDlgManufStr, (int)strlen(carDlgManufStr), carDlgPartnoStr, (int)strlen(carDlgPartnoStr), carDlgScaleInx );
 			if ( partP != NULL &&
 				 NoticeMessage( MSG_CARPART_DUPNAME, _("Yes"), _("No") ) <= 0 )
 				return;
@@ -4175,9 +4175,9 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 
 	if ( reloadRoadnameList ) {
 		tabs[0].ptr = carDlgRoadnameStr;
-		tabs[0].len = strlen(carDlgRoadnameStr);
+		tabs[0].len = (int)strlen(carDlgRoadnameStr);
 		tabs[1].ptr = carDlgRepmarkStr;
-		tabs[1].len = strlen(carDlgRepmarkStr);
+		tabs[1].len = (int)strlen(carDlgRepmarkStr);
 		LoadRoadnameList( &tabs[0], &tabs[1] );
 		CarDlgLoadRoadnameList();
 		ParamLoadControl( &carDlgPG, I_CD_ROADNAME_LIST );
@@ -4305,13 +4305,13 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 		roadnameMapChanged = TRUE;
 
 		for ( inx=0; inx<N_CONDLISTMAP; inx++ )
-			wListAddValue( (wList_p)carDlgPLs[I_CD_COND].control, _(condListMap[inx].name), NULL, (void*)condListMap[inx].value );
+			wListAddValue( (wList_p)carDlgPLs[I_CD_COND].control, _(condListMap[inx].name), NULL, I2VP(condListMap[inx].value) );
 
 		for ( inx=0; inx<N_TYPELISTMAP; inx++ )
-			wListAddValue( (wList_p)carDlgPLs[I_CD_TYPE_LIST].control, _(typeListMap[inx].name), NULL, (void*)typeListMap[inx].value );
+			wListAddValue( (wList_p)carDlgPLs[I_CD_TYPE_LIST].control, _(typeListMap[inx].name), NULL, I2VP(typeListMap[inx].value) );
 
 		for ( inx=0; inx<N_TYPELISTMAP; inx++ )
-			wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[inx].name), NULL, (void*)typeListMap[inx].value );
+			wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[inx].name), NULL, I2VP(typeListMap[inx].value) );
 
 		wTextSetReadonly( (wText_p)carDlgPLs[I_CD_NOTES].control, FALSE );
 	}
@@ -4397,10 +4397,10 @@ static char * sortOrders[] = {
 static paramListData_t carInvListData = { 30, 600, sizeof carInvColumnTitles/sizeof carInvColumnTitles[0], carInvColumnWidths, carInvColumnTitles };
 static paramData_t carInvPLs[] = {
 #define I_CI_SORT		(0)
-	{ PD_DROPLIST, &carInvSort[0], "sort1", PDO_LISTINDEX|0, (void*)110, N_("Sort By") },
-	{ PD_DROPLIST, &carInvSort[1], "sort2", PDO_LISTINDEX|PDO_DLGHORZ, (void*)110, "" },
-	{ PD_DROPLIST, &carInvSort[2], "sort3", PDO_LISTINDEX|PDO_DLGHORZ, (void*)110, "" },
-	{ PD_DROPLIST, &carInvSort[3], "sort4", PDO_LISTINDEX|PDO_DLGHORZ, (void*)110, "" },
+	{ PD_DROPLIST, &carInvSort[0], "sort1", PDO_LISTINDEX|0, I2VP(110), N_("Sort By") },
+	{ PD_DROPLIST, &carInvSort[1], "sort2", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
+	{ PD_DROPLIST, &carInvSort[2], "sort3", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
+	{ PD_DROPLIST, &carInvSort[3], "sort4", PDO_LISTINDEX|PDO_DLGHORZ, I2VP(110), "" },
 #define S				(4)
 #define I_CI_LIST		(S+0)
 	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX|PDO_DLGRESIZE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY|BL_MANY },
@@ -4443,7 +4443,7 @@ static void CarInvDlgFind( void * junk )
 	CarSetVisible( item->car );
 	panCenter = pos;
 	LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-	PanHere( (void*)0 );		// CarInvDlgFind
+	PanHere( I2VP(0) );		// CarInvDlgFind
 }
 
 
@@ -4535,9 +4535,9 @@ static int CarInvSaveText(
 		item = carItemInfo(inx);
 		TabStringExtract( item->title, 7, tabs );
 		sprintf( message, "%ld", item->index );
-		width = strlen( message );
+		width = (int)strlen( message );
 		if ( width > widths[0] ) widths[0] = width;
-		width = strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 + tabs[T_PART].len;
+		width = (int)strlen(GetScaleName(item->scaleInx)) + 1 + tabs[T_MANUF].len + 1 + tabs[T_PART].len;
 		if ( width > widths[1] ) widths[1] = width;
 		if ( tabs[T_PROTO].len > widths[2] ) widths[2] = tabs[T_PROTO].len;
 		width = tabs[T_REPMARK].len + tabs[T_NUMBER].len;
@@ -4547,14 +4547,14 @@ static int CarInvSaveText(
 		if ( item->data.purchDate > 0 ) widths[4] = 8;
 		if ( item->data.purchPrice > 0 ) {
 			sprintf( message, "%0.2f", item->data.purchPrice );
-			width = strlen(message);
+			width = (int)strlen(message);
 			if ( width > widths[5] ) widths[5] = width;
 		}
 		if ( item->data.condition != 0 )
 			widths[6] = 5;
 		if ( item->data.currPrice > 0 ) {
 			sprintf( message, "%0.2f", item->data.currPrice );
-			width = strlen(message);
+			width = (int)strlen(message);
 			if ( width > widths[7] ) widths[7] = width;
 		}
 		if ( item->data.serviceDate > 0 ) widths[8] = 8;
@@ -4624,9 +4624,9 @@ static int CarInvSaveText(
 			while ( 1 ) {
 				cp1 = strchr( cp0, '\n' );
 				if ( cp1 ) {
-					len = cp1-cp0;
+					len = (int)(cp1-cp0);
 				} else {
-					len = strlen( cp0 );
+					len = (int)strlen( cp0 );
 					if ( len == 0 )
 						break;
 				}
@@ -4725,11 +4725,11 @@ static int ParseCsvLine(
 				rc = NoticeMessage( MSG_CARIMP_MISSING_COMMA, _("Continue"), _("Stop"), ptr );
 				return (rc<1)?-1:elem;
 			}
-			len = cq-ptr;
+			len = (int)(cq-ptr);
 		} else {
 			ptr = cp;
 			while ( *cp && *cp != ',' ) { cp++; }
-			len = cp-ptr;
+			len = (int)(cp-ptr);
 		}
 		if ( map[elem] >= 0 ) {
 		   tabs[map[elem]].ptr = ptr;
@@ -5012,14 +5012,14 @@ static int CarInvExportCsv(
 	SetCLocale();
 
 	for ( inx=0; inx<sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0]; inx++ ) {
-		CsvFormatString( f, carCsvColumnTitles[inx], strlen(carCsvColumnTitles[inx]), inx<(sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0])-1?",":"\n" );
+		CsvFormatString( f, carCsvColumnTitles[inx], (int)strlen(carCsvColumnTitles[inx]), inx<(sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0])-1?",":"\n" );
 	}
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ ) {
 		item = carItemInfo( inx );
 		TabStringExtract( item->title, 7, tabs );
 		CsvFormatLong( f, item->index, "," );
 		sp = GetScaleName(item->scaleInx);
-		CsvFormatString( f, sp, strlen(sp), "," );
+		CsvFormatString( f, sp, (int)strlen(sp), "," );
 		CsvFormatString( f, tabs[T_MANUF].ptr, tabs[T_MANUF].len, "," );
 		CsvFormatLong( f, item->type, "," );
 		CsvFormatString( f, tabs[T_PART].ptr, tabs[T_PART].len, "," );
@@ -5041,9 +5041,9 @@ static int CarInvExportCsv(
 		CsvFormatLong( f, item->data.purchDate, "," );
 		CsvFormatLong( f, item->data.serviceDate, "," );
 		if ( item->data.notes )
-			CsvFormatString( f, item->data.notes, strlen(item->data.notes), "\n" );
+			CsvFormatString( f, item->data.notes, (int)strlen(item->data.notes), "\n" );
 		else
-			CsvFormatString( f, "", strlen(""), "\n" );
+			CsvFormatString( f, "", (int)strlen(""), "\n" );
 	}
 	fclose( f );
 	SetUserLocale();

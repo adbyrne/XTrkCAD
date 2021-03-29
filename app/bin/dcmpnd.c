@@ -63,10 +63,10 @@ static paramData_t updateTitlePLs[] = {
 	{	PD_MESSAGE, "You can use the List Labels control on the Preferences dialog to" },
 	{	PD_MESSAGE, "control the format of the list entries" },
 #define I_UPDATESTR		(9)
-	{	PD_STRING, NULL, "old", PDO_NOPREF, (void*)400, NULL, BO_READONLY },
+	{	PD_STRING, NULL, "old", PDO_NOPREF, I2VP(400), NULL, BO_READONLY },
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
-	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, (void*)400 },
+	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, I2VP(400) },
 	{	PD_BUTTON, (void*)UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
@@ -309,11 +309,11 @@ static void RefreshSkip( void * );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
-		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_M2		(1)
-		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_S		(2)
-		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
 		{ PD_BUTTON, (void*)RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
@@ -445,9 +445,9 @@ static char renamePartno[STR_SIZE];
 static turnoutInfo_t * renameTo;
 
 static paramData_t renamePLs[] = {
-/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
-/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)230, N_("Description"), 0, 0, sizeof(renameDesc)},
-/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_STRINGLIMITLENGTH, (void*)100, N_("#"), 0, 0, sizeof(renamePartno)} };
+/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
+/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
+/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_STRINGLIMITLENGTH, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)} };
 static paramGroup_t renamePG = { "rename", 0, renamePLs, sizeof renamePLs/sizeof renamePLs[0] };
 
 

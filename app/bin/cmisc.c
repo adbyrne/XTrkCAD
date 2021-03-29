@@ -109,14 +109,14 @@ static paramData_t describePLs[] = {
 #define I_LONG_N		I_LONG_0+5
 
 #define I_STRING_0		I_LONG_N
-    { PD_STRING, NULL, "S1", PDO_NOPREF, (void*)300 },
-    { PD_STRING, NULL, "S2", PDO_NOPREF, (void*)300 },
-    { PD_STRING, NULL, "S3", PDO_NOPREF, (void*)300 },
-    { PD_STRING, NULL, "S4", PDO_NOPREF, (void*)300 },
+    { PD_STRING, NULL, "S1", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S2", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S3", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S4", PDO_NOPREF, I2VP(300) },
 #define I_STRING_N		I_STRING_0+4
 
 #define I_LAYER_0		I_STRING_N
-    { PD_DROPLIST, NULL, "Y1", PDO_NOPREF, (void*)150, NULL, 0 },
+    { PD_DROPLIST, NULL, "Y1", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_LAYER_N		I_LAYER_0+1
 
 #define I_COLOR_0		I_LAYER_N
@@ -124,14 +124,14 @@ static paramData_t describePLs[] = {
 #define I_COLOR_N		I_COLOR_0+1
 
 #define I_LIST_0		I_COLOR_N
-    { PD_DROPLIST, NULL, "L1", PDO_NOPREF, (void*)150, NULL, 0 },
-    { PD_DROPLIST, NULL, "L2", PDO_NOPREF, (void*)150, NULL, 0 },
-	{ PD_DROPLIST, NULL, "L3", PDO_NOPREF, (void*)150, NULL, 0 },
-	{ PD_DROPLIST, NULL, "L4", PDO_NOPREF, (void*)150, NULL, 0 },
+    { PD_DROPLIST, NULL, "L1", PDO_NOPREF, I2VP(150), NULL, 0 },
+    { PD_DROPLIST, NULL, "L2", PDO_NOPREF, I2VP(150), NULL, 0 },
+	{ PD_DROPLIST, NULL, "L3", PDO_NOPREF, I2VP(150), NULL, 0 },
+	{ PD_DROPLIST, NULL, "L4", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_LIST_N		I_LIST_0+4
 
 #define I_EDITLIST_0	I_LIST_N
-    { PD_DROPLIST, NULL, "LE1", PDO_NOPREF, (void*)150, NULL, BL_EDITABLE },
+    { PD_DROPLIST, NULL, "LE1", PDO_NOPREF, I2VP(150), NULL, BL_EDITABLE },
 #define I_EDITLIST_N	I_EDITLIST_0+1
 
 #define I_TEXT_0		I_EDITLIST_N
@@ -246,7 +246,7 @@ static void DescribeUpdate(
     }
 
     UndoModify(descTrk);
-    descUpdateFunc(descTrk, ddp-descData, descData, FALSE);
+    descUpdateFunc(descTrk, (int)(ddp-descData), descData, FALSE);
 
     if (descTrk) {
         GetBoundingBox(descTrk, &hi, &lo);
@@ -512,7 +512,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
             if (ro_mode) {
             	char *layerFormattedName;
             	layerFormattedName = FormatLayerName(*(int *)(ddp->valueP));
-            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
                 free(layerFormattedName);
                 *(int *)(ddp->valueP) = 0;
                 layerValue = (int *)(ddp->valueP);
@@ -521,7 +521,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 				for (inx = 0; inx<NUM_LAYERS; inx++) {
 					char *layerFormattedName;
 					layerFormattedName = FormatLayerName(editableLayerList[inx]);
-					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
 					free(layerFormattedName);
 				}
 
@@ -697,8 +697,8 @@ void InitCmdDescribe(wMenu_p menu)
 void InitCmdDescribe2(wMenu_p menu)
 {
     descPopupM = MenuRegister( "Describe Context Menu" );
-    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
-    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, I2VP(selectCmdInx));
+    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
+    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, I2VP(panCmdInx));
 
 }

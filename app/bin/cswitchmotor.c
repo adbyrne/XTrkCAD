@@ -86,10 +86,10 @@ static track_p last_motor;
 static track_p first_motor;
 
 static paramData_t switchmotorPLs[] = {
-/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(switchmotorName)},
-/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Normal"), 0, 0, sizeof(switchmotorNormal)},
-/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Reverse"), 0, 0, sizeof(switchmotorReverse)},
-/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Point Sense"), 0, 0, sizeof(switchmotorPointSense)}
+/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(switchmotorName)},
+/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Normal"), 0, 0, sizeof(switchmotorNormal)},
+/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Reverse"), 0, 0, sizeof(switchmotorReverse)},
+/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Point Sense"), 0, 0, sizeof(switchmotorPointSense)}
 };
 
 static paramGroup_t switchmotorPG = { "switchmotor", 0, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
@@ -105,10 +105,10 @@ static track_p switchmotorEditTrack;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 
 static paramData_t switchmotorEditPLs[] = {
-    /*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(switchmotorEditName)},
-/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Normal"), 0, 0, sizeof(switchmotorEditNormal)},
-/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Reverse"), 0, 0, sizeof(switchmotorEditReverse)},
-/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Point Sense"), 0, 0, sizeof(switchmotorEditPointSense)},
+    /*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(switchmotorEditName)},
+/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Normal"), 0, 0, sizeof(switchmotorEditNormal)},
+/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Reverse"), 0, 0, sizeof(switchmotorEditReverse)},
+/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Point Sense"), 0, 0, sizeof(switchmotorEditPointSense)},
 /*4*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, N_("Turnout Number"), BO_READONLY }, 
 };
 
@@ -692,7 +692,7 @@ static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 
 	LOG( log_switchmotor, 1, ("*** CmdSwitchMotor(%08x,{%f,%f})\n",action,pos.x,pos.y))
 
-	switch ((long)commandContext) {
+	switch (VP2L(commandContext)) {
 	case SWITCHMOTOR_CREATE: return CmdSwitchMotorCreate(action,pos);
 	case SWITCHMOTOR_EDIT:   return CmdSwitchMotorEdit(action,pos);
 	case SWITCHMOTOR_DELETE: return CmdSwitchMotorDelete(action,pos);

@@ -29,7 +29,6 @@
 #include "misc.h"
 #include "cselect.h"
 #include "common-ui.h"
-
 extern TRKTYP_T T_BZRLIN;
 
 static wMenu_p drawModDelMI;
@@ -76,17 +75,17 @@ EXPORT void LoadFontSizeList(
 			(curFontSize < fontSizeList[inx]))
 		{
 			sprintf(message, "%ld", curFontSize);
-			curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
+			curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
 		}
 		sprintf(message, "%ld", fontSizeList[inx]);
-		inx1 = wListAddValue(list, message, NULL, (void*)fontSizeList[inx]);
+		inx1 = wListAddValue(list, message, NULL, I2VP(fontSizeList[inx]));
 		if (curFontSize == fontSizeList[inx])
 			curInx = inx1;
 	}
 	if (curFontSize > fontSizeList[(sizeof fontSizeList / sizeof fontSizeList[0]) - 1])
 	{
 		sprintf(message, "%ld", curFontSize);
-		curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
+		curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
 	}
 	wListSetIndex(list, curInx);
 	wFlush();
@@ -116,7 +115,7 @@ EXPORT void UpdateFontSizeList(
 	long fontSize;
 
 	if ( listInx >= 0 ) {
-		*fontSizeR = (long)wListGetItemContext( list, listInx );
+		*fontSizeR = VP2L( wListGetItemContext( list, listInx ));
 	} else {
 		wListGetValues( list, message, sizeof message, NULL, NULL );
 		if ( message[0] != '\0' ) {
@@ -899,15 +898,15 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		drawDesc[A1].mode |= DESC_CHANGE;
 		break;
 	case BE:
-		BenchUpdateOrientationList( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), (wList_p)drawDesc[OR].control0 );
+		BenchUpdateOrientationList( VP2L( wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
 		if ( drawData.benchOrient < wListGetCount( (wList_p)drawDesc[OR].control0 ) )
 			wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
 		else
 			drawData.benchOrient = 0;
-		segPtr->u.l.option = GetBenchData( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case OR:
-		segPtr->u.l.option = GetBenchData( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case DS:
 		segPtr->u.l.option = drawData.dimenSize;
@@ -1281,26 +1280,26 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	if ( segPtr->type==SEG_BENCH && drawDesc[BE].control0!=NULL && drawDesc[OR].control0!=NULL) {
 		BenchLoadLists( (wList_p)drawDesc[BE].control0, (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[BE].control0, drawData.benchChoice );
-		BenchUpdateOrientationList( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), (wList_p)drawDesc[OR].control0 );
+		BenchUpdateOrientationList( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
 	}
 	if ( (segPtr->type==SEG_STRLIN || segPtr->type==SEG_CRVLIN || segPtr->type==SEG_POLY) && drawDesc[LT].control0!=NULL) {
 		wListClear( (wList_p)drawDesc[LT].control0 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Solid"), NULL, (void*)0 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dash"), NULL, (void*)1 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, (void*)2 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Solid"), NULL, I2VP(0 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dash"), NULL, I2VP(1 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, I2VP(2 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, I2VP(3 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("CenterDot"), NULL, I2VP(5 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6 ));
 		wListSetIndex( (wList_p)drawDesc[LT].control0, drawData.lineType );
 	}
 	if ( segPtr->type==SEG_DIMLIN && drawDesc[DS].control0!=NULL ) {
 		wListClear( (wList_p)drawDesc[DS].control0 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Tiny"), NULL, (void*)0 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Small"), NULL, (void*)1 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Medium"), NULL, (void*)2 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Large"), NULL, (void*)3 );
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Tiny"), NULL, I2VP(0 ));
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Small"), NULL, I2VP(1 ));
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Medium"), NULL, I2VP(2 ));
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Large"), NULL, I2VP(3 ));
 		wListSetIndex( (wList_p)drawDesc[DS].control0, drawData.dimenSize );
 	}
 	if ( segPtr->type==SEG_TEXT && drawDesc[TS].control0!=NULL ) {
@@ -2680,18 +2679,18 @@ static paramData_t drawPLs[] = {
 	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchChoicePD		(drawPLs[3])
 #ifdef WINDOWS
-	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)120, N_("Lumber Type") },
+	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(120), N_("Lumber Type") },
 #else    
-    { PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)145, N_("Lumber Type") },
+    { PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(145), N_("Lumber Type") },
 #endif    
 #define drawBenchOrientPD		(drawPLs[4])
 #ifdef WINDOWS
-	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)45, "", 0 },
+	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(45), "", 0 },
 #else
-	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)105, "", 0 },
+	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(105), "", 0 },
 #endif
 #define drawDimArrowSizePD		(drawPLs[5])
-	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, (void*)80, N_("Size") },
+	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, I2VP(80), N_("Size") },
 #define drawLengthPD			(drawPLs[6])
 	{ PD_FLOAT, &drawCmdContext.length, "length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawWidthPD				(drawPLs[7])
@@ -2702,7 +2701,7 @@ static paramData_t drawPLs[] = {
 #define drawRadiusPD            (drawPLs[9])
 	{ PD_FLOAT, &drawCmdContext.radius, "radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
 #define drawLineTypePD			(drawPLs[10])
-	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, (void*)0, N_("Line Type") },
+	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
 };
 static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
 
@@ -2750,7 +2749,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		drawBenchChoicePD.option |= PDO_NORECORD;
 		drawBenchOrientPD.option |= PDO_NORECORD;
 		drawDimArrowSizePD.option |= PDO_NORECORD;
-		drawCmdContext.Op = (wIndex_t)(long)commandContext;
+		drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
 		if ( drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST ) {
 			NoticeMessage( "cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op );
 			drawCmdContext.Op = OP_LINE;
@@ -2814,7 +2813,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				BenchLoadLists( (wList_p)drawBenchChoicePD.control, (wList_p)drawBenchOrientPD.control );
 
 			ParamLoadControls( &drawPG );
-			BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice ), (wList_p)drawBenchOrientPD.control );
+			BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice )), (wList_p)drawBenchOrientPD.control );
 			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
 			InfoSubstituteControls( controls, labels );
 			drawBenchColorPD.option &= ~PDO_NORECORD;
@@ -2855,7 +2854,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			return CmdBezCurve(act2, pos);
 		}
 		if ( drawCmdContext.Op == OP_BENCH ) {
-			drawCmdContext.benchOption = GetBenchData( (long)wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice ), benchOrient );
+			drawCmdContext.benchOption = GetBenchData( VP2L(wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice )), benchOrient );
 			drawCmdContext.Color = benchColor;
 
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
@@ -3150,7 +3149,7 @@ static void DrawDlgUpdate(
 	}
 
 	if ( inx >= 0 && pg->paramPtr[inx].valueP == &benchChoice )
-		BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP ), (wList_p)drawBenchOrientPD.control );
+		BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP )), (wList_p)drawBenchOrientPD.control );
 }
 
 EXPORT void InitCmdDraw( wMenu_p menu )
@@ -3173,7 +3172,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 		for ( inx2=0; inx2<dsp->cnt; inx2++ ) {
 			ddp = &dsp->data[inx2];
 			icon = wIconCreatePixMap( ddp->xpm );
-			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ddp->acclKey, (void *)(intptr_t)ddp->OP );
+			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ddp->acclKey, I2VP(ddp->OP) );
 		}
 		ButtonGroupEnd();
 	}
@@ -3359,29 +3358,29 @@ EXPORT void InitTrkDraw( void )
 	AddParam( "TEXT", ReadText );
 
 	drawModDelMI = MenuRegister( "Modify Draw Edit Menu" );
-	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'g'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'g');
-	drawModOpen = wMenuPushCreate( drawModDelMI, "", _("Make PolyLine - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l');
-	drawModFill = wMenuPushCreate( drawModDelMI, "", _("Fill Polygon - 'f'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'f');
-	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'u'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'u');
+	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'g'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'g'));
+	drawModOpen = wMenuPushCreate( drawModDelMI, "", _("Make PolyLine - 'l'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'l'));
+	drawModFill = wMenuPushCreate( drawModDelMI, "", _("Fill Polygon - 'f'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'f'));
+	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'u'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'u'));
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
-	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
-	drawModVertex = wMenuPushCreate( drawModDelMI, "", _("Vertex Point - 'v'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'v' );
-	drawModRound =  wMenuPushCreate( drawModDelMI, "", _("Round Corner - 'r'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'r' );
-	drawModSmooth =  wMenuPushCreate( drawModDelMI, "", _("Smooth Corner - 's'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 's' );
+	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, I2VP( 0 ));
+	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 127 ));
+	drawModVertex = wMenuPushCreate( drawModDelMI, "", _("Vertex Point - 'v'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'v' ));
+	drawModRound =  wMenuPushCreate( drawModDelMI, "", _("Round Corner - 'r'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'r' ));
+	drawModSmooth =  wMenuPushCreate( drawModDelMI, "", _("Smooth Corner - 's'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 's' ));
 	wMenuSeparatorCreate( drawModDelMI );
 	drawModLinMI = wMenuMenuCreate( drawModDelMI, "", _("LineType...") );
-	drawModSolid =  wMenuPushCreate( drawModLinMI, "", _("Solid Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '0' );
-	drawModDot =  wMenuPushCreate( drawModLinMI, "", _("Dashed Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '1' );
-	drawModDash =  wMenuPushCreate( drawModLinMI, "", _("Dotted Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '2' );
-	drawModDashDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '3' );
-	drawModDashDotDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '4' );
-	drawModCenterDot =  wMenuPushCreate( drawModLinMI, "", _("Center-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '5' );
-	drawModPhantom =  wMenuPushCreate( drawModLinMI, "", _("Phantom-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '6' );
+	drawModSolid =  wMenuPushCreate( drawModLinMI, "", _("Solid Line"), 0, (wMenuCallBack_p)MenuLine, I2VP( '0' ));
+	drawModDot =  wMenuPushCreate( drawModLinMI, "", _("Dashed Line"), 0, (wMenuCallBack_p)MenuLine, I2VP( '1' ));
+	drawModDash =  wMenuPushCreate( drawModLinMI, "", _("Dotted Line"), 0, (wMenuCallBack_p)MenuLine, I2VP( '2' ));
+	drawModDashDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot Line"), 0, (wMenuCallBack_p)MenuLine, I2VP( '3' ));
+	drawModDashDotDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot-Dot Line"), 0, (wMenuCallBack_p)MenuLine, I2VP( '4' ));
+	drawModCenterDot =  wMenuPushCreate( drawModLinMI, "", _("Center-Dot Line"), 0, (wMenuCallBack_p)MenuLine, I2VP( '5' ));
+	drawModPhantom =  wMenuPushCreate( drawModLinMI, "", _("Phantom-Dot Line"), 0, (wMenuCallBack_p)MenuLine, I2VP( '6' ));
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
-	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
-	drawModLast = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
-	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Middle - 'm'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'm');
+	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, I2VP( 1 ));
+	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( '0' ));
+	drawModLast = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'l' ));
+	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Middle - 'm'"), 0, (wMenuCallBack_p)MenuEnter, I2VP( 'm'));
 
 }

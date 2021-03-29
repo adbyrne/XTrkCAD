@@ -52,11 +52,11 @@ static paramData_t fileEditPLs[] = {
 #define I_ORIGY (1)
     /*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
-    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
+    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
 #define I_PATH (4)
-	{ PD_STRING, NULL, "filename", PDO_NOPSHUPD,   (void*)200, N_("Document"), BO_READONLY, (void *)0L },
+	{ PD_STRING, NULL, "filename", PDO_NOPSHUPD,   I2VP(200), N_("Document"), BO_READONLY, I2VP(0L) },
 #define I_BROWSE (5)
 	{ PD_BUTTON, (void *)NoteFileBrowse, "browse", 0L, NULL, N_("Select...") },
 #define I_OPEN (6)

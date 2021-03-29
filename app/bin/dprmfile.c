@@ -71,7 +71,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILTOGGLE	(1)
     {	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (2)
-	{ PD_MESSAGE, "", NULL, 0, (void *)370 },
+	{ PD_MESSAGE, "", NULL, 0, I2VP(370) },
     {	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 #define I_PRMFILEFAVORITE (4)
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
@@ -124,7 +124,7 @@ void
 SortParamFileList(size_t cnt,  dynArr_t *files, int *list)
 {
     for (size_t i = 0; i < cnt; i++) {
-        list[i] = i;
+        list[i] = (int)i;
     }
 
     sortFiles = files;
@@ -161,7 +161,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
             wListAddValue(paramFileL,
                           DynStringToCStr(&description),
                           indicatorIcons[ paramFileInfo.favorite ][paramFileInfo.trackState],
-                          (void*)(intptr_t)sortedIndex[i]);
+                          I2VP(sortedIndex[i]));
 
 			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents, paramFileInfo.trackState))
         }
@@ -207,13 +207,13 @@ static void UpdateParamFileButton(void)
     for (inx=0; inx<cnt; inx++) {
         if (wListGetItemSelected((wList_p)paramFileL, inx)) {
             // if item is selected, get status
-            fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+            fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
             if (fileInx < 0 || fileInx >= GetParamFileCount()) {
                 return;
             }
             if (!IsParamFileFavorite(fileInx)) {
-                paramFilePLs[I_PRMFILEFAVORITE].context = (void *)TRUE;
+                paramFilePLs[I_PRMFILEFAVORITE].context = I2VP(TRUE);
             }
         }
     }
@@ -237,7 +237,7 @@ UpdateParamFileProperties( bool newState)
     // walk through the whole list box
     for (inx = 0; inx < cnt; inx++) {
         if (wListGetItemSelected((wList_p)paramFileL, inx)) {
-            fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+            fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
             SetParamFileFavorite(fileInx, newState);
         }
     }
@@ -277,7 +277,7 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 
 	for (inx = 0; inx < cnt; inx++) {
 		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
-			fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
 			switch (paramFileChange) {
 			case PARAMFILE_UNLOAD:

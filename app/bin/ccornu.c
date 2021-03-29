@@ -189,7 +189,7 @@ static char * CmdCornuHotBarProc(
 	case HB_SELECT:
 		CmdCornu( C_CANCEL, zero );
 		curCornu = trkseg;
-		DoCommandB( (void*)(intptr_t)cornuHotBarCmdInx );
+		DoCommandB( I2VP(cornuHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
 		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
@@ -1041,7 +1041,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 	wControl_p controls[5];				//Always needs a NULL last entry
 	char * labels[4];
 
-	Da.cmdType = (long)commandContext;
+	Da.cmdType = VP2L(commandContext);
 
 
 	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED) return C_CONTINUE;
@@ -2215,7 +2215,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_START:
 		lock = FALSE;
-		Da.cmdType = (long)commandContext;
+		Da.cmdType = VP2L(commandContext);
 		Da.state = NONE;
 		Da.selectEndPoint = -1;
 		Da.selectMidPoint = -1;
@@ -2698,7 +2698,7 @@ static STATUS_T cmdCornuCreate(
 		/* no break */
 	case C_START:
 		createState = 0;
-		commandContext = (void *)cornuCmdHotBar;
+		commandContext = I2VP(cornuCmdHotBar);
 		rc = CmdCornu(C_START, pos);
 		Da.prevSelected = -1;
 		Da.selectEndHandle = -1;

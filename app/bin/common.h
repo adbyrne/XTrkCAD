@@ -92,6 +92,15 @@
 #pragma warning( disable : 4305)
 #endif
 
+// We need to pass integer values via void* objects
+// typically context vars (declared as void*) which sometimes pass pointers and some times integers
+// For example see paramData_t.context. 
+// Also some wlib calls take a generic parameter, declared as void* but somethings used to pass integers
+// These are used in logical pairs; VP=I2VP(INTEGER); ...a lot of code...; INTEGER=VP2L(VP);
+// Note: we never use VP2L to manipulate integer-ized values of a pointer and all integer values we use fit in a long
+#define I2VP(VAL) ((void*)(intptr_t)(VAL))
+#define VP2L(VAL) ((long)(intptr_t)(VAL))
+
 
 #ifndef TRUE
 #define TRUE	(1)
