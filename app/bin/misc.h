@@ -439,6 +439,8 @@ void BlockMgmLoad( void );
 BOOL_T HasBlocks( void );
 void UpdateMinBlockLength( void );
 void UpdateMaxBlockLength( void );
+/* clcc.c */
+void LccTest( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
 void SwitchmotorMgmLoad( void );

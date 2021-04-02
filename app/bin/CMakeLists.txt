@@ -85,6 +85,7 @@ SET(SOURCES
 	csensor.c
 	csnap.c
 	csplit.c
+	clcc.c
 	csignal.c
 	cstraigh.c
 	cstruct.c

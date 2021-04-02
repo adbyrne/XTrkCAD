@@ -391,6 +391,12 @@ It can be changed to a new local file and the next \f{Save} will rebuild the pac
 
 \u000
 
+\dd \f{OpenLCB Mode} - when set control elements are created with valid format
+Lcc events. Entered events are validated for correct format
+"xx.xx.xx.xx.xx.xx.xx.xx" where "x" is a hex dight ( 0-9, a-f, A-F ).
+
+\u000
+ 
 \dd \f{Background Pos X, Y} - The offset of the bottom left corner of the background image from the origin (in inches or centimeters) after rotation.
 
 \u000

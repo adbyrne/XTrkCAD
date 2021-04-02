@@ -108,6 +108,8 @@ extern TRKTYP_T T_BEZIER;
 extern TRKTYP_T T_BZRLIN;
 extern TRKTYP_T T_CORNU;
 extern TRKTYP_T T_BLOCK;
+extern TRKTYP_T T_SIGNAL;
+extern TRKTYP_T T_SWITCHMOTOR;
 extern TRKTYP_T T_EASEMENT;
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
@@ -193,10 +195,13 @@ BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T
 track_p NewHandLaidTurnout( coOrd, ANGLE_T, coOrd, ANGLE_T, coOrd, ANGLE_T, ANGLE_T );
 void NextTurnoutPosition( track_p trk );
 enum paramFileState	GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+int GetHeadCount( track_p trk, EPINX_T ep, BOOL_T *dwarf );
+void SetupControlElements( void );
 void SetTurnoutFlags( void );
 void ClearTurnoutFlags( void );
 void SetupTurnouts( void );
 EPINX_T GetRemoteEp( track_p trk, EPINX_T ep );
+void CalcThisSignal( track_p trk, EPINX_T ep, int *head, int *aspect );
 
 /* ctodesgn.c */
 void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );
