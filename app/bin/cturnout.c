@@ -35,6 +35,7 @@
 #include "include/paramfile.h"
 #include "track.h"
 #include "trackx.h"
+#include "clcc.h"
 #include "common-ui.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
@@ -53,6 +54,10 @@ static int log_turnout = 0;
 static int log_traverseTurnout = 0;
 static int log_suppressCheckPaths = 0;
 static int log_splitturnout = 0;
+
+static char *asp[] = { "OFF", "RED", "YELLOW", "GREEN" };
+static void SetupEpPaths( track_p trk );
+static void displayTurnout(track_p trk);
 
 static wMenu_p turnoutPopupM;
 
@@ -1809,6 +1814,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 		AbortProg( "nextTurnoutPosition" );
 
 	SetCurrPathIndex( trk, GetCurrPathIndex( trk ) + 1 );
+	CalculateAllSignals( TRUE );
 	InfoMessage( _("Turnout %d Path: %s"), GetTrkIndex( trk ), GetCurrPath( trk ) );
 	if ( angleR == NULL || posR == NULL )
 		return;
@@ -3244,6 +3250,7 @@ main( INT_T argc, char * argv[] )
  * End Point flags -
  * toBlock - This endpoint points to a block
  * toTrack - This endpoint points to a track
+ * onRoute - This endpoint can be on a route between blocks
  */
 
 // Recursively scan down a set of track segments
@@ -3257,8 +3264,10 @@ static BOOL_T ConnectsToTurnout(track_p from, EPINX_T ep, DIST_T len)
 {
 	track_p trk;
 
+#if 0
 	LOG( log_turnout, 2, ("*** ConnectsToTurnout() from T%d-%d %4.1f\n",
 			GetTrkIndex(from), ep, len))
+#endif
 
 	/* the end point is a track end */
 	if ((trk = from->endPt[ep].track) == NULL)
@@ -3286,23 +3295,188 @@ static BOOL_T ConnectsToTurnout(track_p from, EPINX_T ep, DIST_T len)
 	return FALSE;
 }
 
-// Called when entering train mode to initialize turnout flags
+// Input trk[ep] points to a block.
+// tree walk looking for all routes to blocks.
+static BOOL_T setRouteFlags( track_p trk, EPINX_T ep )
+{
+	int ind;
+	EPINX_T epR;
+	extraDataCompound_t * xx;
+	BOOL_T retVal = FALSE;
+	BOOL_T ret;
+#if 0
+	LOG( log_turnout, 2, ("*** setRouteFlags(1) T%d-%d  numEps %d\n",
+		GetTrkIndex(trk ),ep,GetTrkEndPtCnt(trk)))
+#endif
+	if ( GetTrkEndPtCnt(trk) <= 2 ) {
+		epR = ep==0?1:0;
+#if 0
+		LOG( log_turnout, 2, ("*** setRouteFlags(2) T%d-%d  calling setRouteFlags T%d-%d\n",
+			GetTrkIndex(trk ),ep,
+			GetTrkIndex(trk->endPt[epR].track), trk->endPt[epR].trackEp))
+#endif
+		return setRouteFlags( trk->endPt[epR].track, trk->endPt[epR].trackEp );
+	}
+
+	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+	for ( ind = 0; ind < xx->pathCnt; ind++ ) {
+		epR = trk->endPt[ep].epPth[ind].rmtEp;
+#if 0
+		LOG( log_turnout, 2, ("*** setRouteFlags(3) T%d-%d (ind %d)  ep %d epR %d\n",
+				GetTrkIndex(trk ),ep,ind, ep, epR))
+#endif
+		if ( ep == epR ) continue; // turnout open for this path at this ep
+		if ( trk->endPt[epR].toBlock || trk->endPt[epR].toTrack ) {
+			if ( trk->endPt[epR].toBlock ) {
+				trk->endPt[epR].onRoute = TRUE;
+				trk->endPt[ep].onRoute = TRUE;
+				retVal = TRUE;
+			}
+		} else {
+#if 0
+			LOG( log_turnout, 2, ("*** setRouteFlags(4) T%d-%d (eps %d)  calling setRouteFlags T%d-%d\n",
+				GetTrkIndex(trk ),ep,GetTrkEndPtCnt(trk),
+				GetTrkIndex(trk->endPt[epR].track), trk->endPt[epR].trackEp))
+#endif
+			ret = setRouteFlags(trk->endPt[epR].track, trk->endPt[epR].trackEp);
+			if ( ret ) {
+				trk->endPt[epR].onRoute = TRUE;
+				trk->endPt[ep].onRoute = TRUE;
+				retVal = TRUE;
+			}
+		}
+#if 0
+		LOG( log_turnout, 2, ("*** setRouteFlags(5) T%d-%d  onRoute(%d) %d onRoute(%d) %d\n",
+			GetTrkIndex(trk ),ep,ep,trk->endPt[ep].onRoute,epR,trk->endPt[epR].onRoute))
+#endif
+	}
+	return retVal;
+}
+
+EXPORT void CalcThisSignal( track_p trk, EPINX_T ep, int *head, int *aspect )
+{
+	track_p trk0 = trk;
+	EPINX_T num = 0, ind, ep0, epRmt;
+	extraDataCompound_t * xx;
+
+	if ( GetTrkType(trk) != T_TURNOUT ) {
+		*head = 0;
+		*aspect = ASP_OFF;
+		return;
+	}
+
+	// signal between sub blocks
+	if ( GetTrkType(trk) != T_TURNOUT || GetTrkEndPtCnt(trk) <= 2  ) {
+		*head = 0;
+		*aspect = ASP_GREEN;
+	} else {
+
+		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+
+		*head = trk->endPt[ep].epPth[xx->currPathIndex].head;
+		*aspect = trk->endPt[ep].epPth[xx->currPathIndex].aspect;
+	}
+#if 0
+	LOG( log_turnout, 1,  ("*** CalcThisSignal( T%03d-%d ) pos %d head %d %s\n",
+		GetTrkIndex(trk),ep,xx->currPathIndex,*head,asp[*aspect]))
+#endif
+}
+
+// trk is Turnout
+EXPORT int GetHeadCount( track_p trk, EPINX_T ep, BOOL_T *dwarf )
+{
+	track_p blk = trk, trk1 = trk, trk0;
+	EPINX_T num = 0, ind, blkEp = ep, ep1 = ep, ep0;
+	extraDataCompound_t * xx;
+
+	LOG( log_turnout, 1, ("*** GetHeadCount(1) -- T%d-%d  %s\n", GetTrkIndex(trk),ep,GetTrkTypeName(trk)))
+	*dwarf = FALSE;
+
+	if ( GetTrkEndPtCnt( trk1 ) <=2 ) return 1;
+	xx = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
+	// number of paths to this ep
+	for ( ind = 0; ind < xx->pathCnt; ind++ ) {
+		LOG( log_turnout, 1, ("*** GetHeadCount(3a) -- ep(%d %d) ind %d pathCnt %d  num %d\n",
+			ep1, trk1->endPt[ep1].epPth[ind].rmtEp, ind, xx->pathCnt, num))
+		if ( ! (ep1 == trk1->endPt[ep1].epPth[ind].rmtEp ) ) num++;
+	}
+	LOG( log_turnout, 1, ("*** GetHeadCount(3) -- T%d-%d  heads %d\n", GetTrkIndex(trk1),ep1,num))
+	// dwarf signal
+	if ( ! trk1->endPt[ep1].toBlock ) *dwarf = TRUE;
+
+	return num;
+}
+
+#if 0
+// Get current switch position for this turnout
+EXPORT int GetCurPos( track_p trk )
+{
+	extraDataCompound_t * xx;
+
+	if ( GetTrkType(trk) != T_TURNOUT ) return 0;
+
+	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+	return xx->currPathIndex;
+}
+#endif
+
+// Get the number of switch positions for this turnout
+EXPORT int GetNumPos( track_p trk )
+{
+	extraDataCompound_t * xx;
+
+	if ( GetTrkType(trk) != T_TURNOUT ) return 0;
+
+	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+	return xx->pathCnt;
+}
+
+EXPORT long GetPosNames( track_p trk, evtId_t *item )
+{
+	extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+	PATHPTR_T path = xx->paths;
+	int pos;
+
+#if 0
+	LOG( log_turnout, 1, ("*** GetPosNames(1) -- %s\n", path))
+#endif
+	item->name = MyStrdup( path );
+	item++;
+	for ( path += strlen((char*)path); path[0] || path[1]; path++ );
+	path +=2;
+	xx->pathCnt = 3;
+	for ( pos = 1; pos < xx->pathCnt; pos++ ) {
+#if 0
+		LOG( log_turnout, 1, ("*** GetPosNames(1) -- %s\n", path))
+#endif
+		item->name = MyStrdup( path );
+		item++;
+		for ( path += strlen((char*)path); path[0] || path[1]; path++ );
+		path +=2;
+	}
+	return xx->currPathIndex;
+}
+
+// Called when entering train mode and AddMissing to initialize turnout flags
 // toBlock - turnout ep leads to a block
 // toTrack - turnout ep does not lead to a switch
-EXPORT void SetTurnoutFlags( void )
+// onRoute - turnout ep can be on a route between blocks
+EXPORT void SetupTurnouts( void )
 {
 	track_p trk;
 	EPINX_T ep;
 	DIST_T len;
 
-	LOG( log_turnout, 1, ("*** SetTurnoutFlags() -- enter\n"))
+	LOG( log_turnout, 1, ("*** SetupTurnouts(1) -- enter\n"))
 	TRK_ITERATE(trk) {
 		if ( ! IsTrack(trk) ) continue;
 		/* turnouts have 3 or more endpoints */
 		if ( GetTrkEndPtCnt(trk) <= 2 ) continue;
 
-		LOG( log_turnout, 2, ("*** SetTurnoutFlags() turnout T%d numEp %d\n",
+#if 0
+		LOG( log_turnout, 2, ("*** SetupTurnouts(2) turnout T%d numEp %d\n",
 			GetTrkIndex(trk ), GetTrkEndPtCnt(trk)))
+#endif
 
 		for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
 			if ( trk->endPt[ep].track && trk->endPt[ep].track->conBlock ) {
@@ -3312,11 +3486,47 @@ EXPORT void SetTurnoutFlags( void )
 				len = 0.0;
 				trk->endPt[ep].toTrack = ConnectsToTurnout(trk, ep, len);
 			}
-			LOG( log_turnout, 2, ("*** SetTurnoutFlags() turnout T%d-%d toBlock %d toTrack %d\n",
-				GetTrkIndex(trk), ep, trk->endPt[ep].toBlock, trk->endPt[ep].toTrack))
+#if 0
+			LOG( log_turnout, 2, ("*** SetupTurnouts(3) turnout T%d-%d toBlock %d toTrack %d\n",
+				GetTrkIndex(trk), ep, trk->endPt[ep].toBlock, trk->endPt[ep].toTrack ))
+#endif
 		}
 	}
-	LOG( log_turnout, 1, ("*** SetTurnoutFlags() -- exit\n"))
+
+	// Find the eps that are on routes between blocks.
+#if 0
+	LOG( log_turnout, 1, ("*** SetupTurnouts(4) -- set onRoute flags\n"))
+#endif
+	TRK_ITERATE(trk) {
+		if ( ! IsTrack(trk) ) continue;
+		/* turnouts have 3 or more endpoints */
+		if ( GetTrkEndPtCnt(trk) <= 2 ) continue;
+
+#if 0
+		LOG( log_turnout, 2, ("*** SetupTurnouts(5) turnout T%d numEp %d\n",
+			GetTrkIndex(trk ), GetTrkEndPtCnt(trk)))
+#endif
+
+		for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+			if ( trk->endPt[ep].toBlock )
+				setRouteFlags( trk, ep );
+		}
+	}
+
+	TRK_ITERATE(trk) {
+		if ( ! IsTrack(trk) || GetTrkType(trk) != T_TURNOUT ) continue;
+
+		SetupEpPaths(trk);
+	}
+
+	TRK_ITERATE(trk) {
+		if ( ! IsTrack(trk) || GetTrkType(trk) != T_TURNOUT ) continue;
+
+		displayTurnout(trk);
+	}
+#if 0
+	LOG( log_turnout, 1, ("*** SetupTurnouts(6) -- exit\n"))
+#endif
 }
 
 // Called when leaving train mode to clear the turnout flags
@@ -3337,6 +3547,7 @@ EXPORT void ClearTurnoutFlags( void )
 		for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
 			trk->endPt[ep].toBlock = FALSE;
 		       	trk->endPt[ep].toTrack = FALSE;
+			trk->endPt[ep].onRoute = FALSE;
 			trk->endPt[ep].attached = FALSE;
 		}
 	}
@@ -3345,9 +3556,9 @@ EXPORT void ClearTurnoutFlags( void )
 
 
 /*
- * Each endpoint has a vector, epPath, indexed by currPathIndex
- * that holds the remote ep for the position. ep is the curent ep
- * when the turnout is physically open.
+ * Each endpoint has a vector, epPth, indexed by currPathIndex that
+ * holds the remote ep, head and aspect for the position. ep is the curent
+ * ep when the turnout is physically open.
  * Extra data has pathIndex, the index of the pathCurr. Whenever pathCurr
  * is changed, pathIndex is updated.
  *
@@ -3361,30 +3572,31 @@ static void displayTurnout(track_p trk)
 	int i;
 	EPINX_T ep;
 
-	if (/*PHIL GetTrkEndPtCnt(trk) <= 2 ||*/ GetTrkType(trk) == T_TURNTABLE ) return;
+	if ( GetTrkType(trk) != T_TURNOUT || GetTrkEndPtCnt(trk) <= 2 ) return;
 
-	if ( GetTrkType(trk) == T_TURNOUT ) {
-		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 
-		LOG( log_turnout, 1, ("*** displayTurnout() T%d EPs %d pathCnt %d  ",
-			GetTrkIndex(trk), GetTrkEndPtCnt(trk), xx->pathCnt))
+	LOG( log_turnout, 1, ("*** displayTurnout( T%03d ) EPs %d paths %d\n",
+		GetTrkIndex(trk), GetTrkEndPtCnt(trk), xx->pathCnt))
 
+	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+		LOG( log_turnout, 2, ("*** displayTurnout( T%03d-%d ) %s%s%s", GetTrkIndex(trk), ep,
+			trk->endPt[ep].toBlock?"B":" ",
+			trk->endPt[ep].toTrack?"T":" ",trk->endPt[ep].onRoute?"R":" "))
 		for ( i=0 ; i < xx->pathCnt ; i++ ) {
-			LOG( log_turnout, 1, ("  index %d ", i))
-			for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
-				if ( ep < trk->endPt[ep].epPath[i])
-					LOG( log_turnout, 1, ("  ep %d %d",
-						ep,trk->endPt[ep].epPath[i]))
-			}
+			LOG( log_turnout, 1, ("  p %d  Rmt %d Hd %d %s",
+				i, trk->endPt[ep].epPth[i].rmtEp,
+				trk->endPt[ep].epPth[i].head,
+				asp[trk->endPt[ep].epPth[i].aspect]))
 		}
 		LOG( log_turnout, 1, ("\n"))
 	}
 
-	LOG( log_turnout, 1, ("*** displayTurnout()"))
+	LOG( log_turnout, 1, ("*** displayTurnout( T%03d )  ", GetTrkIndex(trk)))
 	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
 		if ( trk->endPt[ep].track )
-			LOG( log_turnout, 1, ("  T%d-%d <> T%d-%d ",
-				GetTrkIndex(trk),ep,
+			LOG( log_turnout, 1, ("  %d <> T%d-%d ",
+				ep,
 				GetTrkIndex(trk->endPt[ep].track),
 				trk->endPt[ep].trackEp))
 	}
@@ -3401,6 +3613,7 @@ static void configEndPt(track_p trk, int pathIndex, coOrd pos0, int p0, coOrd po
 {
 	EPINX_T ep, ep0 = -1, ep1 = -1;
 
+	// Set turnout ep for this position
 	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
 		if ( isSamePos(trk->endPt[ep].pos, pos0)) {
 			ep1 = ep;
@@ -3414,15 +3627,25 @@ static void configEndPt(track_p trk, int pathIndex, coOrd pos0, int p0, coOrd po
 		GetTrkIndex(trk),ep0,ep1,pathIndex))
 #endif
 	if ( ep0 == -1 || ep1 == -1 ) return;
-	trk->endPt[ep0].epPath[pathIndex] = ep1;
-	trk->endPt[ep1].epPath[pathIndex] = ep0;
+	trk->endPt[ep0].epPth[pathIndex].rmtEp = ep1;
+	trk->endPt[ep1].epPth[pathIndex].rmtEp = ep0;
+	if ( trk->endPt[ep0].onRoute )
+		trk->endPt[ep1].epPth[pathIndex].aspect = ASP_GREEN;
+	else
+		trk->endPt[ep1].epPth[pathIndex].aspect = ASP_YELLOW;
+	if ( trk->endPt[ep1].onRoute )
+		trk->endPt[ep0].epPth[pathIndex].aspect = ASP_GREEN;
+	else
+		trk->endPt[ep0].epPth[pathIndex].aspect = ASP_YELLOW;
+
+
 }
 
 static void SetupEpPaths( track_p trk )
 {
-	struct extraDataCompound_t * xx;
+	struct extraDataCompound_t * xx = 0;
 	PATHPTR_T path;
-	int pathIndex = 0;
+	int pathIndex = 0, pi, head, pathCnt = 1;
 	EPINX_T ep, ep1;
 	coOrd pos0, pos1;
 	track_p trk0;
@@ -3430,10 +3653,13 @@ static void SetupEpPaths( track_p trk )
 	if ( GetTrkEndPtCnt(trk) >= 3 ) {
 		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 		path = xx->paths;
-		while (*path && pathIndex < sizeof( trk->endPt[ep].epPath ) ) {
+		while (*path && pathIndex < sizeof( trk->endPt[ep].epPth ) ) {
 			// set all EndPts at this position to open
-			for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ )
-				trk->endPt[ep].epPath[pathIndex] = ep;
+			for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+				trk->endPt[ep].epPth[pathIndex].rmtEp = ep;
+				trk->endPt[ep].epPth[pathIndex].head = 0;
+				trk->endPt[ep].epPth[pathIndex].aspect = ASP_RED;
+			}
 			// There can be 1 or more paths between EndPts in a complex
 			// turnout at each position
 			for ( path+=strlen((char *)path); path[0] || path[1]; path++ ) {
@@ -3449,10 +3675,19 @@ static void SetupEpPaths( track_p trk )
 			path += 2;
 			pathIndex++;
 		}
-		xx->pathCnt = pathIndex;
+		pathCnt = xx->pathCnt = pathIndex;
 	}
 
-	// For each endpoint find the back ep (endPt[i].track[ep] == trk)
+	// calculate head number for each ep
+	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
+		head = 0;
+		for ( pi = 0; pi < pathCnt; pi++ ) {
+			if ( trk->endPt[ep].epPth[pi].rmtEp != ep )
+				trk->endPt[ep].epPth[pi].head = head++;
+		}
+	}
+
+	// For each endpoint find the back ep (endPt[i].track[trackEp] == trk)
 	for ( ep=0 ; ep < GetTrkEndPtCnt(trk) ; ep++ ) {
 		if ( ! (trk0 = trk->endPt[ep].track) ) continue;
 		for ( ep1=0; ep1 < GetTrkEndPtCnt(trk0) ; ep1++ ) {
@@ -3461,30 +3696,30 @@ static void SetupEpPaths( track_p trk )
 				break;
 			}
 		}
-#if 0
-		LOG( log_turnout, 1, ("*** SetupEpPaths(): trk T%d-%d  <> T%d-%d\n",
-			GetTrkIndex(trk),ep,
-			trk->endPt[ep].track?GetTrkIndex(trk->endPt[ep].track):0,trk->endPt[ep].trackEp))
-#endif
 	}
-
-#if 0
-	displayTurnout( trk );
-#endif
 }
 
-EXPORT void SetupTurnouts( void )
+// Given track[ep] pass back active head and aspect to show
+EXPORT BOOL_T GetHeadAspect( track_p trk, EPINX_T ep, int *head, int *aspect )
 {
-	track_p trk;
+	struct extraDataCompound_t * xx;
+	EPINX_T epCnt, epN;
+	coOrd end1, end2;
 
-	TRK_ITERATE(trk) {
-		if ( ! IsTrack(trk) || GetTrkType(trk) == T_TURNTABLE ) continue;
+	epCnt = GetTrkEndPtCnt(trk);
+	if ( ep == epCnt || GetTrkType(trk) == T_TURNTABLE) return FALSE;
 
-		SetupEpPaths(trk);
+	if ( epCnt == 2 ) {
+		*head = 0;
+		*aspect = ASP_GREEN;
+		return TRUE;
 	}
+	*head = trk->endPt[ep].epPth[xx->currPathIndex].head;
+	*aspect = trk->endPt[ep].epPth[xx->currPathIndex].aspect;
+	return TRUE;
 }
 
-// Givern a track and ep where a train is entering the track
+// Given a track and ep where a train is entering the track
 // return ep the train will exit the track
 // on error return the ep count
 EXPORT EPINX_T GetRemoteEp( track_p trk, EPINX_T ep )
@@ -3507,10 +3742,10 @@ EXPORT EPINX_T GetRemoteEp( track_p trk, EPINX_T ep )
 		xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 #if 0
 	LOG( log_turnout, 1, ("*** GetRemoteEp()  T%d-%d remote %d currPathIndex %d (%s)\n",
-		GetTrkIndex(trk),ep, trk->endPt[ep].epPath[xx->currPathIndex],
+		GetTrkIndex(trk),ep, trk->endPt[ep].epPth[xx->currPathIndex].rmtEp,
 		xx->currPathIndex,xx->currPath))
 #endif
-		return trk->endPt[ep].epPath[xx->currPathIndex];
+		return trk->endPt[ep].epPth[xx->currPathIndex].rmtEp;
 	}
 	return epCnt;
 }

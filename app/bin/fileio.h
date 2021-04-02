@@ -86,6 +86,7 @@ char * GetNextLine( void );
 
 #define END_TRK_FILE	"END$TRACKS"
 #define END_BLOCK	"END$BLOCK"
+#define END_SWITCHMOTOR	"END$SWITCHMOTOR"
 #define END_SIGNAL	"END$SIGNAL"
 #define END_SEGS	"END$SEGS"
 #define END_MESSAGE	"END$MESSAGE"

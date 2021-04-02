@@ -1007,6 +1007,25 @@ This block is too short. The minimum block length is set for the layout in optio
 
 END
 
+MESSAGE MSG_OCCUPANCY_ERROR
+Block occupancy error!
+HELP
+Block occupancy error! Fatal error in calculating block occupancy.
+END
+
+MESSAGE MSG_EVENT_STRING_FORMAT
+Format of an event string (ascii version of an event)
+HELP
+Format of event string must be xx.xx.xx.xx.xx.xx.xx.xx where x is a hex digit (0-9,a-f,A-F)
+END
+
+MESSAGE MSG_BLOCK_PATH_ERROR
+Track segments in block are not contiguous.
+HELP
+Track segments in block are not contiguous. This is an internal error.
+END
+
+
 # cmodify.c
 MESSAGE MSG_CANNOT_CHANGE
 Track cannot be changed.
@@ -1114,6 +1133,12 @@ Please report this error to the \e{XTrackCAD} project development team at Source
 END
 
 # param.c
+MESSAGE MSG_LCC_FORMAT_ERROR
+The format of an event is xx.xx.xx.xx.xx.xx.xx.xx where x is a hex digit (0-9,a-f,A-F)
+HELP
+The format of an event is xx.xx.xx.xx.xx.xx.xx.xx where x is a hex digit (0-9,a-f,A-F)
+END
+
 MESSAGE MSG_ENTERED_STRING_TRUNCATED
 The entered text is too long. Maximum length is %d. 
 HELP

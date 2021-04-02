@@ -219,16 +219,41 @@ CTC panels, the panel elements can have their LCC event IDs automatically
 populated from the information in the XTrackCAD file, if the proper syntax is 
 observed.
 
+Xtrkcad OpenLCB mode ( Options->"Layout Options"->OpenLCB ) creates valid Lcc
+events in xx.xx.xx.xx.xx.xx.xx.xx format where "x" is a hex digit when control
+elements that produce events are created. The vendor and Sn are "02.01.0d"
+(DYI reserved). The event values can be edited as needed. The OpenLCB mode
+setting is saved in the .xtc file.
+
+Xtrkcak can create all of the needed blocks, switch motors and signals to manage
+train flow over the layout through the Manage->"Layout Control Elements"->"Add Missing"
+button. The user can also add elements using the Add->"Control Element" drop down
+menu. Note When this is used a template "filler" name and events are shown. Its best to 
+just ignore them and later edit the desired values with the Manage->"Layout Control
+Elements"->"Edit" dialog.
+
+When it creates events it uses the DYI top level 
+bytes "02.01.0D" to indicate that the event is not related to a physical device.
+Each block, signal, and switch motor is considered to be a node that is identified 
+by it's track index number. After the nodes are created, the user can edit them
+to reflect events and names from the physical hardware devices on the layout.
+Since the events are just numbers it really doesn't matter what values are used
+as long as they are unique numbers.
+
+
+OBSOLETE: 
 A LCC event id is a 64-bit number, represented as eight pairs of hexadecimal
 digits (0-9, a-f/A-F) separated by periods (.). Each pair represents one 8-bit
 byte of the event id. This event id is either produced by a sensor or logic
 element or is consumed by a control/device or a logic element.
 
+OBSOLETE: 
 For blocks the occupancy script contains a pair of LCC event ids, separated by
 a colon (:).  The first LCC event id is produced by the occupancy detector
 when the train enters the block and the second LCC event id is produced by the 
 occupancy detector when the train leaves the block.
 
+OBSOLETE: 
 For switchmotors the point sense script contains a pair of LCC event ids, 
 separated by a colon (:).  The first LCC event id is produced by the point 
 sensor when the points are aligned in the "normal" position (typically aligned 
@@ -238,6 +263,7 @@ spur).  The normal and reverse script each contain a signal LCC event id.
 These events are produced by the CTC Panel when the control point Code button 
 is pressed (clicked) and are consumed by the switch motor.
 
+OBSOLETE: 
 For signals, the aspect name is a space separated list of the color(s) of the
 signal heads from top to bottom and the aspect script is a LCC event id that
 is consumed to produce that aspect. Presumably, the LCC event id is produced
