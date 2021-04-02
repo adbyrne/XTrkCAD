@@ -32,11 +32,12 @@
             <property name="margin_top">18</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-help">
-                <property name="label" translatable="yes">Help</property>
+              <object class="GtkButton" id="id-cancel">
+                <property name="label" translatable="yes">_Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -45,8 +46,8 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-ok">
-                <property name="label" translatable="yes">_Done</property>
+              <object class="GtkButton" id="id-help">
+                <property name="label" translatable="yes">_Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -59,11 +60,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-cancel">
-                <property name="label" translatable="yes">Cancel</property>
+              <object class="GtkButton" id="id-ok">
+                <property name="label" translatable="yes">_Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -144,7 +149,7 @@
             </child>
             <child>
               <object class="GtkButton" id="turnout-new">
-                <property name="label" translatable="yes">_Create</property>
+                <property name="label" translatable="yes">C_reate</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

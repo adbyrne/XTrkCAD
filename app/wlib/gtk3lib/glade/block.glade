@@ -76,19 +76,6 @@
             <property name="row_spacing">6</property>
             <property name="column_spacing">12</property>
             <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_Script	</property>
-                <property name="use_underline">True</property>
-                <property name="mnemonic_widget">block-script</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="block-name">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -117,7 +104,22 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_Name	</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">_Script</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">block-script</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">_Name</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">block-name</property>
               </object>

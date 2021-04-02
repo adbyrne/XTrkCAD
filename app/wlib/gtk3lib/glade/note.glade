@@ -8,12 +8,12 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">12</property>
-        <property name="margin_right">12</property>
-        <property name="margin_top">12</property>
-        <property name="margin_bottom">12</property>
+        <property name="margin_start">18</property>
+        <property name="margin_end">18</property>
+        <property name="margin_top">18</property>
+        <property name="margin_bottom">18</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">12</property>
+        <property name="spacing">6</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
@@ -58,7 +58,22 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
+            <property name="margin_top">18</property>
+            <property name="spacing">12</property>
             <property name="layout_style">start</property>
+            <child>
+              <object class="GtkButton" id="id-cancel">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkButton" id="id-ok">
                 <property name="label" translatable="yes">_Save</property>
@@ -71,19 +86,6 @@
                 <style>
                   <class name="suggested-action"/>
                 </style>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="id-cancel">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
