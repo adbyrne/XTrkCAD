@@ -733,6 +733,97 @@ static trkSeg_p MapPathSeg(
 }
 
 
+static void DrawTurnoutTies(
+	drawCmd_p d,
+	SCALEINX_T scaleInx,
+	int pathCnt, 
+	int strSeg, 
+	int nPts[3],
+	coOrd pts[3][10],
+	wDrawColor color)
+{
+	tieData_p td;
+	DIST_T tieOff0 = 0.0, tieOff1 = 0.0;
+	DIST_T len, dlen, tlen;
+	coOrd pos;
+	int cnt;
+	ANGLE_T angle;
+
+	if ((d->options & DC_SIMPLE) != 0)
+		return;
+
+	if (color == wDrawColorBlack)
+		color = tieColor;
+	if (scaleInx < 0)
+		return;
+
+	coOrd x0, x1, x2, p1, p2, q1, q2;
+	ANGLE_T a0;
+	int othSeg = 1, secSeg = 2;
+	if (pathCnt == 2) {
+		othSeg = 1 - strSeg;
+		secSeg = strSeg;
+	}
+	else {
+		switch (strSeg) {
+		case 1:
+			othSeg = 0; secSeg = 2;
+			break;
+		}
+	}
+	x1 = pts[strSeg][0];
+	x2 = pts[strSeg][nPts[strSeg]-1];
+
+	p1 = pts[othSeg][0];
+	p2 = pts[othSeg][nPts[othSeg] - 1];
+	q1 = pts[secSeg][0];
+	q2 = pts[secSeg][nPts[secSeg] - 1];
+
+	x0.x = (p2.x + q2.x) / 2;
+	x0.y = (p2.y + q2.y) / 2;
+
+	td = GetScaleTieData(scaleInx);
+	len = FindDistance(x1, x2);
+	len -= tieOff0 + tieOff1;
+	angle = FindAngle(x1, x2); // The straight segment
+	a0 = FindAngle(x1, x0); // The midpoint line
+	cnt = (int)floor(len / td->spacing + 0.5);
+	if (len - td->spacing * cnt - td->width > (td->spacing - td->width) / 2) {
+		cnt++;
+	}
+	if (cnt != 0) {
+		int cnt1 = cnt > 1 ? cnt - 1 : 1;
+		dlen = FindDistance(x1, x2) / cnt;
+		tlen = FindDistance(p2, q2) / cnt1;
+		DIST_T tdlen = td->length;
+
+		// Single tie at beginning
+		Translate(&pos, x1, a0, dlen / 2);
+		DrawTie(d, pos, angle, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+
+		cnt-=2;
+		for (len = dlen + dlen / 2; cnt; cnt--, len += dlen, tdlen += tlen) {
+			Translate(&pos, x1, a0, len);
+			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		}
+
+		// Final single tie at ends
+		angle = FindAngle(pts[strSeg][nPts[strSeg] - 2], pts[strSeg][nPts[strSeg] - 1]);
+		Translate(&pos, x2, angle, -dlen / 2);
+		DrawTie(d, pos, angle, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+
+		angle = FindAngle(pts[othSeg][nPts[othSeg] - 2], pts[othSeg][nPts[othSeg] - 1]);
+		Translate(&pos, p2, angle, -dlen / 2);
+		DrawTie(d, pos, angle, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+
+		if (pathCnt == 3) {
+			angle = FindAngle(pts[secSeg][nPts[secSeg] - 2], pts[secSeg][nPts[secSeg] - 1]);
+			Translate(&pos, q2, angle, -dlen / 2);
+			DrawTie(d, pos, angle, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		}
+	}
+}
+
 static void DrawTurnout(
 		track_p trk,
 		drawCmd_p d,
@@ -744,7 +835,107 @@ static void DrawTurnout(
 	DIST_T scale2rail;
 
 	widthOptions = DTS_LEFT|DTS_RIGHT;
-    
+
+	wIndex_t segInx;
+	wIndex_t segEP;
+
+	int noTies = 0;
+	long res1, res2; 
+	ANGLE_T a, a0, a1, aa0, aa1; 
+	DIST_T r;
+	coOrd p0; 
+	coOrd p1; 
+	coOrd c;
+
+	int nPts[3] = { 0,0,0 };
+	int sFlag[3] = { 1,1,1 };
+	coOrd pts[3][10];
+
+	DIST_T len;
+
+	PATHPTR_T pp;
+	int pathCnt;
+
+	pp = GetPaths(trk);
+	pathCnt = 0;
+	while (pp[0]) {
+		pp += strlen((char*)pp) + 1;
+		while (pp[0]) {
+			while (pp[0]) {
+				GetSegInxEP(pp[0], &segInx, &segEP);
+				trkSeg_p segPtr = &xx->segs[segInx];
+				switch (segPtr->type) {
+				case SEG_STRTRK:
+					REORIGIN(p0, segPtr->u.l.pos[0], xx->angle, xx->orig)
+						REORIGIN(p1, segPtr->u.l.pos[1], xx->angle, xx->orig)
+						break;
+				case SEG_CRVTRK:
+					REORIGIN(c, segPtr->u.c.center, xx->angle, xx->orig);
+					r = fabs(segPtr->u.c.radius);
+					a0 = segPtr->u.c.a0;
+					a1 = segPtr->u.c.a1;
+					if (segPtr->u.c.radius > 0) {
+						aa0 = a0;
+						aa1 = a0 + a1;
+					}
+					else {
+						aa0 = a0 + a1;
+						aa1 = a0;
+					}
+					PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
+					p0.x += xx->orig.x;
+					p0.y += xx->orig.y;
+					PointOnCircle(&p1, segPtr->u.c.center, r, aa1);
+					p1.x += xx->orig.x;
+					p1.y += xx->orig.y;
+					if (pathCnt < 3) sFlag[pathCnt] = 0;
+					break;
+				}
+
+				if (pathCnt < 3) {
+					if (nPts[pathCnt] == 0) {
+						pts[pathCnt][nPts[pathCnt]] = p0;
+						nPts[pathCnt]++;
+					}
+					pts[pathCnt][nPts[pathCnt]] = p1;
+					nPts[pathCnt]++;
+				}
+				pp++;
+			}
+			pp++;
+		}
+		pathCnt++;
+		pp++;
+	}
+
+	scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
+	if ((d->scale < scale2rail)
+		&& ((trk->bits & TB_NOTIES) == 0)
+		&& (pathCnt > 1)
+		&& (xx->special == TOnormal))
+	{
+		int sf = -1;
+		if (pathCnt == 2) {
+			sf = sFlag[0] ? 0 : (sFlag[1] ? 1 : -1);
+			if (sf >= 0) {
+				DrawTurnoutTies(d, GetTrkScale(trk), pathCnt, sf, nPts, pts, color);
+
+				noTies = 1;
+				trk->bits |= TB_NOTIES;
+			}
+		}
+		else if (pathCnt == 3) {
+			sf = sFlag[0] ? 0 : (sFlag[1] ? 1 : (sFlag[2] ? 2 : -1));
+			if (sf >= 0) {
+				DrawTurnoutTies(d, GetTrkScale(trk), pathCnt, sf, nPts, pts, color);
+
+				noTies = 1;
+				trk->bits |= TB_NOTIES;
+			}
+		}
+	}
+
+	// Begin standard DrawTurnout code
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER );  // no curve center for turnouts
 
@@ -765,6 +956,8 @@ static void DrawTurnout(
 		  (roadbedOnScreen && d->scale <= twoRailScale) ) )
 		DrawTurnoutRoadbed( d, color, xx->orig, xx->angle, xx->segs, xx->segCnt );
 
+	// Restore this setting
+	if (noTies) trk->bits &= ~TB_NOTIES;
 }
 
 

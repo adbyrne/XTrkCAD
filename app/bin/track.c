@@ -2852,6 +2852,7 @@ static void DrawStraightTies(
 }
 
 
+
 EXPORT void DrawStraightTrack(
 		drawCmd_p d,
 		coOrd p0,
