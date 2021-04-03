@@ -732,19 +732,26 @@ static trkSeg_p MapPathSeg(
 	return xx->segs+(segInx-1);
 }
 
+#define DTO_DIM 3
+struct DrawTo_t {
+	int n;
+	trkSeg_p trkSeg[10];
+	coOrd base[10];
+	DIST_T dy[10];
+	coOrd pts[10];
+	char type;
+};
 
 static void DrawTurnoutTies(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
 	int pathCnt, 
 	int strSeg, 
-	int nPts[3],
-	coOrd pts[3][10],
+	struct DrawTo_t dto[DTO_DIM],
 	wDrawColor color)
 {
 	tieData_p td;
-	DIST_T tieOff0 = 0.0, tieOff1 = 0.0;
-	DIST_T len, dlen, tlen;
+	DIST_T len, dlen;
 	coOrd pos;
 	int cnt;
 	ANGLE_T angle;
@@ -757,8 +764,9 @@ static void DrawTurnoutTies(
 	if (scaleInx < 0)
 		return;
 
-	coOrd x0, x1, x2, p1, p2, q1, q2;
-	ANGLE_T a0;
+	coOrd s1, s2, p1, p2, q1, q2;
+	int s0, p0, q0;
+	ANGLE_T a0, a1, a2;
 	int othSeg = 1, secSeg = 2;
 	if (pathCnt == 2) {
 		othSeg = 1 - strSeg;
@@ -766,64 +774,81 @@ static void DrawTurnoutTies(
 	}
 	else {
 		switch (strSeg) {
+		case 0:
+			othSeg = 1; secSeg = 2;
+			break;
 		case 1:
 			othSeg = 0; secSeg = 2;
 			break;
+		case 2:
+			othSeg = 0; secSeg = 1;
+			break;
 		}
 	}
-	x1 = pts[strSeg][0];
-	x2 = pts[strSeg][nPts[strSeg] - 1];
 
-	p1 = pts[othSeg][0];
-	p2 = pts[othSeg][nPts[othSeg] - 1];
-	q1 = pts[secSeg][0];
-	q2 = pts[secSeg][nPts[secSeg] - 1];
-
-	x0.x = (p2.x + q2.x) / 2;
-	x0.y = (p2.y + q2.y) / 2;
+	// Straight
+	s1 = dto[strSeg].pts[0];
+	s2 = dto[strSeg].pts[dto[strSeg].n - 1];
+	dto[strSeg].pts[dto[strSeg].n].x = DIST_INF;
+	// Diverging
+	p1 = dto[othSeg].pts[0];
+	p2 = dto[othSeg].pts[dto[othSeg].n - 1];
+	dto[othSeg].pts[dto[othSeg].n].x = DIST_INF;
+	q1 = dto[secSeg].pts[0];
+	q2 = dto[secSeg].pts[dto[secSeg].n - 1];
+	dto[secSeg].pts[dto[secSeg].n].x = DIST_INF;
 
 	td = GetScaleTieData(scaleInx);
-	len = FindDistance(x1, x2);
-	len -= tieOff0 + tieOff1;
-	angle = FindAngle(x1, x2); // The straight segment
-	a0 = FindAngle(x1, x0); // The midpoint line
+	len = FindDistance(s1, s2);
+	angle = FindAngle(s1, s2); // The straight segment
 	cnt = (int)floor(len / td->spacing + 0.5);
 	if (len - td->spacing * cnt - td->width > (td->spacing - td->width) / 2) {
 		cnt++;
 	}
 	if (cnt != 0) {
 		int cnt1 = cnt > 1 ? cnt - 1 : 1;
-		dlen = FindDistance(x1, x2) / cnt;
-		tlen = FindDistance(p2, q2) / cnt1;
-		DIST_T tdlen = td->length;
+		dlen = len / cnt;
+		s0 = p0 = q0 = 0;
 
 		// Single tie at beginning
-		Translate(&pos, x1, a0, dlen / 2);
-		DrawTie(d, pos, angle, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		//Translate(&pos, s1, angle, dlen / 2);
+		//DrawTie(d, pos, angle, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
-		cnt -= 2;
-		for (len = dlen + dlen / 2; cnt; cnt--, len += dlen, tdlen += tlen) {
-			Translate(&pos, x1, a0, len);
+		DIST_T tdlen = td->length;
+
+		cnt -= 1;
+		for (len = dlen / 2; cnt; cnt--, len += dlen) {
+			if (len >= dto[othSeg].base[p0+1].x) p0++;
+			if (len >= dto[secSeg].base[q0+1].x) q0++;
+			if (p0 >= dto[othSeg].n || q0 >= dto[secSeg].n) 
+				break;
+
+			DIST_T dy1 = dto[othSeg].base[p0].y + (len - dto[othSeg].base[p0].x) * dto[othSeg].dy[p0];
+			DIST_T dy2 = dto[secSeg].base[q0].y + (len - dto[secSeg].base[q0].x) * dto[secSeg].dy[q0];
+			tdlen = td->length + fabs(dy1)+fabs(dy2);
+			DIST_T dy = dy1 + dy2;
+			Translate(&pos, s1, angle, len);
+			Translate(&pos, pos, (angle - 90.0), dy / 2);
 			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
 		// Final single tie at ends
-		int n = nPts[strSeg];
-		x0 = pts[strSeg][n - 2];
-		a0 = FindAngle(x0, x2);
-		Translate(&pos, x2, a0, -dlen / 2);
+		int n = dto[strSeg].n;
+		s1 = dto[strSeg].pts[n - 2];
+		a0 = FindAngle(s1, s2);
+		Translate(&pos, s2, a0, -dlen / 2);
 		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
-		n = nPts[othSeg];
-		x0 = pts[othSeg][n - 2];
-		a0 = FindAngle(x0, p2);
+		n = dto[othSeg].n;
+		p1 = dto[othSeg].pts[n - 2];
+		a0 = FindAngle(p1, p2);
 		Translate(&pos, p2, a0, -dlen / 2);
 		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		if (pathCnt == 3) {
-			n = nPts[secSeg];
-			x0 = pts[secSeg][n - 2];
-			a0 = FindAngle(x0, q2);
+			n = dto[secSeg].n;
+			q1 = dto[secSeg].pts[n - 2];
+			a0 = FindAngle(q1, q2);
 			Translate(&pos, q2, a0, -dlen / 2);
 			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
@@ -836,7 +861,7 @@ static void DrawTurnout(
 		wDrawColor color )
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
-	wIndex_t i;
+	wIndex_t i, j;
 	long widthOptions = 0;
 	DIST_T scale2rail;
 
@@ -847,15 +872,14 @@ static void DrawTurnout(
 
 	int noTies = 0;
 	long res1, res2; 
-	ANGLE_T a, a0, a1, aa0, aa1; 
+	ANGLE_T a, a0, a1, aa0, aa1, aa2; 
 	DIST_T r;
-	coOrd p0; 
-	coOrd p1; 
+	coOrd p0, p1, p2; 
 	coOrd c;
 
-	int nPts[3] = { 0,0,0 };
-	int sFlag[3] = { 1,1,1 };
-	coOrd pts[3][10];
+	struct DrawTo_t dto[DTO_DIM];
+	for (i = 0; i < DTO_DIM; i++)
+		dto[i].n = 0;
 
 	DIST_T len;
 
@@ -867,46 +891,55 @@ static void DrawTurnout(
 	while (pp[0]) {
 		pp += strlen((char*)pp) + 1;
 		while (pp[0]) {
+			if (pathCnt < DTO_DIM)
+				dto[pathCnt].type = 'S';
 			while (pp[0]) {
 				GetSegInxEP(pp[0], &segInx, &segEP);
 				trkSeg_p segPtr = &xx->segs[segInx];
 				switch (segPtr->type) {
 				case SEG_STRTRK:
-					REORIGIN(p0, segPtr->u.l.pos[0], xx->angle, xx->orig)
-					REORIGIN(p1, segPtr->u.l.pos[1], xx->angle, xx->orig)
+					p0 = segPtr->u.l.pos[0];
+					p2 = segPtr->u.l.pos[1];
 					break;
 				case SEG_CRVTRK:
-					REORIGIN(c, segPtr->u.c.center, xx->angle, xx->orig);
 					r = fabs(segPtr->u.c.radius);
 					a0 = segPtr->u.c.a0;
 					a1 = segPtr->u.c.a1;
 					if (segPtr->u.c.radius > 0) {
 						aa0 = a0;
-						aa1 = a0 + a1;
+						aa1 = a0 + a1 / 2;
+						aa2 = a0 + a1;
 					}
 					else {
 						aa0 = a0 + a1;
-						aa1 = a0;
+						aa1 = a0 + a1 / 2;
+						aa2 = a0;
 					}
 					PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
-					REORIGIN(p0, p0, xx->angle, xx->orig);
-					//p0.x += xx->orig.x;
-					//p0.y += xx->orig.y;
 					PointOnCircle(&p1, segPtr->u.c.center, r, aa1);
-					REORIGIN(p1, p1, xx->angle, xx->orig);
-					//p1.x += xx->orig.x;
-					//p1.y += xx->orig.y;
-					if (pathCnt < 3) sFlag[pathCnt] = 0;
+					PointOnCircle(&p2, segPtr->u.c.center, r, aa2);
+
+					if (pathCnt < DTO_DIM) 
+						dto[pathCnt].type = segPtr->u.c.radius > 0 ? 'R' : 'L';
 					break;
 				}
 
-				if (pathCnt < 3) {
-					if (nPts[pathCnt] == 0) {
-						pts[pathCnt][nPts[pathCnt]] = p0;
-						nPts[pathCnt]++;
+				if (pathCnt < DTO_DIM) {
+					wIndex_t n = dto[pathCnt].n;
+					if (n == 0) {
+						dto[pathCnt].trkSeg[n] = segPtr;
+						dto[pathCnt].base[n] = p0;
+						n++;
 					}
-					pts[pathCnt][nPts[pathCnt]] = p1;
-					nPts[pathCnt]++;
+					if (segPtr->type == SEG_CRVTRK) {
+						dto[pathCnt].trkSeg[n] = segPtr;
+						dto[pathCnt].base[n] = p1;
+						n++;
+					}
+					dto[pathCnt].trkSeg[n] = segPtr;
+					dto[pathCnt].base[n] = p2;
+					n++;
+					dto[pathCnt].n = n;
 				}
 				pp++;
 			}
@@ -919,39 +952,44 @@ static void DrawTurnout(
 
 	// Single origin
 	int toFlag = 1;
-	p0 = pts[0][0];
+	p0 = dto[0].base[0];
 	for (i = 1; i < pathCnt; i++)
-		if (FindDistance(p0, pts[i][0]) > EPSILON)
+		if (FindDistance(p0, dto[i].base[0]) > EPSILON)
 			toFlag = 0;
 
 	scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
 	if ((d->scale < scale2rail)
 		&& ((trk->bits & TB_NOTIES) == 0)
 		&& (toFlag)
-		&& (pathCnt > 1) && (pathCnt <= 3)
+		&& (pathCnt > 1) && (pathCnt <= DTO_DIM)
 		&& (trk->endCnt <= 4)
 		&& (xx->special == TOnormal))
 	{
-		int sf = -1;
-		int sfCnt = sFlag[0] + sFlag[1] + (pathCnt > 2 ? sFlag[2] : 0);
-		if (sfCnt == 1) {
-			if (pathCnt == 2) {
-				sf = sFlag[0] ? 0 : (sFlag[1] ? 1 : -1);
-				if (sf >= 0) {
-					DrawTurnoutTies(d, GetTrkScale(trk), pathCnt, sf, nPts, pts, color);
+		int strSeg = -1;
+		int sfCnt = 0;
+		if (dto[0].type == 'S') {
+			sfCnt++; strSeg = 0;
+		}
+		if (dto[1].type == 'S') {
+			sfCnt++; strSeg = 1;
+		}
+		if (pathCnt > 2 && dto[2].type == 'S') {
+			sfCnt++; strSeg = 1;
+		}
+		if (sfCnt == 1 && strSeg >= 0) {
+			if (pathCnt == 2 || pathCnt == 3) {
 
-					noTies = 1;
-					trk->bits |= TB_NOTIES;
-				}
-			}
-			else if (pathCnt == 3) {
-				sf = sFlag[0] ? 0 : (sFlag[1] ? 1 : (sFlag[2] ? 2 : -1));
-				if (sf >= 0) {
-					DrawTurnoutTies(d, GetTrkScale(trk), pathCnt, sf, nPts, pts, color);
+				for (i = 0; i < DTO_DIM; i++)
+					for (j = 0; j < dto[i].n; j++) {
+						REORIGIN(p0, dto[i].base[j], xx->angle, xx->orig);
+						dto[i].pts[j] = p0;
+						dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
+					}
 
-					noTies = 1;
-					trk->bits |= TB_NOTIES;
-				}
+				DrawTurnoutTies(d, GetTrkScale(trk), pathCnt, strSeg, dto, color);
+
+				noTies = 1;
+				trk->bits |= TB_NOTIES;
 			}
 		}
 	}
