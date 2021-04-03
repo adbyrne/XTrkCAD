@@ -895,6 +895,7 @@ EXPORT void wShow(wWin_p win) {
 	if (win != mainW)
 		wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
 	wWinShow(win, TRUE);
+	ParamResetInvalid( win );
 }
 
 EXPORT void wHide(wWin_p win) {

@@ -176,6 +176,7 @@ static void pushButt(
         return;
     }
 
+    wlibStringUpdate();
     if (b->action) {
         b->action(b->data);
     }
@@ -235,6 +236,8 @@ static gint pressButt(
 		GdkEventButton *event,
 		wButton_p bb) {
 
+	if ( debugWindow >= 1 )
+		printf( "buttonPress: %s\n", bb->labelStr );
 	if (bb->recursion) {
 		return TRUE;
 
@@ -270,6 +273,8 @@ static gint releaseButt(
 		GdkEventButton *event,
 		wButton_p bb) {
 
+	if ( debugWindow >= 1 )
+		printf( "buttonRelease: %s\n", bb->labelStr );
 	/* Remove any existing timer */
 	if (bb->timer_id) {
 	  g_source_remove(bb->timer_id);
