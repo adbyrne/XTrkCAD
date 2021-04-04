@@ -622,6 +622,8 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 
+void DrawStraightTies( drawCmd_p d, SCALEINX_T scaleInx, coOrd p0, coOrd p1, wDrawColor color );
+
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);
 track_p OnTrack( coOrd *, INT_T, BOOL_T );

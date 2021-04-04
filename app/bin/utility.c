@@ -472,6 +472,14 @@ double CircleDistance( coOrd *p, coOrd c, double r, double a0, double a1 )
 
 
 
+coOrd MidPtCoOrd(coOrd p0, coOrd p1)
+{
+	coOrd res;
+	res.x = (p0.x + p1.x) / 2.0;
+	res.y = (p0.y + p1.y) / 2.0;
+	return res;
+}
+
 coOrd AddCoOrd( coOrd p0, coOrd p1, double a )
 {
 	coOrd res, zero;

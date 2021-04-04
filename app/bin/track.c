@@ -2812,7 +2812,7 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 }
 
 
-static void DrawStraightTies(
+EXPORT void DrawStraightTies(
 		drawCmd_p d,
 		SCALEINX_T scaleInx,
 		coOrd p0,

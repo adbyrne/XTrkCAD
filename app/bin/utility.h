@@ -63,6 +63,7 @@ double LineDistance( coOrd *p, coOrd p0, coOrd p1 );
 double CircleDistance( coOrd *p, coOrd c, double r, double a0, double a1 );
 int PickArcEndPt( coOrd, coOrd, coOrd );
 int PickLineEndPt( coOrd, double, coOrd );
+coOrd MidPtCoOrd(coOrd, coOrd);
 coOrd AddCoOrd( coOrd, coOrd, double );
 int ClipLine( coOrd *, coOrd *, coOrd, double, coOrd );
 coOrd FindCentroid(int vertexCount, pts_t vertices[] );
