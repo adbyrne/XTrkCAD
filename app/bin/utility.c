@@ -59,6 +59,14 @@ double min( double a, double b )
 
 
 
+int CoOrdEqual(coOrd p0, coOrd p1)
+{
+	double d = fabs(p1.x - p0.x) + fabs(p1.y - p0.y);
+	return (d < EPSILON);
+}
+
+
+
 double FindDistance( coOrd p0, coOrd p1 )
 {
 	double dx = p1.x-p0.x, dy = p1.y-p0.y;
