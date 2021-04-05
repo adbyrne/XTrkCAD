@@ -55,18 +55,18 @@ struct wFilSel_t {
 
 /**
  * Create a new file selector. Only the internal data structures are
- * set up, no dialog is created. 
+ * set up, no dialog is created.
  *
  * \param w IN parent window
  * \param mode IN ?
  * \param opt IN ?
  * \param title IN dialog title
  * \param pattList IN list of selection patterns
- * \param action IN callback 
+ * \param action IN callback
  * \param data IN ?
  * \return    the newly created file selector structure
  */
- 
+
 struct wFilSel_t * wFilSelCreate(
 	wWin_p w,
 	wFilSelMode_e mode,
@@ -96,13 +96,32 @@ struct wFilSel_t * wFilSelCreate(
 
 		//create filters for the passed filter list
 		// names and patterns are separated by |
-		cp = strtok( cp, "|" );		
+		// patterns themselves are separated by ;
+		// each pattern has to be added individually
+
+		cp = strtok( cp, "|" );
 		while ( cp  && count < (MAX_ALLOWEDFILTERS - 1)) {
 			fs->filter[ count ] = gtk_file_filter_new ();
 			gtk_file_filter_set_name ( fs->filter[ count ], cp );
 			cp = strtok( NULL, "|" );
-			gtk_file_filter_add_pattern (fs->filter[ count ], cp );
-			// the first pattern is considered to match the default extension
+            if (cp)
+            {
+                char *patterns = strdup(cp);
+                char *patternStart = patterns;
+
+                for (int i = 0; i < strlen(cp); i++) {
+                    if (patterns[ i ] == ';') {
+                        patterns[ i ] = '\0';
+                        gtk_file_filter_add_pattern(fs->filter[ count ], patternStart);
+                        patternStart = patterns +  i + 1;
+                    }
+                }
+
+                gtk_file_filter_add_pattern(fs->filter[ count ], patternStart);
+                free(patterns);
+            }
+
+            // the first pattern is considered to match the default extension
 			if( count == 0 ) {
 
 				fs->defaultExtension = strdup( cp );
@@ -132,13 +151,13 @@ struct wFilSel_t * wFilSelCreate(
 }
 
 /**
- * Show and handle the file selection dialog. 
+ * Show and handle the file selection dialog.
  *
- * \param fs IN file selection 
+ * \param fs IN file selection
  * \param dirName IN starting directory
  * \return    always TRUE
  */
- 
+
 int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 {
 	char name[1024];
@@ -148,7 +167,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 	GError *err = NULL;
 
 	if (fs->window == NULL) {
-		fs->window = gtk_file_chooser_dialog_new( fs->title, 
+		fs->window = gtk_file_chooser_dialog_new( fs->title,
 										   GTK_WINDOW( fs->parent->gtkwin ),
 										   (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE ),
 										   _("_Cancel"), GTK_RESPONSE_CANCEL,
@@ -157,42 +176,42 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		if (fs->window==0) abort();
 		// get confirmation before overwriting an existing file
 		gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(fs->window), TRUE );
-		
+
 		// allow selecting multiple files
 		if( fs->opt & FS_MULTIPLEFILES ) {
 			gtk_file_chooser_set_select_multiple ( GTK_FILE_CHOOSER(fs->window), TRUE);
-		}	
+		}
 		// add the file filters to the dialog box
 		if( fs->pattCount ) {
 			for( i = 0; i <= fs->pattCount; i++ ) {
-				gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( fs->window ), fs->filter[ i ] ); 
+				gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( fs->window ), fs->filter[ i ] );
 			}
-		}												
+		}
 		/** \todo for loading a shortcut folder could be added linking to the example directory */
 
 	}
 	strcpy( name, dirName );
 
 	if( fs->mode == FS_SAVE )
-		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name ); 
+		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
     // Add a current folder and a shortcut to it for Load/import dialogs
     if( fs->mode == FS_LOAD ) {
         gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
         gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER(fs->window), name, NULL );
     }
-    
+
 	if( gtk_dialog_run( GTK_DIALOG( fs->window )) == GTK_RESPONSE_ACCEPT ) {
-		char **fileNames;	
+		char **fileNames;
 		GSList *fileNameList;
-		
+
 		fileNameList = gtk_file_chooser_get_uris( GTK_FILE_CHOOSER(fs->window) );
-		fileNames = calloc( sizeof(char *), g_slist_length (fileNameList) ); 
-			
+		fileNames = calloc( sizeof(char *), g_slist_length (fileNameList) );
+
 		for (i=0; i < g_slist_length (fileNameList); i++ ) {
 			char *namePart;
 
 			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ), &host, &err );
-			
+
 			// check for presence of file extension
 			// jump behind tha last directory delimiter
 			namePart = strrchr( file, '/' ) + 1;
@@ -201,25 +220,25 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 				// make room for the extension
 				file = g_realloc( file, strlen(file)+strlen(fs->defaultExtension));
 				strcat( file, fs->defaultExtension + 1 );
-			}	
+			}
 			fileNames[ i ] = file;
 			g_free( g_slist_nth_data ( fileNameList, i));
 		}
-		
+
 		if (fs->data)
 			strcpy( fs->data, fileNames[ 0 ] );
-		
+
 		if (fs->action) {
 			fs->action( g_slist_length(fileNameList), fileNames, fs->data );
 		}
-		
+
 		for(i=0; i < g_slist_length(fileNameList); i++) {
 			g_free( fileNames[ i ]);
 		}
 		free( fileNames );
-		g_slist_free (fileNameList);	
+		g_slist_free (fileNameList);
 	}
 	gtk_widget_hide( GTK_WIDGET( fs->window ));
-	
+
 	return 1;
 }
