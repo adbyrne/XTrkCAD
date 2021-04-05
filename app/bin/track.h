@@ -623,6 +623,7 @@ void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, 
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 
 void DrawStraightTies( drawCmd_p d, SCALEINX_T scaleInx, coOrd p0, coOrd p1, wDrawColor color );
+wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
 
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);
