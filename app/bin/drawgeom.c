@@ -1575,14 +1575,18 @@ STATUS_T DrawGeomPolyModify(
 			}
 			if ((action>>8 == 'f') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType != POLYLINE )) {
 				tempSegs(0).type = SEG_FILPOLY;
+				tempSegs(0).u.p.polyType = FREEFORM;
 				context->type =  SEG_FILPOLY;
+				context->subtype=FREEFORM;
 				context->filled = TRUE;
 				CreatePolyAnchors( -1);
 				return C_CONTINUE;
 			}
 			if ((action>>8 == 'u') && (tempSegs(0).type == SEG_FILPOLY) ) {
 				tempSegs(0).type = SEG_POLY;
+				tempSegs(0).u.p.polyType = FREEFORM;
 				context->type =  SEG_POLY;
+				context->subtype=FREEFORM;
 				context->filled = FALSE;
 				CreatePolyAnchors( -1);
 				return C_CONTINUE;
@@ -2577,6 +2581,8 @@ STATUS_T DrawGeomModify(
 			DrawGeomPolyModify(action,pos,context);
 			context->segPtr[segInx].type = context->type;
 			context->segPtr[segInx].u.p.polyType = context->subtype;
+			if (context->segPtr[segInx].type == SEG_FILPOLY)
+				context->segPtr[segInx].u.p.polyType = FREEFORM;  //Ensure Filled is closed
 			context->state = MOD_NONE;
 			DrawNewTrack( context->trk );
 			return C_TERMINATE;

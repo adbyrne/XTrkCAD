@@ -937,6 +937,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		break;
 	case FL:
 		if (segPtr->type == SEG_POLY && drawData.open) {
+			segPtr->u.p.polyType = POLYLINE;
 			drawData.filled = FALSE;
 			drawDesc[FL].mode = DESC_RO|DESC_CHANGE;
 			break;
@@ -944,6 +945,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if(drawData.filled) {
 			if (segPtr->type == SEG_POLY) {
 				segPtr->type = SEG_FILPOLY;
+				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_RO|DESC_CHANGE;
 			}
@@ -955,6 +957,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		} else {
 			if (segPtr->type == SEG_FILPOLY) {
 				segPtr->type = SEG_POLY;
+				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_CHANGE;
 			}
@@ -1233,6 +1236,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 				drawData.open=TRUE;
 				drawData.filled= FALSE;
 				drawDesc[FL].mode = DESC_RO;
+				drawDesc[OP].mode = 0;
 				break;
 			default:
 				title = filled?_("Filled Polygon"):_("Polygon");
