@@ -562,6 +562,7 @@ EXPORT void ParamLoadControl(
 		case PD_STRING:
 			if (p->oldD.s)
 				MyFree( p->oldD.s );
+			ASSERT( p->max_string > 0 );
 			if (p->max_string) {
                 p->oldD.s = MyMalloc(p->max_string);
 				strncpy(p->oldD.s, (char*)p->valueP, p->max_string-1);
@@ -627,7 +628,7 @@ EXPORT long ParamUpdate(
 			longV = atol( stringV );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(long*)p->valueP = longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -638,7 +639,7 @@ EXPORT long ParamUpdate(
 			longV = wRadioGetValue( (wChoice_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(long*)p->valueP = longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -649,7 +650,7 @@ EXPORT long ParamUpdate(
 			longV = wToggleGetValue( (wChoice_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(long*)p->valueP = longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -662,7 +663,7 @@ EXPORT long ParamUpdate(
 			longV = wListGetIndex( (wList_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(wIndex_t*)p->valueP = (wIndex_t)longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -673,7 +674,7 @@ EXPORT long ParamUpdate(
 			dc = wColorSelectButtonGetColor( (wButton_p)p->control );
 			if (dc != p->oldD.dc) {
 				p->oldD.dc = dc;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(wDrawColor*)p->valueP = dc;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
 					pg->changeProc( pg, inx, &longV ); /* COLORNOP */
@@ -693,7 +694,7 @@ EXPORT long ParamUpdate(
 				break;
 			if (floatV != p->oldD.f) {
 				p->oldD.f = floatV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(FLOAT_T*)p->valueP = floatV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &floatV );
@@ -707,15 +708,10 @@ EXPORT long ParamUpdate(
 					MyFree( p->oldD.s );
 				p->oldD.s = MyStrdup( stringV );
 				if ( p->valueP ) {
-					if (p->option & PDO_STRINGLIMITLENGTH ) {
-						strncpy((char*)p->valueP, stringV, p->max_string-1);
-						((char *)p->valueP)[p->max_string - 1] = '\0';
-						if (strlen(stringV) > p->max_string-1) {
-							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, p->max_string-1);
-						}
-					}
-					else {
-						strcpy((char*)p->valueP, stringV);
+					strncpy((char*)p->valueP, stringV, p->max_string-1);
+					((char *)p->valueP)[p->max_string - 1] = '\0';
+					if (strlen(stringV) > p->max_string-1) {
+						NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, p->max_string-1);
 					}
 				}
 
@@ -928,16 +924,10 @@ static long ParamIntRestore(
 			break;
 		case PD_STRING:
 			if ( oldP->s && strcmp((char*)p->valueP,oldP->s) != 0 ) {
-				if (p->max_string && (p->option & PDO_STRINGLIMITLENGTH)) {
-					((char*)p->valueP)[0] = '\0';
-					strncat((char*)p->valueP,oldP->s,p->max_string-1);
-					if (p->control)
-						wStringSetValue( (wString_p)p->control, (char*)p->valueP );
-				} else {
-					strcpy( (char*)p->valueP, oldP->s );
-					if (p->control)
-						wStringSetValue( (wString_p)p->control, oldP->s );
-				}
+				((char*)p->valueP)[0] = '\0';
+				strncat((char*)p->valueP,oldP->s,p->max_string-1);
+				if (p->control)
+					wStringSetValue( (wString_p)p->control, (char*)p->valueP );
 				change |= (1L<<inx);
 			}
 			break;

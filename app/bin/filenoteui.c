@@ -56,7 +56,7 @@ static paramData_t fileEditPLs[] = {
 #define I_TITLE (3)
     /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
 #define I_PATH (4)
-	{ PD_STRING, NULL, "filename", PDO_NOPSHUPD,   I2VP(200), N_("Document"), BO_READONLY, I2VP(0L) },
+	{ PD_STRING, NULL, "filename", PDO_NOPSHUPD,   I2VP(200), N_("Document"), BO_READONLY, I2VP(0L), PATHMAXIMUMLENGTH-1  },
 #define I_BROWSE (5)
 	{ PD_BUTTON, (void *)NoteFileBrowse, "browse", 0L, NULL, N_("Select...") },
 #define I_OPEN (6)

@@ -47,44 +47,55 @@ typedef enum {
 		PD_BITMAP
 		} parameterType;
 
-#define PDO_DIM					(1L<<0)
-#define PDO_ANGLE				(1L<<1)
-#define PDO_NORECORD			(1L<<2)
-#define PDO_NOPSHACT			(1L<<3)
-#define PDO_NOPSHUPD			(1L<<4)
-#define PDO_NOPREF				(1L<<5)
-#define PDO_NOUPDACT			(1L<<6)
-#define PDO_MISC				(1L<<7)
-#define PDO_DRAW				(1L<<8)
-#define PDO_FILE				(1L<<9)
-#define PDO_ENTER               (1L<<10)
+// PD_FLOAT modifiers
+#define PDO_DIM				(1L<<0)
+#define PDO_ANGLE			(1L<<1)
+#define PDO_SMALLDIM			(1L<<2)
+// P_STRING modifiers
+//#define PDO_NOTBLANK			(1L<<3)
 
-#define PDO_STRINGLIMITLENGTH	(1L<<11)	/**< context has maximum length for string */
-#define PDO_SMALLDIM			(1L<<12)
+#define PDO_NORECORD			(1L<<6)
+#define PDO_NOPSHACT			(1L<<7)
+#define PDO_NOPSHUPD			(1L<<8)
+#define PDO_NOUPDACT			(1L<<9)
+#define PDO_NOACT		(PDO_NOPSHACT|PDO_NOUPDACT)
+#define PDO_NOUPD		(PDO_NORSTUPD|PDO_NOPSHUPD)
 
-#define PDO_DLGSTARTBTNS		(1L<<13)
-#define PDO_DLGWIDE				(1L<<14)
-#define PDO_DLGNARROW			(1L<<15)
-#define PDO_DLGBOXEND			(1L<<16)	 /**< draw recessed frame around the controls */
-#define PDO_DLGRESETMARGIN		(1L<<17)	 /**< position control on the left ?*/
-#define PDO_DLGIGNORELABELWIDTH (1L<<18)
+// Override paramGroup pref group
+#define PDO_NOPREF			(1L<<10)
+#define PDO_MISC			(1L<<11)
+#define PDO_DRAW			(1L<<12)
+#define PDO_FILE			(1L<<13)
+//#define PDO_ENTER               	(1L<<14)
+#define PDO_ENTER               	0
 
-#define PDO_DLGHORZ				(1L<<20)  /**< arrange on same line as previous element */
-#define PDO_DLGNEWCOLUMN		(1L<<21)
-#define PDO_DLGNOLABELALIGN		(1L<<22)
-#define PDO_LISTINDEX			(1L<<23)
-#define PDO_DLGSETY				(1L<<24)
-#define PDO_DLGIGNOREX			(1L<<25)
-#define PDO_DLGUNDERCMDBUTT		(1L<<26)
-#define PDO_DLGCMDBUTTON		(1L<<27)	/**< arrange button on the right with the default buttons */
-#define PDO_DLGIGNORE			(1L<<28)
+//#define PDO_STRINGLIMITLENGTH		(1L<<11)	/**< context has maximum length for string */
+#define PDO_STRINGLIMITLENGTH		0	/**< context has maximum length for string */
 
-#define PDO_DLGRESIZEW			(1L<<29)
-#define PDO_DLGRESIZEH			(1L<<30)
+// Ignore param
+#define PDO_DLGIGNORE			(1L<<15)
+
+// Layout options
+#define PDO_DLGSTARTBTNS		(1L<<16)
+#define PDO_DLGWIDE			(1L<<17)
+#define PDO_DLGNARROW			(1L<<18)
+#define PDO_DLGBOXEND			(1L<<19)	 /**< draw recessed frame around the controls */
+#define PDO_DLGRESETMARGIN		(1L<<20)	 /**< position control on the left ?*/
+#define PDO_DLGIGNORELABELWIDTH 	(1L<<21)
+#define PDO_DLGHORZ			(1L<<22)  /**< arrange on same line as previous element */
+#define PDO_DLGNEWCOLUMN		(1L<<23)
+#define PDO_DLGNOLABELALIGN		(1L<<24)
+#define PDO_LISTINDEX			(1L<<25)
+#define PDO_DLGSETY			(1L<<26)
+#define PDO_DLGIGNOREX			(1L<<27)
+#define PDO_DLGUNDERCMDBUTT		(1L<<28)
+#define PDO_DLGCMDBUTTON		(1L<<29)	/**< arrange button on the right with the default buttons */
+#define PDO_DLGRESIZEW			(1L<<30)
+#define PDO_DLGRESIZEH			(1L<<31)
 #define PDO_DLGRESIZE			(PDO_DLGRESIZEW|PDO_DLGRESIZEH)
 
-#define PDO_NOACT		(PDO_NOPSHACT|PDO_NOUPDACT)
-#define PDO_NOUPD		(PDO_NORSTUPD|PDO_NOPSHUPD|PDO_NOUPDUPD)
+
+
 
 typedef struct paramGroup_t *paramGroup_p;
 

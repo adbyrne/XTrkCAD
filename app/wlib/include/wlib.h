@@ -290,7 +290,8 @@ void wDestroySplash( void );
 #define BO_READONLY	(1L<<2)
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
-#define BO_ENTER    (1L<<10)
+//#define BO_ENTER    (1L<<10)
+#define BO_ENTER    0
 #define BO_REPEAT   (1L<<11)
 
 wWinPix_t wLabelWidth(		const char * );

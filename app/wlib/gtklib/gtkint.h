@@ -309,6 +309,7 @@ void psPrintString(wDrawPix_t x, wDrawPix_t y, double a, char *s, wFont_p fp, do
 static void WlibGetPaperSize(void);
 
 /* single.c */
+void wlibStringUpdate();
 
 /* splash.c */
 

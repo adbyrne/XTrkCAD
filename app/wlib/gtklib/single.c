@@ -185,6 +185,7 @@ static int stringChanged(
 {
 	if ( debugWindow >= 1 )
 		printf( "stringChanged: %s\n", b->labelStr);
+	stringControl = b;
 	return FALSE;
 }
 
