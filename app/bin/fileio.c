@@ -53,6 +53,12 @@ EXPORT dynArr_t paramProc_da;
 
 #define COPYBLOCKSIZE	1024
 
+#if 0
+// When .xtc file doesn't specify minBlockLength or maxBlockLength use these
+#define MINBLOCKDEFAULT   8.0
+#define MAXBLOCKDEFAULT  48.0
+#endif /*PHIL */
+
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
@@ -513,13 +519,11 @@ ReadMultilineText()
 static wBool_t ParseBlockLength(
 		char * s,
 		DIST_T * min,
-		DIST_T * max,
-	        long *lcb )
+		DIST_T * max )
 {
 	char *cp;
 
 	*min = strtod( s, &cp );
-	*lcb = 1; // default on
 	if (cp != s) {
 		s = cp;
 		while (isspace((unsigned char)*s)) s++;
@@ -530,15 +534,6 @@ static wBool_t ParseBlockLength(
 		if (strncmp(s,"MAXBLOCKLENGTH ",14) == 0) {
 			s += 14;
 			*max = strtod( s, &cp );
-		}
-		s = cp;
-		while (isspace((unsigned char)*s)) s++;
-		if ( ! *s ) {
-			return TRUE;
-		}
-		if (strncmp(s,"OPENLCB ",7) == 0) {
-			s += 7;
-			*lcb = strtol( s, &cp, 10 );
 			if (cp != s) {
 				return TRUE;
 			}
@@ -785,11 +780,9 @@ static BOOL_T ReadTrackFile(
 			}
 		} else if (strncmp( paramLine, "MINBLOCKLENGTH ", 14 ) == 0) {
 			DIST_T min, max;
-			long lcb;
-			if ( ParseBlockLength( paramLine+14, &min, &max, &lcb ) ) {
+			if ( ParseBlockLength( paramLine+14, &min, &max ) ) {
 				SetLayoutMinBlockLength( min );
 				SetLayoutMaxBlockLength( max );
-				SetLayoutOpenLCBmode( lcb );
 			} else {
 				if( !(ret = InputError( "BLOCKLENGTH: bad value", TRUE )))
 					break;
@@ -1068,8 +1061,8 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
 	if (GetLayoutMinBlockLength() > 0.0)
-		rc &= fprintf(f, "MINBLOCKLENGTH %0.2f MAXBLOCKLENGTH %0.2f OPENLCB %d\n",
-			GetLayoutMinBlockLength(), GetLayoutMaxBlockLength(), GetLayoutOpenLCBmode() )>0;
+		rc &= fprintf(f, "MINBLOCKLENGTH %0.2f MAXBLOCKLENGTH %0.2f\n",
+				GetLayoutMinBlockLength(), GetLayoutMaxBlockLength() )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );

@@ -333,7 +333,7 @@ from the Hotbar menus, the Add menu, or the \f{Add Missing} button.
 
 The \f{Edit} button allows for editing a control element. And the \f{Delete} button 
 deletes the selected element(s). The \f{Add Missing} button automatically adds
-any missing blocks, signals and switch motors. The \f{Delete Auto} button automatically deletes all blocks
+any missing blocks. The \f{Delete Auto} button automatically deletes all blocks
 that have been created by \f{Add Missing} that have not been edited or saved.
 \f{Min Block Length} or \f{Max Block Length} cannot be changed when there are any
 blocks. Use \f{Delete Autoll} to delete auto generated blocks. Select remaining blocks

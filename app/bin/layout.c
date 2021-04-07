@@ -42,7 +42,6 @@ struct sLayoutProps {
     DIST_T			maxTrackGrade;
     DIST_T			maxBlockLength;
     DIST_T			minBlockLength;
-    long			OpenLCBmode;
     coOrd			roomSize;
     DynString       backgroundFileName;
     coOrd			backgroundPos;
@@ -58,7 +57,7 @@ struct sDataLayout {
 };
 
 static struct sDataLayout thisLayout = {
-    { "", "", -1, 0, 0, 0.0, 5.0, 24.0, 8.0, 1, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
+    { "", "", -1, 0, 0, 0.0, 5.0, 24.0, 8.0, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
     NaS,
     NULL,
 };
@@ -70,7 +69,6 @@ static paramFloatRange_t r1_9999999 = { 1, 9999999 };
 static paramFloatRange_t r360_360 = { -360, 360 };
 static paramFloatRange_t rN_9999999 = { -99999, 99999 };
 static paramIntegerRange_t i0_100 = { 0, 100 };
-static char * OpenLCBmodeLabel[] = { N_("Off"), N_("On"), NULL };
 
 static void SettingsWrite( void  );
 static void SettingsRead( void  );
@@ -160,12 +158,6 @@ void
 SetLayoutMinBlockLength(DIST_T len)
 {
     thisLayout.props.minBlockLength = len;
-}
-
-void
-SetLayoutOpenLCBmode(DIST_T mode)
-{
-    thisLayout.props.OpenLCBmode = mode;
 }
 
 
@@ -293,12 +285,6 @@ DIST_T
 GetLayoutMaxBlockLength()
 {
     return (thisLayout.props.maxBlockLength);
-}
-
-long
-GetLayoutOpenLCBmode()
-{
-    return (thisLayout.props.OpenLCBmode);
 }
 
 SCALEDESCINX_T
@@ -522,7 +508,6 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.minBlockLength, "minBlockLength", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r0o1_1000, N_("Min Block Length"), 0, (void *)(CHANGE_MINBLKLN) },
 #define MAXBLKLENGTH (12)
     { PD_FLOAT, &thisLayout.props.maxBlockLength, "maxBlockLength", PDO_NOPSHUPD|PDO_DLGHORZ, &r0o1_1000, N_(" Max Block Length"), 0, (void *)(CHANGE_MAXBLKLN) },
-    { PD_RADIO, &thisLayout.props.OpenLCBmode, "OpenLCBmode", PDO_NOPSHUPD|PDO_DRAW, OpenLCBmodeLabel, N_(" OpenLCB mode"), BC_HORZ, (void *)(CHANGE_MAIN) },
 #define BACKGROUNDPOSX (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDPOSY (14)

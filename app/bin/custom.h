@@ -103,7 +103,6 @@ void InitTrkSwitchMotor( void );
 void InitTrkSignal ( void );
 void InitTrkControl ( void );
 void InitTrkSensor ( void );
-void InitLcc ( void );
 
 void InitCmdCurve( wMenu_p menu );
 void InitCmdCornu( wMenu_p menu);
