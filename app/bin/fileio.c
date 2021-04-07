@@ -53,6 +53,12 @@ EXPORT dynArr_t paramProc_da;
 
 #define COPYBLOCKSIZE	1024
 
+#if 0
+// When .xtc file doesn't specify minBlockLength or maxBlockLength use these
+#define MINBLOCKDEFAULT   8.0
+#define MAXBLOCKDEFAULT  48.0
+#endif /*PHIL */
+
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
@@ -510,6 +516,32 @@ ReadMultilineText()
 }
 
 
+static wBool_t ParseBlockLength(
+		char * s,
+		DIST_T * min,
+		DIST_T * max )
+{
+	char *cp;
+
+	*min = strtod( s, &cp );
+	if (cp != s) {
+		s = cp;
+		while (isspace((unsigned char)*s)) s++;
+		if ( ! *s ) {
+			*max = *min;
+			return TRUE;
+		}
+		if (strncmp(s,"MAXBLOCKLENGTH ",14) == 0) {
+			s += 14;
+			*max = strtod( s, &cp );
+			if (cp != s) {
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
 EXPORT wBool_t ParseRoomSize(
 		char * s,
 		coOrd * roomSizeRet )
@@ -654,6 +686,8 @@ static BOOL_T ReadTrackFile(
 	long scale;
 	char * cp;
 	int ret = TRUE;
+	int skipLines = 0;
+	BOOL_T skip = FALSE;
 
 	paramFile = fopen( pathName, "r" );
 	if (paramFile == NULL) {
@@ -669,8 +703,6 @@ static BOOL_T ReadTrackFile(
 
 	InfoMessage("0");
 	count = 0;
-	int skipLines = 0;
-	BOOL_T skip = FALSE;
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;
 		BOOL_T old_skip = skip;
@@ -738,6 +770,15 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
 			if ( !DoSetScale( paramLine+5 ) ) {
 				if( !(ret = InputError( "SCALE: bad value", TRUE )))
+					break;
+			}
+		} else if (strncmp( paramLine, "MINBLOCKLENGTH ", 14 ) == 0) {
+			DIST_T min, max;
+			if ( ParseBlockLength( paramLine+14, &min, &max ) ) {
+				SetLayoutMinBlockLength( min );
+				SetLayoutMaxBlockLength( max );
+			} else {
+				if( !(ret = InputError( "BLOCKLENGTH: bad value", TRUE )))
 					break;
 			}
 		} else if (strncmp( paramLine, "MAPSCALE ", 9 ) == 0) {
@@ -1008,6 +1049,9 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "MAPSCALE %ld\n", (long)mapD.scale )>0;
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
+	if (GetLayoutMinBlockLength() > 0.0)
+		rc &= fprintf(f, "MINBLOCKLENGTH %0.2f MAXBLOCKLENGTH %0.2f\n",
+				GetLayoutMinBlockLength(), GetLayoutMaxBlockLength() )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );

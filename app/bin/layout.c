@@ -40,6 +40,8 @@ struct sLayoutProps {
     GAUGEINX_T		curGaugeInx;
     DIST_T			minTrackRadius;
     DIST_T			maxTrackGrade;
+    DIST_T			maxBlockLength;
+    DIST_T			minBlockLength;
     coOrd			roomSize;
     DynString       backgroundFileName;
     coOrd			backgroundPos;
@@ -55,11 +57,12 @@ struct sDataLayout {
 };
 
 static struct sDataLayout thisLayout = {
-    { "", "", -1, 0, 0, 0.0, 5.0, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
+    { "", "", -1, 0, 0, 0.0, 5.0, 24.0, 8.0, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
     NaS,
     NULL,
 };
 
+static paramFloatRange_t r0o1_1000 = { 0.1, 1000 };
 static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
@@ -143,6 +146,18 @@ void
 SetLayoutMaxTrackGrade(ANGLE_T angle)
 {
     thisLayout.props.maxTrackGrade = angle;
+}
+
+void
+SetLayoutMaxBlockLength(DIST_T len)
+{
+    thisLayout.props.maxBlockLength = len;
+}
+
+void
+SetLayoutMinBlockLength(DIST_T len)
+{
+    thisLayout.props.minBlockLength = len;
 }
 
 
@@ -258,6 +273,18 @@ ANGLE_T
 GetLayoutMaxTrackGrade()
 {
     return (thisLayout.props.maxTrackGrade);
+}
+
+DIST_T
+GetLayoutMinBlockLength()
+{
+    return (thisLayout.props.minBlockLength);
+}
+
+DIST_T
+GetLayoutMaxBlockLength()
+{
+    return (thisLayout.props.maxBlockLength);
 }
 
 SCALEDESCINX_T
@@ -477,15 +504,19 @@ static paramData_t layoutPLs[] = {
 	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND),sizeof(backgroundFileName) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
-#define BACKGROUNDPOSX (11)
+#define MINBLKLENGTH (11)
+    { PD_FLOAT, &thisLayout.props.minBlockLength, "minBlockLength", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r0o1_1000, N_("Min Block Length"), 0, I2VP(CHANGE_MINBLKLN) },
+#define MAXBLKLENGTH (12)
+    { PD_FLOAT, &thisLayout.props.maxBlockLength, "maxBlockLength", PDO_NOPSHUPD|PDO_DLGHORZ, &r0o1_1000, N_(" Max Block Length"), 0, I2VP(CHANGE_MAXBLKLN) },
+#define BACKGROUNDPOSX (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDPOSY (12)
+#define BACKGROUNDPOSY (14)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDWIDTH (13)
-	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDSCREEN (14)
+#define BACKGROUNDWIDTH (15)
+	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Size"), 0,  I2VP(CHANGE_BACKGROUND) },
+#define BACKGROUNDSCREEN (16)
 	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDANGLE (15)
+#define BACKGROUNDANGLE (17)
 	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, I2VP(CHANGE_BACKGROUND) },
 	{ PD_MESSAGE, N_("Named Settings File"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 	{ PD_BUTTON, (void*)SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, I2VP(0) },
@@ -494,7 +525,6 @@ static paramData_t layoutPLs[] = {
 };
 
 static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, sizeof layoutPLs / sizeof layoutPLs[0] };
-
 
 static void ChangeLayout() {
 
@@ -511,6 +541,24 @@ static void ChangeLayout() {
 
     if (changes & CHANGE_MAP) {
         SetRoomSize(thisLayout.props.roomSize);
+    }
+
+    if (changes & CHANGE_MINBLKLN) {
+        if ( HasBlocks() ) {
+            NoticeMessage( _("Blocks must be deleted before changing MinBlockSize"), _("Ok"), NULL );
+            thisLayout.props.minBlockLength = thisLayout.copyOfLayoutProps->minBlockLength;
+        } else {
+            UpdateMinBlockLength();
+        }
+    }
+
+    if (changes & CHANGE_MAXBLKLN) {
+        if ( HasBlocks() ) {
+            NoticeMessage( _("Blocks must be deleted before changing MaxBlockSize"), _("Ok"), NULL );
+            thisLayout.props.maxBlockLength = thisLayout.copyOfLayoutProps->maxBlockLength;
+        } else {
+            UpdateMaxBlockLength();
+        }
     }
 
     DoChangeNotification(changes);

@@ -990,13 +990,21 @@ Either no operations have been performed since the current file was opened or al
 Refer to \k{cmdUndo} for detail.
 END
 
-# cgroup.c:groupOk
+# cgroup.c:groupOk, cblock.c
 MESSAGE MSG_TOOMANYSEGSINGROUP
 Too many segments in Group.
 HELP
 A group is limited to a maximum of 128 track segments. The number of segments within the selected group of tracks exceed this number. Select a smaller number of tracks then try again.
 
 Refer to \k{cmdGroup} for detail.
+END
+
+# cblock.c
+MESSAGE MSG_BLOCKTOOSHORT
+Block is shorter than the minimum block length
+HELP
+This block is too short. The minimum block length is set for the layout in options->preferences.
+
 END
 
 # cmodify.c

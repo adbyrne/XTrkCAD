@@ -28,7 +28,7 @@
 #include "cselect.h"
 #include "common-ui.h"
 
-static TRKTYP_T T_TURNTABLE = -1;
+EXPORT TRKTYP_T T_TURNTABLE = -1;
 
 
 typedef struct extraDataTurntable_t {

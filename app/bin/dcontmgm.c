@@ -13,7 +13,7 @@
  *  Description
  * 
  *     Control Element Mangment.  Control Elements are elements related to 
- *     layout control: Blocks (occupency detection), Switchmotors (actuators
+ *     layout control: Blocks (occupancy detection), Switchmotors (actuators
  *     to "throw" turnouts), and (eventually) signals.  These elements don't
  *     relate to "physical" items on the layout, but instead refer to the
  *     elements used by the layout control software.  These elements contain
@@ -74,11 +74,14 @@ static const char rcsid[] = "@(#) : $Id$";
 
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
+static void ControlAddMissing( void * action );
+static void ControlDeleteAllAuto( void * action );
 static void ControlDone( void * action );
-static wWinPix_t controlListWidths[] = { 18, 100, 150 };
-static const char * controlListTitles[] = { "", N_("Name"),
+static void LoadControlMgmList( void );
+static wWinPix_t controlListWidths[] = { 18, 100, 100, 150 };
+static const char * controlListTitles[] = { "", N_("Name"), N_("Length"), 
 	N_("Tracks") };
-static paramListData_t controlListData = { 10, 400, 3, controlListWidths, controlListTitles };
+static paramListData_t controlListData = { 10, 500, 4, controlListWidths, controlListTitles };
 static paramData_t controlPLs[] = {
 #define I_CONTROLLIST	(0)
 #define controlSelL		((wList_p)controlPLs[I_CONTROLLIST].control)
@@ -87,6 +90,10 @@ static paramData_t controlPLs[] = {
 	{	PD_BUTTON, (void*)ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CONTROLDEL		(2)
     {	PD_BUTTON, (void*)ControlDelete, "delete", 0, NULL, N_("Delete") },
+#define I_CONTROLUPD		(3)
+    {	PD_BUTTON, (void*)ControlAddMissing, "Add Missing", 0, NULL, N_("Add Missing") },
+#define I_CONTROLDELALL		(4)
+    {	PD_BUTTON, (void*)ControlDeleteAllAuto, "Delete Auto", 0, NULL, N_("Delete Auto") },
   } ;
 static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
 
@@ -174,6 +181,34 @@ static void ControlDelete( void * action )
 	}
         UndoEnd();
 	DoChangeNotification( CHANGE_PARAMS );
+	MainRedraw();
+}
+
+//
+// Automatically add missing control elements on layout
+// Controls are associated with track segments
+static void ControlAddMissing( void * action )
+{
+	if ( (NoticeMessage2( 1, _("Automatically generate missing blocks?"), _("Yes"), _("No") ) ) )
+		AddMissingBlockTrack();
+//	AddMissingSwitchMotor();
+
+	DoChangeNotification( CHANGE_PARAMS );
+	MainRedraw();
+}
+
+//
+// Automatically delete all control elements on layout
+// Controls are associated with track segments
+static void ControlDeleteAllAuto( void * action )
+{
+	if ( (NoticeMessage2( 1, _("Are you sure you want to delete the auto generated blocks?"),
+					_("Yes"), _("No") ) ) )
+		DeleteAllBlockTrack();
+//	DeleteAllSwitchMotor();
+
+	DoChangeNotification( CHANGE_PARAMS );
+	MainRedraw();
 }
 
 static void ControlDone( void * action )

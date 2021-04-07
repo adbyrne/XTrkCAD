@@ -73,6 +73,13 @@ EXPORT wIndex_t trackCount;
 EXPORT long drawEndPtV = 2;
 EXPORT long drawUnconnectedEndPt = 0;		/**< How do we draw Unconnected EndPts */
 
+EXPORT long drawBlocksMode = FALSE;		/**< How do we draw Blocks */
+
+EXPORT long drawOccupiedMode = 0;		/**< How do we draw Occupied Blocks and Segments */
+#define DRAW_OCCUPIED_OFF 0
+#define DRAW_OCCUPIED_BLOCK 1
+#define DRAW_OCCUPIED_SEGMENT 2
+
 EXPORT long centerDrawMode = FALSE;			/**< flag to control drawing of circle centers */
 EXPORT long printCenterLines = FALSE; 		/**< flag to control drawing of centerline in Print */
 
@@ -391,6 +398,8 @@ EXPORT void GetBoundingBox( track_p trk, coOrd *hi, coOrd *lo )
 
 EXPORT EPINX_T GetTrkEndPtCnt( track_cp trk )
 {
+	if (trk == NULL)
+		return (EPINX_T)0;
 	return trk->endCnt;
 }
 
@@ -418,6 +427,7 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
+	if ( trk == NULL || trk->endPt == NULL ) return;
 	ASSERT( ep < trk->endCnt );
 	if (trk->endPt[ep].track != NULL) {
 		AbortProg( "setTrkEndPoint: endPt is connected" );
@@ -705,6 +715,8 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	assert ( endPt != NULL );
 	if (bWriteEndPtDirectIndex && endPt->index > 0) {
 		rc &= fprintf( f, "\tT4 %d ", endPt->index )>0;
+	} else if ( GetTrkType( trk ) == T_BLOCK ) {
+		rc &= fprintf( f, "\tT4 %d ", GetTrkIndex( endPt->prevTrack ) )>0;
 	} else if (endPt->track == NULL ||
 		( exportingTracks && !GetTrkSelected(endPt->track) ) ) {
 		rc &= fprintf( f, "\tE4 " )>0;
@@ -1138,7 +1150,7 @@ EXPORT void ResolveIndex( void )
 	EPINX_T ep;
 	TRK_ITERATE(trk) {
 		LOG (log_track, 1, ( "ResNextTrack( T%d, t%d, E%d, X%ld)\n", trk->index, trk->type, trk->endCnt, trk->extraSize ));
-		for (ep=0; ep<trk->endCnt; ep++)
+		for (ep=0; ep<trk->endCnt; ep++) {
 			if (trk->endPt[ep].index >= 0) {
 				trk->endPt[ep].track = FindTrack( trk->endPt[ep].index );
 				if (trk->endPt[ep].track == NULL) {
@@ -1147,6 +1159,7 @@ EXPORT void ResolveIndex( void )
 						return;
 				}
 			}
+		}
                 ResolveBlockTrack (trk);
                 ResolveSwitchmotorTurnout (trk);
         }
@@ -1178,9 +1191,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 				UndoJoint( trk2, ep2, trk, i );
 		}
 	}
-    CheckDeleteSwitchmotor( trk );
-    CheckDeleteBlock( trk );
-    CheckCarTraverse( trk );
+	CheckCarTraverse( trk );
 	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
@@ -2589,6 +2600,8 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 #define DRAW_TUNNEL_DASH		(1)
 #define DRAW_TUNNEL_SOLID		(2)
 EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
+EXPORT long colorTrack;
+EXPORT long colorDraw;
 
 /******************************************************************************
  *
@@ -3021,6 +3034,13 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		(d != &mapD) && (color == wDrawColorBlack) )
 		if (GetLayerUseColor((unsigned int)curTrackLayer))
 			color = GetLayerColor((unsigned int)curTrackLayer);
+	if ( programMode==MODE_TRAIN) {
+	       if ( drawOccupiedMode != DRAW_OCCUPIED_OFF && trk->occupied )
+		color = occupiedColor;
+	       if ( drawOccupiedMode == DRAW_OCCUPIED_BLOCK && trk->conBlock &&
+			       trk->conBlock->occupied )
+		color = occupiedColor;
+	}
 	trackCmds(trkTyp)->draw( trk, d, color );
 	d->options &= ~DC_DASH;
 

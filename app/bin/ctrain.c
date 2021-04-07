@@ -167,6 +167,25 @@ void CarSetVisible(
     WALK_CARS_END(car, xx, dir)
 }
 
+EXPORT  track_p TrainCarOnTrk ( track_p car, coOrd * pos )
+{
+	struct extraDataCar_t * xx;
+
+	if ( GetTrkType(car) != T_CAR ) return FALSE;
+       	xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+	*pos = xx->trvTrk.pos;
+	return xx->trvTrk.trk;
+}
+
+EXPORT  BOOL_T IsTrainCarOnTrk ( track_p car )
+{
+	struct extraDataCar_t * xx;
+
+	if ( GetTrkType(car) != T_CAR ) return FALSE;
+       	xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
+        if ( ! xx->trvTrk.trk) return FALSE;
+	return TRUE;
+}
 
 static struct {
     long index;
@@ -2030,6 +2049,8 @@ static BOOL_T MoveTrain(
 
     TraverseTrack(&trvTrk, &dist1);
 
+    UpdateOccupied();
+
     if (dist1 > 0.0) {
         if (dist1 > dist0) {
             /*ErrorMessage( "%s no room: L%0.3f D%0.3f", CarItemNumber(xx->item), length, dist1 );*/
@@ -2520,6 +2541,10 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             curTrainDlg = CreateTrainControlDlg();
         }
 
+	SetupTurnouts();
+	UpdateBlockTrack();
+	SetOccupied();
+
         curTrainDlg->train = NULL;
         wListClear((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control);
         Dtrain.state = 0;
@@ -2667,6 +2692,9 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         PlaceTrainInit(currCar, trk0, pos0, xx->trvTrk.angle,
                        (MyGetKeyState()&WKEY_SHIFT) == 0);
         ControllerDialogSync(curTrainDlg);
+        ClearDynamicBlocks();
+	ClearOccupied();
+	SetOccupied();
         return C_CONTINUE;
 
     case C_UP:
@@ -2702,6 +2730,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             programMode = MODE_DESIGN;
 
             if ((trk0=OnTrack(&pos,FALSE,TRUE)) &&
+                    trk0->occupied == 0 &&
                     QueryTrack(trk0, Q_CAN_NEXT_POSITION) &&
                     TrainOnMovableTrack(trk0, &trk1)) {
                 if (trk1) {
@@ -2713,7 +2742,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                     angle1 = 0;
                 }
 
-                AdvancePositionIndicator(trk0, pos0, &pos1, &angle1);
+                if ( ! IsOccupied( trk0 ) )
+                    AdvancePositionIndicator(trk0, pos0, &pos1, &angle1);
 
                 if (trk1) {
                     xx->trvTrk.pos = pos1;
@@ -2817,6 +2847,10 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         if (curTrainDlg->win) {
             wHide(curTrainDlg->win);
         }
+
+        ClearDynamicBlocks();
+        ClearTurnoutFlags();
+        ClearOccupied();
 
         MainRedraw(); // CmdTrain: Exit
         curTrainDlg->train = NULL;

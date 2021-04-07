@@ -169,6 +169,10 @@ Setting this option constrains the Main Canvas to minimize these areas (the \f{g
 
 \u000
 
+\dd \f{Draw Occupied Blocks} - enable or disable highlighting blocks when they are occupied.
+
+\u000
+
 \dd \f{Draw Tunnel} - how to draw hidden tracks (\K{cmdTunnel}), either not at all, as dashed lines or as normal solid lines (which might be faster).
 
 \u000
@@ -376,6 +380,14 @@ The file is initally specified to be in the local file system. In order to send 
 This will create a single zipped package file containing the layout and the image file which can be sent and will open on a different system.
 If this has been done, after \f{Open} of the archive, the image file path will point into the extracted archive file directory.
 It can be changed to a new local file and the next \f{Save} will rebuild the package using the new image file instead of the old one.
+
+\u000
+
+\dd \f{Min Block Length} - specifies the minimum length of a block. This is also the maximum track segment that connects turnouts.  This is used by the \f{Add Missing} button when automatically creating blocks. If this is changed, existing blocks must be deleted and recreated.  Default 8.0 disables check.
+
+\u000
+
+\dd \f{Max Block Length} - specifies the nominal maximum length of a block. Very long blocks are divided into a set of Max Block Length blocks. This permits trains to follow each other down a long track. This is used by the \f{Add Missing} button when automatically creating blocks. If this is changed, existing blocks must be deleted and recreated.  Default 24.0 disables check.
 
 \u000
 
