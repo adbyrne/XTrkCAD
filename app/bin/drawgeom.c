@@ -1575,14 +1575,18 @@ STATUS_T DrawGeomPolyModify(
 			}
 			if ((action>>8 == 'f') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType != POLYLINE )) {
 				tempSegs(0).type = SEG_FILPOLY;
+				tempSegs(0).u.p.polyType = FREEFORM;
 				context->type =  SEG_FILPOLY;
+				context->subtype=FREEFORM;
 				context->filled = TRUE;
 				CreatePolyAnchors( -1);
 				return C_CONTINUE;
 			}
 			if ((action>>8 == 'u') && (tempSegs(0).type == SEG_FILPOLY) ) {
 				tempSegs(0).type = SEG_POLY;
+				tempSegs(0).u.p.polyType = FREEFORM;
 				context->type =  SEG_POLY;
+				context->subtype=FREEFORM;
 				context->filled = FALSE;
 				CreatePolyAnchors( -1);
 				return C_CONTINUE;
@@ -1631,6 +1635,18 @@ STATUS_T DrawGeomPolyModify(
 				DYNARR_RESET(trkSeg_t,anchors_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 				return C_TERMINATE;
+			}
+			//If ends overlap precisely remove last segment and close if >3 points
+			DIST_T dist = FindDistance(points(0).pt,points(points_da.cnt-1).pt);
+			if (IsClose(dist*4) && points_da.cnt>3 && tempSegs(0).u.p.polyType == POLYLINE) {
+				tempSegs(0).u.p.polyType = FREEFORM;
+				context->subtype=FREEFORM;
+				context->open = FALSE;
+				points_da.cnt--;
+				select_da.cnt--;
+				selected_count=0;
+				tempSegs(0).u.p.cnt = points_da.cnt;
+				context->max_inx = points_da.cnt-1;
 			}
 			pts_t * oldPts = context->segPtr[segInx].u.p.pts;
 			void * newPts = (pts_t*)MyMalloc( points_da.cnt * sizeof (pts_t) );
@@ -2565,6 +2581,8 @@ STATUS_T DrawGeomModify(
 			DrawGeomPolyModify(action,pos,context);
 			context->segPtr[segInx].type = context->type;
 			context->segPtr[segInx].u.p.polyType = context->subtype;
+			if (context->segPtr[segInx].type == SEG_FILPOLY)
+				context->segPtr[segInx].u.p.polyType = FREEFORM;  //Ensure Filled is closed
 			context->state = MOD_NONE;
 			DrawNewTrack( context->trk );
 			return C_TERMINATE;
