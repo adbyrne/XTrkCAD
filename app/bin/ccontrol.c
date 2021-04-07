@@ -419,15 +419,15 @@ static char controlEditOffScript[STR_LONG_SIZE];
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t controlEditPLs[] = {
 #define I_CONTROLNAME (0)
-    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(controlEditName) },
+    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(controlEditName) },
 #define I_ORIGX (1)
     /*1*/ { PD_FLOAT, &controlEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") },
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &controlEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_CONTROLONSCRIPT (3)
-    /*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
+    /*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF, I2VP(350), N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
 #define I_CONTROLOFFSCRIPT (4)
-    /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
+    /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
 static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, sizeof controlEditPLs/sizeof controlEditPLs[0] };

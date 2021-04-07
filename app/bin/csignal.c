@@ -503,7 +503,7 @@ static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360         = { 0.0, 360.0, 80 };
 static paramData_t signalEditPLs[] = {
 #define I_SIGNALNAME (0)
-    /*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(signalEditName)},
+    /*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(signalEditName)},
 #define I_ORIGX (1)
     /*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") }, 
 #define I_ORIGY (2)
@@ -529,9 +529,9 @@ static paramIntegerRange_t rm1_999999 = { -1, 999999 };
 
 static paramData_t aspectEditPLs[] = {
 #define I_ASPECTNAME (0)
-    /*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(200),  N_("Name"), 0, 0, sizeof(signalAspectEditName)},
+    /*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200),  N_("Name"), 0, 0, sizeof(signalAspectEditName)},
 #define I_ASPECTSCRIPT (1)
-    /*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Script"), 0, 0, sizeof(signalAspectEditScript)},
+    /*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(signalAspectEditScript)},
 #define I_ASPECTINDEX (2)
     /*2*/ { PD_LONG,   &signalAspectEditIndex, "index", PDO_NOPREF, &rm1_999999, N_("Aspect Index"), BO_READONLY },
 };
