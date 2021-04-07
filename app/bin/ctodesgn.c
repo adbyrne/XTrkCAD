@@ -139,9 +139,8 @@ static long newTurnRoadbedLineWidth = 0;
 static wDrawColor roadbedColor;
 static DIST_T newTurnTrackGauge;
 static char * newTurnScaleName;
-static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
-static paramFloatRange_t r_10000_10000 = {-10000, 10000, 80 };
-static paramFloatRange_t r0_360 = { 0, 360, 80 };
+static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
+static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
 static paramFloatRange_t r0_100 = { 0, 100, 80 };
 static paramIntegerRange_t i0_100 = { 0, 100, 40 };
 static void NewTurnOk( void * );
@@ -163,37 +162,37 @@ static double angles[10];
 static paramData_t turnDesignPLs[] = {
 #define I_TOLENGTH			(0)
 #define I_TO_FIRST_FLOAT	(0)
-	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnLen1, "len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnLen2, "len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnLen3, "len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen1, "len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen2, "len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen3, "len3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
 #define I_TOOFFSET			(4)
-	{ PD_FLOAT, &newTurnOff0, "off0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
-	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
-	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
-	{ PD_FLOAT, &newTurnOff3, "off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff0, "off0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff3, "off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Offset") },
 #define I_TORAD             (8)
-	{ PD_FLOAT, &newTurnRad0, "rad0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
-	{ PD_FLOAT, &newTurnRad1, "rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
-    { PD_FLOAT, &newTurnRad2, "rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
-	{ PD_FLOAT, &newTurnRad3, "rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, &newTurnRad0, "rad0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Radius") },
+	{ PD_FLOAT, &newTurnRad1, "rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Radius") },
+    { PD_FLOAT, &newTurnRad2, "rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Radius") },
+	{ PD_FLOAT, &newTurnRad3, "rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Radius") },
 #define I_TOTOELENGTH       (12)
-	{ PD_FLOAT, &newTurnToeL, "toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnToeR, "toeR", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnToeL, "toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnToeR, "toeR", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d001_10000, N_("Length") },
 #define I_TOANGLE			(14)
-	{ PD_FLOAT, &newTurnAngle0, "angle0", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
-	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
-	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
+	{ PD_FLOAT, &newTurnAngle0, "angle0", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
+	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
 #define I_TO_LAST_FLOAT		(17)
-	{ PD_FLOAT, &newTurnAngle3, "angle3", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
+	{ PD_FLOAT, &newTurnAngle3, "angle3", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
 #define I_TOMANUF			(18)
-	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_STRINGLIMITLENGTH, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
+	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_NOTBLANK, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
 #define I_TOLDESC			(19)
-	{ PD_STRING, &newTurnLeftDesc, "desc1", PDO_STRINGLIMITLENGTH, NULL, N_("Left Description"), 0, 0, sizeof(newTurnLeftDesc)},
-	{ PD_STRING, &newTurnLeftPartno, "partno1", PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, NULL, N_(" #"), 0, 0, sizeof(newTurnLeftPartno)},
+	{ PD_STRING, &newTurnLeftDesc, "desc1", PDO_NOTBLANK, NULL, N_("Left Description"), 0, 0, sizeof(newTurnLeftDesc)},
+	{ PD_STRING, &newTurnLeftPartno, "partno1", PDO_DLGHORZ | PDO_NOTBLANK, NULL, N_(" #"), 0, 0, sizeof(newTurnLeftPartno)},
 #define I_TORDESC			(21)
-	{ PD_STRING, &newTurnRightDesc, "desc2", PDO_STRINGLIMITLENGTH, NULL, N_("Right Description"),0, 0, sizeof(newTurnRightDesc)},
-	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, NULL, N_(" #"),0, 0, sizeof(newTurnRightPartno)},
+	{ PD_STRING, &newTurnRightDesc, "desc2", PDO_NOTBLANK, NULL, N_("Right Description"),0, 0, sizeof(newTurnRightDesc)},
+	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ | PDO_NOTBLANK, NULL, N_(" #"),0, 0, sizeof(newTurnRightPartno)},
 	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
 	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
 	{ PD_COLORLIST, &roadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
@@ -1322,15 +1321,15 @@ static toDesignSchema_t * LoadSegs(
 	pp = dp->paths;
 	if (loadPoints) {
 		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
-		for ( i=0; i<dp->floatCnt; i++ )
-			if ( *(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) == 0.0 )
-				if (dp->type != NTO_CORNU &&
-					dp->type != NTO_CORNUWYE &&
-					dp->type != NTO_CORNU3WAY
-						) {
-					NoticeMessage( MSG_TODSGN_VALUES_GTR_0, _("Ok"), NULL );
-					return NULL;
-			}
+//		for ( i=0; i<dp->floatCnt; i++ )
+//			if ( *(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) == 0.0 )
+//				if (dp->type != NTO_CORNU &&
+//					dp->type != NTO_CORNUWYE &&
+//					dp->type != NTO_CORNU3WAY
+//						) {
+//					NoticeMessage( MSG_TODSGN_VALUES_GTR_0, _("Ok"), NULL );
+//					return NULL;
+//			}
 
 		switch (dp->type) {
 		case NTO_REGULAR:
@@ -2649,14 +2648,19 @@ static void NewTurnOk( void * context )
 	wIndex_t segCnt;
 	char * customInfoP;
 
+#ifndef MKTURNOUT
+	if ( ! ParamCheckInputs( &turnDesignPG ) )
+		return;
+#endif
+
 	if ((pp=LoadSegs( curDesign, TRUE )) == NULL)
 		return;
 
-	if ( (curDesign->strCnt >= 1 && newTurnLeftDesc[0] == 0) ||
-		 (curDesign->strCnt >= 2 && newTurnRightDesc[0] == 0) ) {
-		NoticeMessage( MSG_TODSGN_DESC_NONBLANK, _("Ok"), NULL );
-		return;
-	}
+//	if ( (curDesign->strCnt >= 1 && newTurnLeftDesc[0] == 0) ||
+//		 (curDesign->strCnt >= 2 && newTurnRightDesc[0] == 0) ) {
+//		NoticeMessage( MSG_TODSGN_DESC_NONBLANK, _("Ok"), NULL );
+//		return;
+//	}
 
 	BuildTrimedTitle( message, "\t", newTurnManufacturer, newTurnLeftDesc, newTurnLeftPartno );
 #ifndef MKTURNOUT

@@ -445,9 +445,9 @@ static char renamePartno[STR_SIZE];
 static turnoutInfo_t * renameTo;
 
 static paramData_t renamePLs[] = {
-/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
-/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
-/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_STRINGLIMITLENGTH, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)} };
+/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
+/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
+/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)} };
 static paramGroup_t renamePG = { "rename", 0, renamePLs, sizeof renamePLs/sizeof renamePLs[0] };
 
 

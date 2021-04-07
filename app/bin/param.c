@@ -573,6 +573,9 @@ EXPORT void ParamLoadControl(
 				p->oldD.s = MyStrdup((char *)p->valueP);
 				wStringSetValue((wString_p)p->control, (char*)p->valueP);
 			}
+			if ( (p->option & PDO_NOTBLANK) && strlen( p->oldD.s ) == 0 ) {
+				p->bInvalid = TRUE;
+			}
 			break;
 		case PD_MESSAGE:
 			wMessageSetValue( (wMessage_p)p->control, _((char*)p->valueP) );
@@ -703,6 +706,10 @@ EXPORT long ParamUpdate(
 			break;
 		case PD_STRING:
 			stringV = wStringGetValue( (wString_p)p->control );
+			if ( (p->option & PDO_NOTBLANK) && stringV [0] == '\0' ) {
+				p->bInvalid = TRUE;
+				break;
+			}
 			if ( strcmp( stringV, p->oldD.s ) != 0 ) {
 				if (p->oldD.s)
 					MyFree( p->oldD.s );
@@ -1507,6 +1514,14 @@ static void ParamStringPush( const char * val, void * dp )
 		value = CAST_AWAY_CONST val;
 		p->enter_pressed = FALSE;
 	}
+	if ( (p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
+		p->bInvalid = TRUE;
+		wControlSetBalloon( p->control, 0, 0, NULL );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, _("String cannot be blank") );
+		ParamHilite( p->group->win, p->control, TRUE );
+		return;
+	}
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
@@ -1514,8 +1529,7 @@ static void ParamStringPush( const char * val, void * dp )
 		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );
-	if ( bInvalid != p->bInvalid )
-		ParamHilite( p->group->win, p->control, p->bInvalid );
+	ParamHilite( p->group->win, p->control, FALSE );
 }
 
 
@@ -1605,15 +1619,12 @@ static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w, wD
 }
 
 
-static void ParamButtonOk(
-		paramGroup_p group )
+EXPORT wBool_t ParamCheckInputs(
+	paramGroup_p group )
 {
-	wFlush();
 	wBool_t bInvalid = FALSE;
-	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
 	// Check for invalid entries
 	for ( paramData_p p = group->paramPtr; p < &group->paramPtr[group->paramCnt]; p++ ) {
-		paramHiliteFast = TRUE;
 		ParamHilite( group->win, p->control, p->bInvalid );
 		if ( p->bInvalid == FALSE )
 			continue;
@@ -1623,10 +1634,21 @@ static void ParamButtonOk(
 	if ( bInvalid ) {
 		// At least 1 invalid entry
 		LOG( log_paraminput, 1, ( "  Group %s Invalid\n", group->nameStr ) );
-		wControlSetBalloon( (wControl_p)group->okB, 0, -29, _("Invalid input, please correct the hilighted field(s)") );
+		wControlSetBalloon( (wControl_p)group->okB, 0, -29, _("Invalid input(s), please correct the hilighted field(s)") );
 		wFlush();
-		return;
+		return FALSE;
 	}
+	return TRUE;
+}
+
+
+static void ParamButtonOk(
+		paramGroup_p group )
+{
+	wFlush();
+	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
+	if ( ! ParamCheckInputs( group ) )
+		return;
 	if ( recordF && group->nameStr )
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); {
 		fflush( recordF );
@@ -1745,13 +1767,12 @@ EXPORT void ParamHilite(
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
-		if ( !paramHiliteFast )
+		if ( inPlayback && !paramHiliteFast )
 			wPause(500);
 	} else {
-		if ( !paramHiliteFast )
+		if ( inPlayback && !paramHiliteFast )
 			wPause(500);
 		wControlHilite( control, FALSE );
-		wFlush();
 	}
 }
 

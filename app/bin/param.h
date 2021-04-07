@@ -51,8 +51,8 @@ typedef enum {
 #define PDO_DIM				(1L<<0)
 #define PDO_ANGLE			(1L<<1)
 #define PDO_SMALLDIM			(1L<<2)
-// P_STRING modifiers
-//#define PDO_NOTBLANK			(1L<<3)
+// PD_STRING modifiers
+#define PDO_NOTBLANK			(1L<<3)
 
 #define PDO_NORECORD			(1L<<6)
 #define PDO_NOPSHACT			(1L<<7)
@@ -226,6 +226,7 @@ void ParamSaveAll( void );
 void ParamMenuPush( void * );
 extern int paramHiliteFast;
 void ParamHilite( wWin_p, wControl_p, BOOL_T );
+wBool_t ParamCheckInputs( paramGroup_p pg );
 
 void ParamInit( void );
 
