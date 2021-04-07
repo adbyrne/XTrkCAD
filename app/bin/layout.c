@@ -521,8 +521,8 @@ static paramData_t layoutPLs[] = {
 #define MINBLKLENGTH (11)
     { PD_FLOAT, &thisLayout.props.minBlockLength, "minBlockLength", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r0o1_1000, N_("Min Block Length"), 0, I2VP(CHANGE_MINBLKLN) },
 #define MAXBLKLENGTH (12)
-    { PD_FLOAT, &thisLayout.props.maxBlockLength, "maxBlockLength", PDO_NOPSHUPD|PDO_DLGHORZ, &r0o1_1000, N_(" Max Block Length"), 0, IV2P(CHANGE_MAXBLKLN) },
-    { PD_RADIO, &thisLayout.props.OpenLCBmode, "OpenLCBmode", PDO_NOPSHUPD|PDO_DRAW, OpenLCBmodeLabel, N_(" OpenLCB mode"), BC_HORZ, IV2P(CHANGE_MAIN) },
+    { PD_FLOAT, &thisLayout.props.maxBlockLength, "maxBlockLength", PDO_NOPSHUPD|PDO_DLGHORZ, &r0o1_1000, N_(" Max Block Length"), 0, I2VP(CHANGE_MAXBLKLN) },
+    { PD_RADIO, &thisLayout.props.OpenLCBmode, "OpenLCBmode", PDO_NOPSHUPD|PDO_DRAW, OpenLCBmodeLabel, N_(" OpenLCB mode"), BC_HORZ, I2VP(CHANGE_MAIN) },
 #define BACKGROUNDPOSX (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDPOSY (14)
