@@ -23,7 +23,8 @@
 #ifndef CUSTOM_H
 #define CUSTOM_H
 
-#include "common.h"
+#include "wlib.h"
+#include "misc.h"
 
 #define ICON_WIDTH		(64)
 #define ICON_HEIGHT		(64)

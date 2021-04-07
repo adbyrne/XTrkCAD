@@ -28,7 +28,7 @@ static HPALETTE newPrintPalette;
 static HPALETTE oldPrintPalette;
 
 
-void wPrintClip( wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h )
+void wPrintClip( wPos_t x, wPos_t y, wPos_t w, wPos_t h )
 {
 	wDrawClip( &print_d, x, y, w, h );
 }

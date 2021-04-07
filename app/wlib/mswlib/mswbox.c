@@ -30,8 +30,8 @@ struct wBox_t {
 
 void wBoxSetSize(
 		wBox_p bb,
-		wWinPix_t w,
-		wWinPix_t h )
+		wPos_t w,
+		wPos_t h )
 {
 	bb->w = w;
 	bb->h = h;
@@ -42,7 +42,7 @@ static void repaintBox( HWND hWnd, wControl_p b )
 {						  
 	HDC hDc;
 	wBox_p bb = (wBox_p)(b);
-	wWinPix_t x0, y0, x1, y1;
+	wPos_t x0, y0, x1, y1;
 	char lastColor;
 	int lastRop;
 	static char colors[8][4][2] = {
@@ -95,12 +95,12 @@ static callBacks_t boxCallBacks = {
 
 wBox_p wBoxCreate(
 		wWin_p	parent,
-		wWinPix_t	origX,
-		wWinPix_t	origY,
+		wPos_t	origX,
+		wPos_t	origY,
 		const char	* labelStr,
 		wBoxType_e typ,
-		wWinPix_t	width,
-		wWinPix_t	height )
+		wPos_t	width,
+		wPos_t	height )
 {
 	wBox_p b;
 	int index;

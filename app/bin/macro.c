@@ -21,19 +21,49 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#ifndef WINDOWS
+#include <unistd.h>
+#include <dirent.h>
+#include <errno.h>
+#endif
+#include <math.h>
+#include <ctype.h>
+#include <string.h>
+#include <time.h>
+#ifdef WINDOWS
+#include <io.h>
+#include <windows.h>
+#else
+#include <sys/stat.h>
+#endif
+#include <stdarg.h>
+#ifndef WINDOWS
+#include <sys/time.h>
+#else
+#include <sys/timeb.h>
+#endif
+#include <locale.h>
+
+#include <stdint.h>
+
 #include "common.h"
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
 #include "misc.h"
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"
+#include "utility.h"
 #include "version.h"
-#include "common-ui.h"
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );
@@ -73,8 +103,6 @@ static paramGroup_t recordPG = { "record", 0, recordPLs, sizeof recordPLs/sizeof
 
 
 #ifndef WINDOWS
-#include <sys/time.h>
-
 static struct timeval lastTim = {0,0};
 static void ComputePause( void )
 {
@@ -93,8 +121,6 @@ static void ComputePause( void )
 	lastTim = tim;
 }
 #else
-#include <sys/timeb.h>
-
 static struct _timeb lastTim;
 static void ComputePause( void )
 {
@@ -266,7 +292,7 @@ EXPORT void DoRecord( void * context )
 static drawCmd_p playbackD = NULL;
 static wDrawBitMap_p playbackBm = NULL;
 static wDrawColor playbackColor;
-static wDrawPix_t playbackX, playbackY;
+static wPos_t playbackX, playbackY;
 static wBool_t bDoFlash = FALSE;
 static wDrawColor flashColor;
 
@@ -343,8 +369,8 @@ char * DrawBitMapToString(DrawBitMap_e dbm) {
 static void MacroDrawBitMap(
 		DrawBitMap_e dbm,
 		wDrawBitMap_p bm,
-		wDrawPix_t x,
-		wDrawPix_t y,
+		wPos_t x,
+		wPos_t y,
 		wDrawColor color )
 {
 	wDrawBitMap( playbackD->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip );
@@ -354,7 +380,7 @@ static void MacroDrawBitMap(
 }
 
 
-static void Flash( drawCmd_p d, wDrawPix_t x, wDrawPix_t y, wDrawColor color )
+static void Flash( drawCmd_p d, wPos_t x, wPos_t y, wDrawColor color )
 {
 	bDoFlash = TRUE;
 	flashColor = color;
@@ -411,9 +437,9 @@ static void MoveCursor(
 	DIST_T dist, dx, dy;
 	coOrd pos1, dpos;
 	int i, steps;
-	wDrawPix_t x, y;
-	wDrawPix_t x0=playbackX;
-	wDrawPix_t y0=playbackY;
+	wPos_t x, y;
+	wPos_t x0=playbackX;
+	wPos_t y0=playbackY;
 
 	if (d == NULL)
 		return;
@@ -435,8 +461,8 @@ static void MoveCursor(
 
 		for ( i=1; i<=steps; i++ ) {
 
-			playbackX = x0+(wDrawPix_t)(i*dx);
-			playbackY = y0+(wDrawPix_t)(i*dy);
+			playbackX = x0+(wPos_t)(i*dx);
+			playbackY = y0+(wPos_t)(i*dy);
 
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
@@ -474,7 +500,7 @@ static void PlaybackCursor(
 {
 	wDrawBitMap_p bm = playbackBm;
 	playbackD = d;
-	wDrawPix_t x, y;
+	wPos_t x, y;
 	long time0, time1;
 
 	time0 = wGetTimer();
@@ -571,8 +597,8 @@ EXPORT void PlaybackMouse(
 
 EXPORT void MovePlaybackCursor(
 		drawCmd_p d,
-		wDrawPix_t x,
-		wDrawPix_t y, wBool_t direct, wControl_p control)
+		wPos_t x,
+		wPos_t y, wBool_t direct, wControl_p control)
 {
 	coOrd pos;
 	playbackD = &tempD;
@@ -738,7 +764,7 @@ static BOOL_T snapshotMouse = FALSE;
 EXPORT void TakeSnapshot( drawCmd_t * d )
 {
 	char * cp;
-	wWinPix_t ix, iy;
+	wPos_t ix, iy;
 	if (d->dpi < 0)
 		d->dpi = mainD.dpi;
 	if (d->scale < 0)
@@ -747,8 +773,8 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 		d->orig = mainD.orig;
 	if (d->size.x < 0 || d->size.y < 0)
 		d->size = mainD.size;
-	ix = (wWinPix_t)(d->dpi*d->size.x/d->scale);
-	iy = (wWinPix_t)(d->dpi*d->size.y/d->scale);
+	ix = (wPos_t)(d->dpi*d->size.x/d->scale);
+	iy = (wPos_t)(d->dpi*d->size.y/d->scale);
 	d->d = wBitMapCreate( ix, iy, 8 );
 	if (d->d == (wDraw_p)0) {
 		return;

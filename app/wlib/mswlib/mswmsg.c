@@ -107,18 +107,18 @@ void wMessageSetValue(
 
 void wMessageSetWidth(
 		wMessage_p b,
-		wWinPix_t width )
+		wPos_t width )
 {
 	b->w = width;
 
 }
 
-wWinPix_t wMessageGetWidth(const char *string)
+wPos_t wMessageGetWidth(const char *string)
 {
 	return(wLabelWidth(string));
 }
 
-wWinPix_t wMessageGetHeight( long flags )
+wPos_t wMessageGetHeight( long flags )
 {
 	double scale = 1.0;
 
@@ -127,7 +127,7 @@ wWinPix_t wMessageGetHeight( long flags )
 	if( flags & BM_SMALL )
 		scale = SCALE_SMALL;
 
-	return((wWinPix_t)((mswEditHeight) * scale ));
+	return((wPos_t)((mswEditHeight) * scale ));
 
 }
 
@@ -147,10 +147,10 @@ static callBacks_t messageCallBacks = {
 
 wMessage_p wMessageCreateEx(
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
-		wWinPix_t	width,
+		POS_T	width,
 		const char	*message,
 		long	flags )
 {

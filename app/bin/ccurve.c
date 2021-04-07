@@ -20,6 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
+#include <string.h>
+
 #include "ccurve.h"
  
 #include "cjoin.h"
@@ -27,14 +30,18 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "cselect.h"
 
+#include "messages.h"
+#include "param.h"
 #include "param.h"
 #include "track.h"
+#include "utility.h"
+#include "wlib.h"
 #include "cbezier.h"
 #include "ccornu.h"
 #include "layout.h"
-#include "common-ui.h"
 
 /*
  * STATE INFO
@@ -216,7 +223,6 @@ EXPORT STATUS_T CreateCurve(
 		    }
 			Da.down = TRUE;
 			if (!found && !track) SnapPos( &pos );
-			if (mode == crvCmdFromCenter) SnapPos( &pos );
 			Da.lock0 = found;
 
 			if (Da.create_state == NOCURVE)
@@ -413,7 +419,7 @@ static paramData_t curvePLs[] = {
 #define curveRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
+static paramGroup_t curvePG = { "curve-fixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {

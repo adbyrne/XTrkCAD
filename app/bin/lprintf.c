@@ -20,11 +20,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#ifndef WINDOWS
+#include <time.h>
+#else
+#include <time.h>
+#include <sys/timeb.h>
+#endif
+
 #include "custom.h"
 #include "fileio.h"
+#include "messages.h"
 #include "paths.h"
 #include "track.h"
-#include "common-ui.h"
 
 
 /****************************************************************************
@@ -105,7 +117,7 @@ EXPORT void LogSet( char * name, int level )
 }
 
 
-EXPORT int LogFindIndex( const char * name )
+EXPORT int LogFindIndex( char * name )
 {
 	int inx;
 	for ( inx=0; inx<logTable_da.cnt; inx++ )
@@ -115,7 +127,7 @@ EXPORT int LogFindIndex( const char * name )
 }
 
 EXPORT void LogPrintf(
-		const char * format,
+		char * format,
 		... )
 {
 	va_list ap;

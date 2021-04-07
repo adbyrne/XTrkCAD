@@ -7,9 +7,9 @@
 
 #ifndef APP_BIN_CCORNU_H_
 #define APP_BIN_CCORNU_H_
-#include "common.h"
 
-typedef void (*cornuMessageProc)( const char *, ... );
+
+typedef void (*cornuMessageProc)( char *, ... );
 
 #define cornuCmdNone   		  (0)
 #define cornuJoinTrack        (1)

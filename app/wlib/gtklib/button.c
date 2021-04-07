@@ -318,12 +318,12 @@ static wBool_t exposeButt(
 
 wButton_p wButtonCreate(
     wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
+    wPos_t	x,
+    wPos_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long 	option,
-    wWinPix_t 	width,
+    wPos_t 	width,
     wButtonCallBack_p action,
     void 	* data)
 {
@@ -590,8 +590,8 @@ static void choiceRepaint(
 
 wChoice_p wRadioCreate(
     wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
+    wPos_t	x,
+    wPos_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
@@ -698,8 +698,8 @@ wChoice_p wRadioCreate(
 
 wChoice_p wToggleCreate(
     wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
+    wPos_t	x,
+    wPos_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,

@@ -31,6 +31,7 @@
 
 #define wFont_t tagLOGFONTA
 
+#include "misc.h"
 #include "mswint.h"
 #include <FreeImage.h>
 
@@ -56,49 +57,65 @@ static long clrOp = 0xbb0226;
 
 static bool bDrawMainBM = 0;
 
-typedef struct {
-	double x, y;
-} coOrd;
-
 #ifdef SLOW
-static wDrawPix_t XWINPIX2DRAWPIX( wDraw_p d, wWinPix_t ix )
+static wPos_t XPIX2INCH( wDraw_p d, int ix )
 {
-	return (wDrawPix_t)ix;
+	return (wPos_t)ix;
 }
 
-static wDrawPix_t YWINPIX2DRAWPIX( wDraw_p d, wWinPix_t iy )
+static wPos_t YPIX2INCH( wDraw_p d, int iy )
 {
-	wWinPix_t y;
-	y = (wDrawPix_t)(d->h-2-iy);
+	wPos_t y;
+	y = (wPos_t)(d->h-2-iy);
 	return y;
 }
 
-static wWinPix_t XDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t xx )
+static int XINCH2PIX( wDraw_p d, wPos_t xx )
 {
-	wWinPix_t ix;
-	ix = (wWinPix_t)(xx);
+	int ix;
+	ix = (int)(xx);
 	return ix;
 }
 
-static wWinPix_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
+static int YINCH2PIX( wDraw_p d, wPos_t y )
 {
-	wWinPix_t iy;
-	iy = (d->h)-2 - (wWinPix_t)(y);
+	int iy;
+	iy = d->h-2 - (int)(y);
 	return iy;
 }
 
+
+static wPos_t XPIXELSTOINCH( wDraw_p d, int ix )
+{
+	return (wPos_t)ix;
+}
+
+
+static wPos_t YPIXELSTOINCH( wDraw_p d, int iy )
+{
+	return (wPos_t)iy;
+}
 #else
-#define XWINPIX2DRAWPIX( d, ix ) \
-	((wDrawPix_t)ix)
+#define XPIX2INCH( d, ix ) \
+	((wPos_t)ix)
 
-#define YWINPIX2DRAWPIX( d, iy ) \
-	((wDrawPix_t)(d->h-2-iy))
+#define YPIX2INCH( d, iy ) \
+	((wPos_t)(d->h-2-iy))
 
-#define XDRAWPIX2WINPIX( d, xx ) \
-	((wWinPix_t)(xx))
+#define XINCH2PIX( d, xx ) \
+	((int)(xx))
 
-#define YDRAWPIX2WINPIX( d, y ) \
-	(d->h - 2 - (wWinPix_t)(y))
+#define YINCH2PIX( d, y ) \
+	(d->h-2 - (int)(y))
+
+
+#define XPIXELSTOINCH( d, ix ) \
+	((wPos_t)ix)
+
+
+#define YPIXELSTOINCH( d, iy ) \
+	((wPos_t)iy)
+
 #endif
 
 /*
@@ -300,10 +317,10 @@ static int clip0( POINT * p0, POINT * p1, wDraw_p d )
 
 void wDrawLine(
 		wDraw_p d,
-		wDrawPix_t p0x,
-		wDrawPix_t p0y,
-		wDrawPix_t p1x,
-		wDrawPix_t p1y,
+		wPos_t p0x,
+		wPos_t p0y,
+		wPos_t p1x,
+		wPos_t p1y,
 		wDrawWidth dw,
 		wDrawLineType_e lt,
 		wDrawColor dc,
@@ -312,10 +329,10 @@ void wDrawLine(
 	POINT p0, p1;
 	RECT rect;
 	setDrawMode( d, dw, lt, dc, dopt );
-	p0.x = XDRAWPIX2WINPIX(d,p0x);
-	p0.y = YDRAWPIX2WINPIX(d,p0y);
-	p1.x = XDRAWPIX2WINPIX(d,p1x);
-	p1.y = YDRAWPIX2WINPIX(d,p1y);
+	p0.x = XINCH2PIX(d,p0x);
+	p0.y = YINCH2PIX(d,p0y);
+	p1.x = XINCH2PIX(d,p1x);
+	p1.y = YINCH2PIX(d,p1y);
 	if ( noNegDrawArgs>0 && !clip0( &p0, &p1, d ) )
 		return;
 	MoveTo( d->hDc, p0.x, p0.y );
@@ -383,9 +400,9 @@ static double mswasin( double x, double h )
 
 void wDrawArc(
 		wDraw_p d,
-		wDrawPix_t px,
-		wDrawPix_t py,
-		wDrawPix_t r,
+		wPos_t px,
+		wPos_t py,
+		wPos_t r,
 		double a0,
 		double a1,
 		int drawCenter,
@@ -396,8 +413,7 @@ void wDrawArc(
 {
 	int i, cnt;
 	POINT p0, p1, ps, pe, pp0, pp1, pp2, pc;
-	wDrawPix_t psx, psy, pex, pey;
-        double len, aa;
+	double psx, psy, pex, pey, len, aa;
 	RECT rect;
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
@@ -406,10 +422,10 @@ void wDrawArc(
 	if (len < 3)
 		return;
 
-	p0.x = XDRAWPIX2WINPIX(d,px-r);
-	p0.y = YDRAWPIX2WINPIX(d,py+r);
-	p1.x = XDRAWPIX2WINPIX(d,px+r);
-	p1.y = YDRAWPIX2WINPIX(d,py-r);
+	p0.x = XINCH2PIX(d,px-r);
+	p0.y = YINCH2PIX(d,py+r);
+	p1.x = XINCH2PIX(d,px+r);
+	p1.y = YINCH2PIX(d,py-r);
 
 	pex = px + r * mswsin(a0);
 	pey = py + r * mswcos(a0);
@@ -418,10 +434,10 @@ void wDrawArc(
 
 	/*pointOnCircle( &pe, p, r, a0 );
 	pointOnCircle( &ps, p, r, a0+a1 );*/
-	ps.x = XDRAWPIX2WINPIX(d,psx);
-	ps.y = YDRAWPIX2WINPIX(d,psy);
-	pe.x = XDRAWPIX2WINPIX(d,pex);
-	pe.y = YDRAWPIX2WINPIX(d,pey);
+	ps.x = XINCH2PIX(d,(wPos_t)psx);
+	ps.y = YINCH2PIX(d,(wPos_t)psy);
+	pe.x = XINCH2PIX(d,(wPos_t)pex);
+	pe.y = YINCH2PIX(d,(wPos_t)pey);
 
 	setDrawMode( d, dw, lt, dc, dopt );
 
@@ -443,15 +459,15 @@ void wDrawArc(
 		aa = a1 / cnt;
 		psx = px + r * mswsin(a0);
 		psy = py + r * mswcos(a0);
-		pp0.x = XDRAWPIX2WINPIX( d, psx );
-		pp0.y = YDRAWPIX2WINPIX( d, psy );
+		pp0.x = XINCH2PIX( d, (wPos_t)psx );
+		pp0.y = YINCH2PIX( d, (wPos_t)psy );
 		needMoveTo = TRUE;
 		for ( i=0; i<cnt; i++ ) {
 			a0 += aa;
 			psx = px + r * mswsin(a0);
 			psy = py + r * mswcos(a0);
-			pp2.x = pp1.x = XDRAWPIX2WINPIX( d, psx );
-			pp2.y = pp1.y = YDRAWPIX2WINPIX( d, psy );
+			pp2.x = pp1.x = XINCH2PIX( d, (wPos_t)psx );
+			pp2.y = pp1.y = YINCH2PIX( d, (wPos_t)psy );
 			if ( clip0( &pp0, &pp1, d ) ) {
 				if (needMoveTo) {
 					MoveTo( d->hDc, pp0.x, pp0.y );
@@ -476,8 +492,8 @@ void wDrawArc(
 	if( drawCenter ) {
 			
 			// calculate the center coordinates
-			pc.x = XDRAWPIX2WINPIX( d, px );
-			pc.y = YDRAWPIX2WINPIX( d, py );
+			pc.x = XINCH2PIX( d, px );
+			pc.y = YINCH2PIX( d, py );
 			// now draw the crosshair
 			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH/2, pc.y );
 			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH/2, pc.y );
@@ -522,16 +538,16 @@ void wDrawArc(
 
 void wDrawPoint(
 		wDraw_p d,
-		wDrawPix_t px,
-		wDrawPix_t py,
+		wPos_t px,
+		wPos_t py,
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
 	POINT p0;
 	RECT rect;
 
-	p0.x = XDRAWPIX2WINPIX(d,px);
-	p0.y = YDRAWPIX2WINPIX(d,py);
+	p0.x = XINCH2PIX(d,px);
+	p0.y = YINCH2PIX(d,py);
 
 	if ( p0.x < 0 || p0.y < 0 )
 		return;
@@ -728,16 +744,16 @@ static int computeFontSize( wDraw_p d, double siz )
 }
 
 void wDrawGetTextSize(
-		wDrawPix_t *w,
-		wDrawPix_t *h,
-		wDrawPix_t *d,
-		wDrawPix_t *a,
+		wPos_t *w,
+		wPos_t *h,
+		wPos_t *d,
+		wPos_t *a,
 		wDraw_p bd,
 		const char * text,
 		wFont_p fp,
 		double siz )
 {
-	wWinPix_t x, y;
+	int x, y;
 	HFONT newFont, prevFont;
 	DWORD extent;
 	int oldLfHeight;
@@ -757,10 +773,10 @@ void wDrawGetTextSize(
 
 	x = LOWORD(extent);
 	y = HIWORD(extent);
-	*w = (wDrawPix_t)x;
-	*h = (wDrawPix_t)y;
-	*d = (wDrawPix_t)textMetric.tmDescent;
-	*a = (wDrawPix_t)textMetric.tmAscent;
+	*w = XPIXELSTOINCH( bd, x );
+	*h = YPIXELSTOINCH( bd, y );
+	*d = YPIXELSTOINCH(bd, textMetric.tmDescent );
+	*a = YPIXELSTOINCH(bd, textMetric.tmAscent );
 
 	SelectObject( bd->hDc, prevFont );
 	DeleteObject( newFont );
@@ -781,8 +797,8 @@ void wDrawGetTextSize(
  */
 void wDrawString(
     wDraw_p d,
-    wDrawPix_t px,
-    wDrawPix_t py,
+    wPos_t px,
+    wPos_t py,
     double angle,
     const char * text,
     wFont_p fp,
@@ -806,8 +822,8 @@ void wDrawString(
     fp->lfHeight = computeFontSize(d, siz);
     fp->lfWidth = 0;
     newFont = CreateFontIndirect(fp);
-    x = XDRAWPIX2WINPIX(d,px) + (int)(mswsin(angle)*fp->lfHeight-0.5);
-    y = YDRAWPIX2WINPIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
+    x = XINCH2PIX(d,px) + (int)(mswsin(angle)*fp->lfHeight-0.5);
+    y = YINCH2PIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
 
     if (noNegDrawArgs > 0 && (x < 0 || y < 0)) {
 		DeleteObject(newFont);
@@ -903,10 +919,10 @@ void wSetSelectedFontSize(wFontSize_t size)
 
 void wDrawFilledRectangle(
 		wDraw_p d,
-		wDrawPix_t px,
-		wDrawPix_t py,
-		wDrawPix_t sx,
-		wDrawPix_t sy,
+		wPos_t px,
+		wPos_t py,
+		wPos_t sx,
+		wPos_t sy,
 		wDrawColor color,
 		wDrawOpts opts )
 {
@@ -922,10 +938,10 @@ void wDrawFilledRectangle(
 		mode = R2_COPYPEN;
 	}
 	SetROP2(d->hDc, mode);
-	rect.left = XDRAWPIX2WINPIX(d,px);
-	rect.right = XDRAWPIX2WINPIX(d,px+sx);
-	rect.top = YDRAWPIX2WINPIX(d,py+sy);
-	rect.bottom = YDRAWPIX2WINPIX(d,py);
+	rect.left = XINCH2PIX(d,px);
+	rect.right = XINCH2PIX(d,px+sx);
+	rect.top = YINCH2PIX(d,py+sy);
+	rect.bottom = YINCH2PIX(d,py);
 	if ( rect.right < 0 ||
 		 rect.bottom < 0 )
 		return;
@@ -978,8 +994,8 @@ static void addPoint(
     BYTE type, RECT * pr)
 {
     POINT p;
-    p.x = XDRAWPIX2WINPIX(d, pp->x);
-    p.y = YDRAWPIX2WINPIX(d, pp->y);
+    p.x = XINCH2PIX(d, pp->x);
+    p.y = YINCH2PIX(d, pp->y);
 
 #ifdef DRAWFILLPOLYLOG
     fprintf(logF, "	q[%d] = {%d,%d}\n", pk, p.x, p.y);
@@ -1020,7 +1036,7 @@ static void addPoint(
 
 void wDrawPolygon(
     wDraw_p d,
-    wDrawPix_t node[][2],
+    wPos_t node[][2],
     wPolyLine_e type[],
     wIndex_t cnt,
     wDrawColor color,
@@ -1066,8 +1082,8 @@ void wDrawPolygon(
         setDrawMode(d, dw, lt, color, opts);
     }
 
-    rect.left = rect.right = XDRAWPIX2WINPIX(d,node[cnt-1][0]-1);
-    rect.top = rect.bottom = YDRAWPIX2WINPIX(d,node[cnt-1][1]+1);
+    rect.left = rect.right = XINCH2PIX(d,node[cnt-1][0]-1);
+    rect.top = rect.bottom = YINCH2PIX(d,node[cnt-1][1]+1);
 
 #ifdef DRAWFILLPOLYLOG
     logF = fopen("log.txt", "a");
@@ -1088,10 +1104,10 @@ void wDrawPolygon(
             nextNode = (i == cnt - 1) ? 0 : i + 1;
 
             // calculate distance to neighboring nodes
-            int prevXDistance = (wWinPix_t)(node[i][0] - node[prevNode][0]);
-            int prevYDistance = (wWinPix_t)(node[i][1] - node[prevNode][1]);
-            int nextXDistance = (wWinPix_t)(node[nextNode][0]-node[i][0]);
-            int nextYDistance = (wWinPix_t)(node[nextNode][1]-node[i][1]);
+            int prevXDistance = node[i][0] - node[prevNode][0];
+            int prevYDistance = node[i][1] - node[prevNode][1];
+            int nextXDistance = node[nextNode][0]-node[i][0];
+            int nextYDistance = node[nextNode][1]-node[i][1];
 
             // distance from node to endpoints of curve is half the line length
             endPoint0.x = (prevXDistance/2)+node[prevNode][0];
@@ -1180,29 +1196,29 @@ void wDrawPolygon(
 #define MAX_FILLCIRCLE_POINTS	(30)
 void wDrawFilledCircle(
 		wDraw_p d,
-		wDrawPix_t x,
-		wDrawPix_t y,
-		wDrawPix_t r,
+		wPos_t x,
+		wPos_t y,
+		wPos_t r,
 		wDrawColor color,
 		wDrawOpts opts )
 {
 	POINT p0, p1;
 	RECT rect;
-	static wDrawPix_t circlePts[MAX_FILLCIRCLE_POINTS][2];
+	static wPos_t circlePts[MAX_FILLCIRCLE_POINTS][2];
 	int inx, cnt;
 	double dang;
 
-	p0.x = XDRAWPIX2WINPIX(d,x-r);
-	p0.y = YDRAWPIX2WINPIX(d,y+r);
-	p1.x = XDRAWPIX2WINPIX(d,x+r);
-	p1.y = YDRAWPIX2WINPIX(d,y-r);
+	p0.x = XINCH2PIX(d,x-r);
+	p0.y = YINCH2PIX(d,y+r);
+	p1.x = XINCH2PIX(d,x+r);
+	p1.y = YINCH2PIX(d,y-r);
 						   
 	setDrawBrush( d, color, opts );						  
 	if ( noNegDrawArgs > 0 && ( p0.x < 0 || p0.y < 0 ) ) {
 		if ( r > MAX_FILLCIRCLE_POINTS )
 			cnt = MAX_FILLCIRCLE_POINTS;
 		else if ( r > 8 )
-			cnt = XDRAWPIX2WINPIX(d,r);
+			cnt = r;
 		else
 			cnt = 8;
 		dang = 360.0/cnt;
@@ -1286,8 +1302,8 @@ void wDrawClear( wDraw_p d )
 
 void wDrawSetSize(
 		wDraw_p d,
-		wWinPix_t width,
-		wWinPix_t height, void * redraw)
+		wPos_t width,
+		wPos_t height, void * redraw)
 {
 	d->w = width;
 	d->h = height;
@@ -1301,8 +1317,8 @@ void wDrawSetSize(
 
 void wDrawGetSize(
 		wDraw_p d,
-		wWinPix_t * width,
-		wWinPix_t * height )
+		wPos_t * width,
+		wPos_t * height )
 {
 	*width = d->w-2;
 	*height = d->h-2;
@@ -1327,17 +1343,17 @@ double wDrawGetMaxRadius( wDraw_p d )
 
 void wDrawClip(
 		wDraw_p d,
-		wDrawPix_t x,
-		wDrawPix_t y,
-		wDrawPix_t w,
-		wDrawPix_t h )
+		wPos_t x,
+		wPos_t y,
+		wPos_t w,
+		wPos_t h )
 {
-	wWinPix_t ix0, iy0, ix1, iy1;
+	int ix0, iy0, ix1, iy1;
 	HRGN hRgnClip;
-	ix0 = XDRAWPIX2WINPIX(d,x);
-	iy0 = YDRAWPIX2WINPIX(d,y);
-	ix1 = XDRAWPIX2WINPIX(d,x+w);
-	iy1 = YDRAWPIX2WINPIX(d,y+h);
+	ix0 = XINCH2PIX(d,x);
+	iy0 = YINCH2PIX(d,y);
+	ix1 = XINCH2PIX(d,x+w);
+	iy1 = YINCH2PIX(d,y+h);
 	/* Note: Ydim is upside down so iy1<iy0 */
 	hRgnClip = CreateRectRgn( ix0, iy1, ix1, iy0 );
 	SelectClipRgn( d->hDc, hRgnClip );
@@ -1362,24 +1378,22 @@ void wRedraw( wDraw_p d )
 
 struct wDrawBitMap_t {
 		wDrawBitMap_p next;
-		wDrawPix_t x;
-		wDrawPix_t y;
-		wDrawPix_t w;
-		wDrawPix_t h;
+		wPos_t x;
+		wPos_t y;
+		wPos_t w;
+		wPos_t h;
 		char * bmx;
 		wDrawColor color;
 		HBITMAP bm;
 		};
 static wDrawBitMap_p bmRoot = NULL;
 
-extern wDrawColor drawColorWhite;
-extern wDrawColor drawColorBlack;
 
 void wDrawBitMap(
 		wDraw_p d,
 		wDrawBitMap_p bm,
-		wDrawPix_t px,
-		wDrawPix_t py,
+		wPos_t px,
+		wPos_t py,
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
@@ -1389,15 +1403,15 @@ void wDrawBitMap(
 	int x0, y0;
 	RECT rect;
 
-	x0 = XDRAWPIX2WINPIX(d,px-bm->x);
-	y0 = YDRAWPIX2WINPIX(d,py-bm->y+bm->h);
+	x0 = XINCH2PIX(d,px-bm->x);
+	y0 = YINCH2PIX(d,py-bm->y+bm->h);
 #ifdef LATER
 	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
 		return;
 #endif
-	if (dc == drawColorWhite) {
+	if (dc == wDrawColorWhite) {
 		mode = clrOp;
-		dc = drawColorBlack;
+		dc = wDrawColorBlack;
 	} else {
 		mode = setOp;
 	}
@@ -1406,21 +1420,21 @@ void wDrawBitMap(
 		if ( bm->bm )
 			DeleteObject( bm->bm );
 		bm->bm = mswCreateBitMap( mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/, RGB( 255, 255, 255 ),
-				RGB( 255, 255, 255 ), (wWinPix_t)bm->w, (wWinPix_t)bm->h, bm->bmx );
+				RGB( 255, 255, 255 ), bm->w, bm->h, bm->bmx );
 		bm->color = dc;
 	}
 
 	bmDc = CreateCompatibleDC( d->hDc );
 	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	oldBm = SelectObject( bmDc, bm->bm );
-	BitBlt( d->hDc, x0, y0, (wWinPix_t)bm->w, (wWinPix_t)bm->h, bmDc, 0, 0, mode );
+	BitBlt( d->hDc, x0, y0, bm->w, bm->h, bmDc, 0, 0, mode );
 	SelectObject( bmDc, oldBm );
 	DeleteDC( bmDc );
 	if (d->hWnd) {
 	rect.top = y0-1;
-	rect.bottom = rect.top+ (wWinPix_t)bm->h+1;
+	rect.bottom = rect.top+bm->h+1;
 	rect.left = x0-1;
-	rect.right = rect.left+ (wWinPix_t)bm->w+1;
+	rect.right = rect.left+bm->w+1;
 	myInvalidateRect( d, &rect );
 	}
 }
@@ -1466,16 +1480,16 @@ wDrawBitMap_p wDrawBitMapCreate(
 
 static int doSetFocus = 1;
 
-LRESULT FAR PASCAL XEXPORT mswDrawPush(
+long FAR PASCAL XEXPORT mswDrawPush(
 		HWND hWnd,
 		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+		UINT wParam,
+		LONG lParam )
 {
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	long inx = GetWindowLong( hWnd, GWL_ID );
 	wDraw_p b;
-	wWinPix_t ix, iy;
-	wDrawPix_t x, y;
+	short int ix, iy;
+	wPos_t x, y;
 	HDC hDc;
 	PAINTSTRUCT ps;
 	wAction_t action;
@@ -1542,7 +1556,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			b->drawResize( b, b->size );*/
 		if (b->drawRepaint)
 			b->drawRepaint( b, b->data, 0, 0 );
-		return (LRESULT)0;
+		return 0;
 	case WM_MOUSEMOVE:
 		activeWnd = GetActiveWindow();
 		focusWnd = GetFocus();
@@ -1591,15 +1605,15 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		}
 		ix = LOWORD( lParam );
 		iy = HIWORD( lParam );
-		x = XWINPIX2DRAWPIX( b, ix );
-		y = YWINPIX2DRAWPIX( b, iy );
+		x = XPIX2INCH( b, ix );
+		y = YPIX2INCH( b, iy );
 		b->lastX = x;
 		b->lastY = y;
 		if (b->action)
 			b->action( b, b->data, action, x, y );
 		if (b->hWnd)
 			UpdateWindow(b->hWnd);
-		return (LRESULT)0;
+		return 0;
 	case WM_CHAR:
 		b = (wDraw_p)mswMapIndex( inx );
 		extChar = wAccelKey_None;
@@ -1635,7 +1649,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			else
 				b->action( b, b->data, wActionText + ( wParam << 8 ), b->lastX, b->lastY );
 		}
-		return (LRESULT)0;
+		return 0;
 
 	case WM_PAINT:
 		b = (wDraw_p)mswMapIndex( inx );
@@ -1718,7 +1732,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 		}
 		if (b->action)
 			b->action( b, b->data, action, b->lastX, b->lastY );
-		return (LRESULT)0;
+		return 0;
 	case WM_MOUSEHWHEEL:
 		if ( GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON)) {
 			if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
@@ -1729,7 +1743,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 		}
 		if (b->action)
 			b->action( b, b->data, action, b->lastX, b->lastY );
-		return (LRESULT)0;
+		return 0;
 	}
 
 	return DefWindowProc( hWnd, message, wParam, lParam );
@@ -1819,12 +1833,12 @@ void mswRepaintAll( void )
 
 wDraw_p wDrawCreate(
 		wWin_p parent,
-		wWinPix_t x,
-		wWinPix_t y,
+		wPos_t x,
+		wPos_t y,
 		const char * helpStr,
 		long option,
-		wWinPix_t w,
-		wWinPix_t h,
+		wPos_t w,
+		wPos_t h,
 		void * data,
 		wDrawRedrawCallBack_p redrawProc,
 		wDrawActionCallBack_p action )
@@ -1887,7 +1901,7 @@ wDraw_p wDrawCreate(
  *****************************************************************************
  */
 
-wDraw_p wBitMapCreate( wWinPix_t w, wWinPix_t h, int planes )
+wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
 {
 	wDraw_p d;
 	HDC hDc;
@@ -1912,13 +1926,11 @@ wDraw_p wBitMapCreate( wWinPix_t w, wWinPix_t h, int planes )
 	d->hBmMain = CreateCompatibleBitmap( hDc, d->w, d->h );
 	if ( d->hBmMain == (HBITMAP)0 ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Main fails", "Ok", NULL );
-		ReleaseDC(mswHWnd, hDc);
 		return FALSE;
 	}
 	d->hBmTemp = CreateCompatibleBitmap( hDc, d->w, d->h );
 	if ( d->hBmTemp == (HBITMAP)0 ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Temp fails", "Ok", NULL );
-		ReleaseDC(mswHWnd, hDc);
 		return FALSE;
 	}
 	d->hasPalette = (GetDeviceCaps(hDc,RASTERCAPS ) & RC_PALETTE) != 0;
@@ -2024,6 +2036,7 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
 
         if (bCanSave) {
             bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
+            return bSuccess;
         }
     }
     FreeImage_Unload(dib2);

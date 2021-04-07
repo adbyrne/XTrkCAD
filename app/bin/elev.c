@@ -19,16 +19,20 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <math.h>
 
 #include "ccurve.h"
 #include "tbezier.h"
 #include "tcornu.h"
 #include "cundo.h"
+#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "common-ui.h"
+#include "utility.h"
+#include "string.h"
 
+EXPORT long oldElevationEvaluation = 0;
 static int log_fillElev = 0;
 static int log_dumpElev = 0;
 static BOOL_T log_fillElev_initted;
@@ -138,53 +142,86 @@ BOOL_T ComputeElev(
 		DIST_T *gradeR,
 		BOOL_T force )
 {
-	DIST_T grade = 0.0;
-	DIST_T elev0;
+	DIST_T grade;
+	DIST_T elev0, elev1, dist0, dist1;
 	BOOL_T rc = FALSE;
+if (oldElevationEvaluation) {
+	int rc0, rc1;
+	if (GetTrkEndElevMode(trk,ep) == ELEV_DEF) {
+		if (elevR)
+			*elevR = GetTrkEndElevHeight(trk,ep);
+		if (gradeR)
+			*gradeR = 0.0;
+		return TRUE;
+	}
+	rc0 = FindDefinedElev( trk, ep, 0, onpath, &elev0, &dist0 );
+	rc1 = FindDefinedElev( trk, ep, 1, onpath, &elev1, &dist1 );
+	if ( rc0 == FDE_DEF && rc1 == FDE_DEF ) {
+		if (dist0+dist1 > 0.1)
+			grade = (elev1-elev0)/(dist0+dist1);
+		else
+			grade = 0.0;
+		elev0 += grade*dist0;
+		rc = TRUE;
+	} else if ( rc0 == FDE_DEF && rc1 == FDE_END ) {
+		grade = 0.0;
+		rc = TRUE;
+	} else if ( rc1 == FDE_DEF && rc0 == FDE_END ) {
+		grade = 0.0;
+		elev0 = elev1;
+		rc = TRUE;
+	} else if ( rc0 == FDE_END && rc1 == FDE_END ) {
+		grade = 0.0;
+		elev0 = 0.0;
+		rc = TRUE;
+	} else {
+		grade = 0.0;
+		elev0 = 0.0;
+	}
+} else {
 
 	track_p trk1;
 	EPINX_T ep1;
+	grade = -1;
 	rc = TRUE;
 	if ( EndPtIsDefinedElev(trk,ep) ) {
 		elev0 = GetTrkEndElevHeight(trk,ep);
 		rc = FALSE;
-	} else if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&grade))) {
+	} else {
+		if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&dist0))) {
+			elev0 = GetElevation( trk );
+			dist0 = GetTrkLength( trk, ep, -1 );
+		}
+		SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
 		trk1 = GetTrkEndTrk( trk, ep );
 		if (trk1!=NULL) {
-			// Compute weighted average of the 2 track elevation
 			ep1 = GetEndPtConnectedToMe(trk1,trk);
-			if (force || (!GetTrkEndElevCachedHeight(trk1,ep1,&elev0,&grade))) {
-				// Not cached, need to compute
-				DIST_T elev1, dist0, dist1;
-				elev0 = GetElevation( trk );
-				dist0 = GetTrkLength( trk, ep, -1 );
+			if (force || (!GetTrkEndElevCachedHeight(trk1,ep1,&elev1,&dist1))) {
 				elev1 = GetElevation( trk1 );
 				dist1 = GetTrkLength( trk1, ep1, -1 );
-				if (dist0+dist1>0.1) {
-					grade = (elev1-elev0)/(dist0+dist1);
-					elev0 += grade*dist0;
-				} else {
-					elev0 = (elev0+elev1)/2.0;
-					rc = FALSE;
-				}
-				SetTrkEndElevCachedHeight(trk,ep,elev0,grade);
-				SetTrkEndElevCachedHeight(trk1,ep1,elev0,-grade);
+			}
+			SetTrkEndElevCachedHeight(trk1,ep1,elev1,dist1);
+			if (dist0+dist1>0.1) {
+				grade = (elev1-elev0)/(dist0+dist1);
+				elev0 += grade*dist0;
 			} else {
-				// flip grade from connected EP
-				grade = - grade;
+				elev0 = (elev0+elev1)/2.0;
+				rc = FALSE;
+				SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
+				SetTrkEndElevCachedHeight(trk1,ep1,elev0,dist1);
 			}
 		} else {
-			// Not connected - use track elevation
-			elev0 = GetElevation( trk );
-			SetTrkEndElevCachedHeight(trk,ep,elev0,0.0);
+			grade = 0.0;
 		}
-	}
 
-	if ( elevR )
-		*elevR = elev0;
-	if ( gradeR )
-		*gradeR = grade;
-	return rc;
+	}
+}
+if ( elevR )
+	*elevR = elev0;
+if ( gradeR )
+	*gradeR = grade;
+return rc;
+
 }
 
 
@@ -976,17 +1013,19 @@ LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
 				printf( "%d:%0.2f\n", GetTrkElevMode(trk), elev );
 			else
 				printf( "noelev\n" );
-			EPINX_T ep;
-			int mode;
+#ifdef LATER
+		EPINX_T ep;
+		int mode;
 			for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
 				mode = GetTrkEndElevMode( trk, ep );
-				ComputeElev( trk, ep, FALSE, &elev, NULL, FALSE );
+				ComputeElev( trk, ep, FALSE, &elev, NULL );
 				printf( "T%4.4d[%2.2d] = %s:%0.3f\n",
 						GetTrkIndex(trk), ep,
 						mode==ELEV_NONE?"None":mode==ELEV_DEF?"Def":mode==ELEV_COMP?"Comp":
 						mode==ELEV_GRADE?"Grade":mode==ELEV_IGNORE?"Ignore":mode==ELEV_STATION?"Station":"???",
 						elev );
 			}
+#endif
 		}
 	}
 }

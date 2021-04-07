@@ -20,13 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
+
 #include "common.h"
+#include "utility.h"
 #include "cundo.h"
+#include "i18n.h"
+#include "messages.h"
 #include "param.h"
 #include "fileio.h"
 #include "cselect.h"
 #include "track.h"
-#include "common-ui.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
@@ -43,8 +47,8 @@ static POS_T descBorder;
 static wDrawColor descColor = 0;
 static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
-static wWinPix_t describeW_posy;
-static wWinPix_t describeCmdButtonEnd;
+static wPos_t describeW_posy;
+static wPos_t describeCmdButtonEnd;
 
 static wMenu_p descPopupM;
 
@@ -196,7 +200,7 @@ SearchEditableLayerList(unsigned int layer)
 
 static void DrawDescHilite(BOOL_T selected)
 {
-    wDrawPix_t x, y, w, h;
+    wPos_t x, y, w, h;
 
     if (descNeedDrawHilite == FALSE) {
         return;
@@ -206,8 +210,8 @@ static void DrawDescHilite(BOOL_T selected)
         descColor = wDrawColorGray(87);
     }
 
-    w = ((descSize.x/mainD.scale)*mainD.dpi+0.5);
-    h = ((descSize.y/mainD.scale)*mainD.dpi+0.5);
+    w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
+    h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
     mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
     wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
 }
@@ -357,7 +361,7 @@ static struct {
  */
  
 static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, char * label,
-                               wWinPix_t sep)
+                               wPos_t sep)
 {
     int inx;
 
@@ -399,12 +403,12 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
 static void DescribeLayout(
     paramData_t * pd,
     int inx,
-    wWinPix_t colX,
-    wWinPix_t * x,
-    wWinPix_t * y)
+    wPos_t colX,
+    wPos_t * x,
+    wPos_t * y)
 {
     descData_p ddp;
-    wWinPix_t w, h;
+    wPos_t w, h;
 
     if (inx < 0) {
         return;
@@ -547,6 +551,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 static void DescChange(long changes)
 {
+	descData_p ddp;
 	if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
         ParamLoadControls(&describePG);
     }

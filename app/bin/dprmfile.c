@@ -20,9 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"

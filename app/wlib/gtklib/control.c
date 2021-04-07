@@ -112,7 +112,7 @@ void wControlActive(
  * \returns width of label including some space
 */
 
-wWinPix_t wLabelWidth(
+wPos_t wLabelWidth(
     const char * label)
 {
     GtkWidget * widget;
@@ -132,7 +132,7 @@ wWinPix_t wLabelWidth(
  * \returns width
  */
 
-wWinPix_t wControlGetWidth(
+wPos_t wControlGetWidth(
     wControl_p b)
 {
     return b->w;
@@ -145,7 +145,7 @@ wWinPix_t wControlGetWidth(
  * \returns height
  */
 
-wWinPix_t wControlGetHeight(
+wPos_t wControlGetHeight(
     wControl_p b)
 {
     return b->h;
@@ -158,7 +158,7 @@ wWinPix_t wControlGetHeight(
  * \returns position
  */
 
-wWinPix_t wControlGetPosX(
+wPos_t wControlGetPosX(
     wControl_p b)		/* Control */
 {
     return b->realX;
@@ -171,7 +171,7 @@ wWinPix_t wControlGetPosX(
  * \returns position
  */
 
-wWinPix_t wControlGetPosY(
+wPos_t wControlGetPosY(
     wControl_p b)		/* Control */
 {
     return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
@@ -187,8 +187,8 @@ wWinPix_t wControlGetPosY(
 
 void wControlSetPos(
     wControl_p b,
-    wWinPix_t x,
-    wWinPix_t y)
+    wPos_t x,
+    wPos_t y)
 {
     b->realX = x;
     b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);

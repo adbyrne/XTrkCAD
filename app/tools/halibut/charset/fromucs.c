@@ -16,7 +16,7 @@ static void charset_emit(void *ctx, long int output)
     struct charset_emit_param *param = (struct charset_emit_param *)ctx;
 
     if (param->outlen > 0) {
-	*param->output++ = (char)output;
+	*param->output++ = output;
 	param->outlen--;
     } else {
 	param->stopped = 1;

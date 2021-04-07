@@ -27,16 +27,16 @@ struct wList_t {
 		wListCallBack_p action;
 		wBool_t editable;
 		int colCnt;
-		wWinPix_t * colWidths;
+		wPos_t * colWidths;
 		wBool_t * colRightJust;
 		const char * * colTitles;
-		wWinPix_t maxWidth;
-		wWinPix_t scrollPos;
+		wPos_t maxWidth;
+		wPos_t scrollPos;
 		HWND hScrollWnd;
-		wWinPix_t scrollH;
-		wWinPix_t dragPos;
+		wPos_t scrollH;
+		wPos_t dragPos;
 		int dragCol;
-		wWinPix_t dragColWidth;
+		wPos_t dragColWidth;
 		};
 
 
@@ -58,18 +58,18 @@ void wListClear(
 		msg = LB_RESETCONTENT;
 	else
 		msg = CB_RESETCONTENT;
-	SendMessage( b->hWnd, msg, (WPARAM)0, (LPARAM)0 );
+	SendMessage( b->hWnd, msg, 0, 0 );
 	b->last = -1;
 	b->count = 0;
 }
 
 
 
-void wListSetSize( wList_p bl, wWinPix_t w, wWinPix_t h )
+void wListSetSize( wList_p bl, wPos_t w, wPos_t h )
 {
 	int rc;
 	RECT rect;
-	wWinPix_t y;
+	wPos_t y;
 
 	bl->w = w;
 	bl->h = h;
@@ -109,24 +109,24 @@ void wListSetIndex(
 		return;
 	if ( bl->type==B_LIST && (bl->option&BL_MANY) != 0 ) {
 		if ( bl->last != -1 )
-			SendMessage( bl->hWnd, LB_SETSEL, (WPARAM)0, (LPARAM)bl->last );
+			SendMessage( bl->hWnd, LB_SETSEL, 0, MAKELPARAM(bl->last,0) );
 		if ( index >= 0 )
-			SendMessage( bl->hWnd, LB_SETSEL, (WPARAM)1, (LPARAM)index );
+			SendMessage( bl->hWnd, LB_SETSEL, 1, MAKELPARAM(index, 0) );
 	} else {
 		SendMessage( bl->hWnd,
-				bl->type==B_LIST?LB_SETCURSEL:CB_SETCURSEL, (WPARAM)index, (LPARAM)0 );
+				bl->type==B_LIST?LB_SETCURSEL:CB_SETCURSEL, index, 0 );
 	}
 	if ( bl->last >= 0 ) {
 		ldp = (listData*)SendMessage( bl->hWnd,
 				(bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
-			    (WPARAM)bl->last, (LPARAM)0 );
+				bl->last, 0L );
 		if ( ldp && ldp!=(void*)LB_ERR )
 			ldp->selected = FALSE;
 	}
 	if ( index >= 0 ) {
 		ldp = (listData*)SendMessage( bl->hWnd,
 				(bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
-			    (WPARAM)index, (LPARAM)0 );
+				index, 0L );
 		if ( ldp && ldp!=(void*)LB_ERR )
 			ldp->selected = TRUE;
 	}
@@ -164,7 +164,7 @@ void wListSetValue(
 		const char * val )
 {
 	if ( bl->type == B_DROPLIST ) {
-		SendMessage( bl->hWnd, WM_SETTEXT, (WPARAM)0, (LPARAM)val );
+		SendMessage( bl->hWnd, WM_SETTEXT, 0, (DWORD)(LPSTR)val );
 		bl->last = -1;
 	}
 }
@@ -179,8 +179,8 @@ wIndex_t wListFindValue(
 	wListGetCount(bl);
 	for ( inx = 0; inx < bl->count ; inx++ ) {
 		cnt = (int)SendMessage( bl->hWnd,
-				(bl->type==B_LIST?LB_GETTEXT:CB_GETLBTEXT), (WPARAM)inx,
-				(LPARAM)mswTmpBuff );
+				(bl->type==B_LIST?LB_GETTEXT:CB_GETLBTEXT), inx,
+				(DWORD)(LPSTR)mswTmpBuff );
 		mswTmpBuff[cnt] = '\0';
 		if ( strcmp( val, mswTmpBuff ) == 0 )
 			return inx;
@@ -212,7 +212,7 @@ wIndex_t wListGetValues(
 			msg = CB_GETLBTEXT;
 		}
 	}
-	cnt = (int)SendMessage( bl->hWnd, msg, (WPARAM)inx, (LPARAM)mswTmpBuff );
+	cnt = (int)SendMessage( bl->hWnd, msg, inx, (DWORD)(LPSTR)mswTmpBuff );
 	mswTmpBuff[cnt] = '\0';
 	if (s) {
 		strncpy(s, mswTmpBuff, siz);
@@ -221,7 +221,7 @@ wIndex_t wListGetValues(
 	if (bl->last >= 0) {
 		ldp = (listData*)SendMessage( bl->hWnd,
 				(bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
-			    (WPARAM)bl->last, (LPARAM)0 );
+				bl->last, 0L );
 		if ( ldp==(listData*)LB_ERR )
 			ldp = NULL;
 	} else {
@@ -252,24 +252,24 @@ wBool_t wListSetValues(
 		curSel = (WORD)SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_GETCURSEL:CB_GETCURSEL,
 				(WPARAM)0,
-				(LPARAM)0 );
+				(DWORD)0L );
 	SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_DELETESTRING:CB_DELETESTRING,
 				(WPARAM)inx,
-				(LPARAM)0 );
+				(DWORD)0L );
 	inx = (wIndex_t)SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_INSERTSTRING:CB_INSERTSTRING,
 				(WPARAM)inx,
-		        (LPARAM)labelStr );
+				(DWORD)(LPSTR)labelStr );
 	SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_SETITEMDATA:CB_SETITEMDATA,
 				(WPARAM)inx,
-		        (LPARAM)ldp );
+				(DWORD)ldp );
 	if ( (b->option&BL_MANY) == 0 && curSel == (WORD)inx)
 			SendMessage( b->hWnd,
 					(UINT)b->type==B_LIST?LB_SETCURSEL:CB_SETCURSEL,
 					(WPARAM)inx,
-					(LPARAM)0 );
+					(DWORD)0L );
 	/*if (b->option&BL_ICON)*/
 		InvalidateRect( b->hWnd, NULL, FALSE );
 	return TRUE;
@@ -283,7 +283,7 @@ void wListDelete(
 	SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_DELETESTRING:CB_DELETESTRING,
 				(WPARAM)inx,
-				(LPARAM)0 );
+				(DWORD)0L );
 }
 
 
@@ -303,19 +303,19 @@ void wListSelectAll( wList_p bl )
 	SendMessage( bl->hWnd,
 				 LB_SETSEL,
 				 (WPARAM)TRUE,
-				 (LPARAM)-1 );
+				 (DWORD)-1L );
 
 	// and synchronize the internal data structures 
 	wListGetCount(bl);
 	for ( inx=0; inx<bl->count; inx++ ) {
 		ldp = (listData*)SendMessage( bl->hWnd,
 									  (bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
-									   (WPARAM)inx, (LPARAM)0 );
+									   inx, 0L );
 		ldp->selected = TRUE;
 		SendMessage( bl->hWnd,
 					(UINT)bl->type==B_LIST?LB_SETITEMDATA:CB_SETITEMDATA,
 					(WPARAM)inx,
-					(LPARAM)ldp );
+					(DWORD)ldp );
 	}
 }
 
@@ -323,7 +323,7 @@ void wListSelectAll( wList_p bl )
 wIndex_t wListGetCount(
 		wList_p bl )
 {			  
-	bl->count = (int)SendMessage( bl->hWnd, (UINT)bl->type==B_LIST?LB_GETCOUNT:CB_GETCOUNT, (WPARAM)0, (LPARAM)0 );
+	bl->count = (int)SendMessage( bl->hWnd, (UINT)bl->type==B_LIST?LB_GETCOUNT:CB_GETCOUNT, 0, 0L );
 	return bl->count;
 }
 
@@ -337,7 +337,7 @@ void * wListGetItemContext(
 	if ( inx < 0 || inx >= bl->count ) return NULL;
 	ldp = (listData*)SendMessage( bl->hWnd,
 				(bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
-				(WPARAM)inx, (LPARAM)0 );
+				inx, 0L );
 	return ((ldp&&ldp!=(void*)LB_ERR)?ldp->itemContext:NULL);
 }
 
@@ -351,7 +351,7 @@ wBool_t wListGetItemSelected(
 	if ( inx < 0 || inx >= bl->count ) return FALSE;
 	ldp = (listData*)SendMessage( bl->hWnd,
 				(bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
-				(WPARAM)inx, (LPARAM)0 );
+				inx, 0L );
 	return ((ldp&&ldp!=(void*)LB_ERR)?ldp->selected:FALSE);
 }
 
@@ -389,18 +389,18 @@ wIndex_t wListAddValue(
 				b->hWnd,
 				(UINT)b->type==B_LIST?LB_ADDSTRING:CB_ADDSTRING,
 				(WPARAM)0,
-				(LPARAM)value );
+				(DWORD)value );
 	if (nindex == 0) {
 		SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_SETCURSEL:CB_SETCURSEL,
 				(WPARAM)nindex,
-			    (LPARAM)0 );
+				(DWORD)0 );
 		b->last = 0;
 	}
 	SendMessage( b->hWnd,
 				(UINT)b->type==B_LIST?LB_SETITEMDATA:CB_SETITEMDATA,
 				(WPARAM)nindex,
-		        (LPARAM)ldp );
+				(DWORD)ldp );
 	return nindex;
 }
 
@@ -408,7 +408,7 @@ wIndex_t wListAddValue(
 int wListGetColumnWidths(
 		wList_p bl,
 		int colCnt,
-		wWinPix_t * colWidths )
+		wPos_t * colWidths )
 {
 	wIndex_t inx;
 
@@ -454,11 +454,11 @@ static void listShow(
 
 static void listSetPos(
 		wControl_p b,
-		wWinPix_t x,
-		wWinPix_t y )
+		wPos_t x,
+		wPos_t y )
 {
 	wList_p bl = (wList_p)b;
-	wWinPix_t x1, y1;
+	wPos_t x1, y1;
 	RECT rect;
 	
 	bl->x = x1 = x;
@@ -492,7 +492,7 @@ static void listRepaintLabel(
 	const char * * title;
 	int inx;
 	int start;
-	wWinPix_t colWidth;
+	wPos_t colWidth;
 
 	mswRepaintLabel( hWnd, b );
 	if ( bl->colTitles == NULL )
@@ -597,8 +597,7 @@ LRESULT listProc(
 	LPDRAWITEMSTRUCT lpdis;
 	RECT rc, rc1;
 	char * cp0, * cp1;
-	wWinPix_t x;
-	int colWidth;
+	wPos_t colWidth, x;
 	int nPos;
 	HFONT hFont;
 	HPEN hPen;
@@ -622,14 +621,14 @@ LRESULT listProc(
 				if ( (bl->option&BL_MANY) ) {
 					wListGetCount(bl);
 					for ( inx=0; inx<bl->count; inx++ ) {
-					ldp = (listData*)SendMessage( bl->hWnd, LB_GETITEMDATA, (WPARAM)inx, (LPARAM)0 );
+					ldp = (listData*)SendMessage( bl->hWnd, LB_GETITEMDATA, inx, 0L );
 					if ( ldp != NULL && ldp != (void*)LB_ERR ) {
-						selected = ((long)SendMessage( bl->hWnd, LB_GETSEL, (WPARAM)inx, (LPARAM)0 ) != 0L );
+						selected = ((long)SendMessage( bl->hWnd, LB_GETSEL, inx, 0L ) != 0L );
 						if ( selected != ldp->selected ) {
 							ldp->selected = selected;
 							if ( selected ) {
 								bl->last = inx;
-								cnt = (int)SendMessage( bl->hWnd, LB_GETTEXT, (WPARAM)bl->last, (LPARAM)mswTmpBuff );
+								cnt = (int)SendMessage( bl->hWnd, LB_GETTEXT, bl->last, (DWORD)(LPSTR)mswTmpBuff );
 								mswTmpBuff[cnt] = '\0';
 							} else {
 								mswTmpBuff[0] = '\0';
@@ -642,13 +641,13 @@ LRESULT listProc(
 					}
 					}
 				} else {
-					bl->last = (int)SendMessage( bl->hWnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0 );
-					cnt = (int)SendMessage( bl->hWnd, LB_GETTEXT, (WPARAM)bl->last,
-										(LPARAM)mswTmpBuff );
+					bl->last = (int)SendMessage( bl->hWnd, LB_GETCURSEL, 0, 0L );
+					cnt = (int)SendMessage( bl->hWnd, LB_GETTEXT, bl->last,
+										(DWORD)(LPSTR)mswTmpBuff );
 					mswTmpBuff[cnt] = '\0';
 					if (bl->action) {
 						ldp = (listData*)SendMessage( bl->hWnd, LB_GETITEMDATA,
-							(WPARAM)bl->last, (LPARAM)0 );
+										bl->last, 0L );
 						bl->action( bl->last, mswTmpBuff, 1, bl->data,
 							((bl->last>=0&&ldp&&ldp!=(void*)LB_ERR)?ldp->itemContext:NULL) );
 					}
@@ -660,8 +659,8 @@ LRESULT listProc(
 
 			case LBN_KILLFOCUS:
 				if ( ( bl->option&BL_MANY ) == 0 &&
-					 bl->last != (int)SendMessage( bl->hWnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0 ) )
-					(void)SendMessage( bl->hWnd, LB_SETCURSEL, (WPARAM)bl->last, (LPARAM)0 );
+					 bl->last != (int)SendMessage( bl->hWnd, LB_GETCURSEL, 0, 0L ) )
+					(void)SendMessage( bl->hWnd, LB_SETCURSEL, bl->last, 0L );
 				break;
 			}
 			break;
@@ -678,14 +677,14 @@ LRESULT listProc(
 					break;
 
 			case CBN_CLOSEUP:
-				bl->last = (int)SendMessage( bl->hWnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0 );
+				bl->last = (int)SendMessage( bl->hWnd, CB_GETCURSEL, 0, 0L );
 				if (bl->last < 0)
 					break;
 				if (bl->action) {
-					cnt = (int)SendMessage( bl->hWnd, CB_GETLBTEXT, 
-						(WPARAM)bl->last, (LPARAM)mswTmpBuff );
+					cnt = (int)SendMessage( bl->hWnd, CB_GETLBTEXT, bl->last,
+										(DWORD)(LPSTR)mswTmpBuff );
 					ldp = (listData*)SendMessage( bl->hWnd, CB_GETITEMDATA,
-						(WPARAM)bl->last, (LPARAM)0 );
+										bl->last, 0L );
 					mswTmpBuff[cnt] = '\0';
 					bl->action( bl->last, mswTmpBuff, 1, bl->data,
 						((bl->last>=0&&ldp&&ldp!=(void*)LB_ERR)?ldp->itemContext:NULL) );
@@ -698,9 +697,9 @@ LRESULT listProc(
 				break;
 
 			case CBN_KILLFOCUS:
-				inx = (int)SendMessage( bl->hWnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0 );
+				inx = (int)SendMessage( bl->hWnd, CB_GETCURSEL, 0, 0L );
 				if ( bl->last != inx )
-					(void)SendMessage( bl->hWnd, CB_SETCURSEL, (WPARAM)bl->last, (LPARAM)0 );
+					(void)SendMessage( bl->hWnd, CB_SETCURSEL, bl->last, 0L );
 				break;
 
 			case CBN_DROPDOWN:
@@ -710,8 +709,8 @@ LRESULT listProc(
 			case CBN_EDITCHANGE:
 				bl->last = -1;
 				if (bl->action) {
-					cnt = (int)SendMessage( bl->hWnd, WM_GETTEXT, (WPARAM)sizeof mswTmpBuff,
-						(LPARAM)mswTmpBuff );
+					cnt = (int)SendMessage( bl->hWnd, WM_GETTEXT, sizeof mswTmpBuff,
+										(DWORD)(LPSTR)mswTmpBuff );
 					mswTmpBuff[cnt] = '\0';
 					bl->action( -1, mswTmpBuff, 1, bl->data, NULL );
 				}
@@ -741,14 +740,14 @@ LRESULT listProc(
 		}
 		ldp = (listData*)SendMessage( bl->hWnd,
 						(bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
-						(WPARAM)lpdis->itemID, (LPARAM)0);
+						lpdis->itemID, 0L );
 		rc = lpdis->rcItem;
 		if (lpdis->itemAction & (ODA_DRAWENTIRE|ODA_SELECT|ODA_FOCUS)) {
 			if( bl->type == B_LIST )
 				hFont = SelectObject( lpdis->hDC, mswLabelFont );
 			cnt = (int)SendMessage( lpdis->hwndItem, 
 				(bl->type==B_LIST?LB_GETTEXT:CB_GETLBTEXT),
-				(WPARAM)lpdis->itemID, (LPARAM)mswTmpBuff );
+				lpdis->itemID, (LONG)(LPSTR)mswTmpBuff );
 			mswTmpBuff[cnt] = '\0';
 			if ( lpdis->itemState & ODS_SELECTED ) {
 				SetTextColor( lpdis->hDC, GetSysColor( COLOR_HIGHLIGHTTEXT ) );
@@ -810,7 +809,7 @@ LRESULT listProc(
 			}
 			if ( bl->type == B_LIST)
 				SelectObject( lpdis->hDC, hFont );
-			return (LRESULT)TRUE;
+			return TRUE;
 		}
 		
 		break;
@@ -818,17 +817,17 @@ LRESULT listProc(
 	case WM_HSCROLL:
 		len = ((long)bl->maxWidth)-((long)bl->w);
 		if ( len <= 0 )
-			return (LRESULT)0;
+			return 0;
 		switch ( WSCROLL_PARAM_CODE ) {
 		case SB_LEFT:
 			if ( bl->scrollPos == 0 )
-				return (LRESULT)0;
+				return 0;
 			bl->scrollPos = 0;
 			break;
 		case SB_LINELEFT:
 		case SB_PAGELEFT:
 			if ( bl->scrollPos == 0 )
-				return (LRESULT)0;
+				return 0;
 			for ( inx=colWidth=0; inx<bl->colCnt; inx++ ) {
 				if ( colWidth+bl->colWidths[inx] >= bl->scrollPos ) {
 					bl->scrollPos = colWidth; 
@@ -840,7 +839,7 @@ LRESULT listProc(
 		case SB_LINERIGHT:
 		case SB_PAGERIGHT:
 			if ( bl->scrollPos >= len )
-				return (LRESULT)0;
+				return 0;
 			for ( inx=colWidth=0; inx<bl->colCnt; inx++ ) {
 				if ( colWidth >= bl->scrollPos ) {
 					bl->scrollPos = colWidth+bl->colWidths[inx];
@@ -851,17 +850,17 @@ LRESULT listProc(
 			break;
 		case SB_RIGHT:
 			if ( bl->scrollPos >= len )
-				return (LRESULT)0;
+				return 0;
 			bl->scrollPos = (int)len;
 			break;
 		case SB_THUMBTRACK:	  
-			return (LRESULT)0;
+			return 0;
 		case SB_THUMBPOSITION:
 			nPos = (int)WSCROLL_PARAM_NPOS;
 			bl->scrollPos = (int)(len*nPos/100);
 			break;
 		case SB_ENDSCROLL:
-			return (LRESULT)0;
+			return 0;
 		}
 		if ( bl->scrollPos > len ) bl->scrollPos = (int)len;
 		if ( bl->scrollPos < 0 ) bl->scrollPos = 0;
@@ -869,7 +868,7 @@ LRESULT listProc(
 		SetScrollPos( bl->hScrollWnd, SB_CTL, nPos, TRUE );
 		InvalidateRect( bl->hWnd, NULL, FALSE );
 		listRepaintLabel( ((wControl_p)(bl->parent))->hWnd, (wControl_p)bl );
-		return (LRESULT)0;
+		return 0;
 
 	case WM_LBUTTONDOWN:
 		if ( bl->type != B_LIST )
@@ -887,7 +886,7 @@ LRESULT listProc(
 		}
 		if ( bl->dragCol >= 0 )
 			bl->dragColWidth = bl->colWidths[inx];
-		return (LRESULT)0;
+		return 0L;
 
 #ifdef LATER
 	case WM_MOUSEMOVE:
@@ -903,7 +902,7 @@ LRESULT listProc(
 			if ( x <= 0 )
 				break;
 		}
-		return (LRESULT)0;
+		return 0L;
 #endif
 
 	case WM_MOUSEMOVE:
@@ -934,26 +933,22 @@ LRESULT listProc(
 		}
 		InvalidateRect( bl->hWnd, NULL, FALSE );
 		listRepaintLabel( ((wControl_p)(bl->parent))->hWnd, (wControl_p)bl );
-		return (LRESULT)0;
+		return 0L;
 
 	}													  
 	
 	return DefWindowProc( hWnd, message, wParam, lParam );
 }					
 
-LRESULT FAR PASCAL _export pushList(
+long FAR PASCAL _export pushList(
 		HWND hWnd,
 		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+		UINT wParam,
+		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	wIndex_t inx = GetWindowLongPtr(hWnd, GWL_ID);
-	wControl_p b = mswMapIndex(inx);
-#ifdef OLDCODE
 	long inx = GetWindowLong( hWnd, GWL_ID );
 	wControl_p b = mswMapIndex( inx );
-#endif
 
 	switch (message) {
 	case WM_CHAR:
@@ -967,7 +962,7 @@ LRESULT FAR PASCAL _export pushList(
 						wParam, lParam );
 				/*SendMessage( ((wControl_p)(b->parent))->hWnd, WM_COMMAND,
 						inx, MAKELONG( hWnd, EN_KILLFOCUS ) );*/
-				return (LRESULT)0;
+				return 0L;
 			}
 		}
 		break;
@@ -975,14 +970,14 @@ LRESULT FAR PASCAL _export pushList(
 	return CallWindowProc( oldListProc, hWnd, message, wParam, lParam );
 }
 
-LRESULT FAR PASCAL _export pushCombo(
+long FAR PASCAL _export pushCombo(
 		HWND hWnd,
 		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+		UINT wParam,
+		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	long inx = GetWindowLong( hWnd, GWL_ID );
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
@@ -997,7 +992,7 @@ LRESULT FAR PASCAL _export pushCombo(
 						wParam, lParam );
 				/*SendMessage( ((wControl_p)(b->parent))->hWnd, WM_COMMAND,
 						inx, MAKELONG( hWnd, EN_KILLFOCUS ) );*/
-				return (LRESULT)0;
+				return 0L;
 			}
 		}
 		break;
@@ -1019,13 +1014,13 @@ static wList_p listCreate(
 		const char	*className,
 		long	style,
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		wWinPix_t	width,
+		POS_T	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data,
@@ -1071,43 +1066,34 @@ static wList_p listCreate(
 	if (addFocus) {
 		mswChainFocus( (wControl_p)b );
 		if (b->type == B_LIST) {
-			newListProc = MakeProcInstance((XWNDPROC)pushList, mswHInst);
-			oldListProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWLP_WNDPROC);
-			SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)newListProc);
-#ifdef _OLDCODE
-			oldListProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC);
-			SetWindowLong(b->hWnd, GWL_WNDPROC, (LONG)newListProc);
-#endif
-		}
-		else {
-			newComboProc = MakeProcInstance((XWNDPROC)pushCombo, mswHInst);
-			oldComboProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWLP_WNDPROC);
-			SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)newComboProc);
-#ifdef _OLDCODE
-			oldComboProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC);
-			SetWindowLong(b->hWnd, GWL_WNDPROC, (LONG)newComboProc);
-#endif
+			newListProc = MakeProcInstance( (XWNDPROC)pushList, mswHInst );
+			oldListProc = (XWNDPROC)GetWindowLong( b->hWnd, GWL_WNDPROC );
+			SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newListProc );
+		} else {
+			newComboProc = MakeProcInstance( (XWNDPROC)pushCombo, mswHInst );
+			oldComboProc = (XWNDPROC)GetWindowLong( b->hWnd, GWL_WNDPROC );
+			SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newComboProc );
 		}
 	}
 	if ( indexR )
 		*indexR = index;
 	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
+		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
 	return b;
 }
 
 
 wList_p wListCreate(
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		wWinPix_t	width,
+		POS_T	width,
 		int		colCnt,
-		wWinPix_t	* colWidths,
+		wPos_t	* colWidths,
 		wBool_t * colRightJust,
 		const char	* * colTitles,
 		long	*valueP,
@@ -1140,7 +1126,7 @@ wList_p wListCreate(
 	}	 
 	if ( colCnt > 1 ) {
 		bl->colCnt = colCnt;
-		bl->colWidths = (wWinPix_t*)malloc( colCnt * sizeof *bl->colWidths );
+		bl->colWidths = (int*)malloc( colCnt * sizeof *bl->colWidths );
 		bl->colRightJust = (wBool_t*)malloc( colCnt * sizeof *bl->colRightJust );
 		bl->colTitles = colTitles;
 		bl->maxWidth = 0;
@@ -1165,13 +1151,13 @@ wList_p wListCreate(
 
 wList_p wDropListCreate(
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		wWinPix_t	width,
+		POS_T	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data )
@@ -1191,13 +1177,13 @@ wList_p wDropListCreate(
 
 wList_p wComboListCreate(
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
 		long	number,
-		wWinPix_t	width,
+		POS_T	width,
 		long	*valueP,
 		wListCallBack_p action,
 		void	*data )

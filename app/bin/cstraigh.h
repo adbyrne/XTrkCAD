@@ -24,6 +24,7 @@
 #define HAVE_CSTRAIGH_H
 
 #include "common.h"
+#include "track.h"
 
 void AdjustStraightEndPt( track_p t, EPINX_T ep, coOrd pos );
 track_p NewStraightTrack( coOrd p0, coOrd p1 );

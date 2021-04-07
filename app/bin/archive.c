@@ -20,18 +20,42 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <errno.h>
 #include <fcntl.h>
+
+#include <string.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <zip.h>
 
+#ifdef WINDOWS
+    #include "include/dirent.h"
+    #include <direct.h>
+    #include <io.h>
+    #include <process.h>
+    #define unlink(a) _unlink((a))
+    #define rmdir(a) _rmdir((a))
+    #define open(name, flag, mode) _open((name), (flag), (mode))
+    #define write(file, buffer, count) _write((file),(buffer), (count))
+    #define close(file) _close((file))
+    #define getpid() _getpid()
+#else
+    #include <dirent.h>
+    #include <unistd.h>
+#endif
+
+#include <wlib.h>
 #include "archive.h"
 #include "directory.h"
 #include "dynstring.h"
+#include "i18n.h"
+#include "messages.h"
 #include "misc.h"
 #include "misc2.h"
 #include "paths.h"
 #include "include/utf8convert.h"
-#include "common-ui.h"
 
 int log_zip = 0;
 
@@ -39,7 +63,7 @@ int log_zip = 0;
 //NativeToUtf8(const char *nativeString)
 //{
 //
-//#ifdef XINDOWS
+//#ifdef WINDOWS
 //
 //	int cnt = 2 * (strlen(nativeString) + 1);
 //	char *tempBuffer = MyMalloc( cnt );
@@ -203,11 +227,11 @@ BOOL_T AddDirectoryToArchive(
         } else {
 			char *archPathUtf8 = MyStrdup(arch_path);
 			char *fullPathUtf8 = MyStrdup(full_path);
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 			archPathUtf8 = Convert2UTF8(archPathUtf8);
 			fullPathUtf8 = Convert2UTF8(fullPathUtf8);
 			ConvertPathForward(archPathUtf8);
-#endif // UTFCONVERT
+#endif // WINDOWS
             zt = zip_source_file(za, fullPathUtf8, 0, -1);
             if (zip_file_add(za, archPathUtf8, zt, ZIP_FL_ENC_UTF_8) == -1) {
                 zip_error_t  *ziperr = zip_get_error(za);
@@ -259,9 +283,9 @@ BOOL_T CreateArchive(
     MakeFullpath(&archive_path, workingDir, archive_name, NULL);
 	    
 	archiveUtf8 = MyStrdup(archive_path);
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 	archiveUtf8 = Convert2UTF8(archiveUtf8);
-#endif // UTFCONVERT
+#endif // WINDOWS
 
 	MyFree(archive);
 
@@ -331,9 +355,9 @@ BOOL_T UnpackArchiveFor(
     long long sum;
 
 	char *destBuffer = MyStrdup(pathName);
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 	destBuffer = Convert2UTF8(destBuffer);
-#endif // UTFCONVERT
+#endif // WINDOWS
 
 
     if ((za = zip_open(destBuffer, 0, &err)) == NULL) {
@@ -384,9 +408,9 @@ BOOL_T UnpackArchiveFor(
                     }
                 }
                 MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 				ConvertUTF8ToSystem(dirName);
-#endif // UTFCONVERT
+#endif // WINDOWS
 				fd = fopen(dirName, "wb");
                 if (!fd) {
                     NoticeMessage(MSG_ZIP_FILE_OPEN_FAIL, _("Continue"), NULL, dirName,

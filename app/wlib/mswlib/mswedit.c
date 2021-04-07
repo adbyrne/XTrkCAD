@@ -66,14 +66,14 @@ static void triggerFloat( wControl_p b );
 #endif
 
 
-LRESULT FAR PASCAL _export pushEdit(
+long FAR PASCAL _export pushEdit(
 		HWND hWnd,
 		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+		UINT wParam,
+		LONG lParam )
 {
 
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	long inx = GetWindowLong( hWnd, GWL_ID );
 	wString_p b = (wString_p)mswMapIndex(inx);
 
 	switch (message)
@@ -83,14 +83,14 @@ LRESULT FAR PASCAL _export pushEdit(
 	        switch (wParam) {
 	        case VK_RETURN:
 	            triggerString(b);
-	            return (LRESULT)0;
+	            return (0L);
 	            break;
 	        case 0x1B:
 	        case 0x09:
 	            SetFocus(((wControl_p)(b->parent))->hWnd);
 	            SendMessage(((wControl_p)(b->parent))->hWnd, WM_CHAR,
 	                        wParam, lParam);
-	            return (LRESULT)0;
+	            return 0L;
 	        }
 	    }
 	    break;
@@ -113,21 +113,21 @@ void wStringSetValue(
 		const char * arg )
 {
 	WORD len = (WORD)strlen( arg );
-	SendMessage( b->hWnd, WM_SETTEXT, (WPARAM)0, (LPARAM)arg );
-	SendMessage( b->hWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1 );
-	SendMessage( b->hWnd, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0 );
-	SendMessage( b->hWnd, EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0 );
+	SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)arg );
+	SendMessage( b->hWnd, EM_SETSEL, 0, -1 );
+	SendMessage( b->hWnd, EM_SCROLLCARET, 0, 0L );
+	SendMessage( b->hWnd, EM_SETMODIFY, FALSE, 0L );
 }
 
 
 void wStringSetWidth(
 		wString_p b,
-		wWinPix_t w )
+		wPos_t w )
 {
 	int rc;
 	b->w = w;
 	rc = SetWindowPos( b->hWnd, HWND_TOP, 0, 0,
-		b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
+				b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
 }
 
 
@@ -135,7 +135,7 @@ const char * wStringGetValue(
 		wString_p b )
 {
 	static char buff[1024];
-	SendMessage( b->hWnd, WM_GETTEXT, (WPARAM)sizeof buff, (LPARAM)buff );
+	SendMessage( b->hWnd, WM_GETTEXT, sizeof buff, (DWORD)buff );
 	return buff;
 }
 
@@ -150,12 +150,12 @@ const char * wStringGetValue(
 static char *getString(wString_p bs)
 {
     char *tmpBuffer = NULL;
-    UINT chars = SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, (LPARAM)0);
+    UINT chars = SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, 0L);
 
     if (chars) {
         tmpBuffer = malloc(chars > sizeof(WORD)? chars + 1 : sizeof(WORD) + 1);
         *(WORD *)tmpBuffer = chars;
-        SendMessage(bs->hWnd, (UINT)EM_GETLINE, (WPARAM)0, (LPARAM)tmpBuffer);
+        SendMessage(bs->hWnd, (UINT)EM_GETLINE, 0, (LPARAM)tmpBuffer);
         tmpBuffer[chars] = '\0';
     }
 
@@ -205,7 +205,7 @@ LRESULT stringProc(
     case WM_COMMAND:
         switch (WCMD_PARAM_NOTF) {
         case EN_KILLFOCUS:
-            modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, (WPARAM)0, (LPARAM)0);
+            modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, 0, 0L);
             if (!modified) {
                 break;
             }
@@ -221,7 +221,7 @@ LRESULT stringProc(
                 }
                 free(enteredString);
             }
-            SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0);
+            SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L);
         }
         break;
     }
@@ -238,12 +238,12 @@ static callBacks_t stringCallBacks = {
 
 wString_p wStringCreate(
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		wWinPix_t	width,
+		POS_T	width,
 		char	*valueP,
 		wIndex_t valueL,
 		wStringCallBack_p action,
@@ -275,19 +275,15 @@ wString_p wStringCreate(
 	}
 
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
-	oldEditProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWLP_WNDPROC);
-	SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)newEditProc);
-#ifdef _OLDCODE
-	oldEditProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWL_WNDPROC );
+	oldEditProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC );
 	SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newEditProc );
-#endif // WIN64
 
 	if (b->valueP) {
-		SendMessage( b->hWnd, WM_SETTEXT, (WPARAM)0, (LPARAM)b->valueP );
+		SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)b->valueP );
 	}
-	SendMessage( b->hWnd, EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0 );
+	SendMessage( b->hWnd, EM_SETMODIFY, FALSE, 0L );
 	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
+		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
 	GetWindowRect( b->hWnd, &rect );
 	b->w = rect.right - rect.left;
 	b->h = rect.bottom - rect.top;
@@ -457,12 +453,12 @@ static callBacks_t integerCallBacks = {
 
 wInteger_p wIntegerCreate(
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		wWinPix_t	width,
+		POS_T	width,
 		long	low,
 		long	high,
 		long	*valueP,
@@ -678,12 +674,12 @@ static callBacks_t floatCallBacks = {
 
 wFloat_p wFloatCreate(
 		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
+		POS_T	x,
+		POS_T	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		wWinPix_t	width,
+		POS_T	width,
 		double	low,
 		double	high,
 		double	*valueP,

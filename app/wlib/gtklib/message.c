@@ -45,7 +45,7 @@ struct wMessage_t {
     WOBJ_COMMON
     GtkWidget * labelWidget;
     const char * message;
-    wWinPix_t labelWidth;
+    wPos_t labelWidth;
 };
 
 /**
@@ -77,7 +77,7 @@ void wMessageSetValue(
 
 void wMessageSetWidth(
     wMessage_p b,
-    wWinPix_t width)
+    wPos_t width)
 {
     b->labelWidth = width;
     gtk_widget_set_size_request(b->widget, width, -1);
@@ -90,7 +90,7 @@ void wMessageSetWidth(
  * \return text height
  */
 
-wWinPix_t wMessageGetHeight(
+wPos_t wMessageGetHeight(
     long flags)
 {
     GtkWidget * temp;
@@ -149,10 +149,10 @@ wWinPix_t wMessageGetHeight(
 
 wMessage_p wMessageCreateEx(
     wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
+    wPos_t	x,
+    wPos_t	y,
     const char 	* labelStr,
-    wWinPix_t	width,
+    wPos_t	width,
     const char	*message,
     long flags)
 {
@@ -212,7 +212,7 @@ wMessage_p wMessageCreateEx(
  * \return expected width of message box
  */
 
-wWinPix_t
+wPos_t
 wMessageGetWidth(const char *testString)
 {
     GtkWidget *entry;

@@ -314,12 +314,12 @@ static void doColorButton(
 
 wButton_p wColorSelectButtonCreate(
 		wWin_p win,
-		wWinPix_t x,
-		wWinPix_t y,
+		wPos_t x,
+		wPos_t y,
 		const char * helpStr,
 		const char * labelStr,
 		long option,
-		wWinPix_t width,
+		wPos_t width,
 		wDrawColor * color,
 		wColorSelectButtonCallBack_p action,
 		void * data )

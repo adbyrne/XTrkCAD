@@ -20,10 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
+#include <string.h>
+
 #include "ccurve.h"
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "custom.h"
+#include "i18n.h"
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
@@ -223,9 +227,9 @@ static void EasementDlgUpdate(
 static void LayoutEasementW(
 		paramData_t * pd,
 		int inx,
-		wWinPix_t colX,
-		wWinPix_t * x,
-		wWinPix_t * y )
+		wPos_t colX,
+		wPos_t * x,
+		wPos_t * y )
 {
 	if ( inx == 2 )
 		wControlSetPos( easementPLs[0].control, *x, wControlGetPosY(easementPLs[0].control) );

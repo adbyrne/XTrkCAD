@@ -19,10 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <string.h>
 
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "misc.h"
 #include "param.h"
 #include "include/utf8convert.h"
@@ -82,7 +84,7 @@ BOOL_T WriteMainNote(FILE* f)
 	char *noteText = mainText;
 
 	if (noteText && *noteText) {
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 		char *out = NULL;
 		if (RequiresConvToUTF8(mainText)) {
 			unsigned cnt = strlen(mainText) * 2 + 1;
@@ -90,18 +92,18 @@ BOOL_T WriteMainNote(FILE* f)
 			wSystemToUTF8(mainText, out, cnt);
 			noteText = out;
 		}
-#endif // UTFCONVERT
+#endif // WINDOWS
 
 
 	char * sText = ConvertToEscapedText( noteText );
         rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
 	MyFree( sText );
 
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 		if (out) {
 			MyFree(out);
 		}
-#endif // UTFCONVERT
+#endif // WINDOWS
     }
     return rc;
 }
@@ -119,7 +121,7 @@ BOOL_T ReadMainNote(char *line)
 
     if (!GetArgs(line + 9,
 	paramVersion < 3 ? "l" :
-	paramVersion < VERSION_INLINENOTE ? "0000l":
+	paramVersion < 12 ? "0000l":
 	"0000lq", &size, &sNote)) {
         return FALSE;
     }
@@ -128,7 +130,7 @@ BOOL_T ReadMainNote(char *line)
         MyFree(mainText);
     }
 
-    if ( paramVersion < VERSION_INLINENOTE )
+    if ( paramVersion < 12 )
 	mainText = ReadMultilineText();
     else
 	mainText = sNote;

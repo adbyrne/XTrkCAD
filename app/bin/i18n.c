@@ -20,6 +20,7 @@
  */
 
 #include <locale.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "i18n.h"

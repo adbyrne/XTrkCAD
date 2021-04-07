@@ -20,13 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
 #include "cundo.h"
 #include "compound.h"
 #include "cselect.h"
+#include "i18n.h"
+#include "messages.h"
 #include "track.h"
-#include "draw.h"
+#include "utility.h"
 #include "fileio.h"
-#include "common-ui.h"
 
 static wMenu_p splitPopupM[2];
 static wMenuToggle_p splitPopupMI[2][4];
@@ -369,7 +371,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			wBeep();
 			return C_TERMINATE;
 		}
-		coOrd pos1 = pos;
+		coOrd pos1 = pos, pos2 = pos;
 		if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
 			if (IsTrack(trk1)) {
 				InfoMessage(_("Can't Split a track object"));
@@ -420,12 +422,13 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 			}
 		}
 		if (trimState == TRIM_LINE) {
-			coOrd pos1=pos;
+			coOrd pos1=pos, pos2 = pos;
 			if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
 				if (IsTrack(trk1)) {
 					return C_CONTINUE;
 				}
 				pos1 = pos;
+				coOrd old_pos = pos1;
 				if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 					if (IsClose(GetTrkDistance(trk1,&pos1)*4)) {
 						//Iterate Twice

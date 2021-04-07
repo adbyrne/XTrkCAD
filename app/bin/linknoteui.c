@@ -20,21 +20,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <string.h>
+#include <stdbool.h>
+
 #include "custom.h"
 #include "dynstring.h"
+#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "include/stringxtc.h"
 #include "track.h"
 #include "validator.h"
+#include "wlib.h"
 
 extern BOOL_T inDescribeCmd;
 
 #define DEFAULTLINKURL "http://www.xtrkcad.org/"
 #define DEFAULTLINKTITLE "The XTrackCAD Homepage"
 
-static struct extraDataNote_t noteDataInUI;
+static struct extraDataNote noteDataInUI;
 
 static void NoteLinkBrowse(void *junk);
 static void NoteLinkOpen(char *url );
@@ -61,7 +66,7 @@ static wWin_p linkEditW;
 BOOL_T
 IsLinkNote(track_p trk)
 {
-    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
 	return(xx->op == OP_NOTELINK);
 }
@@ -163,11 +168,10 @@ LinkEditOK(void *junk)
 static void 
 CreateEditLinkDialog(track_p trk, char *title)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
 	// create the dialog if necessary
     if (!linkEditW) {
-	    	noteDataInUI.base.trkType = T_NOTE;
 		noteDataInUI.noteData.linkData.url = MyMalloc(URLMAXIMUMLENGTH);
 		noteDataInUI.noteData.linkData.title = MyMalloc(TITLEMAXIMUMLENGTH);
 		linkEditPLs[I_TITLE].valueP = noteDataInUI.noteData.linkData.title;
@@ -204,7 +208,7 @@ CreateEditLinkDialog(track_p trk, char *title)
 
 void ActivateLinkNote(track_p trk)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 	NoteLinkOpen(xx->noteData.linkData.url);
 }
 
@@ -219,7 +223,7 @@ void ActivateLinkNote(track_p trk)
 
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
     DynString statusLine;
 
     DynStringMalloc(&statusLine, 80);
@@ -247,7 +251,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 
 void NewLinkNoteUI(track_p trk)
 {
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
 	xx->noteData.linkData.url = MyStrdup( DEFAULTLINKURL );
 	xx->noteData.linkData.title = MyStrdup( DEFAULTLINKTITLE );

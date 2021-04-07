@@ -49,18 +49,23 @@
  *
  */
 
+#include <ctype.h>
+#include <string.h>
+
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "common-ui.h"
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 #include "include/utf8convert.h"
-#endif // UTFCONVERT
+#endif // WINDOWS
+#include "utility.h"
+#include "messages.h"
 
 EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 
@@ -115,16 +120,12 @@ static paramData_t switchmotorEditPLs[] = {
 static paramGroup_t switchmotorEditPG = { "switchmotorEdit", 0, switchmotorEditPLs, sizeof switchmotorEditPLs/sizeof switchmotorEditPLs[0] };
 static wWin_p switchmotorEditW;
 
-static void SwitchMotorOk ( void * junk );
-static void initSwitchMotorData(track_p trk);
-
 /*
 static dynArr_t switchmotorTrk_da;
 #define switchmotorTrk(N) DYNARR_N( track_p , switchmotorTrk_da, N )
 */
 
 typedef struct switchmotorData_t {
-    extraDataBase_t base;
     char * name;
     char * normal;
     char * reverse;
@@ -135,11 +136,9 @@ typedef struct switchmotorData_t {
     track_p next_motor;
 } switchmotorData_t, *switchmotorData_p;
 
-static void EditSwitchMotor (track_p trk);
-
 static switchmotorData_p GetswitchmotorData ( track_p trk )
 {
-	return GET_EXTRA_DATA( trk, T_SWITCHMOTOR, switchmotorData_t );
+	return (switchmotorData_p) GetTrkExtraData(trk);
 }
 
 #if 0
@@ -157,7 +156,7 @@ static void ComputeSwitchMotorBoundingBox (track_p t)
 {
     coOrd hi, lo, p;
     switchmotorData_p data_p = GetswitchmotorData(t);
-    struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout, T_TURNOUT, extraDataCompound_t);
+    struct extraData *xx = GetTrkExtraData(data_p->turnout);
     coOrd orig = xx->orig;
     ANGLE_T angle = xx->angle;
     SCALEINX_T s = GetTrkScale(data_p->turnout);
@@ -192,7 +191,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 {
     coOrd p[switchmotorPoly_CNT];
     switchmotorData_p data_p = GetswitchmotorData(t);
-    struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout, T_TURNOUT, extraDataCompound_t);
+    struct extraData *xx = GetTrkExtraData(data_p->turnout);
     coOrd orig = xx->orig;
     ANGLE_T angle = xx->angle;
     SCALEINX_T s = GetTrkScale(data_p->turnout);
@@ -413,9 +412,9 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 	switchmotorData_p xx = GetswitchmotorData(t);
 	char *switchMotorName = MyStrdup(xx->name);
     
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 	switchMotorName = Convert2UTF8(switchMotorName);
-#endif // UTFCONVERT
+#endif // WINDOWS
 
     if (xx->turnout == NULL) 
 		return FALSE;
@@ -439,9 +438,9 @@ static BOOL_T ReadSwitchMotor ( char * line )
 	if (!GetArgs(line+12,"ddqqqq",&index,&trkindex,&name,&normal,&reverse,&pointsense)) {
 		return FALSE;
 	}
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 	ConvertUTF8ToSystem(name);
-#endif // UTFCONVERT
+#endif // WINDOWS
 	trk = NewTrack(index, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
 	xx = GetswitchmotorData( trk );
 	xx->name = name;
@@ -464,15 +463,14 @@ static BOOL_T ReadSwitchMotor ( char * line )
 	return TRUE;
 }
 
-EXPORT BOOL_T ResolveSwitchmotorTurnout ( track_p trk )
+EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
 {
-//	LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(T%d)\n",GetTrkIndex(trk)))
+    LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(%p)\n",trk))
     switchmotorData_p xx;
     track_p t_trk;
-    if (GetTrkType(trk) != T_SWITCHMOTOR) return TRUE;
-    LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(T%d)\n",GetTrkIndex(trk)))
+    if (GetTrkType(trk) != T_SWITCHMOTOR) return;
     xx = GetswitchmotorData(trk);
-    LOG( log_switchmotor, 1, ("*** ResolveSwitchmotorTurnout(xx T%d)\n",GetTrkIndex(trk)))
+    LOG( log_switchmotor, 1, ("*** ResolveSwitchmotorTurnout(%d)\n",GetTrkIndex(trk)))
     t_trk = FindTrack(xx->turnindx);
     if (t_trk == NULL) {
         NoticeMessage( _("ResolveSwitchmotor: Turnout T%d: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), xx->turnindx );
@@ -480,39 +478,6 @@ EXPORT BOOL_T ResolveSwitchmotorTurnout ( track_p trk )
     xx->turnout = t_trk;
     ComputeSwitchMotorBoundingBox(trk);
     LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(): t_trk = (%d) %p\n",xx->turnindx,t_trk))
-}
-
-EXPORT void AddMissingSwitchMotor( void ) {
-    track_p trk, sm_trk;
-
-    LOG( log_switchmotor, 1, ("*** AddMissingSwitchMotor()\n"))
-
-    if ( !switchmotorW ) {
-	ParamRegister( &switchmotorPG );
-	switchmotorW = ParamCreateDialog (&switchmotorPG,
-		MakeWindowTitle(_("Create switch motor")),
-		_("Ok"), SwitchMotorOk, wHide, TRUE, NULL, F_BLOCK, NULL );
-	switchmotorD.dpi = mainD.dpi;
-    }
-
-    // Loop through all turnout segs
-    // Create switchmotor for them.
-    TRK_ITERATE(trk) {
-	LOG( log_switchmotor, 1, ("*** AddMissingSwitchMotor() next seg T%d\n", GetTrkIndex(trk )))
-	// seg already in a block
-	if ( ! IsTrack(trk) ) continue;
-	if ( GetTrkEndPtCnt(trk) <= 2 ) continue;
-
-	UndoStart( _("Create Switch Motor"), "Create Switch Motor" );
-
-	switchmotorTurnout = trk;
-	sprintf(switchmotorName,"SW%03d",GetTrkIndex(trk));
-
-	sm_trk = NewTrack(0, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
-
-	initSwitchMotorData(sm_trk);
-    }
-    MainRedraw();
 }
 
 static void MoveSwitchMotor (track_p trk, coOrd orig ) {}
@@ -569,27 +534,21 @@ static track_p FindSwitchMotor (track_p trk)
 	return NULL;
 }
 
-static track_p FindSwitchMotorByName (char *name)
+static void SwitchMotorOk ( void * junk )
 {
-	track_p a_trk;
-	switchmotorData_p xx;
+	switchmotorData_p xx,xx1;
+	track_p trk,trk1;
 
-	a_trk = first_motor;
-	while (a_trk) {
-		xx =  GetswitchmotorData(a_trk);
-		if (strcmp(xx->name, name) == 0) {
-			return a_trk;
-		}
-		a_trk = xx->next_motor;
+	LOG( log_switchmotor, 1, ("*** SwitchMotorOk()\n"))
+	ParamUpdate (&switchmotorPG );
+	if ( switchmotorName[0]==0 ) {
+		NoticeMessage( _("Switch motor must have a name!"), _("Ok"), NULL);
+		return;
 	}
-	return NULL;
-}
-
-static void initSwitchMotorData(track_p trk)
-{
-	track_p trk1;
-	switchmotorData_p xx, xx1;
-
+	wDrawDelayUpdate( mainD.d, TRUE );
+	UndoStart( _("Create Switch Motor"), "Create Switch Motor" );
+	/* Create a switchmotor object */
+	trk = NewTrack(0, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
 	xx = GetswitchmotorData( trk );
 	xx->name = MyStrdup(switchmotorName);
 	xx->normal = MyStrdup(switchmotorNormal);
@@ -603,68 +562,23 @@ static void initSwitchMotorData(track_p trk)
 	} else first_motor = trk;
 	xx->next_motor = NULL;
 	last_motor = trk;
-	LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",
-			trk, GetTrkIndex(trk), xx))
+    LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
 	switchmotorDebug(trk);
 	UndoEnd();
 	wHide( switchmotorW );
 	ComputeSwitchMotorBoundingBox(trk);
 	DrawNewTrack(trk);
-        switchmotorDebug(trk);
-}
-
-static void SwitchMotorOk ( void * junk )
-{
-	track_p trk;
-
-	LOG( log_switchmotor, 1, ("*** SwitchMotorOk()\n"))
-	ParamUpdate (&switchmotorPG );
-	if ( switchmotorName[0]==0 ) {
-		NoticeMessage( _("Switch motor must have a name!"), _("Ok"), NULL);
-		return;
-	}
-	if ( FindSwitchMotorByName (switchmotorName) ) {
-		NoticeMessage( _("Switch motor must have a unique name!"), _("Ok"), NULL);
-		return;
-	}
-	wDrawDelayUpdate( mainD.d, TRUE );
-	UndoStart( _("Create Switch Motor"), "Create Switch Motor" );
-	/* Create a switchmotor object */
-	trk = NewTrack(0, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
-
-	initSwitchMotorData(trk);
-
 }
 
 static void NewSwitchMotorDialog(track_p trk)
 {
-	track_p s_trk;
-
-	if ( log_switchmotor < 0 ) log_switchmotor = LogFindIndex( "switchmotor" );
-
-	LOG( log_switchmotor, 1, ("*** NewSwitchMotorDialog( T%d) type %d\n",
-			GetTrkIndex(trk), GetTrkType(trk)))
-
-	if (GetTrkEndPtCnt( trk ) <= 2) {
-		LOG( log_switchmotor, 1, ("*** NewSwitchMotorDialog( turnout count %d)\n",
-				GetTrkEndPtCnt( trk )))
-		NoticeMessage( _("Please select a turnout"), _("Ok"), NULL);
-		return;
-	}
-
-	if ((s_trk = FindSwitchMotor (trk))!=NULL) {
-		EditSwitchMotor(s_trk);
-		return;
-	}
+	LOG( log_switchmotor, 1, ("*** NewSwitchMotorDialog()\n"))
 
 	switchmotorTurnout = trk;
-	sprintf(switchmotorName,"SW%03d",GetTrkIndex(trk));
-
+	if ( log_switchmotor < 0 ) log_switchmotor = LogFindIndex( "switchmotor" );
 	if ( !switchmotorW ) {
 		ParamRegister( &switchmotorPG );
-		switchmotorW = ParamCreateDialog (&switchmotorPG,
-			MakeWindowTitle(_("Create switch motor")),
-			_("Ok"), SwitchMotorOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+		switchmotorW = ParamCreateDialog (&switchmotorPG, MakeWindowTitle(_("Create switch motor")), _("Ok"), SwitchMotorOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		switchmotorD.dpi = mainD.dpi;
 	}
 	ParamLoadControls( &switchmotorPG );
@@ -675,7 +589,7 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 {
 	track_p trk;
 
-	//LOG( log_switchmotor, 1, ("*** CmdSwitchMotorCreate(%08x,{%f,%f})\n",action,pos.x,pos.y))
+	LOG( log_switchmotor, 1, ("*** CmdSwitchMotorCreate(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
 		InfoMessage( _("Select a turnout") );
@@ -845,11 +759,11 @@ static POS_T swmhiliteBorder;
 static wDrawColor swmhiliteColor = 0;
 static void DrawSWMotorTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
+	wPos_t x, y, w, h;
 	if (swmhiliteColor==0)
 		swmhiliteColor = wDrawColorGray(87);
-	w = ((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = ((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = (wPos_t)((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = (wPos_t)((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
 	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
@@ -957,7 +871,6 @@ EXPORT void CheckDeleteSwitchmotor(track_p t)
     while ((sm = FindSwitchMotor( t ))) {	                 //Cope with multiple motors for one Turnout!
     	xx = GetswitchmotorData (sm);
     	InfoMessage(_("Deleting Switch Motor %s"),xx->name);
-	//PHIL need to delete icon too
     	DeleteTrack (sm, FALSE);
     };
 }

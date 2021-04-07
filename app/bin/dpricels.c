@@ -19,10 +19,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <string.h>
 
 #include "compound.h"
 #include "custom.h"
+#include "i18n.h"
 #include "layout.h"
+#include "messages.h"
 #include "param.h"
 #include "track.h"
 
@@ -38,7 +41,7 @@ DIST_T priceListFlexLengthV;
 DIST_T priceListFlexCostV;
 
 static paramFloatRange_t priceListCostData = { 0.0, 9999.99, 80 };
-static wWinPix_t priceListColumnWidths[] = { -60, 200 };
+static wPos_t priceListColumnWidths[] = { -60, 200 };
 static const char * priceListColumnTitles[] = { N_("Price"), N_("Item") };
 static paramListData_t priceListListData = { 10, 400, 2, priceListColumnWidths, priceListColumnTitles };
 static paramFloatRange_t priceListFlexData = { 0.0, 999.99, 80 };

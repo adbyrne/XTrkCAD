@@ -20,13 +20,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <sys/types.h>
+#include <time.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdbool.h>
+
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "layout.h"
+#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "common-ui.h"
+#include "utility.h"
 
 #define PRINT_GAUDY		(0)
 #define PRINT_PLAIN		(1)
@@ -102,7 +111,7 @@ static void PrintClear( void );
 static void PrintMaxPageSize( void );
 static void SelectAllPages(void);
 static void DoPrintMargin(void);
-static bool PrintPageNumber( int x, int y, DIST_T width, DIST_T height );
+static bool PrintPageNumber( wPos_t x, wPos_t y, DIST_T width, DIST_T height );
 static bool PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH);
 
 static char * printFormatLabels[] = { N_("Portrait"), N_("Landscape"), NULL };
@@ -112,7 +121,7 @@ static char * printRegistrationMarksLabels[] = { N_("Registration Marks (in 1:1 
 static char * printPageNumberLabels[] = { N_("Page Numbers"), NULL };
 static char * printPhysSizeLabels[] = { N_("Ignore Page Margins"), NULL };
 static char * printGridLabels[] = { N_("Snap Grid"), NULL };
-static char * printRulerLabels[] = { N_("Layout Edge"), N_("Every Page"), N_("None"), NULL };
+static char * printRulerLabels[] = { N_("Rulers"), NULL };
 static char * printRoadbedLabels[] = { N_("Roadbed Outline"), NULL };
 static char * printCenterLineLabels[] = { N_("Centerline below Scale 1:1"), NULL };
 static paramIntegerRange_t rminScale_999 = { 1, 999, 0, PDO_NORANGECHECK_HIGH };
@@ -138,7 +147,7 @@ static paramData_t printPLs[] = {
 #define I_GRID			(11)
 /*11*/ { PD_TOGGLE, &printGrid, "grid", PDO_DLGNOLABELALIGN, printGridLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_RULER			(12)
-/*12*/ { PD_RADIO, &printRuler, "ruler", 0, printRulerLabels, N_("Rulers:"), BC_HORZ|BC_NOBORDER },
+/*12*/ { PD_TOGGLE, &printRuler, "ruler", PDO_DLGNOLABELALIGN, printRulerLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_CENTERLINE    (13)
 /*13*/ { PD_TOGGLE, &printCenterLine, "centerLine", PDO_DLGNOLABELALIGN, printCenterLineLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_ROADBED		(14)
@@ -414,8 +423,8 @@ static void PrintGaudyBox(
 
 
 static void PrintPlainBox(
-		int x,
-		int y,
+		wPos_t x,
+		wPos_t y,
 		coOrd *corners )
 {
 	coOrd p00, p01, p10, p11;
@@ -629,9 +638,9 @@ static int pmyoff=5;
 static void PrintMarginLayout(
 		paramData_t * pd,
 		int index,
-		wWinPix_t colX,
-		wWinPix_t * w,
-		wWinPix_t * h )
+		wPos_t colX,
+		wPos_t * w,
+		wPos_t * h )
 {
 	if ( index < I_PM_FIRST || index > (I_PM_MESSAGE) )
 		return;
@@ -639,7 +648,7 @@ static void PrintMarginLayout(
 		*h = wControlGetPosY( printMarginPLs[I_PM_FIRST+2].control ) + wControlGetHeight( printMarginPLs[I_PM_FIRST+2].control );
 		return;
 	}
-	wWinPix_t x0, y0;
+	wPos_t x0, y0;
 	x0 = (aPmLines[index-I_PM_FIRST].x0+aPmLines[index-I_PM_FIRST].x1)/2;
 	y0 = (aPmLines[index-I_PM_FIRST].y0+aPmLines[index-I_PM_FIRST].y1)/2;
 	x0 -= pmxoff;
@@ -717,7 +726,7 @@ static void DoPrintMargin( void )
 		DoPrintSetup();
 	}
 	if ( printMarginWin == NULL ) {
-		int x=10, y=10;
+		wPos_t x=10, y=10;
 		printMarginWin = ParamCreateDialog( &printMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
 		if ( printMarginWin == NULL )
 			return;
@@ -944,7 +953,7 @@ FormatPageNumber(int x, int y)
  */
 
 static bool
-PrintPageNumber(int x, int y, DIST_T width, DIST_T height)
+PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
 {
     coOrd printPosition;
     coOrd textSize;
@@ -1146,11 +1155,11 @@ static BOOL_T PrintPage(
 					}
 				}
 				if (printRotate) {
-					wPrintClip( (clipOrig.y*print_d.dpi), (clipOrig.x*print_d.dpi),
-							(clipSize.y*print_d.dpi), (clipSize.x*print_d.dpi) );
+					wPrintClip( (wPos_t)(clipOrig.y*print_d.dpi), (wPos_t)(clipOrig.x*print_d.dpi),
+							(wPos_t)(clipSize.y*print_d.dpi), (wPos_t)(clipSize.x*print_d.dpi) );
 				} else {
-					wPrintClip( (clipOrig.x*print_d.dpi), (clipOrig.y*print_d.dpi),
-							(clipSize.x*print_d.dpi), (clipSize.y*print_d.dpi) );
+					wPrintClip( (wPos_t)(clipOrig.x*print_d.dpi), (wPos_t)(clipOrig.y*print_d.dpi),
+							(wPos_t)(clipSize.x*print_d.dpi), (wPos_t)(clipSize.y*print_d.dpi) );
 				}
 				p[0].x = p[3].x = 0.0;
 				p[1].x = p[2].x = roomSize.x;
@@ -1164,13 +1173,11 @@ static BOOL_T PrintPage(
 				if (clipOrig.x + clipSize.x > roomSize.x + 0.5*printScale) right_clear = TRUE;
 				if (clipOrig.y + clipSize.y > roomSize.y + 0.5*printScale) top_clear = TRUE;
 
-				if (printRuler != 2) {    /* Not None so Edge or Every */
-					DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, !base_clear, wDrawColorBlack );
-					DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, left_clear, wDrawColorBlack );
-					DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, right_clear, wDrawColorBlack );
-					DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, !top_clear, wDrawColorBlack );
-				}
-				if ( printRuler==1 && currPrintGrid.angle == 0 ) {  /* Every Page and not rotated origin */
+				DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, !base_clear, wDrawColorBlack );
+				DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, left_clear, wDrawColorBlack );
+				DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, right_clear, wDrawColorBlack );
+				DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, !top_clear, wDrawColorBlack );
+				if ( printRuler && currPrintGrid.angle == 0 ) {
 					if ( !printRotate ) {
 						p[2] = p[3] = print_d.orig;
 						p[3].x += print_d.size.x;

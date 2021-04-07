@@ -20,12 +20,22 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+#include <locale.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 #include <wchar.h>
+
+#ifdef WINDOWS
+#include <Windows.h>
+#include <malloc.h>
+#endif
 
 #include "common.h"
 #include "custom.h"
 #include "fileio.h"
 #include "paths.h"
+#include "wlib.h"
 
 enum defaultTypes {
     INTEGERCONSTANT,
@@ -193,7 +203,6 @@ InitializeRegionCode(void)
 {
     strcpy(regionCode, "US");
 
-// TODO Move this to wlib
 #ifdef WINDOWS
     {
         LCID lcid;

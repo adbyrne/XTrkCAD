@@ -23,6 +23,7 @@
 #define HAVE_SHRTPATH_H
 
 #include "common.h"
+#include "track.h"
 
 typedef enum {
 		SPTC_MATCH,				/* trk:ep is end of path? */

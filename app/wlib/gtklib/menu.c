@@ -904,8 +904,8 @@ static gint pushMenu(
 
 wMenu_p wMenuCreate(
 	wWin_p	parent,
-	wWinPix_t	x,
-	wWinPix_t	y,
+	wPos_t	x,
+	wPos_t	y,
 	const char 	* helpStr,
 	const char	* labelStr,
 	long	option )

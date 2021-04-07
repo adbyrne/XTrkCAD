@@ -20,6 +20,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#ifndef WINDOWS
+#include <unistd.h>
+#include <dirent.h>
+#endif
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+#include <math.h>
+#include <ctype.h>
+#include <string.h>
+#include <time.h>
+#ifdef WINDOWS
+#include <io.h>
+#include <windows.h>
+#include "getopt.h"
+#define R_OK (02)
+#define access _access
+#if _MSC_VER >1300
+#define strdup _strdup
+#endif
+#else
+#include <sys/stat.h>
+#endif
+#include <locale.h>
+#include <stdarg.h>
+#include <stdint.h>
+
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
@@ -28,14 +57,16 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "layout.h"
+#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
-#include "common-ui.h"
+#include "utility.h"
 
 #define DEFAULT_SCALE ("N")
 
@@ -113,17 +144,17 @@ EXPORT DIST_T easeR = 0.0;
 EXPORT DIST_T easeL = 0.0;
 EXPORT coOrd cmdMenuPos;
 
-EXPORT wWinPix_t DlgSepLeft = 12;
-EXPORT wWinPix_t DlgSepMid = 18;
-EXPORT wWinPix_t DlgSepRight = 12;
-EXPORT wWinPix_t DlgSepTop = 12;
-EXPORT wWinPix_t DlgSepBottom = 12;
-EXPORT wWinPix_t DlgSepNarrow = 6;
-EXPORT wWinPix_t DlgSepWide = 12;
-EXPORT wWinPix_t DlgSepFrmLeft = 4;
-EXPORT wWinPix_t DlgSepFrmRight = 4;
-EXPORT wWinPix_t DlgSepFrmTop = 4;
-EXPORT wWinPix_t DlgSepFrmBottom = 4;
+EXPORT wPos_t DlgSepLeft = 12;
+EXPORT wPos_t DlgSepMid = 18;
+EXPORT wPos_t DlgSepRight = 12;
+EXPORT wPos_t DlgSepTop = 12;
+EXPORT wPos_t DlgSepBottom = 12;
+EXPORT wPos_t DlgSepNarrow = 6;
+EXPORT wPos_t DlgSepWide = 12;
+EXPORT wPos_t DlgSepFrmLeft = 4;
+EXPORT wPos_t DlgSepFrmRight = 4;
+EXPORT wPos_t DlgSepFrmTop = 4;
+EXPORT wPos_t DlgSepFrmBottom = 4;
 
 static int verbose = 0;
 
@@ -132,11 +163,11 @@ static BOOL_T inMainW = TRUE;
 
 static long stickySet = 0;
 static long stickyCnt = 0;
-static const char * stickyLabels[33];
+static char * stickyLabels[33];
 #define TOOLBARSET_INIT				(0xFFFF)
 EXPORT long toolbarSet = TOOLBARSET_INIT;
-EXPORT wWinPix_t toolbarHeight = 0;
-static wWinPix_t toolbarWidth = 0;
+EXPORT wPos_t toolbarHeight = 0;
+static wPos_t toolbarWidth = 0;
 
 static wMenuList_p messageList_ml;
 static BOOL_T messageListEmpty = TRUE;
@@ -174,6 +205,11 @@ EXPORT void * MyMalloc(long size) {
 	void * p;
 	totalMallocs++;
 	totalMalloced += size;
+#if defined(WINDOWS) && ! defined(WIN32)
+	if ( size > 65500L ) {
+		AbortProg( "mallocing > 65500 bytes" );
+	}
+#endif
 	p = malloc((size_t) size + sizeof(size_t) + 2 * sizeof(unsigned long));
 	if (p == NULL)
 		AbortProg("No memory");
@@ -196,6 +232,11 @@ EXPORT void * MyRealloc(void * old, long size) {
 		return MyMalloc(size);
 	totalReallocs++;
 	totalRealloced += size;
+#if defined(WINDOWS) && ! defined(WIN32)
+	if ( size > 65500L ) {
+		AbortProg( "reallocing > 65500 bytes" );
+	}
+#endif
 	if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
 		AbortProg("Guard0 is hosed");
 	}
@@ -324,9 +365,9 @@ EXPORT char * ConvertToEscapedText(const char * text) {
 		text_i++;
 	}
 	cout[cout_i] = '\0';
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 	wSystemToUTF8(cout, cout, cnt);
-#endif // UTFCONVERT
+#endif // WINDOWS
 
 	return cout;
 }
@@ -384,7 +425,7 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 	return cout;
 }
 
-EXPORT void AbortProg(const char * msg, ...) {
+EXPORT void AbortProg(char * msg, ...) {
 	static BOOL_T abort2 = FALSE;
 	int rc;
 	va_list ap;
@@ -404,8 +445,8 @@ EXPORT void AbortProg(const char * msg, ...) {
 	}
 }
 
-EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes) {
-	const char * cp;
+EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
+	char * cp;
 	while (*src && isspace((unsigned char) *src))
 		src++;
 	if (!*src)
@@ -423,6 +464,10 @@ EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes) {
 }
 
 static char * directory;
+
+#ifdef WINDOWS
+#define F_OK (0)
+#endif
 
 EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 
@@ -457,8 +502,8 @@ EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 
 }
 
-EXPORT char * BuildTrimedTitle(char * cp, const char * sep, const char * mfg, const char * desc,
-		const char * partno) {
+EXPORT char * BuildTrimedTitle(char * cp, char * sep, char * mfg, char * desc,
+		char * partno) {
 	cp = Strcpytrimed(cp, mfg, FALSE);
 	strcpy(cp, sep);
 	cp += strlen(cp);
@@ -485,7 +530,7 @@ static void ShowMessageHelp(int index, const char * label, void * data) {
 	wHelp(msgKey);
 }
 
-static const char * ParseMessage(const char *msgSrc) {
+static char * ParseMessage(char *msgSrc) {
 	char *cp1 = NULL, *cp2 = NULL;
 	static char shortMsg[STR_SIZE];
 	cp1 = strchr(_(msgSrc), '\t');
@@ -512,7 +557,7 @@ static const char * ParseMessage(const char *msgSrc) {
 	}
 }
 
-EXPORT void InfoMessage(const char * format, ...) {
+EXPORT void InfoMessage(char * format, ...) {
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
@@ -524,7 +569,7 @@ EXPORT void InfoMessage(const char * format, ...) {
 	SetMessage(message2);
 }
 
-EXPORT void ErrorMessage(const char * format, ...) {
+EXPORT void ErrorMessage(char * format, ...) {
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
@@ -536,7 +581,7 @@ EXPORT void ErrorMessage(const char * format, ...) {
 	inError = TRUE;
 }
 
-EXPORT int NoticeMessage(const char * format, const char * yes, const char * no, ...) {
+EXPORT int NoticeMessage(char * format, char * yes, char * no, ...) {
 	va_list ap;
 	va_start(ap, no);
 	format = ParseMessage(format);
@@ -545,7 +590,7 @@ EXPORT int NoticeMessage(const char * format, const char * yes, const char * no,
 	return wNotice(message2, yes, no);
 }
 
-EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes, const char * no,
+EXPORT int NoticeMessage2(int playbackRC, char * format, char * yes, char * no,
 		...) {
 	va_list ap;
 	if (inPlayback)
@@ -649,15 +694,15 @@ static void ChkFileList(int index, const char * label, void * data) {
  */
 
 EXPORT void SaveState(void) {
-	wWinPix_t width, height;
+	wPos_t width, height;
 	const char * fileName;
 	void * pathName;
 	char file[6];
 	int inx;
 
 	wWinGetSize(mainW, &width, &height);
-	wPrefSetInteger("draw", "mainwidth", (int)width);
-	wPrefSetInteger("draw", "mainheight", (int)height);
+	wPrefSetInteger("draw", "mainwidth", width);
+	wPrefSetInteger("draw", "mainheight", height);
 	SaveParamFileList();
 	ParamUpdatePrefs();
 
@@ -684,8 +729,9 @@ EXPORT void SaveState(void) {
  */
 static void DoQuitAfter(void) {
 	changed = 0;
-	CleanupFiles();  //Get rid of checkpoint if we quit.
 	SaveState();
+
+	CleanupFiles();
 }
 /**
  * Process shutdown request. This function is called when the user requests
@@ -861,7 +907,7 @@ EXPORT void SelectFont(void) {
 static struct {
 	wControl_p control;
 	wBool_t enabled;
-	wWinPix_t x, y;
+	wPos_t x, y;
 	long options;
 	int group;
 	wIndex_t cmdInx;
@@ -888,7 +934,7 @@ static int commandCnt = 0;
 int * balloonHelpCnts;
 #endif
 
-EXPORT const char * GetBalloonHelpStr(const char * helpKey) {
+EXPORT const char * GetBalloonHelpStr(char * helpKey) {
 	wBalloonHelp_t * bh;
 #ifdef CHECK_UNUSED_BALLOONHELP
 	if ( balloonHelpCnts == NULL ) {
@@ -1391,11 +1437,11 @@ static void DoCommandBIndirect(void * cmdInxP) {
 }
 
 EXPORT void LayoutSetPos(wIndex_t inx) {
-	wWinPix_t w, h, offset;
-	static wWinPix_t toolbarRowHeight = 0;
-	static wWinPix_t width;
+	wPos_t w, h, offset;
+	static wPos_t toolbarRowHeight = 0;
+	static wPos_t width;
 	static int lastGroup;
-	static wWinPix_t gap;
+	static wPos_t gap;
 	static int layerButtCnt;
 	static int layerButtNumber;
 	int currGroup;
@@ -1497,8 +1543,8 @@ EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx) {
 	return commandList[cmdInx].enabled;
 }
 
-static wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
-		const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
+static wIndex_t AddCommand(procCommand_t cmdProc, char * helpKey,
+		char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
 		void * context) {
 	if (commandCnt >= COMMAND_MAX - 1) {
 		AbortProg("addCommand: too many commands");
@@ -1536,7 +1582,7 @@ EXPORT void AddToolbarControl(wControl_p control, long options) {
 	buttonCnt++;
 }
 
-EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long options,
+EXPORT wButton_p AddToolbarButton(char * helpStr, wIcon_p icon, long options,
 		wButtonCallBack_p action, void * context) {
 	wButton_p bb;
 	wIndex_t inx;
@@ -1560,7 +1606,7 @@ EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long optio
 }
 
 EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
-	wWinPix_t cmdX, cmdY;
+	wPos_t cmdX, cmdY;
 
 	if (buttInx < 0 || buttInx >= buttonCnt)
 		return;
@@ -1568,7 +1614,7 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 		return;
 	cmdX = buttonList[buttInx].x + 17;
 	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-			+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
+			+ (wPos_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
 
 	MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
 	if (playbackTimer == 0) {
@@ -1581,13 +1627,13 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 }
 
 #include "bitmaps/openbutt.xpm"
-static const char * buttonGroupMenuTitle;
-static const char * buttonGroupHelpKey;
-static const char * buttonGroupStickyLabel;
+static char * buttonGroupMenuTitle;
+static char * buttonGroupHelpKey;
+static char * buttonGroupStickyLabel;
 static wMenu_p buttonGroupPopupM;
 
-EXPORT void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
-		const char * stickyLabel) {
+EXPORT void ButtonGroupBegin(char * menuTitle, char * helpKey,
+		char * stickyLabel) {
 	buttonGroupMenuTitle = menuTitle;
 	buttonGroupHelpKey = helpKey;
 	buttonGroupStickyLabel = stickyLabel;
@@ -1601,7 +1647,7 @@ EXPORT void ButtonGroupEnd(void) {
 }
 
 EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
-		const char * helpKey, const char * nameStr, wIcon_p icon, int reqLevel,
+		char * helpKey, char * nameStr, wIcon_p icon, int reqLevel,
 		long options, long acclKey, void * context) {
 	wIndex_t buttInx = -1;
 	wIndex_t cmdInx;
@@ -1692,8 +1738,8 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 	return cmdInx;
 }
 
-EXPORT wIndex_t InitCommand(wMenu_p menu, procCommand_t command, const char * nameStr,
-		const char * bits, int reqLevel, long options, long acclKey) {
+EXPORT wIndex_t InitCommand(wMenu_p menu, procCommand_t command, char * nameStr,
+		char * bits, int reqLevel, long options, long acclKey) {
 	char helpKey[STR_SHORT_SIZE];
 	wIcon_p icon = NULL;
 	if (bits)
@@ -1706,7 +1752,7 @@ EXPORT wIndex_t InitCommand(wMenu_p menu, procCommand_t command, const char * na
 
 /*--------------------------------------------------------------------*/
 
-EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
+EXPORT void PlaybackCommand(char * line, wIndex_t lineNum) {
 	wIndex_t inx;
 	wIndex_t buttInx;
 	int len1, len2;
@@ -1722,11 +1768,11 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
 		fprintf(stderr, "Unknown playback COMMAND command %d : %s\n", lineNum,
 				line);
 	} else {
-		wWinPix_t cmdX, cmdY;
+		wPos_t cmdX, cmdY;
 		if ((buttInx = commandList[inx].buttInx) >= 0) {
 			cmdX = buttonList[buttInx].x + 17;
 			cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-					+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
+					+ (wPos_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
 			MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
@@ -1777,7 +1823,7 @@ static void DoMenuTrace(wMenu_p menu, const char * label, void * data) {
 	}
 }
 
-EXPORT wMenu_p MenuRegister(const char * label) {
+EXPORT wMenu_p MenuRegister(char * label) {
 	wMenu_p m;
 	menuTrace_p mt;
 	m = wMenuPopupCreate(mainW, label);
@@ -1792,7 +1838,7 @@ EXPORT wMenu_p MenuRegister(const char * label) {
 void MenuPlayback(char * line) {
 	char * menuName, *itemName;
 	coOrd pos;
-	wDrawPix_t x, y;
+	wPos_t x, y;
 	menuTrace_p mt;
 
 	if (!GetArgs(line, "pqq", &pos, &menuName, &itemName))
@@ -1814,7 +1860,7 @@ static wWin_p stickyW;
 
 static void StickyOk(void *);
 static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
-		(void*)stickyLabels } };
+		stickyLabels } };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 		sizeof stickyPLs / sizeof stickyPLs[0] };
 
@@ -1896,7 +1942,7 @@ static void DoAddElev(void *);
 
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { { PD_FLOAT, &addElevValueV, "value",
-		PDO_NOPREF|PDO_DIM, &rn1000_1000, NULL, 0 } };
+		PDO_DIM, &rn1000_1000, NULL, 0 } };
 static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, sizeof addElevPLs
 		/ sizeof addElevPLs[0] };
 
@@ -1921,33 +1967,25 @@ static void ShowAddElevations(void) {
 /*--------------------------------------------------------------------*/
 
 static wWin_p rotateW;
-static wWin_p indexW;
 static wWin_p moveW;
 static double rotateValue;
-static char trackIndex[STR_LONG_SIZE];
 static coOrd moveValue;
 static rotateDialogCallBack_t rotateDialogCallBack;
-static indexDialogCallBack_t indexDialogCallBack;
 static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void *);
 
-static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80 };
-static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:") } };
+static paramFloatRange_t rn360_360 = { -360.0, 360.0, (wPos_t)80.0 };
+static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE,
+		&rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
 
-static void IndexEnterOk(void *);
-static paramData_t indexPLs[] = {
-		{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, (void*)(STR_SIZE-1), N_("Indexes:"), 0, 0, sizeof(trackIndex) } };
-static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
-		/ sizeof indexPLs[0] };
-
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static void MoveEnterOk(void *);
-static paramData_t movePLs[] = {
-		{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:") },
-		{ PD_FLOAT, &moveValue.y, "moveY", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move Y:") } };
+static paramData_t movePLs[] = { { PD_FLOAT, &moveValue.x, "moveX", PDO_DIM,
+		&r_1000_1000, N_("Move X:") }, { PD_FLOAT, &moveValue.y, "moveY",
+		PDO_DIM, &r_1000_1000, N_("Move Y:") } };
 static paramGroup_t movePG = { "move", 0, movePLs, sizeof movePLs
 		/ sizeof movePLs[0] };
 
@@ -1958,16 +1996,6 @@ EXPORT void StartRotateDialog(rotateDialogCallBack_t func) {
 	ParamLoadControls(&rotatePG);
 	rotateDialogCallBack = func;
 	wShow(rotateW);
-}
-
-EXPORT void StartIndexDialog(indexDialogCallBack_t func) {
-	if (indexW == NULL)
-		indexW = ParamCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
-				_("Ok"), IndexEnterOk, wHide, FALSE, NULL, 0, NULL);
-	ParamLoadControls(&indexPG);
-	indexDialogCallBack = func;
-	trackIndex[0] = '\0';
-	wShow(indexW);
 }
 
 EXPORT void StartMoveDialog(moveDialogCallBack_t func) {
@@ -1984,12 +2012,6 @@ static void MoveEnterOk(void * junk) {
 	ParamLoadData(&movePG);
 	moveDialogCallBack((void*) &moveValue);
 	wHide(moveW);
-}
-
-static void IndexEnterOk(void * junk) {
-	ParamLoadData(&indexPG);
-	indexDialogCallBack((void*) trackIndex);
-	wHide(indexW);
 }
 
 static void RotateEnterOk(void * junk) {
@@ -2009,18 +2031,9 @@ static void MoveDialogInit(void) {
 	ParamRegister(&movePG);
 }
 
-static void IndexDialogInit(void) {
-	ParamRegister(&indexPG);
-}
-
 EXPORT void AddMoveMenu(wMenu_p m, moveDialogCallBack_t func) {
 	wMenuPushCreate(m, "", _("Enter Move ..."), 0,
 			(wMenuCallBack_p) StartMoveDialog, (void*) func);
-}
-
-EXPORT void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func) {
-	wMenuPushCreate(m, "cmdSelectIndex", _("Select Track Index ..."), 0,
-			(wMenuCallBack_p) StartIndexDialog, (void*) func);
 }
 
 //All values multipled by 100 to support decimal points from PD_FLOAT
@@ -2100,7 +2113,7 @@ EXPORT void DebugInit(void) {
 }
 
 
-EXPORT void InitDebug(const char * label, long * valueP) {
+EXPORT void InitDebug(char * label, long * valueP) {
 	if (debugCnt >= sizeof debugPLs / sizeof debugPLs[0])
 		AbortProg("Too many debug flags");
 	memset(&debugPLs[debugCnt], 0, sizeof debugPLs[debugCnt]);
@@ -2114,8 +2127,8 @@ EXPORT void InitDebug(const char * label, long * valueP) {
 
 void RecomputeElevations(void);
 
-static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
-		const char * label, long acclKey, void * func, long option, void * context) {
+static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, char * name,
+		char * label, long acclKey, void * func, long option, void * context) {
 	wMenuPush_p mp;
 	mp = wMenuPushCreate(m1, name, label, acclKey, ParamMenuPush,
 			&menuPLs[menuPG.paramCnt]);
@@ -2138,7 +2151,7 @@ static char * accelKeyNames[] = { "Del", "Ins", "Home", "End", "Pgup", "Pgdn",
 		"Up", "Down", "Right", "Left", "Back", "F1", "F2", "F3", "F4", "F5",
 		"F6", "F7", "F8", "F9", "F10", "F11", "F12", "NumpadAdd", "NumpadSub" };
 
-static void SetAccelKey(const char * prefName, wAccelKey_e key, int mode,
+static void SetAccelKey(char * prefName, wAccelKey_e key, int mode,
 		wAccelKeyCallBack_p func, void * context) {
 	int mode1 = 0;
 	int inx;
@@ -2287,10 +2300,6 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) SelectCurrentLayer, 0, (void *) 0);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0,
 			(void*) (wMenuCallBack_p) SetAllTrackSelect, 0, (void *) 0);
-	wMenuPushCreate(popup1M, "cmdSelectIndex", _("Select Track Index..."), 0,
-				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
-	wMenuPushCreate(popup2M, "cmdSelectIndex", _("Select Track Index..."), 0,
-				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
 	/* Modify */
 	wMenuPushCreate(popup2M, "cmdMove", _("Move"), 0,
 			(wMenuCallBack_p) DoCommandBIndirect, &moveCmdInx);
@@ -2411,7 +2420,6 @@ static void CreateMenus(void) {
 	menuPLs[menuPG.paramCnt].context = (void*)1;
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"), ACCL_SELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", _("Select Current Layer"), ACCL_SETCURLAYER, (void*)(wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
-	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L, (void*)(wMenuCallBack_p)StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"), ACCL_DESELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L, (void*)(wMenuCallBack_p)InvertTrackSelect, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", _("Select Stranded Track"), 0L, (void*)(wMenuCallBack_p)OrphanedTrackSelect, 0, (void *)0 );
@@ -2722,8 +2730,8 @@ static void CreateMenus(void) {
 			(void*) 1);
 	SetAccelKey("redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p) MainRedraw,
 			(void*) 1);
-	//SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
-	//		(void*) 1);
+	SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
+			(void*) 1);
 	SetAccelKey("copy", wAccelKey_Ins, WKEY_CTRL,
 			(wAccelKeyCallBack_p) EditCopy, 0);
 	SetAccelKey("paste", wAccelKey_Ins, WKEY_SHIFT,
@@ -2835,8 +2843,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	char *oldLocale = NULL;
 	char buffer[STR_SIZE];
 	unsigned int i;
-	wWinPix_t displayWidth;
-	wWinPix_t displayHeight;
+	wPos_t displayWidth;
+	wPos_t displayHeight;
 
 	strcpy(buffer, sProdNameLower);
 
@@ -2970,8 +2978,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	profilePathColor = drawColorPurple;
 	exceptionColor = wDrawFindColor(wRGB(255, 89, 0 ));
 	tieColor = wDrawFindColor(wRGB(153, 89, 68));
-	occupiedColor = drawColorAqua;
-	blockColor = drawColorPurple;
 
 	newToolbarMax = (1 << BG_COUNT) - 1;
 	wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
@@ -3010,7 +3016,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	RotateDialogInit();
 	MoveDialogInit();
-	IndexDialogInit();
 
 	wSetSplashInfo(_("Initializing commands"));
 	LOG1(log_init, ( "paramInit\n" ))
@@ -3050,8 +3055,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	if (toolbarSet&(1<<BG_HOTBAR)) {
 		LayoutHotBar( NULL );
 	} else {
-		LayoutHotBar( NULL );   /* Must run once to set it up */
-		HideHotBar();           /* Then hide */
+		HideHotBar();
 	}
 	LOG1(log_init, ( "drawInit\n" ))
 	DrawInit(initialZoom);

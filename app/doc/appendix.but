@@ -219,15 +219,15 @@ CTC panels, the panel elements can have their LCC event IDs automatically
 populated from the information in the XTrackCAD file, if the proper syntax is 
 observed.
 
-A LCC event id is a 64-bit number, represented as eight pairs of hexadecimal
+A LCC event id is a 64-bit number, represented as eight pairs of hexadevimal
 digits (0-9, a-f/A-F) separated by periods (.). Each pair represents one 8-bit
 byte of the event id. This event id is either produced by a sensor or logic
 element or is consumed by a control/device or a logic element.
 
-For blocks the occupancy script contains a pair of LCC event ids, separated by
-a colon (:).  The first LCC event id is produced by the occupancy detector
+For blocks the occupency script contains a pair of LCC event ids, separated by 
+a colon (:).  The first LCC event id is produced by the occupency detector 
 when the train enters the block and the second LCC event id is produced by the 
-occupancy detector when the train leaves the block.
+occupency detector when the train leaves the block.
 
 For switchmotors the point sense script contains a pair of LCC event ids, 
 separated by a colon (:).  The first LCC event id is produced by the point 
@@ -243,96 +243,6 @@ signal heads from top to bottom and the aspect script is a LCC event id that
 is consumed to produce that aspect. Presumably, the LCC event id is produced
 by a logic element (presumably a mast group in a Tower-LCC or similar device)
 or virtual track circuit in a Tower-LCC or similar device.
-
-\rule
-
-
-\H{controlElementBlocks} Block occupancy and the Model RR System's Dispatcher
-
-The Model RR System's Dispatcher relies on knowing which sections of track
-are occupied. The layout is divided into blocks and each block reports
-when it becomes occupied and when it becomes unocupied (as described above).
-Creating the needed blocks can be time consuming and error prone.  Hovever,
-much of the work of creating of blocks can be automated by software by applying a
-collection of rules.
-
-Creating blocks can be largely automated using these rules:
-- Blocks connect turnouts and/or other blocks.
-- The desired length of a block is long enough to hold the maximum length
-  train.
-- There may be 1 or more turnouts, and maybe short track segments, that form
-  a logical turnout that connects two blocks.
-- Turnouts can be set to either allow trains to pass from block to block or to
-  allow trains to enter or leave from a yard or industry or be local within a yard
-  or industry.
-- Very long blocks that can hold multiple trains can be divided into sub-blocks.
-- Turnouts don't have occupancy sensors or reporting. They are locically part
-  of the block the train is coming from or going to.
-- Each block has a unique name.
-
-The layout can be scanned for sections of track that connect turnouts. If the
-section is long enough a block can be automatically created. When the track is
-very long, more than one block can be created. For this to work we need to know
-the minimum block length that will result in a block being created and we need
-to know the maximum train length for dividing very long blocks into multiple
-blocks.
-
-Options->layout->\f{Min Block Length} and \f{Max Block Length} provide the needed
-lengths. These options are saved in the .xtc file. As a practical matter the
-\f{Min Block Length}, being the minimum length block, needs to be at least the
-length of an engine and longer than any connecting track that is part of a
-collection of turnouts. Also, the \f{Max Block Length} needs to be large enough
-to hold the longest train.
-
-When track or turnouts are changed existing blocks shuold be deleted and recreated
-to reflect the changed layout. The Manage->Layout_Control_Elements provides a quick
-way to create and delete blocks while working on the layout design. Once the layout
-and blocks are edited and/or saved they must be manually deleted before making changes
-to \f{MinBlockLength} or \f{MaxBlockLength}.
-
-During the layout design process blocks can be quickly created. They can be quickly
-deleted and recreated with different \f{Min Block Length} and \f{Max Block Length}
-values.
-
-In train mode the occupied blocks can be highlighted by setting Options->Display
-"Draw Occupied Blocks". Whenever a block is occupied it is highlighted.
-
-When trains move through the layout the dispatcher and signal controllers are
-notified when the train enters or leaves a block. Turnouts are not really
-part of blocks since they are very short compared to the block and they don't
-have occupancy sensors or report occupancy. The notifications, however, need
-to consider them. When a train enters a trunout the turnout is occupied and
-considered to be part of the block that the train is in. When the train engine
-passes through the turnout and enters the next block, the new block becomes
-occupied and the turnout is changed to be part of the new block. When the end
-of the train leaves the block and enters the turnout, the block is unoccupied,
-unless the engine has not yet enterd the block following the turnout. In this
-case the previous block remains occupied. Blocks are dynamically created and
-deleted as trains enter and exit turnouts. It is important that a tain can't
-disappear into a turnout and confuse the dispatcher into thinking the track
-is clear. Since turnouts don't have occupancy sensors, dynamic blocks do not
-have names or scripts.
-
-When a turnout is occupied, the point position is locked and can't be changed.
-When multiple turnouts connect blocks, as soon as the first turnout is entered,
-a dynamic block is created and all of them are considered to be occupied and
-locked. They stay locked until the last car of the train leaves the turnouts
-at which point the dynamic block is deleted.
-
-New block elements can be added by the Add->"Control element" pull down.
-Select a track segment and a dialog appears that permits changing the name and
-script. The set of track segments is automatically generated and can't be
-edited.
-
-The Manage->"Manage Layout Control Elements" dialog permits editing and
-deleting blocks. Select the desired block in the list and press "edit" or
-"delete".  Editing is limited to changing the block name and script.
-
-The Manage->"Manage Layout Control Elements" also has a "Add Missing" button to
-scan the layout and automatically generate all needed blocks. The "Delete Auto"
-button deletes all automatically generated blocks that have not been edited
-or saved.  All blocks must be deleted before changing the \f{Min Block Length}
-or \f{Max Block Length} parameters in options->layout.
 
 \rule
 

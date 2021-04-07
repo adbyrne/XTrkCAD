@@ -61,8 +61,8 @@ struct wBox_t {
 
 void wBoxSetSize(
     wBox_p b,	
-    wWinPix_t w,	
-    wWinPix_t h)	
+    wPos_t w,	
+    wPos_t h)	
 {
     b->w = w;
     b->h = h;
@@ -84,12 +84,12 @@ void wBoxSetSize(
 void wlibDrawBox(
     wWin_p win,
     wBoxType_e style,
-    wWinPix_t x,
-    wWinPix_t y,
-    wWinPix_t w,
-    wWinPix_t h)
+    wPos_t x,
+    wPos_t y,
+    wPos_t w,
+    wPos_t h)
 {
-    wWinPix_t x0, y0, x1, y1;
+    wPos_t x0, y0, x1, y1;
     GdkDrawable * window;
     cairo_t *cr;
     static char colors[8][4][2] = {
@@ -185,12 +185,12 @@ static void boxRepaint(wControl_p b)
 
 wBox_p wBoxCreate(
     wWin_p	parent,
-    wWinPix_t	bx,
-    wWinPix_t	by,
+    wPos_t	bx,
+    wPos_t	by,
     const char	* labelStr,
     wBoxType_e boxTyp,
-    wWinPix_t	bw,
-    wWinPix_t	bh)
+    wPos_t	bw,
+    wPos_t	bh)
 {
     wBox_p b;
     b = (wBox_p)wlibAlloc(parent, B_BOX, bx, by, labelStr, sizeof *b, NULL);

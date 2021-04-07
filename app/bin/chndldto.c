@@ -21,14 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
+
 #include "ccurve.h"
 #include "cjoin.h"
 #include "compound.h"
 #include "cstraigh.h"
 #include "cundo.h"
+#include "i18n.h"
+#include "messages.h"
 #include "track.h"
-#include "draw.h"
-#include "common-ui.h"
+#include "utility.h"
 
 #define PTRACE(X)
 

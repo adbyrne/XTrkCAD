@@ -20,15 +20,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <string.h>
+#include <stdbool.h>
+#ifdef WINDOWS
+	#include <io.h>
+	#define access(path,mode) _access(path,mode)
+	#define F_OK (0) 
+#else
+	#include <unistd.h>
+#endif
 #include "custom.h"
 #include "dynstring.h"
 #include "file2uri.h"
+#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "track.h"
+#include "wlib.h"
 
 extern BOOL_T inDescribeCmd;
 
@@ -37,7 +48,7 @@ extern BOOL_T inDescribeCmd;
 #define DOCUMENTFILEPATTERN "All Files (*.*)|*.*"
 #define DOCUMENTPATHKEY "document"
 
-static struct extraDataNote_t noteDataInUI;
+static struct extraDataNote noteDataInUI;
 static struct wFilSel_t * documentFile_fs;
 
 static void NoteFileOpenExternal(void * junk);
@@ -71,7 +82,7 @@ static wWin_p fileEditW;
 
 BOOL_T IsFileNote(track_p trk)
 {
-    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
 	return(xx->op == OP_NOTEFILE );
 }
@@ -224,10 +235,9 @@ FileEditOK(void *junk)
 
 void CreateEditFileDialog(track_p trk, char * windowTitle)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
     if (!fileEditW) {
-	    	noteDataInUI.base.trkType = T_NOTE;
 		noteDataInUI.noteData.fileData.path = MyMalloc(PATHMAXIMUMLENGTH);
 		noteDataInUI.noteData.fileData.title = MyMalloc(TITLEMAXIMUMLENGTH);
 		fileEditPLs[I_TITLE].valueP = noteDataInUI.noteData.fileData.title;
@@ -263,7 +273,7 @@ void CreateEditFileDialog(track_p trk, char * windowTitle)
 
 void ActivateFileNote(track_p trk)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
 	NoteFileOpen(xx->noteData.fileData.path);
 }
@@ -278,7 +288,7 @@ void ActivateFileNote(track_p trk)
 
 void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 {
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
     DynString statusLine;
 
     DynStringMalloc(&statusLine, 80);
@@ -309,7 +319,7 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 
 void NewFileNoteUI(track_p trk)
 {
-	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
 	char *tmpPtrText = _("Describe the file");
 
 	xx->noteData.fileData.title = MyStrdup(tmpPtrText);

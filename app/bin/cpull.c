@@ -20,13 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
+
 #include "cselect.h"
 #include "compound.h"
 #include "cundo.h"
 #include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
 #include "track.h"
-#include "draw.h"
-#include "common-ui.h"
+#include "utility.h"
 
 int debugPull = 0;
 

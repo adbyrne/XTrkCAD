@@ -20,14 +20,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
+#include <stdbool.h>
+
 #include "custom.h"
 #include "cselect.h"
 #include "cundo.h"
+#include "i18n.h"
 #include "layout.h"
+#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "common-ui.h"
 
 
 /*
@@ -382,8 +386,8 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 
 
 
-static void ProfilePix2CoOrd(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
-static void ProfileCoOrd2Pix(drawCmd_p, coOrd, wDrawPix_t*, wDrawPix_t*);
+static void ProfilePix2CoOrd(drawCmd_p, wPos_t, wPos_t, coOrd *);
+static void ProfileCoOrd2Pix(drawCmd_p, coOrd, wPos_t*, wPos_t*);
 static drawCmd_t screenProfileD = {
     NULL,
     &screenDrawFuncs,
@@ -396,8 +400,8 @@ static drawCmd_t screenProfileD = {
 
 static void ProfilePix2CoOrd(
     drawCmd_p d,
-    wDrawPix_t xx,
-    wDrawPix_t yy,
+    wPos_t xx,
+    wPos_t yy,
     coOrd * pos)
 {
     pos->x = (xx/d->dpi+d->orig.x)/prof.scaleX;
@@ -408,12 +412,12 @@ static void ProfilePix2CoOrd(
 static void ProfileCoOrd2Pix(
     drawCmd_p d,
     coOrd pos,
-    wDrawPix_t *xx,
-    wDrawPix_t *yy)
+    wPos_t *xx,
+    wPos_t *yy)
 {
-    wDrawPix_t x, y;
-    x = ((((pos.x*prof.scaleX)/d->scale-d->orig.x)*d->dpi+0.5));
-    y = (((((pos.y-prof.minE)*prof.scaleY)/d->scale-d->orig.y)*d->dpi+0.5));
+    wPos_t x, y;
+    x = (wPos_t)((((pos.x*prof.scaleX)/d->scale-d->orig.x)*d->dpi+0.5));
+    y = (wPos_t)(((((pos.y-prof.minE)*prof.scaleY)/d->scale-d->orig.y)*d->dpi+0.5));
     if (d->angle == 0) {
         *xx = x;
         *yy = y;
@@ -434,7 +438,7 @@ static void ProfileCoOrd2Pix(
 
 static void RedrawProfileW(void)
 {
-    wWinPix_t ww, hh;
+    wPos_t ww, hh;
     coOrd size;
     int divC;
     DIST_T maxE, rngE;
@@ -738,9 +742,6 @@ static void SelProfileW(
     elev = pos.y;
 
     switch (action&0xFF) {
-    case C_START:
-    	profileUndo = FALSE;
-    	break;
     case C_DOWN:
         for (inx=0; inx<profElem_da.cnt; inx++) {
             if (dist <= profElem(inx).dist) {

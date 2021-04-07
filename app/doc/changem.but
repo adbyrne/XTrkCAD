@@ -192,17 +192,15 @@ The resulting track(s) will mimic the shape of the Cornu/Bezier(s) exactly. This
 
 The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. 
 
-The endpoint which you are working on is indicated with a big red dot. Note that when an endpoint is selected, the Elevation Window will have focus. To select a different endpoint without closing this window, two clicks (or a double click) will be needed. The first click restores focus to the main window, the second selects the point.
+The endpoint which you are working on is indicated with a big red dot.
 
-If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift+Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
+Moving around the layout will show you the elevation at the point indicated by a blue dot.
 
-Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move existing Elevation Labels if the option is set for them to be displayed and the Zoom level is adequate, Only "Defined" and "Station" endpoint labels can be moved.
+If you hover over a point where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
 
-If you add \f{Alt}, while moving around the layout close to tracks will show you the elevation at the point indicated by a blue closed dot. 
+If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
 
-With \f{Alt} held, if you hover over a point close to where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
-
-Clicking with \f{Shift} at this point will split the track, allowing the elevation to be adjusted to provide adequate clearance.
+Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move Elevation Labels if both the option is set for them to be displayed and the Zoom level is correct,, Only Defined and Station endpoint labels can be moved.
 
 \G{png.d/celev.png}
 
@@ -210,17 +208,17 @@ An endpoint can have one of several elevation types:
 
 \u000
 
-\b \f{None} - no elevation control defined. This is the default state and the elevation will be computed. It will be shown if the Display Option \K{cmdDisplay} \f{EndPt Elevations} setting is on.
+\b \f{None} - no elevation defined.
 
-\b \f{Defined} - the defined elevation is set to a specified height. The elevation will be shown. 
+\b \f{Defined} - a defined elevation at a specified height.
 
-\b \f{Hidden} - a defined elevation like \f{Defined} but not displayed on the layout.
+\b \f{Hidden} - a defined elevation but not displayed on the layout.
 
-\b \f{Computed} - height is calculated and displayed even if the Display Option \K{cmdDisplay} \e{EndPt Elevations} is on.
+\b \f{Computed} - height is based on height of closest neighbors.
 
-\b \f{Grade} - grade is based on height of closest neighbors and displayed.
+\b \f{Grade} - grade is based on height of closest neighbors.
 
-\b \f{Ignored} - endpoint is not considered in computations.  This breaks the flow of the elevation influence from one side to the other, resulting in an elevation that is not dependent on the connected track but on the other connected tracks. A common use would be to ensure a mainline dictates the elevation of the start of a branch.
+\b \f{Ignored} - endpoint is not considered in computations.
 
 \b \f{Station} - assigns a name to the endpoint.
 
@@ -230,11 +228,9 @@ When an endpoint is selected on the layout by \e{Left-Click}, it is highlighted 
 
 Additionally, \f{Defined Elevation} endpoints are indicated on the layout by gold colored dots. \f{Ignored Elevation} endpoints are indicated by blue colored dots.
 
-The grade at the specified endpoint is displayed next to the \f{Grade} radio button. For \e{Defined Elevation} endpoints, the grade on each side of the endpoint is displayed.
+The grade at the specified endpoint is displayed next to the \f{Grade} radio button. For \f{Defined Elevation} endpoints, the grade on each side of the endpoint is displayed.
 
-\f{Defined Elevation} endpoints are used to specify fixed heights of track endpoints. Typically, this would be where a grade changes or where clearances must be maintained. \f{Computed} Elevations and \f{Grade} markers can place between \f{Defined Elevation} endpoints. 
-These values are not entered directly but are computed dynamically based on \f{Defined Elevations} of connected tracks. 
-This allows labeling of elevations at intermediate endpoints without having the enter specific values.  \f{Computed} markers can also placed between a \f{Defined Elevation} point and the end of a track.
+\f{Defined Elevation} endpoints are used to specify fixed heights of track endpoints. Typically, this would be where a grade changes or where clearances must be maintained. \f{Computed} Elevations and \f{Grade} markers can place between \f{Defined Elevation} endpoints. These values are not entered directly but are computed dynamically based on \f{Defined Elevations} of connected tracks. This allows labeling of elevations at intermediate endpoints without having the enter specific values.  \f{Computed} markers can also placed between a \f{Defined Elevation} point and the end of a track.
 
 \f{Stations} are used to provide information for the Profile (\K{cmdProfile}) command.
 
@@ -247,7 +243,7 @@ All \f{Elevation} labels (including \f{Grade} and \f{Station}) are drawn on the 
 
 Elevations of Tracks are computed in following steps.  The colors listed in each step are used as the background color of the Track Elevation Markers (if they are enabled (\K{cmdDisplay})).
 
-\b The Shortest Paths between all \e{Defined Elevations} are computed.  A Path stops at \f{Ignored} or \e{Defined} endpoints. The Elevation of any Turnouts on these Paths with more than two connections are computed as the average Elevation inversely weighted by distance along the tracks to the \e{Defined Elevation} points (\e{Blue}).
+\b The Shortest Paths between all \e{Defined Elevations} are computed.  A Path stops at \e{Ignored} or \e{Defined} endpoints.  The Elevation of any Turnouts on these Paths with more than two connections are computed as the average Elevation inversely weighted by distance along the tracks to the \e{Defined Elevation} points (\e{Blue}).
 
 \u000
 
@@ -261,8 +257,7 @@ Elevations of Tracks are computed in following steps.  The colors listed in each
 
 \b Any remaining tracks are not connected to a \e{Defined Elevation} and do not have an Elevation.
 
-The elevation computation is performed incrementally every time the layout is changed to keep all elevations in sync. The performance of the computation is affected by the placement of the \e{Defined Elevation} endpoints and the number of Paths between them. 
-Place the \e{Defined Elevations} at points where tracks begin to branch (such as the throat of a yard or at the ends of a siding). Also, use \e{Defined Elevations} or \e{Ignore Elevations} to break the layout into areas so recomputation has fewer tracks and Paths to deal with.
+The elevation computation is performed incrementally every time the layout is changed to keep all elevations in sync. The performance of the computation is affected by the placement of the \e{Defined Elevation} endpoints and the number of Paths between them. Place the \e{Defined Elevations} at points where tracks begin to branch (such as the throat of a yard or at the ends of a siding). Also, use \e{Defined Elevations} to break the layout into areas so recomputation has fewer tracks and Paths to deal with.
 
 \rule
 
@@ -902,7 +897,7 @@ When a Polygon or a PolyLine is modified, open blue circle anchors show the posi
 
 \u000
 
-\b \f{Delete} or \f{Backspace} will remove a selected node.
+\b \f{Delete} will remove a selected node.
 
 \u000
 
@@ -1106,66 +1101,18 @@ Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{En
 
 \G{png.d/bmovedes.png}
 
-This command is used to move Elevation, Grade, or Station (\K{cmdElevation}), and to enable/disable and move
-Straight Track (\K{cmdStraight}), Curved Track (\K{cmdCurve}), Bezier (\K{cmdBezier}, Cornu (\K{cmdCornu}), Joint (\K{cmdJoin}), Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
+This command is used to enable and move Elevation, Grade, Station (\K{cmdElevation}), Straight Track (\K{cmdStraight}), Curved Track (\K{cmdCurve}), Bezier (\K{cmdBezier}, Cornu (\K{cmdCornu}), Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
 
 The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item or the \f{Move Description} button.
 
-Click the \f{Move Description} button to activate the \f{Move Description} command. As the cursor passes close to an object that can display a label it will be highlighted. 
-A dark blue indicates a label that has "Show Description" set on, a teal color means it is set to hide.
+Click the \f{Move Description} button to activate the \f{Move Description} command. As the cursor passes close to an object that can display a label it will be highlighted. A dark blue indicates a label that has "Show Description" set on, a light blue set off.
 
 Use \e{Left+Drag} to move the label to a new position and unhide if hidden. Once moved, the label becomes fixed in a position relative to the object. Subsequent moves of that object will cause the label to move as well.
 
-This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}). 
+This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}).
 
-Note that labels need to be visible in the Display menu and the layout needs to be zoomed in enough to show labels for them to be moved.
-
-There are keys that control the display of description when hovering over a description or a track.
-
-\b The letter "\f{s}" when hovering over a track will show the hidden description - the teal highlight will show which tracks can have descriptions. 
-
-\b The letter "\f{h}", when hovering over the track or description, can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix, Joint or Turnout Labels. 
-
-\b The letter "\f{d}" will enable and disable a detailed description which is intended for tracklaying - it is a table of points and track angles that lie along the track path. 
-
-Using these values a curve can be constructed even for complex objects such as Bezier or Cornu.
-
-There is a \f{Context Menu} Show/Hide Toggle as well.
-
-Labels can be moved by hovering the "hot spots" or over the attached track object. \e{Left-Drag} will reposition it. Elevation labels can be selected by hovering of thier centers or the end point they refer to.
-Note that end points with elevation mode "None" are not selectable. 
- 
-\b Cornu, Bezier, Straight and Joint (Easment) Labels can be moved along the line between the end-points and also laterally. The fields show data about the curves. 
-
-\lcont{\u000
-
-\b Cornu and Bezier Tracks show the "chord" length, its absolute angle, and the length of the track and the minimum radius. 
-To lay these variable radius curves out, the detailed description selected by \f{'d'} is suggested. 
-
-\b Joint/Easement Tracks show the "chord" length and abslute angle and easement curve constructing values of Radius and Lengths. 
-For larger easmements, the detailed position and angle description selected by \f{'d'} may be useful.
-
-\b Straight Tracks show the length and the absolute angle.
-
-}
-
-\u000
-
-\b Curve Track Labels can be moved so that the label is somewhere on a radial line from the center to a position within the arc. 
-A Curve label shows the absolute angle of the chord, its length, the Curve Radius and the deflection from the chord at the center of it. 
-This enables the curve to be laid out even if the center point of the arc is inaccesible. Note that the detailed description may also be helpful in this case.
-
-\u000
-
-\b Compound (Structure and Turnout) Labels can be moved without restriction. They show the Object's Title information. 
-
-\u000
-
-\b Elevation points labels can be moved without restriction - they show the Grade, Elevation, or Station Name as appropriate. 
-
-\u000
-
-\b The detailed description setting is not preserved in the saved layout. It is designed for use when transferring a complex part of the plan to a real layout.  
+The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter "\f{s}" will show a hidden description. 
+The letter "\f{d}" will enable and disable detailed descriptions. There is a \f{Context Menu} Show/Hide Toggle as well.
 
 Note - existing defined elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElevation} command.
 
@@ -1798,14 +1745,6 @@ If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to 
 \u000
 
 \dd \e{"?"} - displays the Property menu for the object hovered over
-
-\u000
-
-\b \e{"e"} sets the zoom to a value that allows all the room to be shown and moves the origin of bottom left of the window to be 0,0
-
-\u000
-
-\b \e{"s"} sets the zoom to show the selected set of objects and pans the window to center the highlit area.
 
 \u000
 

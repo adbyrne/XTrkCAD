@@ -182,11 +182,11 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
                                        wFont_p fp,
                                        wFontSize_t fs,
                                        const char *s,
-                                       wDrawPix_t *width_p,
-                                       wDrawPix_t *height_p,
-                                       wDrawPix_t *ascent_p,
-                                       wDrawPix_t *descent_p,
-				       wDrawPix_t *baseline_p)
+                                       int *width_p,
+                                       int *height_p,
+                                       int *ascent_p,
+                                       int *descent_p,
+									   int *baseline_p)
 {
     if (!fontInitted) {
         fontInit();
@@ -215,10 +215,9 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
                                     FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
     pango_layout_set_font_description(layout, fontDescription);
     /* get layout measures */
-    gint width_i, height_i;
-    pango_layout_get_size(layout, &width_i, &height_i);
-    *width_p = width_i / PANGO_SCALE;
-    *height_p = height_i / PANGO_SCALE;
+    pango_layout_get_size(layout, width_p, height_p);
+    *width_p = *width_p / PANGO_SCALE;
+    *height_p = *height_p / PANGO_SCALE;
     context = gtk_widget_create_pango_context(widget);
     metrics = pango_context_get_metrics(context, fontDescription,
                                         pango_context_get_language(context));

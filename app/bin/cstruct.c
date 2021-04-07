@@ -20,22 +20,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "layout.h"
+#include "messages.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
+#include "utility.h"
 #include "ccurve.h"
-#include "common-ui.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
 EXPORT dynArr_t structureInfo_da;
+
+typedef struct compoundData extraData;
 
 
 static wIndex_t pierListInx;
@@ -58,7 +67,7 @@ static wIndex_t structureInx;
 static long hideStructureWindow;
 static void RedrawStructure(void);
 
-static wWinPix_t structureListWidths[] = { 80, 80, 220 };
+static wPos_t structureListWidths[] = { 80, 80, 220 };
 static const char * structureListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, structureListWidths, structureListTitles };
 static const char * hideLabels[] = { N_("Hide"), NULL };
@@ -346,7 +355,7 @@ static void DrawStructure(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_STRUCTURE, extraDataCompound_t);
+	struct extraData *xx = GetTrkExtraData(t);
 
 	d->options &= ~DC_NOTSOLIDLINE;
 	switch(xx->lineType) {
@@ -395,7 +404,7 @@ static ANGLE_T GetAngleStruct(
 		EPINX_T * ep0,
 		EPINX_T * ep1 )
 {
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
+	struct extraData * xx = GetTrkExtraData(trk);
 	ANGLE_T angle;
 
 	pos.x -= xx->orig.x;
@@ -423,8 +432,8 @@ static BOOL_T QueryStructure( track_p trk, int query )
 
 static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
 {
-	struct extraDataCompound_t *xx1 = GET_EXTRA_DATA( trk1, T_STRUCTURE, extraDataCompound_t );
-	struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE, extraDataCompound_t );
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -525,7 +534,7 @@ static wWin_p structureW;
 static void RescaleStructure( void )
 {
 	DIST_T xscale, yscale;
-	wWinPix_t ww, hh;
+	wPos_t ww, hh;
 	DIST_T w, h;
 	wDrawGetSize( structureD.d, &ww, &hh );
 	w = ww/structureD.dpi - 0.2;
@@ -719,7 +728,7 @@ static ANGLE_T PlaceStructure(
 static void NewStructure( void )
 {
 	track_p trk;
-	struct extraDataCompound_t *xx;
+	struct extraData *xx;
 	wIndex_t titleLen;
 	wIndex_t pierInx;
 
@@ -736,7 +745,7 @@ static void NewStructure( void )
 	UndoStart( _("Place Structure"), "newStruct" );
 	titleLen = strlen( curStructure->title );
 	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
-	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
+	xx = GetTrkExtraData(trk);
 #ifdef LATER
 	trk = NewTrack( 0, T_STRUCTURE, 0, sizeof (*xx) + 1 );
 	xx->orig = Dst.pos;

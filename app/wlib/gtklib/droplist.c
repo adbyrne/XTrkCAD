@@ -353,13 +353,13 @@ wlibNewDropList(GtkListStore *ls, int editable)
 
 wList_p wDropListCreate(
     wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
+    wPos_t	x,
+    wPos_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
     long	number,
-    wWinPix_t	width,
+    wPos_t	width,
     long	*valueP,
     wListCallBack_p action,
     void 	*data)

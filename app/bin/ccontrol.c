@@ -46,19 +46,24 @@
 
 static const char rcsid[] = "@(#) : $Id$";
 
+#include <ctype.h>
+#include <string.h>
+
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "common-ui.h"
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 #include "include/utf8convert.h"
-#endif // UTFCONVERT
+#endif // WINDOWS
+#include "utility.h"
+#include "messages.h"
 
 EXPORT TRKTYP_T T_CONTROL = -1;
 
@@ -81,7 +86,6 @@ static char controlOffScript[STR_LONG_SIZE];
 #endif
 
 typedef struct controlData_t {
-    extraDataBase_t base;
     coOrd orig;
     BOOL_T IsHilite;
     char * name;
@@ -91,7 +95,7 @@ typedef struct controlData_t {
 
 static controlData_p GetcontrolData ( track_p trk )
 {
-    return GET_EXTRA_DATA( trk, T_CONTROL, controlData_t );
+    return (controlData_p) GetTrkExtraData(trk);
 }
 
 #define RADIUS 6
@@ -307,9 +311,9 @@ static BOOL_T WriteControl ( track_p t, FILE * f )
     controlData_p xx = GetcontrolData(t);
 	char *controlName = MyStrdup(xx->name);
 
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 	controlName = Convert2UTF8(controlName);
-#endif // UTFCONVERT
+#endif // WINDOWS
 
     rc &= fprintf(f, "CONTROL %d %u %s %d %0.6f %0.6f \"%s\" \"%s\" \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
@@ -337,9 +341,9 @@ static BOOL_T ReadControl ( char * line )
         return FALSE;
     }
 
-#ifdef UTFCONVERT
+#ifdef WINDOWS
 	ConvertUTF8ToSystem(name);
-#endif // UTFCONVERT
+#endif // WINDOWS
 
     trk = NewTrack(index, T_CONTROL, 0, sizeof(controlData_t));
     SetTrkVisible(trk, visible); 
@@ -551,11 +555,11 @@ static POS_T ctlhiliteBorder;
 static wDrawColor ctlhiliteColor = 0;
 static void DrawControlTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
+	wPos_t x, y, w, h;
 	if (ctlhiliteColor==0)
 		ctlhiliteColor = wDrawColorGray(87);
-	w = (wDrawPix_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wDrawPix_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = (wPos_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = (wPos_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
 	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }

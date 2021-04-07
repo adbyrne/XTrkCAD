@@ -19,14 +19,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <math.h>
+#include <string.h>
 
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "param.h"
 #include "track.h"
 #include "ccurve.h"
+#include "utility.h"
 
 static wWin_p elevW;
 
@@ -125,11 +129,11 @@ void static CreateMoveAnchor(coOrd pos) {
 static void LayoutElevW(
 		paramData_t * pd,
 		int inx,
-		wWinPix_t colX,
-		wWinPix_t * x,
-		wWinPix_t * y )
+		wPos_t colX,
+		wPos_t * x,
+		wPos_t * y )
 {
-	static wWinPix_t h = 0;
+	static wPos_t h = 0;
 	switch ( inx ) {
 	case I_HEIGHT:
 		h = wControlGetHeight( elevationPLs[I_MODE].control )/((sizeof elevModeLabels/sizeof elevModeLabels[0])-1);
@@ -239,6 +243,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	int mode;
 	DIST_T elevX, grade, elev, dist;
 	long radio;
+	BOOL_T computedOk;
 	BOOL_T gradeOk = TRUE;
 	track_p trk1;
 	EPINX_T ep1;
@@ -291,55 +296,69 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	elevModeV = radio;
 	ParamLoadControl( &elevationPG, I_MODE );
 	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
-	sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0, (units==UNITS_METRIC?"cm":"\"") );
-	ParamLoadMessage( &elevationPG, I_COMPUTED, message );
-	if (gradeOk) {
-		sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
-	} else {
-		if ( EndPtIsDefinedElev(trk,ep) ) {
-			elev = GetElevation(trk);
-			dist = GetTrkLength(trk,ep,-1);
-			if (dist>0.1)
-				sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
-			else
-				sprintf( message, _("Undefined") );
-			if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
-				elev = GetElevation(trk1);
-				dist = GetTrkLength(trk1,ep1,-1);
-				if (dist>0.1)
-					sprintf( message+strlen(message), " - %0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
-				else
-					sprintf( message+strlen(message), " - %s", _("Undefined") );
-			}
+	computedOk = TRUE;
+	if (oldElevationEvaluation || computedOk) {
+		sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0, (units==UNITS_METRIC?"cm":"\"") );
+		ParamLoadMessage( &elevationPG, I_COMPUTED, message );
+		if (gradeOk) {
+			sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
 		} else {
-			strcpy( message, _("Undefined") );
+			if ( EndPtIsDefinedElev(trk,ep) ) {
+				elev = GetElevation(trk);
+				dist = GetTrkLength(trk,ep,-1);
+				if (dist>0.1)
+					sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
+				else
+					sprintf( message, _("Undefined") );
+				if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
+					elev = GetElevation(trk1);
+					dist = GetTrkLength(trk1,ep1,-1);
+					if (dist>0.1)
+						sprintf( message+strlen(message), " - %0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
+					else
+						sprintf( message+strlen(message), " - %s", _("Undefined") );
+				}
+			} else {
+				strcpy( message, _("Undefined") );
+			}
 		}
-	}
-	ParamLoadMessage( &elevationPG, I_GRADE, message );
-	if ( (mode&ELEV_MASK)!=ELEV_DEF ) {
-		elevHeightV = elevX;
-		ParamLoadControl( &elevationPG, I_HEIGHT );
+		ParamLoadMessage( &elevationPG, I_GRADE, message );
+		if ( (mode&ELEV_MASK)!=ELEV_DEF ) {
+			elevHeightV = elevX;
+			ParamLoadControl( &elevationPG, I_HEIGHT );
+		}
 	}
 	wShow(elevW);
 }
 
 static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
-	DIST_T elev0, elev1, dist0, dist1;
+	DIST_T len, len1, elev0, elev1, dist0, dist1;
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
-		if ( GetTrkLength( trk, 0, 1 ) < 0.1 )
-			return FALSE;
 		dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
 		dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
-		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
-		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
-		if (dist1+dist0 <= 0.1) {
+		if (EndPtIsDefinedElev(trk,0))
+			elev0 = GetTrkEndElevHeight(trk,0);
+		else {
+			if (!GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
+				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
+				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
+			}
+		}
+		if (EndPtIsDefinedElev(trk,1))
+			elev1 = GetTrkEndElevHeight(trk,1);
+		else {
+			if (!GetTrkEndElevCachedHeight(trk,1,&elev1,&len1)) {
+				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
+				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
+			}
+		}
+		if (dist1+dist0 < 0.1) {
 			*height = elev0;
 			return TRUE;
 		}
 		*height = ((elev1-elev0)*(dist0/(dist0+dist1)))+elev0;
 		return TRUE;
-	} else if (GetTrkEndPtCnt(trk) == 1 && 
-		  ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE ) ) {
+	} else if (GetTrkEndPtCnt(trk) == 1 && GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
 		*height = elev0;
 		return TRUE;
 	}
@@ -368,7 +387,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
 		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
 		ParamLoadMessage( &elevationPG, I_GRADE, "" );
-		InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description, +Alt to show elevation") );
+		InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		elevTrk = NULL;
 		elevUndo = FALSE;
 		CmdMoveDescription( action, pos );
@@ -395,40 +414,37 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				InfoMessage( _("Move to end or track crossing") );
 				return C_CONTINUE;
 			}
-			if (((MyGetKeyState()&WKEY_ALT))) {   //Add square with Alt
-				if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
-					if (IsClose(FindDistance(p0,p2))) {
-						if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
-							if (GetTrkEndPtCnt(trk1) == 2) {
-								if (GetPointElev(trk1,p2,&elev1)) {
-									if (MyGetKeyState()&WKEY_SHIFT) {
-										InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
-									} else
-										InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
-								}
-								CreateSquareAnchor(p2);
-								return C_CONTINUE;
+			if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
+				if (IsClose(FindDistance(p0,p2))) {
+					if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
+						if (GetTrkEndPtCnt(trk1) == 2) {
+							if (GetPointElev(trk1,p2,&elev1)) {
+								if (MyGetKeyState()&WKEY_SHIFT) {
+									InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+								} else
+									InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
 							}
+							CreateSquareAnchor(p2);
+							return C_CONTINUE;
 						}
 					}
 				}
 			}
 			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
-			    if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
+				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
+					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
+					InfoMessage (_("Track End elevation %0.3f"), PutDim(elev0));
+				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
 						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
 					CreateSplitAnchor(p0,trk0);
-			   } else if ((IsClose(FindDistance(GetTrkEndPos(trk0,ep0),p0))
-					   || (FindDistance(GetTrkEndPos(trk0,ep0),p0)<minLength))) {
-					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
-					InfoMessage (_("Track End elevation %0.3f - snap End Pt"), PutDim(elev0));
-				} else if (MyGetKeyState()&WKEY_ALT) {
+				} else {
+					InfoMessage( _("Track Point elevation %0.3f"), PutDim(elev0));
 					CreateEndAnchor(p0,TRUE);
-					InfoMessage (_("Track End elevation %0.3f"), PutDim(elev0));
 				}
-			} else InfoMessage( _("Click on End Pt, +Shift to split, +Ctrl to move description, +Alt show Elevation") );
+			} else InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		} else
-			InfoMessage( _("Click on End Pt, +Shift to split, +Ctrl to move description, +Alt show Elevation") );
+			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		return C_CONTINUE;
 	case C_DOWN:
 	case C_MOVE:
@@ -450,7 +466,10 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		} else {
 			ep0 = PickEndPoint( p0, trk0 );
-			if ( (MyGetKeyState()&WKEY_SHIFT) ) {
+			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
+				InfoMessage( _("Point selected!") );
+				ElevSelect( trk0, ep0 );
+			} else if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 				oldTrackCount = trackCount;
 				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
@@ -460,10 +479,6 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				ElevSelect( trk0, ep0 );
 				UndoEnd();
 				elevUndo = FALSE;
-			} else if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),p0)) ||
-					  (FindDistance(GetTrkEndPos(trk0,ep0),p0)<minLength)) {   //Snap if close visually or track
-				InfoMessage( _("Point selected!") );
-				ElevSelect( trk0, ep0 );
 			}
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);

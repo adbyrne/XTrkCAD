@@ -20,14 +20,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
+
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cselect.h"
 #include "cundo.h"
+#include "i18n.h"
+#include "messages.h"
 #include "param.h"
 #include "track.h"
+#include "utility.h"
 #include "layout.h"
-#include "common-ui.h"
 
 static struct {
 		track_p Trk;

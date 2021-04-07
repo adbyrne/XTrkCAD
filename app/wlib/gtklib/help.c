@@ -28,8 +28,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
-//#include "misc.h"
-extern const char * GetCurCommandName();
+#include "misc.h"
 
 #include "gtkint.h"
 #include "i18n.h"

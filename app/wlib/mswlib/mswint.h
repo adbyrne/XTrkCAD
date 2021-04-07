@@ -1,6 +1,7 @@
 #include "wlib.h"
 #include "mswlib.h"
-#include "dynarr.h"
+//#include "dynarr.h"
+#include "common.h"
 #ifndef WIN32
 /*#define CONTROL3D*/
 #endif
@@ -43,6 +44,7 @@
 #endif
 
 #define BOOL_T wBool_t
+#define POS_T wPos_t
 #define INDEX_T wIndex_t
 #define INTEGER_T wInteger_t
 
@@ -61,7 +63,7 @@ typedef LRESULT (*messageCallback_p)( wControl_p, HWND, UINT, WPARAM, LPARAM );
 typedef void (*setTriggerCallback_p)( wControl_p b );
 typedef void (*setBusyCallback_p)( wControl_p, BOOL_T );
 typedef void (*showCallback_p)( wControl_p, BOOL_T );
-typedef void (*setPosCallback_p)( wControl_p, wWinPix_t, wWinPix_t );
+typedef void (*setPosCallback_p)( wControl_p, wPos_t, wPos_t );
 
 typedef struct {
 		repaintProcCallback_p	repaintProc;
@@ -81,10 +83,10 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		wControl_p next; \
 		wControl_p synonym; \
 		wWin_p parent; \
-		wWinPix_t x, y; \
-		wWinPix_t w, h; \
+		POS_T x, y; \
+		POS_T w, h; \
 		long option; \
-		wWinPix_t labelX, labelY; \
+		POS_T labelX, labelY; \
 		const char * labelStr; \
 		const char * helpStr; \
 		const char * tipStr; \
@@ -106,8 +108,8 @@ typedef struct {
 
 struct wIcon_t {
 		int type;
-		wWinPix_t w;				/**< width */
-		wWinPix_t h;				/**< height */
+		wPos_t w;				/**< width */
+		wPos_t h;				/**< height */
 		wDrawColor color;
 		int colorcnt;			/**< number of colors */
 		RGBQUAD *colormap;
@@ -138,8 +140,8 @@ struct wDraw_t {
 		wBool_t bTempMode;
 		wBool_t bCopiedMain;
 
-		wDrawPix_t lastX;
-		wDrawPix_t lastY;
+		wPos_t lastX;
+		wPos_t lastY;
 
 		};
 
@@ -166,7 +168,7 @@ void mswResize( wWin_p );
 wControl_p mswMapIndex( INDEX_T );
 void mswButtPush( wControl_p );
 void * mswAlloc( wWin_p, wType_e, const char *, int, void *, int * );
-void mswComputePos( wControl_p, wWinPix_t, wWinPix_t );
+void mswComputePos( wControl_p, wPos_t, wPos_t );
 void mswAddButton( wControl_p, BOOL_T, const char * );
 void mswRepaintLabel( HWND, wControl_p );
 int mswRegister( wControl_p );
@@ -176,7 +178,7 @@ void mswSetFocus( wControl_p );
 void mswSetTrigger( wControl_p, setTriggerCallback_p );
 void mswMenuPush( wControl_p );
 void mswCreateCheckBitmaps( void );
-LRESULT FAR PASCAL XEXPORT mswDrawPush( HWND, UINT, WPARAM, LPARAM );
+long FAR PASCAL XEXPORT mswDrawPush( HWND, UINT, UINT, LONG );
 #ifdef WIN32
 DWORD GetTextExtent( HDC, CHAR *, UINT );
 #endif
@@ -184,7 +186,7 @@ void mswRedrawAll( void );
 void mswRepaintAll( void );
 HDC mswGetPrinterDC( void );
 int mswMenuAccelerator( wWin_p, long );
-void mswMenuMove( wMenu_p, wWinPix_t, wWinPix_t );
+void mswMenuMove( wMenu_p, wPos_t, wPos_t );
 void mswRegisterBitMap( HBITMAP );
 void mswFontInit( void );
 void mswInitColorPalette( void );

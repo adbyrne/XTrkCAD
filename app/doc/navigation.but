@@ -302,7 +302,7 @@ Instead of using the menus or the buttons on the \f{Tool-bar} (\K{mainW}), most 
 
 \u000
 
-\dd The \c{DELETE} or the \c{BackSpace} key invokes the \f{Delete} (\K{cmdDelete}) command.
+\dd The \c{DELETE} key invokes the \f{Delete} (\K{cmdDelete}) command.
 
 Several Shortcut key commands are used in conjunction with the mouse. These commands are listed in \K{cmdAcclKeys}.
 

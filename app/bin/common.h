@@ -23,74 +23,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-// INCLUDES
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <locale.h>
-#include <math.h>
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <time.h>
-
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
-#include "wlib.h"
-
-#ifndef WINDOWS
-// Unix/Mac
-#include <dirent.h>
-#include <unistd.h>
-
-#define PATH_SEPARATOR "/"
-
-#else
-// Windows
-#include <io.h>
-#include <process.h>
-#include "include/dirent.h"
-#include "direct.h"
-#include "getopt.h"
-
-// DEFINES
-#define UTFCONVERT
-#define M_PI 3.14159
-#define F_OK (00)
-#define W_OK (02)
-#define R_OK (04)
-#define PATH_SEPARATOR "\\"
-
-// ALIASES for WINDOWS
-#define access _access
-#define unlink(a) _unlink((a))
-#define rmdir(a) _rmdir((a))
-#define open(name, flag, mode) _open((name), (flag), (mode))
-#define close(file) _close((file))
-#define getpid() _getpid()
-#define strcasecmp _stricmp
-#define strncasecmp _strnicmp
-#define mkdir( DIR, MODE ) _mkdir( (DIR) )
-#if _MSC_VER >1300
-#define strnicmp _strnicmp
-#define stricmp _stricmp
-#define strdup _strdup
-#endif
-// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
-#if ( _MSC_VER < 1900 )
-#define round(x) floor((x)+0.5)
-#endif
-
-/* suppress warning from *.bmp about conversion of int to char */
-#pragma warning( disable : 4305)
-#endif
-
+#include <stdint.h>
 
 #ifndef TRUE
 #define TRUE	(1)
@@ -98,8 +32,6 @@
 #endif
 
 #define NUM_LAYERS		(99)
-
-// TYPEDEFS
 
 typedef double FLOAT_T;
 typedef double POS_T;
@@ -140,15 +72,19 @@ enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COM
 #define SCALE_ANY	(-2)
 #define SCALE_DEMO	(-1)
 
-// DYNARRAY
-
 typedef struct {
 		int cnt;
 		int max;
 		void * ptr;
 		} dynArr_t;
 
+#if defined(WINDOWS) && ! defined(WIN32)
+#define CHECK_SIZE(T,DA) \
+		if ( (long)((DA).max) * (long)(sizeof *(T*)NULL) > 65500L ) \
+			AbortProg( "Dynamic array too large at %s:%d", __FILE__, __LINE__ );
+#else
 #define CHECK_SIZE(T,DA)
+#endif
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
@@ -197,39 +133,15 @@ typedef struct {
 // Base DotsPerInch
 #define BASE_DPI	(75.0)
 
-// FILE VERSIONS - non-backward file format changes
-// Descriptions added for Bezier, Cornu, Joint
-#define VERSION_DESCRIPTION2	(12)
-// Inline quoted text replaces multiline text in Notes and Cars
-#define VERSION_INLINENOTE	(12)
-// END is replaced by END$SEGS, END$TRK, ...
-#define VERSION_NONAKEDENDS	(12)
+#ifdef WINDOWS
+#define M_PI 3.14159
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#endif
 
-
-// FORWARD TYPE DECLS
-typedef struct drawCmd_t * drawCmd_p;
-typedef struct track_t * track_p;
-typedef struct trkSeg_t * trkSeg_p;
-typedef struct traverseTrack_t * traverseTrack_p;
-typedef struct trkEndPt_t * trkEndPt_p;
-
-// base class for extraData*_t: each of which must include this struct as the first element
-typedef struct extraDataBase_t {
-		TRKTYP_T trkType;
-	} extraDataBase_t;
-// We check if TRKTYP_T in trk, trk->extraDataBase and the code context (TRKTYP) match.
-// If TRKTYP is T_NOTRACK then we are dealing with T_TURNOUT/T_STRUCTURE or T_BEZIER/T_BEZLIN which
-// share a log of code and have the same extraData*_t structure.
-#define GET_EXTRA_DATA(TRK,TRKTYP,TYPE) \
-	((TYPE*)GetTrkExtraData( (TRK), (TRKTYP) ))
-extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
-
-// COMMON INCLUDES
-// If you add includes here, please remove them elsewhere
-
-#include "i18n.h"
-#include "utility.h"
-#include "misc.h"
+#if _MSC_VER >1300
+	#define strdup _strdup
+#endif
 
 #endif
 
