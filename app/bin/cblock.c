@@ -2027,10 +2027,10 @@ EXPORT void UpdateOccupied( void )
 #endif
 
         // Create a Dynamic Block before entering the turnout
-        if ( blkD = createDynamicBlock( car0, ep0 ) ) {
+        if ( (blkD = createDynamicBlock( car0, ep0 )) ) {
             // Set the attached flag for the new dynamic block
             setAttached( blkD, car1 );
-        } else if ( blkD = createDynamicBlock( car1, ep1 ) ) {
+        } else if ( (blkD = createDynamicBlock( car1, ep1 )) ) {
             // Set the attached flag for the new dynamic block
             setAttached( blkD, car0 );
         }

@@ -117,7 +117,7 @@ static paramData_t displayPLs[] = {
 	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, I2VP(CHANGE_MAIN) },
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, I2VP(CHANGE_MAIN | CHANGE_MAP) },
 	{ PD_RADIO, &drawOccupiedMode, "occupiedDraw", PDO_NOPSHUPD|PDO_DRAW, drawOccupiedLabel, N_("Draw Occupied Blocks"), BC_HORZ, I2VP(CHANGE_MAIN) },
-	{ PD_RADIO, &drawBlocksMode, "blockDraw", PDO_NOPSHUPD|PDO_DRAW, drawBlocksLabel, N_("Draw Blocks"), BC_HORZ, (I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawBlocksMode, "blockDraw", PDO_NOPSHUPD|PDO_DRAW, drawBlocksLabel, N_("Draw Blocks"), BC_HORZ, I2VP(CHANGE_MAIN) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, I2VP(CHANGE_MAP) },
 	{ PD_TOGGLE, &dontHideCursor, "donthidecursor", PDO_NOPSHUPD, dontHideLabels, "", BC_HORZ },
