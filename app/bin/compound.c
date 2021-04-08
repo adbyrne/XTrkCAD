@@ -95,7 +95,6 @@ EXPORT PATHPTR_T GetCurrPath( track_p trk )
 	if ( xx->currPath )
 		return xx->currPath;
 	PATHPTR_T path = GetPaths( trk );
-	if ( ! path ) return NULL;
 	for ( wIndex_t position = xx->currPathIndex;
 		position > 0 && path[0];
 		path+=2, position-- ) {

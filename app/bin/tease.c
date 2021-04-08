@@ -73,7 +73,7 @@ do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 #include "param.h"
 #include "common-ui.h"
 
-EXPORT TRKTYP_T T_EASEMENT = -1;
+static TRKTYP_T T_EASEMENT = -1;
 
 static ANGLE_T JOINT_ANGLE_INCR = 2.0;
 

@@ -300,8 +300,6 @@ void InitDebug( const char *, long * );
 #define CHANGE_TOOLBAR	(1<<8)
 #define CHANGE_CMDOPT	(1<<9)
 #define CHANGE_LIMITS	(1<<10)
-#define CHANGE_MINBLKLN	(1<<11)
-#define CHANGE_MAXBLKLN	(1<<12)
 #define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
 typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
@@ -436,9 +434,6 @@ void AttachTrains( void );
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
 void BlockMgmLoad( void );
-BOOL_T HasBlocks( void );
-void UpdateMinBlockLength( void );
-void UpdateMaxBlockLength( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
 void SwitchmotorMgmLoad( void );

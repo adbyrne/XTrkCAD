@@ -25,7 +25,6 @@
 
 #include "common.h"
 #include "track.h" //- PATHPTR_T drawLineType_e
-#include "math.h"
 
 typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast, TOcurved } TOspecial_e;
 
@@ -94,7 +93,6 @@ typedef struct extraDataCompound_t {
 		PATHPTR_T paths;
 		PATHPTR_T currPath;
 		long currPathIndex;
-		int pathCnt;
 		wIndex_t segCnt;
 		trkSeg_p segs;
 		DIST_T * radii;
@@ -102,20 +100,16 @@ typedef struct extraDataCompound_t {
 		} extraDataCompound_t;
 
 extern TRKTYP_T T_TURNOUT;
-extern TRKTYP_T T_TURNTABLE;
 extern TRKTYP_T T_STRUCTURE;
 extern TRKTYP_T T_BEZIER;
 extern TRKTYP_T T_BZRLIN;
 extern TRKTYP_T T_CORNU;
-extern TRKTYP_T T_BLOCK;
-extern TRKTYP_T T_EASEMENT;
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
 extern dynArr_t structureInfo_da;
 extern dynArr_t carDescInfo_da;
 #define turnoutInfo(N) DYNARR_N( turnoutInfo_t *, turnoutInfo_da, N )
 #define structureInfo(N) DYNARR_N( turnoutInfo_t *, structureInfo_da, N )
-#define isSame(P1,P2) fabs(P1.x-P2.x) < 0.015 && fabs(P1.y-P2.y) < 0.015
 extern turnoutInfo_t * curTurnout;
 extern turnoutInfo_t * curStructure;
 
@@ -193,11 +187,6 @@ BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T
 track_p NewHandLaidTurnout( coOrd, ANGLE_T, coOrd, ANGLE_T, coOrd, ANGLE_T, ANGLE_T );
 void NextTurnoutPosition( track_p trk );
 enum paramFileState	GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
-void SetTurnoutFlags( void );
-void ClearTurnoutFlags( void );
-void SetupTurnouts( void );
-EPINX_T GetRemoteEp( track_p trk, EPINX_T ep );
-
 /* ctodesgn.c */
 void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );
 long ComputeTurnoutRoadbedSide( trkSeg_p, int, int, ANGLE_T, DIST_T );

@@ -329,15 +329,10 @@ control information and the layout itself.
 The main part of this dialog contains a list of the currently defined layout
 control elements (blocks, switchmotors, signals, controls, and sensors),
 along with the tracks they relate to. These elements are added to the layout
-from the Hotbar menus, the Add menu, or the \f{Add Missing} button.
+either from their Hotbar menus or from the Add menu.
 
 The \f{Edit} button allows for editing a control element. And the \f{Delete} button 
-deletes the selected element(s). The \f{Add Missing} button automatically adds
-any missing blocks. The \f{Delete Auto} button automatically deletes all blocks
-that have been created by \f{Add Missing} that have not been edited or saved.
-\f{Min Block Length} or \f{Max Block Length} cannot be changed when there are any
-blocks. Use \f{Delete Autoll} to delete auto generated blocks. Select remaining blocks
-and use \f{Delete} to delete them.  \f{Add Missing} can be used to create new blocks elements.
+deletes the selected element(s).
 
 \S{cmdGroup} Group Dialog
 

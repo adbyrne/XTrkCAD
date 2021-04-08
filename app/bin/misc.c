@@ -3068,8 +3068,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	profilePathColor = drawColorPurple;
 	exceptionColor = wDrawFindColor(wRGB(255, 89, 0 ));
 	tieColor = wDrawFindColor(wRGB(153, 89, 68));
-	occupiedColor = drawColorAqua;
-	blockColor = drawColorPurple;
 
 	newToolbarMax = (1 << BG_COUNT) - 1;
 	wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);

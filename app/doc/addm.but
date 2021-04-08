@@ -469,8 +469,6 @@ software to determine block occupancy.  This could be a code snippet to
 retrieve the state of the block occupancy or it could be the address of the
 sensor, etc.
 
-Manage->Layout Control Elements may also be uesed to create, edit and delete blocks.
-
 \G{png.d/block.png}
 
 The create block dialog has spaces for two text strings. One is the name and
