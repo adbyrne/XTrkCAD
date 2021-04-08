@@ -1198,7 +1198,6 @@ static void DrawXingToTies(
 	len = FindDistance(s1, s2);
 	POS_T x1 = max(dto[strPath].base[0].x, dto[str2Path].base[0].x);
 	POS_T x2 = min(dto[strPath].base[dto[strPath].n - 1].x, dto[str2Path].base[dto[str2Path].n - 1].x);
-
 	// Clip to shortest length in x-coord
 	POS_T dy = (s1.y - s2.y) / len;
 	if (s1.x < x1) {
@@ -1213,11 +1212,11 @@ static void DrawXingToTies(
 	}
 
 	// Rotate base coordinates so that the tie line is aligned with x-axis and origin is at zero
-	p1.x = -s1.x; p1.y = -s1.y;
 	for (i = 0; i < DTO_DIM; i++)
 		for (j = 0; j < dto[i].n; j++) {
-			REORIGIN(pos, dto[i].base[j], (90.0 - cAngle), p1);
-			dto[i].base[j] = pos;
+			dto[i].base[j].x -= s1.x;
+			dto[i].base[j].y -= s1.y;
+			Rotate(&dto[i].base[j], zero, (90.0 - cAngle));
 		}
 
 	for (i = 0; i < DTO_DIM; i++)
@@ -1249,6 +1248,13 @@ static void DrawXingToTies(
 	FindIntersection(&pos, p1, a1, q1, a2);
 	dtod.midPt = pos;
 
+	//d->funcs->drawLine(d, p1, p2, 1, drawColorPurple);
+	//d->funcs->drawLine(d, q1, q2, 1, drawColorPurple);
+	//DrawFillCircle(d, pos, 0.5, drawColorPurple);
+	a0 = DifferenceBetweenAngles(a1, a2);
+
+	double magic = 1 / cos(0.5 * D2R(DifferenceBetweenAngles(dto[0].angle, dto[1].angle)));
+
 	// Draw right half
 	len = FindDistance(dtod.midPt, c2);
 	cnt = (int)floor(len / td->spacing + 0.5);
@@ -1276,13 +1282,13 @@ static void DrawXingToTies(
 
 		DIST_T dy1 = dto[othPath].base[p0].y + (lenx - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 		DIST_T dy2 = dto[secPath].base[q0].y + (lenx - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-		tdlen = td->length + fabs(dy1) + fabs(dy2);
+		tdlen = (td->length + fabs(dy1) + fabs(dy2)) * magic;
 		if (tdlen > 2.5 * td->length)
 			break;
 
-		DIST_T dy = dy1 + dy2;
-		Translate(&pos, c1, cAngle, lenx);
-		Translate(&pos, pos, (cAngle - 90.0), dy / 2);
+		DIST_T dy = (dy1 + dy2) / 2;
+		Translate(&pos, dtod.midPt, cAngle, lenx - len);
+		Translate(&pos, pos, (cAngle - 90.0), dy); 
 		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		lenx += dlen;
@@ -1348,13 +1354,13 @@ static void DrawXingToTies(
 
 		DIST_T dy1 = dto[othPath].base[p0].y + (lenx - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 		DIST_T dy2 = dto[secPath].base[q0].y + (lenx - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-		tdlen = td->length + fabs(dy1) + fabs(dy2);
+		tdlen = (td->length + fabs(dy1) + fabs(dy2)) * magic;
 		if (tdlen > 2.5 * td->length)
 			break;
 
-		DIST_T dy = dy1 + dy2;
-		Translate(&pos, c1, cAngle, lenx);
-		Translate(&pos, pos, (cAngle - 90.0), dy / 2);
+		DIST_T dy = (dy1 + dy2) / 2;
+		Translate(&pos, dtod.midPt, cAngle, lenx - len);
+		Translate(&pos, pos, (cAngle - 90.0), dy); 
 		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		lenx -= dlen;
