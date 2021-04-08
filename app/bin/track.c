@@ -1161,7 +1161,6 @@ EXPORT void ResolveIndex( void )
 			}
 		}
                 ResolveBlockTrack (trk);
-                ResolveBlockSignal (trk);
                 ResolveSwitchmotorTurnout (trk);
         }
 	AuditTracks( "readTracks" );
@@ -3042,7 +3041,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 			       trk->conBlock->occupied )
 		color = occupiedColor;
 	}
-	if ( trackCmds(trkTyp)->draw ) trackCmds(trkTyp)->draw( trk, d, color );
+	trackCmds(trkTyp)->draw( trk, d, color );
 	d->options &= ~DC_DASH;
 
 	d->options &= ~DC_THICK;

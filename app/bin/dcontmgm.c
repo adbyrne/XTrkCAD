@@ -64,7 +64,6 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "custom.h"
 #include "param.h"
 #include "track.h"
-#include "compound.h"
 
 
 /*****************************************************************************
@@ -190,32 +189,23 @@ static void ControlDelete( void * action )
 // Controls are associated with track segments
 static void ControlAddMissing( void * action )
 {
-	SetupControlElements();
-
-	AddMissingBlockTrack();
-
-	SetupControlElements();
-
-	AddMissingSwitchMotor();
-	AddMissingSignals();
-
-	CalculateAllSignals( FALSE );
+	if ( (NoticeMessage2( 1, _("Automatically generate missing blocks?"), _("Yes"), _("No") ) ) )
+		AddMissingBlockTrack();
+//	AddMissingSwitchMotor();
 
 	DoChangeNotification( CHANGE_PARAMS );
 	MainRedraw();
 }
 
-
-// Automatically delete all automatically generated control elements on layout
+//
+// Automatically delete all control elements on layout
 // Controls are associated with track segments
 static void ControlDeleteAllAuto( void * action )
 {
-	if ( (NoticeMessage2( 1, _("Are you sure you want to delete the auto generated elements?"),
-					_("Yes"), _("No") ) ) ) {
-		DeleteAllBlockSignals();
-		DeleteAllSwitchMotors();
+	if ( (NoticeMessage2( 1, _("Are you sure you want to delete the auto generated blocks?"),
+					_("Yes"), _("No") ) ) )
 		DeleteAllBlockTrack();
-	}
+//	DeleteAllSwitchMotor();
 
 	DoChangeNotification( CHANGE_PARAMS );
 	MainRedraw();

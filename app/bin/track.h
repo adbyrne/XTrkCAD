@@ -204,11 +204,6 @@ typedef struct {
 		double cachedGrade;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
-typedef struct pathEp_t {
-		int rmtEp;		// Path from this EP goes to epPath
-		int head;		// active signal head
-		int aspect;		// head shows this aspect
-		} pathEp_t;
 typedef struct trkEndPt_t {
 		coOrd pos;
 		ANGLE_T angle;
@@ -220,9 +215,8 @@ typedef struct trkEndPt_t {
 		long option;
 		BOOL_T toBlock;   // points to a block
 		BOOL_T toTrack;   // points to a track segment
-		BOOL_T onRoute;   // can be on a route between blocks
 		BOOL_T attached;  // Dynamic block attached to block
-		pathEp_t epPth[32];   // remote end point, head, aspect for currPathIndex
+		char epPath[32];   // remote end point for pathIndex
 		} trkEndPt_t;
 typedef struct trkEndPt_t * trkEndPt_p;
 
@@ -820,22 +814,16 @@ extern DIST_T BlockDescriptionDistance( coOrd, track_p);
 extern STATUS_T BlockDescriptionMove( track_p, wAction_t, coOrd);
 extern void AddMissingBlockTrack( void );
 extern void DeleteAllBlockTrack( void );
-extern void DeleteAllBlockSignals( void );
-extern void DeleteAllSwitchMotors( void );
 extern void UpdateBlockTrack( void );
 extern void ClearDynamicBlocks( void );
 extern void ClearOccupied( void );
 extern BOOL_T IsOccupied ( track_p trk );
 extern void SetOccupied( void );
-extern void CalculateAllSignals( BOOL_T changed_only );
 
 /* cswitchmotor.c */
-extern BOOL_T ResolveSwitchmotorTurnout ( track_p trk );
-extern void AddMissingSwitchMotor( void );
-
-/* csignal.c */
-extern BOOL_T ResolveBlockSignal( track_p trk );
-extern void AddMissingSignals( void );
+void CheckDeleteSwitchmotor( track_p t );
+BOOL_T ResolveSwitchmotorTurnout ( track_p trk );
+void AddMissingSwitchMotor( void );
 
 #endif
 

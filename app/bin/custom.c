@@ -124,7 +124,6 @@ BOOL_T Initialize( void )
         InitTrkSignal();
         InitTrkControl();
         InitTrkSensor();
-	InitLcc();
 	InitCarDlg();
 	InitCmdNote();
 

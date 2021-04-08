@@ -460,18 +460,6 @@ The \f{Turntable Angle} control on the Preferences (\K{cmdPref}) dialog controls
 
 \G{png.d/bblock.png}
 
-Blocks are a key component of a Computerized Train Control (CTC) system. It 
-allows the software to know when a train occupied the block. On a main line,
-the track between turnouts can contain one or more blocks. Exit from the block
-and therefore entry into the next block is controlled by a signal at each end
-of the block.
-
-The block can produce an event when the block becomes occupied and another
-event when teh block becomes unoccupied.
-
-Blocks can be automaically created where needed by the Manage->"Layout Control
-Elements"->AddMissing button (which will also add the needed Signals) or manually.
-
 A block is created by first selecting the track segments in the block and then
 selecting \f{Create Block} from either the Add menu \K{cmdAdd} or from the block menu on the
 hotbar.  A block gets a name and a script.  The name is only used for
@@ -485,24 +473,17 @@ Manage->Layout Control Elements may also be uesed to create, edit and delete blo
 
 \G{png.d/block.png}
 
+The create block dialog has spaces for two text strings. One is the name and
+the other is a block occupancy script. The name identifies the block and the
+script is information used by the layout control software to detect block
+occupancy. The script could be a code snippet or I/O device address
+information, etc.
 
 \rule
 
 \S{cmdSwitchmotor} Switchmotor
 
 \G{png.d/bswitchmotor.png}
-
-A Swtich Motor is for every turnout that can pass trains between blocks. They can be 
-either automatically created by Manage->"Layout Control Elements"->AddMissing or
-manually. They can be locked to prevent position change either by a dispatcher
-or when they become occupied.
-
-The switch Motor has events for locking and unlocking and also an event for
-each position the switch can enter (see the "P" records for the Turnout).
-The events are produced when a change occurs and can be consumed to change 
-state. For example, When the switch position changes (either manually or through
-a event from the dispatcher, the Switch Motor responds by producing the event for
-the new position. The lock is indicated by a white light on the switch Motor.
 
 A switchmotor is created by selecting \f{Create SwitchMotor} from either the Add
 menu \K{cmdAdd} or from the switchmotor menu on the hotbar and then clicking on a turnout.
@@ -527,13 +508,6 @@ could be code snippets or I/O device address information, etc.
 \S{cmdSignal} Signal
 
 \G{png.d/bsignal.png}
-
-Signals are usually found at the ends of blocks to control entry to teh next block.
-They are also found on turnouts that connect blocks to control accessing the block.
-
-Signals can be individually created or automatically created by Manage->"Layout Control
-Elements"->AddMissing. When a block is created signals are also created at each 
-end of the block. 
 
 A signal is created by selecting \f{Create Signal} from either the Add menu \K{cmdAdd} or
 from the hotbar. Use the mouse to select a location (left button) and then

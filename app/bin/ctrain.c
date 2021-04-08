@@ -2541,7 +2541,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             curTrainDlg = CreateTrainControlDlg();
         }
 
-	SetupControlElements();
+	SetupTurnouts();
+	UpdateBlockTrack();
 	SetOccupied();
 
         curTrainDlg->train = NULL;
