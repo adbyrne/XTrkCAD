@@ -116,7 +116,7 @@ static track_p blockEditTrack;
 static paramData_t blockEditPLs[] = {
 /*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(blockEditName)},
 /*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(blockEditScript)},
-/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, I2VP(350), N_("Segments"), BO_READONLY },
+/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, I2VP(350), N_("Segments"), BO_READONLY, 0, sizeof(blockEditSegs) },
 };
 static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
 static wWin_p blockEditW;
