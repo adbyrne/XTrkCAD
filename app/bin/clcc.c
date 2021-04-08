@@ -438,7 +438,7 @@ EXPORT char * EventToAscii( event_t evt )
 EXPORT event_t AsciiToEvent( char * aEvt )
 {
 	event_t evt;
-	unsigned int tmp;
+	unsigned long tmp;
 	char buf[100], * op, *ip;
 	int cnt = 0;
 

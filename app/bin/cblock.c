@@ -181,13 +181,13 @@ static track_p blockEditTrack;
 
 static paramData_t blockEditPLs[] = {
 /*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH,
-	I2VP(200), N_("Name"), 0, 0, sizeof(blockEditName)},
+	IV2P(200), N_("Name"), 0, 0, sizeof(blockEditName)},
 /*1*/ { PD_STRING, blockEditScriptOcc, "occupied", PDO_NOPREF | PDO_STRINGLIMITLENGTH,
-	I2VP(350), N_("Occupied"), 0, 0, sizeof(blockEditScriptOcc)},
+	IV2P(350), N_("Occupied"), 0, 0, sizeof(blockEditScriptOcc)},
 /*2*/ { PD_STRING, blockEditScriptUnocc, "unoccupied", PDO_NOPREF | PDO_STRINGLIMITLENGTH,
-	I2VP(350), N_("Unoccupied"), 0, 0, sizeof(blockEditScriptOcc)},
+	IV2P(350), N_("Unoccupied"), 0, 0, sizeof(blockEditScriptOcc)},
 /*3*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF,
-	I2VP(350), N_("Segments"), BO_READONLY },
+	IV2P(350), N_("Segments"), BO_READONLY },
 };
 static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
 static wWin_p blockEditW;

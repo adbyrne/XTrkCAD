@@ -108,10 +108,10 @@ static track_p first_motor;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 
 static paramData_t switchmotorPLs[] = {
-/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(switchmotorName)},
+/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, IV2P(200), N_("Name"), 0, 0, sizeof(switchmotorName)},
 /*1*/ { PD_LONG,   &switchmotorTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, N_("Turnout Number"), BO_READONLY },
-/*2*/ { PD_STRING, switchmotorUnlocked, "unlocked", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Unlocked"), 0, 0, sizeof(switchmotorUnlocked)},
-/*3*/ { PD_STRING, switchmotorLocked, "locked", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Locked"), 0, 0, sizeof(switchmotorLocked)},
+/*2*/ { PD_STRING, switchmotorUnlocked, "unlocked", PDO_NOPREF|PDO_STRINGLIMITLENGTH, IV2P(350), N_("Unlocked"), 0, 0, sizeof(switchmotorUnlocked)},
+/*3*/ { PD_STRING, switchmotorLocked, "locked", PDO_NOPREF | PDO_STRINGLIMITLENGTH, IV2P(350), N_("Locked"), 0, 0, sizeof(switchmotorLocked)},
 };
 
 static paramGroup_t switchmotorPG = { "switchmotor", 0, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
@@ -135,13 +135,13 @@ static void SmotorEdit( void * action );
 
 static paramData_t switchmotorEditPLs[] = {
     /*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH,
-	    I2VP(200), N_("Name"), 0, 0, sizeof(switchmotorEditName)},
+	    IV2P(200), N_("Name"), 0, 0, sizeof(switchmotorEditName)},
     /*1*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF,
 	    &r0_999999, N_("Turnout Number"), BO_READONLY }, 
     /*2*/ { PD_STRING, switchmotorEditUnlocked, "unlocked", PDO_NOPREF | PDO_STRINGLIMITLENGTH,
-	    I2VP(350), N_("Unlocked"), 0, 0, sizeof(switchmotorEditUnlocked)},
+	    IV2P(350), N_("Unlocked"), 0, 0, sizeof(switchmotorEditUnlocked)},
     /*3*/ { PD_STRING, switchmotorEditLocked, "locked", PDO_NOPREF | PDO_STRINGLIMITLENGTH,
-	    I2VP(350), N_("Locked"), 0, 0, sizeof(switchmotorEditLocked)},
+	    IV2P(350), N_("Locked"), 0, 0, sizeof(switchmotorEditLocked)},
 #define I_SWITCHMOTORLIST (4)
 #define smotorSelL ((wList_p)switchmotorEditPLs[I_SWITCHMOTORLIST].control)
     /*5*/ { PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &smotorListData, NULL, BL_MANY },
@@ -159,9 +159,9 @@ static paramIntegerRange_t rm1_999999 = { -1, 999999 };
 
 static paramData_t smotorEditPLs[] = {
     /*0*/ { PD_STRING, smotorEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH,
-	    I2VP(200),  N_("Name"), 0, 0, sizeof(smotorEditName)},
+	    IV2P(200),  N_("Name"), 0, 0, sizeof(smotorEditName)},
     /*1*/ { PD_STRING, smotorEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH,
-	    I2VP(350), N_("Script"), 0, 0, sizeof(smotorEditScript)},
+	    IV2P(350), N_("Script"), 0, 0, sizeof(smotorEditScript)},
 };
 
 static paramGroup_t smotorEditPG = { "smotorEdit", 0, smotorEditPLs, sizeof smotorEditPLs/sizeof smotorEditPLs[0] };
@@ -716,7 +716,6 @@ EXPORT BOOL_T ResolveSwitchmotorTurnout ( track_p trk )
     xx->turnout = t_trk;
     ComputeSwitchMotorBoundingBox(trk);
     LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(): t_trk = (%d) %p\n",xx->turnindx,t_trk))
-    return TRUE;
 }
 
 EXPORT void AddMissingSwitchMotor( void )
