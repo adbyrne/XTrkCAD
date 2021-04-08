@@ -125,6 +125,7 @@ struct DrawTo_t {
 	trkSeg_p trkSeg[DTO_SEGS];
 	coOrd base[DTO_SEGS];
 	DIST_T dy[DTO_SEGS];
+	ANGLE_T angle;
 	coOrd pts[DTO_SEGS];
 	char type;
 };
@@ -943,7 +944,7 @@ void GetTurnoutType() {
 		a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
 		a0 = DifferenceBetweenAngles(a1, a2);
 		
-		if (a0 <= 30 && strCnt == 2) {
+		if (a0 <= 47 && strCnt == 2) {
 			if (dtod.pathCnt == 2)
 				dtod.toType = DTO_XING;
 			else if (dtod.pathCnt == 3 && (lftCnt == 1 || rgtCnt == 1))
@@ -1136,28 +1137,28 @@ static void DrawXingToTies(
 	DIST_T len, dlen;
 	coOrd pos;
 	int cnt;
-	ANGLE_T angle;
+	ANGLE_T cAngle;
 
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
-	coOrd s1, s2, p1, p2, q1, q2;
-	int s0, p0, q0;
-	ANGLE_T a0, a1, a2; //, str1a, str2a;
+	coOrd c1, c2, s1, s2, p1, p2, q1, q2;
+	int p0, q0;
+	ANGLE_T a0, a1, a2; 
 	int strPath = dtod.strPath, str2Path = dtod.str2Path;
 
 	struct extraDataCompound_t* xx = dtod.xx;
 
+	// Create drawing points
 	int i, j;
-	for (i = 0; i < DTO_DIM; i++)
+	for (i = 0; i < DTO_DIM; i++) {
 		for (j = 0; j < dto[i].n; j++) {
 			REORIGIN(p1, dto[i].base[j], xx->angle, xx->orig);
 			dto[i].pts[j] = p1;
 		}
-
-	if (dto[strPath].base[0].y > dto[str2Path].base[0].y) {
-
+		dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n-1]);
 	}
+
 	int othPath = strPath, secPath = str2Path;
 	int toType = dtod.toType;
 
@@ -1193,35 +1194,36 @@ static void DrawXingToTies(
 	// Straight vector for tie angle
 	s1 = MidPtCoOrd(dto[strPath].base[0], dto[str2Path].base[0]);
 	s2 = MidPtCoOrd(dto[strPath].base[dto[strPath].n - 1], dto[str2Path].base[dto[str2Path].n - 1]);
-	angle = FindAngle(s1, s2);
+	cAngle = FindAngle(s1, s2);
+	len = FindDistance(s1, s2);
+	POS_T x1 = max(dto[strPath].base[0].x, dto[str2Path].base[0].x);
+	POS_T x2 = min(dto[strPath].base[dto[strPath].n - 1].x, dto[str2Path].base[dto[str2Path].n - 1].x);
 
-	p1 = dto[strPath].pts[0];
-	p2 = dto[strPath].pts[dto[strPath].n - 1];
-	a1 = FindAngle(p1, p2);
-	q1 = dto[str2Path].pts[0];
-	q2 = dto[str2Path].pts[dto[str2Path].n - 1];
-	a2 = FindAngle(q1, q2);
-
-	FindIntersection(&pos, p1, a1, q1, a2);
-	dtod.midPt = pos;
+	// Clip to shortest length in x-coord
+	POS_T dy = (s1.y - s2.y) / len;
+	if (s1.x < x1) {
+		POS_T dx = s1.x - x1;
+		s1.x = x1;
+		s1.y = s1.y + dy * dx;
+	}
+	if (s2.x > x2) {
+		POS_T dx = s2.x - x2;
+		s2.x = x2;
+		s2.y = s2.y + dy * dx;
+	}
 
 	// Rotate base coordinates so that the tie line is aligned with x-axis and origin is at zero
 	p1.x = -s1.x; p1.y = -s1.y;
 	for (i = 0; i < DTO_DIM; i++)
 		for (j = 0; j < dto[i].n; j++) {
-			REORIGIN(s1, dto[i].base[j], (90.0 - angle), p1);
-			dto[i].base[j] = s1;
+			REORIGIN(pos, dto[i].base[j], (90.0 - cAngle), p1);
+			dto[i].base[j] = pos;
 		}
 
 	for (i = 0; i < DTO_DIM; i++)
 		for (j = 0; j < dto[i].n - 1; j++) {
 			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
-
-	// Establish the tie center line in drawing coordinates
-	s1 = MidPtCoOrd(dto[strPath].pts[0], dto[str2Path].pts[0]);
-	s2 = MidPtCoOrd(dto[strPath].pts[dto[strPath].n - 1], dto[str2Path].pts[dto[str2Path].n - 1]);
-	angle = FindAngle(s1, s2);
 
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
@@ -1230,14 +1232,31 @@ static void DrawXingToTies(
 
 	td = GetScaleTieData(scaleInx);
 
+	// Tie center line in drawing coordinates
+	REORIGIN(c1, s1, xx->angle, xx->orig);
+	REORIGIN(c2, s2, xx->angle, xx->orig);
+	cAngle = FindAngle(c1, c2);
+
+	// Midpoint
+	p1 = dto[strPath].pts[0];
+	// p2 = dto[strPath].pts[dto[strPath].n - 1];
+	a1 = dto[strPath].angle; //FindAngle(p1, p2);
+
+	q1 = dto[str2Path].pts[0];
+	// q2 = dto[str2Path].pts[dto[str2Path].n - 1];
+	a2 = dto[str2Path].angle; //FindAngle(q1, q2);
+
+	FindIntersection(&pos, p1, a1, q1, a2);
+	dtod.midPt = pos;
+
 	// Draw right half
-	len = FindDistance(dtod.midPt, s2);
+	len = FindDistance(dtod.midPt, c2);
 	cnt = (int)floor(len / td->spacing + 0.5);
 	if (cnt <= 0) 
 		return;
 
 	dlen = len / cnt;
-	s0 = p0 = q0 = 0;
+	p0 = q0 = 0;
 	DIST_T tdlen = td->length;
 	DIST_T dlenx = dlen / 2;
 	DIST_T lenx = len + dlenx; 
@@ -1262,11 +1281,38 @@ static void DrawXingToTies(
 			break;
 
 		DIST_T dy = dy1 + dy2;
-		Translate(&pos, s1, angle, lenx);
-		Translate(&pos, pos, (angle - 90.0), dy / 2);
-		DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		Translate(&pos, c1, cAngle, lenx);
+		Translate(&pos, pos, (cAngle - 90.0), dy / 2);
+		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		lenx += dlen;
+	}
+
+	int n = dto[strPath].n;
+	p1 = dtod.midPt;
+	p2 = dto[strPath].pts[n - 1];
+	a0 = dto[strPath].angle; //FindAngle(p1, p2);
+	DIST_T lenr = FindDistance(p1, p2) - len;
+	if (lenr > dlen) {
+		Translate(&p1, p2, a0, -lenr - dlen);
+		DrawStraightTies(d, scaleInx, p1, p2, color);
+	}
+	else {
+		Translate(&pos, p2, a0, -dlenx);
+		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+	}
+	n = dto[str2Path].n;
+	p1 = dtod.midPt;
+	p2 = dto[str2Path].pts[n - 1];
+	a0 = dto[str2Path].angle; //FindAngle(p1, p2);
+	lenr = FindDistance(p1, p2) - len;
+	if (lenr > dlen) {
+		Translate(&p1, p2, a0, -lenr - dlen);
+		DrawStraightTies(d, scaleInx, p1, p2, color);
+	}
+	else {
+		Translate(&pos, p2, a0, -dlenx);
+		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 
 	// Draw left half
@@ -1275,18 +1321,18 @@ static void DrawXingToTies(
 		othPath = str2Path;
 	}
 
-	len = FindDistance(s1, dtod.midPt);
+	len = FindDistance(c1, dtod.midPt);
 	cnt = (int)floor(len / td->spacing + 0.5);
 	if (cnt <= 0)
 		return;
 
 	dlen = len / cnt;
-	s0 = p0 = q0 = 0;
+	p0 = q0 = 0;
 	tdlen = td->length;
 	lenx = len;
 	dlenx = dlen / 2;
 
-	lenx = len + dlenx;
+	lenx = len - dlenx;
 	while (p0 < pn && lenx > dto[othPath].base[p0 + 1].x) p0++;
 	while (q0 < qn && lenx > dto[secPath].base[q0 + 1].x) q0++;
 	while (p0 >= 0 && q0 >= 0) {
@@ -1307,38 +1353,38 @@ static void DrawXingToTies(
 			break;
 
 		DIST_T dy = dy1 + dy2;
-		Translate(&pos, s1, angle, lenx);
-		Translate(&pos, pos, (angle - 90.0), dy / 2);
-		DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		Translate(&pos, c1, cAngle, lenx);
+		Translate(&pos, pos, (cAngle - 90.0), dy / 2);
+		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		lenx -= dlen;
 	}
 
-	int n; // = dto[strPath].base[qn - 1].x;
-	//if (lenx + dlen < len) {
-	//	angle = FindAngle(s1, s2);
-	//	DIST_T lenr = len - lenx + dlenx;
-	//	Translate(&s1, s2, angle, -lenr);
-	//	DrawStraightTies(d, scaleInx, s1, s2, color);
-	//}
-	//else {
-
-		//n = dto[strPath].n;
-		//s1 = dto[strPath].pts[0];
-		//Translate(&pos, s1, str1a, dlen / 2);
-		//DrawTie(d, pos, str1a, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-		//s1 = dto[strPath].pts[n - 1];
-		//Translate(&pos, s1, str1a, -dlen / 2);
-		//DrawTie(d, pos, str1a, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-
-		//n = dto[str2Path].n;
-		//s1 = dto[str2Path].pts[0];
-		//Translate(&pos, s1, str2a, dlen / 2);
-		//DrawTie(d, pos, str2a, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-		//s1 = dto[str2Path].pts[n - 1];
-		//Translate(&pos, s1, str2a, -dlen / 2);
-		//DrawTie(d, pos, str2a, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-	//}
+	p1 = dto[strPath].pts[0];
+	p2 = dtod.midPt;
+	a0 = dto[strPath].angle; //FindAngle(p1, p2);
+	// c2 = dto[strPath].pts[n - 1];
+	lenr = FindDistance(p1, p2) - len;
+	if (lenr > dlen) {
+		Translate(&pos, p1, a0, lenr + dlen);
+		DrawStraightTies(d, scaleInx, p1, pos, color);
+	}
+	else {
+		Translate(&pos, p1, a0, dlenx);
+		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+	}
+	p1 = dto[str2Path].pts[0]; 
+	p2 = dtod.midPt;
+	a0 = dto[str2Path].angle; //FindAngle(p1, p2);
+	lenr = FindDistance(p1, p2) - len;
+	if (lenr > dlen) {
+		Translate(&pos, p1, a0, lenr + dlen);
+		DrawStraightTies(d, scaleInx, p1, pos, color);
+	}
+	else {
+		Translate(&pos, p1, a0, dlenx);
+		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+	}
 }
 
 static void DrawTurnout(
