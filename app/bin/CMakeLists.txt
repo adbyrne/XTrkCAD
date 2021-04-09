@@ -144,10 +144,12 @@ SET(SOURCES
 	tease.c
 	textnoteui.c
 	track.c
+	track.h
 	trknote.c
 	trkseg.c
 	tstraigh.c
 	utility.c
+	utility.h
 	validator.c
 	cJSON.c
 	archive.h

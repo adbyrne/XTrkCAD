@@ -59,6 +59,14 @@ double min( double a, double b )
 
 
 
+int CoOrdEqual(coOrd p0, coOrd p1)
+{
+	double d = fabs(p1.x - p0.x) + fabs(p1.y - p0.y);
+	return (d < EPSILON);
+}
+
+
+
 double FindDistance( coOrd p0, coOrd p1 )
 {
 	double dx = p1.x-p0.x, dy = p1.y-p0.y;
@@ -471,6 +479,14 @@ double CircleDistance( coOrd *p, coOrd c, double r, double a0, double a1 )
 }
 
 
+
+coOrd MidPtCoOrd(coOrd p0, coOrd p1)
+{
+	coOrd res;
+	res.x = (p0.x + p1.x) / 2.0;
+	res.y = (p0.y + p1.y) / 2.0;
+	return res;
+}
 
 coOrd AddCoOrd( coOrd p0, coOrd p1, double a )
 {
