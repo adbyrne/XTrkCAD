@@ -14,8 +14,12 @@
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox">
+            <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">end</property>
             <property name="margin_top">18</property>
+            <property name="spacing">6</property>
+            <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="id-cancel">
@@ -76,19 +80,6 @@
             <property name="row_spacing">6</property>
             <property name="column_spacing">12</property>
             <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_Script	</property>
-                <property name="use_underline">True</property>
-                <property name="mnemonic_widget">blockedit-script</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="blockedit-name">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -114,10 +105,24 @@
               </packing>
             </child>
             <child>
+              <object class="GtkEntry" id="blockedit-segments">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="editable">False</property>
+                <property name="max_length">1024</property>
+                <property name="width_chars">40</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">2</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">_Name	</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">_Name</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">blockedit-name</property>
               </object>
@@ -130,24 +135,27 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Segments</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">_Script</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">blockedit-script</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="blockedit-segments">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="editable">False</property>
-                <property name="max_length">1024</property>
-                <property name="width_chars">40</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">S_egments</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">blockedit-segments</property>
               </object>
               <packing>
-                <property name="left_attach">1</property>
+                <property name="left_attach">0</property>
                 <property name="top_attach">2</property>
               </packing>
             </child>

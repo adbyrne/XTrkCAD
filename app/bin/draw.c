@@ -33,6 +33,9 @@
 
 EXPORT wIndex_t panCmdInx;
 
+
+wIndex_t panCmdInx;
+
 static void DrawRoomWalls( wBool_t );
 static void DrawMarkers( void );
 static void ConstraintOrig( coOrd *, coOrd, int, int );

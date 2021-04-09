@@ -1,14 +1,13 @@
-# Setup GTK UI library...
-file(GLOB headers *.h)
+# Setup GTK v3 UI library...
 
 set(sources
 	bitmap.c
 	boxes.c
-    builder.c
+   	builder.c
 	button.c
 	color.c
 	control.c
-	droplist.c	
+	droplist.c
 	filesel.c
 	font.c
 	help.c
@@ -16,7 +15,7 @@ set(sources
 	list.c
 	liststore.c
 	main.c
-	menu.c	
+	menu.c
 	message.c
 	notice.c
 	opendocument.c
@@ -25,45 +24,46 @@ set(sources
 	print.c
 	single.c
 	splash.c
-    statusbar.c
+   	statusbar.c
 	text.c
 	timer.c
-	tooltip.c	
+	tooltip.c
 	treeview.c
 	util.c
 	window.c
 	wpref.c
-# end of refactored sources	
 	gtkdraw-cairo.c
 	)
 
+set (SOURCES
+	${SOURCES}
+	dynarr.h
+	gtkint.h
+	uthash.h
+)
+
 # help system is OS and build specific, add appropriate source files
 if(APPLE)
-    set(sources 
+    set(sources
         ${sources}
-	osxhelp.c)	
+	osxhelp.c)
 else()
-    if(XTRKCAD_USE_BROWSER) 
-        set(sources 
+    if(XTRKCAD_USE_BROWSER)
+        set(sources
             ${sources}
             browserhelp.c)
     else()
-        set(sources 
+        set(sources
             ${sources}
             ixhelp.c)
-    endif()    
+    endif()
 endif()
 
 include_directories(${XTrkCAD_BINARY_DIR})
 
-add_library(xtrkcad-wlib ${headers} ${sources})
+add_library(xtrkcad-wlib ${sources})
 
-# WrapBox
-target_include_directories(xtrkcad-wlib PRIVATE ${CMAKE_CURRENT_LIST_DIR}/wrapbox/)
-TARGET_LINK_LIBRARIES(xtrkcad-wlib PRIVATE wrapbox)
-
-
-# GTK 
+# GTK
 include_directories(${GTK_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib PRIVATE ${GTK_LIBRARIES})
 
@@ -79,7 +79,18 @@ if(NOT XTRKCAD_USE_BROWSER)
     target_link_libraries(xtrkcad-wlib PRIVATE ${GTK_WEBKIT_LIBRARIES})
 endif()
 
+# WrapBox
+target_include_directories(xtrkcad-wlib PRIVATE ${CMAKE_CURRENT_LIST_DIR}/wrapbox/)
+target_link_libraries(xtrkcad-wlib PRIVATE wrapbox)
 add_subdirectory(wrapbox)
 
-add_subdirectory(glade)
-INSTALL(DIRECTORY glade/ DESTINATION bin/ui/)
+# copy the glade ui definitions into the build tree
+
+add_custom_target(gladeui
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    ${CMAKE_CURRENT_SOURCE_DIR}/glade
+                    ${CMAKE_BINARY_DIR}/app/bin/ui
+)
+add_dependencies(xtrkcad-wlib gladeui)
+
+install(DIRECTORY glade/ DESTINATION bin/ui/)
