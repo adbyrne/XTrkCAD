@@ -117,15 +117,16 @@ static char * printRoadbedLabels[] = { N_("Roadbed Outline"), NULL };
 static char * printCenterLineLabels[] = { N_("Centerline below Scale 1:1"), NULL };
 static paramIntegerRange_t rminScale_999 = { 1, 999, 0, PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r0_ = { 0, 0, 0, PDO_NORANGECHECK_HIGH };
-static paramFloatRange_t r1_ = { 1, 0, 0, PDO_NORANGECHECK_HIGH };
+static paramFloatRange_t r1_pgsz_x = { 1, 0, 0, 0 };
+static paramFloatRange_t r1_pgsz_y = { 1, 0, 0, 0 };
 static paramFloatRange_t r_10_99999 = { -10, 99999, 0, PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r0_360 = { 0, 360 };
 
 static paramData_t printPLs[] = {
 /*0*/ { PD_LONG, &iPrintScale, "scale", 0, &rminScale_999, N_("Print Scale"), 0, I2VP(1) },
-/*1*/ { PD_FLOAT, &newPrintGrid.size.x, "pagew", PDO_DIM|PDO_SMALLDIM|PDO_NORECORD|PDO_NOPREF, &r1_, N_("Page Width"), 0, I2VP(2) },
+/*1*/ { PD_FLOAT, &newPrintGrid.size.x, "pagew", PDO_DIM|PDO_SMALLDIM|PDO_NORECORD|PDO_NOPREF, &r1_pgsz_x, N_("Page Width"), 0, I2VP(2) },
 /*2*/ { PD_BUTTON, (void*)PrintMaxPageSize, "max", PDO_DLGHORZ, NULL, N_("Max") },
-/*3*/ { PD_FLOAT, &newPrintGrid.size.y, "pageh", PDO_DIM|PDO_SMALLDIM|PDO_NORECORD|PDO_NOPREF, &r1_, N_("Height"), 0, I2VP(2) },
+/*3*/ { PD_FLOAT, &newPrintGrid.size.y, "pageh", PDO_DIM|PDO_SMALLDIM|PDO_NORECORD|PDO_NOPREF, &r1_pgsz_y, N_("Height"), 0, I2VP(2) },
 /*4*/ { PD_BUTTON, (void*)PrintSnapShot, "snapshot", PDO_DLGHORZ, NULL, N_("Snap Shot") },
 /*5*/ { PD_RADIO, &printFormat, "format", 0, printFormatLabels, N_("Page Format"), BC_HORZ|BC_NOBORDER, I2VP(1) },
 /*6*/ { PD_RADIO, &printOrder, "order", PDO_DLGBOXEND, printOrderLabels, N_("Print Order"), BC_HORZ|BC_NOBORDER },
@@ -505,11 +506,6 @@ static void PrintUpdate( int inx0 )
 
 	ParamLoadData( &printPG );
 
-	if (newPrintGrid.size.x > maxPageSize.x+0.01 ||
-		newPrintGrid.size.y > maxPageSize.y+0.01) {
-		NoticeMessage( MSG_PRINT_MAX_SIZE, _("Ok"), NULL,
-				FormatSmallDistance(maxPageSize.x), FormatSmallDistance(maxPageSize.y) );
-	}
 	if (newPrintGrid.size.x > maxPageSize.x) {
 		newPrintGrid.size.x = maxPageSize.x;
 		ParamLoadControl( &printPG, 1 );
@@ -552,6 +548,8 @@ static void SetPageSize( BOOL_T doScale )
 		maxPageSize.x *= printScale;
 		maxPageSize.y *= printScale;
 	}
+	r1_pgsz_x.high = maxPageSize.x+0.0001;
+	r1_pgsz_y.high = maxPageSize.y+0.0001;
 }
 
 /**

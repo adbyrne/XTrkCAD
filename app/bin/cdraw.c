@@ -1489,6 +1489,7 @@ static drawModContext_t drawModCmdContext = {
 static BOOL_T infoSubst = FALSE;
 
 static paramIntegerRange_t i100_100 = { -100, 100, 25 };  //Allow negative numbers
+static paramFloatRange_t r0d001_10000 = { 0.001, 10000 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r10000_10000 = {-10000, 10000};
@@ -1509,7 +1510,7 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.height, "Height", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Height") },
 #define drawModRadiusPD		(drawModPLs[5])
 #define drawModRadius           5
-	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("Radius") },
+	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r0d001_10000, N_("Radius") },
 #define drawModArcAnglePD		(drawModPLs[6])
 	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r360_360, N_("Arc Angle") },
 #define drawModRotAnglePD		(drawModPLs[7)
