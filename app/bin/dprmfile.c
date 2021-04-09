@@ -58,9 +58,9 @@ static long paramFileSel = 0;
 
 static void ParamFileFavorite(void * favorite);
 static void ParamRefreshSelectedFiles(void * action);
-static void ParamUnloadSelectedFiles(void *);
-static void ParamFileBrowse(void *);
-static void ParamFileSelectAll(void *);
+static void ParamUnloadSelectedFiles(void * action);
+static void ParamFileBrowse(void * junk);
+static void ParamFileSelectAll(void * junk);
 
 static paramListData_t paramFileListData = { 15, 370 };
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
@@ -72,13 +72,13 @@ static paramData_t paramFilePLs[] = {
     {	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (2)
 	{ PD_MESSAGE, "", NULL, 0, I2VP(370) },
-    {	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+    {	PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 #define I_PRMFILEFAVORITE (4)
-    {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
-    {	PD_BUTTON, (void*)ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
-	{   PD_BUTTON, (void*)ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
-    {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Library...") },
-	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse...") },
+    {   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE), N_("Favorite")},
+    {	PD_BUTTON, ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
+	{   PD_BUTTON, ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
+    {	PD_BUTTON, DoSearchParams, "find", 0, NULL, N_("Library...") },
+	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, N_("Browse...") },
 
 
 };
@@ -129,7 +129,7 @@ SortParamFileList(size_t cnt,  dynArr_t *files, int *list)
 
     sortFiles = files;
 
-    qsort((void *)list, (size_t)cnt, sizeof(int), CompareParameterFiles);
+    qsort(list, (size_t)cnt, sizeof(int), CompareParameterFiles);
 }
 
 

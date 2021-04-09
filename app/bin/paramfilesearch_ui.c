@@ -59,9 +59,9 @@ static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
     { PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGRESIZE, I2VP(340), "", 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
-    { PD_BUTTON, (void*)SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
+    { PD_BUTTON, SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_CLEARBUTTON (2)
-    { PD_BUTTON, (void*)SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
+    { PD_BUTTON, SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_FITRADIO	(3)
     {	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (4)
@@ -73,9 +73,9 @@ static paramData_t searchUiPLs[] = {
 #define I_MODETOGGLE	(7)
     {	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_APPLYBUTTON	(8)
-    {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
+    {	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
 #define I_SELECTALLBUTTON (9)
-    {	PD_BUTTON, (void*)SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+    {	PD_BUTTON, SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 };
 
 #define SEARCHBUTTON ((wButton_p)searchUiPLs[I_SEARCHBUTTON].control)
@@ -163,7 +163,7 @@ int SearchFileListLoad(Catalog *catalog)
             wListAddValue(RESULTLIST,
                           DynStringToCStr(&description),
                           NULL,
-                          (void*)catalogEntry->fullFileName[i]);
+                          catalogEntry->fullFileName[i]);
         }
     }
 
@@ -221,7 +221,7 @@ SearchUILoadResults(void)
 
         LoadParamFile(files, fileNames, NULL);
         MyFree(fileNames);
-        SearchUiOk((void *) 0);
+        SearchUiOk(NULL);
     }
 
 }

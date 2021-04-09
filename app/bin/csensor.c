@@ -583,7 +583,7 @@ EXPORT void SensorMgmLoad ( void )
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SENSOR) continue;
-        ContMgmLoad (sensorI, SensorMgmProc, (void *) trk );
+        ContMgmLoad (sensorI, SensorMgmProc, trk );
     }
 }
 

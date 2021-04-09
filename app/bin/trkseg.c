@@ -2051,7 +2051,7 @@ EXPORT void AppendSegsToArray(dynArr_t * seg_to, dynArr_t * seg_from) {
 	for (int i=0; i<seg_from->cnt;i++,j++) {
 		trkSeg_p from_p = &DYNARR_N(trkSeg_t, * seg_from,j);
 		trkSeg_p to_p = &DYNARR_N(trkSeg_t, * seg_to,i);
-		memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+		memcpy(to_p,from_p,sizeof( trkSeg_t));
 		if (from_p->type == SEG_BEZLIN || from_p->type == SEG_BEZTRK) {
 			if (from_p->bezSegs.ptr) {
 				to_p->bezSegs.ptr = memdup(from_p->bezSegs.ptr,from_p->bezSegs.cnt*sizeof(trkSeg_t));
@@ -2072,7 +2072,7 @@ EXPORT void AppendTransformedSegs(dynArr_t * seg_to, dynArr_t * seg_from, coOrd 
 	for (int i=0; i<seg_from->cnt;i++,j++) {
 		trkSeg_p from_p = &DYNARR_N(trkSeg_t, * seg_from,j);
 		trkSeg_p to_p = &DYNARR_N(trkSeg_t, * seg_to,i);
-		memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+		memcpy(to_p,from_p,sizeof( trkSeg_t));
 		if (from_p->type == SEG_BEZLIN || from_p->type == SEG_BEZTRK) {
 			if (from_p->bezSegs.ptr) {
 				to_p->bezSegs.ptr = memdup(from_p->bezSegs.ptr,from_p->bezSegs.cnt*sizeof(trkSeg_t));

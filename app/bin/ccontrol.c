@@ -627,7 +627,7 @@ EXPORT void ControlMgmLoad ( void )
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_CONTROL) continue;
-        ContMgmLoad (controlI, ControlMgmProc, (void *) trk );
+        ContMgmLoad (controlI, ControlMgmProc, trk );
     }
 }
 

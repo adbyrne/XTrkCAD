@@ -638,7 +638,7 @@ static trainControlDlg_t * curTrainDlg;
 static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
 static void SpeedAction(wAction_t, coOrd);
 static void LocoListChangeEntry(track_p, track_p);
-static void CmdTrainExit(void *);
+static void CmdTrainExit(void * junk);
 
 drawCmd_t speedD = {
     NULL,

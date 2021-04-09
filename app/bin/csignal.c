@@ -516,11 +516,11 @@ static paramData_t signalEditPLs[] = {
 #define aspectSelL ((wList_p)signalEditPLs[I_SIGNALASPECTLIST].control)
     /*5*/ { PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &aspectListData, NULL, BL_MANY },
 #define I_SIGNALASPECTEDIT (6)
-    /*6*/ { PD_BUTTON, (void*)AspectEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit Aspect") },
+    /*6*/ { PD_BUTTON, AspectEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit Aspect") },
 #define I_SIGNALASPECTADD (7)
-    /*7*/ { PD_BUTTON, (void*)AspectAdd, "add", PDO_DLGCMDBUTTON, NULL, N_("Add Aspect") },
+    /*7*/ { PD_BUTTON, AspectAdd, "add", PDO_DLGCMDBUTTON, NULL, N_("Add Aspect") },
 #define I_SIGNALASPECTDELETE (8)
-    /*8*/ { PD_BUTTON, (void*)AspectDelete, "delete", 0, NULL, N_("Delete Aspect") },
+    /*8*/ { PD_BUTTON, AspectDelete, "delete", 0, NULL, N_("Delete Aspect") },
 };
 static paramGroup_t signalEditPG = { "signalEdit", 0, signalEditPLs, sizeof signalEditPLs/sizeof signalEditPLs[0] };
 static wWin_p signalEditW;
@@ -901,7 +901,7 @@ EXPORT void SignalMgmLoad ( void )
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SIGNAL) continue;
-        ContMgmLoad (signalI, SignalMgmProc, (void *) trk );
+        ContMgmLoad (signalI, SignalMgmProc, trk );
     }
 }
 

@@ -985,7 +985,7 @@ EXPORT void BlockMgmLoad( void )
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_BLOCK) continue;
-        ContMgmLoad( blockI, BlockMgmProc, (void *)trk );
+        ContMgmLoad( blockI, BlockMgmProc, trk );
     }
     
 }

@@ -146,8 +146,8 @@ static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
 static paramFloatRange_t r_90_90 = { -90, 90, 80 };
 static paramFloatRange_t r0_100 = { 0, 100, 80 };
 static paramIntegerRange_t i0_100 = { 0, 100, 40 };
-static void NewTurnOk( void * );
-static void ShowTurnoutDesigner( void * );
+static void NewTurnOk( void * context );
+static void ShowTurnoutDesigner( void * context );
 
 
 static coOrd points[20];
@@ -199,8 +199,8 @@ static paramData_t turnDesignPLs[] = {
 	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
 	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
 	{ PD_COLORLIST, &roadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
-	{ PD_BUTTON, (void*)NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
-	{ PD_BUTTON, (void*)wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
+	{ PD_BUTTON, NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
 #define I_TOANGMODE			(28)
 	{ PD_RADIO, &newTurnAngleMode, "angleMode", 0, newTurnAngleModeLabels },
 #define I_TOSLIPMODE        (29)
@@ -3241,7 +3241,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 	ParamRegister( &turnDesignPG );
 	for ( i=0; i<(sizeof designDescs/sizeof designDescs[0]); i++ ) {
 		wMenuPushCreate( m, NULL, _(designDescs[i]->label), 0,
-				ShowTurnoutDesigner, (void*)designDescs[i] );
+				ShowTurnoutDesigner, designDescs[i] );
 		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, designDescs[i]->label );
 		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, designDescs[i] );
 	}
