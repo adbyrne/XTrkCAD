@@ -2599,7 +2599,7 @@ EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
 EXPORT long tieDrawMode = TIEDRAWMODE_SOLID;
 EXPORT wDrawColor tieColor;
 
-static wBool_t DoDrawTies( drawCmd_p d, track_cp trk )
+EXPORT wBool_t DoDrawTies( drawCmd_p d, track_cp trk )
 {
 	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	if ( !trk )
@@ -2812,7 +2812,7 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 }
 
 
-static void DrawStraightTies(
+EXPORT void DrawStraightTies(
 		drawCmd_p d,
 		SCALEINX_T scaleInx,
 		coOrd p0,
@@ -2850,6 +2850,7 @@ static void DrawStraightTies(
 		}
 	}
 }
+
 
 
 EXPORT void DrawStraightTrack(
