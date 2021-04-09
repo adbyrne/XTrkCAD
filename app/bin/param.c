@@ -481,6 +481,9 @@ EXPORT char * FormatSmallDistance(
  *
  */
 
+static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL );
+static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF );
+
 EXPORT void ParamControlActive(
 		paramGroup_p pg,
 		int inx,
@@ -524,6 +527,8 @@ EXPORT void ParamLoadControl(
 		switch ( p->type ) {
 		case PD_LONG:
 			wStringSetValue( (wString_p)p->control, FormatLong( *(long*)p->valueP ) );
+			if ( !ParamIntegerRangeCheck( p, *(long*)p->valueP ) )
+				return;
 			p->oldD.l = *(long*)p->valueP;
 			break;
 		case PD_RADIO:
@@ -557,6 +562,8 @@ EXPORT void ParamLoadControl(
 				valS = FormatFloat( tmpR );
 			}
 			wStringSetValue( (wString_p)p->control, valS );
+			if ( !ParamFloatRangeCheck( p, tmpR ) )
+				break;
 			p->oldD.f = tmpR;
 			break;
 		case PD_STRING:
@@ -629,6 +636,8 @@ EXPORT long ParamUpdate(
 		case PD_LONG:
 			stringV = wStringGetValue( (wString_p)p->control );
 			longV = atol( stringV );
+			if ( ! ParamIntegerRangeCheck( p, longV ) )
+				break;
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
 				if ( p->valueP)
@@ -694,6 +703,8 @@ EXPORT long ParamUpdate(
 					floatV = NormalizeAngle( (angleSystem==ANGLE_POLAR)?floatV:-floatV );
 			}
 			if ( !valid )
+				break;
+			if ( ! ParamFloatRangeCheck( p, floatV ) )
 				break;
 			if (floatV != p->oldD.f) {
 				p->oldD.f = floatV;
@@ -1358,36 +1369,10 @@ static void ParamChoicePush( long valL, void * dp )
 }
 
 
-static void ParamIntegerPush( const char * val, void * dp )
+static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 {
-	paramData_p p = (paramData_p)dp;
-	long valL;
-	char * cp;
-	const char * value;
-	paramIntegerRange_t * irangeP;
-
+	paramIntegerRange_t * irangeP = (paramIntegerRange_t*)p->winData;
 	wBool_t bInvalid = p->bInvalid;
-	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
-		value = wStringGetValue((wString_p)p->control);
-		p->enter_pressed = TRUE;
-	} else {
-		value = CAST_AWAY_CONST val;
-		p->enter_pressed = FALSE;
-	}
-	LOG( log_paraminput, 1, ( "ParamIntegerPush( Enter:%d Val:%s )\n", p->enter_pressed, value ) );
-
-	valL = strtol( value, &cp, 10 );
-	for ( ; isspace( (unsigned char)*cp); cp++ );
-	if ( *cp != '\0' ) {
-		wWinPix_t h = wControlGetHeight(p->control);
-		wControlSetBalloon( p->control, 0, -h*3/4, _("Invalid Number") );
-		p->bInvalid = TRUE;
-		LOG( log_paraminput, 1, ( " -> InvalidNumber\n" ) );
-		if ( ! bInvalid )
-			ParamHilite( p->group->win, p->control, p->bInvalid );
-		return;
-	}
-	irangeP = (paramIntegerRange_t*)p->winData;
 	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
 		 ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
 		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
@@ -1402,8 +1387,42 @@ static void ParamIntegerPush( const char * val, void * dp )
 		LOG( log_paraminput, 1, ( " -> RangeError\n" ) );
 		if ( ! bInvalid )
 			ParamHilite( p->group->win, p->control, p->bInvalid );
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
+static void ParamIntegerPush( const char * val, void * dp )
+{
+	paramData_p p = (paramData_p)dp;
+	long valL;
+	char * cp;
+	const char * value;
+
+	wBool_t bInvalid = p->bInvalid;
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
+	} else {
+		value = CAST_AWAY_CONST val;
+		p->enter_pressed = FALSE;
+	}
+	LOG( log_paraminput, 1, ( "ParamIntegerPush( %s Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
+
+	valL = strtol( value, &cp, 10 );
+	for ( ; isspace( (unsigned char)*cp); cp++ );
+	if ( *cp != '\0' ) {
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, _("Invalid Number") );
+		p->bInvalid = TRUE;
+		LOG( log_paraminput, 1, ( " -> InvalidNumber\n" ) );
+		if ( ! bInvalid )
+			ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
+	if ( ! ParamIntegerRangeCheck( p, valL ) )
+		return;
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
@@ -1419,6 +1438,34 @@ static void ParamIntegerPush( const char * val, void * dp )
 		ParamHilite( p->group->win, p->control, p->bInvalid );
 	LOG( log_paraminput, 1, ( " -> %ld\n", valL ) );
 }
+
+
+static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
+{
+	paramFloatRange_t * frangeP = (paramFloatRange_t*)p->winData;
+	wBool_t bInvalid = p->bInvalid;
+	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
+		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
+		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
+			sprintf( message, _("Enter a value > %s"),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low) );
+		else if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
+			 sprintf( message, _("Enter a value < %s"),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
+		else
+			 sprintf( message, _("Enter a value between %s and %s"),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, message );
+		p->bInvalid = TRUE;
+		if ( ! bInvalid )
+			ParamHilite( p->group->win, p->control, p->bInvalid );
+		return FALSE;
+	}
+	return TRUE;
+}
+
 
 /**
  * Checks the entered value in a float field. Accepts data entered in the different
@@ -1445,7 +1492,7 @@ static void ParamFloatPush( const char * val, void * dp )
 		value = CAST_AWAY_CONST val;
 		p->enter_pressed = FALSE;
 	}
-	LOG( log_paraminput, 1, ( "ParamFloatPush( Enter:%d Val:%s )\n", p->enter_pressed, value ) );
+	LOG( log_paraminput, 1, ( "ParamFloatPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
 
 	if (p->option & PDO_DIM) {
 		valF = DecodeDistance( (wString_p)p->control, &valid );
@@ -1462,26 +1509,8 @@ static void ParamFloatPush( const char * val, void * dp )
 			ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
-	frangeP = (paramFloatRange_t*)p->winData;
-	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
-		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
-		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
-			sprintf( message, _("Enter a value > %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low) );
-		else if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
-			 sprintf( message, _("Enter a value < %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
-		else
-			 sprintf( message, _("Enter a value between %s and %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
-		wWinPix_t h = wControlGetHeight(p->control);
-		wControlSetBalloon( p->control, 0, -h*3/4, message );
-		p->bInvalid = TRUE;
-		if ( ! bInvalid )
-			ParamHilite( p->group->win, p->control, p->bInvalid );
+	if ( !ParamFloatRangeCheck( p, valF ) )
 		return;
-	}
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
@@ -1514,6 +1543,7 @@ static void ParamStringPush( const char * val, void * dp )
 		value = CAST_AWAY_CONST val;
 		p->enter_pressed = FALSE;
 	}
+	LOG( log_paraminput, 1, ( "ParamStringPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
 	if ( (p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
 		p->bInvalid = TRUE;
 		wControlSetBalloon( p->control, 0, 0, NULL );
