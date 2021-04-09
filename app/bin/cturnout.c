@@ -1,5 +1,5 @@
 /** \file cturnout.c
- * T_TURNOUT
+ * Turnout object handling and drawing
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -216,7 +216,9 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 /**
  * Delete a turnout parameter from the list and free the related memory
  *
- * \param [IN] to turnout definition to be deleted 
+ * \param [IN] toInfo turnout definition to be deleted 
+ *
+ * \returns True if it succeeds
  */
 
 BOOL_T
@@ -293,7 +295,7 @@ DeleteTurnoutParams(int fileIndex)
  * 
  * \param paramFileIndex
  * \param scaleIndex
- * \return 
+ * \return enum paraFileState
  */
 
 enum paramFileState 
@@ -323,8 +325,15 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 	return(ret);
 }
 
-/*
- * Check Paths will assume new-P or old-P order is possible and doesn't not change it
+/**
+ * Check Paths verifies that each track segment is on at least one path. 
+ * It will assume new-P or old-P order is possible and does not change it.
+ * 
+ * \param segCnt
+ * \param segs 
+ * \param paths 
+ * 
+ * \returns -1 if a track segment is not on a path
  */
 EXPORT wIndex_t CheckPaths(
 		wIndex_t segCnt,
@@ -777,11 +786,14 @@ static trkSeg_p MapPathSeg(
  *
  */
 
-/** Get the paths from the turnout definition. Puts the results into static dto structure
-
-    @trk track_p pointer to a track
-	@xx  pointer to the extraDataCompound struct
- */
+/**
+* Get the paths from the turnout definition. Puts the results into static dto structure.
+*
+* \param trk track_p pointer to a track
+* \param xx  pointer to the extraDataCompound struct
+*
+* \returns the number of paths
+*/
 int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	wIndex_t segInx;
 	wIndex_t segEP;
@@ -867,9 +879,12 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	return pathCnt;
 }
 
-/* Sets the turnout type 
- * DTO_INVALID (0) if the enhanced method cannot handle it 
- */
+/**
+* Sets the turnout type if compatible with enhanced drawing methods. The data is
+* from the path data saved in dtod and dto by GetTurnoutPaths. The turnout type is
+* stored in the dtod.toType. DTO_INVALID (0) if the enhanced methods cannot handle 
+* it. 
+*/
 void GetTurnoutType() {
 	dtod.strPath = -1;
 	dtod.toType = DTO_INVALID;
@@ -959,8 +974,12 @@ void GetTurnoutType() {
 	}
 }
 
-/* Draw Normal (Single Origin) Turnout Ties 
- * Uses the static dto and dtod structures
+/**
+ * Draw Normal (Single Origin) Turnout Ties. Uses the static dto and dtod structures.
+ * 
+ * \param d The drawing object
+ * \param scaleInx The layout/track scale index
+ * \param color The tie color. If black the color is read from the global tieColor.
  */
 static void DrawNormalToTies(
 	drawCmd_p d,
@@ -1126,8 +1145,13 @@ static void DrawNormalToTies(
 	}
 }
 
-/** Draw Crossing and Slip Turnout Ties - Uses the static dto and dtod structures
- */
+/**
+  * Draw Crossing and Slip Turnout Ties - Uses the static dto and dtod structures.
+  *
+  * \param d The drawing object
+  * \param scaleInx The layout/track scale index
+  * \param color The tie color. If black the color is read from the global tieColor.
+  */
 static void DrawXingToTies(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
@@ -1387,6 +1411,16 @@ static void DrawXingToTies(
 	}
 }
 
+/**
+  * Draw all turnout components: ties, rail, roadbed, etc. The turnout is checked
+  * to see if the enhanced methods can be used. If so the ties are drawn and the
+  * TB_NOTIES bit is set so that the rails and such are drawn on top of the ties.
+  * That bit is restored to its previous state before return. 
+  *
+  * \param trk Pointer to the track object
+  * \param d The drawing object
+  * \param color The turnout color. 
+  */
 static void DrawTurnout(
 		track_p trk,
 		drawCmd_p d,
@@ -1402,16 +1436,13 @@ static void DrawTurnout(
 
 	int noTies = 0;
 
-	// coOrd p0, p1, p2; 
-	// DIST_T len;
-
 	if (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0)
 	{
 		int pathCnt = GetTurnoutPaths(trk, xx);
 
 		if ((pathCnt > 1) && (pathCnt <= DTO_DIM)
 			&& (trk->endCnt <= 4)
-			&& (xx->special == TOnormal))
+			&& (xx->special == TOnormal || xx->special == TOcurved))
 		{
 			
 			int strPath = -1;
