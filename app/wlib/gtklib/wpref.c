@@ -48,6 +48,7 @@ static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
 
+
 /*
  *******************************************************************************
  *
@@ -167,7 +168,7 @@ const char * wGetAppWorkDir(
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
 				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
-				system( copyConfigCmd );
+				int rc = system( copyConfigCmd );
 			}
 		}
 	}
@@ -206,8 +207,8 @@ const char *wGetUserHomeDir( void )
  *
  *******************************************************************************
  */
- 
- typedef struct {
+
+typedef struct {
 		char * section;
 		char * name;
 		wBool_t present;
@@ -218,59 +219,69 @@ dynArr_t prefs_da;
 #define prefs(N) DYNARR_N(prefs_t,prefs_da,N)
 wBool_t prefInitted = FALSE;
 
-static wBool_t prefInitted = FALSE;
-static GKeyFile *keyFile = NULL;
-static gchar *stringBuffer = NULL;
-
-
-static gchar *
-BuildConfigFileName()
-{
-    gchar *tmp;
-    gchar *result;
-    const char * workDir;
-    
-    workDir = wGetAppWorkDir();
-    tmp = g_build_filename (workDir,
-                           wConfigName, 
-                           NULL );
-    
-    result = g_strconcat( tmp, ".ini", NULL );
-    g_free( tmp );
-    
-    return( result );
-}    
 /**
  * Read the configuration file into memory
  */
 
 static void readPrefs( char * name, wBool_t update )
 {
-char tmp[BUFSIZ], *np, *vp, *cp;
+	char tmp[BUFSIZ], *np, *vp, *cp;
 	const char * workDir;
 	FILE * prefFile;
 	prefs_t * p;
 
-    gchar *tmp;
-    GError *error = NULL;
-
-    prefInitted = TRUE;
-
-    tmp = BuildConfigFileName();
-
-    keyFile = g_key_file_new();
-
-    if(keyFile) {
-        g_key_file_load_from_file(keyFile,
-                                  tmp,
-                                  G_KEY_FILE_KEEP_COMMENTS,
-                                  &error );
-        if( error ) {
-            if (!g_error_matches (error, G_FILE_ERROR, G_FILE_ERROR_NOENT))
-                g_warning ("Error loading key file: %s", error->message);
-        }
-    }
-    g_free(tmp);
+	prefInitted = TRUE;
+	workDir = wGetAppWorkDir();
+	if (name && name[0])
+		sprintf( tmp, "%s", name );
+	else
+		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+	prefFile = fopen( tmp, "r" );
+	if (prefFile == NULL)
+		return;
+	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
+		char *sp;
+		
+		sp = tmp;
+		while ( *sp==' ' || *sp=='\t' ) sp++;
+		if ( *sp == '\n' || *sp == '#' )
+			continue;
+		np = strchr( sp, '.' );
+		if (np == NULL) {
+			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
+			continue;
+		}
+		*np++ = '\0';
+		while ( *np==' ' || *np=='\t' ) np++;
+		vp = strchr( np, ':' );
+		if (vp == NULL) {
+			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
+			continue;
+		}
+		*vp++ = '\0';
+		while ( *vp==' ' || *vp=='\t' ) vp++;
+		cp = vp + strlen(vp) -1;
+		while ( cp >= vp && (*cp=='\n' || *cp==' ' || *cp=='\t') ) cp--;
+		cp[1] = '\0';
+		if (update) {
+			for (int i=0;i<prefs_da.cnt;i++) {
+				p = &DYNARR_N(prefs_t,prefs_da,i);
+				if (strcmp(p->name,np)==0 && strcmp(p->section,sp)==0) {
+					p->val = strdup(vp);
+					p->dirty = TRUE;
+					break;
+				}
+			}
+		} else {
+			DYNARR_APPEND( prefs_t, prefs_da, 10 );
+			p = &prefs(prefs_da.cnt-1);
+			p->name = strdup(np);
+			p->section = strdup(sp);
+			p->dirty = FALSE;
+			p->val = strdup(vp);
+		}
+	}
+	fclose( prefFile );
 }
 
 /**
@@ -286,13 +297,26 @@ void wPrefSetString(
 		const char * name,		/* Name */
 		const char * sval )		/* Value */
 {
-    if (!prefInitted)
-	readPrefs();
+	prefs_t * p;
 
-    g_key_file_set_string( keyFile,
-                           section,
-                           name,
-                           sval );
+	if (!prefInitted)
+		readPrefs("", FALSE);
+	
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
+			if (p->val)
+				free(p->val);
+			p->dirty = TRUE;
+			p->val = (sval?strdup( sval ):NULL);
+			return;
+		}
+	}
+	DYNARR_APPEND( prefs_t, prefs_da, 10 );
+	p = &prefs(prefs_da.cnt-1);
+	p->name = strdup(name);
+	p->section = strdup(section);
+	p->dirty = TRUE;
+	p->val = (sval?strdup(sval):NULL);
 }
 
 /**
@@ -306,25 +330,17 @@ char * wPrefGetStringBasic(
 		const char * section,			/* Section */
 		const char * name )			/* Name */
 {
-    GError *error = NULL;
-    gchar *value;
-    
-    if (!prefInitted)
-            readPrefs();
+	prefs_t * p;
 
-    value = g_key_file_get_string( keyFile,
-                                   section,
-                                   name,
-                                   &error );
-    
-    // re-use the previously allocated result buffer
-    if(stringBuffer) {
-        g_free(stringBuffer);
-    }
-    stringBuffer = g_strdup( value );
-    g_free( value );
-    
-    return( stringBuffer );
+	if (!prefInitted)
+		readPrefs("", FALSE);
+	
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
+			return p->val;
+		}
+	}
+	return NULL;
 }
 
 /**
@@ -340,13 +356,10 @@ char * wPrefGetStringBasic(
 		const char * name,		/* Name */
 		long lval )		/* Value */
 {
-    if (!prefInitted)
-	readPrefs();
-    
-    g_key_file_set_int64( keyFile,
-                           section,
-                           name, 
-                           lval );
+	char tmp[20];
+
+	snprintf(tmp, sizeof(tmp), "%ld", lval );
+	wPrefSetString( section, name, tmp );
 }
 
 /**
@@ -365,23 +378,20 @@ wBool_t wPrefGetIntegerBasic(
 		long * res,		/* Address of result */
 		long def )		/* Default value */
 {
-    GError *error = NULL;
-    gint64 value;
-    
-    if (!prefInitted)
-	readPrefs();
-    
-    value = g_key_file_get_int64( keyFile,
-                                  section,
-                                  name,
-                                  &error );
-    if(error || (value == def)) {
-        *res = def;
-        return( FALSE );
-    } else {
-        *res= value;
-        return( TRUE );
-    }   
+	const char * cp;
+    char *cp1;
+
+	cp = wPrefGetStringBasic( section, name );
+	if (cp == NULL) {
+		*res = def;
+		return FALSE;
+	}
+	*res = strtol(cp,&cp1,0);
+	if (cp==cp1) {
+		*res = def;
+		return FALSE;
+	}
+	return TRUE;
 }
 
 /**
@@ -397,13 +407,10 @@ wBool_t wPrefGetIntegerBasic(
 		const char * name,		/* Name */
 		double lval )		/* Value */
 {
-    if (!prefInitted)
-	readPrefs();
-         
-    g_key_file_set_double( keyFile,
-                           section,
-                           name, 
-                           lval );     
+	char tmp[20];
+
+	snprintf(tmp, sizeof(tmp), "%0.6f", lval );
+	wPrefSetString( section, name, tmp );
 }
 
 /**
@@ -423,28 +430,24 @@ wBool_t wPrefGetFloatBasic(
 		double * res,		/* Address of result */
 		double def )		/* Default value */
 {
-    GError *error = NULL;
-    gdouble value;
-    
-    if (!prefInitted)
-	readPrefs();
-    
-    value = g_key_file_get_double( keyFile,
-                                   section,
-                                   name,
-                                   &error );
-    if(error || value == def ) {
-        *res = def;
-        return( FALSE );
-    } else {
-        *res= value;
-        return( TRUE );
-    }   
+	const char * cp;
+    char *cp1;
+
+	cp = wPrefGetStringBasic( section, name );
+	if (cp == NULL) {
+		*res = def;
+		return FALSE;
+	}
+	*res = strtod(cp, &cp1);
+	if (cp == cp1) {
+		*res = def;
+		return FALSE;
+	}
+	return TRUE;
 }
 
-
 void wPrefsLoad(char * name) {
-	readPrefs();
+	readPrefs(name,TRUE);
 }
 
 /**
@@ -466,9 +469,9 @@ void wPrefFlush(
 	
 	workDir = wGetAppWorkDir();
 	if (name && name[0])
-		sprintf( tmp, "%s", name );
+		snprintf( tmp, sizeof(tmp), "%s", name );
 	else
-		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL)
 		return;
@@ -476,19 +479,29 @@ void wPrefFlush(
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
 		if(p->val) {
 			fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
-		}
+		}	
 	}
 	fclose( prefFile );
 }
-
 
 /**
  * Clear the preferences from memory
  * \return  
  */
 
-void wPrefReset(void )
+void wPrefReset(
+		void )
 {
-    prefInitted = FALSE;
-    g_key_file_free( keyFile );
+	prefs_t * p;
+
+	prefInitted = FALSE;
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if (p->section)
+			free( p->section );
+		if (p->name)
+			free( p->name );
+		if (p->val)
+			free( p->val );
+	}
+	prefs_da.cnt = 0;
 }

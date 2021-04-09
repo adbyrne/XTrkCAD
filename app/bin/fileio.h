@@ -22,10 +22,7 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#include <stdio.h>
-
 #include "common.h"
-#include "misc.h"
 
 extern FILE * paramFile;
 extern char *paramFileName;
@@ -81,7 +78,7 @@ typedef struct {
 	char * name;
 	readParam_t proc;
 } paramProc_t;
-dynArr_t paramProc_da;
+extern dynArr_t paramProc_da;
 #define paramProc(N) DYNARR_N( paramProc_t, paramProc_da, N )
 
 void Stripcr( char * );
@@ -104,10 +101,6 @@ void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
 
-#ifdef WINDOWS
-#define fopen( FN, MODE ) wFileOpen( FN, MODE )
-#endif
-
 void SetWindowTitle( void );
 char * PutTitle( char * cp );
 
@@ -117,6 +110,7 @@ void DoParamFiles(void * junk);
 int LoadTracks( int cnt, char **fileName, void *data );
 
 typedef void (*doSaveCallBack_p)( void );
+void SetAutoSave(void);
 void DoSave( doSaveCallBack_p );
 void DoSaveAs( doSaveCallBack_p );
 void DoLoad( void );
@@ -137,7 +131,7 @@ BOOL_T EditClone( void );
 
 void DoRecord( void * );
 void AddPlaybackProc( char *, playbackProc_p, void * );
-EXPORT void TakeSnapshot( drawCmd_t * );
+EXPORT void TakeSnapshot( drawCmd_p );
 void PlaybackMessage( char * );
 void DoPlayBack( void * );
 int MyGetKeyState( void );

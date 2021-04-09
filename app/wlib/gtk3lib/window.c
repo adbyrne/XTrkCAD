@@ -30,6 +30,9 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#define MIN_WIDTH 100
+#define MIN_HEIGHT 100
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -38,8 +41,11 @@
 
 wWin_p gtkMainW;
 
-#define MIN_WIN_WIDTH (50)
-#define MIN_WIN_HEIGHT (50)
+#define MIN_WIN_WIDTH 150
+#define MIN_WIN_HEIGHT 150
+
+#define MIN_WIN_WIDTH_MAIN 400
+#define MIN_WIN_HEIGHT_MAIN 400
 
 #define SECTIONWINDOWSIZE  "gtklib window size"
 #define SECTIONWINDOWPOS   "gtklib window pos"
@@ -68,13 +74,6 @@ static wBool_t maximize_at_next_show = FALSE;
 static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 	GdkRectangle monitor_dimensions;
-
-	if (!widget) {
-		GdkDisplay * display = gdk_display_get_default();
-		GdkMonitor * monitor = gdk_display_get_primary_monitor(display);
-		gdk_monitor_get_geometry(monitor,&monitor_dimensions);
-		return monitor_dimensions;
-	}
 
 	GdkScreen *screen = NULL;
 
@@ -114,9 +113,10 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 static void getWinSize(wWin_p win, const char * nameStr)
 {
-    int w, h;
+    int w=50, h=50;
     const char *cp;
     char *cp1, *cp2;
+
 
     /*
      * Clamp window to be no bigger than one monitor size (to start - the user can always maximize)
@@ -124,11 +124,12 @@ static void getWinSize(wWin_p win, const char * nameStr)
 
     GdkRectangle monitor_dimensions = getMonitorDimensions(GTK_WIDGET(win->gtkwin));
 
-    wPos_t maxDisplayWidth = monitor_dimensions.width-5;
-    wPos_t maxDisplayHeight = monitor_dimensions.height-25;
+    wWinPix_t maxDisplayWidth = monitor_dimensions.width-10;
+    wWinPix_t maxDisplayHeight = monitor_dimensions.height-50;
 
 
-    if ((win->option&F_RESIZE) &&
+
+    if ((win->option&F_RECALLSIZE) &&
             (win->option&F_RECALLPOS) &&
             (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
@@ -165,8 +166,8 @@ static void saveSize(wWin_p win)
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
         char pos_s[20];
 
-        sprintf(pos_s, "%d %d", win->w,
-                win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0)));
+        sprintf(pos_s, "%ld %ld", win->w,
+                (win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
         wPrefSetString(SECTIONWINDOWSIZE, win->nameStr, pos_s);
     }
 }
@@ -264,11 +265,11 @@ wBool_t wWinIsTemplated(wWin_p win) {
 
 void wWinGetSize(
     wWin_p win,		/* Window */
-    wPos_t * width,		/* Returned window width */
-    wPos_t * height)	/* Returned window height */
+    wWinPix_t * width,		/* Returned window width */
+    wWinPix_t * height)	/* Returned window height */
 {
     GtkRequisition min_req,pref_req;
-    wPos_t w, h;
+    wWinPix_t w, h;
     gtk_widget_get_preferred_size(win->gtkwin,&min_req,&pref_req);
     //gtk_widget_size_request(win->gtkwin, &requisition);
     w = win->w;
@@ -298,8 +299,8 @@ void wWinGetSize(
 
 void wWinSetSize(
     wWin_p win,		/* Window */
-    wPos_t width,		/* Window width */
-    wPos_t height)		/* Window height */
+    wWinPix_t width,		/* Window width */
+    wWinPix_t height)		/* Window height */
 {
     win->busy = TRUE;
     win->w = width;
@@ -555,10 +556,10 @@ const char * wWinGetTitle(
 
 void wWinClear(
     wWin_p win,
-    wPos_t x,
-    wPos_t y,
-    wPos_t width,
-    wPos_t height)
+    wWinPix_t x,
+    wWinPix_t y,
+    wWinPix_t width,
+    wWinPix_t height)
 {
 	if (win->builder) {
 		wStatusClearControls(win);
@@ -710,8 +711,6 @@ static int window_configure_event(
                 win->h = MIN_WIN_HEIGHT;
             }
 
-
-
             //if (win->option&F_MENUBAR) {
             //	GtkAllocation allocation;
             //	gtk_widget_get_allocation(win->menubar, &allocation);
@@ -820,10 +819,8 @@ wBool_t catch_shift_ctrl_alt_keys(
         } else {
         	keyState &= ~state;
         }
-
         return TRUE;
     }
-
     return FALSE;
 }
 
@@ -860,7 +857,7 @@ static gint window_char_event(
     }
 }
 
-void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
+void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_t min_height, wWinPix_t max_height, wWinPix_t base_width, wWinPix_t base_height, double aspect_ratio ) {
 	GdkGeometry hints;
     hints.min_width = min_width;
 	hints.max_width = max_width;
@@ -909,8 +906,8 @@ void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int 
 static wWin_p wWinCommonCreate(
     wWin_p parent,
     int winType,
-    wPos_t x,
-    wPos_t y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * labelStr,
     const char * nameStr,
     long option,
@@ -937,8 +934,9 @@ static wWin_p wWinCommonCreate(
         w->gtkwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
         if (gtkMainW) {
-            gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
-                                         GTK_WINDOW(gtkMainW->gtkwin));
+        	if (!(w->option&F_NOTTRANSIENT))
+        		gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
+        									GTK_WINDOW(gtkMainW->gtkwin));
         }
     }
     if (winType != W_MAIN) {
@@ -990,13 +988,15 @@ static wWin_p wWinCommonCreate(
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
         }
     }
-    int scr_w, scr_h;
+    wWinPix_t scr_w, scr_h;
     	wGetDisplaySize(&scr_w, &scr_h);
         if (winType != W_MAIN) {
         	wSetGeometry(w, 50, scr_w-10, 50, scr_h-10, -1, -1, -1);
         } else {
         	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, -1, -1, -1);
      }
+
+
 
     w->first = w->last = NULL;
     w->winProc = winProc;
@@ -1077,8 +1077,8 @@ static wWin_p wWinCommonCreate(
 
 wWin_p wWinMainCreate(
     const char * name,		/* Application name */
-    wPos_t x,				/* Initial window width */
-    wPos_t y,				/* Initial window height */
+    wWinPix_t x,				/* Initial window width */
+    wWinPix_t y,				/* Initial window height */
     const char * helpStr,	/* Help topic string */
     const char * labelStr,	/* Window title */
     const char * nameStr,	/* Window name */
@@ -1237,8 +1237,8 @@ void wlibRedraw(wWin_p parent) {
 wWin_p wlibCreateFromTemplate(
     wWin_p parent,
     int winType,
-    wPos_t x,
-    wPos_t y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * labelStr,
     const char * nameStr,
     long option,
@@ -1340,8 +1340,8 @@ wWin_p wlibCreateFromTemplate(
 
 wWin_p wWinPopupCreate(
     wWin_p parent,
-    wPos_t x,
-    wPos_t y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * helpStr,
     const char * labelStr,
     const char * nameStr,
@@ -1387,7 +1387,6 @@ wWin_p wWinPopupCreate(
 }
 
 
-
 /**
  * Terminates the applicaton with code <rc>. Before closing the main window
  * call back is called with wQuit_e. The program is terminated without exiting
@@ -1418,4 +1417,3 @@ void wExit(
 
     exit(rc);
 }
-

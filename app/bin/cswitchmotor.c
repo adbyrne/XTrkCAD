@@ -49,22 +49,18 @@
  *
  */
 
-#include <ctype.h>
-#include <string.h>
-
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#ifdef WINDOWS
+#include "common-ui.h"
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
-#include "utility.h"
-#include "messages.h"
+#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 
@@ -125,6 +121,7 @@ static dynArr_t switchmotorTrk_da;
 */
 
 typedef struct switchmotorData_t {
+    extraDataBase_t base;
     char * name;
     char * normal;
     char * reverse;
@@ -137,7 +134,7 @@ typedef struct switchmotorData_t {
 
 static switchmotorData_p GetswitchmotorData ( track_p trk )
 {
-	return (switchmotorData_p) GetTrkExtraData(trk);
+	return GET_EXTRA_DATA( trk, T_SWITCHMOTOR, switchmotorData_t );
 }
 
 #if 0
@@ -155,7 +152,7 @@ static void ComputeSwitchMotorBoundingBox (track_p t)
 {
     coOrd hi, lo, p;
     switchmotorData_p data_p = GetswitchmotorData(t);
-    struct extraData *xx = GetTrkExtraData(data_p->turnout);
+    struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout, T_TURNOUT, extraDataCompound_t);
     coOrd orig = xx->orig;
     ANGLE_T angle = xx->angle;
     SCALEINX_T s = GetTrkScale(data_p->turnout);
@@ -190,7 +187,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 {
     coOrd p[switchmotorPoly_CNT];
     switchmotorData_p data_p = GetswitchmotorData(t);
-    struct extraData *xx = GetTrkExtraData(data_p->turnout);
+    struct extraDataCompound_t *xx = GET_EXTRA_DATA(data_p->turnout, T_TURNOUT, extraDataCompound_t);
     coOrd orig = xx->orig;
     ANGLE_T angle = xx->angle;
     SCALEINX_T s = GetTrkScale(data_p->turnout);
@@ -411,9 +408,9 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 	switchmotorData_p xx = GetswitchmotorData(t);
 	char *switchMotorName = MyStrdup(xx->name);
     
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	switchMotorName = Convert2UTF8(switchMotorName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     if (xx->turnout == NULL) 
 		return FALSE;
@@ -437,9 +434,9 @@ static BOOL_T ReadSwitchMotor ( char * line )
 	if (!GetArgs(line+12,"ddqqqq",&index,&trkindex,&name,&normal,&reverse,&pointsense)) {
 		return FALSE;
 	}
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 	trk = NewTrack(index, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
 	xx = GetswitchmotorData( trk );
 	xx->name = name;
@@ -592,6 +589,7 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 	switch (action & 0xFF) {
 	case C_START:
 		InfoMessage( _("Select a turnout") );
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 	case C_DOWN:
 		if ((trk = OnTrack(&pos, TRUE, TRUE )) == NULL) {
@@ -757,11 +755,11 @@ static POS_T swmhiliteBorder;
 static wDrawColor swmhiliteColor = 0;
 static void DrawSWMotorTrackHilite( void )
 {
-	wPos_t x, y, w, h;
+	wDrawPix_t x, y, w, h;
 	if (swmhiliteColor==0)
 		swmhiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = ((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = ((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
 	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }

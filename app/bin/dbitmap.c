@@ -20,23 +20,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
+#include "common-ui.h"
+
+#ifdef WIN32
+#ifdef _WIN64
+#define BITMAPDIM 50000
+#define BITMAPSIZE 500e6
+#else
+#define BITMAPDIM 32000
+#define BITMAPSIZE 150e6
+#endif
+#else // Not WIN
+#define BITMAPDIM 50000
+#define BITMAPSIZE 500e6
+#endif // WIN32
 
 
 static long outputBitMapTogglesV = 3;
 static double outputBitMapDensity = 10;
 
 static struct wFilSel_t * bitmap_fs;
-static long bitmap_w, bitmap_h;
+static wWinPix_t bitmap_w, bitmap_h;
 static drawCmd_t bitmap_d = {
 		NULL,
 		&screenDrawFuncs,
@@ -63,7 +73,7 @@ static int SaveBitmapFile(
 
 	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] ); 
 
-	bitmap_d.d = wBitMapCreate( (wPos_t)bitmap_w, (wPos_t)bitmap_h, 8 );
+	bitmap_d.d = wBitMapCreate( bitmap_w, bitmap_h, 8 );
 	if (bitmap_d.d == (wDraw_p)0) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		return FALSE;
@@ -108,10 +118,10 @@ static int SaveBitmapFile(
 		DrawString( &bitmap_d, p[0], 0.0, sProdName, fp_bi, fs*bitmap_d.scale, wDrawColorBlack );
 	}
 	wDrawClip( bitmap_d.d,
-		 (wPos_t)(-bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi),
-		 (wPos_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
-		 (wPos_t)(mapD.size.x/bitmap_d.scale*bitmap_d.dpi),
-		 (wPos_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi) );
+		 (wWinPix_t)(-bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi),
+		 (wWinPix_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
+		 (wWinPix_t)(mapD.size.x/bitmap_d.scale*bitmap_d.dpi),
+		 (wWinPix_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi) );
 	wSetCursor( mainD.d, wCursorWait );
 	InfoMessage( _("Drawing tracks to BitMap") );
 	DrawSnapGrid( &bitmap_d, mapD.size, TRUE );
@@ -123,6 +133,7 @@ static int SaveBitmapFile(
 	InfoMessage( _("Writing BitMap to file") );
 	if ( wBitMapWriteFile( bitmap_d.d, fileName[0] ) == FALSE ) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
+		wBitMapDelete( bitmap_d.d );
 		return FALSE;
 	}
 	InfoMessage( "" );
@@ -151,11 +162,11 @@ static paramData_t outputBitMapPLs[] = {
 #define I_DENSITY		(1)
 	{   PD_FLOAT, &outputBitMapDensity, "density", PDO_DLGRESETMARGIN, &r0o1_100, N_("    dpi") },
 #define I_MSG1			(2)
-	{   PD_MESSAGE, N_("Bitmap : 99999 by 99999 pixels"), "pixelsize", PDO_DLGRESETMARGIN|PDO_DLGUNDERCMDBUTT|PDO_DLGWIDE, (void*)180 },
+	{   PD_MESSAGE, N_("Bitmap : 99999 by 99999 pixels"), "message1", PDO_DLGRESETMARGIN|PDO_DLGUNDERCMDBUTT|PDO_DLGWIDE, (void*)180 },
 #define I_MSG2			(3)
-	{   PD_MESSAGE, N_("Approximate file size: 999.9Mb"), "filesize", PDO_DLGUNDERCMDBUTT, (void*)180 } };
+	{   PD_MESSAGE, N_("Approximate file size: 999.9Mb"), "message2", PDO_DLGUNDERCMDBUTT, (void*)180 } };
 
-static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_DIALOGTEMPLATE, outputBitMapPLs, sizeof outputBitMapPLs/sizeof outputBitMapPLs[0] };
+static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, sizeof outputBitMapPLs/sizeof outputBitMapPLs[0] };
 
 
 static void OutputBitMapComputeSize( void )
@@ -181,17 +192,19 @@ static void OutputBitMapComputeSize( void )
 	bitmap_d.size.x = mapD.size.x + (Lborder+Rborder)*bitmap_d.scale;
 	bitmap_d.orig.y = 0.0-Bborder*bitmap_d.scale;
 	bitmap_d.size.y = mapD.size.y + (Bborder+Tborder)*bitmap_d.scale;
-	bitmap_w = (long)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
-	bitmap_h = (long)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
+	bitmap_w = (wWinPix_t)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
+	bitmap_h = (wWinPix_t)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
 	sprintf( message, _("Bitmap : %ld by %ld pixels"), bitmap_w, bitmap_h );
 	ParamLoadMessage( &outputBitMapPG, I_MSG1, message );
-	size = bitmap_w * bitmap_h;
+	size = (FLOAT_T)bitmap_w * bitmap_h;
 	if ( size < 1e4 )
 		sprintf( message, _("Approximate file size : %0.0f"), size );
 	else if ( size < 1e6 )
 		sprintf( message, _("Approximate file size : %0.1fKb"), (size+50.0)/1e3 );
-	else
+	else if ( size < 1e9 )
 		sprintf( message, _("Approximate file size : %0.1fMb"), (size+5e4)/1e6 );
+	else 
+		sprintf(message, _("Approximate file size : %0.1fGb"), (size + 5e7) / 1e9);
 	ParamLoadMessage( &outputBitMapPG, I_MSG2, message );
 }
 
@@ -199,12 +212,12 @@ static void OutputBitMapComputeSize( void )
 static void OutputBitMapOk( void * junk )
 {
 	FLOAT_T size;
-	if (bitmap_w>32000 || bitmap_h>32000) {
+	if (bitmap_w > BITMAPDIM || bitmap_h > BITMAPDIM) {
 		NoticeMessage( MSG_BITMAP_TOO_LARGE, _("Ok"), NULL );
 		return;
 	}
-	size = bitmap_w * bitmap_h;
-	if (size >= 1000000) {
+	size = (FLOAT_T)bitmap_w * bitmap_h;
+	if (size > BITMAPSIZE) {
 		if (NoticeMessage(MSG_BITMAP_SIZE_WARNING, _("Yes"), _("Cancel") )==0)
 			return;
 	}

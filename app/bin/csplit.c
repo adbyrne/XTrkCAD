@@ -22,11 +22,11 @@
 
 #include "cundo.h"
 #include "compound.h"
-#include "i18n.h"
-#include "messages.h"
+#include "cselect.h"
 #include "track.h"
-#include "utility.h"
+#include "draw.h"
 #include "fileio.h"
+#include "common-ui.h"
 
 static wMenu_p splitPopupM[2];
 static wMenuToggle_p splitPopupMI[2][4];
@@ -59,7 +59,7 @@ static void ChangeSplitEPMode( wBool_t set, void * mode )
 	DrawEndPt( &mainD, splitTrkTrk[1], splitTrkEP[1], wDrawColorBlack );
 }
 
-static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a) {
+static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a, BOOL_T trim) {
 	DIST_T d = tempD.scale*0.1;
 	DIST_T w = tempD.scale/tempD.dpi*4;
 	int i;
@@ -68,8 +68,8 @@ static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a) 
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
 		anchors(i).color = wDrawColorBlue;
-		Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
-		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[0],pos,a,trim?2*GetTrkGauge(t):GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],pos,a,trim?2*-GetTrkGauge(t):-GetTrkGauge(t));
 		anchors(i).width = w;
 	} else {
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -95,7 +95,28 @@ static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a) 
 
 static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
-	CreateSplitAnchorAngle(pos,t,end,a);
+	CreateSplitAnchorAngle(pos,t,end,a,FALSE);
+}
+
+static void CreateTrimAnchorLeg(coOrd pos, ANGLE_T a, track_p t) {
+	DIST_T d = tempD.scale*0.1;
+	DIST_T w = tempD.scale/tempD.dpi*4;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.l.pos[0] = pos;
+	Translate(&anchors(i).u.l.pos[1],pos,a,GetTrkGauge(t)*2);
+	anchors(i).width = w;
+
+}
+
+static void CreateTrimAnchor(coOrd pos, track_p t, track_p s, coOrd cursor) {
+	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(s,pos,NULL,NULL));
+	CreateSplitAnchorAngle(pos,t,FALSE,a,TRUE);
+	ANGLE_T aa = FindAngle(pos,cursor);
+	ANGLE_T d = DifferenceBetweenAngles(a,aa);
+	CreateTrimAnchorLeg(pos,a+(d>0?90:-90),t);
 }
 
 static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
@@ -110,6 +131,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	case C_START:
 		InfoMessage( _("Select track to split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		SetAllTrackSelect( FALSE );
 		/* no break */
 	case C_DOWN:
 	case C_MOVE:
@@ -219,7 +241,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				if ((MyGetKeyState()&WKEY_SHIFT) != 0 ) {
 					if (SplitTurnoutCheck(trk0,pos,ep0,NULL,NULL,NULL,TRUE,&pos,&angle)) {
 						angle = NormalizeAngle(angle+90);
-						CreateSplitAnchorAngle(pos,trk0,FALSE,angle);
+						CreateSplitAnchorAngle(pos,trk0,FALSE,angle,FALSE);
 					}
 				} else {
 					CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
@@ -257,6 +279,7 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 	case C_START:
 		InfoMessage( _("Select draw to split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		SetAllTrackSelect( FALSE );
 		/* no break */
 	case C_DOWN:
 	case C_MOVE:
@@ -294,7 +317,6 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 			}
 		}
 		onTrackInSplit = FALSE;
-
 		break;
 	case C_REDRAW:
 		if (anchors_da.cnt)
@@ -305,15 +327,153 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 	return C_CONTINUE;
 }
 
+typedef enum {TRIM_NONE, TRIM_LINE} TrimState_e;
+
+static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
+{
+	track_p trk0, trk1, trk2;
+	EPINX_T ep0 = 0;
+	static TrimState_e trimState;
+	static track_p trimLine;
+	static track_p trk;
+
+	switch (action&0xFF) {
+	case C_START:
+		InfoMessage( _("Select the draw object to Trim to") );
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		trimState = TRIM_NONE;
+		trimLine = NULL;
+		trk = NULL;
+		SetAllTrackSelect( FALSE );
+		/* no break */
+	case C_DOWN:
+	case C_MOVE:
+		return C_CONTINUE;
+		break;
+	case C_UP:
+		if (trimState == TRIM_NONE) {
+			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
+				if (IsTrack(trk0))  {
+					InfoMessage(_("Can't Trim with a Track"));
+					return C_CONTINUE;
+				}
+				trimState = TRIM_LINE;
+				trimLine = trk0;
+				InfoMessage( _("Select an intersecting draw object to Trim") );
+				return C_CONTINUE;
+			}
+			else return C_CONTINUE;
+		}
+		if (!trimLine) {
+			InfoMessage(_("No Draw to Trim with"));
+			wBeep();
+			return C_TERMINATE;
+		}
+		coOrd pos1 = pos;
+		if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
+			if (IsTrack(trk1)) {
+				InfoMessage(_("Can't Split a track object"));
+				wBeep();
+				return C_CONTINUE;
+			}
+			if (!QueryTrack(trk1,Q_MODIFY_CAN_SPLIT)) {
+				onTrackInSplit = FALSE;
+				InfoMessage(_("Can't Split that Draw Object"));
+				return C_CONTINUE;
+			}
+			pos1 = pos;
+		    if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
+				if ( IsClose(GetTrkDistance(trk1,&pos1)*4)) {
+					//Iterate twice
+					for (int i=0; i<2;i++) {
+						GetTrkDistance(trimLine,&pos1);
+						GetTrkDistance(trk1,&pos1);
+					}
+				} else return C_CONTINUE;
+			} else {
+				return C_CONTINUE;
+			}
+		} else return C_CONTINUE;
+
+		ANGLE_T a = GetAngleAtPoint(trk1,pos1,NULL,NULL);
+		ANGLE_T aa = DifferenceBetweenAngles(a,FindAngle(pos1,pos));
+		if (fabs(aa)<90 ) ep0 = 1;
+		else ep0 = 0;
+
+		UndoStart( _("Trim Draw"), "TrimDraw( T%d[%d] )", GetTrkIndex(trimLine), ep0 );
+		SplitTrack( trk1, pos1, ep0, &trk2, FALSE );
+		if (trk2 ) DeleteTrack(trk2, FALSE);
+		UndoEnd();
+		MainRedraw();
+		InfoMessage( _("Select another draw object to Trim, or Space to Deselect") );
+		return C_CONTINUE;
+		break;
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		trk = NULL;
+		if (trimState == TRIM_NONE) {
+			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
+				if (IsTrack(trk0)) break;
+				if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+					trk = trk0;
+				}
+			}
+		}
+		if (trimState == TRIM_LINE) {
+			coOrd pos1=pos;
+			if ((trk1 = OnTrackIgnore(&pos1,FALSE,FALSE,trimLine))!=NULL) {
+				if (IsTrack(trk1)) {
+					return C_CONTINUE;
+				}
+				pos1 = pos;
+				if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
+					if (IsClose(GetTrkDistance(trk1,&pos1)*4)) {
+						//Iterate Twice
+						for (int i=0; i<2;i++) {
+							GetTrkDistance(trimLine,&pos1);
+							GetTrkDistance(trk1,&pos1);
+						}
+						CreateTrimAnchor(pos1, trk1, trimLine, pos);
+					}
+				}
+			}
+		}
+		break;
+	case C_REDRAW:
+		if (trk) {
+			DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+		}
+		if (trimLine) {
+			DrawTrack(trimLine,&tempD,selectedColor);
+		}
+		if (anchors_da.cnt)
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		break;
+	case C_TEXT:
+		if (action>>8 != ' ' && action>>8 != 13 )
+			return C_CONTINUE;
+		trimLine = NULL;
+		trk = NULL;
+		trimState = TRIM_NONE;
+		InfoMessage("");
+		return C_TERMINATE;
+	default: ;
+	}
+
+	return C_CONTINUE;
+}
+
 
 #include "bitmaps/splittrk.xpm"
 #include "bitmaps/splitdraw.xpm"
+#include "bitmaps/trimdraw.xpm"
 
 void InitCmdSplit( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Split"), "cmdSplitSetCmd", _("Split") );
 	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(splittrk_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
 	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"), wIconCreatePixMap(splitdraw_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
+	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"), wIconCreatePixMap(trimdraw_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
 	ButtonGroupEnd();
 }
 

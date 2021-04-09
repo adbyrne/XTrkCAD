@@ -1,6 +1,7 @@
 include( CheckSymbolExists )
 
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
+
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(cnvdsgn m)
 ENDIF(NOT WIN32)
@@ -196,7 +197,11 @@ TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
 TARGET_LINK_LIBRARIES(xtrkcad dynstring)
+IF(UNIX AND NOT APPLE)
+target_link_libraries(xtrkcad ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
+ELSE(UNIX AND NOT APPLE)
 target_link_libraries(xtrkcad ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES})
+ENDIF(UNIX AND NOT APPLE)
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}

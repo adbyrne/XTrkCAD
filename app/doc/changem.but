@@ -76,7 +76,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or draw objects (\K{cmdSplitDraw}). 
+\dd \f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or split draw objects (\K{cmdSplitDraw}) or use a second Object to Trim (\K{cmdTrimDraw}). 
 The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \lcont{
@@ -192,15 +192,17 @@ The resulting track(s) will mimic the shape of the Cornu/Bezier(s) exactly. This
 
 The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. 
 
-The endpoint which you are working on is indicated with a big red dot.
+The endpoint which you are working on is indicated with a big red dot. Note that when an endpoint is selected, the Elevation Window will have focus. To select a different endpoint without closing this window, two clicks (or a double click) will be needed. The first click restores focus to the main window, the second selects the point.
 
-Moving around the layout will show you the elevation at the point indicated by a blue dot.
+If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift+Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
 
-If you hover over a point where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
+Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move existing Elevation Labels if the option is set for them to be displayed and the Zoom level is adequate, Only "Defined" and "Station" endpoint labels can be moved.
 
-If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
+If you add \f{Alt}, while moving around the layout close to tracks will show you the elevation at the point indicated by a blue closed dot. 
 
-Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move Elevation Labels if both the option is set for them to be displayed and the Zoom level is correct,, Only Defined and Station endpoint labels can be moved.
+With \f{Alt} held, if you hover over a point close to where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
+
+Clicking with \f{Shift} at this point will split the track, allowing the elevation to be adjusted to provide adequate clearance.
 
 \G{png.d/celev.png}
 
@@ -208,17 +210,17 @@ An endpoint can have one of several elevation types:
 
 \u000
 
-\b \f{None} - no elevation defined.
+\b \f{None} - no elevation control defined. This is the default state and the elevation will be computed. It will be shown if the Display Option \K{cmdDisplay} \f{EndPt Elevations} setting is on.
 
-\b \f{Defined} - a defined elevation at a specified height.
+\b \f{Defined} - the defined elevation is set to a specified height. The elevation will be shown. 
 
-\b \f{Hidden} - a defined elevation but not displayed on the layout.
+\b \f{Hidden} - a defined elevation like \f{Defined} but not displayed on the layout.
 
-\b \f{Computed} - height is based on height of closest neighbors.
+\b \f{Computed} - height is calculated and displayed even if the Display Option \K{cmdDisplay} \e{EndPt Elevations} is on.
 
-\b \f{Grade} - grade is based on height of closest neighbors.
+\b \f{Grade} - grade is based on height of closest neighbors and displayed.
 
-\b \f{Ignored} - endpoint is not considered in computations.
+\b \f{Ignored} - endpoint is not considered in computations.  This breaks the flow of the elevation influence from one side to the other, resulting in an elevation that is not dependent on the connected track but on the other connected tracks. A common use would be to ensure a mainline dictates the elevation of the start of a branch.
 
 \b \f{Station} - assigns a name to the endpoint.
 
@@ -228,9 +230,11 @@ When an endpoint is selected on the layout by \e{Left-Click}, it is highlighted 
 
 Additionally, \f{Defined Elevation} endpoints are indicated on the layout by gold colored dots. \f{Ignored Elevation} endpoints are indicated by blue colored dots.
 
-The grade at the specified endpoint is displayed next to the \f{Grade} radio button. For \f{Defined Elevation} endpoints, the grade on each side of the endpoint is displayed.
+The grade at the specified endpoint is displayed next to the \f{Grade} radio button. For \e{Defined Elevation} endpoints, the grade on each side of the endpoint is displayed.
 
-\f{Defined Elevation} endpoints are used to specify fixed heights of track endpoints. Typically, this would be where a grade changes or where clearances must be maintained. \f{Computed} Elevations and \f{Grade} markers can place between \f{Defined Elevation} endpoints. These values are not entered directly but are computed dynamically based on \f{Defined Elevations} of connected tracks. This allows labeling of elevations at intermediate endpoints without having the enter specific values.  \f{Computed} markers can also placed between a \f{Defined Elevation} point and the end of a track.
+\f{Defined Elevation} endpoints are used to specify fixed heights of track endpoints. Typically, this would be where a grade changes or where clearances must be maintained. \f{Computed} Elevations and \f{Grade} markers can place between \f{Defined Elevation} endpoints. 
+These values are not entered directly but are computed dynamically based on \f{Defined Elevations} of connected tracks. 
+This allows labeling of elevations at intermediate endpoints without having the enter specific values.  \f{Computed} markers can also placed between a \f{Defined Elevation} point and the end of a track.
 
 \f{Stations} are used to provide information for the Profile (\K{cmdProfile}) command.
 
@@ -243,7 +247,7 @@ All \f{Elevation} labels (including \f{Grade} and \f{Station}) are drawn on the 
 
 Elevations of Tracks are computed in following steps.  The colors listed in each step are used as the background color of the Track Elevation Markers (if they are enabled (\K{cmdDisplay})).
 
-\b The Shortest Paths between all \e{Defined Elevations} are computed.  A Path stops at \e{Ignored} or \e{Defined} endpoints.  The Elevation of any Turnouts on these Paths with more than two connections are computed as the average Elevation inversely weighted by distance along the tracks to the \e{Defined Elevation} points (\e{Blue}).
+\b The Shortest Paths between all \e{Defined Elevations} are computed.  A Path stops at \f{Ignored} or \e{Defined} endpoints. The Elevation of any Turnouts on these Paths with more than two connections are computed as the average Elevation inversely weighted by distance along the tracks to the \e{Defined Elevation} points (\e{Blue}).
 
 \u000
 
@@ -257,7 +261,8 @@ Elevations of Tracks are computed in following steps.  The colors listed in each
 
 \b Any remaining tracks are not connected to a \e{Defined Elevation} and do not have an Elevation.
 
-The elevation computation is performed incrementally every time the layout is changed to keep all elevations in sync. The performance of the computation is affected by the placement of the \e{Defined Elevation} endpoints and the number of Paths between them. Place the \e{Defined Elevations} at points where tracks begin to branch (such as the throat of a yard or at the ends of a siding). Also, use \e{Defined Elevations} to break the layout into areas so recomputation has fewer tracks and Paths to deal with.
+The elevation computation is performed incrementally every time the layout is changed to keep all elevations in sync. The performance of the computation is affected by the placement of the \e{Defined Elevation} endpoints and the number of Paths between them. 
+Place the \e{Defined Elevations} at points where tracks begin to branch (such as the throat of a yard or at the ends of a siding). Also, use \e{Defined Elevations} or \e{Ignore Elevations} to break the layout into areas so recomputation has fewer tracks and Paths to deal with.
 
 \rule
 
@@ -336,7 +341,7 @@ For detail about;
 
 \u000
 
-\dd Using Normal Easments where tracks are either joined with a straight or a 'simple curve' \k{joinNormalEasment}, 
+\dd Using Normal Easements where tracks are either joined with a straight or a 'simple curve' \k{joinNormalEasment}, 
 e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms})
 
 \u000
@@ -350,6 +355,8 @@ e.g. one which uses a curve in a single direction as opposed to using reverse cu
 \rule
 
 \S2{joinNormalEasment} Join with Normal Easement
+
+This type of join does not work for Bezier or Cornu tracks, use Cornu Easements (\K{joinCornu}) for these tracks instead.
 
 \u000
 
@@ -674,7 +681,9 @@ Either the left mouse button (for changing length or creating a tangent track) o
 
 \S2{objectModify} Modifying Objects
 
-\n The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.
+\n The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Benchwork} can be dragged to new positions.
+
+\n The ends of a \e{Ruler} or the ends and origin of a \e{Protractor} can be dragged to new positions
 
 \n A \e{Box} or a \e{FilledBox} can be modified by selecting a corner and dragging in two dimensions, or a side and dragging it orthogonally. This modifications preserve a 4-sided rectangle.
 
@@ -727,12 +736,15 @@ For more detail about;
 \lcont{\u000}
 
 \n With the mouse pointer hovering over the endpoint of the object to be modified, \e{Left+Drag} (\K{windowTerms}) to change the length of the track segment, table edge, bench-work, dimension line or line.
+If \f{MagneticSnap} is enabled, the end will snap to any close draw object. \c{Alt} inverts the MagneticSnap setting.  If there is no nearby object and \f{SnapGrid} is enabled, the end will snap to a grid point unless \f{Alt} is added.
 
 \lcont{\u000}
 
 \e{Left+Drag}ging the endpoint of a turnout (or other sectional track) causes a straight length of flex-track to be created from the selected endpoint to the cursor.
 
-\e{Left+Drag}ging the endpoint of a \f{Table Edge} (\K{cmdDraw}) allows the endpoint to be moved to a new position. If the endpoint is moved close to another \f{Table Edge} then the endpoint will be moved to it.
+\e{Left+Drag}ging the endpoint of a \f{Table Edge} (\K{cmdDraw}) allows the endpoint to be moved to a new position. If \c{Ctrl} is added and the endpoint is moved close to another \f{Table Edge} then the endpoint will be moved to it if not, the line will be a multiple of 90 degrees.
+
+
 
 The length of a curved track can be changed to form an almost complete circle by selecting one endpoint of the curved track then dragging the cursor to the other endpoint. Going past the other endpoint creates a very small curve. Curves greater than 360\u00B0 cannot be created.
 
@@ -890,7 +902,7 @@ When a Polygon or a PolyLine is modified, open blue circle anchors show the posi
 
 \u000
 
-\b \f{Delete} will remove a selected node.
+\b \f{Delete} or \f{Backspace} will remove a selected node.
 
 \u000
 
@@ -1039,7 +1051,7 @@ A move can be achieved using one of the following methods;
 
 \u000
 
-During a Move of tracks, and \f{MagneticSnap} is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
+During a Move of tracks, and \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
 This indicates that the two points will auto-join and that all the moved tracks will align to the unselected point if the Move is stopped.
 This behaviour can be suppressed with \e{Alt}. If \f{MagneticSnap} is disabled, the alignment will only occur if \e{Alt} is pressed.
 
@@ -1094,18 +1106,66 @@ Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{En
 
 \G{png.d/bmovedes.png}
 
-This command is used to enable and move Elevation, Grade, Station (\K{cmdElevation}), Straight Track (\K{cmdStraight}), Curved Track (\K{cmdCurve}), Bezier (\K{cmdBezier}, Cornu (\K{cmdCornu}), Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
+This command is used to move Elevation, Grade, or Station (\K{cmdElevation}), and to enable/disable and move
+Straight Track (\K{cmdStraight}), Curved Track (\K{cmdCurve}), Bezier (\K{cmdBezier}, Cornu (\K{cmdCornu}), Joint (\K{cmdJoin}), Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
 
 The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item or the \f{Move Description} button.
 
-Click the \f{Move Description} button to activate the \f{Move Description} command. As the cursor passes close to an object that can display a label it will be highlighted. A dark blue indicates a label that has "Show Description" set on, a light blue set off.
+Click the \f{Move Description} button to activate the \f{Move Description} command. As the cursor passes close to an object that can display a label it will be highlighted. 
+A dark blue indicates a label that has "Show Description" set on, a teal color means it is set to hide.
 
 Use \e{Left+Drag} to move the label to a new position and unhide if hidden. Once moved, the label becomes fixed in a position relative to the object. Subsequent moves of that object will cause the label to move as well.
 
-This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}).
+This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}). 
 
-The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter "\f{s}" will show a hidden description. 
-The letter "\f{d}" will enable and disable detailed descriptions. There is a \f{Context Menu} Show/Hide Toggle as well.
+Note that labels need to be visible in the Display menu and the layout needs to be zoomed in enough to show labels for them to be moved.
+
+There are keys that control the display of description when hovering over a description or a track.
+
+\b The letter "\f{s}" when hovering over a track will show the hidden description - the teal highlight will show which tracks can have descriptions. 
+
+\b The letter "\f{h}", when hovering over the track or description, can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix, Joint or Turnout Labels. 
+
+\b The letter "\f{d}" will enable and disable a detailed description which is intended for tracklaying - it is a table of points and track angles that lie along the track path. 
+
+Using these values a curve can be constructed even for complex objects such as Bezier or Cornu.
+
+There is a \f{Context Menu} Show/Hide Toggle as well.
+
+Labels can be moved by hovering the "hot spots" or over the attached track object. \e{Left-Drag} will reposition it. Elevation labels can be selected by hovering of thier centers or the end point they refer to.
+Note that end points with elevation mode "None" are not selectable. 
+ 
+\b Cornu, Bezier, Straight and Joint (Easment) Labels can be moved along the line between the end-points and also laterally. The fields show data about the curves. 
+
+\lcont{\u000
+
+\b Cornu and Bezier Tracks show the "chord" length, its absolute angle, and the length of the track and the minimum radius. 
+To lay these variable radius curves out, the detailed description selected by \f{'d'} is suggested. 
+
+\b Joint/Easement Tracks show the "chord" length and abslute angle and easement curve constructing values of Radius and Lengths. 
+For larger easmements, the detailed position and angle description selected by \f{'d'} may be useful.
+
+\b Straight Tracks show the length and the absolute angle.
+
+}
+
+\u000
+
+\b Curve Track Labels can be moved so that the label is somewhere on a radial line from the center to a position within the arc. 
+A Curve label shows the absolute angle of the chord, its length, the Curve Radius and the deflection from the chord at the center of it. 
+This enables the curve to be laid out even if the center point of the arc is inaccesible. Note that the detailed description may also be helpful in this case.
+
+\u000
+
+\b Compound (Structure and Turnout) Labels can be moved without restriction. They show the Object's Title information. 
+
+\u000
+
+\b Elevation points labels can be moved without restriction - they show the Grade, Elevation, or Station Name as appropriate. 
+
+\u000
+
+\b The detailed description setting is not preserved in the saved layout. It is designed for use when transferring a complex part of the plan to a real layout.  
 
 Note - existing defined elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElevation} command.
 
@@ -1200,7 +1260,7 @@ Until an object is selected, the object under the cursor that will be selected w
 Objects in Frozen Layers will only be highlighted and selected if \f{Shift} is added.
 
 A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear.
-The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object.
+The properties dialog contains information pertaining to the selected objects size, position, size, color and layer as appropriate for each type of object.
 Certain values can be changed to modify the object. Some values, e.g., endpoint positions, can not be changed if, for example, a Track is joined to another Track.
 The values will take effect when \f{Enter}, \f{Tab} is pressed or the cursor leaves the entry field.
 
@@ -1208,11 +1268,14 @@ The values will take effect when \f{Enter}, \f{Tab} is pressed or the cursor lea
 
 The selected object is highlighted by a grey area.
 
-If it is a Line, Curve, Circle or Polygon object, and the rotation origin is non-zero, a large blue cross will show its position.
-
 \G{png.d/dpropertieshighlight.png}
 
-\S2{drawDescribe} Draw Object Fields
+\S2{drawDescribe} Draw Object Describe Fields
+
+\S3{drawDescribeCommon} Common Draw Object Fields
+
+If the Object is a Line, Curve, Circle or Polygon object, and the rotation origin is non-zero, a large blue cross will show its position.  
+If it is zero, the command starts with the \f{Lock Origin} field unticked and the \f{Rotate By} field greyed out.
 
 Some fields are used by multiple types of objects - these are listed below
 
@@ -1221,34 +1284,45 @@ Some fields are used by multiple types of objects - these are listed below
 \dd The width of the line for a line, curve or unfilled object can be set. 0 means a pixel width at all scales.
 Other values are the width of the line in scale units. If the value is negative, it is the absolute value of pixels wide at all scales.
 
-\dt Lock
+\dt Pivot
 
-\dd The Lock control can be set to fix in place the start, or the middle or the end, and it applies to the Length and Angular Length controls. When these are chnaged the new dimensions are applied so as to keep the locked position in place.
-
-\dt Rotation Angle
-
-\dd Some Draw objects (Polygon, Polyline, Lines, Curves, Circles) can be rotated about their rotation origin in Describe.
-After the rotation completes, the rotation angle will be set to zero, as all the points of the object will be adjusted to thier absolute position in the layout.
+\dd The Pivot control can be set to fix in place the start, or the middle or the end, and it applies to the Length, Line Angle and Angular Length controls. 
+When these are changed the new dimensions are applied so as to keep the locked position in place.
 
 \dt Rotation Origin
 
-\dd By default the rotation origin is the Layout origin \{0,0\}.
-By setting a different Rotation Origin, subsequent Rotations will be about that new point. This may be useful when using Draw objects as part of larger collections.
+\dd By default the rotation origin is the Layout origin \{0,0\}. 
+If the origin is not at the Layout origin, it will be displayed with a blue cross.
+When the origin is changed with the \f{Lock} off, the object is not moved. 
+But if the origin is changed with the \f{Lock} on, the object will be moved as well. 
+Enabling the \f{Lock To Origin} allows subsequent Rotations to be about the origin. 
+This may be especially useful when using creating larger groups of Draw objects. 
 
-\dt Lock Rotation Origin
+\dt Lock To Origin
 
-\dd For ease of use, the rotation origin can be \e{Relative} to the First Point. If this is done, altering either the First Point or the Rotation Origin will move the both values.
-This value is always set to locked if the Draw origin is non-zero when the \K{cmdDescribe} command is started but can be unset to allow repositioning of the Rotate Origin without moving the object. If the Rotate Origin is set to zero, the Object has an \e{Absolute} origin.
+\dd Locking to the rotation origin makes the distance between the First Point and the origin fixed. 
+If this is set on, altering either the First Point or the Rotation Origin will move the both values.
+This value is initially set to locked if the Draw origin is non-zero when the \K{cmdDescribe} command is started 
+but can be unset to allow repositioning of the Rotate Origin without moving the object in the layout. 
+If the Rotate Origin is set to \{0,0\}, the Object has an \e{Absolute} origin.
+
+\dt Rotate By
+
+\dd Some Draw objects (Polygon, Polyline, Lines, Curves, Circles, Text) can be rotated about their rotation origin in Describe. 
+In order to rotate them, the \f{Lock To Origin} must be enabled.
+After the rotation completes, the rotation angle will be set back to zero and all the points of the object will be adjusted to their absolute position in the layout.
+Negative values of rotation are counter-clockwise.
+Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 \dt Layer
 
-\dd The object can be moved between layers
+\dd The layer of the object. The object can be moved between layers if the layer is not frozen. Only non-frozen layers are listed as options.
 
 \dt Color
 
 \dd The color of the line or the fill can be set
 
-\S3{drawDescribeStr} Straight Line Objects
+\S3{drawDescribeStr} Straight Line Objects Describe Fields
 
 \dt End Pt 1
 
@@ -1258,13 +1332,13 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd Straight Lines have a second point, altering this, moves just that end of the line, altering its length as needed.
 
-\dt Angle
+\dt Line Angle
 
-\dd Straight Lines have an angle - this is the angle between the two points, altering this moves the ends so as to respect the Lock control setting.
+\dd Straight Lines have an angle - this is the angle between the two points, altering this moves the ends so as to respect the \f{Pivot} control setting.
 
 \dt Length
 
-\dd The Length control can add to the start or end or both of a Line object depending on the setting of the \f{Lock} control setting.
+\dd The Length control can add to the start or end or both of a Line object depending on the setting of the \f{Pivot} control setting.
 
 \S3{drawDescribeDim} Dimension Line Objects
 
@@ -1272,7 +1346,7 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd The size of the arrows and text can be set to Tine, Small, Medium or Large.
 
-\S3{drawDescribeBench} BenchWork Objects
+\S3{drawDescribeBench} BenchWork Objects Describe Fields
 
 \dt Lumber
 
@@ -1282,7 +1356,7 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd The timber can be orientated "On Edge" which will draw the smaller dimension or "Flat".
 
-\S3{drawDescribeCurve} Curved and Circle Objects
+\S3{drawDescribeCurve} Curved and Circle Objects Describe Fields
 
 \dt Center
 
@@ -1294,17 +1368,17 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dt Angular Length
 
-\dd For Curved Lines this is the length of the arc. If altered it will move the arc to respect the \f{Lock} control setting.
+\dd For Curved Lines this is the length of the arc in degrees. If altered it will move the arc to respect the \f{Pivot} control setting.
 
-\S3{drawDescribePoly} Polygon Objects
+\S3{drawDescribePoly} Polygon Objects Describe Fields 
 
 \dt Fill
 
 \dd Some draw objects (Circles, Polygons) can be filled or emptied - note that Polylines can not be filled - they have to be closed first.
 
-\dt Open
+\dt Open 
 
-\dd Polygons can be opened to become Polylines or Polylines closed to become Polygons using Describe.
+\dd Unfilled Polygons can be opened to become Polylines or Polylines closed to become Polygons. Note that PolyLines can't be filled, they have to be closed first.
 
 \dt Point Count
 
@@ -1318,18 +1392,145 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dd Straight and Curved Lines, PolyLines, Polygons and Structures can be drawn with dotted, dashed, dash-dotted and dash-dot-dotted lines.
 
-\S3{drawDescribeText} Text Objects
+\S3{drawDescribeText} Text Objects Describe Fields
 
 \dt Text Angle
 
-\dd For Text objects, the Text Angle determines the angle the text is rendered at. This is independent of the rotation of the starting position which is gained from the Rotation Angle and the Rotation Origin.
+\dd For Text objects, the Text Angle determines the absolute angle the text is rendered at. 
 
-\S2{DescribeCompound} Structures, Sectional Track and Turnouts
+This will be set by itself or by rotation of the starting position about the Rotation Origin with \f{Lock to Origin} set.
+
+\S2{DescribeCompound} Structures, Sectional Track and Turnouts Describe Fields
 
 \dt Pivot
 
-\dd The Pivot fixes the point about which the Angle of Rotation will occur
+\dd The Pivot fixes the point about which the Angle of Rotation will occur to be the Start (Bottom Left) Point, the middle of the object, or End (Top Right) of the object. 
+These relative positions are calculated as though the object was rotated by zero degrees.
 
+\dt Angle
+
+\dd The Angle rotates the object about the Pivot point.
+
+\S2{DescribeTrack} Describe Track Fields
+
+\S3{trackDescribeCommon} Common Track Object Fields
+
+\dt End Pt 1
+
+\dd For the starting position (or first point) - altering this value causes the whole object to move relative to the layout origin.
+This can only be changed if the track is unconnected at that end. The elevation is shown beneath the X,Y as a read-only Z value.
+
+\dt End Pt 2
+
+\dd The end position (or second point), altering this, moves just that end of the line, altering its length as needed. 
+This can only be changed if the track is unconnected at that end. The elevation is shown beneath the X,Y as a read-only Z value.
+
+\dt Grade
+
+\dd The calculated grade between the two end-points 
+
+\dt Layer
+
+\dd The layer of the object. The object can be moved between layers if the layer is not frozen. Only non-frozen layers are listed as options.
+
+\dt Length
+
+\dd The length of the track object. This can be set for a Straight Track if it is not connected, and will respect the value of the \f{Pivot} field.
+
+\dt Pivot
+
+\dd The Pivot control can be set to fix in place the start, or the middle or the end, and it applies to the Length, Track Angle and Angular Length controls. 
+When these are changed the new dimensions are applied so as to keep the locked position in place.
+
+\S3{trackDescribeStr} Straight Track Describe Fields
+
+
+\dt Track Angle
+
+\dd The angle of the Track object. This can be set if the track is not connected. It respects the value of the \f{Pivot} field
+
+
+\S3{trackDescribeCurve} Curved Track Describe Fields
+
+\dt Center
+
+\dd The center point of the curve. The center can only be modified if both ends are unconnected.
+
+\dt Radius
+
+\dd The radius of the curve. The radius can only be modified if one end is not connected.
+
+\dt Angular Length
+
+\dd The length of the curve in degrees. Modifications respect the \f{Pivot} value and are only available if at least one end is disconnected.
+
+\dt CCW Angle
+
+\dd The Counter-Clockwise Angle (the angle from the center to the first position).  Can only be modified if the first end of the curve is not connected.
+
+\dt CW Angle
+
+\dd The ClockWise Angle (the angle from the center to the end position). Can only be modified if the second end of the curve is not connected.
+
+
+\S3{trackDescribeCornu} Cornu Track Describe Fields
+
+\dt End Angle
+
+\dd Each end has an angle which helps determine the curve shape. It can only be set if the Track is not joined at that end.
+
+\dt End Radius
+
+\dd Each end has an radius which helps determine the curve shape. It can only be set if the Track is not joined at that end.
+
+\dt End Pt
+
+\dd Each End Point has a position. It can only be set if the Track is not joined at that end.
+
+\dt Center
+
+\dd Each End shows the center of the curve of the end segment - this is a read-only field. If the radius is zero, the field will show \{0,0\}.
+
+\dt Minimum Radius 
+
+\dd This is the approximate smallest radius along the curve based on curve fitting to the Cornu.
+
+\dt Maximum Rate of Curvature 
+
+\dd The maximum rate that the radius is changing over its length based on curve fitting. 
+It gives an idea of the "sharpness" of the curve.
+
+\dt Total Winding Angle
+
+\dd The number of degrees that the curve executes - this number will rise if there are loops in the curve.
+
+\S3{trackDescribeBezier} Cornu Track Describe Fields
+
+\dt Ctl Pt
+
+\dd The positions of the two Bezier control points. These will only be adjustable if the end they control is not attached to another track.
+
+\dt End Angle
+
+\dd Each end has an angle which is set by the control arm at that end - this is a read-only field
+
+\dt End Radius
+
+\dd Each end has an radius which is driven by the curve shape - this is a read-only field
+
+\dt End Pt
+
+\dd Each End Point has a position. It can only be set if the Track is not joined at that end.
+
+\dt Center
+
+\dd Each End shows the center of the curve of the end segment - this is a read-only field. If the radius is zero, the field will show \{0,0\}.
+
+\dt Minimum Radius 
+
+\dd This is the approximate smallest radius along the curve based on curve fitting to the Bezier.
+
+\rule
 
 Most commands return to \f{Properties} mode then they terminate unless the command is sticky (\K{cmdSticky}).
 
@@ -1379,7 +1580,7 @@ Rotation can be achieved using one of the following methods;
 
 \dd Aligning the selected object with another object on the layout. See \K{rotateByAlign} for detail.
 
-During Rotation of a track, if \f{MagneticSnap} is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
+During Rotation of a track, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. 
 This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Rotation is stopped. This does not happen if \e{Alt} is used. 
 If \f{MagneticSnap} is disabled, the snap will only occur if \e{Alt} is held.
 Note that this also applies to \K{cmdMove}.
@@ -1597,6 +1798,14 @@ If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to 
 \u000
 
 \dd \e{"?"} - displays the Property menu for the object hovered over
+
+\u000
+
+\b \e{"e"} sets the zoom to a value that allows all the room to be shown and moves the origin of bottom left of the window to be 0,0
+
+\u000
+
+\b \e{"s"} sets the zoom to show the selected set of objects and pans the window to center the highlit area.
 
 \u000
 
@@ -1884,9 +2093,38 @@ For detail about;
 
 \S2{cmdSplitDraw} Split a Draw Object
 
-The \f{Split Draw} command can be used to split an open-ended draw object (Straight Line, Curved Line, PolyLine) it will also split a Circle Line into two draw parts.
+The \f{Split Draw} command can be used to split many draw object (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). 
 
 Until a split point is selected, the split point under the cursor will have a blue marker. 
 
-If the object being split is a PolyLine, the split will either result in a Straight Line and a PolyLine or two PolyLines depending on where the split is along the line. (PolyLines must always have at least 2 segments).
+\n If the object being split is a Polyline, the split will either result in a Straight Line and a PolyLine or two PolyLines depending on where the split is along the line. (PolyLines must always have at least 2 segments).
+
+\n Filled Circles and Polygons will be unfilled after the split.
+
+\n If the split object is a Circle, the result is an circular arc split at the point with a small (5 degree) gap.
+
+\n If the split object is a Polygon, a PolyLine with two end points at the split results. 
+
+\rule
+
+\S2{cmdTrimDraw} Trim a Draw Object using another Draw object
+
+The \f{Trim Draw} command can be used to trim many draw objects (Straight Lines, Curved Lines, Circles, Polygons, PolyLines). Polygons and Circles are split into PolyLines and Curves.
+
+\n First a Trimming object (draw object) is selected with \f{Left-Click}. Until the trim draw object is selected, a draw object under the cursor will be highlit in blue. Once it is selected it will be highlit in the current Select Color. 
+
+\n Next the point of intersection between the trim object and an object to be trimmed is selected. Until a split point is selected, a suitable split point under the cursor will have a blue trim anchor that is a T shape aligned with the trimming object.
+
+The trim anchor base has an arm that indicates which side of the trimmed object will be deleted. A \f{Left-Click} will trim the object.
+
+\u000
+
+If the trimmed object is a circle or a polygon, the result will be the same as a Split (\K{cmdSplitDraw}), a 355 degree circle and an open polyline with ends at the split will result. 
+
+Once a trim has occured, the trimming object remains selected for another trim. 
+
+To leave the command use the spacebar. If \e{Sticky} (\K{cmdSticky}) is set for Split commands you will be able to select another trim object. 
+
+\rule
+
 

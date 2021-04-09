@@ -22,9 +22,6 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
-#include <string.h>
-
-#include <wlib.h>
 #include "misc.h"
 #include "include/utf8convert.h"
 
@@ -65,7 +62,7 @@ void
 ConvertUTF8ToSystem(unsigned char *in)
 {
 	if (wIsUTF8(in)) {
-		unsigned cnt = strlen(in) * 2 + 1;
+		unsigned cnt = strlen(in) * 2 + 2;
 		unsigned char *out = MyMalloc(cnt);
 		wUTF8ToSystem(in, out, cnt);
 		strcpy(in, out);

@@ -71,7 +71,9 @@ EllipsizeString(char *source, char *dest, size_t length)
 		return;
 	}
 
-	strncpy(resultString, source, length);
+	if ( dest )
+		strncpy(resultString, source, length);
+
 	resultString[ length ] = '\0';
 
 	position = length - 1;
@@ -90,3 +92,4 @@ EllipsizeString(char *source, char *dest, size_t length)
 	}
 	return;
 }
+

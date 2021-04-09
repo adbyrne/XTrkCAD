@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-
 #include "cjoin.h"
 #include "ccurve.h"
 #include "cbezier.h"
@@ -29,15 +27,13 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "drawgeom.h"
 #include "common.h"
 #include "layout.h"
 #include "cselect.h"
+#include "common-ui.h"
 
 static struct {
 		track_p Trk;
@@ -65,6 +61,7 @@ static BOOL_T modifyBezierMode;
 static BOOL_T modifyCornuMode;
 static BOOL_T modifyDrawMode;
 static BOOL_T modifyRulerMode;
+static BOOL_T modifyProtractorMode;
 static BOOL_T modifyExtendMode;
 
 
@@ -221,6 +218,9 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			menuPos = pos;
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
+		case wActionExtKey:
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
 		default:
 			break;
 	}
@@ -272,28 +272,40 @@ STATUS_T CmdModify(
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;
 		modifyExtendMode = FALSE;
+		modifyRulerMode = FALSE;
+		modifyProtractorMode = FALSE;
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case C_DOWN:
 	case C_LDOUBLE:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (modifyProtractorMode)
+			return ModifyProtractor(C_DOWN, pos);
 		if (modifyBezierMode)
 			return ModifyBezier(C_DOWN, pos);
 		if (modifyCornuMode)
 			return ModifyCornu(C_DOWN, pos);
 		if (modifyDrawMode)
 			return ModifyDraw(C_DOWN, pos);
+
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs(1).color = wDrawColorBlack;
 		tempSegs(1).width = 0;
 		tempSegs_da.cnt = 0;
-		Dex.Trk = OnTrack( &pos, TRUE, FALSE );
+		Dex.Trk = OnTrack( &pos, FALSE, FALSE );
 		//Dex.Trk = trk;
 		if (Dex.Trk == NULL) {
-			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE )
+			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE ) {
 				modifyRulerMode = TRUE;
+			} else if (ModifyProtractor( C_DOWN, pos ) == C_CONTINUE ) {
+				modifyProtractorMode = TRUE;
+			} else {
+				InfoMessage("Not on object, or Ruler, or Protractor");
+				wBeep();
+			}
 			return C_CONTINUE;
 		}
 		if (!CheckTrackLayer( Dex.Trk ) ) {
@@ -425,12 +437,16 @@ STATUS_T CmdModify(
 				&& (!(GetLayerFrozen(GetTrkLayer(t)) || GetLayerModule(GetTrkLayer(t))))
 				&& (QueryTrack(t, Q_IS_DRAW ) && !QueryTrack(t, Q_IS_TEXT)) ) {
 			CreateEndAnchor(pos,FALSE);
+		} else {
+			ModifyRuler (wActionMove, pos);
 		}
 		return C_CONTINUE;
 
 	case C_MOVE:
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
+		if ( modifyProtractorMode )
+			return ModifyProtractor( C_MOVE, pos );
 		if (Dex.Trk == NULL)
 			return C_CONTINUE;
 		if ( modifyBezierMode )
@@ -443,7 +459,7 @@ STATUS_T CmdModify(
 			goto extendTrackMove;
 		tempSegs_da.cnt = 0;
 
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		rc = ModifyTrack( Dex.Trk, C_MOVE, pos );
 		if ( rc != C_CONTINUE ) {
 			rc = C_CONTINUE;
@@ -457,6 +473,8 @@ STATUS_T CmdModify(
 			return C_CONTINUE;
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
+		if ( modifyProtractorMode)
+			return ModifyProtractor( C_UP, pos);
 		if ( modifyBezierMode )
 			return ModifyBezier( C_UP, pos);
 		if (modifyCornuMode)
@@ -467,7 +485,7 @@ STATUS_T CmdModify(
 
 		tempSegs_da.cnt = 0;
 
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
@@ -481,6 +499,7 @@ extendTrack:
 		changeTrackMode = TRUE;
 		modifyExtendMode = TRUE;
 		modifyRulerMode = FALSE;
+		modifyProtractorMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;
@@ -529,7 +548,7 @@ extendTrackMove:
 		tempSegs_da.cnt = 0;
 		Dex.valid = FALSE;
 		if (Dex.Trk == NULL) return C_CONTINUE;
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		if ( Dex.first && FindDistance( pos, Dex.pos00 ) <= minLength )
 			return C_CONTINUE;
 		Dex.first = FALSE;
@@ -547,9 +566,9 @@ extendTrackMove:
 					Rotate(&pos,Dex.params.cornuCenter[Dex.params.ep],angle);
 				}
 			} else pos = Dex.pos00;					//Only out from end
-			PlotCurve( crvCmdFromCornu, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, FALSE );
+			PlotCurve( crvCmdFromCornu, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, FALSE, 0.0 );
 		} else
-			PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE );
+			PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE, 0.0 );
 		curveType = Dex.curveData.type;
 		if ( curveType == curveTypeStraight ) {
 			Dex.r1 = 0.0;
@@ -732,7 +751,10 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			return C_CONTINUE;
 		}
 		if ((action>>8) == 'e') {
-			DoZoomExtents(0);
+			DoZoomExtents((void*)0);
+		}
+		if ((action>>8) == 's') {
+			DoZoomExtents((void*)1);
 		}
 		if ((action>>8) == '0' || (action>>8 == 'o')) {
 			PanMenuEnter('o');

@@ -42,7 +42,7 @@ struct wStatus_t {
     WOBJ_COMMON
     GtkWidget * labelWidget;
     const char * message;
-    wPos_t labelWidth;
+    wWinPix_t labelWidth;
 };
 
 static GtkWidget *controlsbox;
@@ -86,11 +86,11 @@ void wStatusSetValue(
 
 wStatus_p wStatusCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
-	const char * helpStr,
+    wWinPix_t	x,
+    wWinPix_t	y,
+    const char  * helpStr,
     const char 	* labelStr,
-    wPos_t	width,
+    wWinPix_t	width,
     const char	*message)
 {
     wStatus_p b;
@@ -115,6 +115,9 @@ wStatus_p wStatusCreate(
 		gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
 		gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
 		gtk_widget_set_can_focus(b->labelWidget, FALSE);
+        gtk_widget_set_sensitive(b->labelWidget, FALSE);
+    //GdkColor black = {0, 0x0000, 0x0000, 0x0000};
+    //gtk_widget_modify_text(b->labelWidget,GTK_STATE_INSENSITIVE,&black);
 		gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
 						   message?wlibConvertInput(message):"");
 
@@ -138,7 +141,7 @@ wStatus_p wStatusCreate(
  * \return expected width of message box
  */
 
-wPos_t
+wWinPix_t
 wStatusGetWidth(const char *testString)
 {
     GtkWidget *entry;
@@ -166,7 +169,7 @@ wStatusGetWidth(const char *testString)
  * \return text height
  */
 
-wPos_t wStatusGetHeight(
+wWinPix_t wStatusGetHeight(
     long flags)
 {
     GtkWidget * temp;
@@ -209,7 +212,7 @@ wPos_t wStatusGetHeight(
 
 void wStatusSetWidth(
     wStatus_p b,
-    wPos_t width)
+    wWinPix_t width)
 {
 	if (!b->fromTemplate) {
 		b->labelWidth = width;

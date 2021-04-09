@@ -164,22 +164,31 @@ long wDrawGetRGB(
 }
 
 /**
- * Get the color definition from the palette index
+ * Get the color definition from the "index"
  *
  * \param color IN index into palette
  * \param normal IN normal or inverted color
  * \return  the selected color definition
  */
 
-wDrawColor wlibGetColor(
+GdkRGBA wlibGetColor(
     wDrawColor color,
     wBool_t normal)
 {
+	GdkRGBA out;
+	out.red = ((color&0x00FF0000)>>16)/256;
+	out.green = ((color&0x0000FF00)>>8)/256;
+	out.blue = ((color&0x000000FF))/256;
+	if ((color&0xFF000000) == 0) out.alpha = 1.0;
+	else out.alpha = ((color&0xFF000000)>>24)/256;
 
     if (normal) {
-        return RGBA(color,255);
+    	return out;
     } else {
-        return RGBA(0xFFFFFF-color,255);
+    	out.red = 1.0-out.red;
+    	out.green = 1.0-out.green;
+    	out.blue = 1.0-out.blue;
+        return out;
     }
 }
 
@@ -219,8 +228,8 @@ colorChange(GtkColorButton *widget, gpointer user_data)
     gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), &rgba);
     //gtk_color_button_get_color(widget, &newcolor);
 
-    rgb = RGB((int)(rgba.red/256), (int)(rgba.green/256),
-              (int)(rgba.blue/256));
+    rgb = RGBA(RGB((int)(rgba.red*256), (int)(rgba.green*256),
+              (int)(rgba.blue*256)), (int)(rgba.alpha*256));
 
     if (cd->valueP) {
         *(cd->valueP) = rgb;
@@ -246,10 +255,10 @@ void wColorSelectButtonSetColor(
 
 	GdkRGBA rgba;
 
-	rgba.red = (color&0x00FF0000)>>16;
-	rgba.green = (color&0x0000FF00)>>8;
-	rgba.blue = (color&0x000000FF);
-	rgba.alpha = 1.0;
+	rgba.red = ((color&0x00FF0000)>>16)/256;
+	rgba.green = ((color&0x0000FF00)>>8)/256;
+	rgba.blue = (color&0x000000FF)/256;
+	rgba.alpha = ((color&0xFF000000)>>16)/256;
 
     gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(bb->widget),
                                &rgba);
@@ -288,12 +297,12 @@ wDrawColor wColorSelectButtonGetColor(
 
 wButton_p wColorSelectButtonCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long 	option,
-    wPos_t 	width,
+    wWinPix_t 	width,
     wDrawColor *valueP,
     wColorSelectButtonCallBack_p action,
     void 	* data)

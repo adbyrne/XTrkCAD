@@ -404,7 +404,7 @@ changeSelection(GtkTreeSelection *selection,
     gtk_tree_model_get_value(model, &iter, LISTCOL_DATA, &value);
 
     id_p = g_value_get_pointer(&value);
-    id_p->selected = path_currently_selected;
+    id_p->selected = !path_currently_selected;
 
     if (id_p->selected) {
         bl->last = row;
@@ -444,15 +444,15 @@ changeSelection(GtkTreeSelection *selection,
 
 wList_p wListCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
     long	number,
-    wPos_t	width,
+    wWinPix_t	width,
     int	colCnt,
-    wPos_t	* colWidths,
+    wWinPix_t	* colWidths,
     wBool_t * colRightJust,
     const char 	** colTitles,
     long	*valueP,
@@ -461,7 +461,7 @@ wList_p wListCreate(
 {
     GtkTreeSelection *sel;
     wList_p bl;
-    static wPos_t zeroPos = 0;
+    static wWinPix_t zeroPos = 0;
 
     assert(width != 0);
 
@@ -480,8 +480,8 @@ wList_p wListCreate(
     }
 
     bl->colCnt = colCnt;
-    bl->colWidths = (wPos_t*)malloc(colCnt * sizeof *(wPos_t*)0);
-    memcpy(bl->colWidths, colWidths, colCnt * sizeof *(wPos_t*)0);
+    bl->colWidths = (wWinPix_t*)malloc(colCnt * sizeof *(wWinPix_t*)0);
+    memcpy(bl->colWidths, colWidths, colCnt * sizeof *(wWinPix_t*)0);
     
     if( !(option & BO_USETEMPLATE )) {
         /* create the data structure for data */
@@ -491,7 +491,17 @@ wList_p wListCreate(
                                        colTitles != NULL,
                                        option & BL_MANY);
 
+
+        sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
+
+        gtk_tree_selection_set_select_function(sel,
+                                           changeSelection,
+                                           bl,
+                                           NULL);
+
         wlibTreeViewAddColumns(bl->treeView, colCnt);
+
+        wlibAddColumnTitles(bl->treeView, colTitles);
 
         wlibComputePos((wControl_p)bl);
 
@@ -501,7 +511,7 @@ wList_p wListCreate(
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
         gtk_container_add(GTK_CONTAINER(bl->widget),
-									  bl->treeView);
+                                          bl->treeView);
 
         gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
     } else {

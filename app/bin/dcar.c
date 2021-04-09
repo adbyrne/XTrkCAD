@@ -20,26 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef WINDOWS
-#include <errno.h>
-#endif
-#include <assert.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "cselect.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
+#include "include/paramfile.h"
+#include "common-ui.h"
 
 static int log_carList;
 static int log_carInvList;
@@ -597,6 +587,7 @@ static carProto_p CarProtoLookup(
 		CloneFilledDraw( proto->segCnt, proto->segPtr, FALSE );
 		GetSegBounds( zero, 0.0, proto->segCnt, proto->segPtr, &proto->orig, &proto->size );
 		carProtoListChanged = TRUE;
+		// return proto;
 	}
 	return proto;
 }
@@ -909,7 +900,7 @@ static roadnameMap_p LoadRoadnameList(
 
 	cmp_key.name = roadnameTab->ptr;
 	cmp_key.len = roadnameTab->len;
-	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof roadnameMapP );
+	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof (roadnameMap_t) );
 	if ( roadnameMapP->roadname == NULL ) {
 		roadnameMapP->roadname = TabStringDup(roadnameTab);
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
@@ -1269,9 +1260,8 @@ static carItem_p CarItemNew(
 }
 
 /**
- * Check the whether the parameter file has CARPARTS that are compatible
- * with the current state. For CARPARTS only the exactly identical scale
- * is accepted as compatible
+ * Check the whether the parameter file has CARPARTS that are a fit or compatible
+ * with the current state.
  * 
  * \param paramFileIndex IN the parameter file
  * \param scaleIndex IN the scale to check against
@@ -1283,6 +1273,7 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
 	DIST_T ratio = GetScaleRatio(scaleIndex);
+	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -1290,16 +1281,18 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 
 	for (i = 0; i < carPartParent_da.cnt && ret != PARAMFILE_FIT; i++) {
 		carPartParent_t *carPartParent = carPartParent( i );
-
-		if(GetScaleRatio(carPartParent->scale) == ratio ){
-			for(int j = 0; j < carPartParent->parts_da.cnt; j++ ){
+		SCALE_FIT_T fit = CompatibleScale(FIT_CAR,carPartParent->scale,scaleIndex);
+		if(fit == FIT_EXACT) {
+			for(int j = 0; j < carPartParent->parts_da.cnt; j++ ) {
 				carPart_t *carPart = carPart( carPartParent, j  );
-
 				if (carPart->paramFileIndex == paramFileIndex) {
 					ret = PARAMFILE_FIT;
 					break;
 				}
 			}
+		}
+		if (fit == FIT_COMPATIBLE) {
+			ret = PARAMFILE_COMPATIBLE;
 		}
 	}
 	return(ret);
@@ -1335,7 +1328,7 @@ EXPORT BOOL_T CarItemRead(
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
 	dim.truckCenterOffset = longCenterOffset/1000.0;
-	if ( paramVersion < 12 ) {
+	if ( paramVersion < VERSION_INLINENOTE ) {
 		if ( (options&CAR_ITEM_HASNOTES) ) {
 			sNote = ReadMultilineText();
 		}
@@ -1655,7 +1648,7 @@ EXPORT void CarItemLoadList( void * junk )
 	wIndex_t inx;
 	carItem_p item;
 	char * cp;
-	wPos_t w, h;
+	wWinPix_t w, h;
 
 	DYNARR_SET( carItem_t*, carItemHotbar_da, carItemInfo_da.cnt );
 	memcpy( carItemHotbar_da.ptr, carItemInfo_da.ptr, carItemInfo_da.cnt * sizeof item );
@@ -1690,7 +1683,7 @@ static char * CarItemHotbarProc(
 	wIndex_t inx;
 	long mode;
 	char * cp;
-	wPos_t w, h;
+	wWinPix_t w, h;
 
 	item = carItemHotbar(carItemInx);
 	if ( item == NULL )
@@ -1750,7 +1743,7 @@ EXPORT int CarAvailableCount( void )
 	carItem_t * item;
 	for ( inx=0; inx < carItemHotbar_da.cnt; inx ++ ) {
 		item = carItemHotbar(inx);
-		if ( item->scaleInx != GetLayoutCurScale())
+		if (FIT_NONE == CompatibleScale( FIT_CAR, item->scaleInx, GetLayoutCurScale()))
 			continue;
 		cnt++;
 	}
@@ -1772,7 +1765,7 @@ EXPORT void AddHotBarCarDesc( void )
 		item1 = carItemHotbar(inx);
 		if ( item1->car && !IsTrackDeleted(item1->car) )
 			continue;
-		if ( item1->scaleInx != GetLayoutCurScale())
+		if ( FIT_NONE == CompatibleScale(FIT_CAR,item1->scaleInx,GetLayoutCurScale()))
 			continue;
 		if ( (carHotbarModes[carHotbarModeInx]&0xF000)!=0 || ( item0 == NULL || Cmp_carHotbar( &item0, &item1 ) != 0 ) ) {
 #ifdef DESCFIX
@@ -2248,15 +2241,15 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_ITEMINDEX          (C+0)
 	{ PD_LONG, &carDlgItemIndex, "index", PDO_NOPREF|PDO_DLGWIDE, &i1_999999999, N_("Index"), 0 },
 #define I_CD_PURPRC             (C+1)
-	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE, (void*)50, N_("Purchase Price"), 0, &carDlgPurchPrice },
+	{ PD_STRING, &carDlgPurchPriceStr, "purchPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)50, N_("Purchase Price"), 0, &carDlgPurchPrice, sizeof(carDlgPurchPriceStr) },
 #define I_CD_CURPRC             (C+2)
-	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)50, N_("Current Price"), 0, &carDlgCurrPrice },
+	{ PD_STRING, &carDlgCurrPriceStr, "currPrice", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)50, N_("Current Price"), 0, &carDlgCurrPrice, sizeof(carDlgCurrPriceStr) },
 #define I_CD_COND               (C+3)
 	{ PD_DROPLIST, &carDlgConditionInx, "condition", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)90, N_("Condition") },
 #define I_CD_PURDAT             (C+4)
-	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE, (void*)80, N_("Purchase Date"), 0, &carDlgPurchDate },
+	{ PD_STRING, &carDlgPurchDateStr, "purchDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_STRINGLIMITLENGTH, (void*)80, N_("Purchase Date"), 0, &carDlgPurchDate, sizeof(carDlgPurchDateStr) },
 #define I_CD_SRVDAT             (C+5)
-	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, (void*)80, N_("Service Date"), 0, &carDlgServiceDate },
+	{ PD_STRING, &carDlgServiceDateStr, "serviceDate",  PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ|PDO_STRINGLIMITLENGTH, (void*)80, N_("Service Date"), 0, &carDlgServiceDate, sizeof(carDlgServiceDateStr) },
 #define I_CD_QTY                (C+6)
 	{ PD_LONG, &carDlgQuantity, "quantity", PDO_NOPREF|PDO_DLGWIDE, &i1_9999, N_("Quantity") },
 #define I_CD_MLTNUM             (C+7)
@@ -2540,7 +2533,7 @@ static void CarDlgLoadDimsFromProto( carProto_p protoP )
 
 static void CarDlgRedraw( void )
 {
-	wPos_t w, h;
+	wWinPix_t w, h;
 	DIST_T ww, hh;
 	DIST_T scale_w, scale_h;
 	coOrd orig, pos, size;
@@ -4082,10 +4075,10 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			}
 			if ( len > 0 ) {
 				if ( itemP->data.notes )
-					itemP->data.notes = MyRealloc( itemP->data.notes, len+2 );
+					itemP->data.notes = MyRealloc( itemP->data.notes, (len+2) * sizeof(wchar_t) );
 				else
-					itemP->data.notes = MyMalloc( len+2 );
-				itemP->data.notes = (char*)MyMalloc( len+2 );
+					itemP->data.notes = MyMalloc( (len+2) * sizeof(wchar_t) );
+				// itemP->data.notes = (char*)MyMalloc( (len+2) * sizeof(wchar_t) );
 				wTextGetText( (wText_p)carDlgPLs[I_CD_NOTES].control, itemP->data.notes, len );
 				if ( itemP->data.notes[len-1] != '\n' ) {
 					itemP->data.notes[len] = '\n';
@@ -4227,12 +4220,12 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 static void CarDlgLayout(
 		paramData_t * pd,
 		int inx,
-		wPos_t currX,
-		wPos_t *xx,
-		wPos_t *yy )
+		wWinPix_t currX,
+		wWinPix_t *xx,
+		wWinPix_t *yy )
 {
-	static wPos_t col2pos = 0;
-	wPos_t y0, y1;
+	static wWinPix_t col2pos = 0;
+	wWinPix_t y0, y1;
 
 	switch (inx) {
 	case I_CD_PROTOTYPE_STR:
@@ -4359,7 +4352,7 @@ static void CarInvDlgExportCsv( void );
 static void CarInvDlgSaveText( void );
 static void CarInvListLoad( void );
 
-static wPos_t carInvColumnWidths[] = {
+static wWinPix_t carInvColumnWidths[] = {
 		-40, 30, 100, -50, 50, 130, 120, 100,
 		-50, -50, 60, 55, 55, 40, 200 };
 static const char * carInvColumnTitles[] = {
@@ -4899,7 +4892,7 @@ static int CarInvImportCsv(
 				&dim, wDrawFindColor(color),
 				purchPrice, currPrice, condition, purchDate, srvcDate );
 		if ( tabs[M_NOTES].len > 0 ) {
-			item->data.notes = cp = MyMalloc( tabs[M_NOTES].len+1 );
+			item->data.notes = cp = MyMalloc( (tabs[M_NOTES].len+2) );
 			for ( cq=tabs[M_NOTES].ptr,len=tabs[M_NOTES].len; *cq&&len; ) {
 				if ( strncmp( cq, "<NL>", 4 ) == 0 ) {
 					*cp++ = '\n';

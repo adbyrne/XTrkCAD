@@ -60,22 +60,10 @@
 
 static const char rcsid[] = "@(#) : $Id$";
 
-#include <errno.h>
-#include <math.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define F_OK	(0)
-#define W_OK	(2)
-#define access	_access
-#endif
-
 #include "cundo.h"
 #include "custom.h"
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
-#include "wlib.h"
 
 
 /*****************************************************************************
@@ -87,7 +75,7 @@ static const char rcsid[] = "@(#) : $Id$";
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
 static void ControlDone( void * action );
-static wPos_t controlListWidths[] = { 18, 100, 150 };
+static wWinPix_t controlListWidths[] = { 18, 100, 150 };
 static const char * controlListTitles[] = { "", N_("Name"),
 	N_("Tracks") };
 static paramListData_t controlListData = { 10, 400, 3, controlListWidths, controlListTitles };

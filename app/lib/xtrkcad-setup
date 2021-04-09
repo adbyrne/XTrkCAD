@@ -1,0 +1,81 @@
+#/bin/sh
+
+usage() {
+	echo "$0 (install|remove|desktop) <install-dir>"
+	echo "install: Sets up file associations and menus for XTrkCad"
+	echo "remove: Removes file associations and menus for XTrkCad"
+	echo "desktop: Installs short cut on the user's desktop"
+	echo
+	echo "<install-dir> is the location of XTrkCad's data files"
+	echo
+	echo "to be run as normal user"
+	exit 0
+}
+
+echo "`date`: $0 $* as ${USER}"
+
+if [ $# -ne 2 ] ; then
+	usage
+fi
+
+COMMAND=$1
+export INSTALLDIR=$2
+
+if [ ! -d ${INSTALLDIR} ] ; then
+	echo "$0: $INSTALLDIR: not found"
+	exit 1
+fi
+if [ ! -f ${INSTALLDIR}/applications/xtrkcad.xml ] ; then
+	echo "$0: $INSTALLDIR/applications/xtrkcad.xml: not found"
+	exit 1
+fi
+if [ ! -f ${INSTALLDIR}/applications/xtrkcad.desktop ] ; then
+	echo "$0: $INSTALLDIR/applications/xtrkcad.desktop: not found"
+	exit 1
+fi
+if [ ! -f ${INSTALLDIR}/pixmaps/xtrkcad.png ] ; then
+	echo "$0: $INSTALLDIR/pixmaps/xtrkcad.png: not found"
+	exit 1
+fi
+
+ID=`id -u`
+if [ $ID -eq 0 ]  ; then
+	echo $0: Must not be root
+	exit 1
+fi
+
+if [ "$COMMAND" = "install" ] ; then
+	echo SETUP ICONS
+	# Set icon for file browser
+	xdg-icon-resource install --context mimetypes --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png xtrkcad
+	# set icon for file browser
+	xdg-icon-resource install --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png application-x-xtrkcad
+	echo SETUP MIME
+	# mimetype for .xtc files is application/x-xtrkcad
+	xdg-mime install --novendor ${INSTALLDIR}/applications/xtrkcad.xml
+	# default handler for application/x-xtrkcad is xtrkcad
+	xdg-mime default xtrkcad.desktop application/x-xtrkcad 
+	echo SETUP DESKTOP
+	# add app to system menu
+	xdg-desktop-menu install --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+	# add desktop shortcut
+	xdg-desktop-icon install --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+	chmod 755 ${HOME}/Desktop/xtrkcad.desktop
+
+elif [ "$COMMAND" = "remove" ] ; then
+	xdg-desktop-icon uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+	xdg-desktop-menu uninstall ${INSTALLDIR}/applications/xtrkcad.desktop
+	xdg-mime uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.xml
+	xdg-icon-resource uninstall --novendor --size 64 xtrkcad
+	xdg-icon-resource uninstall --novendor --context mimetypes --size 64 xtrkcad
+
+elif [ "$COMMAND" = "desktop" ] ; then
+	echo SETUP DESKTOP
+	# set desktop command
+	xdg-desktop-menu install --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+	xdg-desktop-icon install --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
+	chmod 755 ${HOME}/Desktop/xtrkcad.desktop
+
+else 
+	usage
+fi

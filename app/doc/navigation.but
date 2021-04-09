@@ -245,15 +245,17 @@ Lengths and Distances can be entered in a variety of formats;
 
 \u000
 
-\dd Pressing the Equal Sign (\c{=}) key after an entry will reformat the value entered to your preferred length format (\K{cmdPref}).
+\dd Adding the Equal Sign (\c{=}) key after an entry will reformat the value entered to your preferred length format (\K{cmdPref}).
 
 \u000
 
-\dd Pressing the "\c{p}" key after an entry will convert a prototype measurement to a scale measurement by dividing the value entered by the ratio for the current scale.
+\dd Adding the "\c{p}" key after an entry will convert a prototype measurement to a scale measurement by dividing the value entered by the ratio for the current scale.
 
 \u000
 
-\dd Pressing the "\c{s}" key after an entry will convert a scale measurement to a prototype measurement.
+\dd Adding the "\c{s}" key after an entry will convert a scale measurement to a prototype measurement.
+
+The conversion will happen when the \e{Tab} key is used, or the cursor is moved to a different entry box.
 
 \rule
 
@@ -300,7 +302,7 @@ Instead of using the menus or the buttons on the \f{Tool-bar} (\K{mainW}), most 
 
 \u000
 
-\dd The \c{DELETE} key invokes the \f{Delete} (\K{cmdDelete}) command.
+\dd The \c{DELETE} or the \c{BackSpace} key invokes the \f{Delete} (\K{cmdDelete}) command.
 
 Several Shortcut key commands are used in conjunction with the mouse. These commands are listed in \K{cmdAcclKeys}.
 

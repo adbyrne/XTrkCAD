@@ -127,6 +127,8 @@ wlibListStoreClear(GtkListStore *listStore)
     id_p = wlibListStoreGetContext(listStore, i++);
 
     while (id_p) {
+        if (id_p->label)
+            g_free(id_p->label);
         g_free(id_p);
         id_p = wlibListStoreGetContext(listStore, i++);
     }

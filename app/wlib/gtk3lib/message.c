@@ -45,7 +45,7 @@ struct wMessage_t {
     WOBJ_COMMON
     GtkWidget * labelWidget;
     const char * message;
-    wPos_t labelWidth;
+    wWinPix_t labelWidth;
 };
 
 /**
@@ -77,7 +77,7 @@ void wMessageSetValue(
 
 void wMessageSetWidth(
     wMessage_p b,
-    wPos_t width)
+    wWinPix_t width)
 {
     b->labelWidth = width;
     gtk_widget_set_size_request(b->widget, width, -1);
@@ -91,12 +91,21 @@ void wMessageSetWidth(
  */
 static int fonts_set = 0;
 
-wPos_t wMessageGetHeight(
+wWinPix_t wMessageGetHeight(
     long flags)
-
 {
+    GtkWidget * temp;
 
-	GtkWidget * temp = gtk_combo_box_text_new();   //to get max size of an object in infoBar
+    if (!(flags&COMBOBOX)) {
+		temp = gtk_label_new("Test");	 //To get size of text itself
+    } else {
+        temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
+    }
+
+    if (flags&1L) {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
+    }
+
 	if (wMessageSetFont(flags))	{
 		if (!fonts_set) {
 			GtkStyleContext *context;
@@ -149,7 +158,6 @@ wPos_t wMessageGetHeight(
  * \param IN x position in x direction
  * \param IN y position in y direction
  * \param IN helpStr - name of field
- * \param IN labelStr ???
  * \param IN width horizontal size of window
  * \param IN message message to display ( null terminated )
  * \param IN flags display options
@@ -158,11 +166,11 @@ wPos_t wMessageGetHeight(
 
 wMessage_p wMessageCreateEx(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
-	const char * helpStr,
-    const char 	* labelStr,
-    wPos_t	width,
+    wWinPix_t	x,
+    wWinPix_t	y,
+    const char 	* helpStr,
+	const char  * labelStr,
+    wWinPix_t	width,
     const char	*message,
     long flags)
 {
@@ -176,7 +184,7 @@ wMessage_p wMessageCreateEx(
     b->message = message;
     b->labelWidth = width;
     if (flags&BO_USETEMPLATE) {
-    	b->labelWidget = wlibWidgetFromIdWarn( parent, helpStr);
+    	b->labelWidget = wlibWidgetFromIdWarn( parent, labelStr);
     	b->fromTemplate = TRUE;
     	b->template_id = strdup(helpStr);
     	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
@@ -231,7 +239,11 @@ wMessage_p wMessageCreateEx(
 		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
 		gtk_widget_show(b->widget);
 		gtk_widget_show(b->labelWidget);
-		 wlibAddButton((wControl_p)b);
+		wlibAddButton((wControl_p)b);
+		/* Reset font size to normal */
+		if (wMessageSetFont(flags))	{
+			pango_font_description_set_size(fontDesc, fontSize * PANGO_SCALE);
+    }
     } else {
     	b->widget = wlibGetWidgetFromName( parent, helpStr, "box", FALSE );
     	gtk_widget_show_all(b->labelWidget);
@@ -247,7 +259,7 @@ wMessage_p wMessageCreateEx(
  * \return expected width of message box
  */
 
-wPos_t
+wWinPix_t
 wMessageGetWidth(const char *testString)
 {
     GtkWidget *entry;

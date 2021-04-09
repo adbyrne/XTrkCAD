@@ -46,7 +46,7 @@ struct wBitmap_t {
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, char * helpStr, long options, wIcon_p iconP )
 {
 	wBitmap_p bt;
 	GdkPixbuf *pixbuf;
@@ -56,6 +56,14 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
 	bt->w = iconP->w;
 	bt->h = iconP->h;
 	bt->option = options;
+	
+	/*
+	 * Depending on the platform, parent->widget->window might still be null 
+	 * at this point. The window allocation should be forced before creating
+	 * the pixmap.
+	 */
+	if ( gtk_widget_get_window( parent->widget ) == NULL )
+		gtk_widget_realize( parent->widget ); /* force allocation, if pending */
 	
 	/* create the bitmap from supplied xpm data */
 	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
@@ -103,7 +111,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
  * \returns icon handle
  */
 
-wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor color )
+wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawColor color )
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );

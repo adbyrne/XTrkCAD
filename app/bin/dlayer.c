@@ -20,30 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-#include "include/dirent.h"
-#else
-#include <dirent.h>
-#endif
-
-
+#include "cselect.h"
 #include "custom.h"
 #include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
 #include "include/partcatalog.h"
 #include "include/stringxtc.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  *
@@ -159,7 +146,7 @@ static int oldColorMap[][3] = {
 };
 
 static void DoLayerOp(void * data);
-static void UpdateLayerDlg(void);
+void UpdateLayerDlg(unsigned int);
 
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
@@ -167,7 +154,7 @@ static void LayerPrefLoad(void);
 
 int IsLayerValid(unsigned int layer)
 {
-    return (layer <= NUM_LAYERS);
+    return (layer <= NUM_LAYERS && layer != -1);
 }
 
 BOOL_T GetLayerVisible(unsigned int layer)
@@ -255,7 +242,7 @@ static void RedrawLayer( unsigned int l, BOOL_T draw )
 }
 
 
-static void FlipLayer(unsigned int layer)
+EXPORT void FlipLayer(unsigned int layer)
 {
     wBool_t visible;
 
@@ -321,11 +308,14 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
     	strcpy(lastSettings,layers[inx].settingsName);
     }
 
+
     curLayer = newLayer;
 
     if (!IsLayerValid(curLayer)) {
-        curLayer = 0;
+    	curLayer = 0;							//Too big or -1
+    	layers[curLayer].frozen = FALSE;        //Make sure the layer is not frozen
     }
+
 
     if (!layers[curLayer].visible) {
         FlipLayer(inx);
@@ -394,7 +384,7 @@ FormatLayerName(unsigned int layerNumber)
     DynStringPrintf(&string,
                     "%2d %c %s",
                     layerNumber + 1,
-                    (layers[layerNumber].objCount > 0 ? '+' : '-'),
+					(layers[layerNumber].frozen ? '*': layers[layerNumber].module ? 'm': layers[layerNumber].objCount > 0 ? '+' : '-'),
                     layers[layerNumber].name);
     result = strdup(DynStringToCStr(&string));
     DynStringFree(&string);
@@ -695,7 +685,7 @@ LayerSystemDefaults(void)
     int inx;
 
     for (inx=0; inx<NUM_LAYERS; inx++) {
-        strcpy(layers[inx].name, inx==0?_("Main"):" ");
+        strcpy(layers[inx].name, inx==0?_("Main"):"");
         layers[inx].visible = TRUE;
         layers[inx].frozen = FALSE;
         layers[inx].onMap = TRUE;
@@ -717,7 +707,7 @@ void LoadLayerLists(void)
     /* clear both lists */
     wListClear(setLayerL);
 
-    if (layerW) {
+    if (layerL) {
         wListClear(layerL);
     }
 
@@ -731,7 +721,7 @@ void LoadLayerLists(void)
         char *layerLabel;
         layerLabel = FormatLayerName(inx);
 
-        if (layerW) {
+        if (layerL) {
             wListAddValue(layerL, layerLabel, NULL, NULL);
         }
 
@@ -742,9 +732,8 @@ void LoadLayerLists(void)
     /* set current layer to selected */
     wListSetIndex(setLayerL, curLayer);
 
-    if (layerW) {
-        wListSetIndex(layerL, curLayer);
-    }
+    if (layerL) wListSetIndex(layerL,curLayer);
+
 }
 
 /**
@@ -772,7 +761,7 @@ static void DoLayerOp(void * data)
         break;
     }
 
-    UpdateLayerDlg();
+    UpdateLayerDlg(curLayer);   //Reset to current Layer
 
     if (layoutLayerChanged) {
         MainProc(mainW, wResize_e, NULL, NULL);
@@ -788,38 +777,39 @@ static void DoLayerOp(void * data)
  * elements to the new settings.
  */
 
-static void
-UpdateLayerDlg()
+EXPORT void UpdateLayerDlg(unsigned int layer)
 {
-    int inx;
+	int inx;
     /* update the globals for the layer dialog */
-    layerVisible = layers[curLayer].visible;
-    layerFrozen = layers[curLayer].frozen;
-    layerOnMap = layers[curLayer].onMap;
-    layerModule = layers[curLayer].module;
-    layerColor = layers[curLayer].color;
-    layerUseColor = layers[curLayer].useColor;
-    layerNoButton = layers[curLayer].button_off;
-    strcpy(layerName, layers[curLayer].name);
-    strcpy(settingsName, layers[curLayer].settingsName);
-    GetLayerLinkString(curLayer,layerLinkList);
+    layerVisible = layers[layer].visible;
+    layerFrozen = layers[layer].frozen;
+    layerOnMap = layers[layer].onMap;
+    layerModule = layers[layer].module;
+    layerColor = layers[layer].color;
+    layerUseColor = layers[layer].useColor;
+    layerNoButton = layers[layer].button_off;
+    strcpy(layerName, layers[layer].name);
+    strcpy(settingsName, layers[layer].settingsName);
+    GetLayerLinkString(layer,layerLinkList);
 
-    layerCurrent = curLayer;
+    layerCurrent = layer;
     /* now re-load the layer list boxes */
     LoadLayerLists();
 
 
-    /* force update of the 'manage layers' dialog box */
+
+    /* force update of the 'manage layers' dialogbox */
     if (layerL) {
+    	wListSetIndex(layerL,layer);
         ParamLoadControls(&layerPG);
     }
 
     if (layerS) {
     	if (!LoadFileListLoad(settingsCatalog,settingsName))
-    		layers[curLayer].settingsName[0] = '\0';
+    		layers[layer].settingsName[0] = '\0';
     }
 
-    sprintf(message, "Object Count: %ld", layers[curLayer].objCount);
+    sprintf(message, "Object Count: %ld", layers[layer].objCount);
     if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
 
     /* finally show the layer buttons with balloon text */
@@ -870,9 +860,20 @@ InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
     /* count the objects on each layer */
     LayerSetCounts();
 
-    /* Switch the current layer when requested */
+    /* Switch the current layer when requested or the first above not frozen*/
     if (newCurrLayer != -1) {
-        curLayer = newCurrLayer;
+    	curLayer = -1;
+    	for (int i = newCurrLayer; i< NUM_LAYERS; i++) {
+    		if (!layers[i].frozen) {
+    			curLayer = i;
+    			break;
+    		}
+    	}
+    	if (curLayer == -1) {
+    		ErrorMessage( MSG_NO_EMPTY_LAYER );
+    		layers[0].frozen = FALSE;
+    		curLayer = 0;
+    	}
     }
 }
 
@@ -1024,6 +1025,18 @@ LayerPrefLoad(void)
             prefString = strtok(NULL, ",");
         }
     }
+    //Make sure curLayer not frozen
+    for (int i=curLayer; i<NUM_LAYERS; i++) {
+    	if (!layers[i].frozen)  {
+    		curLayer = i;
+    		break;
+    	}
+    }
+    if (layers[curLayer].frozen) {
+    	ErrorMessage( MSG_NO_EMPTY_LAYER );
+    	layers[0].frozen = FALSE;
+    	curLayer = 0;
+    }
 }
 
 /**
@@ -1090,7 +1103,7 @@ void
 DefaultLayerProperties(void)
 {
     InitializeLayers(LayerPrefLoad, 0);
-    UpdateLayerDlg();
+    UpdateLayerDlg(curLayer);			//Use Current Layer
 
     if (layoutLayerChanged) {
         MainProc(mainW, wResize_e, NULL, NULL);
@@ -1190,6 +1203,7 @@ static void LayerUpdate(void)
 			FlipLayer(layerCurrent);
     layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
+    if (layers[(int)layerCurrent].frozen) DeselectLayer(layerCurrent);
     layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
     layers[(int)layerCurrent].module = (BOOL_T)layerModule;
     strcpy(layers[(int)layerCurrent].settingsName,settingsName);
@@ -1271,7 +1285,21 @@ void ResetLayers(void)
         wControlSetBalloonText((wControl_p)layer_btns[inx], _("Show/Hide Layer"));
     }
 
-    curLayer = 0;
+    curLayer = -1;
+
+    for (int i=0;i<NUM_LAYERS;i++) {
+    	if (!layers[i].frozen) {
+    		curLayer = i;
+    		break;
+    	}
+    }
+
+    if (curLayer == -1) {
+    	ErrorMessage( MSG_NO_EMPTY_LAYER );
+    	layers[0].frozen = FALSE;
+    	curLayer = 0;
+    }
+
     layerVisible = TRUE;
     layerFrozen = FALSE;
     layerOnMap = TRUE;
@@ -1387,7 +1415,14 @@ static void LayerDlgUpdate(
 
     case I_MAP:
         layerRedrawMap = TRUE;
-        break;
+        /* No Break */
+    case I_VIS:
+    case I_FRZ:
+    case I_MOD:
+    case I_BUT:
+    	 LayerUpdate();
+    	 UpdateLayerDlg(layerCurrent);
+    	 break;
 
     case I_SETTINGS:
     	if (strcmp((char*)wListGetItemContext(settingsListL,(wIndex_t)*(long*)valueP)," ")==0)
@@ -1396,6 +1431,9 @@ static void LayerDlgUpdate(
     		strcpy(settingsName,(char*)wListGetItemContext(settingsListL,(wIndex_t)*(long*)valueP));
     	break;
     }
+
+
+
 }
 
 /**
@@ -1456,11 +1494,6 @@ static CatalogEntry *
 ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 {
     DIR *d;
-#if defined(WINDOWS)
-	#define PATH_SEPARATOR '\\'
-#else
-	#define PATH_SEPARATOR '/'
-#endif
     CatalogEntry *newEntry = catalog->head;
     char contents[STR_SHORT_SIZE];
 
@@ -1469,15 +1502,14 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
         char *fileName = NULL;
 
         while (GetNextSettingsFile(d, dirName, &fileName)) {
-            CatalogEntry *existingEntry;
-            char *contents_start = strrchr(fileName,PATH_SEPARATOR);
+            char *contents_start = strrchr(fileName,PATH_SEPARATOR[0]);
             if (contents_start[0] == '/') contents_start++;
             char *contents_end = strchr(contents_start,'.');
             if (contents_end[0] == '.') contents_end[0] = '\0';
             strcpy(contents,contents_start);
             contents_end[0] = '.';
-			newEntry = InsertInOrder(catalog,contents);
-            UpdateCatalogEntry(newEntry, fileName, contents);
+			newEntry = InsertInOrder(catalog,contents, NULL);
+            UpdateCatalogEntry(newEntry, fileName, contents, NULL);
             free(fileName);
             fileName = NULL;
         }
@@ -1500,7 +1532,7 @@ static void DoLayer(void * junk)
 
 
     /* set the globals to the values for the current layer */
-    UpdateLayerDlg();
+    UpdateLayerDlg(curLayer);
     layerRedrawMap = FALSE;
     wShow(layerW);
     layoutLayerChanged = FALSE;
@@ -1526,7 +1558,13 @@ BOOL_T ReadLayers(char * line)
         curLayer = atoi(line+7);
 
         if (!IsLayerValid(curLayer)) {
+
             curLayer = 0;
+        }
+
+        if (layers[curLayer].frozen) {
+        	ErrorMessage( MSG_NOT_UNFROZEN_LAYER );
+        	layers[curLayer].frozen = FALSE;
         }
 
         if (layerL) {
@@ -1700,6 +1738,8 @@ void InitLayers(void)
 	
 	backgroundB = AddToolbarButton("cmdBackgroundShow", wIconCreatePixMap(background), 0,
 		(addButtonCallBack_t)BackgroundToggleShow, NULL);
+	/* add the help text */
+	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));
 	wControlActive((wControl_p)backgroundB, FALSE);
 
     for (int i = 0; i<NUM_LAYERS; i++) {
@@ -1710,7 +1750,7 @@ void InitLayers(void)
             sprintf(message, "cmdLayerShow%u", i);
             layer_btns[i] = wButtonCreateForToolbar(mainW, 0, 0, message,
                                           (char*)(show_layer_bmps[i]),
-                                          BO_ICON|BO_TOOLBAR, 0, (wButtonCallBack_p)FlipLayer, (void*)(intptr_t)i);
+                                          BO_ICON|BO_TOOLBAR, 0, (wButtonCallBack_p)FlipLayer, (void*)(uintptr_t)i);
             /* add the help text */
             wControlSetBalloonText((wControl_p)layer_btns[i], _("Show/Hide Layer"));
             /* put on toolbar */
@@ -1720,7 +1760,7 @@ void InitLayers(void)
         }
 
         layerName = FormatLayerName(i);
-        wListAddValue(setLayerL, layerName, NULL, (void*)(long)i);
+        wListAddValue(setLayerL, layerName, NULL, (void*)(uintptr_t)i);
         free(layerName);
     }
 

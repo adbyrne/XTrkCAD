@@ -46,24 +46,18 @@
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "utility.h"
+#include "common-ui.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
@@ -133,12 +127,14 @@ typedef struct btrackinfo_t {
 } btrackinfo_t, *btrackinfo_p;
 
 static dynArr_t blockTrk_da;
+
 #define blockTrk(N) DYNARR_N( btrackinfo_t , blockTrk_da, N )
 
 #define tracklist(N) (&(xx->trackList))[N]
 
 
 typedef struct blockData_t {
+    extraDataBase_t base;
     char * name;
     char * script;
     BOOL_T IsHilite;
@@ -149,7 +145,7 @@ typedef struct blockData_t {
 
 static blockData_p GetblockData ( track_p trk )
 {
-	return (blockData_p) GetTrkExtraData(trk);
+	return GET_EXTRA_DATA( trk, T_BLOCK, blockData_t );
 }
 
 static void DrawBlock (track_p t, drawCmd_p d, wDrawColor color )
@@ -393,9 +389,9 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	blockData_p xx = GetblockData(t);
 	char *blockName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	blockName = Convert2UTF8(blockName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
 		GetTrkIndex(t), blockName, xx->script)>0;
@@ -426,11 +422,12 @@ static BOOL_T ReadBlock ( char * line )
 		return FALSE;
 	}
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
-	DYNARR_RESET( btrackinfo_p , blockTrk_da );
+
+	DYNARR_RESET( btrackinfo_t , blockTrk_da );
 	while ( (cp = GetNextLine()) != NULL ) {
 		if ( IsEND( END_BLOCK ) ) {
 			break;
@@ -442,12 +439,12 @@ static BOOL_T ReadBlock ( char * line )
 		if ( strncmp( cp, "TRK", 3 ) == 0 ) {
 			if (!GetArgs(cp+4,"d",&trkindex)) return FALSE;
 			/*trk = FindTrack(trkindex);*/
-			DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
-			blockTrk(blockTrk_da.cnt-1).i = trkindex;
+			DYNARR_APPEND( btrackinfo_t, blockTrk_da, 10 );
+			DYNARR_LAST( btrackinfo_t, blockTrk_da ).i = trkindex;
 		}
 	}
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
+	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
 	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
 		endPtP = &tempEndPts(ep);
 		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
@@ -857,11 +854,11 @@ static POS_T blkhiliteBorder;
 static wDrawColor blkhiliteColor = 0;
 static void DrawBlockTrackHilite( void )
 {
-	wPos_t x, y, w, h;
+	wDrawPix_t x, y, w, h;
 	if (blkhiliteColor==0)
 		blkhiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = (wDrawPix_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = (wDrawPix_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
 	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
@@ -1008,6 +1005,10 @@ EXPORT void InitTrkBlock( void )
 {
 	T_BLOCK = InitObject ( &blockCmds );
 	log_block = LogFindIndex ( "block" );
+	blockTrk_da.max = 0;
+	blockTrk_da.cnt = 0;
+	blockTrk_da.ptr = NULL;
+	last_block = NULL;
 }
 
 

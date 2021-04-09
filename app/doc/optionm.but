@@ -149,6 +149,10 @@ Setting this option constrains the Main Canvas to minimize these areas (the \f{g
 
 \u000
 
+\dd \f{Dont Hide System Cursor} - when XTrackCAD substitutes a specialized cursor to show actions that will occur (or are occuring) it will normallly hide the System Cursor.  This option suppresses this behaviour and leaves the system cursor in place.
+
+\u000
+
 \dd \f{Draw EndPts} - when to draw endpoints between connected track: never, only for turnouts or for all tracks.
 
 \u000

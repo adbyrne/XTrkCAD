@@ -445,15 +445,15 @@ changeSelection(GtkTreeSelection *selection,
 
 wList_p wListCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
     long	number,
-    wPos_t	width,
+    wWinPix_t	width,
     int	colCnt,
-    wPos_t	* colWidths,
+    wWinPix_t	* colWidths,
     wBool_t * colRightJust,
     const char 	** colTitles,
     long	*valueP,
@@ -462,7 +462,7 @@ wList_p wListCreate(
 {
     GtkTreeSelection *sel;
     wList_p bl;
-    static wPos_t zeroPos = 0;
+    static wWinPix_t zeroPos = 0;
 
     assert(width != 0);
 
@@ -493,16 +493,16 @@ wList_p wListCreate(
                                        option & BL_MANY);
 
 
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
+        sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
 
-    gtk_tree_selection_set_select_function(sel,
+        gtk_tree_selection_set_select_function(sel,
                                            changeSelection,
                                            bl,
                                            NULL);
 
         wlibTreeViewAddColumns(bl->treeView, colCnt);
 
-    wlibAddColumnTitles(bl->treeView, colTitles);
+        wlibAddColumnTitles(bl->treeView, colTitles);
 
         wlibComputePos((wControl_p)bl);
 

@@ -117,7 +117,17 @@ void wControlActive(
         abort();
     }
 
-    gtk_widget_set_sensitive(GTK_WIDGET(b->widget), active);
+    if (b->type == B_LIST || b->type == B_DROPLIST ) {
+
+    	gtk_widget_set_sensitive(gtk_bin_get_child(GTK_BIN(b->widget)), active);
+    	gtk_combo_box_set_button_sensitivity(GTK_COMBO_BOX(b->widget),
+    	  		active?GTK_SENSITIVITY_ON:GTK_SENSITIVITY_OFF);
+
+    } else {
+
+    	gtk_widget_set_sensitive(GTK_WIDGET(b->widget), active);
+
+    }
 }
 
 /**
@@ -130,7 +140,7 @@ void wControlActive(
  * \returns width of label including some space
 */
 
-wPos_t wLabelWidth(
+wWinPix_t wLabelWidth(
     const char * label)
 {
     GtkWidget * widget;
@@ -150,7 +160,7 @@ wPos_t wLabelWidth(
  * \returns width
  */
 
-wPos_t wControlGetWidth(
+wWinPix_t wControlGetWidth(
     wControl_p b)
 {
     return b->w;
@@ -163,7 +173,7 @@ wPos_t wControlGetWidth(
  * \returns height
  */
 
-wPos_t wControlGetHeight(
+wWinPix_t wControlGetHeight(
     wControl_p b)
 {
     return b->h;
@@ -176,7 +186,7 @@ wPos_t wControlGetHeight(
  * \returns position
  */
 
-wPos_t wControlGetPosX(
+wWinPix_t wControlGetPosX(
     wControl_p b)		/* Control */
 {
     return b->realX;
@@ -189,7 +199,7 @@ wPos_t wControlGetPosX(
  * \returns position
  */
 
-wPos_t wControlGetPosY(
+wWinPix_t wControlGetPosY(
     wControl_p b)		/* Control */
 {
     return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?MENUH:0);
@@ -205,8 +215,8 @@ wPos_t wControlGetPosY(
 
 void wControlSetPos(
     wControl_p b,
-    wPos_t x,
-    wPos_t y)
+    wWinPix_t x,
+    wWinPix_t y)
 {
 
 	if (b->inToolbar) {
@@ -331,6 +341,7 @@ void wControlHilite(
     rect.y = b->realY - off;
     cairo_region_t * region = cairo_region_create_rectangle(&rect);
 
+    b->outline = hilite;
 
     GdkDrawingContext * context = gdk_window_begin_draw_frame (gtk_widget_get_window(GTK_WIDGET(b->widget)),
                                  region);

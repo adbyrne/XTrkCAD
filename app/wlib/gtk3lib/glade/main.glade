@@ -791,7 +791,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkRevealer" id="main-draw-Angle.reveal">
+                          <object class="GtkRevealer" id="main-draw-angle.reveal">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="transition_type">none</property>
@@ -813,7 +813,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="main-draw-Angle">
+                                  <object class="GtkEntry" id="main-draw-angle">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="width_chars">5</property>
@@ -834,7 +834,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkRevealer" id="main-draw-Length.reveal">
+                          <object class="GtkRevealer" id="main-draw-length.reveal">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="transition_type">none</property>
@@ -856,7 +856,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="main-draw-Length">
+                                  <object class="GtkEntry" id="main-draw-length">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="width_chars">5</property>
@@ -877,7 +877,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkRevealer" id="main-draw-BoxWidth.reveal">
+                          <object class="GtkRevealer" id="main-draw-width.reveal">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="transition_type">none</property>
@@ -899,7 +899,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="main-draw-BoxWidth">
+                                  <object class="GtkEntry" id="main-draw-width">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="width_chars">5</property>
@@ -920,7 +920,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkRevealer" id="main-draw-Radius.reveal">
+                          <object class="GtkRevealer" id="main-draw-radius.reveal">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="transition_type">none</property>
@@ -942,7 +942,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="main-draw-Radius">
+                                  <object class="GtkEntry" id="main-draw-radius">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="width_chars">5</property>
@@ -963,7 +963,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkRevealer" id="main-draw-Type.reveal">
+                          <object class="GtkRevealer" id="main-draw-type.reveal">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="transition_type">none</property>
@@ -973,7 +973,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkComboBox" id="main-draw-Type">
+                                  <object class="GtkComboBox" id="main-draw-type">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                   </object>

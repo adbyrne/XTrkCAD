@@ -20,32 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#include <errno.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#include <ctype.h>
-#ifdef WINDOWS
-	#include <io.h>
-	#define W_OK (2)
-	#define access	_access
-	#include <windows.h>
-#endif
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <locale.h>
-
-#include <stdint.h>
-
-#include <assert.h>
-
 #include <cJSON.h>
 
 #include "archive.h"
@@ -58,23 +32,22 @@
 #include "draw.h"
 #include "fileio.h"
 #include "fcntl.h"
-#include "i18n.h"
 #include "layout.h"
 #include "manifest.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 #include "version.h"
 #include "dynstring.h"
+#include "common-ui.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
+EXPORT dynArr_t paramProc_da;
 
 /*#define TIME_READTRACKFILE*/
 
@@ -453,7 +426,7 @@ EXPORT BOOL_T GetArgs(
 			} else {
 				message[0] = '\0';
 			}
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(message);
 #endif
 			*qp = (char*)ConvertFromEscapedText(message);
@@ -484,7 +457,7 @@ EXPORT BOOL_T GetArgs(
 wBool_t IsEND( char * sEnd )
 {
 	char * cp;
-	wBool_t bAllowNakedENDs = paramVersion < 12;
+	wBool_t bAllowNakedENDs = paramVersion < VERSION_NONAKEDENDS;
 	for( cp = paramLine; *cp && (isspace( *cp ) || *cp == '\t'); cp++ );
 	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 )
 		cp += strlen( sEnd );
@@ -526,11 +499,11 @@ ReadMultilineText()
 	string = MyStrdup(DynStringToCStr(&noteText));
 	string[strlen(string) - 1] = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if (wIsUTF8(string)) {
 		ConvertUTF8ToSystem(string);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	DynStringFree(&noteText);
 	return(string);
@@ -608,14 +581,14 @@ EXPORT char * PutTitle( char * cp )
 		NoticeMessage( _("putTitle: title too long: %s"), _("Ok"), NULL, title );
 	*tp = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if(RequiresConvToUTF8(title)) {
 		char *out = MyMalloc(cnt);
 		wSystemToUTF8(title, out, cnt);
 		strcpy(title, out);
 		MyFree(out);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	return title;
 }
@@ -653,11 +626,6 @@ void SetWindowTitle( void )
 static struct wFilSel_t * loadFile_fs = NULL;
 static struct wFilSel_t * saveFile_fs = NULL;
 static struct wFilSel_t * examplesFile_fs = NULL;
-
-static wWin_p checkPointingW;
-static paramData_t checkPointingPLs[] = {
-   {    PD_MESSAGE, N_("Check Pointing"), "mess1" } };
-static paramGroup_t checkPointingPG = { "checkpoint", PGO_DIALOGTEMPLATE, checkPointingPLs, sizeof checkPointingPLs/sizeof checkPointingPLs[0] };
 
 static char * checkPtFileName1;
 static char * checkPtFileName2;
@@ -701,6 +669,7 @@ static BOOL_T ReadTrackFile(
 		return FALSE;
 	}
 
+	checkPtFileNameBackup = NULL;
 	paramLineNum = 0;
 	paramFileName = strdup( fileName );
 
@@ -754,14 +723,14 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {
@@ -837,6 +806,15 @@ int LoadTracks(
 	assert( fileName != NULL );
 	assert( cnt == 1 );
 
+	nameOfFile = FindFilename(fileName[0]);
+
+	// Make sure it exists and it is readable
+	if (access(fileName[0], R_OK) != 0)
+	{
+		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found"));
+		return FALSE;
+	}
+
 	if ( ! bExample )
 		SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 	bReadOnly = bExample;
@@ -853,7 +831,6 @@ int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	time0 = wGetTimer();
 #endif
-	nameOfFile = FindFilename( fileName[ 0 ] );
 
  /*
   * Support zipped filetype
@@ -977,13 +954,14 @@ int LoadTracks(
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
-		LoadLayerLists();
 		LayerSetCounts();
 	}
 
 	MyFree(copyOfFileName);
 	free(full_path);
 	full_path = NULL;
+
+	UpdateLayerDlg(curLayer);
 
 	UndoResume();
 	Reset();
@@ -1206,6 +1184,17 @@ static int SaveTracks(
 	return TRUE;
 }
 
+EXPORT void SetAutoSave() {
+	if (saveFile_fs == NULL)
+		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("AutoSave Tracks As"),
+			sSourceFilePattern, SaveTracks, NULL );
+	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	changed = checkPtMark = 1;
+	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
+	SaveState();
+
+}
 
 EXPORT void DoSave( doSaveCallBack_p after )
 {
@@ -1221,6 +1210,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1233,6 +1223,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	changed = checkPtMark = 1;
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1245,6 +1236,7 @@ EXPORT void DoLoad( void )
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	paste_offset = zero;
 	cursor_offset = zero;
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1259,6 +1251,7 @@ EXPORT void DoExamples( void )
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
 	wFilSelect( examplesFile_fs, message );
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1276,12 +1269,8 @@ EXPORT void DoCheckPoint( void )
 		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
 	}
 
-	if (checkPointingW == NULL) {
-		ParamRegister( &checkPointingPG );
-		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle(_("Check Pointing")), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
-	}
 	rename( checkPtFileName1, checkPtFileName2 );
-	//wShow( checkPointingW );
+
 	rc = DoSaveTracks( checkPtFileName1 );
 
 	/* could the check point file be written ok? */
@@ -1308,7 +1297,6 @@ EXPORT void DoCheckPoint( void )
 		rename( checkPtFileName2, checkPtFileName1 );
 	}
 
-	//wHide( checkPointingW );
 	wShow( mainW );
 }
 
@@ -1405,7 +1393,11 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
+
 	} else SetLayoutFullPath("");
+
+	LayerSetCounts();
+	UpdateLayerDlg(curLayer);
 
 	Reset();
 	UndoResume();

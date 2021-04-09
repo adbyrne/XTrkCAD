@@ -66,14 +66,12 @@ static GtkWidget *fontChooserDialog;
  * the font size coming from the gtk font dialog which is located in this file */
 int absoluteFontSize = 18;
 
-static wFont_p standardFonts[F_HELV-F_TIMES+1][2][2];
-static wFont_p curFont = NULL;
-
-static wBool_t fontInitted = FALSE;
-
 struct wFont_t {
     PangoFontDescription *fontDescription;
 };
+
+static wFont_p standardFonts[F_HELV-F_TIMES+1][2][2];
+static wFont_p curFont = NULL;
 
 /**
  * Callback for font selection dialog
@@ -84,13 +82,13 @@ struct wFont_t {
  * \return
  */
 
-static void fontChooserDialogCallback(GtkFontChooserDialog
+static void fontChooserCallback(GtkFontChooser
                                         *fontChooserDialog, gint response, gpointer data)
 {
     if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
         gchar *fontName;
 
-        fontName = gtk_font_chooser_get_font(GTK_FONT_CHOOSER(fontChooserDialog));
+        fontName = gtk_font_chooser_get_font(fontChooserDialog);
         wPrefSetString("font", "name", fontName);
         pango_font_description_free(curFont->fontDescription);
         curFont->fontDescription = pango_font_description_from_string(fontName);
@@ -112,6 +110,7 @@ static void fontChooserDialogCallback(GtkFontChooserDialog
     }
 }
 
+static wBool_t fontInitted = FALSE;
 
 static wBool_t fontInit()
 {
@@ -183,11 +182,11 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
                                        wFont_p fp,
                                        wFontSize_t fs,
                                        const char *s,
-                                       int *width_p,
-                                       int *height_p,
-                                       int *ascent_p,
-                                       int *descent_p,
-									   int *baseline_p)
+                                       wDrawPix_t *width_p,
+                                       wDrawPix_t *height_p,
+                                       wDrawPix_t *ascent_p,
+                                       wDrawPix_t *descent_p,
+				       wDrawPix_t *baseline_p)
 {
     if (!fontInitted) {
         fontInit();
@@ -216,9 +215,10 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
                                     FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
     pango_layout_set_font_description(layout, fontDescription);
     /* get layout measures */
-    pango_layout_get_size(layout, width_p, height_p);
-    *width_p = *width_p / PANGO_SCALE;
-    *height_p = *height_p / PANGO_SCALE;
+    gint width_i, height_i;
+    pango_layout_get_size(layout, &width_i, &height_i);
+    *width_p = width_i / PANGO_SCALE;
+    *height_p = height_i / PANGO_SCALE;
     context = gtk_widget_create_pango_context(widget);
     metrics = pango_context_get_metrics(context, fontDescription,
                                         pango_context_get_language(context));
@@ -272,20 +272,20 @@ void wInitializeFonts()
  */
 
 void wSelectFont(
-    const char * title, wWin_p win)
+    const char * title, wWin_p W)
 {
     if (!fontInitted) {
         fontInit();
     }
 
     if (fontChooserDialog == NULL) {
-        fontChooserDialog = gtk_font_chooser_dialog_new(_("Font Select"),GTK_WINDOW(win->gtkwin));
+        fontChooserDialog = gtk_font_chooser_dialog_new(_("Font Select"),GTK_WINDOW(W->gtkwin));
         gtk_window_set_position(GTK_WINDOW(fontChooserDialog), GTK_WIN_POS_MOUSE);
         gtk_window_set_modal(GTK_WINDOW(fontChooserDialog), TRUE);
         gtk_font_chooser_set_preview_text(GTK_FONT_CHOOSER(
                     fontChooserDialog), sampleText);
         g_signal_connect(G_OBJECT(fontChooserDialog), "response",
-                         G_CALLBACK(fontChooserDialogCallback), NULL);
+                         G_CALLBACK(fontChooserCallback), NULL);
         g_signal_connect(G_OBJECT(fontChooserDialog), "destroy",
                          G_CALLBACK(gtk_widget_destroyed), &fontChooserDialog);
     }

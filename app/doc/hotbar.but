@@ -16,7 +16,9 @@ The arrow buttons on either side of the \e{Hot bar} move the list one object to 
 
 A \c{Right-Click} over the \e{Hot Bar} will display a pop-up menu listing the files with contents on the \e{Hot Bar}. Selecting an item from this list causes the \e{Hot Bar} to jump to the relative spot on the whole list.
 
-Objects on the \e{Hot Bar} are placed on the drawing canvas by first clicking on the object, \e{Dragging} it the Main window, rotating it with \c{Ctrl+Left-Drag} or \c{Right-Drag} positioning it then pressing the \c{Space} key to set it in place.
+Objects on the \e{Hot Bar} are placed on the drawing canvas by first selecting an object by \e{Cicking} it on the \e{Hot Bar}. Then \e{Click} and \e{Drag} on the Main window, rotating it with \c{Right-Drag} to position it, and then pressing the \c{Space} key to set it in place.
+
+For \e{Turnouts}, see below for additional details on the \e{Active EndPoint}.
 
 \rule
 
@@ -39,7 +41,7 @@ It will be a smooth monotonic curve if the ends are not in a line and the end an
 
 \S{hbStructures} Structures
 
-\e{Structures} are placed on the layout in the same way as turnouts (\K{hbTurnouts}) except no active endpoint exists and they do not align with existing track.
+\e{Structures} are placed on the layout in the same way as turnouts (\K{hbTurnouts}) except no Active EndPoint exists and they do not align with existing track.
 
 Refer to \K{cmdStructure} for information pertaining to use of the \e{Structure} dialog.
 
@@ -48,9 +50,9 @@ Refer to \K{cmdStructure} for information pertaining to use of the \e{Structure}
 
 \S{hbTurnouts} Turnouts
 
-\e{Turnouts} have an active endpoint (\K{generalTerms}) which is the handle used to position the \e{Turnout}. You can change the \e{active endpoint} by a \c{Shift+Left-Click} which causes the next endpoint to become Active. 
+\e{Turnouts} have an \e{Active EndPoint} (\K{generalTerms}) which is the handle used to position the \e{Turnout}. You can change the \e{Active EndPoint} by a \c{Shift+Left-Click} which causes the next endpoint to become Active. 
 
-If you \c{Left+Drag} a turnout onto a track, the active endpoint (\K{generalTerms}) is aligned with the selected track. On flex-track, you can flip the turnout by moving the cursor from one side of the track centerline to the other. On another turnout, the new turnout will be placed at the endpoint closest to the cursor.
+If you \c{Left+Drag} a turnout onto a track, the Active EndPoint (\K{generalTerms}) is aligned with the selected track. On flex-track, you can flip the turnout by moving the cursor from one side of the track centerline to the other. On another turnout, the new turnout will be placed at the endpoint closest to the cursor.
 
 \e{XTrackCAD} will automatically connect the turnout's endpoints to any other tracks they are aligned with. The number of endpoints that will be connected is displayed on the Status Bar, as well as the Maximum displacement between these endpoints and the tracks they will be connected to. \e{XTrackCAD} will adjust the position of the Turnout to give you the best fit for locating the turnout.  You can override this adjustment by holding down the \e{Shift} key while \e{Dragging}.
 

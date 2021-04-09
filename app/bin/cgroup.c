@@ -21,23 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-
+#include "cselect.h"
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "tbezier.h"
 #include "tcornu.h"
 #include "common.h"
-#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 
 /*****************************************************************************
@@ -168,8 +163,8 @@ static void GroupCopyTitle(
 EXPORT void UngroupCompound(
 		track_p trk )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
-	struct extraData *xx1;
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx1;
 	trkSeg_p sp;
 	track_p trk0, trk1;
 	int segCnt, segInx, segInx1;
@@ -220,7 +215,12 @@ EXPORT void UngroupCompound(
 LOG( log_group, 1, ( "Ungroup( T%d )\n", GetTrkIndex(trk) ) );
 	epCnt = GetTrkEndPtCnt(trk);
 	segCnt = xx->segCnt;
-	ASSERT( (epCnt==0) == (segCnt==0) );
+	int trackCount = 0;
+	for ( sp=xx->segs; sp<&xx->segs[xx->segCnt]; sp++ ) {
+		if (IsSegTrack(sp)) trackCount++;
+	}
+	//ASSERT( (epCnt==0) == (segCnt==0) );
+	ASSERT( (epCnt==0) == (trackCount==0) );
 	turnoutChanged = FALSE;
 	if ( epCnt > 0 ) {
 		turnoutChanged = TRUE;
@@ -481,7 +481,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		orig.x = xx->orig.x - orig.x;
 		orig.y = xx->orig.y - orig.y;
 		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), NULL, (PATHPTR_T)&pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
-		xx1 = GetTrkExtraData(trk1);
+		xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
 		xx1->ungrouped = TRUE;
 
 		SetTrkVisible( trk1, TRUE );
@@ -686,7 +686,6 @@ static char * FindPathBtwEP(
 		EPINX_T ep2,
 		BOOL_T * flip )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
 	char * cp;
 	coOrd trkPos[2];
 
@@ -703,6 +702,7 @@ LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
 		LOG( log_group, 3, (" Flip:%s Path= Seg=%d-\n", *flip?"T":"F", *cp ) );
 		return cp;
 	}
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
 	cp = (char *)GetPaths( trk );
 	trkPos[0] = GetTrkEndPos(trk,ep1);
 	Rotate( &trkPos[0], xx->orig, -xx->angle );
@@ -916,7 +916,7 @@ static BOOL_T CheckPathEndPt(
 		char cc,
 		EPINX_T ep )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	wIndex_t segInx;
 	EPINX_T segEP, epCnt;
 	DIST_T d;
@@ -1014,7 +1014,7 @@ static void LogSeg(
 
 static void GroupOk( void * junk )
 {
-	struct extraData *xx = NULL;
+	struct extraDataCompound_t *xx = NULL;
 	turnoutInfo_t * to;
 	int inx;
 	EPINX_T ep, epCnt, epN;
@@ -1074,6 +1074,7 @@ static void GroupOk( void * junk )
 	 */
 	trk = NULL;
 	int InInx = -1;
+	BOOL_T hasTracks = FALSE;
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			DYNARR_APPEND( groupTrk_t, groupTrk_da, 10 );
@@ -1081,14 +1082,15 @@ static void GroupOk( void * junk )
 			groupP->trk = trk;
 			groupP->segStart = trackSegs_da.cnt;
 			groupP->totalSegStart = tempSegs_da.cnt+trackSegs_da.cnt;
+			if (IsTrack(trk)) hasTracks = TRUE;
 			if ( GetTrkType(trk) == T_TURNOUT || GetTrkType(trk) == T_STRUCTURE) {
-				xx = GetTrkExtraData(trk);
+				xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 				for ( pinx=0; pinx<xx->segCnt; pinx++ ) {
 					segPtr = &xx->segs[pinx];
 					if ( IsSegTrack(segPtr) ) {
 						DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
 						trackSegs(trackSegs_da.cnt-1) = *segPtr;
-
+						hasTracks = TRUE;
 						RotateSegs( 1, &trackSegs(trackSegs_da.cnt-1), zero, xx->angle );
 						MoveSegs( 1, &trackSegs(trackSegs_da.cnt-1), xx->orig );
 
@@ -1114,7 +1116,7 @@ static void GroupOk( void * junk )
 				GetBezierSegmentsFromCornu(trk,&trackSegs_da,TRUE);  //Only give back Bezier - cant be undone
 
 			} else {
-
+				if (IsTrack(trk)) hasTracks=TRUE;
 				segCnt = tempSegs_da.cnt;
 				DrawTrack( trk, &groupD, wDrawColorBlack );
 				DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
@@ -1122,7 +1124,7 @@ static void GroupOk( void * junk )
 				*segPtr = tempSegs( segCnt );
 
 				if ( tempSegs_da.cnt != segCnt+1  ) {
-					NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, _("Ok"), NULL );
+					NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, _("Ok"), NULL, GetTrkTypeName(trk));
 					wHide( groupW );
 					return;
 				}
@@ -1148,7 +1150,7 @@ if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 	}
 }
 
-	if ( groupTrk_da.cnt>0 ) {
+	if ( groupTrk_da.cnt>0 && hasTracks) {
 		if ( groupTrk_da.cnt > 128 ) {
 			NoticeMessage( MSG_TOOMANYSEGSINGROUP, _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
@@ -1601,6 +1603,7 @@ LOG( log_group, 3, ( "\n" ) );
 					trackCount--;
 				}
 			}
+			SelectRecount();
 			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, path, outputSegs_da.cnt, &outputSegs(0) );
 
 			SetTrkVisible( trk, TRUE );
@@ -1614,18 +1617,18 @@ LOG( log_group, 3, ( "\n" ) );
 			EnableCommands();
 		}
 	} else {
-		CloneFilledDraw( tempSegs_da.cnt, &tempSegs(0), TRUE );
-		GetSegBounds( zero, 0, tempSegs_da.cnt, &tempSegs(0), &orig, &size );
+		CloneFilledDraw( trackSegs_da.cnt, &trackSegs(0), TRUE );
+		GetSegBounds( zero, 0, trackSegs_da.cnt, &trackSegs(0), &orig, &size );
 
 		orig.x = - orig.x-groupOriginX;  //Include orig offset
 		orig.y = - orig.y-groupOriginY;
-		MoveSegs( tempSegs_da.cnt, &tempSegs(0), orig );
-		to = CreateNewStructure( curScaleName, groupTitle, tempSegs_da.cnt, &tempSegs(0), TRUE );
+		MoveSegs( trackSegs_da.cnt, &trackSegs(0), orig );
+		to = CreateNewStructure( curScaleName, groupTitle, trackSegs_da.cnt, &trackSegs(0), TRUE );
 		f = OpenCustom("a");
 		if (f && to) {
 			oldLocale = SaveLocale("C");
 			rc &= fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName, PutTitle(groupTitle) )>0;
-			rc &= WriteSegs( f, tempSegs_da.cnt, &tempSegs(0) );
+			rc &= WriteSegs( f, trackSegs_da.cnt, &trackSegs(0) );
 		}
 		if ( groupReplace ) {
 			UndoStart( _("Group Tracks"), "group" );
@@ -1637,9 +1640,10 @@ LOG( log_group, 3, ( "\n" ) );
 					trackCount--;
 				}
 			}
+			SelectRecount();
 			orig.x = - orig.x;
 			orig.y = - orig.y;
-			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, (PATHPTR_T)"", tempSegs_da.cnt, &tempSegs(0) );
+			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, (PATHPTR_T)"", trackSegs_da.cnt, &trackSegs(0) );
 			SetTrkVisible( trk, TRUE );
 			DrawNewTrack( trk );
 			EnableCommands();
@@ -1658,7 +1662,7 @@ LOG( log_group, 3, ( "\n" ) );
 EXPORT void DoGroup( void )
 {
 	track_p trk = NULL;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	TRKTYP_T trkType;
 	xx = NULL;
 	groupSegCnt = 0;
@@ -1672,7 +1676,7 @@ EXPORT void DoGroup( void )
 			trkType = GetTrkType(trk);
 			if ( IsTrack(trk) ) isTurnout = TRUE;
 			if ( trkType == T_TURNOUT || trkType == T_STRUCTURE ) {
-				xx = GetTrkExtraData(trk);
+				xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 				groupSegCnt += xx->segCnt;
 				GroupCopyTitle( xtitle(xx) );
 			} else

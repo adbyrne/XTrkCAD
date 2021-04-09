@@ -23,10 +23,7 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <string.h>
 #include "common.h"
-#include "draw.h"
-#include "misc2.h"
 
 extern TRKTYP_T T_NOTRACK;
 
@@ -35,6 +32,7 @@ typedef struct track_t * track_p;
 typedef struct track_t * track_cp;
 extern track_p tempTrack;
 extern wIndex_t trackCount;
+extern wBool_t bFreeTrack;
 extern long colorTrack;
 extern long colorDraw;
 extern long drawTunnel;
@@ -137,13 +135,14 @@ typedef struct {
 #define Q_IS_TURNOUT                    (31)
 #define Q_GET_NODES						(32)
 
-typedef struct {
+typedef struct traverseTrack_t {
 		track_p trk;							// IN Current Track OUT Next Track
 		DIST_T length;							// IN How far to go
 		DIST_T dist;							// OUT how far left = 0 if found
 		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
 		ANGLE_T angle;							// IN/OUT - angle now
-		} traverseTrack_t, *traverseTrack_p;
+		} traverseTrack_t;
+typedef struct traverseTrack_t *traverseTrack_p;
 
 
 typedef struct {
@@ -198,17 +197,18 @@ typedef struct {
 		} u;
 		BOOL_T cacheSet;
 		double cachedElev;
-		double cachedLength;
+		double cachedGrade;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
-typedef struct {
+typedef struct trkEndPt_t {
 		coOrd pos;
 		ANGLE_T angle;
 		TRKINX_T index;
 		track_p track;
 		elev_t elev;
 		long option;
-		} trkEndPt_t, * trkEndPt_p;
+		} trkEndPt_t;
+typedef struct trkEndPt_t * trkEndPt_p;
 
 extern dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
@@ -217,7 +217,7 @@ typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;
 
 
-typedef struct {
+typedef struct trkSeg_t {
 		char type;
 		wDrawColor color;
 		DIST_T width;
@@ -267,7 +267,8 @@ typedef struct {
 				PolyType_e polyType;
 			} p;
 		} u;
-		} trkSeg_t, * trkSeg_p;
+		} trkSeg_t;
+typedef struct trkSeg_t * trkSeg_p;
 
 #define SEG_STRTRK		('S')
 #define SEG_CRVTRK		('C')
@@ -467,7 +468,7 @@ void SetDebug( char * );
 #define GetTrkEndAngle( T, I )	((T)->endPt[I].angle)
 #define GetTrkEndOption( T, I ) ((T)->endPt[I].option)
 #define SetTrkEndOption( T, I, O )		((T)->endPt[I].option=O)
-#define GetTrkExtraData( T )	((T)->extraData)
+#define GetTrkExtraData( T, TT )	((T)->extraData)
 #define GetTrkWidth( T )		(int)((T)->width)
 #define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
 #define GetTrkBits(T)			((T)->bits)
@@ -493,7 +494,7 @@ coOrd GetTrkEndPos( track_p, EPINX_T );
 ANGLE_T GetTrkEndAngle( track_p, EPINX_T );
 long GetTrkEndOption( track_p, EPINX_T );
 long SetTrkEndOption( track_p, EPINX_T, long );
-struct extraData * GetTrkExtraData( track_p );
+struct extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
 int GetTrkWidth( track_p );
 void SetTrkWidth( track_p, int );
 int GetTrkBits( track_p );
@@ -517,8 +518,8 @@ void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
 DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
-BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *length);
-void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length);
+BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *grade);
+void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade);
 char * GetTrkEndElevStation( track_p, EPINX_T );
 #define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
 #define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
@@ -616,6 +617,7 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_DASH		(1<<8)
 #define DTS_DASHDOT		(1<<9)
 #define DTS_DASHDOTDOT  (1<<10)
+#define DTS_CENTERONLY  (1<<11)
 
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
@@ -711,7 +713,7 @@ DIST_T JointDescriptionDistance(coOrd pos,track_p trk,coOrd * dpos,BOOL_T show_h
 STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 
 /* cmisc.c */
-wIndex_t describeCmdInx;
+extern wIndex_t describeCmdInx;
 typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
@@ -733,7 +735,7 @@ typedef struct {
 		int mode;
 		wControl_p control0;
 		wControl_p control1;
-		wPos_t posy;
+		wWinPix_t posy;
 		int grid_col0;
 		int grid_col1;
 		int grid_row0;

@@ -19,28 +19,8 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <assert.h>
-#include <ctype.h>
-#ifdef HAVE_MALLOC_H
-    #include <malloc.h>
-#endif
-#include <search.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-    #include "include/dirent.h"
-#else
-    #include <dirent.h>
-#endif
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "include/levenshtein.h"
 #include "misc.h"
 #include "misc2.h"
@@ -50,13 +30,6 @@
 #include "include/stringxtc.h"
 #include "include/utf8convert.h"
 #include "include/utlist.h"
-#include "utility.h"
-
-#if _MSC_VER > 1300
-    #define strnicmp _strnicmp
-    #define stricmp _stricmp
-    #define strdup _strdup
-#endif
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"
@@ -93,7 +66,27 @@ InitCatalog(void)
 void
 DestroyCatalog(Catalog *catalog)
 {
-    MyFree(catalog);
+	CatalogEntry *current = catalog->head;
+	CatalogEntry *entry = NULL;
+	CatalogEntry *tmp = NULL, *old = NULL;
+	DL_FOREACH_SAFE(current, entry, tmp)
+	{
+		//if (old) MyFree(old);
+		old = NULL;
+		for (unsigned int i = 0; i < entry->files; i++) {
+		   MyFree(entry->fullFileName[i]);
+		   entry->fullFileName[i] = NULL;
+		}
+		entry->files = 0;
+		MyFree(entry->contents);
+		entry->contents = NULL;
+		MyFree(entry->tag);
+		entry->tag = NULL;
+		old = entry;
+		DL_DELETE(catalog->head,entry);
+	}
+
+	catalog->head = NULL;
 }
 
 /**
@@ -109,9 +102,11 @@ InsertIntoCatalogAfter(CatalogEntry *entry)
 {
     CatalogEntry *newEntry = (CatalogEntry *)MyMalloc(sizeof(CatalogEntry));
     newEntry->next = entry->next;
+    newEntry->prev = entry;
     entry->next = newEntry;
     newEntry->files = 0;
     newEntry->contents = NULL;
+    newEntry->tag = NULL;
 
     return (newEntry);
 }
@@ -143,15 +138,22 @@ CatalogDiscard(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
     CatalogEntry *element;
-    CatalogEntry *tmp;
+    CatalogEntry *tmp,*old = NULL;
 
     DL_FOREACH_SAFE(current, element, tmp) {
+    	//if (old) MyFree(old);
+    	old = NULL;
     	MyFree(element->contents);
+    	element->contents = NULL;
+    	MyFree(element->tag);
+    	element->tag = NULL;
     	for (unsigned int i = 0; i < element->files; i++) {
     	    MyFree(element->fullFileName[i]);
+    	    element->fullFileName[i] = NULL;
     	}
-        DL_DELETE(current, element);
-        MyFree(element);
+    	element->files = 0;
+        old = element;
+        DL_DELETE(catalog->head,element);
     }
 
     catalog->head = NULL;
@@ -177,17 +179,21 @@ CompareEntries(CatalogEntry *a, CatalogEntry *b)
  *
  * \param [in] catalog
  * \param [in] contents to include.
+ * \param [in] tag
  *
  * \returns CatalogEntry
  */
 
 EXPORT CatalogEntry *
-InsertInOrder(Catalog *catalog, const char *contents)
+InsertInOrder(Catalog *catalog, const char *contents, const char *tag)
 {
     CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
     newEntry->files = 0;
 
-    newEntry->contents = MyStrdup(contents);
+    if (contents)
+    	newEntry->contents = MyStrdup(contents);
+    if (tag)
+    	newEntry->tag = MyStrdup(tag);
 
     DL_INSERT_INORDER(catalog->head, newEntry, CompareEntries);
 
@@ -232,11 +238,21 @@ IsExistingContents(Catalog *catalog, const char *contents, BOOL_T silent)
  */
 
 EXPORT void
-UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
+UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents, char *tag)
 {
     if (!entry->contents) {
-        entry->contents = MyStrdup(contents);
+    	MyFree(entry->contents);
+    	entry->contents = NULL;
     }
+    if (contents)
+        entry->contents = MyStrdup(contents);
+
+    if (!entry->tag) {
+    	MyFree(entry->tag);
+    	entry->tag = NULL;
+    }
+    if (tag)
+    	entry->tag = MyStrdup(tag);
 
     if (entry->files < MAXFILESPERCONTENT) {
         entry->fullFileName[entry->files++] = MyStrdup(path);
@@ -546,14 +562,18 @@ CreateCatalogFromDir(ParameterLib *paramLib, char *directory)
 
             char *contents = GetParameterFileContent(fileName);
 
+            char *scale = GetParameterFileScale(fileName);
+
+
             if ((existingEntry = IsExistingContents(catalog, contents, FALSE))) {
-                UpdateCatalogEntry(existingEntry, fileName, contents);
+                UpdateCatalogEntry(existingEntry, fileName, contents, scale);
             } else {
                 CatalogEntry *newEntry;
-                newEntry = InsertInOrder(catalog, contents);
-                UpdateCatalogEntry(newEntry, fileName, contents);
+                newEntry = InsertInOrder(catalog, contents, scale);
+                UpdateCatalogEntry(newEntry, fileName, contents, scale);
             }
             MyFree(contents);
+            MyFree(scale);
             free(fileName);
             fileName = NULL;
         }
@@ -577,6 +597,7 @@ DiscardCatalog(ParameterLib *library)
 
     DL_FOREACH_SAFE(library->catalog->head, entry, temp) {
         MyFree(entry->contents);
+        MyFree(entry->tag);
         for (unsigned int i = 0; i < entry->files; i++) {
             MyFree(entry->fullFileName[i]);
         }
@@ -675,6 +696,7 @@ DiscardLibrary(ParameterLib* library)
 
     DL_FOREACH_SAFE(entry, element, tmp) {
         MyFree(element->contents);
+        MyFree(element->tag);
         for (unsigned int i = 0; i < element->files; i++) {
             MyFree(element->fullFileName[i]);
         }
@@ -863,10 +885,12 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                 for (int j = 0; j < entries->references->cnt; j++) {
                     CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
                     CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
-                    newEntry->contents = foundEntry->contents;
+                    newEntry->contents = MyStrdup(foundEntry->contents);
+                    newEntry->tag = MyStrdup(foundEntry->tag);
                     newEntry->files = foundEntry->files;
-                    memcpy(newEntry->fullFileName, foundEntry->fullFileName,
-                           sizeof(char *) * MAXFILESPERCONTENT);
+                    for (unsigned int i=0;i<newEntry->files;i++) {
+                    	newEntry->fullFileName[i] = MyStrdup(foundEntry->fullFileName[i]);
+                    }
 
                     DL_APPEND(results->subCatalog.head, newEntry);
                 }
@@ -880,13 +904,19 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                     for (int j = 0; j < entries->references->cnt; j++) {
                         CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
 
-                        if (foundEntry->contents == current->contents) {
+                        if (strcmp(foundEntry->contents,current->contents)==0) {
                             found = TRUE;
                             break;
                         }
                     }
                     if (!found) {
                         DL_DELETE(results->subCatalog.head, current);
+                        MyFree(current->contents);
+                        MyFree(current->tag);
+                        for (unsigned int i=0;i<current->files;i++) {
+                               MyFree(current->fullFileName[i]);
+                        }
+                        MyFree(current);
                     }
                 }
             }
@@ -955,9 +985,9 @@ GetParameterFileContent(char *file)
                     ptr = ptr+strlen(CONTENTSCOMMAND)+1;
                     ptr = strtok(ptr, "\r\n");
                     result = MyStrdup(ptr);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
                     ConvertUTF8ToSystem(result);
-#endif // WINDOWS
+#endif // UTFCONVERT
                     found = true;
                 }
             } else {
@@ -968,6 +998,81 @@ GetParameterFileContent(char *file)
         fclose(fh);
     }
     return (result);
+}
+
+/**
+ * Get the first scale values from a parameter file. Returned strings have to be MyFreed after use
+ *
+ * \param file IN xtpfile
+ * \param array of one of three char results (Track, Structure and Car)
+ */
+
+char *
+GetParameterFileScale(char *file)
+{
+    FILE *fh;
+    char *scale = NULL;
+
+
+    fh = fopen(file, "rt");
+    if (fh) {
+        bool found = FALSE, found_Turnout = FALSE, found_Structure = FALSE, found_Car = FALSE;
+
+        while (!found) {
+            char buffer[512];
+            if (fgets(buffer, sizeof(buffer), fh)) {
+                char *ptr = strtok(buffer, " \t");
+                if (!found_Turnout && !XtcStricmp(ptr, TURNOUTCOMMAND)) {
+                    /* if found, store the rest of the line and the filename	*/
+                    ptr = ptr+strlen(TURNOUTCOMMAND)+1;
+                    ptr = strtok(ptr, " \t");
+                    scale = MyMalloc(strlen(TURNOUTCOMMAND)+2+strlen(ptr));
+                    strcpy(scale,TURNOUTCOMMAND);
+                    char * cp = scale + strlen(TURNOUTCOMMAND);
+                    cp[0] = ' ';
+                    cp++;
+                    strcpy(cp,ptr);
+                    found_Turnout = true;
+                } else if (!found_Structure && !XtcStricmp(ptr, STRUCTURECOMMAND)) {
+                    /* if found, store the rest of the line and the filename	*/
+                    ptr = ptr+strlen(STRUCTURECOMMAND)+1;
+                    ptr = strtok(ptr, " \t");
+                    scale = MyMalloc(strlen(STRUCTURECOMMAND)+2+strlen(ptr));
+                    strcpy(scale,STRUCTURECOMMAND);
+					char * cp = scale + strlen(STRUCTURECOMMAND)+1;
+					cp[-1] = ' ';
+					strcpy(cp,ptr);
+                    found_Structure = true;
+                } else if (!found_Car && !XtcStricmp(ptr, CARCOMMAND)) {
+                    /* if found, store the rest of the line and the filename	*/
+                    ptr = ptr+strlen(CARCOMMAND)+1;
+                    ptr = strtok(ptr, " \t");
+                    scale = MyMalloc(strlen(CARCOMMAND)+2+strlen(ptr));
+                    strcpy(scale,CARCOMMAND);
+					char * cp = scale + strlen(CARCOMMAND)+1;
+					cp[-1] = ' ';
+					strcpy(cp,ptr);
+                    found_Car = true;
+                } else if (!found_Car && !XtcStricmp(ptr, CARPROTOCOMMAND)) {
+                    /* if found, store the rest of the line and the filename	*/
+                    scale = MyMalloc(strlen(CARPROTOCOMMAND)+3);
+                    strcpy(scale,CARPROTOCOMMAND);
+					char * cp = scale + strlen(CARPROTOCOMMAND);
+					strcpy(cp," *");
+                    found_Car = true;
+                }
+            } else {
+            	if (!found_Turnout && !found_Structure && !found_Car) {
+            		fprintf(stderr, "Nothing found in %s\n", file);
+            		found = true;
+            	}
+            }
+            if (found_Turnout || found_Structure || found_Car) found = TRUE;
+        }
+        fclose(fh);
+    }
+    return scale;
+
 }
 
 #ifdef MEMWATCH

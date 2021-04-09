@@ -116,7 +116,7 @@ struct font_info_Tag {
     float italicangle;
 };
 
-font_info *all_fonts;
+extern font_info *all_fonts;
 
 /*
  * This structure holds the information about how a font is used

@@ -47,23 +47,19 @@
 static const char rcsid[] = "@(#) : $Id$";
 
 
-#include <ctype.h>
-#include <string.h>
-
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#ifdef WINDOWS
+#include "common-ui.h"
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
-#include "utility.h"
-#include "messages.h"
+#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_SIGNAL = -1;
 
@@ -93,6 +89,7 @@ static dynArr_t signalAspect_da;
 #define signalAspect(N) DYNARR_N( signalAspect_t, signalAspect_da, N )
 
 typedef struct signalData_t {
+    extraDataBase_t base;
     coOrd orig;
     ANGLE_T angle;
     char * name;
@@ -104,7 +101,7 @@ typedef struct signalData_t {
 
 static signalData_p GetsignalData ( track_p trk )
 {
-    return (signalData_p) GetTrkExtraData(trk);
+    return GET_EXTRA_DATA( trk, T_SIGNAL, signalData_t );
 }
 
 #define BASEX 6
@@ -343,9 +340,9 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
     signalData_p xx = GetsignalData(t);
 	char *signalName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	signalName = Convert2UTF8(signalName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     rc &= fprintf(f, "SIGNAL %d %u %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), 
@@ -383,9 +380,9 @@ static BOOL_T ReadSignal ( char * line )
         return FALSE;
     }
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     DYNARR_RESET( signalAspect_p, signalAspect_da );
     while ( (cp = GetNextLine()) != NULL ) {
@@ -494,7 +491,7 @@ static char signalAspectEditScript[STR_LONG_SIZE];
 static long signalAspectEditIndex;
 
 static paramIntegerRange_t r1_3 = {1, 3};
-static wPos_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
+static wWinPix_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
 static const char * aspectListTitles[] = { N_("Name"), N_("Script") };
 static paramListData_t aspectListData = {10, 400, 2, aspectListWidths, aspectListTitles};
 
@@ -508,7 +505,7 @@ static paramData_t signalEditPLs[] = {
 #define I_SIGNALNAME (0)
     /*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(signalEditName)},
 #define I_ORIGX (1)
-    /*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Orgin X") }, 
+    /*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") }, 
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &signalEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_ANGLE (3)
@@ -794,6 +791,7 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
     case C_START:
         InfoMessage(_("Place base of signal"));
         create = FALSE;
+        SetAllTrackSelect( FALSE );
         return C_CONTINUE;
     case C_DOWN:
         SnapPos(&pos);
@@ -827,11 +825,11 @@ static POS_T sighiliteBorder;
 static wDrawColor sighiliteColor = 0;
 static void DrawSignalTrackHilite( void )
 {
-	wPos_t x, y, w, h;
+	wDrawPix_t x, y, w, h;
 	if (sighiliteColor==0)
 		sighiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	w = ((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = ((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,sighiliteOrig,&x,&y);
 	wDrawFilledRectangle( tempD.d, x, y, w, h, sighiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }

@@ -20,22 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <sys/types.h>
-#include <time.h>
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdbool.h>
-
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 #define PRINT_GAUDY		(0)
 #define PRINT_PLAIN		(1)
@@ -111,7 +102,7 @@ static void PrintClear( void );
 static void PrintMaxPageSize( void );
 static void SelectAllPages(void);
 static void DoPrintMargin(void);
-static bool PrintPageNumber( wPos_t x, wPos_t y, DIST_T width, DIST_T height );
+static bool PrintPageNumber( int x, int y, DIST_T width, DIST_T height );
 static bool PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH);
 
 static char * printFormatLabels[] = { N_("Portrait"), N_("Landscape"), NULL };
@@ -121,7 +112,7 @@ static char * printRegistrationMarksLabels[] = { N_("Registration Marks (in 1:1 
 static char * printPageNumberLabels[] = { N_("Page Numbers"), NULL };
 static char * printPhysSizeLabels[] = { N_("Ignore Page Margins"), NULL };
 static char * printGridLabels[] = { N_("Snap Grid"), NULL };
-static char * printRulerLabels[] = { N_("Rulers"), NULL };
+static char * printRulerLabels[] = { N_("Layout Edge"), N_("Every Page"), N_("None"), NULL };
 static char * printRoadbedLabels[] = { N_("Roadbed Outline"), NULL };
 static char * printCenterLineLabels[] = { N_("Centerline below Scale 1:1"), NULL };
 static paramIntegerRange_t rminScale_999 = { 1, 999, 0, PDO_NORANGECHECK_HIGH };
@@ -147,7 +138,7 @@ static paramData_t printPLs[] = {
 #define I_GRID			(11)
 /*11*/ { PD_TOGGLE, &printGrid, "grid", PDO_DLGNOLABELALIGN, printGridLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_RULER			(12)
-/*12*/ { PD_TOGGLE, &printRuler, "ruler", PDO_DLGNOLABELALIGN, printRulerLabels, NULL, BC_HORZ|BC_NOBORDER },
+/*12*/ { PD_RADIO, &printRuler, "ruler", 0, printRulerLabels, N_("Rulers:"), BC_HORZ|BC_NOBORDER },
 #define I_CENTERLINE    (13)
 /*13*/ { PD_TOGGLE, &printCenterLine, "centerLine", PDO_DLGNOLABELALIGN, printCenterLineLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_ROADBED		(14)
@@ -423,8 +414,8 @@ static void PrintGaudyBox(
 
 
 static void PrintPlainBox(
-		wPos_t x,
-		wPos_t y,
+		int x,
+		int y,
 		coOrd *corners )
 {
 	coOrd p00, p01, p10, p11;
@@ -638,9 +629,9 @@ static int pmyoff=5;
 static void PrintMarginLayout(
 		paramData_t * pd,
 		int index,
-		wPos_t colX,
-		wPos_t * w,
-		wPos_t * h )
+		wWinPix_t colX,
+		wWinPix_t * w,
+		wWinPix_t * h )
 {
 	if ( index < I_PM_FIRST || index > (I_PM_MESSAGE) )
 		return;
@@ -648,7 +639,7 @@ static void PrintMarginLayout(
 		*h = wControlGetPosY( printMarginPLs[I_PM_FIRST+2].control ) + wControlGetHeight( printMarginPLs[I_PM_FIRST+2].control );
 		return;
 	}
-	wPos_t x0, y0;
+	wWinPix_t x0, y0;
 	x0 = (aPmLines[index-I_PM_FIRST].x0+aPmLines[index-I_PM_FIRST].x1)/2;
 	y0 = (aPmLines[index-I_PM_FIRST].y0+aPmLines[index-I_PM_FIRST].y1)/2;
 	x0 -= pmxoff;
@@ -726,7 +717,7 @@ static void DoPrintMargin( void )
 		DoPrintSetup();
 	}
 	if ( printMarginWin == NULL ) {
-		wPos_t x=10, y=10;
+		int x=10, y=10;
 		printMarginWin = ParamCreateDialog( &printMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
 		if ( printMarginWin == NULL )
 			return;
@@ -801,8 +792,8 @@ static void PrintSnapShot( void )
 	scaleH = 1;
 	for (i=0;i<3;i++) {
 		size = mapD.size;
-		size.x += 0.75*scaleH;
-		size.y += 0.75*scaleH;
+		size.x += 2*0.5*scaleH;
+		size.y += 2*0.5*scaleH;
 		if (printGaudy)
 			size.y += 1.0*scaleH;
 		scaleX = size.x/pageSize.x;
@@ -813,8 +804,8 @@ static void PrintSnapShot( void )
 	scaleV = 1;
 	for (i=0;i<3;i++) {
 		size = mapD.size;
-		size.x += 0.75*scaleV;
-		size.y += 0.75*scaleV;
+		size.x += 2*0.5*scaleV;
+		size.y += 2*0.5*scaleV;
 		if (printGaudy)
 			size.y += 1.0*scaleV;
 		scaleX = size.x/pageSize.y;
@@ -837,8 +828,8 @@ static void PrintSnapShot( void )
 		currPrintGrid.orig.y = maxPageSize.x-0.5*printScale;
 		currPrintGrid.angle = 90.0;
 	} else {*/
-		currPrintGrid.orig.x = -0.5*printScale;
-		currPrintGrid.orig.y = -0.5*printScale;
+		currPrintGrid.orig.x = -0.5*printScale;  //Bigger rulers
+		currPrintGrid.orig.y = -0.5*printScale;  //Bigger rules
 		currPrintGrid.angle = 0.0;
 /*    }*/
 	currPrintGrid.size = maxPageSize;
@@ -928,7 +919,9 @@ FormatPageNumber(int x, int y)
     char *result;
 
     DynStringMalloc(&formatted, 16);
-    if (x > 0 &&  x <= bm.x1 && y > 0 && y <= bm.y1) {
+    x -= bm.x0-1;
+    y -= bm.y0-1;
+    if (x > 0 &&  x <= bm.x1-bm.x0 && y > 0 && y <= bm.y1-bm.y0) {
         DynStringPrintf(&formatted, "(%d/%d)", x, y);
     } else {
         DynStringCatCStr(&formatted, "(-/-)");
@@ -951,7 +944,7 @@ FormatPageNumber(int x, int y)
  */
 
 static bool
-PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
+PrintPageNumber(int x, int y, DIST_T width, DIST_T height)
 {
     coOrd printPosition;
     coOrd textSize;
@@ -960,23 +953,25 @@ PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
     wFont_p fp = wStandardFont(F_HELV, TRUE, FALSE);
     wFontSize_t fs = 64.0;
 
-    positionText = FormatPageNumber(x + 1, y + 1);
+    positionText = FormatPageNumber(x, y);
 
-    // even though we're printing into page_d, mainD must be used here
-    DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
+    if (strcmp(positionText,"(-/-)") != 0) {
+		// even though we're printing into page_d, mainD must be used here
+		DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
 
-	if (printFormat == PORTRAIT) {
-		printPosition.x = (width - textSize.x) / 2;
-		printPosition.y = (height - textSize.y) / 2;
-	} else {
-		printPosition.x = (height - textSize.x) / 2;
-		printPosition.y = (width - textSize.y) / 2;
-	}
+		if (printFormat == PORTRAIT) {
+			printPosition.x = (width - textSize.x) / 2;
+			printPosition.y = (height - textSize.y) / 2;
+		} else {
+			printPosition.x = (height - textSize.x) / 2;
+			printPosition.y = (width - textSize.y) / 2;
+		}
 
-	page_d.funcs->options |= wDrawOutlineFont;
-    DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
-               wDrawColorGray(70));
-	page_d.funcs->options &= ~wDrawOutlineFont;
+		page_d.funcs->options |= wDrawOutlineFont;
+		DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
+				   wDrawColorGray(70));
+		page_d.funcs->options &= ~wDrawOutlineFont;
+    }
 
     free(positionText);
 
@@ -999,7 +994,9 @@ PrintNextPageNumberAt(int x, int y, coOrd position)
     wFontSize_t fs = 8.0;
 
     pageNumber = FormatPageNumber(x, y);
-    DrawString(&page_d, position, 0.0, pageNumber, fp, fs, wDrawColorBlack);
+    //Suppress garbage page numbers
+    if (strcmp(pageNumber,"(-/-)") != 0)
+    	DrawString(&page_d, position, 0.0, pageNumber, fp, fs, wDrawColorBlack);
     free(pageNumber);
 }
 
@@ -1027,7 +1024,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 		p00.x = pageH / 2.0 - 20.0 / 72.0;
 		p00.y = pageW - 10.0 / 72.0;
 	}
-    PrintNextPageNumberAt(x + 1, y + 2, p00);
+    PrintNextPageNumberAt(x, y + 1, p00);
 
     // below
 	if (printFormat == PORTRAIT) {
@@ -1035,7 +1032,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 	} else {
 		p00.y = 10.0 / 72.0;
 	}
-    PrintNextPageNumberAt(x + 1, y, p00);
+    PrintNextPageNumberAt(x, y-1, p00);
 
     // right
 	if (printFormat == PORTRAIT) {
@@ -1045,7 +1042,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 		p00.y = pageW / 2 + 10.0 / 72.0;
 		p00.x = pageH - 20.0 / 72.0;
 	}
-    PrintNextPageNumberAt(x + 2, y + 1, p00);
+    PrintNextPageNumberAt(x+1, y, p00);
 
 	// left
 	if (printFormat == PORTRAIT) {
@@ -1053,7 +1050,7 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
 	} else {
 		p00.x = 10.0 / 72.0;
 	}
-	PrintNextPageNumberAt(x, y + 1, p00);
+	PrintNextPageNumberAt(x-1, y, p00);
     return (TRUE);
 }
 
@@ -1149,22 +1146,31 @@ static BOOL_T PrintPage(
 					}
 				}
 				if (printRotate) {
-					wPrintClip( (wPos_t)(clipOrig.y*print_d.dpi), (wPos_t)(clipOrig.x*print_d.dpi),
-							(wPos_t)(clipSize.y*print_d.dpi), (wPos_t)(clipSize.x*print_d.dpi) );
+					wPrintClip( (clipOrig.y*print_d.dpi), (clipOrig.x*print_d.dpi),
+							(clipSize.y*print_d.dpi), (clipSize.x*print_d.dpi) );
 				} else {
-					wPrintClip( (wPos_t)(clipOrig.x*print_d.dpi), (wPos_t)(clipOrig.y*print_d.dpi),
-							(wPos_t)(clipSize.x*print_d.dpi), (wPos_t)(clipSize.y*print_d.dpi) );
+					wPrintClip( (clipOrig.x*print_d.dpi), (clipOrig.y*print_d.dpi),
+							(clipSize.x*print_d.dpi), (clipSize.y*print_d.dpi) );
 				}
 				p[0].x = p[3].x = 0.0;
 				p[1].x = p[2].x = roomSize.x;
 				p[0].y = p[1].y = 0.0;
 				p[2].y = p[3].y = roomSize.y;
 				
-				DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, FALSE, wDrawColorBlack );
-				DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, TRUE, wDrawColorBlack );
-				DrawRuler( &print_d, p[1], p[2], 0.0, FALSE, FALSE, wDrawColorBlack );
-				DrawRuler( &print_d, p[3], p[2], 0.0, FALSE, TRUE, wDrawColorBlack );
-				if ( printRuler && currPrintGrid.angle == 0 ) {
+				BOOL_T left_clear = FALSE, right_clear = FALSE, base_clear = FALSE, top_clear = FALSE;
+
+				if (currPrintGrid.orig.x <= -0.5*printScale) left_clear = TRUE;
+				if (currPrintGrid.orig.y <= -0.5*printScale) base_clear = TRUE;
+				if (clipOrig.x + clipSize.x > roomSize.x + 0.5*printScale) right_clear = TRUE;
+				if (clipOrig.y + clipSize.y > roomSize.y + 0.5*printScale) top_clear = TRUE;
+
+				if (printRuler != 2) {    /* Not None so Edge or Every */
+					DrawRuler( &print_d, p[0], p[1], 0.0, TRUE, !base_clear, wDrawColorBlack );
+					DrawRuler( &print_d, p[0], p[3], 0.0, TRUE, left_clear, wDrawColorBlack );
+					DrawRuler( &print_d, p[1], p[2], 0.0, TRUE, right_clear, wDrawColorBlack );
+					DrawRuler( &print_d, p[3], p[2], 0.0, TRUE, !top_clear, wDrawColorBlack );
+				}
+				if ( printRuler==1 && currPrintGrid.angle == 0 ) {  /* Every Page and not rotated origin */
 					if ( !printRotate ) {
 						p[2] = p[3] = print_d.orig;
 						p[3].x += print_d.size.x;
@@ -1181,40 +1187,40 @@ static BOOL_T PrintPage(
 						p[3].y = print_d.orig.y;
 					}
 					if ( p[2].x > 0 )
-						minP.x = p[2].x + 0.4 * print_d.scale;
+						minP.x = p[2].x + 0.5 * print_d.scale;
 					else
 						minP.x = 0.0;
 					if ( p[3].x < roomSize.x )
-						maxP.x = p[3].x - 0.2 * print_d.scale;
+						maxP.x = p[3].x - 0.5 * print_d.scale;
 					else
 						maxP.x = roomSize.x;
-					if ( p[2].y > 0 )
-						minP.y = p[2].y + 0.4 * print_d.scale;
+					if ( p[2].y > 0  )
+						minP.y = p[2].y + 0.5 * print_d.scale;
 					else
 						minP.y = 0.0;
 					if ( p[3].y < roomSize.y )
-						maxP.y = p[3].y - 0.2 * print_d.scale;
+						maxP.y = p[3].y - 0.5 * print_d.scale;
 					else
 						maxP.y = roomSize.y;
 					p[0].y = 0.0;
 					p[1].y = maxP.y - minP.y;
-					if ( p[2].x > 0 ) {
-						p[0].x = p[1].x = p[2].x + 0.4 * print_d.scale;
+					if ( p[2].x > 0.5* print_d.scale ) {
+						p[0].x = p[1].x = p[2].x + 0.5* print_d.scale;
 						DrawRuler( &print_d, p[0], p[1], minP.y, TRUE, TRUE, wDrawColorBlack );
 					}
-					if ( p[3].x < roomSize.x ) {
-						p[0].x = p[1].x = p[3].x - 0.2 * print_d.scale;
-						DrawRuler( &print_d, p[0], p[1], minP.y, FALSE, FALSE, wDrawColorBlack );
+					if ( p[3].x < roomSize.x - 0.5 * print_d.scale ) {
+						p[0].x = p[1].x = p[3].x - 0.5 * print_d.scale;
+						DrawRuler( &print_d, p[0], p[1], minP.y, TRUE, FALSE, wDrawColorBlack );
 					}
 					p[0].x = 0;
 					p[1].x = maxP.x - minP.x;
-					if ( p[2].y > 0 ) {
-						p[0].y = p[1].y = p[2].y + 0.4 * print_d.scale;
+					if ( p[2].y > 0.5 * print_d.scale ) {
+						p[0].y = p[1].y = p[2].y + 0.5 * print_d.scale;
 						DrawRuler( &print_d, p[0], p[1], minP.x, TRUE, FALSE, wDrawColorBlack );
 					}
-					if ( p[3].y < roomSize.y ) {
-						p[0].y = p[1].y = p[3].y - 0.2 * print_d.scale;
-						DrawRuler( &print_d, p[0], p[1], minP.x, FALSE, TRUE, wDrawColorBlack );
+					if ( p[3].y < roomSize.y  - 0.5 * print_d.scale) {
+						p[0].y = p[1].y = p[3].y - 0.5 * print_d.scale;
+						DrawRuler( &print_d, p[0], p[1], minP.x, TRUE, TRUE, wDrawColorBlack );
 					}
 				}
 

@@ -45,7 +45,7 @@ struct wMessage_t {
     WOBJ_COMMON
     GtkWidget * labelWidget;
     const char * message;
-    wPos_t labelWidth;
+    wWinPix_t labelWidth;
 };
 
 /**
@@ -77,7 +77,7 @@ void wMessageSetValue(
 
 void wMessageSetWidth(
     wMessage_p b,
-    wPos_t width)
+    wWinPix_t width)
 {
     b->labelWidth = width;
     gtk_widget_set_size_request(b->widget, width, -1);
@@ -91,7 +91,7 @@ void wMessageSetWidth(
  */
 static int fonts_set = 0;
 
-wPos_t wMessageGetHeight(
+wWinPix_t wMessageGetHeight(
     long flags)
 {
     GtkWidget * temp;
@@ -100,6 +100,31 @@ wPos_t wMessageGetHeight(
 		temp = gtk_label_new("Test");	 //To get size of text itself
     } else {
         temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
+    }
+
+    if (wMessageSetFont(flags))	{
+        GtkStyle *style;
+        PangoFontDescription *fontDesc;
+        int fontSize;
+        /* get the current font descriptor */
+        style = gtk_widget_get_style(temp);
+        fontDesc = style->font_desc;
+        /* get the current font size */
+        fontSize = PANGO_PIXELS(pango_font_description_get_size(fontDesc));
+
+        /* calculate the new font size */
+        if (flags & BM_LARGE) {
+            pango_font_description_set_size(fontDesc, fontSize * 1.4 * PANGO_SCALE);
+        } else {
+            pango_font_description_set_size(fontDesc, fontSize * 0.7 * PANGO_SCALE);
+        }
+
+        /* set the new font size */
+        gtk_widget_modify_font(temp, fontDesc);
+    }
+
+    if (flags&1L) {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
     }
 
 	if (wMessageSetFont(flags))	{
@@ -163,11 +188,10 @@ wPos_t wMessageGetHeight(
 
 wMessage_p wMessageCreateEx(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
-	const char * helpStr,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* labelStr,
-    wPos_t	width,
+    wWinPix_t	width,
     const char	*message,
     long flags)
 {
@@ -256,7 +280,7 @@ wMessage_p wMessageCreateEx(
  * \return expected width of message box
  */
 
-wPos_t
+wWinPix_t
 wMessageGetWidth(const char *testString)
 {
     GtkWidget *entry;

@@ -19,17 +19,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <math.h>
 
 #include "cstraigh.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "layout.h"
+#include "common-ui.h"
 
 /*
  * STATE INFO
@@ -75,6 +73,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.ep=-1;
 		Dl.down = FALSE;
 		InfoMessage( _("Place 1st endpoint of straight track, snap to unconnected endpoint") );
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -113,6 +112,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	case C_MOVE:
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		found = FALSE;
 		if (!Dl.down) {
 			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				p = pos;
@@ -120,11 +120,17 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					   if (ep != -1) {
-						   if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale()))
+						   if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 							   CreateEndAnchor(GetTrkEndPos(t,ep),FALSE);
+							   found = TRUE;
+						   }
 					   }
 					}
 				}
+			}
+			if (!found && SnapPos( &pos )) {
+				CreateEndAnchor(pos,FALSE);
+				found = TRUE;
 			}
 			return C_CONTINUE;
 		}
@@ -135,7 +141,10 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			if (angle2 > 90.0 && angle2 < 270.0)
 				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ) );
 			else pos = Dl.pos0;	
-		} else 	SnapPos( &pos );
+		} else if (SnapPos( &pos )) {
+			 CreateEndAnchor(pos,FALSE);
+			 found = TRUE;
+		}
 		
 		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),
 				FormatDistance(FindDistance( Dl.pos0, pos )),

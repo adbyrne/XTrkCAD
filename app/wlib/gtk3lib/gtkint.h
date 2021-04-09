@@ -32,13 +32,25 @@
 #define strcasecmp _stricmp
 #endif
 
+#ifndef MISC_H
 #include "dynarr.h"
+#endif
 
 #define BORDERSIZE	(4)
 #define LABEL_OFFSET	(3)
 #define MENUH	(24)
 
 extern wWin_p gtkMainW;
+
+#ifdef CURSOR_SURFACE
+typedef struct {
+		cairo_surface_t* surface;
+		wWinPix_t width;
+		wWinPix_t height;
+		wBool_t show;
+} wCursorSurface_t, * wSurface_p;
+#endif
+
 
 typedef enum {
 		W_MAIN, W_POPUP,
@@ -57,11 +69,11 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		wControl_p next; \
 		wControl_p synonym; \
 		wWin_p parent; \
-		wPos_t origX, origY; \
-		wPos_t realX, realY; \
-		wPos_t default_size_x, default_size_y; \
-		wPos_t labelW; \
-		wPos_t w, h; \
+		wWinPix_t origX, origY; \
+		wWinPix_t realX, realY; \
+		wWinPix_t default_size_x, default_size_y; \
+		wWinPix_t labelW; \
+		wWinPix_t w, h; \
 		int maximize_initially; \
 		long option; \
 		const char * labelStr; \
@@ -71,6 +83,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		doneProcCallback_p doneProc; \
 		cairo_t * cr; \
 		void * data; \
+		wBool_t outline; \
         int fromTemplate;               /**< widget was build from ui template */ \
         int useGrid;                    /**< widget still uses a fixed layout */ \
         GtkBox * box;                   /**< box with label and widget */ \
@@ -87,7 +100,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 struct wWin_t {
 		WOBJ_COMMON
 		GtkWidget *gtkwin;             /**< GTK window */
-		wPos_t lastX, lastY;
+		wWinPix_t lastX, lastY;
 		wControl_p first, last;
 		wWinCallBack_p winProc;        /**< window procedure */
 		wBool_t shown;                 /**< visibility state */
@@ -98,6 +111,8 @@ struct wWin_t {
 		wBool_t busy;
 		int resizeTimer;		       /** resizing **/
 		int resizeW,resizeH;
+		int timer_idle_count;
+		int timer_busy_count;
 		int modalLevel;
         GtkBuilder *builder;
         GtkWidget *grid;
@@ -117,12 +132,12 @@ struct wList_t {
 		int count;
 		int number;
 		int colCnt;
-		wPos_t *colWidths;
+		wWinPix_t *colWidths;
 		wBool_t *colRightJust;
 		GtkListStore *listStore;
 		GtkWidget  *treeView;
 		int last;
-		wPos_t listX;
+		wWinPix_t listX;
 		long * valueP;
 		wListCallBack_p action;
 		int recursion;
@@ -144,8 +159,8 @@ struct wListItem_t {
 #define gtkIcon_pixmap (2)
 struct wIcon_t {
 		int gtkIconType;
-		wPos_t w;
-		wPos_t h;
+		wWinPix_t w;
+		wWinPix_t h;
 		wDrawColor color;
 		const void * bits;
 		};
@@ -157,11 +172,14 @@ extern wDrawColor wDrawColorBlack;
 
 
 /* boxes.c */
-void wlibDrawBox(wWin_p win, wBoxType_e style, wPos_t x, wPos_t y, wPos_t w, wPos_t h);
+void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y, wWinPix_t w, wWinPix_t h);
 
 /* button.c */
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wButton_p bb);
+wButton_p wButtonCreateForToolbar(wWin_p w, wWinPix_t x, wWinPix_t y,
+		const char * helpStr, const char * labelStr,
+        long option, wWinPix_t width, wButtonCallBack_p action, void * data);
 
 struct wButton_t {
     WOBJ_COMMON
@@ -170,22 +188,17 @@ struct wButton_t {
     wButtonCallBack_p action;
     int busy;
     int recursion;
+    long timer_id;
+    int timer_count;
+    int timer_state;
 };
 
 /* color.c */
-typedef struct {
-    unsigned char red;
-    unsigned char green;
-    unsigned char blue;
-    GdkColor normalColor;
-    GdkColor invertColor;
-    long rgb;
-    int colorChar;
-} colorMap_t;
 
-wDrawColor wlibGetColor(wDrawColor color, wBool_t normal);
+GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal);
 
 /* control.c */
+wBool_t wControlExpose (GtkWidget * widget, GdkEventExpose * event, wControl_p b);
 
 /* droplist.c */
 enum columns {
@@ -201,12 +214,12 @@ void *wDropListGetItemContext(wList_p b, wIndex_t inx);
 void wDropListAddValue(wList_p b, char *text, wListItem_p data);
 void wDropListSetIndex(wList_p b, int val);
 wBool_t wDropListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
-wList_p wDropListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);
+wList_p wDropListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, long number, wWinPix_t width, long *valueP, wListCallBack_p action, void *data);
 
 /* filesel.c */
 
 /* font.c */
-PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, int *width_p, int *height_p, int *ascent_p, int *descent_p, int *baseline_p);
+PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, wDrawPix_t *width_p, wDrawPix_t *height_p, wDrawPix_t *ascent_p, wDrawPix_t *descent_p, wDrawPix_t *baseline_p);
 void wlibFontDestroyPangoLayout(PangoLayout *layout);
 const char *wlibFontTranslate(wFont_p fp);
 
@@ -244,11 +257,11 @@ typedef struct accelData_t {
 
 GdkPixbuf* wlibPixbufFromXBM(wIcon_p ip);
 int wlibAddLabel(wControl_p b, const char *labelStr);
-void *wlibAlloc(wWin_p parent, wType_e type, wPos_t origX, wPos_t origY, const char *labelStr, int size, void *data);
+void *wlibAlloc(wWin_p parent, wType_e type, wWinPix_t origX, wWinPix_t origY, const char *labelStr, int size, void *data);
 void wlibComputePos(wControl_p b);
 void wlibControlGetSize(wControl_p b);
 void wlibAddButton(wControl_p b);
-wControl_p wlibGetControlFromPos(wWin_p win, wPos_t x, wPos_t y);
+wControl_p wlibGetControlFromPos(wWin_p win, wWinPix_t x, wWinPix_t y);
 char *wlibConvertInput(const char *inString);
 char *wlibConvertOutput(const char *inString);
 struct accelData_t *wlibFindAccelKey(GdkEventKey *event);
@@ -282,14 +295,14 @@ struct wDraw_t {
 		//GdkGC * gc;
 		wDrawWidth lineWidth;
 		wDrawOpts opts;
-		wPos_t maxW;
-		wPos_t maxH;
+		wWinPix_t maxW;
+		wWinPix_t maxH;
 		unsigned long lastColor;
 		wBool_t lastColorInverted;
 		const char * helpStr;
 
-		wPos_t lastX;
-		wPos_t lastY;
+		wWinPix_t lastX;
+		wWinPix_t lastY;
 
 		wBool_t delayUpdate;
 		cairo_t *printContext;
@@ -297,17 +310,16 @@ struct wDraw_t {
 		GdkPixbuf * background;
 
 		wBool_t bTempMode;
-
 		};
 
 void WlibApplySettings(GtkPrintOperation *op);
 void WlibSaveSettings(GtkPrintOperation *op);
-void psPrintLine(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
-void psPrintArc(wPos_t x0, wPos_t y0, wPos_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
-void psPrintFillRectangle(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawColor color, wDrawOpts opts);
-void psPrintFillPolygon(wPos_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
-void psPrintFillCircle(wPos_t x0, wPos_t y0, wPos_t r, wDrawColor color, wDrawOpts opts);
-void psPrintString(wPos_t x, wPos_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
+void psPrintLine(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintArc(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintFillRectangle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawColor color, wDrawOpts opts);
+void psPrintFillPolygon(wDrawPix_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
+void psPrintFillCircle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, wDrawColor color, wDrawOpts opts);
+void psPrintString(wDrawPix_t x, wDrawPix_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
 static void WlibGetPaperSize(void);
 
 /* single.c */
@@ -340,7 +352,7 @@ void *wTreeViewGetItemContext(wList_p b, int row);
 /* window.c */
 void wlibDoModal(wWin_p win0, wBool_t modal);
 wBool_t catch_shift_ctrl_alt_keys(GtkWidget *widget, GdkEventKey *event, void *data);
-wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wPos_t x, wPos_t y,
+wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wWinPix_t x, wWinPix_t y,
     const char * labelStr, const char * nameStr, long option,
     wWinCallBack_p winProc, void * data);
 

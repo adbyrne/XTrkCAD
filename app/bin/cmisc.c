@@ -20,18 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdint.h>
-#include <string.h>
-
 #include "common.h"
-#include "utility.h"
 #include "cundo.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "fileio.h"
 #include "cselect.h"
 #include "track.h"
+#include "common-ui.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
@@ -55,9 +50,9 @@ static POS_T descBorder;
 static wDrawColor descColor = 0;
 static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
-static wPos_t describeW_posy;
+static wWinPix_t describeW_posy;
 static int describe_row;
-static wPos_t describeCmdButtonEnd;
+static wWinPix_t describeCmdButtonEnd;
 
 static wMenu_p descPopupM;
 
@@ -209,7 +204,7 @@ SearchEditableLayerList(unsigned int layer)
 
 static void DrawDescHilite(BOOL_T selected)
 {
-    wPos_t x, y, w, h;
+    wDrawPix_t x, y, w, h;
 
     if (descNeedDrawHilite == FALSE) {
         return;
@@ -219,8 +214,8 @@ static void DrawDescHilite(BOOL_T selected)
         descColor = wDrawColorGray(87);
     }
 
-    w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
-    h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
+    w = (wDrawPix_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
+    h = (wDrawPix_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
     mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
     wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
 }
@@ -360,7 +355,7 @@ static int GetDescTypeOption(descType type) {
 }
 
 static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
-                               wPos_t sep)
+                               wWinPix_t sep)
 {
 
     int inx;

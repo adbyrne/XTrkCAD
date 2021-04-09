@@ -46,7 +46,7 @@ struct wBitmap_t {
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, char * helpStr, long options, wIcon_p iconP )
 {
 	wBitmap_p bt;
 	GdkPixbuf *pixbuf;
@@ -93,7 +93,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
  * \returns icon handle
  */
 
-wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor color )
+wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawColor color )
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );

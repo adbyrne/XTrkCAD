@@ -116,18 +116,18 @@ wDropListClear(wList_p b)
 void *wDropListGetItemContext(wList_p b, wIndex_t inx)
 {
     GtkTreeIter iter;
-    wListItem_p data = NULL;
+    wListItem_p addData;
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
                                       inx)) {
         gtk_tree_model_get(GTK_TREE_MODEL(b->listStore),
                            &iter,
-                           LISTCOL_DATA, (void *)&data,
+                           LISTCOL_DATA, (void *)&addData,
                            -1);
     }
 
-    if (data) {
-        return (data->itemData);
+    if (addData) {
+        return (addData->itemData);
     } else {
         return (NULL);
     }
@@ -283,8 +283,8 @@ static int DropListSelectChild(
     GtkTreeIter iter;
 
     wIndex_t inx = 0;
-    gchar *string;
-    wListItem_p addData;
+    gchar *string = NULL;
+    wListItem_p addData = NULL;
 
     if (bl->recursion) {
         return 0;
@@ -305,19 +305,30 @@ static int DropListSelectChild(
                  &iter);
         inx = atoi(string);
         g_free(string);
+        string = NULL;
 
         /* Obtain string from model. */
         gtk_tree_model_get(model, &iter,
                            LISTCOL_TEXT, &string,
                            LISTCOL_DATA, (void *)&addData,
                            -1);
+        bl->editted = FALSE;
 
     } else {
+	/* Nothing selected, user is entering text directly */
+        inx = -1;
+        GtkEntry * entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget)));
+	if ( entry == NULL )
+            return 0;
+        const char * string1 = gtk_entry_get_text(entry);
+	if ( string1 == NULL )
         return 0;
+        string = g_strdup(string1);
+        bl->editted = TRUE;
     }
 
     /* selection changed, store new selections and call back */
-    if (bl->last != inx) {
+    if (bl->last != inx || bl->editted == TRUE) {
 
         bl->last = inx;
 
@@ -331,7 +342,8 @@ static int DropListSelectChild(
         }
     }
 
-    g_free(string);
+    if ( string )
+        g_free(string);
     return 1;
 }
 
@@ -376,13 +388,13 @@ wlibNewDropList(GtkListStore *ls, int editable)
 
 wList_p wDropListCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
     long	number,
-    wPos_t	width,
+    wWinPix_t	width,
     long	*valueP,
     wListCallBack_p action,
     void 	*data)

@@ -31,7 +31,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <assert.h>
-#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
 
@@ -185,7 +184,7 @@ static LRESULT menuPush(
 				((wMenuRadio_p)m)->action(((wMenuRadio_p)m)->data);
 			break;
 		}
-		return 0L;
+		return (LRESULT)0;
 	}
 	if ( (m->parentMenu)->traceFunc ) {
 		(m->parentMenu)->traceFunc( m->parentMenu, m->labelStr, ((wMenu_p)m->parentMenu)->traceData );
@@ -958,8 +957,8 @@ void wMenuToggleEnable(
 
 void mswMenuMove(
 		wMenu_p m,
-		wPos_t x,
-		wPos_t y )
+		wWinPix_t x,
+		wWinPix_t y )
 {
 	wControl_p b;
 	b = (wControl_p)m->parent;
@@ -985,8 +984,8 @@ static void pushMenuButt(
 
 wMenu_p wMenuCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option )

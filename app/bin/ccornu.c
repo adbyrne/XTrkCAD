@@ -79,18 +79,13 @@
 #include "cstraigh.h"
 #include "drawgeom.h"
 #include "cjoin.h"
-#include "i18n.h"
 #include "common.h"
-#include "utility.h"
-#include "math.h"
 #include "param.h"
 #include "layout.h"
 #include "cundo.h"
-#include "messages.h"
 #include "cselect.h"
 #include "fileio.h"
-
-#include <stdint.h>
+#include "common-ui.h"
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;
@@ -253,7 +248,7 @@ EXPORT void AddHotBarCornu( void )
 	hotB.txt.u.t.boxed = TRUE;
 	hotB.txt.u.t.string = MyStrdup(_(" FLEX "));
 	hotB.txt.u.t.fontP = NULL;
-	hotB.txt.u.t.fontSize = 160.0*ratio;
+	hotB.txt.u.t.fontSize = 160*mainD.dpi/72.0*ratio;
 	hotB.txt.u.t.angle = 0.0;
 
 	char * label = MyMalloc(256);
@@ -358,7 +353,7 @@ int createEndPoint(
 			Rotate(&cm,endHandle->end_curve,-a );
 			endHandle->mid_disp = cm.x-endHandle->end_curve.x;
 			curveData_t curveData;
-			PlotCurve(crvCmdFromCenter,pos0,endHandle->end_center, endHandle->end_curve, &curveData, FALSE);
+			PlotCurve(crvCmdFromCenter,pos0,endHandle->end_center, endHandle->end_curve, &curveData, FALSE, 0.0);
 			if (curveData.type == curveTypeStraight) {
 				coOrd pos_line[2];
 				Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)+90,trackGauge/2);
@@ -991,9 +986,6 @@ track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2]) {
 }
 
 
-struct extraData {
-				cornuData_t cornuData;
-		};
 
 ANGLE_T GetOpenAngle(coOrd pos[2],ANGLE_T angle[2],int moved) {
 	ANGLE_T a = FindAngle(pos[1-moved],pos[moved]);
@@ -1374,7 +1366,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 				if (((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {   //Extend end locked
 					SetUpCornuParms(&cp);
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
-					struct extraData *xx = GetTrkExtraData(Da.selectTrack);
 					if (Da.radius[sel] == 0)  {                //Straight
 						  Da.extendSeg[sel].type = SEG_STRTRK;
 						  Da.extendSeg[sel].width = 0;
@@ -1830,7 +1821,6 @@ static void cornuModDlgUpdate(
  *
  */
 STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG ) {
-	struct extraData *xx = GetTrkExtraData(trk);
 
 	Da.trackGauge = trackG;
 
@@ -1875,11 +1865,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			else Da.ep[0] = -1;
 		}
 		if (prior) {
-			struct extraData *xx0 = GetTrkExtraData(prior);
-			Da.pos[0] = xx0->cornuData.pos[ep0];              //Copy parms from FIRST CORNU trk
-			Da.radius[0] = xx0->cornuData.r[ep0];
-			Da.angle[0] = xx0->cornuData.a[ep0];
-			Da.center[0] = xx0->cornuData.c[ep0];
+			struct extraDataCornu_t *xx0 = GET_EXTRA_DATA(prior, T_CORNU, extraDataCornu_t);
+			Da.pos[0] = xx0->pos[ep0];              //Copy parms from FIRST CORNU trk
+			Da.radius[0] = xx0->r[ep0];
+			Da.angle[0] = xx0->a[ep0];
+			Da.center[0] = xx0->c[ep0];
 		}
 
 		//Move to RHS
@@ -1901,11 +1891,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		}
 
 		if (next) {
-			struct extraData *xx1 = GetTrkExtraData(next);
-			Da.pos[1] = xx1->cornuData.pos[ep1];              //Copy parms from LAST CORNU trk
-			Da.radius[1] = xx1->cornuData.r[ep1];
-			Da.angle[1] = xx1->cornuData.a[ep1];
-			Da.center[1] = xx1->cornuData.c[ep1];
+			struct extraDataCornu_t *xx1 = GET_EXTRA_DATA(next, T_CORNU, extraDataCornu_t);
+			Da.pos[1] = xx1->pos[ep1];              //Copy parms from LAST CORNU trk
+			Da.radius[1] = xx1->r[ep1];
+			Da.angle[1] = xx1->a[ep1];
+			Da.center[1] = xx1->c[ep1];
 		}
 
 		InfoMessage(_("Now Select or Add (+Shift) a Point"));
@@ -2144,7 +2134,7 @@ DIST_T CornuOffsetLength(dynArr_t segs, double offset) {
 }
 
 DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
-	DIST_T r = 100000.0, rr;
+	DIST_T r = DIST_INF, rr;
 	if (segs.cnt == 0 ) return r;
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
@@ -2152,7 +2142,7 @@ DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
 			rr = fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rr = CornuMinRadius(t.u.b.pos, t.bezSegs);
-		} else rr = 100000.00;
+		} else rr = DIST_INF;
 		if (rr<r) r = rr;
 	}
 	return r;
@@ -2212,6 +2202,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	track_p t = NULL;
 	cornuParm_t cp;
 
+	static BOOL_T lock;
+
 	Da.commandType = CORNU_CREATE;
 
 	Da.width = (double)lineWidth/mainD.dpi;
@@ -2222,6 +2214,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	switch (action&0xFF) {
 
 	case C_START:
+		lock = FALSE;
 		Da.cmdType = (long)commandContext;
 		Da.state = NONE;
 		Da.selectEndPoint = -1;
@@ -2302,7 +2295,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.angle[end] = GetTrkEndAngle(t,ep);
 			} else if (t == NULL) {      //end not on Track, OK for CreateCornu -> empty end point
 				pos = p;	//Reset to initial
-				SnapPos( &pos );
+				if (lock) SnapPos( &pos );  //Only snap if snapped in move
 				if (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) {
 					Da.trk[end] = NULL;
 					Da.pos[end] = pos;
@@ -2389,6 +2382,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case wActionMove:
+		lock = FALSE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != NONE && Da.state != LOC_2) return C_CONTINUE;
 		if (Da.trk[0] && Da.trk[1]) return C_CONTINUE;
@@ -2425,6 +2419,9 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateCornuEndAnchor(pos,TRUE);
 			} else CreateCornuEndAnchor(pos,TRUE);
+		} else if (SnapPos(&pos)) {
+			CreateCornuEndAnchor(pos,FALSE);
+			lock = TRUE;
 		}
 
 		return C_CONTINUE;
@@ -2546,11 +2543,14 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.pos[i] = zero;
 				Da.endHandle[i].end_valid = FALSE;
 			}
+			SetAllTrackSelect( FALSE );
     	}
     	return rc;
 
 	case C_REDRAW:
 		wSetCursor(mainD.d,defaultCursor);
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if ( Da.state != NONE ) {
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,
 					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
@@ -2579,6 +2579,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			}
 			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		}
+		SetAllTrackSelect( FALSE );
 		Da.state = NONE;
 		if (infoSubst) {
 			InfoSubstituteControls( NULL, NULL, NULL );
@@ -2596,12 +2597,12 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 	track_p trk_old = NULL;
 	newTracks[0] = NULL, newTracks[1] = NULL;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	if (!IsTrack(trk)) return FALSE;
-	for (int i=0; i<xx->cornuData.arcSegs.cnt;i++) {
+	for (int i=0; i<xx->arcSegs.cnt;i++) {
 		track_p bezTrack[2];
 		bezTrack[0] = NULL, bezTrack[1] = NULL;
-		trkSeg_p seg = &DYNARR_N(trkSeg_t,xx->cornuData.arcSegs,i);
+		trkSeg_p seg = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		if (seg->type == SEG_BEZTRK) {
 			DYNARR_RESET(trkSeg_t,seg->bezSegs);
 			FixUpBezierSeg(seg->u.b.pos,seg,TRUE);

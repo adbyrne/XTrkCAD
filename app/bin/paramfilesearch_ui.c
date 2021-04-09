@@ -20,26 +20,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "custom.h"
 #include "dynstring.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "include/partcatalog.h"
 #include "paths.h"
 #include "include/paramfilelist.h"
+#include "include/paramfile.h"
 #include "fileio.h"
 #include "directory.h"
-#include "wlib.h"
+#include "misc2.h"
+#include "layout.h"
 
 static ParameterLib *trackLibrary;			/**< Track Library          */
-static Catalog *currentCat;					/**< catalog being shown    */
+static Catalog currentCat;					/**< catalog being shown    */
 
 /* define the search / browse dialog */
 
@@ -50,10 +44,14 @@ static void SearchUiDoSearch(void *junk);
 static void SearchUiClearFilter(void *ptr);
 
 static long searchUiMode = 0;
+static long searchFitMode = 0;
 static paramListData_t searchUiListData = { 10, 370, 0 };
 #define MAXQUERYLENGTH 250
 static char searchUiQuery[MAXQUERYLENGTH];
 static char * searchUiLabels[] = { N_("Show File Names"), NULL };
+// Note these are defined in the same order as FIT_ANY, FIT_COMPATIBLE, FIT_EXACT
+static char * searchFitLabels[] = { N_("Fit Any"), N_("Fit Compatible"), N_("Fit Exact"), NULL};
+
 
 #define QUERYPROMPTSTRING "Enter at least one search word"
 
@@ -64,17 +62,19 @@ static paramData_t searchUiPLs[] = {
     { PD_BUTTON, (void*)SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
 #define I_CLEARBUTTON (2)
     { PD_BUTTON, (void*)SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
-#define I_MESSAGE (3)
+#define I_FITRADIO	(3)
+    {	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
+#define I_MESSAGE (4)
     { PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, (void *)370 },
-#define I_STATISTICS (4)
+#define I_STATISTICS (5)
     { PD_MESSAGE, "", NULL, PDO_DLGBOXEND, (void *)370 },
-#define I_RESULTLIST	(5)
+#define I_RESULTLIST	(6)
     {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
-#define I_MODETOGGLE	(6)
+#define I_MODETOGGLE	(7)
     {	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_APPLYBUTTON	(7)
+#define I_APPLYBUTTON	(8)
     {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
-#define I_SELECTALLBUTTON (8)
+#define I_SELECTALLBUTTON (9)
     {	PD_BUTTON, (void*)SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 };
 
@@ -86,12 +86,27 @@ static paramData_t searchUiPLs[] = {
 #define MESSAGETEXT ((wMessage_p)searchUiPLs[I_MESSAGE].control)
 #define QUERYSTRING ((wString_p)searchUiPLs[I_QUERYSTRING].control)
 #define SEARCHSTAT ((wMessage_p)searchUiPLs[I_STATISTICS].control)
+#define FITRADIO ((wChoice_p)searchUiPLs[I_FITRADIO].control)
 
 static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
 static wWin_p searchUiW;
 
 #define FILESECTION "file"
 #define PARAMDIRECTORY "paramdir"
+
+
+/** 
+ * Clears the current catalog 
+ */
+  
+void
+ClearCurrentCatalog(void)
+{
+	if (currentCat.head) {
+		DestroyCatalog(&currentCat);
+		currentCat.head = NULL;
+	}
+}
 
 /**
  * Reload the listbox showing the current catalog. The catalog is either the system
@@ -101,7 +116,7 @@ static wWin_p searchUiW;
  */
 
 static
-void SearchFileListLoad(Catalog *catalog)
+int SearchFileListLoad(Catalog *catalog)
 
 {
     CatalogEntry *head = catalog->head;
@@ -115,6 +130,30 @@ void SearchFileListLoad(Catalog *catalog)
 
     DL_FOREACH(head, catalogEntry) {
         for (unsigned int i=0; i<catalogEntry->files; i++) {
+        	if (catalogEntry->tag && searchFitMode != 0) {
+        		char * type_copy = MyStrdup(catalogEntry->tag);
+        		char * cp = type_copy;
+        		char * type = strtok(cp, " \t");
+        		SCALE_FIT_TYPE_T fit_type;
+        		if (strcmp(type,TURNOUTCOMMAND) == 0)
+        			fit_type = FIT_TURNOUT;
+        		else if (strcmp(type,STRUCTURECOMMAND)==0)
+					fit_type = FIT_STRUCTURE;
+        		else if ((strcmp(type,CARCOMMAND)==0) || (strcmp(type,CARPROTOCOMMAND)==0))
+        			fit_type = FIT_CAR;
+        		char * scale = strtok(NULL, " \t\n");
+        		if (scale) {
+        			SCALEINX_T scale1 = LookupScale(scale);
+        			SCALEINX_T scale2 = GetLayoutCurScale();
+        			if (searchFitMode == FIT_COMPATIBLE) {
+        				if (CompatibleScale(fit_type,scale1,scale2)<FIT_COMPATIBLE) continue;
+        			} else {
+        				if (CompatibleScale(fit_type,scale1,scale2)<FIT_EXACT) continue;
+        			}
+
+        		}
+        		MyFree(type_copy);
+        	}
             DynStringClear(&description);
             DynStringCatCStr(&description,
                              ((!searchUiMode) && catalogEntry->contents) ?
@@ -133,24 +172,23 @@ void SearchFileListLoad(Catalog *catalog)
                    wListGetCount(RESULTLIST));
 
     DynStringFree(&description);
-
-    currentCat = catalog;
+    return wListGetCount(RESULTLIST);
 }
 
 /**
  * Reload just the system files into the searchable set
  */
 
-static void SearchUiDefault()
+static void SearchUiDefault(void)
 {
 	DynString dsSummary;
 
-    SearchFileListLoad(trackLibrary->catalog);  //Start with system files
+    int matches = SearchFileListLoad(trackLibrary->catalog);  //Start with system files
 	wStringSetValue(QUERYSTRING, "");
 
 	wMessageSetValue(MESSAGETEXT, _(QUERYPROMPTSTRING));
 	DynStringMalloc(&dsSummary, 16);
-	DynStringPrintf(&dsSummary, _("%u parameter files in library."), CountCatalogEntries(trackLibrary->catalog));
+	DynStringPrintf(&dsSummary, _("%u parameter files in library. %d Fit Scale."), CountCatalogEntries(trackLibrary->catalog), matches);
 	wMessageSetValue(SEARCHSTAT, DynStringToCStr(&dsSummary));
 	DynStringFree(&dsSummary);
 
@@ -247,6 +285,8 @@ static void SearchUiDoSearch(void * ptr)
     SearchResult *currentResults = MyMalloc(sizeof(SearchResult));
     char * search;
 
+	ClearCurrentCatalog();
+
 	strcpy(searchUiQuery, wStringGetValue((wString_p)searchUiPG.paramPtr[I_QUERYSTRING].control));
     search = StringTrim(searchUiQuery);
 
@@ -254,18 +294,22 @@ static void SearchUiDoSearch(void * ptr)
 		result = SearchLibrary(trackLibrary, search, currentResults);
 
 		if (result) {
-			DynString hitsMessage;
+
 			char *statistics;
-			DynStringMalloc(&hitsMessage, 16);
-			DynStringPrintf(&hitsMessage, _("%d parameter files found."), result);
-			wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
-			DynStringFree(&hitsMessage);
 
 			statistics = SearchStatistics(currentResults);
 			wMessageSetValue(SEARCHSTAT, statistics);
 			MyFree(statistics);
 
-			SearchFileListLoad(&(currentResults->subCatalog));
+			int matches = SearchFileListLoad(&(currentResults->subCatalog));
+
+			DynString hitsMessage;
+			DynStringMalloc(&hitsMessage, 16);
+			DynStringPrintf(&hitsMessage, _("%d parameter files found. %d Fit Scale"), result, matches);
+			wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
+			DynStringFree(&hitsMessage);
+
+			currentCat = currentResults->subCatalog;
 			wControlActive((wControl_p)CLEARBUTTON, TRUE);
 		} else {
 			wListClear(RESULTLIST);
@@ -275,7 +319,7 @@ static void SearchUiDoSearch(void * ptr)
 	} else {
 		SearchUiDefault();
 	}
-	MyFree(currentResults);
+	MyFree(currentResults);  //Because SearchFileList also caches the currentResults->subCatalog address as currentCatalog for reuse.
 }
 
 /**
@@ -287,6 +331,7 @@ static void SearchUiDoSearch(void * ptr)
 static void
 SearchUiClearFilter(void *ptr)
 {
+	ClearCurrentCatalog();
 	SearchUiDefault();
 }
 
@@ -351,13 +396,28 @@ static void SearchUiDlgUpdate(
     case I_RESULTLIST:
         UpdateSearchUiButton();
         break;
+    case I_FITRADIO:
+    	strcpy( searchUiQuery, wStringGetValue((wString_p)pg->paramPtr[I_QUERYSTRING].control) );
+    	SearchUiDoSearch(NULL);
+    	break;
     case I_MODETOGGLE:
-        SearchFileListLoad(currentCat);
+		if (currentCat.head) {
+			SearchFileListLoad(&currentCat);
+		} else {
+			SearchFileListLoad(trackLibrary->catalog);
+		}
         break;
     case -1:
         SearchUiOk(valueP);
         break;
     }
+}
+
+void 
+SearchUiCancel(wWin_p window)
+{
+	ClearCurrentCatalog();
+	wHide(window);
 }
 
 /**
@@ -406,18 +466,26 @@ void DoSearchParams(void * junk)
         searchUiPLs[I_CLEARBUTTON].winLabel = (char *)wIconCreatePixMap(
                 funnelclear_xpm);
 
+        searchFitMode = FIT_COMPATIBLE;  //Default to "Any" after startup
+
         ParamRegister(&searchUiPG);
 
+
+
         searchUiW = ParamCreateDialog(&searchUiPG,
-                                      MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, wHide,
+                                      MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, SearchUiCancel,
                                       TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
+
 
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
     }
 
+    wControlActive((wControl_p)FITRADIO, TRUE);
+
     ParamLoadControls(&searchUiPG);
     ParamGroupRecord(&searchUiPG);
+
 
     if (!trackLibrary) {
         wControlActive((wControl_p)SEARCHBUTTON, FALSE);

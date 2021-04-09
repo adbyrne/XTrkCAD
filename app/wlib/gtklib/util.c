@@ -37,7 +37,7 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-wWin_p gtkMainW;
+extern wWin_p gtkMainW;
 
 long debugWindow = 0;
 
@@ -113,7 +113,7 @@ GdkPixbuf* wlibPixbufFromXBM(
     pixmapData = (char**) malloc((3 + ip->h) * sizeof *pixmapData);
     pixmapData[0] = line0;
     rgb = wDrawGetRGB(ip->color);
-    sprintf(line0, " %d %d 2 1", ip->w, ip->h);
+    sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
     sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
             rgb & 0xFF);
     pixmapData[1] = ". c None s None";
@@ -198,8 +198,8 @@ int wlibAddLabel(wControl_p b, const char * labelStr)
 void * wlibAlloc(
                  wWin_p parent,
                  wType_e type,
-                 wPos_t origX,
-                 wPos_t origY,
+                 wWinPix_t origX,
+                 wWinPix_t origY,
                  const char * labelStr,
                  int size,
                  void * data)
@@ -340,11 +340,11 @@ void wlibAddButton(
 
 wControl_p wlibGetControlFromPos(
                                  wWin_p win,
-                                 wPos_t x,
-                                 wPos_t y)
+                                 wWinPix_t x,
+                                 wWinPix_t y)
 {
     wControl_p b;
-    wPos_t xx, yy;
+    wWinPix_t xx, yy;
 
     for (b = win->first; b != NULL; b = b->next) {
         if (b->widget && gtk_widget_get_visible(b->widget)) {
@@ -402,6 +402,8 @@ void wWinTop(wWin_p win)
 {
 }
 
+extern long dontHideCursor;
+
 /**
  * Set the cursor in GTK
 
@@ -416,6 +418,7 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 	//GdkWindow * gdkwindow = gtk_widget_get_window(GTK_WIDGET(win->gtkwin));;
 	GdkWindow * gdkwindow = gdk_get_default_root_window();
 	GdkDisplay * display = gdk_window_get_display(gdkwindow);
+	if ((cursor == wCursorNone) && dontHideCursor) return;  //Ignore if we dont want to suppress
 	if (!gdkcursors[cursor]) {
 		switch(cursor) {
 			case wCursorAppStart:
@@ -500,7 +503,7 @@ const char * wMemStats(void)
  * \param h IN pointer to height
  */
 
-void wGetDisplaySize(wPos_t * w, wPos_t * h)
+void wGetDisplaySize(wWinPix_t * w, wWinPix_t * h)
 {
 	GdkRectangle rect;
 

@@ -30,7 +30,7 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
-\dd \f{Magnetic Snap On/Off} - Toggles Magnets for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
+\dd \f{Magnetic Snap On/Off} - Toggles Magnets (\K{cmdMagneticSnap}) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
 
 \u000
 
@@ -66,15 +66,34 @@ When zooming in or out, the corresponding highlighted area of the \f{Map Window}
 
 \rule
 
+\S{cmdMagneticSnap} Magnetic Snap
+
+The \f{MagneticSnap} feature eases constructing and assembling Tracks and Draw objects by "snapping" the end of new objects to existing objects. 
+For existing track objects the point snapped to is always an open end point. 
+The snap operates when "close" to the object (a few pixels distant) and an anchor point (a blue circle) is displayed when this will occur if the mouse is clicked. 
+
+\u000
+When Adding Draw line objects, the snap point is the nearest point on the existing object. 
+A snap to the end of a line object can be selected by positioning the cursor close to the end of the line but off it, in the direction of the line. This will ensure the closest point is the end.
+
+\u000  
+The \f{MagneticSnap} feature is enabled and disabled using either the magnet icon which is part of the \f{SnapGrid} Toolbar button set, or using the View (\K{viewM}) menu.
+
+For each part of an Add or Move or Rotate operation, the current state of \f{MagneticSnap} can be temporarily inverted using the \f{Alt} key. 
+This enables snapping to be inhibited for a single part of an operation (or conversely enabled for just one part).
+
+\rule
+
 \S{cmdGrid} Grid Dialog
 
-The \f{Grid} dialog, displayed by \f{Change Grid} on the View (\K{viewM}) menu, specifies the origin, angle and other parameters of the Snap Grid.  The Snap Grid controls the position of the cursor during the \f{Curve} (\K{cmdCurve}), \f{Circle} (\K{cmdCircle}), \f{Modify} (\K{cmdModify}), \f{Straight} (\K{cmdStraight}), \f{Line Drawing} (\K{cmdDraw}) and \f{Turntable} (\K{cmdTurntable}) commands.
+The \f{Grid} dialog, displayed by \f{Change Grid} on the View (\K{viewM}) menu, specifies the origin, angle and other parameters of the Snap Grid.  
+The Snap Grid can sbe used to snap the position of the cursor during the \f{Curve} (\K{cmdCurve}), \f{Circle} (\K{cmdCircle}), \f{Cornu} (\K{cmdCornu}), \f{Modify} (\K{cmdModify}), \f{Straight} (\K{cmdStraight}), \f{Draw} (\K{cmdDraw}) and \f{Turntable} (\K{cmdTurntable}) commands.
 
 \G{png.d/grid.png}
 
 The \f{Grid} dialog contains controls affecting the horizontal and vertical snap grid lines.  Each dimension can be independently controlled.
 
-\dd The \f{Spacing} value specifies the distance between major grid lines, which are drawn as solid lines on the layout.
+\dd The \f{Spacing} value specifies the distance between major grid lines, which are drawn as solid lines on the layout. The value of the distance is entered in either inches or centimeters depending on the value of the \f{Units} setting in Options->Preferencecs (\K{cmdPref}) menu.
 
 \u000
 
@@ -82,7 +101,7 @@ The \f{Grid} dialog contains controls affecting the horizontal and vertical snap
 
 \u000
 
-\dd The Grid can be enabled or disabled in each dimension via the \f{Enable} check box.
+\dd The Grid can be enabled or disabled in each dimension via the \f{Enable} check box. The action of snapping is secondary to \f{Magnetic Snap} if enabled, and is suppressed if \f{Alt} is held.
 
 \u000
 
@@ -136,6 +155,10 @@ Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} button
 
 \u000
 
+\b Key 's' sets the zoom to show the selected set of objects and pans the window to center the highlit area.
+
+\u000
+
 \b Key '0' or 'o' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
 
 \u000
@@ -147,6 +170,10 @@ Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} button
 Normally a zoom in more of more than 1:1 is not possible, however if the Ctrl key is held down while the \f{Zoom In} button is pressed a zoom less that 1:1 can be achieved. This function is useful when working on detail.
 
 Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors that can be select from.
+
+\u000
+
+\e{Note} - The value of Zoom 1:1 will be set using 96 dpi as a default, it can be overriden using a Configuration Value in the Preferences section of ScreenDPI.
 
 \u000
 

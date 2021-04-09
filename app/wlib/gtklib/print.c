@@ -427,8 +427,8 @@ static void psSetColor(
  */
 
 void psPrintLine(
-    wPos_t x0, wPos_t y0,
-    wPos_t x1, wPos_t y1,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
     wDrawWidth width,
     wDrawLineType_e lineType,
     wDrawColor color,
@@ -466,8 +466,8 @@ void psPrintLine(
  */
 
 void psPrintArc(
-    wPos_t x0, wPos_t y0,
-    wPos_t r,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
     double angle0,
     double angle1,
     wBool_t drawCenter,
@@ -538,8 +538,8 @@ void psPrintArc(
  */
 
 void psPrintFillRectangle(
-    wPos_t x0, wPos_t y0,
-    wPos_t x1, wPos_t y1,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
     wDrawColor color,
     wDrawOpts opts)
 {
@@ -574,7 +574,7 @@ void psPrintFillRectangle(
  */
 
 void psPrintFillPolygon(
-    wPos_t p[][2],
+    wDrawPix_t p[][2],
 	wPolyLine_e type[],
     int cnt,
     wDrawColor color,
@@ -595,7 +595,7 @@ void psPrintFillPolygon(
 
     psSetColor(color);
 
-    wPos_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
+    wDrawPix_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
 
     for (inx=0; inx<cnt; inx++) {
     	int j = inx-1;
@@ -627,7 +627,7 @@ void psPrintFillPolygon(
 		mid3[1] = (p[inx][1]-mid0[1])/2+mid0[1];
 		mid4[0] = (mid1[0]-p[inx][0])/2+p[inx][0];
 		mid4[1] = (mid1[1]-p[inx][1])/2+p[inx][1];
-		wPos_t save[2];
+		wDrawPix_t save[2];
 		if (inx==0) {
 			 if (!type || (type && type[0] == wPolyLineStraight) || open) {
 				 cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
@@ -669,8 +669,8 @@ void psPrintFillPolygon(
  */
 
 void psPrintFillCircle(
-    wPos_t x0, wPos_t y0,
-    wPos_t r,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
     wDrawColor color,
     wDrawOpts opts)
 {
@@ -714,7 +714,7 @@ void psPrintFillCircle(
  */
 
 void psPrintString(
-    wPos_t x, wPos_t y,
+    wDrawPix_t x, wDrawPix_t y,
     double a,
     char * s,
     wFont_p fp,
@@ -762,7 +762,10 @@ void psPrintString(
 
     // render the string to a Pango layout
     pango_layout_set_font_description(layout, desc);
-    pango_layout_set_text(layout, s, -1);
+
+    gchar *utf8 = wlibConvertInput(s);
+
+    pango_layout_set_text(layout, utf8, -1);
     pango_layout_set_width(layout, -1);
     pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
     pango_layout_get_size(layout, &text_width, &text_height);
@@ -794,9 +797,11 @@ void psPrintString(
     // and show the string
     if(!(opts & wDrawOutlineFont)) {
 		pango_cairo_show_layout(cr, layout);
+		cairo_stroke( cr );
 	} else {
 		PangoLayoutLine *line;
 		line = pango_layout_get_line_readonly (layout, 0);
+	        setLineType( wDrawLineSolid, 0, 0 );
 		pango_cairo_layout_line_path (cr, line);
 		cairo_stroke( cr );	
 	}
@@ -815,7 +820,7 @@ void psPrintString(
  * \return
  */
 
-void wPrintClip(wPos_t x, wPos_t y, wPos_t w, wPos_t h)
+void wPrintClip(wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h)
 {
     cairo_move_to(psPrint_d.printContext, x, y);
     cairo_rel_line_to(psPrint_d.printContext, w, 0);
@@ -1022,28 +1027,50 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 
         /*
          * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
-         * - the user sets the environment variable XTRKCADPRINTSCALE to a value
+         * - the user either sets preferences or the environment variable XTRKCADPRINTSCALE to a value
          * and we just let the dpi default to 72ppi and set scaling to that value.
-         * And for PangoText we allow an override via variable XTRKCADPRINTTEXTSCALE
+         * And for PangoText we allow an override via preferences or variable XTRKCADPRINTTEXTSCALE
          * Note - doing this will introduce differing artifacts.
          *
          */
         char * sEnvScale = PRODUCT "PRINTSCALE";
+        char * sEnvTextScale = PRODUCT "PRINTTEXTSCALE";
+
+        scale_text = 1.0;
+        scale_adjust = 1.0;
+
+        double printScale,printTextScale;
+
+        wPrefGetFloat(PREFSECTION, PRINTSCALE, &printScale, -1.0);
+        wPrefGetFloat(PREFSECTION, PRINTTEXTSCALE, &printTextScale, -1.0);
+
+
+        //If the preferences are not set, look at environmental variables
+
+        if (printScale < 0.0 ) {
+        	if (getenv(sEnvScale) && (atof(getenv(sEnvScale)) > 0.0)) {
+        		printScale = atof(getenv(sEnvScale));
+        	}
+        }
+        if (printTextScale < 0.0 ) {
+        	if (getenv(sEnvTextScale) && (atof(getenv(sEnvTextScale)) > 0.0)) {
+        	    printTextScale = atof(getenv(sEnvTextScale));
+        	}
+        }
 
 	const char * sPrinterName = gtk_printer_get_name( selPrinter );
-        if ((strcmp(sPrinterName,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
+        if ((strcmp(sPrinterName,"Print to File") == 0) || printScale < 0.0) {
 			double p_def = 600;
 			cairo_surface_set_fallback_resolution(psPrint_d.curPrintSurface, p_def, p_def);
 			psPrint_d.dpi = p_def;
 			scale_adjust = 72/p_def;
 		} else {
-			char * sEnvTextScale = PRODUCT "PRINTTEXTSCALE";
-			if (getenv(sEnvTextScale) && (atof(getenv(sEnvTextScale)) != 0.0)) {
-				scale_text = atof(getenv(sEnvTextScale));
-			} else scale_text = 1.0;
-			if (getenv(sEnvScale) && (atof(getenv(sEnvScale)) != 0.0)) {
-				scale_adjust = atof(getenv(sEnvScale));
-			} else scale_adjust = 1.0;
+			if (printTextScale > 0.0) {
+				scale_text = printTextScale;
+			}
+			if (printScale > 0.0) {
+				scale_adjust = printScale;
+			}
 			psPrint_d.dpi = 72;
 		}
 

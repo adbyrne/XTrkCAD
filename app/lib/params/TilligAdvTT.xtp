@@ -265,9 +265,11 @@ TURNOUT TT "Tillig	DW-15 Asymmetrical 3-Way	83230"
 END
 
 SUBCONTENTS Pilz/Tillig TT-Scale Advance Track - Slips
-TURNOUT TT "Tillig	DKW15 Double-Slip	83300/391"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT TT "Tillig	DKW15 Double-Slip	83300/391" 512
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 6.535433 0.000000 90.000000
 	E 0.111343 0.845742 285.000000

@@ -22,11 +22,18 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+
+//#include "misc.h"
 
 #include "gtkint.h"
 #include "i18n.h"
 
+extern wBool_t CheckHelpTopicExists(const char * topic);
+
 #include "dynstring.h"
+
+#define debug 0
 
 #define DEFAULTBROWSERCOMMAND "xdg-open"
 
@@ -38,7 +45,7 @@
 								"variable.\n Also make sure that the user has sufficient access rights to read these" \
  								"files."
 /**
- * Create a fully qualified url froma topic
+ * Create a fully qualified url from a topic
  *
  * \param helpUrl OUT pointer to url, free by caller
  * \param topic IN the help topic
@@ -104,34 +111,20 @@ void wHelp(const char * topic)
 {
     int rc;
     char *url;
-    DynString commandLine;
     char *currentPath;
 
     assert(topic != NULL);
     assert(strlen(topic));
 
-    currentPath = ExtendPath();
+    if (!CheckHelpTopicExists(topic)) return;
+
     TopicToUrl(&url, topic);
 
-    DynStringMalloc(&commandLine, 16);
-    DynStringCatCStrs(&commandLine,
-                      DEFAULTBROWSERCOMMAND,
-                      " ",
-                      url,
-                      NULL);
+	rc = wOpenFileExternal(url);
 
-    // the command should be found via the PATH
-    rc = system(DynStringToCStr(&commandLine));
-
-    if (rc) {
+	if (!rc) {
         wNotice(HELPERRORTEXT, _("Cancel"), NULL);
     }
 
-    // restore the PATH
-    setenv("PATH",
-           currentPath,
-           TRUE);
-
     free(url);
-    DynStringFree(&commandLine);
 }

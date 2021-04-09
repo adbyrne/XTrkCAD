@@ -21,13 +21,11 @@
  */
 
 #include "cundo.h"
+#include "cselect.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
-
-#include <math.h>
+#include "misc.h"
 
 #define AN_OFF (0)
 #define AN_FIRST (1)
@@ -40,6 +38,7 @@ static struct {
 		coOrd pos0;
 		coOrd pos1;
 		coOrd pos2;
+		BOOL_T isClose;
 		int modifyingEnd;
 		} An = { AN_OFF, { 0,0 }, { 0,0 } };
 
@@ -165,6 +164,8 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if (An.state != AN_OFF) {
 			if (!IsClose(FindDistance(An.pos1,An.pos2))) {
 				DrawAngle( &tempD, An.pos0, An.pos1, An.pos2, wDrawColorBlack );
@@ -179,6 +180,57 @@ static STATUS_T CmdAngle( wAction_t action, coOrd pos )
 	return C_CONTINUE;
 
 }
+
+STATUS_T ModifyProtractor(
+		wAction_t action,
+		coOrd pos )
+{
+	switch (action&0xFF) {
+	case C_DOWN:
+		An.modifyingEnd = -1;
+		An.isClose = FALSE;
+		if ( An.state == AN_OFF )
+			return C_ERROR;
+		if ( IsClose(FindDistance( pos, An.pos0 ))) {
+			An.modifyingEnd = 0;
+		} else if ( IsClose(FindDistance( pos, An.pos1 ))) {
+			An.modifyingEnd = 1;
+		} else if ( IsClose(FindDistance( pos, An.pos2 ))) {
+			An.modifyingEnd = 2;
+		} else
+			return C_ERROR;
+		break;
+	case C_MOVE:
+		if ( An.modifyingEnd == 0 ) {
+			An.pos0 = pos;
+		} else if (An.modifyingEnd == 1) {
+			An.pos1 = pos;
+		} else if (An.modifyingEnd == 2) {
+			An.pos2 = pos;
+		}
+		InfoMessage( "Base Angle %0.3f, Relative Angle %0.3f",FindAngle(An.pos0,An.pos1),
+							fabs(DifferenceBetweenAngles(FindAngle(An.pos0,An.pos1),FindAngle(An.pos0,An.pos2))));
+		return C_CONTINUE;
+	case C_UP:
+		return C_CONTINUE;
+	case C_REDRAW:
+		DrawAngle( &tempD, An.pos0, An.pos1, An.pos2, An.isClose?wDrawColorBlue:wDrawColorBlack );
+		break;
+	case wActionMove:
+		if ( IsClose(FindDistance( pos, An.pos0 )) ||
+				IsClose(FindDistance( pos, An.pos1 )) ||
+				IsClose(FindDistance( pos, An.pos2 )) ) {
+			An.isClose = TRUE;
+		} else
+			An.isClose = FALSE;
+		break;
+	default:
+		return C_ERROR;
+	}
+	return C_CONTINUE;
+}
+
+
 
 
 /*****************************************************************************
@@ -197,19 +249,22 @@ static struct {
 		STATE_T state;
 		coOrd pos0;
 		coOrd pos1;
+		BOOL_T isClose;
 		int modifyingEnd;
 		} Dr = { DR_OFF, { 0,0 }, { 0,0 } };
 
+
 void RulerRedraw( BOOL_T demo )
 {
+	if (programMode == MODE_TRAIN) return;
 	if (Dr.state == DR_ON)
-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
+		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, Dr.isClose?wDrawColorBlue:wDrawColorBlack );
 	if (demo) {
 		Dr.state = DR_OFF;
 		An.state = AN_OFF;
 	}
 	if (An.state != AN_OFF)
-		DrawAngle( &tempD, An.pos0, An.pos1, An.pos2, wDrawColorBlack);
+		DrawAngle( &tempD, An.pos0, An.pos1, An.pos2, An.isClose?wDrawColorBlue:wDrawColorBlack);
 
 }
 
@@ -218,6 +273,7 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 	switch (action) {
 
 	case C_START:
+		Dr.isClose = FALSE;
 		switch (Dr.state) {
 		case DR_OFF:
 			Dr.state = DR_ON;
@@ -245,17 +301,20 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if (Dr.state == DR_ON) {
-			DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
+			DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, Dr.isClose?wDrawColorBlue:wDrawColorBlack );
 		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		return C_TERMINATE;
-
 	}
+
 	return C_CONTINUE;
 }
+
 
 
 STATUS_T ModifyRuler(
@@ -267,25 +326,36 @@ STATUS_T ModifyRuler(
 		Dr.modifyingEnd = -1;
 		if ( Dr.state != DR_ON )
 			return C_ERROR;
-		if ( FindDistance( pos, Dr.pos0 ) < mainD.scale*0.25 ) {
+		if ( IsClose(FindDistance( pos, Dr.pos0 ))) {
 			Dr.modifyingEnd = 0;
-		} else if ( FindDistance( pos, Dr.pos1 ) < mainD.scale*0.25 ) {
+		} else if ( IsClose(FindDistance( pos, Dr.pos1 ))) {
 			Dr.modifyingEnd = 1;
 		} else {
 			return C_ERROR;
 		}
+		break;
 	case C_MOVE:
 		if ( Dr.modifyingEnd == 0 ) {
 			Dr.pos0 = pos;
-		} else {
+		} else if ( Dr.modifyingEnd == 1) {
 			Dr.pos1 = pos;
-		}
+		} else return C_ERROR;
 		InfoMessage( "%s", FormatDistance( FindDistance( Dr.pos0, Dr.pos1 ) ) );
 		return C_CONTINUE;
 	case C_UP:
 		return C_CONTINUE;
 	case C_REDRAW:
-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
+		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, Dr.isClose?wDrawColorBlue:wDrawColorBlack );
+		break;
+	case wActionMove:
+		if ( IsClose(FindDistance( pos, Dr.pos0 )) ||
+				IsClose(FindDistance( pos, Dr.pos1 ))) {
+			Dr.isClose = TRUE;
+			An.isClose = FALSE;
+		} else {
+			Dr.isClose = FALSE;
+			ModifyProtractor(wActionMove,pos);
+		}
 		break;
 	default:
 		return C_ERROR;
@@ -300,7 +370,7 @@ STATUS_T ModifyRuler(
 void InitCmdRuler( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Measurement"), "cmdMeasureSetCmd", _("Measurement") );
-	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm), LEVEL0, IC_STICKY|IC_NORESTART, ACCL_RULER, NULL );
-	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(angle_xpm), LEVEL0, IC_STICKY|IC_NORESTART, ACCL_ANGLE, NULL );
+	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
+	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(angle_xpm), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
 	ButtonGroupEnd();
 }

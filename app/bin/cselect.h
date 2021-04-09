@@ -23,7 +23,6 @@
 #define CSELECT_H
 
 #include "common.h"
-#include "track.h"
 
 #define defaultCursor wCursorCross
 
@@ -41,10 +40,12 @@ void SelectBridge( void );
 void SelectTies( void );
 void SelectRecount( void );
 void SelectTrackWidth( void* );
-void SelectDelete( void );
+int SelectDelete( void );
 void MoveToJoin( track_p, EPINX_T, track_p, EPINX_T );
 void MoveSelectedTracksToCurrentLayer( void );
 void SelectCurrentLayer( void );
+void DeselectLayer( unsigned int );
+void SelectByIndex( void* string);
 void ClearElevations( void );
 void AddElevations( DIST_T );
 void DoRefreshCompound( void );
@@ -52,5 +53,6 @@ void WriteSelectedTracksToTempSegs( void );
 void DoRescale( void );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
 void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
+void HighlightSelectedTracks(track_p trk_ignore, BOOL_T keep, BOOL_T invert );
 
 #endif

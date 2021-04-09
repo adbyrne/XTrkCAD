@@ -20,21 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdbool.h>
-#include <string.h>
 #include <dynstring.h>
-#include <assert.h>
 
 #include "custom.h"
-#include "i18n.h"
 #include "layout.h"
 #include "misc2.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "wlib.h"
 #include "fileio.h"
-#include "utility.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
@@ -473,14 +467,14 @@ static paramData_t layoutPLs[] = {
     { PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
     { PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
 #define SCALEINX (4)
-    { PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, (void *)120, N_("Scale"), 0, (void*)(CHANGE_SCALE) },
+    { PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, (void *)180, N_("Scale"), 0, (void*)(CHANGE_SCALE) },
 #define GAUGEINX (5)
-    { PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, (void *)120, N_("     Gauge"), 0, (void *)(CHANGE_SCALE) },
+    { PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, (void *)180, N_("     Gauge"), 0, (void *)(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
-	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
+	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND),sizeof(backgroundFileName) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
@@ -501,14 +495,9 @@ static paramData_t layoutPLs[] = {
 
 static paramGroup_t layoutPG = { "layout", PGO_DIALOGTEMPLATE | PGO_RECORD | PGO_PREFMISC, layoutPLs, sizeof layoutPLs / sizeof layoutPLs[0] };
 
-/**
-* Apply the changes entered to settings
-*
-* \param junk IN unused
-*/
 
-static void LayoutOk(void * junk)
-{
+static void ChangeLayout() {
+
     long changes;
 
     changes = GetChanges(&layoutPG);
@@ -538,6 +527,18 @@ static void LayoutOk(void * junk)
     	LayoutBackGroundSave();
     	file_changed = FALSE;
     }
+}
+
+/**
+* Apply the changes entered to settings
+*
+* \param junk IN unused
+*/
+
+static void LayoutOk(void * junk)
+{
+
+	ChangeLayout();
 
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);
@@ -786,6 +787,7 @@ static struct wFilSel_t * settingsWrite_fs;
 
 static void SettingsWrite( void  )
 {
+	ChangeLayout();
 	if ( settingsWrite_fs == NULL )
 		settingsWrite_fs  = wFilSelCreate( mainW, FS_UPDATE, 0, _("Write Settings"),
 				_("Settings File (*.xset)|*.xset"), DoSettingsWrite, NULL );

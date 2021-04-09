@@ -149,10 +149,12 @@ The dialog contains a list of parameter files. Each file is preceded by a color 
 are usable in the current scale and gauge.
 
 \G{png.d/greendot.png} \G{png.d/greenstar.png} Definitions from this file are a perfect fit for the current layout options. The file has been loaded and will be visible in the \f{HotBar}. For track this means that gauge and scale of the track elements
-are identical to the layout settings.
+are identical to the layout settings. Prototype definitions (Scale "*") are always a perfect fit. Turnouts and Sectional Track must have the same gauge and usually the same scale unless the scale/gauge combination has been defined to fit. 
+OO layouts use HO track as an example.
 
 \G{png.d/yellowdot.png} \G{png.d/yellowstar.png} Definitions from this file can be used with this layout but do not fit perfectly. A typical example is On30 where HO scale track can be used because the
-gauge is the same. But differences in scale may make the track look out of scale.
+gauge is the same. But differences in scale may make the track look out of scale. Structures are considered compatible if the scale is within +/-20%. Cars are compatible if the gauge is the same, but the scale can be +/-20%. 
+Exceptions to this can be defined in the scale definitions.
 
 \G{png.d/reddot.png} \G{png.d/redstar.png} This parameter file doesn't contain any usable definitions with current settings. You may want to change the layout options if you want to use elements from
 this file (for example altering the Layout Scale).
@@ -211,9 +213,14 @@ Selecting and loading additional parameter files from the System Library is done
 
 Using the Search function you can find and select parameter files that are
 part of the XTrackCAD installation.
-Enter a search string and select the Search button. Search results are
+Enter a set of one or more words and select the Search button. Search results are
 shown in the list box. Pressing the \i{Clear Filter} button shows the complete
 list again. 
+
+You can subset the search to only search for parameter files who start with contents that fit the current Layout Scale using the \f{Fit} Mode. 
+The options are "Fit All", "Fit Compatible" and "Fit Exact".  Fit Compatible means that structures with 
+Note that the code only looks at the first Turnout, Structure or Car entry to decide on the scale for the entire file.
+They will correspond to the color icons on the Parameter Files menu once they are loaded \K{cmdPrmfile} when the same Layout scale is in use.
 
 Select the files you're interested in and press the \f{Add} button to add them to your
 parameter list.
@@ -278,7 +285,8 @@ Whether tracks are printed with one or two lines (representing the center line a
 
 \u000
 
-\dd \f{Page Numbers} - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y). x is the position from left to right, y in from bottom to top, So (1/1) is the page at the bottom left.
+\dd \f{Page Numbers} - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y). 
+x is the page position from left to right, y in from bottom to top, So (1/1) is the page at the bottom left.
 As an additional aid, the numbers of the next pages are printed on each edge.
 
 \u000
@@ -287,7 +295,7 @@ As an additional aid, the numbers of the next pages are printed on each edge.
 
 \u000
 
-\dd \f{Rulers} - print rulers on all edges of the page.  This option is only enabled if the \f{Angle} is \e{0.000}.
+\dd \f{Rulers} - choose to print rulers at the layout edge, or on all edges of the page, an option is only enabled if the \f{Angle} is \e{0.000}, or None - which means print no rulers.
 
 \u000
 
@@ -376,6 +384,29 @@ The \f{Printer Setup} window contains:
 
 \dd \f{Cancel} - ends the dialog without update.
 
+\u000
+
+\e{Note} - 
+Printing uses a default of 600ppi. It scales the print and text from a default size of 72dpi. 
+This is often the expected value for a standard printer driver to work correctly, but will not work if the driver is not accurately setting the ppi available.
+To override the printer ppi you can use either the configuration file settings for print or environmental variables. 
+These values are set in the Preferences section.
+\u000
+
+\n Preferences.PrintScale - The floating point ratio of the real printer dpi to 72. 
+
+\n Preferences.PrintTextScale - The floating point ratio of the real printer text support to a dpi of 72. This value has no effect unless PrintScale is set to > 0.0.
+
+\u000
+These values can also be set using environmental variables if the configuration preference values are not set or they are set to <=0.0. 
+\u000
+
+\n XTRKCADPRINTSCALE
+
+\n XTRKCADPRINTTEXTSCALE
+
+\u000
+
 \rule
 
 \S2{MS-Windows} \i{Microsoft Windows}
@@ -440,7 +471,7 @@ To check your printer's margin:
 
 \u000
 
-\dd Enable \f{Registration Marks}
+\dd Enable \f{Registration Marks} this prints crosshairs every 6" at scale 1:1. 
 
 \u000
 

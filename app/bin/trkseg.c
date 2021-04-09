@@ -20,24 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <track.h>
-#include <time.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdarg.h>
-#include "track.h"
-#include <common.h>
-#include <cbezier.h>
-#include <string.h>
-
-#include <tbezier.h>
-
-#include "cjoin.h"
+#include "common.h"
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "misc.h"
+#include "cbezier.h"
+#include "tbezier.h"
+#include "cjoin.h"
 
 
 /*****************************************************************************
@@ -276,13 +266,20 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 					hi->y = pc.y + radius;
 					break;
 				}
-				if ( a0 + a1 >= 360.0 )
+
+				if ( a0 + a1 >= 360.0  )
 					hi->y = pc.y + radius;
 				if ( a0 < 90.0 && a0+a1 >= 90.0 )
 					hi->x = pc.x + radius;
-				if ( a0 < 180 && a0+a1 >= 180.0 )
+				if ( a0 > 90.0 && a0+a1 >= 450.0 )
+					hi->x = pc.x + radius;
+				if ( a0 < 180.0 && a0+a1 >= 180.0 )
+					lo->y = pc.y - radius;
+				if (a0 > 180.0 && a0+a1 >= 540.0 )
 					lo->y = pc.y - radius;
 				if ( a0 < 270.0 && a0+a1 >= 270.0 )
+					lo->x = pc.x - radius;
+				if ( a0 > 270.0 && a0+a1 >= 630.0 )
 					lo->x = pc.x - radius;
 			}
 			if ( segPtr->type == SEG_STRLIN ) {
@@ -723,7 +720,7 @@ EXPORT DIST_T DistanceSegs(
 		coOrd * pos,
 		wIndex_t * inx_ret )
 {
-	DIST_T d, dd = 100000.0, ddd;
+	DIST_T d, dd = DIST_INF, ddd;
 	coOrd p0, p1, p2, pt, lo, hi;
 	BOOL_T found = FALSE;
 	wIndex_t inx, lin;
@@ -754,7 +751,7 @@ EXPORT DIST_T DistanceSegs(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			ddd = 100000.0;
+			ddd = DIST_INF;
 			for (lin=0;lin<segPtr->u.p.cnt;lin++) {
 				pt = p0;
 				if (lin < segPtr->u.p.cnt-1 )
@@ -769,7 +766,7 @@ EXPORT DIST_T DistanceSegs(
 			break;
         case SEG_BEZTRK:
         case SEG_BEZLIN:
-        		dd = 100000.0;
+        		dd = DIST_INF;
         		pt = p0;
         		for (int i = 0;i<segPtr->bezSegs.cnt;i++) {
         			segProcData2.distance.pos1 = pt;
@@ -815,7 +812,7 @@ EXPORT DIST_T DistanceSegs(
 			dd = JointDistance( &p1, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
 			break;
 		default:
-			dd = 100000.0;
+			dd = DIST_INF;
 		}
 		if (dd < d) {
 			d = dd;
@@ -1695,8 +1692,8 @@ EXPORT void DrawDimLine(
 	if ( dist <= dist1*1.5 ) {
 		DrawLine( d, p0, p1, width, color );
 		coOrd s_pos;
-		s_pos.x = (p1.x-p0.x)*0.75+p0.x;
-		s_pos.y = (p1.y-p0.y)*0.75+p0.y;
+		s_pos.x = (p1.x-p0.x)*middle+p0.x;
+		s_pos.y = (p1.y-p0.y)*middle+p0.y;
 		ANGLE_T a = FindAngle(p0,p1);
 		Translate(&s_pos,s_pos,a+90,textsize.y/2);
 		DrawString( d, s_pos, 0.0, dimP, fp, fs, color );
@@ -1771,7 +1768,7 @@ EXPORT void DrawSegsO(
 		}
 		wDrawWidth thick = 3;
 #ifdef WINDOWS
-		thick *= (wDrawWidth)(d->dpi/mainD.dpi);
+		thick *= (wDrawWidth)(d->dpi/75.0);
 #endif
 		switch (segPtr->type) {
 		case SEG_STRLIN:
@@ -1787,6 +1784,10 @@ EXPORT void DrawSegsO(
 					color1 = normalColor;
 				if ( segPtr->color == wDrawColorWhite )
 					break;
+				if (options&DTS_CENTERONLY) {
+					DrawLine( d, p0, p1, thick, color1 );
+					break;
+				}
 				DrawStraightTrack( d,
 					p0, p1,
 					FindAngle(p1, p0 ),
@@ -1823,7 +1824,7 @@ EXPORT void DrawSegsO(
 						DrawBench( d, p0, p1, color1, color2, options, segPtr->u.l.option );
 						break;
 					case SEG_TBLEDGE:
-						DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/mainD.dpi*d->dpi+0.5) , color );
+						DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/BASE_DPI*d->dpi+0.5) , color );
 						break;
 					}
 				}
@@ -1840,6 +1841,11 @@ EXPORT void DrawSegsO(
 				if ( segPtr->color == wDrawColorWhite )
 					break;
 				p0.x = p0.y = p1.x = p1.y = 0;
+				if (options&DTS_CENTERONLY) {
+					DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
+							FALSE, thick, color1 );
+					break;
+				}
 				DrawCurvedTrack( d,
 					c,
 					fabs(segPtr->u.c.radius),
@@ -1880,6 +1886,11 @@ EXPORT void DrawSegsO(
         					if (color1 == wDrawColorBlack)	color1 = normalColor;
         					if ( tempPtr->color == wDrawColorWhite )  break;
         					p0.x = p0.y = p1.x = p1.y = 0;
+        					if (options&DTS_CENTERONLY) {
+        						DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
+        											FALSE, thick, color1 );
+        						break;
+        					}
         					DrawCurvedTrack( d,
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
@@ -1901,6 +1912,10 @@ EXPORT void DrawSegsO(
         				if ( tempPtr->color == wDrawColorWhite ) break;
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
         				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
+        				if (options&DTS_CENTERONLY) {
+							DrawLine( d, p0, p1, thick, color1 );
+							break;
+						}
         				DrawStraightTrack( d, p0, p1,
 						FindAngle(p1, p0 ),
 						trk, color1, options );

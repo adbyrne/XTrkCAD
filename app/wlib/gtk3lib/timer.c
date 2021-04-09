@@ -109,6 +109,9 @@ void wlibSetTrigger(
 void wPause(
     long count)		/* milliseconds */
 {
+	while (gtk_events_pending())
+	    gtk_main_iteration();			//Allow GTK to finish before pausing
+
     struct timeval timeout;
     sigset_t signal_mask;
     sigset_t oldsignal_mask;

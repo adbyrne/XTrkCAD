@@ -20,30 +20,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
-#include "utility.h"
 #include "ccurve.h"
+#include "common-ui.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
 EXPORT dynArr_t structureInfo_da;
-
-typedef struct compoundData extraData;
 
 
 static wIndex_t pierListInx;
@@ -66,7 +58,7 @@ static wIndex_t structureInx;
 static long hideStructureWindow;
 static void RedrawStructure(void);
 
-static wPos_t structureListWidths[] = { 80, 80, 220 };
+static wWinPix_t structureListWidths[] = { 80, 80, 220 };
 static const char * structureListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, structureListWidths, structureListTitles };
 static const char * hideLabels[] = { N_("Hide"), NULL };
@@ -225,6 +217,17 @@ DeleteStructures(int fileIndex)
     structureInfo_da.cnt -= cnt;
 }
 
+/**
+ * Check to find out to what extent the contents of the parameter file can be used with
+ * the current layout scale / gauge.
+ *
+ * If parameter scale == layout we have an exact fit.
+ * If parameter scale == layout scale +/15% we have compatible track.
+ *
+ * \param paramFileIndex
+ * \param scaleIndex
+ * \return
+ */
 enum paramFileState
 GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
@@ -236,14 +239,22 @@ GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 		return(PARAMFILE_UNLOADED);
 	}
 
+	//Loop over all entries until an exact fit is found if none return if compatibles were found
+
 	for (i = 0; i < structureInfo_da.cnt; i++) {
 		turnoutInfo_t *to = structureInfo(i);
 		if (to->paramFileIndex == paramFileIndex) {
-			if (GetScaleRatio(to->scaleInx) == ratio || to->scaleInx == SCALE_ANY) {
+			SCALE_FIT_T fit = CompatibleScale(FIT_STRUCTURE,to->scaleInx,scaleIndex);
+			if (fit == FIT_EXACT) {
 				ret = PARAMFILE_FIT;
 				break;
-			} 
+			}
+			//Within 15% of scale
+			if (fit == FIT_COMPATIBLE) {
+				ret = PARAMFILE_COMPATIBLE;
+			}
 		}
+
 	}
 	return(ret);
 }
@@ -299,7 +310,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list, coO
 		to = structureInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
 			 to->segCnt > 0 &&
-			 CompatibleScale( FALSE, to->scaleInx, scale ) &&
+			 (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, scale )) &&
 			 to->segCnt != 0 ) {
 			if (to1 == NULL)
 				to1 = to;
@@ -334,7 +345,7 @@ static void DrawStructure(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_STRUCTURE, extraDataCompound_t);
 
 	d->options &= ~DC_NOTSOLIDLINE;
 	switch(xx->lineType) {
@@ -383,7 +394,7 @@ static ANGLE_T GetAngleStruct(
 		EPINX_T * ep0,
 		EPINX_T * ep1 )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 	ANGLE_T angle;
 
 	pos.x -= xx->orig.x;
@@ -411,8 +422,8 @@ static BOOL_T QueryStructure( track_p trk, int query )
 
 static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
 {
-	struct extraData *xx1 = GetTrkExtraData( trk1 );
-	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	struct extraDataCompound_t *xx1 = GET_EXTRA_DATA( trk1, T_STRUCTURE, extraDataCompound_t );
+	struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE, extraDataCompound_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -513,7 +524,7 @@ static wWin_p structureW;
 static void RescaleStructure( void )
 {
 	DIST_T xscale, yscale;
-	wPos_t ww, hh;
+	wWinPix_t ww, hh;
 	DIST_T w, h;
 	wDrawGetSize( structureD.d, &ww, &hh );
 	w = ww/structureD.dpi - 0.2;
@@ -597,7 +608,7 @@ static void StructureDlgUpdate(
 	curStructure = to;
 	ShowPierL();
 	RedrawStructure();
-	ParamDialogOkActive( &structurePG, FALSE );
+	/* ParamDialogOkActive( &structurePG, FALSE ); */
 }
 
 
@@ -707,7 +718,7 @@ static ANGLE_T PlaceStructure(
 static void NewStructure( void )
 {
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	wIndex_t titleLen;
 	wIndex_t pierInx;
 
@@ -724,7 +735,7 @@ static void NewStructure( void )
 	UndoStart( _("Place Structure"), "newStruct" );
 	titleLen = strlen( curStructure->title );
 	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 #ifdef LATER
 	trk = NewTrack( 0, T_STRUCTURE, 0, sizeof (*xx) + 1 );
 	xx->orig = Dst.pos;
@@ -813,7 +824,7 @@ EXPORT STATUS_T CmdStructureAction(
 		Dst.state = 0;
 		Dst.angle = 00.0;
 		ShowPierL();
-		InfoMessage(_("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel"));
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -866,7 +877,7 @@ EXPORT STATUS_T CmdStructureAction(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curStructure == NULL ) return C_CONTINUE;
 		rot1 = pos;
-		if ( FindDistance( rot0, rot1 ) > (6.0/75.0)*mainD.scale ) {
+		if ( FindDistance( rot0, rot1 ) > (6.0/BASE_DPI)*mainD.scale ) {
 			angle = FindAngle( rot0, rot1 );
 			if (!validAngle) {
 				baseAngle = angle;
@@ -907,6 +918,13 @@ EXPORT STATUS_T CmdStructureAction(
 			}
 		if (Dst.state == 2)
 			DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );
+		return C_CONTINUE;
+
+	case C_LCLICK:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if ( curStructure == NULL ) return C_CONTINUE;
+		CmdStructureAction( C_DOWN, pos );
+	    CmdStructureAction( C_UP, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -953,7 +971,7 @@ static STATUS_T CmdStructure(
 
 	case C_START:
 		if (structureW == NULL) {
-			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")), _("Ok"), (paramActionOkProc)DoStructOk, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, StructureDlgUpdate );
+			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")), _("Close"), (paramActionOkProc)DoStructOk, wHide, TRUE, NULL, F_RESIZE, StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}
 		ParamDialogOkActive( &structurePG, FALSE );
@@ -973,6 +991,7 @@ static STATUS_T CmdStructure(
 		InfoMessage( _("Select Structure and then drag to place"));
 		ParamLoadControls( &structurePG );
 		ParamGroupRecord( &structurePG );
+		SetAllTrackSelect( FALSE );
 		return CmdStructureAction( action, pos );
 
 	case wActionMove:
@@ -1010,6 +1029,10 @@ static STATUS_T CmdStructure(
 			wShow( structureW );
 		InfoMessage( _("Left drag to move, right drag to rotate, or press Return or click Ok to finalize") );
 		return CmdStructureAction( action, pos );
+		return C_CONTINUE;
+
+	case C_LCLICK:
+		CmdStructureAction( action, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -1053,8 +1076,8 @@ static char * CmdStructureHotBarProc(
 	case HB_FULLTITLE:
 		return to->title;
 	case HB_DRAW:
-		origP->x -= to->orig.x;
-		origP->y -= to->orig.y;
+		//origP->x -= to->orig.x;
+		//origP->y -= to->orig.y;
 		DrawSegs( d, *origP, 0.0, to->segs, to->segCnt, trackGauge, wDrawColorBlack );
 		return NULL;
 	}
@@ -1070,7 +1093,7 @@ EXPORT void AddHotBarStructures( void )
 		to = structureInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 			    to->segCnt > 0 &&
-			    CompatibleScale( FALSE, to->scaleInx, GetLayoutCurScale()) ) )
+			    (FIT_NONE != CompatibleScale( FIT_STRUCTURE, to->scaleInx, GetLayoutCurScale())) ) )
 			 /*( (strcmp( to->scale, "*" ) == 0 && strcasecmp( curScaleName, "DEMO" ) != 0 ) ||
 			   strncasecmp( to->scale, curScaleName, strlen(to->scale) ) == 0 ) ) )*/
 				continue;
@@ -1085,7 +1108,7 @@ static STATUS_T CmdStructureHotBar(
 	switch (action & 0xFF) {
 
 	case C_START:
-		structureChange( CHANGE_PARAMS );
+		//structureChange( CHANGE_PARAMS );
 		if (curStructure == NULL) {
 			NoticeMessage( MSG_STRUCT_NO_STRUCTS, _("Ok"), NULL );
 			return C_TERMINATE;
@@ -1093,10 +1116,10 @@ static STATUS_T CmdStructureHotBar(
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curStructure->title );
 		InfoMessage( _("Place %s and draw into position"), message );
         wIndex_t listIndex = FindListItemByContext( structureListL, curStructure );
-        if ( listIndex > 0 )
+        if ( listIndex >= 0 )
             structureInx = listIndex;
-		//ParamLoadControls( &structurePG );
-		//ParamGroupRecord( &structurePG );
+		ParamLoadControls( &structurePG );
+		ParamGroupRecord( &structurePG );
 		return CmdStructureAction( action, pos );
 
 	case wActionMove:

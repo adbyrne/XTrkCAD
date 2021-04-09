@@ -20,39 +20,18 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define access _access
-#else 
-#include <unistd.h>
-#endif
-
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "include/utf8convert.h"
-
-#if _MSC_VER >1300
-#define stricmp( a, b ) _stricmp(a, b )
-#endif
+#include "common-ui.h"
 
 static long paramCheckSum;
 
@@ -155,11 +134,14 @@ void SetParamFileState(int index)
 	enum paramFileState newState;
 	SCALEINX_T scale = GetLayoutCurScale();
 
-	for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
-		state != PARAMFILE_UNLOADED; i++) {
-		newState = (*GetCompatibility[i])(index, scale);
-		if (newState > state || newState == PARAMFILE_UNLOADED) {
-			state = newState;
+	//Set yet?
+	if (scale>=0) {
+		for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
+			state != PARAMFILE_UNLOADED; i++) {
+			newState = (*GetCompatibility[i])(index, scale);
+			if (newState > state || newState == PARAMFILE_UNLOADED) {
+				state = newState;
+			}
 		}
 	}
 
@@ -174,10 +156,6 @@ void SetParamFileState(int index)
  * \returns True if it succeeds, false if it fails.
  */
  
-#ifdef WINDOWS
-#define R_OK 0x4
-#endif
-
 static bool
 CheckFileReadable(const char *file)
 {
@@ -287,7 +265,7 @@ bool ReadParams(
 	checkSummed = FALSE;
 	BOOL_T skip = false;
 	int skipLines = 0;
-	while (paramFile && (fgets(paramLine, 256, paramFile)) != NULL) {
+	while (paramFile && (fgets(paramLine, 1024, paramFile)) != NULL) {
 		paramLineNum++;
 		Stripcr(paramLine);
 		if (strncmp(paramLine, "CHECKSUM ", 9) == 0) {
@@ -333,20 +311,20 @@ bool ReadParams(
 			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 9);
 #endif
 			curContents = MyStrdup(paramLine + 9);
 			curSubContents = curContents;
 			skip = FALSE;
 		} else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 12);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			curSubContents = MyStrdup(paramLine + 12);
 			skip = FALSE;
 		} else if (strncmp(paramLine, "PARAM ", 6) == 0) {
-			paramVersion = strtol(paramLine + 8, &cp, 10);
+			paramVersion = strtol(paramLine + 6, &cp, 10);
 			if (cp)
 				while (*cp && isspace((unsigned char)*cp)) cp++;
 			if (paramVersion > iParamVersion) {

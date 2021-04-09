@@ -184,7 +184,7 @@ _________________________________________
 
 Filled Boxes and Circles work the same as line Boxes and Circles.
 END
-COMMAND DrawFilledCircleTangent
+COMMAND DrawFilledCircleCenter
 PARAMETER draw linecolor 16776960
 BIGPAUSE
 MOUSE 2 7.360 6.45333

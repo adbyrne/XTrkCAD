@@ -48,6 +48,7 @@ static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
 
+
 /*
  *******************************************************************************
  *
@@ -167,7 +168,7 @@ const char * wGetAppWorkDir(
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
 				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
-				system( copyConfigCmd );
+				int rc = system( copyConfigCmd );
 			}
 		}
 	}
@@ -243,7 +244,7 @@ BuildConfigFileName()
  * Read the configuration file into memory
  */
 
-static void readPrefs( void )
+static void readPrefs()
 {
     gchar *tmp;
     GError *error = NULL;
@@ -461,9 +462,9 @@ void wPrefFlush(
 	
 	workDir = wGetAppWorkDir();
 	if (name && name[0])
-		sprintf( tmp, "%s", name );
+		snprintf( tmp, sizeof(tmp), "%s", name );
 	else
-		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL)
 		return;
@@ -471,18 +472,18 @@ void wPrefFlush(
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
 		if(p->val) {
 			fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
-		}
+		}	
 	}
 	fclose( prefFile );
 }
-
 
 /**
  * Clear the preferences from memory
  * \return  
  */
 
-void wPrefReset(void )
+void wPrefReset(
+		void )
 {
     prefInitted = FALSE;
     g_key_file_free( keyFile );

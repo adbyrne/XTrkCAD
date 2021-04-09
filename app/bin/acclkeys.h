@@ -56,6 +56,7 @@
 #define ACCL_HELIX		(WCTL+WSHIFT+'h')
 #define ACCL_SPLIT		(WCTL+WSHIFT+'s')
 #define ACCL_SPLITDRAW  (0)
+#define ACCL_TRIMDRAW   (0)
 #define ACCL_ELEVATION	(WCTL+WSHIFT+'e')
 #define ACCL_PROFILE	(WCTL+WSHIFT+'f')
 #define ACCL_DELETE		(WCTL+'d')
