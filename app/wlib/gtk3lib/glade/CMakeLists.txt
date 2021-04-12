@@ -37,7 +37,7 @@ set(gladefiles
     "tip.glade"
     "train.glade"
     "turnout.glade"
-    "turnoutnew.glade"
+    "turnoutNew.glade"
     )
 
 foreach( glade IN LISTS gladefiles )

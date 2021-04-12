@@ -134,7 +134,9 @@ wSetSplashInfo(char *msg)
 void
 wDestroySplash(void)
 {
+	if (!window) return;
     /* kill window */
     gtk_widget_destroy(window);
+    window = NULL;
     return;
 }

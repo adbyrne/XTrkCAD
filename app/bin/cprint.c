@@ -129,7 +129,7 @@ static paramData_t printPLs[] = {
 /*4*/ { PD_BUTTON, (void*)PrintSnapShot, "snapshot", PDO_DLGHORZ, NULL, N_("Snap Shot") },
 /*5*/ { PD_RADIO, &printFormat, "format", 0, printFormatLabels, N_("Page Format"), BC_HORZ|BC_NOBORDER, (void*)1 },
 /*6*/ { PD_RADIO, &printOrder, "order", PDO_DLGBOXEND, printOrderLabels, N_("Print Order"), BC_HORZ|BC_NOBORDER },
-/*7*/ { PD_MESSAGE, N_("Print "), NULL, PDO_DLGRESETMARGIN| PDO_DLGNOLABELALIGN, (void*)0 },
+/*7*/ { PD_MESSAGE, N_("Print "), "mess0", PDO_DLGRESETMARGIN| PDO_DLGNOLABELALIGN, (void*)0 },
 /*8*/ { PD_TOGGLE, &printGaudy, "style", PDO_DLGNOLABELALIGN, printGaudyLabels, NULL, BC_HORZ|BC_NOBORDER, (void*)1 },
 #define I_REGMARKS		(9)
 /*9*/ { PD_TOGGLE, &printRegistrationMarks, "registrationMarks", PDO_DLGNOLABELALIGN, printRegistrationMarksLabels, NULL, BC_HORZ|BC_NOBORDER },
@@ -155,8 +155,8 @@ static paramData_t printPLs[] = {
 /*23*/ { PD_BUTTON, (void*)SelectAllPages, "selall", 0, NULL, N_("Select All") },
 /*24*/ { PD_BUTTON, (void*)PrintClear, "clear", 0, NULL, N_("Clear") },
 #define I_PAGECNT		(25)
-/*25*/ { PD_MESSAGE, N_("0 pages"), NULL, 0, (void*)80 },
-/*26*/ { PD_MESSAGE, N_("selected"), NULL, 0, (void*)80 }
+/*25*/ { PD_MESSAGE, N_("0 pages"), "mess1", 0, (void*)80 },
+/*26*/ { PD_MESSAGE, N_("selected"), "mess2", 0, (void*)80 }
 };
 
 static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP | PGO_DIALOGTEMPLATE, printPLs, sizeof printPLs/sizeof printPLs[0] };
