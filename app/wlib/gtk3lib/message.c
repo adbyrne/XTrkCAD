@@ -94,15 +94,13 @@ static int fonts_set = 0;
 wWinPix_t wMessageGetHeight(
     long flags)
 {
-    GtkWidget * temp;
+
+	GtkWidget * temp;
 
     if (!(flags&COMBOBOX)) {
 		temp = gtk_label_new("Test");	 //To get size of text itself
     } else {
         temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
-    }
-
-    if (flags&1L) {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
     }
 
@@ -143,7 +141,7 @@ wWinPix_t wMessageGetHeight(
 	   }
         
    	}
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
+
 	GtkRequisition min_requisition,natural_requisition;
 	gtk_widget_get_preferred_size (temp,&min_requisition,&natural_requisition);
     g_object_ref_sink(temp);
@@ -245,7 +243,7 @@ wMessage_p wMessageCreateEx(
 			pango_font_description_set_size(fontDesc, fontSize * PANGO_SCALE);
     }
     } else {
-    	b->widget = wlibGetWidgetFromName( parent, helpStr, "box", FALSE );
+    	b->widget = wlibWidgetFromIdWarn( parent, helpStr);
     	gtk_widget_show_all(b->labelWidget);
     }
 

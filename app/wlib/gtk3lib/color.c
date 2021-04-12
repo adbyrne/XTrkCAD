@@ -255,10 +255,10 @@ void wColorSelectButtonSetColor(
 
 	GdkRGBA rgba;
 
-	rgba.red = ((color&0x00FF0000)>>16)/256;
-	rgba.green = ((color&0x0000FF00)>>8)/256;
-	rgba.blue = (color&0x000000FF)/256;
-	rgba.alpha = ((color&0xFF000000)>>16)/256;
+	rgba.red = ((color&0x00FF0000)>>16)/256.0;
+	rgba.green = ((color&0x0000FF00)>>8)/256.0;
+	rgba.blue = (color&0x000000FF)/256.0;
+	rgba.alpha = 1.0;
 
     gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(bb->widget),
                                &rgba);
