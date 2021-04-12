@@ -1789,7 +1789,7 @@ EXPORT void ParamHilite(
 		wControl_p control,
 		BOOL_T hilite )
 {
-	LOG(log_paraminput, 2, ("ParamHilite(%s,%d) - ", control?wControlGetHelp(control):"NULL", hilite));
+	LOG(log_paraminput, 2, ("ParamHilite(%d) - ", hilite));
 	if (win != NULL && wWinIsVisible(win) == FALSE) {
 		LOG(log_paraminput, 2, ("not visible\n"));
 		return;
