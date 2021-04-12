@@ -100,12 +100,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="prmfile-action">
-                    <property name="label" translatable="yes">_Unload</property>
+                  <object class="GtkToggleButton" id="prmfile-favorite">
+                    <property name="label" translatable="yes">Favorite</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -114,8 +113,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
-                    <property name="label" translatable="yes">Reload</property>
+                  <object class="GtkToggleButton" id="prmfile-unload">
+                    <property name="label" translatable="yes">Unload</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -127,8 +126,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="id-librar">
-                    <property name="label" translatable="yes">Library...</property>
+                  <object class="GtkToggleButton" id="prmfile-refresh">
+                    <property name="label" translatable="yes">Reload</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -137,6 +136,19 @@
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="prmfile-find">
+                    <property name="label" translatable="yes">Library...</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -150,11 +162,8 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
-                </child>
-                <child>
-                  <placeholder/>
                 </child>
               </object>
               <packing>

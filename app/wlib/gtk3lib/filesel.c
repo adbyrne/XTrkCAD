@@ -168,41 +168,20 @@ struct wFilSel_t * wFilSelCreate(
 
 		//create filters for the passed filter list
 		// names and patterns are separated by |
+		// filter elements are also separated by |
 		// patterns themselves are separated by ;
 		// each pattern has to be added individually
-
-		cp = strtok( cp, "|" );
-		while ( cp  && count < (MAX_ALLOWEDFILTERS - 1)) {
-			fs->filter[ count ] = gtk_file_filter_new ();
-			gtk_file_filter_set_name ( fs->filter[ count ], cp );
-			cp = strtok( NULL, "|" );
-            if (cp)
-            {
-                char *patterns = strdup(cp);
-                char *patternStart = patterns;
-
-                for (int i = 0; i < strlen(cp); i++) {
-                    if (patterns[ i ] == ';') {
-                        patterns[ i ] = '\0';
-                        gtk_file_filter_add_pattern(fs->filter[ count ], patternStart);
-                        patternStart = patterns +  i + 1;
-                    }
-                }
-
-                gtk_file_filter_add_pattern(fs->filter[ count ], patternStart);
-                free(patterns);
-            }
-
-            // the first pattern is considered to match the default extension
-			if( count == 0 ) {
-
-				fs->defaultExtension = strdup( cp );
-				int i = 0;
-				for (i=0; i<strlen(cp) && cp[i] != ' ' && cp[i] != ';';i++) ;
-				if (i<strlen(cp)) fs->defaultExtension[i] = '\0';
+		cp = cps;
+		while (cp && cp[0]) {
+			if (cp[0] == '|') {
+				count++;
+				if (count && count%2==0) {
+					cp[0] = ':';             //Replace every second "|" with ":"
+				}
 			}
 			cp++;
 		}
+
 		count = 0;
 		cp = cps;							//Restart
 		if (opt&FS_PICTURES) {				//Put first
