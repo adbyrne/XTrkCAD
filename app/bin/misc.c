@@ -905,6 +905,7 @@ EXPORT void wHide(wWin_p win) {
 	if (inMainW && win == aboutW)
 		return;
 	wMenuListDelete(winList_mi, wWinGetTitle(win));
+	ParamResetInvalid( win );
 	if (inPlayback)
 		for (inx = 0; inx < demoWindows_da.cnt; inx++)
 			if ( demoWindows(inx) == win)

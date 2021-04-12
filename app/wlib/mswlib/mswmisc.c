@@ -372,6 +372,7 @@ void * mswAlloc(
     w->data = data;
     w->focusChainNext = NULL;
     w->shown = TRUE;
+	w->hilite = FALSE;
     return w;
 }
 
@@ -1296,6 +1297,10 @@ void wWinShow(
         win->centerWin = FALSE;
         win->shown = TRUE;
 
+		// Clear hilites
+		for (wControl_p controlP = win->first; controlP; controlP = controlP->next)
+			controlP->hilite = FALSE;
+
         if (mswHWnd == (HWND)0 || !IsIconic(mswHWnd)) {
             ShowWindow(win->hWnd, SW_SHOW);
 
@@ -1808,13 +1813,14 @@ void wControlHilite(
         return;
     }
 
-    if (!IsWindowVisible(b->parent->hWnd)) {	
+    if ((!IsWindowVisible(b->parent->hWnd)) || (!IsWindowVisible(b->hWnd))) {
+		b->hilite = FALSE;
         return;
     }
 
-    if (!IsWindowVisible(b->hWnd)) {
-        return;
-    }
+	if (b->hilite == hilite)
+		return;
+	b->hilite = hilite;
 
     hDc = GetDC(b->parent->hWnd);
 	newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_ROUND | PS_JOIN_BEVEL,
