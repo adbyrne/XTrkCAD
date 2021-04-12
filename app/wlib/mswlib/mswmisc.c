@@ -1813,7 +1813,7 @@ void wControlHilite(
         return;
     }
 
-    if ((!IsWindowVisible(b->parent->hWnd)) || (!IsWindowVisible(b->hWnd))) {
+    if ((b->parent==NULL) || (!IsWindowVisible(b->parent->hWnd)) || (!IsWindowVisible(b->hWnd))) {
 		b->hilite = FALSE;
         return;
     }
