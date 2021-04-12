@@ -176,11 +176,11 @@ GdkRGBA wlibGetColor(
     wBool_t normal)
 {
 	GdkRGBA out;
-	out.red = ((color&0x00FF0000)>>16)/256;
-	out.green = ((color&0x0000FF00)>>8)/256;
-	out.blue = ((color&0x000000FF))/256;
+	out.red = ((color&0x00FF0000)>>16)/256.0;
+	out.green = ((color&0x0000FF00)>>8)/256.0;
+	out.blue = ((color&0x000000FF))/256.0;
 	if ((color&0xFF000000) == 0) out.alpha = 1.0;
-	else out.alpha = ((color&0xFF000000)>>24)/256;
+	else out.alpha = ((color&0xFF000000)>>24)/256.0;
 
     if (normal) {
     	return out;

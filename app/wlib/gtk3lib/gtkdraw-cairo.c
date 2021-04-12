@@ -80,119 +80,23 @@ struct wDraw_t psPrint_d;
  *
 *******************************************************************************/
 
-static cairo_t* gtkDrawCreateCairoCursorContext(
-		wControl_p ct,
-		cairo_surface_t * surf,
-		wDrawWidth width,
-		wDrawLineType_e lineType,
-		wDrawColor color,
-		wDrawOpts opts )
-{
-	cairo_t* cairo;
-
-	cairo = cairo_create(surf);
-
-	width = width ? abs(width) : 1;
-	cairo_set_line_width(cairo, width);
-
-	cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
-	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
-
-	switch(lineType)
-	{
-		case wDrawLineSolid:
-		{
-			cairo_set_dash(cairo, 0, 0, 0);
-			break;
-		}
-		case wDrawLineDash:
-		{
-			double dashes[] = { 5, 3 };
-			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
-			cairo_set_dash(cairo, dashes, len_dashes, 0);
-			break;
-		}
-		case wDrawLineDot:
-		{
-			double dashes[] = { 1, 2 };
-			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
-			cairo_set_dash(cairo, dashes, len_dashes, 0);
-			break;
-		}
-		case wDrawLineDashDot:
-		{
-			double dashes[] = { 5, 2, 1, 2 };
-			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
-			cairo_set_dash(cairo, dashes, len_dashes, 0);
-			break;
-		}
-		case wDrawLineDashDotDot:
-		{
-			double dashes[] = { 5, 2, 1, 2, 1, 2 };
-			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
-			cairo_set_dash(cairo, dashes, len_dashes, 0);
-			break;
-		}
-		case wDrawLineCenter:
-		{
-			double dashes[] = { 8, 3, 5, 3};
-			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
-			cairo_set_dash(cairo, dashes, len_dashes, 0.0);
-			break;
-		}
-		case wDrawLinePhantom:
-		{
-			double dashes[] = { 8, 3, 5, 3, 5, 3};
-			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
-			cairo_set_dash(cairo, dashes, len_dashes, 0.0);
-			break;
-		}
-
-	}
-	GdkRGBA gcolor;
-
-
-	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-	gcolor = wlibGetColor(color, TRUE);
-
-	if (ct->type == B_DRAW)  {
-		wDraw_p bd = (wDraw_p)ct;
-		bd->lastColor = color;
-	}
-
-	cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, gcolor.alpha);
-
-	return cairo;
-}
-
-
-wBool_t wDrawSetTempMode(
-	wDraw_p bd,
-	wBool_t bTemp )
-{
-	wBool_t ret = bd->bTempMode;
-	bd->bTempMode = bTemp;
-	if ( ret == FALSE && bTemp == TRUE ) {
-		// Main to Temp drawing
-		wDrawClearTemp( bd );
-	}
-	return ret;
-}
-
-
-static long GtkDrawSetColor(
+static unsigned long GtkDrawSetColor(
 	cairo_t * cairo,
 	wDrawColor color,
 	GdkRGBA *gcolor )
 {
-        *gcolor = wlibGetColor(color, TRUE);
-        cairo_set_source_rgba(cairo, gcolor->red, gcolor->green, gcolor->blue, gcolor->alpha );
-	if ( iDrawLog >= 3 )
-		printf( "%ld: GtkDrawGetColor( %lx: R%0.3f G%0.3f B%0.3f A%0.3f\n",
-			lDrawCnt++, color, gcolor->red, gcolor->green, gcolor->blue, gcolor->alpha );
-	return color;
-}
 
+        long tcolor = color;
+        gcolor->red = ((color&0xFF0000)>>16)/255.0;
+        gcolor->green = ((color&0xFF00)>>8)/255.0;
+        gcolor->blue  = (color&0xFF)/255.0;
+        gcolor->alpha = 1.0;
+        cairo_set_source_rgba(cairo, gcolor->red, gcolor->green, gcolor->blue, 1.0 );
+	if ( iDrawLog >= 3 )
+		printf( "%ld: GtkDrawGetColor( %lx: R%0.3f G%0.3f B%0.3f\n",
+			lDrawCnt++, color, gcolor->red, gcolor->green, gcolor->blue );
+	return tcolor;
+}
 
 static cairo_t* gtkDrawCreateCairoContext(
 		wDraw_p bd,
@@ -309,6 +213,20 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 
 	return cairo;
+}
+
+
+wBool_t wDrawSetTempMode(
+	wDraw_p bd,
+	wBool_t bTemp )
+{
+	wBool_t ret = bd->bTempMode;
+	bd->bTempMode = bTemp;
+	if ( ret == FALSE && bTemp == TRUE ) {
+		// Main to Temp drawing
+		wDrawClearTemp( bd );
+	}
+	return ret;
 }
 
 static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
