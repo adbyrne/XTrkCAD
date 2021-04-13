@@ -101,12 +101,11 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, sizeof turnoutPLs/si
 #define DTO_WYE 3
 
 #define DTO_XING 4
-#define DTO_XNG9 5
-#define DTO_SSLIP 6
-#define DTO_DSLIP 7
+#define DTO_SSLIP 5
+#define DTO_DSLIP 6
 
 #define DTO_DIM 8
-#define DTO_SEGS 16
+#define DTO_SEGS 10
 
 static struct DrawToData_t {
 	int toType;
@@ -964,18 +963,14 @@ void GetTurnoutType() {
 		coOrd pos = zero;
 		int intersect = FindIntersection(&pos, p1, a1, p2, a2);
 
-		if (intersect && strCnt == 2) {
+		if (intersect && a0 <= 30 && strCnt == 2) {
 			if (dtod.pathCnt == 2)
-				if (a0 <= 30)
-					dtod.toType = DTO_XING;
-				else
-					dtod.toType = DTO_XNG9;
+				dtod.toType = DTO_XING;
 			else if (dtod.pathCnt == 3 && (lftCnt == 1 || rgtCnt == 1))
 				dtod.toType = DTO_SSLIP;
 			else if (dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1)
 				dtod.toType = DTO_DSLIP;
 		}
-		// If no intersect, it could be a crossover
 	}
 }
 
@@ -1196,7 +1191,6 @@ static void DrawXingToTies(
 
 	switch (toType) {
 	case DTO_XING:
-	case DTO_XNG9:
 		break;
 	case DTO_SSLIP:
 		for (i = 0; i < dtod.pathCnt; i++) {
@@ -1216,38 +1210,6 @@ static void DrawXingToTies(
 			}
 		}
 		break;
-	}
-
-	td = GetScaleTieData(scaleInx);
-	DIST_T tdlen = td->length;
-
-	// Midpoint
-	p1 = dto[strPath].pts[0];
-	a1 = dto[strPath].angle;
-
-	q1 = dto[str2Path].pts[0];
-	a2 = dto[str2Path].angle;
-
-	FindIntersection(&pos, p1, a1, q1, a2);
-	dtod.midPt = pos;
-
-	// Tie length adjust
-	a0 = DifferenceBetweenAngles(a1, a2);
-	double magic = 1 / cos(0.5 * D2R(90 - a0));
-
-	if (toType == DTO_XNG9) {
-		p1 = dto[strPath].pts[0];
-		p2 = dto[strPath].pts[dto[strPath].n - 1];
-		DrawStraightTies(d, scaleInx, p1, p2, color);
-		p1 = dto[str2Path].pts[0];
-		p2 = dto[str2Path].pts[dto[strPath].n - 1];
-		// Omit the center ties
-		DIST_T tdadj = (td->length / 2) * magic;
-		Translate(&pos, dtod.midPt, a2, -tdadj);
-		DrawStraightTies(d, scaleInx, p1, pos, color);
-		Translate(&pos, dtod.midPt, a2, tdadj);
-		DrawStraightTies(d, scaleInx, pos, p2, color);
-		return;
 	}
 
 	dto[othPath].base[dto[othPath].n].x = DIST_INF;
@@ -1286,18 +1248,31 @@ static void DrawXingToTies(
 			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
 
-	// Tie center line in drawing coordinates
-	REORIGIN(c1, s1, xx->angle, xx->orig);
-	REORIGIN(c2, s2, xx->angle, xx->orig);
-	cAngle = FindAngle(c1, c2);
-
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
 	int px = 0;
 	int qx = 0;
 
+	td = GetScaleTieData(scaleInx);
+
+	// Tie center line in drawing coordinates
+	REORIGIN(c1, s1, xx->angle, xx->orig);
+	REORIGIN(c2, s2, xx->angle, xx->orig);
+	cAngle = FindAngle(c1, c2);
+
+	// Midpoint
+	p1 = dto[strPath].pts[0];
+	a1 = dto[strPath].angle; 
+
+	q1 = dto[str2Path].pts[0];
+	a2 = dto[str2Path].angle;
+
+	FindIntersection(&pos, p1, a1, q1, a2);
+	dtod.midPt = pos;
+
 	// Tie length adjust
-	magic = 1 / cos(0.75 * D2R(a0));
+	a0 = DifferenceBetweenAngles(a1, a2);
+	double magic = 1 / cos(0.75 * D2R(a0));
 
 	// Draw right half
 	len = FindDistance(dtod.midPt, c2);
@@ -1307,6 +1282,7 @@ static void DrawXingToTies(
 
 	dlen = len / cnt;
 	p0 = q0 = 0;
+	DIST_T tdlen = td->length;
 	DIST_T dlenx = dlen / 2;
 	DIST_T lenx = len + dlenx; 
 
