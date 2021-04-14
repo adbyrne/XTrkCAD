@@ -1059,17 +1059,16 @@ void GetTurnoutType() {
 					dtod.toType = DTO_DSLIP;
 			}
 			// No intersect, it could be a crossover
-			//else if (strCnt == 2) {
-			//	if (dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1) {
-			//		dtod.toType = DTO_DCROSS;
-			//	}
-			//	else if (dtod.pathCnt == 3)
-			//		if (lftCnt == 1)
-			//			dtod.toType = DTO_RCROSS;
-			//		else if (rgtCnt == 1)
-			//			dtod.toType = DTO_LCROSS;
-			//}
-
+			else if (strCnt == 2) {
+				if (dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1) {
+					dtod.toType = DTO_DCROSS;
+				}
+				else if (dtod.pathCnt == 3)
+					if (lftCnt == 1)
+						dtod.toType = DTO_RCROSS;
+					else if (rgtCnt == 1)
+						dtod.toType = DTO_LCROSS;
+			}
 		}
 }
 
@@ -1766,12 +1765,10 @@ static void DrawCrossToTies(
 	wDrawColor color)
 {
 	tieData_p td;
-	DIST_T len, dlen;
+	DIST_T len, dx;
 	coOrd pos;
 	int cnt;
 	ANGLE_T angle;
-	coOrd c1, c2, p1, p2, q1, q2;
-	int s0, p0, q0;
 	ANGLE_T a0, a1, a2;
 
 	if (color == wDrawColorBlack)
@@ -1782,13 +1779,16 @@ static void DrawCrossToTies(
 	int i, j;
 	for (i = 0; i < DTO_DIM; i++)
 		for (j = 0; j < dto[i].n; j++) {
-			REORIGIN(p1, dto[i].base[j], xx->angle, xx->orig);
-			dto[i].pts[j] = p1;
+			REORIGIN(pos, dto[i].base[j], xx->angle, xx->orig);
+			dto[i].pts[j] = pos;
 			if (j < dto[i].n - 1)
 				dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
 
-	int othPath = 0, secPath = 1;
+	int strPath = 0, str2Path = 1;
+	int othPath = 2, secPath = 2;
+	if (dtod.pathCnt == 4) secPath = 3;
+
 	int toType = dtod.toType;
 
 	td = GetScaleTieData(scaleInx);
@@ -1796,13 +1796,167 @@ static void DrawCrossToTies(
 	// draw the points
 	double r = td->width / 2;
 	for (i = 0; i < DTO_DIM; i++) {
-		for (j = 0; j < dto[i].n - 1; j++) {
+		for (j = 0; j < dto[i].n; j++) {
 			DrawFillCircle(d, dto[i].pts[j], r, drawColorPurple);
 			if (j < dto[i].n - 1)
 				DrawLine(d, dto[i].pts[j], dto[i].pts[j + 1], 0, drawColorPurple);
 		}
 	}
 
+	coOrd c1, c2, p1, p2, q1, q2;
+	int s0, t0, p0, q0;
+
+	int sn = dto[strPath].n;
+	int tn = dto[str2Path].n;
+	int pn = dto[othPath].n;
+	int qn = secPath >= 0 ? dto[secPath].n : 1;
+
+	coOrd s1 = dto[strPath].pts[0];
+	coOrd s2 = dto[strPath].pts[sn - 1];
+	coOrd t1 = dto[str2Path].pts[0];
+	coOrd t2 = dto[str2Path].pts[tn - 1];
+	angle = FindAngle(s1, s2); // The straight segment
+
+	p1 = dto[othPath].base[0];
+	p2 = dto[othPath].base[pn - 1];
+	q1 = dto[secPath].base[0];
+	q2 = dto[secPath].base[qn - 1];
+
+	td = GetScaleTieData(scaleInx);
+	len = FindDistance(s1, s2);
+	cnt = (int)floor(len / td->spacing + 0.5);
+	if (cnt > 0) {
+		DIST_T px = 0;
+		DIST_T dy, dy1, dy2;
+
+		dy = dto[str2Path].base[0].y - dto[strPath].base[0].y;
+
+		dx = len / cnt;
+		s0 = t0 = p0 = q0 = 0;
+		DIST_T tdlen = td->length;
+		DIST_T lenx = len, dlenx = dx / 2;
+
+		DIST_T px1 = len / 2 - dlenx * 5,
+			px2 = len / 2 + dlenx * 4;
+
+		for (px = dlenx; cnt; cnt--, px += dx) {
+			if (px >= dto[strPath].base[s0 + 1].x) s0++;
+			if (px >= dto[str2Path].base[t0 + 1].x) t0++;
+			if (px >= dto[othPath].base[p0 + 1].x) p0++;
+			if (px >= dto[secPath].base[q0 + 1].x) q0++;
+			if (s0 >= sn || t0 >= tn || p0 >= pn || q0 >= qn)
+				break;
+
+			if ((px >= dto[strPath].base[sn - 1].x)
+				|| (px >= dto[str2Path].base[tn - 1].x)) {
+				break;
+			}
+
+			dy1 = dy2 = 0;
+			if (px < px1) {
+				switch (dtod.toType) {
+				case DTO_DCROSS:
+					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					break;
+				case DTO_LCROSS:
+					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy2 = 0;
+					break;
+				case DTO_RCROSS:
+					dy1 = 0;
+					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					break;
+				}
+			}
+			else if (px < px2) {
+				dy1 = (dto[str2Path].base[s0].y - dto[strPath].base[t0].y) / 2;
+				dy2 = dy1;
+			}
+			else {
+				switch (dtod.toType) {
+				case DTO_DCROSS:
+					dy1 = dto[othPath].base[q0].y + (px - dto[othPath].base[q0].x) * dto[othPath].dy[q0];
+					dy2 = dy - dto[secPath].base[p0].y - (px - dto[secPath].base[p0].x) * dto[secPath].dy[p0];
+					break;
+				case DTO_LCROSS:
+					dy1 = 0;
+					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					break;
+				case DTO_RCROSS:
+					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy2 = 0;
+					break;
+				}
+			}
+
+			//tdlen = td->length + fabs(dy1) + fabs(dy2);
+			//if (tdlen > 2.5 * td->length)
+			//	break;
+
+			//tdlen = td->length + fabs(dy1);
+			//Translate(&pos, s1, angle, px);
+			//Translate(&pos, pos, (angle - 90.0), dy1 / 2);
+			//DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+
+			tdlen = td->length + fabs(dy2);
+			Translate(&pos, t1, angle, px);
+			Translate(&pos, pos, (angle - 90.0), -dy2 / 2);
+			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		}
+		return;
+
+		// Draw remaining ties, if any
+		if (lenx + dx < dto[strPath].base[pn - 1].x) {
+			p1 = dto[strPath].pts[p0];
+			p2 = dto[strPath].pts[pn - 1];
+			angle = FindAngle(p1, p2);
+			a0 = FindAngle(dto[strPath].base[p0], dto[strPath].base[pn - 1]);
+			DIST_T lenr = (dto[strPath].base[pn - 1].x - lenx + dlenx) / cos(D2R(90.0 - a0));
+			Translate(&p1, p2, angle, -lenr);
+			DrawStraightTies(d, scaleInx, p1, p2, color);
+		}
+		else {
+			p1 = dto[strPath].pts[pn - 2];
+			a0 = FindAngle(p1, p2);
+			Translate(&pos, p2, a0, -dx / 2);
+			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		}
+
+		if (lenx + dx < dto[str2Path].base[qn - 1].x) {
+			q1 = dto[str2Path].pts[q0];
+			q2 = dto[str2Path].pts[qn - 1];
+			angle = FindAngle(q1, q2);
+			a0 = FindAngle(dto[str2Path].base[q0], dto[str2Path].base[qn - 1]);
+			DIST_T lenr = (dto[str2Path].base[qn - 1].x - lenx + dlenx) / cos(D2R(90.0 - a0));
+			Translate(&q1, q2, angle, -lenr);
+			DrawStraightTies(d, scaleInx, q1, q2, color);
+		}
+		else {
+			q1 = dto[str2Path].pts[qn - 2];
+			a0 = FindAngle(q1, q2);
+			Translate(&pos, q2, a0, -dx / 2);
+			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		}
+
+		// Final ties at end
+		//if (dtod.toType == DTO_THREE) {
+		//	int n = dto[strPath].base[qn - 1].x;
+		//	if (lenx + dlen < len) {
+		//		angle = FindAngle(s1, s2);
+		//		DIST_T lenr = len - lenx + dlenx;
+		//		Translate(&s1, s2, angle, -lenr);
+		//		DrawStraightTies(d, scaleInx, s1, s2, color);
+		//	}
+		//	else {
+		//		n = dto[str2Path].n;
+		//		s1 = dto[str2Path].pts[n - 2];
+		//		a0 = FindAngle(s1, s2);
+		//		Translate(&pos, s2, a0, -dlen / 2);
+		//		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		//	}
+		//}
+	}
 }
 
 /**
