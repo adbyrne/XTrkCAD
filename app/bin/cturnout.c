@@ -1064,6 +1064,7 @@ void GetTurnoutType() {
 					dtod.toType = DTO_DCROSS;
 				}
 				else if (dtod.pathCnt == 3)
+					// Perverse test because the cross paths go Left then Right, for example
 					if (lftCnt == 1)
 						dtod.toType = DTO_RCROSS;
 					else if (rgtCnt == 1)
