@@ -2652,7 +2652,7 @@ static void NewTurnOk( void * context )
 	char * customInfoP;
 
 #ifndef MKTURNOUT
-	if ( ! ParamCheckInputs( &turnDesignPG ) )
+	if ( ! ParamCheckInputs( &turnDesignPG, (wControl_p)turnDesignPG.okB ) )
 		return;
 #endif
 

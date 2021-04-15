@@ -520,8 +520,10 @@ EXPORT void ParamLoadControl(
 	FLOAT_T tmpR;
 	char * valS;
 
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
+		if ( (p->option&PDO_DLGIGNORE) != 0 ) {
+			p->bInvalid = FALSE;
 			return;
+		}
 		if (p->control == NULL || p->valueP == NULL)
 			return;
 		switch ( p->type ) {
@@ -1551,12 +1553,12 @@ static void ParamStringPush( const char * val, void * dp )
 	}
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
+	ParamHilite( p->group->win, p->control, FALSE );
 
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );
-	ParamHilite( p->group->win, p->control, FALSE );
 }
 
 
@@ -1647,7 +1649,8 @@ static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w, wD
 
 
 EXPORT wBool_t ParamCheckInputs(
-	paramGroup_p group )
+	paramGroup_p group,
+	wControl_p b )
 {
 	wBool_t bInvalid = FALSE;
 	// Check for invalid entries
@@ -1661,7 +1664,7 @@ EXPORT wBool_t ParamCheckInputs(
 	if ( bInvalid ) {
 		// At least 1 invalid entry
 		LOG( log_paraminput, 1, ( "  Group %s Invalid\n", group->nameStr ) );
-		wControlSetBalloon( (wControl_p)group->okB, 0, -29, _("Invalid input(s), please correct the hilighted field(s)") );
+		wControlSetBalloon( b, 0, -29, _("Invalid input(s), please correct the hilighted field(s)") );
 		wFlush();
 		return FALSE;
 	}
@@ -1674,7 +1677,7 @@ static void ParamButtonOk(
 {
 	wFlush();
 	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
-	if ( ! ParamCheckInputs( group ) )
+	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
 		return;
 	if ( recordF && group->nameStr )
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); {
@@ -1789,13 +1792,8 @@ EXPORT void ParamHilite(
 		wControl_p control,
 		BOOL_T hilite )
 {
-	LOG(log_paraminput, 2, ("ParamHilite(%d) - ", hilite));
-	if (win != NULL && wWinIsVisible(win) == FALSE) {
-		LOG(log_paraminput, 2, ("not visible\n"));
-		return;
-	}
 	if ( control == NULL ) return;
-	LOG(log_paraminput, 2, ("set\n"));
+	LOG(log_paraminput, 2, ("ParamHilite %s\n", hilite?"Set":"Clr" ));
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
@@ -1818,9 +1816,9 @@ EXPORT void ParamResetInvalid(
 			for ( paramData_p p = &pg->paramPtr[0]; p < &pg->paramPtr[pg->paramCnt]; p++ ) {
 				if ( p->bInvalid )
 					LOG( log_paraminput, 1, ( "  %s Invalid\n", p->nameStr ) );
-				ParamHilite( win, p->control, p->bInvalid );
+				ParamHilite( win, p->control, FALSE );
 				wControlSetBalloon( p->control, 0, 0, NULL );
-//				p->bInvalid = FALSE;
+				p->bInvalid = FALSE;
 			}
 			break;
 		}
