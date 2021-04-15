@@ -1591,10 +1591,12 @@ static void DrawXingToTies(
 			Rotate(&dto[i].base[j], zero, (90.0 - cAngle));
 		}
 
-	for (i = 0; i < DTO_DIM; i++)
+	for (i = 0; i < DTO_DIM; i++) {
 		for (j = 0; j < dto[i].n - 1; j++) {
 			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
+		dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
+	}
 
 	// Tie center line in drawing coordinates
 	REORIGIN(c1, s1, xx->angle, xx->orig);
@@ -1778,6 +1780,7 @@ static void DrawCrossToTies(
 			dto[i].pts[j] = pos;
 			if (j < dto[i].n - 1)
 				dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
+			dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
 		}
 
 	// Bad assumption
@@ -1811,7 +1814,7 @@ static void DrawCrossToTies(
 	s2 = dto[strPath].pts[sn - 1];
 	t1 = dto[str2Path].pts[0];
 	t2 = dto[str2Path].pts[tn - 1];
-	angle = dto[strPath].angle; //FindAngle(s1, s2); // The straight segment
+	angle = FindAngle(s1, s2); // The straight segment
 
 	p1 = dto[othPath].base[0];
 	p2 = dto[othPath].base[pn - 1];
@@ -1820,6 +1823,8 @@ static void DrawCrossToTies(
 
 	td = GetScaleTieData(scaleInx);
 	len = FindDistance(s1, s2);
+	angle = dto[strPath].angle;
+
 	cnt = (int)floor(len / td->spacing + 0.5);
 	if (cnt > 0) {
 		DIST_T px = 0;
