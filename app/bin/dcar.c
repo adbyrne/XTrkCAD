@@ -37,6 +37,7 @@ static int log_carDlgState;
 static int log_carDlgList;
 
 static paramFloatRange_t r0_99999 = { 0, 99999, 80 };
+static paramFloatRange_t r0d001_99999 = { 0.001, 99999, 80 };
 static paramFloatRange_t r9999_9999 = {-99999, 99999, 80};
 static paramIntegerRange_t i1_999999999 = { 1, 999999999, 80, PDO_NORANGECHECK_HIGH };
 static paramIntegerRange_t i1_9999 = { 1, 9999, 50 };
@@ -2183,7 +2184,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_MANUF_LIST         (A+0)
 	{ PD_DROPLIST, &carDlgManufInx, "manuf", PDO_NOPREF, I2VP(350), N_("Manufacturer"), BL_EDITABLE },
 #define I_CD_PROTOTYPE_STR      (A+1)
-	{ PD_STRING, &carDlgProtoStr, "prototype", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Prototype"), 0, 0, sizeof(carDlgProtoStr)},
+	{ PD_STRING, &carDlgProtoStr, "prototype", PDO_NOPREF|PDO_NOTBLANK, I2VP(350), N_("Prototype"), 0, 0, sizeof(carDlgProtoStr)},
 #define I_CD_PROTOKIND_LIST     (A+2)
 	{ PD_DROPLIST, &carDlgKindInx, "protokind-list", PDO_NOPREF, I2VP(125), N_("Prototype"), 0 },
 #define I_CD_PROTOTYPE_LIST     (A+3)
@@ -2193,7 +2194,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_PARTNO_LIST        (A+5)
 	{ PD_DROPLIST, &carDlgPartnoInx, "partno-list", PDO_NOPREF, I2VP(350), N_("Part"), BL_EDITABLE },
 #define I_CD_PARTNO_STR         (A+6)
-	{ PD_STRING, &carDlgPartnoStr, "partno", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Part Number"), 0, 0, sizeof(carDlgPartnoStr)},
+	{ PD_STRING, &carDlgPartnoStr, "partno", PDO_NOPREF|PDO_NOTBLANK, I2VP(350), N_("Part Number"), 0, 0, sizeof(carDlgPartnoStr)},
 #define I_CD_ISLOCO             (A+7)
 	{ PD_TOGGLE, &carDlgIsLoco, "isLoco", PDO_NOPREF|PDO_DLGWIDE, isLocoLabels, N_("Loco?"), BC_HORZ|BC_NOBORDER },
 #define I_CD_DESC_STR           (A+8)
@@ -2218,19 +2219,19 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_BODYCOLOR          (B+3)
 	{ PD_COLORLIST, &carDlgBodyColor, "bodyColor", PDO_DLGWIDE|PDO_DLGHORZ, NULL, N_("Color") },
 #define I_CD_CARLENGTH          (B+4)
-	{ PD_FLOAT, &carDlgDim.carLength, "carLength", PDO_DIM|PDO_NOPREF|PDO_DLGWIDE, &r0_99999, N_("Car Length") },
+	{ PD_FLOAT, &carDlgDim.carLength, "carLength", PDO_DIM|PDO_NOPREF|PDO_DLGWIDE, &r0d001_99999, N_("Car Length") },
 #define I_CD_CARWIDTH           (B+5)
-	{ PD_FLOAT, &carDlgDim.carWidth, "carWidth", PDO_DIM|PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, &r0_99999, N_("Width") },
+	{ PD_FLOAT, &carDlgDim.carWidth, "carWidth", PDO_DIM|PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, &r0d001_99999, N_("Width") },
 #define I_CD_TRKCENTER          (B+6)
-	{ PD_FLOAT, &carDlgDim.truckCenter, "trkCenter", PDO_DIM|PDO_NOPREF, &r0_99999, N_("Truck Centers") },
+	{ PD_FLOAT, &carDlgDim.truckCenter, "trkCenter", PDO_DIM|PDO_NOPREF, &r0d001_99999, N_("Truck Centers") },
 #define I_CD_TRKOFFSET			(B+7)
 	{ PD_FLOAT, &carDlgDim.truckCenterOffset, "trkCenterOffset", PDO_DIM|PDO_NOPREF|PDO_DLGHORZ|PDO_DLGWIDE, &r9999_9999, N_("Center Offset") },
 #define I_CD_CPLRMNT            (B+8)
 	{ PD_RADIO, &carDlgCouplerMount, "cplrMount", PDO_NOPREF, cplrModeLabels, N_("Coupler Mount"), BC_HORZ|BC_NOBORDER },
 #define I_CD_CPLDLEN            (B+9)
-	{ PD_FLOAT, &carDlgDim.coupledLength, "cpldLen", PDO_DIM|PDO_NOPREF, &r0_99999, N_("Coupled Length") },
+	{ PD_FLOAT, &carDlgDim.coupledLength, "cpldLen", PDO_DIM|PDO_NOPREF, &r0d001_99999, N_("Coupled Length") },
 #define I_CD_CPLRLEN            (B+10)
-	{ PD_FLOAT, &carDlgCouplerLength, "cplrLen", PDO_DIM|PDO_NOPREF|PDO_DLGHORZ, &r0_99999, N_("Coupler Length") },
+	{ PD_FLOAT, &carDlgCouplerLength, "cplrLen", PDO_DIM|PDO_NOPREF|PDO_DLGHORZ, &r0d001_99999, N_("Coupler Length") },
 #define I_CD_CANVAS             (B+11)
 	{ PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGWIDE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND|PDO_DLGRESIZE, &carDlgDrawData, NULL, 0 },
 
@@ -3469,6 +3470,18 @@ static BOOL_T CheckCarDlgItemIndex( long * index )
 }
 
 
+void CarDlgError(
+	wBool_t ok,
+	paramData_p p,
+	char * msg )
+{
+	p->bInvalid = !ok;
+	ParamHilite( p->group->win, p->control, !ok );
+	wWinPix_t h = wControlGetHeight(p->control);
+	wControlSetBalloon( p->control, 0, -h*3/4, ok?NULL:msg );
+}
+
+
 static void CarDlgUpdate(
 		paramGroup_p pg,
 		int inx,
@@ -3479,7 +3492,7 @@ static void CarDlgUpdate(
 	char * cp, *cq;
 	long valL, d, m;
 	FLOAT_T ratio;
-	BOOL_T ok;
+	BOOL_T ok = TRUE;
 	DIST_T len;
 	BOOL_T checkTruckCenter = FALSE;
 	cmp_key_t cmp_key;
@@ -3561,6 +3574,12 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		break;
 
 	case I_CD_DISPMODE:
+
+		if ( !ParamCheckInputs( &carDlgPG, carDlgPLs[I_CD_DISPMODE].control ) ) {
+			carDlgDispMode = 1-carDlgDispMode;
+			ParamLoadControl( &carDlgPG, I_CD_DISPMODE );
+			break;
+		}
 		for ( inx=B; inx<C; inx++ )
 			ParamControlShow( &carDlgPG, inx, carDlgDispMode==1 );
 		for ( inx=C; inx<D; inx++ )
@@ -3664,14 +3683,14 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		} else if ( carDlgDim.carLength != 0 && ( carDlgDim.coupledLength == 0 || carDlgCarLengthClock >= carDlgCoupledLengthClock ) ) {
 			len = carDlgDim.carLength+carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
-				carDlgDim.coupledLength = carDlgDim.carLength+carDlgCouplerLength*2.0;
+				carDlgDim.coupledLength = len;
 				ParamLoadControl( &carDlgPG, I_CD_CPLDLEN );
 			}
 			carDlgCouplerLengthClock = ++carDlgClock;
 		} else if ( carDlgDim.coupledLength != 0 && ( carDlgDim.carLength == 0 || carDlgCoupledLengthClock > carDlgCarLengthClock ) ) {
-			len = carDlgCouplerLength-carDlgDim.coupledLength*2.0;
+			len = carDlgDim.coupledLength-carDlgCouplerLength*2.0;
 			if ( len > 0 ) {
-				carDlgDim.carLength = carDlgCouplerLength-carDlgDim.coupledLength*2.0;
+				carDlgDim.carLength = len;
 				ParamLoadControl( &carDlgPG, I_CD_CARLENGTH );
 				checkTruckCenter = TRUE;
 			}
@@ -3713,6 +3732,10 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 			carDlgTruckOffsetL = 0;
 			carDlgTruckOffsetR = 0;
 		}
+		if ( 2*carDlgDim.truckCenterOffset > carDlgDim.carLength - carDlgDim.truckCenter) {
+			ok = FALSE;
+			CarDlgError( ok, &carDlgPLs[I_CD_TRKOFFSET], _("Truck Center Offset plus Truck Centers must be less than Car Length") );
+		}
 		redraw = TRUE;
 		break;
 
@@ -3743,8 +3766,12 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 	case I_CD_CURPRC:
 		carDlgChanged++;
 		*(FLOAT_T*)(pg->paramPtr[inx].context) = strtod( (char*)pg->paramPtr[inx].valueP, &cp );
-		if ( cp==NULL || *cp!='\0' )
+		if ( cp==NULL || *cp!='\0' ) {
 			*(FLOAT_T*)(pg->paramPtr[inx].context) = -1;
+			ok = FALSE;
+			sprintf( message, "%s not valid", pg->paramPtr[inx].winLabel );
+		}
+		CarDlgError( ok, &pg->paramPtr[inx], message );
 		break;
 
 	case I_CD_COND:
@@ -3765,34 +3792,36 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 			valL = strtol( cp, &cq, 10 );
 			if ( cq==NULL || *cq !='\0' ) {
 				cp = N_("Enter a 8 digit numeric date (yyyymmdd)");
+				ok = FALSE;
 			} else {
 				if ( strlen(cp) != 8  || valL == 0) {
 					cp = N_("Enter a 8 digit numeric date (yyyymmdd)");
+					ok = FALSE;
 				} else if ( valL < 19000101 || valL > 21991231 ) {
 					cp = N_("Enter a date between 19000101 and 21991231");
+					ok = FALSE;
 				} else {
 					d = valL % 100;
 					m = (valL / 100) % 100;
 					if ( m < 1 || m > 12 ) {
 						cp = N_("Invalid month");
+						ok = FALSE;
 					} else if ( d < 1 || d > 31 ) {
 						cp = N_("Invalid day");
+						ok = FALSE;
 					} else {
 						cp = NULL;
 					}
 				}
 			}
-			if ( cp ) {
+			if ( !ok ) {
 				valL = -1;
 			}
 		} else {
 			cp = NULL;
 			valL = 0;
 		}
-		pg->paramPtr[inx].bInvalid = cp!=NULL;
-		ParamHilite( pg->win, pg->paramPtr[inx].control, cp!=NULL );
-		wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
-		wControlSetBalloon( pg->paramPtr[inx].control, 0, -h*3/4, cp );
+		CarDlgError( ok, &pg->paramPtr[inx], cp );
 		if (inx == I_CD_PURDAT)
 			carDlgPurchDate = valL;
 		else
@@ -3872,39 +3901,8 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		ParamLoadControl( &carDlgPG, I_CD_TRKOFFSET );
 	}
 
-	ok = FALSE;
-	if ( S_PROTO && carDlgProtoStr[0] == '\0' )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter a Prototype name") );
-	else if ( S_PART && carDlgManufStr[0] == '\0' )
+	if ( S_PART && carDlgManufStr[0] == '\0' )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Select or Enter a Manufacturer") );
-	else if ( S_PART && carDlgPartnoStr[0] == '\0' )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter a Part Number") );
-	else if ( carDlgDim.carLength <= 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Car Length") );
-	else if ( carDlgDim.carWidth <= 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Car Width") );
-	else if ( carDlgDim.truckCenter <= 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Truck Centers") );
-	else if ( carDlgDim.truckCenterOffset < 0)
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Center Offset must be greater than 0 or 0") );
-	else if ( carDlgDim.truckCenter >= carDlgDim.carLength )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Centers must be less than Car Length") );
-	else if ( 2*carDlgDim.truckCenterOffset > carDlgDim.carLength - carDlgDim.truckCenter)
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Center Offset plus Truck Centers must be less than Car Length") );
-	else if ( (!S_PROTO) && ( carDlgDim.coupledLength <= 0 || carDlgCouplerLength <= 0 ) )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Coupled Length or Coupler Length") );
-	else if ( S_PROTO && carDlgDim.coupledLength <= 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Coupled Length") );
-	else if ( S_ITEM && carDlgItemIndex <= 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter a item Index") );
-	else if ( S_ITEM && carDlgPurchPrice < 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Purchase Price is not valid") );
-	else if ( S_ITEM && carDlgCurrPrice < 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Current Price is not valid") );
-	else if ( S_ITEM && carDlgPurchDate < 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Purchase Date is not valid - (use yyyymmdd)") );
-	else if ( S_ITEM && carDlgServiceDate < 0 )
-		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Service Date is not valid - (use yyyymmdd)" ) );
 	else if ( S_ITEM && carDlgUpdateItemPtr==NULL &&
 			( valL = carDlgItemIndex , !CheckCarDlgItemIndex(&carDlgItemIndex) ) ) {
 		sprintf( message, _("Item Index %ld duplicated an existing item: updated to new value"), valL );
@@ -4320,6 +4318,8 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 	carDlgScaleInx = GetLayoutCurScale();
 	carDlgFlipToggle = FALSE;
 	carDlgChanged = 0;
+	for ( paramData_p p=carDlgPLs; p < carDlgPLs + sizeof carDlgPLs/sizeof carDlgPLs[0]; p++ )
+		p->bInvalid = FALSE;
 
 	CarDlgDoStateActions( actions );
 

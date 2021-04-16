@@ -844,7 +844,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 		p0 = segPtr->u.l.pos[0];
 		p1 = segPtr->u.l.pos[1];
 		if ((FindDistance(p0, zero) > EPSILON) || (fabs(p1.y) > EPSILON))
-			return;
+			return -1;
 		break;
 	case SEG_CRVTRK:
 		r = fabs(segPtr->u.c.radius);
@@ -860,7 +860,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 		PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
 		if ((FindDistance(p0, zero) > EPSILON)
 			|| ((fabs(aa0 - 180) > EPSILON) && (fabs(aa0) > EPSILON)))
-			return;
+			return -1;
 		break;
 	}
 
