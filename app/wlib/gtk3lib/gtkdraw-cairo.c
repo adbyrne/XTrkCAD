@@ -580,7 +580,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 
 	gtkDrawDestroyCairoContext(cairo);
 	if (bd->widget && !bd->delayUpdate)
-		gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),w>0?x:x+w,h>0?y:y+h,fabs(w),fabs(h));
+		gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),w>0?x:x+w,h>0?y:y+h,fabs(w)+1,fabs(h)+1);
 
 }
 
@@ -619,10 +619,11 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 	min_y = max_y = INMAPY(bd,p[0][1]);
     for (i=0; i<cnt; i++) {
     	points[i].x = INMAPX(bd,p[i][0]);
+    	points[i].y = INMAPY(bd,p[i][1]);
     	if (points[i].x < min_x) min_x = points[i].x;
     	if (points[i].x > max_x) max_x = points[i].x;
     	if (points[i].y > max_y) max_y = points[i].y;
-    	points[i].y = INMAPY(bd,p[i][1]);
+    	if (points[i].y < min_y) min_y = points[i].y;
 	}
 
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, fill?0:dw, fill?wDrawLineSolid:lt, color, opt);
@@ -705,8 +706,9 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		cairo_stroke(cairo);
 	}
 	gtkDrawDestroyCairoContext(cairo);
-	if (bd->widget && !bd->delayUpdate)
-			gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),min_x,min_y,max_x-min_y,max_y-min_y);
+	if (bd->widget && !bd->delayUpdate) {
+			gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),min_x,min_y,max_x-min_x+1,max_y-min_y+1);  //Ensure positive width
+	}
 
 }
 
