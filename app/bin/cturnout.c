@@ -1106,7 +1106,7 @@ static void DrawDtoLayout(
 
 	// Draw the points and lines from dto
 	double r = td->width / 2;
-	if (r < 1) r = 1;
+	// if (r < 1) r = 1;
 
 	int i, j;
 	for (i = 0; i < DTO_DIM; i++) {
@@ -1306,9 +1306,10 @@ static void DrawCurvedToTies(
 	DIST_T len, r;
 	coOrd pos;
 	int cnt;
-	ANGLE_T angle;
-	coOrd c1, c2, p1, p2, q1, q2;
-	ANGLE_T a0, a1, a2;
+	ANGLE_T angle, dang;
+	coOrd center;
+	coOrd p1, p2, q1, q2;
+	ANGLE_T a0, a1;
 
 	if (color == wDrawColorBlack)
 		color = tieColor;
@@ -1332,14 +1333,13 @@ static void DrawCurvedToTies(
 
 	td = GetScaleTieData(scaleInx);
 
-	ANGLE_T ang, dang;
-	coOrd center;
 	// Save the ending coordinates
 	coOrd othEnd = zero, secEnd = zero;
 
 	trkSeg_p trk = dto[0].trkSeg;
 	DIST_T tdlen = td->length, tdmax = tdlen * 2.25;
 	DIST_T tdspc = td->spacing, tdspc2 = tdspc / 2.0;
+	double rdot = td->width / 2;
 
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
@@ -1380,35 +1380,37 @@ static void DrawCurvedToTies(
 				DIST_T dx = len / cnt, dx2 = dx / 2;
 
 				if (dto[othPath].type == 'R') {
-					ang = a0 + dang / 2;
+					angle = a0 + dang / 2;
 				}
 				else {
-					ang = a0 + a1 - dang / 2;
+					angle = a0 + a1 - dang / 2;
 					dang = -dang;
 				}
-				for (; cnt; cnt--, ang += dang) {
-					p2 = dto[othPath].base[p0 + 1];
-					q2 = dto[secPath].base[q0 + 1];
 
-					if (px > p2.x)
+				px += dx2;
+
+				for (; cnt; cnt--, angle += dang) {
+					if (px >= dto[othPath].base[p0 + 1].x) 
 						p0++;
-					if (px > q2.x)
+					if (px >= dto[secPath].base[q0 + 1].x) 
 						q0++;
 					if ((p0 >= pn) || (q0 >= qn)) {
 						extraDraw = 1;
 						break;
 					}
 
-					PointOnCircle(&othEnd, center, r, ang);
-					//DrawTie(d, othEnd, ang + 90, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+					PointOnCircle(&othEnd, center, r, angle);
+					// DrawTie(d, othEnd, angle + 90, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+					// DrawFillCircle(d, othEnd, rdot, drawColorGreen);
 
 					q1 = dto[secPath].pts[q0];
 					q2 = dto[secPath].pts[q0 + 1];
-					FindIntersection(&secEnd, othEnd, ang, q1, FindAngle(q1, q2));
+					FindIntersection(&secEnd, othEnd, angle, q2, FindAngle(q2, q1));
 					//DrawLine(d, q1, q2, 0, drawColorBlue);
-					//DrawFillCircle(d, p1, rdot, drawColorBlue);
+					//DrawFillCircle(d, secEnd, rdot, drawColorBlue);
 
 					DIST_T dy = FindDistance(othEnd, secEnd);
+					// DIST_T dy = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
 					DIST_T tlen = tdlen + dy;
 
 					if (tlen > tdmax) {
@@ -1416,9 +1418,9 @@ static void DrawCurvedToTies(
 						break;
 					}
 
-					Translate(&pos, othEnd, ang, -dy / 2);
-					DrawTie(d, pos, ang + 90, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-					// DrawFillCircle(d, pos, rdot, drawColorGreen);
+					Translate(&pos, othEnd, angle, -dy / 2);
+					DrawTie(d, pos, angle + 90, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+					// DrawFillCircle(d, pos, rdot, drawColorBlue);
 
 					px += dx;
 				}
@@ -1443,27 +1445,32 @@ static void DrawCurvedToTies(
 						break;
 					}
 
+					p1 = dto[othPath].base[p0];
+					p2 = dto[othPath].base[p0 + 1];
+
 					if ((px + tdspc >= dto[othPath].base[pn - 1].x)
 						|| (px + tdspc >= dto[secPath].base[qn - 1].x)) {
 						extraDraw = 1;
 						break;
 					}
 
-					DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-					DIST_T tlen = tdlen + fabs(dy2);
+					DIST_T dy = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					DIST_T tlen = tdlen + fabs(dy);
 					if (tlen > tdmax) {
 						extraDraw = 1;
 						break;
 					}
 
-					p1 = dto[othPath].pts[p0];
-					p2 = dto[othPath].pts[p0 + 1];
-					a1 = FindAngle(p1, p2);
+					q1 = dto[othPath].pts[p0];
+					q2 = dto[othPath].pts[p0 + 1];
+					a1 = FindAngle(q1, q2);
 					DIST_T xlen = px - dto[othPath].base[p0].x;
-					Translate(&pos, p1, a1, xlen);
+					Translate(&pos, q1, a1, xlen);
 					othEnd = pos;
-					Translate(&pos, pos, (a1 - 90.0), dy2 / 2);
-					DrawTie(d, pos, a1, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+					// DrawFillCircle(d, pos, rdot, drawColorGreen);
+					Translate(&secEnd, pos, (a1 - 90.0), dy / 2);
+					// DrawFillCircle(d, pos, rdot, drawColorBlue);
+					DrawTie(d, secEnd, a1, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 					px += dx;
 				}
