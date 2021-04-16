@@ -216,6 +216,31 @@ const char *wGetUserHomeDir(void)
 static wBool_t prefInitted = FALSE;
 static GKeyFile *keyFile = NULL;
 static gchar *stringBuffer = NULL;
+static GHashTable *hashTable;
+
+static void
+FreeHashKey( gpointer key )
+{
+    //printf("Free key: >%s<\n", (char *)key );
+    g_free(key);
+}
+
+static void
+FreeHashValue( gpointer value )
+{
+    //printf("Free value: >%s<\n", (char *)value );
+    g_free( value );
+}
+
+static void
+CreateStringSet(void)
+{
+    hashTable = g_hash_table_new_full ( NULL,
+                                        NULL,
+                                        FreeHashKey,
+                                        FreeHashValue);
+
+}
 
 static gchar *
 BuildConfigFileName()
@@ -263,6 +288,33 @@ static void readPrefs(void)
     }
 
     g_free(tmp);
+
+    CreateStringSet();
+}
+
+/**
+ * make sure that the name for a preference has only valid chars (a-zA-Z0-9-)
+ * see the specification at freedesktop.org
+ *
+ * \param name the preference name to be checked
+ * \return pointer to a valid name string, g_free() after usage
+ */
+
+static gchar *
+wlibConvertName( const char *name )
+{
+    gchar *result = g_malloc( strlen(name) + 2 );
+    gchar *tmp = result;
+
+    while(*name) {
+        if(g_ascii_isalnum(*name ) || *name =='-' ){
+            *tmp++ = *name;
+        }
+        name++;
+    }
+    *tmp = '\0';
+
+    return(result);
 }
 
 /**
@@ -278,6 +330,8 @@ void wPrefSetString(
     const char * name,		/* Name */
     const char * sval)		/* Value */
 {
+    gchar *prefName;
+
     if (!prefInitted) {
         readPrefs();
     }
@@ -286,10 +340,12 @@ void wPrefSetString(
         return;
     }
 
+    prefName = wlibConvertName(name);
     g_key_file_set_string(keyFile,
                           section,
-                          name,
+                          prefName,
                           sval);
+    g_free(prefName);
 }
 
 /**
@@ -305,25 +361,22 @@ char * wPrefGetStringBasic(
 {
     GError *error = NULL;
     gchar *value;
+    gchar *prefName;
+    gchar *result;
 
     if (!prefInitted) {
         readPrefs();
     }
 
+    prefName = wlibConvertName(name);
     value = g_key_file_get_string(keyFile,
                                   section,
-                                  name,
+                                  prefName,
                                   &error);
+    result = g_strdup( value );
+    g_hash_table_add(hashTable, result);
 
-    // re-use the previously allocated result buffer
-    if (stringBuffer) {
-        g_free(stringBuffer);
-    }
-
-    stringBuffer = g_strdup(value);
-    g_free(value);
-
-    return (stringBuffer);
+    return (result);
 }
 
 /**
@@ -339,14 +392,18 @@ void wPrefSetInteger(
     const char * name,		/* Name */
     long lval)		/* Value */
 {
+    gchar *prefName;
+
     if (!prefInitted) {
         readPrefs();
     }
 
+    prefName = wlibConvertName(name);
     g_key_file_set_int64(keyFile,
                          section,
-                         name,
+                         prefName,
                          lval);
+    g_free(prefName);
 }
 
 /**
@@ -367,15 +424,18 @@ wBool_t wPrefGetIntegerBasic(
 {
     GError *error = NULL;
     gint64 value;
+    gchar *prefName;
 
     if (!prefInitted) {
         readPrefs();
     }
 
+    prefName = wlibConvertName(name);
     value = g_key_file_get_int64(keyFile,
                                  section,
-                                 name,
+                                 prefName,
                                  &error);
+    g_free(prefName);
 
     if (error || (value == def)) {
         *res = def;
@@ -399,14 +459,18 @@ void wPrefSetFloat(
     const char * name,		/* Name */
     double lval)		/* Value */
 {
+    gchar *prefName;
+
     if (!prefInitted) {
         readPrefs();
     }
 
+    prefName = wlibConvertName(name);
     g_key_file_set_double(keyFile,
                           section,
-                          name,
+                          prefName,
                           lval);
+    g_free(prefName);
 }
 
 /**
@@ -428,15 +492,18 @@ wBool_t wPrefGetFloatBasic(
 {
     GError *error = NULL;
     gdouble value;
+    gchar *prefName;
 
     if (!prefInitted) {
         readPrefs();
     }
 
+    prefName = wlibConvertName(name);
     value = g_key_file_get_double(keyFile,
                                   section,
-                                  name,
+                                  prefName,
                                   &error);
+    g_free(prefName);
 
     if (error || value == def) {
         *res = def;
