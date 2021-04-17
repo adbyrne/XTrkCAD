@@ -85,7 +85,7 @@ target_link_libraries(xtrkcad-wlib PRIVATE wrapbox)
 add_subdirectory(wrapbox)
 
 # copy the glade ui definitions into the build tree
-
+# files are copied unconditionally on every build
 add_custom_target(gladeui
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                     ${CMAKE_CURRENT_SOURCE_DIR}/glade
