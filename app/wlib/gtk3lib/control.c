@@ -1,7 +1,7 @@
 /** \file control.c
  * Control Utilities
  */
-/* 
+/*
  * Copyright 2016 Martin Fischer <m_fischer@sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -129,6 +129,13 @@ void wControlActive(
 
     }
 }
+
+wBool_t
+wControlExpose (GtkWidget * widget, GdkEventExpose * event, wControl_p b)
+{
+    return TRUE;
+}
+
 
 /**
  * Returns the width of <label>.
