@@ -112,6 +112,9 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, sizeof turnoutPLs / 
 #define DTO_RCROSS 10
 #define DTO_DCROSS 11
 
+// Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
+// #define DTO_DEBUG DTO_CURVED
+
 #define DTO_DIM 16
 #define DTO_SEGS 24
 
@@ -123,6 +126,8 @@ static struct DrawToData_t {
 	int routeCnt;
 	int strCnt;
 	int crvCnt;
+	int rgtCnt;
+	int lftCnt;
 	int strPath;
 	int str2Path;
 	int crvPath;
@@ -139,6 +144,7 @@ struct DrawTo_t {
 	coOrd base[DTO_SEGS];
 	DIST_T dy[DTO_SEGS];
 	ANGLE_T angle;
+	ANGLE_T crvAngle;
 	coOrd pts[DTO_SEGS];
 	char type;
 };
@@ -867,6 +873,8 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	pp = GetPaths(trk);
 	while (pp[0]) {
 		pp += strlen((char*)pp) + 1;
+
+		ANGLE_T angle = 0;
 		while (pp[0]) {
 			if (pathCnt < DTO_DIM)
 				dto[pathCnt].type = 'S';
@@ -888,7 +896,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 					// n++;
 					dto[pathCnt].n = n;
 
-					if (n >= DTO_SEGS) return -1;
+					if (n >= DTO_SEGS - 1) return -1;
 
 					break;
 				case SEG_CRVTRK:
@@ -898,6 +906,9 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 					a0 = segPtr->u.c.a0;
 					a1 = segPtr->u.c.a1;
+
+					angle += a1;
+
 					l = D2R(a1) * r;
 					// Every 5 degrees or 5 * tie width
 					int cnt = (int)floor(a1 / 5.0);
@@ -930,7 +941,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 						n++;
 						// dto[pathCnt].n = n;
 
-						if (n >= DTO_SEGS) return -1;
+						if (n >= DTO_SEGS - 1) return -1;
 
 						cnt--;
 					}
@@ -940,6 +951,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 				pp++;
 			}
 			// Include the last point
+			dto[pathCnt].crvAngle = angle;
 			dto[pathCnt].n++;
 
 			pathCnt++;
@@ -953,7 +965,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	dtod.routeCnt = routeCnt;
 	dtod.endCnt = trk->endCnt;
 
-	// Guard value
+	// Guard value: n < DTO_SEGS - 2
 	for (i = 0; i < pathCnt; i++)
 		dto[i].pts[dto[i].n].x = DIST_INF;
 
@@ -1029,23 +1041,27 @@ void GetTurnoutType() {
 
 	dtod.strCnt = strCnt;
 	dtod.crvCnt = crvCnt;
+	dtod.lftCnt = lftCnt;
+	dtod.rgtCnt = rgtCnt;
 
-	// Normal two- or three-way turnout
+	// Normal two- or three-way turnout, or a curved turnout
 	if (dtod.origCnt == 1) {
 		// Make sure each path ends in a straight segment
+		/*
 		for (i = 0; i < dtod.pathCnt; i++) {
 			int n = dto[i].n - 1;
 			if (dto[i].trkSeg[n]->type == SEG_CRVTRK) {
 				return;
 			}
 		}
+		*/
 		if (dtod.pathCnt == 2) {
 			if (strCnt == 1 && crvCnt == 1) {
 				dtod.toType = DTO_NORMAL;
 			}
 			else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
-				// dtod.toType = DTO_CURVED;
-				dtod.toType = DTO_INVALID;
+				if ((dto[0].crvAngle <= 20) && (dto[1].crvAngle - dto[0].crvAngle <= 20))
+					dtod.toType = DTO_CURVED;
 			}
 			else if (lftCnt == 1 && rgtCnt == 1) {
 				dtod.toType = DTO_WYE;
@@ -1160,7 +1176,9 @@ static void DrawNormalToTies(
 		}
 
 	// draw the points
-	if (0) DrawDtoLayout(d, scaleInx);
+#ifdef DTO_DEBUG
+	if (DTO_DEBUG == DTO_NORMAL) DrawDtoLayout(d, scaleInx);
+#endif
 
 	int strPath = dtod.strPath, othPath = 0, secPath = 1;
 	int toType = dtod.toType;
@@ -1312,7 +1330,7 @@ static void DrawCurvedToTies(
 	ANGLE_T angle, dang;
 	coOrd center;
 	coOrd p1, p2, q1, q2;
-	ANGLE_T a0, a1;
+	ANGLE_T a0, a1, a2;
 
 	if (color == wDrawColorBlack)
 		color = tieColor;
@@ -1329,7 +1347,9 @@ static void DrawCurvedToTies(
 		}
 
 	// draw the points
-	if (1) DrawDtoLayout(d, scaleInx);
+#ifdef DTO_DEBUG
+	if (DTO_DEBUG == DTO_CURVED) DrawDtoLayout(d, scaleInx);
+#endif
 
 	int othPath = 0, secPath = 1;
 	int toType = dtod.toType;
@@ -1347,16 +1367,22 @@ static void DrawCurvedToTies(
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
 	int p0 = 0, q0 = 0;
-	DIST_T px = tdspc2;
-	int extraDraw = 0;
+	DIST_T px = 0, qx = 0, dy = 0, dy1 = 0, dy2 = 0;
 
-	while (!extraDraw && p0 < pn && q0 < qn) {
+	double magic = 1.0;
+
+	angle = 0;
+	px = tdspc2;
+	qx = tdspc2;
+	int iterations = 0;
+	while (p0 < pn && q0 < qn) {
+		iterations++;
+
 		if (px >= dto[othPath].base[p0 + 1].x)
 			p0++;
-		if (px >= dto[secPath].base[q0 + 1].x)
+		if (qx >= dto[secPath].base[q0 + 1].x)
 			q0++;
-		if ((p0 >= pn) || (q0 >= qn)) {
-			extraDraw = 1;
+		if ((p0 >= pn - 1) || (q0 >= qn - 1)) {
 			break;
 		}
 
@@ -1381,163 +1407,162 @@ static void DrawCurvedToTies(
 
 			if (cnt != 0) {
 				dang = (len / cnt) * 360 / (2 * M_PI * r);
-				// dang = len / cnt / r * D2R(360.0);
 				DIST_T dx = len / cnt, dx2 = dx / 2;
 
 				if (dto[othPath].type == 'R') {
-					angle = a0 + dang / 2;
+					a2 = a0 + dang / 2;
 				}
 				else {
-					angle = a0 + a1 - dang / 2;
+					a2 = a0 + a1 - dang / 2;
 					dang = -dang;
 				}
+				angle += fabs(dang / 2);
 
-				px += dx2;
+				double magic = fabs(cos(D2R(angle)));
+				px += dx2 * magic;
+				qx += dx2 * magic;
 
-				for (; cnt; cnt--, angle += dang) {
-					if (px >= dto[othPath].base[p0 + 1].x) 
+				for (; cnt; cnt--, a2 += dang, angle += dang) {
+					if (px >= dto[othPath].base[p0 + 1].x)
 						p0++;
-					if (px >= dto[secPath].base[q0 + 1].x) 
+					if (qx >= dto[secPath].base[q0 + 1].x)
 						q0++;
-					if (p0 >= pn - 1) extraDraw = 1;
-					if (q0 >= qn - 1) extraDraw |= 2;
-					if (extraDraw)
-						break;
-
-					PointOnCircle(&othEnd, center, r, angle);
-					// DrawTie(d, othEnd, angle + 90, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-					// DrawFillCircle(d, othEnd, rdot, drawColorGreen);
-
-					q1 = dto[secPath].pts[q0];
-					q2 = dto[secPath].pts[q0 + 1];
-					FindIntersection(&secEnd, othEnd, angle, q2, FindAngle(q2, q1));
-					//DrawLine(d, q1, q2, 0, drawColorBlue);
-					//DrawFillCircle(d, secEnd, rdot, drawColorBlue);
-
-					DIST_T dy = FindDistance(othEnd, secEnd);
-					// DIST_T dy = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-					DIST_T tlen = tdlen + dy;
-
-					if (tlen > tdmax) {
-						extraDraw = 3;
+					if ((p0 >= pn - 1) || (q0 >= qn - 1)) {
 						break;
 					}
 
-					Translate(&pos, othEnd, angle, -dy / 2);
-					DrawTie(d, pos, angle + 90, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-					// DrawFillCircle(d, pos, rdot, drawColorBlue);
+					coOrd e1, e2;
+					PointOnCircle(&e1, center, r, a2);
 
-					px += dx;
+					q1 = dto[secPath].pts[q0];
+					q2 = dto[secPath].pts[q0 + 1];
+					FindIntersection(&e2, e1, a2, q1, FindAngle(q1, q2));
+
+					dy = FindDistance(e1, e2);
+					DIST_T tlen = tdlen + dy;
+
+					if (tlen > tdmax) {
+						break;
+					}
+
+					Translate(&pos, e1, a2, -dy / 2);
+					DrawTie(d, pos, angle + xx->angle + 90, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+
+					// Assures that these ends are the last point drawn before break
+					othEnd = e1;
+					secEnd = e2;
+
+					magic = fabs(cos(D2R(angle)));
+					if (cnt > 1) {
+						px += dx * magic;
+						qx += dx * magic;
+					}
+					else {
+						px += dx2 * magic;
+						qx += dx2 * magic;
+					}
 				}
 			}
 		}
 		else {
+			magic = fabs(cos(D2R(angle)));
+
 			p1 = dto[othPath].base[p0];
 			p2 = dto[othPath].base[p0 + 1];
 			len = FindDistance(p1, p2);
 			cnt = (int)floor(len / tdspc + 0.5);
 			if (cnt > 0) {
 				DIST_T dx = len / cnt, dx2 = dx / 2;
-				px = p1.x + dx2;
 
-				// cnt = cnt > 1 ? cnt - 1 : 1;
 				for (; cnt; cnt--) {
 					if (px >= dto[othPath].base[p0 + 1].x)
 						p0++;
-					if (px >= dto[secPath].base[q0 + 1].x)
+					if (qx >= dto[secPath].base[q0 + 1].x)
 						q0++;
-					if (p0 >= pn - 1) extraDraw = 1;
-					if (q0 >= qn - 1) extraDraw |= 2;
-					if (extraDraw)
+					if ((p0 >= pn - 1) || (q0 >= qn - 1)) {
 						break;
+					}
 
 					p1 = dto[othPath].base[p0];
 					p2 = dto[othPath].base[p0 + 1];
 
-					if ((px + tdspc >= dto[othPath].base[pn - 1].x)
-						|| (px + tdspc >= dto[secPath].base[qn - 1].x)) {
-						extraDraw = 3;
+					if ((px >= dto[othPath].base[pn - 1].x)
+						|| (qx >= dto[secPath].base[qn - 1].x)) {
 						break;
 					}
 
-					DIST_T dy = dto[secPath].base[q0].y - dto[othPath].base[p0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-					DIST_T tlen = tdlen + fabs(dy);
+					dy1 = dto[secPath].base[q0].y + (qx - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					dy2 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy = dy1 - dy2;
+					DIST_T tlen = tdlen + fabs(magic * dy);
 					if (tlen > tdmax) {
-						extraDraw = 3;
 						break;
 					}
+
+					q1 = dto[secPath].pts[q0];
+					q2 = dto[secPath].pts[q0 + 1];
+					a1 = FindAngle(q1, q2);
+					DIST_T xlen = qx - dto[secPath].base[q0].x;
+					Translate(&pos, q1, a1, xlen);
+					secEnd = pos;
 
 					q1 = dto[othPath].pts[p0];
 					q2 = dto[othPath].pts[p0 + 1];
 					a1 = FindAngle(q1, q2);
-					DIST_T xlen = px - dto[othPath].base[p0].x;
+					xlen = px - dto[othPath].base[p0].x;
 					Translate(&pos, q1, a1, xlen);
-					// DrawFillCircle(d, pos, rdot, drawColorGreen);
+					othEnd = pos;
 					Translate(&pos, pos, (a1 - 90.0), dy / 2);
-					// DrawFillCircle(d, pos, rdot, drawColorBlue);
 					DrawTie(d, pos, a1, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
-					px += dx;
+					double magic = fabs(cos(D2R(angle)));
+					px += dx * magic;
+					qx += dx * magic;
 				}
 			}
+			else {
+				break;
+			}
 		}
 	}
+
+#ifdef DTO_DEBUG
+	if (DTO_DEBUG == DTO_CURVED) {
+		DrawFillCircle(d, othEnd, rdot, drawColorGreen);
+		DrawFillCircle(d, secEnd, rdot, drawColorGreen);
+
+		DrawFillCircle(d, dto[othPath].pts[p0], rdot, drawColorBlue);
+		DrawFillCircle(d, dto[secPath].pts[q0], rdot, drawColorBlue);
+	}
+#endif
 
 	// Draw remaining ties, if any
-	if (extraDraw & 1) {
-		p1 = othEnd;
-		// if (FindDistance(p1, p2) >= tdspc) {
-		if (p0 < pn - 1) {
-			p2 = dto[othPath].pts[p0 + 1];
-			a0 = FindAngle(p1, p2);
-			Translate(&p1, p1, a0, -tdspc2);
-
-			while (p0 < pn - 1) {
-				p2 = dto[othPath].pts[p0 + 1];
-				DrawStraightTies(d, scaleInx, p1, p2, color);
-
-				p1 = p2;
-				p0++;
-			}
-			p1 = dto[othPath].pts[pn - 2];
-			p2 = dto[othPath].pts[pn - 1];
-			a0 = FindAngle(p1, p2);
-			Translate(&pos, p2, a0, -tdspc2);
-			DrawTie(d, pos, a0, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-		}
-		else {
-			p2 = dto[othPath].pts[pn - 1];
-			a0 = FindAngle(p1, p2);
-			Translate(&pos, p2, a0, -tdspc2);
-			DrawTie(d, pos, a0, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-		}
+	p1 = othEnd;
+	p2 = dto[othPath].pts[pn - 1];
+	a0 = FindAngle(p1, p2);
+	len = FindDistance(p1, p2);
+	if (len >= 2 * tdspc) {
+		Translate(&p1, p1, a0, tdspc2);
+		//Translate(&p2, p2, a0, -tdspc2);
+		DrawStraightTies(d, scaleInx, p1, p2, color);
 	}
-	if (extraDraw & 2) {
-		if (q0 < qn - 1) {
-			q1 = dto[secPath].pts[q0];
-			q2 = dto[secPath].pts[q0 + 1];
-			a0 = FindAngle(q1, q2);
-			len = px - dto[secPath].base[q0].x - tdspc;
-			Translate(&q1, q1, a0, len);
+	else { 
+		Translate(&p2, p2, a0, -tdspc2);
+		DrawTie(d, p2, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+	}
 
-			while (q0 < qn - 1) {
-				q2 = dto[secPath].pts[q0 + 1];
-				//angle = FindAngle(q1, q2);
-				//Translate(&pos, q2, angle, -tdspc2);
-				DrawStraightTies(d, scaleInx, q1, q2, color); 
-
-				q1 = q2;
-				q0++;
-			}
-		}
-		else {
-			q1 = dto[secPath].pts[qn - 2];
-			q2 = dto[secPath].pts[qn - 1];
-			a0 = FindAngle(q1, q2);
-			Translate(&pos, q2, a0, -tdspc2);
-			// DrawStraightTies(d, scaleInx, q1, q2, color);
-			DrawTie(d, pos, a0, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
-		}
+	q1 = secEnd;
+	q2 = dto[secPath].pts[qn - 1];
+	a0 = FindAngle(q1, q2);
+	len = FindDistance(p1, p2);
+	if (len >= 2 * tdspc) {
+		Translate(&q1, q1, a0, tdspc2);
+		//Translate(&q2, q2, a0, -tdspc2);
+		DrawStraightTies(d, scaleInx, q1, q2, color);
+	}
+	else { 
+		Translate(&q2, q2, a0, -tdspc2);
+		DrawTie(d, q2, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 }
 
@@ -1584,7 +1609,9 @@ static void DrawXingToTies(
 	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
 
 	// draw the points
-	if (0) DrawDtoLayout(d, scaleInx);
+#ifdef DTO_DEBUG
+	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
+#endif
 
 	int othPath = strPath, secPath = str2Path;
 	int toType = dtod.toType;
@@ -1883,7 +1910,9 @@ static void DrawCrossToTies(
 	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
 
 	// draw the points
-	if (0) DrawDtoLayout(d, scaleInx);
+#ifdef DTO_DEBUG
+	if (DTO_DEBUG == DTO_LCROSS) DrawDtoLayout(d, scaleInx);
+#endif
 
 	int strPath = dtod.strPath, str2Path = dtod.str2Path;
 	// Bad assumption
