@@ -1282,7 +1282,7 @@ static toDesignSchema_t * LoadSegs(
 		wBool_t loadPoints )
 {
 	wIndex_t s;
-	int i, p, p0, p1;
+	int p, p0, p1;
 	DIST_T d;
 #ifndef MKTURNOUT
 	wIndex_t pathLen;
