@@ -1254,21 +1254,14 @@ static gint draw_button_event(
 	bd->lastX = OUTMAPX(bd, event->x);
 	bd->lastY = OUTMAPY(bd, event->y);
 
-	printf("Button Event %d %s \n",event->button, event->type == GDK_BUTTON_PRESS?"Press":"Release");
-
 	switch ( event->button ) {
 	case 1: /* left mouse button */
 	case 2: /* middle mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp;
-		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp, bd->lastX, bd->lastY );*/
-		GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask ();
-		/* left plus control = right mouse */
-		if ((event->state & modifiers) == GDK_CONTROL_MASK)
-			action = event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp;
+		if (event->type==GDK_2BUTTON_PRESS) action = wActionLDownDouble;
 		break;
 	case 3: /* right mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp;
-		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp, (wDrawPix_t)bd->lastX, (wDrawPix_t)bd->lastY );*/
 		break;
 	}
 	if (action != 0) {
@@ -1340,6 +1333,8 @@ static gint draw_char_release_event(
 			case GDK_KEY_Control_R:	modKey = wModKey_Ctrl; break;
 				default: ;
 		}
+
+		catch_shift_ctrl_alt_keys(widget, event, NULL);
 
 		if (modKey!= wModKey_None && (bd->option & BD_MODKEYS)) {
 			 bd->action(bd, bd->context, wActionModKey+((int)modKey<<8), (wDrawPix_t)bd->lastX, (wDrawPix_t)bd->lastY );
@@ -1424,10 +1419,10 @@ static gint draw_char_event(
 				gtk_widget_grab_focus( bd->widget );
 		return TRUE;
 	} else if (modKey!= wModKey_None && (bd->option & BD_MODKEYS)) {
-				bd->action(bd, bd->context, wActionModKey+((int)modKey<<8), (wDrawPix_t)bd->lastX, (wDrawPix_t)bd->lastY );
-				if (!(bd->option & BD_NOFOCUS))
-								gtk_widget_grab_focus( bd->widget );
-				return TRUE;
+		bd->action(bd, bd->context, wActionModKey+((int)modKey<<8), (wDrawPix_t)bd->lastX, (wDrawPix_t)bd->lastY );
+		if (!(bd->option & BD_NOFOCUS))
+						gtk_widget_grab_focus( bd->widget );
+		return TRUE;
 	} else {
 		return FALSE;
 	}

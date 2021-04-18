@@ -2936,7 +2936,7 @@ EXPORT void DrawInit( int initialZoom )
 	if (wWinIsTemplated(mainW)) {
 		if ( w <= 0 ) w = 1;
 		if ( h <= 0 ) h = 1;
-		tempD.d = mainD.d = wDrawCreate( mainW, 0, 0, "main-maindraw", BD_TICKS|BO_USETEMPLATE,
+		tempD.d = mainD.d = wDrawCreate( mainW, 0, 0, "main-maindraw", BD_TICKS|BO_USETEMPLATE|BD_MODKEYS,
 												w, h, &mainD,
 												(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
 

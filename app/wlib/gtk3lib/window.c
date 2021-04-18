@@ -796,22 +796,22 @@ wBool_t catch_shift_ctrl_alt_keys(
     if ((event->state & modifiers)&GDK_MOD2_MASK)
     	state |= WKEY_CMD;
 
-    //switch (event->keyval) {
-    //case GDK_KEY_Shift_L:
-    //case GDK_KEY_Shift_R:
-    //    state |= WKEY_SHIFT;
-    //    break;
+    switch (event->keyval) {					//GTK3 - modifiers not set for modifier press/release
+    	case GDK_KEY_Shift_L:
+    	case GDK_KEY_Shift_R:
+    		state |= WKEY_SHIFT;
+    		break;
 
-    //case GDK_KEY_Control_L:
-    //case GDK_KEY_Control_R:
-    //    state |= WKEY_CTRL;
-    //    break;
+    	case GDK_KEY_Control_L:
+    	case GDK_KEY_Control_R:
+    		state |= WKEY_CTRL;
+    		break;
 
-    //case GDK_KEY_Alt_L:
-    //case GDK_KEY_Alt_R:
-    //    state |= WKEY_ALT;
-    //    break;
-    //}
+    	case GDK_KEY_Alt_L:
+    	case GDK_KEY_Alt_R:
+    		state |= WKEY_ALT;
+    		break;
+    }
 
     if (state != 0) {
         if (event->type == GDK_KEY_PRESS) {
