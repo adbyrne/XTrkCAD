@@ -439,10 +439,6 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 	/* draw text */
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts);
 
-	cairo_save( cairo );
-	cairo_translate( cairo, x, y );
-	cairo_rotate( cairo, angle );
-
 	layout = wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 									  (wDrawPix_t *) &w, (wDrawPix_t *) &h,
 									  (wDrawPix_t *) &ascent, (wDrawPix_t *) &descent, (wDrawPix_t *) &baseline);
