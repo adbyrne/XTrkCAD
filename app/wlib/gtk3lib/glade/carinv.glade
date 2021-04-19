@@ -2,6 +2,7 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkSizeGroup" id="carinv-buttonsize"/>
   <object class="GtkListStore" id="carinv-list.liststore">
     <columns>
       <!-- column-name data -->
@@ -56,12 +57,11 @@
             <property name="margin_top">18</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
+              <object class="GtkToggleButton" id="id-help">
+                <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -70,17 +70,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-cancel">
-                <property name="label" translatable="yes">_Done</property>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">Close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -371,12 +365,11 @@
                 <property name="spacing">6</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkButton" id="carinv-edit">
-                    <property name="label" translatable="yes">_Edit...</property>
+                  <object class="GtkToggleButton" id="carinv-edit">
+                    <property name="label" translatable="yes">Edit</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -385,12 +378,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="carinv-add">
-                    <property name="label" translatable="yes">_Add...</property>
+                  <object class="GtkToggleButton" id="carinv-add">
+                    <property name="label" translatable="yes">Add</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -399,12 +391,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="carinv-delete">
-                    <property name="label" translatable="yes">Dele_te</property>
+                  <object class="GtkToggleButton" id="carinv-delete">
+                    <property name="label" translatable="yes">Delete</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -429,12 +420,11 @@
                 <property name="spacing">6</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkButton" id="carinv-import">
-                    <property name="label" translatable="yes">_Import...</property>
+                  <object class="GtkToggleButton" id="carinv-import">
+                    <property name="label" translatable="yes">Import...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -443,12 +433,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="carinv-export">
-                    <property name="label" translatable="yes">E_xport...</property>
+                  <object class="GtkToggleButton" id="carinv-export">
+                    <property name="label" translatable="yes">Export ...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -457,12 +446,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="carinv-savetext">
-                    <property name="label" translatable="yes">_Save...</property>
+                  <object class="GtkToggleButton" id="carinv-savetext">
+                    <property name="label" translatable="yes">Save...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -484,12 +472,11 @@
                 <property name="orientation">vertical</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkButton" id="id-ok">
-                    <property name="label" translatable="yes">_Find</property>
+                  <object class="GtkToggleButton" id="id-ok">
+                    <property name="label" translatable="yes">Find</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -518,16 +505,5 @@
     <child type="titlebar">
       <placeholder/>
     </child>
-  </object>
-  <object class="GtkSizeGroup" id="carinv-buttonsize">
-    <widgets>
-      <widget name="carinv-edit"/>
-      <widget name="carinv-add"/>
-      <widget name="carinv-delete"/>
-      <widget name="carinv-import"/>
-      <widget name="carinv-export"/>
-      <widget name="carinv-savetext"/>
-      <widget name="id-ok"/>
-    </widgets>
   </object>
 </interface>

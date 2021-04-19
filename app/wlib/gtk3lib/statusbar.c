@@ -231,7 +231,8 @@ static void wStatusHideChild(GtkWidget * w, void * container) {
  */
 
 void wStatusClearControls(wWin_p win) {
-	if (win->builder && !controlsbox) {
+	if (!win->builder) return;
+	if (!controlsbox) {
 		controlsbox = wlibGetWidgetFromName(win, "main-infoBarControls", "box", FALSE);
 	}
 

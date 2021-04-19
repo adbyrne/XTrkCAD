@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow">
@@ -807,14 +807,11 @@
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkButton" id="add">
+              <object class="GtkToggleButton" id="add">
                 <property name="label" translatable="yes">Add</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -823,7 +820,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="new">
+              <object class="GtkToggleButton" id="new">
                 <property name="label" translatable="yes">New</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -836,8 +833,8 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="close">
-                <property name="label" translatable="yes">Close</property>
+              <object class="GtkToggleButton" id="id-ok">
+                <property name="label" translatable="yes">Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -849,7 +846,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="help">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -872,6 +869,9 @@
           </packing>
         </child>
       </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
     </child>
   </object>
 </interface>

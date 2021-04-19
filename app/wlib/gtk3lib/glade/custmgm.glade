@@ -130,12 +130,24 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkButton" id="custmgm-edit">
-                    <property name="label" translatable="yes">_Edit...</property>
+                  <object class="GtkToggleButton" id="custmgm-edit">
+                    <property name="label" translatable="yes">Edit</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="custmgm-export">
+                    <property name="label" translatable="yes">Move To...</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -144,31 +156,16 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="custmgm-export">
-                    <property name="label" translatable="yes">_Move to...</property>
+                  <object class="GtkToggleButton" id="custmgm-delete">
+                    <property name="label" translatable="yes">Delete</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="custmgm-delete">
-                    <property name="label" translatable="yes">_Delete</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
@@ -217,12 +214,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="custmgm-newcar">
-                <property name="label" translatable="yes">_Go</property>
+              <object class="GtkToggleButton" id="custmgm-newcar">
+                <property name="label" translatable="yes">Add</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -245,12 +241,11 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
+              <object class="GtkToggleButton" id="id-help">
+                <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -259,15 +254,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-ok">
-                <property name="label" translatable="yes">_Done</property>
+              <object class="GtkToggleButton" id="id-ok">
+                <property name="label" translatable="yes">Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -276,7 +267,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-cancel">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

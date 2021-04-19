@@ -16,15 +16,11 @@
             <property name="margin_top">18</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-cancel">
-                <property name="label" translatable="yes">_Done</property>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -105,42 +101,14 @@
                 <property name="halign">end</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkButton" id="id-ok">
+                  <object class="GtkToggleButton" id="id-ok">
+                    <property name="label">gtk-media-play</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">_Step</property>
-                            <property name="use_underline">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">media-playback-start</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="use_stock">True</property>
+                    <property name="image_position">right</property>
+                    <property name="always_show_image">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -149,43 +117,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="demo-next">
+                  <object class="GtkToggleButton" id="demo-next">
+                    <property name="label">gtk-media-next</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="spacing">12</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">_Next</property>
-                            <property name="use_underline">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkImage">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="icon_name">media-skip-forward</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="use_stock">True</property>
+                    <property name="image_position">right</property>
+                    <property name="always_show_image">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>

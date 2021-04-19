@@ -413,7 +413,7 @@ static paramData_t curvePLs[] = {
 #define curveRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
+static paramGroup_t curvePG = { "cmdcurve", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -583,7 +583,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			controls[0] = curveRadPD.control;
 			controls[1] = NULL;
 			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(controls, labels, "curvecmd-radius");
+			InfoSubstituteControls(controls, labels, curvePG.nameStr);
 			infoSubst = TRUE;
 			curveRadPD.option |= PDO_NORECORD;
 			ParamLoadControls(&curvePG);
@@ -705,7 +705,7 @@ static paramGroup_t helixPG = { "helix", PGO_DIALOGTEMPLATE | PGO_PREFMISCGROUP,
 
 static paramData_t circleRadiusPLs[] = {
 	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 } };
-static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, sizeof circleRadiusPLs/sizeof circleRadiusPLs[0] };
+static paramGroup_t circleRadiusPG = { "cmdcircle", 0, circleRadiusPLs, sizeof circleRadiusPLs/sizeof circleRadiusPLs[0] };
 
 
 static void ComputeHelix(

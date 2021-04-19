@@ -476,7 +476,7 @@ static trackCmd_t structureCmds = {
 
 static paramData_t pierPLs[] = {
 	{	PD_DROPLIST, &pierListInx, "inx", 0, (void*)50, N_("Pier Number") } };
-static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
+static paramGroup_t pierPG = { "cmdstructure", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
 #define pierL ((wList_p)pierPLs[0].control)
 
 static void ShowPierL( void )

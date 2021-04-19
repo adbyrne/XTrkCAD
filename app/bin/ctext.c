@@ -67,7 +67,7 @@ static paramData_t textPLs[] = {
 #define boxPD (textPLs[2])
     { PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0}
     };
-static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
+static paramGroup_t textPG = { "cmdtext", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
 
 enum TEXT_POSITION
 {

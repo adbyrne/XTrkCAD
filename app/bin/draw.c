@@ -1212,8 +1212,11 @@ EXPORT void InfoSubstituteControls(
 	wWinPix_t x, y;
 	int inx;
 
-	if (id)
-		wStatusRevealControlSet(mainW,id);  /* Unhide this set */
+	if (id) {
+			wStatusRevealControlSet(mainW,id);  /* Unhide this set */
+	}
+	if (labels == NULL)
+			wStatusClearControls(mainW);  /* Hide all */
 
 	for ( inx=0; inx<NUM_INFOCTL; inx++ ) {
 		if (curInfoControl[inx]) {

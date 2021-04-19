@@ -47,7 +47,7 @@ static paramFloatRange_t r1_100 = { 1.0, 100.0, 100 };
 static paramData_t turntablePLs[] = {
 #define turntableDiameterPD		(turntablePLs[0])
 	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") } };
-static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, sizeof turntablePLs/sizeof turntablePLs[0] };
+static paramGroup_t turntablePG = { "cmdturntable", 0, turntablePLs, sizeof turntablePLs/sizeof turntablePLs[0] };
 
 
 static BOOL_T ValidateTurntablePosition(
@@ -944,7 +944,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
-		InfoSubstituteControls( controls, labels, "cmdTurntable-diameter" );
+		InfoSubstituteControls( controls, labels, turntablePG.nameStr );
 		SetAllTrackSelect( FALSE );
 		/*InfoMessage( "Place Turntable");*/
 		state = 0;

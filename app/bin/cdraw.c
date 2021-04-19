@@ -2699,7 +2699,7 @@ static paramData_t drawPLs[] = {
 #define drawLineTypePD			(drawPLs[10])
 	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, (void*)0, N_("Line Type") },
 };
-static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
+static paramGroup_t drawPG = { "cmddraw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
 
 static char * objectName[] = {
 		N_("Straight"),
