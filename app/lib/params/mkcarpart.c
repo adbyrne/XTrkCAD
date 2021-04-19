@@ -311,6 +311,8 @@ void processFile(
 		len = strlen(line);
 		if ( line[len-1] == '\n' )
 			line[len-1] = '\0';
+		if ( line[len-2] == '\r' )
+			line[len-2] = '\0';
 		if ( strnicmp( line, "scale=", 6 ) == 0 ) {
 			strcpy( scale, line+6 );
 			if ( stricmp( scale, "N" ) == 0 )
