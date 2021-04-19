@@ -1060,7 +1060,7 @@ void GetTurnoutType() {
 				dtod.toType = DTO_NORMAL;
 			}
 			else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
-				if ((dto[0].crvAngle <= 20) && (dto[1].crvAngle - dto[0].crvAngle <= 20))
+				if ((dto[0].crvAngle <= 20) && (dto[1].crvAngle - dto[0].crvAngle <= 15))
 					dtod.toType = DTO_CURVED;
 			}
 			else if (lftCnt == 1 && rgtCnt == 1) {
@@ -1369,14 +1369,13 @@ static void DrawCurvedToTies(
 	int p0 = 0, q0 = 0;
 	DIST_T px = 0, qx = 0, dy = 0, dy1 = 0, dy2 = 0;
 
-	double magic = 1.0;
+	double cosAdj = 1.0;
 
 	angle = 0;
 	px = tdspc2;
 	qx = tdspc2;
-	int iterations = 0;
-	while (p0 < pn && q0 < qn) {
-		iterations++;
+	int segs = max(dto[othPath].n, dto[secPath].n);
+	for (; segs > 0; segs--) {
 
 		if (px >= dto[othPath].base[p0 + 1].x)
 			p0++;
@@ -1418,9 +1417,9 @@ static void DrawCurvedToTies(
 				}
 				angle += fabs(dang / 2);
 
-				double magic = fabs(cos(D2R(angle)));
-				px += dx2 * magic;
-				qx += dx2 * magic;
+				cosAdj = fabs(cos(D2R(angle)));
+				px += dx2 * cosAdj;
+				qx += dx2 * cosAdj;
 
 				for (; cnt; cnt--, a2 += dang, angle += dang) {
 					if (px >= dto[othPath].base[p0 + 1].x)
@@ -1452,20 +1451,20 @@ static void DrawCurvedToTies(
 					othEnd = e1;
 					secEnd = e2;
 
-					magic = fabs(cos(D2R(angle)));
+					cosAdj = fabs(cos(D2R(angle)));
 					if (cnt > 1) {
-						px += dx * magic;
-						qx += dx * magic;
+						px += dx * cosAdj;
+						qx += dx * cosAdj;
 					}
 					else {
-						px += dx2 * magic;
-						qx += dx2 * magic;
+						px += dx2 * cosAdj;
+						qx += dx2 * cosAdj;
 					}
 				}
 			}
 		}
 		else {
-			magic = fabs(cos(D2R(angle)));
+			cosAdj = fabs(cos(D2R(angle)));
 
 			p1 = dto[othPath].base[p0];
 			p2 = dto[othPath].base[p0 + 1];
@@ -1494,7 +1493,7 @@ static void DrawCurvedToTies(
 					dy1 = dto[secPath].base[q0].y + (qx - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
 					dy2 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 					dy = dy1 - dy2;
-					DIST_T tlen = tdlen + fabs(magic * dy);
+					DIST_T tlen = tdlen + fabs(cosAdj * dy);
 					if (tlen > tdmax) {
 						break;
 					}
@@ -1515,9 +1514,9 @@ static void DrawCurvedToTies(
 					Translate(&pos, pos, (a1 - 90.0), dy / 2);
 					DrawTie(d, pos, a1, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
-					double magic = fabs(cos(D2R(angle)));
-					px += dx * magic;
-					qx += dx * magic;
+					cosAdj = fabs(cos(D2R(angle)));
+					px += dx * cosAdj;
+					qx += dx * cosAdj;
 				}
 			}
 			else {
@@ -1546,7 +1545,7 @@ static void DrawCurvedToTies(
 		//Translate(&p2, p2, a0, -tdspc2);
 		DrawStraightTies(d, scaleInx, p1, p2, color);
 	}
-	else { 
+	else if (len > tdspc2) { 
 		Translate(&p2, p2, a0, -tdspc2);
 		DrawTie(d, p2, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
@@ -1554,13 +1553,13 @@ static void DrawCurvedToTies(
 	q1 = secEnd;
 	q2 = dto[secPath].pts[qn - 1];
 	a0 = FindAngle(q1, q2);
-	len = FindDistance(p1, p2);
+	len = FindDistance(q1, q2);
 	if (len >= 2 * tdspc) {
 		Translate(&q1, q1, a0, tdspc2);
 		//Translate(&q2, q2, a0, -tdspc2);
 		DrawStraightTies(d, scaleInx, q1, q2, color);
 	}
-	else { 
+	else if (len > tdspc2) {
 		Translate(&q2, q2, a0, -tdspc2);
 		DrawTie(d, q2, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
