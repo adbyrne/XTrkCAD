@@ -119,7 +119,7 @@ static paramIntegerRange_t rminScale_999 = { 1, 999, 0, PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r0_ = { 0, 0, 0, PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r1_pgsz_x = { 1, 0, 0, 0 };
 static paramFloatRange_t r1_pgsz_y = { 1, 0, 0, 0 };
-static paramFloatRange_t r_10_99999 = { -10, 99999, 0, PDO_NORANGECHECK_HIGH };
+static paramFloatRange_t r_100_99999 = { -100, 99999, 0, PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r0_360 = { 0, 360 };
 
 static paramData_t printPLs[] = {
@@ -148,8 +148,8 @@ static paramData_t printPLs[] = {
 /*15*/{ PD_FLOAT, &printRoadbedWidth, "roadbedWidth", PDO_DIM , &r0_, N_("    Width") },
 /*16*/ { PD_TOGGLE, &printPhysSize, "physsize", PDO_DLGNOLABELALIGN, printPhysSizeLabels, NULL, BC_HORZ | BC_NOBORDER, I2VP(1) },
 /*17*/ { PD_BUTTON, (void*)DoPrintMargin, "margin", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Margins") },
-/*18*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_10_99999, N_("Origin: X"), 0, I2VP(2) },
-/*19*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_10_99999, N_("Y"), 0, I2VP(2) },
+/*18*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_100_99999, N_("Origin: X"), 0, I2VP(2) },
+/*19*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_100_99999, N_("Y"), 0, I2VP(2) },
 /*20*/ { PD_BUTTON, (void*)DoResetGrid, "reset", PDO_DLGHORZ, NULL, N_("Reset") },
 /*21*/ { PD_FLOAT, &newPrintGrid.angle, "origa", PDO_ANGLE|PDO_DLGBOXEND, &r0_360, N_("Angle"), 0, I2VP(2) },
 /*22*/ { PD_BUTTON, (void*)DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },

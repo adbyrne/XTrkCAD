@@ -62,6 +62,7 @@ static struct sDataLayout thisLayout = {
 
 static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
+static paramFloatRange_t r0_9999999 = { 0, 9999999 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
 static paramFloatRange_t r360_360 = { -360, 360 };
 static paramFloatRange_t rN_9999999 = { -99999, 99999 };
@@ -482,7 +483,7 @@ static paramData_t layoutPLs[] = {
 #define BACKGROUNDPOSY (12)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDWIDTH (13)
-	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDSCREEN (14)
 	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
