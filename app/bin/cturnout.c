@@ -828,7 +828,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	tieData_p td = GetScaleTieData(scaleInx);
 
 	int i;
-	ANGLE_T a, a0, a1, aa0, aa1, aa2;
+	ANGLE_T a0, a1, aa0, aa1;
 	DIST_T r, l;
 	coOrd p0, p1;
 
@@ -992,7 +992,6 @@ void GetTurnoutType() {
 
 	// Count path origins
 	dtod.origCnt = 1;
-	coOrd p[5];
 	dtod.origins[0] = 0;
 
 	for (i = 1; i < dtod.pathCnt; i++) {
@@ -1159,7 +1158,7 @@ static void DrawNormalToTies(
 	ANGLE_T angle;
 	coOrd s1, s2, p1, p2, q1, q2;
 	int s0, p0, q0;
-	ANGLE_T a0, a1, a2;
+	ANGLE_T a0;
 
 	if (color == wDrawColorBlack)
 		color = tieColor;
@@ -1293,7 +1292,8 @@ static void DrawNormalToTies(
 
 		// Final ties at end
 		if (dtod.toType == DTO_THREE) {
-			int n = dto[strPath].base[qn - 1].x;
+
+			int n = (int)(dto[strPath].base[qn - 1].x);
 			if (px + dx < len) {
 				angle = FindAngle(s1, s2);
 				DIST_T lenr = len - px + dlenx;
@@ -1586,7 +1586,7 @@ static void DrawXingToTies(
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
-	coOrd c1, c2, s1, s2, p1, p2, q1, q2;
+	coOrd c1, c2, s1, s2, p1, p2, q1;
 	int p0, q0;
 	ANGLE_T a0, a1, a2;
 	int strPath = dtod.strPath, str2Path = dtod.str2Path;
@@ -1887,7 +1887,6 @@ static void DrawCrossToTies(
 	coOrd pos;
 	int cnt;
 	ANGLE_T angle;
-	ANGLE_T a0, a1, a2;
 
 	if (color == wDrawColorBlack)
 		color = tieColor;
@@ -2087,7 +2086,7 @@ static void DrawTurnout(
 	wDrawColor color)
 {
 	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
-	wIndex_t i, j;
+	wIndex_t i;
 	long widthOptions = 0;
 	DIST_T scale2rail;
 

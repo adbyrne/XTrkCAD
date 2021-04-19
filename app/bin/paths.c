@@ -74,7 +74,11 @@ AddPath(const char *type, char*path)
         tableEntry = malloc(sizeof(struct pathTable));
         DynStringMalloc(&tableEntry->path, 16);
         strcpy(tableEntry->type, type);
+#ifdef WINDOWS
+#pragma warning( disable : 4267)
+		// This generates warning C4267 on windows
         HASH_ADD_STR(paths, type, tableEntry);
+#endif
     }
 
     DynStringCatCStr(&(tableEntry->path), path);
