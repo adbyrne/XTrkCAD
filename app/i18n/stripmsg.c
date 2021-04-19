@@ -153,7 +153,7 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 				*cp++ = 'n';
 
 				/* read a line */
-				if (!fgets( cp, (sizeof(line)) - (cp-line), inFile )) {
+				if (!fgets( cp, (int)((sizeof(line)) - (cp-line)), inFile) ) {
 					return;
 				}
 				lineNo++;
@@ -171,7 +171,7 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 			if (strchr(line, '"'))
 			{
 				printf("N_(\"");
-				len = strlen(line);
+				len = (int)(strlen(line));
 				for (i = 0; i < len; i++)
 				{
 					/* Escape double quotation marks */

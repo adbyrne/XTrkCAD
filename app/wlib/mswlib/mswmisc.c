@@ -832,7 +832,6 @@ wWin_p wWinMainCreate(
     void * data)
 {
     wWin_p w;
-    RECT rect;
     const char * appDir;
     const char * libDir;
     int showCmd;
@@ -2288,13 +2287,8 @@ void wControlSetBalloonText(wControl_p b, const char * text)
 
 void startBalloonHelp(void)
 {
-    HDC hDc;
-    DWORD extent;
-    RECT rect;
-    POINT pt;
     wBalloonHelp_t * bh;
     const char * hs;
-    HFONT hFont;
 
     if (!balloonHelpStrings) {
         return;
