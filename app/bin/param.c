@@ -1685,7 +1685,8 @@ static void ParamButtonOk(
 	}
 
 	if ( group->okProc )
-		group->okProc( group->okProc==(paramActionOkProc)wHide?((void*)group->win):group );
+		group->okProc( group );
+
 	wControlSetBalloon( (wControl_p)group->okB, 0, 0, NULL );
 	wFlush();
 
