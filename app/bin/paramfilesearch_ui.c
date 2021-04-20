@@ -65,9 +65,9 @@ static paramData_t searchUiPLs[] = {
 #define I_FITRADIO	(3)
     {	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (4)
-    { PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, (void *)370 },
+    { PD_MESSAGE, N_(QUERYPROMPTSTRING), "mess1", 0, (void *)370 },
 #define I_STATISTICS (5)
-    { PD_MESSAGE, "", NULL, PDO_DLGBOXEND, (void *)370 },
+    { PD_MESSAGE, "", "mess2", PDO_DLGBOXEND, (void *)370 },
 #define I_RESULTLIST	(6)
     {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MODETOGGLE	(7)
@@ -474,7 +474,7 @@ void DoSearchParams(void * junk)
 
         searchUiW = ParamCreateDialog(&searchUiPG,
                                       MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, SearchUiCancel,
-                                      TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
+                                      TRUE, NULL, F_RESIZE | F_RECALLSIZE| F_USETEMPLATE, SearchUiDlgUpdate);
 
 
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
