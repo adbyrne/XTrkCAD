@@ -21,7 +21,7 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-cancel">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -34,17 +34,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-ok">
-                <property name="label" translatable="yes">_Done</property>
+              <object class="GtkToggleButton" id="id-ok">
+                <property name="label" translatable="yes">Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
                 <property name="expand">True</property>

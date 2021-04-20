@@ -30,13 +30,11 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-save">
-                <property name="label" translatable="yes">_Save</property>
+              <object class="GtkToggleButton" id="id-save">
+                <property name="label" translatable="yes">Save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">start</property>
-                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -45,12 +43,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
+              <object class="GtkToggleButton" id="id-help">
+                <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -59,15 +56,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-ok">
-                <property name="label" translatable="yes">_Close</property>
+              <object class="GtkToggleButton" id="id-ok">
+                <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
                 <property name="expand">True</property>

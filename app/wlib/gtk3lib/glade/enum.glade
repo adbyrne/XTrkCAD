@@ -17,34 +17,27 @@
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
+              <object class="GtkToggleButton" id="id-helo">
+                <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-cancel">
-                <property name="label" translatable="yes">_Done</property>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="has_focus">True</property>
-                <property name="is_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
@@ -97,12 +90,11 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkButton" id="enum-save">
-                    <property name="label" translatable="yes">Save _As ...</property>
+                  <object class="GtkToggleButton" id="enum-save">
+                    <property name="label" translatable="yes">Save...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -111,12 +103,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="enum-print">
-                    <property name="label" translatable="yes">_Print...</property>
+                  <object class="GtkToggleButton" id="enum-print">
+                    <property name="label" translatable="yes">Print</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -125,12 +116,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="enum-printsetup">
-                    <property name="label" translatable="yes">Print Set_up...</property>
+                  <object class="GtkToggleButton" id="enum-printsetup">
+                    <property name="label" translatable="yes">Print Setup</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>

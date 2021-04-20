@@ -675,7 +675,7 @@ when current</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-cancel">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
