@@ -61,6 +61,7 @@
             <property name="label" translatable="yes">Enter comments or information for this layout. </property>
             <attributes>
               <attribute name="style" value="normal"/>
+              <attribute name="scale" value="0.80000000000000004"/>
             </attributes>
           </object>
           <packing>
