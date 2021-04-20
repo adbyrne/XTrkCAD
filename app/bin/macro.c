@@ -1513,8 +1513,10 @@ static void DemoInitValues( void )
 		wNoticeEx( NT_INFORMATION, _("Can not find PARAMETER playback proc"), _("Ok"), NULL );
 		return;
 	}
+	paramHiliteFast = TRUE;
 	for ( cpp = demoInitParams; *cpp; cpp++ )
 		paramPlaybackProc( *cpp );
+	paramHiliteFast = FALSE;
 	// Have to do this manually
 	oldMagneticSnap = MagneticSnap( TRUE );
 }
