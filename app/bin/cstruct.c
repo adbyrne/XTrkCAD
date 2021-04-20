@@ -70,7 +70,7 @@ static paramData_t structurePLs[] = {
 #define I_DRAW	(1)
 	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &structureDrawData, NULL, 0 },
 #define I_HIDE	(2)
-	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/hideLabels, NULL, BC_NOBORDER },
+	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(char**)hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
 	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGWIDTH		(4)
