@@ -91,7 +91,8 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		HWND hWnd; \
 		void * data;\
 		wControl_p focusChainNext; \
-		wBool_t shown;
+		wBool_t shown; \
+		wBool_t hilite;
 
 struct wControl_t {
 		WOBJ_COMMON

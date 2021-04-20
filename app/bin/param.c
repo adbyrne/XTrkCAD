@@ -520,8 +520,10 @@ EXPORT void ParamLoadControl(
 	FLOAT_T tmpR;
 	char * valS;
 
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
+		if ( (p->option&PDO_DLGIGNORE) != 0 ) {
+			p->bInvalid = FALSE;
 			return;
+		}
 		if (p->control == NULL || p->valueP == NULL)
 			return;
 		switch ( p->type ) {
@@ -581,6 +583,7 @@ EXPORT void ParamLoadControl(
 				wStringSetValue((wString_p)p->control, (char*)p->valueP);
 			}
 			if ( (p->option & PDO_NOTBLANK) && strlen( p->oldD.s ) == 0 ) {
+				ParamHilite( p->group->win, p->control, TRUE );
 				p->bInvalid = TRUE;
 			}
 			break;
@@ -608,6 +611,7 @@ EXPORT void ParamLoadControls(
 		paramGroup_p pg )
 {
 	int inx;
+	LOG( log_paraminput, 1, ( "ParamLoadControls( %s )\n", pg->nameStr ) );
 	for ( inx=0; inx<pg->paramCnt; inx++ )
 		ParamLoadControl( pg, inx );
 }
@@ -1385,10 +1389,10 @@ static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 		wControlSetBalloon( p->control, 0, -h*3/4, message );
 		p->bInvalid = TRUE;
 		LOG( log_paraminput, 1, ( " -> RangeError\n" ) );
-		if ( ! bInvalid )
-			ParamHilite( p->group->win, p->control, p->bInvalid );
+		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return FALSE;
 	}
+	p->bInvalid = FALSE;
 	return TRUE;
 }
 
@@ -1417,8 +1421,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 		wControlSetBalloon( p->control, 0, -h*3/4, _("Invalid Number") );
 		p->bInvalid = TRUE;
 		LOG( log_paraminput, 1, ( " -> InvalidNumber\n" ) );
-		if ( ! bInvalid )
-			ParamHilite( p->group->win, p->control, p->bInvalid );
+		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
 	if ( ! ParamIntegerRangeCheck( p, valL ) )
@@ -1434,8 +1437,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 		*((long*)(p->valueP)) = valL;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL);
-	if ( bInvalid )
-		ParamHilite( p->group->win, p->control, p->bInvalid );
+	ParamHilite( p->group->win, p->control, p->bInvalid );
 	LOG( log_paraminput, 1, ( " -> %ld\n", valL ) );
 }
 
@@ -1459,10 +1461,10 @@ static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 		wWinPix_t h = wControlGetHeight(p->control);
 		wControlSetBalloon( p->control, 0, -h*3/4, message );
 		p->bInvalid = TRUE;
-		if ( ! bInvalid )
-			ParamHilite( p->group->win, p->control, p->bInvalid );
+		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return FALSE;
 	}
+	p->bInvalid = FALSE;
 	return TRUE;
 }
 
@@ -1482,7 +1484,6 @@ static void ParamFloatPush( const char * val, void * dp )
 	FLOAT_T valF;
 	BOOL_T valid;
 	const char * value;
-	paramFloatRange_t * frangeP;
 
 	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
@@ -1505,8 +1506,7 @@ static void ParamFloatPush( const char * val, void * dp )
 		wWinPix_t h = wControlGetHeight(p->control);
 		wControlSetBalloon( p->control, 0, -h*3/4, decodeErrorStr );
 		p->bInvalid = TRUE;
-		if ( ! bInvalid )
-			ParamHilite( p->group->win, p->control, p->bInvalid );
+		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
 	if ( !ParamFloatRangeCheck( p, valF ) )
@@ -1522,8 +1522,7 @@ static void ParamFloatPush( const char * val, void * dp )
 		*((FLOAT_T*)(p->valueP)) = valF;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value ))
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valF );
-	if ( bInvalid )
-		ParamHilite( p->group->win, p->control, p->bInvalid );
+	ParamHilite( p->group->win, p->control, p->bInvalid );
 }
 
 
@@ -1554,12 +1553,12 @@ static void ParamStringPush( const char * val, void * dp )
 	}
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
+	ParamHilite( p->group->win, p->control, FALSE );
 
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );
-	ParamHilite( p->group->win, p->control, FALSE );
 }
 
 
@@ -1650,7 +1649,8 @@ static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w, wD
 
 
 EXPORT wBool_t ParamCheckInputs(
-	paramGroup_p group )
+	paramGroup_p group,
+	wControl_p b )
 {
 	wBool_t bInvalid = FALSE;
 	// Check for invalid entries
@@ -1664,7 +1664,7 @@ EXPORT wBool_t ParamCheckInputs(
 	if ( bInvalid ) {
 		// At least 1 invalid entry
 		LOG( log_paraminput, 1, ( "  Group %s Invalid\n", group->nameStr ) );
-		wControlSetBalloon( (wControl_p)group->okB, 0, -29, _("Invalid input(s), please correct the hilighted field(s)") );
+		wControlSetBalloon( b, 0, -29, _("Invalid input(s), please correct the hilighted field(s)") );
 		wFlush();
 		return FALSE;
 	}
@@ -1677,7 +1677,7 @@ static void ParamButtonOk(
 {
 	wFlush();
 	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
-	if ( ! ParamCheckInputs( group ) )
+	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
 		return;
 	if ( recordF && group->nameStr )
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); {
@@ -1793,16 +1793,16 @@ EXPORT void ParamHilite(
 		wControl_p control,
 		BOOL_T hilite )
 {
-	if ( win != NULL && wWinIsVisible(win) == FALSE ) return;
 	if ( control == NULL ) return;
+	LOG(log_paraminput, 2, ("ParamHilite %s\n", hilite?"Set":"Clr" ));
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
 		if ( inPlayback && !paramHiliteFast )
 			wPause(500);
 	} else {
-		if ( inPlayback && !paramHiliteFast )
-			wPause(500);
+//		if ( inPlayback && !paramHiliteFast )
+//			wPause(500);
 		wControlHilite( control, FALSE );
 	}
 }
@@ -1815,12 +1815,11 @@ EXPORT void ParamResetInvalid(
 		if ( pg->win == win ) {
 			LOG( log_paraminput, 1, ( "Reset Invalid: %s\n", pg->nameStr ) );
 			for ( paramData_p p = &pg->paramPtr[0]; p < &pg->paramPtr[pg->paramCnt]; p++ ) {
-				if ( p->bInvalid ) {
+				if ( p->bInvalid )
 					LOG( log_paraminput, 1, ( "  %s Invalid\n", p->nameStr ) );
-					ParamHilite( win, p->control, FALSE );
-					wControlSetBalloon( p->control, 0, 0, NULL );
-					p->bInvalid = FALSE;
-				}
+				ParamHilite( win, p->control, FALSE );
+				wControlSetBalloon( p->control, 0, 0, NULL );
+				p->bInvalid = FALSE;
 			}
 			break;
 		}

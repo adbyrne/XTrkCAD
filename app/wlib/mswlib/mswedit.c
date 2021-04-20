@@ -157,6 +157,10 @@ static char *getString(wString_p bs)
         *(WORD *)tmpBuffer = chars;
         SendMessage(bs->hWnd, (UINT)EM_GETLINE, (WPARAM)0, (LPARAM)tmpBuffer);
         tmpBuffer[chars] = '\0';
+    } else {
+	    tmpBuffer = malloc(2);
+	    tmpBuffer[0] = '\n';
+	    tmpBuffer[1] = '\0';
     }
 
     return (tmpBuffer);

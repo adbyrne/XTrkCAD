@@ -316,19 +316,12 @@ void wControlHilite(
 {
     cairo_t *cr;
     int off = GTKCONTROLHILITEWIDTH/2+1;
+    if ( debugWindow >= 1 )
+	    printf( "wControlHIlite( %s, %d )\n", b->labelStr, hilite );
 
     if (b->widget == NULL) {
         return;
     }
-
-    if (! gtk_widget_get_visible(b->widget)) {
-        return;
-    }
-
-    if (! gtk_widget_get_visible(b->parent->widget)) {
-        return;
-    }
-
     b->outline = hilite;
 
     if (b->widget)

@@ -372,6 +372,7 @@ void * mswAlloc(
     w->data = data;
     w->focusChainNext = NULL;
     w->shown = TRUE;
+	w->hilite = FALSE;
     return w;
 }
 
@@ -831,7 +832,6 @@ wWin_p wWinMainCreate(
     void * data)
 {
     wWin_p w;
-    RECT rect;
     const char * appDir;
     const char * libDir;
     int showCmd;
@@ -1295,6 +1295,10 @@ void wWinShow(
 
         win->centerWin = FALSE;
         win->shown = TRUE;
+
+		// Clear hilites
+		for (wControl_p controlP = win->first; controlP; controlP = controlP->next)
+			controlP->hilite = FALSE;
 
         if (mswHWnd == (HWND)0 || !IsIconic(mswHWnd)) {
             ShowWindow(win->hWnd, SW_SHOW);
@@ -1808,13 +1812,14 @@ void wControlHilite(
         return;
     }
 
-    if (!IsWindowVisible(b->parent->hWnd)) {	
+    if ((b->parent==NULL) || (!IsWindowVisible(b->parent->hWnd)) || (!IsWindowVisible(b->hWnd))) {
+		b->hilite = FALSE;
         return;
     }
 
-    if (!IsWindowVisible(b->hWnd)) {
-        return;
-    }
+	if (b->hilite == hilite)
+		return;
+	b->hilite = hilite;
 
     hDc = GetDC(b->parent->hWnd);
 	newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_ROUND | PS_JOIN_BEVEL,
@@ -2282,13 +2287,8 @@ void wControlSetBalloonText(wControl_p b, const char * text)
 
 void startBalloonHelp(void)
 {
-    HDC hDc;
-    DWORD extent;
-    RECT rect;
-    POINT pt;
     wBalloonHelp_t * bh;
     const char * hs;
-    HFONT hFont;
 
     if (!balloonHelpStrings) {
         return;
