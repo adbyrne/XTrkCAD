@@ -2299,7 +2299,9 @@ void startBalloonHelp(void)
     }
 
     if (balloonHelpHWnd) { 
-        if (balloonHelpButton->tipStr) {
+		if (balloonHelpButton->errStr) {
+			hs = balloonHelpButton->errStr;
+		} else if (balloonHelpButton->tipStr) {
             hs = balloonHelpButton->tipStr;
         } else {
             hs = balloonHelpButton->helpStr;
@@ -2353,7 +2355,9 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
         w = LOWORD(extent);
         h = HIWORD(extent);
 
-        if (b->type == B_RADIO ||
+		b->errStr = mswStrdup(msg); //RWS
+
+		if (b->type == B_RADIO ||
                 b->type == B_TOGGLE) {
             pt.y = b->h;
         } else {
@@ -2382,7 +2386,8 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
         balloonHelpState = balloonHelpShow;
         balloonControlButton = b;
     } else {
-        closeBalloonHelp();
+		b->errStr = NULL; //RWS
+		closeBalloonHelp();
     }
 }
 

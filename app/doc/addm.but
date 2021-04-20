@@ -96,7 +96,7 @@ A circle track is a special form of a curved track that extends 360\u00B0 and ha
 
 \u000
 
-\dd (\K{cmdCircleFixedRadius}) - Use the Fixed Radius specified on the \e{Circle Radius} control displayed on the Status Bar (\K{mainW}).
+\dd (\K{cmdCircleFixedRadius}) - Use the Fixed Radius specified on the \i\e{Circle Radius} control displayed on the Status Bar (\K{mainW}).
 \c{Left-Drag} the Circle track into position.
 
 \u000
@@ -128,7 +128,7 @@ You can join to and from circles, after which they become curved tracks.
 
 \G{png.d/bcircl1.png}
 
-(\c{Control-8}) Use the Fixed Radius specified on the \e{Circle Radius} control displayed on the Status Bar (\K{mainW}).
+(\c{Control-8}) Use the Fixed Radius specified on the \i\e{Circle Radius} control displayed on the Status Bar (\K{mainW}).
 \c{Left-Drag} the Circle track into position.
 
 \rule

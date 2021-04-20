@@ -88,13 +88,14 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		const char * labelStr; \
 		const char * helpStr; \
 		const char * tipStr; \
+		const char * errStr; \
 		HWND hWnd; \
 		void * data;\
 		wControl_p focusChainNext; \
 		wBool_t shown; \
 		wBool_t hilite;
 
-struct wControl_t {
+struct wControl_t { // RWS added errStr
 		WOBJ_COMMON
 		};
 
