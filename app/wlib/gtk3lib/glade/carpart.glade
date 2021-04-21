@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="carpart">
     <property name="can_focus">False</property>
     <child>
       <object class="GtkBox">
@@ -72,7 +72,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkComboBoxText" id="manuf">
+                          <object class="GtkComboBoxText" id="carpart-manuf">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                           </object>
@@ -87,7 +87,7 @@
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkComboBox" id="prototype">
+                              <object class="GtkComboBox" id="carpart-prototype">
                                 <property name="width_request">150</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
@@ -99,7 +99,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBox" id="protokind-list">
+                              <object class="GtkComboBox" id="carpart-protokind-list">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="hexpand">True</property>
@@ -117,7 +117,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="partno">
+                          <object class="GtkEntry" id="carpart-partno">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="hexpand">True</property>
@@ -128,7 +128,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="desc">
+                          <object class="GtkEntry" id="carpart-desc">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                           </object>
@@ -173,7 +173,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkNotebook" id="dispmode">
+                      <object class="GtkNotebook" id="carpart-dispmode">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <child>
@@ -235,7 +235,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="index">
+                              <object class="GtkEntry" id="carpart-index">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                               </object>
@@ -250,7 +250,7 @@
                                 <property name="can_focus">False</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                  <object class="GtkEntry" id="purchPrice">
+                                  <object class="GtkEntry" id="carpart-purchPrice">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
@@ -273,7 +273,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="currPrice">
+                                  <object class="GtkEntry" id="carpart-currPrice">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
@@ -296,7 +296,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBoxText" id="condition">
+                                  <object class="GtkComboBoxText" id="carpart-condition">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                   </object>
@@ -318,7 +318,7 @@
                                 <property name="can_focus">False</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                  <object class="GtkEntry" id="purchDate">
+                                  <object class="GtkEntry" id="carpart-purchDate">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
@@ -341,7 +341,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="serviceDate">
+                                  <object class="GtkEntry" id="carpart-serviceDate">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
@@ -363,7 +363,7 @@
                                 <property name="can_focus">False</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                  <object class="GtkEntry" id="quantity">
+                                  <object class="GtkEntry" id="carpart-quantity">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
@@ -386,34 +386,45 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkRadioButton" id="multinum">
-                                    <property name="label" translatable="yes">Sequential</property>
+                                  <object class="GtkBox" id="carpart-multinum.box">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="active">True</property>
-                                    <property name="draw_indicator">True</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <object class="GtkRadioButton" id="carpart-repeated">
+                                        <property name="label" translatable="yes">Repeated</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="active">True</property>
+                                        <property name="draw_indicator">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRadioButton" id="carpart-multinum">
+                                        <property name="label" translatable="yes">Sequential</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="active">True</property>
+                                        <property name="draw_indicator">True</property>
+                                        <property name="group">carpart-repeated</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkRadioButton">
-                                    <property name="label" translatable="yes">Repeated</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="active">True</property>
-                                    <property name="draw_indicator">True</property>
-                                    <property name="group">multinum</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">3</property>
                                   </packing>
                                 </child>
                               </object>
@@ -423,7 +434,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="notes">
+                              <object class="GtkEntry" id="carpart-notes">
                                 <property name="height_request">150</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -485,43 +496,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">end</property>
-                                <property name="label" translatable="yes">Car Length</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">end</property>
-                                <property name="label" translatable="yes">Truck Centers</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">end</property>
-                                <property name="label" translatable="yes">Coupled Length</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">0</property>
-                                <property name="top_attach">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkComboBoxText" id="road">
+                              <object class="GtkComboBoxText" id="carpart-road">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                               </object>
@@ -536,7 +511,7 @@
                                 <property name="can_focus">False</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                  <object class="GtkEntry" id="repmark">
+                                  <object class="GtkEntry" id="carpart-repmark">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
@@ -561,7 +536,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="number">
+                                  <object class="GtkEntry" id="carpart-number">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
@@ -586,7 +561,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkColorButton" id="bodycolor">
+                                  <object class="GtkColorButton" id="carpart-bodyColor">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -610,34 +585,35 @@
                                 <property name="margin_top">6</property>
                                 <property name="row_spacing">6</property>
                                 <property name="column_spacing">6</property>
+                                <property name="row_homogeneous">True</property>
                                 <child>
-                                  <object class="GtkEntry" id="carlength">
+                                  <object class="GtkEntry" id="carpart-carLength">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">0</property>
+                                    <property name="left_attach">1</property>
                                     <property name="top_attach">0</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="trkCenter">
+                                  <object class="GtkEntry" id="carpart-trkCenter">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">0</property>
+                                    <property name="left_attach">1</property>
                                     <property name="top_attach">1</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="cpldLen">
+                                  <object class="GtkEntry" id="carpart-cpldLen">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">2</property>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">3</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -648,20 +624,8 @@
                                     <property name="label" translatable="yes">Width</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
+                                    <property name="left_attach">2</property>
                                     <property name="top_attach">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="halign">end</property>
-                                    <property name="label" translatable="yes">Coupler Mount</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -672,37 +636,39 @@
                                     <property name="label" translatable="yes">Coupler Lerngth</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">2</property>
+                                    <property name="left_attach">2</property>
+                                    <property name="top_attach">3</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="carWidth">
+                                  <object class="GtkEntry" id="carpart-carWidth">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">2</property>
+                                    <property name="left_attach">3</property>
                                     <property name="top_attach">0</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="cplrLen">
+                                  <object class="GtkEntry" id="carpart-cplrLen">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">2</property>
-                                    <property name="top_attach">2</property>
+                                    <property name="left_attach">3</property>
+                                    <property name="top_attach">3</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkBox">
+                                  <object class="GtkBox" id="carpart-cplrMount.box">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">center</property>
                                     <property name="spacing">6</property>
                                     <child>
-                                      <object class="GtkRadioButton" id="cplrMount">
+                                      <object class="GtkRadioButton" id="carpart-cplrMount">
                                         <property name="label" translatable="yes">Truck</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -712,37 +678,112 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkRadioButton">
+                                      <object class="GtkRadioButton" id="carpart-bodyMount">
                                         <property name="label" translatable="yes">Body</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
                                         <property name="active">True</property>
                                         <property name="draw_indicator">True</property>
-                                        <property name="group">cplrMount</property>
+                                        <property name="group">carpart-cplrMount</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">1</property>
+                                    <property name="top_attach">2</property>
+                                    <property name="width">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="yes">Center Offset</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">2</property>
                                     <property name="top_attach">1</property>
                                   </packing>
                                 </child>
+                                <child>
+                                  <object class="GtkEntry" id="carpart-trkCenterOffset">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">3</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="yes">Car Length</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="yes">Truck Centers</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="yes">Coupler Mount</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">end</property>
+                                    <property name="label" translatable="yes">Coupled Length</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left_attach">0</property>
+                                    <property name="top_attach">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
                               </object>
                               <packing>
-                                <property name="left_attach">1</property>
+                                <property name="left_attach">0</property>
                                 <property name="top_attach">2</property>
-                                <property name="height">3</property>
+                                <property name="width">2</property>
+                                <property name="height">4</property>
                               </packing>
                             </child>
                             <child>
@@ -754,7 +795,7 @@
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
-                                <property name="top_attach">5</property>
+                                <property name="top_attach">6</property>
                                 <property name="width">2</property>
                               </packing>
                             </child>
@@ -807,7 +848,7 @@
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkToggleButton" id="add">
+              <object class="GtkToggleButton" id="carpart-add">
                 <property name="label" translatable="yes">Add</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -820,7 +861,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="new">
+              <object class="GtkToggleButton" id="carpart-new">
                 <property name="label" translatable="yes">New</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -859,7 +900,17 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
             </child>
           </object>
           <packing>

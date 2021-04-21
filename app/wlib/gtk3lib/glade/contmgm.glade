@@ -2,6 +2,7 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkTreeStore" id="contmgm-inx.treestore"/>
   <object class="GtkWindow" id="contmgm">
     <property name="can_focus">False</property>
     <property name="border_width">18</property>
@@ -24,11 +25,30 @@
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
                 <property name="shadow_type">in</property>
+                <property name="min_content_width">84</property>
                 <property name="min_content_height">120</property>
-                <property name="propagate_natural_width">True</property>
-                <property name="propagate_natural_height">True</property>
                 <child>
-                  <placeholder/>
+                  <object class="GtkTreeView" id="contmgm-inx.treeview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">contmgm-inx.treestore</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="contmgm-inx.selection"/>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="contmgm-inx.col1">
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">type</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="contmgm-inx.col2">
+                        <property name="spacing">2</property>
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Name</property>
+                      </object>
+                    </child>
+                  </object>
                 </child>
               </object>
               <packing>
@@ -45,29 +65,27 @@
                 <property name="spacing">6</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkButton" id="contmgm-edit">
-                    <property name="label" translatable="yes">_Edit</property>
+                  <object class="GtkToggleButton" id="contmgm-edit">
+                    <property name="label" translatable="yes">Edit</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_underline">True</property>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="contmgm-delete">
+                  <object class="GtkToggleButton" id="contmgm-delete">
                     <property name="label" translatable="yes">Delete</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <accelerator key="Delete" signal="clicked"/>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
@@ -95,12 +113,11 @@
             <property name="spacing">6</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkButton" id="id-help">
-                <property name="label" translatable="yes">_Help</property>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -109,20 +126,29 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-ok">
-                <property name="label" translatable="yes">_Done</property>
+              <object class="GtkToggleButton" id="id-help">
+                <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="id-ok">
+                <property name="label" translatable="yes">Done</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>

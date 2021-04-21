@@ -50,6 +50,7 @@
                     </child>
                     <child>
                       <object class="GtkTreeViewColumn" id="icon">
+                        <property name="title" translatable="yes">Type</property>
                         <child>
                           <object class="GtkCellRendererPixbuf"/>
                           <attributes>
@@ -61,7 +62,7 @@
                     <child>
                       <object class="GtkTreeViewColumn" id="parameterfile">
                         <property name="resizable">True</property>
-                        <property name="title" translatable="yes">Parameter</property>
+                        <property name="title" translatable="yes">Parameter File</property>
                         <child>
                           <object class="GtkCellRendererText"/>
                           <attributes>
