@@ -2380,6 +2380,7 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
         SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
                      SWP_SHOWWINDOW|SWP_NOACTIVATE);
         SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
+		// SetBkColor(hDc, RGB(255,191,191));
         TextOut(hDc, 2, 1, msg, (int)(strlen(msg)));
         SelectObject(hDc, hFont);
         ReleaseDC(balloonHelpHWnd, hDc);
