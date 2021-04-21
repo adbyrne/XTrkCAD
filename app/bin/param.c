@@ -1375,6 +1375,8 @@ static void ParamChoicePush( long valL, void * dp )
 
 static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 {
+	if ( inPlayback )
+		return TRUE;
 	paramIntegerRange_t * irangeP = (paramIntegerRange_t*)p->winData;
 	wBool_t bInvalid = p->bInvalid;
 	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
@@ -1444,6 +1446,8 @@ static void ParamIntegerPush( const char * val, void * dp )
 
 static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 {
+	if ( inPlayback )
+		return TRUE;
 	paramFloatRange_t * frangeP = (paramFloatRange_t*)p->winData;
 	wBool_t bInvalid = p->bInvalid;
 	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
@@ -1543,7 +1547,7 @@ static void ParamStringPush( const char * val, void * dp )
 		p->enter_pressed = FALSE;
 	}
 	LOG( log_paraminput, 1, ( "ParamStringPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
-	if ( (p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
+	if ( ((!inPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
 		p->bInvalid = TRUE;
 		wControlSetBalloon( p->control, 0, 0, NULL );
 		wWinPix_t h = wControlGetHeight(p->control);
@@ -1685,7 +1689,8 @@ static void ParamButtonOk(
 	}
 
 	if ( group->okProc )
-		group->okProc( group->okProc==(paramActionOkProc)wHide?((void*)group->win):group );
+		group->okProc( group );
+
 	wControlSetBalloon( (wControl_p)group->okB, 0, 0, NULL );
 	wFlush();
 

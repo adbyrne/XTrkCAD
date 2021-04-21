@@ -51,13 +51,13 @@ static paramData_t customPLs[] = {
 #define I_CUSTOMNEWTYPE (1)
     {   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
 #define I_CUSTOMNEW     (2)    
-    {   PD_BUTTON, (void *)CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
+    {   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
 #define I_CUSTOMEDIT	(3)
-	{	PD_BUTTON, (void*)CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CUSTOMDEL		(4)
-	{	PD_BUTTON, (void*)CustomDelete, "delete", 0, NULL, N_("Delete") },
+	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, N_("Delete") },
 #define I_CUSTOMCOPYTO	(5)
-	{	PD_BUTTON, (void*)CustomExport, "export", 0, NULL, N_("Move To") },
+	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
   } ;
 static paramGroup_t customPG = { "custmgm", 0, customPLs, sizeof customPLs/sizeof customPLs[0] };
 

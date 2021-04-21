@@ -84,9 +84,9 @@ static paramData_t controlPLs[] = {
 #define controlSelL		((wList_p)controlPLs[I_CONTROLLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &controlListData, NULL, BL_MANY },
 #define I_CONTROLEDIT	(1)
-	{	PD_BUTTON, (void*)ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CONTROLDEL		(2)
-    {	PD_BUTTON, (void*)ControlDelete, "delete", 0, NULL, N_("Delete") },
+    {	PD_BUTTON, ControlDelete, "delete", 0, NULL, N_("Delete") },
   } ;
 static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
 

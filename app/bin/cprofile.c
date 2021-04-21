@@ -693,10 +693,10 @@ static wWin_p profileW;
 static BOOL_T profileUndo = FALSE;
 static void DoProfileChange(void *junk);
 static void DoProfileReset(void *junk);
-static void DoProfileDone(void *);
-static void DoProfileClear(void *);
-static void DoProfilePrint(void *);
-static void DoProfileChangeMode(void *);
+static void DoProfileDone(void * junk);
+static void DoProfileClear(void * junk);
+static void DoProfilePrint(void * junk);
+static void DoProfileChangeMode(void * junk);
 static void SelProfileW(wIndex_t, coOrd);
 static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
 
@@ -706,13 +706,13 @@ static paramData_t profilePLs[] = {
 #define I_PROFILEMSG			(1)
     {	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(300) },
 #define I_CHANGEBUTTON 2
-    {	PD_BUTTON, (void*)DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
+    {	PD_BUTTON, DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
 #define I_RESETBUTTON 3
-    {	PD_BUTTON, (void*)DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL, N_("Reset") },
+    {	PD_BUTTON, DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL, N_("Reset") },
 #define I_CLEARBUTTON 4
-    {	PD_BUTTON, (void*)DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
+    {	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
 #define I_PRINTBUTTON 5
-    {	PD_BUTTON, (void*)DoProfilePrint, "print", 0, NULL, N_("Print") }
+    {	PD_BUTTON, DoProfilePrint, "print", 0, NULL, N_("Print") }
 };
 static paramGroup_t profilePG = { "profile", 0, profilePLs, sizeof profilePLs/sizeof profilePLs[0] };
 

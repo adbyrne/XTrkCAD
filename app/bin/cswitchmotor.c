@@ -842,7 +842,7 @@ EXPORT void SwitchmotorMgmLoad( void )
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SWITCHMOTOR) continue;
-        ContMgmLoad( switchmI, SwitchmotorMgmProc, (void *)trk );
+        ContMgmLoad( switchmI, SwitchmotorMgmProc, trk );
     }
 }
 

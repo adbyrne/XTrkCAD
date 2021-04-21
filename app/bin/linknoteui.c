@@ -52,7 +52,7 @@ static paramData_t linkEditPLs[] = {
 #define I_URL (4)
     /*4*/ { PD_STRING, NULL, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("URL"), 0, 0, URLMAXIMUMLENGTH-1 },
 #define I_OPEN (5)
-	/*5*/{ PD_BUTTON, (void*)NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
+	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
 };
 
 static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, sizeof linkEditPLs / sizeof linkEditPLs[0] };

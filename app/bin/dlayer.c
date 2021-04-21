@@ -533,7 +533,7 @@ static long layerFrozen = FALSE;
 static long layerOnMap = TRUE;
 static long layerModule = FALSE;
 static long layerNoButton = FALSE;
-static void LayerOk(void *);
+static void LayerOk(void * junk);
 static BOOL_T layerRedrawMap = FALSE;
 
 #define ENUMLAYER_RELOAD (1)
@@ -574,9 +574,9 @@ static paramData_t layerPLs[] = {
 #define I_COUNT (11)
     { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, I2VP(370) },
     { PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
-    { PD_BUTTON, (void*)DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
-    { PD_BUTTON, (void*)DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
-    { PD_BUTTON, (void*)DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
+    { PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
+    { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
+    { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
     { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
 };
 
@@ -613,7 +613,7 @@ int LoadFileListLoad(Catalog *catalog, char * name)
 		wListAddValue(settingsListL,
 					  DynStringToCStr(&description),
 					  NULL,
-					  (void*)currentEntry->fullFileName[0]);
+					  currentEntry->fullFileName[0]);
 		if (strcmp(currentEntry->fullFileName[0],name)==0) currset = i;
         currentEntry = currentEntry->next;
     }

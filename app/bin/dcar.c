@@ -275,7 +275,7 @@ static void * LookupListElem(
 	DYNARR_APPEND( void*, *da, 10 );
 	for ( mid=da->cnt-1; mid>lo; mid-- )
 		DYNARR_N(void*,*da,mid) = DYNARR_N(void*,*da,mid-1);
-	DYNARR_N(void*,*da,lo) = (void*)MyMalloc(elem_size);
+	DYNARR_N(void*,*da,lo) = MyMalloc(elem_size);
 	memset( DYNARR_N(void*,*da,lo), 0, elem_size );
 	lookupListIndex = lo;
 	return DYNARR_N(void*,*da,lo);
@@ -2260,10 +2260,10 @@ static paramData_t carDlgPLs[] = {
 	{ PD_MESSAGE, NULL, NULL, PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND, I2VP(450) },
 #define I_CD_NEW                (D+1)
 	{ PD_MENU, NULL, "new-menu", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, I2VP(0) },
-	{ PD_MENUITEM, (void*)CarDlgNewDesc, "new-part-mi", 0, NULL, N_("Car Part"), 0, I2VP(0) },
-	{ PD_MENUITEM, (void*)CarDlgNewProto, "new-proto-mi", 0, NULL, N_("Car Prototype"), 0, I2VP(0) },
+	{ PD_MENUITEM, CarDlgNewDesc, "new-part-mi", 0, NULL, N_("Car Part"), 0, I2VP(0) },
+	{ PD_MENUITEM, CarDlgNewProto, "new-proto-mi", 0, NULL, N_("Car Prototype"), 0, I2VP(0) },
 #define I_CD_NEWPROTO           (D+4)
-	{ PD_BUTTON, (void*)CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, I2VP(0) } };
+	{ PD_BUTTON, CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, I2VP(0) } };
 
 static paramGroup_t carDlgPG = { "carpart", 0, carDlgPLs, sizeof carDlgPLs/sizeof carDlgPLs[0] };
 
@@ -2670,7 +2670,7 @@ LOG( log_carDlgList, 3, ( "CarDlgLoadManufList( %s, %s, %d )\n    carDlgManufStr
 				continue;
 			if ( !CheckAvail(manufP) )
 				continue;
-			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, manufP->manuf, NULL, (void*)manufP );
+			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, manufP->manuf, NULL, manufP );
 			if ( carDlgManufInx < 0 && ( carDlgManufStr[0] == '\0' || strcasecmp( carDlgManufStr, manufP->manuf ) == 0 ) ) {
 LOG( log_carDlgList, 4, ( "    found manufStr (inx=%d, listInx=%d)\n", inx, listInx ) )
 				carDlgManufInx = listInx;
@@ -2681,7 +2681,7 @@ LOG( log_carDlgList, 4, ( "    found manufStr (inx=%d, listInx=%d)\n", inx, list
 			manufP1 = manufP;
 		}
 		if ( bInclCustomUnknown ) {
-			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, _("Custom"), NULL, (void*)NULL );
+			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, _("Custom"), NULL, NULL );
 			if ( carDlgManufInx < 0 && ( carDlgManufStr[0] == '\0' || strcasecmp( carDlgManufStr, "Custom" ) == 0 ) ) {
 LOG( log_carDlgList, 4, ( "    found Cus manufStr (inx=%d, listInx=%d)\n", inx, listInx ) )
 				carDlgManufInx = listInx;
@@ -2689,7 +2689,7 @@ LOG( log_carDlgList, 4, ( "    found Cus manufStr (inx=%d, listInx=%d)\n", inx, 
 			}
 			if ( firstName == NULL )
 				firstName = "Custom";
-			wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, _("Unknown"), NULL, (void*)NULL );
+			wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, _("Unknown"), NULL, NULL );
 			if ( carDlgManufInx < 0 && ( carDlgManufStr[0] == '\0' || strcasecmp( carDlgManufStr, "Unknown" ) == 0 ) ) {
 LOG( log_carDlgList, 4, ( "    found Unk manufStr (inx=%d, listInx=%d)\n", inx, listInx ) )
 				carDlgManufInx = listInx;
@@ -2749,7 +2749,7 @@ LOG( log_carDlgList, 4, ( "    found typeinx, reset list (old=%d)\n", listTypeIn
 				firstName = NULL;
 			}
 			if ( currTypeInx != listTypeInx ) continue;
-			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOTYPE_LIST].control, protoP->desc, NULL, (void*)protoP );
+			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOTYPE_LIST].control, protoP->desc, NULL, protoP );
 			if ( carDlgProtoInx < 0 && carDlgProtoStr[0] && strcasecmp( carDlgProtoStr, protoP->desc ) == 0 ) {
 LOG( log_carDlgList, 4, ( "    found protoStr (inx=%d, listInx=%d)\n", inx, listInx ) )
 				carDlgProtoInx = listInx;
@@ -2787,7 +2787,7 @@ LOG( log_carDlgList, 4, ( "    found typeinx, reset list (old=%d)\n", listTypeIn
 			}
 			if ( !found )
 				continue;
-			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOTYPE_LIST].control, parentP->proto, NULL, (void*)parentP );
+			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOTYPE_LIST].control, parentP->proto, NULL, parentP );
 			if ( carDlgProtoInx < 0 && ( carDlgProtoStr[0] == '\0' || strcasecmp( carDlgProtoStr, parentP->proto ) == 0 ) ) {
 LOG( log_carDlgList, 4, ( "    found protoStr (inx=%d, listInx=%d)\n", inx, listInx ) )
 				carDlgProtoInx = listInx;
@@ -2893,7 +2893,7 @@ static BOOL_T CarDlgLoadPartList( carPartParent_p parentP )
 		lastPart.paramFileIndex = partP->paramFileIndex;
 		if ( message[0] && IsParamValid(partP->paramFileIndex) &&
 			 ( lastPart.title == NULL || Cmp_part( &lastPart, partP ) != 0 ) ) {
-			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PARTNO_LIST].control, message, NULL, (void*)partP );
+			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PARTNO_LIST].control, message, NULL, partP );
 			if ( carDlgPartnoInx<0 &&
 				 (carDlgPartnoStr[0]?TabStringCmp( carDlgPartnoStr, &tabs[T_PART] ) == 0:TRUE) ) {
 				carDlgPartnoInx = listInx;
@@ -2967,7 +2967,7 @@ static BOOL_T CarDlgLoadLists(
 	}
 	if ( (!CarDlgLoadManufList( !isItem, loadCustomUnknown, scale )) && tabs ) {
 		TabStringCpy( carDlgManufStr, &tabs[T_MANUF] );
-		carDlgManufInx = wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufStr, NULL, (void*)NULL );
+		carDlgManufInx = wListAddValue( (wList_p)carDlgPLs[I_CD_MANUF_LIST].control, carDlgManufStr, NULL, NULL );
 		isItem = FALSE;
 	}
 	if ( isItem ) {
@@ -4401,17 +4401,17 @@ static paramData_t carInvPLs[] = {
 #define I_CI_LIST		(S+0)
 	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX|PDO_DLGRESIZE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY|BL_MANY },
 #define I_CI_EDIT		(S+1)
-	{ PD_BUTTON, (void*)CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{ PD_BUTTON, CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CI_ADD		(S+2)
-	{ PD_BUTTON, (void*)CarInvDlgAdd, "add", 0, NULL, N_("Add"), 0, 0 },
+	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL, N_("Add"), 0, 0 },
 #define I_CI_DELETE		(S+3)
-	{ PD_BUTTON, (void*)CarInvDlgDelete, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
+	{ PD_BUTTON, CarInvDlgDelete, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
 #define I_CI_IMPORT_CSV	(S+4)
-	{ PD_BUTTON, (void*)CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL, N_("Import") },
+	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL, N_("Import") },
 #define I_CI_EXPORT_CSV	(S+5)
-	{ PD_BUTTON, (void*)CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
+	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
 #define I_CI_PRINT		(S+6)
-	{ PD_BUTTON, (void*)CarInvDlgSaveText, "savetext", 0, NULL, N_("List") } };
+	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL, N_("List") } };
 static paramGroup_t carInvPG = { "carinv", 0, carInvPLs, sizeof carInvPLs/sizeof carInvPLs[0] };
 
 static carItem_p CarInvDlgFindCurrentItem( void )
@@ -5439,7 +5439,7 @@ EXPORT void CarCustMgmLoad( void )
 			partP = carPart(parentP,partX);
 			if ( partP->paramFileIndex != PARAM_CUSTOM )
 				continue;
-			CustMgmLoad( carpartI, CarPartCustMgmProc, (void*)partP );
+			CustMgmLoad( carpartI, CarPartCustMgmProc, partP );
 		}
 	}
 
@@ -5448,7 +5448,7 @@ EXPORT void CarCustMgmLoad( void )
 		if ( carProtoP->paramFileIndex != PARAM_CUSTOM )
 			continue;
 		if (carProtoP->paramFileIndex == PARAM_CUSTOM) {
-			CustMgmLoad( carprotoI, CarProtoCustMgmProc, (void*)carProtoP );
+			CustMgmLoad( carprotoI, CarProtoCustMgmProc, carProtoP );
 		}
 	}
 }

@@ -1544,7 +1544,7 @@ LOG( log_group, 3, ( "\n" ) );
 			DYNARR_APPEND(trkSeg_t,outputSegs_da,10);
 			trkSeg_p from_p = &trackSegs(i);
 			trkSeg_p to_p = &DYNARR_LAST(trkSeg_t, outputSegs_da);
-			memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+			memcpy(to_p,from_p,sizeof( trkSeg_t));
 		}
 		CloneFilledDraw( outputSegs_da.cnt, outputSegs_da.ptr, FALSE );
 

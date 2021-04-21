@@ -2760,7 +2760,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawCmdContext.Op = OP_LINE;
 		}
 		SetAllTrackSelect( FALSE );
-		/*DrawGeomOp( (void*)(drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
+		/*DrawGeomOp( (drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
 		infoSubst = TRUE;
 		switch( drawCmdContext.Op ) {
 		case OP_LINE:

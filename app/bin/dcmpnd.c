@@ -67,7 +67,7 @@ static paramData_t updateTitlePLs[] = {
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
 	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, I2VP(400) },
-	{	PD_BUTTON, (void*)UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
+	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
 static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
@@ -165,7 +165,7 @@ void DoUpdateTitles( void )
 		return;
 	if (updateTitleW == NULL) {
 		ParamRegister( &updateTitlePG );
-		updateTitlePLs[I_UPDATELOAD].valueP = (void*)ParamFilesInit();
+		updateTitlePLs[I_UPDATELOAD].valueP = ParamFilesInit();
 		updateTitleW = ParamCreateDialog( &updateTitlePG, MakeWindowTitle(_("Update Title")), _("Update"), UpdateTitleUpdate, UpdateTitleCancel, TRUE, NULL, 0, NULL );
 		RegisterChangeNotification( UpdateTitleChange );
 	}
@@ -305,7 +305,7 @@ static dynArr_t refreshSpecial_da;
 #define refreshSpecial(N) DYNARR_N( refreshSpecial_t, refreshSpecial_da, N )
 static wIndex_t refreshSpecialInx;
 static BOOL_T refreshReturnVal;
-static void RefreshSkip( void * );
+static void RefreshSkip( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
@@ -316,7 +316,7 @@ static paramData_t refreshSpecialPLs[] = {
 		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
-		{ PD_BUTTON, (void*)RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
+		{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
 static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
 static void RefreshSpecialOk(
 		void * junk )
@@ -582,13 +582,13 @@ EXPORT void CompoundCustMgmLoad( void )
 	for ( inx=0; inx<turnoutInfo_da.cnt; inx++ ) {
 		to = turnoutInfo(inx);
 		if (to->paramFileIndex == PARAM_CUSTOM && to->segCnt > 0) {
-			CustMgmLoad( turnoutI, CompoundCustMgmProc, (void*)to );
+			CustMgmLoad( turnoutI, CompoundCustMgmProc, to );
 		}
 	}
 	for ( inx=0; inx<structureInfo_da.cnt; inx++ ) {
 		to = structureInfo(inx);
 		if (to->paramFileIndex == PARAM_CUSTOM && to->segCnt > 0) {
-			CustMgmLoad( structI, CompoundCustMgmProc, (void*)to );
+			CustMgmLoad( structI, CompoundCustMgmProc, to );
 		}
 	}
 }
