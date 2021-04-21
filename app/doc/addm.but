@@ -527,12 +527,12 @@ could be code snippets or I/O device address information, etc.
 
 \G{png.d/bsignal.png}
 
-A signal is created by selecting \f{Create Signal} from either the Add menu \K{cmdAdd} or
-from the hotbar. Use the mouse to select a location (left button) and then
-draging (left button down) the signal to set its orientation. Once the left
-button is released, a Create/Edit Signal dialog box is displayed, and you can
-fill in the signal's properties: name, fine tune the location and orientation,
-number of heads, and the aspects.
+A signal is created by selecting \f{Create Signal} from either the Add menu
+\K{cmdAdd} or from the hotbar. Use the mouse to select a location (left button)
+and then dragging (left button down) the signal to set its orientation. Once
+the left button is released, a Create/Edit Signal dialog box is displayed, and
+you can fill in the signal's properties: name, fine tune the location and
+orientation, number of heads, and the aspects.
 
 \G{png.d/signal.png}
 
