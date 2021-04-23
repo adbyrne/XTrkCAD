@@ -363,7 +363,8 @@ HBITMAP GetMyCheckBitmaps(UINT fuCheck)
     HBITMAP hbmpCheck;      /* handle to check-mark bitmap */
     RECT rc;                /* rectangle for check-box bitmap */    
     WORD wBitmapX;          /* width of check-mark bitmap */       
-    WORD wBitmapY;          /* height of check-mark bitmap */      
+    WORD wBitmapY;          /* height of check-mark bitmap */    
+	WORD wMenuH;            /* height of menu line */
  
     /* Get the menu background color and create a solid brush 
        with that color. */
@@ -382,6 +383,7 @@ HBITMAP GetMyCheckBitmaps(UINT fuCheck)
  
     wBitmapX = GetSystemMetrics(SM_CXMENUCHECK); 
     wBitmapY = GetSystemMetrics(SM_CYMENUCHECK); 
+	wMenuH = GetSystemMetrics(SM_CYMENU);
  
     hbmpCheck = CreateCompatibleBitmap(hdcSource, wBitmapX, 
         wBitmapY); 
@@ -427,11 +429,11 @@ HBITMAP GetMyCheckBitmaps(UINT fuCheck)
 	case RADIOCHECK:
         rc.left = (bmCheckbox.bmWidth / 4); 
         rc.right = (bmCheckbox.bmWidth / 4) * 2; 
-		rc.top = (bmCheckbox.bmHeight / 3) + 1;
+		rc.top = (bmCheckbox.bmHeight / 3);
 	    rc.bottom = (bmCheckbox.bmHeight / 3) * 2; 
 		break;
 	case RADIOUNCHECK:
-		rc.top = (bmCheckbox.bmHeight / 3) + 1;
+		rc.top = (bmCheckbox.bmHeight / 3);
 	    rc.bottom = (bmCheckbox.bmHeight / 3) * 2; 
         rc.left = 0; 
         rc.right = (bmCheckbox.bmWidth / 4); 
@@ -443,7 +445,6 @@ HBITMAP GetMyCheckBitmaps(UINT fuCheck)
        check-box bitmap is larger than the default check-mark 
        bitmap, use StretchBlt to make it fit; otherwise, just 
        copy it. */
- 
     if (((rc.right - rc.left) > (int) wBitmapX) || 
             ((rc.bottom - rc.top) > (int) wBitmapY)) 
     {
@@ -454,7 +455,9 @@ HBITMAP GetMyCheckBitmaps(UINT fuCheck)
  
     else 
     {
-        BitBlt(hdcTarget, 0, 0, rc.right - rc.left, 
+		// Center it vertically
+		WORD dy = (wMenuH > wBitmapY) ? (wMenuH - wBitmapY) / 2 : 0;
+		BitBlt(hdcTarget, 0, dy, rc.right - rc.left,
             rc.bottom - rc.top, 
             hdcSource, rc.left, rc.top, SRCCOPY); 
     }

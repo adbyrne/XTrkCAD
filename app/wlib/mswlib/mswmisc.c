@@ -2299,7 +2299,7 @@ void startBalloonHelp(void)
     }
 
     if (balloonHelpHWnd) { 
-        if (balloonHelpButton->tipStr) {
+		if (balloonHelpButton->tipStr) {
             hs = balloonHelpButton->tipStr;
         } else {
             hs = balloonHelpButton->helpStr;
@@ -2353,7 +2353,7 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
         w = LOWORD(extent);
         h = HIWORD(extent);
 
-        if (b->type == B_RADIO ||
+		if (b->type == B_RADIO ||
                 b->type == B_TOGGLE) {
             pt.y = b->h;
         } else {
@@ -2376,13 +2376,14 @@ void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * m
         SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
                      SWP_SHOWWINDOW|SWP_NOACTIVATE);
         SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
+		// SetBkColor(hDc, RGB(255,191,191));
         TextOut(hDc, 2, 1, msg, (int)(strlen(msg)));
         SelectObject(hDc, hFont);
         ReleaseDC(balloonHelpHWnd, hDc);
         balloonHelpState = balloonHelpShow;
         balloonControlButton = b;
     } else {
-        closeBalloonHelp();
+		closeBalloonHelp();
     }
 }
 
@@ -2727,8 +2728,6 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     int inx;
     wWin_p w;
     wControl_p b, oldW;
-    // RWS: child is never used 
-    // wIndex_t child = ((GetWindowLongPtr(hWnd, GWL_STYLE) & WS_CHILD) != 0); 
     wWinPix_t newW, newH;
     RECT rect;
     PAINTSTRUCT ps;

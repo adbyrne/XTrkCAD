@@ -1721,7 +1721,8 @@ static void DrawXingToTies(
 		for (j = 0; j < dto[i].n - 1; j++) {
 			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
-		dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
+		if (dto[i].type == 'S')
+			dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
 	}
 
 	// Tie center line in drawing coordinates

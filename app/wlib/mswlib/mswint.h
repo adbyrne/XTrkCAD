@@ -94,7 +94,7 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		wBool_t shown; \
 		wBool_t hilite;
 
-struct wControl_t {
+struct wControl_t { 
 		WOBJ_COMMON
 		};
 
