@@ -2643,6 +2643,10 @@ static void CreateMenus(void) {
 	InitCmdModify(changeM);
 	InitCmdCornu(changeM);
 
+	MiscMenuItemCreate(changeM, NULL, "cmdRescale", _("Change Scale"), 0,
+		(void*)(wMenuCallBack_p)DoRescale, IC_SELECTED, I2VP(0));
+
+
 	wMenuSeparatorCreate(changeM);
 
 	InitCmdJoin(changeM);
@@ -2671,11 +2675,6 @@ static void CreateMenus(void) {
 	MiscMenuItemCreate(changeM, NULL, "cmdElevation", _("Recompute Elevations"),
 			0, (void*) (wMenuCallBack_p) RecomputeElevations, 0, I2VP(0));
 	ParamRegister(&addElevPG);
-
-	wMenuSeparatorCreate(changeM);
-
-	MiscMenuItemCreate(changeM, NULL, "cmdRescale", _("Change Scale"), 0,
-			(void*) (wMenuCallBack_p) DoRescale, IC_SELECTED, I2VP(0));
 
 	/*
 	 * DRAW MENU
