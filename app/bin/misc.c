@@ -2632,22 +2632,30 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_TRKGRP;
 	InitCmdMove(changeM);
+	InitCmdMoveDescription(changeM);
 	InitCmdDelete();
 	InitCmdTunnel();
 	InitCmdBridge();
 	InitCmdAboveBelow();
 
 	cmdGroup = BG_TRKMOD;
-	if (extraButtons)
-		MiscMenuItemCreate(changeM, NULL, "loosen", _("&Loosen Tracks"),
-				ACCL_LOOSEN, (void*) (wMenuCallBack_p) LoosenTracks,
-				IC_SELECTED, I2VP(0));
 
 	InitCmdModify(changeM);
+	InitCmdCornu(changeM);
+
+	wMenuSeparatorCreate(changeM);
+
 	InitCmdJoin(changeM);
-	InitCmdPull(changeM);
 	InitCmdSplit(changeM);
-	InitCmdMoveDescription(changeM);
+
+	wMenuSeparatorCreate(changeM);
+
+	InitCmdPull(changeM);
+	if (extraButtons)
+		MiscMenuItemCreate(changeM, NULL, "loosen", _("&Loosen Tracks"),
+			ACCL_LOOSEN, (void*)(wMenuCallBack_p)LoosenTracks,
+			IC_SELECTED, I2VP(0));
+
 	wMenuSeparatorCreate(changeM);
 
 	MiscMenuItemCreate(changeM, NULL, "cmdAddElevations",
@@ -2665,12 +2673,9 @@ static void CreateMenus(void) {
 	ParamRegister(&addElevPG);
 
 	wMenuSeparatorCreate(changeM);
+
 	MiscMenuItemCreate(changeM, NULL, "cmdRescale", _("Change Scale"), 0,
 			(void*) (wMenuCallBack_p) DoRescale, IC_SELECTED, I2VP(0));
-
-	wMenuSeparatorCreate(changeM);
-
-	InitCmdCornu(changeM);
 
 	/*
 	 * DRAW MENU
