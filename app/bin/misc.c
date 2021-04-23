@@ -2639,11 +2639,6 @@ static void CreateMenus(void) {
 	InitCmdAboveBelow();
 
 	cmdGroup = BG_TRKMOD;
-	if (extraButtons)
-		MiscMenuItemCreate(changeM, NULL, "loosen", _("&Loosen Tracks"),
-				ACCL_LOOSEN,  (wMenuCallBack_p) LoosenTracks,
-				IC_SELECTED, I2VP(0));
-
 	InitCmdModify(changeM);
 	InitCmdCornu(changeM);
 
@@ -2654,7 +2649,6 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(changeM);
 
 	InitCmdJoin(changeM);
-	InitCmdPull(changeM);
 	InitCmdSplit(changeM);
 
 	wMenuSeparatorCreate(changeM);
