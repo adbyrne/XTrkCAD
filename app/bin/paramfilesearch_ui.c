@@ -65,9 +65,9 @@ static paramData_t searchUiPLs[] = {
 #define I_FITRADIO	(3)
     {	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (4)
-    { PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, (void *)370 },
+    { PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
 #define I_STATISTICS (5)
-    { PD_MESSAGE, "", NULL, PDO_DLGBOXEND, (void *)370 },
+    { PD_MESSAGE, "", "searchstat", PDO_DLGBOXEND, (void *)370 },
 #define I_RESULTLIST	(6)
     {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MODETOGGLE	(7)
@@ -88,17 +88,17 @@ static paramData_t searchUiPLs[] = {
 #define SEARCHSTAT ((wMessage_p)searchUiPLs[I_STATISTICS].control)
 #define FITRADIO ((wChoice_p)searchUiPLs[I_FITRADIO].control)
 
-static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
+static paramGroup_t searchUiPG = { "searchgui", PGO_DIALOGTEMPLATE, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
 static wWin_p searchUiW;
 
 #define FILESECTION "file"
 #define PARAMDIRECTORY "paramdir"
 
 
-/** 
- * Clears the current catalog 
+/**
+ * Clears the current catalog
  */
-  
+
 void
 ClearCurrentCatalog(void)
 {
@@ -413,7 +413,7 @@ static void SearchUiDlgUpdate(
     }
 }
 
-void 
+void
 SearchUiCancel(wWin_p window)
 {
 	ClearCurrentCatalog();
