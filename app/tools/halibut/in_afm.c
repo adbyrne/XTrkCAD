@@ -100,56 +100,56 @@ void read_afm_file(input *in) {
 		    error(err_afmval, &in->pos, key, 4);
 		    goto giveup;
 		}
-		fi->fontbbox[i] = atof(val);
+		fi->fontbbox[i] = (float)atof(val);
 	    }
 	} else if (strcmp(key, "CapHeight") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->capheight = atof(val);
+	    fi->capheight = (float)atof(val);
 	} else if (strcmp(key, "XHeight") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->xheight = atof(val);
+	    fi->xheight = (float)atof(val);
 	} else if (strcmp(key, "Ascender") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->ascent = atof(val);
+	    fi->ascent = (float)atof(val);
 	} else if (strcmp(key, "Descender") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->descent = atof(val);
+	    fi->descent = (float)atof(val);
 	} else if (strcmp(key, "CapHeight") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->capheight = atof(val);
+	    fi->capheight = (float)atof(val);
 	} else if (strcmp(key, "StdHW") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->stemh = atof(val);
+	    fi->stemh = (float)atof(val);
 	} else if (strcmp(key, "StdVW") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->stemv = atof(val);
+	    fi->stemv = (float)atof(val);
 	} else if (strcmp(key, "ItalicAngle") == 0) {
 	    if (!(val = strtok(NULL, " \t"))) {
 		error(err_afmval, &in->pos, key, 1);
 		goto giveup;
 	    }
-	    fi->italicangle = atof(val);
+	    fi->italicangle = (float)atof(val);
 	} else if (strcmp(key, "StartCharMetrics") == 0) {
 	    int nglyphs, i;
 	    if (!(val = strtok(NULL, " \t"))) {

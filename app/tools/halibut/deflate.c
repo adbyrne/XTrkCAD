@@ -1786,8 +1786,9 @@ static struct table *mkonetab(int *codes, unsigned char *lengths, int nsyms,
     int pfxmask = (1 << pfxbits) - 1;
     int nbits, i, j, code;
 
-    tab->table = snewn(1 << bits, struct tableentry);
-    tab->mask = (1 << bits) - 1;
+	int bit = 1 << bits;
+    tab->table = snewn(bit, struct tableentry);
+    tab->mask = bit - 1;
 
     for (code = 0; code <= tab->mask; code++) {
 	tab->table[code].code = -1;
