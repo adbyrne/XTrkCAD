@@ -42,7 +42,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \dd \G{png.d/mjoin.png}
 
-\dd \f{Join} \I{Join Lines} \I{Join Track} \I {Track, Join} - connect two separate pieces of track or two lines. This command can be used to move one of the pieces of track to the endpoint of the other or to create a connection by laying a stretch of flex-track. (\K{cmdJoin}).
+\dd \f{Join} \I{Join Lines} \I{Join Track} \I{Track, Join} - connect two separate pieces of track or two lines. This command can be used to move one of the pieces of track to the endpoint of the other or to create a connection by laying a stretch of flex-track. (\K{cmdJoin}).
 
 \u000
 
