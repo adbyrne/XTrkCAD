@@ -1909,7 +1909,7 @@ static wWin_p stickyW;
 
 static void StickyOk(void * junk);
 static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
-		stickyLabels } };
+		/*CAST_AWAY_CONST*/(char**)stickyLabels } };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 		sizeof stickyPLs / sizeof stickyPLs[0] };
 
