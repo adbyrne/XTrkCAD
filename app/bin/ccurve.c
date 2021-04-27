@@ -990,7 +990,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 
-	ButtonGroupBegin( _("Curve Track"), "cmdCircleSetCmd", _("Curve Tracks") );
+	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
 	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
@@ -998,7 +998,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
 	ButtonGroupEnd();
 
-	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );
+	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
 	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius", _("Fixed Radius Circle"), wIconCreatePixMap( circle1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"), wIconCreatePixMap( circle2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"), wIconCreatePixMap( circle3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
