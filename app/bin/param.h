@@ -145,7 +145,7 @@ typedef struct {
 		void * valueP;
 		const char * nameStr;
 		long option;
-		void * winData;
+		const void * winData;
 		const char * winLabel;
 		long winOption;
 		void * context;
