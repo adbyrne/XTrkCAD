@@ -988,14 +988,13 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
-
 	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
 	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, I2VP(3) );
 	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
+	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
