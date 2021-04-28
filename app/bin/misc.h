@@ -209,8 +209,6 @@ typedef void (*moveDialogCallBack_t) (void *);
 extern void AddRotateMenu( wMenu_p, rotateDialogCallBack_t );
 extern void AddMoveMenu( wMenu_p, moveDialogCallBack_t );
 extern void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func);
-extern void StartRotateDialog( rotateDialogCallBack_t );
-extern void StartMoveDialog(moveDialogCallBack_t );
 /*
  * Safe Memory etc
  */
@@ -227,7 +225,7 @@ void ErrorMessage( const char *, ... );
 void InfoMessage( const char *, ... );
 int NoticeMessage( const char *, const char*, const char *, ... );
 int NoticeMessage2( int, const char *, const char*, const char *, ... );
-void DoQuit( void );
+void DoQuit( void * junk );
 
 void FileIsChanged(void);
 char * ConvertFromEscapedText(const char * text);

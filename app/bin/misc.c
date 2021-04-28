@@ -698,16 +698,16 @@ Confirm(char * label2, doSaveCallBack_p after)
 	return(rc != 0);
 }
 
-static void ChkLoad(void) {
+static void ChkLoad(void * junk) {
 	Confirm(_("Load"), DoLoad);
 }
 
-static void ChkExamples( void )
+static void ChkExamples( void * junk )
 {
 	Confirm(_("examples"), DoExamples);
 }
 
-static void ChkRevert(void)
+static void ChkRevert(void * junk)
 {
     int rc;
 
@@ -782,7 +782,7 @@ static void DoQuitAfter(void) {
  * to close the application. Before shutting down confirmation is gotten to
  * prevent data loss.
  */
-void DoQuit(void) {
+void DoQuit(void * junk) {
 	if (Confirm(_("Quit"), DoQuitAfter)) {
 
 #ifdef CHECK_UNUSED_BALLOONHELP
@@ -809,7 +809,7 @@ static void DoClearAfter(void) {
 	LayoutBackGroundInit(TRUE);
 }
 
-static void DoClear(void) {
+static void DoClear(void * junk) {
 	Confirm(_("Clear"), DoClearAfter);
 }
 
@@ -817,7 +817,7 @@ static void DoClear(void) {
  * Toggle visibility state of map window.
  */
 
-void MapWindowToggleShow(void) {
+void MapWindowToggleShow(void * junk) {
 	MapWindowShow(!mapVisible);
 }
 
@@ -856,7 +856,7 @@ int MagneticSnap(int state)
 /**
  * Toggle magnets on/off
  */
-void MagneticSnapToggle(void) {
+void MagneticSnapToggle(void * junk) {
 	MagneticSnap(!magneticSnap);
 }
 
@@ -1917,7 +1917,7 @@ static void StickyOk(void * junk) {
 	wHide(stickyW);
 }
 
-static void DoSticky(void) {
+static void DoSticky(void * junk) {
 	if (!stickyW)
 		stickyW = ParamCreateDialog(&stickyPG,
 				MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, wHide,
@@ -2001,7 +2001,7 @@ static void DoAddElev(void * junk) {
 	wHide(addElevW);
 }
 
-static void ShowAddElevations(void) {
+static void ShowAddElevations(void * junk) {
 	if (selectedTrackCount <= 0) {
 		ErrorMessage(MSG_NO_SELECTED_TRK);
 		return;
@@ -2046,7 +2046,9 @@ static paramData_t movePLs[] = {
 static paramGroup_t movePG = { "move", 0, movePLs, sizeof movePLs
 		/ sizeof movePLs[0] };
 
-EXPORT void StartRotateDialog(rotateDialogCallBack_t func) {
+static void StartRotateDialog(void * param)
+{
+	rotateDialogCallBack_t func = param;
 	if (rotateW == NULL)
 		rotateW = ParamCreateDialog(&rotatePG, MakeWindowTitle(_("Rotate")),
 				_("Ok"), RotateEnterOk, wHide, FALSE, NULL, 0, NULL);
@@ -2055,7 +2057,9 @@ EXPORT void StartRotateDialog(rotateDialogCallBack_t func) {
 	wShow(rotateW);
 }
 
-EXPORT void StartIndexDialog(indexDialogCallBack_t func) {
+static void StartIndexDialog(void * param)
+{
+	indexDialogCallBack_t func = param;
 	if (indexW == NULL)
 		indexW = ParamCreateDialog(&indexPG, MakeWindowTitle(_("Select Index")),
 				_("Ok"), IndexEnterOk, wHide, FALSE, NULL, 0, NULL);
@@ -2065,7 +2069,9 @@ EXPORT void StartIndexDialog(indexDialogCallBack_t func) {
 	wShow(indexW);
 }
 
-EXPORT void StartMoveDialog(moveDialogCallBack_t func) {
+static void StartMoveDialog(void * param)
+{
+	moveDialogCallBack_t func = param;
 	if (moveW == NULL)
 		moveW = ParamCreateDialog(&movePG, MakeWindowTitle(_("Move")), _("Ok"),
 				MoveEnterOk, wHide, FALSE, NULL, 0, NULL);
@@ -2110,12 +2116,12 @@ static void IndexDialogInit(void) {
 
 EXPORT void AddMoveMenu(wMenu_p m, moveDialogCallBack_t func) {
 	wMenuPushCreate(m, "", _("Enter Move ..."), 0,
-			(wMenuCallBack_p) StartMoveDialog, func);
+			StartMoveDialog, func);
 }
 
 EXPORT void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func) {
 	wMenuPushCreate(m, "cmdSelectIndex", _("Select Track Index ..."), 0,
-			(wMenuCallBack_p) StartIndexDialog, func);
+			StartIndexDialog, func);
 }
 
 //All values multipled by 100 to support decimal points from PD_FLOAT
@@ -2130,7 +2136,7 @@ EXPORT void AddRotateMenu(wMenu_p m, rotateDialogCallBack_t func) {
 	wMenuPushCreate(m, "", _("45  CCW"), 0, func, I2VP(360000 - 45000));
 	wMenuPushCreate(m, "", _("90  CCW"), 0, func, I2VP(360000 - 90000));
 	wMenuPushCreate(m, "", _("Enter Angle ..."), 0,
-			(wMenuCallBack_p) StartRotateDialog, func);
+			StartRotateDialog, func);
 }
 
 /*****************************************************************************
@@ -2168,7 +2174,7 @@ static void CreateDebugW(void) {
 	wHide(debugW);
 }
 
-EXPORT void DebugInit(void) {
+EXPORT void DebugInit(void * junk) {
 
 	if (!debugW) {
 		debugPLs[0] = p0[0];
@@ -2350,22 +2356,22 @@ static void CreateMenus(void) {
 			(wMenuCallBack_p) UndoRedo, 0, I2VP(0));
 	/* Zoom */
 	wMenuPushCreate(popup1M, "cmdZoomIn", _("Zoom In"), 0,
-			(wMenuCallBack_p) DoZoomUp, I2VP(1));
+			DoZoomUp, I2VP(1));
 	wMenuPushCreate(popup2M, "cmdZoomIn", _("Zoom In"), 0,
-			(wMenuCallBack_p) DoZoomUp, I2VP(1));
+			DoZoomUp, I2VP(1));
 	wMenuPushCreate(popup1M, "cmdZoomOut", _("Zoom Out"), 0,
-			(wMenuCallBack_p) DoZoomDown, I2VP(1));
+			DoZoomDown, I2VP(1));
 	wMenuPushCreate(popup2M, "cmdZoomOut", _("Zoom Out"), 0,
-			(wMenuCallBack_p) DoZoomDown, I2VP(1));
+			DoZoomDown, I2VP(1));
 	/* Display */
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("Enable SnapGrid"),
 			0, (wMenuCallBack_p) SnapGridEnable, 0, I2VP(0));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
 			(wMenuCallBack_p) SnapGridShow, 0, I2VP(0));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMagneticSnap", _(" Enable Magnetic Snap"), 0,
-			(wMenuCallBack_p) MagneticSnapToggle, 0, I2VP(0));
+			MagneticSnapToggle, 0, I2VP(0));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
-				(wMenuCallBack_p) MapWindowToggleShow, 0, I2VP(0));
+				MapWindowToggleShow, 0, I2VP(0));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdBackgroundShow", _("Show/Hide Background"), 0,
 			(wMenuCallBack_p) BackgroundToggleShow, 0, I2VP(0));
 	wMenuSeparatorCreate(popup1M);
@@ -2384,18 +2390,18 @@ static void CreateMenus(void) {
 			(wMenuCallBack_p) SetAllTrackSelect, 0, I2VP(1));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectCurrentLayer",
 			_("Select Current Layer"), 0,
-			(wMenuCallBack_p) SelectCurrentLayer, 0, I2VP(0));
+			SelectCurrentLayer, 0, I2VP(0));
 	MiscMenuItemCreate(popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0,
 			(wMenuCallBack_p) SetAllTrackSelect, 0, I2VP(0));
 	wMenuPushCreate(popup1M, "cmdSelectIndex", _("Select Track Index..."), 0,
-				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
+				StartIndexDialog, &SelectByIndex);
 	wMenuPushCreate(popup2M, "cmdSelectIndex", _("Select Track Index..."), 0,
-				(wMenuCallBack_p) StartIndexDialog, &SelectByIndex);
+				StartIndexDialog, &SelectByIndex);
 	/* Modify */
 	wMenuPushCreate(popup2M, "cmdMove", _("Move"), 0,
-			(wMenuCallBack_p) DoCommandBIndirect, &moveCmdInx);
+			DoCommandBIndirect, &moveCmdInx);
 	wMenuPushCreate(popup2M, "cmdRotate", _("Rotate"), 0,
-			(wMenuCallBack_p) DoCommandBIndirect, &rotateCmdInx);
+			DoCommandBIndirect, &rotateCmdInx);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDelete", _("Delete"), 0,
@@ -2410,9 +2416,9 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_FILE;
 	AddToolbarButton("menuFile-clear", wIconCreatePixMap(document_new),
-			IC_MODETRAIN_TOO, (addButtonCallBack_t) DoClear, NULL);
+			IC_MODETRAIN_TOO, DoClear, NULL);
 	AddToolbarButton("menuFile-load", wIconCreatePixMap(document_open),
-			IC_MODETRAIN_TOO, (addButtonCallBack_t) ChkLoad, NULL);
+			IC_MODETRAIN_TOO, ChkLoad, NULL);
 	AddToolbarButton("menuFile-save", wIconCreatePixMap(document_save),
 			IC_MODETRAIN_TOO, (addButtonCallBack_t) DoSave, NULL);
 
@@ -2420,14 +2426,14 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoomin_xpm),
-			IC_MODETRAIN_TOO, (addButtonCallBack_t) DoZoomUp, NULL);
+			IC_MODETRAIN_TOO, DoZoomUp, NULL);
 
 	zoomM = wMenuPopupCreate(mainW, "");
 	AddToolbarButton("cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO,
 			(wButtonCallBack_p) wMenuPopupShow, zoomM);
 
 	zoomDownB = AddToolbarButton("cmdZoomOut", wIconCreatePixMap(zoomout_xpm),
-			IC_MODETRAIN_TOO, (addButtonCallBack_t) DoZoomDown, NULL);
+			IC_MODETRAIN_TOO, DoZoomDown, NULL);
 
 	cmdGroup = BG_UNDO;
 	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(edit_undo), 0,
@@ -2443,9 +2449,9 @@ static void CreateMenus(void) {
 	 * FILE MENU
 	 */
 	MiscMenuItemCreate(fileM, NULL, "menuFile-clear", _("&New ..."), ACCL_NEW,
-			(wMenuCallBack_p) DoClear, 0, I2VP(0));
+			DoClear, 0, I2VP(0));
 	wMenuPushCreate(fileM, "menuFile-load", _("&Open ..."), ACCL_OPEN,
-			(wMenuCallBack_p) ChkLoad, NULL);
+			ChkLoad, NULL);
 	wMenuSeparatorCreate(fileM);
 
 	wMenuPushCreate(fileM, "menuFile-save", _("&Save"), ACCL_SAVE,
@@ -2453,7 +2459,7 @@ static void CreateMenus(void) {
 	wMenuPushCreate(fileM, "menuFile-saveAs", _("Save &As ..."), ACCL_SAVEAS,
 			(wMenuCallBack_p) DoSaveAs, NULL);
 	wMenuPushCreate(fileM, "menuFile-revert", _("Revert"), ACCL_REVERT,
-			(wMenuCallBack_p) ChkRevert, NULL);
+			ChkRevert, NULL);
 	wMenuSeparatorCreate(fileM);
 	MiscMenuItemCreate(fileM, NULL, "printSetup", _("P&rint Setup ..."),
 			ACCL_PRINTSETUP, (wMenuCallBack_p) wPrintSetup, 0,
@@ -2461,9 +2467,9 @@ static void CreateMenus(void) {
 	printCmdInx = InitCmdPrint(fileM);
 	wMenuSeparatorCreate(fileM);
 	MiscMenuItemCreate(fileM, NULL, "cmdImport", _("&Import"), ACCL_IMPORT,
-			(wMenuCallBack_p) DoImport, 0, I2VP(0));
+			DoImport, 0, I2VP(0));
 	MiscMenuItemCreate(fileM, NULL, "cmdImportModule", _("Import &Module"), ACCL_IMPORT_MOD,
-				(wMenuCallBack_p) DoImport, 0, I2VP(1));
+				DoImport, 0, I2VP(1));
 	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
 			ACCL_PRINTBM, (wMenuCallBack_p) OutputBitMapInit(), 0,
 			I2VP(0));
@@ -2484,7 +2490,7 @@ static void CreateMenus(void) {
 			ChkFileList);
 	wMenuSeparatorCreate(fileM);
 	wMenuPushCreate(fileM, "menuFile-quit", _("E&xit"), 0,
-			(wMenuCallBack_p) DoQuit, NULL);
+			DoQuit, NULL);
 
 	/*
 	 * EDIT MENU
@@ -2506,37 +2512,37 @@ static void CreateMenus(void) {
 			(wMenuCallBack_p) SelectDelete, IC_SELECTED, I2VP(0));
 	MiscMenuItemCreate(editM, NULL, "cmdMoveToCurrentLayer",
 			_("Move To Current Layer"), ACCL_MOVCURLAYER,
-			(wMenuCallBack_p) MoveSelectedTracksToCurrentLayer,
+			MoveSelectedTracksToCurrentLayer,
 			IC_SELECTED, I2VP(0));
 	wMenuSeparatorCreate( editM );
 	menuPLs[menuPG.paramCnt].context = I2VP(1);
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"), ACCL_SELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, I2VP(1) );
-	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", _("Select Current Layer"), ACCL_SETCURLAYER, (wMenuCallBack_p)SelectCurrentLayer, 0, I2VP(0) );
-	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L, (wMenuCallBack_p)StartIndexDialog, 0, &SelectByIndex );
+	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", _("Select Current Layer"), ACCL_SETCURLAYER, SelectCurrentLayer, 0, I2VP(0) );
+	MiscMenuItemCreate( editM, NULL, "cmdSelectByIndex", _("Select By Index"), 0L, StartIndexDialog, 0, &SelectByIndex );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"), ACCL_DESELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, I2VP(0) );
-	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L, (wMenuCallBack_p)InvertTrackSelect, 0, I2VP(0) );
-	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", _("Select Stranded Track"), 0L, (wMenuCallBack_p)OrphanedTrackSelect, 0, I2VP(0) );
+	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L, InvertTrackSelect, 0, I2VP(0) );
+	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", _("Select Stranded Track"), 0L, OrphanedTrackSelect, 0, I2VP(0) );
 	wMenuSeparatorCreate( editM );
-	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL, (wMenuCallBack_p)SelectTunnel, IC_SELECTED, I2VP(0) );
-	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B&ridge"), ACCL_BRIDGE, (wMenuCallBack_p)SelectBridge, IC_SELECTED, I2VP(0));
-	MiscMenuItemCreate( editM, NULL, "cmdTies", _("Ties/NoTies"), ACCL_TIES, (wMenuCallBack_p)SelectTies, IC_SELECTED, I2VP(0));
+	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL, SelectTunnel, IC_SELECTED, I2VP(0) );
+	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B&ridge"), ACCL_BRIDGE, SelectBridge, IC_SELECTED, I2VP(0));
+	MiscMenuItemCreate( editM, NULL, "cmdTies", _("Ties/NoTies"), ACCL_TIES, SelectTies, IC_SELECTED, I2VP(0));
 	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("Move to &Front"), ACCL_ABOVE, (wMenuCallBack_p)SelectAbove, IC_SELECTED, I2VP(0) );
 	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Move to &Back"), ACCL_BELOW, (wMenuCallBack_p)SelectBelow, IC_SELECTED, I2VP(0) );
 
 	wMenuSeparatorCreate( editM );
-	MiscMenuItemCreate( editM, NULL, "cmdWidth0", _("Thin Tracks"), ACCL_THIN, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, I2VP(0) );
-	MiscMenuItemCreate( editM, NULL, "cmdWidth2", _("Medium Tracks"), ACCL_MEDIUM, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, I2VP(2) );
-	MiscMenuItemCreate( editM, NULL, "cmdWidth3", _("Thick Tracks"), ACCL_THICK, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, I2VP(3) );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth0", _("Thin Tracks"), ACCL_THIN, SelectTrackWidth, IC_SELECTED, I2VP(0) );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth2", _("Medium Tracks"), ACCL_MEDIUM, SelectTrackWidth, IC_SELECTED, I2VP(2) );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth3", _("Thick Tracks"), ACCL_THICK, SelectTrackWidth, IC_SELECTED, I2VP(3) );
 
 	/*
 	 * VIEW MENU
 	 */
 
 	zoomInM = wMenuPushCreate(viewM, "menuEdit-zoomIn", _("Zoom &In"),
-			ACCL_ZOOMIN, (wMenuCallBack_p) DoZoomUp, I2VP(1));
+			ACCL_ZOOMIN, DoZoomUp, I2VP(1));
 	zoomSubM = wMenuMenuCreate(viewM, "menuEdit-zoomTo", _("&Zoom"));
 	zoomOutM = wMenuPushCreate(viewM, "menuEdit-zoomOut", _("Zoom &Out"),
-			ACCL_ZOOMOUT, (wMenuCallBack_p) DoZoomDown, I2VP(1));
+			ACCL_ZOOMOUT, DoZoomDown, I2VP(1));
 	wMenuSeparatorCreate(viewM);
 
 	InitCmdZoom(zoomM, zoomSubM, NULL, NULL);
@@ -2588,12 +2594,12 @@ static void CreateMenus(void) {
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
 	magnetsB = AddToolbarButton("cmdMagneticSnap", wIconCreatePixMap(magnet_xpm),
-				IC_MODETRAIN_TOO, (addButtonCallBack_t) MagneticSnapToggle, NULL);
+				IC_MODETRAIN_TOO, MagneticSnapToggle, NULL);
 		wControlLinkedSet((wControl_p) magnetsMI, (wControl_p) magnetsB);
 		wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
 	mapShowB = AddToolbarButton("cmdMapShow", wIconCreatePixMap(map_xpm),
-			IC_MODETRAIN_TOO, (addButtonCallBack_t) MapWindowToggleShow, NULL);
+			IC_MODETRAIN_TOO, MapWindowToggleShow, NULL);
 	wControlLinkedSet((wControl_p) mapShowMI, (wControl_p) mapShowB);
 	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
 
@@ -2643,7 +2649,7 @@ static void CreateMenus(void) {
 	InitCmdCornu(changeM);
 
 	MiscMenuItemCreate(changeM, NULL, "cmdRescale", _("Change Scale"), 0,
-		(wMenuCallBack_p)DoRescale, IC_SELECTED, I2VP(0));
+		DoRescale, IC_SELECTED, I2VP(0));
 
 
 	wMenuSeparatorCreate(changeM);
@@ -2663,14 +2669,14 @@ static void CreateMenus(void) {
 
 	MiscMenuItemCreate(changeM, NULL, "cmdAddElevations",
 			_("Raise/Lower Elevations"), ACCL_CHGELEV,
-			(wMenuCallBack_p) ShowAddElevations, IC_SELECTED,
+			ShowAddElevations, IC_SELECTED,
 			I2VP(0));
 	InitCmdElevation(changeM);
 	InitCmdProfile(changeM);
 
 	MiscMenuItemCreate(changeM, NULL, "cmdClearElevations",
 			_("Clear Elevations"), ACCL_CLRELEV,
-			(wMenuCallBack_p) ClearElevations, IC_SELECTED, I2VP(0));
+			ClearElevations, IC_SELECTED, I2VP(0));
 	MiscMenuItemCreate(changeM, NULL, "cmdElevation", _("Recompute Elevations"),
 			0, (wMenuCallBack_p) RecomputeElevations, 0, I2VP(0));
 	ParamRegister(&addElevPG);
@@ -2701,12 +2707,12 @@ static void CreateMenus(void) {
 	MiscMenuItemCreate(optionM, NULL, "fontSelW", _("&Fonts ..."), ACCL_FONTW,
 			(wMenuCallBack_p) SelectFont, IC_MODETRAIN_TOO, I2VP(0));
 	MiscMenuItemCreate(optionM, NULL, "cmdSticky", _("Stic&ky ..."),
-			ACCL_STICKY, (wMenuCallBack_p) DoSticky, IC_MODETRAIN_TOO,
+			ACCL_STICKY, DoSticky, IC_MODETRAIN_TOO,
 			I2VP(0));
 	if (extraButtons) {
 		menuPLs[menuPG.paramCnt].context = debugW;
 		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("&Debug ..."), 0,
-				(wMenuCallBack_p) DebugInit, IC_MODETRAIN_TOO, I2VP(0));
+				DebugInit, IC_MODETRAIN_TOO, I2VP(0));
 	}
 	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("&Preferences ..."),
 			ACCL_PREFERENCES, PrefInit(), IC_MODETRAIN_TOO, I2VP(0));
@@ -2747,12 +2753,12 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "cmdTip", _("Tip of the Day..."), 0, (wMenuCallBack_p)ShowTip, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP));
 	demoM = wMenuMenuCreate( helpM, "cmdDemo", _("&Demos") );
-	wMenuPushCreate( helpM, "cmdExamples", _("Examples..."), 0, (wMenuCallBack_p)ChkExamples, I2VP(0));
+	wMenuPushCreate( helpM, "cmdExamples", _("Examples..."), 0, ChkExamples, I2VP(0));
 
 	/* about window */
 	wMenuSeparatorCreate(helpM);
 	wMenuPushCreate(helpM, "about", _("About"), 0,
-			(wMenuCallBack_p) CreateAboutW, NULL);
+			CreateAboutW, NULL);
 
 	/*
 	 * MANAGE MENU
@@ -2779,7 +2785,7 @@ static void CreateMenus(void) {
 			0, I2VP(0));
 	MiscMenuItemCreate(manageM, NULL, "cmdRefreshCompound",
 			_("Update Turnouts and Structures"), 0,
-			(wMenuCallBack_p) DoRefreshCompound, 0, I2VP(0));
+			DoRefreshCompound, 0, I2VP(0));
 
 	MiscMenuItemCreate(manageM, NULL, "cmdCarInventory", _("Car Inventory"),
 			ACCL_CARINV, (wMenuCallBack_p) DoCarDlg, IC_MODETRAIN_TOO,
@@ -2883,9 +2889,9 @@ EXPORT void InitCmdExport(void) {
 	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(export_dxf_xpm), IC_SELECTED | IC_ACCLKEY,
 		(addButtonCallBack_t)DoExportDXF, I2VP(1));
 	AddToolbarButton("cmdImport", wIconCreatePixMap(import_xpm), IC_ACCLKEY,
-			(addButtonCallBack_t) DoImport, I2VP(0));
+			DoImport, I2VP(0));
 	AddToolbarButton("cmdImportModule", wIconCreatePixMap(importmod_xpm), IC_ACCLKEY,
-				(addButtonCallBack_t) DoImport, I2VP(1));
+				DoImport, I2VP(1));
 	ButtonGroupEnd();
 }
 

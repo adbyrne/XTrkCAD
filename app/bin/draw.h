@@ -241,12 +241,11 @@ void DrawRuler(drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor);
 void MainProc(wWin_p, winProcEvent, void *, void *);
 void InitInfoBar(void);
 void DrawInit(int);
-void DoZoomUp(void *);
-void DoZoomDown(void *);
-void DoZoomExtents( void *);
-void DoZoom(DIST_T *);
-void PanHere(void *);
-void PanMenuEnter(int);
+void DoZoomUp(void * param);
+void DoZoomDown(void * param);
+void DoZoomExtents( void * param);
+void PanHere(void * param);
+void PanMenuEnter(void * param);
 
 void InitCmdZoom(wMenu_p, wMenu_p, wMenu_p, wMenu_p);
 
