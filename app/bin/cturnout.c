@@ -2968,6 +2968,7 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos, trackParams_t* p
 			PATHPTR_T path, pathCurr;
 			//Find starting seg on path (nearest to end Pt)
 			path = GetCurrPath(trk);
+			pathCurr = path;
 			for (path += strlen((char*)path) + 1; path[0] || path[1]; path++) {
 				if (path[0] == 0)
 					continue;
@@ -3166,7 +3167,7 @@ static void DrawTurnoutPositionIndicator(
 {
 	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	PATHPTR_T path, path1;
-	coOrd pos0, pos1;
+	coOrd pos0 = zero, pos1;
 	trkSeg_p seg;
 	BOOL_T multiPart = FALSE;
 
