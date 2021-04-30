@@ -1679,9 +1679,9 @@ EXPORT wBool_t ParamCheckInputs(
 }
 
 
-static void ParamButtonOk(
-		paramGroup_p group )
+static void ParamButtonOk( void * groupVP )
 {
+	paramGroup_p group = groupVP;
 	wFlush();
 	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
 	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
@@ -1701,9 +1701,9 @@ static void ParamButtonOk(
 }
 
 
-static void ParamButtonCancel(
-		paramGroup_p group )
+static void ParamButtonCancel( void * groupVP )
 {
+	paramGroup_p group = groupVP;
 	if ( recordF && group->nameStr ) {
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "cancel" );
 		fflush( recordF );
@@ -2735,10 +2735,10 @@ wWin_p ParamCreateDialog(
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
-		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, (wButtonCallBack_p)ParamButtonOk, group );
+		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, ParamButtonOk, group );
 	}
 	if ( group->cancelProc ) {
-		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, (wButtonCallBack_p)ParamButtonCancel, group );
+		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, ParamButtonCancel, group );
 	}
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );

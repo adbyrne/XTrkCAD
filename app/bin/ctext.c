@@ -267,7 +267,7 @@ void InitCmdText( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
-	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
+	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
     Dt.color = wDrawColorBlack;
 }

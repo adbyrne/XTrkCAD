@@ -105,14 +105,14 @@ void SetWindowTitle( void );
 char * PutTitle( char * cp );
 
 void ParamFileListLoad(int paramFileCnt, dynArr_t *paramFiles);
-void DoParamFiles(void * junk);
+void DoParamFiles(void * unused);
 
 int LoadTracks( int cnt, char **fileName, void *data );
 
 typedef void (*doSaveCallBack_p)( void );
 void SetAutoSave(void);
-void DoSave( doSaveCallBack_p );
-void DoSaveAs( doSaveCallBack_p );
+void DoSave( void * dpAfterSaveVP );
+void DoSaveAs( void * dpAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
@@ -120,9 +120,9 @@ void DoCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
-void DoImport( void * );
-void DoExport( void );
-void DoExportDXF( void );
+void DoImport( void * typeVP );
+void DoExport( void * unused );
+void DoExportDXF( void * unused );
 BOOL_T EditCopy( void );
 BOOL_T EditCut( void );
 BOOL_T EditPaste( void );
@@ -148,6 +148,6 @@ void SetCLocale();
 void SetUserLocale();
 
 // Parameter file search
-void DoSearchParams(void * junk);
+void DoSearchParams(void * unused);
 
 #endif

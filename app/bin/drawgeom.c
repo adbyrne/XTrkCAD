@@ -1539,7 +1539,7 @@ STATUS_T DrawGeomPolyModify(
 			break;
 		case C_TEXT:
 			if (action>>8 == 'o') {  //"o" -> origin mode
-				MenuMode(1);
+				MenuMode(I2VP(1));
 				InfoMessage("Move Origin Mode: Place Origin, p for Points, Enter or Esc");
 				return C_CONTINUE;
 			}
@@ -1826,7 +1826,7 @@ STATUS_T DrawGeomOriginMove(
 					}
 				}
 				if (action>>8 == 'p') {     //"p" - points mode
-					MenuMode(0);
+					MenuMode(I2VP(0));
 					return C_CONTINUE;
 				}
 				context->rel_center = context->rot_center;
@@ -2565,7 +2565,7 @@ STATUS_T DrawGeomModify(
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
 
 		if (action>>8 == 'o') {
-			MenuMode(1);
+			MenuMode(I2VP(1));
 		}
 
 		if (action>>8 != 32 && action>>8 != 13) return C_CONTINUE;

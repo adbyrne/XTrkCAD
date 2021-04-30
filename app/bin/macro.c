@@ -1115,7 +1115,7 @@ static void Playback( void )
 			DoSetScale( paramLine+6 );
 		} else if (strncmp( paramLine, "REDRAW", 6 ) == 0) {
 			ResolveIndex();
-			RecomputeElevations();
+			RecomputeElevations(NULL);
 			DoRedraw();
 			/*DoChangeNotification( CHANGE_ALL );*/
 		} else if (strncmp( paramLine, "COMMAND ", 8 ) == 0) {

@@ -586,7 +586,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 
 
 
-EXPORT void DoUngroup( void )
+EXPORT void DoUngroup( void * unused )
 {
 	track_p trk = NULL;
 	int ungroupCnt;
@@ -1012,7 +1012,7 @@ static void LogSeg(
  * 11 - optionally replace grouped tracks with new defn
  */
 
-static void GroupOk( void * junk )
+static void GroupOk( void * unused )
 {
 	struct extraDataCompound_t *xx = NULL;
 	turnoutInfo_t * to;
@@ -1659,7 +1659,7 @@ LOG( log_group, 3, ( "\n" ) );
 }
 
 
-EXPORT void DoGroup( void )
+EXPORT void DoGroup( void * unused )
 {
 	track_p trk = NULL;
 	struct extraDataCompound_t *xx;

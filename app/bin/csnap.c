@@ -560,7 +560,7 @@ static void RedrawGrid( void )
 }
 
 
-static void GridOk( void * junk )
+static void GridOk( void * unused )
 {
 	long changes;
 
@@ -786,14 +786,14 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 }
 
 
-EXPORT void SnapGridEnable( void )
+EXPORT void SnapGridEnable( void * unused )
 {
 	grid.Vert.Enable = grid.Horz.Enable = !( grid.Vert.Enable || grid.Horz.Enable );
 	GridButtonUpdate( (CHK_HENABLE|CHK_VENABLE) );
 }
 
 
-EXPORT void SnapGridShow( void )
+EXPORT void SnapGridShow( void * unused )
 {
 	grid.Show = !grid.Show;
 	GridButtonUpdate( CHK_SHOW );

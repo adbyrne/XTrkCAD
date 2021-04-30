@@ -48,7 +48,7 @@ static void DDrawPoly(
 		int open );
 static void DrawMapBoundingBox( BOOL_T set );
 static void DrawTicks( drawCmd_p d, coOrd size );
-static void DoZoom( void * param );
+static void DoZoom( void * pScaleVP );
 
 EXPORT int log_pan = 0;
 static int log_zoom = 0;
@@ -2218,9 +2218,9 @@ EXPORT void DoZoomDown( void  * mode)
  *
  */
 
-static void DoZoom( void * param )
+static void DoZoom( void * pScaleVP )
 {
-	DIST_T *pScale = param;
+	DIST_T *pScale = pScaleVP;
 	DIST_T scale = *pScale;
 
 	if( scale != mainD.scale )
@@ -2936,10 +2936,6 @@ EXPORT void DrawInit( int initialZoom )
 	SetInfoBar();
 	InfoPos( zero );
 	RegisterChangeNotification( DrawChange );
-#ifdef LATER
-	wAttachAccelKey( wAccelKey_Pgup, 0, (wAccelKeyCallBack_p)doZoomUp, NULL );
-	wAttachAccelKey( wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)doZoomDown, NULL );
-#endif
 }
 
 #include "bitmaps/pan.xpm"
@@ -3108,9 +3104,9 @@ static STATUS_T CmdPan(
 static wMenuPush_p zoomExtents,panOrig,panHere;
 static wMenuPush_p zoomLvl1,zoomLvl2,zoomLvl3,zoomLvl4,zoomLvl5,zoomLvl6,zoomLvl7,zoomLvl8,zoomLvl9;
 
-EXPORT void PanMenuEnter( void * param )
+EXPORT void PanMenuEnter( void * keyVP )
 {
-	int key = (int)VP2L(param);
+	int key = (int)VP2L(keyVP);
 	int action;
 	action = C_TEXT;
 	action |= key<<8;

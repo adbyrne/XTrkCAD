@@ -350,7 +350,7 @@ BOOL_T backgroundVisible = TRUE;
 char * noname = "";
 
 void
-BackgroundToggleShow()
+BackgroundToggleShow( void * unused )
 {
 	backgroundVisible = !backgroundVisible;
 	wButtonSetBusy(backgroundB, backgroundVisible);
@@ -438,7 +438,7 @@ void LayoutBackGroundSave(void) {
 /************************************************************
  * Run File Select for the Background Image File
  */
-static void ImageFileBrowse( void * junk )
+static void ImageFileBrowse( void * unused )
 {
 	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), sImageFilePattern, LoadImageFile, NULL );
 
@@ -449,7 +449,7 @@ static void ImageFileBrowse( void * junk )
 /************************************************************
  * Remove the background Image File
  */
-static void ImageFileClear( void * junk)
+static void ImageFileClear( void * unused)
 {
 	char * noname = "";
 	SetLayoutBackGroundFullPath(noname);
@@ -533,10 +533,10 @@ static void ChangeLayout() {
 /**
 * Apply the changes entered to settings
 *
-* \param junk IN unused
+* \param unused IN unused
 */
 
-static void LayoutOk(void * junk)
+static void LayoutOk(void * unused)
 {
 
 	ChangeLayout();
@@ -552,14 +552,14 @@ static void LayoutOk(void * junk)
 /**
 * Discard the changes entered and replace with earlier values
 *
-* \param junk IN unused
+* \param unused IN unused
 */
 
-static void LayoutCancel(struct wWin_t *junk)
+static void LayoutCancel(struct wWin_t *unused)
 {
     thisLayout.props = *(thisLayout.copyOfLayoutProps);
     ParamLoadControls(&layoutPG);
-    LayoutOk(junk);
+    LayoutOk(unused);
 }
 
 static void LayoutChange(long changes)
@@ -570,7 +570,7 @@ static void LayoutChange(long changes)
         }
 }
 
-void DoLayout(void * junk)
+void DoLayout(void * unused)
 {
     SetLayoutRoomSize(mapD.size);
 

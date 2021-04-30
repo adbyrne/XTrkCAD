@@ -206,7 +206,7 @@ static int DoExportDXFTracks(
 * Create and show the dialog for selected the DXF export filename
 */
 
-void DoExportDXF(void)
+void DoExportDXF(void* unused )
 {
     //if (selectedTrackCount <= 0) {
     //    ErrorMessage(MSG_NO_SELECTED_TRK);

@@ -1641,7 +1641,7 @@ EXPORT char * CarItemDescribe(
 }
 
 
-EXPORT void CarItemLoadList( void * junk )
+EXPORT void CarItemLoadList( void * unused )
 {
 	wIndex_t inx;
 	carItem_p item;
@@ -3985,7 +3985,7 @@ static void CarDlgClose( wWin_p win )
 }
 
 
-static void CarDlgOk( void * junk )
+static void CarDlgOk( void * unused )
 {
 	long options = 0;
 	int len;
@@ -4429,7 +4429,7 @@ static carItem_p CarInvDlgFindCurrentItem( void )
 }
 
 
-static void CarInvDlgFind( void * junk )
+static void CarInvDlgFind( void * unused )
 {
 	carItem_p item = CarInvDlgFindCurrentItem();
 	coOrd pos;
@@ -5254,7 +5254,7 @@ static void CarInvListUpdate(
 }
 
 
-EXPORT void DoCarDlg( void )
+EXPORT void DoCarDlg( void * unused )
 {
 	int inx, inx2;
 	if ( carInvPG.win == NULL ) {

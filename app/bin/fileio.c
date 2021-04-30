@@ -943,7 +943,7 @@ int LoadTracks(
 		time1 = wGetTimer();
 		LogPrintf( "time= %ld ms \n", time1-time0 );
 #endif
-		RecomputeElevations();
+		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
@@ -1184,9 +1184,9 @@ EXPORT void SetAutoSave() {
 
 }
 
-EXPORT void DoSave( doSaveCallBack_p after )
+EXPORT void DoSave( void * dpAfterSaveVP )
 {
-	doAfterSave = after;
+	doAfterSave = dpAfterSaveVP;
 	if ( bReadOnly || *(GetLayoutFilename()) == '\0') {
 		if (saveFile_fs == NULL)
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
@@ -1202,9 +1202,9 @@ EXPORT void DoSave( doSaveCallBack_p after )
 	SaveState();
 }
 
-EXPORT void DoSaveAs( doSaveCallBack_p after )
+EXPORT void DoSaveAs( void * dpAfterSaveVP )
 {
-	doAfterSave = after;
+	doAfterSave = dpAfterSaveVP;
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
@@ -1377,7 +1377,7 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 			}
 		} else SetLayoutFullPath("");
 
-		RecomputeElevations();
+		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
@@ -1520,7 +1520,7 @@ static int DoExportTracks(
 }
 
 
-EXPORT void DoExport( void )
+EXPORT void DoExport( void * unused )
 {
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );

@@ -421,7 +421,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
  * \return none
  */
  
-EXPORT void InvertTrackSelect( void *ptr )
+EXPORT void InvertTrackSelect( void * unused )
 {
 	track_p trk;
 
@@ -647,9 +647,9 @@ EXPORT void SelectTrackWidth( void* width )
 	UndoEnd();
 }
 
-static void SelectLineType( void* param )
+static void SelectLineType( void* widthVP )
 {
-	int width = (int)VP2L(param);
+	int width = (int)VP2L(widthVP);
 	track_p trk;
 	if (SelectedTracksAreFrozen())
 		return;
@@ -720,7 +720,7 @@ EXPORT void TrySelectDelete( void ) {
 
 
 BOOL_T flipHiddenDoSelectRecount;
-static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
+static BOOL_T FlipHidden( track_p trk, BOOL_T unused )
 {
 	EPINX_T i;
 	track_p trk2;
@@ -751,7 +751,7 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
 	return TRUE;
 }
 
-static BOOL_T FlipBridge( track_p trk, BOOL_T junk )
+static BOOL_T FlipBridge( track_p trk, BOOL_T unused )
 {
 	UndoModify( trk );
 	if (GetTrkBridge(trk)) {
@@ -763,7 +763,7 @@ static BOOL_T FlipBridge( track_p trk, BOOL_T junk )
 	return TRUE;
 }
 
-static BOOL_T FlipTies( track_p trk, BOOL_T junk )
+static BOOL_T FlipTies( track_p trk, BOOL_T unused )
 {
 	UndoModify( trk );
 	if (GetTrkNoTies(trk)) {
@@ -775,7 +775,7 @@ static BOOL_T FlipTies( track_p trk, BOOL_T junk )
 	return TRUE;
 }
 
-EXPORT void SelectTunnel( void * junk )
+EXPORT void SelectTunnel( void * unused )
 {
 	if (SelectedTracksAreFrozen())
 		return;
@@ -793,7 +793,7 @@ EXPORT void SelectTunnel( void * junk )
 		SelectRecount();
 }
 
-EXPORT void SelectBridge( void * junk )
+EXPORT void SelectBridge( void * unused )
 {
 	if (SelectedTracksAreFrozen())
 		return;
@@ -810,7 +810,7 @@ EXPORT void SelectBridge( void * junk )
 	MainRedraw(); // SelectBridge
 }
 
-EXPORT void SelectTies( void * junk )
+EXPORT void SelectTies( void * unused )
 {
 	if (SelectedTracksAreFrozen())
 		return;
@@ -841,14 +841,14 @@ void SelectRecount( void )
 }
 
 
-static BOOL_T SetLayer( track_p trk, BOOL_T junk )
+static BOOL_T SetLayer( track_p trk, BOOL_T unused )
 {
 	UndoModify( trk );
 	SetTrkLayer( trk, curLayer );
 	return TRUE;
 }
 
-EXPORT void MoveSelectedTracksToCurrentLayer( void * junk )
+EXPORT void MoveSelectedTracksToCurrentLayer( void * unused )
 {
 	if (SelectedTracksAreFrozen())
 		return;
@@ -861,7 +861,7 @@ EXPORT void MoveSelectedTracksToCurrentLayer( void * junk )
 		}
 }
 
-EXPORT void SelectCurrentLayer( void * junk )
+EXPORT void SelectCurrentLayer( void * unused )
 {
 	track_p trk;
 	trk = NULL;
@@ -886,7 +886,7 @@ EXPORT void DeselectLayer( unsigned int layer ) {
 }
 
 
-static BOOL_T ClearElevation( track_p trk, BOOL_T junk )
+static BOOL_T ClearElevation( track_p trk, BOOL_T unused )
 {
 	EPINX_T ep;
 	for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
@@ -900,7 +900,7 @@ static BOOL_T ClearElevation( track_p trk, BOOL_T junk )
 	return TRUE;
 }
 
-EXPORT void ClearElevations( void * junk )
+EXPORT void ClearElevations( void * unused )
 {
 	if (SelectedTracksAreFrozen())
 		return;
@@ -916,7 +916,7 @@ EXPORT void ClearElevations( void * junk )
 
 
 static DIST_T elevDelta;
-static BOOL_T AddElevation( track_p trk, BOOL_T junk )
+static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 {
 	track_p trk1;
 	EPINX_T ep, ep1;
@@ -959,7 +959,7 @@ EXPORT void AddElevations( DIST_T delta )
 }
 
 
-EXPORT void DoRefreshCompound( void * junk )
+EXPORT void DoRefreshCompound( void * unused )
 {
 	if (SelectedTracksAreFrozen())
 		return;
@@ -1029,7 +1029,7 @@ static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, sizeof rescalePLs/si
 static long getboundsCount;
 static coOrd getboundsLo, getboundsHi;
 
-static BOOL_T GetboundsDoIt( track_p trk, BOOL_T junk )
+static BOOL_T GetboundsDoIt( track_p trk, BOOL_T unused )
 {
 	coOrd hi, lo;
 
@@ -1048,7 +1048,7 @@ static BOOL_T GetboundsDoIt( track_p trk, BOOL_T junk )
 }
 
 static coOrd rescaleShift;
-static BOOL_T RescaleDoIt( track_p trk, BOOL_T junk )
+static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 {
 	EPINX_T ep, ep1;
 	track_p trk1;
@@ -1076,7 +1076,7 @@ static BOOL_T RescaleDoIt( track_p trk, BOOL_T junk )
 
 
 static void RescaleDlgOk(
-		void * junk )
+		void * unused )
 {
 	coOrd center, size;
 	DIST_T d;
@@ -1189,11 +1189,11 @@ static void RescaleDlgUpdate(
  * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
  *
  * \param IN trk track element
- * \param IN junk
+ * \param IN unused
  * \return TRUE;
  */
  
-static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T junk )
+static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
 {
 	char *scaleName;
 	SCALEINX_T scale;
@@ -1222,7 +1222,7 @@ static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T junk )
  * RescaleDlgUpdate()
  */
 
-EXPORT void DoRescale( void * junk )
+EXPORT void DoRescale( void * unused )
 {
 	if ( rescalePG.win == NULL ) {
 		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"), RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
@@ -1271,7 +1271,7 @@ static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
 }
 
 static BOOL_T AddSelectedTrack(
-		track_p trk, BOOL_T junk )
+		track_p trk, BOOL_T unused )
 {
 	DYNARR_APPEND( track_p, tlist_da, 10 );
 	DYNARR_LAST( track_p, tlist_da ) = trk;
@@ -2009,9 +2009,9 @@ static STATUS_T CmdMove(
 
 static int rotateAlignState = 0;
 
-static void RotateAlign( void * param )
+static void RotateAlign( void * alignVP )
 {
-	BOOL_T align = (BOOL_T)VP2L(param);
+	BOOL_T align = (BOOL_T)VP2L(alignVP);
 	rotateAlignState = 0;
 	if (align) {
 		rotateAlignState = 1;
@@ -2357,7 +2357,7 @@ static track_p SelectTrackByIndex(TRKINX_T ti, char * message ) {
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
 				snprintf(message, STR_LONG_SIZE, "%s %d",_("In module layer:"),GetTrkLayer(trk)+1);
 			} else {
-				if (!GetLayerVisible(GetTrkLayer(trk))) FlipLayer(GetTrkLayer(trk));
+				if (!GetLayerVisible(GetTrkLayer(trk))) FlipLayer(I2VP(GetTrkLayer(trk)));
 				if (!GetTrkVisible(trk) && drawTunnel==0 ) drawTunnel = 1; //Force DRAW_TUNNEL_DASH
 				SelectOneTrack(trk,TRUE);
 			}
@@ -3142,7 +3142,7 @@ static STATUS_T CallDescribe(wAction_t action, coOrd pos) {
 	return rc;
 }
 
-static void CallPushDescribe(void * junk) {
+static void CallPushDescribe(void * unused) {
 	if (moveDescTrk) {
 		CallDescribe(C_START, moveDescPos);
 		CallDescribe(C_DOWN, moveDescPos);
@@ -3153,7 +3153,7 @@ static void CallPushDescribe(void * junk) {
 
 static STATUS_T CmdSelect(wAction_t,coOrd);
 
-static void CallPushModify(void * junk) {
+static void CallPushModify(void * unused) {
 	if (moveDescTrk) {
 		CmdSelect(C_LDOUBLE, moveDescPos);
 	}
@@ -3583,7 +3583,7 @@ static void SetMoveMode( char * line )
 	enableMoveDraw = ((tmp&0x10) == 0);
 }
 
-static void moveDescription( void * junk ) {
+static void moveDescription( void * unused ) {
 	if (!moveDescTrk) return;
 	int hidden = GetTrkBits( moveDescTrk) &TB_HIDEDESC ;
 	if (hidden)
@@ -3676,11 +3676,11 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dotted Line"), 0, SelectLineType, I2VP(3 ));
 	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dot-Dotted Line"), 0, SelectLineType, I2VP(4 ));
 	wMenuSeparatorCreate( selectPopup2M );
-	wMenuPushCreate(selectPopup2M, "", _("Move To Front"), 0,(wMenuCallBack_p) SelectAbove,I2VP( 0));
-	wMenuPushCreate(selectPopup2M, "", _("Move To Back"), 0,(wMenuCallBack_p) SelectBelow, I2VP( 0));
+	wMenuPushCreate(selectPopup2M, "", _("Move To Front"), 0, SelectAbove,I2VP( 0));
+	wMenuPushCreate(selectPopup2M, "", _("Move To Back"), 0, SelectBelow, I2VP( 0));
 	wMenuSeparatorCreate( selectPopup2M );
-	wMenuPushCreate(selectPopup2M, "", _("Group"), 0,(wMenuCallBack_p) DoGroup, I2VP( 0));
-	wMenuPushCreate(selectPopup2M, "", _("UnGroup"), 0,(wMenuCallBack_p) DoUngroup, I2VP( 0));
+	wMenuPushCreate(selectPopup2M, "", _("Group"), 0, DoGroup, I2VP( 0));
+	wMenuPushCreate(selectPopup2M, "", _("UnGroup"), 0, DoUngroup, I2VP( 0));
 	wMenuSeparatorCreate( selectPopup2M );
 
 	ParamRegister( &rescalePG );

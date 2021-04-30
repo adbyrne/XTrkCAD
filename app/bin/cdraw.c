@@ -3271,7 +3271,9 @@ EXPORT BOOL_T ReadText( char * line )
 	return TRUE;
 }
 
-void MenuMode(int mode) {
+void MenuMode(void * modeVP )
+{
+	int mode = (int)VP2L(modeVP);
 	if ( infoSubst ) {
 		InfoSubstituteControls( NULL, NULL );
 		infoSubst = FALSE;
@@ -3285,9 +3287,9 @@ void MenuMode(int mode) {
 	}
 }
 
-void MenuEnter( void * param )
+void MenuEnter( void * keyVP )
 {
-	int key = (int)VP2L(param);
+	int key = (int)VP2L(keyVP);
 	int action;
 	action = C_TEXT;
 	action |= key<<8;
@@ -3297,9 +3299,9 @@ void MenuEnter( void * param )
 		DrawGeomModify(action,zero,&drawModCmdContext);
 }
 
-void MenuLine( void * param )
+void MenuLine( void * keyVP )
 {
-	int key = (int)VP2L(param);
+	int key = (int)VP2L(keyVP);
 	struct extraDataDraw_t * xx = GET_EXTRA_DATA(drawModCmdContext.trk, T_DRAW, extraDataDraw_t);
 	if ( drawModCmdContext.type==SEG_STRLIN || drawModCmdContext.type==SEG_CRVLIN || drawModCmdContext.type==SEG_POLY ) {
 		switch(key) {
@@ -3372,7 +3374,7 @@ EXPORT void InitTrkDraw( void )
 	drawModFill = wMenuPushCreate( drawModDelMI, "", _("Fill Polygon - 'f'"), 0, MenuEnter, I2VP( 'f'));
 	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'u'"), 0, MenuEnter, I2VP( 'u'));
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, I2VP( 0 ));
+	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, MenuMode, I2VP( 0 ));
 	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, MenuEnter, I2VP( 127 ));
 	drawModVertex = wMenuPushCreate( drawModDelMI, "", _("Vertex Point - 'v'"), 0, MenuEnter, I2VP( 'v' ));
 	drawModRound =  wMenuPushCreate( drawModDelMI, "", _("Round Corner - 'r'"), 0, MenuEnter, I2VP( 'r' ));
@@ -3387,7 +3389,7 @@ EXPORT void InitTrkDraw( void )
 	drawModCenterDot =  wMenuPushCreate( drawModLinMI, "", _("Center-Dot Line"), 0, MenuLine, I2VP( '5' ));
 	drawModPhantom =  wMenuPushCreate( drawModLinMI, "", _("Phantom-Dot Line"), 0, MenuLine, I2VP( '6' ));
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, I2VP( 1 ));
+	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, MenuMode, I2VP( 1 ));
 	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, MenuEnter, I2VP( '0' ));
 	drawModLast = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, MenuEnter, I2VP( 'l' ));
 	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Middle - 'm'"), 0, MenuEnter, I2VP( 'm'));

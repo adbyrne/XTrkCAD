@@ -163,8 +163,8 @@ void SetCompoundLineType( track_p trk, int width );
 
 /* cgroup.c */
 void UngroupCompound( track_p );
-void DoUngroup( void );
-void DoGroup( void );
+void DoUngroup( void * unused );
+void DoGroup( void * unused );
 
 /* dcmpnd.c */
 void UpdateTitleMark( char *, SCALEINX_T );

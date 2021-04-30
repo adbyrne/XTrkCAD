@@ -225,7 +225,7 @@ void ErrorMessage( const char *, ... );
 void InfoMessage( const char *, ... );
 int NoticeMessage( const char *, const char*, const char *, ... );
 int NoticeMessage2( int, const char *, const char*, const char *, ... );
-void DoQuit( void * junk );
+void DoQuit( void * unused );
 
 void FileIsChanged(void);
 char * ConvertFromEscapedText(const char * text);
@@ -285,7 +285,7 @@ void PlaybackCommand( const char *, wIndex_t );
 wMenu_p MenuRegister( const char * label );
 void DoCommandB( void * );
 
-extern void EnumerateTracks( void );
+extern void EnumerateTracks( void * unused );
 void InitDebug( const char *, long * );
 
 #define CHANGE_SCALE	(1<<0)
@@ -351,8 +351,8 @@ BOOL_T SnapPos( coOrd * );
 void DrawSnapGrid( drawCmd_p, coOrd, BOOL_T );
 BOOL_T GridIsVisible( void );
 void InitSnapGridButtons( void );
-void SnapGridEnable( void );
-void SnapGridShow( void );
+void SnapGridEnable( void * unused );
+void SnapGridShow( void * unused );
 void MapWindowShow( int state );
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
@@ -363,7 +363,7 @@ void EnumerateStart(void);
 void EnumerateEnd(void);
 
 /* cnote.c */
-void DoNote( void );
+void DoNote( void  * unused );
 BOOL_T WriteMainNote( FILE * );
 
 BOOL_T ReadMainNote(char * line);
