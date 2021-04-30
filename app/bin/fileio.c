@@ -1534,19 +1534,20 @@ EXPORT void DoExport( void * unused )
 }
 
 
-EXPORT BOOL_T EditCopy( void )
+EXPORT void EditCopy( void * pRetVP )
 {
+	if ( pRetVP ) *(BOOL_T*)pRetVP = FALSE;
 	FILE * f;
 	time_t clock;
 
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
-		return FALSE;
+		return;
 	}
 	f = fopen( clipBoardN, "w" );
 	if (f == NULL) {
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Clipboard"), clipBoardN, strerror(errno) );
-		return FALSE;
+		return;
 	}
 
 	SetCLocale();
@@ -1559,16 +1560,18 @@ EXPORT BOOL_T EditCopy( void )
 	SetUserLocale();
 	fclose(f);
 
-	return TRUE;
+	if ( pRetVP ) *(BOOL_T*)pRetVP = TRUE;
 }
 
 
-EXPORT BOOL_T EditCut( void )
+EXPORT void EditCut( void * pRetVP )
 {
-	if (!EditCopy())
-		return FALSE;
+	if ( pRetVP ) *(BOOL_T*)pRetVP = FALSE;
+	BOOL_T ret;
+	EditCopy(&ret);
+	if ( !ret ) return;
 	SelectDelete();
-	return TRUE;
+	if ( pRetVP ) *(BOOL_T*)pRetVP = TRUE;
 }
 
 
@@ -1616,15 +1619,19 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	return rc;
 }
 
-EXPORT BOOL_T EditPaste( void) {
-	return EditPastePlace(FALSE);
+EXPORT void EditPaste( void * pRetVP ) {
+	BOOL_T ret = EditPastePlace(FALSE);
+	if ( pRetVP ) *(BOOL_T*)pRetVP = ret;
 }
-
-EXPORT BOOL_T EditClone( void ) {
-	BOOL_T rc = TRUE;
-	if (!EditCopy()) return FALSE;
-	if (!EditPastePlace(TRUE)) return FALSE;
-	return rc;
+
+EXPORT void EditClone( void * pRetVP ) {
+	if ( pRetVP ) *(BOOL_T*)pRetVP = FALSE;
+	BOOL_T ret;
+	EditCopy( &ret );
+	if ( !ret ) return;
+	if (!EditPastePlace(TRUE)) return;
+	if ( pRetVP ) *(BOOL_T*)pRetVP = TRUE;
+	return;
 }
 
 /*****************************************************************************

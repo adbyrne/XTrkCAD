@@ -1994,7 +1994,7 @@ static STATUS_T CmdMove(
 		case C_CANCEL:
 			if (doingMove) {
 				doingMove = FALSE;
-				UndoUndo();
+				UndoUndo(NULL);
 			}
 			RemoveEndCornus();
 			tlist_da.cnt = 0;
@@ -3615,8 +3615,8 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	if (moveMode > MAXMOVEMODE || moveMode < 0)
 		moveMode = MAXMOVEMODE;
 	selectPopup1M = MenuRegister( "Select Mode Menu" );
-	wMenuPushCreate(selectPopup1M, "", _("Undo"), 0,(wMenuCallBack_p) UndoUndo, I2VP(0 ));
-	wMenuPushCreate(selectPopup1M, "", _("Redo"), 0,(wMenuCallBack_p) UndoRedo, I2VP(0 ));
+	wMenuPushCreate(selectPopup1M, "", _("Undo"), 0, UndoUndo, NULL);
+	wMenuPushCreate(selectPopup1M, "", _("Redo"), 0, UndoRedo, NULL);
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "cmdDescribeMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
 	wMenuPushCreate(selectPopup1M, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, I2VP(panCmdInx));
@@ -3636,8 +3636,8 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup1M );
 
 	selectPopup2M = MenuRegister( "Track Selected Menu " );
-	wMenuPushCreate(selectPopup2M, "", _("Undo"), 0,(wMenuCallBack_p)UndoUndo , I2VP(0 ));
-	wMenuPushCreate(selectPopup2M, "", _("Redo"), 0,(wMenuCallBack_p)UndoRedo , I2VP(0 ));
+	wMenuPushCreate(selectPopup2M, "", _("Undo"), 0, UndoUndo , NULL);
+	wMenuPushCreate(selectPopup2M, "", _("Redo"), 0, UndoRedo , NULL);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0, DoZoomUp, I2VP( 1));
 	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0, DoZoomDown, I2VP( 1));
@@ -3651,10 +3651,10 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0, CallPushDescribe, I2VP(0));
 	menuPushModify = wMenuPushCreate(selectPopup2M, "", _("Modify/Activate Track"), 0, CallPushModify, I2VP(0));
 	wMenuSeparatorCreate( selectPopup2M );
-	wMenuPushCreate(selectPopup2M, "", _("Cut"), 0,(wMenuCallBack_p) EditCut, I2VP( 0));
-	wMenuPushCreate(selectPopup2M, "", _("Copy"), 0,(wMenuCallBack_p) EditCopy, I2VP( 0));
-	wMenuPushCreate(selectPopup2M,  "", _("Paste"), 0, (wMenuCallBack_p) EditPaste, I2VP( 0));
-	wMenuPushCreate(selectPopup2M,  "", _("Clone"), 0, (wMenuCallBack_p) EditClone, I2VP( 0));
+	wMenuPushCreate(selectPopup2M, "", _("Cut"), 0, EditCut, I2VP( 0));
+	wMenuPushCreate(selectPopup2M, "", _("Copy"), 0, EditCopy, I2VP( 0));
+	wMenuPushCreate(selectPopup2M,  "", _("Paste"), 0, EditPaste, I2VP( 0));
+	wMenuPushCreate(selectPopup2M,  "", _("Clone"), 0, EditClone, I2VP( 0));
 	AddMoveMenu( selectPopup2M, QuickMove);
 	selectPopup2RM = wMenuMenuCreate(selectPopup2M, "", _("Rotate..."));
 	AddRotateMenu( selectPopup2RM, QuickRotate );

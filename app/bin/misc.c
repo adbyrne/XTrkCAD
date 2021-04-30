@@ -1832,7 +1832,7 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
 				wButtonSetBusy((wButton_p) buttonList[buttInx].control, FALSE);
 				wFlush();
 			}
-			UndoUndo();
+			UndoUndo(NULL);
 		} else if (strcmp(line + 8, "Redo") == 0) {
 			if (buttInx >= 0 && playbackTimer == 0) {
 				wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
@@ -1841,7 +1841,7 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
 				wButtonSetBusy((wButton_p) buttonList[buttInx].control, FALSE);
 				wFlush();
 			}
-			UndoRedo();
+			UndoRedo(NULL);
 		} else {
 			if (buttInx >= 0 && playbackTimer == 0) {
 				wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
@@ -2351,9 +2351,9 @@ static void CreateMenus(void) {
 	popup1M = wMenuPopupCreate(mainW, _("Context Commands"));
 	popup2M = wMenuPopupCreate(mainW, _("Shift Context Commands"));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdUndo", _("Undo"), 0,
-			(wMenuCallBack_p) UndoUndo, 0, NULL);
+			UndoUndo, 0, NULL);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdRedo", _("Redo"), 0,
-			(wMenuCallBack_p) UndoRedo, 0, NULL);
+			UndoRedo, 0, NULL);
 	/* Zoom */
 	wMenuPushCreate(popup1M, "cmdZoomIn", _("Zoom In"), 0,
 			DoZoomUp, I2VP(1));
@@ -2378,13 +2378,13 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(popup2M);
 	/* Copy/Paste */
 	MiscMenuItemCreate(popup2M, NULL, "cmdCut", _("Cut"), 0,
-				(wMenuCallBack_p) EditCut, 0, I2VP(0));
+				EditCut, 0, NULL);
 	MiscMenuItemCreate(popup2M, NULL, "cmdCopy", _("Copy"), 0,
-			(wMenuCallBack_p) EditCopy, 0, I2VP(0));
+			EditCopy, 0, NULL);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdPaste", _("Paste"), 0,
-			(wMenuCallBack_p) EditPaste, 0, I2VP(0));
+			EditPaste, 0, NULL);
 	MiscMenuItemCreate(popup2M, NULL, "cmdClone", _("Clone"), 0,
-			(wMenuCallBack_p) EditClone, 0, I2VP(0));
+			EditClone, 0, NULL);
 	/*Select*/
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectAll", _("Select All"), 0,
 			(wMenuCallBack_p) SetAllTrackSelect, 0, I2VP(1));
@@ -2437,9 +2437,9 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_UNDO;
 	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(edit_undo), 0,
-			(addButtonCallBack_t) UndoUndo, NULL);
+			UndoUndo, NULL);
 	redoB = AddToolbarButton("cmdRedo", wIconCreatePixMap(edit_redo), 0,
-			(addButtonCallBack_t) UndoRedo, NULL);
+			UndoRedo, NULL);
 
 	wControlActive((wControl_p) undoB, FALSE);
 	wControlActive((wControl_p) redoB, FALSE);
@@ -2496,18 +2496,18 @@ static void CreateMenus(void) {
 	 * EDIT MENU
 	 */
 	MiscMenuItemCreate(editM, NULL, "cmdUndo", _("&Undo"), ACCL_UNDO,
-			(wMenuCallBack_p) UndoUndo, 0, NULL);
+			UndoUndo, 0, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdRedo", _("R&edo"), ACCL_REDO,
-			(wMenuCallBack_p) UndoRedo, 0, NULL);
+			UndoRedo, 0, NULL);
 	wMenuSeparatorCreate(editM);
 	MiscMenuItemCreate(editM, NULL, "cmdCut", _("Cu&t"), ACCL_CUT,
-			(wMenuCallBack_p) EditCut, IC_SELECTED, I2VP(0));
+			EditCut, IC_SELECTED, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdCopy", _("&Copy"), ACCL_COPY,
-			(wMenuCallBack_p) EditCopy, IC_SELECTED, I2VP(0));
+			EditCopy, IC_SELECTED, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdPaste", _("&Paste"), ACCL_PASTE,
-			(wMenuCallBack_p) EditPaste, 0, I2VP(0));
+			EditPaste, 0, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdClone", _("C&lone"), ACCL_CLONE,
-				(wMenuCallBack_p) EditClone, 0, I2VP(0));
+			EditClone, 0, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdDelete", _("De&lete"), ACCL_DELETE,
 			(wMenuCallBack_p) SelectDelete, IC_SELECTED, NULL);
 	MiscMenuItemCreate(editM, NULL, "cmdMoveToCurrentLayer",

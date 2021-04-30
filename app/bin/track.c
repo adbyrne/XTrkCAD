@@ -1785,12 +1785,16 @@ nextEndPt:;
 			Rdump( auditFile );
 			if (strcmp("undoUndo",event)==0) {
 				fprintf( auditFile, "# failure in undo\n" );
-			} else if (UndoUndo()) {
-				fprintf( auditFile, "# after undo\n" );
-				WriteTracks(auditFile, TRUE);
-				Rdump( auditFile );
 			} else {
-				fprintf( auditFile, "# undo stack is empty\n" );
+				BOOL_T ret;
+				UndoUndo( &ret );
+				if ( ret ) {				
+					fprintf( auditFile, "# after undo\n" );
+					WriteTracks(auditFile, TRUE);
+					Rdump( auditFile );
+				} else {
+					fprintf( auditFile, "# undo stack is empty\n" );
+				}
 			}
 		}
 		if (NoticeMessage( MSG_AUDIT_ABORT, _("Yes"), _("No"))) {

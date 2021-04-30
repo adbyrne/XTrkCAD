@@ -76,6 +76,8 @@ static BOOL_T recordUndo = 1;
 
 #define UASSERT( ARG, VAL ) \
 		if (!(ARG)) return UndoFail( #ARG, VAL, __FILE__, __LINE__ )
+#define UASSERT2( ARG, VAL ) \
+		if (!(ARG)) { UndoFail( #ARG, VAL, __FILE__, __LINE__ ); return; }
 
 #define INC_UNDO_INX( INX ) {\
 		if (++INX >= UNDO_STACK_SIZE) \
@@ -781,8 +783,10 @@ LOG( log_undo, 2, ( "    UndoClear()\n" ) )
 }
 
 
-BOOL_T UndoUndo( void )
+void UndoUndo( void * pRetVP )
 {
+	BOOL_T * pRet = pRetVP;
+	if ( pRet ) *pRet = FALSE;
 	undoStack_p us;
 	track_p trk;
 	wIndex_t oldCount;
@@ -790,7 +794,7 @@ BOOL_T UndoUndo( void )
 
 	if (doCount <= 0) {
 		ErrorMessage( MSG_NO_UNDO );
-		return FALSE;
+		return;
 	}
 
 	int rc = ConfirmReset( FALSE );
@@ -812,11 +816,11 @@ LOG( log_undo, 1, ( "    undoUndo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	for (trk=us->newTrks; trk; trk=trk->next ) {
 		if (recordUndo)
 			Rprintf(" Deleting New Track T%d @ "SLOG_FMT"\n", trk->index, (intptr_t)trk );
-		UASSERT( !IsTrackDeleted(trk), (intptr_t)trk );
+		UASSERT2( !IsTrackDeleted(trk), (intptr_t)trk );
 		trk->deleted = TRUE;
 	}
 	if (!(us->oldTail=FindParent(us->newTrks,__LINE__)))
-		return FALSE; 
+		return; 
 	us->newTail = to_last;
 	to_last = us->oldTail;
 	*to_last = NULL;
@@ -825,7 +829,7 @@ LOG( log_undo, 1, ( "    undoUndo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	undoStream.curr = us->undoStart;
 	while ( undoStream.curr < us->undoEnd ) {
 		if (!ReadObject( &undoStream, us->needRedo ))
-			return FALSE;
+			return;
 	}
 	if (us->needRedo)
 		us->redoEnd = redoStream.end;
@@ -854,12 +858,15 @@ LOG( log_undo, 1, ( "    undoUndo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	SetButtons( doCount>0, TRUE );
 	wBalloonHelpUpdate();
 	wDrawDelayUpdate( mainD.d, FALSE );
-	return TRUE;
+	if ( pRet ) *pRet = TRUE;
+	return;
 }
 
 
-BOOL_T UndoRedo( void )
+void UndoRedo( void * pRetVP )
 {
+	BOOL_T * pRet = pRetVP;
+	if ( pRet ) *pRet = FALSE;
 	undoStack_p us;
 	wIndex_t oldCount;
 	BOOL_T redrawAll;
@@ -867,7 +874,7 @@ BOOL_T UndoRedo( void )
 
 	if (undoCount <= 0) {
 		ErrorMessage( MSG_NO_REDO );
-		return FALSE;
+		return;
 	}
 
 	int rc = ConfirmReset( FALSE );
@@ -885,20 +892,20 @@ LOG( log_undo, 1, ( "    undoRedo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 
 	for (trk=us->newTrks; trk; trk=trk->next ) {
 		if (recordUndo) Rprintf(" Undeleting New Track T%d @ "SLOG_FMT"\n", trk->index, (uintptr_t)trk );
-		UASSERT( IsTrackDeleted(trk), (uintptr_t)trk );
+		UASSERT2( IsTrackDeleted(trk), (uintptr_t)trk );
 		trk->deleted = FALSE;
 	}
-	UASSERT( us->newTail != NULL, (uintptr_t)us->newTail );
+	UASSERT2( us->newTail != NULL, (uintptr_t)us->newTail );
 	*to_last = us->newTrks;
 	to_last = us->newTail;
-	UASSERT( (*to_last) == NULL, (uintptr_t)*to_last );
+	UASSERT2( (*to_last) == NULL, (uintptr_t)*to_last );
 	RenumberTracks();
 
 	needAttachTrains = FALSE;
 	redoStream.curr = us->redoStart;
 	while ( redoStream.curr < us->redoEnd ) {
 		if (!ReadObject( &redoStream, FALSE ))
-			return FALSE;
+			return;
 	}
 
 	if ( needAttachTrains ) {
@@ -926,7 +933,8 @@ LOG( log_undo, 1, ( "    undoRedo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	SetButtons( TRUE, undoCount>0 );
 	wBalloonHelpUpdate();
 	wDrawDelayUpdate( mainD.d, FALSE );
-	return TRUE;
+	if ( pRet ) *pRet = TRUE;
+	return;
 }
 
 

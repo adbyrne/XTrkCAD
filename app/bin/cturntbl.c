@@ -665,7 +665,7 @@ EXPORT BOOL_T ConnectTurntableTracks(
 			UndoModify(trk1);
 			EPINX_T ep = NewTurntableEndPt(trk1,angle);
 			if (ConnectTracks( trk1, ep, trk2, ep2 )) {
-				UndoUndo();
+				UndoUndo(NULL);
 				return FALSE;
 			}
 			return TRUE;

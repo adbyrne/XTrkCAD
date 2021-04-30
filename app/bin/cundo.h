@@ -25,8 +25,8 @@
 
 #include "common.h"
 
-int UndoUndo( void );
-int UndoRedo( void );
+void UndoUndo( void * pRetVP );
+void UndoRedo( void * pRetVP );
 void UndoResume( void );
 void UndoSuspend( void );
 void UndoStart( char *, char *, ... );
