@@ -11,7 +11,7 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">1</property>
+        <property name="spacing">12</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
@@ -62,7 +62,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">end</property>
-                    <property name="label" translatable="yes">_Height</property>
+                    <property name="label" translatable="yes">Page _Height</property>
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
@@ -150,7 +150,6 @@
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">4</property>
-                    <property name="width">2</property>
                   </packing>
                 </child>
                 <child>
@@ -208,7 +207,6 @@
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">5</property>
-                    <property name="width">2</property>
                   </packing>
                 </child>
                 <child>
@@ -221,7 +219,7 @@
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
-                    <property name="left_attach">3</property>
+                    <property name="left_attach">2</property>
                     <property name="top_attach">1</property>
                   </packing>
                 </child>
@@ -236,7 +234,7 @@
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
-                    <property name="left_attach">3</property>
+                    <property name="left_attach">2</property>
                     <property name="top_attach">0</property>
                   </packing>
                 </child>
@@ -268,6 +266,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
+                            <property name="yalign">0.5</property>
                             <property name="draw_indicator">True</property>
                           </object>
                         </child>
@@ -309,32 +308,60 @@
                   <packing>
                     <property name="left_attach">0</property>
                     <property name="top_attach">6</property>
-                    <property name="width">3</property>
+                    <property name="width">2</property>
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkToggleButton" id="print-selall">
+                    <property name="label" translatable="yes">Select All</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">2</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkToggleButton" id="print-clear">
+                    <property name="label" translatable="yes">_Unselect all</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="valign">center</property>
+                    <property name="use_underline">True</property>
+                    <property name="image_position">right</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">3</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkToggleButton" id="print-clea">
+                    <property name="label" translatable="yes">Clear</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">4</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
+                  <object class="GtkToggleButton" id="print-setup">
+                    <property name="label" translatable="yes">Printer _Setup</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">5</property>
+                  </packing>
                 </child>
                 <child>
                   <placeholder/>
@@ -350,7 +377,6 @@
               <object class="GtkExpander">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="margin_top">18</property>
                 <property name="resize_toplevel">True</property>
                 <child>
                   <object class="GtkGrid">
@@ -442,7 +468,7 @@
                         <property name="can_focus">False</property>
                         <property name="spacing">6</property>
                         <child>
-                          <object class="GtkRadioButton" id="print-rukeredge">
+                          <object class="GtkRadioButton" id="print-ruleredge">
                             <property name="label" translatable="yes">Layout Edge</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -464,7 +490,7 @@
                             <property name="receives_default">False</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
-                            <property name="group">print-rukeredge</property>
+                            <property name="group">print-ruleredge</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -480,7 +506,7 @@
                             <property name="receives_default">False</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
-                            <property name="group">print-rukeredge</property>
+                            <property name="group">print-ruleredge</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -589,7 +615,7 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="halign">end</property>
+                        <property name="halign">start</property>
                         <property name="label" translatable="yes">Print Rulers:</property>
                       </object>
                       <packing>
@@ -632,7 +658,6 @@
               <object class="GtkExpander">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="margin_top">18</property>
                 <property name="spacing">6</property>
                 <property name="resize_toplevel">True</property>
                 <child>
@@ -797,21 +822,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="print-clear">
-                <property name="label" translatable="yes">_Unselect all</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-                <property name="use_underline">True</property>
-                <property name="image_position">right</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -837,7 +848,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -850,34 +861,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="print-selall">
-                <property name="label" translatable="yes">Select All</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="print-setup">
-                <property name="label" translatable="yes">_Setup</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -894,19 +878,6 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="print-clea">
-                <property name="label" translatable="yes">Clear</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
                 <property name="position">5</property>
               </packing>
             </child>
@@ -922,8 +893,5 @@
     <child type="titlebar">
       <placeholder/>
     </child>
-  </object>
-  <object class="GtkSizeGroup" id="rightcolumn-buttons">
-    <property name="mode">vertical</property>
   </object>
 </interface>
