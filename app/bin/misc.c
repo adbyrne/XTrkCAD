@@ -1946,7 +1946,10 @@ static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOO
 		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
 		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
-static void ToolbarAction(wBool_t set, void * data) {
+static wMenuToggle_p toolbarMI;
+
+static void ToolbarAction(void * data) {
+	wBool_t set = wMenuToggleGet( toolbarMI );
 	long mask = VP2L(data);
 	if (set)
 		toolbarSet |= mask;
@@ -1977,7 +1980,7 @@ static void CreateToolbarM(wMenu_p toolbarM) {
 	labels = AllToolbarLabels;
 	for (inx = 0; inx < cnt; inx++, masks++, labels++) {
 		set = (toolbarSet & *masks) != 0;
-		wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
+		toolbarMI = wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
 				ToolbarAction, I2VP(*masks));
 	}
 }
@@ -2376,6 +2379,8 @@ static void SetAccelKeys()
 #include "bitmaps/map.xpm"
 #include "bitmaps/magnet.xpm"
 
+static wMenu_p toolbarM;
+
 static void CreateMenus(void) {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM,
 			messageListM, manageM, addM, changeM, drawM;
@@ -2640,10 +2645,10 @@ static void CreateMenus(void) {
 
 	snapGridEnableMI = wMenuToggleCreate(viewM, "cmdGridEnable",
 			_("Enable SnapGrid"), ACCL_SNAPENABLE, 0,
-			(wMenuToggleCallBack_p)SnapGridEnable, NULL);
+			SnapGridEnable, NULL);
 	snapGridShowMI = wMenuToggleCreate(viewM, "cmdGridShow", _("Show SnapGrid"),
 			ACCL_SNAPSHOW,
-			FALSE, (wMenuToggleCallBack_p)SnapGridShow, NULL);
+			FALSE, SnapGridShow, NULL);
 	gridCmdInx = InitGrid(viewM);
 
 	// visibility toggle for anchors
@@ -2653,7 +2658,7 @@ static void CreateMenus(void) {
 	magneticSnap = anchors_long ? TRUE : FALSE;
 	magnetsMI = wMenuToggleCreate(viewM, "cmdMagneticSnap", _("Enable Magnetic Snap"),
 		0, magneticSnap,
-		(wMenuToggleCallBack_p)MagneticSnapToggle, NULL);
+		MagneticSnapToggle, NULL);
 
 	// visibility toggle for map window
 	// get the start value
@@ -2662,7 +2667,7 @@ static void CreateMenus(void) {
 	mapVisible = mapVisible_long ? TRUE : FALSE;
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
 			ACCL_MAPSHOW, mapVisible,
-			(wMenuToggleCallBack_p) MapWindowToggleShow, NULL);
+			MapWindowToggleShow, NULL);
 
 	wMenuSeparatorCreate(viewM);
 

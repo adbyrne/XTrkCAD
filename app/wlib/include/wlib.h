@@ -681,7 +681,7 @@ void wDoAccelHelp( wAccelKey_e key, void * );
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wMenuListCallBack_p)( int, const char *, void * );
-typedef void (*wMenuToggleCallBack_p)( wBool_t , void * );
+typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wAccelKeyCallBack_p)( wAccelKey_e, void * );
 typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );
 
@@ -707,7 +707,7 @@ void wMenuListDelete(		wMenuList_p, const char * );
 const char * wMenuListGet(	wMenuList_p, int, void ** );
 void wMenuListClear(		wMenuList_p );
 
-wMenuToggle_p wMenuToggleCreate(	wMenu_p, const char *, const char *, long, wBool_t, wMenuToggleCallBack_p, void * );
+wMenuToggle_p wMenuToggleCreate(	wMenu_p, const char *, const char *, long, wBool_t, wMenuCallBack_p, void * );
 wBool_t wMenuToggleSet(		wMenuToggle_p, wBool_t );
 wBool_t wMenuToggleGet(		wMenuToggle_p );
 void wMenuToggleEnable(		wMenuToggle_p, wBool_t );
