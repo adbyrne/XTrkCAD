@@ -2240,43 +2240,124 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 	menuPG.paramCnt++;
 }
 
+
+/*****************************************************************************
+ *
+ * ACCEL KEY
+ *
+ */
+
+enum eAccelAction_t { EA_ZOOMUP, EA_ZOOMDOWN, EA_REDRAW, EA_DELETE, EA_UNDO, EA_COPY, EA_PASTE, EA_CUT, EA_NEXT, EA_HELP };
+struct accelKey_s {
+	const char * sPrefName;
+	wAccelKey_e eKey;
+	int iMode;
+	enum eAccelAction_t iAction;
+	int iContext; } aAccelKeys[] = {
+		{ "zoomUp", wAccelKey_Pgdn, 0, EA_ZOOMUP, 1 },
+		{ "zoomDown", wAccelKey_Pgup, 0, EA_ZOOMDOWN, 1 },
+		{ "redraw", wAccelKey_F5, 0, EA_REDRAW, 0 },
+#ifdef WINDOWS
+		{ "delete", "wAccelKey_Del", 0, EA_DELETE, 0 },
+#endif
+		{ "undo", wAccelKey_Back, WKEY_SHIFT, EA_UNDO, 0 },
+		{ "copy", wAccelKey_Ins, WKEY_CTRL, EA_COPY, 0 },
+		{ "paste", wAccelKey_Ins, WKEY_SHIFT, EA_PASTE, 0 },
+		{ "cut", wAccelKey_Del, WKEY_SHIFT, EA_CUT, 0 },
+		{ "nextWindow", wAccelKey_F6, 0, EA_NEXT, 0 },
+		{ "zoomUp", wAccelKey_Numpad_Add, WKEY_CTRL, EA_ZOOMUP, 1 },
+		{ "zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL, EA_ZOOMDOWN, 1 },
+		{ "help", wAccelKey_F1, WKEY_SHIFT, EA_HELP, 1 },
+		{ "help-context", wAccelKey_F1, 0, EA_HELP, 3 } };
+
+static void AccelKeyDispatch( wAccelKey_e key, void * accelKeyIndexVP )
+{
+	int iAccelKeyIndex = (int)VP2L(accelKeyIndexVP);
+	switch( aAccelKeys[iAccelKeyIndex].iAction ) {
+	case EA_ZOOMUP:
+		DoZoomUp( I2VP(aAccelKeys[iAccelKeyIndex].iContext) );
+		break;
+	case EA_ZOOMDOWN:
+		DoZoomDown( I2VP(aAccelKeys[iAccelKeyIndex].iContext) );
+		break;
+	case EA_REDRAW:
+		MainRedraw();
+		break;
+	case EA_DELETE:
+		TrySelectDelete();
+		break;
+	case EA_UNDO:
+		UndoUndo(NULL);
+		break;
+	case EA_COPY:
+		EditCopy(NULL);
+		break;
+	case EA_PASTE:
+		EditPaste(NULL);
+		break;
+	case EA_CUT:
+		EditCut(NULL);
+		break;
+	case EA_NEXT:
+		NextWindow();
+		break;
+	case EA_HELP:
+		wDoAccelHelp(key, I2VP(aAccelKeys[iAccelKeyIndex].iContext));
+		break;
+	default:
+		abort();
+	}
+}
+
 static char * accelKeyNames[] = { "Del", "Ins", "Home", "End", "Pgup", "Pgdn",
 		"Up", "Down", "Right", "Left", "Back", "F1", "F2", "F3", "F4", "F5",
 		"F6", "F7", "F8", "F9", "F10", "F11", "F12", "NumpadAdd", "NumpadSub" };
 
-static void SetAccelKey(const char * prefName, wAccelKey_e key, int mode,
-		wAccelKeyCallBack_p func, void * context) {
-	int mode1 = 0;
-	int inx;
-	const char * prefValue = wPrefGetString("accelKey", prefName);
-	if (prefValue != NULL) {
-		while (prefValue[1] == '-') {
-			switch (prefValue[0]) {
-			case 'S':
-				mode1 |= WKEY_SHIFT;
-				break;
-			case 'C':
-				mode1 |= WKEY_CTRL;
-				break;
-			case 'A':
-				mode1 |= WKEY_ALT;
-				break;
-			default:
-				;
+static void SetAccelKeys()
+{
+	for ( int iAccelKey = 0; iAccelKey < COUNT( aAccelKeys ); iAccelKey++ )
+	{
+		struct accelKey_s * akP = &aAccelKeys[iAccelKey];
+		int eKey = akP->eKey;
+		int iMode = akP->iMode;
+		const char * sPrefValue = wPrefGetString("accelKey", akP->sPrefName);
+		if (sPrefValue != NULL) {
+			int iMode1 = 0;
+			while (sPrefValue[1] == '-') {
+				switch (sPrefValue[0]) {
+				case 'S':
+					iMode1 |= WKEY_SHIFT;
+					break;
+				case 'C':
+					iMode1 |= WKEY_CTRL;
+					break;
+				case 'A':
+					iMode1 |= WKEY_ALT;
+					break;
+				default:
+					;
+				}
+				sPrefValue += 2;
 			}
-			prefValue += 2;
-		}
-		for (inx = 0; inx < sizeof accelKeyNames / sizeof accelKeyNames[0];
-				inx++) {
-			if (strcmp(prefValue, accelKeyNames[inx]) == 0) {
-				key = inx + 1;
-				mode = mode1;
-				break;
+			for (int inx = 0; inx < COUNT( accelKeyNames ); inx++) {
+				if (strcmp(sPrefValue, accelKeyNames[inx]) == 0) {
+					eKey = inx + 1;
+					iMode = iMode1;
+					break;
+				}
 			}
 		}
+		wAttachAccelKey(eKey, iMode, AccelKeyDispatch, I2VP(iAccelKey));
 	}
-	wAttachAccelKey(key, mode, func, context);
 }
+
+
+/*****************************************************************************
+ *
+ * MENUS
+ *
+ */
+
 
 #include "bitmaps/zoomin.xpm"
 #include "bitmaps/zoom.xpm"
@@ -2814,32 +2895,7 @@ static void CreateMenus(void) {
 	cmdGroup = BG_HOTBAR;
 	InitHotBar();
 
-	SetAccelKey("zoomUp", wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p) DoZoomUp,
-			I2VP(1));
-	SetAccelKey("zoomDown", wAccelKey_Pgup, 0, (wAccelKeyCallBack_p) DoZoomDown,
-			I2VP(1));
-	SetAccelKey("redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p) MainRedraw,
-			I2VP(1));
-	//SetAccelKey("delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p) SelectDelete,
-	//		I2VP(1));
-	SetAccelKey("copy", wAccelKey_Ins, WKEY_CTRL,
-			(wAccelKeyCallBack_p) EditCopy, 0);
-	SetAccelKey("paste", wAccelKey_Ins, WKEY_SHIFT,
-			(wAccelKeyCallBack_p) EditPaste, 0);
-	SetAccelKey("undo", wAccelKey_Back, WKEY_SHIFT,
-			(wAccelKeyCallBack_p) UndoUndo, 0);
-	SetAccelKey("cut", wAccelKey_Del, WKEY_SHIFT, (wAccelKeyCallBack_p) EditCut,
-			0);
-	SetAccelKey("nextWindow", wAccelKey_F6, 0, (wAccelKeyCallBack_p) NextWindow,
-			0);
-	SetAccelKey("zoomUp", wAccelKey_Numpad_Add, WKEY_CTRL,
-			(wAccelKeyCallBack_p) DoZoomUp, I2VP(1));
-	SetAccelKey("zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL,
-			(wAccelKeyCallBack_p) DoZoomDown, I2VP(1));
-	SetAccelKey("help", wAccelKey_F1, WKEY_SHIFT,
-			(wAccelKeyCallBack_p) wDoAccelHelp, I2VP(1));
-	SetAccelKey("help-context", wAccelKey_F1, 0,
-			(wAccelKeyCallBack_p) wDoAccelHelp, I2VP(3));
+	SetAccelKeys();
 
 	InitBenchDialog();
 	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );

@@ -2170,8 +2170,9 @@ static drawCmd_t carDlgD = {
 		0.0,
 		{ 0, 0 }, { 0, 0 },
 		Pix2CoOrd, CoOrd2Pix };
-static void CarDlgRedraw(void);
-static paramDrawData_t carDlgDrawData = { 455, 100, (wDrawRedrawCallBack_p)CarDlgRedraw, NULL, &carDlgD };
+static void CarDlgRedraw( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
+
+static paramDrawData_t carDlgDrawData = { 455, 100, CarDlgRedraw, NULL, &carDlgD };
 static paramTextData_t notesData = { 440, 100 };
 static char *multinumLabels[] = { N_("Sequential"), N_("Repeated"), NULL };
 static void CarDlgNewProto( void );
@@ -2529,7 +2530,8 @@ static void CarDlgLoadDimsFromProto( carProto_p protoP )
 }
 
 
-static void CarDlgRedraw( void )
+static void CarDlgRedraw(
+	wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
 	wWinPix_t w, h;
 	DIST_T ww, hh;
@@ -3262,7 +3264,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			RELOAD_DIMS;
 			break;
 		case A_Redraw:
-			CarDlgRedraw();
+			CarDlgRedraw( carDlgD.d, NULL, 0, 0 );
 			break;
 		case A_ClrManuf:
 			carDlgManufStr[0] = '\0';
@@ -3915,7 +3917,7 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 	}
 
 	if ( redraw )
-		CarDlgRedraw();
+		CarDlgRedraw( carDlgD.d, NULL, 0, 0 );
 
 	ParamDialogOkActive( pg, ok );
 }

@@ -3693,9 +3693,6 @@ EXPORT void InitCmdDelete( void )
 	wIcon_p icon;
 	icon = wIconCreatePixMap( delete_xpm );
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
-#ifdef WINDOWS
-	wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)TrySelectDelete, NULL );
-#endif
 }
 
 EXPORT void InitCmdTunnel( void )

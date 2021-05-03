@@ -41,6 +41,7 @@ void SelectTies( void * unused );
 void SelectRecount( void );
 void SelectTrackWidth( void* );
 int SelectDelete( void );
+void TrySelectDelete( void );
 void MoveToJoin( track_p, EPINX_T, track_p, EPINX_T );
 void MoveSelectedTracksToCurrentLayer( void * unused );
 void SelectCurrentLayer( void * unused );

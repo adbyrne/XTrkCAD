@@ -1300,7 +1300,8 @@ EXPORT void GetRoomSize( coOrd * froomSize )
 }
 
 
-static void MapRedraw()
+static void MapRedraw(
+		wDraw_p bd, void * pContex, wWinPix_t px, wWinPix_t py )
 {
 	if (inPlaybackQuit)
 		return;
@@ -1325,7 +1326,7 @@ static void MapResize( void )
 {
 	mapD.scale = mapScale;
 	ChangeMapScale(TRUE);
-	MapRedraw();
+	MapRedraw( mapD.d, NULL, 0, 0 );
 }
 
 #ifdef LATER
@@ -1344,7 +1345,7 @@ static void MapProc( wWin_p win, winProcEvent e, void * data )
 	/*case wRedraw_e:
 		if (mapD.d == NULL)
 			break;
-		MapRedraw();
+		MapRedraw( mapD.d, NULL, 0, 0 );
 		break;*/
 	default:
 		break;
@@ -1579,7 +1580,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 
 EXPORT void DoRedraw( void )
 {
-	MapRedraw();
+	MapRedraw( mapD.d, NULL, 0, 0 );
 	MainRedraw(); // DoRedraw
 }
 
@@ -2810,7 +2811,7 @@ static wBool_t PlaybackKey( char * line )
  *
  */
 
-static paramDrawData_t mapDrawData = { 100, 100, (wDrawRedrawCallBack_p)MapRedraw, DoMapPan, &mapD };
+static paramDrawData_t mapDrawData = { 100, 100, MapRedraw, DoMapPan, &mapD };
 static paramData_t mapPLs[] = {
 	{	PD_DRAW, NULL, "canvas", 0, &mapDrawData } };
 static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC, mapPLs, sizeof mapPLs/sizeof mapPLs[0] };
@@ -2844,7 +2845,7 @@ static void MapDlgUpdate(
 				ChangeMapScale(FALSE);
 
 				if (mapVisible) {
-					MapRedraw();
+					MapRedraw( mapD.d, NULL, 0, 0 );
 				}
 				wPrefSetInteger( "draw", "mapscale", (long)mapD.scale );
 			}
@@ -2889,7 +2890,7 @@ EXPORT void DrawInit( int initialZoom )
 	if ( h <= 0 ) h = 1;
 	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS|BD_MODKEYS,
 												w, h, &mainD,
-				(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
+				MainLayoutCB, DoMousew );
 
 	if (initialZoom == 0) {
 		WDOUBLE_T tmpR;
