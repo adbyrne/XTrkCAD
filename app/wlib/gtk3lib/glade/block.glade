@@ -49,6 +49,9 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -73,7 +76,6 @@
               <object class="GtkEntry" id="block-name">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="halign">start</property>
                 <property name="max_length">80</property>
                 <property name="width_chars">20</property>
               </object>
