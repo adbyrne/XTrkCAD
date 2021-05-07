@@ -696,7 +696,7 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_START:
 		if (gridW == NULL) {
-			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")), _("Ok"), GridOk, (paramActionCancelProc)Reset, TRUE, NULL, 0, GridDlgUpdate );
+			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")), _("Ok"), GridOk, NULL, TRUE, NULL, 0, GridDlgUpdate );
 		}
 		oldGrid = grid;
 		ParamLoadControls( &gridPG );
