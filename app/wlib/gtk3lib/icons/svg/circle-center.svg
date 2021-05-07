@@ -1,34 +1,204 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 48 48" style="enable-background:new 0 0 48 48;" xml:space="preserve">
-<style type="text/css">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 48 48"
+   style="enable-background:new 0 0 48 48;"
+   xml:space="preserve"
+   sodipodi:docname="circle-center.svg"
+   inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"><metadata
+   id="metadata3349"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
+   id="defs3347" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1431"
+   inkscape:window-height="935"
+   id="namedview3345"
+   showgrid="false"
+   inkscape:zoom="17.708333"
+   inkscape:cx="24"
+   inkscape:cy="24"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Layer_1" />
+<style
+   type="text/css"
+   id="style3300">
 	.st0{fill:none;stroke:#FBB03B;stroke-width:2;stroke-miterlimit:10;}
 	.st1{fill:none;stroke:#000000;stroke-miterlimit:10;}
 	.st2{fill:none;stroke:#FF0000;stroke-width:2;stroke-miterlimit:10;}
 	.st3{fill:none;stroke:#FF0000;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;}
 </style>
-<line class="st0" x1="23.9" y1="2.9" x2="24" y2="11.9"/>
-<line class="st0" x1="23.9" y1="36.9" x2="24" y2="45.1"/>
-<line class="st0" x1="36.5" y1="24" x2="45.3" y2="24.2"/>
-<line class="st0" x1="3" y1="25" x2="12" y2="25"/>
-<line class="st0" x1="8.7" y1="9.9" x2="15.3" y2="15.5"/>
-<line class="st0" x1="38.6" y1="8.4" x2="32.8" y2="15.3"/>
-<line class="st0" x1="32" y1="4.5" x2="28.8" y2="12.6"/>
-<line class="st0" x1="43.3" y1="14.7" x2="35.1" y2="19"/>
-<line class="st0" x1="14.7" y1="4.9" x2="19" y2="12.6"/>
-<line class="st0" x1="4.1" y1="16.9" x2="12.4" y2="19.7"/>
-<line class="st0" x1="8.7" y1="39" x2="15.3" y2="32.8"/>
-<line class="st0" x1="4.6" y1="32.8" x2="12.8" y2="28.9"/>
-<line class="st0" x1="15.3" y1="43.9" x2="19.4" y2="35.4"/>
-<line class="st0" x1="39.2" y1="39.6" x2="32.8" y2="33.1"/>
-<line class="st0" x1="43.9" y1="32.8" x2="35.1" y2="29.1"/>
-<line class="st0" x1="32" y1="43.9" x2="28.8" y2="35.9"/>
-<path class="st1" d="M43.9,24.2c0,10.9-8.8,19.7-19.7,19.7c-10.9,0-19.7-8.8-19.7-19.7c0-10.9,8.8-19.7,19.7-19.7
-	C35.1,4.5,43.9,13.3,43.9,24.2z"/>
-<path class="st1" d="M37.7,24.2c0,7.6-6.1,13.7-13.7,13.7c-7.6,0-13.7-6.1-13.7-13.7c0-7.6,6.1-13.7,13.7-13.7
-	C31.5,10.5,37.7,16.6,37.7,24.2z"/>
-<line class="st1" x1="43.5" y1="45" x2="43.5" y2="45"/>
-<line class="st2" x1="36" y1="36.4" x2="24.2" y2="24.5"/>
-<polyline class="st3" points="31.4,36.9 35.9,36.2 36.6,31.8 "/>
+<line
+   class="st0"
+   x1="23.9"
+   y1="2.9"
+   x2="24"
+   y2="11.9"
+   id="line3302"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="23.9"
+   y1="36.9"
+   x2="24"
+   y2="45.1"
+   id="line3304"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="36.5"
+   y1="24"
+   x2="45.3"
+   y2="24.2"
+   id="line3306"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="3"
+   y1="25"
+   x2="12"
+   y2="25"
+   id="line3308"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="8.7"
+   y1="9.9"
+   x2="15.3"
+   y2="15.5"
+   id="line3310"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="38.6"
+   y1="8.4"
+   x2="32.8"
+   y2="15.3"
+   id="line3312"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="32"
+   y1="4.5"
+   x2="28.8"
+   y2="12.6"
+   id="line3314"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="43.3"
+   y1="14.7"
+   x2="35.1"
+   y2="19"
+   id="line3316"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="14.7"
+   y1="4.9"
+   x2="19"
+   y2="12.6"
+   id="line3318"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="4.1"
+   y1="16.9"
+   x2="12.4"
+   y2="19.7"
+   id="line3320"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="8.7"
+   y1="39"
+   x2="15.3"
+   y2="32.8"
+   id="line3322"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="4.6"
+   y1="32.8"
+   x2="12.8"
+   y2="28.9"
+   id="line3324"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="15.3"
+   y1="43.9"
+   x2="19.4"
+   y2="35.4"
+   id="line3326"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="39.2"
+   y1="39.6"
+   x2="32.8"
+   y2="33.1"
+   id="line3328"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="43.9"
+   y1="32.8"
+   x2="35.1"
+   y2="29.1"
+   id="line3330"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<line
+   class="st0"
+   x1="32"
+   y1="43.9"
+   x2="28.8"
+   y2="35.9"
+   id="line3332"
+   style="stroke:#d98a0d;stroke-opacity:1" />
+<path
+   class="st1"
+   d="M43.9,24.2c0,10.9-8.8,19.7-19.7,19.7c-10.9,0-19.7-8.8-19.7-19.7c0-10.9,8.8-19.7,19.7-19.7  C35.1,4.5,43.9,13.3,43.9,24.2z"
+   id="path3334" />
+<path
+   class="st1"
+   d="M37.7,24.2c0,7.6-6.1,13.7-13.7,13.7c-7.6,0-13.7-6.1-13.7-13.7c0-7.6,6.1-13.7,13.7-13.7  C31.5,10.5,37.7,16.6,37.7,24.2z"
+   id="path3336" />
+<line
+   class="st1"
+   x1="43.5"
+   y1="45"
+   x2="43.5"
+   y2="45"
+   id="line3338" />
+<line
+   class="st2"
+   x1="36"
+   y1="36.4"
+   x2="24.2"
+   y2="24.5"
+   id="line3340" />
+<polyline
+   class="st3"
+   points="31.4,36.9 35.9,36.2 36.6,31.8 "
+   id="polyline3342" />
 </svg>
