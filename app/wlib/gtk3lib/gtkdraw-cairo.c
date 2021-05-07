@@ -298,6 +298,12 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		psPrintLine( x0, y0, x1, y1, width, lineType, color, opts );
 		return;
 	}
+
+	if(bd->drawDestination == EXPORTBITMAP) {
+		wlibBitMapDrawLine( bd, x0, y0, x1, y1, width, lineType, color, opts );
+		return;
+	}
+
 	x0 = INMAPX(bd,x0);
 	y0 = INMAPY(bd,y0);
 	x1 = INMAPX(bd,x1);
@@ -347,6 +353,11 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		return;
 	}
 
+	if(bd->drawDestination == EXPORTBITMAP) {
+		wlibBitMapDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );
+		return;
+	}
+
 	if (r < 6.0/75.0) return;
 	x = INMAPX(bd,x0-r);
 	y = INMAPY(bd,y0+r);
@@ -393,6 +404,10 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		return;
 	}
 
+	if(bd->drawDestination == EXPORTBITMAP) {
+
+		return;
+	}
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts);
 	cairo_new_path(cairo);
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
@@ -430,6 +445,11 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 
 	if ( bd == &psPrint_d ) {
 		psPrintString( x, y, a, (char *) s, fp, fs, color, opts );
+		return;
+	}
+
+	if(bd->drawDestination == EXPORTBITMAP) {
+		wlibBitMapDrawString( bd, x, y, a, (char *) s, fp, fs, color, opts );
 		return;
 	}
 
@@ -562,6 +582,11 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		return;
 	}
 
+	if(bd->drawDestination == EXPORTBITMAP) {
+		wlibBitMapDrawFillRectangle( bd, x, y, w, h, color, opt );
+		return;
+	}
+
 	x = INMAPX(bd,x);
 	y = INMAPY(bd,y)-h;
 
@@ -601,6 +626,10 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		return;
 	}
 
+	if(bd->drawDestination == EXPORTBITMAP) {
+		wlibBitMapDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
+		return;
+	}
 		if (cnt > maxCnt) {
 		if (points == NULL)
 			points = (GdkPoint*)malloc( cnt*sizeof *points );
@@ -720,6 +749,11 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 
 	if ( bd == &psPrint_d ) {
 		psPrintFillCircle( x0, y0, r, color, opt );
+		return;
+	}
+
+	if(bd->drawDestination == EXPORTBITMAP) {
+		wlibBitMapDrawFillCircle( bd, x0, y0, r, color, opt );
 		return;
 	}
 
@@ -1560,27 +1594,49 @@ wDraw_p wBitMapCreate(          wWinPix_t w, wWinPix_t h, int arg )
 	bd->maxH = bd->h = h;
 	bd->clip_set = FALSE;
 
-	bd->pixbuf = gdk_pixbuf_get_from_window( gtk_widget_get_window(GTK_WIDGET(gtkMainW->gtkwin)), 0, 0, w, h );
-	if ( bd->pixbuf == NULL ) {
-		wNoticeEx( NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL );
-		return FALSE;
-	}
-	//bd->gc = gdk_gc_new( gtkMainW->gtkwin->window );
-	//if ( bd->gc == NULL ) {
-	//	wNoticeEx( NT_ERROR, "CreateBitMap: gc_new failed", "Ok", NULL );
-	//	return FALSE;
-	//}
-	//gdk_gc_copy( bd->gc, gtkMainW->gtkwin->style->base_gc[GTK_STATE_NORMAL] );
+	if( arg & EXPORTBITMAP) {
+		bd->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+		if ( bd->surface == NULL ) {
+			wNoticeEx( NT_ERROR, "image_ surface_create failed", "Ok", NULL );
+			return NULL;
+		}
+		bd->cr = cairo_create(bd->surface);
+		if ( bd->cr == NULL ) {
+			wNoticeEx( NT_ERROR, "image_ surface_create failed", "Ok", NULL );
+			return NULL;
+		}
+		bd->drawDestination = EXPORTBITMAP;
 
-	wDrawClear( bd );
+		// correct origin of coordinates top left -> bottom left
+		cairo_translate(bd->cr, 0, h );
+		cairo_scale(bd->cr, 1.0, -1.0 );
+
+		wlibBitMapClear( bd );
+	} else {
+		bd->pixbuf = gdk_pixbuf_get_from_window( gtk_widget_get_window(GTK_WIDGET(gtkMainW->gtkwin)), 0, 0, w, h );
+		if ( bd->pixbuf == NULL ) {
+			wNoticeEx( NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL );
+			return FALSE;
+		}
+		bd->drawDestination = 0;
+		wDrawClear( bd );
+
+	}
 	return bd;
 }
 
 
-wBool_t wBitMapDelete(          wDraw_p d )
+wBool_t wBitMapDelete(wDraw_p d )
 {
-	g_object_unref( d->pixbuf );
-	d->pixbuf = NULL;
+	if(d->drawDestination == EXPORTBITMAP ){
+		cairo_destroy( d->cr );
+		d->cr = NULL;
+		cairo_surface_destroy( d->surface );
+		d->surface = NULL;
+	} else {
+		g_object_unref( d->pixbuf );
+		d->pixbuf = NULL;
+	}
 	d->clip_set = FALSE;
 	return TRUE;
 }

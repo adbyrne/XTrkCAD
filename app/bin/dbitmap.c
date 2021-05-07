@@ -73,7 +73,7 @@ static int SaveBitmapFile(
 
 	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] ); 
 
-	bitmap_d.d = wBitMapCreate( bitmap_w, bitmap_h, 8 );
+	bitmap_d.d = wBitMapCreate( bitmap_w, bitmap_h, 8 + EXPORTBITMAP );
 	if (bitmap_d.d == (wDraw_p)0) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		return FALSE;

@@ -274,6 +274,62 @@ GdkPixbuf *wlibMakePixbuf(wIcon_p ip);
 
 /* png.c */
 
+void wlibBitMapClear( wDraw_p bd );
+void wlibBitMapDrawLine(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
+    wDrawWidth width,
+    wDrawLineType_e lineType,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBitMapDrawArc(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
+    double angle0,
+    double angle1,
+    wBool_t drawCenter,
+    wDrawWidth width,
+    wDrawLineType_e lineType,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBitMapDrawString(
+	wDraw_p bd,
+    wDrawPix_t x, wDrawPix_t y,
+    double a,
+    char * s,
+    wFont_p fp,
+    double fs,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBitMapDrawFillPolygon(
+	wDraw_p bd,
+    wDrawPix_t p[][2],
+	wPolyLine_e type[],
+    int cnt,
+    wDrawColor color,
+    wDrawOpts opts,
+	int fill,
+	int open );
+
+void wlibBitMapDrawFillRectangle(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBitMapDrawFillCircle(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
+    wDrawColor color,
+    wDrawOpts opts);
+
 /* print.c */
 struct wDraw_t {
 		WOBJ_COMMON
@@ -310,6 +366,7 @@ struct wDraw_t {
 		GdkPixbuf * background;
 
 		wBool_t bTempMode;
+		unsigned drawDestination;
 		};
 
 void WlibApplySettings(GtkPrintOperation *op);
