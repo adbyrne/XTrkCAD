@@ -15,13 +15,15 @@
           <object class="GtkButtonBox">
             <property name="can_focus">False</property>
             <property name="margin_top">18</property>
+            <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkToggleButton" id="id-cancel">
-                <property name="label" translatable="yes">Cancel</property>
+                <property name="label" translatable="yes">_Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -30,16 +32,34 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="id-ok">
-                <property name="label" translatable="yes">Done</property>
+              <object class="GtkButton" id="id-help">
+                <property name="label" translatable="yes">_Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleButton" id="id-ok">
+                <property name="label" translatable="yes">_Done</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
@@ -64,11 +84,12 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkToggleButton" id="profile-print">
-                    <property name="label" translatable="yes">Print</property>
+                  <object class="GtkToggleButton" id="profile-clear">
+                    <property name="label" translatable="yes">C_lear</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -77,11 +98,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="profile-change">
-                    <property name="label" translatable="yes">Change</property>
+                  <object class="GtkToggleButton" id="profile-print">
+                    <property name="label" translatable="yes">_Print</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -90,11 +112,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="profile-reset">
-                    <property name="label" translatable="yes">Reset</property>
+                  <object class="GtkToggleButton" id="profile-change">
+                    <property name="label" translatable="yes">C_hange</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -102,10 +125,25 @@
                     <property name="position">2</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkToggleButton" id="profile-reset">
+                    <property name="label" translatable="yes">_Reset</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
+                <property name="top_attach">0</property>
+                <property name="height">2</property>
               </packing>
             </child>
             <child>
@@ -146,6 +184,9 @@
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Drag to change elevation</property>
+                    <attributes>
+                      <attribute name="scale" value="0.80000000000000004"/>
+                    </attributes>
                     <style>
                       <class name="title"/>
                     </style>
@@ -157,18 +198,6 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleButton" id="profile-clear">
-                <property name="label" translatable="yes">Clear</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
               </packing>
             </child>
