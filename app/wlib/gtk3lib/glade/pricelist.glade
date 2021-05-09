@@ -14,7 +14,7 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkDialog">
+  <object class="GtkDialog" id="pricelist">
     <property name="can_focus">False</property>
     <property name="border_width">18</property>
     <property name="type_hint">dialog</property>
@@ -30,8 +30,8 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkToggleButton" id="id-save">
-                <property name="label" translatable="yes">Save</property>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -57,10 +57,13 @@
             </child>
             <child>
               <object class="GtkToggleButton" id="id-ok">
-                <property name="label" translatable="yes">Cancel</property>
+                <property name="label" translatable="yes">Save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
