@@ -17,7 +17,7 @@
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkToggleButton" id="id-helo">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -35,6 +35,9 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -54,7 +57,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_bottom">18</property>
-            <property name="spacing">6</property>
+            <property name="spacing">12</property>
             <child>
               <object class="GtkScrolledWindow" id="enum-text.scrollwindow">
                 <property name="visible">True</property>
@@ -153,6 +156,31 @@
                     <property name="position">3</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkFrame" id="enum-list-indexes.box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="label" translatable="yes">Show Indexes</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                    </child>
+                    <child type="label_item">
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -172,5 +200,14 @@
     <child type="titlebar">
       <placeholder/>
     </child>
+  </object>
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="id-help"/>
+      <widget name="id-cancel"/>
+      <widget name="enum-save"/>
+      <widget name="enum-print"/>
+      <widget name="enum-printsetup"/>
+    </widgets>
   </object>
 </interface>
