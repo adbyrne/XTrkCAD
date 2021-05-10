@@ -854,7 +854,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
     
 	int i, j, wb;
 	wDrawPix_t xx, yy;
-	wControl_p b;
+	wControl_p b = (wControl_p)bd;
 	GdkPixbuf * gdk_pixbuf, * cairo_pixbuf;
 	cairo_surface_t * surface = NULL;
 
