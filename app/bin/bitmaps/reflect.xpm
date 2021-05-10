@@ -1,4 +1,4 @@
-static char* reflect_x16[] = {
+static char *reflect_x16[] = {
 	"16 16 5 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -22,7 +22,7 @@ static char* reflect_x16[] = {
 	"       00       ",
 	"                "};
 
-static char* reflect_x24[] = {
+static char *reflect_x24[] = {
 	"24 24 5 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -54,7 +54,7 @@ static char* reflect_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* reflect_x32[] = {
+static char *reflect_x32[] = {
 	"32 32 4 1",
 	" 	c	None",
 	"0	c	#000000",

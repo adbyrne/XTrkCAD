@@ -1,4 +1,4 @@
-static char* turnout_designer_x16[] = {
+static char *turnout_designer_x16[] = {
 	"16 16 19 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -36,7 +36,7 @@ static char* turnout_designer_x16[] = {
 	"       FFF      ",
 	"                "};
 
-static char* turnout_designer_x24[] = {
+static char *turnout_designer_x24[] = {
 	"24 24 17 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -80,7 +80,7 @@ static char* turnout_designer_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* turnout_designer_x32[] = {
+static char *turnout_designer_x32[] = {
 	"32 32 17 1",
 	" 	c	None",
 	"0	c	#000000",

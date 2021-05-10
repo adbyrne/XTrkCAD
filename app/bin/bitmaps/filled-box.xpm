@@ -1,4 +1,4 @@
-static char* filled_box_x16[] = {
+static char *filled_box_x16[] = {
 	"16 16 17 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -34,7 +34,7 @@ static char* filled_box_x16[] = {
 	"                ",
 	"                "};
 
-static char* filled_box_x24[] = {
+static char *filled_box_x24[] = {
 	"24 24 17 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -78,7 +78,7 @@ static char* filled_box_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* filled_box_x32[] = {
+static char *filled_box_x32[] = {
 	"32 32 17 1",
 	" 	c	None",
 	"0	c	#000000",

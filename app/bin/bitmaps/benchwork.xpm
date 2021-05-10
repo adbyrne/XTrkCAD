@@ -1,4 +1,4 @@
-static char* benchwork_x16[] = {
+static char *benchwork_x16[] = {
 	"16 16 9 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -26,7 +26,7 @@ static char* benchwork_x16[] = {
 	"                ",
 	"                "};
 
-static char* benchwork_x24[] = {
+static char *benchwork_x24[] = {
 	"24 24 8 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -61,7 +61,7 @@ static char* benchwork_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* benchwork_x32[] = {
+static char *benchwork_x32[] = {
 	"32 32 10 1",
 	" 	c	None",
 	"0	c	#000000",

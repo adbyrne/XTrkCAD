@@ -1,4 +1,4 @@
-static char* description_x16[] = {
+static char *description_x16[] = {
 	"16 16 9 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -26,7 +26,7 @@ static char* description_x16[] = {
 	"                ",
 	"                "};
 
-static char* description_x24[] = {
+static char *description_x24[] = {
 	"24 24 10 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -63,7 +63,7 @@ static char* description_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* description_x32[] = {
+static char *description_x32[] = {
 	"32 32 13 1",
 	" 	c	None",
 	"0	c	#000000",

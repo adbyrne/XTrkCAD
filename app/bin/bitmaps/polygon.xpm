@@ -1,4 +1,4 @@
-static char* polygon_x16[] = {
+static char *polygon_x16[] = {
 	"16 16 2 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -19,7 +19,7 @@ static char* polygon_x16[] = {
 	"                ",
 	"                "};
 
-static char* polygon_x24[] = {
+static char *polygon_x24[] = {
 	"24 24 2 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -48,7 +48,7 @@ static char* polygon_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* polygon_x32[] = {
+static char *polygon_x32[] = {
 	"32 32 2 1",
 	" 	c	None",
 	"0	c	#000000",

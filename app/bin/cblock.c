@@ -50,6 +50,7 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
+#include "misc.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
@@ -981,7 +982,7 @@ EXPORT void BlockMgmLoad( void )
     static wIcon_p blockI = NULL;
     
     if ( blockI == NULL) 
-        blockI = wIconCreatePixMap( block_xpm );
+        blockI = wIconCreatePixMap( block_xpm[iconSize] );
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_BLOCK) continue;
@@ -995,7 +996,7 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
         AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"), 
-                       wIconCreatePixMap( block_xpm ), LEVEL0_50, 
+                       wIconCreatePixMap( block_xpm[iconSize] ), LEVEL0_50, 
                        IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
 	ParamRegister( &blockPG );
 }

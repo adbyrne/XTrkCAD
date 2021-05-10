@@ -689,7 +689,7 @@ extern wIndex_t panCmdInx;
 void InitCmdDescribe(wMenu_p menu)
 {
     describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
-                                   _("Properties"), wIconCreatePixMap(describe_xpm),
+                                   _("Properties"), wIconCreatePixMap(describe_xpm[iconSize]),
                                    LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
     RegisterChangeNotification(DescChange);
     ParamRegister(&describePG);

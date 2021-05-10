@@ -31,6 +31,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
+#include "misc.h"
 #include "param.h"
 #include "track.h"
 #include "cjoin.h"
@@ -3568,8 +3569,8 @@ static STATUS_T CmdSelect(
 #include "bitmaps/bridge.xpm"
 #include "bitmaps/move.xpm"
 #include "bitmaps/rotate.xpm"
-#include "bitmaps/flip.xpm"
-#include "bitmaps/movedesc.xpm"
+#include "bitmaps/reflect.xpm"
+#include "bitmaps/description.xpm"
 
 
 static void SetMoveMode( char * line )
@@ -3594,7 +3595,7 @@ static void moveDescription( void ) {
 
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
-	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"), wIconCreatePixMap(select_xpm),
+	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"), wIconCreatePixMap(select_xpm[iconSize]),
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS, ACCL_SELECT, NULL );
 }
 
@@ -3689,7 +3690,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 EXPORT void InitCmdDelete( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( delete_xpm );
+	icon = wIconCreatePixMap( delete_xpm[iconSize] );
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
 #ifdef WINDOWS
 	wAttachAccelKey( wAccelKey_Del, 0, (wAccelKeyCallBack_p)TrySelectDelete, NULL );
@@ -3699,31 +3700,31 @@ EXPORT void InitCmdDelete( void )
 EXPORT void InitCmdTunnel( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( tunnel_xpm );
+	icon = wIconCreatePixMap( tunnel_xpm[iconSize] );
 	AddToolbarButton( "cmdTunnel", icon, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectTunnel, NULL );
 }
 
 EXPORT void InitCmdBridge( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( bridge_xpm );
+	icon = wIconCreatePixMap( bridge_xpm[iconSize] );
 	AddToolbarButton( "cmdBridge", icon, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectBridge, NULL );
 }
 
 
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(movedesc_xpm),
+	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(description_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, I2VP( 0 ));
 }
 
 
 EXPORT void InitCmdMove( wMenu_p menu )
 {
-	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"), wIconCreatePixMap(move_xpm),
+	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"), wIconCreatePixMap(move_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
-	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm),
+	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
-	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(flip_xpm),
+	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(reflect_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

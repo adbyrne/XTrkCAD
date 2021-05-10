@@ -1,4 +1,4 @@
-static char* polyline_x16[] = {
+static char *polyline_x16[] = {
 	"16 16 3 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -20,7 +20,7 @@ static char* polyline_x16[] = {
 	"                ",
 	"                "};
 
-static char* polyline_x24[] = {
+static char *polyline_x24[] = {
 	"24 24 3 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -50,7 +50,7 @@ static char* polyline_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* polyline_x32[] = {
+static char *polyline_x32[] = {
 	"32 32 3 1",
 	" 	c	None",
 	"0	c	#000000",
