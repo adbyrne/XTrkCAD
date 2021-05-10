@@ -799,11 +799,12 @@ EXPORT void SnapGridShow( void )
 	GridButtonUpdate( CHK_SHOW );
 }
 
-#include "bitmaps/snapcurs.xbm"
-#include "bitmaps/snapvis.xbm"
+#include "bitmaps/snap-curs.xpm"
+#include "bitmaps/snap-grid.xpm"
 
 EXPORT void InitSnapGridButtons( void )
 {
-	snapGridEnable_b = AddToolbarButton( "cmdGridEnable", wIconCreateBitMap(snapcurs_width, snapcurs_height, snapcurs_bits, wDrawColorBlack), 0, (addButtonCallBack_t)SnapGridEnable, NULL );
-	snapGridShow_b = AddToolbarButton( "cmdGridShow", wIconCreateBitMap(snapvis_width, snapvis_height, snapvis_bits, wDrawColorBlack), IC_MODETRAIN_TOO, (addButtonCallBack_t)SnapGridShow, NULL );
+	// wIconCreatePixMap(doc_new_xpm[iconSize]
+	snapGridEnable_b = AddToolbarButton( "cmdGridEnable", wIconCreatePixMap(snap_curs_xpm[iconSize]), 0, (addButtonCallBack_t)SnapGridEnable, NULL );
+	snapGridShow_b = AddToolbarButton( "cmdGridShow", wIconCreatePixMap(snap_grid_xpm[iconSize]), IC_MODETRAIN_TOO, (addButtonCallBack_t)SnapGridShow, NULL );
 }

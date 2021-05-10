@@ -45,6 +45,8 @@ typedef void (*addButtonCallBack_t)(void*);
  * Globals
  */
 
+extern int iconSize;
+
 extern long adjTimer;
 
 typedef int SCALEINX_T;
