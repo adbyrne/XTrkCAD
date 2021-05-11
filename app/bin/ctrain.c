@@ -99,6 +99,7 @@ static coOrd followCenter;
 static BOOL_T trainsTimeoutPending;
 static enum { TRAINS_STOP, TRAINS_RUN, TRAINS_IDLE, TRAINS_PAUSE } trainsState;
 static wIcon_p stopI, goI;
+static wIcon_p stopB, goB;
 static void RestartTrains(void);
 static void DrawAllCars(void);
 static void UncoupleCars(track_p, track_p);
@@ -2527,7 +2528,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         tempSegs_da.cnt = 0;
 	DYNARR_SET(trkSeg_t, tempSegs_da, 8);
         RestartTrains();
-        wButtonSetLabel(trainPauseB, (char*)goI);
+        wButtonSetLabel(trainPauseB, (char*)goB);
         trainTime0 = 0;
         AttachTrains();
         curTrainDlg->train = NULL;
@@ -2857,8 +2858,10 @@ STATUS_T CmdCarDescAction(
 #include "bitmaps/exit.xpm"
 #include "bitmaps/newcar.xpm"
 #include "bitmaps/zero.xpm"
-#include "bitmaps/ballgreen.xpm"
-#include "bitmaps/ballred.xpm"
+#include "bitmaps/go.xpm"
+#include "bitmaps/stop.xpm"
+#include "bitmaps/greendot.xpm"
+#include "bitmaps/reddot.xpm"
 
 
 static void CmdTrainStopGo(void * junk)
@@ -2866,11 +2869,11 @@ static void CmdTrainStopGo(void * junk)
     wIcon_p icon;
 
     if (trainsState == TRAINS_STOP) {
-        icon = goI;
+        icon = goB;
         RestartTrains();
     } else {
         trainsState = TRAINS_STOP;
-        icon = stopI;
+        icon = stopB;
         TrainTimeEndPause();
     }
 
@@ -3100,16 +3103,19 @@ void InitCmdTrain(wMenu_p menu)
     trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
                   wIconCreatePixMap(train_xpm[iconSize]), LEVEL0_50, IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
                   NULL);
-    stopI = wIconCreatePixMap(ballred);
-    goI = wIconCreatePixMap(ballgreen);
-    trainPauseB = AddToolbarButton("cmdTrainPause", stopI, IC_MODETRAIN_ONLY,
+    stopI = wIconCreatePixMap(reddot);
+    goI = wIconCreatePixMap(greendot);
+	stopB = wIconCreatePixMap(stop_xpm[iconSize]);
+	goB = wIconCreatePixMap(go_xpm[iconSize]);
+	trainPauseB = AddToolbarButton("cmdTrainPause", stopB, IC_MODETRAIN_ONLY,
                                    CmdTrainStopGo, NULL);
-    AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm), IC_MODETRAIN_ONLY,
+    AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm[iconSize]), IC_MODETRAIN_ONLY,
                      CmdTrainExit, NULL);
     newcarB = AddToolbarButton("cmdTrainNewCar", wIconCreatePixMap(newcar_xpm),
                                IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
     T_CAR = InitObject(&carCmds);
-    trainPopupM = MenuRegister("Train Commands");
+
+	trainPopupM = MenuRegister("Train Commands");
     trainPopupMI[DO_UNCOUPLE]   = wMenuPushCreate(trainPopupM, "", _("Uncouple"), 0,
                                   TrainFunc, I2VP(DO_UNCOUPLE));
     trainPopupMI[DO_FLIPCAR]    = wMenuPushCreate(trainPopupM, "", _("Flip Car"), 0,
