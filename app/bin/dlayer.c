@@ -1760,7 +1760,7 @@ void InitLayers(void)
     wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
     AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
 	
-	backgroundB = AddToolbarButton("cmdBackgroundShow", wIconCreatePixMap(background), 0,
+	backgroundB = AddToolbarButton("cmdBackgroundShow", wIconCreatePixMap(background_xpm[iconSize]), 0,
 		(addButtonCallBack_t)BackgroundToggleShow, NULL);
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));

@@ -46,14 +46,14 @@ typedef struct {
 	long acclKey;
 } trknoteData_t;
 
-#include "bitmaps/sticky-note-text.xpm"
-#include "bitmaps/sticky-note-chain.xpm"
-#include "bitmaps/sticky-note-clip.xpm"
+#include "bitmaps/sticky-note.xpm"
+#include "bitmaps/sticky-link.xpm"
+#include "bitmaps/sticky-doc.xpm"
 
 static trknoteData_t noteTypes[] = {
-	{ sticky_note_text_bits, OP_NOTETEXT, N_("Note"), N_("Comment"), "cmdTextNote", 0L },
-	{ sticky_note_chain_bits, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
-	{ sticky_note_clip_bits, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
+	{ sticky_note_xpm, OP_NOTETEXT, N_("Note"), N_("Comment"), "cmdTextNote", 0L },
+	{ sticky_link_xpm, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
+	{ sticky_doc_xpm, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
 };
 
 static long curNoteType;
@@ -711,7 +711,7 @@ void InitTrkNote(wMenu_p menu)
 		wIcon_p icon;
 
 		nt = noteTypes + i;
-		icon = wIconCreatePixMap(nt->xpm);
+		icon = wIconCreatePixMap(nt->xpm[iconSize]);
 		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, I2VP(nt->OP));
 	}
 	ButtonGroupEnd();

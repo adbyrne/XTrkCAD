@@ -2279,7 +2279,7 @@ static void SetAccelKey(const char * prefName, wAccelKey_e key, int mode,
 #include "bitmaps/zoom-out.xpm"
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
-#include "bitmaps/partlist.xpm"
+// #include "bitmaps/partlist.xpm"
 #include "bitmaps/doc-export.xpm"
 #include "bitmaps/doc-export-dxf.xpm"
 #include "bitmaps/doc-import.xpm"
@@ -2287,7 +2287,7 @@ static void SetAccelKey(const char * prefName, wAccelKey_e key, int mode,
 #include "bitmaps/doc-new.xpm"
 #include "bitmaps/doc-save.xpm"
 #include "bitmaps/doc-open.xpm"
-#include "bitmaps/document-print.xpm"
+// #include "bitmaps/document-print.xpm"
 #include "bitmaps/map.xpm"
 #include "bitmaps/magnet.xpm"
 
@@ -2871,11 +2871,11 @@ static void LoadFileList(void) {
 	}
 }
 
-EXPORT void InitCmdEnumerate(void) {
-	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
-			IC_SELECTED | IC_ACCLKEY, (addButtonCallBack_t) EnumerateTracks,
-			NULL);
-}
+//EXPORT void InitCmdEnumerate(void) {
+//	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
+//			IC_SELECTED | IC_ACCLKEY, (addButtonCallBack_t) EnumerateTracks,
+//			NULL);
+//}
 
 EXPORT void InitCmdExport(void) {
 	ButtonGroupBegin( _("Import/Export"), "cmdExportImportSetCmd", _("Import/Export") );

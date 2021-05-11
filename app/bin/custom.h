@@ -139,7 +139,7 @@ void InitCmdNote();
 void InitCmdUndo( void );
 void InitCmdStruct( wMenu_p menu );
 void InitCmdAboveBelow( void );
-void InitCmdEnumerate( void );
+//void InitCmdEnumerate( void );
 void InitCmdExport( void );
 void InitCmdEasement( void );
 
