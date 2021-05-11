@@ -1,4 +1,4 @@
-static char* trim_x16[] = {
+static char *trim_x16[] = {
 	"16 16 6 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -23,7 +23,7 @@ static char* trim_x16[] = {
 	"  0             ",
 	"                "};
 
-static char* trim_x24[] = {
+static char *trim_x24[] = {
 	"24 24 6 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -56,7 +56,7 @@ static char* trim_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* trim_x32[] = {
+static char *trim_x32[] = {
 	"32 32 4 1",
 	" 	c	None",
 	"0	c	#000000",

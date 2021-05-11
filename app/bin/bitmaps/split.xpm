@@ -1,4 +1,4 @@
-static char* split_x16[] = {
+static char *split_x16[] = {
 	"16 16 12 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -29,7 +29,7 @@ static char* split_x16[] = {
 	"  AA11          ",
 	"   A1           "};
 
-static char* split_x24[] = {
+static char *split_x24[] = {
 	"24 24 7 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -63,7 +63,7 @@ static char* split_x24[] = {
 	"    5514                ",
 	"                        "};
 
-static char* split_x32[] = {
+static char *split_x32[] = {
 	"32 32 9 1",
 	" 	c	None",
 	"0	c	#000000",

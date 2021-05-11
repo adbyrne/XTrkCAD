@@ -697,7 +697,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 #include "bitmaps/note.xbm"
 #include "bitmaps/link.xbm"
 #include "bitmaps/clip.xbm"
-#include "bitmaps/cnote.xpm"
+// RWS not used #include "bitmaps/note.xpm"
 
 void InitTrkNote(wMenu_p menu)
 {

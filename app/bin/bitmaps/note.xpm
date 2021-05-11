@@ -1,4 +1,4 @@
-static char* note_x16[] = {
+static char *note_x16[] = {
 	"16 16 10 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -27,7 +27,7 @@ static char* note_x16[] = {
 	"                ",
 	"                "};
 
-static char* note_x24[] = {
+static char *note_x24[] = {
 	"24 24 10 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -64,7 +64,7 @@ static char* note_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* note_x32[] = {
+static char *note_x32[] = {
 	"32 32 11 1",
 	" 	c	None",
 	"0	c	#000000",

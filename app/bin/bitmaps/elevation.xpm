@@ -1,4 +1,4 @@
-static char* elevation_x16[] = {
+static char *elevation_x16[] = {
 	"16 16 16 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -33,7 +33,7 @@ static char* elevation_x16[] = {
 	"                ",
 	"                "};
 
-static char* elevation_x24[] = {
+static char *elevation_x24[] = {
 	"24 24 12 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -72,7 +72,7 @@ static char* elevation_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* elevation_x32[] = {
+static char *elevation_x32[] = {
 	"32 32 13 1",
 	" 	c	None",
 	"0	c	#000000",

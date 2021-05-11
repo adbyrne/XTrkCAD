@@ -391,8 +391,8 @@ FormatLayerName(unsigned int layerNumber)
     return result;
 }
 
-int lbits_width[3] = {12,18,24};
-int lbits_height[3] = {16,24,32};
+static int lbits_width[3] = {14,20,26};
+static int lbits_height[3] = {16,24,32};
 
 #include "bitmaps/l1.xbm"
 #include "bitmaps/l2.xbm"
