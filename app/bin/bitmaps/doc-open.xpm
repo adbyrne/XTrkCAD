@@ -1,4 +1,4 @@
-static char* doc_open_x16[] = {
+static char *doc_open_x16[] = {
 	"16 16 13 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -14,15 +14,15 @@ static char* doc_open_x16[] = {
 	"A	c	#FFFFFF",
 	"B	c	#C0C0C0",
 	"                ",
-	"    6666666666  ",
-	"  6669AAAAAAA66 ",
-	"666669AAAAAAAA66",
-	"66B6B9AAAAAAAAB6",
-	"66B6B9AAAAAAAAB6",
-	"66B6B9AAAAAAAAB6",
-	"66B6B9AAAAAAAAB6",
-	"66B6B9AAAAAAAAB6",
-	"6111111111111116",
+	"    666666666   ",
+	"   669AAAAAAA6  ",
+	" 66669AAAAAAAA6 ",
+	" 6B6B9AAAAAAAAB ",
+	" 6B6B9AAAAAAAAB ",
+	" 6B6B9AAAAAAAAB ",
+	" 6B6B9AAAAAAAAB ",
+	" 6B6B9AAAAAAAAB ",
+	" 11111111111111 ",
 	" 175787578757871",
 	" 130343034303421",
 	" 130343034303421",
@@ -30,7 +30,7 @@ static char* doc_open_x16[] = {
 	" 111111111111111",
 	"                "};
 
-static char* doc_open_x24[] = {
+static char *doc_open_x24[] = {
 	"24 24 14 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -47,11 +47,11 @@ static char* doc_open_x24[] = {
 	"B	c	#FFFFFF",
 	"C	c	#C0C0C0",
 	"                        ",
-	"       777777777777     ",
+	"                        ",
 	"       7CCCCCCCCCC77    ",
-	"    7777BBBBBBBBBBBA7   ",
-	"  777CC7BBBBBBBBBBBBC7  ",
-	" 7777AA7BBBBBBBBBBBBBC7 ",
+	"     777BBBBBBBBBBBA7   ",
+	"    7CC7BBBBBBBBBBBBC7  ",
+	" 7777AA7BBBBBBBBBBBBBC  ",
 	" 7CA7AA7BBBBBBBBBBBBBA7 ",
 	" 7CA7AA7BBBBBBBBBBBBBA7 ",
 	" 7CA7AA7BBBBBBBBBBBBBA7 ",
@@ -71,7 +71,7 @@ static char* doc_open_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* doc_open_x32[] = {
+static char *doc_open_x32[] = {
 	"32 32 15 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -90,11 +90,11 @@ static char* doc_open_x32[] = {
 	"D	c	#C0C0C0",
 	"                                ",
 	"                                ",
-	"         88888888888888888      ",
-	"         8DBBBBBBBBBBBBBB88     ",
-	"      8888BCCCCCCCCCCCCCCC88    ",
-	"     88888BCCCCCCCCCCCCCCCB88   ",
-	"  88888BBDBCCCCCCCCCCCCCCCCB8   ",
+	"          888888888888888       ",
+	"         8DBBBBBBBBBBBBBB8      ",
+	"         8BCCCCCCCCCCCCCCC8     ",
+	"      8888BCCCCCCCCCCCCCCCB8    ",
+	"   8888BBDBCCCCCCCCCCCCCCCCB8   ",
 	"  8DDD8BBDBCCCCCCCCCCCCCCCCCB8  ",
 	"  8BBB8BBDBCCCCCCCCCCCCCCCCCC8  ",
 	"  8BBB8BBDBCCCCCCCCCCCCCCCCCC8  ",

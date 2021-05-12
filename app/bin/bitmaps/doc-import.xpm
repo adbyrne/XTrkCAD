@@ -1,4 +1,4 @@
-static char* doc_import_x16[] = {
+static char *doc_import_x16[] = {
 	"16 16 9 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -26,7 +26,7 @@ static char* doc_import_x16[] = {
 	"    44444444444 ",
 	"                "};
 
-static char* doc_import_x24[] = {
+static char *doc_import_x24[] = {
 	"24 24 10 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -63,7 +63,7 @@ static char* doc_import_x24[] = {
 	"                        ",
 	"                        "};
 
-static char* doc_import_x32[] = {
+static char *doc_import_x32[] = {
 	"32 32 11 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -90,7 +90,7 @@ static char* doc_import_x32[] = {
 	"         58447777777777775885   ",
 	"         59114977777777775885   ",
 	"         58611267777777775885   ",
-	"   11111157742114777777775885   ",
+	"         57742114777777775885   ",
 	"   11111111111111577777775885   ",
 	"   11111111111111577777775885   ",
 	"         58841116777777775885   ",

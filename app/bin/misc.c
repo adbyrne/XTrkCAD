@@ -64,7 +64,7 @@ void DoCarDlg(void);
  *
  */
 
-EXPORT int iconSize = 1;
+EXPORT int iconSize = 0;
 
 EXPORT int foobar = 0;
 
@@ -2297,6 +2297,8 @@ static void CreateMenus(void) {
 	wMenu_p zoomM, zoomSubM;
 
 	wMenuPush_p zoomInM, zoomOutM;
+
+	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
 
 	fileM = wMenuBarAdd(mainW, "menuFile", _("&File"));
 	editM = wMenuBarAdd(mainW, "menuEdit", _("&Edit"));
