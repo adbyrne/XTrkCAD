@@ -111,8 +111,8 @@ int LoadTracks( int cnt, char **fileName, void *data );
 
 typedef void (*doSaveCallBack_p)( void );
 void SetAutoSave(void);
-void DoSave( void * dpAfterSaveVP );
-void DoSaveAs( void * dpAfterSaveVP );
+void DoSave( void * doAfterSaveVP );
+void DoSaveAs( void * doAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
