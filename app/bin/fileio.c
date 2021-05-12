@@ -1184,9 +1184,9 @@ EXPORT void SetAutoSave() {
 
 }
 
-EXPORT void DoSave( void * dpAfterSaveVP )
+EXPORT void DoSave( void * doAfterSaveVP )
 {
-	doAfterSave = dpAfterSaveVP;
+	doAfterSave = doAfterSaveVP;
 	if ( bReadOnly || *(GetLayoutFilename()) == '\0') {
 		if (saveFile_fs == NULL)
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
@@ -1202,9 +1202,9 @@ EXPORT void DoSave( void * dpAfterSaveVP )
 	SaveState();
 }
 
-EXPORT void DoSaveAs( void * dpAfterSaveVP )
+EXPORT void DoSaveAs( void * doAfterSaveVP )
 {
-	doAfterSave = dpAfterSaveVP;
+	doAfterSave = doAfterSaveVP;
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
