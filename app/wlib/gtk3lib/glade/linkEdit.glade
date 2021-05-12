@@ -144,23 +144,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="linkEdit-layer">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="has_entry">True</property>
-                <child internal-child="entry">
-                  <object class="GtkEntry" id="linkEdit-laye">
-                    <property name="can_focus">False</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="linkEdit-title">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_top">12</property>
@@ -173,7 +157,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="linkEdit-name">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">URL</property>
@@ -185,7 +169,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="linkEdit-titl">
+              <object class="GtkEntry" id="linkEdit-title">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="margin_top">12</property>
@@ -200,8 +184,9 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="hexpand">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkEntry" id="linkEdit-url">
+                  <object class="GtkEntry" id="linkEdit-name">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -232,6 +217,16 @@
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="linkEdit-layer">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
           </object>

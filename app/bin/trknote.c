@@ -681,6 +681,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 			case OP_NOTELINK:
 				DrawBitMap(&tempD, oldPos, link_bm, normalColor);
 				break;
+			case OP_NOTEFILE:
+				DrawBitMap(&tempD, oldPos, document_bm, normalColor);
+				break;
 			}
     	}
         return C_CONTINUE;

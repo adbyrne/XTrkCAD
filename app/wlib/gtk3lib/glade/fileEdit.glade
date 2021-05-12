@@ -6,11 +6,11 @@
     <property name="can_focus">False</property>
     <property name="border_width">18</property>
     <property name="title" translatable="yes">Create attachment</property>
-    <property name="resizable">False</property>
     <property name="default_width">320</property>
     <property name="default_height">260</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
+    <property name="has_resize_grip">True</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can_focus">False</property>
@@ -144,22 +144,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="fileEdit-layer">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="has_entry">True</property>
-                <child internal-child="entry">
-                  <object class="GtkEntry" id="fileEdit-laye">
-                    <property name="can_focus">False</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -173,7 +157,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="fileEdit-filename">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Document</property>
@@ -199,8 +183,9 @@
               <object class="GtkBox" id="fileEdit-box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkEntry" id="fileEdit-url">
+                  <object class="GtkEntry" id="fileEdit-filename">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -247,6 +232,16 @@
                 <property name="top_attach">4</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkComboBox" id="fileEdit-layer">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">2</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -259,14 +254,5 @@
     <child type="titlebar">
       <placeholder/>
     </child>
-  </object>
-  <object class="GtkSizeGroup">
-    <widgets>
-      <widget name="id-cancel"/>
-      <widget name="id-help"/>
-      <widget name="id-ok"/>
-      <widget name="fileEdit-browse"/>
-      <widget name="fileEdit-openfile"/>
-    </widgets>
   </object>
 </interface>
