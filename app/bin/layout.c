@@ -379,7 +379,9 @@ LoadBackGroundImage(void)
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
 		return FALSE;
 	}
-	
+	wControlActive((wControl_p)backgroundB, backgroundVisible);
+	wButtonSetBusy(backgroundB, backgroundVisible);
+
 	return TRUE;
 }
 
