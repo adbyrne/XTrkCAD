@@ -46,11 +46,11 @@
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
+#include "common.h"
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "misc.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"

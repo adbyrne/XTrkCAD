@@ -303,7 +303,7 @@ static char * enableFlexTrackLabels[] = { N_("Show FlexTrack in HotBar"), NULL }
 static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
 static paramData_t prefPLs[] = {
-	{ PD_RADIO, &iconSize, "iconsize", PDO_NOPSHUPD, iconSizeLabels, N_("Icon Size"), BC_HORZ, I2VP(CHANGE_MAIN|CHANGE_TOOLBAR|CHANGE_CMDOPT) },
+	{ PD_RADIO, &iconSize, "iconsize", 0, iconSizeLabels, N_("Icon Size"), BC_HORZ, I2VP(CHANGE_TOOLBAR) },
 	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
 #define I_DSTFMT		(3)

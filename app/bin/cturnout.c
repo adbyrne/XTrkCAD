@@ -20,6 +20,7 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
+#include "common.h"
 #include "ccurve.h"
 #include "tbezier.h"
 #include "tcornu.h"
@@ -30,7 +31,6 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
