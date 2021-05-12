@@ -64,12 +64,13 @@ static void EasementCancel( void );
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
 static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
+static paramFloatRange_t r0_200 = { 0.0, 200.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
 	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0n1_100, N_("Value") },
-	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_100, N_("R"), BO_READONLY },
+	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_200, N_("R"), BO_READONLY },
 	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
