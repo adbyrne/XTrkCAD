@@ -277,7 +277,7 @@ wIndex_t InitCommand( wMenu_p, procCommand_t, const char *, const char *,  int, 
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );
 wButton_p AddToolbarButton( const char*, wIcon_p, long, wButtonCallBack_p, void * context );
-wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
+// RWS not found wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
 wIndex_t AddMenuButton( wMenu_p, procCommand_t, const char*, const char*, wIcon_p, int, long, long, void* );
 void PlaybackButtonMouse( wIndex_t );
 void ButtonGroupBegin( const char *, const char *, const char * );
@@ -302,6 +302,7 @@ void InitDebug( const char *, long * );
 #define CHANGE_TOOLBAR	(1<<8)
 #define CHANGE_CMDOPT	(1<<9)
 #define CHANGE_LIMITS	(1<<10)
+#define CHANGE_ICONSIZE	(1<<11)
 #define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
 typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );

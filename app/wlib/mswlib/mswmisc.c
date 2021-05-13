@@ -892,16 +892,21 @@ wWin_p wWinMainCreate(
                         nameStr, &showCmd);
     mswHWnd = w->hWnd;
 
+	//HICON hIcon = LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(0), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
+	//HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(0));
+	//SendMessage(mswHWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+	//SendMessage(mswHWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+
     if (!mswThickFont) {
-        SendMessage(w->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
-        hDc = GetDC(w->hWnd);
+        SendMessage(mswHWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
+        hDc = GetDC(mswHWnd);
         GetTextMetrics(hDc, &tm);
         mswEditHeight = tm.tmHeight+2;
-        ReleaseDC(w->hWnd, hDc);
+        ReleaseDC(mswHWnd, hDc);
     }
 
-    ShowWindow(w->hWnd, showCmd);
-    UpdateWindow(w->hWnd);
+    ShowWindow(mswHWnd, showCmd);
+    UpdateWindow(mswHWnd);
     w->busy = FALSE;
     return w;
 }

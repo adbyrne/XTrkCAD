@@ -1792,7 +1792,6 @@ void InitLayers(void)
     AddPlaybackProc("LAYERS", (playbackProc_p)ReadLayers, NULL);
 }
 
-
 addButtonCallBack_t InitLayersDialog(void)
 {
     ParamRegister(&layerPG);
