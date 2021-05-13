@@ -236,7 +236,7 @@ void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );
 void DefaultProc( wWin_p, winProcEvent, void * );
-void SelectFont();
+void SelectFont( void * unused );
 
 void CheckRoomSize( BOOL_T );
 const char * GetBalloonHelpStr( const char* );

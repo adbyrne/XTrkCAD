@@ -173,7 +173,7 @@ static LRESULT menuPush(
 			set = !set;
 			wMenuToggleSet((wMenuToggle_p)m,set);
 			if (((wMenuToggle_p)m)->action)
-				((wMenuToggle_p)m)->action(set, ((wMenuPush_p)m)->data);
+				((wMenuToggle_p)m)->action(((wMenuPush_p)m)->data);
 			break;
 		case M_LISTITEM:
 			if (((wMenuListItem_p)m)->action)

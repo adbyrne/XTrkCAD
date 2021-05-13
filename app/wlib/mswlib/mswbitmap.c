@@ -510,7 +510,7 @@ wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long option, const struc
 	}
 	control->h = iconP->h;
 	control->w = iconP->w;
-	control->data = iconP;
+	control->data = (void*)iconP;
 
 	return (wControl_p)control;
 }

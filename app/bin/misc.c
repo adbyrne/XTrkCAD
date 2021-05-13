@@ -935,7 +935,7 @@ EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data) {
 static void NextWindow(void) {
 }
 
-EXPORT void SelectFont(void) {
+EXPORT void SelectFont(void * unused) {
 	wSelectFont(_("XTrackCAD Font"));
 }
 
@@ -2261,7 +2261,7 @@ struct accelKey_s {
 		{ "zoomDown", wAccelKey_Pgup, 0, EA_ZOOMDOWN, 1 },
 		{ "redraw", wAccelKey_F5, 0, EA_REDRAW, 0 },
 #ifdef WINDOWS
-		{ "delete", "wAccelKey_Del", 0, EA_DELETE, 0 },
+		{ "delete", wAccelKey_Del, 0, EA_DELETE, 0 },
 #endif
 		{ "undo", wAccelKey_Back, WKEY_SHIFT, EA_UNDO, 0 },
 		{ "copy", wAccelKey_Ins, WKEY_CTRL, EA_COPY, 0 },
