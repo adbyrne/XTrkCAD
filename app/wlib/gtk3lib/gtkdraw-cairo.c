@@ -41,7 +41,6 @@ static long drawVerbose = 0;
 
 #define gtkAddHelpString( a, b ) wlibAddHelpString( a, b )
 
-#define CENTERMARK_LENGTH (6)
 
 // Hack to do TempRedraw or MainRedraw
 // For Windows only
@@ -295,12 +294,14 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 {
 
 	if ( bd == &psPrint_d ) {
-		psPrintLine( x0, y0, x1, y1, width, lineType, color, opts );
+        wlibBasicDrawLine( bd, x0, y0, x1, y1, width,
+                           MINLINEWIDTHPRINT, lineType, color, opts );
 		return;
 	}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBitMapDrawLine( bd, x0, y0, x1, y1, width, lineType, color, opts );
+		wlibBasicDrawLine( bd, x0, y0, x1, y1, width,
+						   MINLINEWIDTHBITMAP, lineType, color, opts );
 		return;
 	}
 
@@ -349,12 +350,14 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 	int x, y, w, h;
 
 	if ( bd == &psPrint_d ) {
-		psPrintArc( x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );
+        wlibBasicDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width,
+                          MINLINEWIDTHPRINT, lineType, color, opts );
 		return;
 	}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBitMapDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );
+		wlibBasicDrawArc( bd, x0, y0, r, angle0, angle1, drawCenter, width,
+						  MINLINEWIDTHBITMAP, lineType, color, opts );
 		return;
 	}
 
@@ -444,12 +447,16 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 	double angle = -M_PI * a / 180.0;
 
 	if ( bd == &psPrint_d ) {
-		psPrintString( x, y, a, (char *) s, fp, fs, color, opts );
+        wlibBasicDrawString( bd, x, y, a, (char *) s, fp, fs,
+                             MINLINEWIDTHPRINT, MINLINEWIDTHPRINT,
+                             color, opts );
 		return;
 	}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBitMapDrawString( bd, x, y, a, (char *) s, fp, fs, color, opts );
+		wlibBasicDrawString( bd, x, y, a, (char *) s, fp, fs,
+							 MINLINEWIDTHBITMAP, MINLINEWIDTHBITMAP,
+							 color, opts );
 		return;
 	}
 
@@ -578,12 +585,12 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 {
 
 	if ( bd == &psPrint_d ) {
-		psPrintFillRectangle( x, y, w, h, color, opt );
+        wlibBasicDrawFillRectangle( bd, x, y, w, h, color, opt );
 		return;
 	}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBitMapDrawFillRectangle( bd, x, y, w, h, color, opt );
+		wlibBasicDrawFillRectangle( bd, x, y, w, h, color, opt );
 		return;
 	}
 
@@ -622,12 +629,12 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 	int i;
 
 	if ( bd == &psPrint_d ) {
-		psPrintFillPolygon( p, type, cnt, color, opt, fill, open );
+        wlibBasicDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
 		return;
 	}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBitMapDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
+		wlibBasicDrawFillPolygon( bd, p, type, cnt, color, opt, fill, open );
 		return;
 	}
 		if (cnt > maxCnt) {
@@ -748,12 +755,12 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 	int x, y, w, h;
 
 	if ( bd == &psPrint_d ) {
-		psPrintFillCircle( x0, y0, r, color, opt );
+        wlibBasicDrawFillCircle( bd, x0, y0, r, color, opt );
 		return;
 	}
 
 	if(bd->drawDestination == EXPORTBITMAP) {
-		wlibBitMapDrawFillCircle( bd, x0, y0, r, color, opt );
+		wlibBasicDrawFillCircle( bd, x0, y0, r, color, opt );
 		return;
 	}
 
@@ -1577,7 +1584,28 @@ int xw, xh, cw, ch;
  *
 *******************************************************************************/
 
-wDraw_p wBitMapCreate(          wWinPix_t w, wWinPix_t h, int arg )
+/**
+* Export as bitmap file.
+*
+* \param d IN the drawing area ?
+* \param fileName IN  fully qualified filename for the bitmap file.
+* \return    TRUE on success, FALSE on error
+*/
+
+wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName)
+{
+    cairo_status_t status;
+
+    status = cairo_surface_write_to_png (d->surface, fileName);
+
+    if( status != CAIRO_STATUS_SUCCESS ) {
+        wNoticeEx(NT_ERROR, "WriteBitMap: surface_write_to_png failed", "Ok", NULL);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+wDraw_p wBitMapCreate(wWinPix_t w, wWinPix_t h, int arg )
 {
 	wDraw_p bd;
 
@@ -1593,6 +1621,8 @@ wDraw_p wBitMapCreate(          wWinPix_t w, wWinPix_t h, int arg )
 	bd->maxW = bd->w = w;
 	bd->maxH = bd->h = h;
 	bd->clip_set = FALSE;
+	bd->scale_adjust = 1.0;
+	bd->scale_text = 1.0;
 
 	if( arg & EXPORTBITMAP) {
 		bd->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
@@ -1611,7 +1641,7 @@ wDraw_p wBitMapCreate(          wWinPix_t w, wWinPix_t h, int arg )
 		cairo_translate(bd->cr, 0, h );
 		cairo_scale(bd->cr, 1.0, -1.0 );
 
-		wlibBitMapClear( bd );
+		wlibBasicClear( bd );
 	} else {
 		bd->pixbuf = gdk_pixbuf_get_from_window( gtk_widget_get_window(GTK_WIDGET(gtkMainW->gtkwin)), 0, 0, w, h );
 		if ( bd->pixbuf == NULL ) {

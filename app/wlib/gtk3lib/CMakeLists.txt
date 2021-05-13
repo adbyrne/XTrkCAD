@@ -1,6 +1,7 @@
 # Setup GTK v3 UI library...
 
 set(sources
+	basicdraw.c
 	bitmap.c
 	boxes.c
    	builder.c
@@ -20,7 +21,6 @@ set(sources
 	notice.c
 	opendocument.c
 	pixbuf.c
-	png.c
 	print.c
 	single.c
 	splash.c

@@ -40,6 +40,18 @@
 #define LABEL_OFFSET	(3)
 #define MENUH	(24)
 
+#define PRINT_PORTRAIT  (0)
+#define PRINT_LANDSCAPE (1)
+
+#define PPI (72.0)
+#define P2I( P ) ((P)/PPI)
+
+#define CENTERMARK_LENGTH (60)				/**< size of cross marking center of circles */
+#define DASH_LENGTH (8.0)					/**< length of single dash */
+
+#define MINLINEWIDTHBITMAP (1.0)
+#define MINLINEWIDTHPRINT (0.09)
+
 extern wWin_p gtkMainW;
 
 #ifdef CURSOR_SURFACE
@@ -169,6 +181,67 @@ extern char wConfigName[];
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 
+/* basicdraw.c */
+
+void wlibBasicClear( wDraw_p bd );
+void wlibBasicDrawLine(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
+    double width,
+	double minWidth,
+    wDrawLineType_e lineType,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBasicDrawArc(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
+    double angle0,
+    double angle1,
+    wBool_t drawCenter,
+    double width,
+	double minWidth,
+    wDrawLineType_e lineType,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBasicDrawString(
+	wDraw_p bd,
+    wDrawPix_t x, wDrawPix_t y,
+    double a,
+    char * s,
+    wFont_p fp,
+    double fs,
+    double width,
+	double minWidth,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBasicDrawFillPolygon(
+	wDraw_p bd,
+    wDrawPix_t p[][2],
+	wPolyLine_e type[],
+    int cnt,
+    wDrawColor color,
+    wDrawOpts opts,
+	int fill,
+	int open );
+
+void wlibBasicDrawFillRectangle(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
+    wDrawColor color,
+    wDrawOpts opts);
+
+void wlibBasicDrawFillCircle(
+	wDraw_p bd,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
+    wDrawColor color,
+    wDrawOpts opts);
 
 
 /* boxes.c */
@@ -274,61 +347,6 @@ GdkPixbuf *wlibMakePixbuf(wIcon_p ip);
 
 /* png.c */
 
-void wlibBitMapClear( wDraw_p bd );
-void wlibBitMapDrawLine(
-	wDraw_p bd,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawPix_t x1, wDrawPix_t y1,
-    wDrawWidth width,
-    wDrawLineType_e lineType,
-    wDrawColor color,
-    wDrawOpts opts);
-
-void wlibBitMapDrawArc(
-	wDraw_p bd,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawPix_t r,
-    double angle0,
-    double angle1,
-    wBool_t drawCenter,
-    wDrawWidth width,
-    wDrawLineType_e lineType,
-    wDrawColor color,
-    wDrawOpts opts);
-
-void wlibBitMapDrawString(
-	wDraw_p bd,
-    wDrawPix_t x, wDrawPix_t y,
-    double a,
-    char * s,
-    wFont_p fp,
-    double fs,
-    wDrawColor color,
-    wDrawOpts opts);
-
-void wlibBitMapDrawFillPolygon(
-	wDraw_p bd,
-    wDrawPix_t p[][2],
-	wPolyLine_e type[],
-    int cnt,
-    wDrawColor color,
-    wDrawOpts opts,
-	int fill,
-	int open );
-
-void wlibBitMapDrawFillRectangle(
-	wDraw_p bd,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawPix_t x1, wDrawPix_t y1,
-    wDrawColor color,
-    wDrawOpts opts);
-
-void wlibBitMapDrawFillCircle(
-	wDraw_p bd,
-    wDrawPix_t x0, wDrawPix_t y0,
-    wDrawPix_t r,
-    wDrawColor color,
-    wDrawOpts opts);
 
 /* print.c */
 struct wDraw_t {
@@ -347,8 +365,9 @@ struct wDraw_t {
 		GdkPixbuf * pixbufBackup;
 
 		double dpi;
+		double scale_adjust;
+		double scale_text;
 
-		//GdkGC * gc;
 		wDrawWidth lineWidth;
 		wDrawOpts opts;
 		wWinPix_t maxW;
@@ -361,8 +380,6 @@ struct wDraw_t {
 		wWinPix_t lastY;
 
 		wBool_t delayUpdate;
-		cairo_t *printContext;
-		cairo_surface_t *curPrintSurface;
 		GdkPixbuf * background;
 
 		wBool_t bTempMode;
@@ -371,12 +388,6 @@ struct wDraw_t {
 
 void WlibApplySettings(GtkPrintOperation *op);
 void WlibSaveSettings(GtkPrintOperation *op);
-void psPrintLine(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
-void psPrintArc(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
-void psPrintFillRectangle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawColor color, wDrawOpts opts);
-void psPrintFillPolygon(wDrawPix_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
-void psPrintFillCircle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, wDrawColor color, wDrawOpts opts);
-void psPrintString(wDrawPix_t x, wDrawPix_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
 static void WlibGetPaperSize(void);
 
 /* single.c */

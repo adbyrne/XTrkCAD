@@ -616,7 +616,8 @@ void wDrawBitMap(		wDraw_p, wDrawBitMap_p, wDrawPix_t, wDrawPix_t,
 
 wDraw_p wBitMapCreate(		wWinPix_t, wWinPix_t, int );
 wBool_t wBitMapDelete(		wDraw_p );
-wBool_t wBitMapWriteFile(	wDraw_p, const char * );
+
+wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName);
 
 /* Misc */
 void * wDrawGetContext(		wDraw_p );
