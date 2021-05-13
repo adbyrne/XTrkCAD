@@ -783,10 +783,11 @@ LOG( log_undo, 2, ( "    UndoClear()\n" ) )
 }
 
 
-void UndoUndo( void * pRetVP )
+EXPORT wBool_t undoStatus = TRUE;
+
+void UndoUndo( void * unused )
 {
-	BOOL_T * pRet = pRetVP;
-	if ( pRet ) *pRet = FALSE;
+	undoStatus = FALSE;
 	undoStack_p us;
 	track_p trk;
 	wIndex_t oldCount;
@@ -858,15 +859,14 @@ LOG( log_undo, 1, ( "    undoUndo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	SetButtons( doCount>0, TRUE );
 	wBalloonHelpUpdate();
 	wDrawDelayUpdate( mainD.d, FALSE );
-	if ( pRet ) *pRet = TRUE;
+	undoStatus = TRUE;
 	return;
 }
 
 
-void UndoRedo( void * pRetVP )
+void UndoRedo( void * unused )
 {
-	BOOL_T * pRet = pRetVP;
-	if ( pRet ) *pRet = FALSE;
+	undoStatus = FALSE;
 	undoStack_p us;
 	wIndex_t oldCount;
 	BOOL_T redrawAll;
@@ -933,7 +933,7 @@ LOG( log_undo, 1, ( "    undoRedo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doC
 	SetButtons( TRUE, undoCount>0 );
 	wBalloonHelpUpdate();
 	wDrawDelayUpdate( mainD.d, FALSE );
-	if ( pRet ) *pRet = TRUE;
+	undoStatus = TRUE;
 	return;
 }
 

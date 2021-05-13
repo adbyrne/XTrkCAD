@@ -1534,9 +1534,11 @@ EXPORT void DoExport( void * unused )
 }
 
 
-EXPORT void EditCopy( void * pRetVP )
+EXPORT wBool_t editStatus = TRUE;
+
+EXPORT void EditCopy( void * unused )
 {
-	if ( pRetVP ) *(BOOL_T*)pRetVP = FALSE;
+	editStatus = FALSE;
 	FILE * f;
 	time_t clock;
 
@@ -1560,18 +1562,15 @@ EXPORT void EditCopy( void * pRetVP )
 	SetUserLocale();
 	fclose(f);
 
-	if ( pRetVP ) *(BOOL_T*)pRetVP = TRUE;
+	editStatus = TRUE;
 }
 
 
-EXPORT void EditCut( void * pRetVP )
+EXPORT void EditCut( void * unused )
 {
-	if ( pRetVP ) *(BOOL_T*)pRetVP = FALSE;
-	BOOL_T ret;
-	EditCopy(&ret);
-	if ( !ret ) return;
+	EditCopy(NULL);
+	if ( !editStatus ) return;
 	SelectDelete();
-	if ( pRetVP ) *(BOOL_T*)pRetVP = TRUE;
 }
 
 
@@ -1582,7 +1581,7 @@ EXPORT void EditCut( void * pRetVP )
  * \return    TRUE if success, FALSE on error (file not found)
  */
 
-BOOL_T EditPastePlace( wBool_t inPlace )
+static BOOL_T EditPastePlace( wBool_t inPlace )
 {
 
 	BOOL_T rc = TRUE;
@@ -1619,19 +1618,14 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	return rc;
 }
 
-EXPORT void EditPaste( void * pRetVP ) {
-	BOOL_T ret = EditPastePlace(FALSE);
-	if ( pRetVP ) *(BOOL_T*)pRetVP = ret;
+EXPORT void EditPaste( void * unused ) {
+	editStatus = EditPastePlace(FALSE);
 }
 
-EXPORT void EditClone( void * pRetVP ) {
-	if ( pRetVP ) *(BOOL_T*)pRetVP = FALSE;
-	BOOL_T ret;
-	EditCopy( &ret );
-	if ( !ret ) return;
-	if (!EditPastePlace(TRUE)) return;
-	if ( pRetVP ) *(BOOL_T*)pRetVP = TRUE;
-	return;
+EXPORT void EditClone( void * unused ) {
+	EditCopy( NULL );
+	if ( !editStatus ) return;
+	editStatus = EditPastePlace(TRUE);
 }
 
 /*****************************************************************************

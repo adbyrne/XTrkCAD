@@ -1786,9 +1786,8 @@ nextEndPt:;
 			if (strcmp("undoUndo",event)==0) {
 				fprintf( auditFile, "# failure in undo\n" );
 			} else {
-				BOOL_T ret;
-				UndoUndo( &ret );
-				if ( ret ) {				
+				UndoUndo( NULL );
+				if ( undoStatus ) {				
 					fprintf( auditFile, "# after undo\n" );
 					WriteTracks(auditFile, TRUE);
 					Rdump( auditFile );

@@ -123,10 +123,11 @@ int LoadCheckpoint( BOOL_T );
 void DoImport( void * typeVP );
 void DoExport( void * unused );
 void DoExportDXF( void * unused );
-void EditCopy( void * pRetVP );
-void EditCut( void * pRetVP );
-void EditPaste( void * pRetVP );
-void EditClone( void * pRetVP );
+extern wBool_t editStatus; // Status of last Edit* command
+void EditCopy( void * unused );
+void EditCut( void * unused );
+void EditPaste( void * unused );
+void EditClone( void * unused );
 
 
 void DoRecord( void * );

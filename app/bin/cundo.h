@@ -25,8 +25,9 @@
 
 #include "common.h"
 
-void UndoUndo( void * pRetVP );
-void UndoRedo( void * pRetVP );
+extern wBool_t undoStatus; // Status of the last Undo/Redo command
+void UndoUndo( void * unused );
+void UndoRedo( void * unused );
 void UndoResume( void );
 void UndoSuspend( void );
 void UndoStart( char *, char *, ... );
