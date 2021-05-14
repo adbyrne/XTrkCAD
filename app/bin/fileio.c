@@ -49,7 +49,7 @@
 
 EXPORT dynArr_t paramProc_da;
 
-#define TIME_READTRACKFILE
+//#define TIME_READTRACKFILE
 
 #define COPYBLOCKSIZE	1024
 
