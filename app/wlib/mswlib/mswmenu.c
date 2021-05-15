@@ -93,7 +93,7 @@ struct wMenuRadio_t {
 struct wMenuToggle_t {
 		MOBJ_COMMON
 		wMenu_p mparent;
-		wMenuToggleCallBack_p action;
+		wMenuCallBack_p action;
 		long acclKey;
 		wBool_t enabled;
 		};
@@ -173,7 +173,7 @@ static LRESULT menuPush(
 			set = !set;
 			wMenuToggleSet((wMenuToggle_p)m,set);
 			if (((wMenuToggle_p)m)->action)
-				((wMenuToggle_p)m)->action(set, ((wMenuPush_p)m)->data);
+				((wMenuToggle_p)m)->action(((wMenuPush_p)m)->data);
 			break;
 		case M_LISTITEM:
 			if (((wMenuListItem_p)m)->action)
@@ -859,7 +859,7 @@ wMenuToggle_p wMenuToggleCreate(
 		const char * labelStr,
 		long acclKey,
 		wBool_t set,
-		wMenuToggleCallBack_p action,
+		wMenuCallBack_p action,
 		void * data )
 {
 	wMenuToggle_p mt;
@@ -1120,7 +1120,7 @@ wBool_t wMenuAction(
 				} else {
 					set = wMenuToggleGet( mt );
 					wMenuToggleSet( mt, !set );
-					mt->action( set, mt->data );
+					mt->action( mt->data );
 				}
 				break;
 			case M_MENU:

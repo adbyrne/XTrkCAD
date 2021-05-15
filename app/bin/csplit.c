@@ -36,7 +36,7 @@ static BOOL_T splitTrkFlip;
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-static void ChangeSplitEPMode( wBool_t set, void * mode )
+static void ChangeSplitEPMode( void * mode )
 {
 	long imode = VP2L(mode);
 	long option;

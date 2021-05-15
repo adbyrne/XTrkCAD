@@ -28,7 +28,7 @@ typedef struct {
 
 struct wChoice_t {
 		WOBJ_COMMON
-		const char * * labels;
+		const char * const * labels;
 		wChoiceItem_p *buttList;
 		long *valueP;
 		long oldVal;
@@ -42,7 +42,7 @@ void wRadioSetValue(
 		wChoice_p bc,
 		long val )
 {
-	const char ** labels;
+	const char * const * labels;
 	long cnt;
 	wChoiceItem_p * butts;
 
@@ -67,7 +67,7 @@ void wToggleSetValue(
 		wChoice_p bc,
 		long val )
 {
-	const char ** labels;
+	const char * const * labels;
 	long cnt;
 	wChoiceItem_p * butts;
 
@@ -261,13 +261,13 @@ static wChoice_p choiceCreate(
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		const char	**labels,
+		const char * const * labels,
 		long	*valueP,
 		wChoiceCallBack_p action,
 		void	*data )
 {
 	wChoice_p b;
-	const char ** lp;
+	const char * const * lp;
 	int cnt;
 	wChoiceItem_p * butts;
 	wWinPix_t ppx, ppy;
@@ -398,7 +398,7 @@ wChoice_p wRadioCreate(
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		const char	**labels,
+		const char * const *labels,
 		long	*valueP,
 		wChoiceCallBack_p action,
 		void	*data )
@@ -414,7 +414,7 @@ wChoice_p wToggleCreate(
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		const char	**labels,
+		const char * const *labels,
 		long	*valueP,
 		wChoiceCallBack_p action,
 		void	*data )

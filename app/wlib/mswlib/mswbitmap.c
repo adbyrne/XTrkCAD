@@ -489,7 +489,7 @@ wIconDraw( wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y )
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long option, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long option, const struct wIcon_t * iconP )
 {
 	wBitmap_p control;
 	int index;
@@ -510,7 +510,7 @@ wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long option, wIcon_p ico
 	}
 	control->h = iconP->h;
 	control->w = iconP->w;
-	control->data = iconP;
+	control->data = (void*)iconP;
 
 	return (wControl_p)control;
 }

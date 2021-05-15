@@ -66,7 +66,7 @@ bool HasBackGround(void);
 void LayoutBackGroundInit(BOOL_T clear);
 void LayoutBackGroundLoad(void);
 void LayoutBackGroundSave(void);
-void BackgroundToggleShow(void);
-void DoLayout(void * junk);
+void BackgroundToggleShow(void * unused);
+void DoLayout(void * unused);
 int LoadImageFile(int files,char ** fileName,void * data );
 #endif

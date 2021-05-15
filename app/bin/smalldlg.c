@@ -139,8 +139,9 @@ static void CreateTipW( void )
  *
  */
 
-void ShowTip( long flags )
+void ShowTip( void * flagsVP )
 {
+	long flags = VP2L(flagsVP);
 	long tipNum;
 	
 	if (showTipAtStart || (flags & SHOWTIP_FORCESHOW))  

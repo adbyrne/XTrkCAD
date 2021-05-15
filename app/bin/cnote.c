@@ -47,7 +47,7 @@ void ClearNote(void)
     }
 }
 
-static void NoteOk(void * junk)
+static void NoteOk(void * unused)
 {
     if (wTextGetModified(noteT)) {
         int len;
@@ -61,7 +61,7 @@ static void NoteOk(void * junk)
 }
 
 
-void DoNote(void)
+void DoNote(void * unused)
 {
     if (noteW == NULL) {
         noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,

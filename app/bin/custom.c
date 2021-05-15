@@ -85,7 +85,7 @@ void InitCmdEasement( void )
 {
 	easementP = EasementInit();
 }
-void DoEasementRedir( void )
+void DoEasementRedir( void * unused )
 {
 	if (easementP)
 		easementP(NULL);

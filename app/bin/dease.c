@@ -233,7 +233,7 @@ static void LayoutEasementW(
 }
 
 
-static void DoEasement( void * junk )
+static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
 		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
@@ -281,7 +281,7 @@ EXPORT addButtonCallBack_t EasementInit( void )
 	ebroad_bm = wIconCreatePixMap( ebroad_xpm );
 	egtbroad_bm = wIconCreatePixMap( egtbroad_xpm );
 	ecornu_bm = wIconCreatePixMap( ecornu_xpm );
-	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, (addButtonCallBack_t)DoEasementRedir, NULL );
+	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir, NULL );
 
 	RegisterChangeNotification( EasementChange );
 	return &DoEasement;

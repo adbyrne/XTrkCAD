@@ -105,7 +105,7 @@ static void EnumDlgUpdate(
 		void * valueP )
 {
 	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) return;
-	EnumerateTracks();
+	EnumerateTracks( NULL );
 }
 
 

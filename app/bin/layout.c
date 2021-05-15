@@ -61,7 +61,7 @@ static struct sDataLayout thisLayout = {
 };
 
 static paramFloatRange_t r0_90 = { 0, 90 };
-static paramFloatRange_t r1_10000 = { 1, 10000 };
+static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r0_9999999 = { 0, 9999999 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
 static paramFloatRange_t r360_360 = { -360, 360 };
@@ -350,7 +350,7 @@ BOOL_T backgroundVisible = TRUE;
 char * noname = "";
 
 void
-BackgroundToggleShow()
+BackgroundToggleShow( void * unused )
 {
 	backgroundVisible = !backgroundVisible;
 	wButtonSetBusy(backgroundB, backgroundVisible);
@@ -440,7 +440,7 @@ void LayoutBackGroundSave(void) {
 /************************************************************
  * Run File Select for the Background Image File
  */
-static void ImageFileBrowse( void * junk )
+static void ImageFileBrowse( void * unused )
 {
 	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), sImageFilePattern, LoadImageFile, NULL );
 
@@ -451,7 +451,7 @@ static void ImageFileBrowse( void * junk )
 /************************************************************
  * Remove the background Image File
  */
-static void ImageFileClear( void * junk)
+static void ImageFileClear( void * unused)
 {
 	char * noname = "";
 	SetLayoutBackGroundFullPath(noname);
@@ -474,7 +474,7 @@ static paramData_t layoutPLs[] = {
 #define GAUGEINX (5)
     { PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
-    { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+    { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
 	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND),sizeof(backgroundFileName) },
@@ -535,10 +535,10 @@ static void ChangeLayout() {
 /**
 * Apply the changes entered to settings
 *
-* \param junk IN unused
+* \param unused IN unused
 */
 
-static void LayoutOk(void * junk)
+static void LayoutOk(void * unused)
 {
 
 	ChangeLayout();
@@ -554,14 +554,14 @@ static void LayoutOk(void * junk)
 /**
 * Discard the changes entered and replace with earlier values
 *
-* \param junk IN unused
+* \param unused IN unused
 */
 
-static void LayoutCancel(struct wWin_t *junk)
+static void LayoutCancel(struct wWin_t *unused)
 {
     thisLayout.props = *(thisLayout.copyOfLayoutProps);
     ParamLoadControls(&layoutPG);
-    LayoutOk(junk);
+    LayoutOk(unused);
 }
 
 static void LayoutChange(long changes)
@@ -572,7 +572,7 @@ static void LayoutChange(long changes)
         }
 }
 
-void DoLayout(void * junk)
+void DoLayout(void * unused)
 {
     SetLayoutRoomSize(mapD.size);
 

@@ -48,6 +48,7 @@ static void DDrawPoly(
 		int open );
 static void DrawMapBoundingBox( BOOL_T set );
 static void DrawTicks( drawCmd_p d, coOrd size );
+static void DoZoom( void * pScaleVP );
 
 EXPORT int log_pan = 0;
 static int log_zoom = 0;
@@ -1299,7 +1300,8 @@ EXPORT void GetRoomSize( coOrd * froomSize )
 }
 
 
-static void MapRedraw()
+static void MapRedraw(
+		wDraw_p bd, void * pContex, wWinPix_t px, wWinPix_t py )
 {
 	if (inPlaybackQuit)
 		return;
@@ -1324,7 +1326,7 @@ static void MapResize( void )
 {
 	mapD.scale = mapScale;
 	ChangeMapScale(TRUE);
-	MapRedraw();
+	MapRedraw( mapD.d, NULL, 0, 0 );
 }
 
 #ifdef LATER
@@ -1343,7 +1345,7 @@ static void MapProc( wWin_p win, winProcEvent e, void * data )
 	/*case wRedraw_e:
 		if (mapD.d == NULL)
 			break;
-		MapRedraw();
+		MapRedraw( mapD.d, NULL, 0, 0 );
 		break;*/
 	default:
 		break;
@@ -1568,7 +1570,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 		break;
 	case wClose_e:
 		/* shutdown the application via "close window"  button  */
-		DoQuit();
+		DoQuit(NULL);
 		break;
 	default:
 		break;
@@ -1578,7 +1580,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 
 EXPORT void DoRedraw( void )
 {
-	MapRedraw();
+	MapRedraw( mapD.d, NULL, 0, 0 );
 	MainRedraw(); // DoRedraw
 }
 
@@ -1970,15 +1972,15 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1, wMen
 				 (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value))))
 				{
 			if (zoomM)
-				zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (&(zoomList[inx].value)));
+				zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
 			if( zoomSubM )
-				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (&(zoomList[inx].value)));
+				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
 			if (panMenu)
-				zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (&(zoomList[inx].value)));
+				zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom", zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
 		}
 		if ((zoomList[inx].value >=1.0 && zoomList[inx].value <= 10.0) || (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value)))) {
 			if (ctxMenu1)
-				zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (&(zoomList[inx].value)));
+				zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom", zoomList[inx].name, 0, DoZoom, (&(zoomList[inx].value)));
 		}
 	}
 }
@@ -2217,8 +2219,9 @@ EXPORT void DoZoomDown( void  * mode)
  *
  */
 
-EXPORT void DoZoom( DIST_T *pScale )
+static void DoZoom( void * pScaleVP )
 {
+	DIST_T *pScale = pScaleVP;
 	DIST_T scale = *pScale;
 
 	if( scale != mainD.scale )
@@ -2808,7 +2811,7 @@ static wBool_t PlaybackKey( char * line )
  *
  */
 
-static paramDrawData_t mapDrawData = { 100, 100, (wDrawRedrawCallBack_p)MapRedraw, DoMapPan, &mapD };
+static paramDrawData_t mapDrawData = { 100, 100, MapRedraw, DoMapPan, &mapD };
 static paramData_t mapPLs[] = {
 	{	PD_DRAW, NULL, "canvas", 0, &mapDrawData } };
 static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC, mapPLs, sizeof mapPLs/sizeof mapPLs[0] };
@@ -2842,7 +2845,7 @@ static void MapDlgUpdate(
 				ChangeMapScale(FALSE);
 
 				if (mapVisible) {
-					MapRedraw();
+					MapRedraw( mapD.d, NULL, 0, 0 );
 				}
 				wPrefSetInteger( "draw", "mapscale", (long)mapD.scale );
 			}
@@ -2887,7 +2890,7 @@ EXPORT void DrawInit( int initialZoom )
 	if ( h <= 0 ) h = 1;
 	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS|BD_MODKEYS,
 												w, h, &mainD,
-				(wDrawRedrawCallBack_p)MainLayoutCB, DoMousew );
+				MainLayoutCB, DoMousew );
 
 	if (initialZoom == 0) {
 		WDOUBLE_T tmpR;
@@ -2934,10 +2937,6 @@ EXPORT void DrawInit( int initialZoom )
 	SetInfoBar();
 	InfoPos( zero );
 	RegisterChangeNotification( DrawChange );
-#ifdef LATER
-	wAttachAccelKey( wAccelKey_Pgup, 0, (wAccelKeyCallBack_p)doZoomUp, NULL );
-	wAttachAccelKey( wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)doZoomDown, NULL );
-#endif
 }
 
 #include "bitmaps/pan.xpm"
@@ -3106,7 +3105,9 @@ static STATUS_T CmdPan(
 static wMenuPush_p zoomExtents,panOrig,panHere;
 static wMenuPush_p zoomLvl1,zoomLvl2,zoomLvl3,zoomLvl4,zoomLvl5,zoomLvl6,zoomLvl7,zoomLvl8,zoomLvl9;
 
-EXPORT void PanMenuEnter(int key) {
+EXPORT void PanMenuEnter( void * keyVP )
+{
+	int key = (int)VP2L(keyVP);
 	int action;
 	action = C_TEXT;
 	action |= key<<8;
@@ -3130,18 +3131,18 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, I2VP(describeCmdInx));
 	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
 	wMenuSeparatorCreate(panPopupM);
-	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( 'e'));
-	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '1'));
-	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '2'));
-	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '3'));
-	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '4'));
-	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '5'));
-	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '6'));
-	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '7'));
-	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '8'));
-	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( '9'));
-	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, I2VP( 'o'));
+	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, PanMenuEnter, I2VP( 'e'));
+	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, PanMenuEnter, I2VP( '1'));
+	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, PanMenuEnter, I2VP( '2'));
+	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, PanMenuEnter, I2VP( '3'));
+	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, PanMenuEnter, I2VP( '4'));
+	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, PanMenuEnter, I2VP( '5'));
+	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, PanMenuEnter, I2VP( '6'));
+	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, PanMenuEnter, I2VP( '7'));
+	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, PanMenuEnter, I2VP( '8'));
+	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, PanMenuEnter, I2VP( '9'));
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, PanMenuEnter, I2VP( 'o'));
 	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
-	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - 'c'"), 0, (wMenuCallBack_p)PanHere, I2VP( 3));
+	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - 'c'"), 0, PanHere, I2VP( 3));
 }
