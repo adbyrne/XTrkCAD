@@ -92,7 +92,7 @@ static paramData_t switchmotorPLs[] = {
 /*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF, I2VP(350), N_("Point Sense"), 0, 0, sizeof(switchmotorPointSense)}
 };
 
-static paramGroup_t switchmotorPG = { "switchmotor", 0, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
+static paramGroup_t switchmotorPG = { "switchmotor", 0, switchmotorPLs, COUNT( switchmotorPLs ) };
 static wWin_p switchmotorW;
 
 static char switchmotorEditName[STR_SHORT_SIZE];
@@ -112,7 +112,7 @@ static paramData_t switchmotorEditPLs[] = {
 /*4*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, N_("Turnout Number"), BO_READONLY }, 
 };
 
-static paramGroup_t switchmotorEditPG = { "switchmotorEdit", 0, switchmotorEditPLs, sizeof switchmotorEditPLs/sizeof switchmotorEditPLs[0] };
+static paramGroup_t switchmotorEditPG = { "switchmotorEdit", 0, switchmotorEditPLs, COUNT( switchmotorEditPLs ) };
 static wWin_p switchmotorEditW;
 
 /*
@@ -145,7 +145,7 @@ static wDrawBitMap_p switchmotormark_bm = NULL;
 static coOrd switchmotorPoly_Pix[] = {
     {6,0}, {6,13}, {4,13}, {4,19}, {6,19}, {6,23}, {9,23}, {9,19}, {13,19},
     {13,23}, {27,23}, {27,10}, {13,10}, {13,13}, {9,13}, {9,0}, {6,0} };
-#define switchmotorPoly_CNT (sizeof(switchmotorPoly_Pix)/sizeof(switchmotorPoly_Pix[0]))
+#define switchmotorPoly_CNT (COUNT(switchmotorPoly_Pix))
 #define switchmotorPoly_SF (3.0)
 
 static void ComputeSwitchMotorBoundingBox (track_p t)

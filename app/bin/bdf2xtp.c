@@ -1096,7 +1096,7 @@ void parse( void )
 			inch++;
 			continue;
 		}
-		for ( tp=tokens; tp<&tokens[ sizeof tokens / sizeof *tp ]; tp++ ){
+		for ( tp=tokens; tp<&tokens[COUNT( tokens )]; tp++ ){
 			tlen = strlen(tp->name);
 			if ( strncasecmp( cp, tp->name, tlen) != 0 )
 				continue;

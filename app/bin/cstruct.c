@@ -77,7 +77,7 @@ static paramData_t structurePLs[] = {
 	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
 	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) } };
-static paramGroup_t structurePG = { "structure", 0, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
+static paramGroup_t structurePG = { "structure", 0, structurePLs, COUNT( structurePLs ) };
 
 
 
@@ -477,7 +477,7 @@ static trackCmd_t structureCmds = {
 
 static paramData_t pierPLs[] = {
 	{	PD_DROPLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") } };
-static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
+static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, COUNT( pierPLs ) };
 #define pierL ((wList_p)pierPLs[0].control)
 
 static void ShowPierL( void )

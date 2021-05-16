@@ -57,7 +57,7 @@ static paramData_t priceListPLs[] = {
 	{	PD_MESSAGE, N_("costs"), NULL, PDO_DLGHORZ },
 #define I_PRICELSFLEXCOST		(6)
 	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData } };
-static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, sizeof priceListPLs/sizeof priceListPLs[0] };
+static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, COUNT( priceListPLs ) };
 
 
 static void PriceListUpdate()
