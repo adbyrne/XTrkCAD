@@ -69,7 +69,7 @@ EXPORT void LoadFontSizeList(
 	wIndex_t curInx = 0, inx1;
 	int inx;
 	wListClear(list);
-	for (inx = 0; inx < sizeof fontSizeList / sizeof fontSizeList[0]; inx++)
+	for (inx = 0; inx < COUNT( fontSizeList ); inx++)
 	{
 		if ((inx == 0 || curFontSize > fontSizeList[inx - 1]) &&
 			(curFontSize < fontSizeList[inx]))
@@ -82,7 +82,7 @@ EXPORT void LoadFontSizeList(
 		if (curFontSize == fontSizeList[inx])
 			curInx = inx1;
 	}
-	if (curFontSize > fontSizeList[(sizeof fontSizeList / sizeof fontSizeList[0]) - 1])
+	if (curFontSize > fontSizeList[ COUNT( fontSizeList ) - 1])
 	{
 		sprintf(message, "%ld", curFontSize);
 		curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
@@ -99,7 +99,7 @@ long GetFontSize(wIndex_t inx)
 long GetFontSizeIndex(long size)
 {
 	int i;
-	for (i = 0; i < sizeof fontSizeList / sizeof fontSizeList[0]; i++)
+	for (i = 0; i < COUNT( fontSizeList ); i++)
 	{
 		if (fontSizeList[i] == size)
 			return(i);
@@ -1050,7 +1050,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	if ( drawSegInx==-1 )
 		return;
 	segPtr = &xx->segs[drawSegInx];
-	for ( inx=0; inx<sizeof drawDesc/sizeof drawDesc[0]; inx++ ) {
+	for ( inx=0; inx<COUNT( drawDesc ); inx++ ) {
 		drawDesc[inx].mode = DESC_IGNORE;
 		drawDesc[inx].control0 = NULL;
 	}
@@ -1522,7 +1522,7 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCentery", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
 
 };
-static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };
+static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, COUNT( drawModPLs ) };
 
 static void DrawModDlgUpdate(
 		paramGroup_p pg,
@@ -2708,7 +2708,7 @@ static paramData_t drawPLs[] = {
 #define drawLineTypePD			(drawPLs[10])
 	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
 };
-static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
+static paramGroup_t drawPG = { "draw", 0, drawPLs, COUNT( drawPLs ) };
 
 static char * objectName[] = {
 		N_("Straight"),

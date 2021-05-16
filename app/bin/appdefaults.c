@@ -104,7 +104,7 @@ struct appDefault xtcDefaults[] = {
     { "misc.scale", 0, STRINGFUNCTION, { .stringFunction = GetLocalPopularScale}},				/**< the (probably) most popular scale for a region */
 };
 
-#define DEFAULTCOUNT (sizeof(xtcDefaults)/sizeof(xtcDefaults[0]))
+#define DEFAULTCOUNT COUNT(xtcDefaults)
 
 
 static long bFirstRun;						/**< TRUE if appl is run the first time */

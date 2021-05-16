@@ -45,7 +45,7 @@ GetCompatibilityFunction GetCompatibility[] = {
 	GetCarPartCompatibility
 };
 
-#define COMPATIBILITYCHECKSCOUNT (sizeof(GetCompatibility)/sizeof(GetCompatibility[0]))
+#define COMPATIBILITYCHECKSCOUNT COUNT(GetCompatibility)
 
 /**
  * Check whether parameter file is still loaded

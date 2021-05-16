@@ -1967,7 +1967,7 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1, wMen
 {
 	int inx;
 	
-	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+	for ( inx=0; inx<COUNT( zoomList ); inx++ ) {
 		if( (zoomList[ inx ].value >= 1.0 && zoomList[ inx ].value<=10 ) ||
 				 (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value))))
 				{
@@ -1997,7 +1997,7 @@ static void SetZoomRadio( DIST_T scale )
 	int inx;
 	long curScale = (long)scale;
 	
-	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+	for ( inx=0; inx<COUNT( zoomList ); inx++ ) {
 		if( curScale == zoomList[inx].value ) {
 			if (zoomList[inx].btRadio)
 				wMenuRadioSetActive( zoomList[inx].btRadio );
@@ -2009,7 +2009,7 @@ static void SetZoomRadio( DIST_T scale )
 				wMenuRadioSetActive( zoomList[inx].panRadio );
 			/* activate / deactivate zoom buttons when appropriate */				
 			wControlLinkedActive( (wControl_p)zoomUpB, ( inx != 0 ) );
-			wControlLinkedActive( (wControl_p)zoomDownB, ( inx < (sizeof zoomList/sizeof zoomList[0] - 1)));			
+			wControlLinkedActive( (wControl_p)zoomDownB, ( inx < (COUNT( zoomList ) - 1)));			
 		}
 	}
 }	
@@ -2026,7 +2026,7 @@ static int ScaleInx(  DIST_T scale )
 {
 	int inx;
 	
-	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+	for ( inx=0; inx<COUNT( zoomList); inx++ ) {
 		if( scale == zoomList[inx].value ) {
 			return inx;
 		}
@@ -2041,7 +2041,7 @@ static int ScaleInx(  DIST_T scale )
 static int NearestScaleInx ( DIST_T scale, BOOL_T larger ) {
 	int inx;
 
-		for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+		for ( inx=0; inx<COUNT( zoomList ); inx++ ) {
 			if( scale == zoomList[inx].value ) {
 				return inx;
 			}
@@ -2194,7 +2194,7 @@ EXPORT void DoZoomDown( void  * mode)
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
-		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
+		if( i>= 0 && i < ( COUNT( zoomList ) - 1 )) {
 			InfoMessage("");
 			DoNewScale( zoomList[ i + 1 ].value );
 		} else
@@ -2814,7 +2814,7 @@ static wBool_t PlaybackKey( char * line )
 static paramDrawData_t mapDrawData = { 100, 100, MapRedraw, DoMapPan, &mapD };
 static paramData_t mapPLs[] = {
 	{	PD_DRAW, NULL, "canvas", 0, &mapDrawData } };
-static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC, mapPLs, sizeof mapPLs/sizeof mapPLs[0] };
+static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC, mapPLs, COUNT( mapPLs ) };
 
 static void MapDlgUpdate(
 		paramGroup_p pg,

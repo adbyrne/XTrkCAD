@@ -150,7 +150,7 @@ static paramData_t describePLs[] = {
 #define I_TOGGLE_N 		I_TOGGLE_0+4
 };
 
-static paramGroup_t describePG = { "describe", 0, describePLs, sizeof describePLs/sizeof describePLs[0] };
+static paramGroup_t describePG = { "describe", 0, describePLs, COUNT( describePLs ) };
 
 /**
  * A mapping table is used to map the index in the dropdown list to the layer
@@ -266,7 +266,7 @@ static void DescribeUpdate(
     }
 
 
-    for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
+    for (inx = 0; inx < COUNT( describePLs ); inx++) {
         if ((describePLs[inx].option & PDO_DLGIGNORE) != 0) {
             continue;
         }
@@ -469,7 +469,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
     }
 
-    for (inx=0; inx<sizeof describePLs/sizeof describePLs[0]; inx++) {
+    for (inx=0; inx<COUNT( describePLs ); inx++) {
         describePLs[inx].option = PDO_DLGIGNORE;
         wControlShow(describePLs[inx].control, FALSE);
     }

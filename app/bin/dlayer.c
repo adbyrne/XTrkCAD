@@ -584,7 +584,7 @@ static paramData_t layerPLs[] = {
 #define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
 #define MESSAGETEXT ((wMessage_p)layerPLs[I_COUNT].control)
 
-static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
+static paramGroup_t layerPG = { "layer", 0, layerPLs, COUNT( layerPLs ) };
 
 /**
  * Reload the listbox showing the current catalog
@@ -1605,7 +1605,7 @@ BOOL_T ReadLayers(char * line)
 
 
     if (paramVersion < 9) {
-        if ((int)rgb < sizeof oldColorMap/sizeof oldColorMap[0]) {
+        if ((int)rgb < COUNT( oldColorMap ) ) {
             rgb = wRGB(oldColorMap[(int)rgb][0], oldColorMap[(int)rgb][1],
                        oldColorMap[(int)rgb][2]);
         } else {

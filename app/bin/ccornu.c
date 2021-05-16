@@ -1013,7 +1013,7 @@ static paramData_t cornuModPLs[] = {
 #define cornuModEndRadius           1
 	{ PD_FLOAT, &cornuModCmdContext.radius, "endradius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
 };
-static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, sizeof cornuModPLs/sizeof cornuModPLs[0] };
+static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, COUNT( cornuModPLs ) };
 
 /*
  * AdjustCornuCurve

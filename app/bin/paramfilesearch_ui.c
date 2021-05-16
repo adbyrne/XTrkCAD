@@ -88,7 +88,7 @@ static paramData_t searchUiPLs[] = {
 #define SEARCHSTAT ((wMessage_p)searchUiPLs[I_STATISTICS].control)
 #define FITRADIO ((wChoice_p)searchUiPLs[I_FITRADIO].control)
 
-static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
+static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, COUNT( searchUiPLs ) };
 static wWin_p searchUiW;
 
 #define FILESECTION "file"

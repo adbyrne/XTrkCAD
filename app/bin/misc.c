@@ -1911,7 +1911,7 @@ static void StickyOk(void * unused);
 static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
 		stickyLabels } };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
-		sizeof stickyPLs / sizeof stickyPLs[0] };
+		COUNT( stickyPLs ) };
 
 static void StickyOk(void * unused) {
 	wHide(stickyW);
@@ -1975,7 +1975,7 @@ static void CreateToolbarM(wMenu_p toolbarM) {
 	char **labels;
 	wBool_t set;
 
-	cnt = sizeof(AllToolbarMasks) / sizeof(AllToolbarMasks[0]);
+	cnt = COUNT(AllToolbarMasks);
 	masks = AllToolbarMasks;
 	labels = AllToolbarLabels;
 	for (inx = 0; inx < cnt; inx++, masks++, labels++) {
@@ -1995,8 +1995,7 @@ static void DoAddElev(void * unused);
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { { PD_FLOAT, &addElevValueV, "value",
 		PDO_NOPREF|PDO_DIM, &rn1000_1000, NULL, 0 } };
-static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, sizeof addElevPLs
-		/ sizeof addElevPLs[0] };
+static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, COUNT( addElevPLs ) };
 
 static void DoAddElev(void * unused) {
 	ParamLoadData(&addElevPG);
@@ -2032,22 +2031,19 @@ static void RotateEnterOk(void * unused);
 
 static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80 };
 static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:") } };
-static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
-		/ sizeof rotatePLs[0] };
+static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, COUNT( rotatePLs ) };
 
 static void IndexEnterOk(void * unused);
 static paramData_t indexPLs[] = {
 		{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, I2VP(STR_SIZE-1), N_("Indexes:"), 0, 0, sizeof(trackIndex) } };
-static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
-		/ sizeof indexPLs[0] };
+static paramGroup_t indexPG = { "index", 0, indexPLs, COUNT( indexPLs ) };
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static void MoveEnterOk(void * unused);
 static paramData_t movePLs[] = {
 		{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:") },
 		{ PD_FLOAT, &moveValue.y, "moveY", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move Y:") } };
-static paramGroup_t movePG = { "move", 0, movePLs, sizeof movePLs
-		/ sizeof movePLs[0] };
+static paramGroup_t movePG = { "move", 0, movePLs, COUNT( movePLs ) };
 
 static void StartRotateDialog(void * funcVP)
 {
@@ -2210,7 +2206,7 @@ EXPORT void DebugInit(void * unused) {
 
 
 EXPORT void InitDebug(const char * label, long * valueP) {
-	if (debugCnt+1 >= sizeof debugPLs / sizeof debugPLs[0])
+	if (debugCnt+1 >= COUNT( debugPLs ) )
 		AbortProg("Too many debug flags");
 	memset(&debugPLs[debugCnt+1], 0, sizeof debugPLs[debugCnt]);
 	debugPLs[debugCnt+1].type = PD_LONG;

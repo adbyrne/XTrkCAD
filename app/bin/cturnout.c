@@ -91,7 +91,7 @@ static paramData_t turnoutPLs[] = {
 #define I_HIDE		(3)
 #define turnoutHideT    ((wChoice_p)turnoutPLs[I_HIDE].control)
 	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER } };
-static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, sizeof turnoutPLs / sizeof turnoutPLs[0] };
+static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) };
 #endif
 
 /* Draw turnout data */

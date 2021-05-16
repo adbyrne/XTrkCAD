@@ -373,28 +373,28 @@ static void CarProtoDrawTruck(
 	wDrawColor color = wDrawColorBlack;
 
 	memcpy( p, truckOutline, sizeof truckOutline );
-	RescalePts( sizeof truckOutline/sizeof truckOutline[0], p, 1.0, width/56.5 );
-	RescalePts( sizeof truckOutline/sizeof truckOutline[0], p, ratio, ratio );
-	RotatePts( sizeof truckOutline/sizeof truckOutline[0], p, zero, angle );
-	MovePts( sizeof truckOutline/sizeof truckOutline[0], p, pos );
-	DrawPoly( d, sizeof truckOutline/sizeof truckOutline[0], p, NULL, color, 0, 1, 0);
+	RescalePts( COUNT( truckOutline ), p, 1.0, width/56.5 );
+	RescalePts( COUNT( truckOutline ), p, ratio, ratio );
+	RotatePts( COUNT( truckOutline ), p, zero, angle );
+	MovePts( COUNT( truckOutline ), p, pos );
+	DrawPoly( d, COUNT( truckOutline ), p, NULL, color, 0, 1, 0);
 	pp.x = -70/2;
 	pp.y = 0;
 	memcpy( p, wheelOutline, sizeof wheelOutline );
-	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, 1.0, width/56.5 );
-	MovePts( sizeof wheelOutline/sizeof wheelOutline[0], p, pp );
-	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, ratio, ratio );
-	RotatePts( sizeof wheelOutline/sizeof wheelOutline[0], p, zero, angle );
-	MovePts( sizeof wheelOutline/sizeof wheelOutline[0], p, pos );
-	DrawPoly( d, sizeof wheelOutline/sizeof wheelOutline[0], p, NULL, color, 0, 1, 0);
+	RescalePts( COUNT( wheelOutline ), p, 1.0, width/56.5 );
+	MovePts( COUNT( wheelOutline ), p, pp );
+	RescalePts( COUNT( wheelOutline ), p, ratio, ratio );
+	RotatePts( COUNT( wheelOutline ), p, zero, angle );
+	MovePts( COUNT( wheelOutline ), p, pos );
+	DrawPoly( d, COUNT( wheelOutline ), p, NULL, color, 0, 1, 0);
 	pp.x = 70/2;
 	memcpy( p, wheelOutline, sizeof wheelOutline );
-	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, 1.0, width/56.5 );
-	MovePts( sizeof wheelOutline/sizeof wheelOutline[0], p, pp );
-	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, ratio, ratio );
-	RotatePts( sizeof wheelOutline/sizeof wheelOutline[0], p, zero, angle );
-	MovePts( sizeof wheelOutline/sizeof wheelOutline[0], p, pos );
-	DrawPoly( d, sizeof wheelOutline/sizeof wheelOutline[0], p, NULL, color, 0, 1, 0 );
+	RescalePts( COUNT( wheelOutline ), p, 1.0, width/56.5 );
+	MovePts( COUNT( wheelOutline ), p, pp );
+	RescalePts( COUNT( wheelOutline ), p, ratio, ratio );
+	RotatePts( COUNT( wheelOutline ), p, zero, angle );
+	MovePts( COUNT( wheelOutline ), p, pos );
+	DrawPoly( d, COUNT( wheelOutline ), p, NULL, color, 0, 1, 0 );
 }
 
 
@@ -431,11 +431,11 @@ static void CarProtoDrawCoupler(
 	pp.x = length-12.0;
 	pp.y = 0;
 /* TODO - if length > 6 then draw Sills */
-	MovePts( sizeof couplerOutline/sizeof couplerOutline[0], p, pp );
-	RescalePts( sizeof couplerOutline/sizeof couplerOutline[0], p, ratio, ratio );
-	RotatePts( sizeof couplerOutline/sizeof couplerOutline[0], p, zero, angle-90.0 );
-	MovePts( sizeof couplerOutline/sizeof couplerOutline[0], p, pos );
-	DrawPoly( d, sizeof couplerOutline/sizeof couplerOutline[0], p, NULL, color, 0, 1 ,0 );
+	MovePts( COUNT( couplerOutline ), p, pp );
+	RescalePts( COUNT( couplerOutline ), p, ratio, ratio );
+	RotatePts( COUNT( couplerOutline ), p, zero, angle-90.0 );
+	MovePts( COUNT( couplerOutline ), p, pos );
+	DrawPoly( d, COUNT( couplerOutline ), p, NULL, color, 0, 1 ,0 );
 }
 
 
@@ -1490,7 +1490,7 @@ static long carHotbarContents[] = { 0x0005, 0x0002, 0x0012, 0x0012, 0x0001, 0x00
 static long newCarInx;
 static paramData_t newCarPLs[] = {
 	{ PD_DROPLIST, &newCarInx, "index", PDO_DLGWIDE, I2VP(400), N_("Item") } };
-static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, sizeof newCarPLs/sizeof newCarPLs[0] };
+static paramGroup_t newCarPG = { "train-newcar", 0, newCarPLs, COUNT( newCarPLs ) };
 EXPORT wControl_p newCarControls[2];
 static char newCarLabel1[STR_SIZE];
 static char * newCarLabels[2] = { newCarLabel1, NULL };
@@ -2266,7 +2266,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_NEWPROTO           (D+4)
 	{ PD_BUTTON, CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, I2VP(0) } };
 
-static paramGroup_t carDlgPG = { "carpart", 0, carDlgPLs, sizeof carDlgPLs/sizeof carDlgPLs[0] };
+static paramGroup_t carDlgPG = { "carpart", 0, carDlgPLs, COUNT( carDlgPLs ) };
 
 
 static dynArr_t carDlgSegs_da;
@@ -3119,7 +3119,7 @@ static void CarDlgDoActions(
 	DIST_T ratio;
 	tabString_t tabs[7];
 	char * cp;
-	BOOL_T reload[sizeof carDlgPLs/sizeof carDlgPLs[0]];
+	BOOL_T reload[COUNT( carDlgPLs )];
 #define RELOAD_DIMS \
 		reload[I_CD_CARLENGTH] = reload[I_CD_CARWIDTH] = reload[I_CD_CPLDLEN] = \
 		reload[I_CD_TRKCENTER] = reload[I_CD_TRKOFFSET] = reload[I_CD_CPLRLEN] = TRUE
@@ -3139,7 +3139,7 @@ static void CarDlgDoActions(
 LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 		switch ( *actions++ ) {
 		case A_Return:
-			for ( inx=0; inx<sizeof carDlgPLs/sizeof carDlgPLs[0]; inx++ )
+			for ( inx=0; inx<COUNT( carDlgPLs ); inx++ )
 				if ( reload[inx] )
 					ParamLoadControl( &carDlgPG, inx );
 			return;
@@ -4320,7 +4320,7 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 	carDlgScaleInx = GetLayoutCurScale();
 	carDlgFlipToggle = FALSE;
 	carDlgChanged = 0;
-	for ( paramData_p p=carDlgPLs; p < carDlgPLs + sizeof carDlgPLs/sizeof carDlgPLs[0]; p++ )
+	for ( paramData_p p=carDlgPLs; p < carDlgPLs + COUNT( carDlgPLs ); p++ )
 		p->bInvalid = FALSE;
 
 	CarDlgDoStateActions( actions );
@@ -4357,7 +4357,7 @@ EXPORT void CarDlgAddDesc( void )
 static wIndex_t carInvInx;
 
 static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
-#define N_SORT			(sizeof carInvSort/sizeof carInvSort[0])
+#define N_SORT			(COUNT( carInvSort ))
 
 static void CarInvDlgAdd( void );
 static void CarInvDlgEdit( void );
@@ -4392,7 +4392,7 @@ static char * sortOrders[] = {
 #define S_CONDITION		(10)
 #define S_PURCHDATE		(11)
 #define S_SRVDATE		(12)
-static paramListData_t carInvListData = { 30, 600, sizeof carInvColumnTitles/sizeof carInvColumnTitles[0], carInvColumnWidths, carInvColumnTitles };
+static paramListData_t carInvListData = { 30, 600, COUNT( carInvColumnTitles ), carInvColumnWidths, carInvColumnTitles };
 static paramData_t carInvPLs[] = {
 #define I_CI_SORT		(0)
 	{ PD_DROPLIST, &carInvSort[0], "sort1", PDO_LISTINDEX|0, I2VP(110), N_("Sort By") },
@@ -4414,7 +4414,7 @@ static paramData_t carInvPLs[] = {
 	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
 #define I_CI_PRINT		(S+6)
 	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL, N_("List") } };
-static paramGroup_t carInvPG = { "carinv", 0, carInvPLs, sizeof carInvPLs/sizeof carInvPLs[0] };
+static paramGroup_t carInvPG = { "carinv", 0, carInvPLs, COUNT( carInvPLs ) };
 
 static carItem_p CarInvDlgFindCurrentItem( void )
 {
@@ -4789,7 +4789,7 @@ static int CarInvImportCsv(
 	for ( j=0; j<40; j++ ) map[j] = -1;
 	requiredCols = 0;
 	for ( i=0; i<numCol; i++ ) {
-		for ( j=0; j<sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0]; j++ ) {
+		for ( j=0; j<COUNT( carCsvColumnTitles ); j++ ) {
 			if ( TabStringCmp( carCsvColumnTitles[j], &tabs[i] ) == 0 ) {
 				if ( map[i] >= 0 ) {
 					NoticeMessage( MSG_CARIMP_DUP_COLUMNS, _("Continue"), NULL, carCsvColumnTitles[j] );
@@ -4798,7 +4798,7 @@ static int CarInvImportCsv(
 					return FALSE;
 				}
 				map[i] = j;
-				/*j = sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0];*/
+				/*j = COUNT( carCsvColumnTitles );*/
 				if ( j == M_SCALE || j == M_PROTO || j == M_MANUF || j == M_PARTNO )
 					requiredCols++;
 			}
@@ -5009,8 +5009,8 @@ static int CarInvExportCsv(
 
 	SetCLocale();
 
-	for ( inx=0; inx<sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0]; inx++ ) {
-		CsvFormatString( f, carCsvColumnTitles[inx], (int)strlen(carCsvColumnTitles[inx]), inx<(sizeof carCsvColumnTitles/sizeof carCsvColumnTitles[0])-1?",":"\n" );
+	for ( inx=0; inx<COUNT( carCsvColumnTitles ); inx++ ) {
+		CsvFormatString( f, carCsvColumnTitles[inx], (int)strlen(carCsvColumnTitles[inx]), inx<(COUNT( carCsvColumnTitles ))-1?",":"\n" );
 	}
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ ) {
 		item = carItemInfo( inx );
@@ -5262,7 +5262,7 @@ EXPORT void DoCarDlg( void * unused )
 	if ( carInvPG.win == NULL ) {
 		ParamCreateDialog( &carInvPG, MakeWindowTitle(_("Car Inventory")), _("Find"), CarInvDlgFind, wHide, TRUE, NULL, F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, CarInvDlgUpdate );
 		for ( inx=I_CI_SORT; inx<I_CI_SORT+N_SORT; inx++ ) {
-			for ( inx2=0; inx2<sizeof sortOrders/sizeof sortOrders[0]; inx2++ ) {
+			for ( inx2=0; inx2<COUNT( sortOrders ); inx2++ ) {
 				wListAddValue( (wList_p)carInvPLs[inx].control, _(sortOrders[inx2]), NULL, NULL );
 				ParamLoadControl( &carInvPG, inx );
 			}
