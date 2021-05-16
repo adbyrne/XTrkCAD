@@ -113,5 +113,5 @@ static char *table_edge_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *table_edge_xpm[3] = { table_edge_x16, table_edge_x24, table_edge_x32 };
+static char **table_edge_xpm[3] = { table_edge_x16, table_edge_x24, table_edge_x32 };
 

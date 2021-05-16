@@ -124,5 +124,5 @@ static char *stop_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *stop_xpm[3] = { stop_x16, stop_x24, stop_x32 };
+static char **stop_xpm[3] = { stop_x16, stop_x24, stop_x32 };
 

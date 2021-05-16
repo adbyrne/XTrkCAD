@@ -145,5 +145,5 @@ static char *background_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *background_xpm[3] = { background_x16, background_x24, background_x32 };
+static char **background_xpm[3] = { background_x16, background_x24, background_x32 };
 

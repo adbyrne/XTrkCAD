@@ -125,5 +125,5 @@ static char *sticky_link_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *sticky_link_xpm[3] = { sticky_link_x16, sticky_link_x24, sticky_link_x32 };
+static char **sticky_link_xpm[3] = { sticky_link_x16, sticky_link_x24, sticky_link_x32 };
 

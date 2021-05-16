@@ -109,5 +109,5 @@ static char *doc_save_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *doc_save_xpm[3] = { doc_save_x16, doc_save_x24, doc_save_x32 };
+static char **doc_save_xpm[3] = { doc_save_x16, doc_save_x24, doc_save_x32 };
 

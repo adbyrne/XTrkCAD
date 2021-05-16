@@ -85,5 +85,5 @@ static char *grid_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *grid_xpm[3] = { grid_x16, grid_x24, grid_x32 };
+static char **grid_xpm[3] = { grid_x16, grid_x24, grid_x32 };
 

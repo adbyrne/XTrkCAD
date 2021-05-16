@@ -143,5 +143,5 @@ static char *join_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *join_xpm[3] = { join_x16, join_x24, join_x32 };
+static char **join_xpm[3] = { join_x16, join_x24, join_x32 };
 

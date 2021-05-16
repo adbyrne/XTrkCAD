@@ -86,4 +86,4 @@ static char* ease_gtsharp_x32[] = {
 "                                                        xx        ",
 "                                                                  "};
 
-static char *ease_gtsharp_xpm[3] = { ease_gtsharp_x16, ease_gtsharp_x24, ease_gtsharp_x32 };
+static char **ease_gtsharp_xpm[3] = { ease_gtsharp_x16, ease_gtsharp_x24, ease_gtsharp_x32 };

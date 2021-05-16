@@ -85,5 +85,5 @@ static char *down_x32[] = {
 	"                ",
 	"                "};
 
-static char *down_xpm[3] = { down_x16, down_x24, down_x32 };
+static char **down_xpm[3] = { down_x16, down_x24, down_x32 };
 

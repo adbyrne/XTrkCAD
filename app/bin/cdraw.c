@@ -3028,7 +3028,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 #include "bitmaps/polyline.xpm"
 
 typedef struct {
-		char **xpm;
+		char ***xpm;
 		int OP;
 		char * shortName;
 		char * cmdName;

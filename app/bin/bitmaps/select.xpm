@@ -112,5 +112,5 @@ static char *select_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *select_xpm[3] = { select_x16, select_x24, select_x32 };
+static char **select_xpm[3] = { select_x16, select_x24, select_x32 };
 

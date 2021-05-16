@@ -113,5 +113,5 @@ static char *curved_end_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *curved_end_xpm[3] = { curved_end_x16, curved_end_x24, curved_end_x32 };
+static char **curved_end_xpm[3] = { curved_end_x16, curved_end_x24, curved_end_x32 };
 

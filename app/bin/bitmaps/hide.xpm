@@ -114,5 +114,5 @@ static char *hide_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *hide_xpm[3] = { hide_x16, hide_x24, hide_x32 };
+static char **hide_xpm[3] = { hide_x16, hide_x24, hide_x32 };
 

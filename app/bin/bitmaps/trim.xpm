@@ -95,5 +95,5 @@ static char *trim_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *trim_xpm[3] = { trim_x16, trim_x24, trim_x32 };
+static char **trim_xpm[3] = { trim_x16, trim_x24, trim_x32 };
 

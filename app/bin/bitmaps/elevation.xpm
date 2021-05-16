@@ -119,5 +119,5 @@ static char *elevation_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *elevation_xpm[3] = { elevation_x16, elevation_x24, elevation_x32 };
+static char **elevation_xpm[3] = { elevation_x16, elevation_x24, elevation_x32 };
 

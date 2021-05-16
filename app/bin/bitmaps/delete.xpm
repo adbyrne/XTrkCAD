@@ -111,5 +111,5 @@ static char *delete_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *delete_xpm[3] = { delete_x16, delete_x24, delete_x32 };
+static char **delete_xpm[3] = { delete_x16, delete_x24, delete_x32 };
 

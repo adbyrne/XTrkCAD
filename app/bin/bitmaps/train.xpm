@@ -110,5 +110,5 @@ static char *train_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *train_xpm[3] = { train_x16, train_x24, train_x32 };
+static char **train_xpm[3] = { train_x16, train_x24, train_x32 };
 

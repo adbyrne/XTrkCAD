@@ -103,5 +103,5 @@ static char *signal_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *signal_xpm[3] = { signal_x16, signal_x24, signal_x32 };
+static char **signal_xpm[3] = { signal_x16, signal_x24, signal_x32 };
 

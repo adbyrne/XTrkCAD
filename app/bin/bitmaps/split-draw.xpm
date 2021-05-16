@@ -94,5 +94,5 @@ static char *split_draw_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *split_draw_xpm[3] = { split_draw_x16, split_draw_x24, split_draw_x32 };
+static char **split_draw_xpm[3] = { split_draw_x16, split_draw_x24, split_draw_x32 };
 

@@ -86,4 +86,4 @@ static char* ease_gtbroad_x32[] = {
 "                                                                  ",
 "                                                                  "};
 
-static char *ease_gtbroad_xpm[3] = { ease_gtbroad_x16, ease_gtbroad_x24, ease_gtbroad_x32 };
+static char **ease_gtbroad_xpm[3] = { ease_gtbroad_x16, ease_gtbroad_x24, ease_gtbroad_x32 };

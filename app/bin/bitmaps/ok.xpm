@@ -88,5 +88,5 @@ static char *ok_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *ok_xpm[3] = { ok_x16, ok_x24, ok_x32 };
+static char **ok_xpm[3] = { ok_x16, ok_x24, ok_x32 };
 

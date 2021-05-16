@@ -123,5 +123,5 @@ static char *sticky_doc_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *sticky_doc_xpm[3] = { sticky_doc_x16, sticky_doc_x24, sticky_doc_x32 };
+static char **sticky_doc_xpm[3] = { sticky_doc_x16, sticky_doc_x24, sticky_doc_x32 };
 

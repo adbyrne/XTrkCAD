@@ -141,5 +141,5 @@ static char *circle_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *circle_xpm[3] = { circle_x16, circle_x24, circle_x32 };
+static char **circle_xpm[3] = { circle_x16, circle_x24, circle_x32 };
 

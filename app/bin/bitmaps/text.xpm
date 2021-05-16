@@ -85,5 +85,5 @@ static char *text_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *text_xpm[3] = { text_x16, text_x24, text_x32 };
+static char **text_xpm[3] = { text_x16, text_x24, text_x32 };
 

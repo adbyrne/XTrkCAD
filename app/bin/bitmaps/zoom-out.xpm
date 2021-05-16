@@ -184,5 +184,5 @@ static char *zoom_out_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *zoom_out_xpm[3] = { zoom_out_x16, zoom_out_x24, zoom_out_x32 };
+static char **zoom_out_xpm[3] = { zoom_out_x16, zoom_out_x24, zoom_out_x32 };
 

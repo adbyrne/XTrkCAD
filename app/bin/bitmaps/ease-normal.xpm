@@ -86,4 +86,4 @@ static char* ease_normal_x32[] = {
 "                                                                  ",
 "                                                                  "};
 
-static char *ease_normal_xpm[3] = { ease_normal_x16, ease_normal_x24, ease_normal_x32 };
+static char **ease_normal_xpm[3] = { ease_normal_x16, ease_normal_x24, ease_normal_x32 };

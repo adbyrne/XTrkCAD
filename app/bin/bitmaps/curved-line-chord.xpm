@@ -93,5 +93,5 @@ static char *curved_line_chord_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *curved_line_chord_xpm[3] = { curved_line_chord_x16, curved_line_chord_x24, curved_line_chord_x32 };
+static char **curved_line_chord_xpm[3] = { curved_line_chord_x16, curved_line_chord_x24, curved_line_chord_x32 };
 

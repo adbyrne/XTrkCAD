@@ -99,5 +99,5 @@ static char *box_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *box_xpm[3] = { box_x16, box_x24, box_x32 };
+static char **box_xpm[3] = { box_x16, box_x24, box_x32 };
 

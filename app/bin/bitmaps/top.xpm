@@ -100,5 +100,5 @@ static char *top_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *top_xpm[3] = { top_x16, top_x24, top_x32 };
+static char **top_xpm[3] = { top_x16, top_x24, top_x32 };
 

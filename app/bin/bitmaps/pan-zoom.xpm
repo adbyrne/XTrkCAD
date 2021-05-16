@@ -88,5 +88,5 @@ static char *pan_zoom_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *pan_zoom_xpm[3] = { pan_zoom_x16, pan_zoom_x24, pan_zoom_x32 };
+static char **pan_zoom_xpm[3] = { pan_zoom_x16, pan_zoom_x24, pan_zoom_x32 };
 

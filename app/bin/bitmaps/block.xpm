@@ -132,5 +132,5 @@ static char *block_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *block_xpm[3] = { block_x16, block_x24, block_x32 };
+static char **block_xpm[3] = { block_x16, block_x24, block_x32 };
 

@@ -151,5 +151,5 @@ static char *rotate_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *rotate_xpm[3] = { rotate_x16, rotate_x24, rotate_x32 };
+static char **rotate_xpm[3] = { rotate_x16, rotate_x24, rotate_x32 };
 

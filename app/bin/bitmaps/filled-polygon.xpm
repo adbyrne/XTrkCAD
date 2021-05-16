@@ -119,5 +119,5 @@ static char *filled_polygon_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *filled_polygon_xpm[3] = { filled_polygon_x16, filled_polygon_x24, filled_polygon_x32 };
+static char **filled_polygon_xpm[3] = { filled_polygon_x16, filled_polygon_x24, filled_polygon_x32 };
 

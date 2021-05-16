@@ -194,5 +194,5 @@ static char *zoom_choose_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *zoom_choose_xpm[3] = { zoom_choose_x16, zoom_choose_x24, zoom_choose_x32 };
+static char **zoom_choose_xpm[3] = { zoom_choose_x16, zoom_choose_x24, zoom_choose_x32 };
 

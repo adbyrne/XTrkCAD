@@ -188,5 +188,5 @@ static char *zoom_in_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *zoom_in_xpm[3] = { zoom_in_x16, zoom_in_x24, zoom_in_x32 };
+static char **zoom_in_xpm[3] = { zoom_in_x16, zoom_in_x24, zoom_in_x32 };
 

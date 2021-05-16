@@ -134,5 +134,5 @@ static char *magnet_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *magnet_xpm[3] = { magnet_x16, magnet_x24, magnet_x32 };
+static char **magnet_xpm[3] = { magnet_x16, magnet_x24, magnet_x32 };
 

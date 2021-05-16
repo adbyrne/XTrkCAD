@@ -93,5 +93,5 @@ static char *curved_line_middle_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *curved_line_middle_xpm[3] = { curved_line_middle_x16, curved_line_middle_x24, curved_line_middle_x32 };
+static char **curved_line_middle_xpm[3] = { curved_line_middle_x16, curved_line_middle_x24, curved_line_middle_x32 };
 

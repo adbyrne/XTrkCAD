@@ -91,5 +91,5 @@ static char *reflect_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *reflect_xpm[3] = { reflect_x16, reflect_x24, reflect_x32 };
+static char **reflect_xpm[3] = { reflect_x16, reflect_x24, reflect_x32 };
 

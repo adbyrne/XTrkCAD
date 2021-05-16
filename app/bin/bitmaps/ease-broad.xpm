@@ -86,4 +86,4 @@ static char* ease_broad_x32[] = {
 "                                                                  ",
 "                                                                  "};
 
-static char *ease_broad_xpm[3] = { ease_broad_x16, ease_broad_x24, ease_broad_x32 };
+static char **ease_broad_xpm[3] = { ease_broad_x16, ease_broad_x24, ease_broad_x32 };

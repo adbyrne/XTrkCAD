@@ -92,5 +92,5 @@ static char *convert_to_x32[] = {
 	"                          00    ",
 	"                                "};
 
-static char *convert_to_xpm[3] = { convert_to_x16, convert_to_x24, convert_to_x32 };
+static char **convert_to_xpm[3] = { convert_to_x16, convert_to_x24, convert_to_x32 };
 

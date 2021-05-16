@@ -108,5 +108,5 @@ static char *bridge_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *bridge_xpm[3] = { bridge_x16, bridge_x24, bridge_x32 };
+static char **bridge_xpm[3] = { bridge_x16, bridge_x24, bridge_x32 };
 

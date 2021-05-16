@@ -100,5 +100,5 @@ static char *profile_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *profile_xpm[3] = { profile_x16, profile_x24, profile_x32 };
+static char **profile_xpm[3] = { profile_x16, profile_x24, profile_x32 };
 

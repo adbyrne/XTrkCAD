@@ -116,5 +116,5 @@ static char *bezier_track_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *bezier_track_xpm[3] = { bezier_track_x16, bezier_track_x24, bezier_track_x32 };
+static char **bezier_track_xpm[3] = { bezier_track_x16, bezier_track_x24, bezier_track_x32 };
 

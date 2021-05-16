@@ -88,5 +88,5 @@ static char *exit_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *exit_xpm[3] = { exit_x16, exit_x24, exit_x32 };
+static char **exit_xpm[3] = { exit_x16, exit_x24, exit_x32 };
 

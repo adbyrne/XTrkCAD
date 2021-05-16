@@ -126,5 +126,5 @@ static char *turntable_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *turntable_xpm[3] = { turntable_x16, turntable_x24, turntable_x32 };
+static char **turntable_xpm[3] = { turntable_x16, turntable_x24, turntable_x32 };
 

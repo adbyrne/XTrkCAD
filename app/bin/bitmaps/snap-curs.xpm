@@ -109,5 +109,5 @@ static char *snap_curs_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *snap_curs_xpm[3] = { snap_curs_x16, snap_curs_x24, snap_curs_x32 };
+static char **snap_curs_xpm[3] = { snap_curs_x16, snap_curs_x24, snap_curs_x32 };
 

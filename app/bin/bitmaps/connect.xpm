@@ -111,5 +111,5 @@ static char *connect_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *connect_xpm[3] = { connect_x16, connect_x24, connect_x32 };
+static char **connect_xpm[3] = { connect_x16, connect_x24, connect_x32 };
 

@@ -116,5 +116,5 @@ static char *filled_box_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *filled_box_xpm[3] = { filled_box_x16, filled_box_x24, filled_box_x32 };
+static char **filled_box_xpm[3] = { filled_box_x16, filled_box_x24, filled_box_x32 };
 

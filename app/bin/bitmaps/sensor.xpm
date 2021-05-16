@@ -126,5 +126,5 @@ static char *sensor_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *sensor_xpm[3] = { sensor_x16, sensor_x24, sensor_x32 };
+static char **sensor_xpm[3] = { sensor_x16, sensor_x24, sensor_x32 };
 

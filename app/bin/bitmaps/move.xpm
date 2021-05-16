@@ -129,5 +129,5 @@ static char *move_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *move_xpm[3] = { move_x16, move_x24, move_x32 };
+static char **move_xpm[3] = { move_x16, move_x24, move_x32 };
 

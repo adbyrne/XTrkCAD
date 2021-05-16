@@ -106,5 +106,5 @@ static char *split_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *split_xpm[3] = { split_x16, split_x24, split_x32 };
+static char **split_xpm[3] = { split_x16, split_x24, split_x32 };
 

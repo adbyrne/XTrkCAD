@@ -103,5 +103,5 @@ static char *turnout_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *turnout_xpm[3] = { turnout_x16, turnout_x24, turnout_x32 };
+static char **turnout_xpm[3] = { turnout_x16, turnout_x24, turnout_x32 };
 

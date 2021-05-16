@@ -85,5 +85,5 @@ static char *polygon_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *polygon_xpm[3] = { polygon_x16, polygon_x24, polygon_x32 };
+static char **polygon_xpm[3] = { polygon_x16, polygon_x24, polygon_x32 };
 

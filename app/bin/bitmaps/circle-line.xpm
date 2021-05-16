@@ -97,5 +97,5 @@ static char *circle_line_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *circle_line_xpm[3] = { circle_line_x16, circle_line_x24, circle_line_x32 };
+static char **circle_line_xpm[3] = { circle_line_x16, circle_line_x24, circle_line_x32 };
 

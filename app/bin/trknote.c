@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "common.h"
 #include "cundo.h"
 #include "custom.h"
 #include "dynstring.h"
@@ -38,7 +39,7 @@ EXPORT TRKTYP_T T_NOTE = -1;
 static wDrawBitMap_p note_bm, link_bm, document_bm;
 
 typedef struct {
-	char **xpm;
+	char ***xpm;
 	int OP;
 	char * shortName;
 	char * cmdName;

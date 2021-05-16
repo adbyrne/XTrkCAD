@@ -91,5 +91,5 @@ static char *bottom_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *bottom_xpm[3] = { bottom_x16, bottom_x24, bottom_x32 };
+static char **bottom_xpm[3] = { bottom_x16, bottom_x24, bottom_x32 };
 

@@ -119,5 +119,5 @@ static char *straight_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *straight_xpm[3] = { straight_x16, straight_x24, straight_x32 };
+static char **straight_xpm[3] = { straight_x16, straight_x24, straight_x32 };
 

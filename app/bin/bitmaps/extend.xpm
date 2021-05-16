@@ -150,5 +150,5 @@ static char *extend_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *extend_xpm[3] = { extend_x16, extend_x24, extend_x32 };
+static char **extend_xpm[3] = { extend_x16, extend_x24, extend_x32 };
 

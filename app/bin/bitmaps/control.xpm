@@ -133,5 +133,5 @@ static char *control_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *control_xpm[3] = { control_x16, control_x24, control_x32 };
+static char **control_xpm[3] = { control_x16, control_x24, control_x32 };
 

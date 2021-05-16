@@ -115,5 +115,5 @@ static char *doc_import_xtc_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *doc_import_xtc_xpm[3] = { doc_import_xtc_x16, doc_import_xtc_x24, doc_import_xtc_x32 };
+static char **doc_import_xtc_xpm[3] = { doc_import_xtc_x16, doc_import_xtc_x24, doc_import_xtc_x32 };
 

@@ -95,5 +95,5 @@ static char *curved_line_tangent_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *curved_line_tangent_xpm[3] = { curved_line_tangent_x16, curved_line_tangent_x24, curved_line_tangent_x32 };
+static char **curved_line_tangent_xpm[3] = { curved_line_tangent_x16, curved_line_tangent_x24, curved_line_tangent_x32 };
 

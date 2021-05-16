@@ -95,5 +95,5 @@ static char *bezier_line_x32[] = {
 	"                  3             ",
 	"                                "};
 
-static char *bezier_line_xpm[3] = { bezier_line_x16, bezier_line_x24, bezier_line_x32 };
+static char **bezier_line_xpm[3] = { bezier_line_x16, bezier_line_x24, bezier_line_x32 };
 

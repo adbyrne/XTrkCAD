@@ -85,5 +85,5 @@ static char *ruler_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *ruler_xpm[3] = { ruler_x16, ruler_x24, ruler_x32 };
+static char **ruler_xpm[3] = { ruler_x16, ruler_x24, ruler_x32 };
 

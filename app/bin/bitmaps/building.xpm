@@ -123,5 +123,5 @@ static char *building_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *building_xpm[3] = { building_x16, building_x24, building_x32 };
+static char **building_xpm[3] = { building_x16, building_x24, building_x32 };
 

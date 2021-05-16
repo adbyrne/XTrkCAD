@@ -88,5 +88,5 @@ static char *polyline_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *polyline_xpm[3] = { polyline_x16, polyline_x24, polyline_x32 };
+static char **polyline_xpm[3] = { polyline_x16, polyline_x24, polyline_x32 };
 

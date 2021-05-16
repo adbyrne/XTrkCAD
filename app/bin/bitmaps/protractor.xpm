@@ -85,5 +85,5 @@ static char *protractor_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *protractor_xpm[3] = { protractor_x16, protractor_x24, protractor_x32 };
+static char **protractor_xpm[3] = { protractor_x16, protractor_x24, protractor_x32 };
 

@@ -94,5 +94,5 @@ static char *redo_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *redo_xpm[3] = { redo_x16, redo_x24, redo_x32 };
+static char **redo_xpm[3] = { redo_x16, redo_x24, redo_x32 };
 

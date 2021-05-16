@@ -110,5 +110,5 @@ static char *sticky_note_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *sticky_note_xpm[3] = { sticky_note_x16, sticky_note_x24, sticky_note_x32 };
+static char **sticky_note_xpm[3] = { sticky_note_x16, sticky_note_x24, sticky_note_x32 };
 

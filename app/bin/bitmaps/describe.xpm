@@ -113,5 +113,5 @@ static char *describe_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *describe_xpm[3] = { describe_x16, describe_x24, describe_x32 };
+static char **describe_xpm[3] = { describe_x16, describe_x24, describe_x32 };
 

@@ -132,5 +132,5 @@ static char *turnout_designer_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *turnout_designer_xpm[3] = { turnout_designer_x16, turnout_designer_x24, turnout_designer_x32 };
+static char **turnout_designer_xpm[3] = { turnout_designer_x16, turnout_designer_x24, turnout_designer_x32 };
 

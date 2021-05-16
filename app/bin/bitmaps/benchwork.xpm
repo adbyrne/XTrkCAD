@@ -106,5 +106,5 @@ static char *benchwork_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *benchwork_xpm[3] = { benchwork_x16, benchwork_x24, benchwork_x32 };
+static char **benchwork_xpm[3] = { benchwork_x16, benchwork_x24, benchwork_x32 };
 

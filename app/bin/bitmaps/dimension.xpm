@@ -92,5 +92,5 @@ static char *dimension_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *dimension_xpm[3] = { dimension_x16, dimension_x24, dimension_x32 };
+static char **dimension_xpm[3] = { dimension_x16, dimension_x24, dimension_x32 };
 

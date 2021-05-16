@@ -113,5 +113,5 @@ static char *tunnel_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *tunnel_xpm[3] = { tunnel_x16, tunnel_x24, tunnel_x32 };
+static char **tunnel_xpm[3] = { tunnel_x16, tunnel_x24, tunnel_x32 };
 

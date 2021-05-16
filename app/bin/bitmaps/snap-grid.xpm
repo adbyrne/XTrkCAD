@@ -88,5 +88,5 @@ static char *snap_grid_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *snap_grid_xpm[3] = { snap_grid_x16, snap_grid_x24, snap_grid_x32 };
+static char **snap_grid_xpm[3] = { snap_grid_x16, snap_grid_x24, snap_grid_x32 };
 

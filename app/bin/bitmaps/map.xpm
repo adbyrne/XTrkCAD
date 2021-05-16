@@ -169,5 +169,5 @@ static char *map_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *map_xpm[3] = { map_x16, map_x24, map_x32 };
+static char **map_xpm[3] = { map_x16, map_x24, map_x32 };
 

@@ -86,4 +86,4 @@ static char* ease_ltsharp_x32[] = {
 "                                                        xx        ",
 "                                                                  "};
 
-static char *ease_ltsharp_xpm[3] = { ease_ltsharp_x16, ease_ltsharp_x24, ease_ltsharp_x32 };
+static char **ease_ltsharp_xpm[3] = { ease_ltsharp_x16, ease_ltsharp_x24, ease_ltsharp_x32 };

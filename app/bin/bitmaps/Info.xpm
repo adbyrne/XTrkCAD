@@ -112,5 +112,5 @@ static char *Info_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *Info_xpm[3] = { Info_x16, Info_x24, Info_x32 };
+static char **Info_xpm[3] = { Info_x16, Info_x24, Info_x32 };
 

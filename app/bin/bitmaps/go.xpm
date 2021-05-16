@@ -131,5 +131,5 @@ static char *go_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *go_xpm[3] = { go_x16, go_x24, go_x32 };
+static char **go_xpm[3] = { go_x16, go_x24, go_x32 };
 

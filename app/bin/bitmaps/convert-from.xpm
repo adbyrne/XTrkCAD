@@ -91,5 +91,5 @@ static char *convert_from_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *convert_from_xpm[3] = { convert_from_x16, convert_from_x24, convert_from_x32 };
+static char **convert_from_xpm[3] = { convert_from_x16, convert_from_x24, convert_from_x32 };
 

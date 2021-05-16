@@ -121,5 +121,5 @@ static char *doc_open_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *doc_open_xpm[3] = { doc_open_x16, doc_open_x24, doc_open_x32 };
+static char **doc_open_xpm[3] = { doc_open_x16, doc_open_x24, doc_open_x32 };
 

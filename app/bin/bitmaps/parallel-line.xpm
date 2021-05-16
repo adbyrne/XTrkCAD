@@ -101,5 +101,5 @@ static char *parallel_line_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *parallel_line_xpm[3] = { parallel_line_x16, parallel_line_x24, parallel_line_x32 };
+static char **parallel_line_xpm[3] = { parallel_line_x16, parallel_line_x24, parallel_line_x32 };
 

@@ -92,5 +92,5 @@ static char *join_line_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *join_line_xpm[3] = { join_line_x16, join_line_x24, join_line_x32 };
+static char **join_line_xpm[3] = { join_line_x16, join_line_x24, join_line_x32 };
 

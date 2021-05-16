@@ -91,5 +91,5 @@ static char *switch_ai_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *switch_ai_xpm[3] = { switch_ai_x16, switch_ai_x24, switch_ai_x32 };
+static char **switch_ai_xpm[3] = { switch_ai_x16, switch_ai_x24, switch_ai_x32 };
 

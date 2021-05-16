@@ -138,5 +138,5 @@ static char *circle_filled_tangent_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *circle_filled_tangent_xpm[3] = { circle_filled_tangent_x16, circle_filled_tangent_x24, circle_filled_tangent_x32 };
+static char **circle_filled_tangent_xpm[3] = { circle_filled_tangent_x16, circle_filled_tangent_x24, circle_filled_tangent_x32 };
 

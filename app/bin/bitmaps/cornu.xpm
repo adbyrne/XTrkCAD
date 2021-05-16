@@ -114,5 +114,5 @@ static char *cornu_x32[] = {
 	"                  9             ",
 	"                                "};
 
-static char *cornu_xpm[3] = { cornu_x16, cornu_x24, cornu_x32 };
+static char **cornu_xpm[3] = { cornu_x16, cornu_x24, cornu_x32 };
 

@@ -100,5 +100,5 @@ static char *undo_x32[] = {
 	"                                ",
 	"                                "};
 
-static char *undo_xpm[3] = { undo_x16, undo_x24, undo_x32 };
+static char **undo_xpm[3] = { undo_x16, undo_x24, undo_x32 };
 
