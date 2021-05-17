@@ -85,8 +85,15 @@ double scaleIcon = 1.0;				   /**< Scaling factor for toolbar icons */
 
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
-void closeBalloonHelp(void);
+void closeBalloonHelp(int inx);
 static wControl_p getControlFromCursor(HWND, wWin_p *);
+
+#ifdef BALLOON_TRACE
+// To use:
+// change logFile defn in lprintf.c from static to EXPORT
+// Run with some debug flag set to ensure logFile is set
+extern FILE * logFile;
+#endif
 /*
  * LOCAL VARIABLES
  */
@@ -373,6 +380,7 @@ void * mswAlloc(
     w->focusChainNext = NULL;
     w->shown = TRUE;
 	w->hilite = FALSE;
+	w->errStr = NULL;
     return w;
 }
 
@@ -1125,7 +1133,7 @@ int mswTranslateAccelerator(
     }
 
     if (acclKey == (long)VK_F1) {
-        closeBalloonHelp();
+        closeBalloonHelp(1);
 
         if (!b && win) {
             wHelp(win->helpStr);
@@ -2284,108 +2292,130 @@ void wControlSetBalloonText(wControl_p b, const char * text)
     b->tipStr = mswStrdup(text);
 }
 
+void openBalloonHelp(wControl_p b, int dx, int dy)
+{
+	HDC hDc;
+	DWORD extent;
+	RECT rect;
+	POINT pt;
+	HFONT hFont;
+	const char * msg;
+	if (b->errStr) {
+		msg = b->errStr;
+	}
+	else {
+		msg = b->tipStr;
+		if (!balloonHelpEnable) {
+#ifdef BALLOON_TRACE
+			fprintf(logFile, "openBalloon !Enable state %d\n", balloonHelpState); fflush(logFile);
+#endif
+			return;
+		}
+	}
+#ifdef BALLOON_TRACE
+	fprintf(logFile, "openBalloon %s state %d\n", msg, balloonHelpState); fflush(logFile);
+#endif
+	if (!balloonHelpHWnd)
+		return;
+	int w, h;
+	hDc = GetDC(balloonHelpHWnd);
+	hFont = SelectObject(hDc, mswLabelFont);
+	extent = GetTextExtent(hDc, CAST_AWAY_CONST msg, (int)(strlen(msg)));
+	w = LOWORD(extent);
+	h = HIWORD(extent);
+
+	if (b->type == B_RADIO ||
+		b->type == B_TOGGLE) {
+		pt.y = b->h;
+	}
+	else {
+		GetClientRect(b->hWnd, &rect);
+		pt.y = rect.bottom;
+	}
+
+	pt.x = dx;
+	pt.y -= dy;
+	ClientToScreen(b->hWnd, &pt);
+
+	if (pt.x + w + 2 > screenWidth) {
+		pt.x = screenWidth - (w + 2);
+	}
+
+	if (pt.x < 0) {
+		pt.x = 0;
+	}
+
+	SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w + 6, h + 4,
+		SWP_SHOWWINDOW | SWP_NOACTIVATE);
+	if (!b->errStr) {
+		SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
+		SetTextColor(hDc, GetSysColor(COLOR_INFOTEXT));
+	} else {
+		SetBkColor(hDc, GetSysColor(COLOR_HIGHLIGHT));
+		SetTextColor(hDc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+	}
+	TextOut(hDc, 2, 1, msg, (int)(strlen(msg)));
+	SelectObject(hDc, hFont);
+	ReleaseDC(balloonHelpHWnd, hDc);
+	balloonHelpState = balloonHelpShow;
+	balloonControlButton = b;
+}
+
+
 
 void startBalloonHelp(void)
 {
-    wBalloonHelp_t * bh;
-    const char * hs;
+	wBalloonHelp_t * bh;
+	
+	if (!balloonHelpButton->tipStr) {
+		if (!balloonHelpStrings)
+			return;
+		for (bh = balloonHelpStrings; bh->name && strcmp(bh->name, balloonHelpButton->helpStr) != 0; bh++);
+		if (!bh->name || !bh->value)
+			balloonHelpButton->tipStr = _(balloonHelpButton->helpStr);
+		else
+			balloonHelpButton->tipStr = _(bh->value);
+	}
 
-    if (!balloonHelpStrings) {
-        return;
-    }
-
-    if (!balloonHelpEnable) {
-        return;
-    }
-
-    if (balloonHelpHWnd) { 
-		if (balloonHelpButton->tipStr) {
-            hs = balloonHelpButton->tipStr;
-        } else {
-            hs = balloonHelpButton->helpStr;
-
-            if (!hs) {
-                return;
-            }
-
-            for (bh = balloonHelpStrings; bh->name && strcmp(bh->name,hs) != 0; bh++);
-
-            if (!bh->name || !bh->value) {
-                return;
-            }
-
-            balloonHelpButton->tipStr = hs = _(bh->value);
-        }
-
-        wControlSetBalloon(balloonHelpButton, 0, 0, hs);
-    }
+	openBalloonHelp(balloonHelpButton, 0, 0);
 }
 
-void closeBalloonHelp(void)
+
+void closeBalloonHelp(int inx)
 {
-    if (balloonHelpTimer) {
-        KillTimer(mswHWnd, balloonHelpTimer);
-        balloonHelpTimer = (UINT_PTR)0;
-    }
+#ifdef BALLOON_TRACE
+	fprintf(logFile, "closeBallonHelp %d state=%d\n", inx, balloonHelpState); fflush(logFile);
+#endif
+		if (balloonHelpTimer) {
+			KillTimer(mswHWnd, balloonHelpTimer);
+			balloonHelpTimer = (UINT_PTR)0;
+		}
 
-    if (balloonHelpState == balloonHelpShow)
-        if (balloonHelpHWnd) {
-            ShowWindow(balloonHelpHWnd, SW_HIDE);
-        }
+	if (balloonHelpState == balloonHelpShow)
+		if (balloonHelpHWnd) {
+			ShowWindow(balloonHelpHWnd, SW_HIDE);
+		}
 
-    balloonHelpState = balloonHelpIdle;
+	balloonHelpState = balloonHelpIdle;
 }
 
 
 void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * msg)
 {
-    HDC hDc;
-    DWORD extent;
-    RECT rect;
-    POINT pt;
-    HFONT hFont;
-
-    if (msg) {
-        int w, h;
-        hDc = GetDC(balloonHelpHWnd);
-        hFont = SelectObject(hDc, mswLabelFont);
-        extent = GetTextExtent(hDc, CAST_AWAY_CONST msg, (int)(strlen(msg)));
-        w = LOWORD(extent);
-        h = HIWORD(extent);
-
-		if (b->type == B_RADIO ||
-                b->type == B_TOGGLE) {
-            pt.y = b->h;
-        } else {
-            GetClientRect(b->hWnd, &rect);
-            pt.y = rect.bottom;
-        }
-
-        pt.x = dx;
-        pt.y -= dy;
-        ClientToScreen(b->hWnd, &pt);
-
-        if (pt.x + w+2 > screenWidth) {
-            pt.x = screenWidth-(w+2);
-        }
-
-        if (pt.x < 0) {
-            pt.x = 0;
-        }
-
-        SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
-                     SWP_SHOWWINDOW|SWP_NOACTIVATE);
-        SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
-		// SetBkColor(hDc, RGB(255,191,191));
-        TextOut(hDc, 2, 1, msg, (int)(strlen(msg)));
-        SelectObject(hDc, hFont);
-        ReleaseDC(balloonHelpHWnd, hDc);
-        balloonHelpState = balloonHelpShow;
-        balloonControlButton = b;
-    } else {
-		closeBalloonHelp();
-    }
+	if (msg) {
+		if (b->errStr)
+			free(b->errStr);
+		b->errStr = mswStrdup(msg);
+		openBalloonHelp(b, dx, dy);
+	}
+	else {
+		if (b->errStr)
+			free(b->errStr);
+		b->errStr = NULL;
+		closeBalloonHelp(2);
+	}
 }
+
 
 
 int wGetKeyState(void)
@@ -2767,10 +2797,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         return (LRESULT)0;
 
-    case WM_DRAWITEM:
-    case WM_COMMAND:
+	case WM_COMMAND:
+        closeBalloonHelp(3);
+	case WM_DRAWITEM:
     case WM_MEASUREITEM:
-        closeBalloonHelp();
 
         if (WCMD_PARAM_ID < CONTROL_BASE || WCMD_PARAM_ID > (WPARAM)controlMap_da.cnt) {
             break;
@@ -2920,7 +2950,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         b = getControlFromCursor(hWnd, NULL);
-        closeBalloonHelp();
+        closeBalloonHelp(4);
 
         if (b && b->type == B_DRAW) {
             // Change Num keypad to a special code to emulate cursor keys
@@ -3056,7 +3086,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
 
-        closeBalloonHelp();
+        closeBalloonHelp(5);
         wHelp(b->helpStr);
         return (LRESULT)0;
 
@@ -3073,21 +3103,38 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 
 		b = getControlFromCursor(hWnd, NULL);
-
+		
+#ifdef BALLOON_TRACE
+		fprintf(logFile, "SETCURSOR %s\n", b ? b->helpStr : "NULL"); fflush(logFile);
+#endif
 		if (b == balloonControlButton) {
+			//closeBalloonHelp(61);
 			break;
 		}
 
-		if (GetActiveWindow() != hWnd || (!b) ||
-			b->type == B_DRAW || b->helpStr == NULL) {
-			closeBalloonHelp();
+		if (GetActiveWindow() != hWnd) {
+			closeBalloonHelp(62);
+			break;
+		}
+		if (!b) {
+			closeBalloonHelp(63);
+			break;
+		}
+		if (b->type == B_DRAW) {
+			closeBalloonHelp(64);
+			break;
+		}
+		if (b->helpStr == NULL) {
+			closeBalloonHelp(65);
 			break;
 		}
 
 		if (b != balloonHelpButton) {
-			closeBalloonHelp();
+			closeBalloonHelp(7);
 		}
-
+#ifdef BALLOON_TRACE
+		fprintf(logFile, "SETCURSOR state %d\n", balloonHelpState); fflush(logFile);
+#endif
 		if (balloonHelpState != balloonHelpIdle) {
 			break;
 		}
@@ -3188,7 +3235,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_MENUSELECT:
         mswAllowBalloonHelp = TRUE;
-        closeBalloonHelp();
+        closeBalloonHelp(8);
         break;
 
     case WM_WINDOWPOSCHANGED:
@@ -3233,7 +3280,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_ACTIVATE:
         if (LOWORD(wParam) == WA_INACTIVE) {
-            closeBalloonHelp();
+            closeBalloonHelp(9);
         }
 
         break;

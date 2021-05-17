@@ -88,6 +88,7 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 		const char * labelStr; \
 		const char * helpStr; \
 		const char * tipStr; \
+		char * errStr; \
 		HWND hWnd; \
 		void * data;\
 		wControl_p focusChainNext; \
