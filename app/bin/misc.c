@@ -2365,7 +2365,7 @@ static void SetAccelKeys()
 #include "bitmaps/zoom-out.xpm"
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
-// #include "bitmaps/partlist.xpm"
+#include "bitmaps/partlist.xpm" // unused icon
 #include "bitmaps/doc-export.xpm"
 #include "bitmaps/doc-export-dxf.xpm"
 #include "bitmaps/doc-import.xpm"

@@ -804,6 +804,6 @@ EXPORT void SnapGridShow( void * unused )
 
 EXPORT void InitSnapGridButtons( void )
 {
-	snapGridEnable_b = AddToolbarButton( "cmdGridEnable", wIconCreateBitMap(snapcurs_width, snapcurs_height, snapcurs_bits, wDrawColorBlack), 0, SnapGridEnable, NULL );
-	snapGridShow_b = AddToolbarButton( "cmdGridShow", wIconCreateBitMap(snapvis_width, snapvis_height, snapvis_bits, wDrawColorBlack), IC_MODETRAIN_TOO, SnapGridShow, NULL );
+	snapGridEnable_b = AddToolbarButton( "cmdGridEnable", wIconCreatePixMap(snap_curs_xpm[iconSize], wDrawColorBlack), 0, SnapGridEnable, NULL );
+	snapGridShow_b = AddToolbarButton( "cmdGridShow", wIconCreatePixMap(snap_grid_xpm[iconSize], wDrawColorBlack), IC_MODETRAIN_TOO, SnapGridShow, NULL );
 }
