@@ -1170,6 +1170,21 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 			}
 		}
 	}
+	/* If Car, simulate Remove Car -> uncouple and mark deleted (no Undo) */
+	if (QueryTrack(trk,Q_ISTRAIN)) {
+		trk->deleted = TRUE;
+		int dir;
+		for (dir=0; dir<2; dir++) {
+		    if (GetTrkEndTrk(trk,dir)) {
+		    	track_p car = GetTrkEndTrk(trk,dir);
+		    	for (int dir2=0;dir2<2; dir2++) {
+		    		if (car->endPt[dir2].track == trk) car->endPt[dir2].track = NULL;
+		    	}
+		        trk->endPt[dir].track = NULL;
+		    }
+		}
+		return TRUE;
+	}
 	for (i=0;i<trk->endCnt;i++) {
 		if ((trk2=trk->endPt[i].track) != NULL) {
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
