@@ -592,7 +592,25 @@ static void DrawSingleTrack(track_p trk, BOOL_T bit) {
 	DrawTrack(trk,&tempD,bit?wDrawColorPreviewSelected:wDrawColorPreviewUnselected);
 }
 
+typedef BOOL_T (*testSelectedTrackCallBack_t)(track_p, int);
+
+
+static BOOL_T TestAllSelectedTracks( testSelectedTrackCallBack_t testit, int value)
+{
+	track_p trk;
+		trk = NULL;
+		while ( TrackIterate( &trk ) ) {
+			if (GetTrkSelected(trk)) {
+				if ( !testit( trk, value ) ) {
+					return FALSE;
+				}
+			}
+		}
+	return TRUE;
+}
+
 typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
+
 static void DoSelectedTracks( doSelectedTrackCallBack_t doit )
 {
 	track_p trk;
@@ -693,7 +711,11 @@ EXPORT int SelectDelete( void )
 	if (SelectedTracksAreFrozen())
 		return 0;
 	if (selectedTrackCount>0) {
-		UndoStart( _("Delete Tracks"), "delete" );
+		BOOL_T UndoStarted = FALSE;
+		if (!TestAllSelectedTracks(QueryTrack,(int)Q_ISTRAIN)) {  // If all Cars, don't bother with UndoStart as there will be nothing to delete
+			UndoStarted = TRUE;
+			UndoStart( _("Delete Tracks"), "delete" );
+		}
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wDrawDelayUpdate( mapD.d, TRUE );
 		DoSelectedTracks( DeleteTrack );
@@ -702,7 +724,8 @@ EXPORT int SelectDelete( void )
 		wDrawDelayUpdate( mapD.d, FALSE );
 		selectedTrackCount = 0;
 		SelectedTrackCountChange();
-		UndoEnd();
+		if (UndoStarted)
+			UndoEnd();
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
