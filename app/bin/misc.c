@@ -1948,7 +1948,7 @@ static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOO
 		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
 		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
-static wMenuToggle_p toolbarMI[16];
+static wMenuToggle_p toolbarMI[COUNT(AllToolbarMasks)];
 
 static void ToolbarAction(void * data) {
 	long inx = VP2L(data);
