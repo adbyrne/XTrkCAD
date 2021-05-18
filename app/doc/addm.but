@@ -32,7 +32,7 @@ The \f{Add Menu} has all the actions related to adding track pieces to the layou
 
 \u000
 
-\dd \i\f{Parallel} - \I{Parallel Track} \I{Track, Parallel} \I{Parallel Line} \I {Line, Parallel}
+\dd \i\f{Parallel} - \I{Parallel Track} \I{Track, Parallel} \I{Parallel Line} \I{Line, Parallel}
 create parallel track or line to existing flex-track, straight or curved track. (\K{cmdParallel})
 
 \dd \G{png.d/maddparallel.png}

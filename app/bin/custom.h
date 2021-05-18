@@ -150,7 +150,7 @@ void InitLayers( void );
 void InitHotBar( void );
 void InitCarDlg( void );
 BOOL_T Initialize( void );
-void DoEasementRedir( void );
+void DoEasementRedir( void * unused );
 void DoStructDesignerRedir( void );
 void InitNewTurnRedir( wMenu_p );
 

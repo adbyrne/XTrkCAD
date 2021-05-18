@@ -160,7 +160,7 @@ static paramData_t printPLs[] = {
 /*26*/ { PD_MESSAGE, N_("selected"), NULL, 0, I2VP(80) }
 };
 
-static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, sizeof printPLs/sizeof printPLs[0] };
+static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, COUNT( printPLs ) };
 
 static struct {
 	double top, right, bottom, left;
@@ -515,7 +515,7 @@ static void PrintUpdate( int inx0 )
 		ParamLoadControl( &printPG, 3 );
 	}
 	currPrintGrid = newPrintGrid;
-	for ( inx = 0; inx < sizeof printPLs/sizeof printPLs[0]; inx++ ) {
+	for ( inx = 0; inx < COUNT( printPLs ); inx++ ) {
 		if ( inx != inx0 && printPLs[inx].context == I2VP(2) )
 			ParamLoadControl( &printPG, inx );
 	}
@@ -614,7 +614,7 @@ static paramData_t printMarginPLs[] = {
 	{ PD_MESSAGE, NULL, NULL, 0, NULL },
 #define I_PM_RESET (5)
 	{ PD_BUTTON, PrintMarginReset, "marginReset", PDO_DLGCMDBUTTON, NULL, N_("Reset") } };
-static paramGroup_t printMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC, printMarginPLs, sizeof printMarginPLs/sizeof printMarginPLs[0] };
+static paramGroup_t printMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC, printMarginPLs, COUNT( printMarginPLs ) };
 
 static wLines_t aPmLines[] = {
 		{ 1,  25,  11,  94,  11 },
@@ -686,7 +686,7 @@ static void DoPrintMarginOk( void * context )
 	sprintf( message, "%s-marginL", sPrinterName );
 	wPrefSetFloat( "printer", message, printMargin.left );
 	SetPageSize( TRUE );
-	for ( int inx = 0; inx < sizeof printPLs/sizeof printPLs[0]; inx++ ) {
+	for ( int inx = 0; inx < COUNT( printPLs ); inx++ ) {
 		if ( printPLs[inx].context == I2VP(2) )
 			ParamLoadControl( &printPG, inx );
 	}
@@ -719,13 +719,13 @@ static void DoPrintMargin( void )
 		printMarginWin = ParamCreateDialog( &printMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
 		if ( printMarginWin == NULL )
 			return;
-		for ( int i=0; i<sizeof aPmLines / sizeof aPmLines[0]; i++ ) {
+		for ( int i=0; i<COUNT( aPmLines ); i++ ) {
 			aPmLines[i].x0 += x;
 			aPmLines[i].x1 += x;
 			aPmLines[i].y0 += y;
 			aPmLines[i].y1 += y;
 		}
-		wLineCreate( printMarginWin, NULL, sizeof aPmLines / sizeof aPmLines[0], aPmLines );
+		wLineCreate( printMarginWin, NULL, COUNT( aPmLines ), aPmLines );
 	}
 	wMessageSetValue( (wMessage_p)printMarginPLs[I_PM_MESSAGE].control, sPrinterName );
 	// Enable Reset button if we've changed anything
@@ -1574,7 +1574,7 @@ main( INT_T argc, char * argv[] )
 	mapD.size.x = 4*12;
 	mapD.size.y = 3*12;
 	printD.scale = 1.0;
-	for (i=0; i<(sizeof cmds)/(sizeof cmds[0]); i++) {
+	for (i=0; i<COUNT( cmds ); i++) {
 		switch (cmds[i].cmd) {
 		case C_START:
 			CmdPrint( cmds[i].cmd );

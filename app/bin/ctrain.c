@@ -639,7 +639,7 @@ static trainControlDlg_t * curTrainDlg;
 static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
 static void SpeedAction(wAction_t, coOrd);
 static void LocoListChangeEntry(track_p, track_p);
-static void CmdTrainExit(void * junk);
+static void CmdTrainExit(void * unused);
 
 drawCmd_t speedD = {
     NULL,
@@ -689,7 +689,7 @@ static paramData_t trainPLs[] = {
     { PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(120) }
 };
 
-static paramGroup_t trainPG = { "train", 0, trainPLs, sizeof trainPLs/sizeof trainPLs[0] };
+static paramGroup_t trainPG = { "train", 0, trainPLs, COUNT( trainPLs ) };
 
 
 typedef struct {
@@ -2510,7 +2510,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 
         if (CarAvailableCount() <= 0) {
             if (NoticeMessage(MSG_NO_CARS, _("Yes"), _("No")) > 0) {
-                DoCarDlg();
+                DoCarDlg(NULL);
                 DoChangeNotification(CHANGE_PARAMS);
             }
         }
@@ -2864,7 +2864,7 @@ STATUS_T CmdCarDescAction(
 #include "bitmaps/reddot.xpm"
 
 
-static void CmdTrainStopGo(void * junk)
+static void CmdTrainStopGo(void * unused)
 {
     wIcon_p icon;
 
@@ -2899,7 +2899,7 @@ static BOOL_T TrainStopGoPlayback(char * line)
 }
 
 
-static void CmdTrainExit(void * junk)
+static void CmdTrainExit(void * unused)
 {
     Reset();
     InfoSubstituteControls(NULL, NULL);

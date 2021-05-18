@@ -38,7 +38,7 @@ typedef struct {
 
 extern carItem_p currCarItemPtr;
 extern wControl_p newCarControls[2];
-void DoCarDlg( void );
+void DoCarDlg( void * unused );
 BOOL_T CarItemRead( char * );
 track_p NewCar( wIndex_t, carItem_p, coOrd, ANGLE_T );
 void CarGetPos( track_p, coOrd *, ANGLE_T * );

@@ -522,7 +522,7 @@ static paramData_t signalEditPLs[] = {
 #define I_SIGNALASPECTDELETE (8)
     /*8*/ { PD_BUTTON, AspectDelete, "delete", 0, NULL, N_("Delete Aspect") },
 };
-static paramGroup_t signalEditPG = { "signalEdit", 0, signalEditPLs, sizeof signalEditPLs/sizeof signalEditPLs[0] };
+static paramGroup_t signalEditPG = { "signalEdit", 0, signalEditPLs, COUNT( signalEditPLs ) };
 static wWin_p signalEditW;
 
 static paramIntegerRange_t rm1_999999 = { -1, 999999 };
@@ -536,7 +536,7 @@ static paramData_t aspectEditPLs[] = {
     /*2*/ { PD_LONG,   &signalAspectEditIndex, "index", PDO_NOPREF, &rm1_999999, N_("Aspect Index"), BO_READONLY },
 };
 
-static paramGroup_t aspectEditPG = { "aspectEdit", 0, aspectEditPLs, sizeof aspectEditPLs/sizeof aspectEditPLs[0] };
+static paramGroup_t aspectEditPG = { "aspectEdit", 0, aspectEditPLs, COUNT( aspectEditPLs ) };
 static wWin_p aspectEditW;
 
 

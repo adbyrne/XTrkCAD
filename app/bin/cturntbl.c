@@ -47,7 +47,7 @@ static paramFloatRange_t r1_100 = { 1.0, 100.0, 100 };
 static paramData_t turntablePLs[] = {
 #define turntableDiameterPD		(turntablePLs[0])
 	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") } };
-static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, sizeof turntablePLs/sizeof turntablePLs[0] };
+static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, COUNT( turntablePLs ) };
 
 
 static BOOL_T ValidateTurntablePosition(
@@ -665,7 +665,7 @@ EXPORT BOOL_T ConnectTurntableTracks(
 			UndoModify(trk1);
 			EPINX_T ep = NewTurntableEndPt(trk1,angle);
 			if (ConnectTracks( trk1, ep, trk2, ep2 )) {
-				UndoUndo();
+				UndoUndo(NULL);
 				return FALSE;
 			}
 			return TRUE;

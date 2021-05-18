@@ -120,12 +120,13 @@ static dynArr_t benchType_da;
 
 static void AddBenchTypes(
 		long type,
-		char * key,
-		char * defvalue )
+		const char * key,
+		const char * defvalue )
 {
 	benchType_p bt;
-	char *value, *cp, *cq;
-	value = CAST_AWAY_CONST wPrefGetString( "misc", key );
+	const char *value, *cp;
+	char *cq;
+	value = wPrefGetString( "misc", key );
 	if ( value == NULL ) {
 		value = defvalue;
 		wPrefSetString( "misc", key, value );
@@ -135,14 +136,15 @@ static void AddBenchTypes(
 		DYNARR_APPEND( benchType_t, benchType_da, 10 );
 		bt = &benchType(benchType_da.cnt-1);
 		bt->type = type;
-		bt->width = strtol( cq=cp, &cp, 10 );
-		bt->height0 = strtol( cq=cp, &cp, 10 );
-		bt->height1 = strtol( cq=cp, &cp, 10 );
+		bt->width = strtol( cp, &cq, 10 );
+		bt->height0 = strtol( cp=cq, &cq, 10 );
+		bt->height1 = strtol( cp=cq, &cq, 10 );
 		if ( cp == cq ) {
 			NoticeMessage( _("Bad BenchType for %s:\n%s"), _("Continue"), NULL, key, value );
 			benchType_da.cnt--;
 			return;
 		}
+		cp = cq;
 	}
 }
 

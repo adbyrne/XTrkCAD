@@ -62,7 +62,7 @@ static long curNoteType;
 static unsigned layerSave;
 static 	coOrd posSave;
 
-#define NOTETYPESCOUNT (sizeof(noteTypes)/sizeof(trknoteData_t))
+#define NOTETYPESCOUNT COUNT(noteTypes)
 
 
 /*****************************************************************************

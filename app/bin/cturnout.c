@@ -70,7 +70,7 @@ static drawCmd_t turnoutD = {
 static wIndex_t turnoutHotBarCmdInx;
 static wIndex_t turnoutInx;
 static long hideTurnoutWindow;
-static void RedrawTurnout(void);
+static void RedrawTurnout( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 static void SelTurnoutEndPt(wIndex_t, coOrd);
 static void HilightEndPt(void);
 
@@ -78,7 +78,7 @@ static wWinPix_t turnoutListWidths[] = { 80, 80, 220 };
 static const char* turnoutListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, turnoutListWidths, turnoutListTitles };
 static const char* hideLabels[] = { N_("Hide"), NULL };
-static paramDrawData_t turnoutDrawData = { 490, 200, (wDrawRedrawCallBack_p)RedrawTurnout, SelTurnoutEndPt, &turnoutD };
+static paramDrawData_t turnoutDrawData = { 490, 200, RedrawTurnout, SelTurnoutEndPt, &turnoutD };
 static paramData_t turnoutPLs[] = {
 #define I_LIST		(0)
 #define turnoutListL    ((wList_p)turnoutPLs[I_LIST].control)
@@ -91,8 +91,8 @@ static paramData_t turnoutPLs[] = {
 	{   PD_MENU, NULL, "new", PDO_DLGCMDBUTTON, NULL, N_("New") },
 #define I_HIDE		(3)
 #define turnoutHideT    ((wChoice_p)turnoutPLs[I_HIDE].control)
-	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(char**)hideLabels, NULL, BC_NOBORDER } };
-static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, sizeof turnoutPLs / sizeof turnoutPLs[0] };
+	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER } };
+static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) };
 #endif
 
 /* Draw turnout data */
@@ -2969,6 +2969,7 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos, trackParams_t* p
 			PATHPTR_T path, pathCurr;
 			//Find starting seg on path (nearest to end Pt)
 			path = GetCurrPath(trk);
+			pathCurr = path;
 			for (path += strlen((char*)path) + 1; path[0] || path[1]; path++) {
 				if (path[0] == 0)
 					continue;
@@ -3167,7 +3168,7 @@ static void DrawTurnoutPositionIndicator(
 {
 	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	PATHPTR_T path, path1;
-	coOrd pos0, pos1;
+	coOrd pos0 = zero, pos1;
 	trkSeg_p seg;
 	BOOL_T multiPart = FALSE;
 
@@ -3483,11 +3484,11 @@ static void TurnoutChange(long changes)
 	maxTurnoutDim.x += 2 * trackGauge;
 	maxTurnoutDim.y += 2 * trackGauge;
 	/*RescaleTurnout();*/
-	RedrawTurnout();
+	RedrawTurnout( turnoutD.d, NULL, 0, 0 );
 	return;
 }
 
-static void RedrawTurnout()
+static void RedrawTurnout( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
 	RescaleTurnout();
 	LOG(log_turnout, 2, ("SelTurnout(%s)\n", (curTurnout ? curTurnout->title : "<NULL>")))
@@ -3522,7 +3523,7 @@ static void TurnoutDlgUpdate(
 	to = (turnoutInfo_t*)wListGetItemContext((wList_p)pg->paramPtr[inx].control, (wIndex_t) * (long*)valueP);
 	AddTurnout();
 	curTurnout = to;
-	RedrawTurnout();
+	RedrawTurnout( turnoutD.d, NULL, 0, 0 );
 	/*	ParamDialogOkActive( &turnoutPG, FALSE ); */
 }
 
@@ -4351,7 +4352,7 @@ static STATUS_T CmdTurnout(
 		if (turnoutIndex > 0 && turnoutPtr) {
 			curTurnout = turnoutPtr;
 			wListSetIndex(turnoutListL, turnoutIndex);
-			RedrawTurnout();
+			RedrawTurnout( turnoutD.d, NULL, 0, 0 );
 		}
 		InfoMessage(_("Pick turnout and active End Point, then place on the layout"));
 		ParamLoadControls(&turnoutPG);

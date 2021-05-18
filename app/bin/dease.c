@@ -75,7 +75,7 @@ static paramData_t easementPLs[] = {
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
 	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE } };
-static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, sizeof easementPLs/sizeof easementPLs[0] };
+static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, COUNT( easementPLs ) };
 
 
 static void SetEasement(
@@ -234,7 +234,7 @@ static void LayoutEasementW(
 }
 
 
-static void DoEasement( void * junk )
+static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
 		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
@@ -282,7 +282,7 @@ EXPORT addButtonCallBack_t EasementInit( void )
 	ebroad_bm = wIconCreatePixMap( ease_broad_xpm[iconSize] );
 	egtbroad_bm = wIconCreatePixMap( ease_gtbroad_xpm[iconSize] );
 	ecornu_bm = wIconCreatePixMap( ease_cornu_xpm[iconSize] );
-	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, (addButtonCallBack_t)DoEasementRedir, NULL );
+	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir, NULL );
 
 	RegisterChangeNotification( EasementChange );
 	return &DoEasement;

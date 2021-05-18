@@ -46,7 +46,7 @@ struct wBitmap_t {
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long options, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long options, const struct wIcon_t * iconP )
 {
 	wBitmap_p bt;
 	GdkPixbuf *pixbuf;

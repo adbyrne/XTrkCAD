@@ -392,7 +392,7 @@ static paramData_t sensorEditPLs[] = {
     /*3*/ { PD_STRING, sensorEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(sensorEditScript)},
 };
 
-static paramGroup_t sensorEditPG = { "sensorEdit", 0, sensorEditPLs, sizeof sensorEditPLs/sizeof sensorEditPLs[0] };
+static paramGroup_t sensorEditPG = { "sensorEdit", 0, sensorEditPLs, COUNT( sensorEditPLs ) };
 static wWin_p sensorEditW;
 
 static void SensorEditOk ( void * junk )

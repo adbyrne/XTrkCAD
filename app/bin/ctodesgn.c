@@ -208,7 +208,7 @@ static paramData_t turnDesignPLs[] = {
 	};
 #ifndef MKTURNOUT
 
-static paramGroup_t turnDesignPG = { "turnoutNew", 0, turnDesignPLs, sizeof turnDesignPLs/sizeof turnDesignPLs[0] };
+static paramGroup_t turnDesignPG = { "turnoutNew", 0, turnDesignPLs, COUNT( turnDesignPLs )  };
 
 static turnoutInfo_t * customTurnout1, * customTurnout2;
 static BOOL_T includeNontrackSegments;
@@ -246,8 +246,8 @@ static toDesignDesc_t RegDesc = {
 		NTO_REGULAR,
 		N_("Regular Turnout"),
 		2,
-		sizeof RegLines/sizeof RegLines[0], RegLines,
-		sizeof RegFloats/sizeof RegFloats[0], RegFloats,
+		COUNT( RegLines ), RegLines,
+		COUNT( RegFloats ), RegFloats,
 		&RegSchema, 1 };
 
 static wLines_t CrvLines[] = {
@@ -283,8 +283,8 @@ static toDesignDesc_t CrvDesc = {
 		NTO_CURVED,
 		N_("Curved Turnout"),
 		2,
-		sizeof CrvLines/sizeof CrvLines[0], CrvLines,
-		sizeof CrvFloats/sizeof CrvFloats[0], CrvFloats,
+		COUNT( CrvLines ), CrvLines,
+		COUNT( CrvFloats ), CrvFloats,
 		&Crv1Schema, 1 };
 
 static wLines_t CornuLines[] = {
@@ -312,8 +312,8 @@ static toDesignDesc_t CornuDesc = {
 		NTO_CORNU,
 		N_("Cornu Curved Turnout"),
 		2,
-		sizeof CornuLines/sizeof CornuLines[0], CornuLines,
-		sizeof CornuFloats/sizeof CornuFloats[0], CornuFloats,
+		COUNT( CornuLines ), CornuLines,
+		COUNT( CornuFloats ), CornuFloats,
 		&CornuSchema, 1 };
 
 static wLines_t WyeLines[] = {
@@ -349,8 +349,8 @@ static toDesignDesc_t WyeDesc = {
 		NTO_WYE,
 		N_("Wye Turnout"),
 		1,
-		sizeof WyeLines/sizeof WyeLines[0], WyeLines,
-		sizeof WyeFloats/sizeof WyeFloats[0], WyeFloats,
+		COUNT( WyeLines ), WyeLines,
+		COUNT( WyeFloats ), WyeFloats,
 		NULL, 1 };
 
 static wLines_t CornuWyeLines[] = {
@@ -378,8 +378,8 @@ static toDesignDesc_t CornuWyeDesc = {
 		NTO_CORNUWYE,
 		N_("Cornu Wye Turnout"),
 		1,
-		sizeof CornuWyeLines/sizeof CornuWyeLines[0], CornuWyeLines,
-		sizeof CornuWyeFloats/sizeof CornuWyeFloats[0], CornuWyeFloats,
+		COUNT( CornuWyeLines ), CornuWyeLines,
+		COUNT( CornuWyeFloats ), CornuWyeFloats,
 		NULL, 1 };
 
 static wLines_t ThreewayLines[] = {
@@ -419,8 +419,8 @@ static toDesignDesc_t ThreewayDesc = {
 		NTO_3WAY,
 		N_("3-way Turnout"),
 		1,
-		sizeof ThreewayLines/sizeof ThreewayLines[0], ThreewayLines,
-		sizeof ThreewayFloats/sizeof ThreewayFloats[0], ThreewayFloats,
+		COUNT( ThreewayLines ), ThreewayLines,
+		COUNT( ThreewayFloats ), ThreewayFloats,
 		NULL, 1 };
 
 static wLines_t CornuThreewayLines[] = {
@@ -454,8 +454,8 @@ static toDesignDesc_t CornuThreewayDesc = {
 		NTO_CORNU3WAY,
 		N_("Cornu 3-way Turnout"),
 		1,
-		sizeof CornuThreewayLines/sizeof CornuThreewayLines[0], CornuThreewayLines,
-		sizeof CornuThreewayFloats/sizeof CornuThreewayFloats[0], CornuThreewayFloats,
+		COUNT( CornuThreewayLines ), CornuThreewayLines,
+		COUNT( CornuThreewayFloats ), CornuThreewayFloats,
 		NULL, 1 };
 
 static wLines_t CrossingLines[] = {
@@ -474,8 +474,8 @@ static toDesignDesc_t CrossingDesc = {
 		NTO_CROSSING,
 		N_("Crossing"),
 		1,
-		sizeof CrossingLines/sizeof CrossingLines[0], CrossingLines,
-		sizeof CrossingFloats/sizeof CrossingFloats[0], CrossingFloats,
+		COUNT( CrossingLines ), CrossingLines,
+		COUNT( CrossingFloats ), CrossingFloats,
 		&CrossingSchema, 1 };
 
 static wLines_t SingleSlipLines[] = {
@@ -495,8 +495,8 @@ static toDesignDesc_t SingleSlipDesc = {
 		NTO_S_SLIP,
 		N_("Single Slipswitch"),
 		1,
-		sizeof SingleSlipLines/sizeof SingleSlipLines[0], SingleSlipLines,
-		sizeof SingleSlipFloats/sizeof SingleSlipFloats[0], SingleSlipFloats,
+		COUNT( SingleSlipLines ), SingleSlipLines,
+		COUNT( SingleSlipFloats ), SingleSlipFloats,
 		&SingleSlipSchema, 1 };
 
 static wLines_t DoubleSlipLines[] = {
@@ -524,8 +524,8 @@ static toDesignDesc_t DoubleSlipDesc = {
 		NTO_D_SLIP,
 		N_("Double Slipswitch"),
 		1,
-		sizeof DoubleSlipLines/sizeof DoubleSlipLines[0], DoubleSlipLines,
-		sizeof DoubleSlipFloats/sizeof DoubleSlipFloats[0], DoubleSlipFloats,
+		COUNT( DoubleSlipLines ), DoubleSlipLines,
+		COUNT( DoubleSlipFloats ), DoubleSlipFloats,
 		&DoubleSlipSchema, 1 };
 
 static wLines_t RightCrossoverLines[] = {
@@ -544,8 +544,8 @@ static toDesignDesc_t RightCrossoverDesc = {
 		NTO_R_CROSSOVER,
 		N_("Right Crossover"),
 		1,
-		sizeof RightCrossoverLines/sizeof RightCrossoverLines[0], RightCrossoverLines,
-		sizeof RightCrossoverFloats/sizeof RightCrossoverFloats[0], RightCrossoverFloats,
+		COUNT( RightCrossoverLines ), RightCrossoverLines,
+		COUNT( RightCrossoverFloats ), RightCrossoverFloats,
 		&RightCrossoverSchema, 0 };
 
 static wLines_t LeftCrossoverLines[] = {
@@ -564,8 +564,8 @@ static toDesignDesc_t LeftCrossoverDesc = {
 		NTO_L_CROSSOVER,
 		N_("Left Crossover"),
 		1,
-		sizeof LeftCrossoverLines/sizeof LeftCrossoverLines[0], LeftCrossoverLines,
-		sizeof LeftCrossoverFloats/sizeof LeftCrossoverFloats[0], LeftCrossoverFloats,
+		COUNT( LeftCrossoverLines ), LeftCrossoverLines,
+		COUNT( LeftCrossoverFloats ), LeftCrossoverFloats,
 		&LeftCrossoverSchema, 0 };
 
 static wLines_t DoubleCrossoverLines[] = {
@@ -584,8 +584,8 @@ static toDesignDesc_t DoubleCrossoverDesc = {
 		NTO_D_CROSSOVER,
 		N_("Double Crossover"),
 		1,
-		sizeof DoubleCrossoverLines/sizeof DoubleCrossoverLines[0], DoubleCrossoverLines,
-		sizeof DoubleCrossoverFloats/sizeof DoubleCrossoverFloats[0], DoubleCrossoverFloats,
+		COUNT( DoubleCrossoverLines ), DoubleCrossoverLines,
+		COUNT( DoubleCrossoverFloats ), DoubleCrossoverFloats,
 		&DoubleCrossoverSchema, 0 };
 
 static wLines_t StrSectionLines[] = {
@@ -602,8 +602,8 @@ static toDesignDesc_t StrSectionDesc = {
 		NTO_STR_SECTION,
 		N_("Straight Section"),
 		1,
-		sizeof StrSectionLines/sizeof StrSectionLines[0], StrSectionLines,
-		sizeof StrSectionFloats/sizeof StrSectionFloats[0], StrSectionFloats,
+		COUNT( StrSectionLines ), StrSectionLines,
+		COUNT( StrSectionFloats ), StrSectionFloats,
 		&StrSectionSchema, 0 };
 
 static wLines_t CrvSectionLines[] = {
@@ -621,8 +621,8 @@ static toDesignDesc_t CrvSectionDesc = {
 		NTO_CRV_SECTION,
 		N_("Curved Section"),
 		1,
-		sizeof CrvSectionLines/sizeof CrvSectionLines[0], CrvSectionLines,
-		sizeof CrvSectionFloats/sizeof CrvSectionFloats[0], CrvSectionFloats,
+		COUNT( CrvSectionLines ), CrvSectionLines,
+		COUNT( CrvSectionFloats ), CrvSectionFloats,
 		&CrvSectionSchema, 0 };
 
 #ifdef LATER
@@ -640,8 +640,8 @@ static toDesignDesc_t BumperDesc = {
 		NTO_BUMPER,
 		N_("Bumper Section"),
 		1,
-		sizeof StrSectionLines/sizeof StrSectionLines[0], StrSectionLines,
-		sizeof BumperFloats/sizeof BumperFloats[0], BumperFloats,
+		COUNT( BumberLines ), BumperLines,
+		COUNT( BumperFloats ), BumperFloats,
 		&BumperSchema, 0 };
 
 static wLines_t TurntableLines[] = {
@@ -732,8 +732,8 @@ static toDesignDesc_t TurntableDesc = {
 		NTO_TURNTABLE,
 		N_("Turntable Section"),
 		1,
-		sizeof StrSectionLines/sizeof StrSectionLines[0], StrSectionLines,
-		sizeof TurntableFloats/sizeof TurntableFloats[0], TurntableFloats,
+		COUNT( TurntableLines ), TurntableLines,
+		COUNT( TurntableFloats ), TurntableFLoats,
 		&TurntableSchema, 0 };
 #endif
 
@@ -946,7 +946,7 @@ EXPORT long ComputeTurnoutRoadbedSide(
 	rbw = (int)(roadbedWidth/length*32/2);
 /*printf( "L=%0.3f G=%0.3f [%0.3f %0.3f] RBW=%d\n", length, gapWidth, first, last, rbw );*/
 	res = 0xFF0000FF;
-	for ( p=searchTable; p<&searchTable[sizeof searchTable/sizeof searchTable[0]]; p++) {
+	for ( p=searchTable; p<&searchTable[COUNT( searchTable )]; p++) {
 		if ( (p->width < rbw && res==0xFFFFFFFF) || res==0 )
 			break;
 		res1 = (p->mask & res);
@@ -2896,7 +2896,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 			I2VP(partnoWidth);
 		partnoWidth += wLabelWidth( " # " );
 		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"), NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK, NULL );
-		for ( inx=0; inx<(sizeof designDescs/sizeof designDescs[0]); inx++ ) {
+		for ( inx=0; inx<COUNT( designDescs ); inx++ ) {
 			designDescs[inx]->lineC = wLineCreate( turnDesignPG.win, NULL, designDescs[inx]->lineCnt, designDescs[inx]->lines );
 			wControlShow( (wControl_p)designDescs[inx]->lineC, FALSE );
 		}
@@ -3046,13 +3046,13 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 
 	if ( ! GetArgs( to->customInfo, "qqqqqc", &type, &name, &mfg, &descL, &partL, &cp ) )
 		return;
-	for ( i=0; i<(sizeof designDescs/sizeof designDescs[0]); i++ ) {
+	for ( i=0; i<COUNT( designDescs ); i++ ) {
 		dp = designDescs[i];
 		if ( strcmp( type, dp->label ) == 0 ) {
 			break;
 		}
 	}
-	if ( i >= (sizeof designDescs/sizeof designDescs[0]) )
+	if ( i >= COUNT( designDescs ) )
 		return;
 
 	SetupTurnoutDesignerW(dp);
@@ -3239,7 +3239,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 {
 	int i;
 	ParamRegister( &turnDesignPG );
-	for ( i=0; i<(sizeof designDescs/sizeof designDescs[0]); i++ ) {
+	for ( i=0; i<COUNT( designDescs ); i++ ) {
 		wMenuPushCreate( m, NULL, _(designDescs[i]->label), 0,
 				ShowTurnoutDesigner, designDescs[i] );
 		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, designDescs[i]->label );
@@ -3547,7 +3547,7 @@ int main ( int argc, char * argv[] )
 
 	newTurnScaleName = curScaleName = *argv++;
 	trackGauge = 0.0;
-	for ( inx=0; inx<sizeof scaleMap/sizeof scaleMap[0]; inx++ ) {
+	for ( inx=0; inx<COUNT( scaleMap ); inx++ ) {
 		if (strcmp( curScaleName, scaleMap[inx].scale ) == 0 ) {
 			newTurnTrackGauge = trackGauge = scaleMap[inx].trackGauge;
 			break;

@@ -84,7 +84,7 @@ extern long wDebugFont;
  * Bitmap Controls bitmap.c
  */
 
-wControl_p wBitmapCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, long options, wIcon_p iconP);
+wControl_p wBitmapCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, long options, const struct wIcon_t * iconP);
 wIcon_p wIconCreateBitMap(wWinPix_t w, wWinPix_t h, const char *bits, wDrawColor color);
 wIcon_p wIconCreatePixMap(char *pm[]);
 void wIconSetColor(wIcon_p ip, wDrawColor color);
@@ -140,8 +140,8 @@ void wRadioSetValue(wChoice_p bc, long value);
 long wRadioGetValue(wChoice_p bc);
 void wToggleSetValue(wChoice_p bc, long value);
 long wToggleGetValue(wChoice_p b);
-wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char **labels, long *valueP, wChoiceCallBack_p action, void *data);
-wChoice_p wToggleCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char **labels, long *valueP, wChoiceCallBack_p action, void *data);
+wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
+wChoice_p wToggleCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
 
 
 /*------------------------------------------------------------------------------
@@ -681,7 +681,7 @@ void wDoAccelHelp( wAccelKey_e key, void * );
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wMenuListCallBack_p)( int, const char *, void * );
-typedef void (*wMenuToggleCallBack_p)( wBool_t , void * );
+typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wAccelKeyCallBack_p)( wAccelKey_e, void * );
 typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );
 
@@ -707,7 +707,7 @@ void wMenuListDelete(		wMenuList_p, const char * );
 const char * wMenuListGet(	wMenuList_p, int, void ** );
 void wMenuListClear(		wMenuList_p );
 
-wMenuToggle_p wMenuToggleCreate(	wMenu_p, const char *, const char *, long, wBool_t, wMenuToggleCallBack_p, void * );
+wMenuToggle_p wMenuToggleCreate(	wMenu_p, const char *, const char *, long, wBool_t, wMenuCallBack_p, void * );
 wBool_t wMenuToggleSet(		wMenuToggle_p, wBool_t );
 wBool_t wMenuToggleGet(		wMenuToggle_p );
 void wMenuToggleEnable(		wMenuToggle_p, wBool_t );

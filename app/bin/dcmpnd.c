@@ -70,7 +70,7 @@ static paramData_t updateTitlePLs[] = {
 	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
-static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
+static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, COUNT( updateTitlePLs ) };
 
 
 static void UpdateTitleChange( long changes )
@@ -317,7 +317,7 @@ static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
 		{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
-static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
+static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
 static void RefreshSpecialOk(
 		void * junk )
 {
@@ -448,7 +448,7 @@ static paramData_t renamePLs[] = {
 /*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
 /*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
 /*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)} };
-static paramGroup_t renamePG = { "rename", 0, renamePLs, sizeof renamePLs/sizeof renamePLs[0] };
+static paramGroup_t renamePG = { "rename", 0, renamePLs, COUNT( renamePLs ) };
 
 
 EXPORT BOOL_T CompoundCustomSave(

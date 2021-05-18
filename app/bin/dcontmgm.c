@@ -88,7 +88,7 @@ static paramData_t controlPLs[] = {
 #define I_CONTROLDEL		(2)
     {	PD_BUTTON, ControlDelete, "delete", 0, NULL, N_("Delete") },
   } ;
-static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
+static paramGroup_t controlPG = { "contmgm", 0, controlPLs, COUNT( controlPLs ) };
 
 
 typedef struct {

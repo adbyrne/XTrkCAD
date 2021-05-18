@@ -54,7 +54,7 @@ static paramData_t elevationPLs[] = {
 	{ PD_MESSAGE, NULL, "grade", 0, I2VP(80) },
 #define I_STATION			(4)
 	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(200), NULL, 0, 0, sizeof(elevStationV)} };
-static paramGroup_t elevationPG = { "elev", 0, elevationPLs, sizeof elevationPLs/sizeof elevationPLs[0] };
+static paramGroup_t elevationPG = { "elev", 0, elevationPLs, COUNT( elevationPLs ) };
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
@@ -132,7 +132,7 @@ static void LayoutElevW(
 	static wWinPix_t h = 0;
 	switch ( inx ) {
 	case I_HEIGHT:
-		h = wControlGetHeight( elevationPLs[I_MODE].control )/((sizeof elevModeLabels/sizeof elevModeLabels[0])-1);
+		h = wControlGetHeight( elevationPLs[I_MODE].control )/(COUNT( elevModeLabels )-1);
 #ifndef WINDOWS
 		h += 3;
 #endif

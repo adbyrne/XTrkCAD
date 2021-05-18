@@ -36,7 +36,7 @@ static paramData_t notePLs[] = {
 #define noteT			((wText_p)notePLs[I_NOTETEXT].control)
     {	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
 };
-static paramGroup_t notePG = { "note", 0, notePLs, sizeof notePLs/sizeof notePLs[0] };
+static paramGroup_t notePG = { "note", 0, notePLs, COUNT( notePLs ) };
 
 
 void ClearNote(void)
@@ -47,7 +47,7 @@ void ClearNote(void)
     }
 }
 
-static void NoteOk(void * junk)
+static void NoteOk(void * unused)
 {
     if (wTextGetModified(noteT)) {
         int len;
@@ -61,7 +61,7 @@ static void NoteOk(void * junk)
 }
 
 
-void DoNote(void)
+void DoNote(void * unused)
 {
     if (noteW == NULL) {
         noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,

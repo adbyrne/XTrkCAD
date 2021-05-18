@@ -59,7 +59,7 @@ static paramData_t customPLs[] = {
 #define I_CUSTOMCOPYTO	(5)
 	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
   } ;
-static paramGroup_t customPG = { "custmgm", 0, customPLs, sizeof customPLs/sizeof customPLs[0] };
+static paramGroup_t customPG = { "custmgm", 0, customPLs, COUNT( customPLs ) };
 
 
 typedef struct {
@@ -172,7 +172,7 @@ static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
 	{ PD_STRING, custMgmContentsStr, "label", PDO_NOTBLANK, I2VP(400), N_("Label"), 0, 0, sizeof(custMgmContentsStr)} };
-static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, sizeof custMgmContentsPLs/sizeof custMgmContentsPLs[0] };
+static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, COUNT( custMgmContentsPLs ) };
 
 static void CustMgmContentsOk( void * junk )
 {

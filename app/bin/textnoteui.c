@@ -43,7 +43,7 @@ static paramData_t textEditPLs[] = {
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
 
-static paramGroup_t textEditPG = { "textEdit", 0, textEditPLs, sizeof textEditPLs / sizeof textEditPLs[0] };
+static paramGroup_t textEditPG = { "textEdit", 0, textEditPLs, COUNT( textEditPLs ) };
 static wWin_p textEditW;
 
 #define textEntry	((wText_p)textEditPLs[I_TEXT].control)

@@ -413,7 +413,7 @@ static paramData_t curvePLs[] = {
 #define curveRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
+static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, COUNT( curvePLs ) };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -701,11 +701,11 @@ static paramData_t helixPLs[] = {
 	{ PD_FLOAT, &helixVertSep, "vertSep", PDO_DIM, &r0_1000000, N_("Vertical Separation") },
 #define I_HELIXMSG		(6)
 	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, I2VP(200) } };
-static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, sizeof helixPLs/sizeof helixPLs[0] };
+static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, COUNT( helixPLs ) };
 
 static paramData_t circleRadiusPLs[] = {
 	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 } };
-static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, sizeof circleRadiusPLs/sizeof circleRadiusPLs[0] };
+static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, COUNT( circleRadiusPLs ) };
 
 
 static void ComputeHelix(
@@ -716,7 +716,7 @@ static void ComputeHelix(
 	DIST_T totTurns;
 	DIST_T length;
 	long updates = 0;
-	if ( h_inx < 0 || h_inx >= sizeof h_orders/sizeof h_orders[0] )
+	if ( h_inx < 0 || h_inx >= COUNT( h_orders ) )
 		return;
 	ParamLoadData( &helixPG );
 	totTurns = helixTurns + helixAngSep/360.0;

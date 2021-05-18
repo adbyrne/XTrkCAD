@@ -430,7 +430,7 @@ static paramData_t controlEditPLs[] = {
     /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
-static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, sizeof controlEditPLs/sizeof controlEditPLs[0] };
+static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, COUNT( controlEditPLs ) };
 static wWin_p controlEditW;
 
 static void ControlEditOk ( void * junk )

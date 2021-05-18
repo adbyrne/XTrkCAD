@@ -953,7 +953,7 @@ LOG( log_fillElev, 1, ( "%s: findIslandElevs [%d] (%ld)\n", elevPrefix, islandCn
  *
  */
 
-EXPORT void RecomputeElevations( void )
+EXPORT void RecomputeElevations( void * unused )
 {
 	long time0 = wGetTimer();
 	elevPrefix = "RECELV";

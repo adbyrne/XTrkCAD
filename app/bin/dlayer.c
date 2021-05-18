@@ -242,8 +242,9 @@ static void RedrawLayer( unsigned int l, BOOL_T draw )
 }
 
 
-EXPORT void FlipLayer(unsigned int layer)
+EXPORT void FlipLayer( void * layerVP )
 {
+	unsigned int layer = (unsigned int)VP2L(layerVP);
     wBool_t visible;
 
     if (!IsLayerValid(layer)) {
@@ -318,7 +319,7 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 
 
     if (!layers[curLayer].visible) {
-        FlipLayer(inx);
+        FlipLayer(I2VP(inx));
     }
 
     /* Set visible on related layers other than current */
@@ -555,7 +556,7 @@ static long layerFrozen = FALSE;
 static long layerOnMap = TRUE;
 static long layerModule = FALSE;
 static long layerNoButton = FALSE;
-static void LayerOk(void * junk);
+static void LayerOk(void * unused);
 static BOOL_T layerRedrawMap = FALSE;
 
 #define ENUMLAYER_RELOAD (1)
@@ -605,7 +606,7 @@ static paramData_t layerPLs[] = {
 #define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
 #define MESSAGETEXT ((wMessage_p)layerPLs[I_COUNT].control)
 
-static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
+static paramGroup_t layerPG = { "layer", 0, layerPLs, COUNT( layerPLs ) };
 
 /**
  * Reload the listbox showing the current catalog
@@ -1222,7 +1223,7 @@ static void LayerUpdate(void)
 
     layers[(int)layerCurrent].useColor = (BOOL_T)layerUseColor;
     if (layers[(int)layerCurrent].visible != (BOOL_T)layerVisible)
-			FlipLayer(layerCurrent);
+			FlipLayer(I2VP(layerCurrent));
     layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
     if (layers[(int)layerCurrent].frozen) DeselectLayer(layerCurrent);
@@ -1399,7 +1400,7 @@ void RestoreLayers(void)
  *
  */
 
-static void LayerOk(void * junk)
+static void LayerOk(void * unused)
 {
     LayerSelect(layerCurrent);
 
@@ -1541,7 +1542,7 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
     return (newEntry);
 }
 
-static void DoLayer(void * junk)
+static void DoLayer(void * unused)
 {
     if (layerW == NULL) {
         layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
@@ -1626,7 +1627,7 @@ BOOL_T ReadLayers(char * line)
 
 
     if (paramVersion < 9) {
-        if ((int)rgb < sizeof oldColorMap/sizeof oldColorMap[0]) {
+        if ((int)rgb < COUNT( oldColorMap ) ) {
             rgb = wRGB(oldColorMap[(int)rgb][0], oldColorMap[(int)rgb][1],
                        oldColorMap[(int)rgb][2]);
         } else {
@@ -1761,7 +1762,7 @@ void InitLayers(void)
     AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
 	
 	backgroundB = AddToolbarButton("cmdBackgroundShow", wIconCreatePixMap(background_xpm[iconSize]), 0,
-		(addButtonCallBack_t)BackgroundToggleShow, NULL);
+		BackgroundToggleShow, NULL);
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));
 	wControlActive((wControl_p)backgroundB, FALSE);
@@ -1774,7 +1775,7 @@ void InitLayers(void)
             sprintf(message, "cmdLayerShow%u", i);
             layer_btns[i] = wButtonCreate(mainW, 0, 0, message,
                                           (char*)(show_layer_bmps[i]),
-                                          BO_ICON, 0, (wButtonCallBack_p)FlipLayer, I2VP(i) );
+                                          BO_ICON, 0, FlipLayer, I2VP(i) );
             /* add the help text */
             wControlSetBalloonText((wControl_p)layer_btns[i], _("Show/Hide Layer"));
             /* put on toolbar */

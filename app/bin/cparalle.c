@@ -51,7 +51,7 @@ static paramData_t parSepPLs[] = {
 #define parFactorI 1
 	{   PD_FLOAT, &parSepFactor, "factor", 0, &r_0_10, N_("Radius Factor") }
 };
-static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
+static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, COUNT( parSepPLs ) };
 
 
 static STATUS_T CmdParallel(wAction_t action, coOrd pos)
