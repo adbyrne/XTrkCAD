@@ -432,7 +432,7 @@ static void ProfileCoOrd2Pix(
  * Redraw profile window 
  */
 
-static void RedrawProfileW(void)
+static void RedrawProfileW( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
     wWinPix_t ww, hh;
     coOrd size;
@@ -700,7 +700,7 @@ static void DoProfileChangeMode(void * junk);
 static void SelProfileW(wIndex_t, coOrd);
 static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
 
-static paramDrawData_t profileDrawData = { 300, 150, (wDrawRedrawCallBack_p)RedrawProfileW, SelProfileW, &screenProfileD };
+static paramDrawData_t profileDrawData = { 300, 150, RedrawProfileW, SelProfileW, &screenProfileD };
 static paramData_t profilePLs[] = {
     {	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
 #define I_PROFILEMSG			(1)
@@ -714,7 +714,7 @@ static paramData_t profilePLs[] = {
 #define I_PRINTBUTTON 5
     {	PD_BUTTON, DoProfilePrint, "print", 0, NULL, N_("Print") }
 };
-static paramGroup_t profilePG = { "profile", 0, profilePLs, sizeof profilePLs/sizeof profilePLs[0] };
+static paramGroup_t profilePG = { "profile", 0, profilePLs, COUNT( profilePLs ) };
 
 #define CHANGEBUTTON  ((wButton_p)profilePLs[I_CHANGEBUTTON].control)
 #define RESETBUTTON  ((wButton_p)profilePLs[I_RESETBUTTON].control)
@@ -756,7 +756,7 @@ static void SelProfileW(
         sprintf(message, _("Elev = %0.1f"), round(PutDim(elev)*10.0)/10.0);
         ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
         oldElev = elev;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
         break;
     case C_MOVE:
         if (inx < 0) {
@@ -785,7 +785,7 @@ static void SelProfileW(
         ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
         oldElev = elev;
         profElem(inx).elev = oldElev;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
 		wPause(500l);
 		break;
     case C_UP:
@@ -798,7 +798,7 @@ static void SelProfileW(
                              oldElev, NULL);
         }
         profElem(inx).elev = oldElev;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
         ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
         inx = -1;
         break;
@@ -863,7 +863,7 @@ DoProfileReset(void *junk)
 		UndoStart(_("Profile Command"), "Profile");
 	}
 	ResetChanges();
-	RedrawProfileW();
+	RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     TempRedraw();
 }
 
@@ -894,7 +894,7 @@ static void DoProfileClear(void * junk)
     station_da.cnt = 0;
     ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE);
     pathStartTrk = pathEndTrk = NULL;
-    RedrawProfileW();
+    RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
 }
 
 
@@ -1370,7 +1370,7 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
     ComputeProfElem();
     CreateCopyProfileElements();
 
-    RedrawProfileW();
+    RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     DoProfileChangeMode(NULL);
     if (log_profile>=1) {
         lprintf(" = ");
@@ -1382,7 +1382,7 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
 
 
 
-static void ProfileSubCommand(wBool_t set, void* pcmd)
+static void ProfileSubCommand(void* pcmd)
 {
     long cmd = VP2L(pcmd);
     int mode;
@@ -1424,7 +1424,7 @@ static void ProfileSubCommand(wBool_t set, void* pcmd)
     }
     UpdateTrkEndElev(profilePopupTrk, profilePopupEp, mode, elev, NULL);
     ComputeProfElem();
-    RedrawProfileW();
+    RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     TempRedraw(); // ProfileSubCommand
 }
 
@@ -1453,7 +1453,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
         ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
         profElem_da.cnt = 0;
         station_da.cnt = 0;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
         ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE);
         pathStartTrk = NULL;
         SetAllTrackSelect(FALSE);
@@ -1513,7 +1513,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 static void ProfileChange(long changes)
 {
     if ((changes & CHANGE_UNITS) && screenProfileD.d) {
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     }
 }
 

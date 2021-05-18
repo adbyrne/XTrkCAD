@@ -879,7 +879,7 @@ static void docs_char(charset_state *state,
 	    emit(emitctx, '/');
 	    emit(emitctx, '0' + ctext_encodings[curr_cset].octets_per_char);
 	    len = currlen + datalen +
-		strlen(ctext_encodings[curr_cset].name);
+		(int)strlen(ctext_encodings[curr_cset].name);
 	    assert(len < (1 << 14));
 	    emit(emitctx, 0x80 | ((len >> 7) & 0x7F));
 	    emit(emitctx, 0x80 | ((len     ) & 0x7F));
@@ -1195,7 +1195,7 @@ static int write_iso2022(charset_spec const *charset, long int input_chr,
 	}
 
 	if (cs != -2) {
-	    docs_char(state, emit, emitctx, cs, data, p - data);
+	    docs_char(state, emit, emitctx, cs, data, (int)(p - data));
 	    return TRUE;
 	}
     }

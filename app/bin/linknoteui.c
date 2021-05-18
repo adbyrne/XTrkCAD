@@ -55,7 +55,7 @@ static paramData_t linkEditPLs[] = {
 	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
 };
 
-static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, sizeof linkEditPLs / sizeof linkEditPLs[0] };
+static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, COUNT( linkEditPLs ) };
 static wWin_p linkEditW;
 
 BOOL_T

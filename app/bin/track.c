@@ -245,7 +245,7 @@ EXPORT BOOL_T CheckTrackLayerSilent( track_p trk )
  */
 
 
-EXPORT void EnumerateTracks( void )
+EXPORT void EnumerateTracks( void * unused )
 {
 	track_p trk;
 	TRKINX_T inx;
@@ -1361,7 +1361,7 @@ static void ExciseSelectedTracks( track_p * pxtrk, track_p * pltrk )
 }
 
 
-EXPORT void SelectAbove( void )
+EXPORT void SelectAbove( void * unused )
 {
 	track_p xtrk, ltrk;
 	if (selectedTrackCount<=0) {
@@ -1380,7 +1380,7 @@ EXPORT void SelectAbove( void )
 }
 
 
-EXPORT void SelectBelow( void )
+EXPORT void SelectBelow( void * unused )
 {
 	track_p xtrk, ltrk, trk;
 	coOrd lo, hi, lowest, highest;
@@ -1425,9 +1425,9 @@ EXPORT void InitCmdAboveBelow( void )
 {
 	wIcon_p bm_p;
 	bm_p = wIconCreatePixMap( above_xpm );
-	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectAbove, NULL );
+	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED|IC_POPUP, SelectAbove, NULL );
 	bm_p = wIconCreatePixMap( below_xpm );
-	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectBelow, NULL );
+	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED|IC_POPUP, SelectBelow, NULL );
 }
 
 /*****************************************************************************
@@ -1800,12 +1800,15 @@ nextEndPt:;
 			Rdump( auditFile );
 			if (strcmp("undoUndo",event)==0) {
 				fprintf( auditFile, "# failure in undo\n" );
-			} else if (UndoUndo()) {
-				fprintf( auditFile, "# after undo\n" );
-				WriteTracks(auditFile, TRUE);
-				Rdump( auditFile );
 			} else {
-				fprintf( auditFile, "# undo stack is empty\n" );
+				UndoUndo( NULL );
+				if ( undoStatus ) {				
+					fprintf( auditFile, "# after undo\n" );
+					WriteTracks(auditFile, TRUE);
+					Rdump( auditFile );
+				} else {
+					fprintf( auditFile, "# undo stack is empty\n" );
+				}
 			}
 		}
 		if (NoticeMessage( MSG_AUDIT_ABORT, _("Yes"), _("No"))) {
@@ -1938,7 +1941,7 @@ EXPORT STATUS_T EndPtDescriptionMove(
 static DIST_T distanceEpsilon = 0.0;
 static ANGLE_T angleEpsilon = 0.0;
 
-EXPORT void LoosenTracks( void )
+EXPORT void LoosenTracks( void * unused )
 {
 	track_p trk, trk1;
 	EPINX_T ep0, ep1;

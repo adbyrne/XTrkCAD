@@ -63,17 +63,18 @@ static void EasementCancel( void );
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
 static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
+static paramFloatRange_t r0_200 = { 0.0, 200.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
 	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0n1_100, N_("Value") },
-	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_100, N_("R"), BO_READONLY },
+	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_200, N_("R"), BO_READONLY },
 	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
 	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE } };
-static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, sizeof easementPLs/sizeof easementPLs[0] };
+static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, COUNT( easementPLs ) };
 
 
 static void SetEasement(
@@ -232,7 +233,7 @@ static void LayoutEasementW(
 }
 
 
-static void DoEasement( void * junk )
+static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
 		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
@@ -280,7 +281,7 @@ EXPORT addButtonCallBack_t EasementInit( void )
 	ebroad_bm = wIconCreatePixMap( ebroad_xpm );
 	egtbroad_bm = wIconCreatePixMap( egtbroad_xpm );
 	ecornu_bm = wIconCreatePixMap( ecornu_xpm );
-	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, (addButtonCallBack_t)DoEasementRedir, NULL );
+	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir, NULL );
 
 	RegisterChangeNotification( EasementChange );
 	return &DoEasement;

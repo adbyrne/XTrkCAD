@@ -68,7 +68,7 @@ static paramData_t recordPLs[] = {
 #define I_RECTEXT		(3)
 #define recordT			((wText_p)recordPLs[I_RECTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY} };
-static paramGroup_t recordPG = { "record", 0, recordPLs, sizeof recordPLs/sizeof recordPLs[0] };
+static paramGroup_t recordPG = { "record", 0, recordPLs, COUNT( recordPLs ) };
 
 
 #ifndef WINDOWS
@@ -660,7 +660,7 @@ static paramData_t demoPLs[] = {
 #define I_DEMOTEXT		(4)
 #define demoT			((wText_p)demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY} };
-static paramGroup_t demoPG = { "demo", 0, demoPLs, sizeof demoPLs/sizeof demoPLs[0] };
+static paramGroup_t demoPG = { "demo", 0, demoPLs, COUNT( demoPLs ) };
 
 EXPORT int MyGetKeyState( void )
 {
@@ -1115,7 +1115,7 @@ static void Playback( void )
 			DoSetScale( paramLine+6 );
 		} else if (strncmp( paramLine, "REDRAW", 6 ) == 0) {
 			ResolveIndex();
-			RecomputeElevations();
+			RecomputeElevations(NULL);
 			DoRedraw();
 			/*DoChangeNotification( CHANGE_ALL );*/
 		} else if (strncmp( paramLine, "COMMAND ", 8 ) == 0) {

@@ -758,7 +758,7 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			DoZoomExtents(I2VP(1));
 		}
 		if ((action>>8) == '0' || (action>>8 == 'o')) {
-			PanMenuEnter('o');
+			PanMenuEnter(I2VP('o'));
 		}
 		if ( !Dex.Trk )
 			return C_CONTINUE;
@@ -826,7 +826,7 @@ void InitCmdModify( wMenu_p menu )
 	wMenuPushCreate(modPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, I2VP(describeCmdInx));
 	wMenuPushCreate(modPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, I2VP(panCmdInx));
 	wMenuSeparatorCreate(modPopupM);
-	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, I2VP(1));
-	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, I2VP(1));
-	wMenuPushCreate(modPopupM, "", _("Pan center - 'c'"), 0,	(wMenuCallBack_p) PanHere, I2VP(3));
+	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0, DoZoomUp, I2VP(1));
+	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0, DoZoomDown, I2VP(1));
+	wMenuPushCreate(modPopupM, "", _("Pan center - 'c'"), 0, PanHere, I2VP(3));
 }

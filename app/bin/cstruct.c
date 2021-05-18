@@ -56,13 +56,13 @@ static drawCmd_t structureD = {
 static wIndex_t structureHotBarCmdInx;
 static wIndex_t structureInx;
 static long hideStructureWindow;
-static void RedrawStructure(void);
+static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 
 static wWinPix_t structureListWidths[] = { 80, 80, 220 };
 static const char * structureListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, structureListWidths, structureListTitles };
 static const char * hideLabels[] = { N_("Hide"), NULL };
-static paramDrawData_t structureDrawData = { 490, 200, (wDrawRedrawCallBack_p)RedrawStructure, NULL, &structureD };
+static paramDrawData_t structureDrawData = { 490, 200, RedrawStructure, NULL, &structureD };
 static paramData_t structurePLs[] = {
 #define I_LIST	(0)
 #define structureListL	((wList_p)structurePLs[I_LIST].control)
@@ -70,14 +70,14 @@ static paramData_t structurePLs[] = {
 #define I_DRAW	(1)
 	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &structureDrawData, NULL, 0 },
 #define I_HIDE	(2)
-	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(char**)hideLabels, NULL, BC_NOBORDER },
+	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
 	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGWIDTH		(4)
 	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
 	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) } };
-static paramGroup_t structurePG = { "structure", 0, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
+static paramGroup_t structurePG = { "structure", 0, structurePLs, COUNT( structurePLs ) };
 
 
 
@@ -477,7 +477,7 @@ static trackCmd_t structureCmds = {
 
 static paramData_t pierPLs[] = {
 	{	PD_DROPLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") } };
-static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
+static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, COUNT( pierPLs ) };
 #define pierL ((wList_p)pierPLs[0].control)
 
 static void ShowPierL( void )
@@ -570,13 +570,13 @@ static void structureChange( long changes )
 	maxStructureDim.x += 2*trackGauge;
 	maxStructureDim.y += 2*trackGauge;
 	/*RescaleStructure();*/
-	RedrawStructure();
+	RedrawStructure( structureD.d, NULL, 0, 0 );
 	return;
 }
 
 
 
-static void RedrawStructure()
+static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
 	RescaleStructure();
 LOG( log_structure, 2, ( "SelStructure(%s)\n", (curStructure?curStructure->title:"<NULL>") ) )
@@ -608,7 +608,7 @@ static void StructureDlgUpdate(
 	NewStructure();
 	curStructure = to;
 	ShowPierL();
-	RedrawStructure();
+	RedrawStructure( structureD.d, NULL, 0, 0 );
 	/* ParamDialogOkActive( &structurePG, FALSE ); */
 }
 
@@ -985,7 +985,7 @@ static STATUS_T CmdStructure(
 		if (structureIndex > 0 && structurePtr) {
 			curStructure = structurePtr;
 			wListSetIndex( structureListL, structureIndex );
-			RedrawStructure();
+			RedrawStructure( structureD.d, NULL, 0, 0 );
 		}
 		InfoMessage( _("Select Structure and then drag to place"));
 		ParamLoadControls( &structurePG );

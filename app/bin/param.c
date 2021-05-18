@@ -291,6 +291,7 @@ FLOAT_T DecodeDistance(
 {
     FLOAT_T valF;
     char *cp0, *cp1, *cpN, c1;
+    // CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
     cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
     cpN += strlen(cpN)-1;
 
@@ -738,6 +739,7 @@ EXPORT long ParamUpdate(
 				}
 
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
+					// CAST_AWAY_CONST: param 3 should be const but its a big change
 					 pg->changeProc( pg, inx, CAST_AWAY_CONST stringV );
 				change |= (1L<<inx);
 			}
@@ -1411,7 +1413,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
 	} else {
-		value = CAST_AWAY_CONST val;
+		value = val;
 		p->enter_pressed = FALSE;
 	}
 	LOG( log_paraminput, 1, ( "ParamIntegerPush( %s Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
@@ -1494,7 +1496,7 @@ static void ParamFloatPush( const char * val, void * dp )
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
 	} else {
-		value = CAST_AWAY_CONST val;
+		value = val;
 		p->enter_pressed = FALSE;
 	}
 	LOG( log_paraminput, 1, ( "ParamFloatPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
@@ -1543,7 +1545,7 @@ static void ParamStringPush( const char * val, void * dp )
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
 	} else {
-		value = CAST_AWAY_CONST val;
+		value = val;
 		p->enter_pressed = FALSE;
 	}
 	LOG( log_paraminput, 1, ( "ParamStringPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
@@ -1562,6 +1564,7 @@ static void ParamStringPush( const char * val, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
+		// CAST_AWAY_CONST: param 3 should be const but its a big change
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );
 }
 
@@ -1676,9 +1679,9 @@ EXPORT wBool_t ParamCheckInputs(
 }
 
 
-static void ParamButtonOk(
-		paramGroup_p group )
+static void ParamButtonOk( void * groupVP )
 {
+	paramGroup_p group = groupVP;
 	wFlush();
 	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
 	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
@@ -1698,9 +1701,9 @@ static void ParamButtonOk(
 }
 
 
-static void ParamButtonCancel(
-		paramGroup_p group )
+static void ParamButtonCancel( void * groupVP )
 {
+	paramGroup_p group = groupVP;
 	if ( recordF && group->nameStr ) {
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "cancel" );
 		fflush( recordF );
@@ -2165,7 +2168,7 @@ static void ParamCheck( char * line )
 			case PD_STRING:
 				line += len;
 				while ( *line == ' ' ) line++;
-				valS = CAST_AWAY_CONST wStringGetValue( (wString_p)p->control );
+				wStringGetValue( (wString_p)p->control );
 				if ( strcasecmp( line, (char*)p->valueP ) != 0 ) {
 					expVal = line;
 					actVal = (char*)p->valueP;
@@ -2211,12 +2214,12 @@ static void ParamCreateControl(
 		wWinPix_t xx,
 		wWinPix_t yy )
 {
-	paramFloatRange_t * floatRangeP;
-	paramIntegerRange_t * integerRangeP;
-	paramDrawData_t * drawDataP;
-	paramTextData_t * textDataP;
+	const paramFloatRange_t * floatRangeP;
+	const paramIntegerRange_t * integerRangeP;
+	const paramDrawData_t * drawDataP;
+	const paramTextData_t * textDataP;
 	paramListData_t * listDataP;
-	wIcon_p iconP;
+	const struct wIcon_t * iconP;
 
 	wWin_p win;
 	wWinPix_t w;
@@ -2352,9 +2355,9 @@ static void ParamPositionControl(
 		wWinPix_t xx,
 		wWinPix_t yy )
 {
-	paramDrawData_t * drawDataP;
-	paramTextData_t * textDataP;
-	paramListData_t * listDataP;
+	const paramDrawData_t * drawDataP;
+	const paramTextData_t * textDataP;
+	const paramListData_t * listDataP;
 	wWinPix_t winW, winH, ctlW, ctlH;
 
 	if ( pd->type != PD_MENUITEM )
@@ -2732,10 +2735,10 @@ wWin_p ParamCreateDialog(
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
-		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, (wButtonCallBack_p)ParamButtonOk, group );
+		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, ParamButtonOk, group );
 	}
 	if ( group->cancelProc ) {
-		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, (wButtonCallBack_p)ParamButtonCancel, group );
+		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, ParamButtonCancel, group );
 	}
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );

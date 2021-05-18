@@ -1013,7 +1013,7 @@ static paramData_t cornuModPLs[] = {
 #define cornuModEndRadius           1
 	{ PD_FLOAT, &cornuModCmdContext.radius, "endradius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
 };
-static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, sizeof cornuModPLs/sizeof cornuModPLs[0] };
+static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, COUNT( cornuModPLs ) };
 
 /*
  * AdjustCornuCurve
@@ -2002,7 +2002,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 									Da.center[1].x,Da.center[1].y,
 									Da.angle[0],Da.angle[1],
 									FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
-				UndoUndo();
+				UndoUndo(NULL);
 				Da.state = NONE;
 				return C_TERMINATE;
 			}
@@ -2032,7 +2032,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 								Da.center[1].x,Da.center[1].y,
 								Da.angle[0],Da.angle[1],
 								FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
-			UndoUndo();
+			UndoUndo(NULL);
 			Da.state = NONE;
 			return C_TERMINATE;
 		}
@@ -2067,7 +2067,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 					if (Da.ep[i]>= 0)
 						ConnectTracks(i==0?first_trk:trk1,i,Da.trk[i],Da.ep[i]);
 				} else {
-					UndoUndo();
+					UndoUndo(NULL);
 					wBeep();
 					InfoMessage(_("Connected Track End Adjust for end %d failed"),i);
 					return C_TERMINATE;

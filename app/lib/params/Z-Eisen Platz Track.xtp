@@ -11,7 +11,7 @@ TURNOUT Z  "Eisen Platz	Straight 110mm	ZP-002"
 	END
 
 SUBCONTENTS Eisen Platz Z-Scale - Track Curve Track
-TURNOUT Z  "Eisen Platz	Curved 195mm 45°	ZP-001"	
+TURNOUT Z  "Eisen Platz	Curved 195mm 45Â°	ZP-001"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.428575 -2.248590 135.000000

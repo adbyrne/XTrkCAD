@@ -413,7 +413,7 @@ static paramData_t curvePLs[] = {
 #define curveRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, sizeof curvePLs/sizeof curvePLs[0] };
+static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, COUNT( curvePLs ) };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -701,11 +701,11 @@ static paramData_t helixPLs[] = {
 	{ PD_FLOAT, &helixVertSep, "vertSep", PDO_DIM, &r0_1000000, N_("Vertical Separation") },
 #define I_HELIXMSG		(6)
 	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, I2VP(200) } };
-static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, sizeof helixPLs/sizeof helixPLs[0] };
+static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, COUNT( helixPLs ) };
 
 static paramData_t circleRadiusPLs[] = {
 	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 } };
-static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, sizeof circleRadiusPLs/sizeof circleRadiusPLs[0] };
+static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, COUNT( circleRadiusPLs ) };
 
 
 static void ComputeHelix(
@@ -716,7 +716,7 @@ static void ComputeHelix(
 	DIST_T totTurns;
 	DIST_T length;
 	long updates = 0;
-	if ( h_inx < 0 || h_inx >= sizeof h_orders/sizeof h_orders[0] )
+	if ( h_inx < 0 || h_inx >= COUNT( h_orders ) )
 		return;
 	ParamLoadData( &helixPG );
 	totTurns = helixTurns + helixAngSep/360.0;
@@ -988,17 +988,16 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
-
-	ButtonGroupBegin( _("Curve Track"), "cmdCircleSetCmd", _("Curve Tracks") );
+	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
 	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, I2VP(3) );
 	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
+	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 	ButtonGroupEnd();
 
-	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );
+	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
 	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius", _("Fixed Radius Circle"), wIconCreatePixMap( circle1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"), wIconCreatePixMap( circle2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );
 	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"), wIconCreatePixMap( circle3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );

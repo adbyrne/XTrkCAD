@@ -314,7 +314,7 @@ SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge)
 	dynArr_t gauges_da;
 
 	gauges_da = (scaleDesc(desc)).gauges_da;
-	SetLayoutCurScale(((gaugeInfo_p)gauges_da.ptr)[gauge].scale);
+	SetLayoutCurScale( DYNARR_N( gaugeInfo_t, gauges_da, gauge).scale);
 }
 
 static BOOL_T

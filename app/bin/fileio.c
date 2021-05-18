@@ -49,7 +49,7 @@
 
 EXPORT dynArr_t paramProc_da;
 
-#define TIME_READTRACKFILE
+//#define TIME_READTRACKFILE
 
 #define COPYBLOCKSIZE	1024
 
@@ -943,7 +943,7 @@ int LoadTracks(
 		time1 = wGetTimer();
 		LogPrintf( "time= %ld ms \n", time1-time0 );
 #endif
-		RecomputeElevations();
+		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
@@ -1184,9 +1184,9 @@ EXPORT void SetAutoSave() {
 
 }
 
-EXPORT void DoSave( doSaveCallBack_p after )
+EXPORT void DoSave( void * doAfterSaveVP )
 {
-	doAfterSave = after;
+	doAfterSave = doAfterSaveVP;
 	if ( bReadOnly || *(GetLayoutFilename()) == '\0') {
 		if (saveFile_fs == NULL)
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
@@ -1202,9 +1202,9 @@ EXPORT void DoSave( doSaveCallBack_p after )
 	SaveState();
 }
 
-EXPORT void DoSaveAs( doSaveCallBack_p after )
+EXPORT void DoSaveAs( void * doAfterSaveVP )
 {
-	doAfterSave = after;
+	doAfterSave = doAfterSaveVP;
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
@@ -1377,7 +1377,7 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 			}
 		} else SetLayoutFullPath("");
 
-		RecomputeElevations();
+		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
@@ -1520,7 +1520,7 @@ static int DoExportTracks(
 }
 
 
-EXPORT void DoExport( void )
+EXPORT void DoExport( void * unused )
 {
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
@@ -1534,19 +1534,22 @@ EXPORT void DoExport( void )
 }
 
 
-EXPORT BOOL_T EditCopy( void )
+EXPORT wBool_t editStatus = TRUE;
+
+EXPORT void EditCopy( void * unused )
 {
+	editStatus = FALSE;
 	FILE * f;
 	time_t clock;
 
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
-		return FALSE;
+		return;
 	}
 	f = fopen( clipBoardN, "w" );
 	if (f == NULL) {
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Clipboard"), clipBoardN, strerror(errno) );
-		return FALSE;
+		return;
 	}
 
 	SetCLocale();
@@ -1559,16 +1562,15 @@ EXPORT BOOL_T EditCopy( void )
 	SetUserLocale();
 	fclose(f);
 
-	return TRUE;
+	editStatus = TRUE;
 }
 
 
-EXPORT BOOL_T EditCut( void )
+EXPORT void EditCut( void * unused )
 {
-	if (!EditCopy())
-		return FALSE;
+	EditCopy(NULL);
+	if ( !editStatus ) return;
 	SelectDelete();
-	return TRUE;
 }
 
 
@@ -1579,7 +1581,7 @@ EXPORT BOOL_T EditCut( void )
  * \return    TRUE if success, FALSE on error (file not found)
  */
 
-BOOL_T EditPastePlace( wBool_t inPlace )
+static BOOL_T EditPastePlace( wBool_t inPlace )
 {
 
 	BOOL_T rc = TRUE;
@@ -1616,15 +1618,14 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	return rc;
 }
 
-EXPORT BOOL_T EditPaste( void) {
-	return EditPastePlace(FALSE);
+EXPORT void EditPaste( void * unused ) {
+	editStatus = EditPastePlace(FALSE);
 }
-
-EXPORT BOOL_T EditClone( void ) {
-	BOOL_T rc = TRUE;
-	if (!EditCopy()) return FALSE;
-	if (!EditPastePlace(TRUE)) return FALSE;
-	return rc;
+
+EXPORT void EditClone( void * unused ) {
+	EditCopy( NULL );
+	if ( !editStatus ) return;
+	editStatus = EditPastePlace(TRUE);
 }
 
 /*****************************************************************************

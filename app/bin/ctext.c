@@ -67,7 +67,7 @@ static paramData_t textPLs[] = {
 #define boxPD (textPLs[2])
 		{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 }
         };
-static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
+static paramGroup_t textPG = { "text", 0, textPLs, COUNT( textPLs ) };
 
 enum TEXT_POSITION
 {
@@ -267,7 +267,7 @@ void InitCmdText( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
-	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
+	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
     Dt.color = wDrawColorBlack;
 }

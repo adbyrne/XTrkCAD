@@ -661,7 +661,7 @@ void FreeTrack( track_p );
 void ClearTracks( void );
 BOOL_T TrackIterate( track_p * );
 
-void LoosenTracks( void );
+void LoosenTracks( void * unused );
 
 void SaveTrackState( void );
 void RestoreTrackState( void );
@@ -697,8 +697,8 @@ void LabelLengths( drawCmd_p, track_p, wDrawColor );
 DIST_T GetTrkLength( track_p, EPINX_T, EPINX_T );
 void AddTrkDetails(drawCmd_p d, track_p trk, coOrd pos, DIST_T length, wDrawColor color);
 
-void SelectAbove( void );
-void SelectBelow( void );
+void SelectAbove( void * unused );
+void SelectBelow( void * unused );
 
 void FlipPoint( coOrd*, coOrd, ANGLE_T );
 void FlipTrack( track_p, coOrd, ANGLE_T );
@@ -761,7 +761,7 @@ extern long oldElevationEvaluation;
 EPINX_T GetNextTrkOnPath( track_p trk, EPINX_T ep );
 int FindDefinedElev( track_p, EPINX_T, int, BOOL_T, DIST_T *, DIST_T * );
 BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T *, BOOL_T );
-void RecomputeElevations( void );
+void RecomputeElevations( void * unused );
 void UpdateAllElevations( void );
 DIST_T GetElevation( track_p );
 void ClrTrkElev( track_p );
@@ -785,7 +785,7 @@ BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );
 BOOL_T ReadText( char * );
 void SetLineType( track_p trk, int width );
-void MenuMode(int );
+void MenuMode( void * moveVP );
 
 /* chotbar.c */
 extern DIST_T curBarScale;

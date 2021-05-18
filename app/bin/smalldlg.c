@@ -55,7 +55,7 @@ static paramData_t tipPLs[] = {
 	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }};
 
-static paramGroup_t tipPG = { "tip", 0, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };
+static paramGroup_t tipPG = { "tip", 0, tipPLs, COUNT( tipPLs ) };
 
 /**
  * Create and initialize the tip of the day window. The dialog box is created and the list of tips is loaded
@@ -139,8 +139,9 @@ static void CreateTipW( void )
  *
  */
 
-void ShowTip( long flags )
+void ShowTip( void * flagsVP )
 {
+	long flags = VP2L(flagsVP);
 	long tipNum;
 	
 	if (showTipAtStart || (flags & SHOWTIP_FORCESHOW))  
@@ -188,7 +189,7 @@ static paramData_t aboutPLs[] = {
 #define COPYRIGHT_T			((wText_p)aboutPLs[I_COPYRIGHT].control)
 	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &aboutTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS }
 };
-static paramGroup_t aboutPG = { "about", 0, aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
+static paramGroup_t aboutPG = { "about", 0, aboutPLs, COUNT( aboutPLs ) };
 
 /** 
  *	Create and show the About window.
