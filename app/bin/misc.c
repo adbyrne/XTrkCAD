@@ -1946,11 +1946,13 @@ static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOO
 		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
 		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
-static wMenuToggle_p toolbarMI;
+static wMenuToggle_p AllToolbarMI[ COUNT( AllToolbarMasks ) ];
 
 static void ToolbarAction(void * data) {
-	wBool_t set = wMenuToggleGet( toolbarMI );
-	long mask = VP2L(data);
+	int inx = (int)VP2L(data);
+	ASSERT( inx >=0 && inx < COUNT( AllToolbarMasks ) );
+	wBool_t set = wMenuToggleGet( AllToolbarMI[inx] );
+	long mask = AllToolbarMasks[inx];
 	if (set)
 		toolbarSet |= mask;
 	else
@@ -1980,8 +1982,8 @@ static void CreateToolbarM(wMenu_p toolbarM) {
 	labels = AllToolbarLabels;
 	for (inx = 0; inx < cnt; inx++, masks++, labels++) {
 		set = (toolbarSet & *masks) != 0;
-		toolbarMI = wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
-				ToolbarAction, I2VP(*masks));
+		AllToolbarMI[inx] = wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
+				ToolbarAction, I2VP(inx));
 	}
 }
 
