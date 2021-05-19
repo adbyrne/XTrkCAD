@@ -275,7 +275,7 @@ wIndex_t InitCommand( wMenu_p, procCommand_t, const char *, const char *,  int, 
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );
 wButton_p AddToolbarButton( const char*, wIcon_p, long, wButtonCallBack_p, void * context );
-// RWS not found wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
+// RWS not found: wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
 wIndex_t AddMenuButton( wMenu_p, procCommand_t, const char*, const char*, wIcon_p, int, long, long, void* );
 void PlaybackButtonMouse( wIndex_t );
 void ButtonGroupBegin( const char *, const char *, const char * );

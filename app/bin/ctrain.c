@@ -2537,7 +2537,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         LocoListInit();
         ControllerDialogSync(curTrainDlg);
         wShow(curTrainDlg->win);
-        wControlShow((wControl_p)newcarB, (toolbarSet&(1<<BG_HOTBAR)) == 0);
+        wControlShow((wControl_p)newcarB, (toolbarSet&(1<<BG_TRAIN)));
         currCarItemPtr = NULL;
 	TempRedraw(); // CmdTrain C_START
         return C_CONTINUE;
@@ -2856,7 +2856,7 @@ STATUS_T CmdCarDescAction(
 
 #include "bitmaps/train.xpm"
 #include "bitmaps/exit.xpm"
-#include "bitmaps/newcar.xpm"
+#include "bitmaps/new-car.xpm"
 #include "bitmaps/zero.xpm"
 #include "bitmaps/go.xpm"
 #include "bitmaps/stop.xpm"
@@ -3111,7 +3111,7 @@ void InitCmdTrain(wMenu_p menu)
                                    CmdTrainStopGo, NULL);
     AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm[iconSize]), IC_MODETRAIN_ONLY,
                      CmdTrainExit, NULL);
-    newcarB = AddToolbarButton("cmdTrainNewCar", wIconCreatePixMap(newcar_xpm),
+    newcarB = AddToolbarButton("cmdTrainNewCar", wIconCreatePixMap(new_car_xpm[iconSize]),
                                IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
     T_CAR = InitObject(&carCmds);
 
