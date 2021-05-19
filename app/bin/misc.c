@@ -1948,10 +1948,11 @@ static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOO
 		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
 		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
-static wMenuToggle_p AllToolbarMI[COUNT(AllToolbarMasks)];
+static wMenuToggle_p AllToolbarMI[ COUNT( AllToolbarMasks ) ];
 
 static void ToolbarAction(void * data) {
-	long inx = VP2L(data);
+	int inx = (int)VP2L(data);
+	ASSERT( inx >=0 && inx < COUNT( AllToolbarMasks ) );
 	wBool_t set = wMenuToggleGet( AllToolbarMI[inx] );
 	long mask = AllToolbarMasks[inx];
 	if (set)
