@@ -2370,12 +2370,15 @@ static void SetAccelKeys()
 #include "bitmaps/partlist.xpm" // unused icon
 #include "bitmaps/doc-export.xpm"
 #include "bitmaps/doc-export-dxf.xpm"
+#include "bitmaps/doc-export-bmap.xpm"
 #include "bitmaps/doc-import.xpm"
 #include "bitmaps/doc-import-xtc.xpm"
 #include "bitmaps/doc-new.xpm"
 #include "bitmaps/doc-save.xpm"
 #include "bitmaps/doc-open.xpm"
-// #include "bitmaps/document-print.xpm"
+#include "bitmaps/doc-print.xpm"
+#include "bitmaps/doc-setup.xpm"
+#include "bitmaps/parameter.xpm"
 #include "bitmaps/map.xpm"
 #include "bitmaps/magnet.xpm"
 
@@ -2509,8 +2512,15 @@ static void CreateMenus(void) {
 			IC_MODETRAIN_TOO, ChkLoad, NULL);
 	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm[iconSize]),
 			IC_MODETRAIN_TOO, DoSave, NULL);
+	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
+		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, NULL);
+	AddToolbarButton("menuFile-print", wIconCreatePixMap(doc_print_xpm[iconSize]),
+		IC_MODETRAIN_TOO, NULL, NULL); // DoPrint 
 
 	InitCmdExport();
+
+	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
+		IC_MODETRAIN_TOO, NULL, NULL); // DoParameter
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoom_in_xpm[iconSize]),
@@ -2939,6 +2949,8 @@ EXPORT void InitCmdExport(void) {
 			IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
 	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), IC_SELECTED | IC_ACCLKEY,
 		DoExportDXF, I2VP(1));
+	AddToolbarButton("cmdExportBmap", wIconCreatePixMap(doc_export_bmap_xpm[iconSize]), IC_ACCLKEY,
+		OutputBitMapInit(), NULL);
 	AddToolbarButton("cmdImport", wIconCreatePixMap(doc_import_xpm[iconSize]), IC_ACCLKEY,
 			DoImport, I2VP(0));
 	AddToolbarButton("cmdImportModule", wIconCreatePixMap(doc_import_xtc_xpm[iconSize]), IC_ACCLKEY,
