@@ -199,7 +199,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			tempSegs_da.cnt = 0;
 			if ((t0=OnTrack(&p, FALSE, TRUE)) != NULL) {
 				ep0 = PickEndPoint(p, t0);
-				if (GetTrkEndTrk(t0,ep0) != NULL) {
+				if (ep0 < 0 || GetTrkEndTrk(t0,ep0) != NULL) {
 					t0 = NULL;
 				} else {
 					p = GetTrkEndPos(t0, ep0);
@@ -212,7 +212,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			p = p1;
 			if ((t1=OnTrack(&p, FALSE, TRUE)) != NULL) {
 				ep1 = PickEndPoint(p, t1);
-				if (GetTrkEndTrk(t1,ep1) != NULL) {
+				if (ep1 < 0 || GetTrkEndTrk(t1,ep1) != NULL) {
 					t1 = NULL;
 				} else {
 					p = GetTrkEndPos(t1, ep1);
