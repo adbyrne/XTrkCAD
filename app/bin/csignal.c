@@ -825,13 +825,9 @@ static POS_T sighiliteBorder;
 static wDrawColor sighiliteColor = 0;
 static void DrawSignalTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (sighiliteColor==0)
 		sighiliteColor = wDrawColorGray(87);
-	w = ((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = ((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,sighiliteOrig,&x,&y);
-	wDrawFilledRectangle( tempD.d, x, y, w, h, sighiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, sighiliteOrig, sighiliteSize, sighiliteColor, DRAW_TRANSPARENT );
 }
 
 static int SignalMgmProc ( int cmd, void * data )

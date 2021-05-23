@@ -728,7 +728,7 @@ static void SpeedRedraw(
     wWinPix_t w,
     wWinPix_t h)
 {
-    wDrawPix_t y, pts[4][2];
+    wDrawPix_t y;
     trainControlDlg_p dlg = (trainControlDlg_p)context;
     struct extraDataCar_t * xx;
     wDrawColor drawColor;
@@ -751,17 +751,16 @@ static void SpeedRedraw(
     y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
                  +SLIDER_THICKNESS/2);
     drawColor  = wDrawFindColor(wRGB(160, 160, 160));
-    pts[0][1] = pts[1][1] = y-SLIDER_THICKNESS/2;
-    pts[2][1] = pts[3][1] = y+SLIDER_THICKNESS/2;
-    pts[0][0] = pts[3][0] = 0;
-    pts[1][0] = pts[2][0] = SLIDER_WIDTH;
-    wDrawPolygon(d, pts, NULL, 4, drawColor, 0, 0, 0, 1, 0);
+    coOrd pts[4];
+    pts[0].x = pts[3].x = 0.0;
+    pts[1].x = pts[2].x = SLIDER_WIDTH/speedD.dpi;
+    pts[0].y = pts[1].y = (y-SLIDER_THICKNESS/2)/speedD.dpi;
+    pts[2].y = pts[3].y = (y+SLIDER_THICKNESS/2)/speedD.dpi;
+    DrawPoly( &speedD, 4, pts, NULL, drawColor, 0, DRAW_FILL );
+    pts[0].y = pts[1].y = (y)/speedD.dpi;
+    pts[2].y = pts[3].y = (y+SLIDER_THICKNESS/2)/speedD.dpi;
     drawColor  = wDrawFindColor(wRGB(220, 220, 220));
-    pts[0][1] = pts[1][1] = y+SLIDER_THICKNESS/2;
-    pts[2][1] = pts[3][1] = y;
-    pts[0][0] = pts[3][0] = 0;
-    pts[1][0] = pts[2][0] = SLIDER_WIDTH;
-    wDrawPolygon(d, pts, NULL, 4, drawColor, 0, 0, 0, 1, 0);
+    DrawPoly( &speedD, 4, pts, NULL, drawColor, 0, DRAW_FILL );
     wDrawLine(d, 0, y, SLIDER_WIDTH, y, 1, wDrawLineSolid, drawColorRed, 0);
     wDrawLine(d, 0, y+SLIDER_THICKNESS/2, SLIDER_WIDTH, y+SLIDER_THICKNESS/2, 1,
               wDrawLineSolid, drawColorBlack, 0);

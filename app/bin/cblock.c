@@ -72,10 +72,11 @@ static void NoDrawString( drawCmd_p d, coOrd p, ANGLE_T a, char * s,
 			  wFont_p fp, FONTSIZE_T fontSize, wDrawColor color ) {}
 static void NoDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm,
 			  wDrawColor color) {}
-static void NoDrawFillPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
-			    wDrawColor color, wDrawWidth width, int fill, int open) {}
+static void NoDrawPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
+			    wDrawColor color, wDrawWidth width, drawFill_e eFillOpt ) {}
 static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
 			      wDrawColor color ) {}
+static void NoDrawRectangle( drawCmd_p d, coOrd orig, coOrd size, wDrawColor color, drawFill_e eFill ) {}
 
 static drawFuncs_t noDrawFuncs = {
 	0,
@@ -83,8 +84,9 @@ static drawFuncs_t noDrawFuncs = {
 	NoDrawArc,
 	NoDrawString,
 	NoDrawBitMap,
-	NoDrawFillPoly,
-	NoDrawFillCircle };
+	NoDrawPoly,
+	NoDrawFillCircle,
+	NoDrawRectangle};
 
 static drawCmd_t blockD = {
 	NULL,
@@ -854,13 +856,10 @@ static POS_T blkhiliteBorder;
 static wDrawColor blkhiliteColor = 0;
 static void DrawBlockTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (blkhiliteColor==0)
 		blkhiliteColor = wDrawColorGray(87);
-	w = (wDrawPix_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wDrawPix_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	// This is incomplete.  We should be in temp drawing mode and clearing temp draw on UN_HILIGHT
+	DrawRectangle( &tempD, blkhiliteOrig, blkhiliteSize, blkhiliteColor, DRAW_TRANSPARENT );
 }
 
 

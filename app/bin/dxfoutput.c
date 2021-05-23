@@ -118,22 +118,21 @@ static void DxfBitMap(
 {
 }
 
-static void DxfFillPoly(
+static void DxfPoly(
     drawCmd_p d,
     int cnt,
     coOrd * pts,
 	int * types,
     wDrawColor color,
 	wDrawWidth width,
-	int fill,
-	int open )
+	drawFill_e eOpts )
 {
     int inx;
 
     for (inx=1; inx<cnt; inx++) {
         DxfLine(d, pts[inx-1], pts[inx], width, color);
     }
-    if (!open)
+    if (eOpts != DRAW_OPEN)
     	DxfLine(d, pts[cnt-1], pts[0], width, color);
 }
 
@@ -144,14 +143,28 @@ static void DxfFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
 }
 
 
+static void DxfRectangle(drawCmd_p d, coOrd orig, coOrd size, wDrawColor color, drawFill_e eOpts)
+{
+	coOrd p[4];
+	// p1 p2
+	// p0 p3
+	p[0].x = p[1].x = orig.x;
+	p[2].x = p[3].x = orig.x+size.x;
+	p[0].y = p[3].y = orig.y;
+	p[1].y = p[2].y = orig.y+size.y;
+	DxfPoly( d, 4, p, NULL, color, 0, eOpts );
+}
+
+
 static drawFuncs_t dxfDrawFuncs = {
     0,
     DxfLine,
     DxfArc,
     DxfString,
     DxfBitMap,
-    DxfFillPoly,
-    DxfFillCircle
+    DxfPoly,
+    DxfFillCircle,
+    DxfRectangle
 };
 
 static drawCmd_t dxfD = {

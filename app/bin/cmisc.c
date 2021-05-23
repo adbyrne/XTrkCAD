@@ -196,8 +196,6 @@ SearchEditableLayerList(unsigned int layer)
 
 static void DrawDescHilite(BOOL_T selected)
 {
-    wDrawPix_t x, y, w, h;
-
     if (descNeedDrawHilite == FALSE) {
         return;
     }
@@ -205,11 +203,7 @@ static void DrawDescHilite(BOOL_T selected)
     if (descColor==0) {
         descColor = wDrawColorGray(87);
     }
-
-    w = ((descSize.x/mainD.scale)*mainD.dpi+0.5);
-    h = ((descSize.y/mainD.scale)*mainD.dpi+0.5);
-    mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
-    wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
+    DrawRectangle(&tempD, descOrig, descSize, selected?descColor:wDrawColorBlue, DRAW_TRANSPARENT);
 }
 
 

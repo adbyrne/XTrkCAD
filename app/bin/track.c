@@ -2662,9 +2662,9 @@ EXPORT void DrawTie(
 			return;
 	}
 	if ( solid ) {
-		DrawPoly( d, 4, p, t, color, 0, 1, 0 );
+		DrawPoly( d, 4, p, t, color, 0, DRAW_FILL );
 	} else {
-		DrawPoly( d, 4, p, t, color, 0, 0, 0);
+		DrawPoly( d, 4, p, t, color, 0, DRAW_CLOSED);
 	}
 }
 

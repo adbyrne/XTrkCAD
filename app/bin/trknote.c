@@ -111,8 +111,8 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 		for (int i=0;i<5;i++) {
 			type[i] = 0;
 		}
-		DrawPoly(d, 5, p, type, color, 0, FALSE, FALSE);
-		DrawPoly(d, 5, p, type, drawColorGold, 0, TRUE, FALSE);
+		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
+		DrawPoly(d, 5, p, type, drawColorGold, 0, DRAW_FILL);
 	} else {
 		// draw a bitmap for static object
 		wDrawBitMap_p bm;

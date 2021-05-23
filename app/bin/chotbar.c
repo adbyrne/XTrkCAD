@@ -71,14 +71,25 @@ static DIST_T hotBarWidth = 0.0;
 
 static void HotBarHighlight( int inx, DIST_T fixed_x )
 {
-	wWinPix_t x0;
-	if ( inx == 0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {
-		x0 = 0;
-		wDrawFilledRectangle( hotBarD.d, x0, 0, (wWinPix_t)(hotBarMap(0).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTransparent );
-	} else if ( inx >= hotBarCurrStart && inx < hotBarCurrEnd ) {
-		x0 = (wWinPix_t)((hotBarMap(inx).x-hotBarMap((int)hotBarCurrStart).x + (inx>0?fixed_x:0))*hotBarD.dpi);
-		wDrawFilledRectangle( hotBarD.d, x0, 0, (wWinPix_t)(hotBarMap(inx).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTransparent );
-	}
+	if ( inx > 0 && ( inx < hotBarCurrStart || inx >= hotBarCurrEnd ) )
+		return;
+	coOrd orig, size;
+	hotBarD.scale = 1;
+	if ( inx == 0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed)
+		orig.x = 0;
+	else
+		orig.x = hotBarMap(inx).x-hotBarMap(hotBarCurrStart).x + (inx>0?fixed_x:0);
+	orig.y = 0;
+	size.x = hotBarMap(inx).w - 2.0/hotBarD.dpi;
+	size.y = toolbarHeight;
+#ifdef LATER
+	printf( "HotBarHilite fixed_x:%0.3f X0:%d/%0.3f X:%d/%0.3f+%0.3f X=%0.3f\n",
+			fixed_x,
+			hotBarCurrStart, hotBarMap(hotBarCurrStart).x,
+			inx, hotBarMap(inx).x, hotBarMap(inx).w,
+			orig.x );
+#endif
+	DrawRectangle( &hotBarD, orig, size, wDrawColorBlack, DRAW_TRANSPARENT );
 }
 
 
