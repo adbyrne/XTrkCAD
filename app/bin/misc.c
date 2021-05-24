@@ -1935,18 +1935,18 @@ static void DoSticky(void * unused) {
  * specified in the following array.
  * Note: text and choices must be given in the same order.
  */
-static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Import/Export Buttons"), N_("Zoom Buttons"), N_(
-		"Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"), N_(
-		"Create Track Buttons"), N_("Layout Control Elements"), N_(
-		"Modify Track Buttons"), N_("Properties/Select"), N_(
-		"Track Group Buttons"), N_("Train Group Buttons"), N_(
-		"Create Misc Buttons"), N_("Ruler Button"), N_("Layer Buttons"), N_(
-		"Hot Bar"),
+static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Print Buttons"), N_("Import/Export Buttons"), 
+        N_("Zoom Buttons"), N_("Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"), 
+	    N_("Create Track Buttons"), N_("Layout Control Elements"), 
+	    N_("Modify Track Buttons"), N_("Properties/Select"), 
+	    N_("Track Group Buttons"), N_("Train Group Buttons"), 
+	    N_("Create Misc Buttons"), N_("Ruler Button"), 
+	    N_("Layer Buttons"), N_("Hot Bar"),
 NULL };
-static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOOM, 1 << BG_UNDO, 1
-		<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT, 1 << BG_CONTROL, 1
-		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
-		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
+static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_PRINT, 1<< BG_EXPORTIMPORT, 
+        1<< BG_ZOOM, 1<< BG_UNDO, 1<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT, 
+	    1<< BG_CONTROL, 1<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 
+	    1<< BG_MISCCRT, 1<< BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
 static wMenuToggle_p AllToolbarMI[ COUNT( AllToolbarMasks ) ];
 
@@ -2505,44 +2505,6 @@ static void CreateMenus(void) {
 	popup1mM = wMenuMenuCreate(popup1M, "", _("More..."));
 	popup2mM = wMenuMenuCreate(popup2M, "", _("More..."));
 
-	cmdGroup = BG_FILE;
-	AddToolbarButton("menuFile-clear", wIconCreatePixMap(doc_new_xpm[iconSize]),
-			IC_MODETRAIN_TOO, DoClear, NULL);
-	AddToolbarButton("menuFile-load", wIconCreatePixMap(doc_open_xpm[iconSize]),
-			IC_MODETRAIN_TOO, ChkLoad, NULL);
-	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm[iconSize]),
-			IC_MODETRAIN_TOO, DoSave, NULL);
-	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
-		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, NULL);
-	AddToolbarButton("menuFile-print", wIconCreatePixMap(doc_print_xpm[iconSize]),
-		IC_MODETRAIN_TOO, NULL, NULL); // DoPrint 
-
-	InitCmdExport();
-
-	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
-		IC_MODETRAIN_TOO, NULL, NULL); // DoParameter
-
-	cmdGroup = BG_ZOOM;
-	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoom_in_xpm[iconSize]),
-			IC_MODETRAIN_TOO, DoZoomUp, NULL);
-
-	zoomM = wMenuPopupCreate(mainW, "");
-	AddToolbarButton("cmdZoom", wIconCreatePixMap(zoom_choose_xpm[iconSize]), IC_MODETRAIN_TOO,
-			(wButtonCallBack_p) wMenuPopupShow, zoomM);
-
-	zoomDownB = AddToolbarButton("cmdZoomOut", wIconCreatePixMap(zoom_out_xpm[iconSize]),
-			IC_MODETRAIN_TOO, DoZoomDown, NULL);
-
-	cmdGroup = BG_UNDO;
-	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(undo_xpm[iconSize]), 0,
-			UndoUndo, NULL);
-	redoB = AddToolbarButton("cmdRedo", wIconCreatePixMap(redo_xpm[iconSize]), 0,
-			UndoRedo, NULL);
-
-	wControlActive((wControl_p) undoB, FALSE);
-	wControlActive((wControl_p) redoB, FALSE);
-	InitCmdUndo();
-
 	/*
 	 * FILE MENU
 	 */
@@ -2589,6 +2551,49 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(fileM);
 	wMenuPushCreate(fileM, "menuFile-quit", _("E&xit"), 0,
 			DoQuit, NULL);
+
+	/*
+	 * File Buttons
+	 */
+	cmdGroup = BG_FILE;
+	AddToolbarButton("menuFile-clear", wIconCreatePixMap(doc_new_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoClear, NULL);
+	AddToolbarButton("menuFile-load", wIconCreatePixMap(doc_open_xpm[iconSize]),
+		IC_MODETRAIN_TOO, ChkLoad, NULL);
+	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoSave, NULL);
+
+	cmdGroup = BG_PRINT;
+	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
+		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
+	AddToolbarButton("menuFile-print", wIconCreatePixMap(doc_print_xpm[iconSize]),
+		IC_MODETRAIN_TOO, NULL, NULL); // DoPrint 
+
+	InitCmdExport();
+
+	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
+		IC_MODETRAIN_TOO, NULL, NULL); // DoParameter
+
+	cmdGroup = BG_ZOOM;
+	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoom_in_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoZoomUp, NULL);
+
+	zoomM = wMenuPopupCreate(mainW, "");
+	AddToolbarButton("cmdZoom", wIconCreatePixMap(zoom_choose_xpm[iconSize]), IC_MODETRAIN_TOO,
+		(wButtonCallBack_p) wMenuPopupShow, zoomM);
+
+	zoomDownB = AddToolbarButton("cmdZoomOut", wIconCreatePixMap(zoom_out_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoZoomDown, NULL);
+
+	cmdGroup = BG_UNDO;
+	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(undo_xpm[iconSize]), 0,
+		UndoUndo, NULL);
+	redoB = AddToolbarButton("cmdRedo", wIconCreatePixMap(redo_xpm[iconSize]), 0,
+		UndoRedo, NULL);
+
+	wControlActive((wControl_p) undoB, FALSE);
+	wControlActive((wControl_p) redoB, FALSE);
+	InitCmdUndo();
 
 	/*
 	 * EDIT MENU
