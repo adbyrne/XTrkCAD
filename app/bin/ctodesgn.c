@@ -2599,17 +2599,7 @@ static void NewTurnPrint(
 							  message, fp, 20, wDrawColorBlack, 0 );
 			}
 
-			wDrawLine( newTurnout_d.d, POSX(0), POSY(0),
-						POSX(newTurnout_d.size.x), POSY(0), 0, wDrawLineSolid,
-						wDrawColorBlack, 0 );
-			wDrawLine( newTurnout_d.d, POSX(newTurnout_d.size.x), POSY(0.0),
-						POSX(newTurnout_d.size.x), POSY(newTurnout_d.size.y), 0,
-						wDrawLineSolid, wDrawColorBlack, 0 );
-			wDrawLine( newTurnout_d.d, POSX(newTurnout_d.size.x), POSY(newTurnout_d.size.y),
-						POSX(0.0), POSY(newTurnout_d.size.y), 0, wDrawLineSolid,
-						wDrawColorBlack, 0 );
-			wDrawLine( newTurnout_d.d, POSX(0.0), POSY(newTurnout_d.size.y),
-						POSX(0.0), POSX(0.0), 0, wDrawLineSolid, wDrawColorBlack, 0 );
+			DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size, wDrawColorBlack, DRAW_CLOSED );
 
 			DrawSegs( &newTurnout_d, zero, 270.0, &tempSegs(0), tempSegs_da.cnt, newTurnTrackGauge, wDrawColorBlack );
 

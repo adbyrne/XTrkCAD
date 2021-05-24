@@ -751,21 +751,20 @@ static void SpeedRedraw(
     y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
                  +SLIDER_THICKNESS/2);
     drawColor  = wDrawFindColor(wRGB(160, 160, 160));
-    coOrd pts[4];
-    pts[0].x = pts[3].x = 0.0;
-    pts[1].x = pts[2].x = SLIDER_WIDTH/speedD.dpi;
-    pts[0].y = pts[1].y = (y-SLIDER_THICKNESS/2)/speedD.dpi;
-    pts[2].y = pts[3].y = (y+SLIDER_THICKNESS/2)/speedD.dpi;
-    DrawPoly( &speedD, 4, pts, NULL, drawColor, 0, DRAW_FILL );
-    pts[0].y = pts[1].y = (y)/speedD.dpi;
-    pts[2].y = pts[3].y = (y+SLIDER_THICKNESS/2)/speedD.dpi;
-    drawColor  = wDrawFindColor(wRGB(220, 220, 220));
-    DrawPoly( &speedD, 4, pts, NULL, drawColor, 0, DRAW_FILL );
-    wDrawLine(d, 0, y, SLIDER_WIDTH, y, 1, wDrawLineSolid, drawColorRed, 0);
-    wDrawLine(d, 0, y+SLIDER_THICKNESS/2, SLIDER_WIDTH, y+SLIDER_THICKNESS/2, 1,
-              wDrawLineSolid, drawColorBlack, 0);
-    wDrawLine(d, 0, y-SLIDER_THICKNESS/2, SLIDER_WIDTH, y-SLIDER_THICKNESS/2, 1,
-              wDrawLineSolid, drawColorBlack, 0);
+	coOrd pos0, pos1, siz;
+	y /= speedD.dpi;
+	siz.x = SLIDER_WIDTH/speedD.dpi;
+	siz.y = SLIDER_THICKNESS/speedD.dpi;
+	pos0.x = 0.0;
+	pos0.y = y - siz.y/2.0;
+	DrawRectangle( &speedD, pos0, siz, drawColor, DRAW_FILL );
+	pos1.x = siz.x;
+	pos1.y = pos0.y;
+	DrawLine( &speedD, pos0, pos1, 1, drawColorBlack );
+	pos0.y = pos1.y = y;
+	DrawLine( &speedD, pos0, pos1, 3, drawColorRed );
+	pos0.y = pos1.y = y + siz.y/2.0;
+	DrawLine( &speedD, pos0, pos1, 1, drawColorBlack );
     sprintf(dlg->speedS, "%3d %s",
             (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6),
             (units==UNITS_ENGLISH?"mph":"km/h"));
@@ -1304,6 +1303,8 @@ static trainControlDlg_p CreateTrainControlDlg(void)
     dlg->trainPGp = &trainPG;
     dlg->win = ParamCreateDialog(dlg->trainPGp, _("Train Control"), NULL, NULL,
                                  NULL, FALSE, NULL, 0, ControllerDialogUpdate);
+    speedD.size.x = SLIDER_WIDTH/speedD.dpi;
+    speedD.size.y = SLIDER_HEIGHT/speedD.dpi;
     return dlg;
 }
 

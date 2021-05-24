@@ -573,16 +573,31 @@ static void DDrawRectangle(
 	drawCount++;
 	if (drawEnable) {
 		wDrawOpts opts = (wDrawOpts)d->funcs->options;
+		coOrd p1, p2;
 		switch (eFillOpt) {
-		case DRAW_FILL:
+		case DRAW_CLOSED:
+			// 1 2
+			// 0 3
+			p1.x = orig.x;
+			p1.y = orig.y+size.y;
+			DrawLine( d, orig, p1, 0, color );
+			p2.x = orig.x+size.x;
+			p2.y = p1.y;
+			DrawLine( d, p1, p2, 0, color );
+			p1.x = p2.x;
+			p1.y = orig.y;
+			DrawLine( d, p2, p1, 0, color );
+			DrawLine( d, p1, orig, 0, color );
 			break;
 		case DRAW_TRANSPARENT:
 			opts |= wDrawOptTransparent;
+			// Fallthru
+		case DRAW_FILL:
+			wDrawFilledRectangle( d->d, x, y, w, h, color, opts );
 			break;
 		default:
 			abort();
 		}
-		wDrawFilledRectangle( d->d, x, y, w, h, color, opts );
 	}
 }
 
@@ -1714,12 +1729,15 @@ static void DrawRoomWalls( wBool_t drawBackground )
 
 static void DrawMarkers( void )
 {
-	wDrawPix_t x, y;
-	mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
-	wDrawLine( tempD.d, 0, y, (wDrawPix_t)LBORDER, y,
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
-	wDrawLine( tempD.d, x, 0, x, (wDrawPix_t)BBORDER,
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
+	coOrd p0, p1;
+	p0.x = p1.x = oldMarker.x;
+	p1.y = mainD.orig.y;
+	p1.y = mainD.orig.y-BBORDER*mainD.scale/mainD.dpi;
+	DrawLine( &tempD, p0, p1, 0, markerColor );
+	p0.y = p1.y = oldMarker.y;
+	p0.x = mainD.orig.x;
+	p1.x = mainD.orig.x-LBORDER*mainD.scale/mainD.dpi;
+	DrawLine( &tempD, p0, p1, 0, markerColor );
 }
 
 static DIST_T rulerFontSize = 12.0;
@@ -1773,10 +1791,7 @@ EXPORT void DrawRuler(
 		start = -start;
 	end = FindDistance( orig, pos1 );
 
-	d->CoOrd2Pix( d, pos0, &x0, &y0 );
-	d->CoOrd2Pix( d, pos1, &x1, &y1 );
-	wDrawLine( d->d, x0, y0, x1, y1,
-				0, wDrawLineSolid, color, (wDrawOpts)d->funcs->options );
+	DrawLine( d, pos0, pos1, 0, color );
 
 	if (units == UNITS_METRIC) {
 		mm0 = (int)ceil(start*25.4-0.5);
@@ -1810,11 +1825,7 @@ EXPORT void DrawRuler(
 				if (power==1000 || mm%(power*10) != 0) {
 					Translate( &p0, orig, a, mm/25.4 );
 					Translate( &p1, p0, aa, len*d->scale/mainD.dpi );
-					d->CoOrd2Pix( d, p0, &x0, &y0 );
-					d->CoOrd2Pix( d, p1, &x1, &y1 );
-					wDrawLine( d->d, x0, y0, x1, y1,
-							0, wDrawLineSolid, color, (wDrawOpts)d->funcs->options );
-
+					DrawLine( d, p0, p1, 0, color );
 					if (!number || (d->scale > 40 && mm % skip != 0.0))
 						continue;
 					if ( (power>=1000) ||
@@ -1891,11 +1902,7 @@ EXPORT void DrawRuler(
 			for ( fraction = firstFraction; fraction<=lastFraction; fraction += incr ) {
 				Translate( &p0, orig, a, inch+fraction/16.0 );
 				Translate( &p1, p0, aa, lengths[fraction]*d->scale/mainD.dpi );
-				d->CoOrd2Pix( d, p0, &x0, &y0 );
-				d->CoOrd2Pix( d, p1, &x1, &y1 );
-				wDrawLine( d->d, x0, y0, x1, y1,
-						0, wDrawLineSolid, color,
-						(wDrawOpts)d->funcs->options );
+				DrawLine( d, p0, p1, 0, color );
 			if (fraction == 0) {
 				// Label interval for scale > 40
 				if (d->scale <= 80) {

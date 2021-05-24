@@ -756,13 +756,16 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	DrawTracks( d, d->scale, d->orig, d->size );
 	if ( snapshotMouse && playbackBm )
 		wDrawBitMap( d->d, playbackBm, playbackX, playbackY, playbackColor, 0 );
-	wDrawLine( d->d, 0, 0, ix-1, 0, 0, wDrawLineSolid, wDrawColorBlack, 0 );
-	wDrawLine( d->d, ix-1, 0, ix-1, iy-1, 0, wDrawLineSolid, wDrawColorBlack, 0 );
-	wDrawLine( d->d, ix-1, iy-1, 0, iy-1, 0, wDrawLineSolid, wDrawColorBlack, 0 );
-	wDrawLine( d->d, 0, iy-1, 0, 0, 0, wDrawLineSolid, wDrawColorBlack, 0 );
+	coOrd p0, s1;
+	DIST_T off = 0.02;
+	p0.x = off * d->scale;
+	p0.y = off * d->scale;
+	s1.x = d->size.x-off*2 * d->scale;
+	s1.y = d->size.y-off*2 * d->scale;
+	DrawRectangle( d, p0, s1, wDrawColorBlack, DRAW_CLOSED );
 	strcpy( message, paramFileName );
 	cp = message+strlen(message)-4;
-	sprintf( cp, "-%4.4d.xpm", documentSnapshotNum );
+	sprintf( cp, "-%4.4d.png", documentSnapshotNum );
 	wBitMapWriteFile( d->d, message );
 	wBitMapDelete( d->d );
 	documentSnapshotNum++;
@@ -1021,6 +1024,7 @@ static void Playback( void )
 				return;
 			}
 			
+			paramFileName = strdup( demoFileName );
 			playbackColor=wDrawColorBlack;
 			paramLineNum = 0;
 			wWinSetTitle( demoW, demoList( curDemo ).title );

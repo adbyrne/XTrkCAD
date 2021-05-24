@@ -150,23 +150,7 @@ static void DrawGridLine(
 	p1.x = x;
 	if (size && clip && !ClipLine( &p0, &p1, zero, 0.0, *size ))
 		return;
-	p0.x -= D->orig.x;
-	p0.y -= D->orig.y;
-	p1.x -= D->orig.x;
-	p1.y -= D->orig.y;
-	x = (p0.x*Ddx + p0.y*Ddy);
-	p0.y = (p0.y*Ddx - p0.x*Ddy);
-	p0.x = x;
-	x = (p1.x*Ddx + p1.y*Ddy);
-	p1.y = (p1.y*Ddx - p1.x*Ddy);
-	p1.x = x;
-	if (clip && !ClipLine( &p0, &p1, zero, 0.0, D->size ))
-		return;
-	x0 = (p0.x*dpi+0.5) + lborder;
-	y0 = (p0.y*dpi+0.5) + bborder;
-	x1 = (p1.x*dpi+0.5) + lborder;
-	y1 = (p1.y*dpi+0.5) + bborder;
-	wDrawLine( D->d, x0, y0, x1, y1, 0, wDrawLineSolid, Color, (wDrawOpts)D->funcs->options );
+	DrawLine( D, p0, p1, 0, Color );
 }
 
 
