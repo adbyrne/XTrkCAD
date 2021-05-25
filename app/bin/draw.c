@@ -1517,10 +1517,6 @@ EXPORT void MainRedraw( void )
 	wDrawSetTempMode( mainD.d, FALSE );
 	wDrawClear( mainD.d );
 
-	//mainD.d->option = 0;
-	//mainD.options = 0;
-	mainD.funcs->options = 0;		//Force MainD back from Temp
-
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= LBORDER/mainD.dpi*mainD.scale;

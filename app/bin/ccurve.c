@@ -534,7 +534,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 					ErrorMessage( MSG_CURVE_TOO_LARGE );
 					tempSegs_da.cnt = 0;
 					Da.curveData.type = curveTypeNone;
-					mainD.funcs->options = 0;
 					return C_CONTINUE;
 				}
 				InfoMessage( _("Curved Track: Radius=%s Angle=%0.3f Length=%s"),
@@ -557,7 +556,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 					CreateEndAnchor(Da.curveData.curvePos,&anchors_da,FALSE);
 			}
 		}
-		mainD.funcs->options = 0;
 		return rc;
 	case C_TEXT:
 		if ( Da.state == 0 )
@@ -575,7 +573,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			Da.state = 1;
 			CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 			tempSegs_da.cnt = 1;
-			mainD.funcs->options = 0;
 			segCnt = tempSegs_da.cnt;
 
 			sprintf(message, "desired_radius-%s", curScaleName);
@@ -599,7 +596,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			}
 			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE, desired_radius );
 		}
-		mainD.funcs->options = 0;
 		tempSegs_da.cnt = 0;
 		segCnt = 0;
 		Da.state = -1;
@@ -639,7 +635,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		if ( Da.state >= 0 ) {
 			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-			mainD.funcs->options = 0;
 		}
 		if (anchors_da.cnt)
 			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
