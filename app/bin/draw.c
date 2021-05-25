@@ -1730,7 +1730,7 @@ static void DrawMarkers( void )
 {
 	coOrd p0, p1;
 	p0.x = p1.x = oldMarker.x;
-	p1.y = mainD.orig.y;
+	p0.y = mainD.orig.y;
 	p1.y = mainD.orig.y-BBORDER*mainD.scale/mainD.dpi;
 	DrawLine( &tempD, p0, p1, 0, markerColor );
 	p0.y = p1.y = oldMarker.y;
