@@ -1,5 +1,6 @@
-/** \file button.c
- * Toolbar button creation and handling
+/**
+ * \file button.c
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -209,7 +210,11 @@ void wButtonToolBarRedraw(wWin_p win) {
 #define REPEAT_STAGE1_DELAY 150
 #define REPEAT_STAGE2_DELAY 100
 
-/* Timer callback function! */
+/**
+ * Timer callback function! 
+ * 
+ */
+
 static int timer_func ( void * data)
 {
 	wButton_p bb = (wButton_p)data;
@@ -562,6 +567,43 @@ struct wChoice_t {
     char * helpStr;
 };
 
+/**
+ * Get the value from a list of toggles stored in a list model
+ * 
+ * \param bc widget holding the list model
+ * \return the result
+ */
+
+static long ButtonListGetValue(wChoice_p bc)
+{
+    long value = 0;
+    GtkTreeIter iter;
+    gboolean result;
+
+    int number_of_rows = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(bc->widget), NULL);
+
+    result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(bc->widget),
+                                           &iter,
+                                           NULL,
+                                           number_of_rows - 1);
+    while (result)
+    {
+        long newValue;
+
+        value <<= 1;
+        //set value
+        gtk_tree_model_get(GTK_TREE_MODEL(bc->widget),
+                           &iter,
+                           0,
+                           &newValue,
+                           -1);
+        value |= (newValue ? 1 : 0);
+
+        result = gtk_tree_model_iter_previous(GTK_TREE_MODEL(bc->widget),
+                                              &iter);
+    }
+    return (value);
+}
 
 /**
  * Get the state of a group of buttons. If the group consists of
@@ -645,33 +687,58 @@ long wRadioGetValue(
 }
 
 /**
- * Set a group of toggle buttons from a bitfield
+ * Set a group of toggle buttons from a bitfield. In case the group is in a list store, the stored values are
+ * updated, otherwise the buttons are changed directly
  *
- * \param bc IN button group
+ * \param bc IN button group, either part of a box or a list store
  * \param value IN bitfield
  */
 
 void wToggleSetValue(
-    wChoice_p bc,		/* Toggle box */
-    long value)		/* Values */
+    wChoice_p bc, 
+    long value)   
 {
-    GList * child, * children;
-    long inx;
+
     bc->recursion++;
 
-    for (children=child=gtk_container_get_children(GTK_CONTAINER(bc->widget)),inx=0;
-            child; child=child->next,inx++) {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(child->data),
-                                     (value&(1<<inx))!=0);
+    if (GTK_IS_LIST_STORE(bc->widget))
+    {
+        GtkTreeIter iter;
+        gboolean result;
+        result = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(bc->widget),
+                                               &iter);
+        while (result)
+        {
+            long newValue = value & 0x01;
+            //set value
+            gtk_list_store_set(GTK_LIST_STORE(bc->widget),
+                               &iter,
+                               0,
+                               newValue,
+                               -1);
+            value >>= 1;
+            result = gtk_tree_model_iter_next(GTK_TREE_MODEL(bc->widget),
+                                              &iter);
+        }
     }
+    else
+    {
+        GList *child, *children;
+        long inx;
+        for (children = child = gtk_container_get_children(GTK_CONTAINER(bc->widget)), inx = 0;
+             child; child = child->next, inx++)
+        {
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(child->data),
+                                         (value & (1 << inx)) != 0);
+        }
 
-    if (children) {
-        g_list_free(children);
+        if (children)
+        {
+            g_list_free(children);
+        }
     }
-
     bc->recursion--;
 }
-
 
 /**
  * Get the active buttons from a group of toggle buttons
@@ -683,7 +750,63 @@ void wToggleSetValue(
 long wToggleGetValue(
     wChoice_p b)		/* Toggle box */
 {
-    return choiceGetValue(b);
+    if (GTK_IS_LIST_STORE(b->widget))
+    {
+        ButtonListGetValue(b);
+    }
+    else
+    {
+        return choiceGetValue(b);
+    }
+}
+/**
+ * Signal handler called when toggle button is clicked in list view
+ * 
+ * \param renderer see GTK documentation
+ * \param path 
+ * \param bc 
+ * 
+ * \return int 
+ */
+static int ToggleRenderer(
+    GtkCellRendererToggle *renderer,
+    char *path,
+    wChoice_p bc)
+{
+    GtkTreeIter iter;
+    unsigned long value;
+
+    if (debugWindow >= 2)
+    {
+        printf("Button %s clicked\n", path);
+    }
+
+    // Get the  iter from the path
+    gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(bc->widget),
+                                        &iter,
+                                        path);
+    // get the value
+    gtk_tree_model_get(GTK_TREE_MODEL(bc->widget),
+                       &iter,
+                       0,
+                       &value,
+                       -1);
+
+    value = (value ? 0 : 1);
+
+    // set the value
+    gtk_list_store_set(GTK_LIST_STORE(bc->widget),
+                       &iter,
+                       0,
+                       value,
+                       -1);
+
+    value = ButtonListGetValue(bc);
+    if (bc->action)
+    {
+        bc->action(value, bc->data);
+    }
+    return (TRUE);
 }
 
 /**
@@ -929,10 +1052,35 @@ wChoice_p wToggleCreate(
     ((wControl_p)b)->outline = FALSE;
 
     if (option&BO_USETEMPLATE ) {
-        b->widget = wlibGetWidgetFromName(parent, helpStr, "box", FALSE);
-    	if (b->widget) 
+        if (option & BO_LISTELEMENT)
+        {
+            GtkListStore *list = GTK_LIST_STORE(wlibGetWidgetFromName(parent, helpStr, "list", FALSE));
+            for (label = labels; *label; label++)
+            {
+                GtkTreeIter iter;
+                gtk_list_store_append(list, &iter);
+                gtk_list_store_set(list,
+                                   &iter,
+                                   0, 0,
+                                   1, *label,
+                                   -1);
+            }
+            b->widget = GTK_WIDGET(list);
+
             b->fromTemplate = TRUE;
-    	b->template_id = strdup(helpStr);
+
+            GtkCellRendererToggle *renderer = GTK_CELL_RENDERER_TOGGLE(wlibGetWidgetFromName(parent, helpStr, "toggle-renderer", FALSE));
+            g_signal_connect(renderer,
+                             "toggled",
+                             G_CALLBACK(ToggleRenderer),
+                             b);
+            return (b);
+        }
+
+        b->widget = wlibGetWidgetFromName(parent, helpStr, "box", FALSE);
+        if (b->widget)
+            b->fromTemplate = TRUE;
+        b->template_id = strdup(helpStr);
     } else {
 		if (option&BC_HORZ) {
 			b->widget = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
