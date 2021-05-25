@@ -1051,7 +1051,8 @@ wChoice_p wToggleCreate(
     
     ((wControl_p)b)->outline = FALSE;
 
-    if (option&BO_USETEMPLATE ) {
+    if (option & BO_USETEMPLATE)
+    {
         if (option & BO_LISTELEMENT)
         {
             GtkListStore *list = GTK_LIST_STORE(wlibGetWidgetFromName(parent, helpStr, "list", FALSE));
@@ -1065,7 +1066,7 @@ wChoice_p wToggleCreate(
                                    1, *label,
                                    -1);
             }
-            b->widget = GTK_WIDGET(list);
+            b->widget = (GtkWidget *)list;
 
             b->fromTemplate = TRUE;
 
@@ -1081,8 +1082,10 @@ wChoice_p wToggleCreate(
         if (b->widget)
             b->fromTemplate = TRUE;
         b->template_id = strdup(helpStr);
-    } else {
-		if (option&BC_HORZ) {
+    }
+    else
+    {
+        if (option&BC_HORZ) {
 			b->widget = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 		} else {
 			b->widget = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
