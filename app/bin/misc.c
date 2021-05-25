@@ -2383,6 +2383,7 @@ static void SetAccelKeys()
 #include "bitmaps/magnet.xpm"
 
 static wMenu_p toolbarM;
+static addButtonCallBack_t paramFilesCallback;
 
 static void CreateMenus(void) {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM,
@@ -2540,8 +2541,9 @@ static void CreateMenus(void) {
 			NULL);
 	wMenuSeparatorCreate(fileM);
 
+	paramFilesCallback = ParamFilesInit();
 	MiscMenuItemCreate(fileM, NULL, "cmdPrmfile", _("Parameter &Files ..."),
-			ACCL_PARAMFILES, ParamFilesInit(), 0, NULL);
+			ACCL_PARAMFILES, paramFilesCallback, 0, NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdFileNote", _("No&tes ..."), ACCL_NOTES,
 			DoNote, 0, NULL);
 
@@ -2563,6 +2565,9 @@ static void CreateMenus(void) {
 	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm[iconSize]),
 		IC_MODETRAIN_TOO, DoSave, NULL);
 
+	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
+		IC_MODETRAIN_TOO, paramFilesCallback, NULL); // DoParameter
+
 	cmdGroup = BG_PRINT;
 	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
 		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
@@ -2570,9 +2575,6 @@ static void CreateMenus(void) {
 		IC_MODETRAIN_TOO, NULL, NULL); // DoPrint 
 
 	InitCmdExport();
-
-	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
-		IC_MODETRAIN_TOO, NULL, NULL); // DoParameter
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoom_in_xpm[iconSize]),
