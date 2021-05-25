@@ -2555,26 +2555,25 @@ static void NewTurnPrint(
 #endif
 	orig.x = - ( size.y + orig.x + newTurnTrackGauge/2.0 + 0.5 );
 	orig.y -= (0.5);
+	coOrd strPos;
 	for ( i=0, newTurnout_d.orig.x=orig.x; i<ii;
 		  i++, newTurnout_d.orig.x+=newTurnout_d.size.x ) {
 		for ( j=0, newTurnout_d.orig.y=orig.y; j<jj;
 			  j++, newTurnout_d.orig.y+=newTurnout_d.size.y ) {
 			newTurnout_d.d = wPrintPageStart();
 			newTurnout_d.dpi = wDrawGetDPI(newTurnout_d.d);
+			strPos.x = newTurnout_d.orig.x + 3.0;
 
 			sprintf( message, "%s", sProdName );
-			wDrawString( newTurnout_d.d, POSX(3.0),
-						POSY(6.75), 0.0, message, fp, 40,
-						wDrawColorBlack, 0 );
+			strPos.y = newTurnout_d.orig.y + 6.75;
+			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 40, wDrawColorBlack );
 			sprintf( message, _("%s Designer"), _(curDesign->label) );
-			wDrawString( newTurnout_d.d, POSX(3.0),
-						POSY(6.25), 0.0, message, fp, 30,
-						wDrawColorBlack, 0 );
+			strPos.y -= 0.5;
+			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 20, wDrawColorBlack );
 			sprintf( message, _("%s %d x %d (of %d x %d)"), _("Page"), i+1, j+1, ii, jj );
-			wDrawString( newTurnout_d.d, POSX(3.0),
-						POSY(5.75), 0.0, message, fp, 20,
-						wDrawColorBlack, 0 );
-
+			strPos.y -= 0.5;
+			DrawString( &newTurnout_d, strPos, 0.0, message, fp, 20, wDrawColorBlack );
+			strPos.y -= 0.10;
 			for ( p=0; p<curDesign->floatCnt; p++ ) {
 				tmpR = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[p].index].valueP);
 				sprintf( message, "%s: %s",
@@ -2582,21 +2581,18 @@ static void NewTurnPrint(
 						curDesign->floats[p].mode==Dim_e?
 							 FormatDistance(tmpR):
 							 FormatFloat(tmpR) );
-				wDrawString( newTurnout_d.d, POSX(3.0),
-							  POSY(5.50-p*0.25), 0.0,
-							  message, fp, 20, wDrawColorBlack, 0 );
+				strPos.y -= 0.25;
+				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
 			}
 			if (newTurnLeftDesc[0] || newTurnLeftPartno[0]) {
 				sprintf( message, "%s %s %s", newTurnManufacturer, newTurnLeftPartno, newTurnLeftDesc );
-				wDrawString( newTurnout_d.d, POSX(3.0),
-							  POSY(5.50-curDesign->floatCnt*0.25), 0.0,
-							  message, fp, 20, wDrawColorBlack, 0 );
+				strPos.y -= 0.25;
+				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
 			}
 			if (newTurnRightDesc[0] || newTurnRightPartno[0]) {
 				sprintf( message, "%s %s %s", newTurnManufacturer, newTurnRightPartno, newTurnRightDesc );
-				wDrawString( newTurnout_d.d, POSX(3.0),
-							  POSY(5.50-curDesign->floatCnt*0.25-0.25), 0.0,
-							  message, fp, 20, wDrawColorBlack, 0 );
+				strPos.y -= 0.25;
+				DrawString( &newTurnout_d, strPos, 0.0, message, fp, 16, wDrawColorBlack );
 			}
 
 			DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size, wDrawColorBlack, DRAW_CLOSED );

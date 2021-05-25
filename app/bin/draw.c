@@ -1763,7 +1763,6 @@ EXPORT void DrawRuler(
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
 	long mm, mm0, mm1, power, skip;
-	wDrawPix_t x0, y0, x1, y1;
 	
 	static double lengths[] = {
 		0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 0.0 };
@@ -1846,11 +1845,7 @@ EXPORT void DrawRuler(
 							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
-						d->CoOrd2Pix( d, p0, &x0, &y0 );
-						if (x0<0) x0 = 0;
-						if (y0<0) y0 = 0;
-						wDrawString( d->d, x0, y0, d->angle, message, rulerFp,
-										fs, color, (wDrawOpts)d->funcs->options );
+						DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
 					}
 				}
 			}
@@ -1919,10 +1914,7 @@ EXPORT void DrawRuler(
 						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
 						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 						sprintf(message, "%d%c", digit, quote );
-						d->CoOrd2Pix( d, p0, &x0, &y0 );
-						if (x0<0) x0 = 0;
-						if (y0<0) y0 = 0;
-						wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
+						DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
 					}
 				}
 			}
