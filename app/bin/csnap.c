@@ -105,7 +105,6 @@ void static DrawGridPoint(
 		coOrd p0,
 		BOOL_T bigdot )
 {
-	wDrawPix_t x0, y0;
 	// Map Grid index to Layout pos
 	POS_T x;
 	x = (p0.x*Gdx + p0.y*Gdy) + orig.x;
@@ -136,7 +135,6 @@ static void DrawGridLine(
 		coOrd p0,
 		coOrd p1 )
 {
-	wDrawPix_t x0, y0, x1, y1;
 	POS_T x;
 	x = (p0.x*Gdx + p0.y*Gdy) + orig.x;
 	p0.y = (p0.y*Gdx - p0.x*Gdy) + orig.y;
