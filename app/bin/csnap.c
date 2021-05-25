@@ -27,6 +27,7 @@
 #include "common-ui.h"
 
 #define bigdot_width 2
+int log_timedrawgrid = 0;
 
 /*****************************************************************************
  *
@@ -105,6 +106,7 @@ void static DrawGridPoint(
 		BOOL_T bigdot )
 {
 	wDrawPix_t x0, y0;
+	// Map Grid index to Layout pos
 	POS_T x;
 	x = (p0.x*Gdx + p0.y*Gdy) + orig.x;
 	p0.y = (p0.y*Gdx - p0.x*Gdy) + orig.y;
@@ -113,20 +115,14 @@ void static DrawGridPoint(
 		( p0.x < 0.0 || p0.x > size->x ||
 		  p0.y < 0.0 || p0.y > size->y ) )
 		return;
-	p0.x -= D->orig.x;
-	p0.y -= D->orig.y;
-	x = (p0.x*Ddx + p0.y*Ddy);
-	p0.y = (p0.y*Ddx - p0.x*Ddy);
-	p0.x = x;
-	if ( p0.x < 0.0 || p0.x > D->size.x ||
-		 p0.y < 0.0 || p0.y > D->size.y )
-		return;
-	x0 = (p0.x*dpi+0.5) + lborder;
-	y0 = (p0.y*dpi+0.5) + bborder;
-	if ( bigdot )
-		wDrawFilledCircle(D->d, x0, y0, (bigdot_width+0.5)/2, Color, (wDrawOpts)D->funcs->options );
-	else
-		wDrawPoint( D->d, x0, y0, Color, (wDrawOpts)D->funcs->options );
+	DIST_T r;
+	if ( bigdot ) {
+		r = (bigdot_width+0.5)/2 - 0.5;
+	} else {
+		r = 0.75;
+	}
+	r /= dpi;
+	DrawFillCircle( D, p0, r, Color );
 }
 
 
@@ -152,7 +148,6 @@ static void DrawGridLine(
 		return;
 	DrawLine( D, p0, p1, 0, Color );
 }
-
 
 
 EXPORT void DrawGrid(
@@ -184,6 +179,7 @@ EXPORT void DrawGrid(
 		cross0_bm = wDrawBitMapCreate( mainD.d, cross0_width, cross0_height, 2, 2, cross0_bits );
 #endif
 
+	unsigned long time0 = wGetTimer();
 	wSetCursor( mainD.d, wCursorWait );
 	dpi = D->dpi/D->scale;
 	Gdx = cos(D2R(Gangle));
@@ -305,6 +301,7 @@ EXPORT void DrawGrid(
 
 done:
 	wSetCursor( mainD.d, defaultCursor );
+	LOG( log_timedrawgrid, 1, ( "DrawGrid time = %lu mS\n", wGetTimer()-time0 ) );
 }
 
 
@@ -672,9 +669,6 @@ EXPORT STATUS_T CmdGrid(
 		coOrd pos )
 {
 	STATUS_T rc;
-#ifdef TIMEDRAWGRID
-	unsigned long time0, time1, time2;
-#endif
 
 	switch (action) {
 
@@ -719,20 +713,10 @@ EXPORT STATUS_T CmdGrid(
 		return rc;
 	case C_UP:
 	case C_RUP:
-#ifdef TIMEDRAWGRID
-		time0 = wGetTimer();
-#endif
-#ifdef TIMEDRAWGRID
-		time1 = wGetTimer();
-#endif
 		rc = GridAction( action, pos, &grid.Orig, &grid.Angle );
 		ParamLoadControls( &gridPG );
 		RedrawGrid();
 		oldGrid = grid;
-#ifdef TIMEDRAWGRID
-		time2 = wGetTimer();
-		InfoMessage( "undraw %ld, draw %ld", (long)(time1-time0), (long)(time2-time1) );
-#endif
 		return rc;
 
 	case C_CMDMENU:
@@ -766,6 +750,7 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 	snapGridPopupM = MenuRegister( "Snap Grid Rotate" );
 	AddRotateMenu( snapGridPopupM, SnapGridRotate );
 	GridButtonUpdate( 0 );
+	log_timedrawgrid = LogFindIndex( "timedrawgrid" );
 	return InitCommand( menu, CmdGrid, N_("Change Grid..."), NULL, LEVEL0, IC_CMDMENU, ACCL_GRIDW );
 }
 

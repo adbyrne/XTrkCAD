@@ -53,6 +53,7 @@ EXPORT int log_pan = 0;
 static int log_zoom = 0;
 static int log_mouse = 0;
 static int log_redraw = 0;
+static int log_timemainredraw = 0;
 
 static wFontSize_t drawMaxTextFontSize = 100;
 
@@ -1509,6 +1510,7 @@ EXPORT void MainRedraw( void )
 
 	static int cMR = 0;
 	LOG( log_redraw, 1, ( "MainRedraw: %d\n", cMR++ ) );
+	unsigned long time0 = wGetTimer();
 	if (delayUpdate)
 	wDrawDelayUpdate( mainD.d, TRUE );
 
@@ -1549,6 +1551,7 @@ EXPORT void MainRedraw( void )
 
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
+	LOG( log_timemainredraw, 1, ( "MainRedraw time = %lu mS\n", wGetTimer()-time0 ) );
 	// The remainder is from TempRedraw
 	wDrawSetTempMode( tempD.d, TRUE );
 	DrawMarkers();
@@ -3006,6 +3009,8 @@ EXPORT void DrawInit( int initialZoom )
 	log_zoom = LogFindIndex( "zoom" );
 	log_mouse = LogFindIndex( "mouse" );
 	log_redraw = LogFindIndex( "redraw" );
+	log_timemainredraw = LogFindIndex( "timemainredraw" );
+
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
 	AddPlaybackProc( "KEY ", (playbackProc_p)PlaybackKey, NULL );
 

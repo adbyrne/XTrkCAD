@@ -54,6 +54,7 @@ EXPORT char tempSpecial[4096];
 static int log_track = 0;
 static int log_endPt = 0;
 static int log_readTracks = 0;
+static int log_timedrawtracks = 0;
 
 // Enable trkType checks on extraData*_t
 #define CHECK_EXTRA_DATA
@@ -333,6 +334,7 @@ EXPORT void InitTrkTrack( void )
 	log_track = LogFindIndex( "track" );
 	log_endPt = LogFindIndex( "endPt" );
 	log_readTracks = LogFindIndex( "readTracks" );
+	log_timedrawtracks = LogFindIndex( "timedrawtracks" );
 }
 
 /*****************************************************************************
@@ -3326,6 +3328,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 	wIndex_t count = 0;
 	coOrd lo, hi;
 	BOOL_T doSelectRecount = FALSE;
+	unsigned long time0 = wGetTimer();
 	
 	inDrawTracks = TRUE;
 	InfoCount( 0 );
@@ -3357,6 +3360,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 		for (inx=1; inx<trackCmds_da.cnt; inx++)
 			if (trackCmds(inx)->redraw != NULL)
 				trackCmds(inx)->redraw();
+		LOG( log_timedrawtracks, 1, ( "DrawTracks time = %lu mS\n", wGetTimer()-time0 ) );
 	}
 	InfoCount( trackCount );
 	inDrawTracks = FALSE;
