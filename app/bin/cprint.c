@@ -1354,7 +1354,8 @@ static void PrintDlgUpdate(
  */
 EXPORT void DoPrint ()
 {
-	CmdPrint(C_START, zero);
+	STATUS_T status = C_START;
+	status = CmdPrint(status, zero);
 }
 
 static STATUS_T CmdPrint(
