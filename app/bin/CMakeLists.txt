@@ -96,6 +96,7 @@ SET(SOURCES
 	cturntbl.c
 	cundo.c
 	custom.c
+	custom.h
 	dbench.c
 	dbitmap.c
 	dcar.c
@@ -120,6 +121,7 @@ SET(SOURCES
 	filenoteui.c
 	i18n.c
 	layout.c
+	layout.h
 	levenshtein.c
 	linknoteui.c
 	lprintf.c

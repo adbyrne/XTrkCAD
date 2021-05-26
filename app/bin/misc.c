@@ -2566,13 +2566,13 @@ static void CreateMenus(void) {
 		IC_MODETRAIN_TOO, DoSave, NULL);
 
 	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
-		IC_MODETRAIN_TOO, paramFilesCallback, NULL); // DoParameter
+		IC_MODETRAIN_TOO, paramFilesCallback, NULL); 
 
 	cmdGroup = BG_PRINT;
 	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
 		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
 	AddToolbarButton("menuFile-print", wIconCreatePixMap(doc_print_xpm[iconSize]),
-		IC_MODETRAIN_TOO, NULL, NULL); // DoPrint 
+		IC_MODETRAIN_TOO, DoPrint, NULL); 
 
 	InitCmdExport();
 
