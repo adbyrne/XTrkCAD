@@ -2769,6 +2769,13 @@ EXPORT void DrawCurvedTrack(
 
 LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 				p.x, p.y, r, a0, a1 ) )
+
+	// Draw a solid background
+	if(trk && GetTrkBridge(trk)) {
+		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
+		DrawArc( d, p, r, a0, a1, 0, width3, drawColorGrey90 );
+	}
+
 	if ( DoDrawTies( d, trk ) )
 		DrawCurvedTies( d, GetTrkScale(trk), p, r, a0, a1, color );
 	if (color == wDrawColorBlack)
@@ -2914,6 +2921,13 @@ EXPORT void DrawStraightTrack(
 #endif
 LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 				p0.x, p0.y, p1.x, p1.y ) )
+
+	// Draw solid background
+	if(trk && GetTrkBridge(trk)) {
+		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
+		DrawLine(d,p0,p1,width3,wDrawColorGrey90);
+	}
+
 	if ( DoDrawTies( d, trk ) )
 		DrawStraightTies( d, GetTrkScale(trk), p0, p1, color );
 	if (color == wDrawColorBlack)
