@@ -708,10 +708,7 @@ EXPORT void DrawMultiString(
 		for (int i=0;i<4;i++) {
 			Rotate( &p[i], orig, a);
 		}
-		DrawLine( d, p[0], p[1], 0, color );
-		DrawLine( d, p[1], p[2], 0, color );
-		DrawLine( d, p[2], p[3], 0, color );
-		DrawLine( d, p[3], p[0], 0, color );
+		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
 	}
 
 	free(line);
@@ -1700,8 +1697,6 @@ EXPORT void DoRedraw( void )
 
 static void DrawRoomWalls( wBool_t drawBackground )
 {
-	coOrd p00, p01, p11, p10;
-
 	if (mainD.d == NULL)
 		return;
 
@@ -1710,18 +1705,12 @@ static void DrawRoomWalls( wBool_t drawBackground )
 		DrawRectangle( &mainD, zero, mapD.size, wDrawColorWhite, DRAW_FILL );
 
 	} else {
-
+		coOrd p[4];
 		DrawTicks( &mainD, mapD.size );
-
-		p00.x = 0.0; p00.y = 0.0;
-		p01.x = p10.y = 0.0;
-		p11.x = p10.x = mapD.size.x;
-		p01.y = p11.y = mapD.size.y;
-
-		DrawLine( &mainD, p01, p11, 3, borderColor );
-		DrawLine( &mainD, p11, p10, 3, borderColor );
-		DrawLine( &mainD, p00, p01, 3, borderColor );
-		DrawLine( &mainD, p00, p10, 3, borderColor );
+		p[0].x = p[0].y = p[1].x = p[3].y = 0.0;
+		p[2].x = p[3].x = mapD.size.x;
+		p[1].y = p[2].y = mapD.size.y;
+		DrawPoly( &mainD, 4, p, NULL, borderColor, 3, DRAW_CLOSED );
 	}
 }
 
