@@ -2969,8 +2969,8 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 
 		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
-		Translate( &pp0, pp0, angle+180, trackGauge*1.5 );
-		Translate( &pp1, pp1, angle, trackGauge*1.5 );
+		Translate( &pp0, pp0, angle+180, trackGauge*1.0 );
+		Translate( &pp1, pp1, angle, trackGauge*1.0 );
 		DrawLine( d, pp0, pp1, width2, color );
 		Translate( &pp2,pp0, angle+90-45, trackGauge);
 		DrawLine( d, pp0, pp2, width2, color );
@@ -2979,8 +2979,8 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 
 		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
-		Translate( &pp0, pp0, angle+180, trackGauge*1.5 );
-		Translate( &pp1, pp1, angle, trackGauge*1.5 );
+		Translate( &pp0, pp0, angle+180, trackGauge*1.0 );
+		Translate( &pp1, pp1, angle, trackGauge*1.0 );
 		DrawLine( d, pp0, pp1, width2, color );
 		Translate( &pp2,pp0, angle-90+45, trackGauge);
 		DrawLine( d, pp0, pp2, width2, color );
