@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "common.h"
 #include "draw.h"
 #include "ccurve.h"
 #include "tcornu.h"
@@ -592,7 +593,25 @@ static void DrawSingleTrack(track_p trk, BOOL_T bit) {
 	DrawTrack(trk,&tempD,bit?wDrawColorPreviewSelected:wDrawColorPreviewUnselected);
 }
 
+typedef BOOL_T (*testSelectedTrackCallBack_t)(track_p, int);
+
+
+static BOOL_T TestAllSelectedTracks( testSelectedTrackCallBack_t testit, int value)
+{
+	track_p trk;
+		trk = NULL;
+		while ( TrackIterate( &trk ) ) {
+			if (GetTrkSelected(trk)) {
+				if ( !testit( trk, value ) ) {
+					return FALSE;
+				}
+			}
+		}
+	return TRUE;
+}
+
 typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
+
 static void DoSelectedTracks( doSelectedTrackCallBack_t doit )
 {
 	track_p trk;
@@ -693,7 +712,11 @@ EXPORT int SelectDelete( void )
 	if (SelectedTracksAreFrozen())
 		return 0;
 	if (selectedTrackCount>0) {
-		UndoStart( _("Delete Tracks"), "delete" );
+		BOOL_T UndoStarted = FALSE;
+		if (!TestAllSelectedTracks(QueryTrack,(int)Q_ISTRAIN)) {  // If all Cars, don't bother with UndoStart as there will be nothing to delete
+			UndoStarted = TRUE;
+			UndoStart( _("Delete Tracks"), "delete" );
+		}
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wDrawDelayUpdate( mapD.d, TRUE );
 		DoSelectedTracks( DeleteTrack );
@@ -702,7 +725,8 @@ EXPORT int SelectDelete( void )
 		wDrawDelayUpdate( mapD.d, FALSE );
 		selectedTrackCount = 0;
 		SelectedTrackCountChange();
-		UndoEnd();
+		if (UndoStarted)
+			UndoEnd();
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
@@ -3568,8 +3592,8 @@ static STATUS_T CmdSelect(
 #include "bitmaps/bridge.xpm"
 #include "bitmaps/move.xpm"
 #include "bitmaps/rotate.xpm"
-#include "bitmaps/flip.xpm"
-#include "bitmaps/movedesc.xpm"
+#include "bitmaps/reflect.xpm"
+#include "bitmaps/description.xpm"
 
 
 static void SetMoveMode( char * line )
@@ -3594,7 +3618,7 @@ static void moveDescription( void * unused ) {
 
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
-	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"), wIconCreatePixMap(select_xpm),
+	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"), wIconCreatePixMap(select_xpm[iconSize]),
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS, ACCL_SELECT, NULL );
 }
 
@@ -3689,38 +3713,38 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 EXPORT void InitCmdDelete( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( delete_xpm );
+	icon = wIconCreatePixMap( delete_xpm[iconSize] );
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
 }
 
 EXPORT void InitCmdTunnel( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( tunnel_xpm );
+	icon = wIconCreatePixMap( tunnel_xpm[iconSize] );
 	AddToolbarButton( "cmdTunnel", icon, IC_SELECTED|IC_POPUP, SelectTunnel, NULL );
 }
 
 EXPORT void InitCmdBridge( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( bridge_xpm );
+	icon = wIconCreatePixMap( bridge_xpm[iconSize] );
 	AddToolbarButton( "cmdBridge", icon, IC_SELECTED|IC_POPUP, SelectBridge, NULL );
 }
 
 
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(movedesc_xpm),
+	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(description_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, I2VP( 0 ));
 }
 
 
 EXPORT void InitCmdMove( wMenu_p menu )
 {
-	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"), wIconCreatePixMap(move_xpm),
+	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"), wIconCreatePixMap(move_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
-	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm),
+	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
-	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(flip_xpm),
+	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(reflect_xpm[iconSize]),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

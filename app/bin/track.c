@@ -1172,6 +1172,21 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 			}
 		}
 	}
+	/* If Car, simulate Remove Car -> uncouple and mark deleted (no Undo) */
+	if (QueryTrack(trk,Q_ISTRAIN)) {
+		trk->deleted = TRUE;
+		int dir;
+		for (dir=0; dir<2; dir++) {
+		    if (GetTrkEndTrk(trk,dir)) {
+		    	track_p car = GetTrkEndTrk(trk,dir);
+		    	for (int dir2=0;dir2<2; dir2++) {
+		    		if (car->endPt[dir2].track == trk) car->endPt[dir2].track = NULL;
+		    	}
+		        trk->endPt[dir].track = NULL;
+		    }
+		}
+		return TRUE;
+	}
 	for (i=0;i<trk->endCnt;i++) {
 		if ((trk2=trk->endPt[i].track) != NULL) {
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
@@ -1405,15 +1420,15 @@ EXPORT void SelectBelow( void * unused )
 }
 
 
-#include "bitmaps/above.xpm"
-#include "bitmaps/below.xpm"
+#include "bitmaps/top.xpm"
+#include "bitmaps/bottom.xpm"
 
 EXPORT void InitCmdAboveBelow( void )
 {
 	wIcon_p bm_p;
-	bm_p = wIconCreatePixMap( above_xpm );
+	bm_p = wIconCreatePixMap( top_xpm[iconSize] );
 	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED|IC_POPUP, SelectAbove, NULL );
-	bm_p = wIconCreatePixMap( below_xpm );
+	bm_p = wIconCreatePixMap( bottom_xpm[iconSize] );
 	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED|IC_POPUP, SelectBelow, NULL );
 }
 
@@ -2756,6 +2771,13 @@ EXPORT void DrawCurvedTrack(
 
 LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 				p.x, p.y, r, a0, a1 ) )
+
+	// Draw a solid background
+	if(trk && GetTrkBridge(trk)) {
+		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
+		DrawArc( d, p, r, a0, a1, 0, width3, drawColorGrey90 );
+	}
+
 	if ( DoDrawTies( d, trk ) )
 		DrawCurvedTies( d, GetTrkScale(trk), p, r, a0, a1, color );
 	if (color == wDrawColorBlack)
@@ -2901,6 +2923,13 @@ EXPORT void DrawStraightTrack(
 #endif
 LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 				p0.x, p0.y, p1.x, p1.y ) )
+
+	// Draw solid background
+	if(trk && GetTrkBridge(trk)) {
+		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
+		DrawLine(d,p0,p1,width3,wDrawColorGrey90);
+	}
+
 	if ( DoDrawTies( d, trk ) )
 		DrawStraightTies( d, GetTrkScale(trk), p0, p1, color );
 	if (color == wDrawColorBlack)
@@ -2942,8 +2971,8 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 
 		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
-		Translate( &pp0, pp0, angle+180, trackGauge*1.5 );
-		Translate( &pp1, pp1, angle, trackGauge*1.5 );
+		Translate( &pp0, pp0, angle+180, trackGauge*1.0 );
+		Translate( &pp1, pp1, angle, trackGauge*1.0 );
 		DrawLine( d, pp0, pp1, width2, color );
 		Translate( &pp2,pp0, angle+90-45, trackGauge);
 		DrawLine( d, pp0, pp2, width2, color );
@@ -2952,8 +2981,8 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 
 		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
-		Translate( &pp0, pp0, angle+180, trackGauge*1.5 );
-		Translate( &pp1, pp1, angle, trackGauge*1.5 );
+		Translate( &pp0, pp0, angle+180, trackGauge*1.0 );
+		Translate( &pp1, pp1, angle, trackGauge*1.0 );
 		DrawLine( d, pp0, pp1, width2, color );
 		Translate( &pp2,pp0, angle-90+45, trackGauge);
 		DrawLine( d, pp0, pp2, width2, color );

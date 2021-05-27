@@ -64,6 +64,8 @@ static void ShowUnusedBalloonHelp(void);
  *
  */
 
+EXPORT int iconSize = 0;
+
 EXPORT int foobar = 0;
 
 EXPORT int log_error;
@@ -1675,7 +1677,7 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 	}
 }
 
-#include "bitmaps/openbutt.xpm"
+#include "bitmaps/down.xpm"
 static const char * buttonGroupMenuTitle;
 static const char * buttonGroupHelpKey;
 static const char * buttonGroupStickyLabel;
@@ -1719,7 +1721,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 		}
 		if (buttonGroupMenuTitle != NULL && buttonGroupPopupM == NULL) {
 			if (openbuttIcon == NULL)
-				openbuttIcon = wIconCreatePixMap(openbutt_xpm);
+				openbuttIcon = wIconCreatePixMap(down_xpm[iconSize]);
 			buttonGroupPopupM = wMenuPopupCreate(mainW, buttonGroupMenuTitle);
 			AddToolbarButton(buttonGroupHelpKey, openbuttIcon, IC_ABUT,
 					(wButtonCallBack_p) wMenuPopupShow,
@@ -1933,24 +1935,26 @@ static void DoSticky(void * unused) {
  * specified in the following array.
  * Note: text and choices must be given in the same order.
  */
-static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Import/Export Buttons"), N_("Zoom Buttons"), N_(
-		"Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"), N_(
-		"Create Track Buttons"), N_("Layout Control Elements"), N_(
-		"Modify Track Buttons"), N_("Properties/Select"), N_(
-		"Track Group Buttons"), N_("Train Group Buttons"), N_(
-		"Create Misc Buttons"), N_("Ruler Button"), N_("Layer Buttons"), N_(
-		"Hot Bar"),
+static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Print Buttons"), N_("Import/Export Buttons"), 
+        N_("Zoom Buttons"), N_("Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"), 
+	    N_("Create Track Buttons"), N_("Layout Control Elements"), 
+	    N_("Modify Track Buttons"), N_("Properties/Select"), 
+	    N_("Track Group Buttons"), N_("Train Group Buttons"), 
+	    N_("Create Misc Buttons"), N_("Ruler Button"), 
+	    N_("Layer Buttons"), N_("Hot Bar"),
 NULL };
-static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOOM, 1 << BG_UNDO, 1
-		<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT, 1 << BG_CONTROL, 1
-		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
-		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
+static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_PRINT, 1<< BG_EXPORTIMPORT, 
+        1<< BG_ZOOM, 1<< BG_UNDO, 1<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT, 
+	    1<< BG_CONTROL, 1<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 
+	    1<< BG_MISCCRT, 1<< BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
-static wMenuToggle_p toolbarMI;
+static wMenuToggle_p AllToolbarMI[ COUNT( AllToolbarMasks ) ];
 
 static void ToolbarAction(void * data) {
-	wBool_t set = wMenuToggleGet( toolbarMI );
-	long mask = VP2L(data);
+	int inx = (int)VP2L(data);
+	ASSERT( inx >=0 && inx < COUNT( AllToolbarMasks ) );
+	wBool_t set = wMenuToggleGet( AllToolbarMI[inx] );
+	long mask = AllToolbarMasks[inx];
 	if (set)
 		toolbarSet |= mask;
 	else
@@ -1980,8 +1984,8 @@ static void CreateToolbarM(wMenu_p toolbarM) {
 	labels = AllToolbarLabels;
 	for (inx = 0; inx < cnt; inx++, masks++, labels++) {
 		set = (toolbarSet & *masks) != 0;
-		toolbarMI = wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
-				ToolbarAction, I2VP(*masks));
+		AllToolbarMI[inx] = wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
+				ToolbarAction, I2VP(inx));
 	}
 }
 
@@ -2358,24 +2362,28 @@ static void SetAccelKeys()
  */
 
 
-#include "bitmaps/zoomin.xpm"
-#include "bitmaps/zoom.xpm"
-#include "bitmaps/zoomout.xpm"
-#include "bitmaps/edit-undo.xpm"
-#include "bitmaps/edit-redo.xpm"
-#include "bitmaps/partlist.xpm"
-#include "bitmaps/document-export.xpm"
-#include "bitmaps/document-exportdxf.xpm"
-#include "bitmaps/document-import.xpm"
-#include "bitmaps/document-importmod.xpm"
-#include "bitmaps/document-new.xpm"
-#include "bitmaps/document-save.xpm"
-#include "bitmaps/document-open.xpm"
-#include "bitmaps/document-print.xpm"
+#include "bitmaps/zoom-in.xpm"
+#include "bitmaps/zoom-choose.xpm"
+#include "bitmaps/zoom-out.xpm"
+#include "bitmaps/undo.xpm"
+#include "bitmaps/redo.xpm"
+#include "bitmaps/partlist.xpm" // unused icon
+#include "bitmaps/doc-export.xpm"
+#include "bitmaps/doc-export-dxf.xpm"
+#include "bitmaps/doc-export-bmap.xpm"
+#include "bitmaps/doc-import.xpm"
+#include "bitmaps/doc-import-xtc.xpm"
+#include "bitmaps/doc-new.xpm"
+#include "bitmaps/doc-save.xpm"
+#include "bitmaps/doc-open.xpm"
+#include "bitmaps/doc-print.xpm"
+#include "bitmaps/doc-setup.xpm"
+#include "bitmaps/parameter.xpm"
 #include "bitmaps/map.xpm"
 #include "bitmaps/magnet.xpm"
 
 static wMenu_p toolbarM;
+static addButtonCallBack_t paramFilesCallback;
 
 static void CreateMenus(void) {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM,
@@ -2383,6 +2391,8 @@ static void CreateMenus(void) {
 	wMenu_p zoomM, zoomSubM;
 
 	wMenuPush_p zoomInM, zoomOutM;
+
+	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
 
 	fileM = wMenuBarAdd(mainW, "menuFile", _("&File"));
 	editM = wMenuBarAdd(mainW, "menuEdit", _("&Edit"));
@@ -2496,37 +2506,6 @@ static void CreateMenus(void) {
 	popup1mM = wMenuMenuCreate(popup1M, "", _("More..."));
 	popup2mM = wMenuMenuCreate(popup2M, "", _("More..."));
 
-	cmdGroup = BG_FILE;
-	AddToolbarButton("menuFile-clear", wIconCreatePixMap(document_new),
-			IC_MODETRAIN_TOO, DoClear, NULL);
-	AddToolbarButton("menuFile-load", wIconCreatePixMap(document_open),
-			IC_MODETRAIN_TOO, ChkLoad, NULL);
-	AddToolbarButton("menuFile-save", wIconCreatePixMap(document_save),
-			IC_MODETRAIN_TOO, DoSave, NULL);
-
-	InitCmdExport();
-
-	cmdGroup = BG_ZOOM;
-	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoomin_xpm),
-			IC_MODETRAIN_TOO, DoZoomUp, NULL);
-
-	zoomM = wMenuPopupCreate(mainW, "");
-	AddToolbarButton("cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO,
-			(wButtonCallBack_p) wMenuPopupShow, zoomM);
-
-	zoomDownB = AddToolbarButton("cmdZoomOut", wIconCreatePixMap(zoomout_xpm),
-			IC_MODETRAIN_TOO, DoZoomDown, NULL);
-
-	cmdGroup = BG_UNDO;
-	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(edit_undo), 0,
-			UndoUndo, NULL);
-	redoB = AddToolbarButton("cmdRedo", wIconCreatePixMap(edit_redo), 0,
-			UndoRedo, NULL);
-
-	wControlActive((wControl_p) undoB, FALSE);
-	wControlActive((wControl_p) redoB, FALSE);
-	InitCmdUndo();
-
 	/*
 	 * FILE MENU
 	 */
@@ -2562,8 +2541,9 @@ static void CreateMenus(void) {
 			NULL);
 	wMenuSeparatorCreate(fileM);
 
+	paramFilesCallback = ParamFilesInit();
 	MiscMenuItemCreate(fileM, NULL, "cmdPrmfile", _("Parameter &Files ..."),
-			ACCL_PARAMFILES, ParamFilesInit(), 0, NULL);
+			ACCL_PARAMFILES, paramFilesCallback, 0, NULL);
 	MiscMenuItemCreate(fileM, NULL, "cmdFileNote", _("No&tes ..."), ACCL_NOTES,
 			DoNote, 0, NULL);
 
@@ -2573,6 +2553,49 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(fileM);
 	wMenuPushCreate(fileM, "menuFile-quit", _("E&xit"), 0,
 			DoQuit, NULL);
+
+	/*
+	 * File Buttons
+	 */
+	cmdGroup = BG_FILE;
+	AddToolbarButton("menuFile-clear", wIconCreatePixMap(doc_new_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoClear, NULL);
+	AddToolbarButton("menuFile-load", wIconCreatePixMap(doc_open_xpm[iconSize]),
+		IC_MODETRAIN_TOO, ChkLoad, NULL);
+	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoSave, NULL);
+
+	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
+		IC_MODETRAIN_TOO, paramFilesCallback, NULL); 
+
+	cmdGroup = BG_PRINT;
+	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
+		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
+	AddToolbarButton("menuFile-print", wIconCreatePixMap(doc_print_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoPrint, NULL); 
+
+	InitCmdExport();
+
+	cmdGroup = BG_ZOOM;
+	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoom_in_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoZoomUp, NULL);
+
+	zoomM = wMenuPopupCreate(mainW, "");
+	AddToolbarButton("cmdZoom", wIconCreatePixMap(zoom_choose_xpm[iconSize]), IC_MODETRAIN_TOO,
+		(wButtonCallBack_p) wMenuPopupShow, zoomM);
+
+	zoomDownB = AddToolbarButton("cmdZoomOut", wIconCreatePixMap(zoom_out_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoZoomDown, NULL);
+
+	cmdGroup = BG_UNDO;
+	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(undo_xpm[iconSize]), 0,
+		UndoUndo, NULL);
+	redoB = AddToolbarButton("cmdRedo", wIconCreatePixMap(redo_xpm[iconSize]), 0,
+		UndoRedo, NULL);
+
+	wControlActive((wControl_p) undoB, FALSE);
+	wControlActive((wControl_p) redoB, FALSE);
+	InitCmdUndo();
 
 	/*
 	 * EDIT MENU
@@ -2675,12 +2698,12 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
-	magnetsB = AddToolbarButton("cmdMagneticSnap", wIconCreatePixMap(magnet_xpm),
+	magnetsB = AddToolbarButton("cmdMagneticSnap", wIconCreatePixMap(magnet_xpm[iconSize]),
 				IC_MODETRAIN_TOO, MagneticSnapToggle, NULL);
 		wControlLinkedSet((wControl_p) magnetsMI, (wControl_p) magnetsB);
 		wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
-	mapShowB = AddToolbarButton("cmdMapShow", wIconCreatePixMap(map_xpm),
+	mapShowB = AddToolbarButton("cmdMapShow", wIconCreatePixMap(map_xpm[iconSize]),
 			IC_MODETRAIN_TOO, MapWindowToggleShow, NULL);
 	wControlLinkedSet((wControl_p) mapShowMI, (wControl_p) mapShowB);
 	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
@@ -2929,13 +2952,15 @@ EXPORT void InitCmdEnumerate(void) {
 EXPORT void InitCmdExport(void) {
 	ButtonGroupBegin( _("Import/Export"), "cmdExportImportSetCmd", _("Import/Export") );
 	cmdGroup = BG_EXPORTIMPORT;
-	AddToolbarButton("cmdExport", wIconCreatePixMap(export_xpm),
+	AddToolbarButton("cmdExport", wIconCreatePixMap(doc_export_xpm[iconSize]),
 			IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
-	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(export_dxf_xpm), IC_SELECTED | IC_ACCLKEY,
+	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), IC_SELECTED | IC_ACCLKEY,
 		DoExportDXF, I2VP(1));
-	AddToolbarButton("cmdImport", wIconCreatePixMap(import_xpm), IC_ACCLKEY,
+	AddToolbarButton("cmdExportBmap", wIconCreatePixMap(doc_export_bmap_xpm[iconSize]), IC_ACCLKEY,
+		OutputBitMapInit(), NULL);
+	AddToolbarButton("cmdImport", wIconCreatePixMap(doc_import_xpm[iconSize]), IC_ACCLKEY,
 			DoImport, I2VP(0));
-	AddToolbarButton("cmdImportModule", wIconCreatePixMap(importmod_xpm), IC_ACCLKEY,
+	AddToolbarButton("cmdImportModule", wIconCreatePixMap(doc_import_xtc_xpm[iconSize]), IC_ACCLKEY,
 				DoImport, I2VP(1));
 	ButtonGroupEnd();
 }

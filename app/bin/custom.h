@@ -45,6 +45,7 @@
 #define BG_FILE			(14)
 #define BG_CONTROL		(15)
 #define BG_EXPORTIMPORT (16)
+#define BG_PRINT		(17)
 #define BG_BIGGAP		(1<<8)
 extern int cmdGroup;
 
@@ -139,7 +140,7 @@ void InitCmdNote();
 void InitCmdUndo( void );
 void InitCmdStruct( wMenu_p menu );
 void InitCmdAboveBelow( void );
-void InitCmdEnumerate( void );
+//void InitCmdEnumerate( void );
 void InitCmdExport( void );
 void InitCmdEasement( void );
 
