@@ -464,16 +464,16 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/splittrk.xpm"
-#include "bitmaps/splitdraw.xpm"
-#include "bitmaps/trimdraw.xpm"
+#include "bitmaps/split.xpm"
+#include "bitmaps/split-draw.xpm"
+#include "bitmaps/trim.xpm"
 
 void InitCmdSplit( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Split"), "cmdSplitSetCmd", _("Split") );
-	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(splittrk_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
-	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"), wIconCreatePixMap(splitdraw_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
-	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"), wIconCreatePixMap(trimdraw_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
+	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(split_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
+	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"), wIconCreatePixMap(split_draw_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
+	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"), wIconCreatePixMap(trim_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
 	ButtonGroupEnd();
 }
 

@@ -265,7 +265,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 void InitCmdText( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
+	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
 	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();

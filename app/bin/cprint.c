@@ -1349,6 +1349,15 @@ static void PrintDlgUpdate(
 	TempRedraw(); // PrintDlgUpdate
 }
 
+/*
+ *  Used by Print button
+ */
+EXPORT void DoPrint ()
+{
+	STATUS_T status = C_START;
+	status = CmdPrint(status, zero);
+}
+
 static STATUS_T CmdPrint(
 		wAction_t action,
 		coOrd pos )

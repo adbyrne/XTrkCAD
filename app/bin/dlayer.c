@@ -392,6 +392,8 @@ FormatLayerName(unsigned int layerNumber)
     return result;
 }
 
+static int lbits_width[3] = {14,20,26};
+static int lbits_height[3] = {16,24,32};
 
 #include "bitmaps/l1.xbm"
 #include "bitmaps/l2.xbm"
@@ -494,17 +496,37 @@ FormatLayerName(unsigned int layerNumber)
 #include "bitmaps/l99.xbm"
 
 
-static char * show_layer_bits[NUM_BUTTONS] = {
-    l1_bits, l2_bits, l3_bits, l4_bits, l5_bits, l6_bits, l7_bits, l8_bits, l9_bits, l10_bits,
-    l11_bits, l12_bits, l13_bits, l14_bits, l15_bits, l16_bits, l17_bits, l18_bits, l19_bits, l20_bits,
-    l21_bits, l22_bits, l23_bits, l24_bits, l25_bits, l26_bits, l27_bits, l28_bits, l29_bits, l30_bits,
-    l31_bits, l32_bits, l33_bits, l34_bits, l35_bits, l36_bits, l37_bits, l38_bits, l39_bits, l40_bits,
-    l41_bits, l42_bits, l43_bits, l44_bits, l45_bits, l46_bits, l47_bits, l48_bits, l49_bits, l50_bits,
-    l51_bits, l52_bits, l53_bits, l54_bits, l55_bits, l56_bits, l57_bits, l58_bits, l59_bits, l60_bits,
-    l61_bits, l62_bits, l63_bits, l64_bits, l65_bits, l66_bits, l67_bits, l68_bits, l69_bits, l70_bits,
-    l71_bits, l72_bits, l73_bits, l74_bits, l75_bits, l76_bits, l77_bits, l78_bits, l79_bits, l80_bits,
-    l81_bits, l82_bits, l83_bits, l84_bits, l85_bits, l86_bits, l87_bits, l88_bits, l89_bits, l90_bits,
-    l91_bits, l92_bits, l93_bits, l94_bits, l95_bits, l96_bits, l97_bits, l98_bits, l99_bits,
+static char * show_layer_bits[3][NUM_BUTTONS] = {
+	{ l1_x16, l2_x16, l3_x16, l4_x16, l5_x16, l6_x16, l7_x16, l8_x16, l9_x16, l10_x16,
+	  l11_x16, l12_x16, l13_x16, l14_x16, l15_x16, l16_x16, l17_x16, l18_x16, l19_x16, l20_x16,
+	  l21_x16, l22_x16, l23_x16, l24_x16, l25_x16, l26_x16, l27_x16, l28_x16, l29_x16, l30_x16,
+	  l31_x16, l32_x16, l33_x16, l34_x16, l35_x16, l36_x16, l37_x16, l38_x16, l39_x16, l40_x16,
+	  l41_x16, l42_x16, l43_x16, l44_x16, l45_x16, l46_x16, l47_x16, l48_x16, l49_x16, l50_x16,
+	  l51_x16, l52_x16, l53_x16, l54_x16, l55_x16, l56_x16, l57_x16, l58_x16, l59_x16, l60_x16,
+	  l61_x16, l62_x16, l63_x16, l64_x16, l65_x16, l66_x16, l67_x16, l68_x16, l69_x16, l70_x16,
+	  l71_x16, l72_x16, l73_x16, l74_x16, l75_x16, l76_x16, l77_x16, l78_x16, l79_x16, l80_x16,
+	  l81_x16, l82_x16, l83_x16, l84_x16, l85_x16, l86_x16, l87_x16, l88_x16, l89_x16, l90_x16,
+	  l91_x16, l92_x16, l93_x16, l94_x16, l95_x16, l96_x16, l97_x16, l98_x16, l99_x16, },
+	{ l1_x24, l2_x24, l3_x24, l4_x24, l5_x24, l6_x24, l7_x24, l8_x24, l9_x24, l10_x24,
+	  l11_x24, l12_x24, l13_x24, l14_x24, l15_x24, l16_x24, l17_x24, l18_x24, l19_x24, l20_x24,
+	  l21_x24, l22_x24, l23_x24, l24_x24, l25_x24, l26_x24, l27_x24, l28_x24, l29_x24, l30_x24,
+	  l31_x24, l32_x24, l33_x24, l34_x24, l35_x24, l36_x24, l37_x24, l38_x24, l39_x24, l40_x24,
+	  l41_x24, l42_x24, l43_x24, l44_x24, l45_x24, l46_x24, l47_x24, l48_x24, l49_x24, l50_x24,
+	  l51_x24, l52_x24, l53_x24, l54_x24, l55_x24, l56_x24, l57_x24, l58_x24, l59_x24, l60_x24,
+	  l61_x24, l62_x24, l63_x24, l64_x24, l65_x24, l66_x24, l67_x24, l68_x24, l69_x24, l70_x24,
+	  l71_x24, l72_x24, l73_x24, l74_x24, l75_x24, l76_x24, l77_x24, l78_x24, l79_x24, l80_x24,
+	  l81_x24, l82_x24, l83_x24, l84_x24, l85_x24, l86_x24, l87_x24, l88_x24, l89_x24, l90_x24,
+	  l91_x24, l92_x24, l93_x24, l94_x24, l95_x24, l96_x24, l97_x24, l98_x24, l99_x24, },
+	{ l1_x32, l2_x32, l3_x32, l4_x32, l5_x32, l6_x32, l7_x32, l8_x32, l9_x32, l10_x32,
+	  l11_x32, l12_x32, l13_x32, l14_x32, l15_x32, l16_x32, l17_x32, l18_x32, l19_x32, l20_x32,
+	  l21_x32, l22_x32, l23_x32, l24_x32, l25_x32, l26_x32, l27_x32, l28_x32, l29_x32, l30_x32,
+	  l31_x32, l32_x32, l33_x32, l34_x32, l35_x32, l36_x32, l37_x32, l38_x32, l39_x32, l40_x32,
+	  l41_x32, l42_x32, l43_x32, l44_x32, l45_x32, l46_x32, l47_x32, l48_x32, l49_x32, l50_x32,
+	  l51_x32, l52_x32, l53_x32, l54_x32, l55_x32, l56_x32, l57_x32, l58_x32, l59_x32, l60_x32,
+	  l61_x32, l62_x32, l63_x32, l64_x32, l65_x32, l66_x32, l67_x32, l68_x32, l69_x32, l70_x32,
+	  l71_x32, l72_x32, l73_x32, l74_x32, l75_x32, l76_x32, l77_x32, l78_x32, l79_x32, l80_x32,
+	  l81_x32, l82_x32, l83_x32, l84_x32, l85_x32, l86_x32, l87_x32, l88_x32, l89_x32, l90_x32,
+	  l91_x32, l92_x32, l93_x32, l94_x32, l95_x32, l96_x32, l97_x32, l98_x32, l99_x32, }
 };
 
 
@@ -1725,7 +1747,9 @@ void InitLayers(void)
     /* create the bitmaps for the layer buttons */
     /* all bitmaps have to have the same dimensions */
     for (int i = 0;i<NUM_LAYERS; i++) {
-        show_layer_bmps[i] = wIconCreateBitMap(l1_width, l1_height, show_layer_bits[i],
+		// char *bits = (show_layer_bits[i] + iconSize * sizeof(char*)));
+        show_layer_bmps[i] = wIconCreateBitMap(lbits_width[iconSize], lbits_height[iconSize], 
+			                                   show_layer_bits[iconSize][i],
                                                layerColorTab[i%(COUNT(layerColorTab))]);
         layers[i].color = layerColorTab[i%(COUNT(layerColorTab))];
         layers[i].useColor = TRUE;
@@ -1737,7 +1761,7 @@ void InitLayers(void)
     wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
     AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
 	
-	backgroundB = AddToolbarButton("cmdBackgroundShow", wIconCreatePixMap(background), 0,
+	backgroundB = AddToolbarButton("cmdBackgroundShow", wIconCreatePixMap(background_xpm[iconSize]), 0,
 		BackgroundToggleShow, NULL);
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));
@@ -1768,7 +1792,6 @@ void InitLayers(void)
     AddPlaybackProc("SETCURRLAYER", PlaybackCurrLayer, NULL);
     AddPlaybackProc("LAYERS", (playbackProc_p)ReadLayers, NULL);
 }
-
 
 addButtonCallBack_t InitLayersDialog(void)
 {

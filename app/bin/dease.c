@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "common.h"
 #include "ccurve.h"
 #include "cjoin.h"
 #include "cstraigh.h"
@@ -257,30 +258,30 @@ static void EasementChange( long changes )
 }
 
 
-#include "bitmaps/enone.xpm"
-#include "bitmaps/esharp.xpm"
-#include "bitmaps/egtsharp.xpm"
-#include "bitmaps/eltsharp.xpm"
-#include "bitmaps/enormal.xpm"
-#include "bitmaps/eltbroad.xpm"
-#include "bitmaps/ebroad.xpm"
-#include "bitmaps/egtbroad.xpm"
-#include "bitmaps/ecornu.xpm"
+#include "bitmaps/ease-none.xpm"
+#include "bitmaps/ease-sharp.xpm"
+#include "bitmaps/ease-gt-sharp.xpm"
+#include "bitmaps/ease-lt-sharp.xpm"
+#include "bitmaps/ease-normal.xpm"
+#include "bitmaps/ease-broad.xpm"
+#include "bitmaps/ease-gt-broad.xpm"
+#include "bitmaps/ease-lt-broad.xpm"
+#include "bitmaps/ease-cornu.xpm"
 
 
 EXPORT addButtonCallBack_t EasementInit( void )
 {
 	ParamRegister( &easementPG );
 
-	enone_bm = wIconCreatePixMap( enone_xpm );
-	eltsharp_bm = wIconCreatePixMap( eltsharp_xpm );
-	esharp_bm = wIconCreatePixMap( esharp_xpm );
-	egtsharp_bm = wIconCreatePixMap( egtsharp_xpm );
-	enormal_bm = wIconCreatePixMap( enormal_xpm );
-	eltbroad_bm = wIconCreatePixMap( eltbroad_xpm );
-	ebroad_bm = wIconCreatePixMap( ebroad_xpm );
-	egtbroad_bm = wIconCreatePixMap( egtbroad_xpm );
-	ecornu_bm = wIconCreatePixMap( ecornu_xpm );
+	enone_bm = wIconCreatePixMap( ease_none_xpm[iconSize] );
+	eltsharp_bm = wIconCreatePixMap( ease_ltsharp_xpm[iconSize] );
+	esharp_bm = wIconCreatePixMap( ease_sharp_xpm[iconSize] );
+	egtsharp_bm = wIconCreatePixMap( ease_gtsharp_xpm[iconSize] );
+	enormal_bm = wIconCreatePixMap( ease_normal_xpm[iconSize] );
+	eltbroad_bm = wIconCreatePixMap( ease_ltbroad_xpm[iconSize] );
+	ebroad_bm = wIconCreatePixMap( ease_broad_xpm[iconSize] );
+	egtbroad_bm = wIconCreatePixMap( ease_gtbroad_xpm[iconSize] );
+	ecornu_bm = wIconCreatePixMap( ease_cornu_xpm[iconSize] );
 	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir, NULL );
 
 	RegisterChangeNotification( EasementChange );
