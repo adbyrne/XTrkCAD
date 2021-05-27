@@ -122,6 +122,8 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 static struct DrawToData_t {
 	TRKINX_T index;
 	int toType;
+	track_p trk;
+	int bridge; 
 	int endCnt;
 	int pathCnt;
 	int routeCnt;
@@ -839,6 +841,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	for (i = 0; i < DTO_DIM; i++)
 		dto[i].n = 0;
 
+	dtod.trk = trk;
 	dtod.index = trk->index;
 	dtod.xx = xx;
 
@@ -1161,9 +1164,13 @@ static void DrawNormalToTies(
 	int s0, p0, q0;
 	ANGLE_T a0;
 
+	coOrd b1, b2, b3, b4, bb1, bb2, bb3, bb4; // bridge
+	DIST_T blen1, blen2;
+
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	struct extraDataCompound_t* xx = dtod.xx;
 
 	int i, j;
@@ -1182,6 +1189,8 @@ static void DrawNormalToTies(
 
 	int strPath = dtod.strPath, othPath = 0, secPath = 1;
 	int toType = dtod.toType;
+	int first = 1;
+
 	switch (toType) {
 	case DTO_NORMAL:
 		othPath = 1 - strPath;
@@ -1255,6 +1264,38 @@ static void DrawNormalToTies(
 			DIST_T dy = dy1 + dy2;
 			Translate(&pos, s1, angle, px);
 			Translate(&pos, pos, (angle - 90.0), dy / 2);
+
+			if (dtod.bridge) {
+				DIST_T trackGauge = GetTrkGauge(dtod.trk);
+				wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+				wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
+
+				DIST_T bdy = fabs(dy) / 2 + trackGauge * 1.5;
+				if (first) {
+					pos = s1;
+					Translate(&b1, pos, (angle - 90.0), bdy);
+					Translate(&b2, pos, (angle + 90.0), bdy);
+					first = 0;
+				}
+
+				Translate(&pos, s1, angle, px);
+				Translate(&pos, pos, (angle - 90.0), dy / 2);
+
+				Translate(&b3, pos, (angle - 90.0), bdy);
+				Translate(&b4, pos, (angle + 90.0), bdy);
+
+				// Lines
+				DrawLine(d,b1,b3,width2,wDrawColorBlack);
+				DrawLine(d,b2,b4,width2,wDrawColorBlack);
+
+				// Background
+				//DrawLine(d,b1,b3,width3,wDrawColorGrey90);
+				//DrawLine(d,b2,b4,width3,wDrawColorGrey90);
+
+				b1 = b3;
+				b2 = b4;
+			}
+
 			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
@@ -2108,6 +2149,7 @@ static void DrawTurnout(
 		{
 
 			bridge = trk->bits & TB_BRIDGE;
+			dtod.bridge = bridge; 
 
 			int strPath = -1;
 			GetTurnoutType();
