@@ -2096,6 +2096,7 @@ static void DrawTurnout(
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 
 	int noTies = 0;
+	int bridge = 0;
 
 	if (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0)
 	{
@@ -2105,6 +2106,8 @@ static void DrawTurnout(
 			&& (trk->endCnt <= 4)
 			&& (xx->special == TOnormal || xx->special == TOcurved))
 		{
+
+			bridge = trk->bits & TB_BRIDGE;
 
 			int strPath = -1;
 			GetTurnoutType();
@@ -2135,6 +2138,7 @@ static void DrawTurnout(
 				}
 				noTies = 1;
 				trk->bits |= TB_NOTIES;
+				trk->bits &= ~TB_BRIDGE;
 			}
 		}
 	}
@@ -2160,8 +2164,9 @@ static void DrawTurnout(
 			(roadbedOnScreen && d->scale <= twoRailScale)))
 		DrawTurnoutRoadbed(d, color, xx->orig, xx->angle, xx->segs, xx->segCnt);
 
-	// Restore this setting
+	// Restore these settings
 	if (noTies) trk->bits &= ~TB_NOTIES;
+	if (bridge) trk->bits |= TB_BRIDGE;
 }
 
 
