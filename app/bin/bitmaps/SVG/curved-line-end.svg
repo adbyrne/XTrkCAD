@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 48 48"
+   style="enable-background:new 0 0 48 48;"
+   xml:space="preserve"
+   sodipodi:docname="curved-line-end.svg"
+   inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"><metadata
+   id="metadata2891"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
+   id="defs2889" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1375"
+   inkscape:window-height="904"
+   id="namedview2887"
+   showgrid="false"
+   inkscape:zoom="17.708333"
+   inkscape:cx="24"
+   inkscape:cy="24"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Layer_1" />
+<style
+   type="text/css"
+   id="style2828">
+	.st0{fill:none;stroke:#FBB03B;stroke-width:2;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#000000;stroke-miterlimit:10;}
+	.st3{fill:none;stroke:#FC1500;stroke-miterlimit:10;}
+	.st4{fill:none;stroke:#FC1500;stroke-width:2;stroke-miterlimit:10;}
+	.st5{fill:none;stroke:#FC1500;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;}
+</style>
+<path
+   class="st0"
+   d="M22.8,24.8"
+   id="path2830" />
+<path
+   class="st0"
+   d="M15.3,19.3"
+   id="path2832" />
+<path
+   class="st0"
+   d="M15.3,40.7"
+   id="path2834" />
+<path
+   class="st0"
+   d="M6.4,40.3"
+   id="path2836" />
+<path
+   class="st0"
+   d="M29.7,19.3"
+   id="path2838" />
+<path
+   class="st0"
+   d="M25,12"
+   id="path2840" />
+<path
+   class="st0"
+   d="M17.8,31.7"
+   id="path2842" />
+<path
+   class="st0"
+   d="M9.1,28.5"
+   id="path2844" />
+<path
+   class="st0"
+   d="M33.9,17"
+   id="path2846" />
+<path
+   class="st0"
+   d="M30.7,9.3"
+   id="path2848" />
+<path
+   class="st0"
+   d="M25.7,22"
+   id="path2850" />
+<path
+   class="st0"
+   d="M19.6,15.3"
+   id="path2852" />
+<path
+   class="st0"
+   d="M20.1,27.7"
+   id="path2854" />
+<path
+   class="st0"
+   d="M12,23.4"
+   id="path2856" />
+<path
+   class="st0"
+   d="M16.1,36.1"
+   id="path2858" />
+<path
+   class="st0"
+   d="M7.2,34.3"
+   id="path2860" />
+<path
+   class="st1"
+   d="M8.1,40.7C8.1,21,23.7,12,38.8,12"
+   id="path2862" />
+<path
+   class="st2"
+   d="M39.5,14.9"
+   id="path2864" />
+<path
+   class="st2"
+   d="M13.5,42"
+   id="path2866" />
+<path
+   class="st3"
+   d="M38.5,5.4"
+   id="path2868" />
+<path
+   class="st3"
+   d="M41.8,7.1"
+   id="path2870" />
+<path
+   class="st3"
+   d="M38.5,5.4"
+   id="path2872" />
+<line
+   class="st4"
+   x1="38.8"
+   y1="19.3"
+   x2="38.5"
+   y2="5.4"
+   id="line2874"
+   style="stroke:#cc1400;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
+<path
+   class="st3"
+   d="M35.6,17.9"
+   id="path2876" />
+<path
+   class="st3"
+   d="M38.8,19.3"
+   id="path2878" />
+<path
+   class="st3"
+   d="M41.8,17.7"
+   id="path2880" />
+<polyline
+   class="st5"
+   points="35.6,7.8 38.5,5.4 41.4,7.8 "
+   id="polyline2882"
+   style="stroke:#cc1400;stroke-width:2.11202252;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.1836995,0,0,1.1836995,-7.0724307,-0.9919772)" />
+<polyline
+   class="st5"
+   points="41.4,17 38.8,19.1 35.6,17 "
+   id="polyline2884"
+   style="stroke:#cc1400;stroke-width:2.11202252;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.1836995,0,0,1.1836995,-7.1275406,-3.3086604)" />
+</svg>

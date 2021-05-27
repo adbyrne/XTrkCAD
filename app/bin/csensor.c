@@ -578,7 +578,7 @@ EXPORT void SensorMgmLoad ( void )
     static wIcon_p sensorI = NULL;
     
     if (sensorI == NULL) {
-        sensorI = wIconCreatePixMap( sensor_xpm );
+        sensorI = wIconCreatePixMap( sensor_xpm[iconSize] );
     }
     
     TRK_ITERATE(trk) {
@@ -592,7 +592,7 @@ EXPORT void SensorMgmLoad ( void )
 EXPORT void InitCmdSensor ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdSensor, "cmdSensor", _("Sensor"), 
-                   wIconCreatePixMap( sensor_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SENSOR, NULL );
+                   wIconCreatePixMap( sensor_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SENSOR, NULL );
 }
 
 EXPORT void InitTrkSensor ( void )

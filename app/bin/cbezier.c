@@ -1224,8 +1224,8 @@ void UpdateParms(wDrawColor color,long width) {
 }
 
 
-#include "bitmaps/bezier.xpm"
-#include "bitmaps/dbezier.xpm"
+#include "bitmaps/bezier-track.xpm"
+#include "bitmaps/bezier-line.xpm"
 
 EXPORT void InitCmdBezier( wMenu_p menu )
 {	

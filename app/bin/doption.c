@@ -295,6 +295,7 @@ EXPORT addButtonCallBack_t CmdoptInit( void )
 static wWin_p prefW;
 static long displayUnits;
 
+static char * iconSizeLabels[] = { N_("16 px"), N_("24 px"), N_("32 px"), NULL };
 static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
 static char * enableBalloonHelpLabels[] = { N_("Balloon Help"), NULL };
@@ -302,9 +303,10 @@ static char * enableFlexTrackLabels[] = { N_("Show FlexTrack in HotBar"), NULL }
 static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
 static paramData_t prefPLs[] = {
+	{ PD_RADIO, &iconSize, "iconsize", PDO_NOPSHUPD, iconSizeLabels, N_("Icon Size"), BC_HORZ, I2VP(CHANGE_ICONSIZE) },
 	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
-#define I_DSTFMT		(2)
+#define I_DSTFMT		(3)
 	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, I2VP(150), N_("Length Format"), 0, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
@@ -316,9 +318,9 @@ static paramData_t prefPLs[] = {
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-#define I_CHKPT		(13)
+#define I_CHKPT		(14)
 	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point Frequency") },
-#define I_AUTOSAVE		(14)
+#define I_AUTOSAVE		(15)
 	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD|PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
 	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
 	};
@@ -479,6 +481,8 @@ static void PrefOk( void * junk )
 		NoticeMessage2( 0, MSG_CONN_PARAMS_TOO_BIG, _("Ok"), NULL ) ;
 	}
 
+	if(changes & CHANGE_ICONSIZE)
+		NoticeMessage( MSG_ICON_SIZE_RESTART, _("Ok"), NULL ) ;
 
 	wHide( prefW );
 	DoChangeNotification(changes);
