@@ -1349,15 +1349,6 @@ static void PrintDlgUpdate(
 	TempRedraw(); // PrintDlgUpdate
 }
 
-/*
- *  Used by Print button
- */
-EXPORT void DoPrint ()
-{
-	STATUS_T status = C_START;
-	status = CmdPrint(status, zero);
-}
-
 static STATUS_T CmdPrint(
 		wAction_t action,
 		coOrd pos )
@@ -1504,6 +1495,15 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
 	ParamRegister( &printMarginPG );
 	return InitCommand( menu, CmdPrint, N_("Print..."), NULL, LEVEL0, IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT );
+}
+
+/*
+*  Used by Print button
+*/
+EXPORT void DoPrint (void * unused)
+{
+	STATUS_T status = C_START;
+	status = CmdPrint(status, zero);
 }
 
 /*****************************************************************************
