@@ -1486,16 +1486,6 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 }
 
 
-/*
- *  Used by Print button
- */
-EXPORT void DoPrint ( void * unused )
-{
-	STATUS_T status = C_START;
-	status = CmdPrint(status, zero);
-}
-
-
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {
 	ParamRegister( &printPG );
@@ -1506,6 +1496,15 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
 	ParamRegister( &printMarginPG );
 	return InitCommand( menu, CmdPrint, N_("Print..."), NULL, LEVEL0, IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT );
+}
+
+/*
+*  Used by Print button
+*/
+EXPORT void DoPrint (void * unused)
+{
+	STATUS_T status = C_START;
+	status = CmdPrint(status, zero);
 }
 
 /*****************************************************************************
