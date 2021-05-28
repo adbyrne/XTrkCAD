@@ -1349,15 +1349,6 @@ static void PrintDlgUpdate(
 	TempRedraw(); // PrintDlgUpdate
 }
 
-/*
- *  Used by Print button
- */
-EXPORT void DoPrint ()
-{
-	STATUS_T status = C_START;
-	status = CmdPrint(status, zero);
-}
-
 static STATUS_T CmdPrint(
 		wAction_t action,
 		coOrd pos )
@@ -1493,6 +1484,17 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		return C_CONTINUE;
 	}
 }
+
+
+/*
+ *  Used by Print button
+ */
+EXPORT void DoPrint ( void * unused )
+{
+	STATUS_T status = C_START;
+	status = CmdPrint(status, zero);
+}
+
 
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {
