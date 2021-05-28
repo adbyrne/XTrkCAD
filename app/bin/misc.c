@@ -2042,7 +2042,7 @@ static void DoAddElev(void *);
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { { PD_FLOAT, &addElevValueV, "value",
 		PDO_NOPREF|PDO_DIM, &rn1000_1000, NULL, 0 } };
-static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, sizeof addElevPLs
+static paramGroup_t addElevPG = { "addElev", PGO_DIALOGTEMPLATE, addElevPLs, sizeof addElevPLs
 		/ sizeof addElevPLs[0] };
 
 static void DoAddElev(void * junk) {

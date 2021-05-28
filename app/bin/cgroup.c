@@ -638,8 +638,8 @@ static paramData_t groupPLs[] = {
 #define I_GROUP_ORIGIN_OFFSET 4  /* Need to change if add above */
 /*4*/ { PD_FLOAT, &groupOriginX, "orig", PDO_DIM, &r_1000_1000, N_("Offset X,Y:")},
 /*5*/ { PD_FLOAT, &groupOriginY, "origy",PDO_DIM | PDO_DLGHORZ, &r_1000_1000, ""},
-/*6*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ|BC_NOBORDER } };
-static paramGroup_t groupPG = { "group", 0, groupPLs, sizeof groupPLs/sizeof groupPLs[0] };
+/*6*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ} };
+static paramGroup_t groupPG = { "group", PGO_DIALOGTEMPLATE, groupPLs, sizeof groupPLs/sizeof groupPLs[0] };
 
 
 typedef struct {
