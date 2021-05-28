@@ -114,7 +114,7 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 #define DTO_DCROSS 11
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
-// #define DTO_DEBUG DTO_CURVED
+#define DTO_DEBUG DTO_NORMAL
 
 #define DTO_DIM 16
 #define DTO_SEGS 24
