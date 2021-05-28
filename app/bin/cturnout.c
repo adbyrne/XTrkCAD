@@ -114,7 +114,7 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 #define DTO_DCROSS 11
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
-#define DTO_DEBUG DTO_NORMAL
+#define DTO_DEBUG 0
 
 #define DTO_DIM 16
 #define DTO_SEGS 24
@@ -1144,6 +1144,61 @@ static void DrawDtoLayout(
 }
 
 /**
+* Draw Layout lines and points
+* 
+* \param d The drawing object
+* \param scaleInx The layout/track scale index
+*/
+static void DrawTurnoutBridge(
+	drawCmd_p d, 
+	int path1,
+	int path2
+)
+{
+	// Draw the bridge edges
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+
+	coOrd b1, b2, b3, b4, b5, b6;
+	ANGLE_T angle = dtod.xx->angle, a = 0.0;
+	int i, j, i1, i2;
+	i1 = path1;
+	i2 = path2;
+	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
+		i1 = path2;
+		i2 = path1;
+		// a = -a;
+	}
+	
+	for(i = i1; 1; i = i2, a = 180.0) {
+		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+		b3 = dto[i].pts[0];
+		Translate(&b1,b3,(angle + a),dy);
+		Translate(&b5,b3,(angle + a),-(dy*0.75));
+		for(j = 1; j < dto[i].n; j++) {
+			dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
+			b4 = dto[i].pts[j];
+			Translate(&b2,b4,(angle + a),dy);
+			Translate(&b6,b4,(angle + a),-(dy*0.75));
+
+			wDrawPix_t pts[4][2];
+			d->CoOrd2Pix(d,b1,&pts[0][0],&pts[0][1]);
+			d->CoOrd2Pix(d,b2,&pts[1][0],&pts[1][1]);
+			d->CoOrd2Pix(d,b6,&pts[2][0],&pts[2][1]);
+			d->CoOrd2Pix(d,b5,&pts[3][0],&pts[3][1]);
+			wDrawPolygon( d->d, pts, NULL, 4, drawColorGrey90, 0, 0, 0, 1, 0);
+
+			DrawLine(d,b1,b2,width2,drawColorBlack);
+			b1 = b2;
+			b3 = b4;
+			b5 = b6;
+		}
+		if(i == i2)
+			break;
+	}
+}
+
+/**
  * Draw Normal (Single Origin) Turnout Ties. Uses the static dto and dtod structures.
  *
  * \param d The drawing object
@@ -1215,6 +1270,10 @@ static void DrawNormalToTies(
 		break;
 	}
 
+	if(dtod.bridge) {
+		DrawTurnoutBridge(d,othPath,secPath);
+	}
+
 	// Straight vector for tie angle
 	if (toType == DTO_WYE) {
 		s1 = dto[othPath].pts[0];
@@ -1265,36 +1324,36 @@ static void DrawNormalToTies(
 			Translate(&pos, s1, angle, px);
 			Translate(&pos, pos, (angle - 90.0), dy / 2);
 
-			if (dtod.bridge) {
-				DIST_T trackGauge = GetTrkGauge(dtod.trk);
-				wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
-				wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
+			//if (dtod.bridge) {
+			//	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+			//	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+			//	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
 
-				DIST_T bdy = fabs(dy) / 2 + trackGauge * 1.5;
-				if (first) {
-					pos = s1;
-					Translate(&b1, pos, (angle - 90.0), bdy);
-					Translate(&b2, pos, (angle + 90.0), bdy);
-					first = 0;
-				}
+			//	DIST_T bdy = fabs(dy) / 2 + trackGauge * 1.5;
+			//	if (first) {
+			//		pos = s1;
+			//		Translate(&b1, pos, (angle - 90.0), bdy);
+			//		Translate(&b2, pos, (angle + 90.0), bdy);
+			//		first = 0;
+			//	}
 
-				Translate(&pos, s1, angle, px);
-				Translate(&pos, pos, (angle - 90.0), dy / 2);
+			//	Translate(&pos, s1, angle, px);
+			//	Translate(&pos, pos, (angle - 90.0), dy / 2);
 
-				Translate(&b3, pos, (angle - 90.0), bdy);
-				Translate(&b4, pos, (angle + 90.0), bdy);
+			//	Translate(&b3, pos, (angle - 90.0), bdy);
+			//	Translate(&b4, pos, (angle + 90.0), bdy);
 
-				// Lines
-				DrawLine(d,b1,b3,width2,wDrawColorBlack);
-				DrawLine(d,b2,b4,width2,wDrawColorBlack);
+			//	// Lines
+			//	DrawLine(d,b1,b3,width2,wDrawColorBlack);
+			//	DrawLine(d,b2,b4,width2,wDrawColorBlack);
 
-				// Background
-				//DrawLine(d,b1,b3,width3,wDrawColorGrey90);
-				//DrawLine(d,b2,b4,width3,wDrawColorGrey90);
+			//	// Background
+			//	//DrawLine(d,b1,b3,width3,wDrawColorGrey90);
+			//	//DrawLine(d,b2,b4,width3,wDrawColorGrey90);
 
-				b1 = b3;
-				b2 = b4;
-			}
+			//	b1 = b3;
+			//	b2 = b4;
+			//}
 
 			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
@@ -1395,6 +1454,10 @@ static void DrawCurvedToTies(
 
 	int othPath = 0, secPath = 1;
 	int toType = dtod.toType;
+
+	if(dtod.bridge) {
+		DrawTurnoutBridge(d,othPath,secPath);
+	}
 
 	td = GetScaleTieData(scaleInx);
 
