@@ -64,10 +64,6 @@ long GetChanges( paramGroup_p pg )
 	return changes;
 }
 
-static paramGroup_t prefPG;
-
-
-
 
 
 static void OptionDlgCancel(
