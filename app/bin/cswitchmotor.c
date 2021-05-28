@@ -205,7 +205,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
         Translate (&p[iPoint], orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
         Translate (&p[iPoint], p[iPoint], y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
     }
-    DrawPoly(d, switchmotorPoly_CNT, p, NULL, color, 0, 1, 0);
+    DrawPoly(d, switchmotorPoly_CNT, p, NULL, color, 0, DRAW_FILL);
 }
 
 static struct {
@@ -755,13 +755,9 @@ static POS_T swmhiliteBorder;
 static wDrawColor swmhiliteColor = 0;
 static void DrawSWMotorTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (swmhiliteColor==0)
 		swmhiliteColor = wDrawColorGray(87);
-	w = ((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = ((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, swmhiliteOrig, swmhiliteSize, swmhiliteColor, DRAW_TRANSPARENT );
 }
 
 static int SwitchmotorMgmProc ( int cmd, void * data )

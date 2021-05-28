@@ -507,13 +507,9 @@ static POS_T ctlhiliteBorder;
 static wDrawColor ctlhiliteColor = 0;
 static void DrawSensorTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (ctlhiliteColor==0)
 		ctlhiliteColor = wDrawColorGray(87);
-	w = ((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = ((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( tempD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor, DRAW_TRANSPARENT );
 }
 
 static int SensorMgmProc ( int cmd, void * data )

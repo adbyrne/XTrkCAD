@@ -377,7 +377,7 @@ static void CarProtoDrawTruck(
 	RescalePts( COUNT( truckOutline ), p, ratio, ratio );
 	RotatePts( COUNT( truckOutline ), p, zero, angle );
 	MovePts( COUNT( truckOutline ), p, pos );
-	DrawPoly( d, COUNT( truckOutline ), p, NULL, color, 0, 1, 0);
+	DrawPoly( d, COUNT( truckOutline ), p, NULL, color, 0, DRAW_FILL);
 	pp.x = -70/2;
 	pp.y = 0;
 	memcpy( p, wheelOutline, sizeof wheelOutline );
@@ -386,7 +386,7 @@ static void CarProtoDrawTruck(
 	RescalePts( COUNT( wheelOutline ), p, ratio, ratio );
 	RotatePts( COUNT( wheelOutline ), p, zero, angle );
 	MovePts( COUNT( wheelOutline ), p, pos );
-	DrawPoly( d, COUNT( wheelOutline ), p, NULL, color, 0, 1, 0);
+	DrawPoly( d, COUNT( wheelOutline ), p, NULL, color, 0, DRAW_FILL);
 	pp.x = 70/2;
 	memcpy( p, wheelOutline, sizeof wheelOutline );
 	RescalePts( COUNT( wheelOutline ), p, 1.0, width/56.5 );
@@ -394,7 +394,7 @@ static void CarProtoDrawTruck(
 	RescalePts( COUNT( wheelOutline ), p, ratio, ratio );
 	RotatePts( COUNT( wheelOutline ), p, zero, angle );
 	MovePts( COUNT( wheelOutline ), p, pos );
-	DrawPoly( d, COUNT( wheelOutline ), p, NULL, color, 0, 1, 0 );
+	DrawPoly( d, COUNT( wheelOutline ), p, NULL, color, 0, DRAW_FILL );
 }
 
 
@@ -435,7 +435,7 @@ static void CarProtoDrawCoupler(
 	RescalePts( COUNT( couplerOutline ), p, ratio, ratio );
 	RotatePts( COUNT( couplerOutline ), p, zero, angle-90.0 );
 	MovePts( COUNT( couplerOutline ), p, pos );
-	DrawPoly( d, COUNT( couplerOutline ), p, NULL, color, 0, 1 ,0 );
+	DrawPoly( d, COUNT( couplerOutline ), p, NULL, color, 0, DRAW_FILL );
 }
 
 

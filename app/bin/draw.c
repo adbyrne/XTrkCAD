@@ -44,8 +44,7 @@ static void DDrawPoly(
 		int * types,
 		wDrawColor color,
 		wDrawWidth width,
-		int fill,
-		int open );
+		drawFill_e eFillOpt );
 static void DrawMapBoundingBox( BOOL_T set );
 static void DrawTicks( drawCmd_p d, coOrd size );
 static void DoZoom( void * pScaleVP );
@@ -54,6 +53,7 @@ EXPORT int log_pan = 0;
 static int log_zoom = 0;
 static int log_mouse = 0;
 static int log_redraw = 0;
+static int log_timemainredraw = 0;
 
 static wFontSize_t drawMaxTextFontSize = 100;
 
@@ -447,7 +447,7 @@ static void DDrawString(
 		Rotate( &pos[1], pos[0], a );
 		Rotate( &pos[2], pos[0], a );
 		Rotate( &pos[3], pos[0], a );
-		DDrawPoly( d, 4, pos, NULL, color, 0, 1, 0 );
+		DDrawPoly( d, 4, pos, NULL, color, 0, DRAW_FILL );
 	} else {
 		fontSize /= d->scale;
 		wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
@@ -462,13 +462,14 @@ static void DDrawPoly(
 		int * types,
 		wDrawColor color,
 		wDrawWidth width,
-		int fill,
-		int open )
+		drawFill_e eFillOpt )
 {
 	typedef wDrawPix_t wPos2[2];
 	static dynArr_t wpts_da;
 	static  dynArr_t wpts_type_da;
 	int inx;
+	int fill = 0;
+	int open = 0;
 	wDrawPix_t x, y;
 	DYNARR_SET( wPos2, wpts_da, cnt * 2 );
 	DYNARR_SET( int, wpts_type_da, cnt);
@@ -498,7 +499,25 @@ static void DDrawPoly(
 		lineOpt = wDrawLineCenter;
 	else if (opt == DC_PHANTOM)
 		lineOpt = wDrawLinePhantom;
-	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, lineOpt, (wDrawOpts)d->funcs->options, fill, open );
+
+	wDrawOpts drawOpts = (wDrawOpts)d->funcs->options;
+	switch ( eFillOpt ) {
+	case DRAW_OPEN:
+		open = 1;
+		break;
+	case DRAW_CLOSED:
+		break;
+	case DRAW_FILL:
+		fill = 1;
+		break;
+	case DRAW_TRANSPARENT:
+		fill = 1;
+		drawOpts |= wDrawOptTransparent;
+		break;
+	default:
+		abort();
+	}
+	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, lineOpt, drawOpts, fill, open );
 }
 
 
@@ -519,10 +538,67 @@ static void DDrawFillCircle(
 		return;
 	}
 	d->CoOrd2Pix(d,p,&x,&y);
+	wWinPix_t w, h;
+	wDrawGetSize( d->d, &w, &h );
+	if ( d->options & DC_TICKS ) {
+		if ( x+rr < LBORDER || x-rr > w-RBORDER ||
+		     y+rr < BBORDER || y-rr > h-TBORDER )
+			return;
+	} else {
+		if ( x+rr < 0 || x-rr > w ||
+		     y+rr < 0 || y-rr > h )
+			return;
+	}
 	drawCount++;
 	if (drawEnable) {
 		wDrawFilledCircle( d->d, x, y, (wDrawPix_t)(rr),
 				color, (wDrawOpts)d->funcs->options );
+	}
+}
+
+
+static void DDrawRectangle(
+		drawCmd_p d,
+		coOrd orig,
+		coOrd size,
+		wDrawColor color,
+		drawFill_e eFillOpt )
+{
+	wDrawPix_t x, y, w, h;
+
+	if (d == &mapD && !mapVisible)
+		return;
+	d->CoOrd2Pix(d,orig,&x,&y);
+	w = (wDrawPix_t)((size.x/d->scale)*d->dpi+0.5);
+	h = (wDrawPix_t)((size.y/d->scale)*d->dpi+0.5);
+	drawCount++;
+	if (drawEnable) {
+		wDrawOpts opts = (wDrawOpts)d->funcs->options;
+		coOrd p1, p2;
+		switch (eFillOpt) {
+		case DRAW_CLOSED:
+			// 1 2
+			// 0 3
+			p1.x = orig.x;
+			p1.y = orig.y+size.y;
+			DrawLine( d, orig, p1, 0, color );
+			p2.x = orig.x+size.x;
+			p2.y = p1.y;
+			DrawLine( d, p1, p2, 0, color );
+			p1.x = p2.x;
+			p1.y = orig.y;
+			DrawLine( d, p2, p1, 0, color );
+			DrawLine( d, p1, orig, 0, color );
+			break;
+		case DRAW_TRANSPARENT:
+			opts |= wDrawOptTransparent;
+			// Fallthru
+		case DRAW_FILL:
+			wDrawFilledRectangle( d->d, x, y, w, h, color, opts );
+			break;
+		default:
+			abort();
+		}
 	}
 }
 
@@ -544,8 +620,6 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 
 EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 {
-	wDrawPix_t q[4][2];
-	int i;
 #ifdef LATER
 	if (d->options&DC_TEMPSEGS) {
 		return;
@@ -554,13 +628,10 @@ EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 		return;
 #endif
 	ASSERT( cnt <= 4 );
-	for (i=0; i<cnt; i++) {
-		d->CoOrd2Pix(d,p[i],&q[i][0],&q[i][1]);
-	}
 	static wDrawColor color = 0;
 	if ( color == 0 )
 		color = wDrawColorGray( 70 );
-	wDrawPolygon( d->d, q, NULL, cnt, color, 0, 0, wDrawOptTemp|wDrawOptTransparent, 1, 0 );
+	DrawPoly( d, cnt, p, NULL, color, 0, DRAW_TRANSPARENT );
 }
 
 
@@ -637,10 +708,7 @@ EXPORT void DrawMultiString(
 		for (int i=0;i<4;i++) {
 			Rotate( &p[i], orig, a);
 		}
-		DrawLine( d, p[0], p[1], 0, color );
-		DrawLine( d, p[1], p[2], 0, color );
-		DrawLine( d, p[2], p[3], 0, color );
-		DrawLine( d, p[3], p[0], 0, color );
+		DrawPoly( d, 4, p, NULL, color, 0, DRAW_CLOSED );
 	}
 
 	free(line);
@@ -717,7 +785,7 @@ EXPORT void DrawBoxedString(
 	case BOX_BOX:
 	case BOX_BOX_BACKGROUND:
 		if (style == BOX_ARROW_BACKGROUND || style == BOX_BOX_BACKGROUND)
-			DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, 1, 0 );  //Clear background for box and box-arrow
+			DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, DRAW_FILL );  //Clear background for box and box-arrow
 		DrawLine( d, p[1], p[2], 0, color );
 		DrawLine( d, p[2], p[3], 0, color );
 		DrawLine( d, p[3], p[0], 0, color );
@@ -727,12 +795,12 @@ EXPORT void DrawBoxedString(
 		DrawString( d, p0, 0.0, text, fp, fs, color );
 		break;
 	case BOX_INVERT:
-		DrawPoly( d, 4, p, NULL, color, 0, 1, 0);
+		DrawPoly( d, 4, p, NULL, color, 0, DRAW_FILL );
 		if ( color != wDrawColorWhite )
 			DrawString( d, p0, 0.0, text, fp, fs, wDrawColorGray( 94 ) );
 		break;
 	case BOX_BACKGROUND:
-		DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, 1, 0 );
+		DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, DRAW_FILL );
 		DrawString( d, p0, 0.0, text, fp, fs, color );
 		break;
 	}
@@ -924,9 +992,25 @@ static void TempSegPoly(
 		int * types,
 		wDrawColor color,
 		wDrawWidth width,
-		int fill,
-		int open )
+		drawFill_e eFillOpt )
 {
+	int fill = 0;
+	int open = 0;
+	switch (eFillOpt) {
+	case DRAW_OPEN:
+		open = 1;
+		break;
+	case DRAW_CLOSED:
+		break;
+	case DRAW_FILL:
+		fill = 1;
+		break;
+	case DRAW_TRANSPARENT:
+		fill = 1;
+		break;
+	default:
+		abort();
+	}
 	DYNARR_APPEND( trkSeg_t, tempSegs_da, 1);
 	tempSegs(tempSegs_da.cnt-1).type = fill?SEG_FILPOLY:SEG_POLY;
 	tempSegs(tempSegs_da.cnt-1).color = color;
@@ -966,6 +1050,24 @@ static void TempSegFillCircle(
 }
 
 
+static void TempSegRectangle(
+		drawCmd_p d,
+		coOrd orig,
+		coOrd size,
+		wDrawColor color,
+		drawFill_e eOpts )
+{
+	coOrd p[4];
+	// p1 p2
+	// p0 p3
+	p[0].x = p[1].x = orig.x;
+	p[2].x = p[3].x = orig.x+size.x;
+	p[0].y = p[3].y = orig.y;
+	p[1].y = p[2].y = orig.y+size.y;
+	TempSegPoly( d, 4, p, NULL, color, 0, eOpts );
+}
+
+
 static void NoDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm, wDrawColor color )
 {
 }
@@ -979,7 +1081,8 @@ EXPORT drawFuncs_t screenDrawFuncs = {
 		DDrawString,
 		DDrawBitMap,
 		DDrawPoly,
-		DDrawFillCircle };
+		DDrawFillCircle,
+		DDrawRectangle};
 
 EXPORT drawFuncs_t tempDrawFuncs = {
 		wDrawOptTemp,
@@ -988,7 +1091,8 @@ EXPORT drawFuncs_t tempDrawFuncs = {
 		DDrawString,
 		DDrawBitMap,
 		DDrawPoly,
-		DDrawFillCircle };
+		DDrawFillCircle,
+		DDrawRectangle};
 
 EXPORT drawFuncs_t printDrawFuncs = {
 		0,
@@ -997,7 +1101,8 @@ EXPORT drawFuncs_t printDrawFuncs = {
 		DDrawString,
 		NoDrawBitMap,
 		DDrawPoly,
-		DDrawFillCircle };
+		DDrawFillCircle,
+		DDrawRectangle};
 
 EXPORT drawFuncs_t tempSegDrawFuncs = {
 		0,
@@ -1006,7 +1111,8 @@ EXPORT drawFuncs_t tempSegDrawFuncs = {
 		TempSegString,
 		NoDrawBitMap,
 		TempSegPoly,
-		TempSegFillCircle };
+		TempSegFillCircle,
+		TempSegRectangle};
 
 EXPORT drawCmd_t mainD = {
 		NULL, &screenDrawFuncs, DC_TICKS, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix, 96.0};
@@ -1401,15 +1507,12 @@ EXPORT void MainRedraw( void )
 
 	static int cMR = 0;
 	LOG( log_redraw, 1, ( "MainRedraw: %d\n", cMR++ ) );
+	unsigned long time0 = wGetTimer();
 	if (delayUpdate)
 	wDrawDelayUpdate( mainD.d, TRUE );
 
 	wDrawSetTempMode( mainD.d, FALSE );
 	wDrawClear( mainD.d );
-
-	//mainD.d->option = 0;
-	//mainD.options = 0;
-	mainD.funcs->options = 0;		//Force MainD back from Temp
 
 	orig = mainD.orig;
 	size = mainD.size;
@@ -1441,6 +1544,7 @@ EXPORT void MainRedraw( void )
 
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
+	LOG( log_timemainredraw, 1, ( "MainRedraw time = %lu mS\n", wGetTimer()-time0 ) );
 	// The remainder is from TempRedraw
 	wDrawSetTempMode( tempD.d, TRUE );
 	DrawMarkers();
@@ -1593,53 +1697,35 @@ EXPORT void DoRedraw( void )
 
 static void DrawRoomWalls( wBool_t drawBackground )
 {
-	coOrd p00, p01, p11, p10;
-	wDrawPix_t p0,p1,p2,p3;
-
 	if (mainD.d == NULL)
 		return;
 
 	if (drawBackground) {
-		mainD.CoOrd2Pix(&mainD,mainD.orig,&p0,&p1);
-		coOrd end;
-		end.x = mainD.orig.x + mainD.size.x;
-		end.y = mainD.orig.y + mainD.size.y;
-		mainD.CoOrd2Pix(&mainD,end,&p2,&p3);
-		p2 -= p0;
-		p3 -= p1;
-		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorGrey80, 0 );
-
-		mainD.CoOrd2Pix(&mainD,zero,&p0,&p1);
-		mainD.CoOrd2Pix(&mainD,mapD.size,&p2,&p3);
-		p2 -= p0;
-		p3 -= p1;
-		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorWhite, 0 );
+		DrawRectangle( &mainD, mainD.orig, mainD.size, drawColorGrey80, DRAW_FILL );
+		DrawRectangle( &mainD, zero, mapD.size, wDrawColorWhite, DRAW_FILL );
 
 	} else {
-
+		coOrd p[4];
 		DrawTicks( &mainD, mapD.size );
-
-		p00.x = 0.0; p00.y = 0.0;
-		p01.x = p10.y = 0.0;
-		p11.x = p10.x = mapD.size.x;
-		p01.y = p11.y = mapD.size.y;
-
-		DrawLine( &mainD, p01, p11, 3, borderColor );
-		DrawLine( &mainD, p11, p10, 3, borderColor );
-		DrawLine( &mainD, p00, p01, 3, borderColor );
-		DrawLine( &mainD, p00, p10, 3, borderColor );
+		p[0].x = p[0].y = p[1].x = p[3].y = 0.0;
+		p[2].x = p[3].x = mapD.size.x;
+		p[1].y = p[2].y = mapD.size.y;
+		DrawPoly( &mainD, 4, p, NULL, borderColor, 3, DRAW_CLOSED );
 	}
 }
 
 
 static void DrawMarkers( void )
 {
-	wDrawPix_t x, y;
-	mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
-	wDrawLine( tempD.d, 0, y, (wDrawPix_t)LBORDER, y,
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
-	wDrawLine( tempD.d, x, 0, x, (wDrawPix_t)BBORDER,
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
+	coOrd p0, p1;
+	p0.x = p1.x = oldMarker.x;
+	p0.y = mainD.orig.y;
+	p1.y = mainD.orig.y-BBORDER*mainD.scale/mainD.dpi;
+	DrawLine( &tempD, p0, p1, 0, markerColor );
+	p0.y = p1.y = oldMarker.y;
+	p0.x = mainD.orig.x;
+	p1.x = mainD.orig.x-LBORDER*mainD.scale/mainD.dpi;
+	DrawLine( &tempD, p0, p1, 0, markerColor );
 }
 
 static DIST_T rulerFontSize = 12.0;
@@ -1665,7 +1751,6 @@ EXPORT void DrawRuler(
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
 	long mm, mm0, mm1, power, skip;
-	wDrawPix_t x0, y0, x1, y1;
 	
 	static double lengths[] = {
 		0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 0.0 };
@@ -1693,10 +1778,7 @@ EXPORT void DrawRuler(
 		start = -start;
 	end = FindDistance( orig, pos1 );
 
-	d->CoOrd2Pix( d, pos0, &x0, &y0 );
-	d->CoOrd2Pix( d, pos1, &x1, &y1 );
-	wDrawLine( d->d, x0, y0, x1, y1,
-				0, wDrawLineSolid, color, (wDrawOpts)d->funcs->options );
+	DrawLine( d, pos0, pos1, 0, color );
 
 	if (units == UNITS_METRIC) {
 		mm0 = (int)ceil(start*25.4-0.5);
@@ -1730,11 +1812,7 @@ EXPORT void DrawRuler(
 				if (power==1000 || mm%(power*10) != 0) {
 					Translate( &p0, orig, a, mm/25.4 );
 					Translate( &p1, p0, aa, len*d->scale/mainD.dpi );
-					d->CoOrd2Pix( d, p0, &x0, &y0 );
-					d->CoOrd2Pix( d, p1, &x1, &y1 );
-					wDrawLine( d->d, x0, y0, x1, y1,
-							0, wDrawLineSolid, color, (wDrawOpts)d->funcs->options );
-
+					DrawLine( d, p0, p1, 0, color );
 					if (!number || (d->scale > 40 && mm % skip != 0.0))
 						continue;
 					if ( (power>=1000) ||
@@ -1755,11 +1833,7 @@ EXPORT void DrawRuler(
 							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
-						d->CoOrd2Pix( d, p0, &x0, &y0 );
-						if (x0<0) x0 = 0;
-						if (y0<0) y0 = 0;
-						wDrawString( d->d, x0, y0, d->angle, message, rulerFp,
-										fs, color, (wDrawOpts)d->funcs->options );
+						DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
 					}
 				}
 			}
@@ -1811,11 +1885,7 @@ EXPORT void DrawRuler(
 			for ( fraction = firstFraction; fraction<=lastFraction; fraction += incr ) {
 				Translate( &p0, orig, a, inch+fraction/16.0 );
 				Translate( &p1, p0, aa, lengths[fraction]*d->scale/mainD.dpi );
-				d->CoOrd2Pix( d, p0, &x0, &y0 );
-				d->CoOrd2Pix( d, p1, &x1, &y1 );
-				wDrawLine( d->d, x0, y0, x1, y1,
-						0, wDrawLineSolid, color,
-						(wDrawOpts)d->funcs->options );
+				DrawLine( d, p0, p1, 0, color );
 			if (fraction == 0) {
 				// Label interval for scale > 40
 				if (d->scale <= 80) {
@@ -1832,10 +1902,7 @@ EXPORT void DrawRuler(
 						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
 						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 						sprintf(message, "%d%c", digit, quote );
-						d->CoOrd2Pix( d, p0, &x0, &y0 );
-						if (x0<0) x0 = 0;
-						if (y0<0) y0 = 0;
-						wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
+						DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
 					}
 				}
 			}
@@ -2780,7 +2847,7 @@ static wBool_t PlaybackMain( char * line )
 	if (rc != 3) {
 		SyntaxError( "MOUSE", rc, 3 );
 	} else {
-		PlaybackMouse( DoMouse, &mainD, (wAction_t)action, pos, wDrawColorBlack );
+		PlaybackMouse( DoMouse, &tempD, (wAction_t)action, pos, wDrawColorBlack );
 	}
 	return TRUE;
 }
@@ -2800,7 +2867,7 @@ static wBool_t PlaybackKey( char * line )
 		SyntaxError( "MOUSE", rc, 3 );
 	} else {
 		action = action|c<<8;
-		PlaybackMouse( DoMouse, &mainD, (wAction_t)action, pos, wDrawColorBlack );
+		PlaybackMouse( DoMouse, &tempD, (wAction_t)action, pos, wDrawColorBlack );
 	}
 	return TRUE;
 }
@@ -2927,6 +2994,8 @@ EXPORT void DrawInit( int initialZoom )
 	log_zoom = LogFindIndex( "zoom" );
 	log_mouse = LogFindIndex( "mouse" );
 	log_redraw = LogFindIndex( "redraw" );
+	log_timemainredraw = LogFindIndex( "timemainredraw" );
+
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
 	AddPlaybackProc( "KEY ", (playbackProc_p)PlaybackKey, NULL );
 

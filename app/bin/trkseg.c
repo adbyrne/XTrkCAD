@@ -1970,7 +1970,14 @@ EXPORT void DrawSegsO(
 				w = (int)floor(fabs(segPtr->width)+0.5);
 			else
 				w = (int)floor(segPtr->width*factor+0.5);
-			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, bThick?thick:w, bFill?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
+			drawFill_e eOptFill;
+			if ( bFill ) 
+				eOptFill = DRAW_FILL;
+			else if ( segPtr->u.p.polyType == POLYLINE )
+				eOptFill = DRAW_OPEN;
+			else
+				eOptFill = DRAW_CLOSED;
+			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, bThick?thick:w, eOptFill );
 			free(tempPts);
 			free(tempTypes);
 

@@ -57,6 +57,8 @@
 #define MIN_MAIN_SCALE	(1.0)
 #define MIN_MAIN_MACRO  (0.10)
 
+typedef enum { DRAW_OPEN, DRAW_CLOSED, DRAW_FILL, DRAW_TRANSPARENT } drawFill_e;
+
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {
@@ -67,9 +69,9 @@ typedef struct {
     void (*drawString)(drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T,
                        wDrawColor);
     void (*drawBitMap)(drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor);
-    void (*drawPoly)(drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth, int,
-                     int);
+    void (*drawPoly)(drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth, drawFill_e);
     void (*drawFillCircle)(drawCmd_p, coOrd, DIST_T,  wDrawColor);
+    void (*drawRectangle)(drawCmd_p, coOrd, coOrd, wDrawColor, drawFill_e);
 } drawFuncs_t;
 
 typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
@@ -189,8 +191,9 @@ extern drawFuncs_t printDrawFuncs;
 #define DrawArc( D, P, R, A0, A1, F, W, C ) (D)->funcs->drawArc( D, P, R, A0, A1, F, W, C )
 #define DrawString( D, P, A, S, FP, FS, C ) (D)->funcs->drawString( D, P, A, S, FP, FS, C )
 #define DrawBitMap( D, P, B, C ) (D)->funcs->drawBitMap( D, P, B, C )
-#define DrawPoly( D, N, P, T, C, W, F, O ) (D)->funcs->drawPoly( D, N, P, T, C, W, F, O );
+#define DrawPoly( D, N, P, T, C, W, O ) (D)->funcs->drawPoly( D, N, P, T, C, W, O );
 #define DrawFillCircle( D, P, R, C ) (D)->funcs->drawFillCircle( D, P, R, C );
+#define DrawRectangle( D, P, S, C, O ) (D)->funcs->drawRectangle( D, P, S, C, O )
 
 #define REORIGIN( Q, P, A, O ) { \
         (Q) = (P); \

@@ -49,8 +49,6 @@
 
 EXPORT dynArr_t paramProc_da;
 
-//#define TIME_READTRACKFILE
-
 #define COPYBLOCKSIZE	1024
 
 EXPORT const char * workingDir;
@@ -98,6 +96,7 @@ static char * sUserLocale = NULL;	// current user locale
 static long lCLocale = 0;		// locale state: > 0 C locale, <= 0 user locale
 static long nCLocale = 0;		// total # of setlocals calls
 static int log_locale = 0;		// logging
+static int log_timereadfile = 0;
 
 EXPORT void SetCLocale()
 {
@@ -789,9 +788,6 @@ int LoadTracks(
 		char **fileName,
 		void * data)
 {
-#ifdef TIME_READTRACKFILE
-	long time0, time1;
-#endif
 	char *nameOfFile = NULL;
 
 	char *extOfFile;
@@ -821,9 +817,6 @@ int LoadTracks(
 		LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden by archive
 	UndoSuspend();
 	useCurrentLayer = FALSE;
-#ifdef TIME_READTRACKFILE
-	time0 = wGetTimer();
-#endif
 
  /*
   * Support zipped filetype
@@ -923,6 +916,7 @@ int LoadTracks(
 
 	char *copyOfFileName = MyStrdup(fileName[0]);
 
+	unsigned long time0 = wGetTimer();
 	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
 
 		nameOfFile = NULL;
@@ -939,10 +933,7 @@ int LoadTracks(
 
 
 		ResolveIndex();
-#ifdef TIME_READTRACKFILE
-		time1 = wGetTimer();
-		LogPrintf( "time= %ld ms \n", time1-time0 );
-#endif
+		LOG( log_timereadfile, 1, ( "Read time (%s) = %lu mS \n", fileName[0], wGetTimer()-time0 ) );
 		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
@@ -1646,4 +1637,5 @@ EXPORT void FileInit( void )
 		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
 
 	log_locale = LogFindIndex( "locale" );
+	log_timereadfile = LogFindIndex( "timereadfile" );
 }

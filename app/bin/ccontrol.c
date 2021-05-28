@@ -551,13 +551,9 @@ static POS_T ctlhiliteBorder;
 static wDrawColor ctlhiliteColor = 0;
 static void DrawControlTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (ctlhiliteColor==0)
 		ctlhiliteColor = wDrawColorGray(87);
-	w = (wDrawPix_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wDrawPix_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor, DRAW_TRANSPARENT );
 }
 
 static int ControlMgmProc ( int cmd, void * data )
