@@ -254,15 +254,12 @@ EXPORT void DrawBench(
 		Translate( &pp[1], p0, a-90, width );
 		Translate( &pp[2], p1, a-90, width );
 		Translate( &pp[3], p1, a+90, width );
-		DrawPoly( d, 4, pp, NULL, color1, 0, 1, 0);
+		DrawPoly( d, 4, pp, NULL, color1, 0, DRAW_FILL );
 		/* Draw Outline */
 		if ( /*color1 != color2 &&*/
 			 ( ( d->scale < ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) ) ||	/* big enough scale */
-			   ( d->funcs == &tempSegDrawFuncs ) ) ) {										/* DrawFillPoly didn't draw */
-			DrawLine( d, pp[0], pp[1], 0, color2 );
-			DrawLine( d, pp[1], pp[2], 0, color2 );
-			DrawLine( d, pp[2], pp[3], 0, color2 );
-			DrawLine( d, pp[3], pp[0], 0, color2 );
+			   ( d->funcs == &tempSegDrawFuncs ) ) ) {
+			DrawPoly( d, 4, pp, NULL, color2, 0, DRAW_CLOSED );
 			if ( color1 != color2 && type != B_RECT ) {
 				oldOptions = d->options;
 				if ( type == B_LGRIDER || orient == 1 || orient == 2 ) {

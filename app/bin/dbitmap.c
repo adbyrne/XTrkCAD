@@ -92,10 +92,7 @@ static int SaveBitmapFile(
 		y1 = 0.2;
 	}
 	if ( (outputBitMapTogglesV&3) == 1) {
-		DrawLine( &bitmap_d, p[0], p[1], 2, wDrawColorBlack );
-		DrawLine( &bitmap_d, p[0], p[3], 2, wDrawColorBlack );
-		DrawLine( &bitmap_d, p[1], p[2], 2, wDrawColorBlack );
-		DrawLine( &bitmap_d, p[3], p[2], 2, wDrawColorBlack );
+		DrawPoly( &bitmap_d, 4, p, NULL, wDrawColorBlack, 2, DRAW_CLOSED );
 	}
 	if (outputBitMapTogglesV&1) {
 		fp = wStandardFont( F_TIMES, FALSE, FALSE );

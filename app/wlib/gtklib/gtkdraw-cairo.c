@@ -710,6 +710,7 @@ static void wlibDrawFilled(
     for (i=0; i<cnt; i++) {
     	points[i].x = INMAPX(bd,p[i][0]);
     	if (points[i].x < min_x) min_x = points[i].x;
+    	if (points[i].y < min_y) min_y = points[i].y;
     	if (points[i].x > max_x) max_x = points[i].x;
     	if (points[i].y > max_y) max_y = points[i].y;
     	points[i].y = INMAPY(bd,p[i][1]);

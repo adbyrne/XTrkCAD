@@ -264,7 +264,7 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
         DYNARR_APPEND(pts_t, points_da, 10);
         pb.x = 0;
         points(points_da.cnt-1) = pb;
-        DrawPoly(D, points_da.cnt, points_da.ptr, NULL, profileColorFill, 1, 1, 0);
+        DrawPoly(D, points_da.cnt, points_da.ptr, NULL, profileColorFill, 1, DRAW_FILL);
     }
 
     pt.y = prof.minE-(2*LABELH+3.0/mainD.dpi)/prof.scaleY*D->scale;
@@ -672,10 +672,7 @@ static void DoProfilePrint(void * junk)
     p[1].x = p[2].x = PRINT_ABS2PAGEX(size.x+(printVert?PBR(
                                           printProfileFontSize)/4.0:PBR(printProfileFontSize)));
     p[2].y = p[3].y = PRINT_ABS2PAGEY(size.y+(printVert?PBT*2:PBT));
-    DrawLine(&printProfileD, p[0], p[1], 0, drawColorBlack);
-    DrawLine(&printProfileD, p[1], p[2], 0, drawColorBlack);
-    DrawLine(&printProfileD, p[2], p[3], 0, drawColorBlack);
-    DrawLine(&printProfileD, p[3], p[0], 0, drawColorBlack);
+    DrawPoly( &printProfileD, 4, p, NULL, drawColorBlack, 0, DRAW_CLOSED );
 
     DrawProfile(&printProfileD, printProfileFontSize, printVert);
     wPrintPageEnd(printProfileD.d);

@@ -1765,17 +1765,16 @@ void DrawHighlightLayer(int layer) {
 	layer_lo.x -=margin;
 	layer_lo.y -=margin;
 
-	wDrawPix_t rect[4][2];
 	int type[4];
-	coOrd top_left, bot_right;
-	top_left.x = layer_lo.x; top_left.y = layer_hi.y;
-	bot_right.x = layer_hi.x; bot_right.y = layer_lo.y;
 	type[0] = type[1] = type[2] = type[3] = 0;
-	mainD.CoOrd2Pix(&mainD,layer_lo,&rect[0][0],&rect[0][1]);
-	mainD.CoOrd2Pix(&mainD,top_left,&rect[1][0],&rect[1][1]);
-	mainD.CoOrd2Pix(&mainD,layer_hi,&rect[2][0],&rect[2][1]);
-	mainD.CoOrd2Pix(&mainD,bot_right,&rect[3][0],&rect[3][1]);
-	wDrawPolygon(tempD.d,rect,(wPolyLine_e *)type,4,wDrawColorPowderedBlue,0,wDrawLineDash,wDrawOptTemp,0,0);
+	coOrd rect[4];
+	// r3 r2
+	// r0 r1
+	rect[0].x = rect[3].x = layer_lo.x;
+	rect[1].x = rect[2].x = layer_hi.x;
+	rect[0].y = rect[1].y = layer_lo.y;
+	rect[2].y = rect[3].y = layer_hi.y;
+	DrawPoly(&tempD,4,rect,type,wDrawColorPowderedBlue,wDrawLineDash,DRAW_CLOSED);
 }
 
 void SetUpMenu2(coOrd pos, track_p trk) {
@@ -3143,12 +3142,11 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select, track_p not_th
 		coOrd size;
 		size.x = max.x-origin.x;
 		size.y = max.y-origin.y;
-		wDrawPix_t w,h;
-		w = ((size.x/mainD.scale)*mainD.dpi+0.5+10);
-		h = ((size.y/mainD.scale)*mainD.dpi+0.5+10);
-		wDrawPix_t x, y;
-		tempD.CoOrd2Pix(&tempD,origin,&x,&y);
-		wDrawFilledRectangle(tempD.d, x-5, y-5, w, h, wDrawColorPowderedBlue, wDrawOptTemp|wDrawOptTransparent);
+		origin.x -= 5*tempD.scale/tempD.dpi;
+		origin.y -= 5*tempD.scale/tempD.dpi;
+		size.x += 10*tempD.scale/tempD.dpi;
+		size.y += 10*tempD.scale/tempD.dpi;
+		DrawRectangle( &tempD, origin, size, wDrawColorPowderedBlue, DRAW_TRANSPARENT );
 	}
 
 }
