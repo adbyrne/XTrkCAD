@@ -53,7 +53,7 @@ static paramData_t customPLs[] = {
 #define I_CUSTOMNEW     (2)    
     {   PD_BUTTON, (void *)CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
 #define I_CUSTOMEDIT	(3)
-	{	PD_BUTTON, (void*)CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, (void*)CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Rename") },
 #define I_CUSTOMDEL		(4)
 	{	PD_BUTTON, (void*)CustomDelete, "delete", 0, NULL, N_("Delete") },
 #define I_CUSTOMCOPYTO	(5)
@@ -172,7 +172,7 @@ static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
 	{ PD_STRING, custMgmContentsStr, "label", PDO_STRINGLIMITLENGTH, (void*)400, N_("Label"), 0, 0, sizeof(custMgmContentsStr)} };
-static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, sizeof custMgmContentsPLs/sizeof custMgmContentsPLs[0] };
+static paramGroup_t custMgmContentsPG = { "contents", PGO_DIALOGTEMPLATE, custMgmContentsPLs, sizeof custMgmContentsPLs/sizeof custMgmContentsPLs[0] };
 
 static void CustMgmContentsOk( void * junk )
 {

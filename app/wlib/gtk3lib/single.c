@@ -120,7 +120,7 @@ const char *wStringGetValue(
  * Kill an active timer
  *
  * \param b IN entry field
- * \return   the entered text
+ * \return   
  */
 
 static gboolean killTimer(
@@ -143,7 +143,25 @@ static gboolean killTimer(
 	gtk_editable_select_region( GTK_EDITABLE( widget ), 0, 0 );
 	return( FALSE );
 }	
-
+/**
+ * Save the entered data in case the parent dialog is hidden
+ * 
+ * \param widget  GTK widget	
+ * \param b wlib control 
+ * 
+ * \return gboolean 
+ */
+static void unmapEntry(
+    GtkEntry *widget,
+    wString_p b) 
+{
+	if (b->action) {
+		const char *s;
+		
+		s = gtk_entry_get_text(GTK_ENTRY(b->widget));
+		b->action(s, b->data);
+	}
+}	
 /**
  *	Timer handler for string activity. This timer checks the input if the user
  * 	doesn't change an entry value for the preset time (0.5s).
@@ -369,7 +387,6 @@ wString_p wStringCreate(
 	
 	if (!b->useGrid)
 		gtk_widget_show(b->widget);
-
 	
 	// add the new widget to the list of created widgets
 	wlibAddButton((wControl_p)b);
@@ -377,9 +394,8 @@ wString_p wStringCreate(
 	// link into help 
 	wlibAddHelpString(b->widget, helpStr);
 	
-	//g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged), b);
-	//if (option&BO_ENTER)
-		g_signal_connect(G_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
+	g_signal_connect(G_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
+	g_signal_connect(G_OBJECT(b->widget), "unmap", G_CALLBACK(unmapEntry), b);
 	b->hasSignal = 1;
 	
 	// set the default text	and select it to make replacing it easier
@@ -390,6 +406,6 @@ wString_p wStringCreate(
 
 	gtk_widget_add_events( b->widget, GDK_FOCUS_CHANGE_MASK );
 	g_signal_connect(G_OBJECT(b->widget), "focus-out-event", G_CALLBACK(killTimer), b);
-	
+
 	return b;
 }

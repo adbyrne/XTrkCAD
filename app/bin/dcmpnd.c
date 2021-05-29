@@ -483,11 +483,12 @@ EXPORT BOOL_T CompoundCustomSave(
 
 static void RenameOk( void * junk )
 {
+	wHide( renamePG.win );
+
 	sprintf( message, "%s\t%s\t%s", renameManuf, renameDesc, renamePartno );
 	if ( renameTo->title )
 		MyFree( renameTo->title );
 	renameTo->title = MyStrdup( message );
-	wHide( renamePG.win );
 	DoChangeNotification( CHANGE_PARAMS );
 }
 
