@@ -1144,10 +1144,11 @@ static void DrawDtoLayout(
 }
 
 /**
-* Draw Layout lines and points
+* Draw Bridge parapets and background for a turnout
 * 
 * \param d The drawing object
-* \param scaleInx The layout/track scale index
+* \param path1 The first path
+* \param path2 The second path
 */
 static void DrawTurnoutBridge(
 	drawCmd_p d, 
@@ -1155,7 +1156,6 @@ static void DrawTurnoutBridge(
 	int path2
 )
 {
-	// Draw the bridge edges
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
@@ -1181,6 +1181,7 @@ static void DrawTurnoutBridge(
 			Translate(&b2,b4,(angle + a),dy);
 			Translate(&b6,b4,(angle + a),-(dy*0.75));
 
+			// Draw the bridge background
 			wDrawPix_t pts[4][2];
 			d->CoOrd2Pix(d,b1,&pts[0][0],&pts[0][1]);
 			d->CoOrd2Pix(d,b2,&pts[1][0],&pts[1][1]);
@@ -1188,6 +1189,7 @@ static void DrawTurnoutBridge(
 			d->CoOrd2Pix(d,b5,&pts[3][0],&pts[3][1]);
 			wDrawPolygon( d->d, pts, NULL, 4, drawColorGrey90, 0, 0, 0, 1, 0);
 
+			// Draw the bridge edge
 			DrawLine(d,b1,b2,width2,drawColorBlack);
 			b1 = b2;
 			b3 = b4;
@@ -1195,6 +1197,149 @@ static void DrawTurnoutBridge(
 		}
 		if(i == i2)
 			break;
+	}
+}
+
+/**
+* Draw Bridge parapets and background for a crossing
+* 
+* \param d The drawing object
+* \param path1 The first path
+* \param path2 The second path
+*/
+static void DrawXingBridge(
+	drawCmd_p d, 
+	int path1,
+	int path2
+)
+{
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+
+	int i, j, i1, i2;
+	i1 = path1;
+	i2 = path2;
+	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
+		i1 = path2;
+		i2 = path1;
+	}
+
+	BOOL_T hasLeft = 0, hasRgt = 0;
+	coOrd b0, b1, b2, b3, b4, b5, b6;
+	ANGLE_T angle = dtod.xx->angle, a = 0.0;
+	for(i = i1; 1; i = i2,a = 180.0) {
+		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+		b3 = dto[i].pts[0];
+		Translate(&b1,b3,(angle + a),dy);
+		Translate(&b5,b3,(angle + a),-(dy * 0.75));
+		if(dto[i].type != 'S') {
+			if(dto[i].type == 'L')
+				hasLeft = 1;
+			else if(dto[i].type == 'R')
+				hasRgt = 1;
+			for(j = 1; j < dto[i].n; j++) {
+				dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
+				b4 = dto[i].pts[j];
+				Translate(&b2,b4,(angle + a),dy);
+				Translate(&b6,b4,(angle + a),-(dy * 0.75));
+
+				// Draw the bridge background
+				wDrawPix_t pts[4][2];
+				d->CoOrd2Pix(d,b1,&pts[0][0],&pts[0][1]);
+				d->CoOrd2Pix(d,b2,&pts[1][0],&pts[1][1]);
+				d->CoOrd2Pix(d,b6,&pts[2][0],&pts[2][1]);
+				d->CoOrd2Pix(d,b5,&pts[3][0],&pts[3][1]);
+				wDrawPolygon(d->d,pts,NULL,4,drawColorGrey90,0,0,0,1,0);
+
+				// Draw the bridge edge
+				DrawLine(d,b1,b2,width2,drawColorBlack);
+				b1 = b2;
+				b3 = b4;
+				b5 = b6;
+			}
+		}
+		if(i == i2)
+			break;
+	}
+
+	if(dtod.strPath >= 0 && dtod.str2Path >= 0) {
+		i1 = dtod.strPath;
+		i2 = dtod.str2Path;
+
+		if(!hasRgt) {
+			DIST_T dy = trackGauge * 1.5;
+			b1 = dto[i1].pts[0];
+			Translate(&b3,b1,(angle + dto[i1].angle + 90),dy);
+			Translate(&b5,b1,(angle + dto[i1].angle + 90),-(dy * 0.75));
+
+			b2 = dto[i2].pts[dto[i2].n - 1];
+
+			FindIntersection(&b0, b1, angle + dto[i1].angle, b2, angle + dto[i2].angle);
+			Translate(&b4,b0,(angle + dto[i2].angle + 90),dy);
+			Translate(&b6,b0,(angle + dto[i2].angle + 90),-(dy * 0.75));
+
+			// Draw the bridge background
+			wDrawPix_t pts[4][2];
+			d->CoOrd2Pix(d,b3,&pts[0][0],&pts[0][1]);
+			d->CoOrd2Pix(d,b4,&pts[1][0],&pts[1][1]);
+			d->CoOrd2Pix(d,b6,&pts[2][0],&pts[2][1]);
+			d->CoOrd2Pix(d,b5,&pts[3][0],&pts[3][1]);
+			wDrawPolygon(d->d,pts,NULL,4,drawColorGrey90,0,0,0,1,0);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b4,width2,drawColorBlack);
+
+			Translate(&b3,b2,(angle + dto[i2].angle + 90),dy);
+			Translate(&b5,b2,(angle + dto[i2].angle + 90),-(dy * 0.75));
+			
+			// Draw the bridge background
+			d->CoOrd2Pix(d,b3,&pts[0][0],&pts[0][1]);
+			d->CoOrd2Pix(d,b4,&pts[1][0],&pts[1][1]);
+			d->CoOrd2Pix(d,b6,&pts[2][0],&pts[2][1]);
+			d->CoOrd2Pix(d,b5,&pts[3][0],&pts[3][1]);
+			wDrawPolygon(d->d,pts,NULL,4,drawColorGrey90,0,0,0,1,0);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b4,width2,drawColorBlack);
+		}
+
+		if(!hasLeft) {
+			DIST_T dy = trackGauge * 1.5;
+			b1 = dto[i2].pts[0];
+			Translate(&b3,b1,(angle + dto[i2].angle - 90),dy);
+			Translate(&b5,b1,(angle + dto[i2].angle - 90),-(dy * 0.75));
+
+			b2 = dto[i1].pts[dto[i1].n - 1];
+
+			FindIntersection(&b0, b1, angle + dto[i2].angle, b2, angle + dto[i1].angle);
+			Translate(&b4,b0,(angle + dto[i1].angle - 90),dy);
+			Translate(&b6,b0,(angle + dto[i1].angle - 90),-(dy * 0.75));
+
+			// Draw the bridge background
+			wDrawPix_t pts[4][2];
+			d->CoOrd2Pix(d,b3,&pts[0][0],&pts[0][1]);
+			d->CoOrd2Pix(d,b4,&pts[1][0],&pts[1][1]);
+			d->CoOrd2Pix(d,b6,&pts[2][0],&pts[2][1]);
+			d->CoOrd2Pix(d,b5,&pts[3][0],&pts[3][1]);
+			wDrawPolygon(d->d,pts,NULL,4,drawColorGrey90,0,0,0,1,0);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b4,width2,drawColorBlack);
+
+			Translate(&b3,b2,(angle + dto[i1].angle - 90),dy);
+			Translate(&b5,b2,(angle + dto[i2].angle - 90),-(dy * 0.75));
+
+			// Draw the bridge background
+			// wDrawPix_t pts[4][2];
+			d->CoOrd2Pix(d,b3,&pts[0][0],&pts[0][1]);
+			d->CoOrd2Pix(d,b4,&pts[1][0],&pts[1][1]);
+			d->CoOrd2Pix(d,b6,&pts[2][0],&pts[2][1]);
+			d->CoOrd2Pix(d,b5,&pts[3][0],&pts[3][1]);
+			wDrawPolygon(d->d,pts,NULL,4,drawColorGrey90,0,0,0,1,0);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b4,width2,drawColorBlack);
+		}
 	}
 }
 
@@ -1750,7 +1895,7 @@ static void DrawXingTurnout(
 	}
 
 	if(dtod.bridge) {
-		DrawTurnoutBridge(d,othPath,secPath);
+		DrawXingBridge(d,othPath,secPath);
 	}
 	// draw the points
 #ifdef DTO_DEBUG
