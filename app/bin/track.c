@@ -2823,48 +2823,48 @@ EXPORT void DrawCurvedTrack(
 	}
 	if (trk && GetTrkBridge( trk ) ) {
 
-			ANGLE_T a2, a3;
-			double a4 = 0.0;
-			coOrd pp0,pp1,pp2,pp3;
-			wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+		ANGLE_T a2, a3;
+		double a4 = 0.0;
+		coOrd pp0,pp1,pp2,pp3;
+		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
-			if(trk0 && GetTrkBridge(trk0))
-			{
-				a2 = a0;
-			}
-			else {
-				a2 = a0 + R2D(trackGauge * 1.0 / r);
-				a4 += 1.0;
-
-				PointOnCircle(&pp0,p,r+(trackGauge*1.5),a2);
-				Translate( &pp2,pp0, a2-90+45, trackGauge);
-				DrawLine( d, pp0, pp2, width2, color );
-
-				PointOnCircle(&pp0,p,r-(trackGauge*1.5),a2);
-				Translate( &pp2,pp0, a2-90-45, trackGauge);
-				DrawLine( d, pp0, pp2, width2, color );
-			}
-			if(trk1 && GetTrkBridge(trk1))
-			{
-				a3 = a1 - R2D(trackGauge * a4 / r);
-			}
-			else {
-				a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
-
-				PointOnCircle(&pp1,p,r + (trackGauge * 1.5),a3 + a2);
-				Translate(&pp3,pp1,a2 + a3 + 90 - 45,trackGauge);
-				DrawLine(d,pp1,pp3,width2,color);
-
-				PointOnCircle(&pp1,p,r-(trackGauge*1.5),a3+a2);
-				Translate( &pp3,pp1, a2+a3+90+45, trackGauge);
-				DrawLine( d, pp1, pp3, width2, color );
-			}
-			//a2 = a0+R2D(trackGauge*1.0/r);
-			//a3 = a1-R2D(trackGauge*2.0/r);
-
-			DrawArc( d, p, r+(trackGauge*1.5), a2, a3, 0, width2, color );
-			DrawArc( d, p, r-(trackGauge*1.5), a2, a3, 0, width2, color );
+		if(trk0 && GetTrkBridge(trk0))
+		{
+			a2 = a0;
 		}
+		else {
+			a2 = a0 + R2D(trackGauge * 1.0 / r);
+			a4 += 1.0;
+
+			PointOnCircle(&pp0,p,r+(trackGauge*1.5),a2);
+			Translate( &pp2,pp0, a2-90+45, trackGauge);
+			DrawLine( d, pp0, pp2, width2, color );
+
+			PointOnCircle(&pp0,p,r-(trackGauge*1.5),a2);
+			Translate( &pp2,pp0, a2-90-45, trackGauge);
+			DrawLine( d, pp0, pp2, width2, color );
+		}
+		if(trk1 && GetTrkBridge(trk1))
+		{
+			a3 = a1 - R2D(trackGauge * a4 / r);
+		}
+		else {
+			a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
+
+			PointOnCircle(&pp1,p,r+(trackGauge*1.5),a3+a2);
+			Translate(&pp3,pp1,a2+a3+90-45, trackGauge);
+			DrawLine(d,pp1,pp3,width2,color);
+
+			PointOnCircle(&pp1,p,r-(trackGauge*1.5),a3+a2);
+			Translate( &pp3,pp1,a2+a3+90+45, trackGauge);
+			DrawLine( d, pp1, pp3, width2, color );
+		}
+		//a2 = a0+R2D(trackGauge*1.0/r);
+		//a3 = a1-R2D(trackGauge*2.0/r);
+
+		DrawArc( d, p, r+(trackGauge*1.5), a2, a3, 0, width2, color );
+		DrawArc( d, p, r-(trackGauge*1.5), a2, a3, 0, width2, color );
+	}
 
 }
 

@@ -114,7 +114,7 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 #define DTO_DCROSS 11
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
-#define DTO_DEBUG DTO_LCROSS
+#define DTO_DEBUG DTO_XING
 
 #define DTO_DIM 16
 #define DTO_SEGS 24
@@ -1199,15 +1199,16 @@ static void DrawTurnoutBridge(
 }
 
 /**
- * Draw Normal (Single Origin) Turnout Ties. Uses the static dto and dtod structures.
+ * Draw Normal (Single Origin) Turnout Bridge and Ties. Uses the static dto and dtod structures.
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
  * \param color The tie color. If black the color is read from the global tieColor.
  */
-static void DrawNormalToTies(
+static void DrawNormalTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -1273,6 +1274,8 @@ static void DrawNormalToTies(
 	if(dtod.bridge) {
 		DrawTurnoutBridge(d,othPath,secPath);
 	}
+	if (omitTies)
+		return;
 
 	// Straight vector for tie angle
 	if (toType == DTO_WYE) {
@@ -1413,15 +1416,16 @@ static void DrawNormalToTies(
 }
 
 /**
- * Draw Curved (Single Origin) Turnout Ties. Uses the static dto and dtod structures.
+ * Draw Curved (Single Origin) Turnout Bridge and Ties. Uses the static dto and dtod structures.
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
  * \param color The tie color. If black the color is read from the global tieColor.
  */
-static void DrawCurvedToTies(
+static void DrawCurvedTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -1458,6 +1462,8 @@ static void DrawCurvedToTies(
 	if(dtod.bridge) {
 		DrawTurnoutBridge(d,othPath,secPath);
 	}
+	if(omitTies)
+		return;
 
 	td = GetScaleTieData(scaleInx);
 
@@ -1671,15 +1677,16 @@ static void DrawCurvedToTies(
 }
 
 /**
-  * Draw Crossing and Slip Turnout Ties - Uses the static dto and dtod structures.
+  * Draw Crossing and Slip Turnout Bridge and Ties - Uses the static dto and dtod structures.
   *
   * \param d The drawing object
   * \param scaleInx The layout/track scale index
   * \param color The tie color. If black the color is read from the global tieColor.
   */
-static void DrawXingToTies(
+static void DrawXingTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -1712,11 +1719,6 @@ static void DrawXingToTies(
 	i = str2Path;
 	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
 
-	// draw the points
-#ifdef DTO_DEBUG
-	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
-#endif
-
 	int othPath = strPath, secPath = str2Path;
 	int toType = dtod.toType;
 
@@ -1746,6 +1748,17 @@ static void DrawXingToTies(
 		}
 		break;
 	}
+
+	if(dtod.bridge) {
+		DrawTurnoutBridge(d,othPath,secPath);
+	}
+	// draw the points
+#ifdef DTO_DEBUG
+	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
+#endif
+
+	if(omitTies)
+		return;
 
 	td = GetScaleTieData(scaleInx);
 	DIST_T tdlen = td->length, tdmax = 2.5 * tdlen;
@@ -1977,15 +1990,16 @@ static void DrawXingToTies(
 }
 
 /**
- * Draw Crossover (Two Origin) Turnout Ties. Uses the static dto and dtod structures.
+ * Draw Crossover (Two Origin) Turnout Bridge and Ties. Uses the static dto and dtod structures.
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
  * \param color The tie color. If black the color is read from the global tieColor.
  */
-static void DrawCrossToTies(
+static void DrawCrossTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -2028,6 +2042,8 @@ static void DrawCrossToTies(
 	if(dtod.bridge) {
 		DrawTurnoutBridge(d,strPath,str2Path);
 	}
+	if (omitTies)
+		return;
 
 	td = GetScaleTieData(scaleInx);
 
@@ -2198,15 +2214,16 @@ static void DrawTurnout(
 	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	wIndex_t i;
 	long widthOptions = 0;
-	DIST_T scale2rail;
+	SCALEINX_T scaleInx = GetTrkScale(trk);
+	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
+	BOOL_T omitTies = (d->scale >= twoRailScale)  && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0;
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
-	SCALEINX_T scaleInx = GetTrkScale(trk);
 
 	int noTies = 0;
-	int bridge = 0;
+	int bridge = trk->bits & TB_BRIDGE;
 
-	if (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0)
+	if (bridge || (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0))
 	{
 		int pathCnt = GetTurnoutPaths(trk, xx);
 
@@ -2215,7 +2232,6 @@ static void DrawTurnout(
 			&& (xx->special == TOnormal || xx->special == TOcurved))
 		{
 
-			bridge = trk->bits & TB_BRIDGE;
 			dtod.bridge = bridge; 
 
 			int strPath = -1;
@@ -2228,21 +2244,21 @@ static void DrawTurnout(
 				case DTO_NORMAL:
 				case DTO_THREE:
 				case DTO_WYE:
-					DrawNormalToTies(d, scaleInx, color);
+					DrawNormalTurnout(d, scaleInx, omitTies, color);
 					break;
 				case DTO_CURVED:
-					DrawCurvedToTies(d, scaleInx, color);
+					DrawCurvedTurnout(d, scaleInx, omitTies, color);
 					break;
 				case DTO_XING:
 				case DTO_XNG9:
 				case DTO_SSLIP:
 				case DTO_DSLIP:
-					DrawXingToTies(d, scaleInx, color);
+					DrawXingTurnout(d, scaleInx, omitTies, color);
 					break;
 				case DTO_LCROSS:
 				case DTO_RCROSS:
 				case DTO_DCROSS:
-					DrawCrossToTies(d, scaleInx, color);
+					DrawCrossTurnout(d, scaleInx, omitTies, color);
 					break;
 				}
 				noTies = 1;
@@ -2252,8 +2268,7 @@ static void DrawTurnout(
 		}
 	}
 
-	// Begin standard DrawTurnout code
-	scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
+	// Begin standard DrawTurnout code to draw rails or centerline
 	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER);  // no curve center for turnouts
 
 
