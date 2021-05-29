@@ -2522,10 +2522,23 @@ static void CreateMenus(void) {
 	wMenuPushCreate(fileM, "menuFile-revert", _("Revert"), ACCL_REVERT,
 			ChkRevert, NULL);
 	wMenuSeparatorCreate(fileM);
+
+	cmdGroup = BG_FILE;
+	AddToolbarButton("menuFile-clear", wIconCreatePixMap(doc_new_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoClear, NULL);
+	AddToolbarButton("menuFile-load", wIconCreatePixMap(doc_open_xpm[iconSize]),
+		IC_MODETRAIN_TOO, ChkLoad, NULL);
+	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm[iconSize]),
+		IC_MODETRAIN_TOO, DoSave, NULL);
+
+	cmdGroup = BG_PRINT;
 	MiscMenuItemCreate(fileM, NULL, "printSetup", _("P&rint Setup ..."),
 			ACCL_PRINTSETUP, (wMenuCallBack_p) wPrintSetup, 0,
 			I2VP(0));
 	printCmdInx = InitCmdPrint(fileM);
+	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
+		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
+
 	wMenuSeparatorCreate(fileM);
 	MiscMenuItemCreate(fileM, NULL, "cmdImport", _("&Import"), ACCL_IMPORT,
 			DoImport, 0, I2VP(0));
@@ -2554,25 +2567,10 @@ static void CreateMenus(void) {
 	wMenuPushCreate(fileM, "menuFile-quit", _("E&xit"), 0,
 			DoQuit, NULL);
 
-	/*
-	 * File Buttons
-	 */
-	cmdGroup = BG_FILE;
-	AddToolbarButton("menuFile-clear", wIconCreatePixMap(doc_new_xpm[iconSize]),
-		IC_MODETRAIN_TOO, DoClear, NULL);
-	AddToolbarButton("menuFile-load", wIconCreatePixMap(doc_open_xpm[iconSize]),
-		IC_MODETRAIN_TOO, ChkLoad, NULL);
-	AddToolbarButton("menuFile-save", wIconCreatePixMap(doc_save_xpm[iconSize]),
-		IC_MODETRAIN_TOO, DoSave, NULL);
+	InitCmdExport();
 
 	AddToolbarButton("menuFile-parameter", wIconCreatePixMap(parameter_xpm[iconSize]),
 		IC_MODETRAIN_TOO, paramFilesCallback, NULL); 
-
-	cmdGroup = BG_PRINT;
-	AddToolbarButton("menuFile-setup", wIconCreatePixMap(doc_setup_xpm[iconSize]),
-		IC_MODETRAIN_TOO, (wMenuCallBack_p) wPrintSetup, I2VP(0));
-
-	InitCmdExport();
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoom_in_xpm[iconSize]),

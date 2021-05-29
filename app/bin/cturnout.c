@@ -114,7 +114,7 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 #define DTO_DCROSS 11
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
-#define DTO_DEBUG 0
+#define DTO_DEBUG DTO_LCROSS
 
 #define DTO_DIM 16
 #define DTO_SEGS 24
@@ -2024,6 +2024,10 @@ static void DrawCrossToTies(
 	if (dtod.pathCnt == 4) secPath = 3;
 
 	int toType = dtod.toType;
+
+	if(dtod.bridge) {
+		DrawTurnoutBridge(d,strPath,str2Path);
+	}
 
 	td = GetScaleTieData(scaleInx);
 
