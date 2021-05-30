@@ -2769,13 +2769,30 @@ EXPORT void DrawCurvedTrack(
 		width *= 300/75;
 #endif
 
-LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
+	LOG(log_track,4,("DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 				p.x, p.y, r, a0, a1 ) )
 
-	// Draw a solid background
-	if(trk && GetTrkBridge(trk)) {
+    // Draw a solid background
+	track_p trk0 = NULL, trk1 = NULL;
+    if(trk && GetTrkBridge(trk)) {
+		EPINX_T ep0 = GetNextTrk(trk, 0, &trk0, &ep0, 0);
+		EPINX_T ep1 = GetNextTrk(trk, 1, &trk1, &ep1, 0);
+
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
-		DrawArc( d, p, r, a0, a1, 0, width3, drawColorGrey90 );
+		ANGLE_T a2,a3;
+
+		double a4 = 0.0;
+		if(trk0 && GetTrkBridge(trk0))
+			a2 = a0;
+		else {
+			a2 = a0 + R2D(trackGauge * 1.0 / r);
+			a4 += 1.0;
+		}
+		if(trk1 && GetTrkBridge(trk1))
+			a3 = a1 - R2D(trackGauge * a4 / r);
+		else
+			a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
+		DrawArc( d, p, r, a2, a3, 0, width3, drawColorGrey90 );
 	}
 
 	if ( DoDrawTies( d, trk ) )
@@ -2806,35 +2823,48 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 	}
 	if (trk && GetTrkBridge( trk ) ) {
 
-			ANGLE_T a2,a3;
-			coOrd pp0,pp1,pp2,pp3;
+		ANGLE_T a2, a3;
+		double a4 = 0.0;
+		coOrd pp0,pp1,pp2,pp3;
+		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
-			a2 = a0+R2D(trackGauge*1.0/r);
-			a3 = a1-R2D(trackGauge*2.0/r);
-
-			wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
-
-			DrawArc( d, p, r+(trackGauge*1.5), a2, a3, 0, width2, color );
+		if(trk0 && GetTrkBridge(trk0))
+		{
+			a2 = a0;
+		}
+		else {
+			a2 = a0 + R2D(trackGauge * 1.0 / r);
+			a4 += 1.0;
 
 			PointOnCircle(&pp0,p,r+(trackGauge*1.5),a2);
-			PointOnCircle(&pp1,p,r+(trackGauge*1.5),a3+a2);
-
 			Translate( &pp2,pp0, a2-90+45, trackGauge);
 			DrawLine( d, pp0, pp2, width2, color );
-			Translate( &pp3,pp1, a2+a3+90-45, trackGauge);
-			DrawLine( d, pp1, pp3, width2, color );
-
-			DrawArc( d, p, r-(trackGauge*1.5), a2, a3, 0, width2, color );
 
 			PointOnCircle(&pp0,p,r-(trackGauge*1.5),a2);
-			PointOnCircle(&pp1,p,r-(trackGauge*1.5),a3+a2);
-
 			Translate( &pp2,pp0, a2-90-45, trackGauge);
 			DrawLine( d, pp0, pp2, width2, color );
-			Translate( &pp3,pp1, a2+a3+90+45, trackGauge);
-			DrawLine( d, pp1, pp3, width2, color );
-
 		}
+		if(trk1 && GetTrkBridge(trk1))
+		{
+			a3 = a1 - R2D(trackGauge * a4 / r);
+		}
+		else {
+			a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
+
+			PointOnCircle(&pp1,p,r+(trackGauge*1.5),a3+a2);
+			Translate(&pp3,pp1,a2+a3+90-45, trackGauge);
+			DrawLine(d,pp1,pp3,width2,color);
+
+			PointOnCircle(&pp1,p,r-(trackGauge*1.5),a3+a2);
+			Translate( &pp3,pp1,a2+a3+90+45, trackGauge);
+			DrawLine( d, pp1, pp3, width2, color );
+		}
+		//a2 = a0+R2D(trackGauge*1.0/r);
+		//a3 = a1-R2D(trackGauge*2.0/r);
+
+		DrawArc( d, p, r+(trackGauge*1.5), a2, a3, 0, width2, color );
+		DrawArc( d, p, r-(trackGauge*1.5), a2, a3, 0, width2, color );
+	}
 
 }
 
@@ -2921,13 +2951,25 @@ EXPORT void DrawStraightTrack(
 	if (d->options&DC_PRINT)
 		width *= 300/75;
 #endif
-LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
+	LOG(log_track,4,("DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 				p0.x, p0.y, p1.x, p1.y ) )
 
-	// Draw solid background
-	if(trk && GetTrkBridge(trk)) {
+    // Draw solid background
+	track_p trk0 = NULL, trk1 = NULL;
+    if(trk && GetTrkBridge(trk)) {
+		EPINX_T ep0 = GetNextTrk(trk, 1, &trk0, &ep0, 0);
+		EPINX_T ep1 = GetNextTrk(trk, 0, &trk1, &ep1, 0);
+
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
-		DrawLine(d,p0,p1,width3,wDrawColorGrey90);
+		if (trk0 && GetTrkBridge(trk0))
+			pp0 = p0;
+		else
+			Translate( &pp0, p0, angle + 180, trackGauge * 1.0);
+		if (trk1 && GetTrkBridge(trk1))
+			pp1 = p1;
+		else
+			Translate( &pp1, p1, angle, trackGauge * 1.0 );
+		DrawLine(d,pp0,pp1,width3,wDrawColorGrey90);
 	}
 
 	if ( DoDrawTies( d, trk ) )
@@ -2947,9 +2989,11 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 		Translate( &pp0, p0, angle+90, trackGauge/2.0 );
 		Translate( &pp1, p1, angle+90, trackGauge/2.0 );
 		DrawLine( d, pp0, pp1, width, color );
+
 		Translate( &pp0, p0, angle-90, trackGauge/2.0 );
 		Translate( &pp1, p1, angle-90, trackGauge/2.0 );
 		DrawLine( d, pp0, pp1, width, color );
+
 		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && d->scale <= scale2rail/2.0) {
 			 wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			 if ( options&DTS_RIGHT ) {
@@ -2964,31 +3008,43 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 			 }
 		}
 	}
+
 	if (trk && GetTrkBridge( trk ) ) {
 
 		coOrd pp2,pp3;
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
-		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
-		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
-		Translate( &pp0, pp0, angle+180, trackGauge*1.0 );
-		Translate( &pp1, pp1, angle, trackGauge*1.0 );
-		DrawLine( d, pp0, pp1, width2, color );
-		Translate( &pp2,pp0, angle+90-45, trackGauge);
-		DrawLine( d, pp0, pp2, width2, color );
-		Translate( &pp3,pp1, angle+90+45, trackGauge);
-		DrawLine( d, pp1, pp3, width2, color );
-
 		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
-		Translate( &pp0, pp0, angle+180, trackGauge*1.0 );
-		Translate( &pp1, pp1, angle, trackGauge*1.0 );
-		DrawLine( d, pp0, pp1, width2, color );
-		Translate( &pp2,pp0, angle-90+45, trackGauge);
-		DrawLine( d, pp0, pp2, width2, color );
-		Translate( &pp3,pp1, angle-90-45, trackGauge);
-		DrawLine( d, pp1, pp3, width2, color );
+		if(!(trk0 && GetTrkBridge(trk0))) {
+			Translate( &pp0, pp0, angle + 180, trackGauge * 1.0);
 
+			Translate( &pp2, pp0, angle - 90 + 45, trackGauge);
+			DrawLine( d, pp0, pp2, width2, color );
+		}
+		if(!(trk1 && GetTrkBridge(trk1))) {
+			Translate(&pp1,pp1,angle,trackGauge * 1.0);
+
+			Translate( &pp2, pp1, angle - 90 - 45, trackGauge);
+			DrawLine( d, pp1, pp2, width2, color );
+		}
+		DrawLine( d, pp0, pp1, width2, color );
+
+		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
+		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
+		if(!(trk0 && GetTrkBridge(trk0))) {
+			Translate(&pp0,pp0,angle + 180,trackGauge * 1.0);
+
+			Translate( &pp2, pp0, angle + 90 - 45, trackGauge);
+			DrawLine( d, pp0, pp2, width2, color );
+		}
+		if(!(trk1 && GetTrkBridge(trk1))) {
+			Translate(&pp1,pp1,angle,trackGauge * 1.0);
+
+			Translate( &pp2, pp1, angle + 90 + 45, trackGauge);
+			DrawLine( d, pp1, pp2, width2, color );
+		}
+		DrawLine( d, pp0, pp1, width2, color);
 	}
 }
 

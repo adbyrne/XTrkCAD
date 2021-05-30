@@ -114,7 +114,7 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 #define DTO_DCROSS 11
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
-// #define DTO_DEBUG DTO_CURVED
+// #define DTO_DEBUG DTO_XING
 
 #define DTO_DIM 16
 #define DTO_SEGS 24
@@ -122,6 +122,8 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 static struct DrawToData_t {
 	TRKINX_T index;
 	int toType;
+	track_p trk;
+	int bridge; 
 	int endCnt;
 	int pathCnt;
 	int routeCnt;
@@ -839,6 +841,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	for (i = 0; i < DTO_DIM; i++)
 		dto[i].n = 0;
 
+	dtod.trk = trk;
 	dtod.index = trk->index;
 	dtod.xx = xx;
 
@@ -1141,15 +1144,291 @@ static void DrawDtoLayout(
 }
 
 /**
- * Draw Normal (Single Origin) Turnout Ties. Uses the static dto and dtod structures.
+* Use the coOrds to build a polygon and draw the bridge fill. Note that the coordinates are 
+* passed as pairs, and rearranged into a polygon. 
+* 
+* \param d The drawing object
+* \param b1 The first coordinate
+* \param b2 The second coordinate
+* \param b3 The third coordinate
+* \param b4 The fourth coordinate
+*/
+static void DrawBridgeFill(
+	drawCmd_p d, 
+	coOrd b1,
+	coOrd b2,
+	coOrd b3,
+	coOrd b4
+	) 
+{
+	wDrawPix_t pts[4][2];
+	d->CoOrd2Pix(d,b1,&pts[0][0],&pts[0][1]);
+	d->CoOrd2Pix(d,b2,&pts[1][0],&pts[1][1]);
+	d->CoOrd2Pix(d,b4,&pts[2][0],&pts[2][1]);
+	d->CoOrd2Pix(d,b3,&pts[3][0],&pts[3][1]);
+	wDrawPolygon(d->d,pts,NULL,4,drawColorGrey90,0,0,0,1,0);
+}
+
+/**
+* Draw Bridge parapets and background for a turnout
+* 
+* \param d The drawing object
+* \param path1 The first path
+* \param path2 The second path
+*/
+static void DrawTurnoutBridge(
+	drawCmd_p d, 
+	int path1,
+	int path2
+)
+{
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+
+	coOrd b1, b2, b3, b4, b5, b6;
+	ANGLE_T angle = dtod.xx->angle, a = 0.0;
+	int i, j, i1, i2;
+	i1 = path1;
+	i2 = path2;
+	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
+		i1 = path2;
+		i2 = path1;
+		// a = -a;
+	}
+	
+	for(i = i1; 1; i = i2, a = 180.0) {
+		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+		b1 = dto[i].pts[0];
+		Translate(&b3,b1,(angle + a),dy);
+		Translate(&b5,b1,(angle + a),-(dy*0.75));
+		for(j = 1; j < dto[i].n; j++) {
+			dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
+			b2 = dto[i].pts[j];
+			Translate(&b4,b2,(angle + a),dy);
+			Translate(&b6,b2,(angle + a),-(dy*0.75));
+
+			// Draw the bridge background
+			DrawBridgeFill(d, b3, b4, b5, b6);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b4,width2,drawColorBlack);
+
+			b1 = b2;
+			b3 = b4;
+			b5 = b6;
+		}
+		if(i == i2)
+			break;
+	}
+}
+
+/**
+* Draw Bridge parapets and background for a cross-over
+* 
+* \param d The drawing object
+* \param path1 The first path, straight
+* \param path2 The second path, straight
+*/
+static void DrawCrossBridge(
+	drawCmd_p d, 
+	int path1,
+	int path2
+)
+{
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+
+	coOrd b1, b2, b3, b4, b5, b6;
+	ANGLE_T angle = dtod.xx->angle, a = 0.0;
+	int i, j, i1, i2;
+	i1 = path1;
+	i2 = path2;
+	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
+		i1 = path2;
+		i2 = path1;
+		// a = -a;
+	}
+
+	DIST_T dy = fabs(dto[i1].dy[0]) + trackGauge * 1.5;
+	b1 = dto[i1].pts[0];
+	Translate(&b3,b1,(angle + a),dy);
+	b1 = dto[i1].pts[dto[i1].n-1];
+	Translate(&b4,b1,(angle + a),dy);
+	b2 = dto[i2].pts[0];
+	Translate(&b5,b2,(angle + a),-dy);
+	b2 = dto[i2].pts[dto[i2].n-1];
+	Translate(&b6,b2,(angle + a),-dy);
+
+	// Draw the bridge background
+	DrawBridgeFill(d, b3, b4, b5, b6);
+
+	// Draw the bridge edges
+	DrawLine(d,b3,b4,width2,drawColorBlack);
+	DrawLine(d,b5,b6,width2,drawColorBlack);
+}
+
+/**
+* Draw Bridge parapets and background for a crossing
+* 
+* \param d The drawing object
+* \param path1 The first path
+* \param path2 The second path
+*/
+static void DrawXingBridge(
+	drawCmd_p d, 
+	int path1,
+	int path2
+)
+{
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+
+	coOrd b0, b1, b2, b3, b4, b5, b6;
+	int i, j, i1, i2;
+	i1 = dtod.strPath;
+	i2 = dtod.str2Path;
+
+	// Bridge fill both straight sections
+	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
+	b1 = dto[i1].pts[0];
+	b2 = dto[i1].pts[dto[i1].n-1];
+	DrawLine(d,b1,b2,width3,wDrawColorGrey90);
+	b1 = dto[i2].pts[0];
+	b2 = dto[i2].pts[dto[i1].n-1];
+	DrawLine(d,b1,b2,width3,wDrawColorGrey90);
+
+	i1 = path1;
+	i2 = path2;
+	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
+		i1 = path2;
+		i2 = path1;
+	}
+
+	// Handle curved sections for slips
+	BOOL_T hasLeft = 0, hasRgt = 0;
+	ANGLE_T angle = dtod.xx->angle, a = 0.0;
+	for(i = i1; 1; i = i2,a = 180.0) {
+		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+		b1 = dto[i].pts[0];
+		Translate(&b3,b1,(angle + a),dy);
+		Translate(&b5,b1,(angle + a),-(dy * 0.75));
+		if(dto[i].type != 'S') {
+			if(dto[i].type == 'L')
+				hasLeft = 1;
+			else if(dto[i].type == 'R')
+				hasRgt = 1;
+			for(j = 1; j < dto[i].n; j++) {
+				dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
+				b2 = dto[i].pts[j];
+				Translate(&b4,b2,(angle + a),dy);
+				Translate(&b6,b2,(angle + a),-(dy * 0.75));
+
+				// Draw the bridge background
+				DrawBridgeFill(d,b3,b4,b5,b6);
+
+				// Draw the bridge edge
+				DrawLine(d,b3,b4,width2,drawColorBlack);
+				b1 = b2;
+				b3 = b4;
+				b5 = b6;
+			}
+		}
+		if(i == i2)
+			break;
+	}
+
+	if(dtod.strPath >= 0 && dtod.str2Path >= 0) {
+		i1 = dtod.strPath;
+		i2 = dtod.str2Path;
+		if(!hasRgt) {
+			DIST_T dy = trackGauge * 1.5;
+			ANGLE_T a1, a2;
+			b1 = dto[i1].pts[0];
+			a1 = angle + dto[i1].angle + 90;
+			Translate(&b3,b1,a1,dy);
+			Translate(&b5,b1,a1,-(dy * 0.75));
+
+			b2 = dto[i2].pts[dto[i2].n - 1];
+			a2 = angle + dto[i2].angle + 90;
+			Translate(&b4,b2,a2,dy);
+			Translate(&b6,b2,a2,-(dy * 0.75));
+
+			FindIntersection(&b0, b3, angle + dto[i1].angle, b4, angle + dto[i2].angle);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b0,width2,drawColorBlack);
+			DrawLine(d,b0,b4,width2,drawColorBlack);
+		}
+
+		if(!hasLeft) {
+			DIST_T dy = trackGauge * 1.5;
+			ANGLE_T a1, a2;
+			b1 = dto[i2].pts[0];
+			a1 = angle + dto[i2].angle - 90;
+			Translate(&b3,b1,a1,dy);
+			Translate(&b5,b1,a1,-(dy * 0.75));
+
+			b2 = dto[i1].pts[dto[i1].n - 1];
+			a2 = angle + dto[i1].angle - 90;
+			Translate(&b4,b2,a2,dy);
+			Translate(&b6,b2,a2,-(dy * 0.75));
+
+			FindIntersection(&b0, b3, angle + dto[i2].angle, b4, angle + dto[i1].angle);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b0,width2,drawColorBlack);
+			DrawLine(d,b0,b4,width2,drawColorBlack);
+		}
+
+		if(dtod.toType == DTO_XNG9) {
+			DIST_T dy = trackGauge * 1.5;
+			ANGLE_T a1, a2;
+			b1 = dto[i1].pts[dto[i1].n - 1];
+			a1 = angle + dto[i1].angle + 90;
+			Translate(&b3,b1,a1,dy);
+			Translate(&b5,b1,a1,-(dy * 0.75));
+
+			b2 = dto[i2].pts[dto[i2].n - 1];
+			a2 = angle + dto[i2].angle - 90;
+			Translate(&b4,b2,a2,dy);
+			Translate(&b6,b2,a2,-(dy * 0.75));
+
+			FindIntersection(&b0, b3, angle + dto[i1].angle, b4, angle + dto[i2].angle);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b0,width2,drawColorBlack);
+			DrawLine(d,b0,b4,width2,drawColorBlack);
+
+			b1 = dto[i1].pts[0];
+			a1 = angle + dto[i1].angle - 90;
+			Translate(&b3,b1,a1,dy);
+			Translate(&b5,b1,a1,-(dy * 0.75));
+
+			b2 = dto[i2].pts[0];
+			a2 = angle + dto[i2].angle + 90;
+			Translate(&b4,b2,a2,dy);
+			Translate(&b6,b2,a2,-(dy * 0.75));
+
+			FindIntersection(&b0, b3, angle + dto[i1].angle, b4, angle + dto[i2].angle);
+
+			// Draw the bridge edge
+			DrawLine(d,b3,b0,width2,drawColorBlack);
+			DrawLine(d,b0,b4,width2,drawColorBlack);
+		}
+	}
+}
+
+/**
+ * Draw Normal (Single Origin) Turnout Bridge and Ties. Uses the static dto and dtod structures.
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
  * \param color The tie color. If black the color is read from the global tieColor.
  */
-static void DrawNormalToTies(
+static void DrawNormalTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -1161,9 +1440,13 @@ static void DrawNormalToTies(
 	int s0, p0, q0;
 	ANGLE_T a0;
 
+	coOrd b1, b2, b3, b4, bb1, bb2, bb3, bb4; // bridge
+	DIST_T blen1, blen2;
+
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	struct extraDataCompound_t* xx = dtod.xx;
 
 	int i, j;
@@ -1182,6 +1465,8 @@ static void DrawNormalToTies(
 
 	int strPath = dtod.strPath, othPath = 0, secPath = 1;
 	int toType = dtod.toType;
+	int first = 1;
+
 	switch (toType) {
 	case DTO_NORMAL:
 		othPath = 1 - strPath;
@@ -1205,6 +1490,12 @@ static void DrawNormalToTies(
 		}
 		break;
 	}
+
+	if(dtod.bridge) {
+		DrawTurnoutBridge(d,othPath,secPath);
+	}
+	if (omitTies)
+		return;
 
 	// Straight vector for tie angle
 	if (toType == DTO_WYE) {
@@ -1255,6 +1546,7 @@ static void DrawNormalToTies(
 			DIST_T dy = dy1 + dy2;
 			Translate(&pos, s1, angle, px);
 			Translate(&pos, pos, (angle - 90.0), dy / 2);
+
 			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
@@ -1313,15 +1605,16 @@ static void DrawNormalToTies(
 }
 
 /**
- * Draw Curved (Single Origin) Turnout Ties. Uses the static dto and dtod structures.
+ * Draw Curved (Single Origin) Turnout Bridge and Ties. Uses the static dto and dtod structures.
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
  * \param color The tie color. If black the color is read from the global tieColor.
  */
-static void DrawCurvedToTies(
+static void DrawCurvedTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -1354,6 +1647,12 @@ static void DrawCurvedToTies(
 
 	int othPath = 0, secPath = 1;
 	int toType = dtod.toType;
+
+	if(dtod.bridge) {
+		DrawTurnoutBridge(d,othPath,secPath);
+	}
+	if(omitTies)
+		return;
 
 	td = GetScaleTieData(scaleInx);
 
@@ -1567,15 +1866,16 @@ static void DrawCurvedToTies(
 }
 
 /**
-  * Draw Crossing and Slip Turnout Ties - Uses the static dto and dtod structures.
+  * Draw Crossing and Slip Turnout Bridge and Ties - Uses the static dto and dtod structures.
   *
   * \param d The drawing object
   * \param scaleInx The layout/track scale index
   * \param color The tie color. If black the color is read from the global tieColor.
   */
-static void DrawXingToTies(
+static void DrawXingTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -1608,11 +1908,6 @@ static void DrawXingToTies(
 	i = str2Path;
 	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
 
-	// draw the points
-#ifdef DTO_DEBUG
-	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
-#endif
-
 	int othPath = strPath, secPath = str2Path;
 	int toType = dtod.toType;
 
@@ -1642,6 +1937,17 @@ static void DrawXingToTies(
 		}
 		break;
 	}
+
+	if(dtod.bridge) {
+		DrawXingBridge(d,othPath,secPath);
+	}
+	// draw the points
+#ifdef DTO_DEBUG
+	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
+#endif
+
+	if(omitTies)
+		return;
 
 	td = GetScaleTieData(scaleInx);
 	DIST_T tdlen = td->length, tdmax = 2.5 * tdlen;
@@ -1873,15 +2179,16 @@ static void DrawXingToTies(
 }
 
 /**
- * Draw Crossover (Two Origin) Turnout Ties. Uses the static dto and dtod structures.
+ * Draw Crossover (Two Origin) Turnout Bridge and Ties. Uses the static dto and dtod structures.
  *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
  * \param color The tie color. If black the color is read from the global tieColor.
  */
-static void DrawCrossToTies(
+static void DrawCrossTurnout(
 	drawCmd_p d,
 	SCALEINX_T scaleInx,
+	BOOL_T omitTies,
 	wDrawColor color)
 {
 	tieData_p td;
@@ -1920,6 +2227,12 @@ static void DrawCrossToTies(
 	if (dtod.pathCnt == 4) secPath = 3;
 
 	int toType = dtod.toType;
+
+	if(dtod.bridge) {
+		DrawCrossBridge(d,strPath,str2Path);
+	}
+	if (omitTies)
+		return;
 
 	td = GetScaleTieData(scaleInx);
 
@@ -2090,14 +2403,16 @@ static void DrawTurnout(
 	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	wIndex_t i;
 	long widthOptions = 0;
-	DIST_T scale2rail;
+	SCALEINX_T scaleInx = GetTrkScale(trk);
+	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
+	BOOL_T omitTies = (d->scale >= twoRailScale)  && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0;
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
-	SCALEINX_T scaleInx = GetTrkScale(trk);
 
 	int noTies = 0;
+	int bridge = trk->bits & TB_BRIDGE;
 
-	if (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0)
+	if (bridge || (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0))
 	{
 		int pathCnt = GetTurnoutPaths(trk, xx);
 
@@ -2105,6 +2420,8 @@ static void DrawTurnout(
 			&& (trk->endCnt <= 4)
 			&& (xx->special == TOnormal || xx->special == TOcurved))
 		{
+
+			dtod.bridge = bridge; 
 
 			int strPath = -1;
 			GetTurnoutType();
@@ -2116,31 +2433,31 @@ static void DrawTurnout(
 				case DTO_NORMAL:
 				case DTO_THREE:
 				case DTO_WYE:
-					DrawNormalToTies(d, scaleInx, color);
+					DrawNormalTurnout(d, scaleInx, omitTies, color);
 					break;
 				case DTO_CURVED:
-					DrawCurvedToTies(d, scaleInx, color);
+					DrawCurvedTurnout(d, scaleInx, omitTies, color);
 					break;
 				case DTO_XING:
 				case DTO_XNG9:
 				case DTO_SSLIP:
 				case DTO_DSLIP:
-					DrawXingToTies(d, scaleInx, color);
+					DrawXingTurnout(d, scaleInx, omitTies, color);
 					break;
 				case DTO_LCROSS:
 				case DTO_RCROSS:
 				case DTO_DCROSS:
-					DrawCrossToTies(d, scaleInx, color);
+					DrawCrossTurnout(d, scaleInx, omitTies, color);
 					break;
 				}
 				noTies = 1;
 				trk->bits |= TB_NOTIES;
+				trk->bits &= ~TB_BRIDGE;
 			}
 		}
 	}
 
-	// Begin standard DrawTurnout code
-	scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
+	// Begin standard DrawTurnout code to draw rails or centerline
 	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER);  // no curve center for turnouts
 
 
@@ -2160,8 +2477,9 @@ static void DrawTurnout(
 			(roadbedOnScreen && d->scale <= twoRailScale)))
 		DrawTurnoutRoadbed(d, color, xx->orig, xx->angle, xx->segs, xx->segCnt);
 
-	// Restore this setting
+	// Restore these settings
 	if (noTies) trk->bits &= ~TB_NOTIES;
+	if (bridge) trk->bits |= TB_BRIDGE;
 }
 
 
