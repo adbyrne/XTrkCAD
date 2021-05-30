@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkRevealer" id="describe-straight.reveal">
@@ -18,104 +18,100 @@
           <object class="GtkListBoxRow" id="describe-straight-pos1.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_bottom">18</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
-              <object class="GtkFrame">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkAlignment">
+                  <object class="GtkLabel" id="pos1x">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="label" translatable="yes">Pos1 X:</property>
+                    <property name="justify">right</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-straight-endpt1x">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="valign">center</property>
+                    <property name="margin_start">12</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="top_padding">3</property>
-                    <property name="bottom_padding">3</property>
-                    <property name="right_padding">3</property>
-                    <child>
-                      <object class="GtkGrid">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="row_spacing">3</property>
-                        <property name="column_spacing">3</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <property name="label" translatable="yes">Pos1 X,Y:</property>
-                            <property name="justify">right</property>
-                            <property name="width_chars">15</property>
-                            <property name="xalign">1</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-straight-endpt1x">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-straight-endpt1y">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="halign">start</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="label" translatable="yes">Z1</property>
-                            <property name="width_chars">15</property>
-                            <property name="xalign">1</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-straight-elev1">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">True</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="label" translatable="yes">Y</property>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
-                <child type="label_item">
-                  <placeholder/>
+                <child>
+                  <object class="GtkEntry" id="describe-straight-endpt1y">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="pos">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">Z1</property>
+                    <property name="width_chars">0</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-straight-elev1">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
                 </child>
               </object>
             </child>
@@ -124,107 +120,102 @@
         <child>
           <object class="GtkListBoxRow" id="describe-straight-pos2.row">
             <property name="width_request">100</property>
-            <property name="height_request">80</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_bottom">18</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
-              <object class="GtkFrame">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkAlignment">
+                  <object class="GtkLabel" id="pos2x">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="label" translatable="yes">Pos2 X:</property>
+                    <property name="justify">right</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-straight-endpt2x">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="valign">center</property>
+                    <property name="margin_start">12</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="top_padding">3</property>
-                    <property name="bottom_padding">3</property>
-                    <property name="right_padding">3</property>
-                    <child>
-                      <object class="GtkGrid">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="row_spacing">3</property>
-                        <property name="column_spacing">3</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <property name="label" translatable="yes">Pos2 X,Y:</property>
-                            <property name="justify">right</property>
-                            <property name="width_chars">15</property>
-                            <property name="xalign">1</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-straight-endpt2x">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-straight-endpt2y">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="halign">start</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Z2</property>
-                            <property name="justify">right</property>
-                            <property name="width_chars">15</property>
-                            <property name="xalign">1</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-straight-elev2">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">True</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="label" translatable="yes">Y</property>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
-                <child type="label_item">
-                  <placeholder/>
+                <child>
+                  <object class="GtkEntry" id="describe-straight-endpt2y">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Z2</property>
+                    <property name="justify">right</property>
+                    <property name="width_chars">0</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-straight-elev2">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
                 </child>
               </object>
             </child>
@@ -234,16 +225,19 @@
           <object class="GtkListBoxRow" id="describe-straight-length.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_top">6</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="length">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Length:</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -256,6 +250,7 @@
                   <object class="GtkEntry" id="describe-straight-length">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="margin_start">12</property>
                     <property name="width_chars">10</property>
                   </object>
                   <packing>
@@ -272,17 +267,20 @@
           <object class="GtkListBoxRow" id="describe-straight-angle.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="angle">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_bottom">6</property>
                     <property name="label" translatable="yes">Angle:</property>
                     <property name="use_markup">True</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -295,6 +293,7 @@
                   <object class="GtkEntry" id="describe-straight-angle">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="margin_start">12</property>
                     <property name="width_chars">10</property>
                   </object>
                   <packing>
@@ -311,18 +310,21 @@
           <object class="GtkListBoxRow" id="describe-straight-grade.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_bottom">18</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="grade">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">end</property>
                     <property name="label" translatable="yes">Grade:</property>
                     <property name="justify">right</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -337,6 +339,7 @@
                     <property name="can_focus">True</property>
                     <property name="halign">center</property>
                     <property name="valign">center</property>
+                    <property name="margin_start">12</property>
                     <property name="width_chars">10</property>
                   </object>
                   <packing>
@@ -353,17 +356,20 @@
           <object class="GtkListBoxRow" id="describe-straight-pivot.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_bottom">18</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="pivot">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Pivot:</property>
                     <property name="use_markup">True</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -376,6 +382,8 @@
                   <object class="GtkBox" id="describe-straight-pivot.box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_start">12</property>
+                    <property name="spacing">6</property>
                     <child>
                       <object class="GtkRadioButton" id="left">
                         <property name="label" translatable="yes">Left</property>
@@ -436,16 +444,18 @@
           <object class="GtkListBoxRow" id="describe-straight-layer.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="layer">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Layer:</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -458,6 +468,7 @@
                   <object class="GtkComboBox" id="describe-straight-layer">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_start">12</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -471,5 +482,16 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="pos1x"/>
+      <widget name="pos2x"/>
+      <widget name="length"/>
+      <widget name="angle"/>
+      <widget name="grade"/>
+      <widget name="pivot"/>
+      <widget name="layer"/>
+    </widgets>
   </object>
 </interface>
