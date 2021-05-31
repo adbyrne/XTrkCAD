@@ -1790,6 +1790,7 @@ EXPORT void DrawSegsO(
 					DrawLine( d, p0, p1, thick, color1 );
 					break;
 				}
+				bridgeOptions = GetTrkBridgeOptions( trk );
 				DrawStraightTrack( d,
 					p0, p1,
 					FindAngle(p1, p0 ),
@@ -1848,6 +1849,7 @@ EXPORT void DrawSegsO(
 							FALSE, thick, color1 );
 					break;
 				}
+				bridgeOptions = GetTrkBridgeOptions( trk );
 				DrawCurvedTrack( d,
 					c,
 					fabs(segPtr->u.c.radius),
@@ -1892,7 +1894,8 @@ EXPORT void DrawSegsO(
         											FALSE, thick, color1 );
         						break;
         					}
-        					DrawCurvedTrack( d,
+							bridgeOptions = GetTrkBridgeOptions( trk );
+							DrawCurvedTrack( d,
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
             		   					a0, tempPtr->u.c.a1,
@@ -1916,7 +1919,8 @@ EXPORT void DrawSegsO(
 							DrawLine( d, p0, p1, thick, color1 );
 							break;
 						}
-        				DrawStraightTrack( d, p0, p1,
+						bridgeOptions = GetTrkBridgeOptions( trk );
+						DrawStraightTrack( d, p0, p1,
 							FindAngle(p1,p0),
 							trk,color1,bridgeOptions,options);
             			break;
@@ -1935,7 +1939,8 @@ EXPORT void DrawSegsO(
             break;
 		case SEG_JNTTRK:
 			REORIGIN( p0, segPtr->u.j.pos, angle, orig );
-			DrawJointTrack( d, p0, NormalizeAngle(segPtr->u.j.angle+angle), segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve, NULL, -1, -1, trackGauge, color1, 0, options );
+			bridgeOptions = GetTrkBridgeOptions( trk );
+			DrawJointTrack( d, p0, NormalizeAngle(segPtr->u.j.angle+angle), segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve, NULL, -1, -1, trackGauge, color1, bridgeOptions, options );
 			break;
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )

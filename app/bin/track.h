@@ -518,6 +518,8 @@ BOOL_T IsTrackDeleted( track_p );
 int ClrAllTrkBits( int );
 int ClrAllTrkBitsRedraw( int, wBool_t );
 
+long GetTrkBridgeOptions( track_p trk );
+
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 int GetTrkEndElevMode( track_p, EPINX_T );

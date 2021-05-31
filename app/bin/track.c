@@ -496,6 +496,15 @@ EXPORT int ClrTrkBits( track_p trk, int bits )
 	return oldBits;
 }
 
+EXPORT long GetTrkBridgeOptions( track_p trk )
+{
+	long bridgeBits = 0;
+	if(trk){
+		bridgeBits = trk->bits & TB_BRIDGE;
+	}
+	return bridgeBits;
+}
+
 EXPORT BOOL_T IsTrackDeleted( track_p trk )
 {
 	return trk->deleted;
