@@ -2079,13 +2079,13 @@ static void RotateEnterOk(void *);
 
 static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80 };
 static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_NOPREF|PDO_ANGLE|PDO_NORECORD, &rn360_360, N_("Angle:") } };
-static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
+static paramGroup_t rotatePG = { "rotate", PGO_DIALOGTEMPLATE, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
 
 static void IndexEnterOk(void *);
 static paramData_t indexPLs[] = {
 		{ PD_STRING, &trackIndex, "select",	PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH, (void*)(STR_SIZE-1), N_("Indexes:"), 0, 0, sizeof(trackIndex) } };
-static paramGroup_t indexPG = { "index", 0, indexPLs, sizeof indexPLs
+static paramGroup_t indexPG = { "index", PGO_DIALOGTEMPLATE, indexPLs, sizeof indexPLs
 		/ sizeof indexPLs[0] };
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
@@ -2093,7 +2093,7 @@ static void MoveEnterOk(void *);
 static paramData_t movePLs[] = {
 		{ PD_FLOAT, &moveValue.x, "moveX", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move X:") },
 		{ PD_FLOAT, &moveValue.y, "moveY", PDO_NOPREF|PDO_DIM|PDO_NORECORD, &r_1000_1000, N_("Move Y:") } };
-static paramGroup_t movePG = { "move", 0, movePLs, sizeof movePLs
+static paramGroup_t movePG = { "move", PGO_DIALOGTEMPLATE, movePLs, sizeof movePLs
 		/ sizeof movePLs[0] };
 
 EXPORT void StartRotateDialog(rotateDialogCallBack_t func) {
