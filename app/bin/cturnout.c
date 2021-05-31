@@ -1240,7 +1240,7 @@ static void DrawCrossBridge(
 
 	coOrd b1, b2, b3, b4, b5, b6;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
-	int i, j, i1, i2;
+	int i1, i2;
 	i1 = path1;
 	i2 = path2;
 	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
@@ -1440,8 +1440,8 @@ static void DrawNormalTurnout(
 	int s0, p0, q0;
 	ANGLE_T a0;
 
-	coOrd b1, b2, b3, b4, bb1, bb2, bb3, bb4; // bridge
-	DIST_T blen1, blen2;
+	// coOrd b1, b2, b3, b4, bb1, bb2, bb3, bb4; // bridge
+	// DIST_T blen1, blen2;
 
 	if (color == wDrawColorBlack)
 		color = tieColor;

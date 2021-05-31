@@ -147,6 +147,7 @@ SET(SOURCES
 	textnoteui.c
 	track.c
 	track.h
+	trackx.h
 	trknote.c
 	trkseg.c
 	tstraigh.c

@@ -2732,10 +2732,9 @@ EXPORT void DrawCurvedTrack(
 		DIST_T r,
 		ANGLE_T a0,
 		ANGLE_T a1,
-		coOrd p0,
-		coOrd p1,
 		track_p trk,
 		wDrawColor color,
+	    long bridge, 
 		long options )
 {
 	DIST_T scale2rail;
@@ -2773,22 +2772,18 @@ EXPORT void DrawCurvedTrack(
 				p.x, p.y, r, a0, a1 ) )
 
     // Draw a solid background
-	track_p trk0 = NULL, trk1 = NULL;
-    if(trk && GetTrkBridge(trk)) {
-		EPINX_T ep0 = GetNextTrk(trk, 0, &trk0, &ep0, 0);
-		EPINX_T ep1 = GetNextTrk(trk, 1, &trk1, &ep1, 0);
-
+    if(bridge&BB_BRIDGE) {
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
 		ANGLE_T a2,a3;
 
 		double a4 = 0.0;
-		if(trk0 && GetTrkBridge(trk0))
+		if(bridge&BB_PT0)
 			a2 = a0;
 		else {
 			a2 = a0 + R2D(trackGauge * 1.0 / r);
 			a4 += 1.0;
 		}
-		if(trk1 && GetTrkBridge(trk1))
+		if(bridge&BB_PT1)
 			a3 = a1 - R2D(trackGauge * a4 / r);
 		else
 			a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
@@ -2821,14 +2816,14 @@ EXPORT void DrawCurvedTrack(
 			 }
 		}
 	}
-	if (trk && GetTrkBridge( trk ) ) {
+	if (bridge&BB_BRIDGE) {
 
 		ANGLE_T a2, a3;
 		double a4 = 0.0;
 		coOrd pp0,pp1,pp2,pp3;
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
-		if(trk0 && GetTrkBridge(trk0))
+		if(bridge&BB_PT0)
 		{
 			a2 = a0;
 		}
@@ -2844,7 +2839,7 @@ EXPORT void DrawCurvedTrack(
 			Translate( &pp2,pp0, a2-90-45, trackGauge);
 			DrawLine( d, pp0, pp2, width2, color );
 		}
-		if(trk1 && GetTrkBridge(trk1))
+		if(bridge&BB_PT1)
 		{
 			a3 = a1 - R2D(trackGauge * a4 / r);
 		}
@@ -2917,6 +2912,7 @@ EXPORT void DrawStraightTrack(
 		ANGLE_T angle,
 		track_cp trk,
 		wDrawColor color,
+	    long bridge, 
 		long options )
 {
 	coOrd pp0, pp1;
@@ -2955,17 +2951,13 @@ EXPORT void DrawStraightTrack(
 				p0.x, p0.y, p1.x, p1.y ) )
 
     // Draw solid background
-	track_p trk0 = NULL, trk1 = NULL;
-    if(trk && GetTrkBridge(trk)) {
-		EPINX_T ep0 = GetNextTrk(trk, 1, &trk0, &ep0, 0);
-		EPINX_T ep1 = GetNextTrk(trk, 0, &trk1, &ep1, 0);
-
+    if(bridge&BB_BRIDGE) {
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
-		if (trk0 && GetTrkBridge(trk0))
+		if (bridge&BB_PT0)
 			pp0 = p0;
 		else
 			Translate( &pp0, p0, angle + 180, trackGauge * 1.0);
-		if (trk1 && GetTrkBridge(trk1))
+		if (bridge&BB_PT1)
 			pp1 = p1;
 		else
 			Translate( &pp1, p1, angle, trackGauge * 1.0 );
@@ -3009,20 +3001,20 @@ EXPORT void DrawStraightTrack(
 		}
 	}
 
-	if (trk && GetTrkBridge( trk ) ) {
+	if (bridge&BB_BRIDGE) {
 
-		coOrd pp2,pp3;
+		coOrd pp2;
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
 		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
-		if(!(trk0 && GetTrkBridge(trk0))) {
+		if((bridge&BB_PT0)==0) {
 			Translate( &pp0, pp0, angle + 180, trackGauge * 1.0);
 
 			Translate( &pp2, pp0, angle - 90 + 45, trackGauge);
 			DrawLine( d, pp0, pp2, width2, color );
 		}
-		if(!(trk1 && GetTrkBridge(trk1))) {
+		if((bridge&BB_PT1)==0) {
 			Translate(&pp1,pp1,angle,trackGauge * 1.0);
 
 			Translate( &pp2, pp1, angle - 90 - 45, trackGauge);
@@ -3032,13 +3024,13 @@ EXPORT void DrawStraightTrack(
 
 		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
-		if(!(trk0 && GetTrkBridge(trk0))) {
+		if((bridge&BB_PT0)==0) {
 			Translate(&pp0,pp0,angle + 180,trackGauge * 1.0);
 
 			Translate( &pp2, pp0, angle + 90 - 45, trackGauge);
 			DrawLine( d, pp0, pp2, width2, color );
 		}
-		if(!(trk1 && GetTrkBridge(trk1))) {
+		if((bridge&BB_PT1)==0) {
 			Translate(&pp1,pp1,angle,trackGauge * 1.0);
 
 			Translate( &pp2, pp1, angle + 90 + 45, trackGauge);
