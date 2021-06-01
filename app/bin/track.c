@@ -501,6 +501,14 @@ EXPORT long GetTrkBridgeOptions( track_p trk )
 	long bridgeBits = 0;
 	if(trk){
 		bridgeBits = trk->bits & TB_BRIDGE;
+		int ep0 = -1;
+		track_p trk0;
+		int ep = GetNextTrk(trk, 0, &trk0, &ep0, 0);
+		if (trk0 && (trk0->bits&TB_BRIDGE))
+			bridgeBits |= BB_PT1;
+		ep = GetNextTrk(trk, 1, &trk0, &ep0, 0);
+		if (trk0 && (trk0->bits&TB_BRIDGE))
+			bridgeBits |= BB_PT0;
 	}
 	return bridgeBits;
 }
@@ -2743,7 +2751,7 @@ EXPORT void DrawCurvedTrack(
 		ANGLE_T a1,
 		track_p trk,
 		wDrawColor color,
-	    long bridge, 
+	    long bridgeOptions, 
 		long options )
 {
 	DIST_T scale2rail;
@@ -2781,18 +2789,18 @@ EXPORT void DrawCurvedTrack(
 				p.x, p.y, r, a0, a1 ) )
 
     // Draw a solid background
-    if(bridge&BB_BRIDGE) {
+    if(bridgeOptions&BB_BRIDGE) {
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
 		ANGLE_T a2,a3;
 
 		double a4 = 0.0;
-		if(bridge&BB_PT0)
+		if(bridgeOptions&BB_PT1)
 			a2 = a0;
 		else {
 			a2 = a0 + R2D(trackGauge * 1.0 / r);
 			a4 += 1.0;
 		}
-		if(bridge&BB_PT1)
+		if(bridgeOptions&BB_PT0)
 			a3 = a1 - R2D(trackGauge * a4 / r);
 		else
 			a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
@@ -2825,14 +2833,14 @@ EXPORT void DrawCurvedTrack(
 			 }
 		}
 	}
-	if (bridge&BB_BRIDGE) {
+	if (bridgeOptions&BB_BRIDGE) {
 
 		ANGLE_T a2, a3;
 		double a4 = 0.0;
 		coOrd pp0,pp1,pp2,pp3;
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
-		if(bridge&BB_PT0)
+		if(bridgeOptions&BB_PT1)
 		{
 			a2 = a0;
 		}
@@ -2848,7 +2856,7 @@ EXPORT void DrawCurvedTrack(
 			Translate( &pp2,pp0, a2-90-45, trackGauge);
 			DrawLine( d, pp0, pp2, width2, color );
 		}
-		if(bridge&BB_PT1)
+		if(bridgeOptions&BB_PT0)
 		{
 			a3 = a1 - R2D(trackGauge * a4 / r);
 		}

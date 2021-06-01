@@ -1872,11 +1872,13 @@ EXPORT void DrawSegsO(
                     color1 = normalColor;
                 if ( segPtr->color == wDrawColorWhite )
                     break;
-            } else
-            REORIGIN(p0, segPtr->u.b.pos[0], angle, orig);
-            REORIGIN(p1, segPtr->u.b.pos[1], angle, orig);
-            REORIGIN(p2, segPtr->u.b.pos[2], angle, orig);
-            REORIGIN(p3, segPtr->u.b.pos[3], angle, orig);
+            } 
+			else {
+				REORIGIN(p0,segPtr->u.b.pos[0],angle,orig);
+				REORIGIN(p1,segPtr->u.b.pos[1],angle,orig);
+				REORIGIN(p2,segPtr->u.b.pos[2],angle,orig);
+				REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
+			}
 
             for(int j=0;j<segPtr->bezSegs.cnt;j++) {     //Loop through sub Segs
             	tempPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,j);
@@ -1895,6 +1897,11 @@ EXPORT void DrawSegsO(
         						break;
         					}
 							bridgeOptions = GetTrkBridgeOptions( trk );
+							if(i>0)
+								bridgeOptions|= (tempPtr->u.c.radius>0?BB_PT0:BB_PT1);
+							if(i<segCnt-1)
+								bridgeOptions|= (tempPtr->u.c.radius>0?BB_PT1:BB_PT0);
+							bridgeOptions|=BB_PT0|BB_PT1;
 							DrawCurvedTrack( d,
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
@@ -1920,6 +1927,11 @@ EXPORT void DrawSegsO(
 							break;
 						}
 						bridgeOptions = GetTrkBridgeOptions( trk );
+						if(i>0)
+							bridgeOptions|=BB_PT1;
+						if(i<segCnt-1)
+							bridgeOptions|=BB_PT0;
+						bridgeOptions|=BB_PT0|BB_PT1;
 						DrawStraightTrack( d, p0, p1,
 							FindAngle(p1,p0),
 							trk,color1,bridgeOptions,options);
