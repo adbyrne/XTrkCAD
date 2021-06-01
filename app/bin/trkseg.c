@@ -1755,7 +1755,7 @@ EXPORT void DrawSegsO(
 	DIST_T factor = d->dpi/d->scale;
 	trkSeg_p tempPtr;
 
-	long bridgeOptions = 0;
+	long bridge = 0;
 	long option;
 	wFontSize_t fs;
 
@@ -1790,11 +1790,12 @@ EXPORT void DrawSegsO(
 					DrawLine( d, p0, p1, thick, color1 );
 					break;
 				}
-				bridgeOptions = GetTrkBridgeOptions( trk );
+				if (trk)
+					bridge = GetTrkBridge( trk );
 				DrawStraightTrack( d,
 					p0, p1,
 					FindAngle(p1, p0 ),
-					trk, color1, bridgeOptions, options );
+					trk, color1, bridge, options );
 				break;
 			case SEG_STRLIN:;
 				wDrawWidth w;
@@ -1849,12 +1850,13 @@ EXPORT void DrawSegsO(
 							FALSE, thick, color1 );
 					break;
 				}
-				bridgeOptions = GetTrkBridgeOptions( trk );
+				if (trk)
+					bridge = GetTrkBridge( trk );
 				DrawCurvedTrack( d,
 					c,
 					fabs(segPtr->u.c.radius),
 					a0, segPtr->u.c.a1,
-					trk, color1, bridgeOptions, options );
+					trk, color1, bridge, options );
 			} else {
 				wDrawWidth w;
 				if (segPtr->width <0)
@@ -1873,14 +1875,16 @@ EXPORT void DrawSegsO(
                 if ( segPtr->color == wDrawColorWhite )
                     break;
             } 
-			else {
-				REORIGIN(p0,segPtr->u.b.pos[0],angle,orig);
-				REORIGIN(p1,segPtr->u.b.pos[1],angle,orig);
-				REORIGIN(p2,segPtr->u.b.pos[2],angle,orig);
-				REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
-			}
+			//else {
+			//	REORIGIN(p0,segPtr->u.b.pos[0],angle,orig);
+			//	REORIGIN(p1,segPtr->u.b.pos[1],angle,orig);
+			//	REORIGIN(p2,segPtr->u.b.pos[2],angle,orig);
+			//	REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
+			//}
 
-            for(int j=0;j<segPtr->bezSegs.cnt;j++) {     //Loop through sub Segs
+			if(trk)
+				bridge = GetTrkBridge( trk );
+			for(int j=0;j<segPtr->bezSegs.cnt;j++) {     //Loop through sub Segs
             	tempPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,j);
             	switch (tempPtr->type) {
         			case SEG_CRVTRK:
@@ -1896,17 +1900,11 @@ EXPORT void DrawSegsO(
         											FALSE, thick, color1 );
         						break;
         					}
-							bridgeOptions = GetTrkBridgeOptions( trk );
-							if(i>0)
-								bridgeOptions|= (tempPtr->u.c.radius>0?BB_PT0:BB_PT1);
-							if(i<segCnt-1)
-								bridgeOptions|= (tempPtr->u.c.radius>0?BB_PT1:BB_PT0);
-							bridgeOptions|=BB_PT0|BB_PT1;
 							DrawCurvedTrack( d,
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
             		   					a0, tempPtr->u.c.a1,
-            		   					trk, color1, bridgeOptions, options );
+            		   					trk, color1, bridge, options );
         				} else if (tempPtr->type == SEG_CRVLIN) {
         					wDrawWidth w;
         					if (tempPtr->width <0)
@@ -1926,15 +1924,9 @@ EXPORT void DrawSegsO(
 							DrawLine( d, p0, p1, thick, color1 );
 							break;
 						}
-						bridgeOptions = GetTrkBridgeOptions( trk );
-						if(i>0)
-							bridgeOptions|=BB_PT1;
-						if(i<segCnt-1)
-							bridgeOptions|=BB_PT0;
-						bridgeOptions|=BB_PT0|BB_PT1;
 						DrawStraightTrack( d, p0, p1,
 							FindAngle(p1,p0),
-							trk,color1,bridgeOptions,options);
+							trk,color1,bridge,options);
             			break;
         			case SEG_STRLIN:
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
@@ -1951,8 +1943,8 @@ EXPORT void DrawSegsO(
             break;
 		case SEG_JNTTRK:
 			REORIGIN( p0, segPtr->u.j.pos, angle, orig );
-			bridgeOptions = GetTrkBridgeOptions( trk );
-			DrawJointTrack( d, p0, NormalizeAngle(segPtr->u.j.angle+angle), segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve, NULL, -1, -1, trackGauge, color1, bridgeOptions, options );
+			bridge = GetTrkBridge( trk );
+			DrawJointTrack( d, p0, NormalizeAngle(segPtr->u.j.angle+angle), segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve, NULL, -1, -1, trackGauge, color1, bridge, options );
 			break;
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )

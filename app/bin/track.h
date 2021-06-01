@@ -442,11 +442,6 @@ void SetDebug( char * );
 #define TB_DETAILDESC  	(1<<12)
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
-#define BB_BRIDGE       TB_BRIDGE
-#define BB_PT0          (1<<0)
-#define BB_PT1          (1<<1)
-#define BB_SOLIDBG      (1<<8)
-
 /* track.c */
 #ifdef FASTTRACK
 #include "trackx.h"
@@ -517,8 +512,6 @@ BOOL_T IsTrackDeleted( track_p );
 #define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
 int ClrAllTrkBits( int );
 int ClrAllTrkBitsRedraw( int, wBool_t );
-
-long GetTrkBridgeOptions( track_p trk );
 
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
