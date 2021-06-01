@@ -1161,12 +1161,12 @@ static void DrawBridgeFill(
 	coOrd b4
 	) 
 {
-	wDrawPix_t pts[4][2];
-	d->CoOrd2Pix(d,b1,&pts[0][0],&pts[0][1]);
-	d->CoOrd2Pix(d,b2,&pts[1][0],&pts[1][1]);
-	d->CoOrd2Pix(d,b4,&pts[2][0],&pts[2][1]);
-	d->CoOrd2Pix(d,b3,&pts[3][0],&pts[3][1]);
-	wDrawPolygon(d->d,pts,NULL,4,drawColorGrey90,0,0,0,1,0);
+	coOrd p[4];
+	p[0] = b1;
+	p[1] = b2;
+	p[2] = b4;
+	p[3] = b3;
+	DrawPoly(d,4,p,NULL,drawColorGrey90,0,DRAW_FILL );
 }
 
 /**
