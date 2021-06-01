@@ -708,6 +708,7 @@ static void DrawJointSegment(
 	cnt1 = (int)floor(a1/JOINT_ANGLE_INCR) + 1;
 	a1 /= cnt1;
 
+    long bridge = GetTrkBridge(trk);
 	widthOptions |= DTS_RIGHT|DTS_LEFT;
 	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
 	for (i=1; i<=cnt1; i++) {
@@ -718,7 +719,7 @@ static void DrawJointSegment(
 			DrawLine(d,p0,p1,thick,color);
 		}
 		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk,
-								color, 0, widthOptions );
+								color, bridge, widthOptions );
 		p0 = p1;
 	}
 }

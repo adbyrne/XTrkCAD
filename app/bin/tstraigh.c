@@ -332,11 +332,11 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 	   ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 	  DrawStraightDescription( t, d, color );
 	}
-	long bridgeOptions = 0;
+	long bridge = GetTrkBridge( t );
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				GetTrkEndAngle(t,0),
-				t, color, bridgeOptions, widthOptions );
+				t, color, bridge, widthOptions );
 	DrawEndPt( d, t, 0, color );
 	DrawEndPt( d, t, 1, color );
 }
