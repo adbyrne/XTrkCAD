@@ -1145,7 +1145,7 @@ static void DrawDtoLayout(
 
 /**
 * Use the coOrds to build a polygon and draw the bridge fill. Note that the coordinates are 
-* passed as pairs, and rearranged into a polygon. 
+* passed as pairs, and rearranged into a polygon with the 1,2,4,3 order. 
 * 
 * \param d The drawing object
 * \param b1 The first coordinate
@@ -1161,12 +1161,8 @@ static void DrawBridgeFill(
 	coOrd b4
 	) 
 {
-	coOrd p[4];
-	p[0] = b1;
-	p[1] = b2;
-	p[2] = b4;
-	p[3] = b3;
-	DrawPoly(d,4,p,NULL,drawColorGrey90,0,DRAW_FILL );
+	coOrd p[4] = {b1, b2, b4, b3};
+	DrawPoly(d,4,p,NULL,drawColorGrey90,0,DRAW_FILL ); 
 }
 
 /**
@@ -1240,7 +1236,7 @@ static void DrawCrossBridge(
 
 	coOrd b1, b2, b3, b4, b5, b6;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
-	int i, j, i1, i2;
+	int i1, i2;
 	i1 = path1;
 	i2 = path2;
 	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
@@ -1440,8 +1436,8 @@ static void DrawNormalTurnout(
 	int s0, p0, q0;
 	ANGLE_T a0;
 
-	coOrd b1, b2, b3, b4, bb1, bb2, bb3, bb4; // bridge
-	DIST_T blen1, blen2;
+	// coOrd b1, b2, b3, b4, bb1, bb2, bb3, bb4; // bridge
+	// DIST_T blen1, blen2;
 
 	if (color == wDrawColorBlack)
 		color = tieColor;
@@ -2405,15 +2401,15 @@ static void DrawTurnout(
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
-	BOOL_T omitTies = (d->scale >= twoRailScale)  && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0;
+	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= twoRailScale) && (d->options & DC_SIMPLE) == 0 && (scaleInx >= 0));
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
 	int noTies = 0;
 	int bridge = trk->bits & TB_BRIDGE;
 
-	if (bridge || (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0))
-	{
+	// if (bridge || (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0))
+	// {
 		int pathCnt = GetTurnoutPaths(trk, xx);
 
 		if ((pathCnt > 1) && (pathCnt <= DTO_DIM)
@@ -2455,7 +2451,7 @@ static void DrawTurnout(
 				trk->bits &= ~TB_BRIDGE;
 			}
 		}
-	}
+	// }
 
 	// Begin standard DrawTurnout code to draw rails or centerline
 	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER);  // no curve center for turnouts

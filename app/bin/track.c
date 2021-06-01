@@ -2732,10 +2732,9 @@ EXPORT void DrawCurvedTrack(
 		DIST_T r,
 		ANGLE_T a0,
 		ANGLE_T a1,
-		coOrd p0,
-		coOrd p1,
 		track_p trk,
 		wDrawColor color,
+	    long bridge, 
 		long options )
 {
 	DIST_T scale2rail;
@@ -2773,26 +2772,9 @@ EXPORT void DrawCurvedTrack(
 				p.x, p.y, r, a0, a1 ) )
 
     // Draw a solid background
-	track_p trk0 = NULL, trk1 = NULL;
-    if(trk && GetTrkBridge(trk)) {
-		EPINX_T ep0 = GetNextTrk(trk, 0, &trk0, &ep0, 0);
-		EPINX_T ep1 = GetNextTrk(trk, 1, &trk1, &ep1, 0);
-
+    if(bridge) {
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
-		ANGLE_T a2,a3;
-
-		double a4 = 0.0;
-		if(trk0 && GetTrkBridge(trk0))
-			a2 = a0;
-		else {
-			a2 = a0 + R2D(trackGauge * 1.0 / r);
-			a4 += 1.0;
-		}
-		if(trk1 && GetTrkBridge(trk1))
-			a3 = a1 - R2D(trackGauge * a4 / r);
-		else
-			a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
-		DrawArc( d, p, r, a2, a3, 0, width3, drawColorGrey90 );
+		DrawArc( d, p, r, a0, a1, 0, width3, drawColorGrey90 );
 	}
 
 	if ( DoDrawTies( d, trk ) )
@@ -2821,49 +2803,11 @@ EXPORT void DrawCurvedTrack(
 			 }
 		}
 	}
-	if (trk && GetTrkBridge( trk ) ) {
-
-		ANGLE_T a2, a3;
-		double a4 = 0.0;
-		coOrd pp0,pp1,pp2,pp3;
+	if (bridge) {
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
-		if(trk0 && GetTrkBridge(trk0))
-		{
-			a2 = a0;
-		}
-		else {
-			a2 = a0 + R2D(trackGauge * 1.0 / r);
-			a4 += 1.0;
-
-			PointOnCircle(&pp0,p,r+(trackGauge*1.5),a2);
-			Translate( &pp2,pp0, a2-90+45, trackGauge);
-			DrawLine( d, pp0, pp2, width2, color );
-
-			PointOnCircle(&pp0,p,r-(trackGauge*1.5),a2);
-			Translate( &pp2,pp0, a2-90-45, trackGauge);
-			DrawLine( d, pp0, pp2, width2, color );
-		}
-		if(trk1 && GetTrkBridge(trk1))
-		{
-			a3 = a1 - R2D(trackGauge * a4 / r);
-		}
-		else {
-			a3 = a1 - R2D(trackGauge * (a4 + 1.0) / r);
-
-			PointOnCircle(&pp1,p,r+(trackGauge*1.5),a3+a2);
-			Translate(&pp3,pp1,a2+a3+90-45, trackGauge);
-			DrawLine(d,pp1,pp3,width2,color);
-
-			PointOnCircle(&pp1,p,r-(trackGauge*1.5),a3+a2);
-			Translate( &pp3,pp1,a2+a3+90+45, trackGauge);
-			DrawLine( d, pp1, pp3, width2, color );
-		}
-		//a2 = a0+R2D(trackGauge*1.0/r);
-		//a3 = a1-R2D(trackGauge*2.0/r);
-
-		DrawArc( d, p, r+(trackGauge*1.5), a2, a3, 0, width2, color );
-		DrawArc( d, p, r-(trackGauge*1.5), a2, a3, 0, width2, color );
+		DrawArc( d, p, r+(trackGauge*1.5), a0, a1, 0, width2, color );
+		DrawArc( d, p, r-(trackGauge*1.5), a0, a1, 0, width2, color );
 	}
 
 }
@@ -2917,6 +2861,7 @@ EXPORT void DrawStraightTrack(
 		ANGLE_T angle,
 		track_cp trk,
 		wDrawColor color,
+	    long bridge, 
 		long options )
 {
 	coOrd pp0, pp1;
@@ -2955,21 +2900,9 @@ EXPORT void DrawStraightTrack(
 				p0.x, p0.y, p1.x, p1.y ) )
 
     // Draw solid background
-	track_p trk0 = NULL, trk1 = NULL;
-    if(trk && GetTrkBridge(trk)) {
-		EPINX_T ep0 = GetNextTrk(trk, 1, &trk0, &ep0, 0);
-		EPINX_T ep1 = GetNextTrk(trk, 0, &trk1, &ep1, 0);
-
+    if(bridge) {
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
-		if (trk0 && GetTrkBridge(trk0))
-			pp0 = p0;
-		else
-			Translate( &pp0, p0, angle + 180, trackGauge * 1.0);
-		if (trk1 && GetTrkBridge(trk1))
-			pp1 = p1;
-		else
-			Translate( &pp1, p1, angle, trackGauge * 1.0 );
-		DrawLine(d,pp0,pp1,width3,wDrawColorGrey90);
+		DrawLine(d,p0,p1,width3,wDrawColorGrey90);
 	}
 
 	if ( DoDrawTies( d, trk ) )
@@ -3009,41 +2942,15 @@ EXPORT void DrawStraightTrack(
 		}
 	}
 
-	if (trk && GetTrkBridge( trk ) ) {
-
-		coOrd pp2,pp3;
+	if (bridge) {
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
 
 		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
-		if(!(trk0 && GetTrkBridge(trk0))) {
-			Translate( &pp0, pp0, angle + 180, trackGauge * 1.0);
-
-			Translate( &pp2, pp0, angle - 90 + 45, trackGauge);
-			DrawLine( d, pp0, pp2, width2, color );
-		}
-		if(!(trk1 && GetTrkBridge(trk1))) {
-			Translate(&pp1,pp1,angle,trackGauge * 1.0);
-
-			Translate( &pp2, pp1, angle - 90 - 45, trackGauge);
-			DrawLine( d, pp1, pp2, width2, color );
-		}
 		DrawLine( d, pp0, pp1, width2, color );
 
 		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
-		if(!(trk0 && GetTrkBridge(trk0))) {
-			Translate(&pp0,pp0,angle + 180,trackGauge * 1.0);
-
-			Translate( &pp2, pp0, angle + 90 - 45, trackGauge);
-			DrawLine( d, pp0, pp2, width2, color );
-		}
-		if(!(trk1 && GetTrkBridge(trk1))) {
-			Translate(&pp1,pp1,angle,trackGauge * 1.0);
-
-			Translate( &pp2, pp1, angle + 90 + 45, trackGauge);
-			DrawLine( d, pp1, pp2, width2, color );
-		}
 		DrawLine( d, pp0, pp1, width2, color);
 	}
 }
@@ -3273,118 +3180,137 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
  */
 
 EXPORT void DrawEndPt(
-		drawCmd_p d,
-		track_p trk,
-		EPINX_T ep,
-		wDrawColor color )
+	drawCmd_p d,
+	track_p trk,
+	EPINX_T ep,
+	wDrawColor color)
 {
 	coOrd p;
 	ANGLE_T a;
 	track_p trk1;
-	coOrd p0, p1, p2;
+	coOrd p0,p1,p2;
 	BOOL_T sepBoundary;
+	BOOL_T showBridge = 1;
 	DIST_T trackGauge;
 	wDrawWidth width;
 	wDrawWidth width2;
 
-	if ( (d->options & (DC_SIMPLE|DC_SEGTRACK)) != 0)
+	if((d->options & (DC_SIMPLE | DC_SEGTRACK)) != 0)
 		return;
-	if ( trk && QueryTrack( trk, Q_NODRAWENDPT ) )
+	if(trk && QueryTrack(trk,Q_NODRAWENDPT))
 		return;
-	if (trk == NULL || ep < 0)
+	if(trk == NULL || ep < 0)
 		return;
 
 	// line width for the tunnel portal, make sure it is rounded correctly
-	width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+	width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
 
-	if (color == wDrawColorBlack)
+	if(color == wDrawColorBlack)
 		color = normalColor;
 
-	if (labelScale >= d->scale)
-		DrawEndElev( d, trk, ep, color );
+	if(labelScale >= d->scale)
+		DrawEndElev(d,trk,ep,color);
 
 	trk1 = GetTrkEndTrk(trk,ep);
-	p = GetTrkEndPos( trk, ep );
-	a = GetTrkEndAngle( trk, ep ) + 90.0;
+	p = GetTrkEndPos(trk,ep);
+	a = GetTrkEndAngle(trk,ep) + 90.0;
 
 	trackGauge = GetTrkGauge(trk);
-	if (trk1 == NULL) {
-		DrawUnconnectedEndPt( d, p, a, trackGauge, color );
+	if(trk1 == NULL) {
+		DrawUnconnectedEndPt(d,p,a,trackGauge,color);
 		return;
 	}
 
-	if ( d->scale >= ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) )
-			return;
+	if(d->scale >= ((d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale))
+		return;
 
 	sepBoundary = FALSE;
-	if ( inDrawTracks && (d->options&DC_PRINT)==0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
+	if(inDrawTracks && (d->options & DC_PRINT) == 0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
 		DIST_T len;
-		len = trackGauge*2.0;
-		if (len < 0.10*d->scale)
-			len = 0.10*d->scale;
+		len = trackGauge * 2.0;
+		if(len < 0.10 * d->scale)
+			len = 0.10 * d->scale;
 		long oldOptions = d->options;
 		d->options &= ~DC_NOTSOLIDLINE;
-		Translate( &p0, p, a+45, len );
-		Translate( &p1, p, a+225, len );
-		DrawLine( d, p0, p1, 2, selectedColor );
-		Translate( &p0, p, a-45, len );
-		Translate( &p1, p, a-225, len );
-		DrawLine( d, p0, p1, 2, selectedColor );
+		Translate(&p0,p,a + 45,len);
+		Translate(&p1,p,a + 225,len);
+		DrawLine(d,p0,p1,2,selectedColor);
+		Translate(&p0,p,a - 45,len);
+		Translate(&p1,p,a - 225,len);
+		DrawLine(d,p0,p1,2,selectedColor);
 		d->options = oldOptions;
 		sepBoundary = TRUE;
-	} else if ((d->options&DC_PRINT)==0 && importTrack == NULL && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
+	}
+	else if((d->options & DC_PRINT) == 0 && importTrack == NULL && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
 		sepBoundary = TRUE;
 	}
 
 	// is the endpoint a transition into a tunnel?
-	if (GetTrkVisible(trk) && (!GetTrkVisible(trk1))) {
+	if(GetTrkVisible(trk) && (!GetTrkVisible(trk1))) {
 		// yes, draw tunnel portal
-		Translate( &p0, p, a, trackGauge );
-		Translate( &p1, p, a+180, trackGauge );
-		DrawLine( d, p0, p1, width2, color );
-		Translate( &p2, p0, a+45, trackGauge/2.0 );
-		DrawLine( d, p0, p2, width2, color );
-		Translate( &p2, p1, a+135, trackGauge/2.0 );
-		DrawLine( d, p1, p2, width2, color );
-		if ( d == &mainD ) {
-			width = (wDrawWidth)ceil(trackGauge*d->dpi/2.0/d->scale);
-			if ( width > 1 ) {
-				if ( (GetTrkEndOption(trk,ep)&EPOPT_GAPPED) != 0 ) {
-					Translate( &p0, p, a, trackGauge );
-					DrawLine( d, p0, p, width, color );
+		Translate(&p0,p,a,trackGauge);
+		Translate(&p1,p,a + 180,trackGauge);
+		DrawLine(d,p0,p1,width2,color);
+		Translate(&p2,p0,a + 45,trackGauge / 2.0);
+		DrawLine(d,p0,p2,width2,color);
+		Translate(&p2,p1,a + 135,trackGauge / 2.0);
+		DrawLine(d,p1,p2,width2,color);
+		if(d == &mainD) {
+			width = (wDrawWidth)ceil(trackGauge * d->dpi / 2.0 / d->scale);
+			if(width > 1) {
+				if((GetTrkEndOption(trk,ep) & EPOPT_GAPPED) != 0) {
+					Translate(&p0,p,a,trackGauge);
+					DrawLine(d,p0,p,width,color);
 				}
 				trk1 = GetTrkEndTrk(trk,ep);
-				if ( trk1 ) {
-					ep = GetEndPtConnectedToMe( trk1, trk );
-					if ( (GetTrkEndOption(trk1,ep)&EPOPT_GAPPED) != 0 ) {
-						Translate( &p0, p, a+180.0, trackGauge );
-						DrawLine( d, p0, p, width, color );
+				if(trk1) {
+					ep = GetEndPtConnectedToMe(trk1,trk);
+					if((GetTrkEndOption(trk1,ep) & EPOPT_GAPPED) != 0) {
+						Translate(&p0,p,a + 180.0,trackGauge);
+						DrawLine(d,p0,p,width,color);
 					}
 				}
 			}
+			showBridge = 0;
 		}
-	} else if ((!GetTrkVisible(trk)) && GetTrkVisible(trk1)) {
-		;
-	} else if ( GetLayerVisible( GetTrkLayer( trk ) ) && !GetLayerVisible( GetTrkLayer( trk1 ) ) ) {
+	}
+	else if((!GetTrkVisible(trk)) && GetTrkVisible(trk1)) {
+		showBridge = 0;
+	}
+	else if(GetLayerVisible(GetTrkLayer(trk)) && !GetLayerVisible(GetTrkLayer(trk1))) {
 		a -= 90.0;
-		Translate( &p, p, a, trackGauge/2.0 );
-		Translate( &p0, p, a-135.0, trackGauge*2.0 );
-		DrawLine( d, p0, p, width2, color );
-		Translate( &p0, p, a+135.0, trackGauge*2.0 );
-		DrawLine( d, p0, p, width2, color );
-	} else if ( !GetLayerVisible( GetTrkLayer( trk ) ) && GetLayerVisible( GetTrkLayer( trk1 ) ) ) {
+		Translate(&p,p,a,trackGauge / 2.0);
+		Translate(&p0,p,a - 135.0,trackGauge * 2.0);
+		DrawLine(d,p0,p,width2,color);
+		Translate(&p0,p,a + 135.0,trackGauge * 2.0);
+		DrawLine(d,p0,p,width2,color);
+
+		showBridge = 0;
+	}
+	else if(!GetLayerVisible(GetTrkLayer(trk)) && GetLayerVisible(GetTrkLayer(trk1))) {
+		showBridge = 0;
+	}
+	else if(sepBoundary) {
 		;
-	} else if ( sepBoundary ) {
-		;
-	} else if ( (drawEndPtV == 1 && (QueryTrack(trk,Q_DRAWENDPTV_1) || QueryTrack(trk1,Q_DRAWENDPTV_1)) ) ||
-				(drawEndPtV == 2) ) {
-		Translate( &p0, p, a, trackGauge );
+	}
+	else if((drawEndPtV == 1 && (QueryTrack(trk,Q_DRAWENDPTV_1) || QueryTrack(trk1,Q_DRAWENDPTV_1))) || (drawEndPtV == 2)) {
+		Translate(&p0,p,a,trackGauge);
 		width = 0;
-		if ( d != &mapD && d != &tempD && (GetTrkEndOption(trk,ep)&EPOPT_GAPPED) != 0 )
-			width = (wDrawWidth)ceil(trackGauge*d->dpi/2.0/d->scale);
-		DrawLine( d, p0, p, width, color );
-	} else {
+		if(d != &mapD && d != &tempD && (GetTrkEndOption(trk,ep) & EPOPT_GAPPED) != 0)
+			width = (wDrawWidth)ceil(trackGauge * d->dpi / 2.0 / d->scale);
+		DrawLine(d,p0,p,width,color);
+	}
+	else {
 		;
+	}
+
+	if(showBridge && GetTrkBridge(trk) && (!GetTrkBridge(trk1))) {
+		Translate(&p0,p,a,trackGauge * 1.5);
+		Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+		DrawLine(d,p0,p1,width2,color);
+		Translate(&p0,p,a,-trackGauge * 1.5);
+		Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+		DrawLine(d,p0,p1,width2,color);
 	}
 }
 
