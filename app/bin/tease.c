@@ -719,7 +719,7 @@ static void DrawJointSegment(
 			DrawLine(d,p0,p1,thick,color);
 		}
 		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk,
-								color, bridge, widthOptions );
+								color, widthOptions );
 		p0 = p1;
 	}
 }
