@@ -112,7 +112,7 @@ static paramData_t switchmotorEditPLs[] = {
 /*4*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, N_("Turnout Number"), BO_READONLY }, 
 };
 
-static paramGroup_t switchmotorEditPG = { "switchmotorEdit", F_USETEMPLATE, switchmotorEditPLs, sizeof switchmotorEditPLs/sizeof switchmotorEditPLs[0] };
+static paramGroup_t switchmotorEditPG = { "switchmotorEdit", PGO_DIALOGTEMPLATE, switchmotorEditPLs, sizeof switchmotorEditPLs/sizeof switchmotorEditPLs[0] };
 static wWin_p switchmotorEditW;
 
 /*

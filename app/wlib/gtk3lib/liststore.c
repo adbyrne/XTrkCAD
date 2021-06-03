@@ -186,6 +186,8 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 
     convertedLabels = strdup(wlibConvertInput(labels));
     start = convertedLabels;
+    if(*start == '\t')
+        start++;
 
     while ((text = strchr(start, '\t')) != NULL) {
         *text = '\0';
@@ -196,7 +198,6 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 
     /* add the last piece of the string */
     gtk_list_store_set(ls, iter, LISTCOL_TEXT + current, start, -1);
-
     free(convertedLabels);
     return (current+1);
 }

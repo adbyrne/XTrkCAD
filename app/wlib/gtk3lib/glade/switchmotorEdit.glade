@@ -73,7 +73,7 @@
             <property name="row_spacing">6</property>
             <property name="column_spacing">12</property>
             <child>
-              <object class="GtkEntry" id="switchmotor-name">
+              <object class="GtkEntry" id="switchmotorEdit-name">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="max_length">80</property>
@@ -85,7 +85,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="switchmotor-normal">
+              <object class="GtkEntry" id="switchmotorEdit-normal">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="max_length">1024</property>
@@ -97,7 +97,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="switchmotor-reverse">
+              <object class="GtkEntry" id="switchmotorEdit-reverse">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="max_length">1024</property>
@@ -109,7 +109,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="switchmotor-pointsense">
+              <object class="GtkEntry" id="switchmotorEdit-pointSense">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="max_length">1024</property>
@@ -121,7 +121,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="switchmotor-turnoutNumber">
+              <object class="GtkEntry" id="switchmotorEdit-turnoutNumber">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
@@ -140,7 +140,7 @@
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">_Name</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic_widget">switchmotor-turnoutNumber</property>
+                <property name="mnemonic_widget">switchmotorEdit-turnoutNumber</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -154,7 +154,7 @@
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Script _Straight</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic_widget">switchmotor-normal</property>
+                <property name="mnemonic_widget">switchmotorEdit-normal</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -168,7 +168,7 @@
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Script _Diverge</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic_widget">switchmotor-reverse</property>
+                <property name="mnemonic_widget">switchmotorEdit-reverse</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
