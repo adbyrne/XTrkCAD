@@ -3287,7 +3287,22 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	/* this has to be called before ShowTip() */
 	InitSmallDlg();
 
-	ShowTip(SHOWTIP_NEXTTIP);
+    /* Compare the program version and display Beta warning if appropriate */
+    pref = wPrefGetString("misc", "version");
+    if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0))
+    {
+        if(strstr(XTRKCAD_VERSION,"Beta") != NULL)
+        {
+            NoticeMessage(_("Beta version warning..."),_("Ok"),NULL);
+        }
+        else {
+            NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
+        }
+        wPrefSetString("misc", "version", XTRKCAD_VERSION);
+    }
+    else {
+        ShowTip(SHOWTIP_NEXTTIP);
+    }
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;

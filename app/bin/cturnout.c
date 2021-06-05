@@ -1225,22 +1225,22 @@ static void DrawTurnoutBridge(
 
     for(ep = 0; ep < 3; ep++) {
         trk1 = GetTrkEndTrk(dtod.trk,ep);
-        p = GetTrkEndPos(dtod.trk,ep);
-        a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
-        if(trk1) {
-            if(GetTrkBridge(dtod.trk) && (!GetTrkBridge(trk1))) {
-                int i = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
-                if(ep != i) {
-                    Translate(&p0,p,a,trackGauge * 1.5);
-                    Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
-                    DrawLine(d,p0,p1,width2,drawColorBlack);
-                }
-                if(ep != (3-i)) {
-                    Translate(&p0,p,a,-trackGauge * 1.5);
-                    Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
-                    DrawLine(d,p0,p1,width2,drawColorBlack);
-                }
+        if((trk1) && (!GetTrkBridge(trk1))) {
+
+            p = GetTrkEndPos(dtod.trk,ep);
+            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+
+            int i = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
+            if(ep != i) {
+                Translate(&p0,p,a,trackGauge * 1.5);
+                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+            if(ep != (3 - i)) {
+                Translate(&p0,p,a,-trackGauge * 1.5);
+                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
             }
         }
     }
@@ -1293,25 +1293,24 @@ static void DrawCrossBridge(
     EPINX_T ep;
     coOrd p;
     track_p trk1;
-    coOrd p0,p1,p2;
+    coOrd p0,p1;
 
     for(ep = 0; ep < 4; ep++) {
         trk1 = GetTrkEndTrk(dtod.trk,ep);
-        p = GetTrkEndPos(dtod.trk,ep);
-        a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
-        if(trk1) {
-            if(GetTrkBridge(dtod.trk) && (!GetTrkBridge(trk1))) {
-                if((ep == 1)||(ep == 2)) {
-                    Translate(&p0,p,a,trackGauge * 1.5);
-                    Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
-                    DrawLine(d,p0,p1,width2,drawColorBlack);
-                }
-                if((ep == 0)||(ep == 3)) {
-                    Translate(&p0,p,a,-trackGauge * 1.5);
-                    Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
-                    DrawLine(d,p0,p1,width2,drawColorBlack);
-                }
+        if((trk1) && (!GetTrkBridge(trk1))) {
+            p = GetTrkEndPos(dtod.trk,ep);
+            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+
+            if((ep == 1) || (ep == 2)) {
+                Translate(&p0,p,a,trackGauge * 1.5);
+                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+            if((ep == 0) || (ep == 3)) {
+                Translate(&p0,p,a,-trackGauge * 1.5);
+                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
             }
         }
     }
@@ -1463,25 +1462,24 @@ static void DrawXingBridge(
     EPINX_T ep;
     coOrd p;
     track_p trk1;
-    coOrd p0,p1,p2;
+    coOrd p0,p1;
 
     for(ep = 0; ep < 4; ep++) {
         trk1 = GetTrkEndTrk(dtod.trk,ep);
-        p = GetTrkEndPos(dtod.trk,ep);
-        a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
-        if(trk1) {
-            if(GetTrkBridge(dtod.trk) && (!GetTrkBridge(trk1))) {
-                if((dtod.toType == DTO_XNG9)||(ep == 2)||(ep == 3)) {
-                    Translate(&p0,p,a,trackGauge * 1.5);
-                    Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
-                    DrawLine(d,p0,p1,width2,drawColorBlack);
-                }
-                if((dtod.toType == DTO_XNG9)||(ep == 0)||(ep == 1)) {
-                    Translate(&p0,p,a,-trackGauge * 1.5);
-                    Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
-                    DrawLine(d,p0,p1,width2,drawColorBlack);
-                }
+        if((trk1) && (!GetTrkBridge(trk1))) {
+            p = GetTrkEndPos(dtod.trk,ep);
+            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+
+            if((dtod.toType == DTO_XNG9) || (ep == 2) || (ep == 3)) {
+                Translate(&p0,p,a,trackGauge * 1.5);
+                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+            if((dtod.toType == DTO_XNG9) || (ep == 0) || (ep == 1)) {
+                Translate(&p0,p,a,-trackGauge * 1.5);
+                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
             }
         }
     }
