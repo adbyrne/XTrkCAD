@@ -317,7 +317,7 @@ static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
 		{ PD_BUTTON, (void*)RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
-static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
+static paramGroup_t refreshSpecialPG = { "refreshSpecial", PGO_DIALOGTEMPLATE, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
 static void RefreshSpecialOk(
 		void * junk )
 {
