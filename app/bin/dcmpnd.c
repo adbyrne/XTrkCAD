@@ -70,7 +70,7 @@ static paramData_t updateTitlePLs[] = {
 	{	PD_BUTTON, (void*)UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
-static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
+static paramGroup_t updateTitlePG = { "updatetitle", PGO_DIALOGTEMPLATE, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
 
 
 static void UpdateTitleChange( long changes )
