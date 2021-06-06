@@ -319,7 +319,7 @@ wBool_t wWinIsTemplated(wWin_p win);
 #define BO_REPEAT   (1L<<12)
 #define BO_GRID     (1L<<13)
 #define BO_ENTER    (1L<<14)
-#define BO_LISTELEMENT (1L<<15)	 /**< add control to a listbox */
+#define BO_LISTELEMENT (1L<<31)	 /**< add control to a listbox */
 
 wWinPix_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
