@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkRevealer" id="describe-block.reveal">
@@ -18,17 +18,18 @@
           <object class="GtkListBoxRow" id="describe-block-name.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_bottom">18</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="label1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Name:</property>
                     <property name="use_markup">True</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -57,17 +58,18 @@
           <object class="GtkListBoxRow" id="describe-block-script.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_bottom">18</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Script:</property>
                     <property name="use_markup">True</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -96,16 +98,17 @@
           <object class="GtkListBoxRow" id="describe-block-length.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_bottom">18</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Length:</property>
-                    <property name="width_chars">15</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -135,71 +138,61 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkFrame">
+              <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
+                <property name="row_spacing">3</property>
+                <property name="column_spacing">6</property>
                 <child>
-                  <object class="GtkAlignment">
+                  <object class="GtkLabel" id="label4">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="label" translatable="yes">End Pt1 X:</property>
+                    <property name="justify">right</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-block-endpt1x">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-block-endpt1y">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="top_padding">3</property>
-                    <property name="bottom_padding">3</property>
-                    <property name="right_padding">3</property>
-                    <child>
-                      <object class="GtkGrid">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="row_spacing">3</property>
-                        <property name="column_spacing">3</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <property name="label" translatable="yes">End Pt1 X,Y:</property>
-                            <property name="justify">right</property>
-                            <property name="width_chars">15</property>
-                            <property name="xalign">1</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-block-endpt1x">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-block-endpt1y">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="label" translatable="yes">Y:</property>
                   </object>
-                </child>
-                <child type="label_item">
-                  <placeholder/>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">0</property>
+                  </packing>
                 </child>
               </object>
             </child>
@@ -210,71 +203,61 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkFrame">
+              <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
+                <property name="row_spacing">3</property>
+                <property name="column_spacing">6</property>
                 <child>
-                  <object class="GtkAlignment">
+                  <object class="GtkLabel" id="label5">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="valign">center</property>
+                    <property name="label" translatable="yes">End Pt2 X:</property>
+                    <property name="justify">right</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-block-endpt2x">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-block-endpt2y">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="valign">center</property>
+                    <property name="width_chars">10</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="top_padding">3</property>
-                    <property name="bottom_padding">3</property>
-                    <property name="right_padding">3</property>
-                    <child>
-                      <object class="GtkGrid">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="row_spacing">3</property>
-                        <property name="column_spacing">3</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <property name="label" translatable="yes">End Pt2 X,Y:</property>
-                            <property name="justify">right</property>
-                            <property name="width_chars">15</property>
-                            <property name="xalign">1</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-block-endpt2x">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-block-endpt2y">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="label" translatable="yes">Y:</property>
                   </object>
-                </child>
-                <child type="label_item">
-                  <placeholder/>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">0</property>
+                  </packing>
                 </child>
               </object>
             </child>
@@ -282,5 +265,14 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="label1"/>
+      <widget name="label2"/>
+      <widget name="label3"/>
+      <widget name="label4"/>
+      <widget name="label5"/>
+    </widgets>
   </object>
 </interface>
