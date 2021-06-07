@@ -337,7 +337,7 @@ int createEndPoint(
     	endHandle->end_curve = zero;
     	endHandle->end_valid = TRUE;
     	endHandle->mid_disp = 0.0;
-    	DIST_T end_length = 20*trackGauge;
+    	DIST_T end_length = tempD.scale*2.0;
     	Translate(&endHandle->end_curve,pos0,angle,end_length);
     	Translate(&endHandle->end_center,pos0,angle,end_length/2);
     	if (radius>0.0) {
