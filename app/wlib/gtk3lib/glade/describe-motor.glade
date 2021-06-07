@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.36.0 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <object class="GtkRevealer" id="describe-control.reveal">
+  <requires lib="gtk+" version="3.22"/>
+  <object class="GtkRevealer" id="describe-motor.reveal">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="transition_type">none</property>
     <property name="reveal_child">True</property>
     <child>
-      <object class="GtkListBox" id="describe-control-list">
+      <object class="GtkListBox" id="describe-motor-list">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="halign">start</property>
-        <property name="valign">start</property>
-        <property name="selection_mode">none</property>
         <child>
-          <object class="GtkListBoxRow" id="describe-control-name.row">
+          <object class="GtkListBoxRow" id="describe-motor-name.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="margin_bottom">18</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel" id="describe-control-nam">
+                  <object class="GtkLabel" id="name">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Name:</property>
@@ -39,7 +38,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="describe-control-name">
+                  <object class="GtkEntry" id="describe-motor-name">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">30</property>
@@ -55,86 +54,100 @@
           </object>
         </child>
         <child>
-          <object class="GtkListBoxRow" id="describe-control-position.row">
+          <object class="GtkListBoxRow" id="describe-motor-normal.row">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_bottom">6</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Normal:</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-motor-normal">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkListBoxRow" id="describe-motor-reverse.row">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_bottom">6</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Reverse:</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="describe-motor-reverse">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkListBoxRow" id="describe-motor-pointSense.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="margin_bottom">18</property>
-            <child>
-              <object class="GtkGrid">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="row_spacing">3</property>
-                <property name="column_spacing">6</property>
-                <child>
-                  <object class="GtkLabel" id="describe-control-posx">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">end</property>
-                    <property name="valign">center</property>
-                    <property name="label" translatable="yes">Position X:</property>
-                    <property name="justify">right</property>
-                    <property name="xalign">1</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="describe-control-positionx">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="valign">center</property>
-                    <property name="width_chars">10</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="describe-control-positiony">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="valign">center</property>
-                    <property name="width_chars">10</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">3</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Y:</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">2</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
-          <object class="GtkListBoxRow" id="describe-control-on.row">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel" id="describe-control-o">
+                  <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">On:</property>
-                    <property name="use_markup">True</property>
+                    <property name="label" translatable="yes">Point Sense:</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -144,10 +157,9 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="describe-control-on">
+                  <object class="GtkEntry" id="describe-motor-sense">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">30</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -160,20 +172,21 @@
           </object>
         </child>
         <child>
-          <object class="GtkListBoxRow" id="describe-control-off.row">
+          <object class="GtkListBoxRow" id="describe-motor-turnout.row">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="activatable">False</property>
+            <property name="selectable">False</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkLabel" id="describe-control-of">
+                  <object class="GtkLabel" id="label4">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Off:</property>
-                    <property name="use_markup">True</property>
+                    <property name="label" translatable="yes">Turnout Number:</property>
                     <property name="xalign">1</property>
                   </object>
                   <packing>
@@ -183,10 +196,10 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="describe-control-off">
+                  <object class="GtkEntry" id="describe-motor-turnout">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="width_chars">30</property>
+                    <property name="width_chars">10</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -203,10 +216,11 @@
   </object>
   <object class="GtkSizeGroup">
     <widgets>
-      <widget name="describe-control-nam"/>
-      <widget name="describe-control-posx"/>
-      <widget name="describe-control-o"/>
-      <widget name="describe-control-of"/>
+      <widget name="name"/>
+      <widget name="label1"/>
+      <widget name="label2"/>
+      <widget name="label3"/>
+      <widget name="label4"/>
     </widgets>
   </object>
 </interface>
