@@ -2472,7 +2472,7 @@ static void DrawTurnout(
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
-	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= twoRailScale) && (d->options & DC_SIMPLE) == 0 && (scaleInx >= 0));
+	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= scale2rail) && (d->options & DC_SIMPLE) == 0 && (scaleInx >= 0));
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
