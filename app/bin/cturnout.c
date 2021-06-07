@@ -1173,49 +1173,77 @@ static void DrawBridgeFill(
 * \param path2 The second path
 */
 static void DrawTurnoutBridge(
-	drawCmd_p d, 
-	int path1,
-	int path2
+    drawCmd_p d,
+    int path1,
+    int path2
 )
 {
-	DIST_T trackGauge = GetTrkGauge(dtod.trk);
-	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+    DIST_T trackGauge = GetTrkGauge(dtod.trk);
+    wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
 
-	coOrd b1, b2, b3, b4, b5, b6;
-	ANGLE_T angle = dtod.xx->angle, a = 0.0;
-	int i, j, i1, i2;
-	i1 = path1;
-	i2 = path2;
-	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
-		i1 = path2;
-		i2 = path1;
-		// a = -a;
-	}
-	
-	for(i = i1; 1; i = i2, a = 180.0) {
-		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
-		b1 = dto[i].pts[0];
-		Translate(&b3,b1,(angle + a),dy);
-		Translate(&b5,b1,(angle + a),-(dy*0.75));
-		for(j = 1; j < dto[i].n; j++) {
-			dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
-			b2 = dto[i].pts[j];
-			Translate(&b4,b2,(angle + a),dy);
-			Translate(&b6,b2,(angle + a),-(dy*0.75));
+    coOrd b1,b2,b3,b4,b5,b6;
+    ANGLE_T angle = dtod.xx->angle,a = 0.0;
+    int i,j,i1,i2;
+    i1 = path1;
+    i2 = path2;
+    if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
+        i1 = path2;
+        i2 = path1;
+        // a = -a;
+    }
 
-			// Draw the bridge background
-			DrawBridgeFill(d, b3, b4, b5, b6);
+    for(i = i1; 1; i = i2,a = 180.0) {
+        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+        b1 = dto[i].pts[0];
+        Translate(&b3,b1,(angle + a),dy);
+        Translate(&b5,b1,(angle + a),-(dy * 0.75));
+        for(j = 1; j < dto[i].n; j++) {
+            dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
+            b2 = dto[i].pts[j];
+            Translate(&b4,b2,(angle + a),dy);
+            Translate(&b6,b2,(angle + a),-(dy * 0.75));
 
-			// Draw the bridge edge
-			DrawLine(d,b3,b4,width2,drawColorBlack);
+            // Draw the bridge background
+            DrawBridgeFill(d,b3,b4,b5,b6);
 
-			b1 = b2;
-			b3 = b4;
-			b5 = b6;
-		}
-		if(i == i2)
-			break;
-	}
+            // Draw the bridge edge
+            DrawLine(d,b3,b4,width2,drawColorBlack);
+
+            b1 = b2;
+            b3 = b4;
+            b5 = b6;
+        }
+
+        if(i == i2)
+            break;
+    }
+
+    EPINX_T ep;
+    coOrd p;
+    track_p trk1;
+    coOrd p0,p1,p2;
+
+    for(ep = 0; ep < 3; ep++) {
+        trk1 = GetTrkEndTrk(dtod.trk,ep);
+
+        if((trk1) && (!GetTrkBridge(trk1))) {
+
+            p = GetTrkEndPos(dtod.trk,ep);
+            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+
+            int i = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
+            if(ep != i) {
+                Translate(&p0,p,a,trackGauge * 1.5);
+                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+            if(ep != (3 - i)) {
+                Translate(&p0,p,a,-trackGauge * 1.5);
+                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+        }
+    }
 }
 
 /**
@@ -1261,6 +1289,31 @@ static void DrawCrossBridge(
 	// Draw the bridge edges
 	DrawLine(d,b3,b4,width2,drawColorBlack);
 	DrawLine(d,b5,b6,width2,drawColorBlack);
+
+    EPINX_T ep;
+    coOrd p;
+    track_p trk1;
+    coOrd p0,p1;
+
+    for(ep = 0; ep < 4; ep++) {
+        trk1 = GetTrkEndTrk(dtod.trk,ep);
+
+        if((trk1) && (!GetTrkBridge(trk1))) {
+            p = GetTrkEndPos(dtod.trk,ep);
+            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+
+            if((ep == 1) || (ep == 2)) {
+                Translate(&p0,p,a,trackGauge * 1.5);
+                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+            if((ep == 0) || (ep == 3)) {
+                Translate(&p0,p,a,-trackGauge * 1.5);
+                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+        }
+    }
 }
 
 /**
@@ -1340,16 +1393,14 @@ static void DrawXingBridge(
 			DIST_T dy = trackGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i1].pts[0];
-			a1 = angle + dto[i1].angle + 90;
+            a1 = dto[i1].angle + 90;
 			Translate(&b3,b1,a1,dy);
-			Translate(&b5,b1,a1,-(dy * 0.75));
 
 			b2 = dto[i2].pts[dto[i2].n - 1];
-			a2 = angle + dto[i2].angle + 90;
+            a2 = dto[i2].angle + 90;
 			Translate(&b4,b2,a2,dy);
-			Translate(&b6,b2,a2,-(dy * 0.75));
 
-			FindIntersection(&b0, b3, angle + dto[i1].angle, b4, angle + dto[i2].angle);
+			FindIntersection(&b0, b3, a1-90.0, b4, a2-90.0);
 
 			// Draw the bridge edge
 			DrawLine(d,b3,b0,width2,drawColorBlack);
@@ -1360,16 +1411,14 @@ static void DrawXingBridge(
 			DIST_T dy = trackGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i2].pts[0];
-			a1 = angle + dto[i2].angle - 90;
+			a1 = dto[i2].angle - 90;
 			Translate(&b3,b1,a1,dy);
-			Translate(&b5,b1,a1,-(dy * 0.75));
 
 			b2 = dto[i1].pts[dto[i1].n - 1];
-			a2 = angle + dto[i1].angle - 90;
+			a2 = dto[i1].angle - 90;
 			Translate(&b4,b2,a2,dy);
-			Translate(&b6,b2,a2,-(dy * 0.75));
 
-			FindIntersection(&b0, b3, angle + dto[i2].angle, b4, angle + dto[i1].angle);
+			FindIntersection(&b0, b3, a1+90.0, b4, a2+90.0);
 
 			// Draw the bridge edge
 			DrawLine(d,b3,b0,width2,drawColorBlack);
@@ -1380,38 +1429,60 @@ static void DrawXingBridge(
 			DIST_T dy = trackGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i1].pts[dto[i1].n - 1];
-			a1 = angle + dto[i1].angle + 90;
+			a1 = dto[i1].angle + 90;
 			Translate(&b3,b1,a1,dy);
-			Translate(&b5,b1,a1,-(dy * 0.75));
 
 			b2 = dto[i2].pts[dto[i2].n - 1];
-			a2 = angle + dto[i2].angle - 90;
+			a2 = dto[i2].angle - 90;
 			Translate(&b4,b2,a2,dy);
-			Translate(&b6,b2,a2,-(dy * 0.75));
 
-			FindIntersection(&b0, b3, angle + dto[i1].angle, b4, angle + dto[i2].angle);
+			FindIntersection(&b0, b3, a1-90.0, b4, a2+90.0);
 
 			// Draw the bridge edge
 			DrawLine(d,b3,b0,width2,drawColorBlack);
 			DrawLine(d,b0,b4,width2,drawColorBlack);
 
 			b1 = dto[i1].pts[0];
-			a1 = angle + dto[i1].angle - 90;
+			a1 = dto[i1].angle - 90;
 			Translate(&b3,b1,a1,dy);
-			Translate(&b5,b1,a1,-(dy * 0.75));
 
 			b2 = dto[i2].pts[0];
-			a2 = angle + dto[i2].angle + 90;
+			a2 = dto[i2].angle + 90;
 			Translate(&b4,b2,a2,dy);
-			Translate(&b6,b2,a2,-(dy * 0.75));
 
-			FindIntersection(&b0, b3, angle + dto[i1].angle, b4, angle + dto[i2].angle);
+			FindIntersection(&b0, b3, a1+90.0, b4, a2-90.0);
 
 			// Draw the bridge edge
 			DrawLine(d,b3,b0,width2,drawColorBlack);
 			DrawLine(d,b0,b4,width2,drawColorBlack);
 		}
 	}
+
+    // Bridge wings
+    EPINX_T ep;
+    coOrd p;
+    track_p trk1;
+    coOrd p0,p1;
+
+    for(ep = 0; ep < 4; ep++) {
+        trk1 = GetTrkEndTrk(dtod.trk,ep);
+
+        if((trk1) && (!GetTrkBridge(trk1))) {
+            p = GetTrkEndPos(dtod.trk,ep);
+            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+
+            if((dtod.toType == DTO_XNG9) || (ep == 2) || (ep == 3)) {
+                Translate(&p0,p,a,trackGauge * 1.5);
+                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+            if((dtod.toType == DTO_XNG9) || (ep == 0) || (ep == 1)) {
+                Translate(&p0,p,a,-trackGauge * 1.5);
+                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+                DrawLine(d,p0,p1,width2,drawColorBlack);
+            }
+        }
+    }
 }
 
 /**
@@ -2408,50 +2479,47 @@ static void DrawTurnout(
 	int noTies = 0;
 	int bridge = trk->bits & TB_BRIDGE;
 
-	// if (bridge || (DoDrawTies(d, trk) && (d->options & DC_SIMPLE) == 0 && scaleInx >= 0))
-	// {
-		int pathCnt = GetTurnoutPaths(trk, xx);
+	int pathCnt = GetTurnoutPaths(trk, xx);
 
-		if ((pathCnt > 1) && (pathCnt <= DTO_DIM)
-			&& (trk->endCnt <= 4)
-			&& (xx->special == TOnormal || xx->special == TOcurved))
-		{
+	if ((pathCnt > 1) && (pathCnt <= DTO_DIM)
+		&& (trk->endCnt <= 4)
+		&& (xx->special == TOnormal || xx->special == TOcurved))
+	{
 
-			dtod.bridge = bridge; 
+		dtod.bridge = bridge; 
 
-			int strPath = -1;
-			GetTurnoutType();
+		int strPath = -1;
+		GetTurnoutType();
 
-			if (dtod.toType > DTO_INVALID) {
+		if (dtod.toType > DTO_INVALID) {
 
-				switch (dtod.toType)
-				{
-				case DTO_NORMAL:
-				case DTO_THREE:
-				case DTO_WYE:
-					DrawNormalTurnout(d, scaleInx, omitTies, color);
-					break;
-				case DTO_CURVED:
-					DrawCurvedTurnout(d, scaleInx, omitTies, color);
-					break;
-				case DTO_XING:
-				case DTO_XNG9:
-				case DTO_SSLIP:
-				case DTO_DSLIP:
-					DrawXingTurnout(d, scaleInx, omitTies, color);
-					break;
-				case DTO_LCROSS:
-				case DTO_RCROSS:
-				case DTO_DCROSS:
-					DrawCrossTurnout(d, scaleInx, omitTies, color);
-					break;
-				}
-				noTies = 1;
-				trk->bits |= TB_NOTIES;
-				trk->bits &= ~TB_BRIDGE;
+			switch (dtod.toType)
+			{
+			case DTO_NORMAL:
+			case DTO_THREE:
+			case DTO_WYE:
+				DrawNormalTurnout(d, scaleInx, omitTies, color);
+				break;
+			case DTO_CURVED:
+				DrawCurvedTurnout(d, scaleInx, omitTies, color);
+				break;
+			case DTO_XING:
+			case DTO_XNG9:
+			case DTO_SSLIP:
+			case DTO_DSLIP:
+				DrawXingTurnout(d, scaleInx, omitTies, color);
+				break;
+			case DTO_LCROSS:
+			case DTO_RCROSS:
+			case DTO_DCROSS:
+				DrawCrossTurnout(d, scaleInx, omitTies, color);
+				break;
 			}
+			noTies = 1;
+			trk->bits |= TB_NOTIES;
+			trk->bits &= ~TB_BRIDGE;
 		}
-	// }
+	}
 
 	// Begin standard DrawTurnout code to draw rails or centerline
 	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER);  // no curve center for turnouts

@@ -677,7 +677,6 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 {
 	ANGLE_T a0, a1;
 	track_p tt = t;
-	long bridge = GetTrkBridge(t);
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 
@@ -697,7 +696,7 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 	}
 
 	DrawCurvedTrack( d, xx->pos, xx->radius, a0, a1,
-				t, color, bridge, widthOptions );
+				t, color, widthOptions );
 	DrawEndPt( d, t, 0, color );
 	DrawEndPt( d, t, 1, color );
 }

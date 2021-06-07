@@ -1756,7 +1756,9 @@ EXPORT void DrawSegsO(
 	trkSeg_p tempPtr;
 
 	long bridge = 0;
-	long option;
+    if(trk)
+        bridge = GetTrkBridge( trk );
+    long option;
 	wFontSize_t fs;
 
 	wBool_t bFill,bThick;
@@ -1790,12 +1792,10 @@ EXPORT void DrawSegsO(
 					DrawLine( d, p0, p1, thick, color1 );
 					break;
 				}
-				if (trk)
-					bridge = GetTrkBridge( trk );
 				DrawStraightTrack( d,
 					p0, p1,
 					FindAngle(p1, p0 ),
-					trk, color1, bridge, options );
+					trk, color1, options );
 				break;
 			case SEG_STRLIN:;
 				wDrawWidth w;
@@ -1850,13 +1850,11 @@ EXPORT void DrawSegsO(
 							FALSE, thick, color1 );
 					break;
 				}
-				if (trk)
-					bridge = GetTrkBridge( trk );
 				DrawCurvedTrack( d,
 					c,
 					fabs(segPtr->u.c.radius),
 					a0, segPtr->u.c.a1,
-					trk, color1, bridge, options );
+					trk, color1, options );
 			} else {
 				wDrawWidth w;
 				if (segPtr->width <0)
@@ -1876,14 +1874,12 @@ EXPORT void DrawSegsO(
                     break;
             } 
 			//else {
-			//	REORIGIN(p0,segPtr->u.b.pos[0],angle,orig);
-			//	REORIGIN(p1,segPtr->u.b.pos[1],angle,orig);
-			//	REORIGIN(p2,segPtr->u.b.pos[2],angle,orig);
-			//	REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
+				REORIGIN(p0,segPtr->u.b.pos[0],angle,orig);
+				REORIGIN(p1,segPtr->u.b.pos[1],angle,orig);
+				REORIGIN(p2,segPtr->u.b.pos[2],angle,orig);
+				REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
 			//}
 
-			if(trk)
-				bridge = GetTrkBridge( trk );
 			for(int j=0;j<segPtr->bezSegs.cnt;j++) {     //Loop through sub Segs
             	tempPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,j);
             	switch (tempPtr->type) {
@@ -1904,7 +1900,7 @@ EXPORT void DrawSegsO(
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
             		   					a0, tempPtr->u.c.a1,
-            		   					trk, color1, bridge, options );
+            		   					trk, color1, options );
         				} else if (tempPtr->type == SEG_CRVLIN) {
         					wDrawWidth w;
         					if (tempPtr->width <0)
@@ -1926,7 +1922,7 @@ EXPORT void DrawSegsO(
 						}
 						DrawStraightTrack( d, p0, p1,
 							FindAngle(p1,p0),
-							trk,color1,bridge,options);
+							trk,color1,options);
             			break;
         			case SEG_STRLIN:
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);

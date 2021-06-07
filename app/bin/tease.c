@@ -719,7 +719,7 @@ static void DrawJointSegment(
 			DrawLine(d,p0,p1,thick,color);
 		}
 		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk,
-								color, bridge, widthOptions );
+								color, widthOptions );
 		p0 = p1;
 	}
 }
@@ -955,7 +955,7 @@ static BOOL_T WriteJoint(
 			options |= 0x80;
 	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
 		GetTrkIndex(t), GetTrkLayer(t), options,
-		GetTrkScaleName(t), GetTrkVisible(t), xx->l0, xx->l1, xx->R, xx->L,
+		GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->l0, xx->l1, xx->R, xx->L,
 		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );

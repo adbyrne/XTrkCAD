@@ -2285,7 +2285,6 @@ EXPORT void DoZoomDown( void  * mode)
  * \param IN scale current pScale
  *
  */
-
 static void DoZoom( void * pScaleVP )
 {
 	DIST_T *pScale = pScaleVP;
@@ -2294,7 +2293,6 @@ static void DoZoom( void * pScaleVP )
 	if( scale != mainD.scale )
 		DoNewScale( scale );
 }
-
 
 
 EXPORT void Pix2CoOrd(

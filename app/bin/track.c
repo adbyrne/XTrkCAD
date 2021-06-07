@@ -2734,13 +2734,15 @@ EXPORT void DrawCurvedTrack(
 		ANGLE_T a1,
 		track_p trk,
 		wDrawColor color,
-	    long bridge, 
 		long options )
 {
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
+    long bridge = 0;
+    if(trk)
+        bridge = GetTrkBridge( trk );
 
 	if ( (d->options&DC_SEGTRACK) ) {
 		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
@@ -2861,12 +2863,14 @@ EXPORT void DrawStraightTrack(
 		ANGLE_T angle,
 		track_cp trk,
 		wDrawColor color,
-	    long bridge, 
 		long options )
 {
 	coOrd pp0, pp1;
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
+    long bridge = 0;
+    if ( trk )
+        bridge = GetTrkBridge(trk);
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
 

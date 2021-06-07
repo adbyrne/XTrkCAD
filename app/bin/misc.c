@@ -93,6 +93,7 @@ EXPORT wButton_p redoB;
 
 EXPORT wButton_p zoomUpB;
 EXPORT wButton_p zoomDownB;
+EXPORT wButton_p zoomExtentsB;
 wButton_p mapShowB;
 wButton_p magnetsB;
 wButton_p backgroundB;
@@ -2365,6 +2366,7 @@ static void SetAccelKeys()
 #include "bitmaps/zoom-in.xpm"
 #include "bitmaps/zoom-choose.xpm"
 #include "bitmaps/zoom-out.xpm"
+#include "bitmaps/zoom-extent.xpm"
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
 #include "bitmaps/partlist.xpm" // unused icon
@@ -2390,7 +2392,7 @@ static void CreateMenus(void) {
 			messageListM, manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
 
-	wMenuPush_p zoomInM, zoomOutM;
+	wMenuPush_p zoomInM, zoomOutM, zoomExtentsM;
 
 	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
 
@@ -2455,7 +2457,11 @@ static void CreateMenus(void) {
 			DoZoomDown, I2VP(1));
 	wMenuPushCreate(popup2M, "cmdZoomOut", _("Zoom Out"), 0,
 			DoZoomDown, I2VP(1));
-	/* Display */
+    wMenuPushCreate(popup1M, "cmdZoomExtents", _("Zoom Extents"), 0,
+        DoZoomExtents, I2VP(1));
+    wMenuPushCreate(popup2M, "cmdZoomExtents", _("Zoom Extents"), 0,
+        DoZoomExtents, I2VP(1));
+    /* Display */
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("Enable SnapGrid"),
 			0, SnapGridEnable, 0, NULL);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
@@ -2575,13 +2581,13 @@ static void CreateMenus(void) {
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoom_in_xpm[iconSize]),
 		IC_MODETRAIN_TOO, DoZoomUp, NULL);
-
 	zoomM = wMenuPopupCreate(mainW, "");
 	AddToolbarButton("cmdZoom", wIconCreatePixMap(zoom_choose_xpm[iconSize]), IC_MODETRAIN_TOO,
 		(wButtonCallBack_p) wMenuPopupShow, zoomM);
-
 	zoomDownB = AddToolbarButton("cmdZoomOut", wIconCreatePixMap(zoom_out_xpm[iconSize]),
 		IC_MODETRAIN_TOO, DoZoomDown, NULL);
+    zoomExtentsB = AddToolbarButton("cmdZoomExtent", wIconCreatePixMap(zoom_extent_xpm[iconSize]), 
+        IC_MODETRAIN_TOO, DoZoomExtents, NULL);
 
 	cmdGroup = BG_UNDO;
 	undoB = AddToolbarButton("cmdUndo", wIconCreatePixMap(undo_xpm[iconSize]), 0,
@@ -2644,13 +2650,16 @@ static void CreateMenus(void) {
 	zoomSubM = wMenuMenuCreate(viewM, "menuEdit-zoomTo", _("&Zoom"));
 	zoomOutM = wMenuPushCreate(viewM, "menuEdit-zoomOut", _("Zoom &Out"),
 			ACCL_ZOOMOUT, DoZoomDown, I2VP(1));
-	wMenuSeparatorCreate(viewM);
+    zoomExtentsM = wMenuPushCreate(viewM, "menuEdit-zoomExtents", _("Zoom &Extents"),
+            0, DoZoomExtents, I2VP(0));
+    wMenuSeparatorCreate(viewM);
 
 	InitCmdZoom(zoomM, zoomSubM, NULL, NULL);
 
 	/* these menu choices and toolbar buttons are synonymous and should be treated as such */
 	wControlLinkedSet((wControl_p) zoomInM, (wControl_p) zoomUpB);
 	wControlLinkedSet((wControl_p) zoomOutM, (wControl_p) zoomDownB);
+    wControlLinkedSet((wControl_p) zoomExtentsM, (wControl_p) zoomExtentsB);
 
 	wMenuPushCreate(viewM, "menuEdit-redraw", _("&Redraw"), ACCL_REDRAW,
 			(wMenuCallBack_p) MainRedraw, NULL);
@@ -3278,7 +3287,22 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	/* this has to be called before ShowTip() */
 	InitSmallDlg();
 
-	ShowTip(SHOWTIP_NEXTTIP);
+    /* Compare the program version and display Beta warning if appropriate */
+    pref = wPrefGetString("misc", "version");
+    if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0))
+    {
+        if(strstr(XTRKCAD_VERSION,"Beta") != NULL)
+        {
+            NoticeMessage(_("Beta version warning..."),_("Ok"),NULL);
+        }
+        else {
+            NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
+        }
+        wPrefSetString("misc", "version", XTRKCAD_VERSION);
+    }
+    else {
+        ShowTip(SHOWTIP_NEXTTIP);
+    }
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
