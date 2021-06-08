@@ -2784,7 +2784,7 @@ EXPORT void DrawCurvedTrack(
 	if (color == wDrawColorBlack)
 		color = normalColor;
 	if ( d->scale >= scale2rail ) {
-		DrawArc( d, p, r, a0, a1, ((d->scale<32) && centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, width, color );
+		DrawArc( d, p, r, a0, a1, (centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, width, color );
 	} else {
 		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0
 				|| (d->scale <= scale2rail/2 && ((d->options&DC_PRINT) && printCenterLines))) {  // if printing two rails respect print CenterLine option
@@ -3212,7 +3212,7 @@ EXPORT void DrawEndPt(
 	if(color == wDrawColorBlack)
 		color = normalColor;
 
-	if(labelScale >= d->scale)
+	if(((d->options & DC_PRINT) ? (labelScale * 2 + 1) : labelScale) >= d->scale)
 		DrawEndElev(d,trk,ep,color);
 
 	trk1 = GetTrkEndTrk(trk,ep);
