@@ -506,7 +506,7 @@ BOOL_T IsTrackDeleted( track_p );
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
 #define GetTrkVisible(T)		(GetTrkBits(T)&TB_VISIBLE)
 #define GetTrkNoTies(T)			(GetTrkBits(T)&TB_NOTIES)
-#define GetTrkBridge(T)         (GetTrkBits(T)&TB_BRIDGE)
+#define GetTrkBridge(T)         ((T)?GetTrkBits(T)&TB_BRIDGE:0)
 #define SetTrkVisible(T,V)		((V)?SetTrkBits(T,TB_VISIBLE):ClrTrkBits(T,TB_VISIBLE))
 #define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
 #define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
