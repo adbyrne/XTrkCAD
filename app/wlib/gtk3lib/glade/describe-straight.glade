@@ -61,7 +61,7 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Y</property>
+                    <property name="label" translatable="yes">Y:</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -88,7 +88,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">end</property>
-                    <property name="label" translatable="yes">Z1</property>
+                    <property name="label" translatable="yes">Z:</property>
                     <property name="width_chars">0</property>
                     <property name="xalign">1</property>
                   </object>
@@ -165,7 +165,7 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Y</property>
+                    <property name="label" translatable="yes">Y:</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -191,7 +191,7 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Z2</property>
+                    <property name="label" translatable="yes">Z:</property>
                     <property name="justify">right</property>
                     <property name="width_chars">0</property>
                     <property name="xalign">1</property>
