@@ -3295,9 +3295,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
         {
             NoticeMessage(_("Beta version warning..."),_("Ok"),NULL);
         }
-        else {
-            NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
-        }
+        //else {
+        //    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
+        //}
         wPrefSetString("misc", "version", XTRKCAD_VERSION);
     }
     else {
