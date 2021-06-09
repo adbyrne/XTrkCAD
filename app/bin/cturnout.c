@@ -1237,7 +1237,7 @@ static void DrawTurnoutBridge(
     EPINX_T ep;
     coOrd p;
     track_p trk1;
-    coOrd p0,p1,p2;
+    coOrd p0,p1;
 
     for(ep = 0; ep < 3; ep++) {
         trk1 = GetTrkEndTrk(dtod.trk,ep);
