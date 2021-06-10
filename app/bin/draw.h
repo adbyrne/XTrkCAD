@@ -40,8 +40,13 @@
 #define DC_CENTERLINE		(1<<4)
 // TICKS: draw rulers on edges
 #define DC_TICKS		(1<<5)
+// TEMP: temp mode draws
+#define DC_TEMP			(1<<6)
+// OUTLINE: use outline font
+#define DC_OUTLINE		(1<<7)
+
 // Line styles
-#define DC_THICK        	(1<<7)
+#define DC_THICK        	(1<<9)
 #define DC_DASH			(1<<12)
 #define DC_DOT          	(1<<13)
 #define DC_DASHDOT      	(1<<14)
@@ -62,7 +67,6 @@ typedef enum { DRAW_OPEN, DRAW_CLOSED, DRAW_FILL, DRAW_TRANSPARENT } drawFill_e;
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {
-    long options;
     void (*drawLine)(drawCmd_p, coOrd, coOrd, wDrawWidth, wDrawColor);
     void (*drawArc)(drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth,
                     wDrawColor);
@@ -271,7 +275,7 @@ void FakeDownMouseState(void);
 void GetMousePosition(wDrawPix_t  *x, wDrawPix_t *y);
 void RecordMouse(char *, wAction_t, POS_T, POS_T);
 extern long playbackDelay;
-void MovePlaybackCursor(drawCmd_p, wDrawPix_t, wDrawPix_t, wBool_t, wControl_p);
+void MovePlaybackCursor(drawCmd_p, coOrd pos, wBool_t, wControl_p);
 typedef void (*playbackProc)(wAction_t, coOrd);
 void PlaybackMouse(playbackProc, drawCmd_p, wAction_t, coOrd, wDrawColor);
 void RedrawPlaybackCursor();

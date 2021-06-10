@@ -272,6 +272,8 @@ if (Pix2CoOrd_interpolate) {
 }
 
 
+#define DRAWOPTS( D ) (((D->options&DC_TEMP)?wDrawOptTemp:0)|((D->options&DC_OUTLINE)?wDrawOutlineFont:0))
+
 static void DDrawLine(
 		drawCmd_p d,
 		coOrd p0,
@@ -327,7 +329,7 @@ static void DDrawLine(
 		wDrawLine( d->d, x0, y0, x1, y1,
 				width,
 				lineOpt,
-				color, (wDrawOpts)d->funcs->options );
+				color, DRAWOPTS(d) );
 	}
 }
 
@@ -412,7 +414,7 @@ static void DDrawArc(
     {
         wDrawArc(d->d, x, y, (wDrawPix_t)(rr), angle0, angle1, drawCenter,
                  width, lineOpt,
-                 color, (wDrawOpts)d->funcs->options);
+                 color, DRAWOPTS(d) );
     }
 }
 
@@ -450,7 +452,7 @@ static void DDrawString(
 		DDrawPoly( d, 4, pos, NULL, color, 0, DRAW_FILL );
 	} else {
 		fontSize /= d->scale;
-		wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
+		wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, DRAWOPTS(d) );
 	}
 }
 
@@ -500,7 +502,7 @@ static void DDrawPoly(
 	else if (opt == DC_PHANTOM)
 		lineOpt = wDrawLinePhantom;
 
-	wDrawOpts drawOpts = (wDrawOpts)d->funcs->options;
+	wDrawOpts drawOpts = DRAWOPTS(d);
 	switch ( eFillOpt ) {
 	case DRAW_OPEN:
 		open = 1;
@@ -552,7 +554,7 @@ static void DDrawFillCircle(
 	drawCount++;
 	if (drawEnable) {
 		wDrawFilledCircle( d->d, x, y, (wDrawPix_t)(rr),
-				color, (wDrawOpts)d->funcs->options );
+				color, DRAWOPTS(d) );
 	}
 }
 
@@ -567,13 +569,13 @@ static void DDrawRectangle(
 	wDrawPix_t x, y, w, h;
 
 	if (d == &mapD && !mapVisible)
-		return;
+		return; 
 	d->CoOrd2Pix(d,orig,&x,&y);
 	w = (wDrawPix_t)((size.x/d->scale)*d->dpi+0.5);
 	h = (wDrawPix_t)((size.y/d->scale)*d->dpi+0.5);
 	drawCount++;
 	if (drawEnable) {
-		wDrawOpts opts = (wDrawOpts)d->funcs->options;
+		wDrawOpts opts = DRAWOPTS(d);
 		coOrd p1, p2;
 		switch (eFillOpt) {
 		case DRAW_CLOSED:
@@ -605,28 +607,16 @@ static void DDrawRectangle(
 
 EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 {
-	wDrawPix_t x, y, w, h;
-	if (d == &mapD && !mapVisible)
-		return;
-	w = (wDrawPix_t)((s.x/d->scale)*d->dpi+0.5);
-	h = (wDrawPix_t)((s.y/d->scale)*d->dpi+0.5);
-	d->CoOrd2Pix(d,p,&x,&y);
-	if ( add )
-		wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp|wDrawOptTransparent );
-	else
-		wDrawFilledRectangle( d->d, x, y, w, h, selectedColor, wDrawOptTemp|wDrawOptTransparent );
-
+	unsigned long options = d->options;
+	d->options |= DC_TEMP;
+	wBool_t bTemp = wDrawSetTempMode( d->d, TRUE );
+	DrawRectangle( d, p, s, add?drawColorPowderedBlue:selectedColor, DRAW_TRANSPARENT );
+	wDrawSetTempMode( d->d, bTemp );
+	d->options = options;
 }
 
 EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 {
-#ifdef LATER
-	if (d->options&DC_TEMPSEGS) {
-		return;
-	}
-	if (d->options&DC_PRINT)
-		return;
-#endif
 	ASSERT( cnt <= 4 );
 	static wDrawColor color = 0;
 	if ( color == 0 )
@@ -904,15 +894,8 @@ EXPORT void DrawMultiLineTextSize(
 static void DDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm, wDrawColor color)
 {
 	wDrawPix_t x, y;
-#ifdef LATER
-	if (d->options&DC_TEMPSEGS) {
-		return;
-	}
-	if (d->options&DC_PRINT)
-		return;
-#endif
 	d->CoOrd2Pix( d, p, &x, &y );
-	wDrawBitMap( d->d, bm, x, y, color, (wDrawOpts)d->funcs->options );
+	wDrawBitMap( d->d, bm, x, y, color, DRAWOPTS(d) );
 }
 
 
@@ -1075,17 +1058,6 @@ static void NoDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm, wDrawColor col
 
 
 EXPORT drawFuncs_t screenDrawFuncs = {
-		0,
-		DDrawLine,
-		DDrawArc,
-		DDrawString,
-		DDrawBitMap,
-		DDrawPoly,
-		DDrawFillCircle,
-		DDrawRectangle};
-
-EXPORT drawFuncs_t tempDrawFuncs = {
-		wDrawOptTemp,
 		DDrawLine,
 		DDrawArc,
 		DDrawString,
@@ -1095,7 +1067,6 @@ EXPORT drawFuncs_t tempDrawFuncs = {
 		DDrawRectangle};
 
 EXPORT drawFuncs_t printDrawFuncs = {
-		0,
 		DDrawLine,
 		DDrawArc,
 		DDrawString,
@@ -1105,7 +1076,6 @@ EXPORT drawFuncs_t printDrawFuncs = {
 		DDrawRectangle};
 
 EXPORT drawFuncs_t tempSegDrawFuncs = {
-		0,
 		TempSegLine,
 		TempSegArc,
 		TempSegString,
@@ -1114,11 +1084,12 @@ EXPORT drawFuncs_t tempSegDrawFuncs = {
 		TempSegFillCircle,
 		TempSegRectangle};
 
+
 EXPORT drawCmd_t mainD = {
 		NULL, &screenDrawFuncs, DC_TICKS, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix, 96.0};
 
 EXPORT drawCmd_t tempD = {
-		NULL, &tempDrawFuncs, DC_TICKS, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix, 96.0};
+		NULL, &screenDrawFuncs, DC_TICKS|DC_TEMP, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix, 96.0};
 
 EXPORT drawCmd_t mapD = {
 		NULL, &screenDrawFuncs, DC_SIMPLE, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix, 96.0};
@@ -1419,6 +1390,8 @@ static void MapRedraw(
 	wDrawDelayUpdate( mapD.d, TRUE );
 	//wSetCursor( mapD.d, wCursorWait );
 	wBool_t bTemp = wDrawSetTempMode( mapD.d, FALSE );
+	if ( bTemp )
+		printf( "MapRedraw TempMode\n" );
 	wDrawClear( mapD.d );
 	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
 	DrawMapBoundingBox( TRUE );
@@ -1434,30 +1407,6 @@ static void MapResize( void )
 	ChangeMapScale(TRUE);
 	MapRedraw( mapD.d, NULL, 0, 0 );
 }
-
-#ifdef LATER
-static void MapProc( wWin_p win, winProcEvent e, void * data )
-{
-	switch( e ) {
-	case wResize_e:
-		if (mapD.d == NULL)
-			return;
-		DrawMapBoundingBox( FALSE );
-		ChangeMapScale();
-		break;
-	case wClose_e:
-		mapVisible = FALSE;
-		break;
-	/*case wRedraw_e:
-		if (mapD.d == NULL)
-			break;
-		MapRedraw( mapD.d, NULL, 0, 0 );
-		break;*/
-	default:
-		break;
-	}
-}
-#endif
 
 
 EXPORT void SetMainSize( void )
@@ -1565,26 +1514,13 @@ EXPORT void MainLayout(
 	wBool_t bRedraw,
 	wBool_t bNoBorder )
 {
-#ifdef LATER
-   wWinPix_t ww, hh;
-   DIST_T w, h;
-#endif
-
 	DIST_T t1;
 	if (inPlaybackQuit)
 		return;
 	static int cML = 0;
 	LOG( log_redraw, 1, ( "MainLayout: %d\n", cML++ ) );
 
-#ifdef LATER
-	wDrawGetSize( mainD.d, &ww, &hh );
-	w = ww/mainD.dpi;
-	h = hh/mainD.dpi;
-#endif
 	SetMainSize();
-#ifdef LATER
-	/*wDrawClip( mainD.d, 0, 0, w, h );*/
-#endif
 	t1 = mainD.dpi/mainD.scale;
 	if (units == UNITS_ENGLISH) {
 		t1 /= 2.0;
@@ -1653,6 +1589,8 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
 		if (height >= 0) {
 			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE );
+if ( bTemp )
+	printf( "MainProc TempMode\n" );
 			wDrawSetSize( mainD.d, width-20, height, refresh );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
@@ -1970,10 +1908,10 @@ EXPORT coOrd mainCenter;
 static void DrawMapBoundingBox( BOOL_T set )
 {
 	if (mainD.d == NULL || mapD.d == NULL)
+		abort();
+	if (!mapVisible)
 		return;
-	wDrawSetTempMode( mapD.d, TRUE );
 	DrawHilight( &mapD, mainD.orig, mainD.size, TRUE );
-	wDrawSetTempMode( mapD.d, FALSE );
 }
 
 
