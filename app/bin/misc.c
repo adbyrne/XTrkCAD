@@ -3041,6 +3041,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	 */
 
 	opterr = 0;
+	LogSet("dummy",0);
 
 	while ((c = getopt(argc, argv, "vl:d:c:m")) != -1)
 		switch (c) {
@@ -3295,11 +3296,11 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
     {
         if(strstr(XTRKCAD_VERSION,"Beta") != NULL)
         {
-            NoticeMessage(_("Beta version warning..."),_("Ok"),NULL);
+            NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
         }
-        else {
-            NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
-        }
+        //else {
+        //    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
+        //}
         wPrefSetString("misc", "version", XTRKCAD_VERSION);
     }
     else {

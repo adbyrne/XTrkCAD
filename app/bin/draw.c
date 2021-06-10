@@ -412,7 +412,8 @@ static void DDrawArc(
 		lineOpt = wDrawLinePhantom;
     if (drawEnable)
     {
-        wDrawArc(d->d, x, y, (wDrawPix_t)(rr), angle0, angle1, drawCenter,
+        int sizeCenter = (drawCenter ? ((d->options & DC_PRINT) ? (d->dpi / BASE_DPI) : 1) : 0);
+        wDrawArc(d->d, x, y, (wDrawPix_t)(rr), angle0, angle1, sizeCenter,
                  width, lineOpt,
                  color, DRAWOPTS(d) );
     }
