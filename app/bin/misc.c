@@ -3039,6 +3039,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	 */
 
 	opterr = 0;
+	LogSet("dummy",0);
 
 	while ((c = getopt(argc, argv, "vl:d:c:m")) != -1)
 		switch (c) {
