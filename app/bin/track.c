@@ -479,7 +479,10 @@ EXPORT void SetTrkWidth( track_p trk, int width )
 
 EXPORT int GetTrkBits( track_p trk )
 {
-	return trk->bits;
+	if (trk)
+		return trk->bits;
+	else
+		return 0;
 }
 
 EXPORT int SetTrkBits( track_p trk, int bits )

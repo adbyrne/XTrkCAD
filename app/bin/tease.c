@@ -708,7 +708,6 @@ static void DrawJointSegment(
 	cnt1 = (int)floor(a1/JOINT_ANGLE_INCR) + 1;
 	a1 /= cnt1;
 
-    long bridge = GetTrkBridge(trk);
 	widthOptions |= DTS_RIGHT|DTS_LEFT;
 	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
 	for (i=1; i<=cnt1; i++) {
@@ -861,7 +860,6 @@ EXPORT void DrawJointTrack(
 		EPINX_T ep1,
 		DIST_T trackGauge,
 		wDrawColor color,
-	    long bridge, 
 		long options )
 {
 	wIndex_t cnt;
@@ -927,10 +925,9 @@ static void DrawJoint(
  */
 {
 	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
-	long bridgeOptions = 0;
 	long widthOptions = 0;
 
-	DrawJointTrack( d, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, xx->flip, xx->Scurve, trk, 0, 1, GetTrkGauge(trk), color, bridgeOptions, widthOptions );
+	DrawJointTrack( d, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, xx->flip, xx->Scurve, trk, 0, 1, GetTrkGauge(trk), color, widthOptions );
 }
 
 

@@ -1755,9 +1755,6 @@ EXPORT void DrawSegsO(
 	DIST_T factor = d->dpi/d->scale;
 	trkSeg_p tempPtr;
 
-	long bridge = 0;
-    if(trk)
-        bridge = GetTrkBridge( trk );
     long option;
 	wFontSize_t fs;
 
@@ -1939,8 +1936,7 @@ EXPORT void DrawSegsO(
             break;
 		case SEG_JNTTRK:
 			REORIGIN( p0, segPtr->u.j.pos, angle, orig );
-			bridge = GetTrkBridge( trk );
-			DrawJointTrack( d, p0, NormalizeAngle(segPtr->u.j.angle+angle), segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve, NULL, -1, -1, trackGauge, color1, bridge, options );
+			DrawJointTrack( d, p0, NormalizeAngle(segPtr->u.j.angle+angle), segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve, NULL, -1, -1, trackGauge, color1, options );
 			break;
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )

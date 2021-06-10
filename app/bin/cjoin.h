@@ -43,7 +43,7 @@ extern DIST_T easeL;
 STATUS_T ComputeJoint( DIST_T, DIST_T, easementData_t * );
 BOOL_T JoinTracks( track_p, EPINX_T, coOrd, track_p, EPINX_T, coOrd, easementData_t * );
 void UndoJoint( track_p, EPINX_T, track_p, EPINX_T );
-void DrawJointTrack( drawCmd_p, coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T, BOOL_T, track_p, EPINX_T, EPINX_T, DIST_T, wDrawColor, long, long );
+void DrawJointTrack( drawCmd_p, coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T, BOOL_T, track_p, EPINX_T, EPINX_T, DIST_T, wDrawColor, long );
 DIST_T JointDistance( coOrd *, coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T );
 coOrd GetJointSegEndPos( coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T, BOOL_T, EPINX_T, ANGLE_T * );
 DIST_T JointDescriptionDistance(coOrd pos, track_p trk, coOrd * dpos, BOOL_T show_hidden, BOOL_T * hidden);
