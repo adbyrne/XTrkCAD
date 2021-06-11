@@ -52,7 +52,7 @@ static long tmpOp = 0x990066;
 static long setOp = 0x8800c6;
 static long clrOp = 0xbb0226;
 
-#define CENTERMARK_LENGTH 6
+#define CENTERMARK_LENGTH 4
 
 static bool bDrawMainBM = 0;
 
@@ -388,7 +388,7 @@ void wDrawArc(
 		wDrawPix_t r,
 		double a0,
 		double a1,
-		int drawCenter,
+		int sizeCenter,
 		wDrawWidth dw,
 		wDrawLineType_e lt,
 		wDrawColor dc,
@@ -473,22 +473,22 @@ void wDrawArc(
 	}
 
 	// should the center of the arc be drawn?
-	if( drawCenter ) {
+	if( sizeCenter ) {
 			
 			// calculate the center coordinates
 			pc.x = XDRAWPIX2WINPIX( d, px );
 			pc.y = YDRAWPIX2WINPIX( d, py );
 			// now draw the crosshair
-			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH/2, pc.y );
-			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH/2, pc.y );
-			MoveTo( d->hDc, pc.x, pc.y - CENTERMARK_LENGTH/2 );
-			LineTo( d->hDc, pc.x, pc.y + CENTERMARK_LENGTH/2 );
+			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH*sizeCenter, pc.y );
+			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH*sizeCenter, pc.y );
+			MoveTo( d->hDc, pc.x, pc.y - CENTERMARK_LENGTH*sizeCenter );
+			LineTo( d->hDc, pc.x, pc.y + CENTERMARK_LENGTH*sizeCenter );
 			
 			// invalidate the area of the crosshair
-			rect.top  = pc.y - CENTERMARK_LENGTH / 2 - 1;
-			rect.bottom  = pc.y + CENTERMARK_LENGTH / 2 + 1;
-			rect.left = pc.x - CENTERMARK_LENGTH / 2 - 1;
-			rect.right = pc.x + CENTERMARK_LENGTH / 2 + 1;
+			rect.top  = pc.y - CENTERMARK_LENGTH*sizeCenter - 1;
+			rect.bottom  = pc.y + CENTERMARK_LENGTH*sizeCenter + 1;
+			rect.left = pc.x - CENTERMARK_LENGTH*sizeCenter - 1;
+			rect.right = pc.x + CENTERMARK_LENGTH*sizeCenter + 1;
 			myInvalidateRect( d, &rect );
 	}
 

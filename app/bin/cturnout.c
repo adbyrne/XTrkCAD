@@ -1181,6 +1181,22 @@ static void DrawTurnoutBridge(
         // a = -a;
     }
 
+    if(dtod.toType == DTO_THREE) {
+        i = dtod.strPath;
+        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+        b1 = dto[i].pts[0];
+        Translate(&b3,b1,(angle + a),dy);
+        b1 = dto[i].pts[dto[i].n - 1];
+        Translate(&b4,b1,(angle + a),dy);
+        b2 = dto[i].pts[0];
+        Translate(&b5,b2,(angle + a),-dy);
+        b2 = dto[i].pts[dto[i].n - 1];
+        Translate(&b6,b2,(angle + a),-dy);
+
+        // Draw the bridge background
+        DrawBridgeFill(d,b3,b4,b5,b6);
+    }
+
     for(i = i1; 1; i = i2,a = 180.0) {
         DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
         b1 = dto[i].pts[0];
@@ -1210,7 +1226,7 @@ static void DrawTurnoutBridge(
     EPINX_T ep;
     coOrd p;
     track_p trk1;
-    coOrd p0,p1,p2;
+    coOrd p0,p1;
 
     for(ep = 0; ep < 3; ep++) {
         trk1 = GetTrkEndTrk(dtod.trk,ep);
@@ -2461,12 +2477,12 @@ static void DrawTurnout(
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
-	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= twoRailScale) && (d->options & DC_SIMPLE) == 0 && (scaleInx >= 0));
+	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= scale2rail) && (d->options & DC_SIMPLE) == 0 && (scaleInx >= 0));
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
 	int noTies = 0;
-	int bridge = trk->bits & TB_BRIDGE;
+	int bridge = GetTrkBridge(trk);
 
 	int pathCnt = GetTurnoutPaths(trk, xx);
 
@@ -2505,8 +2521,8 @@ static void DrawTurnout(
 				break;
 			}
 			noTies = 1;
-			trk->bits |= TB_NOTIES;
-			trk->bits &= ~TB_BRIDGE;
+			SetTrkNoTies(trk, 1); // ->bits |= TB_NOTIES;
+            ClrTrkBits(trk, TB_BRIDGE); // ->bits &= ~TB_BRIDGE;
 		}
 	}
 
@@ -2531,8 +2547,8 @@ static void DrawTurnout(
 		DrawTurnoutRoadbed(d, color, xx->orig, xx->angle, xx->segs, xx->segCnt);
 
 	// Restore these settings
-	if (noTies) trk->bits &= ~TB_NOTIES;
-	if (bridge) trk->bits |= TB_BRIDGE;
+	if (noTies) ClrTrkBits(trk, TB_NOTIES);
+	if (bridge) SetTrkBits(trk, TB_BRIDGE);
 }
 
 

@@ -2,6 +2,13 @@
 # Various messages with help. Sorted by message content
 ############################################################
 
+# misc.c
+MESSAGE MSG_BETA_NOTICE
+XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still undergoing final testing before its official release. The sole purpose of this Beta Version is to conduct testing and obtain feedback. Should you encounter any bugs, glitches, lack of functionality or other problems, please let us know immediately so we can rectify these accordingly. Your help in this regard is greatly appreciated!
+HELP
+XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still undergoing final testing before its official release. The sole purpose of this Beta Version is to conduct testing and obtain feedback. Should you encounter any bugs, glitches, lack of functionality or other problems, please let us know immediately so we can rectify these accordingly. Your help in this regard is greatly appreciated!
+END
+
 # chndldto.c
 MESSAGE MSG_CANT_PLACE_FROGPOINTS
 A %s cannot be placed on a turnout, circle or helix.
