@@ -157,7 +157,6 @@ static void DxfRectangle(drawCmd_p d, coOrd orig, coOrd size, wDrawColor color, 
 
 
 static drawFuncs_t dxfDrawFuncs = {
-    0,
     DxfLine,
     DxfArc,
     DxfString,
