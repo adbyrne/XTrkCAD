@@ -733,21 +733,8 @@ static void NewStructure( void )
 		return;
 	}
 	UndoStart( _("Place Structure"), "newStruct" );
-	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
+	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
 	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
-#ifdef LATER
-	trk = NewTrack( 0, T_STRUCTURE, 0, sizeof (*xx) + 1 );
-	xx->orig = Dst.pos;
-	xx->angle = Dst.angle;
-	xx->segs = MyMalloc( (curStructure->segCnt)*sizeof curStructure->segs[0] );
-
-	/*
-	 * copy data */
-	xx->segCnt = curStructure->segCnt;
-	memcpy( xx->segs, curStructure->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
-	xx->title = curStructure->title;
-	SetPaths( trk, "" );
-#endif
 	switch(curStructure->special) {
 		case TOnormal:
 			xx->special = TOnormal;
@@ -774,13 +761,6 @@ static void NewStructure( void )
 	SetTrkVisible( trk, TRUE );
 	SetTrkNoTies( trk, FALSE);
 	SetTrkBridge( trk, FALSE);
-#ifdef LATER
-	ComputeCompoundBoundingBox( trk );
-
-	SetDescriptionOrig( trk );
-	xx->descriptionOff = zero;
-	xx->descriptionSize = zero;
-#endif
 
 	DrawNewTrack( trk );
 	/*DrawStructure( trk, &mainD, wDrawColorBlack, 0 );*/

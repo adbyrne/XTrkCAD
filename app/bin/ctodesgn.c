@@ -2725,7 +2725,7 @@ static void NewTurnOk( void * context )
 	 }
 
 	to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), radii, FALSE, 0 );
+						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, 0 );
 	to->customInfo = customInfoP;
 #endif
 	if (f) {
@@ -2755,7 +2755,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE, 0 );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, 0 );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2802,7 +2802,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE, 0 );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, 0 );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
