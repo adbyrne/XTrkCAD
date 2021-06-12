@@ -1236,13 +1236,27 @@ static BOOL_T MakeParallelBezier(
  * - that the Segs are restored and
  * - other fields reset.
  */
-BOOL_T RebuildBezier (track_p trk)
+BOOL_T RebuildBezierLine (track_p trk)
 {
+	bFreeTrack = TRUE;
 	struct extraDataBezier_t *xx;
-	xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
+	xx = GET_EXTRA_DATA(trk, T_BZRLIN, extraDataBezier_t);
 	xx->arcSegs.cnt = 0;
-	FixUpBezier(xx->pos,xx,IsTrack(trk));
+	FixUpBezier(xx->pos,xx,FALSE);
 	ComputeBezierBoundingBox(trk, xx);
+	bFreeTrack = FALSE;
+	return TRUE;
+}
+
+BOOL_T RebuildBezierTrack (track_p trk)
+{
+	bFreeTrack = TRUE;
+	struct extraDataBezier_t *xx;
+	xx = GET_EXTRA_DATA(trk, T_BEZIER, extraDataBezier_t);
+	xx->arcSegs.cnt = 0;
+	FixUpBezier(xx->pos,xx,TRUE);
+	ComputeBezierBoundingBox(trk, xx);
+	bFreeTrack = FALSE;
 	return TRUE;
 }
 
@@ -1315,7 +1329,7 @@ static trackCmd_t bezlinCmds = {
 		NULL,
 		MakeParallelBezier,
 		NULL,
-		RebuildBezier,
+		RebuildBezierLine,
 		NULL,
 		NULL,
 		NULL,
@@ -1353,7 +1367,7 @@ static trackCmd_t bezierCmds = {
 		NULL,
 		MakeParallelBezier,
 		NULL,
-		RebuildBezier,
+		RebuildBezierTrack,
 		NULL,
 		NULL,
 		NULL,
