@@ -80,7 +80,6 @@ static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
 static void NoDrawRectangle( drawCmd_p d, coOrd orig, coOrd size, wDrawColor color, drawFill_e eFill ) {}
 
 static drawFuncs_t noDrawFuncs = {
-	0,
 	NoDrawLine,
 	NoDrawArc,
 	NoDrawString,

@@ -1659,6 +1659,7 @@ EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long optio
 
 EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 	wWinPix_t cmdX, cmdY;
+	coOrd pos;
 
 	if (buttInx < 0 || buttInx >= buttonCnt)
 		return;
@@ -1668,7 +1669,8 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
 			+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
 
-	MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
+	mainD.Pix2CoOrd( &mainD, cmdX, cmdY, &pos );
+	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
 	if (playbackTimer == 0) {
 		wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
 		wFlush();
@@ -1821,11 +1823,13 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
 				line);
 	} else {
 		wWinPix_t cmdX, cmdY;
+		coOrd pos;
 		if ((buttInx = commandList[inx].buttInx) >= 0) {
 			cmdX = buttonList[buttInx].x + 17;
 			cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
 					+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
-			MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
+			mainD.Pix2CoOrd( &mainD, cmdX, cmdY, &pos );
+			MovePlaybackCursor(&mainD, pos,TRUE,buttonList[buttInx].control);
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
 			if (buttInx > 0 && playbackTimer == 0) {
@@ -1890,15 +1894,13 @@ EXPORT wMenu_p MenuRegister(const char * label) {
 void MenuPlayback(char * line) {
 	char * menuName, *itemName;
 	coOrd pos;
-	wDrawPix_t x, y;
 	menuTrace_p mt;
 
 	if (!GetArgs(line, "pqq", &pos, &menuName, &itemName))
 		return;
 	for (mt = &menuTrace(0); mt < &menuTrace(menuTrace_da.cnt); mt++) {
 		if (strcmp(mt->label, menuName) == 0) {
-			mainD.CoOrd2Pix(&mainD, pos, &x, &y);
-			MovePlaybackCursor(&mainD, x, y, FALSE, NULL);
+			MovePlaybackCursor(&mainD, pos, FALSE, NULL);
 			oldMarker = cmdMenuPos = pos;
 			wMenuAction(mt->menu, _(itemName));
 			return;
