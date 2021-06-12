@@ -471,7 +471,7 @@ void SetDebug( char * );
 #define GetTrkExtraData( T, TT )	((T)->extraData)
 #define GetTrkWidth( T )		(int)((T)->width)
 #define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
-#define GetTrkBits(T)			((T)->bits)
+#define GetTrkBits(T)			((T)?((T)->bits):0)
 #define SetTrkBits(T,V)			((T)->bits|=(V))
 #define ClrTrkBits(T,V)			((T)->bits&=~(V))
 #define IsTrackDeleted(T)		((T)->deleted)
