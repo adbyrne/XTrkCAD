@@ -669,7 +669,7 @@ static void MoveBezier( track_p trk, coOrd orig )
 static void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
-    for (int i=0;i<5;i++) {
+    for (int i=0;i<COUNT(xx->pos);i++) {
         Rotate( &xx->pos[i], orig, angle );
     }
     FixUpBezier(xx->pos,xx,IsTrack(trk));
