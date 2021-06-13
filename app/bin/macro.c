@@ -69,7 +69,7 @@ static paramData_t recordPLs[] = {
 #define I_RECTEXT		(3)
 #define recordT			((wText_p)recordPLs[I_RECTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY} };
-static paramGroup_t recordPG = { "record", 0, recordPLs, sizeof recordPLs/sizeof recordPLs[0] };
+static paramGroup_t recordPG = { "record", PGO_DIALOGTEMPLATE, recordPLs, sizeof recordPLs/sizeof recordPLs[0] };
 
 
 #ifndef WINDOWS
