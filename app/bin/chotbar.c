@@ -100,7 +100,7 @@ static wFontSize_t hotBarFs = 8;
 
 static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 {
-	DIST_T hh = (double)hotBarDrawHeight[iconSize]/hotBarD.dpi;
+	DIST_T hh = (double)(hotBarDrawHeight[iconSize] + 1)/hotBarD.dpi;
 	coOrd orig;
 	int inx;
 	hotBarMap_t * tbm;
@@ -491,27 +491,27 @@ static void ChangeHotBar( long changes )
 	if ( hotBarLabels && !hotBarFp )
 		hotBarFp = wStandardFont( F_HELV, FALSE, FALSE );
 	if (hotBarLeftB != NULL && curScaleName) {
-	hotBarWidth = 0.0;
-	hotBarMLcnt = 0;
-	wMenuListClear( hotBarML );
-	DYNARR_RESET( hotBarMap_t, hotBarMap_da );
-	curContentsLabel[0] = '\0';
-	if ( programMode == MODE_DESIGN ) {
-		if (showFlexTrack)
-			AddHotBarCornu();
-		AddHotBarTurnouts();
-		AddHotBarStructures();
-	} else {
-		AddHotBarCarDesc();
-	}
+		hotBarWidth = 0.0;
+		hotBarMLcnt = 0;
+		wMenuListClear( hotBarML );
+		DYNARR_RESET( hotBarMap_t, hotBarMap_da );
+		curContentsLabel[0] = '\0';
+		if ( programMode == MODE_DESIGN ) {
+			if (showFlexTrack)
+				AddHotBarCornu();
+			AddHotBarTurnouts();
+			AddHotBarStructures();
+		} else {
+			AddHotBarCarDesc();
+		}
 
-	if ( programModeOld != programMode ) {
-		hotBarCurrSelects[0] = hotBarCurrSelects[1] = -1;
-		programModeOld = programMode;
-	}
-	if (hotBarMap_da.cnt > 0 && (hotBarCurrStart >= hotBarMap_da.cnt||hotBarCurrStart < 0))
-		hotBarCurrStart = 0;
-	RedrawHotBar( NULL, NULL, 0, 0 );
+		if ( programModeOld != programMode ) {
+			hotBarCurrSelects[0] = hotBarCurrSelects[1] = -1;
+			programModeOld = programMode;
+		}
+		if (hotBarMap_da.cnt > 0 && (hotBarCurrStart >= hotBarMap_da.cnt||hotBarCurrStart < 0))
+			hotBarCurrStart = 0;
+		RedrawHotBar( NULL, NULL, 0, 0 );
 	}
 }
 
