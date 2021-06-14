@@ -1073,7 +1073,17 @@ static void FlipBezier(
 	FlipPoint( &xx->pos[1], orig, angle );
     FlipPoint( &xx->pos[2], orig, angle );
     FlipPoint( &xx->pos[3], orig, angle );
-    FixUpBezier(xx->pos,xx,IsTrack(trk));
+
+	// Reverse control point order
+	coOrd pos = xx->pos[0];
+	xx->pos[0] = xx->pos[3];
+	xx->pos[3] = pos;
+
+	pos = xx->pos[1];
+	xx->pos[1] = xx->pos[2];
+	xx->pos[2] = pos;
+	
+	FixUpBezier(xx->pos,xx,IsTrack(trk));
     ComputeBezierBoundingBox(trk,xx);
 
 }
