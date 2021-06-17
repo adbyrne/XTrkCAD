@@ -2766,12 +2766,9 @@ EXPORT void DrawCurvedTrack(
 		width = 3;
 	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
-#ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/BASE_DPI);
-#else
+
 	if (d->options&DC_PRINT)
-		width *= 300/75;
-#endif
+		width *= 300/BASE_DPI;
 
 	LOG(log_track,4,("DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 				p.x, p.y, r, a0, a1 ) )
@@ -2897,12 +2894,10 @@ EXPORT void DrawStraightTrack(
 		width = 3;
 	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
-#ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/BASE_DPI);
-#else
+
 	if (d->options&DC_PRINT)
-		width *= 300/75;
-#endif
+		width *= 300/BASE_DPI; 
+
 	LOG(log_track,4,("DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 				p0.x, p0.y, p1.x, p1.y ) )
 
