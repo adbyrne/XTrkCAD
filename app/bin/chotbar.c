@@ -49,6 +49,7 @@ static drawCmd_t hotBarD = {
 		{0.0, 0.0}, {0.0, 0.0},
 		Pix2CoOrd, CoOrd2Pix };
 static wWinPix_t hotBarDrawHeight[] = {26, 32, 40};
+static wFontSize_t hotBarFontSize[] = {7, 8, 9};
 typedef struct {
 		DIST_T x;
 		DIST_T w;
@@ -528,6 +529,7 @@ EXPORT void InitHotBar( void )
 	hotbarPopupM = MenuRegister( "Hotbar Select" );
 	hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
 	hotBarHeight = hotBarDrawHeight[iconSize];
+	hotBarFs = hotBarFontSize[iconSize];
 }
 
 EXPORT void LayoutHotBar( void * redraw )
