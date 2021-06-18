@@ -98,6 +98,7 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 
 static wFont_p hotBarFp = NULL;
 static wFontSize_t hotBarFs = 8;
+static wWinPix_t hotBarTextHeight = 11;
 
 static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 {
@@ -125,7 +126,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 	}
 	if ( hotBarLabels && !hotBarFp )
 		hotBarFp = wStandardFont( F_HELV, FALSE, FALSE );
-	wWinPix_t textSize = wMessageGetHeight(BM_SMALL);
+
 	DIST_T fixed_x = 0.0;
 	if (hotBarCurrStart>0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {				//Do fixed element first - Cornu
 		tbm = &hotBarMap(0);
@@ -133,7 +134,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 		x = 0.0;
 		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
 		if ( hotBarLabels ) {
-			orig.y += textSize/hotBarD.dpi*barScale;
+			orig.y += hotBarTextHeight/hotBarD.dpi*barScale;
 			if ( tbm->labelW > tbm->objectW ) {
 				fixed_x = tbm->labelW;
 				x += (tbm->labelW-tbm->objectW)/2;
@@ -162,7 +163,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 		}
 		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
 		if ( hotBarLabels ) {
-			orig.y += textSize/hotBarD.dpi*barScale;
+			orig.y += hotBarTextHeight/hotBarD.dpi*barScale;
 			if ( tbm->labelW > tbm->objectW ) {
 				x += (tbm->labelW-tbm->objectW)/2;
 			}
@@ -546,8 +547,10 @@ EXPORT void LayoutHotBar( void * redraw )
 	//if (scaleicon>1.0) {
 	//	hotBarHeight = (wWinPix_t)(hotBarHeight);
 	//}
+	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.5 + (double)iconSize / 10.0));
+
 	if ( hotBarLabels) {
-	   hbHeight += wMessageGetHeight(BM_SMALL);
+	   hbHeight += hotBarTextHeight;
 	}
 	if (hotBarLeftB == NULL) {
 		wIcon_p bm_p;
