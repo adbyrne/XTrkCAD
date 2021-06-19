@@ -132,7 +132,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 		tbm = &hotBarMap(0);
 		barScale = tbm->barScale;
 		x = 0.0;
-		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
+		orig.y = barScale/hotBarD.dpi + hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
 		if ( hotBarLabels ) {
 			orig.y += hotBarTextHeight/hotBarD.dpi*barScale;
 			if ( tbm->labelW > tbm->objectW ) {
@@ -161,7 +161,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 		if ( x + tbm->w > barWidth ) {
 			break;
 		}
-		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
+		orig.y = barScale/hotBarD.dpi + hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
 		if ( hotBarLabels ) {
 			orig.y += hotBarTextHeight/hotBarD.dpi*barScale;
 			if ( tbm->labelW > tbm->objectW ) {
@@ -443,16 +443,18 @@ EXPORT void AddHotBarElement(
 			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
 			strncpy( curContentsLabel, contentsLabel, sizeof curContentsLabel );
 		}
-
 		if (barScale <= 0) {
 			if (!isTrack)
 				barScale = size.y/(((double)hotBarHeight-2.0)/hotBarD.dpi);
 			else if (isTrack) {
-				barScale = (trackGauge>0.1)?trackGauge*(36-hotBarHeight/2):10;
-				if (size.y/barScale > ((double)hotBarHeight-2.0)/hotBarD.dpi)
+				// size.y += 2.0 * trackGauge;
+				barScale = (trackGauge>0.1)?trackGauge*(36-hotBarHeight/2):10.0;
+				// barScale = 2.0 / ((hotBarHeight-2.0) / hotBarD.dpi);
 				//if (size.y >= size.x)
-				   barScale = size.y/(((double)hotBarHeight-2.0)/hotBarD.dpi);
+				if (size.y/barScale > ((double)hotBarHeight-2.0)/hotBarD.dpi)
+				   barScale = (size.y+2.0*trackGauge)/(((double)hotBarHeight-2.0)/hotBarD.dpi);
 			}
+			// orig.y += 1.0/hotBarD.dpi;
 		}
 		DYNARR_APPEND( hotBarMap_t, hotBarMap_da, 10 );
 		tbm = &hotBarMap(hotBarMap_da.cnt-1);
