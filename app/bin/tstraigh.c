@@ -20,17 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 /*******************************************************************************
  *
@@ -39,6 +35,11 @@
  */
 
 static TRKTYP_T T_STRAIGHT = -1;
+
+typedef struct extraDataStraight_t {
+		extraDataBase_t base;
+		coOrd descriptionOff;
+		} extraDataStraight_t;
 
 
 /****************************************
@@ -87,9 +88,9 @@ static descData_t strDesc[] = {
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &strData.endPt[1] },
 /*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1] },
 /*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
-/*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
+/*AN*/	{ DESC_ANGLE, N_("Track Angle"), &strData.angle },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Lock"), &strData.pivot },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber },
 		{ DESC_NULL } };
 
@@ -172,49 +173,6 @@ static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T fin
 		strDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
 		/*return;*/
 		break;
-#ifdef LATER
-		update = UpdateDescStraight( 0, &strDesc[E0], &strDesc[E1], &strDesc[LN], &strDesc[AN], strData.pivot );
-		break;
-	case E1:
-		update = UpdateDescStraight( 1, &strDesc[E0], &strDesc[E1], &strDesc[LN], &strDesc[AN], strData.pivot );
-		break;
-	case E1:
-		strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
-		strData.angle = FindAngle( strData.endPt[0], strData.endPt[1] );
-		strDesc[1-inx].mode |= DESC_CHANGE;
-		strDesc[LN].mode |= DESC_CHANGE;
-		strDesc[AN].mode |= DESC_CHANGE;
-		break;
-	case LN:
-		if ( strData.length < minLength ) {
-			ErrorMessage( );
-			strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
-			strDesc[LN].mode |= DESC_CHANGE;
-			break;
-		}
-	case AN:
-		switch (strData.pivot) {
-		case DESC_PIVOT_FIRST:
-			Translate( &strData.endPt[1], strData.endPt[0], strData.angle, strData.length );
-			strDesc[E1].mode |= DESC_CHANGE;
-			break;
-		case DESC_PIVOT_SECOND:
-			Translate( &strData.endPt[0], strData.endPt[1], strData.angle+180.0, strData.length );
-			strDesc[E0].mode |= DESC_CHANGE;
-			break;
-		case DESC_PIVOT_MID:
-			mid.x = (strData.endPt[0].x+strData.endPt[1].x)/2.0;
-			mid.y = (strData.endPt[0].y+strData.endPt[1].y)/2.0;
-			Translate( &strData.endPt[0], mid, strData.angle+180.0, strData.length/2.0 );
-			Translate( &strData.endPt[1], mid, strData.angle, strData.length/2.0 );
-			strDesc[E0].mode |= DESC_CHANGE;
-			strDesc[E1].mode |= DESC_CHANGE;
-			break;
-		default:
-			break;
-		}
-		break;
-#endif
 	case LY:
 		SetTrkLayer( trk, strData.layerNumber);
 		break;
@@ -272,8 +230,109 @@ static DIST_T DistanceStraight( track_p t, coOrd * p )
 	return LineDistance( p, GetTrkEndPos(t,0), GetTrkEndPos(t,1) );
 }
 
+STATUS_T StraightDescriptionMove(
+		track_p trk,
+		wAction_t action,
+		coOrd pos )
+{
+	extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
+	ANGLE_T a,ap;
+	coOrd end0, end1;
+    end0 = GetTrkEndPos(trk,0);
+    end1 = GetTrkEndPos(trk,1);
+    a = FindAngle(end0,end1);
+    ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
+
+    xx->descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap))-2*GetTrkGauge(trk);
+    xx->descriptionOff.x = -0.5 + FindDistance(end0,pos)*cos(D2R(ap))/FindDistance(end0,end1);
+    if (xx->descriptionOff.x > 0.5) xx->descriptionOff.x = 0.5;
+    if (xx->descriptionOff.x < -0.5) xx->descriptionOff.x = -0.5;
+
+
+	return C_CONTINUE;
+
+}
+
+DIST_T StraightDescriptionDistance(
+		coOrd pos,
+		track_p trk,
+		coOrd * dpos,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
+{
+	coOrd p1;
+	if (hidden) *hidden = FALSE;
+	if ( GetTrkType( trk ) != T_STRAIGHT || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
+		return DIST_INF;
+
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
+	ANGLE_T a;
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+	Translate(&end1off,end1,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+
+	p1.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+	p1.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y;
+
+	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
+	*dpos = p1;
+	coOrd tpos  = pos;
+	if (LineDistance(&tpos,end0,end1)<FindDistance( p1, pos ))
+		return LineDistance(&pos,end0,end1);
+	return FindDistance( p1, pos );
+}
+
+
+static void DrawStraightDescription(
+		track_p trk,
+		drawCmd_p d,
+		wDrawColor color )
+{
+	ANGLE_T a;
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
+
+	if (layoutLabels == 0)
+		return;
+	if ((labelEnable&LABELENABLE_TRKDESC)==0)
+		return;
+
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+	DrawLine(d,end0,end0off,0,color);
+	Translate(&end1off,end1,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+	DrawLine(d,end1,end1off,0,color);
+	sprintf( message, "L%s A%0.3f",
+			FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1));
+
+	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, xx->descriptionOff.x+0.5, 0, color, 0x00 );
+
+	if ( !(GetTrkBits( trk ) & TB_DETAILDESC) ) return;
+
+	if ( GetTrkBits( trk ) & TB_DETAILDESC ) {
+		coOrd details_pos;
+		details_pos.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+		details_pos.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y-(2*descriptionFontSize/mainD.dpi);
+
+		AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
+	}
+
+}
+
 static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 {
+	if (((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
+	   (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+	   labelScale >= d->scale &&
+	   ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
+	  DrawStraightDescription( t, d, color );
+	}
+	long bridge = GetTrkBridge( t );
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				GetTrkEndAngle(t,0),
@@ -288,10 +347,17 @@ static void DeleteStraight( track_p t )
 
 static BOOL_T WriteStraight( track_p t, FILE * f )
 {
+	long options;
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT, extraDataStraight_t);
 	BOOL_T rc = TRUE;
-	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d\n",
-				GetTrkIndex(t), GetTrkLayer(t), (long)GetTrkWidth(t),
-				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0) )>0;
+
+	options = GetTrkWidth(t) & 0x0F;
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
+		// 0x80 means Show Description
+		options |= 0x80;
+	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d %0.6f %0.6f\n",
+				GetTrkIndex(t), GetTrkLayer(t), options,
+				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
 	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
@@ -306,12 +372,21 @@ static BOOL_T ReadStraight( char * line )
 	char scale[10];
 	wIndex_t layer;
 	long options;
+	struct extraDataStraight_t *xx;
+	char * cp = NULL;
+	coOrd descriptionOff = { 0.0, 0.0 };
 
-	if ( !GetArgs( line+8, paramVersion<3?"dXZsd":"dLl00sd", &index, &layer, &options, scale, &visible ) )
+	if ( !GetArgs( line+8, paramVersion<3?"dXZsdc":"dLl00sdc", &index, &layer, &options, scale, &visible, &cp ) )
 		return FALSE;
+	if (cp) {
+		if (!GetArgs(cp,"p",&descriptionOff))
+			return FALSE;
+	}
 	if ( !ReadSegs() )
 		return FALSE;
-	trk = NewTrack( index, T_STRAIGHT, 0, 0 );
+	trk = NewTrack( index, T_STRAIGHT, 0, sizeof *xx );
+	xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
+	xx->descriptionOff = descriptionOff;
 	SetTrkScale( trk, LookupScale(scale) );
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
@@ -323,9 +398,11 @@ static BOOL_T ReadStraight( char * line )
 		SetTrkBridge(trk, visible&8);
 	}
 	SetTrkLayer(trk, layer);
-	SetTrkWidth( trk, (int)(options&3) );
+	SetTrkWidth( trk, (int)(options & 0x0F) );
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) )
+		SetTrkBits(trk,TB_HIDEDESC);
 	return TRUE;
 }
 
@@ -418,8 +495,9 @@ static BOOL_T EnumerateStraight( track_p trk )
 	if (trk != NULL) {
 		d = FindDistance( GetTrkEndPos( trk, 0 ), GetTrkEndPos( trk, 1 ) );
 		ScaleLengthIncrement( GetTrkScale(trk), d );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
 static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center )
@@ -606,7 +684,7 @@ static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t 
 	params->lineEnd = GetTrkEndPos(trk,params->ep);
 	params->len = FindDistance( params->lineOrig, params->lineEnd );
 	params->track_angle = FindAngle( params->lineOrig, params->lineEnd);
-	params->angle = GetTrkEndAngle(trk,params->ep);
+	params->angle = params->track_angle;
 	params->arcR = 0.0;
 	return TRUE;
 }
@@ -635,6 +713,7 @@ static BOOL_T QueryStraight( track_p trk, int query )
 	case Q_CORNU_CAN_MODIFY:
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CAN_EXTEND:
+	case Q_HAS_DESC:
 		return TRUE;
 	default:
 		return FALSE;
@@ -680,6 +759,7 @@ static BOOL_T MakeParallelStraight(
 			tempSegs(0).u.l.pos[0] = p0;
 			tempSegs(0).u.l.pos[1] = p1;
 			*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+			SetTrkBits( *newTrkR, TB_HIDEDESC );
 		}
 
 	} else {
@@ -848,13 +928,14 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 {
 	track_p t;
 	ANGLE_T a;
-	t = NewTrack( 0, T_STRAIGHT, 2, 0 );
+	t = NewTrack( 0, T_STRAIGHT, 2, sizeof (struct extraDataStraight_t) );
 	SetTrkScale( t, GetLayoutCurScale() );
 	a = FindAngle( p1, p0 );
 	SetTrkEndPoint( t, 0, p0, a );
 	SetTrkEndPoint( t, 1, p1, NormalizeAngle( a+180.0 ) );
 	ComputeBoundingBox( t );
 	CheckTrackLength( t );
+	SetTrkBits( t, TB_HIDEDESC );
 	return t;
 }
 

@@ -20,32 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#include <errno.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#include <ctype.h>
-#ifdef WINDOWS
-	#include <io.h>
-	#define W_OK (2)
-	#define access	_access
-	#include <windows.h>
-#endif
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <locale.h>
-
-#include <stdint.h>
-
-#include <assert.h>
-
 #include <cJSON.h>
 
 #include "archive.h"
@@ -58,25 +32,22 @@
 #include "draw.h"
 #include "fileio.h"
 #include "fcntl.h"
-#include "i18n.h"
 #include "layout.h"
 #include "manifest.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 #include "version.h"
 #include "dynstring.h"
+#include "common-ui.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
-
-/*#define TIME_READTRACKFILE*/
+EXPORT dynArr_t paramProc_da;
 
 #define COPYBLOCKSIZE	1024
 
@@ -90,7 +61,6 @@ static coOrd paste_offset, cursor_offset;
 
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
-
 
 
 #ifdef WINDOWS
@@ -116,43 +86,46 @@ static int Copyfile( char * fn1, char * fn2 )
 }
 #endif
 
-/**
- * Save the old locale and set to new.
- *
- * \param newlocale IN the new locale to set
- * \return    pointer to the old locale
- */
+//
+// Locale handling
+// SetCLocale is called before reading/writing any data files (.xtc, .xti, .xtq, .cus...)
+// SetUserLocale is called after
+// Calls can be nested: C, C, User, User
+// 
+static char * sUserLocale = NULL;	// current user locale
+static long lCLocale = 0;		// locale state: > 0 C locale, <= 0 user locale
+static long nCLocale = 0;		// total # of setlocals calls
+static int log_locale = 0;		// logging
+static int log_timereadfile = 0;
 
-char *
-SaveLocale( char *newLocale )
+EXPORT void SetCLocale()
 {
-	char *oldLocale;
-	char *saveLocale = NULL;
-
-	/* get old locale setting */
-	oldLocale = setlocale(LC_ALL, NULL);
-
-	/* allocate memory to save */
-	if (oldLocale)
-		saveLocale = strdup( oldLocale );
-
-	setlocale(LC_ALL, newLocale );
-
-	return( saveLocale );
+	if ( sUserLocale == NULL ) {
+		sUserLocale = MyStrdup( setlocale( LC_ALL, NULL ) );
+	}
+	if ( lCLocale == 0 ) {
+		LOG( log_locale, 1, ( "Set C Locale: %ld\n", ++nCLocale ) );
+		setlocale( LC_ALL, "C" );
+	}
+	lCLocale++;
+	if ( lCLocale > 1 ) {
+		LOG( log_locale, 3, ( "SetClocale - C! %ld\n", nCLocale) );
+	} else if ( lCLocale < 1 ) {
+		LOG( log_locale, 2, ( "SetClocale - User! %ld\n", nCLocale) );
+	}
 }
 
-/**
- * Restore a previously saved locale.
- *
- * \param locale IN return value from earlier call to SaveLocale
- */
-
-void
-RestoreLocale( char * locale )
+EXPORT void SetUserLocale()
 {
-	if( locale ) {
-		setlocale( LC_ALL, locale );
-		free( locale );
+	if ( lCLocale == 1 ) {
+		LOG( log_locale, 1, ( "Set %s Locale: %ld\n", sUserLocale, ++nCLocale ) );
+		setlocale( LC_ALL, sUserLocale );
+	}
+	lCLocale--;
+	if ( lCLocale < 0 ) {
+		LOG( log_locale, 2, ("SetUserLocale - User! %ld\n", nCLocale) );
+	} else if ( lCLocale > 0 ) {
+		LOG( log_locale, 3, ("SetUserLocale - C! %ld\n", nCLocale) );
 	}
 }
 
@@ -304,10 +277,10 @@ EXPORT BOOL_T GetArgs(
 	char * ps;
 	char ** qp;
 	va_list ap;
-	char *oldLocale = NULL;
 	char * sError = NULL;
 
-	oldLocale = SaveLocale("C");
+	if ( lCLocale < 1 )
+		LOG( log_locale, 1, ( "GetArgs: not in C locale\n" ) );
 
 	cp = line;
 	va_start( ap, format );
@@ -453,7 +426,7 @@ EXPORT BOOL_T GetArgs(
 			} else {
 				message[0] = '\0';
 			}
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(message);
 #endif
 			*qp = (char*)ConvertFromEscapedText(message);
@@ -471,7 +444,6 @@ EXPORT BOOL_T GetArgs(
 		}
 	}
 	va_end( ap );
-	RestoreLocale(oldLocale);
 	if ( sError ) {
 		InputError( sError, TRUE, cp );
 		return FALSE;
@@ -484,7 +456,7 @@ EXPORT BOOL_T GetArgs(
 wBool_t IsEND( char * sEnd )
 {
 	char * cp;
-	wBool_t bAllowNakedENDs = paramVersion < 12;
+	wBool_t bAllowNakedENDs = paramVersion < VERSION_NONAKEDENDS;
 	for( cp = paramLine; *cp && (isspace( *cp ) || *cp == '\t'); cp++ );
 	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 )
 		cp += strlen( sEnd );
@@ -526,11 +498,11 @@ ReadMultilineText()
 	string = MyStrdup(DynStringToCStr(&noteText));
 	string[strlen(string) - 1] = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if (wIsUTF8(string)) {
 		ConvertUTF8ToSystem(string);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	DynStringFree(&noteText);
 	return(string);
@@ -585,7 +557,7 @@ EXPORT char * PutTitle( char * cp )
 {
 	static char *title;
 	char * tp;
-	unsigned cnt = strlen(cp) * 2 + 3;		// add 3 for quotes and terminating \0
+	size_t cnt = strlen(cp) * 2 + 3;		// add 3 for quotes and terminating \0
 
 	if (!title) {
 		title = MyMalloc(cnt);
@@ -608,14 +580,14 @@ EXPORT char * PutTitle( char * cp )
 		NoticeMessage( _("putTitle: title too long: %s"), _("Ok"), NULL, title );
 	*tp = '\0';
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	if(RequiresConvToUTF8(title)) {
 		char *out = MyMalloc(cnt);
-		wSystemToUTF8(title, out, cnt);
+		wSystemToUTF8(title, out, (unsigned int)cnt);
 		strcpy(title, out);
 		MyFree(out);
 	}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	return title;
 }
@@ -654,11 +626,6 @@ static struct wFilSel_t * loadFile_fs = NULL;
 static struct wFilSel_t * saveFile_fs = NULL;
 static struct wFilSel_t * examplesFile_fs = NULL;
 
-static wWin_p checkPointingW;
-static paramData_t checkPointingPLs[] = {
-   {    PD_MESSAGE, N_("Check Pointing") } };
-static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeof checkPointingPLs/sizeof checkPointingPLs[0] };
-
 static char * checkPtFileName1;
 static char * checkPtFileName2;
 static char * checkPtFileNameBackup;
@@ -685,22 +652,17 @@ static BOOL_T ReadTrackFile(
 	coOrd roomSize;
 	long scale;
 	char * cp;
-	char *oldLocale = NULL;
 	int ret = TRUE;
-
-	oldLocale = SaveLocale( "C" );
 
 	paramFile = fopen( pathName, "r" );
 	if (paramFile == NULL) {
-		/* Reset the locale settings */
-		RestoreLocale( oldLocale );
-
 		if ( complain )
 			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, sProdName, pathName, strerror(errno) );
-
 		return FALSE;
 	}
 
+	SetCLocale();
+	checkPtFileNameBackup = NULL;
 	paramLineNum = 0;
 	paramFileName = strdup( fileName );
 
@@ -754,14 +716,14 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 7);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {
@@ -812,10 +774,9 @@ static BOOL_T ReadTrackFile(
 	 if (skipLines>0)
 		 NoticeMessage( MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
 
-	RestoreLocale( oldLocale );
-
 	paramFile = NULL;
 
+	SetUserLocale();
 	free(paramFileName);
     paramFileName = NULL;
 	InfoMessage( "%d", count );
@@ -827,15 +788,21 @@ int LoadTracks(
 		char **fileName,
 		void * data)
 {
-#ifdef TIME_READTRACKFILE
-	long time0, time1;
-#endif
 	char *nameOfFile = NULL;
 
 	char *extOfFile;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );
+
+	nameOfFile = FindFilename(fileName[0]);
+
+	// Make sure it exists and it is readable
+	if (access(fileName[0], R_OK) != 0)
+	{
+		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), nameOfFile, _("Not Found"));
+		return FALSE;
+	}
 
 	if ( ! bExample )
 		SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
@@ -846,13 +813,10 @@ int LoadTracks(
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
-	LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden my archive
+	if (!data)
+		LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden by archive
 	UndoSuspend();
 	useCurrentLayer = FALSE;
-#ifdef TIME_READTRACKFILE
-	time0 = wGetTimer();
-#endif
-	nameOfFile = FindFilename( fileName[ 0 ] );
 
  /*
   * Support zipped filetype
@@ -952,6 +916,7 @@ int LoadTracks(
 
 	char *copyOfFileName = MyStrdup(fileName[0]);
 
+	unsigned long time0 = wGetTimer();
 	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
 
 		nameOfFile = NULL;
@@ -968,21 +933,19 @@ int LoadTracks(
 
 
 		ResolveIndex();
-#ifdef TIME_READTRACKFILE
-		time1 = wGetTimer();
-		printf( "time= %ld ms \n", time1-time0 );
-#endif
-		RecomputeElevations();
+		LOG( log_timereadfile, 1, ( "Read time (%s) = %lu mS \n", fileName[0], wGetTimer()-time0 ) );
+		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
-		LoadLayerLists();
 		LayerSetCounts();
 	}
 
 	MyFree(copyOfFileName);
 	free(full_path);
 	full_path = NULL;
+
+	UpdateLayerDlg(curLayer);
 
 	UndoResume();
 	Reset();
@@ -994,7 +957,7 @@ int LoadTracks(
  * Load the layout specified by data. Filename may contain a full
  * path.
  * \param index IN ignored
- * \param label IN ignored
+ * \param label IN if not NULL - during startup - set flag to not load background
  * \param data IN path and filename
  */
 
@@ -1005,9 +968,11 @@ EXPORT void DoFileList(
 {
 	char *pathName = (char*)data;
 	bExample = FALSE;
-	LoadTracks( 1, &pathName, NULL );
+	if (label)
+		LoadTracks( 1, &pathName, I2VP(1));
+	else
+		LoadTracks( 1, &pathName, NULL );
 }
-
 
 static BOOL_T DoSaveTracks(
 		const char * fileName )
@@ -1015,18 +980,14 @@ static BOOL_T DoSaveTracks(
 	FILE * f;
 	time_t clock;
 	BOOL_T rc = TRUE;
-	char *oldLocale = NULL;
 
-	oldLocale = SaveLocale( "C" );
 
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
-		RestoreLocale( oldLocale );
-
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), fileName, strerror(errno) );
-
 		return FALSE;
 	}
+	SetCLocale();
 	wSetCursor( mainD.d, wCursorWait );
 	time(&clock);
 	rc &= fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) )>0;
@@ -1047,10 +1008,9 @@ static BOOL_T DoSaveTracks(
 	fclose(f);
 	bReadOnly = FALSE;
 
-	RestoreLocale( oldLocale );
-
 	checkPtMark = changed;
 	wSetCursor( mainD.d, defaultCursor );
+	SetUserLocale();
 	return rc;
 }
 
@@ -1160,7 +1120,7 @@ static int SaveTracks(
 			CopyDependency(background,DependencyDir);
 
 		//The details are stored into the manifest - TODO use arrays for files, locations
-		char *oldLocale = SaveLocale("C");
+		SetCLocale();
 		char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
 		char * manifest_file;
 
@@ -1174,7 +1134,7 @@ static int SaveTracks(
 		} else {
 			NoticeMessage( MSG_MANIFEST_FAIL, _("Continue"), NULL, manifest_file );
 		}
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 
 		free(manifest_file);
 		free(json_Manifest);
@@ -1203,10 +1163,21 @@ static int SaveTracks(
 	return TRUE;
 }
 
+EXPORT void SetAutoSave() {
+	if (saveFile_fs == NULL)
+		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("AutoSave Tracks As"),
+			sSourceFilePattern, SaveTracks, NULL );
+	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	changed = checkPtMark = 1;
+	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
+	SaveState();
 
-EXPORT void DoSave( doSaveCallBack_p after )
+}
+
+EXPORT void DoSave( void * doAfterSaveVP )
 {
-	doAfterSave = after;
+	doAfterSave = doAfterSaveVP;
 	if ( bReadOnly || *(GetLayoutFilename()) == '\0') {
 		if (saveFile_fs == NULL)
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
@@ -1218,18 +1189,20 @@ EXPORT void DoSave( doSaveCallBack_p after )
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
-EXPORT void DoSaveAs( doSaveCallBack_p after )
+EXPORT void DoSaveAs( void * doAfterSaveVP )
 {
-	doAfterSave = after;
+	doAfterSave = doAfterSaveVP;
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	changed = checkPtMark = 1;
 	SetWindowTitle();
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1242,6 +1215,7 @@ EXPORT void DoLoad( void )
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	paste_offset = zero;
 	cursor_offset = zero;
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1251,11 +1225,12 @@ EXPORT void DoExamples( void )
 	if (examplesFile_fs == NULL) {
 		static wBool_t bExample = TRUE;
 		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
-			sSourceFilePattern, LoadTracks, &bExample );
+			sSourceFilePattern, LoadTracks, NULL );
 	}
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
 	wFilSelect( examplesFile_fs, message );
+	CleanupFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1273,12 +1248,8 @@ EXPORT void DoCheckPoint( void )
 		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
 	}
 
-	if (checkPointingW == NULL) {
-		ParamRegister( &checkPointingPG );
-		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle(_("Check Pointing")), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
-	}
 	rename( checkPtFileName1, checkPtFileName2 );
-	//wShow( checkPointingW );
+
 	rc = DoSaveTracks( checkPtFileName1 );
 
 	/* could the check point file be written ok? */
@@ -1305,7 +1276,6 @@ EXPORT void DoCheckPoint( void )
 		rename( checkPtFileName2, checkPtFileName1 );
 	}
 
-	//wHide( checkPointingW );
 	wShow( mainW );
 }
 
@@ -1398,11 +1368,15 @@ EXPORT int LoadCheckpoint( BOOL_T sameName )
 			}
 		} else SetLayoutFullPath("");
 
-		RecomputeElevations();
+		RecomputeElevations(NULL);
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
+
 	} else SetLayoutFullPath("");
+
+	LayerSetCounts();
+	UpdateLayerDlg(curLayer);
 
 	Reset();
 	UndoResume();
@@ -1474,14 +1448,14 @@ static int ImportTracks(
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
 	paramVersion = paramVersionOld;
-	DoCommandB( (void*)(intptr_t)selectCmdInx );
+	DoCommandB( I2VP(selectCmdInx) );
 	SelectRecount();
 	return TRUE;
 }
 
 EXPORT void DoImport( void * type )
 {
-	importAsModule = (int)(long)type;
+	importAsModule = (int)VP2L(type);
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );
@@ -1506,7 +1480,6 @@ static int DoExportTracks(
 {
 	FILE * f;
 	time_t clock;
-	char *oldLocale = NULL;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );
@@ -1518,7 +1491,7 @@ static int DoExportTracks(
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	wSetCursor( mainD.d, wCursorWait );
 	time(&clock);
@@ -1529,7 +1502,7 @@ static int DoExportTracks(
 	fprintf(f, "%s\n", END_TRK_FILE);
 	fclose(f);
 
-	RestoreLocale( oldLocale );
+	SetUserLocale();
 
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
@@ -1538,7 +1511,7 @@ static int DoExportTracks(
 }
 
 
-EXPORT void DoExport( void )
+EXPORT void DoExport( void * unused )
 {
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
@@ -1552,42 +1525,43 @@ EXPORT void DoExport( void )
 }
 
 
-EXPORT BOOL_T EditCopy( void )
+EXPORT wBool_t editStatus = TRUE;
+
+EXPORT void EditCopy( void * unused )
 {
+	editStatus = FALSE;
 	FILE * f;
 	time_t clock;
-	char *oldLocale = NULL;
 
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
-		return FALSE;
+		return;
 	}
 	f = fopen( clipBoardN, "w" );
 	if (f == NULL) {
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Clipboard"), clipBoardN, strerror(errno) );
-		return FALSE;
+		return;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
 	ExportTracks(f, &paste_offset);
 	fprintf(f, "%s\n", END_TRK_FILE );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	fclose(f);
 
-	return TRUE;
+	editStatus = TRUE;
 }
 
 
-EXPORT BOOL_T EditCut( void )
+EXPORT void EditCut( void * unused )
 {
-	if (!EditCopy())
-		return FALSE;
+	EditCopy(NULL);
+	if ( !editStatus ) return;
 	SelectDelete();
-	return TRUE;
 }
 
 
@@ -1598,13 +1572,10 @@ EXPORT BOOL_T EditCut( void )
  * \return    TRUE if success, FALSE on error (file not found)
  */
 
-BOOL_T EditPastePlace( wBool_t inPlace )
+static BOOL_T EditPastePlace( wBool_t inPlace )
 {
 
 	BOOL_T rc = TRUE;
-	char *oldLocale = NULL;
-
-	oldLocale = SaveLocale("C");
 
 	wSetCursor( mainD.d, wCursorWait );
 	Reset();
@@ -1631,23 +1602,21 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
-	DoCommandB( (void*)(intptr_t)selectCmdInx );
+	DoCommandB( I2VP(selectCmdInx) );
 	SelectRecount();
 	UpdateAllElevations();
-	RestoreLocale(oldLocale);
 
 	return rc;
 }
 
-EXPORT BOOL_T EditPaste( void) {
-	return EditPastePlace(FALSE);
+EXPORT void EditPaste( void * unused ) {
+	editStatus = EditPastePlace(FALSE);
 }
-
-EXPORT BOOL_T EditClone( void ) {
-	BOOL_T rc = TRUE;
-	if (!EditCopy()) return FALSE;
-	if (!EditPastePlace(TRUE)) return FALSE;
-	return rc;
+
+EXPORT void EditClone( void * unused ) {
+	EditCopy( NULL );
+	if ( !editStatus ) return;
+	editStatus = EditPastePlace(TRUE);
 }
 
 /*****************************************************************************
@@ -1667,4 +1636,6 @@ EXPORT void FileInit( void )
 	SetLayoutFullPath("");
 		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
 
+	log_locale = LogFindIndex( "locale" );
+	log_timereadfile = LogFindIndex( "timereadfile" );
 }

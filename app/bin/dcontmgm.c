@@ -60,22 +60,10 @@
 
 static const char rcsid[] = "@(#) : $Id$";
 
-#include <errno.h>
-#include <math.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define F_OK	(0)
-#define W_OK	(2)
-#define access	_access
-#endif
-
 #include "cundo.h"
 #include "custom.h"
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
-#include "wlib.h"
 
 
 /*****************************************************************************
@@ -87,7 +75,7 @@ static const char rcsid[] = "@(#) : $Id$";
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
 static void ControlDone( void * action );
-static wPos_t controlListWidths[] = { 18, 100, 150 };
+static wWinPix_t controlListWidths[] = { 18, 100, 150 };
 static const char * controlListTitles[] = { "", N_("Name"),
 	N_("Tracks") };
 static paramListData_t controlListData = { 10, 400, 3, controlListWidths, controlListTitles };
@@ -96,11 +84,11 @@ static paramData_t controlPLs[] = {
 #define controlSelL		((wList_p)controlPLs[I_CONTROLLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &controlListData, NULL, BL_MANY },
 #define I_CONTROLEDIT	(1)
-	{	PD_BUTTON, (void*)ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CONTROLDEL		(2)
-    {	PD_BUTTON, (void*)ControlDelete, "delete", 0, NULL, N_("Delete") },
+    {	PD_BUTTON, ControlDelete, "delete", 0, NULL, N_("Delete") },
   } ;
-static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
+static paramGroup_t controlPG = { "contmgm", 0, controlPLs, COUNT( controlPLs ) };
 
 
 typedef struct {

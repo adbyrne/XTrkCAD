@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 
     while (1) {
 
-	rdret = fread(inbuf, 1, sizeof(inbuf), stdin);
+	rdret = (int)fread(inbuf, 1, sizeof(inbuf), stdin);
 
 	if (rdret <= 0)
 	    break;		       /* EOF */

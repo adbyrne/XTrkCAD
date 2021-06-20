@@ -20,40 +20,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdarg.h>
-
-#include <stdint.h>
-
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;
-EXPORT long autosaveChkPoints = 2;
+EXPORT long autosaveChkPoints = 0;
 
 EXPORT DIST_T curScaleRatio;
 EXPORT char * curScaleName;
@@ -64,6 +46,7 @@ EXPORT long labelWhen = 2;
 EXPORT long colorTrack = 0;
 EXPORT long colorDraw = 0;
 EXPORT long constrainMain = 0;
+EXPORT long dontHideCursor = 0;
 EXPORT long hideSelectionWindow = 0;
 EXPORT long angleSystem = 0;
 EXPORT DIST_T minLength = 0.1;
@@ -173,6 +156,17 @@ typedef struct {
 EXPORT typedef scaleInfo_t * scaleInfo_p;
 static dynArr_t scaleInfo_da;
 #define scaleInfo(N) DYNARR_N( scaleInfo_t, scaleInfo_da, N )
+
+typedef struct {
+		char *in_scales;
+		SCALE_FIT_TYPE_T type;
+		char *match_scales;
+		SCALE_FIT_T result;
+} scaleComp_t;
+EXPORT typedef scaleComp_t * scaleComp_p;
+static dynArr_t scaleCompatible_da;
+#define scaleComp(N) DYNARR_N( scaleComp_t, scaleCompatible_da, N )
+
 static tieData_t tieData_demo = {
 		96.0/160.0,
 		16.0/160.0,
@@ -243,12 +237,16 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 }
 EXPORT DIST_T GetScaleTrackGauge( SCALEINX_T si )
 {
-	return scaleInfo(si).gauge;
+	if (si >=0 && si<scaleInfo_da.cnt)
+		return scaleInfo(si).gauge;
+	else return 1.0;
 }
 
 EXPORT DIST_T GetScaleRatio( SCALEINX_T si )
 {
-	return scaleInfo(si).ratio;
+	if (si >=0 && si<scaleInfo_da.cnt)
+		return scaleInfo(si).ratio;
+	else return 1.0;
 }
 
 EXPORT char * GetScaleName( SCALEINX_T si )
@@ -289,6 +287,7 @@ EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
 		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
 		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
+		s->tieDataValid = TRUE;
 	}
 	return &scaleInfo(si).tieData;
 }
@@ -315,7 +314,7 @@ SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge)
 	dynArr_t gauges_da;
 
 	gauges_da = (scaleDesc(desc)).gauges_da;
-	SetLayoutCurScale(((gaugeInfo_p)gauges_da.ptr)[gauge].scale);
+	SetLayoutCurScale( DYNARR_N( gaugeInfo_t, gauges_da, gauge).scale);
 }
 
 static BOOL_T
@@ -376,29 +375,91 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 	return si;
 }
 
+/*
+ * Evaluate the fit of a part scale1 to a definition in scale2 for a type.
+ *
+ * The rules differ by type of object.
+ *
+ * Tracks need to be the same gauge to be a fit. If they are the same scale they are exact.
+ * If the gauge is the same, but the scale is different they are compatible.
+ * There are well known exceptions where the scale is not the same but we call them exact.
+ *
+ * Structures need to be the same scale to be exact. If they are within 15% they are compatible.
+ *
+ * Cars need to be the same gauge and scale to be exact.
+ * If they are the same gauge, but within 15% of the scale they are compatible.
+ *
+ *\param type (FIT_TURNOUT,FIT_STRUCTURE,FIT_CAR)
+ *\param scale1 the input scale
+ *\param scale2 the scale to check against
+ *
+ *\return FIT_EXACT, FIT_COMPATIBLE, FIT_NONE
+ */
 
-EXPORT BOOL_T CompatibleScale(
-	BOOL_T isTurnout,
+EXPORT SCALE_FIT_T CompatibleScale(
+	SCALE_FIT_TYPE_T type,
 	SCALEINX_T scale1,
 	SCALEINX_T scale2 )
 {
+	SCALE_FIT_T rc;
 	if ( scale1 == scale2 )
-		return TRUE;
+		return FIT_EXACT;
 	if ( scale1 == SCALE_DEMO || scale2 == SCALE_DEMO )
-		return FALSE;
+		return FIT_NONE;
 	if ( scale1 == demoScaleInx || scale2 == demoScaleInx )
-		return FALSE;
-	if ( isTurnout ) {
-		if ( includeSameGaugeTurnouts &&
-			 scaleInfo(scale1).gauge == scaleInfo(scale2).gauge )
-			return TRUE;
-	} else {
+		return FIT_NONE;
+	switch(type) {
+	case FIT_TURNOUT:
 		if ( scale1 == SCALE_ANY )
-			return TRUE;
+			return FIT_EXACT;
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge &&
+				scaleInfo(scale1).scale == scaleInfo(scale2).scale)
+			return FIT_EXACT;
+
+		rc = FindScaleCompatible(FIT_TURNOUT, scaleInfo(scale1).scale, scaleInfo(scale2).scale);
+		if (rc != FIT_NONE) return rc;
+
+		if ( includeSameGaugeTurnouts &&
+			scaleInfo(scale1).gauge == scaleInfo(scale2).gauge )
+			return FIT_COMPATIBLE;
+		break;
+	case FIT_STRUCTURE:
+		if ( scale1 == SCALE_ANY )
+			return FIT_EXACT;
 		if ( scaleInfo(scale1).ratio == scaleInfo(scale2).ratio )
-			return TRUE;
+			return FIT_EXACT;
+
+		rc = FindScaleCompatible(FIT_STRUCTURE, scaleInfo(scale1).scale, scaleInfo(scale2).scale);
+		if (rc != FIT_NONE) return rc;
+
+		//15% scale match is compatible for structures
+		if (scaleInfo(scale1).ratio/scaleInfo(scale2).ratio>=0.85 &&
+				scaleInfo(scale1).ratio/scaleInfo(scale2).ratio<=1.15)
+			return FIT_COMPATIBLE;
+		break;
+	case FIT_CAR:
+		if ( scale1 == SCALE_ANY )
+				return FIT_EXACT;
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge &&
+				scaleInfo(scale1).scale == scaleInfo(scale2).scale)
+				return FIT_EXACT;
+
+		rc = FindScaleCompatible(FIT_CAR, scaleInfo(scale1).scale, scaleInfo(scale2).scale);
+		if (rc != FIT_NONE) return rc;
+
+		//Same gauge and 15% scale match is compatible for cars
+		if (scaleInfo(scale1).gauge == scaleInfo(scale2).gauge) {
+			if (scaleInfo(scale1).ratio/scaleInfo(scale2).ratio>=0.85 &&
+					scaleInfo(scale1).ratio/scaleInfo(scale2).ratio<=1.15)
+				return FIT_COMPATIBLE;
+		}
+		break;
+
+	default:;
 	}
-	return FALSE;
+
+	return FIT_NONE;
+
 }
 
 /** Split the scale and the gauge description for a given combination. Eg HOn3 will be
@@ -451,7 +512,7 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 static void 
 SetScale( SCALEINX_T newScaleInx )
 {
-	if (newScaleInx < 0 && newScaleInx >= scaleInfo_da.cnt) {
+	if (newScaleInx < 0 || newScaleInx >= scaleInfo_da.cnt) {
 		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
 		return;
 	}
@@ -530,7 +591,7 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	DIST_T ratio;
 	BOOL_T found;
 	char buf[ 80 ];
-	int len;
+	size_t len;
 
 	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
 		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
@@ -629,13 +690,113 @@ static BOOL_T AddScale(
 	return TRUE;
 }
 
+static BOOL_T AddScaleFit(
+		char * line) {
+	char scales[STR_SIZE], matches[STR_SIZE], type[20], result[20];
+	BOOL_T rc;
+	scaleComp_p s;
+
+	if ( (rc=sscanf( line, "SCALEFIT %s %s %s %s",
+					type, result, scales, matches )) != 4) {
+			SyntaxError( "SCALEFIT", rc, 4 );
+			return FALSE;
+		}
+	DYNARR_APPEND( scaleComp_t, scaleCompatible_da, 10 );
+	s = &scaleComp(scaleCompatible_da.cnt-1);
+	s->in_scales = MyStrdup(scales);
+	s->match_scales = MyStrdup(matches);
+	if (strcmp(type,"STRUCTURE") == 0) {
+		s->type = FIT_STRUCTURE;
+	} else if (strcmp(type,"TURNOUT")==0) {
+		s->type = FIT_TURNOUT;
+	} else if (strcmp(type,"CAR")==0) {
+		s->type = FIT_CAR;
+	} else {
+		InputError( "Invalid SCALEFIT type %s", TRUE, type );
+		return FALSE;
+	}
+	if (strcmp(result,"COMPATIBLE")==0) {
+		s->result = FIT_COMPATIBLE;
+	} else if (strcmp(result,"EXACT")==0) {
+		s->result = FIT_EXACT;
+	} else {
+		InputError( "Invalid SCALEFIT result %s", TRUE, result );
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+EXPORT SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * scale2) {
+
+	char * cp, * cq;
+
+	if (!scale1 || !scale1[0]) return FIT_NONE;
+	if (!scale2 || !scale2[0]) return FIT_NONE;
+
+	for (int i=0; i<scaleCompatible_da.cnt; i++) {
+		scaleComp_p s;
+		s = &scaleComp(i);
+		if (s->type != type) continue;
+		BOOL_T found = FALSE;
+		cp = s->in_scales;
+		//Match input scale
+		while (cp) {
+			//Next instance of needle in haystack
+			cp = strstr(cp,scale2);
+			if (!cp) break;
+			//Check that this is start of csv string
+			if (cp == s->in_scales || cp[-1] == ',') {
+				//Is this end of haystack?
+				if (strlen(cp) == strlen(scale2)) {
+					found = TRUE;
+					break;
+				}
+				//Is it the same until the next ','
+				cq=strstr(cp,",");
+				if (cq && (cq-cp == strlen(scale2))) {
+					found = TRUE;
+					break;
+				}
+				else cp=cq;
+			} else cp=strstr(cp,",");
+		}
+		if (!found) continue;
+		found = FALSE;
+		cp = s->match_scales;
+		//Match output scale
+		while (cp) {
+			//Next instance of needle in haystack
+			cp = strstr(cp,scale1);
+			if (!cp) break;
+			//Check that this is start of csv string
+			if (cp == s->match_scales || cp[-1] == ',') {
+				//Is this end of haystack?
+				if (strlen(cp) == strlen(scale1)) {
+					found = TRUE;
+					break;
+				}
+				//Is it the same until the next ','
+				cq=strstr(cp,",");
+				if (cq && (cq-cp == strlen(scale1))) {
+					found = TRUE;
+					break;
+				}
+				else cp=cq;
+			} else cp=strstr(cp,",");
+		}
+		if (!found) continue;
+		return s->result;
+	}
+	return FIT_NONE;
+}
 
 EXPORT void ScaleLengthIncrement(
 		SCALEINX_T scale,
 		DIST_T length )
 {
 	char * cp;
-	int len;
+	size_t len;
 	if (scaleInfo(scale).length == 0.0) {
 		if (units == UNITS_METRIC)
 			cp = "999.99m SCALE Flex Track";
@@ -643,7 +804,7 @@ EXPORT void ScaleLengthIncrement(
 			cp = "999' 11\" SCALE Flex Track";
 		len = strlen( cp )+1;
 		if (len > enumerateMaxDescLen)
-			enumerateMaxDescLen = len;
+			enumerateMaxDescLen = (int)len;
 	}
 	scaleInfo(scale).length += length;
 }
@@ -651,7 +812,7 @@ EXPORT void ScaleLengthIncrement(
 EXPORT void ScaleLengthEnd( void )
 {
 	wIndex_t si;
-	int count;
+	size_t count;
 	DIST_T length;
 	char tmp[STR_SIZE];
 	FLOAT_T flexLen;
@@ -672,7 +833,7 @@ EXPORT void ScaleLengthEnd( void )
 			if (flexLen > 0.0) {
 				count = (int)ceil( length / (flexLen/(flexUnit?2.54:1.00)));
 			}
-			EnumerateList( count, flexCost, tmp );
+			EnumerateList( (long)count, flexCost, tmp, NULL );
 		}
 		scaleInfo(si).length = 0;
 	}
@@ -685,7 +846,7 @@ EXPORT void LoadScaleList( wList_p scaleList )
 	wIndex_t inx;
 	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
 		scaleDesc(inx).index =
-				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, (void*)(intptr_t)inx );
+				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, I2VP(inx) );
 	}
 }
 
@@ -703,7 +864,7 @@ EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 
 	wListClear( gaugeList );			/* remove old list in case */
 	for (inx=0; inx<gauges_da_p->cnt; inx++) {
-		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, (void*)(intptr_t)(g[inx]).scale );
+		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, I2VP(g[inx].scale) );
 	}
 }
 
@@ -723,6 +884,7 @@ static void ScaleChange( long changes )
 EXPORT void Misc2Init( void )
 {
 	AddParam( "SCALE ", AddScale );
+	AddParam( "SCALEFIT", AddScaleFit);
 	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );

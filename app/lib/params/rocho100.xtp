@@ -28,9 +28,11 @@ TURNOUT HO "ModelPower/Roco	#6 R Curved	490-181/625-42381"
 	END
 # Straight Section Design by Victor Bobier - 18.000000
 # Double Slipswitch Design by Victor Bobier - 9.000000 12.500000 9.000000
-TURNOUT HO "ModelPower/Roco	#6 Double SlipSwitch	490-189"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT HO "ModelPower/Roco	#6 Double SlipSwitch	490-189" 512
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 9.000000 0.000000 90.000000
 	E 0.106666 0.973972 282.500000

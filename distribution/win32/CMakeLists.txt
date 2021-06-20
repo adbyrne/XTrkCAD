@@ -1,4 +1,3 @@
-SET(CPACK_SOURCE_GENERATOR "ZIP")
+set(CPACK_SOURCE_GENERATOR "ZIP")
 
-ADD_SUBDIRECTORY(nsis)
-
+add_subdirectory(nsis)

@@ -20,15 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdint.h>
-
 #include "common.h"
-#include "utility.h"
 #include "cundo.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
+#include "fileio.h"
+#include "cselect.h"
 #include "track.h"
+#include "common-ui.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
@@ -45,8 +43,8 @@ static POS_T descBorder;
 static wDrawColor descColor = 0;
 static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
-static wPos_t describeW_posy;
-static wPos_t describeCmdButtonEnd;
+static wWinPix_t describeW_posy;
+static wWinPix_t describeCmdButtonEnd;
 
 static wMenu_p descPopupM;
 
@@ -60,65 +58,65 @@ static char * pivotLabels[] = { N_("First"), N_("Middle"), N_("End"), NULL };
 static char * boxLabels[] = { "", NULL };
 static paramData_t describePLs[] = {
 #define I_FLOAT_0		(0)
-    { PD_FLOAT, NULL, "F1", 0, &rdata },
-    { PD_FLOAT, NULL, "F2", 0, &rdata },
-    { PD_FLOAT, NULL, "F3", 0, &rdata },
-    { PD_FLOAT, NULL, "F4", 0, &rdata },
-    { PD_FLOAT, NULL, "F5", 0, &rdata },
-    { PD_FLOAT, NULL, "F6", 0, &rdata },
-    { PD_FLOAT, NULL, "F7", 0, &rdata },
-    { PD_FLOAT, NULL, "F8", 0, &rdata },
-    { PD_FLOAT, NULL, "F9", 0, &rdata },
-    { PD_FLOAT, NULL, "F10", 0, &rdata },
-    { PD_FLOAT, NULL, "F11", 0, &rdata },
-    { PD_FLOAT, NULL, "F12", 0, &rdata },
-    { PD_FLOAT, NULL, "F13", 0, &rdata },
-    { PD_FLOAT, NULL, "F14", 0, &rdata },
-    { PD_FLOAT, NULL, "F15", 0, &rdata },
-    { PD_FLOAT, NULL, "F16", 0, &rdata },
-    { PD_FLOAT, NULL, "F17", 0, &rdata },
-    { PD_FLOAT, NULL, "F18", 0, &rdata },
-    { PD_FLOAT, NULL, "F19", 0, &rdata },
-    { PD_FLOAT, NULL, "F20", 0, &rdata },
-	{ PD_FLOAT, NULL, "F21", 0, &rdata },
-    { PD_FLOAT, NULL, "F22", 0, &rdata },
-	{ PD_FLOAT, NULL, "F23", 0, &rdata },
-	{ PD_FLOAT, NULL, "F24", 0, &rdata },
-	{ PD_FLOAT, NULL, "F25", 0, &rdata },
-	{ PD_FLOAT, NULL, "F26", 0, &rdata },
-	{ PD_FLOAT, NULL, "F27", 0, &rdata },
-	{ PD_FLOAT, NULL, "F28", 0, &rdata },
-	{ PD_FLOAT, NULL, "F29", 0, &rdata },
-	{ PD_FLOAT, NULL, "F30", 0, &rdata },
-	{ PD_FLOAT, NULL, "F31", 0, &rdata },
-	{ PD_FLOAT, NULL, "F32", 0, &rdata },
-    { PD_FLOAT, NULL, "F33", 0, &rdata },
-	{ PD_FLOAT, NULL, "F34", 0, &rdata },
-	{ PD_FLOAT, NULL, "F35", 0, &rdata },
-	{ PD_FLOAT, NULL, "F36", 0, &rdata },
-	{ PD_FLOAT, NULL, "F37", 0, &rdata },
-	{ PD_FLOAT, NULL, "F38", 0, &rdata },
-	{ PD_FLOAT, NULL, "F39", 0, &rdata },
-	{ PD_FLOAT, NULL, "F40", 0, &rdata },
+    { PD_FLOAT, NULL, "F1", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F2", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F3", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F4", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F5", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F6", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F7", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F8", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F9", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F10", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F11", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F12", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F13", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F14", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F15", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F16", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F17", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F18", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F19", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F20", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F21", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F22", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F23", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F24", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F25", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F26", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F27", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F28", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F29", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F30", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F31", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F32", PDO_NOPREF, &rdata },
+    { PD_FLOAT, NULL, "F33", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F34", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F35", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F36", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F37", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F38", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F39", PDO_NOPREF, &rdata },
+	{ PD_FLOAT, NULL, "F40", PDO_NOPREF, &rdata },
 #define I_FLOAT_N		I_FLOAT_0+40
 
 #define I_LONG_0		I_FLOAT_N
-    { PD_LONG, NULL, "I1", 0, &idata },
-    { PD_LONG, NULL, "I2", 0, &idata },
-    { PD_LONG, NULL, "I3", 0, &idata },
-    { PD_LONG, NULL, "I4", 0, &idata },
-    { PD_LONG, NULL, "I5", 0, &idata },
+    { PD_LONG, NULL, "I1", PDO_NOPREF, &idata },
+    { PD_LONG, NULL, "I2", PDO_NOPREF, &idata },
+    { PD_LONG, NULL, "I3", PDO_NOPREF, &idata },
+    { PD_LONG, NULL, "I4", PDO_NOPREF, &idata },
+    { PD_LONG, NULL, "I5", PDO_NOPREF, &idata },
 #define I_LONG_N		I_LONG_0+5
 
 #define I_STRING_0		I_LONG_N
-    { PD_STRING, NULL, "S1", 0, (void*)300 },
-    { PD_STRING, NULL, "S2", 0, (void*)300 },
-    { PD_STRING, NULL, "S3", 0, (void*)300 },
-    { PD_STRING, NULL, "S4", 0, (void*)300 },
+    { PD_STRING, NULL, "S1", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S2", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S3", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S4", PDO_NOPREF, I2VP(300) },
 #define I_STRING_N		I_STRING_0+4
 
 #define I_LAYER_0		I_STRING_N
-    { PD_DROPLIST, NULL, "Y1", 0, (void*)150, NULL, 0 },
+    { PD_DROPLIST, NULL, "Y1", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_LAYER_N		I_LAYER_0+1
 
 #define I_COLOR_0		I_LAYER_N
@@ -126,22 +124,22 @@ static paramData_t describePLs[] = {
 #define I_COLOR_N		I_COLOR_0+1
 
 #define I_LIST_0		I_COLOR_N
-    { PD_DROPLIST, NULL, "L1", 0, (void*)150, NULL, 0 },
-    { PD_DROPLIST, NULL, "L2", 0, (void*)150, NULL, 0 },
-	{ PD_DROPLIST, NULL, "L3", 0, (void*)150, NULL, 0 },
-	{ PD_DROPLIST, NULL, "L4", 0, (void*)150, NULL, 0 },
+    { PD_DROPLIST, NULL, "L1", PDO_NOPREF, I2VP(150), NULL, 0 },
+    { PD_DROPLIST, NULL, "L2", PDO_NOPREF, I2VP(150), NULL, 0 },
+	{ PD_DROPLIST, NULL, "L3", PDO_NOPREF, I2VP(150), NULL, 0 },
+	{ PD_DROPLIST, NULL, "L4", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_LIST_N		I_LIST_0+4
 
 #define I_EDITLIST_0	I_LIST_N
-    { PD_DROPLIST, NULL, "LE1", 0, (void*)150, NULL, BL_EDITABLE },
+    { PD_DROPLIST, NULL, "LE1", PDO_NOPREF, I2VP(150), NULL, BL_EDITABLE },
 #define I_EDITLIST_N	I_EDITLIST_0+1
 
 #define I_TEXT_0		I_EDITLIST_N
-    { PD_TEXT, NULL, "T1", 0, &tdata, NULL, BT_HSCROLL },
+    { PD_TEXT, NULL, "T1", PDO_NOPREF, &tdata, NULL, BT_HSCROLL },
 #define I_TEXT_N		I_TEXT_0+1
 
 #define I_PIVOT_0		I_TEXT_N
-    { PD_RADIO, NULL, "P1", 0, pivotLabels, N_("Lock"), BC_HORZ|BC_NOBORDER, 0 },
+    { PD_RADIO, NULL, "P1", PDO_NOPREF, pivotLabels, N_("Lock"), BC_HORZ|BC_NOBORDER, 0 },
 #define I_PIVOT_N		I_PIVOT_0+1
 
 #define I_TOGGLE_0      I_PIVOT_N
@@ -152,7 +150,7 @@ static paramData_t describePLs[] = {
 #define I_TOGGLE_N 		I_TOGGLE_0+4
 };
 
-static paramGroup_t describePG = { "describe", 0, describePLs, sizeof describePLs/sizeof describePLs[0] };
+static paramGroup_t describePG = { "describe", 0, describePLs, COUNT( describePLs ) };
 
 /**
  * A mapping table is used to map the index in the dropdown list to the layer
@@ -198,8 +196,6 @@ SearchEditableLayerList(unsigned int layer)
 
 static void DrawDescHilite(BOOL_T selected)
 {
-    wPos_t x, y, w, h;
-
     if (descNeedDrawHilite == FALSE) {
         return;
     }
@@ -207,11 +203,7 @@ static void DrawDescHilite(BOOL_T selected)
     if (descColor==0) {
         descColor = wDrawColorGray(87);
     }
-
-    w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
-    h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
-    mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
-    wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
+    DrawRectangle(&tempD, descOrig, descSize, selected?descColor:wDrawColorBlue, DRAW_TRANSPARENT);
 }
 
 
@@ -248,26 +240,27 @@ static void DescribeUpdate(
     }
 
     UndoModify(descTrk);
-    descUpdateFunc(descTrk, ddp-descData, descData, FALSE);
+    descUpdateFunc(descTrk, (int)(ddp-descData), descData, FALSE);
 
     if (descTrk) {
         GetBoundingBox(descTrk, &hi, &lo);
+        if ((ddp->mode&DESC_NOREDRAW) == 0) {
+            descOrig = lo;
+            descSize = hi;
+            descOrig.x -= descBorder;
+            descOrig.y -= descBorder;
+            descSize.x -= descOrig.x-descBorder;
+            descSize.y -= descOrig.y-descBorder;
+        }
+
 
         if (OFF_D(mapD.orig, mapD.size, descOrig, descSize)) {
             ErrorMessage(MSG_MOVE_OUT_OF_BOUNDS);
         }
     }
 
-    if ((ddp->mode&DESC_NOREDRAW) == 0) {
-        descOrig = lo;
-        descSize = hi;
-        descOrig.x -= descBorder;
-        descOrig.y -= descBorder;
-        descSize.x -= descOrig.x-descBorder;
-        descSize.y -= descOrig.y-descBorder;
-    }
 
-    for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
+    for (inx = 0; inx < COUNT( describePLs ); inx++) {
         if ((describePLs[inx].option & PDO_DLGIGNORE) != 0) {
             continue;
         }
@@ -283,6 +276,12 @@ static void DescribeUpdate(
         		continue;
         }
 
+        if (ddp->mode&DESC_RO) {
+        	wControlActive(ddp->control0, FALSE);
+        } else {
+        	wControlActive(ddp->control0, TRUE);
+        }
+
         ddp->mode &= ~DESC_CHANGE;
         if (ddp->type == DESC_POS) {			//POS Has two fields
         	if (ddp->mode&DESC_CHANGE2) {
@@ -291,6 +290,7 @@ static void DescribeUpdate(
         		ddp->mode |= DESC_CHANGE2;		//First time
         	}
         }
+
         ParamLoadControl(&describePG, inx);
     }
 }
@@ -351,7 +351,7 @@ static struct {
  */
  
 static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, char * label,
-                               wPos_t sep)
+                               wWinPix_t sep)
 {
     int inx;
 
@@ -393,12 +393,12 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
 static void DescribeLayout(
     paramData_t * pd,
     int inx,
-    wPos_t colX,
-    wPos_t * x,
-    wPos_t * y)
+    wWinPix_t colX,
+    wWinPix_t * x,
+    wWinPix_t * y)
 {
     descData_p ddp;
-    wPos_t w, h;
+    wWinPix_t w, h;
 
     if (inx < 0) {
         return;
@@ -463,7 +463,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
     }
 
-    for (inx=0; inx<sizeof describePLs/sizeof describePLs[0]; inx++) {
+    for (inx=0; inx<COUNT( describePLs ); inx++) {
         describePLs[inx].option = PDO_DLGIGNORE;
         wControlShow(describePLs[inx].control, FALSE);
     }
@@ -476,7 +476,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
                 continue;
             }
 
-            ddp->mode |= ro_mode;
+            ddp->mode |= DESC_RO;
         }
 
     for (ddp=data; ddp->type != DESC_NULL; ddp++) {
@@ -488,7 +488,8 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         ddp->posy = describeW_posy;
         ddp->control0 = AssignParamToDescribeDialog(ddp, ddp->valueP, label,
                                      (ddp->type == DESC_POS?3:3));
-        wControlActive(ddp->control0, ((ddp->mode|ro_mode)&DESC_RO)==0);
+        if (ddp->type != DESC_LAYER)
+        	wControlActive(ddp->control0, (!(ddp->mode&DESC_RO)));
 
         switch (ddp->type) {
         case DESC_POS:
@@ -496,21 +497,33 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
                                          &((coOrd*)(ddp->valueP))->y,
                                          NULL,
                                          0);
-            wControlActive(ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0);
+            wControlActive(ddp->control1, (!(ddp->mode&DESC_RO)));
             break;
 
         case DESC_LAYER:
-            wListClear((wList_p)ddp->control0);  // Rebuild list on each invovation
+            wListClear((wList_p)ddp->control0);  // Rebuild list on each invocation
 
-            for (inx = 0; inx<NUM_LAYERS; inx++) {
-                char *layerFormattedName;
-                layerFormattedName = FormatLayerName(editableLayerList[inx]);
-                wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+            if (ro_mode) {
+            	char *layerFormattedName;
+            	layerFormattedName = FormatLayerName(*(int *)(ddp->valueP));
+            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
                 free(layerFormattedName);
+                *(int *)(ddp->valueP) = 0;
+                layerValue = (int *)(ddp->valueP);
+                wControlActive(ddp->control0, FALSE);
+            } else {
+				for (inx = 0; inx<NUM_LAYERS; inx++) {
+					char *layerFormattedName;
+					layerFormattedName = FormatLayerName(editableLayerList[inx]);
+					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
+					free(layerFormattedName);
+				}
+
+				*(int *)(ddp->valueP) = SearchEditableLayerList(*(int *)(ddp->valueP));
+				layerValue = (int *)(ddp->valueP);
+				wControlActive(ddp->control0, TRUE);
             }
 
-            *(int *)(ddp->valueP) = SearchEditableLayerList(*(int *)(ddp->valueP));
-            layerValue = (int *)(ddp->valueP);
             break;
 
         default:
@@ -528,7 +541,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 static void DescChange(long changes)
 {
-    if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
+	if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
         ParamLoadControls(&describePG);
     }
 }
@@ -569,7 +582,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     switch (action) {
     case C_START:
-        InfoMessage(_("Select track to describe"));
+        InfoMessage(_("Select track to describe +Shift for Frozen"));
         wSetCursor(mainD.d,wCursorQuestion);
         descUndoStarted = FALSE;
         trk = NULL;
@@ -577,11 +590,20 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     case wActionMove:
     	trk = OnTrack(&pos, FALSE, FALSE);
+    	if (trk && GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState() & WKEY_SHIFT)) {
+			trk = NULL;
+			return C_CONTINUE;
+		}
     	return C_CONTINUE;
 
 
     case C_DOWN:
         if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
+        	if (GetLayerFrozen(GetTrkLayer(trk)) && !(MyGetKeyState()& WKEY_SHIFT)) {
+        		InfoMessage("Track is Frozen, Add Shift to Describe");
+        		trk = NULL;
+        		return C_CONTINUE;
+        	}
             if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
                 descUpdateFunc(descTrk, -1, descData, TRUE);
                 descTrk = NULL;
@@ -613,7 +635,18 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
     case C_REDRAW:
 
         if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
+        	descNeedDrawHilite = TRUE;
+        	coOrd lo,hi;
+        	GetBoundingBox(descTrk,&hi,&lo);
+			descOrig = lo;
+			descSize = hi;
+			descOrig.x -= descBorder;
+			descOrig.y -= descBorder;
+			descSize.x -= descOrig.x-descBorder;
+			descSize.y -= descOrig.y-descBorder;
+
             DrawDescHilite(TRUE);
+
             if (descTrk && QueryTrack(descTrk, Q_IS_DRAW)) {
 				DrawOriginAnchor(descTrk);
 			}
@@ -650,7 +683,7 @@ extern wIndex_t panCmdInx;
 void InitCmdDescribe(wMenu_p menu)
 {
     describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
-                                   _("Properties"), wIconCreatePixMap(describe_xpm),
+                                   _("Properties"), wIconCreatePixMap(describe_xpm[iconSize]),
                                    LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
     RegisterChangeNotification(DescChange);
     ParamRegister(&describePG);
@@ -658,8 +691,8 @@ void InitCmdDescribe(wMenu_p menu)
 void InitCmdDescribe2(wMenu_p menu)
 {
     descPopupM = MenuRegister( "Describe Context Menu" );
-    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
-    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, I2VP(selectCmdInx));
+    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
+    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, I2VP(panCmdInx));
 
 }

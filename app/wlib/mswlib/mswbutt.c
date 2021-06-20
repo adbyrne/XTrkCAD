@@ -27,7 +27,6 @@
 #include <commdlg.h>
 #include <math.h>
 #include "mswint.h"
-int kludge12 = 0;
 
 /** Macros for button repeat timers */
 #define REPEAT_STAGE0_DELAY 500
@@ -54,7 +53,7 @@ struct wButton_t {
 		wBool_t busy;
 		wBool_t selected;
 		wIcon_p icon;
-		long timer_id;
+		UINT_PTR timer_id;
 		int timer_count;
 		int timer_state;
 		};
@@ -87,7 +86,7 @@ static void drawButton(
 	HPEN oldPen, newPen;
 	RECT rect;
 	COLORREF color1, color2;
-	POS_T offw=5, offh=5;
+	wWinPix_t offw=5, offh=5;
 	TRIVERTEX        vert[2] ;
 	GRADIENT_RECT    gRect;
 
@@ -203,7 +202,7 @@ static void buttDrawIcon(
 		HDC butt_hDc )
 {
 		wIcon_p bm = b->icon;
-		POS_T offw=5, offh=5;
+		wWinPix_t offw=5, offh=5;
 
 		if (b->selected || b->busy) {
 			offw++; offh++;
@@ -314,7 +313,7 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 	case WM_COMMAND:
 		if (bb->action /*&& !bb->busy*/) {
 			bb->action( bb->data );
-			return 0L;
+			return (LRESULT)0;
 		}
 		break;
 
@@ -323,10 +322,10 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 		if (bb->type != B_BUTTON || (bb->option & BO_ICON) == 0)
 			break;
 		mi->CtlType = ODT_BUTTON;
-		mi->CtlID = wParam;
+		mi->CtlID = (UINT)wParam;
 		mi->itemWidth = (UINT)ceil(bb->w*scaleIcon);
 		mi->itemHeight = (UINT)ceil(bb->h*scaleIcon);
-		} return 0L;
+		} return (LRESULT)0;
 
 	case WM_DRAWITEM:
 		if (bb->type == B_BUTTON && (bb->option & BO_ICON) != 0) {
@@ -335,7 +334,7 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 				bb->selected = selected;
 				InvalidateRgn( bb->hWnd, NULL, FALSE );
 			}
-			return TRUE;
+			return (LRESULT)TRUE;
 		}
 		break;
 	}
@@ -352,15 +351,12 @@ static void buttDone(
 LRESULT CALLBACK pushButt(
 		HWND hWnd,
 		UINT message,
-		UINT wParam,
-		LONG lParam )
+		WPARAM wParam,
+		LPARAM lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
-	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
+
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wButton_p b = (wButton_p)mswMapIndex( inx );
 	PAINTSTRUCT ps;
 
@@ -370,7 +366,7 @@ LRESULT CALLBACK pushButt(
 			BeginPaint( hWnd, &ps );
 			buttDrawIcon( (wButton_p)b, ps.hdc );
 			EndPaint( hWnd, &ps );
-			return 1L;
+			return (LRESULT)1;
 		}
 		break;
 	case WM_CHAR:
@@ -384,14 +380,14 @@ LRESULT CALLBACK pushButt(
 						wParam, lParam );
 				/*SendMessage( ((wControl_p)(b->parent))->hWnd, WM_COMMAND,
 						inx, MAKELONG( hWnd, EN_KILLFOCUS ) );*/
-				return 0L;
+				return (LONG_PTR)0;
 			}
 		}
 		break;
 	case WM_KILLFOCUS:
 		if ( b )
 			InvalidateRect( b->hWnd, NULL, TRUE );
-		return 0L;
+		return (LRESULT)0;
 		break;
 	case WM_LBUTTONDOWN:
 		if (b->option&BO_REPEAT) {
@@ -419,12 +415,12 @@ static callBacks_t buttonCallBacks = {
 
 wButton_p wButtonCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		wPos_t	width,
+		wWinPix_t	width,
 		wButtonCallBack_p action,
 		void	* data )
 {
@@ -450,11 +446,11 @@ wButton_p wButtonCreate(
 	b->selected = 0;
 	mswComputePos( (wControl_p)b, x, y );
 	if (b->option&BO_ICON) {
-		width = (wPos_t)ceil(bm->w*scaleIcon)+10;
+		width = (wWinPix_t)ceil(bm->w*scaleIcon)+10;
 		h = (int)ceil(bm->h*scaleIcon)+10;
 		b->icon = bm;
 	} else {
-		width = (wPos_t)(width*mswScale);
+		width = (wWinPix_t)(width*mswScale);
 	}
 	style = ((b->option&BO_ICON)? BS_OWNERDRAW : BS_PUSHBUTTON) |
 				WS_CHILD | WS_VISIBLE |
@@ -463,7 +459,7 @@ wButton_p wButtonCreate(
 		style |= BS_DEFPUSHBUTTON;
 	b->hWnd = CreateWindow( "BUTTON", labelStr, style, b->x, b->y,
 				/*CW_USEDEFAULT, CW_USEDEFAULT,*/ width, h,
-				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(BUTTON)");
 		return b;
@@ -477,7 +473,10 @@ wButton_p wButtonCreate(
 	mswCallBacks[B_BUTTON] = &buttonCallBacks;
 	mswChainFocus( (wControl_p)b );
 
-	oldButtProc = (WNDPROC) SetWindowLongPtr(b->hWnd, GWL_WNDPROC, (LONG_PTR)&pushButt);
+	oldButtProc = (WNDPROC)SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)&pushButt);
+#ifdef _OLDCODE
+	oldButtProc = (WNDPROC)SetWindowLongPtr(b->hWnd, GWL_WNDPROC, (LONG_PTR)&pushButt);
+#endif 
 	if (mswPalette) {
 		hDc = GetDC( b->hWnd );
 		SelectPalette( hDc, mswPalette, 0 );
@@ -485,7 +484,7 @@ wButton_p wButtonCreate(
 		ReleaseDC( b->hWnd, hDc );
 	}
 	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
+		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 
 
 	InvalidateRect(b->hWnd, &rect, TRUE);

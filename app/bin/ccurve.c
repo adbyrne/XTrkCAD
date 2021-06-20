@@ -20,9 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <string.h>
-
 #include "ccurve.h"
  
 #include "cjoin.h"
@@ -30,17 +27,14 @@
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
+#include "cselect.h"
 
-#include "messages.h"
-#include "param.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
-#include "wlib.h"
 #include "cbezier.h"
 #include "ccornu.h"
 #include "layout.h"
+#include "common-ui.h"
 
 /*
  * STATE INFO
@@ -213,7 +207,7 @@ EXPORT STATUS_T CreateCurve(
 					}
 				}
 		    } else {
-		    	if ((t = OnTrack(&p, FALSE, FALSE)) != NULL) {
+		    	if (((t = OnTrack(&p, FALSE, FALSE)) != NULL) && IsClose(FindDistance(p,pos))) {
 		    		if (!IsTrack(t)) {
 		    			pos = p;
 		    			found = TRUE;
@@ -221,7 +215,8 @@ EXPORT STATUS_T CreateCurve(
 		    	}
 		    }
 			Da.down = TRUE;
-			if (!found) SnapPos( &pos );
+			if (!found && !track) SnapPos( &pos );
+			if (mode == crvCmdFromCenter) SnapPos( &pos );
 			Da.lock0 = found;
 
 			if (Da.create_state == NOCURVE)
@@ -279,7 +274,7 @@ EXPORT STATUS_T CreateCurve(
 		DYNARR_RESET(trkSeg_t,*anchor_array);
 		DYNARR_APPEND(trkSeg_t,*anchor_array,1);
 		if (!Da.down) return C_CONTINUE;
-		if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {  //Shift inhibits direction lock
+		if (Da.trk && track && !(MyGetKeyState() & WKEY_SHIFT)) {  //Shift inhibits direction lock
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Da.pos0)-angle1);
 			if (mode ==crvCmdFromEP1 ) {
@@ -302,7 +297,7 @@ EXPORT STATUS_T CreateCurve(
 				DIST_T dp = FindDistance(Da.pos0, pos)*sin(D2R(angle2));
 				Translate( &pos, Da.pos0, angle1-90.0, dp );
 			}
-		} else SnapPos(&pos);
+		} else if (track) SnapPos(&pos);
 		tempSegs_da.cnt =1;
 		if (Da.trk && mode == crvCmdFromChord) {
 			tempSegs(0).type = SEG_CRVTRK;
@@ -400,7 +395,7 @@ EXPORT STATUS_T CreateCurve(
 			}
 			break;
 		}
-		message( _("Drag on Red arrows to adjust curve") );
+		//message( _("Drag on Red arrows to adjust curve") );
 		return C_CONTINUE;
 
 	default:
@@ -409,7 +404,16 @@ EXPORT STATUS_T CreateCurve(
 	}
 }
 
+static DIST_T desired_radius = 0.0;
+static BOOL_T infoSubst = FALSE;
 
+static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
+static paramData_t curvePLs[] = {
+#define curveRadPD (curvePLs[0])
+#define curveRadI 0
+	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
+};
+static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, COUNT( curvePLs ) };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -417,39 +421,32 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
+	wControl_p controls[2];
+	char * labels[1];
+	static BOOL_T lock;
+	static coOrd movePos;
+
 
 	switch (action) {
 
 	case C_START:
-		curveMode = (long)commandContext;
+		lock = FALSE;
+		curveMode = VP2L(commandContext);
 		Da.state = -1;
 		Da.pos0 = pos;
 		tempSegs_da.cnt = 0;
 		segCnt = 0;
 		STATUS_T rcode;
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (curvePLs[0].control==NULL) {
+			ParamCreateControls(&curvePG, NULL);
+		}
+		SetAllTrackSelect(FALSE);
 		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 
 	case C_DOWN:
 		if (Da.state == -1) {
-			BOOL_T found = FALSE;
-			if (curveMode != crvCmdFromCenter ) {
-				if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
-					if ((t = OnTrack(&pos,FALSE,TRUE))!=NULL) {
-					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
-					   if (ep != -1) {
-						   if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
-								wBeep();
-								InfoMessage(_("Track is different gauge"));
-								return C_CONTINUE;
-							}
-							pos = GetTrkEndPos(t, ep);
-							found = TRUE;
-					   }
-					}
-				}
-			}
-			if (!found) SnapPos( &pos );
+			if (lock) pos = movePos;
 			Da.pos0 = Da.pos1 = pos;
 			Da.state = 0;
 			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
@@ -458,12 +455,19 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return rcode;
 			//Da.pos0 = pos;
 		}
+		if (infoSubst) {
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefSetFloat("misc", message, desired_radius);
+			InfoSubstituteControls(NULL, NULL);
+		}
+		infoSubst = FALSE;
 		//This is where the user could adjust - if we allow that?
 		tempSegs_da.cnt = segCnt;
 		return C_CONTINUE;
 
 
 	case wActionMove:
+		lock = FALSE;
 		if ((Da.state<0) && (curveMode != crvCmdFromCenter)) {
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
@@ -473,9 +477,16 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 						if (ep != -1) {
 							pos = GetTrkEndPos(t, ep);
 							CreateEndAnchor(pos,&anchors_da,FALSE);
+							lock = TRUE;
+							movePos = pos;
 						}
 					}
 				}
+			}
+			if (!lock && SnapPos(&pos)) {
+				CreateEndAnchor(pos,&anchors_da,FALSE);
+				lock = TRUE;
+				movePos = pos;
 			}
 		}
 		return C_CONTINUE;
@@ -490,8 +501,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			// SnapPos( &pos );
 			tempSegs_da.cnt = segCnt;
-			if (Da.trk) PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, FALSE );
-			else PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, TRUE );
+			if (Da.trk) PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, FALSE, desired_radius );
+			else PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, TRUE, desired_radius );
 			if (Da.curveData.type == curveTypeStraight) {
 				tempSegs(0).type = SEG_STRTRK;
 				tempSegs(0).u.l.pos[0] = Da.pos0;
@@ -514,14 +525,15 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				tempSegs(0).u.c.a1 = Da.curveData.a1;
 				tempSegs_da.cnt = 1;
 				segCnt = 1;
+
 				d = D2R(Da.curveData.a1);
+
 				if (d < 0.0)
 					d = 2*M_PI+d;
 				if ( d*Da.curveData.curveRadius > mapD.size.x+mapD.size.y ) {
 					ErrorMessage( MSG_CURVE_TOO_LARGE );
 					tempSegs_da.cnt = 0;
 					Da.curveData.type = curveTypeNone;
-					mainD.funcs->options = 0;
 					return C_CONTINUE;
 				}
 				InfoMessage( _("Curved Track: Radius=%s Angle=%0.3f Length=%s"),
@@ -532,13 +544,18 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				if (curveMode == crvCmdFromEP1 || curveMode == crvCmdFromChord)
 					DrawArrowHeadsArray(&anchors_da,pos,FindAngle(Da.curveData.curvePos,pos),TRUE,wDrawColorRed);
 				else if (curveMode == crvCmdFromTangent || curveMode == crvCmdFromCenter) {
-					CreateEndAnchor(Da.curveData.pos2,&anchors_da,FALSE);
+					if (Da.curveData.curveRadius == desired_radius)
+						CreateEndAnchor(Da.curveData.pos2,&anchors_da,TRUE);
+					else
+						CreateEndAnchor(Da.curveData.pos2,&anchors_da,FALSE);
 					DrawArrowHeadsArray(&anchors_da,Da.curveData.pos2,FindAngle(Da.curveData.curvePos,Da.curveData.pos2)+90,TRUE,wDrawColorRed);
 				}
-				CreateEndAnchor(Da.curveData.curvePos,&anchors_da,TRUE);
+				if (Da.curveData.curveRadius == desired_radius)
+					CreateEndAnchor(Da.curveData.curvePos,&anchors_da,TRUE);
+				else
+					CreateEndAnchor(Da.curveData.curvePos,&anchors_da,FALSE);
 			}
 		}
-		mainD.funcs->options = 0;
 		return rc;
 	case C_TEXT:
 		if ( Da.state == 0 )
@@ -547,8 +564,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case C_UP:
 		if (Da.state<0) return C_CONTINUE;
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord) || (curveMode == crvCmdFromChord && !Da.trk))) {
-			SnapPos( &pos );
-			Da.pos1 = pos;
+			//SnapPos( &pos );
+			//Da.pos1 = pos;
 			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
@@ -556,9 +573,20 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			Da.state = 1;
 			CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 			tempSegs_da.cnt = 1;
-			mainD.funcs->options = 0;
 			segCnt = tempSegs_da.cnt;
-			InfoMessage( _("Drag on Red arrows to adjust curve") );
+
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
+			controls[0] = curveRadPD.control;
+			controls[1] = NULL;
+			labels[0] = N_("Desired Radius");
+			InfoSubstituteControls(controls, labels);
+			infoSubst = TRUE;
+			curveRadPD.option |= PDO_NORECORD;
+			ParamLoadControls(&curvePG);
+			ParamGroupRecord(&curvePG);
+			//InfoMessage( _("Drag on Red arrows to adjust curve") );
+
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
 			pos = Da.middle;
@@ -566,9 +594,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
-			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE );
+			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE, desired_radius );
 		}
-		mainD.funcs->options = 0;
 		tempSegs_da.cnt = 0;
 		segCnt = 0;
 		Da.state = -1;
@@ -590,6 +617,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
+
 			UndoStart( _("Create Curved Track"), "newCurve - curve" );
 			t = NewCurvedTrack( Da.curveData.curvePos, Da.curveData.curveRadius,
 					Da.curveData.a0, Da.curveData.a1, 0 );
@@ -607,7 +635,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		if ( Da.state >= 0 ) {
 			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-			mainD.funcs->options = 0;
 		}
 		if (anchors_da.cnt)
 			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
@@ -668,12 +695,12 @@ static paramData_t helixPLs[] = {
 	{ PD_FLOAT, &helixGrade, "grade", 0, &r0_100, N_("Grade") },
 	{ PD_FLOAT, &helixVertSep, "vertSep", PDO_DIM, &r0_1000000, N_("Vertical Separation") },
 #define I_HELIXMSG		(6)
-	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, (void*)200 } };
-static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, sizeof helixPLs/sizeof helixPLs[0] };
+	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, I2VP(200) } };
+static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, COUNT( helixPLs ) };
 
 static paramData_t circleRadiusPLs[] = {
 	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 } };
-static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, sizeof circleRadiusPLs/sizeof circleRadiusPLs[0] };
+static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, COUNT( circleRadiusPLs ) };
 
 
 static void ComputeHelix(
@@ -684,7 +711,7 @@ static void ComputeHelix(
 	DIST_T totTurns;
 	DIST_T length;
 	long updates = 0;
-	if ( h_inx < 0 || h_inx >= sizeof h_orders/sizeof h_orders[0] )
+	if ( h_inx < 0 || h_inx >= COUNT( h_orders ) )
 		return;
 	ParamLoadData( &helixPG );
 	totTurns = helixTurns + helixAngSep/360.0;
@@ -809,6 +836,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				break;
 			}
 		}
+		SetAllTrackSelect( FALSE );
 		tempSegs_da.cnt = 0;
 		return C_CONTINUE;
 
@@ -932,7 +960,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 static STATUS_T CmdCircle( wAction_t action, coOrd pos )
 {
 	if ( action == C_START ) {
-		circleMode = (long)commandContext;
+		circleMode = VP2L(commandContext);
 	}
 	return CmdCircleCommon( action, pos, FALSE );
 }
@@ -943,32 +971,31 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 	return CmdCircleCommon( action, pos, TRUE );
 }
 
-#include "bitmaps/curve1.xpm"
-#include "bitmaps/curve2.xpm"
-#include "bitmaps/curve3.xpm"
-#include "bitmaps/curve4.xpm"
-#include "bitmaps/bezier.xpm"
+#include "bitmaps/curved-end.xpm"
+#include "bitmaps/curved-tangent.xpm"
+#include "bitmaps/curved-middle.xpm"
+#include "bitmaps/curved-chord.xpm"
+#include "bitmaps/bezier-track.xpm"
 #include "bitmaps/cornu.xpm"
-#include "bitmaps/circle1.xpm"
-#include "bitmaps/circle2.xpm"
-#include "bitmaps/circle3.xpm"
+#include "bitmaps/circle.xpm"
+#include "bitmaps/circle-tangent.xpm"
+#include "bitmaps/circle-center.xpm"
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, (void*)cornuCmdCreateTrack);
-
-	ButtonGroupBegin( _("Curve Track"), "cmdCircleSetCmd", _("Curve Tracks") );
-	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, (void*)0 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, (void*)1 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, (void*)2 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, (void*)3 );
-	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, (void*)bezCmdCreateTrack );
+	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
+	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curved_end_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
+	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curved_tangent_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
+	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curved_middle_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
+	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curved_chord_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, I2VP(3) );
+	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap( bezier_track_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
+	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap( cornu_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 	ButtonGroupEnd();
 
-	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );
-	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius", _("Fixed Radius Circle"), wIconCreatePixMap( circle1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, (void*)0 );
-	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"), wIconCreatePixMap( circle2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, (void*)1 );
-	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"), wIconCreatePixMap( circle3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, (void*)2 );
+	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
+	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius", _("Fixed Radius Circle"), wIconCreatePixMap( circle_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
+	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"), wIconCreatePixMap( circle_tangent_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );
+	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"), wIconCreatePixMap( circle_center_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
 	ButtonGroupEnd();
 
 	ParamRegister( &circleRadiusPG );

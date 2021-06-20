@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-
 #include "cjoin.h"
 #include "ccurve.h"
 #include "cbezier.h"
@@ -29,14 +27,13 @@
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "drawgeom.h"
 #include "common.h"
 #include "layout.h"
+#include "cselect.h"
+#include "common-ui.h"
 
 static struct {
 		track_p Trk;
@@ -64,6 +61,7 @@ static BOOL_T modifyBezierMode;
 static BOOL_T modifyCornuMode;
 static BOOL_T modifyDrawMode;
 static BOOL_T modifyRulerMode;
+static BOOL_T modifyProtractorMode;
 static BOOL_T modifyExtendMode;
 
 
@@ -79,6 +77,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 static void CreateCornuAnchor(coOrd p, wBool_t lock) {
@@ -102,6 +101,7 @@ static void CreateCornuAnchor(coOrd p, wBool_t lock) {
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
 
@@ -172,7 +172,7 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 }
 
 /*
- * Picking a DRAW will allow point modifications until terminated with "Enter"
+ * Picking a DRAW will allow point modifications until terminated with "Enter"/"Space"
  */
 static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
@@ -189,21 +189,22 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			break;
 		case C_TEXT:
 			//Delete or '0' - continues
-			if ((action>>8 !=32) && (action >>8 !=13))
+			if ((action>>8 !=32) && (action >>8 !=13) && (action >>8 !=9))
 				return ModifyTrack( Dex.Trk, action, pos );
-			//Enter/Space does not
-			if ((action>>8 !=32) && (action>>8 != 13)) return C_CONTINUE;
+			//Enter/Space/Tab does not
+			if ((action>>8 !=32) && (action>>8 != 13) && (action>>8 != 9)) return C_CONTINUE;
+			if (((action>>8) == 9 && (MyGetKeyState()&WKEY_SHIFT))) return C_TERMINATE;
 			/*no break*/
 		case C_OK:
-			UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
-			UndoModify( Dex.Trk );
-			rc = ModifyTrack( Dex.Trk, C_TEXT | (13<<8), pos );
+			rc = ModifyTrack( Dex.Trk, C_OK, pos );
 			if (rc != C_CONTINUE) modifyDrawMode = FALSE;
 			UndoEnd();
 			break;
+		case C_CONFIRM:
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
 		case C_CANCEL:
 		case C_FINISH:
-		case C_CONFIRM:
 		case C_TERMINATE:
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			Dex.Trk = NULL;
@@ -216,6 +217,9 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			break;
 		case C_CMDMENU:
 			menuPos = pos;
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
+		case wActionExtKey:
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
 		default:
@@ -269,34 +273,46 @@ STATUS_T CmdModify(
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;
 		modifyExtendMode = FALSE;
+		modifyRulerMode = FALSE;
+		modifyProtractorMode = FALSE;
+		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case C_DOWN:
 	case C_LDOUBLE:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (modifyProtractorMode)
+			return ModifyProtractor(C_DOWN, pos);
 		if (modifyBezierMode)
 			return ModifyBezier(C_DOWN, pos);
 		if (modifyCornuMode)
 			return ModifyCornu(C_DOWN, pos);
 		if (modifyDrawMode)
 			return ModifyDraw(C_DOWN, pos);
+
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs(1).color = wDrawColorBlack;
 		tempSegs(1).width = 0;
 		tempSegs_da.cnt = 0;
-		Dex.Trk = OnTrack( &pos, TRUE, FALSE );
+		Dex.Trk = OnTrack( &pos, FALSE, FALSE );
 		//Dex.Trk = trk;
 		if (Dex.Trk == NULL) {
-			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE )
+			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE ) {
 				modifyRulerMode = TRUE;
+			} else if (ModifyProtractor( C_DOWN, pos ) == C_CONTINUE ) {
+				modifyProtractorMode = TRUE;
+			} else {
+				InfoMessage("Not on object, or Ruler, or Protractor");
+				wBeep();
+			}
 			return C_CONTINUE;
 		}
 		if (!CheckTrackLayer( Dex.Trk ) ) {
 			Dex.Trk = NULL;
 
-			return C_CONTINUE;
+			return C_ERROR;
 		}
 		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if (QueryTrack( Dex.Trk, Q_CAN_MODIFY_CONTROL_POINTS )) { //Bezier
@@ -373,6 +389,7 @@ STATUS_T CmdModify(
 		if (modifyDrawMode) return ModifyDraw(wActionMove,pos);
 		if (modifyBezierMode) return ModifyBezier(wActionMove, pos);
 		track_p t;
+		wSetCursor(mainD.d,defaultCursor);
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayerSilent( t )) {
 			EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 			if (QueryTrack( t, Q_IS_CORNU )) {
@@ -386,6 +403,7 @@ STATUS_T CmdModify(
 				ANGLE_T a = tp.angle;
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateRadiusAnchor(pos,a,FALSE);
+				wSetCursor(mainD.d,wCursorNone);
 			} else if (QueryTrack(t,Q_CAN_EXTEND)) {
 				if (ep != -1) {
 					if (MyGetKeyState()&WKEY_CTRL) {
@@ -417,15 +435,19 @@ STATUS_T CmdModify(
 				}
 			}
 		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL)
-				&& (!(GetLayerFrozen(GetTrkLayer(t)) && GetLayerModule(GetTrkLayer(t))))
+				&& (!(GetLayerFrozen(GetTrkLayer(t)) || GetLayerModule(GetTrkLayer(t))))
 				&& (QueryTrack(t, Q_IS_DRAW ) && !QueryTrack(t, Q_IS_TEXT)) ) {
 			CreateEndAnchor(pos,FALSE);
+		} else {
+			ModifyRuler (wActionMove, pos);
 		}
 		return C_CONTINUE;
 
 	case C_MOVE:
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
+		if ( modifyProtractorMode )
+			return ModifyProtractor( C_MOVE, pos );
 		if (Dex.Trk == NULL)
 			return C_CONTINUE;
 		if ( modifyBezierMode )
@@ -438,7 +460,7 @@ STATUS_T CmdModify(
 			goto extendTrackMove;
 		tempSegs_da.cnt = 0;
 
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		rc = ModifyTrack( Dex.Trk, C_MOVE, pos );
 		if ( rc != C_CONTINUE ) {
 			rc = C_CONTINUE;
@@ -452,6 +474,8 @@ STATUS_T CmdModify(
 			return C_CONTINUE;
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
+		if ( modifyProtractorMode)
+			return ModifyProtractor( C_UP, pos);
 		if ( modifyBezierMode )
 			return ModifyBezier( C_UP, pos);
 		if (modifyCornuMode)
@@ -462,7 +486,7 @@ STATUS_T CmdModify(
 
 		tempSegs_da.cnt = 0;
 
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
@@ -476,6 +500,7 @@ extendTrack:
 		changeTrackMode = TRUE;
 		modifyExtendMode = TRUE;
 		modifyRulerMode = FALSE;
+		modifyProtractorMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;
@@ -485,7 +510,7 @@ extendTrack:
 			if (Dex.Trk) {
 				if (!CheckTrackLayer( Dex.Trk ) ) {
 					Dex.Trk = NULL;
-					return C_CONTINUE;
+					return C_ERROR;
 				}
 				trackGauge = GetTrkGauge( Dex.Trk );
 				Dex.pos00 = pos;
@@ -524,7 +549,7 @@ extendTrackMove:
 		tempSegs_da.cnt = 0;
 		Dex.valid = FALSE;
 		if (Dex.Trk == NULL) return C_CONTINUE;
-		SnapPos( &pos );
+		if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &pos );
 		if ( Dex.first && FindDistance( pos, Dex.pos00 ) <= minLength )
 			return C_CONTINUE;
 		Dex.first = FALSE;
@@ -542,9 +567,9 @@ extendTrackMove:
 					Rotate(&pos,Dex.params.cornuCenter[Dex.params.ep],angle);
 				}
 			} else pos = Dex.pos00;					//Only out from end
-			PlotCurve( crvCmdFromCornu, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, FALSE );
+			PlotCurve( crvCmdFromCornu, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, FALSE, 0.0 );
 		} else
-			PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE );
+			PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE, 0.0 );
 		curveType = Dex.curveData.type;
 		if ( curveType == curveTypeStraight ) {
 			Dex.r1 = 0.0;
@@ -723,14 +748,17 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 		if ((action>>8) == 'c') {
 			panCenter = pos;
 			LOG( log_pan, 2, ( "PanCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			PanHere((void*)0);
+			PanHere(I2VP(0));
 			return C_CONTINUE;
 		}
 		if ((action>>8) == 'e') {
-			DoZoomExtents(0);
+			DoZoomExtents(I2VP(0));
+		}
+		if ((action>>8) == 's') {
+			DoZoomExtents(I2VP(1));
 		}
 		if ((action>>8) == '0' || (action>>8 == 'o')) {
-			PanMenuEnter('o');
+			PanMenuEnter(I2VP('o'));
 		}
 		if ( !Dex.Trk )
 			return C_CONTINUE;
@@ -791,14 +819,14 @@ extern wIndex_t describeCmdInx;
 
 void InitCmdModify( wMenu_p menu )
 {
-	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
+	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
 	log_modify = LogFindIndex( "modify" );
 	modPopupM = MenuRegister( "Modify Context Menu" );
-	wMenuPushCreate(modPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-	wMenuPushCreate(modPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
-	wMenuPushCreate(modPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+	wMenuPushCreate(modPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, I2VP(selectCmdInx));
+	wMenuPushCreate(modPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, I2VP(describeCmdInx));
+	wMenuPushCreate(modPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, I2VP(panCmdInx));
 	wMenuSeparatorCreate(modPopupM);
-	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
-	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(modPopupM, "", _("Pan center - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
+	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0, DoZoomUp, I2VP(1));
+	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0, DoZoomDown, I2VP(1));
+	wMenuPushCreate(modPopupM, "", _("Pan center - 'c'"), 0, PanHere, I2VP(3));
 }

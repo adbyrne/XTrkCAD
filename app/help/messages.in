@@ -2,6 +2,13 @@
 # Various messages with help. Sorted by message content
 ############################################################
 
+# misc.c
+MESSAGE MSG_BETA_NOTICE
+XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still undergoing final testing before its official release. The sole purpose of this Beta Version is to conduct testing and obtain feedback. Should you encounter any bugs, glitches, lack of functionality or other problems, please let us know immediately so we can rectify these accordingly. Your help in this regard is greatly appreciated!
+HELP
+XTrackCAD Version %s: Please note that this Beta Version of XTrackCAD is still undergoing final testing before its official release. The sole purpose of this Beta Version is to conduct testing and obtain feedback. Should you encounter any bugs, glitches, lack of functionality or other problems, please let us know immediately so we can rectify these accordingly. Your help in this regard is greatly appreciated!
+END
+
 # chndldto.c
 MESSAGE MSG_CANT_PLACE_FROGPOINTS
 A %s cannot be placed on a turnout, circle or helix.
@@ -39,6 +46,13 @@ HELP
 A large font has been selected. Large fonts (or changing fonts sizes) may take a noticeable amount of time to load.
 
 Refer to \k{cmdText} for detail.
+END
+
+#cdraw.c
+MESSAGE MSG_TEXT_TOO_LONG
+The entered text was too long for the text object. It was truncated.
+HELP
+Text objects are limited to about 10k characters.
 END
 
 # ctodesgn.c
@@ -113,7 +127,7 @@ END
 MESSAGE MSG_BITMAP_TOO_LARGE
 Bitmap is too large.
 HELP
-A Bitmap must be less than 32000 pixels in height or width. Try increasing the DPI (or DPCM) value. 
+A Bitmap must be less than 32000 pixels in height or width. Try increasing the DPI (or DPCM) value.
 
 Refer to \k{cmdOutputbitmap} for detail.
 END
@@ -154,9 +168,9 @@ END
 
 # cgroup.c:doGroup
 MESSAGE MSG_CANNOT_GROUP_TRACK
-Cannot Group selected track.
+Cannot Group selected track type %s.
 HELP
-Group objects are formed from Straight, Curved, Turnout or Sectional track. The selected objects include a track which is not one of these. Reselect the objects, including only track segments of these types.
+Group objects are formed from Straight, Curved, Turnout or Sectional track or Structures or Draw elements. The selected objects include an object which is not one of these. Reselect the objects, including only elements of these types.
 
 Refer to \k{cmdGroup} for detail.
 END
@@ -224,6 +238,13 @@ HELP
 You are trying to \f{Join} a section of track with itself. Different tracks must selected when using the \f{Join} command.
 
 Refer to \k{cmdJoin} for detail.
+END
+
+#cjoin.c
+MESSAGE MSG_JOIN_NOTBEZIERORCORNU
+Cannot Join Bezier or Cornu track if Easement is not Cornu
+HELP
+You must change the Easement value to Cornu in order to join Bezier or Cornu Tracks
 END
 
 # cjoin.c
@@ -533,7 +554,7 @@ No Cars are defined for the current scale.
 
 Do you want to use the Car Inventory dialog?
 HELP
-No Cars are defined for the current scale. Use the  dialog to select cars of the current scale and add them to the \f{Car Inventory}.
+No Cars are defined for the current layout scale. Either set the scale to the value of already defined cars, or use the  dialog to select cars of the current scale and add them to the \f{Car Inventory}.
 
 Refer to \k{cmdCarinv} for detail.
 END
@@ -601,6 +622,20 @@ MESSAGE MSG_NO_EMPTY_LAYER
 No layer was found that has no contents, so the module can not be imported
 HELP
 The import module function needs an empty layer to work with, but none could be found. Clear a layer and retry.
+END
+
+# dlayer.c
+MESSAGE MSG_NO_UNFROZEN_LAYER
+No layer was found that wasn't frozen. Layer 0 is unfrozen.
+HELP
+There has to be one layer that isn't frozen, Layer 0 will be unfrozen
+END
+
+# dlayer.c
+MESSAGE MSG_NOT_UNFROZEN_LAYER
+The current layer was defined as frozen. It is now unfrozen.
+HELP
+The current layer has to be unfrozen
 END
 
 # dcmpnd.c:refreshCompound
@@ -700,16 +735,23 @@ END
 
 # drawgeom.c
 MESSAGE MSG_POLY_SHAPES_3_SIDES
-Poly shapes must have at least 3 sides.
+Polygons must have at least 3 nodes.
 HELP
-Polygons and Poly Lines must have at least 3 sides. You're attempting to create a Poly shape with only 2 sides by deleting the third. 
+Polygons and Poly Lines must have at least 3 nodes. You're attempting to create a Polygon with only 2 sides or a PolyLine with one line segment.
 END
 
 # drawgeom.c
 MESSAGE MSG_POLY_MULTIPLE_SELECTED
 Can't delete multiple points at once
 HELP
-Polygons and Poly Lines points can only be deleted one at a time. 
+Polygons and Poly Lines points can only be deleted one at a time.
+END
+
+# drawgeom.c
+MESSAGE MSG_POLY_NOTHING_SELECTED
+No Point on a Poly shape selected.
+HELP
+Select a Poly shape and a single point in order to be able to delete it.
 END
 
 # dcar.c
@@ -731,20 +773,20 @@ HELP
 It's not possible to create a Circle or Helix with a radius of 0\u00B0 or less. Specify a positive value in the \f{Radius} field that appears in the Status Bar.
 END
 
-MESSAGE MSG_RADIUS_GTR_10000 
+MESSAGE MSG_RADIUS_GTR_10000
 Radius must be less than 10000.
 HELP
 It's not possible to create a Circle or Helix with a radius of 10000\u00B0 or more. Specify a smaller value in the \f{Radius} field.
 END
 
-MESSAGE MSG_RADIUS_TOO_BIG 
+MESSAGE MSG_RADIUS_TOO_BIG
 The Circle or Helix will not fit within the layouts room parameters (Height and Width).
 HELP
 The defined circle can not fit within the defined layout parameters. Either specify a smaller value in the \f{Radius} field, or increase the room parameters in the \f{Layout} dialog.
 END
 
 #cselect.c
-MESSAGE MSG_RESCALE_TOO_BIG 
+MESSAGE MSG_RESCALE_TOO_BIG
 Rescaled tracks do not fit within layouts room parameters
 (Height and width). The layouts room parameters should be
 set to at least %s by %s.
@@ -893,7 +935,7 @@ This error occurs when;
 
 \b no structures are available in the structure selection list or;
 
-\b the scale setting of the layout and \f{Parameter File}s does not match.  
+\b the scale setting of the layout and \f{Parameter File}s does not match.
 
 Using the \f{File>Parameter Files} menu, check which Parameter files are loaded. Ensure the scale of the loaded files match that of the layout. Alternately a new Structure could be created using the \f{Group} command.
 
@@ -912,7 +954,7 @@ This error occurs when;
 
 \b no turnouts are available in the turnouts selection list or;
 
-\b the scale setting of the layout and \f{Parameter File}s does not match.  
+\b the scale setting of the layout and \f{Parameter File}s does not match.
 
 Using the \f{File>Parameter Files} menu, check which Parameter files are loaded. Ensure the scale of the loaded files match that of the layout. Alternately a new turnout could be created using the \f{Turnout Designer} command.
 
@@ -1063,7 +1105,7 @@ Critical file damaged!
 
 %s is corrupt.
 
-Please reinstall software. 
+Please reinstall software.
 HELP
 A critical file is corrupt. Unfortunately it will be necessary to reinstall the software or contact the XTrackCAD project development team at SourceForge in order to overcome this error.
 
@@ -1072,7 +1114,7 @@ END
 
 # param.c
 MESSAGE MSG_ENTERED_STRING_TRUNCATED
-The entered text is too long. Maximum length is %d. 
+The entered text is too long. Maximum length is %d.
 HELP
 The text entered into a field is longer than the maximum allowed length and was truncated. Please check the shortened text and edit as necessary.
 END
@@ -1097,7 +1139,11 @@ Bitmaps can use a large amount of system resources. They may also take a long ti
 Refer to \k{cmdOutputbitmap} for detail.
 END
 
-
+# doption.c
+MESSAGE MSG_ICON_SIZE_RESTART
+Icon Size change will take effect on next program start.
+#NOHELP
+END
 
 ############################################################
 # Various messages without help or specific origin.
@@ -1124,25 +1170,25 @@ END
 
 # fileio.c
 MESSAGE MSG_DIR_OPEN_FAIL
-Cannot open directory: %s 
+Cannot open directory: %s
 #NOHELP
 END
 
 # fileio.c
 MESSAGE MSG_NOT_DIR_FAIL
-Path for deletion is not a directory: %s 
+Path for deletion is not a directory: %s
 #NOHELP
 END
 
 # fileio.c
 MESSAGE MSG_OPEN_DIR_FAIL
-Open failed for directory: %s 
+Open failed for directory: %s
 #NOHELP
 END
 
 # fileio.c
 MESSAGE MSG_ZIP_DIR_ADD_FAIL
-Can't add directory record %s to zip - %s 
+Can't add directory record %s to zip - %s
 #NOHELP
 END
 
@@ -1196,13 +1242,13 @@ END
 
 # fileio.c
 MESSAGE MSG_UNLINK_FAIL
-Unlink failed for: %s 
+Unlink failed for: %s
 #NOHELP
 END
 
 # fileio.c
 MESSAGE MSG_RMDIR_FAIL
-Remove Directory failed for: %s 
+Remove Directory failed for: %s
 #NOHELP
 END
 
@@ -1232,7 +1278,7 @@ END
 
 # fileio.c
 MESSAGE MSG_COPY_OPEN_FAIL
-Cannot open file %s 
+Cannot open file %s
 #NOHELP
 END
 
@@ -1282,7 +1328,7 @@ END
 # cgroup.c:doGroup
 MESSAGE MSG_CANT_GROUP_BUMPER2
 At least one path for the Turnout T%d does not
-terminate on an endpoint. Such a track cannot be grouped.  
+terminate on an endpoint. Such a track cannot be grouped.
 The track has been unselected.
 #NOHELP
 END

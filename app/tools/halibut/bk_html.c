@@ -1611,8 +1611,8 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 	 */
 	 
     if (conf.appletoc_filename) {
-		htmlsect *s, *top;
-		htmlfile *f;
+		htmlsect *s;// , *top;
+//		htmlfile *f;
 		htmloutput ho; 
 		ho.charset = conf.output_charset;
 	    ho.restrict_charset = conf.restrict_charset;
@@ -2728,7 +2728,7 @@ static char *html_sanitise_fragment(htmlfilelist *files, htmlfile *file,
 
 	while (add234(files->frags, frag) != frag) {
 	    if (!len) {
-		len = strlen(text);
+		len = (int)strlen(text);
 		frag->fragment = text = sresize(text, len+20, char);
 	    }
 
@@ -2781,7 +2781,7 @@ static char *html_sanitise_filename(htmlfilelist *files, char *text)
 
 	while (find234(files->files, text, NULL)) {
 	    if (!p) {
-		len = strlen(text);
+		len = (int)strlen(text);
 		p = text;
 		text = snewn(len+20, char);
 

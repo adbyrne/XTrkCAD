@@ -23,10 +23,8 @@
 #ifndef HAVE_CCURVE_H
 #define HAVE_CCURVE_H
 
-#include "draw.h"
-#include "track.h"
-#include "wlib.h"
-#include "utility.h"
+#include "common.h"
+#include "track.h" //- curveType_e
 
 typedef struct {
 		curveType_e type;
@@ -48,10 +46,10 @@ typedef struct {
 #define circleCmdFromTangent	(1)
 #define circleCmdFromCenter		(2)
 
-typedef void (*curveMessageProc)( char *, ... );
+typedef void (*curveMessageProc)( const char *, ... );
 STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, dynArr_t *,curveMessageProc );
 int IsCurveCircle( track_p );
-void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T );
+void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T, DIST_T );
 track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
 DIST_T CurveDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T CurveDescriptionMove( track_p, wAction_t, coOrd );

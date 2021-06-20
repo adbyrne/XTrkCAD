@@ -1,6 +1,7 @@
 include( CheckSymbolExists )
 
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
+
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(cnvdsgn m)
 ENDIF(NOT WIN32)
@@ -77,6 +78,8 @@ SET(SOURCES
 	cmisc.c
 	cmodify.c
 	cnote.c
+	common.h
+	common-ui.h
 	compound.c
 	cparalle.c
 	cprint.c
@@ -98,6 +101,7 @@ SET(SOURCES
 	cturntbl.c
 	cundo.c
 	custom.c
+	custom.h
 	dbench.c
 	dbitmap.c
 	dcar.c
@@ -122,10 +126,14 @@ SET(SOURCES
 	filenoteui.c
 	i18n.c
 	layout.c
+	layout.h
+	levenshtein.c
 	linknoteui.c
 	lprintf.c
 	macro.c
 	manifest.c
+	misc.c
+	misc.h
 	misc2.c
 	param.c
 	paramfile.c
@@ -143,10 +151,13 @@ SET(SOURCES
 	tease.c
 	textnoteui.c
 	track.c
+	track.h
+	trackx.h
 	trknote.c
 	trkseg.c
 	tstraigh.c
 	utility.c
+	utility.h
 	validator.c
 	cJSON.c
 	archive.h
@@ -167,8 +178,12 @@ endif(WIN32)
 set (SOURCES
 	${SOURCES}
 	include/dirent.h
+	include/levenshtein.h
 	include/paramfile.h
 	include/paramfilelist.h
+	include/partcatalog.h
+	include/stringxtc.h	
+	include/utlist.h
 )
 
 if(XTRKCAD_CREATE_SVG)
@@ -215,7 +230,11 @@ TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
 TARGET_LINK_LIBRARIES(xtrkcad dynstring)
+IF(UNIX AND NOT APPLE)
+target_link_libraries(xtrkcad ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
+ELSE(UNIX AND NOT APPLE)
 target_link_libraries(xtrkcad ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES})
+ENDIF(UNIX AND NOT APPLE)
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}
@@ -262,13 +281,20 @@ ELSE(NOT WIN32)
 	)
 
 	# add dll to install package
-	install(FILES
-	${LIBZIP_SHAREDLIB}
-	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	INSTALL(
+	    FILES
+	    ${LIBZIP_SHAREDLIB}
+	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
-	install(FILES
-	${ZLIB_SHAREDLIB}
-	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	    INSTALL(FILES
+	    ${ZLIB_SHAREDLIB}
+	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	)
+
+        # Copy program PDB file
+        INSTALL(
+            FILES $<TARGET_PDB_FILE:xtrkcad> 
+	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR} OPTIONAL
 	)
 ENDIF(NOT WIN32)
 

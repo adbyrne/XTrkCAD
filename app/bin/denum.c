@@ -20,18 +20,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <string.h>
-#include <time.h>
-
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "i18n.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
 
 static wWin_p enumW;
 
@@ -42,21 +36,26 @@ static wWin_p enumW;
 #undef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 
-static void DoEnumOp( void * );
+static void DoEnumOp( void * data );
 static long enableListPrices;
+static long enableListIndexes;
 
 static paramTextData_t enumTextData = { 80, 24 };
 static char * priceLabels[] = { N_("Prices"), NULL };
+static char * indexLabels[] = { N_("Indexes"), NULL };
 static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
 #define enumT			((wText_p)enumPLs[I_ENUMTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &enumTextData, NULL, BT_CHARUNITS|BT_FIXEDFONT },
-	{   PD_BUTTON, (void*)DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, (void*)ENUMOP_SAVE },
-	{   PD_BUTTON, (void*)DoEnumOp, "print", 0, NULL, N_("Print"), 0, (void*)ENUMOP_PRINT },
-	{   PD_BUTTON, (void*)wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
+	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, I2VP(ENUMOP_SAVE) },
+	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, N_("Print"), 0, I2VP(ENUMOP_PRINT) },
+	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
 #define I_ENUMLISTPRICE	(4)
-	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER } };
-static paramGroup_t enumPG = { "enum", 0, enumPLs, sizeof enumPLs/sizeof enumPLs[0] };
+	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER },
+#define I_ENUMLISTINDEXES  (5)
+	{   PD_TOGGLE, &enableListIndexes, "list-indexes", PDO_DLGRESETMARGIN, indexLabels, NULL, BC_HORZ|BC_NOBORDER }
+};
+static paramGroup_t enumPG = { "enum", 0, enumPLs, COUNT( enumPLs ) };
 
 static struct wFilSel_t * enumFile_fs;
 
@@ -86,7 +85,7 @@ static int DoEnumSave(
 static void DoEnumOp(
 		void * data )
 {
-	switch( (int)(long)data ) {
+	switch( VP2L(data) ) {
 	case ENUMOP_SAVE:
 		wFilSelect( enumFile_fs, GetCurrentPath(PARTLISTPATHKEY) );
 		break;
@@ -105,8 +104,8 @@ static void EnumDlgUpdate(
 		int inx,
 		void * valueP )
 {
-	if ( inx != I_ENUMLISTPRICE ) return;
-	EnumerateTracks();
+	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) return;
+	EnumerateTracks( NULL );
 }
 
 
@@ -116,10 +115,11 @@ static FLOAT_T enumerateTotal;
 void EnumerateList(
 		long count,
 		FLOAT_T price,
-		char * desc )
+		char * desc,
+		char * indexes )
 {
 	char * cp;
-	int len;
+	size_t len;
 	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
@@ -134,6 +134,8 @@ void EnumerateList(
 			sprintf( cp, " | %-*s |\n", (int) max( 7, count_utf8_chars( _("Each"))), " " );
 		}
 	}
+	if (enableListIndexes && indexes)
+		sprintf( message, "%s%s -> %s \n", message, N_("Indexes"), indexes);
 	wTextAppend( enumT, message );
 }
 
@@ -210,7 +212,7 @@ void EnumerateStart(void)
 
 void EnumerateEnd(void)
 {
-	int len;
+	size_t len;
 	char * cp;
 	ScaleLengthEnd();
 	

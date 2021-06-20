@@ -1,0 +1,13 @@
+#!/bin/sh
+INSTALLDIR=/usr/share/xtrkcad
+
+LOGF=/tmp/xtrkcad-setup.log
+if [ -f "${LOGF}" ] ; then
+	chmod 666 ${LOGF}
+else
+	LOGF=/dev/null
+fi
+
+( su -c "sh ${INSTALLDIR}/xtrkcad-setup install ${INSTALLDIR}" -l $SUDO_USER ) >> ${LOGF} 2>&1
+
+exit 0 

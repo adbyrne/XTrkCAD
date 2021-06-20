@@ -20,20 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <ctype.h>
-#include <string.h>
-
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  *
@@ -68,14 +63,14 @@ static paramData_t updateTitlePLs[] = {
 	{	PD_MESSAGE, "You can use the List Labels control on the Preferences dialog to" },
 	{	PD_MESSAGE, "control the format of the list entries" },
 #define I_UPDATESTR		(9)
-	{	PD_STRING, NULL, "old", PDO_NOPREF, (void*)400, NULL, BO_READONLY },
+	{	PD_STRING, NULL, "old", PDO_NOPREF, I2VP(400), NULL, BO_READONLY },
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
-	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, (void*)400 },
-	{	PD_BUTTON, (void*)UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
+	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, I2VP(400) },
+	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
-static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
+static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, COUNT( updateTitlePLs ) };
 
 
 static void UpdateTitleChange( long changes )
@@ -102,7 +97,7 @@ static void UpdateTitleNext( void )
 	wIndex_t inx;
 	wIndex_t cnt;
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	updateTitleInx++;
 	if (updateTitleInx >= updateTitles_da.cnt) {
 		wHide( updateTitleW );
@@ -112,8 +107,9 @@ static void UpdateTitleNext( void )
 		trk = NULL;
 		while (TrackIterate( &trk ) ) {
 			InfoCount(cnt++);
-			if (GetTrkType(trk) == T_TURNOUT || GetTrkType(trk) == T_STRUCTURE) {
-				xx = GetTrkExtraData(trk);
+			TRKTYP_T trkType = GetTrkType(trk);
+			if (trkType == T_TURNOUT || trkType == T_STRUCTURE) {
+				xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 				for (inx=0; inx<updateTitles_da.cnt; inx++) {
 					if ( updateTitles(inx).old &&
 						 strcmp( xx->title, updateTitles(inx).old ) == 0 ) {
@@ -169,7 +165,7 @@ void DoUpdateTitles( void )
 		return;
 	if (updateTitleW == NULL) {
 		ParamRegister( &updateTitlePG );
-		updateTitlePLs[I_UPDATELOAD].valueP = (void*)ParamFilesInit();
+		updateTitlePLs[I_UPDATELOAD].valueP = ParamFilesInit();
 		updateTitleW = ParamCreateDialog( &updateTitlePG, MakeWindowTitle(_("Update Title")), _("Update"), UpdateTitleUpdate, UpdateTitleCancel, TRUE, NULL, 0, NULL );
 		RegisterChangeNotification( UpdateTitleChange );
 	}
@@ -218,7 +214,7 @@ static BOOL_T CheckCompoundEndPoint(
 		BOOL_T flip )
 {
 	
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	coOrd pos;
 	DIST_T d;
 	ANGLE_T a, a2;
@@ -251,7 +247,6 @@ static BOOL_T RefreshCompound1(
 		track_p trk,
 		turnoutInfo_t * to )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	EPINX_T ep, epCnt;
 	BOOL_T ok;
 	BOOL_T flip = FALSE;
@@ -286,16 +281,13 @@ static BOOL_T RefreshCompound1(
 		}
 	}
 	UndoModify( trk );
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	FreeFilledDraw( xx->segCnt, xx->segs );
 	MyFree( xx->segs );
 	xx->segCnt = to->segCnt;
 	xx->segs = (trkSeg_p)MyMalloc( xx->segCnt * sizeof *(trkSeg_p)0 );
 	memcpy( xx->segs, to->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
-	MyFree( xx->paths);
-	xx->paths = (signed char*)MyMalloc( to->pathLen * sizeof *xx->paths );
-	memcpy( xx->paths, to->paths, to->pathLen * sizeof *xx->paths );
-	xx->pathLen = to->pathLen;
-	xx->pathCurr = xx->paths;
+	SetPaths( trk, to->paths );
 	if ( flip )
 		FlipSegs( xx->segCnt, xx->segs, zero, 90.0 );
 	ClrTrkBits( trk, TB_SELECTED );
@@ -313,19 +305,19 @@ static dynArr_t refreshSpecial_da;
 #define refreshSpecial(N) DYNARR_N( refreshSpecial_t, refreshSpecial_da, N )
 static wIndex_t refreshSpecialInx;
 static BOOL_T refreshReturnVal;
-static void RefreshSkip( void * );
+static void RefreshSkip( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
-		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_M2		(1)
-		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_S		(2)
-		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
-		{ PD_BUTTON, (void*)RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
-static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
+		{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
+static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
 static void RefreshSpecialOk(
 		void * junk )
 {
@@ -350,7 +342,7 @@ EXPORT BOOL_T RefreshCompound(
 		BOOL_T junk )
 {
 	TRKTYP_T trkType;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	int inx;
 	turnoutInfo_t *to;
 	SCALEINX_T scale;
@@ -365,12 +357,12 @@ EXPORT BOOL_T RefreshCompound(
 		return FALSE;
 	}
 	trkType = GetTrkType(trk);
-	xx = GetTrkExtraData(trk);
 	scale = GetTrkScale(trk);
 	if ( trkType != T_TURNOUT && trkType != T_STRUCTURE ) {
 		ClrTrkBits( trk, TB_SELECTED );
 		return TRUE;
 	}
+	xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 	refreshReturnVal = TRUE;
 	for ( inx=0; inx<refreshSpecial_da.cnt; inx++ ) {
 		if ( refreshSpecial(inx).name != NULL &&
@@ -380,7 +372,7 @@ EXPORT BOOL_T RefreshCompound(
 				return TRUE;
 			if ( IsParamValid(to->paramFileIndex) &&
 				 to->segCnt > 0 &&
-				 CompatibleScale( GetTrkEndPtCnt(trk)>0, to->scaleInx, scale ) ) {
+				 (FIT_NONE != CompatibleScale( GetTrkEndPtCnt(trk)>0, to->scaleInx, scale ) )) {
 				if ( RefreshCompound1( trk, refreshSpecial(inx).to ) ) {
 					if ( strcasecmp( xx->title, to->title ) != 0 ) {
 						MyFree( xx->title );
@@ -453,10 +445,10 @@ static char renamePartno[STR_SIZE];
 static turnoutInfo_t * renameTo;
 
 static paramData_t renamePLs[] = {
-/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
-/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)230, N_("Description"), 0, 0, sizeof(renameDesc)},
-/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_STRINGLIMITLENGTH, (void*)100, N_("#"), 0, 0, sizeof(renamePartno)} };
-static paramGroup_t renamePG = { "rename", 0, renamePLs, sizeof renamePLs/sizeof renamePLs[0] };
+/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
+/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
+/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)} };
+static paramGroup_t renamePG = { "rename", 0, renamePLs, COUNT( renamePLs ) };
 
 
 EXPORT BOOL_T CompoundCustomSave(
@@ -573,7 +565,7 @@ static int CompoundCustMgmProc(
 
 
 #include "bitmaps/turnout.xpm"
-#include "bitmaps/struct.xpm"
+#include "bitmaps/building.xpm"
 
 EXPORT void CompoundCustMgmLoad( void )
 {
@@ -583,20 +575,20 @@ EXPORT void CompoundCustMgmLoad( void )
 	static wIcon_p structI = NULL;
 
 	if ( turnoutI == NULL )
-		turnoutI = wIconCreatePixMap( turnout_xpm );
+		turnoutI = wIconCreatePixMap( turnout_xpm[0] );
 	if ( structI == NULL )
-		structI = wIconCreatePixMap( struct_xpm );
+		structI = wIconCreatePixMap( building_xpm[0] );
 
 	for ( inx=0; inx<turnoutInfo_da.cnt; inx++ ) {
 		to = turnoutInfo(inx);
 		if (to->paramFileIndex == PARAM_CUSTOM && to->segCnt > 0) {
-			CustMgmLoad( turnoutI, CompoundCustMgmProc, (void*)to );
+			CustMgmLoad( turnoutI, CompoundCustMgmProc, to );
 		}
 	}
 	for ( inx=0; inx<structureInfo_da.cnt; inx++ ) {
 		to = structureInfo(inx);
 		if (to->paramFileIndex == PARAM_CUSTOM && to->segCnt > 0) {
-			CustMgmLoad( structI, CompoundCustMgmProc, (void*)to );
+			CustMgmLoad( structI, CompoundCustMgmProc, to );
 		}
 	}
 }

@@ -47,23 +47,19 @@
 static const char rcsid[] = "@(#) : $Id$";
 
 
-#include <ctype.h>
-#include <string.h>
-
 #include "compound.h"
+#include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
-#ifdef WINDOWS
+#include "common-ui.h"
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
-#include "utility.h"
-#include "messages.h"
+#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_SIGNAL = -1;
 
@@ -93,6 +89,7 @@ static dynArr_t signalAspect_da;
 #define signalAspect(N) DYNARR_N( signalAspect_t, signalAspect_da, N )
 
 typedef struct signalData_t {
+    extraDataBase_t base;
     coOrd orig;
     ANGLE_T angle;
     char * name;
@@ -104,7 +101,7 @@ typedef struct signalData_t {
 
 static signalData_p GetsignalData ( track_p trk )
 {
-    return (signalData_p) GetTrkExtraData(trk);
+    return GET_EXTRA_DATA( trk, T_SIGNAL, signalData_t );
 }
 
 #define BASEX 6
@@ -343,9 +340,9 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
     signalData_p xx = GetsignalData(t);
 	char *signalName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	signalName = Convert2UTF8(signalName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     rc &= fprintf(f, "SIGNAL %d %u %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), 
@@ -383,9 +380,9 @@ static BOOL_T ReadSignal ( char * line )
         return FALSE;
     }
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     DYNARR_RESET( signalAspect_p, signalAspect_da );
     while ( (cp = GetNextLine()) != NULL ) {
@@ -494,7 +491,7 @@ static char signalAspectEditScript[STR_LONG_SIZE];
 static long signalAspectEditIndex;
 
 static paramIntegerRange_t r1_3 = {1, 3};
-static wPos_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
+static wWinPix_t aspectListWidths[] = { STR_SHORT_SIZE, 150 };
 static const char * aspectListTitles[] = { N_("Name"), N_("Script") };
 static paramListData_t aspectListData = {10, 400, 2, aspectListWidths, aspectListTitles};
 
@@ -506,9 +503,9 @@ static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360         = { 0.0, 360.0, 80 };
 static paramData_t signalEditPLs[] = {
 #define I_SIGNALNAME (0)
-    /*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(signalEditName)},
+    /*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(signalEditName)},
 #define I_ORIGX (1)
-    /*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Orgin X") }, 
+    /*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") }, 
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &signalEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_ANGLE (3)
@@ -519,27 +516,27 @@ static paramData_t signalEditPLs[] = {
 #define aspectSelL ((wList_p)signalEditPLs[I_SIGNALASPECTLIST].control)
     /*5*/ { PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &aspectListData, NULL, BL_MANY },
 #define I_SIGNALASPECTEDIT (6)
-    /*6*/ { PD_BUTTON, (void*)AspectEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit Aspect") },
+    /*6*/ { PD_BUTTON, AspectEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit Aspect") },
 #define I_SIGNALASPECTADD (7)
-    /*7*/ { PD_BUTTON, (void*)AspectAdd, "add", PDO_DLGCMDBUTTON, NULL, N_("Add Aspect") },
+    /*7*/ { PD_BUTTON, AspectAdd, "add", PDO_DLGCMDBUTTON, NULL, N_("Add Aspect") },
 #define I_SIGNALASPECTDELETE (8)
-    /*8*/ { PD_BUTTON, (void*)AspectDelete, "delete", 0, NULL, N_("Delete Aspect") },
+    /*8*/ { PD_BUTTON, AspectDelete, "delete", 0, NULL, N_("Delete Aspect") },
 };
-static paramGroup_t signalEditPG = { "signalEdit", 0, signalEditPLs, sizeof signalEditPLs/sizeof signalEditPLs[0] };
+static paramGroup_t signalEditPG = { "signalEdit", 0, signalEditPLs, COUNT( signalEditPLs ) };
 static wWin_p signalEditW;
 
 static paramIntegerRange_t rm1_999999 = { -1, 999999 };
 
 static paramData_t aspectEditPLs[] = {
 #define I_ASPECTNAME (0)
-    /*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200,  N_("Name"), 0, 0, sizeof(signalAspectEditName)},
+    /*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_NOTBLANK, I2VP(200),  N_("Name"), 0, 0, sizeof(signalAspectEditName)},
 #define I_ASPECTSCRIPT (1)
-    /*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(signalAspectEditScript)},
+    /*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(signalAspectEditScript)},
 #define I_ASPECTINDEX (2)
     /*2*/ { PD_LONG,   &signalAspectEditIndex, "index", PDO_NOPREF, &rm1_999999, N_("Aspect Index"), BO_READONLY },
 };
 
-static paramGroup_t aspectEditPG = { "aspectEdit", 0, aspectEditPLs, sizeof aspectEditPLs/sizeof aspectEditPLs[0] };
+static paramGroup_t aspectEditPG = { "aspectEdit", 0, aspectEditPLs, COUNT( aspectEditPLs ) };
 static wWin_p aspectEditW;
 
 
@@ -794,6 +791,7 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
     case C_START:
         InfoMessage(_("Place base of signal"));
         create = FALSE;
+        SetAllTrackSelect( FALSE );
         return C_CONTINUE;
     case C_DOWN:
         SnapPos(&pos);
@@ -827,13 +825,9 @@ static POS_T sighiliteBorder;
 static wDrawColor sighiliteColor = 0;
 static void DrawSignalTrackHilite( void )
 {
-	wPos_t x, y, w, h;
 	if (sighiliteColor==0)
 		sighiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,sighiliteOrig,&x,&y);
-	wDrawFilledRectangle( tempD.d, x, y, w, h, sighiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, sighiliteOrig, sighiliteSize, sighiliteColor, DRAW_TRANSPARENT );
 }
 
 static int SignalMgmProc ( int cmd, void * data )
@@ -898,12 +892,12 @@ EXPORT void SignalMgmLoad ( void )
     static wIcon_p signalI = NULL;
     
     if (signalI == NULL) {
-        signalI = wIconCreatePixMap( signal_xpm );
+        signalI = wIconCreatePixMap( signal_xpm[iconSize] );
     }
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SIGNAL) continue;
-        ContMgmLoad (signalI, SignalMgmProc, (void *) trk );
+        ContMgmLoad (signalI, SignalMgmProc, trk );
     }
 }
 
@@ -912,7 +906,7 @@ EXPORT void SignalMgmLoad ( void )
 EXPORT void InitCmdSignal ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdSignal, "cmdSignal", _("Signal"), 
-                   wIconCreatePixMap( signal_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SIGNAL, NULL );
+                   wIconCreatePixMap( signal_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SIGNAL, NULL );
 }
 
 EXPORT void InitTrkSignal ( void )

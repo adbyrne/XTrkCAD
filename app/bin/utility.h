@@ -44,6 +44,7 @@ double max( double a, double b );
 double min( double a, double b );
 #endif
 double FindDistance( coOrd p0, coOrd p1 );
+int CoOrdEqual(coOrd p0, coOrd p1);
 double NormalizeAngle( double a );
 double DifferenceBetweenAngles(double a, double b);
 int AngleInRange(double a, double start, double size);
@@ -63,6 +64,7 @@ double LineDistance( coOrd *p, coOrd p0, coOrd p1 );
 double CircleDistance( coOrd *p, coOrd c, double r, double a0, double a1 );
 int PickArcEndPt( coOrd, coOrd, coOrd );
 int PickLineEndPt( coOrd, double, coOrd );
+coOrd MidPtCoOrd(coOrd, coOrd);
 coOrd AddCoOrd( coOrd, coOrd, double );
 int ClipLine( coOrd *, coOrd *, coOrd, double, coOrd );
 coOrd FindCentroid(int vertexCount, pts_t vertices[] );

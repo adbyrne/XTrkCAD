@@ -25,8 +25,8 @@
 #define NUM_GRAYS (16)
 #define NUM_COLORS (256)
 
-wDrawColor wDrawColorWhite = 0;
-wDrawColor wDrawColorBlack = 1;
+static wDrawColor wDrawColorWhite = 0;
+static wDrawColor wDrawColorBlack = 1;
 
 #define MAX_COLOR_DISTANCE (3)
 
@@ -44,8 +44,6 @@ static struct {
 		{ 255, 255, 255 },		/* White */
 		{	0,	 0,	  0 }		/* Black */
 		} };
-
-COLORREF mappedColors[NUM_COLORS];
 
 
 static long flipRGB( long rgb )
@@ -316,12 +314,12 @@ static void doColorButton(
 
 wButton_p wColorSelectButtonCreate(
 		wWin_p win,
-		wPos_t x,
-		wPos_t y,
+		wWinPix_t x,
+		wWinPix_t y,
 		const char * helpStr,
 		const char * labelStr,
 		long option,
-		wPos_t width,
+		wWinPix_t width,
 		wDrawColor * color,
 		wColorSelectButtonCallBack_p action,
 		void * data )

@@ -47,7 +47,7 @@ static GtkWidget * balloonPI;
 
 static char balloonMsg[100] = "";
 static wControl_p balloonB;
-static wPos_t balloonDx, balloonDy;
+static wWinPix_t balloonDx, balloonDy;
 static wBool_t balloonVisible = FALSE;
 
 
@@ -128,13 +128,13 @@ void wControlSetBalloonText(
  * \return
  */
 
-void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
+void wControlSetBalloon( wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * msg )
 {
     PangoLayout * layout;
 
-    wPos_t x, y;
-    wPos_t w, h;
-    wPos_t xx, yy;
+    gint x, y;
+    gint w, h;
+    wWinPix_t xx, yy;
     const char * msgConverted;
     GtkRequisition size;
 
@@ -157,12 +157,18 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 
     if ( balloonF == NULL ) {
 		//GtkWidget *alignment;
-		
+
+    	GdkColor color;
+    	color.red = 0x00C5 * 65536/255;
+    	color.green = 0x006F * 65536/255;
+    	color.blue = 0x0078 * 65536/255;
+
         balloonF = gtk_window_new( GTK_WINDOW_POPUP );
         gtk_window_set_type_hint( GTK_WINDOW( balloonF), GDK_WINDOW_TYPE_HINT_TOOLTIP );
         gtk_window_set_decorated (GTK_WINDOW (balloonF), FALSE );
         gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
         gtk_window_set_accept_focus(GTK_WINDOW( balloonF), FALSE);
+        gtk_widget_modify_bg(GTK_WIDGET(balloonF), GTK_STATE_NORMAL, &color);
             
 		GtkWidget * alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
 		gtk_alignment_set_padding( GTK_ALIGNMENT(alignment), 6, 6, 6, 6 );
@@ -189,6 +195,9 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 
     x += b->realX + dx;
     y += b->realY + b->h - dy;
+#ifdef __linux__
+    y += 7; // balloon popup overlaps the control
+#endif
     xx = gdk_screen_width();
     yy = gdk_screen_height();
     if ( x < 0 ) {

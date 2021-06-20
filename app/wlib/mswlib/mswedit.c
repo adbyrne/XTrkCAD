@@ -35,6 +35,7 @@ struct wString_t {
 		char * valueP;
 		wIndex_t valueL;
 		wStringCallBack_p action;
+		wBool_t enter_pressed;	/**< flag if enter was pressed */
 		};
 
 #ifdef LATER
@@ -58,26 +59,22 @@ struct wFloat_t {
 
 static XWNDPROC oldEditProc = NULL;
 static XWNDPROC newEditProc;
-static void triggerString( wControl_p b );
+static void triggerString( wString_p b );
 #ifdef LATER
 static void triggerInteger( wControl_p b );
 static void triggerFloat( wControl_p b );
 #endif
 
 
-long FAR PASCAL _export pushEdit(
+LRESULT FAR PASCAL _export pushEdit(
 		HWND hWnd,
 		UINT message,
-		UINT wParam,
-		LONG lParam )
+		WPARAM wParam,
+		LPARAM lParam )
 {
 
-#ifdef WIN32
-	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
-	wControl_p b = mswMapIndex(inx);
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
+	wString_p b = (wString_p)mswMapIndex(inx);
 
 	switch (message)
 	{
@@ -86,14 +83,14 @@ long FAR PASCAL _export pushEdit(
 	        switch (wParam) {
 	        case VK_RETURN:
 	            triggerString(b);
-	            return (0L);
+	            return (LRESULT)0;
 	            break;
 	        case 0x1B:
 	        case 0x09:
 	            SetFocus(((wControl_p)(b->parent))->hWnd);
 	            SendMessage(((wControl_p)(b->parent))->hWnd, WM_CHAR,
 	                        wParam, lParam);
-	            return 0L;
+	            return (LRESULT)0;
 	        }
 	    }
 	    break;
@@ -116,25 +113,21 @@ void wStringSetValue(
 		const char * arg )
 {
 	WORD len = (WORD)strlen( arg );
-	SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)arg );
-#ifdef WIN32
-	SendMessage( b->hWnd, EM_SETSEL, 0, -1 );
-	SendMessage( b->hWnd, EM_SCROLLCARET, 0, 0L );
-#else
-	SendMessage( b->hWnd, EM_SETSEL, 0, MAKELPARAM(len,len) );
-#endif
-	SendMessage( b->hWnd, EM_SETMODIFY, FALSE, 0L );
+	SendMessage( b->hWnd, WM_SETTEXT, (WPARAM)0, (LPARAM)arg );
+	SendMessage( b->hWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1 );
+	SendMessage( b->hWnd, EM_SCROLLCARET, (WPARAM)0, (LPARAM)0 );
+	SendMessage( b->hWnd, EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0 );
 }
 
 
 void wStringSetWidth(
 		wString_p b,
-		wPos_t w )
+		wWinPix_t w )
 {
 	int rc;
 	b->w = w;
 	rc = SetWindowPos( b->hWnd, HWND_TOP, 0, 0,
-				b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
+		b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
 }
 
 
@@ -142,7 +135,7 @@ const char * wStringGetValue(
 		wString_p b )
 {
 	static char buff[1024];
-	SendMessage( b->hWnd, WM_GETTEXT, sizeof buff, (DWORD)buff );
+	SendMessage( b->hWnd, WM_GETTEXT, (WPARAM)sizeof buff, (LPARAM)buff );
 	return buff;
 }
 
@@ -157,13 +150,17 @@ const char * wStringGetValue(
 static char *getString(wString_p bs)
 {
     char *tmpBuffer = NULL;
-    UINT chars = SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, 0L);
+    UINT chars = (UINT)SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, (LPARAM)0);
 
     if (chars) {
         tmpBuffer = malloc(chars > sizeof(WORD)? chars + 1 : sizeof(WORD) + 1);
         *(WORD *)tmpBuffer = chars;
-        SendMessage(bs->hWnd, (UINT)EM_GETLINE, 0, (LPARAM)tmpBuffer);
+        SendMessage(bs->hWnd, (UINT)EM_GETLINE, (WPARAM)0, (LPARAM)tmpBuffer);
         tmpBuffer[chars] = '\0';
+    } else {
+	    tmpBuffer = malloc(2);
+	    tmpBuffer[0] = '\n';
+	    tmpBuffer[1] = '\0';
     }
 
     return (tmpBuffer);
@@ -177,19 +174,21 @@ static char *getString(wString_p bs)
  */
 
 static void triggerString(
-    wControl_p b)
+    wString_p b)
 {
-    wString_p bs = (wString_p)b;
+	const char *output = "\n";
 
-    char *enteredString = getString(bs);
+    char *enteredString = getString(b);
     if (enteredString)
     {
-        if (bs->valueP) {
-            strcpy(bs->valueP, enteredString);
+        if (b->valueP) {
+            strcpy(b->valueP, enteredString);
         }
-		if (bs->action) {
-            bs->action(enteredString, bs->data);
+		if (b->action) {
+			b->enter_pressed = TRUE;
+			b->action(output, b->data);
         }
+
 		free(enteredString);
 	}
 }
@@ -210,7 +209,7 @@ LRESULT stringProc(
     case WM_COMMAND:
         switch (WCMD_PARAM_NOTF) {
         case EN_KILLFOCUS:
-            modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, 0, 0L);
+            modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, (WPARAM)0, (LPARAM)0);
             if (!modified) {
                 break;
             }
@@ -226,7 +225,7 @@ LRESULT stringProc(
                 }
                 free(enteredString);
             }
-            SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L);
+            SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0);
         }
         break;
     }
@@ -243,12 +242,12 @@ static callBacks_t stringCallBacks = {
 
 wString_p wStringCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		char	*valueP,
 		wIndex_t valueL,
 		wStringCallBack_p action,
@@ -269,34 +268,30 @@ wString_p wStringCreate(
 	if (option & BO_READONLY)
 		style |= ES_READONLY;
 
-#ifdef WIN32
 	b->hWnd = CreateWindowEx( WS_EX_CLIENTEDGE, "EDIT", NULL,
 						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
 						b->x, b->y,
 						width, mswEditHeight,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
-#else
-	b->hWnd = CreateWindow( "EDIT", NULL,
-						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
-						b->x, b->y,
-						width, mswEditHeight,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
-#endif
+						((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(STRING)");
 		return b;
 	}
 
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
-	oldEditProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC );
+	oldEditProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWLP_WNDPROC);
+	SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)newEditProc);
+#ifdef _OLDCODE
+	oldEditProc = (XWNDPROC)GetWindowLongPtr(b->hWnd, GWL_WNDPROC );
 	SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newEditProc );
+#endif // WIN64
 
 	if (b->valueP) {
-		SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)b->valueP );
+		SendMessage( b->hWnd, WM_SETTEXT, (WPARAM)0, (LPARAM)b->valueP );
 	}
-	SendMessage( b->hWnd, EM_SETMODIFY, FALSE, 0L );
+	SendMessage( b->hWnd, EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0 );
 	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
+		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 	GetWindowRect( b->hWnd, &rect );
 	b->w = rect.right - rect.left;
 	b->h = rect.bottom - rect.top;
@@ -466,12 +461,12 @@ static callBacks_t integerCallBacks = {
 
 wInteger_p wIntegerCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		long	low,
 		long	high,
 		long	*valueP,
@@ -504,10 +499,7 @@ wInteger_p wIntegerCreate(
 		return b;
 	}
 
-#ifdef CONTROL3D
-	Ctl3dSubclassCtl( b->hWnd);
-#endif
-		  
+	  
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
 	oldEditProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC );
 	SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newEditProc );
@@ -690,12 +682,12 @@ static callBacks_t floatCallBacks = {
 
 wFloat_p wFloatCreate(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
 		const char	* labelStr,
 		long	option,
-		POS_T	width,
+		wWinPix_t	width,
 		double	low,
 		double	high,
 		double	*valueP,
@@ -728,9 +720,6 @@ wFloat_p wFloatCreate(
 		return b;
 	}
 
-#ifdef CONTROL3D
-	Ctl3dSubclassCtl( b->hWnd);
-#endif
 	
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
 	oldEditProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC );

@@ -20,19 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-  #include <io.h>
-  #include <windows.h>
-#else
-  #include <errno.h>
-#endif
-
 #include <xtrkcad-config.h>
-#include <locale.h>
-#include <assert.h>
 
 #include <dynstring.h>
 
@@ -40,11 +28,10 @@
 #include "custom.h"
 #include "dxfformat.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
+#include "draw.h"
+#include "common-ui.h"
 
 static struct wFilSel_t * exportDXFFile_fs;
 
@@ -131,22 +118,21 @@ static void DxfBitMap(
 {
 }
 
-static void DxfFillPoly(
+static void DxfPoly(
     drawCmd_p d,
     int cnt,
     coOrd * pts,
 	int * types,
     wDrawColor color,
 	wDrawWidth width,
-	int fill,
-	int open )
+	drawFill_e eOpts )
 {
     int inx;
 
     for (inx=1; inx<cnt; inx++) {
         DxfLine(d, pts[inx-1], pts[inx], width, color);
     }
-    if (!open)
+    if (eOpts != DRAW_OPEN)
     	DxfLine(d, pts[cnt-1], pts[0], width, color);
 }
 
@@ -157,14 +143,27 @@ static void DxfFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
 }
 
 
+static void DxfRectangle(drawCmd_p d, coOrd orig, coOrd size, wDrawColor color, drawFill_e eOpts)
+{
+	coOrd p[4];
+	// p1 p2
+	// p0 p3
+	p[0].x = p[1].x = orig.x;
+	p[2].x = p[3].x = orig.x+size.x;
+	p[0].y = p[3].y = orig.y;
+	p[1].y = p[2].y = orig.y+size.y;
+	DxfPoly( d, 4, p, NULL, color, 0, eOpts );
+}
+
+
 static drawFuncs_t dxfDrawFuncs = {
-    0,
     DxfLine,
     DxfArc,
     DxfString,
     DxfBitMap,
-    DxfFillPoly,
-    DxfFillCircle
+    DxfPoly,
+    DxfFillCircle,
+    DxfRectangle
 };
 
 static drawCmd_t dxfD = {
@@ -177,7 +176,6 @@ static int DoExportDXFTracks(
     void * data)
 {
     time_t clock;
-    char *oldLocale;
 	DynString command = NaS;
 	FILE * dxfF;
 
@@ -195,7 +193,7 @@ static int DoExportDXFTracks(
         return FALSE;
     }
 
-    oldLocale = SaveLocale("C");
+    SetCLocale();
     wSetCursor(mainD.d, wCursorWait);
     time(&clock);
  
@@ -210,7 +208,7 @@ static int DoExportDXFTracks(
 	fputs(DynStringToCStr(&command), dxfF);
 
     fclose(dxfF);
-    RestoreLocale(oldLocale);
+    SetUserLocale();
     Reset();
     wSetCursor(mainD.d, defaultCursor);
     return TRUE;
@@ -220,7 +218,7 @@ static int DoExportDXFTracks(
 * Create and show the dialog for selected the DXF export filename
 */
 
-void DoExportDXF(void)
+void DoExportDXF(void* unused )
 {
     //if (selectedTrackCount <= 0) {
     //    ErrorMessage(MSG_NO_SELECTED_TRK);

@@ -20,31 +20,18 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "include/utf8convert.h"
-
-#if _MSC_VER >1300
-#define stricmp( a, b ) _stricmp(a, b )
-#endif
+#include "common-ui.h"
 
 static long paramCheckSum;
 
@@ -58,7 +45,7 @@ GetCompatibilityFunction GetCompatibility[] = {
 	GetCarPartCompatibility
 };
 
-#define COMPATIBILITYCHECKSCOUNT (sizeof(GetCompatibility)/sizeof(GetCompatibility[0]))
+#define COMPATIBILITYCHECKSCOUNT COUNT(GetCompatibility)
 
 /**
  * Check whether parameter file is still loaded
@@ -147,15 +134,36 @@ void SetParamFileState(int index)
 	enum paramFileState newState;
 	SCALEINX_T scale = GetLayoutCurScale();
 
-	for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
-		state != PARAMFILE_UNLOADED; i++) {
-		newState = (*GetCompatibility[i])(index, scale);
-		if (newState > state || newState == PARAMFILE_UNLOADED) {
-			state = newState;
+	//Set yet?
+	if (scale>=0) {
+		for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
+			state != PARAMFILE_UNLOADED; i++) {
+			newState = (*GetCompatibility[i])(index, scale);
+			if (newState > state || newState == PARAMFILE_UNLOADED) {
+				state = newState;
+			}
 		}
 	}
 
 	paramFileInfo(index).trackState = state;
+}
+
+/**
+ * Check whether file exists and is readable
+ *
+ * \param  file The file.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+ 
+static bool
+CheckFileReadable(const char *file)
+{
+	if(!access( file, R_OK )) {
+			return TRUE;
+	} else {
+		return FALSE;
+	}
 }
 
 /**
@@ -168,15 +176,18 @@ void SetParamFileState(int index)
 int
 ReadParamFile(const char *fileName)
 {
-	DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
-	curParamFileIndex = paramFileInfo_da.cnt - 1;
-	paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
-	paramFileInfo(curParamFileIndex).valid = TRUE;
-	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
-	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
+	if (!CheckFileReadable(fileName)) {
+		return(-1);
+	} else {
+		DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
+		curParamFileIndex = paramFileInfo_da.cnt - 1;
+		paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
+		paramFileInfo(curParamFileIndex).valid = TRUE;
+		paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
+		paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
-	SetParamFileState(curParamFileIndex);
-
+		SetParamFileState(curParamFileIndex);
+	}
 	return (curParamFileIndex);
 }
 
@@ -223,7 +234,6 @@ bool ReadParams(
 	long checkSum = 0;
 	BOOL_T checkSummed;
 	paramVersion = -1;
-	char *oldLocale = NULL;
 
 	if (dirName) {
 		MakeFullpath(&paramFileName, dirName, fileName, NULL);
@@ -237,12 +247,12 @@ bool ReadParams(
 
 	//LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	paramFile = fopen(paramFileName, "r");
 	if (paramFile == NULL) {
 		/* Reset the locale settings */
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName,
 			strerror(errno));
@@ -254,7 +264,7 @@ bool ReadParams(
 	checkSummed = FALSE;
 	BOOL_T skip = false;
 	int skipLines = 0;
-	while (paramFile && (fgets(paramLine, 256, paramFile)) != NULL) {
+	while (paramFile && (fgets(paramLine, 1024, paramFile)) != NULL) {
 		paramLineNum++;
 		Stripcr(paramLine);
 		if (strncmp(paramLine, "CHECKSUM ", 9) == 0) {
@@ -279,15 +289,14 @@ bool ReadParams(
 				if (paramFile) {
 					fclose(paramFile);
 				}
-				RestoreLocale(oldLocale);
-
+				SetUserLocale();
 				return FALSE;
 			}
 			oldFile = paramFile;
 			oldLineNum = paramLineNum;
 			oldCheckSum = paramCheckSum;
 			if (!ReadParams(key, dirName, cp)) {
-				RestoreLocale(oldLocale);
+				SetUserLocale();
 				return FALSE;
 			}
 			paramFile = oldFile;
@@ -300,20 +309,20 @@ bool ReadParams(
 			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 9);
 #endif
 			curContents = MyStrdup(paramLine + 9);
 			curSubContents = curContents;
 			skip = FALSE;
 		} else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 12);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			curSubContents = MyStrdup(paramLine + 12);
 			skip = FALSE;
 		} else if (strncmp(paramLine, "PARAM ", 6) == 0) {
-			paramVersion = strtol(paramLine + 8, &cp, 10);
+			paramVersion = strtol(paramLine + 6, &cp, 10);
 			if (cp)
 				while (*cp && isspace((unsigned char)*cp)) cp++;
 			if (paramVersion > iParamVersion) {
@@ -358,7 +367,7 @@ bool ReadParams(
 						free(paramFileName);
 						paramFileName = NULL;
 					}
-					RestoreLocale(oldLocale);
+					SetUserLocale();
 					return FALSE;
 				}
 			}
@@ -373,7 +382,7 @@ bool ReadParams(
 			if (paramFile) {
 				fclose(paramFile);
 			}
-			RestoreLocale(oldLocale);
+			SetUserLocale();
 
 			NoticeMessage(MSG_PROG_CORRUPTED, _("Ok"), NULL, paramFileName);
 
@@ -387,7 +396,7 @@ bool ReadParams(
 	}
 	free(paramFileName);
 	paramFileName = NULL;
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	return TRUE;
 }

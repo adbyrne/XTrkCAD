@@ -4,6 +4,158 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.1 GA]
+
+## Bugs
+
++ Fix Bezier Line Joins when inverted
++ Fix print of page numbers
++ Invert edge rulers on Print so they show
++ Fix split of arcs and circles 
++ Block memory allocation fixes
++ Fix issue when placing wrong Turnout after Esc
++ Update Layout when changes are made in order to allow save settings properly
++ Draw parameters with negative segments properly in the HotBar
++ Fix issues with Describe for Draw Objects, seperate Angle from Rotate By, make Lock to Origin work properly
++ Remove Flex track from HotBar Popup
++ Fix display of short tracks to not expand
++ Windows: fail on saving Notes
++ Fail on Selecting Notes > 72 characters long
++ Windows fail on Zooming background if memory exhausted during rescale
++ Stop curved lines showing adjustment handles too early in construction
++ Fix right-arrow function with HotBar to be active when there is only one to right
++ Windows: Reset parmlib parms when upgrading correctly
++ Highlight Boxes when using Selected outside Select
++ For commands that do not use selected, deselect all before starting, for others, highlight correctly
++ Linux: Statically link libzip
++ Highlighting for Move/Rotate/Flip 
++ Fix UnGroup and Group of Structures
++ Make Add Circle Icons match the way the constructors work
++ Optimize tie-data performance to cache results
++ Fix Bezier Lines to not have endpoints
++ Fix Add Structure from HotBar
++ Fix tooltips for command icons when i18n languages used
++ Stop Join for Bezier or Cornu Tracks if Easment not set to Cornu
++ Fix Split of Bezier tracks when curve reversed
++ Stop Flip of Bezier lines trying to move endpoints
++ Fix bounding box for almost complete circle arcs
++ Enlarge Text Buffer in Modify Notes to "Huge"
++ Set layer for split line to be same as old line
++ Dont select frozen layer objects on Select All
++ Make Mesurement Submenu appear in Context Menu
+
+
+## Added
+
++ Trim Draw Object Command
++ New Scales added for G and S families
++ Display Path when switching turnout 
++ Add DPI setting to allow precise sizing of 1:1 display to real world size
++ Read Only length for curved lines in Describe
++ Added control of degree of fit in Library Search to only show relevant files for current scale
++ Compatible fit for structures with similar scales
++ Compatble fit for cars with same gauge and similar scales 
++ Definitions for exact fit for some tracks that have same gauge but different scales (e.g., HO for OO).  
++ Updated command line install on Ubuntu
++ Updated debian install
++ Fixes to O scale/gauge - 1:45 now O(EU), gauge for O(Fine) same as others
++ Install and Build Notes now link to updated Wikka
++ Alert user if Parts List used with no listable parts selected or present in layout
++ New O and G narrow-gauge scales
++ Desired radius value for constructing curved track
++ Rewritten path check code
++ SplitLine now works for Polygons and Circles (Filled or not)
++ Modify supported for Protractor to allow other usage scenarios
++ More documentation for Magnetic Snap
+
+## Parameters
+
++ Brio Track
++ Assorted fixes to parm files
++ Double Slip Pathing correction
++ Switch Machines
++ Fn3 NMRA
++ Gn3 Aristo
++ HO Tillig Luna Tramway 
++ N RocoAtlas Code 80
++ N Tram 
++ N ScaleScenes
++ OO9 Peco
+
+## [5.2.0 GA]
+ 
+## Bugs
+
++ Abend when searching in the parmlib
++ SplitLine command places last point at origin
++ Warning-track added to add back system cursor when apporaching the edge of the drawing surface
++ Fix poistion of elevation label for Bezier and Cornu Tracks
++ Improved message when grouping with invalid track
++ Fix some snapping in draw with +Alt
++ Fix Grouping of draw objects with no tracks
+
+## Added
+
++ Option to not suppress system cursor when appliaction cursor shown
+
+## [5.2.0 Beta 3.0] 
+
+## Bugs
+
++ Library parameter file searching 
++ Removal of entries for missing parameter files
++ Path logic when non-track objects are below tracks
++ Better highlighting of moving filled objects
++ Selection highlighting 
++ Snap Grid for Modify Line
++ Move Description anchor fixes
++ Fix handling of frozen track - dont highlight
++ Grade calcualtions for intermediate points
++ Draw command checkpoint between invocations - improves Undo
++ Snap Grid position in draw order
++ Fix Layer button count
++ Restore Linetype on restart
++ Fix adjustable track and Pier memory leaks
++ Auto-upgrade of system parm files for Windows as well
++ Enter key support for Windows entry fields
++ DimLine snapping and editing
++ Rescale Background when Rescaling
++ Fix shortcuts in Modify Polygon
++ Fix Pan Here to be "c" and not "@" which is not available on some keyboards
++ Parallel PolyLine Points corrected
++ Bounding box for large Arcs
++ Change Pivot to Lock in Describe
++ Assorted work on Magnetic Snap for Draw objects
++ Fix Windows resize cursor
++ Pan/Zoom under View and not Change menu
++ Misordered columns on Car Inventory export
++ Contents shown for Help->Contents
++ Stop adding end-cornus to Select after Move
+
+## Added
+
++ Layer Groups
++ Layer Button Hiding
++ Settings Saving/Restoring from named .xset files
++ Cursor Suppression when internal anchor/cursor shown
++ Optional additional detail descriptions for curved tracks 
++ Welsh as a message and UI language
++ Increase Text Note Limit to 10k
++ Debian install integration
++ Updated French and German translations
++ Negative linewidths on Lines mean fixed pixels
++ Russian as a message and UI language
++ Split Draw Command
++ Parallel Line function includes Beziers
++ HotBar left/right buttons auto-repeat if held down
++ Protractor Tool
+
+## Parm Files
+
++ FastTrak O3n file
++ 3x Z scale tracks
+
+
 ## [5.2.0 Beta 2.1]
 
 ### Bugs

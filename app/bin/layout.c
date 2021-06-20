@@ -20,19 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <string.h>
 #include <dynstring.h>
 
 #include "custom.h"
-#include "i18n.h"
 #include "layout.h"
 #include "misc2.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "wlib.h"
 #include "fileio.h"
-#include "utility.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
@@ -65,11 +61,15 @@ static struct sDataLayout thisLayout = {
 };
 
 static paramFloatRange_t r0_90 = { 0, 90 };
-static paramFloatRange_t r1_10000 = { 1, 10000 };
+static paramFloatRange_t r0_10000 = { 0, 10000 };
+static paramFloatRange_t r0_9999999 = { 0, 9999999 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
 static paramFloatRange_t r360_360 = { -360, 360 };
 static paramFloatRange_t rN_9999999 = { -99999, 99999 };
 static paramIntegerRange_t i0_100 = { 0, 100 };
+
+static void SettingsWrite( void  );
+static void SettingsRead( void  );
 
 static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 
@@ -355,13 +355,13 @@ static paramData_p layout_p;
 static paramGroup_t * layout_pg_p;
 static wBool_t file_changed;
 
-EXPORT BOOL_T haveBackground = FALSE;
+bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
 char * noname = "";
 
 void
-BackgroundToggleShow()
+BackgroundToggleShow( void * unused )
 {
 	backgroundVisible = !backgroundVisible;
 	wButtonSetBusy(backgroundB, backgroundVisible);
@@ -371,6 +371,11 @@ BackgroundToggleShow()
 int GetLayoutBackGroundVisible()
 {
 	return(backgroundVisible);
+}
+
+bool HasBackGround()
+{
+	return(haveBackground);
 }
 
 /*****************************************
@@ -385,6 +390,9 @@ LoadBackGroundImage(void)
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
 		return FALSE;
 	}
+	wControlActive((wControl_p)backgroundB, backgroundVisible);
+	wButtonSetBusy(backgroundB, backgroundVisible);
+
 	return TRUE;
 }
 
@@ -437,13 +445,13 @@ void LayoutBackGroundSave(void) {
    	wPrefSetInteger("layout", "BackgroundScreen", thisLayout.props.backgroundScreen);
    	wPrefSetFloat("layout", "BackgroundSize", thisLayout.props.backgroundSize);
 
-   	wPrefFlush();
+   	wPrefFlush("");
 }
 
 /************************************************************
  * Run File Select for the Background Image File
  */
-static void ImageFileBrowse( void * junk )
+static void ImageFileBrowse( void * unused )
 {
 	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), sImageFilePattern, LoadImageFile, NULL );
 
@@ -454,7 +462,7 @@ static void ImageFileBrowse( void * junk )
 /************************************************************
  * Remove the background Image File
  */
-static void ImageFileClear( void * junk)
+static void ImageFileClear( void * unused)
 {
 	char * noname = "";
 	SetLayoutBackGroundFullPath(noname);
@@ -462,49 +470,48 @@ static void ImageFileClear( void * junk)
 	SetName();
 	wControlActive((wControl_p)backgroundB, FALSE);
 	file_changed = TRUE;
+	haveBackground = false;
 	ParamLoadControl(layout_pg_p, 8);
 	MainRedraw();
 }
 
 static paramData_t layoutPLs[] = {
-    { PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
-    { PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
+    { PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+    { PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
     { PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
     { PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
 #define SCALEINX (4)
-    { PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, (void *)120, N_("Scale"), 0, (void*)(CHANGE_SCALE) },
+    { PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
 #define GAUGEINX (5)
-    { PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, (void *)120, N_("     Gauge"), 0, (void *)(CHANGE_SCALE) },
+    { PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
-    { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
-    { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
+    { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+    { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
-	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
-	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
-	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
+	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND),sizeof(backgroundFileName) },
+	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
+	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACKGROUND) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDPOSY (12)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, (void*)(CHANGE_BACKGROUND) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDWIDTH (13)
-	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Size"), 0, (void*)(CHANGE_BACKGROUND) },
+	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDSCREEN (14)
-	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, (void*)(CHANGE_BACKGROUND) },
+	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
-	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r360_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) }
+	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, I2VP(CHANGE_BACKGROUND) },
+	{ PD_MESSAGE, N_("Named Settings File"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+	{ PD_BUTTON, SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, I2VP(0) },
+	{ PD_BUTTON, SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, I2VP(0) }
 
 };
 
-static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, sizeof layoutPLs / sizeof layoutPLs[0] };
+static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, COUNT( layoutPLs ) };
 
-/**
-* Apply the changes entered to settings
-*
-* \param junk IN unused
-*/
 
-static void LayoutOk(void * junk)
-{
+static void ChangeLayout() {
+
     long changes;
 
     changes = GetChanges(&layoutPG);
@@ -534,6 +541,18 @@ static void LayoutOk(void * junk)
     	LayoutBackGroundSave();
     	file_changed = FALSE;
     }
+}
+
+/**
+* Apply the changes entered to settings
+*
+* \param unused IN unused
+*/
+
+static void LayoutOk(void * unused)
+{
+
+	ChangeLayout();
 
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);
@@ -546,14 +565,14 @@ static void LayoutOk(void * junk)
 /**
 * Discard the changes entered and replace with earlier values
 *
-* \param junk IN unused
+* \param unused IN unused
 */
 
-static void LayoutCancel(struct wWin_t *junk)
+static void LayoutCancel(struct wWin_t *unused)
 {
     thisLayout.props = *(thisLayout.copyOfLayoutProps);
     ParamLoadControls(&layoutPG);
-    LayoutOk(junk);
+    LayoutOk(unused);
 }
 
 static void LayoutChange(long changes)
@@ -564,7 +583,7 @@ static void LayoutChange(long changes)
         }
 }
 
-void DoLayout(void * junk)
+void DoLayout(void * unused)
 {
     SetLayoutRoomSize(mapD.size);
 
@@ -704,16 +723,84 @@ LayoutBackGroundInit(BOOL_T clear) {
 	}
 	char * str = GetLayoutBackGroundFullPath();
 	if (str && str[0]) {
-		if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
+        haveBackground = true;
+        if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
 			SetLayoutBackGroundFullPath(noname);
 			SetLayoutBackGroundPos(zero);
 			SetLayoutBackGroundAngle(0.0);
 			SetLayoutBackGroundScreen(0);
 			SetLayoutBackGroundSize(0.0);
 			LayoutBackGroundSave();
+            haveBackground = false;
 		}
 	} else {
+		haveBackground = false;
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
-
 }
+
+EXPORT int DoSettingsRead(
+		int files,
+		char ** fileName,
+		void * data )
+{
+	char * pref;
+	assert( files == 1 );
+	if (fileName == NULL) wPrefsLoad(NULL);
+	else wPrefsLoad(fileName[0]);
+	// get the preferred scale from the new configuration file
+	pref = wPrefGetString("misc", "scale");
+	if (pref) {
+		char buffer[STR_SHORT_SIZE];
+		strcpy(buffer, pref);
+		DoSetScale(buffer);
+	}
+	//Get command options
+	wPrefGetInteger("DialogItem","cmdopt-preselect",&preSelect,preSelect);
+	wPrefGetInteger("DialogItem","cmdopt-rightclickmode",&rightClickMode,rightClickMode);
+	wPrefGetInteger("DialogItem","cmdopt-selectmode",&selectMode,selectMode);
+	wPrefGetInteger("DialogItem","cmdopt-selectzero",&selectZero,selectZero);
+
+	//Get Toolbar showing
+	wPrefGetInteger( "misc", "toolbarset",&toolbarSet,toolbarSet);
+
+	//Redraw the screen to reflect changes
+	MainProc( mainW, wResize_e, NULL, NULL );
+	return TRUE;
+}
+
+static struct wFilSel_t * settingsRead_fs;
+
+static void SettingsRead( void )
+{
+	if (settingsRead_fs == NULL)
+		settingsRead_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Read Settings"),
+				_("Settings File (*.xset)|*.xset"), DoSettingsRead, NULL );
+	bExample = FALSE;
+	wFilSelect( settingsRead_fs, wGetAppWorkDir());
+}
+
+static int DoSettingsWrite(
+		int files,
+		char ** fileName,
+		void * data )
+{
+	assert( fileName != NULL );
+	assert( files == 1 );
+	wPrefFlush(fileName[0]);
+	return TRUE;
+}
+
+static struct wFilSel_t * settingsWrite_fs;
+
+static void SettingsWrite( void  )
+{
+	ChangeLayout();
+	if ( settingsWrite_fs == NULL )
+		settingsWrite_fs  = wFilSelCreate( mainW, FS_UPDATE, 0, _("Write Settings"),
+				_("Settings File (*.xset)|*.xset"), DoSettingsWrite, NULL );
+	wFilSelect( settingsWrite_fs, wGetAppWorkDir());
+}
+
+
+

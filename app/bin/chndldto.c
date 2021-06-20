@@ -21,17 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-
 #include "ccurve.h"
 #include "cjoin.h"
 #include "compound.h"
 #include "cstraigh.h"
 #include "cundo.h"
-#include "i18n.h"
-#include "messages.h"
 #include "track.h"
-#include "utility.h"
+#include "draw.h"
+#include "common-ui.h"
 
 #define PTRACE(X)
 
@@ -351,9 +348,9 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 }
 
 
-#include "bitmaps/hndldto.xpm"
+#include "bitmaps/turnout-designer.xpm"
 
 EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
+	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(turnout_designer_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
 }

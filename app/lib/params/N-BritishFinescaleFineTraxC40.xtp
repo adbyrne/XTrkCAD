@@ -304,9 +304,11 @@ TURNOUT N "British Finescale Code 40 FineTrax	FineTrax OS8 Single Slipswitch 226
 	END
 
 SUBCONTENTS British Finescale Code 40 FineTrax - Double Slip Switches
-TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS6 Double Slipswicth 160.2mm	2MDS6"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS6 Double Slipswicth 160.2mm	2MDS6" 512
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 6.307087 0.000000 90.000000
 	E 0.044107 0.525586 279.594076
@@ -320,9 +322,11 @@ TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS6 Double Slipswicth 160
 	C 0 0.000000 29.133317 0.708622 -29.133317 0.000076 9.594228
 	C 0 0.000000 -29.133317 5.598386 29.133310 180.000076 9.594228
 	END
-TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS7 Double Slipswitch 179.6mm	2MDS7"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS7 Double Slipswitch 179.6mm	2MDS7" 512
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 7.070866 0.000000 90.000000
 	E 0.036261 0.505057 278.213218
@@ -336,9 +340,11 @@ TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS7 Double Slipswitch 179
 	C 0 0.000000 39.371434 0.708626 -39.371434 0.000076 8.213370
 	C 0 0.000000 -39.371434 6.362135 39.371426 180.000076 8.213370
 	END
-TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS8 Double Slipswitch 200.2mm	2MDS8"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT N "British Finescale Code 40 FineTrax	FineTrax DS8 Double Slipswitch 200.2mm	2MDS8" 512
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 7.881890 0.000000 90.000000
 	E 0.030909 0.492613 277.180762

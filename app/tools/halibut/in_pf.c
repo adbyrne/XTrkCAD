@@ -22,6 +22,8 @@
 typedef struct t1_font_Tag t1_font;
 typedef struct t1_data_Tag t1_data;
 
+font_info *all_fonts;
+
 struct t1_font_Tag {
     t1_data *data;
     size_t length1;
@@ -68,7 +70,7 @@ static t1_data *load_pfb_file(FILE *fp, filepos *pos) {
 	    if (c == EOF) abort();
 	    tail->length |= c << (8 * i);
 	}
-	tail->data = snewn(tail->length, unsigned char);
+	tail->data = snewn((int)tail->length, unsigned char);
 	if (fread(tail->data, 1, tail->length, fp) != tail->length) abort();
     }
 }
@@ -80,15 +82,15 @@ static t1_data *load_pfa_file(FILE *fp, filepos *pos) {
     pos->line = 0;
     ret->type = PFB_ASCII;
     len = 32768;
-    ret->data = snewn(len, unsigned char);
+    ret->data = snewn((int)len, unsigned char);
     for (;;) {
 	got = fread(ret->data + off, 1, len - off, fp);
 	off += got;
 	if (off != len) break;
 	len *= 2;
-	ret->data = sresize(ret->data, len, unsigned char);
+	ret->data = sresize(ret->data, (int)len, unsigned char);
     }
-    ret->data = sresize(ret->data, off, unsigned char);
+    ret->data = sresize(ret->data, (int)off, unsigned char);
     ret->length = off;
     return ret;
 }
@@ -189,7 +191,7 @@ static void pf_identify(t1_font *tf) {
     p++;
     p += strspn(p, " \t");
     len = strcspn(p, " \t");
-    fontname = snewn(len + 1, char);
+    fontname = snewn((int)len + 1, char);
     memcpy(fontname, p, len);
     fontname[len] = 0;
     sfree(rsc.text);
@@ -283,11 +285,11 @@ static void pf_getascii(t1_font *tf, size_t off, size_t len,
     while (td && len) {
 	blk = len < td->length ? len : td->length;
 	if (td->type == PFB_ASCII) {
-	    *bufp = sresize(*bufp, *lenp + blk, char);
+	    *bufp = sresize(*bufp, (int)(*lenp + blk), char);
 	    memcpy(*bufp + *lenp, td->data + off, blk);
 	    *lenp += blk;
 	} else {
-	    *bufp = sresize(*bufp, *lenp + blk * 2 + blk / 39 + 3, char);
+	    *bufp = sresize(*bufp, (int)(*lenp + blk * 2 + blk / 39 + 3), char);
 	    p = *bufp + *lenp;
 	    for (i = 0; i < blk; i++) {
 		if (i % 39 == 0) p += sprintf(p, "\n");
@@ -334,11 +336,11 @@ static void pf_getbinary(t1_font *tf, size_t off, size_t len,
     while (td && len) {
 	blk = len < td->length ? len : td->length;
 	if (td->type == PFB_BINARY) {
-	    *bufp = sresize(*bufp, *lenp + blk, char);
+	    *bufp = sresize(*bufp, (int)(*lenp + blk), char);
 	    memcpy(*bufp + *lenp, td->data + off, blk);
 	    *lenp += blk;
 	} else {
-	    *bufp = sresize(*bufp, *lenp + blk / 2 + 1, char);
+	    *bufp = sresize(*bufp, (int)(*lenp + blk / 2 + 1), char);
 	    p = *bufp + *lenp;
 	    for (i = 0; i < blk; i++) {
 		if (pf_isspace(td->data[off + i])) continue;

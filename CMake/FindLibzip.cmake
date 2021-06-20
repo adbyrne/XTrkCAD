@@ -10,23 +10,44 @@
 #
 
 if(WIN32)
-  find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip
-    DOC "The directory where zip.h resides")
-  find_path( LIBZIP_INCLUDE_DIR_ZIPCONF zipconf.h
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip
-    DOC "The directory where zip.h resides")
-  find_library( LIBZIP_LIBRARY
-    NAMES zip Zip
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip
-    DOC "The libzip library")
-  find_file( LIBZIP_SHAREDLIB
-    NAMES zip.dll Zip.dll
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/libzip)
+  # Folders for x86/x64
+  if (WIN64)
+    find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip
+      DOC "The directory where zip.h resides")
+    find_path( LIBZIP_INCLUDE_DIR_ZIPCONF zipconf.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip
+      DOC "The directory where zip.h resides")
+    find_library( LIBZIP_LIBRARY
+      NAMES zip Zip
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip
+      DOC "The libzip library")
+    find_file( LIBZIP_SHAREDLIB
+      NAMES zip.dll Zip.dll
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/libzip)
+  else (WIN64)
+    find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip
+      DOC "The directory where zip.h resides")
+    find_path( LIBZIP_INCLUDE_DIR_ZIPCONF zipconf.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip
+      DOC "The directory where zip.h resides")
+    find_library( LIBZIP_LIBRARY
+      NAMES zip Zip
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip
+      DOC "The libzip library")
+    find_file( LIBZIP_SHAREDLIB
+      NAMES zip.dll Zip.dll
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/libzip)
+  endif (WIN64)
 else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_LIBZIP QUIET libzip)
@@ -39,8 +60,13 @@ else(WIN32)
     NAMES zipconf.h
     HINTS ${PC_LIBZIP_INCLUDE_DIRS})
 
+if(UNIX AND NOT APPLE)
+  find_library(LIBZIP_LIBRARY
+    NAMES libzip.a zip)
+else(UNIX AND NOT APPLE)
   find_library(LIBZIP_LIBRARY
     NAMES zip)
+endif(UNIX AND NOT APPLE)
 endif(WIN32)
 
 include(FindPackageHandleStandardArgs)

@@ -29,7 +29,6 @@
 #include <commdlg.h>
 #include <stdio.h>
 #include <assert.h>
-#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
 
@@ -49,8 +48,8 @@ HBITMAP mswCreateBitMap(
 		COLORREF fgCol1,
 		COLORREF fgCol2,
 		COLORREF bgCol,
-		wPos_t w,
-		wPos_t h,
+		int w,
+		int h,
 		const char * bits )
 {
 	HDC hDc;
@@ -100,7 +99,7 @@ HBITMAP mswCreateBitMap(
 	return hBitMap;
 }
 
-dynArr_t bitmap_da;
+static dynArr_t bitmap_da;
 #define controlMap(N) DYNARR_N(controlMap_t,controlMap_da,N)
 #define bitmap(N) DYNARR_N(HBITMAP,bitmap_da,N)
 
@@ -252,7 +251,7 @@ void mswDrawIcon(
  * \return    pointer to icon
  */
 
-wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor color )
+wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawColor color )
 {
 	int lineLength;
 	int i, j;
@@ -330,12 +329,13 @@ wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor col
 wIcon_p wIconCreatePixMap( char *pm[])
 {
 	wIcon_p ip;
-	int col, r, g, b, len;
+	int col, r, g, b;
+	size_t len;
 	int width, height;
 	char buff[3];
 	char * cp, * cq, * ptr;
 	int i, j, k;
-	int lineLength;
+	size_t lineLength;
 	unsigned *keys;
 	unsigned numchars;
 	unsigned pixel;
@@ -473,7 +473,7 @@ void wIconSetColor( wIcon_p ip, wDrawColor color )
  */
 
 void
-wIconDraw( wDraw_p d, wIcon_p bm, wPos_t x, wPos_t y )
+wIconDraw( wDraw_p d, wIcon_p bm, wWinPix_t x, wWinPix_t y )
 {
 	mswDrawIcon( d->hDc, (int)x, (int)y, bm, FALSE, 0, 0 );
 }
@@ -489,7 +489,7 @@ wIconDraw( wDraw_p d, wIcon_p bm, wPos_t x, wPos_t y )
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long option, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long option, const struct wIcon_t * iconP )
 {
 	wBitmap_p control;
 	int index;
@@ -502,7 +502,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long option, wIcon_p iconP )
 	control->hWnd = CreateWindow( "STATIC", NULL,
 						style, control->x, control->y,
 						iconP->w, iconP->h,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+						((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 
 	if (control->hWnd == NULL) {
 		mswFail("CreateWindow(BITMAP)");
@@ -510,7 +510,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long option, wIcon_p iconP )
 	}
 	control->h = iconP->h;
 	control->w = iconP->w;
-	control->data = iconP;
+	control->data = (void*)iconP;
 
 	return (wControl_p)control;
 }

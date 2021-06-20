@@ -23,8 +23,7 @@
 #ifndef CUSTOM_H
 #define CUSTOM_H
 
-#include "wlib.h"
-#include "misc.h"
+#include "common.h"
 
 #define ICON_WIDTH		(64)
 #define ICON_HEIGHT		(64)
@@ -46,6 +45,7 @@
 #define BG_FILE			(14)
 #define BG_CONTROL		(15)
 #define BG_EXPORTIMPORT (16)
+#define BG_PRINT		(17)
 #define BG_BIGGAP		(1<<8)
 extern int cmdGroup;
 
@@ -141,7 +141,7 @@ void InitCmdNote();
 void InitCmdUndo( void );
 void InitCmdStruct( wMenu_p menu );
 void InitCmdAboveBelow( void );
-void InitCmdEnumerate( void );
+//void InitCmdEnumerate( void );
 void InitCmdExport( void );
 void InitCmdEasement( void );
 
@@ -152,7 +152,7 @@ void InitLayers( void );
 void InitHotBar( void );
 void InitCarDlg( void );
 BOOL_T Initialize( void );
-void DoEasementRedir( void );
+void DoEasementRedir( void * unused );
 void DoStructDesignerRedir( void );
 void InitNewTurnRedir( wMenu_p );
 

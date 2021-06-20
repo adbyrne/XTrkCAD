@@ -20,44 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <time.h>
-#ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#define R_OK (02)
-#define access _access
-#else
-#include <sys/stat.h>
-#include <errno.h>
-#endif
-#include <stdarg.h>
-#include <locale.h>
-#include <wlib.h>
-
 #include "common.h"
 #include "compound.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "misc.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
+EXPORT int paramHiliteFast = FALSE;
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
@@ -71,7 +43,8 @@ EXPORT char *PREFSECT = "DialogItem";
 static int paramCheckErrorCount = 0;
 static BOOL_T paramCheckShowErrors = FALSE;
 
-static int log_paramLayout;
+static int log_paramLayout = 0;
+static int log_paraminput = 0;
 
 
 /*****************************************************************************
@@ -81,12 +54,12 @@ static int log_paramLayout;
  */
 
 static char * getNumberError;
-static char decodeErrorStr[STR_SHORT_SIZE];
+static char decodeErrorStr[STR_SIZE];
 
 static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 {
 	char *cp=*cpp, *cq;
-	int len;
+	size_t len;
 	*numP = 0;
 	if ( cp == NULL ) {
 		getNumberError = N_("Unexpected End Of String");
@@ -101,7 +74,7 @@ static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 	}
 	len = cq-cp;
 	if ( lenP )
-		*lenP = len;
+		*lenP = (int)len;
 	if ( len > 9 ) {
 		getNumberError = N_("Overflow");
 		return FALSE;
@@ -299,7 +272,7 @@ EXPORT FLOAT_T DecodeFloat(
 		valF = strtod( cp1, &cp2 );
 		if ( *cp2 != 0 ) {
 			/*wStringSetHilight( strCtrl, cp2-cp0, -1 );*/
-			sprintf( decodeErrorStr, _("Invalid Number") );
+			snprintf( decodeErrorStr, sizeof(decodeErrorStr), _("Invalid Number") );
 			*validP = FALSE;
 			return 0.0;
 		}
@@ -318,6 +291,7 @@ FLOAT_T DecodeDistance(
 {
     FLOAT_T valF;
     char *cp0, *cp1, *cpN, c1;
+    // CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
     cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
     cpN += strlen(cpN)-1;
 
@@ -357,7 +331,7 @@ FLOAT_T DecodeDistance(
             wStringSetValue(strCtrl, FormatDistance(valF));
         }
     } else {
-        sprintf(decodeErrorStr, "%s @ %s", _(getNumberError),
+        snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(getNumberError),
                 *cp1?cp1:_("End Of String"));
         valF =	0.0;
     }
@@ -367,8 +341,9 @@ FLOAT_T DecodeDistance(
 
 
 #define N_STRING (10)
-static char formatStrings[N_STRING][40];
-static int formatStringInx;
+static int formatStringInx;					//Index ahead in case of overwrite
+static char formatStrings[N_STRING+1][80];  //Add safety
+
 
 EXPORT char * FormatLong(
 		long valL )
@@ -507,6 +482,9 @@ EXPORT char * FormatSmallDistance(
  *
  */
 
+static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL );
+static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF );
+
 EXPORT void ParamControlActive(
 		paramGroup_p pg,
 		int inx,
@@ -543,13 +521,17 @@ EXPORT void ParamLoadControl(
 	FLOAT_T tmpR;
 	char * valS;
 
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
+		if ( (p->option&PDO_DLGIGNORE) != 0 ) {
+			p->bInvalid = FALSE;
 			return;
+		}
 		if (p->control == NULL || p->valueP == NULL)
 			return;
 		switch ( p->type ) {
 		case PD_LONG:
 			wStringSetValue( (wString_p)p->control, FormatLong( *(long*)p->valueP ) );
+			if ( !ParamIntegerRangeCheck( p, *(long*)p->valueP ) )
+				return;
 			p->oldD.l = *(long*)p->valueP;
 			break;
 		case PD_RADIO:
@@ -583,11 +565,14 @@ EXPORT void ParamLoadControl(
 				valS = FormatFloat( tmpR );
 			}
 			wStringSetValue( (wString_p)p->control, valS );
+			if ( !ParamFloatRangeCheck( p, tmpR ) )
+				break;
 			p->oldD.f = tmpR;
 			break;
 		case PD_STRING:
 			if (p->oldD.s)
 				MyFree( p->oldD.s );
+			ASSERT( p->max_string > 0 );
 			if (p->max_string) {
                 p->oldD.s = MyMalloc(p->max_string);
 				strncpy(p->oldD.s, (char*)p->valueP, p->max_string-1);
@@ -597,6 +582,10 @@ EXPORT void ParamLoadControl(
 			else {
 				p->oldD.s = MyStrdup((char *)p->valueP);
 				wStringSetValue((wString_p)p->control, (char*)p->valueP);
+			}
+			if ( (p->option & PDO_NOTBLANK) && strlen( p->oldD.s ) == 0 ) {
+				ParamHilite( p->group->win, p->control, TRUE );
+				p->bInvalid = TRUE;
 			}
 			break;
 		case PD_MESSAGE:
@@ -623,6 +612,7 @@ EXPORT void ParamLoadControls(
 		paramGroup_p pg )
 {
 	int inx;
+	LOG( log_paraminput, 1, ( "ParamLoadControls( %s )\n", pg->nameStr ) );
 	for ( inx=0; inx<pg->paramCnt; inx++ )
 		ParamLoadControl( pg, inx );
 }
@@ -645,13 +635,17 @@ EXPORT long ParamUpdate(
 			continue;
 		if ( p->control == NULL )
 			continue;
+		if ( p->bInvalid == TRUE )
+			break;
 		switch ( p->type ) {
 		case PD_LONG:
 			stringV = wStringGetValue( (wString_p)p->control );
 			longV = atol( stringV );
+			if ( ! ParamIntegerRangeCheck( p, longV ) )
+				break;
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(long*)p->valueP = longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -662,7 +656,7 @@ EXPORT long ParamUpdate(
 			longV = wRadioGetValue( (wChoice_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(long*)p->valueP = longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -673,7 +667,7 @@ EXPORT long ParamUpdate(
 			longV = wToggleGetValue( (wChoice_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(long*)p->valueP = longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -686,7 +680,7 @@ EXPORT long ParamUpdate(
 			longV = wListGetIndex( (wList_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(wIndex_t*)p->valueP = (wIndex_t)longV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &longV );
@@ -697,7 +691,7 @@ EXPORT long ParamUpdate(
 			dc = wColorSelectButtonGetColor( (wButton_p)p->control );
 			if (dc != p->oldD.dc) {
 				p->oldD.dc = dc;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(wDrawColor*)p->valueP = dc;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
 					pg->changeProc( pg, inx, &longV ); /* COLORNOP */
@@ -715,9 +709,11 @@ EXPORT long ParamUpdate(
 			}
 			if ( !valid )
 				break;
+			if ( ! ParamFloatRangeCheck( p, floatV ) )
+				break;
 			if (floatV != p->oldD.f) {
 				p->oldD.f = floatV;
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
+				if ( p->valueP)
 					*(FLOAT_T*)p->valueP = floatV;
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, &floatV );
@@ -726,24 +722,24 @@ EXPORT long ParamUpdate(
 			break;
 		case PD_STRING:
 			stringV = wStringGetValue( (wString_p)p->control );
+			if ( (p->option & PDO_NOTBLANK) && stringV [0] == '\0' ) {
+				p->bInvalid = TRUE;
+				break;
+			}
 			if ( strcmp( stringV, p->oldD.s ) != 0 ) {
 				if (p->oldD.s)
 					MyFree( p->oldD.s );
 				p->oldD.s = MyStrdup( stringV );
 				if ( p->valueP ) {
-					if (p->option & PDO_STRINGLIMITLENGTH ) {
-						strncpy((char*)p->valueP, stringV, p->max_string-1);
-						((char *)p->valueP)[p->max_string - 1] = '\0';
-						if (strlen(stringV) > p->max_string-1) {
-							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, p->max_string-1);
-						}
-					}
-					else {
-						strcpy((char*)p->valueP, stringV);
+					strncpy((char*)p->valueP, stringV, p->max_string-1);
+					((char *)p->valueP)[p->max_string - 1] = '\0';
+					if (strlen(stringV) > p->max_string-1) {
+						NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, p->max_string-1);
 					}
 				}
 
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
+					// CAST_AWAY_CONST: param 3 should be const but its a big change
 					 pg->changeProc( pg, inx, CAST_AWAY_CONST stringV );
 				change |= (1L<<inx);
 			}
@@ -952,16 +948,10 @@ static long ParamIntRestore(
 			break;
 		case PD_STRING:
 			if ( oldP->s && strcmp((char*)p->valueP,oldP->s) != 0 ) {
-				if (p->max_string && (p->option & PDO_STRINGLIMITLENGTH)) {
-					((char*)p->valueP)[0] = '\0';
-					strncat((char*)p->valueP,oldP->s,p->max_string-1);
-					if (p->control)
-						wStringSetValue( (wString_p)p->control, (char*)p->valueP );
-				} else {
-					strcpy( (char*)p->valueP, oldP->s );
-					if (p->control)
-						wStringSetValue( (wString_p)p->control, oldP->s );
-				}
+				((char*)p->valueP)[0] = '\0';
+				strncat((char*)p->valueP,oldP->s,p->max_string-1);
+				if (p->control)
+					wStringSetValue( (wString_p)p->control, (char*)p->valueP );
 				change |= (1L<<inx);
 			}
 			break;
@@ -1048,12 +1038,13 @@ static long ParamRestore( paramGroup_p pg )
 
 static dynArr_t paramGroups_da;
 #define paramGroups(N) DYNARR_N( paramGroup_p, paramGroups_da, N )
+static BOOL_T paramGroups_init = FALSE;
 
 
 
 EXPORT void ParamRegister( paramGroup_p pg )
 {
-	paramData_p p;
+	paramData_t * p;
 	const char * cp;
 	WDOUBLE_T tmpR;
 	long valL;
@@ -1061,13 +1052,16 @@ EXPORT void ParamRegister( paramGroup_p pg )
 	char prefName1[STR_SHORT_SIZE];
 	const char *prefSect2, *prefName2;
 
+	if (!paramGroups_init) ParamInit();
+
 	DYNARR_APPEND( paramGroup_p, paramGroups_da, 10 );
 	paramGroups(paramGroups_da.cnt-1) = pg;
-	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
+	int i;
+	for ( i=0, p=pg->paramPtr; i<(pg->paramCnt); p++, i++ ) {
 		p->group = pg;
 		if ( p->nameStr == NULL )
 			continue;
-		sprintf( prefName1, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName1, sizeof(prefName1), "%s-%s", pg->nameStr, p->nameStr );
 		if ( p->type != PD_MENUITEM ) {
 			(void)GetBalloonHelpStr( prefName1 );
 		}
@@ -1174,21 +1168,22 @@ EXPORT void ParamUpdatePrefs( void )
 	paramData_p p;
 	long rgb;
 	char prefName[STR_SHORT_SIZE];
-	int len;
+	size_t len;
 	int col;
 	char * cp;
-	static wPos_t * colWidths;
+	static wWinPix_t * colWidths;
 	static int maxColCnt = 0;
 	paramListData_t * listDataP;
 
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
 	  pg = paramGroups(inx);
+	  if (pg->nameStr == NULL) continue;
 	  for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
 		if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 )
 			continue;
 		if ( (p->option&PDO_DLGIGNORE) != 0 )
 			continue;
-		sprintf( prefName, "%s-%s", pg->nameStr, p->nameStr );
+		snprintf( prefName, sizeof(prefName), "%s-%s", pg->nameStr, p->nameStr );
 		switch ( p->type ) {
 		case PD_LONG:
 		case PD_RADIO:
@@ -1200,15 +1195,15 @@ EXPORT void ParamUpdatePrefs( void )
 			if ( p->control && listDataP->colCnt > 0 ) {
 				if ( maxColCnt < listDataP->colCnt ) {
 					if ( maxColCnt == 0 )
-						colWidths = (wPos_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
+						colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
 					else
-						colWidths = (wPos_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof * colWidths );
+						colWidths = (wWinPix_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof * colWidths );
 					maxColCnt = listDataP->colCnt;
 				}
 				len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
 				cp = message;
 				for ( col=0; col<len; col++ ) {
-					sprintf( cp, "%d ", colWidths[col] );
+					sprintf( cp, "%ld ", colWidths[col] );
 					cp += strlen(cp);
 				}
 				*cp = '\0';
@@ -1360,7 +1355,7 @@ static void ParamButtonPush( void * dp )
 		if ( p->valueP )
 			((wButtonCallBack_p)(p->valueP))( p->context );
 		else if ( p->group->changeProc)
-			 p->group->changeProc( p->group, p-p->group->paramPtr, NULL);
+			 p->group->changeProc( p->group, (int)(p-p->group->paramPtr), NULL);
 	}
 }
 
@@ -1376,7 +1371,33 @@ static void ParamChoicePush( long valL, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((long*)(p->valueP)) = valL;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, &valL);
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL);
+}
+
+
+static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
+{
+	if ( inPlayback )
+		return TRUE;
+	paramIntegerRange_t * irangeP = (paramIntegerRange_t*)p->winData;
+	wBool_t bInvalid = p->bInvalid;
+	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
+		 ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
+		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
+			sprintf( message, _("Enter a value > %ld"), irangeP->low );
+		else if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
+			 sprintf( message, _("Enter a value < %ld"), irangeP->high );
+		else
+			 sprintf( message, _("Enter a value between %ld and %ld"), irangeP->low, irangeP->high );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, message );
+		p->bInvalid = TRUE;
+		LOG( log_paraminput, 1, ( " -> RangeError\n" ) );
+		ParamHilite( p->group->win, p->control, p->bInvalid );
+		return FALSE;
+	}
+	p->bInvalid = FALSE;
+	return TRUE;
 }
 
 
@@ -1386,39 +1407,31 @@ static void ParamIntegerPush( const char * val, void * dp )
 	long valL;
 	char * cp;
 	const char * value;
-	paramIntegerRange_t * irangeP;
 
-	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & BO_ENTER)) {
+	wBool_t bInvalid = p->bInvalid;
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
 	} else {
+		value = val;
 		p->enter_pressed = FALSE;
-		value = CAST_AWAY_CONST val;
 	}
+	LOG( log_paraminput, 1, ( "ParamIntegerPush( %s Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
 
-
-	while ( isspace((unsigned char)*value)) value++;
 	valL = strtol( value, &cp, 10 );
-
-
-	//wControlSetBalloon( p->control, 0, -5, NULL );
-	if ( value == cp ) {
-		wControlSetBalloon( p->control, 0, -5, _("Invalid Number") );
+	for ( ; isspace( (unsigned char)*cp); cp++ );
+	if ( *cp != '\0' ) {
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, _("Invalid Number") );
+		p->bInvalid = TRUE;
+		LOG( log_paraminput, 1, ( " -> InvalidNumber\n" ) );
+		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
-	irangeP = (paramIntegerRange_t*)p->winData;
-	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
-		 ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
-		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
-			sprintf( message, _("Enter a value > %ld"), irangeP->low );
-		else if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
-			 sprintf( message, _("Enter a value < %ld"), irangeP->high );
-		else
-			 sprintf( message, _("Enter a value between %ld and %ld"), irangeP->low, irangeP->high );
-		wControlSetBalloon( p->control, 0, -5, message );
+	if ( ! ParamIntegerRangeCheck( p, valL ) )
 		return;
-	}
-	wControlSetBalloon( p->control, 0, -5, NULL );
+	wControlSetBalloon( p->control, 0, 0, NULL );
+	p->bInvalid = FALSE;
 
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, valL );
@@ -1427,8 +1440,40 @@ static void ParamIntegerPush( const char * val, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((long*)(p->valueP)) = valL;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, &valL);
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL);
+	ParamHilite( p->group->win, p->control, p->bInvalid );
+	LOG( log_paraminput, 1, ( " -> %ld\n", valL ) );
 }
+
+
+static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
+{
+	if ( inPlayback )
+		return TRUE;
+	paramFloatRange_t * frangeP = (paramFloatRange_t*)p->winData;
+	wBool_t bInvalid = p->bInvalid;
+	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
+		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
+		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
+			sprintf( message, _("Enter a value > %s"),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low) );
+		else if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
+			 sprintf( message, _("Enter a value < %s"),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
+		else
+			 sprintf( message, _("Enter a value between %s and %s"),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
+				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, message );
+		p->bInvalid = TRUE;
+		ParamHilite( p->group->win, p->control, p->bInvalid );
+		return FALSE;
+	}
+	p->bInvalid = FALSE;
+	return TRUE;
+}
+
 
 /**
  * Checks the entered value in a float field. Accepts data entered in the different
@@ -1445,14 +1490,16 @@ static void ParamFloatPush( const char * val, void * dp )
 	FLOAT_T valF;
 	BOOL_T valid;
 	const char * value;
-	paramFloatRange_t * frangeP;
-	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
+
+	wBool_t bInvalid = p->bInvalid;
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
 	} else {
 		value = val;
 		p->enter_pressed = FALSE;
 	}
+	LOG( log_paraminput, 1, ( "ParamFloatPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
 
 	if (p->option & PDO_DIM) {
 		valF = DecodeDistance( (wString_p)p->control, &valid );
@@ -1461,28 +1508,17 @@ static void ParamFloatPush( const char * val, void * dp )
 		if (p->option & PDO_ANGLE)
 			valF = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF:-valF );
 	}
-	// wControlSetBalloon( p->control, 0, -5, NULL );
 	if ( !valid ) {
-		wControlSetBalloon( p->control, 0, -5, decodeErrorStr );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, decodeErrorStr );
+		p->bInvalid = TRUE;
+		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
-	frangeP = (paramFloatRange_t*)p->winData;
-	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
-		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
-		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
-			sprintf( message, _("Enter a value > %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low) );
-		else if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
-			 sprintf( message, _("Enter a value < %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
-		else
-			 sprintf( message, _("Enter a value between %s and %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
-		wControlSetBalloon( p->control, 0, -5, message );
+	if ( !ParamFloatRangeCheck( p, valF ) )
 		return;
-	}
-	wControlSetBalloon( p->control, 0, -5, NULL );
+	wControlSetBalloon( p->control, 0, 0, NULL );
+	p->bInvalid = FALSE;
 
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr, valF );
@@ -1491,7 +1527,8 @@ static void ParamFloatPush( const char * val, void * dp )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((FLOAT_T*)(p->valueP)) = valF;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value ))
-		p->group->changeProc( p->group, p-p->group->paramPtr, &valF );
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valF );
+	ParamHilite( p->group->win, p->control, p->bInvalid );
 }
 
 
@@ -1499,22 +1536,36 @@ static void ParamStringPush( const char * val, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
 	const char * value;
+	wBool_t bInvalid = p->bInvalid;
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
 		fflush( recordF );
 	}
-	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
-			value = wStringGetValue((wString_p)p->control);
-			p->enter_pressed = TRUE;
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' ) {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
 	} else {
+		value = val;
 		p->enter_pressed = FALSE;
-		value = CAST_AWAY_CONST val;
 	}
+	LOG( log_paraminput, 1, ( "ParamStringPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
+	if ( ((!inPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
+		p->bInvalid = TRUE;
+		wControlSetBalloon( p->control, 0, 0, NULL );
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, -h*3/4, _("String cannot be blank") );
+		ParamHilite( p->group->win, p->control, TRUE );
+		return;
+	}
+	wControlSetBalloon( p->control, 0, 0, NULL );
+	p->bInvalid = FALSE;
+	ParamHilite( p->group->win, p->control, FALSE );
 
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST value );
+		// CAST_AWAY_CONST: param 3 should be const but its a big change
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );
 }
 
 
@@ -1535,7 +1586,7 @@ static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op, void * d
 			*(wIndex_t*)(p->valueP) = inx;
 		if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc ) {
 			valL = inx;
-			p->group->changeProc( p->group, p-p->group->paramPtr, &valL );
+			p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL );
 		}
 		break;
 
@@ -1576,11 +1627,11 @@ static void ParamColorSelectPush( void * dp, wDrawColor dc )
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*(wDrawColor*)(p->valueP) = dc;
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc )
-		p->group->changeProc( p->group, p-p->group->paramPtr, &dc );
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &dc );
 }
 
 
-static void ParamDrawRedraw( wDraw_p d, void * dp, wPos_t w, wPos_t h )
+static void ParamDrawRedraw( wDraw_p d, void * dp, wWinPix_t w, wWinPix_t h )
 {
 	paramData_p p = (paramData_p)dp;
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;
@@ -1589,7 +1640,7 @@ static void ParamDrawRedraw( wDraw_p d, void * dp, wPos_t w, wPos_t h )
 }
 
 
-static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wPos_t w, wPos_t h )
+static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w, wDrawPix_t h )
 {
 	paramData_p p = (paramData_p)dp;
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;
@@ -1604,21 +1655,55 @@ static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wPos_t w, wPos_t
 }
 
 
-static void ParamButtonOk(
-		paramGroup_p group )
+EXPORT wBool_t ParamCheckInputs(
+	paramGroup_p group,
+	wControl_p b )
 {
+	wBool_t bInvalid = FALSE;
+	// Check for invalid entries
+	for ( paramData_p p = group->paramPtr; p < &group->paramPtr[group->paramCnt]; p++ ) {
+		ParamHilite( group->win, p->control, p->bInvalid );
+		if ( p->bInvalid == FALSE )
+			continue;
+		LOG( log_paraminput, 1, ( "   %s: Invalid\n", p->nameStr ) );
+		bInvalid = TRUE;
+	}
+	if ( bInvalid ) {
+		// At least 1 invalid entry
+		LOG( log_paraminput, 1, ( "  Group %s Invalid\n", group->nameStr ) );
+		wControlSetBalloon( b, 0, -29, _("Invalid input(s), please correct the hilighted field(s)") );
+		wFlush();
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
+static void ParamButtonOk( void * groupVP )
+{
+	paramGroup_p group = groupVP;
+	wFlush();
+	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
+	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
+		return;
 	if ( recordF && group->nameStr )
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); {
 		fflush( recordF );
 	}
+
 	if ( group->okProc )
-		group->okProc( group->okProc==(paramActionOkProc)wHide?((void*)group->win):group );
+		group->okProc( group );
+
+	wControlSetBalloon( (wControl_p)group->okB, 0, 0, NULL );
+	wFlush();
+
+	LOG( log_paraminput, 1, ( "ParamButtonOk -> Ok\n" ) );
 }
 
 
-static void ParamButtonCancel(
-		paramGroup_p group )
+static void ParamButtonCancel( void * groupVP )
 {
+	paramGroup_p group = groupVP;
 	if ( recordF && group->nameStr ) {
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "cancel" );
 		fflush( recordF );
@@ -1710,28 +1795,43 @@ EXPORT void ParamChange( paramData_p p )
 #endif
 
 
-EXPORT int paramHiliteFast = FALSE;
 EXPORT void ParamHilite(
 		wWin_p win,
 		wControl_p control,
 		BOOL_T hilite )
 {
-	if ( win != NULL && wWinIsVisible(win) == FALSE ) return;
 	if ( control == NULL ) return;
-	if ( !paramTogglePlaybackHilite ) return;
+	LOG(log_paraminput, 2, ("ParamHilite %s\n", hilite?"Set":"Clr" ));
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
-		if ( !paramHiliteFast )
+		if ( inPlayback && !paramHiliteFast )
 			wPause(500);
 	} else {
-		if ( !paramHiliteFast )
-			wPause(500);
+//		if ( inPlayback && !paramHiliteFast )
+//			wPause(500);
 		wControlHilite( control, FALSE );
-		wFlush();
 	}
 }
 
+EXPORT void ParamResetInvalid(
+	wWin_p win )
+{
+	for ( int inx=0; inx<paramGroups_da.cnt; inx++ ) {
+		paramGroup_p pg = paramGroups(inx);
+		if ( pg->win == win ) {
+			LOG( log_paraminput, 1, ( "Reset Invalid: %s\n", pg->nameStr ) );
+			for ( paramData_p p = &pg->paramPtr[0]; p < &pg->paramPtr[pg->paramCnt]; p++ ) {
+				if ( p->bInvalid )
+					LOG( log_paraminput, 1, ( "  %s Invalid\n", p->nameStr ) );
+				ParamHilite( win, p->control, FALSE );
+				wControlSetBalloon( p->control, 0, 0, NULL );
+				p->bInvalid = FALSE;
+			}
+			break;
+		}
+	}
+}
 
 static void ParamPlayback( char * line )
 {
@@ -1739,7 +1839,7 @@ static void ParamPlayback( char * line )
 	paramData_p p;
 	long valL;
 	FLOAT_T valF, valF1;
-	int len, len1, len2;
+	size_t len, len1, len2;
 	wIndex_t inx;
 	void * listContext, * itemContext;
 	long rgb;
@@ -1749,7 +1849,6 @@ static void ParamPlayback( char * line )
 	wAction_t a;
 	coOrd pos;
 	char * valS;
-	char *oldLocale = NULL;
 
 	if ( strncmp( line, "GROUP ", 6 ) == 0 ) {
 #ifdef PGPROC
@@ -1878,9 +1977,9 @@ static void ParamPlayback( char * line )
 				}
 				break;
 			case PD_FLOAT:
-				oldLocale = SaveLocale("C");
+				SetCLocale();
 				valF = valF1 = atof( line+len );
-				RestoreLocale(oldLocale);
+				SetUserLocale();
 				if (p->valueP)
 					*(FLOAT_T*)p->valueP = valF;
 				if (p->option&PDO_DIM) {
@@ -1935,7 +2034,7 @@ static void ParamPlayback( char * line )
 			case PD_MENUITEM:
 				if (p->valueP) {
 					if ( (p->option&IC_PLAYBACK_PUSH) != 0 )
-						PlaybackButtonMouse( (wIndex_t)(long)p->context );
+						PlaybackButtonMouse( (wIndex_t)VP2L(p->context) );
 					((wButtonCallBack_p)(p->valueP))( p->context );
 				}
 				break;
@@ -1981,7 +2080,7 @@ static void ParamCheck( char * line )
 	paramData_p p;
 	long valL;
 	FLOAT_T valF, diffF;
-	int len, len1, len2;
+	size_t len, len1, len2;
 	wIndex_t inx;
 	void * listContext, * itemContext;
 	char * valS;
@@ -2069,7 +2168,7 @@ static void ParamCheck( char * line )
 			case PD_STRING:
 				line += len;
 				while ( *line == ' ' ) line++;
-				valS = CAST_AWAY_CONST wStringGetValue( (wString_p)p->control );
+				wStringGetValue( (wString_p)p->control );
 				if ( strcasecmp( line, (char*)p->valueP ) != 0 ) {
 					expVal = line;
 					actVal = (char*)p->valueP;
@@ -2112,20 +2211,20 @@ static void ParamCheck( char * line )
 static void ParamCreateControl(
 		paramData_p pd,
 		char * helpStr,
-		wPos_t xx,
-		wPos_t yy )
+		wWinPix_t xx,
+		wWinPix_t yy )
 {
-	paramFloatRange_t * floatRangeP;
-	paramIntegerRange_t * integerRangeP;
-	paramDrawData_t * drawDataP;
-	paramTextData_t * textDataP;
+	const paramFloatRange_t * floatRangeP;
+	const paramIntegerRange_t * integerRangeP;
+	const paramDrawData_t * drawDataP;
+	const paramTextData_t * textDataP;
 	paramListData_t * listDataP;
-	wIcon_p iconP;
+	const struct wIcon_t * iconP;
 
 	wWin_p win;
-	wPos_t w;
-	wPos_t colWidth;
-	static wPos_t *colWidths;
+	wWinPix_t w;
+	wWinPix_t colWidth;
+	static wWinPix_t *colWidths;
 	static wBool_t *colRightJust;
 	static wBool_t maxColCnt = 0;
 	int col;
@@ -2149,7 +2248,7 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
 			break;
 		case PD_STRING:
-			w = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)250;
+			w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
 			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush, pd );
 			break;
 		case PD_RADIO:
@@ -2163,23 +2262,23 @@ static void ParamCreateControl(
 			if ( listDataP->colCnt > 1 ) {
 				if ( maxColCnt < listDataP->colCnt ) {
 					if ( maxColCnt == 0 ) {
-						colWidths = (wPos_t*)MyMalloc( listDataP->colCnt * sizeof *colWidths );
+						colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof *colWidths );
 						colRightJust = (wBool_t*)MyMalloc( listDataP->colCnt * sizeof *colRightJust );
 					} else {
-						colWidths = (wPos_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof *colWidths );
+						colWidths = (wWinPix_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof *colWidths );
 						colRightJust = (wBool_t*)MyRealloc( colRightJust, listDataP->colCnt * sizeof *colRightJust );
 					}
 					maxColCnt = listDataP->colCnt;
 				}
 				for ( col=0; col<listDataP->colCnt; col++ ) {
 					colRightJust[col] = listDataP->colWidths[col]<0;
-					colWidths[col] = abs(listDataP->colWidths[col]);
+					colWidths[col] = labs(listDataP->colWidths[col]);
 				}
 				sprintf( message, "%s-%s-%s", pd->group->nameStr, pd->nameStr, "columnwidths" );
 				cp = wPrefGetString( PREFSECT, message );
 				if ( cp != NULL ) {
 				for ( col=0; col<listDataP->colCnt; col++ ) {
-					colWidth = (wPos_t)strtol( cp, &cq, 10 );
+					colWidth = (wWinPix_t)strtol( cp, &cq, 10 );
 					if ( cp == cq )
 						break;
 					colWidths[col] = colWidth;
@@ -2195,7 +2294,7 @@ static void ParamCreateControl(
 			listDataP->height = wControlGetHeight( pd->control );
 			break;
 		case PD_DROPLIST:
-			w = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)100;
+			w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
 			pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
 			break;
 		case PD_COMBOLIST:
@@ -2208,7 +2307,7 @@ static void ParamCreateControl(
             break;
 		case PD_MESSAGE:
 			if ( pd->winData != 0 )
-				w = (wPos_t)(long)pd->winData;
+				w = (wWinPix_t)VP2L(pd->winData);
 			else if (pd->valueP)
 				w = wLabelWidth( _(pd->valueP) );
 			else
@@ -2253,13 +2352,13 @@ static void ParamCreateControl(
 static void ParamPositionControl(
 		paramData_p pd,
 		char * helpStr,
-		wPos_t xx,
-		wPos_t yy )
+		wWinPix_t xx,
+		wWinPix_t yy )
 {
-	paramDrawData_t * drawDataP;
-	paramTextData_t * textDataP;
-	paramListData_t * listDataP;
-	wPos_t winW, winH, ctlW, ctlH;
+	const paramDrawData_t * drawDataP;
+	const paramTextData_t * textDataP;
+	const paramListData_t * listDataP;
+	wWinPix_t winW, winH, ctlW, ctlH;
 
 	if ( pd->type != PD_MENUITEM )
 		wControlSetPos( pd->control, xx, yy );
@@ -2270,7 +2369,7 @@ static void ParamPositionControl(
 		case PD_COMBOLIST:
 		case PD_DROPLIST:
 			if ( pd->type == PD_DROPLIST ) {
-				ctlW = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)100;
+				ctlW = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
 				ctlH = wControlGetHeight( pd->control );
 			} else {
 				listDataP = (paramListData_t*)pd->winData;
@@ -2316,14 +2415,14 @@ static void ParamPositionControl(
 			wTextSetSize( (wText_p)pd->control, ctlW, ctlH );
 			break;
 		case PD_STRING:
-			ctlW = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)250;
+			ctlW = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
 			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-ctlW);
 				wStringSetWidth( (wString_p)pd->control, ctlW );
 			}
 			break;
 		case PD_MESSAGE:
-			ctlW = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)150;
+			ctlW = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)150;
 			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-ctlW);
 				wMessageSetWidth( (wMessage_p)pd->control, ctlW );
@@ -2336,27 +2435,27 @@ static void ParamPositionControl(
 }
 
 
-typedef void (*layoutControlsProc)(paramData_p, char *, wPos_t, wPos_t );
+typedef void (*layoutControlsProc)(paramData_p, char *, wWinPix_t, wWinPix_t );
 static void LayoutControls(
 		paramGroup_p group,
 		layoutControlsProc proc,
-		wPos_t * retW,
-		wPos_t * retH )
+		wWinPix_t * retW,
+		wWinPix_t * retH )
 {
 	struct {
-		struct { wPos_t x, y; } orig, term;
+		struct { wWinPix_t x, y; } orig, term;
 	} controlK, columnK, windowK;
-	wPos_t controlSize_x;
-	wPos_t controlSize_y;
+	wWinPix_t controlSize_x;
+	wWinPix_t controlSize_y;
 	paramData_p pd;
-	wPos_t w;
+	wWinPix_t w;
 	BOOL_T hasBox;
-	wPos_t boxTop;
-	wPos_t boxPos[10];
+	wWinPix_t boxTop;
+	wWinPix_t boxPos[10];
 	int boxCnt = 0;
 	int box;
 	int inx;
-	wPos_t labelW[100];
+	wWinPix_t labelW[100];
 	int lastLabelPos, currLabelPos;
 	char helpStr[STR_SHORT_SIZE], * helpStrP;
 	BOOL_T inCmdButtons = FALSE;
@@ -2618,7 +2717,7 @@ wWin_p ParamCreateDialog(
 		paramChangeProc changeProc )
 {
 	char helpStr[STR_SHORT_SIZE];
-	wPos_t w0, h0;
+	wWinPix_t w0, h0;
 	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
@@ -2636,10 +2735,10 @@ wWin_p ParamCreateDialog(
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
-		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, (wButtonCallBack_p)ParamButtonOk, group );
+		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, ParamButtonOk, group );
 	}
 	if ( group->cancelProc ) {
-		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, (wButtonCallBack_p)ParamButtonCancel, group );
+		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, ParamButtonCancel, group );
 	}
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );
@@ -2674,7 +2773,7 @@ wWin_p ParamCreateDialog(
 EXPORT void ParamLayoutDialog(
 		paramGroup_p pg )
 {
-	wPos_t w, h;
+	wWinPix_t w, h;
 	LayoutControls( pg, ParamPositionControl, &w, &h );
 	w += DlgSepRight;
 	h += DlgSepBottom;
@@ -2717,7 +2816,15 @@ EXPORT void ParamCreateControls(
 
 EXPORT void ParamInit( void )
 {
+	if (paramGroups_init) return;
+
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 	log_paramLayout = LogFindIndex( "paramlayout" );
+	log_paraminput = LogFindIndex( "paraminput" );
+	paramGroups_da.cnt = 0;
+	paramGroups_da.max = 0;
+	paramGroups_da.ptr = NULL;
+	paramGroups_init = TRUE;
+
 }

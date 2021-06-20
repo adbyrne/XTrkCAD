@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
-#ifndef WIN32
-#include <print.h>
-#endif
 #include "mswint.h"
 
 /*
@@ -18,13 +15,9 @@
  */
 
 
-struct wDraw_t print_d;
+static struct wDraw_t print_d;
 
-#ifdef WIN32
-struct tagPDA printDlg;
-#else
-struct tagPD printDlg;
-#endif
+static struct tagPDA printDlg;
 static int printStatus = FALSE;
 static DOCINFO docInfo;
 static double tBorder = 0.0, rBorder = 0.0, bBorder = 0.0, lBorder = 0.0;
@@ -35,7 +28,7 @@ static HPALETTE newPrintPalette;
 static HPALETTE oldPrintPalette;
 
 
-void wPrintClip( wPos_t x, wPos_t y, wPos_t w, wPos_t h )
+void wPrintClip( wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h )
 {
 	wDrawClip( &print_d, x, y, w, h );
 }
@@ -196,9 +189,9 @@ void wPrintSetup( wPrintSetupCallBack_p callback )
 	if (PrintDlg(&printDlg) != 0  && printDlg.hDC) {
 		getPageDim( printDlg.hDC );
 	}
-	if ( callback ) {
-		callback( TRUE );
-	}
+	//if ( callback ) {
+	//	callback( TRUE );
+	//}
 }
 
 const char* wPrintGetName()
@@ -255,8 +248,8 @@ HDC mswGetPrinterDC( void )
 
 
 static wBool_t printAbort = FALSE;
-HWND hAbortDlgWnd;
-FARPROC lpAbortDlg, lpAbortProc;
+static HWND hAbortDlgWnd;
+static FARPROC lpAbortDlg, lpAbortProc;
 static int pageNumber;
 
 int FAR PASCAL mswAbortDlg( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )

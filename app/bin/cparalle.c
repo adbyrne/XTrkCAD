@@ -20,17 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-
 #include "ccurve.h"
 #include "cstraigh.h"
+#include "cselect.h"
 #include "cundo.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "layout.h"
+#include "common-ui.h"
 
 static struct {
 		track_p Trk;
@@ -54,7 +51,7 @@ static paramData_t parSepPLs[] = {
 #define parFactorI 1
 	{   PD_FLOAT, &parSepFactor, "factor", 0, &r_0_10, N_("Radius Factor") }
 };
-static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
+static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, COUNT( parSepPLs ) };
 
 
 static STATUS_T CmdParallel(wAction_t action, coOrd pos)
@@ -71,7 +68,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
     char * labels[3];
     static DIST_T parRFactor;
 
-    parType = (long)commandContext;
+    parType = VP2L(commandContext);
 
     switch (action&0xFF) {
 
@@ -104,6 +101,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         parFactorPD.option &= ~PDO_NORECORD;
         Dpa.anchor_Trk = NULL;
         tempSegs_da.cnt = 0;
+        SetAllTrackSelect( FALSE );
         return C_CONTINUE;
 
     case wActionMove:
@@ -201,7 +199,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			tempSegs_da.cnt = 0;
 			if ((t0=OnTrack(&p, FALSE, TRUE)) != NULL) {
 				ep0 = PickEndPoint(p, t0);
-				if (GetTrkEndTrk(t0,ep0) != NULL) {
+				if (ep0 < 0 || GetTrkEndTrk(t0,ep0) != NULL) {
 					t0 = NULL;
 				} else {
 					p = GetTrkEndPos(t0, ep0);
@@ -214,7 +212,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			p = p1;
 			if ((t1=OnTrack(&p, FALSE, TRUE)) != NULL) {
 				ep1 = PickEndPoint(p, t1);
-				if (GetTrkEndTrk(t1,ep1) != NULL) {
+				if (ep1 < 0 || GetTrkEndTrk(t1,ep1) != NULL) {
 					t1 = NULL;
 				} else {
 					p = GetTrkEndPos(t1, ep1);
@@ -296,8 +294,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 EXPORT void InitCmdParallel( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Parallel"), "cmdParallelSetCmd", _("Parallel") );
-	AddMenuButton( menu, CmdParallel, "cmdParallelTrack", _("Parallel Track"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)0 );
-	AddMenuButton( menu, CmdParallel, "cmdParallelLine", _("Parallel Line"), wIconCreatePixMap(parallel_line_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)1 );
+	AddMenuButton( menu, CmdParallel, "cmdParallelTrack", _("Parallel Track"), wIconCreatePixMap(parallel_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(0) );
+	AddMenuButton( menu, CmdParallel, "cmdParallelLine", _("Parallel Line"), wIconCreatePixMap(parallel_line_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, I2VP(1) );
 	ButtonGroupEnd();
 	ParamRegister( &parSepPG );
 }

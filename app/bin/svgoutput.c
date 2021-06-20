@@ -38,6 +38,7 @@
 
 #include "cselect.h"
 #include "custom.h"
+#include "draw.h"
 #include "include/svgformat.h"
 #include "fileio.h"
 #include "i18n.h"
@@ -185,7 +186,8 @@ static void SvgDrawFillPoly(
     drawCmd_p d,
     int cnt,
     coOrd * pts,
-    wDrawColor color)
+	int * pointer,
+    wDrawColor color, wDrawWidth width, drawFill_e pattern)
 {
     int inx;
 
@@ -204,7 +206,6 @@ static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
 
 
 static drawFuncs_t svgDrawFuncs = {
-    0,
     SvgDrawLine,
     SvgDrawArc,
     SvgDrawString,
@@ -226,17 +227,16 @@ static int DoExportSVGTracks(
     char ** fileName,
     void * data)
 {
-    time_t clock;
 	DynString command = NaS;
 	SVGDocument *svg;
 	SVGParent *svgData;
 	coOrd roomSize;
-	char *oldLocale;
+//	char *oldLocale;
 	
     assert(fileName != NULL);
     assert(cnt == 1);
 
-	oldLocale = SaveLocale("C");
+//	oldLocale = SaveLocale("C");
 	GetLayoutRoomSize(&roomSize);
 
 	SetCurrentPath(SVGPATHKEY, fileName[ 0 ]);
@@ -254,12 +254,12 @@ static int DoExportSVGTracks(
 		NoticeMessage(MSG_OPEN_FAIL, _("Cancel"), NULL, "SVG", fileName[0],
 			strerror(errno));
 		wSetCursor(NULL, wCursorNormal);
-		RestoreLocale(oldLocale);
+//		RestoreLocale(oldLocale);
 		return FALSE;
 	}
 
     Reset();	/**<TODO: was tut das? */
-	RestoreLocale(oldLocale);
+//	RestoreLocale(oldLocale);
     return TRUE;
 }
 

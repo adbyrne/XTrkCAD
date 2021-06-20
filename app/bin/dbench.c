@@ -20,14 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common.h"
 
 /*****************************************************************************
  *
@@ -125,12 +120,13 @@ static dynArr_t benchType_da;
 
 static void AddBenchTypes(
 		long type,
-		char * key,
-		char * defvalue )
+		const char * key,
+		const char * defvalue )
 {
 	benchType_p bt;
-	char *value, *cp, *cq;
-	value = CAST_AWAY_CONST wPrefGetString( "misc", key );
+	const char *value, *cp;
+	char *cq;
+	value = wPrefGetString( "misc", key );
 	if ( value == NULL ) {
 		value = defvalue;
 		wPrefSetString( "misc", key, value );
@@ -140,14 +136,15 @@ static void AddBenchTypes(
 		DYNARR_APPEND( benchType_t, benchType_da, 10 );
 		bt = &benchType(benchType_da.cnt-1);
 		bt->type = type;
-		bt->width = strtol( cq=cp, &cp, 10 );
-		bt->height0 = strtol( cq=cp, &cp, 10 );
-		bt->height1 = strtol( cq=cp, &cp, 10 );
+		bt->width = strtol( cp, &cq, 10 );
+		bt->height0 = strtol( cp=cq, &cq, 10 );
+		bt->height1 = strtol( cp=cq, &cq, 10 );
 		if ( cp == cq ) {
 			NoticeMessage( _("Bad BenchType for %s:\n%s"), _("Continue"), NULL, key, value );
 			benchType_da.cnt--;
 			return;
 		}
+		cp = cq;
 	}
 }
 
@@ -176,7 +173,7 @@ EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
 				sprintf( cp, "%ld\"x%ld\"", bt->width, height );
 			else
 				sprintf( cp, "%ldmm x %ldmm", height*25, bt->width*25 );
-			wListAddValue( choiceL, message, NULL, (void*)benchData );
+			wListAddValue( choiceL, message, NULL, I2VP(benchData) );
 		}
 	}
 	BenchUpdateOrientationList( benchType(0).type<<24, orientL );
@@ -257,15 +254,12 @@ EXPORT void DrawBench(
 		Translate( &pp[1], p0, a-90, width );
 		Translate( &pp[2], p1, a-90, width );
 		Translate( &pp[3], p1, a+90, width );
-		DrawPoly( d, 4, pp, NULL, color1, 0, 1, 0);
+		DrawPoly( d, 4, pp, NULL, color1, 0, DRAW_FILL );
 		/* Draw Outline */
 		if ( /*color1 != color2 &&*/
 			 ( ( d->scale < ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) ) ||	/* big enough scale */
-			   ( d->funcs == &tempSegDrawFuncs ) ) ) {										/* DrawFillPoly didn't draw */
-			DrawLine( d, pp[0], pp[1], 0, color2 );
-			DrawLine( d, pp[1], pp[2], 0, color2 );
-			DrawLine( d, pp[2], pp[3], 0, color2 );
-			DrawLine( d, pp[3], pp[0], 0, color2 );
+			   ( d->funcs == &tempSegDrawFuncs ) ) ) {
+			DrawPoly( d, 4, pp, NULL, color2, 0, DRAW_CLOSED );
 			if ( color1 != color2 && type != B_RECT ) {
 				oldOptions = d->options;
 				if ( type == B_LGRIDER || orient == 1 || orient == 2 ) {
@@ -384,9 +378,9 @@ EXPORT void CountBench(
 	bp->length = length;
 foundBenchEnum:
 	PrintBenchLine( message, bp );
-	iwidth = strlen(message);
-	if ( iwidth > enumerateMaxDescLen)
-		enumerateMaxDescLen = (int)iwidth;
+	size_t width = strlen(message);
+	if ( width > enumerateMaxDescLen)
+		enumerateMaxDescLen = (int)width;
 }
 
 static int Cmp_benchEnum(
@@ -413,7 +407,7 @@ EXPORT void TotalBench( void )
 		bp = &benchEnum(inx);
 		if ( bp->length > 0 ) {
 			PrintBenchLine( title, bp );
-			EnumerateList( 1, 0, title );
+			EnumerateList( 1, 0, title, NULL );
 			bp->length = 0;
 		}
 	}

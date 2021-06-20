@@ -25,7 +25,6 @@
 
 #include "common.h"
 #include "misc.h"
-#include "time.h"
 
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)
@@ -46,8 +45,8 @@ extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
 void LogSet( char *, int );
-int LogFindIndex( char * );
-void LogPrintf( char *, ... );
+int LogFindIndex( const char * );
+void LogPrintf( const char *, ... );
 #define LOG( DBINX, DBLVL, DBMSG ) \
 		if ( DBINX > 0 && logTable( DBINX ).level >= DBLVL ) { \
 				LogPrintf DBMSG ; \
@@ -64,6 +63,7 @@ typedef struct {
 		DIST_T width;
 		DIST_T spacing;
 		} tieData_t, *tieData_p;
+
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -82,7 +82,13 @@ BOOL_T DoSetScale( char * );
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void LoadScaleList( wList_p );
 void LoadGaugeList( wList_p, SCALEDESCINX_T );
-BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
+
+typedef enum {FIT_STRUCTURE, FIT_TURNOUT, FIT_CAR} SCALE_FIT_TYPE_T;
+typedef enum {FIT_NONE, FIT_COMPATIBLE, FIT_EXACT} SCALE_FIT_T;
+SCALE_FIT_T CompatibleScale( SCALE_FIT_TYPE_T, SCALEINX_T, SCALEINX_T );
+
+SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * scale2);
+
 BOOL_T DoSetScaleDesc( void );
 
 extern unsigned int curLayer;
@@ -92,9 +98,11 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 wDrawColor GetLayerColor( unsigned int );
 BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
+void FlipLayer( void * layerVP );
 BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );
+BOOL_T GetLayerHidden( unsigned int);
 void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
 void SetLayerName(unsigned int layer, char* name);
@@ -104,6 +112,7 @@ char * FormatLayerName(unsigned int layerNumber);
 /* dlayers.c */
 void UpdateLayerLists( void );
 void DefaultLayerProperties(void);
+void UpdateLayerDlg( unsigned int );
 void ResetLayers( void );
 void SaveLayers( void );
 void RestoreLayers( void );

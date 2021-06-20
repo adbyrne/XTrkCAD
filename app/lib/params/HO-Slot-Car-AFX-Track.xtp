@@ -346,7 +346,9 @@ TURNOUT HO  "AFX	Banked Curved R12 1/8 Circle	8991"
 	L 0 0.053333 6.363961 -4.886039 8.485281 -2.764719
 	END
 TURNOUT HO  "AFX	HairPin Curved	8992"
-	P "Normal" 1 -7 8 5 -10 -9 -4 0 2 -11 12 6 -14 -13 -3
+# Flip the subpaths so they have the minimum number of negatives
+#	P "Normal" 1 -7 8 5 -10 -9 -4 0 2 -11 12 6 -14 -13 -3
+	P "Normal" 4 9 10 -5 -8 7 -1 0 3 13 14 -6 -12 11 -2
 	E 0.000000 0.000000 270.000000
 	E 0.000000 -1.500000 270.000000
 	E 0.000000 -3.000000 270.000000

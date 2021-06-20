@@ -20,24 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <track.h>
-#include <time.h>
-#include <ctype.h>
-#include <math.h>
-#include <stdarg.h>
-#include "track.h"
-#include <common.h>
-#include <cbezier.h>
-#include <string.h>
-
-#include <tbezier.h>
-
-#include "cjoin.h"
+#include "common.h"
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "misc.h"
+#include "cbezier.h"
+#include "tbezier.h"
+#include "cjoin.h"
 
 
 /*****************************************************************************
@@ -264,7 +254,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 			if ( (segPtr->type == SEG_CRVTRK) ||
 					(segPtr->type == SEG_CRVLIN) ) {
 				/* TODO: be more precise about curved line width */
-				width.x = width.y = segPtr->width/2.0;
+				width.x = width.y = fabs(segPtr->width)/2.0;
 				REORIGIN( pc, segPtr->u.c.center, angle, xlat );
 				a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
 				a1 = segPtr->u.c.a1;
@@ -276,18 +266,25 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 					hi->y = pc.y + radius;
 					break;
 				}
-				if ( a0 + a1 >= 360.0 )
+
+				if ( a0 + a1 >= 360.0  )
 					hi->y = pc.y + radius;
 				if ( a0 < 90.0 && a0+a1 >= 90.0 )
 					hi->x = pc.x + radius;
-				if ( a0 < 180 && a0+a1 >= 180.0 )
+				if ( a0 > 90.0 && a0+a1 >= 450.0 )
+					hi->x = pc.x + radius;
+				if ( a0 < 180.0 && a0+a1 >= 180.0 )
+					lo->y = pc.y - radius;
+				if (a0 > 180.0 && a0+a1 >= 540.0 )
 					lo->y = pc.y - radius;
 				if ( a0 < 270.0 && a0+a1 >= 270.0 )
 					lo->x = pc.x - radius;
+				if ( a0 > 270.0 && a0+a1 >= 630.0 )
+					lo->x = pc.x - radius;
 			}
 			if ( segPtr->type == SEG_STRLIN ) {
-				width.x = segPtr->width * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
-				width.y = segPtr->width * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
+				width.x = fabs(segPtr->width) * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
+				width.y = fabs(segPtr->width) * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
 			} else if ( segPtr->type == SEG_BENCH ) {
 				width.x = BenchGetWidth( segPtr->u.l.option ) * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
 				width.y = BenchGetWidth( segPtr->u.l.option ) * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
@@ -295,7 +292,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 		break;
 	case SEG_POLY:
 		/* TODO: be more precise about poly line width */
-		width.x = width.y = segPtr->width/2.0;
+		width.x = width.y = fabs(segPtr->width)/2.0;
 	case SEG_FILPOLY:
 		for (inx=0; inx<segPtr->u.p.cnt; inx++ ) {
 			REORIGIN( p0, segPtr->u.p.pts[inx].pt, angle, xlat )
@@ -338,7 +335,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 			hi->x = hi->x<pBez[i].x?pBez[i].x:hi->x;
 			hi->y = hi->y<pBez[i].y?pBez[i].y:hi->y;
 		}
-		width.x = width.y = segPtr->width/2.0;
+		width.x = width.y = fabs(segPtr->width)/2.0;
 		break;
 	default:
 		;
@@ -580,7 +577,8 @@ EXPORT void RescaleSegs(
 	int inx;
 
 	for (s=segs; s<&segs[segCnt]; s++) {
-		s->width *= scale_w;
+		if (s->width>0)
+			s->width *= scale_w;
 		switch (s->type) {
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
@@ -722,7 +720,7 @@ EXPORT DIST_T DistanceSegs(
 		coOrd * pos,
 		wIndex_t * inx_ret )
 {
-	DIST_T d, dd = 100000.0, ddd;
+	DIST_T d, dd = DIST_INF, ddd;
 	coOrd p0, p1, p2, pt, lo, hi;
 	BOOL_T found = FALSE;
 	wIndex_t inx, lin;
@@ -753,7 +751,7 @@ EXPORT DIST_T DistanceSegs(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			ddd = 100000.0;
+			ddd = DIST_INF;
 			for (lin=0;lin<segPtr->u.p.cnt;lin++) {
 				pt = p0;
 				if (lin < segPtr->u.p.cnt-1 )
@@ -768,7 +766,7 @@ EXPORT DIST_T DistanceSegs(
 			break;
         case SEG_BEZTRK:
         case SEG_BEZLIN:
-        		dd = 100000.0;
+        		dd = DIST_INF;
         		pt = p0;
         		for (int i = 0;i<segPtr->bezSegs.cnt;i++) {
         			segProcData2.distance.pos1 = pt;
@@ -814,7 +812,7 @@ EXPORT DIST_T DistanceSegs(
 			dd = JointDistance( &p1, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
 			break;
 		default:
-			dd = 100000.0;
+			dd = DIST_INF;
 		}
 		if (dd < d) {
 			d = dd;
@@ -1353,6 +1351,7 @@ EXPORT BOOL_T ReadSegs( void )
 				rc = FALSE;
 				/*??*/break;
 			}
+			if (s->type == SEG_FILPOLY) s->u.p.polyType = FREEFORM;  //Ensure closed if filled
 			s->color = wDrawFindColor( rgb );
 			s->u.p.pts = (pts_t*)MyMalloc( s->u.p.cnt * sizeof (pts_t) );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
@@ -1691,8 +1690,14 @@ EXPORT void DrawDimLine(
 	size.x = textsize.x/2.0;
 	size.y = textsize.y/2.0;
 	dist1 = FindDistance( zero, size );
-	if ( dist <= dist1*2 ) {
+	if ( dist <= dist1*1.5 ) {
 		DrawLine( d, p0, p1, width, color );
+		coOrd s_pos;
+		s_pos.x = (p1.x-p0.x)*middle+p0.x;
+		s_pos.y = (p1.y-p0.y)*middle+p0.y;
+		ANGLE_T a = FindAngle(p0,p1);
+		Translate(&s_pos,s_pos,a+90,textsize.y/2);
+		DrawString( d, s_pos, 0.0, dimP, fp, fs, color );
 		return;
 	}
 		a1 = FindAngle( zero, size );
@@ -1750,10 +1755,10 @@ EXPORT void DrawSegsO(
 	DIST_T factor = d->dpi/d->scale;
 	trkSeg_p tempPtr;
 
-	long option;
+    long option;
 	wFontSize_t fs;
 
-	wBool_t bFill;
+	wBool_t bFill,bThick;
 
 	for (i=0; i<segCnt; i++,segPtr++ ) {
 		if (color == wDrawColorBlack) {
@@ -1764,7 +1769,7 @@ EXPORT void DrawSegsO(
 		}
 		wDrawWidth thick = 3;
 #ifdef WINDOWS
-		thick *= (wDrawWidth)(d->dpi/mainD.dpi);
+		thick *= (wDrawWidth)(d->dpi/75.0);
 #endif
 		switch (segPtr->type) {
 		case SEG_STRLIN:
@@ -1780,13 +1785,22 @@ EXPORT void DrawSegsO(
 					color1 = normalColor;
 				if ( segPtr->color == wDrawColorWhite )
 					break;
+				if (options&DTS_CENTERONLY) {
+					DrawLine( d, p0, p1, thick, color1 );
+					break;
+				}
 				DrawStraightTrack( d,
 					p0, p1,
 					FindAngle(p1, p0 ),
 					trk, color1, options );
 				break;
-			case SEG_STRLIN:
-				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
+			case SEG_STRLIN:;
+				wDrawWidth w;
+				if (segPtr->width <0)
+					w = (int)floor(fabs(segPtr->width)+0.5);
+				else
+					w = (int)floor(fabs(segPtr->width*factor)+0.5);
+				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 				break;
 			case SEG_DIMLIN:
 			case SEG_BENCH:
@@ -1811,7 +1825,7 @@ EXPORT void DrawSegsO(
 						DrawBench( d, p0, p1, color1, color2, options, segPtr->u.l.option );
 						break;
 					case SEG_TBLEDGE:
-						DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/mainD.dpi*d->dpi+0.5) , color );
+						DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/BASE_DPI*d->dpi+0.5) , color );
 						break;
 					}
 				}
@@ -1828,15 +1842,24 @@ EXPORT void DrawSegsO(
 				if ( segPtr->color == wDrawColorWhite )
 					break;
 				p0.x = p0.y = p1.x = p1.y = 0;
+				if (options&DTS_CENTERONLY) {
+					DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
+							FALSE, thick, color1 );
+					break;
+				}
 				DrawCurvedTrack( d,
 					c,
 					fabs(segPtr->u.c.radius),
 					a0, segPtr->u.c.a1,
-					p0, p1,
 					trk, color1, options );
 			} else {
+				wDrawWidth w;
+				if (segPtr->width <0)
+					w = (int)floor(fabs(segPtr->width)+0.5);
+				else
+					w = (int)floor(segPtr->width*factor+0.5);
 				DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
-						FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
+						FALSE, (d->options&DC_THICK)?thick:w, color1 );
 			}
 			break;
         case SEG_BEZTRK:
@@ -1846,13 +1869,15 @@ EXPORT void DrawSegsO(
                     color1 = normalColor;
                 if ( segPtr->color == wDrawColorWhite )
                     break;
-            } else
-            REORIGIN(p0, segPtr->u.b.pos[0], angle, orig);
-            REORIGIN(p1, segPtr->u.b.pos[1], angle, orig);
-            REORIGIN(p2, segPtr->u.b.pos[2], angle, orig);
-            REORIGIN(p3, segPtr->u.b.pos[3], angle, orig);
+            } 
+			//else {
+				REORIGIN(p0,segPtr->u.b.pos[0],angle,orig);
+				REORIGIN(p1,segPtr->u.b.pos[1],angle,orig);
+				REORIGIN(p2,segPtr->u.b.pos[2],angle,orig);
+				REORIGIN(p3,segPtr->u.b.pos[3],angle,orig);
+			//}
 
-            for(int j=0;j<segPtr->bezSegs.cnt;j++) {     //Loop through sub Segs
+			for(int j=0;j<segPtr->bezSegs.cnt;j++) {     //Loop through sub Segs
             	tempPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,j);
             	switch (tempPtr->type) {
         			case SEG_CRVTRK:
@@ -1863,15 +1888,24 @@ EXPORT void DrawSegsO(
         					if (color1 == wDrawColorBlack)	color1 = normalColor;
         					if ( tempPtr->color == wDrawColorWhite )  break;
         					p0.x = p0.y = p1.x = p1.y = 0;
-        					DrawCurvedTrack( d,
+        					if (options&DTS_CENTERONLY) {
+        						DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
+        											FALSE, thick, color1 );
+        						break;
+        					}
+							DrawCurvedTrack( d,
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
             		   					a0, tempPtr->u.c.a1,
-            		   					p0, p1,
             		   					trk, color1, options );
         				} else if (tempPtr->type == SEG_CRVLIN) {
+        					wDrawWidth w;
+        					if (tempPtr->width <0)
+        						w = (int)floor(fabs(tempPtr->width)+0.5);
+        					else
+        						w = (int)floor(tempPtr->width*factor+0.5);
         					DrawArc( d, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1,
-        							FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
+        							FALSE, (d->options&DC_THICK)?thick:w, color1 );
         				}
         				break;
         			case SEG_STRTRK:
@@ -1879,14 +1913,23 @@ EXPORT void DrawSegsO(
         				if ( tempPtr->color == wDrawColorWhite ) break;
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
         				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
-        				DrawStraightTrack( d, p0, p1,
-						FindAngle(p1, p0 ),
-						trk, color1, options );
+        				if (options&DTS_CENTERONLY) {
+							DrawLine( d, p0, p1, thick, color1 );
+							break;
+						}
+						DrawStraightTrack( d, p0, p1,
+							FindAngle(p1,p0),
+							trk,color1,options);
             			break;
         			case SEG_STRLIN:
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
         				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
-        				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
+        				wDrawWidth w;
+						if (tempPtr->width <0)
+							w = (int)floor(fabs(tempPtr->width)+0.5);
+						else
+        				    w = (int)floor(tempPtr->width*factor+0.5);
+        				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
         				break;
             	}
             }
@@ -1914,20 +1957,48 @@ EXPORT void DrawSegsO(
 			bFill = (segPtr->type == SEG_FILPOLY);
 			if ( (d->options&DC_SIMPLE) && programMode != MODE_TRAIN )
 				bFill = FALSE;
-			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), bFill?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
+
+			// If we are drawing highlights for Select, don't fill just edges
+			bThick = d->options&DC_THICK;
+			if (&tempD == d && ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected || color == selectedColor)) {
+				bFill = FALSE;
+				bThick = TRUE;
+			}
+
+			wDrawWidth w;
+			if (segPtr->width <0)
+				w = (int)floor(fabs(segPtr->width)+0.5);
+			else
+				w = (int)floor(segPtr->width*factor+0.5);
+			drawFill_e eOptFill;
+			if ( bFill ) 
+				eOptFill = DRAW_FILL;
+			else if ( segPtr->u.p.polyType == POLYLINE )
+				eOptFill = DRAW_OPEN;
+			else
+				eOptFill = DRAW_CLOSED;
+			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, bThick?thick:w, eOptFill );
 			free(tempPts);
 			free(tempTypes);
+
 			break;
 		case SEG_FILCRCL:
 			REORIGIN( c, segPtr->u.c.center, angle, orig )
 			bFill = TRUE;
 			if ( (d->options&DC_SIMPLE) && programMode != MODE_TRAIN )
 				bFill = FALSE;
+
+			// If we are drawing highlights for Select, don't fill just edges
+			bThick = d->options&DC_THICK;
+			if (&tempD == d && (color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected || color == selectedColor)) {
+				bFill = FALSE;
+				bThick = TRUE;
+			}
 			if ( bFill ) {
 				DrawFillCircle( d, c, fabs(segPtr->u.c.radius), color1 );
 			} else {
 				DrawArc( d, c, fabs(segPtr->u.c.radius), 0, 360,
-						FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)0, color1 );
+						FALSE, bThick?thick:(wDrawWidth)0, color1 );
 			}
 			break;
 		}
@@ -1987,7 +2058,7 @@ EXPORT void AppendSegsToArray(dynArr_t * seg_to, dynArr_t * seg_from) {
 	for (int i=0; i<seg_from->cnt;i++,j++) {
 		trkSeg_p from_p = &DYNARR_N(trkSeg_t, * seg_from,j);
 		trkSeg_p to_p = &DYNARR_N(trkSeg_t, * seg_to,i);
-		memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+		memcpy(to_p,from_p,sizeof( trkSeg_t));
 		if (from_p->type == SEG_BEZLIN || from_p->type == SEG_BEZTRK) {
 			if (from_p->bezSegs.ptr) {
 				to_p->bezSegs.ptr = memdup(from_p->bezSegs.ptr,from_p->bezSegs.cnt*sizeof(trkSeg_t));
@@ -2008,7 +2079,7 @@ EXPORT void AppendTransformedSegs(dynArr_t * seg_to, dynArr_t * seg_from, coOrd 
 	for (int i=0; i<seg_from->cnt;i++,j++) {
 		trkSeg_p from_p = &DYNARR_N(trkSeg_t, * seg_from,j);
 		trkSeg_p to_p = &DYNARR_N(trkSeg_t, * seg_to,i);
-		memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+		memcpy(to_p,from_p,sizeof( trkSeg_t));
 		if (from_p->type == SEG_BEZLIN || from_p->type == SEG_BEZTRK) {
 			if (from_p->bezSegs.ptr) {
 				to_p->bezSegs.ptr = memdup(from_p->bezSegs.ptr,from_p->bezSegs.cnt*sizeof(trkSeg_t));

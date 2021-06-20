@@ -20,20 +20,15 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
   
-#include <string.h>
-#include <stdbool.h>
-
 #include "custom.h"
 #include "dynstring.h"
-#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "shortentext.h"
 #include "track.h" 
-#include "wlib.h"
 
-static struct extraDataNote	noteDataInUI;
+static struct extraDataNote_t	noteDataInUI;
 
 static paramTextData_t noteTextData = { 300, 150 };
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
@@ -43,12 +38,12 @@ static paramData_t textEditPLs[] = {
 #define I_ORIGY (1)
 	/*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+	/*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, I2VP(150), "Layer", 0 },
 #define I_TEXT (3)
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
 
-static paramGroup_t textEditPG = { "textEdit", 0, textEditPLs, sizeof textEditPLs / sizeof textEditPLs[0] };
+static paramGroup_t textEditPG = { "textEdit", 0, textEditPLs, COUNT( textEditPLs ) };
 static wWin_p textEditW;
 
 #define textEntry	((wText_p)textEditPLs[I_TEXT].control)
@@ -161,7 +156,7 @@ TextEditOK(void *junk)
 static void
 CreateEditTextNote(track_p trk, char *title)
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	// create the dialog if necessary
 	if (!textEditW) {
@@ -201,7 +196,7 @@ CreateEditTextNote(track_p trk, char *title)
 
 void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	char *noteText;
 	DynString statusLine;
 
@@ -233,7 +228,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
  */
 
 void NewTextNoteUI(track_p trk) {
-	struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	char *tmpPtrText = _("Replace this text with your note");
 
 	xx->noteData.text = MyStrdup(tmpPtrText);

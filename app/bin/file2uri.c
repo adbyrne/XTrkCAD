@@ -20,9 +20,7 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
   
-#include <string.h>
-#include <stdio.h>
-#include "wlib.h"
+#include "common.h"
 
 static char *reservedChars = "?#[]@!$&'()*+,;= ";
 
@@ -51,7 +49,7 @@ File2URI(char *fileName, unsigned resultLen, char *resultBuffer)
 
 	}
 	*currentDest = '\0';
-	return(strlen(resultBuffer));
+	return((unsigned)strlen(resultBuffer));
 }
 
 unsigned 
@@ -79,5 +77,5 @@ URI2File(char *encodedFileName, unsigned resultLen, char *resultBuffer)
 		}
 	}
 	*currentDest = '\0';
-	return(strlen(resultBuffer));
+	return((unsigned)strlen(resultBuffer));
 }

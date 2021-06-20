@@ -316,70 +316,70 @@ static paper_conf paper_configure(paragraph *source, font_list *fontlist) {
 		ret.bullet = uadv(p->keyword);
 	    } else if (!ustricmp(p->keyword, L"paper-page-width")) {
 		ret.paper_width =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-page-height")) {
 		ret.paper_height =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-left-margin")) {
 		ret.left_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-top-margin")) {
 		ret.top_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-right-margin")) {
 		ret.right_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-bottom-margin")) {
 		ret.bottom_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-list-indent")) {
 		ret.indent_list_bullet =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-listitem-indent")) {
 		ret.indent_list =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-quote-indent")) {
 		ret.indent_quote =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-base-leading")) {
 		ret.base_leading =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-base-para-spacing")) {
 		ret.base_para_spacing =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-chapter-top-space")) {
 		ret.chapter_top_space =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-sect-num-left-space")) {
 		ret.sect_num_left_space =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-chapter-underline-depth")) {
 		ret.chapter_underline_depth =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-chapter-underline-thickness")) {
 		ret.chapter_underline_thickness =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-rule-thickness")) {
 		ret.rule_thickness =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-contents-indent-step")) {
 		ret.contents_indent_step =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-contents-margin")) {
 		ret.contents_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-leader-separation")) {
 		ret.leader_separation =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-index-gutter")) {
 		ret.index_gutter =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-index-minsep")) {
 		ret.index_minsep =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-footer-distance")) {
 		ret.footer_distance =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-base-font-size")) {
 		ret.fbase.font_size = utoi(uadv(p->keyword));
 	    } else if (!ustricmp(p->keyword, L"paper-index-columns")) {
@@ -1846,8 +1846,8 @@ static page_data *page_breaks(line_data *first, line_data *last,
 		     */
 		    if (m != last && m->next && !m->next->page_break)
 		    {
-			int x = (this_height - minheight) / FUNITS_PER_PT *
-			    4096.0;
+			int x = (int)((this_height - minheight) / FUNITS_PER_PT *
+			    4096.0);
 			int xf;
 
 			xf = x & 0xFF;
@@ -1938,8 +1938,8 @@ static page_data *page_breaks(line_data *first, line_data *last,
 	    l->page = page;
 	    l->ypos = text + space + head;
 	    if (page->first_line->space[n]) {
-		l->ypos += space * (float)page->first_line->vshortfall[n] /
-		    page->first_line->space[n];
+		l->ypos += (int)(space * (float)page->first_line->vshortfall[n] /
+		    page->first_line->space[n]);
 	    }
 
 	    if (l == page->last_line)
@@ -2530,7 +2530,8 @@ static para_data *code_paragraph(int indent, word *words, paper_conf *conf)
 	    w->alt = NULL;
 	    w->type = (prev == 0 ? word_WeakCode :
 		      prev == 1 ? word_Emph : word_Normal);
-	    w->text = snewn(t-start+1, wchar_t);
+	    w->text = snewn((int)(t-start+1),
+			wchar_t);
 	    memcpy(w->text, start, (t-start) * sizeof(wchar_t));
 	    w->text[t-start] = '\0';
 	    w->breaks = FALSE;

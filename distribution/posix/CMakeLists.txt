@@ -17,7 +17,7 @@ set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package.txt)
 set(CPACK_PACKAGE_VENDOR "XTrackCAD Fork Project")
 
 # common dependencies for all Linux builds
-set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2 zip zlib")
+set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2 zlib")
 
 set(CPACK_RPM_BUILDREQUIRES 
     "gcc, cmake >= 2.4.7, pkgconfig, gtk2-devel" 
@@ -54,13 +54,23 @@ set(CPACK_DEBIAN_PACKAGE_VERSION "1:${XTRKCAD_VERSION}")
 
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "zip")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "xdg-utils")
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "xtrkcad@sillub.com")
 
 set(CPACK_PACKAGE_CONTACT "xtrkcad@sillub.com")
 
-set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "XTrkCad description")
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "XTrkCad supports any scale, has libraries of popular brands of \
+turnouts and sectional track (plus you add your own easily), can \
+automatically use spiral transition curves when joining track \
+XTrkCad lets you manipulate track much like you would with actual \
+flex-track to modify, extend and join tracks and turnouts. \
+Additional features include tunnels, 'post-it' notes, on-screen \
+ruler, parts list, 99 drawing layers, undo/redo commands, \
+benchwork, 'Print to BitMap', elevations, train simulation and \
+car inventory. \
+")
+
 
 set(CPACK_DEBIAN_PACKAGE_SECTION "contrib/graphics")
 
@@ -73,6 +83,8 @@ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "xtrkcad.org")
 set(CPACK_PACKAGE_EXECUTABLES "xtrkcad;XTrkCad-5.2.1-Beta")
 
 set(CPACK_CREATE_DESKTOP_LINKS "xtrkcad")
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/postinst;${CMAKE_CURRENT_SOURCE_DIR}/prerm")
 
 include(CPack)
 

@@ -21,26 +21,18 @@
  */
 
 
-#include <assert.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
+#include "common-ui.h"
 
 
 dynArr_t paramFileInfo_da;
@@ -62,7 +54,24 @@ int GetParamFileCount()
     return (paramFileInfo_da.cnt);
 }
 
+/**
+ * Show parameter file  error message
+ *
+ * \param [in,out] file If non-null, the file.
+ */
 
+static void
+ReadParamError(char *file)
+{
+	DynString error_msg;
+	DynStringMalloc(&error_msg, 100);
+	DynStringPrintf(&error_msg,
+		_("The parameter file: %s could not be found and was probably deleted or moved. "
+			"The file is removed from the active parameter file list."),
+		file);
+	wNoticeEx(NT_ERROR, DynStringToCStr(&error_msg), "OK", NULL);
+	DynStringFree(&error_msg);
+}
 
 
 /**
@@ -194,34 +203,37 @@ void LoadParamFileList(void)
         }
         char * share;
 
-        // Rewire to the latest system level
-        if ((share= strstr(fileName,"/share/xtrkcad/params/"))) {
-        	share += strlen("/share/xtrkcad/params/");
+       // Rewire to the latest system level
+#define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
+        if ((share= strstr(fileName,SHAREPARAMS))) {
+        	share += strlen(SHAREPARAMS);
         	MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
         	wPrefSetString("Parameter File Map", contents, fileName);
         }
 
-        ReadParamFile(fileName);
+		if (ReadParamFile(fileName) >= 0) {
 
-        if (curContents == NULL) {
-            curContents = curSubContents = MyStrdup(contents);
-        }
-        paramFileInfo(curParamFileIndex).contents = curContents;
-        if (favoriteList && fileNo == favoriteList[nextFavorite]) {
-            DynString topic;
-            long deleted;
-            DynStringMalloc(&topic, 16);
-            DynStringPrintf(&topic, FAVORITEDELETED, fileNo);
+			if (curContents == NULL) {
+				curContents = curSubContents = MyStrdup(contents);
+			}
+			paramFileInfo(curParamFileIndex).contents = curContents;
+			if (favoriteList && fileNo == favoriteList[nextFavorite]) {
+				DynString topic;
+				long deleted;
+				DynStringMalloc(&topic, 16);
+				DynStringPrintf(&topic, FAVORITEDELETED, fileNo);
 
-            wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &deleted, 0L);
-            paramFileInfo(curParamFileIndex).favorite = TRUE;
-            paramFileInfo(curParamFileIndex).deleted = deleted;
-            if (nextFavorite < favorites - 1) {
-                nextFavorite++;
-            }
-            DynStringFree(&topic);
-        }
-
+				wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &deleted, 0L);
+				paramFileInfo(curParamFileIndex).favorite = TRUE;
+				paramFileInfo(curParamFileIndex).deleted = deleted;
+				if (nextFavorite < favorites - 1) {
+					nextFavorite++;
+				}
+				DynStringFree(&topic);
+			}
+		} else {
+			ReadParamError(fileName);
+		}
     }
     curParamFileIndex = PARAM_CUSTOM;
     if (updated) {
@@ -276,9 +288,11 @@ void
 UpdateParamFileList(void)
 {
     for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
-        SetParamFileState(i);
+        SetParamFileState((int)i);
     }
 }
+
+
 
 /**
  * Load the selected parameter files. This is a callback executed when the file selection dialog
@@ -317,21 +331,24 @@ int LoadParamFile(
         curContents = curSubContents = NULL;
 
         newIndex = ReadParamFile(fileName[i]);
+		if (newIndex >= 0) {
+			// in case the contents is already present, make invalid
+			for (inx = 0; inx < newIndex; inx++) {
+				if (paramFileInfo(inx).valid &&
+					strcmp(paramFileInfo(inx).contents, curContents) == 0) {
+					paramFileInfo(inx).valid = FALSE;
+					break;
+				}
+			}
 
-        // in case the contents is already present, make invalid
-        for (inx = 0; inx < newIndex; inx++) {
-            if (paramFileInfo(inx).valid &&
-                    strcmp(paramFileInfo(inx).contents, curContents) == 0) {
-                paramFileInfo(inx).valid = FALSE;
-                break;
-            }
-        }
-
-        wPrefSetString("Parameter File Map", curContents,
-                       paramFileInfo(curParamFileIndex).name);
+			wPrefSetString("Parameter File Map", curContents,
+				paramFileInfo(curParamFileIndex).name);
+		} else {
+			ReadParamError(fileName[i]);
+		}
     }
     //Only set the ParamFileDir if not the system directory
-    if (!strstr(fileName[i-1],"/share/xtrkcad/params/"))
+    if (!strstr(fileName[i-1],SHAREPARAMS))
     	SetParamFileDir(fileName[i - 1]);
     curParamFileIndex = PARAM_CUSTOM;
     DoChangeNotification(CHANGE_PARAMS);
@@ -354,10 +371,7 @@ static void ReadCustom(void)
 
 
 /*
- * Open the file and then set the locale to "C". Old locale will be copied to
- * oldLocale. After the required file I/O is done, the caller must call
- * CloseCustom() with the same locale value that was returned in oldLocale by
- * this function.
+ * Open the custonm file
  */
 
 FILE * OpenCustom(char *mode)
@@ -409,8 +423,10 @@ BOOL_T ParamFileListInit(void)
 {
     log_params = LogFindIndex("params");
 
+    SetCLocale();
 	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
+	SetUserLocale();
         return FALSE;
     }
 
@@ -421,6 +437,7 @@ BOOL_T ParamFileListInit(void)
         ReadCustom();
     }
 
+    SetUserLocale();
     return TRUE;
 
 }
