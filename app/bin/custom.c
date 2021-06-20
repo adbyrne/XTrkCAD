@@ -81,6 +81,7 @@ char * sSaveFilePattern = NULL;
 char * sImageFilePattern = NULL;
 char * sImportFilePattern = NULL;
 char * sDXFFilePattern = NULL;
+char * sSVGFilePattern = NULL;
 char * sRecordFilePattern = NULL;
 char * sNoteFilePattern = NULL;
 char * sLogFilePattern = NULL;
@@ -206,6 +207,11 @@ void InitCustom( void )
 	{
 		sDXFFilePattern = strdup(_("Data Exchange Format Files (*.dxf)|*.dxf"));
 	}
+	if (sSVGFilePattern == NULL) 		
+	{
+		sSVGFilePattern = strdup(_("Scalable Vector Graphics Format Files|*.svg" ));
+	}
+
 	if (sRecordFilePattern == NULL)
 	{
 		sprintf(buf, _("%s Record Files (*.xtr)|*.xtr"), Product);
@@ -258,6 +264,10 @@ void CleanupCustom( void )
 	{
 		free(sDXFFilePattern);
 		sDXFFilePattern = NULL;
+	}
+	if (sSVGFilePattern) {
+		free(sSVGFilePattern);
+		sSVGFilePattern = NULL;
 	}
 	if (sRecordFilePattern)
 	{

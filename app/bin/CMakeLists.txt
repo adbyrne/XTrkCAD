@@ -53,6 +53,11 @@ ADD_CUSTOM_COMMAND(
        COMMAND genhelp ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.json ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        )
 
+ADD_EXECUTABLE(xtrkcad WIN32
+ 	misc.c
+ 	xtrkcad.rc
+)
+
 SET(SOURCES
 	${LIN_SOURCES}
 	appdefaults.c
@@ -166,6 +171,29 @@ set (SOURCES
 	include/paramfilelist.h
 )
 
+if(XTRKCAD_CREATE_SVG)
+	set (SOURCES
+	  ${SOURCES}
+		svgformat.c
+		svgoutput.c
+	)
+	include_directories(${MINIXML_INCLUDE_PATH})
+	target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
+
+	add_custom_command(
+		TARGET xtrkcad POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${MINIXML_SHAREDLIB}
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+
+	# add dll to install package
+	install(FILES
+	${MINIXML_SHAREDLIB}
+	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	)
+endif(XTRKCAD_CREATE_SVG)
+
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
 INCLUDE_DIRECTORIES(${help_BINARY_DIR})
@@ -183,10 +211,6 @@ ADD_LIBRARY(xtrkcad-lib ${SOURCES})
 # This ensures that messages.h has been generated before we build xtrkcad-lib
 ADD_DEPENDENCIES(xtrkcad-lib Help)
 
-ADD_EXECUTABLE(xtrkcad WIN32
-	misc.c
-	xtrkcad.rc
-	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)

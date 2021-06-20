@@ -22,33 +22,34 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#include <dirent.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
 #ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#include "getopt.h"
-#define R_OK (02)
-#define access _access
-#if _MSC_VER >1300
-#define strdup _strdup
-#endif
+	#include <io.h>
+	#include <windows.h>
+	#include "getopt.h"
+	#define R_OK (02)
+	#define access _access
+	#if _MSC_VER >1300
+		#define strdup _strdup
+	#endif
 #else
-#include <sys/stat.h>
+	#include <unistd.h>
+	#include <dirent.h>
+	#include <sys/stat.h>
 #endif
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
+
 #include <locale.h>
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <xtrkcad-config.h>
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
@@ -2355,6 +2356,10 @@ static void CreateMenus(void) {
 	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export D&XF"),
 			ACCL_EXPORTDXF, (void*) (wMenuCallBack_p) DoExportDXF, IC_SELECTED,
 			(void *) 0);
+#if XTRKCAD_CREATE_SVG
+	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"), ACCL_EXPORTDXF, 
+			(void*)(wMenuCallBack_p)DoExportSVG, IC_SELECTED, (void *)0);
+#endif
 	wMenuSeparatorCreate(fileM);
 
 	MiscMenuItemCreate(fileM, NULL, "cmdPrmfile", _("Parameter &Files ..."),

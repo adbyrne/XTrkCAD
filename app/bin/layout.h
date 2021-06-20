@@ -52,6 +52,7 @@ DIST_T GetLayoutMinTrackRadius(void);
 SCALEINX_T GetLayoutCurScale(void );
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
 //GAUGEINX_T GetLayoutCurGauge(void);
+void GetLayoutRoomSize(coOrd *roomSize);
 
 ANGLE_T GetLayoutMaxTrackGrade(void);
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);

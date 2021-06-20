@@ -72,6 +72,7 @@ extern char * sSaveFilePattern;
 extern char * sImageFilePattern;
 extern char * sImportFilePattern;
 extern char * sDXFFilePattern;
+extern char * sSVGFilePattern;
 extern char * sRecordFilePattern;
 extern char * sNoteFilePattern;
 extern char * sLogFilePattern;

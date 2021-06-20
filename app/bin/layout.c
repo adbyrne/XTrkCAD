@@ -307,6 +307,18 @@ int GetLayoutBackGroundScreen()
 	return (thisLayout.props.backgroundScreen);
 }
 
+/**
+ * Gets layout room size
+ *
+ * \param [out] roomSize size of the room.
+ */
+
+void
+GetLayoutRoomSize(coOrd *roomSize)
+{
+	*roomSize = thisLayout.props.roomSize;
+}
+
 /****************************************************************************
 *
 * Layout Dialog
