@@ -669,7 +669,7 @@ static void MoveBezier( track_p trk, coOrd orig )
 static void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
-    for (int i=0;i<5;i++) {
+    for (int i=0;i<COUNT(xx->pos);i++) {
         Rotate( &xx->pos[i], orig, angle );
     }
     FixUpBezier(xx->pos,xx,IsTrack(trk));
@@ -1073,7 +1073,17 @@ static void FlipBezier(
 	FlipPoint( &xx->pos[1], orig, angle );
     FlipPoint( &xx->pos[2], orig, angle );
     FlipPoint( &xx->pos[3], orig, angle );
-    FixUpBezier(xx->pos,xx,IsTrack(trk));
+
+	// Reverse control point order
+	coOrd pos = xx->pos[0];
+	xx->pos[0] = xx->pos[3];
+	xx->pos[3] = pos;
+
+	pos = xx->pos[1];
+	xx->pos[1] = xx->pos[2];
+	xx->pos[2] = pos;
+	
+	FixUpBezier(xx->pos,xx,IsTrack(trk));
     ComputeBezierBoundingBox(trk,xx);
 
 }
@@ -1236,13 +1246,27 @@ static BOOL_T MakeParallelBezier(
  * - that the Segs are restored and
  * - other fields reset.
  */
-BOOL_T RebuildBezier (track_p trk)
+BOOL_T RebuildBezierLine (track_p trk)
 {
+	bFreeTrack = TRUE;
 	struct extraDataBezier_t *xx;
-	xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
+	xx = GET_EXTRA_DATA(trk, T_BZRLIN, extraDataBezier_t);
 	xx->arcSegs.cnt = 0;
-	FixUpBezier(xx->pos,xx,IsTrack(trk));
+	FixUpBezier(xx->pos,xx,FALSE);
 	ComputeBezierBoundingBox(trk, xx);
+	bFreeTrack = FALSE;
+	return TRUE;
+}
+
+BOOL_T RebuildBezierTrack (track_p trk)
+{
+	bFreeTrack = TRUE;
+	struct extraDataBezier_t *xx;
+	xx = GET_EXTRA_DATA(trk, T_BEZIER, extraDataBezier_t);
+	xx->arcSegs.cnt = 0;
+	FixUpBezier(xx->pos,xx,TRUE);
+	ComputeBezierBoundingBox(trk, xx);
+	bFreeTrack = FALSE;
 	return TRUE;
 }
 
@@ -1315,7 +1339,7 @@ static trackCmd_t bezlinCmds = {
 		NULL,
 		MakeParallelBezier,
 		NULL,
-		RebuildBezier,
+		RebuildBezierLine,
 		NULL,
 		NULL,
 		NULL,
@@ -1353,7 +1377,7 @@ static trackCmd_t bezierCmds = {
 		NULL,
 		MakeParallelBezier,
 		NULL,
-		RebuildBezier,
+		RebuildBezierTrack,
 		NULL,
 		NULL,
 		NULL,

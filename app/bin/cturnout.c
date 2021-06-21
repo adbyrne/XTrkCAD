@@ -171,7 +171,6 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 	PATHPTR_T paths,
 	EPINX_T endPtCnt,
 	trkEndPt_t* endPts,
-	DIST_T* radii,
 	wBool_t updateList,
 	long options)
 {
@@ -223,13 +222,6 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 
 	to->barScale = curBarScale > 0 ? curBarScale : -1;
 	to->special = TOnormal;
-	if (radii) {
-		to->special = TOcurved;
-		DYNARR_SET(DIST_T, to->u.curved.radii, to->endCnt);
-		for (int i = 0; i < to->endCnt; i++) {
-			DYNARR_N(DIST_T, to->u.curved.radii, i) = radii[i];
-		}
-	}
 	if (updateList && changes)
 		DoChangeNotification(changes);
 	return to;
@@ -253,9 +245,6 @@ DeleteTurnout(void* toInfo)
 	MyFree(to->paths);
 	if (to->special) {
 		switch (to->special) {
-		case TOcurved:
-			DYNARR_FREE(DIST_T, to->u.curved.radii);
-			break;
 		case TOadjustable:
 		default:;
 		}
@@ -457,7 +446,7 @@ static BOOL_T ReadTurnoutParam(
 		return FALSE;
 	CheckPaths(tempSegs_da.cnt, &tempSegs(0), pathPtr);
 	to = CreateNewTurnout(scale, title, tempSegs_da.cnt, &tempSegs(0),
-		pathPtr, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE, options);
+		pathPtr, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options);
 	MyFree(title);
 	if (to == NULL)
 		return FALSE;
@@ -761,7 +750,7 @@ track_p NewHandLaidTurnout(
 	segs[1].color = wDrawColorBlack;
 	segs[1].u.l.pos[0] = zero;
 	segs[1].u.l.pos[1] = p2;
-	trk = NewCompound(T_TURNOUT, 0, p0, a0, message, 3, &tempEndPts(0), NULL, (PATHPTR_T)"Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs);
+	trk = NewCompound(T_TURNOUT, 0, p0, a0, message, 3, &tempEndPts(0), (PATHPTR_T)"Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs);
 	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	xx->handlaid = TRUE;
 
@@ -2499,7 +2488,7 @@ static void DrawTurnout(
 
 	if ((pathCnt > 1) && (pathCnt <= DTO_DIM)
 		&& (trk->endCnt <= 4)
-		&& (xx->special == TOnormal || xx->special == TOcurved))
+		&& (xx->special == TOnormal))
 	{
 
 		dtod.bridge = bridge; 
@@ -3415,16 +3404,6 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos, trackParams_t* p
 			params->angle = params->track_angle = 0;
 			return FALSE;
 		}
-		/* Use end radii if we have them */
-		//if (xx->special == TOcurved) {
-		//	params->type = curveTypeCurve;
-		//	params->arcR = fabs(DYNARR_N(DIST_T,xx->u.curved.radii,params->ep));
-		//	if (params->arcR != 0.0)
-		//		Translate(&params->arcP,pos,params->track_angle-90.0,params->arcR);
-		//	else
-		//		params->type = curveTypeStraight;
-		//	return TRUE;
-		//}
 		/* Find the path we are closest to */
 		PATHPTR_T pathCurr = 0;
 		int segInx, subSegInx;
@@ -3698,17 +3677,10 @@ static BOOL_T MakeParallelTurnout(
 
 			yy = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 
-			DIST_T* radii = NULL;
-			if (yy->special == TOcurved) {
-				radii = MyMalloc(GetTrkEndPtCnt(trk) * sizeof(DIST_T));
-				for (int i = 0; i < GetTrkEndPtCnt(trk); i++) {
-					radii[i] = DYNARR_N(DIST_T, yy->u.curved.radii, i);
-				}
-			}
 
 			PATHPTR_T paths = GetPaths(trk);
 			*newTrk = NewCompound(T_TURNOUT, 0, endPt[0].pos, endPt[0].angle + 90.0,
-				yy->title, 2, endPt, radii, paths,
+				yy->title, 2, endPt, paths,
 				yy->segCnt, yy->segs);
 			xx = GET_EXTRA_DATA(*newTrk, T_TURNOUT, extraDataCompound_t);
 			xx->customInfo = yy->customInfo;
@@ -3953,9 +3925,7 @@ static void HilightEndPt(void)
 	p.x = curTurnout->endPt[(int)curTurnoutEp].pos.x - trackGauge;
 	p.y = curTurnout->endPt[(int)curTurnoutEp].pos.y - trackGauge;
 	s.x = s.y = trackGauge * 2.0 /*+ turnoutD.minSize*/;
-	wDrawSetTempMode(turnoutD.d, TRUE);
 	DrawHilight(&turnoutD, p, s, FALSE);
-	wDrawSetTempMode(turnoutD.d, FALSE);
 }
 
 
@@ -4337,7 +4307,7 @@ static void AddTurnout(void)
 	/*
 	 * copy data */
 
-	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, curTurnout->paths, curTurnout->segCnt, curTurnout->segs);
+	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), curTurnout->paths, curTurnout->segCnt, curTurnout->segs);
 	xx = GET_EXTRA_DATA(newTrk, T_TURNOUT, extraDataCompound_t);
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {
@@ -4345,12 +4315,6 @@ static void AddTurnout(void)
 		SetTrkScale(newTrk, GetLayoutCurScale());
 	}
 	xx->special = curTurnout->special;
-	if (xx->special == TOcurved) {
-		DYNARR_SET(DIST_T, xx->u.curved.radii, curTurnout->endCnt);
-		for (int i = 0; i < curTurnout->endCnt; i++) {
-			DYNARR_N(DIST_T, xx->u.curved.radii, i) = DYNARR_N(DIST_T, curTurnout->u.curved.radii, i);
-		}
-	}
 	xx->u = curTurnout->u;
 	xx->pathOverRide = curTurnout->pathOverRide;
 	xx->pathNoCombine = curTurnout->pathNoCombine;

@@ -1050,7 +1050,7 @@ void DeleteCompound(
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	FreeFilledDraw( xx->segCnt, xx->segs );
-	MyFree( xx->segs );
+	if (xx->segCnt>0) MyFree( xx->segs );
 	xx->segs = NULL;
 }
 
@@ -1155,7 +1155,6 @@ EXPORT track_p NewCompound(
 		char * title,
 		EPINX_T epCnt,
 		trkEndPt_t * epp,
-		DIST_T * radii,
 		PATHPTR_T paths,
 		wIndex_t segCnt,
 		trkSeg_p segs )
@@ -1185,17 +1184,8 @@ EXPORT track_p NewCompound(
 	FixUpBezierSegs(xx->segs,xx->segCnt);
 	ComputeCompoundBoundingBox( trk );
 	SetDescriptionOrig( trk );
-//	if (radii) {
-//		xx->special = TOcurved;
-//		xx->u.curved.radii.max = 0;
-//		xx->u.curved.radii.cnt = 0;
-//		DYNARR_SET(DIST_T,xx->u.curved.radii,epCnt);
-//	}
 	for ( ep=0; ep<epCnt; ep++ ) {
 		SetTrkEndPoint( trk, ep, epp[ep].pos, epp[ep].angle );
-//		if (radii) {
-//			DYNARR_N(DIST_T,xx->u.curved.radii,ep) = radii[ep];
-//		}
 	}
 	return trk;
 }
@@ -1255,7 +1245,7 @@ BOOL_T ReadCompound(
 			UpdateTitleMark( title, LookupScale(scale) );
 		}
 	}
-	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL, NULL,
+	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL,
 			path,
 			tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );

@@ -480,7 +480,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		Rotate( &orig, zero, xx->angle );
 		orig.x = xx->orig.x - orig.x;
 		orig.y = xx->orig.y - orig.y;
-		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), NULL, (PATHPTR_T)&pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
+		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), (PATHPTR_T)&pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
 		xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
 		xx1->ungrouped = TRUE;
 
@@ -1563,7 +1563,7 @@ LOG( log_group, 3, ( "\n" ) );
 
 		CheckPaths( outputSegs_da.cnt, &outputSegs(0), path );
 
-		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), path, tempEndPts_da.cnt, &tempEndPts(0), NULL, TRUE, 0 );
+		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), path, tempEndPts_da.cnt, &tempEndPts(0), TRUE, 0 );
 
 		/*
 		 * 10: Write defn to xtrkcad.cus
@@ -1604,7 +1604,7 @@ LOG( log_group, 3, ( "\n" ) );
 				}
 			}
 			SelectRecount();
-			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, path, outputSegs_da.cnt, &outputSegs(0) );
+			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), path, outputSegs_da.cnt, &outputSegs(0) );
 
 			SetTrkVisible( trk, TRUE );
 			for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
@@ -1644,7 +1644,7 @@ LOG( log_group, 3, ( "\n" ) );
 			SelectRecount();
 			orig.x = - orig.x;
 			orig.y = - orig.y;
-			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, (PATHPTR_T)"", trackSegs_da.cnt, &trackSegs(0) );
+			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, (PATHPTR_T)"", trackSegs_da.cnt, &trackSegs(0) );
 			SetTrkVisible( trk, TRUE );
 			DrawNewTrack( trk );
 			EnableCommands();

@@ -965,10 +965,11 @@ PrintPageNumber(int x, int y, DIST_T width, DIST_T height)
 			printPosition.y = (width - textSize.y) / 2;
 		}
 
-		page_d.funcs->options |= wDrawOutlineFont;
+		unsigned long options = page_d.options;
+		page_d.options |= DC_OUTLINE;
 		DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
 				   wDrawColorGray(70));
-		page_d.funcs->options &= ~wDrawOutlineFont;
+		page_d.options = options;
     }
 
     free(positionText);
@@ -1509,10 +1510,6 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 
 wDrawable_t printD, mainD;
 
-void wDrawHilight( void * d, coOrd orig, coOrd size )
-{
-	lprintf( "wDrawHilight (%0.3f %0.3f) (%0.3f %0.3f)\n", orig.x, orig.y, size.x, size.y );
-}
 void PrintPage( void * d, wIndex_t mode , wIndex_t x, wIndex_t y )
 {
 	lprintf( "printPage %dx%d at (%0.3f %0.3f)\n", x, y, orig.x, orig.y );
