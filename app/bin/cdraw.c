@@ -1934,7 +1934,9 @@ static BOOL_T QueryDraw( track_p trk, int query )
 			(xx->segs[0].type == SEG_BEZLIN) ||
 			(xx->segs[0].type == SEG_FILCRCL) ||
 			(xx->segs[0].type == SEG_FILPOLY) ||
-			(xx->segs[0].type == SEG_POLY)
+			(xx->segs[0].type == SEG_POLY) ||
+			(xx->segs[0].type == SEG_BENCH) ||
+			(xx->segs[0].type == SEG_TBLEDGE)
 		) return TRUE;
 		else return FALSE;
 	default:
@@ -2102,12 +2104,14 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 
 		switch (xx->segs[0].type) {
 			case SEG_STRLIN:
+			case SEG_BENCH:
+			case SEG_TBLEDGE:
 				REORIGIN(p0,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
 				REORIGIN(p1,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
 				tempSegs(0).color = xx->segs[0].color;
 				tempSegs(0).width = xx->segs[0].width;
 				tempSegs_da.cnt = 1;
-				tempSegs(0).type = SEG_STRLIN;
+				tempSegs(0).type = xx->segs[0].type;
 				tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
 				tempSegs(0).u.l.pos[1] = 1-ep?pos:p1;
 				xx->segs[0].u.l.pos[0] = 1-ep?pos:p0;
