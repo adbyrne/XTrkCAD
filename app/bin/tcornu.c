@@ -1404,7 +1404,6 @@ static BOOL_T TrimCornu( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANG
  */
 EXPORT BOOL_T RebuildCornu (track_p trk)
 {
-	bFreeTrack = TRUE;
 	struct extraDataCornu_t *xx;
 	xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	xx->arcSegs.max = 0;
@@ -1413,7 +1412,6 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 	xx->arcSegs.ptr = NULL;
 	if (!FixUpCornu0(xx->pos,xx->c,xx->a,xx->r, xx)) return FALSE;
 	ComputeCornuBoundingBox(trk, xx);
-	bFreeTrack = FALSE;
 	return TRUE;
 }
 
