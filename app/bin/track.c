@@ -2807,6 +2807,8 @@ EXPORT void DrawCurvedTrack(
 	}
 	if (bridge) {
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+		if (d->options&DC_PRINT)
+			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 		DrawArc( d, p, r+(trackGauge*1.5), a0, a1, 0, width2, color );
 		DrawArc( d, p, r-(trackGauge*1.5), a0, a1, 0, width2, color );
@@ -2890,13 +2892,14 @@ EXPORT void DrawStraightTrack(
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 
 	width = trk ? GetTrkWidth( trk ): 0;
+	if ((d->options&DC_PRINT) && (d->dpi>2*BASE_DPI))
+		width = (wDrawWidth)round(width * d->dpi / 2 / BASE_DPI);
+
 	if ( d->options&DC_THICK )
 		width = 3;
 	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
 
-	if ((d->options&DC_PRINT) && (d->dpi>2*BASE_DPI))
-		width = (wDrawWidth)round(width * d->dpi / 2 / BASE_DPI);
 
 	LOG(log_track,4,("DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 				p0.x, p0.y, p1.x, p1.y ) )
@@ -2946,6 +2949,8 @@ EXPORT void DrawStraightTrack(
 
 	if (bridge) {
 		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+		if (d->options&DC_PRINT)
+			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
 		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
@@ -3204,8 +3209,11 @@ EXPORT void DrawEndPt(
 	if(trk == NULL || ep < 0)
 		return;
 
-	// line width for the tunnel portal, make sure it is rounded correctly
+	// line width for the tunnel portal and bridge parapets, make sure it is rounded correctly
 	width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
+	if ((d->options&DC_PRINT) && (d->dpi>2*BASE_DPI))
+		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
+
 
 	if(color == wDrawColorBlack)
 		color = normalColor;
@@ -3223,28 +3231,30 @@ EXPORT void DrawEndPt(
 		return;
 	}
 
-	if(d->scale >= ((d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale))
-		return;
-
 	sepBoundary = FALSE;
-	if(inDrawTracks && (d->options & DC_PRINT) == 0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
-		DIST_T len;
-		len = trackGauge * 2.0;
-		if(len < 0.10 * d->scale)
-			len = 0.10 * d->scale;
-		long oldOptions = d->options;
-		d->options &= ~DC_NOTSOLIDLINE;
-		Translate(&p0,p,a + 45,len);
-		Translate(&p1,p,a + 225,len);
-		DrawLine(d,p0,p1,2,selectedColor);
-		Translate(&p0,p,a - 45,len);
-		Translate(&p1,p,a - 225,len);
-		DrawLine(d,p0,p1,2,selectedColor);
-		d->options = oldOptions;
-		sepBoundary = TRUE;
-	}
-	else if((d->options & DC_PRINT) == 0 && importTrack == NULL && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
-		sepBoundary = TRUE;
+	if(d->scale < ((d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale))
+	{
+		// return;
+
+		if(inDrawTracks && (d->options & DC_PRINT) == 0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
+			DIST_T len;
+			len = trackGauge * 2.0;
+			if(len < 0.10 * d->scale)
+				len = 0.10 * d->scale;
+			long oldOptions = d->options;
+			d->options &= ~DC_NOTSOLIDLINE;
+			Translate(&p0,p,a + 45,len);
+			Translate(&p1,p,a + 225,len);
+			DrawLine(d,p0,p1,2,selectedColor);
+			Translate(&p0,p,a - 45,len);
+			Translate(&p1,p,a - 225,len);
+			DrawLine(d,p0,p1,2,selectedColor);
+			d->options = oldOptions;
+			sepBoundary = TRUE;
+		}
+		else if((d->options & DC_PRINT) == 0 && importTrack == NULL && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
+			sepBoundary = TRUE;
+		}
 	}
 
 	// is the endpoint a transition into a tunnel?

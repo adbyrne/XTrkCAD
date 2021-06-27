@@ -1169,6 +1169,8 @@ static void DrawTurnoutBridge(
 {
     DIST_T trackGauge = GetTrkGauge(dtod.trk);
     wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
+	if (d->options&DC_PRINT)
+		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
     coOrd b1,b2,b3,b4,b5,b6;
     ANGLE_T angle = dtod.xx->angle,a = 0.0;
@@ -1266,6 +1268,8 @@ static void DrawCrossBridge(
 {
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+	if (d->options&DC_PRINT)
+		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 	coOrd b1, b2, b3, b4, b5, b6;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
@@ -1336,6 +1340,8 @@ static void DrawXingBridge(
 {
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+	if (d->options&DC_PRINT)
+		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 	coOrd b0, b1, b2, b3, b4, b5, b6;
 	int i, j, i1, i2;
