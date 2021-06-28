@@ -47,8 +47,10 @@
 #include "paths.h"
 #include "track.h"
 #include "utility.h"
+#include "wlib.h"
 
 static struct wFilSel_t * exportSVGFile_fs;
+static coOrd roomSize;
 
 /**
  * Svg draw line
@@ -67,11 +69,13 @@ static void SvgDrawLine(
     wDrawWidth width,
     wDrawColor color)
 {
+	width = (wDrawWidth)(width != 0.0 ? width : MININMUMLINEWIDTH );
+
     SvgLineCommand((SVGParent *)(d->d),
-                   p0.x, p0.y,
-                   p1.x, p1.y,
-                   width,
-				   color);
+                   p0.x, roomSize.y - p0.y,
+                   p1.x, roomSize.y - p1.y,
+                   (double)width,
+				   wDrawGetRGB( color ));
 }
 
 /**
@@ -97,30 +101,26 @@ static void SvgDrawArc(
     wDrawWidth width,
     wDrawColor color)
 {
-    DynString command = NaS;
-    DynStringMalloc(&command, 100);
     angle0 = NormalizeAngle(90.0-(angle0+angle1));
 
     if (angle1 >= 360.0) {
-        SvgCircleCommand(&command,
-                         curTrackLayer + 1,
-                         p.x,
-                         p.y,
-                         r,
-                         ((d->options&DC_DASH) != 0));
+		SvgCircleCommand((SVGParent *)(d->d),
+			p.x,
+			roomSize.y - p.y,
+			r,
+			width,
+			wDrawGetRGB( color ),
+			false );
     } else {
-        SvgArcCommand(&command,
-                      curTrackLayer + 1,
-                      p.x,
-                      p.y,
-                      r,
-                      angle0,
-                      angle1,
-                      ((d->options&DC_DASH) != 0));
+        //SvgArcCommand((SVGParent *)(d->d),
+        //              p.x,
+        //              p.y,
+        //              r,
+        //              angle0,
+        //              angle1,
+        //              ((d->options&DC_DASH) != 0));
     }
 
-    fputs(DynStringToCStr(&command), (FILE *)d->d);
-    DynStringFree(&command);
 }
 
 /**
@@ -144,16 +144,13 @@ static void SvgDrawString(
     FONTSIZE_T fontSize,
     wDrawColor color)
 {
-    DynString command = NaS;
-    DynStringMalloc(&command, 100);
-    SvgTextCommand(&command,
-                   curTrackLayer + 1,
+    SvgTextCommand((SVGParent *)(d->d),
                    p.x,
-                   p.y,
+                   roomSize.y - p.y,
                    fontSize,
+				   wDrawGetRGB(color),
                    s);
-    fputs(DynStringToCStr(&command), (FILE *)d->d);
-    DynStringFree(&command);
+
 }
 
 /**
@@ -176,10 +173,13 @@ static void SvgDrawBitmap(
 /**
  * Svg draw fill polygon
  *
- * \param 		   d	 A drawCmd_p to process.
- * \param 		   cnt   Number of.
- * \param [in,out] pts   If non-null, the points.
- * \param 		   color The color.
+ * \param 		   d		 A drawCmd_p to process.
+ * \param 		   cnt		 Number of points in polyline.
+ * \param [in,out] pts		 the coordinates
+ * \param [in,out] pointer   If non-null, the pointer.
+ * \param 		   color	 color.
+ * \param 		   width	 line width.
+ * \param 		   fillStyle fill style.
  */
 
 static void SvgDrawFillPoly(
@@ -187,23 +187,72 @@ static void SvgDrawFillPoly(
     int cnt,
     coOrd * pts,
 	int * pointer,
-    wDrawColor color, wDrawWidth width, drawFill_e pattern)
+    wDrawColor color, wDrawWidth width, drawFill_e fillStyle)
 {
-    int inx;
+	int i;
+	double *points = malloc( (cnt + 1) * 2 * sizeof(double));
 
-    for (inx=1; inx<cnt; inx++) {
-        SvgDrawLine(d, pts[inx-1], pts[inx], 0, color);
-    }
+	if (!points) {
+		puts("memory for poly line coordinates could not be allocated!");
+		abort();
+	}
+	for (i = 0; i < cnt; i++ ) {
+		points[i * 2] = pts[i].x;
+		points[i * 2 + 1] = roomSize.y - pts[i].y;
+	}
 
-    SvgDrawLine(d, pts[cnt-1], pts[0], 0, color);
+	if (fillStyle == DRAW_CLOSED || fillStyle == DRAW_FILL) {
+		points[i * 2] = points[0];
+		points[i * 2 + 1] = points[1];
+		cnt++;
+	}
+
+	width = (wDrawWidth)(width != 0.0 ? width : MININMUMLINEWIDTH);
+	SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  wDrawGetRGB(color), (double)width, fillStyle == DRAW_FILL);
+
+	free(points);
 }
+
+/**
+ * Svg draw filled circle
+ *
+ * \param  d	  A drawCmd_p to process.
+ * \param  center The center.
+ * \param  radius The radius.
+ * \param  color  The fill color.
+ */
 
 static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
                           wDrawColor color)
 {
-    SvgDrawArc(d, center, radius, 0.0, 360, FALSE, 0, color);
+	SvgCircleCommand((SVGParent *)(d->d),
+		center.x,
+		roomSize.y - center.y,
+		radius,
+		0,
+		wDrawGetRGB(color),
+		true);
 }
 
+/**
+ * Svg draw rectangle
+ *
+ * \param  d	   A drawCmd_p to process.
+ * \param  corner1 The first corner.
+ * \param  corner2 The second corner.
+ * \param  color   The color.
+ * \param  pattern Specifies the pattern.
+ */
+
+static void
+SvgDrawRectangle(drawCmd_p d, coOrd corner1, coOrd corner2, wDrawColor color, drawFill_e fillOpt)
+{
+	SvgRectCommand((SVGParent *)(d->d),
+					corner1.x, roomSize.y - corner1.y,
+					corner2.x, roomSize.y - corner2.y,
+					wDrawGetRGB(color),
+					fillOpt);
+}
 
 static drawFuncs_t svgDrawFuncs = {
     SvgDrawLine,
@@ -211,16 +260,14 @@ static drawFuncs_t svgDrawFuncs = {
     SvgDrawString,
     SvgDrawBitmap,
     SvgDrawFillPoly,
-    SvgDrawFillCircle
+    SvgDrawFillCircle,
+	SvgDrawRectangle
 };
-
-
-
-
 
 static drawCmd_t svgD = {
     NULL, &svgDrawFuncs, 0, 1.0, 0.0, {0.0,0.0}, {0.0,0.0}, Pix2CoOrd, CoOrd2Pix, 100.0
 };
+
 
 static int DoExportSVGTracks(
     int cnt,
@@ -230,13 +277,11 @@ static int DoExportSVGTracks(
 	DynString command = NaS;
 	SVGDocument *svg;
 	SVGParent *svgData;
-	coOrd roomSize;
-//	char *oldLocale;
 	
     assert(fileName != NULL);
     assert(cnt == 1);
 
-//	oldLocale = SaveLocale("C");
+	SetCLocale();
 	GetLayoutRoomSize(&roomSize);
 
 	SetCurrentPath(SVGPATHKEY, fileName[ 0 ]);
@@ -253,18 +298,20 @@ static int DoExportSVGTracks(
 	if( !SvgSaveFile(svg, fileName[0] )) {
 		NoticeMessage(MSG_OPEN_FAIL, _("Cancel"), NULL, "SVG", fileName[0],
 			strerror(errno));
+
+		SvgDestroyDocument(svg);
 		wSetCursor(NULL, wCursorNormal);
-//		RestoreLocale(oldLocale);
+		SetUserLocale();
 		return FALSE;
 	}
-
+	SvgDestroyDocument(svg);
     Reset();	/**<TODO: was tut das? */
-//	RestoreLocale(oldLocale);
+	wSetCursor(NULL, wCursorNormal);
+	SetUserLocale();
     return TRUE;
 }
 
 /** Create and show the dialog for selected the DXF export filename */
-
 
 void DoExportSVG(void)
 {
