@@ -4429,6 +4429,7 @@ static void AddTurnout(void)
 				else {
 					UndrawNewTrack(lt);
 					DeleteTrack(lt, TRUE);
+					leftover(i).trk = NULL;
 				}
 			}
 			else {
