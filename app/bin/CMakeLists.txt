@@ -113,6 +113,7 @@ SET(SOURCES
 	draw.c
 	drawgeom.c
 	dxfformat.c
+	dxfformat.h
 	dxfoutput.c
 	elev.c
 	file2uri.c
