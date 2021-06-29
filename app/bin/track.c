@@ -404,7 +404,6 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 		// - ClearTracks to remove all tracks
 		// - DoRegression to remove expected track
 		// - UndoStart / UndoDelete
-		// Or cundo.c/ReadObject when saving a possibly deleted track to Redo stream
 		// Anywhere else: needs investigation
 		if ( bFreeTrack == FALSE )
 			printf( "GetExtraData T%d is deleted!\n", trk->index );
@@ -1351,6 +1350,7 @@ static void ExciseSelectedTracks( track_p * pxtrk, track_p * pltrk )
 	track_p trk, *ptrk;
 	for (ptrk=&to_first; *ptrk!=NULL; ) {
 		trk = *ptrk;
+		// TODO: unset SELECTED flag when trk is deleted
 		if (IsTrackDeleted(trk) || !GetTrkSelected(trk)) {
 			ptrk = &(*ptrk)->next;
 			continue;
@@ -1559,12 +1559,11 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 
 
 	for ( trk=*importTrack; trk; trk=trk->next ) {
-		if (!IsTrackDeleted(trk)) {
-			if (trk->hi.y > ymax ) ymax = trk->hi.y;
-			if (trk->lo.y < ymin ) ymin = trk->lo.y;
-			if (trk->hi.x > xmax ) xmax = trk->hi.x;
-			if (trk->lo.x < xmin ) xmin = trk->lo.x;
-		}
+		ASSERT(!IsTrackDeleted(trk)); // Export ignores deleted tracks
+		if (trk->hi.y > ymax ) ymax = trk->hi.y;
+		if (trk->lo.y < ymin ) ymin = trk->lo.y;
+		if (trk->hi.x > xmax ) xmax = trk->hi.x;
+		if (trk->lo.x < xmin ) xmin = trk->lo.x;
 	}
 
 	coOrd size = {xmax-xmin,ymax-ymin};
@@ -1601,7 +1600,8 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 	RenumberTracks();
 
 	// move the imported track into place
-	for ( trk=*importTrack; trk; trk=trk->next ) if (!IsTrackDeleted(trk)) {
+	for ( trk=*importTrack; trk; trk=trk->next ) {
+		ASSERT( !IsTrackDeleted(trk) );
 		coOrd move;
 		move.x = offset.x;
 		move.y = offset.y;
@@ -1773,7 +1773,7 @@ EXPORT void AuditTracks( char * event, ... )
 		}
 		for (i=0; i<trk->endCnt; i++) {
 			if ( (tn = trk->endPt[i].track) != NULL ) {
-				if (IsTrackDeleted(trk)) {
+				if (IsTrackDeleted(tn)) {
 					sprintf( msgp, "T%d[%d]: T%d is deleted\n", trk->index, i, tn->index );
 					AuditPrint( msg );
 					trk->endPt[i].track = NULL;

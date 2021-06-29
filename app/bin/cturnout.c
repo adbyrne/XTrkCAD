@@ -4375,7 +4375,8 @@ static void AddTurnout(void)
 	AuditTracks("addTurnout T%d before dealing with leftovers", GetTrkIndex(newTrk));
 	/* deal with the leftovers */
 	for (i = 0; i < curTurnout->endCnt; i++) {
-		if ((trk = leftover(i).trk) != NULL && !IsTrackDeleted(trk)) {
+		if ((trk = leftover(i).trk) != NULL) {
+			ASSERT( !IsTrackDeleted(trk) );
 			/* move endPt beyond the turnout */
 			/* it it is short then delete it */
 			coOrd off;
@@ -4428,6 +4429,7 @@ static void AddTurnout(void)
 				else {
 					UndrawNewTrack(lt);
 					DeleteTrack(lt, TRUE);
+					leftover(i).trk = NULL;
 				}
 			}
 			else {

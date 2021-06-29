@@ -557,8 +557,8 @@ EXPORT void DescribeCancel(void)
 {
     if (describePG.win && wWinIsVisible(describePG.win)) {
         if (descTrk) {
-        	if (!IsTrackDeleted(descTrk))
-        		descUpdateFunc(descTrk, -1, descData, TRUE);
+        	ASSERT(!IsTrackDeleted(descTrk));
+       		descUpdateFunc(descTrk, -1, descData, TRUE);
         	descTrk = NULL;
 
         }
