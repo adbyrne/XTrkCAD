@@ -37,7 +37,7 @@ void SvgLineCommand(SVGParent *svg, double x0, double y0, double x1, double y1, 
 void SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill);
 void SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int color, int linestyle);
 void SvgCircleCommand(SVGParent *svg, double x, double y, double r, double w, long c, bool fill );
-void SvgArcCommand(SVGParent *result, int layer, double x, double y, double r, double a0, double a1, int style);
+void SvgArcCommand(SVGParent *svg, double x, double y, double r, double a0, double a1, bool center, double w, long c);
 void SvgTextCommand(SVGParent *svg, double x, double y, double size, long c, char *text);
 
 SVGDocument *SvgCreateDocument(void);

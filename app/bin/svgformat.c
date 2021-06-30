@@ -20,6 +20,7 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+#define _USE_MATH_DEFINES 
 #include <math.h>
 #include <stdarg.h>
 #include <string.h>
@@ -33,6 +34,8 @@
 #include "include/svgformat.h"
 
 #define SVGDPIFACTOR 90.0				   /**< the assumed resolution of the svg, 90 is what Inkscape uses */
+#define ROUND2PIXEL( value ) ((int)floor(value * SVGDPIFACTOR + 0.5))
+
 
 /**
  * Hashes the given string, taken from http://www.cse.yorku.ca/~oz/hash.html
@@ -228,6 +231,17 @@ SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int c
 	SvgFillColor(xmlData, color );
 }
 
+/**
+ * Svg polygon line command
+ *
+ * \param [in]	svg    If non-null, the svg.
+ * \param 		cnt    Number of point.
+ * \param [in]	points If non-null, the points.
+ * \param 		color  The line and fill color.
+ * \param 		width  The line width.
+ * \param 		fill   True to fill.
+ */
+
 void
 SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill)
 {
@@ -295,21 +309,71 @@ SvgCircleCommand(SVGParent *svg, double x,
 }
 
 /**
-* Format a complete ARC command after DXF spec
+ * Polar to cartesian
+ *
+ * \param 		cx	  x coordinate of center.
+ * \param 		cy	  y coordinate of center
+ * \param 		radius radius.
+ * \param 		angle  angle.
+ * \param [out] px	  resulting x coordinate
+ * \param [out] py	  resulting y coordinate
+ */
+
+static void
+PolarToCartesian(double cx, double cy, double radius, double angle, double *px, double *py )
+{
+	double angleInRadians = ((angle ) * M_PI) / 180.0;
+
+	*px = cx + (radius * cos(angleInRadians));
+	*py = cy + (radius * sin(angleInRadians));
+}
+
+/**
+* Format an arc as a SVG path
+* See https://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
 *
-* \param result OUT buffer for the completed command
-* \param layer IN number part of the layer
+* \param svg the svg document
 * \param x, y IN center point
 * \param r IN radius
 * \param a0 IN starting angle
 * \param a1 IN ending angle
-* \param style IN line style, TRUE for dashed, FALSE for continuous
+* \param center IN draw center mark if true
+* \param w line width							
+* \param c line color 
 */
 
 void
-SvgArcCommand(SVGParent *result, int layer, double x, double y,
-              double r, double a0, double a1, int style)
+SvgArcCommand(SVGParent *svg, double x, double y,
+              double r, double a0, double a1, bool center, double w, long c)
 {
+	double startX;
+	double startY;
+	double endX;
+	double endY;
+	char largeArcFlag = (a1 - a0 <= 180 ? '0' : '1');
+	char pathArc[1000];
+	mxml_node_t *xmlData;
+
+	xmlData = mxmlNewElement(svg, "path");
+
+	PolarToCartesian(x, y, r, a0+a1-90, &startX, &startY );
+	PolarToCartesian(x, y, r, a0-90, &endX, &endY );
+
+	sprintf(pathArc, 
+			"M %d %d A %d %d 0 %c 0 %d %d", 
+			ROUND2PIXEL(startX), 
+			ROUND2PIXEL(startY), 
+			ROUND2PIXEL(r), 
+			ROUND2PIXEL(r), 
+			largeArcFlag, 
+			ROUND2PIXEL(endX), 
+			ROUND2PIXEL(endY));
+
+	mxmlElementSetAttr(xmlData, "d", pathArc);
+
+	SvgLineColor(xmlData, c);
+	SvgFillNone(xmlData);
+	SvgAddRealUnit(xmlData, "stroke-width", w);
 
 }
 
@@ -442,6 +506,7 @@ whitespace_cb(mxml_node_t *node, int where)
 	} else {
 		if (!strcmp(element, "line") ||
 			!strcmp(element, "circle") ||
+			!strcmp(element, "path") ||
 			!strcmp(element, "polyline"))
 		{
 			if (where == MXML_WS_BEFORE_OPEN ||

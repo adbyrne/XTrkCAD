@@ -101,7 +101,6 @@ static void SvgDrawArc(
     wDrawWidth width,
     wDrawColor color)
 {
-    angle0 = NormalizeAngle(90.0-(angle0+angle1));
 
     if (angle1 >= 360.0) {
 		SvgCircleCommand((SVGParent *)(d->d),
@@ -112,13 +111,15 @@ static void SvgDrawArc(
 			wDrawGetRGB( color ),
 			false );
     } else {
-        //SvgArcCommand((SVGParent *)(d->d),
-        //              p.x,
-        //              p.y,
-        //              r,
-        //              angle0,
-        //              angle1,
-        //              ((d->options&DC_DASH) != 0));
+        SvgArcCommand((SVGParent *)(d->d),
+                      p.x,
+                      roomSize.y-p.y,
+                      r,
+                      angle0,
+                      angle1,
+					  drawCenter,
+					  (width > 0 ? width: 1),	
+                      wDrawGetRGB(color));
     }
 
 }
