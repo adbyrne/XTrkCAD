@@ -820,7 +820,7 @@ EXPORT STATUS_T AdjustBezCurve(
  */
 STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) {
 	BOOL_T track = TRUE;
-	track_p t;
+//	track_p t;
 	double width = 1.0;
 	long mode = 0;
 	long cmd;
@@ -885,22 +885,31 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 			return C_CANCEL;
 		}
 		UndoStart( _("Modify Bezier"), "newBezier - CR" );
-		if (Da.track) t = NewBezierTrack( Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
-		else t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,xx->segsColor,xx->segsWidth);
+		UndoModify( trk );
+//		if (Da.track) t = NewBezierTrack( Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
+//		else t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,xx->segsColor,xx->segsWidth);
             
-		if (Da.track) CopyAttributes( trk, t );
+//		if (Da.track) CopyAttributes( trk, t );
 
 		Da.state = NONE;												//Must do before Delete for redraw
-		DeleteTrack(trk, TRUE);
-
-		if (Da.track) {
-			for (int i=0;i<2;i++) {										//Attach new track
-				if (Da.trk[i] != NULL && Da.ep[i] != -1) {								//Like the old track
-					ConnectAbuttingTracks(t,i,Da.trk[i],Da.ep[i]);
-				}
-			}
+//		DeleteTrack(trk, TRUE);
+		wDrawColor color = wDrawColorBlack;
+		DIST_T width = 0;
+		if ( !Da.track ) {
+			color = xx->segsColor;
+			width = xx->segsWidth;
 		}
-		DrawNewTrack( t );
+		SetBezierData( trk, Da.pos, xx->segsColor, xx->segsWidth );
+
+//		if (Da.track) {
+//			for (int i=0;i<2;i++) {										//Attach new track
+//				if (Da.trk[i] != NULL && Da.ep[i] != -1) {								//Like the old track
+//					ConnectAbuttingTracks(t,i,Da.trk[i],Da.ep[i]);
+//				}
+//			}
+//		}
+//		DrawNewTrack( t );
+		DrawNewTrack( trk );
 		UndoEnd();
 		InfoMessage(_("Modify Bezier Complete"));
 		return C_TERMINATE;
