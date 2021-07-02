@@ -1626,8 +1626,6 @@ EXPORT void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T wid
 		p->endPt[0].angle = xx->a0;
 		p->endPt[1].pos = pos[3];
 		p->endPt[1].angle = xx->a1;
-//		SetTrkEndPoint( p, 0, pos[0], xx->a0);
-//		SetTrkEndPoint( p, 1, pos[3], xx->a1);
 		CheckTrackLength( p );
 		SetTrkBits( p, TB_HIDEDESC );
 	}
