@@ -25,7 +25,7 @@
 #include <time.h>
 #ifdef WINDOWS
   #include <io.h>
-  #include <windows.h>
+  #define UTFCONVERT
 #else
   #include <errno.h>
 #endif
@@ -46,6 +46,7 @@
 #include "messages.h"
 #include "paths.h"
 #include "track.h"
+#include "include/utf8convert.h"
 #include "utility.h"
 #include "wlib.h"
 
@@ -125,15 +126,15 @@ static void SvgDrawArc(
 }
 
 /**
- * Svg draw string
+ * Svg draw string. Perform conversion to UTF-8 if required.
  *
  * \param 		   d	    A drawCmd_p to process.
- * \param 		   p	    A coOrd to process.
- * \param 		   a	    An ANGLE_T to process.
- * \param [in,out] s	    If non-null, a char to process.
- * \param 		   fp	    The fp.
+ * \param 		   p	    position of text
+ * \param 		   a	    text angle
+ * \param [in,out] s	    the string
+ * \param 		   fp	    font definition (ignored)
  * \param 		   fontSize Size of the font.
- * \param 		   color    The color.
+ * \param 		   color    color.
  */
 
 static void SvgDrawString(
@@ -145,13 +146,20 @@ static void SvgDrawString(
     FONTSIZE_T fontSize,
     wDrawColor color)
 {
+	char *text = MyStrdup(s);
+
+#ifdef UTFCONVERT
+	text = Convert2UTF8(text);
+#endif // UTFCONVERT
+
     SvgTextCommand((SVGParent *)(d->d),
                    p.x,
                    roomSize.y - p.y,
                    fontSize,
 				   wDrawGetRGB(color),
-                   s);
+                   text );
 
+	MyFree(text);
 }
 
 /**

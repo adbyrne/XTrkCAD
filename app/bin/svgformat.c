@@ -30,12 +30,12 @@
 #include <malloc.h>
 #endif
 
+#include "dynstring.h"
 #include "mxml.h"
 #include "include/svgformat.h"
 
 #define SVGDPIFACTOR 90.0				   /**< the assumed resolution of the svg, 90 is what Inkscape uses */
 #define ROUND2PIXEL( value ) ((int)floor(value * SVGDPIFACTOR + 0.5))
-
 
 /**
  * Hashes the given string, taken from http://www.cse.yorku.ca/~oz/hash.html
@@ -94,7 +94,7 @@ SvgAddRealUnit(mxml_node_t *node, char *name, double value)
 static void
 SvgAddCoordinate(mxml_node_t *node, char *name, double value)
 {
-	mxmlElementSetAttrf(node, name, "%d", (int)floor(value * SVGDPIFACTOR + 0.5));
+	mxmlElementSetAttrf(node, name, "%d", ROUND2PIXEL(value));
 }
 
 /**
@@ -246,23 +246,25 @@ void
 SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill)
 {
 	mxml_node_t *xmlData;
-	char *pointList = malloc( 1 );
-	*pointList = '\0';
+	DynString pointList;
+	DynString pos;
+
+	DynStringMalloc(&pointList, 64);
+	DynStringMalloc(&pos, 20);
+
 
 	for (int i = 0; i < cnt; i++) {
-		char pos[20];
-		size_t length;
-		length = snprintf(pos, 19, 
-				"%d,%d ", 
-				(int)floor(points[i * 2] * SVGDPIFACTOR + 0.5), 
-				(int)floor(points[ i * 2 + 1] * SVGDPIFACTOR + 0.5));
+		DynStringPrintf(&pos,
+						"%d,%d ", 
+						(int)floor(points[i * 2] * SVGDPIFACTOR + 0.5), 
+						(int)floor(points[ i * 2 + 1] * SVGDPIFACTOR + 0.5));
 
-		pointList = realloc(pointList, strlen(pointList) + length + 1);
-		strcat(pointList, pos);
+		DynStringCatStr(&pointList, &pos);
+		DynStringClear(&pos);
 	}
 
 	xmlData = mxmlNewElement(svg, "polyline");
-	mxmlElementSetAttr(xmlData, "points", pointList);
+	mxmlElementSetAttr(xmlData, "points", DynStringToCStr(&pointList));
 
 	SvgAddRealUnit(xmlData, "stroke-width", width);
 
@@ -272,7 +274,8 @@ SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double wi
 	} else {
 		SvgFillNone(xmlData);
 	}
-	free(pointList);
+	DynStringFree(&pos);
+	DynStringFree(&pointList);
 }
 
 /**
@@ -351,7 +354,7 @@ SvgArcCommand(SVGParent *svg, double x, double y,
 	double endX;
 	double endY;
 	char largeArcFlag = (a1 - a0 <= 180 ? '0' : '1');
-	char pathArc[1000];
+	DynString pathArc;
 	mxml_node_t *xmlData;
 
 	xmlData = mxmlNewElement(svg, "path");
@@ -359,33 +362,36 @@ SvgArcCommand(SVGParent *svg, double x, double y,
 	PolarToCartesian(x, y, r, a0+a1-90, &startX, &startY );
 	PolarToCartesian(x, y, r, a0-90, &endX, &endY );
 
-	sprintf(pathArc, 
-			"M %d %d A %d %d 0 %c 0 %d %d", 
-			ROUND2PIXEL(startX), 
-			ROUND2PIXEL(startY), 
-			ROUND2PIXEL(r), 
-			ROUND2PIXEL(r), 
-			largeArcFlag, 
-			ROUND2PIXEL(endX), 
-			ROUND2PIXEL(endY));
+	DynStringMalloc( &pathArc, 64);
+	DynStringPrintf( &pathArc, 
+					"M %d %d A %d %d 0 %c 0 %d %d", 
+					ROUND2PIXEL(startX), 
+					ROUND2PIXEL(startY), 
+					ROUND2PIXEL(r), 
+					ROUND2PIXEL(r), 
+					largeArcFlag, 
+					ROUND2PIXEL(endX), 
+					ROUND2PIXEL(endY));
 
-	mxmlElementSetAttr(xmlData, "d", pathArc);
+	mxmlElementSetAttr(xmlData, "d", DynStringToCStr( &pathArc));
+
+	DynStringFree(&pathArc);
 
 	SvgLineColor(xmlData, c);
 	SvgFillNone(xmlData);
 	SvgAddRealUnit(xmlData, "stroke-width", w);
-
 }
 
 /**
-* Format a complete TEXT command after DXF spec
-*
-* \param result OUT buffer for the completed command
-* \param layer IN number part of the layer
-* \param x, y IN text position
-* \param size IN font size
-* \param text IN text
-*/
+ *  Create SVG text command 
+ *
+ * \param [in] svg  If non-null, the svg.
+ * \param 		   x    The x coordinate.
+ * \param 		   y    The y coordinate.
+ * \param 		   size The fontsize.
+ * \param 		   c    the text color
+ * \param [in]	   text text in UTF-8 format
+ */
 
 void
 SvgTextCommand(SVGParent *svg, double x,
