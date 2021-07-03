@@ -1350,11 +1350,11 @@ static void ExciseSelectedTracks( track_p * pxtrk, track_p * pltrk )
 	track_p trk, *ptrk;
 	for (ptrk=&to_first; *ptrk!=NULL; ) {
 		trk = *ptrk;
-		// TODO: unset SELECTED flag when trk is deleted
-		if (IsTrackDeleted(trk) || !GetTrkSelected(trk)) {
+		if (!GetTrkSelected(trk)) {
 			ptrk = &(*ptrk)->next;
 			continue;
 		}
+		ASSERT( !IsTrackDeleted(trk) );
 		UndoModify( *ptrk );
 		UndoModify( trk );
 		*ptrk = trk->next;
