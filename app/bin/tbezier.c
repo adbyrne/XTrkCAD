@@ -45,6 +45,7 @@
 #include "cundo.h"
 #include "layout.h"
 #include "fileio.h"
+#include "trackx.h"
 
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
@@ -1605,47 +1606,48 @@ LOG( log_bezierSegments, 1, ( "    BezGA-Out SI%d A%0.3f P[%0.3f %0.3f] B%d\n", 
  */
 
 
+EXPORT void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T width )
+{
+	BOOL_T bTrack = (GetTrkType(p) == T_BEZIER);
+	struct extraDataBezier_t *xx = GET_EXTRA_DATA(p, T_NOTRACK, extraDataBezier_t);
+	xx->pos[0] = pos[0];
+	xx->pos[1] = pos[1];
+	xx->pos[2] = pos[2];
+	xx->pos[3] = pos[3];
+	xx->a0 = FindAngle(pos[1],pos[0]);
+	xx->a1 = FindAngle(pos[2],pos[3]);
+	xx->segsColor = color;
+	xx->segsWidth = width;
+	FixUpBezier(pos, xx, bTrack);
+	ComputeBezierBoundingBox( p, xx );
+	if ( bTrack ) {
+		// Should call SetTrkEndPoint but we may be already connected
+		p->endPt[0].pos = pos[0];
+		p->endPt[0].angle = xx->a0;
+		p->endPt[1].pos = pos[3];
+		p->endPt[1].angle = xx->a1;
+		CheckTrackLength( p );
+		SetTrkBits( p, TB_HIDEDESC );
+	}
+}
+
+
 track_p NewBezierTrack(coOrd pos[4], trkSeg_t * tempsegs, int count)
 {
-	struct extraDataBezier_t *xx;
 	track_p p;
-	p = NewTrack( 0, T_BEZIER, 2, sizeof *xx );
-	xx = GET_EXTRA_DATA(p, T_BEZIER, extraDataBezier_t);
-    xx->pos[0] = pos[0];
-    xx->pos[1] = pos[1];
-    xx->pos[2] = pos[2];
-    xx->pos[3] = pos[3];
-    xx->a0 = FindAngle(pos[1],pos[0]);
-    xx->a1 = FindAngle(pos[2],pos[3]);
-    xx->segsColor = wDrawColorBlack;
-    xx->segsWidth = 0;
-    FixUpBezier(pos, xx, TRUE);
+	p = NewTrack( 0, T_BEZIER, 2, sizeof *(extraDataBezier_t*)NULL );
+	SetBezierData( p, pos, wDrawColorBlack, 0 );
 LOG( log_bezier, 1, ( "NewBezierTrack( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %0.3f, %0.3f, EP2 %0.3f, %0.3f )  = %d\n", pos[0].x, pos[0].y, pos[1].x, pos[1].y, pos[2].x, pos[2].y, pos[3].x, pos[3].y, GetTrkIndex(p) ) )
-	ComputeBezierBoundingBox( p, xx );
-	SetTrkEndPoint( p, 0, pos[0], xx->a0);
-	SetTrkEndPoint( p, 1, pos[3], xx->a1);
-	CheckTrackLength( p );
-	SetTrkBits( p, TB_HIDEDESC );
 	return p;
 }
 
+
 EXPORT track_p NewBezierLine( coOrd pos[4], trkSeg_t * tempsegs, int count, wDrawColor color, DIST_T width )
 {
-	struct extraDataBezier_t *xx;
 	track_p p;
-	p = NewTrack( 0, T_BZRLIN, 0, sizeof *xx );  //No endpoints
-	xx = GET_EXTRA_DATA(p, T_BZRLIN, extraDataBezier_t);
-    xx->pos[0] = pos[0];
-    xx->pos[1] = pos[1];
-    xx->pos[2] = pos[2];
-    xx->pos[3] = pos[3];
-    xx->a0 = FindAngle(pos[1],pos[0]);
-    xx->a1 = FindAngle(pos[2],pos[3]);
-    xx->segsColor = color;
-    xx->segsWidth = width;
-    FixUpBezier(pos, xx, FALSE);
+	p = NewTrack( 0, T_BZRLIN, 0, sizeof *(extraDataBezier_t*)NULL );  //No endpoints
+	SetBezierData( p, pos, color, width );
 LOG( log_bezier, 1, ( "NewBezierLine( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %0.3f, %0.3f, EP2 %0.3f, %0.3f)  = %d\n", pos[0].x, pos[0].y, pos[1].x, pos[1].y, pos[2].x, pos[2].y, pos[3].x, pos[3].y, GetTrkIndex(p) ) )
-	ComputeBezierBoundingBox( p, xx );
 	return p;
 }
 

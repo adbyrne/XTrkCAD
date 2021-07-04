@@ -3376,6 +3376,11 @@ static STATUS_T CmdSelect(
 		break;
 
 	case C_REDRAW:
+		if ( trk != NULL && IsTrackDeleted(trk) ) {
+			// If the track is deleted, then trk should be cleared
+			// TODO: This should be done at the point trk is deleted
+			trk = NULL;
+		}
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
@@ -3412,10 +3417,14 @@ static STATUS_T CmdSelect(
 		DrawHighlightBoxes(FALSE, FALSE, trk);
 
 		// If not on a track, show all tracks as going to be de-selected if selectZero on
-		if (!trk && selectZero ) {
-			HighlightSelectedTracks(NULL, FALSE, TRUE);
-		//Handle the SHIFT+ which means SelectAllConnected case
-		} else if ( trk && !IsTrackDeleted(trk)) {
+		if (!trk) {
+			if ( selectZero ) {
+				HighlightSelectedTracks(NULL, FALSE, TRUE);
+			} else {
+				HighlightSelectedTracks(trk, TRUE, FALSE);
+			}
+		} else {
+			//Handle the SHIFT+ which means SelectAllConnected case
 			if ((MyGetKeyState() & WKEY_SHIFT) )
 				SelectConnectedTracks(trk, TRUE);        	 //Highlight all connected
 			//Normal case - handle track we are hovering over
@@ -3471,8 +3480,6 @@ static STATUS_T CmdSelect(
 				else
 					HighlightSelectedTracks(trk, TRUE, FALSE); // Highlight all others selected
 			}
-		} else if (!trk ){
-			HighlightSelectedTracks(trk, TRUE, FALSE);
 		}
 		//Finally add the anchors for any actions or snaps
 		if (anchors_da.cnt) {

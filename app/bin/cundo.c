@@ -836,6 +836,7 @@ LOG( log_undo, 2, ( "    UndoDelete( T%d, E%d, X%ld @ "SLOG_FMT" )\n", trk->inde
 		us->newCnt--;
 		return TRUE;
 	}
+	ClrTrkBits( trk, TB_SELECTED );
 	trk->deleted = TRUE;
 	us->delCnt++;
 	return TRUE;

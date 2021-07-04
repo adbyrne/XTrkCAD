@@ -46,6 +46,7 @@ double BezierCurvature(coOrd[4], double , coOrd *);
 double BezierMaxCurve(coOrd[4]);
 double BezierMathMinRadius(coOrd[4]);
 coOrd BezierMathFindNearestPoint(coOrd *, coOrd[4] , int );
+void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T width );
 track_p NewBezierTrack(coOrd[4], trkSeg_p , int );
 track_p NewBezierLine(coOrd[4], trkSeg_p , int, wDrawColor, DIST_T);
 DIST_T BezierMathDistance( coOrd *, coOrd[4], int , double * );
