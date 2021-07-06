@@ -1072,6 +1072,16 @@ void GetTurnoutType() {
 			ANGLE_T a0, a1, a2;
 			a1 = FindAngle(dto[dtod.strPath].base[0], dto[dtod.strPath].base[1]);
 			a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
+			// Swap the ends of the str2Path if large angle
+			if((a2 > 180.0) && (dto[dtod.str2Path].n == 2))
+			{
+				coOrd tmp = dto[dtod.str2Path].base[0];
+				dto[dtod.str2Path].base[0] = dto[dtod.str2Path].base[1];
+				dto[dtod.str2Path].base[1] = tmp;
+				tmp = dto[dtod.str2Path].pts[0];
+				dto[dtod.str2Path].pts[dto[dtod.str2Path].n - 1] = tmp;
+				a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
+			}
 			a0 = DifferenceBetweenAngles(a1, a2);
 			if(a0 < 0)
 			{
@@ -1090,7 +1100,7 @@ void GetTurnoutType() {
 
 			if (intersect) {
 				if (strCnt == 2 && dtod.pathCnt == 2)
-					if ((a0 <= 30) && (a0 >= -30))
+					if ((a0 <= 45) && (a0 >= -45))
 						dtod.toType = DTO_XING;
 					else
 						dtod.toType = DTO_XNG9;
@@ -2052,8 +2062,10 @@ static void DrawXingTurnout(
 	dtod.midPt = pos;
 
 	// Tie length adjust
-	a0 = DifferenceBetweenAngles(a1, a2);
+	a0 = fabs(DifferenceBetweenAngles(a1, a2));
 	double magic = 1.0;
+	// Extra ties length adjust
+	double magic2 =	(a0 <= 20 ? 1.0 : 1.0 / cos(0.5 * D2R(a0 - 20.0)));
 
 	// Short circuit the complex code for this simple case
 	if (toType == DTO_XNG9) {
@@ -2129,7 +2141,7 @@ static void DrawXingTurnout(
 	int qn = dto[secPath].n;
 
 	// Tie length adjust
-	magic = 1 / cos(0.75 * D2R(a0));
+	magic = 1 / cos(0.5 * D2R(a0));
 
 	// Draw right half
 	len = FindDistance(dtod.midPt, c2);
@@ -2141,7 +2153,7 @@ static void DrawXingTurnout(
 	p0 = q0 = 0;
 	DIST_T dx2 = dx / 2;
 	DIST_T px = len + dx2;
-	DIST_T lenr = len;
+	DIST_T lenx = 0;
 
 	while (p0 < pn && px > dto[othPath].base[p0 + 1].x) p0++;
 	while (q0 < qn && px > dto[secPath].base[q0 + 1].x) q0++;
@@ -2168,14 +2180,15 @@ static void DrawXingTurnout(
 		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		px += dx;
-		lenr -= dx;
+		lenx += dx;
 	}
 
 	int n = dto[strPath].n;
 	p1 = dtod.midPt;
 	p2 = dto[strPath].pts[n - 1];
+	DIST_T lenr = FindDistance(p1, p2) - lenx * magic2;
 	a0 = dto[strPath].angle;
-	if (lenr >= dx2) {
+	if (lenr > dx) {
 		Translate(&pos, p2, a0, -lenr);
 		DrawStraightTies(d, scaleInx, pos, p2, color);
 	}
@@ -2186,8 +2199,9 @@ static void DrawXingTurnout(
 	n = dto[str2Path].n;
 	// p1 = dtod.midPt;
 	p2 = dto[str2Path].pts[n - 1];
+	lenr = FindDistance(p1, p2) - lenx * magic2;
 	a0 = dto[str2Path].angle;
-	if (lenr > dx2) {
+	if (lenr > dx) {
 		Translate(&pos, p2, a0, -lenr);
 		DrawStraightTies(d, scaleInx, pos, p2, color);
 	}
@@ -2213,6 +2227,8 @@ static void DrawXingTurnout(
 	dx = len / cnt;
 	dx2 = dx / 2;
 	px = len - dx2;
+	lenx = 0;
+
 	while (p0 < pn && px > dto[othPath].base[p0 + 1].x) p0++;
 	while (q0 < qn && px > dto[secPath].base[q0 + 1].x) q0++;
 	while (p0 >= 0 && q0 >= 0) {
@@ -2238,14 +2254,15 @@ static void DrawXingTurnout(
 		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		px -= dx;
+		lenx += dx;
 	}
 
 	p1 = dto[strPath].pts[0];
 	p2 = dtod.midPt;
 	a0 = dto[strPath].angle;
-	lenr = px; // FindDistance(p1, p2) - len;
-	if (lenr > dx2) {
-		Translate(&pos, p1, a0, lenr + dx2);
+	lenr = FindDistance(p1, p2) - lenx * magic2;
+	if (lenr > dx) {
+		Translate(&pos, p1, a0, lenr);
 		DrawStraightTies(d, scaleInx, p1, pos, color);
 	}
 	else {
@@ -2255,9 +2272,9 @@ static void DrawXingTurnout(
 	p1 = dto[str2Path].pts[0];
 	// p2 = dtod.midPt;
 	a0 = dto[str2Path].angle;
-	lenr = px; // FindDistance(p1, p2) - len;
-	if (lenr > dx2) {
-		Translate(&pos, p1, a0, lenr + dx2);
+	lenr = FindDistance(p1, p2) - lenx * magic2;
+	if (lenr > dx) {
+		Translate(&pos, p1, a0, lenr);
 		DrawStraightTies(d, scaleInx, p1, pos, color);
 	}
 	else {
