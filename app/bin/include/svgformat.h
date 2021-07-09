@@ -1,5 +1,5 @@
 /** \file svgformat.h
- * Definitions and prototypes for DXF export
+ * Definitions and prototypes for SVG export
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -25,19 +25,17 @@
 #include <stdbool.h>
 #include <mxml.h>
 
-#define MININMUMLINEWIDTH 1.0
+#define MININMUMLINEWIDTH 3.0
 
 typedef  mxml_node_t SVGParent;
 typedef  mxml_node_t SVGDocument;
 
-void SvgLayerName(mxml_node_t *result, char *name, int layer);
-void SvgLineStyle(mxml_node_t *result, int isDashed);
-
-void SvgLineCommand(SVGParent *svg, double x0, double y0, double x1, double y1, double w, long c);
-void SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill);
-void SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int color, int linestyle);
-void SvgCircleCommand(SVGParent *svg, double x, double y, double r, double w, long c, bool fill );
-void SvgArcCommand(SVGParent *svg, double x, double y, double r, double a0, double a1, bool center, double w, long c);
+void SvgAddCSSStyle(SVGParent *svg);
+void SvgLineCommand(SVGParent *svg, double x0, double y0, double x1, double y1, double w, long c, unsigned lineOpt);
+void SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill, unsigned lineStyle);
+void SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int color, unsigned linestyle);
+void SvgCircleCommand(SVGParent *svg, double x, double y, double r, double w, long c, bool fill, unsigned lineStyle );
+void SvgArcCommand(SVGParent *svg, double x, double y, double r, double a0, double a1, bool center, double w, long c, unsigned lineStyle);
 void SvgTextCommand(SVGParent *svg, double x, double y, double size, long c, char *text);
 
 SVGDocument *SvgCreateDocument(void);
@@ -46,7 +44,5 @@ void SvgEpilogue(SVGParent *result);
 
 bool SvgSaveFile(SVGDocument *svg, char *filename);
 void SvgDestroyDocument(SVGDocument *svg);
-
-
 #endif // !HAVE_SVGFORMAT_H
 

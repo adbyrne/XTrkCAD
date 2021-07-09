@@ -54,6 +54,48 @@ static struct wFilSel_t * exportSVGFile_fs;
 static coOrd roomSize;
 
 /**
+ * get line style for element 
+ *
+ * \param  d drawCmd_p to process.
+ * 			 
+ * \returns the line style
+ */
+
+static unsigned
+SvgDrawGetLineStyle(drawCmd_p d)
+{
+	unsigned long notSolid = DC_NOTSOLIDLINE;
+	unsigned long opt = d->options & notSolid;
+	unsigned lineOpt;
+
+	switch (opt) {
+	case DC_DASH:
+		lineOpt = wDrawLineDash;
+		break;
+	case DC_DOT:
+		lineOpt = wDrawLineDot;
+		break;
+	case DC_DASHDOT:
+		lineOpt = wDrawLineDashDot;
+		break;
+	case DC_DASHDOTDOT:
+		lineOpt = wDrawLineDashDotDot;
+		break;
+	case DC_CENTER:
+		lineOpt = wDrawLineCenter;
+		break;
+	case DC_PHANTOM:
+		lineOpt = wDrawLinePhantom;
+		break;
+	default:
+		lineOpt = wDrawLineSolid;
+		break;
+	}
+
+	return(lineOpt);
+}
+
+/**
  * Svg draw line
  *
  * \param  d	 A drawCmd_p to process.
@@ -70,13 +112,16 @@ static void SvgDrawLine(
     wDrawWidth width,
     wDrawColor color)
 {
-	width = (wDrawWidth)(width != 0.0 ? width : MININMUMLINEWIDTH );
+	unsigned lineOpt = SvgDrawGetLineStyle(d);
 
-    SvgLineCommand((SVGParent *)(d->d),
-                   p0.x, roomSize.y - p0.y,
-                   p1.x, roomSize.y - p1.y,
-                   (double)width,
-				   wDrawGetRGB( color ));
+	width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
+
+	SvgLineCommand((SVGParent *)(d->d),
+		p0.x, roomSize.y - p0.y,
+		p1.x, roomSize.y - p1.y,
+		(double)width,
+		wDrawGetRGB(color),
+		lineOpt);
 }
 
 /**
@@ -102,15 +147,17 @@ static void SvgDrawArc(
     wDrawWidth width,
     wDrawColor color)
 {
+	unsigned lineOpt = SvgDrawGetLineStyle(d);
 
     if (angle1 >= 360.0) {
 		SvgCircleCommand((SVGParent *)(d->d),
 			p.x,
 			roomSize.y - p.y,
 			r,
-			width,
+			(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH),
 			wDrawGetRGB( color ),
-			false );
+			false,
+			lineOpt );
     } else {
         SvgArcCommand((SVGParent *)(d->d),
                       p.x,
@@ -119,8 +166,9 @@ static void SvgDrawArc(
                       angle0,
                       angle1,
 					  drawCenter,
-					  (width > 0 ? width: 1),	
-                      wDrawGetRGB(color));
+					  (width > MININMUMLINEWIDTH ? width: MININMUMLINEWIDTH),	
+                      wDrawGetRGB(color),
+					  lineOpt);
     }
 
 }
@@ -201,6 +249,8 @@ static void SvgDrawFillPoly(
 	int i;
 	double *points = malloc( (cnt + 1) * 2 * sizeof(double));
 
+	unsigned lineOpt = SvgDrawGetLineStyle(d);
+
 	if (!points) {
 		puts("memory for poly line coordinates could not be allocated!");
 		abort();
@@ -216,8 +266,8 @@ static void SvgDrawFillPoly(
 		cnt++;
 	}
 
-	width = (wDrawWidth)(width != 0.0 ? width : MININMUMLINEWIDTH);
-	SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  wDrawGetRGB(color), (double)width, fillStyle == DRAW_FILL);
+	width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
+	SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  wDrawGetRGB(color), (double)width, fillStyle == DRAW_FILL, lineOpt);
 
 	free(points);
 }
@@ -240,7 +290,8 @@ static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
 		radius,
 		0,
 		wDrawGetRGB(color),
-		true);
+		true,
+		0);
 }
 
 /**
@@ -304,6 +355,8 @@ static int DoExportSVGTracks(
 	svgD.d = (wDraw_p)svgData;
 
     DrawSelectedTracks(&svgD);
+	SvgAddCSSStyle((SVGParent *)svgD.d);
+
 	if( !SvgSaveFile(svg, fileName[0] )) {
 		NoticeMessage(MSG_OPEN_FAIL, _("Cancel"), NULL, "SVG", fileName[0],
 			strerror(errno));

@@ -33,39 +33,164 @@
 #include "dynstring.h"
 #include "mxml.h"
 #include "include/svgformat.h"
+#include "include/utlist.h"
 
-#define SVGDPIFACTOR 90.0				   /**< the assumed resolution of the svg, 90 is what Inkscape uses */
+#define SVGDPIFACTOR 90.0					/**< the assumed resolution of the svg, 90 is what Inkscape uses */
 #define ROUND2PIXEL( value ) ((int)floor(value * SVGDPIFACTOR + 0.5))
 
+typedef struct sCssStyle {
+	DynString name;
+	DynString style;
+	struct sCssStyle *next;
+} sCssStyle;
+
+static sCssStyle *styleCache = NULL;
+static unsigned cacheCount;
+
+static char *lineStyleCSS[] = {				/**< The css class names for line styles */
+	NULL,										// no style needed for solid line
+	"linedash",
+	"linedot",
+	"linedashdot",
+	"linedashdot",
+	"linecenter",
+	"linephantom"
+};
+
+#define LINESTYLECLASSES \
+		".linedash{ stroke-dasharray: 1.8% 0.8%; }\n" \
+		".linedot{ stroke-dasharray: 0.5% 0.8%; }\n" \
+		".linedashdot{ stroke-dasharray: 1.8% 0.8% 0.5% 0.8%; }\n" \
+		".linedashdotdot{ stroke-dasharray: 1.8% 0.8% 0.5% 0.8% 0.5% 0.8%; }\n" \
+		".linecenter{ stroke-dasharray: 2.8% 0.8% 1.8% 0.8%; }\n" \
+		".linephantom{ stroke-dasharray: 2.8% 0.8% 1.4% 0.8% 1.4% 0.8%; }\n"
+
+
+/** 
+ * Initialize style cache. Memory is allocated and the default style added
+ */
+ 
+static void
+SvgInitStyleCache(void)
+{
+	sCssStyle *style;
+
+	style = malloc(sizeof(sCssStyle));
+	DynStringMalloc(&(style->name), 2);
+	DynStringCatCStr(&(style->name), "*");
+
+	DynStringMalloc(&(style->style), 16);
+	DynStringCatCStr(&(style->style), "stroke-width:1; stroke:#000000; fill:none;");
+	LL_APPEND(styleCache, style);
+
+	cacheCount = 1; 
+}
+
+static int
+CompareStyle(sCssStyle *a, sCssStyle *b)
+{
+	return(strcmp(DynStringToCStr(&(a->style)), DynStringToCStr(&(b->style))));
+}
+
 /**
- * Hashes the given string, taken from http://www.cse.yorku.ca/~oz/hash.html
+ * Add style to cache. If an identical style definition can be found in the 
+ * cache, the class name is returned.
+ * If no previous definition is in the cache, a new one is contructed and
+ * stored in the cache. The new class name is returned
  *
- * \param str the string to be hashed
+ * \param [in] styleDef style definition.
  *
- * \returns the hash
+ * \returns Null if default style can be used, else the class name 
  */
 
-//static unsigned long
-//hash(unsigned char *str)
-//{
-//	unsigned long hash = 5381;
-//	int c;
-//
-//	while (c = *str++)
-//		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-//
-//	return hash;
-//}
+static char *
+SvgAddStyleToCache(DynString *styleDef)
+{
+	sCssStyle *style;
+	sCssStyle *result;
 
-/**
- * Utility macros to set colors
- *
- * \param  node  The node.
- * \param  color The color.
+	style = malloc(sizeof(sCssStyle));
+	style->style = *styleDef;
+
+	LL_SEARCH(styleCache, result, style, CompareStyle);
+	if (result) {
+		if (!strcmp(DynStringToCStr(&(result->name)), "*")) {
+			return(NULL);
+		} else {
+			return(DynStringToCStr(&(result->name) ) + 1);
+		}
+	} else {
+		DynString className;
+		DynStringMalloc(&className, 16);
+		DynStringPrintf(&className, ".xtc%u", cacheCount++ );
+		style->name = className;
+		LL_APPEND(styleCache, style);
+		return(DynStringToCStr(&className) + 1);		//skip leading dot in class name
+	}
+}
+
+/** 
+ * destroy style cache freeing all memory allocated
  */
 
-#define SvgLineColor(node, color)	SvgAddColor(node, "stroke", color )
-#define SvgFillColor(node, color)	SvgAddColor(node, "fill", color )
+static void
+SvgDestroyStyleCache(void)
+{
+	sCssStyle *style;
+	sCssStyle *tmp;
+
+	LL_FOREACH_SAFE(styleCache, style, tmp)
+	{
+		DynStringFree(&(style->name));
+		DynStringFree(&(style->style));
+		free(style);
+	}
+
+	styleCache = NULL;
+}
+
+/**
+ * Svg create style, add to the cache and the associated CSS class name to the element
+ *
+ * \param element	SVG element
+ * \param colorRGB	RGB value
+ * \param width     line width
+ * \param fill		true to fill
+ */
+
+static void
+SvgCreateStyle(mxml_node_t *element, unsigned long colorRGB, double width, bool fill, unsigned lineStyle)
+{
+	DynString style;
+	char color[10];
+	char *className = NULL;
+	char *classLineStyle = NULL;
+
+	assert(lineStyle < 7);
+
+	sprintf(color, "#%02.2x%02.2x%02.2x", (colorRGB >> 16) & 0xFF, (colorRGB >> 8) & 0xFF, colorRGB & 0xFF);
+
+	DynStringMalloc(&style, 32);
+
+	DynStringPrintf(&style,
+		"stroke-width:%d; stroke:%s; fill:%s;",
+		(int)(width + 0.5),
+		color,
+		(fill ? color: "none"));
+
+	className = SvgAddStyleToCache(&style);
+	classLineStyle = lineStyleCSS[lineStyle];
+
+	if (className && classLineStyle) {
+		mxmlElementSetAttrf(element, "class", "%s %s", className, classLineStyle );
+	} else {
+		if (className || classLineStyle) {
+			mxmlElementSetAttr(element, "class", (className? className:classLineStyle));
+		} else {
+			// strict default, nothing to add
+		}
+	}
+}
 
 /**
  * add real unit, ie. units that are specified in pixels. Rounding is performed 
@@ -97,25 +222,6 @@ SvgAddCoordinate(mxml_node_t *node, char *name, double value)
 	mxmlElementSetAttrf(node, name, "%d", ROUND2PIXEL(value));
 }
 
-/**
- * Svg add color
- *
- * \param [in,out] node  If non-null, the node.
- * \param 		   color color in 8 bit RGB format.
- */
-
-static void 
-SvgAddColor(mxml_node_t *node, char *attr, long colorRBG)
-{
-	mxmlElementSetAttrf(node, attr, "#%02.2x%02.2x%02.2x", (colorRBG >> 16) & 0xFF, (colorRBG >> 8) & 0xFF, colorRBG & 0xFF);
-}
-
-static void
-SvgFillNone(mxml_node_t *node)
-{
-	mxmlElementSetAttr(node, "fill", "none");
-}
-
 
 /**
  * Build and format layer name. The name is created by appending the layer number to the basic
@@ -127,18 +233,6 @@ SvgFillNone(mxml_node_t *node)
  */
 
 void SvgLayerName(mxml_node_t *result, char *name, int layer)
-{
-
-}
-
-/**
-* Build and format the line style definition
-*
-* \param result OUT buffer for result
-* \param type IN line style TRUE for dashed, FALSE for solid lines
-*/
-
-void SvgLineStyle(mxml_node_t *result, int isDashed)
 {
 
 }
@@ -158,34 +252,22 @@ SvgAppendLayerName(mxml_node_t *result, int layer)
 
 }
 
-/**
-* Build and format the line style definition. The result is appended to the existing result buffer.
-*
-* \param result OUT buffer for result
-* \param type IN line style TRUE for dashed, FALSE for solid lines
-*/
-
-static void
-SvgAppendLineStyle(SVGParent *output, int style)
-{
-
-}
 
 /**
  * Svg line command
- *
- * \param [in]	   svg the svg parent.
- * \param 		   x0  The x coordinate 0.
- * \param 		   y0  The y coordinate 0.
- * \param 		   x1  The first x value.
- * \param 		   y1  The first y value.
- * \param 		   w   A wDrawWidth to process.
- * \param 		   c   RGB color definition
+ * \param [in] svg		 the svg parent.
+ * \param 	   x0		 The x coordinate 0.
+ * \param 	   y0		 The y coordinate 0.
+ * \param 	   x1		 The first x value.
+ * \param 	   y1		 The first y value.
+ * \param 	   w		 A wDrawWidth to process.
+ * \param 	   c		 RGB color definition.
+ * \param 	   lineStyle line style.
  */
 
 void
 SvgLineCommand(SVGParent *svg, double x0,
-               double y0, double x1, double y1, double w, long c)
+               double y0, double x1, double y1, double w, long c, unsigned lineStyle )
 {
 	mxml_node_t *xmlData;
 
@@ -197,10 +279,7 @@ SvgLineCommand(SVGParent *svg, double x0,
 	SvgAddCoordinate(xmlData, "x2", x1); 
 	SvgAddCoordinate(xmlData, "y2", y1);
 
-	SvgAddRealUnit(xmlData, "stroke-width", w);
-
-	// color
-	SvgLineColor(xmlData, c );
+	SvgCreateStyle(xmlData, c, w, false, lineStyle);
 }
 
 /**
@@ -216,7 +295,7 @@ SvgLineCommand(SVGParent *svg, double x0,
  */
 
 void
-SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int color, int linestyle)
+SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int color, unsigned lineStyle)
 {
 	mxml_node_t *xmlData;
 
@@ -227,23 +306,25 @@ SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int c
 	SvgAddCoordinate(xmlData, "y1", y0);
 	SvgAddCoordinate(xmlData, "x2", x1);
 	SvgAddCoordinate(xmlData, "y2", y1);
-
-	SvgFillColor(xmlData, color );
+	
+	SvgCreateStyle(xmlData, color, 1, false, lineStyle);
+	
 }
 
 /**
  * Svg polygon line command
  *
- * \param [in]	svg    If non-null, the svg.
- * \param 		cnt    Number of point.
- * \param [in]	points If non-null, the points.
- * \param 		color  The line and fill color.
- * \param 		width  The line width.
- * \param 		fill   True to fill.
+ * \param [in] svg		 If non-null, the svg.
+ * \param 	   cnt		 Number of point.
+ * \param [in] points    If non-null, the points.
+ * \param 	   color	 The line and fill color.
+ * \param 	   width	 The line width.
+ * \param 	   lineStyle The line style.
+ * \param 	   fill		 True to fill.
  */
 
 void
-SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill)
+SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill, unsigned lineStyle)
 {
 	mxml_node_t *xmlData;
 	DynString pointList;
@@ -266,31 +347,28 @@ SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double wi
 	xmlData = mxmlNewElement(svg, "polyline");
 	mxmlElementSetAttr(xmlData, "points", DynStringToCStr(&pointList));
 
-	SvgAddRealUnit(xmlData, "stroke-width", width);
+	SvgCreateStyle(xmlData, color, width, fill, lineStyle );
 
-	SvgLineColor(xmlData, color);
-	if (fill) {
-		SvgFillColor(xmlData, color);
-	} else {
-		SvgFillNone(xmlData);
-	}
 	DynStringFree(&pos);
 	DynStringFree(&pointList);
 }
 
 /**
-* Format a complete CIRCLE command after DXF spec
-*
-* \param result OUT buffer for the completed command
-* \param layer IN number part of the layer
-* \param x, y IN center point
-* \param r IN radius
-* \param style IN line style, TRUE for dashed, FALSE for continuous
-*/
+ * Format a complete CIRCLE command
+ *
+ * \param [in,out] svg		 OUT buffer for the completed command.
+ * \param 		   x		 x position of center.
+ * \param 		   y		 y position of center point.
+ * \param 		   r		 radius.
+ * \param 		   w		 width
+ * \param 		   c		 color
+ * \param 		   lineStyle The line style.
+ * \param 		   fill		 True to fill.
+ */
 
 void
 SvgCircleCommand(SVGParent *svg, double x,
-                 double y, double r, double w, long c, bool fill)
+                 double y, double r, double w, long c, bool fill, unsigned lineStyle)
 {
 	mxml_node_t *xmlData;
 
@@ -302,13 +380,8 @@ SvgCircleCommand(SVGParent *svg, double x,
 
 	SvgAddCoordinate(xmlData, "r", r);
 
-	// color
-	SvgLineColor(xmlData, c);
-	if (fill) {
-		SvgFillColor(xmlData, c);
-	} else {
-		SvgFillNone(xmlData);
-	}
+	SvgCreateStyle(xmlData, c, w, fill, lineStyle);
+
 }
 
 /**
@@ -332,22 +405,24 @@ PolarToCartesian(double cx, double cy, double radius, double angle, double *px, 
 }
 
 /**
-* Format an arc as a SVG path
-* See https://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
-*
-* \param svg the svg document
-* \param x, y IN center point
-* \param r IN radius
-* \param a0 IN starting angle
-* \param a1 IN ending angle
-* \param center IN draw center mark if true
-* \param w line width							
-* \param c line color 
-*/
+ * Format an arc as a SVG path See
+ * https://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
+ *
+ * \param [in,out] svg		 the svg document.
+ * \param 		   x		 y IN center point.
+ * \param 		   y		 The y coordinate.
+ * \param 		   r		 IN radius.
+ * \param 		   a0		 IN starting angle.
+ * \param 		   a1		 IN ending angle.
+ * \param 		   center    IN draw center mark if true.
+ * \param 		   w		 line width.
+ * \param 		   c		 line color.
+ * \param 		   lineStyle line style.
+ */
 
 void
 SvgArcCommand(SVGParent *svg, double x, double y,
-              double r, double a0, double a1, bool center, double w, long c)
+              double r, double a0, double a1, bool center, double w, long c, unsigned lineStyle)
 {
 	double startX;
 	double startY;
@@ -377,9 +452,7 @@ SvgArcCommand(SVGParent *svg, double x, double y,
 
 	DynStringFree(&pathArc);
 
-	SvgLineColor(xmlData, c);
-	SvgFillNone(xmlData);
-	SvgAddRealUnit(xmlData, "stroke-width", w);
+	SvgCreateStyle(xmlData, c, w, false, lineStyle);
 }
 
 /**
@@ -404,12 +477,51 @@ SvgTextCommand(SVGParent *svg, double x,
 	SvgAddCoordinate(xmlData, "x", x);
 	SvgAddCoordinate(xmlData, "y", y);
 
-	SvgFillColor(xmlData, c);
-	SvgLineColor(xmlData, c);
+	SvgCreateStyle(xmlData, c, 1, 1, 0);
 
 	SvgAddRealUnit(xmlData, "font-size", size);
 
 	mxmlNewText(xmlData, false, text);
+}
+
+/**
+ * Add CSS style definitions to the SVG file. CSS definitions are 
+ * created from the options of the drawing commands. As a final step
+ * in creation of the SVG file, these definitions have to be added.  
+ * For compatibility reasons the styles have to be defined before
+ * first use. 
+ *
+ * \param [in,out] svg If non-null, the svg.
+ */
+
+void 
+SvgAddCSSStyle(SVGParent *svg)
+{
+	mxml_node_t *cssNode;
+	DynString cssDefs;
+	DynString tmp;
+	sCssStyle *style;
+
+	cssNode = mxmlNewElement(MXML_NO_PARENT, "style");
+	mxmlElementSetAttr(cssNode, "type", "text/css");
+
+	DynStringMalloc(&cssDefs, 64);
+	DynStringMalloc(&tmp, 64);
+	LL_FOREACH(styleCache, style)
+	{
+		DynStringPrintf(&tmp, "%s { %s }\n", 
+						DynStringToCStr(&(style->name)), 
+						DynStringToCStr(&(style->style)));
+
+		DynStringCatStr(&cssDefs, &tmp);
+	}
+	
+	DynStringCatCStr(&cssDefs, LINESTYLECLASSES );
+	mxmlNewCDATA(cssNode, DynStringToCStr(&cssDefs));
+
+	mxmlAdd(svg, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT, cssNode);
+	DynStringFree(&tmp);
+	DynStringFree(&cssDefs);
 }
 
 /**
@@ -421,6 +533,8 @@ SvgTextCommand(SVGParent *svg, double x,
 SVGDocument *
 SvgCreateDocument()
 {
+	SvgInitStyleCache();
+
 	return((SVGDocument *)mxmlNewXML("1.0"));
 }
 
@@ -434,18 +548,22 @@ void
 SvgDestroyDocument(SVGDocument *xml)
 {
 	mxmlDelete((mxml_node_t *)xml);
+
+	SvgDestroyStyleCache();
 }
 
-
 /**
-* Create the complete prologue for a DXF file. Includes the header section,
-* a table for line styles and a table for layers.
-*
-* \param result OUT buffer for the completed command
-* \param layerCount IN count of defined layers
-* \param x0, y0 IN minimum (left bottom) position
-* \param x1, y1 IN maximum (top right) position
-*/
+ * Create the complete prologue for a SVG file.
+ *
+ * \param [in,out] parent	  the document handle
+ * \param 		   layerCount IN count of defined layers.
+ * \param 		   x0		  y0 IN minimum (left bottom) position.
+ * \param 		   y0		  y1 IN maximum (top right) position.
+ * \param 		   x1		  The first x value.
+ * \param 		   y1		  The first y value.
+ *
+ * \returns Null if it fails, else a pointer to a SVGParent.
+ */
 
 SVGParent *
 SvgPrologue(SVGDocument *parent, int layerCount, double x0, double y0, double x1,
@@ -520,7 +638,8 @@ whitespace_cb(mxml_node_t *node, int where)
 				return("\n\t");
 			}
 		} else {
-			if (!strcmp(element, "text")) {
+			if (!strcmp(element, "style") || 
+				!strcmp(element, "text")) {
 				if (where == MXML_WS_BEFORE_OPEN) {
 					return("\n\t");
 				} else {
@@ -528,7 +647,7 @@ whitespace_cb(mxml_node_t *node, int where)
 						return("\n\t\t");
 					} else {
 						if (where == MXML_WS_AFTER_CLOSE) {
-							return("\n");
+							return("");
 						} else {
 							return("\n\t");
 						}
