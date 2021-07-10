@@ -1078,8 +1078,12 @@ void GetTurnoutType() {
 				coOrd tmp = dto[dtod.str2Path].base[0];
 				dto[dtod.str2Path].base[0] = dto[dtod.str2Path].base[1];
 				dto[dtod.str2Path].base[1] = tmp;
+				
+				i = dto[dtod.str2Path].n - 1;
 				tmp = dto[dtod.str2Path].pts[0];
-				dto[dtod.str2Path].pts[dto[dtod.str2Path].n - 1] = tmp;
+				dto[dtod.str2Path].pts[0] = dto[dtod.str2Path].pts[i];
+				dto[dtod.str2Path].pts[i] = tmp;
+
 				a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
 			}
 			a0 = DifferenceBetweenAngles(a1, a2);
@@ -2064,8 +2068,6 @@ static void DrawXingTurnout(
 	// Tie length adjust
 	a0 = fabs(DifferenceBetweenAngles(a1, a2));
 	double magic = 1.0;
-	// Extra ties length adjust
-	double magic2 =	(a0 <= 20 ? 1.0 : 1.0 / cos(0.5 * D2R(a0 - 20.0)));
 
 	// Short circuit the complex code for this simple case
 	if (toType == DTO_XNG9) {
@@ -2142,6 +2144,8 @@ static void DrawXingTurnout(
 
 	// Tie length adjust
 	magic = 1 / cos(0.5 * D2R(a0));
+	// Extra ties length adjust
+	double magic2 =	1.0 / cos(0.5 * D2R(a0)); // (a0 <= 20 ? 1.0 : 1.0 / cos(0.5 * D2R(a0 - 20.0)));
 
 	// Draw right half
 	len = FindDistance(dtod.midPt, c2);
