@@ -1073,6 +1073,20 @@ void GetTurnoutType() {
 			a1 = FindAngle(dto[dtod.strPath].base[0], dto[dtod.strPath].base[1]);
 			a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
 			// Swap the ends of the str2Path if large angle
+			if((a1 > 180.0) && (dto[dtod.strPath].n == 2))
+			{
+				coOrd tmp = dto[dtod.strPath].base[0];
+				dto[dtod.strPath].base[0] = dto[dtod.strPath].base[1];
+				dto[dtod.strPath].base[1] = tmp;
+
+				i = dto[dtod.strPath].n - 1;
+				tmp = dto[dtod.strPath].pts[0];
+				dto[dtod.strPath].pts[0] = dto[dtod.strPath].pts[i];
+				dto[dtod.strPath].pts[i] = tmp;
+
+				a1 = FindAngle(dto[dtod.strPath].base[0], dto[dtod.strPath].base[1]);
+				dto[dtod.strPath].angle = a1;
+			}
 			if((a2 > 180.0) && (dto[dtod.str2Path].n == 2))
 			{
 				coOrd tmp = dto[dtod.str2Path].base[0];
@@ -1093,7 +1107,7 @@ void GetTurnoutType() {
 				int tmp = dtod.strPath;
 				dtod.strPath = dtod.str2Path;
 				dtod.str2Path = tmp;
-				a0 = -a0;
+				a0 = NormalizeAngle(-a0);
 			}
 			if ((a0 > 90.0) || (a0 < 0.0))
 				return;
@@ -2053,7 +2067,7 @@ static void DrawXingTurnout(
 		return;
 
 	td = GetScaleTieData(scaleInx);
-	DIST_T tdlen = td->length, tdmax = 2.5 * tdlen;
+	DIST_T tdlen = td->length, tdmax = 2.0 * tdlen;
 	DIST_T tdspc = td->spacing, tdspc2 = tdspc / 2;
 
 	// Midpoint
@@ -2255,7 +2269,7 @@ static void DrawXingTurnout(
 		DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 		DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
 		tdlen = (td->length + fabs(dy1) + fabs(dy2)) * magic;
-		if(tdlen > 2.5 * td->length)
+		if(tdlen > tdmax)
 		{
 			if(dAngle >= 30)
 			{
