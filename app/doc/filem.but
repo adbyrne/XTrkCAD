@@ -37,6 +37,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
+\dd \f{Export to SVG} - Exports the selected objects to a file in SVG format. The exported file can then be imported into a vector drawing program like Inkscape 
+or used for publishing on the web.
+
+\u000
+
 \dd \f{File List} - List of the five most recently used \e{XTrackCAD} files or archives.
 
 \u000
@@ -126,6 +131,22 @@ This menu item displays a file selection dialog where a file name for exported o
 \G{png.d/exportfiledxf.png}
 
 Exported files can then be imported into other CAD programs.
+
+\rule
+
+\S{ExportSVG} \i{Export to SVG}
+
+This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\K{cmdSelect}) objects are exported to the file. The export file will have an \c{svg} extension.
+
+Files in SVG format can be used for different purposes. 
+
+\b SVG files can be loaded into many drawing programs. This makes it possible to enhance and resize the image. Vector images have the advantage of 
+allowing lossless resizing.
+
+\b Most modern browsers support SVG as an image format. So the resulting file can directly be used to publish your plan on the web. By adding a bit of 
+Javascript, zooming and panning can be enabled. Appropiate scripts can easily be found using your favorite search engine. 
+The generated SVG uses the layout description as a title that is shown by some browser. Also the drawing has an 'id' for manipulation by Javascript. 
+This id is derived from the filename by removing all spaces and sticking the word 'id' in front. Eg exporting \c{stonega.xtc} the resulting id will be \c{idstonega}.
 
 \rule
 

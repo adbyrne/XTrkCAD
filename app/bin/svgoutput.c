@@ -24,10 +24,10 @@
 #include <string.h>
 #include <time.h>
 #ifdef WINDOWS
-  #include <io.h>
-  #define UTFCONVERT
+    #include <io.h>
+    #define UTFCONVERT
 #else
-  #include <errno.h>
+    #include <errno.h>
 #endif
 
 #include <xtrkcad-config.h>
@@ -54,45 +54,45 @@ static struct wFilSel_t * exportSVGFile_fs;
 static coOrd roomSize;
 
 /**
- * get line style for element 
+ * get line style for element
  *
  * \param  d drawCmd_p to process.
- * 			 
+ *
  * \returns the line style
  */
 
 static unsigned
 SvgDrawGetLineStyle(drawCmd_p d)
 {
-	unsigned long notSolid = DC_NOTSOLIDLINE;
-	unsigned long opt = d->options & notSolid;
-	unsigned lineOpt;
+    unsigned long notSolid = DC_NOTSOLIDLINE;
+    unsigned long opt = d->options & notSolid;
+    unsigned lineOpt;
 
-	switch (opt) {
-	case DC_DASH:
-		lineOpt = wDrawLineDash;
-		break;
-	case DC_DOT:
-		lineOpt = wDrawLineDot;
-		break;
-	case DC_DASHDOT:
-		lineOpt = wDrawLineDashDot;
-		break;
-	case DC_DASHDOTDOT:
-		lineOpt = wDrawLineDashDotDot;
-		break;
-	case DC_CENTER:
-		lineOpt = wDrawLineCenter;
-		break;
-	case DC_PHANTOM:
-		lineOpt = wDrawLinePhantom;
-		break;
-	default:
-		lineOpt = wDrawLineSolid;
-		break;
-	}
+    switch (opt) {
+    case DC_DASH:
+        lineOpt = wDrawLineDash;
+        break;
+    case DC_DOT:
+        lineOpt = wDrawLineDot;
+        break;
+    case DC_DASHDOT:
+        lineOpt = wDrawLineDashDot;
+        break;
+    case DC_DASHDOTDOT:
+        lineOpt = wDrawLineDashDotDot;
+        break;
+    case DC_CENTER:
+        lineOpt = wDrawLineCenter;
+        break;
+    case DC_PHANTOM:
+        lineOpt = wDrawLinePhantom;
+        break;
+    default:
+        lineOpt = wDrawLineSolid;
+        break;
+    }
 
-	return(lineOpt);
+    return (lineOpt);
 }
 
 /**
@@ -112,16 +112,16 @@ static void SvgDrawLine(
     wDrawWidth width,
     wDrawColor color)
 {
-	unsigned lineOpt = SvgDrawGetLineStyle(d);
+    unsigned lineOpt = SvgDrawGetLineStyle(d);
 
-	width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
+    width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
 
-	SvgLineCommand((SVGParent *)(d->d),
-		p0.x, roomSize.y - p0.y,
-		p1.x, roomSize.y - p1.y,
-		(double)width,
-		wDrawGetRGB(color),
-		lineOpt);
+    SvgLineCommand((SVGParent *)(d->d),
+                   p0.x, roomSize.y - p0.y,
+                   p1.x, roomSize.y - p1.y,
+                   (double)width,
+                   wDrawGetRGB(color),
+                   lineOpt);
 }
 
 /**
@@ -147,17 +147,17 @@ static void SvgDrawArc(
     wDrawWidth width,
     wDrawColor color)
 {
-	unsigned lineOpt = SvgDrawGetLineStyle(d);
+    unsigned lineOpt = SvgDrawGetLineStyle(d);
 
     if (angle1 >= 360.0) {
-		SvgCircleCommand((SVGParent *)(d->d),
-			p.x,
-			roomSize.y - p.y,
-			r,
-			(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH),
-			wDrawGetRGB( color ),
-			false,
-			lineOpt );
+        SvgCircleCommand((SVGParent *)(d->d),
+                         p.x,
+                         roomSize.y - p.y,
+                         r,
+                         (width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH),
+                         wDrawGetRGB(color),
+                         false,
+                         lineOpt);
     } else {
         SvgArcCommand((SVGParent *)(d->d),
                       p.x,
@@ -165,10 +165,10 @@ static void SvgDrawArc(
                       r,
                       angle0,
                       angle1,
-					  drawCenter,
-					  (width > MININMUMLINEWIDTH ? width: MININMUMLINEWIDTH),	
+                      drawCenter,
+                      (width > MININMUMLINEWIDTH ? width: MININMUMLINEWIDTH),
                       wDrawGetRGB(color),
-					  lineOpt);
+                      lineOpt);
     }
 
 }
@@ -194,20 +194,20 @@ static void SvgDrawString(
     FONTSIZE_T fontSize,
     wDrawColor color)
 {
-	char *text = MyStrdup(s);
+    char *text = MyStrdup(s);
 
 #ifdef UTFCONVERT
-	text = Convert2UTF8(text);
+    text = Convert2UTF8(text);
 #endif // UTFCONVERT
 
     SvgTextCommand((SVGParent *)(d->d),
                    p.x,
                    roomSize.y - p.y,
                    fontSize,
-				   wDrawGetRGB(color),
-                   text );
+                   wDrawGetRGB(color),
+                   text);
 
-	MyFree(text);
+    MyFree(text);
 }
 
 /**
@@ -243,33 +243,34 @@ static void SvgDrawFillPoly(
     drawCmd_p d,
     int cnt,
     coOrd * pts,
-	int * pointer,
+    int * pointer,
     wDrawColor color, wDrawWidth width, drawFill_e fillStyle)
 {
-	int i;
-	double *points = malloc( (cnt + 1) * 2 * sizeof(double));
+    int i;
+    double *points = malloc((cnt + 1) * 2 * sizeof(double));
 
-	unsigned lineOpt = SvgDrawGetLineStyle(d);
+    unsigned lineOpt = SvgDrawGetLineStyle(d);
 
-	if (!points) {
-		puts("memory for poly line coordinates could not be allocated!");
-		abort();
-	}
-	for (i = 0; i < cnt; i++ ) {
-		points[i * 2] = pts[i].x;
-		points[i * 2 + 1] = roomSize.y - pts[i].y;
-	}
+    if (!points) {
+        puts("memory for poly line coordinates could not be allocated!");
+        abort();
+    }
+    for (i = 0; i < cnt; i++) {
+        points[i * 2] = pts[i].x;
+        points[i * 2 + 1] = roomSize.y - pts[i].y;
+    }
 
-	if (fillStyle == DRAW_CLOSED || fillStyle == DRAW_FILL) {
-		points[i * 2] = points[0];
-		points[i * 2 + 1] = points[1];
-		cnt++;
-	}
+    if (fillStyle == DRAW_CLOSED || fillStyle == DRAW_FILL) {
+        points[i * 2] = points[0];
+        points[i * 2 + 1] = points[1];
+        cnt++;
+    }
 
-	width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
-	SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  wDrawGetRGB(color), (double)width, fillStyle == DRAW_FILL, lineOpt);
+    width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
+    SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  wDrawGetRGB(color),
+                       (double)width, fillStyle == DRAW_FILL, lineOpt);
 
-	free(points);
+    free(points);
 }
 
 /**
@@ -282,16 +283,16 @@ static void SvgDrawFillPoly(
  */
 
 static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
-                          wDrawColor color)
+                              wDrawColor color)
 {
-	SvgCircleCommand((SVGParent *)(d->d),
-		center.x,
-		roomSize.y - center.y,
-		radius,
-		0,
-		wDrawGetRGB(color),
-		true,
-		0);
+    SvgCircleCommand((SVGParent *)(d->d),
+                     center.x,
+                     roomSize.y - center.y,
+                     radius,
+                     0,
+                     wDrawGetRGB(color),
+                     true,
+                     0);
 }
 
 /**
@@ -305,13 +306,14 @@ static void SvgDrawFillCircle(drawCmd_p d, coOrd center, DIST_T radius,
  */
 
 static void
-SvgDrawRectangle(drawCmd_p d, coOrd corner1, coOrd corner2, wDrawColor color, drawFill_e fillOpt)
+SvgDrawRectangle(drawCmd_p d, coOrd corner1, coOrd corner2, wDrawColor color,
+                 drawFill_e fillOpt)
 {
-	SvgRectCommand((SVGParent *)(d->d),
-					corner1.x, roomSize.y - corner1.y,
-					corner2.x, roomSize.y - corner2.y,
-					wDrawGetRGB(color),
-					fillOpt);
+    SvgRectCommand((SVGParent *)(d->d),
+                   corner1.x, roomSize.y - corner1.y,
+                   corner2.x, roomSize.y - corner2.y,
+                   wDrawGetRGB(color),
+                   fillOpt);
 }
 
 static drawFuncs_t svgDrawFuncs = {
@@ -321,59 +323,154 @@ static drawFuncs_t svgDrawFuncs = {
     SvgDrawBitmap,
     SvgDrawFillPoly,
     SvgDrawFillCircle,
-	SvgDrawRectangle
+    SvgDrawRectangle
 };
 
 static drawCmd_t svgD = {
     NULL, &svgDrawFuncs, 0, 1.0, 0.0, {0.0,0.0}, {0.0,0.0}, Pix2CoOrd, CoOrd2Pix, 100.0
 };
 
+/**
+ * Creates valid identifier from a string. Whitespaces are removed
+ * and characters are prepended to make sure the i starts with
+ * valid chars.
+ * https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/id
+ *
+ * \param [in,out] base the base for the id.
+ *
+ * \returns Null if it fails, else the new valid identifier.
+ */
+
+static char *
+CreateValidId(char *base)
+{
+    const char *idHead = "id";
+    char *out = MyMalloc(strlen(idHead) + strlen(base) + 1);
+    char *tmp;
+    int j;
+
+    strcpy(out, idHead);
+    j = strlen(out);
+
+    for (unsigned int i = 0; i < strlen(base); i++) {
+        if (isblank(base[i])) {
+            i++;
+        } else {
+            out[j++] = base[i];
+        }
+    }
+
+    out[j] = '\0';
+
+    // strip off the extension
+    tmp = strchr(out, '.');
+    if (tmp) {
+        *tmp = '\0';
+    }
+    return (out);
+}
+
+/**
+ * get a valid identifier for SVG export
+ *
+ * \returns Null if it fails, else a pointer to a char.
+ */
+
+static char * SvgGetId(void)
+{
+    char *fileName = GetLayoutFilename();
+    char *id = NULL;
+
+    if (fileName) {
+        id = CreateValidId(fileName);
+        id = Convert2UTF8(id);
+    }
+
+    return (id);
+}
+
+/**
+ * Set title for SVG file
+ * The first title line of the design is used and stored in the SVG file
+ *
+ * \param  d A drawCmd_p to process.
+ */
+
+static void SvgSetTitle(drawCmd_p d)
+{
+    char *tmp = GetLayoutTitle();
+    char *title;
+
+    if (tmp) {
+        title = MyStrdup(tmp);
+        title = Convert2UTF8(title);
+        SvgAddTitle((SVGParent *)(d->d), title);
+        MyFree(title);
+    }
+
+}
+
+/**
+ * Executes the export tracks to SVG operation
+ *
+ * \param 		   cnt	    Number of filenames, has to be 1
+ * \param [in]     fileName filename of the export file.
+ * \param [in]     data	    If non-null, the data.
+ *
+ * \returns TRUE on success, FALSE on failure
+ */
 
 static int DoExportSVGTracks(
     int cnt,
     char ** fileName,
     void * data)
 {
-	DynString command = NaS;
-	SVGDocument *svg;
-	SVGParent *svgData;
-	
+    DynString command = NaS;
+    SVGDocument *svg;
+    SVGParent *svgData;
+    char *id;
+
     assert(fileName != NULL);
     assert(cnt == 1);
 
-	SetCLocale();
-	GetLayoutRoomSize(&roomSize);
+    SetCLocale();
+    GetLayoutRoomSize(&roomSize);
 
-	SetCurrentPath(SVGPATHKEY, fileName[ 0 ]);
+    SetCurrentPath(SVGPATHKEY, fileName[ 0 ]);
 
-	svg = SvgCreateDocument();
-	svgData = SvgPrologue(svg, 0, 0.0, 0.0, roomSize.x, roomSize.y);
-    
+    svg = SvgCreateDocument();
+    id = SvgGetId();
+    svgData = SvgPrologue(svg, id, 0, 0.0, 0.0, roomSize.x, roomSize.y);
+    MyFree(id);
+
     wSetCursor(NULL, wCursorWait);
 //    time(&clock);
- 
-	svgD.d = (wDraw_p)svgData;
+
+    svgD.d = (wDraw_p)svgData;
 
     DrawSelectedTracks(&svgD);
-	SvgAddCSSStyle((SVGParent *)svgD.d);
+    SvgAddCSSStyle((SVGParent *)svgD.d);
+    SvgSetTitle(&svgD);						// make sure this is the last element
 
-	if( !SvgSaveFile(svg, fileName[0] )) {
-		NoticeMessage(MSG_OPEN_FAIL, _("Cancel"), NULL, "SVG", fileName[0],
-			strerror(errno));
+    if (!SvgSaveFile(svg, fileName[0])) {
+        NoticeMessage(MSG_OPEN_FAIL, _("Cancel"), NULL, "SVG", fileName[0],
+                      strerror(errno));
 
-		SvgDestroyDocument(svg);
-		wSetCursor(NULL, wCursorNormal);
-		SetUserLocale();
-		return FALSE;
-	}
-	SvgDestroyDocument(svg);
+        SvgDestroyDocument(svg);
+        wSetCursor(NULL, wCursorNormal);
+        SetUserLocale();
+        return FALSE;
+    }
+    SvgDestroyDocument(svg);
     Reset();	/**<TODO: was tut das? */
-	wSetCursor(NULL, wCursorNormal);
-	SetUserLocale();
+    wSetCursor(NULL, wCursorNormal);
+    SetUserLocale();
     return TRUE;
 }
 
-/** Create and show the dialog for selected the DXF export filename */
+/**
+ * Create and show the dialog for selecting the DXF export filename
+ */
 
 void DoExportSVG(void)
 {

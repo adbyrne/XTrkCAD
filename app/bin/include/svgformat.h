@@ -31,16 +31,23 @@ typedef  mxml_node_t SVGParent;
 typedef  mxml_node_t SVGDocument;
 
 void SvgAddCSSStyle(SVGParent *svg);
-void SvgLineCommand(SVGParent *svg, double x0, double y0, double x1, double y1, double w, long c, unsigned lineOpt);
-void SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color, double width, bool fill, unsigned lineStyle);
-void SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1, int color, unsigned linestyle);
-void SvgCircleCommand(SVGParent *svg, double x, double y, double r, double w, long c, bool fill, unsigned lineStyle );
-void SvgArcCommand(SVGParent *svg, double x, double y, double r, double a0, double a1, bool center, double w, long c, unsigned lineStyle);
-void SvgTextCommand(SVGParent *svg, double x, double y, double size, long c, char *text);
+void SvgLineCommand(SVGParent *svg, double x0, double y0, double x1, double y1,
+                    double w, long c, unsigned lineOpt);
+void SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color,
+                        double width, bool fill, unsigned lineStyle);
+void SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1,
+                    int color, unsigned linestyle);
+void SvgCircleCommand(SVGParent *svg, double x, double y, double r, double w,
+                      long c, bool fill, unsigned lineStyle);
+void SvgArcCommand(SVGParent *svg, double x, double y, double r, double a0,
+                   double a1, bool center, double w, long c, unsigned lineStyle);
+void SvgTextCommand(SVGParent *svg, double x, double y, double size, long c,
+                    char *text);
+void SvgAddTitle(SVGParent *svg, char *title);
 
 SVGDocument *SvgCreateDocument(void);
-SVGParent *SvgPrologue(SVGDocument *result, int layerCount, double x0, double y0, double x1, double y1);
-void SvgEpilogue(SVGParent *result);
+SVGParent *SvgPrologue(SVGDocument *result, char *id, int layerCount, double x0,
+                       double y0, double x1, double y1);
 
 bool SvgSaveFile(SVGDocument *svg, char *filename);
 void SvgDestroyDocument(SVGDocument *svg);
