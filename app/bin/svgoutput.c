@@ -383,7 +383,7 @@ static char * SvgGetId(void)
 
     if (fileName) {
         id = CreateValidId(fileName);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
         id = Convert2UTF8(id);
 #endif
     }
@@ -405,7 +405,7 @@ static void SvgSetTitle(drawCmd_p d)
 
     if (tmp) {
         title = MyStrdup(tmp);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
         title = Convert2UTF8(title);
 #endif
         SvgAddTitle((SVGParent *)(d->d), title);
