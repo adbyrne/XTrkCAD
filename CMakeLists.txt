@@ -44,6 +44,9 @@ find_package(MiniXML)
 
 if(MINIXML_FOUND)
     set(XTRKCAD_CREATE_SVG 1)
+	message( STATUS "MiniXML found: SVG export is enabled")
+else(MINIXML_FOUND)
+	message( STATUS "MiniXML not found: no SVG export")
 endif(MINIXML_FOUND)
 
 IF(WIN32)

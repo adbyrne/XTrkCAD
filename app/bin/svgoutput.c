@@ -383,7 +383,9 @@ static char * SvgGetId(void)
 
     if (fileName) {
         id = CreateValidId(fileName);
+#ifdef WINDOWS
         id = Convert2UTF8(id);
+#endif
     }
 
     return (id);
@@ -403,7 +405,9 @@ static void SvgSetTitle(drawCmd_p d)
 
     if (tmp) {
         title = MyStrdup(tmp);
+#ifdef WINDOWS
         title = Convert2UTF8(title);
+#endif
         SvgAddTitle((SVGParent *)(d->d), title);
         MyFree(title);
     }
@@ -443,7 +447,7 @@ static int DoExportSVGTracks(
     svgData = SvgPrologue(svg, id, 0, 0.0, 0.0, roomSize.x, roomSize.y);
     MyFree(id);
 
-    wSetCursor(NULL, wCursorWait);
+    wSetCursor(mainD.d, wCursorWait);
 //    time(&clock);
 
     svgD.d = (wDraw_p)svgData;
@@ -457,13 +461,13 @@ static int DoExportSVGTracks(
                       strerror(errno));
 
         SvgDestroyDocument(svg);
-        wSetCursor(NULL, wCursorNormal);
+        wSetCursor(mainD.d, wCursorNormal);
         SetUserLocale();
         return FALSE;
     }
     SvgDestroyDocument(svg);
     Reset();	/**<TODO: was tut das? */
-    wSetCursor(NULL, wCursorNormal);
+    wSetCursor(mainD.d, wCursorNormal);
     SetUserLocale();
     return TRUE;
 }

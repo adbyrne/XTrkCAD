@@ -182,7 +182,7 @@ set (SOURCES
 	include/paramfile.h
 	include/paramfilelist.h
 	include/partcatalog.h
-	include/stringxtc.h	
+	include/stringxtc.h
 	include/utlist.h
 )
 
@@ -193,20 +193,24 @@ if(XTRKCAD_CREATE_SVG)
 		svgoutput.c
 	)
 	include_directories(${MINIXML_INCLUDE_PATH})
-	target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
+	if(WIN32)
+	    target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
 
-	add_custom_command(
+	    add_custom_command(
 		TARGET xtrkcad POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy
 		${MINIXML_SHAREDLIB}
 		${CMAKE_CURRENT_BINARY_DIR}
-	)
+	    )
 
-	# add dll to install package
-	install(FILES
-	${MINIXML_SHAREDLIB}
-	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-	)
+            # add dll to install package
+	    install(FILES ${MINIXML_SHAREDLIB}
+        	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	    )
+	else(WIN32)
+	    target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
+	endif(WIN32)
+
 endif(XTRKCAD_CREATE_SVG)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
@@ -293,7 +297,7 @@ ELSE(NOT WIN32)
 
         # Copy program PDB file
         INSTALL(
-            FILES $<TARGET_PDB_FILE:xtrkcad> 
+            FILES $<TARGET_PDB_FILE:xtrkcad>
 	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR} OPTIONAL
 	)
 ENDIF(NOT WIN32)
