@@ -31,6 +31,12 @@ if(NOT XTRKCAD_USE_BROWSER)
 #    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
 endif()
 
+#Add dependency to MiniXML (mxml) if configured
+if(XTRKCAD_CREATE_SVG)
+	set(CPACK_RPM_PACKAGE_REQUIRES
+		"${CPACK_RPM_PACKAGE_REQUIRES} mxml")
+endif()		
+
 # exclude these directories from the rpm
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 	"/usr/local"
