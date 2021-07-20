@@ -907,6 +907,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 					int cnt = (int)floor(a1 / 5.0);
 					int cnt2 = (int)floor(l / 5 / td->spacing);
 					if (cnt2 > cnt) cnt = cnt2;
+					if (cnt <= 0) cnt = 1;
 
 					aa1 = a1 / cnt;
 					if (segPtr->u.c.radius > 0) {
