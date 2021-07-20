@@ -2551,7 +2551,10 @@ static void DrawTurnout(
 	int noTies = 0;
 	int bridge = GetTrkBridge(trk);
 
-	int pathCnt = GetTurnoutPaths(trk, xx);
+	long skip = 0;
+	wPrefGetInteger("Preference", "NormalTurnoutDraw", (long *) &skip, 0);
+
+	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
 
 	if ((pathCnt > 1) && (pathCnt <= DTO_DIM)
 		&& (trk->endCnt <= 4)
