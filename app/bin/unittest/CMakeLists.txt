@@ -56,6 +56,7 @@ add_executable(catalogtest
 				catalogtest.c
 				../partcatalog.c
 				../paths.c
+				../stringxtc.c
 				)
 
 target_link_libraries(catalogtest

@@ -20,6 +20,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+
+
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
@@ -2560,6 +2562,10 @@ static void CreateMenus(void) {
 	MiscMenuItemCreate(fileM, NULL, "cmdExportDXF", _("Export D&XF"),
 			ACCL_EXPORTDXF, DoExportDXF, IC_SELECTED,
 			NULL);
+#if XTRKCAD_CREATE_SVG
+	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"), ACCL_EXPORTDXF, 
+			(void*)(wMenuCallBack_p)DoExportSVG, IC_SELECTED, (void *)0);
+#endif
 	wMenuSeparatorCreate(fileM);
 
 	paramFilesCallback = ParamFilesInit();

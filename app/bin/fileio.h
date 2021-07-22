@@ -66,6 +66,7 @@ extern wMenuList_p fileList_ml;
 #define BITMAPPATHKEY "bitmap"
 #define BACKGROUNDPATHKEY "images"
 #define DXFPATHKEY "dxf"
+#define SVGPATHKEY "svg"
 #define PARTLISTPATHKEY "parts"
 #define CARSPATHKEY "cars"
 #define PARAMETERPATHKEY "params"
@@ -123,6 +124,7 @@ int LoadCheckpoint( BOOL_T );
 void DoImport( void * typeVP );
 void DoExport( void * unused );
 void DoExportDXF( void * unused );
+void DoExportSVG(void);
 extern wBool_t editStatus; // Status of last Edit* command
 void EditCopy( void * unused );
 void EditCut( void * unused );

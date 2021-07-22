@@ -40,6 +40,14 @@ ENDIF(WIN32)
 
 find_package(Libzip)
 find_package(Zlib)
+find_package(MiniXML)
+
+if(MINIXML_FOUND)
+    set(XTRKCAD_CREATE_SVG 1)
+	message( STATUS "MiniXML found: SVG export is enabled")
+else(MINIXML_FOUND)
+	message( STATUS "MiniXML not found: no SVG export")
+endif(MINIXML_FOUND)
 
 IF(WIN32)
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
@@ -118,6 +126,9 @@ find_package(Pandoc)
 
 INCLUDE (CheckIncludeFiles)
 CHECK_INCLUDE_FILES (malloc.h HAVE_MALLOC_H)
+if(HAVE_MALLOC_H)
+  add_definitions(-DHAVE_MALLOC_H)
+endif(HAVE_MALLOC_H)
 
 # Setup some global options for installation ...
 SET(XTRKCAD_MAJOR_VERSION "5")
