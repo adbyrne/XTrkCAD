@@ -188,7 +188,7 @@ void InitCustom( void )
 	}
 	if (sSVGFilePattern == NULL) 		
 	{
-		sSVGFilePattern = strdup(_("Scalable Vector Graphics Format Files|*.svg" ));
+		sSVGFilePattern = strdup(_("Scalable Vector Graphics Format Files(*.svg)|*.svg" ));
 	}
 
 	if (sRecordFilePattern == NULL)
