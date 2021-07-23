@@ -12,25 +12,48 @@
 #
 
 if (WIN32)
+    # Folders for x86/x64
+    if (WIN64)
 	find_path( MINIXML_INCLUDE_PATH mxml.h
 		PATHS
-    $ENV{XTCEXTERNALROOT}/x86/mxml
-	DOC "The directory where mxml.h resides")
+		$ENV{XTCEXTERNALROOT}/x64/mxml
+		DOC "The directory where mxml.h resides")
 	find_library( MINIXML_LIBRARY
 		NAMES mxml1
 		PATHS
-    $ENV{XTCEXTERNALROOT}/x86/mxml
-	  DOC "The Mini XML shared library")
+		$ENV{XTCEXTERNALROOT}/x64/mxml
+		DOC "The Mini XML shared library")
 	find_file( MINIXML_SHAREDLIB
 		NAMES mxml1.DLL
 		PATHS
-    $ENV{XTCEXTERNALROOT}/x86/mxml
-	  DOC "The Mini XML DLL" )
-  find_library( MINIXML_STATIC_LIBRARY
-	  NAMES mxmlstat.lib
-	  PATHS
-	  $ENV{XTCEXTERNALROOT}/x86/mxml
-	  DOC "The Mini XML static library")
+		$ENV{XTCEXTERNALROOT}/x64/mxml
+		DOC "The Mini XML DLL" )
+	find_library( MINIXML_STATIC_LIBRARY
+		NAMES mxmlstat.lib
+		PATHS
+		$ENV{XTCEXTERNALROOT}/x64/mxml
+		DOC "The Mini XML static library")
+    else (WIN64)
+	find_path( MINIXML_INCLUDE_PATH mxml.h
+		PATHS
+		$ENV{XTCEXTERNALROOT}/x86/mxml
+		DOC "The directory where mxml.h resides")
+	find_library( MINIXML_LIBRARY
+		NAMES mxml1
+		PATHS
+		$ENV{XTCEXTERNALROOT}/x86/mxml
+		DOC "The Mini XML shared library")
+	find_file( MINIXML_SHAREDLIB
+		NAMES mxml1.DLL
+		PATHS
+		$ENV{XTCEXTERNALROOT}/x86/mxml
+		DOC "The Mini XML DLL" )
+	find_library( MINIXML_STATIC_LIBRARY
+		NAMES mxmlstat.lib
+		PATHS
+		$ENV{XTCEXTERNALROOT}/x86/mxml
+		DOC "The Mini XML static library")
+    endif (WIN64)
 else (WIN32)
 	find_path( MINIXML_INCLUDE_PATH mxml.h
 		/usr/include
