@@ -895,7 +895,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 				case SEG_CRVTRK:
 					r = fabs(segPtr->u.c.radius);
 
-					dto[pathCnt].type = segPtr->u.c.radius > 0 ? 'R' : 'L';
+					dto[pathCnt].type = segPtr->u.c.center.y < 0 ? 'R' : 'L';
 
 					a0 = segPtr->u.c.a0;
 					a1 = segPtr->u.c.a1;
@@ -910,7 +910,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 					if (cnt <= 0) cnt = 1;
 
 					aa1 = a1 / cnt;
-					if (segPtr->u.c.radius > 0) {
+					if (dto[pathCnt].type == 'R') {
 						aa0 = a0;
 					}
 					else {
@@ -924,7 +924,6 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 					n++;
 					dto[pathCnt].n = n;
 
-					// cnt--; 
 					while (cnt > 0) {
 						aa0 += aa1;
 						PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
@@ -933,7 +932,6 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 						dto[pathCnt].trkSeg[n] = segPtr;
 						dto[pathCnt].base[n] = p0;
 						n++;
-						// dto[pathCnt].n = n;
 
 						if (n >= DTO_SEGS - 1) return -1;
 
@@ -1558,9 +1556,6 @@ static void DrawNormalTurnout(
 	int s0, p0, q0;
 	ANGLE_T a0;
 
-	// coOrd b1, b2, b3, b4, bb1, bb2, bb3, bb4; // bridge
-	// DIST_T blen1, blen2;
-
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
@@ -1816,7 +1811,7 @@ static void DrawCurvedTurnout(
 
 			len = r * D2R(a1);
 			cnt = (int)floor(len / tdspc + 0.5);
-			if (len - tdspc * cnt > tdspc2) {
+			if (len - tdspc * cnt >= tdspc2) {
 				cnt++;
 			}
 			DIST_T tdlen = td->length;
