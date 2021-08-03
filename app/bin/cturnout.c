@@ -116,8 +116,8 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
 // #define DTO_DEBUG DTO_XING
 
-#define DTO_DIM 16
-#define DTO_SEGS 24
+#define DTO_DIM 4  // Maximum number of paths
+#define DTO_SEGS 24 // Maximum number of control points
 
 static struct DrawToData_t {
 	TRKINX_T index;
@@ -947,7 +947,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 			dto[pathCnt].n++;
 
 			pathCnt++;
-			if (pathCnt >= DTO_DIM) return -1;
+			if (pathCnt > DTO_DIM) return -1;
 			pp++;
 		}
 		routeCnt++;
