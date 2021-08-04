@@ -168,8 +168,8 @@ SvgCreateStyle(mxml_node_t *element, unsigned long colorRGB, double width,
 
     assert(lineStyle < 7);
 
-    sprintf(color, "#%02.2x%02.2x%02.2x", (colorRGB >> 16) & 0xFF,
-            (colorRGB >> 8) & 0xFF, colorRGB & 0xFF);
+    sprintf(color, "#%2.2x%2.2x%2.2x", ((unsigned int)colorRGB >> 16) & 0xFF,
+            ((unsigned int)colorRGB >> 8) & 0xFF, (unsigned int)colorRGB & 0xFF);
 
     DynStringMalloc(&style, 32);
 
