@@ -1664,7 +1664,33 @@ static void DrawNormalTurnout(
 		}
 
 		// Draw remaining ties, if any
-		if (px + dx < dto[othPath].base[pn - 1].x) {
+		if (px + dx < dto[othPath].base[pn - 1].x){
+			// Asymmetric? Use longer ties for remaining two tracks (strPath, othPath)
+			DIST_T sx = px; // Save these values for second code block
+			int s0 = p0;
+			if((dtod.toType == DTO_THREE) && (px + dx >= dto[secPath].base[qn - 1].x)){
+				for ( ; cnt; cnt--, px += dx) {
+					if (px >= dto[othPath].base[p0 + 1].x) p0++;
+					// if (px >= dto[secPath].base[q0 + 1].x) q0++;
+					if (p0 >= pn)
+						break;
+
+					if (px + dx >= dto[othPath].base[pn - 1].x) {
+						break;
+					}
+
+					DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					tdlen = td->length + fabs(dy1);
+					if (tdlen > tdmax)
+						break;
+
+					DIST_T dy = dy1;
+					Translate(&pos, s1, angle, px);
+					Translate(&pos, pos, (angle - 90.0), dy / 2);
+
+					DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+				}
+			}
 			p1 = dto[othPath].pts[p0];
 			p2 = dto[othPath].pts[pn - 1];
 			angle = FindAngle(p1, p2);
@@ -1672,6 +1698,11 @@ static void DrawNormalTurnout(
 			DIST_T lenr = (dto[othPath].base[pn - 1].x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&p1, p2, angle, -lenr);
 			DrawStraightTies(d, scaleInx, p1, p2, color);
+
+			if(dtod.toType == DTO_THREE){
+				px = sx;
+				p0 = s0;
+			}
 		}
 		else {
 			p1 = dto[othPath].pts[pn - 2];
@@ -1681,6 +1712,30 @@ static void DrawNormalTurnout(
 		}
 
 		if (px + dx < dto[secPath].base[qn - 1].x) {
+			// Asymmetric? Use longer ties for remaining two tracks (strPath, secPath)
+			if((dtod.toType == DTO_THREE) && (px + dx >= dto[othPath].base[pn - 1].x)){
+				for ( ; cnt; cnt--, px += dx) {
+					// if (px >= dto[othPath].base[p0 + 1].x) p0++;
+					if (px >= dto[secPath].base[q0 + 1].x) q0++;
+					if (q0 >= qn)
+						break;
+
+					if (px + dx >= dto[secPath].base[qn - 1].x) {
+						break;
+					}
+
+					DIST_T dy1 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					tdlen = td->length + fabs(dy1);
+					if (tdlen > tdmax)
+						break;
+
+					DIST_T dy = dy1;
+					Translate(&pos, s1, angle, px);
+					Translate(&pos, pos, (angle - 90.0), dy / 2);
+
+					DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+				}
+			}
 			q1 = dto[secPath].pts[q0];
 			q2 = dto[secPath].pts[qn - 1];
 			angle = FindAngle(q1, q2);
@@ -1882,7 +1937,7 @@ static void DrawCurvedTurnout(
 			p1 = dto[othPath].base[p0];
 			p2 = dto[othPath].base[p0 + 1];
 			len = FindDistance(p1, p2);
-			cnt = (int)floor(len / tdspc + 0.5);
+			cnt = (int)floor(len / tdspc + 0.6);
 			if (cnt > 0) {
 				DIST_T dx = len / cnt, dx2 = dx / 2;
 
