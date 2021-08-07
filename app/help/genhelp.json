@@ -459,7 +459,7 @@
 		{"line": "parameter-name", "contents": "Enter your name as specified in the XTrackCAD Registration Notice" },
 		{"line": "parameter-key", "contents": "Enter the key value as specified in the XTrackCAD Registration Notice" },
 		{"line": "parameter-ok", "contents": "Validates the name and key.  Terminates the registration command" },
-		{"line": "pref-anglesystem", "contents": "0� is up or to the right" },
+		{"line": "pref-anglesystem", "contents": "0 degrees is up or to the right" },
 		{"line": "pref-units", "contents": "Choose english (inches) or metric (centimeters)" },
 		{"line": "pref-dstfmt", "contents": "How to display length measurements" },
 		{"line": "pref-minlength", "contents": "Do not create tracks to be shorter than this value" },
