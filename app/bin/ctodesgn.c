@@ -1036,7 +1036,7 @@ if ( debugComputeRoadbed>=3 ) printf( "  res=%lx\n", res );
 		hit0 = hit1;
 	}
 if ( debugComputeRoadbed>=2 ) printf( "S%d %c    res=%lx\n", segInx, side>0?'+':'-', res );
-	return res;
+	return (0xFFFFFFFF)&res;
 }
 
 
