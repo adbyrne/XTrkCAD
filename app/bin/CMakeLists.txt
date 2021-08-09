@@ -208,8 +208,6 @@ if(XTRKCAD_CREATE_SVG)
 	    install(FILES ${MINIXML_SHAREDLIB}
         	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	    )
-	else(WIN32)
-	    target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
 	endif(WIN32)
 
 endif(XTRKCAD_CREATE_SVG)
@@ -235,6 +233,12 @@ TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
 TARGET_LINK_LIBRARIES(xtrkcad dynstring)
+if(XTRKCAD_CREATE_SVG)
+IF(UNIX AND NOT APPLE)
+	    target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
+ENDIF(UNIX AND NOT APPLE)
+endif(XTRKCAD_CREATE_SVG)
+
 IF(UNIX AND NOT APPLE)
 target_link_libraries(xtrkcad ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
 ELSE(UNIX AND NOT APPLE)
