@@ -1533,7 +1533,7 @@ static void DrawXingBridge(
  * Sets pts values REORIGIN base to actual position and angle
  * Save often used last base and last point coOrd
  */
-static void DrawInitTurnout()
+static void DrawDtoInit()
 {
 	struct extraDataCompound_t* xx = dtod.xx;
 	coOrd p1;
@@ -1579,7 +1579,7 @@ static void DrawNormalTurnout(
 
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 
-	DrawInitTurnout();
+	DrawDtoInit();
 
 	// draw the points
 #ifdef DTO_DEBUG
@@ -1617,7 +1617,7 @@ static void DrawNormalTurnout(
 	if(dtod.bridge) {
 		DrawTurnoutBridge(d,othPath,secPath);
 	}
-	if (omitTies || (d->options&DC_SIMPLE) != 0 )
+	if (omitTies)
 		return;
 
 	// Straight vector for tie angle
@@ -1809,7 +1809,7 @@ static void DrawCurvedTurnout(
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
-	DrawInitTurnout();
+	DrawDtoInit();
 
 	// draw the points
 #ifdef DTO_DEBUG
@@ -1822,7 +1822,7 @@ static void DrawCurvedTurnout(
 	if(dtod.bridge) {
 		DrawTurnoutBridge(d,othPath,secPath);
 	}
-	if (omitTies || (d->options&DC_SIMPLE) != 0 )
+	if (omitTies)
 		return;
 
 	td = GetScaleTieData(scaleInx);
@@ -2063,7 +2063,7 @@ static void DrawXingTurnout(
 
 	struct extraDataCompound_t* xx = dtod.xx;
 
-	DrawInitTurnout();
+	DrawDtoInit();
 
 	dto[strPath].angle = FindAngle(dto[strPath].pts[0], dto[strPath].ptsLast);
 	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
@@ -2104,7 +2104,7 @@ static void DrawXingTurnout(
 	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
 #endif
 
-	if (omitTies || (d->options&DC_SIMPLE) != 0 )
+	if (omitTies)
 		return;
 
 	td = GetScaleTieData(scaleInx);
@@ -2217,7 +2217,7 @@ static void DrawXingTurnout(
 		if (px > dto[secPath].base[q0 + 1].x) q0++;
 		if (p0 >= pn || q0 >= qn)
 			break;
-		// Dont use baseLast, as these have been rotated
+		// Dont use baseLast, as base coOrds have been rotated
 		if ((px + dx >= dto[othPath].base[pn - 1].x)
 			|| (px + dx >= dto[secPath].base[qn - 1].x)) {
 			break;
@@ -2381,7 +2381,7 @@ static void DrawCrossTurnout(
 
 	struct extraDataCompound_t* xx = dtod.xx;
 
-	DrawInitTurnout();
+	DrawDtoInit();
 
 	// draw the points
 #ifdef DTO_DEBUG
@@ -2401,7 +2401,7 @@ static void DrawCrossTurnout(
 	if(dtod.bridge) {
 		DrawCrossBridge(d,strPath,str2Path);
 	}
-	if (omitTies || (d->options&DC_SIMPLE) != 0 )
+	if (omitTies)
 		return;
 
 	td = GetScaleTieData(scaleInx);
@@ -2575,11 +2575,11 @@ static void DrawTurnout(
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
-	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= scale2rail) && ((d->options & DC_SIMPLE) != 0) && (scaleInx >= 0));
+	BOOL_T omitTies = !DoDrawTies(d, trk) || (d->scale > scale2rail) || ((d->options & DC_SIMPLE) != 0) || (scaleInx == 0);
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
-	int noTies = 0;
+	int noTies = GetTrkNoTies(trk);
 	int bridge = GetTrkBridge(trk);
 
 	long skip = 0;
@@ -2587,7 +2587,6 @@ static void DrawTurnout(
 
 	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
 
-	// ((d->options&DC_SIMPLE) == 0 )
 	if ( (pathCnt > 1) && (pathCnt <= DTO_DIM)
 		&& (trk->endCnt <= 4)
 		&& (xx->special == TOnormal) )
@@ -2622,9 +2621,8 @@ static void DrawTurnout(
 				DrawCrossTurnout(d, scaleInx, omitTies, color);
 				break;
 			}
-			noTies = 1;
-			SetTrkNoTies(trk, 1); // ->bits |= TB_NOTIES;
-            ClrTrkBits(trk, TB_BRIDGE); // ->bits &= ~TB_BRIDGE;
+			SetTrkNoTies(trk, 1); 
+            ClrTrkBits(trk, TB_BRIDGE); 
 		}
 	}
 
@@ -2649,7 +2647,7 @@ static void DrawTurnout(
 		DrawTurnoutRoadbed(d, color, xx->orig, xx->angle, xx->segs, xx->segCnt);
 
 	// Restore these settings
-	if (noTies) ClrTrkBits(trk, TB_NOTIES);
+	if (noTies == 0) ClrTrkBits(trk, TB_NOTIES);
 	if (bridge) SetTrkBits(trk, TB_BRIDGE);
 }
 
