@@ -145,6 +145,7 @@ struct DrawTo_t {
 	int n;
 	trkSeg_p trkSeg[DTO_SEGS];
 	coOrd base[DTO_SEGS];
+	coOrd baseLast;
 	DIST_T dy[DTO_SEGS];
 	ANGLE_T angle;
 	ANGLE_T crvAngle;
@@ -1038,15 +1039,6 @@ void GetTurnoutType() {
 
 	// Normal two- or three-way turnout, or a curved turnout
 	if (dtod.origCnt == 1) {
-		// Make sure each path ends in a straight segment
-		/*
-		for (i = 0; i < dtod.pathCnt; i++) {
-			int n = dto[i].n - 1;
-			if (dto[i].trkSeg[n]->type == SEG_CRVTRK) {
-				return;
-			}
-		}
-		*/
 		if (dtod.pathCnt == 2) {
 			if (strCnt == 1 && crvCnt == 1) {
 				dtod.toType = DTO_NORMAL;
@@ -1537,6 +1529,9 @@ static void DrawXingBridge(
 
 /**
  * Init Normal Turnout data structure
+ * Calculates the dy value of each segment
+ * Sets pts values REORIGIN base to actual position and angle
+ * Save often used last base and last point coOrd
  */
 static void DrawInitTurnout()
 {
@@ -1545,13 +1540,15 @@ static void DrawInitTurnout()
 	int i, j;
 
 	for(i = 0; i < DTO_DIM; i++) {
-		for(j = 0; j < dto[i].n; j++) {
+		int n = dto[i].n;
+		for(j = 0; j < n; j++) {
 			REORIGIN(p1,dto[i].base[j],xx->angle,xx->orig);
 			dto[i].pts[j] = p1;
-			if(j < dto[i].n - 1)
+			if(j < n - 1)
 				dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
-		dto[i].ptsLast = dto[i].pts[dto[i].n - 1];
+		dto[i].ptsLast = dto[i].pts[n - 1];
+		dto[i].baseLast = dto[i].base[n - 1];
 	}
 }
 
@@ -1583,15 +1580,6 @@ static void DrawNormalTurnout(
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 
 	DrawInitTurnout();
-	//struct extraDataCompound_t* xx = dtod.xx;
-	//int i, j;
-	//for (i = 0; i < DTO_DIM; i++)
-	//	for (j = 0; j < dto[i].n; j++) {
-	//		REORIGIN(p1, dto[i].base[j], xx->angle, xx->orig);
-	//		dto[i].pts[j] = p1;
-	//		if (j < dto[i].n - 1)
-	//			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
-	//	}
 
 	// draw the points
 #ifdef DTO_DEBUG
@@ -1629,7 +1617,7 @@ static void DrawNormalTurnout(
 	if(dtod.bridge) {
 		DrawTurnoutBridge(d,othPath,secPath);
 	}
-	if (omitTies)
+	if (omitTies || (d->options&DC_SIMPLE) != 0 )
 		return;
 
 	// Straight vector for tie angle
@@ -1668,7 +1656,7 @@ static void DrawNormalTurnout(
 			if (p0 >= pn || q0 >= qn)
 				break;
 
-			if ((px + dx >= dto[othPath].base[pn - 1].x) || (px + dx >= dto[secPath].base[qn - 1].x)) {
+			if ((px + dx >= dto[othPath].baseLast.x) || (px + dx >= dto[secPath].baseLast.x)) {
 				break;
 			}
 
@@ -1688,14 +1676,14 @@ static void DrawNormalTurnout(
 		// Asymmetric? Use longer ties for remaining two tracks (strPath, othPath)
 		DIST_T sx = px; // Save these values for second code block
 		int s0 = p0;
-		if((dtod.toType == DTO_THREE) && (px + dx >= dto[secPath].base[qn - 1].x)){
+		if((dtod.toType == DTO_THREE) && (px + dx >= dto[secPath].baseLast.x)){
 			for ( ; cnt; cnt--, px += dx) {
 				if (px >= dto[othPath].base[p0 + 1].x) p0++;
 				// if (px >= dto[secPath].base[q0 + 1].x) q0++;
 				if (p0 >= pn)
 					break;
 
-				if (px + dx >= dto[othPath].base[pn - 1].x) {
+				if (px + dx >= dto[othPath].baseLast.x) {
 					break;
 				}
 
@@ -1713,12 +1701,12 @@ static void DrawNormalTurnout(
 		}
 
 		// Draw remaining ties, if any
-		if (px + dx < dto[othPath].base[pn - 1].x){
+		if (px + dx < dto[othPath].baseLast.x){
 			p1 = dto[othPath].pts[p0];
-			p2 = dto[othPath].pts[pn - 1];
+			p2 = dto[othPath].ptsLast;
 			angle = FindAngle(p1, p2);
-			a0 = FindAngle(dto[othPath].base[p0], dto[othPath].base[pn - 1]);
-			DIST_T lenr = (dto[othPath].base[pn - 1].x - px + dlenx) / cos(D2R(90.0 - a0));
+			a0 = FindAngle(dto[othPath].base[p0], dto[othPath].baseLast);
+			DIST_T lenr = (dto[othPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&p1, p2, angle, -lenr);
 			DrawStraightTies(d, scaleInx, p1, p2, color);
 		}
@@ -1735,14 +1723,14 @@ static void DrawNormalTurnout(
 		}
 
 		// Asymmetric? Use longer ties for remaining two tracks (strPath, secPath)
-		if((dtod.toType == DTO_THREE) && (px + dx >= dto[othPath].base[pn - 1].x)){
+		if((dtod.toType == DTO_THREE) && (px + dx >= dto[othPath].baseLast.x)){
 			for ( ; cnt; cnt--, px += dx) {
 				// if (px >= dto[othPath].base[p0 + 1].x) p0++;
 				if (px >= dto[secPath].base[q0 + 1].x) q0++;
 				if (q0 >= qn)
 					break;
 
-				if (px + dx >= dto[secPath].base[qn - 1].x) {
+				if (px + dx >= dto[secPath].baseLast.x) {
 					break;
 				}
 
@@ -1758,12 +1746,12 @@ static void DrawNormalTurnout(
 				DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 			}
 		}
-		if (px + dx < dto[secPath].base[qn - 1].x) {
+		if (px + dx < dto[secPath].baseLast.x) {
 			q1 = dto[secPath].pts[q0];
-			q2 = dto[secPath].pts[qn - 1];
+			q2 = dto[secPath].ptsLast;
 			angle = FindAngle(q1, q2);
-			a0 = FindAngle(dto[secPath].base[q0], dto[secPath].base[qn - 1]);
-			DIST_T lenr = (dto[secPath].base[qn - 1].x - px + dlenx) / cos(D2R(90.0 - a0));
+			a0 = FindAngle(dto[secPath].base[q0], dto[secPath].baseLast);
+			DIST_T lenr = (dto[secPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&q1, q2, angle, -lenr);
 			DrawStraightTies(d, scaleInx, q1, q2, color);
 		}
@@ -1777,7 +1765,7 @@ static void DrawNormalTurnout(
 		// Final ties at end
 		if (dtod.toType == DTO_THREE) {
 
-			int n = (int)(dto[strPath].base[qn - 1].x);
+			int n = (int)(dto[strPath].baseLast.x);
 			if (px + dx < len) {
 				angle = FindAngle(s1, s2);
 				DIST_T lenr = len - px + dlenx;
@@ -1822,14 +1810,6 @@ static void DrawCurvedTurnout(
 		color = tieColor;
 
 	DrawInitTurnout();
-	//int i, j;
-	//for (i = 0; i < DTO_DIM; i++)
-	//	for (j = 0; j < dto[i].n; j++) {
-	//		REORIGIN(p1, dto[i].base[j], xx->angle, xx->orig);
-	//		dto[i].pts[j] = p1;
-	//		if (j < dto[i].n - 1)
-	//			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
-	//	}
 
 	// draw the points
 #ifdef DTO_DEBUG
@@ -1842,7 +1822,7 @@ static void DrawCurvedTurnout(
 	if(dtod.bridge) {
 		DrawTurnoutBridge(d,othPath,secPath);
 	}
-	if(omitTies)
+	if (omitTies || (d->options&DC_SIMPLE) != 0 )
 		return;
 
 	td = GetScaleTieData(scaleInx);
@@ -1976,8 +1956,8 @@ static void DrawCurvedTurnout(
 					p1 = dto[othPath].base[p0];
 					p2 = dto[othPath].base[p0 + 1];
 
-					if ((px >= dto[othPath].base[pn - 1].x)
-						|| (qx >= dto[secPath].base[qn - 1].x)) {
+					if ((px >= dto[othPath].baseLast.x)
+						|| (qx >= dto[secPath].baseLast.x)) {
 						break;
 					}
 
@@ -2028,12 +2008,11 @@ static void DrawCurvedTurnout(
 
 	// Draw remaining ties, if any
 	p1 = othEnd;
-	p2 = dto[othPath].pts[pn - 1];
+	p2 = dto[othPath].ptsLast;
 	a0 = FindAngle(p1, p2);
 	len = FindDistance(p1, p2);
 	if (len >= 2 * tdspc) {
 		Translate(&p1, p1, a0, tdspc2);
-		//Translate(&p2, p2, a0, -tdspc2);
 		DrawStraightTies(d, scaleInx, p1, p2, color);
 	}
 	else if (len > tdspc2) { 
@@ -2042,12 +2021,11 @@ static void DrawCurvedTurnout(
 	}
 
 	q1 = secEnd;
-	q2 = dto[secPath].pts[qn - 1];
+	q2 = dto[secPath].ptsLast;
 	a0 = FindAngle(q1, q2);
 	len = FindDistance(q1, q2);
 	if (len >= 2 * tdspc) {
 		Translate(&q1, q1, a0, tdspc2);
-		//Translate(&q2, q2, a0, -tdspc2);
 		DrawStraightTies(d, scaleInx, q1, q2, color);
 	}
 	else if (len > tdspc2) {
@@ -2086,26 +2064,14 @@ static void DrawXingTurnout(
 	struct extraDataCompound_t* xx = dtod.xx;
 
 	DrawInitTurnout();
-	// Create drawing points
-	int i, j;
-	//for (i = 0; i < DTO_DIM; i++) {
-	//	for (j = 0; j < dto[i].n; j++) {
-	//		REORIGIN(p1, dto[i].base[j], xx->angle, xx->orig);
-	//		dto[i].pts[j] = p1;
-	//	}
-	//}
 
-	i = strPath;
-	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
-	i = str2Path;
-	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
+	dto[strPath].angle = FindAngle(dto[strPath].pts[0], dto[strPath].ptsLast);
+	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
 
 	int othPath = strPath, secPath = str2Path;
 	int toType = dtod.toType;
 
-	othPath = dtod.strPath;
-	secPath = dtod.str2Path;
-
+	int i, j;
 	switch (toType) {
 	case DTO_XING:
 	case DTO_XNG9:
@@ -2138,7 +2104,7 @@ static void DrawXingTurnout(
 	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
 #endif
 
-	if(omitTies)
+	if (omitTies || (d->options&DC_SIMPLE) != 0 )
 		return;
 
 	td = GetScaleTieData(scaleInx);
@@ -2172,11 +2138,11 @@ static void DrawXingTurnout(
 	// Short circuit the complex code for this simple case
 	if (toType == DTO_XNG9) {
 		p1 = dto[strPath].pts[0];
-		p2 = dto[strPath].pts[dto[strPath].n - 1];
+		p2 = dto[strPath].ptsLast;
 		DrawStraightTies(d, scaleInx, p1, p2, color);
 
 		p1 = dto[str2Path].pts[0];
-		p2 = dto[str2Path].pts[dto[strPath].n - 1];
+		p2 = dto[str2Path].ptsLast;
 		
 		// Omit the center ties
 		magic = 1 / cos(D2R(90 - dAngle));
@@ -2200,7 +2166,7 @@ static void DrawXingTurnout(
 
 	// Straight vector for tie angle
 	s1 = MidPtCoOrd(dto[strPath].base[0], dto[str2Path].base[0]);
-	s2 = MidPtCoOrd(dto[strPath].base[dto[strPath].n - 1], dto[str2Path].base[dto[str2Path].n - 1]);
+	s2 = MidPtCoOrd(dto[strPath].baseLast, dto[str2Path].baseLast);
 
 	// Rotate base coordinates so that the tie line is aligned with x-axis and origin is at zero
 	cAngle = FindAngle(s1, s2);
@@ -2216,7 +2182,7 @@ static void DrawXingTurnout(
 			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
 		if (dto[i].type == 'S')
-			dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
+			dto[i].angle = FindAngle(dto[i].pts[0], dto[i].ptsLast);
 	}
 
 	// Tie center line in drawing coordinates
@@ -2230,7 +2196,7 @@ static void DrawXingTurnout(
 	// Tie length adjust
 	magic = 1 / cos(0.5 * D2R(dAngle));
 	// Extra ties length adjust
-	double magic2 =	1.0 / cos(0.5 * D2R(dAngle)); // (dAngle <= 20 ? 1.0 : 1.0 / cos(0.5 * D2R(dAngle - 20.0)));
+	double magic2 =	1.0 / cos(0.5 * D2R(dAngle)); 
 
 	// Draw right half
 	len = FindDistance(dtod.midPt, c2);
@@ -2251,7 +2217,7 @@ static void DrawXingTurnout(
 		if (px > dto[secPath].base[q0 + 1].x) q0++;
 		if (p0 >= pn || q0 >= qn)
 			break;
-
+		// Dont use baseLast, as these have been rotated
 		if ((px + dx >= dto[othPath].base[pn - 1].x)
 			|| (px + dx >= dto[secPath].base[qn - 1].x)) {
 			break;
@@ -2282,9 +2248,8 @@ static void DrawXingTurnout(
 		lenx += dx;
 	}
 
-	int n = dto[strPath].n;
 	p1 = dtod.midPt;
-	p2 = dto[strPath].pts[n - 1];
+	p2 = dto[strPath].ptsLast;
 	DIST_T lenr = FindDistance(p1, p2) - lenx * magic2;
 	a0 = dto[strPath].angle;
 	if (lenr > dx) {
@@ -2295,9 +2260,9 @@ static void DrawXingTurnout(
 		Translate(&pos, p2, a0, -dx2);
 		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
-	n = dto[str2Path].n;
+
 	// p1 = dtod.midPt;
-	p2 = dto[str2Path].pts[n - 1];
+	p2 = dto[str2Path].ptsLast;
 	lenr = FindDistance(p1, p2) - lenx * magic2;
 	a0 = dto[str2Path].angle;
 	if (lenr > dx) {
@@ -2417,19 +2382,6 @@ static void DrawCrossTurnout(
 	struct extraDataCompound_t* xx = dtod.xx;
 
 	DrawInitTurnout();
-	int i, j;
-	//for (i = 0; i < DTO_DIM; i++)
-	//	for (j = 0; j < dto[i].n; j++) {
-	//		REORIGIN(pos, dto[i].base[j], xx->angle, xx->orig);
-	//		dto[i].pts[j] = pos;
-	//		if (j < dto[i].n - 1)
-	//			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
-	//	}
-
-	i = dtod.strPath; 
-	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
-	i = dtod.str2Path;
-	dto[i].angle = FindAngle(dto[i].pts[0], dto[i].pts[dto[i].n - 1]);
 
 	// draw the points
 #ifdef DTO_DEBUG
@@ -2441,12 +2393,15 @@ static void DrawCrossTurnout(
 	int othPath = 2, secPath = 2;
 	if (dtod.pathCnt == 4) secPath = 3;
 
+	dto[strPath].angle = FindAngle(dto[strPath].pts[0], dto[strPath].ptsLast);
+	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
+
 	int toType = dtod.toType;
 
 	if(dtod.bridge) {
 		DrawCrossBridge(d,strPath,str2Path);
 	}
-	if (omitTies)
+	if (omitTies || (d->options&DC_SIMPLE) != 0 )
 		return;
 
 	td = GetScaleTieData(scaleInx);
@@ -2460,15 +2415,15 @@ static void DrawCrossTurnout(
 	int qn = dto[secPath].n;
 
 	s1 = dto[strPath].pts[0];
-	s2 = dto[strPath].pts[sn - 1];
+	s2 = dto[strPath].ptsLast;
 	t1 = dto[str2Path].pts[0];
-	t2 = dto[str2Path].pts[tn - 1];
-	angle = dto[strPath].angle; // FindAngle(s1, s2); // The straight segment
+	t2 = dto[str2Path].ptsLast;
+	angle = dto[strPath].angle; 
 
 	p1 = dto[othPath].base[0];
-	p2 = dto[othPath].base[pn - 1];
+	p2 = dto[othPath].baseLast;
 	q1 = dto[secPath].base[0];
-	q2 = dto[secPath].base[qn - 1];
+	q2 = dto[secPath].baseLast;
 
 	td = GetScaleTieData(scaleInx);
 	len = FindDistance(s1, s2);
@@ -2497,8 +2452,8 @@ static void DrawCrossTurnout(
 			if (s0 >= sn || t0 >= tn || p0 >= pn || q0 >= qn)
 				break;
 
-			if ((px >= dto[strPath].base[sn - 1].x)
-				|| (px >= dto[str2Path].base[tn - 1].x)) {
+			if ((px >= dto[strPath].baseLast.x)
+				|| (px >= dto[str2Path].baseLast.x)) {
 				break;
 			}
 
@@ -2565,12 +2520,12 @@ static void DrawCrossTurnout(
 		// Draw remaining ties, if any
 		// Currently by definition, there won't be any
 		/*
-		if (px + dx < dto[strPath].base[pn - 1].x) {
+		if (px + dx < dto[strPath].baseLast.x) {
 			p1 = dto[strPath].pts[p0];
-			p2 = dto[strPath].pts[pn - 1];
+			p2 = dto[strPath].ptsLast;
 			angle = FindAngle(p1, p2);
-			a0 = FindAngle(dto[strPath].base[p0], dto[strPath].base[pn - 1]);
-			DIST_T lenr = (dto[strPath].base[pn - 1].x - px + dlenx) / cos(D2R(90.0 - a0));
+			a0 = FindAngle(dto[strPath].base[p0], dto[strPath].baseLast);
+			DIST_T lenr = (dto[strPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&p1, p2, angle, -lenr);
 			DrawStraightTies(d, scaleInx, p1, p2, color);
 		}
@@ -2581,12 +2536,12 @@ static void DrawCrossTurnout(
 			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
-		if (px + dx < dto[str2Path].base[qn - 1].x) {
+		if (px + dx < dto[str2Path].baseLast.x) {
 			q1 = dto[str2Path].pts[q0];
-			q2 = dto[str2Path].pts[qn - 1];
+			q2 = dto[str2Path].ptsLast;
 			angle = FindAngle(q1, q2);
-			a0 = FindAngle(dto[str2Path].base[q0], dto[str2Path].base[qn - 1]);
-			DIST_T lenr = (dto[str2Path].base[qn - 1].x - px + dlenx) / cos(D2R(90.0 - a0));
+			a0 = FindAngle(dto[str2Path].base[q0], dto[str2Path].baseLast);
+			DIST_T lenr = (dto[str2Path].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&q1, q2, angle, -lenr);
 			DrawStraightTies(d, scaleInx, q1, q2, color);
 		}
@@ -2620,7 +2575,7 @@ static void DrawTurnout(
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
-	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= scale2rail) && (d->options & DC_SIMPLE) == 0 && (scaleInx >= 0));
+	BOOL_T omitTies = !DoDrawTies(d, trk) || ((d->scale >= scale2rail) && ((d->options & DC_SIMPLE) != 0) && (scaleInx >= 0));
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
@@ -2632,10 +2587,11 @@ static void DrawTurnout(
 
 	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
 
-	if ((pathCnt > 1) && (pathCnt <= DTO_DIM)
+	// ((d->options&DC_SIMPLE) == 0 )
+	if ( (pathCnt > 1) && (pathCnt <= DTO_DIM)
 		&& (trk->endCnt <= 4)
-		&& (xx->special == TOnormal))
-	{
+		&& (xx->special == TOnormal) )
+		{
 
 		dtod.bridge = bridge; 
 
