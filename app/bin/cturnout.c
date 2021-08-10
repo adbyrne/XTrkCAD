@@ -1064,7 +1064,7 @@ void GetTurnoutType() {
 			ANGLE_T a0, a1, a2;
 			a1 = FindAngle(dto[dtod.strPath].base[0], dto[dtod.strPath].base[1]);
 			a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
-			// Swap the ends of the str2Path if large angle
+			// Swap the ends of the strPath if large angle
 			if((a1 > 180.0) && (dto[dtod.strPath].n == 2))
 			{
 				coOrd tmp = dto[dtod.strPath].base[0];
@@ -1076,9 +1076,10 @@ void GetTurnoutType() {
 				dto[dtod.strPath].pts[0] = dto[dtod.strPath].pts[i];
 				dto[dtod.strPath].pts[i] = tmp;
 
-				a1 = FindAngle(dto[dtod.strPath].base[0], dto[dtod.strPath].base[1]);
+				a1 = a1 - 180.0; 
 				dto[dtod.strPath].angle = a1;
 			}
+			// Swap the ends of the str2Path if large angle
 			if((a2 > 180.0) && (dto[dtod.str2Path].n == 2))
 			{
 				coOrd tmp = dto[dtod.str2Path].base[0];
@@ -1090,7 +1091,7 @@ void GetTurnoutType() {
 				dto[dtod.str2Path].pts[0] = dto[dtod.str2Path].pts[i];
 				dto[dtod.str2Path].pts[i] = tmp;
 
-				a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
+				a2 = a2 - 180.0; 
 				dto[dtod.str2Path].angle = a2;
 			}
 			a0 = DifferenceBetweenAngles(a1, a2);
@@ -1982,6 +1983,7 @@ static void DrawCurvedTurnout(
 					xlen = px - dto[othPath].base[p0].x;
 					Translate(&pos, q1, a1, xlen);
 					othEnd = pos;
+
 					Translate(&pos, pos, (a1 - 90.0), dy / 2);
 					DrawTie(d, pos, a1, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
@@ -2575,7 +2577,7 @@ static void DrawTurnout(
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
 	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
-	BOOL_T omitTies = !DoDrawTies(d, trk) || (d->scale > scale2rail) || ((d->options & DC_SIMPLE) != 0) || (scaleInx == 0);
+	BOOL_T omitTies = !DoDrawTies(d, trk) || (d->scale > scale2rail) || ((d->options & DC_SIMPLE) != 0); // || (scaleInx == 0);
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
