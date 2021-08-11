@@ -1168,7 +1168,7 @@ EXPORT void SetAutoSave() {
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("AutoSave Tracks As"),
 			sSourceFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
-	changed = checkPtMark = 1;
+	checkPtMark = 1;
 	SetWindowTitle();
 	CleanupFiles();  //Remove old checkpoint
 	SaveState();
@@ -1183,7 +1183,7 @@ EXPORT void DoSave( void * doAfterSaveVP )
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
-		changed = checkPtMark = 1;
+		checkPtMark = 1;
 	} else {
 		char *temp = GetLayoutFullPath();
 		SaveTracks( 1, &temp, NULL );
@@ -1200,7 +1200,7 @@ EXPORT void DoSaveAs( void * doAfterSaveVP )
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
-	changed = checkPtMark = 1;
+	checkPtMark = 1;
 	SetWindowTitle();
 	CleanupFiles();  //Remove old checkpoint
 	SaveState();
