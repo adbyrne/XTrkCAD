@@ -37,6 +37,7 @@
 #include "common-ui.h"
 
 static BOOL_T debug = 0;
+/** @logcmd @showrefby join=n cjoin.c */
 static int log_join = 0;
 typedef struct {
 				curveType_e type;

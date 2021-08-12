@@ -50,9 +50,13 @@ EXPORT turnoutInfo_t* curTurnout = NULL;
 EXPORT long curTurnoutEp = 0;
 static int curTurnoutInx = -1;
 
+/** @logcmd @showrefby turnout=n cturnout.c */
 static int log_turnout = 0;
+/** @logcmd @showrefby traverseTurnout=n cturnout.c */
 static int log_traverseTurnout = 0;
+/** @logcmd @showrefby suppresscheckpaths=n cturnout.c */
 static int log_suppressCheckPaths = 0;
+/** @logcmd @showrefby splitturnout=n cturnout.c */
 static int log_splitturnout = 0;
 
 static wMenu_p turnoutPopupM;
@@ -96,22 +100,27 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 #endif
 
 /* Draw turnout data */
-#define DTO_INVALID 0
 
-#define DTO_NORMAL 1
-#define DTO_THREE 2
-#define DTO_WYE 3
+/** 
+ * The types of turnouts that get enhanced drawing methods
+ */
+enum dtoType {
+	DTO_INVALID,
+	DTO_NORMAL,
+	DTO_THREE,
+	DTO_WYE,
 
-#define DTO_CURVED 4
+	DTO_CURVED,
 
-#define DTO_XING 5
-#define DTO_XNG9 6
-#define DTO_SSLIP 7
-#define DTO_DSLIP 8
+	DTO_XING,
+	DTO_XNG9,
+	DTO_SSLIP,
+	DTO_DSLIP,
 
-#define DTO_LCROSS 9
-#define DTO_RCROSS 10
-#define DTO_DCROSS 11
+	DTO_LCROSS,
+	DTO_RCROSS,
+	DTO_DCROSS
+}; 
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
 // #define DTO_DEBUG DTO_XING
@@ -121,7 +130,7 @@ static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) 
 
 static struct DrawToData_t {
 	TRKINX_T index;
-	int toType;
+	enum dtoType toType;
 	track_p trk;
 	int bridge; 
 	int endCnt;
@@ -981,7 +990,7 @@ void GetTurnoutType() {
 	dtod.toType = DTO_INVALID;
 
 	int strCnt = 0, crvCnt = 0, lftCnt = 0, rgtCnt = 0;
-	int toType = 0;
+	enum dtoType toType = DTO_INVALID;
 	int i, j;
 
 	// Count path origins

@@ -29,7 +29,9 @@
 #include "track.h"
 #include "common-ui.h"
 
+/** @logcmd @showrefby fillElev=n elev.c */
 static int log_fillElev = 0;
+/** @logcmd @showrefby dumpElev=n elev.c */
 static int log_dumpElev = 0;
 static BOOL_T log_fillElev_initted;
 static int checkTrk = 0;

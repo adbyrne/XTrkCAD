@@ -51,9 +51,13 @@
 
 EXPORT char tempSpecial[4096];
 
+/** @logcmd @showrefby track=n track.c */
 static int log_track = 0;
+/** @logcmd @showrefby endPt=n track.c */
 static int log_endPt = 0;
+/** @logcmd @showrefby readTracks=n track.c */
 static int log_readTracks = 0;
+/** @logcmd @showrefby timedrawtracks=n track.c */
 static int log_timedrawtracks = 0;
 
 // Enable trkType checks on extraData*_t
