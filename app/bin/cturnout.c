@@ -817,6 +817,7 @@ static trkSeg_p MapPathSeg(
 
  /**
  * Get the paths from the turnout definition. Puts the results into static dto structure.
+ * Curved segments are broken up into short sections of the lesser of 5 degrees or 5 * tie spacing. 
  *
  * \param trk track_p pointer to a track
  * \param xx  pointer to the extraDataCompound struct
@@ -914,7 +915,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 					angle += a1;
 
 					l = D2R(a1) * r;
-					// Every 5 degrees or 5 * tie width
+					// Every 5 degrees or 5 * tie spacing
 					int cnt = (int)floor(a1 / 5.0);
 					int cnt2 = (int)floor(l / 5 / td->spacing);
 					if (cnt2 > cnt) cnt = cnt2;
@@ -1053,6 +1054,7 @@ void GetTurnoutType() {
 				dtod.toType = DTO_NORMAL;
 			}
 			else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
+				// Assumes outer curve is [0] and inner is [1]
 				if ((dto[0].crvAngle <= 20) && (dto[1].crvAngle - dto[0].crvAngle <= 15))
 					dtod.toType = DTO_CURVED;
 			}
@@ -1120,15 +1122,18 @@ void GetTurnoutType() {
 			int intersect = FindIntersection(&pos, p1, a1, p2, a2);
 
 			if (intersect) {
-				if (strCnt == 2 && dtod.pathCnt == 2)
-					if ((a0 <= 61) && (a0 >= -61))
+				if(strCnt == 2 && dtod.pathCnt == 2){
+					if((a0 <= 61) && (a0 >= -61))
 						dtod.toType = DTO_XING;
 					else
 						dtod.toType = DTO_XNG9;
-				else if (dtod.pathCnt == 3 && (lftCnt == 1 || rgtCnt == 1))
+				}
+				else if(dtod.pathCnt == 3 && (lftCnt == 1 || rgtCnt == 1)){
 					dtod.toType = DTO_SSLIP;
-				else if (dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1)
+				}
+				else if(dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1){
 					dtod.toType = DTO_DSLIP;
+				}
 			}
 			// No intersect, it could be a crossover
 			else if (strCnt == 2) {
