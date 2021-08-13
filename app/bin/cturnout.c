@@ -1135,12 +1135,18 @@ void GetTurnoutType() {
 				if (dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1) {
 					dtod.toType = DTO_DCROSS;
 				}
-				else if (dtod.pathCnt == 3)
+				else if(dtod.pathCnt == 3){
 					// Perverse test because the cross paths go Left then Right, for example
-					if (lftCnt == 1)
+					if(lftCnt == 1){
 						dtod.toType = DTO_RCROSS;
-					else if (rgtCnt == 1)
+					}
+					else if(rgtCnt == 1){
 						dtod.toType = DTO_LCROSS;
+					}
+					else{
+						dtod.toType = DTO_INVALID;
+					}
+				}
 			}
 		}
 }
@@ -2407,8 +2413,6 @@ static void DrawCrossTurnout(
 	dto[strPath].angle = FindAngle(dto[strPath].pts[0], dto[strPath].ptsLast);
 	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
 
-	int toType = dtod.toType;
-
 	if(dtod.bridge) {
 		DrawCrossBridge(d,strPath,str2Path);
 	}
@@ -2484,6 +2488,8 @@ static void DrawCrossTurnout(
 					dy1 = 0;
 					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
 					break;
+				default:
+					break;
 				}
 			}
 			else if (px < px2) {
@@ -2504,6 +2510,8 @@ static void DrawCrossTurnout(
 				case DTO_RCROSS:
 					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 					dy2 = 0;
+					break;
+				default:
 					break;
 				}
 			}
@@ -2608,7 +2616,7 @@ static void DrawTurnout(
 		int strPath = -1;
 		GetTurnoutType();
 
-		if (dtod.toType > DTO_INVALID) {
+		if (dtod.toType != DTO_INVALID) {
 
 			switch (dtod.toType)
 			{
@@ -2630,6 +2638,8 @@ static void DrawTurnout(
 			case DTO_RCROSS:
 			case DTO_DCROSS:
 				DrawCrossTurnout(d, scaleInx, omitTies, color);
+				break;
+			default:
 				break;
 			}
 			SetTrkNoTies(trk, 1); 
