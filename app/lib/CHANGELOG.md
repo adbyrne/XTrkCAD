@@ -4,6 +4,63 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.2 Beta 2]
+
+## Bugs
+
++ Turnout Designer fixes
++ Hotbar drawing fixes
++ Fix redo of Bezier and Cornu undo
++ Parallel Tool crash
++ Car Delete - Uncouple and mark deleted
++ Polygon editing fixes
++ BitMap Memory Leak
++ Curve from center
++ Description and Elevation attachments
++ Cornu Split
++ Remove bad checkpoint
++ Describe Bezier improvements
++ Fix Export Tracks when Trains present
++ Fix desired radius join
+
+
+## Added
+
++ Windows 64 bit
++ More realistic drawing of ties/sleepers within Turnouts
++ SVG Export of draw objects
++ Benchwork and Table Edge can be Split
++ Drawing of Bridge Track Deck 
++ Zoom Extents button
++ Zoom Selected
++ Resizeable Menu Buttons
++ Increase Easement Radius Limit
++ Assorted Help Menu Improvements
++ Improved prompting and error processing for entry fields
++ Disable AutoSave CheckPoints by default
++ Follow Train uses Room Limits
++ Select Track by Index
++ Improved Ruler precision at high zoom
++ Turntable movement commands and alignment in Train Mode
++ Real Delete key in Poly Modify
++ Improve Elevation command editing
+
+
+## Parameters
+
++ HO-TrixExpress
++ Bachmann HO and N
++ MiniTrix
++ Trees
++ Fix Lego track scale
++ Short Marklin straights
++ Proto-ng-3ft
++ Aristo
++ USA Trains
++ G-MicroEngineering
++ Accucraft Cars
+
+
 ## [5.2.1 GA]
 
 ## Bugs
