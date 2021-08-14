@@ -62,8 +62,8 @@ static char userHomeDir[BUFSIZ];
  *  The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
  *  2. Directory specified by XTRKCAD_INSTALL_PREFIX/share/xtrkcad
- *  3. /usr/lib/xtrkcad
- *  4. /usr/local/lib/xtrkcad
+ *  3. /usr/share/xtrkcad
+ *  4. /usr/local/share/xtrkcad
  *  
  *  \return pointer to directory name
  */
@@ -86,39 +86,48 @@ const char * wGetAppLibDir( void )
 	if (ep != NULL) {
 		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 			strncpy( appLibDir, ep, sizeof appLibDir );
+			//printf( "wAppLbDir=%s\n", appLibDir );
 			return appLibDir;
 		}
 	}
 
-	strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX);
-	strcat(appLibDir, "/share/");
+	strcpy(appLibDir, "../share/");
 	strcat(appLibDir, wlibGetAppName());
-
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+		//printf( "wAppLbDir=%s\n", appLibDir );
 		return appLibDir;
 	}
 
-	strcpy( appLibDir, "/usr/lib/" );
+	char * dir1 = "/usr/share/";
+	char * dir2 = "/usr/local/share/";
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		dir1 = "/usr/local/share/";
+		dir2 = "/usr/share/";
+	}
+
+	strcpy( appLibDir, dir1 );
 	strcat( appLibDir, wlibGetAppName() );
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+		//printf( "wAppLbDir=%s\n", appLibDir );
 		return appLibDir;
 	}
 
-	strcpy( appLibDir, "/usr/local/lib/" );
+	strcpy( appLibDir, dir2 );
 	strcat( appLibDir, wlibGetAppName() );
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+		//printf( "wAppLbDir=%s\n", appLibDir );
 		return appLibDir;
 	}
 
 	sprintf( msg,
 		_("The required configuration files could not be located in the expected location.\n\n"
 		"Usually this is an installation problem. Make sure that these files are installed in either \n"
-		"  %s/share/xtrkcad or\n"
-		"  /usr/lib/%s or\n"
-		"  /usr/local/lib/%s\n"
+		"  ../share/xtrkcad or\n"
+		"  /usr/share/%s or\n"
+		"  /usr/local/share/%s\n"
 		"If this is not possible, the environment variable %s must contain "
 		"the name of the correct directory."),
-		XTRKCAD_INSTALL_PREFIX, wlibGetAppName(), wlibGetAppName(), envvar );
+		wlibGetAppName(), wlibGetAppName(), envvar );
 	wNoticeEx( NT_ERROR, msg, _("Ok"), NULL );
 	appLibDir[0] = '\0';
 	wExit(0);
