@@ -195,7 +195,6 @@ if(XTRKCAD_CREATE_SVG)
 	)
 	include_directories(${MINIXML_INCLUDE_PATH})
 	if(WIN32)
-	    target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
 
 	    add_custom_command(
 		TARGET xtrkcad POST_BUILD
@@ -235,7 +234,14 @@ TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
 TARGET_LINK_LIBRARIES(xtrkcad dynstring)
 if(XTRKCAD_CREATE_SVG)
 IF(UNIX)
-	    target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
+	if (NOT APPLE)
+		target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
+		target_link_libraries(xtrkcad "pthread")
+	else(NOT APPLE)
+		target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
+	endif(NOT APPLE)
+ELSE(UNIX)
+	target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
 ENDIF(UNIX)
 endif(XTRKCAD_CREATE_SVG)
 
