@@ -15,7 +15,7 @@ if(WIN32)
     find_path( ZLIB_INCLUDE_DIR zlib.h
       PATHS
       $ENV{XTCEXTERNALROOT}/x64/zlib
-      DOC "The directory where zip.h resides")
+      DOC "The directory where zlib.h resides")
     find_library( ZLIB_LIBRARY
       NAMES zlib Zlib
       PATHS
@@ -29,7 +29,7 @@ if(WIN32)
     find_path( ZLIB_INCLUDE_DIR zlib.h
       PATHS
       $ENV{XTCEXTERNALROOT}/x86/zlib
-      DOC "The directory where zip.h resides")
+      DOC "The directory where zlib.h resides")
     find_library( ZLIB_LIBRARY
       NAMES zlib Zlib
       PATHS
