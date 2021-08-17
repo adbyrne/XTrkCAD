@@ -225,7 +225,7 @@ void CreateAboutW(void *ptr)
 		wTextAppend(COPYRIGHT_T, "\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
 								  "The authors can be contacted at libzip@nih.at");
 
-		wTextAppend(COPYRIGHT_T, "\n\nMiniXML: Copyright © 2003-2019 by Michael R Sweet.\n" \
+		wTextAppend(COPYRIGHT_T, "\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
 			"The Mini - XML library is licensed under the Apache License Version 2.0 with an\n" \
 			"exception to allow linking against GPL2 / LGPL2 - only software.");
 	}
