@@ -284,6 +284,11 @@ EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 	if ( !s->tieDataValid ) {
 		sprintf( message, "tiedata-%s", s->scale );
 		defLength = (96.0-54.0)/s->ratio+s->gauge;
+
+		/** @prefs [tiedata-<SCALE>] length, width, spacing Sets tie drawing data. 
+		* Example for 6"x8"x6' ties spaced 20" in HOn3 (slash separates 4 lines): 
+		* [tiedata-HOn3] \ length=0.83 \ width=0.07 \ spacing=0.23
+		*/
 		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
 		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
 		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
@@ -887,5 +892,6 @@ EXPORT void Misc2Init( void )
 	AddParam( "SCALEFIT", AddScaleFit);
 	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 	RegisterChangeNotification( ScaleChange );
+	/** @prefs [msw tweak] NoNegDrawArgs=1 Unknown */
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );
 }

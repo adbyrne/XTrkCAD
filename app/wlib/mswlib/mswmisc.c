@@ -885,11 +885,13 @@ wWin_p wWinMainCreate(
     /* length of path + \ + length of filename + . + length of extension + \0 */
     helpFile = (char*)malloc(strlen(libDir) + 1 + strlen(appName) + 1 + 3 + 1);
     wsprintf(helpFile, "%s\\%s.chm", libDir, appName);
+	/** @prefs [msw tweak] ThickFont=1  */
     wPrefGetInteger("msw tweak", "ThickFont", &mswThickFont, 0);
 
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
 
+	/** @prefs [Preference] LargeIcons=1.5 Sets toolbar icon scaling. Limited 1.0 to 2.0 */
 	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
 	if (scaleIcon < 1.0) scaleIcon = 1.0;
 	if (scaleIcon > 2.0) scaleIcon = 2.0;

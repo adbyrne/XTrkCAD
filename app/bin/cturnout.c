@@ -2607,6 +2607,7 @@ static void DrawTurnout(
 	int bridge = GetTrkBridge(trk);
 
 	long skip = 0;
+	/** @prefs [Preference] NormalTurnoutDraw=1 to skip enhanced drawing methods */
 	wPrefGetInteger("Preference", "NormalTurnoutDraw", (long *) &skip, 0);
 
 	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);

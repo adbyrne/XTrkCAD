@@ -1506,6 +1506,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		b->wFactor = (double)GetDeviceCaps( b->hDc, LOGPIXELSX );
 		b->hFactor = (double)GetDeviceCaps( b->hDc, LOGPIXELSY );
 		double dpi;
+		/** @prefs [Preference] ScreenDPI=96.0 Sets DPI of screen */
 		wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
 		b->DPI = dpi;
 		b->hWnd = hWnd;
@@ -1835,7 +1836,9 @@ wDraw_p wDrawCreate(
 	HDC hDc;
 
 	if ( noNegDrawArgs < 0 ) {
+		/** @prefs [msw tweak] NoNegDrawArgs=1 Suppress drawing if x < 0 or y < 0 */
 		wPrefGetInteger( "msw tweak", "NoNegDrawArgs", &noNegDrawArgs, 0 );
+		/** @prefs [msw tweak] NoFlatEndCaps=1 Suppress EndCap Flat pen style */
 		wPrefGetInteger( "msw tweak", "NoFlatEndCaps", &noFlatEndCaps, 0 );
 	}
 
