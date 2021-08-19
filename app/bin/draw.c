@@ -206,7 +206,15 @@ static struct {
 				{ "192:1", 192.0 },
 				{ "224:1", 224.0 },
 				{ "256:1", 256.0 },
-};
+				{ "320:1", 320.0 },
+			    { "384:1", 384.0 },
+			    { "448:1", 448.0 },
+			    { "512:1", 512.0 },
+			    { "640:1", 640.0 },
+			    { "768:1", 768.0 },
+			    { "896:1", 896.0 },
+			    { "1024:1", 1024.0 },
+		};
 
 
 
@@ -1762,14 +1770,14 @@ EXPORT void DrawRuler(
 							sprintf(message, "%ld", mm/10%10 );
 							fs = rulerFontSize*2/3;
 							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
-							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi ); 
 							//p0.x = p1.x+4*dxn/10*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						} else {
 							sprintf(message, "%0.1f", mm/1000.0 );
 							fs = rulerFontSize;
 							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
-							Translate( &p0, p0, 225, 1.5*fs*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, 1.5*fs*d->scale/mainD.dpi ); 
 							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
@@ -1800,19 +1808,19 @@ EXPORT void DrawRuler(
 			firstFraction = 16 - firstFraction;
 		}
 		for ( ; inch<=lastInch; inch++){
-			if (inch % 12 == 0) {
+			if(inch % 12 == 0) {
 				lengths[0] = 12;
 				majorLength = 16;
 				digit = (int)(inch/12);
 				fs = rulerFontSize;
 				quote = '\'';
-			} else if (d->scale <= 8) {
+			} else if (d->scale <= 12) { // 8
 				lengths[0] = 12;
 				majorLength = 16;
 				digit = (int)(inch%12);
 				fs = rulerFontSize*(2.0/3.0);
 				quote = '"';
-			} else if (d->scale <= 16){
+			} else if (d->scale <= 24){ // 16
 				lengths[0] = 10;
 				majorLength = 12;
 				digit = (int)(inch%12);
@@ -1822,30 +1830,49 @@ EXPORT void DrawRuler(
 			}
 			if (inch == lastInch)
 				lastFraction = (((int)((end - lastInch)*16)) / incr) * incr;
-			for ( fraction = firstFraction; fraction<=lastFraction; fraction += incr ) {
-				Translate( &p0, orig, a, inch+fraction/16.0 );
-				Translate( &p1, p0, aa, lengths[fraction]*d->scale/mainD.dpi );
-				DrawLine( d, p0, p1, 0, color );
-			if (fraction == 0) {
-				// Label interval for scale > 40
-				if (d->scale <= 80) {
-					skip = 2;
+			for ( fraction = firstFraction; fraction <= lastFraction; fraction += incr ) {
+				// Tick interval for scale > 240
+				skip = 0;
+				if(d->scale > 512) {
+					skip = (inch % 120 != 0);
 				}
-				else if (d->scale <= 120) {
-					skip = 5;
+				else if(d->scale > 256) {
+					skip = (inch % 60 != 0);
 				}
-				else {
-					skip = 10;
+				else if(d->scale > 128) {
+					skip = (inch % 24 != 0);
 				}
-				if ( (number == TRUE && d->scale <= 40) || (digit % skip == 0)) {
-					if (inch % 12 == 0 || d->scale <= 2) {
-						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
-						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
-						sprintf(message, "%d%c", digit, quote );
-						DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
+				if(!skip){
+					Translate( &p0, orig, a, inch+fraction/16.0 );
+					Translate( &p1, p0, aa, lengths[fraction]*d->scale/mainD.dpi );
+					DrawLine( d, p0, p1, 0, color );
+				}
+				if (fraction == 0) {
+					// Label interval for scale > 40
+					if (d->scale <= 80) {
+						skip = 2;
+					}
+					else if (d->scale <= 120) {
+						skip = 5;
+					}
+					else if (d->scale <= 240) {
+						skip = 10;
+					}
+					else if (d->scale <= 480) {
+						skip = 20;
+					}
+					else {
+						skip = 50;
+					}
+					if ( (number == TRUE && d->scale <= 40) || (digit % skip == 0)) {
+						if (inch % 12 == 0 || d->scale <= 2) {
+							Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
+							sprintf(message, "%d%c", digit, quote );
+							DrawString( d, p0, 0.0, message, rulerFp, fs*d->scale, color );
+						}
 					}
 				}
-			}
 			firstFraction = 0;
 			}
 		}
@@ -2841,8 +2868,8 @@ static void MapDlgUpdate(
 				if (scaleX<scaleY) scale = scaleX;
 				else scale = scaleY;
 
-				if (scale > 256.0) scale = 256.0;
-				if (scale < 0.01) scale = 0.01;
+				if (scale > MAX_MAIN_SCALE) scale = MAX_MAIN_SCALE;
+				if (scale < MIN_MAIN_MACRO) scale = MIN_MAIN_MACRO;
 
 				mapScale = (long)scale;
 

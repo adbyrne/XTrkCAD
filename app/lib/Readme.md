@@ -64,7 +64,7 @@ Please see http://xtrkcad-fork.sourceforge.net/Wikka/DownloadInstall.
 ## Upgrade Information ##
 
 **Note:** This version of XTrackCAD comes with the several new features
-like backgroudn images or extensions to notes. In order to support
+like background images or extensions to notes. In order to support
 this feature, an additional file format for layout files (.xtce) was added.
 The old .xtc format is still supported for reading and writing. So
 files from earlier versions of XTrackCAD can be read without problems.

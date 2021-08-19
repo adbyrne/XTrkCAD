@@ -58,7 +58,7 @@
 
 #define INIT_MAIN_SCALE (8.0)
 #define INIT_MAP_SCALE	(64.0)
-#define MAX_MAIN_SCALE	(256.0)
+#define MAX_MAIN_SCALE	(1024.0)
 #define MIN_MAIN_SCALE	(1.0)
 #define MIN_MAIN_MACRO  (0.10)
 
