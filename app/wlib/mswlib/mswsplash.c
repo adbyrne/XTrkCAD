@@ -41,9 +41,9 @@ static HWND hSplash;
 
 static LPWORD lpwAlign( LPWORD lpIn )
 {
-    ULONG ul;
+    ULONGLONG ul;
 
-    ul = (ULONG) lpIn;
+    ul = (ULONGLONG) lpIn;
     ul +=3;
     ul >>=2;
     ul <<=2;
@@ -148,7 +148,7 @@ wCreateSplash( char *appname, char *appver )
 	cyDlgUnit = HIWORD(GetDialogBaseUnits());
 
 	/* load the logo bitmap */
-	sprintf( logoPath, "%s\\logo.bmp", wGetAppLibDir());
+	snprintf( logoPath, sizeof(logoPath), "%s\\logo.bmp", wGetAppLibDir());
 	hBmp = LoadImage( mswHInst, logoPath, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_LOADFROMFILE );
 	if( !hBmp )
 		return( 0 );
@@ -267,3 +267,4 @@ wDestroySplash(void)
 	DestroyWindow( hSplash );
 	return;
 }
+

@@ -92,7 +92,7 @@ void *(srealloc)(LOGPARAMS void *p, int size) {
  * of smalloc (and also reliably defined in all environments :-)
  */
 char *dupstr(char *s) {
-    char *r = smalloc(1+strlen(s));
+    char *r = smalloc(1+(int)strlen(s));
     strcpy(r,s);
     return r;
 }

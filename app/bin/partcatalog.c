@@ -19,28 +19,8 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <assert.h>
-#include <ctype.h>
-#ifdef HAVE_MALLOC_H
-    #include <malloc.h>
-#endif
-#include <search.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-    #include "include/dirent.h"
-#else
-    #include <dirent.h>
-#endif
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "include/levenshtein.h"
 #include "misc.h"
 #include "misc2.h"
@@ -50,13 +30,6 @@
 #include "include/stringxtc.h"
 #include "include/utf8convert.h"
 #include "include/utlist.h"
-#include "utility.h"
-
-#if _MSC_VER > 1300
-    #define strnicmp _strnicmp
-    #define stricmp _stricmp
-    #define strdup _strdup
-#endif
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"
@@ -410,7 +383,7 @@ CreateKeywordIndex(ParameterLib *library)
 {
     CatalogEntry *listOfEntries = library->catalog->head;
     CatalogEntry *curParamFile;
-    unsigned totalMemory = 0;
+    size_t totalMemory = 0;
     size_t wordCount = 0;
     char *wordList;
     char *wordListPtr;
@@ -472,7 +445,7 @@ CreateKeywordIndex(ParameterLib *library)
         LOG1(log_params, ("Index Entry: <%s> Count: %d\n", existingEntry->keyWord,
                           existingEntry->references->cnt));
     }
-    return (wordCount);
+    return (unsigned)(wordCount);
 }
 
 /**
@@ -915,7 +888,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                     newEntry->contents = MyStrdup(foundEntry->contents);
                     newEntry->tag = MyStrdup(foundEntry->tag);
                     newEntry->files = foundEntry->files;
-                    for (int i=0;i<newEntry->files;i++) {
+                    for (unsigned int i=0;i<newEntry->files;i++) {
                     	newEntry->fullFileName[i] = MyStrdup(foundEntry->fullFileName[i]);
                     }
 
@@ -940,7 +913,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                         DL_DELETE(results->subCatalog.head, current);
                         MyFree(current->contents);
                         MyFree(current->tag);
-                        for (int i=0;i<current->files;i++) {
+                        for (unsigned int i=0;i<current->files;i++) {
                                MyFree(current->fullFileName[i]);
                         }
                         MyFree(current);
@@ -1012,9 +985,9 @@ GetParameterFileContent(char *file)
                     ptr = ptr+strlen(CONTENTSCOMMAND)+1;
                     ptr = strtok(ptr, "\r\n");
                     result = MyStrdup(ptr);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
                     ConvertUTF8ToSystem(result);
-#endif // WINDOWS
+#endif // UTFCONVERT
                     found = true;
                 }
             } else {

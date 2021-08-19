@@ -10,19 +10,36 @@
 #
 
 if(WIN32)
-  find_path( ZLIB_INCLUDE_DIR zlib.h
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/zlib
-    DOC "The directory where zip.h resides")
-  find_library( ZLIB_LIBRARY
-    NAMES zlib Zlib
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/zlib
-    DOC "The zlib library")
-  find_file( ZLIB_SHAREDLIB
-    NAMES zlib.dll Zlib.dll
-    PATHS
-    $ENV{XTCEXTERNALROOT}/x86/zlib)
+  # Folders for x86/x64
+  if (WIN64)
+    find_path( ZLIB_INCLUDE_DIR zlib.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/zlib
+      DOC "The directory where zlib.h resides")
+    find_library( ZLIB_LIBRARY
+      NAMES zlib Zlib
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/zlib
+      DOC "The zlib library")
+    find_file( ZLIB_SHAREDLIB
+      NAMES zlib.dll Zlib.dll
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x64/zlib)
+  else (WIN64)
+    find_path( ZLIB_INCLUDE_DIR zlib.h
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/zlib
+      DOC "The directory where zlib.h resides")
+    find_library( ZLIB_LIBRARY
+      NAMES zlib Zlib
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/zlib
+      DOC "The zlib library")
+    find_file( ZLIB_SHAREDLIB
+      NAMES zlib.dll Zlib.dll
+      PATHS
+      $ENV{XTCEXTERNALROOT}/x86/zlib)
+  endif (WIN64)
 else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_ZLIB QUIET zlib)

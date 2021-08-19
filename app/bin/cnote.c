@@ -19,12 +19,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <string.h>
 
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "misc.h"
 #include "param.h"
 #include "include/utf8convert.h"
@@ -38,7 +36,7 @@ static paramData_t notePLs[] = {
 #define noteT			((wText_p)notePLs[I_NOTETEXT].control)
     {	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
 };
-static paramGroup_t notePG = { "note", 0, notePLs, sizeof notePLs/sizeof notePLs[0] };
+static paramGroup_t notePG = { "note", 0, notePLs, COUNT( notePLs ) };
 
 
 void ClearNote(void)
@@ -49,7 +47,7 @@ void ClearNote(void)
     }
 }
 
-static void NoteOk(void * junk)
+static void NoteOk(void * unused)
 {
     if (wTextGetModified(noteT)) {
         int len;
@@ -63,7 +61,7 @@ static void NoteOk(void * junk)
 }
 
 
-void DoNote(void)
+void DoNote(void * unused)
 {
     if (noteW == NULL) {
         noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
@@ -84,26 +82,26 @@ BOOL_T WriteMainNote(FILE* f)
 	char *noteText = mainText;
 
 	if (noteText && *noteText) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 		char *out = NULL;
 		if (RequiresConvToUTF8(mainText)) {
-			unsigned cnt = strlen(mainText) * 2 + 1;
+			size_t cnt = strlen(mainText) * 2 + 1;
 			out = MyMalloc(cnt);
-			wSystemToUTF8(mainText, out, cnt);
+			wSystemToUTF8(mainText, out, (unsigned int)cnt);
 			noteText = out;
 		}
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 
 	char * sText = ConvertToEscapedText( noteText );
         rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
 	MyFree( sText );
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 		if (out) {
 			MyFree(out);
 		}
-#endif // WINDOWS
+#endif // UTFCONVERT
     }
     return rc;
 }
@@ -121,7 +119,7 @@ BOOL_T ReadMainNote(char *line)
 
     if (!GetArgs(line + 9,
 	paramVersion < 3 ? "l" :
-	paramVersion < 12 ? "0000l":
+	paramVersion < VERSION_INLINENOTE ? "0000l":
 	"0000lq", &size, &sNote)) {
         return FALSE;
     }
@@ -130,7 +128,7 @@ BOOL_T ReadMainNote(char *line)
         MyFree(mainText);
     }
 
-    if ( paramVersion < 12 )
+    if ( paramVersion < VERSION_INLINENOTE )
 	mainText = ReadMultilineText();
     else
 	mainText = sNote;

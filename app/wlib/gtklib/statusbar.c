@@ -42,7 +42,7 @@ struct wStatus_t {
     WOBJ_COMMON
     GtkWidget * labelWidget;
     const char * message;
-    wPos_t labelWidth;
+    wWinPix_t labelWidth;
 };
 
 /**
@@ -84,10 +84,10 @@ void wStatusSetValue(
 
 wStatus_p wStatusCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* labelStr,
-    wPos_t	width,
+    wWinPix_t	width,
     const char	*message)
 {
     wStatus_p b;
@@ -124,7 +124,7 @@ wStatus_p wStatusCreate(
  * \return expected width of message box
  */
 
-wPos_t
+wWinPix_t
 wStatusGetWidth(const char *testString)
 {
     GtkWidget *entry;
@@ -152,7 +152,7 @@ wStatusGetWidth(const char *testString)
  * \return text height
  */
 
-wPos_t wStatusGetHeight(
+wWinPix_t wStatusGetHeight(
     long flags)
 {
     GtkWidget * temp;
@@ -208,7 +208,7 @@ wPos_t wStatusGetHeight(
 
 void wStatusSetWidth(
     wStatus_p b,
-    wPos_t width)
+    wWinPix_t width)
 {
     b->labelWidth = width;
     gtk_widget_set_size_request(b->widget, width, -1);

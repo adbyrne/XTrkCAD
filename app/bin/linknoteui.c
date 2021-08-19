@@ -20,26 +20,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <string.h>
-#include <stdbool.h>
-
 #include "custom.h"
 #include "dynstring.h"
-#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "include/stringxtc.h"
 #include "track.h"
 #include "validator.h"
-#include "wlib.h"
 
 extern BOOL_T inDescribeCmd;
 
 #define DEFAULTLINKURL "http://www.xtrkcad.org/"
 #define DEFAULTLINKTITLE "The XTrackCAD Homepage"
 
-static struct extraDataNote noteDataInUI;
+static struct extraDataNote_t noteDataInUI;
 
 static void NoteLinkBrowse(void *junk);
 static void NoteLinkOpen(char *url );
@@ -51,22 +46,22 @@ static paramData_t linkEditPLs[] = {
 #define I_ORIGY (1)
     /*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
-    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
+    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
 #define I_URL (4)
-    /*4*/ { PD_STRING, NULL, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("URL"), 0, 0, URLMAXIMUMLENGTH-1 },
+    /*4*/ { PD_STRING, NULL, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("URL"), 0, 0, URLMAXIMUMLENGTH-1 },
 #define I_OPEN (5)
-	/*5*/{ PD_BUTTON, (void*)NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
+	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
 };
 
-static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, sizeof linkEditPLs / sizeof linkEditPLs[0] };
+static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, COUNT( linkEditPLs ) };
 static wWin_p linkEditW;
 
 BOOL_T
 IsLinkNote(track_p trk)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	return(xx->op == OP_NOTELINK);
 }
@@ -168,10 +163,10 @@ LinkEditOK(void *junk)
 static void 
 CreateEditLinkDialog(track_p trk, char *title)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
 	// create the dialog if necessary
     if (!linkEditW) {
+	    	noteDataInUI.base.trkType = T_NOTE;
 		noteDataInUI.noteData.linkData.url = MyMalloc(URLMAXIMUMLENGTH);
 		noteDataInUI.noteData.linkData.title = MyMalloc(TITLEMAXIMUMLENGTH);
 		linkEditPLs[I_TITLE].valueP = noteDataInUI.noteData.linkData.title;
@@ -188,6 +183,7 @@ CreateEditLinkDialog(track_p trk, char *title)
     wWinSetTitle(linkEditPG.win, MakeWindowTitle(title));
 
 	// initialize the dialog fields
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     noteDataInUI.pos = xx->pos;
 	noteDataInUI.layer = xx->layer;
     noteDataInUI.trk = trk;
@@ -208,7 +204,7 @@ CreateEditLinkDialog(track_p trk, char *title)
 
 void ActivateLinkNote(track_p trk)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	NoteLinkOpen(xx->noteData.linkData.url);
 }
 
@@ -223,7 +219,7 @@ void ActivateLinkNote(track_p trk)
 
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     DynString statusLine;
 
     DynStringMalloc(&statusLine, 80);
@@ -251,7 +247,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 
 void NewLinkNoteUI(track_p trk)
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	xx->noteData.linkData.url = MyStrdup( DEFAULTLINKURL );
 	xx->noteData.linkData.title = MyStrdup( DEFAULTLINKTITLE );

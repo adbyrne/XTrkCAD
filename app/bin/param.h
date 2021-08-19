@@ -24,8 +24,7 @@
 #define PARAM_H
 
 #include "common.h"
-#include "wlib.h"
-#include "draw.h"
+#include "draw.h" //- playbackAction
 
 typedef struct turnoutInfo_t * turnoutInfo_p;
 
@@ -48,44 +47,55 @@ typedef enum {
 		PD_BITMAP
 		} parameterType;
 
-#define PDO_DIM					(1L<<0)
-#define PDO_ANGLE				(1L<<1)
-#define PDO_NORECORD			(1L<<2)
-#define PDO_NOPSHACT			(1L<<3)
-#define PDO_NOPSHUPD			(1L<<4)
-#define PDO_NOPREF				(1L<<5)
-#define PDO_NOUPDACT			(1L<<6)
-#define PDO_MISC				(1L<<7)
-#define PDO_DRAW				(1L<<8)
-#define PDO_FILE				(1L<<9)
-#define PDO_ENTER               (1L<<10)
+// PD_FLOAT modifiers
+#define PDO_DIM				(1L<<0)
+#define PDO_ANGLE			(1L<<1)
+#define PDO_SMALLDIM			(1L<<2)
+// PD_STRING modifiers
+#define PDO_NOTBLANK			(1L<<3)
 
-#define PDO_STRINGLIMITLENGTH	(1L<<11)	/**< context has maximum length for string */
-#define PDO_SMALLDIM			(1L<<12)
+#define PDO_NORECORD			(1L<<6)
+#define PDO_NOPSHACT			(1L<<7)
+#define PDO_NOPSHUPD			(1L<<8)
+#define PDO_NOUPDACT			(1L<<9)
+#define PDO_NOACT		(PDO_NOPSHACT|PDO_NOUPDACT)
+#define PDO_NOUPD		(PDO_NORSTUPD|PDO_NOPSHUPD)
 
-#define PDO_DLGSTARTBTNS		(1L<<13)
-#define PDO_DLGWIDE				(1L<<14)
-#define PDO_DLGNARROW			(1L<<15)
-#define PDO_DLGBOXEND			(1L<<16)	 /**< draw recessed frame around the controls */
-#define PDO_DLGRESETMARGIN		(1L<<17)	 /**< position control on the left ?*/
-#define PDO_DLGIGNORELABELWIDTH (1L<<18)
+// Override paramGroup pref group
+#define PDO_NOPREF			(1L<<10)
+#define PDO_MISC			(1L<<11)
+#define PDO_DRAW			(1L<<12)
+#define PDO_FILE			(1L<<13)
+//#define PDO_ENTER               	(1L<<14)
+#define PDO_ENTER               	0
 
-#define PDO_DLGHORZ				(1L<<20)  /**< arrange on same line as previous element */
-#define PDO_DLGNEWCOLUMN		(1L<<21)
-#define PDO_DLGNOLABELALIGN		(1L<<22)
-#define PDO_LISTINDEX			(1L<<23)
-#define PDO_DLGSETY				(1L<<24)
-#define PDO_DLGIGNOREX			(1L<<25)
-#define PDO_DLGUNDERCMDBUTT		(1L<<26)
-#define PDO_DLGCMDBUTTON		(1L<<27)	/**< arrange button on the right with the default buttons */
-#define PDO_DLGIGNORE			(1L<<28)
+//#define PDO_STRINGLIMITLENGTH		(1L<<11)	/**< context has maximum length for string */
+#define PDO_STRINGLIMITLENGTH		0	/**< context has maximum length for string */
 
-#define PDO_DLGRESIZEW			(1L<<29)
-#define PDO_DLGRESIZEH			(1L<<30)
+// Ignore param
+#define PDO_DLGIGNORE			(1L<<15)
+
+// Layout options
+#define PDO_DLGSTARTBTNS		(1L<<16)
+#define PDO_DLGWIDE			(1L<<17)
+#define PDO_DLGNARROW			(1L<<18)
+#define PDO_DLGBOXEND			(1L<<19)	 /**< draw recessed frame around the controls */
+#define PDO_DLGRESETMARGIN		(1L<<20)	 /**< position control on the left ?*/
+#define PDO_DLGIGNORELABELWIDTH 	(1L<<21)
+#define PDO_DLGHORZ			(1L<<22)  /**< arrange on same line as previous element */
+#define PDO_DLGNEWCOLUMN		(1L<<23)
+#define PDO_DLGNOLABELALIGN		(1L<<24)
+#define PDO_LISTINDEX			(1L<<25)
+#define PDO_DLGSETY			(1L<<26)
+#define PDO_DLGIGNOREX			(1L<<27)
+#define PDO_DLGUNDERCMDBUTT		(1L<<28)
+#define PDO_DLGCMDBUTTON		(1L<<29)	/**< arrange button on the right with the default buttons */
+#define PDO_DLGRESIZEW			(1L<<30)
+#define PDO_DLGRESIZEH			(1L<<31)
 #define PDO_DLGRESIZE			(PDO_DLGRESIZEW|PDO_DLGRESIZEH)
 
-#define PDO_NOACT		(PDO_NOPSHACT|PDO_NOUPDACT)
-#define PDO_NOUPD		(PDO_NORSTUPD|PDO_NOPSHUPD|PDO_NOUPDUPD)
+
+
 
 typedef struct paramGroup_t *paramGroup_p;
 
@@ -94,33 +104,33 @@ typedef struct paramGroup_t *paramGroup_p;
 typedef struct {
 		long low;
 		long high;
-		wPos_t width;
+		wWinPix_t width;
 		int rangechecks;
 		} paramIntegerRange_t;
 typedef struct {
 		FLOAT_T low;
 		FLOAT_T high;
-		wPos_t width;
+		wWinPix_t width;
 		int rangechecks;
 		} paramFloatRange_t;
 typedef struct {
-		wPos_t width;
-		wPos_t height;
+		wWinPix_t width;
+		wWinPix_t height;
 		wDrawRedrawCallBack_p redraw;
 		playbackProc action;
 		drawCmd_p d;
 		} paramDrawData_t;
 typedef struct {
 		wIndex_t number;
-		wPos_t width;
+		wWinPix_t width;
 		int colCnt;
-		wPos_t * colWidths;
+		wWinPix_t * colWidths;
 		const char * * colTitles;
-		wPos_t height;
+		wWinPix_t height;
 		} paramListData_t;
 typedef struct {
-		wPos_t width;
-		wPos_t height; 
+		wWinPix_t width;
+		wWinPix_t height; 
 		} paramTextData_t;
 
 typedef union {
@@ -133,10 +143,10 @@ typedef union {
 typedef struct {
 		parameterType type;
 		void * valueP;
-		char * nameStr;
+		const char * nameStr;
 		long option;
-		void * winData;
-		char * winLabel;
+		const void * winData;
+		const char * winLabel;
 		long winOption;
 		void * context;
         unsigned int max_string;
@@ -144,6 +154,7 @@ typedef struct {
 		paramGroup_p group;
 		paramOldData_t oldD, demoD;
 		wBool_t enter_pressed;
+		wBool_t bInvalid;
 		} paramData_t, *paramData_p;
 
 
@@ -160,7 +171,7 @@ typedef void (*paramGroupProc_t) ( long, long );
 #define PGO_PREFDRAWGROUP		(1<<9)
 #define PGO_PREFMISC			(1<<10)
 
-typedef void (*paramLayoutProc)( paramData_t *, int, wPos_t, wPos_t *, wPos_t * );
+typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *, wWinPix_t * );
 typedef void (*paramActionOkProc)( void * );
 typedef void (*paramActionCancelProc)( wWin_p );
 typedef void (*paramChangeProc)( paramGroup_p, int, void * );
@@ -181,8 +192,8 @@ typedef struct paramGroup_t {
 		wButton_p okB;
 		wButton_p cancelB;
 		wButton_p helpB;
-		wPos_t origW;
-		wPos_t origH;
+		wWinPix_t origW;
+		wWinPix_t origH;
 		wBox_p * boxs;
 		} paramGroup_t;
 
@@ -215,6 +226,7 @@ void ParamSaveAll( void );
 void ParamMenuPush( void * );
 extern int paramHiliteFast;
 void ParamHilite( wWin_p, wControl_p, BOOL_T );
+wBool_t ParamCheckInputs( paramGroup_p pg, wControl_p b );
 
 void ParamInit( void );
 
@@ -237,6 +249,8 @@ void ParamCreateControls( paramGroup_p, paramChangeProc );
 void ParamLayoutDialog( paramGroup_p );
 
 void ParamDialogOkActive( paramGroup_p, int );
+
+void ParamResetInvalid( wWin_p win );
 
 #define ParamControlShow( PG, INX, SHOW ) \
 		wControlShow( ((PG)->paramPtr)[INX].control, SHOW )

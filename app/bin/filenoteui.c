@@ -20,26 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <string.h>
-#include <stdbool.h>
-#ifdef WINDOWS
-	#include <io.h>
-	#define access(path,mode) _access(path,mode)
-	#define F_OK (0) 
-#else
-	#include <unistd.h>
-#endif
 #include "custom.h"
 #include "dynstring.h"
 #include "file2uri.h"
-#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "track.h"
-#include "wlib.h"
 
 extern BOOL_T inDescribeCmd;
 
@@ -48,7 +37,7 @@ extern BOOL_T inDescribeCmd;
 #define DOCUMENTFILEPATTERN "All Files (*.*)|*.*"
 #define DOCUMENTPATHKEY "document"
 
-static struct extraDataNote noteDataInUI;
+static struct extraDataNote_t noteDataInUI;
 static struct wFilSel_t * documentFile_fs;
 
 static void NoteFileOpenExternal(void * junk);
@@ -63,26 +52,26 @@ static paramData_t fileEditPLs[] = {
 #define I_ORIGY (1)
     /*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
-    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
+    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
 #define I_PATH (4)
-	{ PD_STRING, NULL, "filename", PDO_NOPSHUPD,   (void*)200, N_("Document"), BO_READONLY, (void *)0L },
+	{ PD_STRING, NULL, "filename", PDO_NOPSHUPD,   I2VP(200), N_("Document"), BO_READONLY, I2VP(0L), PATHMAXIMUMLENGTH-1  },
 #define I_BROWSE (5)
-	{ PD_BUTTON, (void *)NoteFileBrowse, "browse", 0L, NULL, N_("Select...") },
+	{ PD_BUTTON, NoteFileBrowse, "browse", 0L, NULL, N_("Select...") },
 #define I_OPEN (6)
-	{ PD_BUTTON, (void*)NoteFileOpenExternal, "openfile", PDO_DLGHORZ, NULL, N_("Open...") },
+	{ PD_BUTTON, NoteFileOpenExternal, "openfile", PDO_DLGHORZ, NULL, N_("Open...") },
 //#define I_ARCHIVE (7)
 //	{ PD_TOGGLE, &noteFileData.inArchive, "archive", 0, toggleLabels, NULL },
 
 };
 
-static paramGroup_t fileEditPG = { "fileEdit", 0, fileEditPLs, sizeof fileEditPLs / sizeof fileEditPLs[0] };
+static paramGroup_t fileEditPG = { "fileEdit", 0, fileEditPLs, COUNT( fileEditPLs ) };
 static wWin_p fileEditW;
 
 BOOL_T IsFileNote(track_p trk)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	return(xx->op == OP_NOTEFILE );
 }
@@ -235,9 +224,9 @@ FileEditOK(void *junk)
 
 void CreateEditFileDialog(track_p trk, char * windowTitle)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
     if (!fileEditW) {
+	    	noteDataInUI.base.trkType = T_NOTE;
 		noteDataInUI.noteData.fileData.path = MyMalloc(PATHMAXIMUMLENGTH);
 		noteDataInUI.noteData.fileData.title = MyMalloc(TITLEMAXIMUMLENGTH);
 		fileEditPLs[I_TITLE].valueP = noteDataInUI.noteData.fileData.title;
@@ -254,6 +243,7 @@ void CreateEditFileDialog(track_p trk, char * windowTitle)
 
     wWinSetTitle(fileEditPG.win, MakeWindowTitle(windowTitle));
 
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     noteDataInUI.pos = xx->pos;
 	noteDataInUI.layer = xx->layer;
     noteDataInUI.trk = trk;
@@ -273,7 +263,7 @@ void CreateEditFileDialog(track_p trk, char * windowTitle)
 
 void ActivateFileNote(track_p trk)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	NoteFileOpen(xx->noteData.fileData.path);
 }
@@ -288,7 +278,7 @@ void ActivateFileNote(track_p trk)
 
 void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     DynString statusLine;
 
     DynStringMalloc(&statusLine, 80);
@@ -319,7 +309,7 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 
 void NewFileNoteUI(track_p trk)
 {
-	struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	char *tmpPtrText = _("Describe the file");
 
 	xx->noteData.fileData.title = MyStrdup(tmpPtrText);

@@ -19,13 +19,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <string.h>
 
 #include "compound.h"
 #include "custom.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
 
@@ -41,7 +38,7 @@ DIST_T priceListFlexLengthV;
 DIST_T priceListFlexCostV;
 
 static paramFloatRange_t priceListCostData = { 0.0, 9999.99, 80 };
-static wPos_t priceListColumnWidths[] = { -60, 200 };
+static wWinPix_t priceListColumnWidths[] = { -60, 200 };
 static const char * priceListColumnTitles[] = { N_("Price"), N_("Item") };
 static paramListData_t priceListListData = { 10, 400, 2, priceListColumnWidths, priceListColumnTitles };
 static paramFloatRange_t priceListFlexData = { 0.0, 999.99, 80 };
@@ -51,7 +48,7 @@ static paramData_t priceListPLs[] = {
 	{	PD_FLOAT, &priceListCostV, "cost", PDO_NOPREF|PDO_NOPSHUPD, &priceListCostData },
 #define I_PRICELSENTRY			(1)
 #define priceListEntryS			((wString_p)priceListPLs[I_PRICELSENTRY].control)
-	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, (void*)(400-80-3), NULL, BO_READONLY },
+	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, I2VP(400-80-3), NULL, BO_READONLY, NULL, sizeof priceListEntryV },
 #define I_PRICELSLIST			(2)
 #define priceListSelL			((wList_p)priceListPLs[I_PRICELSLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
@@ -60,7 +57,7 @@ static paramData_t priceListPLs[] = {
 	{	PD_MESSAGE, N_("costs"), NULL, PDO_DLGHORZ },
 #define I_PRICELSFLEXCOST		(6)
 	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData } };
-static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, sizeof priceListPLs/sizeof priceListPLs[0] };
+static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, COUNT( priceListPLs ) };
 
 
 static void PriceListUpdate()

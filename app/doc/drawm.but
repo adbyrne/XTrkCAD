@@ -139,9 +139,12 @@ If Magnetic Snap is disabled, snapping to objects will only occur if \e{Alt} is 
 
 If \f{Grid Snap} is on and magnetic snap does not find a draw object, the curve ends will snap to the grid. \e{Alt} suppresses this snap.
 
-The precise values of Radius and Arc Length can be set using the text boxes on the bottom rail once the mouse button is released.
+If \e{Sticky} is set for curved line objects, after the curve is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the radius and the arc angle. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the new values to the curve. Pressing \c{Space} or \c{Enter} or \c{Tab} on the drawing surface will move to drawing a new curve. 
+Pressing \c{Shift+Tab} with the cursor on the drawing surface will remove the current curve, but allow a new curve to be drawn.
+Even if \c{Esc} is pressed, the curve will already exist, it can be removed with \f{Undo}. 
 
-To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a the radius. Hit \e{Enter} or \e{Space} to accept, \e{Esc} to reject.
+To adjust the curve with the mouse, \e{Left-Click} and \e{Left-Drag} an end or a the radius. Hit \e{Enter} or \e{Space} to accept, \e{Esc} to reject.
 
 \rule
 
@@ -330,9 +333,9 @@ Shapes are drawn by:
 \u000
 
 
-If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \c{Space} or \c{Return} or by selecting a new operation.
+If \e{Sticky} is set for many draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation.
 
-The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \c{Space} or \c{Return} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
+The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \c{Space} or \c{Return} \c{Tab} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
 All Polylines and Polygons must have more than 2 corners to be created successfully.
 
 Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points and to make them curved or rounded points.
@@ -485,13 +488,15 @@ The \f{Straight Line Width} field is a scaled dimension in 75ths of an inch if >
 
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
 
-If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
-before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation. 
-
 With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor. If \c{Alt} is held down, the magnetic Snap is reversed. 
 If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is suppressed if \f{Alt} is held.
 
 The \f{Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
+If \e{Sticky} is set for straight draw, after the line is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the angle and the length. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the value to the line. Pressing \c{Space} or \c{Enter} on the drawing surface will move to drawing a new line. 
+Pressing \c{Shift+Tab} will remove the current object and allow a new one to drawn.
+Even if \c{Esc} is pressed, the line will already exist, it can be removed with \f{Undo}.  
 
 \rule
 
@@ -506,8 +511,6 @@ If it is disabled, it will only snap if \e{Alt} is held.  If \f{GridSnap} is ena
 suppressed if \f{Alt} is held.
 
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
-If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
-before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation.
 
 \S2{cmdDrawBench} Draw Benchwork.
 
@@ -532,8 +535,11 @@ If it is disabled, it will only snap if \e{Alt} is held. If \f{GridSnap} is enab
 suppressed if \f{Alt} is held.
 
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
-If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
-before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation. 
+
+If \e{Sticky} is set for straight draw, after the benchwork is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the angle and the length. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the value to the benchwork. Pressing \c{Space} or \c{Enter} or \c{Tab} on the drawing surface will move to drawing a new benchwork line. 
+Pressing \c{Shift+Tab} on the drawing surface will remove the current object and allow a new one to be drawn.
+Even if \c{Esc} is pressed, the benchwork will already exist, it can be removed with \f{Undo}.  
 
 \S2{cmdDrawTableEdge} Draw Table Edge
 
@@ -547,8 +553,10 @@ suppressed if \f{Alt} is held.
 
 If \c{Ctrl} is held down during \c{Left+Drag} the edge will to a end point of another table edge or to a multiple of 90 degrees if that isn't available.
 
-If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, 
-before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation. 
+If \e{Sticky} is set for straight draw, after the edge is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the angle and the length. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the value to the edge. Pressing \c{Space} or \c{Enter} or \c{Tab} on the drawing surface will move to drawing a new edge. 
+Pressing \c{Shift+Tab} on the drawing surface will remove the current object and allow a new one to be drawn.
+Even if \c{Esc} is pressed, the edge will already exist, it can be removed with \f{Undo}. 
 
 \rule
 

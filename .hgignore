@@ -5,5 +5,3 @@
 build/
 syntax: glob
 *.mo
-xtrkcad-4.2.3b.hg
-app/bin/dprmfile.c.orig

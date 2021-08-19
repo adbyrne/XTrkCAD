@@ -234,6 +234,7 @@ static void mswGetCustomColors( void )
 	strcpy( colorName, "custom-" );
 	for ( inx=0; inx<16; inx++ ) {
 		sprintf( colorName+7, "%d", inx );
+		/** @prefs [mswcolor] custom-0=<rgb> to custom-15=<rgb> Set custom colors */
 		wPrefGetInteger( "mswcolor", colorName, &rgb, 0 );
 		aclrCust[inx] = flipRGB(rgb);
 	}
@@ -314,12 +315,12 @@ static void doColorButton(
 
 wButton_p wColorSelectButtonCreate(
 		wWin_p win,
-		wPos_t x,
-		wPos_t y,
+		wWinPix_t x,
+		wWinPix_t y,
 		const char * helpStr,
 		const char * labelStr,
 		long option,
-		wPos_t width,
+		wWinPix_t width,
 		wDrawColor * color,
 		wColorSelectButtonCallBack_p action,
 		void * data )

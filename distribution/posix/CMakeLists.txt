@@ -8,7 +8,7 @@ set(CPACK_RPM_PACKAGE_GROUP "Applications/Engineering")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}////xtrkcad-desc.txt")
 set(CPACK_PACKAGE_FILE_NAME "xtrkcad-setup-${XTRKCAD_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 
-set(CPACK_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+set(CPACK_INSTALL_PREFIX "/usr/local" )
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CPACK_INSTALL_PREFIX})
 
 # get the specific configuration for each packager
@@ -30,6 +30,12 @@ if(NOT XTRKCAD_USE_BROWSER)
         "${CPACK_RPM_PACKAGE_REQUIRES} webkitgtk")
 #    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
 endif()
+
+#Add dependency to MiniXML (mxml) if configured
+if(XTRKCAD_CREATE_SVG)
+	set(CPACK_RPM_PACKAGE_REQUIRES
+		"${CPACK_RPM_PACKAGE_REQUIRES} mxml")
+endif()		
 
 # exclude these directories from the rpm
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION

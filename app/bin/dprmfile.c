@@ -20,16 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
-
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
@@ -65,9 +58,9 @@ static long paramFileSel = 0;
 
 static void ParamFileFavorite(void * favorite);
 static void ParamRefreshSelectedFiles(void * action);
-static void ParamUnloadSelectedFiles(void *);
-static void ParamFileBrowse(void *);
-static void ParamFileSelectAll(void *);
+static void ParamUnloadSelectedFiles(void * action);
+static void ParamFileBrowse(void * junk);
+static void ParamFileSelectAll(void * junk);
 
 static paramListData_t paramFileListData = { 15, 370 };
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
@@ -78,19 +71,19 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILTOGGLE	(1)
     {	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (2)
-	{ PD_MESSAGE, "", NULL, 0, (void *)370 },
-    {	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+	{ PD_MESSAGE, "", NULL, 0, I2VP(370) },
+    {	PD_BUTTON, ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 #define I_PRMFILEFAVORITE (4)
-    {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
-    {	PD_BUTTON, (void*)ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
-	{   PD_BUTTON, (void*)ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
-    {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Library...") },
-	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse...") },
+    {   PD_BUTTON, ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, I2VP(TRUE), N_("Favorite")},
+    {	PD_BUTTON, ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
+	{   PD_BUTTON, ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
+    {	PD_BUTTON, DoSearchParams, "find", 0, NULL, N_("Library...") },
+	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, N_("Browse...") },
 
 
 };
 
-static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
+static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, COUNT( paramFilePLs ) };
 
 #define MESSAGETEXT ((wMessage_p)paramFilePLs[I_MESSAGE].control)
 
@@ -131,12 +124,12 @@ void
 SortParamFileList(size_t cnt,  dynArr_t *files, int *list)
 {
     for (size_t i = 0; i < cnt; i++) {
-        list[i] = i;
+        list[i] = (int)i;
     }
 
     sortFiles = files;
 
-    qsort((void *)list, (size_t)cnt, sizeof(int), CompareParameterFiles);
+    qsort(list, (size_t)cnt, sizeof(int), CompareParameterFiles);
 }
 
 
@@ -168,7 +161,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
             wListAddValue(paramFileL,
                           DynStringToCStr(&description),
                           indicatorIcons[ paramFileInfo.favorite ][paramFileInfo.trackState],
-                          (void*)(intptr_t)sortedIndex[i]);
+                          I2VP(sortedIndex[i]));
 
 			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents, paramFileInfo.trackState))
         }
@@ -214,13 +207,13 @@ static void UpdateParamFileButton(void)
     for (inx=0; inx<cnt; inx++) {
         if (wListGetItemSelected((wList_p)paramFileL, inx)) {
             // if item is selected, get status
-            fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+            fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
             if (fileInx < 0 || fileInx >= GetParamFileCount()) {
                 return;
             }
             if (!IsParamFileFavorite(fileInx)) {
-                paramFilePLs[I_PRMFILEFAVORITE].context = (void *)TRUE;
+                paramFilePLs[I_PRMFILEFAVORITE].context = I2VP(TRUE);
             }
         }
     }
@@ -244,7 +237,7 @@ UpdateParamFileProperties( bool newState)
     // walk through the whole list box
     for (inx = 0; inx < cnt; inx++) {
         if (wListGetItemSelected((wList_p)paramFileL, inx)) {
-            fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+            fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
             SetParamFileFavorite(fileInx, newState);
         }
     }
@@ -284,7 +277,7 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 
 	for (inx = 0; inx < cnt; inx++) {
 		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
-			fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+			fileInx = (wIndex_t)VP2L(wListGetItemContext(paramFileL, inx));
 
 			switch (paramFileChange) {
 			case PARAMFILE_UNLOAD:

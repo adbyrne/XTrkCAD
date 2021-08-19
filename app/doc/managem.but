@@ -129,7 +129,7 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \u000
 
-\dd \e{PurchPrice}, \e{CurrPrice}, \e{PurchDate} and \e{ServiceDate} - numeric values
+\dd \e{PurchPrice}, \e{CurrPrice}, \e{PurchDate} and \e{ServiceDate} - numeric values - dates are in the form yyyymmdd, where yyyy is the year, mm the month, dd the day
 
 \u000
 
@@ -426,6 +426,8 @@ Objects are drawn on the map window, if the Layer they are on has \f{On Map} che
 
 The \f{Parts List} command produces a list of all selected (\K{cmdSelect}) turnouts, sectional track and bench-work. It also computes total length of selected flex-track.
 
+If no objects are selected, all objects are enumerated.
+
 \G{png.d/partslist.png}
 
 The \f{Save As...} button opens a \e{File Save} dialog window that's used to name and save the parts list to a file.
@@ -436,7 +438,9 @@ The \f{Close} button terminates the \f{Parts List} command.
 
 The \f{Parts List} dialog will list pricing for selected objects if the \e{Prices} check box is checked.  Prices are set using the Price List (\K{cmdPricelist}) dialog.
 
-Hint: use the \f{Parts List} command to measure the length of selected flex-track.
+The \f{Parts List} dialog will list the index numbers of each type of named track in a comma delimited list on a new line if the \e{Indexes} check box is checked. This list can be used in the Select By Index (\K{cmdSelectIndex}) command.
+
+Hint: you can use the \f{Parts List} command to measure the length of selected flex-track.
 
 \rule
 
@@ -614,7 +618,7 @@ The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{
 
 \u000
 
-\dd Turntables can be turned by using \e{Shift+Left-Click} on the endpoint you want the Turntable to move to.  To turn the Turntable 180\u00B0, \e{Shift+Left-Click} on the endpoint again.
+\dd Turntables can be turned by using \e{Shift+Left-Click} on the endpoint you want the Turntable bridge to move to.  If you click on the Turntable where there is no endpoint, the Turntable will turn to the next endpoint beyond that point in the direction of the click relative to the nearest end of the turntable bridge. To turn the Turntable 180\u00B0, \e{Shift+Left-Click} on the current endpoint again.
 
 \rule
 

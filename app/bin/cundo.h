@@ -24,10 +24,10 @@
 #define HAVE_CUNDO_H
 
 #include "common.h"
-#include "track.h"
 
-int UndoUndo( void );
-int UndoRedo( void );
+extern wBool_t undoStatus; // Status of the last Undo/Redo command
+void UndoUndo( void * unused );
+void UndoRedo( void * unused );
 void UndoResume( void );
 void UndoSuspend( void );
 void UndoStart( char *, char *, ... );

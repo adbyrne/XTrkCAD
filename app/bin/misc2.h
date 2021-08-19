@@ -25,7 +25,6 @@
 
 #include "common.h"
 #include "misc.h"
-#include "time.h"
 
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)
@@ -46,8 +45,8 @@ extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
 void LogSet( char *, int );
-int LogFindIndex( char * );
-void LogPrintf( char *, ... );
+int LogFindIndex( const char * );
+void LogPrintf( const char *, ... );
 #define LOG( DBINX, DBLVL, DBMSG ) \
 		if ( DBINX > 0 && logTable( DBINX ).level >= DBLVL ) { \
 				LogPrintf DBMSG ; \
@@ -99,6 +98,7 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 wDrawColor GetLayerColor( unsigned int );
 BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
+void FlipLayer( void * layerVP );
 BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );

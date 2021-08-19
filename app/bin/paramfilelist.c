@@ -21,26 +21,18 @@
  */
 
 
-#include <assert.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
+#include "common-ui.h"
 
 
 dynArr_t paramFileInfo_da;
@@ -212,11 +204,7 @@ void LoadParamFileList(void)
         char * share;
 
        // Rewire to the latest system level
-#if defined(WINDOWS)
-#define SHAREPARAMS "\\share\\xtrkcad\\params\\"
-#else
-#define SHAREPARAMS "/share/xtrkcad/params/"
-#endif
+#define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
         if ((share= strstr(fileName,SHAREPARAMS))) {
         	share += strlen(SHAREPARAMS);
         	MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
@@ -300,7 +288,7 @@ void
 UpdateParamFileList(void)
 {
     for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
-        SetParamFileState(i);
+        SetParamFileState((int)i);
     }
 }
 
@@ -383,10 +371,7 @@ static void ReadCustom(void)
 
 
 /*
- * Open the file and then set the locale to "C". Old locale will be copied to
- * oldLocale. After the required file I/O is done, the caller must call
- * CloseCustom() with the same locale value that was returned in oldLocale by
- * this function.
+ * Open the custonm file
  */
 
 FILE * OpenCustom(char *mode)
@@ -438,8 +423,10 @@ BOOL_T ParamFileListInit(void)
 {
     log_params = LogFindIndex("params");
 
+    SetCLocale();
 	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
+	SetUserLocale();
         return FALSE;
     }
 
@@ -450,6 +437,7 @@ BOOL_T ParamFileListInit(void)
         ReadCustom();
     }
 
+    SetUserLocale();
     return TRUE;
 
 }

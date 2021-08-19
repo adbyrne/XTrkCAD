@@ -23,9 +23,7 @@
 #ifndef HAVE_LAYOUT_H
 #define HAVE_LAYOUT_H
 
-#include <stdbool.h>
 #include "common.h"
-#include "misc.h"
 
 
 void SetLayoutFullPath(const char *fileName);
@@ -55,6 +53,7 @@ DIST_T GetLayoutMinTrackRadius(void);
 SCALEINX_T GetLayoutCurScale(void );
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
 //GAUGEINX_T GetLayoutCurGauge(void);
+void GetLayoutRoomSize(coOrd *roomSize);
 
 ANGLE_T GetLayoutMaxTrackGrade(void);
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
@@ -68,7 +67,7 @@ bool HasBackGround(void);
 void LayoutBackGroundInit(BOOL_T clear);
 void LayoutBackGroundLoad(void);
 void LayoutBackGroundSave(void);
-void BackgroundToggleShow(void);
-void DoLayout(void * junk);
+void BackgroundToggleShow(void * unused);
+void DoLayout(void * unused);
 int LoadImageFile(int files,char ** fileName,void * data );
 #endif

@@ -20,13 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#endif
-#include <math.h>
-#include "common.h"
 #include "utility.h"
 
 /*****************************************************************************
@@ -66,6 +59,14 @@ double min( double a, double b )
 
 
 
+int CoOrdEqual(coOrd p0, coOrd p1)
+{
+	double d = fabs(p1.x - p0.x) + fabs(p1.y - p0.y);
+	return (d < EPSILON);
+}
+
+
+
 double FindDistance( coOrd p0, coOrd p1 )
 {
 	double dx = p1.x-p0.x, dy = p1.y-p0.y;
@@ -78,7 +79,6 @@ double NormalizeAngle( double a )
 {
 	while (a<0.0) a += 360.0;
 	while (a>=360.0) a -= 360.0;
-	if ( a > 360.0-EPSILON ) a = 0.0;
 	return a;
 }
 
@@ -155,14 +155,9 @@ void Translate( coOrd *res, coOrd orig, double a, double d )
 double FindAngle( coOrd p0, coOrd p1 )
 {
 	double dx = p1.x-p0.x, dy = p1.y-p0.y;
-	if (small(dx)) {
-		if (dy >=0) return 0.0;
-		else return 180.0;
-	}
-	if (small(dy)) {
-		if (dx >=0) return 90.0;
-		else return 270.0;
-	}
+	if ( dx == 0.0 && dy == 0.0 )
+		// Avoid implementation defined behavior
+		return 0.0;
 	return R2D(atan2( dx,dy ));
 }
 
@@ -245,85 +240,44 @@ BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radiu
 }
 
 /*
- * Find Intersections between a line and a circle
- *
- * |c-x|^2 = r^2
- *
- * 𝑥(𝑡)=𝑎+𝑡𝑏
- *
- * where 𝑎 is a point and 𝑏 is a vector.
- *
- * For a point on this line to satisfy the equation, you need to have
- *
- * (𝑡𝑏+(𝑎−𝑐))⋅(𝑡𝑏+(𝑎−𝑐))=𝑟^2
- *
- * which is a quadratic in 𝑡:
- * |b|^2*t^2 + 2(a-c).bt +(|a-c|^2-r^2) = 0
- *
- * whose solutions are
- *
- * t = (-2(a-c).b +/- SQRT([2(a-c).b]^2 - 4|b|^2(|a-c|^2-r^2)) / 2|b|^2
+ * Find Intersection between arc and line.
+ * First - move arc/circle and line so circle is at origin
+ * Then find nearest point on line to origin
+ * If nearest point is > radius -> no intersect
+ * If nearest point is == radius -> one point (the nearest)
+ * If nearest point is < radius -> two points
+ * Find two intersect points on secant by triangle formed between middle, center and arc point
  *
  */
-
-double VectorLength (coOrd v) {
-	return sqrt(v.x*v.x+v.y+v.y);
-}
-double VectorDot (coOrd v1, coOrd v2) {
-	return (v1.x*v2.x+ v1.y*v2.y);
-}
-coOrd VectorSubtract (coOrd v1, coOrd v2) {
-	coOrd result;
-	result.x = v1.x-v2.x;
-	result.y = v1.y-v2.y;
-	return result;
-}
-coOrd VectorAdd (coOrd v1, coOrd v2) {
-	coOrd result;
-	result.x = v1.x+v2.x;
-	result.y = v1.y+v2.y;
-	return result;
-}
-
 BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2, coOrd c, DIST_T radius,
                                         coOrd point1, coOrd point2 )
 {
-    double dx, dy, cx, cy, A, B, C, det, t;
 
-    dx = point2.x - point1.x;
-    dy = point2.y - point1.y;
+	double la, lb, lc;   //Line equation
 
-    cx = c.x;
-    cy = c.y;
+    la = point1.y - point2.y;
+    lb = point2.x - point1.x;
+    lc = (point1.x-c.x)*(point2.y-c.y) - (point2.x-c.x)*(point1.y-c.y);  //Move by c(x,y)
 
-    A = dx * dx + dy * dy;
-    B = 2 * (dx * (point1.x - cx) + dy * (point1.x - cy));
-    C = (point1.x - cx) * (point1.x - cx) + (point1.y - cy) * (point1.y - cy) - radius * radius;
+    double x0 = -la*lc/(la*la+lb*lb), y0 = -lb*lc/(la*la+lb*lb);
 
-    det = B * B - 4 * A * C;
-    if ((A <= 0.0000001) || (det < 0))
-    {
+    double dis = radius*radius*(la*la+lb*lb);
+
+    if (lc*lc > dis) {
     	return FALSE;
-    }
-    else if (det == 0)
-    {
-        // One solution.
-        t = -B / (2 * A);
-        (*intersection1).x = point1.x + t * dx;
-        (*intersection1).y = point1.y + t * dy;
-        intersection2 = intersection1;
-        return TRUE;
-    }
-    else
-    {
-        // Two solutions.
-        t = (float)((-B + sqrt(det)) / (2 * A));
-        (*intersection1).x = point1.x + t * dx;
-        (*intersection1).y = point1.y + t * dy;
-        t = (float)((-B - sqrt(det)) / (2 * A));
-        (*intersection2).x = point1.x + t * dx;
-        (*intersection2).y = point1.y + t * dy;
-        return TRUE;
+    } else if (fabs(lc*lc - dis) < EPSILON) {
+    	(*intersection1).x = x0+c.x;
+    	(*intersection1).y = y0+c.y;
+    	*intersection2 = *intersection1;
+    	return TRUE;
+    } else {
+    	double d = radius*radius - lc*lc/(la*la+lb*lb);
+    	double mult = sqrt(d/(la*la+lb*lb));
+    	(*intersection1).x = x0+lb*mult+c.x;
+    	(*intersection2).x = x0-lb*mult+c.x;
+    	(*intersection1).y = y0-la*mult+c.y;
+    	(*intersection2).y = y0+la*mult+c.y;
+    	return TRUE;
     }
 }
 
@@ -526,6 +480,14 @@ double CircleDistance( coOrd *p, coOrd c, double r, double a0, double a1 )
 
 
 
+coOrd MidPtCoOrd(coOrd p0, coOrd p1)
+{
+	coOrd res;
+	res.x = (p0.x + p1.x) / 2.0;
+	res.y = (p0.y + p1.y) / 2.0;
+	return res;
+}
+
 coOrd AddCoOrd( coOrd p0, coOrd p1, double a )
 {
 	coOrd res, zero;
@@ -665,7 +627,7 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 	}
 
 	/* both points without box and cannot intersect */
-	if ( (x0==x1 && y0==y1) || /* within same sector (but not the middle one) */
+	if ( (x0==x1 && y0==y1 && x0!=0 && y0!=0) || /* within same sector (but not the middle one) */
 		 (x0!=0 && x0==x1) ||  /* both right or left */
 		 (y0!=0 && y0==y1) )   /* both above or below */
 		return 0;

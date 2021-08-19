@@ -20,14 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <math.h>
-#include <string.h>
-
+#include "common.h"
 #include "ccurve.h"
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "custom.h"
-#include "i18n.h"
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
@@ -67,17 +64,18 @@ static void EasementCancel( void );
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
 static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
+static paramFloatRange_t r0_200 = { 0.0, 200.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
 	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0n1_100, N_("Value") },
-	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_100, N_("R"), BO_READONLY },
+	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_200, N_("R"), BO_READONLY },
 	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
 	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE } };
-static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, sizeof easementPLs/sizeof easementPLs[0] };
+static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, COUNT( easementPLs ) };
 
 
 static void SetEasement(
@@ -164,14 +162,14 @@ static void SetEasement(
 static void EasementOk( void )
 {
 	ParamLoadData( &easementPG );
-	SetEasement( easementVal, (void*)FALSE );
+	SetEasement( easementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
 
 
 static void EasementCancel( void )
 {
-	SetEasement( easementVal = oldEasementVal, (void*)FALSE );
+	SetEasement( easementVal = oldEasementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
 
@@ -204,7 +202,7 @@ static void EasementSel(
 		val = 0.0;
 		break;
 	}
-	SetEasement( val, (void*)FALSE );
+	SetEasement( val, I2VP(FALSE) );
 }
 
 
@@ -215,7 +213,7 @@ static void EasementDlgUpdate(
 {
 	switch (inx) {
 	case I_EASEVAL:
-		SetEasement( *(FLOAT_T*)valueP, (void*)1 );
+		SetEasement( *(FLOAT_T*)valueP, I2VP(1) );
 		break;
 	case I_EASESEL:
 		EasementSel( *(long*)valueP );
@@ -227,24 +225,24 @@ static void EasementDlgUpdate(
 static void LayoutEasementW(
 		paramData_t * pd,
 		int inx,
-		wPos_t colX,
-		wPos_t * x,
-		wPos_t * y )
+		wWinPix_t colX,
+		wWinPix_t * x,
+		wWinPix_t * y )
 {
 	if ( inx == 2 )
 		wControlSetPos( easementPLs[0].control, *x, wControlGetPosY(easementPLs[0].control) );
 }
 
 
-static void DoEasement( void * junk )
+static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
 		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
-		SetEasement( easementVal, (void*)TRUE );
+		SetEasement( easementVal, I2VP(TRUE) );
 	}
 	oldEasementVal = easementVal;
 	wShow( easementW );
-	SetEasement( easementVal, (void*)TRUE );
+	SetEasement( easementVal, I2VP(TRUE) );
 }
 
 
@@ -255,36 +253,36 @@ static void EasementChange( long changes )
 {
 	if (changes&(CHANGE_SCALE|CHANGE_UNITS)) {
 		GetScaleEasementValues( Rvalues, Lvalues );
-		SetEasement( easementVal, (void*)TRUE );
+		SetEasement( easementVal, I2VP(TRUE) );
 	}
 }
 
 
-#include "bitmaps/enone.xpm"
-#include "bitmaps/esharp.xpm"
-#include "bitmaps/egtsharp.xpm"
-#include "bitmaps/eltsharp.xpm"
-#include "bitmaps/enormal.xpm"
-#include "bitmaps/eltbroad.xpm"
-#include "bitmaps/ebroad.xpm"
-#include "bitmaps/egtbroad.xpm"
-#include "bitmaps/ecornu.xpm"
+#include "bitmaps/ease-none.xpm"
+#include "bitmaps/ease-sharp.xpm"
+#include "bitmaps/ease-gt-sharp.xpm"
+#include "bitmaps/ease-lt-sharp.xpm"
+#include "bitmaps/ease-normal.xpm"
+#include "bitmaps/ease-broad.xpm"
+#include "bitmaps/ease-gt-broad.xpm"
+#include "bitmaps/ease-lt-broad.xpm"
+#include "bitmaps/ease-cornu.xpm"
 
 
 EXPORT addButtonCallBack_t EasementInit( void )
 {
 	ParamRegister( &easementPG );
 
-	enone_bm = wIconCreatePixMap( enone_xpm );
-	eltsharp_bm = wIconCreatePixMap( eltsharp_xpm );
-	esharp_bm = wIconCreatePixMap( esharp_xpm );
-	egtsharp_bm = wIconCreatePixMap( egtsharp_xpm );
-	enormal_bm = wIconCreatePixMap( enormal_xpm );
-	eltbroad_bm = wIconCreatePixMap( eltbroad_xpm );
-	ebroad_bm = wIconCreatePixMap( ebroad_xpm );
-	egtbroad_bm = wIconCreatePixMap( egtbroad_xpm );
-	ecornu_bm = wIconCreatePixMap( ecornu_xpm );
-	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, (addButtonCallBack_t)DoEasementRedir, NULL );
+	enone_bm = wIconCreatePixMap( ease_none_xpm[iconSize] );
+	eltsharp_bm = wIconCreatePixMap( ease_ltsharp_xpm[iconSize] );
+	esharp_bm = wIconCreatePixMap( ease_sharp_xpm[iconSize] );
+	egtsharp_bm = wIconCreatePixMap( ease_gtsharp_xpm[iconSize] );
+	enormal_bm = wIconCreatePixMap( ease_normal_xpm[iconSize] );
+	eltbroad_bm = wIconCreatePixMap( ease_ltbroad_xpm[iconSize] );
+	ebroad_bm = wIconCreatePixMap( ease_broad_xpm[iconSize] );
+	egtbroad_bm = wIconCreatePixMap( ease_gtbroad_xpm[iconSize] );
+	ecornu_bm = wIconCreatePixMap( ease_cornu_xpm[iconSize] );
+	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir, NULL );
 
 	RegisterChangeNotification( EasementChange );
 	return &DoEasement;

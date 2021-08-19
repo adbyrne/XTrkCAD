@@ -42,7 +42,7 @@
  */
 
 
-#include "track.h"
+#include "common.h"
 #include "draw.h"
 #include "ccurve.h"
 #include "cbezier.h"
@@ -50,15 +50,14 @@
 #include "cstraigh.h"
 #include "drawgeom.h"
 #include "cjoin.h"
-#include "i18n.h"
 #include "common.h"
+#include "track.h"
 #include "wcolors.h"
-#include "math.h"
-#include "utility.h"
 #include "param.h"
 #include "fileio.h"
 #include "layout.h"
 #include "cundo.h"
+#include "compound.h"
 
 extern drawCmd_t tempD;
 
@@ -615,7 +614,7 @@ EXPORT STATUS_T AdjustBezCurve(
 
 	case C_DOWN:
 		if (Da.state != PICK_POINT) return C_CONTINUE;
-		dd = 10000.0;
+		dd = DIST_INF;
 		Da.selectPoint = -1;
 		for (int i=0;i<4;i++) {
 			d = FindDistance(Da.pos[i],pos);
@@ -803,10 +802,6 @@ EXPORT STATUS_T AdjustBezCurve(
 
 }
 
-struct extraData {
-				BezierData_t bezierData;
-		};
-
 /*
  * CmdBezModify
  *
@@ -825,13 +820,12 @@ struct extraData {
  */
 STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) {
 	BOOL_T track = TRUE;
-	track_p t;
 	double width = 1.0;
 	long mode = 0;
 	long cmd;
 
-	struct extraData *xx = GetTrkExtraData(trk);
-	cmd = (long)commandContext;
+	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
+	cmd = VP2L(commandContext);
 	Da.trackGauge = trackG;
 
 	switch (action&0xFF) {
@@ -854,30 +848,30 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 
 		Da.selectTrack = trk;
 
-	    for (int i=0;i<4;i++) Da.pos[i] = xx->bezierData.pos[i];              //Copy parms from old trk
+	    for (int i=0;i<4;i++) Da.pos[i] = xx->pos[i];              //Copy parms from old trk
 		InfoMessage(_("%s picked - now select a Point"),track?"Track":"Line");
 		Da.state = TRACK_SELECTED;
 		DrawTrack(Da.selectTrack,&mainD,wDrawColorWhite);                    //Wipe out real track, draw replacement
-		return AdjustBezCurve(C_START, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
+		return AdjustBezCurve(C_START, pos, Da.track, xx->segsColor, xx->segsWidth, InfoMessage);
 
 	case wActionMove:
 		if (Da.state == NONE) return C_CONTINUE;
-		return AdjustBezCurve(wActionMove, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
+		return AdjustBezCurve(wActionMove, pos, Da.track, xx->segsColor, xx->segsWidth, InfoMessage);
 	case C_DOWN:
 		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up
 		UndrawNewTrack( Da.selectTrack );
-		return AdjustBezCurve(C_DOWN, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
+		return AdjustBezCurve(C_DOWN, pos, Da.track, xx->segsColor, xx->segsWidth, InfoMessage);
 
 
 	case C_MOVE:
 		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up and down
-		return AdjustBezCurve(C_MOVE, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
+		return AdjustBezCurve(C_MOVE, pos, Da.track, xx->segsColor, xx->segsWidth, InfoMessage);
 
 	case C_UP:
 		if (Da.state == TRACK_SELECTED) {
 			Da.state = PICK_POINT;                                           //First time up, next time pick a point
 		}
-		return AdjustBezCurve(C_UP, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth,  InfoMessage);					//Run Adjust
+		return AdjustBezCurve(C_UP, pos, Da.track, xx->segsColor, xx->segsWidth,  InfoMessage);					//Run Adjust
 
 	case C_TEXT:
 		if ((action>>8) != 32)
@@ -890,22 +884,18 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 			return C_CANCEL;
 		}
 		UndoStart( _("Modify Bezier"), "newBezier - CR" );
-		if (Da.track) t = NewBezierTrack( Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
-		else t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,xx->bezierData.segsColor,xx->bezierData.segsWidth);
-            
-		if (Da.track) CopyAttributes( trk, t );
+		UndoModify( trk );
 
-		Da.state = NONE;												//Must do before Delete for redraw
-		DeleteTrack(trk, TRUE);
-
-		if (Da.track) {
-			for (int i=0;i<2;i++) {										//Attach new track
-				if (Da.trk[i] != NULL && Da.ep[i] != -1) {								//Like the old track
-					ConnectAbuttingTracks(t,i,Da.trk[i],Da.ep[i]);
-				}
-			}
+		Da.state = NONE;
+		wDrawColor color = wDrawColorBlack;
+		DIST_T width = 0;
+		if ( !Da.track ) {
+			color = xx->segsColor;
+			width = xx->segsWidth;
 		}
-		DrawNewTrack( t );
+		SetBezierData( trk, Da.pos, xx->segsColor, xx->segsWidth );
+
+		DrawNewTrack( trk );
 		UndoEnd();
 		InfoMessage(_("Modify Bezier Complete"));
 		return C_TERMINATE;
@@ -916,7 +906,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		return AdjustBezCurve(C_REDRAW, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
+		return AdjustBezCurve(C_REDRAW, pos, Da.track, xx->segsColor, xx->segsWidth, InfoMessage);
 	}
 
 	return C_CONTINUE;
@@ -961,7 +951,7 @@ DIST_T BezierOffsetLength(dynArr_t segs, double offset) {
 
 
 DIST_T BezierMinRadius(coOrd pos[4],dynArr_t segs) {
-	DIST_T r = 100000.0, rr;
+	DIST_T r = DIST_INF, rr;
 	if (segs.cnt == 0 ) return r;
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
@@ -969,7 +959,7 @@ DIST_T BezierMinRadius(coOrd pos[4],dynArr_t segs) {
 			rr = fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rr = BezierMinRadius(t.u.b.pos, t.bezSegs);
-		} else rr = 100000.00;
+		} else rr = DIST_INF;
 		if (rr<r) r = rr;
 	}
 	return r;
@@ -1010,7 +1000,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 	long cmd;
 	if (action>>8) {
 		cmd = action>>8;
-	} else cmd = (long)commandContext;
+	} else cmd = VP2L(commandContext);
 
 	Da.width = (double)lineWidth/mainD.dpi;
 
@@ -1229,8 +1219,8 @@ void UpdateParms(wDrawColor color,long width) {
 }
 
 
-#include "bitmaps/bezier.xpm"
-#include "bitmaps/dbezier.xpm"
+#include "bitmaps/bezier-track.xpm"
+#include "bitmaps/bezier-line.xpm"
 
 EXPORT void InitCmdBezier( wMenu_p menu )
 {	

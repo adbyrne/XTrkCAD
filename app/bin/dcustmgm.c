@@ -20,29 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <assert.h>
-#include <errno.h>
-#include <string.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define F_OK	(0)
-#define W_OK	(2)
-#define access	_access
-#else
-#include <unistd.h>
-#endif
-
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "wlib.h"
 #include "include/paramfilelist.h"
-#ifdef WINDOWS
+#include "common-ui.h"
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif
 
@@ -55,7 +40,7 @@ static void CustomNewCar( void * action );
 static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
 static wIndex_t selectedType;
 
-static wPos_t customListWidths[] = { 18, 100, 30, 80, 220 };
+static wWinPix_t customListWidths[] = { 18, 100, 30, 80, 220 };
 static const char * customListTitles[] = { "", N_("Manufacturer"),
 	N_("Scale"), N_("Part No"), N_("Description") };
 static paramListData_t customListData = { 10, 400, 5, customListWidths, customListTitles };
@@ -64,17 +49,17 @@ static paramData_t customPLs[] = {
 #define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },   
 #define I_CUSTOMNEWTYPE (1)
-    {   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, (void*)150, N_("Create a new ") },
+    {   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
 #define I_CUSTOMNEW     (2)    
-    {   PD_BUTTON, (void *)CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
+    {   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
 #define I_CUSTOMEDIT	(3)
-	{	PD_BUTTON, (void*)CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CUSTOMDEL		(4)
-	{	PD_BUTTON, (void*)CustomDelete, "delete", 0, NULL, N_("Delete") },
+	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, N_("Delete") },
 #define I_CUSTOMCOPYTO	(5)
-	{	PD_BUTTON, (void*)CustomExport, "export", 0, NULL, N_("Move To") },
+	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
   } ;
-static paramGroup_t customPG = { "custmgm", 0, customPLs, sizeof customPLs/sizeof customPLs[0] };
+static paramGroup_t customPG = { "custmgm", 0, customPLs, COUNT( customPLs ) };
 
 
 typedef struct {
@@ -186,8 +171,8 @@ EXPORT FILE * customMgmF;
 static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
-	{ PD_STRING, custMgmContentsStr, "label", PDO_STRINGLIMITLENGTH, (void*)400, N_("Label"), 0, 0, sizeof(custMgmContentsStr)} };
-static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, sizeof custMgmContentsPLs/sizeof custMgmContentsPLs[0] };
+	{ PD_STRING, custMgmContentsStr, "label", PDO_NOTBLANK, I2VP(400), N_("Label"), 0, 0, sizeof(custMgmContentsStr)} };
+static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, COUNT( custMgmContentsPLs ) };
 
 static void CustMgmContentsOk( void * junk )
 {
@@ -205,7 +190,6 @@ static int CustomDoExport(
 	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
-	char *oldLocale = NULL;
 
 	assert( fileName != NULL );
 	assert( files == 1 );
@@ -237,18 +221,18 @@ static int CustomDoExport(
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	if (rc == -1)
 	{
-	#ifdef WINDOWS
+	#ifdef UTFCONVERT
 	    char *contents = MyStrdup(custMgmContentsStr);
 	    contents = Convert2UTF8(contents);
 	    fprintf(customMgmF, "CONTENTS %s\n", contents);
 		MyFree(contents);
 	#else
 	    fprintf(customMgmF, "CONTENTS %s\n", custMgmContentsStr);
-	#endif // WINDOWS
+	#endif // UTFCONVERT
 	}
 
 	cnt = wListGetCount( (wList_p)customPLs[0].control );
@@ -260,7 +244,7 @@ static int CustomDoExport(
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
 			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName[ 0 ] );
 			fclose( customMgmF );
-			RestoreLocale(oldLocale);
+			SetUserLocale();
 			return FALSE;
 		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
@@ -270,7 +254,7 @@ static int CustomDoExport(
 		cnt--;
 	}
 	fclose( customMgmF );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	LoadParamFile( 1, fileName, NULL );
 	DoChangeNotification( CHANGE_PARAMS );
 	return TRUE;
@@ -288,18 +272,17 @@ static void CustomExport( void * junk )
 
 static void CustomDone( void * action )
 {
-	char *oldLocale = NULL;
 	FILE * f = OpenCustom("w");
 
 	if (f == NULL) {
 		wHide( customPG.win );
 		return;
 	}
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 	CompoundCustomSave(f);
 	CarCustomSave(f);
 	fclose(f);
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	wHide( customPG.win );
 }
 

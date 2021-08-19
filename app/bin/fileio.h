@@ -22,10 +22,7 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#include <stdio.h>
-
 #include "common.h"
-#include "misc.h"
 
 extern FILE * paramFile;
 extern char *paramFileName;
@@ -69,6 +66,7 @@ extern wMenuList_p fileList_ml;
 #define BITMAPPATHKEY "bitmap"
 #define BACKGROUNDPATHKEY "images"
 #define DXFPATHKEY "dxf"
+#define SVGPATHKEY "svg"
 #define PARTLISTPATHKEY "parts"
 #define CARSPATHKEY "cars"
 #define PARAMETERPATHKEY "params"
@@ -104,22 +102,18 @@ void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
 
-#ifdef WINDOWS
-#define fopen( FN, MODE ) wFileOpen( FN, MODE )
-#endif
-
 void SetWindowTitle( void );
 char * PutTitle( char * cp );
 
 void ParamFileListLoad(int paramFileCnt, dynArr_t *paramFiles);
-void DoParamFiles(void * junk);
+void DoParamFiles(void * unused);
 
 int LoadTracks( int cnt, char **fileName, void *data );
 
 typedef void (*doSaveCallBack_p)( void );
 void SetAutoSave(void);
-void DoSave( doSaveCallBack_p );
-void DoSaveAs( doSaveCallBack_p );
+void DoSave( void * doAfterSaveVP );
+void DoSaveAs( void * doAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
@@ -127,18 +121,20 @@ void DoCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
-void DoImport( void * );
-void DoExport( void );
-void DoExportDXF( void );
-BOOL_T EditCopy( void );
-BOOL_T EditCut( void );
-BOOL_T EditPaste( void );
-BOOL_T EditClone( void );
+void DoImport( void * typeVP );
+void DoExport( void * unused );
+void DoExportDXF( void * unused );
+void DoExportSVG(void);
+extern wBool_t editStatus; // Status of last Edit* command
+void EditCopy( void * unused );
+void EditCut( void * unused );
+void EditPaste( void * unused );
+void EditClone( void * unused );
 
 
 void DoRecord( void * );
 void AddPlaybackProc( char *, playbackProc_p, void * );
-EXPORT void TakeSnapshot( drawCmd_t * );
+EXPORT void TakeSnapshot( drawCmd_p );
 void PlaybackMessage( char * );
 void DoPlayBack( void * );
 int MyGetKeyState( void );
@@ -151,10 +147,10 @@ void FileInit( void );
 
 BOOL_T MacroInit( void );
 
-char *SaveLocale( char *newLocale );
-void RestoreLocale( char * locale );
+void SetCLocale();
+void SetUserLocale();
 
 // Parameter file search
-void DoSearchParams(void * junk);
+void DoSearchParams(void * unused);
 
 #endif

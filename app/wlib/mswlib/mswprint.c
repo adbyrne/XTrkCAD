@@ -28,7 +28,7 @@ static HPALETTE newPrintPalette;
 static HPALETTE oldPrintPalette;
 
 
-void wPrintClip( wPos_t x, wPos_t y, wPos_t w, wPos_t h )
+void wPrintClip( wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h )
 {
 	wDrawClip( &print_d, x, y, w, h );
 }
@@ -189,9 +189,9 @@ void wPrintSetup( wPrintSetupCallBack_p callback )
 	if (PrintDlg(&printDlg) != 0  && printDlg.hDC) {
 		getPageDim( printDlg.hDC );
 	}
-	if ( callback ) {
-		callback( TRUE );
-	}
+	//if ( callback ) {
+	//	callback( TRUE );
+	//}
 }
 
 const char* wPrintGetName()

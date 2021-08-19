@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "bezctx.h"
 #include "bezctx_xtrkcad.h"
 #include "track.h"
+#include "draw.h"
 #include "tbezier.h"
 #include "i18n.h"
 #include "math.h"

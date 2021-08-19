@@ -28,7 +28,6 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "misc.h"
 #include "gtkint.h"
 #include "i18n.h"
 
@@ -40,6 +39,7 @@ static pid_t pidOfChild;
 static int handleOfPipe;
 extern char *wExecutableName;
 
+extern wBool_t CheckHelpTopicExists(const char *);
 
 /**
  * Create the fully qualified filename for the help helper

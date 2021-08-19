@@ -118,7 +118,7 @@ typedef struct wMenuListItem_t * wMenuListItem_p;
 struct wMenuToggle_t {
 	WOBJ_COMMON
 	MOBJ_COMMON m;
-	wMenuToggleCallBack_p action;
+	wMenuCallBack_p action;
 	wBool_t enabled;
 	wBool_t set;
 	};
@@ -151,7 +151,7 @@ static void pushMenuItem(
 	case M_TOGGLE:
 		mt = (wMenuToggle_p)m;
 		wMenuToggleSet( mt, !mt->set );
-		mt->action( mt->set, mt->data );
+		mt->action( mt->data );
 		break;
 	case M_RADIO:
 		/* NOTE: action is only called when radio button is activated, not when deactivated */
@@ -790,7 +790,7 @@ wMenuToggle_p wMenuToggleCreate(
 	const char * labelStr,
 	long acclKey,
 	wBool_t set,
-	wMenuToggleCallBack_p action,
+	wMenuCallBack_p action,
 	void * data )
 {
 	wMenuToggle_p mt;
@@ -904,8 +904,8 @@ static gint pushMenu(
 
 wMenu_p wMenuCreate(
 	wWin_p	parent,
-	wPos_t	x,
-	wPos_t	y,
+	wWinPix_t	x,
+	wWinPix_t	y,
 	const char 	* helpStr,
 	const char	* labelStr,
 	long	option )
@@ -1067,7 +1067,7 @@ wBool_t wMenuAction(
 					wBeep();
 				} else {
 					wMenuToggleSet( mt, !mt->set );
-					mt->action( mt->set, mt->data );
+					mt->action( mt->data );
 				}
 				break;
 			case M_MENU:

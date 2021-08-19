@@ -1,6 +1,7 @@
 include( CheckSymbolExists )
 
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
+
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(cnvdsgn m)
 ENDIF(NOT WIN32)
@@ -53,6 +54,11 @@ ADD_CUSTOM_COMMAND(
        COMMAND genhelp ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.json ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        )
 
+ADD_EXECUTABLE(xtrkcad WIN32
+ 	misc.c
+ 	xtrkcad.rc
+)
+
 SET(SOURCES
 	${LIN_SOURCES}
 	appdefaults.c
@@ -72,6 +78,8 @@ SET(SOURCES
 	cmisc.c
 	cmodify.c
 	cnote.c
+	common.h
+	common-ui.h
 	compound.c
 	cparalle.c
 	cprint.c
@@ -93,6 +101,7 @@ SET(SOURCES
 	cturntbl.c
 	cundo.c
 	custom.c
+	custom.h
 	dbench.c
 	dbitmap.c
 	dcar.c
@@ -109,6 +118,7 @@ SET(SOURCES
 	draw.c
 	drawgeom.c
 	dxfformat.c
+	dxfformat.h
 	dxfoutput.c
 	elev.c
 	file2uri.c
@@ -117,11 +127,14 @@ SET(SOURCES
 	filenoteui.c
 	i18n.c
 	layout.c
+	layout.h
 	levenshtein.c
 	linknoteui.c
 	lprintf.c
 	macro.c
 	manifest.c
+	misc.c
+	misc.h
 	misc2.c
 	param.c
 	paramfile.c
@@ -139,10 +152,13 @@ SET(SOURCES
 	tease.c
 	textnoteui.c
 	track.c
+	track.h
+	trackx.h
 	trknote.c
 	trkseg.c
 	tstraigh.c
 	utility.c
+	utility.h
 	validator.c
 	cJSON.c
 	archive.h
@@ -167,9 +183,33 @@ set (SOURCES
 	include/paramfile.h
 	include/paramfilelist.h
 	include/partcatalog.h
-	include/stringxtc.h	
+	include/stringxtc.h
 	include/utlist.h
 )
+
+if(XTRKCAD_CREATE_SVG)
+	set (SOURCES
+	  ${SOURCES}
+		svgformat.c
+		svgoutput.c
+	)
+	include_directories(${MINIXML_INCLUDE_PATH})
+	if(WIN32)
+
+	    add_custom_command(
+		TARGET xtrkcad POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${MINIXML_SHAREDLIB}
+		${CMAKE_CURRENT_BINARY_DIR}
+	    )
+
+            # add dll to install package
+	    install(FILES ${MINIXML_SHAREDLIB}
+        	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	    )
+	endif(WIN32)
+
+endif(XTRKCAD_CREATE_SVG)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
@@ -188,14 +228,23 @@ ADD_LIBRARY(xtrkcad-lib ${SOURCES})
 # This ensures that messages.h has been generated before we build xtrkcad-lib
 ADD_DEPENDENCIES(xtrkcad-lib Help)
 
-ADD_EXECUTABLE(xtrkcad WIN32
-	misc.c
-	xtrkcad.rc
-	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
 TARGET_LINK_LIBRARIES(xtrkcad dynstring)
+if(XTRKCAD_CREATE_SVG)
+IF(UNIX)
+	if (NOT APPLE)
+		target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
+		target_link_libraries(xtrkcad "pthread")
+	else(NOT APPLE)
+		target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
+	endif(NOT APPLE)
+ELSE(UNIX)
+	target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
+ENDIF(UNIX)
+endif(XTRKCAD_CREATE_SVG)
+
 IF(UNIX AND NOT APPLE)
 target_link_libraries(xtrkcad ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
 ELSE(UNIX AND NOT APPLE)
@@ -247,13 +296,20 @@ ELSE(NOT WIN32)
 	)
 
 	# add dll to install package
-	install(FILES
-	${LIBZIP_SHAREDLIB}
-	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	INSTALL(
+	    FILES
+	    ${LIBZIP_SHAREDLIB}
+	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
-	install(FILES
-	${ZLIB_SHAREDLIB}
-	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	    INSTALL(FILES
+	    ${ZLIB_SHAREDLIB}
+	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	)
+
+        # Copy program PDB file
+        INSTALL(
+            FILES $<TARGET_PDB_FILE:xtrkcad>
+	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR} OPTIONAL
 	)
 ENDIF(NOT WIN32)
 

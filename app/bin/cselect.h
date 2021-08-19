@@ -23,7 +23,6 @@
 #define CSELECT_H
 
 #include "common.h"
-#include "track.h"
 
 #define defaultCursor wCursorCross
 
@@ -33,23 +32,26 @@ extern wIndex_t rotateCmdInx;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
-void InvertTrackSelect( void * );
-void OrphanedTrackSelect( void * );
+void InvertTrackSelect( void * unused );
+void OrphanedTrackSelect( void * unused );
 void SetAllTrackSelect( BOOL_T );
-void SelectTunnel( void );
-void SelectBridge( void );
-void SelectTies( void );
+void SelectTunnel( void * unused );
+void SelectBridge( void * unused );
+void SelectTies( void * unused );
 void SelectRecount( void );
 void SelectTrackWidth( void* );
-void SelectDelete( void );
+int SelectDelete( void );
+void TrySelectDelete( void );
 void MoveToJoin( track_p, EPINX_T, track_p, EPINX_T );
-void MoveSelectedTracksToCurrentLayer( void );
-void SelectCurrentLayer( void );
-void ClearElevations( void );
+void MoveSelectedTracksToCurrentLayer( void * unused );
+void SelectCurrentLayer( void * unused );
+void DeselectLayer( unsigned int );
+void SelectByIndex( void* string);
+void ClearElevations( void * unused );
 void AddElevations( DIST_T );
-void DoRefreshCompound( void );
+void DoRefreshCompound( void * unused );
 void WriteSelectedTracksToTempSegs( void );
-void DoRescale( void );
+void DoRescale( void *unused );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
 void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
 void HighlightSelectedTracks(track_p trk_ignore, BOOL_T keep, BOOL_T invert );

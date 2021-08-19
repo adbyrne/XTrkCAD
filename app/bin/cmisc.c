@@ -20,17 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdint.h>
-
 #include "common.h"
-#include "utility.h"
 #include "cundo.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "fileio.h"
 #include "cselect.h"
 #include "track.h"
+#include "common-ui.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
@@ -47,8 +43,8 @@ static POS_T descBorder;
 static wDrawColor descColor = 0;
 static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
-static wPos_t describeW_posy;
-static wPos_t describeCmdButtonEnd;
+static wWinPix_t describeW_posy;
+static wWinPix_t describeCmdButtonEnd;
 
 static wMenu_p descPopupM;
 
@@ -113,14 +109,14 @@ static paramData_t describePLs[] = {
 #define I_LONG_N		I_LONG_0+5
 
 #define I_STRING_0		I_LONG_N
-    { PD_STRING, NULL, "S1", PDO_NOPREF, (void*)300 },
-    { PD_STRING, NULL, "S2", PDO_NOPREF, (void*)300 },
-    { PD_STRING, NULL, "S3", PDO_NOPREF, (void*)300 },
-    { PD_STRING, NULL, "S4", PDO_NOPREF, (void*)300 },
+    { PD_STRING, NULL, "S1", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S2", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S3", PDO_NOPREF, I2VP(300) },
+    { PD_STRING, NULL, "S4", PDO_NOPREF, I2VP(300) },
 #define I_STRING_N		I_STRING_0+4
 
 #define I_LAYER_0		I_STRING_N
-    { PD_DROPLIST, NULL, "Y1", PDO_NOPREF, (void*)150, NULL, 0 },
+    { PD_DROPLIST, NULL, "Y1", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_LAYER_N		I_LAYER_0+1
 
 #define I_COLOR_0		I_LAYER_N
@@ -128,14 +124,14 @@ static paramData_t describePLs[] = {
 #define I_COLOR_N		I_COLOR_0+1
 
 #define I_LIST_0		I_COLOR_N
-    { PD_DROPLIST, NULL, "L1", PDO_NOPREF, (void*)150, NULL, 0 },
-    { PD_DROPLIST, NULL, "L2", PDO_NOPREF, (void*)150, NULL, 0 },
-	{ PD_DROPLIST, NULL, "L3", PDO_NOPREF, (void*)150, NULL, 0 },
-	{ PD_DROPLIST, NULL, "L4", PDO_NOPREF, (void*)150, NULL, 0 },
+    { PD_DROPLIST, NULL, "L1", PDO_NOPREF, I2VP(150), NULL, 0 },
+    { PD_DROPLIST, NULL, "L2", PDO_NOPREF, I2VP(150), NULL, 0 },
+	{ PD_DROPLIST, NULL, "L3", PDO_NOPREF, I2VP(150), NULL, 0 },
+	{ PD_DROPLIST, NULL, "L4", PDO_NOPREF, I2VP(150), NULL, 0 },
 #define I_LIST_N		I_LIST_0+4
 
 #define I_EDITLIST_0	I_LIST_N
-    { PD_DROPLIST, NULL, "LE1", PDO_NOPREF, (void*)150, NULL, BL_EDITABLE },
+    { PD_DROPLIST, NULL, "LE1", PDO_NOPREF, I2VP(150), NULL, BL_EDITABLE },
 #define I_EDITLIST_N	I_EDITLIST_0+1
 
 #define I_TEXT_0		I_EDITLIST_N
@@ -154,7 +150,7 @@ static paramData_t describePLs[] = {
 #define I_TOGGLE_N 		I_TOGGLE_0+4
 };
 
-static paramGroup_t describePG = { "describe", 0, describePLs, sizeof describePLs/sizeof describePLs[0] };
+static paramGroup_t describePG = { "describe", 0, describePLs, COUNT( describePLs ) };
 
 /**
  * A mapping table is used to map the index in the dropdown list to the layer
@@ -200,8 +196,6 @@ SearchEditableLayerList(unsigned int layer)
 
 static void DrawDescHilite(BOOL_T selected)
 {
-    wPos_t x, y, w, h;
-
     if (descNeedDrawHilite == FALSE) {
         return;
     }
@@ -209,11 +203,7 @@ static void DrawDescHilite(BOOL_T selected)
     if (descColor==0) {
         descColor = wDrawColorGray(87);
     }
-
-    w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
-    h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
-    mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
-    wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
+    DrawRectangle(&tempD, descOrig, descSize, selected?descColor:wDrawColorBlue, DRAW_TRANSPARENT);
 }
 
 
@@ -250,7 +240,7 @@ static void DescribeUpdate(
     }
 
     UndoModify(descTrk);
-    descUpdateFunc(descTrk, ddp-descData, descData, FALSE);
+    descUpdateFunc(descTrk, (int)(ddp-descData), descData, FALSE);
 
     if (descTrk) {
         GetBoundingBox(descTrk, &hi, &lo);
@@ -270,7 +260,7 @@ static void DescribeUpdate(
     }
 
 
-    for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
+    for (inx = 0; inx < COUNT( describePLs ); inx++) {
         if ((describePLs[inx].option & PDO_DLGIGNORE) != 0) {
             continue;
         }
@@ -361,7 +351,7 @@ static struct {
  */
  
 static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, char * label,
-                               wPos_t sep)
+                               wWinPix_t sep)
 {
     int inx;
 
@@ -403,12 +393,12 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
 static void DescribeLayout(
     paramData_t * pd,
     int inx,
-    wPos_t colX,
-    wPos_t * x,
-    wPos_t * y)
+    wWinPix_t colX,
+    wWinPix_t * x,
+    wWinPix_t * y)
 {
     descData_p ddp;
-    wPos_t w, h;
+    wWinPix_t w, h;
 
     if (inx < 0) {
         return;
@@ -473,7 +463,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
     }
 
-    for (inx=0; inx<sizeof describePLs/sizeof describePLs[0]; inx++) {
+    for (inx=0; inx<COUNT( describePLs ); inx++) {
         describePLs[inx].option = PDO_DLGIGNORE;
         wControlShow(describePLs[inx].control, FALSE);
     }
@@ -516,7 +506,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
             if (ro_mode) {
             	char *layerFormattedName;
             	layerFormattedName = FormatLayerName(*(int *)(ddp->valueP));
-            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+            	wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
                 free(layerFormattedName);
                 *(int *)(ddp->valueP) = 0;
                 layerValue = (int *)(ddp->valueP);
@@ -525,7 +515,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 				for (inx = 0; inx<NUM_LAYERS; inx++) {
 					char *layerFormattedName;
 					layerFormattedName = FormatLayerName(editableLayerList[inx]);
-					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
+					wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, I2VP(inx));
 					free(layerFormattedName);
 				}
 
@@ -551,7 +541,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 static void DescChange(long changes)
 {
-	descData_p ddp;
 	if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
         ParamLoadControls(&describePG);
     }
@@ -568,8 +557,8 @@ EXPORT void DescribeCancel(void)
 {
     if (describePG.win && wWinIsVisible(describePG.win)) {
         if (descTrk) {
-        	if (!IsTrackDeleted(descTrk))
-        		descUpdateFunc(descTrk, -1, descData, TRUE);
+        	ASSERT(!IsTrackDeleted(descTrk));
+       		descUpdateFunc(descTrk, -1, descData, TRUE);
         	descTrk = NULL;
 
         }
@@ -694,7 +683,7 @@ extern wIndex_t panCmdInx;
 void InitCmdDescribe(wMenu_p menu)
 {
     describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
-                                   _("Properties"), wIconCreatePixMap(describe_xpm),
+                                   _("Properties"), wIconCreatePixMap(describe_xpm[iconSize]),
                                    LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
     RegisterChangeNotification(DescChange);
     ParamRegister(&describePG);
@@ -702,8 +691,8 @@ void InitCmdDescribe(wMenu_p menu)
 void InitCmdDescribe2(wMenu_p menu)
 {
     descPopupM = MenuRegister( "Describe Context Menu" );
-    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
-    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, I2VP(selectCmdInx));
+    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
+    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, I2VP(panCmdInx));
 
 }

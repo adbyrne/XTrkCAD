@@ -59,7 +59,7 @@ struct PrintData {
 
 struct wText_t {
     WOBJ_COMMON
-    wPos_t width, height;
+    wWinPix_t width, height;
     int changed;
     GtkWidget *text;
 };
@@ -462,7 +462,7 @@ wBool_t wTextGetModified(wText_p bt)
  * \return
  */
 
-void wTextSetSize(wText_p bt, wPos_t w, wPos_t h)
+void wTextSetSize(wText_p bt, wWinPix_t w, wWinPix_t h)
 {
     gtk_widget_set_size_request(bt->widget, w, h);
     bt->w = w;
@@ -481,8 +481,8 @@ void wTextSetSize(wText_p bt, wPos_t w, wPos_t h)
  * \return
  */
 
-void wTextComputeSize(wText_p bt, int rows, int cols, wPos_t *width,
-                      wPos_t *height)
+void wTextComputeSize(wText_p bt, wWinPix_t rows, wWinPix_t cols, wWinPix_t *width,
+                      wWinPix_t *height)
 {
     *width = rows * 7;
     *height = cols * 14;
@@ -498,7 +498,7 @@ void wTextComputeSize(wText_p bt, int rows, int cols, wPos_t *width,
 
 void wTextSetPosition(wText_p bt, int pos)
 {
-    /* TODO */
+    /* TODO TextSetPosition */
 }
 
 /**
@@ -536,13 +536,13 @@ static void textChanged(GtkWidget *widget, wText_p bt)
 
 wText_p
 wTextCreate(wWin_p	parent,
-            wPos_t	x,
-            wPos_t	y,
+            wWinPix_t	x,
+            wWinPix_t	y,
             const char 	 *helpStr,
             const char	 *labelStr,
             long	option,
-            wPos_t	width,
-            wPos_t	height)
+            wWinPix_t	width,
+            wWinPix_t	height)
 {
     wText_p bt;
     GtkTextBuffer *tb;
