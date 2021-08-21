@@ -519,13 +519,15 @@ static void ChangeLayout() {
     /* [mf Nov. 15, 2005] Get the gauge/scale settings */
     if (changes & CHANGE_SCALE) {
         SetScaleGauge(thisLayout.props.curScaleDescInx, thisLayout.props.curGaugeInx);
-    }
+		file_changed = TRUE;
+	}
 
     /* [mf Nov. 15, 2005] end */
 
     if (changes & CHANGE_MAP) {
         SetRoomSize(thisLayout.props.roomSize);
-    }
+		file_changed = TRUE;
+	}
 
     DoChangeNotification(changes);
 
@@ -534,12 +536,13 @@ static void ChangeLayout() {
         // now set the minimum track radius
         sprintf(prefString, "minTrackRadius-%s", curScaleName);
         wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
-    }
+		file_changed = TRUE;
+	}
 
-    if ((changes & CHANGE_BACKGROUND) || file_changed) {
+    if (changes & CHANGE_BACKGROUND) {
 
     	LayoutBackGroundSave();
-    	file_changed = FALSE;
+    	file_changed = TRUE;
     }
 }
 

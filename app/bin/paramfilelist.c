@@ -370,8 +370,8 @@ static void ReadCustom(void)
 }
 
 
-/*
- * Open the custonm file
+/**
+ * Open the custom file where user-defined turnouts, cars and such are stored
  */
 
 FILE * OpenCustom(char *mode)
@@ -421,12 +421,15 @@ addButtonCallBack_t ParamFilesInit(void)
  */
 BOOL_T ParamFileListInit(void)
 {
+	/** @logcmd @showrefby params=n paramfilelist.c Log ReadParams 
+	 * (including scale file (xtq), custom file (*.cus) and other params (xtp)) 
+	 */
     log_params = LogFindIndex("params");
 
     SetCLocale();
 	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
-	SetUserLocale();
+		SetUserLocale();
         return FALSE;
     }
 

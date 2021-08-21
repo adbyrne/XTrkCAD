@@ -63,11 +63,15 @@ SET(SOURCES
 	${LIN_SOURCES}
 	appdefaults.c
 	archive.c
+	archive.h
 	bllnhlp.c
 	cbezier.c
+	cbezier.h
 	cblock.c
 	ccornu.c
+	ccornu.h
 	ccurve.c
+	ccurve.h
 	ccontrol.c
 	cdraw.c
 	celev.c
@@ -75,23 +79,27 @@ SET(SOURCES
 	chndldto.c
 	chotbar.c
 	cjoin.c
+	cjoin.h
 	cmisc.c
 	cmodify.c
 	cnote.c
 	common.h
 	common-ui.h
 	compound.c
+	compound.h
 	cparalle.c
 	cprint.c
 	cprofile.c
 	cpull.c
 	cruler.c
 	cselect.c
+	cselect.h
 	csensor.c
 	csnap.c
 	csplit.c
 	csignal.c
 	cstraigh.c
+	cstraigh.h
 	cstruct.c
 	cswitchmotor.c
 	ctext.c
@@ -116,6 +124,7 @@ SET(SOURCES
 	dpricels.c
 	dprmfile.c
 	draw.c
+	draw.h
 	drawgeom.c
 	dxfformat.c
 	dxfformat.h

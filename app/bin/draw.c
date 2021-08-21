@@ -1799,6 +1799,7 @@ EXPORT void DrawRuler(
 			incr = 32;
 		else
 			incr = 16;			  //Inches
+
 		lastInch = (int)floor(end);
 		lastFraction = 16;
 		inch = (int)ceil(start);
@@ -1831,7 +1832,7 @@ EXPORT void DrawRuler(
 			if (inch == lastInch)
 				lastFraction = (((int)((end - lastInch)*16)) / incr) * incr;
 			for ( fraction = firstFraction; fraction <= lastFraction; fraction += incr ) {
-				// Tick interval for scale > 240
+				// Tick interval for scale > 128
 				skip = 0;
 				if(d->scale > 512) {
 					skip = (inch % 120 != 0);
@@ -1841,6 +1842,9 @@ EXPORT void DrawRuler(
 				}
 				else if(d->scale > 128) {
 					skip = (inch % 24 != 0);
+				}
+				else if(d->scale > 64) {
+					skip = (inch % 12 != 0);
 				}
 				if(!skip){
 					Translate( &p0, orig, a, inch+fraction/16.0 );
