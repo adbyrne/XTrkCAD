@@ -554,8 +554,11 @@ static void ChangeLayout() {
 
 static void LayoutOk(void * unused)
 {
-
 	ChangeLayout();
+	if(file_changed){
+		SetFileChanged();
+		file_changed = FALSE;
+	}
 
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);

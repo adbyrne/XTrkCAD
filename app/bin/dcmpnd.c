@@ -122,8 +122,7 @@ static void UpdateTitleNext( void )
 		DYNARR_RESET( updateTitleElement, updateTitles_da );
 		InfoMessage("");
 		InfoCount( trackCount );
-		changed++;
-		SetWindowTitle();
+		SetFileChanged();
 		DoChangeNotification( CHANGE_MAIN );
 		return;
 	}

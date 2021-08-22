@@ -229,7 +229,7 @@ int NoticeMessage( const char *, const char*, const char *, ... );
 int NoticeMessage2( int, const char *, const char*, const char *, ... );
 void DoQuit( void * unused );
 
-void FileIsChanged(void);
+void SetFileChanged(void);
 char * ConvertFromEscapedText(const char * text);
 char * ConvertToEscapedText(const char * text);
 

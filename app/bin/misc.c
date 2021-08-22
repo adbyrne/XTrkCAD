@@ -657,7 +657,7 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
 */
 
 void
-FileIsChanged(void)
+SetFileChanged(void)
 {
 	changed++;
 	SetWindowTitle();

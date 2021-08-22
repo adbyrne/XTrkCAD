@@ -789,8 +789,7 @@ static void DoLayerOp(void * data)
     if (layoutLayerChanged) {
         MainProc(mainW, wResize_e, NULL, NULL);
         layoutLayerChanged = FALSE;
-        changed++;
-        SetWindowTitle();
+        SetFileChanged();
     }
 }
 
@@ -1179,8 +1178,7 @@ static void LayerUpdate(void)
 			layers[(int)layerCurrent].button_off != (BOOL_T)layerNoButton ||
 			strcmp(layers[(int)layerCurrent].settingsName,settingsName) ||
 			strcmp(oldLinkList,layerLinkList)) {
-        changed++;
-        SetWindowTitle();
+        SetFileChanged();
     }
 
     if (layerL) {

@@ -700,8 +700,8 @@ LOG( log_undo, 1, ( "UndoStart[%d] (%s) d:%d u:%d us:"SLOG_FMT"\n", undoHead, la
 
 	INC_UNDO_INX(undoHead);
 	us = &undoStack[undoHead];
-	changed++;
-	SetWindowTitle();
+
+	SetFileChanged();
 	if (doCount == UNDO_STACK_SIZE) {
 		if (recordUndo) Rprintf( "  Wrapped N:%d M:%d D:%d\n", us->newCnt, us->modCnt, us->delCnt );
 		/* wrapped around stack */
