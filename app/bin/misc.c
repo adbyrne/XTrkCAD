@@ -75,8 +75,6 @@ static int log_command;
 
 EXPORT wWin_p mainW;
 
-EXPORT wIndex_t changed = 0;
-
 EXPORT char message[STR_HUGE_SIZE];
 static char message2[STR_LONG_SIZE];
 
@@ -652,16 +650,6 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
 	return wNoticeEx( NT_INFORMATION, message2, yes, no);
 }
 
-/**
-* Set the file's changed flag and update the window title.
-*/
-
-void
-SetFileChanged(void)
-{
-	changed++;
-	SetWindowTitle();
-}
 
 /*****************************************************************************
  *

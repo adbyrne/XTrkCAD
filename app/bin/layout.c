@@ -60,6 +60,8 @@ static struct sDataLayout thisLayout = {
     NULL,
 };
 
+EXPORT wIndex_t changed = 0;
+
 static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r0_9999999 = { 0, 9999999 };
@@ -120,6 +122,18 @@ CopyLayoutTitle(char* dest, char *src)
 {
     strncpy(dest, src, TITLEMAXLEN);
     *(dest + TITLEMAXLEN - 1) = '\0';
+}
+
+
+/**
+* Set the file's changed flag and update the window title.
+*/
+
+void
+SetFileChanged(void)
+{
+	changed++;
+	SetWindowTitle();
 }
 
 void
