@@ -41,6 +41,13 @@
 #define BITMAPSIZE 500e6
 #endif // WIN32
 
+/** Option flags for bitmap export */
+#define BITMAPDRAWTITLE 1
+#define BITMAPDRAWFRAMEONLY (1<<1)
+#define BITMAPDRAWCENTERLINE (1<<2)
+#define BITMAPDRAWBACKGROUND (1<<3)
+
+#define BITMAPEXPORTFONTSIZE 18
 
 static long outputBitMapTogglesV = 3;
 static double outputBitMapDensity = 10;
@@ -56,6 +63,15 @@ static drawCmd_t bitmap_d = {
 		{0.0, 0.0}, {1.0,1.0},
 		Pix2CoOrd, CoOrd2Pix };
 
+/**
+ * Saves a bitmap file
+ *
+ * \param 		   files    number of files, must be 1
+ * \param [in]     fileName name of the file
+ * \param [in,out] data	    unused
+ *
+ * \returns true on success, false otherwise
+ */
 
 static int SaveBitmapFile( 
 		int files,
@@ -83,37 +99,34 @@ static int SaveBitmapFile(
 	p[1].x = p[2].x = mapD.size.x;
 	p[0].y = p[1].y = 0.0;
 	p[2].y = p[3].y = mapD.size.y;
-	if ( (outputBitMapTogglesV&2) ) {
-		DrawRuler( &bitmap_d, p[0], p[1], 0.0, TRUE, FALSE, wDrawColorBlack );
-		DrawRuler( &bitmap_d, p[0], p[3], 0.0, TRUE, TRUE, wDrawColorBlack );
-		DrawRuler( &bitmap_d, p[1], p[2], 0.0, FALSE, FALSE, wDrawColorBlack );
-		DrawRuler( &bitmap_d, p[3], p[2], 0.0, FALSE, TRUE, wDrawColorBlack );
-		y0 = 0.37;
-		y1 = 0.2;
+
+	if ((outputBitMapTogglesV & BITMAPDRAWFRAMEONLY) ||
+		(outputBitMapTogglesV & BITMAPDRAWTITLE)) {
+		DrawPoly(&bitmap_d, 4, p, NULL, wDrawColorBlack, 2, DRAW_CLOSED);
 	}
-	if ( (outputBitMapTogglesV&3) == 1) {
-		DrawPoly( &bitmap_d, 4, p, NULL, wDrawColorBlack, 2, DRAW_CLOSED );
-	}
-	if (outputBitMapTogglesV&1) {
-		fp = wStandardFont( F_TIMES, FALSE, FALSE );
-		fs = 18;
-		DrawTextSize( &mainD, GetLayoutTitle(), fp, fs, FALSE, &textsize );
-		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
-		p[0].y = mapD.size.y + (y1+0.30)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, GetLayoutTitle(), fp, fs*bitmap_d.scale, wDrawColorBlack );
-		DrawTextSize( &mainD, GetLayoutSubtitle(), fp, fs, FALSE, &textsize );
-		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
-		p[0].y = mapD.size.y + (y1+0.05)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, GetLayoutSubtitle(), fp, fs*bitmap_d.scale, wDrawColorBlack );
-		fp_bi = wStandardFont( F_TIMES, TRUE, TRUE );
-		DrawTextSize( &mainD, _("Drawn with "), fp, fs, FALSE, &textsize );
-		DrawTextSize( &mainD, sProdName, fp_bi, fs, FALSE, &textsize1 );
-		p[0].x = (bitmap_d.size.x - ((textsize.x+textsize1.x)*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
-		p[0].y = -(y0+0.23)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, _("Drawn with "), fp, fs*bitmap_d.scale, wDrawColorBlack );
+
+	if(outputBitMapTogglesV & BITMAPDRAWTITLE ) {
+		DrawPoly(&bitmap_d, 4, p, NULL, wDrawColorBlack, 2, DRAW_CLOSED);
+		fp = wStandardFont(F_TIMES, FALSE, FALSE);
+		fs = BITMAPEXPORTFONTSIZE;
+		DrawTextSize(&mainD, GetLayoutTitle(), fp, fs, FALSE, &textsize);
+		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale)) / 2.0 + bitmap_d.orig.x;
+		p[0].y = mapD.size.y + (y1 + 0.30)*bitmap_d.scale;
+		DrawString(&bitmap_d, p[0], 0.0, GetLayoutTitle(), fp, fs*bitmap_d.scale, wDrawColorBlack);
+		DrawTextSize(&mainD, GetLayoutSubtitle(), fp, fs, FALSE, &textsize);
+		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale)) / 2.0 + bitmap_d.orig.x;
+		p[0].y = mapD.size.y + (y1 + 0.05)*bitmap_d.scale;
+		DrawString(&bitmap_d, p[0], 0.0, GetLayoutSubtitle(), fp, fs*bitmap_d.scale, wDrawColorBlack);
+		fp_bi = wStandardFont(F_TIMES, TRUE, TRUE);
+		DrawTextSize(&mainD, _("Drawn with "), fp, fs, FALSE, &textsize);
+		DrawTextSize(&mainD, sProdName, fp_bi, fs, FALSE, &textsize1);
+		p[0].x = (bitmap_d.size.x - ((textsize.x + textsize1.x)*bitmap_d.scale)) / 2.0 + bitmap_d.orig.x;
+		p[0].y = -(y0 + 0.23)*bitmap_d.scale;
+		DrawString(&bitmap_d, p[0], 0.0, _("Drawn with "), fp, fs*bitmap_d.scale, wDrawColorBlack);
 		p[0].x += (textsize.x*bitmap_d.scale);
-		DrawString( &bitmap_d, p[0], 0.0, sProdName, fp_bi, fs*bitmap_d.scale, wDrawColorBlack );
+		DrawString(&bitmap_d, p[0], 0.0, sProdName, fp_bi, fs*bitmap_d.scale, wDrawColorBlack);
 	}
+
 	wDrawClip( bitmap_d.d,
 		 (wWinPix_t)(-bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi),
 		 (wWinPix_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
@@ -122,7 +135,7 @@ static int SaveBitmapFile(
 	wSetCursor( mainD.d, wCursorWait );
 	InfoMessage( _("Drawing tracks to BitMap") );
 	DrawSnapGrid( &bitmap_d, mapD.size, TRUE );
-	if ( (outputBitMapTogglesV&4) )
+	if ( outputBitMapTogglesV & BITMAPDRAWCENTERLINE )
 		bitmap_d.options |= DC_CENTERLINE;
 	else
 		bitmap_d.options &= ~DC_CENTERLINE;
@@ -131,12 +144,12 @@ static int SaveBitmapFile(
 	if ( wBitMapWriteFile( bitmap_d.d, fileName[0] ) == FALSE ) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		wBitMapDelete( bitmap_d.d );
-		return FALSE;
+		return false;
 	}
 	InfoMessage( "" );
 	wSetCursor( mainD.d, defaultCursor );
 	wBitMapDelete( bitmap_d.d );
-	return TRUE;
+	return true;
 }
 
 
@@ -221,11 +234,7 @@ static void OutputBitMapOk( void * junk )
 	wHide( outputBitMapW );
 	if (bitmap_fs == NULL)
 		bitmap_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Bitmap"),
-//#ifdef WINDOWS
-//				_("Bitmap files (*.bmp)|*.bmp"),
-//#else
 				_("Bitmap files (*.png)|*.png"),
-//#endif
 				SaveBitmapFile, NULL );
 	wFilSelect( bitmap_fs, GetCurrentPath( BITMAPPATHKEY ));
 }
