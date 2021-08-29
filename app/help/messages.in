@@ -1130,7 +1130,7 @@ END
 
 # dbitmap.c
 MESSAGE MSG_BITMAP_SIZE_WARNING
-You have specified a large Bitmap.
+You have specified a large bitmap.
 
 Are you sure you want to continue?
 HELP
