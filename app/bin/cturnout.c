@@ -833,7 +833,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 	int i;
 	ANGLE_T a0, a1, aa0, aa1;
-	DIST_T r, l;
+	DIST_T r, len;
 	coOrd p0, p1;
 
 	PATHPTR_T pp;
@@ -914,10 +914,10 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 					angle += a1;
 
-					l = D2R(a1) * r;
+					len = D2R(a1) * r;
 					// Every 5 degrees or 5 * tie spacing
 					int cnt = (int)floor(a1 / 5.0);
-					int cnt2 = (int)floor(l / 5 / td->spacing);
+					int cnt2 = (int)floor(len / 5 / td->spacing);
 					if (cnt2 > cnt) cnt = cnt2;
 					if (cnt <= 0) cnt = 1;
 

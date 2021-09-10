@@ -342,6 +342,14 @@ void wDrawLine(
 	}
 }
 
+static double d2r(double angle)
+{
+	while (angle < 0.0) angle += 360.0;
+	while (angle >= 360.0) angle -= 360.0;
+	angle *= (M_PI / 180.0);
+	return angle;
+}
+
 static double mswsin( double angle )
 {
 	while (angle < 0.0) angle += 360.0;
@@ -397,12 +405,12 @@ void wDrawArc(
 	int i, cnt;
 	POINT p0, p1, ps, pe, pp0, pp1, pp2, pc;
 	wDrawPix_t psx, psy, pex, pey;
-        double len, aa;
+    double len, aa, ai;
 	RECT rect;
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
 
-	len = a1/360.0 * (2 * M_PI) * r;
+	len = d2r(a1) * r;
 	if (len < 3)
 		return;
 
@@ -428,7 +436,7 @@ void wDrawArc(
 	if (dw == 0)
 		dw = 1;
 
-	if (r>4096) {
+	if (r > 100) { // 4096
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -437,19 +445,21 @@ void wDrawArc(
 			fakeArc = TRUE;
 	}
 	if ( fakeArc ) {
-		cnt = (int)a1;
+		cnt = (int)(a1 / 2);
 		if ( cnt <= 0 ) cnt = 1;
-		if ( cnt > 360 ) cnt = 360;
-		aa = a1 / cnt;
-		psx = px + r * mswsin(a0);
-		psy = py + r * mswcos(a0);
+		if ( cnt > 180 ) cnt = 180;
+		// Convert a0 and a1 to radians here
+		ai = d2r(a1) / cnt;
+		aa = d2r(a0);
+		psx = px + r * sin(aa);
+		psy = py + r * cos(aa);
 		pp0.x = XDRAWPIX2WINPIX( d, psx );
 		pp0.y = YDRAWPIX2WINPIX( d, psy );
 		needMoveTo = TRUE;
 		for ( i=0; i<cnt; i++ ) {
-			a0 += aa;
-			psx = px + r * mswsin(a0);
-			psy = py + r * mswcos(a0);
+			aa += ai;
+			psx = px + r * sin(aa);
+			psy = py + r * cos(aa);
 			pp2.x = pp1.x = XDRAWPIX2WINPIX( d, psx );
 			pp2.y = pp1.y = YDRAWPIX2WINPIX( d, psy );
 			if ( clip0( &pp0, &pp1, d ) ) {
