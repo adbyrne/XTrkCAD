@@ -21,6 +21,7 @@
  */
 
 #include "custom.h"
+#include "dynstring.h"
 #include "fileio.h"
 #include "layout.h"
 #include "param.h"
@@ -218,6 +219,8 @@ static void OutputBitMapComputeSize(void)
 {
     FLOAT_T Lborder=0.0, Rborder=0.0, Tborder=0.0, Bborder=0.0;
     FLOAT_T size;
+    DynString message;
+    DynStringMalloc(&message, 16);
 
     ParamLoadData(&outputBitMapPG);
     bitmap_d.dpi = mainD.dpi;
@@ -241,21 +244,22 @@ static void OutputBitMapComputeSize(void)
     bitmap_d.size.y = mapD.size.y + (Bborder+Tborder)*bitmap_d.scale;
     bitmap_w = (wWinPix_t)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi);
     bitmap_h = (wWinPix_t)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi);
-    sprintf(message, _("Bitmap : %ld by %ld pixels"), bitmap_w, bitmap_h);
-    ParamLoadMessage(&outputBitMapPG, I_MSG1, message);
+    DynStringPrintf(&message, _("Bitmap : %ld by %ld pixels"), bitmap_w, bitmap_h);
+    ParamLoadMessage(&outputBitMapPG, I_MSG1, DynStringToCStr(&message));
     size = (FLOAT_T)bitmap_w * bitmap_h;
 
     if (size < 1e4) {
-        sprintf(message, _("Approximate file size : %0.0f"), size);
+        DynStringPrintf(&message, _("Approximate file size : %0.0f"), size);
     } else if (size < 1e6) {
-        sprintf(message, _("Approximate file size : %0.1fKb"), (size+50.0)/1e3);
+        DynStringPrintf(&message, _("Approximate file size : %0.1fKb"), (size+50.0)/1e3);
     } else if (size < 1e9) {
-        sprintf(message, _("Approximate file size : %0.1fMb"), (size+5e4)/1e6);
+        DynStringPrintf(&message, _("Approximate file size : %0.1fMb"), (size+5e4)/1e6);
     } else {
-        sprintf(message, _("Approximate file size : %0.1fGb"), (size + 5e7) / 1e9);
+        DynStringPrintf(&message, _("Approximate file size : %0.1fGb"), (size + 5e7) / 1e9);
     }
 
-    ParamLoadMessage(&outputBitMapPG, I_MSG2, message);
+    ParamLoadMessage(&outputBitMapPG, I_MSG2, DynStringToCStr(&message));
+    DynStringFree(&message);
 }
 
 /**
