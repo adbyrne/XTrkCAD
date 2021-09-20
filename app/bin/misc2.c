@@ -42,6 +42,7 @@ EXPORT char * curScaleName;
 EXPORT DIST_T trackGauge;
 EXPORT long labelScale = 8;
 EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
+/** @prefs [draw] label-when=2 Unknown */
 EXPORT long labelWhen = 2;
 EXPORT long colorTrack = 0;
 EXPORT long colorDraw = 0;
@@ -174,6 +175,7 @@ static tieData_t tieData_demo = {
 
 //EXPORT SCALEINX_T curScaleInx = -1;
 static scaleInfo_p curScale;
+/** @prefs [misc] include same gauge turnouts=1 Unknown */
 EXPORT long includeSameGaugeTurnouts = FALSE;
 static SCALEINX_T demoScaleInx = -1;
 
@@ -892,6 +894,5 @@ EXPORT void Misc2Init( void )
 	AddParam( "SCALEFIT", AddScaleFit);
 	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 	RegisterChangeNotification( ScaleChange );
-	/** @prefs [msw tweak] NoNegDrawArgs=1 Unknown */
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );
 }

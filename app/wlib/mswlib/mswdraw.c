@@ -111,7 +111,9 @@ static wWinPix_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 
 
 
+/** @prefs [msw tweak] NoNegDrawArgs=1 Suppress drawing if x < 0 or y < 0 (-1 value causes preference read) */
 static long noNegDrawArgs = -1;
+/** @prefs [msw tweak] NoFlatEndCaps=1 Suppress EndCap Flat pen style */
 static long noFlatEndCaps = 0;
 
 void wDrawDelayUpdate(
@@ -436,7 +438,8 @@ void wDrawArc(
 	if (dw == 0)
 		dw = 1;
 
-	if (r > 100) { // 4096
+	/* Windows drawing will overshoot the end of the arc for large radius */
+	if (r > 500) { 
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -695,7 +698,9 @@ void mswFontInit( void )
 {
 	const char * face;
 	long size;
+	/** @prefs [msw window font] face=FontName */
 	face = wPrefGetString( "msw window font", "face" );
+	/** @prefs [msw window font] size=-24 */
 	wPrefGetInteger( "msw window font", "size", &size, -24 );
 	if (face) {
 		strncpy( logFont.lfFaceName, face, LF_FACESIZE );
@@ -1846,9 +1851,7 @@ wDraw_p wDrawCreate(
 	HDC hDc;
 
 	if ( noNegDrawArgs < 0 ) {
-		/** @prefs [msw tweak] NoNegDrawArgs=1 Suppress drawing if x < 0 or y < 0 */
 		wPrefGetInteger( "msw tweak", "NoNegDrawArgs", &noNegDrawArgs, 0 );
-		/** @prefs [msw tweak] NoFlatEndCaps=1 Suppress EndCap Flat pen style */
 		wPrefGetInteger( "msw tweak", "NoFlatEndCaps", &noFlatEndCaps, 0 );
 	}
 
