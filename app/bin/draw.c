@@ -1457,6 +1457,34 @@ if (wDrawDoTempDraw == FALSE) {
 }
 }
 
+/**
+ * Calculate position and size of background bitmap
+ *
+ * \param [in]	    drawP   destination drawing area
+ * \param [in]		origX	x origin of drawing area 					
+ * \param [in]		origY	y origin of drawing area
+ * \param [out]     posX    x position of bitmap
+ * \param [out]     posY    y position of bitmap
+ * \param [out]     pWidth  width of bitmap in destination coordinates
+ *
+ * \returns true on success, false otherwise
+ */
+
+void
+TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY, wWinPix_t* posX,
+                    wWinPix_t* posY, wWinPix_t* pWidth)
+{
+    coOrd back_pos = GetLayoutBackGroundPos();
+
+    *pWidth = (wWinPix_t)(GetLayoutBackGroundSize() / drawP->scale *
+                          drawP->dpi);
+
+    *posX = (wWinPix_t)((back_pos.x - origX) / drawP->scale *
+                        drawP->dpi);
+    *posY = (wWinPix_t)((back_pos.y - origY) / drawP->scale *
+                        drawP->dpi);
+}
+
 /*
 * Redraw contents on main window
 */
@@ -1477,15 +1505,22 @@ EXPORT void MainRedraw( void )
 	size = mainD.size;
 	orig.x -= LBORDER/mainD.dpi*mainD.scale;
 	orig.y -= BBORDER/mainD.dpi*mainD.scale;
-	wWinPix_t back_x,back_y;
-	coOrd back_pos = GetLayoutBackGroundPos();
-	back_x = (wWinPix_t)((back_pos.x-orig.x)/mainD.scale*mainD.dpi);
-	back_y = (wWinPix_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
-	wWinPix_t back_width = (wWinPix_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
 
 	DrawRoomWalls( TRUE );
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
-		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
+		wWinPix_t bitmapPosX;
+		wWinPix_t bitmapPosY;
+		wWinPix_t bitmapWidth;
+
+		TranslateBackground(&mainD, orig.x, orig.y, &bitmapPosX, &bitmapPosY,
+		                    &bitmapWidth);
+
+		wDrawShowBackground(mainD.d,
+		                    bitmapPosX,
+		                    bitmapPosY,
+		                    bitmapWidth,
+		                    GetLayoutBackGroundAngle(),
+		                    GetLayoutBackGroundScreen());
 	}
 	DrawSnapGrid( &mainD, mapD.size, TRUE );
 

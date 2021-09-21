@@ -174,7 +174,7 @@ static int SaveBitmapFile(
         DrawTextCenterXPosY(GetLayoutSubtitle(), fp, BITMAPEXPORTFONTSIZE, 0.4 * LINEHEIGHT );
 		DrawProductInfo(N_("Drawn with "), BITMAPEXPORTFONTSIZE, -LINEHEIGHT);
     }
-
+    
     wDrawClip(bitmap_d.d,
               (wWinPix_t)(-bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi),
               (wWinPix_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
@@ -182,6 +182,28 @@ static int SaveBitmapFile(
               (wWinPix_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi));
 
     DrawSnapGrid(&bitmap_d, mapD.size, TRUE);
+
+   if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible())
+   {
+       wWinPix_t bitmapPosX;
+       wWinPix_t bitmapPosY;
+       wWinPix_t bitmapWidth;
+
+       TranslateBackground(&bitmap_d, 
+                            bitmap_d.orig.x, 
+                            bitmap_d.orig.y, 
+                            &bitmapPosX,
+                            &bitmapPosY, 
+                            &bitmapWidth);
+       wDrawCloneBackground(mainD.d, bitmap_d.d);
+
+       wDrawShowBackground(bitmap_d.d,
+                           bitmapPosX,
+                           bitmapPosY,
+                           bitmapWidth,
+                           GetLayoutBackGroundAngle(),
+                           GetLayoutBackGroundScreen());
+   }
 
     if (outputBitMapTogglesV & BITMAPDRAWCENTERLINE) {
         bitmap_d.options |= DC_CENTERLINE;
@@ -331,12 +353,10 @@ static void ComputeBitmapSize(void)
         Tborder = DEFAULTMARGIN;
         Bborder = DEFAULTMARGIN;
     }
-
     if (outputBitMapTogglesV & BITMAPDRAWTITLE) {
         Tborder += 2 * LINEHEIGHT;
         Bborder += LINEHEIGHT;
     }
-
 	dpiRange.high = CalculateMaxDPI(mapD.size, Lborder + Rborder, Bborder + Tborder);
 
 	bitmap_d.orig.x = -Lborder*bitmap_d.scale;
@@ -424,28 +444,28 @@ static void OutputBitMapChange(long changes)
  * \param [in,out] unused.
  */
 
-static void DoOutputBitMap(void * unused)
+static void DoOutputBitMap(void* unused)
 {
     if (outputBitMapW == NULL) {
         outputBitMapW = ParamCreateDialog(&outputBitMapPG,
-                                          MakeWindowTitle(_("Export to bitmap")),
-                                          _("Ok"),
-                                          OutputBitMapOk,
-                                          wHide,
-                                          TRUE,
-                                          NULL,
-                                          0,
-                                          (paramChangeProc)UpdateBitmapDialog);
+            MakeWindowTitle(_("Export to bitmap")),
+            _("Ok"),
+            OutputBitMapOk,
+            wHide,
+            TRUE,
+            NULL,
+            0,
+            (paramChangeProc)UpdateBitmapDialog);
     }
     ParamLoadControls(&outputBitMapPG);
     ParamGroupRecord(&outputBitMapPG);
 
-	UpdateBitmapDialog();
+    UpdateBitmapDialog();
 
-	if (dpiRange.high > outputBitMapDensity) {
-		outputBitMapDensity = dpiRange.high;
-		ParamLoadControl(&outputBitMapPG, I_DENSITY );
-	}
+    if (dpiRange.high > outputBitMapDensity) {
+        outputBitMapDensity = dpiRange.high;
+        ParamLoadControl(&outputBitMapPG, I_DENSITY);
+    }
 
     wShow(outputBitMapW);
 }

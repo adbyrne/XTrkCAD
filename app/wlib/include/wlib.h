@@ -593,6 +593,7 @@ void * wDrawGetContext(		wDraw_p );
 void wDrawSaveImage(		wDraw_p );
 void wDrawRestoreImage(		wDraw_p );
 int wDrawSetBackground(    wDraw_p, char * path, char ** error);
+void wDrawCloneBackground(wDraw_p from, wDraw_p to);
 void wDrawShowBackground(   wDraw_p, wWinPix_t pos_x, wWinPix_t pos_y, wWinPix_t width, wAngle_t angle, int screen);
 
 /*------------------------------------------------------------------------------

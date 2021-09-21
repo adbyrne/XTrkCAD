@@ -237,6 +237,9 @@ void DrawTextSize(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *);
 void DrawMultiString(drawCmd_p d, coOrd pos, char * text, wFont_p fp,
                      wFontSize_t fs, wDrawColor color, ANGLE_T a, coOrd * lo, coOrd * hi,
                      BOOL_T boxed);
+void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
+                         wWinPix_t* posX,
+                         wWinPix_t* posY, wWinPix_t* pWidth);
 BOOL_T SetRoomSize(coOrd);
 void GetRoomSize(coOrd *);
 void DoRedraw(void);
