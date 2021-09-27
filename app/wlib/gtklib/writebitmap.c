@@ -1,5 +1,5 @@
-/** \file png.c
- * PNG creation 
+/** \file writebitmap.c
+ * Bitmap file creation 
  */
 
 /*  XTrackCad - Model Railroad CAD
@@ -25,10 +25,31 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#include <string.h>
 #include <gtk/gtk.h>
 #include "gtkint.h"
 
-#define BITMAPFILEFORMAT "png"
+#define PNGFORMAT "png"
+#define JPEGFORMAT "jpeg"
+
+/**
+ * Get the Extension part of a filename
+ * 
+ * /param fname the filename
+ * 
+ * /return char* point to the extension
+ */
+
+static char *
+GetExtension(const char *fname)
+{
+    char *end = fname + strlen(fname);
+
+    while (end > fname && *end != '.') {
+        --end;
+    }
+    return( end + 1 );
+}
 
 /**
 * Export as bitmap file.
@@ -43,6 +64,22 @@ wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName)
     GdkPixbuf *pixbuf;
     GError *error;
     gboolean res;
+    char *fileFormat = GetExtension(fileName);
+    char *writeFormat = NULL; 
+
+    if(!strcasecmp(fileFormat, PNGFORMAT )){
+        writeFormat = PNGFORMAT;
+    } 
+    if( !strcasecmp(fileFormat, "jpg") || 
+        !strcasecmp(fileFormat, "jpeg")){
+        writeFormat = JPEGFORMAT;
+    }
+
+    if(!writeFormat) {
+        wNoticeEx(NT_ERROR, "WriteBitMap: invalid file format!", "Ok", NULL);
+        return FALSE;        
+    }
+
     pixbuf = gdk_pixbuf_get_from_drawable(NULL, (GdkWindow*)d->pixmap, NULL, 0, 0,
                                           0, 0, d->w, d->h);
 
@@ -52,7 +89,7 @@ wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName)
     }
 
     error = NULL;
-    res = gdk_pixbuf_save(pixbuf, fileName, BITMAPFILEFORMAT, &error, NULL);
+    res = gdk_pixbuf_save(pixbuf, fileName, writeFormat, &error, NULL);
 
     if (res == FALSE) {
         wNoticeEx(NT_ERROR, "WriteBitMap: pixbuf_save failed", "Ok", NULL);
