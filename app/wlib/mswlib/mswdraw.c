@@ -2026,7 +2026,19 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
         }
 
         if (bCanSave) {
-            bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
+			int flags;
+
+			switch (fif) {
+			case FIF_JPEG:
+				flags = JPEG_QUALITYNORMAL;
+				break;
+			case FIF_PNG:
+				flags = PNG_DEFAULT;
+				break;
+			default:
+				flags = 0;		// whatver the default is for the file format
+			}
+            bSuccess = FreeImage_Save(fif, dib2, fileName, flags);
         }
     }
     FreeImage_Unload(dib2);

@@ -436,7 +436,8 @@ static void OutputBitMapOk(void * unused)
 
     if (!bitmap_fs) {
         bitmap_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Save Bitmap"),
-                                  _("Bitmap files (*.png)|*.png"),
+                                  _("Portable Network Graphics format (*.png)|*.png |" \
+                                    "JPEG format (*.jpg)|*.jpg"),
                                   SaveBitmapFile, NULL);
     }
 
