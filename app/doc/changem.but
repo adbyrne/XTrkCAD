@@ -1134,24 +1134,28 @@ There are keys that control the display of description when hovering over a desc
 
 \b The letter "\f{d}" will enable and disable a detailed description which is intended for tracklaying - it is a table of points and track angles that lie along the track path.
 
-Using these values a curve can be constructed even for complex objects such as Bezier or Cornu.
+Using these detailed values a curve can be constructed even for complex objects such as Bezier or Cornu.
 
-There is a \f{Context Menu} Show/Hide Toggle as well.
+There is a \f{Context Menu} invoked with \e{Right-Click} or \e{Shift plus Right-Click} to Show/Hide individual descriptions as well as set the description to detailed.
 
 Labels can be moved by hovering the "hot spots" or over the attached track object. \e{Left-Drag} will reposition it. Elevation labels can be selected by hovering of thier centers or the end point they refer to.
 Note that end points with elevation mode "None" are not selectable.
 
-\b Cornu, Bezier, Straight and Joint (Easment) Labels can be moved along the line between the end-points and also laterally. The fields show data about the curves.
+\b Cornu, Bezier, Straight, Curve and Joint (Easement) Labels can be moved along the line between the end-points and also laterally. 
 
 \lcont{\u000
 
 \b Cornu and Bezier Tracks show the "chord" length, its absolute angle, and the length of the track and the minimum radius.
-To lay these variable radius curves out, the detailed description selected by \f{'d'} is suggested.
+To help lay these variable radius curves out, the detailed description information about track centers and angles selected by \f{'d'} is suggested.
 
 \b Joint/Easement Tracks show the "chord" length and abslute angle and easement curve constructing values of Radius and Lengths.
-For larger easmements, the detailed position and angle description selected by \f{'d'} may be useful.
+For laying out larger easmements, the detailed position and angle description selected by \f{'d'} may be useful.
 
 \b Straight Tracks show the length and the absolute angle.
+For laying out long straights, the detailed track center position and angle descriptions selected by \f{'d'} may be useful.
+
+\b Curved Tracks show the radius, chord length, deflection at the center from the chord and the angular length.
+For laying out curves, the detailed track center position and angle descriptions selected by \f{'d'} may be useful.
 
 }
 
