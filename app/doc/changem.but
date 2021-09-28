@@ -1406,6 +1406,10 @@ Note that for Text objects, the Rotation also changes the \f{Text Angle}.
 
 This will be set by itself or by rotation of the starting position about the Rotation Origin with \f{Lock to Origin} set.
 
+\dt Boxed
+
+\dd For Text objects, whether a line is drawn around the text.
+
 \S2{DescribeCompound} Structures, Sectional Track and Turnouts Describe Fields
 
 \dt Pivot
