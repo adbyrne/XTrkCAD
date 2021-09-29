@@ -43,6 +43,8 @@ wBool_t wDrawDoTempDraw = TRUE;
  *****************************************************************************
  */
 
+#define M_PI 3.14159265358979323846
+
 static wBool_t initted = FALSE;
 
 static FARPROC oldDrawProc;
