@@ -1,14 +1,9 @@
 #include "wlib.h"
 #include "mswlib.h"
 #include "dynarr.h"
-#ifndef WIN32
-/*#define CONTROL3D*/
-#endif
-#include "stdio.h"
 
-#ifdef CONTROL3D
-#include "ctl3d.h"
-#endif
+#include <FreeImage.h>
+#include <stdio.h>
 
 #ifdef WIN32
 #ifdef FAR
@@ -136,7 +131,7 @@ struct wDraw_t {
 		HBITMAP hBmBackup;
 		HDC hDcBackup;
 		HBITMAP hBmBackupOld;
-		void *background;
+		FIBITMAP *background;
 		wBool_t bTempMode;
 		wBool_t bCopiedMain;
 
