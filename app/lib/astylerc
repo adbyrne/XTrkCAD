@@ -1,8 +1,7 @@
 --style=1tbs
 --indent=tab=8
---unpad-paren
---pad-paren-in
---pad-header
 --max-code-length=80
 --mode=c
 --keep-one-line-blocks
+--keep-one-line-statements
+--min-conditional-indent=0
