@@ -63,13 +63,13 @@ static double outputBitMapDensity = 10;
 static struct wFilSel_t * bitmap_fs;
 static wWinPix_t bitmap_w, bitmap_h;
 static drawCmd_t bitmap_d = {
-    NULL,
-    &screenDrawFuncs,
-    0,
-    16.0,
-    0.0,
-    {0.0, 0.0}, {1.0,1.0},
-    Pix2CoOrd, CoOrd2Pix
+	NULL,
+	&screenDrawFuncs,
+	0,
+	16.0,
+	0.0,
+	{0.0, 0.0}, {1.0, 1.0},
+	Pix2CoOrd, CoOrd2Pix
 };
 
 /**
@@ -82,17 +82,18 @@ static drawCmd_t bitmap_d = {
  */
 
 static
-DrawTextCenterXPosY(char *string, wFont_p font, wFontSize_t fontSize,
-                    POS_T yPos)
+DrawTextCenterXPosY( char *string, wFont_p font, wFontSize_t fontSize,
+                     POS_T yPos )
 {
-    coOrd textSize;
-    coOrd p;
+	coOrd textSize;
+	coOrd p;
 
-    DrawTextSize(&mainD, string, font, fontSize * bitmap_d.scale, FALSE, &textSize);
-	p.x = (bitmap_d.size.x - textSize.x) / 2.0 + bitmap_d.orig.x;
-    p.y = mapD.size.y + yPos*bitmap_d.scale;
-    DrawString(&bitmap_d, p, 0.0, string, font, fontSize*bitmap_d.scale,
-               wDrawColorBlack);
+	DrawTextSize( &mainD, string, font, fontSize * bitmap_d.scale, FALSE,
+	              &textSize );
+	p.x = ( bitmap_d.size.x - textSize.x ) / 2.0 + bitmap_d.orig.x;
+	p.y = mapD.size.y + yPos*bitmap_d.scale;
+	DrawString( &bitmap_d, p, 0.0, string, font, fontSize*bitmap_d.scale,
+	            wDrawColorBlack );
 }
 
 /**
@@ -104,25 +105,25 @@ DrawTextCenterXPosY(char *string, wFont_p font, wFontSize_t fontSize,
 */
 
 static void
-DrawProductInfo(char *preFix, wFontSize_t fontSize, POS_T yPos)
+DrawProductInfo( char *preFix, wFontSize_t fontSize, POS_T yPos )
 {
 	wFont_p fp, fp_bi;
 	coOrd textsize, textsize1;
 	coOrd textPos;
 
-	fp = wStandardFont(F_TIMES, FALSE, FALSE);
-	fp_bi = wStandardFont(F_TIMES, TRUE, TRUE);
-	DrawTextSize(&mainD, preFix, fp, fontSize * bitmap_d.scale, FALSE, &textsize);
-	DrawTextSize(&mainD, sProdName, fp_bi, fontSize * bitmap_d.scale, FALSE,
-				 &textsize1);
-	textPos.x = (bitmap_d.size.x - (textsize.x + textsize1.x)) /
-		2.0 + bitmap_d.orig.x;
+	fp = wStandardFont( F_TIMES, FALSE, FALSE );
+	fp_bi = wStandardFont( F_TIMES, TRUE, TRUE );
+	DrawTextSize( &mainD, preFix, fp, fontSize * bitmap_d.scale, FALSE, &textsize );
+	DrawTextSize( &mainD, sProdName, fp_bi, fontSize * bitmap_d.scale, FALSE,
+	              &textsize1 );
+	textPos.x = ( bitmap_d.size.x - ( textsize.x + textsize1.x ) ) /
+	            2.0 + bitmap_d.orig.x;
 	textPos.y = -LINEHEIGHT*bitmap_d.scale;
-	DrawString(&bitmap_d, textPos, 0.0, preFix, fp,
-		fontSize * bitmap_d.scale, wDrawColorBlack);
+	DrawString( &bitmap_d, textPos, 0.0, preFix, fp,
+	            fontSize * bitmap_d.scale, wDrawColorBlack );
 	textPos.x += textsize.x;
-	DrawString(&bitmap_d, textPos, 0.0, sProdName, fp_bi,
-		fontSize * bitmap_d.scale, wDrawColorBlack);
+	DrawString( &bitmap_d, textPos, 0.0, sProdName, fp_bi,
+	            fontSize * bitmap_d.scale, wDrawColorBlack );
 }
 
 /**
@@ -136,107 +137,108 @@ DrawProductInfo(char *preFix, wFontSize_t fontSize, POS_T yPos)
  */
 
 static int SaveBitmapFile(
-    int files,
-    char **fileName,
-    void * data)
+        int files,
+        char **fileName,
+        void * data )
 {
 	bool result;
 
-    assert(fileName != NULL);
-    assert(files == 1);
+	assert( fileName != NULL );
+	assert( files == 1 );
 
-    wSetCursor(mainD.d, wCursorWait);
-    InfoMessage(_("Drawing tracks to bitmap"));
+	wSetCursor( mainD.d, wCursorWait );
+	InfoMessage( _( "Drawing tracks to bitmap" ) );
 
-    SetCurrentPath(BITMAPPATHKEY, fileName[ 0 ]);
+	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] );
 
-    bitmap_d.d = wBitMapCreate(bitmap_w, bitmap_h, 8);
+	bitmap_d.d = wBitMapCreate( bitmap_w, bitmap_h, 8 );
 
-    if (!bitmap_d.d) {
-        NoticeMessage(MSG_WBITMAP_FAILED, _("Ok"), NULL);
-        return false;
-    }
+	if( !bitmap_d.d ) {
+		NoticeMessage( MSG_WBITMAP_FAILED, _( "Ok" ), NULL );
+		return false;
+	}
 
-    if (outputBitMapTogglesV & ( BITMAPDRAWFRAMEONLY | BITMAPDRAWTITLE)) {
-        coOrd p[4];
+	if( outputBitMapTogglesV & ( BITMAPDRAWFRAMEONLY | BITMAPDRAWTITLE ) ) {
+		coOrd p[4];
 
-        p[0].x = p[3].x = 0.0;
-        p[1].x = p[2].x = mapD.size.x;
-        p[0].y = p[1].y = 0.0;
-        p[2].y = p[3].y = mapD.size.y;
-        DrawPoly(&bitmap_d, 4, p, NULL, wDrawColorBlack, 2, DRAW_CLOSED);
+		p[0].x = p[3].x = 0.0;
+		p[1].x = p[2].x = mapD.size.x;
+		p[0].y = p[1].y = 0.0;
+		p[2].y = p[3].y = mapD.size.y;
+		DrawPoly( &bitmap_d, 4, p, NULL, wDrawColorBlack, 2, DRAW_CLOSED );
 
-        if ((outputBitMapTogglesV & BITMAPDRAWFRAMEONLY )) {
-            DrawRuler(&bitmap_d, p[0], p[1], 0.0, TRUE, FALSE, wDrawColorBlack);
-            DrawRuler(&bitmap_d, p[0], p[3], 0.0, TRUE, TRUE, wDrawColorBlack);
-            DrawRuler(&bitmap_d, p[1], p[2], 0.0, FALSE, FALSE, wDrawColorBlack);
-            DrawRuler(&bitmap_d, p[3], p[2], 0.0, FALSE, TRUE, wDrawColorBlack);
-            //y0 = 0.37;
-            //y1 = 0.2;
-        }
+		if( ( outputBitMapTogglesV & BITMAPDRAWFRAMEONLY ) ) {
+			DrawRuler( &bitmap_d, p[0], p[1], 0.0, TRUE, FALSE, wDrawColorBlack );
+			DrawRuler( &bitmap_d, p[0], p[3], 0.0, TRUE, TRUE, wDrawColorBlack );
+			DrawRuler( &bitmap_d, p[1], p[2], 0.0, FALSE, FALSE, wDrawColorBlack );
+			DrawRuler( &bitmap_d, p[3], p[2], 0.0, FALSE, TRUE, wDrawColorBlack );
+			//y0 = 0.37;
+			//y1 = 0.2;
+		}
 
-        if (outputBitMapTogglesV & BITMAPDRAWTITLE) {
-            wFont_p fp;
+		if( outputBitMapTogglesV & BITMAPDRAWTITLE ) {
+			wFont_p fp;
 
-            fp = wStandardFont(F_TIMES, FALSE, FALSE);
-            DrawTextCenterXPosY(GetLayoutTitle(), fp, BITMAPEXPORTFONTSIZE, 1.4 * LINEHEIGHT);
-            DrawTextCenterXPosY(GetLayoutSubtitle(), fp, BITMAPEXPORTFONTSIZE, 0.4 * LINEHEIGHT);
-            DrawProductInfo(N_("Drawn with "), BITMAPEXPORTFONTSIZE, -LINEHEIGHT);
-        }
-    }
-    
-    wDrawClip(bitmap_d.d,
-              (wWinPix_t)(-bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi),
-              (wWinPix_t)(-bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi),
-              (wWinPix_t)(mapD.size.x/bitmap_d.scale*bitmap_d.dpi),
-              (wWinPix_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi));
+			fp = wStandardFont( F_TIMES, FALSE, FALSE );
+			DrawTextCenterXPosY( GetLayoutTitle(), fp, BITMAPEXPORTFONTSIZE,
+			                     1.4 * LINEHEIGHT );
+			DrawTextCenterXPosY( GetLayoutSubtitle(), fp, BITMAPEXPORTFONTSIZE,
+			                     0.4 * LINEHEIGHT );
+			DrawProductInfo( N_( "Drawn with " ), BITMAPEXPORTFONTSIZE, -LINEHEIGHT );
+		}
+	}
 
-    DrawSnapGrid(&bitmap_d, mapD.size, TRUE);
+	wDrawClip( bitmap_d.d,
+	           ( wWinPix_t )( -bitmap_d.orig.x/bitmap_d.scale*bitmap_d.dpi ),
+	           ( wWinPix_t )( -bitmap_d.orig.y/bitmap_d.scale*bitmap_d.dpi ),
+	           ( wWinPix_t )( mapD.size.x/bitmap_d.scale*bitmap_d.dpi ),
+	           ( wWinPix_t )( mapD.size.y/bitmap_d.scale*bitmap_d.dpi ) );
 
-   if (outputBitMapTogglesV & BITMAPDRAWBACKGROUND && 
-       GetLayoutBackGroundScreen() < 100.0 )
-   {
-       wWinPix_t bitmapPosX;
-       wWinPix_t bitmapPosY;
-       wWinPix_t bitmapWidth;
+	DrawSnapGrid( &bitmap_d, mapD.size, TRUE );
 
-       TranslateBackground(&bitmap_d, 
-                            bitmap_d.orig.x, 
-                            bitmap_d.orig.y, 
-                            &bitmapPosX,
-                            &bitmapPosY, 
-                            &bitmapWidth);
-       wDrawCloneBackground(mainD.d, bitmap_d.d);
+	if( outputBitMapTogglesV & BITMAPDRAWBACKGROUND &&
+	    GetLayoutBackGroundScreen() < 100.0 ) {
+		wWinPix_t bitmapPosX;
+		wWinPix_t bitmapPosY;
+		wWinPix_t bitmapWidth;
 
-       wDrawShowBackground(bitmap_d.d,
-                           bitmapPosX,
-                           bitmapPosY,
-                           bitmapWidth,
-                           GetLayoutBackGroundAngle(),
-                           GetLayoutBackGroundScreen());
-   }
+		TranslateBackground( &bitmap_d,
+		                     bitmap_d.orig.x,
+		                     bitmap_d.orig.y,
+		                     &bitmapPosX,
+		                     &bitmapPosY,
+		                     &bitmapWidth );
+		wDrawCloneBackground( mainD.d, bitmap_d.d );
 
-    if (outputBitMapTogglesV & BITMAPDRAWCENTERLINE) {
-        bitmap_d.options |= DC_CENTERLINE;
-    } else {
-        bitmap_d.options &= ~DC_CENTERLINE;
-    }
+		wDrawShowBackground( bitmap_d.d,
+		                     bitmapPosX,
+		                     bitmapPosY,
+		                     bitmapWidth,
+		                     GetLayoutBackGroundAngle(),
+		                     GetLayoutBackGroundScreen() );
+	}
 
-    DrawTracks(&bitmap_d, bitmap_d.scale, bitmap_d.orig, bitmap_d.size);
+	if( outputBitMapTogglesV & BITMAPDRAWCENTERLINE ) {
+		bitmap_d.options |= DC_CENTERLINE;
+	} else {
+		bitmap_d.options &= ~DC_CENTERLINE;
+	}
 
-    InfoMessage(_("Writing bitmap to file"));
+	DrawTracks( &bitmap_d, bitmap_d.scale, bitmap_d.orig, bitmap_d.size );
 
-    if (!wBitMapWriteFile(bitmap_d.d, fileName[0])) {
-        NoticeMessage(MSG_WBITMAP_FAILED, _("Ok"), NULL);
-        result = false;
-    } else {
-		InfoMessage("");
+	InfoMessage( _( "Writing bitmap to file" ) );
+
+	if( !wBitMapWriteFile( bitmap_d.d, fileName[0] ) ) {
+		NoticeMessage( MSG_WBITMAP_FAILED, _( "Ok" ), NULL );
+		result = false;
+	} else {
+		InfoMessage( "" );
 		result = true;
 	}
 
-    wSetCursor(mainD.d, defaultCursor);
-    wBitMapDelete(bitmap_d.d);
-    return result;
+	wSetCursor( mainD.d, defaultCursor );
+	wBitMapDelete( bitmap_d.d );
+	return result;
 }
 
 /*******************************************************************************
@@ -247,29 +249,29 @@ static int SaveBitmapFile(
 
 static wWin_p outputBitMapW;
 
-static char *bitmapTogglesLabels[] = { N_("Layout Titles"), 
-                                       N_("Borders"),
-                                       N_("Centerline of Track"), 
-                                       N_("Background Image"),
+static char *bitmapTogglesLabels[] = { N_( "Layout Titles" ),
+                                       N_( "Borders" ),
+                                       N_( "Centerline of Track" ),
+                                       N_( "Background Image" ),
                                        NULL
                                      };
 static paramFloatRange_t dpiRange = { 0.1, 100.0, 60 };
 
 static paramData_t outputBitMapPLs[] = {
 #define I_TOGGLES		(0)
-    { PD_TOGGLE, &outputBitMapTogglesV, "toggles", PDO_NOPSHUPD, bitmapTogglesLabels, N_("Include ") },
+	{ PD_TOGGLE, &outputBitMapTogglesV, "toggles", PDO_NOPSHUPD, bitmapTogglesLabels, N_( "Include " ) },
 #define I_DENSITY		(1)
-    { PD_FLOAT, &outputBitMapDensity, "density", PDO_NOPSHUPD, &dpiRange, N_("Resolution ") },
-    { PD_MESSAGE, N_("dpi"), NULL, PDO_DLGHORZ },
-    { PD_MESSAGE, N_("Bitmap Size "), NULL, PDO_NOPSHUPD | PDO_DLGRESETMARGIN, 0 },
+	{ PD_FLOAT, &outputBitMapDensity, "density", PDO_NOPSHUPD, &dpiRange, N_( "Resolution " ) },
+	{ PD_MESSAGE, N_( "dpi" ), NULL, PDO_DLGHORZ },
+	{ PD_MESSAGE, N_( "Bitmap Size " ), NULL, PDO_NOPSHUPD | PDO_DLGRESETMARGIN, 0 },
 #define I_MSG1			(4)
-    { PD_MESSAGE, N_("99999 by 99999 pixels"), NULL, PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT /* | PDO_DLGWIDE */ , I2VP(180)},
-    { PD_MESSAGE, N_("Approximate File Size "), NULL, PDO_NOPSHUPD, 0 },
+	{ PD_MESSAGE, N_( "99999 by 99999 pixels" ), NULL, PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT /* | PDO_DLGWIDE */, I2VP( 180 )},
+	{ PD_MESSAGE, N_( "Approximate File Size " ), NULL, PDO_NOPSHUPD, 0 },
 #define I_MSG2			(6)
-    { PD_MESSAGE, N_("999.9Mb"), NULL, PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT | PDO_DLGBOXEND, I2VP(180) },
+	{ PD_MESSAGE, N_( "999.9Mb" ), NULL, PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT | PDO_DLGBOXEND, I2VP( 180 ) },
 };
 
-static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, COUNT(outputBitMapPLs) };
+static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, COUNT( outputBitMapPLs ) };
 
 /**
  * The upper limit for the dpi setting is calculated. The limit is set
@@ -279,42 +281,42 @@ static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, COUNT
  * \param [in]		size	The size of the layout
  * \param [in]		marginX	The total size of margins in X direction
  * \param [in]		marginY	The total size of margins in Y direction
- * 
+ *
  * \returns the maximum allowed dpi value
  */
 
-static double CalculateMaxDPI(coOrd size, POS_T marginX, POS_T marginY )
+static double CalculateMaxDPI( coOrd size, POS_T marginX, POS_T marginY )
 {
 	POS_T maxSize;
 	POS_T maxMargin;
 	double maxDpi;
 
-	if (size.x > size.y) {
+	if( size.x > size.y ) {
 		maxMargin = marginX;
 		maxSize = size.x;
-	}
-	else {
+	} else {
 		maxMargin = marginY;
 		maxSize = size.y;
 	}
-	maxDpi = (BITMAPDIM - maxMargin * mainD.dpi) / maxSize;
-    return(floor(maxDpi));
+
+	maxDpi = ( BITMAPDIM - maxMargin * mainD.dpi ) / maxSize;
+	return( floor( maxDpi ) );
 }
 
 /**
- * Display the pixel size of the bitmap 
+ * Display the pixel size of the bitmap
  */
 
-static void 
-OutputBitmapPixelSize(void)
+static void
+OutputBitmapPixelSize( void )
 {
 	DynString message;
-	DynStringMalloc(&message, 16);
-	ParamLoadData(&outputBitMapPG);
+	DynStringMalloc( &message, 16 );
+	ParamLoadData( &outputBitMapPG );
 
-	DynStringPrintf(&message, _("%ld by %ld pixels"), bitmap_w, bitmap_h);
-	ParamLoadMessage(&outputBitMapPG, I_MSG1, DynStringToCStr(&message));
-	DynStringFree(&message);
+	DynStringPrintf( &message, _( "%ld by %ld pixels" ), bitmap_w, bitmap_h );
+	ParamLoadMessage( &outputBitMapPG, I_MSG1, DynStringToCStr( &message ) );
+	DynStringFree( &message );
 }
 
 /**
@@ -324,87 +326,87 @@ OutputBitmapPixelSize(void)
 */
 
 static FLOAT_T
-OutputBitmapFileSize(void)
+OutputBitmapFileSize( void )
 {
 	DynString message;
-	DynStringMalloc(&message, 16);
-	ParamLoadData(&outputBitMapPG);
+	DynStringMalloc( &message, 16 );
+	ParamLoadData( &outputBitMapPG );
 	FLOAT_T size;
 
-	size = (FLOAT_T)bitmap_w * bitmap_h;
+	size = ( FLOAT_T )bitmap_w * bitmap_h;
 
-	if (size < 1e4) {
-		DynStringPrintf(&message, _("%0.0f"), size);
-	}
-	else if (size < 1e6) {
-		DynStringPrintf(&message, _("%0.1fKb"), (size + 50.0) / 1e3);
-	}
-	else if (size < 1e9) {
-		DynStringPrintf(&message, _("%0.1fMb"), (size + 5e4) / 1e6);
-	}
-	else {
-		DynStringPrintf(&message, _("%0.1fGb"), (size + 5e7) / 1e9);
+	if( size < 1e4 ) {
+		DynStringPrintf( &message, _( "%0.0f" ), size );
+	} else if( size < 1e6 ) {
+		DynStringPrintf( &message, _( "%0.1fKb" ), ( size + 50.0 ) / 1e3 );
+	} else if( size < 1e9 ) {
+		DynStringPrintf( &message, _( "%0.1fMb" ), ( size + 5e4 ) / 1e6 );
+	} else {
+		DynStringPrintf( &message, _( "%0.1fGb" ), ( size + 5e7 ) / 1e9 );
 	}
 
-	ParamLoadMessage(&outputBitMapPG, I_MSG2, DynStringToCStr(&message));
+	ParamLoadMessage( &outputBitMapPG, I_MSG2, DynStringToCStr( &message ) );
 
-	DynStringFree(&message);
+	DynStringFree( &message );
 
-	return(size);
+	return( size );
 }
 
 /**
- * Compute pixel size of bitmap 
+ * Compute pixel size of bitmap
  */
 
-static void ComputeBitmapSize(void)
+static void ComputeBitmapSize( void )
 {
-    FLOAT_T Lborder=0.0, Rborder=0.0, Tborder=0.0, Bborder=0.0;
+	FLOAT_T Lborder=0.0, Rborder=0.0, Tborder=0.0, Bborder=0.0;
 
-    bitmap_d.dpi = mainD.dpi;
+	bitmap_d.dpi = mainD.dpi;
 	bitmap_d.scale = mainD.dpi / outputBitMapDensity;
 
-    if (outputBitMapTogglesV & ( BITMAPDRAWFRAMEONLY | BITMAPDRAWTITLE )) {
-        Lborder = LEFTMARGIN;
-        Rborder = DEFAULTMARGIN;
-        Tborder = DEFAULTMARGIN;
-        Bborder = BOTTOMMARGIN;
-    }
-    if (outputBitMapTogglesV & BITMAPDRAWTITLE) {
-        Tborder += 2 * LINEHEIGHT;
-        Bborder += LINEHEIGHT;
-    }
-	dpiRange.high = CalculateMaxDPI(mapD.size, Lborder + Rborder, Bborder + Tborder);
+	if( outputBitMapTogglesV & ( BITMAPDRAWFRAMEONLY | BITMAPDRAWTITLE ) ) {
+		Lborder = LEFTMARGIN;
+		Rborder = DEFAULTMARGIN;
+		Tborder = DEFAULTMARGIN;
+		Bborder = BOTTOMMARGIN;
+	}
+
+	if( outputBitMapTogglesV & BITMAPDRAWTITLE ) {
+		Tborder += 2 * LINEHEIGHT;
+		Bborder += LINEHEIGHT;
+	}
+
+	dpiRange.high = CalculateMaxDPI( mapD.size, Lborder + Rborder,
+	                                 Bborder + Tborder );
 
 	bitmap_d.orig.x = -Lborder*bitmap_d.scale;
-	bitmap_d.size.x = mapD.size.x + (Lborder + Rborder)*bitmap_d.scale;
+	bitmap_d.size.x = mapD.size.x + ( Lborder + Rborder )*bitmap_d.scale;
 	bitmap_d.orig.y = -Bborder*bitmap_d.scale;
-	bitmap_d.size.y = mapD.size.y + (Bborder + Tborder)*bitmap_d.scale;
+	bitmap_d.size.y = mapD.size.y + ( Bborder + Tborder )*bitmap_d.scale;
 
-	bitmap_w = (wWinPix_t)(bitmap_d.size.x / bitmap_d.scale*bitmap_d.dpi);
-	bitmap_h = (wWinPix_t)(bitmap_d.size.y / bitmap_d.scale*bitmap_d.dpi);
+	bitmap_w = ( wWinPix_t )( bitmap_d.size.x / bitmap_d.scale*bitmap_d.dpi );
+	bitmap_h = ( wWinPix_t )( bitmap_d.size.y / bitmap_d.scale*bitmap_d.dpi );
 }
 
 /**
- * Update the dialog for changed bitmap settings. Based on the new dimensions 
+ * Update the dialog for changed bitmap settings. Based on the new dimensions
  * selected options the bitmap size and and maximum density is calculated and
  * displayed.
  */
 
 void
-UpdateBitmapDialog(void)
+UpdateBitmapDialog( void )
 {
-    ParamLoadData(&outputBitMapPG);
+	ParamLoadData( &outputBitMapPG );
 
 	ComputeBitmapSize();
-    ParamLoadControl(&outputBitMapPG, I_DENSITY); // trigger range check
+	ParamLoadControl( &outputBitMapPG, I_DENSITY ); // trigger range check
 
-	if (outputBitMapDensity > dpiRange.high) {
-		ParamDialogOkActive(&outputBitMapPG, false);
+	if( outputBitMapDensity > dpiRange.high ) {
+		ParamDialogOkActive( &outputBitMapPG, false );
+	} else {
+		ParamDialogOkActive( &outputBitMapPG, true );
 	}
-	else {
-		ParamDialogOkActive(&outputBitMapPG, true);
-	}
+
 	OutputBitmapPixelSize();
 	OutputBitmapFileSize();
 }
@@ -415,28 +417,29 @@ UpdateBitmapDialog(void)
  * \param [in,out] junk If non-null, the junk.
  */
 
-static void OutputBitMapOk(void * unused)
+static void OutputBitMapOk( void * unused )
 {
-    FLOAT_T size;
+	FLOAT_T size;
 
 	size = OutputBitmapFileSize();
 
-    if (size > BITMAPSIZE) {
-        if (NoticeMessage(MSG_BITMAP_SIZE_WARNING, _("Continue"), _("Cancel"))==0) {
-            return;
-        }
-    }
+	if( size > BITMAPSIZE ) {
+		if( NoticeMessage( MSG_BITMAP_SIZE_WARNING, _( "Continue" ),
+		                   _( "Cancel" ) )==0 ) {
+			return;
+		}
+	}
 
-    wHide(outputBitMapW);
+	wHide( outputBitMapW );
 
-    if (!bitmap_fs) {
-        bitmap_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Save Bitmap"),
-                                  _("Portable Network Graphics format (*.png)|*.png |" \
-                                    "JPEG format (*.jpg)|*.jpg"),
-                                  SaveBitmapFile, NULL);
-    }
+	if( !bitmap_fs ) {
+		bitmap_fs = wFilSelCreate( mainW, FS_SAVE, 0, _( "Save Bitmap" ),
+		                           _( "Portable Network Graphics format (*.png)|*.png |" \
+		                              "JPEG format (*.jpg)|*.jpg" ),
+		                           SaveBitmapFile, NULL );
+	}
 
-    wFilSelect(bitmap_fs, GetCurrentPath(BITMAPPATHKEY));
+	wFilSelect( bitmap_fs, GetCurrentPath( BITMAPPATHKEY ) );
 }
 
 /**
@@ -446,14 +449,14 @@ static void OutputBitMapOk(void * unused)
  * \param  changes The changes.
  */
 
-static void OutputBitMapChange(long changes)
+static void OutputBitMapChange( long changes )
 {
-    if ((changes & CHANGE_MAP) && outputBitMapW) {
-        ParamLoadControls(&outputBitMapPG);
-        ComputeBitmapSize();
-    }
+	if( ( changes & CHANGE_MAP ) && outputBitMapW ) {
+		ParamLoadControls( &outputBitMapPG );
+		ComputeBitmapSize();
+	}
 
-    return;
+	return;
 }
 
 /**
@@ -462,30 +465,31 @@ static void OutputBitMapChange(long changes)
  * \param [in,out] unused.
  */
 
-static void DoOutputBitMap(void* unused)
+static void DoOutputBitMap( void* unused )
 {
-    if (outputBitMapW == NULL) {
-        outputBitMapW = ParamCreateDialog(&outputBitMapPG,
-            MakeWindowTitle(_("Export to bitmap")),
-            _("Ok"),
-            OutputBitMapOk,
-            wHide,
-            TRUE,
-            NULL,
-            0,
-            (paramChangeProc)UpdateBitmapDialog);
-    }
-    ParamLoadControls(&outputBitMapPG);
-    ParamGroupRecord(&outputBitMapPG);
+	if( outputBitMapW == NULL ) {
+		outputBitMapW = ParamCreateDialog( &outputBitMapPG,
+		                                   MakeWindowTitle( _( "Export to bitmap" ) ),
+		                                   _( "Ok" ),
+		                                   OutputBitMapOk,
+		                                   wHide,
+		                                   TRUE,
+		                                   NULL,
+		                                   0,
+		                                   ( paramChangeProc )UpdateBitmapDialog );
+	}
 
-    UpdateBitmapDialog();
+	ParamLoadControls( &outputBitMapPG );
+	ParamGroupRecord( &outputBitMapPG );
 
-    if (dpiRange.high < outputBitMapDensity) {
-        outputBitMapDensity = dpiRange.high;
-        ParamLoadControl(&outputBitMapPG, I_DENSITY);
-    }
+	UpdateBitmapDialog();
 
-    wShow(outputBitMapW);
+	if( dpiRange.high < outputBitMapDensity ) {
+		outputBitMapDensity = dpiRange.high;
+		ParamLoadControl( &outputBitMapPG, I_DENSITY );
+	}
+
+	wShow( outputBitMapW );
 }
 
 /**
@@ -494,9 +498,9 @@ static void DoOutputBitMap(void* unused)
  * \returns entry point for bitmap export
  */
 
-EXPORT addButtonCallBack_t OutputBitMapInit(void)
+EXPORT addButtonCallBack_t OutputBitMapInit( void )
 {
-    ParamRegister(&outputBitMapPG);
-    RegisterChangeNotification(OutputBitMapChange);
-    return &DoOutputBitMap;
+	ParamRegister( &outputBitMapPG );
+	RegisterChangeNotification( OutputBitMapChange );
+	return &DoOutputBitMap;
 }
