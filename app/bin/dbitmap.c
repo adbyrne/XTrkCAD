@@ -419,11 +419,6 @@ static void OutputBitMapOk(void * unused)
 {
     FLOAT_T size;
 
-    if (bitmap_w > BITMAPDIM || bitmap_h > BITMAPDIM) {
-        NoticeMessage(MSG_BITMAP_TOO_LARGE, _("Ok"), NULL);
-        return;
-    }
-
 	size = OutputBitmapFileSize();
 
     if (size > BITMAPSIZE) {
