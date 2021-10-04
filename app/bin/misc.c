@@ -2552,7 +2552,7 @@ static void CreateMenus(void) {
 			NULL);
 #if XTRKCAD_CREATE_SVG
 	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"), ACCL_EXPORTDXF, 
-			(void*)(wMenuCallBack_p)DoExportSVG, IC_SELECTED, (void *)0);
+			DoExportSVG, IC_SELECTED, NULL);
 #endif
 	wMenuSeparatorCreate(fileM);
 
