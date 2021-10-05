@@ -40,10 +40,10 @@
  * /return char* point to the extension
  */
 
-static char *
+static const char *
 GetExtension(const char *fname)
 {
-    char *end = fname + strlen(fname);
+    const char *end = fname + strlen(fname);
 
     while (end > fname && *end != '.') {
         --end;
@@ -64,7 +64,7 @@ wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName)
     GdkPixbuf *pixbuf;
     GError *error;
     gboolean res;
-    char *fileFormat = GetExtension(fileName);
+    const char *fileFormat = GetExtension(fileName);
     char *writeFormat = NULL; 
 
     if(!strcasecmp(fileFormat, PNGFORMAT )){
