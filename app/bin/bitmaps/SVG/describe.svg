@@ -38,7 +38,7 @@
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="question"
+   inkscape:current-layer="Layer_1"
    inkscape:document-rotation="0" />
 <style
    type="text/css"
@@ -59,7 +59,7 @@
 <g
    id="ties"
    inkscape:label="ties"
-   transform="translate(0.51362945,2.6537522)"><line
+   transform="matrix(1.3046527,0,0,1.3046527,-5.9214072,-2.9615326)"><line
      class="st0"
      x1="8"
      y1="16"
@@ -80,13 +80,6 @@
      x2="18"
      y2="27"
      id="line899"
-     style="stroke:#d98b0d;stroke-opacity:1" /><line
-     class="st0"
-     x1="23"
-     y1="16"
-     x2="23"
-     y2="27"
-     id="line901"
      style="stroke:#d98b0d;stroke-opacity:1" /><line
      class="st0"
      x1="28"
@@ -113,19 +106,22 @@
 <g
    id="rail"
    inkscape:label="rail"
-   transform="translate(0.51362945,2.6537522)"><line
+   transform="matrix(1.3046527,0,0,1.1147635,-6.0070121,1.1958036)"
+   style="stroke-width:1.49671;stroke-miterlimit:10;stroke-dasharray:none"><line
      class="st1"
      x1="6"
      y1="17.5"
      x2="40"
      y2="17.5"
-     id="line909" /><line
+     id="line909"
+     style="stroke-width:1.49671;stroke-miterlimit:10;stroke-dasharray:none" /><line
      class="st1"
      x1="6"
      y1="25.5"
      x2="40"
      y2="25.5"
-     id="line911" /></g>
+     id="line911"
+     style="stroke-width:1.49671;stroke-miterlimit:10;stroke-dasharray:none" /></g>
 
 
 
@@ -133,11 +129,11 @@
 <g
    id="question"
    inkscape:label="question"
-   transform="matrix(1.6236226,0,0,1.3689334,-14.060991,-7.4839758)"><path
+   transform="matrix(1.8239805,0,0,1.6303501,-18.297728,-12.564437)"><path
      class="st4"
      d="M 18.825677,15.7 C 17.914059,11.7 27.6,11.1 27.6,15.3 c 0,3.9 -1.937188,5.6 -4.672042,5.7 v 7.5"
      id="path919"
-     style="stroke-width:3.20245;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" /><rect
+     style="stroke:#cc0000;stroke-width:3.20245;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /><rect
      x="22.491764"
      y="31.943529"
      class="st5"

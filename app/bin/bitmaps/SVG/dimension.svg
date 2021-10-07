@@ -32,13 +32,14 @@
    inkscape:window-height="842"
    id="namedview1535"
    showgrid="false"
-   inkscape:zoom="13.417014"
+   inkscape:zoom="12.521303"
    inkscape:cx="24"
-   inkscape:cy="21.741176"
+   inkscape:cy="24.695735"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style1492">
@@ -112,34 +113,36 @@
    id="path1522" />
 <line
    class="st3"
-   x1="31.493195"
-   y1="16.671917"
-   x2="42.188274"
-   y2="5.7138414"
+   x1="32.164993"
+   y1="15.832255"
+   x2="44.44154"
+   y2="3.2073443"
    id="line1524"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0e00;stroke-opacity:1" />
+   style="stroke:#cc0e00;stroke-width:3.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <polyline
    class="st4"
    points="42.6,12.6 42.1,5.8 35.5,5.8 "
    id="polyline1526"
-   style="stroke:#cc0e00;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke:#cc0e00;stroke-width:2.94445055;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.1864868,0,0,1.1908708,-5.5442267,-3.6659913)" />
 <line
    class="st3"
-   x1="18.964966"
-   y1="30.072451"
-   x2="8.4285078"
-   y2="40.969131"
+   x1="15.726236"
+   y1="32.24678"
+   x2="4.0029783"
+   y2="44.370842"
    id="line1528"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0e00;stroke-opacity:1" />
+   style="stroke:#cc0e00;stroke-width:3.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <polyline
    class="st4"
    points="8,34 8.5,40.9 15.1,40.9 "
    id="polyline1530"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0e00;stroke-opacity:1" />
+   style="stroke:#cc0e00;stroke-width:2.68761367;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.3022705,0,0,1.3022705,-6.8028116,-9.1468245)" />
 <text
    class="st5 st6"
    id="text1532"
-   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:16px;font-family:Arial;-inkscape-font-specification:'Arial Bold';"
-   x="16.350348"
-   y="28.919847">36</text>
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.6667px;font-family:Calibri;-inkscape-font-specification:'Calibri Bold'"
+   x="14.434245"
+   y="29.897146">36</text>
 </svg>
