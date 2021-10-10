@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1435"
+   inkscape:window-width="1438"
    inkscape:window-height="878"
    id="namedview27"
    showgrid="false"
@@ -38,7 +38,7 @@
    inkscape:window-x="3"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="x"
+   inkscape:current-layer="Layer_1"
    inkscape:document-rotation="0" />
 <style
    type="text/css"
@@ -56,7 +56,7 @@
 <g
    id="ties"
    inkscape:label="ties"
-   transform="translate(-0.07986389,2.3959168)"><line
+   transform="matrix(1.3006641,0,0,1.3006641,-7.3756654,-4.111636)"><line
      class="st0"
      x1="9"
      y1="16"
@@ -110,31 +110,34 @@
 <g
    id="rail"
    inkscape:label="rail"
-   transform="translate(-0.07986389,2.3959168)"><line
+   transform="matrix(1.3006641,0,0,1.1040829,-7.3756654,0.10254712)"
+   style="stroke-width:1.47801;stroke-miterlimit:10;stroke-dasharray:none"><line
      class="st1"
      x1="7"
      y1="17.5"
      x2="41"
      y2="17.5"
-     id="line18" /><line
+     id="line18"
+     style="stroke-width:1.47801;stroke-miterlimit:10;stroke-dasharray:none" /><line
      class="st1"
      x1="7"
      y1="25.5"
      x2="41"
      y2="25.5"
-     id="line20" /></g>
+     id="line20"
+     style="stroke-width:1.47801;stroke-miterlimit:10;stroke-dasharray:none" /></g>
 
 <g
    id="x"
    inkscape:label="x"
    style="stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none"
-   transform="matrix(1.217065,0,0,1.1619439,-6.1110668,-1.5373867)"><path
+   transform="matrix(1.2833014,0,0,1.2251804,-6.9372327,-2.6670144)"><path
      class="st2"
-     d="m 16.6,10.7 c 9.9,10.4 9.9,10.4 0.9,22.3"
+     d="M 14.106487,7.2987516 C 26.983061,20.825658 26.983061,20.825658 15.277084,36.30356"
      id="path22"
-     style="stroke-width:2.94319189;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" /><path
+     style="stroke:#cc0000;stroke-width:3.8281;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /><path
      class="st2"
-     d="M 31.9,33 C 22.6,22.2 22.6,22.2 31.9,10.7"
+     d="m 34.006647,36.30356 c -12.096176,-14.047171 -12.096176,-14.047171 0,-29.0048084"
      id="path24"
-     style="stroke-width:2.94319189;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" /></g>
+     style="stroke:#cc0000;stroke-width:3.8281;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /></g>
 </svg>
