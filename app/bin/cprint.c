@@ -1226,7 +1226,11 @@ static BOOL_T PrintPage(
 				if (printGrid)
 					DrawSnapGrid( &print_d, mapD.size, FALSE );
 				roadbedWidth = printRoadbed?printRoadbedWidth:0.0;
-				printCenterLines = printCenterLine;
+				if (printCenterLine) {
+					print_d.options |= DC_CENTERLINE;
+				} else {
+					print_d.options &= ~DC_CENTERLINE;
+				}
 				DrawTracks( &print_d, print_d.scale, minP, maxP );
 				if (printRegistrationMarks && printScale == 1)
 					DrawRegistrationMarks( &print_d );
