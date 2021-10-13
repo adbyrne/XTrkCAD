@@ -38,7 +38,8 @@
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style2">
@@ -80,10 +81,10 @@
    style="stroke-width:1.07757" />
 <polygon
    class="st1"
-   points="20.7,21.2 14.4,10 12,10 9,12 9,38 40,38 40,18 30.3,16 "
+   points="12,10 9,12 9,38 40,38 40,18 30.3,16 20.7,21.2 14.4,10 "
    id="polygon12"
-   style="fill:#80deff;fill-opacity:1"
-   transform="matrix(1.0775746,0,0,1.0775746,-2.5222782,-4.8168301)" />
+   style="fill:#80deff;fill-opacity:1;stroke:#000000;stroke-opacity:1"
+   transform="matrix(1.1414801,0,0,1.1160593,-4.0879632,-5.2016771)" />
 <line
    class="st2"
    x1="17.673576"

@@ -28,17 +28,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1219"
+   inkscape:window-width="1231"
    inkscape:window-height="814"
    id="namedview4205"
    showgrid="false"
-   inkscape:zoom="17.708333"
+   inkscape:zoom="10.897825"
    inkscape:cx="24"
    inkscape:cy="24"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style4142">
@@ -52,127 +53,138 @@
 </style>
 <path
    class="st0"
-   d="M15.3,40.7"
+   d="M 12.078246,44.927861"
    id="path4144" />
 <path
    class="st0"
-   d="M6.4,40.3"
+   d="M 1.0635811,44.409525"
    id="path4146" />
 <path
    class="st0"
-   d="M29.7,19.3"
+   d="M 30.738383,17.196825"
    id="path4148" />
 <path
    class="st0"
-   d="M25.7,11.6"
+   d="M 25.555012,7.2188348"
    id="path4150" />
 <path
    class="st0"
-   d="M17.4,31.7"
+   d="M 14.799516,33.265276"
    id="path4152" />
 <path
    class="st0"
-   d="M9.7,27.9"
+   d="M 4.8215252,28.341074"
    id="path4154" />
 <path
    class="st0"
-   d="M25.4,21.7"
+   d="M 25.166258,20.306848"
    id="path4156" />
 <path
    class="st0"
-   d="M20,14.9"
+   d="M 18.168707,11.495116"
    id="path4158" />
 <path
    class="st0"
-   d="M20,27.7"
+   d="M 18.168707,28.081905"
    id="path4160" />
 <path
    class="st0"
-   d="M12.9,23"
+   d="M 8.9682223,21.991444"
    id="path4162" />
 <path
    class="st0"
-   d="M16.1,36.1"
+   d="M 13.114921,38.966985"
    id="path4164" />
 <path
    class="st0"
-   d="M7.2,34.3"
+   d="M 1.5819182,36.634468"
    id="path4166" />
 <path
    class="st0"
-   d="M37.9,16"
+   d="M 41.364295,12.920544"
    id="path4168" />
 <path
    class="st0"
-   d="M36.9,8"
+   d="M 40.068452,2.5538006"
    id="path4170" />
 <path
    class="st0"
-   d="M33.5,17.1"
+   d="M 35.662586,14.34597"
    id="path4172" />
 <path
    class="st0"
-   d="M31.2,9.3"
+   d="M 32.682147,4.2383963"
    id="path4174" />
 <path
    class="st0"
-   d="M22.7,24.7"
+   d="M 21.667483,24.194376"
    id="path4176" />
 <path
    class="st0"
-   d="M15.8,18.7"
+   d="M 12.726167,16.419319"
    id="path4178" />
 <path
    class="st1"
-   d="M7.7,42c0-18,16.8-32.6,31.8-32.6"
-   id="path4180" />
+   d="m 3.1707748,45.065034 c 0,-22.568039 22.1983802,-40.8732267 42.0183602,-40.8732267"
+   id="path4180"
+   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st2"
-   d="M39.5,14.9"
-   id="path4182" />
+   d="M 43.437643,11.495116"
+   id="path4182"
+   style="stroke-width:1.29584" />
 <path
    class="st2"
-   d="M13.5,42"
-   id="path4184" />
+   d="M 9.7457276,46.612458"
+   id="path4184"
+   style="stroke-width:1.29584" />
 <path
    class="st3"
-   d="M38.5,5.4"
-   id="path4186" />
+   d="M 43.913924,-1.2068227"
+   id="path4186"
+   style="stroke-width:1.29584" />
 <path
    class="st3"
-   d="M41.8,7.1"
-   id="path4188" />
+   d="M 46.418082,1.3875421"
+   id="path4188"
+   style="stroke-width:1.29584" />
 <path
    class="st3"
-   d="M38.5,5.4"
-   id="path4190" />
+   d="M 43.913924,-1.2068227"
+   id="path4190"
+   style="stroke-width:1.29584" />
 <path
    class="st3"
-   d="M35.6,17.9"
-   id="path4192" />
+   d="M 38.383856,15.382645"
+   id="path4192"
+   style="stroke-width:1.29584" />
 <path
    class="st3"
-   d="M38.8,19.3"
-   id="path4194" />
+   d="M 42.530553,17.196825"
+   id="path4194"
+   style="stroke-width:1.29584" />
 <path
    class="st3"
-   d="M41.8,17.7"
-   id="path4196" />
+   d="M 46.418082,15.123476"
+   id="path4196"
+   style="stroke-width:1.29584" />
 <line
    class="st4"
-   x1="37.521076"
-   y1="38.522655"
-   x2="17.918659"
-   y2="20.28558"
+   x1="42.983685"
+   y1="43.366608"
+   x2="16.089582"
+   y2="18.271143"
    id="line4198"
-   style="stroke:#cc0000;stroke-width:2.43811;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:2.47961;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <path
    class="st5"
-   d="M38.8,26.8"
-   id="path4200" />
+   d="M 42.530553,26.915646"
+   id="path4200"
+   style="stroke-width:1.29584" />
 <polyline
    class="st6"
    points="38,34 38,39 33,39 "
    id="polyline4202"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:1.43697;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.7397675,0,0,1.7397675,-23.134377,-24.49174)" />
 </svg>
