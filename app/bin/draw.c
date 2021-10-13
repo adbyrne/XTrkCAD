@@ -1019,9 +1019,8 @@ static void TempSegPoly(
 	tempSegs(tempSegs_da.cnt-1).u.p.pts = (pts_t *)MyMalloc(cnt*sizeof(pts_t));
 	for (int i=0;i<=cnt-1;i++) {
 		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt = pts[i];
-		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_SIMPLE)==0?types[i]:wPolyLineStraight;
+		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = ((d->options&DC_SIMPLE)==0 && (types!=0))?types[i]:wPolyLineStraight;
 	}
-
 }
 
 

@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1309"
+   inkscape:window-width="1316"
    inkscape:window-height="850"
    id="namedview1019"
    showgrid="false"
@@ -182,8 +182,9 @@
    id="path1004" />
 <path
    class="st1"
-   d="M43.9,24.2c0,10.9-8.8,19.7-19.7,19.7c-10.9,0-19.7-8.8-19.7-19.7c0-10.9,8.8-19.7,19.7-19.7  C35.1,4.5,43.9,13.3,43.9,24.2z"
-   id="path1006" />
+   d="M 44.434014,24 C 44.434014,35.30613 35.306129,44.434014 24,44.434014 12.69387,44.434014 3.5659857,35.30613 3.5659857,24 3.5659857,12.693871 12.69387,3.5659861 24,3.5659861 35.306129,3.5659861 44.434014,12.693871 44.434014,24 Z"
+   id="path1006"
+   style="stroke-width:2.59315;stroke-miterlimit:10;stroke-dasharray:none" />
 <line
    class="st2"
    x1="43.5"
@@ -193,32 +194,34 @@
    id="line1008" />
 <line
    class="st3"
-   x1="5.4"
-   y1="24.5"
-   x2="42.4"
-   y2="24"
+   x1="6.2269526"
+   y1="24.224487"
+   x2="41.573009"
+   y2="24.275513"
    id="line1010"
-   style="stroke:#cc0000;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke:#cc0000;stroke-width:2.44399;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <polyline
    class="st4"
    points="8.6,20.9 5.6,24.5 8.6,28.1 "
    id="polyline1012"
-   style="stroke:#cc0000;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke:#cc0000;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.1988158,0,0,1.1988158,-0.48641593,-5.1464998)" />
 <polyline
    class="st4"
    points="39.2,27.7 42.6,24.2 39.2,20.9 "
    id="polyline1014"
-   style="stroke:#cc0000;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke:#cc0000;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.1777431,0,0,1.1777431,-8.5988466,-4.2258703)" />
 
 <text
    xml:space="preserve"
-   style="font-weight:bold;font-size:13.7621px;line-height:0;font-family:Arial;-inkscape-font-specification:'Arial Bold';fill:#cc0000;fill-opacity:1;stroke-width:1.14684;"
-   x="15.269485"
-   y="21.657965"
+   style="font-weight:bold;font-size:17.0194px;line-height:0;font-family:Arial;-inkscape-font-specification:'Arial Bold';fill:#cc0000;fill-opacity:1;stroke-width:1.41828"
+   x="12.717101"
+   y="21.812561"
    id="text1608"
-   transform="scale(1.0582049,0.94499655)"><tspan
+   transform="scale(1.0582049,0.94499656)"><tspan
      sodipodi:role="line"
      id="tspan1606"
-     x="15.269485"
-     y="21.657965"
-     style="stroke-width:1.14684;fill:#cc0000;fill-opacity:1;">36</tspan></text></svg>
+     x="12.717101"
+     y="21.812561"
+     style="fill:#cc0000;fill-opacity:1;stroke-width:1.41828">36</tspan></text></svg>

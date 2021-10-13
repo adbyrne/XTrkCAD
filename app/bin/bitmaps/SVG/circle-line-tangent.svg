@@ -28,17 +28,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1325"
+   inkscape:window-width="1346"
    inkscape:window-height="914"
    id="namedview3359"
    showgrid="false"
-   inkscape:zoom="17.708333"
+   inkscape:zoom="13.417014"
    inkscape:cx="24"
    inkscape:cy="24"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style3348">
@@ -49,8 +50,9 @@
 </style>
 <path
    class="st0"
-   d="M43.9,24.2c0,10.9-8.8,19.7-19.7,19.7c-10.9,0-19.7-8.8-19.7-19.7c0-10.9,8.8-19.7,19.7-19.7  C35.1,4.5,43.9,13.3,43.9,24.2z"
-   id="path3350" />
+   d="M 44.260681,24 C 44.260681,35.210225 35.210225,44.260682 24,44.260682 12.789775,44.260682 3.7393186,35.210225 3.7393186,24 3.7393186,12.789775 12.789775,3.7393183 24,3.7393183 35.210225,3.7393183 44.260681,12.789775 44.260681,24 Z"
+   id="path3350"
+   style="stroke-width:2.57115;stroke-miterlimit:10;stroke-dasharray:none" />
 <line
    class="st1"
    x1="43.5"
@@ -71,5 +73,5 @@
    class="st3"
    points="28.8,24 24.4,24.7 23.7,29.1 "
    id="polyline4090"
-   transform="matrix(1.3657905,0,0,1.3104272,-8.7371928,-8.3854388)"
+   transform="matrix(1.504829,0,0,1.4438297,-11.993827,-11.542984)"
    style="fill:none;stroke:#cc0000;stroke-width:1.86871;stroke-linecap:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /></svg>
