@@ -28,17 +28,19 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1494"
+   inkscape:window-width="1505"
    inkscape:window-height="979"
    id="namedview35"
    showgrid="false"
-   inkscape:zoom="17.708333"
+   inkscape:zoom="12.521303"
    inkscape:cx="24"
-   inkscape:cy="24"
+   inkscape:cy="23.994223"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0"
+   inkscape:snap-nodes="true" />
 <style
    type="text/css"
    id="style2">
@@ -52,92 +54,101 @@
 </style>
 <line
    class="st0"
-   x1="10.8"
-   y1="43.4"
-   x2="10"
-   y2="35"
+   x1="7.5470886"
+   y1="47.193569"
+   x2="7.2768564"
+   y2="37.174618"
    id="line4" />
 <line
    class="st0"
-   x1="32.5"
-   y1="32"
-   x2="25.1"
-   y2="26.6"
+   x1="31.996704"
+   y1="34.336292"
+   x2="23.924202"
+   y2="27.692272"
    id="line6" />
 <line
    class="st1"
-   x1="41.5"
-   y1="11.1"
-   x2="32.5"
-   y2="10.6"
+   x1="42.519207"
+   y1="10.242915"
+   x2="32.247654"
+   y2="9.6722736"
    id="line8" />
 <line
    class="st0"
-   x1="22.8"
-   y1="39.4"
-   x2="18.2"
-   y2="32"
+   x1="21.287994"
+   y1="42.723392"
+   x2="15.945395"
+   y2="34.106956"
    id="line10" />
 <line
    class="st1"
-   x1="38.8"
-   y1="22.9"
-   x2="30"
-   y2="19.7"
+   x1="39.43774"
+   y1="23.710064"
+   x2="29.394444"
+   y2="20.057959"
    id="line12" />
 <line
    class="st0"
-   x1="17.5"
-   y1="42"
-   x2="14.4"
-   y2="34.1"
+   x1="15.177601"
+   y1="45.53397"
+   x2="11.927899"
+   y2="36.209274"
    id="line14" />
 <line
    class="st0"
-   x1="28.2"
-   y1="36.4"
-   x2="22.1"
-   y2="29.3"
+   x1="27.223528"
+   y1="38.999069"
+   x2="20.366007"
+   y2="31.003716"
    id="line16" />
 <line
    class="st1"
-   x1="35.8"
-   y1="28"
-   x2="27.8"
-   y2="23.6"
+   x1="36.013885"
+   y1="29.530613"
+   x2="26.883617"
+   y2="24.508965"
    id="line18" />
 <line
    class="st1"
-   x1="40.7"
-   y1="17.1"
-   x2="31.8"
-   y2="15.2"
+   x1="41.606178"
+   y1="17.09062"
+   x2="31.448753"
+   y2="14.922179"
    id="line20" />
 <path
    class="st2"
-   d="M40.2,9.4c0,7.6-3,14.6-7.6,20.2C26.3,37.1,17,42,8.4,42"
-   id="path22" />
+   d="m 40.519942,8.3027324 c 0,8.6737586 -2.714909,15.9041266 -7.964815,22.2953166"
+   id="path22"
+   sodipodi:nodetypes="cc"
+   style="stroke-width:1.82605;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st3"
-   d="M27.4,26.3c-5.1,6-12.2,10.2-19,10.2"
-   id="path24" />
+   d="M 27.47306,27.282955 C 21.652512,34.130659 12.50344,39.231526 4.7427103,39.231526"
+   id="path24"
+   sodipodi:nodetypes="cc"
+   style="stroke-width:1.82605;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st2"
-   d="M34.3,9.3c-0.3,6.4-2.2,11.1-7,16.9"
-   id="path26" />
+   d="M 34.68866,8.1886044 C 34.346274,15.492822 32.951222,20.663508 27.47306,27.282955"
+   id="path26"
+   sodipodi:nodetypes="cc"
+   style="stroke-width:1.82605;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st4"
-   d="M32.6,29.5C26.3,37.1,17,42,8.4,42"
-   id="path28" />
+   d="M 32.555127,30.598049 C 25.365039,39.400704 15.450638,44.928548 4.8716081,45.186343"
+   id="path28"
+   sodipodi:nodetypes="cc"
+   style="stroke-width:1.82605;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st5"
-   d="M29.3,29.3c5-5.7,8.2-15.3,8.2-22.1"
+   d="M 30.710554,27.980636 C 36.479253,21.29741 38.414811,9.9257047 37.889623,2.1827656"
    id="path30"
-   style="stroke:#cc1b00;stroke-opacity:1;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke:#cc1b00;stroke-width:2.28257;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   sodipodi:nodetypes="cc" />
 <polyline
    class="st6"
    points="33.8,8.5 37.6,6.4 40.7,8.5 "
    id="polyline32"
-   style="stroke:#cc1b00;stroke-width:1.96196;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
-   transform="matrix(1.2106677,0,0,1.3411394,-8.0211055,-1.3832922)" />
+   style="stroke:#cc1b00;stroke-width:1.56957;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.3817155,0,0,1.5306208,-14.062881,-7.6132075)" />
 </svg>

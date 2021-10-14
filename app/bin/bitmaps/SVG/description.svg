@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1319"
+   inkscape:window-width="1322"
    inkscape:window-height="889"
    id="namedview2187"
    showgrid="false"
@@ -38,7 +38,8 @@
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style2160">
@@ -51,89 +52,91 @@
 </style>
 <line
    class="st0"
-   x1="9"
-   y1="28.833466"
-   x2="9"
-   y2="39.833469"
+   x1="4.4900398"
+   y1="27.800583"
+   x2="4.4900398"
+   y2="42.107891"
    id="line2162" />
 <line
    class="st0"
-   x1="14"
-   y1="28.833466"
-   x2="14"
-   y2="39.833469"
+   x1="10.99336"
+   y1="27.800583"
+   x2="10.99336"
+   y2="42.107891"
    id="line2164" />
 <line
    class="st0"
-   x1="19"
-   y1="28.833466"
-   x2="19"
-   y2="39.833469"
+   x1="17.496681"
+   y1="27.800583"
+   x2="17.496681"
+   y2="42.107891"
    id="line2166" />
 <line
    class="st0"
    x1="24"
-   y1="28.833466"
+   y1="27.800583"
    x2="24"
-   y2="39.833469"
+   y2="42.107891"
    id="line2168" />
 <line
    class="st0"
-   x1="29"
-   y1="28.833466"
-   x2="29"
-   y2="39.833469"
+   x1="30.503323"
+   y1="27.800583"
+   x2="30.503323"
+   y2="42.107891"
    id="line2170" />
 <line
    class="st0"
-   x1="34"
-   y1="28.833466"
-   x2="34"
-   y2="39.833469"
+   x1="37.006641"
+   y1="27.800583"
+   x2="37.006641"
+   y2="42.107891"
    id="line2172" />
 <line
    class="st0"
-   x1="39"
-   y1="28.833466"
-   x2="39"
-   y2="39.833469"
+   x1="43.509964"
+   y1="27.800583"
+   x2="43.509964"
+   y2="42.107891"
    id="line2174" />
 <line
    class="st1"
-   x1="7"
-   y1="30.333466"
-   x2="41"
-   y2="30.333466"
-   id="line2176" />
+   x1="1.8887117"
+   y1="30.582594"
+   x2="46.11129"
+   y2="30.582594"
+   id="line2176"
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
 <line
    class="st1"
-   x1="7"
-   y1="38.333469"
-   x2="41"
-   y2="38.333469"
-   id="line2178" />
+   x1="1.8887117"
+   y1="39.325878"
+   x2="46.11129"
+   y2="39.325878"
+   id="line2178"
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
 
 <line
    class="st4"
    x1="24"
-   y1="34.833469"
+   y1="33.08651"
    x2="24"
-   y2="19.833466"
+   y2="18.086506"
    id="line2182"
    style="stroke:#cc0e00;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <polyline
    class="st5"
    points="27.9,19.7 24,16 19.8,19.7 "
    id="polyline2184"
-   transform="translate(0,3.8334669)"
+   transform="translate(9.272406e-7,2.0865077)"
    style="stroke:#cc0e00;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <text
    xml:space="preserve"
-   style="font-weight:bold;font-size:13.3333px;line-height:1.25;font-family:Arial;-inkscape-font-specification:'Arial Bold'"
-   x="5.5106091"
-   y="17.170738"
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.3333px;line-height:1.25;font-family:'Gill Sans MT';-inkscape-font-specification:'Gill Sans MT Bold'"
+   x="5.1491361"
+   y="15.104323"
    id="text2756"><tspan
      sodipodi:role="line"
      id="tspan2754"
-     x="5.5106091"
-     y="17.170738">DESC</tspan></text></svg>
+     x="5.1491361"
+     y="15.104323">DESC</tspan></text></svg>

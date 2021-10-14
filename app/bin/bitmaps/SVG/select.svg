@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1385"
+   inkscape:window-width="1386"
    inkscape:window-height="955"
    id="namedview29"
    showgrid="false"
@@ -51,98 +51,100 @@
 </style>
 <line
    class="st0"
-   x1="8.4471931"
-   y1="12.795115"
-   x2="8.4471931"
-   y2="23.795115"
+   x1="3.8428819"
+   y1="9.4009237"
+   x2="3.8428819"
+   y2="24.094875"
    id="line4"
    style="stroke:#d98a0d;stroke-opacity:1" />
 <line
    class="st0"
-   x1="13.447193"
-   y1="12.795115"
-   x2="13.447193"
-   y2="23.795115"
+   x1="10.521953"
+   y1="9.4009237"
+   x2="10.521953"
+   y2="24.094875"
    id="line6"
    style="stroke:#d98a0d;stroke-opacity:1" />
 <line
    class="st0"
-   x1="18.447193"
-   y1="12.795115"
-   x2="18.447193"
-   y2="23.795115"
+   x1="17.201021"
+   y1="9.4009237"
+   x2="17.201021"
+   y2="24.094875"
    id="line8"
    style="stroke:#d98a0d;stroke-opacity:1" />
 <line
    class="st0"
-   x1="23.447193"
-   y1="12.795115"
-   x2="23.447193"
-   y2="17.60894"
+   x1="23.880093"
+   y1="9.4009237"
+   x2="23.880093"
+   y2="15.831297"
    id="line10"
-   style="stroke:#d98a0d;stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+   style="stroke:#d98a0d;stroke-width:2.67163;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <line
    class="st0"
-   x1="28.447193"
-   y1="12.795115"
-   x2="28.447193"
-   y2="17.683472"
+   x1="30.55916"
+   y1="9.4009237"
+   x2="30.55916"
+   y2="15.930859"
    id="line12"
-   style="stroke:#d98a0d;stroke-opacity:1;stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke:#d98a0d;stroke-width:2.67163;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <line
    class="st0"
-   x1="33.447197"
-   y1="12.795115"
-   x2="33.447197"
-   y2="23.795115"
+   x1="37.238239"
+   y1="9.4009237"
+   x2="37.238239"
+   y2="24.094875"
    id="line14"
    style="stroke:#d98a0d;stroke-opacity:1" />
 <line
    class="st0"
-   x1="38.447197"
-   y1="12.795115"
-   x2="38.447197"
-   y2="23.795115"
+   x1="43.917309"
+   y1="9.4009237"
+   x2="43.917309"
+   y2="24.094875"
    id="line16"
    style="stroke:#d98a0d;stroke-opacity:1" />
 <line
    class="st1"
-   x1="6.4471931"
-   y1="14.742311"
-   x2="40.447197"
-   y2="14.742311"
-   id="line18" />
+   x1="1.1712544"
+   y1="12.300144"
+   x2="46.588936"
+   y2="12.300144"
+   id="line18"
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
 <line
    class="st1"
-   x1="6.4471931"
-   y1="21.847925"
-   x2="19.876301"
-   y2="21.847925"
+   x1="1.1712544"
+   y1="21.195667"
+   x2="19.110044"
+   y2="21.195667"
    id="line20"
-   style="stroke-width:1;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
 <line
    class="st2"
-   x1="21.781013"
-   y1="19.598078"
-   x2="35.981018"
-   y2="33.398075"
+   x1="22.168528"
+   y1="19.00256"
+   x2="41.137093"
+   y2="37.436787"
    id="line22"
-   style="stroke:#cc0000;stroke-width:3.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <path
    class="st3"
-   d="M 25.147194,28.495114"
-   id="path24" />
+   d="M 26.150977,30.3732"
+   id="path24"
+   style="stroke-width:1.33581" />
 <polyline
    class="st4"
    points="25,27 25,21 31,21 "
    id="polyline26"
-   transform="matrix(1.2199381,0,0,1.2199381,-8.3325484,-5.6357303)"
-   style="stroke:#cc0000;stroke-width:2.869;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+   transform="matrix(1.6296104,0,0,1.6296104,-18.571732,-15.219259)"
+   style="stroke:#cc0000;stroke-width:1.84093081;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <line
    class="st1"
-   x1="31.222351"
-   y1="21.987013"
-   x2="40.62672"
-   y2="21.987013"
+   x1="34.266258"
+   y1="21.381462"
+   x2="46.828747"
+   y2="21.381462"
    id="line20-0"
-   style="fill:none;stroke:#000000;stroke-width:0.925914;stroke-miterlimit:10;stroke-dasharray:none" /></svg>
+   style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" /></svg>
