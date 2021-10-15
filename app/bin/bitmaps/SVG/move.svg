@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1245"
+   inkscape:window-width="1250"
    inkscape:window-height="856"
    id="namedview53"
    showgrid="false"
@@ -38,7 +38,8 @@
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style2">
@@ -58,114 +59,128 @@
    y1="4.6662092"
    x2="30.444595"
    y2="4.6662092"
-   id="line4" />
+   id="line4"
+   style="stroke:#b2b2b2;stroke-opacity:1" />
 <line
    class="st0"
    x1="44.622711"
    y1="11.110806"
    x2="30.444595"
    y2="11.110806"
-   id="line6" />
+   id="line6"
+   style="stroke:#b2b2b2;stroke-opacity:1" />
 <line
    class="st0"
    x1="44.622711"
    y1="17.555403"
    x2="30.444595"
    y2="17.555403"
-   id="line8" />
+   id="line8"
+   style="stroke:#b2b2b2;stroke-opacity:1" />
 <line
    class="st0"
    x1="44.622711"
    y1="24"
    x2="30.444595"
    y2="24"
-   id="line10" />
+   id="line10"
+   style="stroke:#b2b2b2;stroke-opacity:1" />
 <line
    class="st0"
    x1="44.622711"
    y1="30.444595"
    x2="30.444595"
    y2="30.444595"
-   id="line12" />
+   id="line12"
+   style="stroke:#b2b2b2;stroke-opacity:1" />
 <line
    class="st0"
    x1="44.622711"
    y1="36.889191"
    x2="30.444595"
    y2="36.889191"
-   id="line14" />
+   id="line14"
+   style="stroke:#b2b2b2;stroke-opacity:1" />
 <line
    class="st0"
    x1="44.622711"
    y1="43.33379"
    x2="30.444595"
    y2="43.33379"
-   id="line16" />
+   id="line16"
+   style="stroke:#b2b2b2;stroke-opacity:1" />
 <line
    class="st1"
    x1="17.555403"
    y1="4.6662092"
    x2="3.3772895"
    y2="4.6662092"
-   id="line18" />
+   id="line18"
+   style="stroke:#00cccc;stroke-opacity:1" />
 <line
    class="st1"
    x1="17.555403"
    y1="11.110806"
    x2="3.3772895"
    y2="11.110806"
-   id="line20" />
+   id="line20"
+   style="stroke:#00cccc;stroke-opacity:1" />
 <line
    class="st1"
    x1="17.555403"
    y1="17.555403"
    x2="3.3772895"
    y2="17.555403"
-   id="line22" />
+   id="line22"
+   style="stroke:#00cccc;stroke-opacity:1" />
 <line
    class="st1"
    x1="17.555403"
    y1="24"
    x2="3.3772895"
    y2="24"
-   id="line24" />
+   id="line24"
+   style="stroke:#00cccc;stroke-opacity:1" />
 <line
    class="st1"
    x1="17.555403"
    y1="30.444595"
    x2="3.3772895"
    y2="30.444595"
-   id="line26" />
+   id="line26"
+   style="stroke:#00cccc;stroke-opacity:1" />
 <line
    class="st1"
    x1="17.555403"
    y1="36.889191"
    x2="3.3772895"
    y2="36.889191"
-   id="line28" />
+   id="line28"
+   style="stroke:#00cccc;stroke-opacity:1" />
 <line
    class="st1"
    x1="17.555403"
    y1="43.33379"
    x2="3.3772895"
    y2="43.33379"
-   id="line30" />
+   id="line30"
+   style="stroke:#00cccc;stroke-opacity:1" />
 <line
    class="st2"
-   x1="42.050415"
+   x1="41.411499"
    y1="2.0883698"
-   x2="42.050415"
+   x2="41.411499"
    y2="45.911629"
    id="line32"
-   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#666666;stroke-opacity:1" />
 <line
    class="st2"
-   x1="33.016895"
+   x1="33.655811"
    y1="2.0883698"
-   x2="33.016895"
+   x2="33.655811"
    y2="45.911629"
    id="line34"
-   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#666666;stroke-opacity:1" />
 <path
    class="st3"
    d="M 41.271518,38.04922"
@@ -181,20 +196,20 @@
    style="stroke-width:1.28891" />
 <line
    class="st6"
-   x1="14.983111"
+   x1="14.344203"
    y1="2.0883698"
-   x2="14.983111"
+   x2="14.344203"
    y2="45.911629"
    id="line42"
-   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#006699;stroke-opacity:1" />
 <line
    class="st6"
-   x1="5.9495811"
+   x1="6.5884933"
    y1="2.0883698"
-   x2="5.9495811"
+   x2="6.5884933"
    y2="45.911629"
    id="line44"
-   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#006699;stroke-opacity:1" />
 <path
    class="st7"
    d="M 11.755265,24.773351"
@@ -206,10 +221,11 @@
    x2="35.821922"
    y2="24"
    id="line48"
-   style="stroke-width:2.527;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
 <polyline
    class="st8"
    points="30.5,18.7 34,23 30.5,27.2 "
    id="polyline50"
-   transform="matrix(1.2889194,0,0,1.2889194,-6.9340656,-5.6451464)" />
+   transform="matrix(1.2889194,0,0,1.2889194,-6.9340656,-5.6451464)"
+   style="stroke:#cc0000;stroke-opacity:1;stroke-width:2.32753111;stroke-miterlimit:10;stroke-dasharray:none" />
 </svg>

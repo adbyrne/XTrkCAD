@@ -28,18 +28,19 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1347"
+   inkscape:window-width="1352"
    inkscape:window-height="949"
    id="namedview19"
    showgrid="false"
    inkscape:snap-nodes="false"
-   inkscape:zoom="17.708333"
+   inkscape:zoom="12.521303"
    inkscape:cx="24"
-   inkscape:cy="24"
+   inkscape:cy="24.475191"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style2">
@@ -48,46 +49,51 @@
 	.st2{fill:none;stroke:#000000;stroke-miterlimit:10;}
 	.st3{fill:none;stroke:#000000;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:10;}
 </style>
-<rect
-   x="15.5"
-   y="17.5"
+<path
+   style="fill:#ff8200;fill-opacity:1;stroke:none;stroke-width:1.35305px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+   d="M 9.0487196,15.746355 27.956498,2.4863975 38.20151,2.5931501 19.873175,15.746355 H 9.0487196"
+   id="path2655"
+   sodipodi:nodetypes="ccccc" /><rect
+   x="9.0487204"
+   y="15.746355"
    class="st0"
-   width="8"
-   height="22"
-   id="rect4" />
+   width="10.824455"
+   height="29.767252"
+   id="rect4"
+   style="stroke-width:1.5;stroke-miterlimit:10;stroke-dasharray:none" />
 <polygon
    class="st1"
    points="37,29.4 24,39.5 24,17.8 37,8.1 "
-   id="polygon6" />
+   id="polygon6"
+   transform="matrix(1.3530569,0,0,1.3530569,-11.923661,-7.93214)" />
 <line
    class="st2"
-   x1="23.5"
-   y1="17.5"
-   x2="37"
-   y2="8.1"
-   id="line8" />
+   x1="19.873175"
+   y1="15.746355"
+   x2="38.139446"
+   y2="3.0276213"
+   id="line8"
+   style="stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st3"
-   d="M38.1,29"
-   id="path10" />
+   d="M 39.627805,31.306509"
+   id="path10"
+   style="stroke-width:1.35305" />
 <path
    class="st3"
-   d="M23.5,39.9"
-   id="path12" />
+   d="M 19.873175,46.054829"
+   id="path12"
+   style="stroke-width:1.35305" />
 <line
    class="st2"
-   x1="15.274117"
-   y1="17.326557"
-   x2="29.474119"
-   y2="7.6999998"
+   x1="9.0439491"
+   y1="15.334949"
+   x2="27.965971"
+   y2="2.4769235"
    id="line14"
-   style="stroke-width:0.991111" />
-<polygon
-   class="st1"
-   points="23.5,17.1 15.9,17 29.7,7.7 36.5,8.1 "
-   id="polygon16"
-   transform="translate(0.11294118)" />
+   style="stroke-width:1.5;stroke-linecap:round;stroke-miterlimit:10;stroke-dasharray:none" />
+
 <path
-   style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-   d="M 23.661177,39.585883 36.988236,29.195294"
+   style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+   d="M 20.209116,45.449884 38.129799,31.564479"
    id="path848" /></svg>

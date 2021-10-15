@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1282"
+   inkscape:window-width="1288"
    inkscape:window-height="878"
    id="namedview906"
    showgrid="false"
@@ -38,7 +38,8 @@
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style897">
@@ -61,11 +62,11 @@
    x2="40.014923"
    y2="9.0605688"
    id="line901"
-   style="stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
 <polyline
    class="st2"
    points="39.9,18.3 39.4,11.4 32.7,11.4 "
    id="polyline903"
    transform="matrix(1.4025875,0,0,1.3570092,-15.557291,-6.2439345)"
-   style="stroke-width:2.17452736;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="stroke-width:2.17452736;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
 </svg>
