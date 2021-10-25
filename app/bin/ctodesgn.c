@@ -140,6 +140,7 @@ static wDrawColor roadbedColor;
 static DIST_T newTurnTrackGauge;
 static char * newTurnScaleName;
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
+static paramFloatRange_t r0d300_10000 = { 0.300, 10000, 80 };
 static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
 static paramFloatRange_t r_10000_10000 = { -1000, 10000, 80 };
 static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
@@ -180,8 +181,8 @@ static paramData_t turnDesignPLs[] = {
 	{ PD_FLOAT, &newTurnRad2, "rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
 	{ PD_FLOAT, &newTurnRad3, "rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
 #define I_TOTOELENGTH       (12)
-	{ PD_FLOAT, &newTurnToeL, "toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnToeR, "toeR", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnToeL, "toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d300_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnToeR, "toeR", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0d300_10000, N_("Length") },
 #define I_TOANGLE			(14)
 	{ PD_FLOAT, &newTurnAngle0, "angle0", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
 	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH, &r0d001_90, N_("Angle") },
@@ -1491,7 +1492,7 @@ static toDesignSchema_t * LoadSegs(
 				}
 			}
 
-			DIST_T end_length = minLength*2;
+			DIST_T end_length = MIN_TRACK_LENGTH;
 
 			for (int i=0;i<((dp->type==NTO_CORNU3WAY)?4:3);i++) {
 				if (radii[i] == 0.0) {
@@ -1626,7 +1627,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			/* Override if a "Y" has zero radius at base to be a straight until the Toe
 			 * We set the start of the curve to be at the Toe position */
 			if (cornuData.radius[0] == 0.0) {
-				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
+				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR)-MIN_TRACK_LENGTH;
 				pos.y = end_points[0].y;
 				angle = 90.0;
 				radius = 0.0;
@@ -1694,7 +1695,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			  	if (newTurnToeR!=newTurnToeL) {
 					/* Second Toe */
 			  		if (cornuData.radius[0] == 0.0) {
-						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
+						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL)-MIN_TRACK_LENGTH;
 						pos.y = 0.0;
 						angle = 90.0;
 						radius = 0.0;
@@ -2150,7 +2151,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 	if(dp->type == NTO_CORNU) {
 			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
 
-			DIST_T end_length = minLength*2;
+			DIST_T end_length = MIN_TRACK_LENGTH;
 
 			// Adjust end_points to impose small fixed end segments
 
@@ -2217,7 +2218,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			wBool_t back, neg;
 			DIST_T radius;
 			coOrd center;
-			pos.x = end_points[0].x+newTurnToeL;
+			pos.x = end_points[0].x+newTurnToeL-MIN_TRACK_LENGTH;
 			pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
 			ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,NULL,&back,&subSeg,&neg);
 			segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
