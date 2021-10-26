@@ -23,6 +23,7 @@ if(UNIX)
         endif()
    else()
     set(XTRKCAD_USE_BROWSER_DEFAULT ON)
+    set(XTRKCAD_PACKAGE_GA_RELEASE_DEFAULT OFF)
    endif(APPLE)
 endif(UNIX)
 
@@ -76,6 +77,7 @@ OPTION(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_
 OPTION(XTRKCAD_USE_DOXYGEN "Generate internals documentation using doxygen" ${XTRKCAD_USE_DOXYGEN_DEFAULT})
 if(UNIX AND NOT APPLE)
     option(XTRKCAD_USE_BROWSER "Show help in default browser" ${XTRKCAD_USE_BROWSER_DEFAULT})
+    option(XTRKCAD_PACKAGE_GA_RELEASE "Package for a Beta (OFF/Default) or GA (ON) release" ${XTRKCAD_PACKAGE_GA_RELEASE_DEFAULT})
 endif()
 
 if(APPLE)
