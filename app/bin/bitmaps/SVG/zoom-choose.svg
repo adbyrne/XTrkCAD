@@ -73,7 +73,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1515"
+   inkscape:window-width="1518"
    inkscape:window-height="932"
    id="namedview1130"
    showgrid="false"
@@ -154,7 +154,7 @@
    class="st5"
    d="m 31.915477,11.108565 c 1.92652,3.85304 1.92652,8.308118 0.48163,12.04075 -1.324482,3.130595 -3.612225,5.779559 -6.983635,7.465265 C 18.189022,34.226804 9.5196818,31.337024 6.0278649,24.112575 2.4156399,16.888125 5.3054199,8.218786 12.529871,4.6065612 19.633912,1.1147437 28.423659,4.0045236 31.915477,11.108565 Z"
    id="path1035"
-   style="fill:#cccccc;fill-opacity:1;stroke-width:2.07382;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="fill:#b3edff;fill-opacity:1;stroke-width:2.07382;stroke-miterlimit:10;stroke-dasharray:none" />
 <linearGradient
    id="SVGID_3_"
    gradientUnits="userSpaceOnUse"
@@ -353,7 +353,7 @@
 </linearGradient>
 
 <path
-   style="fill:#666666;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-   d="M 10.416552,13.925973 27.257839,13.830826 19.027493,24.15444 10.416552,13.925975"
+   style="fill:#666666;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+   d="m 10.600075,13.283643 16.841287,-0.09515 -8.322107,11.700035 -8.51918,-11.604886"
    id="path2931"
    sodipodi:nodetypes="cccc" /></svg>
