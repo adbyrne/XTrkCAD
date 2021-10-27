@@ -5,7 +5,6 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
@@ -29,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1439"
+   inkscape:window-width="1440"
    inkscape:window-height="939"
    id="namedview1035"
    showgrid="false"
@@ -54,95 +53,9 @@
 	.st7{fill:url(#SVGID_4_);stroke:#000000;stroke-width:2;stroke-miterlimit:10;}
 </style>
 <path
-   style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-   d="M 28.251829,24.948755 41.815519,40.972181 37.879941,44.275255 24.245973,28.181551 Z"
-   id="path2383" /><g
-   id="g963"
-   style="fill:#784421">
-	<g
-   id="g943"
-   style="fill:#784421">
-		<line
-   class="st0"
-   x1="39.8"
-   y1="42.6"
-   x2="26.2"
-   y2="26.6"
-   id="line939"
-   style="fill:#784421" />
-		<line
-   class="st1"
-   x1="39.8"
-   y1="42.6"
-   x2="26.2"
-   y2="26.6"
-   id="line941"
-   style="fill:#784421" />
-	</g>
-	<defs
-   id="defs950">
-		<filter
-   id="Adobe_OpacityMaskFilter"
-   filterUnits="userSpaceOnUse"
-   x="24.3"
-   y="25"
-   width="17.5"
-   height="19.2">
-			<feFlood
-   style="flood-color:white;flood-opacity:1"
-   result="back"
-   id="feFlood945" />
-			<feBlend
-   in="SourceGraphic"
-   in2="back"
-   mode="normal"
-   id="feBlend947" />
-		</filter>
-	</defs>
-	<mask
-   maskUnits="userSpaceOnUse"
-   x="24.3"
-   y="25"
-   width="17.5"
-   height="19.2"
-   id="SVGID_1_">
-		<g
-   class="st2"
-   id="g954">
-			
-				<image
-   style="overflow:visible;"
-   width="22"
-   height="25"
-   xlink:href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAgEASABIAAD/7AARRHVja3kAAQAEAAAAHgAA/+4AIUFkb2JlAGTAAAAAAQMA EAMCAwYAAAGKAAABqwAAAe7/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoX Hh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoa JjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIABkAFgMBIgACEQEDEQH/ xAB3AAEAAwEBAAAAAAAAAAAAAAAAAwQFAgYBAQAAAAAAAAAAAAAAAAAAAAAQAAICAwEBAAAAAAAA AAAAAAMEAQIAIBEQFBEBAAEDAwQDAAAAAAAAAAAAAQIAITEQEVEgQTIDEiIEEgEAAAAAAAAAAAAA AAAAAAAg/9oADAMBAAIRAxEAAADw8HegZYE8Asqw/9oACAECAAEFANP/2gAIAQMAAQUA0//aAAgB AQABBQBZSWK2rNbYA1wEbCJsPJ7ijNlySwL6/f/aAAgBAgIGPwAf/9oACAEDAgY/AB//2gAIAQEB Bj8AkxlsmCmMjZLOhOLjJyUfo9F5nkFbd+NPlmL5FHuI/QunNuj/2Q=="
-   transform="matrix(1 0 0 1 22 22)"
-   id="image952">
-			</image>
-		</g>
-	</mask>
-	<g
-   class="st3"
-   mask="url(#SVGID_1_)"
-   id="g961"
-   style="fill:#784421">
-		<line
-   class="st0"
-   x1="39.8"
-   y1="42.6"
-   x2="26.2"
-   y2="26.6"
-   id="line957"
-   style="fill:#784421" />
-		<line
-   class="st4"
-   x1="39.8"
-   y1="42.6"
-   x2="26.2"
-   y2="26.6"
-   id="line959"
-   style="fill:#784421" />
-	</g>
-</g>
+   style="fill:#666666;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1"
+   d="M 30.073634,26.309814 43.199281,41.81576 39.390804,45.01216 26.197147,29.438204 Z"
+   id="path2383" />
 <linearGradient
    id="SVGID_2_"
    gradientUnits="userSpaceOnUse"
@@ -191,8 +104,9 @@
 </linearGradient>
 <path
    class="st5"
-   d="M29,12.1c1.6,3.2,1.6,6.9,0.4,10c-1.1,2.6-3,4.8-5.8,6.2c-6,3-13.2,0.6-16.1-5.4c-3-6-0.6-13.2,5.4-16.2  C18.8,3.8,26.1,6.2,29,12.1z"
-   id="path986" />
+   d="m 31.708262,10.530367 c 1.91834,3.836679 1.91834,8.27284 0.479585,11.989623 -1.318858,3.117302 -3.596887,5.755019 -6.953981,7.433566 C 18.040093,33.550442 9.4075646,30.672933 5.9305742,23.47916 2.3336874,16.285386 5.2111968,7.652858 12.40497,4.0559712 19.478848,0.57898069 28.231272,3.4564902 31.708262,10.530367 Z"
+   id="path986"
+   style="fill:#cccccc;stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;fill-opacity:1" />
 <linearGradient
    id="SVGID_3_"
    gradientUnits="userSpaceOnUse"
@@ -243,12 +157,12 @@
 </linearGradient>
 <line
    class="st6"
-   x1="18"
-   y1="9"
-   x2="18"
-   y2="25"
+   x1="19.011627"
+   y1="7.305531"
+   x2="19.011627"
+   y2="26.488928"
    id="line1009"
-   style="stroke-width:3.77952756;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="fill:url(#SVGID_3_);stroke-width:4.532;stroke-miterlimit:10;stroke-dasharray:none" />
 <linearGradient
    id="SVGID_4_"
    gradientUnits="userSpaceOnUse"
@@ -299,10 +213,10 @@
 </linearGradient>
 <line
    class="st7"
-   x1="10"
-   y1="17.245974"
-   x2="26"
-   y2="17.245974"
+   x1="9.4199266"
+   y1="17.192142"
+   x2="28.603325"
+   y2="17.192142"
    id="line1032"
-   style="fill:url(#SVGID_4_);stroke-width:3.77952756;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="fill:url(#SVGID_4_);stroke-width:4.53151;stroke-miterlimit:10;stroke-dasharray:none" />
 </svg>
