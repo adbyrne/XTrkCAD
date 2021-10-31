@@ -1100,7 +1100,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 EXPORT void FreeTrack( track_p trk )
 {
 	bFreeTrack = TRUE;
-	trackCmds(trk->type)->delete( trk );
+	trackCmds(trk->type)->deleteTrk( trk );
 	if (trk->endPt)
 		MyFree(trk->endPt);
 	if (trk->extraData)

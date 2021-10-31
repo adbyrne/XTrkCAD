@@ -149,7 +149,7 @@ typedef struct {
 		void (*draw)( track_p, drawCmd_p, wDrawColor );
 		DIST_T (*distance)( track_p, coOrd * );
 		void (*describe)( track_p, char * line, CSIZE_T len );
-		void (*delete)( track_p );
+		void (*deleteTrk)( track_p );
 		BOOL_T (*write)( track_p, FILE * );
 		BOOL_T (*read)( char * );
 		void (*move)( track_p, coOrd );
