@@ -2711,6 +2711,9 @@ static void NewTurnOk( void * context )
 	strcpy( tempCustom, message );
 
 	segCnt = tempSegs_da.cnt;
+	long options = 0;
+	if ( curDesign->type == NTO_D_SLIP && newTurnSlipMode == 1)
+		options |= COMPOUND_OPTION_PATH_NOCOMBINE;
 #ifndef MKTURNOUT
 	if (includeNontrackSegments && customTurnout1)
 		CopyNonTracks( customTurnout1 );
@@ -2724,13 +2727,12 @@ static void NewTurnOk( void * context )
 		 (curDesign->type == NTO_CORNU3WAY)) {
 		 radii_ends = &radii[0];
 	 }
-
 	to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, 0 );
+						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
 	to->customInfo = customInfoP;
 #endif
 	if (f) {
-		fprintf( f, "TURNOUT %s \"%s\"\n", newTurnScaleName, PutTitle(tempCustom) );
+		fprintf( f, "TURNOUT %s \"%s\" %ld\n", newTurnScaleName, PutTitle(tempCustom), options );
 #ifdef MKTURNOUT
 		if (doCustomInfoLine)
 #endif
@@ -2756,11 +2758,11 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, 0 );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
-			fprintf( f, "TURNOUT %s \"%s\"\n", newTurnScaleName, PutTitle(tempCustom) );
+			fprintf( f, "TURNOUT %s \"%s\" %ld\n", newTurnScaleName, PutTitle(tempCustom), options );
 #ifdef MKTURNOUT
 			if (doCustomInfoLine)
 #endif
@@ -2803,11 +2805,11 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, 0 );
+			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
-			fprintf( f, "TURNOUT %s \"%s\"\n", newTurnScaleName, PutTitle(tempCustom) );
+			fprintf( f, "TURNOUT %s \"%s\" %ld\n", newTurnScaleName, PutTitle(tempCustom), options );
 #ifdef MKTURNOUT
 			if (doCustomInfoLine)
 #endif
