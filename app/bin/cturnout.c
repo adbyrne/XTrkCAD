@@ -3655,7 +3655,11 @@ static BOOL_T QueryTurnout(track_p trk, int query)
 		else
 			return FALSE;
 	case Q_CAN_NEXT_POSITION:
-		return (GetTrkEndPtCnt(trk) > 2);
+		{
+			PATHPTR_T path = GetPaths( trk ); // QueryTurnout
+			for ( path += strlen((char*)path) + 1; path[0] || path[1]; path++ );
+			return ( path[2] != 0 );
+		}
 	case Q_CORNU_CAN_MODIFY:
 		return FALSE;
 	default:
@@ -3677,9 +3681,7 @@ static void DrawTurnoutPositionIndicator(
 	BOOL_T multiPart = FALSE;
 
 	// Only 1 path?  Don't draw
-	path = GetPaths(trk);
-	for (path += strlen((char*)path) + 1; path[0] || path[1]; path++);
-	if (path[2] == 0)
+	if ( ! QueryTurnout( trk, Q_CAN_NEXT_POSITION ) )
 		return;
 
 	path = GetCurrPath(trk);
