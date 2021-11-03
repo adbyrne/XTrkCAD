@@ -364,6 +364,7 @@ EXPORT wIndex_t CheckPaths(
 	PATHPTR_T paths)
 {
 	if ((segCnt == 0) || !segs) return -1;
+	if (!paths) return -1;
 	int pc, ps;
 	PATHPTR_T pp = 0;
 
@@ -455,9 +456,12 @@ static BOOL_T ReadTurnoutParam(
 	pathCnt = 0;
 	if (!ReadSegs())
 		return FALSE;
-	CheckPaths(tempSegs_da.cnt, &tempSegs(0), pathPtr);
+	PATHPTR_T pPaths = NULL;
+	if ( pathPtr && pathPtr[0] && pathCnt > 0 )
+		pPaths = pathPtr;
+	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pPaths );
 	to = CreateNewTurnout(scale, title, tempSegs_da.cnt, &tempSegs(0),
-		pathPtr, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options);
+			pPaths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
 	MyFree(title);
 	if (to == NULL)
 		return FALSE;
