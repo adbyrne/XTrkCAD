@@ -60,7 +60,7 @@
 <g
    id="ties"
    inkscape:label="ties"
-   transform="matrix(1.1169958,0,0,1.1169958,-1.7103261,-9.7557749)"><line
+   transform="matrix(1.1169958,0,0,1.1169958,-1.7103261,3.8486509)"><line
      class="st0"
      x1="5"
      y1="22"
@@ -137,7 +137,7 @@
 <g
    id="rail"
    inkscape:label="rail"
-   transform="matrix(1.1169958,0,0,1.1169958,-1.7103261,-9.7557749)"
+   transform="matrix(1.1169958,0,0,1.1169958,-1.7103261,3.8486509)"
    style="stroke-width:1.79052;stroke-miterlimit:4;stroke-dasharray:none"><line
      class="st1"
      x1="3"
@@ -172,8 +172,8 @@
 
 <polygon
    class="st2"
-   points="24.9,39.5 21.5,39.5 21.5,29.5 17,29.5 18.5,25.5 28.5,25.5 28.5,29.5 24.8,29.5 "
+   points="24.8,29.5 24.9,39.5 21.5,39.5 21.5,29.5 17,29.5 18.5,25.5 28.5,25.5 28.5,29.5 "
    id="polygon985"
-   transform="matrix(1.9632679,0,0,1.6064765,-21.275845,-20.014893)"
+   transform="matrix(2.1634384,0,0,1.7702694,-25.884336,-36.87808)"
    style="stroke:#cccccc;stroke-width:1.12617;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 </svg>
