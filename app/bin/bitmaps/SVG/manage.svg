@@ -46,7 +46,7 @@
        transform="translate(12.5,35)"
        id="g21" /><path
        sodipodi:type="star"
-       style="opacity:1;fill:#cccccc;fill-opacity:1;stroke:#666666;stroke-width:4.30787;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       style="opacity:1;fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:4.30787;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path3469"
        inkscape:flatsided="false"
        sodipodi:sides="8"
@@ -61,7 +61,7 @@
        d="m 34.016871,32.794023 c -9.260139,9.601701 -6.693085,-7.580595 -18.92275,-2.253481 -12.2296636,5.327113 2.100246,15.149269 -11.2370884,15.39079 -13.337335,0.241521 0.6275641,-10.093016 -11.7869529,-14.973857 -12.4145157,-4.88084 -9.2270537,12.19725 -18.8287537,2.937111 -9.601701,-9.260139 7.580595,-6.693085 2.253481,-18.92275 -5.327113,-12.2296635 -15.14927,2.100246 -15.39079,-11.2370883 -0.241521,-13.337335 10.093016,0.6275641 14.973857,-11.7869529 4.88084,-12.4145158 -12.19725,-9.2270538 -2.937111,-18.8287538 9.260139,-9.601701 6.693085,7.580595 18.9227497,2.253481 12.2296637,-5.327113 -2.1002457,-15.149269 11.2370885,-15.39079 13.3373348,-0.241521 -0.6275641,10.093016 11.7869528,14.973857 12.414516,4.88084 9.227054,-12.19725 18.828754,-2.937111 9.601701,9.260139 -7.580595,6.693085 -2.253481,18.9227498 C 35.98994,3.1708915 45.812096,-11.159018 46.053617,2.1783163 46.295138,15.515651 35.960601,1.5507522 31.07976,13.965269 c -4.88084,12.414516 12.197249,9.227054 2.937111,18.828754 z"
        transform="matrix(0.31028492,0,0,-0.31639281,23.493281,23.799663)" /><path
        sodipodi:type="star"
-       style="opacity:1;fill-opacity:1;stroke:#666666;stroke-width:3.65588;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;fill-rule:evenodd;fill:#e5e5e5"
+       style="opacity:1;fill:#e5e5e5;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.65588;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path5664"
        inkscape:flatsided="false"
        sodipodi:sides="10"
