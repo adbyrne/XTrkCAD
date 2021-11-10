@@ -467,7 +467,7 @@ void DrawCompoundDescription(
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-	if ( (d->options&DC_SIMPLE) )
+	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) )
 		return;
 	if ( xx->special == TOpier ) {
 		desc = xx->u.pier.name;
