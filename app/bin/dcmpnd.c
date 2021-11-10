@@ -286,7 +286,9 @@ static BOOL_T RefreshCompound1(
 	xx->segCnt = to->segCnt;
 	xx->segs = (trkSeg_p)MyMalloc( xx->segCnt * sizeof *(trkSeg_p)0 );
 	memcpy( xx->segs, to->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
-	SetPaths( trk, to->paths );
+	xx->pathOverRide = to->pathOverRide;
+	xx->pathNoCombine = to->pathNoCombine;
+	SetPaths( trk, GetParamPaths(to) );
 	if ( flip )
 		FlipSegs( xx->segCnt, xx->segs, zero, 90.0 );
 	ClrTrkBits( trk, TB_SELECTED );
@@ -463,7 +465,7 @@ EXPORT BOOL_T CompoundCustomSave(
 			rc &= fprintf( f, "TURNOUT %s \"%s\"\n", GetScaleName(to->scaleInx), PutTitle(to->title) )>0;
 			if ( to->customInfo )
 				rc &= fprintf( f, "\tU %s\n",to->customInfo )>0;
-			 rc &= WriteCompoundPathsEndPtsSegs( f, to->paths, to->segCnt, to->segs,
+			 rc &= WriteCompoundPathsEndPtsSegs( f, GetParamPaths( to ), to->segCnt, to->segs,
 				to->endCnt, to->endPt );
 		}
 	}
@@ -510,7 +512,8 @@ static int CompoundCustMgmProc(
 			rc &= fprintf( customMgmF, "TURNOUT %s \"%s\"\n", GetScaleName(to->scaleInx), PutTitle(to->title) )>0;
 			if ( to->customInfo )
 				rc &= fprintf( customMgmF, "\tU %s\n",to->customInfo )>0;
-			 rc &= WriteCompoundPathsEndPtsSegs( customMgmF, to->paths, to->segCnt, to->segs,
+			 rc &= WriteCompoundPathsEndPtsSegs( customMgmF,
+				GetParamPaths( to ), to->segCnt, to->segs,
 				to->endCnt, to->endPt );
 		} else {
 			rc &= fprintf( customMgmF, "STRUCTURE %s \"%s\"\n", GetScaleName(to->scaleInx), PutTitle(to->title) )>0;

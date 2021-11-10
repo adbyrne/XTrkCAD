@@ -129,7 +129,7 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 	else
 		to->contentsLabel = curSubContents;
 	to->endCnt = 0;
-	to->paths = (PATHPTR_T)"";
+	SetParamPaths( to, NULL );
 	if (updateList && structureListL != NULL) {
 		FormatCompoundTitle( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, to->title );
 		if (message[0] != '\0')
@@ -733,7 +733,7 @@ static void NewStructure( void )
 		return;
 	}
 	UndoStart( _("Place Structure"), "newStruct" );
-	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
+	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, curStructure->segCnt, curStructure->segs );
 	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 	switch(curStructure->special) {
 		case TOnormal:

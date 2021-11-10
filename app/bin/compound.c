@@ -41,20 +41,32 @@
  */
 
 
+#ifndef NEWPATH
+/* GetPaths()
+ *
+ * Return the paths for 'trk'.
+ *
+ * \param trk IN Get paths for track 'trk'
+ */
 EXPORT PATHPTR_T GetPaths( track_p trk )
 {
 	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
-#ifdef NEWPATH
-	if ( xx->new_paths == NULL ) {
-		xx->new_paths = GenerateTrackPaths( trk );
+	if ( GetTrkType(trk) == T_STRUCTURE && xx->paths != NULL ) {
+		LogPrintf( "GetPaths( STRUCTURE, paths!=NULL )\n" );
 	}
-	return xx->new_paths;
-#else
+	if ( GetTrkType(trk) == T_TURNOUT && xx->paths == NULL ) {
+		LogPrintf( "GetPaths( TURNOUT, paths==NULL )\n" );
+	}
 	return xx->paths;
-#endif
 }
+#endif
 
-
+/* GetPathsLength()
+ *
+ * Return the length of the paths object
+ *
+ * \param paths IN paths object
+ */
 EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
 {
 	PATHPTR_T pp;
@@ -65,30 +77,48 @@ EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
 }
 
 
+#ifndef NEWPATH
+/* SetPaths()
+ *
+ * Set the paths for 'trk'.
+ * Called when paths are read from a layout file, copied from a param def'n or
+ * from a Spilt turnout.
+ *
+ * \param trk IN
+ * \param paths IN
+ */
 EXPORT void SetPaths( track_p trk, PATHPTR_T paths )
 {
+	if ( GetTrkType(trk) == T_STRUCTURE && paths != NULL ) {
+		LogPrintf( "SetPaths( STRUCTURE, paths!=NULL )\n" );
+	}
+	if ( GetTrkType(trk) == T_TURNOUT && paths == NULL ) {
+		LogPrintf( "SetPaths( TURNOUT, paths==NULL )\n" );
+	}
+
 	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
-	wIndex_t pathLen = GetPathsLength( paths );
-#ifdef NEWPATH
-	if ( xx->saved_paths )
-		MyFree( xx->saved_paths );
-	xx->saved_paths = memdup( paths, pathLen * sizeof *xx->saved_paths );
-	xx->new_paths = NULL;
-#else
 	if ( xx->paths )
 		MyFree( xx->paths );
 	if ( paths == NULL ) {
-		// Structure, but just to be safe
-		paths = (PATHPTR_T)"\0\0\0";
-		pathLen = 3;
+		xx->paths = NULL;
+	} else {
+		wIndex_t pathLen = GetPathsLength( paths );
+		xx->paths = memdup( paths, pathLen * sizeof *xx->paths );
 	}
-	xx->paths = memdup( paths, pathLen * sizeof *xx->paths );
 	xx->currPath = NULL;
-#endif
 	xx->currPathIndex = 0;
 }
+#endif
 
 
+/* GetCurrPath()
+ *
+ * Return the current path for 'trk'.
+ * Current path is the .currPathIndex'th path
+ * If the .currPathIndex is greater then the number of paths, return the first
+ *
+ * \param trk IN
+ */
 EXPORT PATHPTR_T GetCurrPath( track_p trk )
 {
 	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
@@ -127,6 +157,36 @@ EXPORT void SetCurrPathIndex( track_p trk, long position )
 	xx->currPath = NULL;
 }
 
+#ifndef NEWPATH
+/* GetParamPaths()
+ *
+ * Return the paths for turnout parameter 'to'.
+ *
+ * \param to IN
+ */
+PATHPTR_T GetParamPaths( turnoutInfo_t * to )
+{
+	return to->paths;
+}
+
+/* SetParamPaths()
+ *
+ * Set paths for a Turnout Parameter 'to'
+ * Used when creating a new turnout def'n
+ * 
+ * \param to IN
+ * \param paths IN
+ */
+void SetParamPaths( turnoutInfo_t * to, PATHPTR_T paths )
+{
+	if ( paths ) {
+		wIndex_t len = GetPathsLength(paths);
+		to->paths = (PATHPTR_T)memdup( paths, len * ( sizeof * to->paths ) );
+	} else {
+		to->paths = NULL;
+	}
+}
+#endif
 
 /*****************************************************************************
  *
@@ -146,11 +206,13 @@ EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
 	PATHPTR_T pp;
 
 	BOOL_T rc = TRUE;
-	for ( pp=paths; *pp; pp+=2 ) {
-		rc &= fprintf( f, "\tP \"%s\"", pp )>0;
-		for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ )
-			rc &= fprintf( f, " %d", pp[0] )>0;
-		rc &= fprintf( f, "\n" )>0;
+	if ( paths ) {
+		for ( pp=paths; *pp; pp+=2 ) {
+			rc &= fprintf( f, "\tP \"%s\"", pp )>0;
+			for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ )
+				rc &= fprintf( f, " %d", pp[0] )>0;
+			rc &= fprintf( f, "\n" )>0;
+		}
 	}
 	for ( i=0; i<endPtCnt; i++ )
 		rc &= fprintf( f, "\tE %0.6f %0.6f %0.6f\n",
@@ -1209,7 +1271,6 @@ BOOL_T ReadCompound(
 	long options = 0;
 	long position = 0;
 	long lineType = 0;
-	PATHPTR_T path=NULL;
 
 	if (paramVersion<3) {
 		if ( !GetArgs( line, "dXsdpfq",
@@ -1230,11 +1291,15 @@ BOOL_T ReadCompound(
 	pathCnt = 0;
 	if ( !ReadSegs() )
 		return FALSE;
-	path = pathPtr;
-	if ( tempEndPts_da.cnt > 0 && pathCnt <= 1 ) {
-		// A Turnout with no path: fake it
-		pathCnt = 11;
-		path = (PATHPTR_T)"Normal\01\0\0\0";
+	if ( trkType == T_TURNOUT ) {
+		if ( tempEndPts_da.cnt <= 0 ) {
+			InputError( "Turnout defn without EndPoints", TRUE );
+			return FALSE;
+		}
+		if ( pathCnt <= 1 ) {
+			InputError( "Turnout defn without a Path", TRUE );
+			return FALSE;
+		}
 	}
 	if (paramVersion<6 && strlen( title ) > 2) {
 		cp = strchr( title, '\t' );
@@ -1246,7 +1311,7 @@ BOOL_T ReadCompound(
 		}
 	}
 	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL,
-			path,
+			pathCnt > 1 ? pathPtr : NULL,
 			tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );
 	if ( paramVersion < 3 ) {
