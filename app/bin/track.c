@@ -2777,9 +2777,11 @@ EXPORT void DrawCurvedTrack(
 	DIST_T trackGauge = GetTrkGauge(trk);
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
-    long bridge = 0;
-    if(trk)
+    long bridge = 0, roadbed = 0;
+    if(trk) {
         bridge = GetTrkBridge( trk );
+		roadbed = GetTrkRoadbed( trk );
+	}
 
 	if ( (d->options&DC_SEGTRACK) ) {
 		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
@@ -2812,6 +2814,11 @@ EXPORT void DrawCurvedTrack(
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
 		DrawArc( d, p, r, a0, a1, 0, width3, drawColorGrey90 );
 	}
+	else
+		if(roadbed) {
+			wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi/d->scale); 
+			DrawArc( d, p, r, a0, a1, 0, width4, drawColorGrey90 );
+		}
 
 	if ( DoDrawTies( d, trk ) )
 		DrawCurvedTies( d, GetTrkScale(trk), p, r, a0, a1, color );
@@ -2903,9 +2910,11 @@ EXPORT void DrawStraightTrack(
 	coOrd pp0, pp1;
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
-    long bridge = 0;
-    if ( trk )
+    long bridge = 0, roadbed = 0;
+    if ( trk ) {
         bridge = GetTrkBridge(trk);
+		roadbed = GetTrkRoadbed(trk);
+	}
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
 
@@ -2942,6 +2951,11 @@ EXPORT void DrawStraightTrack(
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
 		DrawLine(d,p0,p1,width3,wDrawColorGrey90);
 	}
+	else
+		if(roadbed) {
+			wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi/d->scale); 
+			DrawLine(d,p0,p1,width4,wDrawColorGrey90);
+		}
 
 	if ( DoDrawTies( d, trk ) )
 		DrawStraightTies( d, GetTrkScale(trk), p0, p1, color );

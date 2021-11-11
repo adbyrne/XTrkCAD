@@ -2608,6 +2608,7 @@ static void DrawTurnout(
 
 	int noTies = GetTrkNoTies(trk);
 	int bridge = GetTrkBridge(trk);
+	int roadbed = GetTrkRoadbed(trk);
 
 	long skip = 0;
 	/** @prefs [Preference] NormalTurnoutDraw=1 to skip enhanced drawing methods */
@@ -2653,6 +2654,7 @@ static void DrawTurnout(
 			}
 			SetTrkNoTies(trk, 1); 
             ClrTrkBits(trk, TB_BRIDGE); 
+			ClrTrkBits(trk, TB_ROADBED);
 		}
 	}
 
@@ -2679,6 +2681,7 @@ static void DrawTurnout(
 	// Restore these settings
 	if (noTies == 0) ClrTrkBits(trk, TB_NOTIES);
 	if (bridge) SetTrkBits(trk, TB_BRIDGE);
+	if (roadbed) SetTrkBits(trk, TB_ROADBED);
 }
 
 

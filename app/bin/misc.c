@@ -2429,7 +2429,7 @@ static void CreateMenus(void) {
 	/* Group/Un-group Selected */
 	/*----------*/
 	/* Thick/Thin */
-	/* Bridge/Tunnel */
+	/* Bridge/Roadbed/Tunnel */
 	/* Ties/NoTies */
 	/*-----------*/
 	/* More Commands */
@@ -2628,6 +2628,7 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate( editM );
 	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL, SelectTunnel, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B&ridge"), ACCL_BRIDGE, SelectBridge, IC_SELECTED, NULL);
+	MiscMenuItemCreate( editM, NULL, "cmdRoadbed", _("&Roadbed"), 0L, SelectRoadbed, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdTies", _("Ties/NoTies"), ACCL_TIES, SelectTies, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("Move to &Front"), ACCL_ABOVE, SelectAbove, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Move to &Back"), ACCL_BELOW, SelectBelow, IC_SELECTED, NULL);
