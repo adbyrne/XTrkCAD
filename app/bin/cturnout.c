@@ -216,8 +216,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 		to->pathOverRide = TRUE;
 	if (options & COMPOUND_OPTION_PATH_NOCOMBINE)
 		to->pathNoCombine = TRUE;
-	wIndex_t pathsLen = GetPathsLength(paths);
-	to->paths = (PATHPTR_T)memdup(paths, pathsLen * (sizeof * to->paths));
+	SetParamPaths( to, paths );
 	to->paramFileIndex = curParamFileIndex;
 	if (curParamFileIndex == PARAM_CUSTOM)
 		to->contentsLabel = MyStrdup("Custom Turnouts");
@@ -3811,7 +3810,7 @@ static BOOL_T MakeParallelTurnout(
 			yy = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 
 
-			PATHPTR_T paths = GetPaths(trk);
+			PATHPTR_T paths = GetPaths(trk); // MakeParallelTurnout
 			*newTrk = NewCompound(T_TURNOUT, 0, endPt[0].pos, endPt[0].angle + 90.0,
 				yy->title, 2, endPt, paths,
 				yy->segCnt, yy->segs);
@@ -4440,7 +4439,7 @@ static void AddTurnout(void)
 	/*
 	 * copy data */
 
-	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), curTurnout->paths, curTurnout->segCnt, curTurnout->segs);
+	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), GetParamPaths(curTurnout), curTurnout->segCnt, curTurnout->segs);
 	xx = GET_EXTRA_DATA(newTrk, T_TURNOUT, extraDataCompound_t);
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {
