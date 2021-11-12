@@ -4,19 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [5.3.0 Beta 1]
+## [5.2.2 Beta 3]
 
 ## Bugs
 
 + Windows arc/curve drawing fix
++ Improved all the icons
+
 
 ## Added
 
++ Add JPEG format to bitmap export
 + Added 5", 7-1/4" and 7-1/2" Gauge to scale selection
 + Increased Zoom levels to 1024
 
+
 ## Parameters
 
++ Updated PIKO G Track parameter file, added new R3 Turnouts
++ Walthers HO DCC Code 100 Turnouts and Walthers HO DCC Code 83 Turnouts
++ HO Piko A and Piko A Roadbed
 + Miniature Railway Workshop 7-1/4" portable track system
 + Mini Train Systems 5" and 7-1/4" track
 + AccuTie 7-1/4" and 7-1/2" track kits
