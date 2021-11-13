@@ -10,7 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 + Windows arc/curve drawing fix
 + Improved all the icons
-
++ Preserve Double Slip Switch Quad path setting thru Ungroup/Group and other operations
++ Fix search order order for Appl Lib dir
++ fix Cornu Turnout Designer creating short segments
 
 ## Added
 
