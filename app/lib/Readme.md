@@ -18,7 +18,7 @@ To report bugs, please use the SourceForge bugs reporting page https://sourcefor
 
 To discuss the Release, please use the user forum https://xtrackcad.groups.io/g/main/topics
 
-# XTrackCAD 5.2.3 Beta 2 Notes#
+# XTrackCAD 5.2.2 Beta 3 Notes#
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
