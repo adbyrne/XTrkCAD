@@ -133,6 +133,7 @@ static struct DrawToData_t {
 	enum dtoType toType;
 	track_p trk;
 	int bridge; 
+	int roadbed;
 	int endCnt;
 	int pathCnt;
 	int routeCnt;
@@ -1192,13 +1193,15 @@ static void DrawDtoLayout(
 * passed as pairs, and rearranged into a polygon with the 1,2,4,3 order. 
 * 
 * \param d The drawing object
+* \param c The color
 * \param b1 The first coordinate
 * \param b2 The second coordinate
 * \param b3 The third coordinate
 * \param b4 The fourth coordinate
 */
-static void DrawBridgeFill(
+static void DrawFill(
 	drawCmd_p d, 
+	wDrawColor c,
 	coOrd b1,
 	coOrd b2,
 	coOrd b3,
@@ -1206,18 +1209,20 @@ static void DrawBridgeFill(
 	) 
 {
 	coOrd p[4] = {b1, b2, b4, b3};
-	DrawPoly(d,4,p,NULL,drawColorGrey90,0,DRAW_FILL ); 
+	DrawPoly(d,4,p,NULL,c,0,DRAW_FILL ); 
 }
 
 /**
-* Draw Bridge parapets and background for a turnout
+* Draw Bridge parapets and background or Roadbed for a turnout
 * 
 * \param d The drawing object
+* \param fillType 0 for bridge, 1 for roadbed
 * \param path1 The first path
 * \param path2 The second path
 */
-static void DrawTurnoutBridge(
+static void DrawTurnoutFill(
     drawCmd_p d,
+	int fillType, 
     int path1,
     int path2
 )
@@ -1227,6 +1232,7 @@ static void DrawTurnoutBridge(
 	if (d->options&DC_PRINT)
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
+	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
     coOrd b1,b2,b3,b4,b5,b6;
     ANGLE_T angle = dtod.xx->angle,a = 0.0;
     int i,j,i1,i2;
@@ -1240,7 +1246,7 @@ static void DrawTurnoutBridge(
 
     if(dtod.toType == DTO_THREE) {
         i = dtod.strPath;
-        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * (fillType==0?1.5:2.0);
         b1 = dto[i].pts[0];
         Translate(&b3,b1,(angle + a),dy);
         b1 = dto[i].pts[dto[i].n - 1];
@@ -1250,8 +1256,8 @@ static void DrawTurnoutBridge(
         b2 = dto[i].pts[dto[i].n - 1];
         Translate(&b6,b2,(angle + a),-dy);
 
-        // Draw the bridge background
-        DrawBridgeFill(d,b3,b4,b5,b6);
+        // Draw the background
+        DrawFill(d,color,b3,b4,b5,b6);
     }
 
     for(i = i1; 1; i = i2,a = 180.0) {
@@ -1265,11 +1271,13 @@ static void DrawTurnoutBridge(
             Translate(&b4,b2,(angle + a),dy);
             Translate(&b6,b2,(angle + a),-(dy * 0.75));
 
-            // Draw the bridge background
-            DrawBridgeFill(d,b3,b4,b5,b6);
+            // Draw the background
+            DrawFill(d,color,b3,b4,b5,b6);
 
             // Draw the bridge edge
-            DrawLine(d,b3,b4,width2,drawColorBlack);
+			if(fillType==0) {
+				DrawLine( d,b3,b4,width2,drawColorBlack );
+			}
 
             b1 = b2;
             b3 = b4;
@@ -1285,38 +1293,42 @@ static void DrawTurnoutBridge(
     track_p trk1;
     coOrd p0,p1;
 
-    for(ep = 0; ep < 3; ep++) {
-        trk1 = GetTrkEndTrk(dtod.trk,ep);
+	if(fillType==0) {
+		for(ep = 0; ep < 3; ep++) {
+			trk1 = GetTrkEndTrk(dtod.trk,ep);
 
-        if((trk1) && (!GetTrkBridge(trk1))) {
+			if((trk1) && (!GetTrkBridge(trk1))) {
 
-            p = GetTrkEndPos(dtod.trk,ep);
-            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+				p = GetTrkEndPos(dtod.trk,ep);
+				a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
-            int i = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
-            if(ep != i) {
-                Translate(&p0,p,a,trackGauge * 1.5);
-                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
-                DrawLine(d,p0,p1,width2,drawColorBlack);
-            }
-            if(ep != (3 - i)) {
-                Translate(&p0,p,a,-trackGauge * 1.5);
-                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
-                DrawLine(d,p0,p1,width2,drawColorBlack);
-            }
-        }
-    }
+				int i = (dtod.lftCnt > 0) && (dtod.rgtCnt == 0) ? 2 : 1;
+				if(ep != i) {
+					Translate(&p0,p,a,trackGauge * 1.5);
+					Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+					DrawLine(d,p0,p1,width2,drawColorBlack);
+				}
+				if(ep != (3 - i)) {
+					Translate(&p0,p,a,-trackGauge * 1.5);
+					Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+					DrawLine(d,p0,p1,width2,drawColorBlack);
+				}
+			}
+		}
+	}
 }
 
 /**
-* Draw Bridge parapets and background for a cross-over
+* Draw Bridge parapets and background or Roadbed for a cross-over
 * 
 * \param d The drawing object
+* \param fillType 0 for bridge, 1 for roadbed
 * \param path1 The first path, straight
 * \param path2 The second path, straight
 */
-static void DrawCrossBridge(
+static void DrawCrossFill(
 	drawCmd_p d, 
+	int fillType, 
 	int path1,
 	int path2
 )
@@ -1326,6 +1338,7 @@ static void DrawCrossBridge(
 	if (d->options&DC_PRINT)
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
+	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
 	coOrd b1, b2, b3, b4, b5, b6;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
 	int i1, i2;
@@ -1337,7 +1350,7 @@ static void DrawCrossBridge(
 		// a = -a;
 	}
 
-	DIST_T dy = fabs(dto[i1].dy[0]) + trackGauge * 1.5;
+	DIST_T dy = fabs(dto[i1].dy[0]) + trackGauge * (fillType==0?1.5:2.0);
 	b1 = dto[i1].pts[0];
 	Translate(&b3,b1,(angle + a),dy);
 	b1 = dto[i1].pts[dto[i1].n-1];
@@ -1347,48 +1360,54 @@ static void DrawCrossBridge(
 	b2 = dto[i2].pts[dto[i2].n-1];
 	Translate(&b6,b2,(angle + a),-dy);
 
-	// Draw the bridge background
-	DrawBridgeFill(d, b3, b4, b5, b6);
+	// Draw the background
+	DrawFill(d, color, b3, b4, b5, b6);
 
 	// Draw the bridge edges
-	DrawLine(d,b3,b4,width2,drawColorBlack);
-	DrawLine(d,b5,b6,width2,drawColorBlack);
+	if(fillType == 0) {
+		DrawLine(d,b3,b4,width2,drawColorBlack);
+		DrawLine(d,b5,b6,width2,drawColorBlack);
+	}
 
     EPINX_T ep;
     coOrd p;
     track_p trk1;
     coOrd p0,p1;
 
-    for(ep = 0; ep < 4; ep++) {
-        trk1 = GetTrkEndTrk(dtod.trk,ep);
+	if(fillType==0) {
+		for(ep = 0; ep < 4; ep++) {
+			trk1 = GetTrkEndTrk(dtod.trk,ep);
 
-        if((trk1) && (!GetTrkBridge(trk1))) {
-            p = GetTrkEndPos(dtod.trk,ep);
-            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+			if((trk1) && (!GetTrkBridge(trk1))) {
+				p = GetTrkEndPos(dtod.trk,ep);
+				a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
-            if((ep == 1) || (ep == 2)) {
-                Translate(&p0,p,a,trackGauge * 1.5);
-                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
-                DrawLine(d,p0,p1,width2,drawColorBlack);
-            }
-            if((ep == 0) || (ep == 3)) {
-                Translate(&p0,p,a,-trackGauge * 1.5);
-                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
-                DrawLine(d,p0,p1,width2,drawColorBlack);
-            }
-        }
-    }
+				if((ep == 1) || (ep == 2)) {
+					Translate(&p0,p,a,trackGauge * 1.5);
+					Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+					DrawLine(d,p0,p1,width2,drawColorBlack);
+				}
+				if((ep == 0) || (ep == 3)) {
+					Translate(&p0,p,a,-trackGauge * 1.5);
+					Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+					DrawLine(d,p0,p1,width2,drawColorBlack);
+				}
+			}
+		}
+	}
 }
 
 /**
-* Draw Bridge parapets and background for a crossing
+* Draw Bridge parapets and background or Roadbed for a crossing
 * 
 * \param d The drawing object
+* \param fillType 0 for bridge, 1 for roadbed
 * \param path1 The first path
 * \param path2 The second path
 */
-static void DrawXingBridge(
+static void DrawXingFill(
 	drawCmd_p d, 
+	int fillType, 
 	int path1,
 	int path2
 )
@@ -1403,14 +1422,15 @@ static void DrawXingBridge(
 	i1 = dtod.strPath;
 	i2 = dtod.str2Path;
 
-	// Bridge fill both straight sections
+	// Fill both straight sections
 	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
+	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
 	b1 = dto[i1].pts[0];
 	b2 = dto[i1].pts[dto[i1].n-1];
-	DrawLine(d,b1,b2,width3,wDrawColorGrey90);
+	DrawLine(d,b1,b2,width3,color);
 	b1 = dto[i2].pts[0];
 	b2 = dto[i2].pts[dto[i1].n-1];
-	DrawLine(d,b1,b2,width3,wDrawColorGrey90);
+	DrawLine(d,b1,b2,width3,color);
 
 	i1 = path1;
 	i2 = path2;
@@ -1439,10 +1459,12 @@ static void DrawXingBridge(
 				Translate(&b6,b2,(angle + a),-(dy * 0.75));
 
 				// Draw the bridge background
-				DrawBridgeFill(d,b3,b4,b5,b6);
+				DrawFill(d,bridgeColor,b3,b4,b5,b6);
 
 				// Draw the bridge edge
-				DrawLine(d,b3,b4,width2,drawColorBlack);
+				if(fillType==0) {
+					DrawLine( d,b3,b4,width2,drawColorBlack );
+				}
 				b1 = b2;
 				b3 = b4;
 				b5 = b6;
@@ -1455,7 +1477,7 @@ static void DrawXingBridge(
 	if(dtod.strPath >= 0 && dtod.str2Path >= 0) {
 		i1 = dtod.strPath;
 		i2 = dtod.str2Path;
-		if(!hasRgt) {
+		if(!hasRgt&&fillType==0) {
 			DIST_T dy = trackGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i1].pts[0];
@@ -1473,7 +1495,7 @@ static void DrawXingBridge(
 			DrawLine(d,b0,b4,width2,drawColorBlack);
 		}
 
-		if(!hasLeft) {
+		if(!hasLeft&&fillType==0) {
 			DIST_T dy = trackGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i2].pts[0];
@@ -1491,7 +1513,7 @@ static void DrawXingBridge(
 			DrawLine(d,b0,b4,width2,drawColorBlack);
 		}
 
-		if(dtod.toType == DTO_XNG9) {
+		if(dtod.toType == DTO_XNG9 && fillType==0) {
 			DIST_T dy = trackGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i1].pts[dto[i1].n - 1];
@@ -1530,25 +1552,27 @@ static void DrawXingBridge(
     track_p trk1;
     coOrd p0,p1;
 
-    for(ep = 0; ep < 4; ep++) {
-        trk1 = GetTrkEndTrk(dtod.trk,ep);
+	if(fillType==0) {
+		for(ep = 0; ep < 4; ep++) {
+			trk1 = GetTrkEndTrk(dtod.trk,ep);
 
-        if((trk1) && (!GetTrkBridge(trk1))) {
-            p = GetTrkEndPos(dtod.trk,ep);
-            a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
+			if((trk1) && (!GetTrkBridge(trk1))) {
+				p = GetTrkEndPos(dtod.trk,ep);
+				a = GetTrkEndAngle(dtod.trk,ep) + 90.0;
 
-            if((dtod.toType == DTO_XNG9) || (ep == 2) || (ep == 3)) {
-                Translate(&p0,p,a,trackGauge * 1.5);
-                Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
-                DrawLine(d,p0,p1,width2,drawColorBlack);
-            }
-            if((dtod.toType == DTO_XNG9) || (ep == 0) || (ep == 1)) {
-                Translate(&p0,p,a,-trackGauge * 1.5);
-                Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
-                DrawLine(d,p0,p1,width2,drawColorBlack);
-            }
-        }
-    }
+				if((dtod.toType == DTO_XNG9) || (ep == 2) || (ep == 3)) {
+					Translate(&p0,p,a,trackGauge * 1.5);
+					Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+					DrawLine(d,p0,p1,width2,drawColorBlack);
+				}
+				if((dtod.toType == DTO_XNG9) || (ep == 0) || (ep == 1)) {
+					Translate(&p0,p,a,-trackGauge * 1.5);
+					Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+					DrawLine(d,p0,p1,width2,drawColorBlack);
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -1639,8 +1663,12 @@ static void DrawNormalTurnout(
 	}
 
 	if(dtod.bridge) {
-		DrawTurnoutBridge(d,othPath,secPath);
+		DrawTurnoutFill(d,0,othPath,secPath);
 	}
+	else 
+		if(dtod.roadbed) {
+			DrawTurnoutFill( d,1,othPath,secPath );
+		}
 	if (omitTies)
 		return;
 
@@ -1844,8 +1872,12 @@ static void DrawCurvedTurnout(
 	int toType = dtod.toType;
 
 	if(dtod.bridge) {
-		DrawTurnoutBridge(d,othPath,secPath);
+		DrawTurnoutFill(d,0,othPath,secPath);
 	}
+	else
+		if(dtod.roadbed) {
+			DrawTurnoutFill(d,1,othPath,secPath);
+		}
 	if (omitTies)
 		return;
 
@@ -2122,8 +2154,13 @@ static void DrawXingTurnout(
 	}
 
 	if(dtod.bridge) {
-		DrawXingBridge(d,othPath,secPath);
+		DrawXingFill(d,0,othPath,secPath);
 	}
+	else
+		if(dtod.roadbed) {
+			DrawXingFill(d,1,othPath,secPath);
+		}
+
 	// draw the points
 #ifdef DTO_DEBUG
 	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
@@ -2422,8 +2459,12 @@ static void DrawCrossTurnout(
 	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
 
 	if(dtod.bridge) {
-		DrawCrossBridge(d,strPath,str2Path);
+		DrawCrossFill(d,0,strPath,str2Path);
 	}
+	else
+		if(dtod.roadbed) {
+			DrawCrossFill(d,1,strPath,str2Path);
+		}
 	if (omitTies)
 		return;
 
@@ -2622,6 +2663,7 @@ static void DrawTurnout(
 		{
 
 		dtod.bridge = bridge; 
+		dtod.roadbed = roadbed;
 
 		int strPath = -1;
 		GetTurnoutType();

@@ -55,6 +55,8 @@ extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
 extern wDrawColor tieColor;
+extern wDrawColor bridgeColor;
+extern wDrawColor roadbedColor;
 
 
 extern TRKINX_T max_index;

@@ -2624,6 +2624,8 @@ EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
 
 EXPORT long tieDrawMode = TIEDRAWMODE_SOLID;
 EXPORT wDrawColor tieColor;
+EXPORT wDrawColor bridgeColor;
+EXPORT wDrawColor roadbedColor;
 
 /**
  * Centerline drawing test
@@ -2812,12 +2814,12 @@ EXPORT void DrawCurvedTrack(
     // Draw a solid background
     if(bridge) {
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); // / BASE_DPI);
-		DrawArc( d, p, r, a0, a1, 0, width3, drawColorGrey90 );
+		DrawArc( d, p, r, a0, a1, 0, width3, bridgeColor );
 	}
 	else
 		if(roadbed) {
 			wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi/d->scale); 
-			DrawArc( d, p, r, a0, a1, 0, width4, drawColorGrey90 );
+			DrawArc( d, p, r, a0, a1, 0, width4, roadbedColor );
 		}
 
 	if ( DoDrawTies( d, trk ) )
@@ -2949,12 +2951,12 @@ EXPORT void DrawStraightTrack(
     // Draw solid background
     if(bridge) {
 		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
-		DrawLine(d,p0,p1,width3,wDrawColorGrey90);
+		DrawLine(d,p0,p1,width3,bridgeColor);
 	}
 	else
 		if(roadbed) {
 			wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi/d->scale); 
-			DrawLine(d,p0,p1,width4,wDrawColorGrey90);
+			DrawLine(d,p0,p1,width4,roadbedColor);
 		}
 
 	if ( DoDrawTies( d, trk ) )

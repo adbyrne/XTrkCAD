@@ -708,15 +708,17 @@ static void DeleteCurve( track_p t )
 static BOOL_T WriteCurve( track_p t, FILE * f )
 {
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
+	long bits;
 	long options;
 	BOOL_T rc = TRUE;
 	options = GetTrkWidth(t) & 0x0F;
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
 			// 0x80 means Show Description
 			options |= 0x80;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "CURVE %d %d %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n", 
 		GetTrkIndex(t), GetTrkLayer(t), (long)options,
-		GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->pos.x, xx->pos.y, xx->radius,
+		GetTrkScaleName(t), bits, xx->pos.x, xx->pos.y, xx->radius,
 		xx->helixTurns, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
@@ -758,10 +760,12 @@ static BOOL_T ReadCurve( char * line )
 		SetTrkVisible(t, visible!=0);
 		SetTrkNoTies(t, FALSE);
 		SetTrkBridge(t, FALSE);
+		SetTrkRoadbed(t, FALSE);
 	} else {
 		SetTrkVisible(t, visible&2);
 		SetTrkNoTies(t, visible&4);
 		SetTrkBridge(t, visible&8);
+		SetTrkRoadbed(t, visible&16);
 	}
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
