@@ -1233,7 +1233,8 @@ static void DrawTurnoutFill(
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
-    coOrd b1,b2,b3,b4,b5,b6;
+	double fillWidth = (fillType==0?1.5:2.0);
+	coOrd b1,b2,b3,b4,b5,b6;
     ANGLE_T angle = dtod.xx->angle,a = 0.0;
     int i,j,i1,i2;
     i1 = path1;
@@ -1246,7 +1247,7 @@ static void DrawTurnoutFill(
 
     if(dtod.toType == DTO_THREE) {
         i = dtod.strPath;
-        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * (fillType==0?1.5:2.0);
+        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
         b1 = dto[i].pts[0];
         Translate(&b3,b1,(angle + a),dy);
         b1 = dto[i].pts[dto[i].n - 1];
@@ -1260,39 +1261,40 @@ static void DrawTurnoutFill(
         DrawFill(d,color,b3,b4,b5,b6);
     }
 
-    for(i = i1; 1; i = i2,a = 180.0) {
-        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
-        b1 = dto[i].pts[0];
-        Translate(&b3,b1,(angle + a),dy);
-        Translate(&b5,b1,(angle + a),-(dy * 0.75));
-        for(j = 1; j < dto[i].n; j++) {
-            dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
-            b2 = dto[i].pts[j];
-            Translate(&b4,b2,(angle + a),dy);
-            Translate(&b6,b2,(angle + a),-(dy * 0.75));
+	for(i = i1; 1; i = i2,a = 180.0) {
+		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
+		b1 = dto[i].pts[0];
+		Translate(&b3,b1,(angle + a),dy);
+		Translate(&b5,b1,(angle + a),-(dy * 0.75));
+		for(j = 1; j < dto[i].n; j++) {
+			dy = fabs(dto[i].dy[j]) + trackGauge * fillWidth;
+			b2 = dto[i].pts[j];
+			Translate(&b4,b2,(angle + a),dy);
+			Translate(&b6,b2,(angle + a),-(dy * 0.75));
 
-            // Draw the background
-            DrawFill(d,color,b3,b4,b5,b6);
+			// Draw the background
+			DrawFill(d,color,b3,b4,b5,b6);
 
-            // Draw the bridge edge
+			// Draw the bridge edge
 			if(fillType==0) {
 				DrawLine( d,b3,b4,width2,drawColorBlack );
 			}
 
-            b1 = b2;
-            b3 = b4;
-            b5 = b6;
-        }
+			b1 = b2;
+			b3 = b4;
+			b5 = b6;
+		}
 
-        if(i == i2)
-            break;
-    }
+		if(i == i2)
+			break;
+	}
 
     EPINX_T ep;
     coOrd p;
     track_p trk1;
     coOrd p0,p1;
 
+	// Bridge parapet ends
 	if(fillType==0) {
 		for(ep = 0; ep < 3; ep++) {
 			trk1 = GetTrkEndTrk(dtod.trk,ep);
@@ -1339,6 +1341,7 @@ static void DrawCrossFill(
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
+	double fillWidth = (fillType==0?1.5:2.0);
 	coOrd b1, b2, b3, b4, b5, b6;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
 	int i1, i2;
@@ -1350,7 +1353,7 @@ static void DrawCrossFill(
 		// a = -a;
 	}
 
-	DIST_T dy = fabs(dto[i1].dy[0]) + trackGauge * (fillType==0?1.5:2.0);
+	DIST_T dy = fabs(dto[i1].dy[0]) + trackGauge * fillWidth;
 	b1 = dto[i1].pts[0];
 	Translate(&b3,b1,(angle + a),dy);
 	b1 = dto[i1].pts[dto[i1].n-1];
@@ -1374,6 +1377,7 @@ static void DrawCrossFill(
     track_p trk1;
     coOrd p0,p1;
 
+	// Bridge parapet ends
 	if(fillType==0) {
 		for(ep = 0; ep < 4; ep++) {
 			trk1 = GetTrkEndTrk(dtod.trk,ep);
@@ -1417,13 +1421,14 @@ static void DrawXingFill(
 	if (d->options&DC_PRINT)
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
+	double fillWidth = (fillType==0?1.5:2.0);
 	coOrd b0, b1, b2, b3, b4, b5, b6;
 	int i, j, i1, i2;
 	i1 = dtod.strPath;
 	i2 = dtod.str2Path;
 
 	// Fill both straight sections
-	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi/d->scale); 
+	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 2 * fillWidth * d->dpi / d->scale); 
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
 	b1 = dto[i1].pts[0];
 	b2 = dto[i1].pts[dto[i1].n-1];
@@ -1443,7 +1448,7 @@ static void DrawXingFill(
 	BOOL_T hasLeft = 0, hasRgt = 0;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
 	for(i = i1; 1; i = i2,a = 180.0) {
-		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * 1.5;
+		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
 		b1 = dto[i].pts[0];
 		Translate(&b3,b1,(angle + a),dy);
 		Translate(&b5,b1,(angle + a),-(dy * 0.75));
@@ -1453,13 +1458,13 @@ static void DrawXingFill(
 			else if(dto[i].type == 'R')
 				hasRgt = 1;
 			for(j = 1; j < dto[i].n; j++) {
-				dy = fabs(dto[i].dy[j]) + trackGauge * 1.5;
+				dy = fabs(dto[i].dy[j]) + trackGauge * fillWidth;
 				b2 = dto[i].pts[j];
 				Translate(&b4,b2,(angle + a),dy);
 				Translate(&b6,b2,(angle + a),-(dy * 0.75));
 
-				// Draw the bridge background
-				DrawFill(d,bridgeColor,b3,b4,b5,b6);
+				// Draw the background
+				DrawFill(d,color,b3,b4,b5,b6);
 
 				// Draw the bridge edge
 				if(fillType==0) {
