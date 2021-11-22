@@ -2635,7 +2635,7 @@ EXPORT wDrawColor roadbedColor;
  */
 
 EXPORT bool
-HasTrackCenterline( drawCmd_p d )
+hasTrackCenterline( drawCmd_p d )
 {
 	// for printing, drawing of center line depends on the scale
 	if( d->options & DC_CENTERLINE && d->options & DC_PRINT ) {

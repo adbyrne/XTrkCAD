@@ -451,7 +451,7 @@ EXPORT void DrawStraightTrack(
 	if ( d->scale >= scale2rail ) {
 		DrawLine( d, p0, p1, width, color );
 	} else {
-		if ( HasTrackCenterline(d)) { 
+		if ( hasTrackCenterline(d)) { 
 			long options = d->options;
 			d->options |= DC_DASH;
 			DrawLine( d, p0, p1, 0, color );

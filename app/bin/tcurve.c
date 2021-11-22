@@ -22,7 +22,7 @@
 
 #include "ccurve.h"
 #include "cjoin.h"
-#include "cstraigh.h"
+// #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
 #include "layout.h"
@@ -804,7 +804,7 @@ EXPORT void DrawCurvedTrack(
 	if ( d->scale >= scale2rail ) {
 		DrawArc( d, p, r, a0, a1, (centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, width, color );
 	} else {
-		if ( HasTrackCenterline(d)) {
+		if ( hasTrackCenterline(d)) {
 			long options = d->options;
 			d->options |= DC_DASH;
 			DrawArc( d, p, r, a0, a1, 0, 0, color );
