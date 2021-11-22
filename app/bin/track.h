@@ -35,6 +35,7 @@ extern wIndex_t trackCount;
 extern wBool_t bFreeTrack;
 extern long colorTrack;
 extern long colorDraw;
+
 extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
@@ -50,6 +51,7 @@ extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
 extern wDrawColor exceptionColor;
+extern bool HasTrackCenterline;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)
 #define TIEDRAWMODE_SOLID		(2)
