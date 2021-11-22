@@ -51,7 +51,6 @@ extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
 extern wDrawColor exceptionColor;
-extern bool HasTrackCenterline;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)
 #define TIEDRAWMODE_SOLID		(2)
@@ -625,6 +624,7 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_DASHDOTDOT  (1<<10)
 #define DTS_CENTERONLY  (1<<11)
 
+BOOL_T hasTrackCenterline( drawCmd_p d );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 

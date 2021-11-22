@@ -435,12 +435,12 @@ EXPORT void DrawStraightTrack(
 
 		// Draw solid background
 		if(bridge) {
-			wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale); //  * d->dpi/d->scale); 
+			wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
 			DrawLine(d,p0,p1,width3,bridgeColor);
 		}
 		else
 			if(roadbed) {
-				wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi / d->scale); //  * d->dpi/d->scale); 
+				wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi / d->scale);
 				DrawLine(d,p0,p1,width4,roadbedColor);
 			}
 

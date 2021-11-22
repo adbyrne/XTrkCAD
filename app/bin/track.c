@@ -2634,7 +2634,7 @@ EXPORT wDrawColor roadbedColor;
  * \return	true for centerline, false if no centerline to draw
  */
 
-EXPORT bool
+EXPORT BOOL_T
 hasTrackCenterline( drawCmd_p d )
 {
 	// for printing, drawing of center line depends on the scale
