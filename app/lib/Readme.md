@@ -1,8 +1,8 @@
-# Beta 2 Release Notes
+# Beta 3 Release Notes
 
-Welcome to the XtrackCAD V5.2.2 Beta2 release!
+Welcome to the XtrackCAD V5.2.2 Beta3 release!
 
-Beta 2 of V5.2.2 contains new features and enhancements but is in need of testing to iron out any bugs before GA Release.
+Beta 3 of V5.2.2 contains new features and enhancements but is in need of testing to iron out any bugs before GA Release.
 
 Enjoy!
 
@@ -18,7 +18,7 @@ To report bugs, please use the SourceForge bugs reporting page https://sourcefor
 
 To discuss the Release, please use the user forum https://xtrackcad.groups.io/g/main/topics
 
-# XTrackCAD 5.2.2 Beta 2 Notes#
+# XTrackCAD 5.2.2 Beta 3 Notes#
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
