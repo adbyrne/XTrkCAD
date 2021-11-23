@@ -586,14 +586,16 @@ static void DeleteBezier( track_p t )
 static BOOL_T WriteBezier( track_p t, FILE * f )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataBezier_t);
+	long bits;
 	long options;
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_BEZIER);
 	options = GetTrkWidth(t) & 0x0F;
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 ) options |= 0x80;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %d %0.6f %0.6f \n",
 		track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options, wDrawGetRGB(xx->segsColor), xx->segsWidth,
-                  GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
+                  GetTrkScaleName(t), bits,
 				  xx->pos[0].x, xx->pos[0].y,
 				  xx->pos[1].x, xx->pos[1].y,
 				  xx->pos[2].x, xx->pos[2].y,
@@ -635,6 +637,7 @@ static BOOL_T ReadBezier( char * line )
 	SetTrkVisible(t, visible&2);
 	SetTrkNoTies(t,visible&4);
 	SetTrkBridge(t,visible&8);
+	SetTrkRoadbed(t,visible&16);
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));

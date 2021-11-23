@@ -42,6 +42,9 @@ typedef struct extraDataStraight_t {
 		} extraDataStraight_t;
 
 
+/** @logcmd @showrefby straight=n tstraigh.c */
+static int log_straight = 0;
+
 /****************************************
  *
  * UTILITIES
@@ -332,7 +335,7 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 	   ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 	  DrawStraightDescription( t, d, color );
 	}
-	long bridge = GetTrkBridge( t );
+	// long bridge = GetTrkBridge( t );
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				GetTrkEndAngle(t,0),
@@ -341,12 +344,165 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 	DrawEndPt( d, t, 1, color );
 }
 
+EXPORT void DrawStraightTies(
+	drawCmd_p d,
+	SCALEINX_T scaleInx,
+	coOrd p0,
+	coOrd p1,
+	wDrawColor color )
+{
+	tieData_p td;
+	DIST_T tieOff0=0.0, tieOff1=0.0;
+	DIST_T len, dlen;
+	coOrd pos;
+	int cnt;
+	ANGLE_T angle;
+
+	if ( (d->options&DC_SIMPLE) != 0 )
+		return;
+
+	if ( color == wDrawColorBlack )
+		color = tieColor;
+	if ( scaleInx < 0 )
+		return;
+	td = GetScaleTieData( scaleInx );
+	len = FindDistance( p0, p1 );
+	len -= tieOff0+tieOff1;
+	angle = FindAngle( p0, p1 );
+	cnt = (int)floor(len/td->spacing+0.5);
+	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 ) {
+		cnt++;
+	}
+	if ( cnt != 0 ) {
+		dlen = FindDistance( p0, p1 )/cnt;
+		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
+		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
+			Translate( &pos, p0, angle, len );
+			DrawTie( d, pos, angle, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
+		}
+	}
+}
+
+
+
+EXPORT void DrawStraightTrack(
+	drawCmd_p d,
+	coOrd p0,
+	coOrd p1,
+	ANGLE_T angle,
+	track_cp trk,
+	wDrawColor color,
+	long options )
+{
+	coOrd pp0, pp1;
+	DIST_T scale2rail;
+	DIST_T trackGauge = GetTrkGauge(trk);
+	long bridge = 0, roadbed = 0;
+	if ( trk ) {
+		bridge = GetTrkBridge(trk);
+		roadbed = GetTrkRoadbed(trk);
+	}
+	wDrawWidth width=0;
+	trkSeg_p segPtr;
+
+	if ( (d->options&DC_SEGTRACK) ) {
+		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
+		segPtr = &tempSegs(tempSegs_da.cnt-1);
+		segPtr->type = SEG_STRTRK;
+		segPtr->width = 0;
+		segPtr->color = wDrawColorBlack;
+		segPtr->u.l.pos[0] = p0;
+		segPtr->u.l.pos[1] = p1;
+		segPtr->u.l.angle = angle;
+		segPtr->u.l.option = 0;
+		return;
+	}
+
+	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
+
+	width = trk ? GetTrkWidth( trk ): 0;
+	if ((d->options&DC_PRINT) && (d->dpi>2*BASE_DPI))
+		width = (wDrawWidth)round(width * d->dpi / 2 / BASE_DPI);
+
+	if ( d->options&DC_THICK )
+		width = 3;
+	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
+		width = 3;
+
+
+	LOG(log_straight,4,("DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
+		p0.x, p0.y, p1.x, p1.y ) )
+
+		// Draw solid background
+		if(bridge) {
+			wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+			DrawLine(d,p0,p1,width3,bridgeColor);
+		}
+		else
+			if(roadbed) {
+				wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi / d->scale);
+				DrawLine(d,p0,p1,width4,roadbedColor);
+			}
+
+	if ( DoDrawTies( d, trk ) )
+		DrawStraightTies( d, GetTrkScale(trk), p0, p1, color );
+	if (color == wDrawColorBlack)
+		color = normalColor;
+	if ( d->scale >= scale2rail ) {
+		DrawLine( d, p0, p1, width, color );
+	} else {
+		if ( hasTrackCenterline(d)) { 
+			long options = d->options;
+			d->options |= DC_DASH;
+			DrawLine( d, p0, p1, 0, color );
+			d->options = options;
+		}
+		Translate( &pp0, p0, angle+90, trackGauge/2.0 );
+		Translate( &pp1, p1, angle+90, trackGauge/2.0 );
+		DrawLine( d, pp0, pp1, width, color );
+
+		Translate( &pp0, p0, angle-90, trackGauge/2.0 );
+		Translate( &pp1, p1, angle-90, trackGauge/2.0 );
+		DrawLine( d, pp0, pp1, width, color );
+
+		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && d->scale <= scale2rail/2.0) {
+			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
+			if ( options&DTS_RIGHT ) {
+				Translate( &pp0, p0, angle+90, roadbedWidth/2.0 );
+				Translate( &pp1, p1, angle+90, roadbedWidth/2.0 );
+				DrawLine( d, pp0, pp1, rbw, color );
+			}
+			if ( options&DTS_LEFT ) {
+				Translate( &pp0, p0, angle-90, roadbedWidth/2.0 );
+				Translate( &pp1, p1, angle-90, roadbedWidth/2.0 );
+				DrawLine( d, pp0, pp1, rbw, color );
+			}
+		}
+	}
+
+	if (bridge) {
+		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+		if (d->options&DC_PRINT)
+			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
+
+		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
+		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
+		DrawLine( d, pp0, pp1, width2, color );
+
+		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
+		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
+		DrawLine( d, pp0, pp1, width2, color);
+	}
+}
+
+
 static void DeleteStraight( track_p t )
 {
 }
 
 static BOOL_T WriteStraight( track_p t, FILE * f )
 {
+	long bits;
 	long options;
 	struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT, extraDataStraight_t);
 	BOOL_T rc = TRUE;
@@ -355,9 +511,10 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
 		// 0x80 means Show Description
 		options |= 0x80;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d %0.6f %0.6f\n",
 				GetTrkIndex(t), GetTrkLayer(t), options,
-				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->descriptionOff.x, xx->descriptionOff.y )>0;
+				GetTrkScaleName(t), bits, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
 	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
@@ -392,10 +549,12 @@ static BOOL_T ReadStraight( char * line )
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);
 		SetTrkBridge(trk, FALSE);
+		SetTrkRoadbed(trk, FALSE);
 	} else {
 		SetTrkVisible(trk, visible&2);
 		SetTrkNoTies(trk, visible&4);
 		SetTrkBridge(trk, visible&8);
+		SetTrkRoadbed(trk, visible&16);
 	}
 	SetTrkLayer(trk, layer);
 	SetTrkWidth( trk, (int)(options & 0x0F) );

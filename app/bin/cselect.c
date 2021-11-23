@@ -787,6 +787,18 @@ static BOOL_T FlipBridge( track_p trk, BOOL_T unused )
 	return TRUE;
 }
 
+static BOOL_T FlipRoadbed( track_p trk, BOOL_T unused )
+{
+	UndoModify( trk );
+	if (GetTrkRoadbed(trk)) {
+		ClrTrkBits( trk, TB_ROADBED );
+	} else {
+		SetTrkBits( trk, TB_ROADBED );
+		SetTrkBits( trk, TB_VISIBLE);
+	}
+	return TRUE;
+}
+
 static BOOL_T FlipTies( track_p trk, BOOL_T unused )
 {
 	UndoModify( trk );
@@ -826,6 +838,23 @@ EXPORT void SelectBridge( void * unused )
 		UndoStart( _("Bridge Tracks "), "bridge" );
 		wDrawDelayUpdate( mainD.d, TRUE );
 		DoSelectedTracks( FlipBridge );
+		wDrawDelayUpdate( mainD.d, FALSE );
+		UndoEnd();
+	} else {
+		ErrorMessage( MSG_NO_SELECTED_TRK );
+	}
+	MainRedraw(); // SelectBridge
+}
+
+EXPORT void SelectRoadbed( void * unused )
+{
+	if (SelectedTracksAreFrozen())
+		return;
+	if (selectedTrackCount>0) {
+		flipHiddenDoSelectRecount = FALSE;
+		UndoStart( _("Roadbed Tracks "), "roadbed" );
+		wDrawDelayUpdate( mainD.d, TRUE );
+		DoSelectedTracks( FlipRoadbed );
 		wDrawDelayUpdate( mainD.d, FALSE );
 		UndoEnd();
 	} else {

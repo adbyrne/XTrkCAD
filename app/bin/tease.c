@@ -946,13 +946,15 @@ static BOOL_T WriteJoint(
 {
 	struct extraDataEase_t * xx = GET_EXTRA_DATA(t, T_EASEMENT, extraDataEase_t);
 	BOOL_T rc = TRUE;
+	long bits;
 	long options = (long)GetTrkWidth(t);
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
 			// 0x80 means Show Description
 			options |= 0x80;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
 		GetTrkIndex(t), GetTrkLayer(t), options,
-		GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->l0, xx->l1, xx->R, xx->L,
+		GetTrkScaleName(t), bits, xx->l0, xx->l1, xx->R, xx->L,
 		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
@@ -994,10 +996,12 @@ static BOOL_T ReadJoint(
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);
 		SetTrkBridge(trk, FALSE);
+		SetTrkRoadbed(trk, FALSE);
 	} else {
 		SetTrkVisible(trk, visible&2);
 		SetTrkNoTies(trk, visible&4);
 		SetTrkBridge(trk, visible&8);
+		SetTrkRoadbed(trk, visible&16);
 	}
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);

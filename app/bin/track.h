@@ -35,6 +35,7 @@ extern wIndex_t trackCount;
 extern wBool_t bFreeTrack;
 extern long colorTrack;
 extern long colorDraw;
+
 extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
@@ -55,6 +56,8 @@ extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
 extern wDrawColor tieColor;
+extern wDrawColor bridgeColor;
+extern wDrawColor roadbedColor;
 
 
 extern TRKINX_T max_index;
@@ -435,10 +438,11 @@ void SetDebug( char * );
 #define TB_CARATTACHED	(1<<7)
 #define TB_NOTIES       (1<<8)
 #define TB_BRIDGE       (1<<9)
-#define TB_SELREDRAW	(1<<10)
+#define TB_ROADBED      (1<<10)
+#define TB_SELREDRAW	(1<<11)
 // Track has been undrawn, don't draw it on Redraw
-#define TB_UNDRAWN		(1<<11)
-#define TB_DETAILDESC  	(1<<12)
+#define TB_UNDRAWN		(1<<12)
+#define TB_DETAILDESC  	(1<<13)
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
@@ -506,9 +510,11 @@ BOOL_T IsTrackDeleted( track_p );
 #define GetTrkVisible(T)		(GetTrkBits(T)&TB_VISIBLE)
 #define GetTrkNoTies(T)			(GetTrkBits(T)&TB_NOTIES)
 #define GetTrkBridge(T)         ((T)?GetTrkBits(T)&TB_BRIDGE:0)
+#define GetTrkRoadbed(T)        ((T)?GetTrkBits(T)&TB_ROADBED:0)
 #define SetTrkVisible(T,V)		((V)?SetTrkBits(T,TB_VISIBLE):ClrTrkBits(T,TB_VISIBLE))
 #define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
 #define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
+#define SetTrkRoadbed(T,V)		((V)?SetTrkBits(T,TB_ROADBED):ClrTrkBits(T,TB_ROADBED))
 int ClrAllTrkBits( int );
 int ClrAllTrkBitsRedraw( int, wBool_t );
 
@@ -618,6 +624,7 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_DASHDOTDOT  (1<<10)
 #define DTS_CENTERONLY  (1<<11)
 
+BOOL_T hasTrackCenterline( drawCmd_p d );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 

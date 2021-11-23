@@ -575,15 +575,16 @@ static void DeleteCornu( track_p t )
 
 static BOOL_T WriteCornu( track_p t, FILE * f )
 {
-	long options;
+	long bits, options;
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_CORNU);
 	options = GetTrkWidth(t) & 0x0F;
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 ) options |= 0x80;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "%s %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
 		"CORNU",GetTrkIndex(t), GetTrkLayer(t), (long)options,
-                  GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
+                  GetTrkScaleName(t), bits,
 				  xx->pos[0].x, xx->pos[0].y,
 				  xx->a[0],
 				  xx->r[0],
@@ -625,6 +626,7 @@ static BOOL_T ReadCornu( char * line )
 	SetTrkVisible(t, visible&2);
 	SetTrkNoTies(t, visible&4);
 	SetTrkBridge(t, visible&8);
+	SetTrkRoadbed(t, visible&16);
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));

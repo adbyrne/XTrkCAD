@@ -1123,6 +1123,7 @@ BOOL_T WriteCompound(
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep, epCnt;
+	long bits;
 	long options;
 	long position = 0;
 	drawLineType_e lineType = 0;
@@ -1145,11 +1146,12 @@ BOOL_T WriteCompound(
 		options |= COMPOUND_OPTION_HIDEDESC;
 	epCnt = GetTrkEndPtCnt(t);
 	lineType = xx->lineType;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				GetTrkTypeName(t),
 				GetTrkIndex(t), GetTrkLayer(t), options,
 				GetCurrPathIndex(t), lineType,
-				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
+				GetTrkScaleName(t), bits,
 				xx->orig.x, xx->orig.y, xx->angle,
 				PutTitle(xtitle(xx)) )>0;
 	for (ep=0; ep<epCnt; ep++ )
@@ -1318,10 +1320,12 @@ BOOL_T ReadCompound(
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);
 		SetTrkBridge(trk, FALSE);
+		SetTrkRoadbed(trk, FALSE);
 	} else {
 		SetTrkVisible(trk, visible&2);
 		SetTrkNoTies(trk, visible&4);
 		SetTrkBridge(trk, visible&8);
+		SetTrkRoadbed(trk, visible&16);
 	}
 	SetTrkScale(trk, LookupScale( scale ));
 	SetTrkLayer(trk, layer);

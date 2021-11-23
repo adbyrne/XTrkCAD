@@ -37,6 +37,7 @@ void OrphanedTrackSelect( void * unused );
 void SetAllTrackSelect( BOOL_T );
 void SelectTunnel( void * unused );
 void SelectBridge( void * unused );
+void SelectRoadbed( void * unused );
 void SelectTies( void * unused );
 void SelectRecount( void );
 void SelectTrackWidth( void* );

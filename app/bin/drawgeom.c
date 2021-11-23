@@ -326,12 +326,12 @@ STATUS_T DrawGeomMouse(
 						if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
 							if (context->Op == OP_DIMLINE ) {
 								CreateEndAnchor(p,FALSE);
-								wSetCursor(mainD.d,wCursorNone);
+								// wSetCursor(mainD.d,wCursorNone);
 								movePos = p;
 								locked = TRUE;
 							} else if (!IsTrack(t)) {
 								CreateEndAnchor(p,FALSE);
-								wSetCursor(mainD.d,wCursorNone);
+								// wSetCursor(mainD.d,wCursorNone);
 								movePos = p;
 								locked = TRUE;
 							}
@@ -339,7 +339,7 @@ STATUS_T DrawGeomMouse(
 					}
 					if (!locked && SnapPos(&pos)) {
 						CreateEndAnchor(pos,FALSE);
-						wSetCursor(mainD.d,wCursorNone);
+						// wSetCursor(mainD.d,wCursorNone);
 						movePos = pos;
 						locked = TRUE;
 					}
