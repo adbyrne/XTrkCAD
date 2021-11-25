@@ -980,6 +980,7 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 #include "bitmaps/circle.xpm"
 #include "bitmaps/circle-tangent.xpm"
 #include "bitmaps/circle-center.xpm"
+// #include "bitmaps/helix.xpm"
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {

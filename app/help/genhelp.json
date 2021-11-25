@@ -406,7 +406,7 @@
 		{"line": "helix-elev", "contents": "Elevation difference of Helix End-Points" },
 		{"line": "helix-radius", "contents": "Helix Radius" },
 		{"line": "helix-turns", "contents": "Number of turns in the helix" },
-		{"line": "helix-angSep", "contents": "Angle betweek helix entrance and exit" },
+		{"line": "helix-angSep", "contents": "Angle between helix entrance and exit" },
 		{"line": "helix-grade", "contents": "Grade in helix" },
 		{"line": "helix-vertSep", "contents": "Separation between helix layers including baseboard, track, etc" },
 		{"line": "index-select", "contents": "Index numbers of objects, separated by commas" },
