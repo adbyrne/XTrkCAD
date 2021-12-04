@@ -378,6 +378,13 @@ static double mswasin( double x, double h )
 	return angle;
 }
 
+static double mswNormalizeAngle( double a )
+{
+	while (a<0.0) a += 360.0;
+	while (a>=360.0) a -= 360.0;
+	return a;
+}
+
 /**
  * Draw an arc around a specified center
  *
@@ -440,8 +447,7 @@ void wDrawArc(
 	if (dw == 0)
 		dw = 1;
 
-	/* Windows drawing will overshoot the end of the arc for large radius */
-	if (r > 500) { 
+	if ( r > 10000 || a1 < 1.0 ) { 
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -449,18 +455,22 @@ void wDrawArc(
 		if ( p0.x < 0 || p0.y < 0 || p1.x < 0 || p1.y < 0 )
 			fakeArc = TRUE;
 	}
+
+	// Convert a0 and a1 to radians here
+	psx = px + r * mswsin(a0);
+	psy = py + r * mswcos(a0);
+	pp0.x = XDRAWPIX2WINPIX( d, psx );
+	pp0.y = YDRAWPIX2WINPIX( d, psy );
+
 	if ( fakeArc ) {
 		cnt = (int)(a1 / 2);
 		if ( cnt <= 0 ) cnt = 1;
 		if ( cnt > 180 ) cnt = 180;
-		// Convert a0 and a1 to radians here
+
 		ai = d2r(a1) / cnt;
 		aa = d2r(a0);
-		psx = px + r * sin(aa);
-		psy = py + r * cos(aa);
-		pp0.x = XDRAWPIX2WINPIX( d, psx );
-		pp0.y = YDRAWPIX2WINPIX( d, psy );
 		needMoveTo = TRUE;
+
 		for ( i=0; i<cnt; i++ ) {
 			aa += ai;
 			psx = px + r * sin(aa);
@@ -479,11 +489,24 @@ void wDrawArc(
 			pp0.x = pp2.x; pp0.y = pp2.y;
 		}
 	} else {
+		int cx, cy;
+		cx = XDRAWPIX2WINPIX( d, px );
+		cy = YDRAWPIX2WINPIX( d, py );
+		DWORD rr = XDRAWPIX2WINPIX( d, r );
+
 		if ( a0 == 0.0 && a1 == 360.0 ) {
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p0.y, pe.x, p1.y );
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p1.y, pe.x, p0.y );
+			AngleArc( d->hDc, cx, cy, rr, (float)0, (float)360 );
+			// Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p0.y, pe.x, p1.y );
+			// Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p1.y, pe.x, p0.y );
 		} else {
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, ps.y, pe.x, pe.y );
+			// Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, ps.y, pe.x, pe.y );
+			// AngleArc( d->hDc, cx, cy, 4, (float)0, (float)360 );
+			// AngleArc( d->hDc, pp0.x, pp0.y, 4, (float)0, (float)360 );
+
+			MoveTo( d->hDc, pp0.x, pp0.y );
+
+			SetArcDirection( d->hDc,AD_CLOCKWISE );
+			AngleArc( d->hDc, cx, cy, rr, (float)mswNormalizeAngle(90 - a0), (float)(-a1) );
 		}
 	}
 
