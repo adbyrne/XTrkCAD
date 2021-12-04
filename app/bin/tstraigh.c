@@ -433,16 +433,11 @@ EXPORT void DrawStraightTrack(
 	LOG(log_straight,4,("DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 		p0.x, p0.y, p1.x, p1.y ) )
 
-		// Draw solid background
-		if(bridge) {
-			wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
-			DrawLine(d,p0,p1,width3,bridgeColor);
-		}
-		else
-			if(roadbed) {
-				wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi / d->scale);
-				DrawLine(d,p0,p1,width4,roadbedColor);
-			}
+	// Draw solid background
+	if(bridge|roadbed) {
+		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+		DrawLine(d,p0,p1,width3,bridge?bridgeColor:roadbedColor);
+	}
 
 	if ( DoDrawTies( d, trk ) )
 		DrawStraightTies( d, GetTrkScale(trk), p0, p1, color );

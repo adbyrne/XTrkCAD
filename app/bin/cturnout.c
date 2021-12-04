@@ -1233,7 +1233,7 @@ static void DrawTurnoutFill(
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
-	double fillWidth = (fillType==0?1.5:2.0);
+	double fillWidth = 1.5;
 	coOrd b1,b2,b3,b4,b5,b6;
     ANGLE_T angle = dtod.xx->angle,a = 0.0;
     int i,j,i1,i2;
@@ -1341,7 +1341,7 @@ static void DrawCrossFill(
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
-	double fillWidth = (fillType==0?1.5:2.0);
+	double fillWidth = 1.5;
 	coOrd b1, b2, b3, b4, b5, b6;
 	ANGLE_T angle = dtod.xx->angle, a = 0.0;
 	int i1, i2;
@@ -1421,7 +1421,7 @@ static void DrawXingFill(
 	if (d->options&DC_PRINT)
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
 
-	double fillWidth = (fillType==0?1.5:2.0);
+	double fillWidth = 1.5;
 	coOrd b0, b1, b2, b3, b4, b5, b6;
 	int i, j, i1, i2;
 	i1 = dtod.strPath;
