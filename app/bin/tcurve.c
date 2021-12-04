@@ -787,15 +787,10 @@ EXPORT void DrawCurvedTrack(
 		p.x, p.y, r, a0, a1 ) )
 
 		// Draw a solid background
-		if(bridge) {
+		if(bridge|roadbed) {
 			wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
-			DrawArc( d, p, r, a0, a1, 0, width3, bridgeColor );
+			DrawArc( d, p, r, a0, a1, 0, width3, bridge?bridgeColor:roadbedColor );
 		}
-		else
-			if(roadbed) {
-				wDrawWidth width4 = (wDrawWidth)round(trackGauge * 4 * d->dpi / d->scale);
-				DrawArc( d, p, r, a0, a1, 0, width4, roadbedColor );
-			}
 
 	if ( DoDrawTies( d, trk ) )
 		DrawCurvedTies( d, GetTrkScale(trk), p, r, a0, a1, color );
