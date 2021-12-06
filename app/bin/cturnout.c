@@ -2652,6 +2652,7 @@ static void DrawTurnout(
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
+	// Save these values
 	int noTies = GetTrkNoTies(trk);
 	int bridge = GetTrkBridge(trk);
 	int roadbed = GetTrkRoadbed(trk);
@@ -2699,6 +2700,7 @@ static void DrawTurnout(
 			default:
 				break;
 			}
+			// Ignore these settings
 			SetTrkNoTies(trk, 1); 
             ClrTrkBits(trk, TB_BRIDGE); 
 			ClrTrkBits(trk, TB_ROADBED);
@@ -2706,7 +2708,9 @@ static void DrawTurnout(
 	}
 
 	// Begin standard DrawTurnout code to draw rails or centerline
-	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER);  // no curve center for turnouts
+	// no curve center for turnouts, leave centerline for sectional curved
+	long opts = widthOptions | (xx->segCnt > 1 ? DTS_NOCENTER : 0);
+	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, opts);  
 
 
 	for (i = 0; i < GetTrkEndPtCnt(trk); i++) {

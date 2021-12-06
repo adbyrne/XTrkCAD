@@ -153,12 +153,11 @@ wBool_t wDrawSetTempMode(
  * Sets the proper pen and composition for the next drawing operation
  * 
  *
- * \param hDc IN device context
- * \param d IN ???
+ * \param d IN drawing context
  * \param dw IN line width
  * \param lt IN line type (dashed, solid, ...)
  * \param dc IN color
- * \param dopt IN ????
+ * \param dopt IN drawing options
  */
 static void setDrawMode(
 		wDraw_p d,
@@ -425,6 +424,10 @@ void wDrawArc(
 	if (len < 3)
 		return;
 
+	// calculate the center coordinates
+	pc.x = XDRAWPIX2WINPIX( d, px );
+	pc.y = YDRAWPIX2WINPIX( d, py );
+
 	p0.x = XDRAWPIX2WINPIX(d,px-r);
 	p0.y = YDRAWPIX2WINPIX(d,py+r);
 	p1.x = XDRAWPIX2WINPIX(d,px+r);
@@ -443,11 +446,11 @@ void wDrawArc(
 	pe.y = YDRAWPIX2WINPIX(d,pey);
 
 	setDrawMode( d, dw, lt, dc, dopt );
-
+	
 	if (dw == 0)
 		dw = 1;
 
-	if ( r > 10000 || a1 < 1.0 ) { 
+	if ( r > 30000 || a1 < 1.0 ) { 
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -456,7 +459,7 @@ void wDrawArc(
 			fakeArc = TRUE;
 	}
 
-	// Convert a0 and a1 to radians here
+	// Starting point
 	psx = px + r * mswsin(a0);
 	psy = py + r * mswcos(a0);
 	pp0.x = XDRAWPIX2WINPIX( d, psx );
@@ -489,33 +492,29 @@ void wDrawArc(
 			pp0.x = pp2.x; pp0.y = pp2.y;
 		}
 	} else {
-		int cx, cy;
-		cx = XDRAWPIX2WINPIX( d, px );
-		cy = YDRAWPIX2WINPIX( d, py );
 		DWORD rr = XDRAWPIX2WINPIX( d, r );
+		SetArcDirection( d->hDc,AD_CLOCKWISE );
 
-		if ( a0 == 0.0 && a1 == 360.0 ) {
-			AngleArc( d->hDc, cx, cy, rr, (float)0, (float)360 );
-			// Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p0.y, pe.x, p1.y );
-			// Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p1.y, pe.x, p0.y );
-		} else {
-			// Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, ps.y, pe.x, pe.y );
-			// AngleArc( d->hDc, cx, cy, 4, (float)0, (float)360 );
-			// AngleArc( d->hDc, pp0.x, pp0.y, 4, (float)0, (float)360 );
+		// Draw two arcs from the center to eliminate the odd pie-shaped end artifact
+		if ( dw > 2.0 ) {
+			double a2 = a1 / 2.0;
+			pp2.x = XDRAWPIX2WINPIX( d, px + r * mswsin(a0+a2) );
+			pp2.y = YDRAWPIX2WINPIX( d, py + r * mswcos(a0+a2) );
 
+			MoveTo( d->hDc, pp2.x, pp2.y );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)), (float)(-a2) );
+			MoveTo( d->hDc, pp2.x, pp2.y );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)), (float)(a2) );
+		}
+		else {
 			MoveTo( d->hDc, pp0.x, pp0.y );
-
-			SetArcDirection( d->hDc,AD_CLOCKWISE );
-			AngleArc( d->hDc, cx, cy, rr, (float)mswNormalizeAngle(90 - a0), (float)(-a1) );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - a0), (float)(-a1) );
 		}
 	}
 
 	// should the center of the arc be drawn?
 	if( sizeCenter ) {
 			
-			// calculate the center coordinates
-			pc.x = XDRAWPIX2WINPIX( d, px );
-			pc.y = YDRAWPIX2WINPIX( d, py );
 			// now draw the crosshair
 			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH*sizeCenter, pc.y );
 			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH*sizeCenter, pc.y );
