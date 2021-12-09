@@ -946,7 +946,7 @@ static BOOL_T WriteJoint(
 {
 	struct extraDataEase_t * xx = GET_EXTRA_DATA(t, T_EASEMENT, extraDataEase_t);
 	BOOL_T rc = TRUE;
-	long bits;
+	int bits;
 	long options = (long)GetTrkWidth(t);
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
 			// 0x80 means Show Description

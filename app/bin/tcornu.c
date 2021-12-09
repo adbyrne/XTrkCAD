@@ -575,7 +575,8 @@ static void DeleteCornu( track_p t )
 
 static BOOL_T WriteCornu( track_p t, FILE * f )
 {
-	long bits, options;
+	int bits;
+        long options;
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_CORNU);
 	options = GetTrkWidth(t) & 0x0F;

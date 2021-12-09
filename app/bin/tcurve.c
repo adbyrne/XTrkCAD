@@ -22,7 +22,7 @@
 
 #include "ccurve.h"
 #include "cjoin.h"
-// #include "cstraigh.h"
+#include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
 #include "layout.h"
@@ -836,7 +836,7 @@ static void DeleteCurve( track_p t )
 static BOOL_T WriteCurve( track_p t, FILE * f )
 {
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
-	long bits;
+	int bits;
 	long options;
 	BOOL_T rc = TRUE;
 	options = GetTrkWidth(t) & 0x0F;
