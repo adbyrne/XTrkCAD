@@ -1123,7 +1123,7 @@ BOOL_T WriteCompound(
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep, epCnt;
-	long bits;
+	int bits;
 	long options;
 	long position = 0;
 	drawLineType_e lineType = 0;
