@@ -786,11 +786,11 @@ EXPORT void DrawCurvedTrack(
 	LOG(log_curve,4,("DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 		p.x, p.y, r, a0, a1 ) )
 
-		// Draw a solid background
-		if(bridge|roadbed) {
-			wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
-			DrawArc( d, p, r, a0, a1, 0, width3, bridge?bridgeColor:roadbedColor );
-		}
+	// Draw a solid background
+	if(bridge|roadbed) {
+		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+		DrawArc( d, p, r, a0, a1, 0, width3, bridge?bridgeColor:roadbedColor );
+	}
 
 	if ( DoDrawTies( d, trk ) )
 		DrawCurvedTies( d, GetTrkScale(trk), p, r, a0, a1, color );
