@@ -63,14 +63,14 @@ static paramData_t updateTitlePLs[] = {
 	{	PD_MESSAGE, "You can use the List Labels control on the Preferences dialog to", "mess8" },
 	{	PD_MESSAGE, "control the format of the list entries", "mess9" },
 #define I_UPDATESTR		(9)
-	{	PD_STRING, NULL, "old", PDO_NOPREF, (void*)400, NULL, BO_READONLY },
+	{	PD_STRING, NULL, "old", PDO_NOPREF, I2VP(400), NULL, BO_READONLY },
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
-	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, (void*)400 },
-	{	PD_BUTTON, (void*)UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
+	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, I2VP(400) },
+	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
-static paramGroup_t updateTitlePG = { "updatetitle", PGO_DIALOGTEMPLATE, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
+static paramGroup_t updateTitlePG = { "updatetitle", PGO_DIALOGTEMPLATE, updateTitlePLs, COUNT( updateTitlePLs ) };
 
 
 static void UpdateTitleChange( long changes )
@@ -122,8 +122,7 @@ static void UpdateTitleNext( void )
 		DYNARR_RESET( updateTitleElement, updateTitles_da );
 		InfoMessage("");
 		InfoCount( trackCount );
-		changed++;
-		SetWindowTitle();
+		SetFileChanged();
 		DoChangeNotification( CHANGE_MAIN );
 		return;
 	}
@@ -165,7 +164,7 @@ void DoUpdateTitles( void )
 		return;
 	if (updateTitleW == NULL) {
 		ParamRegister( &updateTitlePG );
-		updateTitlePLs[I_UPDATELOAD].valueP = (void*)ParamFilesInit();
+		updateTitlePLs[I_UPDATELOAD].valueP = ParamFilesInit();
 		updateTitleW = ParamCreateDialog( &updateTitlePG, MakeWindowTitle(_("Update Title")), _("Update"), UpdateTitleUpdate, UpdateTitleCancel, TRUE, NULL, 0, NULL );
 		RegisterChangeNotification( UpdateTitleChange );
 	}
@@ -287,7 +286,9 @@ static BOOL_T RefreshCompound1(
 	xx->segCnt = to->segCnt;
 	xx->segs = (trkSeg_p)MyMalloc( xx->segCnt * sizeof *(trkSeg_p)0 );
 	memcpy( xx->segs, to->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
-	SetPaths( trk, to->paths );
+	xx->pathOverRide = to->pathOverRide;
+	xx->pathNoCombine = to->pathNoCombine;
+	SetPaths( trk, GetParamPaths(to) );
 	if ( flip )
 		FlipSegs( xx->segCnt, xx->segs, zero, 90.0 );
 	ClrTrkBits( trk, TB_SELECTED );
@@ -305,19 +306,19 @@ static dynArr_t refreshSpecial_da;
 #define refreshSpecial(N) DYNARR_N( refreshSpecial_t, refreshSpecial_da, N )
 static wIndex_t refreshSpecialInx;
 static BOOL_T refreshReturnVal;
-static void RefreshSkip( void * );
+static void RefreshSkip( void * junk );
 static paramListData_t refreshSpecialListData = { 30, 600, 0, NULL, NULL };
 static paramData_t refreshSpecialPLs[] = {
 #define REFRESH_M1		(0)
-		{ PD_MESSAGE, NULL, "mess1", 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, "mess1", 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_M2		(1)
-		{ PD_MESSAGE, NULL, "mess2", 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, "mess1", 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_S		(2)
-		{ PD_MESSAGE, NULL, "mess3", 0/*PDO_DLGRESIZEW*/, (void*)380 },
+		{ PD_MESSAGE, NULL, "mess1", 0/*PDO_DLGRESIZEW*/, I2VP(380) },
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
-		{ PD_BUTTON, (void*)RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
-static paramGroup_t refreshSpecialPG = { "refreshSpecial", PGO_DIALOGTEMPLATE, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
+		{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
+static paramGroup_t refreshSpecialPG = { "refreshSpecial", PGO_DIALOGTEMPLATE, refreshSpecialPLs, COUNT( refreshSpecialPLs ) };
 static void RefreshSpecialOk(
 		void * junk )
 {
@@ -445,10 +446,10 @@ static char renamePartno[STR_SIZE];
 static turnoutInfo_t * renameTo;
 
 static paramData_t renamePLs[] = {
-/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
-/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)230, N_("Description"), 0, 0, sizeof(renameDesc)},
-/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_STRINGLIMITLENGTH, (void*)100, N_("#"), 0, 0, sizeof(renamePartno)} };
-static paramGroup_t renamePG = { "rename", PGO_DIALOGTEMPLATE, renamePLs, sizeof renamePLs/sizeof renamePLs[0] };
+/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF | PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Manufacturer"), 0, 0, sizeof(renameManuf)},
+/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF | PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, I2VP(230), N_("Description"), 0, 0, sizeof(renameDesc)},
+/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH | PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, I2VP(100), N_("#"), 0, 0, sizeof(renamePartno)} };
+static paramGroup_t renamePG = { "rename", PGO_DIALOGTEMPLATE, renamePLs, COUNT( renamePLs ) };
 
 
 EXPORT BOOL_T CompoundCustomSave(
@@ -464,7 +465,7 @@ EXPORT BOOL_T CompoundCustomSave(
 			rc &= fprintf( f, "TURNOUT %s \"%s\"\n", GetScaleName(to->scaleInx), PutTitle(to->title) )>0;
 			if ( to->customInfo )
 				rc &= fprintf( f, "\tU %s\n",to->customInfo )>0;
-			 rc &= WriteCompoundPathsEndPtsSegs( f, to->paths, to->segCnt, to->segs,
+			 rc &= WriteCompoundPathsEndPtsSegs( f, GetParamPaths( to ), to->segCnt, to->segs,
 				to->endCnt, to->endPt );
 		}
 	}
@@ -512,7 +513,8 @@ static int CompoundCustMgmProc(
 			rc &= fprintf( customMgmF, "TURNOUT %s \"%s\"\n", GetScaleName(to->scaleInx), PutTitle(to->title) )>0;
 			if ( to->customInfo )
 				rc &= fprintf( customMgmF, "\tU %s\n",to->customInfo )>0;
-			 rc &= WriteCompoundPathsEndPtsSegs( customMgmF, to->paths, to->segCnt, to->segs,
+			 rc &= WriteCompoundPathsEndPtsSegs( customMgmF,
+				GetParamPaths( to ), to->segCnt, to->segs,
 				to->endCnt, to->endPt );
 		} else {
 			rc &= fprintf( customMgmF, "STRUCTURE %s \"%s\"\n", GetScaleName(to->scaleInx), PutTitle(to->title) )>0;
@@ -566,7 +568,7 @@ static int CompoundCustMgmProc(
 
 
 #include "bitmaps/turnout.xpm"
-#include "bitmaps/struct.xpm"
+#include "bitmaps/building.xpm"
 
 EXPORT void CompoundCustMgmLoad( void )
 {
@@ -576,20 +578,20 @@ EXPORT void CompoundCustMgmLoad( void )
 	static wIcon_p structI = NULL;
 
 	if ( turnoutI == NULL )
-		turnoutI = wIconCreatePixMap( turnout_xpm );
+		turnoutI = wIconCreatePixMap( turnout_xpm[0] );
 	if ( structI == NULL )
-		structI = wIconCreatePixMap( struct_xpm );
+		structI = wIconCreatePixMap( building_xpm[0] );
 
 	for ( inx=0; inx<turnoutInfo_da.cnt; inx++ ) {
 		to = turnoutInfo(inx);
 		if (to->paramFileIndex == PARAM_CUSTOM && to->segCnt > 0) {
-			CustMgmLoad( turnoutI, CompoundCustMgmProc, (void*)to );
+			CustMgmLoad( turnoutI, CompoundCustMgmProc, to );
 		}
 	}
 	for ( inx=0; inx<structureInfo_da.cnt; inx++ ) {
 		to = structureInfo(inx);
 		if (to->paramFileIndex == PARAM_CUSTOM && to->segCnt > 0) {
-			CustMgmLoad( structI, CompoundCustMgmProc, (void*)to );
+			CustMgmLoad( structI, CompoundCustMgmProc, to );
 		}
 	}
 }

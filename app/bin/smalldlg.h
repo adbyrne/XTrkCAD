@@ -30,7 +30,7 @@
 extern struct wWin_t * aboutW;
 
 void InitSmallDlg( void );
-void ShowTip( long flags );
+void ShowTip( void * flagsVP );
 void CreateAboutW( void *ptr );
 
 #endif

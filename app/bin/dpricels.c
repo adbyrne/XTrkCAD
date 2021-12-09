@@ -48,7 +48,7 @@ static paramData_t priceListPLs[] = {
 	{	PD_FLOAT, &priceListCostV, "cost", PDO_NOPREF|PDO_NOPSHUPD, &priceListCostData },
 #define I_PRICELSENTRY			(1)
 #define priceListEntryS			((wString_p)priceListPLs[I_PRICELSENTRY].control)
-	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, (void*)(400-80-3), NULL, BO_READONLY },
+	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, I2VP(400-80-3), NULL, BO_READONLY, NULL, sizeof priceListEntryV },
 #define I_PRICELSLIST			(2)
 #define priceListSelL			((wList_p)priceListPLs[I_PRICELSLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
@@ -57,7 +57,7 @@ static paramData_t priceListPLs[] = {
 	{	PD_MESSAGE, N_("costs"), "costs", PDO_DLGHORZ },
 #define I_PRICELSFLEXCOST		(6)
 	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData } };
-static paramGroup_t priceListPG = { "pricelist", PGO_DIALOGTEMPLATE, priceListPLs, sizeof priceListPLs/sizeof priceListPLs[0] };
+static paramGroup_t priceListPG = { "pricelist", PGO_DIALOGTEMPLATE, priceListPLs, COUNT( priceListPLs ) };
 
 
 static void PriceListUpdate()

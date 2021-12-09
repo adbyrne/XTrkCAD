@@ -36,9 +36,9 @@ static BOOL_T splitTrkFlip;
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-static void ChangeSplitEPMode( wBool_t set, void * mode )
+static void ChangeSplitEPMode( void * mode )
 {
-	long imode = (long)mode;
+	long imode = VP2L(mode);
 	long option;
 	int inx0, inx;
 
@@ -190,15 +190,15 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		if ( splitPopupM[0] == NULL ) {
 			splitPopupM[0] = MenuRegister( "End Point Mode R-L" );
-			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", _("None"), 0, TRUE, ChangeSplitEPMode, (void*)0 );
-			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", _("Left"), 0, FALSE, ChangeSplitEPMode, (void*)1 );
-			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", _("Right"), 0, FALSE, ChangeSplitEPMode, (void*)2 );
-			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", _("Both"), 0, FALSE, ChangeSplitEPMode, (void*)3 );
+			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", _("None"), 0, TRUE, ChangeSplitEPMode, I2VP(0) );
+			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", _("Left"), 0, FALSE, ChangeSplitEPMode, I2VP(1) );
+			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", _("Right"), 0, FALSE, ChangeSplitEPMode, I2VP(2) );
+			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", _("Both"), 0, FALSE, ChangeSplitEPMode, I2VP(3) );
 			splitPopupM[1] = MenuRegister( "End Point Mode T-B" );
-			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", _("None"), 0, TRUE, ChangeSplitEPMode, (void*)0 );
-			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", _("Top"), 0, FALSE, ChangeSplitEPMode, (void*)1 );
-			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", _("Bottom"), 0, FALSE, ChangeSplitEPMode, (void*)2 );
-			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", _("Both"), 0, FALSE, ChangeSplitEPMode, (void*)3 );
+			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", _("None"), 0, TRUE, ChangeSplitEPMode, I2VP(0) );
+			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", _("Top"), 0, FALSE, ChangeSplitEPMode, I2VP(1) );
+			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", _("Bottom"), 0, FALSE, ChangeSplitEPMode, I2VP(2) );
+			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", _("Both"), 0, FALSE, ChangeSplitEPMode, I2VP(3) );
 		}
 		splitTrkEP[0] = PickEndPoint( pos, splitTrkTrk[0] );
 		angle = NormalizeAngle(GetTrkEndAngle( splitTrkTrk[0], splitTrkEP[0] ));
@@ -464,16 +464,16 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/splittrk.xpm"
-#include "bitmaps/splitdraw.xpm"
-#include "bitmaps/trimdraw.xpm"
+#include "bitmaps/split.xpm"
+#include "bitmaps/split-draw.xpm"
+#include "bitmaps/trim.xpm"
 
 void InitCmdSplit( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Split"), "cmdSplitSetCmd", _("Split") );
-	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(splittrk_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
-	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"), wIconCreatePixMap(splitdraw_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
-	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"), wIconCreatePixMap(trimdraw_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
+	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(split_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
+	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"), wIconCreatePixMap(split_draw_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
+	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"), wIconCreatePixMap(trim_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
 	ButtonGroupEnd();
 }
 

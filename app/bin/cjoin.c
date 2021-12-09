@@ -37,6 +37,7 @@
 #include "common-ui.h"
 
 static BOOL_T debug = 0;
+/** @logcmd @showrefby join=n cjoin.c */
 static int log_join = 0;
 typedef struct {
 				curveType_e type;
@@ -667,7 +668,7 @@ static paramData_t joinPLs[] = {
 #define joinRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t joinPG = { "cmdjoin", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
+static paramGroup_t joinPG = { "joinfixed", 0, joinPLs, COUNT( joinPLs ) };
 
 
 
@@ -843,7 +844,6 @@ static STATUS_T CmdJoin(
 		Dj.cornuMode = FALSE;
 		/*ParamGroupRecord( &easementPG );*/
 		infoSubst = FALSE;
-		InfoSubstituteControls(NULL, NULL, NULL);
 		anchor_trk = NULL;
 		if (easementVal < 0.0)
 			return CmdCornu(action, pos);
@@ -922,7 +922,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			controls[0] = joinRadPD.control;
 			controls[1] = NULL;
 			labels[0] = N_("Desired Radius");
-			InfoSubstituteControls(controls, labels, joinPG.nameStr);
+			InfoSubstituteControls(controls, labels);
 			infoSubst = TRUE;
 			joinRadPD.option |= PDO_NORECORD;
 			ParamLoadControls(&joinPG);
@@ -941,7 +941,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 				return C_CONTINUE;
 			}
 			if (infoSubst)
-				InfoSubstituteControls(NULL, NULL, NULL);
+				InfoSubstituteControls(NULL, NULL);
 			infoSubst = FALSE;
 
 			Dj.inp[1].realType = GetTrkType(Dj.inp[1].trk);
@@ -1382,14 +1382,14 @@ errorReturn:
 		DrawNewTrack( Dj.inp[1].trk );
 		DrawNewTrack( trk );
 		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls(NULL, NULL);
 		infoSubst = FALSE;
 		return rc;
 
 	case C_CANCEL:
 		SetAllTrackSelect( FALSE );
 		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls(NULL, NULL);
 		infoSubst = FALSE;
 		break;
 
@@ -1411,7 +1411,7 @@ errorReturn:
 		if (easementVal<0 && Dj.cornuMode)
 			return CmdCornu(action,pos);
 		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls(NULL, NULL);
 		infoSubst = FALSE;
 
 	}
@@ -1428,14 +1428,15 @@ errorReturn:
  */
 
 #include "bitmaps/join.xpm"
-#include "bitmaps/joinline.xpm"
+#include "bitmaps/join-line.xpm"
 
 void InitCmdJoin( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
-	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
-	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(joinline_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"), wIconCreatePixMap(join_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(join_line_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
+	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */
 	log_join = LogFindIndex( "join" );
 }
 

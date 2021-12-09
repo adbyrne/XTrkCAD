@@ -36,7 +36,7 @@ static paramData_t notePLs[] = {
 #define noteT			((wText_p)notePLs[I_NOTETEXT].control)
     {	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
 };
-static paramGroup_t notePG = { "note", PGO_DIALOGTEMPLATE, notePLs, sizeof notePLs/sizeof notePLs[0] };
+static paramGroup_t notePG = { "note", PGO_DIALOGTEMPLATE, notePLs, COUNT( notePLs ) };
 
 
 void ClearNote(void)
@@ -47,7 +47,7 @@ void ClearNote(void)
     }
 }
 
-static void NoteOk(void * junk)
+static void NoteOk(void * unused)
 {
     if (wTextGetModified(noteT)) {
         int len;
@@ -61,11 +61,11 @@ static void NoteOk(void * junk)
 }
 
 
-void DoNote(void)
+void DoNote(void * unused)
 {
     if (noteW == NULL) {
         noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
-                                  wHide, FALSE, NULL, F_RESIZE, NULL);
+                                  wHide, FALSE, NULL, F_NOTTRANSIENT|F_RESIZE, NULL);
     }
 
     wTextClear(noteT);
@@ -85,9 +85,9 @@ BOOL_T WriteMainNote(FILE* f)
 #ifdef UTFCONVERT
 		char *out = NULL;
 		if (RequiresConvToUTF8(mainText)) {
-			unsigned cnt = strlen(mainText) * 2 + 1;
+			size_t cnt = strlen(mainText) * 2 + 1;
 			out = MyMalloc(cnt);
-			wSystemToUTF8(mainText, out, cnt);
+			wSystemToUTF8(mainText, out, (unsigned int)cnt);
 			noteText = out;
 		}
 #endif // UTFCONVERT

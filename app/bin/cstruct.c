@@ -56,13 +56,13 @@ static drawCmd_t structureD = {
 static wIndex_t structureHotBarCmdInx;
 static wIndex_t structureInx;
 static long hideStructureWindow;
-static void RedrawStructure(void);
+static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 
 static wWinPix_t structureListWidths[] = { 80, 80, 220 };
 static const char * structureListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, structureListWidths, structureListTitles };
 static const char * hideLabels[] = { N_("Hide"), NULL };
-static paramDrawData_t structureDrawData = { 490, 200, (wDrawRedrawCallBack_p)RedrawStructure, NULL, &structureD };
+static paramDrawData_t structureDrawData = { 490, 200, RedrawStructure, NULL, &structureD };
 static paramData_t structurePLs[] = {
 #define I_LIST	(0)
 #define structureListL	((wList_p)structurePLs[I_LIST].control)
@@ -70,14 +70,15 @@ static paramData_t structurePLs[] = {
 #define I_DRAW	(1)
 	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &structureDrawData, NULL, 0 },
 #define I_HIDE	(2)
-	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(void*)hideLabels, NULL, BC_NOBORDER },
+	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
-	{	PD_MESSAGE, NULL, "mess1", 0, (void*)80 },
+	{	PD_MESSAGE, NULL, "mess1", 0, I2VP(80) },
 #define I_MSGWIDTH		(4)
-	{	PD_MESSAGE, NULL, "mess2", 0, (void*)80 },
+	{	PD_MESSAGE, NULL, "mess2", 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
-	{	PD_MESSAGE, NULL, "mess3", 0, (void*)80 } };
-static paramGroup_t structurePG = { "structure", PGO_DIALOGTEMPLATE, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
+	{	PD_MESSAGE, NULL, "mess3", 0, I2VP(80) } };
+static paramGroup_t structurePG = { "structure", PGO_DIALOGTEMPLATE, structurePLs, COUNT( structurePLs ) };
+
 
 
 /****************************************
@@ -128,7 +129,7 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 	else
 		to->contentsLabel = curSubContents;
 	to->endCnt = 0;
-	to->paths = (PATHPTR_T)"";
+	SetParamPaths( to, NULL );
 	if (updateList && structureListL != NULL) {
 		FormatCompoundTitle( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, to->title );
 		if (message[0] != '\0')
@@ -475,8 +476,8 @@ static trackCmd_t structureCmds = {
 		CompareStruct };
 
 static paramData_t pierPLs[] = {
-	{	PD_DROPLIST, &pierListInx, "inx", 0, (void*)50, N_("Pier Number") } };
-static paramGroup_t pierPG = { "cmdstructure", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
+	{	PD_DROPLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") } };
+static paramGroup_t pierPG = { "cmdstructure", 0, pierPLs, COUNT( pierPLs ) };
 #define pierL ((wList_p)pierPLs[0].control)
 
 static void ShowPierL( void )
@@ -503,9 +504,9 @@ static void ShowPierL( void )
 		controls[0] = (wControl_p)pierL;
 		controls[1] = NULL;
 		labels[0] = N_("Pier Number");
-		InfoSubstituteControls( controls, labels, pierPG.nameStr );
+		InfoSubstituteControls( controls, labels );
 	} else {
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 	}
 }
 
@@ -569,13 +570,13 @@ static void structureChange( long changes )
 	maxStructureDim.x += 2*trackGauge;
 	maxStructureDim.y += 2*trackGauge;
 	/*RescaleStructure();*/
-	RedrawStructure();
+	RedrawStructure( structureD.d, NULL, 0, 0 );
 	return;
 }
 
 
 
-static void RedrawStructure()
+static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
 	RescaleStructure();
 LOG( log_structure, 2, ( "SelStructure(%s)\n", (curStructure?curStructure->title:"<NULL>") ) )
@@ -607,7 +608,7 @@ static void StructureDlgUpdate(
 	NewStructure();
 	curStructure = to;
 	ShowPierL();
-	RedrawStructure();
+	RedrawStructure( structureD.d, NULL, 0, 0 );
 	/* ParamDialogOkActive( &structurePG, FALSE ); */
 }
 
@@ -719,7 +720,6 @@ static void NewStructure( void )
 {
 	track_p trk;
 	struct extraDataCompound_t *xx;
-	wIndex_t titleLen;
 	wIndex_t pierInx;
 
 	if (curStructure->segCnt < 1) {
@@ -733,22 +733,8 @@ static void NewStructure( void )
 		return;
 	}
 	UndoStart( _("Place Structure"), "newStruct" );
-	titleLen = strlen( curStructure->title );
-	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
+	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, curStructure->segCnt, curStructure->segs );
 	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
-#ifdef LATER
-	trk = NewTrack( 0, T_STRUCTURE, 0, sizeof (*xx) + 1 );
-	xx->orig = Dst.pos;
-	xx->angle = Dst.angle;
-	xx->segs = MyMalloc( (curStructure->segCnt)*sizeof curStructure->segs[0] );
-
-	/*
-	 * copy data */
-	xx->segCnt = curStructure->segCnt;
-	memcpy( xx->segs, curStructure->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
-	xx->title = curStructure->title;
-	SetPaths( trk, "" );
-#endif
 	switch(curStructure->special) {
 		case TOnormal:
 			xx->special = TOnormal;
@@ -775,13 +761,6 @@ static void NewStructure( void )
 	SetTrkVisible( trk, TRUE );
 	SetTrkNoTies( trk, FALSE);
 	SetTrkBridge( trk, FALSE);
-#ifdef LATER
-	ComputeCompoundBoundingBox( trk );
-
-	SetDescriptionOrig( trk );
-	xx->descriptionOff = zero;
-	xx->descriptionSize = zero;
-#endif
 
 	DrawNewTrack( trk );
 	/*DrawStructure( trk, &mainD, wDrawColorBlack, 0 );*/
@@ -796,7 +775,7 @@ static void StructRotate( void * pangle )
 {
 	if (Dst.state == 0)
 		return;
-	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	ANGLE_T angle = (ANGLE_T)VP2L(pangle);
 	angle /= 1000.0;
 	Dst.pos = cmdMenuPos;
 	Rotate( &Dst.pos, cmdMenuPos, angle );
@@ -930,7 +909,7 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_CANCEL:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 		HotBarCancel();
 		/*wHide( newTurn.reg.win );*/
 		return C_TERMINATE;
@@ -942,7 +921,7 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_OK:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		NewStructure();
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 		return C_TERMINATE;
 
 	case C_FINISH:
@@ -986,7 +965,7 @@ static STATUS_T CmdStructure(
 		if (structureIndex > 0 && structurePtr) {
 			curStructure = structurePtr;
 			wListSetIndex( structureListL, structureIndex );
-			RedrawStructure();
+			RedrawStructure( structureD.d, NULL, 0, 0 );
 		}
 		InfoMessage( _("Select Structure and then drag to place"));
 		ParamLoadControls( &structurePG );
@@ -1063,7 +1042,7 @@ static char * CmdStructureHotBarProc(
 	case HB_SELECT:
 		CmdStructureAction( C_FINISH, zero );
 		curStructure = to;
-		DoCommandB( (void*)(intptr_t)structureHotBarCmdInx );
+		DoCommandB( I2VP(structureHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );
@@ -1163,11 +1142,11 @@ static STATUS_T CmdStructureHotBar(
 	}
 }
 
-#include "bitmaps/struct.xpm"
+#include "bitmaps/building.xpm"
 
 EXPORT void InitCmdStruct( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"), wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
+	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"), wIconCreatePixMap(building_xpm[iconSize]), LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar, "cmdStructureHotBar", "", NULL, LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	ParamRegister( &structurePG );
 	if ( structPopupM == NULL ) {

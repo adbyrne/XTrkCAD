@@ -149,7 +149,7 @@ Now we are going to convert from one scale to another.
 END
 STEP
 PARAMETER rescale toggle 0
-PARAMETER rescale toS 4 HO
+PARAMETER rescale toS 5 HO
 PARAMETER misc cmdSelectAll
 MESSAGE
 _________________________________________

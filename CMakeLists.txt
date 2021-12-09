@@ -24,6 +24,7 @@ if(UNIX)
         endif()
    else()
     set(XTRKCAD_USE_BROWSER_DEFAULT ON)
+    set(XTRKCAD_PACKAGE_GA_RELEASE_DEFAULT OFF)
    endif(APPLE)
 endif(UNIX)
 
@@ -41,13 +42,21 @@ ENDIF(WIN32)
 
 find_package(Libzip)
 find_package(Zlib)
+find_package(MiniXML)
+
+if(MINIXML_FOUND)
+    set(XTRKCAD_CREATE_SVG 1)
+	message( STATUS "MiniXML found: SVG export is enabled")
+else(MINIXML_FOUND)
+	message( STATUS "MiniXML not found: no SVG export")
+endif(MINIXML_FOUND)
 
 IF(WIN32)
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
 	SET(XTRKCAD_USE_GTK3_DEFAULT OFF)
 	SET(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 
-	SET(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /MTd /Zi  /Ob0 /Od /RTC1" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
+	SET(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /MT /Zi /Ob0 /Od /RTC1" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
 	SET(CMAKE_C_FLAGS_MINSIZEREL "/MT /O1 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release minumum size builds" FORCE)
 	SET(CMAKE_C_FLAGS_RELEASE "/MT /O2 /Ob2 /D NDEBUG" CACHE STRING "Flags used by the compiler during release builds" FORCE)
 	SET(CMAKE_C_FLAGS_RELWITHDEBINFO "/MT /Zi /O2 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release with debug info builds" FORCE)
@@ -71,6 +80,7 @@ OPTION(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_
 OPTION(XTRKCAD_USE_DOXYGEN "Generate internals documentation using doxygen" ${XTRKCAD_USE_DOXYGEN_DEFAULT})
 if(UNIX AND NOT APPLE)
     option(XTRKCAD_USE_BROWSER "Show help in default browser" ${XTRKCAD_USE_BROWSER_DEFAULT})
+    option(XTRKCAD_PACKAGE_GA_RELEASE "Package for a Beta (OFF/Default) or GA (ON) release" ${XTRKCAD_PACKAGE_GA_RELEASE_DEFAULT})
 endif()
 
 if(APPLE)
@@ -126,12 +136,15 @@ find_package(Pandoc)
 
 INCLUDE (CheckIncludeFiles)
 CHECK_INCLUDE_FILES (malloc.h HAVE_MALLOC_H)
+if(HAVE_MALLOC_H)
+  add_definitions(-DHAVE_MALLOC_H)
+endif(HAVE_MALLOC_H)
 
 # Setup some global options for installation ...
 SET(XTRKCAD_MAJOR_VERSION "5")
 SET(XTRKCAD_MINOR_VERSION "3")
 SET(XTRKCAD_RELEASE_VERSION "0")
-SET(XTRKCAD_VERSION_MODIFIER "BSF")
+(??)SET(XTRKCAD_VERSION_MODIFIER "V520Beta2GTK3")
 SET(XTRKCAD_VERSION "${XTRKCAD_MAJOR_VERSION}.${XTRKCAD_MINOR_VERSION}.${XTRKCAD_RELEASE_VERSION}${XTRKCAD_VERSION_MODIFIER}")
 
 IF(WIN32)

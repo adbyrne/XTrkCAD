@@ -45,6 +45,8 @@ typedef void (*addButtonCallBack_t)(void*);
  * Globals
  */
 
+extern int iconSize;
+
 extern long adjTimer;
 
 typedef int SCALEINX_T;
@@ -209,13 +211,11 @@ typedef void (*moveDialogCallBack_t) (void *);
 extern void AddRotateMenu( wMenu_p, rotateDialogCallBack_t );
 extern void AddMoveMenu( wMenu_p, moveDialogCallBack_t );
 extern void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func);
-extern void StartRotateDialog( rotateDialogCallBack_t );
-extern void StartMoveDialog(moveDialogCallBack_t );
 /*
  * Safe Memory etc
  */
-void * MyMalloc( long );
-void * MyRealloc( void *, long );
+void * MyMalloc( size_t );
+void * MyRealloc( void *, size_t );
 void MyFree( void * );
 void * memdup( void *, size_t );
 char * MyStrdup( const char * );
@@ -227,9 +227,9 @@ void ErrorMessage( const char *, ... );
 void InfoMessage( const char *, ... );
 int NoticeMessage( const char *, const char*, const char *, ... );
 int NoticeMessage2( int, const char *, const char*, const char *, ... );
-void DoQuit( void );
+void DoQuit( void * unused );
 
-void FileIsChanged(void);
+void SetFileChanged(void);
 char * ConvertFromEscapedText(const char * text);
 char * ConvertToEscapedText(const char * text);
 
@@ -238,7 +238,7 @@ void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );
 void DefaultProc( wWin_p, winProcEvent, void * );
-void SelectFont();
+void SelectFont( void * unused );
 
 void CheckRoomSize( BOOL_T );
 const char * GetBalloonHelpStr( const char* );
@@ -250,7 +250,7 @@ wIndex_t GetCurrentCommand(void);
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
-void ConfirmReset( BOOL_T );
+int ConfirmReset( BOOL_T );
 void LayoutToolBar( void * );
 #define IC_STICKY               (1<<0)
 #define IC_INITNOTSTICKY        (1<<1)
@@ -275,7 +275,7 @@ wIndex_t InitCommand( wMenu_p, procCommand_t, const char *, const char *,  int, 
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );
 wButton_p AddToolbarButton( const char*, wIcon_p, long, wButtonCallBack_p, void * context );
-wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
+// RWS not found: wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
 wIndex_t AddMenuButton( wMenu_p, procCommand_t, const char*, const char*, wIcon_p, int, long, long, void* );
 void PlaybackButtonMouse( wIndex_t );
 void ButtonGroupBegin( const char *, const char *, const char * );
@@ -287,7 +287,7 @@ void PlaybackCommand( const char *, wIndex_t );
 wMenu_p MenuRegister( const char * label );
 void DoCommandB( void * );
 
-extern void EnumerateTracks( void );
+extern void EnumerateTracks( void * unused );
 void InitDebug( const char *, long * );
 
 #define CHANGE_SCALE	(1<<0)
@@ -300,6 +300,7 @@ void InitDebug( const char *, long * );
 #define CHANGE_TOOLBAR	(1<<8)
 #define CHANGE_CMDOPT	(1<<9)
 #define CHANGE_LIMITS	(1<<10)
+#define CHANGE_ICONSIZE	(1<<11)
 #define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
 typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
@@ -353,8 +354,8 @@ BOOL_T SnapPos( coOrd * );
 void DrawSnapGrid( drawCmd_p, coOrd, BOOL_T );
 BOOL_T GridIsVisible( void );
 void InitSnapGridButtons( void );
-void SnapGridEnable( void );
-void SnapGridShow( void );
+void SnapGridEnable( void * unused );
+void SnapGridShow( void * unused );
 void MapWindowShow( int state );
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
@@ -365,7 +366,7 @@ void EnumerateStart(void);
 void EnumerateEnd(void);
 
 /* cnote.c */
-void DoNote( void );
+void DoNote( void  * unused );
 BOOL_T WriteMainNote( FILE * );
 
 BOOL_T ReadMainNote(char * line);
@@ -448,7 +449,6 @@ void SensorMgmLoad ( void );
 void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
-
 
 #include "misc2.h"
 

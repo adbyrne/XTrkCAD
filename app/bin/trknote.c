@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "common.h"
 #include "cundo.h"
 #include "custom.h"
 #include "dynstring.h"
@@ -38,7 +39,7 @@ EXPORT TRKTYP_T T_NOTE = -1;
 static wDrawBitMap_p note_bm, link_bm, document_bm;
 
 typedef struct {
-	char **xpm;
+	char ***xpm;
 	int OP;
 	char * shortName;
 	char * cmdName;
@@ -46,14 +47,14 @@ typedef struct {
 	long acclKey;
 } trknoteData_t;
 
-#include "bitmaps/sticky-note-text.xpm"
-#include "bitmaps/sticky-note-chain.xpm"
-#include "bitmaps/sticky-note-clip.xpm"
+#include "bitmaps/sticky-note.xpm"
+#include "bitmaps/sticky-link.xpm"
+#include "bitmaps/sticky-doc.xpm"
 
 static trknoteData_t noteTypes[] = {
-	{ sticky_note_text_bits, OP_NOTETEXT, N_("Note"), N_("Comment"), "cmdTextNote", 0L },
-	{ sticky_note_chain_bits, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
-	{ sticky_note_clip_bits, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
+	{ sticky_note_xpm, OP_NOTETEXT, N_("Note"), N_("Comment"), "cmdTextNote", 0L },
+	{ sticky_link_xpm, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
+	{ sticky_doc_xpm, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
 };
 
 static long curNoteType;
@@ -61,7 +62,7 @@ static long curNoteType;
 static unsigned layerSave;
 static 	coOrd posSave;
 
-#define NOTETYPESCOUNT (sizeof(noteTypes)/sizeof(trknoteData_t))
+#define NOTETYPESCOUNT COUNT(noteTypes)
 
 
 /*****************************************************************************
@@ -111,8 +112,8 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 		for (int i=0;i<5;i++) {
 			type[i] = 0;
 		}
-		DrawPoly(d, 5, p, type, color, 0, FALSE, FALSE);
-		DrawPoly(d, 5, p, type, drawColorGold, 0, TRUE, FALSE);
+		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
+		DrawPoly(d, 5, p, type, drawColorGold, 0, DRAW_FILL);
 	} else {
 		// draw a bitmap for static object
 		wDrawBitMap_p bm;
@@ -636,7 +637,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     switch (action) {
     case C_START:
         InfoMessage(_("Place a note on the layout"));
-		curNoteType = (long)commandContext;
+		curNoteType = VP2L(commandContext);
         return C_CONTINUE;
 
     case C_DOWN:
@@ -700,7 +701,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 #include "bitmaps/note.xbm"
 #include "bitmaps/link.xbm"
 #include "bitmaps/clip.xbm"
-#include "bitmaps/cnote.xpm"
+// RWS not used #include "bitmaps/note.xpm"
 
 void InitTrkNote(wMenu_p menu)
 {
@@ -714,8 +715,8 @@ void InitTrkNote(wMenu_p menu)
 		wIcon_p icon;
 
 		nt = noteTypes + i;
-		icon = wIconCreatePixMap(nt->xpm);
-		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, (void *)(intptr_t)nt->OP);
+		icon = wIconCreatePixMap(nt->xpm[iconSize]);
+		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, I2VP(nt->OP));
 	}
 	ButtonGroupEnd();
 

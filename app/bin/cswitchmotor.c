@@ -86,13 +86,13 @@ static track_p last_motor;
 static track_p first_motor;
 
 static paramData_t switchmotorPLs[] = {
-/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(switchmotorName)},
-/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Normal"), 0, 0, sizeof(switchmotorNormal)},
-/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Reverse"), 0, 0, sizeof(switchmotorReverse)},
-/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Point Sense"), 0, 0, sizeof(switchmotorPointSense)}
+/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_NOTBLANK|PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(switchmotorName)},
+/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Normal"), 0, 0, sizeof(switchmotorNormal)},
+/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Reverse"), 0, 0, sizeof(switchmotorReverse)},
+/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Point Sense"), 0, 0, sizeof(switchmotorPointSense)}
 };
 
-static paramGroup_t switchmotorPG = { "switchmotor", PGO_DIALOGTEMPLATE, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
+static paramGroup_t switchmotorPG = { "switchmotor", PGO_DIALOGTEMPLATE, switchmotorPLs, COUNT( switchmotorPLs ) };
 static wWin_p switchmotorW;
 
 static char switchmotorEditName[STR_SHORT_SIZE];
@@ -105,14 +105,14 @@ static track_p switchmotorEditTrack;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 
 static paramData_t switchmotorEditPLs[] = {
-    /*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(switchmotorEditName)},
-/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Normal"), 0, 0, sizeof(switchmotorEditNormal)},
-/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Reverse"), 0, 0, sizeof(switchmotorEditReverse)},
-/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Point Sense"), 0, 0, sizeof(switchmotorEditPointSense)},
+    /*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(switchmotorEditName)},
+/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Normal"), 0, 0, sizeof(switchmotorEditNormal)},
+/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Reverse"), 0, 0, sizeof(switchmotorEditReverse)},
+/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Point Sense"), 0, 0, sizeof(switchmotorEditPointSense)},
 /*4*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, N_("Turnout Number"), BO_READONLY }, 
 };
 
-static paramGroup_t switchmotorEditPG = { "switchmotorEdit", PGO_DIALOGTEMPLATE, switchmotorEditPLs, sizeof switchmotorEditPLs/sizeof switchmotorEditPLs[0] };
+static paramGroup_t switchmotorEditPG = { "switchmotorEdit", PGO_DIALOGTEMPLATE, switchmotorEditPLs, COUNT( switchmotorEditPLs ) };
 static wWin_p switchmotorEditW;
 
 /*
@@ -145,7 +145,7 @@ static wDrawBitMap_p switchmotormark_bm = NULL;
 static coOrd switchmotorPoly_Pix[] = {
     {6,0}, {6,13}, {4,13}, {4,19}, {6,19}, {6,23}, {9,23}, {9,19}, {13,19},
     {13,23}, {27,23}, {27,10}, {13,10}, {13,13}, {9,13}, {9,0}, {6,0} };
-#define switchmotorPoly_CNT (sizeof(switchmotorPoly_Pix)/sizeof(switchmotorPoly_Pix[0]))
+#define switchmotorPoly_CNT (COUNT(switchmotorPoly_Pix))
 #define switchmotorPoly_SF (3.0)
 
 static void ComputeSwitchMotorBoundingBox (track_p t)
@@ -205,7 +205,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
         Translate (&p[iPoint], orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
         Translate (&p[iPoint], p[iPoint], y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
     }
-    DrawPoly(d, switchmotorPoly_CNT, p, NULL, color, 0, 1, 0);
+    DrawPoly(d, switchmotorPoly_CNT, p, NULL, color, 0, DRAW_FILL);
 }
 
 static struct {
@@ -692,7 +692,7 @@ static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 
 	LOG( log_switchmotor, 1, ("*** CmdSwitchMotor(%08x,{%f,%f})\n",action,pos.x,pos.y))
 
-	switch ((long)commandContext) {
+	switch (VP2L(commandContext)) {
 	case SWITCHMOTOR_CREATE: return CmdSwitchMotorCreate(action,pos);
 	case SWITCHMOTOR_EDIT:   return CmdSwitchMotorEdit(action,pos);
 	case SWITCHMOTOR_DELETE: return CmdSwitchMotorDelete(action,pos);
@@ -755,13 +755,9 @@ static POS_T swmhiliteBorder;
 static wDrawColor swmhiliteColor = 0;
 static void DrawSWMotorTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (swmhiliteColor==0)
 		swmhiliteColor = wDrawColorGray(87);
-	w = ((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = ((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, swmhiliteOrig, swmhiliteSize, swmhiliteColor, DRAW_TRANSPARENT );
 }
 
 static int SwitchmotorMgmProc ( int cmd, void * data )
@@ -842,7 +838,7 @@ EXPORT void SwitchmotorMgmLoad( void )
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SWITCHMOTOR) continue;
-        ContMgmLoad( switchmI, SwitchmotorMgmProc, (void *)trk );
+        ContMgmLoad( switchmI, SwitchmotorMgmProc, trk );
     }
 }
 

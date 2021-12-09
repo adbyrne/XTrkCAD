@@ -49,17 +49,17 @@ static paramData_t customPLs[] = {
 #define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },   
 #define I_CUSTOMNEWTYPE (1)
-    {   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, (void*)150, N_("Create a new ") },
+    {   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, I2VP(150), N_("Create a new ") },
 #define I_CUSTOMNEW     (2)    
-    {   PD_BUTTON, (void *)CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
+    {   PD_BUTTON, CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
 #define I_CUSTOMEDIT	(3)
-	{	PD_BUTTON, (void*)CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Rename") },
+	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CUSTOMDEL		(4)
-	{	PD_BUTTON, (void*)CustomDelete, "delete", 0, NULL, N_("Delete") },
+	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, N_("Delete") },
 #define I_CUSTOMCOPYTO	(5)
-	{	PD_BUTTON, (void*)CustomExport, "export", 0, NULL, N_("Move To") },
+	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
   } ;
-static paramGroup_t customPG = { "custmgm", PGO_DIALOGTEMPLATE, customPLs, sizeof customPLs/sizeof customPLs[0] };
+static paramGroup_t customPG = { "custmgm", PGO_DIALOGTEMPLATE, customPLs, COUNT( customPLs ) };
 
 
 typedef struct {
@@ -171,8 +171,8 @@ EXPORT FILE * customMgmF;
 static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
-	{ PD_STRING, custMgmContentsStr, "label", PDO_STRINGLIMITLENGTH, (void*)400, N_("Label"), 0, 0, sizeof(custMgmContentsStr)} };
-static paramGroup_t custMgmContentsPG = { "contents", PGO_DIALOGTEMPLATE, custMgmContentsPLs, sizeof custMgmContentsPLs/sizeof custMgmContentsPLs[0] };
+	{ PD_STRING, custMgmContentsStr, "label", PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, I2VP(400), N_("Label"), 0, 0, sizeof(custMgmContentsStr)} };
+static paramGroup_t custMgmContentsPG = { "contents", PGO_DIALOGTEMPLATE, custMgmContentsPLs, COUNT( custMgmContentsPLs ) };
 
 static void CustMgmContentsOk( void * junk )
 {
@@ -190,7 +190,6 @@ static int CustomDoExport(
 	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
-	char *oldLocale = NULL;
 
 	assert( fileName != NULL );
 	assert( files == 1 );
@@ -222,7 +221,7 @@ static int CustomDoExport(
 		return FALSE;
 	}
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	if (rc == -1)
 	{
@@ -245,7 +244,7 @@ static int CustomDoExport(
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
 			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName[ 0 ] );
 			fclose( customMgmF );
-			RestoreLocale(oldLocale);
+			SetUserLocale();
 			return FALSE;
 		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
@@ -255,7 +254,7 @@ static int CustomDoExport(
 		cnt--;
 	}
 	fclose( customMgmF );
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	LoadParamFile( 1, fileName, NULL );
 	DoChangeNotification( CHANGE_PARAMS );
 	return TRUE;
@@ -273,18 +272,17 @@ static void CustomExport( void * junk )
 
 static void CustomDone( void * action )
 {
-	char *oldLocale = NULL;
 	FILE * f = OpenCustom("w");
 
 	if (f == NULL) {
 		wHide( customPG.win );
 		return;
 	}
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 	CompoundCustomSave(f);
 	CarCustomSave(f);
 	fclose(f);
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 	wHide( customPG.win );
 }
 

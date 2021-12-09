@@ -383,16 +383,16 @@ static char sensorEditScript[STR_LONG_SIZE];
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t sensorEditPLs[] = {
 #define I_SENSORNAME (0)
-    /*0*/ { PD_STRING, sensorEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(sensorEditName)},
+    /*0*/ { PD_STRING, sensorEditName, "name", PDO_NOPREF|PDO_NOTBLANK|PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof(sensorEditName)},
 #define I_ORIGX (1)
     /*1*/ { PD_FLOAT, &sensorEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") }, 
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &sensorEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_SENSORSCRIPT (3)
-    /*3*/ { PD_STRING, sensorEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(sensorEditScript)},
+    /*3*/ { PD_STRING, sensorEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(350), N_("Script"), 0, 0, sizeof(sensorEditScript)},
 };
 
-static paramGroup_t sensorEditPG = { "sensorEdit", PGO_DIALOGTEMPLATE, sensorEditPLs, sizeof sensorEditPLs/sizeof sensorEditPLs[0] };
+static paramGroup_t sensorEditPG = { "sensorEdit", PGO_DIALOGTEMPLATE, sensorEditPLs, COUNT( sensorEditPLs ) };
 static wWin_p sensorEditW;
 
 static void SensorEditOk ( void * junk )
@@ -507,13 +507,9 @@ static POS_T ctlhiliteBorder;
 static wDrawColor ctlhiliteColor = 0;
 static void DrawSensorTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (ctlhiliteColor==0)
 		ctlhiliteColor = wDrawColorGray(87);
-	w = ((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = ((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( tempD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor, DRAW_TRANSPARENT );
 }
 
 static int SensorMgmProc ( int cmd, void * data )
@@ -578,12 +574,12 @@ EXPORT void SensorMgmLoad ( void )
     static wIcon_p sensorI = NULL;
     
     if (sensorI == NULL) {
-        sensorI = wIconCreatePixMap( sensor_xpm );
+        sensorI = wIconCreatePixMap( sensor_xpm[iconSize] );
     }
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SENSOR) continue;
-        ContMgmLoad (sensorI, SensorMgmProc, (void *) trk );
+        ContMgmLoad (sensorI, SensorMgmProc, trk );
     }
 }
 
@@ -592,7 +588,7 @@ EXPORT void SensorMgmLoad ( void )
 EXPORT void InitCmdSensor ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdSensor, "cmdSensor", _("Sensor"), 
-                   wIconCreatePixMap( sensor_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SENSOR, NULL );
+                   wIconCreatePixMap( sensor_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SENSOR, NULL );
 }
 
 EXPORT void InitTrkSensor ( void )

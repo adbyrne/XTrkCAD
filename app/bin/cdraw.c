@@ -20,6 +20,7 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
+#include "common.h"
 #include "ccurve.h"
 #include "cbezier.h"
 #include "drawgeom.h"
@@ -29,7 +30,6 @@
 #include "misc.h"
 #include "cselect.h"
 #include "common-ui.h"
-
 extern TRKTYP_T T_BZRLIN;
 
 static wMenu_p drawModDelMI;
@@ -70,23 +70,23 @@ EXPORT void LoadFontSizeList(
 	wIndex_t curInx = 0, inx1;
 	int inx;
 	wListClear(list);
-	for (inx = 0; inx < sizeof fontSizeList / sizeof fontSizeList[0]; inx++)
+	for (inx = 0; inx < COUNT( fontSizeList ); inx++)
 	{
 		if ((inx == 0 || curFontSize > fontSizeList[inx - 1]) &&
 			(curFontSize < fontSizeList[inx]))
 		{
 			sprintf(message, "%ld", curFontSize);
-			curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
+			curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
 		}
 		sprintf(message, "%ld", fontSizeList[inx]);
-		inx1 = wListAddValue(list, message, NULL, (void*)fontSizeList[inx]);
+		inx1 = wListAddValue(list, message, NULL, I2VP(fontSizeList[inx]));
 		if (curFontSize == fontSizeList[inx])
 			curInx = inx1;
 	}
-	if (curFontSize > fontSizeList[(sizeof fontSizeList / sizeof fontSizeList[0]) - 1])
+	if (curFontSize > fontSizeList[ COUNT( fontSizeList ) - 1])
 	{
 		sprintf(message, "%ld", curFontSize);
-		curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
+		curInx = wListAddValue(list, message, NULL, I2VP(curFontSize));
 	}
 	wListSetIndex(list, curInx);
 	wFlush();
@@ -100,7 +100,7 @@ long GetFontSize(wIndex_t inx)
 long GetFontSizeIndex(long size)
 {
 	int i;
-	for (i = 0; i < sizeof fontSizeList / sizeof fontSizeList[0]; i++)
+	for (i = 0; i < COUNT( fontSizeList ); i++)
 	{
 		if (fontSizeList[i] == size)
 			return(i);
@@ -116,7 +116,7 @@ EXPORT void UpdateFontSizeList(
 	long fontSize;
 
 	if ( listInx >= 0 ) {
-		*fontSizeR = (long)wListGetItemContext( list, listInx );
+		*fontSizeR = VP2L( wListGetItemContext( list, listInx ));
 	} else {
 		wListGetValues( list, message, sizeof message, NULL, NULL );
 		if ( message[0] != '\0' ) {
@@ -899,15 +899,15 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		drawDesc[A1].mode |= DESC_CHANGE;
 		break;
 	case BE:
-		BenchUpdateOrientationList( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), (wList_p)drawDesc[OR].control0 );
+		BenchUpdateOrientationList( VP2L( wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
 		if ( drawData.benchOrient < wListGetCount( (wList_p)drawDesc[OR].control0 ) )
 			wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
 		else
 			drawData.benchOrient = 0;
-		segPtr->u.l.option = GetBenchData( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case OR:
-		segPtr->u.l.option = GetBenchData( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), drawData.benchOrient );
+		segPtr->u.l.option = GetBenchData( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), drawData.benchOrient );
 		break;
 	case DS:
 		segPtr->u.l.option = drawData.dimenSize;
@@ -938,6 +938,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		break;
 	case FL:
 		if (segPtr->type == SEG_POLY && drawData.open) {
+			segPtr->u.p.polyType = POLYLINE;
 			drawData.filled = FALSE;
 			drawDesc[FL].mode = DESC_RO|DESC_CHANGE;
 			break;
@@ -945,6 +946,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if(drawData.filled) {
 			if (segPtr->type == SEG_POLY) {
 				segPtr->type = SEG_FILPOLY;
+				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_RO|DESC_CHANGE;
 			}
@@ -956,6 +958,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		} else {
 			if (segPtr->type == SEG_FILPOLY) {
 				segPtr->type = SEG_POLY;
+				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_CHANGE;
 			}
@@ -1049,7 +1052,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	if ( drawSegInx==-1 )
 		return;
 	segPtr = &xx->segs[drawSegInx];
-	for ( inx=0; inx<sizeof drawDesc/sizeof drawDesc[0]; inx++ ) {
+	for ( inx=0; inx<COUNT( drawDesc ); inx++ ) {
 		drawDesc[inx].mode = DESC_IGNORE;
 		drawDesc[inx].control0 = NULL;
 	}
@@ -1235,6 +1238,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 				drawData.open=TRUE;
 				drawData.filled= FALSE;
 				drawDesc[FL].mode = DESC_RO;
+				drawDesc[OP].mode = 0;
 				break;
 			default:
 				title = filled?_("Filled Polygon"):_("Polygon");
@@ -1282,26 +1286,26 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	if ( segPtr->type==SEG_BENCH && drawDesc[BE].control0!=NULL && drawDesc[OR].control0!=NULL) {
 		BenchLoadLists( (wList_p)drawDesc[BE].control0, (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[BE].control0, drawData.benchChoice );
-		BenchUpdateOrientationList( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), (wList_p)drawDesc[OR].control0 );
+		BenchUpdateOrientationList( VP2L(wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice)), (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
 	}
 	if ( (segPtr->type==SEG_STRLIN || segPtr->type==SEG_CRVLIN || segPtr->type==SEG_POLY) && drawDesc[LT].control0!=NULL) {
 		wListClear( (wList_p)drawDesc[LT].control0 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Solid"), NULL, (void*)0 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dash"), NULL, (void*)1 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, (void*)2 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
-		wListAddValue( (wList_p)drawDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Solid"), NULL, I2VP(0 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dash"), NULL, I2VP(1 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, I2VP(2 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, I2VP(3 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("CenterDot"), NULL, I2VP(5 ));
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6 ));
 		wListSetIndex( (wList_p)drawDesc[LT].control0, drawData.lineType );
 	}
 	if ( segPtr->type==SEG_DIMLIN && drawDesc[DS].control0!=NULL ) {
 		wListClear( (wList_p)drawDesc[DS].control0 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Tiny"), NULL, (void*)0 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Small"), NULL, (void*)1 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Medium"), NULL, (void*)2 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, _("Large"), NULL, (void*)3 );
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Tiny"), NULL, I2VP(0 ));
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Small"), NULL, I2VP(1 ));
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Medium"), NULL, I2VP(2 ));
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Large"), NULL, I2VP(3 ));
 		wListSetIndex( (wList_p)drawDesc[DS].control0, drawData.dimenSize );
 	}
 	if ( segPtr->type==SEG_TEXT && drawDesc[TS].control0!=NULL ) {
@@ -1487,6 +1491,7 @@ static drawModContext_t drawModCmdContext = {
 static BOOL_T infoSubst = FALSE;
 
 static paramIntegerRange_t i100_100 = { -100, 100, 25 };  //Allow negative numbers
+static paramFloatRange_t r0d001_10000 = { 0.001, 10000 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r10000_10000 = {-10000, 10000};
@@ -1507,7 +1512,7 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.height, "Height", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Height") },
 #define drawModRadiusPD		(drawModPLs[5])
 #define drawModRadius           5
-	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("Radius") },
+	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NOPREF|PDO_DIM|PDO_NORECORD|BO_ENTER, &r0d001_10000, N_("Radius") },
 #define drawModArcAnglePD		(drawModPLs[6])
 	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r360_360, N_("Arc Angle") },
 #define drawModRotAnglePD		(drawModPLs[7)
@@ -1519,7 +1524,7 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCenterY", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
 
 };
-static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };
+static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, COUNT( drawModPLs ) };
 
 static void DrawModDlgUpdate(
 		paramGroup_p pg,
@@ -1577,14 +1582,14 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	case C_DOWN:
 		rc = DrawGeomModify( C_DOWN, pos, &drawModCmdContext );
 		if ( infoSubst ) {
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		break;
 	case C_LDOUBLE:
 		rc = DrawGeomModify( C_LDOUBLE, pos, &drawModCmdContext );
 		if ( infoSubst ) {
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		break;
@@ -1616,7 +1621,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 						labels[0] = N_("Seg Lth");
 						labels[1] = N_("Rel Ang");
 						ParamLoadControls( &drawModPG );
-						InfoSubstituteControls( controls, labels, drawModPG.nameStr );
+						InfoSubstituteControls( controls, labels );
 						drawModLengthPD.option &= ~PDO_NORECORD;
 						drawModRelAnglePD.option &= ~PDO_NORECORD;
 						infoSubst = TRUE;
@@ -1628,7 +1633,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					labels[0] = N_("Width");
 					labels[1] = N_("Height");
 					ParamLoadControls( &drawModPG );
-					InfoSubstituteControls( controls, labels, drawModPG.nameStr );
+					InfoSubstituteControls( controls, labels );
 					drawModWidthPD.option &= ~PDO_NORECORD;
 					drawModHeightPD.option &= ~PDO_NORECORD;
 					infoSubst = TRUE;
@@ -1644,7 +1649,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 				labels[0] = N_("Length");
 				labels[1] = N_("Angle");
 				ParamLoadControls( &drawModPG );
-				InfoSubstituteControls( controls, labels, drawModPG.nameStr );
+				InfoSubstituteControls( controls, labels );
 				drawModLengthPD.option &= ~PDO_NORECORD;
 				drawModAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -1660,19 +1665,19 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					labels[1] = N_("Arc Angle");
 				}
 				ParamLoadControls( &drawModPG );
-				InfoSubstituteControls( controls, labels, drawModPG.nameStr );
+				InfoSubstituteControls( controls, labels );
 				drawModArcAnglePD.option &= ~PDO_NORECORD;
 				if (drawModCmdContext.type == SEG_CRVLIN)
 					drawModArcAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
 				break;
 			default:
-				InfoSubstituteControls(NULL, NULL, NULL);
+				InfoSubstituteControls( NULL, NULL );
 				infoSubst = FALSE;
 			break;
 			}
 		} else {
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		break;
@@ -1718,7 +1723,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		ignoredDraw = trk ;
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
 		if ( infoSubst ) {
-					InfoSubstituteControls(NULL, NULL, NULL);
+					InfoSubstituteControls( NULL, NULL );
 					infoSubst = FALSE;
 		}
 		ignoredDraw = NULL;
@@ -1733,18 +1738,24 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		DrawNewTrack( trk );
 		ComputeDrawBoundingBox( trk );
 		if ( infoSubst ) {
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		break;
 	case C_CONFIRM:
+	case C_OK:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		ComputeDrawBoundingBox( trk );
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
 		break;
 	case C_CANCEL:
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
 		drawModCmdContext.state = MOD_NONE;
 		if ( infoSubst ) {
-			InfoSubstituteControls(NULL, NULL, NULL);
+			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		break;
@@ -1924,7 +1935,9 @@ static BOOL_T QueryDraw( track_p trk, int query )
 			(xx->segs[0].type == SEG_BEZLIN) ||
 			(xx->segs[0].type == SEG_FILCRCL) ||
 			(xx->segs[0].type == SEG_FILPOLY) ||
-			(xx->segs[0].type == SEG_POLY)
+			(xx->segs[0].type == SEG_POLY) ||
+			(xx->segs[0].type == SEG_BENCH) ||
+			(xx->segs[0].type == SEG_TBLEDGE)
 		) return TRUE;
 		else return FALSE;
 	default:
@@ -2092,12 +2105,14 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 
 		switch (xx->segs[0].type) {
 			case SEG_STRLIN:
+			case SEG_BENCH:
+			case SEG_TBLEDGE:
 				REORIGIN(p0,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
 				REORIGIN(p1,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
 				tempSegs(0).color = xx->segs[0].color;
 				tempSegs(0).width = xx->segs[0].width;
 				tempSegs_da.cnt = 1;
-				tempSegs(0).type = SEG_STRLIN;
+				tempSegs(0).type = xx->segs[0].type;
 				tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
 				tempSegs(0).u.l.pos[1] = 1-ep?pos:p1;
 				xx->segs[0].u.l.pos[0] = 1-ep?pos:p0;
@@ -2675,18 +2690,18 @@ static paramData_t drawPLs[] = {
 	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchChoicePD		(drawPLs[3])
 #ifdef WINDOWS
-	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)120, N_("Lumber Type") },
+	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(120), N_("Lumber Type") },
 #else    
-    { PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)145, N_("Lumber Type") },
+    { PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(145), N_("Lumber Type") },
 #endif    
 #define drawBenchOrientPD		(drawPLs[4])
 #ifdef WINDOWS
-	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)45, "", 0 },
+	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(45), "", 0 },
 #else
-	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)105, "", 0 },
+	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, I2VP(105), "", 0 },
 #endif
 #define drawDimArrowSizePD		(drawPLs[5])
-	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, (void*)80, N_("Size") },
+	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, I2VP(80), N_("Size") },
 #define drawLengthPD			(drawPLs[6])
 	{ PD_FLOAT, &drawCmdContext.length, "length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawWidthPD				(drawPLs[7])
@@ -2697,9 +2712,9 @@ static paramData_t drawPLs[] = {
 #define drawRadiusPD            (drawPLs[9])
 	{ PD_FLOAT, &drawCmdContext.radius, "radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
 #define drawLineTypePD			(drawPLs[10])
-	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, (void*)0, N_("Line Type") },
+	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
 };
-static paramGroup_t drawPG = { "cmddraw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
+static paramGroup_t drawPG = { "draw", 0, drawPLs, COUNT( drawPLs ) };
 
 static char * objectName[] = {
 		N_("Straight"),
@@ -2745,13 +2760,13 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		drawBenchChoicePD.option |= PDO_NORECORD;
 		drawBenchOrientPD.option |= PDO_NORECORD;
 		drawDimArrowSizePD.option |= PDO_NORECORD;
-		drawCmdContext.Op = (wIndex_t)(long)commandContext;
+		drawCmdContext.Op = (wIndex_t)VP2L(commandContext);
 		if ( drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST ) {
 			NoticeMessage( "cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op );
 			drawCmdContext.Op = OP_LINE;
 		}
 		SetAllTrackSelect( FALSE );
-		/*DrawGeomOp( (void*)(drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
+		/*DrawGeomOp( (drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
 		infoSubst = TRUE;
 		switch( drawCmdContext.Op ) {
 		case OP_LINE:
@@ -2780,7 +2795,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot"), NULL, NULL );
 				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL );
 			}
-			InfoSubstituteControls( controls, labels, drawPG.nameStr );
+			InfoSubstituteControls( controls, labels );
 			drawLineWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
 			drawLineTypePD.option &= ~PDO_NORECORD;
@@ -2794,7 +2809,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels, drawPG.nameStr );
+			InfoSubstituteControls( controls, labels );
 			drawColorPD.option &= ~PDO_NORECORD;
 			break;
 		case OP_BENCH:
@@ -2809,9 +2824,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				BenchLoadLists( (wList_p)drawBenchChoicePD.control, (wList_p)drawBenchOrientPD.control );
 
 			ParamLoadControls( &drawPG );
-			BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice ), (wList_p)drawBenchOrientPD.control );
+			BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice )), (wList_p)drawBenchOrientPD.control );
 			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
-			InfoSubstituteControls( controls, labels, drawPG.nameStr );
+			InfoSubstituteControls( controls, labels );
 			drawBenchColorPD.option &= ~PDO_NORECORD;
 			drawBenchChoicePD.option &= ~PDO_NORECORD;
 			drawBenchOrientPD.option &= ~PDO_NORECORD;
@@ -2828,7 +2843,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Large"), NULL, NULL );
 			}
 			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels, drawPG.nameStr );
+			InfoSubstituteControls( controls, labels );
 			drawDimArrowSizePD.option &= ~PDO_NORECORD;
 			break;
 		case OP_TBLEDGE:
@@ -2836,7 +2851,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			InfoMessage( _("Drag to create Table Edge") );
 			break;
 		default:
-			InfoSubstituteControls( NULL, NULL, NULL );
+			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		ParamGroupRecord( &drawPG );
@@ -2852,7 +2867,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			return CmdBezCurve(act2, pos);
 		}
 		if ( drawCmdContext.Op == OP_BENCH ) {
-			drawCmdContext.benchOption = GetBenchData( (long)wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice ), benchOrient );
+			drawCmdContext.benchOption = GetBenchData( VP2L(wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice )), benchOrient );
 			drawCmdContext.Color = benchColor;
 
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
@@ -2864,7 +2879,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawCmdContext.Color = lineColor;
 		}
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL, NULL );
+			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
 		/* no break */
@@ -2873,6 +2888,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionMove:
 		ParamLoadData( &drawPG );
 		/* no break */
+	case wActionMove:
+	case wActionRDown:
+	case wActionRDrag:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext);
 	case wActionLUp:
@@ -2893,7 +2911,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				controls[1] = NULL;
 				labels[0] = N_("Radius");
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels, drawPG.nameStr );
+				InfoSubstituteControls( controls, labels );
 				drawRadiusPD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
 				break;
@@ -2915,7 +2933,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 					labels[1] = N_("Angle");
 				}
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels, drawPG.nameStr );
+				InfoSubstituteControls( controls, labels );
 				drawLengthPD.option &= ~PDO_NORECORD;
 				drawRadiusPD.option &= ~PDO_NORECORD;
 				drawAnglePD.option &= ~PDO_NORECORD;
@@ -2938,7 +2956,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				else
 					labels[1] = N_("Angle");
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels, drawPG.nameStr );
+				InfoSubstituteControls( controls, labels );
 				drawLengthPD.option &= ~PDO_NORECORD;
 				drawAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -2951,7 +2969,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				labels[0] = N_("Length");
 				labels[1] = N_("Width");
 				ParamLoadControls( &drawPG );
-				InfoSubstituteControls( controls, labels, drawPG.nameStr );
+				InfoSubstituteControls( controls, labels );
 				drawLengthPD.option &= ~PDO_NORECORD;
 				drawWidthPD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
@@ -2963,7 +2981,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		return rc;
 
 	case C_CANCEL:
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext);
 	case C_TEXT:
@@ -2972,8 +2990,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case C_OK:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
-
-		/*DrawOk( NULL );*/
+	case C_CONFIRM:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
+		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
 
 	case C_FINISH:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
@@ -2993,29 +3012,32 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	}
 }
 
-#include "bitmaps/dline.xpm"
-#include "bitmaps/ddimlin.xpm"
-#include "bitmaps/dbench.xpm"
-#include "bitmaps/dtbledge.xpm"
-#include "bitmaps/dcurve1.xpm"
-#include "bitmaps/dcurve2.xpm"
-#include "bitmaps/dcurve3.xpm"
-#include "bitmaps/dcurve4.xpm"
+#include "bitmaps/straight-line.xpm"
+#include "bitmaps/dimension.xpm"
+#include "bitmaps/benchwork.xpm"
+#include "bitmaps/table-edge.xpm"
+
+#include "bitmaps/curved-line-end.xpm"
+#include "bitmaps/curved-line-tangent.xpm"
+#include "bitmaps/curved-line-middle.xpm"
+#include "bitmaps/curved-line-chord.xpm"
+
 /*#include "bitmaps/dcircle1.xpm"*/
-#include "bitmaps/dcircle2.xpm"
-#include "bitmaps/dcircle3.xpm"
+#include "bitmaps/circle-line-center.xpm"
+#include "bitmaps/circle-line-tangent.xpm"
 /*#include "bitmaps/dflcrcl1.xpm"*/
-#include "bitmaps/dflcrcl2.xpm"
-#include "bitmaps/dflcrcl3.xpm"
-#include "bitmaps/dbox.xpm"
-#include "bitmaps/dfilbox.xpm"
-#include "bitmaps/dpoly.xpm"
-#include "bitmaps/dfilpoly.xpm"
-#include "bitmaps/dbezier.xpm"
-#include "bitmaps/dpolyline.xpm"
+#include "bitmaps/circle-filled-center.xpm"
+#include "bitmaps/circle-filled-tangent.xpm"
+
+#include "bitmaps/box.xpm"
+#include "bitmaps/filled-box.xpm"
+#include "bitmaps/polygon.xpm"
+#include "bitmaps/filled-polygon.xpm"
+#include "bitmaps/bezier-line.xpm"
+#include "bitmaps/polyline.xpm"
 
 typedef struct {
-		char **xpm;
+		char ***xpm;
 		int OP;
 		char * shortName;
 		char * cmdName;
@@ -3024,29 +3046,29 @@ typedef struct {
 		} drawData_t;
 
 static drawData_t dlineCmds[] = {
-		{ dline_xpm, OP_LINE, N_("Line"), N_("Draw Line"), "cmdDrawLine", ACCL_DRAWLINE },
-		{ ddimlin_xpm, OP_DIMLINE, N_("Dimension Line"), N_("Draw Dimension Line"), "cmdDrawDimLine", ACCL_DRAWDIMLINE },
-		{ dbench_xpm, OP_BENCH, N_("Benchwork"), N_("Draw Benchwork"), "cmdDrawBench", ACCL_DRAWBENCH },
-		{ dtbledge_xpm, OP_TBLEDGE, N_("Table Edge"), N_("Draw Table Edge"), "cmdDrawTableEdge", ACCL_DRAWTBLEDGE } };
+		{ straight_line_xpm, OP_LINE, N_("Line"), N_("Draw Line"), "cmdDrawLine", ACCL_DRAWLINE },
+		{ dimension_xpm, OP_DIMLINE, N_("Dimension Line"), N_("Draw Dimension Line"), "cmdDrawDimLine", ACCL_DRAWDIMLINE },
+		{ benchwork_xpm, OP_BENCH, N_("Benchwork"), N_("Draw Benchwork"), "cmdDrawBench", ACCL_DRAWBENCH },
+		{ table_edge_xpm, OP_TBLEDGE, N_("Table Edge"), N_("Draw Table Edge"), "cmdDrawTableEdge", ACCL_DRAWTBLEDGE } };
 static drawData_t dcurveCmds[] = {
-		{ dcurve1_xpm, OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
-		{ dcurve2_xpm, OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
-		{ dcurve3_xpm, OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
-		{ dcurve4_xpm, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 },
-		{ dbezier_xpm, OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE } };
+		{ curved_line_end_xpm, OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
+		{ curved_line_tangent_xpm, OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
+		{ curved_line_middle_xpm, OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
+		{ curved_line_chord_xpm, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 },
+		{ bezier_line_xpm, OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE } };
 static drawData_t dcircleCmds[] = {
 		/*{ dcircle1_xpm, OP_CIRCLE1, "Circle Fixed Radius", "Draw Fixed Radius Circle", "cmdDrawCircleFixedRadius", ACCL_DRAWCIRCLE1 },*/
-		{ dcircle3_xpm, OP_CIRCLE3, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE2 },
-		{ dcircle2_xpm, OP_CIRCLE2, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE3 },
+		{ circle_line_center_xpm, OP_CIRCLE3, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE2 },
+		{ circle_line_tangent_xpm, OP_CIRCLE2, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE3 },
 		/*{ dflcrcl1_xpm, OP_FILLCIRCLE1, "Circle Filled Fixed Radius", "Draw Fixed Radius Filled Circle", "cmdDrawFilledCircleFixedRadius", ACCL_DRAWFILLCIRCLE1 },*/
-		{ dflcrcl3_xpm, OP_FILLCIRCLE3, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE2 },
-		{ dflcrcl2_xpm, OP_FILLCIRCLE2, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE3 } };
+		{ circle_filled_center_xpm, OP_FILLCIRCLE3, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE2 },
+		{ circle_filled_tangent_xpm, OP_FILLCIRCLE2, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE3 } };
 static drawData_t dshapeCmds[] = {
-		{ dbox_xpm, OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX },
-		{ dfilbox_xpm, OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX },
-		{ dpoly_xpm, OP_POLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLY },
-		{ dfilpoly_xpm, OP_FILLPOLY, N_("Filled Polygon"), N_("Draw Filled Polygon"), "cmdDrawFilledPolygon", ACCL_DRAWFILLPOLYGON },
-		{ dpolyline_xpm, OP_POLYLINE, N_("PolyLine"), N_("Draw PolyLine"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
+		{ box_xpm, OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX },
+		{ filled_box_xpm, OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX },
+		{ polygon_xpm, OP_POLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLY },
+		{ filled_polygon_xpm, OP_FILLPOLY, N_("Filled Polygon"), N_("Draw Filled Polygon"), "cmdDrawFilledPolygon", ACCL_DRAWFILLPOLYGON },
+		{ polyline_xpm, OP_POLYLINE, N_("PolyLine"), N_("Draw PolyLine"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
 };
 
 typedef struct {
@@ -3145,7 +3167,7 @@ static void DrawDlgUpdate(
 	}
 
 	if ( inx >= 0 && pg->paramPtr[inx].valueP == &benchChoice )
-		BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP ), (wList_p)drawBenchOrientPD.control );
+		BenchUpdateOrientationList( VP2L(wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP )), (wList_p)drawBenchOrientPD.control );
 }
 
 EXPORT void InitCmdDraw( wMenu_p menu )
@@ -3167,8 +3189,8 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 		ButtonGroupBegin( _(dsp->menuTitle), dsp->helpKey, _(dsp->stickyLabel) );
 		for ( inx2=0; inx2<dsp->cnt; inx2++ ) {
 			ddp = &dsp->data[inx2];
-			icon = wIconCreatePixMap( ddp->xpm );
-			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ddp->acclKey, (void *)(intptr_t)ddp->OP );
+			icon = wIconCreatePixMap( ddp->xpm[iconSize] );
+			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ddp->acclKey, I2VP(ddp->OP) );
 		}
 		ButtonGroupEnd();
 	}
@@ -3262,9 +3284,11 @@ EXPORT BOOL_T ReadText( char * line )
 	return TRUE;
 }
 
-void MenuMode(int mode) {
+void MenuMode(void * modeVP )
+{
+	int mode = (int)VP2L(modeVP);
 	if ( infoSubst ) {
-		InfoSubstituteControls(NULL, NULL, NULL);
+		InfoSubstituteControls( NULL, NULL );
 		infoSubst = FALSE;
 	}
 	if (mode == 1) {
@@ -3276,7 +3300,9 @@ void MenuMode(int mode) {
 	}
 }
 
-void MenuEnter(int key) {
+void MenuEnter( void * keyVP )
+{
+	int key = (int)VP2L(keyVP);
 	int action;
 	action = C_TEXT;
 	action |= key<<8;
@@ -3286,7 +3312,9 @@ void MenuEnter(int key) {
 		DrawGeomModify(action,zero,&drawModCmdContext);
 }
 
-void MenuLine(int key) {
+void MenuLine( void * keyVP )
+{
+	int key = (int)VP2L(keyVP);
 	struct extraDataDraw_t * xx = GET_EXTRA_DATA(drawModCmdContext.trk, T_DRAW, extraDataDraw_t);
 	if ( drawModCmdContext.type==SEG_STRLIN || drawModCmdContext.type==SEG_CRVLIN || drawModCmdContext.type==SEG_POLY ) {
 		switch(key) {
@@ -3354,29 +3382,29 @@ EXPORT void InitTrkDraw( void )
 	AddParam( "TEXT", ReadText );
 
 	drawModDelMI = MenuRegister( "Modify Draw Edit Menu" );
-	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'g'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'g');
-	drawModOpen = wMenuPushCreate( drawModDelMI, "", _("Make PolyLine - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l');
-	drawModFill = wMenuPushCreate( drawModDelMI, "", _("Fill Polygon - 'f'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'f');
-	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'u'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'u');
+	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'g'"), 0, MenuEnter, I2VP( 'g'));
+	drawModOpen = wMenuPushCreate( drawModDelMI, "", _("Make PolyLine - 'l'"), 0, MenuEnter, I2VP( 'l'));
+	drawModFill = wMenuPushCreate( drawModDelMI, "", _("Fill Polygon - 'f'"), 0, MenuEnter, I2VP( 'f'));
+	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'u'"), 0, MenuEnter, I2VP( 'u'));
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
-	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
-	drawModVertex = wMenuPushCreate( drawModDelMI, "", _("Vertex Point - 'v'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'v' );
-	drawModRound =  wMenuPushCreate( drawModDelMI, "", _("Round Corner - 'r'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'r' );
-	drawModSmooth =  wMenuPushCreate( drawModDelMI, "", _("Smooth Corner - 's'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 's' );
+	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, MenuMode, I2VP( 0 ));
+	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, MenuEnter, I2VP( 127 ));
+	drawModVertex = wMenuPushCreate( drawModDelMI, "", _("Vertex Point - 'v'"), 0, MenuEnter, I2VP( 'v' ));
+	drawModRound =  wMenuPushCreate( drawModDelMI, "", _("Round Corner - 'r'"), 0, MenuEnter, I2VP( 'r' ));
+	drawModSmooth =  wMenuPushCreate( drawModDelMI, "", _("Smooth Corner - 's'"), 0, MenuEnter, I2VP( 's' ));
 	wMenuSeparatorCreate( drawModDelMI );
 	drawModLinMI = wMenuMenuCreate( drawModDelMI, "", _("LineType...") );
-	drawModSolid =  wMenuPushCreate( drawModLinMI, "", _("Solid Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '0' );
-	drawModDot =  wMenuPushCreate( drawModLinMI, "", _("Dashed Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '1' );
-	drawModDash =  wMenuPushCreate( drawModLinMI, "", _("Dotted Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '2' );
-	drawModDashDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '3' );
-	drawModDashDotDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '4' );
-	drawModCenterDot =  wMenuPushCreate( drawModLinMI, "", _("Center-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '5' );
-	drawModPhantom =  wMenuPushCreate( drawModLinMI, "", _("Phantom-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '6' );
+	drawModSolid =  wMenuPushCreate( drawModLinMI, "", _("Solid Line"), 0, MenuLine, I2VP( '0' ));
+	drawModDot =  wMenuPushCreate( drawModLinMI, "", _("Dashed Line"), 0, MenuLine, I2VP( '1' ));
+	drawModDash =  wMenuPushCreate( drawModLinMI, "", _("Dotted Line"), 0, MenuLine, I2VP( '2' ));
+	drawModDashDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot Line"), 0, MenuLine, I2VP( '3' ));
+	drawModDashDotDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot-Dot Line"), 0, MenuLine, I2VP( '4' ));
+	drawModCenterDot =  wMenuPushCreate( drawModLinMI, "", _("Center-Dot Line"), 0, MenuLine, I2VP( '5' ));
+	drawModPhantom =  wMenuPushCreate( drawModLinMI, "", _("Phantom-Dot Line"), 0, MenuLine, I2VP( '6' ));
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
-	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
-	drawModLast = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
-	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Middle - 'm'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'm');
+	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, MenuMode, I2VP( 1 ));
+	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, MenuEnter, I2VP( '0' ));
+	drawModLast = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, MenuEnter, I2VP( 'l' ));
+	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Middle - 'm'"), 0, MenuEnter, I2VP( 'm'));
 
 }

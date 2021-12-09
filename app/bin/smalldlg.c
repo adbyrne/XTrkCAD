@@ -51,11 +51,11 @@ static paramData_t tipPLs[] = {
 #define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
 	{   PD_MESSAGE, N_("Did you know..."), "mess1", 0, NULL, NULL, BM_LARGE },
 	{   PD_TEXT, NULL, "text", 0, &tipTextData, NULL, BO_READONLY|BT_CHARUNITS|BT_TOP },
-	{   PD_BUTTON, (void*)ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
-	{   PD_BUTTON, (void*)ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
+	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
+	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }};
 
-static paramGroup_t tipPG = { "tip", PGO_DIALOGTEMPLATE, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };
+static paramGroup_t tipPG = { "tip", PGO_DIALOGTEMPLATE, tipPLs, COUNT( tipPLs ) };
 
 /**
  * Create and initialize the tip of the day window. The dialog box is created and the list of tips is loaded
@@ -107,7 +107,7 @@ static void CreateTipW( void )
 				*cp++ = '\n';
 				
 				/* read a line */	
-				if (!fgets( cp, (sizeof buff) - (cp-buff), tipF )) {
+				if (!fgets( cp, (int)((sizeof buff) - (cp-buff)), tipF )) {
 					return;
 				}
 	
@@ -139,8 +139,9 @@ static void CreateTipW( void )
  *
  */
 
-void ShowTip( long flags )
+void ShowTip( void * flagsVP )
 {
+	long flags = VP2L(flagsVP);
 	long tipNum;
 	
 	if (showTipAtStart || (flags & SHOWTIP_FORCESHOW))  
@@ -188,7 +189,7 @@ static paramData_t aboutPLs[] = {
 #define COPYRIGHT_T			((wText_p)aboutPLs[I_COPYRIGHT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &aboutTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS }
 };
-static paramGroup_t aboutPG = { "about", PGO_DIALOGTEMPLATE , aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
+static paramGroup_t aboutPG = { "about", PGO_DIALOGTEMPLATE, aboutPLs, COUNT( aboutPLs ) };
 
 /** 
  *	Create and show the About window.
@@ -201,22 +202,32 @@ void CreateAboutW(void *ptr)
 	if (!aboutW) {
 		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_xpm);
 		ParamRegister(&aboutPG);
-		aboutW = ParamCreateDialog(&aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, wHide, FALSE, NULL, F_TOP | F_CENTER, NULL);
+		aboutW = ParamCreateDialog(&aboutPG, MakeWindowTitle(_("About")), NULL, NULL, wHide, FALSE, NULL, F_TOP | F_CENTER| PD_F_ALT_CANCELLABEL, NULL);
 		ParamLoadMessage(&aboutPG, I_ABOUTVERSION, sAboutProd);
 		wTextAppend(COPYRIGHT_T, DESCRIPTION);
-		wTextAppend(COPYRIGHT_T, "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards.");
-		wTextAppend(COPYRIGHT_T, "\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)");
-		wTextAppend(COPYRIGHT_T, "\nSome icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License.");
-		wTextAppend(COPYRIGHT_T, "\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Daniel Luis Spagnol");
-		wTextAppend(COPYRIGHT_T, "\nParameter Files by: Ralph Boyd, Dwayne Ward");
+		wTextAppend(COPYRIGHT_T, "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards.\n");
+		wTextAppend(COPYRIGHT_T, "\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)\n");
+		wTextAppend(COPYRIGHT_T, "\nSome icons by Yusuke Kamiyamane. Licensed under a Creative Commons Attribution 3.0 License.\n");
+		wTextAppend(COPYRIGHT_T, "\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Russell Shilling, Daniel Luis Spagnol");
+		wTextAppend(COPYRIGHT_T, "\nParameter Files by: Ralph Boyd, Dwayne Ward\n");
+
+		wTextAppend(COPYRIGHT_T, "\nThe following software is distributed with XTrackCAD\n\n");
 #ifdef WINDOWS
-		wTextAppend(COPYRIGHT_T, "\n");
 		wTextAppend(COPYRIGHT_T, FreeImage_GetCopyrightMessage());
+		wTextAppend(COPYRIGHT_T, "\n\n");
 #endif
-		wTextAppend(COPYRIGHT_T, "\nCornu Algorithm and Implementation by: Raph Levien");
-		wTextAppend(COPYRIGHT_T, "\nuthash, utlist Copyright notice:");
+		wTextAppend(COPYRIGHT_T, "Cornu Algorithm and Implementation by: Raph Levien");
+		wTextAppend(COPYRIGHT_T, "\n\nuthash, utlist Copyright notice:");
 		wTextAppend(COPYRIGHT_T, "\nCopyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/");
 		wTextAppend(COPYRIGHT_T, "\nAll rights reserved.");
+
+		wTextAppend(COPYRIGHT_T, "\n\ncJSON: Copyright (c) 2009-2017 Dave Gamble and cJSON contributors");
+		wTextAppend(COPYRIGHT_T, "\n\nlibzip:  Copyright(C) 1999 - 2019 Dieter Baron and Thomas Klausner\n" \
+								  "The authors can be contacted at libzip@nih.at");
+
+		wTextAppend(COPYRIGHT_T, "\n\nMiniXML: Copyright (c) 2003-2019 by Michael R Sweet.\n" \
+			"The Mini - XML library is licensed under the Apache License Version 2.0 with an\n" \
+			"exception to allow linking against GPL2 / LGPL2 - only software.");
 	}
 
 	wShow(aboutW);

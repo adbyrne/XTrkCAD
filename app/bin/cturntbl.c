@@ -47,17 +47,17 @@ static paramFloatRange_t r1_100 = { 1.0, 100.0, 100 };
 static paramData_t turntablePLs[] = {
 #define turntableDiameterPD		(turntablePLs[0])
 	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") } };
-static paramGroup_t turntablePG = { "cmdturntable", 0, turntablePLs, sizeof turntablePLs/sizeof turntablePLs[0] };
+static paramGroup_t turntablePG = { "cmdturntable", 0, turntablePLs, COUNT( turntablePLs ) };
 
 
 static BOOL_T ValidateTurntablePosition(
 		track_p trk )
 {
-	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	EPINX_T ep, epCnt = GetTrkEndPtCnt(trk);
 	
 	if ( epCnt <= 0 )
 		return FALSE;
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	ep = xx->currEp;
 	do {
 		if ( GetTrkEndTrk(trk,ep) ) {
@@ -74,8 +74,8 @@ static BOOL_T ValidateTurntablePosition(
 
 static void ComputeTurntableBoundingBox( track_p trk )
 {
-	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	coOrd hi, lo;
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 	hi.x = xx->pos.x+xx->radius;
 	lo.x = xx->pos.x-xx->radius;
 	hi.y = xx->pos.y+xx->radius;
@@ -567,7 +567,7 @@ static BOOL_T EnumerateTurntable( track_p trk )
 	struct extraDataTurntable_t *xx;
 	static dynArr_t turntables_da;
 #define turntables(N) DYNARR_N( FLOAT_T, turntables_da, N )
-	int inx;
+	size_t inx;
 	char tmp[40];
 	BOOL_T content = FALSE;
 	if ( trk != NULL ) {
@@ -577,8 +577,8 @@ static BOOL_T EnumerateTurntable( track_p trk )
 		turntables(turntables_da.cnt-1) = xx->radius*2.0;
 		sprintf( tmp, "Turntable, diameter %s", FormatDistance(turntables(turntables_da.cnt-1)) );
 		inx = strlen( tmp );
-		if ( inx > (int)enumerateMaxDescLen )
-			enumerateMaxDescLen = inx;
+		if ( inx > enumerateMaxDescLen )
+			enumerateMaxDescLen = (int)inx;
 	} else {
 		for (inx=0; inx<turntables_da.cnt; inx++) {
 			content = TRUE;
@@ -665,7 +665,7 @@ EXPORT BOOL_T ConnectTurntableTracks(
 			UndoModify(trk1);
 			EPINX_T ep = NewTurntableEndPt(trk1,angle);
 			if (ConnectTracks( trk1, ep, trk2, ep2 )) {
-				UndoUndo();
+				UndoUndo(NULL);
 				return FALSE;
 			}
 			return TRUE;
@@ -944,7 +944,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
-		InfoSubstituteControls( controls, labels, turntablePG.nameStr );
+		InfoSubstituteControls( controls, labels );
 		SetAllTrackSelect( FALSE );
 		/*InfoMessage( "Place Turntable");*/
 		state = 0;
@@ -959,7 +959,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
-		InfoSubstituteControls( controls, labels, turntablePG.nameStr );
+		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
 		state = 1;
@@ -976,7 +976,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		t = NewTurntable( pos, turntableDiameter/2.0 );
 		UndoEnd();
 		DrawNewTrack(t);
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
 		state = 0;
@@ -989,7 +989,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 		return C_CONTINUE;
 
 	default:
@@ -998,12 +998,12 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/turntbl.xpm"
+#include "bitmaps/turntable.xpm"
 
 
 EXPORT void InitCmdTurntable( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Custom Turntable"), wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
+	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Custom Turntable"), wIconCreatePixMap(turntable_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
 }
 
 

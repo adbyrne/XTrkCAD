@@ -189,7 +189,7 @@ static char * CmdCornuHotBarProc(
 	case HB_SELECT:
 		CmdCornu( C_CANCEL, zero );
 		curCornu = trkseg;
-		DoCommandB( (void*)(intptr_t)cornuHotBarCmdInx );
+		DoCommandB( I2VP(cornuHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
 		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
@@ -337,7 +337,7 @@ int createEndPoint(
     	endHandle->end_curve = zero;
     	endHandle->end_valid = TRUE;
     	endHandle->mid_disp = 0.0;
-    	DIST_T end_length = 20*trackGauge;
+    	DIST_T end_length = tempD.scale*2.0;
     	Translate(&endHandle->end_curve,pos0,angle,end_length);
     	Translate(&endHandle->end_center,pos0,angle,end_length/2);
     	if (radius>0.0) {
@@ -1013,7 +1013,7 @@ static paramData_t cornuModPLs[] = {
 #define cornuModEndRadius           1
 	{ PD_FLOAT, &cornuModCmdContext.radius, "EndRadius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
 };
-static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, sizeof cornuModPLs/sizeof cornuModPLs[0] };
+static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, COUNT( cornuModPLs ) };
 
 /*
  * AdjustCornuCurve
@@ -1041,7 +1041,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 	wControl_p controls[5];				//Always needs a NULL last entry
 	char * labels[4];
 
-	Da.cmdType = (long)commandContext;
+	Da.cmdType = VP2L(commandContext);
 
 
 	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED) return C_CONTINUE;
@@ -2002,7 +2002,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 									Da.center[1].x,Da.center[1].y,
 									Da.angle[0],Da.angle[1],
 									FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
-				UndoUndo();
+				UndoUndo(NULL);
 				Da.state = NONE;
 				return C_TERMINATE;
 			}
@@ -2032,7 +2032,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 								Da.center[1].x,Da.center[1].y,
 								Da.angle[0],Da.angle[1],
 								FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
-			UndoUndo();
+			UndoUndo(NULL);
 			Da.state = NONE;
 			return C_TERMINATE;
 		}
@@ -2067,7 +2067,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 					if (Da.ep[i]>= 0)
 						ConnectTracks(i==0?first_trk:trk1,i,Da.trk[i],Da.ep[i]);
 				} else {
-					UndoUndo();
+					UndoUndo(NULL);
 					wBeep();
 					InfoMessage(_("Connected Track End Adjust for end %d failed"),i);
 					return C_TERMINATE;
@@ -2215,7 +2215,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_START:
 		lock = FALSE;
-		Da.cmdType = (long)commandContext;
+		Da.cmdType = VP2L(commandContext);
 		Da.state = NONE;
 		Da.selectEndPoint = -1;
 		Da.selectMidPoint = -1;
@@ -2698,7 +2698,7 @@ static STATUS_T cmdCornuCreate(
 		/* no break */
 	case C_START:
 		createState = 0;
-		commandContext = (void *)cornuCmdHotBar;
+		commandContext = I2VP(cornuCmdHotBar);
 		rc = CmdCornu(C_START, pos);
 		Da.prevSelected = -1;
 		Da.selectEndHandle = -1;
@@ -3047,14 +3047,14 @@ static STATUS_T CmdConvertFrom(
 		}
 }
 
-#include "bitmaps/convertto.xpm"
-#include "bitmaps/convertfr.xpm"
+#include "bitmaps/convert-to.xpm"
+#include "bitmaps/convert-from.xpm"
 
 EXPORT void InitCmdCornu( wMenu_p menu )
 {	
 	ButtonGroupBegin( _("Convert"), "cmdConvertSetCmd", _("Convert") );
-	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convertto_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
-	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convertfr_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
+	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convert_to_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
+	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convert_from_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
 	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "", NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
 	ButtonGroupEnd();
 	ParamCreateControls( &cornuModPG, cornuModDlgUpdate) ;

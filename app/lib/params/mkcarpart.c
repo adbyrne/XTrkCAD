@@ -55,7 +55,7 @@ void readMap(
 {
 	FILE * mapF;
 	char line[256];
-	int len;
+	size_t len;
 	mapF = fopen( mapFile, "r" );
 	if ( mapF == NULL ) {
 		perror( mapFile );
@@ -110,7 +110,7 @@ void readRoadnameMap(
 		exit(1);
 	}
 	while ( fgets( line, sizeof line, mapF ) != NULL ) {
-		int len = strlen( line );
+		size_t len = strlen( line );
 		if ( line[len-1] == '\n' )
 			line[--len] = '\0';
 		if ( line[0] == '\0' || line[0] == '\n' || line[0] == '#' )
@@ -282,16 +282,16 @@ void processFile(
 	int lineNumber = 0;
 	char roadnameS[256];
 	char repmarkS[256];
-	int len;
+	size_t len;
 	int inx;
 	char * cp, *cq;
 	char * tab[20];
 	char blanks[10];
-	int partX = 1;
-	int descX = 2;
-	int roadX = 3;
-	int numbX = 4;
-	int colorX = 5;
+	size_t partX = 1;
+	size_t descX = 2;
+	size_t roadX = 3;
+	size_t numbX = 4;
+	size_t colorX = 5;
 
 	inF = fopen( inFile, "r" );
 	if ( inF == NULL ) {
@@ -309,8 +309,10 @@ void processFile(
 		if ( line[0] == '\n' || line[0] == '#' )
 			continue;
 		len = strlen(line);
-		if ( line[len-1] == '\n' )
+		if ( len >= 1 && line[len-1] == '\n' )
 			line[len-1] = '\0';
+		if ( len >= 2 && line[len-2] == '\r' )
+			line[len-2] = '\0';
 		if ( strnicmp( line, "scale=", 6 ) == 0 ) {
 			strcpy( scale, line+6 );
 			if ( stricmp( scale, "N" ) == 0 )

@@ -65,9 +65,9 @@ static paramData_t textPLs[] = {
 #define colorPD (textPLs[1])
         { PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") },
 #define boxPD (textPLs[2])
-    { PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0}
-    };
-static paramGroup_t textPG = { "cmdtext", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
+		{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 }
+        };
+static paramGroup_t textPG = { "cmdtext", 0, textPLs, COUNT( textPLs ) };
 
 enum TEXT_POSITION
 {
@@ -145,7 +145,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		labels[0] = N_("Font Size");
         labels[1] = N_("Color");
         labels[2] = N_("Boxed");
-		InfoSubstituteControls( controls, labels, textPG.nameStr );
+		InfoSubstituteControls( controls, labels );
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
@@ -196,7 +196,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			UndoEnd();
 			DrawNewTrack(t);
 			Dt.state = POSITION_TEXT;
-			InfoSubstituteControls( NULL, NULL, NULL );
+			InfoSubstituteControls( NULL, NULL );
 			return C_TERMINATE;
 		default:
 			if (Dt.len < sizeof Dt.text - 1 ) {
@@ -230,7 +230,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		if (Dt.state != POSITION_TEXT) {
 			Dt.state = POSITION_TEXT;
 		}
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != POSITION_TEXT) {
@@ -242,7 +242,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 				DrawNewTrack(t);
 			}
 		}
-		InfoSubstituteControls( NULL, NULL, NULL );
+		InfoSubstituteControls( NULL, NULL );
 		return C_TERMINATE;
 
 	case C_FINISH:
@@ -265,9 +265,9 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 void InitCmdText( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
+	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
-	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
+	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
     Dt.color = wDrawColorBlack;
 }

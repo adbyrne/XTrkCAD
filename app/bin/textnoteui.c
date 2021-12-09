@@ -38,12 +38,12 @@ static paramData_t textEditPLs[] = {
 #define I_ORIGY (1)
 	/*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+	/*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, I2VP(150), "Layer", 0 },
 #define I_TEXT (3)
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
 
-static paramGroup_t textEditPG = { "textEdit", PGO_DIALOGTEMPLATE, textEditPLs, sizeof textEditPLs / sizeof textEditPLs[0] };
+static paramGroup_t textEditPG = { "textEdit", PGO_DIALOGTEMPLATE, textEditPLs, COUNT( textEditPLs ) };
 static wWin_p textEditW;
 
 #define textEntry	((wText_p)textEditPLs[I_TEXT].control)
@@ -142,7 +142,7 @@ TextEditOK(void *junk)
 	UpdateText(&noteDataInUI, OK_TEXT, FALSE);
 	wHide(textEditW);
 	ResetIfNotSticky();
-	FileIsChanged();
+	SetFileChanged();
 }
 
 

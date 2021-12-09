@@ -288,7 +288,7 @@ void
 UpdateParamFileList(void)
 {
     for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
-        SetParamFileState(i);
+        SetParamFileState((int)i);
     }
 }
 
@@ -370,11 +370,8 @@ static void ReadCustom(void)
 }
 
 
-/*
- * Open the file and then set the locale to "C". Old locale will be copied to
- * oldLocale. After the required file I/O is done, the caller must call
- * CloseCustom() with the same locale value that was returned in oldLocale by
- * this function.
+/**
+ * Open the custom file where user-defined turnouts, cars and such are stored
  */
 
 FILE * OpenCustom(char *mode)
@@ -424,10 +421,15 @@ addButtonCallBack_t ParamFilesInit(void)
  */
 BOOL_T ParamFileListInit(void)
 {
+	/** @logcmd @showrefby params=n paramfilelist.c Log ReadParams 
+	 * (including scale file (xtq), custom file (*.cus) and other params (xtp)) 
+	 */
     log_params = LogFindIndex("params");
 
+    SetCLocale();
 	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
+		SetUserLocale();
         return FALSE;
     }
 
@@ -438,6 +440,7 @@ BOOL_T ParamFileListInit(void)
         ReadCustom();
     }
 
+    SetUserLocale();
     return TRUE;
 
 }

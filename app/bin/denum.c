@@ -36,7 +36,7 @@ static wWin_p enumW;
 #undef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 
-static void DoEnumOp( void * );
+static void DoEnumOp( void * data );
 static long enableListPrices;
 static long enableListIndexes;
 
@@ -47,15 +47,15 @@ static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
 #define enumT			((wText_p)enumPLs[I_ENUMTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &enumTextData, NULL, BT_CHARUNITS|BT_FIXEDFONT },
-	{   PD_BUTTON, (void*)DoEnumOp, "save", 0, NULL, N_("Save As ..."), 0, (void*)ENUMOP_SAVE },
-	{   PD_BUTTON, (void*)DoEnumOp, "print", 0, NULL, N_("Print"), 0, (void*)ENUMOP_PRINT },
-	{   PD_BUTTON, (void*)wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
+	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, I2VP(ENUMOP_SAVE) },
+	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, N_("Print"), 0, I2VP(ENUMOP_PRINT) },
+	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
 #define I_ENUMLISTPRICE	(4)
 	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_ENUMLISTINDEXES  (5)
 	{   PD_TOGGLE, &enableListIndexes, "list-indexes", PDO_DLGRESETMARGIN, indexLabels, NULL, BC_HORZ|BC_NOBORDER }
 };
-static paramGroup_t enumPG = { "enum", PGO_DIALOGTEMPLATE, enumPLs, sizeof enumPLs/sizeof enumPLs[0] };
+static paramGroup_t enumPG = { "enum", PGO_DIALOGTEMPLATE, enumPLs, COUNT( enumPLs ) };
 
 static struct wFilSel_t * enumFile_fs;
 
@@ -85,7 +85,7 @@ static int DoEnumSave(
 static void DoEnumOp(
 		void * data )
 {
-	switch( (int)(long)data ) {
+	switch( VP2L(data) ) {
 	case ENUMOP_SAVE:
 		wFilSelect( enumFile_fs, GetCurrentPath(PARTLISTPATHKEY) );
 		break;
@@ -105,7 +105,7 @@ static void EnumDlgUpdate(
 		void * valueP )
 {
 	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) return;
-	EnumerateTracks();
+	EnumerateTracks( NULL );
 }
 
 
@@ -119,7 +119,7 @@ void EnumerateList(
 		char * indexes )
 {
 	char * cp;
-	int len;
+	size_t len;
 	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
@@ -212,7 +212,7 @@ void EnumerateStart(void)
 
 void EnumerateEnd(void)
 {
-	int len;
+	size_t len;
 	char * cp;
 	ScaleLengthEnd();
 	

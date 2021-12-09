@@ -234,6 +234,7 @@ static void mswGetCustomColors( void )
 	strcpy( colorName, "custom-" );
 	for ( inx=0; inx<16; inx++ ) {
 		sprintf( colorName+7, "%d", inx );
+		/** @prefs [mswcolor] custom-0=<rgb> to custom-15=<rgb> Set custom colors */
 		wPrefGetInteger( "mswcolor", colorName, &rgb, 0 );
 		aclrCust[inx] = flipRGB(rgb);
 	}

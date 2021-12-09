@@ -165,10 +165,10 @@ static struct {
 
 typedef enum { NM, PS, ON, OF } controlDesc_e;
 static descData_t controlDesc[] = {
-    /* NM */ { DESC_STRING, N_("Name"),      &controlProperties.name, "name", sizeof(controlProperties.name) },
-    /* PS */ { DESC_POS,    N_("Position"),  &controlProperties.pos, "position"},
-    /* ON */ { DESC_STRING, N_("On Script"), &controlProperties.onscript, "on", sizeof(controlProperties.onscript) },
-    /* OF */ { DESC_STRING, N_("Off Script"),&controlProperties.offscript, "off", sizeof(controlProperties.offscript) },
+    /* NM */ { DESC_STRING, N_("Name"),      &controlProperties.name, sizeof(controlProperties.name) },
+    /* PS */ { DESC_POS,    N_("Position"),  &controlProperties.pos },
+    /* ON */ { DESC_STRING, N_("On Script"), &controlProperties.onscript, sizeof(controlProperties.onscript) },
+    /* OF */ { DESC_STRING, N_("Off Script"),&controlProperties.offscript, sizeof(controlProperties.offscript) },
     { DESC_NULL } };
 
 static void UpdateControlProperties (  track_p trk, int inx, descData_p
@@ -289,7 +289,7 @@ static void DescribeControl (track_p trk, char * str, CSIZE_T len )
     controlDesc[NM].mode = 
           controlDesc[ON].mode = 
           controlDesc[OF].mode = DESC_NOREDRAW;
-    DoDescribe( _("Control"), "describe-control", trk, controlDesc, UpdateControlProperties );
+    DoDescribe( _("Control"), trk, controlDesc, UpdateControlProperties );
     
 }
 
@@ -419,18 +419,18 @@ static char controlEditOffScript[STR_LONG_SIZE];
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t controlEditPLs[] = {
 #define I_CONTROLNAME (0)
-    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(controlEditName) },
+    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(controlEditName) },
 #define I_ORIGX (1)
     /*1*/ { PD_FLOAT, &controlEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") },
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &controlEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_CONTROLONSCRIPT (3)
-    /*3*/ { PD_STRING, controlEditOnScript, "onscript", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
+    /*3*/ { PD_STRING, controlEditOnScript, "onscript", PDO_NOPREF, I2VP(350), N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
 #define I_CONTROLOFFSCRIPT (4)
-    /*4*/ { PD_STRING, controlEditOffScript, "offscript", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
+    /*4*/ { PD_STRING, controlEditOffScript, "offscript", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
-static paramGroup_t controlEditPG = { "controlEdit", PGO_DIALOGTEMPLATE, controlEditPLs, sizeof controlEditPLs/sizeof controlEditPLs[0] };
+PGO_DIALOGTEMPLATE, static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, COUNT( controlEditPLs ) };
 static wWin_p controlEditW;
 
 static void ControlEditOk ( void * junk )
@@ -551,13 +551,9 @@ static POS_T ctlhiliteBorder;
 static wDrawColor ctlhiliteColor = 0;
 static void DrawControlTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (ctlhiliteColor==0)
 		ctlhiliteColor = wDrawColorGray(87);
-	w = (wDrawPix_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wDrawPix_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor, DRAW_TRANSPARENT );
 }
 
 static int ControlMgmProc ( int cmd, void * data )
@@ -622,12 +618,12 @@ EXPORT void ControlMgmLoad ( void )
     static wIcon_p controlI = NULL;
     
     if (controlI == NULL) {
-        controlI = wIconCreatePixMap( control_xpm );
+        controlI = wIconCreatePixMap( control_xpm[iconSize] );
     }
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_CONTROL) continue;
-        ContMgmLoad (controlI, ControlMgmProc, (void *) trk );
+        ContMgmLoad (controlI, ControlMgmProc, trk );
     }
 }
 
@@ -636,7 +632,7 @@ EXPORT void ControlMgmLoad ( void )
 EXPORT void InitCmdControl ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdControl, "cmdControl", _("Control"), 
-                   wIconCreatePixMap( control_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CONTROL, NULL );
+                   wIconCreatePixMap( control_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CONTROL, NULL );
 }
 
 EXPORT void InitTrkControl ( void )

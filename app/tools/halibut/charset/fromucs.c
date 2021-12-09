@@ -47,7 +47,7 @@ int charset_from_unicode(const wchar_t **input, int *inlen,
 	*error = FALSE;
 
     while (*inlen > 0) {
-	int lenbefore = param.output - output;
+	int lenbefore = (int)(param.output - output);
 	int ret;
 
 	if (input)
@@ -78,5 +78,5 @@ int charset_from_unicode(const wchar_t **input, int *inlen,
 	    (*input)++;
 	(*inlen)--;
     }
-    return param.output - output;
+    return (int)(param.output - output);
 }

@@ -45,7 +45,7 @@ GetCompatibilityFunction GetCompatibility[] = {
 	GetCarPartCompatibility
 };
 
-#define COMPATIBILITYCHECKSCOUNT (sizeof(GetCompatibility)/sizeof(GetCompatibility[0]))
+#define COMPATIBILITYCHECKSCOUNT COUNT(GetCompatibility)
 
 /**
  * Check whether parameter file is still loaded
@@ -234,7 +234,6 @@ bool ReadParams(
 	long checkSum = 0;
 	BOOL_T checkSummed;
 	paramVersion = -1;
-	char *oldLocale = NULL;
 
 	if (dirName) {
 		MakeFullpath(&paramFileName, dirName, fileName, NULL);
@@ -248,12 +247,12 @@ bool ReadParams(
 
 	//LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	paramFile = fopen(paramFileName, "r");
 	if (paramFile == NULL) {
 		/* Reset the locale settings */
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName,
 			strerror(errno));
@@ -290,15 +289,14 @@ bool ReadParams(
 				if (paramFile) {
 					fclose(paramFile);
 				}
-				RestoreLocale(oldLocale);
-
+				SetUserLocale();
 				return FALSE;
 			}
 			oldFile = paramFile;
 			oldLineNum = paramLineNum;
 			oldCheckSum = paramCheckSum;
 			if (!ReadParams(key, dirName, cp)) {
-				RestoreLocale(oldLocale);
+				SetUserLocale();
 				return FALSE;
 			}
 			paramFile = oldFile;
@@ -369,7 +367,7 @@ bool ReadParams(
 						free(paramFileName);
 						paramFileName = NULL;
 					}
-					RestoreLocale(oldLocale);
+					SetUserLocale();
 					return FALSE;
 				}
 			}
@@ -384,7 +382,7 @@ bool ReadParams(
 			if (paramFile) {
 				fclose(paramFile);
 			}
-			RestoreLocale(oldLocale);
+			SetUserLocale();
 
 			NoticeMessage(MSG_PROG_CORRUPTED, _("Ok"), NULL, paramFileName);
 
@@ -398,7 +396,7 @@ bool ReadParams(
 	}
 	free(paramFileName);
 	paramFileName = NULL;
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	return TRUE;
 }

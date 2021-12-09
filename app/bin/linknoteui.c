@@ -46,16 +46,16 @@ static paramData_t linkEditPLs[] = {
 #define I_ORIGY (1)
     /*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
-    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
+    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
 #define I_URL (4)
-    /*4*/ { PD_STRING, NULL, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("URL"), 0, 0, URLMAXIMUMLENGTH-1 },
+    /*4*/ { PD_STRING, NULL, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(200), N_("URL"), 0, 0, URLMAXIMUMLENGTH-1 },
 #define I_OPEN (5)
-	/*5*/{ PD_BUTTON, (void*)NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
+	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
 };
 
-static paramGroup_t linkEditPG = { "linkEdit", PGO_DIALOGTEMPLATE, linkEditPLs, sizeof linkEditPLs / sizeof linkEditPLs[0] };
+static paramGroup_t linkEditPG = { "linkEdit", PGO_DIALOGTEMPLATE, linkEditPLs, COUNT( linkEditPLs ) };
 static wWin_p linkEditW;
 
 BOOL_T
@@ -156,14 +156,13 @@ LinkEditOK(void *junk)
     UpdateLink(&noteDataInUI, OK_LINK, FALSE);
     wHide(linkEditW);
 	ResetIfNotSticky();
-	FileIsChanged();
+	SetFileChanged();
 }
 
 
 static void 
 CreateEditLinkDialog(track_p trk, char *title)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	// create the dialog if necessary
     if (!linkEditW) {
@@ -184,6 +183,7 @@ CreateEditLinkDialog(track_p trk, char *title)
     wWinSetTitle(linkEditPG.win, MakeWindowTitle(title));
 
 	// initialize the dialog fields
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     noteDataInUI.pos = xx->pos;
 	noteDataInUI.layer = xx->layer;
     noteDataInUI.trk = trk;

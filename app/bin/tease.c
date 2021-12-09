@@ -810,7 +810,6 @@ static void DrawJointDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	DIST_T grade=0, sep=0;
 	ANGLE_T a;
 	if (layoutLabels == 0)
@@ -822,6 +821,7 @@ static void DrawJointDescription(
 	end0 = GetTrkEndPos(trk,0);
 	end1 = GetTrkEndPos(trk,1);
 	a = FindAngle(end0,end1);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	Translate(&end0off,end0,a+90,xx->descriptionOff.y);
 	Translate(&end1off,end1,a+90,xx->descriptionOff.y);
 
@@ -946,13 +946,15 @@ static BOOL_T WriteJoint(
 {
 	struct extraDataEase_t * xx = GET_EXTRA_DATA(t, T_EASEMENT, extraDataEase_t);
 	BOOL_T rc = TRUE;
+	long bits;
 	long options = (long)GetTrkWidth(t);
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
 			// 0x80 means Show Description
 			options |= 0x80;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
 		GetTrkIndex(t), GetTrkLayer(t), options,
-		GetTrkScaleName(t), GetTrkVisible(t), xx->l0, xx->l1, xx->R, xx->L,
+		GetTrkScaleName(t), bits, xx->l0, xx->l1, xx->R, xx->L,
 		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
@@ -994,10 +996,12 @@ static BOOL_T ReadJoint(
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);
 		SetTrkBridge(trk, FALSE);
+		SetTrkRoadbed(trk, FALSE);
 	} else {
 		SetTrkVisible(trk, visible&2);
 		SetTrkNoTies(trk, visible&4);
 		SetTrkBridge(trk, visible&8);
+		SetTrkRoadbed(trk, visible&16);
 	}
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
@@ -1053,9 +1057,9 @@ static void RescaleJoint( track_p trk, FLOAT_T ratio )
 
 static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * ep1 )
 {
-	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	DIST_T l;
 	ANGLE_T a;
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	if ( ep0 && ep1 ) {
 		if (xx->flip) {
 			*ep0 = 1;

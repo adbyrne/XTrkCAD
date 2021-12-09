@@ -150,3 +150,77 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE
 \f{END OF TERMS AND CONDITIONS}
 
 \rule
+
+\H{Contributions} \ii{Contributions}
+
+XTrackCAD incorporates the following software:
+
+\c This program uses FreeImage, a free, open source image library supporting all common bitmap formats. 
+\e                   bbbbbbbbb
+\c See http://freeimage.sourceforge.net for details
+
+\u000
+
+\c uthash, utlist 
+\e bbbbbb  bbbbbb
+\c Copyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/
+\c All rights reserved.
+
+\u000
+
+\c CJson - https://github.com/DaveGamble/cJSON/blob/master/README.md#license
+\e bbbbb
+\c Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+
+\u000
+
+\c zlib - https://opensource.org/licenses/zlib-license.php
+\e bbbb
+
+\u000
+
+\c libzip - https://libzip.org/license/
+\e bbbbbb
+\c Copyright (C) 1999-2019 Dieter Baron and Thomas Klausner
+
+\c The authors can be contacted at <libzip@nih.at>
+
+\c Redistribution and use in source and binary forms, with or without
+\c modification, are permitted provided that the following conditions
+\c are met:
+
+\c 1. Redistributions of source code must retain the above copyright
+\c  notice, this list of conditions and the following disclaimer.
+
+\c 2. Redistributions in binary form must reproduce the above copyright
+\c  notice, this list of conditions and the following disclaimer in
+\c  the documentation and/or other materials provided with the
+\c  distribution.
+
+\c 3. The names of the authors may not be used to endorse or promote
+\c  products derived from this software without specific prior
+\c  written permission.
+
+\c THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
+\c OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+\c WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+\c ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+\c DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+\c DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+\c GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+\c INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+\c IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+\c OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+\c IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+\u000
+
+\c minixml - https://github.com/michaelrsweet/mxml/commit/f166ad1977f2f13295689772a5d9e442f73d46f1
+\e bbbbbbb
+
+\c Copyright (C) 2003-2019 by Michael R Sweet.
+\c The Mini-XML library is licensed under the Apache License Version 2.0 with an
+\c exception to allow linking against GPL2/LGPL2-only software.
+
+
+

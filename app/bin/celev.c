@@ -49,12 +49,12 @@ static paramData_t elevationPLs[] = {
 #define I_HEIGHT			(1)
 	{ PD_FLOAT, &elevHeightV, "value", PDO_DIM|PDO_DLGNEWCOLUMN, &r_1000_1000 },
 #define I_COMPUTED			(2)
-	{ PD_MESSAGE, NULL, "computed", 0, (void*)80 },
+	{ PD_MESSAGE, NULL, "computed", 0, I2VP(80) },
 #define I_GRADE			(3)
-	{ PD_MESSAGE, NULL, "grade", 0, (void*)80 },
+	{ PD_MESSAGE, NULL, "grade", 0, I2VP(80) },
 #define I_STATION			(4)
-	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, (void*)200, NULL, 0, 0, sizeof(elevStationV)} };
-static paramGroup_t elevationPG = { "elev", PGO_DIALOGTEMPLATE, elevationPLs, sizeof elevationPLs/sizeof elevationPLs[0] };
+	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(200), NULL, 0, 0, sizeof(elevStationV)} };
+static paramGroup_t elevationPG = { "elev", PGO_DIALOGTEMPLATE, elevationPLs, COUNT( elevationPLs ) };
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
@@ -132,7 +132,7 @@ static void LayoutElevW(
 	static wWinPix_t h = 0;
 	switch ( inx ) {
 	case I_HEIGHT:
-		h = wControlGetHeight( elevationPLs[I_MODE].control )/((sizeof elevModeLabels/sizeof elevModeLabels[0])-1);
+		h = wControlGetHeight( elevationPLs[I_MODE].control )/(COUNT( elevModeLabels )-1);
 #ifndef WINDOWS
 		h += 3;
 #endif
@@ -377,7 +377,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (MyGetKeyState()&WKEY_CTRL) {
-			commandContext = (void*) 1;        //Just end points
+			commandContext = I2VP(1);        //Just end points
 			CmdMoveDescription( action, pos );
 			return C_CONTINUE;
 		}
@@ -434,7 +434,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case C_MOVE:
 	case C_UP:
 		if (MyGetKeyState()&WKEY_CTRL) {
-			commandContext = (void*) 1;        //Just end points
+			commandContext = I2VP(1);        //Just end points
 			CmdMoveDescription( action, pos );
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			elevTrk = NULL;
@@ -494,11 +494,11 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 
 
 
-#include "bitmaps/elev.xpm"
+#include "bitmaps/elevation.xpm"
 
 EXPORT void InitCmdElevation( wMenu_p menu )
 {
 	ParamRegister( &elevationPG );
-	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"), wIconCreatePixMap(elev_xpm), LEVEL0_50, IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
+	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"), wIconCreatePixMap(elevation_xpm[iconSize]), LEVEL0_50, IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
 }
 

@@ -165,7 +165,7 @@ int ustrwid(wchar_t const *s, int charset)
 int strwid(char const *s, int charset)
 {
     wchar_t buf[256];
-    int wid, len = strlen(s);
+    int wid, len = (int)strlen(s);
     charset_state state = CHARSET_INIT_STATE;
 
     wid = 0;

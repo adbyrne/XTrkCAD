@@ -35,6 +35,7 @@ extern wIndex_t trackCount;
 extern wBool_t bFreeTrack;
 extern long colorTrack;
 extern long colorDraw;
+
 extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
@@ -46,7 +47,6 @@ extern unsigned int curTrackLayer;
 extern coOrd descriptionOff;
 extern DIST_T roadbedWidth;
 extern DIST_T roadbedLineWidth;
-extern long printCenterLines;
 extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
@@ -56,6 +56,8 @@ extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
 extern wDrawColor tieColor;
+extern wDrawColor bridgeColor;
+extern wDrawColor roadbedColor;
 
 
 extern TRKINX_T max_index;
@@ -150,7 +152,7 @@ typedef struct {
 		void (*draw)( track_p, drawCmd_p, wDrawColor );
 		DIST_T (*distance)( track_p, coOrd * );
 		void (*describe)( track_p, char * line, CSIZE_T len );
-		void (*delete)( track_p );
+		void (*deleteTrk)( track_p );
 		BOOL_T (*write)( track_p, FILE * );
 		BOOL_T (*read)( char * );
 		void (*move)( track_p, coOrd );
@@ -436,10 +438,11 @@ void SetDebug( char * );
 #define TB_CARATTACHED	(1<<7)
 #define TB_NOTIES       (1<<8)
 #define TB_BRIDGE       (1<<9)
-#define TB_SELREDRAW	(1<<10)
+#define TB_ROADBED      (1<<10)
+#define TB_SELREDRAW	(1<<11)
 // Track has been undrawn, don't draw it on Redraw
-#define TB_UNDRAWN		(1<<11)
-#define TB_DETAILDESC  	(1<<12)
+#define TB_UNDRAWN		(1<<12)
+#define TB_DETAILDESC  	(1<<13)
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
@@ -471,7 +474,7 @@ void SetDebug( char * );
 #define GetTrkExtraData( T, TT )	((T)->extraData)
 #define GetTrkWidth( T )		(int)((T)->width)
 #define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
-#define GetTrkBits(T)			((T)->bits)
+#define GetTrkBits(T)			((T)?((T)->bits):0)
 #define SetTrkBits(T,V)			((T)->bits|=(V))
 #define ClrTrkBits(T,V)			((T)->bits&=~(V))
 #define IsTrackDeleted(T)		((T)->deleted)
@@ -506,10 +509,12 @@ BOOL_T IsTrackDeleted( track_p );
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
 #define GetTrkVisible(T)		(GetTrkBits(T)&TB_VISIBLE)
 #define GetTrkNoTies(T)			(GetTrkBits(T)&TB_NOTIES)
-#define GetTrkBridge(T)         (GetTrkBits(T)&TB_BRIDGE)
+#define GetTrkBridge(T)         ((T)?GetTrkBits(T)&TB_BRIDGE:0)
+#define GetTrkRoadbed(T)        ((T)?GetTrkBits(T)&TB_ROADBED:0)
 #define SetTrkVisible(T,V)		((V)?SetTrkBits(T,TB_VISIBLE):ClrTrkBits(T,TB_VISIBLE))
 #define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
 #define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
+#define SetTrkRoadbed(T,V)		((V)?SetTrkBits(T,TB_ROADBED):ClrTrkBits(T,TB_ROADBED))
 int ClrAllTrkBits( int );
 int ClrAllTrkBitsRedraw( int, wBool_t );
 
@@ -619,8 +624,13 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_DASHDOTDOT  (1<<10)
 #define DTS_CENTERONLY  (1<<11)
 
-void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
+BOOL_T hasTrackCenterline( drawCmd_p d );
+void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
+
+void DrawStraightTies( drawCmd_p d, SCALEINX_T scaleInx, coOrd p0, coOrd p1, wDrawColor color );
+wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
+void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width, wDrawColor color, BOOL_T solid);
 
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);
@@ -657,7 +667,7 @@ void FreeTrack( track_p );
 void ClearTracks( void );
 BOOL_T TrackIterate( track_p * );
 
-void LoosenTracks( void );
+void LoosenTracks( void * unused );
 
 void SaveTrackState( void );
 void RestoreTrackState( void );
@@ -693,8 +703,8 @@ void LabelLengths( drawCmd_p, track_p, wDrawColor );
 DIST_T GetTrkLength( track_p, EPINX_T, EPINX_T );
 void AddTrkDetails(drawCmd_p d, track_p trk, coOrd pos, DIST_T length, wDrawColor color);
 
-void SelectAbove( void );
-void SelectBelow( void );
+void SelectAbove( void * unused );
+void SelectBelow( void * unused );
 
 void FlipPoint( coOrd*, coOrd, ANGLE_T );
 void FlipTrack( track_p, coOrd, ANGLE_T );
@@ -764,7 +774,7 @@ extern long oldElevationEvaluation;
 EPINX_T GetNextTrkOnPath( track_p trk, EPINX_T ep );
 int FindDefinedElev( track_p, EPINX_T, int, BOOL_T, DIST_T *, DIST_T * );
 BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T *, BOOL_T );
-void RecomputeElevations( void );
+void RecomputeElevations( void * unused );
 void UpdateAllElevations( void );
 DIST_T GetElevation( track_p );
 void ClrTrkElev( track_p );
@@ -788,7 +798,7 @@ BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );
 BOOL_T ReadText( char * );
 void SetLineType( track_p trk, int width );
-void MenuMode(int );
+void MenuMode( void * moveVP );
 
 /* chotbar.c */
 extern DIST_T curBarScale;

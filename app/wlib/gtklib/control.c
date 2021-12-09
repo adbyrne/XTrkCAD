@@ -35,7 +35,7 @@
 
 #include "gtkint.h"
 
-#define  GTKCONTROLHILITEWIDTH (3)
+#define  GTKCONTROLHILITEWIDTH (4)
 
 /**
  * Cause the control <b> to be displayed or hidden.
@@ -144,13 +144,13 @@ wWinPix_t wLabelWidth(
     const char * label)
 {
     GtkWidget * widget;
-    GtkRequisition min_requisition, nat_requisition;
+    GtkRequisition requisition;
     widget = gtk_label_new(wlibConvertInput(label));
-    gtk_widget_get_preferred_size(widget, &min_requisition, &nat_requisition);
+    gtk_widget_size_request(widget, &requisition);
+    g_object_ref_sink (widget);
     gtk_widget_destroy(widget);
-    //g_object_ref_sink(widget);
-    //g_object_unref(widget);
-    return nat_requisition.width+8;
+    g_object_unref(widget);
+    return requisition.width+8;
 }
 
 /**
@@ -202,12 +202,13 @@ wWinPix_t wControlGetPosX(
 wWinPix_t wControlGetPosY(
     wControl_p b)		/* Control */
 {
-    return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?MENUH:0);
+    return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
 }
 
 
 /**
  * Set the fixed position of a control within its parent window
+ *
  * \param b IN control
  * \param x IN x position
  * \param y IN y position
@@ -218,38 +219,22 @@ void wControlSetPos(
     wWinPix_t x,
     wWinPix_t y)
 {
+    b->realX = x;
+    b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
 
-	if (b->inToolbar) {
-		return;
-	}
-    if(!b->fromTemplate)
-    {
-        b->realX = x;
-        b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?MENUH:0);
-
-        if (b->widget) {
-            gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
-        }
-
-        if (b->label) {
-            GtkRequisition min_requisition, nat_requisition, min_reqwidget, nat_reqwidget;
-            gtk_widget_get_preferred_size(b->label, &min_requisition, &nat_requisition);
-            if (b->widget)
-                gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
-            else
-                nat_reqwidget.height = nat_requisition.height;
-            gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-                           b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
-        }
+    if (b->widget) {
+        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
     }
 
-    /* Special case for turnout designer window ->
-     * still use Fixed for input fields located over drawing
-     */
-    if (b->useGrid) {
-    	if (b->reveal && b->fixed) {
-    	      gtk_fixed_move(GTK_FIXED(b->fixed), GTK_WIDGET(b->reveal), x-45, y-5);
-    	}
+    if (b->label) {
+    	GtkRequisition requisition, reqwidget;
+    	gtk_widget_size_request(b->label, &requisition);
+    	if (b->widget)
+    	   	gtk_widget_size_request(b->widget, &reqwidget);
+    	else
+    	  	reqwidget.height = requisition.height;
+        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+                       b->realY+(reqwidget.height/2 - requisition.height/2));
     }
 }
 
@@ -264,19 +249,18 @@ void wControlSetLabel(
     wControl_p b,
     const char * labelStr)
 {
-    GtkRequisition min_requisition,nat_requisition, min_reqwidget, nat_reqwidget;
+    GtkRequisition requisition,reqwidget;
 
     if (b->label) {
         gtk_label_set_text(GTK_LABEL(b->label), wlibConvertInput(labelStr));
-        gtk_widget_get_preferred_size(b->label, &min_requisition, &nat_requisition);
+        gtk_widget_size_request(b->label, &requisition);
         if (b->widget)
-        	gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
+        	gtk_widget_size_request(b->widget, &reqwidget);
         else
-        	nat_reqwidget.height = nat_requisition.height;
-        b->labelW = nat_requisition.width+8;
-        if (!b->fromTemplate)
-        	gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-                       b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
+        	reqwidget.height = requisition.height;
+        b->labelW = requisition.width+8;
+        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+                       b->realY+(reqwidget.height/2 - requisition.height/2));
     } else {
         b->labelW = wlibAddLabel(b, labelStr);
     }
@@ -307,6 +291,46 @@ void wControlSetFocus(
 {
 }
 
+wBool_t wControlExpose (
+		 GtkWidget * widget,
+		 GdkEventExpose * event,
+		 wControl_p b
+		)
+{
+	GdkWindow * win = gtk_widget_get_window(b->widget);
+	cairo_t * cr = NULL;
+	if (win) {
+		cr = gdk_cairo_create(win);
+	} else return TRUE;
+
+#ifdef CURSOR_SURFACE
+	if (b && b->cursor_surface.surface && b->cursor_surface.show) {
+		cairo_set_source_surface(cr,b->cursor_surface.surface,event->area.x, event->area.y);
+		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
+		cairo_rectangle(cr,event->area.x, event->area.y,
+				event->area.width, event->area.height);
+		cairo_fill(cr);
+	}
+#endif
+
+	if (b->outline) {
+		cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);
+		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+		cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
+		cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
+		cairo_rectangle(cr,event->area.x+2, event->area.y+2,
+						event->area.width-4, event->area.height-4);
+		cairo_stroke(cr);
+	}
+
+
+	cairo_destroy(cr);
+
+
+    return FALSE;
+}
+
 /**
  * Draw a rectangle around a control
  * \param b IN the control
@@ -320,44 +344,15 @@ void wControlHilite(
     wBool_t hilite)
 {
     cairo_t *cr;
-    cairo_surface_t *s;
     int off = GTKCONTROLHILITEWIDTH/2+1;
+    if ( debugWindow >= 1 )
+	    printf( "wControlHIlite( %s, %d )\n", b->labelStr, hilite );
 
     if (b->widget == NULL) {
         return;
     }
-
-    if (! gtk_widget_get_visible(b->widget)) {
-        return;
-    }
-
-    if (! gtk_widget_get_visible(b->parent->widget)) {
-        return;
-    }
-    cairo_rectangle_int_t rect;
-    rect.width = b->w + GTKCONTROLHILITEWIDTH;
-    rect.height = b->h + off + 1;
-    rect.x = b->realX - GTKCONTROLHILITEWIDTH;
-    rect.y = b->realY - off;
-    cairo_region_t * region = cairo_region_create_rectangle(&rect);
-
     b->outline = hilite;
 
-    GdkDrawingContext * context = gdk_window_begin_draw_frame (gtk_widget_get_window(GTK_WIDGET(b->widget)),
-                                 region);
-    cr = gdk_drawing_context_get_cairo_context(context);
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_XOR);
-    cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
-    cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-    cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
-    cairo_rectangle(cr,
-                    b->realX - GTKCONTROLHILITEWIDTH,
-                    b->realY - off,
-                    b->w + GTKCONTROLHILITEWIDTH,
-                    b->h + off + 1);
-    cairo_stroke(cr);
-    cairo_destroy(cr);
-    gdk_window_end_draw_frame(gtk_widget_get_window(GTK_WIDGET(b->widget)),
-                                 context);
+    if (b->widget)
+    	gtk_widget_queue_draw(b->widget);
 }

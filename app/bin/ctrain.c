@@ -99,6 +99,7 @@ static coOrd followCenter;
 static BOOL_T trainsTimeoutPending;
 static enum { TRAINS_STOP, TRAINS_RUN, TRAINS_IDLE, TRAINS_PAUSE } trainsState;
 static wIcon_p stopI, goI;
+static wIcon_p stopB, goB;
 static void RestartTrains(void);
 static void DrawAllCars(void);
 static void UncoupleCars(track_p, track_p);
@@ -638,7 +639,7 @@ static trainControlDlg_t * curTrainDlg;
 static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
 static void SpeedAction(wAction_t, coOrd);
 static void LocoListChangeEntry(track_p, track_p);
-static void CmdTrainExit(void *);
+static void CmdTrainExit(void * unused);
 
 drawCmd_t speedD = {
     NULL,
@@ -660,18 +661,18 @@ static char * trainAutoReverseLabels[] = { N_("Auto Reverse"), NULL };
 static paramData_t trainPLs[] = {
 #define I_LIST				(0)
 #ifdef WINDOWS
-    /*0*/ { PD_DROPLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, (void*)120, NULL, 0 },
+    /*0*/ { PD_DROPLIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, I2VP(120), NULL, 0 },
 #else
     /*0*/ { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, &listData, NULL, 0 },
 #endif
 #define I_STATUS			(1)
-    { PD_MESSAGE, NULL, "mess1", 0, (void*)120 },
+    { PD_MESSAGE, NULL, "mess1", 0, I2VP(120) },
 #define I_POS				(2)
-    { PD_MESSAGE, NULL, "mess2", 0, (void*)120 },
+(??)    { PD_MESSAGE, NULL, "mess2", 0, (void*)120 },
 #define I_SLIDER			(3)
     { PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
 #define I_DIST				(4)
-    { PD_STRING, NULL, "distance", PDO_DLGNEWCOLUMN, (void*)(100-SLIDER_WIDTH), NULL, BO_READONLY },
+    { PD_STRING, NULL, "distance", PDO_DLGNEWCOLUMN, I2VP(100-SLIDER_WIDTH), NULL, BO_READONLY },
 #define I_ZERO				(5)
     { PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, NULL, NULL, BO_ICON },
 #define I_GOTO				(6)
@@ -685,10 +686,10 @@ static paramData_t trainPLs[] = {
 #define I_STOP				(10)
     { PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, N_("Stop") },
 #define I_SPEED				(11)
-    { PD_MESSAGE, NULL, "mess3", PDO_DLGIGNOREX, (void *)120 }
+    { PD_MESSAGE, NULL, "mess3", PDO_DLGIGNOREX, I2VP(120) }
 };
 
-static paramGroup_t trainPG = { "train", PGO_DIALOGTEMPLATE, trainPLs, sizeof trainPLs/sizeof trainPLs[0] };
+static paramGroup_t trainPG = { "train", PGO_DIALOGTEMPLATE, trainPLs, COUNT( trainPLs ) };
 
 
 typedef struct {
@@ -728,7 +729,7 @@ static void SpeedRedraw(
     wWinPix_t w,
     wWinPix_t h)
 {
-    wDrawPix_t y, pts[4][2];
+    wDrawPix_t y;
     trainControlDlg_p dlg = (trainControlDlg_p)context;
     struct extraDataCar_t * xx;
     wDrawColor drawColor;
@@ -751,22 +752,20 @@ static void SpeedRedraw(
     y = (xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))
                  +SLIDER_THICKNESS/2);
     drawColor  = wDrawFindColor(wRGB(160, 160, 160));
-    pts[0][1] = pts[1][1] = y-SLIDER_THICKNESS/2;
-    pts[2][1] = pts[3][1] = y+SLIDER_THICKNESS/2;
-    pts[0][0] = pts[3][0] = 0;
-    pts[1][0] = pts[2][0] = SLIDER_WIDTH;
-    wDrawPolygon(d, pts, NULL, 4, drawColor, 0, 0, 0, 1, 0);
-    drawColor  = wDrawFindColor(wRGB(220, 220, 220));
-    pts[0][1] = pts[1][1] = y+SLIDER_THICKNESS/2;
-    pts[2][1] = pts[3][1] = y;
-    pts[0][0] = pts[3][0] = 0;
-    pts[1][0] = pts[2][0] = SLIDER_WIDTH;
-    wDrawPolygon(d, pts, NULL, 4, drawColor, 0, 0, 0, 1, 0);
-    wDrawLine(d, 0, y, SLIDER_WIDTH, y, 1, wDrawLineSolid, drawColorRed, 0);
-    wDrawLine(d, 0, y+SLIDER_THICKNESS/2, SLIDER_WIDTH, y+SLIDER_THICKNESS/2, 1,
-              wDrawLineSolid, drawColorBlack, 0);
-    wDrawLine(d, 0, y-SLIDER_THICKNESS/2, SLIDER_WIDTH, y-SLIDER_THICKNESS/2, 1,
-              wDrawLineSolid, drawColorBlack, 0);
+	coOrd pos0, pos1, siz;
+	y /= speedD.dpi;
+	siz.x = SLIDER_WIDTH/speedD.dpi;
+	siz.y = SLIDER_THICKNESS/speedD.dpi;
+	pos0.x = 0.0;
+	pos0.y = y - siz.y/2.0;
+	DrawRectangle( &speedD, pos0, siz, drawColor, DRAW_FILL );
+	pos1.x = siz.x;
+	pos1.y = pos0.y;
+	DrawLine( &speedD, pos0, pos1, 1, drawColorBlack );
+	pos0.y = pos1.y = y;
+	DrawLine( &speedD, pos0, pos1, 3, drawColorRed );
+	pos0.y = pos1.y = y + siz.y/2.0;
+	DrawLine( &speedD, pos0, pos1, 1, drawColorBlack );
     sprintf(dlg->speedS, "%3d %s",
             (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6),
             (units==UNITS_ENGLISH?"mph":"km/h"));
@@ -1305,6 +1304,8 @@ static trainControlDlg_p CreateTrainControlDlg(void)
     dlg->trainPGp = &trainPG;
     dlg->win = ParamCreateDialog(dlg->trainPGp, _("Train Control"), NULL, NULL,
                                  NULL, FALSE, NULL, 0, ControllerDialogUpdate);
+    speedD.size.x = SLIDER_WIDTH/speedD.dpi;
+    speedD.size.y = SLIDER_HEIGHT/speedD.dpi;
     return dlg;
 }
 
@@ -2509,7 +2510,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 
         if (CarAvailableCount() <= 0) {
             if (NoticeMessage(MSG_NO_CARS, _("Yes"), _("No")) > 0) {
-                DoCarDlg();
+                DoCarDlg(NULL);
                 DoChangeNotification(CHANGE_PARAMS);
             }
         }
@@ -2527,7 +2528,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         tempSegs_da.cnt = 0;
 	DYNARR_SET(trkSeg_t, tempSegs_da, 8);
         RestartTrains();
-        wButtonSetLabel(trainPauseB, (char*)goI);
+        wButtonSetLabel(trainPauseB, (char*)goB);
         trainTime0 = 0;
         AttachTrains();
         curTrainDlg->train = NULL;
@@ -2536,7 +2537,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         LocoListInit();
         ControllerDialogSync(curTrainDlg);
         wShow(curTrainDlg->win);
-        wControlShow((wControl_p)newcarB, (toolbarSet&(1<<BG_HOTBAR)) == 0);
+        wControlShow((wControl_p)newcarB, (toolbarSet&(1<<BG_TRAIN)));
         currCarItemPtr = NULL;
 	TempRedraw(); // CmdTrain C_START
         return C_CONTINUE;
@@ -2685,7 +2686,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             ControllerDialogSync(curTrainDlg);
         }
 
-        InfoSubstituteControls(NULL, NULL, NULL);
+        InfoSubstituteControls(NULL, NULL);
         currCar = trk0 = NULL;
         currCarItemPtr = NULL;
 
@@ -2834,7 +2835,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         currCar = NULL;
         currCarItemPtr = NULL;
         HotBarCancel();
-        InfoSubstituteControls(NULL, NULL, NULL);
+        InfoSubstituteControls(NULL, NULL);
         return C_TERMINATE;
     }
 
@@ -2855,22 +2856,24 @@ STATUS_T CmdCarDescAction(
 
 #include "bitmaps/train.xpm"
 #include "bitmaps/exit.xpm"
-#include "bitmaps/newcar.xpm"
+#include "bitmaps/new-car.xpm"
 #include "bitmaps/zero.xpm"
-#include "bitmaps/ballgreen.xpm"
-#include "bitmaps/ballred.xpm"
+#include "bitmaps/go.xpm"
+#include "bitmaps/stop.xpm"
+#include "bitmaps/greendot.xpm"
+#include "bitmaps/reddot.xpm"
 
 
-static void CmdTrainStopGo(void * junk)
+static void CmdTrainStopGo(void * unused)
 {
     wIcon_p icon;
 
     if (trainsState == TRAINS_STOP) {
-        icon = goI;
+        icon = goB;
         RestartTrains();
     } else {
         trainsState = TRAINS_STOP;
-        icon = stopI;
+        icon = stopB;
         TrainTimeEndPause();
     }
 
@@ -2896,10 +2899,10 @@ static BOOL_T TrainStopGoPlayback(char * line)
 }
 
 
-static void CmdTrainExit(void * junk)
+static void CmdTrainExit(void * unused)
 {
     Reset();
-    InfoSubstituteControls(NULL, NULL, NULL);
+    InfoSubstituteControls(NULL, NULL);
 }
 
 
@@ -2925,7 +2928,7 @@ static void TrainFunc(
     angle = NormalizeAngle(angle-xx->trvTrk.angle);
     dir = (angle>90&&angle<270);
 
-    switch ((int)(long)action) {
+    switch (VP2L(action)) {
     case DO_UNCOUPLE:
         if (GetTrkEndTrk(trainFuncCar,dir)) {
             UncoupleCars(trainFuncCar, GetTrkEndTrk(trainFuncCar,dir));
@@ -2999,7 +3002,7 @@ static void TrainFunc(
         /*DeleteTrack( trainFuncCar, FALSE );*/
         CarItemUpdate(xx->item);
         HotBarCancel();
-        InfoSubstituteControls(NULL, NULL, NULL);
+        InfoSubstituteControls(NULL, NULL);
         break;
 
     case DO_DELTRAIN:
@@ -3033,7 +3036,7 @@ static void TrainFunc(
         }
 
         HotBarCancel();
-        InfoSubstituteControls(NULL, NULL, NULL);
+        InfoSubstituteControls(NULL, NULL);
         break;
 
     case DO_MUMASTER:
@@ -3098,39 +3101,42 @@ void InitCmdTrain(wMenu_p menu)
     trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
     ParamRegister(&trainPG);
     trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
-                  wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
+                  wIconCreatePixMap(train_xpm[iconSize]), LEVEL0_50, IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
                   NULL);
-    stopI = wIconCreatePixMap(ballred);
-    goI = wIconCreatePixMap(ballgreen);
-    trainPauseB = AddToolbarButton("cmdTrainPause", stopI, IC_MODETRAIN_ONLY,
+    stopI = wIconCreatePixMap(reddot);
+    goI = wIconCreatePixMap(greendot);
+	stopB = wIconCreatePixMap(stop_xpm[iconSize]);
+	goB = wIconCreatePixMap(go_xpm[iconSize]);
+	trainPauseB = AddToolbarButton("cmdTrainPause", stopB, IC_MODETRAIN_ONLY,
                                    CmdTrainStopGo, NULL);
-    AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm), IC_MODETRAIN_ONLY,
+    AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm[iconSize]), IC_MODETRAIN_ONLY,
                      CmdTrainExit, NULL);
-    newcarB = AddToolbarButton("cmdTrainNewCar", wIconCreatePixMap(newcar_xpm),
+    newcarB = AddToolbarButton("cmdTrainNewCar", wIconCreatePixMap(new_car_xpm[iconSize]),
                                IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
     T_CAR = InitObject(&carCmds);
-    trainPopupM = MenuRegister("Train Commands");
+
+	trainPopupM = MenuRegister("Train Commands");
     trainPopupMI[DO_UNCOUPLE]   = wMenuPushCreate(trainPopupM, "", _("Uncouple"), 0,
-                                  TrainFunc, (void*)DO_UNCOUPLE);
+                                  TrainFunc, I2VP(DO_UNCOUPLE));
     trainPopupMI[DO_FLIPCAR]    = wMenuPushCreate(trainPopupM, "", _("Flip Car"), 0,
-                                  TrainFunc, (void*)DO_FLIPCAR);
+                                  TrainFunc, I2VP(DO_FLIPCAR));
     trainPopupMI[DO_PENCILS_ON]	= wMenuPushCreate(trainPopupM, "", _("Clearance Lines On"), 0,
-    							  TrainFunc, (void*)DO_PENCILS_ON);
+    							  TrainFunc, I2VP(DO_PENCILS_ON));
     trainPopupMI[DO_PENCILS_OFF]	= wMenuPushCreate(trainPopupM, "", _("Clearance Lines Off"), 0,
-       							  TrainFunc, (void*)DO_PENCILS_OFF);
+       							  TrainFunc, I2VP(DO_PENCILS_OFF));
     trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
-                                  0, TrainFunc, (void*)DO_FLIPTRAIN);
+                                  0, TrainFunc, I2VP(DO_FLIPTRAIN));
     trainPopupMI[DO_MUMASTER]   = wMenuPushCreate(trainPopupM, "", _("MU Master"),
-                                  0, TrainFunc, (void*)DO_MUMASTER);
+                                  0, TrainFunc, I2VP(DO_MUMASTER));
     trainPopupMI[DO_CHANGEDIR]  = wMenuPushCreate(trainPopupM, "",
-                                  _("Change Direction"), 0, TrainFunc, (void*)DO_CHANGEDIR);
+                                  _("Change Direction"), 0, TrainFunc, I2VP(DO_CHANGEDIR));
     trainPopupMI[DO_STOP]       = wMenuPushCreate(trainPopupM, "", _("Stop"), 0,
-                                  TrainFunc, (void*)DO_STOP);
+                                  TrainFunc, I2VP(DO_STOP));
     wMenuSeparatorCreate(trainPopupM);
     trainPopupMI[DO_DELCAR]     = wMenuPushCreate(trainPopupM, "", _("Remove Car"),
-                                  0, TrainFunc, (void*)DO_DELCAR);
+                                  0, TrainFunc, I2VP(DO_DELCAR));
     trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate(trainPopupM, "",
-                                  _("Remove Train"), 0, TrainFunc, (void*)DO_DELTRAIN);
+                                  _("Remove Train"), 0, TrainFunc, I2VP(DO_DELTRAIN));
     AddPlaybackProc("TRAINSTOPGO", (playbackProc_p)TrainStopGoPlayback, NULL);
     AddPlaybackProc("TRAINPAUSE", (playbackProc_p)TrainTimeDoPause, NULL);
     AddPlaybackProc("TRAINMOVIE", (playbackProc_p)TrainDoMovie, NULL);

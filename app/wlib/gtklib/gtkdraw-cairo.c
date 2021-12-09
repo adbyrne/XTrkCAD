@@ -710,6 +710,7 @@ static void wlibDrawFilled(
     for (i=0; i<cnt; i++) {
     	points[i].x = INMAPX(bd,p[i][0]);
     	if (points[i].x < min_x) min_x = points[i].x;
+    	if (points[i].y < min_y) min_y = points[i].y;
     	if (points[i].x > max_x) max_x = points[i].x;
     	if (points[i].y > max_y) max_y = points[i].y;
     	points[i].y = INMAPY(bd,p[i][1]);
@@ -1697,6 +1698,34 @@ int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
 	return 0;
 
 }
+
+/**
+ * Use a loaded background in another context.
+ * 
+ * \param from  context with background
+ * \param to    context to get a reference to the existing background			   
+ */
+
+void
+wDrawCloneBackground(wDraw_p from, wDraw_p to)
+{
+    if (from->background) {
+        to->background = from->background;
+    } else {
+        to->background = NULL;
+    }
+}
+
+/**
+* Draw background to screen. The background will be sized and rotated before being shown. The bitmap 
+* is scaled so that the width is equal to size. The height is changed proportionally. 
+*
+* \param bd drawing context
+* \param pos_x, pos_y bitmap position
+* \param size desired width after scaling
+* \param angle 
+* \param screen visibility of bitmap in percent
+*/
 
 void wDrawShowBackground( wDraw_p bd, wWinPix_t pos_x, wWinPix_t pos_y, wWinPix_t size, wAngle_t angle, int screen) {
 

@@ -4,6 +4,90 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.2 Beta 3]
+
+## Bugs
+
++ Windows arc/curve drawing fix
++ Improved all the icons
++ Preserve Double Slip Switch Quad path setting thru Ungroup/Group and other operations
++ Fix search order order for Appl Lib dir
++ fix Cornu Turnout Designer creating short segments
+
+## Added
+
++ Add JPEG format to bitmap export
++ Added 5", 7-1/4" and 7-1/2" Gauge to scale selection
++ Increased Zoom levels to 1024
+
+
+## Parameters
+
++ Updated PIKO G Track parameter file, added new R3 Turnouts
++ Walthers HO DCC Code 100 Turnouts and Walthers HO DCC Code 83 Turnouts
++ HO Piko A and Piko A Roadbed
++ Miniature Railway Workshop 7-1/4" portable track system
++ Mini Train Systems 5" and 7-1/4" track
++ AccuTie 7-1/4" and 7-1/2" track kits
+
+
+## [5.2.2 Beta 2]
+
+## Bugs
+
++ Turnout Designer fixes
++ Hotbar drawing fixes
++ Fix redo of Bezier and Cornu undo
++ Parallel Tool crash
++ Car Delete - Uncouple and mark deleted
++ Polygon editing fixes
++ BitMap Memory Leak
++ Curve from center
++ Description and Elevation attachments
++ Cornu Split
++ Remove bad checkpoint
++ Describe Bezier improvements
++ Fix Export Tracks when Trains present
++ Fix desired radius join
+
+
+## Added
+
++ Windows 64 bit
++ More realistic drawing of ties/sleepers within Turnouts
++ SVG Export of draw objects
++ Benchwork and Table Edge can be Split
++ Drawing of Bridge Track Deck
++ Zoom Extents button
++ Zoom Selected
++ Resizeable Menu Buttons
++ Increase Easement Radius Limit
++ Assorted Help Menu Improvements
++ Improved prompting and error processing for entry fields
++ Disable AutoSave CheckPoints by default
++ Follow Train uses Room Limits
++ Select Track by Index
++ Improved Ruler precision at high zoom
++ Turntable movement commands and alignment in Train Mode
++ Real Delete key in Poly Modify
++ Improve Elevation command editing
+
+
+## Parameters
+
++ HO-TrixExpress
++ Bachmann HO and N
++ MiniTrix
++ Trees
++ Fix Lego track scale
++ Short Marklin straights
++ Proto-ng-3ft
++ Aristo
++ USA Trains
++ G-MicroEngineering
++ Accucraft Cars
+
+
 ## [5.2.1 GA]
 
 ## Bugs
@@ -11,7 +95,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Fix Bezier Line Joins when inverted
 + Fix print of page numbers
 + Invert edge rulers on Print so they show
-+ Fix split of arcs and circles 
++ Fix split of arcs and circles
 + Block memory allocation fixes
 + Fix issue when placing wrong Turnout after Esc
 + Update Layout when changes are made in order to allow save settings properly
@@ -28,7 +112,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Highlight Boxes when using Selected outside Select
 + For commands that do not use selected, deselect all before starting, for others, highlight correctly
 + Linux: Statically link libzip
-+ Highlighting for Move/Rotate/Flip 
++ Highlighting for Move/Rotate/Flip
 + Fix UnGroup and Group of Structures
 + Make Add Circle Icons match the way the constructors work
 + Optimize tie-data performance to cache results
@@ -49,13 +133,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 + Trim Draw Object Command
 + New Scales added for G and S families
-+ Display Path when switching turnout 
++ Display Path when switching turnout
 + Add DPI setting to allow precise sizing of 1:1 display to real world size
 + Read Only length for curved lines in Describe
 + Added control of degree of fit in Library Search to only show relevant files for current scale
 + Compatible fit for structures with similar scales
-+ Compatble fit for cars with same gauge and similar scales 
-+ Definitions for exact fit for some tracks that have same gauge but different scales (e.g., HO for OO).  
++ Compatble fit for cars with same gauge and similar scales
++ Definitions for exact fit for some tracks that have same gauge but different scales (e.g., HO for OO).
 + Updated command line install on Ubuntu
 + Updated debian install
 + Fixes to O scale/gauge - 1:45 now O(EU), gauge for O(Fine) same as others
@@ -76,14 +160,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Switch Machines
 + Fn3 NMRA
 + Gn3 Aristo
-+ HO Tillig Luna Tramway 
++ HO Tillig Luna Tramway
 + N RocoAtlas Code 80
-+ N Tram 
++ N Tram
 + N ScaleScenes
 + OO9 Peco
 
 ## [5.2.0 GA]
- 
+
 ## Bugs
 
 + Abend when searching in the parmlib
@@ -98,15 +182,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 + Option to not suppress system cursor when appliaction cursor shown
 
-## [5.2.0 Beta 3.0] 
+## [5.2.0 Beta 3.0]
 
 ## Bugs
 
-+ Library parameter file searching 
++ Library parameter file searching
 + Removal of entries for missing parameter files
 + Path logic when non-track objects are below tracks
 + Better highlighting of moving filled objects
-+ Selection highlighting 
++ Selection highlighting
 + Snap Grid for Modify Line
 + Move Description anchor fixes
 + Fix handling of frozen track - dont highlight
@@ -138,7 +222,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Layer Button Hiding
 + Settings Saving/Restoring from named .xset files
 + Cursor Suppression when internal anchor/cursor shown
-+ Optional additional detail descriptions for curved tracks 
++ Optional additional detail descriptions for curved tracks
 + Welsh as a message and UI language
 + Increase Text Note Limit to 10k
 + Debian install integration
@@ -167,7 +251,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Make all commands have target HTML pages for context help
 + Make Font Size be remembered when set from Text command
 + Fixed Radius field to be mainatained in Join after first point selected
-+ Param Search UI result box resizeable 
++ Param Search UI result box resizeable
 + Save Bridge Status for Segment Track
 + Updated German translations and translated Help Menu items
 + Clear NoTies if track is hidden
@@ -198,7 +282,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Pan using Shift+horizontal scroll on GTK
 + Param Reload Button to force reload of a param file
 + Multi Keyword search on param library files
-+ "@" Pan to Center and "e" Pan to extents and "0" or "o" Pan to Origin 
++ "@" Pan to Center and "e" Pan to extents and "0" or "o" Pan to Origin
 + Middle button also able to select Pan
 + Selectable Icon Button size between 1.0 and 2.0
 + Parallel Lines now can parallel other lines or tracks
@@ -206,7 +290,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Desired Radius feature for non-Cornu Join
 + AutoSave feature and add keep checkpoints between saves
 + Suppress edge rules on layout if close to window edge rulers
-+ Option to constrain drawing area to room boundaries on zoom 
++ Option to constrain drawing area to room boundaries on zoom
 + New Anchors on Describe and Traditional Join
 + AutoSave feature and Backup of checkpoints
 + Anchors on Split within turnouts with Shift
@@ -235,7 +319,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Convert Fixed->Cornu fixes
 + Bug #345 Fix paths in some Turnouts
 + Respect parmdir setting in configuration file
-+ Bug #348 Fix Demo 
++ Bug #348 Fix Demo
 + Bug #349 Fix inaccessible track segments
 + Bug #346 Fix layout file ends for Signal and Block
 + Bug #351 Fix loading layout with Cars off tracks
@@ -252,7 +336,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Better sized Split and Connect Anchors
 + Windows PanHere now works
 + Fix Map Resize function on GTK
-+ Fix Turnout placement on Cornu for Pins and other issues 
++ Fix Turnout placement on Cornu for Pins and other issues
 + Fox Cornu Pin editing
 
 
@@ -280,8 +364,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + + Finder for selecting System Parameter Library by Contents lines in files
 + + Set and un-set favorite property for parameter files
 + Track Properties
-+ + Bridge track 
-+ + Ties/NoTies 
++ + Bridge track
++ + Ties/NoTies
 + Links in Layout
 + + Document links to local files as an Object
 + + WebLinks as an Object
@@ -296,7 +380,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + + Pins for Cornu - morphs Cornu to pass through Pin, splits Cornu on Accept
 + + Edit multiple joined Cornu as single with Pins
 + + Add automatic 15 inch flex track element to Hotbar -> acts as Cornu and will also join tracks as needed
-+ + Allow Cornu Tracks in Group 
++ + Allow Cornu Tracks in Group
 + + Add placing Turnouts on Cornu Track
 + + End Point Anchor for FlexTrack (Cornu) pieces
 + + Radius and angle handles for no-track end Cornu
@@ -325,7 +409,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + + Updated and corrected the TIP file
 + + System Library location autoset so updated parameter files from new version appear in HorBar
 + Other
-+ + Allow Turnouts to have with curved ends which are downward compatible using short fixed radius at the ends 
++ + Allow Turnouts to have with curved ends which are downward compatible using short fixed radius at the ends
 + + Layers have Module option that are selected and Deselected as a unit
 + + Improve ruler with “English” measurements in High Zoom
 + + Add Examples... menu item on the Help menu to easily find them
@@ -338,22 +422,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + + Change Modify to use Cornu easements if selected
 + + New Cornu Turnout Designer options to build all types of Turnouts
 + + Create proper flex-track lengths for pricing
-+ + Desktop icon can be created with Windows installation 
++ + Desktop icon can be created with Windows installation
 + + Installing on Windows overwrittes earlier version
 
 ### New UI
 
-+ Layout 
++ Layout
 + + Allow viewing of "negative" layout up to half a screen to the left or bottom beyond the origin. Draw Room Walls and a grey zone outside the defined layout
 + + Add rulers on room walls if the display origin is in negative territory
-+ Anchors 
++ Anchors
 + + Anchors on all main commands - predict what will/can happen when clicked with modify keys (Ctrl,Shift,Alt)
 + + Add hover "anchors" for Select, Move, Rotate, Split, Join, Elevation, Move Description, Parallel
 + + Modify hover Anchors or all Straight, Curved Track, Straight and Curved Draw Objects
 + + Draw Anchors immediately adjust to Shift and Ctrl modifier key state
 + + Anchor for Join, fix anchor for Draw once selected
 + + Change System Cursor in main Window for Describe, Select and Pan/Zoom
-+ + Add acnchors to Select for Move and Rotate 
++ + Add acnchors to Select for Move and Rotate
 + + Add Anchors for Connect/Pull - also make selecting second track easier
 + Select Modes
 + + Select hover Anchors thick and in Blue to show what will be selected and Gold what will not be
@@ -370,16 +454,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + + Precision entry of Modify for Draw objects when Sticky selected
 + + Snapping Poly objects to be 0/90/180/270 from previous line with Shift
 + + Anchor shown for point that is 90 degrees from both last line and first point in Poly
-+ + PolyLines and Polygons complete with Enter or Space in Modify or if user clicks away 
++ + PolyLines and Polygons complete with Enter or Space in Modify or if user clicks away
 + ShortCuts
-+ + Text key shortcuts in Pan/Zoom - Zoom Levels "1-9", Extents "e", Origin "0"  
++ + Text key shortcuts in Pan/Zoom - Zoom Levels "1-9", Extents "e", Origin "0"
 + + “Pan Center Here” with a text short-cut “@“ key that works in Select, Pan/Zoom, Modify
 + Context Menus
 + + Default to Context Menu on Right-Click, Command Menu Shift+Right-Click
 + + New Select Context Menus for Selected and UnSelected cases
 + + Numerous updates to context menus including special for Poly Modify
 + DoubleClick in Select
-+ + Open a Weblink, a Document 
++ + Open a Weblink, a Document
 + + Modify for Cornu and Bezier, Modify Draw objects except Text
 + Elevation
 + + Elevation cursor shows elevation at point. Adding Shift displays clearance between two tracks\
@@ -406,13 +490,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Clean up HotBar right click display order documentation
 + Remove timed validation of text entries, use Enter-key, Click Away or Tab to trigger instead
 + Drawing of Ties to use Polygons, reducing the load of unfilled Ties on Redraw
-+ Draw temp Polygons and Circles when moving them (all unfilled and simplified) 
++ Draw temp Polygons and Circles when moving them (all unfilled and simplified)
 + Add up/down arrow keys scrolling in Select
 + Ctrl+Left-Click to rotate Turnouts - in common with other rotates
 + Make sure Draw commits simple elements even if Esc is subsequently pressed
 + Make Note icon size better
 + Make Bezier and Cornu use standard colors during construction
-+ Improve Grid drawing performance 
++ Improve Grid drawing performance
 + Make Status fields insensitive when visible
 + Respect Turntable Angle for Modify and Join to Turntable
 + Save State including filenames and options when Save, Save As or Open commands are run
@@ -428,7 +512,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Make repeated arrow key moves in Move into one Undo
 + Adjust Ties algo to give a more even look in short tracks
 + Fix bounding box for multi-line text
-+ Fix Describe Window sizing 
++ Fix Describe Window sizing
 + Fix for split to preserve elevation properly (keep end point elev type and station name (if any) - new split end point gets elev_none
 + Fix handling of \n in multiline comments
 + Fix flex-track lengths for pricing
@@ -510,7 +594,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [5.1.2]
 
 ### Added
-+ Make Debug menu both work and do something useful 
++ Make Debug menu both work and do something useful
 This menu in Options->Debug only appears if the env variable XTRKCADEXTRA is set A "Loosen" command also appears in Modify when set.The Debug window lists any Logging entries (set with "-d loggingname=level" parms).For example, "-d trainMove=5 -d traverseCornu=2" sets two Loglines - one at level 5 and the other 2. The value of the level can be adjusted in the Debug window and then the button "OK" sets it.Given that a level value of 0 means no logging for that logging variable, this menu allows log/tracing to be adjusted on the fly after startup.
 Debug Window has a default trace level option. This is the level of Log/Trace that all types of tracing will follow unless they have been specified explicitly in the startup parms or otherwise.
 Any log entries created before the first invocation of the window will be included, so a tester could add a LogSet("traverseBezier",0) line into the InitTrkBezier() code while testing or use a -d traverseBezier=0 and then use Debug to set level to 1 and start logging.
@@ -518,13 +602,13 @@ Any log entries created before the first invocation of the window will be includ
 ## Fixed
 + Make Up and Down Scroll only move 1/2 a screen height (rather than 1/2 a width)
 + Fix Modify redraw for Bezier or Cornu
-+ Allow modify of naked Cornu along the Cornu itself if it isn't connected to another Cornu or Bezier 
++ Allow modify of naked Cornu along the Cornu itself if it isn't connected to another Cornu or Bezier
 + Fix Abend on extend of naked Cornu
 + Make sure Flip Cornu produces a correct relationship between ends and Bezier segments
-+ Fix Traverse Cornu for case where there are multiple sub-segments within a Bezier segment 
++ Fix Traverse Cornu for case where there are multiple sub-segments within a Bezier segment
 + Remove UndoModify from low-level functions - to ensure that they can't be called without a preceding UndoStart and cause error messages
 + Description: correct include tag for Linux
-+ Fix possible error when Cloning Structures or Turnouts  
++ Fix possible error when Cloning Structures or Turnouts
 + Fix bad test for RescaleTrack and no test for RotateTrack.
 + Fix the Modify Polygon Undo problem
 + Fix memory bug when flipping a Polygon

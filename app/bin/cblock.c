@@ -46,6 +46,7 @@
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
+#include "common.h"
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
@@ -72,19 +73,20 @@ static void NoDrawString( drawCmd_p d, coOrd p, ANGLE_T a, char * s,
 			  wFont_p fp, FONTSIZE_T fontSize, wDrawColor color ) {}
 static void NoDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm,
 			  wDrawColor color) {}
-static void NoDrawFillPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
-			    wDrawColor color, wDrawWidth width, int fill, int open) {}
+static void NoDrawPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
+			    wDrawColor color, wDrawWidth width, drawFill_e eFillOpt ) {}
 static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
 			      wDrawColor color ) {}
+static void NoDrawRectangle( drawCmd_p d, coOrd orig, coOrd size, wDrawColor color, drawFill_e eFill ) {}
 
 static drawFuncs_t noDrawFuncs = {
-	0,
 	NoDrawLine,
 	NoDrawArc,
 	NoDrawString,
 	NoDrawBitMap,
-	NoDrawFillPoly,
-	NoDrawFillCircle };
+	NoDrawPoly,
+	NoDrawFillCircle,
+	NoDrawRectangle};
 
 static drawCmd_t blockD = {
 	NULL,
@@ -102,10 +104,10 @@ static track_p first_block;
 static track_p last_block;
 
 static paramData_t blockPLs[] = {
-/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof( blockName )},
-/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof( blockScript)}
+/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof( blockName )},
+/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF |PDO_STRINGLIMITLENGTH, I2VP(350), N_("Script"), 0, 0, sizeof( blockScript)}
 };
-static paramGroup_t blockPG = { "block", PGO_DIALOGTEMPLATE, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
+static paramGroup_t blockPG = { "block", PGO_DIALOGTEMPLATE, blockPLs,  COUNT(blockPLs)};
 static wWin_p blockW;
 
 static char blockEditName[STR_SHORT_SIZE];
@@ -114,11 +116,11 @@ static char blockEditSegs[STR_LONG_SIZE];
 static track_p blockEditTrack;
 
 static paramData_t blockEditPLs[] = {
-/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(blockEditName)},
-/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(blockEditScript)},
-/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY },
+/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH |PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(blockEditName)},
+/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(350), N_("Script"), 0, 0, sizeof(blockEditScript)},
+/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, I2VP(350), N_("Segments"), BO_READONLY },
 };
-static paramGroup_t blockEditPG = { "blockedit", PGO_DIALOGTEMPLATE, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
+static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  COUNT( blockEditPLs ) };
 static wWin_p blockEditW;
 
 typedef struct btrackinfo_t {
@@ -768,7 +770,7 @@ static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 {
 	LOG( log_block, 1, ("*** CmdBlock(%08x,{%f,%f})\n",action,pos.x,pos.y))
 
-	switch ((long)commandContext) {
+	switch (VP2L(commandContext)) {
 	case BLOCK_CREATE: return CmdBlockCreate(action,pos);
 	case BLOCK_EDIT:   return CmdBlockEdit(action,pos);
 	case BLOCK_DELETE: return CmdBlockDelete(action,pos);
@@ -854,13 +856,10 @@ static POS_T blkhiliteBorder;
 static wDrawColor blkhiliteColor = 0;
 static void DrawBlockTrackHilite( void )
 {
-	wDrawPix_t x, y, w, h;
 	if (blkhiliteColor==0)
 		blkhiliteColor = wDrawColorGray(87);
-	w = (wDrawPix_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wDrawPix_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	// This is incomplete.  We should be in temp drawing mode and clearing temp draw on UN_HILIGHT
+	DrawRectangle( &tempD, blkhiliteOrig, blkhiliteSize, blkhiliteColor, DRAW_TRANSPARENT );
 }
 
 
@@ -981,11 +980,11 @@ EXPORT void BlockMgmLoad( void )
     static wIcon_p blockI = NULL;
     
     if ( blockI == NULL) 
-        blockI = wIconCreatePixMap( block_xpm );
+        blockI = wIconCreatePixMap( block_xpm[iconSize] );
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_BLOCK) continue;
-        ContMgmLoad( blockI, BlockMgmProc, (void *)trk );
+        ContMgmLoad( blockI, BlockMgmProc, trk );
     }
     
 }
@@ -995,7 +994,7 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
         AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"), 
-                       wIconCreatePixMap( block_xpm ), LEVEL0_50, 
+                       wIconCreatePixMap( block_xpm[iconSize] ), LEVEL0_50, 
                        IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
 	ParamRegister( &blockPG );
 }

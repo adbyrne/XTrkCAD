@@ -1,6 +1,6 @@
 #define RENAME_H
 /** \file custom.c
- * 
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -61,6 +61,7 @@ char * sSaveFilePattern = NULL;
 char * sImageFilePattern = NULL;
 char * sImportFilePattern = NULL;
 char * sDXFFilePattern = NULL;
+char * sSVGFilePattern = NULL;
 char * sRecordFilePattern = NULL;
 char * sNoteFilePattern = NULL;
 char * sLogFilePattern = NULL;
@@ -71,7 +72,6 @@ int iParamVersion = PARAMVERSION;
 int iMinParamVersion = MINPARAMVERSION;
 long lParamKey = PARAMKEY;
 
-extern char *userLocale;
 
 EXPORT char * MakeWindowTitle( char * name )
 {
@@ -86,7 +86,7 @@ void InitCmdEasement( void )
 {
 	easementP = EasementInit();
 }
-void DoEasementRedir( void )
+void DoEasementRedir( void * unused )
 {
 	if (easementP)
 		easementP(NULL);
@@ -119,7 +119,7 @@ BOOL_T Initialize( void )
 	InitTrkStruct();
 	InitTrkText();
 	InitTrkDraw();
-	
+
 	InitTrkBlock();
         InitTrkSwitchMotor();
         InitTrkSignal();
@@ -129,12 +129,12 @@ BOOL_T Initialize( void )
 	InitCmdNote();
 
 	memset( message, 0, sizeof message );
-	
+
 	return TRUE;
 }
 
 /**
- * Initialize siome localized strings for filename patterns etc. 
+ * Initialize siome localized strings for filename patterns etc.
  */
 
 void InitCustom( void )
@@ -157,9 +157,9 @@ void InitCustom( void )
 		sprintf(buf, _("All %s Files (*.xtc,*.xtce)|*.xtc;*.xtce|"
 					   "%s Trackplan (*.xtc)|*.xtc|"
 					   "%s Extended Trackplan (*.xtce)|*.xtce|"
-					   "All Files (*)|*"), 
+					   "All Files (*)|*"),
 						Product,
-						Product, 
+						Product,
 						Product );
 		sSourceFilePattern = strdup(buf);
 	}
@@ -186,6 +186,11 @@ void InitCustom( void )
 	{
 		sDXFFilePattern = strdup(_("Data Exchange Format Files (*.dxf)|*.dxf"));
 	}
+	if (sSVGFilePattern == NULL)
+	{
+		sSVGFilePattern = strdup(_("Scalable Vector Graphics Format Files (*.svg)|*.svg" ));
+	}
+
 	if (sRecordFilePattern == NULL)
 	{
 		sprintf(buf, _("%s Record Files (*.xtr)|*.xtr"), Product);
@@ -239,6 +244,10 @@ void CleanupCustom( void )
 		free(sDXFFilePattern);
 		sDXFFilePattern = NULL;
 	}
+	if (sSVGFilePattern) {
+		free(sSVGFilePattern);
+		sSVGFilePattern = NULL;
+	}
 	if (sRecordFilePattern)
 	{
 		free(sRecordFilePattern);
@@ -258,10 +267,5 @@ void CleanupCustom( void )
 	{
 		free(sPartsListFilePattern);
 		sPartsListFilePattern = NULL;
-	}
-	if (userLocale)
-	{
-		free(userLocale);
-		userLocale = NULL;
 	}
 }

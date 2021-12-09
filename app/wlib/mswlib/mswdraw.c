@@ -43,6 +43,8 @@ wBool_t wDrawDoTempDraw = TRUE;
  *****************************************************************************
  */
 
+#define M_PI 3.14159265358979323846
+
 static wBool_t initted = FALSE;
 
 static FARPROC oldDrawProc;
@@ -52,7 +54,7 @@ static long tmpOp = 0x990066;
 static long setOp = 0x8800c6;
 static long clrOp = 0xbb0226;
 
-#define CENTERMARK_LENGTH 6
+#define CENTERMARK_LENGTH 4
 
 static bool bDrawMainBM = 0;
 
@@ -111,7 +113,9 @@ static wWinPix_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 
 
 
+/** @prefs [msw tweak] NoNegDrawArgs=1 Suppress drawing if x < 0 or y < 0 (-1 value causes preference read) */
 static long noNegDrawArgs = -1;
+/** @prefs [msw tweak] NoFlatEndCaps=1 Suppress EndCap Flat pen style */
 static long noFlatEndCaps = 0;
 
 void wDrawDelayUpdate(
@@ -149,12 +153,11 @@ wBool_t wDrawSetTempMode(
  * Sets the proper pen and composition for the next drawing operation
  * 
  *
- * \param hDc IN device context
- * \param d IN ???
+ * \param d IN drawing context
  * \param dw IN line width
  * \param lt IN line type (dashed, solid, ...)
  * \param dc IN color
- * \param dopt IN ????
+ * \param dopt IN drawing options
  */
 static void setDrawMode(
 		wDraw_p d,
@@ -342,6 +345,14 @@ void wDrawLine(
 	}
 }
 
+static double d2r(double angle)
+{
+	while (angle < 0.0) angle += 360.0;
+	while (angle >= 360.0) angle -= 360.0;
+	angle *= (M_PI / 180.0);
+	return angle;
+}
+
 static double mswsin( double angle )
 {
 	while (angle < 0.0) angle += 360.0;
@@ -366,6 +377,13 @@ static double mswasin( double x, double h )
 	return angle;
 }
 
+static double mswNormalizeAngle( double a )
+{
+	while (a<0.0) a += 360.0;
+	while (a>=360.0) a -= 360.0;
+	return a;
+}
+
 /**
  * Draw an arc around a specified center
  *
@@ -388,7 +406,7 @@ void wDrawArc(
 		wDrawPix_t r,
 		double a0,
 		double a1,
-		int drawCenter,
+		int sizeCenter,
 		wDrawWidth dw,
 		wDrawLineType_e lt,
 		wDrawColor dc,
@@ -397,14 +415,18 @@ void wDrawArc(
 	int i, cnt;
 	POINT p0, p1, ps, pe, pp0, pp1, pp2, pc;
 	wDrawPix_t psx, psy, pex, pey;
-        double len, aa;
+    double len, aa, ai;
 	RECT rect;
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
 
-	len = a1/360.0 * (2 * M_PI) * r;
+	len = d2r(a1) * r;
 	if (len < 3)
 		return;
+
+	// calculate the center coordinates
+	pc.x = XDRAWPIX2WINPIX( d, px );
+	pc.y = YDRAWPIX2WINPIX( d, py );
 
 	p0.x = XDRAWPIX2WINPIX(d,px-r);
 	p0.y = YDRAWPIX2WINPIX(d,py+r);
@@ -424,11 +446,11 @@ void wDrawArc(
 	pe.y = YDRAWPIX2WINPIX(d,pey);
 
 	setDrawMode( d, dw, lt, dc, dopt );
-
+	
 	if (dw == 0)
 		dw = 1;
 
-	if (r>4096) {
+	if ( r > 30000 || a1 < 1.0 ) { 
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -436,20 +458,26 @@ void wDrawArc(
 		if ( p0.x < 0 || p0.y < 0 || p1.x < 0 || p1.y < 0 )
 			fakeArc = TRUE;
 	}
+
+	// Starting point
+	psx = px + r * mswsin(a0);
+	psy = py + r * mswcos(a0);
+	pp0.x = XDRAWPIX2WINPIX( d, psx );
+	pp0.y = YDRAWPIX2WINPIX( d, psy );
+
 	if ( fakeArc ) {
-		cnt = (int)a1;
+		cnt = (int)(a1 / 2);
 		if ( cnt <= 0 ) cnt = 1;
-		if ( cnt > 360 ) cnt = 360;
-		aa = a1 / cnt;
-		psx = px + r * mswsin(a0);
-		psy = py + r * mswcos(a0);
-		pp0.x = XDRAWPIX2WINPIX( d, psx );
-		pp0.y = YDRAWPIX2WINPIX( d, psy );
+		if ( cnt > 180 ) cnt = 180;
+
+		ai = d2r(a1) / cnt;
+		aa = d2r(a0);
 		needMoveTo = TRUE;
+
 		for ( i=0; i<cnt; i++ ) {
-			a0 += aa;
-			psx = px + r * mswsin(a0);
-			psy = py + r * mswcos(a0);
+			aa += ai;
+			psx = px + r * sin(aa);
+			psy = py + r * cos(aa);
 			pp2.x = pp1.x = XDRAWPIX2WINPIX( d, psx );
 			pp2.y = pp1.y = YDRAWPIX2WINPIX( d, psy );
 			if ( clip0( &pp0, &pp1, d ) ) {
@@ -464,31 +492,40 @@ void wDrawArc(
 			pp0.x = pp2.x; pp0.y = pp2.y;
 		}
 	} else {
-		if ( a0 == 0.0 && a1 == 360.0 ) {
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p0.y, pe.x, p1.y );
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, p1.y, pe.x, p0.y );
-		} else {
-			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, ps.y, pe.x, pe.y );
+		DWORD rr = XDRAWPIX2WINPIX( d, r );
+		SetArcDirection( d->hDc,AD_CLOCKWISE );
+
+		// Draw two arcs from the center to eliminate the odd pie-shaped end artifact
+		if ( dw > 2.0 ) {
+			double a2 = a1 / 2.0;
+			pp2.x = XDRAWPIX2WINPIX( d, px + r * mswsin(a0+a2) );
+			pp2.y = YDRAWPIX2WINPIX( d, py + r * mswcos(a0+a2) );
+
+			MoveTo( d->hDc, pp2.x, pp2.y );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)), (float)(-a2) );
+			MoveTo( d->hDc, pp2.x, pp2.y );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)), (float)(a2) );
+		}
+		else {
+			MoveTo( d->hDc, pp0.x, pp0.y );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - a0), (float)(-a1) );
 		}
 	}
 
 	// should the center of the arc be drawn?
-	if( drawCenter ) {
+	if( sizeCenter ) {
 			
-			// calculate the center coordinates
-			pc.x = XDRAWPIX2WINPIX( d, px );
-			pc.y = YDRAWPIX2WINPIX( d, py );
 			// now draw the crosshair
-			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH/2, pc.y );
-			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH/2, pc.y );
-			MoveTo( d->hDc, pc.x, pc.y - CENTERMARK_LENGTH/2 );
-			LineTo( d->hDc, pc.x, pc.y + CENTERMARK_LENGTH/2 );
+			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH*sizeCenter, pc.y );
+			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH*sizeCenter, pc.y );
+			MoveTo( d->hDc, pc.x, pc.y - CENTERMARK_LENGTH*sizeCenter );
+			LineTo( d->hDc, pc.x, pc.y + CENTERMARK_LENGTH*sizeCenter );
 			
 			// invalidate the area of the crosshair
-			rect.top  = pc.y - CENTERMARK_LENGTH / 2 - 1;
-			rect.bottom  = pc.y + CENTERMARK_LENGTH / 2 + 1;
-			rect.left = pc.x - CENTERMARK_LENGTH / 2 - 1;
-			rect.right = pc.x + CENTERMARK_LENGTH / 2 + 1;
+			rect.top  = pc.y - CENTERMARK_LENGTH*sizeCenter - 1;
+			rect.bottom  = pc.y + CENTERMARK_LENGTH*sizeCenter + 1;
+			rect.left = pc.x - CENTERMARK_LENGTH*sizeCenter - 1;
+			rect.right = pc.x + CENTERMARK_LENGTH*sizeCenter + 1;
 			myInvalidateRect( d, &rect );
 	}
 
@@ -685,7 +722,9 @@ void mswFontInit( void )
 {
 	const char * face;
 	long size;
+	/** @prefs [msw window font] face=FontName */
 	face = wPrefGetString( "msw window font", "face" );
+	/** @prefs [msw window font] size=-24 */
 	wPrefGetInteger( "msw window font", "size", &size, -24 );
 	if (face) {
 		strncpy( logFont.lfFaceName, face, LF_FACESIZE );
@@ -751,7 +790,7 @@ void wDrawGetTextSize(
 	fp->lfWidth = 0;
 	newFont = CreateFontIndirect( fp );
 	prevFont = SelectObject( bd->hDc, newFont );
-	extent = GetTextExtent( bd->hDc, CAST_AWAY_CONST text, strlen(text) );
+	extent = GetTextExtent( bd->hDc, CAST_AWAY_CONST text, (int)(strlen(text)) );
 
 	GetTextMetrics(bd->hDc, &textMetric);
 
@@ -821,7 +860,7 @@ void wDrawString(
         if (dopts & wDrawOutlineFont) {
             HPEN oldPen;
             BeginPath(d->hDc);
-            TextOut(d->hDc, x, y, text, strlen(text));
+            TextOut(d->hDc, x, y, text, (int)strlen(text));
             EndPath(d->hDc);
 
             // Now draw outline text
@@ -835,11 +874,11 @@ void wDrawString(
 
             old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
                                                    dc));
-            TextOut(d->hDc, x, y, text, strlen(text));
+            TextOut(d->hDc, x, y, text, (int)(strlen(text)));
             SetTextColor(d->hDc, old);
         }
 
-        extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, strlen(text));
+        extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, (int)(strlen(text)));
         SelectObject(d->hDc, prevFont);
         w = LOWORD(extent);
         h = HIWORD(extent);
@@ -1472,7 +1511,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		WPARAM wParam,
 		LPARAM lParam )
 {
-	wIndex_t inx = GetWindowLongPtr( hWnd, GWL_ID );
+	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wDraw_p b;
 	wWinPix_t ix, iy;
 	wDrawPix_t x, y;
@@ -1506,6 +1545,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		b->wFactor = (double)GetDeviceCaps( b->hDc, LOGPIXELSX );
 		b->hFactor = (double)GetDeviceCaps( b->hDc, LOGPIXELSY );
 		double dpi;
+		/** @prefs [Preference] ScreenDPI=96.0 Sets DPI of screen */
 		wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
 		b->DPI = dpi;
 		b->hWnd = hWnd;
@@ -1633,7 +1673,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			if (extChar != wAccelKey_None)
 				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), b->lastX, b->lastY );
 			else
-				b->action( b, b->data, wActionText + ( wParam << 8 ), b->lastX, b->lastY );
+				b->action( b, b->data, wActionText + ( (int)wParam << 8 ), b->lastX, b->lastY );
 		}
 		return (LRESULT)0;
 
@@ -1850,7 +1890,7 @@ wDraw_p wDrawCreate(
 	d->hWnd = CreateWindow( mswDrawWindowClassName, NULL,
 				WS_CHILDWINDOW|WS_VISIBLE|WS_BORDER,
 				d->x, d->y, w, h,
-				((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 
 	if (d->hWnd == (HWND)0) {
 		mswFail( "CreateWindow(DRAW)" );
@@ -2023,7 +2063,19 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
         }
 
         if (bCanSave) {
-            bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
+			int flags;
+
+			switch (fif) {
+			case FIF_JPEG:
+				flags = JPEG_QUALITYNORMAL;
+				break;
+			case FIF_PNG:
+				flags = PNG_DEFAULT;
+				break;
+			default:
+				flags = 0;		// whatver the default is for the file format
+			}
+            bSuccess = FreeImage_Save(fif, dib2, fileName, flags);
         }
     }
     FreeImage_Unload(dib2);

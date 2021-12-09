@@ -129,7 +129,7 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \u000
 
-\dd \e{PurchPrice}, \e{CurrPrice}, \e{PurchDate} and \e{ServiceDate} - numeric values
+\dd \e{PurchPrice}, \e{CurrPrice}, \e{PurchDate} and \e{ServiceDate} - numeric values - dates are in the form yyyymmdd, where yyyy is the year, mm the month, dd the day
 
 \u000
 
@@ -215,7 +215,7 @@ This dialog is similar the the \f{Car Item} dialog except that the \f{Car Item I
 
 The middle section contains:
 
-\dd The \f{Road}, \f{Reporting Mark}, \f{Number} and \f{Color}.  You can choose a \f{Road name} from the list of known road names or enter a new value.  If known, the \e{reporting mark} (road name abbreviation) is filled in.
+\dd The \f{Road}, \f{Reporting Mark}, \f{Number} and \f{Color}.  You can choose a \f{Road name} from the list of known road names or enter a new value.  If known, the \e{reporting mark} (road name abbreviation) is filled in. These values control what label content is shown for Cars. If a reporting number is present the rep mark and the rep number will be used if the Cars Label Option is on in \K{cmdDisplay}
 
 \u000
 

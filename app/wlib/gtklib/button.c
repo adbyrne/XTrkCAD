@@ -185,6 +185,7 @@ static void pushButt(
         return;
     }
 
+    wlibStringUpdate();
     if (b->action) {
         b->action(b->data);
     }
@@ -252,6 +253,8 @@ static gint pressButt(
 		GdkEventButton *event,
 		wButton_p bb) {
 
+	if ( debugWindow >= 1 )
+		printf( "buttonPress: %s\n", bb->labelStr );
 	if (bb->recursion) {
 		return TRUE;
 
@@ -287,6 +290,8 @@ static gint releaseButt(
 		GdkEventButton *event,
 		wButton_p bb) {
 
+	if ( debugWindow >= 1 )
+		printf( "buttonRelease: %s\n", bb->labelStr );
 	/* Remove any existing timer */
 	if (bb->timer_id) {
 	  g_source_remove(bb->timer_id);
@@ -772,13 +777,13 @@ wChoice_p wRadioCreate(
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
-    const char	**labels,
+    const char	* const *labels,
     long	*valueP,
     wChoiceCallBack_p action,
     void 	*data)
 {
     wChoice_p b;
-    const char ** label;
+    const char * const * label;
     GtkWidget *butt0=NULL, *butt;
 
     if ((option & BC_NOBORDER)==0) {
@@ -902,13 +907,13 @@ wChoice_p wToggleCreate(
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
-    const char	**labels,
+    const char * const * labels,
     long	*valueP,
     wChoiceCallBack_p action,
     void 	*data)
 {
     wChoice_p b;
-    const char ** label;
+    const char * const * label;
 
     if ((option & BC_NOBORDER)==0) {
         if (x>=0) {

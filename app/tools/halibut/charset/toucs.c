@@ -65,7 +65,7 @@ int charset_to_unicode(const char **input, int *inlen,
 	localstate = *state;	       /* structure copy */
 
     while (*inlen > 0) {
-	int lenbefore = param.output - output;
+	int lenbefore = (int)(param.output - output);
 	spec->read(spec, (unsigned char)**input, &localstate,
 		   unicode_emit, &param);
 	if (param.stopped) {
@@ -83,5 +83,5 @@ int charset_to_unicode(const char **input, int *inlen,
 	(*inlen)--;
     }
 
-    return param.output - output;
+    return (int)(param.output - output);
 }

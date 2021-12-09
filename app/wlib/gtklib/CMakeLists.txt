@@ -21,7 +21,6 @@ set(sources
 	notice.c
 	opendocument.c
 	pixbuf.c
-	png.c
 	print.c
 	single.c
 	splash.c
@@ -33,6 +32,7 @@ set(sources
 	util.c
 	window.c
 	wpref.c
+	writebitmap.c
 # end of refactored sources	
 	gtkdraw-cairo.c
 	)

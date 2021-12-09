@@ -42,6 +42,7 @@ EXPORT char * curScaleName;
 EXPORT DIST_T trackGauge;
 EXPORT long labelScale = 8;
 EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
+/** @prefs [draw] label-when=2 Unknown */
 EXPORT long labelWhen = 2;
 EXPORT long colorTrack = 0;
 EXPORT long colorDraw = 0;
@@ -174,6 +175,7 @@ static tieData_t tieData_demo = {
 
 //EXPORT SCALEINX_T curScaleInx = -1;
 static scaleInfo_p curScale;
+/** @prefs [misc] include same gauge turnouts=1 Unknown */
 EXPORT long includeSameGaugeTurnouts = FALSE;
 static SCALEINX_T demoScaleInx = -1;
 
@@ -284,6 +286,11 @@ EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 	if ( !s->tieDataValid ) {
 		sprintf( message, "tiedata-%s", s->scale );
 		defLength = (96.0-54.0)/s->ratio+s->gauge;
+
+		/** @prefs [tiedata-<SCALE>] length, width, spacing Sets tie drawing data. 
+		* Example for 6"x8"x6' ties spaced 20" in HOn3 (slash separates 4 lines): 
+		* [tiedata-HOn3] \ length=0.83 \ width=0.07 \ spacing=0.23
+		*/
 		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
 		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
 		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
@@ -314,7 +321,7 @@ SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge)
 	dynArr_t gauges_da;
 
 	gauges_da = (scaleDesc(desc)).gauges_da;
-	SetLayoutCurScale(((gaugeInfo_p)gauges_da.ptr)[gauge].scale);
+	SetLayoutCurScale( DYNARR_N( gaugeInfo_t, gauges_da, gauge).scale);
 }
 
 static BOOL_T
@@ -591,7 +598,7 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	DIST_T ratio;
 	BOOL_T found;
 	char buf[ 80 ];
-	int len;
+	size_t len;
 
 	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
 		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
@@ -796,7 +803,7 @@ EXPORT void ScaleLengthIncrement(
 		DIST_T length )
 {
 	char * cp;
-	int len;
+	size_t len;
 	if (scaleInfo(scale).length == 0.0) {
 		if (units == UNITS_METRIC)
 			cp = "999.99m SCALE Flex Track";
@@ -804,7 +811,7 @@ EXPORT void ScaleLengthIncrement(
 			cp = "999' 11\" SCALE Flex Track";
 		len = strlen( cp )+1;
 		if (len > enumerateMaxDescLen)
-			enumerateMaxDescLen = len;
+			enumerateMaxDescLen = (int)len;
 	}
 	scaleInfo(scale).length += length;
 }
@@ -812,7 +819,7 @@ EXPORT void ScaleLengthIncrement(
 EXPORT void ScaleLengthEnd( void )
 {
 	wIndex_t si;
-	int count;
+	size_t count;
 	DIST_T length;
 	char tmp[STR_SIZE];
 	FLOAT_T flexLen;
@@ -833,7 +840,7 @@ EXPORT void ScaleLengthEnd( void )
 			if (flexLen > 0.0) {
 				count = (int)ceil( length / (flexLen/(flexUnit?2.54:1.00)));
 			}
-			EnumerateList( count, flexCost, tmp, NULL );
+			EnumerateList( (long)count, flexCost, tmp, NULL );
 		}
 		scaleInfo(si).length = 0;
 	}
@@ -846,7 +853,7 @@ EXPORT void LoadScaleList( wList_p scaleList )
 	wIndex_t inx;
 	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
 		scaleDesc(inx).index =
-				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, (void*)(intptr_t)inx );
+				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, I2VP(inx) );
 	}
 }
 
@@ -864,7 +871,7 @@ EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 
 	wListClear( gaugeList );			/* remove old list in case */
 	for (inx=0; inx<gauges_da_p->cnt; inx++) {
-		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, (void*)(intptr_t)(g[inx]).scale );
+		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, I2VP(g[inx].scale) );
 	}
 }
 

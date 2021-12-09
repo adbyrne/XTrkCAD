@@ -189,9 +189,9 @@ void wPrintSetup( wPrintSetupCallBack_p callback )
 	if (PrintDlg(&printDlg) != 0  && printDlg.hDC) {
 		getPageDim( printDlg.hDC );
 	}
-	if ( callback ) {
-		callback( TRUE );
-	}
+	//if ( callback ) {
+	//	callback( TRUE );
+	//}
 }
 
 const char* wPrintGetName()
