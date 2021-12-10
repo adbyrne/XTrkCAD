@@ -542,8 +542,8 @@ static paramData_t colorPLs[] = {
 	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, N_("Profile Path"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, N_("Exception Track"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, N_("Track Ties"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, N_("Bridge base"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, N_("Track roadbed"), 0, I2VP(CHANGE_MAIN) }
+	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, N_("Bridge Base"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, N_("Track Roadbed"), 0, I2VP(CHANGE_MAIN) }
 };
 static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP, colorPLs, COUNT( colorPLs ) };
 
