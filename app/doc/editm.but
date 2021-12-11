@@ -69,7 +69,11 @@ The newly pasted parts are in \f{Selected} state and can easily be moved into pl
 
 \u000
 
-\dd \i\f{Bridge}\I{Track, Bridge} - Adds parapet symbols to the sides of the track.
+\dd \i\f{Bridge}\I{Track, Bridge} - Adds or removes parapet symbols and a solid base to the track. The color is selectable (\K{cmdRgbcolor}).
+
+\u000
+
+\dd \i\f{Roadbed}\I{Track, Roadbed} - Adds or removes solid roadbed under the track. The color is selectable (\K{cmdRgbcolor}).
 
 \u000
 
@@ -129,6 +133,10 @@ Additional Shortcut keys perform the following:
 
 \u000
 
+\dd \c{Ctrl+R} - Redo
+
+\u000
+
 \dd \c{Ctrl+C} - Copy
 
 \u000
@@ -174,13 +182,23 @@ The \f{Draw Tunnels} Radio button group on the \f{Options>Display} dialog (\K{cm
 \rule
 
 
-\S{cmdBridge} Bridge (Draw Abutments)
+\S{cmdBridge} Bridge (Draw or Hide Abutments)
 
 The \f{Bridge} command is used to add abutments to a track (as on an underbridge).
 
-Select the tracks you want to be a bridge. Bridge abutments are drawn alongside the track. You can split (\K{cmdSplitTrack}) a track to shorten the length of the bridge, or to add an extra pier to the drawing.
+Select the tracks you want to be a bridge. Bridge abutments are drawn alongside the track and a solid layer is added under the ties. You can split (\K{cmdSplitTrack}) a track to shorten the length of the bridge, or to add an extra pier to the drawing.
 
-If you perform this action (or use Tunnel) the bridge is removed.
+If you perform this action on an existing bridge (or use Tunnel) the bridge is removed.
+
+\rule
+
+\S{cmdRoadbed} Roadbed (Draw or Hide Base)
+
+The \f{Roadbed} command is used to add a solid color under a track (as roadbed).
+
+Select the tracks you want to have roadbed. A solid roadbed layer is drawn under the track.
+
+If you perform this action on existing roadbed (or use Tunnel) the roadbed is removed. The bridge option takes precedence over roadbed.
 
 \rule
 

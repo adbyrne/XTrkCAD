@@ -136,7 +136,7 @@ static char *newTurnAngleModeLabels[] = { N_("Frog #"), N_("Degrees"), NULL };
 static char *newTurnSlipModeLabels[] = { N_("Dual Path"), N_("Quad Path"), NULL };
 static DIST_T newTurnRoadbedWidth;
 static long newTurnRoadbedLineWidth = 0;
-static wDrawColor roadbedColor;
+static wDrawColor newTurnRoadbedColor;
 static DIST_T newTurnTrackGauge;
 static char * newTurnScaleName;
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
@@ -199,7 +199,7 @@ static paramData_t turnDesignPLs[] = {
 	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ | PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, NULL, N_(" #"),0, 0, sizeof(newTurnRightPartno)},
 	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
 	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
-	{ PD_COLORLIST, &roadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
+	{ PD_COLORLIST, &newTurnRoadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
 	{ PD_BUTTON, NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
 	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
 #define I_TOANGMODE			(28)
@@ -1108,7 +1108,7 @@ static void AddRoadbedPieces(
 	sp = &tempSegs(inx);
 	sq = &tempSegs(tempSegs_da.cnt-1);
 	sq->width = newTurnRoadbedLineWidth/(_DPI);
-	sq->color = roadbedColor;
+	sq->color = newTurnRoadbedColor;
 	if (sp->type == SEG_STRTRK) {
 		sq->type = SEG_STRLIN;
 		sq->u.l.pos[0] = p0;
@@ -2706,7 +2706,7 @@ static void NewTurnOk( void * context )
 		sprintf( cp, " %0.6f", flt );
 		cp += strlen(cp);
 	}
-	sprintf( cp, " %0.6f %0.6f %ld", newTurnRoadbedWidth, newTurnRoadbedLineWidth/(_DPI), wDrawGetRGB(roadbedColor) );
+	sprintf( cp, " %0.6f %0.6f %ld", newTurnRoadbedWidth, newTurnRoadbedLineWidth/(_DPI), wDrawGetRGB(newTurnRoadbedColor) );
 	customInfoP = MyStrdup( tempCustom );
 	strcpy( tempCustom, message );
 
@@ -3079,12 +3079,12 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	}
 	rgb = 0;
 	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &width, &rgb ) ) {
-		roadbedColor = wDrawFindColor(rgb);
+		newTurnRoadbedColor = wDrawFindColor(rgb);
 		newTurnRoadbedLineWidth = (long)floor(width*mainD.dpi+0.5);
 	} else {
 		newTurnRoadbedWidth = 0;
 		newTurnRoadbedLineWidth = 0;
-		roadbedColor = wDrawColorBlack;
+		newTurnRoadbedColor = wDrawColorBlack;
 	}
 
 	customTurnout1 = to;
@@ -3234,7 +3234,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, designDescs[i]->label );
 		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, designDescs[i] );
 	}
-	roadbedColor = wDrawColorBlack;
+	newTurnRoadbedColor = wDrawColorBlack;
 	includeNontrackSegments = TRUE;
 }
 #endif
@@ -3247,7 +3247,7 @@ char * curScaleName;
 double trackGauge;
 long units = 0;
 wDrawColor drawColorBlack;
-long roadbedColorRGB = 0;
+long newTurnRoadbedColorRGB = 0;
 
 EXPORT void AbortProg(
 		const char * msg,
@@ -3370,7 +3370,7 @@ EXPORT char * PutTitle( char * cp )
 long wDrawGetRGB(
 		wDrawColor color )
 {
-	return roadbedColorRGB;
+	return newTurnRoadbedColorRGB;
 }
 
 EXPORT BOOL_T WriteSegs(
@@ -3385,28 +3385,28 @@ EXPORT BOOL_T WriteSegs(
 		case SEG_STRLIN:
 		case SEG_STRTRK:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-				segs[i].type, (segs[i].type==SEG_STRTRK?0:roadbedColorRGB), segs[i].width,
+				segs[i].type, (segs[i].type==SEG_STRTRK?0:newTurnRoadbedColorRGB), segs[i].width,
 				segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 				segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y )>0;
 			break;
 		case SEG_CRVTRK:
 		case SEG_CRVLIN:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-				segs[i].type, (segs[i].type==SEG_CRVTRK?0:roadbedColorRGB), segs[i].width,
+				segs[i].type, (segs[i].type==SEG_CRVTRK?0:newTurnRoadbedColorRGB), segs[i].width,
 				fabs(segs[i].u.c.radius),
 				segs[i].u.c.center.x, segs[i].u.c.center.y,
 				segs[i].u.c.a0, segs[i].u.c.a1 )>0;
 			break;
 		case SEG_FILCRCL:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f\n",
-				segs[i].type, roadbedColorRGB, segs[i].width,
+				segs[i].type, newTurnRoadbedColorRGB, segs[i].width,
 				fabs(segs[i].u.c.radius),
 				segs[i].u.c.center.x, segs[i].u.c.center.y )>0;
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
 			rc &= fprintf( f, "\t%c %ld %0.6f %d\n",
-				segs[i].type, roadbedColorRGB, segs[i].width,
+				segs[i].type, newTurnRoadbedColorRGB, segs[i].width,
 				segs[i].u.p.cnt )>0;
 			for ( j=0; j<segs[i].u.p.cnt; j++ )
 				rc &= fprintf( f, "\t\t%0.6f %0.6f\n",
@@ -3517,12 +3517,12 @@ int main ( int argc, char * argv[] )
 			if (argv[0][2] == '\0')
 				Usage(argc0,argv0);
 			newTurnRoadbedWidth = atof(&argv[0][2]);
-			roadbedColorRGB = 0;
-			roadbedColor = 0;
+			newTurnRoadbedColorRGB = 0;
+			newTurnRoadbedColor = 0;
 			newTurnRoadbedLineWidth = 0;
 			break;
 		case 'c':
-			roadbedColorRGB = atol(&argv[0][2]);
+			newTurnRoadbedColorRGB = atol(&argv[0][2]);
 			break;
 		case 'l':
 			newTurnRoadbedLineWidth = atol(&argv[0][2]);
