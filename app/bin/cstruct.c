@@ -761,6 +761,7 @@ static void NewStructure( void )
 	SetTrkVisible( trk, TRUE );
 	SetTrkNoTies( trk, FALSE);
 	SetTrkBridge( trk, FALSE);
+	SetTrkRoadbed( trk, FALSE);
 
 	DrawNewTrack( trk );
 	/*DrawStructure( trk, &mainD, wDrawColorBlack, 0 );*/
@@ -820,6 +821,9 @@ EXPORT STATUS_T CmdStructureAction(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curStructure == NULL ) return C_CONTINUE;
 		ShowPierL();
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			SnapPos(&pos);
+		}
 		Dst.pos = pos;
 		rot0 = pos;
 		origPos = Dst.pos;
@@ -832,6 +836,9 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_MOVE:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curStructure == NULL ) return C_CONTINUE;
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			SnapPos(&pos);
+		}
 		PlaceStructure( rot0, pos, origPos, &Dst.pos, &Dst.angle );
 		CreateMoveAnchor(pos);
 		InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
