@@ -695,12 +695,14 @@ static ANGLE_T PlaceStructure(
 	if (curStructure->special == TOpierInfo) {
 		pierTrk = OnTrack( &p1, FALSE, TRUE );
 		if (pierTrk != NULL) {
-			if (GetTrkType(pierTrk) == T_TURNOUT) {
-				pierEp = PickEndPoint( p1, pierTrk );
-				if (pierEp >= 0) {
-					*resPos = GetTrkEndPos(pierTrk, pierEp);
-					*resAngle = NormalizeAngle(GetTrkEndAngle(pierTrk, pierEp)-90.0);
-					return TRUE;
+			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
+				if (GetTrkType(pierTrk) == T_TURNOUT) {
+					pierEp = PickEndPoint( p1, pierTrk );
+					if (pierEp >= 0) {
+						*resPos = GetTrkEndPos(pierTrk, pierEp);
+						*resAngle = NormalizeAngle(GetTrkEndAngle(pierTrk, pierEp)-90.0);
+						return TRUE;
+					}
 				}
 			}
 			*resAngle = NormalizeAngle(GetAngleAtPoint( pierTrk, p1, NULL, NULL )+90.0);
@@ -800,9 +802,14 @@ EXPORT STATUS_T CmdStructureAction(
 	switch (action & 0xFF) {
 
 	case C_START:
+		if (!magneticSnap)
+			InfoMessage(_("+Alt for Magnetic Snap"));
+		else
+			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
+
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
-		Dst.angle = 00.0;
+		Dst.angle = 0.0;
 		ShowPierL();
 		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
@@ -822,7 +829,10 @@ EXPORT STATUS_T CmdStructureAction(
 		if ( curStructure == NULL ) return C_CONTINUE;
 		ShowPierL();
 		if ((MyGetKeyState()&WKEY_ALT) == 0) {
-			SnapPos(&pos);
+			angle = Dst.angle;
+			if (SnapPosAngle(&pos, &angle)) {
+				Dst.angle = angle;
+			}
 		}
 		Dst.pos = pos;
 		rot0 = pos;
@@ -837,11 +847,18 @@ EXPORT STATUS_T CmdStructureAction(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curStructure == NULL ) return C_CONTINUE;
 		if ((MyGetKeyState()&WKEY_ALT) == 0) {
-			SnapPos(&pos);
+			angle = Dst.angle;
+			if (SnapPosAngle(&pos, &angle)) {
+				Dst.angle = angle;
+			}
 		}
 		PlaceStructure( rot0, pos, origPos, &Dst.pos, &Dst.angle );
 		CreateMoveAnchor(pos);
-		InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
+		if (!magneticSnap)
+			InfoMessage(_("+Alt for Magnetic Snap"));
+		else
+			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
+		// InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
 		return C_CONTINUE;
 
 	case C_RDOWN:
@@ -874,7 +891,7 @@ EXPORT STATUS_T CmdStructureAction(
 			Dst.angle = NormalizeAngle( origAngle + angle );
 			Rotate( &Dst.pos, rot0, angle );
 		}
-		InfoMessage( _("Angle = %0.3f"), Dst.angle );
+		// InfoMessage( _("Angle = %0.3f"), Dst.angle );
 		Dst.state = 2;
 		CreateRotateAnchor(rot0);
 		return C_CONTINUE;
