@@ -1040,7 +1040,8 @@ static STATUS_T CmdStructure(
 
 	case C_CANCEL:
 		wHide( structureW );
-		/*no break*/
+		return C_CANCEL;
+
 	case C_REDRAW:
 	case C_TEXT:
 	case C_OK:
@@ -1133,12 +1134,18 @@ static STATUS_T CmdStructureHotBar(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RDOWN, pos );
 		}
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			SnapPos(&pos);
+		}
 		return CmdStructureAction( action, pos );
 
 	case C_RMOVE:
 	case C_MOVE:
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RMOVE, pos );
+		}
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			SnapPos(&pos);
 		}
 		return CmdStructureAction( action, pos );
 

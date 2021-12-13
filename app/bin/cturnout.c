@@ -4551,6 +4551,7 @@ static void AddTurnout(void)
 	SetTrkVisible(newTrk, visible);
 	SetTrkNoTies(newTrk, no_ties);
 	SetTrkBridge(newTrk, FALSE);
+	SetTrkRoadbed(newTrk, FALSE);
 
 	AuditTracks("addTurnout T%d before dealing with leftovers", GetTrkIndex(newTrk));
 	/* deal with the leftovers */
