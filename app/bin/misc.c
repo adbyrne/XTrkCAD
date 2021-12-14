@@ -2748,7 +2748,9 @@ static void CreateMenus(void) {
 	InitCmdMoveDescription(changeM);
 	InitCmdDelete();
 	InitCmdTunnel();
+	InitCmdTies();
 	InitCmdBridge();
+	InitCmdRoadbed();
 	InitCmdAboveBelow();
 
 	cmdGroup = BG_TRKMOD;
