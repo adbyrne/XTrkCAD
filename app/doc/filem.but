@@ -152,7 +152,7 @@ Exported files can then be imported into other CAD programs.
 
 This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\K{cmdSelect}) objects are exported to the file. The export file will have an \c{svg} extension.
 
-\G{png.d/exportsvg.png}
+\G{png.d/exportfilesvg.png}
 
 Files in SVG format can be used for different purposes.
 
@@ -270,7 +270,13 @@ parameter list.
 
 \S{cmdPrint} \i{Printing}
 
+\G{png.d/bprint.png}
+
 The \f{Print} command (\f{File>Print}) is used to print all or a portion of the layout.
+
+\G{png.d/bsetup.png}
+
+The \f{Print Setup} command (\f{File>Print Setup}) is used to set up the printer properties.
 
 When the \f{Print} command is selected a grid, which represents each printed page, is drawn on the layout. Pages can be selected or unselected for printing by placing the mouse over a grid section and clicking the left mouse button.
 
