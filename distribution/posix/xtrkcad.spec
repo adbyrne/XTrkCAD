@@ -1,14 +1,17 @@
-Summary: XTrkCad
+Summary: XTrkCad CAD for Model Railroad layout
 Name: xtrkcad
-Version: 4.3.0
+Version: 5.2.2
 Release: 1%{?dist}
-License: GPL
-Group: Applications/Engineering
-Vendor: XTrkCad Fork Project
-Source: xtrkcad-source-%{version}.tar.gz
-BuildRoot: /var/tmp/%{name}-root
-BuildRequires: gcc, cmake >= 2.4.7, pkgconfig, gtk2-devel, webkitgtk-devel
+License: GPLv2+
+URL: https://sourceforge.net/projects/xtrkcad-fork
+Source0: https://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20%{version}%20/xtrkcad-source-%{version}.zip
+BuildRoot: %{_tmppath}/%{name}-root
+BuildRequires: gcc, gcc-c++, cmake >= 2.4.7, pkgconfig, gtk2-devel
+BuildRequires: libcmocka, libcmocka-devel, libzip, libzip-devel
+BuildRequires: tinyxml, tinyxml-devel, pandoc
 BuildRequires: gettext, gettext-devel, glibc-devel
+Requires: libcmocka, libzip, tinyxml
+
 %description
 XTrkCad is a CAD program for designing Model Railroad layouts.
 XTrkCad supports any scale, has libraries of popular brands of x
@@ -22,22 +25,26 @@ benchwork, 'Print to BitMap', elevations, train simulation and
 car inventory.
 
 %prep
-%setup -n xtrkcad-source-%{version} -q
+%setup -n xtrkcad-source-%{version}/usr/local -q
 
 %build
-cmake -D CMAKE_INSTALL_PREFIX:PATH=/usr/ .
+cmake -D CMAKE_INSTALL_PREFIX:PATH=%{_prefix} -D CMAKE_BUILD_TYPE=Debug  .
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT/*
 make DESTDIR=$RPM_BUILD_ROOT install
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%check
+make test
 
 %files
+%license app/COPYING
 %defattr(-, root, root)
-%defattr(755, root, root) /usr/local/share/xtrkcad/xdg-open
 %{_bindir}/xtrkcad
 %{_datadir}
+
+%changelog
+* Tue Dec 14 2021 Phil Cameron
+- V5.2.2 GA
 
