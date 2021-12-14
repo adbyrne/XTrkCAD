@@ -93,8 +93,10 @@ static wMenu_p selectPopup2TYM;
 static wMenuPush_p menuPushModify;
 static wMenuPush_p rotateAlignMI;
 static wMenuPush_p descriptionMI;
+static wMenuPush_p tiesMI;
 static wMenuPush_p hideMI;
 static wMenuPush_p bridgeMI;
+static wMenuPush_p roadbedMI;
 static wMenuPush_p tiesMI;
 
 
@@ -3625,7 +3627,9 @@ static STATUS_T CmdSelect(
 #include "bitmaps/select.xpm"
 #include "bitmaps/delete.xpm"
 #include "bitmaps/tunnel.xpm"
+#include "bitmaps/ties.xpm"
 #include "bitmaps/bridge.xpm"
+#include "bitmaps/roadbed.xpm"
 #include "bitmaps/move.xpm"
 #include "bitmaps/rotate.xpm"
 #include "bitmaps/reflect.xpm"
@@ -3720,8 +3724,10 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup2M );
 	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Show/Hide Description"), 0, moveDescription, I2VP(0));
 	wMenuSeparatorCreate( selectPopup2M );
+	tiesMI = wMenuPushCreate(selectPopup2M, "", _("Ties/NoTies"), 0, SelectTies, I2VP( 0));
 	hideMI = wMenuPushCreate(selectPopup2M, "", _("Hide/NoHide"), 0, SelectTunnel, I2VP( 0));
 	bridgeMI = wMenuPushCreate(selectPopup2M, "", _("Bridge/NoBridge"), 0, SelectBridge, I2VP( 0));
+	roadbedMI = wMenuPushCreate(selectPopup2M, "", _("Roadbed/NoRoadbed"), 0, SelectRoadbed, I2VP( 0));
 	tiesMI = wMenuPushCreate(selectPopup2M, "", _("NoTies/Ties"), 0, SelectTies, I2VP( 0));
 	selectPopup2TM = wMenuMenuCreate(selectPopup2M, "", _("Thickness..."));
 	wMenuPushCreate( selectPopup2TM, "", _("Thin Tracks"), 0, SelectTrackWidth, I2VP(0 ));
@@ -3753,6 +3759,13 @@ EXPORT void InitCmdDelete( void )
 	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
 }
 
+EXPORT void InitCmdTies( void )
+{
+	wIcon_p icon;
+	icon = wIconCreatePixMap( ties_xpm[iconSize] );
+	AddToolbarButton( "cmdTies", icon, IC_SELECTED|IC_POPUP, SelectTies, NULL );
+}
+
 EXPORT void InitCmdTunnel( void )
 {
 	wIcon_p icon;
@@ -3765,6 +3778,13 @@ EXPORT void InitCmdBridge( void)
 	wIcon_p icon;
 	icon = wIconCreatePixMap( bridge_xpm[iconSize] );
 	AddToolbarButton( "cmdBridge", icon, IC_SELECTED|IC_POPUP, SelectBridge, NULL );
+}
+
+EXPORT void InitCmdRoadbed( void)
+{
+	wIcon_p icon;
+	icon = wIconCreatePixMap( roadbed_xpm[iconSize] );
+	AddToolbarButton( "cmdRoadbed", icon, IC_SELECTED|IC_POPUP, SelectRoadbed, NULL );
 }
 
 
