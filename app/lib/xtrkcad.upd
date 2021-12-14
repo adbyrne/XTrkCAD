@@ -1,4 +1,12 @@
+# Update Param Files
+# First non-comment line must be numeric date: YYYYMMDD
+# If this is less or equal to 'file.updatetime' in xtrkcad.rc/ini then this file is ignored
 20211112
+# Files listed here are
+# - File Renames: Same CONTENTS, different files (old files should be deleted)
+# - Modified CONTENTS: multiple CONTENTS lines. 1st is active contents, subsequent lines are old
+#
+# Updated files from V5.2.2b2
 N-Atlas Code 80 Track.xtp
 G-Piko.xtp
 HO-Piko-A.xtp

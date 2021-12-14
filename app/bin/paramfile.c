@@ -233,6 +233,7 @@ bool ReadParams(
 	long oldCheckSum;
 	long checkSum = 0;
 	BOOL_T checkSummed;
+	BOOL_T bFoundContents = FALSE;
 	paramVersion = -1;
 
 	if (dirName) {
@@ -312,8 +313,12 @@ bool ReadParams(
 #ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 9);
 #endif
-			curContents = MyStrdup(paramLine + 9);
-			curSubContents = curContents;
+			if ( bFoundContents == FALSE ) {
+				// Only use the first CONTENTS
+				curContents = MyStrdup(paramLine + 9);
+				curSubContents = curContents;
+				bFoundContents = TRUE;
+			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
 #ifdef UTFCONVERT
