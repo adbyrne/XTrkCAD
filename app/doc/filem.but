@@ -140,7 +140,7 @@ does so for trackplans without an image background.
 
 This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\K{cmdSelect}) objects are exported to the file. The export file will have an \c{xti} extension.
 
-\G{png.d/exportdxf.png}
+\G{png.d/exportfiledxf.png}
 
 Exported files can then be imported into other CAD programs.
 
