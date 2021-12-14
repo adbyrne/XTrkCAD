@@ -359,11 +359,12 @@ You can join to a helix in the same way you join to a circle.  However, once joi
 
 A label for the helix is drawn at it's the center.  If the elevations are set (either by a Defined Elevation point or connecting to a Defined Elevation point) for the two ends of the helix then the label contains the computed grade and vertical separation between layers as well as the number of turns and total length.  The label can be moved or turned off by the Move Label (\K{cmdMoveLabel}) command.
 
-\rule
+
+\S{cmdParallel} Parallel Track or Line
 
 \dd \G{png.d/maddparallel.png}
 
-\S{cmdParallel} Parallel Track or Line
+\rule
 
 You can pick between two Parallel Commands:
 
