@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.3.0 Beta 1]
+
+## Bugs
+
++ Add > Structure dialog caused weird artifact when closed
+
+## Added
+
++ Improved and Updated Help file
++ Structures snap to grid (if enabled) and respect grid angle
++ Roadbed option to track
++ Color selection for Bridge fill and Roadbed
+
+## Parameters
+
++ Mianne Benchwork parameter an example
+
+
 ## [5.2.2 Beta 3]
 
 ## Bugs
