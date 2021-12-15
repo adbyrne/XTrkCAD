@@ -124,6 +124,7 @@
 #define ACCL_IMPORT		(WALT+WCTL+'i')
 #define ACCL_IMPORT_MOD	(0)
 #define ACCL_EXPORTDXF	(0)
+#define ACCL_EXPORTSVG	(0)
 #define ACCL_LOOSEN		(WCTL+WSHIFT+'k')
 #define ACCL_GROUP		(WCTL+WSHIFT+'g')
 #define ACCL_UNGROUP	(WCTL+WSHIFT+'u')

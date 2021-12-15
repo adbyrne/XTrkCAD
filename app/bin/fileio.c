@@ -1457,7 +1457,7 @@ EXPORT void DoImport( void * type )
 {
 	importAsModule = (int)VP2L(type);
 	if (importFile_fs == NULL)
-		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
+		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, type == 0 ? _("Import Tracks") : _("Import Module"),
 			sImportFilePattern, ImportTracks, NULL );
 
 	wFilSelect( importFile_fs, GetCurrentPath(LAYOUTPATHKEY));

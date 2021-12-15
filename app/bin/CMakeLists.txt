@@ -133,6 +133,7 @@ SET(SOURCES
 	file2uri.c
 	file2uri.h
 	fileio.c
+	fileio.h
 	filenoteui.c
 	i18n.c
 	layout.c

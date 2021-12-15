@@ -2361,12 +2361,13 @@ static void SetAccelKeys()
 #include "bitmaps/zoom-extent.xpm"
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
-#include "bitmaps/partlist.xpm" // unused icon
+// #include "bitmaps/partlist.xpm" // unused
 #include "bitmaps/doc-export.xpm"
-#include "bitmaps/doc-export-dxf.xpm"
 #include "bitmaps/doc-export-bmap.xpm"
+#include "bitmaps/doc-export-dxf.xpm"
+#include "bitmaps/doc-export-svg.xpm"
 #include "bitmaps/doc-import.xpm"
-#include "bitmaps/doc-import-xtc.xpm"
+#include "bitmaps/doc-import-xtc.xpm" 
 #include "bitmaps/doc-new.xpm"
 #include "bitmaps/doc-save.xpm"
 #include "bitmaps/doc-open.xpm"
@@ -2551,8 +2552,8 @@ static void CreateMenus(void) {
 			ACCL_EXPORTDXF, DoExportDXF, IC_SELECTED,
 			NULL);
 #if XTRKCAD_CREATE_SVG
-	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"), ACCL_EXPORTDXF, 
-			DoExportSVG, IC_SELECTED, NULL);
+	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"), 
+		ACCL_EXPORTSVG, DoExportSVG, IC_SELECTED, NULL);
 #endif
 	wMenuSeparatorCreate(fileM);
 
@@ -2947,25 +2948,29 @@ static void LoadFileList(void) {
 	}
 }
 
-EXPORT void InitCmdEnumerate(void) {
-	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
-			IC_SELECTED | IC_ACCLKEY, EnumerateTracks,
-			NULL);
-}
+//EXPORT void InitCmdEnumerate(void) {
+//	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
+//			IC_SELECTED | IC_ACCLKEY, EnumerateTracks,
+//			NULL);
+//}
 
 EXPORT void InitCmdExport(void) {
 	ButtonGroupBegin( _("Import/Export"), "cmdExportImportSetCmd", _("Import/Export") );
 	cmdGroup = BG_EXPORTIMPORT;
 	AddToolbarButton("cmdExport", wIconCreatePixMap(doc_export_xpm[iconSize]),
 			IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
-	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), IC_SELECTED | IC_ACCLKEY,
-		DoExportDXF, I2VP(1));
 	AddToolbarButton("cmdExportBmap", wIconCreatePixMap(doc_export_bmap_xpm[iconSize]), IC_ACCLKEY,
 		OutputBitMapInit(), NULL);
+	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), 
+		IC_SELECTED | IC_ACCLKEY, DoExportDXF, I2VP(1));
+#if XTRKCAD_CREATE_SVG
+	AddToolbarButton("cmdExportSVG", wIconCreatePixMap(doc_export_svg_xpm[iconSize]), 
+		IC_SELECTED | IC_ACCLKEY, DoExportSVG, NULL);
+#endif
 	AddToolbarButton("cmdImport", wIconCreatePixMap(doc_import_xpm[iconSize]), IC_ACCLKEY,
 			DoImport, I2VP(0));
 	AddToolbarButton("cmdImportModule", wIconCreatePixMap(doc_import_xtc_xpm[iconSize]), IC_ACCLKEY,
-				DoImport, I2VP(1));
+			DoImport, I2VP(1));
 	ButtonGroupEnd();
 }
 
