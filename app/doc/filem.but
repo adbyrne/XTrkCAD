@@ -25,19 +25,19 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed below.
+\dd \G{png.d/bexport.png} \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed below.
 
 \u000
 
-\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. The bitmap can be saved in either JPEG or PNG format.
+\dd \G{png.d/bexportbmap.png}\f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. The bitmap can be saved in either JPEG or PNG format.
 
 \u000
 
-\dd \f{Export to DXF} - Exports the selected objects to a file in DXF format (\K{generalTerms}). The exported file can then be imported into other CAD programs.
+\dd \G{png.d/bexportdxf.png}\f{Export to DXF} - Exports the selected objects to a file in DXF format (\K{generalTerms}). The exported file can then be imported into other CAD programs.
 
 \u000
 
-\dd \f{Export to SVG} - Exports the selected objects to a file in SVG format. The exported file can then be imported into a vector drawing program like Inkscape
+\dd \G{png.d/bexportsvg.png} \f{Export to SVG} - Exports the selected objects to a file in SVG format. The exported file can then be imported into a vector drawing program like Inkscape
 or used for publishing on the web.
 
 \u000
@@ -46,11 +46,11 @@ or used for publishing on the web.
 
 \u000
 
-\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
+\dd \G{png.d/bimport.png} \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
 
 \u000
 
-\dd \f{Import Module} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
+\dd \G{png.d/bimportmod.png} \f{Import Module} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
 \u000
 
 \dd \G{png.d/bnew.png} \f{New} - Clears the current layout.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation. After that the Layout Options (\K{cmdLayout}) dialog will be opened.

@@ -1,4 +1,4 @@
-static char *doc_import_xtc_x16[] = {
+static char *doc_import_mod_x16[] = {
 	"16 16 13 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -30,7 +30,7 @@ static char *doc_import_xtc_x16[] = {
 	"   4AAAAAAAAAAA4",
 	"   4444444444444"};
 
-static char *doc_import_xtc_x24[] = {
+static char *doc_import_mod_x24[] = {
 	"24 24 12 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -69,7 +69,7 @@ static char *doc_import_xtc_x24[] = {
 	"     4999999999999999994",
 	"     4444444444444444444"};
 
-static char *doc_import_xtc_x32[] = {
+static char *doc_import_mod_x32[] = {
 	"32 32 15 1",
 	" 	c	None",
 	"0	c	#000000",
@@ -119,5 +119,5 @@ static char *doc_import_xtc_x32[] = {
 	"       5CCCCCCCCCCCCCCCCCCCCCCC5",
 	"        55555555555555555555555 "};
 
-static char **doc_import_xtc_xpm[3] = { doc_import_xtc_x16, doc_import_xtc_x24, doc_import_xtc_x32 };
+static char **doc_import_mod_xpm[3] = { doc_import_mod_x16, doc_import_mod_x24, doc_import_mod_x32 };
 

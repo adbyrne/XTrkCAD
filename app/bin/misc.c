@@ -2367,7 +2367,7 @@ static void SetAccelKeys()
 #include "bitmaps/doc-export-dxf.xpm"
 #include "bitmaps/doc-export-svg.xpm"
 #include "bitmaps/doc-import.xpm"
-#include "bitmaps/doc-import-xtc.xpm" 
+#include "bitmaps/doc-import-mod.xpm" 
 #include "bitmaps/doc-new.xpm"
 #include "bitmaps/doc-save.xpm"
 #include "bitmaps/doc-open.xpm"
@@ -2969,7 +2969,7 @@ EXPORT void InitCmdExport(void) {
 #endif
 	AddToolbarButton("cmdImport", wIconCreatePixMap(doc_import_xpm[iconSize]), IC_ACCLKEY,
 			DoImport, I2VP(0));
-	AddToolbarButton("cmdImportModule", wIconCreatePixMap(doc_import_xtc_xpm[iconSize]), IC_ACCLKEY,
+	AddToolbarButton("cmdImportModule", wIconCreatePixMap(doc_import_mod_xpm[iconSize]), IC_ACCLKEY,
 			DoImport, I2VP(1));
 	ButtonGroupEnd();
 }
