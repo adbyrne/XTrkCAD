@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## Added
 
++ Exports default to All if nothing selected
++ Enhanced DXF export to include color and DOT line style
 + Bitmap export to JPEG and PNG formats
 + Include background bitmap in bitmap export
 + Improved and Updated Help file
