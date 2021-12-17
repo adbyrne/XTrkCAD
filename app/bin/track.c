@@ -1384,7 +1384,7 @@ EXPORT void SelectAbove( void * unused )
 		to_last = &ltrk->next;
 	}
 	UndoEnd();
-	DrawSelectedTracks( &mainD );
+	DrawSelectedTracks( &mainD, false );
 }
 
 
@@ -1625,7 +1625,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 /*******
  * Move Selected Tracks to origin zero and write out
  *******/
-EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset)
+EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset, BOOL_T all )
 {
 	track_p trk;
 	coOrd xlat,orig;
@@ -1649,7 +1649,7 @@ EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset)
 	xlat.x = - orig.x;
 	xlat.y = - orig.y;
 	TRK_ITERATE( trk ) {
-		if ( GetTrkSelected(trk) ) {
+		if ( (all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected(trk) ) {
 			if (QueryTrack(trk,Q_ISTRAIN)) continue; //Don't bother with CARs
 			MoveTrack( trk, xlat );
 			trackCmds(GetTrkType(trk))->write( trk, f );
@@ -3156,7 +3156,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 }
 
 
-EXPORT void DrawSelectedTracks( drawCmd_p d )
+EXPORT void DrawSelectedTracks( drawCmd_p d, BOOL_T all )
 {
 	track_cp trk;
 	wIndex_t count;
@@ -3165,7 +3165,7 @@ EXPORT void DrawSelectedTracks( drawCmd_p d )
 	InfoCount( 0 );
 
 	TRK_ITERATE( trk ) {
-		if ( GetTrkSelected( trk ) ) {
+		if ( (all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected( trk ) ) {
 			DrawTrack( trk, d, wDrawColorBlack );
 			count++;
 			if (count%10 == 0)

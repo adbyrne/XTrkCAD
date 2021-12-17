@@ -432,6 +432,7 @@ static int DoExportSVGTracks(
     DynString command = NaS;
     SVGDocument *svg;
     SVGParent *svgData;
+	BOOL_T all = (selectedTrackCount == 0);
     char *id;
 
     assert(fileName != NULL);
@@ -452,7 +453,7 @@ static int DoExportSVGTracks(
 
     svgD.d = (wDraw_p)svgData;
 
-    DrawSelectedTracks(&svgD);
+    DrawSelectedTracks(&svgD,all);
     SvgAddCSSStyle((SVGParent *)svgD.d);
     SvgSetTitle(&svgD);						// make sure this is the last element
 
@@ -478,7 +479,7 @@ static int DoExportSVGTracks(
 
 void DoExportSVG(void)
 {
-    assert(selectedTrackCount > 0);
+    // assert(selectedTrackCount > 0);
 
     if (exportSVGFile_fs == NULL)
         exportSVGFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to SVG"),

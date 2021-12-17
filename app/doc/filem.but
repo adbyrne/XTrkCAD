@@ -25,7 +25,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \G{png.d/bexport.png} \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed below.
+\dd \G{png.d/bexport.png} \f{Export} - Exports objects to a file in \e{XTrackCAD} (*.xti) format. If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into another layout design. Refer to the Import command listed below.
 
 \u000
 
@@ -33,11 +33,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \G{png.d/bexportdxf.png}\f{Export to DXF} - Exports the selected objects to a file in DXF format (\K{generalTerms}). The exported file can then be imported into other CAD programs.
+\dd \G{png.d/bexportdxf.png}\f{Export to DXF} - Exports objects to a file in DXF format (\K{generalTerms}). If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into other CAD programs.
 
 \u000
 
-\dd \G{png.d/bexportsvg.png} \f{Export to SVG} - Exports the selected objects to a file in SVG format. The exported file can then be imported into a vector drawing program like Inkscape
+\dd \G{png.d/bexportsvg.png} \f{Export to SVG} - Exports objects to a file in SVG format. If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into a vector drawing program like Inkscape
 or used for publishing on the web.
 
 \u000

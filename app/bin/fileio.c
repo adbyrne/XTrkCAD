@@ -1480,6 +1480,7 @@ static int DoExportTracks(
 {
 	FILE * f;
 	time_t clock;
+	BOOL_T all = selectedTrackCount == 0;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );
@@ -1498,7 +1499,7 @@ static int DoExportTracks(
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
 	coOrd offset;
-	ExportTracks( f , &offset);
+	ExportTracks( f , &offset, all );
 	fprintf(f, "%s\n", END_TRK_FILE);
 	fclose(f);
 
@@ -1513,10 +1514,10 @@ static int DoExportTracks(
 
 EXPORT void DoExport( void * unused )
 {
-	if (selectedTrackCount <= 0) {
-		ErrorMessage( MSG_NO_SELECTED_TRK );
-		return;
-	}
+	//if (selectedTrackCount <= 0) {
+	//	ErrorMessage( MSG_NO_SELECTED_TRK );
+	//	return;
+	//}
 	if (exportFile_fs == NULL)
 		exportFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Export Tracks"),
 				sImportFilePattern, DoExportTracks, NULL );
@@ -1548,7 +1549,7 @@ EXPORT void EditCopy( void * unused )
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
-	ExportTracks(f, &paste_offset);
+	ExportTracks(f, &paste_offset, false );
 	fprintf(f, "%s\n", END_TRK_FILE );
 	SetUserLocale();
 	fclose(f);
