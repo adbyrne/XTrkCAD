@@ -46,6 +46,19 @@ void DxfLayerName(DynString *result, char *name, int layer)
 }
 
 /**
+* Build and format an integer. 
+*
+* \param result OUT buffer for result
+* \param type IN type of integer following DXF specs
+* \param value IN position
+*/
+
+void DxfFormatInteger(DynString *result, int type, int value)
+{
+    DynStringPrintf(result, DXF_INDENT "%d\n%d\n", type, value);
+}
+
+/**
 * Build and format a position. If it specifies a point the value
 * is assumed to be in inches and will be converted to millimeters
 * if the metric system is active.
@@ -63,21 +76,25 @@ void DxfFormatPosition(DynString *result, int type, double value)
 		if( type < 50 || type > 58 )
 			value *= 25.4;
 	}
-		
-    DynStringPrintf(result, DXF_INDENT "%d\n%0.6f\n", type, value);
+
+	DynStringPrintf(result, DXF_INDENT "%d\n%0.6f\n", type, value);
 }
 
 /**
 * Build and format the line style definition
 *
 * \param result OUT buffer for result
-* \param type IN line style TRUE for dashed, FALSE for solid lines
+* \param type IN line style
 */
 
-void DxfLineStyle(DynString *result, int isDashed)
+void DxfLineStyle(DynString *result, int style)
 {
-    DynStringPrintf(result, DXF_INDENT "6\n%s\n",
-                    (isDashed ? "DASHED" : "CONTINUOUS"));
+	char* s = "CONTINUOUS";
+	switch ( style ){
+	case 1: s = "DASHEDTINY"; break;
+	case 2: s = "DOTTINY"; break;
+	}
+    DynStringPrintf(result, DXF_INDENT "6\n%s\n", s);
 }
 
 /**
@@ -118,10 +135,28 @@ DxfAppendPosition(DynString *output, int type, double value)
 }
 
 /**
+* Build and format an integer. The result is appended to the existing result buffer.
+*
+* \param output OUT buffer for result
+* \param type IN type of integer following DXF specs
+* \param value IN position
+*/
+
+static void
+DxfAppendInteger(DynString *output, int type, int value)
+{
+	DynString formatted = NaS;
+	DynStringMalloc(&formatted, 0);
+	DxfFormatInteger(&formatted, type, value);
+	DynStringCatStr(output, &formatted);
+	DynStringFree(&formatted);
+}
+
+/**
 * Build and format the line style definition. The result is appended to the existing result buffer.
 *
 * \param result OUT buffer for result
-* \param type IN line style TRUE for dashed, FALSE for solid lines
+* \param type IN line style 0 CONTINUOUS, 1 DASHED or 2 DOT
 */
 
 static void
@@ -142,11 +177,12 @@ DxfAppendLineStyle(DynString *output, int style)
 * \param x0, y0 IN first endpoint
 * \param x1, y1 IN second endpoint
 * \param style IN line style, TRUE for dashed, FALSE for continuous
+* \param color IN line color
 */
 
 void
 DxfLineCommand(DynString *result, int layer, double x0,
-               double y0, double x1, double y1, int style)
+               double y0, double x1, double y1, int style, int color)
 {
     DynStringCatCStr(result, DXF_INDENT "0\nLINE\n");
     DxfAppendLayerName(result, layer);
@@ -155,6 +191,7 @@ DxfLineCommand(DynString *result, int layer, double x0,
     DxfAppendPosition(result, 11, x1);
     DxfAppendPosition(result, 21, y1);
     DxfAppendLineStyle(result, style);
+	DxfAppendInteger(result, 420, color);
 }
 
 /**
@@ -165,11 +202,12 @@ DxfLineCommand(DynString *result, int layer, double x0,
 * \param x, y IN center point
 * \param r IN radius
 * \param style IN line style, TRUE for dashed, FALSE for continuous
+* \param color IN line color
 */
 
 void
 DxfCircleCommand(DynString *result, int layer, double x,
-                 double y, double r, int style)
+                 double y, double r, int style, int color)
 {
     DynStringCatCStr(result, DXF_INDENT "0\nCIRCLE\n");
     DxfAppendPosition(result, 10, x);
@@ -177,6 +215,7 @@ DxfCircleCommand(DynString *result, int layer, double x,
     DxfAppendPosition(result, 40, r);
     DxfAppendLayerName(result, layer);
     DxfAppendLineStyle(result, style);
+	DxfAppendInteger(result, 420, color);
 }
 
 /**
@@ -189,11 +228,12 @@ DxfCircleCommand(DynString *result, int layer, double x,
 * \param a0 IN starting angle
 * \param a1 IN ending angle
 * \param style IN line style, TRUE for dashed, FALSE for continuous
+* \param color IN line color
 */
 
 void
 DxfArcCommand(DynString *result, int layer, double x, double y,
-              double r, double a0, double a1, int style)
+              double r, double a0, double a1, int style, int color)
 {
     DynStringCatCStr(result, DXF_INDENT "0\nARC\n");
     DxfAppendPosition(result, 10, x);
@@ -203,6 +243,7 @@ DxfArcCommand(DynString *result, int layer, double x, double y,
     DxfAppendPosition(result, 51, a0+a1);
     DxfAppendLayerName(result, layer);
     DxfAppendLineStyle(result, style);
+	DxfAppendInteger(result, 420, color);
 }
 
 /**
@@ -213,11 +254,12 @@ DxfArcCommand(DynString *result, int layer, double x, double y,
 * \param x, y IN text position
 * \param size IN font size
 * \param text IN text
+* \param color IN text color
 */
 
 void
 DxfTextCommand(DynString *result, int layer, double x,
-               double y, double size, char *text)
+               double y, double size, char *text, int color)
 {
     DynStringCatCStr(result, DXF_INDENT "0\nTEXT\n");
     DynStringCatCStrs(result, DXF_INDENT "1\n", text, "\n", NULL);
@@ -225,6 +267,7 @@ DxfTextCommand(DynString *result, int layer, double x,
     DxfAppendPosition(result, 20, y);
     DxfAppendPosition(result, 40, size/72.0);
     DxfAppendLayerName(result, layer);
+	DxfAppendInteger(result, 420, color);
 }
 
 /**
