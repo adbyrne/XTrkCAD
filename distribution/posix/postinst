@@ -1,11 +1,19 @@
 #!/bin/sh
-INSTALLDIR=/usr/share/xtrkcad
-
 LOGF=/tmp/xtrkcad-setup.log
 if [ -f "${LOGF}" ] ; then
 	chmod 666 ${LOGF}
+	echo postinst: $* >> ${LOGF}
 else
 	LOGF=/dev/null
+fi
+
+if [ -d /usr/local/share/xtrkcad ] ; then
+	INSTALLDIR=/usr/local/share/xtrkcad
+elif [ -d /usr/share/xtrkcad ] ; then
+	INSTALLDIR=/usr/share/xtrkcad
+else
+	echo No existing XTrkCad install >> ${LOGF}
+	exit 1
 fi
 
 ( su -c "sh ${INSTALLDIR}/xtrkcad-setup install ${INSTALLDIR}" -l $SUDO_USER ) >> ${LOGF} 2>&1

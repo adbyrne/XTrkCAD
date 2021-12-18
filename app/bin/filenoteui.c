@@ -212,7 +212,7 @@ FileEditOK(void *junk)
     UpdateFile(&noteDataInUI, OK_FILE, FALSE);
     wHide(fileEditW);
 	ResetIfNotSticky();
-	FileIsChanged();
+	SetFileChanged();
 }
 
 /**

@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
    id="Layer_1"
    x="0px"
@@ -15,7 +8,14 @@
    style="enable-background:new 0 0 48 48;"
    xml:space="preserve"
    sodipodi:docname="circle-filled-tangent.svg"
-   inkscape:version="1.0.2-2 (e86c870879, 2021-01-15)"><metadata
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata
    id="metadata3982"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
          rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
@@ -28,18 +28,19 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1421"
+   inkscape:window-width="1426"
    inkscape:window-height="903"
    id="namedview3978"
    showgrid="false"
    inkscape:zoom="13.417014"
-   inkscape:cx="24"
-   inkscape:cy="24"
+   inkscape:cx="24.036645"
+   inkscape:cy="24.036645"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
    inkscape:current-layer="Layer_1"
-   inkscape:document-rotation="0" />
+   inkscape:document-rotation="0"
+   inkscape:pagecheckerboard="0" />
 <style
    type="text/css"
    id="style3967">
@@ -50,7 +51,7 @@
 </style>
 <path
    class="st0"
-   d="M43.9,24.2c0,10.9-8.8,19.7-19.7,19.7c-10.9,0-19.7-8.8-19.7-19.7c0-10.9,8.8-19.7,19.7-19.7  C35.1,4.5,43.9,13.3,43.9,24.2z"
+   d="m 46.005278,23.999999 c 0,12.17551 -9.829769,22.005279 -22.005279,22.005279 -12.175509,0 -22.0052775,-9.829769 -22.0052775,-22.005279 0,-12.175509 9.8297685,-22.0052775 22.0052775,-22.0052775 12.17551,0 22.005279,9.8297685 22.005279,22.0052775 z"
    id="path3969"
    style="fill:#80e1ff;fill-opacity:1" />
 <line
@@ -64,14 +65,14 @@
 
 <line
    class="st2"
-   x1="24.973295"
-   y1="24.707342"
-   x2="37.650928"
-   y2="37.238232"
+   x1="24.167141"
+   y1="23.9102"
+   x2="38.231514"
+   y2="37.811775"
    id="line4088"
-   style="fill:none;stroke:#cc0000;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /><polyline
+   style="fill:none;stroke:#cc0000;stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /><polyline
    class="st3"
    points="28.8,24 24.4,24.7 23.7,29.1 "
    id="polyline4090"
-   transform="matrix(1.3657905,0,0,1.3104272,-8.4548399,-7.7642624)"
-   style="fill:none;stroke:#cc0000;stroke-width:1.86871;stroke-linecap:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /></svg>
+   transform="matrix(1.6700933,0,0,1.6023948,-16.583136,-15.668951)"
+   style="fill:none;stroke:#cc0000;stroke-width:1.83385977;stroke-linecap:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" /></svg>

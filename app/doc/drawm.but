@@ -588,17 +588,23 @@ In Origin Mode (entered using \c{'o'} or the Context Menu, there are certain sho
 
 \G{png.d/btext.png}
 
-The \f{Text} command lets you enter text on the layout at the selected position. You can use the Tab key to format the text to fixed tab positions and CTRL+Enter to enter a newLine character.
+The \f{Text} command lets you enter a Text Draw object on the layout at the selected position. You can use the Tab key to format the text to fixed tab positions and CTRL+Enter to enter a newLine character.
 
 \G{png.d/statustext.png}
 
-The font size can be changed by the Font Size drop list on the \f{Status-bar} (\K{mainW}).  The font size is scaled along with everything else on the layout so text is always the same relative size as other layout objects.
+The font size can be changed by the Font Size drop list on the \f{Status-bar} (\K{mainW}). The font size is scaled along with everything else on the layout so text is always the same relative size as other layout objects.
 
-The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \c{Shift+Right-Click} (\K{cmdAcclKeys}).
+The color used can be selected by the Color icon on the \f{Status-bar} (\K{mainW}). 
 
-The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \c{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \c{Left-Click+Drag}ing the text to any desired postion on the layout.
+The new text object can be "boxed" by having a line drawn around it using the Boxed tick-mark  on the \f{Status-bar} (\K{mainW}).
 
-The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects and to draw boxes around them.
+The position where text is to be placed on the layout is selected prior to text entry by \c{Left-Click}ing on the layout at the point where the text is to appear. Desired text is input after the position is selected. If necessary, the location can be changed once text entry begins by \c{Left-Click+Drag}ing the text to any desired postion on the layout.
+
+The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents, color and fontsize of existing \f{Text} objects and to set the boxes property.
+
+The new Text object is committed when another command is entered (or \e{Enter} is used if the Text command is Sticky).
+
+The font used for all Text objects can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \c{Shift+Right-Click} (\K{cmdAcclKeys}).
 
 Note: loading fonts (or changing sizes) can take a noticeable amount of time.
 

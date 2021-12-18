@@ -60,6 +60,8 @@ static struct sDataLayout thisLayout = {
     NULL,
 };
 
+EXPORT wIndex_t changed = 0;
+
 static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r0_9999999 = { 0, 9999999 };
@@ -120,6 +122,18 @@ CopyLayoutTitle(char* dest, char *src)
 {
     strncpy(dest, src, TITLEMAXLEN);
     *(dest + TITLEMAXLEN - 1) = '\0';
+}
+
+
+/**
+* Set the file's changed flag and update the window title.
+*/
+
+void
+SetFileChanged(void)
+{
+	changed++;
+	SetWindowTitle();
 }
 
 void
@@ -519,13 +533,15 @@ static void ChangeLayout() {
     /* [mf Nov. 15, 2005] Get the gauge/scale settings */
     if (changes & CHANGE_SCALE) {
         SetScaleGauge(thisLayout.props.curScaleDescInx, thisLayout.props.curGaugeInx);
-    }
+		file_changed = TRUE;
+	}
 
     /* [mf Nov. 15, 2005] end */
 
     if (changes & CHANGE_MAP) {
         SetRoomSize(thisLayout.props.roomSize);
-    }
+		file_changed = TRUE;
+	}
 
     DoChangeNotification(changes);
 
@@ -534,12 +550,13 @@ static void ChangeLayout() {
         // now set the minimum track radius
         sprintf(prefString, "minTrackRadius-%s", curScaleName);
         wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
-    }
+		file_changed = TRUE;
+	}
 
-    if ((changes & CHANGE_BACKGROUND) || file_changed) {
+    if (changes & CHANGE_BACKGROUND) {
 
     	LayoutBackGroundSave();
-    	file_changed = FALSE;
+    	file_changed = TRUE;
     }
 }
 
@@ -551,8 +568,11 @@ static void ChangeLayout() {
 
 static void LayoutOk(void * unused)
 {
-
 	ChangeLayout();
+	if(file_changed){
+		SetFileChanged();
+		file_changed = FALSE;
+	}
 
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);

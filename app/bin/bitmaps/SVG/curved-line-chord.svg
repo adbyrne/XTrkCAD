@@ -28,17 +28,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1347"
+   inkscape:window-width="1351"
    inkscape:window-height="907"
    id="namedview2196"
    showgrid="false"
-   inkscape:zoom="17.708333"
+   inkscape:zoom="10.897825"
    inkscape:cx="24"
    inkscape:cy="24"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style2171">
@@ -50,56 +51,64 @@
 </style>
 <path
    class="st0"
-   d="M7.7,42c0-18,16.8-32.6,31.8-32.6"
-   id="path2173" />
+   d="M 3.5220297,43.111597 C 3.5220297,21.615075 23.58545,4.1790071 41.499219,4.1790071"
+   id="path2173"
+   style="stroke-width:2.57;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st1"
-   d="M38.5,5.4"
-   id="path2175" />
+   d="M 38.315236,-0.27323563"
+   id="path2175"
+   style="stroke-width:1.16155" />
 <path
    class="st1"
-   d="M41.8,7.1"
-   id="path2177" />
+   d="M 43.095812,2.5733838"
+   id="path2177"
+   style="stroke-width:1.16155" />
 <path
    class="st1"
-   d="M38.5,5.4"
-   id="path2179" />
+   d="M 38.315236,-0.27323563"
+   id="path2179"
+   style="stroke-width:1.16155" />
 <path
    class="st1"
-   d="M35.6,17.9"
-   id="path2181" />
+   d="M 35.894182,15.118161"
+   id="path2181"
+   style="stroke-width:1.16155" />
 <path
    class="st1"
-   d="M38.8,19.3"
-   id="path2183" />
+   d="M 39.611153,16.744336"
+   id="path2183"
+   style="stroke-width:1.16155" />
 <path
    class="st1"
-   d="M41.8,17.7"
-   id="path2185" />
+   d="M 43.095812,14.88585"
+   id="path2185"
+   style="stroke-width:1.16155" />
 <line
    class="st2"
-   x1="18.2"
-   y1="20.3"
-   x2="37.8"
-   y2="38.2"
+   x1="17.087498"
+   y1="19.028881"
+   x2="38.513435"
+   y2="38.767605"
    id="line2187"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:2.36307;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <path
    class="st3"
-   d="M38.8,26.8"
-   id="path2189" />
+   d="M 39.611153,25.455986"
+   id="path2189"
+   style="stroke-width:1.16155" />
 <polyline
    class="st4"
    points="18.4,25.3 18.2,20.3 22.8,20.4 "
    id="polyline2191"
-   style="stroke:#cc0000;stroke-width:2.10522752;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
-   transform="matrix(1.1875201,0,0,1.1875201,-3.4128651,-3.8066588)" />
+   style="stroke:#cc0000;stroke-width:1.34728;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.855595,0,0,1.855595,-16.684331,-18.639697)" />
 <line
    class="st2"
-   x1="43"
-   y1="32.3"
-   x2="31.7"
-   y2="44.2"
+   x1="44.85672"
+   y1="30.743393"
+   x2="31.731171"
+   y2="44.56588"
    id="line2193"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 </svg>

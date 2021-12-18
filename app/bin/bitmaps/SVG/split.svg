@@ -28,17 +28,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1442"
+   inkscape:window-width="1468"
    inkscape:window-height="951"
    id="namedview1562"
    showgrid="false"
-   inkscape:zoom="17.708333"
+   inkscape:zoom="14.378038"
    inkscape:cx="24"
-   inkscape:cy="24"
+   inkscape:cy="23.74054"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style1527">
@@ -49,104 +50,104 @@
 </style>
 <line
    class="st0"
-   x1="5.9"
-   y1="35.8"
-   x2="14.2"
-   y2="43.7"
+   x1="3.8516407"
+   y1="35.657555"
+   x2="13.378208"
+   y2="44.725014"
    id="line1529" />
 <line
    class="st0"
-   x1="9.2"
-   y1="32.3"
-   x2="17.4"
-   y2="40.2"
+   x1="7.6393127"
+   y1="31.640329"
+   x2="17.051104"
+   y2="40.707787"
    id="line1531" />
 <line
    class="st0"
-   x1="12.5"
-   y1="28.8"
-   x2="20.8"
-   y2="36.7"
+   x1="11.426984"
+   y1="27.623102"
+   x2="20.953552"
+   y2="36.690559"
    id="line1533" />
 <line
    class="st0"
-   x1="15.8"
-   y1="25.3"
-   x2="24"
-   y2="33.2"
+   x1="15.214656"
+   y1="23.605873"
+   x2="24.626448"
+   y2="32.673332"
    id="line1535" />
-<path
-   class="st1"
-   d="M27.4,29.7"
-   id="path1537" />
-<path
-   class="st1"
-   d="M19.1,21.8"
-   id="path1539" />
+
+
 <line
    class="st0"
-   x1="22.4"
-   y1="18.3"
-   x2="30.6"
-   y2="26.2"
+   x1="22.789999"
+   y1="15.57142"
+   x2="32.20179"
+   y2="24.638878"
    id="line1541" />
 <line
    class="st0"
-   x1="25.7"
-   y1="14.7"
-   x2="34"
-   y2="22.7"
+   x1="26.577673"
+   y1="11.439415"
+   x2="36.10424"
+   y2="20.621649"
    id="line1543" />
 <line
    class="st0"
-   x1="29"
-   y1="11.2"
-   x2="37.2"
-   y2="19.2"
+   x1="30.365345"
+   y1="7.4221864"
+   x2="39.777134"
+   y2="16.604422"
    id="line1545" />
 <line
    class="st0"
-   x1="32.3"
-   y1="7.7"
-   x2="40.6"
-   y2="15.7"
+   x1="34.153015"
+   y1="3.404959"
+   x2="43.679581"
+   y2="12.587194"
    id="line1547" />
 <line
    class="st2"
-   x1="22.6"
-   y1="21.6"
-   x2="36.5"
-   y2="6.9"
-   id="line1549" />
+   x1="23.084372"
+   y1="19.683172"
+   x2="39.038502"
+   y2="2.8108137"
+   id="line1549"
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#666666;stroke-opacity:1" />
 <line
    class="st2"
-   x1="5.6"
-   y1="39.5"
-   x2="19.3"
-   y2="25"
-   id="line1551" />
+   x1="3.7665691"
+   y1="40.163593"
+   x2="19.491148"
+   y2="23.520805"
+   id="line1551"
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#666666;stroke-opacity:1" />
 <line
    class="st2"
-   x1="27.1"
-   y1="26.2"
-   x2="41.2"
-   y2="11.5"
-   id="line1553" />
+   x1="28.054932"
+   y1="24.509245"
+   x2="44.238625"
+   y2="7.6368885"
+   id="line1553"
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#666666;stroke-opacity:1" />
 <line
    class="st2"
-   x1="10"
-   y1="44.1"
-   x2="24"
-   y2="29.5"
-   id="line1555" />
+   x1="8.5575352"
+   y1="45.184124"
+   x2="24.626448"
+   y2="28.426548"
+   id="line1555"
+   style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none;stroke:#666666;stroke-opacity:1" />
 <polyline
    class="st3"
    points="13.4,23.5 20.2,23.1 20.3,16.4 "
    id="polyline1557"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0e00;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:2.10972;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.3866205,0,0,1.4582594,-8.7657785,-14.110431)" />
 <polyline
    class="st3"
    points="33.7,28.5 26.8,28.9 26.8,35.6 "
    id="polyline1559"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0e00;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:2.19817;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.4082952,0,0,1.32259,-9.2134144,-9.5667462)" />
 </svg>

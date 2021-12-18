@@ -46,7 +46,6 @@ extern unsigned int curTrackLayer;
 extern coOrd descriptionOff;
 extern DIST_T roadbedWidth;
 extern DIST_T roadbedLineWidth;
-extern long printCenterLines;
 extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
@@ -150,7 +149,7 @@ typedef struct {
 		void (*draw)( track_p, drawCmd_p, wDrawColor );
 		DIST_T (*distance)( track_p, coOrd * );
 		void (*describe)( track_p, char * line, CSIZE_T len );
-		void (*delete)( track_p );
+		void (*deleteTrk)( track_p );
 		BOOL_T (*write)( track_p, FILE * );
 		BOOL_T (*read)( char * );
 		void (*move)( track_p, coOrd );

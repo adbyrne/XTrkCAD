@@ -79,7 +79,6 @@ EXPORT long drawEndPtV = 2;
 EXPORT long drawUnconnectedEndPt = 0;		/**< How do we draw Unconnected EndPts */
 
 EXPORT long centerDrawMode = FALSE;			/**< flag to control drawing of circle centers */
-EXPORT long printCenterLines = FALSE; 		/**< flag to control drawing of centerline in Print */
 
 static BOOL_T exportingTracks = FALSE;
 
@@ -1101,7 +1100,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 EXPORT void FreeTrack( track_p trk )
 {
 	bFreeTrack = TRUE;
-	trackCmds(trk->type)->delete( trk );
+	trackCmds(trk->type)->deleteTrk( trk );
 	if (trk->endPt)
 		MyFree(trk->endPt);
 	if (trk->extraData)
@@ -2626,6 +2625,38 @@ EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
 EXPORT long tieDrawMode = TIEDRAWMODE_SOLID;
 EXPORT wDrawColor tieColor;
 
+/**
+ * Centerline drawing test
+ *  
+ * \param 		   d    drawing context
+ * \return	true for centerline, false if no centerline to draw
+ */
+
+static bool
+HasTrackCenterline( drawCmd_p d )
+{
+	// for printing, drawing of center line depends on the scale
+	if( d->options & DC_CENTERLINE && d->options & DC_PRINT ) {
+		if( d->scale <= ( twoRailScale * 2.0 + 1.0 ) / 2.0 ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// all other cases of explicit centerline option (ie. bitmap)
+	if( d->options & DC_CENTERLINE ) {
+		return true;
+	}
+
+	// if zoomed in beyond 1:1 draw centerline when not doing a simple draw
+	if( ( d->scale <= 1.0 ) && !( d->options & DC_SIMPLE ) ) {
+		return true;
+	}
+
+	return false;
+}
+
 EXPORT wBool_t DoDrawTies( drawCmd_p d, track_cp trk )
 {
 	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
@@ -2732,7 +2763,6 @@ static void DrawCurvedTies(
 	}
 }
 
-
 EXPORT void DrawCurvedTrack(
 		drawCmd_p d,
 		coOrd p,
@@ -2790,8 +2820,7 @@ EXPORT void DrawCurvedTrack(
 	if ( d->scale >= scale2rail ) {
 		DrawArc( d, p, r, a0, a1, (centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, width, color );
 	} else {
-		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0
-				|| (d->scale <= scale2rail/2 && ((d->options&DC_PRINT) && printCenterLines))) {  // if printing two rails respect print CenterLine option
+		if ( HasTrackCenterline(d)) {
 			long options = d->options;
 			d->options |= DC_DASH;
 			DrawArc( d, p, r, a0, a1, 0, 0, color );
@@ -2921,8 +2950,7 @@ EXPORT void DrawStraightTrack(
 	if ( d->scale >= scale2rail ) {
 		DrawLine( d, p0, p1, width, color );
 	} else {
-		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0
-				|| (d->scale <= scale2rail/2 && ((d->options&DC_PRINT) && printCenterLines))) {  // if printing two rails respect print CenterLine option
+		if ( HasTrackCenterline(d)) { 
 			long options = d->options;
 			d->options |= DC_DASH;
 			DrawLine( d, p0, p1, 0, color );

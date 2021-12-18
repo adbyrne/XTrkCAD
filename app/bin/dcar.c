@@ -4108,8 +4108,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 			CarInvListAdd( itemP );
 		else
 			CarInvListUpdate( itemP );
-		changed++;
-		SetWindowTitle();
+		SetFileChanged();
 		reloadRoadnameList = TRUE;
 		if ( carDlgUpdateItemPtr==NULL ) {
 			if ( carDlgQuantity > 1 ) {
@@ -4494,8 +4493,7 @@ static void CarInvDlgDelete( void )
 		inx--;
 		cnt--;
 	}
-	changed++;
-	SetWindowTitle();
+	SetFileChanged();
 	carInvInx = -1;
 	ParamLoadControl( &carInvPG, I_CI_LIST );
 	ParamControlActive( &carInvPG, I_CI_EDIT, FALSE );
@@ -4918,8 +4916,7 @@ static int CarInvImportCsv(
 				}
 			}
 		}
-		changed++;
-		SetWindowTitle();
+		SetFileChanged();
 	}
 	fclose( f );
 	SetUserLocale();

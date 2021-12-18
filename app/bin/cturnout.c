@@ -216,8 +216,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 		to->pathOverRide = TRUE;
 	if (options & COMPOUND_OPTION_PATH_NOCOMBINE)
 		to->pathNoCombine = TRUE;
-	wIndex_t pathsLen = GetPathsLength(paths);
-	to->paths = (PATHPTR_T)memdup(paths, pathsLen * (sizeof * to->paths));
+	SetParamPaths( to, paths );
 	to->paramFileIndex = curParamFileIndex;
 	if (curParamFileIndex == PARAM_CUSTOM)
 		to->contentsLabel = MyStrdup("Custom Turnouts");
@@ -364,6 +363,7 @@ EXPORT wIndex_t CheckPaths(
 	PATHPTR_T paths)
 {
 	if ((segCnt == 0) || !segs) return -1;
+	if (!paths) return -1;
 	int pc, ps;
 	PATHPTR_T pp = 0;
 
@@ -455,9 +455,12 @@ static BOOL_T ReadTurnoutParam(
 	pathCnt = 0;
 	if (!ReadSegs())
 		return FALSE;
-	CheckPaths(tempSegs_da.cnt, &tempSegs(0), pathPtr);
+	PATHPTR_T pPaths = NULL;
+	if ( pathPtr && pathPtr[0] && pathCnt > 0 )
+		pPaths = pathPtr;
+	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pPaths );
 	to = CreateNewTurnout(scale, title, tempSegs_da.cnt, &tempSegs(0),
-		pathPtr, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options);
+			pPaths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
 	MyFree(title);
 	if (to == NULL)
 		return FALSE;
@@ -833,7 +836,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 	int i;
 	ANGLE_T a0, a1, aa0, aa1;
-	DIST_T r, l;
+	DIST_T r, len;
 	coOrd p0, p1;
 
 	PATHPTR_T pp;
@@ -914,10 +917,10 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 					angle += a1;
 
-					l = D2R(a1) * r;
+					len = D2R(a1) * r;
 					// Every 5 degrees or 5 * tie spacing
 					int cnt = (int)floor(a1 / 5.0);
-					int cnt2 = (int)floor(l / 5 / td->spacing);
+					int cnt2 = (int)floor(len / 5 / td->spacing);
 					if (cnt2 > cnt) cnt = cnt2;
 					if (cnt <= 0) cnt = 1;
 
@@ -3655,7 +3658,11 @@ static BOOL_T QueryTurnout(track_p trk, int query)
 		else
 			return FALSE;
 	case Q_CAN_NEXT_POSITION:
-		return (GetTrkEndPtCnt(trk) > 2);
+		{
+			PATHPTR_T path = GetPaths( trk ); // QueryTurnout
+			for ( path += strlen((char*)path) + 1; path[0] || path[1]; path++ );
+			return ( path[2] != 0 );
+		}
 	case Q_CORNU_CAN_MODIFY:
 		return FALSE;
 	default:
@@ -3677,9 +3684,7 @@ static void DrawTurnoutPositionIndicator(
 	BOOL_T multiPart = FALSE;
 
 	// Only 1 path?  Don't draw
-	path = GetPaths(trk);
-	for (path += strlen((char*)path) + 1; path[0] || path[1]; path++);
-	if (path[2] == 0)
+	if ( ! QueryTurnout( trk, Q_CAN_NEXT_POSITION ) )
 		return;
 
 	path = GetCurrPath(trk);
@@ -3805,7 +3810,7 @@ static BOOL_T MakeParallelTurnout(
 			yy = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 
 
-			PATHPTR_T paths = GetPaths(trk);
+			PATHPTR_T paths = GetPaths(trk); // MakeParallelTurnout
 			*newTrk = NewCompound(T_TURNOUT, 0, endPt[0].pos, endPt[0].angle + 90.0,
 				yy->title, 2, endPt, paths,
 				yy->segCnt, yy->segs);
@@ -4434,7 +4439,7 @@ static void AddTurnout(void)
 	/*
 	 * copy data */
 
-	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), curTurnout->paths, curTurnout->segCnt, curTurnout->segs);
+	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), GetParamPaths(curTurnout), curTurnout->segCnt, curTurnout->segs);
 	xx = GET_EXTRA_DATA(newTrk, T_TURNOUT, extraDataCompound_t);
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {

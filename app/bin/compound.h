@@ -130,6 +130,8 @@ void SetPaths( track_p trk, PATHPTR_T paths );
 PATHPTR_T GetCurrPath( track_p trk );
 long GetCurrPathIndex( track_p trk );
 void SetCurrPathIndex( track_p trk, long position );
+PATHPTR_T GetParamPaths( turnoutInfo_t * to );
+void SetParamPaths( turnoutInfo_t * to, PATHPTR_T paths );
 
 #define FIND_TURNOUT	(1<<11)
 #define FIND_STRUCT		(1<<12)

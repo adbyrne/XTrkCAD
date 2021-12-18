@@ -1436,6 +1436,7 @@ void InitCmdJoin( wMenu_p menu )
 	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"), wIconCreatePixMap(join_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(join_line_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
+	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */
 	log_join = LogFindIndex( "join" );
 }
 

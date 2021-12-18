@@ -48,25 +48,25 @@
 	.st2{fill:none;stroke:#F80E00;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;}
 </style>
 <rect
-   x="7.4617696"
-   y="8.7013607"
+   x="3.4919739"
+   y="4.7348843"
    class="st0"
-   width="33"
-   height="31"
+   width="41.016052"
+   height="38.530231"
    id="rect4"
-   style="fill:#80e2ff;fill-opacity:1;stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
+   style="fill:#80e2ff;fill-opacity:1;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
 <line
    class="st1"
-   x1="9.2214527"
-   y1="37.844131"
-   x2="37.491364"
-   y2="11.394991"
+   x1="6.4384027"
+   y1="40.359879"
+   x2="40.216499"
+   y2="8.7573147"
    id="line6"
-   style="stroke:#cc0e00;stroke-width:2.39576;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+   style="stroke:#cc0e00;stroke-width:3;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <polyline
    class="st2"
    points="39.9,18.3 39.4,11.4 32.7,11.4 "
    id="polyline8"
-   style="stroke:#cc0e00;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
-   transform="matrix(0.95830207,0,0,0.98231798,-0.26573702,0.19656603)" />
+   style="stroke:#cc0e00;stroke-width:2.48773465;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.1910839,0,0,1.2209336,-6.7122048,-5.1613282)" />
 </svg>

@@ -28,17 +28,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1394"
+   inkscape:window-width="1391"
    inkscape:window-height="982"
    id="namedview9"
    showgrid="false"
-   inkscape:zoom="14.378038"
+   inkscape:zoom="13.418604"
    inkscape:cx="24"
    inkscape:cy="24"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style2">
@@ -47,15 +48,15 @@
 </style>
 <path
    class="st0"
-   d="m 28.352645,23.053044 c 0,6.445429 -5.386657,11.55732 -11.919411,11.55732 -6.6473641,0 -11.9194114,-5.223019 -11.9194114,-11.55732 0,-6.445429 5.386657,-11.557321 11.9194114,-11.557321 6.532754,-0.111128 11.919411,5.111892 11.919411,11.557321 z"
+   d="m 29.039558,24.250588 c 0,7.267052 -6.073314,13.030574 -13.438823,13.030574 -7.4947277,0 -13.4388221,-5.888816 -13.4388221,-13.030574 0,-7.267051 6.0733144,-13.030575 13.4388221,-13.030575 7.365509,-0.125294 13.438823,5.763524 13.438823,13.030575 z"
    id="path4"
-   style="stroke-width:1.12855" />
+   style="stroke-width:1.27241;stroke:#990000;stroke-opacity:1" />
 <rect
-   x="18.037769"
-   y="8.9397774"
+   x="17.409807"
+   y="8.3382511"
    class="st1"
-   width="25.21414"
-   height="27.782021"
+   width="28.42828"
+   height="31.323498"
    id="rect6"
-   style="stroke-width:1.12855" />
+   style="stroke-width:1.27241;stroke:#000000;stroke-opacity:1" />
 </svg>

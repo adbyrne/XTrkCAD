@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1324"
+   inkscape:window-width="1330"
    inkscape:window-height="961"
    id="namedview853"
    showgrid="false"
@@ -38,7 +38,8 @@
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style846">
@@ -47,10 +48,10 @@
 </style>
 <polygon
    class="st0"
-   points="28.2,7.8 39.7,20.1 40,36.5 24.7,39.8 11.8,32.9 7.4,19.8 10.9,10 "
+   points="10.9,10 28.2,7.8 39.7,20.1 40,36.5 24.7,39.8 11.8,32.9 7.4,19.8 "
    id="polygon848"
    style="fill:#80e1ff;fill-opacity:1"
-   transform="translate(0.14906446,0.14906446)" />
+   transform="matrix(1.3119381,0,0,1.3037001,-7.0644654,-7.0270096)" />
 <path
    class="st1"
    d="M3.5,28.2"

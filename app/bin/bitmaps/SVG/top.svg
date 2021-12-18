@@ -28,7 +28,7 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1395"
+   inkscape:window-width="1396"
    inkscape:window-height="976"
    id="namedview858"
    showgrid="false"
@@ -38,7 +38,8 @@
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style851">
@@ -46,16 +47,16 @@
 	.st1{fill:#FF0603;}
 </style>
 <rect
-   x="18.532728"
-   y="10.882017"
+   x="17.38179"
+   y="8.2811852"
    class="st0"
-   width="23.988997"
-   height="26.416113"
+   width="28.549133"
+   height="31.43763"
    id="rect853"
-   style="stroke-width:1.07339" />
+   style="stroke:#000000;stroke-width:1.27743;stroke-opacity:1" />
 <path
    class="st1"
-   d="m 28.34641,24.301402 c 0,6.128538 -5.124922,10.989102 -11.340253,10.989102 -6.324371,0 -11.3402528,-4.966229 -11.3402528,-10.989102 0,-6.128538 5.1249218,-10.989103 11.3402528,-10.989103 6.215331,-0.105664 11.340253,4.860565 11.340253,10.989103 z"
+   d="m 29.060985,24.251499 c 0,7.29353 -6.099134,13.078054 -13.495954,13.078054 -7.5265895,0 -13.4959548,-5.910275 -13.4959548,-13.078054 0,-7.293529 6.0991333,-13.078052 13.4959548,-13.078052 7.39682,-0.125751 13.495954,5.784523 13.495954,13.078052 z"
    id="path855"
-   style="stroke-width:1.07339" />
+   style="stroke:#990000;stroke-width:1.27743;stroke-opacity:1" />
 </svg>

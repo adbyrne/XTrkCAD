@@ -53,85 +53,87 @@
 </style>
 <line
    class="st0"
-   x1="9.1490641"
-   y1="26.490644"
-   x2="9.1490641"
-   y2="37.490646"
+   x1="5.7602229"
+   y1="29.971048"
+   x2="5.7602229"
+   y2="43.648643"
    id="line4" />
 <line
    class="st0"
-   x1="14.149064"
-   y1="26.490644"
-   x2="14.149064"
-   y2="37.490646"
+   x1="11.977306"
+   y1="29.971048"
+   x2="11.977306"
+   y2="43.648643"
    id="line6" />
 <line
    class="st0"
-   x1="19.149065"
-   y1="26.490644"
-   x2="19.149065"
-   y2="37.490646"
+   x1="18.194395"
+   y1="29.971048"
+   x2="18.194395"
+   y2="43.648643"
    id="line8" />
 <line
    class="st0"
-   x1="24.149065"
-   y1="26.490644"
-   x2="24.149065"
-   y2="37.490646"
+   x1="24.411482"
+   y1="29.971048"
+   x2="24.411482"
+   y2="43.648643"
    id="line10" />
 <line
    class="st0"
-   x1="29.149065"
-   y1="26.490644"
-   x2="29.149065"
-   y2="37.490646"
+   x1="30.628567"
+   y1="29.971048"
+   x2="30.628567"
+   y2="43.648643"
    id="line12" />
 <line
    class="st0"
-   x1="34.149063"
-   y1="26.490644"
-   x2="34.149063"
-   y2="37.490646"
+   x1="36.84565"
+   y1="29.971048"
+   x2="36.84565"
+   y2="43.648643"
    id="line14" />
 <line
    class="st0"
-   x1="39.149063"
-   y1="26.490644"
-   x2="39.149063"
-   y2="37.490646"
+   x1="43.062733"
+   y1="29.971048"
+   x2="43.062733"
+   y2="43.648643"
    id="line16" />
 <line
    class="st1"
-   x1="7.1490645"
-   y1="27.990644"
-   x2="41.149063"
-   y2="27.990644"
-   id="line18" />
+   x1="3.2733886"
+   y1="31.836174"
+   x2="45.549568"
+   y2="31.836174"
+   id="line18"
+   style="stroke-width:1.24342" />
 <line
    class="st1"
-   x1="7.1490645"
-   y1="35.990646"
-   x2="41.149063"
-   y2="35.990646"
-   id="line20" />
+   x1="3.2733886"
+   y1="41.783516"
+   x2="45.549568"
+   y2="41.783516"
+   id="line20"
+   style="stroke-width:1.24342" />
 <line
    class="st2"
-   x1="21.764032"
-   y1="31.745321"
-   x2="21.764032"
-   y2="12.788774"
+   x1="21.44589"
+   y1="36.504807"
+   x2="21.44589"
+   y2="12.933911"
    id="line22"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0e00;stroke-opacity:1" />
+   style="stroke:#cc0e00;stroke-width:3.10854;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <polyline
    class="st3"
    points="28.5,15.8 24,11.4 19.8,15.6 "
    id="polyline24"
-   transform="translate(-2.2359669,0.74532229)"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0e00;stroke-opacity:1" />
+   transform="matrix(1.2434171,0,0,1.2434171,-8.3961197,-2.041122)"
+   style="stroke:#cc0e00;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <text
    class="st4 st5 st6"
    id="text26"
-   x="29.025513"
-   y="19.48579"
-   style="font-size:18.6667px;fill:#cc0e00;fill-opacity:1;stroke:#cc0e00;stroke-opacity:1">Z</text>
+   x="30.474941"
+   y="21.261095"
+   style="font-size:23.2105px;fill:#cc0e00;fill-opacity:1;stroke:#cc0e00;stroke-width:1.24342;stroke-opacity:1">Z</text>
 </svg>

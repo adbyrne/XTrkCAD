@@ -28,17 +28,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1277"
+   inkscape:window-width="1293"
    inkscape:window-height="809"
    id="namedview3506"
    showgrid="false"
-   inkscape:zoom="17.708333"
+   inkscape:zoom="10.897825"
    inkscape:cx="24"
    inkscape:cy="24"
    inkscape:window-x="0"
    inkscape:window-y="0"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="Layer_1"
+   inkscape:document-rotation="0" />
 <style
    type="text/css"
    id="style3483">
@@ -50,47 +51,49 @@
 </style>
 <path
    class="st0"
-   d="M7.7,42c0-18,16.8-32.6,31.8-32.6"
-   id="path3485" />
+   d="m 4.2736318,45.488353 c 0,-23.039286 21.5033322,-41.7267057 40.7027362,-41.7267057"
+   id="path3485"
+   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none" />
 <path
    class="st1"
-   d="M38.5,5.4"
+   d="M 38.28716,5.3096567"
    id="path3487" />
 <path
    class="st1"
-   d="M41.8,7.1"
+   d="M 41.58716,7.0096567"
    id="path3489" />
 <path
    class="st1"
-   d="M38.5,5.4"
+   d="M 38.28716,5.3096567"
    id="path3491" />
 <path
    class="st1"
-   d="M35.6,17.9"
+   d="M 35.38716,17.809657"
    id="path3493" />
 <path
    class="st1"
-   d="M38.8,19.3"
+   d="M 38.58716,19.209657"
    id="path3495" />
 <path
    class="st1"
-   d="M41.8,17.7"
+   d="M 41.58716,17.609657"
    id="path3497" />
 <line
    class="st2"
-   x1="18"
-   y1="20.3"
-   x2="37.8"
-   y2="38.2"
+   x1="17.988567"
+   y1="20.386417"
+   x2="42.018471"
+   y2="42.110428"
    id="line3499"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
 <path
    class="st3"
-   d="M38.8,26.8"
+   d="M 38.58716,26.709657"
    id="path3501" />
 <polyline
    class="st4"
    points="18,26 18,20.3 23.4,20.7 "
    id="polyline3503"
-   style="stroke-width:2.5;stroke-miterlimit:10;stroke-dasharray:none;stroke:#cc0000;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:1.99118;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(1.2541677,-0.05864525,0.05864525,1.2541677,-5.956031,-4.2156616)" />
 </svg>

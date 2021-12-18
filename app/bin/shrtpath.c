@@ -235,7 +235,6 @@ int FindShortestPath(
 	pathNode_p pNext;
 	int pinx=0;
 	DIST_T minDist;
-	int count;
 	int rc = 0;
 	EPINX_T ep2, epCnt, ep3;
 	static dynArr_t ep_da;
@@ -243,7 +242,6 @@ int FindShortestPath(
 
 	DYNARR_RESET( pathNode_t, pathNode_da );
 	DYNARR_RESET( trackep_t, trackep_da );
-	count = 0;
 
 	if ( !log_shortPathInitted ) {
 		log_shortPath = LogFindIndex( "shortPath" );
@@ -263,8 +261,6 @@ LOG( log_shortPath, 1, ( "FindShortestPath( T%d:%d, %s, ... )\n", GetTrkIndex(tr
 		AddPath( -1, shortPathTrk1, shortPathEP1, -1, 0.0, func, data );
 
 	while (1) {
-		InfoMessage( "%d", ++count );
-
 		/* select next final node */
 		minDist = 0.0;
 		inxCurr = -1;

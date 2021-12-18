@@ -187,13 +187,13 @@ Setting this option constrains the Main Canvas to minimize these areas (the \f{g
 
 \u000
 
-\b \e{Cars} - Reporting mark labels on cars.
+\b \e{Cars} - Reporting mark labels on cars - the content shown on the Cars label is either the Repmarks (if the Rep Number is set), or the car index number (with a "#" before it). See the Car Part dialog \K{carpart}.
 
 \b \e{EndPt Elevations} - Elevation markers attached to endpoints.
 
-\b \e{Lengths} - Length of flex-track attached to ends of turnouts.
+\b \e{Lengths} - Length of flex-track attached to ends of turnouts all the way to the next turnout.
 
-\b \e{Track Descriptions} - Title of each turnout and sectional track, optional details of each piece of Flexible Track.
+\b \e{Track Descriptions} - Title of each turnout and sectional track, optional details of each piece of Flexible Track. These can be shown or hidden using the Move Description \K{cmdMoveLabel} command.
 
 \b \e{Track Elevations} - Computed elevations at the center of each track.
 
@@ -205,11 +205,11 @@ Setting this option constrains the Main Canvas to minimize these areas (the \f{g
 
 \u000
 
-\dd \f{Layout Labels} - controls the format of titles for turnouts and structures displayed on the Layout.
+\dd \f{Layout Labels} - controls the format of titles for Turnouts and Structures displayed on the Layout.
 
 \u000
 
-\dd \f{Label Scale} - draw labels only when the drawing Scale is smaller or equal to this value.
+\dd \f{Label Scale} - the program will draw labels only when the drawing Scale is smaller or equal to this value.
 
 \u000
 

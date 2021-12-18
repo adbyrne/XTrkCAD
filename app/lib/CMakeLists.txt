@@ -14,6 +14,7 @@ install(FILES
 	COPYING
 	logo.bmp
 	xtrkcad.xtq
+	xtrkcad.upd
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
 	

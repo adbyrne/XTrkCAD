@@ -43,6 +43,8 @@ wBool_t wDrawDoTempDraw = TRUE;
  *****************************************************************************
  */
 
+#define M_PI 3.14159265358979323846
+
 static wBool_t initted = FALSE;
 
 static FARPROC oldDrawProc;
@@ -111,7 +113,9 @@ static wWinPix_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 
 
 
+/** @prefs [msw tweak] NoNegDrawArgs=1 Suppress drawing if x < 0 or y < 0 (-1 value causes preference read) */
 static long noNegDrawArgs = -1;
+/** @prefs [msw tweak] NoFlatEndCaps=1 Suppress EndCap Flat pen style */
 static long noFlatEndCaps = 0;
 
 void wDrawDelayUpdate(
@@ -342,6 +346,14 @@ void wDrawLine(
 	}
 }
 
+static double d2r(double angle)
+{
+	while (angle < 0.0) angle += 360.0;
+	while (angle >= 360.0) angle -= 360.0;
+	angle *= (M_PI / 180.0);
+	return angle;
+}
+
 static double mswsin( double angle )
 {
 	while (angle < 0.0) angle += 360.0;
@@ -397,12 +409,12 @@ void wDrawArc(
 	int i, cnt;
 	POINT p0, p1, ps, pe, pp0, pp1, pp2, pc;
 	wDrawPix_t psx, psy, pex, pey;
-        double len, aa;
+    double len, aa, ai;
 	RECT rect;
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
 
-	len = a1/360.0 * (2 * M_PI) * r;
+	len = d2r(a1) * r;
 	if (len < 3)
 		return;
 
@@ -428,7 +440,8 @@ void wDrawArc(
 	if (dw == 0)
 		dw = 1;
 
-	if (r>4096) {
+	/* Windows drawing will overshoot the end of the arc for large radius */
+	if (r > 500) { 
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -437,19 +450,21 @@ void wDrawArc(
 			fakeArc = TRUE;
 	}
 	if ( fakeArc ) {
-		cnt = (int)a1;
+		cnt = (int)(a1 / 2);
 		if ( cnt <= 0 ) cnt = 1;
-		if ( cnt > 360 ) cnt = 360;
-		aa = a1 / cnt;
-		psx = px + r * mswsin(a0);
-		psy = py + r * mswcos(a0);
+		if ( cnt > 180 ) cnt = 180;
+		// Convert a0 and a1 to radians here
+		ai = d2r(a1) / cnt;
+		aa = d2r(a0);
+		psx = px + r * sin(aa);
+		psy = py + r * cos(aa);
 		pp0.x = XDRAWPIX2WINPIX( d, psx );
 		pp0.y = YDRAWPIX2WINPIX( d, psy );
 		needMoveTo = TRUE;
 		for ( i=0; i<cnt; i++ ) {
-			a0 += aa;
-			psx = px + r * mswsin(a0);
-			psy = py + r * mswcos(a0);
+			aa += ai;
+			psx = px + r * sin(aa);
+			psy = py + r * cos(aa);
 			pp2.x = pp1.x = XDRAWPIX2WINPIX( d, psx );
 			pp2.y = pp1.y = YDRAWPIX2WINPIX( d, psy );
 			if ( clip0( &pp0, &pp1, d ) ) {
@@ -685,7 +700,9 @@ void mswFontInit( void )
 {
 	const char * face;
 	long size;
+	/** @prefs [msw window font] face=FontName */
 	face = wPrefGetString( "msw window font", "face" );
+	/** @prefs [msw window font] size=-24 */
 	wPrefGetInteger( "msw window font", "size", &size, -24 );
 	if (face) {
 		strncpy( logFont.lfFaceName, face, LF_FACESIZE );
@@ -1836,9 +1853,7 @@ wDraw_p wDrawCreate(
 	HDC hDc;
 
 	if ( noNegDrawArgs < 0 ) {
-		/** @prefs [msw tweak] NoNegDrawArgs=1 Suppress drawing if x < 0 or y < 0 */
 		wPrefGetInteger( "msw tweak", "NoNegDrawArgs", &noNegDrawArgs, 0 );
-		/** @prefs [msw tweak] NoFlatEndCaps=1 Suppress EndCap Flat pen style */
 		wPrefGetInteger( "msw tweak", "NoFlatEndCaps", &noFlatEndCaps, 0 );
 	}
 
@@ -2026,7 +2041,19 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
         }
 
         if (bCanSave) {
-            bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
+			int flags;
+
+			switch (fif) {
+			case FIF_JPEG:
+				flags = JPEG_QUALITYNORMAL;
+				break;
+			case FIF_PNG:
+				flags = PNG_DEFAULT;
+				break;
+			default:
+				flags = 0;		// whatver the default is for the file format
+			}
+            bSuccess = FreeImage_Save(fif, dib2, fileName, flags);
         }
     }
     FreeImage_Unload(dib2);

@@ -1140,7 +1140,8 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2], track_p
 				if (GetTrkEndTrk(trk_old,i)==NULL) {
 					coOrd pos = GetTrkEndPos(trk_old,i);
 					EPINX_T ep_n = PickUnconnectedEndPoint(pos,new_trk);
-					if (connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),GetTrkEndPos(new_trk,ep_n))) {
+					if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),GetTrkEndPos(new_trk,ep_n))) &&
+					    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),GetTrkEndAngle(new_trk,ep_n)+180))) ) {
 						ConnectTracks(trk_old,i,new_trk,ep_n);
 						break;
 					}

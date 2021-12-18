@@ -156,7 +156,7 @@ LinkEditOK(void *junk)
     UpdateLink(&noteDataInUI, OK_LINK, FALSE);
     wHide(linkEditW);
 	ResetIfNotSticky();
-	FileIsChanged();
+	SetFileChanged();
 }
 
 

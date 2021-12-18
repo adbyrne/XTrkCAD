@@ -27,10 +27,11 @@
 #include "track.h"
 #include "common-ui.h"
 
-static paramIntegerRange_t i0_64 = { 0, 64 };
 static paramIntegerRange_t i1_64 = { 1, 64 };
 static paramIntegerRange_t i1_100 = { 1, 100 };
+static paramIntegerRange_t i0_256 = { 0, 256 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
+static paramIntegerRange_t i1_1024 = { 1, 1024 };
 static paramIntegerRange_t i0_10000 = { 0, 10000 };
 static paramIntegerRange_t i0_99 = { 0, 99};
 static paramIntegerRange_t i1_1000 = { 1, 1000 };
@@ -114,15 +115,15 @@ static paramData_t displayPLs[] = {
 	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, I2VP(CHANGE_MAIN) },
 	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, I2VP(CHANGE_MAIN) },
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, I2VP(CHANGE_MAP) },
+	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_256, N_("Two Rail Scale"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_1024, N_("Map Scale"), 0, I2VP(CHANGE_MAP) },
 	{ PD_TOGGLE, &dontHideCursor, "donthidecursor", PDO_NOPSHUPD, dontHideLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
 #define labelSelect (12)
 	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_64, N_("Label Scale"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_256, N_("Label Scale"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, I2VP(CHANGE_TOOLBAR) },
 	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, I2VP(CHANGE_MAIN) },

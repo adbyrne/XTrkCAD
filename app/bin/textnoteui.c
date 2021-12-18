@@ -142,7 +142,7 @@ TextEditOK(void *junk)
 	UpdateText(&noteDataInUI, OK_TEXT, FALSE);
 	wHide(textEditW);
 	ResetIfNotSticky();
-	FileIsChanged();
+	SetFileChanged();
 }
 
 

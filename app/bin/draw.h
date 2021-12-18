@@ -58,7 +58,7 @@
 
 #define INIT_MAIN_SCALE (8.0)
 #define INIT_MAP_SCALE	(64.0)
-#define MAX_MAIN_SCALE	(256.0)
+#define MAX_MAIN_SCALE	(1024.0)
 #define MIN_MAIN_SCALE	(1.0)
 #define MIN_MAIN_MACRO  (0.10)
 
@@ -237,6 +237,9 @@ void DrawTextSize(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *);
 void DrawMultiString(drawCmd_p d, coOrd pos, char * text, wFont_p fp,
                      wFontSize_t fs, wDrawColor color, ANGLE_T a, coOrd * lo, coOrd * hi,
                      BOOL_T boxed);
+void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
+                         wWinPix_t* posX,
+                         wWinPix_t* posY, wWinPix_t* pWidth);
 BOOL_T SetRoomSize(coOrd);
 void GetRoomSize(coOrd *);
 void DoRedraw(void);
