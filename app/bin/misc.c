@@ -2974,7 +2974,6 @@ static void CreateMenus(void) {
 	cmdGroup = BG_HOTBAR;
 	InitHotBar();
 
-
 	SetAccelKeys();
 
 	InitBenchDialog();

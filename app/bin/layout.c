@@ -696,11 +696,6 @@ LayoutDlgUpdate(
     }
     if (inx == BACKGROUNDSCREEN) {
     	SetLayoutBackGroundScreen(*(int *)valueP);
-    	if (GetLayoutBackGroundScreen() == 100 )
-    		backgroundVisible = FALSE;
-    	else
-    		backgroundVisible = TRUE;
-    	wControlActive((wControl_p)backgroundB, backgroundVisible);
     	MainRedraw();
     }
     if (inx == BACKGROUNDANGLE) {
@@ -761,7 +756,6 @@ LayoutBackGroundInit(BOOL_T clear) {
 	} else {
 		haveBackground = false;
 		wDrawSetBackground(  mainD.d, NULL, NULL);
-		backgroundVisible = FALSE;
 	}
 }
 

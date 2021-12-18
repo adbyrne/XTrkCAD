@@ -1644,16 +1644,21 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
         } else {
         	height -= (toolbarHeight+max(infoHeight,textHeight)+10);
         	if (height >= 0) {
-				wDrawSetSize( mainD.d, width-20, height, refresh );
-				wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
-				SetMainSize();
-				SetInfoBar();
-				panCenter.x = mainD.orig.x + mainD.size.x/2.0;
-				panCenter.y = mainD.orig.y + mainD.size.y/2.0;
-				LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-				MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
-				wPrefSetInteger( "draw", "mainwidth", (int)width );
-				wPrefSetInteger( "draw", "mainheight", (int)height );
+			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE );
+			if ( bTemp ) {
+				printf( "MainProc TempMode\n" );
+			}
+			wDrawSetSize( mainD.d, width-20, height, refresh );
+			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
+			SetMainSize();
+			SetInfoBar();
+			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
+			wPrefSetInteger( "draw", "mainwidth", (int)width );
+			wPrefSetInteger( "draw", "mainheight", (int)height );
+			wDrawSetTempMode( mainD.d, bTemp );
         	} else	DrawMapBoundingBox( TRUE );
         }
 		break;

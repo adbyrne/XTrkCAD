@@ -50,7 +50,7 @@ static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
 #define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
 	{   PD_MESSAGE, N_("Did you know..."), "mess1", 0, NULL, NULL, BM_LARGE },
-	{   PD_TEXT, NULL, "text", 0, &tipTextData, NULL, BO_READONLY|BT_CHARUNITS|BT_TOP },
+	{   PD_TEXT, NULL, "text", 0, &tipTextData, NULL, BO_READONLY|BT_TOP|BT_CHARUNITS },
 	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
 	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, I2VP(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }};

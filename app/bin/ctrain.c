@@ -668,7 +668,7 @@ static paramData_t trainPLs[] = {
 #define I_STATUS			(1)
     { PD_MESSAGE, NULL, "mess1", 0, I2VP(120) },
 #define I_POS				(2)
-(??)    { PD_MESSAGE, NULL, "mess2", 0, (void*)120 },
+(??)    { PD_MESSAGE, NULL, "mess2", 0, I2VP(120) },
 #define I_SLIDER			(3)
     { PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
 #define I_DIST				(4)

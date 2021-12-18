@@ -1519,9 +1519,9 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.rot_angle, "RotAngle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
 #define drawModRotCenterXPD		(drawModPLs[8])
 #define drawModRotCenterInx      8
-	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "RotCenterX", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X,Y") },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "RotCenterx", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X,Y") },
 #define drawModRotCenterYPD		(drawModPLs[9])
-	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCenterY", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCentery", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
 
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, COUNT( drawModPLs ) };
@@ -2847,7 +2847,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawDimArrowSizePD.option &= ~PDO_NORECORD;
 			break;
 		case OP_TBLEDGE:
-			InfoSubstituteControls( NULL, NULL, NULL);
 			InfoMessage( _("Drag to create Table Edge") );
 			break;
 		default:
@@ -2859,7 +2858,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		DrawGeomMouse( C_START, pos, &drawCmdContext);
 		return C_CONTINUE;
 
-	case wActionRDown:
 	case wActionLDown:
 		ParamLoadData( &drawPG );
 		if (drawCmdContext.Op == OP_BEZLIN) {
@@ -2884,8 +2882,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		}
 		/* no break */
 	case wActionLDrag:
-	case wActionRDrag:
-	case wActionMove:
 		ParamLoadData( &drawPG );
 		/* no break */
 	case wActionMove:

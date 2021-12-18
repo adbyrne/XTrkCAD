@@ -497,7 +497,7 @@ static void DeleteStraight( track_p t )
 
 static BOOL_T WriteStraight( track_p t, FILE * f )
 {
-	int bits;
+	long bits;
 	long options;
 	struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT, extraDataStraight_t);
 	BOOL_T rc = TRUE;

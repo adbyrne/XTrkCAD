@@ -586,7 +586,7 @@ static void DeleteBezier( track_p t )
 static BOOL_T WriteBezier( track_p t, FILE * f )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataBezier_t);
-	int bits;
+	long bits;
 	long options;
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_BEZIER);

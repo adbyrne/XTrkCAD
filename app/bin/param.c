@@ -2313,7 +2313,7 @@ static void ParamCreateControl(
 				w = wLabelWidth( _(pd->valueP) );
 			else
 				w = 150;
-			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, helpStr, helpStr, w, pd->valueP?_(pd->valueP):" ", pd->winOption );
+			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, _(pd->winLabel), w, pd->valueP?_(pd->valueP):" ", pd->winOption );
 			break;
 		case PD_BUTTON:
 			pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, ParamButtonPush, pd );
@@ -2341,7 +2341,7 @@ static void ParamCreateControl(
 			break;
 		case PD_BITMAP:
 			iconP = pd->winData;
-			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, helpStr, pd->winOption, iconP );
+			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
 			break;
 		default:
 			AbortProg( "paramCreatePG" );
@@ -2846,7 +2846,6 @@ wWin_p ParamCreateDialog(
 			group->okB = wButtonCreate( group->win, 0, 0, "id-ok", okLabel, BB_DEFAULT|butOptions, 0, (wButtonCallBack_p)ParamButtonOk, group );
 		}
 		if ( group->cancelProc ) {
-			sprintf( helpStr, "%s-cancel", group->nameStr );
 			group->cancelB = wButtonCreate( group->win, 0, 0, "id-cancel", cancelLabel, BB_CANCEL|butOptions, 0, (wButtonCallBack_p)ParamButtonCancel, group );
 		}
 		if ( needHelpButton ) {

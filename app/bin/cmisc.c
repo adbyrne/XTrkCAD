@@ -353,7 +353,6 @@ static struct {
 static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, char * label,
                                wWinPix_t sep)
 {
-
     int inx;
     paramData_t * param;
     /*Check to see if we already set up the linkage*/
@@ -418,8 +417,6 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
             	describePLs[inx].max_string = ddp->max_string;
             	describePLs[inx].option |= PDO_STRINGLIMITLENGTH;
             }
-
-            //Call
 
             if (label && ddp->type != DESC_TEXT) {
                 wControlSetLabel(describePLs[inx].control, label);
@@ -486,7 +483,7 @@ static void DescribeLayout(
  */
 
 static wList_p setLayerL;
-void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
+void DoDescribe(char * title, char *template-id, track_p trk, descData_p data, descUpdate_t update)
 {
     int inx;
     descData_p ddp;

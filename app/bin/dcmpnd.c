@@ -484,12 +484,11 @@ EXPORT BOOL_T CompoundCustomSave(
 
 static void RenameOk( void * junk )
 {
-	wHide( renamePG.win );
-
 	sprintf( message, "%s\t%s\t%s", renameManuf, renameDesc, renamePartno );
 	if ( renameTo->title )
 		MyFree( renameTo->title );
 	renameTo->title = MyStrdup( message );
+	wHide( renamePG.win );
 	DoChangeNotification( CHANGE_PARAMS );
 }
 
@@ -560,7 +559,7 @@ static int CompoundCustMgmProc(
 		return TRUE;
 	case CUSTMGM_GET_TITLE:
 		ParseCompoundTitle( to->title, &mP, &mL, &pP, &pL, &nP, &nL );
-		sprintf( message, "%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx), nL, nP, pL, pP );
+		sprintf( message, "\t%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx), nL, nP, pL, pP );
 		return TRUE;
 	}
 	return FALSE;
