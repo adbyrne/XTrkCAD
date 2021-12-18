@@ -168,7 +168,7 @@ static BOOL_T UpdateParamFiles(void)
 					wPrefSetString( "Parameter File Names", fileNoS, newContents );
 					break;
 				}
-		    	}
+		    }
 		}
             }
         }

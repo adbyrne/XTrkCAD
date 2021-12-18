@@ -2958,11 +2958,11 @@ EXPORT void InitCmdExport(void) {
 	ButtonGroupBegin( _("Import/Export"), "cmdExportImportSetCmd", _("Import/Export") );
 	cmdGroup = BG_EXPORTIMPORT;
 	AddToolbarButton("cmdExport", wIconCreatePixMap(doc_export_xpm[iconSize]),
-			IC_ACCLKEY, DoExport, NULL); // IC_SELECTED | 
+		IC_SELECTED | IC_ACCLKEY, DoExport, NULL); 
+	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), 
+		IC_SELECTED | IC_ACCLKEY, DoExportDXF, I2VP(1)); 
 	AddToolbarButton("cmdExportBmap", wIconCreatePixMap(doc_export_bmap_xpm[iconSize]), IC_ACCLKEY,
 		OutputBitMapInit(), NULL);
-	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), 
-		IC_ACCLKEY, DoExportDXF, I2VP(1)); // IC_SELECTED | 
 #if XTRKCAD_CREATE_SVG
 	AddToolbarButton("cmdExportSVG", wIconCreatePixMap(doc_export_svg_xpm[iconSize]), 
 		IC_ACCLKEY, DoExportSVG, NULL); // IC_SELECTED | 

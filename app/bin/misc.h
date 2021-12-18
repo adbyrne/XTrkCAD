@@ -351,6 +351,7 @@ addButtonCallBack_t ControlMgrInit ( void );
 wIndex_t InitGrid( wMenu_p menu );
 
 BOOL_T SnapPos( coOrd * );
+BOOL_T SnapPosAngle( coOrd *, ANGLE_T * );
 void DrawSnapGrid( drawCmd_p, coOrd, BOOL_T );
 BOOL_T GridIsVisible( void );
 void InitSnapGridButtons( void );

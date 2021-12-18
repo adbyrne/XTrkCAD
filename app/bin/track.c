@@ -1625,7 +1625,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 /*******
  * Move Selected Tracks to origin zero and write out
  *******/
-EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset, BOOL_T all )
+EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset )
 {
 	track_p trk;
 	coOrd xlat,orig;
@@ -1649,7 +1649,7 @@ EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset, BOOL_T all )
 	xlat.x = - orig.x;
 	xlat.y = - orig.y;
 	TRK_ITERATE( trk ) {
-		if ( (all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected(trk) ) {
+		if ( GetTrkSelected(trk) ) {
 			if (QueryTrack(trk,Q_ISTRAIN)) continue; //Don't bother with CARs
 			MoveTrack( trk, xlat );
 			trackCmds(GetTrkType(trk))->write( trk, f );

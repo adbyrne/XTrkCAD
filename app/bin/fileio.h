@@ -125,7 +125,7 @@ void DoImport( void * typeVP );
 void DoExport( void * unused );
 void DoExportDXF( void * unused );
 #if XTRKCAD_CREATE_SVG
-void DoExportSVG( void );
+void DoExportSVG( void * unused );
 #endif
 extern wBool_t editStatus; // Status of last Edit* command
 void EditCopy( void * unused );

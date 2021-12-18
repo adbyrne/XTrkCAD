@@ -746,7 +746,7 @@ EXPORT void DrawCurvedTrack(
 	DIST_T r,
 	ANGLE_T a0,
 	ANGLE_T a1,
-	track_p trk,
+	track_cp trk,
 	wDrawColor color,
 	long options )
 {

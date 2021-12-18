@@ -190,7 +190,6 @@ static int DoExportDXFTracks(
     time_t clock;
 	DynString command = NaS;
 	FILE * dxfF;
-	BOOL_T all = (selectedTrackCount == 0);
 
     assert(fileName != NULL);
     assert(cnt == 1);
@@ -214,7 +213,7 @@ static int DoExportDXFTracks(
 	fputs(DynStringToCStr(&command), dxfF);
 	dxfD.d = (wDraw_p)dxfF;
 
-    DrawSelectedTracks(&dxfD,all);
+    DrawSelectedTracks( &dxfD, false );
 
 	DynStringClear(&command);
 	DxfEpilogue(&command);
@@ -237,7 +236,7 @@ void DoExportDXF(void* unused )
     //    ErrorMessage(MSG_NO_SELECTED_TRK);
     //    return;
     //}
-    //assert(selectedTrackCount > 0);
+    assert(selectedTrackCount > 0);
 
     if (exportDXFFile_fs == NULL)
         exportDXFFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to DXF"),
