@@ -3045,7 +3045,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	opterr = 0;
 	LogSet("dummy",0);
 
-	while ((c = getopt(argc, argv, "vl:d:c:m")) != -1)
+	while ((c = getopt(argc, argv, "vl:d:c:mV")) != -1)
 		switch (c) {
 		case 'c': /* configuration name */
 			/* test for valid filename */
@@ -3089,6 +3089,10 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			NoticeMessage("Missing parameter for %s", _("Ok"), NULL,
 					argv[optind - 1]);
 			exit(1);
+			break;
+		case 'V': // display version
+			printf("Version: %s\n",XTRKCAD_VERSION);
+			exit(0);
 			break;
 		default:
 			abort();
