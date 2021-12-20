@@ -53,7 +53,7 @@
 static struct wFilSel_t * exportSVGFile_fs;
 static coOrd roomSize;
 
-static svgLineWidth[4] = {10, 10, 20, 30};
+static int svgLineWidth[4] = {10, 10, 20, 30};
 
 /**
  * get line style for element
