@@ -414,10 +414,6 @@ void wDrawArc(
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
 
-	len = d2r(a1) * r;
-	if (len < 3)
-		return;
-
 	p0.x = XDRAWPIX2WINPIX(d,px-r);
 	p0.y = YDRAWPIX2WINPIX(d,py+r);
 	p1.x = XDRAWPIX2WINPIX(d,px+r);
