@@ -348,8 +348,6 @@ void wDrawLine(
 
 static double d2r(double angle)
 {
-	while (angle < 0.0) angle += 360.0;
-	while (angle >= 360.0) angle -= 360.0;
 	angle *= (M_PI / 180.0);
 	return angle;
 }
