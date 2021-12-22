@@ -7,7 +7,7 @@
    viewBox="0 0 48 48"
    style="enable-background:new 0 0 48 48;"
    xml:space="preserve"
-   sodipodi:docname="connect.svg"
+   sodipodi:docname="loosen.svg"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -124,14 +124,7 @@
    y2="20.76922"
    id="line22"
    style="stroke-width:2;stroke-miterlimit:10;stroke-dasharray:none" />
-<line
-   class="st2"
-   x1="26.801924"
-   y1="31.447706"
-   x2="46.29179"
-   y2="31.447706"
-   id="line24"
-   style="stroke:#cc0000;stroke-width:4;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+
 <path
    class="st3"
    d="M 26.229179,29.861805"
@@ -141,20 +134,13 @@
    class="st4"
    points="28.5,33.3 24.2,29 28.5,24.8 "
    id="polyline28"
-   style="stroke:#cc0000;stroke-width:3.17082;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
-   transform="matrix(1.2136125,0,0,1.3112816,-2.0816474,-6.5794627)" />
-<line
-   class="st2"
-   x1="21.503935"
-   y1="31.447706"
-   x2="1.8347114"
-   y2="31.447706"
-   id="line30"
-   style="stroke:#cc0000;stroke-width:4;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+   style="stroke:#cc0000;stroke-width:3.18899611;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(-1.1826806,0,0,1.3302845,60.9101,-7.1314984)" />
+
 <polyline
    class="st4"
    points="18.3,33.3 21.8,29 18.3,24.8 "
    id="polyline32"
-   style="stroke:#cc0000;stroke-width:3.05045;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
-   transform="matrix(1.3112816,0,0,1.3112816,-7.7914533,-6.5794627)" />
+   style="stroke:#cc0000;stroke-width:3.0504508;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+   transform="matrix(-1.3112816,0,0,1.3112816,44.604466,-6.5794627)" />
 </svg>
