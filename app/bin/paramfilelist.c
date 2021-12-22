@@ -40,6 +40,7 @@ dynArr_t paramFileInfo_da;
 int curParamFileIndex = PARAM_DEMO;
 
 static int log_params;
+static int log_paramupdate;
 
 static char * customPath;
 static char * customPathBak;
@@ -90,7 +91,7 @@ static BOOL_T UpdateParamFiles(void)
     char fileName[STR_LONG_SIZE], *fileNameP;
     const char * cp;
     FILE * updateF;
-    long updateTime;
+    long updateTime = -1;
     long lastTime;
 
     MakeFullpath(&fileNameP, libDir, "xtrkcad.upd", NULL);
@@ -99,24 +100,30 @@ static BOOL_T UpdateParamFiles(void)
     if (updateF == NULL) {
         return FALSE;
     }
-    if (fgets(message, sizeof message, updateF) == NULL) {
-        NoticeMessage("short file: xtrkcad.upd", _("Ok"), NULL);
-        fclose(updateF);
-        return FALSE;
-    }
     wPrefGetInteger("file", "updatetime", &lastTime, 0);
-    updateTime = atol(message);
-    if (lastTime >= updateTime) {
-        fclose(updateF);
-        return FALSE;
-    }
 
     while ((fgets(fileName, STR_LONG_SIZE, updateF)) != NULL) {
+	if ( fileName[0] == '#' )
+		continue;
+	if ( updateTime == -1 ) {
+    		updateTime = atol(fileName);
+    		LOG1( log_paramupdate, ( "UpdateParamFiles Last: %ld, Update: %ld\n", lastTime, updateTime ) );
+		if ( updateTime == 0 ) {
+			NoticeMessage( "xtrkcad.upd : invalid Update Time", _("OK"), NULL );
+        		fclose(updateF);
+			return FALSE;
+		}
+    		if (lastTime >= updateTime) {
+        		fclose(updateF);
+        		return FALSE;
+    		}
+		continue;
+	}
         FILE * paramF;
-        char * contents;
 
         Stripcr(fileName);
         InfoMessage(_("Updating %s"), fileName);
+	LOG1( log_paramupdate, ( "Updating %s\n", fileName ) );
         MakeFullpath(&fileNameP, libDir, "params", fileName, NULL);
         paramF = fopen(fileNameP, "r");
         if (paramF == NULL) {
@@ -124,26 +131,52 @@ static BOOL_T UpdateParamFiles(void)
             free(fileNameP);
             continue;
         }
-        contents = NULL;
+        char * newContents = NULL;
+	char * oldContents = NULL;
         while ((fgets(message, sizeof message, paramF)) != NULL) {
-            if (strncmp(message, "CONTENTS", 8) == 0) {
+            if (strncmp(message, "CONTENTS ", 9) == 0) {
                 Stripcr(message);
-                contents = message + 9;
-                break;
+		if ( newContents == NULL ) {
+			// first CONTENTS
+                	newContents = MyStrdup(message + 9);
+			// Get old CONTENTS->FILENAME mapping
+			char * cp = wPrefGetString("Parameter File Map", newContents);
+			if ( cp ) {
+				LOG1( log_paramupdate, ( "  Upd CONTENTS %s (was %s)\n", newContents, cp?cp:"<>" ) );
+			} else {
+				LOG1( log_paramupdate, ( "  New CONTENTS %s\n", newContents ) );
+			}
+			// Update CONTENTS->FILENAME mapping
+			wPrefSetString("Parameter File Map", newContents, fileNameP);
+		} else {
+			// Subsequent old CONTENTS
+                	oldContents = message + 9;
+			LOG1( log_paramupdate, ( "  Old CONTENTS %s\n", oldContents ) );
+			// Check 'Parameter Files Names' map
+			for (int fileNo = 1; ; fileNo++) {
+				char *fileName;
+				char fileNoS[4+9+1];
+				sprintf(fileNoS, "File%d", fileNo);
+				char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
+				if (prevContents == NULL || *prevContents == '\0') {
+					// End of list
+					break;
+				}
+				if ( strcmp( oldContents, prevContents ) == 0 ) {
+					// Update contents index map
+					LOG1( log_paramupdate, ( "  Found at %d\n", fileNo ) );
+					wPrefSetString( "Parameter File Names", fileNoS, newContents );
+					break;
+				}
+		    }
+		}
             }
         }
+	if ( newContents )
+		MyFree( newContents );
         fclose(paramF);
-        if (contents == NULL) {
+        if (newContents == NULL) {
             NoticeMessage(MSG_PRMFIL_NO_CONTENTS, _("Ok"), NULL, fileNameP);
-            free(fileNameP);
-            continue;
-        }
-        cp = wPrefGetString("Parameter File Map", contents);
-        wPrefSetString("Parameter File Map", contents, fileNameP);
-        if (cp != NULL && *cp != '\0') {
-            /* been there, done that */
-            free(fileNameP);
-            continue;
         }
 
         free(fileNameP);
@@ -425,6 +458,7 @@ BOOL_T ParamFileListInit(void)
 	 * (including scale file (xtq), custom file (*.cus) and other params (xtp)) 
 	 */
     log_params = LogFindIndex("params");
+    log_paramupdate = LogFindIndex("paramupdate");
 
     SetCLocale();
 	// get the default definitions

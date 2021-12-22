@@ -1083,7 +1083,7 @@ Move An Object Using Fixed or Specified amounts of X and Y Translation.
 
 A pop-up menu with additional menu items allows you to \f{Move} the selected object(s) through through any amount you specify.
 
-\G{png.d/mmovevariable.png}
+\G{png.d/mentermove.png}
 
 The \f{Move} command is executed as follows;
 
@@ -1093,13 +1093,13 @@ The \f{Move} command is executed as follows;
 
 \n \e{Shift+Right-Click} to raise the Move/Rotate menu.
 
-\lcont{\u000
+\lcont{\u000}
 
 Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{Enter Move...} menu item then entering a desired amount of translation in X and Y in the dialog window that appears.
 
 \u000
 
-\G{png.d/dmovetranslate.png}
+\G{png.d/dentermove.png}
 
 \u000
 
@@ -1141,7 +1141,7 @@ There is a \f{Context Menu} invoked with \e{Right-Click} or \e{Shift plus Right-
 Labels can be moved by hovering the "hot spots" or over the attached track object. \e{Left-Drag} will reposition it. Elevation labels can be selected by hovering of thier centers or the end point they refer to.
 Note that end points with elevation mode "None" are not selectable.
 
-\b Cornu, Bezier, Straight, Curve and Joint (Easement) Labels can be moved along the line between the end-points and also laterally. 
+\b Cornu, Bezier, Straight, Curve and Joint (Easement) Labels can be moved along the line between the end-points and also laterally.
 
 \lcont{\u000
 

@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.3.0 Beta 1]
+
+## Bugs
+
++ Add > Structure dialog caused weird artifact when closed
++ Cornu Turnout Designer misplaces points or fails
++ Add check for max connect angle to Bezier Segment
+
+## Added
+
++ Exports default to All if nothing selected
++ Enhanced DXF export to include color and DOT line style
++ Bitmap export to JPEG and PNG formats
++ Include background bitmap in bitmap export
++ Improved and Updated Help file
++ Structures snap to grid (if enabled) and respect grid angle
++ Refactured Windows arc drawing
++ Draw centers enabled for sectional curved tracks
++ Roadbed option to track
++ Color selection for Bridge fill and Roadbed
++ Graphics improvements and additions
+
+## Parameters
+
++ Mianne Benchwork components
++ Walthers HO DCC Code 83 Turnouts
++ Walthers HO DCC Code 100 Turnouts
++ HO Piko A Roadbed Track Components
++ HO Piko A Track revision
+
+## Examples
+
++ G Scale Folded Dogbone
++ Mianne Benchwork
+
+
 ## [5.2.2 Beta 3]
 
 ## Bugs

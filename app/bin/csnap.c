@@ -435,6 +435,15 @@ EXPORT BOOL_T SnapPos( coOrd * pos )
 	return TRUE;
 }
 
+EXPORT BOOL_T SnapPosAngle( coOrd * pos, ANGLE_T * angle )
+{
+	if ( SnapPos( pos ) ) {
+		*angle = grid.Angle;
+		return TRUE;
+	}
+	return FALSE;
+}
+
 
 static void DrawASnapGrid( gridHVData * gridP, drawCmd_p d, coOrd size, BOOL_T drawDivisions )
 {

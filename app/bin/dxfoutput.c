@@ -42,13 +42,17 @@ static void DxfLine(
     wDrawWidth width,
     wDrawColor color)
 {
-    DynString command = NaS;
+	long c = wDrawGetRGB( color );
+	long s = d->options & DC_DASH ? 1 : (d->options & DC_DOT ? 2 : 0);
+
+	DynString command = NaS;
     DynStringMalloc(&command, 100);
     DxfLineCommand(&command,
                    curTrackLayer + 1,
                    p0.x, p0.y,
                    p1.x, p1.y,
-                   ((d->options&DC_DASH) != 0));
+                   s,
+		           c);
     fputs(DynStringToCStr(&command), (FILE *)d->d);
     DynStringFree(&command);
 }
@@ -63,7 +67,10 @@ static void DxfArc(
     wDrawWidth width,
     wDrawColor color)
 {
-    DynString command = NaS;
+	long c = wDrawGetRGB( color );
+	long s = d->options & DC_DASH ? 1 : (d->options & DC_DOT ? 2 : 0);
+
+	DynString command = NaS;
     DynStringMalloc(&command, 100);
     angle0 = NormalizeAngle(90.0-(angle0+angle1));
 
@@ -73,7 +80,8 @@ static void DxfArc(
                          p.x,
                          p.y,
                          r,
-                         ((d->options&DC_DASH) != 0));
+                         s,
+			             c);
     } else {
         DxfArcCommand(&command,
                       curTrackLayer + 1,
@@ -82,7 +90,8 @@ static void DxfArc(
                       r,
                       angle0,
                       angle1,
-                      ((d->options&DC_DASH) != 0));
+                      s,
+			          c);
     }
 
     fputs(DynStringToCStr(&command), (FILE *)d->d);
@@ -98,14 +107,17 @@ static void DxfString(
     FONTSIZE_T fontSize,
     wDrawColor color)
 {
-    DynString command = NaS;
+	long c = wDrawGetRGB( color );
+	
+	DynString command = NaS;
     DynStringMalloc(&command, 100);
     DxfTextCommand(&command,
                    curTrackLayer + 1,
                    p.x,
                    p.y,
                    fontSize,
-                   s);
+                   s,
+		           c);
     fputs(DynStringToCStr(&command), (FILE *)d->d);
     DynStringFree(&command);
 }
@@ -201,7 +213,7 @@ static int DoExportDXFTracks(
 	fputs(DynStringToCStr(&command), dxfF);
 	dxfD.d = (wDraw_p)dxfF;
 
-    DrawSelectedTracks(&dxfD);
+    DrawSelectedTracks( &dxfD, false );
 
 	DynStringClear(&command);
 	DxfEpilogue(&command);

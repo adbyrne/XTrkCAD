@@ -694,6 +694,12 @@ Defaults are no modules are logged and loglevel is 1 if omitted from logonctrol 
 
 \dd set logfile, only needed in conjunction with the debug option.
 
+\dt \c{V}
+
+\dd Display the xtrkcad version and exit(0).
+
+\u000
+
 \H{introQT} Quick Tour
 
 \G{png.d/main.png}

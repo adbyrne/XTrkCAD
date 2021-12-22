@@ -2409,12 +2409,13 @@ static void SetAccelKeys()
 #include "bitmaps/zoom-extent.xpm"
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
-#include "bitmaps/partlist.xpm" // unused icon
+// #include "bitmaps/partlist.xpm" // unused
 #include "bitmaps/doc-export.xpm"
-#include "bitmaps/doc-export-dxf.xpm"
 #include "bitmaps/doc-export-bmap.xpm"
+#include "bitmaps/doc-export-dxf.xpm"
+#include "bitmaps/doc-export-svg.xpm"
 #include "bitmaps/doc-import.xpm"
-#include "bitmaps/doc-import-xtc.xpm"
+#include "bitmaps/doc-import-mod.xpm" 
 #include "bitmaps/doc-new.xpm"
 #include "bitmaps/doc-save.xpm"
 #include "bitmaps/doc-open.xpm"
@@ -2599,8 +2600,8 @@ static void CreateMenus(void) {
 			ACCL_EXPORTDXF, DoExportDXF, IC_SELECTED,
 			NULL);
 #if XTRKCAD_CREATE_SVG
-	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"), ACCL_EXPORTDXF, 
-			DoExportSVG, IC_SELECTED, NULL);
+	MiscMenuItemCreate( fileM, NULL, "cmdExportSVG", _("Export S&VG"), 
+		ACCL_EXPORTSVG, DoExportSVG, IC_SELECTED, NULL);
 #endif
 	wMenuSeparatorCreate(fileM);
 
@@ -2796,7 +2797,9 @@ static void CreateMenus(void) {
 	InitCmdMoveDescription(changeM);
 	InitCmdDelete();
 	InitCmdTunnel();
+	InitCmdTies();
 	InitCmdBridge();
+	InitCmdRoadbed();
 	InitCmdAboveBelow();
 
 	cmdGroup = BG_TRKMOD;
@@ -2993,25 +2996,29 @@ static void LoadFileList(void) {
 	}
 }
 
-EXPORT void InitCmdEnumerate(void) {
-	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
-			IC_SELECTED | IC_ACCLKEY, EnumerateTracks,
-			NULL);
-}
+//EXPORT void InitCmdEnumerate(void) {
+//	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
+//			IC_SELECTED | IC_ACCLKEY, EnumerateTracks,
+//			NULL);
+//}
 
 EXPORT void InitCmdExport(void) {
 	ButtonGroupBegin( _("Import/Export"), "cmdExportImportSetCmd", _("Import/Export") );
 	cmdGroup = BG_EXPORTIMPORT;
 	AddToolbarButton("cmdExport", wIconCreatePixMap(doc_export_xpm[iconSize]),
-			IC_SELECTED | IC_ACCLKEY, DoExport, NULL);
-	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), IC_SELECTED | IC_ACCLKEY,
-		DoExportDXF, I2VP(1));
+		IC_SELECTED | IC_ACCLKEY, DoExport, NULL); 
+	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(doc_export_dxf_xpm[iconSize]), 
+		IC_SELECTED | IC_ACCLKEY, DoExportDXF, I2VP(1)); 
 	AddToolbarButton("cmdExportBmap", wIconCreatePixMap(doc_export_bmap_xpm[iconSize]), IC_ACCLKEY,
 		OutputBitMapInit(), NULL);
+#if XTRKCAD_CREATE_SVG
+	AddToolbarButton("cmdExportSVG", wIconCreatePixMap(doc_export_svg_xpm[iconSize]), 
+		IC_ACCLKEY, DoExportSVG, NULL); // IC_SELECTED | 
+#endif
 	AddToolbarButton("cmdImport", wIconCreatePixMap(doc_import_xpm[iconSize]), IC_ACCLKEY,
 			DoImport, I2VP(0));
-	AddToolbarButton("cmdImportModule", wIconCreatePixMap(doc_import_xtc_xpm[iconSize]), IC_ACCLKEY,
-				DoImport, I2VP(1));
+	AddToolbarButton("cmdImportModule", wIconCreatePixMap(doc_import_mod_xpm[iconSize]), IC_ACCLKEY,
+			DoImport, I2VP(1));
 	ButtonGroupEnd();
 }
 
@@ -3086,7 +3093,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	opterr = 0;
 	LogSet("dummy",0);
 
-	while ((c = getopt(argc, argv, "vl:d:c:m")) != -1)
+	while ((c = getopt(argc, argv, "vl:d:c:mV")) != -1)
 		switch (c) {
 		case 'c': /* configuration name */
 			/* test for valid filename */
@@ -3130,6 +3137,10 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			NoticeMessage("Missing parameter for %s", _("Ok"), NULL,
 					argv[optind - 1]);
 			exit(1);
+			break;
+		case 'V': // display version
+			printf("Version: %s\n",XTRKCAD_VERSION);
+			exit(0);
 			break;
 		default:
 			abort();

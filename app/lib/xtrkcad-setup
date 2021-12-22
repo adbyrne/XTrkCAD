@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 usage() {
 	echo "$0 (install|remove|desktop) <install-dir>"

@@ -53,6 +53,8 @@
 static struct wFilSel_t * exportSVGFile_fs;
 static coOrd roomSize;
 
+static int svgLineWidth[4] = {10, 10, 20, 30};
+
 /**
  * get line style for element
  *
@@ -114,7 +116,7 @@ static void SvgDrawLine(
 {
     unsigned lineOpt = SvgDrawGetLineStyle(d);
 
-    width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
+    width = (wDrawWidth)(width >= MINIMUMLINEWIDTH ? width : svgLineWidth[width]);
 
     SvgLineCommand((SVGParent *)(d->d),
                    p0.x, roomSize.y - p0.y,
@@ -148,13 +150,14 @@ static void SvgDrawArc(
     wDrawColor color)
 {
     unsigned lineOpt = SvgDrawGetLineStyle(d);
+	wDrawWidth w = (width >= MINIMUMLINEWIDTH ? width : svgLineWidth[width]);
 
     if (angle1 >= 360.0) {
         SvgCircleCommand((SVGParent *)(d->d),
                          p.x,
                          roomSize.y - p.y,
                          r,
-                         (width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH),
+                         w,
                          wDrawGetRGB(color),
                          false,
                          lineOpt);
@@ -166,7 +169,7 @@ static void SvgDrawArc(
                       angle0,
                       angle1,
                       drawCenter,
-                      (width > MININMUMLINEWIDTH ? width: MININMUMLINEWIDTH),
+                      w,
                       wDrawGetRGB(color),
                       lineOpt);
     }
@@ -266,7 +269,7 @@ static void SvgDrawFillPoly(
         cnt++;
     }
 
-    width = (wDrawWidth)(width > MININMUMLINEWIDTH ? width : MININMUMLINEWIDTH);
+    width = (wDrawWidth)(width >= MINIMUMLINEWIDTH ? width : svgLineWidth[width]);
     SvgPolyLineCommand((SVGParent *)(d->d), cnt, points,  wDrawGetRGB(color),
                        (double)width, fillStyle == DRAW_FILL, lineOpt);
 
@@ -432,6 +435,7 @@ static int DoExportSVGTracks(
     DynString command = NaS;
     SVGDocument *svg;
     SVGParent *svgData;
+	BOOL_T all = (selectedTrackCount == 0);
     char *id;
 
     assert(fileName != NULL);
@@ -452,7 +456,7 @@ static int DoExportSVGTracks(
 
     svgD.d = (wDraw_p)svgData;
 
-    DrawSelectedTracks(&svgD);
+    DrawSelectedTracks(&svgD,all);
     SvgAddCSSStyle((SVGParent *)svgD.d);
     SvgSetTitle(&svgD);						// make sure this is the last element
 
@@ -476,9 +480,9 @@ static int DoExportSVGTracks(
  * Create and show the dialog for selecting the DXF export filename
  */
 
-void DoExportSVG(void)
+void DoExportSVG(void * unused)
 {
-    assert(selectedTrackCount > 0);
+    // assert(selectedTrackCount > 0);
 
     if (exportSVGFile_fs == NULL)
         exportSVGFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to SVG"),

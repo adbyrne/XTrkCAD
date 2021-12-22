@@ -179,10 +179,23 @@ A tunnel portal is drawn where a hidden track connects with an 'unhidden' track.
 
 The \f{Draw Tunnels} Radio button group on the \f{Options>Display} dialog (\K{cmdDisplay}) controls whether hidden tracks are not drawn, drawn as dashed lines or drawn as normal lines.
 
+
 \rule
 
+\S{cmdTies} Ties (Draw or Hide Ties)
+
+\G{png.d/bties.png}
+
+The \f{Ties} command is used to hide Ties (or reshow them).  This may be useful for overlapping track, like dual gauge, or in areas like docks or yards where the track is covered.
+
+Select the tracks you want to hide or show ties for.
+
+
+\rule
 
 \S{cmdBridge} Bridge (Draw or Hide Abutments)
+
+\G{png.d/bbridge.png}
 
 The \f{Bridge} command is used to add abutments to a track (as on an underbridge).
 
@@ -190,9 +203,12 @@ Select the tracks you want to be a bridge. Bridge abutments are drawn alongside 
 
 If you perform this action on an existing bridge (or use Tunnel) the bridge is removed.
 
+
 \rule
 
 \S{cmdRoadbed} Roadbed (Draw or Hide Base)
+
+\G{png.d/broadbed.png}
 
 The \f{Roadbed} command is used to add a solid color under a track (as roadbed).
 
@@ -200,16 +216,8 @@ Select the tracks you want to have roadbed. A solid roadbed layer is drawn under
 
 If you perform this action on existing roadbed (or use Tunnel) the roadbed is removed. The bridge option takes precedence over roadbed.
 
-\rule
-
-\S{cmdTies} Ties (Draw or Hide Ties)
-
-The \f{Ties} command is used to hide Ties (or reshow them).  This may be useful for overlapping track, like dual gauge, or in areas like docks or yards where the track is covered.
-
-Select the tracks you want to hide or show ties for.
 
 \rule
-
 
 \S{cmdUndo} Undo and Redo
 

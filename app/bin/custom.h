@@ -126,8 +126,10 @@ void InitCmdPan( wMenu_p menu );
 void InitCmdPan2( wMenu_p menu );
 void InitCmdDelete( void );
 void InitCmdSplit( wMenu_p menu );
+void InitCmdTies( void );
 void InitCmdTunnel( void );
 void InitCmdBridge( void );
+void InitCmdRoadbed( void );
 void InitCmdRuler( wMenu_p menu );
 
 void InitCmdParallel( wMenu_p menu );

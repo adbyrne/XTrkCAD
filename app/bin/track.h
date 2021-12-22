@@ -649,7 +649,7 @@ void DrawTracks( drawCmd_p, DIST_T, coOrd, coOrd );
 void DrawNewTrack( track_cp );
 void DrawOneTrack( track_cp, drawCmd_p );
 void UndrawNewTrack( track_cp );
-void DrawSelectedTracks( drawCmd_p );
+void DrawSelectedTracks( drawCmd_p, BOOL_T );
 void HilightElevations( BOOL_T );
 void HilightSelectedEndPt( BOOL_T, track_p, EPINX_T );
 DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *, BOOL_T show_hidden, BOOL_T * hidden );
@@ -660,14 +660,14 @@ void ResolveIndex( void );
 void RenumberTracks( void );
 BOOL_T ReadTrack( char * );
 BOOL_T WriteTracks( FILE *, wBool_t );
-BOOL_T ExportTracks( FILE * , coOrd *);
+BOOL_T ExportTracks( FILE * , coOrd * );
 void ImportStart( void );
 void ImportEnd( coOrd , wBool_t, wBool_t);
 void FreeTrack( track_p );
 void ClearTracks( void );
 BOOL_T TrackIterate( track_p * );
 
-void LoosenTracks( void * unused );
+void LoosenTracks( void * );
 
 void SaveTrackState( void );
 void RestoreTrackState( void );

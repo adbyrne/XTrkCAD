@@ -25,7 +25,7 @@
 #include <stdbool.h>
 #include <mxml.h>
 
-#define MININMUMLINEWIDTH 3.0
+#define MINIMUMLINEWIDTH 4.0
 
 typedef  mxml_node_t SVGParent;
 typedef  mxml_node_t SVGDocument;
