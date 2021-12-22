@@ -2313,7 +2313,7 @@ static void ParamCreateControl(
 				w = wLabelWidth( _(pd->valueP) );
 			else
 				w = 150;
-			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, _(pd->winLabel), w, pd->valueP?_(pd->valueP):" ", pd->winOption );
+			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, helpStr, helpStr, w, pd->valueP?_(pd->valueP):" ", pd->winOption );
 			break;
 		case PD_BUTTON:
 			pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, ParamButtonPush, pd );
@@ -2341,7 +2341,7 @@ static void ParamCreateControl(
 			break;
 		case PD_BITMAP:
 			iconP = pd->winData;
-			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
+			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, helpStr, pd->winOption, iconP );
 			break;
 		default:
 			AbortProg( "paramCreatePG" );
@@ -2783,26 +2783,26 @@ wWin_p ParamCreateDialog(
 		paramActionCancelProc cancelProc,
 		BOOL_T needHelpButton,
 		paramLayoutProc layoutProc,
-		long winOption,
+		long WinOptionsIn,		/* F_ flags pass through */
 		paramChangeProc changeProc )
 {
 	char helpStr[STR_SHORT_SIZE];
 	wWinPix_t w0, h0;
-	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
+	char * cancelLabel = (WinOptionsIn&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
     long useTemplate = 0L;
 
-	winOption &= ~PD_F_ALT_CANCELLABEL;
+
+
+	WinOptionsIn &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
 	group->cancelProc = cancelProc;
 	group->layoutProc = layoutProc;
 	group->changeProc = changeProc;
-	group->winOption = winOption;
-	if ( (winOption&F_CENTER) == 0 )
-		winOption |= F_RECALLPOS;
-	if ( (winOption&F_RESIZE) != 0 )
-		winOption |= F_RECALLSIZE;
 
-	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
+	if ( (WinOptionsIn&F_CENTER) == 0 )
+		WinOptionsIn |= F_RECALLPOS;
+	if ( (WinOptionsIn&F_RESIZE) != 0 )
+		WinOptionsIn |= F_RECALLSIZE;
 
 	/* Now set up output parms for the calls */
     long winOptionsOut = WinOptionsIn;  /*Copy options for the PopUp call */
@@ -2846,6 +2846,7 @@ wWin_p ParamCreateDialog(
 			group->okB = wButtonCreate( group->win, 0, 0, "id-ok", okLabel, BB_DEFAULT|butOptions, 0, (wButtonCallBack_p)ParamButtonOk, group );
 		}
 		if ( group->cancelProc ) {
+			sprintf( helpStr, "%s-cancel", group->nameStr );
 			group->cancelB = wButtonCreate( group->win, 0, 0, "id-cancel", cancelLabel, BB_CANCEL|butOptions, 0, (wButtonCallBack_p)ParamButtonCancel, group );
 		}
 		if ( needHelpButton ) {
@@ -2913,10 +2914,8 @@ EXPORT void ParamCreateControls(
 		paramChangeProc changeProc )
 {
 	paramData_p pd;
-	char helpStr[STR_SHORT_SIZE], * helpStrP;
-	strcpy( helpStr, pg->nameStr );
-	helpStrP = helpStr+strlen(helpStr);
-	*helpStrP++ = '-';
+	char prefix[STR_SHORT_SIZE], helpStr[STR_SHORT_SIZE];
+	sprintf(prefix,"main-%s",pg->nameStr);  /*the area like "parallel" */
 	for ( pd=pg->paramPtr; pd<&pg->paramPtr[pg->paramCnt]; pd++ ) {
 		pd->group = pg;
 		pd->winOption |= BO_USETEMPLATE;

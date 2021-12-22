@@ -22,7 +22,7 @@
 
 #include "ccurve.h"
 #include "cjoin.h"
-// #include "cstraigh.h"
+#include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
 #include "layout.h"

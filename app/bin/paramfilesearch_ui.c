@@ -65,7 +65,7 @@ static paramData_t searchUiPLs[] = {
 #define I_FITRADIO	(3)
     {	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (4)
-(??)    { PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
+    { PD_MESSAGE, N_(QUERYPROMPTSTRING), "messagetext", 0, (void *)370 },
 #define I_STATISTICS (5)
     { PD_MESSAGE, "", "searchstat", PDO_DLGBOXEND, I2VP(370) },
 #define I_RESULTLIST	(6)

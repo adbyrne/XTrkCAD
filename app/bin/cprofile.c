@@ -1377,11 +1377,9 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
     PathListCheck();
 }
 
-
-
-static void ProfileSubCommand(void* pcmd)
+static void ProfileSubCommand(wBool_t set, void* pcmd)
 {
-    long cmd = VP2L(pcmd);
+    long cmd = (long)pcmd;
     int mode;
     coOrd pos = oldMarker;
     DIST_T elev;

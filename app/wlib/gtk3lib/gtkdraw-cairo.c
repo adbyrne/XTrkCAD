@@ -1698,6 +1698,23 @@ int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
 
 }
 
+/**
+ * Use a loaded background in another context.
+ * 
+ * \param from  context with background
+ * \param to    context to get a reference to the existing background			   
+ */
+
+void
+wDrawCloneBackground(wDraw_p from, wDraw_p to)
+{
+    if (from->background) {
+        to->background = from->background;
+    } else {
+        to->background = NULL;
+    }
+}
+
 void wDrawShowBackground( wDraw_p bd, wWinPix_t pos_x, wWinPix_t pos_y, wWinPix_t size, wAngle_t angle, int screen) {
 
 	if (bd->background) {

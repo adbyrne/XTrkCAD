@@ -2477,7 +2477,7 @@ static wMenu_p moveDescM;
 static wMenuToggle_p moveDescMI;
 static wMenuToggle_p moveDetailDescMI;
 
-static void ChangeDetailedFlag( void * mode )
+static void ChangeDetailedFlag( wBool_t set, void * mode )
 {
 	wDrawDelayUpdate( mainD.d, TRUE );
 	UndoStart( _("Toggle Detail"), "Modedetail( T%d )", GetTrkIndex(moveDescTrk) );
@@ -2492,7 +2492,7 @@ static void ChangeDetailedFlag( void * mode )
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
-static void ChangeDescFlag( void * mode )
+static void ChangeDescFlag( wBool_t set, void * mode )
 {
 	wDrawDelayUpdate( mainD.d, TRUE );
 	UndoStart( _("Toggle Label"), "Modedesc( T%d )", GetTrkIndex(moveDescTrk) );

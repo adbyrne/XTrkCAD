@@ -44,6 +44,7 @@ static wDrawColor descColor = 0;
 static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 static wWinPix_t describeW_posy;
+static int describe_row;
 static wWinPix_t describeCmdButtonEnd;
 
 static wMenu_p descPopupM;
@@ -394,7 +395,7 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
                 describePLs[inx].option |= PDO_DLGUNDERCMDBUTT;
             }
 
-            if (sep)
+            if (sep) {
             	describeW_posy += wControlGetHeight(describePLs[inx].control) + sep;
             	describe_row++;
             }
@@ -483,7 +484,7 @@ static void DescribeLayout(
  */
 
 static wList_p setLayerL;
-void DoDescribe(char * title, char *template-id, track_p trk, descData_p data, descUpdate_t update)
+void DoDescribe(char * title, char *template_id, track_p trk, descData_p data, descUpdate_t update)
 {
     int inx;
     descData_p ddp;

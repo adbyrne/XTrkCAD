@@ -753,14 +753,14 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 }
 
 
-EXPORT void SnapGridEnable( void * unused )
+EXPORT void SnapGridEnable( void )
 {
 	grid.Vert.Enable = grid.Horz.Enable = !( grid.Vert.Enable || grid.Horz.Enable );
 	GridButtonUpdate( (CHK_HENABLE|CHK_VENABLE) );
 }
 
 
-EXPORT void SnapGridShow( void * unused )
+EXPORT void SnapGridShow( void )
 {
 	grid.Show = !grid.Show;
 	GridButtonUpdate( CHK_SHOW );
@@ -771,6 +771,6 @@ EXPORT void SnapGridShow( void * unused )
 
 EXPORT void InitSnapGridButtons( void )
 {
-	snapGridEnable_b = AddToolbarButton( "cmdGridEnable", wIconCreatePixMap(snap_curs_xpm[iconSize] ), 0, SnapGridEnable, NULL );
-	snapGridShow_b = AddToolbarButton( "cmdGridShow", wIconCreatePixMap(snap_grid_xpm[iconSize] ), IC_MODETRAIN_TOO, SnapGridShow, NULL );
+	snapGridEnable_b = AddToolbarButton( "cmdGridEnable", wIconCreatePixMap(snap_curs_xpm[iconSize]), 0, (addButtonCallBack_t)SnapGridEnable, NULL );
+	snapGridShow_b = AddToolbarButton( "cmdGridShow", wIconCreatePixMap(snap_grid_xpm[iconSize]), IC_MODETRAIN_TOO, (addButtonCallBack_t)SnapGridShow, NULL );
 }

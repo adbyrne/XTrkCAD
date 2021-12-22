@@ -1519,9 +1519,9 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.rot_angle, "RotAngle", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
 #define drawModRotCenterXPD		(drawModPLs[8])
 #define drawModRotCenterInx      8
-	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "RotCenterx", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X,Y") },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "RotCenterX", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X,Y") },
 #define drawModRotCenterYPD		(drawModPLs[9])
-	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCentery", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
+	{ PD_FLOAT, &drawModCmdContext.rot_center.y, "RotCenterY", PDO_NOPREF|PDO_NORECORD|BO_ENTER, &r0_10000, NULL },
 
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, COUNT( drawModPLs ) };
@@ -2714,7 +2714,7 @@ static paramData_t drawPLs[] = {
 #define drawLineTypePD			(drawPLs[10])
 	{ PD_DROPLIST, &drawCmdContext.lineType, "type", PDO_DIM|PDO_NORECORD|BO_ENTER, I2VP(0), N_("Line Type") },
 };
-static paramGroup_t drawPG = { "draw", 0, drawPLs, COUNT( drawPLs ) };
+static paramGroup_t drawPG = { "cmddraw", 0, drawPLs, COUNT( drawPLs ) };
 
 static char * objectName[] = {
 		N_("Straight"),

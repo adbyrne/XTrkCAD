@@ -69,7 +69,7 @@ typedef struct wFont_t      * wFont_p;
 typedef struct wBitmap_t	* wBitmap_p;
 typedef struct wStatus_t    * wStatus_p;
 typedef int wDrawWidth;
-typedef int wDrawColor;
+typedef long wDrawColor;
 
 typedef struct {
 	const char * name;
@@ -79,12 +79,13 @@ typedef struct {
 extern long debugWindow;
 extern long wDebugFont;
 
+
 /*------------------------------------------------------------------------------
  *
  * Bitmap Controls bitmap.c
  */
 
-wControl_p wBitmapCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, long options, const struct wIcon_t * iconP);
+wControl_p wBitmapCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, char * helpStr, long options, const struct wIcon_t *iconP);
 wIcon_p wIconCreateBitMap(wWinPix_t w, wWinPix_t h, const char *bits, wDrawColor color);
 wIcon_p wIconCreatePixMap(char *pm[]);
 void wIconSetColor(wIcon_p ip, wDrawColor color);
@@ -143,6 +144,8 @@ void wToggleSetValue(wChoice_p bc, long value);
 long wToggleGetValue(wChoice_p b);
 wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
 wChoice_p wToggleCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
+void wButtonToolBarRedraw(wWin_p win);
+wButton_p wButtonCreateForToolbar(wWin_p  w, wWinPix_t x, wWinPix_t	y,const char *helpStr, const char *labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void * data);
 
 
 /*------------------------------------------------------------------------------
@@ -201,6 +204,7 @@ typedef enum {	wCursorNormal,
 		wCursorIBeam,
 		wCursorCross,
 		wCursorQuestion } wCursor_t;
+
 void wSetCursor( wDraw_p, wCursor_t );
 #define defaultCursor wCursorCross
 
@@ -209,6 +213,7 @@ const char * wMemStats( void );
 #define WKEY_SHIFT	(1<<1)
 #define WKEY_CTRL	(1<<2)
 #define WKEY_ALT	(1<<3)
+#define WKEY_CMD    (1<<4)
 int wGetKeyState(		void );
 
 void wGetDisplaySize(		wWinPix_t*, wWinPix_t* );
@@ -240,6 +245,7 @@ typedef enum {
 typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void * );
 
 /* Creation Options */
+
 #define F_AUTOSIZE	(1L<<1)
 #define F_HEADER 	(1L<<2)
 #define F_RESIZE 	(1L<<3)
@@ -431,8 +437,8 @@ void wListSetEditable(		wList_p, wBool_t );
 
 #define wMessageSetFont( x ) ( x & (BM_LARGE | BM_SMALL ))
 
-#define wMessageCreate( w, p1, p2, l, p3, m ) wMessageCreateEx( w, p1, p2, l, p3, m, 0 )
-wMessage_p wMessageCreateEx(	wWin_p, wWinPix_t, wWinPix_t, const char *,
+#define wMessageCreate( w, p1, p2, l, p3, m ) wMessageCreateEx( w, p1, p2, l, 0, p3, m, 0 )
+wMessage_p wMessageCreateEx(	wWin_p, wWinPix_t, wWinPix_t, const char *, const char *,
 				wWinPix_t, const char *, long );
 
 void wMessageSetValue(		wMessage_p, const char * );
@@ -503,6 +509,7 @@ typedef int wDrawOpts;
 #define wDrawOptOpaque   (1<<9)
 #endif
 
+#define EXPORTBITMAP (1)
 
 typedef enum {
 	wDrawLineSolid,
@@ -617,7 +624,7 @@ void * wDrawGetContext(		wDraw_p );
 void wDrawSaveImage(		wDraw_p );
 void wDrawRestoreImage(		wDraw_p );
 int wDrawSetBackground(    wDraw_p, char * path, char ** error);
-void wDrawCloneBackground(wDraw_p from, wDraw_p to);
+void wDrawCloneBackground(  wDraw_p from, wDraw_p to);
 void wDrawShowBackground(   wDraw_p, wWinPix_t pos_x, wWinPix_t pos_y, wWinPix_t width, wAngle_t angle, int screen);
 
 /*------------------------------------------------------------------------------
@@ -625,7 +632,7 @@ void wDrawShowBackground(   wDraw_p, wWinPix_t pos_x, wWinPix_t pos_y, wWinPix_t
  * Fonts
  */
 void wInitializeFonts();
-void wSelectFont(		const char * );
+void wSelectFont(		const char *, wWin_p win );
 wFontSize_t wSelectedFontSize(	void );
 void wSetSelectedFontSize(wFontSize_t size);
 #define F_TIMES	(1)
@@ -706,7 +713,7 @@ void wDoAccelHelp( wAccelKey_e key, void * );
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );
 typedef void (*wMenuListCallBack_p)( int, const char *, void * );
-typedef void (*wMenuCallBack_p)( void * );
+typedef void (*wMenuToggleCallBack_p)( wBool_t set, void * pcmd);
 typedef void (*wAccelKeyCallBack_p)( wAccelKey_e, void * );
 typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );
 
@@ -732,7 +739,7 @@ void wMenuListDelete(		wMenuList_p, const char * );
 const char * wMenuListGet(	wMenuList_p, int, void ** );
 void wMenuListClear(		wMenuList_p );
 
-wMenuToggle_p wMenuToggleCreate(	wMenu_p, const char *, const char *, long, wBool_t, wMenuCallBack_p, void * );
+wMenuToggle_p wMenuToggleCreate(	wMenu_p, const char *, const char *, long, wBool_t, wMenuToggleCallBack_p, void * );
 wBool_t wMenuToggleSet(		wMenuToggle_p, wBool_t );
 wBool_t wMenuToggleGet(		wMenuToggle_p );
 void wMenuToggleEnable(		wMenuToggle_p, wBool_t );
@@ -816,7 +823,8 @@ wStatus_p wStatusCreate(
     wWin_p	parent,
     wWinPix_t	x,
     wWinPix_t	y,
-    const char 	* labelStr,
+    const char 	* helpStr,
+	const char  * labelStr,
     wWinPix_t	width,
     const char	*message );
 

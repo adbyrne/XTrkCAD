@@ -1185,18 +1185,18 @@ EXPORT void InitInfoBar( void )
 	boxH = infoHeight;
 		x = 2;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
-		infoD.scale_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel);
-		x += infoD.scale_w + 2;
+		infoD.scale_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarScale", "infoBarScale", infoD.scale_w-six, zoomLabel);
+		x += infoD.scale_w + 10;
 		infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posX_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel );
-		x += infoD.pos_w + 2;
+		infoD.posX_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarPosX", "infoBarPosX", infoD.pos_w-six, xLabel );
+		x += infoD.pos_w + 5;
 		infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posY_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel );
-		x += infoD.pos_w + 2;
+		infoD.posY_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarPosY", "infoBarPosY", infoD.pos_w-six, yLabel );
+		x += infoD.pos_w + 10;
 		messageOrControlX = x+info_xm_offset;									//Remember Position
 		messageOrControlY = ym;
 		infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
-		infoD.info_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", infoD.info_w-six, "" );
+		infoD.info_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarStatus", "infoBarStatus", infoD.info_w-six, "" );
 }
 
 

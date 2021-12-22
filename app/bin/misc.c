@@ -929,8 +929,8 @@ EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data) {
 static void NextWindow(void) {
 }
 
-EXPORT void SelectFont(void * unused) {
-	wSelectFont(_("XTrackCAD Font"));
+EXPORT void SelectFont(void *unUsed)  {
+	wSelectFont(_("XTrackCAD Font"), mainW);
 }
 
 /*****************************************************************************
@@ -1662,7 +1662,7 @@ EXPORT void AddToolbarControl(wControl_p control, long options) {
 	buttonList[buttonCnt].y = 0;
 	buttonList[buttonCnt].control = control;
 	buttonList[buttonCnt].cmdInx = -1;
-	LayoutSetPos(buttonCnt);
+	LayoutSetPos(buttonCnt, TRUE);
 	buttonCnt++;
 }
 
@@ -1981,26 +1981,21 @@ static void DoSticky(void * unused) {
  * specified in the following array.
  * Note: text and choices must be given in the same order.
  */
-static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Print Buttons"), N_("Import/Export Buttons"), 
-        N_("Zoom Buttons"), N_("Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"), 
-	    N_("Create Track Buttons"), N_("Layout Control Elements"), 
-	    N_("Modify Track Buttons"), N_("Properties/Select"), 
-	    N_("Track Group Buttons"), N_("Train Group Buttons"), 
-	    N_("Create Misc Buttons"), N_("Ruler Button"), 
-	    N_("Layer Buttons"), N_("Hot Bar"),
+static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Import/Export Buttons"), N_("Zoom Buttons"), N_(
+		"Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"), N_(
+		"Create Track Buttons"), N_("Layout Control Elements"), N_(
+		"Modify Track Buttons"), N_("Properties/Select"), N_(
+		"Track Group Buttons"), N_("Train Group Buttons"), N_(
+		"Create Misc Buttons"), N_("Ruler Button"), N_("Layer Buttons"), N_(
+		"Hot Bar"),
 NULL };
-static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_PRINT, 1<< BG_EXPORTIMPORT, 
-        1<< BG_ZOOM, 1<< BG_UNDO, 1<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT, 
-	    1<< BG_CONTROL, 1<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 
-	    1<< BG_MISCCRT, 1<< BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
+static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOOM, 1 << BG_UNDO, 1
+		<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT, 1 << BG_CONTROL, 1
+		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
+		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
 
-static wMenuToggle_p AllToolbarMI[ COUNT( AllToolbarMasks ) ];
-
-static void ToolbarAction(void * data) {
-	int inx = (int)VP2L(data);
-	ASSERT( inx >=0 && inx < COUNT( AllToolbarMasks ) );
-	wBool_t set = wMenuToggleGet( AllToolbarMI[inx] );
-	long mask = AllToolbarMasks[inx];
+static void ToolbarAction(wBool_t set, void * data) {
+	long mask = (long) data;
 	if (set)
 		toolbarSet |= mask;
 	else
@@ -2030,8 +2025,8 @@ static void CreateToolbarM(wMenu_p toolbarM) {
 	labels = AllToolbarLabels;
 	for (inx = 0; inx < cnt; inx++, masks++, labels++) {
 		set = (toolbarSet & *masks) != 0;
-		AllToolbarMI[inx] = wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
-				ToolbarAction, I2VP(inx));
+		wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
+				ToolbarAction, (void*) *masks);
 	}
 }
 
@@ -2508,15 +2503,15 @@ static void CreateMenus(void) {
         DoZoomExtents, I2VP(1));
     /* Display */
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("Enable SnapGrid"),
-			0, SnapGridEnable, 0, NULL);
+			0, (wMenuCallBack_p)SnapGridEnable, 0, NULL);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
-			SnapGridShow, 0, NULL);
+			(wMenuCallBack_p)SnapGridShow, 0, NULL);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMagneticSnap", _(" Enable Magnetic Snap"), 0,
-			MagneticSnapToggle, 0, NULL);
+			(wMenuCallBack_p)MagneticSnapToggle, 0, NULL);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
-				MapWindowToggleShow, 0, NULL);
+			(wMenuCallBack_p)MapWindowToggleShow, 0, NULL);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdBackgroundShow", _("Show/Hide Background"), 0,
-			BackgroundToggleShow, 0, NULL);
+			(wMenuCallBack_p)BackgroundToggleShow, 0, NULL);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	/* Copy/Paste */
@@ -2719,10 +2714,10 @@ static void CreateMenus(void) {
 
 	snapGridEnableMI = wMenuToggleCreate(viewM, "cmdGridEnable",
 			_("Enable SnapGrid"), ACCL_SNAPENABLE, 0,
-			SnapGridEnable, NULL);
+			(wMenuToggleCallBack_p) SnapGridEnable, NULL);
 	snapGridShowMI = wMenuToggleCreate(viewM, "cmdGridShow", _("Show SnapGrid"),
 			ACCL_SNAPSHOW,
-			FALSE, SnapGridShow, NULL);
+			FALSE, (wMenuToggleCallBack_p) SnapGridShow, NULL);
 	gridCmdInx = InitGrid(viewM);
 
 	// visibility toggle for anchors
@@ -2732,7 +2727,7 @@ static void CreateMenus(void) {
 	magneticSnap = anchors_long ? TRUE : FALSE;
 	magnetsMI = wMenuToggleCreate(viewM, "cmdMagneticSnap", _("Enable Magnetic Snap"),
 		0, magneticSnap,
-		MagneticSnapToggle, NULL);
+		(wMenuToggleCallBack_p)MagneticSnapToggle, NULL);
 
 	// visibility toggle for map window
 	// get the start value
@@ -2741,7 +2736,7 @@ static void CreateMenus(void) {
 	mapVisible = mapVisible_long ? TRUE : FALSE;
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
 			ACCL_MAPSHOW, mapVisible,
-			MapWindowToggleShow, NULL);
+			(wMenuToggleCallBack_p) MapWindowToggleShow, NULL);
 
 	wMenuSeparatorCreate(viewM);
 
