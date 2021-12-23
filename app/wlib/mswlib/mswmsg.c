@@ -41,8 +41,7 @@ static void repaintMessage(
 
 	hDc = GetDC( hWnd );
 
-	if ( !mswThickFont )
-		hFont = SelectObject( hDc, mswLabelFont );
+	hFont = SelectObject( hDc, mswLabelFont );
 
 	switch( wMessageSetFont( ((wMessage_p)b)->flags )) 
 	{
@@ -66,8 +65,7 @@ static void repaintMessage(
 		/* create and activate the new font */
 		hFont = SelectObject( hDc, CreateFontIndirect( &msgFont ) );
 	} else {
-		if ( !mswThickFont )
-			hFont = SelectObject( hDc, mswLabelFont );
+		hFont = SelectObject( hDc, mswLabelFont );
 	}
 
 	GetTextMetrics(hDc, &textMetrics);
@@ -84,8 +82,7 @@ static void repaintMessage(
 		/* in case we did create a new font earlier, delete it now */
 		DeleteObject( SelectObject( hDc, GetStockObject( DEFAULT_GUI_FONT )));
 	else 
-		if ( !mswThickFont )
-			SelectObject( hDc, hFont );
+		SelectObject( hDc, hFont );
 
 	ReleaseDC( hWnd, hDc );
 }

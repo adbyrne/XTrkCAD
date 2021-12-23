@@ -173,9 +173,7 @@ extern HFONT mswOldTextFont;
 extern HFONT mswLabelFont;
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
-extern long mswThickFont;
 extern double mswScale;
-extern double scaleIcon;
 
 DWORD mswGetBaseStyle( wWin_p );
 char * mswStrdup( const char * );
