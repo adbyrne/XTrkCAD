@@ -898,7 +898,7 @@ wChoice_p wRadioCreate(
     void 	*data)
 {
     wChoice_p b;
-    const char * const * label;
+    const char ** label;
     GtkWidget *butt0=NULL, *butt;
 
     if ((option & BC_NOBORDER)==0) {
@@ -1028,7 +1028,7 @@ wChoice_p wToggleCreate(
     void 	*data)
 {
     wChoice_p b;
-    const char * const *  label;
+    const char ** label;
 
     if ((option & BC_NOBORDER)==0) {
         if (x>=0) {

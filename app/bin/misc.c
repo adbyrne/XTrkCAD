@@ -1522,7 +1522,7 @@ EXPORT void LayoutSetPos(wIndex_t inx, BOOL_T force) {
 							|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
 					&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
 							|| layerButtCnt++ <= layerCount)) {
-						wControlSetPos(buttonList[inx].control, 0,0);
+						//wControlSetPos(buttonList[inx].control, 0,0);
 						wControlShow(buttonList[inx].control, TRUE);
 				} else {
 					wControlShow(buttonList[inx].control, FALSE);
