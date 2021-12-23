@@ -2770,10 +2770,6 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(changeM);
 
 	InitCmdPull(changeM);
-	if (extraButtons)
-		MiscMenuItemCreate(changeM, NULL, "loosen", _("&Loosen Tracks"),
-			ACCL_LOOSEN, LoosenTracks,
-			IC_SELECTED, NULL);
 
 	wMenuSeparatorCreate(changeM);
 

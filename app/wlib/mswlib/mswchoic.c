@@ -310,55 +310,54 @@ static wChoice_p choiceCreate(
 	if (helpStr)
 		helpStrCopy = mswStrdup( helpStr );
 	for (lp = b->labels, cnt=0; *lp; lp++, cnt++, butts++ ) {			
-			*butts = (wChoiceItem_p)mswAlloc( parent, B_CHOICEITEM,
-				mswStrdup(_((char *)*lp)), sizeof( wChoiceItem_t ), data, &index );
-			(*butts)->owner = b;
-			(*butts)->hWnd = hButt = CreateWindow( "BUTTON", (*butts)->labelStr,
-						bs | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x+pw, b->y+ph,
-						80, CHOICE_HEIGHT,
-						((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
-			if ( hButt == (HWND)0 ) {
-				mswFail( "choiceCreate button" );
-				return b;
-			}
-			(*butts)->x = b->x+pw;
-			(*butts)->y = b->y+ph;
-			if (b->hWnd == 0)
-				b->hWnd = (*butts)->hWnd;
-			(*butts)->helpStr = helpStrCopy;
+		*butts = (wChoiceItem_p)mswAlloc( parent, B_CHOICEITEM,
+			mswStrdup(_((char *)*lp)), sizeof( wChoiceItem_t ), data, &index );
+		(*butts)->owner = b;
+		(*butts)->hWnd = hButt = CreateWindow( "BUTTON", (*butts)->labelStr,
+					bs | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x+pw, b->y+ph,
+					80, CHOICE_HEIGHT,
+					((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
+		if ( hButt == (HWND)0 ) {
+			mswFail( "choiceCreate button" );
+			return b;
+		}
+		(*butts)->x = b->x+pw;
+		(*butts)->y = b->y+ph;
+		if (b->hWnd == 0)
+			b->hWnd = (*butts)->hWnd;
+		(*butts)->helpStr = helpStrCopy;
 
-			hDc = GetDC( hButt );
-			lab_l = strlen((*butts)->labelStr);
+		hDc = GetDC( hButt );
+		lab_l = strlen((*butts)->labelStr);
 			
-			if (!mswThickFont) {hFont = SelectObject( hDc, mswLabelFont );}
-			dw = GetTextExtent( hDc, (char *)((*butts)->labelStr), (UINT)lab_l );
-			if (!mswThickFont) {SelectObject( hDc, hFont );}
+		hFont = SelectObject( hDc, mswLabelFont );
+		dw = GetTextExtent( hDc, (char *)((*butts)->labelStr), (UINT)lab_l );
+		SelectObject( hDc, hFont );
 		
-			w = LOWORD(dw) + CHOICE_MIN_WIDTH; 
+		w = LOWORD(dw) + CHOICE_MIN_WIDTH; 
 
-			if (w > maxW)
-				maxW = w;
-			SetBkMode( hDc, TRANSPARENT );
-			ReleaseDC( hButt, hDc );
-			if (b->option & BC_HORZ) {
-				pw += w;
-			} else {
-				ph += CHOICE_HEIGHT;
-			}
-			if (!SetWindowPos( hButt, HWND_TOP, 0, 0,
-				w, CHOICE_HEIGHT, SWP_NOMOVE|SWP_NOZORDER)) {
-				mswFail("Create CHOICE: SetWindowPos");
-			}
-			mswChainFocus( (wControl_p)*butts );
-			newChoiceItemProc = MakeProcInstance( (XWNDPROC)pushChoiceItem, mswHInst );
-			oldChoiceItemProc = (XWNDPROC)GetWindowLongPtr((*butts)->hWnd, GWLP_WNDPROC);
-			SetWindowLongPtr((*butts)->hWnd, GWLP_WNDPROC, (LPARAM)newChoiceItemProc);
+		if (w > maxW)
+			maxW = w;
+		SetBkMode( hDc, TRANSPARENT );
+		ReleaseDC( hButt, hDc );
+		if (b->option & BC_HORZ) {
+			pw += w;
+		} else {
+			ph += CHOICE_HEIGHT;
+		}
+		if (!SetWindowPos( hButt, HWND_TOP, 0, 0,
+			w, CHOICE_HEIGHT, SWP_NOMOVE|SWP_NOZORDER)) {
+			mswFail("Create CHOICE: SetWindowPos");
+		}
+		mswChainFocus( (wControl_p)*butts );
+		newChoiceItemProc = MakeProcInstance( (XWNDPROC)pushChoiceItem, mswHInst );
+		oldChoiceItemProc = (XWNDPROC)GetWindowLongPtr((*butts)->hWnd, GWLP_WNDPROC);
+		SetWindowLongPtr((*butts)->hWnd, GWLP_WNDPROC, (LPARAM)newChoiceItemProc);
 #ifdef _OLDCODE
 			oldChoiceItemProc = (XWNDPROC)GetWindowLong((*butts)->hWnd, GWL_WNDPROC);
 			SetWindowLong((*butts)->hWnd, GWL_WNDPROC, (LONG)newChoiceItemProc);
 #endif
-			if ( !mswThickFont )
-				SendMessage( (*butts)->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
+		SendMessage( (*butts)->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 	}
 	*butts = NULL;
 	switch (b->type) {

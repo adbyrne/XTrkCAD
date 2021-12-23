@@ -95,9 +95,9 @@ static void drawButton(
 	COLORREF colF;
 
 #define LEFT (0)
-#define RIGHT (LONG)ceil(bm->w*scaleIcon+10)
+#define RIGHT (bm->w+10)
 #define TOP (0)
-#define BOTTOM (LONG)ceil(bm->h*scaleIcon+10)
+#define BOTTOM (bm->h+10)
 
 	/* get the lightest and the darkest color to use */
 	colL = GetSysColor( COLOR_BTNHIGHLIGHT );
@@ -323,8 +323,8 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			break;
 		mi->CtlType = ODT_BUTTON;
 		mi->CtlID = (UINT)wParam;
-		mi->itemWidth = (UINT)ceil(bb->w*scaleIcon);
-		mi->itemHeight = (UINT)ceil(bb->h*scaleIcon);
+		mi->itemWidth = (UINT)bb->w;
+		mi->itemHeight = (UINT)bb->h;
 		} return (LRESULT)0;
 
 	case WM_DRAWITEM:
@@ -446,8 +446,8 @@ wButton_p wButtonCreate(
 	b->selected = 0;
 	mswComputePos( (wControl_p)b, x, y );
 	if (b->option&BO_ICON) {
-		width = (wWinPix_t)ceil(bm->w*scaleIcon)+10;
-		h = (int)ceil(bm->h*scaleIcon)+10;
+		width = (wWinPix_t)(bm->w+10);
+		h = bm->h+10;
 		b->icon = bm;
 	} else {
 		width = (wWinPix_t)(width*mswScale);
@@ -483,9 +483,8 @@ wButton_p wButtonCreate(
 		RealizePalette( hDc );
 		ReleaseDC( b->hWnd, hDc );
 	}
-	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 
+	SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 
 	InvalidateRect(b->hWnd, &rect, TRUE);
 

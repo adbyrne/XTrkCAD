@@ -290,8 +290,8 @@ wString_p wStringCreate(
 		SendMessage( b->hWnd, WM_SETTEXT, (WPARAM)0, (LPARAM)b->valueP );
 	}
 	SendMessage( b->hWnd, EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0 );
-	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
+	SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
+
 	GetWindowRect( b->hWnd, &rect );
 	b->w = rect.right - rect.left;
 	b->h = rect.bottom - rect.top;

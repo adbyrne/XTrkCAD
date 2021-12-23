@@ -61,8 +61,8 @@ const char * GetCurCommandName(void);
 #define LABELFONTRESET
 #else
 #define LABELFONTDECL	HFONT hFont;
-#define LABELFONTRESET	if (!mswThickFont) {SelectObject( hDc, hFont );}
-#define LABELFONTSELECT if (!mswThickFont) {hFont = SelectObject( hDc, mswLabelFont );}
+#define LABELFONTRESET	SelectObject( hDc, hFont );
+#define LABELFONTSELECT hFont = SelectObject( hDc, mswLabelFont );
 #endif
 
 /*
@@ -78,12 +78,7 @@ int mswEditHeight;
 int mswAllowBalloonHelp = TRUE;
 HFONT mswOldTextFont;
 HFONT mswLabelFont;
-/** @prefs [msw tweak] ThickFont=1  */
-long mswThickFont = 1;
 double mswScale = 1.0;
-
-/** @prefs [Preference] LargeIcons=1.5 Set toolbar icon scaling. Limited 1.0 to 2.0 */
-double scaleIcon = 1.0;				   /** Scaling factor for toolbar icons */
 
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
@@ -887,14 +882,9 @@ wWin_p wWinMainCreate(
     /* length of path + \ + length of filename + . + length of extension + \0 */
     helpFile = (char*)malloc(strlen(libDir) + 1 + strlen(appName) + 1 + 3 + 1);
     wsprintf(helpFile, "%s\\%s.chm", libDir, appName);
-    wPrefGetInteger("msw tweak", "ThickFont", &mswThickFont, 0);
 
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
-
-	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
-	if (scaleIcon < 1.0) scaleIcon = 1.0;
-	if (scaleIcon > 2.0) scaleIcon = 2.0;
 
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",
@@ -907,13 +897,11 @@ wWin_p wWinMainCreate(
 	//SendMessage(mswHWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 	//SendMessage(mswHWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 
-    if (!mswThickFont) {
-        SendMessage(mswHWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
-        hDc = GetDC(mswHWnd);
-        GetTextMetrics(hDc, &tm);
-        mswEditHeight = tm.tmHeight+2;
-        ReleaseDC(mswHWnd, hDc);
-    }
+    SendMessage(mswHWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
+    hDc = GetDC(mswHWnd);
+    GetTextMetrics(hDc, &tm);
+    mswEditHeight = tm.tmHeight+2;
+    ReleaseDC(mswHWnd, hDc);
 
     ShowWindow(mswHWnd, showCmd);
     UpdateWindow(mswHWnd);

@@ -1949,45 +1949,6 @@ EXPORT STATUS_T EndPtDescriptionMove(
 static DIST_T distanceEpsilon = 0.0;
 static ANGLE_T angleEpsilon = 0.0;
 
-EXPORT void LoosenTracks( void * unused )
-{
-	track_p trk, trk1;
-	EPINX_T ep0, ep1;
-	ANGLE_T angle0, angle1;
-	coOrd pos0, pos1;
-	DIST_T d;
-	ANGLE_T a;
-	int count;
-
-	count = 0;
-	TRK_ITERATE(trk) {
-		for (ep0=0; ep0<trk->endCnt; ep0++) {
-			trk1 = GetTrkEndTrk( trk, ep0 );
-			if (trk1 == NULL)
-				continue;
-			ASSERT( !IsTrackDeleted(trk1) );
-			ep1 = GetEndPtConnectedToMe( trk1, trk );
-			if (ep1 < 0)
-				continue;
-			pos0 = GetTrkEndPos( trk, ep0 );
-			pos1 = GetTrkEndPos( trk1, ep1 );
-			angle0 = GetTrkEndAngle( trk, ep0 );
-			angle1 = GetTrkEndAngle( trk1, ep1 );
-			d = FindDistance( pos0, pos1 );
-			a = NormalizeAngle( 180+angle0-angle1+angleEpsilon );
-			if (d > distanceEpsilon || a > angleEpsilon*2.0) {
-				DisconnectTracks( trk, ep0, trk1, ep1 );
-				count++;
-				InfoMessage( _("%d Track(s) loosened"), count );
-			}
-		}
-	}
-	if (count)
-		MainRedraw(); // LoosenTracks
-	else
-		InfoMessage(_("No tracks loosened"));
-}
-
 EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1 )
 {
 	DIST_T d;
