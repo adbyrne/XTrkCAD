@@ -40,9 +40,9 @@
 /**
  * Create UI path and filename from dialog name. Returned filename has to be
  * g_string_freed by caller.
- * 
+ *
  * \param dialog IN name of dialog
- * \return filename 
+ * \return filename
  */
 
 
@@ -51,21 +51,21 @@ wlibFileNameFromDialog( const char *dialog )
 {
 
 #ifdef NDEBUG
-    GString *filename = g_string_new(wGetAppLibDir());
+	GString *filename = g_string_new(wGetAppLibDir());
 #else
-    char * cwd = malloc(PATH_MAX);
-    getcwd(cwd, PATH_MAX );
-    GString *filename = g_string_new( cwd);
+	char * cwd = malloc(PATH_MAX);
+	getcwd(cwd, PATH_MAX );
+	GString *filename = g_string_new( cwd);
 #endif  //NDEBUG    
-    g_string_append(filename, "/ui/");
-    g_string_append(filename, dialog );
-    g_string_append(filename, ".glade");
+	g_string_append(filename, "/ui/");
+	g_string_append(filename, dialog );
+	g_string_append(filename, ".glade");
 
 #ifndef NDEBUG
-    free(cwd);
-#endif    
-    
-    return( filename );
+	free(cwd);
+#endif
+
+	return( filename );
 }
 
 /*
@@ -82,48 +82,49 @@ wlibFileNameFromDialog( const char *dialog )
  */
 
 wWin_p
-wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data )
+wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
+                        long option, void *data )
 {
-    wWin_p w;
-    int h;
-    GString *filename;
-    w = wlibAlloc(NULL, winType, 0, 0, labelStr, sizeof *w, data);
-    w->busy = TRUE;
-    w->option = option;
+	wWin_p w;
+	int h;
+	GString *filename;
+	w = wlibAlloc(NULL, winType, 0, 0, labelStr, sizeof *w, data);
+	w->busy = TRUE;
+	w->option = option;
 	w->resizeTimer = 0;
-    
 
-    filename = wlibFileNameFromDialog( nameStr );
-    
-    w->template_id = strdup(nameStr);
 
-    w->builder = gtk_builder_new_from_file(filename->str);
-    if( !w->builder ) {
-        GString *errorMessage = g_string_new("Could not load ");
-        g_string_append( errorMessage, filename->str);
-        wNoticeEx( NT_ERROR, 
-                   errorMessage->str,
-                  "OK",
-                  NULL );
-        exit(1);
-    }
-    w->gtkwin = (GtkWidget *)gtk_builder_get_object(w->builder,
-                                       nameStr);
-    w->fromTemplate = TRUE;
-    if (!w->gtkwin) {
-    	GString *errorMessage = g_string_new("Could not find window object ");
-    	        g_string_append( errorMessage, nameStr);
-    	        wNoticeEx( NT_ERROR,
-    	                   errorMessage->str,
-    	                  "OK",
-    	                  NULL );
-    	        exit(1);
-    }
-    //w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
-    g_string_free(filename, TRUE);
-   
-    return w;
-}    
+	filename = wlibFileNameFromDialog( nameStr );
+
+	w->template_id = strdup(nameStr);
+
+	w->builder = gtk_builder_new_from_file(filename->str);
+	if( !w->builder ) {
+		GString *errorMessage = g_string_new("Could not load ");
+		g_string_append( errorMessage, filename->str);
+		wNoticeEx( NT_ERROR,
+		           errorMessage->str,
+		           "OK",
+		           NULL );
+		exit(1);
+	}
+	w->gtkwin = (GtkWidget *)gtk_builder_get_object(w->builder,
+	                nameStr);
+	w->fromTemplate = TRUE;
+	if (!w->gtkwin) {
+		GString *errorMessage = g_string_new("Could not find window object ");
+		g_string_append( errorMessage, nameStr);
+		wNoticeEx( NT_ERROR,
+		           errorMessage->str,
+		           "OK",
+		           NULL );
+		exit(1);
+	}
+	//w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
+	g_string_free(filename, TRUE);
+
+	return w;
+}
 /**
  * GetWidgetFromName
  * \param IN win  			Window
@@ -132,47 +133,48 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, 
  * \param IN ignore_failure	If object can't be found, shall we continue?
  */
 GtkWidget *
-wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failure )
+wlibGetWidgetFromName( wWin_p parent, const char *dialogname,
+                       const char *suffix, wBool_t ignore_failure )
 
 {
-    GString *id = g_string_new(dialogname);
-    GtkWidget *widget;
-    
-    g_string_append_printf(id, ".%s", suffix );
-    
-   	widget = wlibWidgetFromId( parent, id->str );
+	GString *id = g_string_new(dialogname);
+	GtkWidget *widget;
 
-   	if(!widget) {
+	g_string_append_printf(id, ".%s", suffix );
+
+	widget = wlibWidgetFromId( parent, id->str );
+
+	if(!widget) {
 		if (!ignore_failure) {
 			GString *errorMessage = g_string_new("Could not find widget ");
 			g_string_append( errorMessage, id->str);
 			wNoticeEx( NT_ERROR,
-				   errorMessage->str,
-				   "OK",
-				   NULL );
+			           errorMessage->str,
+			           "OK",
+			           NULL );
 			g_string_free(errorMessage, TRUE);
 			exit(1);
 		} else {
 			return NULL;
 		}
 	}
-    
-    g_string_free(id, TRUE);
-    
-    return( widget );
+
+	g_string_free(id, TRUE);
+
+	return( widget );
 }
 
 GtkWidget *
 wlibWidgetFromIdWarn( wWin_p win, const char *id)
 {
 	GtkWidget * wi = wlibWidgetFromId(win,id);
-	if (wi) return wi;
+	if (wi) { return wi; }
 	GString *errorMessage = g_string_new("Could not find widget with id: ");
 	g_string_append_printf(errorMessage, "%s", id);
 	wNoticeEx( NT_ERROR,
-		   errorMessage->str,
-		   "OK",
-		   NULL );
+	           errorMessage->str,
+	           "OK",
+	           NULL );
 	g_string_free(errorMessage, TRUE);
 	return NULL;
 }
@@ -191,9 +193,9 @@ wlibWidgetFromId( wWin_p win, const char *id)
 {
 	GString *name = g_string_new(id);
 
-    GObject * wi = gtk_builder_get_object(win->builder, name->str);
-    g_string_free(name, TRUE);
-    return (GtkWidget *)wi;
+	GObject * wi = gtk_builder_get_object(win->builder, name->str);
+	g_string_free(name, TRUE);
+	return (GtkWidget *)wi;
 }
 
 void
@@ -202,19 +204,20 @@ wlibAddContentFromTemplate( wWin_p win, const char *nameStr)
 	GString *filename;
 	filename = wlibFileNameFromDialog( nameStr );
 	GError *error = NULL;
-    int success = gtk_builder_add_from_file(win->builder, filename->str, &error);
-    if (success == 0) {
+	int success = gtk_builder_add_from_file(win->builder, filename->str, &error);
+	if (success == 0) {
 		GString *errorMessage = g_string_new("Could not load sub-widget with name: ");
-		if (error)
+		if (error) {
 			g_string_append(errorMessage,error->message);
+		}
 		wNoticeEx( NT_ERROR,
-			   errorMessage->str,
-			   "OK",
-			   NULL );
-        g_string_free(errorMessage, TRUE);
-        g_clear_error (&error);
+		           errorMessage->str,
+		           "OK",
+		           NULL );
+		g_string_free(errorMessage, TRUE);
+		g_clear_error (&error);
 		exit(1);
-    }
+	}
 
 }
 

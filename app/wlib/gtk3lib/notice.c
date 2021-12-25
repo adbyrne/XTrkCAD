@@ -56,48 +56,48 @@ int wNoticeEx(int type,
               const char * no)
 {
 
-    int res;
-    unsigned flag;
-    char *headline;
-    GtkWidget *dialog;
-    GtkWindow *parent = NULL;
+	int res;
+	unsigned flag;
+	char *headline;
+	GtkWidget *dialog;
+	GtkWindow *parent = NULL;
 
-    switch (type) {
-    case NT_INFORMATION:
-        flag = GTK_MESSAGE_INFO;
-        headline = _("Information");
-        break;
+	switch (type) {
+	case NT_INFORMATION:
+		flag = GTK_MESSAGE_INFO;
+		headline = _("Information");
+		break;
 
-    case NT_WARNING:
-        flag = GTK_MESSAGE_WARNING;
-        headline = _("Warning");
-        break;
+	case NT_WARNING:
+		flag = GTK_MESSAGE_WARNING;
+		headline = _("Warning");
+		break;
 
-    case NT_ERROR:
-        flag = GTK_MESSAGE_ERROR;
-        headline = _("Error");
-        break;
-    }
+	case NT_ERROR:
+		flag = GTK_MESSAGE_ERROR;
+		headline = _("Error");
+		break;
+	}
 
-    if (gtkMainW) {
-        parent = GTK_WINDOW(gtkMainW->gtkwin);
-    }
+	if (gtkMainW) {
+		parent = GTK_WINDOW(gtkMainW->gtkwin);
+	}
 
-    wDestroySplash();
+	wDestroySplash();
 
-    dialog = gtk_message_dialog_new(parent,
-                                    GTK_DIALOG_DESTROY_WITH_PARENT,
-                                    flag,
-                                    ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
-                                    "%s", msg);
-    gtk_window_set_title(GTK_WINDOW(dialog), headline);
+	dialog = gtk_message_dialog_new(parent,
+	                                GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                flag,
+	                                ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
+	                                "%s", msg);
+	gtk_window_set_title(GTK_WINDOW(dialog), headline);
 
-    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
-    res = gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+	res = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
 
-    return res == GTK_RESPONSE_OK  || res == GTK_RESPONSE_YES;
+	return res == GTK_RESPONSE_OK  || res == GTK_RESPONSE_YES;
 }
 
 
@@ -113,11 +113,11 @@ int wNoticeEx(int type,
  */
 
 int wNotice(
-    const char * msg,		/* Message */
-    const char * yes,		/* First button label */
-    const char * no)		/* Second label (or 'NULL') */
+        const char * msg,		/* Message */
+        const char * yes,		/* First button label */
+        const char * no)		/* Second label (or 'NULL') */
 {
-    return wNotice3(msg, yes, no, NULL);
+	return wNotice3(msg, yes, no, NULL);
 }
 
 /** \brief Popup a notice box with three buttons.
@@ -139,73 +139,73 @@ int wNotice(
  */
 
 int wNotice3(
-    const char * msg,			/* Message */
-    const char * affirmative,	/* First button label */
-    const char * cancel,		/* Second label (or 'NULL') */
-    const char * alternate)
+        const char * msg,			/* Message */
+        const char * affirmative,	/* First button label */
+        const char * cancel,		/* Second label (or 'NULL') */
+        const char * alternate)
 {
-    GtkWidget *nw;
-    int resultCode;
+	GtkWidget *nw;
+	int resultCode;
 
-    char *aff = wlibChgMnemonic((char *) affirmative);
-    char *can = wlibChgMnemonic((char *) cancel);
-    char *alt = wlibChgMnemonic((char *) alternate);
+	char *aff = wlibChgMnemonic((char *) affirmative);
+	char *can = wlibChgMnemonic((char *) cancel);
+	char *alt = wlibChgMnemonic((char *) alternate);
 
-    wDestroySplash();
+	wDestroySplash();
 
-    nw = gtk_message_dialog_new (GTK_WINDOW_TOPLEVEL,
-    								  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-									  GTK_MESSAGE_WARNING,
-									  GTK_BUTTONS_NONE,
-    		                          msg );
+	nw = gtk_message_dialog_new (GTK_WINDOW_TOPLEVEL,
+	                             GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+	                             GTK_MESSAGE_WARNING,
+	                             GTK_BUTTONS_NONE,
+	                             msg );
 
-    if(alt){
-        gtk_dialog_add_button( GTK_DIALOG(nw),
-        					    alt,
-    							GTK_RESPONSE_CANCEL);
-    }
+	if(alt) {
+		gtk_dialog_add_button( GTK_DIALOG(nw),
+		                       alt,
+		                       GTK_RESPONSE_CANCEL);
+	}
 
-    if( can ) {
-        gtk_dialog_add_button( GTK_DIALOG(nw),
-        					    can,
-    							GTK_RESPONSE_NO );
-    }
+	if( can ) {
+		gtk_dialog_add_button( GTK_DIALOG(nw),
+		                       can,
+		                       GTK_RESPONSE_NO );
+	}
 
-    gtk_dialog_add_button( GTK_DIALOG(nw),
-    					    aff,
-							GTK_RESPONSE_YES );
-    gtk_dialog_set_default_response (GTK_DIALOG(nw),
-    								 GTK_RESPONSE_YES);
+	gtk_dialog_add_button( GTK_DIALOG(nw),
+	                       aff,
+	                       GTK_RESPONSE_YES );
+	gtk_dialog_set_default_response (GTK_DIALOG(nw),
+	                                 GTK_RESPONSE_YES);
 
-    int result = gtk_dialog_run (GTK_DIALOG (nw));
-    gtk_widget_destroy (GTK_WIDGET (nw));
+	int result = gtk_dialog_run (GTK_DIALOG (nw));
+	gtk_widget_destroy (GTK_WIDGET (nw));
 
-    switch(result){
-    case GTK_RESPONSE_YES:
-    	resultCode = 1;
-    	break;
-    case GTK_RESPONSE_NO:
-    	resultCode = 0;
-    	break;
-    case GTK_RESPONSE_CANCEL:
-    default:
-    	resultCode = -1;
-    	break;
-    }
+	switch(result) {
+	case GTK_RESPONSE_YES:
+		resultCode = 1;
+		break;
+	case GTK_RESPONSE_NO:
+		resultCode = 0;
+		break;
+	case GTK_RESPONSE_CANCEL:
+	default:
+		resultCode = -1;
+		break;
+	}
 
-    if (aff) {
-        free(aff);
-    }
+	if (aff) {
+		free(aff);
+	}
 
-    if (can) {
-        free(can);
-    }
+	if (can) {
+		free(can);
+	}
 
-    if (alt) {
-        free(alt);
-    }
+	if (alt) {
+		free(alt);
+	}
 
-    return resultCode;
+	return resultCode;
 }
 
 /* \brief Convert label string from Windows mnemonic to GTK
@@ -219,22 +219,22 @@ int wNotice3(
 static
 char * wlibChgMnemonic(char *label)
 {
-    char *ptr;
-    char *cp;
+	char *ptr;
+	char *cp;
 
-    if(!label){
-    	return NULL;
-    }
+	if(!label) {
+		return NULL;
+	}
 
-    cp = strdup(label);
+	cp = strdup(label);
 
-    ptr = strchr(cp, '&');
+	ptr = strchr(cp, '&');
 
-    if (ptr) {
-        *ptr = '_';
-    }
+	if (ptr) {
+		*ptr = '_';
+	}
 
-    return (cp);
+	return (cp);
 }
 
 

@@ -44,39 +44,40 @@ long debugWindow = 0;
 char wConfigName[ 256 ];
 
 const char * wNames[] = {
-    "MAIN",
-    "POPUP",
-    "BUTT",
-    "CANCEL",
-    "POPUP",
-    "TEXT",
-    "INTEGER",
-    "FLOAT",
-    "LIST",
-    "DROPLIST",
-    "COMBOLIST",
-    "RADIO",
-    "TOGGLE",
-    "DRAW",
-    "MENU"
-    "MULTITEXT",
-    "MESSAGE",
-    "LINES",
-    "MENUITEM",
-    "BOX"
+	"MAIN",
+	"POPUP",
+	"BUTT",
+	"CANCEL",
+	"POPUP",
+	"TEXT",
+	"INTEGER",
+	"FLOAT",
+	"LIST",
+	"DROPLIST",
+	"COMBOLIST",
+	"RADIO",
+	"TOGGLE",
+	"DRAW",
+	"MENU"
+	"MULTITEXT",
+	"MESSAGE",
+	"LINES",
+	"MENUITEM",
+	"BOX"
 };
 
 /* Set up flag to show backend supports templates */
-wBool_t wUITemplates(void) {
+wBool_t wUITemplates(void)
+{
 	return TRUE;
 }
 
 
 static wBool_t reverseIcon =
 #if defined(linux)
-    FALSE;
+        FALSE;
 #else
-    TRUE;
+        TRUE;
 #endif
 
 
@@ -97,50 +98,49 @@ static wBool_t reverseIcon =
  */
 
 GdkPixbuf* wlibPixbufFromXBM(
-                             wIcon_p ip)
+        wIcon_p ip)
 {
-    GdkPixbuf * pixbuf;
+	GdkPixbuf * pixbuf;
 
-    char line0[40];
-    char line2[40];
+	char line0[40];
+	char line2[40];
 
-    char ** pixmapData;
-    int row, col, wb;
-    long rgb;
-    const char * bits;
+	char ** pixmapData;
+	int row, col, wb;
+	long rgb;
+	const char * bits;
 
-    wb = (ip->w + 7) / 8;
-    pixmapData = (char**) malloc((3 + ip->h) * sizeof *pixmapData);
-    pixmapData[0] = line0;
-    rgb = wDrawGetRGB(ip->color);
-    sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
-    sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
-            rgb & 0xFF);
-    pixmapData[1] = ". c None s None";
-    pixmapData[2] = line2;
-    bits = ip->bits;
+	wb = (ip->w + 7) / 8;
+	pixmapData = (char**) malloc((3 + ip->h) * sizeof *pixmapData);
+	pixmapData[0] = line0;
+	rgb = wDrawGetRGB(ip->color);
+	sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
+	sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
+	        rgb & 0xFF);
+	pixmapData[1] = ". c None s None";
+	pixmapData[2] = line2;
+	bits = ip->bits;
 
-    for (row = 0; row < ip->h; row++) {
-        pixmapData[row + 3] = (char*) malloc((ip->w + 1) * sizeof **pixmapData);
+	for (row = 0; row < ip->h; row++) {
+		pixmapData[row + 3] = (char*) malloc((ip->w + 1) * sizeof **pixmapData);
 
-        for (col = 0; col < ip->w; col++) {
-            if (bits[ row * wb + (col >> 3) ] & (1 << (col & 07))) {
-                pixmapData[row + 3][col] = '#';
-            }
-            else {
-                pixmapData[row + 3][col] = '.';
-            }
-        }
-        pixmapData[row + 3][ip->w] = 0;
-    }
+		for (col = 0; col < ip->w; col++) {
+			if (bits[ row * wb + (col >> 3) ] & (1 << (col & 07))) {
+				pixmapData[row + 3][col] = '#';
+			} else {
+				pixmapData[row + 3][col] = '.';
+			}
+		}
+		pixmapData[row + 3][ip->w] = 0;
+	}
 
-    pixbuf = gdk_pixbuf_new_from_xpm_data((const char **) pixmapData);
+	pixbuf = gdk_pixbuf_new_from_xpm_data((const char **) pixmapData);
 
-    for (row = 0; row < ip->h; row++) {
-        free(pixmapData[row + 3]);
-    }
-    free(pixmapData);
-    return pixbuf;
+	for (row = 0; row < ip->h; row++) {
+		free(pixmapData[row + 3]);
+	}
+	free(pixmapData);
+	return pixbuf;
 }
 
 /**
@@ -153,33 +153,36 @@ GdkPixbuf* wlibPixbufFromXBM(
 
 int wlibAddLabel(wControl_p b, const char * labelStr)
 {
-    GtkRequisition min_req, nat_req, min_reqwidget, nat_reqwidget;
-    if (labelStr == NULL) {
-        return 0;
-    }
+	GtkRequisition min_req, nat_req, min_reqwidget, nat_reqwidget;
+	if (labelStr == NULL) {
+		return 0;
+	}
 
-    if (b->fromTemplate) {
-    	/*Find the label field in the template if there is one */
-    	b->label = wlibGetWidgetFromName( b->parent, b->template_id, "label", TRUE );
-    }
+	if (b->fromTemplate) {
+		/*Find the label field in the template if there is one */
+		b->label = wlibGetWidgetFromName( b->parent, b->template_id, "label", TRUE );
+	}
 
-    if (!b->label)
-    	b->label = gtk_label_new(wlibConvertInput(labelStr));
+	if (!b->label) {
+		b->label = gtk_label_new(wlibConvertInput(labelStr));
+	}
 
-    if (b->fromTemplate) {
-    	return 0;
-    }
+	if (b->fromTemplate) {
+		return 0;
+	}
 	gtk_widget_get_preferred_size(b->label, &min_req, &nat_req);
-	if (b->widget)
+	if (b->widget) {
 		gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
-	else
+	} else {
 		nat_reqwidget.height = nat_req.height;
+	}
 
 	gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
 	gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label,
-			   b->realX - nat_req.width - 8, b->realY + (nat_reqwidget.height/2 - nat_req.height/2));
+	               b->realX - nat_req.width - 8,
+	               b->realY + (nat_reqwidget.height/2 - nat_req.height/2));
 	gtk_widget_show(b->label);
-    return nat_req.width + 8;
+	return nat_req.width + 8;
 }
 
 /**
@@ -196,44 +199,44 @@ int wlibAddLabel(wControl_p b, const char * labelStr)
  */
 
 void * wlibAlloc(
-                 wWin_p parent,
-                 wType_e type,
-                 wWinPix_t origX,
-                 wWinPix_t origY,
-                 const char * labelStr,
-                 int size,
-                 void * data)
+        wWin_p parent,
+        wType_e type,
+        wWinPix_t origX,
+        wWinPix_t origY,
+        const char * labelStr,
+        int size,
+        void * data)
 {
-    wControl_p w = (wControl_p) malloc(size);
-    char * cp;
-    memset(w, 0, size);
+	wControl_p w = (wControl_p) malloc(size);
+	char * cp;
+	memset(w, 0, size);
 
-    if (w == NULL) {
-        abort();
-    }
+	if (w == NULL) {
+		abort();
+	}
 
-    w->outline = FALSE;
+	w->outline = FALSE;
 
-    w->type = type;
-    w->parent = parent;
-    w->origX = origX;
-    w->origY = origY;
+	w->type = type;
+	w->parent = parent;
+	w->origX = origX;
+	w->origY = origY;
 
-    if (labelStr) {
-        cp = (char*) malloc(strlen(labelStr) + 1);
-        w->labelStr = cp;
+	if (labelStr) {
+		cp = (char*) malloc(strlen(labelStr) + 1);
+		w->labelStr = cp;
 
-        for (; *labelStr; labelStr++)
-            if (*labelStr != '&') {
-                *cp++ = *labelStr;
-            }
+		for (; *labelStr; labelStr++)
+			if (*labelStr != '&') {
+				*cp++ = *labelStr;
+			}
 
-        *cp = 0;
-    }
+		*cp = 0;
+	}
 
-    w->doneProc = NULL;
-    w->data = data;
-    return w;
+	w->doneProc = NULL;
+	w->data = data;
+	return w;
 }
 
 /**
@@ -243,23 +246,21 @@ void * wlibAlloc(
  */
 
 void wlibComputePos(
-                    wControl_p b)
+        wControl_p b)
 {
-    wWin_p w = b->parent;
+	wWin_p w = b->parent;
 
-    if (b->origX >= 0) {
-        b->realX = b->origX;
-    }
-    else {
-        b->realX = w->lastX + (-b->origX) - 1;
-    }
+	if (b->origX >= 0) {
+		b->realX = b->origX;
+	} else {
+		b->realX = w->lastX + (-b->origX) - 1;
+	}
 
-    if (b->origY >= 0) {
-        b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? MENUH : 0);
-    }
-    else {
-        b->realY = w->lastY + (-b->origY) - 1;
-    }
+	if (b->origY >= 0) {
+		b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? MENUH : 0);
+	} else {
+		b->realY = w->lastY + (-b->origY) - 1;
+	}
 }
 
 /**
@@ -269,10 +270,10 @@ void wlibComputePos(
  */
 
 void wlibControlGetSize(
-                        wControl_p b)
+        wControl_p b)
 {
-    b->w = gtk_widget_get_allocated_width(b->widget);
-    b->h = gtk_widget_get_allocated_height(b->widget);
+	b->w = gtk_widget_get_allocated_width(b->widget);
+	b->h = gtk_widget_get_allocated_height(b->widget);
 }
 
 /**
@@ -281,53 +282,52 @@ void wlibControlGetSize(
  */
 
 void wlibAddButton(
-                   wControl_p b)
+        wControl_p b)
 {
-    wWin_p win = b->parent;
-    wBool_t resize = FALSE;
+	wWin_p win = b->parent;
+	wBool_t resize = FALSE;
 
-    if (win->first == NULL) {
-        win->first = b;
-    }
-    else {
-        win->last->next = b;
-    }
+	if (win->first == NULL) {
+		win->first = b;
+	} else {
+		win->last->next = b;
+	}
 
-    win->last = b;
-    b->next = NULL;
-    b->parent = win;
+	win->last = b;
+	b->next = NULL;
+	b->parent = win;
 
-    if (b->fromTemplate) return;  /*Don't bother fussing with sizes */
+	if (b->fromTemplate) { return; }  /*Don't bother fussing with sizes */
 
-    win->lastX = b->realX + b->w;
-    win->lastY = b->realY + b->h;
+	win->lastX = b->realX + b->w;
+	win->lastY = b->realY + b->h;
 
-    if (win->option & F_AUTOSIZE) {
-        if (win->lastX > win->realX) {
-            win->realX = win->lastX;
+	if (win->option & F_AUTOSIZE) {
+		if (win->lastX > win->realX) {
+			win->realX = win->lastX;
 
-            if (win->w != (win->realX + win->origX)) {
-                resize = TRUE;
-                win->w = (win->realX + win->origX);
-            }
-        }
+			if (win->w != (win->realX + win->origX)) {
+				resize = TRUE;
+				win->w = (win->realX + win->origX);
+			}
+		}
 
-        if (win->lastY > win->realY) {
-            win->realY = win->lastY;
+		if (win->lastY > win->realY) {
+			win->realY = win->lastY;
 
-            if (win->h != (win->realY + win->origY)) {
-                resize = TRUE;
-                win->h = (win->realY + win->origY);
-            }
-        }
+			if (win->h != (win->realY + win->origY)) {
+				resize = TRUE;
+				win->h = (win->realY + win->origY);
+			}
+		}
 
-        if (win->shown) {
-            if (resize) {
-                gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-                gtk_widget_set_size_request(win->widget, win->w, win->h);
-            }
-        }
-    }
+		if (win->shown) {
+			if (resize) {
+				gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+				gtk_widget_set_size_request(win->widget, win->w, win->h);
+			}
+		}
+	}
 }
 
 /**
@@ -339,26 +339,26 @@ void wlibAddButton(
  */
 
 wControl_p wlibGetControlFromPos(
-                                 wWin_p win,
-                                 wWinPix_t x,
-                                 wWinPix_t y)
+        wWin_p win,
+        wWinPix_t x,
+        wWinPix_t y)
 {
-    wControl_p b;
-    wWinPix_t xx, yy;
+	wControl_p b;
+	wWinPix_t xx, yy;
 
-    for (b = win->first; b != NULL; b = b->next) {
-        if (b->widget && gtk_widget_get_visible(b->widget)) {
-            xx = b->realX;
-            yy = b->realY;
+	for (b = win->first; b != NULL; b = b->next) {
+		if (b->widget && gtk_widget_get_visible(b->widget)) {
+			xx = b->realX;
+			yy = b->realY;
 
-            if (xx <= x && x < xx + b->w &&
-                yy <= y && y < yy + b->h) {
-                return b;
-            }
-        }
-    }
+			if (xx <= x && x < xx + b->w &&
+			    yy <= y && y < yy + b->h) {
+				return b;
+			}
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
 
 
@@ -376,7 +376,7 @@ wControl_p wlibGetControlFromPos(
  */
 void wBeep(void)
 {
-    gdk_display_beep(gdk_display_get_default());
+	gdk_display_beep(gdk_display_get_default());
 }
 
 /**
@@ -384,13 +384,13 @@ void wBeep(void)
  */
 
 void wFlush(
-            void)
+        void)
 {
-    while (gtk_events_pending()) {
-        gtk_main_iteration_do(FALSE);
-    }
+	while (gtk_events_pending()) {
+		gtk_main_iteration_do(FALSE);
+	}
 
-    gdk_display_sync(gdk_display_get_default());
+	gdk_display_sync(gdk_display_get_default());
 }
 
 /**
@@ -418,69 +418,69 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 	//GdkWindow * gdkwindow = gtk_widget_get_window(GTK_WIDGET(win->gtkwin));;
 	GdkWindow * gdkwindow = gdk_get_default_root_window();
 	GdkDisplay * display = gdk_window_get_display(gdkwindow);
-	if ((cursor == wCursorNone) && dontHideCursor) return;  //Ignore if we dont want to suppress
+	if ((cursor == wCursorNone) && dontHideCursor) { return; }  //Ignore if we dont want to suppress
 	if (!gdkcursors[cursor]) {
 		switch(cursor) {
-			case wCursorAppStart:
-				//gdkcursor = gdk_cursor_new_from_name (display,"progress");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_WATCH);
-				break;
-			case wCursorHand:
-				//gdkcursor = gdk_cursor_new_from_name (display,"pointer");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_HAND2);
-							break;
-			case wCursorNo:
-				//gdkcursor = gdk_cursor_new_from_name (display,"not-allowed");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_X_CURSOR);
-							break;
-			case wCursorSizeAll:
-				//gdkcursor = gdk_cursor_new_from_name (display,"move");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_FLEUR);
-							break;
-			case wCursorSizeNESW:
-				//gdkcursor = gdk_cursor_new_from_name (display,"nesw-resize");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_BOTTOM_LEFT_CORNER);
-							break;
-			case wCursorSizeNS:
-				//gdkcursor = gdk_cursor_new_from_name (display,"ns-resize");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_DOUBLE_ARROW);
-							break;
-			case wCursorSizeNWSE:
-				//gdkcursor = gdk_cursor_new_from_name (display,"nwse-resize");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_BOTTOM_RIGHT_CORNER);
-							break;
-			case wCursorSizeWE:
-				//gdkcursor = gdk_cursor_new_from_name (display,"ew-resize");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_SB_H_DOUBLE_ARROW);
-							break;
-			case wCursorWait:
-				//gdkcursor = gdk_cursor_new_from_name (display,"wait");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_WATCH);
-							break;
-			case wCursorIBeam:
-				//gdkcursor = gdk_cursor_new_from_name (display,"text");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_XTERM);
-							break;
-			case wCursorCross:
-				//gdkcursor = gdk_cursor_new_from_name (display,"crosshair");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_TCROSS);
-							break;
-			case wCursorQuestion:
-				//gdkcursor = gdk_cursor_new_from_name (display,"help");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_QUESTION_ARROW);
-							break;
-			case wCursorNone:
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_BLANK_CURSOR);
-							break;
-			case wCursorNormal:
-			default:
-				//gdkcursor = gdk_cursor_new_from_name (display,"default");
-				gdkcursor = gdk_cursor_new_for_display(display,GDK_LEFT_PTR);
-							break;
+		case wCursorAppStart:
+			//gdkcursor = gdk_cursor_new_from_name (display,"progress");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_WATCH);
+			break;
+		case wCursorHand:
+			//gdkcursor = gdk_cursor_new_from_name (display,"pointer");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_HAND2);
+			break;
+		case wCursorNo:
+			//gdkcursor = gdk_cursor_new_from_name (display,"not-allowed");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_X_CURSOR);
+			break;
+		case wCursorSizeAll:
+			//gdkcursor = gdk_cursor_new_from_name (display,"move");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_FLEUR);
+			break;
+		case wCursorSizeNESW:
+			//gdkcursor = gdk_cursor_new_from_name (display,"nesw-resize");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_BOTTOM_LEFT_CORNER);
+			break;
+		case wCursorSizeNS:
+			//gdkcursor = gdk_cursor_new_from_name (display,"ns-resize");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_DOUBLE_ARROW);
+			break;
+		case wCursorSizeNWSE:
+			//gdkcursor = gdk_cursor_new_from_name (display,"nwse-resize");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_BOTTOM_RIGHT_CORNER);
+			break;
+		case wCursorSizeWE:
+			//gdkcursor = gdk_cursor_new_from_name (display,"ew-resize");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_SB_H_DOUBLE_ARROW);
+			break;
+		case wCursorWait:
+			//gdkcursor = gdk_cursor_new_from_name (display,"wait");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_WATCH);
+			break;
+		case wCursorIBeam:
+			//gdkcursor = gdk_cursor_new_from_name (display,"text");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_XTERM);
+			break;
+		case wCursorCross:
+			//gdkcursor = gdk_cursor_new_from_name (display,"crosshair");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_TCROSS);
+			break;
+		case wCursorQuestion:
+			//gdkcursor = gdk_cursor_new_from_name (display,"help");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_QUESTION_ARROW);
+			break;
+		case wCursorNone:
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_BLANK_CURSOR);
+			break;
+		case wCursorNormal:
+		default:
+			//gdkcursor = gdk_cursor_new_from_name (display,"default");
+			gdkcursor = gdk_cursor_new_for_display(display,GDK_LEFT_PTR);
+			break;
 
 		}
 		gdkcursors[cursor] = gdkcursor;
-	} else gdkcursor = gdkcursors[cursor];
+	} else { gdkcursor = gdkcursors[cursor]; }
 
 	gdk_window_set_cursor ( gtk_widget_get_window(bd->widget), gdkcursor);
 
@@ -493,7 +493,7 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 
 const char * wMemStats(void)
 {
-    return "No stats available";
+	return "No stats available";
 }
 
 /**
@@ -508,11 +508,11 @@ void wGetDisplaySize(wWinPix_t * w, wWinPix_t * h)
 	GdkRectangle rect;
 
 	gdk_monitor_get_workarea(
-	    gdk_display_get_primary_monitor(gdk_display_get_default()),
-	    &rect);
+	        gdk_display_get_primary_monitor(gdk_display_get_default()),
+	        &rect);
 
-    *w = rect.width;
-    *h = rect.height;
+	*w = rect.width;
+	*h = rect.height;
 }
 
 
@@ -527,44 +527,44 @@ static dynArr_t conversionBuffer_da;
 
 char * wlibConvertInput(const char * inString)
 {
-    const char * cp;
-    char * cq;
-    int extCharCnt, inCharCnt;
+	const char * cp;
+	char * cq;
+	int extCharCnt, inCharCnt;
 
-    if( !inString )
-        return NULL;
-    /* Already UTF-8 encoded? */
-    if (g_utf8_validate(inString, -1, NULL))
-        /* Yes, do not double-convert */ {
-        return (char*) inString;
-    }
+	if( !inString ) {
+		return NULL;
+	}
+	/* Already UTF-8 encoded? */
+	if (g_utf8_validate(inString, -1, NULL))
+		/* Yes, do not double-convert */ {
+		return (char*) inString;
+	}
 
-    for (cp = inString, extCharCnt = 0; *cp; cp++) {
-        if (((*cp)&0x80) != '\0') {
-            extCharCnt++;
-        }
-    }
+	for (cp = inString, extCharCnt = 0; *cp; cp++) {
+		if (((*cp)&0x80) != '\0') {
+			extCharCnt++;
+		}
+	}
 
-    inCharCnt = cp - inString;
+	inCharCnt = cp - inString;
 
-    if (extCharCnt == '\0') {
-        return (char*) inString;
-    }
+	if (extCharCnt == '\0') {
+		return (char*) inString;
+	}
 
-    DYNARR_SET(char, conversionBuffer_da, inCharCnt + extCharCnt + 1);
+	DYNARR_SET(char, conversionBuffer_da, inCharCnt + extCharCnt + 1);
 
-    for (cp = inString, cq = (char*) conversionBuffer_da.ptr; *cp; cp++) {
-        if (((*cp)&0x80) != 0) {
-            *cq++ = 0xC0 + (((*cp)&0xC0) >> 6);
-            *cq++ = 0x80 + ((*cp)&0x3F);
-        }
-        else {
-            *cq++ = *cp;
-        }
-    }
+	for (cp = inString, cq = (char*) conversionBuffer_da.ptr; *cp; cp++) {
+		if (((*cp)&0x80) != 0) {
+			*cq++ = 0xC0 + (((*cp)&0xC0) >> 6);
+			*cq++ = 0x80 + ((*cp)&0x3F);
+		} else {
+			*cq++ = *cp;
+		}
+	}
 
-    *cq = 0;
-    return (char*) conversionBuffer_da.ptr;
+	*cq = 0;
+	return (char*) conversionBuffer_da.ptr;
 }
 
 /**
@@ -576,36 +576,35 @@ char * wlibConvertInput(const char * inString)
 
 char * wlibConvertOutput(const char * inString)
 {
-    const char * cp;
-    char * cq;
-    int extCharCnt, inCharCnt;
+	const char * cp;
+	char * cq;
+	int extCharCnt, inCharCnt;
 
-    for (cp = inString, extCharCnt = 0; *cp; cp++) {
-        if (((*cp)&0xC0) == 0x80) {
-            extCharCnt++;
-        }
-    }
+	for (cp = inString, extCharCnt = 0; *cp; cp++) {
+		if (((*cp)&0xC0) == 0x80) {
+			extCharCnt++;
+		}
+	}
 
-    inCharCnt = cp - inString;
+	inCharCnt = cp - inString;
 
-    if (extCharCnt == '\0') {
-        return (char*) inString;
-    }
+	if (extCharCnt == '\0') {
+		return (char*) inString;
+	}
 
-    DYNARR_SET(char, conversionBuffer_da, inCharCnt + 1);
+	DYNARR_SET(char, conversionBuffer_da, inCharCnt + 1);
 
-    for (cp = inString, cq = (char*) conversionBuffer_da.ptr; *cp; cp++) {
-        if (((*cp)&0x80) != 0) {
-            *cq++ = 0xC0 + (((*cp)&0xC0) >> 6);
-            *cq++ = 0x80 + ((*cp)&0x3F);
-        }
-        else {
-            *cq++ = *cp;
-        }
-    }
+	for (cp = inString, cq = (char*) conversionBuffer_da.ptr; *cp; cp++) {
+		if (((*cp)&0x80) != 0) {
+			*cq++ = 0xC0 + (((*cp)&0xC0) >> 6);
+			*cq++ = 0x80 + ((*cp)&0x3F);
+		} else {
+			*cq++ = *cp;
+		}
+	}
 
-    *cq = '\0';
-    return (char*) conversionBuffer_da.ptr;
+	*cq = '\0';
+	return (char*) conversionBuffer_da.ptr;
 }
 
 /*-----------------------------------------------------------------*/
@@ -615,32 +614,32 @@ static dynArr_t accelData_da;
 #define accelData(N) DYNARR_N( accelData_t, accelData_da, N )
 
 static guint accelKeyMap[] = {
-    0, /* wAccelKey_None, */
-    GDK_KEY_Delete, /* wAccelKey_Del, */
-    GDK_KEY_Insert, /* wAccelKey_Ins, */
-    GDK_KEY_Home, /* wAccelKey_Home, */
-    GDK_KEY_End, /* wAccelKey_End, */
-    GDK_KEY_Page_Up, /* wAccelKey_Pgup, */
-    GDK_KEY_Page_Down, /* wAccelKey_Pgdn, */
-    GDK_KEY_Up, /* wAccelKey_Up, */
-    GDK_KEY_Down, /* wAccelKey_Down, */
-    GDK_KEY_Right, /* wAccelKey_Right, */
-    GDK_KEY_Left, /* wAccelKey_Left, */
-    GDK_KEY_BackSpace, /* wAccelKey_Back, */
-    GDK_KEY_F1, /* wAccelKey_F1, */
-    GDK_KEY_F2, /* wAccelKey_F2, */
-    GDK_KEY_F3, /* wAccelKey_F3, */
-    GDK_KEY_F4, /* wAccelKey_F4, */
-    GDK_KEY_F5, /* wAccelKey_F5, */
-    GDK_KEY_F6, /* wAccelKey_F6, */
-    GDK_KEY_F7, /* wAccelKey_F7, */
-    GDK_KEY_F8, /* wAccelKey_F8, */
-    GDK_KEY_F9, /* wAccelKey_F9, */
-    GDK_KEY_F10, /* wAccelKey_F10, */
-    GDK_KEY_F11, /* wAccelKey_F11, */
-    GDK_KEY_F12, /* wAccelKey_F12, */
-    GDK_KEY_KP_Add, /* wAccelKey_Numpad_Add */
-    GDK_KEY_KP_Subtract /* wAccelKey_Numpad_Subtract */
+	0, /* wAccelKey_None, */
+	GDK_KEY_Delete, /* wAccelKey_Del, */
+	GDK_KEY_Insert, /* wAccelKey_Ins, */
+	GDK_KEY_Home, /* wAccelKey_Home, */
+	GDK_KEY_End, /* wAccelKey_End, */
+	GDK_KEY_Page_Up, /* wAccelKey_Pgup, */
+	GDK_KEY_Page_Down, /* wAccelKey_Pgdn, */
+	GDK_KEY_Up, /* wAccelKey_Up, */
+	GDK_KEY_Down, /* wAccelKey_Down, */
+	GDK_KEY_Right, /* wAccelKey_Right, */
+	GDK_KEY_Left, /* wAccelKey_Left, */
+	GDK_KEY_BackSpace, /* wAccelKey_Back, */
+	GDK_KEY_F1, /* wAccelKey_F1, */
+	GDK_KEY_F2, /* wAccelKey_F2, */
+	GDK_KEY_F3, /* wAccelKey_F3, */
+	GDK_KEY_F4, /* wAccelKey_F4, */
+	GDK_KEY_F5, /* wAccelKey_F5, */
+	GDK_KEY_F6, /* wAccelKey_F6, */
+	GDK_KEY_F7, /* wAccelKey_F7, */
+	GDK_KEY_F8, /* wAccelKey_F8, */
+	GDK_KEY_F9, /* wAccelKey_F9, */
+	GDK_KEY_F10, /* wAccelKey_F10, */
+	GDK_KEY_F11, /* wAccelKey_F11, */
+	GDK_KEY_F12, /* wAccelKey_F12, */
+	GDK_KEY_KP_Add, /* wAccelKey_Numpad_Add */
+	GDK_KEY_KP_Subtract /* wAccelKey_Numpad_Subtract */
 };
 
 /**
@@ -653,24 +652,24 @@ static guint accelKeyMap[] = {
  */
 
 void wAttachAccelKey(
-                     wAccelKey_e key,
-                     int modifier,
-                     wAccelKeyCallBack_p action,
-                     void * data)
+        wAccelKey_e key,
+        int modifier,
+        wAccelKeyCallBack_p action,
+        void * data)
 {
-    accelData_t * ad;
+	accelData_t * ad;
 
 //    if (key < 1 || key > wAccelKey_F12) {
 //        fprintf(stderr, "wAttachAccelKey(%d) out of range\n", (int) key);
 //        return;
 //    }
 
-    DYNARR_APPEND(accelData_t, accelData_da, 10);
-    ad = &accelData(accelData_da.cnt - 1);
-    ad->key = key;
-    ad->modifier = modifier;
-    ad->action = action;
-    ad->data = data;
+	DYNARR_APPEND(accelData_t, accelData_da, 10);
+	ad = &accelData(accelData_da.cnt - 1);
+	ad->key = key;
+	ad->modifier = modifier;
+	ad->action = action;
+	ad->data = data;
 }
 
 /**
@@ -681,38 +680,38 @@ void wAttachAccelKey(
  */
 
 struct accelData_t * wlibFindAccelKey(
-                                      GdkEventKey * event)
+        GdkEventKey * event)
 {
-    accelData_t * ad;
-    int modifier = 0;
+	accelData_t * ad;
+	int modifier = 0;
 
-    GdkModifierType modifiers;
+	GdkModifierType modifiers;
 
-    modifiers = gtk_accelerator_get_default_mod_mask ();
+	modifiers = gtk_accelerator_get_default_mod_mask ();
 
-    if (((event->state & modifiers) & GDK_SHIFT_MASK)) {
-        modifier |= WKEY_SHIFT;
-    }
+	if (((event->state & modifiers) & GDK_SHIFT_MASK)) {
+		modifier |= WKEY_SHIFT;
+	}
 
-    if ((event->state & modifiers & GDK_CONTROL_MASK)) {
-        modifier |= WKEY_CTRL;
-    }
+	if ((event->state & modifiers & GDK_CONTROL_MASK)) {
+		modifier |= WKEY_CTRL;
+	}
 
-    if ((event->state & modifiers & GDK_MOD1_MASK)) {
-        modifier |= WKEY_ALT;
-    }
+	if ((event->state & modifiers & GDK_MOD1_MASK)) {
+		modifier |= WKEY_ALT;
+	}
 
-    if ((event->state & modifiers & GDK_MOD2_MASK)) {
-    	modifier |= WKEY_CMD;
-    }
+	if ((event->state & modifiers & GDK_MOD2_MASK)) {
+		modifier |= WKEY_CMD;
+	}
 
-    for (ad = &accelData(0); ad<&accelData(accelData_da.cnt); ad++)
-        if (event->keyval == accelKeyMap[ad->key] &&
-            modifier == ad->modifier) {
-            return ad;
-        }
+	for (ad = &accelData(0); ad<&accelData(accelData_da.cnt); ad++)
+		if (event->keyval == accelKeyMap[ad->key] &&
+		    modifier == ad->modifier) {
+			return ad;
+		}
 
-    return NULL;
+	return NULL;
 }
 
 /**
@@ -723,16 +722,16 @@ struct accelData_t * wlibFindAccelKey(
  */
 
 wBool_t wlibHandleAccelKey(
-                           GdkEventKey *event)
+        GdkEventKey *event)
 {
-    accelData_t * ad = wlibFindAccelKey(event);
+	accelData_t * ad = wlibFindAccelKey(event);
 
-    if (ad) {
-        ad->action(ad->key, ad->data);
-        return TRUE;
-    }
+	if (ad) {
+		ad->action(ad->key, ad->data);
+		return TRUE;
+	}
 
-    return FALSE;
+	return FALSE;
 }
 
 /**
@@ -749,13 +748,13 @@ wBool_t wlibHandleAccelKey(
 void wControlLinkedSet(wControl_p b1, wControl_p b2)
 {
 
-    b2->synonym = b1->synonym;
+	b2->synonym = b1->synonym;
 
-    if (b2->synonym == NULL) {
-        b2->synonym = b1;
-    }
+	if (b2->synonym == NULL) {
+		b2->synonym = b1;
+	}
 
-    b1->synonym = b2;
+	b1->synonym = b2;
 }
 
 /**
@@ -768,26 +767,24 @@ void wControlLinkedSet(wControl_p b1, wControl_p b2)
 
 void wControlLinkedActive(wControl_p b, int active)
 {
-    wControl_p savePtr = b;
+	wControl_p savePtr = b;
 
-    if (savePtr->type == B_MENUITEM) {
-        wMenuPushEnable((wMenuPush_p) savePtr, active);
-    }
-    else {
-        wControlActive(savePtr, active);
-    }
+	if (savePtr->type == B_MENUITEM) {
+		wMenuPushEnable((wMenuPush_p) savePtr, active);
+	} else {
+		wControlActive(savePtr, active);
+	}
 
-    savePtr = savePtr->synonym;
+	savePtr = savePtr->synonym;
 
-    while (savePtr && savePtr != b) {
+	while (savePtr && savePtr != b) {
 
-        if (savePtr->type == B_MENUITEM) {
-            wMenuPushEnable((wMenuPush_p) savePtr, active);
-        }
-        else {
-            wControlActive(savePtr, active);
-        }
+		if (savePtr->type == B_MENUITEM) {
+			wMenuPushEnable((wMenuPush_p) savePtr, active);
+		} else {
+			wControlActive(savePtr, active);
+		}
 
-        savePtr = savePtr->synonym;
-    }
+		savePtr = savePtr->synonym;
+	}
 }

@@ -39,10 +39,10 @@
 #include "gtkint.h"
 
 struct wStatus_t {
-    WOBJ_COMMON
-    GtkWidget * labelWidget;
-    const char * message;
-    wWinPix_t labelWidth;
+	WOBJ_COMMON
+	GtkWidget * labelWidget;
+	const char * message;
+	wWinPix_t labelWidth;
 };
 
 static GtkWidget *controlsbox;
@@ -56,19 +56,19 @@ static GtkWidget *controlsbox;
  */
 
 void wStatusSetValue(
-    wStatus_p b,
-    const char * arg)
+        wStatus_p b,
+        const char * arg)
 {
-    if (b->widget == 0) {
-        abort();
-    }
+	if (b->widget == 0) {
+		abort();
+	}
 
-    if (gtk_entry_get_max_length(GTK_ENTRY(b->labelWidget))<strlen(arg)) {
-        gtk_entry_set_max_length(GTK_ENTRY(b->labelWidget), strlen(arg));
-        gtk_entry_set_width_chars(GTK_ENTRY(b->labelWidget), strlen(arg));
-    }
+	if (gtk_entry_get_max_length(GTK_ENTRY(b->labelWidget))<strlen(arg)) {
+		gtk_entry_set_max_length(GTK_ENTRY(b->labelWidget), strlen(arg));
+		gtk_entry_set_width_chars(GTK_ENTRY(b->labelWidget), strlen(arg));
+	}
 
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
+	gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
 }
 /**
  * Create a window for a simple text.
@@ -85,29 +85,29 @@ void wStatusSetValue(
  */
 
 wStatus_p wStatusCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char  * helpStr,
-    const char 	* labelStr,
-    wWinPix_t	width,
-    const char	*message)
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char  * helpStr,
+        const char 	* labelStr,
+        wWinPix_t	width,
+        const char	*message)
 {
-    wStatus_p b;
-    GtkRequisition requisition;
+	wStatus_p b;
+	GtkRequisition requisition;
 
-    b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
-    if (parent->builder) {
-    	b->labelWidget = wlibWidgetFromIdWarn(b->parent, helpStr);
-    	b->fromTemplate = TRUE;
-    	b->template_id = strdup(helpStr);
-    	b->message = message;
-    	gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
-    							   message?wlibConvertInput(message):"");
-    	gtk_widget_show_all(b->labelWidget);
-    	b->widget = wlibGetWidgetFromName(b->parent, helpStr, "box", FALSE);
-    	gtk_widget_show_all(b->widget);
-    } else {
+	b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
+	if (parent->builder) {
+		b->labelWidget = wlibWidgetFromIdWarn(b->parent, helpStr);
+		b->fromTemplate = TRUE;
+		b->template_id = strdup(helpStr);
+		b->message = message;
+		gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
+		                   message?wlibConvertInput(message):"");
+		gtk_widget_show_all(b->labelWidget);
+		b->widget = wlibGetWidgetFromName(b->parent, helpStr, "box", FALSE);
+		gtk_widget_show_all(b->widget);
+	} else {
 		wlibComputePos((wControl_p)b);
 		b->message = message;
 		b->labelWidth = width;
@@ -115,11 +115,11 @@ wStatus_p wStatusCreate(
 		gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
 		gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
 		gtk_widget_set_can_focus(b->labelWidget, FALSE);
-        gtk_widget_set_sensitive(b->labelWidget, FALSE);
-    //GdkColor black = {0, 0x0000, 0x0000, 0x0000};
-    //gtk_widget_modify_text(b->labelWidget,GTK_STATE_INSENSITIVE,&black);
+		gtk_widget_set_sensitive(b->labelWidget, FALSE);
+		//GdkColor black = {0, 0x0000, 0x0000, 0x0000};
+		//gtk_widget_modify_text(b->labelWidget,GTK_STATE_INSENSITIVE,&black);
 		gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
-						   message?wlibConvertInput(message):"");
+		                   message?wlibConvertInput(message):"");
 
 		b->widget = gtk_fixed_new();
 		gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
@@ -129,9 +129,9 @@ wStatus_p wStatusCreate(
 		gtk_widget_show(b->labelWidget);
 		wlibAddButton((wControl_p)b);
 
-    }
+	}
 
-    return b;
+	return b;
 }
 
 /**
@@ -144,22 +144,22 @@ wStatus_p wStatusCreate(
 wWinPix_t
 wStatusGetWidth(const char *testString)
 {
-    GtkWidget *entry;
-    GtkRequisition min_req, nat_req;
+	GtkWidget *entry;
+	GtkRequisition min_req, nat_req;
 
-    entry = gtk_entry_new();
-    g_object_ref_sink(entry);
+	entry = gtk_entry_new();
+	g_object_ref_sink(entry);
 
-    gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
-    gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
-    gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
+	gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
+	gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
+	gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
 
-    gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
+	gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
 
-    gtk_widget_destroy(entry);
-    g_object_unref(entry);
+	gtk_widget_destroy(entry);
+	g_object_unref(entry);
 
-    return (nat_req.width+8);
+	return (nat_req.width+8);
 }
 
 /**
@@ -170,36 +170,36 @@ wStatusGetWidth(const char *testString)
  */
 
 wWinPix_t wStatusGetHeight(
-    long flags)
+        long flags)
 {
-    GtkWidget * temp;
+	GtkWidget * temp;
 
-    if (!(flags&COMBOBOX)) {
+	if (!(flags&COMBOBOX)) {
 		temp = gtk_entry_new();	 //To get size of text itself
-        gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
-    } else {
-        temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
-    }
-    g_object_ref_sink(temp);
+		gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
+	} else {
+		temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
+	}
+	g_object_ref_sink(temp);
 
-    if (wMessageSetFont(flags))	{
-    	if (flags & BM_LARGE) {
-    		gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(temp), "largeLabel");
-    	} else {
-    		gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(temp), "smallLabel");
-    	}
-    }
+	if (wMessageSetFont(flags))	{
+		if (flags & BM_LARGE) {
+			gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(temp), "largeLabel");
+		} else {
+			gtk_widget_class_set_css_name(GTK_WIDGET_CLASS(temp), "smallLabel");
+		}
+	}
 
-    if (flags&1L) {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
-    }
+	if (flags&1L) {
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
+	}
 
-    GtkRequisition temp_min_req, temp_nat_req;
-    gtk_widget_get_preferred_size(temp,&temp_min_req, &temp_nat_req);
-    //g_object_ref_sink(temp);
-    //g_object_unref(temp);
-    gtk_widget_destroy(temp);
-    return temp_nat_req.height;
+	GtkRequisition temp_min_req, temp_nat_req;
+	gtk_widget_get_preferred_size(temp,&temp_min_req, &temp_nat_req);
+	//g_object_ref_sink(temp);
+	//g_object_unref(temp);
+	gtk_widget_destroy(temp);
+	return temp_nat_req.height;
 }
 
 /**
@@ -211,16 +211,17 @@ wWinPix_t wStatusGetHeight(
  */
 
 void wStatusSetWidth(
-    wStatus_p b,
-    wWinPix_t width)
+        wStatus_p b,
+        wWinPix_t width)
 {
 	if (!b->fromTemplate) {
 		b->labelWidth = width;
-    	gtk_widget_set_size_request(b->widget, width, -1);
+		gtk_widget_set_size_request(b->widget, width, -1);
 	}
 }
 
-static void wStatusHideChild(GtkWidget * w, void * container) {
+static void wStatusHideChild(GtkWidget * w, void * container)
+{
 
 	gtk_revealer_set_reveal_child(GTK_REVEALER(w),FALSE);
 
@@ -230,8 +231,9 @@ static void wStatusHideChild(GtkWidget * w, void * container) {
  * Hide all the controls on window
  */
 
-void wStatusClearControls(wWin_p win) {
-	if (!win->builder) return;
+void wStatusClearControls(wWin_p win)
+{
+	if (!win->builder) { return; }
 	if (!controlsbox) {
 		controlsbox = wlibGetWidgetFromName(win, "main-infoBarControls", "box", FALSE);
 	}
@@ -239,32 +241,37 @@ void wStatusClearControls(wWin_p win) {
 	/*Note all the children of this box must be revealers each of which we hide */
 
 	gtk_container_foreach (GTK_CONTAINER(controlsbox),
-	                      wStatusHideChild,
-	                      controlsbox);
+	                       wStatusHideChild,
+	                       controlsbox);
 }
 
 /*
  * Reveal all controls for this command set in window
  */
-void wStatusRevealControlSet(wWin_p win, char *id) {
+void wStatusRevealControlSet(wWin_p win, char *id)
+{
 	char name[256];
 	sprintf(name,"main-%s",id);
-	GtkRevealer * reveal = (GtkRevealer *)wlibGetWidgetFromName(win, name, "reveal", TRUE );
+	GtkRevealer * reveal = (GtkRevealer *)wlibGetWidgetFromName(win, name, "reveal",
+	                       TRUE );
 
 	if (reveal) {
-		if (!gtk_revealer_get_reveal_child(GTK_REVEALER(reveal)))
-				gtk_revealer_set_reveal_child(GTK_REVEALER(reveal),TRUE);
+		if (!gtk_revealer_get_reveal_child(GTK_REVEALER(reveal))) {
+			gtk_revealer_set_reveal_child(GTK_REVEALER(reveal),TRUE);
+		}
 	}
 }
 
-void wStatusAttachControl(wWin_p win, wControl_p b) {
+void wStatusAttachControl(wWin_p win, wControl_p b)
+{
 	if(!controlsbox) {
 		controlsbox = wlibGetWidgetFromName(win, "main-infoBarControls", "box", FALSE );
 	}
 
 	if (b->reveal) {
-		if (!gtk_revealer_get_reveal_child(GTK_REVEALER(b->reveal)))
-						gtk_revealer_set_reveal_child(GTK_REVEALER(b->reveal),FALSE);
+		if (!gtk_revealer_get_reveal_child(GTK_REVEALER(b->reveal))) {
+			gtk_revealer_set_reveal_child(GTK_REVEALER(b->reveal),FALSE);
+		}
 	}
 
 	gtk_widget_show_all(b->widget);

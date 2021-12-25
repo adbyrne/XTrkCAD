@@ -66,64 +66,64 @@ static char userHomeDir[BUFSIZ];
 
 const char * wGetAppLibDir(void)
 {
-    char * cp, *ep;
-    char msg[BUFSIZ*2];
-    char envvar[80];
-    struct stat buf;
+	char * cp, *ep;
+	char msg[BUFSIZ*2];
+	char envvar[80];
+	struct stat buf;
 
-    if (appLibDir[0] != '\0') {
-        return appLibDir;
-    }
+	if (appLibDir[0] != '\0') {
+		return appLibDir;
+	}
 
-    for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++) {
-        *ep = toupper(*cp);
-    }
+	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++) {
+		*ep = toupper(*cp);
+	}
 
-    strcpy(ep, "LIB");
-    ep = getenv(envvar);
+	strcpy(ep, "LIB");
+	ep = getenv(envvar);
 
-    if (ep != NULL) {
-        if ((stat(ep, &buf) == 0) && S_ISDIR(buf.st_mode)) {
-            strncpy(appLibDir, ep, sizeof appLibDir);
-            return appLibDir;
-        }
-    }
+	if (ep != NULL) {
+		if ((stat(ep, &buf) == 0) && S_ISDIR(buf.st_mode)) {
+			strncpy(appLibDir, ep, sizeof appLibDir);
+			return appLibDir;
+		}
+	}
 
-    strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX);
-    strcat(appLibDir, "/share/");
-    strcat(appLibDir, wlibGetAppName());
+	strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX);
+	strcat(appLibDir, "/share/");
+	strcat(appLibDir, wlibGetAppName());
 
-    if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
-        return appLibDir;
-    }
+	if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
+		return appLibDir;
+	}
 
-    strcpy(appLibDir, "/usr/lib/");
-    strcat(appLibDir, wlibGetAppName());
+	strcpy(appLibDir, "/usr/lib/");
+	strcat(appLibDir, wlibGetAppName());
 
-    if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
-        return appLibDir;
-    }
+	if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
+		return appLibDir;
+	}
 
-    strcpy(appLibDir, "/usr/local/lib/");
-    strcat(appLibDir, wlibGetAppName());
+	strcpy(appLibDir, "/usr/local/lib/");
+	strcat(appLibDir, wlibGetAppName());
 
-    if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
-        return appLibDir;
-    }
+	if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
+		return appLibDir;
+	}
 
-    sprintf(msg,
-            _("The required configuration files could not be located in the expected location.\n\n"
-              "Usually this is an installation problem. Make sure that these files are installed in either \n"
-              "  %s/share/xtrkcad or\n"
-              "  /usr/lib/%s or\n"
-              "  /usr/local/lib/%s\n"
-              "If this is not possible, the environment variable %s must contain "
-              "the name of the correct directory."),
-            XTRKCAD_INSTALL_PREFIX, wlibGetAppName(), wlibGetAppName(), envvar);
-    wNoticeEx(NT_ERROR, msg, _("Ok"), NULL);
-    appLibDir[0] = '\0';
-    wExit(0);
-    return NULL;
+	sprintf(msg,
+	        _("The required configuration files could not be located in the expected location.\n\n"
+	          "Usually this is an installation problem. Make sure that these files are installed in either \n"
+	          "  %s/share/xtrkcad or\n"
+	          "  /usr/lib/%s or\n"
+	          "  /usr/local/lib/%s\n"
+	          "If this is not possible, the environment variable %s must contain "
+	          "the name of the correct directory."),
+	        XTRKCAD_INSTALL_PREFIX, wlibGetAppName(), wlibGetAppName(), envvar);
+	wNoticeEx(NT_ERROR, msg, _("Ok"), NULL);
+	appLibDir[0] = '\0';
+	wExit(0);
+	return NULL;
 }
 
 /**
@@ -136,48 +136,48 @@ const char * wGetAppLibDir(void)
 
 
 const char * wGetAppWorkDir(
-    void)
+        void)
 {
-    char tmp[BUFSIZ+20];
-    char * homeDir;
-    DIR *dirp;
+	char tmp[BUFSIZ+20];
+	char * homeDir;
+	DIR *dirp;
 
-    if (appWorkDir[0] != '\0') {
-        return appWorkDir;
-    }
+	if (appWorkDir[0] != '\0') {
+		return appWorkDir;
+	}
 
-    if ((homeDir = getenv("HOME")) == NULL) {
-        wNoticeEx(NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
-        wExit(0);
-    }
+	if ((homeDir = getenv("HOME")) == NULL) {
+		wNoticeEx(NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
+		wExit(0);
+	}
 
-    sprintf(appWorkDir, "%s/.%s", homeDir, wlibGetAppName());
+	sprintf(appWorkDir, "%s/.%s", homeDir, wlibGetAppName());
 
-    if ((dirp = opendir(appWorkDir)) != NULL) {
-        closedir(dirp);
-    } else {
-        if (mkdir(appWorkDir, 0777) == -1) {
-            sprintf(tmp, _("Cannot create %s"), appWorkDir);
-            wNoticeEx(NT_ERROR, tmp, _("Exit"), NULL);
-            wExit(0);
-        } else {
-            /*
-             * check for default configuration file and copy to
-             * the workdir if it exists
-             */
-            struct stat stFileInfo;
-            char appEtcConfig[BUFSIZ];
-            sprintf(appEtcConfig, "/etc/%s.rc", wlibGetAppName());
+	if ((dirp = opendir(appWorkDir)) != NULL) {
+		closedir(dirp);
+	} else {
+		if (mkdir(appWorkDir, 0777) == -1) {
+			sprintf(tmp, _("Cannot create %s"), appWorkDir);
+			wNoticeEx(NT_ERROR, tmp, _("Exit"), NULL);
+			wExit(0);
+		} else {
+			/*
+			 * check for default configuration file and copy to
+			 * the workdir if it exists
+			 */
+			struct stat stFileInfo;
+			char appEtcConfig[BUFSIZ];
+			sprintf(appEtcConfig, "/etc/%s.rc", wlibGetAppName());
 
-            if (stat(appEtcConfig, &stFileInfo) == 0) {
-                char copyConfigCmd[(BUFSIZ * 2) + 3];
-                sprintf(copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir);
-                system(copyConfigCmd);
-            }
-        }
-    }
+			if (stat(appEtcConfig, &stFileInfo) == 0) {
+				char copyConfigCmd[(BUFSIZ * 2) + 3];
+				sprintf(copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir);
+				system(copyConfigCmd);
+			}
+		}
+	}
 
-    return appWorkDir;
+	return appWorkDir;
 }
 
 /**
@@ -189,20 +189,20 @@ const char * wGetAppWorkDir(
 
 const char *wGetUserHomeDir(void)
 {
-    char *homeDir;
+	char *homeDir;
 
-    if (userHomeDir[ 0 ] != '\0') {
-        return userHomeDir;
-    }
+	if (userHomeDir[ 0 ] != '\0') {
+		return userHomeDir;
+	}
 
-    if ((homeDir = getenv("HOME")) == NULL) {
-        wNoticeEx(NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
-        wExit(0);
-    } else {
-        strcpy(userHomeDir, homeDir);
-    }
+	if ((homeDir = getenv("HOME")) == NULL) {
+		wNoticeEx(NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
+		wExit(0);
+	} else {
+		strcpy(userHomeDir, homeDir);
+	}
 
-    return userHomeDir;
+	return userHomeDir;
 }
 
 /*
@@ -221,43 +221,43 @@ static GHashTable *hashTable;
 static void
 FreeHashKey( gpointer key )
 {
-    //printf("Free key: >%s<\n", (char *)key );
-    g_free(key);
+	//printf("Free key: >%s<\n", (char *)key );
+	g_free(key);
 }
 
 static void
 FreeHashValue( gpointer value )
 {
-    //printf("Free value: >%s<\n", (char *)value );
-    g_free( value );
+	//printf("Free value: >%s<\n", (char *)value );
+	g_free( value );
 }
 
 static void
 CreateStringSet(void)
 {
-    hashTable = g_hash_table_new_full ( NULL,
-                                        NULL,
-                                        FreeHashKey,
-                                        FreeHashValue);
+	hashTable = g_hash_table_new_full ( NULL,
+	                                    NULL,
+	                                    FreeHashKey,
+	                                    FreeHashValue);
 
 }
 
 static gchar *
 BuildConfigFileName()
 {
-    gchar *tmp;
-    gchar *result;
-    const char * workDir;
+	gchar *tmp;
+	gchar *result;
+	const char * workDir;
 
-    workDir = wGetAppWorkDir();
-    tmp = g_build_filename(workDir,
-                           wConfigName,
-                           NULL);
+	workDir = wGetAppWorkDir();
+	tmp = g_build_filename(workDir,
+	                       wConfigName,
+	                       NULL);
 
-    result = g_strconcat(tmp, ".ini", NULL);
-    g_free(tmp);
+	result = g_strconcat(tmp, ".ini", NULL);
+	g_free(tmp);
 
-    return (result);
+	return (result);
 }
 /**
  * Read the configuration file into memory
@@ -265,31 +265,31 @@ BuildConfigFileName()
 
 static void readPrefs(void)
 {
-    gchar *tmp;
-    GError *error = NULL;
+	gchar *tmp;
+	GError *error = NULL;
 
-    prefInitted = TRUE;
+	prefInitted = TRUE;
 
-    tmp = BuildConfigFileName();
+	tmp = BuildConfigFileName();
 
-    keyFile = g_key_file_new();
+	keyFile = g_key_file_new();
 
-    if (keyFile) {
-        g_key_file_load_from_file(keyFile,
-                                  tmp,
-                                  G_KEY_FILE_KEEP_COMMENTS,
-                                  &error);
+	if (keyFile) {
+		g_key_file_load_from_file(keyFile,
+		                          tmp,
+		                          G_KEY_FILE_KEEP_COMMENTS,
+		                          &error);
 
-        if (error) {
-            if (!g_error_matches(error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-                g_warning("Error loading key file: %s", error->message);
-            }
-        }
-    }
+		if (error) {
+			if (!g_error_matches(error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+				g_warning("Error loading key file: %s", error->message);
+			}
+		}
+	}
 
-    g_free(tmp);
+	g_free(tmp);
 
-    CreateStringSet();
+	CreateStringSet();
 }
 
 /**
@@ -303,18 +303,18 @@ static void readPrefs(void)
 static gchar *
 wlibConvertName( const char *name )
 {
-    gchar *result = g_malloc( strlen(name) + 2 );
-    gchar *tmp = result;
+	gchar *result = g_malloc( strlen(name) + 2 );
+	gchar *tmp = result;
 
-    while(*name) {
-        if(g_ascii_isalnum(*name ) || *name =='-' ){
-            *tmp++ = *name;
-        }
-        name++;
-    }
-    *tmp = '\0';
+	while(*name) {
+		if(g_ascii_isalnum(*name ) || *name =='-' ) {
+			*tmp++ = *name;
+		}
+		name++;
+	}
+	*tmp = '\0';
 
-    return(result);
+	return(result);
 }
 
 /**
@@ -326,26 +326,26 @@ wlibConvertName( const char *name )
  */
 
 void wPrefSetString(
-    const char * section,		/* Section */
-    const char * name,		/* Name */
-    const char * sval)		/* Value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        const char * sval)		/* Value */
 {
-    gchar *prefName;
+	gchar *prefName;
 
-    if (!prefInitted) {
-        readPrefs();
-    }
+	if (!prefInitted) {
+		readPrefs();
+	}
 
-    if (!sval) {
-        return;
-    }
+	if (!sval) {
+		return;
+	}
 
-    prefName = wlibConvertName(name);
-    g_key_file_set_string(keyFile,
-                          section,
-                          prefName,
-                          sval);
-    g_free(prefName);
+	prefName = wlibConvertName(name);
+	g_key_file_set_string(keyFile,
+	                      section,
+	                      prefName,
+	                      sval);
+	g_free(prefName);
 }
 
 /**
@@ -356,27 +356,27 @@ void wPrefSetString(
  */
 
 char * wPrefGetStringBasic(
-    const char * section,			/* Section */
-    const char * name)			/* Name */
+        const char * section,			/* Section */
+        const char * name)			/* Name */
 {
-    GError *error = NULL;
-    gchar *value;
-    gchar *prefName;
-    gchar *result;
+	GError *error = NULL;
+	gchar *value;
+	gchar *prefName;
+	gchar *result;
 
-    if (!prefInitted) {
-        readPrefs();
-    }
+	if (!prefInitted) {
+		readPrefs();
+	}
 
-    prefName = wlibConvertName(name);
-    value = g_key_file_get_string(keyFile,
-                                  section,
-                                  prefName,
-                                  &error);
-    result = g_strdup( value );
-    g_hash_table_add(hashTable, result);
+	prefName = wlibConvertName(name);
+	value = g_key_file_get_string(keyFile,
+	                              section,
+	                              prefName,
+	                              &error);
+	result = g_strdup( value );
+	g_hash_table_add(hashTable, result);
 
-    return (result);
+	return (result);
 }
 
 /**
@@ -388,22 +388,22 @@ char * wPrefGetStringBasic(
  */
 
 void wPrefSetInteger(
-    const char * section,		/* Section */
-    const char * name,		/* Name */
-    long lval)		/* Value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long lval)		/* Value */
 {
-    gchar *prefName;
+	gchar *prefName;
 
-    if (!prefInitted) {
-        readPrefs();
-    }
+	if (!prefInitted) {
+		readPrefs();
+	}
 
-    prefName = wlibConvertName(name);
-    g_key_file_set_int64(keyFile,
-                         section,
-                         prefName,
-                         lval);
-    g_free(prefName);
+	prefName = wlibConvertName(name);
+	g_key_file_set_int64(keyFile,
+	                     section,
+	                     prefName,
+	                     lval);
+	g_free(prefName);
 }
 
 /**
@@ -417,33 +417,33 @@ void wPrefSetInteger(
  */
 
 wBool_t wPrefGetIntegerBasic(
-    const char * section,		/* Section */
-    const char * name,		/* Name */
-    long * res,		/* Address of result */
-    long def)		/* Default value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long * res,		/* Address of result */
+        long def)		/* Default value */
 {
-    GError *error = NULL;
-    gint64 value;
-    gchar *prefName;
+	GError *error = NULL;
+	gint64 value;
+	gchar *prefName;
 
-    if (!prefInitted) {
-        readPrefs();
-    }
+	if (!prefInitted) {
+		readPrefs();
+	}
 
-    prefName = wlibConvertName(name);
-    value = g_key_file_get_int64(keyFile,
-                                 section,
-                                 prefName,
-                                 &error);
-    g_free(prefName);
+	prefName = wlibConvertName(name);
+	value = g_key_file_get_int64(keyFile,
+	                             section,
+	                             prefName,
+	                             &error);
+	g_free(prefName);
 
-    if (error || (value == def)) {
-        *res = def;
-        return (FALSE);
-    } else {
-        *res= value;
-        return (TRUE);
-    }
+	if (error || (value == def)) {
+		*res = def;
+		return (FALSE);
+	} else {
+		*res= value;
+		return (TRUE);
+	}
 }
 
 /**
@@ -455,22 +455,22 @@ wBool_t wPrefGetIntegerBasic(
  */
 
 void wPrefSetFloat(
-    const char * section,		/* Section */
-    const char * name,		/* Name */
-    double lval)		/* Value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double lval)		/* Value */
 {
-    gchar *prefName;
+	gchar *prefName;
 
-    if (!prefInitted) {
-        readPrefs();
-    }
+	if (!prefInitted) {
+		readPrefs();
+	}
 
-    prefName = wlibConvertName(name);
-    g_key_file_set_double(keyFile,
-                          section,
-                          prefName,
-                          lval);
-    g_free(prefName);
+	prefName = wlibConvertName(name);
+	g_key_file_set_double(keyFile,
+	                      section,
+	                      prefName,
+	                      lval);
+	g_free(prefName);
 }
 
 /**
@@ -485,38 +485,38 @@ void wPrefSetFloat(
 
 
 wBool_t wPrefGetFloatBasic(
-    const char * section,		/* Section */
-    const char * name,		/* Name */
-    double * res,		/* Address of result */
-    double def)		/* Default value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double * res,		/* Address of result */
+        double def)		/* Default value */
 {
-    GError *error = NULL;
-    gdouble value;
-    gchar *prefName;
+	GError *error = NULL;
+	gdouble value;
+	gchar *prefName;
 
-    if (!prefInitted) {
-        readPrefs();
-    }
+	if (!prefInitted) {
+		readPrefs();
+	}
 
-    prefName = wlibConvertName(name);
-    value = g_key_file_get_double(keyFile,
-                                  section,
-                                  prefName,
-                                  &error);
-    g_free(prefName);
+	prefName = wlibConvertName(name);
+	value = g_key_file_get_double(keyFile,
+	                              section,
+	                              prefName,
+	                              &error);
+	g_free(prefName);
 
-    if (error || value == def) {
-        *res = def;
-        return (FALSE);
-    } else {
-        *res= value;
-        return (TRUE);
-    }
+	if (error || value == def) {
+		*res = def;
+		return (FALSE);
+	} else {
+		*res= value;
+		return (TRUE);
+	}
 }
 
 void wPrefsLoad(char * name)
 {
-    readPrefs();
+	readPrefs();
 }
 
 /**
@@ -528,30 +528,30 @@ void wPrefsLoad(char * name)
  */
 
 void wPrefFlush(
-    char * name)
+        char * name)
 {
-    gchar *tmp;
-    GError *error = NULL;
+	gchar *tmp;
+	GError *error = NULL;
 
-    if (!prefInitted) {
-        return;
-    }
+	if (!prefInitted) {
+		return;
+	}
 
-    tmp = BuildConfigFileName();
+	tmp = BuildConfigFileName();
 
-    if (tmp && keyFile) {
-        g_key_file_save_to_file(keyFile,
-                                tmp,
-                                &error);
+	if (tmp && keyFile) {
+		g_key_file_save_to_file(keyFile,
+		                        tmp,
+		                        &error);
 
-        if (error) {
-            if (!g_error_matches(error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-                g_warning("Error saving key file: %s", error->message);
-            }
-        }
-    }
+		if (error) {
+			if (!g_error_matches(error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+				g_warning("Error saving key file: %s", error->message);
+			}
+		}
+	}
 
-    g_free(tmp);
+	g_free(tmp);
 }
 
 /**
@@ -561,6 +561,6 @@ void wPrefFlush(
 
 void wPrefReset(void)
 {
-    prefInitted = FALSE;
-    g_key_file_free(keyFile);
+	prefInitted = FALSE;
+	g_key_file_free(keyFile);
 }

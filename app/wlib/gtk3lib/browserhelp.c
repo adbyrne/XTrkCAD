@@ -54,20 +54,20 @@ extern wBool_t CheckHelpTopicExists(const char * topic);
 static void
 TopicToUrl(char **helpUrl, const char *topic)
 {
-    DynString url;
-    DynStringMalloc(&url, 16);
+	DynString url;
+	DynStringMalloc(&url, 16);
 
-    // build up the url line
-    DynStringCatCStrs(&url,
-                      "file://",
-                      wGetAppLibDir(),
-                      "/html/",
-                      topic,
-                      ".html",
-                      NULL);
+	// build up the url line
+	DynStringCatCStrs(&url,
+	                  "file://",
+	                  wGetAppLibDir(),
+	                  "/html/",
+	                  topic,
+	                  ".html",
+	                  NULL);
 
-    *helpUrl = strdup(DynStringToCStr(&url));
-    DynStringFree(&url);
+	*helpUrl = strdup(DynStringToCStr(&url));
+	DynStringFree(&url);
 }
 /**
  * Extend the PATH variable inthe environment to include XTrackCAD's
@@ -79,24 +79,24 @@ TopicToUrl(char **helpUrl, const char *topic)
 static char *
 ExtendPath(void)
 {
-    char *path = getenv("PATH");
-    DynString newPath;
-    DynStringMalloc(&newPath, 16);
+	char *path = getenv("PATH");
+	DynString newPath;
+	DynStringMalloc(&newPath, 16);
 
-    // append XTrackCAD's directory to the path as a fallback
-    DynStringCatCStrs(&newPath,
-                      path,
-                      ":",
-                      wGetAppLibDir(),
-                      NULL);
+	// append XTrackCAD's directory to the path as a fallback
+	DynStringCatCStrs(&newPath,
+	                  path,
+	                  ":",
+	                  wGetAppLibDir(),
+	                  NULL);
 
-    setenv("PATH",
-           DynStringToCStr(&newPath),
-           TRUE);
+	setenv("PATH",
+	       DynStringToCStr(&newPath),
+	       TRUE);
 
-    DynStringFree(&newPath);
+	DynStringFree(&newPath);
 
-    return (path);
+	return (path);
 }
 
 /**
@@ -109,22 +109,22 @@ ExtendPath(void)
 
 void wHelp(const char * topic)
 {
-    int rc;
-    char *url;
-    char *currentPath;
+	int rc;
+	char *url;
+	char *currentPath;
 
-    assert(topic != NULL);
-    assert(strlen(topic));
+	assert(topic != NULL);
+	assert(strlen(topic));
 
-    if (!CheckHelpTopicExists(topic)) return;
+	if (!CheckHelpTopicExists(topic)) { return; }
 
-    TopicToUrl(&url, topic);
+	TopicToUrl(&url, topic);
 
 	rc = wOpenFileExternal(url);
 
 	if (!rc) {
-        wNotice(HELPERRORTEXT, _("Cancel"), NULL);
-    }
+		wNotice(HELPERRORTEXT, _("Cancel"), NULL);
+	}
 
-    free(url);
+	free(url);
 }
