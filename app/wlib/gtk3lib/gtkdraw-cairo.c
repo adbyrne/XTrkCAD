@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_MALLOC_H
@@ -238,9 +239,11 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 
 		cairo_t * cairo = NULL;
 
+		assert(surface);
+
 		if ((opts&wDrawOptCursor) || (opts&wDrawOptCursorRmv)) {
 
-			if (surface!=NULL || surface->width != width || surface->height != height) {
+			if ( surface->width != width || surface->height != height) {
 				if (surface->surface) cairo_surface_destroy(surface->surface);
 				surface->surface = cairo_image_surface_create( CAIRO_FORMAT_ARGB32, width,height );
 				surface->width = width;
@@ -638,7 +641,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		return;
 	}
 		if (cnt > maxCnt) {
-		if (points == NULL)
+		if (points == NULL) 
 			points = (GdkPoint*)malloc( cnt*sizeof *points );
 		else
 			points = (GdkPoint*)realloc( points, cnt*sizeof *points );

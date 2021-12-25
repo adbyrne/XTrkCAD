@@ -1246,7 +1246,6 @@ wWin_p wlibCreateFromTemplate(
     void * data)
 {
     wWin_p w;
-    int h;
 
     w=wlibDialogFromTemplate( winType, labelStr, nameStr, option, data );
     
@@ -1275,11 +1274,11 @@ wWin_p wlibCreateFromTemplate(
     if (w->option&F_AUTOSIZE) {
         w->realX = 0;
         w->w = 0;
-        w->realY = h;
+        w->realY = 0;
         w->h = 0;
     } else if (w->origX != 0) {
         w->w = w->realX = w->origX;
-        w->h = w->realY = w->origY+h;
+        w->h = w->realY = w->origY;
 
         w->default_size_x = w->w;
         w->default_size_y = w->h;

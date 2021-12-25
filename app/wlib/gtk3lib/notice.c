@@ -222,8 +222,8 @@ char * wlibChgMnemonic(char *label)
     char *ptr;
     char *cp;
 
-    if(!ptr){
-    	return ptr;
+    if(!label){
+    	return NULL;
     }
 
     cp = strdup(label);

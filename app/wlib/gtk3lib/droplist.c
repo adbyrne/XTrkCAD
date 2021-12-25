@@ -116,7 +116,7 @@ wDropListClear(wList_p b)
 void *wDropListGetItemContext(wList_p b, wIndex_t inx)
 {
     GtkTreeIter iter;
-    wListItem_p addData;
+    wListItem_p addData = NULL;
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
                                       inx)) {
