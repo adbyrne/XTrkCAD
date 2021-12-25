@@ -1492,6 +1492,7 @@ static char * demoInitParams[] = {
 		"layer button-count 10",
 		"cmdopt selectmode 0",
 		"cmdopt selectzero 1",
+		"rescale change-dim 0",
 		NULL };
 
 static void DemoInitValues( void )
