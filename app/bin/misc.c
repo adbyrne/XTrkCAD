@@ -3021,6 +3021,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	unsigned int i;
 	wWinPix_t displayWidth;
 	wWinPix_t displayHeight;
+	BOOL_T bRunTests = FALSE;
 
 	strcpy(buffer, sProdNameLower);
 
@@ -3041,7 +3042,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	opterr = 0;
 	LogSet("dummy",0);
 
-	while ((c = getopt(argc, argv, "vl:d:c:mV")) != -1)
+	while ((c = getopt(argc, argv, "vl:d:c:mVT")) != -1)
 		switch (c) {
 		case 'c': /* configuration name */
 			/* test for valid filename */
@@ -3089,6 +3090,10 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		case 'V': // display version
 			printf("Version: %s\n",XTRKCAD_VERSION);
 			exit(0);
+			break;
+		case 'T': // run tests
+			LogSet( "regression", 2 );
+			bRunTests = TRUE;
 			break;
 		default:
 			abort();
@@ -3335,5 +3340,15 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	}
 	MainRedraw();
 	inMainW = FALSE;
+	if ( bRunTests ) {
+		int nFail = RegressionTestAll();
+		if ( nFail == 0 ) {
+			lprintf( "Regression Tests Pass\n" );
+			exit( 0 );
+		} else {
+			lprintf( "%d Regression Tests Fail\n", nFail );
+			exit( 1 );
+		}
+	}
 	return mainW;
 }
