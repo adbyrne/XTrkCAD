@@ -328,9 +328,7 @@ void wControlHilite(
         wControl_p b,
         wBool_t hilite)
 {
-	cairo_t *cr;
-	cairo_surface_t *s;
-	int off = GTKCONTROLHILITEWIDTH/2+1;
+	GtkStyleContext *styleContext;
 
 	if (b->widget == NULL) {
 		return;
@@ -343,31 +341,12 @@ void wControlHilite(
 	if (! gtk_widget_get_visible(b->parent->widget)) {
 		return;
 	}
-	cairo_rectangle_int_t rect;
-	rect.width = b->w + GTKCONTROLHILITEWIDTH;
-	rect.height = b->h + off + 1;
-	rect.x = b->realX - GTKCONTROLHILITEWIDTH;
-	rect.y = b->realY - off;
-	cairo_region_t * region = cairo_region_create_rectangle(&rect);
 
-	b->outline = hilite;
+	styleContext = gtk_widget_get_style_context(b->widget);
 
-	GdkDrawingContext * context = gdk_window_begin_draw_frame (
-	                                      gtk_widget_get_window(GTK_WIDGET(b->widget)),
-	                                      region);
-	cr = gdk_drawing_context_get_cairo_context(context);
-	cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-	cairo_set_operator(cr, CAIRO_OPERATOR_XOR);
-	cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
-	cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-	cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
-	cairo_rectangle(cr,
-	                b->realX - GTKCONTROLHILITEWIDTH,
-	                b->realY - off,
-	                b->w + GTKCONTROLHILITEWIDTH,
-	                b->h + off + 1);
-	cairo_stroke(cr);
-	cairo_destroy(cr);
-	gdk_window_end_draw_frame(gtk_widget_get_window(GTK_WIDGET(b->widget)),
-	                          context);
+	if(hilite) {
+		gtk_style_context_add_class( styleContext, "errorHighlight");
+	} else {
+		gtk_style_context_add_class( styleContext, "noHighlight");
+	}
 }

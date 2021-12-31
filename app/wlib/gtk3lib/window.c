@@ -888,7 +888,30 @@ void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width,
 
 }
 
-
+
+static char * xtcCustomStyle = " \
+	    .errorHighlight { background-color: shade( red, 1.8); background-image: none; } \
+		.noHighlight { background-color: white; background-image: none; } \
+		";
+/**
+ * Styles for further usage in the application are created from a static
+ * CSS definition
+ * 
+ */
+
+void
+wlibCreateCustomStyle(void)
+{
+	GtkStyleContext *context;
+	GError * error = NULL;
+
+    GtkCssProvider *provider = gtk_css_provider_new();
+	gtk_css_provider_load_from_data( provider, xtcCustomStyle, -1, &error );
+
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+									GTK_STYLE_PROVIDER(provider),
+									GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
 /*
  *******************************************************************************
  *
@@ -1136,6 +1159,9 @@ wWin_p wWinMainCreate(
 
 	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
 	wDrawColorBlack = wDrawFindColor(0x000000);
+	
+	wlibCreateCustomStyle();
+
 	return gtkMainW;
 }
 

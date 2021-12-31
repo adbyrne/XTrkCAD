@@ -564,7 +564,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="layout-settingswrite">
+                  <object class="GtkToggleButton" id="layout-write">
                     <property name="label" translatable="yes">Save _As...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -580,7 +580,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="layout-settingsread">
+                  <object class="GtkToggleButton" id="layout-read">
                     <property name="label" translatable="yes">_Load</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -620,8 +620,8 @@
       <widget name="id-ok"/>
       <widget name="layout-browse"/>
       <widget name="layout-clear"/>
-      <widget name="layout-settingswrite"/>
-      <widget name="layout-settingsread"/>
+      <widget name="layout-write"/>
+      <widget name="layout-read"/>
     </widgets>
   </object>
 </interface>

@@ -1754,7 +1754,7 @@ void InitLayers(void)
     }
 
     /* layer list for toolbar */
-    setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
+    setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, BO_TOOLBAR, 10, 200, NULL,
                                 SetCurrLayer, NULL);
     wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
     AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
@@ -1773,7 +1773,7 @@ void InitLayers(void)
             sprintf(message, "cmdLayerShow%u", i);
             layer_btns[i] = wButtonCreate(mainW, 0, 0, message,
                                           (char*)(show_layer_bmps[i]),
-                                          BO_ICON, 0, FlipLayer, I2VP(i) );
+                                          BO_ICON | BO_TOOLBAR, 0, FlipLayer, I2VP(i) );
             /* add the help text */
             wControlSetBalloonText((wControl_p)layer_btns[i], _("Show/Hide Layer"));
             /* put on toolbar */

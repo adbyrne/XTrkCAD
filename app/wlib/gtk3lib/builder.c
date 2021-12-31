@@ -120,7 +120,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr,
 		           NULL );
 		exit(1);
 	}
-	//w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
+	w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
 	g_string_free(filename, TRUE);
 
 	return w;

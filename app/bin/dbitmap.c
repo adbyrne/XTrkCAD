@@ -261,13 +261,13 @@ static paramData_t outputBitMapPLs[] = {
 	{ PD_TOGGLE, &outputBitMapTogglesV, "toggles", PDO_NOPSHUPD, bitmapTogglesLabels, N_( "Include " ) },
 #define I_DENSITY		(1)
 	{ PD_FLOAT, &outputBitMapDensity, "density", PDO_NOPSHUPD, &dpiRange, N_( "Resolution " ) },
-	{ PD_MESSAGE, N_( "dpi" ), NULL, PDO_DLGHORZ },
-	{ PD_MESSAGE, N_( "Bitmap Size " ), NULL, PDO_NOPSHUPD | PDO_DLGRESETMARGIN, 0 },
+	{ PD_MESSAGE, N_( "dpi" ), "dpi", PDO_DLGHORZ },
+	{ PD_MESSAGE, N_( "Bitmap Size " ), "mess1", PDO_NOPSHUPD | PDO_DLGRESETMARGIN, 0 },
 #define I_MSG1			(4)
-	{ PD_MESSAGE, N_( "99999 by 99999 pixels" ), NULL, PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT /* | PDO_DLGWIDE */, I2VP( 180 )},
-	{ PD_MESSAGE, N_( "Approximate File Size " ), NULL, PDO_NOPSHUPD, 0 },
+	{ PD_MESSAGE, N_( "99999 by 99999 pixels" ), "pixelsize", PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT, I2VP( 180 )},
+	{ PD_MESSAGE, N_( "Approximate File Size " ), "mess2", PDO_NOPSHUPD, 0 },
 #define I_MSG2			(6)
-	{ PD_MESSAGE, N_( "999.9Mb" ), NULL, PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT | PDO_DLGBOXEND, I2VP( 180 ) },
+	{ PD_MESSAGE, N_( "999.9Mb" ), "filesize", PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT | PDO_DLGBOXEND, I2VP( 180 ) },
 };
 
 static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_DIALOGTEMPLATE, outputBitMapPLs, COUNT( outputBitMapPLs ) };
