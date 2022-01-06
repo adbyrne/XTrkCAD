@@ -1099,6 +1099,9 @@ static void Playback( void )
 			demoWinOnTop = TRUE;
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
+#ifdef UTFCONVERT
+				ConvertUTF8ToSystem(paramLine);
+#endif
 				if ( IsEND( END_MESSAGE ) )
 					break;
 				if ( strncmp(paramLine, "STEP", 3) == 0 ) {
