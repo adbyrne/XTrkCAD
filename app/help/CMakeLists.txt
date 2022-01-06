@@ -1,8 +1,10 @@
 PROJECT(help)
 
-ADD_EXECUTABLE(genhelp genhelp.c cJSON.c cJSON.h)
+ADD_EXECUTABLE(genhelp genhelp.c genhelp.json cJSON.c cJSON.h)
 
 ADD_EXECUTABLE(genmessages genmessages.c)
+
+SET_SOURCE_FILES_PROPERTIES(genhelp.json PROPERTIES HEADER_FILE_ONLY TRUE)
 
 IF(XTRKCAD_USE_GETTEXT)
 	SET(GENMESSAGES_OPTS "-i18n")

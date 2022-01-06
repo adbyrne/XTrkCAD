@@ -304,7 +304,7 @@ static int blockDebug (track_p trk)
 	return(0);
 }
 
-static BOOL_T blockCheckContigiousPath()
+static BOOL_T blockCheckContiguousPath()
 {
 	EPINX_T ep, epCnt, epN;
 	int inx;
@@ -599,8 +599,8 @@ static void BlockOk ( void * junk )
 		}
 		/* Need to check that all block elements are connected to each
 		   other... */
-		if (!blockCheckContigiousPath()) {
-			NoticeMessage( _("Block is discontigious!"), _("Ok"), NULL );
+		if (!blockCheckContiguousPath()) {
+			NoticeMessage( _("Block is discontiguous!"), _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( blockW );
 			return;

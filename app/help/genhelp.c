@@ -42,7 +42,7 @@ int process(mode_e mode, char * json, FILE * outFile)
         goto end;
     }
 
-    fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n * Changes to this file will be overwritten.\n */\n",
+    fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n * Changes to this file will be overwritten. Edit this: genhelp.json\n */\n",
           outFile);
     fprintf(outFile, "#include <stdio.h>\n");
     fprintf(outFile, "#include \"wlib.h\"\n");
