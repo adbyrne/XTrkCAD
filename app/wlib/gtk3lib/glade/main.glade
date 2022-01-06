@@ -8,10 +8,6 @@
       <object class="GtkGrid" id="main-windowgrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_start">12</property>
-        <property name="margin_end">13</property>
-        <property name="margin_top">12</property>
-        <property name="margin_bottom">12</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
         <property name="column_spacing">6</property>
