@@ -1091,8 +1091,8 @@ static wList_p listCreate(
 	}
 	if ( indexR )
 		*indexR = index;
-	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
+
+	SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 	return b;
 }
 

@@ -694,6 +694,15 @@ Defaults are no modules are logged and loglevel is 1 if omitted from logonctrol 
 
 \dd set logfile, only needed in conjunction with the debug option.
 
+\u000
+
+\dt \c{T}
+
+\dd Runs all Regression tests (Demos) and exits with 0 if all are successful or with 1 if there any failures.
+Regression progress and failures are logged to stdout (Linux and Mac OSX) or xtclog.txt (Windows).
+
+\u000
+
 \dt \c{V}
 
 \dd Display the xtrkcad version and exit(0).

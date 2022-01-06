@@ -778,6 +778,7 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 */
 static int log_regression = 0;
 wBool_t bWriteEndPtDirectIndex;
+static int nRegressionFail = 0;
 
 static BOOL_T DoRegression( char * sFileName )
 {
@@ -846,6 +847,7 @@ static BOOL_T DoRegression( char * sFileName )
 			track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
 			strcat( message, "Regression " );
 			if ( ! CompareTrack( tActual, tExpected ) ) {
+				nRegressionFail++;
 				// Actual doesn't match Expected
 				LOG( log_regression, 1, ("  FAIL: %s", message) );
 				fRegression = fopen( sRegressionFile, "a" );
@@ -966,6 +968,7 @@ static void PlaybackSetup( void )
 	paramTogglePlaybackHilite = FALSE;
 	CompoundClearDemoDefns();
 	SaveLayers();
+	nRegressionFail = 0;
 }
 
 
@@ -1489,6 +1492,7 @@ static char * demoInitParams[] = {
 		"layer button-count 10",
 		"cmdopt selectmode 0",
 		"cmdopt selectzero 1",
+		"rescale change-dim 0",
 		NULL };
 
 static void DemoInitValues( void )
@@ -1607,4 +1611,21 @@ EXPORT BOOL_T MacroInit( void )
 	log_regression = LogFindIndex( "regression" );
 
 	return TRUE;
+}
+
+
+/**
+ * Run all regression tests
+ *
+ * return	number of failed tests
+ */
+EXPORT int RegressionTestAll()
+{
+	playbackNonStop = TRUE;
+	playbackSpeed = 5;
+	CreateDemoW();
+	curDemo = 0;
+	PlaybackSetup();
+	Playback();
+	return nRegressionFail;
 }

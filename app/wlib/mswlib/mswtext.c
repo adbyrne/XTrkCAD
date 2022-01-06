@@ -423,7 +423,7 @@ wText_p wTextCreate(
         }
 
         SendMessage(b->hWnd, WM_SETFONT, (WPARAM)fixedTextFont, (LPARAM)MAKELONG(1, 0));
-    } else 	if (!mswThickFont) {
+    } else {
         SendMessage(b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
     }
 

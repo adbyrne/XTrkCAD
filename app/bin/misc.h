@@ -451,6 +451,9 @@ void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
 
+/* macro.c */
+int RegressionTestAll();
+
 #include "misc2.h"
 
 #endif

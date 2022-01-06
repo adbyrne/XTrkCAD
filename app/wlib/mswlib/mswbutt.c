@@ -95,9 +95,9 @@ static void drawButton(
 	COLORREF colF;
 
 #define LEFT (0)
-#define RIGHT (LONG)ceil(bm->w*scaleIcon+10)
+#define RIGHT (bm->w+9)
 #define TOP (0)
-#define BOTTOM (LONG)ceil(bm->h*scaleIcon+10)
+#define BOTTOM (bm->h+9)
 
 	/* get the lightest and the darkest color to use */
 	colL = GetSysColor( COLOR_BTNHIGHLIGHT );
@@ -128,65 +128,24 @@ static void drawButton(
 			color2 = colD;
 		}
 
-#define GRADIENT_WIDTH 6
+		/* draw delimiting lines in shadow color */
+		newPen = CreatePen( PS_SOLID, 0, color1 );
+		oldPen = SelectObject( hButtDc, newPen );
 
-		/* 
-			first draw the top gradient 
-			this always ends in the button face color 
-			starting color depends on button state (selected or not) 
-		*/
-		vert [0] .x      = LEFT;
-		vert [0] .y      = TOP;
-		vert [0] .Red    = GetRValue( color1 )* 256;
-		vert [0] .Green  = GetGValue( color1 )* 256;
-		vert [0] .Blue   = GetBValue( color1 )* 256;
-		vert [0] .Alpha  = 0x0000;
-		vert [1] .x      = RIGHT;
-		vert [1] .y      = TOP + GRADIENT_WIDTH; 
-		vert [1] .Red    = GetRValue( colF )* 256;
-		vert [1] .Green  = GetGValue( colF )* 256;
-		vert [1] .Blue   = GetBValue( colF )* 256;
-		vert [1] .Alpha  = 0x0000;
-		
-		gRect.UpperLeft  = 0;
-		gRect.LowerRight = 1;
-		
-		GradientFill(hButtDc, vert, 2, &gRect, 1, GRADIENT_FILL_RECT_V);
+		MoveTo( hButtDc, RIGHT-1, TOP );
+		LineTo( hButtDc, LEFT, TOP );
+		LineTo( hButtDc, LEFT, BOTTOM );
+		DeleteObject( SelectObject( hButtDc, oldPen ) );
 
-		/* 
-			now draw the bottom gradient 
-			this always starts with the button face color 
-			ending color depends on button state (selected or not) 
-		*/
-		vert [0] .x      = LEFT;
-		vert [0] .y      = BOTTOM - GRADIENT_WIDTH;
-		vert [0] .Red    = GetRValue( colF )* 256;
-		vert [0] .Green  = GetGValue( colF )* 256;
-		vert [0] .Blue   = GetBValue( colF )* 256;
-		vert [0] .Alpha  = 0x0000;
-		vert [1] .x      = RIGHT;
-		vert [1] .y      = BOTTOM; 
-		vert [1] .Red    = GetRValue( color2 )* 256;
-		vert [1] .Green  = GetGValue( color2 )* 256;
-		vert [1] .Blue   = GetBValue( color2 )* 256;
-		vert [1] .Alpha  = 0x0000;
-		gRect.UpperLeft  = 0;
-		gRect.LowerRight = 1;
-		GradientFill(hButtDc, vert, 2, &gRect, 1, GRADIENT_FILL_RECT_V);
+		newPen = CreatePen( PS_SOLID, 0, color2 );
+		oldPen = SelectObject( hButtDc, newPen );
 
+		MoveTo( hButtDc, RIGHT, TOP+1 );
+		LineTo( hButtDc, RIGHT, BOTTOM );
+		LineTo( hButtDc, LEFT, BOTTOM );
+		DeleteObject( SelectObject( hButtDc, oldPen ) );
 	}
 
-	/* draw delimiting lines in shadow color */
-	newPen = CreatePen( PS_SOLID, 0, colD );
-	oldPen = SelectObject( hButtDc, newPen );
-
-	MoveTo( hButtDc, LEFT, TOP );
-	LineTo( hButtDc, LEFT, BOTTOM );
-	MoveTo( hButtDc, RIGHT, TOP );
-	LineTo( hButtDc, RIGHT, BOTTOM );
-	
-	DeleteObject( SelectObject( hButtDc, oldPen ) );
-		
 	color2 = GetSysColor( COLOR_BTNSHADOW );
 	color1 = RGB( bm->colormap[ 1 ].rgbRed, bm->colormap[ 1 ].rgbGreen, bm->colormap[ 1 ].rgbBlue );
 
@@ -323,8 +282,8 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			break;
 		mi->CtlType = ODT_BUTTON;
 		mi->CtlID = (UINT)wParam;
-		mi->itemWidth = (UINT)ceil(bb->w*scaleIcon);
-		mi->itemHeight = (UINT)ceil(bb->h*scaleIcon);
+		mi->itemWidth = (UINT)bb->w;
+		mi->itemHeight = (UINT)bb->h;
 		} return (LRESULT)0;
 
 	case WM_DRAWITEM:
@@ -446,8 +405,8 @@ wButton_p wButtonCreate(
 	b->selected = 0;
 	mswComputePos( (wControl_p)b, x, y );
 	if (b->option&BO_ICON) {
-		width = (wWinPix_t)ceil(bm->w*scaleIcon)+10;
-		h = (int)ceil(bm->h*scaleIcon)+10;
+		width = (wWinPix_t)(bm->w+10);
+		h = bm->h+10;
 		b->icon = bm;
 	} else {
 		width = (wWinPix_t)(width*mswScale);
@@ -474,18 +433,14 @@ wButton_p wButtonCreate(
 	mswChainFocus( (wControl_p)b );
 
 	oldButtProc = (WNDPROC)SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)&pushButt);
-#ifdef _OLDCODE
-	oldButtProc = (WNDPROC)SetWindowLongPtr(b->hWnd, GWL_WNDPROC, (LONG_PTR)&pushButt);
-#endif 
 	if (mswPalette) {
 		hDc = GetDC( b->hWnd );
 		SelectPalette( hDc, mswPalette, 0 );
 		RealizePalette( hDc );
 		ReleaseDC( b->hWnd, hDc );
 	}
-	if ( !mswThickFont )
-		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 
+	SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0 );
 
 	InvalidateRect(b->hWnd, &rect, TRUE);
 

@@ -542,14 +542,6 @@ EXPORT void LayoutHotBar( void * redraw )
 	BOOL_T initialize = FALSE;
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
-	/** @prefs [Preference] LargeIcons=1.5 Sets Icon scaling limits 1.0 to 2.0 */
-	double scaleicon;
-	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
-	if (scaleicon<1.0) scaleicon=1.0;
-	if (scaleicon>2.0) scaleicon=2.0;
-	//if (scaleicon>1.0) {
-	//	hotBarHeight = (wWinPix_t)(hotBarHeight);
-	//}
 	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.5 + (double)iconSize / 10.0));
 
 	if ( hotBarLabels) {

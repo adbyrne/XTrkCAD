@@ -15,7 +15,7 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/"><metadata
      id="metadata1665"><rdf:RDF><cc:Work
          rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
      id="defs1663" /><sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -50,14 +50,14 @@
        y="-55.713051"
        transform="rotate(90)" /><g
        id="plus"
-       transform="matrix(1.6740309,0,0,1.6334616,-51.092795,-24.413751)"
+       transform="matrix(1.5984081,0,0,1.5596714,-48.1547,-23.370556)"
        inkscape:label="plus"><path
-         style="display:inline;fill:#005a20;fill-opacity:1;stroke:#00993d;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="display:inline;fill:#005a20;fill-opacity:1;stroke:#0082cc;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 46.809533,31.077554 v -4.700241 h 4.630089 v -3.086726 l -4.559936,0.07015 -0.07015,-4.559936 h -3.016572 l 0.140305,4.559936 -4.840547,0.07015 0.07015,3.086726 4.489783,-0.07015 0.140306,4.630088 z"
          id="path1718" /><path
-         style="fill:none;fill-opacity:1;stroke:#00e552;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:none;fill-opacity:1;stroke:#05a3ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="M 45.350068,18.723791 V 31.070694"
          id="path1702" /><path
-         style="fill:none;fill-opacity:1;stroke:#00e552;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:none;fill-opacity:1;stroke:#05a3ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="M 51.516636,24.897242 H 39.169733"
          id="path1708" /></g></g></svg>

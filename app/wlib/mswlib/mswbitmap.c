@@ -180,8 +180,8 @@ void mswDrawIcon(
 	}
 
 	StretchDIBits(hDc, offw, offh,
-				 (int)ceil(bmiInfo->bmiHeader.biWidth*scaleIcon),
-	             (int)ceil(bmiInfo->bmiHeader.biHeight*scaleIcon),
+				  bmiInfo->bmiHeader.biWidth,
+	              bmiInfo->bmiHeader.biHeight,
 	              0, 0,
 	              bmiInfo->bmiHeader.biWidth,
 	              bmiInfo->bmiHeader.biHeight,
@@ -226,11 +226,11 @@ void mswDrawIcon(
 
     /* show the bitmap */
     StretchDIBits(hDc, offw, offh,
-				 (int)ceil(bmiInfo->bmiHeader.biWidth*scaleIcon),
-	             (int)ceil(bmiInfo->bmiHeader.biHeight*scaleIcon),
+				  bmiInfo->bmiHeader.biWidth,
+	              bmiInfo->bmiHeader.biHeight,
                   0, 0,
-                  bmiInfo->bmiHeader.biWidth,
-                  bmiInfo->bmiHeader.biHeight,
+		          bmiInfo->bmiHeader.biWidth,
+		          bmiInfo->bmiHeader.biHeight,
                   bm->pixels, bmiInfo,
                   DIB_RGB_COLORS, SRCPAINT);
 

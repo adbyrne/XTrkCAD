@@ -113,11 +113,6 @@ static wWinPix_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 
 
 
-/** @prefs [msw tweak] NoNegDrawArgs=1 Suppress drawing if x < 0 or y < 0 (-1 value causes preference read) */
-static long noNegDrawArgs = -1;
-/** @prefs [msw tweak] NoFlatEndCaps=1 Suppress EndCap Flat pen style */
-static long noFlatEndCaps = 0;
-
 void wDrawDelayUpdate(
 		wDraw_p d,
 		wBool_t delay )
@@ -205,9 +200,7 @@ static void setDrawMode(
 
 	logBrush.lbColor = mswGetColor(d->hasPalette,dc);
 	if ( lt==wDrawLineSolid ) {
-		penStyle = PS_GEOMETRIC | PS_SOLID;
-		if ( noFlatEndCaps == FALSE )
-			penStyle |= PS_ENDCAP_FLAT;
+		penStyle = PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT;
 	} else if (lt == wDrawLineDot) {
 		penStyle = PS_GEOMETRIC | PS_DOT;
 	} else if (lt == wDrawLineDash) {
@@ -319,8 +312,7 @@ void wDrawLine(
 	p0.y = YDRAWPIX2WINPIX(d,p0y);
 	p1.x = XDRAWPIX2WINPIX(d,p1x);
 	p1.y = YDRAWPIX2WINPIX(d,p1y);
-	if ( noNegDrawArgs>0 && !clip0( &p0, &p1, d ) )
-		return;
+
 	MoveTo( d->hDc, p0.x, p0.y );
 	LineTo( d->hDc, p1.x, p1.y );
 	if (d->hWnd) {
@@ -347,8 +339,6 @@ void wDrawLine(
 
 static double d2r(double angle)
 {
-	while (angle < 0.0) angle += 360.0;
-	while (angle >= 360.0) angle -= 360.0;
 	angle *= (M_PI / 180.0);
 	return angle;
 }
@@ -453,10 +443,6 @@ void wDrawArc(
 	if ( r > 30000 || a1 < 1.0 ) { 
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
-	}
-	if ( noNegDrawArgs > 0 ) {
-		if ( p0.x < 0 || p0.y < 0 || p1.x < 0 || p1.y < 0 )
-			fakeArc = TRUE;
 	}
 
 	// Starting point
@@ -848,48 +834,42 @@ void wDrawString(
     x = XDRAWPIX2WINPIX(d,px) + (int)(mswsin(angle)*fp->lfHeight-0.5);
     y = YDRAWPIX2WINPIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
 
-    if (noNegDrawArgs > 0 && (x < 0 || y < 0)) {
-		DeleteObject(newFont);
-        return;
+  	setDrawMode( d, 0, wDrawLineSolid, dc, dopts );
+	prevFont = SelectObject(d->hDc, newFont);
+    SetBkMode(d->hDc, TRANSPARENT);
+
+    if (dopts & wDrawOutlineFont) {
+        HPEN oldPen;
+        BeginPath(d->hDc);
+        TextOut(d->hDc, x, y, text, (int)strlen(text));
+        EndPath(d->hDc);
+
+        // Now draw outline text
+        oldPen = SelectObject(d->hDc,
+                              CreatePen(PS_SOLID, 1,
+                              mswGetColor(d->hasPalette, dc)));
+        StrokePath(d->hDc);
+        SelectObject(d->hDc, oldPen);
+    } else {
+        COLORREF old;
+
+        old = SetTextColor(d->hDc, mswGetColor(d->hasPalette, dc));
+        TextOut(d->hDc, x, y, text, (int)(strlen(text)));
+        SetTextColor(d->hDc, old);
     }
 
-		setDrawMode( d, 0, wDrawLineSolid, dc, dopts );
-		prevFont = SelectObject(d->hDc, newFont);
-        SetBkMode(d->hDc, TRANSPARENT);
+    extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, (int)(strlen(text)));
+    SelectObject(d->hDc, prevFont);
+    w = LOWORD(extent);
+    h = HIWORD(extent);
 
-        if (dopts & wDrawOutlineFont) {
-            HPEN oldPen;
-            BeginPath(d->hDc);
-            TextOut(d->hDc, x, y, text, (int)strlen(text));
-            EndPath(d->hDc);
-
-            // Now draw outline text
-            oldPen = SelectObject(d->hDc,
-                                  CreatePen(PS_SOLID, 1,
-                                            mswGetColor(d->hasPalette, dc)));
-            StrokePath(d->hDc);
-            SelectObject(d->hDc, oldPen);
-        } else {
-            COLORREF old;
-
-            old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
-                                                   dc));
-            TextOut(d->hDc, x, y, text, (int)(strlen(text)));
-            SetTextColor(d->hDc, old);
-        }
-
-        extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, (int)(strlen(text)));
-        SelectObject(d->hDc, prevFont);
-        w = LOWORD(extent);
-        h = HIWORD(extent);
-
-        if (d->hWnd) {
-            rect.top = y - (w + h + 1);
-            rect.bottom = y + (w + h + 1);
-            rect.left = x - (w + h + 1);
-            rect.right = x + (w + h + 1);
-            myInvalidateRect(d, &rect);
-        }
+    if (d->hWnd) {
+        rect.top = y - (w + h + 1);
+        rect.bottom = y + (w + h + 1);
+        rect.left = x - (w + h + 1);
+        rect.right = x + (w + h + 1);
+        myInvalidateRect(d, &rect);
+    }
 
     DeleteObject(newFont);
     fp->lfHeight = oldLfHeight;
@@ -1237,29 +1217,13 @@ void wDrawFilledCircle(
 	p1.y = YDRAWPIX2WINPIX(d,y-r);
 						   
 	setDrawBrush( d, color, opts );						  
-	if ( noNegDrawArgs > 0 && ( p0.x < 0 || p0.y < 0 ) ) {
-		if ( r > MAX_FILLCIRCLE_POINTS )
-			cnt = MAX_FILLCIRCLE_POINTS;
-		else if ( r > 8 )
-			cnt = XDRAWPIX2WINPIX(d,r);
-		else
-			cnt = 8;
-		dang = 360.0/cnt;
-		for ( inx=0; inx<cnt; inx++ ) {
-			circlePts[inx][0] = x + (int)(r * mswcos( inx*dang ) + 0.5 );
-			circlePts[inx][1] = y + (int)(r * mswsin( inx*dang ) + 0.5 );
-		}
-		//wDrawFilledPolygon( d, circlePts, NULL, cnt, color, opts );
-		wDrawPolygon(d, circlePts, NULL, cnt, color, 1, wDrawLineSolid,opts, TRUE, FALSE );
-	} else {
-		Ellipse( d->hDc, p0.x, p0.y, p1.x, p1.y );
-		if (d->hWnd) {
-			rect.top = p0.y;
-			rect.bottom = p1.y;
-			rect.left = p0.x;
-			rect.right = p1.x;
-			myInvalidateRect( d, &rect );
-		}
+	Ellipse( d->hDc, p0.x, p0.y, p1.x, p1.y );
+	if (d->hWnd) {
+		rect.top = p0.y;
+		rect.bottom = p1.y;
+		rect.left = p0.x;
+		rect.right = p1.x;
+		myInvalidateRect( d, &rect );
 	}
 }
 
@@ -1873,11 +1837,6 @@ wDraw_p wDrawCreate(
 	RECT rect;
 	int index;
 	HDC hDc;
-
-	if ( noNegDrawArgs < 0 ) {
-		wPrefGetInteger( "msw tweak", "NoNegDrawArgs", &noNegDrawArgs, 0 );
-		wPrefGetInteger( "msw tweak", "NoFlatEndCaps", &noFlatEndCaps, 0 );
-	}
 
 	d = mswAlloc( parent, B_DRAW, NULL, sizeof *d, data, &index );
 	mswComputePos( (wControl_p)d, x, y );
