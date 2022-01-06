@@ -18,6 +18,20 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">_Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">_Help</property>
                 <property name="visible">True</property>
@@ -287,52 +301,27 @@
             <property name="margin_top">18</property>
             <property name="resize_toplevel">True</property>
             <child>
-              <object class="GtkAlignment">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">18</property>
+                <property name="hexpand">True</property>
+                <property name="spacing">12</property>
+                <property name="homogeneous">True</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="hexpand">True</property>
                     <property name="spacing">12</property>
-                    <property name="homogeneous">True</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="spacing">12</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="margin_right">6</property>
-                            <property name="hexpand">True</property>
-                            <property name="label" translatable="yes">_X</property>
-                            <property name="use_underline">True</property>
-                            <property name="mnemonic_widget">grid-origx</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="grid-origx">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="margin_right">12</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
+                        <property name="halign">end</property>
+                        <property name="margin_right">6</property>
+                        <property name="hexpand">True</property>
+                        <property name="label" translatable="yes">_X</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">grid-origx</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -341,40 +330,11 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkEntry" id="grid-origx">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="spacing">12</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="margin_right">6</property>
-                            <property name="hexpand">True</property>
-                            <property name="label" translatable="yes">_Y</property>
-                            <property name="use_underline">True</property>
-                            <property name="mnemonic_widget">grid-origy</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="grid-origy">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="margin_right">12</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
+                        <property name="can_focus">True</property>
+                        <property name="margin_right">12</property>
+                        <property name="width_chars">10</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -382,49 +342,96 @@
                         <property name="position">1</property>
                       </packing>
                     </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">12</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="spacing">12</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="margin_right">6</property>
-                            <property name="hexpand">True</property>
-                            <property name="label" translatable="yes">_Angle</property>
-                            <property name="use_underline">True</property>
-                            <property name="mnemonic_widget">grid-origa</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="grid-origa">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">3</property>
-                            <property name="width_chars">3</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
+                        <property name="halign">end</property>
+                        <property name="margin_right">6</property>
+                        <property name="hexpand">True</property>
+                        <property name="label" translatable="yes">_Y</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">grid-origy</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">2</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="grid-origy">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="margin_right">12</property>
+                        <property name="width_chars">10</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">12</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="margin_right">6</property>
+                        <property name="hexpand">True</property>
+                        <property name="label" translatable="yes">_Angle</property>
+                        <property name="use_underline">True</property>
+                        <property name="mnemonic_widget">grid-origa</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="grid-origa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="max_length">3</property>
+                        <property name="width_chars">3</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
               </object>
             </child>
@@ -453,9 +460,8 @@
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Show _grid</property>
+                <property name="label" translatable="yes">Show _Grid</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic_widget">grid-show</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -467,8 +473,6 @@
               <object class="GtkBox" id="grid-show.box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="valign">center</property>
-                <property name="margin_left">6</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkCheckButton" id="grid-show">
@@ -503,5 +507,12 @@
     <child type="titlebar">
       <placeholder/>
     </child>
+  </object>
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="grid-origx"/>
+      <widget name="grid-origy"/>
+      <widget name="grid-origa"/>
+    </widgets>
   </object>
 </interface>
