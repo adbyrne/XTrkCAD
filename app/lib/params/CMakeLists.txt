@@ -19,7 +19,7 @@ FILE(GLOB inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE
 
 FOREACH(infileName ${inFiles})
     # Generate output file name
-    STRING(REGEX REPLACE ".cars\$" ".xtp" outfileName "${infileName}")
+    STRING(REGEX REPLACE "\\.cars\$" ".xtp" outfileName "${infileName}")
     SET(outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfileName}")
     # Generate input file name
     SET(infile "${CMAKE_CURRENT_SOURCE_DIR}/${infileName}")
@@ -41,7 +41,7 @@ FILE(GLOB inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE
 # define build commands for all struct files
 FOREACH(infileName ${inFiles})
     # Generate output file name
-    STRING(REGEX REPLACE ".struct\$" ".xtp" outfileName "${infileName}")
+    STRING(REGEX REPLACE "\\.struct\$" ".xtp" outfileName "${infileName}")
     SET(outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfileName}")
     # Generate input file name
     SET(infile "${CMAKE_CURRENT_SOURCE_DIR}/${infileName}")
