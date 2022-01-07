@@ -410,10 +410,6 @@ void wDrawArc(
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
 
-	len = d2r(a1) * r;
-	if (len < 3)
-		return;
-
 	// calculate the center coordinates
 	pc.x = XDRAWPIX2WINPIX( d, px );
 	pc.y = YDRAWPIX2WINPIX( d, py );
