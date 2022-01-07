@@ -135,7 +135,7 @@ MOUSE 4 1.000 10.000
 MESSAGE
 _________________________________________
 
-The <Rotate> command will restrict the rotation to increments of 15° if you hold down the <Shift> and <Ctrl> keys.
+The <Rotate> command will restrict the rotation to increments of 15Â° if you hold down the <Shift> and <Ctrl> keys.
 END
 STEP
 PARAMETER misc cmdUndo
@@ -327,7 +327,7 @@ END
 #MESSAGE
 #_________________________________________
 #
-#Shift-Right-Click will display a popup-menu that you can use to rotate by fixed amount (15°, 30°, 45°, 90° or 180°).  
+#Shift-Right-Click will display a popup-menu that you can use to rotate by fixed amount (15Â°, 30Â°, 45Â°, 90Â° or 180Â°).  
 #
 #We can not currently show this command.
 #END
@@ -362,7 +362,7 @@ END
 #MESSAGE
 #_________________________________________
 #
-#If we drag the mouse across the track, we can flip the structure by 180°.  This is similar to how we place turnouts.
+#If we drag the mouse across the track, we can flip the structure by 180Â°.  This is similar to how we place turnouts.
 #END
 #STEP
 #MOUSE 3 6.750 2.750
