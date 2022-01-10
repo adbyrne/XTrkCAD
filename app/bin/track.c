@@ -709,7 +709,7 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	BOOL_T rc = TRUE;
 	long option;
 
-	assert ( endPt != NULL );
+	ASSERT ( endPt != NULL );
 	if (bWriteEndPtDirectIndex && endPt->index > 0) {
 		rc &= fprintf( f, "\tT4 %d ", endPt->index )>0;
 	} else if (endPt->track == NULL ||

@@ -191,8 +191,8 @@ static int CustomDoExport(
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
 
-	assert( fileName != NULL );
-	assert( files == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( files == 1 );
 
 	if ( selcnt <= 0 )
 		return FALSE;

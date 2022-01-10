@@ -792,8 +792,8 @@ int LoadTracks(
 
 	char *extOfFile;
 
-	assert( fileName != NULL );
-	assert( cnt == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( cnt == 1 );
 
 	nameOfFile = FindFilename(fileName[0]);
 
@@ -1073,8 +1073,8 @@ static int SaveTracks(
 		void * data )
 {
 
-	assert( fileName != NULL );
-	assert( cnt == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( cnt == 1 );
 
 	char *nameOfFile = FindFilename(fileName[0]);
 
@@ -1417,8 +1417,8 @@ static int ImportTracks(
 	char *nameOfFile;
 	long paramVersionOld = paramVersion;
 
-	assert( fileName != NULL );
-	assert( cnt == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( cnt == 1 );
 
 	nameOfFile = FindFilename(fileName[ 0 ]);
 	paramVersion = -1;
@@ -1481,8 +1481,8 @@ static int DoExportTracks(
 	FILE * f;
 	time_t clock;
 
-	assert( fileName != NULL );
-	assert( cnt == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( cnt == 1 );
 
 	SetCurrentPath( IMPORTPATHKEY, fileName[ 0 ] );
 	f = fopen( fileName[ 0 ], "w" );
@@ -1623,11 +1623,10 @@ EXPORT void EditClone( void * unused ) {
 
 EXPORT void FileInit( void )
 {
-	if ( (libDir = wGetAppLibDir()) == NULL ) {
-		abort();
-	}
-	if ( (workingDir = wGetAppWorkDir()) == NULL )
-		AbortProg( "wGetAppWorkDir()" );
+	libDir = wGetAppLibDir();
+	ASSERT( libDir );
+	workingDir = wGetAppWorkDir();
+	ASSERT( workingDir );
 
 	SetLayoutFullPath("");
 		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);

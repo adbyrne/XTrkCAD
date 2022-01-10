@@ -98,7 +98,7 @@ EXPORT void FixUpBezierSegs(trkSeg_p p,int segCnt) {
 
 static void GetBezierAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-    assert( trk != NULL );
+    ASSERT( trk != NULL );
     
         *a0 = NormalizeAngle( GetTrkEndAngle(trk,0) );
         *a1 = NormalizeAngle( GetTrkEndAngle(trk,1)  );

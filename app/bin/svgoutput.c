@@ -32,7 +32,6 @@
 
 #include <xtrkcad-config.h>
 #include <locale.h>
-#include <assert.h>
 #include <mxml.h>
 #include <dynstring.h>
 
@@ -256,7 +255,7 @@ static void SvgDrawFillPoly(
 
     if (!points) {
         puts("memory for poly line coordinates could not be allocated!");
-        abort();
+        ASSERT(FALSE);
     }
     for (i = 0; i < cnt; i++) {
         points[i * 2] = pts[i].x;
@@ -438,8 +437,8 @@ static int DoExportSVGTracks(
 	BOOL_T all = (selectedTrackCount == 0);
     char *id;
 
-    assert(fileName != NULL);
-    assert(cnt == 1);
+    ASSERT(fileName != NULL);
+    ASSERT(cnt == 1);
 
     SetCLocale();
     GetLayoutRoomSize(&roomSize);
@@ -482,7 +481,7 @@ static int DoExportSVGTracks(
 
 void DoExportSVG(void * unused)
 {
-    // assert(selectedTrackCount > 0);
+    // ASSERT(selectedTrackCount > 0);
 
     if (exportSVGFile_fs == NULL)
         exportSVGFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to SVG"),

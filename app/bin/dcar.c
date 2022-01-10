@@ -4516,8 +4516,8 @@ static int CarInvSaveText(
 	char * cp0, * cp1;
 	int len;
 
-	assert( fileName != NULL );
-	assert( files == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( files == 1 );
 
 	SetCurrentPath( CARSPATHKEY, fileName[0] );
 	f = fopen( fileName[0], "w" );
@@ -4759,8 +4759,8 @@ static int CarInvImportCsv(
 	carPart_p partP;
 	int requiredCols;
 
-	assert( fileName != NULL );
-	assert( files == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( files == 1 );
 
 	SetCurrentPath( CARSPATHKEY, fileName[0] );
 	f = fopen( fileName[0], "r" );
@@ -4994,8 +4994,8 @@ static int CarInvExportCsv(
 	tabString_t tabs[7];
 	char * sp;
 
-	assert( fileName != NULL );
-	assert( files == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( files == 1 );
 	SetCurrentPath( CARSPATHKEY, fileName[0] );
 
 	f = fopen( fileName[0], "w" );

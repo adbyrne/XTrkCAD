@@ -54,7 +54,7 @@ static DIST_T GetLengthCurve( track_p );
 
 static void GetCurveAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-	assert( trk != NULL );
+	ASSERT( trk != NULL );
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	if (xx->circle != TRUE) {
 		*a0 = NormalizeAngle( GetTrkEndAngle(trk,0) + 90 );

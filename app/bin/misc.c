@@ -487,6 +487,7 @@ EXPORT void AbortProg(const char * msg, ...) {
 	if (abort2) {
 		wNoticeEx( NT_ERROR, message, _("ABORT"), NULL);
 	} else {
+		abort2 = TRUE;  // no 2nd chance
 		strcat(message, _("\nDo you want to save your layout?"));
 		rc = wNoticeEx( NT_ERROR, message, _("Ok"), _("ABORT"));
 		if (rc) {
@@ -2301,7 +2302,7 @@ static void AccelKeyDispatch( wAccelKey_e key, void * accelKeyIndexVP )
 		wDoAccelHelp(key, I2VP(aAccelKeys[iAccelKeyIndex].iContext));
 		break;
 	default:
-		abort();
+		ASSERT(FALSE);
 	}
 }
 
@@ -3096,7 +3097,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			bRunTests = TRUE;
 			break;
 		default:
-			abort();
+			ASSERT(FALSE);
 		}
 	if (optind < argc)
 		initialFile = strdup(argv[optind]);

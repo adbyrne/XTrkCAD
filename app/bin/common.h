@@ -24,7 +24,6 @@
 #define COMMON_H
 
 // INCLUDES
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <locale.h>

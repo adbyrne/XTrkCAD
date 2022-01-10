@@ -143,8 +143,8 @@ static int StartRecord( int cnt, char ** pathName, void * context )
 {
 	time_t clock;
 
-	assert( pathName != NULL );
-	assert( cnt == 1 );
+	ASSERT( pathName != NULL );
+	ASSERT( cnt == 1 );
 
 	SetCurrentPath( MACROPATHKEY, pathName[0] );
 	recordF = fopen(pathName[0], "w");
@@ -1304,8 +1304,8 @@ static void Playback( void )
 
 static int StartPlayback( int cnt, char **pathName, void * context )
 {
-	assert( pathName != NULL );
-	assert( cnt ==1 );
+	ASSERT( pathName != NULL );
+	ASSERT( cnt ==1 );
 
 	SetCurrentPath( MACROPATHKEY, pathName[0] );
 	paramFile = fopen( pathName[0], "r" );
