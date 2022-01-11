@@ -595,9 +595,8 @@ EXPORT void SetTrkEndPtCnt( track_p trk, EPINX_T cnt )
 {
 	EPINX_T oldCnt = trk->endCnt;
 	trk->endCnt = cnt;
-	if ((trk->endPt = MyRealloc( trk->endPt, trk->endCnt * sizeof trk->endPt[0] )) == NULL) {
-		AbortProg("setTrkEndPtCnt: No memory" );
-	}
+	trk->endPt = MyRealloc( trk->endPt, trk->endCnt * sizeof trk->endPt[0] );
+	ASSERT( trk->endPt );
 	if (oldCnt < cnt)
 		memset( &trk->endPt[oldCnt], 0, (cnt-oldCnt) * sizeof *trk->endPt );
 }

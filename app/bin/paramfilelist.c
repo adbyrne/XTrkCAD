@@ -204,9 +204,7 @@ void LoadParamFileList(void)
     if (favorites) {
         DynString topic;
         favoriteList = MyMalloc(sizeof(long)*favorites);
-        if (!favoriteList) {
-            AbortProg("Couldn't allocate memory for favorite list!\n");
-        }
+        ASSERT(favoriteList);
 
         DynStringMalloc(&topic, 16);
         for (int i = 0; i < favorites; i++) {

@@ -208,10 +208,7 @@ SearchUILoadResults(void)
         char **fileNames;
         int found = 0;
         fileNames = MyMalloc(sizeof(char *)*files);
-        if (!fileNames) {
-            AbortProg("Couldn't allocate memory for result list: %s (%d)", __FILE__,
-                      __LINE__, NULL);
-        }
+        ASSERT(fileNames);
 
         for (int inx = 0; found < files; inx++) {
             if (wListGetItemSelected(RESULTLIST, inx)) {
