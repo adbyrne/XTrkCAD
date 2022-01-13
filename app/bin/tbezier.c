@@ -351,7 +351,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 		xx->lineType = bezData.lineType;
 		break;
 	default:
-		AbortProg( "updateBezier: Bad inx %d", inx );
+		ASSERTEX( FALSE, ( "updateBezier: Bad inx %d", inx ) );
 	}
 	ConvertToArcs(xx->pos, &xx->arcSegs, IsTrack(trk)?TRUE:FALSE, xx->segsColor, xx->segsWidth);
 	trackParams_t params;

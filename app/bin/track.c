@@ -294,7 +294,7 @@ EXPORT void EnumerateTracks( void * unused )
 
 static void AbortNoTrack( void )
 {
-	AbortProg( "No Track Op called" );
+	ASSERTEX( FALSE, ( "No Track Op called" ) );
 }
 
 static trackCmd_t notrackCmds = {
@@ -423,9 +423,8 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
 	ASSERT( ep < trk->endCnt );
-	if (trk->endPt[ep].track != NULL) {
-		AbortProg( "setTrkEndPoint: endPt is connected" );
-	}
+	// check  setTrkEndPoint: endPt is not connected
+	ASSERT( trk->endPt[ep].track == NULL );
 	trk->endPt[ep].pos = pos;
 	trk->endPt[ep].angle = angle;
 }
@@ -596,7 +595,6 @@ EXPORT void SetTrkEndPtCnt( track_p trk, EPINX_T cnt )
 	EPINX_T oldCnt = trk->endCnt;
 	trk->endCnt = cnt;
 	trk->endPt = MyRealloc( trk->endPt, trk->endCnt * sizeof trk->endPt[0] );
-	ASSERT( trk->endPt );
 	if (oldCnt < cnt)
 		memset( &trk->endPt[oldCnt], 0, (cnt-oldCnt) * sizeof *trk->endPt );
 }
@@ -708,7 +706,7 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	BOOL_T rc = TRUE;
 	long option;
 
-	ASSERT ( endPt != NULL );
+	ASSERT ( endPt );
 	if (bWriteEndPtDirectIndex && endPt->index > 0) {
 		rc &= fprintf( f, "\tT4 %d ", endPt->index )>0;
 	} else if (endPt->track == NULL ||
@@ -1841,8 +1839,7 @@ EXPORT void ComputeBoundingBox( track_p trk )
 {
 	EPINX_T i;
 
-	if (trk->endCnt <= 0)
-		AbortProg("computeBoundingBox - endCnt<=0");
+	ASSERT( trk->endCnt > 0 );
 
 	trk->hi.x = trk->lo.x = (float)trk->endPt[0].pos.x;
 	trk->hi.y = trk->lo.y = (float)trk->endPt[0].pos.y;
@@ -1987,9 +1984,9 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 
 EXPORT void DisconnectTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T ep2 )
 {
-	if (trk1->endPt[ep1].track != trk2 ||
-		trk2->endPt[ep2].track != trk1 )
-		AbortProg("disconnectTracks: tracks not connected" );
+	// Check tracks are connected
+	ASSERT( trk1->endPt[ep1].track == trk2 );
+	ASSERT( trk2->endPt[ep2].track == trk1 );
 	UndoModify( trk1 );
 	UndoModify( trk2 );
 	trk1->endPt[ep1].track = NULL;

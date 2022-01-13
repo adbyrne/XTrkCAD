@@ -724,9 +724,7 @@ static void NewStructure( void )
 	struct extraDataCompound_t *xx;
 	wIndex_t pierInx;
 
-	if (curStructure->segCnt < 1) {
-		AbortProg( "newStructure: bad cnt" );
-	}
+	ASSERT( curStructure->segCnt >= 1 );
 	if (Dst.state == 0)
 		return;
 	if (curStructure->special == TOpierInfo &&
@@ -757,7 +755,7 @@ static void NewStructure( void )
 			}
 			break;
 		default:
-			AbortProg("bad special");
+			ASSERTEX( FALSE, ("bad special %d", (int) (curStructure->special) ) );
 	}
 		
 	SetTrkVisible( trk, TRUE );

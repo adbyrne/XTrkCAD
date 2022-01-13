@@ -208,8 +208,7 @@ SearchUILoadResults(void)
         char **fileNames;
         int found = 0;
         fileNames = MyMalloc(sizeof(char *)*files);
-        ASSERT(fileNames);
-
+ 
         for (int inx = 0; found < files; inx++) {
             if (wListGetItemSelected(RESULTLIST, inx)) {
                 fileNames[found++] = (char *)wListGetItemContext(RESULTLIST, inx);

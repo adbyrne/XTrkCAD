@@ -139,9 +139,7 @@ void CarGetPos(
 {
     struct extraDataCar_t * xx = GET_EXTRA_DATA(car, T_CAR, extraDataCar_t);
 
-    if (GetTrkType(car) != T_CAR) {
-        AbortProg("getCarPos");
-    }
+    ASSERT (GetTrkType(car) == T_CAR);
 
     *posR = xx->trvTrk.pos;
     *angleR = xx->trvTrk.angle;
@@ -155,9 +153,7 @@ void CarSetVisible(
     dir = 0;
     WALK_CARS_START(car, xx, dir)
 
-    if (GetTrkType(car) != T_CAR) {
-        AbortProg("carSetVisible");
-    }
+    ASSERT( GetTrkType(car) == T_CAR );
 
     WALK_CARS_END(car, xx, dir)
     dir = 1-dir;

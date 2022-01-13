@@ -246,14 +246,27 @@ EXPORT BOOL_T TestMallocs() {
 	return rc;
 }
 
+/**
+ * Allocate memory
+ *
+ * Allocated memory has 'guard' values, before and after to detect overruns.
+ * Aborts on allocation failure.
+ *
+ * \param size IN amount of memory to allocate
+ *
+ * \return Pointer to allocated memory - never NULL
+ */
 
 EXPORT void * MyMalloc(size_t size) {
 	void * p;
 	totalMallocs++;
 	totalMalloced += size;
 	p = malloc((size_t) size + sizeof(size_t) + 2 * sizeof(unsigned long));
-	if (p == NULL)
-		AbortProg("No memory");
+	if ( p == NULL ) {
+		// We're hosed, get out of town
+		lprintf( "malloc(%ld) failed\n", size );
+		abort();
+	}
 
 	LOG1(log_malloc,
 			( "  Malloc(%ld) = " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
@@ -272,6 +285,18 @@ EXPORT void * MyMalloc(size_t size) {
 	return p;
 }
 
+/**
+ * Reallocate memory
+ *
+ * Allocated memory has 'guard' values, before and after to detect overruns.
+ * Aborts on allocation failure.
+ *
+ * \param old IN existing pointer to allocated memory
+ * \param size IN amount of memory to allocate
+ *
+ * \return Pointer to reallocated memory - never NULL
+ */
+
 EXPORT void * MyRealloc(void * old, size_t size) {
 	size_t oldSize;
 	void * new;
@@ -279,26 +304,18 @@ EXPORT void * MyRealloc(void * old, size_t size) {
 		return MyMalloc(size);
 	totalReallocs++;
 	totalRealloced += size;
-	if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
-		AbortProg("Guard0 is hosed");
-	}
+	ASSERTEX( (*(unsigned long*) ((char*) old - sizeof(unsigned long)) == guard0),
+		("Guard0 is hosed") );
 	oldSize = *(size_t*) ((char*) old - sizeof(unsigned long) - sizeof(size_t));
-	if (*(unsigned long*) ((char*) old + oldSize) != guard1) {
-		AbortProg("Guard1 is hosed");
-	}
+	ASSERTEX( (*(unsigned long*) ((char*) old + oldSize) == guard1),
+		( "Guard1 is hosed" ) );
 
 	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size, oldSize ))
 
 	if ((long) oldSize == size) {
 		return old;
 	}
-	if (size == 0) {
-		free((char*) old - sizeof *(long*) 0 - sizeof *(size_t*) 0);
-		return NULL;
-	}
 	new = MyMalloc(size);
-	if (new == NULL && size)
-		AbortProg("No memory");
 	memcpy(new, old, min((size_t )size, oldSize));
 	MyFree(old);
 	return new;
@@ -307,35 +324,33 @@ EXPORT void * MyRealloc(void * old, size_t size) {
 EXPORT void MyFree(void * ptr) {
 	size_t oldSize;
 	totalFrees++;
-	if (ptr) {
-		if (*(unsigned long*) ((char*) ptr - sizeof(unsigned long)) != guard0) {
-			AbortProg("Guard0 is hosed");
-		}
-		oldSize = *(size_t*) ((char*) ptr - sizeof(unsigned long)
-				- sizeof(size_t));
-		if (*(unsigned long*) ((char*) ptr + oldSize) != guard1) {
-			AbortProg("Guard1 is hosed");
-		}
+	if (ptr==NULL) {
+		return;
+	}
+	ASSERTEX( (*(unsigned long*) ((char*) ptr - sizeof(unsigned long)) == guard0),
+		( "Guard0 is hosed") );
+	oldSize = *(size_t*) ((char*) ptr - sizeof(unsigned long)
+			- sizeof(size_t));
+	ASSERTEX( (*(unsigned long*) ((char*) ptr + oldSize) == guard1),
+		( "Guard1 is hosed" ) );
 
-		LOG1(log_malloc,
-				("  Free %d at " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
-						oldSize,
-						(size_t)ptr,
-						(size_t)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0),
-						(size_t)((char*)ptr+oldSize+sizeof *(long*)0)));
+	LOG1(log_malloc,
+			("  Free %ld at " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
+					oldSize,
+					(size_t)ptr,
+					(size_t)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0),
+					(size_t)((char*)ptr+oldSize+sizeof *(long*)0)));
 
-		totalFreeed += oldSize;
-		free((char*) ptr - sizeof *(long*) 0 - sizeof *(size_t*) 0);
-		if (extraButtons)
-			RecordMyFree(ptr);
+	totalFreeed += oldSize;
+	free((char*) ptr - sizeof *(long*) 0 - sizeof *(size_t*) 0);
+	if (extraButtons) {
+		RecordMyFree(ptr);
 	}
 }
 
 EXPORT void * memdup(void * src, size_t size) {
 	void * p;
 	p = MyMalloc(size);
-	if (p == NULL)
-		AbortProg("No memory");
 	memcpy(p, src, size);
 	return p;
 }
@@ -477,19 +492,57 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 	return cout;
 }
 
-EXPORT void AbortProg(const char * msg, ...) {
-	static BOOL_T abort2 = FALSE;
-	int rc;
+/**
+ * Print the message into internal buffer
+ *
+ * Called from ASSERTEX define
+ * \param sFormat IN printf-type format string
+ * \param ... IN vargs printf-type operands
+ *
+ * \return address of internal buffer containing formatted message
+ */
+EXPORT const char * AbortMessage(
+	const char * sFormat,
+	... )
+{
+	static char sMessage[STR_SIZE];
+	if ( sFormat == NULL )
+		return "";
 	va_list ap;
-	va_start(ap, msg);
-	vsprintf(message, msg, ap);
+	va_start(ap, sFormat);
+	vsnprintf(sMessage, sizeof sMessage, sFormat, ap);
 	va_end(ap);
+	return sMessage;
+}
+
+/**
+ * Display error notice box
+ * Offer chance to save layout
+ * Abort the program
+ *
+ * Called from ASSERT/ASSERTEX defines
+ *
+ * \param sCond IN string-ized error condition
+ * \param sFileName IN file name of fault
+ * \param iLineNumber IN line number of fault
+ * \param sMsg IN extra message with additional info
+ *
+ * \return No return
+ */
+EXPORT void AbortProg(
+	const char * sCond,
+	const char * sFileName,
+	int iLineNumber,
+	const char * sMsg )
+{
+	static BOOL_T abort2 = FALSE;
+	snprintf( message, sizeof message, "%s: %s:%d %s", sCond, sFileName, iLineNumber, sMsg?sMsg:"" );
 	if (abort2) {
 		wNoticeEx( NT_ERROR, message, _("ABORT"), NULL);
 	} else {
 		abort2 = TRUE;  // no 2nd chance
 		strcat(message, _("\nDo you want to save your layout?"));
-		rc = wNoticeEx( NT_ERROR, message, _("Ok"), _("ABORT"));
+		int rc = wNoticeEx( NT_ERROR, message, _("Ok"), _("ABORT"));
 		if (rc) {
 			DoSaveAs(abort);
 		} else {
@@ -1589,9 +1642,7 @@ EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx) {
 static wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 		const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
 		void * context) {
-	if (commandCnt >= COMMAND_MAX - 1) {
-		AbortProg("addCommand: too many commands");
-	}
+	ASSERT( commandCnt < COMMAND_MAX - 1 );
 	commandList[commandCnt].labelStr = MyStrdup(nameStr);
 	commandList[commandCnt].helpKey = MyStrdup(helpKey);
 	commandList[commandCnt].cmdProc = cmdProc;
@@ -1611,9 +1662,7 @@ static wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 }
 
 EXPORT void AddToolbarControl(wControl_p control, long options) {
-	if (buttonCnt >= COMMAND_MAX - 1) {
-		AbortProg("addToolbarControl: too many buttons");
-	}
+	ASSERT( buttonCnt < COMMAND_MAX - 1 );
 	buttonList[buttonCnt].enabled = TRUE;
 	buttonList[buttonCnt].options = options;
 	buttonList[buttonCnt].group = cmdGroup;
@@ -1742,8 +1791,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 		return cmdInx;
 	if (commandList[cmdInx].options & IC_STICKY) {
 		if (buttonGroupPopupM == NULL || newButtonGroup) {
-			if (stickyCnt > 32)
-				AbortProg("stickyCnt>32");
+			ASSERT( stickyCnt <= 32 );
 			stickyCnt++;
 		}
 		if (buttonGroupPopupM == NULL) {
@@ -1897,7 +1945,7 @@ void MenuPlayback(char * line) {
 			return;
 		}
 	}
-	AbortProg("menuPlayback: %s not found", menuName);
+	ASSERTEX( FALSE, ("menuPlayback: %s not found", menuName) );
 }
 /*--------------------------------------------------------------------*/
 
@@ -2204,8 +2252,7 @@ EXPORT void DebugInit(void * unused) {
 
 
 EXPORT void InitDebug(const char * label, long * valueP) {
-	if (debugCnt+1 >= COUNT( debugPLs ) )
-		AbortProg("Too many debug flags");
+	ASSERT( debugCnt+1 < COUNT( debugPLs ) );
 	memset(&debugPLs[debugCnt+1], 0, sizeof debugPLs[debugCnt]);
 	debugPLs[debugCnt+1].type = PD_LONG;
 	debugPLs[debugCnt+1].valueP = valueP;

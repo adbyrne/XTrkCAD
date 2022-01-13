@@ -106,11 +106,9 @@ static void AdjustCurveEndPt( track_p t, EPINX_T inx, ANGLE_T a )
 {
 	coOrd pos;
 	ANGLE_T aa;
-	if (GetTrkType(t) != T_CURVE) {
-		AbortProg( "AdjustCurveEndPt( %d, %d ) not on CURVE %d",
-				GetTrkIndex(t), inx, GetTrkType(t) );
-		return;
-	}
+	ASSERTEX( GetTrkType(t) == T_CURVE,
+		( "AdjustCurveEndPt( %d, %d ) not on CURVE %d",
+				GetTrkIndex(t), inx, GetTrkType(t) ) );
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 	UndoModify( t );
 LOG( log_curve, 1, ( "adjustCurveEndPt T%d[%d] a=%0.3f\n", GetTrkIndex(t), inx, a ) )
@@ -516,7 +514,7 @@ static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		SetTrkLayer( trk, crvData.layerNumber);
 		break;
 	default:
-		AbortProg( "updateCurve: Bad inx %d", inx );
+		ASSERTEX( FALSE, ( "updateCurve: Bad inx %d", inx ) );
 	}
 	UndrawNewTrack( trk );
 	*xx = xx0;

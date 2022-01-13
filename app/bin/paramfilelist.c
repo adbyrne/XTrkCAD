@@ -204,7 +204,6 @@ void LoadParamFileList(void)
     if (favorites) {
         DynString topic;
         favoriteList = MyMalloc(sizeof(long)*favorites);
-        ASSERT(favoriteList);
 
         DynStringMalloc(&topic, 16);
         for (int i = 0; i < favorites; i++) {

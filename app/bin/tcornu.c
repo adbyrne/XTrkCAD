@@ -414,7 +414,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		SetTrkLayer( trk, cornData.layerNumber);
 		break;
 	default:
-		AbortProg( "updateCornu: Bad inx %d", inx );
+		ASSERTEX( FALSE, ( "updateCornu: Bad inx %d", inx ) );
 	}
 	track_p tracks[2];
 	tracks[0] = GetTrkEndTrk(trk,0);

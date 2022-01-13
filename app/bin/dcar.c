@@ -289,8 +289,7 @@ static void RemoveListElem(
 	for ( inx=0; inx<da->cnt; inx++ )
 		if ( DYNARR_N(void*,*da,inx) == elem )
 			break;
-	if ( inx>=da->cnt )
-		AbortProg( "removeListElem" );
+	ASSERT( inx<da->cnt );
 	for ( inx++; inx<da->cnt; inx++ )
 		DYNARR_N(void*,*da,inx-1) = DYNARR_N(void*,*da,inx);
 	da->cnt--;
@@ -1420,7 +1419,7 @@ EXPORT long CarItemFindIndex(
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ )
 		if ( carItemInfo(inx) == item )
 			return inx;
-	AbortProg( "carItemFindIndex" );
+	ASSERT( FALSE );
 	return -1;
 }
 
@@ -3303,8 +3302,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			ParamControlShow( &carDlgPG, I_CD_PARTNO_STR, TRUE );
 			break;
 		case A_PushDims:
-			if ( carDlgStkPtr >= CARDLG_STK_SIZE )
-				AbortProg( "carDlgNewDesc: CARDLG_STK_SIZE" );
+			ASSERT( carDlgStkPtr < CARDLG_STK_SIZE );
 			carDlgStk[carDlgStkPtr].dim = carDlgDim;
 			carDlgStk[carDlgStkPtr].couplerLength = carDlgCouplerLength;
 			carDlgStk[carDlgStkPtr].state = currState;
@@ -3427,7 +3425,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			wPrefGetFloat( carDlgPG.nameStr, message, &carDlgCouplerLength, carDlgCouplerLength );
 			break;
 		default:
-			AbortProg( "carDlgDoActions: bad action" );
+			ASSERTEX( FALSE, ( "carDlgDoActions: bad action %d", (int)(actions[-1]) ) );
 			break;
 		}
 	}

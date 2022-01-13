@@ -407,8 +407,7 @@ EXPORT BOOL_T GetArgs(
 				ps = &message[0];
 				cp++;
 				while (*cp) {
-					if ( (ps-message)>=sizeof message)
-						AbortProg( "Quoted title argument too long" );
+					ASSERT( (ps-message)<sizeof message );
 					if (*cp == '\"') {
 						if (*++cp == '\"') {
 							*ps++ = '\"';
@@ -440,7 +439,7 @@ EXPORT BOOL_T GetArgs(
 				*qp = NULL;
 			break;
 		default:
-			AbortProg( "getArgs: bad format char: %c", *format );
+			ASSERTEX( FALSE, ( "getArgs: bad format char: %c", *format ) );
 		}
 	}
 	va_end( ap );

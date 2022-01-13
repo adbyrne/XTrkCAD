@@ -250,13 +250,10 @@ static void SvgDrawFillPoly(
 {
     int i;
     double *points = malloc((cnt + 1) * 2 * sizeof(double));
+    ASSERT( points );
 
     unsigned lineOpt = SvgDrawGetLineStyle(d);
 
-    if (!points) {
-        puts("memory for poly line coordinates could not be allocated!");
-        ASSERT(FALSE);
-    }
     for (i = 0; i < cnt; i++) {
         points[i * 2] = pts[i].x;
         points[i * 2 + 1] = roomSize.y - pts[i].y;

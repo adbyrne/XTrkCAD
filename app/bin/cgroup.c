@@ -475,10 +475,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		}
 		DYNARR_SET( char, pathPtr_da, pathPtr_da.cnt+1 );
 		pathPtr(pathPtr_da.cnt-1) = '\0';
-		if ( tempSegs_da.cnt == 0 ) {
-			AbortProg( "tempSegs_da.cnt == 0" );
-			continue;
-		}
+		ASSERT ( tempSegs_da.cnt != 0 );
 		GetSegBounds( zero, 0, tempSegs_da.cnt, &tempSegs(0), &orig, &size );
 		orig.x = -orig.x;
 		orig.y = -orig.y;
@@ -546,12 +543,12 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				trk0 = GetTrkEndTrk( stp->trk, stp->ep[segEP] );
 				trk1 = GetTrkEndTrk( stp1->trk, stp1->ep[segEP1] );
 				if ( trk0 == NULL ) {
-					if ( trk1 != NULL )
-						AbortProg( "ungroup: seg half connected" );
+					ASSERT ( trk1 == NULL );
 					ConnectTracks( stp->trk, stp->ep[segEP], stp1->trk, stp1->ep[segEP1] );
 				} else {
-					if ( trk1 != stp->trk || stp1->trk != trk0 )
-						AbortProg( "ungroup: last seg not connected to curr" );
+					ASSERT( trk1 == stp->trk );
+					ASSERT( stp1->trk == trk0 );
+					// ungroup: last seg not connected to curr
 				}
 				stp1 = stp;
 				segEP1 = 1-segEP;
@@ -701,8 +698,7 @@ static char * FindPathBtwEP(
  
 	LOG( log_group, 3, ("  FindPathBtwEP: T%d .%d .%d = ", trk?GetTrkIndex(trk):-1, ep1, ep2 ));
 	if ( GetTrkType(trk) != T_TURNOUT ) {
-		if ( ep1+ep2 != 1 )
-			AbortProg( "findPathBtwEP" );
+		ASSERT( ep1+ep2 == 1 );
 		*flip = ( ep1 == 1 );
 		if (GetTrkType(trk) == T_CORNU ) { 			// Cornu doesn't have a path but lots of segs!
 			cp = CreateSegPathList(trk);			// Make path
@@ -813,7 +809,7 @@ static int GroupShortestPathFunc(
 				return 0;
 			}
 		}
-		AbortProg( "GroupShortestPathFunc(SPTC_ADD_TRK, T%d) - track not in group", GetTrkIndex(trk) );
+		ASSERTEX( FALSE, ( "GroupShortestPathFunc(SPTC_ADD_TRK, T%d) - track not in group", GetTrkIndex(trk) ) );
 
 	case SPTC_TERMINATE:
 		ppp = &pathElem(pathElemStart);
@@ -871,8 +867,8 @@ LOG( log_group, 4, ( " Keep\n" ) )
 			return 1;
 		if ( GetTrkEndPtCnt(trk) == 2 )
 			return 0;
-		if ( GetTrkType(trk) != T_TURNOUT )
-			AbortProg( "GroupShortestPathFunc(IGNNXTTRK,T%d:%d,%d)", GetTrkIndex(trk), ep1, ep2 );
+		ASSERTEX( GetTrkType(trk) == T_TURNOUT,
+			( "GroupShortestPathFunc(IGNNXTTRK,T%d:%d,%d)", GetTrkIndex(trk), ep1, ep2 ) );
 		return FindPathBtwEP( trk, ep2, ep1, &flip ) == NULL;
 
 	case SPTC_VALID:
@@ -1473,8 +1469,7 @@ if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 				inx = *pPaths;
 				if ( inx<0 )
 					inx = - inx;
-				if ( inx > trackSegs_da.cnt )
-					AbortProg( "inx > trackSegs_da.cnt" );
+				ASSERT( inx <= trackSegs_da.cnt );
 				flip = *pPaths<0;
 				if ( ppp->flip )
 					flip = !flip;
@@ -1515,8 +1510,8 @@ LOG( log_group, 3, ( "\n" ) );
 					groupP = &groupTrk( ppp->groupInx );
 					PATHPTR_T pPaths = ppp->path;
 					flip = ppp->flip;
-					if ( pPaths == NULL )
-						AbortProg( "Missing Path T%d:%d.%d", GetTrkIndex(groupP->trk), ppp->ep2, ppp->ep1 );
+					ASSERTEX(  pPaths,
+						( "Missing Path T%d:%d.%d", GetTrkIndex(groupP->trk), ppp->ep2, ppp->ep1 ) );
 					if ( flip ) pPaths += strlen((char *)pPaths)-1;
 					while ( *pPaths && (pPaths >= ppp->path) ) {      //Add Guard for flip backwards
 						DYNARR_APPEND( char, pathPtr_da, 10 );

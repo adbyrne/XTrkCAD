@@ -1974,8 +1974,8 @@ EXPORT coOrd mainCenter;
 
 static void DrawMapBoundingBox( BOOL_T set )
 {
-	ASSERT (mainD.d != NULL);
-        ASSERT (mapD.d != NULL);
+	ASSERT( mainD.d );
+        ASSERT( mapD.d );
 	if (!mapVisible)
 		return;
 	DrawHilight( &mapD, mainD.orig, mainD.size, TRUE );
