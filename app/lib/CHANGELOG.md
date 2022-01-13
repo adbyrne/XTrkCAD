@@ -40,6 +40,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Mianne Benchwork
 
 
+## [5.2.2 GA]
+
+## Bugs
+
++ Windows circle drawing fix
+
+
 ## [5.2.2 Beta 3]
 
 ## Bugs
