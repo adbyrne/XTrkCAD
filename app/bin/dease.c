@@ -274,13 +274,13 @@ EXPORT addButtonCallBack_t EasementInit( void )
 	ParamRegister( &easementPG );
 
 	enone_bm = wIconCreatePixMap( ease_none_xpm[iconSize] );
-	eltsharp_bm = wIconCreatePixMap( ease_ltsharp_xpm[iconSize] );
+	eltsharp_bm = wIconCreatePixMap( ease_lt_sharp_xpm[iconSize] );
 	esharp_bm = wIconCreatePixMap( ease_sharp_xpm[iconSize] );
-	egtsharp_bm = wIconCreatePixMap( ease_gtsharp_xpm[iconSize] );
+	egtsharp_bm = wIconCreatePixMap( ease_gt_sharp_xpm[iconSize] );
 	enormal_bm = wIconCreatePixMap( ease_normal_xpm[iconSize] );
-	eltbroad_bm = wIconCreatePixMap( ease_ltbroad_xpm[iconSize] );
+	eltbroad_bm = wIconCreatePixMap( ease_lt_broad_xpm[iconSize] );
 	ebroad_bm = wIconCreatePixMap( ease_broad_xpm[iconSize] );
-	egtbroad_bm = wIconCreatePixMap( ease_gtbroad_xpm[iconSize] );
+	egtbroad_bm = wIconCreatePixMap( ease_gt_broad_xpm[iconSize] );
 	ecornu_bm = wIconCreatePixMap( ease_cornu_xpm[iconSize] );
 	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir, NULL );
 

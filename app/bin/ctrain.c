@@ -2811,12 +2811,14 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         UndoResume();
         DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
 
-        if (curTrainDlg->win) {
+        if (curTrainDlg && curTrainDlg->win) {
             wHide(curTrainDlg->win);
         }
 
         MainRedraw(); // CmdTrain: Exit
-        curTrainDlg->train = NULL;
+        if ( curTrainDlg ) {
+		curTrainDlg->train = NULL;
+	}
         return C_CONTINUE;
 
     case C_CONFIRM:
