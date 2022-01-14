@@ -295,7 +295,7 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 				}
 				break;
 			default:
-				AbortProg("Invalid change type %d in  ParamChangeSelectedFiles", paramFileChange);
+				ASSERTEX( FALSE, ("Invalid change type %d in  ParamChangeSelectedFiles", paramFileChange) );
 			}
 		}
 	}

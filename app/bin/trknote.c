@@ -356,7 +356,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 		strings2convert = 2;
 		break;
 	default:
-		AbortProg( "WriteNote: %d", xx->op );
+		ASSERTEX( FALSE, ( "WriteNote: %d", xx->op ) );
 	}
 #ifdef UTFCONVERT
 	for ( unsigned int inx = 0; inx < strings2convert; inx++ ) {
@@ -450,7 +450,7 @@ ReadTrackNote(char *line)
 			xx->noteData.fileData.inArchive = FALSE;
 			break;
 		default:
-			AbortProg( "ReadNote: %d", noteType );
+			ASSERTEX( FALSE, ( "ReadNote: %d", noteType ) );
 		}
 	} else {
 	noteText = ReadMultilineText();

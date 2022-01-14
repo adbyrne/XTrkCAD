@@ -101,8 +101,8 @@ void SetCurrentPath(
 {
     char *path;
     char *copy;
-    assert(fileName != NULL);
-    assert(pathType != NULL);
+    ASSERT(fileName != NULL);
+    ASSERT(pathType != NULL);
     copy = strdup(fileName);
     path = strrchr(copy, FILE_SEP_CHAR[0]);
 
@@ -132,7 +132,7 @@ char *GetCurrentPath(
 {
     struct pathTable *currentPath;
     const char *path;
-    assert(pathType != NULL);
+    ASSERT(pathType != NULL);
     currentPath = FindPath(pathType);
 
     if (currentPath) {

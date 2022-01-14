@@ -1069,7 +1069,7 @@ LayerPrefLoad(void)
 
 void IncrementLayerObjects(unsigned int layer)
 {
-    assert(layer <= NUM_LAYERS);
+    ASSERT(layer <= NUM_LAYERS);
     layers[layer].objCount++;
 }
 
@@ -1081,7 +1081,7 @@ void IncrementLayerObjects(unsigned int layer)
 
 void DecrementLayerObjects(unsigned int layer)
 {
-    assert(layer <= NUM_LAYERS);
+    ASSERT(layer <= NUM_LAYERS);
     layers[layer].objCount--;
 }
 
@@ -1343,9 +1343,7 @@ void SaveLayers(void)
 {
     layers_save = malloc(NUM_LAYERS * sizeof(layers[0]));
 
-    if (layers_save == NULL) {
-        abort();
-    }
+    ASSERT(layers_save != NULL);
 
     for (int i=0;i<NUM_LAYERS;i++) {
     	layers[i].settingsName[0] = '\0';
@@ -1360,7 +1358,7 @@ void RestoreLayers(void)
     int inx;
     char * label;
     wDrawColor color;
-    assert(layers_save != NULL);
+    ASSERT(layers_save != NULL);
     memcpy(layers, layers_save, NUM_LAYERS * sizeof layers[0]);
     free(layers_save);
 

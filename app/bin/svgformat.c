@@ -34,6 +34,7 @@
 #include "mxml.h"
 #include "include/svgformat.h"
 #include "include/utlist.h"
+#include "common.h"
 
 #define SVGDPIFACTOR 90.0					/**< the assumed resolution of the svg, 90 is what Inkscape uses */
 #define ROUND2PIXEL( value ) ((int)floor(value * SVGDPIFACTOR + 0.5))
@@ -166,7 +167,7 @@ SvgCreateStyle(mxml_node_t *element, unsigned long colorRGB, double width,
     char *className = NULL;
     char *classLineStyle = NULL;
 
-    assert(lineStyle < 7);
+    ASSERT(lineStyle < 7);
 
     sprintf(color, "#%2.2x%2.2x%2.2x", ((unsigned int)colorRGB >> 16) & 0xFF,
             ((unsigned int)colorRGB >> 8) & 0xFF, (unsigned int)colorRGB & 0xFF);
