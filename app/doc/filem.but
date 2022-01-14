@@ -180,7 +180,7 @@ After importing the objects from the file, the imported objects are in selected 
 
 \rule
 
-\S{cmdImport} Import as Module
+\S{cmdImportM} Import as Module
 
 \G{png.d/bimportxtc.png}
 
