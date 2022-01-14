@@ -1,0 +1,22 @@
+20220113
+This is repository of the files needed to make a fedora release.
+
+Temporary patches needed for 5.2.2, delete on next GA
+xtrkcad-5.2.2GA-p0.patch
+xtrkcad-5.2.2GA-p1.patch
+
+Builds the needed fedora rpms
+xtrkcad.spec
+Also needs (not saved here)
+xtrkcad-source-5.2.2GA.tar.gz
+
+builds the fc36 rpms
+fedpkg --release rawhide mockbuild
+
+builds fc35 rpms
+fedpkg --release f 35 mockbuild
+
+Built xtrkcad-5.2.2-1.fc35.x86_64.rpm installs as
+a graphical app, Can be selected by Applications->Graphics->XTrackCAD
+
+
