@@ -2,6 +2,7 @@
 <!-- Generated with glade 3.36.0 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
+  <object class="GtkSizeGroup"/>
   <object class="GtkListStore" id="searchgui-inx.liststore">
     <columns>
       <!-- column-name userdata -->
@@ -28,7 +29,7 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="id-help">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">_Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -38,21 +39,24 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-cancel">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">_Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_underline">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -98,7 +102,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="searchgui-find">
+                  <object class="GtkToggleButton" id="searchgui-find">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -113,11 +117,11 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkToggleButton">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -132,7 +136,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
@@ -283,8 +287,8 @@
                 <property name="homogeneous">True</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkButton" id="searchgui-selectall">
-                    <property name="label" translatable="yes">Select _All</property>
+                  <object class="GtkToggleButton" id="searchgui-selectall">
+                    <property name="label" translatable="yes">_Select All</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -297,7 +301,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="searchgui-apply">
+                  <object class="GtkToggleButton" id="searchgui-apply">
                     <property name="label" translatable="yes">_Load</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -335,6 +339,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="halign">start</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -355,13 +360,5 @@
     <child type="titlebar">
       <placeholder/>
     </child>
-  </object>
-  <object class="GtkSizeGroup">
-    <widgets>
-      <widget name="id-help"/>
-      <widget name="id-cancel"/>
-      <widget name="searchgui-selectall"/>
-      <widget name="searchgui-apply"/>
-    </widgets>
   </object>
 </interface>

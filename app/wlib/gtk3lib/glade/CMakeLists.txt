@@ -31,6 +31,7 @@ set(gladefiles
     "rename.glade"
     "rescale.glade"
     "rgbcolor.glade"
+    "searchgui.glade"
     "signalEdit.glade"
     "sticky.glade"
     "structure.glade"

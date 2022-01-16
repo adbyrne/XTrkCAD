@@ -188,6 +188,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
+                    <property name="halign">start</property>
                     <property name="use_underline">True</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -203,7 +204,7 @@
             </child>
             <child>
               <object class="GtkToggleButton" id="turnout-new">
-                <property name="label" translatable="yes">Creaate</property>
+                <property name="label" translatable="yes">Create</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
