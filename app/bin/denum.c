@@ -74,8 +74,8 @@ static int DoEnumSave(
 		char **fileName,
 		void * data )
 {
-	ASSERT( fileName != NULL );
-	ASSERT( files == 1 );
+	CHECK( fileName != NULL );
+	CHECK( files == 1 );
 	
 	SetCurrentPath( PARTLISTPATHKEY, fileName[0] );
 	return wTextSave( enumT, fileName[ 0 ] );

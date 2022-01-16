@@ -765,7 +765,7 @@ EXPORT int DoSettingsRead(
 		void * data )
 {
 	char * pref;
-	ASSERT( files == 1 );
+	CHECK( files == 1 );
 	if (fileName == NULL) wPrefsLoad(NULL);
 	else wPrefsLoad(fileName[0]);
 	// get the preferred scale from the new configuration file
@@ -805,8 +805,8 @@ static int DoSettingsWrite(
 		char ** fileName,
 		void * data )
 {
-	ASSERT( fileName != NULL );
-	ASSERT( files == 1 );
+	CHECK( fileName != NULL );
+	CHECK( files == 1 );
 	wPrefFlush(fileName[0]);
 	return TRUE;
 }

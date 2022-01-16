@@ -225,8 +225,8 @@ LOG( log_group, 1, ( "Ungroup( T%d )\n", GetTrkIndex(trk) ) );
 	for ( sp=xx->segs; sp<&xx->segs[xx->segCnt]; sp++ ) {
 		if (IsSegTrack(sp)) trackCount++;
 	}
-	//ASSERT( (epCnt==0) == (segCnt==0) );
-	ASSERT( (epCnt==0) == (trackCount==0) );
+	//CHECK( (epCnt==0) == (segCnt==0) );
+	CHECK( (epCnt==0) == (trackCount==0) );
 	turnoutChanged = FALSE;
 	if ( epCnt > 0 ) {
 		turnoutChanged = TRUE;
@@ -475,7 +475,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		}
 		DYNARR_SET( char, pathPtr_da, pathPtr_da.cnt+1 );
 		pathPtr(pathPtr_da.cnt-1) = '\0';
-		ASSERT ( tempSegs_da.cnt != 0 );
+		CHECK ( tempSegs_da.cnt != 0 );
 		GetSegBounds( zero, 0, tempSegs_da.cnt, &tempSegs(0), &orig, &size );
 		orig.x = -orig.x;
 		orig.y = -orig.y;
@@ -543,11 +543,11 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				trk0 = GetTrkEndTrk( stp->trk, stp->ep[segEP] );
 				trk1 = GetTrkEndTrk( stp1->trk, stp1->ep[segEP1] );
 				if ( trk0 == NULL ) {
-					ASSERT ( trk1 == NULL );
+					CHECK ( trk1 == NULL );
 					ConnectTracks( stp->trk, stp->ep[segEP], stp1->trk, stp1->ep[segEP1] );
 				} else {
-					ASSERT( trk1 == stp->trk );
-					ASSERT( stp1->trk == trk0 );
+					CHECK( trk1 == stp->trk );
+					CHECK( stp1->trk == trk0 );
 					// ungroup: last seg not connected to curr
 				}
 				stp1 = stp;
@@ -698,7 +698,7 @@ static char * FindPathBtwEP(
  
 	LOG( log_group, 3, ("  FindPathBtwEP: T%d .%d .%d = ", trk?GetTrkIndex(trk):-1, ep1, ep2 ));
 	if ( GetTrkType(trk) != T_TURNOUT ) {
-		ASSERT( ep1+ep2 == 1 );
+		CHECK( ep1+ep2 == 1 );
 		*flip = ( ep1 == 1 );
 		if (GetTrkType(trk) == T_CORNU ) { 			// Cornu doesn't have a path but lots of segs!
 			cp = CreateSegPathList(trk);			// Make path
@@ -809,7 +809,7 @@ static int GroupShortestPathFunc(
 				return 0;
 			}
 		}
-		ASSERTEX( FALSE, ( "GroupShortestPathFunc(SPTC_ADD_TRK, T%d) - track not in group", GetTrkIndex(trk) ) );
+		CHECKMSG( FALSE, ( "GroupShortestPathFunc(SPTC_ADD_TRK, T%d) - track not in group", GetTrkIndex(trk) ) );
 
 	case SPTC_TERMINATE:
 		ppp = &pathElem(pathElemStart);
@@ -867,7 +867,7 @@ LOG( log_group, 4, ( " Keep\n" ) )
 			return 1;
 		if ( GetTrkEndPtCnt(trk) == 2 )
 			return 0;
-		ASSERTEX( GetTrkType(trk) == T_TURNOUT,
+		CHECKMSG( GetTrkType(trk) == T_TURNOUT,
 			( "GroupShortestPathFunc(IGNNXTTRK,T%d:%d,%d)", GetTrkIndex(trk), ep1, ep2 ) );
 		return FindPathBtwEP( trk, ep2, ep1, &flip ) == NULL;
 
@@ -1469,7 +1469,7 @@ if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 				inx = *pPaths;
 				if ( inx<0 )
 					inx = - inx;
-				ASSERT( inx <= trackSegs_da.cnt );
+				CHECK( inx <= trackSegs_da.cnt );
 				flip = *pPaths<0;
 				if ( ppp->flip )
 					flip = !flip;
@@ -1510,7 +1510,7 @@ LOG( log_group, 3, ( "\n" ) );
 					groupP = &groupTrk( ppp->groupInx );
 					PATHPTR_T pPaths = ppp->path;
 					flip = ppp->flip;
-					ASSERTEX(  pPaths,
+					CHECKMSG(  pPaths,
 						( "Missing Path T%d:%d.%d", GetTrkIndex(groupP->trk), ppp->ep2, ppp->ep1 ) );
 					if ( flip ) pPaths += strlen((char *)pPaths)-1;
 					while ( *pPaths && (pPaths >= ppp->path) ) {      //Add Guard for flip backwards

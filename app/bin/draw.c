@@ -526,7 +526,7 @@ static void DDrawPoly(
 		drawOpts |= wDrawOptTransparent;
 		break;
 	default:
-		ASSERT(FALSE);
+		CHECK(FALSE);
 	}
 	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, lineOpt, drawOpts, fill, open );
 }
@@ -608,7 +608,7 @@ static void DDrawRectangle(
 			wDrawFilledRectangle( d->d, x, y, w, h, color, opts );
 			break;
 		default:
-			ASSERT(FALSE);
+			CHECK(FALSE);
 		}
 	}
 }
@@ -626,7 +626,7 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 
 EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 {
-	ASSERT( cnt <= 4 );
+	CHECK( cnt <= 4 );
 	static wDrawColor color = 0;
 	if ( color == 0 )
 		color = wDrawColorGray( 70 );
@@ -1001,7 +1001,7 @@ static void TempSegPoly(
 		fill = 1;
 		break;
 	default:
-		ASSERT(FALSE);
+		CHECK(FALSE);
 	}
 	DYNARR_APPEND( trkSeg_t, tempSegs_da, 1);
 	tempSegs(tempSegs_da.cnt-1).type = fill?SEG_FILPOLY:SEG_POLY;
@@ -1974,8 +1974,8 @@ EXPORT coOrd mainCenter;
 
 static void DrawMapBoundingBox( BOOL_T set )
 {
-	ASSERT( mainD.d );
-        ASSERT( mapD.d );
+	CHECK( mainD.d );
+        CHECK( mapD.d );
 	if (!mapVisible)
 		return;
 	DrawHilight( &mapD, mainD.orig, mainD.size, TRUE );

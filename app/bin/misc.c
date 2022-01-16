@@ -304,10 +304,10 @@ EXPORT void * MyRealloc(void * old, size_t size) {
 		return MyMalloc(size);
 	totalReallocs++;
 	totalRealloced += size;
-	ASSERTEX( (*(unsigned long*) ((char*) old - sizeof(unsigned long)) == guard0),
+	CHECKMSG( (*(unsigned long*) ((char*) old - sizeof(unsigned long)) == guard0),
 		("Guard0 is hosed") );
 	oldSize = *(size_t*) ((char*) old - sizeof(unsigned long) - sizeof(size_t));
-	ASSERTEX( (*(unsigned long*) ((char*) old + oldSize) == guard1),
+	CHECKMSG( (*(unsigned long*) ((char*) old + oldSize) == guard1),
 		( "Guard1 is hosed" ) );
 
 	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size, oldSize ))
@@ -327,11 +327,11 @@ EXPORT void MyFree(void * ptr) {
 	if (ptr==NULL) {
 		return;
 	}
-	ASSERTEX( (*(unsigned long*) ((char*) ptr - sizeof(unsigned long)) == guard0),
+	CHECKMSG( (*(unsigned long*) ((char*) ptr - sizeof(unsigned long)) == guard0),
 		( "Guard0 is hosed") );
 	oldSize = *(size_t*) ((char*) ptr - sizeof(unsigned long)
 			- sizeof(size_t));
-	ASSERTEX( (*(unsigned long*) ((char*) ptr + oldSize) == guard1),
+	CHECKMSG( (*(unsigned long*) ((char*) ptr + oldSize) == guard1),
 		( "Guard1 is hosed" ) );
 
 	LOG1(log_malloc,
@@ -495,7 +495,7 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 /**
  * Print the message into internal buffer
  *
- * Called from ASSERTEX define
+ * Called from CHECKMSG define
  * \param sFormat IN printf-type format string
  * \param ... IN vargs printf-type operands
  *
@@ -520,7 +520,7 @@ EXPORT const char * AbortMessage(
  * Offer chance to save layout
  * Abort the program
  *
- * Called from ASSERT/ASSERTEX defines
+ * Called from CHECK/CHECKMSG defines
  *
  * \param sCond IN string-ized error condition
  * \param sFileName IN file name of fault
@@ -1435,7 +1435,7 @@ EXPORT void DoCommandB(void * data) {
 	inDoCommandB = TRUE;
 
 	if (inx < 0 || inx >= commandCnt) {
-		ASSERT(FALSE);
+		CHECK(FALSE);
 		inDoCommandB = FALSE;
 		return;
 	}
@@ -1642,7 +1642,7 @@ EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx) {
 static wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 		const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
 		void * context) {
-	ASSERT( commandCnt < COMMAND_MAX - 1 );
+	CHECK( commandCnt < COMMAND_MAX - 1 );
 	commandList[commandCnt].labelStr = MyStrdup(nameStr);
 	commandList[commandCnt].helpKey = MyStrdup(helpKey);
 	commandList[commandCnt].cmdProc = cmdProc;
@@ -1662,7 +1662,7 @@ static wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 }
 
 EXPORT void AddToolbarControl(wControl_p control, long options) {
-	ASSERT( buttonCnt < COMMAND_MAX - 1 );
+	CHECK( buttonCnt < COMMAND_MAX - 1 );
 	buttonList[buttonCnt].enabled = TRUE;
 	buttonList[buttonCnt].options = options;
 	buttonList[buttonCnt].group = cmdGroup;
@@ -1791,7 +1791,7 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 		return cmdInx;
 	if (commandList[cmdInx].options & IC_STICKY) {
 		if (buttonGroupPopupM == NULL || newButtonGroup) {
-			ASSERT( stickyCnt <= 32 );
+			CHECK( stickyCnt <= 32 );
 			stickyCnt++;
 		}
 		if (buttonGroupPopupM == NULL) {
@@ -1945,7 +1945,7 @@ void MenuPlayback(char * line) {
 			return;
 		}
 	}
-	ASSERTEX( FALSE, ("menuPlayback: %s not found", menuName) );
+	CHECKMSG( FALSE, ("menuPlayback: %s not found", menuName) );
 }
 /*--------------------------------------------------------------------*/
 
@@ -1994,7 +1994,7 @@ static wMenuToggle_p AllToolbarMI[ COUNT( AllToolbarMasks ) ];
 
 static void ToolbarAction(void * data) {
 	int inx = (int)VP2L(data);
-	ASSERT( inx >=0 && inx < COUNT( AllToolbarMasks ) );
+	CHECK( inx >=0 && inx < COUNT( AllToolbarMasks ) );
 	wBool_t set = wMenuToggleGet( AllToolbarMI[inx] );
 	long mask = AllToolbarMasks[inx];
 	if (set)
@@ -2252,7 +2252,7 @@ EXPORT void DebugInit(void * unused) {
 
 
 EXPORT void InitDebug(const char * label, long * valueP) {
-	ASSERT( debugCnt+1 < COUNT( debugPLs ) );
+	CHECK( debugCnt+1 < COUNT( debugPLs ) );
 	memset(&debugPLs[debugCnt+1], 0, sizeof debugPLs[debugCnt]);
 	debugPLs[debugCnt+1].type = PD_LONG;
 	debugPLs[debugCnt+1].valueP = valueP;
@@ -2349,7 +2349,7 @@ static void AccelKeyDispatch( wAccelKey_e key, void * accelKeyIndexVP )
 		wDoAccelHelp(key, I2VP(aAccelKeys[iAccelKeyIndex].iContext));
 		break;
 	default:
-		ASSERT(FALSE);
+		CHECK(FALSE);
 	}
 }
 
@@ -3144,7 +3144,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			bRunTests = TRUE;
 			break;
 		default:
-			ASSERT(FALSE);
+			CHECK(FALSE);
 		}
 	if (optind < argc)
 		initialFile = strdup(argv[optind]);

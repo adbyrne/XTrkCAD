@@ -222,12 +222,12 @@ char * MyStrdup( const char * );
 
 const char * AbortMessage( const char *, ... );
 void AbortProg( const char *, const char *, int, const char * );
-#ifdef LOG_ASSERT_COVERAGE
-#define ASSERT( X ) lprintf( "ASSERT %s:%i\n", __FILE__, __LINE__ ); if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, NULL )
-#define ASSERTEX( X, MSG ) lprintf( "ASSERT %s:%i\n", __FILE__, __LINE__ ); if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, AbortMessage MSG )
+#ifdef LOG_CHECK_COVERAGE
+#define CHECK( X ) lprintf( "CHECK %s:%i\n", __FILE__, __LINE__ ); if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, NULL )
+#define CHECKMSG( X, MSG ) lprintf( "CHECK %s:%i\n", __FILE__, __LINE__ ); if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, AbortMessage MSG )
 #else
-#define ASSERT( X ) if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, NULL )
-#define ASSERTEX( X, MSG ) if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, AbortMessage MSG )
+#define CHECK( X ) if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, NULL )
+#define CHECKMSG( X, MSG ) if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, AbortMessage MSG )
 #endif
 
 char * Strcpytrimed( char *, const char *, BOOL_T );

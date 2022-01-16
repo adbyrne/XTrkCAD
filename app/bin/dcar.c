@@ -289,7 +289,7 @@ static void RemoveListElem(
 	for ( inx=0; inx<da->cnt; inx++ )
 		if ( DYNARR_N(void*,*da,inx) == elem )
 			break;
-	ASSERT( inx<da->cnt );
+	CHECK( inx<da->cnt );
 	for ( inx++; inx<da->cnt; inx++ )
 		DYNARR_N(void*,*da,inx-1) = DYNARR_N(void*,*da,inx);
 	da->cnt--;
@@ -1419,7 +1419,7 @@ EXPORT long CarItemFindIndex(
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ )
 		if ( carItemInfo(inx) == item )
 			return inx;
-	ASSERT( FALSE );
+	CHECK( FALSE );
 	return -1;
 }
 
@@ -3302,7 +3302,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			ParamControlShow( &carDlgPG, I_CD_PARTNO_STR, TRUE );
 			break;
 		case A_PushDims:
-			ASSERT( carDlgStkPtr < CARDLG_STK_SIZE );
+			CHECK( carDlgStkPtr < CARDLG_STK_SIZE );
 			carDlgStk[carDlgStkPtr].dim = carDlgDim;
 			carDlgStk[carDlgStkPtr].couplerLength = carDlgCouplerLength;
 			carDlgStk[carDlgStkPtr].state = currState;
@@ -3425,7 +3425,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			wPrefGetFloat( carDlgPG.nameStr, message, &carDlgCouplerLength, carDlgCouplerLength );
 			break;
 		default:
-			ASSERTEX( FALSE, ( "carDlgDoActions: bad action %d", (int)(actions[-1]) ) );
+			CHECKMSG( FALSE, ( "carDlgDoActions: bad action %d", (int)(actions[-1]) ) );
 			break;
 		}
 	}
@@ -4514,8 +4514,8 @@ static int CarInvSaveText(
 	char * cp0, * cp1;
 	int len;
 
-	ASSERT( fileName != NULL );
-	ASSERT( files == 1 );
+	CHECK( fileName != NULL );
+	CHECK( files == 1 );
 
 	SetCurrentPath( CARSPATHKEY, fileName[0] );
 	f = fopen( fileName[0], "w" );
@@ -4757,8 +4757,8 @@ static int CarInvImportCsv(
 	carPart_p partP;
 	int requiredCols;
 
-	ASSERT( fileName != NULL );
-	ASSERT( files == 1 );
+	CHECK( fileName != NULL );
+	CHECK( files == 1 );
 
 	SetCurrentPath( CARSPATHKEY, fileName[0] );
 	f = fopen( fileName[0], "r" );
@@ -4992,8 +4992,8 @@ static int CarInvExportCsv(
 	tabString_t tabs[7];
 	char * sp;
 
-	ASSERT( fileName != NULL );
-	ASSERT( files == 1 );
+	CHECK( fileName != NULL );
+	CHECK( files == 1 );
 	SetCurrentPath( CARSPATHKEY, fileName[0] );
 
 	f = fopen( fileName[0], "w" );

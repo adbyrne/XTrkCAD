@@ -254,7 +254,7 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents, char *tag)
     if (tag)
     	entry->tag = MyStrdup(tag);
 
-    ASSERT( entry->files < MAXFILESPERCONTENT );
+    CHECK( entry->files < MAXFILESPERCONTENT );
     entry->fullFileName[entry->files++] = MyStrdup(path);
 }
 

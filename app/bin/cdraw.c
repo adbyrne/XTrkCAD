@@ -410,7 +410,7 @@ EXPORT track_p MakePolyLineFromSegs(
 			j +=sp->u.p.cnt-1;
 			first = FALSE;
 		}
-		ASSERT(j<=cnt);
+		CHECK(j<=cnt);
 
 	}
 	xx->segs[0].u.p.cnt = j;
@@ -1024,7 +1024,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		xx->lineType = drawData.lineType;
 		break;
 	default:
-		ASSERTEX( FALSE,  ( "bad op: %d", inx ) );
+		CHECKMSG( FALSE,  ( "bad op: %d", inx ) );
 	}
 	drawData.oldE0 = drawData.endPt[0];
 	drawData.oldE1 = drawData.endPt[1];

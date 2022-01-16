@@ -54,7 +54,7 @@ static int log_straight = 0;
 
 void AdjustStraightEndPt( track_p t, EPINX_T inx, coOrd pos )
 {
-	ASSERTEX( GetTrkType(t) == T_STRAIGHT,
+	CHECKMSG( GetTrkType(t) == T_STRAIGHT,
 		("AdjustLIneEndPt( %d, %d ) not on STRAIGHT %d\n",
 				GetTrkIndex(t), inx, GetTrkType(t) ) );
 	UndoModify( t );

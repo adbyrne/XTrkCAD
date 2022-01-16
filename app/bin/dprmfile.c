@@ -295,7 +295,7 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 				}
 				break;
 			default:
-				ASSERTEX( FALSE, ("Invalid change type %d in  ParamChangeSelectedFiles", paramFileChange) );
+				CHECKMSG( FALSE, ("Invalid change type %d in  ParamChangeSelectedFiles", paramFileChange) );
 			}
 		}
 	}

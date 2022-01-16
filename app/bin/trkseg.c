@@ -142,7 +142,7 @@ EXPORT coOrd GetSegEndPt(
 
         break;
     default:
-		ASSERTEX( FALSE, ("GetSegCntPt(%c)", segPtr->type ) );
+		CHECKMSG( FALSE, ("GetSegCntPt(%c)", segPtr->type ) );
 	}
 	if ( angleR )
 		*angleR = angle;
@@ -909,7 +909,7 @@ EXPORT ANGLE_T GetAngleSegs(
 		angle = segPtr->u.t.angle;
 		break;
 	default:
-		ASSERTEX( FALSE, ( "GetAngleSegs(%d)", segPtr->type ) );
+		CHECKMSG( FALSE, ( "GetAngleSegs(%d)", segPtr->type ) );
 	}
 	if ( segInxR ) *segInxR = inx;
 	if (seg_backwards) *seg_backwards = backwards;
@@ -1633,7 +1633,7 @@ EXPORT void SegProc(
         BezierSegProc( cmd, segPtr, data);
         break;
     default:
-		ASSERTEX( FALSE, ( "SegProg( %d )", segPtr->type ) );
+		CHECKMSG( FALSE, ( "SegProg( %d )", segPtr->type ) );
 		break;
 	}
 }

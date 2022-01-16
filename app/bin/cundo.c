@@ -56,7 +56,7 @@
  * 1 Marks the track's transaction record with DeleteOp
  *   When the transaction record is recycled, the old track object will be Free'd.
  * 2 Sets the .delete flag in the track object
- *   For the most part (except dcar.c and cundo.c) IsTrackDeleted() is used in ASSERTs
+ *   For the most part (except dcar.c and cundo.c) IsTrackDeleted() is used in CHECKs
  *   There are a few cases where we have to deal with deleted track.
  *   In general, we do not need to look inside a deleted track and
  *   GET_EXTRA_DATA will complain if we try (FreeTrack is the exception)

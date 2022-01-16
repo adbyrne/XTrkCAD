@@ -1204,7 +1204,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			InfoMessage( _("First Track Type not supported for non-Cornu Join") );
 			goto errorReturn;
 		default:
-			ASSERTEX( FALSE, ( "cmdJoin - unknown type[0] %d", (int)(Dj.inp[0].params.type) ) );
+			CHECKMSG( FALSE, ( "cmdJoin - unknown type[0] %d", (int)(Dj.inp[0].params.type) ) );
 		}
 		d -= Dj.jointD[0].d0;
 		if ( d <= minLength ) {
@@ -1236,7 +1236,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			InfoMessage( _("Second Track Type not supported for non-Cornu Join") );
 			goto errorReturn;
 		default:
-			ASSERTEX( FALSE, ( "cmdJoin - unknown type[1]", Dj.inp[1].params.type ) );
+			CHECKMSG( FALSE, ( "cmdJoin - unknown type[1]", Dj.inp[1].params.type ) );
 		}
 		d -= Dj.jointD[1].d0;
 		if ( d <= minLength ) {
@@ -1320,7 +1320,7 @@ errorReturn:
 			tempSegs_da.cnt = 0;
 			break;
 		default:
-			ASSERTEX( FALSE, ( "Bad track type %d", Dj.jRes.type ) );
+			CHECKMSG( FALSE, ( "Bad track type %d", Dj.jRes.type ) );
 		}
 		if (!ok)
 			Dj.jRes.type = curveTypeNone;

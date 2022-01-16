@@ -2424,7 +2424,7 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 	if (!( (dp->type== NTO_CORNU) || (dp->type == NTO_CORNUWYE) || (dp->type == NTO_CORNU3WAY))) {
 		segOrder = pp->segOrder;
 		segCnt = (wIndex_t)strlen( segOrder );
-		ASSERTEX( segCnt%3 == 0, ( "%s", dp->label ) );
+		CHECKMSG( segCnt%3 == 0, ( "%s", dp->label ) );
 		segCnt /= 3;
 		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 		tempSegs_da.cnt = segCnt;
@@ -2685,7 +2685,7 @@ static void NewTurnOk( void * context )
 		strcpy( cp, "\"" );
 		cp += 1;
 	}
-	ASSERT( cp-tempCustom <= sizeof tempCustom );
+	CHECK( cp-tempCustom <= sizeof tempCustom );
 	for ( i=0; i<curDesign->floatCnt; i++ ) {
 		flt = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[i].index].valueP);
 		switch( curDesign->floats[i].mode ) {
@@ -2863,7 +2863,7 @@ static void TurnDesignLayout(
 				return;
 			}
 		}
-		ASSERTEX( FALSE, ( "turnDesignLayout: bad index = %d", index ) );
+		CHECKMSG( FALSE, ( "turnDesignLayout: bad index = %d", index ) );
 	} else if ( index == I_TOMANUF ) {
 		*h = turnDesignHeight + 10;
 	}

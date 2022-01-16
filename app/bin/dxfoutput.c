@@ -191,8 +191,8 @@ static int DoExportDXFTracks(
 	DynString command = NaS;
 	FILE * dxfF;
 
-    ASSERT(fileName != NULL);
-    ASSERT(cnt == 1);
+    CHECK(fileName != NULL);
+    CHECK(cnt == 1);
 
 	DynStringMalloc(&command, 100);
 
@@ -236,7 +236,7 @@ void DoExportDXF(void* unused )
     //    ErrorMessage(MSG_NO_SELECTED_TRK);
     //    return;
     //}
-    ASSERT(selectedTrackCount > 0);
+    CHECK(selectedTrackCount > 0);
 
     if (exportDXFFile_fs == NULL)
         exportDXFFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to DXF"),

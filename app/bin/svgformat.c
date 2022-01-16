@@ -167,7 +167,7 @@ SvgCreateStyle(mxml_node_t *element, unsigned long colorRGB, double width,
     char *className = NULL;
     char *classLineStyle = NULL;
 
-    ASSERT(lineStyle < 7);
+    CHECK(lineStyle < 7);
 
     sprintf(color, "#%2.2x%2.2x%2.2x", ((unsigned int)colorRGB >> 16) & 0xFF,
             ((unsigned int)colorRGB >> 8) & 0xFF, (unsigned int)colorRGB & 0xFF);

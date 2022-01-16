@@ -54,7 +54,7 @@ static DIST_T GetLengthCurve( track_p );
 
 static void GetCurveAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-	ASSERT( trk != NULL );
+	CHECK( trk != NULL );
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
 	if (xx->circle != TRUE) {
 		*a0 = NormalizeAngle( GetTrkEndAngle(trk,0) + 90 );
@@ -106,7 +106,7 @@ static void AdjustCurveEndPt( track_p t, EPINX_T inx, ANGLE_T a )
 {
 	coOrd pos;
 	ANGLE_T aa;
-	ASSERTEX( GetTrkType(t) == T_CURVE,
+	CHECKMSG( GetTrkType(t) == T_CURVE,
 		( "AdjustCurveEndPt( %d, %d ) not on CURVE %d",
 				GetTrkIndex(t), inx, GetTrkType(t) ) );
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
@@ -514,7 +514,7 @@ static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		SetTrkLayer( trk, crvData.layerNumber);
 		break;
 	default:
-		ASSERTEX( FALSE, ( "updateCurve: Bad inx %d", inx ) );
+		CHECKMSG( FALSE, ( "updateCurve: Bad inx %d", inx ) );
 	}
 	UndrawNewTrack( trk );
 	*xx = xx0;

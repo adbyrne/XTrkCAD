@@ -290,7 +290,7 @@ static void DrawTrackAndEndPts(
 	DrawTrack( trk, &mainD, color );
 	for (ep=0;ep<GetTrkEndPtCnt(trk);ep++) {
 		if ((trk2=GetTrkEndTrk(trk,ep)) != NULL) {
-			ASSERT( !IsTrackDeleted(trk) );
+			CHECK( !IsTrackDeleted(trk) );
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
 			DrawEndPt( &mainD, trk2, ep2,
 						(color==wDrawColorBlack && GetTrkSelected(trk2))?

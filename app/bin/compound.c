@@ -70,7 +70,7 @@ EXPORT PATHPTR_T GetPaths( track_p trk )
 EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
 {
 	PATHPTR_T pp;
-	ASSERT( paths != NULL );
+	CHECK( paths != NULL );
 	for ( pp = paths; pp[0]; pp+=2 )
 		for ( pp += strlen( (char*)pp ); pp[0] || pp[1]; pp++ );
 	return (wIndex_t)(pp - paths + 1);

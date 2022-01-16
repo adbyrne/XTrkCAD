@@ -407,7 +407,7 @@ EXPORT BOOL_T GetArgs(
 				ps = &message[0];
 				cp++;
 				while (*cp) {
-					ASSERT( (ps-message)<sizeof message );
+					CHECK( (ps-message)<sizeof message );
 					if (*cp == '\"') {
 						if (*++cp == '\"') {
 							*ps++ = '\"';
@@ -439,7 +439,7 @@ EXPORT BOOL_T GetArgs(
 				*qp = NULL;
 			break;
 		default:
-			ASSERTEX( FALSE, ( "getArgs: bad format char: %c", *format ) );
+			CHECKMSG( FALSE, ( "getArgs: bad format char: %c", *format ) );
 		}
 	}
 	va_end( ap );
@@ -791,8 +791,8 @@ int LoadTracks(
 
 	char *extOfFile;
 
-	ASSERT( fileName != NULL );
-	ASSERT( cnt == 1 );
+	CHECK( fileName != NULL );
+	CHECK( cnt == 1 );
 
 	nameOfFile = FindFilename(fileName[0]);
 
@@ -1072,8 +1072,8 @@ static int SaveTracks(
 		void * data )
 {
 
-	ASSERT( fileName != NULL );
-	ASSERT( cnt == 1 );
+	CHECK( fileName != NULL );
+	CHECK( cnt == 1 );
 
 	char *nameOfFile = FindFilename(fileName[0]);
 
@@ -1416,8 +1416,8 @@ static int ImportTracks(
 	char *nameOfFile;
 	long paramVersionOld = paramVersion;
 
-	ASSERT( fileName != NULL );
-	ASSERT( cnt == 1 );
+	CHECK( fileName != NULL );
+	CHECK( cnt == 1 );
 
 	nameOfFile = FindFilename(fileName[ 0 ]);
 	paramVersion = -1;
@@ -1480,8 +1480,8 @@ static int DoExportTracks(
 	FILE * f;
 	time_t clock;
 
-	ASSERT( fileName != NULL );
-	ASSERT( cnt == 1 );
+	CHECK( fileName != NULL );
+	CHECK( cnt == 1 );
 
 	SetCurrentPath( IMPORTPATHKEY, fileName[ 0 ] );
 	f = fopen( fileName[ 0 ], "w" );
@@ -1623,9 +1623,9 @@ EXPORT void EditClone( void * unused ) {
 EXPORT void FileInit( void )
 {
 	libDir = wGetAppLibDir();
-	ASSERT( libDir );
+	CHECK( libDir );
 	workingDir = wGetAppWorkDir();
-	ASSERT( workingDir );
+	CHECK( workingDir );
 
 	SetLayoutFullPath("");
 		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);

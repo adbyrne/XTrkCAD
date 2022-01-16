@@ -141,7 +141,7 @@ EXPORT char * CreateSegPathList(track_p trk) {
 
 static void GetCornuAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-    ASSERT( trk != NULL );
+    CHECK( trk != NULL );
     
         *a0 = NormalizeAngle( GetTrkEndAngle(trk,0) );
         *a1 = NormalizeAngle( GetTrkEndAngle(trk,1)  );
@@ -414,7 +414,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		SetTrkLayer( trk, cornData.layerNumber);
 		break;
 	default:
-		ASSERTEX( FALSE, ( "updateCornu: Bad inx %d", inx ) );
+		CHECKMSG( FALSE, ( "updateCornu: Bad inx %d", inx ) );
 	}
 	track_p tracks[2];
 	tracks[0] = GetTrkEndTrk(trk,0);

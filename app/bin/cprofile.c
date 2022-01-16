@@ -1352,7 +1352,7 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
             LOG(log_profile, 2, ("Flip/Appending Path\n"))
             break;
         default:
-            ASSERT(FALSE);
+            CHECK(FALSE);
         }
 
     } else {

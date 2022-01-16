@@ -699,7 +699,7 @@ static void PropogateForkElev(
 					ep1 = epN;
 				}
 nextStep:
-				ASSERT(d1>0.0);
+				CHECK(d1>0.0);
 				e1 = (e1-e)/d1;
 				trk1 = NULL;
 				i3 = elist_da.cnt;

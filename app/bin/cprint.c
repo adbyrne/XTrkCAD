@@ -1129,7 +1129,7 @@ static BOOL_T PrintPage(
 				}
 				wSetCursor( mainD.d, wCursorWait );
 				print_d.scale = printScale;
-				ASSERT(print_d.d);
+				CHECK(print_d.d);
 				clipOrig.x = clipOrig.y = 0;
 				clipSize.x = maxPageSize.x/printScale;
 				clipSize.y = maxPageSize.y/printScale;

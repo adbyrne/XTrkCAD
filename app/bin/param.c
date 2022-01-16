@@ -508,7 +508,7 @@ EXPORT void ParamLoadMessage(
 		} else if ( p->type == PD_STRING ) {
 			wStringSetValue( (wString_p)p->control, message );
 		} else {
-			ASSERTEX( FALSE, ("p->tytpe %d", (int)p->type) );
+			CHECKMSG( FALSE, ("p->tytpe %d", (int)p->type) );
 		}
 	}
 }
@@ -573,7 +573,7 @@ EXPORT void ParamLoadControl(
 		case PD_STRING:
 			if (p->oldD.s)
 				MyFree( p->oldD.s );
-			ASSERT( p->max_string > 0 );
+			CHECK( p->max_string > 0 );
 			if (p->max_string) {
                 p->oldD.s = MyMalloc(p->max_string);
 				strncpy(p->oldD.s, (char*)p->valueP, p->max_string-1);
@@ -2344,7 +2344,7 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
 			break;
 		default:
-			ASSERT(FALSE);
+			CHECK(FALSE);
 		}
 
 }
@@ -2430,7 +2430,7 @@ static void ParamPositionControl(
 			}
 			break;
 		default:
-			ASSERT(FALSE);
+			CHECK(FALSE);
 		}
 	}
 }

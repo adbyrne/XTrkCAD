@@ -351,8 +351,8 @@ int LoadParamFile(
     wIndex_t inx;
     int i = 0;
 
-    ASSERT(fileName != NULL);
-    ASSERT(files > 0);
+    CHECK(fileName != NULL);
+    CHECK(files > 0);
 
     for (i = 0; i < files; i++) {
         enum paramFileState structState = PARAMFILE_UNLOADED;

@@ -294,7 +294,7 @@ EXPORT void EnumerateTracks( void * unused )
 
 static void AbortNoTrack( void )
 {
-	ASSERTEX( FALSE, ( "No Track Op called" ) );
+	CHECKMSG( FALSE, ( "No Track Op called" ) );
 }
 
 static trackCmd_t notrackCmds = {
@@ -356,7 +356,7 @@ EXPORT TRKINX_T GetTrkIndex( track_p trk )
 
 EXPORT TRKTYP_T GetTrkType( track_p trk )
 {
-	ASSERT( trk->type != T_NOTRACK && !IsTrackDeleted(trk) );
+	CHECK( trk->type != T_NOTRACK && !IsTrackDeleted(trk) );
 	return trk->type;
 }
 
@@ -413,49 +413,49 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 		return trk->extraData;
 	}
 #ifdef CHECK_EXTRA_DATA
-	ASSERT( trk->extraData );
-	ASSERT( trk->type == trk->extraData->trkType );
-	ASSERT( trkType == T_NOTRACK || trk->type == trkType );
+	CHECK( trk->extraData );
+	CHECK( trk->type == trk->extraData->trkType );
+	CHECK( trkType == T_NOTRACK || trk->type == trkType );
 #endif
 	return trk->extraData;
 }
 
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
-	ASSERT( ep < trk->endCnt );
+	CHECK( ep < trk->endCnt );
 	// check  setTrkEndPoint: endPt is not connected
-	ASSERT( trk->endPt[ep].track == NULL );
+	CHECK( trk->endPt[ep].track == NULL );
 	trk->endPt[ep].pos = pos;
 	trk->endPt[ep].angle = angle;
 }
 
 EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T e )
 {
-	ASSERT( e < trk->endCnt );
+	CHECK( e < trk->endCnt );
 	return trk->endPt[e].pos;
 }
 
 EXPORT ANGLE_T GetTrkEndAngle( track_p trk, EPINX_T e )
 {
-	ASSERT( e < trk->endCnt );
+	CHECK( e < trk->endCnt );
 	return trk->endPt[e].angle;
 }
 
 EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T e )
 {
-	ASSERT( e < trk->endCnt );
+	CHECK( e < trk->endCnt );
 	return trk->endPt[e].track;
 }
 
 EXPORT long GetTrkEndOption( track_p trk, EPINX_T e )
 {
-	ASSERT( e < trk->endCnt );
+	CHECK( e < trk->endCnt );
 	return trk->endPt[e].option;
 }
 
 EXPORT long SetTrkEndOption( track_p trk, EPINX_T e, long option )
 {
-	ASSERT( e < trk->endCnt );
+	CHECK( e < trk->endCnt );
 	return trk->endPt[e].option = option;
 }
 
@@ -554,7 +554,7 @@ EXPORT int GetTrkEndElevMode( track_p trk, EPINX_T e )
 
 EXPORT DIST_T GetTrkEndElevHeight( track_p trk, EPINX_T e )
 {
-	ASSERT( EndPtIsDefinedElev(trk,e) );
+	CHECK( EndPtIsDefinedElev(trk,e) );
 	return trk->endPt[e].elev.u.height;
 }
 
@@ -582,7 +582,7 @@ EXPORT void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, D
 
 EXPORT char * GetTrkEndElevStation( track_p trk, EPINX_T e )
 {
-	ASSERT( EndPtIsStationElev(trk,e) );
+	CHECK( EndPtIsStationElev(trk,e) );
 	if ( trk->endPt[e].elev.u.name == NULL )
 		return "";
 	else
@@ -706,7 +706,7 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	BOOL_T rc = TRUE;
 	long option;
 
-	ASSERT ( endPt );
+	CHECK ( endPt );
 	if (bWriteEndPtDirectIndex && endPt->index > 0) {
 		rc &= fprintf( f, "\tT4 %d ", endPt->index )>0;
 	} else if (endPt->track == NULL ||
@@ -1354,7 +1354,7 @@ static void ExciseSelectedTracks( track_p * pxtrk, track_p * pltrk )
 			ptrk = &(*ptrk)->next;
 			continue;
 		}
-		ASSERT( !IsTrackDeleted(trk) );
+		CHECK( !IsTrackDeleted(trk) );
 		UndoModify( *ptrk );
 		UndoModify( trk );
 		*ptrk = trk->next;
@@ -1559,7 +1559,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 
 
 	for ( trk=*importTrack; trk; trk=trk->next ) {
-		ASSERT(!IsTrackDeleted(trk)); // Export ignores deleted tracks
+		CHECK(!IsTrackDeleted(trk)); // Export ignores deleted tracks
 		if (trk->hi.y > ymax ) ymax = trk->hi.y;
 		if (trk->lo.y < ymin ) ymin = trk->lo.y;
 		if (trk->hi.x > xmax ) xmax = trk->hi.x;
@@ -1601,7 +1601,7 @@ EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 
 	// move the imported track into place
 	for ( trk=*importTrack; trk; trk=trk->next ) {
-		ASSERT( !IsTrackDeleted(trk) );
+		CHECK( !IsTrackDeleted(trk) );
 		coOrd move;
 		move.x = offset.x;
 		move.y = offset.y;
@@ -1839,7 +1839,7 @@ EXPORT void ComputeBoundingBox( track_p trk )
 {
 	EPINX_T i;
 
-	ASSERT( trk->endCnt > 0 );
+	CHECK( trk->endCnt > 0 );
 
 	trk->hi.x = trk->lo.x = (float)trk->endPt[0].pos.x;
 	trk->hi.y = trk->lo.y = (float)trk->endPt[0].pos.y;
@@ -1985,8 +1985,8 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 EXPORT void DisconnectTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T ep2 )
 {
 	// Check tracks are connected
-	ASSERT( trk1->endPt[ep1].track == trk2 );
-	ASSERT( trk2->endPt[ep2].track == trk1 );
+	CHECK( trk1->endPt[ep1].track == trk2 );
+	CHECK( trk2->endPt[ep2].track == trk1 );
 	UndoModify( trk1 );
 	UndoModify( trk2 );
 	trk1->endPt[ep1].track = NULL;
@@ -2436,7 +2436,7 @@ EXPORT BOOL_T GetTrackParams( int inx, track_p trk, coOrd pos, trackParams_t * p
 	if ( trackCmds(trk->type)->getTrackParams ) {
 		return trackCmds(trk->type)->getTrackParams( inx, trk, pos, params );
 	} else {
-		ASSERT( FALSE ); /* CHECKME */
+		CHECK( FALSE ); /* CHECKME */
 		return FALSE;
 	}
 }

@@ -3784,7 +3784,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 	traverseTrack_t trvtrk;
 	DIST_T dist;
 
-	ASSERT( GetTrkType(trk) == T_TURNOUT );
+	CHECK( GetTrkType(trk) == T_TURNOUT );
 
 	SetCurrPathIndex(trk, GetCurrPathIndex(trk) + 1);
 	InfoMessage(_("Turnout %d Path: %s"), GetTrkIndex(trk), GetCurrPath(trk));
@@ -4379,8 +4379,8 @@ static void AddTurnout(void)
 	if (Dto.state == 0)
 		return;
 
-	ASSERT( curTurnout->segCnt >= 1 );
-     	ASSERT(	curTurnout->endCnt >= 1 );
+	CHECK( curTurnout->segCnt >= 1 );
+     	CHECK(	curTurnout->endCnt >= 1 );
 
 	UndoStart(_("Place New Turnout"), "addTurnout");
 
@@ -4555,7 +4555,7 @@ static void AddTurnout(void)
 	/* deal with the leftovers */
 	for (i = 0; i < curTurnout->endCnt; i++) {
 		if ((trk = leftover(i).trk) != NULL) {
-			ASSERT( !IsTrackDeleted(trk) );
+			CHECK( !IsTrackDeleted(trk) );
 			/* move endPt beyond the turnout */
 			/* it it is short then delete it */
 			coOrd off;

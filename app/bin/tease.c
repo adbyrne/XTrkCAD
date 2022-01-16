@@ -296,7 +296,7 @@ LOG( log_ease, 4, ( "ComputeJoint( %0.3f, %0.3f )\n", r0, r1 ) )
 		return E_ERROR;
 	}
 	if (r0 == 0.0 && r1 == 0.0) {
-		/* ASSERT( FALSE );  CHECKME */
+		/* CHECK( FALSE );  CHECKME */
 		e->d0 = e->d1 = e->x = 0.0;
 		return E_NOTREQ;
 	}

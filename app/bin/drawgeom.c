@@ -2165,7 +2165,7 @@ STATUS_T DrawGeomModify(
 			segInx = -1;
 			return C_ERROR;
 		default:
-			ASSERT( FALSE ); /* CHECKME */
+			CHECK( FALSE ); /* CHECKME */
 
 		}
 		if ( FindDistance( p0, pos ) < FindDistance( p1, pos ) )

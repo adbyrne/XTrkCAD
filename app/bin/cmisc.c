@@ -385,7 +385,7 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
         }
     }
 
-    ASSERTEX( FALSE, ("AssignParamToDescribeDialog: can't find %d", ddp->type) );
+    CHECKMSG( FALSE, ("AssignParamToDescribeDialog: can't find %d", ddp->type) );
     return NULL;
 }
 
@@ -557,7 +557,7 @@ EXPORT void DescribeCancel(void)
 {
     if (describePG.win && wWinIsVisible(describePG.win)) {
         if (descTrk) {
-        	ASSERT(!IsTrackDeleted(descTrk));
+        	CHECK(!IsTrackDeleted(descTrk));
        		descUpdateFunc(descTrk, -1, descData, TRUE);
         	descTrk = NULL;
 

@@ -250,7 +250,7 @@ static void SvgDrawFillPoly(
 {
     int i;
     double *points = malloc((cnt + 1) * 2 * sizeof(double));
-    ASSERT( points );
+    CHECK( points );
 
     unsigned lineOpt = SvgDrawGetLineStyle(d);
 
@@ -434,8 +434,8 @@ static int DoExportSVGTracks(
 	BOOL_T all = (selectedTrackCount == 0);
     char *id;
 
-    ASSERT(fileName != NULL);
-    ASSERT(cnt == 1);
+    CHECK(fileName != NULL);
+    CHECK(cnt == 1);
 
     SetCLocale();
     GetLayoutRoomSize(&roomSize);
@@ -478,7 +478,7 @@ static int DoExportSVGTracks(
 
 void DoExportSVG(void * unused)
 {
-    // ASSERT(selectedTrackCount > 0);
+    // CHECK(selectedTrackCount > 0);
 
     if (exportSVGFile_fs == NULL)
         exportSVGFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to SVG"),
