@@ -385,7 +385,7 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, cha
         }
     }
 
-    AbortProg("AssignParamToDescribeDialog: can't find %d", ddp->type);
+    ASSERTEX( FALSE, ("AssignParamToDescribeDialog: can't find %d", ddp->type) );
     return NULL;
 }
 

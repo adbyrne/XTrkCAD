@@ -98,7 +98,7 @@ EXPORT void FixUpBezierSegs(trkSeg_p p,int segCnt) {
 
 static void GetBezierAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-    assert( trk != NULL );
+    ASSERT( trk != NULL );
     
         *a0 = NormalizeAngle( GetTrkEndAngle(trk,0) );
         *a1 = NormalizeAngle( GetTrkEndAngle(trk,1)  );
@@ -351,7 +351,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 		xx->lineType = bezData.lineType;
 		break;
 	default:
-		AbortProg( "updateBezier: Bad inx %d", inx );
+		ASSERTEX( FALSE, ( "updateBezier: Bad inx %d", inx ) );
 	}
 	ConvertToArcs(xx->pos, &xx->arcSegs, IsTrack(trk)?TRUE:FALSE, xx->segsColor, xx->segsWidth);
 	trackParams_t params;

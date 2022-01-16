@@ -54,11 +54,9 @@ static int log_straight = 0;
 
 void AdjustStraightEndPt( track_p t, EPINX_T inx, coOrd pos )
 {
-	if (GetTrkType(t) != T_STRAIGHT) {
-		AbortProg( "AdjustLIneEndPt( %d, %d ) not on STRAIGHT %d\n",
-				GetTrkIndex(t), inx, GetTrkType(t) );
-		return;
-	}
+	ASSERTEX( GetTrkType(t) == T_STRAIGHT,
+		("AdjustLIneEndPt( %d, %d ) not on STRAIGHT %d\n",
+				GetTrkIndex(t), inx, GetTrkType(t) ) );
 	UndoModify( t );
 #ifdef VERBOSE
 lprintf("adjustStraightEndPt T%d[%d] p=[%0.3f %0.3f]\n",

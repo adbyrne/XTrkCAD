@@ -254,11 +254,8 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents, char *tag)
     if (tag)
     	entry->tag = MyStrdup(tag);
 
-    if (entry->files < MAXFILESPERCONTENT) {
-        entry->fullFileName[entry->files++] = MyStrdup(path);
-    } else {
-        AbortProg("Number of files with same content too large!", NULL);
-    }
+    ASSERT( entry->files < MAXFILESPERCONTENT );
+    entry->fullFileName[entry->files++] = MyStrdup(path);
 }
 
 /**

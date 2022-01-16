@@ -2424,8 +2424,7 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 	if (!( (dp->type== NTO_CORNU) || (dp->type == NTO_CORNUWYE) || (dp->type == NTO_CORNU3WAY))) {
 		segOrder = pp->segOrder;
 		segCnt = (wIndex_t)strlen( segOrder );
-		if (segCnt%3 != 0)
-			AbortProg( dp->label );
+		ASSERTEX( segCnt%3 == 0, ( "%s", dp->label ) );
 		segCnt /= 3;
 		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 		tempSegs_da.cnt = segCnt;
@@ -2686,8 +2685,7 @@ static void NewTurnOk( void * context )
 		strcpy( cp, "\"" );
 		cp += 1;
 	}
-	if ( cp-tempCustom > sizeof tempCustom )
-		AbortProg( "Custom line overflow" );
+	ASSERT( cp-tempCustom <= sizeof tempCustom );
 	for ( i=0; i<curDesign->floatCnt; i++ ) {
 		flt = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[i].index].valueP);
 		switch( curDesign->floats[i].mode ) {
@@ -2865,7 +2863,7 @@ static void TurnDesignLayout(
 				return;
 			}
 		}
-		AbortProg( "turnDesignLayout: bad index = %d", index );
+		ASSERTEX( FALSE, ( "turnDesignLayout: bad index = %d", index ) );
 	} else if ( index == I_TOMANUF ) {
 		*h = turnDesignHeight + 10;
 	}
@@ -3249,17 +3247,27 @@ long units = 0;
 wDrawColor drawColorBlack;
 long newTurnRoadbedColorRGB = 0;
 
-EXPORT void AbortProg(
-		const char * msg,
-		... )
+EXPORT const char * AbortMessage(
+	const char * sFormat,
+	... )
 {
-	static BOOL_T abort2 = FALSE;
-//	int rc;
+	static char sMessage[STR_SIZE];
+	if ( sFormat == NULL )
+		return "";
 	va_list ap;
-	va_start( ap, msg );
-	vsprintf( message, msg, ap );
-	va_end( ap );
-	fprintf( stderr, "%s", message );
+	va_start(ap, sFormat);
+	vsnprintf(sMessage, sizeof sMessage, sFormat, ap);
+	va_end(ap);
+	return sMessage;
+}
+
+EXPORT void AbortProg(
+	const char * sCond,
+	const char * sFileName,
+	int iLineNumber,
+	const char * sMsg )
+{
+	fprintf( stderr, "%s: %s:%d %s", sCond, sFileName, iLineNumber, sMsg );
 	abort();
 }
 
@@ -3276,6 +3284,11 @@ EXPORT char * MyStrdup( const char * str )
 	return ret;
 }
 
+EXPORT void LogPrintf(
+                const char * format,
+                ... )
+{
+}
 
 int NoticeMessage( const char * msg, const char * yes, const char * no, ... )
 {

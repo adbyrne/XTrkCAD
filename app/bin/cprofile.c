@@ -166,9 +166,6 @@ CreateCopyProfileElements()
     }
 
     copyOfprofElem = MyMalloc(profElem_da.cnt * sizeof(profElem_t));
-    if (!copyOfprofElem) {
-        AbortProg("Couldn't allocate memory for profile copy\n");
-    }
     for (int i = 0; i < profElem_da.cnt; i++) {
         copyOfprofElem[i] = profElem(i);
     }
@@ -1355,7 +1352,7 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
             LOG(log_profile, 2, ("Flip/Appending Path\n"))
             break;
         default:
-            AbortProg("findPaths:1");
+            ASSERT(FALSE);
         }
 
     } else {

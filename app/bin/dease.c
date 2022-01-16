@@ -198,7 +198,7 @@ static void EasementSel(
 		val = -1.0;
 		break;
 	default:
-		AbortProg( "easementSel: bad value %ld", arg);
+		ASSERTEX( FALSE, ( "easementSel: bad value %ld", arg) );
 		val = 0.0;
 		break;
 	}

@@ -503,12 +503,13 @@ EXPORT void ParamLoadMessage(
 {
 	paramData_p p = &pg->paramPtr[inx];
 	if ( p->control ) {
-		if ( p->type == PD_MESSAGE )
+		if ( p->type == PD_MESSAGE ) {
 			wMessageSetValue( (wMessage_p)p->control, message );
-		else if ( p->type == PD_STRING )
+		} else if ( p->type == PD_STRING ) {
 			wStringSetValue( (wString_p)p->control, message );
-		else
-			AbortProg( "paramLoadMessage: not a PD_MESSAGE or PD_STRING" );
+		} else {
+			ASSERTEX( FALSE, ("p->tytpe %d", (int)p->type) );
+		}
 	}
 }
 
@@ -2343,7 +2344,7 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
 			break;
 		default:
-			AbortProg( "paramCreatePG" );
+			ASSERT(FALSE);
 		}
 
 }
@@ -2429,7 +2430,7 @@ static void ParamPositionControl(
 			}
 			break;
 		default:
-			AbortProg( "paramPositionControl" );
+			ASSERT(FALSE);
 		}
 	}
 }

@@ -204,9 +204,6 @@ void LoadParamFileList(void)
     if (favorites) {
         DynString topic;
         favoriteList = MyMalloc(sizeof(long)*favorites);
-        if (!favoriteList) {
-            AbortProg("Couldn't allocate memory for favorite list!\n");
-        }
 
         DynStringMalloc(&topic, 16);
         for (int i = 0; i < favorites; i++) {
@@ -354,8 +351,8 @@ int LoadParamFile(
     wIndex_t inx;
     int i = 0;
 
-    assert(fileName != NULL);
-    assert(files > 0);
+    ASSERT(fileName != NULL);
+    ASSERT(files > 0);
 
     for (i = 0; i < files; i++) {
         enum paramFileState structState = PARAMFILE_UNLOADED;

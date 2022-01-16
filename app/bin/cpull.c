@@ -87,9 +87,7 @@ static ending_e GetConnectedTracks(
 		if ( ep2 >= 0 ) {
 			int inx;
 			for (inx=0;inx<section_da.cnt;inx++) {
-				if ( section(inx).trk == trk ) {
-					AbortProg("GetConnectedTracks(T%d already selected)", GetTrkIndex(trk));
-				}
+				ASSERTEX( section(inx).trk != trk, ("GetConnectedTracks(T%d already selected)", GetTrkIndex(trk)) );
 			}
 		}
 		DYNARR_APPEND( section_t, section_da, 10 );
@@ -142,8 +140,7 @@ static void MoveConnectedTracks(
 		ep2 = GetNextTrk( trk1, ep1, &trk, &ep, 0 );
 		if (trk==NULL)
 			return;
-		if (ep2 < 0)
-			AbortProg("MoveConnectedTracks(T%d rooted)", GetTrkIndex(trk1));
+		ASSERTEX( ep2 >= 0, ("MoveConnectedTracks(T%d rooted)", GetTrkIndex(trk1)) );;
 		angle = NormalizeAngle(GetTrkEndAngle( trk1, ep2 )+180.0);
 		pos = GetTrkEndPos( trk1, ep2 );
 		trk1 = trk;
@@ -586,8 +583,7 @@ printf("T%d [%0.3f %0.3f %0.3f]\n", GetTrkIndex(trk1), p1.x, p1.y, a1 );
 		ep = GetNextTrk( trk, ep1, &trk1, &ep1, 0 );
 		if (trk1 == NULL)
 			break;
-		if (ep<0)
-			AbortProg( "tightenTracks: can't happen" );
+		ASSERT(ep>=0);
 	}
 	InfoMessage( _("%d tracks moved"), cnt );
 }

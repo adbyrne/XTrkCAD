@@ -1024,7 +1024,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		xx->lineType = drawData.lineType;
 		break;
 	default:
-		AbortProg( "bad op" );
+		ASSERTEX( FALSE,  ( "bad op: %d", inx ) );
 	}
 	drawData.oldE0 = drawData.endPt[0];
 	drawData.oldE1 = drawData.endPt[1];

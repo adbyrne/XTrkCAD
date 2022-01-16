@@ -3784,8 +3784,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 	traverseTrack_t trvtrk;
 	DIST_T dist;
 
-	if (GetTrkType(trk) != T_TURNOUT)
-		AbortProg("nextTurnoutPosition");
+	ASSERT( GetTrkType(trk) == T_TURNOUT );
 
 	SetCurrPathIndex(trk, GetCurrPathIndex(trk) + 1);
 	InfoMessage(_("Turnout %d Path: %s"), GetTrkIndex(trk), GetCurrPath(trk));
@@ -4380,9 +4379,8 @@ static void AddTurnout(void)
 	if (Dto.state == 0)
 		return;
 
-	if (curTurnout->segCnt < 1 || curTurnout->endCnt < 1) {
-		AbortProg("addTurnout: bad cnt");
-	}
+	ASSERT( curTurnout->segCnt >= 1 );
+     	ASSERT(	curTurnout->endCnt >= 1 );
 
 	UndoStart(_("Place New Turnout"), "addTurnout");
 

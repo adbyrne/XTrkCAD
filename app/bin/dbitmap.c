@@ -142,8 +142,8 @@ static int SaveBitmapFile(
 {
 	bool result;
 
-	assert( fileName != NULL );
-	assert( files == 1 );
+	ASSERT( fileName != NULL );
+	ASSERT( files == 1 );
 
 	wSetCursor( mainD.d, wCursorWait );
 	InfoMessage( _( "Drawing tracks to bitmap" ) );
