@@ -36,7 +36,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-help">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">_Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -200,7 +200,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="linkEdit-openlink">
+                  <object class="GtkToggleButton" id="linkEdit-openlink">
                     <property name="label" translatable="yes">_Open</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

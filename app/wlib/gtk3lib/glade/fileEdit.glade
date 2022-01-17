@@ -36,7 +36,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="id-help">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">_Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -199,8 +199,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fileEdit-browse">
-                    <property name="label" translatable="yes">_Select...</property>
+                  <object class="GtkToggleButton" id="fileEdit-browse">
+                    <property name="label" translatable="yes">_Select</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -213,7 +213,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fileEdit-openfile">
+                  <object class="GtkToggleButton" id="fileEdit-openfile">
                     <property name="label" translatable="yes">_Open</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
