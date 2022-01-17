@@ -4,6 +4,12 @@
 
 - [Introduction](#Introduction)
 
+- [Source Files](#SourceFiles)
+
+    - [Naming Convention](#SourceNaming)
+
+    - [Source Layout](#SourceLayout)
+
 - [Text Files](#TextFiles)
 
 - [Parameter File Maintenance](#ParamFile)
@@ -15,8 +21,6 @@
     - [Adding or Deleting Parameter files](#AddDelete)
 
     - [Changing CONTENTS Label and/or FileName](#ChangeContents)
-
-- [Source Layout](#SourceLayout)
 
 - [WLib Interaction](#WlibInteraction)
 
@@ -54,7 +58,7 @@
 
 
 
-<div id='Introduction' />
+<a name='Introduction' />
 
 # Introduction
 
@@ -66,17 +70,43 @@ If you figure out some interesting, tricky or obscure things, please add them to
 
 You'll see a number of place holders (pages with just a header). These will be addressed in the future.
 
-<div id='TextFiles' />
+
+<a name='SourceFiles' />
+
+# Source Files
+
+
+
+<a name='SourceNaming' />
+
+## Naming Convention
+
+Source files use the following naming convention, somewhat loosely followed as not all of these are appropriate for all objects:
+- c\<object\>.c: This would be a class file in c++. It contains the code for creating, manipulating and deleting the object.
+- d\<object\>.c: This code handles the dialog(s) for creating, changing and deleting the object. 
+- t\<object\h.c: This code handle the drawing of the object. 
+- c\<object\>.h: Definitions for the methods of the object that need to be visible outside the object class.
+
+For example, there are files ccruve.c, ccurve.h and tcurve.c. There is no dialog for curved track. 
+
+
+<a name='SourceLayout' />
+
+## Source Layout
+
+
+<a name='TextFiles' />
 
 # Text Files
 
 All text files (Params, Demos, Layout, etc.) use the UTF-8 character set and Unix-style line terminators (Single New Line, no Carriage Return).
 
-<div id='ParamFile' />
+
+<a name='ParamFile' />
 
 # Parameter File Maintenance
 
-<div id='Independence' />
+<a name='Independence' />
 
 ## Independence of Parameters in Layout files
 
@@ -84,7 +114,7 @@ When a Turnout or Structure is place on the layout, all of its information is co
 
 If a change is made to Parameter file, such as adding art-work to a Turnout d0efinition, the existing copies of that definition can be updated by the _Manage/Update Turnouts and Structures_ command.
 
-<div id='Contents' />
+<a name='Contents' />
 
 ## CONTENTS Label
 
@@ -106,7 +136,7 @@ The active Parameter file list is implemented by Preferences entries:
 
 The list is terminated by an empty value
 
-<div id='AddDelete' />
+<a name='AddDelete' />
 
 ## Adding / Deleting Parameter files
 
@@ -114,7 +144,7 @@ A new Parameter file is added to the _parms/_ directory and is available when th
 
 A deleted Paramter is removed from the params/ directory. If the user had loaded that Parameter file, then an error will be raised saying the Parameter file can not be found and will be moved from the Parameter file list.
 
-<div id='ChangeContents' />
+<a name='ChangeContents' />
 
 ## Changing CONTENTS Label and/or FileName
 
@@ -148,11 +178,8 @@ If you are just updating the Contents Label, you only need to do step 1
 
 If you are just changing the file name, you only need to do step 2.
 
-<div id='SourceLayout' />
 
-# Source Layout
-
-<div id='WlibInteraction' />
+<a name='WlibInteraction' />
 
 # WLib Interaction
 
@@ -162,7 +189,8 @@ If you are just changing the file name, you only need to do step 2.
 2. The Callback also is passed a Context value which was specified at creation. This Context value is a void **\*** value, but sometimes the creator of the object needs a integral valiue. A pair of defines **I2VP()** and **VP2I()** handle the conversion of integral value to the void \* Context. Typicall I2VP() is used when creating window object and VP2L in callbacks.
 3. Sometimes we use a **void \* context** in other places as a generic value(eg paramData\_t) and use L2VP()/VP2L() pairs to access integral values.
 
-<div id='PrettyPrint' />
+
+<a name='PrettyPrint' />
 
 # Pretty Printing
 
@@ -170,41 +198,44 @@ Code may be formatted (pretty-printed) using the [astyle](http://astyle.sourcefo
 
 If a file is pretty-printed, that must be to only change made for that commit. Do not mix non-formatting changes with pretty-printing.
 
-<div id='Casts' />
+<a name='Casts' />
+
 
 # Casts
 
 Casts are generally to be avoided. There is no need to cast to or from **void\***. There are a few situations where casts are required:
 
-<div id='Downcast' />
+<a name='Downcast' />
 
 ## Downcast Numeric values
 
 Down casting a wide numeric to a narrower numeric (including floating point to integral)
 
-<div id='Generic' />
+<a name='Generic' />
 
 ## Generic Values
 
 Casting a generic call-back value from or to a (void\*) using **I2VP()** and **VP2L**
 
-<div id='wControl-t' />
+<a name='wControl-t' />
 
 ## Wlib wControl_t conversion
 
 Converting a wlib callback.
 
-<div id='GetTrkExtraData' />
+<a name='GetTrkExtraData' />
 
 ## GetTrkExtraData
 
-<div id='ErrorHandling' />
+
+<a name='ErrorHandling' />
 
 # Error Handling
 
   There are four types of errors:
 
-<div id='UserErrors' />
+
+<a name='UserErrors' />
 
 ## 1. User Input Errors
 
@@ -216,7 +247,7 @@ Otherwise ErrorMessage() can explain the problem. If it is complex, NoticeWindow
 
 Most messages are in _help/messages.in_. These entries provide a user centric description of the problem and its resolution. The errors are added to the 'Help/Recent Messages' list which can direct the user to additional help. If your error does not fit this model (user-centric description and resolution) then you should consider alternatives: InfoMessage(), Logic Error or LOG().
 
-<div id='FileErrors' />
+<a name='FileErrors' />
 
 ## 2. File Input Errors
 
@@ -228,7 +259,7 @@ Layout files are versioned so new feature that are not backwards compatible will
 
 The user is not expected to understand these errors. The corrupt files must be fixed.
 
-<div id='LogicErrors' />
+<a name='LogicErrors' />
 
 ## 3. Logic errors
 
@@ -240,28 +271,28 @@ The user is not expected to understand this error, but report it to the develope
 
 Most likely, these errors indicate a bug in the code.
 
-<div id='SystemErrors' />
+<a name='SystemErrors' />
 
 ## 4. System/Evironmental errors
 
 Typically, Out-Of-Memory. We exit ASAP.
 
-<div id='UndoProcess' />
+<a name='UndoProcess' />
 
 # Undo Processing
 
-<div id='DrawModel' />
+<a name='DrawModel' />
 
 # Draw Model
 
-<div id='Headers' />
+<a name='Headers' />
 
 # Headers
 
-<div id='IfdefWindows' />
+<a name='IfdefWindows' />
 
 ## #ifdef WINDOWS
 
-<div id='VersionHandle' />
+<a name='VersionHandle' />
 
 # VERSION handling
