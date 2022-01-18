@@ -82,12 +82,12 @@ You'll see a number of place holders (pages with just a header). These will be a
 ## Naming Convention
 
 Source files use the following naming convention, somewhat loosely followed as not all of these are appropriate for all objects:
-- c\<object\>.c: This would be a class file in c++. It contains the code for creating, manipulating and deleting the object.
+- c\<object\>.c: This is similar to a class file. It contains the code and data structures for creating, manipulating and deleting the object.
 - d\<object\>.c: This code handles the dialog(s) for creating, changing and deleting the object. 
 - t\<object\h.c: This code handle the drawing of the object. 
 - c\<object\>.h: Definitions for the methods of the object that need to be visible outside the object class.
 
-For example, there are files ccruve.c, ccurve.h and tcurve.c. There is no dialog for curved track. 
+For example, there are files ccurve.c, ccurve.h and tcurve.c. There is no dialog for curved track. 
 
 
 <a name='SourceLayout' />

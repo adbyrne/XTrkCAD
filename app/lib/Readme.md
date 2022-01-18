@@ -1,4 +1,4 @@
-# V5.2.2 GA Release Notes
+# XTrackCAD Version 5.2.2 GA Release Notes
 
 Welcome to the XtrackCAD V5.2.2 GA release!
 
@@ -18,21 +18,22 @@ To report bugs, please use the SourceForge bugs reporting page https://sourcefor
 
 To discuss the Release, please use the user forum https://xtrackcad.groups.io/g/main/topics
 
-# XTrackCAD 5.2.2 GA Notes#
+# V5.2.2 GA Notes
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
 ## Contents ##
 
-* About XTrackCad
-* License Information
-* Installation
-* Upgrading from earlier releases
-* Bugs fixed
-* Building
-* Where to go for support
+* [About XTrackCad](#About)
+* [License Information](#License)
+* [Installation](#Installation)
+* [Upgrading from earlier releases](#Upgrading)
+* [Building](#Building)
+* [Where to go for support](#Support)
 
-## About XTrackCad ##
+<a name='About' />
+
+## About XTrackCAD ##
 
 XTrackCad is a powerful CAD program for designing Model Railroad layouts.
 
@@ -48,6 +49,9 @@ Availability:
 XTrkCad Fork is a project for further development of the original XTrkCad
 software. See the project homepage at <http://www.xtrackcad.org/> for news and current releases.
 
+
+<a name='License' />
+
 ## License Information ##
 
 **Copying:**
@@ -57,9 +61,14 @@ free software under the terms of the GNU General Public License v2 which
 you can find in the file COPYING.
 
 
+<a name='Installation' />
+
 ## Installation ##
 
 Please see http://xtrkcad-fork.sourceforge.net/Wikka/DownloadInstall.
+
+
+<a name='Upgrading' />
 
 ## Upgrade Information ##
 
@@ -71,9 +80,15 @@ files from earlier versions of XTrackCAD can be read without problems.
 Layouts that were saved in the new format cannot be read by older
 versions of XTrackCAD.
 
+
+<a name='Building' />
+
 ## Building ##
 
-Please see http://xtrkcad-fork.sourceforge.net/Wikka/BuildNotes
+Please see <http://xtrkcad-fork.sourceforge.net/Wikka/BuildNotes>
+
+
+<a name='Support' />
 
 ## Where to go for support ##
 
