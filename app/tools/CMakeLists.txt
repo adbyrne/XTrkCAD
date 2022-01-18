@@ -12,4 +12,5 @@ endif ()
 add_executable( listxtp ${sources})
 
 add_subdirectory(halibut)
+add_subdirectory(pngtoxpm)
 
