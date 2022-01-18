@@ -595,8 +595,8 @@ static paramData_t layerPLs[] = {
 #define I_SETTINGS (10)
 	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP( 250), N_("Settings when Current") },
 #define I_COUNT (11)
-    { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, I2VP(370) },
-    { PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+    { PD_MESSAGE, N_("Object Count:"), "objectcount", PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, I2VP(370) },
+    //{ PD_MESSAGE, N_("All Layer Preferences"), layer-preferences, PDO_DLGRESETMARGIN, I2VP(180) },
     { PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
     { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
     { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
