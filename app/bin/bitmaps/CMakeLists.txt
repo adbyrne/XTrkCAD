@@ -50,11 +50,11 @@ foreach(xpm ${XPMS})
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 24 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 32 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}32.png
 		COMMAND pngtoxpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
-		FILE(GLOB PNG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}*.png)
-		FILE(REMOVE ${PNG_FILES})
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}16.png 
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png 
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}32.png
 	)
-	
-	# build a list of all the results
+	# build a list of all the depends
 	list(APPEND XPM_RESULTS ${xpm}.xpm)
 endforeach()
 
@@ -63,9 +63,8 @@ add_custom_target (
 	DEPENDS ${XPM_RESULTS}
 )
 
-#MESSAGE (STATUS "SVGs: ${SVGS}")
-MESSAGE (STATUS "XPMs: ${XPMS}")
+# MESSAGE (STATUS "SVGs: ${SVGS}")
+# MESSAGE (STATUS "XPMs: ${XPMS}")
 MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
-MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
-
+# MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+# MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
