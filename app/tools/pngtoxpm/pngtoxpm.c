@@ -8,11 +8,13 @@
 
 #include <FreeImage.h>
 
-#if defined(WIN32) || defined(_WIN32) 
-#define PATH_SEPARATOR '\\' 
-#else 
-#define PATH_SEPARATOR '/'
-#endif 
+// #define DEBUGPRINT
+
+//#if defined(WIN32) || defined(_WIN32) 
+//#define PATH_SEPARATOR '\\' 
+//#else 
+//#define PATH_SEPARATOR '/'
+//#endif 
 
 #define CHATTY 0 /* 1 = Enable progress messages */
 #define ALPHATHRESH  96
@@ -436,8 +438,8 @@ char pChar( int j ){
 }
 
 int genXpm ( int icon, char* name, int width, int height ) {
-	char xpmCode[100];
-	char tmpBuff[100];
+	char xpmCode[100]; // XPM object name
+	char tmpBuff[100]; // sprintf
 	char c[2];
 	int i, j;
 	int x, y;
@@ -527,12 +529,10 @@ int process( char* path, char* name, int icon ){
 
 	/* printf( "FreeImage version %s\n\n",FreeImage_GetVersion( ) ); */
 
-	if ( strlen(path) > 0 ){
-		sprintf_s( filename,sizeof( filename ),"%spng\\%s%d.png",path,name,icon );
-	}
-	else {
-		sprintf_s( filename,sizeof( filename ),"png\\%s%d.png",name,icon );
-	}
+	sprintf_s( filename,sizeof( filename ),"%s/png/%s%d.png",path,name,icon );
+#ifdef DEBUGPRINT
+	fprintf(stdout, "PNG: %s\n", filename );
+#endif
 
 	image = FreeImage_Load(FIF_PNG, filename, PNG_DEFAULT);
 	if ( image == NULL ){
@@ -598,11 +598,15 @@ int main( int argc, char *argv[] )
 {
 	char buffer[1000];
 	char path[1000];
-	char name[50];
+	char name[250];
 	char *temp;
 	char *ext;
 	int i = 0, j = 0;
 	int icon;
+
+#ifdef DEBUGPRINT
+	fprintf(stderr, "Begin pngtoxpm\n");
+#endif
 
 	if( argc < 2 ){
 		printf("PngToXpm ver 0.2\nUsage: pngtoxpm filename\nfilename is the path to the resultant XPM\n");
@@ -613,7 +617,11 @@ int main( int argc, char *argv[] )
 	strcpy_s( buffer, sizeof(buffer), argv[1] );
 
 	strcpy_s( path, sizeof(path), argv[1] );
-	temp = strrchr( path, PATH_SEPARATOR );
+#ifdef DEBUGPRINT
+	fprintf(stderr, "Path: %s\n", path);
+#endif
+
+	temp = strrchr( path, '/' );
 	if (temp != NULL){
 		temp++;
 		*temp = '\0';
@@ -622,12 +630,21 @@ int main( int argc, char *argv[] )
 		path[0] = '\0';
 	}
 
-	(temp = strrchr(buffer, PATH_SEPARATOR)) ? ++temp : (temp = buffer);
+#ifdef DEBUGPRINT
+	fprintf(stderr, "Path: %s\n", path);
+#endif
+
+	(temp = strrchr(buffer, '/')) ? ++temp : (temp = buffer);
 
 	ext = strrchr(temp, '.');
 	if (ext != NULL) 
 		*ext = '\0';
 	strcpy_s(name, sizeof(name), temp); 
+
+#ifdef DEBUGPRINT
+	fprintf(stdout, "In: %s %s ", path, name );
+#endif
+
 
 	for (icon=16; icon<=32; icon+=8)
 	{
@@ -636,6 +653,10 @@ int main( int argc, char *argv[] )
 
 	// Write the xpm file
 	strcpy_s(buffer, sizeof(buffer), argv[1]);
+#ifdef DEBUGPRINT
+	fprintf(stdout, "XPM: %s\n", buffer );
+#endif
+
 	FILE* ptr; 
 	fopen_s(&ptr, buffer, "w");
 	if ( ptr == NULL ){
