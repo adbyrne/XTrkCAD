@@ -1,5 +1,7 @@
 include( CheckSymbolExists )
 
+ADD_SUBDIRECTORY(bitmaps)
+
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
 
 IF(NOT WIN32)
