@@ -197,6 +197,7 @@ void SetLayoutBackGroundFullPath(const char *fileName) {
 		DynStringCatCStr(&thisLayout.props.backgroundFileName, fileName);
 	} else {
 		DynStringClear(&thisLayout.props.backgroundFileName);
+		DynStringMalloc(&thisLayout.props.backgroundFileName, 1);
 		DynStringCatCStr(&thisLayout.props.backgroundFileName, "");
 	}
 }
@@ -347,18 +348,20 @@ static wWin_p layoutW;
 * Show only the end of the background file path including the filename in the Dialog
 */
 void SetName() {
-	char * name = GetLayoutBackGroundFullPath();
+	char *name = GetLayoutBackGroundFullPath();
 	if (name && name[0]) {									//Ignore ""
-		if (name && (strlen(name)<=TEXT_FIELD_LEN)) {
+		if (name && (strlen(name)<TEXT_FIELD_LEN)) {
 			for (unsigned int i=0; i<=strlen(name);i++) {
 				backgroundFileName[i] = name[i];
 			}
 			backgroundFileName[strlen(name)] = '\0';
 		} else {
-			for (int i=TEXT_FIELD_LEN;i>=0; i--) {
-				backgroundFileName[i] = name[strlen(name)-(TEXT_FIELD_LEN-i)];
-			}
-			backgroundFileName[TEXT_FIELD_LEN] = '\0';     //Insurance
+			char *f = FindFilename(name);
+			if ( f )
+				strncpy( backgroundFileName,f,TEXT_FIELD_LEN );
+			else
+				strncpy( backgroundFileName,name[strlen(name)-TEXT_FIELD_LEN],TEXT_FIELD_LEN );
+			backgroundFileName[TEXT_FIELD_LEN-1] = '\0';     //Insurance
 		}
 	} else backgroundFileName[0] = '\0';
 }
@@ -433,6 +436,14 @@ EXPORT int LoadImageFile(
 			else {
 				backgroundVisible = TRUE;
 				SetCurrentPath(BACKGROUNDPATHKEY, fileName[0]);
+
+				file_changed = TRUE;
+				haveBackground = TRUE;
+				ParamLoadControl(layout_pg_p, 8);
+
+				LayoutBackGroundSave();
+
+				MainRedraw();
 			}
 		} else {
 			SetLayoutBackGroundFullPath(noname);
@@ -486,6 +497,9 @@ static void ImageFileClear( void * unused)
 	file_changed = TRUE;
 	haveBackground = false;
 	ParamLoadControl(layout_pg_p, 8);
+
+	LayoutBackGroundSave();
+
 	MainRedraw();
 }
 
@@ -501,7 +515,7 @@ static paramData_t layoutPLs[] = {
 #define MINRADIUSENTRY (6)
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
-#define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
+#define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it changes, they will need to change
 	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND),sizeof(backgroundFileName) },
 	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
