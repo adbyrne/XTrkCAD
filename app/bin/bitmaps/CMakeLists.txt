@@ -5,8 +5,12 @@ PROJECT(genbitmaps)
 find_program( SVG_CONVERTER
 	NAMES inkscape.exe inkscape rsvg-convert
 	REQUIRED
-	HINTS "C:\\Program Files\\Inkscape\\bin" "/usr/bin"
+	HINTS "C:/Program Files/Inkscape/bin" "/usr/bin"
 	)
+
+if( ${SVG_CONVERTER} STREQUAL "SVG_CONVERTER-NOTFOUND" )
+	message( SEND_ERROR "SVG Converter not found." )
+endif()
 
 #FILE (GLOB 
 #	SVGS
