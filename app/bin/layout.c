@@ -32,6 +32,8 @@
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
+#define TEXT_FIELD_LEN 40
+
 struct sLayoutProps {
     char			title1[TITLEMAXLEN];
     char			title2[TITLEMAXLEN];
@@ -41,7 +43,7 @@ struct sLayoutProps {
     DIST_T			minTrackRadius;
     DIST_T			maxTrackGrade;
     coOrd			roomSize;
-    DynString       backgroundFileName;
+    char            backgroundTextBox[TEXT_FIELD_LEN+1];
     coOrd			backgroundPos;
     ANGLE_T			backgroundAngle;
     int				backgroundScreen;
@@ -51,12 +53,15 @@ struct sLayoutProps {
 struct sDataLayout {
     struct sLayoutProps props;
     DynString	fullFileName;
-    struct sLayoutProps *copyOfLayoutProps;
+	DynString   backgroundFileName;
+	struct sLayoutProps *copyOfLayoutProps;
+	DynString   copyBackgroundFileName; 
 };
 
 static struct sDataLayout thisLayout = {
-    { "", "", -1, 0, 0, 0.0, 5.0, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
+    { "", "", -1, 0, 0, 0.0, 5.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
     NaS,
+	NaS, 
     NULL,
 };
 
@@ -187,18 +192,18 @@ SetLayoutCurGauge(GAUGEINX_T gauge)
 
 void SetLayoutBackGroundFullPath(const char *fileName) {
 	if (fileName && fileName[0]) {
-		if (DynStringSize(&thisLayout.props.backgroundFileName)) {
-			if (strcmp(DynStringToCStr(&thisLayout.props.backgroundFileName),fileName)==0) {
+		if (DynStringSize(&thisLayout.backgroundFileName)) {
+			if (strcmp(DynStringToCStr(&thisLayout.backgroundFileName),fileName)==0) {
 				return;
 			}
-			DynStringClear(&thisLayout.props.backgroundFileName);
+			DynStringClear(&thisLayout.backgroundFileName);
 		}
-		DynStringMalloc(&thisLayout.props.backgroundFileName, strlen(fileName) + 1);
-		DynStringCatCStr(&thisLayout.props.backgroundFileName, fileName);
+		DynStringMalloc(&thisLayout.backgroundFileName, strlen(fileName) + 1);
+		DynStringCatCStr(&thisLayout.backgroundFileName, fileName);
 	} else {
-		DynStringClear(&thisLayout.props.backgroundFileName);
-		DynStringMalloc(&thisLayout.props.backgroundFileName, 1);
-		DynStringCatCStr(&thisLayout.props.backgroundFileName, "");
+		DynStringClear(&thisLayout.backgroundFileName);
+		DynStringMalloc(&thisLayout.backgroundFileName, 1);
+		DynStringCatCStr(&thisLayout.backgroundFileName, "");
 	}
 }
 
@@ -291,7 +296,7 @@ GetLayoutCurScale()
 char *
 GetLayoutBackGroundFullPath()
 {
-	char * s = DynStringToCStr(&thisLayout.props.backgroundFileName);
+	char * s = DynStringToCStr(&thisLayout.backgroundFileName);
 	return s;
 }
 
@@ -339,9 +344,6 @@ GetLayoutRoomSize(coOrd *roomSize)
 * Layout Dialog
 *
 */
-static char backgroundFileName[STR_LONG_SIZE];
-
-#define TEXT_FIELD_LEN 40
 static wWin_p layoutW;
 
 /**************************************************************************************
@@ -350,20 +352,12 @@ static wWin_p layoutW;
 void SetName() {
 	char *name = GetLayoutBackGroundFullPath();
 	if (name && name[0]) {									//Ignore ""
-		if (name && (strlen(name)<TEXT_FIELD_LEN)) {
-			for (unsigned int i=0; i<=strlen(name);i++) {
-				backgroundFileName[i] = name[i];
-			}
-			backgroundFileName[strlen(name)] = '\0';
-		} else {
-			char *f = FindFilename(name);
-			if ( f )
-				strncpy( backgroundFileName,f,TEXT_FIELD_LEN );
-			else
-				strncpy( backgroundFileName,name[strlen(name)-TEXT_FIELD_LEN],TEXT_FIELD_LEN );
-			backgroundFileName[TEXT_FIELD_LEN-1] = '\0';     //Insurance
-		}
-	} else backgroundFileName[0] = '\0';
+		char *f = FindFilename(name);
+		if ( f )
+			strncpy_s( thisLayout.props.backgroundTextBox,TEXT_FIELD_LEN+1, f,strlen(f)+1 );
+		else
+			thisLayout.props.backgroundTextBox[0] = '\0';
+	} else thisLayout.props.backgroundTextBox[0] = '\0';
 }
 
 static struct wFilSel_t * imageFile_fs;
@@ -427,7 +421,7 @@ EXPORT int LoadImageFile(
 		void * data )
 {
 		if (files >0) {
-			SetLayoutBackGroundFullPath( strdup(fileName[0]));
+			SetLayoutBackGroundFullPath( strdup(fileName[0]) );
 
 			if (!LoadBackGroundImage()) {
 				SetLayoutBackGroundFullPath(noname);
@@ -441,8 +435,6 @@ EXPORT int LoadImageFile(
 				haveBackground = TRUE;
 				ParamLoadControl(layout_pg_p, 8);
 
-				LayoutBackGroundSave();
-
 				MainRedraw();
 			}
 		} else {
@@ -455,6 +447,8 @@ EXPORT int LoadImageFile(
 		SetName();
 		file_changed = TRUE;
 		ParamLoadControl(layout_pg_p, 8);
+		LayoutChange( CHANGE_BACKGROUND );
+
 		return FALSE;
 }
 
@@ -498,7 +492,7 @@ static void ImageFileClear( void * unused)
 	haveBackground = false;
 	ParamLoadControl(layout_pg_p, 8);
 
-	LayoutBackGroundSave();
+	LayoutChange( CHANGE_BACKGROUND );
 
 	MainRedraw();
 }
@@ -516,7 +510,7 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it changes, they will need to change
-	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD | PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND),sizeof(backgroundFileName) },
+	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
 	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
@@ -584,11 +578,14 @@ static void LayoutOk(void * unused)
 {
 	ChangeLayout();
 	if(file_changed){
+		LayoutBackGroundSave();
 		SetFileChanged();
 		file_changed = FALSE;
 	}
 
     free(thisLayout.copyOfLayoutProps);
+	DynStringFree(&thisLayout.copyBackgroundFileName);
+
     wHide(layoutW);
 
     MainLayout( TRUE, TRUE );
@@ -604,9 +601,37 @@ static void LayoutOk(void * unused)
 
 static void LayoutCancel(struct wWin_t *unused)
 {
-    thisLayout.props = *(thisLayout.copyOfLayoutProps);
-    ParamLoadControls(&layoutPG);
-    LayoutOk(unused);
+    // thisLayout.props = *(thisLayout.copyOfLayoutProps);
+	char* curr = DynStringToCStr(&thisLayout.backgroundFileName);
+	char* prev = DynStringToCStr(&thisLayout.copyBackgroundFileName);
+	if ((curr == NULL && prev != NULL) || (curr != NULL && prev == NULL) || (strcmp(curr, prev) != 0) ) {
+		if (DynStringSize(&thisLayout.backgroundFileName)) {
+			DynStringClear(&thisLayout.backgroundFileName);
+		}
+		size_t bgSize = DynStringSize(&thisLayout.copyBackgroundFileName);
+		if ( bgSize ){
+			DynStringMalloc(&thisLayout.backgroundFileName, bgSize + 1);
+			char* fileName = DynStringToCStr(&thisLayout.copyBackgroundFileName);
+			DynStringCatCStr(&thisLayout.backgroundFileName, fileName);
+			haveBackground = TRUE;
+			wDrawSetBackground(  mainD.d, fileName, NULL);
+		}
+		else{
+			haveBackground = FALSE;
+			wDrawSetBackground(  mainD.d, NULL, NULL);
+		}
+		SetName(); 
+		// ChangeLayout();
+	}
+
+	ParamLoadControls(&layoutPG);
+
+	free(thisLayout.copyOfLayoutProps);
+	DynStringFree(&thisLayout.copyBackgroundFileName);
+
+	wHide(layoutW);
+
+	MainLayout( TRUE, TRUE );
 }
 
 static void LayoutChange(long changes)
@@ -638,6 +663,13 @@ void DoLayout(void * unused)
     }
     SetName();
     *(thisLayout.copyOfLayoutProps) = thisLayout.props;
+
+	char* curr = DynStringToCStr(&thisLayout.backgroundFileName);
+	size_t bgSize = DynStringSize(&thisLayout.backgroundFileName);
+	if ( bgSize ){
+		DynStringMalloc(&thisLayout.copyBackgroundFileName, bgSize + 1);
+		DynStringCatCStr(&thisLayout.copyBackgroundFileName, curr);	
+	}
 
     ParamLoadControls(&layoutPG);
     wShow(layoutW);
@@ -690,7 +722,11 @@ LayoutDlgUpdate(
         wStringSetValue((wString_p)layoutPLs[MINRADIUSENTRY].control,
                         FormatDistance(thisLayout.props.minTrackRadius));
     }
-    if (inx == BACKGROUNDPOSX) {
+	if (inx == BACKGROUNDFILEENTRY) {
+		SetName();
+		MainRedraw();
+	}
+	if (inx == BACKGROUNDPOSX) {
     	coOrd pos;
     	pos.x = *(double *)valueP;
     	pos.y = GetLayoutBackGroundPos().y;
@@ -771,6 +807,7 @@ LayoutBackGroundInit(BOOL_T clear) {
 		haveBackground = false;
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
+	SetName();
 }
 
 EXPORT int DoSettingsRead(
