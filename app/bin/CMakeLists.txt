@@ -183,6 +183,7 @@ SET(SOURCES
 	trknote.c
 	trkseg.c
 	tstraigh.c
+	turnout.c
 	uthash.h
 	utility.c
 	utility.h

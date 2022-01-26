@@ -709,6 +709,7 @@ void SelectBelow( void * unused );
 void FlipPoint( coOrd*, coOrd, ANGLE_T );
 void FlipTrack( track_p, coOrd, ANGLE_T );
 
+void DrawTurnout(track_p, drawCmd_p, wDrawColor);
 void DrawPositionIndicators( void );
 void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 

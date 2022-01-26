@@ -1,5 +1,5 @@
 /** \file cturnout.c
- * Turnout object handling and drawing
+ * Turnout object handling
  */
 
  /*  XTrkCad - Model Railroad CAD
@@ -99,6 +99,7 @@ static paramData_t turnoutPLs[] = {
 static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) };
 #endif
 
+#ifdef DRAWING
 /* Draw turnout data */
 
 /** 
@@ -165,7 +166,7 @@ struct DrawTo_t {
 };
 
 static struct DrawTo_t dto[DTO_DIM];
-
+#endif
 
 
 /****************************************
@@ -637,6 +638,7 @@ EXPORT BOOL_T ConnectAdjustableTracks(
 	return rc;
 }
 
+#ifdef DRAWING
 /****************************************
  *
  * Draw Turnout Roadbed
@@ -723,6 +725,7 @@ static void DrawTurnoutRoadbed(
 		}
 	}
 }
+#endif
 
 /****************************************
  *
@@ -812,7 +815,7 @@ static trkSeg_p MapPathSeg(
 	return xx->segs + (segInx - 1);
 }
 
-
+#ifdef DRAWING
 /****************************************
  *
  * TURNOUT DRAWING
@@ -2734,6 +2737,7 @@ static void DrawTurnout(
 	if (bridge) SetTrkBits(trk, TB_BRIDGE);
 	if (roadbed) SetTrkBits(trk, TB_ROADBED);
 }
+#endif
 
 
 static BOOL_T ReadTurnout(
