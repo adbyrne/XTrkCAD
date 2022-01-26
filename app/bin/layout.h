@@ -25,7 +25,7 @@
 
 #include "common.h"
 
-static void LayoutChange(long changes);
+void LayoutChange(long changes);
 
 void SetLayoutFullPath(const char *fileName);
 void LoadLayoutMinRadiusPref(char *scaleName, double defaultValue);

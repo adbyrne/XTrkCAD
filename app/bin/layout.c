@@ -460,7 +460,7 @@ void SetName() {
 	if (name && name[0]) {									//Ignore ""
 		char *f = FindFilename(name);
 		if ( f )
-			strncpy_s( thisLayout.props.backgroundTextBox,TEXT_FIELD_LEN+1, f,strlen(f)+1 );
+			strncpy( thisLayout.props.backgroundTextBox,f,TEXT_FIELD_LEN );
 		else
 			thisLayout.props.backgroundTextBox[0] = '\0';
 	} else thisLayout.props.backgroundTextBox[0] = '\0';

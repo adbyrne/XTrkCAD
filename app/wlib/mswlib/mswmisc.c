@@ -1960,7 +1960,7 @@ void wExit(int rc)
 #endif
     DestroyWindow(mswHWnd);
 
-    if (mswPalette != NULL) {
+    if (mswPalette) {
         DeleteObject(mswPalette);
         /*DeleteObject( mswPrintPalette );*/
     }
