@@ -12,16 +12,6 @@ if( ${SVG_CONVERTER} STREQUAL "SVG_CONVERTER-NOTFOUND" )
 	message( SEND_ERROR "SVG Converter not found." )
 endif()
 
-#FILE (GLOB 
-#	SVGS
-#	${CMAKE_CURRENT_SOURCE_DIR}/svg/*.svg
-#	)
-
-#foreach(svg ${SVGS})
-#	get_filename_component(f ${svg} NAME_WE)
-#	LIST (APPEND XPMS ${f})
-#endforeach()
-
 SET (XPMS
 	background benchwork bezier-line bezier-track block bottom box
 	bridge building car-inventory change-grid circle-center
@@ -53,9 +43,9 @@ foreach(xpm ${XPMS})
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 16 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}16.png
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 24 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 32 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}32.png
-		COMMAND pngtoxpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
-		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}16.png 
-		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png 
+		COMMAND pngtoxpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm	
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}16.png
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png
 		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}32.png
 	)
 	# build a list of all the depends
@@ -63,12 +53,11 @@ foreach(xpm ${XPMS})
 endforeach()
 
 add_custom_target (
-	genbitmaps ALL
+	genbitmaps 
 	DEPENDS ${XPM_RESULTS}
 )
 
-# MESSAGE (STATUS "SVGs: ${SVGS}")
-# MESSAGE (STATUS "XPMs: ${XPMS}")
 MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
 # MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+# MESSAGE (STATUS "XPMs: ${XPMS}")
 # MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
