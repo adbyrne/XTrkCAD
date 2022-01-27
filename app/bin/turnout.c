@@ -61,6 +61,7 @@ static struct DrawToData_t {
 	TRKINX_T index;
 	enum dtoType toType;
 	track_p trk;
+	tieData_p td;
 	int bridge; 
 	int roadbed;
 	int endCnt;
@@ -204,23 +205,24 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	wIndex_t segInx;
 	wIndex_t segEP;
 
-	SCALEINX_T scaleInx = GetTrkScale(trk);
-	tieData_p td = GetScaleTieData(scaleInx);
-
 	int i;
 	ANGLE_T a0, a1, aa0, aa1;
 	DIST_T r, len;
 	coOrd p0, p1;
 
 	PATHPTR_T pp;
-	int pathCnt = 0, routeCnt = 0;
-
-	for (i = 0; i < DTO_DIM; i++)
-		dto[i].n = 0;
 
 	dtod.trk = trk;
 	dtod.index = trk->index;
 	dtod.xx = xx;
+
+	SCALEINX_T scaleInx = GetTrkScale(trk);
+	dtod.td = GetScaleTieData(scaleInx);
+
+	int pathCnt = 0, routeCnt = 0;
+
+	for (i = 0; i < DTO_DIM; i++)
+		dto[i].n = 0;
 
 	// Validate that the first segment starts at (0, 0)
 	// and if STR p1.y == 0, if CRV angle == 0 or angle == 180
@@ -545,7 +547,7 @@ static void DrawDtoLayout(
 {
 #ifdef DTO_DEBUG
 	tieData_p td;
-	td = GetScaleTieData(scaleInx);
+	td = dtod.td;
 
 	// Draw the points and lines from dto
 	double r = td->width / 2;
@@ -1066,7 +1068,7 @@ static void DrawNormalTurnout(
 	q1 = dto[secPath].pts[0];
 	q2 = dto[secPath].ptsLast;
 
-	td = GetScaleTieData(scaleInx);
+	td = dtod.td;
 	len = FindDistance(s1, s2);
 	angle = FindAngle(s1, s2); // The straight segment
 
@@ -1260,7 +1262,7 @@ static void DrawCurvedTurnout(
 	if (omitTies)
 		return;
 
-	td = GetScaleTieData(scaleInx);
+	td = dtod.td;
 
 	// Save the ending coordinates
 	coOrd othEnd = zero, secEnd = zero;
@@ -1548,7 +1550,7 @@ static void DrawXingTurnout(
 	if (omitTies)
 		return;
 
-	td = GetScaleTieData(scaleInx);
+	td = dtod.td;
 	DIST_T tdlen = td->length, tdmax = 2.0 * tdlen;
 	DIST_T tdspc = td->spacing, tdspc2 = tdspc / 2;
 
@@ -1847,7 +1849,7 @@ static void DrawCrossTurnout(
 	if (omitTies)
 		return;
 
-	td = GetScaleTieData(scaleInx);
+	td = dtod.td;
 
 	coOrd s1, s2, t1, t2, p1, p2, q1, q2;
 	int s0, t0, p0, q0;
@@ -1868,7 +1870,7 @@ static void DrawCrossTurnout(
 	q1 = dto[secPath].base[0];
 	q2 = dto[secPath].baseLast;
 
-	td = GetScaleTieData(scaleInx);
+	td = dtod.td;
 	len = FindDistance(s1, s2);
 	angle = dto[strPath].angle;
 
