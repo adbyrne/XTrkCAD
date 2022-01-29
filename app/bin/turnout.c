@@ -295,7 +295,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 					len = D2R(a1) * r;
 					// Every 5 degrees or 5 * tie spacing
 					int cnt = (int)floor(a1 / 5.0);
-					int cnt2 = (int)floor(len / 5 / td->spacing);
+					int cnt2 = (int)floor(len / 5 / dtod.td->spacing);
 					if (cnt2 > cnt) cnt = cnt2;
 					if (cnt <= 0) cnt = 1;
 
@@ -546,11 +546,8 @@ static void DrawDtoLayout(
 )
 {
 #ifdef DTO_DEBUG
-	tieData_p td;
-	td = dtod.td;
-
 	// Draw the points and lines from dto
-	double r = td->width / 2;
+	double r = dtod.td->width / 2;
 	// if (r < 1) r = 1;
 
 	int i, j;
@@ -994,7 +991,6 @@ static void DrawNormalTurnout(
 	BOOL_T omitTies,
 	wDrawColor color)
 {
-	tieData_p td;
 	DIST_T len;
 	coOrd pos;
 	int cnt;
@@ -1068,18 +1064,18 @@ static void DrawNormalTurnout(
 	q1 = dto[secPath].pts[0];
 	q2 = dto[secPath].ptsLast;
 
-	td = dtod.td;
 	len = FindDistance(s1, s2);
 	angle = FindAngle(s1, s2); // The straight segment
 
-	cnt = (int)floor(len / td->spacing + 0.5);
+	cnt = (int)floor(len / dtod.td->spacing + 0.5);
 	if (cnt > 0) {
 		int pn = dto[othPath].n;
 		int qn = dto[secPath].n;
 		DIST_T dx = len / cnt;
 		s0 = p0 = q0 = 0;
-		DIST_T tdlen = td->length;
+		DIST_T tdlen = dtod.td->length;
 		DIST_T tdmax = (toType == DTO_WYE) ? 2.0 * tdlen : 2.5 * tdlen;
+		DIST_T tdwid = dtod.td->width;
 		DIST_T px = len, dlenx = dx / 2;
 
 		cnt = cnt > 1 ? cnt - 1 : 1;
@@ -1095,7 +1091,7 @@ static void DrawNormalTurnout(
 
 			DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 			DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-			tdlen = td->length + fabs(dy1) + fabs(dy2);
+			tdlen = dtod.td->length + fabs(dy1) + fabs(dy2);
 			if (tdlen > tdmax)
 				break;
 
@@ -1103,7 +1099,7 @@ static void DrawNormalTurnout(
 			Translate(&pos, s1, angle, px);
 			Translate(&pos, pos, (angle - 90.0), dy / 2);
 
-			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, angle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
 		// Asymmetric? Use longer ties for remaining two tracks (strPath, othPath)
@@ -1121,7 +1117,7 @@ static void DrawNormalTurnout(
 				}
 
 				DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
-				tdlen = td->length + fabs(dy1);
+				tdlen = dtod.td->length + fabs(dy1);
 				if (tdlen > tdmax)
 					break;
 
@@ -1129,7 +1125,7 @@ static void DrawNormalTurnout(
 				Translate(&pos, s1, angle, px);
 				Translate(&pos, pos, (angle - 90.0), dy / 2);
 
-				DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d, pos, angle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 			}
 		}
 
@@ -1147,7 +1143,7 @@ static void DrawNormalTurnout(
 			p1 = dto[othPath].pts[pn - 2];
 			a0 = FindAngle(p1, p2);
 			Translate(&pos, p2, a0, -dx / 2);
-			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 		// Restore saved values
 		if(dtod.toType == DTO_THREE){
@@ -1168,7 +1164,7 @@ static void DrawNormalTurnout(
 				}
 
 				DIST_T dy1 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-				tdlen = td->length + fabs(dy1);
+				tdlen = dtod.td->length + fabs(dy1);
 				if (tdlen > tdmax)
 					break;
 
@@ -1176,7 +1172,7 @@ static void DrawNormalTurnout(
 				Translate(&pos, s1, angle, px);
 				Translate(&pos, pos, (angle - 90.0), dy / 2);
 
-				DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d, pos, angle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 			}
 		}
 		if (px + dx < dto[secPath].baseLast.x) {
@@ -1192,7 +1188,7 @@ static void DrawNormalTurnout(
 			q1 = dto[secPath].pts[qn - 2];
 			a0 = FindAngle(q1, q2);
 			Translate(&pos, q2, a0, -dx / 2);
-			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
 		// Final ties at end
@@ -1210,7 +1206,7 @@ static void DrawNormalTurnout(
 				s1 = dto[strPath].pts[n - 2];
 				a0 = FindAngle(s1, s2);
 				Translate(&pos, s2, a0, -dx / 2);
-				DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d, pos, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 			}
 		}
 	}
@@ -1229,7 +1225,6 @@ static void DrawCurvedTurnout(
 	BOOL_T omitTies,
 	wDrawColor color)
 {
-	tieData_p td;
 	DIST_T len, r;
 	coOrd pos;
 	int cnt;
@@ -1262,15 +1257,14 @@ static void DrawCurvedTurnout(
 	if (omitTies)
 		return;
 
-	td = dtod.td;
-
 	// Save the ending coordinates
 	coOrd othEnd = zero, secEnd = zero;
 
 	trkSeg_p trk;
-	DIST_T tdlen = td->length, tdmax = tdlen * 2.5;
-	DIST_T tdspc = td->spacing, tdspc2 = tdspc / 2.0;
-	double rdot = td->width / 2;
+	DIST_T tdlen = dtod.td->length, tdmax = tdlen * 2.5;
+	DIST_T tdspc = dtod.td->spacing, tdspc2 = tdspc / 2.0;
+	DIST_T tdwid = dtod.td->width;
+	double rdot = tdwid / 2;
 
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
@@ -1309,7 +1303,7 @@ static void DrawCurvedTurnout(
 			if (len - tdspc * cnt >= tdspc2) {
 				cnt++;
 			}
-			DIST_T tdlen = td->length;
+			DIST_T tdlen = dtod.td->length;
 			DIST_T dx = len / cnt, dx2 = dx / 2;
 
 			if (cnt != 0) {
@@ -1353,7 +1347,7 @@ static void DrawCurvedTurnout(
 					}
 
 					Translate(&pos, e1, a2, -dy / 2);
-					DrawTie(d, pos, angle + xx->angle + 90, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+					DrawTie(d, pos, angle + xx->angle + 90, tlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 					// Assures that these ends are the last point drawn before break
 					othEnd = e1;
@@ -1421,7 +1415,7 @@ static void DrawCurvedTurnout(
 					othEnd = pos;
 
 					Translate(&pos, pos, (a1 - 90.0), dy / 2);
-					DrawTie(d, pos, a1, tlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+					DrawTie(d, pos, a1, tlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 					cosAdj = fabs(cos(D2R(angle)));
 					px += dx * cosAdj;
@@ -1455,7 +1449,7 @@ static void DrawCurvedTurnout(
 	}
 	else if (len > tdspc2) { 
 		Translate(&p2, p2, a0, -tdspc2);
-		DrawTie(d, p2, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, p2, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 
 	q1 = secEnd;
@@ -1468,7 +1462,7 @@ static void DrawCurvedTurnout(
 	}
 	else if (len > tdspc2) {
 		Translate(&q2, q2, a0, -tdspc2);
-		DrawTie(d, q2, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, q2, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 }
 
@@ -1485,7 +1479,6 @@ static void DrawXingTurnout(
 	BOOL_T omitTies,
 	wDrawColor color)
 {
-	tieData_p td;
 	DIST_T len;
 	coOrd pos;
 	int cnt;
@@ -1550,9 +1543,9 @@ static void DrawXingTurnout(
 	if (omitTies)
 		return;
 
-	td = dtod.td;
-	DIST_T tdlen = td->length, tdmax = 2.0 * tdlen;
-	DIST_T tdspc = td->spacing, tdspc2 = tdspc / 2;
+	DIST_T tdlen = dtod.td->length, tdmax = 2.0 * tdlen;
+	DIST_T tdwid = dtod.td->width;
+	DIST_T tdspc = dtod.td->spacing, tdspc2 = tdspc / 2;
 
 	// Midpoint
 	p1 = dto[strPath].pts[0];
@@ -1594,13 +1587,13 @@ static void DrawXingTurnout(
 
 		dAngle = (dAngle - 90) / 2;
 		Translate(&pos, dtod.midPt, a2, -tdadj - tdadj2);
-		DrawTie(d, pos, a2 - dAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		Translate(&pos, dtod.midPt, a2, -tdadj - tdspc);
 		DrawStraightTies(d, scaleInx, p1, pos, color);
 
 		Translate(&pos, dtod.midPt, a2, tdadj + tdadj2);
-		DrawTie(d, pos, a2 - dAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		Translate(&pos, dtod.midPt, a2, tdadj + tdspc);
 		DrawStraightTies(d, scaleInx, pos, p2, color);
@@ -1643,7 +1636,7 @@ static void DrawXingTurnout(
 
 	// Draw right half
 	len = FindDistance(dtod.midPt, c2);
-	cnt = (int)floor(len / td->spacing + 0.5);
+	cnt = (int)floor(len / dtod.td->spacing + 0.5);
 	if (cnt <= 0)
 		return;
 
@@ -1668,7 +1661,7 @@ static void DrawXingTurnout(
 
 		DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 		DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-		tdlen = (td->length + fabs(dy1) + fabs(dy2)) * magic;
+		tdlen = (dtod.td->length + fabs(dy1) + fabs(dy2)) * magic;
 		if(tdlen > tdmax)
 		{
 			if(dAngle >= 30)
@@ -1676,7 +1669,7 @@ static void DrawXingTurnout(
 				DIST_T dy = (dy1 + dy2) / 2;
 				Translate(&pos,dtod.midPt,cAngle,px - len);
 				Translate(&pos,pos,(cAngle - 90.0),dy);
-				DrawTie(d,pos,cAngle,tdlen - td->length * magic,td->width,color,tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d,pos,cAngle,tdlen - dtod.td->length * magic,tdwid,color,tieDrawMode == TIEDRAWMODE_SOLID);
 				lenx += dx2 * magic2;
 			}
 			break;
@@ -1685,7 +1678,7 @@ static void DrawXingTurnout(
 		DIST_T dy = (dy1 + dy2) / 2;
 		Translate(&pos, dtod.midPt, cAngle, px - len);
 		Translate(&pos, pos, (cAngle - 90.0), dy);
-		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, cAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		px += dx;
 		lenx += dx;
@@ -1701,7 +1694,7 @@ static void DrawXingTurnout(
 	}
 	else {
 		Translate(&pos, p2, a0, -dx2);
-		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 
 	// p1 = dtod.midPt;
@@ -1714,7 +1707,7 @@ static void DrawXingTurnout(
 	}
 	else {
 		Translate(&pos, p2, a0, -dx2);
-		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 
 	// Draw left half
@@ -1724,12 +1717,12 @@ static void DrawXingTurnout(
 	}
 
 	len = FindDistance(c1, dtod.midPt);
-	cnt = (int)floor(len / td->spacing + 0.5);
+	cnt = (int)floor(len / dtod.td->spacing + 0.5);
 	if (cnt <= 0)
 		return;
 
 	p0 = q0 = 0;
-	tdlen = td->length;
+	tdlen = dtod.td->length;
 
 	dx = len / cnt;
 	dx2 = dx / 2;
@@ -1751,7 +1744,7 @@ static void DrawXingTurnout(
 
 		DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
 		DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-		tdlen = (td->length + fabs(dy1) + fabs(dy2)) * magic;
+		tdlen = (dtod.td->length + fabs(dy1) + fabs(dy2)) * magic;
 		if(tdlen > tdmax)
 		{
 			if(dAngle >= 30)
@@ -1759,7 +1752,7 @@ static void DrawXingTurnout(
 				DIST_T dy = (dy1 + dy2) / 2;
 				Translate(&pos,dtod.midPt,cAngle,px - len);
 				Translate(&pos,pos,(cAngle - 90.0),dy);
-				DrawTie(d,pos,cAngle,tdlen - td->length * magic,td->width,color,tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d,pos,cAngle,tdlen - dtod.td->length * magic,tdwid,color,tieDrawMode == TIEDRAWMODE_SOLID);
 				lenx += dx2 * magic2;
 			}
 			break;
@@ -1768,7 +1761,7 @@ static void DrawXingTurnout(
 		DIST_T dy = (dy1 + dy2) / 2;
 		Translate(&pos, dtod.midPt, cAngle, px - len);
 		Translate(&pos, pos, (cAngle - 90.0), dy);
-		DrawTie(d, pos, cAngle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, cAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		px -= dx;
 		lenx += dx;
@@ -1784,7 +1777,7 @@ static void DrawXingTurnout(
 	}
 	else {
 		Translate(&pos, p1, a0, dx2);
-		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 	p1 = dto[str2Path].pts[0];
 	// p2 = dtod.midPt;
@@ -1796,7 +1789,7 @@ static void DrawXingTurnout(
 	}
 	else {
 		Translate(&pos, p1, a0, dx2);
-		DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 }
 
@@ -1813,7 +1806,6 @@ static void DrawCrossTurnout(
 	BOOL_T omitTies,
 	wDrawColor color)
 {
-	tieData_p td;
 	DIST_T len, dx;
 	coOrd pos;
 	int cnt;
@@ -1849,8 +1841,6 @@ static void DrawCrossTurnout(
 	if (omitTies)
 		return;
 
-	td = dtod.td;
-
 	coOrd s1, s2, t1, t2, p1, p2, q1, q2;
 	int s0, t0, p0, q0;
 
@@ -1870,11 +1860,10 @@ static void DrawCrossTurnout(
 	q1 = dto[secPath].base[0];
 	q2 = dto[secPath].baseLast;
 
-	td = dtod.td;
 	len = FindDistance(s1, s2);
 	angle = dto[strPath].angle;
 
-	cnt = (int)floor(len / td->spacing + 0.5);
+	cnt = (int)floor(len / dtod.td->spacing + 0.5);
 	if (cnt > 0) {
 		DIST_T px = 0;
 		DIST_T dy, dy1, dy2;
@@ -1883,7 +1872,8 @@ static void DrawCrossTurnout(
 
 		dx = len / cnt;
 		s0 = t0 = p0 = q0 = 0;
-		DIST_T tdlen = td->length;
+		DIST_T tdlen = dtod.td->length;
+		DIST_T tdwid = dtod.td->width;
 		DIST_T dlenx = dx / 2;
 
 		DIST_T px1 = len / 2 - dlenx * 5,
@@ -1952,16 +1942,16 @@ static void DrawCrossTurnout(
 				cflag = 1;
 			}
 
-			tdlen = td->length + fabs(dy1);
+			tdlen = dtod.td->length + fabs(dy1);
 			Translate(&pos, s1, angle, px);
 			Translate(&pos, pos, (angle - 90.0), dy1 / 2);
-			DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, angle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 			if (!cflag) {
-				tdlen = td->length + fabs(dy2);
+				tdlen = dtod.td->length + fabs(dy2);
 				Translate(&pos, t1, angle, px);
 				Translate(&pos, pos, (angle - 90.0), -dy2 / 2);
-				DrawTie(d, pos, angle, tdlen, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d, pos, angle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 			}
 		}
 		return;
@@ -1982,7 +1972,7 @@ static void DrawCrossTurnout(
 			p1 = dto[strPath].pts[pn - 2];
 			a0 = FindAngle(p1, p2);
 			Translate(&pos, p2, a0, -dx / 2);
-			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, a0, td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
 		if (px + dx < dto[str2Path].baseLast.x) {
@@ -1998,7 +1988,7 @@ static void DrawCrossTurnout(
 			q1 = dto[str2Path].pts[qn - 2];
 			a0 = FindAngle(q1, q2);
 			Translate(&pos, q2, a0, -dx / 2);
-			DrawTie(d, pos, a0, td->length, td->width, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, a0, td->length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 		*/
 	}
