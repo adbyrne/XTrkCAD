@@ -451,6 +451,7 @@ GetLayoutRoomSize(coOrd *roomSize)
 *
 */
 static wWin_p layoutW;
+static void LayoutChange(long changes);
 
 /**
 * Show only the filename in the Dialog
