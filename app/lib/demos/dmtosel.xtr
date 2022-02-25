@@ -28,19 +28,22 @@ STRAIGHT 4 DEMO 1
 REDRAW
 RESET
 MESSAGE
-Pressing the turnout button displays the Turnout Selection window to let you choose a turnout to place.
-
-Note that once you start to place the turnout on the Main window the Turnout Selection window disappears.  This feature is enabled by the Hide toggle button on the dialog.
+We chose the turnout we want to place by clicking on the HotBar.
 END
 STEP
-COMMAND Turnout
-MOUSE 2 5.750 6.583
+##COMMAND Turnout
+COMMAND TurnoutHotBar
+##PARAMETER turnout list 0
+##PARAMETER turnout hide 0
+PARAMETER GROUP turnout
+HOTBARSELECT Peco-55	Medium Right	SL-E395F
 MESSAGE
 _________________________________________
 
 You can place the turnout on a arbitrary position on the layout.  Left-drag the turnout into place...
 END
 STEP
+MOUSE 2 5.750 6.583
 MOUSE 3 5.833 6.583
 PAUSE 110
 MOUSE 3 6.333 6.583
@@ -57,6 +60,41 @@ MOUSE 3 8.333 6.750
 PAUSE 110
 MOUSE 3 8.750 6.917
 PAUSE 110
+MESSAGE
+_________________________________________
+
+We are moving the Turnout by dragging on the 'Active End Point'
+We can change the 'Active End Point' by a Shift-Left-Click
+END$MESSAGE
+STEP
+KEYSTATE 2
+MOUSE 2 8.750 6.917
+KEYSTATE 2
+MOUSE 4 8.750 6.917
+MOUSE 525 8.750 6.917
+MESSAGE
+
+Notice the Turnout has rotated to the next End Point.
+END$MESSAGE
+STEP
+MESSAGE
+
+If we continue to Shift-Left-Click 2 more times, we will return to the original position.
+END$MESSAGE
+STEP
+KEYSTATE 2
+MOUSE 2 8.750 6.917
+KEYSTATE 2
+MOUSE 4 8.750 6.917
+MOUSE 525 8.750 6.917
+BIGPAUSE
+KEYSTATE 2
+MOUSE 2 8.750 6.917
+KEYSTATE 2
+MOUSE 4 8.750 6.917
+MOUSE 525 8.750 6.917
+BIGPAUSE
+MOUSE 2 8.750 6.917
 MOUSE 3 9.250 6.917
 PAUSE 110
 MOUSE 3 9.750 6.917
@@ -137,8 +175,6 @@ MESSAGE
 _________________________________________
 
 When you are satisfied with the position and orientation of the turnout press Space bar or the Return key on the keyboard to finish placing the turnout.
-
-Pressing the Close button on the Turnout dialog will end the <Turnout> command as well as placing the turnout.
 END
 STEP
 MOUSE 3336 10.500 10.250
@@ -363,12 +399,12 @@ TURNOUT  7 0 0 0 0 DEMO 2 30.934023 6.328592 0 304.064054 "Peco-55	Medium Right	
 	END
 REGRESSION END
 CLEAR
-MESSAGE
-
-Pressing Close ends the <Turnout> command.
-END
-STEP
-PARAMETER turnout ok
+##MESSAGE
+##
+##Pressing Close ends the <Turnout> command.
+##END
+##STEP
+##PARAMETER turnout ok
 MESSAGE
 =========================================
 END
