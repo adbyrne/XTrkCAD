@@ -306,7 +306,7 @@ void psPrintFillRectangle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_
 void psPrintFillPolygon(wDrawPix_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
 void psPrintFillCircle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, wDrawColor color, wDrawOpts opts);
 void psPrintString(wDrawPix_t x, wDrawPix_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
-static void WlibGetPaperSize(void);
+//static void WlibGetPaperSize(void);
 
 /* single.c */
 void wlibStringUpdate();

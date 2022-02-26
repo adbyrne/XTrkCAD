@@ -314,8 +314,8 @@ void wControlHilite(
     wControl_p b,
     wBool_t hilite)
 {
-    cairo_t *cr;
-    int off = GTKCONTROLHILITEWIDTH/2+1;
+//    cairo_t *cr;
+//    int off = GTKCONTROLHILITEWIDTH/2+1;
     if ( debugWindow >= 1 )
 	    printf( "wControlHIlite( %s, %d )\n", b->labelStr, hilite );
 
