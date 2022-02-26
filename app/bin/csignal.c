@@ -44,7 +44,7 @@
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#) : $Id$";
+//static const char rcsid[] = "@(#) : $Id$";
 
 
 #include "compound.h"

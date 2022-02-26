@@ -843,7 +843,7 @@ static void ControllerDialogSync(
     BOOL_T dir;
     BOOL_T followMe;
     BOOL_T autoReverse;
-    coOrd pos;
+//    coOrd pos;
 
     if (dlg == NULL) {
         return;
@@ -866,11 +866,11 @@ static void ControllerDialogSync(
 
     if (dlg->train) {
         char * statusMsg;
-        DIST_T speed;
+//        DIST_T speed;
         xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
         dir = xx->direction==0?0:1;
-        speed = xx->speed;
-        pos = xx->trvTrk.pos;
+//        speed = xx->speed;
+//        pos = xx->trvTrk.pos;
         followMe = followTrain == dlg->train;
         autoReverse = xx->autoReverse;
 

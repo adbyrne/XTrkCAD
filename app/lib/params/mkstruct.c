@@ -49,7 +49,7 @@ int main ( int argc, char * argv [] )
 	char *buffer = malloc( BUFSIZE );
 	char *desc;
 	char *p1;
-	char *p2 = malloc( BUFSIZE );
+//	char *p2 = malloc( BUFSIZE );
 	char *scale;
 	char *ptr;
 	int err;

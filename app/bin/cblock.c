@@ -246,7 +246,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 {
 	blockData_p xx = GetblockData(trk);
 	wIndex_t tcount = 0;
-	track_p lastTrk = NULL;
+//	track_p lastTrk = NULL;
 	long listLabelsOption = listLabels;
 
 	LOG( log_block, 1, ("*** DescribeBlock(): trk is T%d\n",GetTrkIndex(trk)))
