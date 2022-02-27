@@ -217,9 +217,18 @@ BOOL_T GetLayerOnMap(unsigned int layer)
     }
 }
 
+EXPORT SCALEINX_T GetLayerScale( unsigned int layer )
+{
+	if( IsLayerValid(layer) )
+		return layers[layer].scaleInx;
+	return GetLayoutCurScale(); // layout scale 
+}
+
 EXPORT tieData_p GetLayerTieData( unsigned int layer )
 {
-	return &layers[layer].tieData;
+	if( IsLayerValid(layer) && layers[layer].tieData.length > EPSILON )
+		return &layers[layer].tieData;
+	return defaultTieData; // layout scale default tie data
 }
 
 BOOL_T GetLayerModule(unsigned int layer)
@@ -767,7 +776,7 @@ LayerSystemDefaults(void)
 		layers[inx].gaugeInx = 0;
 		layers[inx].minTrackRadius = GetLayoutMinTrackRadius( );
 		layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade( );
-		defaultTieData(layers[inx].scaleInx, &layers[inx].tieData);
+		layers[inx].tieData = *GetScaleTieData(layers[inx].scaleInx);
         layers[inx].objCount = 0;
         DYNARR_RESET(int,layers[inx].layerLinkList);
         SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
@@ -1380,7 +1389,7 @@ static void LayerUpdate(void)
     if (layerRedrawMap) {
         DoRedraw();
     } else if (redraw) {
-        RedrawLayer((unsigned int)layerCurrent, TRUE);
+        RedrawLayer(layerCurrent, TRUE);
     }
 
     layerRedrawMap = FALSE;

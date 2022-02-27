@@ -35,6 +35,11 @@
 #define TEXT_FIELD_LEN 40
 
 /**
+ * Global default tie data
+ */
+EXPORT tieData_p defaultTieData;
+
+/**
  * @brief Layout properties in Dialog
 */
 struct sLayoutProps {
@@ -203,13 +208,14 @@ SetLayoutRoomSize(coOrd size)
 }
 
 /**
- * @brief Set the Layout scale (index)
+ * @brief Set the Layout scale (index). Also set the defaultTieData. 
  * @param scale The Layout scale index.
 */
 void
 SetLayoutCurScale(SCALEINX_T scale)
 {
     thisLayout.props.curScaleInx = scale;
+	defaultTieData = GetScaleTieData( scale );
 }
 
 /**

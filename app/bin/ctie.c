@@ -32,7 +32,6 @@
 
 static int log_tieList;
 
-
 /****************************************************************************
 *
 * TIE DATA
@@ -42,7 +41,7 @@ static int log_tieList;
 /**
 * @brief Default tie data for a scale in tieLength, tieWidth, tieSpacing
 */
-EXPORT void defaultTieData( SCALEINX_T inx, tieData_p tieData ) 
+EXPORT void GetDefaultTieData( SCALEINX_T inx, tieData_p tieData ) 
 {
 	SCALEDESCINX_T scaleInx;
 	GAUGEINX_T gaugeInx;

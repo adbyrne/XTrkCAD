@@ -1080,7 +1080,7 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 	track_p t;
 	ANGLE_T a;
 	t = NewTrack( 0, T_STRAIGHT, 2, sizeof (struct extraDataStraight_t) );
-	SetTrkScale( t, GetLayoutCurScale() );
+	// *new-layer* SetTrkScale( t, GetLayoutCurScale() );
 	a = FindAngle( p1, p0 );
 	SetTrkEndPoint( t, 0, p0, a );
 	SetTrkEndPoint( t, 1, p1, NormalizeAngle( a+180.0 ) );

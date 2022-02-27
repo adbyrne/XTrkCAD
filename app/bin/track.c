@@ -1073,7 +1073,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	trk->index = index;
 	trk->type = type;
 	trk->layer = curLayer;
-	trk->scale = (char)GetLayoutCurScale();
+	trk->scale = (char)GetLayerScale(curLayer); // (char)GetLayoutCurScale();
 	trk->bits = TB_VISIBLE;
 	trk->elevMode = ELEV_ALONE;
 	trk->elev = 0;

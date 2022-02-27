@@ -64,6 +64,8 @@ typedef struct {
 		DIST_T spacing;
 		} tieData_t, *tieData_p;
 
+tieData_p defaultTieData;
+
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -97,6 +99,7 @@ extern long layerCount;
 void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg);
 wDrawColor GetLayerColor( unsigned int );
+SCALEINX_T GetLayerScale( unsigned int );
 BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
 void FlipLayer( void * layerVP );
