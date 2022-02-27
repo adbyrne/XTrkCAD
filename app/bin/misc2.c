@@ -272,6 +272,29 @@ EXPORT void GetScaleEasementValues( DIST_T * R, DIST_T * L )
 	}
 }
 
+EXPORT DIST_T GetScaleMinRadius( SCALEINX_T si )
+{
+	if ( si < 0 || si >= scaleInfo_da.cnt )
+		return 0;
+	return scaleInfo(si).R[0];
+}
+
+
+EXPORT char *GetScaleDesc( SCALEDESCINX_T inx )
+{
+	return scaleDesc(inx).scaleDesc;
+}
+
+EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
+{
+	scaleDesc_t s;
+	gaugeInfo_p g;
+
+	s = scaleDesc(scaleInx);
+    g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
+
+	return g->gauge;
+}
 
 EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 {
@@ -297,22 +320,6 @@ EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 		s->tieDataValid = TRUE;
 	}
 	return &scaleInfo(si).tieData;
-}
-
-EXPORT char *GetScaleDesc( SCALEDESCINX_T inx )
-{
-	return scaleDesc(inx).scaleDesc;
-}
-
-EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
-{
-	scaleDesc_t s;
-	gaugeInfo_p g;
-
-	s = scaleDesc(scaleInx);
-   g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
-
-	return g->gauge;
 }
 
 void

@@ -26,6 +26,7 @@
 #include "dynstring.h"
 #include "fileio.h"
 #include "layout.h"
+#include "misc.h"
 #include "param.h"
 #include "track.h"
 #include "include/partcatalog.h"
@@ -1784,6 +1785,16 @@ BOOL_T ReadLayers(char * line)
 		}
 	}
 
+	// Provide defaults
+	if ( minRad < EPSILON ){
+		minRad = GetScaleMinRadius(sclInx);
+	}
+	if ( tieLen < EPSILON ){
+		tieData_p td = GetScaleTieData(sclInx);
+		tieLen = td->length;
+		tieWid = td->width;
+		tieSpc = td->spacing;
+	}
 
     if (paramVersion < 9) {
         if ((int)rgb < COUNT( oldColorMap ) ) {
@@ -1814,6 +1825,7 @@ BOOL_T ReadLayers(char * line)
     layers[inx].color = color;
     layers[inx].useColor = !dontUseColor;
     layers[inx].button_off = button_off;
+	GetScaleGauge(sclInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
 
     colorTrack = ColorFlags&1;  //Make sure globals are set
     colorDraw = ColorFlags&2;
