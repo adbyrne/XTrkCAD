@@ -48,8 +48,20 @@
 #define LAYERPREF_NAME 	"name"
 #define LAYERPREF_COLOR "color"
 #define LAYERPREF_FLAGS "flags"
+#define LAYERPREF_SCALEINX "scaleInx"
+#define LAYERPREF_SCLDESCINX "sclDescInx"
+#define LAYERPREF_GAUGEINX "gaugeInx"
+#define LAYERPREF_MINRADIUS "minRadius"
+#define LAYERPREF_MAXGRADE "maxGrade"
+#define LAYERPREF_TIELENGTH "tieLength"
+#define LAYERPREF_TIEWIDTH "tieWidth"
+#define LAYERPREF_TIESPACING "tieSpacing"
 #define LAYERPREF_LIST "list"
 #define LAYERPREF_SETTINGS "settings"
+
+static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
+static paramFloatRange_t r0_100 = { 0.0, 100.0 };
+static paramFloatRange_t r0_90 = { 0.0, 90.0 };
 
 unsigned int curLayer;
 long layerCount = 10;
@@ -75,7 +87,15 @@ typedef struct {
     BOOL_T onMap;						/**< is layer shown map */
     BOOL_T module;						/**< is layer a module (all or nothing) */
     BOOL_T button_off;					/**< hide button */
-    long objCount;						/**< number of objects on layer */
+	SCALEINX_T scaleInx;                /**< scale override */
+	SCALEDESCINX_T scaleDescInx;        /**< the scale description */
+	GAUGEINX_T gaugeInx;                /**< the gauge desc index */
+	DIST_T minTrackRadius;              /**< minimum track radius */
+	DIST_T maxTrackGrade;               /**< maximum track grade */
+	DIST_T tieLength;                   /**< tie length */
+	DIST_T tieWidth;                    /**< tie width */
+	DIST_T tieSpacing;                  /**< tie spacing */
+	long objCount;						/**< number of objects on layer */
     dynArr_t layerLinkList;				/**< other layers that show/hide with this one */
     char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
 } layer_t;
@@ -554,6 +574,14 @@ static long layerUseColor = TRUE;
 static long layerVisible = TRUE;
 static long layerFrozen = FALSE;
 static long layerOnMap = TRUE;
+static SCALEINX_T layerScaleInx;
+static SCALEDESCINX_T layerScaleDescInx;
+static GAUGEINX_T layerGaugeInx;
+static DIST_T layerMinRadius;
+static DIST_T layerMaxGrade;
+static DIST_T layerTieLength;
+static DIST_T layerTieWidth;
+static DIST_T layerTieSpacing;
 static long layerModule = FALSE;
 static long layerNoButton = FALSE;
 static void LayerOk(void * unused);
@@ -589,12 +617,23 @@ static paramData_t layerPLs[] = {
 #define I_MOD 	(7)
 	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORZ|BC_NOBORDER },
 #define I_BUT   (8)
-	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("No Button"), BC_HORZ|BC_NOBORDER },
-#define I_LINKLIST (9)
+	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGBOXEND, moduleLabels, N_("No Button"), BC_HORZ|BC_NOBORDER },
+#define SCALEINX (9)
+	{ PD_DROPLIST, &layerScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
+#define GAUGEINX (10)
+	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
+#define MINRADIUSENTRY (11)
+	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF|PDO_DLGBOXEND, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+#define TIEDAYA (13)
+	{ PD_FLOAT, &layerTieLength, "tieLength", PDO_NOPREF|PDO_DRAW, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieWidth, "tieWidth", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieSpacing, "tieSpacing", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ|PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
+#define I_LINKLIST (16)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
-#define I_SETTINGS (10)
+#define I_SETTINGS (17)
 	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP( 250), N_("Settings when Current") },
-#define I_COUNT (11)
+#define I_COUNT (18)
     { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, I2VP(370) },
     { PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
     { PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
@@ -714,6 +753,13 @@ LayerSystemDefaults(void)
         layers[inx].onMap = TRUE;
         layers[inx].module = FALSE;
         layers[inx].button_off = FALSE;
+		layers[inx].scaleInx = GetLayoutCurScale();
+		GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
+		layers[inx].scaleDescInx = GetLayoutCurScaleDesc();
+		layers[inx].gaugeInx = 0;
+		layers[inx].minTrackRadius = GetLayoutMinTrackRadius( );
+		layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade( );
+		defaultTieData(layers[inx].scaleInx, &layers[inx].tieLength, &layers[inx].tieWidth, &layers[inx].tieSpacing);
         layers[inx].objCount = 0;
         DYNARR_RESET(int,layers[inx].layerLinkList);
         SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
@@ -757,6 +803,8 @@ void LoadLayerLists(void)
 
     if (layerL) wListSetIndex(layerL,curLayer);
 
+	/* Sync Scale and lists */
+	GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
 }
 
 /**
@@ -810,17 +858,26 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
     layerColor = layers[layer].color;
     layerUseColor = layers[layer].useColor;
     layerNoButton = layers[layer].button_off;
+	layerScaleInx = layers[layer].scaleInx;
+	layerScaleDescInx = layers[layer].scaleDescInx;
+	layerGaugeInx = layers[layer].gaugeInx;
+	layerMinRadius = layers[layer].minTrackRadius;
+	layerMaxGrade = layers[layer].maxTrackGrade;
+	layerTieLength = layers[layer].tieLength;
+	layerTieWidth = layers[layer].tieWidth;
+	layerTieSpacing = layers[layer].tieSpacing;
     strcpy(layerName, layers[layer].name);
     strcpy(settingsName, layers[layer].settingsName);
     GetLayerLinkString(layer,layerLinkList);
 
-    layerCurrent = layer;
+	layerCurrent = layer;
     /* now re-load the layer list boxes */
     LoadLayerLists();
-
-
-
-    /* force update of the 'manage layers' dialogbox */
+	
+	/* Sync Scale and lists */
+	GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+	
+	/* force update of the 'manage layers' dialogbox */
     if (layerL) {
     	wListSetIndex(layerL,layer);
         ParamLoadControls(&layerPG);
@@ -831,7 +888,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
     		layers[layer].settingsName[0] = '\0';
     }
 
-    sprintf(message, "Object Count: %ld", layers[layer].objCount);
+	sprintf(message, "Object Count: %ld", layers[layer].objCount);
     if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
 
     /* finally show the layer buttons with balloon text */
@@ -867,6 +924,7 @@ FillLayerList( wList_p listLayers)
 	/* set current layer to selected */
 	wListSetIndex(listLayers, curLayer);
 }
+
 /**
  * Initialize the layer lists.
  *
@@ -900,6 +958,29 @@ InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 }
 
 /**
+ * Save an integer to Prefs
+ */
+layerSetInteger( unsigned int inx, char prefName[], int value ){
+	char buffer[80];
+	char name[80];
+	strcpy(name, prefName);
+	strcat(name, ".%0u");
+	sprintf( buffer, name, inx );
+	wPrefSetInteger( LAYERPREF_SECTION, buffer, value );
+}
+/**
+* Save a float to Prefs
+*/
+layerSetFloat( unsigned int inx, char prefName[], double value ){
+	char buffer[80];
+	char name[20];
+	strcpy(name, prefName);
+	strcat(name, ".%0u");
+	sprintf( buffer, name, inx );
+	wPrefSetFloat( LAYERPREF_SECTION, buffer, value );
+}
+
+/**
  * Save the customized layer information to preferences.
  */
 
@@ -919,39 +1000,53 @@ LayerPrefSave(void)
             information about the layer needs to be saved */
         if ((layers[inx].name[0]) ||
                 layers[inx].frozen || (!layers[inx].onMap) || (!layers[inx].visible) ||
-				layers[inx].button_off || (layers[inx].layerLinkList.cnt>0) ||
+				layers[inx].button_off || 
+			    (layers[inx].layerLinkList.cnt>0) ||
 				layers[inx].module ||
-                layers[inx].color != layerColorTab[inx%COUNT(layerColorTab)]) {
+                layers[inx].color != layerColorTab[inx%COUNT(layerColorTab)] ||
+			    layers[inx].scaleInx != layerScaleInx ||
+			    layers[inx].scaleDescInx != layerScaleDescInx ||
+			    layers[inx].gaugeInx != layerGaugeInx ||
+			    layers[inx].minTrackRadius != layerMinRadius ||
+			    layers[inx].maxTrackGrade != layerMaxGrade ||
+			    layers[inx].tieLength != layerTieLength ||
+			    layers[inx].tieWidth != layerTieWidth ||
+			    layers[inx].tieSpacing != layerTieSpacing
+			) {
             sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
             wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
-            sprintf(buffer, LAYERPREF_COLOR ".%0u", inx);
-            wPrefSetInteger(LAYERPREF_SECTION, buffer, wDrawGetRGB(layers[inx].color));
-            flags = 0;
 
-            if (layers[inx].frozen) {
+			layerSetInteger(inx, LAYERPREF_COLOR, wDrawGetRGB(layers[inx].color));
+            
+			flags = 0;
+			if (layers[inx].frozen) {
                 flags |= LAYERPREF_FROZEN;
             }
-
             if (layers[inx].onMap) {
                 flags |= LAYERPREF_ONMAP;
             }
-
             if (layers[inx].visible) {
                 flags |= LAYERPREF_VISIBLE;
             }
-
             if (layers[inx].module) {
             	flags |= LAYERPREF_MODULE;
             }
-
             if (layers[inx].button_off) {
             	flags |= LAYERPREF_NOBUTTON;
             }
+            layerSetInteger(inx, LAYERPREF_FLAGS, flags);
 
-            sprintf(buffer, LAYERPREF_FLAGS ".%0u", inx);
-            wPrefSetInteger(LAYERPREF_SECTION, buffer, flags);
+			layers[inx].scaleInx = GetScaleInx( layers[inx].scaleDescInx, layers[inx].gaugeInx );
+			layerSetInteger(inx, LAYERPREF_SCALEINX, layers[inx].scaleInx);
+			layerSetInteger(inx, LAYERPREF_SCLDESCINX, layers[inx].scaleDescInx);
+			layerSetInteger(inx, LAYERPREF_GAUGEINX, layers[inx].gaugeInx);
+			layerSetFloat(inx, LAYERPREF_MINRADIUS, layers[inx].minTrackRadius);
+			layerSetFloat(inx, LAYERPREF_MAXGRADE, layers[inx].maxTrackGrade);
+			layerSetFloat(inx, LAYERPREF_TIELENGTH, layers[inx].tieLength);
+			layerSetFloat(inx, LAYERPREF_TIEWIDTH, layers[inx].tieWidth);
+			layerSetFloat(inx, LAYERPREF_TIESPACING, layers[inx].tieSpacing);
 
-            if (layers[inx].layerLinkList.cnt>0) {
+			if (layers[inx].layerLinkList.cnt>0) {
             	sprintf(buffer, LAYERPREF_LIST ".%0u", inx);
             	GetLayerLinkString(inx,links);
             	wPrefSetString(LAYERPREF_SECTION, buffer, links);
@@ -975,6 +1070,29 @@ LayerPrefSave(void)
     wPrefSetString(LAYERPREF_SECTION, "layers", layersSaved);
 }
 
+
+/**
+* Load an integer from Prefs
+*/
+layerGetInteger( unsigned int inx, char prefName[], int *value, int deflt ){
+	char buffer[80];
+	char name[80];
+	strcpy(name, prefName);
+	strcat(name, ".%0u");
+	sprintf( buffer, name, inx );
+	wPrefGetInteger( LAYERPREF_SECTION, buffer, &value, deflt );
+}
+/**
+* Load a float from Prefs
+*/
+layerGetFloat( unsigned int inx, char prefName[], double *value, double deflt ){
+	char buffer[80];
+	char name[20];
+	strcpy(name, prefName);
+	strcat(name, ".%0u");
+	sprintf( buffer, name, inx );
+	wPrefGetFloat( LAYERPREF_SECTION, buffer, &value, deflt );
+}
 
 /**
  * Load the settings for all layers from the preferences.
@@ -1012,20 +1130,26 @@ LayerPrefLoad(void)
             }
 
             /* get and set the color, using the system default color in case color is not available from prefs */
-            sprintf(layerOption, LAYERPREF_COLOR ".%d", inx);
-            wPrefGetInteger(LAYERPREF_SECTION, layerOption, &rgb,
-                            layerColorTab[inx%COUNT(layerColorTab)]);
+            layerGetInteger(inx, LAYERPREF_COLOR, &rgb, layerColorTab[inx%COUNT(layerColorTab)]);
             color = wDrawFindColor(rgb);
             SetLayerColor(inx, color);
             /* get and set the flags */
-            sprintf(layerOption, LAYERPREF_FLAGS ".%d", inx);
-            wPrefGetInteger(LAYERPREF_SECTION, layerOption, &flags,
-                            LAYERPREF_ONMAP | LAYERPREF_VISIBLE);
+            wPrefGetInteger(inx, LAYERPREF_FLAGS, &flags, LAYERPREF_ONMAP | LAYERPREF_VISIBLE);
             layers[inx].frozen = ((flags & LAYERPREF_FROZEN) != 0);
             layers[inx].onMap = ((flags & LAYERPREF_ONMAP) != 0);
             layers[inx].visible = ((flags & LAYERPREF_VISIBLE) != 0);
             layers[inx].module = ((flags & LAYERPREF_MODULE) !=0);
             layers[inx].button_off = ((flags & LAYERPREF_NOBUTTON) !=0);
+
+			layerGetInteger(inx, LAYERPREF_SCALEINX, &layers[inx].scaleInx, GetLayoutCurScale());
+			layerGetInteger(inx, LAYERPREF_SCLDESCINX, &layers[inx].scaleDescInx, GetLayoutCurScaleDesc());
+			layerGetInteger(inx, LAYERPREF_GAUGEINX, &layers[inx].gaugeInx, 0);
+
+			layerGetFloat(inx, LAYERPREF_MINRADIUS, &layers[inx].minTrackRadius, 0.0);
+			layerGetFloat(inx, LAYERPREF_MAXGRADE, &layers[inx].maxTrackGrade, 0.0);
+			layerGetFloat(inx, LAYERPREF_TIELENGTH, &layers[inx].tieLength, 0.0);
+			layerGetFloat(inx, LAYERPREF_TIEWIDTH, &layers[inx].tieWidth, 0.0);
+			layerGetFloat(inx, LAYERPREF_TIESPACING, &layers[inx].tieSpacing, 0.0);
 
             sprintf(layerOption, LAYERPREF_LIST ".%d", inx);
             layerValue = wPrefGetString(LAYERPREF_SECTION,layerOption);
@@ -1176,6 +1300,14 @@ static void LayerUpdate(void)
             layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap ||
 			layers[(int)layerCurrent].module != (BOOL_T)layerModule ||
 			layers[(int)layerCurrent].button_off != (BOOL_T)layerNoButton ||
+		    layers[(int)layerCurrent].scaleInx != layerScaleInx ||
+		    layers[(int)layerCurrent].scaleDescInx != layerScaleDescInx ||
+		    layers[(int)layerCurrent].gaugeInx != layerGaugeInx ||
+		    layers[(int)layerCurrent].minTrackRadius != layerMinRadius ||
+		    layers[(int)layerCurrent].maxTrackGrade != layerMaxGrade ||
+		    layers[(int)layerCurrent].tieLength != layerTieLength ||
+		    layers[(int)layerCurrent].tieWidth != layerTieWidth ||
+		    layers[(int)layerCurrent].tieSpacing != layerTieSpacing ||
 			strcmp(layers[(int)layerCurrent].settingsName,settingsName) ||
 			strcmp(oldLinkList,layerLinkList)) {
         SetFileChanged();
@@ -1226,7 +1358,10 @@ static void LayerUpdate(void)
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
     if (layers[(int)layerCurrent].frozen) DeselectLayer(layerCurrent);
     layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
-    layers[(int)layerCurrent].module = (BOOL_T)layerModule;
+	layers[(int)layerCurrent].scaleDescInx = layerScaleDescInx;
+	layers[(int)layerCurrent].gaugeInx = layerGaugeInx;
+	layers[(int)layerCurrent].scaleInx = GetScaleInx( layerScaleDescInx, layerGaugeInx );
+	layers[(int)layerCurrent].module = (BOOL_T)layerModule;
     strcpy(layers[(int)layerCurrent].settingsName,settingsName);
 
     PutLayerListArray((int)layerCurrent,layerLinkList);
@@ -1264,6 +1399,15 @@ static void LayerSelect(
     layerColor = layers[inx].color;
     layerUseColor = layers[inx].useColor;
     layerNoButton = layers[inx].button_off;
+	layerScaleInx = layers[inx].scaleInx;
+	layerScaleDescInx = layers[inx].scaleDescInx;
+	layerGaugeInx = layers[inx].gaugeInx;
+	layerMinRadius = layers[inx].minTrackRadius;
+	layerMaxGrade = layers[inx].maxTrackGrade;
+	layerTieLength = layers[inx].tieLength;
+	layerTieWidth = layers[inx].tieWidth;
+	layerTieSpacing = layers[inx].tieSpacing;
+
     sprintf(message, "%ld", layers[inx].objCount);
     GetLayerLinkString(inx,layerLinkList);
     ParamLoadMessage(&layerPG, I_COUNT, message);
@@ -1541,9 +1685,13 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 static void DoLayer(void * unused)
 {
     if (layerW == NULL) {
-        layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
+		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
                                    LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
-    }
+
+		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+		LoadScaleList((wList_p)layerPLs[SCALEINX].control);
+		LoadGaugeList((wList_p)layerPLs[GAUGEINX].control, layerScaleDescInx); 
+	}
 
     if (settingsCatalog) CatalogDiscard(settingsCatalog);
     else settingsCatalog = InitCatalog();
@@ -1562,7 +1710,8 @@ static void DoLayer(void * unused)
 BOOL_T ReadLayers(char * line)
 {
     char * name, *layerLinkList, *layerSettingsName;
-    int inx, visible, frozen, color, onMap, module, dontUseColor, ColorFlags, button_off;
+    int inx, visible, frozen, color, onMap, sclInx, module, dontUseColor, ColorFlags, button_off;
+	double minRad, maxGrd, tieLen, tieWid, tieSpc;
     unsigned long rgb;
 
     /* older files didn't support layers */
@@ -1614,11 +1763,25 @@ BOOL_T ReadLayers(char * line)
     }
 
     /* get the properties for a layer from the file and update the layer accordingly */
+	if (paramVersion < 13){
+		if (!GetArgs(line, "dddduddddq", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
+				 &name)) {
 
-	if (!GetArgs(line, "dddduddddq", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
-			 &name)) {
+			return FALSE;
+		}
+		sclInx = GetLayoutCurScale();
+		minRad = 0.0;
+		maxGrd = 0.0;
+		tieLen = 0.0;
+		tieWid = 0.0;
+		tieSpc = 0.0;
+	}
+	else {
+		if (!GetArgs(line, "dddduddddufffffq", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
+			&sclInx, &minRad, &maxGrd, &tieLen, &tieWid, &tieSpc, &name)) {
 
-		return FALSE;
+			return FALSE;
+		}
 	}
 
 
@@ -1641,6 +1804,12 @@ BOOL_T ReadLayers(char * line)
     layers[inx].visible = visible;
     layers[inx].frozen = frozen;
     layers[inx].onMap = onMap;
+	layers[inx].scaleInx = sclInx;
+	layers[inx].minTrackRadius = minRad;
+	layers[inx].maxTrackGrade = maxGrd;
+	layers[inx].tieLength = tieLen;
+	layers[inx].tieWidth = tieWid;
+	layers[inx].tieSpacing = tieSpc;
     layers[inx].module = module;
     layers[inx].color = color;
     layers[inx].useColor = !dontUseColor;
@@ -1704,7 +1873,7 @@ BOOL_T WriteLayers(FILE * f)
 
     for (inx = 0; inx < NUM_LAYERS; inx++) {
         if (IsLayerConfigured(inx)) {
-            fprintf(f, "LAYERS %u %d %d %d %ld %d %d %d %d \"%s\"\n",
+            fprintf(f, "LAYERS %u %d %d %d %ld %d %d %d %d %u %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
                     inx,
                     layers[inx].visible,
                     layers[inx].frozen,
@@ -1713,6 +1882,9 @@ BOOL_T WriteLayers(FILE * f)
                     layers[inx].module,
 					layers[inx].useColor?0:1,
 					ColorFlags, layers[inx].button_off,
+				    layers[inx].scaleInx, layers[inx].minTrackRadius, 
+				    layers[inx].maxTrackGrade, layers[inx].tieLength, 
+				    layers[inx].tieWidth, layers[inx].tieSpacing, 
                     PutTitle(layers[inx].name));
         }
     }

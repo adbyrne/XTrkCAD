@@ -105,6 +105,7 @@ SET(SOURCES
 	cstruct.c
 	cswitchmotor.c
 	ctext.c
+	ctie.c
 	ctodesgn.c
 	ctrain.c
 	ctrain.h

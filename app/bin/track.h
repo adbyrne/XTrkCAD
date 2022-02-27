@@ -814,5 +814,8 @@ void ResolveBlockTrack ( track_p trk );
 void CheckDeleteSwitchmotor( track_p t );
 void ResolveSwitchmotorTurnout ( track_p trk );
 
+/* ctie.c */
+void defaultTieData( SCALEINX_T, DIST_T *, DIST_T *, DIST_T * ); 
+
 #endif
 
