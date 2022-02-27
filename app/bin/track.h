@@ -628,7 +628,7 @@ BOOL_T hasTrackCenterline( drawCmd_p d );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 
-void DrawStraightTies( drawCmd_p d, SCALEINX_T scaleInx, coOrd p0, coOrd p1, wDrawColor color );
+void DrawStraightTies( drawCmd_p d, tieData_p td, coOrd p0, coOrd p1, wDrawColor color );
 wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
 void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width, wDrawColor color, BOOL_T solid);
 
@@ -815,7 +815,7 @@ void CheckDeleteSwitchmotor( track_p t );
 void ResolveSwitchmotorTurnout ( track_p trk );
 
 /* ctie.c */
-void defaultTieData( SCALEINX_T, DIST_T *, DIST_T *, DIST_T * ); 
+void defaultTieData( SCALEINX_T, tieData_p ); 
 
 #endif
 

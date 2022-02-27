@@ -93,15 +93,16 @@ typedef struct {
 	GAUGEINX_T gaugeInx;                /**< the gauge desc index */
 	DIST_T minTrackRadius;              /**< minimum track radius */
 	DIST_T maxTrackGrade;               /**< maximum track grade */
-	DIST_T tieLength;                   /**< tie length */
-	DIST_T tieWidth;                    /**< tie width */
-	DIST_T tieSpacing;                  /**< tie spacing */
+	tieData_t tieData;                  /**< tie data structure */
+	//DIST_T tieLength;                   /**< tie length */
+	//DIST_T tieWidth;                    /**< tie width */
+	//DIST_T tieSpacing;                  /**< tie spacing */
 	long objCount;						/**< number of objects on layer */
     dynArr_t layerLinkList;				/**< other layers that show/hide with this one */
     char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
 } layer_t;
 
-static layer_t layers[NUM_LAYERS];
+EXPORT static layer_t layers[NUM_LAYERS];
 static layer_t *layers_save = NULL;
 
 static Catalog * settingsCatalog;
@@ -214,6 +215,11 @@ BOOL_T GetLayerOnMap(unsigned int layer)
     } else {
         return layers[layer].onMap;
     }
+}
+
+EXPORT tieData_p GetLayerTieData( unsigned int layer )
+{
+	return &layers[layer].tieData;
 }
 
 BOOL_T GetLayerModule(unsigned int layer)
@@ -580,9 +586,10 @@ static SCALEDESCINX_T layerScaleDescInx;
 static GAUGEINX_T layerGaugeInx;
 static DIST_T layerMinRadius;
 static DIST_T layerMaxGrade;
-static DIST_T layerTieLength;
-static DIST_T layerTieWidth;
-static DIST_T layerTieSpacing;
+static tieData_t layerTieData;
+//static DIST_T layerTieLength;
+//static DIST_T layerTieWidth;
+//static DIST_T layerTieSpacing;
 static long layerModule = FALSE;
 static long layerNoButton = FALSE;
 static void LayerOk(void * unused);
@@ -626,10 +633,10 @@ static paramData_t layerPLs[] = {
 #define MINRADIUSENTRY (11)
 	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF|PDO_DLGBOXEND, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
-#define TIEDAYA (13)
-	{ PD_FLOAT, &layerTieLength, "tieLength", PDO_NOPREF|PDO_DRAW, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
-	{ PD_FLOAT, &layerTieWidth, "tieWidth", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
-	{ PD_FLOAT, &layerTieSpacing, "tieSpacing", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ|PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
+#define TIEDATA (13)
+	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF|PDO_DRAW, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ|PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
 #define I_LINKLIST (16)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (17)
@@ -760,7 +767,7 @@ LayerSystemDefaults(void)
 		layers[inx].gaugeInx = 0;
 		layers[inx].minTrackRadius = GetLayoutMinTrackRadius( );
 		layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade( );
-		defaultTieData(layers[inx].scaleInx, &layers[inx].tieLength, &layers[inx].tieWidth, &layers[inx].tieSpacing);
+		defaultTieData(layers[inx].scaleInx, &layers[inx].tieData);
         layers[inx].objCount = 0;
         DYNARR_RESET(int,layers[inx].layerLinkList);
         SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
@@ -864,9 +871,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	layerGaugeInx = layers[layer].gaugeInx;
 	layerMinRadius = layers[layer].minTrackRadius;
 	layerMaxGrade = layers[layer].maxTrackGrade;
-	layerTieLength = layers[layer].tieLength;
-	layerTieWidth = layers[layer].tieWidth;
-	layerTieSpacing = layers[layer].tieSpacing;
+	layerTieData = layers[layer].tieData;
     strcpy(layerName, layers[layer].name);
     strcpy(settingsName, layers[layer].settingsName);
     GetLayerLinkString(layer,layerLinkList);
@@ -1010,9 +1015,9 @@ LayerPrefSave(void)
 			    layers[inx].gaugeInx != layerGaugeInx ||
 			    layers[inx].minTrackRadius != layerMinRadius ||
 			    layers[inx].maxTrackGrade != layerMaxGrade ||
-			    layers[inx].tieLength != layerTieLength ||
-			    layers[inx].tieWidth != layerTieWidth ||
-			    layers[inx].tieSpacing != layerTieSpacing
+			    layers[inx].tieData.length != layerTieData.length ||
+			    layers[inx].tieData.width != layerTieData.width ||
+			    layers[inx].tieData.spacing != layerTieData.spacing
 			) {
             sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
             wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
@@ -1043,9 +1048,9 @@ LayerPrefSave(void)
 			layerSetInteger(inx, LAYERPREF_GAUGEINX, layers[inx].gaugeInx);
 			layerSetFloat(inx, LAYERPREF_MINRADIUS, layers[inx].minTrackRadius);
 			layerSetFloat(inx, LAYERPREF_MAXGRADE, layers[inx].maxTrackGrade);
-			layerSetFloat(inx, LAYERPREF_TIELENGTH, layers[inx].tieLength);
-			layerSetFloat(inx, LAYERPREF_TIEWIDTH, layers[inx].tieWidth);
-			layerSetFloat(inx, LAYERPREF_TIESPACING, layers[inx].tieSpacing);
+			layerSetFloat(inx, LAYERPREF_TIELENGTH, layers[inx].tieData.length);
+			layerSetFloat(inx, LAYERPREF_TIEWIDTH, layers[inx].tieData.width);
+			layerSetFloat(inx, LAYERPREF_TIESPACING, layers[inx].tieData.spacing);
 
 			if (layers[inx].layerLinkList.cnt>0) {
             	sprintf(buffer, LAYERPREF_LIST ".%0u", inx);
@@ -1148,9 +1153,9 @@ LayerPrefLoad(void)
 
 			layerGetFloat(inx, LAYERPREF_MINRADIUS, &layers[inx].minTrackRadius, 0.0);
 			layerGetFloat(inx, LAYERPREF_MAXGRADE, &layers[inx].maxTrackGrade, 0.0);
-			layerGetFloat(inx, LAYERPREF_TIELENGTH, &layers[inx].tieLength, 0.0);
-			layerGetFloat(inx, LAYERPREF_TIEWIDTH, &layers[inx].tieWidth, 0.0);
-			layerGetFloat(inx, LAYERPREF_TIESPACING, &layers[inx].tieSpacing, 0.0);
+			layerGetFloat(inx, LAYERPREF_TIELENGTH, &layers[inx].tieData.length, 0.0);
+			layerGetFloat(inx, LAYERPREF_TIEWIDTH, &layers[inx].tieData.width, 0.0);
+			layerGetFloat(inx, LAYERPREF_TIESPACING, &layers[inx].tieData.spacing, 0.0);
 
             sprintf(layerOption, LAYERPREF_LIST ".%d", inx);
             layerValue = wPrefGetString(LAYERPREF_SECTION,layerOption);
@@ -1306,9 +1311,9 @@ static void LayerUpdate(void)
 		    layers[(int)layerCurrent].gaugeInx != layerGaugeInx ||
 		    layers[(int)layerCurrent].minTrackRadius != layerMinRadius ||
 		    layers[(int)layerCurrent].maxTrackGrade != layerMaxGrade ||
-		    layers[(int)layerCurrent].tieLength != layerTieLength ||
-		    layers[(int)layerCurrent].tieWidth != layerTieWidth ||
-		    layers[(int)layerCurrent].tieSpacing != layerTieSpacing ||
+		    layers[(int)layerCurrent].tieData.length != layerTieData.length ||
+		    layers[(int)layerCurrent].tieData.width != layerTieData.width ||
+		    layers[(int)layerCurrent].tieData.spacing != layerTieData.spacing ||
 			strcmp(layers[(int)layerCurrent].settingsName,settingsName) ||
 			strcmp(oldLinkList,layerLinkList)) {
         SetFileChanged();
@@ -1362,6 +1367,7 @@ static void LayerUpdate(void)
 	layers[(int)layerCurrent].scaleDescInx = layerScaleDescInx;
 	layers[(int)layerCurrent].gaugeInx = layerGaugeInx;
 	layers[(int)layerCurrent].scaleInx = GetScaleInx( layerScaleDescInx, layerGaugeInx );
+	layers[(int)layerCurrent].tieData = layerTieData;
 	layers[(int)layerCurrent].module = (BOOL_T)layerModule;
     strcpy(layers[(int)layerCurrent].settingsName,settingsName);
 
@@ -1405,9 +1411,9 @@ static void LayerSelect(
 	layerGaugeInx = layers[inx].gaugeInx;
 	layerMinRadius = layers[inx].minTrackRadius;
 	layerMaxGrade = layers[inx].maxTrackGrade;
-	layerTieLength = layers[inx].tieLength;
-	layerTieWidth = layers[inx].tieWidth;
-	layerTieSpacing = layers[inx].tieSpacing;
+	layerTieData.length = layers[inx].tieData.length;
+	layerTieData.width = layers[inx].tieData.width;
+	layerTieData.spacing = layers[inx].tieData.spacing;
 
     sprintf(message, "%ld", layers[inx].objCount);
     GetLayerLinkString(inx,layerLinkList);
@@ -1818,9 +1824,9 @@ BOOL_T ReadLayers(char * line)
 	layers[inx].scaleInx = sclInx;
 	layers[inx].minTrackRadius = minRad;
 	layers[inx].maxTrackGrade = maxGrd;
-	layers[inx].tieLength = tieLen;
-	layers[inx].tieWidth = tieWid;
-	layers[inx].tieSpacing = tieSpc;
+	layers[inx].tieData.length = tieLen;
+	layers[inx].tieData.width = tieWid;
+	layers[inx].tieData.spacing = tieSpc;
     layers[inx].module = module;
     layers[inx].color = color;
     layers[inx].useColor = !dontUseColor;
@@ -1895,8 +1901,8 @@ BOOL_T WriteLayers(FILE * f)
 					layers[inx].useColor?0:1,
 					ColorFlags, layers[inx].button_off,
 				    layers[inx].scaleInx, layers[inx].minTrackRadius, 
-				    layers[inx].maxTrackGrade, layers[inx].tieLength, 
-				    layers[inx].tieWidth, layers[inx].tieSpacing, 
+				    layers[inx].maxTrackGrade, layers[inx].tieData.length, 
+				    layers[inx].tieData.width, layers[inx].tieData.spacing, 
                     PutTitle(layers[inx].name));
         }
     }

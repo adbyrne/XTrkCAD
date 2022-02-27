@@ -42,20 +42,13 @@ static int log_tieList;
 /**
 * @brief Default tie data for a scale in tieLength, tieWidth, tieSpacing
 */
-EXPORT void defaultTieData( SCALEINX_T inx, DIST_T *tieLength, DIST_T *tieWidth, DIST_T *tieSpacing ) 
+EXPORT void defaultTieData( SCALEINX_T inx, tieData_p tieData ) 
 {
 	SCALEDESCINX_T scaleInx;
 	GAUGEINX_T gaugeInx;
 	GetScaleGauge( inx, &scaleInx, &gaugeInx );
 			
-	*tieLength = (96.0-54.0) / GetScaleRatio(inx) + GetScaleTrackGauge(inx);
-	*tieWidth = 16.0 / GetScaleRatio(inx);
-	*tieSpacing = 2 * (*tieWidth);
+	tieData->length = (96.0-54.0) / GetScaleRatio(inx) + GetScaleTrackGauge(inx);
+	tieData->width = 16.0 / GetScaleRatio(inx);
+	tieData->spacing = 2 * (tieData->width);
 }
-
-EXPORT tieData_t GetTieData( track_cp trk )
-{
-	tieData_t td;
-	return td;
-}
-

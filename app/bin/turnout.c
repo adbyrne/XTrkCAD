@@ -216,8 +216,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	dtod.index = trk->index;
 	dtod.xx = xx;
 
-	SCALEINX_T scaleInx = GetTrkScale(trk);
-	dtod.td = GetScaleTieData(scaleInx);
+	dtod.td = GetLayerTieData(GetTrkLayer(trk));
 
 	int pathCnt = 0, routeCnt = 0;
 
@@ -1137,7 +1136,7 @@ static void DrawNormalTurnout(
 			a0 = FindAngle(dto[othPath].base[p0], dto[othPath].baseLast);
 			DIST_T lenr = (dto[othPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&p1, p2, angle, -lenr);
-			DrawStraightTies(d, scaleInx, p1, p2, color);
+			DrawStraightTies(d, dtod.td, p1, p2, color);
 		}
 		else {
 			p1 = dto[othPath].pts[pn - 2];
@@ -1182,7 +1181,7 @@ static void DrawNormalTurnout(
 			a0 = FindAngle(dto[secPath].base[q0], dto[secPath].baseLast);
 			DIST_T lenr = (dto[secPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&q1, q2, angle, -lenr);
-			DrawStraightTies(d, scaleInx, q1, q2, color);
+			DrawStraightTies(d, dtod.td, q1, q2, color);
 		}
 		else {
 			q1 = dto[secPath].pts[qn - 2];
@@ -1199,7 +1198,7 @@ static void DrawNormalTurnout(
 				angle = FindAngle(s1, s2);
 				DIST_T lenr = len - px + dlenx;
 				Translate(&s1, s2, angle, -lenr);
-				DrawStraightTies(d, scaleInx, s1, s2, color);
+				DrawStraightTies(d, dtod.td, s1, s2, color);
 			}
 			else {
 				n = dto[strPath].n;
@@ -1445,7 +1444,7 @@ static void DrawCurvedTurnout(
 	len = FindDistance(p1, p2);
 	if (len >= 2 * tdspc) {
 		Translate(&p1, p1, a0, tdspc2);
-		DrawStraightTies(d, scaleInx, p1, p2, color);
+		DrawStraightTies(d, dtod.td, p1, p2, color);
 	}
 	else if (len > tdspc2) { 
 		Translate(&p2, p2, a0, -tdspc2);
@@ -1458,7 +1457,7 @@ static void DrawCurvedTurnout(
 	len = FindDistance(q1, q2);
 	if (len >= 2 * tdspc) {
 		Translate(&q1, q1, a0, tdspc2);
-		DrawStraightTies(d, scaleInx, q1, q2, color);
+		DrawStraightTies(d, dtod.td, q1, q2, color);
 	}
 	else if (len > tdspc2) {
 		Translate(&q2, q2, a0, -tdspc2);
@@ -1575,7 +1574,7 @@ static void DrawXingTurnout(
 	if (toType == DTO_XNG9) {
 		p1 = dto[strPath].pts[0];
 		p2 = dto[strPath].ptsLast;
-		DrawStraightTies(d, scaleInx, p1, p2, color);
+		DrawStraightTies(d, dtod.td, p1, p2, color);
 
 		p1 = dto[str2Path].pts[0];
 		p2 = dto[str2Path].ptsLast;
@@ -1590,13 +1589,13 @@ static void DrawXingTurnout(
 		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		Translate(&pos, dtod.midPt, a2, -tdadj - tdspc);
-		DrawStraightTies(d, scaleInx, p1, pos, color);
+		DrawStraightTies(d, dtod.td, p1, pos, color);
 
 		Translate(&pos, dtod.midPt, a2, tdadj + tdadj2);
 		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
 
 		Translate(&pos, dtod.midPt, a2, tdadj + tdspc);
-		DrawStraightTies(d, scaleInx, pos, p2, color);
+		DrawStraightTies(d, dtod.td, pos, p2, color);
 		return;
 	}
 
@@ -1690,7 +1689,7 @@ static void DrawXingTurnout(
 	a0 = dto[strPath].angle;
 	if (lenr > dx) {
 		Translate(&pos, p2, a0, -lenr);
-		DrawStraightTies(d, scaleInx, pos, p2, color);
+		DrawStraightTies(d, dtod.td, pos, p2, color);
 	}
 	else {
 		Translate(&pos, p2, a0, -dx2);
@@ -1703,7 +1702,7 @@ static void DrawXingTurnout(
 	a0 = dto[str2Path].angle;
 	if (lenr > dx) {
 		Translate(&pos, p2, a0, -lenr);
-		DrawStraightTies(d, scaleInx, pos, p2, color);
+		DrawStraightTies(d, dtod.td, pos, p2, color);
 	}
 	else {
 		Translate(&pos, p2, a0, -dx2);
@@ -1773,7 +1772,7 @@ static void DrawXingTurnout(
 	lenr = FindDistance(p1, p2) - lenx * magic2;
 	if (lenr > dx) {
 		Translate(&pos, p1, a0, lenr);
-		DrawStraightTies(d, scaleInx, p1, pos, color);
+		DrawStraightTies(d, dtod.td, p1, pos, color);
 	}
 	else {
 		Translate(&pos, p1, a0, dx2);
@@ -1785,7 +1784,7 @@ static void DrawXingTurnout(
 	lenr = FindDistance(p1, p2) - lenx * magic2;
 	if (lenr > dx) {
 		Translate(&pos, p1, a0, lenr);
-		DrawStraightTies(d, scaleInx, p1, pos, color);
+		DrawStraightTies(d, dtod.td, p1, pos, color);
 	}
 	else {
 		Translate(&pos, p1, a0, dx2);
@@ -1966,7 +1965,7 @@ static void DrawCrossTurnout(
 			a0 = FindAngle(dto[strPath].base[p0], dto[strPath].baseLast);
 			DIST_T lenr = (dto[strPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&p1, p2, angle, -lenr);
-			DrawStraightTies(d, scaleInx, p1, p2, color);
+			DrawStraightTies(d, dtod.td, p1, p2, color);
 		}
 		else {
 			p1 = dto[strPath].pts[pn - 2];
@@ -1982,7 +1981,7 @@ static void DrawCrossTurnout(
 			a0 = FindAngle(dto[str2Path].base[q0], dto[str2Path].baseLast);
 			DIST_T lenr = (dto[str2Path].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&q1, q2, angle, -lenr);
-			DrawStraightTies(d, scaleInx, q1, q2, color);
+			DrawStraightTies(d, dtod.td, q1, q2, color);
 		}
 		else {
 			q1 = dto[str2Path].pts[qn - 2];

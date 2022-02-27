@@ -344,12 +344,11 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 
 EXPORT void DrawStraightTies(
 	drawCmd_p d,
-	SCALEINX_T scaleInx,
+	tieData_p td,
 	coOrd p0,
 	coOrd p1,
 	wDrawColor color )
 {
-	tieData_p td;
 	DIST_T tieOff0=0.0, tieOff1=0.0;
 	DIST_T len, dlen;
 	coOrd pos;
@@ -361,9 +360,6 @@ EXPORT void DrawStraightTies(
 
 	if ( color == wDrawColorBlack )
 		color = tieColor;
-	if ( scaleInx < 0 )
-		return;
-	td = GetScaleTieData( scaleInx );
 	len = FindDistance( p0, p1 );
 	len -= tieOff0+tieOff1;
 	angle = FindAngle( p0, p1 );
@@ -395,6 +391,7 @@ EXPORT void DrawStraightTrack(
 	coOrd pp0, pp1;
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
+	tieData_p td;
 	long bridge = 0, roadbed = 0;
 	if ( trk ) {
 		bridge = GetTrkBridge(trk);
@@ -437,8 +434,10 @@ EXPORT void DrawStraightTrack(
 		DrawLine(d,p0,p1,width3,bridge?bridgeColor:roadbedColor);
 	}
 
-	if ( DoDrawTies( d, trk ) )
-		DrawStraightTies( d, GetTrkScale(trk), p0, p1, color );
+	if ( DoDrawTies( d, trk ) ) {
+		td  = GetLayerTieData( GetTrkLayer(trk) );
+		DrawStraightTies( d, td, p0, p1, color );
+	}
 	if (color == wDrawColorBlack)
 		color = normalColor;
 	if ( d->scale >= scale2rail ) {
