@@ -60,6 +60,7 @@
 #define LAYERPREF_LIST "list"
 #define LAYERPREF_SETTINGS "settings"
 
+static paramIntegerRange_t r0_1000000 = { 0, 1000000 };
 static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0 };
 static paramFloatRange_t r0_90 = { 0.0, 90.0 };
@@ -94,9 +95,6 @@ typedef struct {
 	DIST_T minTrackRadius;              /**< minimum track radius */
 	ANGLE_T maxTrackGrade;               /**< maximum track grade */
 	tieData_t tieData;                  /**< tie data structure */
-	//DIST_T tieLength;                   /**< tie length */
-	//DIST_T tieWidth;                    /**< tie width */
-	//DIST_T tieSpacing;                  /**< tie spacing */
 	long objCount;						/**< number of objects on layer */
     dynArr_t layerLinkList;				/**< other layers that show/hide with this one */
     char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
@@ -288,7 +286,7 @@ wDrawColor GetLayerColor(unsigned int layer)
 
 static void RedrawLayer( unsigned int l, BOOL_T draw )
 {
-	DoRedraw(); // RedrawLayer
+	DoRedraw(); 
 }
 
 
@@ -322,7 +320,7 @@ EXPORT void FlipLayer( void * layerVP )
     /* Set visible on related layers other than current */
      for (int i=0;i<layers[layer].layerLinkList.cnt;i++) {
         int l = DYNARR_N(int,layers[layer].layerLinkList,i)-1;
-        if ((l != curLayer) && (l >=0) && (l < NUM_LAYERS)) {
+        if ((l != curLayer) && (l >= 0) && (l < NUM_LAYERS)) {
 			layers[l].visible = layers[layer].visible;
 			if (!layers[l].button_off)
 				wButtonSetBusy(layer_btns[l], layers[l].visible);
@@ -435,7 +433,8 @@ FormatLayerName(unsigned int layerNumber)
     DynStringPrintf(&string,
                     "%2d %c %s",
                     layerNumber + 1,
-					(layers[layerNumber].frozen ? '*': layers[layerNumber].module ? 'm': layers[layerNumber].objCount > 0 ? '+' : '-'),
+					(layers[layerNumber].frozen ? '*': layers[layerNumber].module ? 'm': 
+						layers[layerNumber].objCount > 0 ? '+' : '-'),
                     layers[layerNumber].name);
     result = strdup(DynStringToCStr(&string));
     DynStringFree(&string);
@@ -613,6 +612,7 @@ static tieData_t layerTieData;
 //static DIST_T layerTieLength;
 //static DIST_T layerTieWidth;
 //static DIST_T layerTieSpacing;
+static long layerObjectCount;
 static long layerModule = FALSE;
 static long layerNoButton = FALSE;
 static void LayerOk(void * unused);
@@ -665,8 +665,8 @@ static paramData_t layerPLs[] = {
 #define I_SETTINGS (17)
 	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP( 250), N_("Settings when Current") },
 #define I_COUNT (18)
-    { PD_MESSAGE, N_("Object Count:"), NULL, PDO_DLGBOXEND|PDO_DLGNOLABELALIGN, I2VP(370) },
-    { PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r0_1000000, N_("Object Count"), 0, 0 },
+	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
     { PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
     { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
     { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
@@ -674,7 +674,6 @@ static paramData_t layerPLs[] = {
 };
 
 #define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
-#define MESSAGETEXT ((wMessage_p)layerPLs[I_COUNT].control)
 
 static paramGroup_t layerPG = { "layer", 0, layerPLs, COUNT( layerPLs ) };
 
@@ -784,13 +783,15 @@ LayerSystemDefaults(void)
         layers[inx].onMap = TRUE;
         layers[inx].module = FALSE;
         layers[inx].button_off = FALSE;
-		layers[inx].scaleInx = GetLayoutCurScale();
+		layers[inx].scaleInx = -1; 
 		GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
 		layers[inx].scaleDescInx = GetLayoutCurScaleDesc();
 		layers[inx].gaugeInx = 0;
-		layers[inx].minTrackRadius = GetLayoutMinTrackRadius( );
-		layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade( );
-		layers[inx].tieData = *GetScaleTieData(layers[inx].scaleInx);
+		layers[inx].minTrackRadius = 0.0; 
+		layers[inx].maxTrackGrade = 0.0; 
+		layers[inx].tieData.length = 0.0; 
+		layers[inx].tieData.width = 0.0;
+		layers[inx].tieData.spacing = 0.0;
         layers[inx].objCount = 0;
         DYNARR_RESET(int,layers[inx].layerLinkList);
         SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
@@ -832,10 +833,12 @@ void LoadLayerLists(void)
     /* set current layer to selected */
     wListSetIndex(setLayerL, curLayer);
 
-    if (layerL) wListSetIndex(layerL,curLayer);
+    if (layerL) {
+		wListSetIndex(layerL,curLayer);
 
-	/* Sync Scale and lists */
-	GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+		/* Sync Scale and lists */
+		GetScaleGauge( layerScaleInx,&layerScaleDescInx,&layerGaugeInx );
+	}
 }
 
 /**
@@ -895,6 +898,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	layerMinRadius = layers[layer].minTrackRadius;
 	layerMaxGrade = layers[layer].maxTrackGrade;
 	layerTieData = layers[layer].tieData;
+	layerObjectCount = layers[layer].objCount;
     strcpy(layerName, layers[layer].name);
     strcpy(settingsName, layers[layer].settingsName);
     GetLayerLinkString(layer,layerLinkList);
@@ -917,18 +921,16 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
     		layers[layer].settingsName[0] = '\0';
     }
 
-	sprintf(message, "Object Count: %ld", layers[layer].objCount);
-    if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
+	ParamControlActive( &layerPG, I_COUNT, FALSE );
 
     /* finally show the layer buttons with balloon text */
     for (inx = 0; inx < NUM_BUTTONS; inx++) {
     	if (!layers[inx].button_off) {
     		wButtonSetBusy(layer_btns[inx], layers[inx].visible != 0);
     		wControlSetBalloonText((wControl_p)layer_btns[inx],
-                               (layers[inx].name[0] != '\0' ? layers[inx].name :_("Show/Hide Layer")));
+                (layers[inx].name[0] != '\0' ? layers[inx].name :_("Show/Hide Layer")));
     	}
     }
-
 }
 
 /**
@@ -1103,13 +1105,13 @@ LayerPrefSave(void)
 /**
 * Load an integer from Prefs
 */
-layerGetInteger( unsigned int inx, char prefName[], int *value, int deflt ){
+layerGetInteger( unsigned int inx, char prefName[], long *value, int deflt ){
 	char buffer[80];
 	char name[80];
 	strcpy(name, prefName);
 	strcat(name, ".%0u");
 	sprintf( buffer, name, inx );
-	wPrefGetInteger( LAYERPREF_SECTION, buffer, &value, deflt );
+	wPrefGetInteger( LAYERPREF_SECTION, buffer, value, deflt );
 }
 /**
 * Load a float from Prefs
@@ -1120,7 +1122,7 @@ layerGetFloat( unsigned int inx, char prefName[], double *value, double deflt ){
 	strcpy(name, prefName);
 	strcat(name, ".%0u");
 	sprintf( buffer, name, inx );
-	wPrefGetFloat( LAYERPREF_SECTION, buffer, &value, deflt );
+	wPrefGetFloat( LAYERPREF_SECTION, buffer, value, deflt );
 }
 
 /**
@@ -1163,7 +1165,7 @@ LayerPrefLoad(void)
             color = wDrawFindColor(rgb);
             SetLayerColor(inx, color);
             /* get and set the flags */
-            wPrefGetInteger(inx, LAYERPREF_FLAGS, &flags, LAYERPREF_ONMAP | LAYERPREF_VISIBLE);
+            layerGetInteger(inx, LAYERPREF_FLAGS, &flags, LAYERPREF_ONMAP | LAYERPREF_VISIBLE);
             layers[inx].frozen = ((flags & LAYERPREF_FROZEN) != 0);
             layers[inx].onMap = ((flags & LAYERPREF_ONMAP) != 0);
             layers[inx].visible = ((flags & LAYERPREF_VISIBLE) != 0);
@@ -1321,7 +1323,10 @@ static void LayerUpdate(void)
     char oldLinkList[STR_LONG_SIZE];
     GetLayerLinkString((int)layerCurrent,oldLinkList);
 
-    if (strcmp(layers[(int)layerCurrent].name, layerName) ||
+	//sprintf(message, "Object Count: %ld", layers[layerCurrent].objCount);
+	//if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
+
+	if (strcmp(layers[(int)layerCurrent].name, layerName) ||
             layerColor != layers[(int)layerCurrent].color ||
 			layers[(int)layerCurrent].useColor != (BOOL_T)layerUseColor ||
             layers[(int)layerCurrent].visible != (BOOL_T)layerVisible ||
@@ -1369,10 +1374,6 @@ static void LayerUpdate(void)
     		layers[(int)layerCurrent].useColor != (BOOL_T)layerUseColor ||
               (BOOL_T)layerVisible != layers[(int)layerCurrent].visible);
 
-    if ((!layerRedrawMap) && redraw) {
-        RedrawLayer((unsigned int)layerCurrent, FALSE);
-    }
-
     SetLayerColor(layerCurrent, layerColor);
 
     if (layerCurrent<NUM_BUTTONS &&
@@ -1380,7 +1381,7 @@ static void LayerUpdate(void)
         wButtonSetBusy(layer_btns[(int)layerCurrent], layerVisible);
     }
 
-    layers[(int)layerCurrent].useColor = (BOOL_T)layerUseColor;
+	layers[(int)layerCurrent].useColor = (BOOL_T)layerUseColor;
     if (layers[(int)layerCurrent].visible != (BOOL_T)layerVisible)
 			FlipLayer(I2VP(layerCurrent));
     layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
@@ -1400,7 +1401,7 @@ static void LayerUpdate(void)
 
     SetLayerHideButton(layerCurrent,layerNoButton);
 
-    MainProc( mainW, wResize_e, NULL, NULL );
+	MainProc( mainW, wResize_e, NULL, NULL );
 
     if (layerRedrawMap) {
         DoRedraw();
@@ -1408,7 +1409,7 @@ static void LayerUpdate(void)
         RedrawLayer(layerCurrent, TRUE);
     }
 
-    layerRedrawMap = FALSE;
+	layerRedrawMap = FALSE;
 }
 
 
@@ -1439,10 +1440,11 @@ static void LayerSelect(
 	layerTieData.length = layers[inx].tieData.length;
 	layerTieData.width = layers[inx].tieData.width;
 	layerTieData.spacing = layers[inx].tieData.spacing;
+	layerObjectCount = layers[inx].objCount;
 
     sprintf(message, "%ld", layers[inx].objCount);
     GetLayerLinkString(inx,layerLinkList);
-    ParamLoadMessage(&layerPG, I_COUNT, message);
+    // ParamLoadMessage(&layerPG, I_COUNT, message);
     ParamLoadControls(&layerPG);
 
     if (layerS) {
@@ -1743,6 +1745,7 @@ BOOL_T ReadLayers(char * line)
 {
     char * name, *layerLinkList, *layerSettingsName;
     int inx, visible, frozen, color, onMap, sclInx, module, dontUseColor, ColorFlags, button_off;
+	unsigned int layerInx = 0;
 	double minRad, maxGrd, tieLen, tieWid, tieSpc;
     unsigned long rgb;
 
@@ -1755,7 +1758,7 @@ BOOL_T ReadLayers(char * line)
     /* set the current layer */
 
     if (strncmp(line, "CURRENT", 7) == 0) {
-        curLayer = atoi(line+7);
+        curLayer = atoi(line+7) - 1;
 
         if (!IsLayerValid(curLayer)) {
 
@@ -1782,7 +1785,7 @@ BOOL_T ReadLayers(char * line)
     	if (!GetArgs(line+4, "dq" , &inx, &layerLinkList)) {
     		return FALSE;
     	}
-    	PutLayerListArray(inx,layerLinkList);
+    	PutLayerListArray(inx-1,layerLinkList);
     	return TRUE;
     }
 
@@ -1790,13 +1793,14 @@ BOOL_T ReadLayers(char * line)
     	if (!GetArgs(line+3, "dq", &inx, &layerSettingsName)) {
     		return FALSE;
     	}
-    	strcpy(layers[inx].settingsName,layerSettingsName);
+		layerInx = inx - 1;
+    	strcpy(layers[layerInx].settingsName,layerSettingsName);
     	return TRUE;
     }
 
     /* get the properties for a layer from the file and update the layer accordingly */
 	if (paramVersion < 13){
-		if (!GetArgs(line, "dddduddddq", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
+		if (!GetArgs(line, "dddduddddq", &layerInx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
 				 &name)) {
 
 			return FALSE;
@@ -1809,7 +1813,7 @@ BOOL_T ReadLayers(char * line)
 		tieSpc = 0.0;
 	}
 	else {
-		if (!GetArgs(line, "dddduddddufffffq", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
+		if (!GetArgs(line, "dddduddddufffffq", &layerInx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
 			&sclInx, &minRad, &maxGrd, &tieLen, &tieWid, &tieSpc, &name)) {
 
 			return FALSE;
@@ -1836,10 +1840,10 @@ BOOL_T ReadLayers(char * line)
         }
     }
 
-    if (inx < 0 || inx >= NUM_LAYERS) {
+    if (layerInx < 1 || layerInx >= NUM_LAYERS) {
         return FALSE;
     }
-
+	inx = layerInx - 1;
     color = wDrawFindColor(rgb);
     SetLayerColor(inx, color);
     strncpy(layers[inx].name, name, sizeof layers[inx].name);
@@ -1885,14 +1889,13 @@ BOOL_T ReadLayers(char * line)
 BOOL_T
 IsLayerConfigured(unsigned int layerNumber)
 {
-    return (!layers[layerNumber].visible ||
+    return (layers[layerNumber].name[0] ||
+		    !layers[layerNumber].visible ||
             layers[layerNumber].frozen ||
             !layers[layerNumber].onMap ||
 			layers[layerNumber].module ||
 			layers[layerNumber].button_off ||
-            layers[layerNumber].color !=
-            layerColorTab[layerNumber % (COUNT(layerColorTab))] ||
-            layers[layerNumber].name[0] ||
+            layers[layerNumber].color != layerColorTab[layerNumber % (COUNT(layerColorTab))] ||
 			layers[layerNumber].layerLinkList.cnt > 0 ||
             layers[layerNumber].objCount);
 }
@@ -1917,7 +1920,7 @@ BOOL_T WriteLayers(FILE * f)
     for (inx = 0; inx < NUM_LAYERS; inx++) {
         if (IsLayerConfigured(inx)) {
             fprintf(f, "LAYERS %u %d %d %d %ld %d %d %d %d %u %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
-                    inx,
+                    (inx+1),
                     layers[inx].visible,
                     layers[inx].frozen,
                     layers[inx].onMap,
@@ -1932,14 +1935,15 @@ BOOL_T WriteLayers(FILE * f)
         }
     }
 
-    fprintf(f, "LAYERS CURRENT %u\n", curLayer);
+    fprintf(f, "LAYERS CURRENT %u\n", (curLayer+1));
 
     for (inx = 0; inx < NUM_LAYERS; inx++) {
+		unsigned int layerInx = inx + 1;
     	GetLayerLinkString(inx,layerLinkList);
     	if (IsLayerConfigured(inx) && strlen(layerLinkList)>0)
-    		fprintf(f, "LAYERS LINK %u \"%s\"\n",inx,layerLinkList);
+    		fprintf(f, "LAYERS LINK %u \"%s\"\n",layerInx,layerLinkList);
     	if (IsLayerConfigured(inx) && layers[inx].settingsName[0])
-    		fprintf(f, "LAYERS SET %u \"%s\"\n",inx, layers[inx].settingsName);
+    		fprintf(f, "LAYERS SET %u \"%s\"\n",layerInx, layers[inx].settingsName);
     }
     return TRUE;
 }
@@ -1957,7 +1961,7 @@ void InitLayers(void)
 
     /* create the bitmaps for the layer buttons */
     /* all bitmaps have to have the same dimensions */
-    for (int i = 0;i<NUM_LAYERS; i++) {
+    for (int i = 0; i < NUM_LAYERS; i++) {
 		// char *bits = (show_layer_bits[i] + iconSize * sizeof(char*)));
         show_layer_bmps[i] = wIconCreateBitMap(lbits_width[iconSize], lbits_height[iconSize], 
 			                                   show_layer_bits[iconSize][i],
