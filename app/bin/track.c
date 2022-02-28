@@ -2703,7 +2703,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	}
 	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) != 0 )
 		return wDrawColorBlack;
-	if ( grade > GetLayoutMaxTrackGrade())
+	if ( grade > GetLayerMaxTrackGrade(trk->layer))
 		return exceptionColor;
 	if ( QueryTrack( trk, Q_EXCEPTION ) )
 		return exceptionColor;

@@ -92,7 +92,7 @@ typedef struct {
 	SCALEDESCINX_T scaleDescInx;        /**< the scale description */
 	GAUGEINX_T gaugeInx;                /**< the gauge desc index */
 	DIST_T minTrackRadius;              /**< minimum track radius */
-	DIST_T maxTrackGrade;               /**< maximum track grade */
+	ANGLE_T maxTrackGrade;               /**< maximum track grade */
 	tieData_t tieData;                  /**< tie data structure */
 	//DIST_T tieLength;                   /**< tie length */
 	//DIST_T tieWidth;                    /**< tie width */
@@ -222,6 +222,20 @@ EXPORT SCALEINX_T GetLayerScale( unsigned int layer )
 	if( IsLayerValid(layer) )
 		return layers[layer].scaleInx;
 	return GetLayoutCurScale(); // layout scale 
+}
+
+EXPORT DIST_T GetLayerMinTrackRadius( unsigned int layer )
+{
+	if( IsLayerValid(layer) )
+		return layers[layer].minTrackRadius;
+	return GetLayoutMinTrackRadius(); 
+}
+
+EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
+{
+	if( IsLayerValid(layer) )
+		return layers[layer].maxTrackGrade;
+	return GetLayoutMaxTrackGrade(); 
 }
 
 EXPORT tieData_p GetLayerTieData( unsigned int layer )
@@ -594,7 +608,7 @@ static SCALEINX_T layerScaleInx;
 static SCALEDESCINX_T layerScaleDescInx;
 static GAUGEINX_T layerGaugeInx;
 static DIST_T layerMinRadius;
-static DIST_T layerMaxGrade;
+static ANGLE_T layerMaxGrade;
 static tieData_t layerTieData;
 //static DIST_T layerTieLength;
 //static DIST_T layerTieWidth;
@@ -1376,6 +1390,8 @@ static void LayerUpdate(void)
 	layers[(int)layerCurrent].scaleDescInx = layerScaleDescInx;
 	layers[(int)layerCurrent].gaugeInx = layerGaugeInx;
 	layers[(int)layerCurrent].scaleInx = GetScaleInx( layerScaleDescInx, layerGaugeInx );
+	layers[(int)layerCurrent].minTrackRadius = layerMinRadius;
+	layers[(int)layerCurrent].maxTrackGrade = layerMaxGrade;
 	layers[(int)layerCurrent].tieData = layerTieData;
 	layers[(int)layerCurrent].module = (BOOL_T)layerModule;
     strcpy(layers[(int)layerCurrent].settingsName,settingsName);

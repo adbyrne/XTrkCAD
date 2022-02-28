@@ -108,6 +108,8 @@ BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );
 BOOL_T GetLayerHidden( unsigned int);
 tieData_p GetLayerTieData( unsigned int );
+DIST_T GetLayerMinTrackRadius( unsigned int layer );
+ANGLE_T GetLayerMaxTrackGrade( unsigned int layer );
 void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
 void SetLayerName(unsigned int layer, char* name);
