@@ -504,6 +504,7 @@ int GetTrkBits( track_p );
 int SetTrkBits( track_p, int );
 int ClrTrkBits( track_p, int );
 BOOL_T IsTrackDeleted( track_p );
+void TrackInsertLayer( int );
 #endif
 
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)

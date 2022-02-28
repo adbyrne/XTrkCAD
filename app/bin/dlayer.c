@@ -65,10 +65,12 @@ static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0 };
 static paramFloatRange_t r0_90 = { 0.0, 90.0 };
 
+EXPORT unsigned int maxLayer;
+
 unsigned int curLayer;
 long layerCount = 10;
 static long newLayerCount = 10;
-static unsigned int layerCurrent = NUM_LAYERS;
+static unsigned int layerSelected = 0;
 
 
 static BOOL_T layoutLayerChanged = FALSE;
@@ -621,6 +623,7 @@ static BOOL_T layerRedrawMap = FALSE;
 #define ENUMLAYER_RELOAD (1)
 #define ENUMLAYER_SAVE	(2)
 #define ENUMLAYER_CLEAR (3)
+#define ENUMLAYER_ADD (4)
 
 static char *visibleLabels[] = { "", NULL };
 static char *frozenLabels[] = { "", NULL };
@@ -634,7 +637,7 @@ static paramData_t layerPLs[] = {
 #define I_LIST	(0)
     { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX, I2VP(250), N_("Select Layer:") },
 #define I_NAME	(1)
-    { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(250-54), N_("Name"), 0, 0, sizeof(layerName) },
+    { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH|PDO_DLGBOXEND, I2VP(250-54), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
     { PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
 #define I_USE_COLOR (3)
@@ -665,12 +668,15 @@ static paramData_t layerPLs[] = {
 #define I_SETTINGS (17)
 	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP( 250), N_("Settings when Current") },
 #define I_COUNT (18)
-	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r0_1000000, N_("Object Count"), 0, 0 },
+	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r0_1000000, N_("Object Count:"), 0, 0 },
 	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
     { PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
     { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
     { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
-    { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
+
+	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN|PDO_DLGBOXEND, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
+	{ PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
 };
 
 #define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
@@ -842,6 +848,25 @@ void LoadLayerLists(void)
 }
 
 /**
+ * Add a layer after selected layer
+ */
+static void LayerAdd( ){
+	int inx;
+	int newLayer = layerSelected + 1;
+
+	maxLayer++;
+	for ( inx = maxLayer; inx > layerSelected; inx-- ){
+		layers[inx] = layers[inx - 1];
+	}
+
+	strcpy(layers[newLayer].name, "New Layer");
+	layers[newLayer].objCount = 0;
+
+	TrackInsertLayer( newLayer );
+	layerSelected = newLayer; 
+}
+
+/**
  * Handle button presses for the layer dialog. For all button presses in the layer
  *	dialog, this function is called. The parameter identifies the button pressed and
  * the operation is performed.
@@ -864,7 +889,11 @@ static void DoLayerOp(void * data)
     case ENUMLAYER_RELOAD:
         LayerPrefLoad();
         break;
-    }
+
+	case ENUMLAYER_ADD:
+		LayerAdd();
+		break;
+	}
 
     UpdateLayerDlg(curLayer);   //Reset to current Layer
 
@@ -885,7 +914,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 {
 	int inx;
     /* update the globals for the layer dialog */
-    layerVisible = layers[layer].visible;
+	layerVisible = layers[layer].visible;
     layerFrozen = layers[layer].frozen;
     layerOnMap = layers[layer].onMap;
     layerModule = layers[layer].module;
@@ -903,7 +932,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
     strcpy(settingsName, layers[layer].settingsName);
     GetLayerLinkString(layer,layerLinkList);
 
-	layerCurrent = layer;
+	layerSelected = layer;
     /* now re-load the layer list boxes */
     LoadLayerLists();
 	
@@ -1299,114 +1328,114 @@ static void LayerUpdate(void)
     char *layerFormattedName;
     ParamLoadData(&layerPG);
 
-    if (!IsLayerValid(layerCurrent)) {
+    if (!IsLayerValid(layerSelected)) {
         return;
     }
 
-    if (layerCurrent == curLayer && layerFrozen) {
+    if (layerSelected == curLayer && layerFrozen) {
         NoticeMessage(MSG_LAYER_FREEZE, _("Ok"), NULL);
         layerFrozen = FALSE;
         ParamLoadControl(&layerPG, I_FRZ);
     }
 
-    if (layerCurrent == curLayer && !layerVisible) {
+    if (layerSelected == curLayer && !layerVisible) {
         NoticeMessage(MSG_LAYER_HIDE, _("Ok"), NULL);
         layerVisible = TRUE;
         ParamLoadControl(&layerPG, I_VIS);
     }
 
-    if (layerCurrent == curLayer && layerModule) {
+    if (layerSelected == curLayer && layerModule) {
             NoticeMessage(MSG_LAYER_MODULE, _("Ok"), NULL);
             layerModule = FALSE;
             ParamLoadControl(&layerPG, I_MOD);
     }
     char oldLinkList[STR_LONG_SIZE];
-    GetLayerLinkString((int)layerCurrent,oldLinkList);
+    GetLayerLinkString((int)layerSelected,oldLinkList);
 
 	//sprintf(message, "Object Count: %ld", layers[layerCurrent].objCount);
 	//if (MESSAGETEXT) wMessageSetValue(MESSAGETEXT, message);
 
-	if (strcmp(layers[(int)layerCurrent].name, layerName) ||
-            layerColor != layers[(int)layerCurrent].color ||
-			layers[(int)layerCurrent].useColor != (BOOL_T)layerUseColor ||
-            layers[(int)layerCurrent].visible != (BOOL_T)layerVisible ||
-            layers[(int)layerCurrent].frozen != (BOOL_T)layerFrozen ||
-            layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap ||
-			layers[(int)layerCurrent].module != (BOOL_T)layerModule ||
-			layers[(int)layerCurrent].button_off != (BOOL_T)layerNoButton ||
-		    layers[(int)layerCurrent].scaleInx != layerScaleInx ||
-		    layers[(int)layerCurrent].scaleDescInx != layerScaleDescInx ||
-		    layers[(int)layerCurrent].gaugeInx != layerGaugeInx ||
-		    layers[(int)layerCurrent].minTrackRadius != layerMinRadius ||
-		    layers[(int)layerCurrent].maxTrackGrade != layerMaxGrade ||
-		    layers[(int)layerCurrent].tieData.length != layerTieData.length ||
-		    layers[(int)layerCurrent].tieData.width != layerTieData.width ||
-		    layers[(int)layerCurrent].tieData.spacing != layerTieData.spacing ||
-			strcmp(layers[(int)layerCurrent].settingsName,settingsName) ||
+	if (strcmp(layers[(int)layerSelected].name, layerName) ||
+            layerColor != layers[(int)layerSelected].color ||
+			layers[(int)layerSelected].useColor != (BOOL_T)layerUseColor ||
+            layers[(int)layerSelected].visible != (BOOL_T)layerVisible ||
+            layers[(int)layerSelected].frozen != (BOOL_T)layerFrozen ||
+            layers[(int)layerSelected].onMap != (BOOL_T)layerOnMap ||
+			layers[(int)layerSelected].module != (BOOL_T)layerModule ||
+			layers[(int)layerSelected].button_off != (BOOL_T)layerNoButton ||
+		    layers[(int)layerSelected].scaleInx != layerScaleInx ||
+		    layers[(int)layerSelected].scaleDescInx != layerScaleDescInx ||
+		    layers[(int)layerSelected].gaugeInx != layerGaugeInx ||
+		    layers[(int)layerSelected].minTrackRadius != layerMinRadius ||
+		    layers[(int)layerSelected].maxTrackGrade != layerMaxGrade ||
+		    layers[(int)layerSelected].tieData.length != layerTieData.length ||
+		    layers[(int)layerSelected].tieData.width != layerTieData.width ||
+		    layers[(int)layerSelected].tieData.spacing != layerTieData.spacing ||
+			strcmp(layers[(int)layerSelected].settingsName,settingsName) ||
 			strcmp(oldLinkList,layerLinkList)) {
         SetFileChanged();
     }
 
     if (layerL) {
-        strncpy(layers[(int)layerCurrent].name, layerName,
-                sizeof layers[(int)layerCurrent].name);
-        layerFormattedName = FormatLayerName(layerCurrent);
-        wListSetValues(layerL, layerCurrent, layerFormattedName, NULL, NULL);
+        strncpy(layers[(int)layerSelected].name, layerName,
+                sizeof layers[(int)layerSelected].name);
+        layerFormattedName = FormatLayerName(layerSelected);
+        wListSetValues(layerL, layerSelected, layerFormattedName, NULL, NULL);
         free(layerFormattedName);
     }
 
 
-    layerFormattedName = FormatLayerName(layerCurrent);
-    wListSetValues(setLayerL, layerCurrent, layerFormattedName, NULL, NULL);
+    layerFormattedName = FormatLayerName(layerSelected);
+    wListSetValues(setLayerL, layerSelected, layerFormattedName, NULL, NULL);
     free(layerFormattedName);
 
-    if (layerCurrent < NUM_BUTTONS && !layers[(int)layerCurrent].button_off) {
-        if (strlen(layers[(int)layerCurrent].name)>0) {
-            wControlSetBalloonText((wControl_p)layer_btns[(int)layerCurrent],
-                                   layers[(int)layerCurrent].name);
+    if (layerSelected < NUM_BUTTONS && !layers[(int)layerSelected].button_off) {
+        if (strlen(layers[(int)layerSelected].name)>0) {
+            wControlSetBalloonText((wControl_p)layer_btns[(int)layerSelected],
+                                   layers[(int)layerSelected].name);
         } else {
-            wControlSetBalloonText((wControl_p)layer_btns[(int)layerCurrent],
+            wControlSetBalloonText((wControl_p)layer_btns[(int)layerSelected],
                                    _("Show/Hide Layer"));
         }
     }
 
-    redraw = (layerColor != layers[(int)layerCurrent].color ||
-    		layers[(int)layerCurrent].useColor != (BOOL_T)layerUseColor ||
-              (BOOL_T)layerVisible != layers[(int)layerCurrent].visible);
+    redraw = (layerColor != layers[(int)layerSelected].color ||
+    		layers[(int)layerSelected].useColor != (BOOL_T)layerUseColor ||
+              (BOOL_T)layerVisible != layers[(int)layerSelected].visible);
 
-    SetLayerColor(layerCurrent, layerColor);
+    SetLayerColor(layerSelected, layerColor);
 
-    if (layerCurrent<NUM_BUTTONS &&
-            layers[(int)layerCurrent].visible!=(BOOL_T)layerVisible && !layers[(int)layerCurrent].button_off) {
-        wButtonSetBusy(layer_btns[(int)layerCurrent], layerVisible);
+    if (layerSelected<NUM_BUTTONS &&
+            layers[(int)layerSelected].visible!=(BOOL_T)layerVisible && !layers[(int)layerSelected].button_off) {
+        wButtonSetBusy(layer_btns[(int)layerSelected], layerVisible);
     }
 
-	layers[(int)layerCurrent].useColor = (BOOL_T)layerUseColor;
-    if (layers[(int)layerCurrent].visible != (BOOL_T)layerVisible)
-			FlipLayer(I2VP(layerCurrent));
-    layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
-    layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
-    if (layers[(int)layerCurrent].frozen) DeselectLayer(layerCurrent);
-    layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
-	layers[(int)layerCurrent].scaleDescInx = layerScaleDescInx;
-	layers[(int)layerCurrent].gaugeInx = layerGaugeInx;
-	layers[(int)layerCurrent].scaleInx = GetScaleInx( layerScaleDescInx, layerGaugeInx );
-	layers[(int)layerCurrent].minTrackRadius = layerMinRadius;
-	layers[(int)layerCurrent].maxTrackGrade = layerMaxGrade;
-	layers[(int)layerCurrent].tieData = layerTieData;
-	layers[(int)layerCurrent].module = (BOOL_T)layerModule;
-    strcpy(layers[(int)layerCurrent].settingsName,settingsName);
+	layers[(int)layerSelected].useColor = (BOOL_T)layerUseColor;
+    if (layers[(int)layerSelected].visible != (BOOL_T)layerVisible)
+			FlipLayer(I2VP(layerSelected));
+    layers[(int)layerSelected].visible = (BOOL_T)layerVisible;
+    layers[(int)layerSelected].frozen = (BOOL_T)layerFrozen;
+    if (layers[(int)layerSelected].frozen) DeselectLayer(layerSelected);
+    layers[(int)layerSelected].onMap = (BOOL_T)layerOnMap;
+	layers[(int)layerSelected].scaleDescInx = layerScaleDescInx;
+	layers[(int)layerSelected].gaugeInx = layerGaugeInx;
+	layers[(int)layerSelected].scaleInx = GetScaleInx( layerScaleDescInx, layerGaugeInx );
+	layers[(int)layerSelected].minTrackRadius = layerMinRadius;
+	layers[(int)layerSelected].maxTrackGrade = layerMaxGrade;
+	layers[(int)layerSelected].tieData = layerTieData;
+	layers[(int)layerSelected].module = (BOOL_T)layerModule;
+    strcpy(layers[(int)layerSelected].settingsName,settingsName);
 
-    PutLayerListArray((int)layerCurrent,layerLinkList);
+    PutLayerListArray((int)layerSelected,layerLinkList);
 
-    SetLayerHideButton(layerCurrent,layerNoButton);
+    SetLayerHideButton(layerSelected,layerNoButton);
 
 	MainProc( mainW, wResize_e, NULL, NULL );
 
     if (layerRedrawMap) {
         DoRedraw();
     } else if (redraw) {
-        RedrawLayer(layerCurrent, TRUE);
+        RedrawLayer(layerSelected, TRUE);
     }
 
 	layerRedrawMap = FALSE;
@@ -1422,7 +1451,7 @@ static void LayerSelect(
         return;
     }
 
-    layerCurrent = (unsigned int)inx;
+    layerSelected = (unsigned int)inx;
     strcpy(layerName, layers[inx].name);
     strcpy(settingsName, layers[inx].settingsName);
     layerVisible = layers[inx].visible;
@@ -1576,7 +1605,7 @@ void RestoreLayers(void)
 
 static void LayerOk(void * unused)
 {
-    LayerSelect(layerCurrent);
+    LayerSelect(layerSelected);
 
     if (newLayerCount != layerCount) {
         layoutLayerChanged = TRUE;
@@ -1618,7 +1647,7 @@ static void LayerDlgUpdate(
     case I_MOD:
     case I_BUT:
     	 LayerUpdate();
-    	 UpdateLayerDlg(layerCurrent);
+    	 UpdateLayerDlg(layerSelected);
     	 break;
 
     case I_SETTINGS:
@@ -1873,7 +1902,10 @@ BOOL_T ReadLayers(char * line)
     }
     MyFree(name);
 
-    return TRUE;
+	// The last layer will set this correctly
+	maxLayer = inx;
+	
+	return TRUE;
 }
 
 /**

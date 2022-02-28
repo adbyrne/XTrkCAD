@@ -1343,7 +1343,29 @@ wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 	return trackCmds( GetTrkType( trk1 ) )->compare( trk1, trk2 );
 }
 
-
+
+/*****************************************************************************
+*
+* LAYER
+*
+*/
+
+/**
+ * @brief Add 1 to track layer numbers that are greater than or equal to New Layer
+ * @param NewLayer 
+*/
+void TrackInsertLayer( int newLayer ){
+	track_p trk;
+
+	TRK_ITERATE( trk ) {
+		// trackCount++;
+		int layer = GetTrkLayer(trk);
+		if (layer >= newLayer) {
+			SetTrkLayer(trk, layer + 1);
+		}
+	}
+}
+
 /*****************************************************************************
  *
  * ABOVE / BELOW
