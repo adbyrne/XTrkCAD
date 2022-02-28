@@ -28,6 +28,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
+#include "trackx.h"
 #include "common-ui.h"
 
 static TRKTYP_T T_CURVE = -1;
@@ -1424,8 +1425,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
-		// *new-layer* GetLayerMinTrackRadius(trk->layer)
-		return fabs(xx->radius) < (GetLayoutMinTrackRadius() - EPSILON); 
+		return fabs(xx->radius) < (GetLayerMinTrackRadius(trk->layer) - EPSILON); // *new-layer* 
 		break;
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
