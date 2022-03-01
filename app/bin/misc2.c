@@ -115,14 +115,15 @@ EXPORT void Rprintf(
  * CHANGE NOTIFICATION
  *
  */
+#define CNCB_COUNT (40)
 
-
-static changeNotificationCallBack_t changeNotificationCallBacks[20];
+static changeNotificationCallBack_t changeNotificationCallBacks[CNCB_COUNT];
 static int changeNotificationCallBackCnt = 0;
 
 EXPORT void RegisterChangeNotification(
 		changeNotificationCallBack_t action )
 {
+	CHECK( (changeNotificationCallBackCnt + 1) < CNCB_COUNT );
 	changeNotificationCallBacks[changeNotificationCallBackCnt] = action;
 	changeNotificationCallBackCnt++;
 }

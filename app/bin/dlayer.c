@@ -60,7 +60,7 @@
 #define LAYERPREF_LIST "list"
 #define LAYERPREF_SETTINGS "settings"
 
-static paramIntegerRange_t r0_1000000 = { 0, 1000000, 80, 0 };
+static paramIntegerRange_t r_nocheck = { 0, 1, 80, PDO_NORANGECHECK_LOW|PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0 };
 static paramFloatRange_t r0_90 = { 0.0, 90.0 };
@@ -95,7 +95,7 @@ typedef struct {
 	SCALEDESCINX_T scaleDescInx;        /**< the scale description */
 	GAUGEINX_T gaugeInx;                /**< the gauge desc index */
 	DIST_T minTrackRadius;              /**< minimum track radius */
-	ANGLE_T maxTrackGrade;               /**< maximum track grade */
+	ANGLE_T maxTrackGrade;              /**< maximum track grade */
 	tieData_t tieData;                  /**< tie data structure */
 	long objCount;						/**< number of objects on layer */
     dynArr_t layerLinkList;				/**< other layers that show/hide with this one */
@@ -611,9 +611,6 @@ static GAUGEINX_T layerGaugeInx;
 static DIST_T layerMinRadius;
 static ANGLE_T layerMaxGrade;
 static tieData_t layerTieData;
-//static DIST_T layerTieLength;
-//static DIST_T layerTieWidth;
-//static DIST_T layerTieSpacing;
 static long layerObjectCount;
 static long layerModule = FALSE;
 static long layerNoButton = FALSE;
@@ -653,23 +650,23 @@ static paramData_t layerPLs[] = {
 	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORZ|BC_NOBORDER },
 #define I_BUT   (8)
 	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGBOXEND, moduleLabels, N_("No Button"), BC_HORZ|BC_NOBORDER },
-#define SCALEINX (9)
-	{ PD_DROPLIST, &layerScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
-#define GAUGEINX (10)
-	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
-#define MINRADIUSENTRY (11)
+#define I_SCALE (9)
+	{ PD_DROPLIST, &layerScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_LAYER) },
+#define I_GAUGE (10)
+	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
+#define I_MINRADIUSENTRY (11)
 	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF|PDO_DLGBOXEND, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
-#define TIEDATA (13)
+#define I_TIEDATA (13)
 	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF|PDO_DRAW, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
 	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
 	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF|PDO_DRAW|PDO_DLGHORZ|PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
 #define I_LINKLIST (16)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(250-54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
 #define I_SETTINGS (17)
-	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP( 250), N_("Settings when Current") },
+	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
 #define I_COUNT (18)
-	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r0_1000000, N_("Object Count:"), 0, 0 },
+	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r_nocheck, N_("Object Count:"), 0, 0 },
 	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
     { PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
     { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
@@ -736,6 +733,27 @@ int LoadFileListLoad(Catalog *catalog, char * name)
 
 #define layerS  ((wList_p)layerPLs[I_SETTINGS].control)
 
+#define scaleL	((wList_p)layerPLs[I_SCALE].control)
+
+#define gaugeL	((wList_p)layerPLs[I_GAUGE].control)
+
+/**
+* @brief Reload Layer parameters if changes
+* @param changes 
+*/
+static void LayerChange(long changes)
+{
+	if (changes & (CHANGE_LAYER))
+		if (layerW != NULL && wWinIsVisible(layerW)) {
+			// GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+			// LoadScaleList(scaleL);
+			// LoadGaugeList(gaugeL, layerScaleDescInx); 
+			// layerGaugeInx = 0;
+			ParamLoadControls(&layerPG);
+			// UpdateLayerDlg(curLayer);
+		}
+}
+
 void GetLayerLinkString(int inx,char * list) {
 
 	char * cp = &list[0];
@@ -789,9 +807,9 @@ LayerSystemDefault( unsigned int inx ){
 	layers[inx].onMap = TRUE;
 	layers[inx].module = FALSE;
 	layers[inx].button_off = FALSE;
-	layers[inx].scaleInx = -1; 
+	layers[inx].scaleInx = 0; 
 	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
-	layers[inx].scaleDescInx = GetLayoutCurScaleDesc();
+	// layers[inx].scaleDescInx = GetLayoutCurScaleDesc();
 	layers[inx].gaugeInx = 0;
 	layers[inx].minTrackRadius = 0.0; 
 	layers[inx].maxTrackGrade = 0.0; 
@@ -803,13 +821,33 @@ LayerSystemDefault( unsigned int inx ){
 	SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
 }
 
+/**
+ * Is a layer the system default?
+ */
+BOOL_T IsLayerDefault( unsigned int inx ){
+	return (!layers[inx].name[0]) &&
+		layers[inx].visible &&
+		!layers[inx].frozen &&
+		layers[inx].onMap &&
+		!layers[inx].module &&
+		!layers[inx].button_off &&
+		(!layers[inx].layerLinkList.cnt) &&
+		(layers[inx].color == layerColorTab[inx%COUNT(layerColorTab)]) &&
+		layers[inx].scaleInx == -1 &&
+		//layers[inx].scaleDescInx != layerScaleDescInx ||
+		//layers[inx].gaugeInx != layerGaugeInx ||
+		layers[inx].minTrackRadius == 0.0 &&
+		layers[inx].maxTrackGrade == 0.0 &&
+		layers[inx].tieData.length == 0.0 &&
+		layers[inx].tieData.width == 0.0 &&
+		layers[inx].tieData.spacing == 0.0;
+}
 
 /**
  * Load the layer settings to hard coded system defaults
  */
-
-void
-LayerAllDefaults(void)
+EXPORT void
+LayerAllDefaults()
 {
     int inx;
 
@@ -821,7 +859,6 @@ LayerAllDefaults(void)
 /**
  * Load the layer listboxes in Manage Layers and the Toolbar with up-to-date information.
  */
-
 void LoadLayerLists(void)
 {
     int inx;
@@ -855,9 +892,6 @@ void LoadLayerLists(void)
 
     if (layerL) {
 		wListSetIndex(layerL,curLayer);
-
-		/* Sync Scale and lists */
-		GetScaleGauge( layerScaleInx,&layerScaleDescInx,&layerGaugeInx );
 	}
 }
 
@@ -894,12 +928,15 @@ static void LayerDelete( ){
 		return;
 	}
 
-	for ( inx = layerSelected; inx < maxLayer; inx++ ){
-		layers[inx] = layers[inx + 1];
-	}
-	LayerSystemDefault(maxLayer);
+	if (layerSelected <= maxLayer){
+		for ( inx = layerSelected; inx < maxLayer; inx++ ){
+			layers[inx] = layers[inx + 1];
+		}
+		LayerSystemDefault(maxLayer);
 
-	maxLayer--;
+		if (maxLayer > 0)
+			maxLayer--;
+	}
 
 	if (layerSelected > 0) 
 		layerSelected--; 
@@ -953,7 +990,6 @@ static void DoLayerOp(void * data)
  * the settings for the labels has been changed, this function needs to be called to update all the user interface
  * elements to the new settings.
  */
-
 EXPORT void UpdateLayerDlg(unsigned int layer)
 {
 	int inx;
@@ -977,9 +1013,17 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
     GetLayerLinkString(layer,layerLinkList);
 
 	layerSelected = layer;
-    /* now re-load the layer list boxes */
+
+	/* now re-load the layer list boxes */
     LoadLayerLists();
 	
+	/* Sync Scale and lists */
+	if (gaugeL){
+		//GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+		// LoadScaleList(scaleL);
+		LoadGaugeList(gaugeL, layerScaleDescInx); 
+		wListSetIndex(gaugeL, layerGaugeInx);
+	}
 	/* Sync Scale and lists */
 	GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
 	
@@ -1012,9 +1056,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
  * \param listLayers the dropbox
  * \return 
  */
-  
-void
-FillLayerList( wList_p listLayers)
+void FillLayerList( wList_p listLayers)
 {
 	wListClear(listLayers);  // Rebuild list on each invocation
 
@@ -1036,7 +1078,6 @@ FillLayerList( wList_p listLayers)
  * \param IN pointer to function that actually initialize tha data structures
  * \param IN current layer (0...NUM_LAYERS), (-1) for no change
  */
-
 static void
 InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 {
@@ -1065,6 +1106,7 @@ InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 /**
  * Save an integer to Prefs
  */
+static void 
 layerSetInteger( unsigned int inx, char prefName[], int value ){
 	char buffer[80];
 	char name[80];
@@ -1076,6 +1118,7 @@ layerSetInteger( unsigned int inx, char prefName[], int value ){
 /**
 * Save a float to Prefs
 */
+static void 
 layerSetFloat( unsigned int inx, char prefName[], double value ){
 	char buffer[80];
 	char name[20];
@@ -1088,7 +1131,6 @@ layerSetFloat( unsigned int inx, char prefName[], double value ){
 /**
  * Save the customized layer information to preferences.
  */
-
 static void
 LayerPrefSave(void)
 {
@@ -1103,21 +1145,7 @@ LayerPrefSave(void)
     for (inx = 0; inx < NUM_LAYERS; inx++) {
         /* if a name is set that is not the default value or a color different from the default has been set,
             information about the layer needs to be saved */
-        if ((layers[inx].name[0]) ||
-                layers[inx].frozen || (!layers[inx].onMap) || (!layers[inx].visible) ||
-				layers[inx].button_off || 
-			    (layers[inx].layerLinkList.cnt>0) ||
-				layers[inx].module ||
-                layers[inx].color != layerColorTab[inx%COUNT(layerColorTab)] ||
-			    layers[inx].scaleInx != layerScaleInx ||
-			    layers[inx].scaleDescInx != layerScaleDescInx ||
-			    layers[inx].gaugeInx != layerGaugeInx ||
-			    layers[inx].minTrackRadius != layerMinRadius ||
-			    layers[inx].maxTrackGrade != layerMaxGrade ||
-			    layers[inx].tieData.length != layerTieData.length ||
-			    layers[inx].tieData.width != layerTieData.width ||
-			    layers[inx].tieData.spacing != layerTieData.spacing
-			) {
+        if (inx == 0 || !IsLayerDefault(inx)) {
             sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
             wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
 
@@ -1179,6 +1207,7 @@ LayerPrefSave(void)
 /**
 * Load an integer from Prefs
 */
+static void 
 layerGetInteger( unsigned int inx, char prefName[], long *value, int deflt ){
 	char buffer[80];
 	char name[80];
@@ -1190,6 +1219,7 @@ layerGetInteger( unsigned int inx, char prefName[], long *value, int deflt ){
 /**
 * Load a float from Prefs
 */
+static void 
 layerGetFloat( unsigned int inx, char prefName[], double *value, double deflt ){
 	char buffer[80];
 	char name[20];
@@ -1697,6 +1727,12 @@ static void LayerDlgUpdate(
     	 UpdateLayerDlg(layerSelected);
     	 break;
 
+	case I_SCALE:
+		LoadGaugeList((wList_p)layerPLs[I_GAUGE].control, *((int *)valueP));
+		// set the first entry as default, usually the standard gauge for a scale
+		wListSetIndex((wList_p)layerPLs[I_GAUGE].control, 0);
+		break;
+
     case I_SETTINGS:
     	if (strcmp((char*)wListGetItemContext(settingsListL,(wIndex_t)*(long*)valueP)," ")==0)
     		settingsName[0] = '\0';
@@ -1799,8 +1835,8 @@ static void DoLayer(void * unused)
                                    LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
 
 		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
-		LoadScaleList((wList_p)layerPLs[SCALEINX].control);
-		LoadGaugeList((wList_p)layerPLs[GAUGEINX].control, layerScaleDescInx); 
+		LoadScaleList(scaleL);
+		LoadGaugeList(gaugeL, layerScaleDescInx); 
 	}
 
     if (settingsCatalog) CatalogDiscard(settingsCatalog);
@@ -2090,5 +2126,6 @@ void InitLayers(void)
 addButtonCallBack_t InitLayersDialog(void)
 {
     ParamRegister(&layerPG);
+	RegisterChangeNotification(LayerChange);
     return &DoLayer;
 }

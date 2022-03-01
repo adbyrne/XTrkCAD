@@ -310,7 +310,8 @@ void InitDebug( const char *, long * );
 #define CHANGE_CMDOPT	(1<<9)
 #define CHANGE_LIMITS	(1<<10)
 #define CHANGE_ICONSIZE	(1<<11)
-#define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
+#define CHANGE_LAYER    (1<<3)
+#define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_LAYER|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
 typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );
@@ -426,6 +427,7 @@ typedef int (*contMgmCallBack_p) (int, void *);
 void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
 
 /* dlayer.c */
+void LayerAllDefaults();
 void LayerSetCounts();
 int FindUnusedLayer(unsigned int start);
 void DecrementLayerObjects(unsigned int index);
