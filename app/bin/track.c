@@ -1354,7 +1354,7 @@ wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
  * @brief Add 1 to track layer numbers that are greater than or equal to New Layer
  * @param NewLayer 
 */
-void TrackInsertLayer( int newLayer ){
+EXPORT void TrackInsertLayer( int newLayer ){
 	track_p trk;
 
 	TRK_ITERATE( trk ) {

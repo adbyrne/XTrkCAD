@@ -60,7 +60,7 @@
 #define LAYERPREF_LIST "list"
 #define LAYERPREF_SETTINGS "settings"
 
-static paramIntegerRange_t r0_1000000 = { 0, 1000000 };
+static paramIntegerRange_t r0_1000000 = { 0, 1000000, 80, 0 };
 static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0 };
 static paramFloatRange_t r0_90 = { 0.0, 90.0 };
@@ -624,6 +624,7 @@ static BOOL_T layerRedrawMap = FALSE;
 #define ENUMLAYER_SAVE	(2)
 #define ENUMLAYER_CLEAR (3)
 #define ENUMLAYER_ADD (4)
+#define ENUMLAYER_DELETE (5)
 
 static char *visibleLabels[] = { "", NULL };
 static char *frozenLabels[] = { "", NULL };
@@ -672,10 +673,13 @@ static paramData_t layerPLs[] = {
 	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
     { PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
     { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
-    { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
+    { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ|PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
 
 	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
-	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN|PDO_DLGBOXEND, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
+#define I_ADD (24)
+	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
+#define I_DELETE (25)
+	{ PD_BUTTON, DoLayerOp, "delete", PDO_DLGHORZ|PDO_DLGBOXEND, 0, N_("Delete Layer"), 0, I2VP(ENUMLAYER_DELETE) },
 	{ PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
 };
 
@@ -774,33 +778,43 @@ void PutLayerListArray(int inx, char * list) {
 
 
 /**
+ * Set a Layer to System Default
+ */
+void
+LayerSystemDefault( unsigned int inx ){
+
+	strcpy(layers[inx].name, inx==0?_("Main"):"");
+	layers[inx].visible = TRUE;
+	layers[inx].frozen = FALSE;
+	layers[inx].onMap = TRUE;
+	layers[inx].module = FALSE;
+	layers[inx].button_off = FALSE;
+	layers[inx].scaleInx = -1; 
+	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
+	layers[inx].scaleDescInx = GetLayoutCurScaleDesc();
+	layers[inx].gaugeInx = 0;
+	layers[inx].minTrackRadius = 0.0; 
+	layers[inx].maxTrackGrade = 0.0; 
+	layers[inx].tieData.length = 0.0; 
+	layers[inx].tieData.width = 0.0;
+	layers[inx].tieData.spacing = 0.0;
+	layers[inx].objCount = 0;
+	DYNARR_RESET(int,layers[inx].layerLinkList);
+	SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
+}
+
+
+/**
  * Load the layer settings to hard coded system defaults
  */
 
 void
-LayerSystemDefaults(void)
+LayerAllDefaults(void)
 {
     int inx;
 
     for (inx=0; inx<NUM_LAYERS; inx++) {
-        strcpy(layers[inx].name, inx==0?_("Main"):"");
-        layers[inx].visible = TRUE;
-        layers[inx].frozen = FALSE;
-        layers[inx].onMap = TRUE;
-        layers[inx].module = FALSE;
-        layers[inx].button_off = FALSE;
-		layers[inx].scaleInx = -1; 
-		GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
-		layers[inx].scaleDescInx = GetLayoutCurScaleDesc();
-		layers[inx].gaugeInx = 0;
-		layers[inx].minTrackRadius = 0.0; 
-		layers[inx].maxTrackGrade = 0.0; 
-		layers[inx].tieData.length = 0.0; 
-		layers[inx].tieData.width = 0.0;
-		layers[inx].tieData.spacing = 0.0;
-        layers[inx].objCount = 0;
-        DYNARR_RESET(int,layers[inx].layerLinkList);
-        SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
+		LayerSystemDefault(inx);
     }
 }
 
@@ -851,19 +865,44 @@ void LoadLayerLists(void)
  * Add a layer after selected layer
  */
 static void LayerAdd( ){
-	int inx;
+	unsigned int inx;
 	int newLayer = layerSelected + 1;
 
+	// UndoStart( _("Add Layer"), "addlayer" );
 	maxLayer++;
 	for ( inx = maxLayer; inx > layerSelected; inx-- ){
 		layers[inx] = layers[inx - 1];
 	}
 
+	TrackInsertLayer( newLayer );
+
 	strcpy(layers[newLayer].name, "New Layer");
 	layers[newLayer].objCount = 0;
 
-	TrackInsertLayer( newLayer );
 	layerSelected = newLayer; 
+	// UndoEnd();
+}
+
+/**
+* Delete the selected layer
+*/
+static void LayerDelete( ){
+	unsigned int inx;
+
+	if (layers[layerSelected].objCount > 0) {
+		NoticeMessage(_("Layer must not have any objects in it."),_("Ok"),NULL);
+		return;
+	}
+
+	for ( inx = layerSelected; inx < maxLayer; inx++ ){
+		layers[inx] = layers[inx + 1];
+	}
+	LayerSystemDefault(maxLayer);
+
+	maxLayer--;
+
+	if (layerSelected > 0) 
+		layerSelected--; 
 }
 
 /**
@@ -879,7 +918,7 @@ static void DoLayerOp(void * data)
 {
     switch (VP2L(data)) {
     case ENUMLAYER_CLEAR:
-        InitializeLayers(LayerSystemDefaults, -1);
+        InitializeLayers(LayerAllDefaults, -1);
         break;
 
     case ENUMLAYER_SAVE:
@@ -893,9 +932,14 @@ static void DoLayerOp(void * data)
 	case ENUMLAYER_ADD:
 		LayerAdd();
 		break;
+
+	case ENUMLAYER_DELETE:
+		LayerDelete();
+		break;
 	}
 
     UpdateLayerDlg(curLayer);   //Reset to current Layer
+	ParamControlActive( &layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
 
     if (layoutLayerChanged) {
         MainProc(mainW, wResize_e, NULL, NULL);
@@ -972,7 +1016,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 void
 FillLayerList( wList_p listLayers)
 {
-	wListClear(listLayers);  // Rebuild list on each invovation
+	wListClear(listLayers);  // Rebuild list on each invocation
 
 	for (int inx = 0; inx < NUM_LAYERS; inx++) {
 		char *layerFormattedName;
@@ -983,6 +1027,7 @@ FillLayerList( wList_p listLayers)
 
 	/* set current layer to selected */
 	wListSetIndex(listLayers, curLayer);
+	ParamControlActive( &layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
 }
 
 /**
@@ -1165,7 +1210,7 @@ LayerPrefLoad(void)
     long rgb;
     long flags;
     /* reset layer preferences to system default */
-    LayerSystemDefaults();
+    LayerAllDefaults();
     prefString = wPrefGetString(LAYERPREF_SECTION, "layers");
 
     if (prefString && prefString[ 0 ]) {
@@ -1382,7 +1427,7 @@ static void LayerUpdate(void)
         layerFormattedName = FormatLayerName(layerSelected);
         wListSetValues(layerL, layerSelected, layerFormattedName, NULL, NULL);
         free(layerFormattedName);
-    }
+	}
 
 
     layerFormattedName = FormatLayerName(layerSelected);
@@ -1476,7 +1521,9 @@ static void LayerSelect(
     // ParamLoadMessage(&layerPG, I_COUNT, message);
     ParamLoadControls(&layerPG);
 
-    if (layerS) {
+	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
+	
+	if (layerS) {
     	if (!LoadFileListLoad(settingsCatalog,settingsName)) {
     		settingsName[0] = '\0';
     		layers[inx].settingsName[0] = '\0';
@@ -1541,7 +1588,7 @@ void ResetLayers(void)
 
     if (layerL) {
         ParamLoadControls(&layerPG);
-        ParamLoadMessage(&layerPG, I_COUNT, "0");
+        // ParamLoadMessage(&layerPG, I_COUNT, "0");
     }
 }
 
