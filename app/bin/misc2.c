@@ -297,15 +297,15 @@ EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	return g->gauge;
 }
 
-EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
+EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 {
 	scaleInfo_p s;
 	DIST_T defLength;
 
 	if ( si == -1 )
-		return &tieData_demo;
+		return tieData_demo;
 	else if ( si < 0 || si >= scaleInfo_da.cnt )
-		return &tieData_demo;
+		return tieData_demo;
 	s = &scaleInfo(si);
 	if ( !s->tieDataValid ) {
 		sprintf( message, "tiedata-%s", s->scale );
@@ -320,7 +320,7 @@ EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
 		s->tieDataValid = TRUE;
 	}
-	return &scaleInfo(si).tieData;
+	return scaleInfo(si).tieData;
 }
 
 void

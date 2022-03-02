@@ -639,6 +639,7 @@ static BOOL_T layerRedrawMap = FALSE;
 #define ENUMLAYER_CLEAR (3)
 #define ENUMLAYER_ADD (4)
 #define ENUMLAYER_DELETE (5)
+#define ENUMLAYER_DEFAULT (6)
 
 static char *visibleLabels[] = { "", NULL };
 static char *frozenLabels[] = { "", NULL };
@@ -673,28 +674,30 @@ static paramData_t layerPLs[] = {
 	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
 #define I_MINRADIUSENTRY (11)
 	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
-	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF | PDO_DLGBOXEND, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define I_TIEDATA (13)
 	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF | PDO_DRAW, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
 	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DRAW | PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
 	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DRAW | PDO_DLGHORZ | PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
-#define I_LINKLIST (16)
+
+	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
+#define I_ADD (17)
+	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
+#define I_DELETE (18)
+	{ PD_BUTTON, DoLayerOp, "delete", PDO_DLGHORZ, 0, N_("Delete Layer"), 0, I2VP(ENUMLAYER_DELETE) },
+#define I_DEFAULT (19)
+	{ PD_BUTTON, DoLayerOp, "default", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Default Values"), 0, I2VP(ENUMLAYER_DEFAULT) },
+	{ PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND | PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
+#define I_LINKLIST (21)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(250 - 54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
-#define I_SETTINGS (17)
+#define I_SETTINGS (22)
 	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
-#define I_COUNT (18)
+#define I_COUNT (23)
 	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r_nocheck, N_("Object Count:"), 0, 0 },
 	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 	{ PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
 	{ PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, I2VP(ENUMLAYER_SAVE) },
 	{ PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, I2VP(ENUMLAYER_CLEAR) },
-
-	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
-#define I_ADD (24)
-	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
-#define I_DELETE (25)
-	{ PD_BUTTON, DoLayerOp, "delete", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Delete Layer"), 0, I2VP(ENUMLAYER_DELETE) },
-	{ PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND | PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
 };
 
 #define settingsListL	((wList_p)layerPLs[I_SETTINGS].control)
@@ -766,7 +769,6 @@ static void LayerChange(long changes)
 
 void GetLayerLinkString(int inx, char * list)
 {
-
 	char * cp = &list[0];
 	cp[0] = '\0';
 	int len = 0;
@@ -920,7 +922,7 @@ static void LayerAdd( )
 
 	// UndoStart( _("Add Layer"), "addlayer" );
 	maxLayer++;
-	for ( inx = maxLayer; inx > layerSelected; inx-- ) {
+	for ( inx = maxLayer; inx > newLayer; inx-- ) {
 		layers[inx] = layers[inx - 1];
 	}
 
@@ -930,6 +932,7 @@ static void LayerAdd( )
 	layers[newLayer].objCount = 0;
 
 	layerSelected = newLayer;
+	layoutLayerChanged = TRUE;
 	// UndoEnd();
 }
 
@@ -939,13 +942,14 @@ static void LayerAdd( )
 static void LayerDelete( )
 {
 	unsigned int inx;
+	int removeLayer = layerSelected;
 
 	if (layers[layerSelected].objCount > 0) {
 		NoticeMessage(_("Layer must not have any objects in it."), _("Ok"), NULL);
 		return;
 	}
 
-	if (layerSelected <= maxLayer) {
+	if (layerSelected < maxLayer) {
 		for ( inx = layerSelected; inx < maxLayer; inx++ ) {
 			layers[inx] = layers[inx + 1];
 		}
@@ -956,9 +960,23 @@ static void LayerDelete( )
 		}
 	}
 
-	if (layerSelected > 0) {
-		layerSelected--;
-	}
+	TrackDeleteLayer( removeLayer );
+
+	layoutLayerChanged = TRUE;
+}
+
+/**
+* Set the Min Radius, Max Grade and Tie values to defaults
+*/
+static void LayerDefault( )
+{
+	int inx = curLayer;
+
+	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
+	layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
+	layers[inx].tieData = GetLayoutTieData();
+
+	layoutLayerChanged = TRUE;
 }
 
 /**
@@ -991,6 +1009,10 @@ static void DoLayerOp(void * data)
 
 	case ENUMLAYER_DELETE:
 		LayerDelete();
+		break;
+
+	case ENUMLAYER_DEFAULT:
+		LayerDefault();
 		break;
 	}
 
@@ -1971,10 +1993,10 @@ BOOL_T ReadLayers(char * line)
 		minRad = GetScaleMinRadius(sclInx);
 	}
 	if ( tieLen < EPSILON ) {
-		tieData_p td = GetScaleTieData(sclInx);
-		tieLen = td->length;
-		tieWid = td->width;
-		tieSpc = td->spacing;
+		tieData_t td = GetScaleTieData(sclInx);
+		tieLen = td.length;
+		tieWid = td.width;
+		tieSpc = td.spacing;
 	}
 
 	if (paramVersion < 9) {

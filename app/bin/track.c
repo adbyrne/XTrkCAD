@@ -1352,16 +1352,30 @@ wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 
 /**
  * @brief Add 1 to track layer numbers that are greater than or equal to New Layer
- * @param NewLayer 
+ * @param newLayer 
 */
 EXPORT void TrackInsertLayer( int newLayer ){
 	track_p trk;
 
 	TRK_ITERATE( trk ) {
-		// trackCount++;
 		int layer = GetTrkLayer(trk);
 		if (layer >= newLayer) {
 			SetTrkLayer(trk, layer + 1);
+		}
+	}
+}
+
+/**
+* @brief Subtract 1 from track layer numbers that are greater than Removed Layer
+* @param removeLayer 
+*/
+EXPORT void TrackDeleteLayer( int removeLayer ){
+	track_p trk;
+
+	TRK_ITERATE( trk ) {
+		int layer = GetTrkLayer(trk);
+		if (layer > removeLayer) {
+			SetTrkLayer(trk, layer - 1);
 		}
 	}
 }
