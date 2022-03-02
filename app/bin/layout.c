@@ -78,7 +78,7 @@ static struct sDataLayout thisLayout = {
 EXPORT wIndex_t changed = 0;
 
 static paramFloatRange_t r0_90 = { 0, 90 };
-static paramFloatRange_t r0_100 = { 0, 100 };
+static paramFloatRange_t r0o05_100 = { 0.05, 100 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r0_9999999 = { 0, 9999999 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
@@ -647,11 +647,11 @@ static paramData_t layoutPLs[] = {
     { PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
-    { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+    { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define TIEDATAENTRY (8)
-	{ PD_FLOAT, &thisLayout.props.tieData.length, "tieLength", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF, &r0_100, N_("Tie Length"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_FLOAT, &thisLayout.props.tieData.width, "tieWidth", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, &r0_100, N_("Width"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_FLOAT, &thisLayout.props.tieData.spacing, "tieSpacing", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ|PDO_DLGBOXEND, &r0_100, N_("Spacing"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &thisLayout.props.tieData.length, "tieLength", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF, &r0o05_100, N_("Tie Length"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &thisLayout.props.tieData.width, "tieWidth", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, &r0o05_100, N_("  Width"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &thisLayout.props.tieData.spacing, "tieSpacing", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ|PDO_DLGBOXEND, &r0o05_100, N_("  Spacing"), 0, I2VP(CHANGE_MAIN) },
 #define BACKGROUNDFILECHECK (11)  //Note this value used in the file section routines above - if it changes, they will need to change
 	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
 	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },

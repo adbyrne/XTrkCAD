@@ -61,8 +61,8 @@
 #define LAYERPREF_LIST "list"
 #define LAYERPREF_SETTINGS "settings"
 
-static paramIntegerRange_t r_nocheck = { 0, 1, 80, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
-static paramFloatRange_t r_tieData = { 0.05, 100.0, 80, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
+static paramIntegerRange_t r_nocheck = { 0, 1, 100, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
+static paramFloatRange_t r_tieData = { 0.05, 100.0, 100, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
 
 static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
 static paramFloatRange_t r0_90 = { 0.0, 90.0 };
@@ -700,13 +700,14 @@ static paramData_t layerPLs[] = {
 	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
 #define I_MINRADIUSENTRY (12)
 	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
-	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+#define I_MAXGRADEENTRY (13)
+	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define I_TIELEN (14)
 	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF, &r_tieData, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
 #define I_TIEWID (15)
-	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DLGHORZ, &r_tieData, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DLGHORZ, &r_tieData, N_( "  Width" ), 0, I2VP( CHANGE_MAIN ) },
 #define I_TIESPC (16)
-	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_( "  Spacing" ), 0, I2VP( CHANGE_MAIN ) },
 
 	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 #define I_ADD (18)
@@ -851,7 +852,7 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].onMap = TRUE;
 	layers[inx].module = FALSE;
 	layers[inx].button_off = FALSE;
-	layers[inx].use_default = FALSE;
+	layers[inx].use_default = TRUE;
 	layers[inx].scaleInx = 0;
 	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
 	              &layers[inx].gaugeInx);
@@ -879,7 +880,7 @@ BOOL_T IsLayerDefault( unsigned int inx )
 	       layers[inx].onMap &&
 	       !layers[inx].module &&
 	       !layers[inx].button_off &&
-		   !layers[inx].use_default &&
+		   layers[inx].use_default &&
 		   (!layers[inx].layerLinkList.cnt) &&
 	       (layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)]) &&
 	       layers[inx].scaleInx == 0 &&
@@ -896,7 +897,7 @@ BOOL_T IsLayerDefault( unsigned int inx )
 /**
  * Load the layer settings to hard coded system defaults
  */
-EXPORT void LayerAllDefaults()
+EXPORT void LayerAllDefaults(void)
 {
 	int inx;
 
@@ -950,7 +951,7 @@ void LoadLayerLists(void)
 static void LayerAdd( )
 {
 	unsigned int inx;
-	int newLayer = layerSelected + 1;
+	unsigned int newLayer = layerSelected + 1;
 
 	// UndoStart( _("Add Layer"), "addlayer" );
 	maxLayer++;
@@ -1112,6 +1113,14 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 	ParamControlActive( &layerPG, I_COUNT, FALSE );
 
+	ParamControlActive( &layerPG, I_SCALE, !layerDefault);
+	ParamControlActive( &layerPG, I_GAUGE, !layerDefault);
+	ParamControlActive( &layerPG, I_MINRADIUSENTRY, !layerDefault);
+	ParamControlActive( &layerPG, I_MAXGRADEENTRY, !layerDefault);
+	ParamControlActive( &layerPG, I_TIELEN, !layerDefault);
+	ParamControlActive( &layerPG, I_TIEWID, !layerDefault);
+	ParamControlActive( &layerPG, I_TIESPC, !layerDefault);
+
 	/* finally show the layer buttons with balloon text */
 	for (inx = 0; inx < NUM_BUTTONS; inx++) {
 		if (!layers[inx].button_off) {
@@ -1141,7 +1150,13 @@ void FillLayerList( wList_p listLayers)
 
 	/* set current layer to selected */
 	wListSetIndex(listLayers, curLayer);
+
 	ParamControlActive( &layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
+	if ( layerDefault ) {
+		ParamControlActive( &layerPG, I_TIELEN, FALSE);
+		ParamControlActive( &layerPG, I_TIEWID, FALSE);
+		ParamControlActive( &layerPG, I_TIESPC, FALSE);
+	}
 }
 
 /**
@@ -1643,6 +1658,14 @@ static void LayerSelect(
 
 	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 
+	ParamControlActive( &layerPG, I_SCALE, !layerDefault);
+	ParamControlActive( &layerPG, I_GAUGE, !layerDefault);
+	ParamControlActive( &layerPG, I_MINRADIUSENTRY, !layerDefault);
+	ParamControlActive( &layerPG, I_MAXGRADEENTRY, !layerDefault);
+	ParamControlActive( &layerPG, I_TIELEN, !layerDefault);
+	ParamControlActive( &layerPG, I_TIEWID, !layerDefault);
+	ParamControlActive( &layerPG, I_TIESPC, !layerDefault);
+
 	if (layerS) {
 		if (!LoadFileListLoad(settingsCatalog, settingsName)) {
 			settingsName[0] = '\0';
@@ -1764,89 +1787,6 @@ void RestoreLayers(void)
 	LoadLayerLists();
 }
 
-/**
- * This function is called when the Done button on the layer dialog is pressed. It hides the layer dialog and
- * updates the layer information.
- *
- * \param IN ignored
- *
- */
-
-static void LayerOk(void * unused)
-{
-	LayerSelect(layerSelected);
-
-	if (newLayerCount != layerCount) {
-		layoutLayerChanged = TRUE;
-
-		if (newLayerCount > NUM_BUTTONS) {
-			newLayerCount = NUM_BUTTONS;
-		}
-
-		layerCount = newLayerCount;
-	}
-
-	if (layoutLayerChanged) {
-		MainProc(mainW, wResize_e, NULL, NULL);
-	}
-
-	wHide(layerW);
-}
-
-
-static void LayerDlgUpdate(
-        paramGroup_p pg,
-        int inx,
-        void * valueP)
-{
-	switch (inx) {
-	case I_LIST:
-		LayerSelect((wIndex_t) * (long*)valueP);
-		break;
-
-	case I_NAME:
-		LayerUpdate();
-		break;
-
-	case I_MAP:
-		layerRedrawMap = TRUE;
-	/* No Break */
-	case I_VIS:
-	case I_FRZ:
-	case I_MOD:
-	case I_BUT:
-	case I_DEF:
-		LayerUpdate();
-		UpdateLayerDlg(layerSelected);
-		break;
-
-	case I_SCALE:
-		LoadGaugeList((wList_p)layerPLs[I_GAUGE].control, *((int *)valueP));
-		// set the first entry as default, usually the standard gauge for a scale
-		wListSetIndex((wList_p)layerPLs[I_GAUGE].control, 0);
-		break;
-
-	case I_TIELEN:
-	case I_TIEWID:
-	case I_TIESPC:
-		ValidateTieData(&layerTieData);
-		r_tieData.rangechecks = layerTieData.valid ? PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH : 0;
-		break;
-
-	case I_SETTINGS:
-		if (strcmp((char*)wListGetItemContext(settingsListL,
-		                                      (wIndex_t) * (long*)valueP), " ") == 0) {
-			settingsName[0] = '\0';
-		} else {
-			strcpy(settingsName, (char*)wListGetItemContext(settingsListL,
-			                (wIndex_t) * (long*)valueP));
-		}
-		break;
-	}
-
-
-
-}
 
 /**
  * Scan opened directory for the next settings file
@@ -1931,29 +1871,13 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 	return (newEntry);
 }
 
-static void DoLayer(void * unused)
-{
-	if (layerW == NULL) {
-		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
-		                           LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
-		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
-		LoadScaleList(scaleL);
-		LoadGaugeList(gaugeL, layerScaleDescInx); 	
-	}
-
-	if (settingsCatalog) { CatalogDiscard(settingsCatalog); }
-	else { settingsCatalog = InitCatalog(); }
-	ScanSettingsDirectory(settingsCatalog, wGetAppWorkDir());
 
 
-	/* set the globals to the values for the current layer */
-	UpdateLayerDlg(curLayer);
-	layerRedrawMap = FALSE;
-	wShow(layerW);
-	layoutLayerChanged = FALSE;
-}
-
-
+/*****************************************************************************
+*
+* FILE READ/WRITE
+*
+*/
 
 BOOL_T ReadLayers(char * line)
 {
@@ -2058,7 +1982,7 @@ BOOL_T ReadLayers(char * line)
 	tieData_t td = {TRUE, tieLen, tieWid, tieSpc};
 	ValidateTieData(&td);
 	if ( !td.valid ) {
-		tieData_t td = GetScaleTieData(sclInx);
+		td = GetScaleTieData(sclInx);
 	}
 	inx = layerInx - 1;
 	color = wDrawFindColor(rgb);
@@ -2169,6 +2093,115 @@ BOOL_T WriteLayers(FILE * f)
 		}
 	}
 	return TRUE;
+}
+
+/*****************************************************************************
+*
+* DIALOG & MENU
+*
+*/
+
+/**
+* This function is called when the Done button on the layer dialog is pressed. It hides the layer dialog and
+* updates the layer information.
+*
+* \param IN ignored
+*
+*/
+static void LayerOk(void * unused)
+{
+	LayerSelect(layerSelected);
+
+	if (newLayerCount != layerCount) {
+		layoutLayerChanged = TRUE;
+
+		if (newLayerCount > NUM_BUTTONS) {
+			newLayerCount = NUM_BUTTONS;
+		}
+
+		layerCount = newLayerCount;
+	}
+
+	if (layoutLayerChanged) {
+		MainProc(mainW, wResize_e, NULL, NULL);
+	}
+
+	wHide(layerW);
+}
+
+
+static void LayerDlgUpdate(
+	paramGroup_p pg,
+	int inx,
+	void * valueP)
+{
+	switch (inx) {
+	case I_LIST:
+		LayerSelect((wIndex_t) * (long*)valueP);
+		break;
+
+	case I_NAME:
+		LayerUpdate();
+		break;
+
+	case I_MAP:
+		layerRedrawMap = TRUE;
+		/* No Break */
+	case I_VIS:
+	case I_FRZ:
+	case I_MOD:
+	case I_BUT:
+	case I_DEF:
+		LayerUpdate();
+		UpdateLayerDlg(layerSelected);
+		break;
+
+	case I_SCALE:
+		LoadGaugeList((wList_p)layerPLs[I_GAUGE].control, *((int *)valueP));
+		// set the first entry as default, usually the standard gauge for a scale
+		wListSetIndex((wList_p)layerPLs[I_GAUGE].control, 0);
+		break;
+
+	case I_TIELEN:
+	case I_TIEWID:
+	case I_TIESPC:
+		ValidateTieData(&layerTieData);
+		r_tieData.rangechecks = layerTieData.valid ? PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH : 0;
+		break;
+
+	case I_SETTINGS:
+		if (strcmp((char*)wListGetItemContext(settingsListL,
+			(wIndex_t) * (long*)valueP), " ") == 0) {
+			settingsName[0] = '\0';
+		} else {
+			strcpy(settingsName, (char*)wListGetItemContext(settingsListL,
+				(wIndex_t) * (long*)valueP));
+		}
+		break;
+	}
+}
+
+
+static void DoLayer(void * unused)
+{
+	if (layerW == NULL) {
+		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
+			LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
+		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+		LoadScaleList(scaleL);
+		LoadGaugeList(gaugeL, layerScaleDescInx); 	
+	}
+
+	if (settingsCatalog) { CatalogDiscard(settingsCatalog); }
+	else { settingsCatalog = InitCatalog(); }
+	ScanSettingsDirectory(settingsCatalog, wGetAppWorkDir());
+
+
+	/* set the globals to the values for the current layer */
+	UpdateLayerDlg(curLayer);
+	layerRedrawMap = FALSE;
+	wShow(layerW);
+	layoutLayerChanged = FALSE;
 }
 
 #include "bitmaps/background.xpm"
