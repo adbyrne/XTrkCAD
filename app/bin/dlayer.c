@@ -62,8 +62,9 @@
 #define LAYERPREF_SETTINGS "settings"
 
 static paramIntegerRange_t r_nocheck = { 0, 1, 80, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
+static paramFloatRange_t r_tieData = { 0.05, 100.0, 80, PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH };
+
 static paramFloatRange_t r0_10000 = { 0.0, 10000.0 };
-static paramFloatRange_t r0_100 = { 0.0, 100.0 };
 static paramFloatRange_t r0_90 = { 0.0, 90.0 };
 
 EXPORT unsigned int maxLayer;
@@ -700,10 +701,12 @@ static paramData_t layerPLs[] = {
 #define I_MINRADIUSENTRY (12)
 	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
-#define I_TIEDATA (14)
-	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
-	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
-	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
+#define I_TIELEN (14)
+	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF, &r_tieData, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
+#define I_TIEWID (15)
+	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DLGHORZ, &r_tieData, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
+#define I_TIESPC (16)
+	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
 
 	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 #define I_ADD (18)
@@ -856,10 +859,10 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].gaugeInx = 0;
 	layers[inx].minTrackRadius = 0.0;
 	layers[inx].maxTrackGrade = 0.0;
+	layers[inx].tieData.valid = FALSE;
 	layers[inx].tieData.length = 0.0;
 	layers[inx].tieData.width = 0.0;
 	layers[inx].tieData.spacing = 0.0;
-	layers[inx].tieData.valid = FALSE;
 	layers[inx].objCount = 0;
 	DYNARR_RESET(int, layers[inx].layerLinkList);
 	SetLayerColor(inx, layerColorTab[inx % COUNT(layerColorTab)]);
@@ -884,10 +887,10 @@ BOOL_T IsLayerDefault( unsigned int inx )
 	       //layers[inx].gaugeInx != layerGaugeInx ||
 	       layers[inx].minTrackRadius == 0.0 &&
 	       layers[inx].maxTrackGrade == 0.0 &&
+		   layers[inx].tieData.valid == FALSE &&
 	       layers[inx].tieData.length == 0.0 &&
 	       layers[inx].tieData.width == 0.0 &&
-	       layers[inx].tieData.spacing == 0.0 &&
-		   layers[inx].tieData.valid == FALSE;
+	       layers[inx].tieData.spacing == 0.0;
 }
 
 /**
@@ -995,15 +998,13 @@ static void LayerDelete( )
 }
 
 /**
-* Set the Min Radius, Max Grade and Tie values to defaults
+* Set the Min Radius, Max Grade and Tie values to Layout or Scale defaults
 */
 static void LayerDefault( )
 {
-	int inx = curLayer;
-
-	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
-	layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
-	layers[inx].tieData = GetLayoutTieData();
+	layerMinRadius = GetLayoutMinTrackRadius();
+	layerMaxGrade = GetLayoutMaxTrackGrade();
+	layerTieData = GetScaleTieData(layerScaleInx); // GetLayoutTieData();
 
 	layoutLayerChanged = TRUE;
 }
@@ -1045,8 +1046,8 @@ static void DoLayerOp(void * data)
 		break;
 	}
 
-	UpdateLayerDlg(curLayer);   //Reset to current Layer
-	ParamControlActive( &layerPG, I_DELETE, (curLayer > 0) ? TRUE : FALSE);
+	// UpdateLayerDlg(curLayer);   //Reset to current Layer
+	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 
 	if (layoutLayerChanged) {
 		MainProc(mainW, wResize_e, NULL, NULL);
@@ -1090,8 +1091,6 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 
 	/* Sync Scale and lists */
 	if (gaugeL) {
-		//GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
-		// LoadScaleList(scaleL);
 		LoadGaugeList(gaugeL, layerScaleDescInx);
 		wListSetIndex(gaugeL, layerGaugeInx);
 	}
@@ -1110,6 +1109,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 		}
 	}
 
+	ParamControlActive( &layerPG, I_DELETE, (layerSelected > 0) ? TRUE : FALSE);
 	ParamControlActive( &layerPG, I_COUNT, FALSE );
 
 	/* finally show the layer buttons with balloon text */
@@ -1826,9 +1826,12 @@ static void LayerDlgUpdate(
 		wListSetIndex((wList_p)layerPLs[I_GAUGE].control, 0);
 		break;
 
-	//case I_DEFAULT:
-	//	LayerDefault();
-	//	break;
+	case I_TIELEN:
+	case I_TIEWID:
+	case I_TIESPC:
+		ValidateTieData(&layerTieData);
+		r_tieData.rangechecks = layerTieData.valid ? PDO_NORANGECHECK_LOW | PDO_NORANGECHECK_HIGH : 0;
+		break;
 
 	case I_SETTINGS:
 		if (strcmp((char*)wListGetItemContext(settingsListL,
