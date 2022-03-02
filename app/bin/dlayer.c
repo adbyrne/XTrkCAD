@@ -758,7 +758,8 @@ static int LoadFileListLoad(Catalog *catalog, char * name)
 static void LayerChange(long changes)
 {
 	if (changes & (CHANGE_LAYER))
-		if (layerW != NULL && wWinIsVisible(layerW)) {
+		if (layerW != NULL && wWinIsVisible(layerW))
+		{
 			ParamLoadControls(&layerPG);
 		}
 }
@@ -1865,6 +1866,9 @@ static void DoLayer(void * unused)
 	if (layerW == NULL) {
 		layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
 		                           LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
+		GetScaleGauge(layerScaleInx, &layerScaleDescInx, &layerGaugeInx);
+		LoadScaleList(scaleL);
+		LoadGaugeList(gaugeL, layerScaleDescInx); 	
 	}
 
 	if (settingsCatalog) { CatalogDiscard(settingsCatalog); }
