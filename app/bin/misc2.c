@@ -297,6 +297,10 @@ EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	return g->gauge;
 }
 
+EXPORT void ValidateTieData( tieData_p td ){
+	td->valid = (td->length > 0.05 && td->width > 0.05 && td->spacing > 0.05);
+}
+
 EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 {
 	scaleInfo_p s;
@@ -318,6 +322,7 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
 		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
 		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
+		s->tieData.valid = TRUE;
 		s->tieDataValid = TRUE;
 	}
 	return scaleInfo(si).tieData;

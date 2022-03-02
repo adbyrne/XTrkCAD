@@ -435,7 +435,7 @@ EXPORT void DrawStraightTrack(
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td  = GetLayerTieData( GetTrkLayer(trk) );
+		td = GetLayerTieData( GetTrkLayer(trk) );
 		DrawStraightTies( d, td, p0, p1, color );
 	}
 	if (color == wDrawColorBlack)

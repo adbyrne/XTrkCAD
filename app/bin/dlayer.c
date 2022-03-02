@@ -45,6 +45,7 @@
 #define LAYERPREF_VISIBLE (4)
 #define LAYERPREF_MODULE  (8)
 #define LAYERPREF_NOBUTTON (16)
+#define LAYERPREF_DEFAULT (32)
 #define LAYERPREF_SECTION ("Layers")
 #define LAYERPREF_NAME 	"name"
 #define LAYERPREF_COLOR "color"
@@ -91,6 +92,7 @@ typedef struct {
 	BOOL_T onMap;						/**< is layer shown map */
 	BOOL_T module;						/**< is layer a module (all or nothing) */
 	BOOL_T button_off;					/**< hide button */
+	BOOL_T use_default;					/**< use layout defaults */
 	SCALEINX_T scaleInx;                /**< scale override */
 	SCALEDESCINX_T scaleDescInx;        /**< the scale description */
 	GAUGEINX_T gaugeInx;                /**< the gauge desc index */
@@ -207,7 +209,6 @@ BOOL_T GetLayerFrozen(unsigned int layer)
 	}
 }
 
-
 BOOL_T GetLayerOnMap(unsigned int layer)
 {
 	if (!IsLayerValid(layer)) {
@@ -216,6 +217,16 @@ BOOL_T GetLayerOnMap(unsigned int layer)
 		return layers[layer].onMap;
 	}
 }
+
+BOOL_T GetLayerDefault(unsigned int layer)
+{
+	if (!IsLayerValid(layer)) {
+		return TRUE;
+	} else {
+		return layers[layer].use_default;
+	}
+}
+
 
 EXPORT SCALEINX_T GetLayerScale( unsigned int layer )
 {
@@ -243,10 +254,10 @@ EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
 
 EXPORT tieData_p GetLayerTieData( unsigned int layer )
 {
-	if ( IsLayerValid(layer) && layers[layer].tieData.length > EPSILON ) {
+	if ( IsLayerValid(layer) && !layers[layer].use_default && layers[layer].tieData.valid ) {
 		return &layers[layer].tieData;
 	}
-	return defaultTieData; // layout scale default tie data
+	return &LayoutTieData; // layout scale default tie data
 }
 
 BOOL_T GetLayerModule(unsigned int layer)
@@ -262,6 +273,13 @@ void SetLayerModule(unsigned int layer, BOOL_T module)
 {
 	if (IsLayerValid(layer)) {
 		layers[layer].module = module;
+	}
+}
+
+void SetLayerDefault(unsigned int layer, BOOL_T use_default)
+{
+	if (IsLayerValid(layer)) {
+		layers[layer].use_default = use_default;
 	}
 }
 
@@ -622,15 +640,18 @@ static long layerUseColor = TRUE;
 static long layerVisible = TRUE;
 static long layerFrozen = FALSE;
 static long layerOnMap = TRUE;
+static long layerModule = FALSE;
+static long layerNoButton = FALSE;
+static long layerDefault = FALSE;
+
 static SCALEINX_T layerScaleInx;
 static SCALEDESCINX_T layerScaleDescInx;
 static GAUGEINX_T layerGaugeInx;
 static DIST_T layerMinRadius;
 static ANGLE_T layerMaxGrade;
 static tieData_t layerTieData;
+
 static long layerObjectCount;
-static long layerModule = FALSE;
-static long layerNoButton = FALSE;
 static void LayerOk(void * unused);
 static BOOL_T layerRedrawMap = FALSE;
 
@@ -645,6 +666,8 @@ static char *visibleLabels[] = { "", NULL };
 static char *frozenLabels[] = { "", NULL };
 static char *onMapLabels[] = { "", NULL };
 static char *moduleLabels[] = { "", NULL };
+static char *noButtonLabels[] = { "", NULL };
+static char *defaultLabels[] = { "", NULL };
 static char *layerColorLabels[] = { "", NULL };
 static paramIntegerRange_t i0_20 = { 0, NUM_BUTTONS };
 static paramListData_t layerUiListData = { 10, 370, 0 };
@@ -667,32 +690,34 @@ static paramData_t layerPLs[] = {
 #define I_MOD 	(7)
 	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF | PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORZ | BC_NOBORDER },
 #define I_BUT   (8)
-	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, moduleLabels, N_("No Button"), BC_HORZ | BC_NOBORDER },
-#define I_SCALE (9)
+	{ PD_TOGGLE, &layerNoButton, "button", PDO_NOPREF | PDO_DLGHORZ, noButtonLabels, N_("No Button"), BC_HORZ | BC_NOBORDER },
+#define I_DEF   (9)
+	{ PD_TOGGLE, &layerDefault, "default", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, defaultLabels, N_("Default"), BC_HORZ | BC_NOBORDER },
+#define I_SCALE (10)
 	{ PD_DROPLIST, &layerScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_LAYER) },
-#define I_GAUGE (10)
+#define I_GAUGE (11)
 	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
-#define I_MINRADIUSENTRY (11)
+#define I_MINRADIUSENTRY (12)
 	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_(" Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
-#define I_TIEDATA (13)
-	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF | PDO_DRAW, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
-	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DRAW | PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
-	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DRAW | PDO_DLGHORZ | PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
+#define I_TIEDATA (14)
+	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF, &r0_100, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DLGHORZ, &r0_100, N_( "Width" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r0_100, N_( "Spacing" ), 0, I2VP( CHANGE_MAIN ) },
 
 	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
-#define I_ADD (17)
+#define I_ADD (18)
 	{ PD_BUTTON, DoLayerOp, "add", PDO_DLGRESETMARGIN, 0, N_("Add Layer"), 0, I2VP(ENUMLAYER_ADD) },
-#define I_DELETE (18)
+#define I_DELETE (19)
 	{ PD_BUTTON, DoLayerOp, "delete", PDO_DLGHORZ, 0, N_("Delete Layer"), 0, I2VP(ENUMLAYER_DELETE) },
-#define I_DEFAULT (19)
+#define I_DEFAULT (20)
 	{ PD_BUTTON, DoLayerOp, "default", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Default Values"), 0, I2VP(ENUMLAYER_DEFAULT) },
 	{ PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND | PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
-#define I_LINKLIST (21)
+#define I_LINKLIST (22)
 	{ PD_STRING, layerLinkList, "layerlist", PDO_NOPREF | PDO_STRINGLIMITLENGTH, I2VP(250 - 54), N_("Linked Layers"), 0, 0, sizeof(layerLinkList) },
-#define I_SETTINGS (22)
+#define I_SETTINGS (23)
 	{ PD_DROPLIST, NULL, "settings", PDO_LISTINDEX, I2VP(250), N_("Settings when Current") },
-#define I_COUNT (23)
+#define I_COUNT (24)
 	{ PD_LONG, &layerObjectCount, "objectCount", PDO_DLGBOXEND, &r_nocheck, N_("Object Count:"), 0, 0 },
 	{ PD_MESSAGE, N_("All Layer Preferences"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 	{ PD_BUTTON, DoLayerOp, "load", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, I2VP(ENUMLAYER_RELOAD) },
@@ -823,6 +848,7 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].onMap = TRUE;
 	layers[inx].module = FALSE;
 	layers[inx].button_off = FALSE;
+	layers[inx].use_default = FALSE;
 	layers[inx].scaleInx = 0;
 	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
 	              &layers[inx].gaugeInx);
@@ -833,6 +859,7 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].tieData.length = 0.0;
 	layers[inx].tieData.width = 0.0;
 	layers[inx].tieData.spacing = 0.0;
+	layers[inx].tieData.valid = FALSE;
 	layers[inx].objCount = 0;
 	DYNARR_RESET(int, layers[inx].layerLinkList);
 	SetLayerColor(inx, layerColorTab[inx % COUNT(layerColorTab)]);
@@ -849,7 +876,8 @@ BOOL_T IsLayerDefault( unsigned int inx )
 	       layers[inx].onMap &&
 	       !layers[inx].module &&
 	       !layers[inx].button_off &&
-	       (!layers[inx].layerLinkList.cnt) &&
+		   !layers[inx].use_default &&
+		   (!layers[inx].layerLinkList.cnt) &&
 	       (layers[inx].color == layerColorTab[inx % COUNT(layerColorTab)]) &&
 	       layers[inx].scaleInx == 0 &&
 	       //layers[inx].scaleDescInx != layerScaleDescInx ||
@@ -858,7 +886,8 @@ BOOL_T IsLayerDefault( unsigned int inx )
 	       layers[inx].maxTrackGrade == 0.0 &&
 	       layers[inx].tieData.length == 0.0 &&
 	       layers[inx].tieData.width == 0.0 &&
-	       layers[inx].tieData.spacing == 0.0;
+	       layers[inx].tieData.spacing == 0.0 &&
+		   layers[inx].tieData.valid == FALSE;
 }
 
 /**
@@ -984,7 +1013,7 @@ static void LayerDefault( )
  *	dialog, this function is called. The parameter identifies the button pressed and
  * the operation is performed.
  *
- * \param[IN] data identifier for the button prerssed
+ * \param[IN] data identifier for the button pressed
  * \return
  */
 
@@ -1042,6 +1071,7 @@ EXPORT void UpdateLayerDlg(unsigned int layer)
 	layerColor = layers[layer].color;
 	layerUseColor = layers[layer].useColor;
 	layerNoButton = layers[layer].button_off;
+	layerDefault = layers[layer].use_default;
 	layerScaleInx = layers[layer].scaleInx;
 	layerScaleDescInx = layers[layer].scaleDescInx;
 	layerGaugeInx = layers[layer].gaugeInx;
@@ -1211,6 +1241,9 @@ LayerPrefSave(void)
 			if (layers[inx].button_off) {
 				flags |= LAYERPREF_NOBUTTON;
 			}
+			if (layers[inx].use_default) {
+				flags |= LAYERPREF_DEFAULT;
+			}
 			layerSetInteger(inx, LAYERPREF_FLAGS, flags);
 
 			layers[inx].scaleInx = GetScaleInx( layers[inx].scaleDescInx,
@@ -1324,6 +1357,7 @@ LayerPrefLoad(void)
 			layers[inx].visible = ((flags & LAYERPREF_VISIBLE) != 0);
 			layers[inx].module = ((flags & LAYERPREF_MODULE) != 0);
 			layers[inx].button_off = ((flags & LAYERPREF_NOBUTTON) != 0);
+			layers[inx].use_default = ((flags & LAYERPREF_DEFAULT) != 0);
 
 			layerGetInteger(inx, LAYERPREF_SCALEINX, &layers[inx].scaleInx,
 			                GetLayoutCurScale());
@@ -1487,7 +1521,8 @@ static void LayerUpdate(void)
 	    layers[(int)layerSelected].onMap != (BOOL_T)layerOnMap ||
 	    layers[(int)layerSelected].module != (BOOL_T)layerModule ||
 	    layers[(int)layerSelected].button_off != (BOOL_T)layerNoButton ||
-	    layers[(int)layerSelected].scaleInx != layerScaleInx ||
+		layers[(int)layerSelected].use_default != (BOOL_T)layerDefault ||
+		layers[(int)layerSelected].scaleInx != layerScaleInx ||
 	    layers[(int)layerSelected].scaleDescInx != layerScaleDescInx ||
 	    layers[(int)layerSelected].gaugeInx != layerGaugeInx ||
 	    layers[(int)layerSelected].minTrackRadius != layerMinRadius ||
@@ -1551,6 +1586,7 @@ static void LayerUpdate(void)
 	layers[(int)layerSelected].maxTrackGrade = layerMaxGrade;
 	layers[(int)layerSelected].tieData = layerTieData;
 	layers[(int)layerSelected].module = (BOOL_T)layerModule;
+	layers[(int)layerSelected].use_default = (BOOL_T)layerDefault;
 	strcpy(layers[(int)layerSelected].settingsName, settingsName);
 
 	PutLayerListArray((int)layerSelected, layerLinkList);
@@ -1588,11 +1624,13 @@ static void LayerSelect(
 	layerColor = layers[inx].color;
 	layerUseColor = layers[inx].useColor;
 	layerNoButton = layers[inx].button_off;
+	layerDefault = layers[inx].use_default;
 	layerScaleInx = layers[inx].scaleInx;
 	layerScaleDescInx = layers[inx].scaleDescInx;
 	layerGaugeInx = layers[inx].gaugeInx;
 	layerMinRadius = layers[inx].minTrackRadius;
 	layerMaxGrade = layers[inx].maxTrackGrade;
+	layerTieData.valid = layers[inx].tieData.valid;
 	layerTieData.length = layers[inx].tieData.length;
 	layerTieData.width = layers[inx].tieData.width;
 	layerTieData.spacing = layers[inx].tieData.spacing;
@@ -1625,6 +1663,7 @@ void ResetLayers(void)
 		layers[inx].onMap = TRUE;
 		layers[inx].module = FALSE;
 		layers[inx].button_off = FALSE;
+		layers[inx].use_default = FALSE;
 		layers[inx].objCount = 0;
 		strcpy(layers[inx].settingsName, "");
 		DYNARR_RESET(int, layers[inx].layerLinkList);
@@ -1661,6 +1700,7 @@ void ResetLayers(void)
 	layerFrozen = FALSE;
 	layerOnMap = TRUE;
 	layerModule = FALSE;
+	layerDefault = FALSE; 
 	layerColor = layers[0].color;
 	layerUseColor = TRUE;
 	strcpy(layerName, layers[0].name);
@@ -1775,6 +1815,7 @@ static void LayerDlgUpdate(
 	case I_FRZ:
 	case I_MOD:
 	case I_BUT:
+	case I_DEF:
 		LayerUpdate();
 		UpdateLayerDlg(layerSelected);
 		break;
@@ -1784,6 +1825,10 @@ static void LayerDlgUpdate(
 		// set the first entry as default, usually the standard gauge for a scale
 		wListSetIndex((wList_p)layerPLs[I_GAUGE].control, 0);
 		break;
+
+	//case I_DEFAULT:
+	//	LayerDefault();
+	//	break;
 
 	case I_SETTINGS:
 		if (strcmp((char*)wListGetItemContext(settingsListL,
@@ -1911,7 +1956,7 @@ BOOL_T ReadLayers(char * line)
 {
 	char * name, *layerLinkList, *layerSettingsName;
 	int inx, visible, frozen, color, onMap, sclInx, module, dontUseColor,
-	    ColorFlags, button_off;
+	    ColorFlags, button_off, use_default;
 	unsigned int layerInx = 0;
 	double minRad, maxGrd, tieLen, tieWid, tieSpc;
 	unsigned long rgb;
@@ -1974,14 +2019,15 @@ BOOL_T ReadLayers(char * line)
 			return FALSE;
 		}
 		sclInx = GetLayoutCurScale();
+		use_default = 0;
 		minRad = 0.0;
 		maxGrd = 0.0;
 		tieLen = 0.0;
 		tieWid = 0.0;
 		tieSpc = 0.0;
 	} else {
-		if (!GetArgs(line, "dddduddddufffffq", &layerInx, &visible, &frozen, &onMap,
-		             &rgb, &module, &dontUseColor, &ColorFlags, &button_off,
+		if (!GetArgs(line, "ddddudddddufffffq", &layerInx, &visible, &frozen, &onMap,
+		             &rgb, &module, &dontUseColor, &ColorFlags, &button_off, &use_default, 
 		             &sclInx, &minRad, &maxGrd, &tieLen, &tieWid, &tieSpc, &name)) {
 
 			return FALSE;
@@ -1991,12 +2037,6 @@ BOOL_T ReadLayers(char * line)
 	// Provide defaults
 	if ( minRad < EPSILON ) {
 		minRad = GetScaleMinRadius(sclInx);
-	}
-	if ( tieLen < EPSILON ) {
-		tieData_t td = GetScaleTieData(sclInx);
-		tieLen = td.length;
-		tieWid = td.width;
-		tieSpc = td.spacing;
 	}
 
 	if (paramVersion < 9) {
@@ -2011,6 +2051,12 @@ BOOL_T ReadLayers(char * line)
 	if (layerInx < 1 || layerInx >= NUM_LAYERS) {
 		return FALSE;
 	}
+
+	tieData_t td = {TRUE, tieLen, tieWid, tieSpc};
+	ValidateTieData(&td);
+	if ( !td.valid ) {
+		tieData_t td = GetScaleTieData(sclInx);
+	}
 	inx = layerInx - 1;
 	color = wDrawFindColor(rgb);
 	SetLayerColor(inx, color);
@@ -2021,13 +2067,12 @@ BOOL_T ReadLayers(char * line)
 	layers[inx].scaleInx = sclInx;
 	layers[inx].minTrackRadius = minRad;
 	layers[inx].maxTrackGrade = maxGrd;
-	layers[inx].tieData.length = tieLen;
-	layers[inx].tieData.width = tieWid;
-	layers[inx].tieData.spacing = tieSpc;
+	layers[inx].tieData = td;
 	layers[inx].module = module;
 	layers[inx].color = color;
 	layers[inx].useColor = !dontUseColor;
 	layers[inx].button_off = button_off;
+	layers[inx].use_default = use_default;
 	GetScaleGauge(sclInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
 
 	colorTrack = ColorFlags & 1; //Make sure globals are set
@@ -2090,17 +2135,17 @@ BOOL_T WriteLayers(FILE * f)
 	if (colorDraw) { ColorFlags |= 2; }
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
-		if (IsLayerConfigured(inx)) {
+		if (IsLayerConfigured(inx) && !IsLayerDefault(inx)) {
 			fprintf(f,
-			        "LAYERS %u %d %d %d %ld %d %d %d %d %u %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
+			        "LAYERS %u %d %d %d %ld %d %d %d %d %d %u %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
 			        (inx + 1),
 			        layers[inx].visible,
 			        layers[inx].frozen,
 			        layers[inx].onMap,
 			        wDrawGetRGB(layers[inx].color),
 			        layers[inx].module,
-			        layers[inx].useColor ? 0 : 1,
-			        ColorFlags, layers[inx].button_off,
+			        layers[inx].useColor ? 0 : 1, ColorFlags, 
+				    layers[inx].button_off, layers[inx].use_default, 
 			        layers[inx].scaleInx, layers[inx].minTrackRadius,
 			        layers[inx].maxTrackGrade, layers[inx].tieData.length,
 			        layers[inx].tieData.width, layers[inx].tieData.spacing,

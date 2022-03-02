@@ -59,13 +59,13 @@ void Rdump( FILE * );
 void Rprintf( char *, ... );
 
 typedef struct {
-		DIST_T length;
-		DIST_T width;
-		DIST_T spacing;
-		} tieData_t, *tieData_p;
+	BOOL_T valid;
+	DIST_T length;
+	DIST_T width;
+	DIST_T spacing;
+} tieData_t, *tieData_p;
 
-tieData_p defaultTieData;
-
+extern tieData_t LayoutTieData;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -76,6 +76,7 @@ char *GetScaleDesc( SCALEDESCINX_T inx );
 char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 void GetScaleEasementValues( DIST_T *, DIST_T * );
 DIST_T GetScaleMinRadius( SCALEINX_T );
+void ValidateTieData( tieData_p );
 tieData_t GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
 BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx);
