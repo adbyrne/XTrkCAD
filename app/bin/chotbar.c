@@ -382,27 +382,23 @@ EXPORT void HotBarCancel( void )
 
 static BOOL_T HotBarSelectPlayback( char * line )
 {
-	int inx;
-	hotBarMap_t * tbm;
 	while (*line && isspace((unsigned char)*line) ) line++;
-	DIST_T fixed_x = 0;
-	for ( inx=0; inx<hotBarMap_da.cnt; inx++ ) {
-		tbm = &hotBarMap(inx);
-		if (inx == 0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {
-			fixed_x = hotBarMap(0).w;
-		}
+	for ( int inx=0; inx<hotBarMap_da.cnt; inx++ ) {
+		hotBarMap_t * tbm = &hotBarMap(inx);
 		if ( strcmp( tbm->proc( HB_FULLTITLE, tbm->context, NULL, NULL ), line) == 0) {
-			if ( hotBarCurrSelect >= 0 ) {
-				//HotBarHighlight( hotBarCurrSelect );
-				RedrawHotBar(hotBarD.d, NULL, 0, 0 );
-			}
+			tbm->proc( HB_SELECT, hotBarMap(inx).context, NULL, NULL );
 			hotBarCurrSelect = inx;
 			if ( hotBarCurrSelect < hotBarCurrStart || hotBarCurrSelect > hotBarCurrEnd ) {
+				// Shift the hotbar so the selected object is visible
 				hotBarCurrStart = hotBarCurrSelect;
 				RedrawHotBar( hotBarD.d, NULL, 0, 0 );
 			}
+			DIST_T fixed_x = 0.0;
+			if ( inx > 0 && hotBarCurrStart > 0 & hotBarMap(0).isFixed ) {
+				// Leave room for Flex object
+				fixed_x = hotBarMap(0).w;
+			}
 			HotBarHighlight( hotBarCurrSelect, fixed_x );
-			hotBarMap(inx).proc( HB_SELECT, hotBarMap(inx).context, NULL, NULL );
 			FakeDownMouseState();
 			return TRUE;
 		}

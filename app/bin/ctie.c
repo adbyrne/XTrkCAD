@@ -1,5 +1,6 @@
-#ifndef XTRKCAD_CONFIG_H
-#define XTRKCAD_CONFIG_H
+/** \file ctie.c
+ * TIE
+ */
 
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
@@ -19,17 +20,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/* Generated file, do not edit! */
+//#include "cselect.h"
+//#include "custom.h"
+//#include "fileio.h"
+#include "layout.h"
+//#include "param.h"
+//#include "paths.h"
+#include "track.h"
+//#include "include/paramfile.h"
+#include "common-ui.h"
 
-#cmakedefine XTRKCAD_USE_GETTEXT
-#cmakedefine XTRKCAD_TESTING
-#cmakedefine XTRKCAD_CREATE_SVG 1
+static int log_tieList;
 
-#define XTRKCAD_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
-#define XTRKCAD_PACKAGE "@XTRKCAD_PACKAGE@"
-#define XTRKCAD_VERSION "@XTRKCAD_VERSION@"
-#define XTRKCAD_PARAMVERSION (13)
-#define XTRKCAD_PARAMVERSIONVERSION "5.3.0"
-#define XTRKCAD_MINPARAMVERSION (1)
+/****************************************************************************
+*
+* TIE DATA
+*
+*/
 
-#endif // !XTRKCAD_CONFIG_H
+/**
+* @brief Default tie data for a scale in tieLength, tieWidth, tieSpacing
+*/
+EXPORT void GetDefaultTieData( SCALEINX_T inx, tieData_p tieData ) 
+{
+	SCALEDESCINX_T scaleInx;
+	GAUGEINX_T gaugeInx;
+	GetScaleGauge( inx, &scaleInx, &gaugeInx );
+			
+	tieData->length = (96.0-54.0) / GetScaleRatio(inx) + GetScaleTrackGauge(inx);
+	tieData->width = 16.0 / GetScaleRatio(inx);
+	tieData->spacing = 2 * (tieData->width);
+}

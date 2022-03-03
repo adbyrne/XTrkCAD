@@ -240,7 +240,7 @@ void DynStringFree(DynString *s)
 /* Create a new string as a copy of an old one */
 DynString *DynStringDupStr(DynString *s2, DynString *s)
 {
-    DynString nas = NaS;
+//    DynString nas = NaS;
 
     /* Not a string? */
     if (isnas(s)) {
@@ -445,7 +445,7 @@ void DynStringPrintf(DynString *s, const char *fmt, ...)
 {
     va_list v;
     size_t len;
-    DynString nas = NaS;
+//    DynString nas = NaS;
 
     /* Are we not a string? */
     if (isnas(s)) {

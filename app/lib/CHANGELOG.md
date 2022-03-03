@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## Bugs
 
++ Fixed Layout Background handling in Dialog (if Cancelled)
++ Fixed Fault if Run Trains with no Cars and no Prototype loaded
++ Made sure UTF-8 handled correctly in Windows Macros (demos)
 + Add > Structure dialog caused weird artifact when closed
 + Cornu Turnout Designer misplaces points or fails
 + Add check for max connect angle to Bezier Segment
@@ -35,7 +38,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## Examples
 
-+ G Scale Folded Dogbone
++ Ondaville Franklin and Carolina RR
++ A Scale Folded Dogbone
 + Mianne Benchwork
 
 

@@ -115,14 +115,15 @@ EXPORT void Rprintf(
  * CHANGE NOTIFICATION
  *
  */
+#define CNCB_COUNT (40)
 
-
-static changeNotificationCallBack_t changeNotificationCallBacks[20];
+static changeNotificationCallBack_t changeNotificationCallBacks[CNCB_COUNT];
 static int changeNotificationCallBackCnt = 0;
 
 EXPORT void RegisterChangeNotification(
 		changeNotificationCallBack_t action )
 {
+	CHECK( (changeNotificationCallBackCnt + 1) < CNCB_COUNT );
 	changeNotificationCallBacks[changeNotificationCallBackCnt] = action;
 	changeNotificationCallBackCnt++;
 }
@@ -272,32 +273,13 @@ EXPORT void GetScaleEasementValues( DIST_T * R, DIST_T * L )
 	}
 }
 
-
-EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
+EXPORT DIST_T GetScaleMinRadius( SCALEINX_T si )
 {
-	scaleInfo_p s;
-	DIST_T defLength;
-
-	if ( si == -1 )
-		return &tieData_demo;
-	else if ( si < 0 || si >= scaleInfo_da.cnt )
-		return &tieData_demo;
-	s = &scaleInfo(si);
-	if ( !s->tieDataValid ) {
-		sprintf( message, "tiedata-%s", s->scale );
-		defLength = (96.0-54.0)/s->ratio+s->gauge;
-
-		/** @prefs [tiedata-<SCALE>] length, width, spacing Sets tie drawing data. 
-		* Example for 6"x8"x6' ties spaced 20" in HOn3 (slash separates 4 lines): 
-		* [tiedata-HOn3] \ length=0.83 \ width=0.07 \ spacing=0.23
-		*/
-		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
-		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
-		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
-		s->tieDataValid = TRUE;
-	}
-	return &scaleInfo(si).tieData;
+	if ( si < 0 || si >= scaleInfo_da.cnt )
+		return 0;
+	return scaleInfo(si).R[0];
 }
+
 
 EXPORT char *GetScaleDesc( SCALEDESCINX_T inx )
 {
@@ -310,9 +292,40 @@ EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	gaugeInfo_p g;
 
 	s = scaleDesc(scaleInx);
-   g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
+    g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
 
 	return g->gauge;
+}
+
+EXPORT void ValidateTieData( tieData_p td ){
+	td->valid = (td->length > 0.05 && td->width > 0.05 && td->spacing > 0.05);
+}
+
+EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
+{
+	scaleInfo_p s;
+	DIST_T defLength;
+
+	if ( si == -1 )
+		return tieData_demo;
+	else if ( si < 0 || si >= scaleInfo_da.cnt )
+		return tieData_demo;
+	s = &scaleInfo(si);
+	if ( !s->tieDataValid ) {
+		sprintf( message, "tiedata-%s", s->scale );
+		defLength = (96.0-54.0)/s->ratio+s->gauge;
+
+		/** @prefs [tiedata-<SCALE>] length, width, spacing Sets tie drawing data. 
+		* Example for 6"x8"x6' ties spaced 20" in HOn3 (slash separates 4 lines): 
+		* [tiedata-HOn3] \ length=0.83 \ width=0.07 \ spacing=0.23
+		*/
+		wPrefGetFloat( message, "length", &s->tieData.length, defLength );
+		wPrefGetFloat( message, "width", &s->tieData.width, 16.0/s->ratio );
+		wPrefGetFloat( message, "spacing", &s->tieData.spacing, 2*s->tieData.width );
+		s->tieData.valid = TRUE;
+		s->tieDataValid = TRUE;
+	}
+	return scaleInfo(si).tieData;
 }
 
 void

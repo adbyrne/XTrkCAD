@@ -81,7 +81,7 @@ void wHelp(const char * topic)
 {
     int rc;
     char *url;
-    char *currentPath;
+//    char *currentPath;
 
     assert(topic != NULL);
     assert(strlen(topic));

@@ -25,7 +25,6 @@
 
 #include "common.h"
 
-
 void SetLayoutFullPath(const char *fileName);
 void LoadLayoutMinRadiusPref(char *scaleName, double defaultValue);
 void SetLayoutTitle(char *title);
@@ -50,12 +49,13 @@ char *GetLayoutFilename(void);
 char *GetLayoutTitle(void);
 char *GetLayoutSubtitle(void);
 DIST_T GetLayoutMinTrackRadius(void);
+ANGLE_T GetLayoutMaxTrackGrade(void);
+tieData_t GetLayoutTieData(void);
 SCALEINX_T GetLayoutCurScale(void );
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
 //GAUGEINX_T GetLayoutCurGauge(void);
 void GetLayoutRoomSize(coOrd *roomSize);
 
-ANGLE_T GetLayoutMaxTrackGrade(void);
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
 char *GetLayoutBackGroundFullPath(void);
 double GetLayoutBackGroundSize(void);

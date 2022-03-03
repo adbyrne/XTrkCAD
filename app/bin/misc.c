@@ -737,8 +737,8 @@ Confirm(char * label2, doSaveCallBack_p after)
 	case 0:		/* cancel operation */
 		break;
 	case 1:		/* save */
-		LayoutBackGroundInit(FALSE);
-		LayoutBackGroundSave();
+		//LayoutBackGroundInit(FALSE);
+		//LayoutBackGroundSave();
 		DoSave(after);
 		break;
 	}

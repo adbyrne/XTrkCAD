@@ -197,7 +197,7 @@ static paramGroup_t aboutPG = { "about", 0, aboutPLs, COUNT( aboutPLs ) };
 
 void CreateAboutW(void *ptr)
 {
-	char *copyright = sAboutProd;
+//	char *copyright = sAboutProd;
 
 	if (!aboutW) {
 		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap(xtc_xpm);

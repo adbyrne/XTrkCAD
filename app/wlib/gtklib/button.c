@@ -84,7 +84,7 @@ void wlibSetLabel(
     GtkWidget * * imageG)
 {
     wIcon_p bm;
-    GdkBitmap * mask;
+//    GdkBitmap * mask;
 
     if (widget == 0) {
         abort();

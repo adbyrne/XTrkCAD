@@ -82,6 +82,8 @@ SET(SOURCES
 	chotbar.c
 	cjoin.c
 	cjoin.h
+	cJSON.c
+	cJSON.h
 	cmisc.c
 	cmodify.c
 	cnote.c
@@ -107,9 +109,11 @@ SET(SOURCES
 	ctext.c
 	ctodesgn.c
 	ctrain.c
+	ctrain.h
 	cturnout.c
 	cturntbl.c
 	cundo.c
+	cundo.h
 	custom.c
 	custom.h
 	dbench.c
@@ -121,6 +125,7 @@ SET(SOURCES
 	dease.c
 	denum.c
 	directory.c
+	directory.h
 	dlayer.c
 	doption.c
 	dpricels.c
@@ -128,6 +133,7 @@ SET(SOURCES
 	draw.c
 	draw.h
 	drawgeom.c
+	drawgeom.h
 	dxfformat.c
 	dxfformat.h
 	dxfoutput.c
@@ -145,21 +151,31 @@ SET(SOURCES
 	lprintf.c
 	macro.c
 	manifest.c
+	manifest.h
 	misc.c
 	misc.h
 	misc2.c
+	misc2.h
+	note.h
 	param.c
+	param.h
 	paramfile.c
 	paramfilelist.c
 	paramfilesearch_ui.c
 	partcatalog.c
 	paths.c
+	paths.h
 	shortentext.c
+	shortentext.h
 	shrtpath.c
+	shrtpath.h
 	smalldlg.c
+	smalldlg.h
 	stringxtc.c
 	tbezier.c
+	tbezier.h
 	tcornu.c
+	tcornu.h
 	tcurve.c
 	tease.c
 	textnoteui.c
@@ -169,13 +185,11 @@ SET(SOURCES
 	trknote.c
 	trkseg.c
 	tstraigh.c
+	turnout.c
+	uthash.h
 	utility.c
 	utility.h
 	validator.c
-	cJSON.c
-	archive.h
-	directory.h
-	manifest.h
 	validator.h
 	)
 

@@ -59,11 +59,13 @@ void Rdump( FILE * );
 void Rprintf( char *, ... );
 
 typedef struct {
-		DIST_T length;
-		DIST_T width;
-		DIST_T spacing;
-		} tieData_t, *tieData_p;
+	BOOL_T valid;
+	DIST_T length;
+	DIST_T width;
+	DIST_T spacing;
+} tieData_t, *tieData_p;
 
+extern tieData_t LayoutTieData;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -73,7 +75,9 @@ SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 char *GetScaleDesc( SCALEDESCINX_T inx );
 char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 void GetScaleEasementValues( DIST_T *, DIST_T * );
-tieData_p GetScaleTieData( SCALEINX_T );
+DIST_T GetScaleMinRadius( SCALEINX_T );
+void ValidateTieData( tieData_p );
+tieData_t GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
 BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx);
 void SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
@@ -96,6 +100,7 @@ extern long layerCount;
 void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg);
 wDrawColor GetLayerColor( unsigned int );
+SCALEINX_T GetLayerScale( unsigned int );
 BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
 void FlipLayer( void * layerVP );
@@ -103,6 +108,9 @@ BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );
 BOOL_T GetLayerHidden( unsigned int);
+tieData_p GetLayerTieData( unsigned int );
+DIST_T GetLayerMinTrackRadius( unsigned int layer );
+ANGLE_T GetLayerMaxTrackGrade( unsigned int layer );
 void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
 void SetLayerName(unsigned int layer, char* name);
