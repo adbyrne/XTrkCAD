@@ -39,7 +39,7 @@ SET (XPMS
 foreach(xpm ${XPMS})
 	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
-		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 16 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}16.png
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 24 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png
 		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 32 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}32.png
