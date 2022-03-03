@@ -1884,7 +1884,6 @@ BOOL_T ReadLayers(char * line)
 	char * name, *layerLinkList, *layerSettingsName;
 	int inx, visible, frozen, color, onMap, sclInx, module, dontUseColor,
 	    ColorFlags, button_off, use_default;
-	unsigned int layerInx = 0;
 	double minRad, maxGrd, tieLen, tieWid, tieSpc;
 	unsigned long rgb;
 
@@ -1932,14 +1931,13 @@ BOOL_T ReadLayers(char * line)
 		if (!GetArgs(line + 3, "dq", &inx, &layerSettingsName)) {
 			return FALSE;
 		}
-		layerInx = inx - 1;
-		strcpy(layers[layerInx].settingsName, layerSettingsName);
+		strcpy(layers[inx].settingsName, layerSettingsName);
 		return TRUE;
 	}
 
 	/* get the properties for a layer from the file and update the layer accordingly */
 	if (paramVersion < 13) {
-		if (!GetArgs(line, "dddduddddq", &layerInx, &visible, &frozen, &onMap, &rgb,
+		if (!GetArgs(line, "dddduddddq", &inx, &visible, &frozen, &onMap, &rgb,
 		             &module, &dontUseColor, &ColorFlags, &button_off,
 		             &name)) {
 
@@ -1953,7 +1951,7 @@ BOOL_T ReadLayers(char * line)
 		tieWid = 0.0;
 		tieSpc = 0.0;
 	} else {
-		if (!GetArgs(line, "ddddudddddufffffq", &layerInx, &visible, &frozen, &onMap,
+		if (!GetArgs(line, "ddddudddddufffffq", &inx, &visible, &frozen, &onMap,
 		             &rgb, &module, &dontUseColor, &ColorFlags, &button_off, &use_default, 
 		             &sclInx, &minRad, &maxGrd, &tieLen, &tieWid, &tieSpc, &name)) {
 
@@ -1975,7 +1973,7 @@ BOOL_T ReadLayers(char * line)
 		}
 	}
 
-	if (layerInx < 1 || layerInx >= NUM_LAYERS) {
+	if (inx < 0 || inx >= NUM_LAYERS) {
 		return FALSE;
 	}
 
@@ -1984,7 +1982,6 @@ BOOL_T ReadLayers(char * line)
 	if ( !td.valid ) {
 		td = GetScaleTieData(sclInx);
 	}
-	inx = layerInx - 1;
 	color = wDrawFindColor(rgb);
 	SetLayerColor(inx, color);
 	strncpy(layers[inx].name, name, sizeof layers[inx].name);
@@ -2065,7 +2062,7 @@ BOOL_T WriteLayers(FILE * f)
 		if (IsLayerConfigured(inx) && !IsLayerDefault(inx)) {
 			fprintf(f,
 			        "LAYERS %u %d %d %d %ld %d %d %d %d %d %u %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
-			        (inx + 1),
+			        inx,
 			        layers[inx].visible,
 			        layers[inx].frozen,
 			        layers[inx].onMap,

@@ -17,6 +17,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## Added
 
++ Layout has additional settings for Tie data: Length, Width, Spacing
++ Layers have additional settings that can override the layout configuration: 
+  Scale, Min Track Radius, Max Track Grade, Tie data: Length, Width, Spacing 
 + Enhanced DXF export to include color and DOT line style
 + Bitmap export to JPEG and PNG formats
 + Include background bitmap in bitmap export
