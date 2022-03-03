@@ -394,7 +394,7 @@ static BOOL_T HotBarSelectPlayback( char * line )
 				RedrawHotBar( hotBarD.d, NULL, 0, 0 );
 			}
 			DIST_T fixed_x = 0.0;
-			if ( inx > 0 && hotBarCurrStart > 0 & hotBarMap(0).isFixed ) {
+			if ( inx > 0 && (hotBarCurrStart > 0 & hotBarMap(0).isFixed) ) {
 				// Leave room for Flex object
 				fixed_x = hotBarMap(0).w;
 			}

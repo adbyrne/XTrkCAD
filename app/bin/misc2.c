@@ -170,6 +170,7 @@ static dynArr_t scaleCompatible_da;
 #define scaleComp(N) DYNARR_N( scaleComp_t, scaleCompatible_da, N )
 
 static tieData_t tieData_demo = {
+	    TRUE, 
 		96.0/160.0,
 		16.0/160.0,
 		32.0/160.0 };

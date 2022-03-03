@@ -1,5 +1,5 @@
 /** \file macro.c
-
+ *
  * Macros
  */
 
@@ -34,6 +34,10 @@
 #include "trackx.h"
 #include "version.h"
 #include "common-ui.h"
+
+#ifdef UTFCONVERT
+#include "include/utf8convert.h"
+#endif // UTFCONVERT
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );
