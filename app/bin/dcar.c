@@ -2128,9 +2128,9 @@ static wIndex_t carDlgManufInx;
 static char carDlgManufStr[STR_SIZE];
 static wIndex_t carDlgKindInx;
 static wIndex_t carDlgProtoInx;
-static char carDlgProtoStr[STR_SIZE];
+static char carDlgProtoStr[STR_SIZE] = "Prototype";	// Make sure we have something in ProtoStr
 static wIndex_t carDlgPartnoInx;
-static char carDlgPartnoStr[STR_SIZE];
+static char carDlgPartnoStr[STR_SIZE] = "0";		// and in PartnoStr
 static char carDlgDescStr[STR_SIZE];
 
 static long carDlgDispMode;
