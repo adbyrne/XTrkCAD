@@ -377,6 +377,11 @@ EXPORT unsigned int GetTrkLayer( track_p trk )
 	return trk->layer;
 }
 
+EXPORT tieData_p GetTrkTieData( track_p trk )
+{
+	return GetLayerTieData(GetTrkLayer(trk));
+}
+
 EXPORT void SetBoundingBox( track_p trk, coOrd hi, coOrd lo )
 {
 	trk->hi.x = (float)hi.x;
@@ -1068,7 +1073,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	trk->index = index;
 	trk->type = type;
 	trk->layer = curLayer;
-	trk->scale = (char)GetLayoutCurScale();
+	trk->scale = (char)GetLayerScale(curLayer); // (char)GetLayoutCurScale();
 	trk->bits = TB_VISIBLE;
 	trk->elevMode = ELEV_ALONE;
 	trk->elev = 0;
@@ -1338,7 +1343,43 @@ wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 	return trackCmds( GetTrkType( trk1 ) )->compare( trk1, trk2 );
 }
 
-
+
+/*****************************************************************************
+*
+* LAYER
+*
+*/
+
+/**
+ * @brief Add 1 to track layer numbers that are greater than or equal to New Layer
+ * @param newLayer 
+*/
+EXPORT void TrackInsertLayer( int newLayer ){
+	track_p trk;
+
+	TRK_ITERATE( trk ) {
+		int layer = GetTrkLayer(trk);
+		if (layer >= newLayer) {
+			SetTrkLayer(trk, layer + 1);
+		}
+	}
+}
+
+/**
+* @brief Subtract 1 from track layer numbers that are greater than Removed Layer
+* @param removeLayer 
+*/
+EXPORT void TrackDeleteLayer( int removeLayer ){
+	track_p trk;
+
+	TRK_ITERATE( trk ) {
+		int layer = GetTrkLayer(trk);
+		if (layer > removeLayer) {
+			SetTrkLayer(trk, layer - 1);
+		}
+	}
+}
+
 /*****************************************************************************
  *
  * ABOVE / BELOW
@@ -2698,7 +2739,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	}
 	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) != 0 )
 		return wDrawColorBlack;
-	if ( grade > GetLayoutMaxTrackGrade())
+	if ( grade > GetLayerMaxTrackGrade(trk->layer))
 		return exceptionColor;
 	if ( QueryTrack( trk, Q_EXCEPTION ) )
 		return exceptionColor;

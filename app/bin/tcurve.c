@@ -701,14 +701,13 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 
 static void DrawCurvedTies(
 	drawCmd_p d,
-	SCALEINX_T scaleInx,
+	tieData_p td,
 	coOrd p,
 	DIST_T r,
 	ANGLE_T a0,
 	ANGLE_T a1,
 	wDrawColor color )
 {
-	tieData_p td; 
 	DIST_T len;
 	ANGLE_T ang, dang;
 	coOrd pos;
@@ -716,10 +715,6 @@ static void DrawCurvedTies(
 
 	if ( (d->options&DC_SIMPLE) != 0 )
 		return;
-
-	if ( scaleInx < 0 )
-		return;
-	td = GetScaleTieData( scaleInx );
 
 	if (color == wDrawColorBlack)
 		color = tieColor;
@@ -750,6 +745,7 @@ EXPORT void DrawCurvedTrack(
 {
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
+	tieData_p td;
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
 	long bridge = 0, roadbed = 0;
@@ -790,8 +786,10 @@ EXPORT void DrawCurvedTrack(
 		DrawArc( d, p, r, a0, a1, 0, width3, bridge?bridgeColor:roadbedColor );
 	}
 
-	if ( DoDrawTies( d, trk ) )
-		DrawCurvedTies( d, GetTrkScale(trk), p, r, a0, a1, color );
+	if ( DoDrawTies( d, trk ) ) {
+		td = GetLayerTieData( GetTrkLayer(trk) );
+		DrawCurvedTies( d, td, p, r, a0, a1, color );
+	}
 	if (color == wDrawColorBlack)
 		color = normalColor;
 	if ( d->scale >= scale2rail ) {
@@ -1426,7 +1424,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
-		return fabs(xx->radius) < (GetLayoutMinTrackRadius() - EPSILON);
+		return fabs(xx->radius) < (GetLayerMinTrackRadius(GetTrkLayer(trk)) - EPSILON); // *new-layer* 
 		break;
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );

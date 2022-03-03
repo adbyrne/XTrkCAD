@@ -504,6 +504,8 @@ int GetTrkBits( track_p );
 int SetTrkBits( track_p, int );
 int ClrTrkBits( track_p, int );
 BOOL_T IsTrackDeleted( track_p );
+void TrackInsertLayer( int );
+void TrackDeleteLayer( int );
 #endif
 
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
@@ -628,7 +630,7 @@ BOOL_T hasTrackCenterline( drawCmd_p d );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 
-void DrawStraightTies( drawCmd_p d, SCALEINX_T scaleInx, coOrd p0, coOrd p1, wDrawColor color );
+void DrawStraightTies( drawCmd_p d, tieData_p td, coOrd p0, coOrd p1, wDrawColor color );
 wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
 void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width, wDrawColor color, BOOL_T solid);
 
