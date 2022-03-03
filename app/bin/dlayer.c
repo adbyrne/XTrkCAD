@@ -219,7 +219,7 @@ BOOL_T GetLayerOnMap(unsigned int layer)
 	}
 }
 
-BOOL_T GetLayerDefault(unsigned int layer)
+BOOL_T GetLayerUseDefault(unsigned int layer)
 {
 	if (!IsLayerValid(layer)) {
 		return TRUE;
@@ -239,7 +239,7 @@ EXPORT SCALEINX_T GetLayerScale( unsigned int layer )
 
 EXPORT DIST_T GetLayerMinTrackRadius( unsigned int layer )
 {
-	if ( IsLayerValid(layer) ) {
+	if ( !GetLayerUseDefault(layer) && IsLayerValid(layer) ) {
 		return layers[layer].minTrackRadius;
 	}
 	return GetLayoutMinTrackRadius();
@@ -247,7 +247,7 @@ EXPORT DIST_T GetLayerMinTrackRadius( unsigned int layer )
 
 EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
 {
-	if ( IsLayerValid(layer) ) {
+	if ( !GetLayerUseDefault(layer) && IsLayerValid(layer) ) {
 		return layers[layer].maxTrackGrade;
 	}
 	return GetLayoutMaxTrackGrade();
@@ -255,7 +255,7 @@ EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
 
 EXPORT tieData_p GetLayerTieData( unsigned int layer )
 {
-	if ( IsLayerValid(layer) && !layers[layer].use_default && layers[layer].tieData.valid ) {
+	if ( !GetLayerUseDefault(layer) && IsLayerValid(layer) && layers[layer].tieData.valid ) {
 		return &layers[layer].tieData;
 	}
 	return &LayoutTieData; // layout scale default tie data
@@ -1944,7 +1944,7 @@ BOOL_T ReadLayers(char * line)
 			return FALSE;
 		}
 		sclInx = GetLayoutCurScale();
-		use_default = 0;
+		use_default = TRUE;
 		minRad = 0.0;
 		maxGrd = 0.0;
 		tieLen = 0.0;
