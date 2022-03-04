@@ -699,15 +699,15 @@ static paramData_t layerPLs[] = {
 #define I_GAUGE (11)
 	{ PD_DROPLIST, &layerGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge") },
 #define I_MINRADIUSENTRY (12)
-	{ PD_FLOAT, &layerMinRadius, "minTrackRadius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+	{ PD_FLOAT, &layerMinRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
 #define I_MAXGRADEENTRY (13)
-	{ PD_FLOAT, &layerMaxGrade, "maxTrackGrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &layerMaxGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ | PDO_NOPREF, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define I_TIELEN (14)
-	{ PD_FLOAT, &layerTieData.length, "tieLength", PDO_NOPREF, &r_tieData, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.length, "tielength", PDO_NOPREF, &r_tieData, N_( "Tie Length" ), 0, I2VP( CHANGE_MAIN ) },
 #define I_TIEWID (15)
-	{ PD_FLOAT, &layerTieData.width, "tieWidth", PDO_NOPREF | PDO_DLGHORZ, &r_tieData, N_( "  Width" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.width, "tiewidth", PDO_NOPREF | PDO_DLGHORZ, &r_tieData, N_( "  Width" ), 0, I2VP( CHANGE_MAIN ) },
 #define I_TIESPC (16)
-	{ PD_FLOAT, &layerTieData.spacing, "tieSpacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_( "  Spacing" ), 0, I2VP( CHANGE_MAIN ) },
+	{ PD_FLOAT, &layerTieData.spacing, "tiespacing", PDO_NOPREF | PDO_DLGHORZ | PDO_DLGBOXEND, &r_tieData, N_( "  Spacing" ), 0, I2VP( CHANGE_MAIN ) },
 
 	{ PD_MESSAGE, N_("Layer Actions"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 #define I_ADD (18)
