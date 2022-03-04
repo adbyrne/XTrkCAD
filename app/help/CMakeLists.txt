@@ -4,7 +4,23 @@ ADD_EXECUTABLE(genhelp genhelp.c genhelp.json cJSON.c cJSON.h)
 
 ADD_EXECUTABLE(genmessages genmessages.c)
 
-SET_SOURCE_FILES_PROPERTIES(genhelp.json PROPERTIES HEADER_FILE_ONLY TRUE)
+TARGET_SOURCES(genhelp PUBLIC
+	cJSON.c
+	cJSON.h
+	genhelp.c
+	genhelp.json
+)
+
+TARGET_SOURCES(genmessages PUBLIC
+	genmessages.c
+	messages.in
+	xtrkcad.tip
+)
+
+SET_SOURCE_FILES_PROPERTIES(
+	genhelp.json messages.in xtrkcad.tip 
+	PROPERTIES HEADER_FILE_ONLY TRUE
+)
 
 IF(XTRKCAD_USE_GETTEXT)
 	SET(GENMESSAGES_OPTS "-i18n")

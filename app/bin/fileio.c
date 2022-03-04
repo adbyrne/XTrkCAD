@@ -634,7 +634,7 @@ static char * checkPtFileNameBackup;
  * \param IN pathName filename including directory
  * \param IN fileName pointer to filename part in pathName
  * \param IN full
- * \param IN noSetCurDir if FALSE current diurectory is changed to file location
+ * \param IN noSetCurDir if FALSE current directory is changed to file location
  * \param IN complain  if FALSE error messages are supressed
  *
  * \return FALSE in case of load error
