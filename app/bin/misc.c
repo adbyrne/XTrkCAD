@@ -2677,7 +2677,7 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate( editM );
 	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL, SelectTunnel, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B&ridge"), ACCL_BRIDGE, SelectBridge, IC_SELECTED, NULL);
-	MiscMenuItemCreate( editM, NULL, "cmdRoadbed", _("&Roadbed"), 0L, SelectRoadbed, IC_SELECTED, NULL);
+	MiscMenuItemCreate( editM, NULL, "cmdRoadbed", _("&Roadbed"), ACCL_ROADBED, SelectRoadbed, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdTies", _("Ties/NoTies"), ACCL_TIES, SelectTies, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("Move to &Front"), ACCL_ABOVE, SelectAbove, IC_SELECTED, NULL);
 	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Move to &Back"), ACCL_BELOW, SelectBelow, IC_SELECTED, NULL);
@@ -2949,6 +2949,8 @@ static void CreateMenus(void) {
 
 	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS,
 			InitLayersDialog(), 0, NULL);
+	MiscMenuItemCreate(manageM, NULL, "cmdDrawOrder", _("Drawing Order ..."), ACCL_DRAWORDER,
+		    InitDrawOrderDialog(), 0, NULL );
 	wMenuSeparatorCreate(manageM);
 
 	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List ..."),
