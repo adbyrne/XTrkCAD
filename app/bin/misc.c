@@ -2949,8 +2949,6 @@ static void CreateMenus(void) {
 
 	MiscMenuItemCreate(manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS,
 			InitLayersDialog(), 0, NULL);
-	MiscMenuItemCreate(manageM, NULL, "cmdDrawOrder", _("Drawing Order ..."), ACCL_DRAWORDER,
-		    InitDrawOrderDialog(), 0, NULL );
 	wMenuSeparatorCreate(manageM);
 
 	MiscMenuItemCreate(manageM, NULL, "cmdEnumerate", _("Parts &List ..."),

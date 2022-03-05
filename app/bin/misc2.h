@@ -96,8 +96,6 @@ SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * sca
 BOOL_T DoSetScaleDesc( void );
 
 /* dlayers.c */
-extern BOOL_T layerEnableOrder;
-extern int layerDrawOrder[]; 
 extern unsigned int curLayer;
 extern long layerCount;
 void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,

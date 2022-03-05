@@ -133,7 +133,6 @@
 #define ACCL_CONTMGM    (WALT+WCTL+'c')
 #define ACCL_CARINV		(WALT+WCTL+'v')
 #define ACCL_LAYERS		(WALT+WCTL+'y')
-#define ACCL_DRAWORDER  (0)
 #define ACCL_SETCURLAYER		(0)
 #define ACCL_MOVCURLAYER		(0)
 #define ACCL_CLRELEV	(0)
