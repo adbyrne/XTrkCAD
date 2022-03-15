@@ -118,7 +118,7 @@ typedef enum {CORNU_MODIFY, CORNU_CREATE} cornuCmdType_e;
 
 static struct {
 		enum Cornu_States state;
-		coOrd pos[2];
+		coOrd pos[4];
 		int number_of_points;
         int selectEndPoint;
         int selectMidPoint;
