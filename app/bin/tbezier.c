@@ -1865,9 +1865,9 @@ extern double BezierCurvature(coOrd p[4], double t, coOrd * center)
 
     if (center) {
         double curvnorm = (d1.x * d1.x + d1.y* d1.y)/(d1.x * d2.y - d2.x * d1.y);
-        coOrd p = BezierPointByParameter(&p, t);
-        center->x = p.x-d1.y*curvnorm;
-        center->y = p.y+d1.x*curvnorm;
+        coOrd p1 = BezierPointByParameter(p, t);
+        center->x = p1.x-d1.y*curvnorm;
+        center->y = p1.y+d1.x*curvnorm;
     }
 
     double r1 = sqrt(pow(d1.x * d1.x + d1.y* d1.y, 3.0));
