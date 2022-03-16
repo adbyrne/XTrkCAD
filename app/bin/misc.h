@@ -49,9 +49,9 @@ extern int iconSize;
 
 extern long adjTimer;
 
-typedef int SCALEINX_T;
-typedef int GAUGEINX_T;
-typedef int SCALEDESCINX_T;
+typedef long SCALEINX_T;
+typedef long GAUGEINX_T;
+typedef long SCALEDESCINX_T;
 
 extern int log_error;
 
