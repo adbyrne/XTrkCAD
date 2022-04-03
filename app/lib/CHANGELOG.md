@@ -37,7 +37,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Walthers HO DCC Code 83 Turnouts
 + Walthers HO DCC Code 100 Turnouts
 + HO Piko A Roadbed Track Components
-+ HO Piko A Track revision
++ HO Piko A Track update
++ Sn3 Fast Tracks Turnouts
++ HO Lionel MagLock FasTrack
++ O LionelFasTrack update
++ HOn30_Minitrains update
++ G Lionel Ready-To-Play Track
++ S Jakks PowerTrains Track (2012)
 
 ## Examples
 
