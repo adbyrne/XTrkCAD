@@ -2070,7 +2070,7 @@ BOOL_T WriteLayers(FILE * f)
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		if (IsLayerConfigured(inx) && !IsLayerDefault(inx)) {
 			fprintf(f,
-			        "LAYERS %u %d %d %d %ld %d %d %d %d %d %u %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
+			        "LAYERS %u %d %d %d %ld %d %d %d %d %d %lu %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
 			        inx,
 			        layers[inx].visible,
 			        layers[inx].frozen,
