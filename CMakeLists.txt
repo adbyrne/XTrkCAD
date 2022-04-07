@@ -2,7 +2,6 @@ PROJECT(XTrkCAD)
 enable_testing()
 cmake_minimum_required(VERSION 2.8.12)
 set(CMAKE_MACOSX_RPATH 0)
-CMAKE_POLICY(SET CMP0076 NEW)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 
@@ -40,8 +39,8 @@ IF(WIN32)
 	endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 ENDIF(WIN32)
 
-find_package(LIBZIP)
-find_package(ZLIB)
+find_package(Libzip)
+find_package(Zlib)
 find_package(MiniXML)
 
 if(MINIXML_FOUND)
