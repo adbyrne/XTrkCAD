@@ -130,8 +130,6 @@ void wControlSetBalloonText(
 
 void wControlSetBalloon( wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * msg )
 {
-    PangoLayout * layout;
-
     gint x, y;
     gint w, h;
     wWinPix_t xx, yy;

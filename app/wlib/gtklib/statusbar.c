@@ -91,7 +91,6 @@ wStatus_p wStatusCreate(
     const char	*message)
 {
     wStatus_p b;
-    GtkRequisition requisition;
     b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
     wlibComputePos((wControl_p)b);
     b->message = message;

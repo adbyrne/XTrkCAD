@@ -140,7 +140,8 @@ static char *wlibGetText(wText_p bt)
 {
     GtkTextBuffer *tb;
     GtkTextIter ti1, ti2;
-    char *cp, *cp1, *res;
+    char *cp, *res;
+    //char *cp1;
 
     if (bt->text == 0) {
         abort();
