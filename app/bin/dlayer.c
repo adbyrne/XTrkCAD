@@ -671,7 +671,7 @@ static char *noButtonLabels[] = { "", NULL };
 static char *defaultLabels[] = { "", NULL };
 static char *layerColorLabels[] = { "", NULL };
 static paramIntegerRange_t i0_20 = { 0, NUM_BUTTONS };
-static paramListData_t layerUiListData = { 10, 370, 0 };
+//static paramListData_t layerUiListData = { 10, 370, 0 };
 
 static paramData_t layerPLs[] = {
 #define I_LIST	(0)

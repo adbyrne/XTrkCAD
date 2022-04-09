@@ -27,7 +27,7 @@
 #include "track.h"
 #include "common-ui.h"
 
-static paramIntegerRange_t i1_64 = { 1, 64 };
+//static paramIntegerRange_t i1_64 = { 1, 64 };
 static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i0_256 = { 0, 256 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
@@ -39,7 +39,7 @@ static paramIntegerRange_t i10_1000 = { 10, 1000 };
 static paramIntegerRange_t i10_100 = { 10, 100 };
 static paramFloatRange_t r0o1_1 = { 0.1, 1 };
 static paramFloatRange_t r1_10 = { 1, 10 };
-static paramFloatRange_t r1_1000 = { 1, 1000 };
+//static paramFloatRange_t r1_1000 = { 1, 1000 };
 static paramFloatRange_t r0_180 = { 0, 180 };
 
 static void UpdatePrefD( void );

@@ -96,6 +96,7 @@ EXPORT void FixUpBezierSegs(trkSeg_p p,int segCnt) {
 }
 
 
+#if 0
 static void GetBezierAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
     CHECK( trk != NULL );
@@ -105,6 +106,7 @@ static void GetBezierAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
     
     LOG( log_bezier, 4, ( "getBezierAngles: = %0.3f %0.3f\n", *a0, *a1 ) )
 }
+#endif
 
 
 static void ComputeBezierBoundingBox( track_p trk, struct extraDataBezier_t * xx )
@@ -204,8 +206,8 @@ STATUS_T BezierDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-	static coOrd p0,p1;
-	static BOOL_T editState = FALSE;
+//	static coOrd p0,p1;
+//	static BOOL_T editState = FALSE;
 
 	if (GetTrkType(trk) != T_BEZIER) return C_TERMINATE;
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_BEZIER, extraDataBezier_t);
@@ -557,7 +559,7 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawBezierDescription( t, d, color );
 	}
-	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
+//	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	DrawSegsO(d,t,zero,0.0,xx->arcSegs.ptr,xx->arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
 	DrawEndPt( d, t, 0, color );
 	DrawEndPt( d, t, 1, color );
@@ -621,7 +623,7 @@ static BOOL_T ReadBezier( char * line )
 	wIndex_t layer;
 	long options;
 	int lt;
-	char * cp = NULL;
+//	char * cp = NULL;
 	unsigned long rgb;
 	DIST_T width;
 
@@ -906,7 +908,7 @@ EXPORT BOOL_T GetBezierMiddle( track_p trk, coOrd * pos) {
 
 	if (GetTrkType(trk) != T_BEZIER)
 		return FALSE;
-	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_BEZIER, extraDataBezier_t);
+//	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_BEZIER, extraDataBezier_t);
 	DIST_T length = GetLengthBezier(trk)/2;
 
 	traverseTrack_t tp;
@@ -1542,11 +1544,11 @@ LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%
 		break;
 
 	case SEGPROC_SPLIT: ;
-		wIndex_t subinx;
+//		wIndex_t subinx;
 		double t;
-		double dd;
+//		double dd;
 		coOrd split_p = data->split.pos;
-		ANGLE_T angle = GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_p)segPtr->bezSegs.ptr, &split_p, &inx, &dd, &back, &subinx, NULL);
+//		ANGLE_T angle = GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_p)segPtr->bezSegs.ptr, &split_p, &inx, &dd, &back, &subinx, NULL);
 		coOrd current[4];
 
 		BezierMathDistance(&split_p, segPtr->u.b.pos, 500, &t);  //Find t value
