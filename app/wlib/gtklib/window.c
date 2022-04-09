@@ -651,8 +651,8 @@ static int fixed_expose_event(
     } else {
         rc = FALSE;
     }
-    cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
 #ifdef CURSOR_SURFACE
+    cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
     if (win && win->cursor_surface.surface && win->cursor_surface.show) {
 		cairo_set_source_surface(cr,win->cursor_surface.surface,event->area.x, event->area.y);
 		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);

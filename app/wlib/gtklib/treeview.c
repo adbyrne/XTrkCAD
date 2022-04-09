@@ -192,6 +192,7 @@ wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection)
 }
 
 
+#if 0
 static int changeListColumnWidth(
     GtkTreeViewColumn * column,
     void * width)
@@ -204,6 +205,7 @@ static int changeListColumnWidth(
     //bl->colWidths[col] = width;
     return 0;
 }
+#endif
 
 /**
  * Create and initialize a column in treeview. Initially all columns are
