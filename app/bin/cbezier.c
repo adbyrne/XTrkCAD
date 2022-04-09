@@ -576,12 +576,12 @@ EXPORT STATUS_T AdjustBezCurve(
 	track_p t;
 	DIST_T d;
 	ANGLE_T angle1, angle2;
-	static coOrd pos0, pos3, p;
+	static coOrd pos0, /* pos3,*/ p;
 	enum BezierType b;
 	DIST_T dd;
 	EPINX_T ep;
 	double fx, fy, cusp;
-	int controlArm = -1;
+//	int controlArm = -1;
 
 
 	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED) return C_CONTINUE;
@@ -744,7 +744,7 @@ EXPORT STATUS_T AdjustBezCurve(
 
 	case C_OK:                            //C_OK is not called by Modify.
 		if ( Da.state == PICK_POINT ) {
-			char c = (unsigned char)(action >> 8);
+//			char c = (unsigned char)(action >> 8);
 			if (Da.track && Da.pos[0].x == Da.pos[3].x && Da.pos[0].y == Da.pos[3].y ) {
 				wBeep();
 				ErrorMessage(_("Invalid Bezier Track - end points are identical"));
@@ -820,8 +820,8 @@ EXPORT STATUS_T AdjustBezCurve(
  */
 STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) {
 	BOOL_T track = TRUE;
-	double width = 1.0;
-	long mode = 0;
+//	double width = 1.0;
+//	long mode = 0;
 	long cmd;
 
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
@@ -992,11 +992,11 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 {
 	track_p t;
-	static int segCnt;
+//	static int segCnt;
 	static BOOL_T lock;
 	static coOrd movePos;
-	STATUS_T rc = C_CONTINUE;
-	long curveMode = 0;
+//	STATUS_T rc = C_CONTINUE;
+//	long curveMode = 0;
 	long cmd;
 	if (action>>8) {
 		cmd = action>>8;
@@ -1129,7 +1129,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		}
 		if (Da.state == CONTROL_ARM_1 ) {
 			if (Da.trk[0]) {
-				EPINX_T ep = 0;
+//				EPINX_T ep = 0;
 				ANGLE_T angle1,angle2;
 				angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[0],Da.ep[0]));
 				angle2 = NormalizeAngle(FindAngle(pos, Da.pos[0])-angle1);
@@ -1147,7 +1147,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 	case C_UP:
 		if (Da.state == CONTROL_ARM_1) {
 			if (Da.trk[0]) {
-				EPINX_T ep = Da.ep[0];
+//				EPINX_T ep = Da.ep[0];
 				ANGLE_T angle1,angle2;
 				angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[0],Da.ep[0]));
 				angle2 = NormalizeAngle(FindAngle(pos, Da.pos[0])-angle1);
