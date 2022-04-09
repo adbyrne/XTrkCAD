@@ -234,7 +234,6 @@ GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	DIST_T ratio = GetScaleRatio(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);

@@ -84,9 +84,7 @@ BOOL_T TListSearch(track_p T) {
 }
 
 static wMenu_p selectPopup1M;
-static wMenu_p selectPopup1CM;
 static wMenu_p selectPopup2M;
-static wMenu_p selectPopup2CM;
 static wMenu_p selectPopup2RM;
 static wMenu_p selectPopup2TM;
 static wMenu_p selectPopup2TYM;

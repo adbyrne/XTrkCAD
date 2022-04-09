@@ -99,7 +99,6 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 }
 
 static void CreateTrimAnchorLeg(coOrd pos, ANGLE_T a, track_p t) {
-	DIST_T d = tempD.scale*0.1;
 	DIST_T w = tempD.scale/tempD.dpi*4;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
