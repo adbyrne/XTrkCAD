@@ -368,7 +368,7 @@ void GetTurnoutType() {
 	dtod.toType = DTO_INVALID;
 
 	int strCnt = 0, crvCnt = 0, lftCnt = 0, rgtCnt = 0;
-	enum dtoType toType = DTO_INVALID;
+//	enum dtoType toType = DTO_INVALID;
 	int i, j;
 
 	// Count path origins
@@ -533,6 +533,7 @@ void GetTurnoutType() {
 		}
 }
 
+#if 0
 /**
  * Draw Layout lines and points
  * 
@@ -559,6 +560,7 @@ static void DrawDtoLayout(
 	}
 #endif
 }
+#endif
 
 /**
 * Use the coOrds to build a polygon and draw the bridge fill. Note that the coordinates are 
@@ -1001,7 +1003,7 @@ static void DrawNormalTurnout(
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
-	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+//	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 
 	DrawDtoInit();
 
@@ -1012,7 +1014,7 @@ static void DrawNormalTurnout(
 
 	int strPath = dtod.strPath, othPath = 0, secPath = 1;
 	int toType = dtod.toType;
-	int first = 1;
+//	int first = 1;
 
 	switch (toType) {
 	case DTO_NORMAL:
@@ -1244,7 +1246,7 @@ static void DrawCurvedTurnout(
 #endif
 
 	int othPath = 0, secPath = 1;
-	int toType = dtod.toType;
+//	int toType = dtod.toType;
 
 	if(dtod.bridge) {
 		DrawTurnoutFill(d,0,othPath,secPath);
@@ -1263,7 +1265,7 @@ static void DrawCurvedTurnout(
 	DIST_T tdlen = dtod.td->length, tdmax = tdlen * 2.5;
 	DIST_T tdspc = dtod.td->spacing, tdspc2 = tdspc / 2.0;
 	DIST_T tdwid = dtod.td->width;
-	double rdot = tdwid / 2;
+//	double rdot = tdwid / 2;
 
 	int pn = dto[othPath].n;
 	int qn = dto[secPath].n;
@@ -1303,7 +1305,7 @@ static void DrawCurvedTurnout(
 				cnt++;
 			}
 			DIST_T tdlen = dtod.td->length;
-			DIST_T dx = len / cnt, dx2 = dx / 2;
+//			DIST_T dx = len / cnt, dx2 = dx / 2;
 
 			if (cnt != 0) {
 				dang = (len / cnt) * 360 / (2 * M_PI * r);
@@ -1372,7 +1374,7 @@ static void DrawCurvedTurnout(
 			len = FindDistance(p1, p2);
 			cnt = (int)floor(len / tdspc + 0.6);
 			if (cnt > 0) {
-				DIST_T dx = len / cnt, dx2 = dx / 2;
+				DIST_T dx = len / cnt/*, dx2 = dx / 2*/;
 
 				for (; cnt; cnt--) {
 					if (px >= dto[othPath].base[p0 + 1].x)
@@ -1813,7 +1815,7 @@ static void DrawCrossTurnout(
 	if (color == wDrawColorBlack)
 		color = tieColor;
 
-	struct extraDataCompound_t* xx = dtod.xx;
+//	struct extraDataCompound_t* xx = dtod.xx;
 
 	DrawDtoInit();
 
@@ -2039,7 +2041,7 @@ EXPORT void DrawTurnout(
 		dtod.bridge = bridge; 
 		dtod.roadbed = roadbed;
 
-		int strPath = -1;
+//		int strPath = -1;
 		GetTurnoutType();
 
 		if (dtod.toType != DTO_INVALID) {
