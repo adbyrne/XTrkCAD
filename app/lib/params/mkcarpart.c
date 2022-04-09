@@ -436,8 +436,6 @@ void processFile(
 
 int main ( int argc, char * argv[] )
 {
-	char *exename = argv[ 0 ];
-
 	argv++;
 	argc--;
 	

@@ -43,13 +43,11 @@ int main ( int argc, char * argv [] )
 	long color = 0xFF00FF;
 	double x;
 	double y;
-	int cm = 0;
 	FILE *fIn, *fOut;
 	int count = 0;
 	char *buffer = malloc( BUFSIZE );
 	char *desc;
 	char *p1;
-//	char *p2 = malloc( BUFSIZE );
 	char *scale;
 	char *ptr;
 	int err;
