@@ -1044,7 +1044,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	trkSeg_p segPtr;
 	int inx;
 	char * title = NULL;
-	char * polyType = NULL;
+//	char * polyType = NULL;
 
 
 	DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, &pos, &drawSegInx );
@@ -1477,9 +1477,11 @@ static void RescaleDraw( track_p trk, FLOAT_T ratio )
 	RescaleSegs( xx->segCnt, xx->segs, ratio, ratio, ratio );
 }
 
+#if 0
 static void DoConvertFill(void) {
 
 }
+#endif
 
 static drawModContext_t drawModCmdContext = {
 		InfoMessage,
@@ -1491,9 +1493,9 @@ static BOOL_T infoSubst = FALSE;
 
 static paramIntegerRange_t i100_100 = { -100, 100, 25 };  //Allow negative numbers
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000 };
-static paramFloatRange_t r1_10000 = { 1, 10000 };
+//static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
-static paramFloatRange_t r10000_10000 = {-10000, 10000};
+//static paramFloatRange_t r10000_10000 = {-10000, 10000};
 static paramFloatRange_t r360_360 = { -360, 360, 80 };
 static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramData_t drawModPLs[] = {

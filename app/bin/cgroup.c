@@ -1080,7 +1080,7 @@ static void GroupOk( void * unused )
 	 * 1: Collect tracks
 	 */
 	trk = NULL;
-	int InInx = -1;
+//	int InInx = -1;
 	BOOL_T hasTracks = FALSE;
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
@@ -1118,7 +1118,7 @@ static void GroupOk( void * unused )
 
 			} else if (GetTrkType(trk) == T_CORNU) {
 
-				int start = trackSegs_da.cnt;
+//				int start = trackSegs_da.cnt;
 
 				GetBezierSegmentsFromCornu(trk,&trackSegs_da,TRUE);  //Only give back Bezier - cant be undone
 
