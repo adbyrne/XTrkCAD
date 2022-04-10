@@ -109,6 +109,7 @@ struct wDraw_t psPrint_d;
  *
 *******************************************************************************/
 
+#ifdef CURSOR_SURFACE
 static cairo_t* gtkDrawCreateCairoCursorContext(
 		wControl_p ct,
 		cairo_surface_t * surf,
@@ -193,6 +194,7 @@ static cairo_t* gtkDrawCreateCairoCursorContext(
 
 	return cairo;
 }
+#endif
 
 
 wBool_t wDrawSetTempMode(
@@ -381,8 +383,8 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		wDrawColor color,
 		wDrawOpts opts )
 {
-	GdkGC * gc;
-	GdkRectangle update_rect;
+//	GdkGC * gc;
+//	GdkRectangle update_rect;
 
 	if ( bd == &psPrint_d ) {
 		psPrintLine( x0, y0, x1, y1, width, lineType, color, opts );
@@ -477,7 +479,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wWinPix_t width,
 		wDrawColor color,
 		wDrawOpts opts )
 {
-	GdkRectangle update_rect;
+//	GdkRectangle update_rect;
 
 	if ( bd == &psPrint_d ) {
 		/*psPrintArc( x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );*/
@@ -649,7 +651,7 @@ static void wlibDrawFilled(
 		wDrawColor color,
 		wDrawOpts opt )
 {
-	GdkRectangle update_rect;
+//	GdkRectangle update_rect;
 
 	if ( bd == &psPrint_d ) {
 		psPrintFillRectangle( x, y, w, h, color, opt );
@@ -912,9 +914,11 @@ static void wlibDrawFilled(
 {
 	int i, j, wb;
 	wDrawPix_t xx, yy;
+#ifdef CURSOR_SURFACE
 	wControl_p b;
 	wWin_p win;
 	GdkDrawable * gdk_drawable, * cairo_surface;
+#endif
 	GtkWidget * widget = bd->widget;
 	
 	static long cDBM = 0;
@@ -1416,7 +1420,7 @@ static gint draw_char_release_event(
 		GdkEventKey *event,
 		wDraw_p bd )
 {
-		GdkModifierType modifiers;
+//		GdkModifierType modifiers;
 		guint key = event->keyval;
 		wModKey_e modKey = wModKey_None;
 		switch (key) {
