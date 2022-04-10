@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#) : $Id$";
+//static const char rcsid[] = "@(#) : $Id$";
 
 #include "cundo.h"
 #include "custom.h"

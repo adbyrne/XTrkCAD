@@ -36,7 +36,7 @@ static int log_carInvList;
 static int log_carDlgState;
 static int log_carDlgList;
 
-static paramFloatRange_t r0_99999 = { 0, 99999, 80 };
+//static paramFloatRange_t r0_99999 = { 0, 99999, 80 };
 static paramFloatRange_t r0d001_99999 = { 0.001, 99999, 80 };
 static paramFloatRange_t r9999_9999 = {-99999, 99999, 80};
 static paramIntegerRange_t i1_999999999 = { 1, 999999999, 80, PDO_NORANGECHECK_HIGH };
@@ -597,7 +597,7 @@ GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	DIST_T ratio = GetScaleRatio(scaleIndex);
+//	DIST_T ratio = GetScaleRatio(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -1270,8 +1270,8 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	DIST_T ratio = GetScaleRatio(scaleIndex);
-	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
+//	DIST_T ratio = GetScaleRatio(scaleIndex);
+//	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -1959,7 +1959,7 @@ EXPORT void CarItemPlace(
 	dists[0] = dists[1] = CarItemCoupledLength(item)/2.0;
 }
 
-static dynArr_t clearance;
+//static dynArr_t clearance;
 
 static void ClearClearancePoints(void) {
 	//DYNARR_RESET(trkSeg_t,clearance);
