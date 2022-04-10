@@ -853,7 +853,8 @@ int LoadTracks(
 			    fseek(f, 0, SEEK_SET);
 			    manifest = malloc(length + 1);
 			    if (manifest) {
-			        size_t siz = fread(manifest, 1, length, f);
+			        size_t siz;
+			        siz = fread(manifest, 1, length, f);
 			        manifest[length] = '\0';
 			    }
 			    fclose(f);
@@ -1222,7 +1223,7 @@ EXPORT void DoLoad( void )
 EXPORT void DoExamples( void )
 {
 	if (examplesFile_fs == NULL) {
-		static wBool_t bExample = TRUE;
+//		static wBool_t bExample = TRUE;
 		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
 			sSourceFilePattern, LoadTracks, NULL );
 	}

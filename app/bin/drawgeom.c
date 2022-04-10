@@ -989,7 +989,7 @@ typedef enum {POLY_NONE, POLY_SELECTED, POLYPOINT_SELECTED} PolyState_e;
 static PolyState_e polyState = POLY_NONE;
 static coOrd rotate_origin;
 static ANGLE_T rotate_angle;
-static dynArr_t origin_da;
+//static dynArr_t origin_da;
 
 
 void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad, ANGLE_T angle) {
@@ -1022,7 +1022,7 @@ void static CreateLineAnchors(int index, coOrd p0, coOrd p1) {
 }
 void static CreateBoxAnchors(int index, pts_t pt[4]) {
 	DYNARR_RESET(trkSeg_t,anchors_da);
-	double d = tempD.scale*0.15;
+//	double d = tempD.scale*0.15;
 	ANGLE_T a = FindAngle(pt[0].pt,pt[1].pt);
 	ANGLE_T diag = FindAngle(pt[0].pt,pt[2].pt);
 	if (index>=0) wSetCursor(mainD.d,wCursorNone);
@@ -1159,9 +1159,9 @@ STATUS_T DrawGeomPolyModify(
 	static int segInx;
 	static int prev_inx;
 	static wDrawColor save_color;
-	static wBool_t drawnAngle;
-	static double currentAngle;
-	static double baseAngle;
+//	static wBool_t drawnAngle;
+//	static double currentAngle;
+//	static double baseAngle;
 	static BOOL_T lock;
 
 	switch ( action&0xFF ) {
@@ -1867,13 +1867,14 @@ STATUS_T DrawGeomModify(
 	static wIndex_t segInx;
 	static EPINX_T segEp;
 	static ANGLE_T segA1;
-	static int inx_other, inx_line, inx_origin;
+	static int inx_line, inx_origin;
+//	static int inx_other;
 	static BOOL_T corner_mode;
 	static BOOL_T polyMode;
-	static ANGLE_T original_angle;
+//	static ANGLE_T original_angle;
 	int inx, inx1, inx2;
 	DIST_T d, d1, d2, dd;
-	coOrd * newPts = NULL;
+//	coOrd * newPts = NULL;
 	tempSegs_da.cnt = 1;
 	switch ( action&0xFF ) {
 	case C_START:
