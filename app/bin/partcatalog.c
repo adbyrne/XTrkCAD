@@ -89,6 +89,7 @@ DestroyCatalog(Catalog *catalog)
 	catalog->head = NULL;
 }
 
+#if 0
 /**
  * Create a new CatalogEntry and add it to the linked list. The newly
  * created entry is inserted into the list after the given position
@@ -110,6 +111,7 @@ InsertIntoCatalogAfter(CatalogEntry *entry)
 
     return (newEntry);
 }
+#endif
 
 /**
  * Count the elements in the linked list
@@ -472,7 +474,7 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 		int maxdistance = 1;
 		while (maxdistance <= LDISTANCELIMIT && !result ) {
 			IndexEntry *current;
-			size_t minDistance = LDISTANCELIMIT + 1;
+//			size_t minDistance = LDISTANCELIMIT + 1;
 			int maxProbability = 0;
 			LOG1(log_params, ("Close match for: <%s> maxdistance: %d\n", search, maxdistance));
 				
@@ -835,7 +837,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 {
     CatalogEntry *element;
     IndexEntry *entries;
-    unsigned entryCount = 0;
+//  unsigned entryCount = 0;
     char *searchWord;
     unsigned words = countWords(searchExpression);
     char *searchExp = MyStrdup(searchExpression);

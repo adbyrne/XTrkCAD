@@ -1381,7 +1381,7 @@ static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 	if ( inPlayback )
 		return TRUE;
 	paramIntegerRange_t * irangeP = (paramIntegerRange_t*)p->winData;
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
 		 ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
 		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
@@ -1409,7 +1409,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	char * cp;
 	const char * value;
 
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1452,7 +1452,7 @@ static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 	if ( inPlayback )
 		return TRUE;
 	paramFloatRange_t * frangeP = (paramFloatRange_t*)p->winData;
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
 		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
 		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
@@ -1492,7 +1492,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	BOOL_T valid;
 	const char * value;
 
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1537,7 +1537,7 @@ static void ParamStringPush( const char * val, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
 	const char * value;
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
 		fflush( recordF );

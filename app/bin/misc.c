@@ -2413,19 +2413,19 @@ static void SetAccelKeys()
 #include "bitmaps/doc-export.xpm"
 #include "bitmaps/doc-export-bmap.xpm"
 #include "bitmaps/doc-export-dxf.xpm"
-#include "bitmaps/doc-export-svg.xpm"
+// #include "bitmaps/doc-export-svg.xpm"
 #include "bitmaps/doc-import.xpm"
 #include "bitmaps/doc-import-mod.xpm" 
 #include "bitmaps/doc-new.xpm"
 #include "bitmaps/doc-save.xpm"
 #include "bitmaps/doc-open.xpm"
-#include "bitmaps/doc-print.xpm"
+// #include "bitmaps/doc-print.xpm"
 #include "bitmaps/doc-setup.xpm"
 #include "bitmaps/parameter.xpm"
 #include "bitmaps/map.xpm"
 #include "bitmaps/magnet.xpm"
 
-static wMenu_p toolbarM;
+//static wMenu_p toolbarM;
 static addButtonCallBack_t paramFilesCallback;
 
 static void CreateMenus(void) {

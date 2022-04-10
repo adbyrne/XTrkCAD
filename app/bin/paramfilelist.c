@@ -89,7 +89,7 @@ ReadParamError(char *file)
 static BOOL_T UpdateParamFiles(void)
 {
     char fileName[STR_LONG_SIZE], *fileNameP;
-    const char * cp;
+//  const char * cp;
     FILE * updateF;
     long updateTime = -1;
     long lastTime;
@@ -154,7 +154,7 @@ static BOOL_T UpdateParamFiles(void)
 			LOG1( log_paramupdate, ( "  Old CONTENTS %s\n", oldContents ) );
 			// Check 'Parameter Files Names' map
 			for (int fileNo = 1; ; fileNo++) {
-				char *fileName;
+//				char *fileName;
 				char fileNoS[4+9+1];
 				sprintf(fileNoS, "File%d", fileNo);
 				char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
@@ -217,7 +217,7 @@ void LoadParamFileList(void)
     for (fileNo = 1; ; fileNo++) {
         char *fileName;
         const char * contents;
-        enum paramFileState structState = PARAMFILE_UNLOADED;
+//      enum paramFileState structState = PARAMFILE_UNLOADED;
 
 
         sprintf(message, "File%d", fileNo);
@@ -355,7 +355,7 @@ int LoadParamFile(
     CHECK(files > 0);
 
     for (i = 0; i < files; i++) {
-        enum paramFileState structState = PARAMFILE_UNLOADED;
+//      enum paramFileState structState = PARAMFILE_UNLOADED;
         int newIndex;
 
         curContents = curSubContents = NULL;

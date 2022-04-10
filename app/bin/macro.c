@@ -530,7 +530,7 @@ static void PlaybackCursor(
 
 	case C_TEXT:
 		proc( action, pos);
-		char c = action>>8;
+//		char c = action>>8;
 		bm = playbackBm;
 		break;
 
