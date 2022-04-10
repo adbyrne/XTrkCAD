@@ -436,7 +436,7 @@ static void DescribeLayout(
  *
  */
 
-static wList_p setLayerL;
+//static wList_p setLayerL;
 void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 {
     int inx;

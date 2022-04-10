@@ -145,7 +145,8 @@ EXPORT STATUS_T CreateCurve(
 	track_p t;
 	DIST_T d;
 	ANGLE_T a, angle1, angle2;
-	static coOrd pos0, p;
+	static coOrd p;
+//	static coOrd pos0;
 	int inx;
 
 	switch ( action ) {

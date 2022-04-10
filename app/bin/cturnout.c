@@ -48,7 +48,7 @@ EXPORT dynArr_t turnoutInfo_da;
 
 EXPORT turnoutInfo_t* curTurnout = NULL;
 EXPORT long curTurnoutEp = 0;
-static int curTurnoutInx = -1;
+//static int curTurnoutInx = -1;
 
 /** @logcmd @showrefby turnout=n cturnout.c */
 static int log_turnout = 0;
@@ -257,7 +257,7 @@ enum paramFileState
 {
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
+//	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -301,7 +301,7 @@ EXPORT wIndex_t CheckPaths(
 	PATHPTR_T pp = 0;
 
 	int segInx[2], segEp[2];
-	int segTrkLast = -1;
+//	int segTrkLast = -1;
 
 	// Check that each track segment is on at least one path
 	// Note - In new-P the tracks may be preceded by draws (or interspersed by them)
@@ -1511,7 +1511,7 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos, trackParams_t* p
 			return FALSE;
 		}
 		/* Find the path we are closest to */
-		PATHPTR_T pathCurr = 0;
+//		PATHPTR_T pathCurr = 0;
 		int segInx, subSegInx;
 		trkSeg_p segPtr;
 		DIST_T d = DIST_INF;
@@ -2145,9 +2145,9 @@ static void PlaceTurnoutTrial(
 		LOG(log_turnout, 3, ("placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 			GetTrkIndex(trk), pos.x, pos.y, angle))
 			/*InfoMessage( "Turnout(%d): Angle=%0.3f", GetTrkIndex(trk), angle );*/
-			track_p ctrk = NULL;
-		int ccnt = 0;
-		DIST_T clarge = DIST_INF;
+//			track_p ctrk = NULL;
+//		int ccnt = 0;
+//		DIST_T clarge = DIST_INF;
 		for (i = 0; i < curTurnout->endCnt; i++) {
 			posI = curTurnout->endPt[i].pos;
 			epPos = AddCoOrd(pos, posI, angle);
@@ -2534,8 +2534,9 @@ static void AddTurnout(void)
 				}
 			}
 			else {
+				wBool_t rc;
 				AuditTracks("addTurnout T%d[%d] before trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le);
-				wBool_t rc = TrimTrack(lt, le, maxX, nearest_pos, nearest_angle, nearest_radius, nearest_center);
+				rc = TrimTrack(lt, le, maxX, nearest_pos, nearest_angle, nearest_radius, nearest_center);
 				AuditTracks("addTurnout T%d[%d] after trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le);
 
 			}

@@ -2444,8 +2444,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			EPINX_T ep = 0;
-			BOOL_T found = FALSE;
-			int end = Da.state==POS_1?0:1;
+//			BOOL_T found = FALSE;
+//			int end = Da.state==POS_1?0:1;
 			if(!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
 				InfoMessage(_("Track can't be split - so locked to endpoint"));
 				return C_CONTINUE;
@@ -2976,7 +2976,8 @@ static STATUS_T CmdConvertFrom(
 			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
 			track_p tracks[2];
 			DYNARR_RESET(track_p,Da.tracks);
-			int converted=0, not_convertable = 0, created=0, deleted=0;
+			int converted=0, not_convertable = 0, deleted=0;
+//			int created=0;
 			while ( TrackIterate( &trk1 ) ) {
 				if ( GetTrkSelected( trk1 ) && IsTrack( trk1 ) ) {
 					//Only Cornu or Bezier
