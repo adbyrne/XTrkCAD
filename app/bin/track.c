@@ -1308,7 +1308,7 @@ wBool_t IsColorClose( wDrawColor color1, wDrawColor color2 )
 
 wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 {
-	wBool_t rc = FALSE;
+//	wBool_t rc = FALSE;
 	if ( trk1 == NULL ) {
 		sprintf( message, "Compare: T%d not found\n", trk2->index );
 		return FALSE;
@@ -1983,8 +1983,8 @@ EXPORT STATUS_T EndPtDescriptionMove(
  */
 
 
-static DIST_T distanceEpsilon = 0.0;
-static ANGLE_T angleEpsilon = 0.0;
+//static DIST_T distanceEpsilon = 0.0;
+//static ANGLE_T angleEpsilon = 0.0;
 
 EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1 )
 {

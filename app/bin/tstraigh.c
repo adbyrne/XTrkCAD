@@ -369,7 +369,7 @@ EXPORT void DrawStraightTies(
 	}
 	if ( cnt != 0 ) {
 		dlen = FindDistance( p0, p1 )/cnt;
-		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
+//		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
 		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
 			Translate( &pos, p0, angle, len );
 			DrawTie( d, pos, angle, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );

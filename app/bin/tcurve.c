@@ -1352,7 +1352,7 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 	params->type = curveTypeCurve;
 	GetTrkCurveCenter( trk, &params->arcP, &params->arcR);
 	GetCurveAngles( &params->arcA0, &params->arcA1, trk );
-	ANGLE_T angle1 = FindAngle(params->arcP,pos);
+//	ANGLE_T angle1 = FindAngle(params->arcP,pos);
 
 	params->track_angle = NormalizeAngle(FindAngle(params->arcP,pos)+90);
 

@@ -102,7 +102,9 @@ typedef struct {
 		wBool_t slipmode;
 		} toDesignDesc_t;
 
+#ifndef MKTURNOUT
 static wWin_p newTurnW;
+#endif
 
 static FLOAT_T newTurnRad0;
 static FLOAT_T newTurnAngle0;
@@ -141,21 +143,25 @@ static DIST_T newTurnTrackGauge;
 static char * newTurnScaleName;
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000, 80 };
 static paramFloatRange_t r0d300_10000 = { 0.300, 10000, 80 };
-static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
+//static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
 static paramFloatRange_t r_10000_10000 = { -1000, 10000, 80 };
 static paramFloatRange_t r0d001_90 = { 0.001, 90, 80 };
-static paramFloatRange_t r_90_90 = { -90, 90, 80 };
 static paramFloatRange_t r0_100 = { 0, 100, 80 };
 static paramIntegerRange_t i0_100 = { 0, 100, 40 };
 static void NewTurnOk( void * context );
+#ifndef MKTURNOUT
+static paramFloatRange_t r_90_90 = { -90, 90, 80 };
 static void ShowTurnoutDesigner( void * context );
+#endif
 
 
 static coOrd points[20];
+#ifndef MKTURNOUT
 static coOrd end_points[20];
 static coOrd end_centers[20];
 static double end_arcs[20];
 static double end_angles[20];
+#endif
 static DIST_T radii[10];
 static double angles[10];
 
@@ -213,9 +219,8 @@ static paramGroup_t turnDesignPG = { "turnoutNew", 0, turnDesignPLs, COUNT( turn
 
 static turnoutInfo_t * customTurnout1, * customTurnout2;
 static BOOL_T includeNontrackSegments;
-#endif
 
-#ifdef MKTURNOUT
+#else
 int doCustomInfoLine = 1;
 int doRoadBed = 0;
 char specialLine[256];
@@ -288,6 +293,7 @@ static toDesignDesc_t CrvDesc = {
 		COUNT( CrvFloats ), CrvFloats,
 		&Crv1Schema, 1 };
 
+#ifndef MKTURNOUT
 static wLines_t CornuLines[] = {
 #include "tocornu.lin"
 		};
@@ -316,6 +322,7 @@ static toDesignDesc_t CornuDesc = {
 		COUNT( CornuLines ), CornuLines,
 		COUNT( CornuFloats ), CornuFloats,
 		&CornuSchema, 1 };
+#endif
 
 static wLines_t WyeLines[] = {
 #include "towye.lin"
@@ -354,6 +361,7 @@ static toDesignDesc_t WyeDesc = {
 		COUNT( WyeFloats ), WyeFloats,
 		NULL, 1 };
 
+#ifndef MKTURNOUT
 static wLines_t CornuWyeLines[] = {
 #include "tocornuwye.lin"
 		};
@@ -382,6 +390,7 @@ static toDesignDesc_t CornuWyeDesc = {
 		COUNT( CornuWyeLines ), CornuWyeLines,
 		COUNT( CornuWyeFloats ), CornuWyeFloats,
 		NULL, 1 };
+#endif
 
 static wLines_t ThreewayLines[] = {
 #include "to3way.lin"
@@ -424,6 +433,7 @@ static toDesignDesc_t ThreewayDesc = {
 		COUNT( ThreewayFloats ), ThreewayFloats,
 		NULL, 1 };
 
+#ifndef MKTURNOUT
 static wLines_t CornuThreewayLines[] = {
 #include "tocornu3way.lin"
 		};
@@ -458,6 +468,7 @@ static toDesignDesc_t CornuThreewayDesc = {
 		COUNT( CornuThreewayLines ), CornuThreewayLines,
 		COUNT( CornuThreewayFloats ), CornuThreewayFloats,
 		NULL, 1 };
+#endif
 
 static wLines_t CrossingLines[] = {
 #include "toxing.lin"
@@ -529,6 +540,7 @@ static toDesignDesc_t DoubleSlipDesc = {
 		COUNT( DoubleSlipFloats ), DoubleSlipFloats,
 		&DoubleSlipSchema, 1 };
 
+#ifndef MKTURNOUT
 static wLines_t RightCrossoverLines[] = {
 #include "torcross.lin"
 		};
@@ -548,7 +560,9 @@ static toDesignDesc_t RightCrossoverDesc = {
 		COUNT( RightCrossoverLines ), RightCrossoverLines,
 		COUNT( RightCrossoverFloats ), RightCrossoverFloats,
 		&RightCrossoverSchema, 0 };
+#endif
 
+#ifndef MKTURNOUT
 static wLines_t LeftCrossoverLines[] = {
 #include "tolcross.lin"
 		};
@@ -568,6 +582,7 @@ static toDesignDesc_t LeftCrossoverDesc = {
 		COUNT( LeftCrossoverLines ), LeftCrossoverLines,
 		COUNT( LeftCrossoverFloats ), LeftCrossoverFloats,
 		&LeftCrossoverSchema, 0 };
+#endif
 
 static wLines_t DoubleCrossoverLines[] = {
 #include "todcross.lin"
@@ -1285,9 +1300,6 @@ static toDesignSchema_t * LoadSegs(
 	wIndex_t s;
 	int p, p0, p1;
 	DIST_T d;
-#ifndef MKTURNOUT
-	wIndex_t pathLen;
-#endif
 	toDesignSchema_t * pp;
 	char *segOrder;
 	coOrd pos;
@@ -1295,6 +1307,7 @@ static toDesignSchema_t * LoadSegs(
 	ANGLE_T angle0, angle1, angle2, angle3;
 	trkSeg_p segPtr;
 #ifndef MKTURNOUT
+	wIndex_t pathLen;
 	struct {
 		coOrd pos[10];
 		coOrd center[10];
@@ -2465,6 +2478,7 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 }
 
 
+#ifndef MKTURNOUT
 static void CopyNonTracks( turnoutInfo_t * to )
 {
 	trkSeg_p sp0;
@@ -2477,7 +2491,6 @@ static void CopyNonTracks( turnoutInfo_t * to )
 }
 
 
-#ifndef MKTURNOUT
 static void NewTurnPrint(
 		void * junk )
 {
@@ -2628,9 +2641,9 @@ static void NewTurnOk( void * context )
 	FILE * f;
 	toDesignSchema_t * pp;
 	int i;
-	BOOL_T foundR=FALSE;
 	char * cp;
 #ifndef MKTURNOUT
+	BOOL_T foundR=FALSE;
 	turnoutInfo_t *to;
 #endif
 	FLOAT_T flt;

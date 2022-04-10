@@ -810,7 +810,7 @@ static void DrawJointDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	DIST_T grade=0, sep=0;
+//	DIST_T grade=0, sep=0;
 	ANGLE_T a;
 	if (layoutLabels == 0)
 		return;

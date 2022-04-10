@@ -295,6 +295,7 @@ void UpdateText(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStar
 	changed++;
 }
 
+#if 0
 /**
  * Get the delimited marker for the current note. Markers start and end with
  * a delimiter. The marker itself is a single digit number. For plain text notes
@@ -321,6 +322,7 @@ GetNoteMarker(enum noteCommands command )
 	}
 	return(marker);
 }
+#endif
 
 /**
  * Write the note to file. Handles the complete syntax for a note statement
