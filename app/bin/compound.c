@@ -1125,7 +1125,7 @@ BOOL_T WriteCompound(
 	EPINX_T ep, epCnt;
 	int bits;
 	long options;
-	long position = 0;
+//	long position = 0;
 	drawLineType_e lineType = 0;
 	BOOL_T rc = TRUE;
 
@@ -1243,7 +1243,7 @@ EXPORT track_p NewCompound(
 	SetPaths( trk, paths );
 	xx->segCnt = segCnt;
 	xx->segs = memdup( segs, segCnt * sizeof *segs );
-	trkSeg_p p = xx->segs;
+//	trkSeg_p p = xx->segs;
 	CopyPoly(xx->segs, xx->segCnt);
 	FixUpBezierSegs(xx->segs,xx->segCnt);
 	ComputeCompoundBoundingBox( trk );

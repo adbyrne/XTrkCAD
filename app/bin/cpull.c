@@ -699,8 +699,8 @@ static STATUS_T CmdPull(
 	EPINX_T ep2;
 	static BOOL_T turntable;
 
-	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
-	BOOL_T found = FALSE;
+//	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
+//	BOOL_T found = FALSE;
 
 	switch (action&0xFF) {
 
