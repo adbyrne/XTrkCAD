@@ -67,7 +67,8 @@
 #include "fileio.h"
 #include "paths.h"
 #include "track.h"
-#include "trackx.h"
+// We need to fiddle with the track list
+#include "trackx.h"	// tempTrk, to_first, to_last
 #include "draw.h"
 #include "cundo.h"
 #include "common-ui.h"

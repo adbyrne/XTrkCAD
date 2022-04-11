@@ -491,6 +491,7 @@ void SetBoundingBox( track_p, coOrd, coOrd );
 void GetBoundingBox( track_p, coOrd*, coOrd* );
 EPINX_T GetTrkEndPtCnt( track_p );
 void SetTrkEndPoint( track_p, EPINX_T, coOrd, ANGLE_T );
+void SetTrkEndTrk( track_p, EPINX_T, track_p );
 track_p GetTrkEndTrk( track_p, EPINX_T );
 coOrd GetTrkEndPos( track_p, EPINX_T );
 #define GetTrkEndPosXY( trk, ep ) PutDim(GetTrkEndPos(trk,ep).x), PutDim(GetTrkEndPos(trk,ep).y)
@@ -507,6 +508,12 @@ BOOL_T IsTrackDeleted( track_p );
 void TrackInsertLayer( int );
 void TrackDeleteLayer( int );
 #endif
+
+track_p GetFirstTrack();
+track_p GetNextTrack( track_p );
+
+#define TRK_ITERATE(TRK)		for (TRK=GetFirstTrack(); TRK!=NULL; TRK=GetNextTrack(TRK) ) if (!IsTrackDeleted(TRK)) 
+
 
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
 #define GetTrkVisible(T)		(GetTrkBits(T)&TB_VISIBLE)

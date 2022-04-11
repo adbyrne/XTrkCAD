@@ -452,6 +452,12 @@ EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T e )
 	return trk->endPt[e].track;
 }
 
+EXPORT void SetTrkEndTrk( track_p trk, EPINX_T e, track_p trk1 )
+{
+	CHECK( e < trk->endCnt );
+	trk->endPt[e].track = trk1 ;
+}
+
 EXPORT long GetTrkEndOption( track_p trk, EPINX_T e )
 {
 	CHECK( e < trk->endCnt );
@@ -1031,11 +1037,21 @@ EXPORT BOOL_T StoreTrackData(
  */
 
 
-
 EXPORT track_p to_first = NULL;
-
 EXPORT TRKINX_T max_index = 0;
 EXPORT track_p * to_last = &to_first;
+
+EXPORT track_p GetFirstTrack()
+{
+	return to_first;
+}
+
+EXPORT track_p GetNextTrack( track_p trk )
+{
+	return trk->next;
+}
+
+
 
 static struct {
 		track_p first;

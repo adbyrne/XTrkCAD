@@ -29,7 +29,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
+#include "trackx.h"	// .deleted
 #include "common-ui.h"
 
 long programMode;
@@ -1532,8 +1532,8 @@ static void UncoupleCars(
     }
 
     loco = FindMasterLoco(car1, NULL);
-    car1->endPt[dir1].track = NULL;
-    car2->endPt[dir2].track = NULL;
+    SetTrkEndTrk( car1, dir1, NULL );
+    SetTrkEndTrk( car2, dir2, NULL );
 
     if (loco) {
         track_p  loco1, loco2;
@@ -1593,8 +1593,8 @@ static void CoupleCars(
     WALK_CARS_END(car, xx1, dir)
     loco1 = FindMasterLoco(car1, NULL);
     loco2 = FindMasterLoco(car2, NULL);
-    car1->endPt[dir1].track = car2;
-    car2->endPt[dir2].track = car1;
+    SetTrkEndTrk( car1, dir1, car2 );
+    SetTrkEndTrk( car2, dir2, car1 );
 
     /*ConnectTracks( car1, dir1, car2, dir2 );*/
     if (logTable(log_trainMove).level >= 2) {
@@ -2051,7 +2051,7 @@ static BOOL_T MoveTrain(
                 CrashTrain(car1, dir1, &trvTrk, (long)xx->speed, FALSE);
                 return TRUE;
             } else {
-            	if (trvTrk.trk && trvTrk.trk->endCnt > 1)    //Test for null track after Traverse
+            	if (trvTrk.trk && GetTrkEndPtCnt( trvTrk.trk ) > 1)    //Test for null track after Traverse
             		StopTrain(train, ST_OpenTurnout );
             	else
             		StopTrain(train, ST_EndOfTrack);
@@ -2952,14 +2952,14 @@ static void TrainFunc(
 
         if (temp0) {
             ep0 = GetEndPtConnectedToMe(temp0,trainFuncCar);
-            trainFuncCar->endPt[0].track = NULL;
-            temp0->endPt[ep0].track = NULL;
+            SetTrkEndTrk( trainFuncCar, 0, NULL );
+            SetTrkEndTrk( temp0, ep0, NULL );
         }
 
         if (temp1) {
             ep1 = GetEndPtConnectedToMe(temp1,trainFuncCar);
-            trainFuncCar->endPt[1].track = NULL;
-            temp1->endPt[ep1].track = NULL;
+            SetTrkEndTrk( trainFuncCar, 1, NULL );
+            SetTrkEndTrk( temp1, ep1, NULL );
         }
 
         xx->direction = !xx->direction;
@@ -2968,13 +2968,13 @@ static void TrainFunc(
         SetTrkEndPoint(trainFuncCar, 1, pos0, angle0);
 
         if (temp0) {
-            trainFuncCar->endPt[1].track = temp0;
-            temp0->endPt[ep0].track = trainFuncCar;
+            SetTrkEndTrk( trainFuncCar, 1, temp0 );
+            SetTrkEndTrk( temp0, ep0, trainFuncCar );
         }
 
         if (temp1) {
-            trainFuncCar->endPt[0].track = temp1;
-            temp1->endPt[ep1].track = trainFuncCar;
+            SetTrkEndTrk( trainFuncCar, 0, temp1 );
+            SetTrkEndTrk( temp1, ep1, trainFuncCar );
         }
 
         ControllerDialogSync(curTrainDlg);

@@ -54,7 +54,6 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"

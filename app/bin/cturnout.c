@@ -35,7 +35,6 @@
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
-#include "trackx.h"
 #include "common-ui.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
@@ -940,7 +939,7 @@ EXPORT BOOL_T SplitTurnoutCheck(
 	epPos.y -= xx->orig.y;
 	splitTurnoutPath = NULL;
 	pp = GetPaths(trk);
-	LOG(log_splitturnout, 1, ("SplitTurnoutCheck T%d POS[%0.3f %0.3f] EP:%d CHK:%d EPPOS[%0.3f %0.3f]\n", trk ? trk->index : 0, pos.x, pos.y, ep, check, epPos.x, epPos.y));
+	LOG(log_splitturnout, 1, ("SplitTurnoutCheck T%d POS[%0.3f %0.3f] EP:%d CHK:%d EPPOS[%0.3f %0.3f]\n", trk ? GetTrkIndex( trk ): 0, pos.x, pos.y, ep, check, epPos.x, epPos.y));
 	while (pp[0]) {
 		pp += strlen((char*)pp) + 1;
 		while (pp[0]) {
@@ -1490,8 +1489,10 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos, trackParams_t* p
 		}
 		else {
 			// Centroid is middle of bounding box
-			params->centroid.x = (trk->lo.x + trk->hi.x) / 2.0;
-			params->centroid.y = (trk->lo.y + trk->hi.y) / 2.0;
+			coOrd lo, hi;
+			GetBoundingBox( trk, &hi, &lo );
+			params->centroid.x = (lo.x + hi.x) / 2.0;
+			params->centroid.y = (lo.y + hi.y) / 2.0;
 			params->len = FindDistance(params->centroid, pos) * 2;  //Times two because it will be halved by track.c
 		}
 		return TRUE;

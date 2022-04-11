@@ -26,7 +26,6 @@
 #include "custom.h"
 #include "draw.h"
 #include "track.h"
-#include "trackx.h"
 
 /* Draw turnout data */
 
@@ -213,7 +212,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	PATHPTR_T pp;
 
 	dtod.trk = trk;
-	dtod.index = trk->index;
+	dtod.index = GetTrkIndex( trk );
 	dtod.xx = xx;
 
 	dtod.td = GetLayerTieData(GetTrkLayer(trk));
@@ -344,7 +343,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	}
 	dtod.pathCnt = pathCnt;
 	dtod.routeCnt = routeCnt;
-	dtod.endCnt = trk->endCnt;
+	dtod.endCnt = GetTrkEndPtCnt( trk );
 
 	// Guard value: n < DTO_SEGS - 2
 	for (i = 0; i < pathCnt; i++)
@@ -2034,7 +2033,7 @@ EXPORT void DrawTurnout(
 	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
 
 	if ( (pathCnt > 1) && (pathCnt <= DTO_DIM)
-		&& (trk->endCnt <= 4)
+		&& ( GetTrkEndPtCnt( trk ) <= 4)
 		&& (xx->special == TOnormal) )
 		{
 
