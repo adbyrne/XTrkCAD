@@ -997,7 +997,8 @@ static void DrawNormalTurnout(
 	int cnt;
 	ANGLE_T angle;
 	coOrd s1, s2, p1, p2, q1, q2;
-	int s0, p0, q0;
+	int p0, q0;
+//	int s0;
 	ANGLE_T a0;
 
 	if (color == wDrawColorBlack)
@@ -1073,7 +1074,7 @@ static void DrawNormalTurnout(
 		int pn = dto[othPath].n;
 		int qn = dto[secPath].n;
 		DIST_T dx = len / cnt;
-		s0 = p0 = q0 = 0;
+		/*s0 =*/ p0 = q0 = 0;
 		DIST_T tdlen = dtod.td->length;
 		DIST_T tdmax = (toType == DTO_WYE) ? 2.0 * tdlen : 2.5 * tdlen;
 		DIST_T tdwid = dtod.td->width;
@@ -1842,7 +1843,8 @@ static void DrawCrossTurnout(
 	if (omitTies)
 		return;
 
-	coOrd s1, s2, t1, t2, p1, p2, q1, q2;
+	coOrd s1, s2, t1;
+//	coOrd t2, p1, p2, q1, q2;
 	int s0, t0, p0, q0;
 
 	int sn = dto[strPath].n;
@@ -1853,13 +1855,13 @@ static void DrawCrossTurnout(
 	s1 = dto[strPath].pts[0];
 	s2 = dto[strPath].ptsLast;
 	t1 = dto[str2Path].pts[0];
-	t2 = dto[str2Path].ptsLast;
+//	t2 = dto[str2Path].ptsLast;
 	angle = dto[strPath].angle; 
 
-	p1 = dto[othPath].base[0];
-	p2 = dto[othPath].baseLast;
-	q1 = dto[secPath].base[0];
-	q2 = dto[secPath].baseLast;
+//	p1 = dto[othPath].base[0];
+//	p2 = dto[othPath].baseLast;
+//	q1 = dto[secPath].base[0];
+//	q2 = dto[secPath].baseLast;
 
 	len = FindDistance(s1, s2);
 	angle = dto[strPath].angle;

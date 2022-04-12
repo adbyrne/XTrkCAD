@@ -214,7 +214,6 @@ static void DrawCornuDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	wFont_p fp;
     coOrd epos0, epos1, offpos0, offpos1;
 
 	if (layoutLabels == 0)
@@ -229,7 +228,7 @@ static void DrawCornuDescription(
 	Translate(&offpos0,epos0,a+90,xx->descriptionOff.y);
 	Translate(&offpos1,epos1,a+90,xx->descriptionOff.y);
 
-    fp = wStandardFont( F_TIMES, FALSE, FALSE );
+    wStandardFont( F_TIMES, FALSE, FALSE );
 
     sprintf( message, _("Cornu: L %s A %0.3f L %s MinR %s"),
     		FormatDistance(FindDistance(xx->pos[0], xx->pos[1])),

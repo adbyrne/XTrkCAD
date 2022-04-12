@@ -237,11 +237,12 @@ STATUS_T StraightDescriptionMove(
 		coOrd pos )
 {
 	extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
-	ANGLE_T a,ap;
+	ANGLE_T ap;
+//	ANGLE_T a;
 	coOrd end0, end1;
     end0 = GetTrkEndPos(trk,0);
     end1 = GetTrkEndPos(trk,1);
-    a = FindAngle(end0,end1);
+//  a = FindAngle(end0,end1);
     ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
 
     xx->descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap))-2*GetTrkGauge(trk);

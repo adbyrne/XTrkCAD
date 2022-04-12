@@ -214,16 +214,22 @@ static void LoadControlMgmList( void )
 	wIndex_t curInx, cnt=0;
 	long tempL;
 	contMgmContext_p context;
+#ifdef LATER
 	contMgmContext_t curContext;
+#endif
 
 	curInx = wListGetIndex( controlSelL );
+#ifdef LATER
 	curContext.proc = NULL;
 	curContext.data = NULL;
 	curContext.icon = NULL;
+#endif
 	if ( curInx >= 0 ) {
 		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
+#ifdef LATER
 		if ( context != NULL )
 			curContext = *context;
+#endif
 	}
 	cnt = wListGetCount( controlSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {

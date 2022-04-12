@@ -336,7 +336,9 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 {
     struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
     BOOL_T rc = TRUE;
+#ifdef UTFCONVERT
 	unsigned strings2convert = 1;
+#endif
 
 	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d", GetTrkIndex(t),
 		GetTrkLayer(t),
@@ -350,12 +352,16 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	case OP_NOTELINK:
 		s[0]=ConvertToEscapedText( xx->noteData.linkData.url );
 		s[1]=ConvertToEscapedText( xx->noteData.linkData.title );
+#ifdef UTFCONVERT
 		strings2convert = 2;
+#endif
 		break;
 	case OP_NOTEFILE:
 		s[0]=ConvertToEscapedText( xx->noteData.fileData.path );
 		s[1]=ConvertToEscapedText( xx->noteData.fileData.title );
+#ifdef UTFCONVERT
 		strings2convert = 2;
+#endif
 		break;
 	default:
 		CHECKMSG( FALSE, ( "WriteNote: %d", xx->op ) );
