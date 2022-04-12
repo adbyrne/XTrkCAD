@@ -982,7 +982,7 @@ static void Playback( void )
 	POS_T zoom;
 	wIndex_t inx;
 	long timeout;
-	static enum { pauseCmd, mouseCmd, otherCmd } thisCmd, lastCmd;
+	static enum { pauseCmd, mouseCmd, otherCmd } thisCmd/*, lastCmd*/;
 	size_t len;
 	static wBool_t demoWinOnTop = FALSE;
 	coOrd roomSize;
@@ -992,7 +992,7 @@ static void Playback( void )
 	useCurrentLayer = FALSE;
 	inPlayback = TRUE;
 	EnableButtons( FALSE );
-	lastCmd = otherCmd;
+//	lastCmd = otherCmd;
 	playbackTimer = 0;
 	if (demoWinOnTop) {
 		wWinTop( mainW );
@@ -1282,7 +1282,7 @@ static void Playback( void )
 				NoticeMessage( MSG_PLAYBACK_UNK_CMD, _("Ok"), NULL, paramLineNum, paramLine );
 			}
 		}
-		lastCmd = thisCmd;
+//		lastCmd = thisCmd;
 		wFlush();
 		if (pauseDemo) {
 			EnableButtons( TRUE );
