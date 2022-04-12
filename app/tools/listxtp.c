@@ -148,8 +148,10 @@ main( int argc, char **argv )
 						/*
 						 * if found, store the restof the line and the filename
 						 */
+						char *bp;
 						buffer[ strlen( buffer ) - 1 ] = '\0';
-						sprintf( buffer, "%s (%s)", buffer + strlen( CONTENTSCOMMAND ) + 1, ent->d_name );
+						bp = buffer;
+						sprintf( buffer, "%s (%s)", bp + strlen( CONTENTSCOMMAND ) + 1, ent->d_name );
 						results[ cnt ] = malloc( strlen( buffer ) + 1 );
 						strcpy( results[ cnt ], buffer );
 						cnt++;
