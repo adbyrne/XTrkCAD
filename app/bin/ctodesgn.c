@@ -1410,7 +1410,7 @@ static toDesignSchema_t * LoadSegs(
 #endif
 		case NTO_WYE:
 		case NTO_3WAY:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_3WAY)?4:3 );
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, ((dp->type==NTO_3WAY)?4:3) );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
 						(newTurnLen0), fabs(newTurnOff0), angle0 ) )
 				return NULL;
@@ -1445,7 +1445,7 @@ static toDesignSchema_t * LoadSegs(
 #ifndef MKTURNOUT
 		case NTO_CORNUWYE:
 		case NTO_CORNU3WAY:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_CORNU3WAY)?4:3 );
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, ((dp->type==NTO_CORNU3WAY)?4:3) );
 
 			/*
 			 * Construct Wye and 3 Way Turnouts with Cornu curves
