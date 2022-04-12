@@ -359,11 +359,11 @@ StandardizeSpelling(char *word)
     }
 
     if (!strncasecmp(word, "h0", 2)) {
-        strncpy(word, "ho", 2);
+        strcpy(word, "ho");
     }
 
     if (!strncasecmp(word, "00", 2)) {
-        strncpy(word, "oo", 2);
+        strcpy(word, "oo");
     }
 
     if (word[0] == '0') {
