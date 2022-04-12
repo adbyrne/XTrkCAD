@@ -1282,8 +1282,8 @@ static gint draw_scroll_event(
 
 
 
-			if (scrollTimer) {					// Already have a timer
-				lastAction = action;
+		if (scrollTimer) {					// Already have a timer
+			lastAction = action;
                 return TRUE;
             } else {
             	 lastAction = action;

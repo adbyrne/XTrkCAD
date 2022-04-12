@@ -323,12 +323,12 @@ wchar_t *ustrlow(wchar_t *s) {
 }
 
 int utoi(wchar_t const *s) {
-    int sign = +1;
+//  int sign = +1;
     int n;
 
     if (*s == L'-') {
 	s++;
-	sign = -1;
+//	sign = -1;
     }
 
     n = 0;
