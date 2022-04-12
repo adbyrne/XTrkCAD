@@ -613,7 +613,8 @@ DIST_T DistanceCompound(
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep;
-	DIST_T d0, d1;
+	DIST_T d0;
+//	DIST_T d1;
 	coOrd p0, p2;
 	PATHPTR_T path;
 	int segInx;
@@ -637,7 +638,7 @@ DIST_T DistanceCompound(
 		path = GetCurrPath( t );
 		for ( path += strlen((char *)path)+1; path[0] || path[1]; path++ ) {
 			if ( path[0] != 0 ) {
-				d1 = DIST_INF;
+//				d1 = DIST_INF;
 				GetSegInxEP( *path, &segInx, &segEP );
 				segProcData.distance.pos1 = p0;
 				SegProc( SEGPROC_DISTANCE, &xx->segs[segInx], &segProcData );

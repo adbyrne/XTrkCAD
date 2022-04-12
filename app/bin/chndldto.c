@@ -55,7 +55,8 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 	EPINX_T ep, ep1, ep2, ep2a=-1, ep2b=-1, pointEp0, pointEp1;
 	DIST_T dist, reverseD, pointD;
 	coOrd off, intersectP;
-	coOrd pointP, pointC, pointP1, reverseC, point0;
+	coOrd pointP, pointP1, reverseC, point0;
+//	coOrd pointC;
 	track_p trk, trk1, trk2, trk2a=NULL, trk2b=NULL, pointT;
 	trkSeg_p segP;
 	BOOL_T right;
@@ -89,7 +90,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			Dhlt.normalA = GetAngleAtPoint( Dhlt.normalT, Dhlt.normalP, NULL, NULL );
 			InfoMessage( _("Drag to set angle") );
 			Dhlt.state = 1;
-			pointC = pointP = pointP1 = reverseC = zero;
+//			pointC = pointP = pointP1 = reverseC = zero;
 			return C_CONTINUE;
 		}
 

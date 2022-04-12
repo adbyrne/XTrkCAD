@@ -353,7 +353,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0;
-	int oldTrackCount;
+//	int oldTrackCount;
 
 	switch (action) {
 	case C_START:
@@ -455,7 +455,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			ep0 = PickEndPoint( p0, trk0 );
 			if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-				oldTrackCount = trackCount;
+//				oldTrackCount = trackCount;
 				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
 					!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
 					return C_CONTINUE;

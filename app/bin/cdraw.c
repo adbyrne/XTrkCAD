@@ -2162,7 +2162,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 				d = DIST_INF;
 				DIST_T dd;
 				BOOL_T onPoint = FALSE;
-				BOOL_T closeSeg = FALSE;
+//				BOOL_T closeSeg = FALSE;
 				coOrd end;
 				int polyInx = -1;
 				for ( int inx=0; inx<xx->segs[0].u.p.cnt-1; inx++ ) {
@@ -2202,7 +2202,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 						d = dd;
 						if (IsClose(d)) {
 							polyInx = xx->segs[0].u.p.cnt-1;
-							closeSeg=TRUE;
+//							closeSeg=TRUE;
 							pos = p0;
 						}
 					}

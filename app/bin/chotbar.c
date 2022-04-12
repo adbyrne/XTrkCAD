@@ -267,7 +267,7 @@ static void DoHotBarJump( int inx )
 static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wDrawPix_t w, wDrawPix_t h )
 {
 	int inx;
-	coOrd pos;
+//	coOrd pos;
 	DIST_T x;
 	wWinPix_t px;
 	hotBarMap_t * tbm;
@@ -316,8 +316,8 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wDrawPix_
 	wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
 	switch (action & 0xff) {
 	case wActionLDown:
-		pos.x = mainD.size.x+mainD.orig.x;
-		pos.y = mainD.size.y+mainD.orig.y;
+//		pos.x = mainD.size.x+mainD.orig.x;
+//		pos.y = mainD.size.y+mainD.orig.y;
 		if ( hotBarCurrSelect >= 0 ) {
 			//HotBarHighlight( hotBarCurrSelect );
 			hotBarCurrSelect = -1;
