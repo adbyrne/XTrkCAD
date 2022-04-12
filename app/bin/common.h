@@ -165,8 +165,8 @@ typedef struct {
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
-			(DA).max += INCR; \
-			CHECK_SIZE(T,DA) \
+			(DA).max += (INCR); \
+			CHECK_SIZE((T),(DA)) \
 			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
 			if ( (DA).ptr == NULL ) \
 				abort(); \
@@ -181,14 +181,14 @@ typedef struct {
 #define DYNARR_RESET(T,DA) \
 		(DA).cnt=0
 #define DYNARR_SET(T,DA,N) \
-		{ if ((DA).max < N) { \
-			(DA).max = N; \
-			CHECK_SIZE(T,DA) \
+		{ if ((DA).max < (N)) { \
+			(DA).max = (N); \
+			CHECK_SIZE((T),(DA)) \
 			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
 			if ( (DA).ptr == NULL ) \
 				abort(); \
 		} \
-		(DA).cnt = N; }
+		(DA).cnt = (N); }
 #define DYNARR_FREE(T,DA) \
 		{ if ((DA).ptr) { \
 			MyFree( (DA).ptr); \
@@ -198,13 +198,13 @@ typedef struct {
 		(DA).cnt = 0; }
 #define DYNARR_REMOVE(T,DA,I) \
 		{ \
-		 { if ((DA).cnt-1 > I) { \
-				for (int i=I;i<(DA).cnt-1;i++) { \
+		 { if ((DA).cnt-1 > (I)) { \
+				for (int i=(I);i<(DA).cnt-1;i++) { \
 				(((T*)(DA).ptr)[i])= (((T*)(DA).ptr)[i+1]); \
 				} \
 			} \
 		 } \
-		if ((DA.cnt)>=I) (DA).cnt--; \
+		if ((DA).cnt>=(I)) (DA).cnt--; \
 		}
 
 // Base DotsPerInch
