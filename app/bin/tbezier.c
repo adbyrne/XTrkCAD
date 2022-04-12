@@ -1763,7 +1763,7 @@ void BezierSlice(coOrd input[], coOrd output[], double t) {
 /**
  * Split bezier into two parts
  */
-extern void BezierSplit(coOrd input[], coOrd left[], coOrd right[] , double t) {
+extern void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4] , double t) {
 
 	BezierSlice(input,left,t);
 

@@ -79,7 +79,7 @@ void SetUpCornuParmFromTracks(track_p trk[2],cornuParm_t * cp, struct extraDataC
 	}
 }
 
-EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct extraDataCornu_t* xx) {
+EXPORT BOOL_T FixUpCornu(coOrd pos[4], track_p trk[2], EPINX_T ep[2], struct extraDataCornu_t* xx) {
 
 	cornuParm_t cp;
 
@@ -110,7 +110,7 @@ EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct ext
 	return TRUE;
 }
 
-EXPORT BOOL_T FixUpCornu0(coOrd pos[2],coOrd center[2],ANGLE_T angle[2],DIST_T radius[2],struct extraDataCornu_t* xx) {
+EXPORT BOOL_T FixUpCornu0(coOrd pos[4],coOrd center[2],ANGLE_T angle[2],DIST_T radius[2],struct extraDataCornu_t* xx) {
 	DIST_T last_c;
 	if (!CallCornu0(pos, center, angle, radius,&xx->arcSegs,FALSE)) return FALSE;
 	xx->minCurveRadius = CornuMinRadius(pos,
