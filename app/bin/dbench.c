@@ -351,12 +351,12 @@ EXPORT void CountBench(
 		DIST_T length )
 {
 	int inx;
-	long orient;
+//	long orient;
 	long type;
 	long iwidth, iheight;
 	benchEnum_p bp;
 
-	orient = benchData&0xFF;
+//	orient = benchData&0xFF;
 	iheight = (benchData>>9)&0xff;
 	iwidth = (benchData>>17)&0x7f;
 	type = (benchData>>24)&0xff;

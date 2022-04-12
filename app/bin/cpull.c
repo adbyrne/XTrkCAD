@@ -446,7 +446,8 @@ static void PullTracks(
 	coOrd p1, p2;
 	ANGLE_T a1, a2;
 	coOrd p;
-	int cnt1, cnt2;
+	int cnt1;
+//	int cnt2;
 	int rc;
 
 	if (QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS)) {
@@ -484,7 +485,7 @@ static void PullTracks(
 	if ( e1 != loopEnd ) {
 		e2 = GetConnectedTracks( trk2, ep2, trk1, ep1 );
 	} 
-	cnt2 = section_da.cnt - cnt1;
+//	cnt2 = section_da.cnt - cnt1;
 	if ( e1 == freeEnd && e2 == freeEnd ) {
 		p.x = (p1.x+p2.x)/2.0;
 		p.y = (p1.y+p2.y)/2.0;

@@ -1995,7 +1995,7 @@ EXPORT void CarItemDraw(
 	trkSeg_t simpleSegs[1];
 	pts_t simplePts[4];
 	int dir;
-	DIST_T rad;
+//	DIST_T rad;
 	static int couplerLineWidth = 3;
 	DIST_T scale2rail;
 
@@ -2090,7 +2090,7 @@ EXPORT void CarItemDraw(
 	if ( d->scale >= scale2rail )
 		return;
 	scale2rail /= 2;
-	rad = trackGauge/8.0;
+//	rad = trackGauge/8.0;
 	for ( dir=0; dir<2; dir++ ) {
 		Translate( &pos, coupler[dir].pos, coupler[dir].angle, CarItemCouplerLength(item,dir) );
 		DrawLine( d, coupler[dir].pos, pos, couplerLineWidth, color );
@@ -3368,10 +3368,11 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 				carDlgServiceDateStr[0] = '\0';
 			wTextClear( (wText_p)carDlgPLs[I_CD_NOTES].control );
 			if ( carDlgUpdateItemPtr->data.notes ) {
-			strncpy( message, carDlgUpdateItemPtr->data.notes, sizeof message );
-			message[sizeof message - 1] = '\0';
-			for ( cp=message; *cp; cp++ )
-				if ( *cp == '\n' ) *cp = ' ';
+				strncpy( message, carDlgUpdateItemPtr->data.notes, sizeof message );
+				message[sizeof message - 1] = '\0';
+				for ( cp=message; *cp; cp++ ) {
+					if ( *cp == '\n' ) *cp = ' ';
+				}
 				wTextAppend( (wText_p)carDlgPLs[I_CD_NOTES].control, message );
 			}
 			LoadRoadnameList( &tabs[T_ROADNAME], &tabs[T_REPMARK] );
