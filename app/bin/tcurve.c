@@ -170,7 +170,8 @@ DIST_T CurveDescriptionDistance(
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
-	coOrd p0,p1,pd;
+	coOrd pd;
+//	coOrd p0,p1;
 	FLOAT_T ratio;
 	ANGLE_T a, a0, a1;
 	if (hidden) *hidden = FALSE;
@@ -184,8 +185,8 @@ DIST_T CurveDescriptionDistance(
 	if ( xx->helixTurns > 0 ) {
 		pd.x = xx->pos.x + offset.x;
 		pd.y = xx->pos.y + offset.y;
-		p0 = pd;
-		p1 = pd;
+//		p0 = pd;
+//		p1 = pd;
 	} else {
 		GetCurveAngles( &a0, &a1, trk );
 		ratio = offset.x;
@@ -306,20 +307,20 @@ STATUS_T CurveDescriptionMove(
 		coOrd pos )
 {
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
-	static coOrd p0,p1;
-	wDrawColor color;
+//	static coOrd p0,p1;
+//	wDrawColor color;
 	ANGLE_T a, a0, a1;
 	DIST_T d;
 
-	p0 = xx->pos;
+//	p0 = xx->pos;
 
-	color = GetTrkColor( trk, &mainD );
+//	color = GetTrkColor( trk, &mainD );
 	if ( xx->helixTurns > 0 ) {
 		xx->descriptionOff.x = (pos.x-xx->pos.x);
 		xx->descriptionOff.y = (pos.y-xx->pos.y);
-		p1 = pos;
+//		p1 = pos;
 	} else {
-		p1 = pos;
+//		p1 = pos;
 		GetCurveAngles( &a0, &a1, trk );
 		if ( a1 < 1 ) a1 = 1.0;
 		a = FindAngle( xx->pos, pos );
@@ -674,14 +675,14 @@ static DIST_T DistanceCurve( track_p t, coOrd * p )
 static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 {
 	ANGLE_T a0, a1;
-	track_p tt = t;
+//	track_p tt = t;
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 
 	GetCurveAngles( &a0, &a1, t );
-	if (xx->circle) {
-		tt = NULL;
-	}
+//	if (xx->circle) {
+//		tt = NULL;
+//	}
 	if (xx->helixTurns > 0) {
 		a0 = 0.0;
 		a1 = 360.0;

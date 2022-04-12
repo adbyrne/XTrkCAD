@@ -68,11 +68,12 @@ DestroyCatalog(Catalog *catalog)
 {
 	CatalogEntry *current = catalog->head;
 	CatalogEntry *entry = NULL;
-	CatalogEntry *tmp = NULL, *old = NULL;
+	CatalogEntry *tmp = NULL;
+//	CatalogEntry *old = NULL;
 	DL_FOREACH_SAFE(current, entry, tmp)
 	{
 		//if (old) MyFree(old);
-		old = NULL;
+//		old = NULL;
 		for (unsigned int i = 0; i < entry->files; i++) {
 		   MyFree(entry->fullFileName[i]);
 		   entry->fullFileName[i] = NULL;
@@ -82,7 +83,7 @@ DestroyCatalog(Catalog *catalog)
 		entry->contents = NULL;
 		MyFree(entry->tag);
 		entry->tag = NULL;
-		old = entry;
+//		old = entry;
 		DL_DELETE(catalog->head,entry);
 	}
 
@@ -140,11 +141,12 @@ CatalogDiscard(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
     CatalogEntry *element;
-    CatalogEntry *tmp,*old = NULL;
+    CatalogEntry *tmp;
+//  CatalogEntry *old = NULL;
 
     DL_FOREACH_SAFE(current, element, tmp) {
     	//if (old) MyFree(old);
-    	old = NULL;
+//  	old = NULL;
     	MyFree(element->contents);
     	element->contents = NULL;
     	MyFree(element->tag);
@@ -154,7 +156,7 @@ CatalogDiscard(Catalog *catalog)
     	    element->fullFileName[i] = NULL;
     	}
     	element->files = 0;
-        old = element;
+//      old = element;
         DL_DELETE(catalog->head,element);
     }
 

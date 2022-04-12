@@ -264,9 +264,10 @@ EXPORT FLOAT_T DecodeFloat(
 		BOOL_T * validP )
 {
 	FLOAT_T valF;
-	const char *cp0, *cp1;
+	const char *cp1;
+//	const char *cp0;
     char *cp2;
-	cp0 = cp1 = wStringGetValue( strCtrl );
+//	cp0 = cp1 = wStringGetValue( strCtrl );
 	while (isspace((unsigned char)*cp1)) cp1++;
 	if ( *cp1 ) {
 		valF = strtod( cp1, &cp2 );
@@ -290,9 +291,9 @@ FLOAT_T DecodeDistance(
     BOOL_T * validP)
 {
     FLOAT_T valF;
-    char *cp0, *cp1, *cpN, c1;
+    char *cp1, *cpN, c1;
     // CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
-    cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
+    cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
     cpN += strlen(cpN)-1;
 
     while (cpN > cp1 && isspace((unsigned char)*cpN)) {
@@ -1685,10 +1686,11 @@ static void ParamButtonOk( void * groupVP )
 	paramGroup_p group = groupVP;
 	wFlush();
 	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
-	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
+	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) ) {
 		return;
-	if ( recordF && group->nameStr )
-		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); {
+	}
+	if ( recordF && group->nameStr ) {
+		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" );
 		fflush( recordF );
 	}
 
@@ -2233,8 +2235,9 @@ static void ParamCreateControl(
     char *cq;
 	static wMenu_p menu = NULL;
 
-	if ( ( win = pd->group->win ) == NULL )
+	if ( ( win = pd->group->win ) == NULL ) {
 		win = mainW;
+	}
 
 
 		switch (pd->type) {

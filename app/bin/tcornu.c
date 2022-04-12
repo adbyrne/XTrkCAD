@@ -418,9 +418,9 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	default:
 		CHECKMSG( FALSE, ( "updateCornu: Bad inx %d", inx ) );
 	}
-	track_p tracks[2];
-	tracks[0] = GetTrkEndTrk(trk,0);
-	tracks[1] = GetTrkEndTrk(trk,1);
+//	track_p tracks[2];
+//	tracks[0] = GetTrkEndTrk(trk,0);
+//	tracks[1] = GetTrkEndTrk(trk,1);
 
 	if (updateEndPts) {
 		if ( GetTrkEndTrk(trk,0) == NULL ) {
@@ -787,8 +787,8 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     DIST_T radius = 0.0;
     coOrd center;
     int inx,subinx;
-    BOOL_T track;
-    track = IsTrack(trk);
+//  BOOL_T track;
+//  track = IsTrack(trk);
     
     cornuParm_t new;
 
