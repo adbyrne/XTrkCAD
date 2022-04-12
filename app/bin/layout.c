@@ -861,7 +861,7 @@ LayoutDlgUpdate(
 {
     /* did the scale change ? */
     if (inx == SCALEINX) {
-        char prefString[100];
+        char prefString[130];
         char scaleDesc[100];
 
         LoadGaugeList((wList_p)layoutPLs[GAUGEINX].control, *((int *)valueP));

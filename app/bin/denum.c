@@ -135,7 +135,7 @@ void EnumerateList(
 		}
 	}
 	if (enableListIndexes && indexes)
-		sprintf( message, "%s%s -> %s \n", message, N_("Indexes"), indexes);
+		sprintf( &message[strlen(message)], "%s -> %s \n", N_("Indexes"), indexes);
 	wTextAppend( enumT, message );
 }
 

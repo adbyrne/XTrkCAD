@@ -3995,7 +3995,7 @@ static void CarDlgOk( void * unused )
 	char * cp;
 	long count;
 	tabString_t tabs[7];
-	char title[STR_LONG_SIZE];
+	char title[STR_LONG_SIZE*2];
 	carItem_p itemP=NULL;
 	carPart_p partP=NULL;
 	carProto_p protoP;
