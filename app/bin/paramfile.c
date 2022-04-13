@@ -289,6 +289,7 @@ bool ReadParams(
 				/* Close file and reset the locale settings */
 				if (paramFile) {
 					fclose(paramFile);
+					paramFile = NULL;
 				}
 				SetUserLocale();
 				return FALSE;
@@ -386,6 +387,7 @@ bool ReadParams(
 			/* Close file and reset the locale settings */
 			if (paramFile) {
 				fclose(paramFile);
+				paramFile = NULL;
 			}
 			SetUserLocale();
 
@@ -398,6 +400,7 @@ bool ReadParams(
 		NoticeMessage(MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
 	if (paramFile) {
 		fclose(paramFile);
+		paramFile = NULL;
 	}
 	free(paramFileName);
 	paramFileName = NULL;
