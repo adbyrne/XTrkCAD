@@ -29,7 +29,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"	// .deleted
+//#include "trackx.h"	// .deleted
 #include "common-ui.h"
 
 long programMode;
@@ -1388,10 +1388,15 @@ static void PlaceCar(
 
     CarItemFindCouplerMountPoint(xx->item, xx->trvTrk, xx->couplerPos);
 
-    car->endPt[0].angle = xx->trvTrk.angle;
-    Translate(&car->endPt[0].pos, xx->trvTrk.pos, car->endPt[0].angle, dists[0]);
-    car->endPt[1].angle = NormalizeAngle(xx->trvTrk.angle + 180.0);
-    Translate(&car->endPt[1].pos, xx->trvTrk.pos, car->endPt[1].angle, dists[1]);
+    coOrd tempPos;
+    ANGLE_T tempAng;
+    tempAng = xx->trvTrk.angle;
+    Translate( &tempPos, xx->trvTrk.pos, tempAng, dists[0] );
+    SetTrkEndPointTrk( car, 0, tempPos, tempAng );
+    tempAng = NormalizeAngle( tempAng+180.0 );
+    Translate( &tempPos, xx->trvTrk.pos, tempAng, dists[1] );
+    SetTrkEndPointTrk( car, 1, tempPos, tempAng );
+
     LOG(log_trainMove, 4, ("%s @ [%0.3f,%0.3f] A%0.3f\n", CarItemNumber(xx->item),
                            xx->trvTrk.pos.x, xx->trvTrk.pos.y, xx->trvTrk.angle))
     SetCarBoundingBox(car);
@@ -1532,8 +1537,7 @@ static void UncoupleCars(
     }
 
     loco = FindMasterLoco(car1, NULL);
-    SetTrkEndTrk( car1, dir1, NULL );
-    SetTrkEndTrk( car2, dir2, NULL );
+    DisconnectTracks( car1, dir1, car2, dir2 );
 
     if (loco) {
         track_p  loco1, loco2;
@@ -1593,10 +1597,8 @@ static void CoupleCars(
     WALK_CARS_END(car, xx1, dir)
     loco1 = FindMasterLoco(car1, NULL);
     loco2 = FindMasterLoco(car2, NULL);
-    SetTrkEndTrk( car1, dir1, car2 );
-    SetTrkEndTrk( car2, dir2, car1 );
+    ConnectTracks( car1, dir1, car2, dir2 );
 
-    /*ConnectTracks( car1, dir1, car2, dir2 );*/
     if (logTable(log_trainMove).level >= 2) {
         LogPrintf("Coupling %s[%d] ", CarItemNumber(xx1->item), dir1);
         LogPrintf(" and %s[%d]\n", CarItemNumber(xx2->item), dir2);
@@ -2914,7 +2916,7 @@ static void TrainFunc(
     track_p temp0, temp1;
     coOrd pos0, pos1;
     ANGLE_T angle0, angle1;
-    EPINX_T ep0=-1, ep1=-1;
+    EPINX_T ep0, ep1;
 
     if (trainFuncCar == NULL) {
         fprintf(stderr, "trainFunc: trainFuncCar==NULL\n");
@@ -2950,32 +2952,24 @@ static void TrainFunc(
         pos1 = GetTrkEndPos(trainFuncCar,1);
         angle1 = GetTrkEndAngle(trainFuncCar,1);
 
-        if (temp0) {
-            ep0 = GetEndPtConnectedToMe(temp0,trainFuncCar);
-            SetTrkEndTrk( trainFuncCar, 0, NULL );
-            SetTrkEndTrk( temp0, ep0, NULL );
-        }
-
-        if (temp1) {
-            ep1 = GetEndPtConnectedToMe(temp1,trainFuncCar);
-            SetTrkEndTrk( trainFuncCar, 1, NULL );
-            SetTrkEndTrk( temp1, ep1, NULL );
-        }
-
         xx->direction = !xx->direction;
         FlipTraverseTrack(&xx->trvTrk);
+	if ( temp0 ) {
+		ep0 = GetEndPtConnectedToMe( temp0, trainFuncCar );
+		DisconnectTracks( trainFuncCar, 0, temp0, ep0 );
+	}
+	if ( temp1 ) {
+		ep1 = GetEndPtConnectedToMe( temp1, trainFuncCar );
+		DisconnectTracks( trainFuncCar, 1, temp1, ep1 );
+	}
         SetTrkEndPoint(trainFuncCar, 0, pos1, angle1);
         SetTrkEndPoint(trainFuncCar, 1, pos0, angle0);
-
-        if (temp0) {
-            SetTrkEndTrk( trainFuncCar, 1, temp0 );
-            SetTrkEndTrk( temp0, ep0, trainFuncCar );
-        }
-
-        if (temp1) {
-            SetTrkEndTrk( trainFuncCar, 0, temp1 );
-            SetTrkEndTrk( temp1, ep1, trainFuncCar );
-        }
+	if ( temp1 ) {
+		ConnectTracks( trainFuncCar, 0, temp1, ep1 );
+	}
+	if ( temp0 ) {
+		ConnectTracks( trainFuncCar, 1, temp0, ep0 );
+	}
 
         ControllerDialogSync(curTrainDlg);
         PlaceCar(trainFuncCar);
@@ -2996,8 +2990,8 @@ static void TrainFunc(
             LocoListChangeEntry(trainFuncCar, NULL);
         }
 
-        trainFuncCar->deleted = TRUE;
-        /*DeleteTrack( trainFuncCar, FALSE );*/
+        //trainFuncCar->deleted = TRUE;
+        DeleteTrack( trainFuncCar, FALSE );
         CarItemUpdate(xx->item);
         HotBarCancel();
         InfoSubstituteControls(NULL, NULL);
@@ -3014,8 +3008,8 @@ static void TrainFunc(
 
         if (temp0) {
             xx1 = GET_EXTRA_DATA(temp0, T_CAR, extraDataCar_t);
-            temp0->deleted = TRUE;
-            /*DeleteTrack( temp0, FALSE );*/
+            //temp0->deleted = TRUE;
+            DeleteTrack( temp0, FALSE );
             CarItemUpdate(xx1->item);
         }
 
@@ -3024,8 +3018,8 @@ static void TrainFunc(
 
         if (temp0) {
             xx1 = GET_EXTRA_DATA(temp0, T_CAR, extraDataCar_t);
-            temp0->deleted = TRUE;
-            /*DeleteTrack( temp0, FALSE );*/
+            //temp0->deleted = TRUE;
+            DeleteTrack( temp0, FALSE );
             CarItemUpdate(xx1->item);
         }
 

@@ -434,6 +434,13 @@ EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 	trk->endPt[ep].angle = angle;
 }
 
+EXPORT void SetTrkEndPointTrk( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
+{
+	CHECK( ep < trk->endCnt );
+	trk->endPt[ep].pos = pos;
+	trk->endPt[ep].angle = angle;
+}
+
 EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T e )
 {
 	CHECK( e < trk->endCnt );
@@ -450,12 +457,6 @@ EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T e )
 {
 	CHECK( e < trk->endCnt );
 	return trk->endPt[e].track;
-}
-
-EXPORT void SetTrkEndTrk( track_p trk, EPINX_T e, track_p trk1 )
-{
-	CHECK( e < trk->endCnt );
-	trk->endPt[e].track = trk1 ;
 }
 
 EXPORT long GetTrkEndOption( track_p trk, EPINX_T e )
@@ -1198,6 +1199,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	/* If Car, simulate Remove Car -> uncouple and mark deleted (no Undo) */
 	if (QueryTrack(trk,Q_ISTRAIN)) {
 		trk->deleted = TRUE;
+#ifdef LATER
 		int dir;
 		for (dir=0; dir<2; dir++) {
 		    if (GetTrkEndTrk(trk,dir)) {
@@ -1208,6 +1210,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 		        trk->endPt[dir].track = NULL;
 		    }
 		}
+#endif
 		return TRUE;
 	}
 	for (i=0;i<trk->endCnt;i++) {
@@ -2008,6 +2011,16 @@ EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1
 	ANGLE_T a;
 	coOrd pos0, pos1;
 
+	if (QueryTrack(trk0,Q_ISTRAIN)) {
+		if (!QueryTrack(trk1,Q_ISTRAIN)) {
+			NoticeMessage( _("Connecting a car to a non-car T%d T%d"), _("Continue"), NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
+			return -1;
+		}
+		trk0->endPt[inx0].track = trk1;
+		trk1->endPt[inx1].track = trk0;
+		return 0;
+	}
+
 	if ( !IsTrack(trk0) ) {
 		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
 		return -1;
@@ -2044,6 +2057,16 @@ EXPORT void DisconnectTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T e
 	// Check tracks are connected
 	CHECK( trk1->endPt[ep1].track == trk2 );
 	CHECK( trk2->endPt[ep2].track == trk1 );
+	if (QueryTrack(trk1,Q_ISTRAIN)) {
+		if (!QueryTrack(trk2,Q_ISTRAIN)) {
+			NoticeMessage( _("Disconnecting a car from a non-car T%d T%d"), _("Continue"), NULL, GetTrkIndex(trk1), GetTrkIndex(trk2) );
+			return;
+		}
+		trk1->endPt[ep1].track = NULL;
+		trk2->endPt[ep2].track = NULL;
+		return;
+	}
+
 	UndoModify( trk1 );
 	UndoModify( trk2 );
 	trk1->endPt[ep1].track = NULL;
