@@ -418,9 +418,9 @@ static BOOL_T FindTurntableEndPt(
 		EPINX_T *epR,
 		BOOL_T *reverseR )
 {
-	EPINX_T ep, ep0, epCnt=GetTrkEndPtCnt(trk);
+	EPINX_T ep, /*ep0,*/ epCnt=GetTrkEndPtCnt(trk);
 	ANGLE_T angle=*angleR, angle0, angle1;
-	for (ep=0,ep0=-1,epCnt=GetTrkEndPtCnt(trk),angle0=370.0; ep<epCnt; ep++) {
+	for (ep=0,/*ep0=-1,*/epCnt=GetTrkEndPtCnt(trk),angle0=370.0; ep<epCnt; ep++) {
 		if ( (GetTrkEndTrk(trk,ep)) == NULL )
 			continue;
 		angle1 = GetTrkEndAngle(trk,ep);
@@ -725,9 +725,10 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d
 	//Look for empty slot
 	BOOL_T found = FALSE;
 	for (*ep=0; *ep<GetTrkEndPtCnt(*trk); *ep=*ep+1) {
-		if ( (GetTrkEndTrk(*trk,*ep)) == NULL )
+		if ( (GetTrkEndTrk(*trk,*ep)) == NULL ) {
 			found = TRUE;
-			break;
+		}
+		break;
 	}
 	if (!found)
 		*ep = NewTurntableEndPt(*trk,angle0);

@@ -79,7 +79,7 @@ void SetUpCornuParmFromTracks(track_p trk[2],cornuParm_t * cp, struct extraDataC
 	}
 }
 
-EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct extraDataCornu_t* xx) {
+EXPORT BOOL_T FixUpCornu(coOrd pos[4], track_p trk[2], EPINX_T ep[2], struct extraDataCornu_t* xx) {
 
 	cornuParm_t cp;
 
@@ -110,7 +110,7 @@ EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct ext
 	return TRUE;
 }
 
-EXPORT BOOL_T FixUpCornu0(coOrd pos[2],coOrd center[2],ANGLE_T angle[2],DIST_T radius[2],struct extraDataCornu_t* xx) {
+EXPORT BOOL_T FixUpCornu0(coOrd pos[4],coOrd center[2],ANGLE_T angle[2],DIST_T radius[2],struct extraDataCornu_t* xx) {
 	DIST_T last_c;
 	if (!CallCornu0(pos, center, angle, radius,&xx->arcSegs,FALSE)) return FALSE;
 	xx->minCurveRadius = CornuMinRadius(pos,
@@ -214,7 +214,6 @@ static void DrawCornuDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	wFont_p fp;
     coOrd epos0, epos1, offpos0, offpos1;
 
 	if (layoutLabels == 0)
@@ -229,7 +228,7 @@ static void DrawCornuDescription(
 	Translate(&offpos0,epos0,a+90,xx->descriptionOff.y);
 	Translate(&offpos1,epos1,a+90,xx->descriptionOff.y);
 
-    fp = wStandardFont( F_TIMES, FALSE, FALSE );
+    wStandardFont( F_TIMES, FALSE, FALSE );
 
     sprintf( message, _("Cornu: L %s A %0.3f L %s MinR %s"),
     		FormatDistance(FindDistance(xx->pos[0], xx->pos[1])),
@@ -418,9 +417,9 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	default:
 		CHECKMSG( FALSE, ( "updateCornu: Bad inx %d", inx ) );
 	}
-	track_p tracks[2];
-	tracks[0] = GetTrkEndTrk(trk,0);
-	tracks[1] = GetTrkEndTrk(trk,1);
+//	track_p tracks[2];
+//	tracks[0] = GetTrkEndTrk(trk,0);
+//	tracks[1] = GetTrkEndTrk(trk,1);
 
 	if (updateEndPts) {
 		if ( GetTrkEndTrk(trk,0) == NULL ) {
@@ -787,8 +786,8 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     DIST_T radius = 0.0;
     coOrd center;
     int inx,subinx;
-    BOOL_T track;
-    track = IsTrack(trk);
+//  BOOL_T track;
+//  track = IsTrack(trk);
     
     cornuParm_t new;
 

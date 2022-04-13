@@ -609,13 +609,13 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	scaleDesc_p s = NULL;
 	gaugeInfo_p g;
 	char *cp;
-	DIST_T ratio;
+//	DIST_T ratio;
 	BOOL_T found;
 	char buf[ 80 ];
 	size_t len;
 
 	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
-		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
+//		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
 
 		/* do we already have a description for this scale? */
 		found = 0;

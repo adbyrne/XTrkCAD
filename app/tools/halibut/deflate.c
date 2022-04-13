@@ -1203,7 +1203,7 @@ static void outblock(deflate_compress_ctx *out,
      */
     for (i = 0; i < 19; i++)
 	codelen[i] = len3[lenlenmap[i]];
-    for (hclen = 19; hclen > 4 && codelen[hclen-1] == 0; hclen--);
+    for (hclen = 19; hclen > 4 && codelen[hclen-1] == 0; hclen--){};
 
     /*
      * Now work out the exact size of both the dynamic and the
@@ -2042,7 +2042,8 @@ int deflate_decompress_data(deflate_decompress_ctx *dctx,
 {
     const coderecord *rec;
     const unsigned char *block = (const unsigned char *)vblock;
-    int code, bfinal, btype, rep, dist, nlen, header, cksum;
+    int code, bfinal, btype, rep, dist, header, cksum;
+//  int nlen;
     int error = 0;
 
     if (len == 0) {
@@ -2441,7 +2442,7 @@ int deflate_decompress_data(deflate_decompress_ctx *dctx,
 	     */
 	    if (dctx->nbits < 16)
 		goto finished;
-	    nlen = dctx->bits & 0xFFFF;
+//	    nlen = dctx->bits & 0xFFFF;
 	    EATBITS(16);
 	    if (dctx->uncomplen == 0)
 		dctx->state = OUTSIDEBLK;	/* block is empty */

@@ -2413,7 +2413,9 @@ static void SetAccelKeys()
 #include "bitmaps/doc-export.xpm"
 #include "bitmaps/doc-export-bmap.xpm"
 #include "bitmaps/doc-export-dxf.xpm"
- #include "bitmaps/doc-export-svg.xpm"
+#if XTRKCAD_CREATE_SVG
+#include "bitmaps/doc-export-svg.xpm"
+#endif
 #include "bitmaps/doc-import.xpm"
 #include "bitmaps/doc-import-mod.xpm" 
 #include "bitmaps/doc-new.xpm"

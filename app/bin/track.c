@@ -1858,21 +1858,22 @@ nextEndPt:;
 	}
 	InfoCount( trackCount );
 	if (auditFile != NULL) {
-	if (auditStop)
-		if (NoticeMessage( MSG_AUDIT_WRITE_FILE, _("Yes"), _("No"))) {
-			fprintf( auditFile, "# before undo\n" );
-			WriteTracks(auditFile, TRUE);
-			Rdump( auditFile );
-			if (strcmp("undoUndo",event)==0) {
-				fprintf( auditFile, "# failure in undo\n" );
-			} else {
-				UndoUndo( NULL );
-				if ( undoStatus ) {				
-					fprintf( auditFile, "# after undo\n" );
-					WriteTracks(auditFile, TRUE);
-					Rdump( auditFile );
+		if (auditStop) {
+			if (NoticeMessage( MSG_AUDIT_WRITE_FILE, _("Yes"), _("No"))) {
+				fprintf( auditFile, "# before undo\n" );
+				WriteTracks(auditFile, TRUE);
+				Rdump( auditFile );
+				if (strcmp("undoUndo",event)==0) {
+					fprintf( auditFile, "# failure in undo\n" );
 				} else {
-					fprintf( auditFile, "# undo stack is empty\n" );
+					UndoUndo( NULL );
+					if ( undoStatus ) {				
+						fprintf( auditFile, "# after undo\n" );
+						WriteTracks(auditFile, TRUE);
+						Rdump( auditFile );
+					} else {
+						fprintf( auditFile, "# undo stack is empty\n" );
+					}
 				}
 			}
 		}
@@ -1960,7 +1961,8 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-	static coOrd p0, p1;
+	static coOrd p0;
+//	static coOrd p1;
 	elev_t *e, *e1;
 	track_p trk1;
 
@@ -1968,13 +1970,13 @@ EXPORT STATUS_T EndPtDescriptionMove(
 	switch (action) {
 	case C_DOWN:
 		p0 = GetTrkEndPos(trk,ep);
-		p1 = pos;
+//		p1 = pos;
 		e->option |= ELEV_VISIBLE; //Make sure we make visible
 		DrawEndElev( &mainD, trk, ep, wDrawColorWhite );
 		/*no break*/
 	case C_MOVE:
 	case C_UP:
-		p1 = pos;
+//		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
 		e->doff.y = (pos.y-p0.y);
 		if ((trk1=GetTrkEndTrk(trk,ep))) {
@@ -3337,9 +3339,9 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length, wDra
 	message[0]='\0';
 	for (int i=0;i<pos_array.cnt;i++) {
 		if (i==pos_array.cnt-1)
-			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
+			sprintf( &message[strlen(message)], _("[%0.2f,%0.2f] A%0.2f"),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
 		else
-			sprintf( message, _("%s[%0.2f,%0.2f] A%0.2f\n"),message,PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle);
+			sprintf( &message[strlen(message)], _("[%0.2f,%0.2f] A%0.2f\n"),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle);
 	}
 	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,0.0);

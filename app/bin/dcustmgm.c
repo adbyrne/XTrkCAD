@@ -307,16 +307,22 @@ static void LoadCustomMgmList( void )
 	wIndex_t curInx, cnt=0;
 	long tempL;
 	custMgmContext_p context;
+#ifdef LATER
 	custMgmContext_t curContext;
+#endif
 
 	curInx = wListGetIndex( customSelL );
+#ifdef LATER
 	curContext.proc = NULL;
 	curContext.data = NULL;
 	curContext.icon = NULL;
+#endif
 	if ( curInx >= 0 ) {
 		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
+#ifdef LATER
 		if ( context != NULL )
 			curContext = *context;
+#endif
 	}
 	cnt = wListGetCount( customSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {

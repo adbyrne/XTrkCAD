@@ -1035,10 +1035,10 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				Dj.jRes.type==curveTypeCurve
 			) {
 			ANGLE_T na0=0.0,na1=0.0;
-			coOrd end0, end1;
+//			coOrd end0, end1;
 			ANGLE_T a0,a1;
-			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
-			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
+//			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
+//			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
 				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(Dj.jRes.pos[0], pos));
 				na0 = NormalizeAngle( Dj.inp[0].params.angle +

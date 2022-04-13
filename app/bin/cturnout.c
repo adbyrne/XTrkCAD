@@ -901,11 +901,13 @@ EXPORT BOOL_T SplitTurnoutCheck(
 {
 	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	wIndex_t segInx0, segInx, segCnt;
-	EPINX_T segEP, epCnt, ep2 = 0, epN;
+	EPINX_T segEP, ep2 = 0, epN;
+//	EPINX_T epCnt;
 	PATHPTR_T pp, pp1, pp2;
 	unsigned char c;
 	char* cp;
-	int negCnt, posCnt, pathCnt, dir;
+	int negCnt, posCnt, dir;
+//	int pathCnt;
 	segProcData_t segProcDataSplit;
 	segProcData_t segProcDataNewTrack;
 	track_p trk2 = NULL;
@@ -928,7 +930,7 @@ EXPORT BOOL_T SplitTurnoutCheck(
 	/*
 	 * 1. Find segment on path that ends at 'ep'
 	 */
-	epCnt = GetTrkEndPtCnt(trk);
+//	epCnt = GetTrkEndPtCnt(trk);
 	epPos = GetTrkEndPos(trk, ep);
 	for (segCnt = 0; segCnt < xx->segCnt && IsSegTrack(&xx->segs[segCnt]); segCnt++);
 	Rotate(&pos, xx->orig, -xx->angle);
@@ -966,7 +968,7 @@ foundSeg:
 	GetSegInxEP(splitTurnoutPath[0], &segInx0, &segEP);
 	LOG(log_splitturnout, 1, (" Found Seg: %d SEG:%d EP:%d\n", *splitTurnoutPath, segInx0, segEP));
 	pp = GetPaths(trk);
-	pathCnt = 0;
+//	pathCnt = 0;
 	while (pp[0]) {
 		pp += strlen((char*)pp) + 1;
 		while (pp[0]) {
@@ -1396,7 +1398,7 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 {
 	struct extraDataCompound_t* xx;
 	static EPINX_T ep;
-	static wBool_t curved;
+//	static wBool_t curved;
 	DIST_T d;
 
 	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
@@ -1404,7 +1406,7 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 		switch (action) {
 		case C_START:
 			ep = -1;
-			curved = FALSE;
+//			curved = FALSE;
 			return C_CONTINUE;
 		case C_DOWN:
 			ep = PickUnconnectedEndPoint(pos, trk);
@@ -2535,9 +2537,8 @@ static void AddTurnout(void)
 				}
 			}
 			else {
-				wBool_t rc;
 				AuditTracks("addTurnout T%d[%d] before trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le);
-				rc = TrimTrack(lt, le, maxX, nearest_pos, nearest_angle, nearest_radius, nearest_center);
+				TrimTrack(lt, le, maxX, nearest_pos, nearest_angle, nearest_radius, nearest_center);
 				AuditTracks("addTurnout T%d[%d] after trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le);
 
 			}
@@ -2629,9 +2630,9 @@ EXPORT STATUS_T CmdTurnoutAction(
 {
 	ANGLE_T angle;
 	static BOOL_T validAngle;
-	static ANGLE_T baseAngle;
 	static coOrd origPos;
 #ifdef NEWROTATE
+	static ANGLE_T baseAngle;
 	static ANGLE_T origAngle;
 #endif
 
@@ -2701,7 +2702,9 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if (FindDistance(Dto.rot0, Dto.rot1) > 0.1 * mainD.scale) {
 			angle = FindAngle(Dto.rot0, Dto.rot1);
 			if (!validAngle) {
+#ifdef NEWROTATE
 				baseAngle = angle/* - Dto.angle*/;
+#endif
 				validAngle = TRUE;
 			}
 			Dto.pos = origPos;

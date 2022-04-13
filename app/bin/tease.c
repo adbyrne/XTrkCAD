@@ -398,7 +398,8 @@ static track_p NewJoint(
 	struct extraDataEase_t *xx;
 	coOrd p, p0, p1, q0, q1;
 	static coOrd qZero = { 0.0, 0.0 };
-	ANGLE_T az0, a01, b, b01, b1, d, d1;
+	ANGLE_T az0, a01, b, b01, d, d1;
+//	ANGLE_T b1;
 	trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
 	SetTrkBits(trk, TB_HIDEDESC);					//Suppress Description for new Joint
 	SetTrkScale( trk, GetLayoutCurScale() );
@@ -431,7 +432,7 @@ static track_p NewJoint(
 	if (!e->Scurve) {
 		az0 = FindAngle( qZero, q0 );
 		a01 = FindAngle( q0, q1 );
-		b1 = NormalizeAngle( b01 - (a01+az0) );
+//		b1 = NormalizeAngle( b01 - (a01+az0) );
 		b = NormalizeAngle( b01 - a01 );
 	} else {
 		q1.x = -q1.x;

@@ -902,15 +902,16 @@ static BOOL_T SetLayer( track_p trk, BOOL_T unused )
 
 EXPORT void MoveSelectedTracksToCurrentLayer( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
-		if (selectedTrackCount>0) {
-			UndoStart( _("Move To Current Layer"), "changeLayer" );
-			DoSelectedTracks( SetLayer );
-			UndoEnd();
-		} else {
-			ErrorMessage( MSG_NO_SELECTED_TRK );
-		}
+	}
+	if (selectedTrackCount>0) {
+		UndoStart( _("Move To Current Layer"), "changeLayer" );
+		DoSelectedTracks( SetLayer );
+		UndoEnd();
+	} else {
+		ErrorMessage( MSG_NO_SELECTED_TRK );
+	}
 }
 
 EXPORT void SelectCurrentLayer( void * unused )
@@ -2516,7 +2517,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 		EPINX_T ep1=-1, ep=-1;
 		BOOL_T hidden_t, hidden;
 		coOrd dpos = pos;
-		coOrd cpos;
+//		coOrd cpos;
 		int mode = -1;
 		while ( TrackIterate( &trk1 ) ) {
 			if ( !GetLayerVisible(GetTrkLayer(trk1)) )
@@ -2534,7 +2535,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 						ep = ep1;
 						mode = 0;
 						hidden = FALSE;
-						cpos= dpos;
+//						cpos= dpos;
 					}
 				}
 			}
@@ -2553,7 +2554,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				ep = -1;
 				mode = 1;
 				hidden = hidden_t;
-				cpos = dpos;
+//				cpos = dpos;
 			}
 			d = CurveDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if ( d < dd ) {
@@ -2562,7 +2563,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				ep = -1;
 				mode = 2;
 				hidden = hidden_t;
-				cpos = dpos;
+//				cpos = dpos;
 			}
 			d = CornuDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if ( d < dd ) {
@@ -2571,7 +2572,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				ep = -1;
 				mode = 3;
 				hidden = hidden_t;
-				cpos = dpos;
+//				cpos = dpos;
 			}
 			d = BezierDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if ( d < dd ) {
@@ -2580,7 +2581,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				ep = -1;
 				mode = 4;
 				hidden = hidden_t;
-				cpos = dpos;
+//				cpos = dpos;
 			}
 			d = StraightDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if (d < dd ) {
@@ -2589,7 +2590,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				ep = -1;
 				mode = 5;
 				hidden = hidden_t;
-				cpos = dpos;
+//				cpos = dpos;
 			}
 			d = JointDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if (d < dd ) {
@@ -2598,7 +2599,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				ep = -1;
 				mode = 6;
 				hidden = hidden_t;
-				cpos = dpos;
+//				cpos = dpos;
 			}
 
 		}
@@ -2734,28 +2735,28 @@ STATUS_T CmdMoveDescription(
 			return C_CONTINUE;
 		if ( moveDescTrk == NULL )
 			return C_CONTINUE;
-		int rc = C_CONTINUE;
+//		int rc = C_CONTINUE;
 		switch (mode) {
 		case 0:
-			rc = EndPtDescriptionMove( moveDescTrk, ep, action, pos );
+			EndPtDescriptionMove( moveDescTrk, ep, action, pos );
 			break;
 		case 1:
-			rc = CompoundDescriptionMove( moveDescTrk, action, pos );
+			CompoundDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 2:
-			rc = CurveDescriptionMove( moveDescTrk, action, pos );
+			CurveDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 3:
-			rc = CornuDescriptionMove( moveDescTrk, action, pos );
+			CornuDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 4:
-			rc = BezierDescriptionMove( moveDescTrk, action, pos );
+			BezierDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 5:
-			rc = StraightDescriptionMove( moveDescTrk, action, pos);
+			StraightDescriptionMove( moveDescTrk, action, pos);
 			break;
 		case 6:
-			rc = JointDescriptionMove( moveDescTrk, action, pos);
+			JointDescriptionMove( moveDescTrk, action, pos);
 			break;
 		}
 		hidden = FALSE;
@@ -3223,7 +3224,7 @@ static STATUS_T CmdSelect(
 	STATUS_T rc=C_CONTINUE;
 	static track_p trk = NULL;
 	typedef enum {NOSHOW,SHOWMOVE,SHOWROTATE,SHOWMODIFY,SHOWACTIVATE} showType;
-	static showType showMode;
+//	static showType showMode;
 
 	mode = AREA;
 	if (doingAlign || doingRotate || doingMove )
@@ -3246,7 +3247,7 @@ static STATUS_T CmdSelect(
 		doingRotate = FALSE;
 		doingAlign = FALSE;
 		doingDouble = FALSE;
-		showMode = NOSHOW;
+//		showMode = NOSHOW;
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
@@ -3259,7 +3260,7 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
-		showMode = NOSHOW;
+//		showMode = NOSHOW;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		coOrd p = pos;
 		trk = OnTrack( &p, FALSE, FALSE );
@@ -3276,20 +3277,20 @@ static STATUS_T CmdSelect(
 			if ((ht = IsInsideABox(pos)) != NULL) {
 				if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
-					showMode = SHOWMOVE;
+//					showMode = SHOWMOVE;
 				} else if ((MyGetKeyState()&WKEY_CTRL)) {
 					CreateRotateAnchor(pos);
-					showMode = SHOWROTATE;
+//					showMode = SHOWROTATE;
 				} else if (!GetLayerModule(GetTrkLayer(ht))) {
 					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
 					QueryTrack( ht, Q_IS_CORNU ) ||
 					(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT))) {
 						CreateModifyAnchor(pos);
-						showMode = SHOWMODIFY;
+//						showMode = SHOWMODIFY;
 					} else {
 						if (QueryTrack(ht,Q_IS_ACTIVATEABLE)) {
 							CreateActivateAnchor(pos);
-							showMode = SHOWACTIVATE;
+//							showMode = SHOWACTIVATE;
 						} else wSetCursor(mainD.d,defaultCursor);
 					}
 				} else wSetCursor(mainD.d,defaultCursor);
@@ -3593,9 +3594,10 @@ static STATUS_T CmdSelect(
 			PanMenuEnter(I2VP('o'));
 		}
 		if ((action>>8) == '?') {
-			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL)
+			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL) {
 				moveDescPos = pos;
-				CallPushDescribe(I2VP(0));
+			}
+			CallPushDescribe(I2VP(0));
 			wSetCursor(mainD.d,defaultCursor);
 			moveDescTrk = NULL;
 		}

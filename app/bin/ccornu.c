@@ -2935,7 +2935,8 @@ static STATUS_T CmdConvertFrom(
 		coOrd pos )
 {
 	static track_p trk;
-	track_p trk1,trk2;
+	track_p trk1;
+//	track_p trk2;
 	switch (action) {
 
 		case wActionMove:
@@ -2968,10 +2969,10 @@ static STATUS_T CmdConvertFrom(
 					return C_TERMINATE;
 				}
 			}
-			dynArr_t trackSegs_da;
-			DYNARR_RESET(trkSeg_t,trackSegs_da);
+//			dynArr_t trackSegs_da;
+//			DYNARR_RESET(trkSeg_t,trackSegs_da);
 			trk1 = NULL;
-			trk2 = NULL;
+//			trk2 = NULL;
 			trk = NULL;
 			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
 			track_p tracks[2];

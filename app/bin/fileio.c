@@ -822,7 +822,7 @@ int LoadTracks(
   */
 	extOfFile = FindFileExtension( nameOfFile);
 
-	BOOL_T zipped = FALSE;
+//	BOOL_T zipped = FALSE;
 	BOOL_T loadXTC = TRUE;
 	char * full_path = strdup(fileName[0]);
 
@@ -853,8 +853,7 @@ int LoadTracks(
 			    fseek(f, 0, SEEK_SET);
 			    manifest = malloc(length + 1);
 			    if (manifest) {
-			        size_t siz;
-			        siz = fread(manifest, 1, length, f);
+			        fread(manifest, 1, length, f);
 			        manifest[length] = '\0';
 			    }
 			    fclose(f);
@@ -900,7 +899,7 @@ int LoadTracks(
 		} else {
 			loadXTC = FALSE; // when unzipping fails, don't attempt loading the trackplan
 		}
-		zipped = TRUE;
+//		zipped = TRUE;
 
 		free(zip_input);
 

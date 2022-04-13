@@ -1410,7 +1410,7 @@ static toDesignSchema_t * LoadSegs(
 #endif
 		case NTO_WYE:
 		case NTO_3WAY:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_3WAY)?4:3 );
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, ((dp->type==NTO_3WAY)?4:3) );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
 						(newTurnLen0), fabs(newTurnOff0), angle0 ) )
 				return NULL;
@@ -1445,7 +1445,7 @@ static toDesignSchema_t * LoadSegs(
 #ifndef MKTURNOUT
 		case NTO_CORNUWYE:
 		case NTO_CORNU3WAY:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_CORNU3WAY)?4:3 );
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, ((dp->type==NTO_CORNU3WAY)?4:3) );
 
 			/*
 			 * Construct Wye and 3 Way Turnouts with Cornu curves
@@ -2219,7 +2219,8 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			cornuData.radius[5] = fabs(radii[1]);        /*Inner*/
 
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
-			trkSeg_t * temp_p, * cornu_p;
+			trkSeg_t * temp_p;
+//			trkSeg_t * cornu_p;
 			temp_p = &tempSegs(0);
 
 			/*Map out the full outer curve */
@@ -2306,7 +2307,7 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 			/* Toe to Outer in cornuSegs array */
 			CallCornuNoBez(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],&cornuData.radius[2],&cornuSegs_da);
 
-			cornu_p = (trkSeg_p)cornuSegs_da.ptr;
+//			cornu_p = (trkSeg_p)cornuSegs_da.ptr;
 
 			if (cornuData.radius[3] == 0.0) {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
@@ -2731,12 +2732,12 @@ static void NewTurnOk( void * context )
 	if ( customTurnout1 )
 		customTurnout1->segCnt = 0;
 
-	DIST_T * radii_ends = NULL;
+//	DIST_T * radii_ends = NULL;
 
 	 if ((curDesign->type == NTO_CORNU) ||
 		 (curDesign->type == NTO_CORNUWYE) ||
 		 (curDesign->type == NTO_CORNU3WAY)) {
-		 radii_ends = &radii[0];
+//		 radii_ends = &radii[0];
 	 }
 	to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
 						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );

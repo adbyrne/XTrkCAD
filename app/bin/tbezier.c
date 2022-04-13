@@ -168,7 +168,7 @@ static void DrawBezierDescription(
 		wDrawColor color )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
-	wFont_p fp;
+//	wFont_p fp;
     coOrd epos0,epos1;
 
 	if (layoutLabels == 0)
@@ -182,7 +182,7 @@ static void DrawBezierDescription(
     ANGLE_T a = FindAngle(epos0,epos1);
     Translate(&epos0,epos0,a+90,xx->descriptionOff.y);
     Translate(&epos1,epos1,a+90,xx->descriptionOff.y);
-    fp = wStandardFont( F_TIMES, FALSE, FALSE );
+    /*fp = */wStandardFont( F_TIMES, FALSE, FALSE );
     sprintf( message, _("Bez: L%s A%0.3f trk_len=%s min_rad=%s"),
     			FormatDistance(FindDistance(xx->pos[0],xx->pos[3])),
 				FindAngle(xx->pos[0],xx->pos[3]),
@@ -1549,14 +1549,14 @@ LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%
 //		double dd;
 		coOrd split_p = data->split.pos;
 //		ANGLE_T angle = GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_p)segPtr->bezSegs.ptr, &split_p, &inx, &dd, &back, &subinx, NULL);
-		coOrd current[4];
+//		coOrd current[4];
 
 		BezierMathDistance(&split_p, segPtr->u.b.pos, 500, &t);  //Find t value
 
-		for (int i=0;i<4;i++) {
-			current[i] = segPtr->u.b.pos[i];
+//		for (int i=0;i<4;i++) {
+//			current[i] = segPtr->u.b.pos[i];
 
-		}
+//		}
 		for (int i=0;i<2;i++) {
 			data->split.newSeg[i].type = segPtr->type;
 			data->split.newSeg[i].color = segPtr->color;
@@ -1760,7 +1760,7 @@ void BezierSlice(coOrd input[], coOrd output[], double t) {
 /**
  * Split bezier into two parts
  */
-extern void BezierSplit(coOrd input[], coOrd left[], coOrd right[] , double t) {
+extern void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4] , double t) {
 
 	BezierSlice(input,left,t);
 

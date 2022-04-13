@@ -175,10 +175,9 @@ const char * wGetAppWorkDir(
 			sprintf( appEtcConfig, "/etc/%s.rc", wlibGetAppName());
 			
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
-				int rc;
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
 				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
-				rc = system( copyConfigCmd );
+				system( copyConfigCmd );
 			}
 		}
 	}

@@ -920,7 +920,6 @@ EXPORT wBool_t undoStatus = TRUE;
  */
 void UndoUndo( void * unused )
 {
-	int rc;
 	undoStatus = FALSE;
 	undoStack_p us;
 	track_p trk;
@@ -932,7 +931,7 @@ void UndoUndo( void * unused )
 		return;
 	}
 
-	rc = ConfirmReset( FALSE );
+	ConfirmReset( FALSE );
 	wDrawDelayUpdate( mainD.d, TRUE );
 	us = &undoStack[undoHead];
 LOG( log_undo, 1, ( "    UndoUndo[%d] d:%d u:%d N:%d M:%d D:%d %s\n", undoHead, doCount, undoCount, us->newCnt, us->modCnt, us->delCnt, us->needRedo?"Redo":"" ) )
@@ -1000,7 +999,6 @@ LOG( log_undo, 1, ( "    UndoUndo[%d] d:%d u:%d N:%d M:%d D:%d %s\n", undoHead, 
  */
 void UndoRedo( void * unused )
 {
-	int rc;
 	undoStatus = FALSE;
 	undoStack_p us;
 	wIndex_t oldCount;
@@ -1012,7 +1010,7 @@ void UndoRedo( void * unused )
 		return;
 	}
 
-	rc = ConfirmReset( FALSE );
+	ConfirmReset( FALSE );
 	wDrawDelayUpdate( mainD.d, TRUE );
 	INC_UNDO_INX( undoHead );
 	us = &undoStack[undoHead];
