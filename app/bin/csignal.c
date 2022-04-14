@@ -55,7 +55,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"	// .extraData
+//#include "trackx.h"	// .extraData
 #include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -564,8 +564,7 @@ static void SignalEditOk ( void * junk )
                 (&(xx->aspectList))[ia].aspectScript = NULL;
             }
             newsize = sizeof(signalData_t)+(sizeof(signalAspect_t)*(signalAspect_da.cnt-1))+1;
-            trk->extraData = MyRealloc(trk->extraData,newsize);
-            trk->extraSize = newsize;
+	    ResizeExtraData( trk, newsize );
             xx = GetsignalData(trk);
         }
     }

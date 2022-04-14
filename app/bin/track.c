@@ -425,6 +425,14 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 	return trk->extraData;
 }
 
+
+EXPORT void ResizeExtraData( track_p trk, CSIZE_T newSize )
+{
+	trk->extraData = MyRealloc( trk->extraData, newSize );
+	trk->extraSize = newSize;
+}
+
+
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
 	CHECK( ep < trk->endCnt );

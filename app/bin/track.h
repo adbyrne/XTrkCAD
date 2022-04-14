@@ -499,6 +499,7 @@ ANGLE_T GetTrkEndAngle( track_p, EPINX_T );
 long GetTrkEndOption( track_p, EPINX_T );
 long SetTrkEndOption( track_p, EPINX_T, long );
 struct extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
+void ResizeExtraData( track_p trk, CSIZE_T newSize );
 int GetTrkWidth( track_p );
 void SetTrkWidth( track_p, int );
 int GetTrkBits( track_p );
