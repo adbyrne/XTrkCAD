@@ -609,7 +609,7 @@ wBool_t IsAngleClose( ANGLE_T, ANGLE_T );
 wBool_t IsDistClose( DIST_T, DIST_T );
 wBool_t IsWidthClose( DIST_T, DIST_T );
 wBool_t IsColorClose( wDrawColor, wDrawColor );
-wBool_t CompareTrack( track_cp, track_cp );
+wBool_t CheckRegressionResult( long regressionVersion, char * sFileName, wBool_t bQuiet );
 
 void MoveTrack( track_p, coOrd );
 void RotateTrack( track_p, coOrd, ANGLE_T );

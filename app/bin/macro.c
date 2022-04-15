@@ -31,7 +31,7 @@
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
-#include "trackx.h"	// to_first, to_last
+//#include "trackx.h"	// to_first, to_last
 #include "version.h"
 #include "common-ui.h"
 
@@ -780,8 +780,7 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 /*
 * Regression test
 */
-static int log_regression = 0;
-wBool_t bWriteEndPtDirectIndex;
+EXPORT int log_regression = 0;
 static int nRegressionFail = 0;
 
 static BOOL_T DoRegression( char * sFileName )
@@ -792,7 +791,7 @@ static BOOL_T DoRegression( char * sFileName )
 	long regressVersion;
 	FILE * fRegression;
 	char * sRegressionFile =  NULL;
-	wBool_t bWroteActualTracks;
+//	wBool_t bWroteActualTracks;
 	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
 	char * cp;
 	regressVersion = strtol( paramLine+16, &cp, 10 );
@@ -825,6 +824,12 @@ static BOOL_T DoRegression( char * sFileName )
 	case REGRESSION_CHECK:
 	case REGRESSION_QUIET:
 		oldParamVersion = paramVersion;
+		int nFail = CheckRegressionResult( regressVersion, sFileName, eRegression == REGRESSION_QUIET );
+		if ( nFail < 0 ) {
+			return FALSE;
+		}
+		nRegressionFail += nFail;
+#ifdef LATER
 		paramVersion = regressVersion;
 		bWroteActualTracks = FALSE;
 		track_p to_first_save = to_first;
@@ -895,6 +900,7 @@ static BOOL_T DoRegression( char * sFileName )
 		to_last = to_last_save;
 		if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
 			InputError( "Expected REGRESSION END", TRUE );
+#endif
 		paramVersion = oldParamVersion;
 		break;
 	case REGRESSION_NONE:
