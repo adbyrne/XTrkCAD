@@ -85,7 +85,7 @@ const char * wGetAppLibDir( void )
 	ep = getenv( envvar );
 	if (ep != NULL) {
 		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
-			strncpy( appLibDir, ep, sizeof appLibDir );
+			strncpy( appLibDir, ep, sizeof(appLibDir) -1 );
 			//printf( "wAppLbDir=%s\n", appLibDir );
 			return appLibDir;
 		}
@@ -234,7 +234,7 @@ wBool_t prefInitted = FALSE;
 
 static void readPrefs( char * name, wBool_t update )
 {
-	char tmp[BUFSIZ], *np, *vp, *cp;
+	char tmp[BUFSIZ+32], *np, *vp, *cp;
 	const char * workDir;
 	FILE * prefFile;
 	prefs_t * p;
@@ -469,7 +469,7 @@ void wPrefFlush(
 		char * name )
 {
 	prefs_t * p;
-	char tmp[BUFSIZ];
+	char tmp[BUFSIZ+32];
     const char *workDir;
 	FILE * prefFile;
 

@@ -168,7 +168,7 @@ static void saveSize(wWin_p win)
 
     if ((win->option&F_RECALLSIZE) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
-        char pos_s[20];
+        char pos_s[32];
 
         sprintf(pos_s, "%ld %ld", win->w,
                 (win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
@@ -240,7 +240,7 @@ static void savePos(wWin_p win)
     int x, y;
 
     if ((win->option&F_RECALLPOS)) {
-        char pos_s[20];
+        char pos_s[32];
 
         gdk_window_get_position(gtk_widget_get_window(GTK_WIDGET(win->gtkwin)), &x, &y);
         x -= 5;

@@ -177,7 +177,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
     controlData_p xx = GetcontrolData(trk);
     const char *thename, *theonscript, *theoffscript;
     unsigned int max_str;
-    char *newName, *newOnScript, *newOffScript;
+    char *newName, *newOnScript, *newOffScript=NULL;
     BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
     
     switch (inx) {
@@ -491,9 +491,9 @@ static void EditControlDialog()
         controlEditOffScript[0] = '\0';
     } else {
         xx = GetcontrolData ( controlEditTrack );
-        strncpy(controlEditName,xx->name,STR_SHORT_SIZE);
-        strncpy(controlEditOnScript,xx->onscript,STR_LONG_SIZE);
-        strncpy(controlEditOffScript,xx->offscript,STR_LONG_SIZE);
+        strncpy(controlEditName,xx->name,STR_SHORT_SIZE-1);
+        strncpy(controlEditOnScript,xx->onscript,STR_LONG_SIZE-1);
+        strncpy(controlEditOffScript,xx->offscript,STR_LONG_SIZE-1);
         controlEditOrig = xx->orig;
     }
     ParamLoadControls( &controlEditPG );

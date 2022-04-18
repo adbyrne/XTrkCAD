@@ -1239,7 +1239,7 @@ static gint draw_scroll_event(
 		GdkEventScroll *event,
 		wDraw_p bd)
 {
-	wAction_t action;
+	wAction_t action = 0;
 	static int oldEventX = 0;
 	static int oldEventY = 0;
 	static int newEventX = 0;

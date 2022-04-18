@@ -272,10 +272,10 @@ void processFile(
 	char desc[256];
 	long color;
 	char scale[256];
-	double length;
-	double width;
-	double couplerLength;
-	double truckCenter;
+	double length = 0.0;
+	double width = 0.0;
+	double couplerLength = 0.0;
+	double truckCenter = 0.0;
 	double ratio = 0.0;
 	int option = 0;
 	int type = 30100;
