@@ -231,7 +231,7 @@ BOOL_T GetLayerUseDefault(unsigned int layer)
 
 EXPORT SCALEINX_T GetLayerScale( unsigned int layer )
 {
-	if ( IsLayerValid(layer) ) {
+	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) ) {
 		return layers[layer].scaleInx;
 	}
 	return GetLayoutCurScale(); // layout scale
@@ -239,7 +239,7 @@ EXPORT SCALEINX_T GetLayerScale( unsigned int layer )
 
 EXPORT DIST_T GetLayerMinTrackRadius( unsigned int layer )
 {
-	if ( !GetLayerUseDefault(layer) && IsLayerValid(layer) ) {
+	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) ) {
 		return layers[layer].minTrackRadius;
 	}
 	return GetLayoutMinTrackRadius();
@@ -247,7 +247,7 @@ EXPORT DIST_T GetLayerMinTrackRadius( unsigned int layer )
 
 EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
 {
-	if ( !GetLayerUseDefault(layer) && IsLayerValid(layer) ) {
+	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) ) {
 		return layers[layer].maxTrackGrade;
 	}
 	return GetLayoutMaxTrackGrade();
@@ -255,7 +255,7 @@ EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
 
 EXPORT tieData_p GetLayerTieData( unsigned int layer )
 {
-	if ( !GetLayerUseDefault(layer) && IsLayerValid(layer) && layers[layer].tieData.valid ) {
+	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) && layers[layer].tieData.valid ) {
 		return &layers[layer].tieData;
 	}
 	return &LayoutTieData; // layout scale default tie data
@@ -1007,12 +1007,22 @@ static void LayerDelete( )
 */
 static void LayerDefault( )
 {
-	layers[layerSelected].scaleInx = GetLayoutCurScale( );
-	GetScaleGauge(layers[layerSelected].scaleInx, &layers[layerSelected].scaleDescInx,
-		&layers[layerSelected].gaugeInx);
-	layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
-	layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
-	layers[layerSelected].tieData = GetLayoutTieData();
+	if ( layers[layerSelected].inherit ){
+		layers[layerSelected].scaleInx = GetLayoutCurScale( );
+		GetScaleGauge(layers[layerSelected].scaleInx, &layers[layerSelected].scaleDescInx,
+			&layers[layerSelected].gaugeInx);
+		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
+		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
+		layers[layerSelected].tieData = GetLayoutTieData();
+	}
+	else {
+		layers[layerSelected].scaleInx = GetLayerScale( layerSelected );
+		GetScaleGauge(layers[layerSelected].scaleInx, &layers[layerSelected].scaleDescInx,
+			&layers[layerSelected].gaugeInx);
+		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
+		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
+		layers[layerSelected].tieData = GetScaleTieData( layers[layerSelected].scaleInx );
+	}
 
 	UpdateLayerDlg( layerSelected );
 

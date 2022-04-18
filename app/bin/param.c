@@ -268,6 +268,7 @@ EXPORT FLOAT_T DecodeFloat(
 //	const char *cp0;
     char *cp2;
 //	cp0 = cp1 = wStringGetValue( strCtrl );
+	cp1 = wStringGetValue( strCtrl );
 	while (isspace((unsigned char)*cp1)) cp1++;
 	if ( *cp1 ) {
 		valF = strtod( cp1, &cp2 );
