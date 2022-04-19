@@ -1425,7 +1425,7 @@ static int ImportTracks(
 	Reset();
 	SetAllTrackSelect( FALSE );
 	int saveLayer = curLayer;
-	int layer;
+	int layer = 0;
 	if (importAsModule) {
 		layer = FindUnusedLayer(0);
 		if (layer==-1) return FALSE;

@@ -1303,7 +1303,7 @@ static toDesignSchema_t * LoadSegs(
 	toDesignSchema_t * pp;
 	char *segOrder;
 	coOrd pos;
-	wIndex_t segCnt;
+	wIndex_t segCnt = 0;
 	ANGLE_T angle0, angle1, angle2, angle3;
 	trkSeg_p segPtr;
 #ifndef MKTURNOUT
@@ -1631,7 +1631,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			temp_p = &tempSegs(0);
 
 
-			DIST_T radius;
+			DIST_T radius = 0.0;
 			coOrd center;
 			ANGLE_T angle;
 			int inx,subSeg;
@@ -2230,7 +2230,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			/*Get ToeAngle/Radius/Center */
 			int inx,subSeg;
 			wBool_t back, neg;
-			DIST_T radius;
+			DIST_T radius = 0.0;
 			coOrd center;
 			pos.x = end_points[0].x+newTurnToeL-MIN_TRACK_LENGTH;
 			pos.y = end_points[0].y; 				/* This will be close to but not on the curve */

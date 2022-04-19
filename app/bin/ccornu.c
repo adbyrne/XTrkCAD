@@ -2624,7 +2624,7 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 			}
 			trk_old = newTracks[1];
 		} else {
-			track_p new_trk;
+			track_p new_trk = NULL;
 			if (seg->type == SEG_CRVTRK)
 				new_trk = NewCurvedTrack(seg->u.c.center,seg->u.c.radius,seg->u.c.a0,seg->u.c.a1,0);
 			else if (seg->type == SEG_STRTRK)
