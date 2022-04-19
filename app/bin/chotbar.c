@@ -437,7 +437,7 @@ EXPORT void AddHotBarElement(
 
 		if ( contentsLabel && strncmp(contentsLabel, curContentsLabel, sizeof curContentsLabel) != 0 && !isFixed ) {
 			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
-			strncpy( curContentsLabel, contentsLabel, sizeof curContentsLabel );
+			strncpy( curContentsLabel, contentsLabel, sizeof(curContentsLabel)-1 );
 		}
 		if (barScale <= 0) {
 			if (!isTrack)
