@@ -514,7 +514,7 @@ void *paper_pre_backend(paragraph *sourceform, keywordlist *keywords,
     int has_index;
     int pagenum;
     paragraph index_placeholder_para;
-    page_data *first_index_page;
+    page_data *first_index_page = NULL;
 
     init_std_fonts();
     fontlist = snew(font_list);
@@ -2741,7 +2741,7 @@ static word *fake_end_ref(void)
 static word *prepare_contents_title(word *first, wchar_t *separator,
 				    word *second)
 {
-    word *ret;
+    word *ret = NULL;
     word **wptr, *w;
 
     wptr = &ret;
