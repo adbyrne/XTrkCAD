@@ -1,15 +1,8 @@
 
-set ( sources listxtp.c )
+add_executable(listxtp listxtp.c)
 
 if (WIN32)
-	set ( sources
-		  ${sources}	
-		  dirent.c)
-		  
-	include_directories( before ${CMAKE_CURRENT_SOURCE_DIR})	  
+	target_sources(listxtp PRIVATE dirent.c )
 endif ()
-				 
-add_executable( listxtp ${sources})
 
 add_subdirectory(halibut)
-

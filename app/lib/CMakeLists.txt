@@ -6,8 +6,6 @@
 #
 project(lib)
 
-add_subdirectory(demos)
-add_subdirectory(examples)
 add_subdirectory(params)
 
 install(FILES 
@@ -15,10 +13,24 @@ install(FILES
 	logo.bmp
 	xtrkcad.xtq
 	xtrkcad.upd
-	xtrkcad.desktop
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
-	
+
+# install demos 
+install(DIRECTORY demos 
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/demos
+		FILES_MATCHING
+		PATTERN "*.xtr")
+
+# install example layouts		
+install(DIRECTORY examples
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/examples
+		FILES_MATCHING
+		PATTERN "*.xtc")
+		
+# install release documentation Readme and CHANGELOG
+# depends on pandoc
+#
 set( infile "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md" )
 set( outfile "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt" )
 set( changelogin "${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md" )
@@ -38,9 +50,9 @@ if(PANDOC_FOUND)
 	install(FILES ${outfile} ${changelogout}
 			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 			)
-else()			
+else(PANDOC_FOUND)			
 	message(STATUS "Pandoc is not available on this system, Readme.txt is not generated!")
-endif()
+endif(PANDOC_FOUND)
 	
 if(UNIX AND NOT APPLE)
     install(PROGRAMS
@@ -55,4 +67,4 @@ if(UNIX AND NOT APPLE)
 		xtrkcad.png
 		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/pixmaps"
 		)
-endif()
+endif(UNIX AND NOT APPLE)

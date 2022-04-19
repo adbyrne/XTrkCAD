@@ -1,27 +1,25 @@
-PROJECT(cornu)
-
-FILE(GLOB HEADERS *.h)
-
-SET(SOURCES
-	bezctx.c
-	bezctx_xtrkcad.c
-	spiroentrypoints.c
-	spiro.c
-	)
+project(cornu)
 	
-SET(HEADERS 
-	spiro.h
-	)
+add_library(xtrkcad-cornu "")
 
+target_sources(xtrkcad-cornu
+	PRIVATE
+		bezctx.c
+		bezctx_xtrkcad.c
+		spiroentrypoints.c
+		spiro.c
+		bezctx.h
+		bezctx_intf.h
+		zmisc.h	
+)
 
-INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
-INCLUDE_DIRECTORIES(${XTrkCAD_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
-INCLUDE_DIRECTORIES(${help_BINARY_DIR})
+target_sources(xtrkcad-cornu
+	PUBLIC
+		bezctx_xtrkcad.h
+		spiro.h
+		spiroentrypoints.h
+)
 
-ADD_LIBRARY(xtrkcad-cornu ${HEADERS} ${SOURCES})
-
-
-
-
-
+target_link_libraries(xtrkcad-cornu
+	PRIVATE
+		xtrkcad-wlib)

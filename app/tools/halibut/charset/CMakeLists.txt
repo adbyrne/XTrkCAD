@@ -1,4 +1,6 @@
-SET(SOURCES 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_library(xtrkcad-charset
 	big5enc.c 
 	big5set.c 
 	charset.h 
@@ -29,10 +31,5 @@ SET(SOURCES
 	utf16.c 
 	utf7.c
 	utf8.c 
-	xenc.c
-	)
-
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
-ADD_LIBRARY(xtrkcad-charset ${SOURCES})
+	xenc.c)
 

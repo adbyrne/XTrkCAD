@@ -1,20 +1,20 @@
 
 # "bin/i18n.h" is widely used
-INCLUDE_DIRECTORIES(bin)
-include_directories(dynstring)
-include_directories(cornu)
+include_directories(bin 
+					)
+
 include_directories(libzip)
 
 # Setup the rest of the build ...
+add_subdirectory(cornu)
 add_subdirectory(dynstring)
 ADD_SUBDIRECTORY(wlib)
-ADD_SUBDIRECTORY(tools)
+add_subdirectory(tools)
 ADD_SUBDIRECTORY(help)
 ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(bin)
 ADD_SUBDIRECTORY(lib)
-ADD_SUBDIRECTORY(cornu)
 
-IF(XTRKCAD_USE_GETTEXT)
-	ADD_SUBDIRECTORY(i18n)
-ENDIF(XTRKCAD_USE_GETTEXT)
+if(XTRKCAD_USE_GETTEXT)
+	add_subdirectory(i18n)
+endif(XTRKCAD_USE_GETTEXT)

@@ -1,10 +1,13 @@
-PROJECT(wlib)
+project(wlib)
 
-INCLUDE_DIRECTORIES("${wlib_SOURCE_DIR}/include")
+add_library( xtrkcad-wlib
+			"")		
 
-IF(XTRKCAD_USE_GTK)
-	ADD_SUBDIRECTORY(gtklib)
-ELSE(XTRKCAD_USE_GTK)
-	ADD_SUBDIRECTORY(mswlib)
-ENDIF(XTRKCAD_USE_GTK)
+add_subdirectory(include)
+
+if(XTRKCAD_USE_GTK)
+	add_subdirectory(gtklib)
+else(XTRKCAD_USE_GTK)
+	add_subdirectory(mswlib)
+endif(XTRKCAD_USE_GTK)
 

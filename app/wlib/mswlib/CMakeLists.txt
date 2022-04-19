@@ -1,51 +1,59 @@
+#
+# build the Win32 variant of the wlib
+#
+# For handlling of bitmaps the FreeImage library is required
+#
+
 find_package(FreeImage REQUIRED)
+target_include_directories(xtrkcad-wlib PRIVATE ${FREEIMAGE_INCLUDE_PATH})
 
-FILE(GLOB HEADERS *.h)
+if(XTRKCAD_USE_GETTEXT)
+	if(WIN32)
+		add_definitions(-DUSE_SIMPLE_GETTEXT )
+	endif(WIN32)
+endif(XTRKCAD_USE_GETTEXT)
 
-SET(SOURCES
-	backgnd.c
-	getopt.c
-	mswbox.c
-	mswbutt.c
-	mswbitmap.c
-	mswchoic.c
-	mswcolor.c
-	mswdraw.c
-	mswedit.c
-	mswlines.c
-	mswlist.c
-	mswmenu.c
-	mswmisc.c
-	mswmsg.c
-	mswpref.c
-	mswprint.c
-	mswsplash.c
-	mswstatus.c
-	mswtext.c
-	gwin32.c
-	simple-gettext.c
-	utf8conv.c
+target_sources(xtrkcad-wlib
+	PRIVATE 
+		backgnd.c
+		getopt.c
+		mswbox.c
+		mswbutt.c
+		mswbitmap.c
+		mswchoic.c
+		mswcolor.c
+		mswdraw.c
+		mswedit.c
+		mswlines.c
+		mswlist.c
+		mswmenu.c
+		mswmisc.c
+		mswmsg.c
+		mswpref.c
+		mswprint.c
+		mswsplash.c
+		mswstatus.c
+		mswtext.c
+		gwin32.c
+		simple-gettext.c
+		utf8conv.c	
+		mswint.h
+		dynarr.h
 	)
 
-include_directories(${FREEIMAGE_INCLUDE_PATH})
-INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
-# INCLUDE_DIRECTORIES(${help_BINARY_DIR})
-
-IF(XTRKCAD_USE_GETTEXT)
-	IF(WIN32)
-		ADD_DEFINITIONS(-DUSE_SIMPLE_GETTEXT )
-	ENDIF(WIN32)
-ENDIF(XTRKCAD_USE_GETTEXT)
-
-ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
-
-TARGET_LINK_LIBRARIES(xtrkcad-wlib Htmlhelp msimg32 shlwapi)
-target_link_libraries(xtrkcad-wlib ${FREEIMAGE_LIBRARY})
+target_link_libraries(xtrkcad-wlib 
+	Htmlhelp 
+	msimg32 
+	shlwapi
+	${FREEIMAGE_LIBRARY})
 
 install(FILES
 	${FREEIMAGE_SHAREDLIB}
 	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
+
+#get_target_property(dateien xtrkcad-wlib SOURCES)
+#message( STATUS ${dateien})
 
 if(XTRKCAD_TESTING AND CMOCKA_FOUND)
 	add_subdirectory( unittest )
