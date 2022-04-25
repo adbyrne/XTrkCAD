@@ -1705,7 +1705,7 @@ void ResetLayers(void)
 		layers[inx].onMap = TRUE;
 		layers[inx].module = FALSE;
 		layers[inx].button_off = FALSE;
-		layers[inx].inherit = FALSE;
+		layers[inx].inherit = TRUE;
 		layers[inx].objCount = 0;
 		strcpy(layers[inx].settingsName, "");
 		DYNARR_RESET(int, layers[inx].layerLinkList);
