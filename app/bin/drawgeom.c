@@ -2173,10 +2173,7 @@ STATUS_T DrawGeomModify(
 			CHECK( FALSE ); /* CHECKME */
 
 		}
-		if ( FindDistance( p0, pos ) < FindDistance( p1, pos ) ) {
-//			segEp = 0;
-		} else {
-//			segEp = 1;
+		if ( FindDistance( p0, pos ) >= FindDistance( p1, pos ) ) {
 			switch ( context->type ) {
 			case SEG_TBLEDGE:
 			case SEG_STRLIN:
