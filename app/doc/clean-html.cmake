@@ -1,0 +1,6 @@
+file(GLOB_RECURSE ALL_FILES *)
+
+if(ALL_FILES)
+	file(REMOVE ${ALL_FILES})
+endif(ALL_FILES)
+
