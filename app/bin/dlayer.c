@@ -1900,7 +1900,7 @@ ScanSettingsDirectory(Catalog *catalog, const char *dirName)
 
 BOOL_T ReadLayers(char * line)
 {
-	char * name, *layerLinkList, *layerSettingsName;
+	char *name, *layerLinkList, *layerSettingsName, *extra;
 	int inx, visible, frozen, color, onMap, sclInx, module, dontUseColor,
 	    ColorFlags, button_off, inherit;
 	double minRad, maxGrd, tieLen, tieWid, tieSpc;
@@ -1955,26 +1955,32 @@ BOOL_T ReadLayers(char * line)
 	}
 
 	/* get the properties for a layer from the file and update the layer accordingly */
-	if (paramVersion < 13) {
-		if (!GetArgs(line, "dddduddddq", &inx, &visible, &frozen, &onMap, &rgb,
-		             &module, &dontUseColor, &ColorFlags, &button_off,
-		             &name)) {
-
-			return FALSE;
+	/* No Scale/tie data version */
+	if (!GetArgs(line, "dddduddddc", &inx, &visible, &frozen, &onMap, &rgb,
+		&module, &dontUseColor, &ColorFlags, &button_off,
+		&extra)) {
+		return FALSE;
+	}
+	else {
+		/* Check for old version: name here */
+		if (extra[0] == '\"') {
+			if (!GetArgs(extra, "q", &name)) {
+				return FALSE;
+			}
+			sclInx = GetLayoutCurScale();
+			inherit = TRUE;
+			minRad = 0.0;
+			maxGrd = 0.0;
+			tieLen = 0.0;
+			tieWid = 0.0;
+			tieSpc = 0.0;
 		}
-		sclInx = GetLayoutCurScale();
-		inherit = TRUE;
-		minRad = 0.0;
-		maxGrd = 0.0;
-		tieLen = 0.0;
-		tieWid = 0.0;
-		tieSpc = 0.0;
-	} else {
-		if (!GetArgs(line, "ddddudddddufffffq", &inx, &visible, &frozen, &onMap,
-		             &rgb, &module, &dontUseColor, &ColorFlags, &button_off, &inherit, 
-		             &sclInx, &minRad, &maxGrd, &tieLen, &tieWid, &tieSpc, &name)) {
-
-			return FALSE;
+		else {
+			/* tie data version */
+			if (!GetArgs(extra, "dufffffq", &inherit,
+				&sclInx, &minRad, &maxGrd, &tieLen, &tieWid, &tieSpc, &name)) {
+				return FALSE;
+			}
 		}
 	}
 
