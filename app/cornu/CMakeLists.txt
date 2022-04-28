@@ -16,10 +16,12 @@ target_sources(xtrkcad-cornu
 target_sources(xtrkcad-cornu
 	PUBLIC
 		bezctx_xtrkcad.h
-		spiro.h
 		spiroentrypoints.h
+		spiro.h
 )
 
 target_link_libraries(xtrkcad-cornu
 	PRIVATE
 		xtrkcad-wlib)
+
+target_include_directories(xtrkcad-cornu PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

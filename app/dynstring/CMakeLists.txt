@@ -12,4 +12,6 @@ target_sources(dynstring
 
 if(XTRKCAD_TESTING)			
 	add_subdirectory(unittest)
-endif(XTRKCAD_TESTING)              
+endif(XTRKCAD_TESTING)    
+
+target_include_directories(dynstring PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
