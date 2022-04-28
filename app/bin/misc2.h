@@ -65,7 +65,6 @@ typedef struct {
 	DIST_T spacing;
 } tieData_t, *tieData_p;
 
-extern tieData_t LayoutTieData;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -109,7 +108,7 @@ BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );
 BOOL_T GetLayerHidden( unsigned int);
-tieData_p GetLayerTieData( unsigned int );
+tieData_t GetLayerTieData( unsigned int );
 DIST_T GetLayerMinTrackRadius( unsigned int layer );
 ANGLE_T GetLayerMaxTrackGrade( unsigned int layer );
 void SetLayerModule(unsigned int, BOOL_T);

@@ -219,7 +219,7 @@ BOOL_T GetLayerOnMap(unsigned int layer)
 	}
 }
 
-BOOL_T GetLayerUseDefault(unsigned int layer)
+EXPORT BOOL_T GetLayerUseDefault(unsigned int layer)
 {
 	if (!IsLayerValid(layer)) {
 		return TRUE;
@@ -253,12 +253,12 @@ EXPORT ANGLE_T GetLayerMaxTrackGrade( unsigned int layer )
 	return GetLayoutMaxTrackGrade();
 }
 
-EXPORT tieData_p GetLayerTieData( unsigned int layer )
+EXPORT tieData_t GetLayerTieData( unsigned int layer )
 {
 	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) && layers[layer].tieData.valid ) {
-		return &layers[layer].tieData;
+		return layers[layer].tieData;
 	}
-	return &LayoutTieData; // layout scale default tie data
+	return GetLayoutTieData(); // layout scale default tie data
 }
 
 BOOL_T GetLayerModule(unsigned int layer)
@@ -2084,21 +2084,42 @@ BOOL_T WriteLayers(FILE * f)
 	if (colorDraw) { ColorFlags |= 2; }
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
-		if (IsLayerConfigured(inx) && !IsLayerDefault(inx)) {
-			fprintf(f,
-			        "LAYERS %u %d %d %d %ld %d %d %d %d %d %lu %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
-			        inx,
-			        layers[inx].visible,
-			        layers[inx].frozen,
-			        layers[inx].onMap,
-			        wDrawGetRGB(layers[inx].color),
-			        layers[inx].module,
-			        layers[inx].useColor ? 0 : 1, ColorFlags, 
-				    layers[inx].button_off, layers[inx].inherit, 
-			        layers[inx].scaleInx, layers[inx].minTrackRadius,
-			        layers[inx].maxTrackGrade, layers[inx].tieData.length,
-			        layers[inx].tieData.width, layers[inx].tieData.spacing,
-			        PutTitle(layers[inx].name));
+		if (IsLayerConfigured(inx)) {
+			if (GetLayerUseDefault(inx)) {
+				fprintf(f,
+					"LAYERS %u %d %d %d %ld %d %d %d %d \"%s\"\n",
+					inx,
+					layers[inx].visible,
+					layers[inx].frozen,
+					layers[inx].onMap,
+					wDrawGetRGB(layers[inx].color),
+					layers[inx].module,
+					layers[inx].useColor ? 0 : 1, 
+					ColorFlags,
+					layers[inx].button_off,
+					PutTitle(layers[inx].name));
+			}
+			else {
+				fprintf(f,
+					"LAYERS %u %d %d %d %ld %d %d %d %d %d %lu %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
+					inx,
+					layers[inx].visible,
+					layers[inx].frozen,
+					layers[inx].onMap,
+					wDrawGetRGB(layers[inx].color),
+					layers[inx].module,
+					layers[inx].useColor ? 0 : 1, 
+					ColorFlags,
+					layers[inx].button_off, 
+					layers[inx].inherit,
+					layers[inx].scaleInx, 
+					layers[inx].minTrackRadius,
+					layers[inx].maxTrackGrade, 
+					layers[inx].tieData.length,
+					layers[inx].tieData.width, 
+					layers[inx].tieData.spacing,
+					PutTitle(layers[inx].name));
+			}
 		}
 	}
 

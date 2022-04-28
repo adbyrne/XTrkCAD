@@ -487,6 +487,7 @@ BOOL_T GetTrkSelected( track_p );
 BOOL_T GetTrkVisible( track_p );
 void SetTrkVisible( track_p, BOOL_T );
 unsigned int GetTrkLayer( track_p );
+tieData_t GetTrkTieData(track_p);
 void SetBoundingBox( track_p, coOrd, coOrd );
 void GetBoundingBox( track_p, coOrd*, coOrd* );
 EPINX_T GetTrkEndPtCnt( track_p );
@@ -630,7 +631,7 @@ BOOL_T hasTrackCenterline( drawCmd_p d );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 
-void DrawStraightTies( drawCmd_p d, tieData_p td, coOrd p0, coOrd p1, wDrawColor color );
+void DrawStraightTies( drawCmd_p d, tieData_t td, coOrd p0, coOrd p1, wDrawColor color );
 wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
 void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width, wDrawColor color, BOOL_T solid);
 

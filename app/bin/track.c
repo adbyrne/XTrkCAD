@@ -377,9 +377,12 @@ EXPORT unsigned int GetTrkLayer( track_p trk )
 	return trk->layer;
 }
 
-EXPORT tieData_p GetTrkTieData( track_p trk )
+EXPORT tieData_t GetTrkTieData( track_p trk )
 {
-	return GetLayerTieData(GetTrkLayer(trk));
+	if (!GetLayerUseDefault(GetTrkLayer(trk))) {
+		return GetLayerTieData(GetTrkLayer(trk));
+	}
+	return GetScaleTieData(GetTrkScale(trk));
 }
 
 EXPORT void SetBoundingBox( track_p trk, coOrd hi, coOrd lo )

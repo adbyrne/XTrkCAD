@@ -54,7 +54,6 @@ struct sLayoutProps {
     double 			backgroundSize;
 };
 
-EXPORT tieData_t LayoutTieData;
 
 /**
  * @brief Layout properties not in dialog, and save values for Cancel
@@ -68,7 +67,7 @@ struct sDataLayout {
 };
 
 static struct sDataLayout thisLayout = {
-    { "", "", -1, 0, 0, 0.0, 0.0, FALSE, 0.0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
+	{ "", "", -1, 0, 0, 0.0, 0.0, {FALSE, 0.0, 0.0, 0.0}, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
     NaS,
 	NaS, 
     NULL,
@@ -216,7 +215,6 @@ SetLayoutCurScale(SCALEINX_T scale)
 {
     thisLayout.props.curScaleInx = scale;
 	thisLayout.props.tieData = GetScaleTieData( scale );
-	LayoutTieData = thisLayout.props.tieData;
 }
 
 /**
@@ -881,9 +879,6 @@ LayoutDlgUpdate(
         wStringSetValue((wString_p)layoutPLs[MINRADIUSENTRY].control,
                         FormatDistance(thisLayout.props.minTrackRadius));
     }
-	if ( inx >= TIEDATAENTRY && inx <= TIEDATAENTRY + 2 ){
-		LayoutTieData = GetLayoutTieData();
-	}
 	if (inx == BACKGROUNDFILEENTRY) {
 		SetName();
 		MainRedraw();

@@ -345,7 +345,7 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 
 EXPORT void DrawStraightTies(
 	drawCmd_p d,
-	tieData_p td,
+	tieData_t td,
 	coOrd p0,
 	coOrd p1,
 	wDrawColor color )
@@ -364,8 +364,8 @@ EXPORT void DrawStraightTies(
 	len = FindDistance( p0, p1 );
 	len -= tieOff0+tieOff1;
 	angle = FindAngle( p0, p1 );
-	cnt = (int)floor(len/td->spacing+0.5);
-	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 ) {
+	cnt = (int)floor(len / td.spacing+0.5);
+	if ( len - td.spacing*cnt - td.width > (td.spacing - td.width)/2 ) {
 		cnt++;
 	}
 	if ( cnt != 0 ) {
@@ -373,7 +373,7 @@ EXPORT void DrawStraightTies(
 //		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
 		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
 			Translate( &pos, p0, angle, len );
-			DrawTie( d, pos, angle, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
+			DrawTie( d, pos, angle, td.length, td.width, color, tieDrawMode==TIEDRAWMODE_SOLID );
 		}
 	}
 }
@@ -392,7 +392,7 @@ EXPORT void DrawStraightTrack(
 	coOrd pp0, pp1;
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
-	tieData_p td;
+	tieData_t td;
 	long bridge = 0, roadbed = 0;
 	if ( trk ) {
 		bridge = GetTrkBridge(trk);
@@ -436,7 +436,7 @@ EXPORT void DrawStraightTrack(
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td = GetLayerTieData( GetTrkLayer(trk) );
+		td = GetTrkTieData( trk );
 		DrawStraightTies( d, td, p0, p1, color );
 	}
 	if (color == wDrawColorBlack)
