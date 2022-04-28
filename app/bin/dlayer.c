@@ -258,7 +258,7 @@ EXPORT tieData_t GetLayerTieData( unsigned int layer )
 	if ( IsLayerValid(layer) && !GetLayerUseDefault(layer) && layers[layer].tieData.valid ) {
 		return layers[layer].tieData;
 	}
-	return GetLayoutTieData(); // layout scale default tie data
+	return GetScaleTieData(GetLayoutCurScale()); // layout scale default tie data
 }
 
 BOOL_T GetLayerModule(unsigned int layer)
@@ -1013,7 +1013,6 @@ static void LayerDefault( )
 			&layers[layerSelected].gaugeInx);
 		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
 		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
-		layers[layerSelected].tieData = GetLayoutTieData();
 	}
 	else {
 		layers[layerSelected].scaleInx = GetLayerScale( layerSelected );
@@ -1021,8 +1020,8 @@ static void LayerDefault( )
 			&layers[layerSelected].gaugeInx);
 		layers[layerSelected].minTrackRadius = GetLayoutMinTrackRadius();
 		layers[layerSelected].maxTrackGrade = GetLayoutMaxTrackGrade();
-		layers[layerSelected].tieData = GetScaleTieData( layers[layerSelected].scaleInx );
 	}
+	layers[layerSelected].tieData = GetScaleTieData(layers[layerSelected].scaleInx);
 
 	UpdateLayerDlg( layerSelected );
 
