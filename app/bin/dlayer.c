@@ -1955,32 +1955,26 @@ BOOL_T ReadLayers(char * line)
 
 	/* get the properties for a layer from the file and update the layer accordingly */
 	/* No Scale/tie data version */
-	if (!GetArgs(line, "dddduddddc", &inx, &visible, &frozen, &onMap, &rgb,
-		&module, &dontUseColor, &ColorFlags, &button_off,
-		&extra)) {
+	if (!GetArgs(line, "dddduddddqc", &inx, &visible, &frozen, &onMap, &rgb,
+			&module, &dontUseColor, &ColorFlags, &button_off, &name, &extra)) {
 		return FALSE;
 	}
+	/* Check for old version: name here */
+	if (extra && strlen(extra) > 0) {
+		/* tie data version */
+		if (!GetArgs(extra, "dufffff", &inherit, &sclInx, &minRad, &maxGrd, 
+				&tieLen, &tieWid, &tieSpc)) {
+			return FALSE;
+		}
+	}
 	else {
-		/* Check for old version: name here */
-		if (extra[0] == '\"') {
-			if (!GetArgs(extra, "q", &name)) {
-				return FALSE;
-			}
-			sclInx = GetLayoutCurScale();
-			inherit = TRUE;
-			minRad = 0.0;
-			maxGrd = 0.0;
-			tieLen = 0.0;
-			tieWid = 0.0;
-			tieSpc = 0.0;
-		}
-		else {
-			/* tie data version */
-			if (!GetArgs(extra, "dufffffq", &inherit,
-				&sclInx, &minRad, &maxGrd, &tieLen, &tieWid, &tieSpc, &name)) {
-				return FALSE;
-			}
-		}
+		sclInx = GetLayoutCurScale();
+		inherit = TRUE;
+		minRad = 0.0;
+		maxGrd = 0.0;
+		tieLen = 0.0;
+		tieWid = 0.0;
+		tieSpc = 0.0;
 	}
 
 	// Provide defaults
@@ -2084,41 +2078,26 @@ BOOL_T WriteLayers(FILE * f)
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		if (IsLayerConfigured(inx)) {
-			if (GetLayerUseDefault(inx)) {
-				fprintf(f,
-					"LAYERS %u %d %d %d %ld %d %d %d %d \"%s\"\n",
-					inx,
-					layers[inx].visible,
-					layers[inx].frozen,
-					layers[inx].onMap,
-					wDrawGetRGB(layers[inx].color),
-					layers[inx].module,
-					layers[inx].useColor ? 0 : 1, 
-					ColorFlags,
-					layers[inx].button_off,
-					PutTitle(layers[inx].name));
-			}
-			else {
-				fprintf(f,
-					"LAYERS %u %d %d %d %ld %d %d %d %d %d %lu %.6f %.6f %.6f %.6f %.6f \"%s\"\n",
-					inx,
-					layers[inx].visible,
-					layers[inx].frozen,
-					layers[inx].onMap,
-					wDrawGetRGB(layers[inx].color),
-					layers[inx].module,
-					layers[inx].useColor ? 0 : 1, 
-					ColorFlags,
-					layers[inx].button_off, 
-					layers[inx].inherit,
-					layers[inx].scaleInx, 
-					layers[inx].minTrackRadius,
-					layers[inx].maxTrackGrade, 
-					layers[inx].tieData.length,
-					layers[inx].tieData.width, 
-					layers[inx].tieData.spacing,
-					PutTitle(layers[inx].name));
-			}
+			fprintf(f,
+				"LAYERS %u %d %d %d %ld %d %d %d %d \"%s\" %d %lu %.6f %.6f %.6f %.6f %.6f\n",
+				inx,
+				layers[inx].visible,
+				layers[inx].frozen,
+				layers[inx].onMap,
+				wDrawGetRGB(layers[inx].color),
+				layers[inx].module,
+				layers[inx].useColor ? 0 : 1, 
+				ColorFlags,
+				layers[inx].button_off, 
+				PutTitle(layers[inx].name), 
+				layers[inx].inherit,
+				layers[inx].scaleInx, 
+				layers[inx].minTrackRadius,
+				layers[inx].maxTrackGrade, 
+				layers[inx].tieData.length,
+				layers[inx].tieData.width, 
+				layers[inx].tieData.spacing
+			);
 		}
 	}
 
