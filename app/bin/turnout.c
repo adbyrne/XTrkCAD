@@ -259,81 +259,83 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 		ANGLE_T angle = 0;
 		while (pp[0]) {
 			if (pathCnt < DTO_DIM)
+			{
 				dto[pathCnt].type = 'S';
-			while (pp[0]) {
-				GetSegInxEP(pp[0], &segInx, &segEP);
-				// trkSeg_p 
-				segPtr = &xx->segs[segInx];
-				switch (segPtr->type) {
-				case SEG_STRTRK:
-					p0 = segPtr->u.l.pos[0];
-					p1 = segPtr->u.l.pos[1];
+				while (pp[0]) {
+					GetSegInxEP(pp[0], &segInx, &segEP);
+					// trkSeg_p 
+					segPtr = &xx->segs[segInx];
+					switch (segPtr->type) {
+					case SEG_STRTRK:
+						p0 = segPtr->u.l.pos[0];
+						p1 = segPtr->u.l.pos[1];
 
-					wIndex_t n = dto[pathCnt].n;
-					dto[pathCnt].trkSeg[n] = segPtr;
-					dto[pathCnt].base[n] = p0;
-					n++;
-					dto[pathCnt].trkSeg[n] = segPtr;
-					dto[pathCnt].base[n] = p1;
-					// n++;
-					dto[pathCnt].n = n;
-
-					if (n >= DTO_SEGS - 1) return -1;
-
-					break;
-				case SEG_CRVTRK:
-					r = fabs(segPtr->u.c.radius);
-
-					dto[pathCnt].type = segPtr->u.c.center.y < 0 ? 'R' : 'L';
-
-					a0 = segPtr->u.c.a0;
-					a1 = segPtr->u.c.a1;
-
-					angle += a1;
-
-					len = D2R(a1) * r;
-					// Every 5 degrees or 5 * tie spacing
-					int cnt = (int)floor(a1 / 5.0);
-					int cnt2 = (int)floor(len / 5 / dtod.td.spacing);
-					if (cnt2 > cnt) cnt = cnt2;
-					if (cnt <= 0) cnt = 1;
-
-					aa1 = a1 / cnt;
-					if (dto[pathCnt].type == 'R') {
-						aa0 = a0;
-					}
-					else {
-						aa0 = a0 + a1;
-						aa1 = -aa1;
-					}
-					PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
-					n = dto[pathCnt].n;
-					dto[pathCnt].trkSeg[n] = segPtr;
-					dto[pathCnt].base[n] = p0;
-					n++;
-					dto[pathCnt].n = n;
-
-					while (cnt > 0) {
-						aa0 += aa1;
-						PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
-
-						// n = dto[pathCnt].n;
+						wIndex_t n = dto[pathCnt].n;
 						dto[pathCnt].trkSeg[n] = segPtr;
 						dto[pathCnt].base[n] = p0;
 						n++;
+						dto[pathCnt].trkSeg[n] = segPtr;
+						dto[pathCnt].base[n] = p1;
+						// n++;
+						dto[pathCnt].n = n;
 
 						if (n >= DTO_SEGS - 1) return -1;
 
-						cnt--;
+						break;
+					case SEG_CRVTRK:
+						r = fabs(segPtr->u.c.radius);
+
+						dto[pathCnt].type = segPtr->u.c.center.y < 0 ? 'R' : 'L';
+
+						a0 = segPtr->u.c.a0;
+						a1 = segPtr->u.c.a1;
+
+						angle += a1;
+
+						len = D2R(a1) * r;
+						// Every 5 degrees or 5 * tie spacing
+						int cnt = (int)floor(a1 / 5.0);
+						int cnt2 = (int)floor(len / 5 / dtod.td.spacing);
+						if (cnt2 > cnt) cnt = cnt2;
+						if (cnt <= 0) cnt = 1;
+
+						aa1 = a1 / cnt;
+						if (dto[pathCnt].type == 'R') {
+							aa0 = a0;
+						}
+						else {
+							aa0 = a0 + a1;
+							aa1 = -aa1;
+						}
+						PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
+						n = dto[pathCnt].n;
+						dto[pathCnt].trkSeg[n] = segPtr;
+						dto[pathCnt].base[n] = p0;
+						n++;
+						dto[pathCnt].n = n;
+
+						while (cnt > 0) {
+							aa0 += aa1;
+							PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
+
+							// n = dto[pathCnt].n;
+							dto[pathCnt].trkSeg[n] = segPtr;
+							dto[pathCnt].base[n] = p0;
+							n++;
+
+							if (n >= DTO_SEGS - 1) return -1;
+
+							cnt--;
+						}
+						n--; // remove that last point count
+						dto[pathCnt].n = n;
 					}
-					n--; // remove that last point count
-					dto[pathCnt].n = n;
+					pp++;
 				}
-				pp++;
+				// Include the last point
+				dto[pathCnt].crvAngle = angle;
+				dto[pathCnt].n++;
 			}
-			// Include the last point
-			dto[pathCnt].crvAngle = angle;
-			dto[pathCnt].n++;
 
 			pathCnt++;
 			if (pathCnt > DTO_DIM) return -1;
