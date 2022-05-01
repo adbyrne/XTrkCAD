@@ -3013,7 +3013,7 @@ EXPORT void DrawInit( int initialZoom )
 
 #include "bitmaps/pan-zoom.xpm"
 
-EXPORT static wMenu_p panPopupM;
+static wMenu_p panPopupM;
 
 static STATUS_T CmdPan(
 		wAction_t action,

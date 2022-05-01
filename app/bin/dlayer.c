@@ -105,7 +105,7 @@ typedef struct {
 	char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
 } layer_t;
 
-EXPORT static layer_t layers[NUM_LAYERS];
+static layer_t layers[NUM_LAYERS];
 static layer_t *layers_save = NULL;
 
 static Catalog * settingsCatalog;
