@@ -380,15 +380,18 @@ void GetTurnoutType() {
 	for (i = 1; i < dtod.pathCnt; i++) {
 		int eq = 0;
 		for (j = 0; j < i; j++) {
-			if (CoOrdEqual(dto[dtod.origins[j]].base[0], dto[i].base[0]))
+			if (CoOrdEqual(dto[dtod.origins[j]].base[0], dto[i].base[0])) {
 				eq++;
+				break;
+			}
 		}
 		if (eq == 0) {
-			dtod.origins[dtod.origCnt] = i;
+			if (dtod.origCnt < DTO_DIM)
+				dtod.origins[dtod.origCnt] = i;
 			dtod.origCnt++;
 		}
 
-		if (dtod.origCnt > 4)
+		if (dtod.origCnt >= DTO_DIM)
 			return;
 	}
 
