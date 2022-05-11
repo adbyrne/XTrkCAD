@@ -4,12 +4,16 @@ project(help)
 # genhelp is used in ..\bin to generate the tooltip texts
 
 add_executable(genhelp "")
-
-target_sources(genhelp PUBLIC
-	cJSON.c
-	cJSON.h
-	genhelp.c
+target_sources(genhelp 
+	PRIVATE
+	genhelp.c)
+target_link_libraries(genhelp 
+	PUBLIC	
+	cJSON
 )
+# target_sources(genhelp PUBLIC
+# 	genhelp.c
+# )
 
 #
 # interpreter for message source file

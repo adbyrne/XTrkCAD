@@ -1,17 +1,17 @@
 
 # "bin/i18n.h" is widely used
-include_directories(bin 
-					)
+include_directories(bin)
 
 include_directories(libzip)
 
 # Setup the rest of the build ...
 add_subdirectory(cornu)
 add_subdirectory(dynstring)
+add_subdirectory(cJSON)
 ADD_SUBDIRECTORY(wlib)
 add_subdirectory(tools)
 add_subdirectory(help)
-ADD_SUBDIRECTORY(doc)
+add_subdirectory(doc)
 add_subdirectory(bin)
 add_subdirectory(lib)
 

@@ -80,7 +80,7 @@ add_custom_command(
        COMMAND genhelp ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.json ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
 )
 
-add_library(xtrkcad-lib "")
+add_library(xtrkcad-lib "$<TARGET_OBJECTS:cJSON>")
 
 target_sources(xtrkcad-lib
 	PRIVATE
@@ -103,8 +103,6 @@ target_sources(xtrkcad-lib
     chotbar.c
     cjoin.c
     cjoin.h
-    cJSON.c
-    cJSON.h
     cmisc.c
     cmodify.c
     cnote.c
@@ -236,7 +234,8 @@ add_dependencies(xtrkcad-lib
 	Help 
 	lines)
 
-target_link_libraries(xtrkcad-lib 
+target_link_libraries(xtrkcad-lib
+    cJSON
 	dynstring
 	xtrkcad-cornu
 	xtrkcad-wlib
