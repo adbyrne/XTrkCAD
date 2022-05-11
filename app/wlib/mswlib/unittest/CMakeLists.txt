@@ -16,3 +16,8 @@ target_link_libraries(utf8test
 )
 
 add_test(UTF8ConversionTest utf8test)
+
+set_target_properties(
+	utf8test 
+ 	PROPERTIES FOLDER UnitTests
+ )
