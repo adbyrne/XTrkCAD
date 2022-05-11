@@ -513,7 +513,7 @@ static BOOL_T TraverseTurntable(
 	coOrd pos0;
 	DIST_T dist, dist1;
 	ANGLE_T angle, angle1;
-	EPINX_T ep;
+	EPINX_T ep = 0;
 	BOOL_T reverse;
 
 	if ( !ValidateTurntablePosition( trk ) )

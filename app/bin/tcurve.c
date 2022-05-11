@@ -702,7 +702,7 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 
 static void DrawCurvedTies(
 	drawCmd_p d,
-	tieData_p td,
+	tieData_t td,
 	coOrd p,
 	DIST_T r,
 	ANGLE_T a0,
@@ -720,15 +720,15 @@ static void DrawCurvedTies(
 	if (color == wDrawColorBlack)
 		color = tieColor;
 	len = 2*M_PI*r*a1/360.0;
-	cnt = (int)floor(len/td->spacing+0.5);
-	if ( len-td->spacing*cnt-(td->width/2) > (td->spacing-td->width)/2 ) {
+	cnt = (int)floor(len/td.spacing + 0.5);
+	if ( len - td.spacing*cnt - (td.width/2) > (td.spacing - td.width)/2 ) {
 		cnt++;
 	}
 	if ( cnt != 0 ) {
 		dang = (360.0*(len)/cnt)/(2*M_PI*r);
 		for ( ang=a0+dang/2; cnt; cnt--,ang+=dang ) {
 			PointOnCircle( &pos, p, r, ang );
-			DrawTie( d, pos, ang+90, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
+			DrawTie( d, pos, ang+90, td.length, td.width, color, tieDrawMode==TIEDRAWMODE_SOLID );
 		}
 
 	}
@@ -746,7 +746,7 @@ EXPORT void DrawCurvedTrack(
 {
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
-	tieData_p td;
+	tieData_t td;
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
 	long bridge = 0, roadbed = 0;
@@ -788,7 +788,7 @@ EXPORT void DrawCurvedTrack(
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td = GetLayerTieData( GetTrkLayer(trk) );
+		td = GetTrkTieData( trk );
 		DrawCurvedTies( d, td, p, r, a0, a1, color );
 	}
 	if (color == wDrawColorBlack)

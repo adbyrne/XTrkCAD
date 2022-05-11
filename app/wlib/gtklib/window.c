@@ -168,7 +168,7 @@ static void saveSize(wWin_p win)
 
     if ((win->option&F_RECALLSIZE) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
-        char pos_s[20];
+        char pos_s[32];
 
         sprintf(pos_s, "%ld %ld", win->w,
                 (win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
@@ -240,7 +240,7 @@ static void savePos(wWin_p win)
     int x, y;
 
     if ((win->option&F_RECALLPOS)) {
-        char pos_s[20];
+        char pos_s[32];
 
         gdk_window_get_position(gtk_widget_get_window(GTK_WIDGET(win->gtkwin)), &x, &y);
         x -= 5;
@@ -651,16 +651,6 @@ static int fixed_expose_event(
     } else {
         rc = FALSE;
     }
-#ifdef CURSOR_SURFACE
-    cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
-    if (win && win->cursor_surface.surface && win->cursor_surface.show) {
-		cairo_set_source_surface(cr,win->cursor_surface.surface,event->area.x, event->area.y);
-		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
-		cairo_rectangle(cr,event->area.x, event->area.y,
-				event->area.width, event->area.height);
-		cairo_fill(cr);
-	}
-#endif
     return rc;
 }
 

@@ -266,6 +266,7 @@ static void lz77_compress(struct LZ77Context *ctx,
     st->npending -= i;
 
     defermatch.len = 0;
+    defermatch.distance = 0;
     deferchr = '\0';
     while (len > 0) {
 

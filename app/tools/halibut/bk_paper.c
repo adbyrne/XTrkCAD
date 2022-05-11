@@ -514,7 +514,7 @@ void *paper_pre_backend(paragraph *sourceform, keywordlist *keywords,
     int has_index;
     int pagenum;
     paragraph index_placeholder_para;
-    page_data *first_index_page;
+    page_data *first_index_page = NULL;
 
     init_std_fonts();
     fontlist = snew(font_list);
@@ -2296,7 +2296,7 @@ static int render_line(line_data *ldata, int left_x, int top_y,
 	    xr = NULL;
 
 	{
-	    int extra_indent, shortfall, spaces;
+	    int extra_indent = 0, shortfall = 0, spaces = 0;
 	    int just = ldata->pdata->justification;
 
 	    /*
@@ -2344,7 +2344,7 @@ static void render_para(para_data *pdata, paper_conf *conf,
 			keywordlist *keywords, indexdata *idx,
 			paragraph *index_placeholder, page_data *index_page)
 {
-    int last_x;
+    int last_x = 0;
     xref *cxref;
     page_data *cxref_page;
     xref_dest dest;
@@ -2741,7 +2741,7 @@ static word *fake_end_ref(void)
 static word *prepare_contents_title(word *first, wchar_t *separator,
 				    word *second)
 {
-    word *ret;
+    word *ret = NULL;
     word **wptr, *w;
 
     wptr = &ret;

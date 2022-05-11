@@ -557,12 +557,8 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 	} else if ( x1!=0 &&
 		 IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y, (x1==-1?(POS_T)0.0:size.x) )) {
 		return;
-#ifndef WINDOWS
-	} else {
-		fprintf(stderr, "intersectBox bogus\n" );
 	}
-	getchar();
-#endif
+	printf("      intersectBox bogus\n" );
 }
 
 BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )

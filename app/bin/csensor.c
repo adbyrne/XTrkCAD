@@ -166,7 +166,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
 {
     sensorData_p xx = GetsensorData(trk);
     const char *thename, *thescript;
-    char *newName, *newScript;
+    char *newName, *newScript = NULL;
     unsigned int max_str;
     BOOL_T changed, nChanged, pChanged, sChanged;
     

@@ -121,7 +121,11 @@ void static DrawGridPoint(
 		r = 0.75;
 	}
 	r /= dpi;
-	DrawFillCircle( D, p0, r, Color );
+	DrawFillCircle(D, p0, r, Color);
+	//r = 0.75 / dpi;
+	//coOrd sz; sz.x=2*r;sz.y=2*r;
+	//p0.x -= r; p0.y -= r;
+	//DrawRectangle( D, p0, sz, Color, DRAW_FILL );
 }
 
 

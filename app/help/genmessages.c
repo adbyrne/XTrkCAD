@@ -171,7 +171,7 @@ int main(int argc, char * argv[])
     FILE *outF;
     char buff[ 4096 ];
     char * cp;
-    int inFileIdx;
+    int inFileIdx = 1;
     enum {m_init, m_title, m_alt, m_help } mode = m_init;
     char msgName[256];
     char msgAlt[256];

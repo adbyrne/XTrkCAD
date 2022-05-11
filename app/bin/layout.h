@@ -35,7 +35,6 @@ void SetLayoutRoomSize(coOrd size);
 void SetLayoutCurScale(SCALEINX_T scale);
 void SetLayoutCurScaleDesc(SCALEDESCINX_T desc);
 void SetLayoutCurGauge(GAUGEINX_T gauge);
-void SetLayoutScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
 void SetLayoutBackGroundFullPath(const char *fileName);
 void SetLayoutBackGroundSize(double size);
 void SetLayoutBackGroundPos(coOrd pos);
@@ -50,10 +49,8 @@ char *GetLayoutTitle(void);
 char *GetLayoutSubtitle(void);
 DIST_T GetLayoutMinTrackRadius(void);
 ANGLE_T GetLayoutMaxTrackGrade(void);
-tieData_t GetLayoutTieData(void);
 SCALEINX_T GetLayoutCurScale(void );
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
-//GAUGEINX_T GetLayoutCurGauge(void);
 void GetLayoutRoomSize(coOrd *roomSize);
 
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);

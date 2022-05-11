@@ -85,8 +85,8 @@ int wNoticeEx(int type,
 {
 
     int res;
-    unsigned flag;
-    char *headline;
+    unsigned flag = GTK_MESSAGE_ERROR;
+    char *headline = _("Error");
     GtkWidget *dialog;
     GtkWindow *parent = NULL;
 

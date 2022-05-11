@@ -394,7 +394,7 @@ static BOOL_T HotBarSelectPlayback( char * line )
 				RedrawHotBar( hotBarD.d, NULL, 0, 0 );
 			}
 			DIST_T fixed_x = 0.0;
-			if ( inx > 0 && (hotBarCurrStart > 0 & hotBarMap(0).isFixed) ) {
+			if ( inx > 0 && hotBarCurrStart > 0 && hotBarMap(0).isFixed ) {
 				// Leave room for Flex object
 				fixed_x = hotBarMap(0).w;
 			}
@@ -437,7 +437,7 @@ EXPORT void AddHotBarElement(
 
 		if ( contentsLabel && strncmp(contentsLabel, curContentsLabel, sizeof curContentsLabel) != 0 && !isFixed ) {
 			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
-			strncpy( curContentsLabel, contentsLabel, sizeof curContentsLabel );
+			strncpy( curContentsLabel, contentsLabel, sizeof(curContentsLabel)-1 );
 		}
 		if (barScale <= 0) {
 			if (!isTrack)
