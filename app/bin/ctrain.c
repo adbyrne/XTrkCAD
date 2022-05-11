@@ -29,7 +29,6 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-//#include "trackx.h"	// .deleted
 #include "common-ui.h"
 
 long programMode;
