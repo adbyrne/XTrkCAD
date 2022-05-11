@@ -1,5 +1,6 @@
-include( CheckSymbolExists )
+project(xtrkcad-lib)
 
+include( CheckSymbolExists )
 #
 # Create line symbols for turnouts from src definitions 
 #
