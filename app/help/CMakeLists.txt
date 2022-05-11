@@ -1,44 +1,53 @@
-PROJECT(help)
+project(help)
 
-ADD_EXECUTABLE(genhelp genhelp.c genhelp.json cJSON.c cJSON.h)
+#
+# genhelp is used in ..\bin to generate the tooltip texts
 
-ADD_EXECUTABLE(genmessages genmessages.c)
+add_executable(genhelp "")
 
-TARGET_SOURCES(genhelp PUBLIC
+target_sources(genhelp PUBLIC
 	cJSON.c
 	cJSON.h
 	genhelp.c
-	genhelp.json
 )
 
-TARGET_SOURCES(genmessages PUBLIC
+#
+# interpreter for message source file
+
+add_executable(genmessages "")
+
+target_sources(genmessages PUBLIC
 	genmessages.c
-	messages.in
-	xtrkcad.tip
 )
 
-SET_SOURCE_FILES_PROPERTIES(
+set_source_files_properties(
 	genhelp.json messages.in xtrkcad.tip 
 	PROPERTIES HEADER_FILE_ONLY TRUE
 )
 
-IF(XTRKCAD_USE_GETTEXT)
-	SET(GENMESSAGES_OPTS "-i18n")
-ELSE(XTRKCAD_USE_GETTEXT)
-	SET(GENMESSAGES_OPTS "")
-ENDIF(XTRKCAD_USE_GETTEXT)
+#
+# Generate message include file and the input file for the help system
 
-ADD_CUSTOM_COMMAND(
+if(XTRKCAD_USE_GETTEXT)
+	set(GENHELP_OPTS "-bhi" PARENT_SCOPE )
+	set(GENMESSAGES_OPTS "-i18n")
+else(XTRKCAD_USE_GETTEXT)
+	set(GENHELP_OPTS "-bh" PARENT_SCOPE )
+	set(GENMESSAGES_OPTS "")
+endif(XTRKCAD_USE_GETTEXT)
+
+add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 	DEPENDS genmessages ${CMAKE_CURRENT_SOURCE_DIR}/messages.in
 	COMMAND genmessages ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 	)
 
-ADD_CUSTOM_TARGET(Help ALL
+add_custom_target(Help ALL
 	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 	)
 
-INSTALL(
+#
+install(
 	FILES xtrkcad.tip
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
