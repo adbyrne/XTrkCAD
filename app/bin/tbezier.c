@@ -45,7 +45,6 @@
 #include "cundo.h"
 #include "layout.h"
 #include "fileio.h"
-//#include "trackx.h"	// .endPt
 
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
