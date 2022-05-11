@@ -52,9 +52,6 @@ install(FILES
 	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
 
-#get_target_property(dateien xtrkcad-wlib SOURCES)
-#message( STATUS ${dateien})
-
 if(XTRKCAD_TESTING AND CMOCKA_FOUND)
 	add_subdirectory( unittest )
 endif()
