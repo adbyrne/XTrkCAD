@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13.0)
+cmake_minimum_required(VERSION 3.17.0)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
@@ -112,10 +112,9 @@ add_definitions(-DXTRKCAD_CMAKE_BUILD)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# I18N related definitions
+# I18N related dependencies
 
 if(XTRKCAD_USE_GETTEXT)
-	set(GENHELP_OPTS "-bhi")
 	#
 	# Find the GnuWin32 installation directory, the gettext include should be located in subdir include
 	#
@@ -140,8 +139,6 @@ if(XTRKCAD_USE_GETTEXT)
 			include_directories(${INTL_PATH})
 		endif(INTL_PATH)
 	endif(APPLE)
-else(XTRKCAD_USE_GETTEXT)
-	set(GENHELP_OPTS "-bh")
 endif(XTRKCAD_USE_GETTEXT)
 
 # Setup the rest of the build ...
