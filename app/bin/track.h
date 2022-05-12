@@ -492,7 +492,7 @@ void SetBoundingBox( track_p, coOrd, coOrd );
 void GetBoundingBox( track_p, coOrd*, coOrd* );
 EPINX_T GetTrkEndPtCnt( track_p );
 void SetTrkEndPoint( track_p, EPINX_T, coOrd, ANGLE_T );
-void SetTrkEndPointTrk( track_p, EPINX_T, coOrd, ANGLE_T );
+void SetTrkEndPointWithTrk( track_p, EPINX_T, coOrd, ANGLE_T );
 track_p GetTrkEndTrk( track_p, EPINX_T );
 coOrd GetTrkEndPos( track_p, EPINX_T );
 #define GetTrkEndPosXY( trk, ep ) PutDim(GetTrkEndPos(trk,ep).x), PutDim(GetTrkEndPos(trk,ep).y)

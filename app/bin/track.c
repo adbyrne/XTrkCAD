@@ -447,8 +447,9 @@ EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 	trk->endPt[ep].angle = angle;
 }
 
-EXPORT void SetTrkEndPointTrk( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
+EXPORT void SetTrkEndPointWithTrk( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
+	// Ignore presence of .trk
 	CHECK( ep < trk->endCnt );
 	trk->endPt[ep].pos = pos;
 	trk->endPt[ep].angle = angle;
