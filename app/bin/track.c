@@ -33,16 +33,11 @@
 #include "param.h"
 #include "paths.h"
 #include "track.h"
+#include "trackx.h"
 #include "misc.h"
 #include "ctrain.h"
 #include "common-ui.h"
 #include "version.h"
-
-#ifndef TRACKDEP
-#ifndef FASTTRACK
-#include "trackx.h"
-#endif
-#endif
 
 #include <inttypes.h>
 
@@ -115,7 +110,6 @@ static wBool_t bWriteEndPtDirectIndex = FALSE;
 
 EXPORT wBool_t bFreeTrack = FALSE;
 
-#ifndef TRACKDEP
 
 /*****************************************************************************
  *
@@ -349,7 +343,6 @@ EXPORT void InitTrkTrack( void )
  */
 
 
-#ifndef FASTTRACK
 
 EXPORT TRKINX_T GetTrkIndex( track_p trk )
 {
@@ -530,7 +523,7 @@ EXPORT BOOL_T IsTrackDeleted( track_p trk )
 {
 	return trk->deleted;
 }
-#endif
+
 
 EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height, char * station )
 {
@@ -2748,7 +2741,6 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 		return fabs(pos1.y);
 	}
 }
-#endif
 /*#define DRAW_TUNNEL_NONE		(0)*/
 #define DRAW_TUNNEL_DASH		(1)
 #define DRAW_TUNNEL_SOLID		(2)
@@ -3022,7 +3014,7 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 
 	if ((labelEnable&LABELENABLE_ENDPT_ELEV)==0)
 		return;
-	elev = &trk->endPt[ep].elev;		/* TRACKDEP */
+	elev = &trk->endPt[ep].elev;
 	if ( (elev->option&ELEV_MASK)==ELEV_NONE ||
 		 (elev->option&ELEV_VISIBLE)==0 )
 		return;
@@ -3329,7 +3321,7 @@ EXPORT void HilightElevations( BOOL_T hilight )
 		radius = trackGauge/2.0;
 	TRK_ITERATE( trk ) {
 		for (ep=0;ep<GetTrkEndPtCnt(trk);ep++) {
-			GetTrkEndElev( trk, ep, &mode, &elev );		/* TRACKDEP */
+			GetTrkEndElev( trk, ep, &mode, &elev );
 			if ((mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE) {
 				if ((trk1=GetTrkEndTrk(trk,ep)) != NULL &&
 					GetTrkIndex(trk1) < GetTrkIndex(trk))

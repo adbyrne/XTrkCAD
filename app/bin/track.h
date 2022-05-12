@@ -446,39 +446,6 @@ void SetDebug( char * );
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
-#ifdef FASTTRACK
-#include "trackx.h"
-#define GetTrkIndex( T )		((T)->index)
-#define GetTrkType( T )			((T)->type)
-#define GetTrkScale( T )		((T)->scale)
-#define SetTrkScale( T, S )		(T)->scale = ((char)(S))
-/*#define GetTrkSelected( T )	((T)->bits&TB_SELECTED)*/
-/*#define GetTrkVisible( T )	((T)->bits&TB_VISIBLE)*/
-/*#define SetTrkVisible( T, V ) ((V) ? (T)->bits |= TB_VISIBLE : (T)->bits &= !TB_VISIBLE)*/
-#define GetTrkLayer( T )		((T)->layer)
-#define SetBoundingBox( T, HI, LO ) \
-								(T)->hi.x = (float)(HI).x; (T)->hi.y = (float)(HI).y; (T)->lo.x = (float)(LO).x; (T)->lo.x; (T)->lo.x = (float)(LO).y = (float)(LO).y
-#define GetBoundingBox( T, HI, LO ) \
-								(HI)->x = (POS_T)(T)->hi.x; (HI)->y = (POS_T)(T)->hi.y; (LO)->x = (POS_T)(T)->lo.x; (LO)->y = (POS_T)(T)->lo.y;
-#define GetTrkEndPtCnt( T )		((T)->endCnt)
-#define SetTrkEndPoint( T, I, PP, AA ) \
-								Assert((T)->endPt[I].track); \
-								(T)->endPt[I].pos = PP; \
-								(T)->endPt[I].angle = AA
-#define GetTrkEndTrk( T, I )	((T)->endPt[I].track)
-#define GetTrkEndPos( T, I )	((T)->endPt[I].pos)
-#define GetTrkEndPosXY( T, I )	PutDim((T)->endPt[I].pos.x), PutDim((T)->endPt[I].pos.y)
-#define GetTrkEndAngle( T, I )	((T)->endPt[I].angle)
-#define GetTrkEndOption( T, I ) ((T)->endPt[I].option)
-#define SetTrkEndOption( T, I, O )		((T)->endPt[I].option=O)
-#define GetTrkExtraData( T, TT )	((T)->extraData)
-#define GetTrkWidth( T )		(int)((T)->width)
-#define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
-#define GetTrkBits(T)			((T)?((T)->bits):0)
-#define SetTrkBits(T,V)			((T)->bits|=(V))
-#define ClrTrkBits(T,V)			((T)->bits&=~(V))
-#define IsTrackDeleted(T)		((T)->deleted)
-#else
 TRKINX_T GetTrkIndex( track_p );
 TRKTYP_T GetTrkType( track_p );
 SCALEINX_T GetTrkScale( track_p );
@@ -509,7 +476,6 @@ int ClrTrkBits( track_p, int );
 BOOL_T IsTrackDeleted( track_p );
 void TrackInsertLayer( int );
 void TrackDeleteLayer( int );
-#endif
 
 track_p GetFirstTrack();
 track_p GetNextTrack( track_p );
