@@ -1,63 +1,97 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/CMakeLists.txt,v 1.9 2008-06-04 18:53:04 m_fischer Exp $
-#
 # CMakeList for the params directory
 #
-# Several xtp files are created from text definitions, all xtp files and the
-# created xtp files are installed.
+# Several xtp files are created from text definitions, the created xtp files are installed.
 #
 
-FILE(GLOB XTP_FILES *.xtp)
+add_custom_target(xtpfiles ALL "")
+set_target_properties(
+   xtpfiles
+   PROPERTIES FOLDER "Param Files"
+)
 
-SET( outFiles )
-
+#
 #  create param files from car definitions
 
-ADD_EXECUTABLE( mkcarpart mkcarpart.c )
+add_executable( mkcarpart mkcarpart.c )
+set_target_properties(
+   mkcarpart
+   PROPERTIES FOLDER "Param Files"
+)
 
-FILE(GLOB inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.cars")
+set(infiles
+    "AccucraftFn3.cars"
+    "AccucraftOn3.cars"
+    "accurail.cars"
+    "atlascho.cars"
+    "atlaseho.cars"
+)
 
-FOREACH(infileName ${inFiles})
+foreach(infile ${infiles})
     # Generate output file name
-    STRING(REGEX REPLACE "\\.cars\$" ".xtp" outfileName "${infileName}")
-    SET(outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfileName}")
-    # Generate input file name
-    SET(infile "${CMAKE_CURRENT_SOURCE_DIR}/${infileName}")
+    cmake_path(REPLACE_EXTENSION infile
+                "xtp" 
+                OUTPUT_VARIABLE outfile
+    )
     # Custom command to do the processing
-    ADD_CUSTOM_COMMAND(OUTPUT "${outfile}"
-        COMMAND mkcarpart "${infile}" "${outfile}"
-        DEPENDS "${infile}" mkcarpart
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-    # Finally remember the output file for dependencies
-    SET(outFiles ${outFiles} "${outfile}")
-ENDFOREACH(infileName)
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
+        DEPENDS "${infile}" mkcarpart 
+        COMMAND mkcarpart "${infile}" "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
+        )
+    target_sources(xtpfiles
+        PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
+    )
+    install(
+	    FILES "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
+	    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
+	)
+endforeach()
 
 # create param files from  structure definitions
 
-ADD_EXECUTABLE( mkstruct mkstruct.c )
+add_executable( mkstruct mkstruct.c )
+set_target_properties(
+   mkstruct
+   PROPERTIES FOLDER "Param Files"
+)
 
-FILE(GLOB inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.struct")
+set(infiles
+    "fallerho.struct"
+    "revell.struct"
+    "pikestuf.struct"
+)
 
 # define build commands for all struct files
-FOREACH(infileName ${inFiles})
+foreach(infile ${infiles})
     # Generate output file name
-    STRING(REGEX REPLACE "\\.struct\$" ".xtp" outfileName "${infileName}")
-    SET(outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfileName}")
-    # Generate input file name
-    SET(infile "${CMAKE_CURRENT_SOURCE_DIR}/${infileName}")
-    # Custom command to do the processing
-    ADD_CUSTOM_COMMAND(OUTPUT "${outfile}"
+    cmake_path(REPLACE_EXTENSION infile
+                "xtp" 
+                OUTPUT_VARIABLE outfile
+    )
+    cmake_path(ABSOLUTE_PATH 
+                outfile
+                BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" )
+
+    add_custom_command(
+        OUTPUT "${outfile}"
         COMMAND mkstruct "${infile}" "${outfile}"
         DEPENDS "${infile}" mkstruct
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" )
-    # Finally remember the output file for dependencies
-    SET(outFiles ${outFiles} "${outfile}")
-ENDFOREACH(infileName)
 
+    target_sources(xtpfiles
+       PRIVATE
+       "${outfile}"
+    )
+    install(
+        FILES "${outfile}"
+        DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
+)
+endforeach()
 
-ADD_CUSTOM_TARGET(xtpfiles ALL DEPENDS ${outFiles})
-
-INSTALL(
-	FILES ${XTP_FILES} t-trak-notes.txt ${outFiles}
+install(
+	FILES t-trak-notes.txt
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
 	)

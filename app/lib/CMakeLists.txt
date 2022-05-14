@@ -16,6 +16,12 @@ install(FILES
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
 
+# install parameter files 
+install(DIRECTORY params
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
+		FILES_MATCHING
+		PATTERN "*.xtp")
+
 # install demos 
 install(DIRECTORY demos 
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/demos
