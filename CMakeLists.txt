@@ -110,8 +110,14 @@ SET(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad")
 # Enable use of a configuration file ...
 add_definitions(-DXTRKCAD_CMAKE_BUILD)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-config.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+# add common include directories
+include_directories(
+	${CMAKE_CURRENT_BINARY_DIR}
+	${xtrkcad-lib_SOURCE_DIR}
+)
+
+#
 # I18N related dependencies
 
 if(XTRKCAD_USE_GETTEXT)

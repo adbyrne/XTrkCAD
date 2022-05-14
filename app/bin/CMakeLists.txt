@@ -301,15 +301,8 @@ endif(UNIX AND NOT APPLE)
 
 include_directories(${help_BINARY_DIR})
 
-#INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-#INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
-#INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 include_directories(${FREEIMAGE_INCLUDE_PATH})
 INCLUDE_DIRECTORIES(${LIBZIP_INCLUDE_DIR_ZIP})
-#INCLUDE_DIRECTORIES(${CJSON_INCLUDE})
-
-#LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
-#LINK_DIRECTORIES(${GTK_WEBKIT_LIBRARY_DIRS})
 LINK_DIRECTORIES(${LIBZIP_LIBZIP_LIBRARY})
 
 #
@@ -320,6 +313,7 @@ add_executable(mkturnout
 	utility.c
 )
 set_target_properties(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
+set_target_properties(mkturnout PROPERTIES FOLDER "Param Files" )
 
 target_link_libraries(mkturnout 
     xtrkcad-wlib 

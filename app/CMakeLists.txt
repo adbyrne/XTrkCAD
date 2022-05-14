@@ -1,7 +1,3 @@
-
-# "bin/i18n.h" is widely used
-include_directories(bin)
-
 include_directories(libzip)
 
 # Setup the rest of the build ...

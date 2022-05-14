@@ -11,9 +11,6 @@ target_link_libraries(genhelp
 	PUBLIC	
 	cJSON
 )
-# target_sources(genhelp PUBLIC
-# 	genhelp.c
-# )
 
 #
 # interpreter for message source file
