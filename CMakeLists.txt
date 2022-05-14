@@ -54,7 +54,7 @@ IF(WIN32)
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
 	SET(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 
-	SET(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /MT /Zi /Ob0 /Od /RTC1" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
+	SET(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /RTC1 /MTd /Od /Zi" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
 	SET(CMAKE_C_FLAGS_MINSIZEREL "/MT /O1 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release minumum size builds" FORCE)
 	SET(CMAKE_C_FLAGS_RELEASE "/MT /O2 /Ob2 /D NDEBUG" CACHE STRING "Flags used by the compiler during release builds" FORCE)
 	SET(CMAKE_C_FLAGS_RELWITHDEBINFO "/MT /Zi /O2 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release with debug info builds" FORCE)
