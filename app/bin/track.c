@@ -55,7 +55,6 @@ static int log_endPt = 0;
 static int log_readTracks = 0;
 /** @logcmd @showrefby timedrawtracks=n track.c */
 static int log_timedrawtracks = 0;
-extern int log_regression;
 
 // Enable trkType checks on extraData*_t
 #define CHECK_EXTRA_DATA
@@ -1409,7 +1408,7 @@ EXPORT int CheckRegressionResult( long regressVersion,char * sFileName, wBool_t 
 		if ( ! CompareTrack( tActual, tExpected ) ) {
 			nFail++;
 			// Actual doesn't match Expected
-			LOG( log_regression, 1, ("  FAIL: %s", message) );
+			lprintf( "  FAIL: %s\n", message);
 			fRegression = fopen( sRegressionFile, "a" );
 			if ( fRegression == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );

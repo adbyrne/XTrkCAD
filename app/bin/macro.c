@@ -779,7 +779,7 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 /*
 * Regression test
 */
-EXPORT int log_regression = 0;
+static int log_regression = 0;
 static int nRegressionFail = 0;
 
 static BOOL_T DoRegression( char * sFileName )
@@ -824,11 +824,11 @@ static BOOL_T DoRegression( char * sFileName )
 	case REGRESSION_QUIET:
 		oldParamVersion = paramVersion;
 		int nFail = CheckRegressionResult( regressVersion, sFileName, eRegression == REGRESSION_QUIET );
+		paramVersion = oldParamVersion;
 		if ( nFail < 0 ) {
 			return FALSE;
 		}
 		nRegressionFail += nFail;
-		paramVersion = oldParamVersion;
 		break;
 	case REGRESSION_NONE:
 	default:
