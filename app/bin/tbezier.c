@@ -45,7 +45,6 @@
 #include "cundo.h"
 #include "layout.h"
 #include "fileio.h"
-#include "trackx.h"
 
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
@@ -1627,11 +1626,8 @@ EXPORT void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T wid
 	FixUpBezier(pos, xx, bTrack);
 	ComputeBezierBoundingBox( p, xx );
 	if ( bTrack ) {
-		// Should call SetTrkEndPoint but we may be already connected
-		p->endPt[0].pos = pos[0];
-		p->endPt[0].angle = xx->a0;
-		p->endPt[1].pos = pos[3];
-		p->endPt[1].angle = xx->a1;
+		SetTrkEndPointWithTrk( p, 0, pos[0], xx->a0 );
+		SetTrkEndPointWithTrk( p, 1, pos[3], xx->a1 );
 		CheckTrackLength( p );
 		SetTrkBits( p, TB_HIDEDESC );
 	}

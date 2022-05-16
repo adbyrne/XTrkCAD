@@ -31,7 +31,6 @@
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
-#include "trackx.h"
 #include "version.h"
 #include "common-ui.h"
 
@@ -781,7 +780,6 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 * Regression test
 */
 static int log_regression = 0;
-wBool_t bWriteEndPtDirectIndex;
 static int nRegressionFail = 0;
 
 static BOOL_T DoRegression( char * sFileName )
@@ -792,7 +790,7 @@ static BOOL_T DoRegression( char * sFileName )
 	long regressVersion;
 	FILE * fRegression;
 	char * sRegressionFile =  NULL;
-	wBool_t bWroteActualTracks;
+//	wBool_t bWroteActualTracks;
 	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
 	char * cp;
 	regressVersion = strtol( paramLine+16, &cp, 10 );
@@ -825,77 +823,12 @@ static BOOL_T DoRegression( char * sFileName )
 	case REGRESSION_CHECK:
 	case REGRESSION_QUIET:
 		oldParamVersion = paramVersion;
-		paramVersion = regressVersion;
-		bWroteActualTracks = FALSE;
-		track_p to_first_save = to_first;
-		track_p* to_last_save = to_last;
-		while ( GetNextLine() ) {
-			if ( paramLine[0] == '#' )
-				continue;
-			// Read Expected track
-			to_first = NULL;
-			to_last = &to_first;
-			paramVersion = regressVersion;
-			if ( !ReadTrack( paramLine ) ) {
-				if ( paramFile == NULL )
-					return FALSE;
-				break;
-			}
-			if ( to_first == NULL ) {
-				// Something bad happened
-				break;
-			}
-			track_cp tExpected = to_first;
-			to_first = to_first_save;
-			// Find corresponding Actual track
-			track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
-			strcat( message, "Regression " );
-			if ( ! CompareTrack( tActual, tExpected ) ) {
-				nRegressionFail++;
-				// Actual doesn't match Expected
-				LOG( log_regression, 1, ("  FAIL: %s", message) );
-				fRegression = fopen( sRegressionFile, "a" );
-				if ( fRegression == NULL ) {
-					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );
-					break;
-				}
-				fprintf( fRegression, "REGRESSION FAIL %d\n",
-					PARAMVERSION );
-				fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
-				fprintf( fRegression, "# %s", message );
-				if ( !bWroteActualTracks ) {
-					// Print Actual tracks
-					fprintf( fRegression, "Actual Tracks\n" );
-					paramVersion = PARAMVERSION;
-					WriteTracks( fRegression, FALSE );
-					bWroteActualTracks = TRUE;
-				}
-				// Print Expected track
-				to_first = tExpected;
-				fprintf( fRegression, "Expected Track\n" );
-				WriteTracks( fRegression, FALSE );
-				fclose( fRegression );
-				strcat( message, "Continue test?" );
-				if ( eRegression == REGRESSION_CHECK ) {
-					int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
-					if ( !rc ) {
-						while ( GetNextLine() &&
-							strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
-							;
-						break;
-					}
-				}
-			}
-			// Delete Expected track
-			to_first = tExpected;
-			to_last = &to_first;
-			FreeTrack( tExpected );
-		}
-		to_first = to_first_save;
-		to_last = to_last_save;
-		if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
-			InputError( "Expected REGRESSION END", TRUE );
+		int nFail = CheckRegressionResult( regressVersion, sFileName, eRegression == REGRESSION_QUIET );
 		paramVersion = oldParamVersion;
+		if ( nFail < 0 ) {
+			return FALSE;
+		}
+		nRegressionFail += nFail;
 		break;
 	case REGRESSION_NONE:
 	default:

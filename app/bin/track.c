@@ -33,15 +33,11 @@
 #include "param.h"
 #include "paths.h"
 #include "track.h"
+#include "trackx.h"
 #include "misc.h"
 #include "ctrain.h"
 #include "common-ui.h"
-
-#ifndef TRACKDEP
-#ifndef FASTTRACK
-#include "trackx.h"
-#endif
-#endif
+#include "version.h"
 
 #include <inttypes.h>
 
@@ -113,7 +109,6 @@ static wBool_t bWriteEndPtDirectIndex = FALSE;
 
 EXPORT wBool_t bFreeTrack = FALSE;
 
-#ifndef TRACKDEP
 
 /*****************************************************************************
  *
@@ -347,7 +342,6 @@ EXPORT void InitTrkTrack( void )
  */
 
 
-#ifndef FASTTRACK
 
 EXPORT TRKINX_T GetTrkIndex( track_p trk )
 {
@@ -428,11 +422,27 @@ EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk, TRKTYP_T trkType 
 	return trk->extraData;
 }
 
+
+EXPORT void ResizeExtraData( track_p trk, CSIZE_T newSize )
+{
+	trk->extraData = MyRealloc( trk->extraData, newSize );
+	trk->extraSize = newSize;
+}
+
+
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
 	CHECK( ep < trk->endCnt );
 	// check  setTrkEndPoint: endPt is not connected
 	CHECK( trk->endPt[ep].track == NULL );
+	trk->endPt[ep].pos = pos;
+	trk->endPt[ep].angle = angle;
+}
+
+EXPORT void SetTrkEndPointWithTrk( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
+{
+	// Ignore presence of .trk
+	CHECK( ep < trk->endCnt );
 	trk->endPt[ep].pos = pos;
 	trk->endPt[ep].angle = angle;
 }
@@ -512,7 +522,7 @@ EXPORT BOOL_T IsTrackDeleted( track_p trk )
 {
 	return trk->deleted;
 }
-#endif
+
 
 EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height, char * station )
 {
@@ -1034,11 +1044,21 @@ EXPORT BOOL_T StoreTrackData(
  */
 
 
-
 EXPORT track_p to_first = NULL;
-
 EXPORT TRKINX_T max_index = 0;
 EXPORT track_p * to_last = &to_first;
+
+EXPORT track_p GetFirstTrack()
+{
+	return to_first;
+}
+
+EXPORT track_p GetNextTrack( track_p trk )
+{
+	return trk->next;
+}
+
+
 
 static struct {
 		track_p first;
@@ -1185,6 +1205,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	/* If Car, simulate Remove Car -> uncouple and mark deleted (no Undo) */
 	if (QueryTrack(trk,Q_ISTRAIN)) {
 		trk->deleted = TRUE;
+#ifdef LATER
 		int dir;
 		for (dir=0; dir<2; dir++) {
 		    if (GetTrkEndTrk(trk,dir)) {
@@ -1195,6 +1216,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 		        trk->endPt[dir].track = NULL;
 		    }
 		}
+#endif
 		return TRUE;
 	}
 	for (i=0;i<trk->endCnt;i++) {
@@ -1258,6 +1280,12 @@ BOOL_T TrackIterate( track_p * trk )
 }
 
 
+/*****************************************************************************
+*
+* REGRESSION
+*
+*/
+
 wBool_t IsPosClose( coOrd pos1, coOrd pos2 ) {
 	DIST_T d = FindDistance( pos1, pos2 );
 	return d < 0.1;
@@ -1309,7 +1337,7 @@ wBool_t IsColorClose( wDrawColor color1, wDrawColor color2 )
 	return (diff < 7);
 }
 
-wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
+static wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 {
 //	wBool_t rc = FALSE;
 	if ( trk1 == NULL ) {
@@ -1344,6 +1372,85 @@ wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
 	if ( trackCmds( GetTrkType( trk1 ) )->compare == NULL )
 		return TRUE;
 	return trackCmds( GetTrkType( trk1 ) )->compare( trk1, trk2 );
+}
+
+EXPORT int CheckRegressionResult( long regressVersion,char * sFileName, wBool_t bQuiet )
+{
+	wBool_t bWroteActualTracks = FALSE;
+	int nFail = 0;
+	FILE * fRegression = NULL;
+	char * sRegressionFile = NULL;
+	track_p to_first_save = to_first;
+	track_p* to_last_save = to_last;
+	MakeFullpath( &sRegressionFile, workingDir, "xtrkcad.regress", NULL );
+
+	while ( GetNextLine() ) {
+		if ( paramLine[0] == '#' )
+			continue;
+		// Read Expected track
+		to_first = NULL;
+		to_last = &to_first;
+		paramVersion = regressVersion;
+		if ( !ReadTrack( paramLine ) ) {
+			if ( paramFile == NULL )
+				return -1;
+			break;
+		}
+		if ( to_first == NULL ) {
+			// Something bad happened
+			break;
+		}
+		track_cp tExpected = to_first;
+		to_first = to_first_save;
+		// Find corresponding Actual track
+		track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
+		strcat( message, "Regression " );
+		if ( ! CompareTrack( tActual, tExpected ) ) {
+			nFail++;
+			// Actual doesn't match Expected
+			lprintf( "  FAIL: %s\n", message);
+			fRegression = fopen( sRegressionFile, "a" );
+			if ( fRegression == NULL ) {
+				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );
+				break;
+			}
+			fprintf( fRegression, "REGRESSION FAIL %d\n",
+				PARAMVERSION );
+			fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+			fprintf( fRegression, "# %s", message );
+			if ( !bWroteActualTracks ) {
+				// Print Actual tracks
+				fprintf( fRegression, "Actual Tracks\n" );
+				paramVersion = PARAMVERSION;
+				WriteTracks( fRegression, FALSE );
+				bWroteActualTracks = TRUE;
+			}
+			// Print Expected track
+			to_first = tExpected;
+			fprintf( fRegression, "Expected Track\n" );
+			WriteTracks( fRegression, FALSE );
+			fclose( fRegression );
+			strcat( message, "Continue test?" );
+			if ( ! bQuiet ) {
+				int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
+				if ( !rc ) {
+					while ( GetNextLine() &&
+						strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+						;
+					break;
+				}
+			}
+		}
+		// Delete Expected track
+		to_first = tExpected;
+		to_last = &to_first;
+		FreeTrack( tExpected );
+	}
+	to_first = to_first_save;
+	to_last = to_last_save;
+	if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+		InputError( "Expected REGRESSION END", TRUE );
+	return nFail;
 }
 
 
@@ -1997,6 +2104,16 @@ EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1
 	ANGLE_T a;
 	coOrd pos0, pos1;
 
+	if (QueryTrack(trk0,Q_ISTRAIN)) {
+		if (!QueryTrack(trk1,Q_ISTRAIN)) {
+			NoticeMessage( _("Connecting a car to a non-car T%d T%d"), _("Continue"), NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
+			return -1;
+		}
+		trk0->endPt[inx0].track = trk1;
+		trk1->endPt[inx1].track = trk0;
+		return 0;
+	}
+
 	if ( !IsTrack(trk0) ) {
 		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
 		return -1;
@@ -2033,6 +2150,16 @@ EXPORT void DisconnectTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T e
 	// Check tracks are connected
 	CHECK( trk1->endPt[ep1].track == trk2 );
 	CHECK( trk2->endPt[ep2].track == trk1 );
+	if (QueryTrack(trk1,Q_ISTRAIN)) {
+		if (!QueryTrack(trk2,Q_ISTRAIN)) {
+			NoticeMessage( _("Disconnecting a car from a non-car T%d T%d"), _("Continue"), NULL, GetTrkIndex(trk1), GetTrkIndex(trk2) );
+			return;
+		}
+		trk1->endPt[ep1].track = NULL;
+		trk2->endPt[ep2].track = NULL;
+		return;
+	}
+
 	UndoModify( trk1 );
 	UndoModify( trk2 );
 	trk1->endPt[ep1].track = NULL;
@@ -2613,7 +2740,6 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 		return fabs(pos1.y);
 	}
 }
-#endif
 /*#define DRAW_TUNNEL_NONE		(0)*/
 #define DRAW_TUNNEL_DASH		(1)
 #define DRAW_TUNNEL_SOLID		(2)
@@ -2887,7 +3013,7 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 
 	if ((labelEnable&LABELENABLE_ENDPT_ELEV)==0)
 		return;
-	elev = &trk->endPt[ep].elev;		/* TRACKDEP */
+	elev = &trk->endPt[ep].elev;
 	if ( (elev->option&ELEV_MASK)==ELEV_NONE ||
 		 (elev->option&ELEV_VISIBLE)==0 )
 		return;
@@ -3194,7 +3320,7 @@ EXPORT void HilightElevations( BOOL_T hilight )
 		radius = trackGauge/2.0;
 	TRK_ITERATE( trk ) {
 		for (ep=0;ep<GetTrkEndPtCnt(trk);ep++) {
-			GetTrkEndElev( trk, ep, &mode, &elev );		/* TRACKDEP */
+			GetTrkEndElev( trk, ep, &mode, &elev );
 			if ((mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE) {
 				if ((trk1=GetTrkEndTrk(trk,ep)) != NULL &&
 					GetTrkIndex(trk1) < GetTrkIndex(trk))

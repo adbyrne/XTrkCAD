@@ -49,5 +49,4 @@ typedef struct track_t {
 
 extern track_p to_first;
 extern track_p * to_last;
-#define TRK_ITERATE(TRK)		for (TRK=to_first; TRK!=NULL; TRK=TRK->next) if (!(TRK->deleted)) 
 #endif
