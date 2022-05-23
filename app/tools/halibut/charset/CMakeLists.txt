@@ -33,3 +33,8 @@ add_library(xtrkcad-charset
 	utf8.c 
 	xenc.c)
 
+set_target_properties(
+	xtrkcad-charset
+	PROPERTIES FOLDER Appl-Help
+ )
+

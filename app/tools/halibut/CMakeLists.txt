@@ -25,6 +25,10 @@ add_executable(halibut
 	wcwidth.c
 )
 
+set_target_properties(
+   halibut
+   PROPERTIES FOLDER Appl-Help
+)
 target_link_libraries(halibut xtrkcad-charset)
 
 add_subdirectory(charset)

@@ -9,6 +9,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in ${CMAKE_CURRENT_BINARY_D
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html)
 
 add_custom_target(helpsystem ALL )
+set_target_properties(
+   helpsystem
+   PROPERTIES FOLDER Appl-Help
+)
+
+add_dependencies(helpsystem messagefiles)
 
 target_sources(helpsystem
 	PRIVATE
@@ -27,10 +33,16 @@ target_sources(helpsystem
 	${CMAKE_CURRENT_SOURCE_DIR}/view_winm.but
 	${CMAKE_CURRENT_SOURCE_DIR}/navigation.but
 	${CMAKE_CURRENT_SOURCE_DIR}/appendix.but
-	${help_BINARY_DIR}/messages.but
 	${CMAKE_CURRENT_SOURCE_DIR}/upgrade.but
 	${CMAKE_CURRENT_SOURCE_DIR}/warranty.but
+	${messagefile_BINARY_DIR}/messages.but
 )
+
+#
+# messages.but is generated in a different directory scope, CMake must not check for existance
+set_source_files_properties(${messagefile_BINARY_DIR}/messages.but
+	PROPERTIES 
+	GENERATED True)
 
 # Add a custom command for cleaning the HTML staging directory
 add_custom_target(clean-html
@@ -97,14 +109,12 @@ if(XTRKCAD_USE_GTK)
     ENDIF(APPLE)
 
 # Otherwise, we're using the Win32 back-end, so generate a compiled HTML help file
-else(XTRKCAD_USE_GTK)
+else()
 	target_sources(helpsystem
 		PRIVATE
 			${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but
 	)
 	file(GLOB IMAGE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/png.d/*)
-
-	get_target_property(HALIBUT_SOURCES helpsystem SOURCES)
 
 	#
 	# Use the Microsoft HTML Help Workshop to create a chm file
@@ -115,7 +125,11 @@ else(XTRKCAD_USE_GTK)
 	# Build the chm file
 	# Add the chm file to the installation 
 	add_custom_target(help-chm ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
-
+	set_target_properties(
+   		help-chm
+   		PROPERTIES FOLDER Appl-Help
+)
+	get_target_property(halibut_sources helpsystem SOURCES)
 	add_custom_command(
 		TARGET help-chm
 		DEPENDS halibut helpsystem ${IMAGE_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css
@@ -123,7 +137,7 @@ else(XTRKCAD_USE_GTK)
 		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/png.d ${CMAKE_CURRENT_BINARY_DIR}/html/png.d
 		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad_win.css ${CMAKE_CURRENT_BINARY_DIR}/html
-		COMMAND halibut ${HALIBUT_SOURCES} 
+		COMMAND halibut ${halibut_sources} 
 		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/hhc.cmake
 	)
 
@@ -132,4 +146,4 @@ else(XTRKCAD_USE_GTK)
         DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 		)
 
-endif(XTRKCAD_USE_GTK)
+endif()

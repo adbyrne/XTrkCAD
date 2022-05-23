@@ -1,4 +1,4 @@
-project(help)
+project(messagefile)
 
 #
 # genhelp is used in ..\bin to generate the tooltip texts
@@ -32,23 +32,23 @@ set_source_files_properties(
 if(XTRKCAD_USE_GETTEXT)
 	set(GENHELP_OPTS "-bhi" PARENT_SCOPE )
 	set(GENMESSAGES_OPTS "-i18n")
-else(XTRKCAD_USE_GETTEXT)
+else()
 	set(GENHELP_OPTS "-bh" PARENT_SCOPE )
 	set(GENMESSAGES_OPTS "")
-endif(XTRKCAD_USE_GETTEXT)
+endif()
 
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
+ add_custom_command(
+ 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 	DEPENDS genmessages ${CMAKE_CURRENT_SOURCE_DIR}/messages.in
-	COMMAND genmessages ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.but
-	)
+ 	COMMAND genmessages ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.but
+)
 
-add_custom_target(Help ALL
+add_custom_target(messagefiles ALL
 	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
-	)
+)
 
 #
 install(
 	FILES xtrkcad.tip
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
-	)
+)
