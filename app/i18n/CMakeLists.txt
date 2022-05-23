@@ -61,14 +61,19 @@ add_custom_command(
 # Create the list of the original source files.
 
 get_target_property(SOURCEFILES xtrkcad-lib SOURCES)
-foreach( FILENAME ${SOURCEFILES})
+foreach( sourcefile ${SOURCEFILES})
+	#
+	# do not scan dependent objects / libraries for translatable strings
+	string(FIND "${sourcefile}" "TARGET_OBJECTS:" result)
+	if(result EQUAL -1)
 	#
 	# bllnhlp is generated in the build directory and has to be special cased
-	string(COMPARE NOTEQUAL ${FILENAME} "bllnhlp.c" RESULT)
-	if(RESULT)
-		cmake_path(ABSOLUTE_PATH FILENAME BASE_DIRECTORY ${xtrkcad-lib_SOURCE_DIR} )
-		cmake_path(RELATIVE_PATH FILENAME BASE_DIRECTORY ${i18n_SOURCE_DIR})
-		list(APPEND XGT_SOURCE_FILES ${FILENAME})
+		string(COMPARE NOTEQUAL ${sourcefile} "bllnhlp.c" RESULT)
+		if(RESULT)
+			cmake_path(ABSOLUTE_PATH sourcefile BASE_DIRECTORY ${xtrkcad-lib_SOURCE_DIR} )
+			cmake_path(RELATIVE_PATH sourcefile BASE_DIRECTORY ${i18n_SOURCE_DIR})
+			list(APPEND XGT_SOURCE_FILES ${sourcefile})
+		endif()
 	endif()
 endforeach()
 
