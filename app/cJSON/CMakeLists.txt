@@ -5,9 +5,9 @@ add_library( cJSON  "")
 
 target_sources(cJSON
 	PRIVATE
-	cJSON.c
+		cJSON.c
 	PUBLIC
-	cJSON.h
+		cJSON.h
 )
 
 target_include_directories(cJSON PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})	
