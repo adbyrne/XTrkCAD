@@ -24,6 +24,7 @@
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "misc.h"
 #include "cbezier.h"
 #include "tbezier.h"
@@ -1148,7 +1149,7 @@ EXPORT BOOL_T ReadSegs( void )
 	tempSpecial[0] = '\0';
 	tempCustom[0] = '\0';
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 	pathCnt = 0;
 	AppendPath(0);	// End of all paths
 	while ( rc && ((cp = GetNextLine()) != NULL) ) {
@@ -1383,8 +1384,7 @@ EXPORT BOOL_T ReadSegs( void )
 			break;
 		case SEG_UNCEP:
 		case SEG_CONEP:
-			DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
-			e = &tempEndPts(tempEndPts_da.cnt-1);
+			e = TempEndPtsAppend();
 			if (type == SEG_CONEP) {
 				if ( !GetArgs( cp, "dc", &e->index, &cp ) ) {
 									rc = FALSE;

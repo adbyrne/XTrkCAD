@@ -29,13 +29,13 @@
 
 #include "param.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "ccornu.h"
 #include "cbezier.h"
 #include "misc.h"
 #include "common-ui.h"
 
 dynArr_t tempSegs_da;
-dynArr_t tempEndPts_da;
 char tempCustom[4096];
 
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
@@ -1337,7 +1337,7 @@ static toDesignSchema_t * LoadSegs(
 
 	pp = dp->paths;
 	if (loadPoints) {
-		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+		TempEndPtsReset();
 //		for ( i=0; i<dp->floatCnt; i++ )
 //			if ( *(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) == 0.0 )
 //				if (dp->type != NTO_CORNU &&
@@ -1350,7 +1350,7 @@ static toDesignSchema_t * LoadSegs(
 
 		switch (dp->type) {
 		case NTO_REGULAR:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
+			TempEndPtsSet( 3 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
 				(newTurnLen0), fabs(newTurnOff0), angle0 ) )
 				return NULL;
@@ -1359,13 +1359,13 @@ static toDesignSchema_t * LoadSegs(
 			points[1].x = (newTurnLen1);
 			points[2].y = fabs(newTurnOff0);
 			points[2].x = (newTurnLen0);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
-			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0-angle0;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
+			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0-angle0;
 			break;
 
 		case NTO_CURVED:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
+			TempEndPtsSet( 3 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
 				(newTurnLen0), fabs(newTurnOff0), angle0 ) )
 				return NULL;
@@ -1384,13 +1384,13 @@ static toDesignSchema_t * LoadSegs(
 			points[0].x = points[0].y = 0.0;
 			points[1].y = fabs(newTurnOff0); points[1].x = (newTurnLen0);
 			points[2].y = fabs(newTurnOff1); points[2].x = (newTurnLen1);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(2).pos = points[1]; tempEndPts(2).angle = 90.0-angle0;
-			tempEndPts(1).pos = points[2]; tempEndPts(1).angle = 90.0-angle1;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(2)->pos = points[1]; TempEndPt(2)->angle = 90.0-angle0;
+			TempEndPt(1)->pos = points[2]; TempEndPt(1)->angle = 90.0-angle1;
 			break;
 #ifndef MKTURNOUT
 		case NTO_CORNU:
-
+			TempEndPtsSet( 3 );
 			radii[0] =  fabs(newTurnRad2); /*Toe*/
 			radii[1] =  fabs(newTurnRad0); /*Inner*/
 			radii[2] =  fabs(newTurnRad1); /*Outer*/
@@ -1402,15 +1402,15 @@ static toDesignSchema_t * LoadSegs(
 			points[1].y = (newTurnOff0); points[1].x = (newTurnLen0); /*Inner*/
 			points[2].y = (newTurnOff1); points[2].x = (newTurnLen1); /*Outer*/
 
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(2).pos = points[1]; tempEndPts(2).angle = 90.0-angles[1];
-			tempEndPts(1).pos = points[2]; tempEndPts(1).angle = 90.0-angles[2];
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(2)->pos = points[1]; TempEndPt(2)->angle = 90.0-angles[1];
+			TempEndPt(1)->pos = points[2]; TempEndPt(1)->angle = 90.0-angles[2];
 
 			break;
 #endif
 		case NTO_WYE:
 		case NTO_3WAY:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, ((dp->type==NTO_3WAY)?4:3) );
+			TempEndPtsSet( ((dp->type==NTO_3WAY)?4:3) );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
 						(newTurnLen0), fabs(newTurnOff0), angle0 ) )
 				return NULL;
@@ -1435,17 +1435,17 @@ static toDesignSchema_t * LoadSegs(
 			} else {
 				pp = (dp->type==NTO_3WAY ? &Tri1Schema : &Wye1Schema );
 			}
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angle0;
-			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0+angle1;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0-angle0;
+			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0+angle1;
 			if (dp->type == NTO_3WAY) {
-				tempEndPts(3).pos = points[7]; tempEndPts(3).angle = 90.0;
+				TempEndPt(3)->pos = points[7]; TempEndPt(3)->angle = 90.0;
 			}
 			break;
 #ifndef MKTURNOUT
 		case NTO_CORNUWYE:
 		case NTO_CORNU3WAY:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, ((dp->type==NTO_CORNU3WAY)?4:3) );
+			TempEndPtsSet( ((dp->type==NTO_CORNU3WAY)?4:3) );
 
 			/*
 			 * Construct Wye and 3 Way Turnouts with Cornu curves
@@ -1485,23 +1485,23 @@ static toDesignSchema_t * LoadSegs(
 
 			pp = (dp->type==NTO_CORNU3WAY ? &CornuTriSchema : &CornuWyeSchema );
 
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
 
 			if (newTurnRad0<0.0) {
-				tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0+angles[1];
+				TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0+angles[1];
 			} else {
-				tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angles[1];
+				TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0-angles[1];
 			}
 			if (newTurnRad1<0.0) {
-				tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0-angles[2];
+				TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0-angles[2];
 			} else {
-				tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0+angles[2];
+				TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0+angles[2];
 			}
 			if (dp->type == NTO_CORNU3WAY) {
 				if (newTurnRad3<0.0) {
-					tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0+angles[3];
+					TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0+angles[3];
 				} else {
-					tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0-angles[3];
+					TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0-angles[3];
 				}
 			}
 
@@ -2063,7 +2063,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				else
 					pp = &DoubleSlipSchema;
 			}
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 4 );
+			TempEndPtsSet( 4 );
 			points[0].x = points[0].y = points[1].y = 0.0;
 			points[1].x = (newTurnLen0);
 			pos.y = 0; pos.x = (newTurnLen0)/2.0;
@@ -2082,16 +2082,16 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				points[7].y = -points[5].y;
 				points[7].x = cpos.x-(points[5].x-cpos.x);
 			}
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
-			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 270.0+angle0;
-			tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0+angle0;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
+			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 270.0+angle0;
+			TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0+angle0;
 			break;
 
 		case NTO_R_CROSSOVER:
 		case NTO_L_CROSSOVER:
 		case NTO_D_CROSSOVER:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 4 );
+			TempEndPtsSet( 4 );
 			d = (newTurnLen0)/2.0 - newTurnTrackGauge;
 			if (d < 0.0) {
 				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
@@ -2112,35 +2112,35 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			points[9].y = fabs(newTurnOff0)-points[5].y; points[9].x = points[5].x;
 			points[10].y = fabs(newTurnOff0); points[10].x = points[6].x;
 			points[11].y = points[9].y; points[11].x = points[7].x;
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
-			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 270.0;
-			tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
+			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 270.0;
+			TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0;
 			break;
 
 		case NTO_STR_SECTION:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 2 );
+			TempEndPtsSet( 2 );
 			points[0].y = points[0].x = 0;
 			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen0);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
 			break;
 
 		case NTO_CRV_SECTION:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 2 );
+			TempEndPtsSet( 2 );
 			points[0].y = points[0].x = 0;
 			points[1].y = (newTurnLen0) * (1.0 - cos( D2R(angle0) ) );
 			points[1].x = (newTurnLen0) * sin( D2R(angle0) );
 			radii[0] = -(newTurnLen0);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angle0;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0-angle0;
 			break;
 
 		case NTO_BUMPER:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 1 );
+			TempEndPtsSet( 1 );
 			points[0].y = points[0].x = 0;
 			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen0);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
 			break;
 
 		default:
@@ -2162,7 +2162,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 
 #ifndef MKTURNOUT
 	if(dp->type == NTO_CORNU) {
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
+			TempEndPtsSet( 3 );
 
 			DIST_T end_length = MIN_TRACK_LENGTH;
 
@@ -2613,18 +2613,18 @@ static void NewTurnPrint(
 
 			DrawSegs( &newTurnout_d, zero, 270.0, &tempSegs(0), tempSegs_da.cnt, newTurnTrackGauge, wDrawColorBlack );
 
-			for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
-				pos.x = -tempEndPts(ep).pos.y;
-				pos.y = tempEndPts(ep).pos.x;
-				Translate( &p0, pos, tempEndPts(ep).angle+90+270.0,
+			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+				pos.x = -TempEndPt(ep)->pos.y;
+				pos.y = TempEndPt(ep)->pos.x;
+				Translate( &p0, pos, TempEndPt(ep)->angle+90+270.0,
 						newTurnTrackGauge );
-				Translate( &p1, pos, tempEndPts(ep).angle+270+270.0,
+				Translate( &p1, pos, TempEndPt(ep)->angle+270+270.0,
 						newTurnTrackGauge );
 				DrawLine( &newTurnout_d, p0, p1, 0, wDrawColorBlack );
-				Translate( &p0, pos, tempEndPts(ep).angle+270.0,
+				Translate( &p0, pos, TempEndPt(ep)->angle+270.0,
 						newTurnout_d.size.y/2.0 );
 				DrawStraightTrack( &newTurnout_d, pos, p0,
-						tempEndPts(ep).angle+270.0,
+						TempEndPt(ep)->angle+270.0,
 						NULL, wDrawColorBlack, 0 );
 			}
 
@@ -2740,7 +2740,7 @@ static void NewTurnOk( void * context )
 //		 radii_ends = &radii[0];
 	 }
 	to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
+						pp->paths, TempEndPtsCount(), TempEndPt(0), FALSE, options );
 	to->customInfo = customInfoP;
 #endif
 	if (f) {
@@ -2750,7 +2750,7 @@ static void NewTurnOk( void * context )
 #endif
 		fprintf( f, "\tU %s\n", customInfoP );
 		WriteCompoundPathsEndPtsSegs( f, pp->paths, tempSegs_da.cnt, &tempSegs(0),
-				tempEndPts_da.cnt, &tempEndPts(0) );
+				TempEndPtsCount(), TempEndPt(0) );
 	}
 
 	switch (curDesign->type) {
@@ -2760,8 +2760,8 @@ static void NewTurnOk( void * context )
 		points[4].y = - points[4].y;
 		radii[0] = - radii[0];
 		LoadSegs( curDesign, FALSE );
-		tempEndPts(2).pos.y = - tempEndPts(2).pos.y;
-		tempEndPts(2).angle = 180.0 - tempEndPts(2).angle;
+		TempEndPt(2)->pos.y = - TempEndPt(2)->pos.y;
+		TempEndPt(2)->angle = 180.0 - TempEndPt(2)->angle;
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc, newTurnRightPartno );
 		tempSegs_da.cnt = segCnt;
 #ifndef MKTURNOUT
@@ -2770,7 +2770,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
+			pp->paths, TempEndPtsCount(), TempEndPt(0), FALSE, options );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2779,7 +2779,7 @@ static void NewTurnOk( void * context )
 			if (doCustomInfoLine)
 #endif
 			fprintf( f, "\tU %s\n", customInfoP );
-			WriteCompoundPathsEndPtsSegs( f, pp->paths, tempSegs_da.cnt, &tempSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
+			WriteCompoundPathsEndPtsSegs( f, pp->paths, tempSegs_da.cnt, &tempSegs(0), TempEndPtsCount(), TempEndPt(0) );
 		}
 		break;
 	case NTO_CURVED:
@@ -2805,10 +2805,10 @@ static void NewTurnOk( void * context )
 		angles[5] = -angles[5];
 		angles[6] = -angles[6];
 		LoadSegs( curDesign, FALSE );
-		tempEndPts(1).pos.y = - tempEndPts(1).pos.y;
-		tempEndPts(1).angle = 180.0 - tempEndPts(1).angle;
-		tempEndPts(2).pos.y = - tempEndPts(2).pos.y;
-		tempEndPts(2).angle = 180.0 - tempEndPts(2).angle;
+		TempEndPt(1)->pos.y = - TempEndPt(1)->pos.y;
+		TempEndPt(1)->angle = 180.0 - TempEndPt(1)->angle;
+		TempEndPt(2)->pos.y = - TempEndPt(2)->pos.y;
+		TempEndPt(2)->angle = 180.0 - TempEndPt(2)->angle;
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc, newTurnRightPartno );
 		//tempSegs_da.cnt = segCnt;
 #ifndef MKTURNOUT
@@ -2817,7 +2817,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-			pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
+			pp->paths, TempEndPtsCount(), TempEndPt(0), FALSE, options );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2826,7 +2826,7 @@ static void NewTurnOk( void * context )
 			if (doCustomInfoLine)
 #endif
 			fprintf( f, "\tU %s\n", customInfoP );
-			WriteCompoundPathsEndPtsSegs( f, pp->paths, tempSegs_da.cnt, &tempSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
+			WriteCompoundPathsEndPtsSegs( f, pp->paths, tempSegs_da.cnt, &tempSegs(0), TempEndPtsCount(), TempEndPt(0) );
 		}
 		break;
 	default:

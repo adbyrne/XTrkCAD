@@ -34,6 +34,7 @@
 #include "paths.h"
 #include "track.h"
 #include "trackx.h"
+#include "trkendpt.h"
 #include "misc.h"
 #include "ctrain.h"
 #include "common-ui.h"
@@ -866,23 +867,23 @@ EXPORT void SetEndPts( track_p trk, EPINX_T cnt )
 	EPINX_T inx;
 
 LOG1( log_readTracks, ( "SetEndPts( T%d, %d )\n", trk->index, cnt ) )
-	if (cnt > 0 && tempEndPts_da.cnt != cnt) {
-		InputError( "Incorrect number of End Points for track, read %d, expected %d.\n", FALSE, tempEndPts_da.cnt, cnt );
+	if (cnt > 0 && TempEndPtsCount() != cnt) {
+		InputError( "Incorrect number of End Points for track, read %d, expected %d.\n", FALSE, TempEndPtsCount(), cnt );
 		return;
 	}
-	if (tempEndPts_da.cnt) {
-		trk->endPt = (trkEndPt_p)MyMalloc( tempEndPts_da.cnt * sizeof *trk->endPt );
+	if (TempEndPtsCount()) {
+		trk->endPt = (trkEndPt_p)MyMalloc( TempEndPtsCount() * sizeof *trk->endPt );
 	} else {
 		trk->endPt = NULL;
 	}
-	for ( inx=0; inx<tempEndPts_da.cnt; inx++ ) {
-		trk->endPt[inx].index = tempEndPts(inx).index;
-		trk->endPt[inx].pos = tempEndPts(inx).pos;
-		trk->endPt[inx].angle = tempEndPts(inx).angle;
-		trk->endPt[inx].elev = tempEndPts(inx).elev;
-		trk->endPt[inx].option = tempEndPts(inx).option;
+	for ( inx=0; inx<TempEndPtsCount(); inx++ ) {
+		trk->endPt[inx].index = TempEndPt(inx)->index;
+		trk->endPt[inx].pos = TempEndPt(inx)->pos;
+		trk->endPt[inx].angle = TempEndPt(inx)->angle;
+		trk->endPt[inx].elev = TempEndPt(inx)->elev;
+		trk->endPt[inx].option = TempEndPt(inx)->option;
 	}
-	trk->endCnt = tempEndPts_da.cnt;
+	trk->endCnt = TempEndPtsCount();
 }
 
 

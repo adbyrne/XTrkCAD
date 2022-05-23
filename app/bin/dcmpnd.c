@@ -28,6 +28,7 @@
 #include "include/paramfile.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "common-ui.h"
 
 /*****************************************************************************
@@ -190,7 +191,7 @@ EXPORT void UpdateTitleMark(
 	}
 	DYNARR_APPEND( updateTitleElement, updateTitles_da, 10 );
 	ut = &updateTitles(updateTitles_da.cnt-1);
-	if ( tempEndPts_da.cnt > 0)
+	if ( TempEndPtsCount() > 0)
 		ut->type = updateTurnout;
 	else
 		ut->type = updateStructure;

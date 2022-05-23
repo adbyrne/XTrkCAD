@@ -53,6 +53,7 @@
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "common-ui.h"
 
 #ifdef UTFCONVERT
@@ -314,7 +315,7 @@ static BOOL_T blockCheckContiguousPath()
 	coOrd endPtOrig = zero;
 	BOOL_T IsConnectedP;
 	trkEndPt_p endPtP;
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 
 	for ( inx=0; inx<blockTrk_da.cnt; inx++ ) {
 		trk = blockTrk(inx).t;
@@ -324,15 +325,15 @@ static BOOL_T blockCheckContiguousPath()
 			trk1 = GetTrkEndTrk(trk,ep);
 			if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
 				/* boundary EP */
-				for ( epN=0; epN<tempEndPts_da.cnt; epN++ ) {
-					dist = FindDistance( GetTrkEndPos(trk,ep), tempEndPts(epN).pos );
-					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - tempEndPts(epN).angle + connectAngle/2.0 );
+				for ( epN=0; epN<TempEndPtsCount(); epN++ ) {
+					endPtP = TempEndPt(epN);
+					dist = FindDistance( GetTrkEndPos(trk,ep), TempEndPt(epN)->pos );
+					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - TempEndPt(epN)->angle + connectAngle/2.0 );
 					if ( dist < connectDistance && angle < connectAngle )
 						break;
 				}
-				if ( epN>=tempEndPts_da.cnt ) {
-					DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
-					endPtP = &tempEndPts(tempEndPts_da.cnt-1);
+				if ( epN>=TempEndPtsCount() ) {
+					endPtP = TempEndPtsAppend();
 					memset( endPtP, 0, sizeof *endPtP );
 					endPtP->pos = GetTrkEndPos(trk,ep);
 					endPtP->angle = GetTrkEndAngle(trk,ep);
@@ -445,9 +446,9 @@ static BOOL_T ReadBlock ( char * line )
 		}
 	}
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
-	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
-		endPtP = &tempEndPts(ep);
+	trk = NewTrack(index, T_BLOCK, TempEndPtsCount(), sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
+	for ( ep=0; ep<TempEndPtsCount(); ep++) {
+		endPtP = TempEndPt(ep);
 		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 	}
 	xx = GetblockData( trk );
@@ -607,9 +608,9 @@ static void BlockOk ( void * junk )
 		UndoStart( _("Create block"), "Create block" );
 		/* Create a block object */
 		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
-		trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
-		for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
-			endPtP = &tempEndPts(ep);
+		trk = NewTrack(0, T_BLOCK, TempEndPtsCount(), sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
+		for ( ep=0; ep<TempEndPtsCount(); ep++) {
+			endPtP = TempEndPt(ep);
 			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 		}
 

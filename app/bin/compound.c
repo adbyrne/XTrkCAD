@@ -30,6 +30,7 @@
 #include "fileio.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "draw.h"
 #include "include/paramfile.h"
 #include "common-ui.h"
@@ -1290,12 +1291,12 @@ BOOL_T ReadCompound(
 	}
 	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE)
 		strcpy( scale, curScaleName );
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 	pathCnt = 0;
 	if ( !ReadSegs() )
 		return FALSE;
 	if ( trkType == T_TURNOUT ) {
-		if ( tempEndPts_da.cnt <= 0 ) {
+		if ( TempEndPtsCount() <= 0 ) {
 			InputError( "Turnout defn without EndPoints", TRUE );
 			return FALSE;
 		}

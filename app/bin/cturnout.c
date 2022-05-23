@@ -35,6 +35,7 @@
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "common-ui.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
@@ -383,7 +384,7 @@ static BOOL_T ReadTurnoutParam(
 	if (cp != NULL)
 		if (!GetArgs((char*)cp, "l", &options))
 			return FALSE;
-	DYNARR_RESET(trkEndPt_t, tempEndPts_da);
+	TempEndPtsReset();
 	pathCnt = 0;
 	if (!ReadSegs())
 		return FALSE;
@@ -392,7 +393,7 @@ static BOOL_T ReadTurnoutParam(
 		pPaths = pathPtr;
 	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pPaths );
 	to = CreateNewTurnout(scale, title, tempSegs_da.cnt, &tempSegs(0),
-			pPaths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
+			pPaths, TempEndPtsCount(), TempEndPt(0), FALSE, options );
 	MyFree(title);
 	if (to == NULL)
 		return FALSE;
@@ -587,14 +588,13 @@ track_p NewHandLaidTurnout(
 	struct extraDataCompound_t* xx;
 	trkSeg_t segs[2];
 	sprintf(message, "\tHand Laid Turnout, Angle=%0.1f\t", frogA);
-	DYNARR_SET(trkEndPt_t, tempEndPts_da, 2);
-	memset(&tempEndPts(0), 0, tempEndPts_da.cnt * sizeof tempEndPts(0));
-	tempEndPts(0).pos = p0;
-	tempEndPts(0).angle = a0;
-	tempEndPts(1).pos = p1;
-	tempEndPts(1).angle = a1;
-	tempEndPts(2).pos = p2;
-	tempEndPts(2).angle = a2;
+	TempEndPtsSet(3);
+	TempEndPt(0)->pos = p0;
+	TempEndPt(0)->angle = a0;
+	TempEndPt(1)->pos = p1;
+	TempEndPt(1)->angle = a1;
+	TempEndPt(2)->pos = p2;
+	TempEndPt(2)->angle = a2;
 	Rotate(&p1, p0, -a0);
 	p1.x -= p0.x;
 	p1.y -= p0.y;
@@ -609,7 +609,7 @@ track_p NewHandLaidTurnout(
 	segs[1].color = wDrawColorBlack;
 	segs[1].u.l.pos[0] = zero;
 	segs[1].u.l.pos[1] = p2;
-	trk = NewCompound(T_TURNOUT, 0, p0, a0, message, 3, &tempEndPts(0), (PATHPTR_T)"Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs);
+	trk = NewCompound(T_TURNOUT, 0, p0, a0, message, 3, TempEndPt(0), (PATHPTR_T)"Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs);
 	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	xx->handlaid = TRUE;
 
@@ -2309,15 +2309,15 @@ static void AddTurnout(void)
 
 	UndoStart(_("Place New Turnout"), "addTurnout");
 
-	DYNARR_SET(trkEndPt_t, tempEndPts_da, curTurnout->endCnt);
+	TempEndPtsSet( curTurnout->endCnt);
 	DYNARR_SET(junk_t, connection_da, curTurnout->endCnt);
 	DYNARR_SET(junk_t, leftover_da, curTurnout->endCnt);
 
 	for (i = 0; i < curTurnout->endCnt; i++) {
 		coOrd posI;
 		posI = curTurnout->endPt[i].pos;
-		tempEndPts(i).pos = AddCoOrd(Dto.pos, posI, Dto.angle);
-		tempEndPts(i).angle = NormalizeAngle(curTurnout->endPt[i].angle + Dto.angle);
+		TempEndPt(i)->pos = AddCoOrd(Dto.pos, posI, Dto.angle);
+		TempEndPt(i)->angle = NormalizeAngle(curTurnout->endPt[i].angle + Dto.angle);
 	}
 
 	AuditTracks("addTurnout begin");
@@ -2328,7 +2328,7 @@ static void AddTurnout(void)
 		connection(i).ep = -1;
 		leftover(i).ep = -1;
 		/* connect each endPt ... */
-		epPos = tempEndPts(i).pos;
+		epPos = TempEndPt(i)->pos;
 		if ((trk = OnTrack(&epPos, FALSE, TRUE)) != NULL &&    //Adjust epPos onto existing track
 			(!GetLayerFrozen(GetTrkLayer(trk))) &&
 			(!GetLayerModule(GetTrkLayer(trk))) &&
@@ -2342,13 +2342,13 @@ static void AddTurnout(void)
 					nearest = -1;
 					goto nextEnd;  //Track already chosen in use
 				}
-				if (dd > FindDistance(epPos, tempEndPts(j).pos)) {
-					dd = FindDistance(epPos, tempEndPts(j).pos);
+				if (dd > FindDistance(epPos, TempEndPt(j)->pos)) {
+					dd = FindDistance(epPos, TempEndPt(j)->pos);
 					nearest = j;
 				}
 			}
 			if (nearest != i) continue;    //Not this one
-			d = FindDistance(tempEndPts(i).pos, epPos);
+			d = FindDistance(TempEndPt(i)->pos, epPos);
 			if (GetTrkType(trk) == T_TURNOUT) {
 				ep0 = ep1 = PickEndPoint(epPos, trk);
 				a = GetTrkEndAngle(trk, ep0);
@@ -2356,7 +2356,7 @@ static void AddTurnout(void)
 			else {
 				a = GetAngleAtPoint(trk, epPos, &ep0, &ep1);
 			}
-			aa = fabs(DifferenceBetweenAngles(a, tempEndPts(i).angle));
+			aa = fabs(DifferenceBetweenAngles(a, TempEndPt(i)->angle));
 			if ((QueryTrack(trk, Q_IS_CORNU) && (d < trackGauge * 2)) ||
 				((IsClose(d) && (((ep0 != ep1) && (aa <= connectAngle)) || ((aa <= connectAngle) || (aa > 180 - connectAngle))) &&
 					!(GetTrkType(trk) == T_TURNOUT &&
@@ -2416,7 +2416,7 @@ static void AddTurnout(void)
 	/*
 	 * copy data */
 
-	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), GetParamPaths(curTurnout), curTurnout->segCnt, curTurnout->segs);
+	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, TempEndPtsCount(), TempEndPt(0), GetParamPaths(curTurnout), curTurnout->segCnt, curTurnout->segs);
 	xx = GET_EXTRA_DATA(newTrk, T_TURNOUT, extraDataCompound_t);
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {
