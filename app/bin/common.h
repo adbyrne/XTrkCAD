@@ -222,6 +222,7 @@ typedef struct {
 // FORWARD TYPE DECLS
 typedef struct drawCmd_t * drawCmd_p;
 typedef struct track_t * track_p;
+typedef struct track_t * track_cp;
 typedef struct trkSeg_t * trkSeg_p;
 typedef struct traverseTrack_t * traverseTrack_p;
 typedef struct trkEndPt_t * trkEndPt_p;

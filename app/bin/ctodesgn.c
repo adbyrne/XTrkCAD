@@ -1359,9 +1359,9 @@ static toDesignSchema_t * LoadSegs(
 			points[1].x = (newTurnLen1);
 			points[2].y = fabs(newTurnOff0);
 			points[2].x = (newTurnLen0);
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
-			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0-angle0;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
+			SetEndPt( TempEndPt(2), points[2], 90.0-angle0 );
 			break;
 
 		case NTO_CURVED:
@@ -1384,9 +1384,9 @@ static toDesignSchema_t * LoadSegs(
 			points[0].x = points[0].y = 0.0;
 			points[1].y = fabs(newTurnOff0); points[1].x = (newTurnLen0);
 			points[2].y = fabs(newTurnOff1); points[2].x = (newTurnLen1);
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(2)->pos = points[1]; TempEndPt(2)->angle = 90.0-angle0;
-			TempEndPt(1)->pos = points[2]; TempEndPt(1)->angle = 90.0-angle1;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(2), points[1], 90.0-angle0 );
+			SetEndPt( TempEndPt(1), points[2], 90.0-angle1 );
 			break;
 #ifndef MKTURNOUT
 		case NTO_CORNU:
@@ -1402,15 +1402,14 @@ static toDesignSchema_t * LoadSegs(
 			points[1].y = (newTurnOff0); points[1].x = (newTurnLen0); /*Inner*/
 			points[2].y = (newTurnOff1); points[2].x = (newTurnLen1); /*Outer*/
 
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(2)->pos = points[1]; TempEndPt(2)->angle = 90.0-angles[1];
-			TempEndPt(1)->pos = points[2]; TempEndPt(1)->angle = 90.0-angles[2];
-
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(2), points[1], 90.0-angles[1] );
+			SetEndPt( TempEndPt(1), points[2], 90.0-angles[2] );
 			break;
 #endif
 		case NTO_WYE:
 		case NTO_3WAY:
-			TempEndPtsSet( ((dp->type==NTO_3WAY)?4:3) );
+			TempEndPtsSet( (dp->type==NTO_3WAY)?4:3 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
 						(newTurnLen0), fabs(newTurnOff0), angle0 ) )
 				return NULL;
@@ -1435,17 +1434,17 @@ static toDesignSchema_t * LoadSegs(
 			} else {
 				pp = (dp->type==NTO_3WAY ? &Tri1Schema : &Wye1Schema );
 			}
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0-angle0;
-			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0+angle1;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0-angle0 );
+			SetEndPt( TempEndPt(2), points[2], 90.0+angle1 );
 			if (dp->type == NTO_3WAY) {
-				TempEndPt(3)->pos = points[7]; TempEndPt(3)->angle = 90.0;
+				SetEndPt( TempEndPt(3), points[7], 90.0 );
 			}
 			break;
 #ifndef MKTURNOUT
 		case NTO_CORNUWYE:
 		case NTO_CORNU3WAY:
-			TempEndPtsSet( ((dp->type==NTO_CORNU3WAY)?4:3) );
+			TempEndPtsSet( (dp->type==NTO_CORNU3WAY)?4:3 );
 
 			/*
 			 * Construct Wye and 3 Way Turnouts with Cornu curves
@@ -1485,23 +1484,23 @@ static toDesignSchema_t * LoadSegs(
 
 			pp = (dp->type==NTO_CORNU3WAY ? &CornuTriSchema : &CornuWyeSchema );
 
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
 
 			if (newTurnRad0<0.0) {
-				TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0+angles[1];
+				SetEndPt( TempEndPt(1), points[1], 90.0+angles[1] );
 			} else {
-				TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0-angles[1];
+				SetEndPt( TempEndPt(1), points[1], 90.0-angles[1] );
 			}
 			if (newTurnRad1<0.0) {
-				TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0-angles[2];
+				SetEndPt( TempEndPt(2), points[2], 90.0-angles[2] );
 			} else {
-				TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 90.0+angles[2];
+				SetEndPt( TempEndPt(2), points[2], 90.0+angles[2] );
 			}
 			if (dp->type == NTO_CORNU3WAY) {
 				if (newTurnRad3<0.0) {
-					TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0+angles[3];
+					SetEndPt( TempEndPt(3), points[3], 90.0+angles[3] );
 				} else {
-					TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0-angles[3];
+					SetEndPt( TempEndPt(3), points[3], 90.0-angles[3] );
 				}
 			}
 
@@ -2082,10 +2081,10 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				points[7].y = -points[5].y;
 				points[7].x = cpos.x-(points[5].x-cpos.x);
 			}
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
-			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 270.0+angle0;
-			TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0+angle0;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
+			SetEndPt( TempEndPt(2), points[2], 270.0+angle0 );
+			SetEndPt( TempEndPt(3), points[3], 90.0+angle0 );
 			break;
 
 		case NTO_R_CROSSOVER:
@@ -2112,18 +2111,18 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			points[9].y = fabs(newTurnOff0)-points[5].y; points[9].x = points[5].x;
 			points[10].y = fabs(newTurnOff0); points[10].x = points[6].x;
 			points[11].y = points[9].y; points[11].x = points[7].x;
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
-			TempEndPt(2)->pos = points[2]; TempEndPt(2)->angle = 270.0;
-			TempEndPt(3)->pos = points[3]; TempEndPt(3)->angle = 90.0;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
+			SetEndPt( TempEndPt(2), points[2], 270.0 );
+			SetEndPt( TempEndPt(3), points[3], 90.0 );
 			break;
 
 		case NTO_STR_SECTION:
 			TempEndPtsSet( 2 );
 			points[0].y = points[0].x = 0;
 			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen0);
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0 );
 			break;
 
 		case NTO_CRV_SECTION:
@@ -2132,15 +2131,15 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			points[1].y = (newTurnLen0) * (1.0 - cos( D2R(angle0) ) );
 			points[1].x = (newTurnLen0) * sin( D2R(angle0) );
 			radii[0] = -(newTurnLen0);
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
-			TempEndPt(1)->pos = points[1]; TempEndPt(1)->angle = 90.0-angle0;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
+			SetEndPt( TempEndPt(1), points[1], 90.0-angle0 );
 			break;
 
 		case NTO_BUMPER:
 			TempEndPtsSet( 1 );
 			points[0].y = points[0].x = 0;
 			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen0);
-			TempEndPt(0)->pos = points[0]; TempEndPt(0)->angle = 270.0;
+			SetEndPt( TempEndPt(0), points[0], 270.0 );
 			break;
 
 		default:
@@ -2614,17 +2613,18 @@ static void NewTurnPrint(
 			DrawSegs( &newTurnout_d, zero, 270.0, &tempSegs(0), tempSegs_da.cnt, newTurnTrackGauge, wDrawColorBlack );
 
 			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
-				pos.x = -TempEndPt(ep)->pos.y;
-				pos.y = TempEndPt(ep)->pos.x;
-				Translate( &p0, pos, TempEndPt(ep)->angle+90+270.0,
+				pos.x = - GetEndPtPos( TempEndPt(ep) ).y;
+				pos.y = GetEndPtPos( TempEndPt(ep) ).x;
+				ANGLE_T angle = GetEndPtAngle( TempEndPt(ep) );
+				Translate( &p0, pos, angle+90+270.0,
 						newTurnTrackGauge );
-				Translate( &p1, pos, TempEndPt(ep)->angle+270+270.0,
+				Translate( &p1, pos, angle+270+270.0,
 						newTurnTrackGauge );
 				DrawLine( &newTurnout_d, p0, p1, 0, wDrawColorBlack );
-				Translate( &p0, pos, TempEndPt(ep)->angle+270.0,
+				Translate( &p0, pos, angle+270.0,
 						newTurnout_d.size.y/2.0 );
 				DrawStraightTrack( &newTurnout_d, pos, p0,
-						TempEndPt(ep)->angle+270.0,
+						angle+270.0,
 						NULL, wDrawColorBlack, 0 );
 			}
 
@@ -2650,6 +2650,9 @@ static void NewTurnOk( void * context )
 	FLOAT_T flt;
 	wIndex_t segCnt;
 	char * customInfoP;
+
+	coOrd pos;
+	ANGLE_T angle;
 
 #ifndef MKTURNOUT
 	if ( ! ParamCheckInputs( &turnDesignPG, (wControl_p)turnDesignPG.okB ) )
@@ -2760,8 +2763,11 @@ static void NewTurnOk( void * context )
 		points[4].y = - points[4].y;
 		radii[0] = - radii[0];
 		LoadSegs( curDesign, FALSE );
-		TempEndPt(2)->pos.y = - TempEndPt(2)->pos.y;
-		TempEndPt(2)->angle = 180.0 - TempEndPt(2)->angle;
+		pos = GetEndPtPos(TempEndPt(2));
+		angle = GetEndPtAngle(TempEndPt(2));
+		pos.y = - pos.y;
+		angle = 180.0 - angle;
+		SetEndPt(TempEndPt(2), pos, angle );
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc, newTurnRightPartno );
 		tempSegs_da.cnt = segCnt;
 #ifndef MKTURNOUT
@@ -2805,10 +2811,16 @@ static void NewTurnOk( void * context )
 		angles[5] = -angles[5];
 		angles[6] = -angles[6];
 		LoadSegs( curDesign, FALSE );
-		TempEndPt(1)->pos.y = - TempEndPt(1)->pos.y;
-		TempEndPt(1)->angle = 180.0 - TempEndPt(1)->angle;
-		TempEndPt(2)->pos.y = - TempEndPt(2)->pos.y;
-		TempEndPt(2)->angle = 180.0 - TempEndPt(2)->angle;
+		pos = GetEndPtPos(TempEndPt(1));
+		angle = GetEndPtAngle(TempEndPt(1));
+		pos.y = - pos.y;
+		angle = 180.0 - angle;
+		SetEndPt( TempEndPt(1), pos, angle );
+		pos = GetEndPtPos(TempEndPt(2));
+		angle = GetEndPtAngle(TempEndPt(2));
+		pos.y = - pos.y;
+		angle = 180.0 - angle;
+		SetEndPt( TempEndPt(2), pos, angle );
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc, newTurnRightPartno );
 		//tempSegs_da.cnt = segCnt;
 #ifndef MKTURNOUT
@@ -3451,7 +3463,7 @@ BOOL_T WriteCompoundPathsEndPtsSegs(
 		wIndex_t segCnt,
 		trkSeg_p segs,
 		EPINX_T endPtCnt,
-		trkEndPt_t * endPts )
+		trkEndPt_p endPts )
 {
 	int i;
 	PATHPTR_T pp;
@@ -3464,7 +3476,9 @@ BOOL_T WriteCompoundPathsEndPtsSegs(
 	}
 	for ( i=0; i<endPtCnt; i++ )
 		rc &= fprintf( f, "\tE %0.6f %0.6f %0.6f\n",
-				endPts[i].pos.x, endPts[i].pos.y, endPts[i].angle )>0;
+				GetEndPtPos(EndPtIndex(endPts,i)).x,
+				GetEndPtPos(EndPtIndex(endPts,i)).y,
+				GetEndPtAngle(EndPtIndex(endPts,i)) )>0;
 #ifdef MKTURNOUT
 	if ( specialLine[0] )
 		rc &= fprintf( f, "%s\n", specialLine );

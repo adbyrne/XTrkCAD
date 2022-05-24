@@ -114,7 +114,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 	trkSeg_p segData,
 	PATHPTR_T paths,
 	EPINX_T endPtCnt,
-	trkEndPt_t* endPts,
+	trkEndPt_p endPts,
 	wBool_t updateList,
 	long options)
 {
@@ -588,13 +588,10 @@ track_p NewHandLaidTurnout(
 	struct extraDataCompound_t* xx;
 	trkSeg_t segs[2];
 	sprintf(message, "\tHand Laid Turnout, Angle=%0.1f\t", frogA);
-	TempEndPtsSet(3);
-	TempEndPt(0)->pos = p0;
-	TempEndPt(0)->angle = a0;
-	TempEndPt(1)->pos = p1;
-	TempEndPt(1)->angle = a1;
-	TempEndPt(2)->pos = p2;
-	TempEndPt(2)->angle = a2;
+	TempEndPtsSet( 2 );
+	SetEndPt( TempEndPt(0), p0, a0 );
+	SetEndPt( TempEndPt(1), p1, a1 );
+	SetEndPt( TempEndPt(2), p2, a2 );
 	Rotate(&p1, p0, -a0);
 	p1.x -= p0.x;
 	p1.y -= p0.y;
@@ -1779,7 +1776,7 @@ static BOOL_T MakeParallelTurnout(
 
 	if (newTrk) {
 		if (track) {
-			endPt = MyMalloc(GetTrkEndPtCnt(trk) * sizeof(trkEndPt_t));
+			endPt = (trkEndPt_p)MyMalloc(GetTrkEndPtCnt(trk) * sizeof(trkEndPt_t));
 			endPt[0].pos = endPts[0];
 			endPt[0].angle = GetTrkEndAngle(trk, 0);
 			endPt[1].pos = endPts[1];
@@ -1789,8 +1786,9 @@ static BOOL_T MakeParallelTurnout(
 
 
 			PATHPTR_T paths = GetPaths(trk); // MakeParallelTurnout
-			*newTrk = NewCompound(T_TURNOUT, 0, endPt[0].pos, endPt[0].angle + 90.0,
-				yy->title, 2, endPt, paths,
+			*newTrk = NewCompound(T_TURNOUT, 0,
+				GetEndPtPos(TempEndPt(0)), GetEndPtAngle(TempEndPt(0)) + 90.0,
+				yy->title, 2, TempEndPt(0), paths,
 				yy->segCnt, yy->segs);
 			xx = GET_EXTRA_DATA(*newTrk, T_TURNOUT, extraDataCompound_t);
 			xx->customInfo = yy->customInfo;

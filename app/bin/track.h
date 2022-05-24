@@ -24,6 +24,8 @@
 #define TRACK_H
 
 #include "common.h"
+#include "trkendpt.h"
+#include "trkendptx.h"
 
 extern TRKTYP_T T_NOTRACK;
 
@@ -190,30 +192,11 @@ typedef struct {
 typedef enum { ELEV_NONE, ELEV_DEF, ELEV_COMP, ELEV_GRADE, ELEV_IGNORE, ELEV_STATION } elevMode_e;
 #define ELEV_MASK		0x07
 #define ELEV_VISIBLE	0x08
-typedef struct {
-		int option;
-		coOrd doff;
-		union {
-			DIST_T height;
-			char * name;
-		} u;
-		BOOL_T cacheSet;
-		double cachedElev;
-		double cachedGrade;
-		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
-typedef struct trkEndPt_t {
-		coOrd pos;
-		ANGLE_T angle;
-		TRKINX_T index;
-		track_p track;
-		elev_t elev;
-		long option;
-		} trkEndPt_t;
+
+struct trkEndPt_t;
 typedef struct trkEndPt_t * trkEndPt_p;
 
-extern dynArr_t tempEndPts_da;
-#define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
 typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;

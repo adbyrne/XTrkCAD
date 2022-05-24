@@ -327,24 +327,23 @@ static BOOL_T blockCheckContiguousPath()
 				/* boundary EP */
 				for ( epN=0; epN<TempEndPtsCount(); epN++ ) {
 					endPtP = TempEndPt(epN);
-					dist = FindDistance( GetTrkEndPos(trk,ep), TempEndPt(epN)->pos );
-					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - TempEndPt(epN)->angle + connectAngle/2.0 );
+					dist = FindDistance( GetTrkEndPos(trk,ep), GetEndPtPos(endPtP) );
+					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - GetEndPtAngle(endPtP) + connectAngle/2.0 );
 					if ( dist < connectDistance && angle < connectAngle )
 						break;
 				}
 				if ( epN>=TempEndPtsCount() ) {
 					endPtP = TempEndPtsAppend();
-					memset( endPtP, 0, sizeof *endPtP );
-					endPtP->pos = GetTrkEndPos(trk,ep);
-					endPtP->angle = GetTrkEndAngle(trk,ep);
+					SetEndPt( endPtP, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );
 					/*endPtP->track = trk1;*/
 					/* These End Points are dummies --
 					   we don't want DeleteTrack to look at
 					   them. */
-					endPtP->track = NULL;
-					endPtP->index = (trk1?GetEndPtConnectedToMe(trk1,trk):-1);
-					endPtOrig.x += endPtP->pos.x;
-					endPtOrig.y += endPtP->pos.y;
+					SetEndPtTrack( endPtP, NULL );
+					// TODO-EPP What is this for?
+					SetEndPtEndPt( endPtP, (trk1?GetEndPtConnectedToMe(trk1,trk):-1) );
+					endPtOrig.x += GetEndPtPos(endPtP).x;
+					endPtOrig.y += GetEndPtPos(endPtP).y;
 				}
 			} else {
 				IsConnectedP = TRUE;
@@ -449,7 +448,7 @@ static BOOL_T ReadBlock ( char * line )
 	trk = NewTrack(index, T_BLOCK, TempEndPtsCount(), sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
 	for ( ep=0; ep<TempEndPtsCount(); ep++) {
 		endPtP = TempEndPt(ep);
-		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
+		SetTrkEndPoint( trk, ep, GetEndPtPos(endPtP), GetEndPtAngle(endPtP) );
 	}
 	xx = GetblockData( trk );
 	LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
@@ -611,7 +610,7 @@ static void BlockOk ( void * junk )
 		trk = NewTrack(0, T_BLOCK, TempEndPtsCount(), sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
 		for ( ep=0; ep<TempEndPtsCount(); ep++) {
 			endPtP = TempEndPt(ep);
-			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
+			SetTrkEndPoint( trk, ep, GetEndPtPos(endPtP), GetEndPtAngle(endPtP) );
 		}
 
 		xx = GetblockData( trk );
