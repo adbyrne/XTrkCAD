@@ -100,7 +100,7 @@ static EPINX_T FindEP(
 	DIST_T dist;
 	EPINX_T ep;
 	for ( ep=0; ep<epCnt; ep++ ) {
-		dist = FindDistance( pos, endPts[ep].pos );
+		dist = FindDistance( pos, GetEndPtPos( EndPtIndex( endPts, ep ) ) );
 		if ( dist < connectDistance )
 			return ep;
 	}
@@ -1257,15 +1257,12 @@ if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 				endPtAngle = angle;
 			}
 		}
-		qsort( TempEndPt(0), TempEndPtsCount(), sizeof *(trkEndPt_p)NULL,  CmpEndPtAngle );
+		qsort( TempEndPt(0), TempEndPtsCount(), EndPtSize(1),  CmpEndPtAngle );
 		if ( NormalizeAngle( GetEndPtAngle(TempEndPt(0)) - GetEndPtAngle(TempEndPt(TempEndPtsCount()-1)) ) >
 			 NormalizeAngle( GetEndPtAngle(TempEndPt(1)) - GetEndPtAngle(TempEndPt(0)) ) ) {
 
 			for ( ep=1; ep<(TempEndPtsCount()+1)/2; ep++ ) {
-				trkEndPt_t tempEndPt;
-				tempEndPt = *TempEndPt(ep);
-				*TempEndPt(ep) = *TempEndPt(TempEndPtsCount()-ep);
-				*TempEndPt(TempEndPtsCount()-ep) = tempEndPt;
+				SwapEndPts( TempEndPt(0), ep, TempEndPtsCount()-ep );
 			}
 		}
 if ( log_group >= 1 && logTable(log_group).level >= 3 ) {

@@ -24,15 +24,12 @@
 #define TRACK_H
 
 #include "common.h"
-#include "trkendpt.h"
-#include "trkendptx.h"
 
 extern TRKTYP_T T_NOTRACK;
 
 struct track_t ;
 typedef struct track_t * track_p;
 typedef struct track_t * track_cp;
-extern track_p tempTrack;
 extern wIndex_t trackCount;
 extern wBool_t bFreeTrack;
 extern long colorTrack;

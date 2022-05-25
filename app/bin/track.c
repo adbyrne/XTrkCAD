@@ -967,9 +967,7 @@ EXPORT void FlipTrack(
 	if ( trackCmds(trk->type)->flip )
 		trackCmds(trk->type)->flip( trk, orig, angle );
 	if ( QueryTrack( trk, Q_FLIP_ENDPTS ) ) {
-		trkEndPt_t endPt = trk->endPt[0];
-		trk->endPt[0] = trk->endPt[1];
-		trk->endPt[1] = endPt;
+		SwapEndPts( trk->endPt, 0, 1 );
 	}
 }
 

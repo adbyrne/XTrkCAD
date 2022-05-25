@@ -25,6 +25,7 @@
 #include "param.h"
 #include "track.h"
 #include "trkendpt.h"
+#include "trkendptx.h"
 #include "misc.h"
 #include "cbezier.h"
 #include "tbezier.h"
