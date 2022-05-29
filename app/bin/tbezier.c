@@ -1626,8 +1626,8 @@ EXPORT void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T wid
 	FixUpBezier(pos, xx, bTrack);
 	ComputeBezierBoundingBox( p, xx );
 	if ( bTrack ) {
-		SetTrkEndPointWithTrk( p, 0, pos[0], xx->a0 );
-		SetTrkEndPointWithTrk( p, 1, pos[3], xx->a1 );
+		SetTrkEndPointSilent( p, 0, pos[0], xx->a0 );
+		SetTrkEndPointSilent( p, 1, pos[3], xx->a1 );
 		CheckTrackLength( p );
 		SetTrkBits( p, TB_HIDEDESC );
 	}

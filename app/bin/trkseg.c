@@ -25,7 +25,6 @@
 #include "param.h"
 #include "track.h"
 #include "trkendpt.h"
-#include "trkendptx.h"
 #include "misc.h"
 #include "cbezier.h"
 #include "tbezier.h"
@@ -1385,6 +1384,8 @@ EXPORT BOOL_T ReadSegs( void )
 			break;
 		case SEG_UNCEP:
 		case SEG_CONEP:
+			rc = GetEndPtArg( cp, type, improvedEnds );
+#ifdef LATER_EPP
 			e = TempEndPtsAppend();
 			if (type == SEG_CONEP) {
 				if ( !GetArgs( cp, "dc", &e->index, &cp ) ) {
@@ -1445,6 +1446,7 @@ EXPORT BOOL_T ReadSegs( void )
 					}
 				}
 			}
+#endif
 			break;
 		case SEG_PATH:
 			while (isspace(*cp)) cp++;

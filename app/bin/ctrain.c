@@ -1391,10 +1391,10 @@ static void PlaceCar(
     ANGLE_T tempAng;
     tempAng = xx->trvTrk.angle;
     Translate( &tempPos, xx->trvTrk.pos, tempAng, dists[0] );
-    SetTrkEndPointWithTrk( car, 0, tempPos, tempAng );
+    SetTrkEndPointSilent( car, 0, tempPos, tempAng );
     tempAng = NormalizeAngle( tempAng+180.0 );
     Translate( &tempPos, xx->trvTrk.pos, tempAng, dists[1] );
-    SetTrkEndPointWithTrk( car, 1, tempPos, tempAng );
+    SetTrkEndPointSilent( car, 1, tempPos, tempAng );
 
     LOG(log_trainMove, 4, ("%s @ [%0.3f,%0.3f] A%0.3f\n", CarItemNumber(xx->item),
                            xx->trvTrk.pos.x, xx->trvTrk.pos.y, xx->trvTrk.angle))

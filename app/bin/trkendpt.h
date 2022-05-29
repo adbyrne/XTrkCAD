@@ -31,7 +31,6 @@ void TempEndPtsSet( EPINX_T );
 EPINX_T TempEndPtsCount( void );
 trkEndPt_p TempEndPt( EPINX_T );
 trkEndPt_p TempEndPtsAppend( void );
-trkEndPt_p TempEndPtsCopy();
 
 CSIZE_T EndPtSize( EPINX_T );
 coOrd GetEndPtPos( trkEndPt_p );
@@ -39,9 +38,17 @@ ANGLE_T GetEndPtAngle( trkEndPt_p );
 void SetEndPt( trkEndPt_p, coOrd, ANGLE_T );
 track_p GetEndPtTrack( trkEndPt_p );
 EPINX_T GetEndPtEndPt( trkEndPt_p );
+TRKINX_T GetEndPtIndex( trkEndPt_p );
 void SetEndPtTrack( trkEndPt_p, track_p);
 void SetEndPtEndPt( trkEndPt_p, EPINX_T );
 trkEndPt_p EndPtIndex( trkEndPt_p, EPINX_T );
 
 void SwapEndPts( trkEndPt_p, EPINX_T, EPINX_T );
+BOOL_T GetEndPtArg( char *, char, BOOL_T );
+void ClrEndPtElevCache( EPINX_T, trkEndPt_p );
+
+extern BOOL_T bWriteEndPtDirectIndex;
+extern BOOL_T bWriteEndPtExporting;
+
+wBool_t CompareEndPt( char * cp, track_p trk1, track_p trk2, EPINX_T ep );
 #endif
