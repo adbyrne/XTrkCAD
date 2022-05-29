@@ -224,7 +224,6 @@ void ParamRestoreAll( void );
 void ParamSaveAll( void );
 
 void ParamMenuPush( void * );
-extern int paramHiliteFast;
 void ParamHilite( wWin_p, wControl_p, BOOL_T );
 wBool_t ParamCheckInputs( paramGroup_p pg, wControl_p b );
 
