@@ -29,8 +29,6 @@
 #include "track.h"
 #include "common-ui.h"
 
-EXPORT int paramHiliteFast = FALSE;
-
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
 EXPORT int paramLen;
@@ -589,6 +587,8 @@ EXPORT void ParamLoadControl(
 			if ( (p->option & PDO_NOTBLANK) && strlen( p->oldD.s ) == 0 ) {
 				ParamHilite( p->group->win, p->control, TRUE );
 				p->bInvalid = TRUE;
+			} else {
+				p->bInvalid = FALSE;
 			}
 			break;
 		case PD_MESSAGE:
@@ -1809,11 +1809,10 @@ EXPORT void ParamHilite(
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
-		if ( inPlayback && !paramHiliteFast )
-			wPause(500);
+		if ( inPlayback ) {
+			wPause(playbackDelay*4+1);
+		}
 	} else {
-//		if ( inPlayback && !paramHiliteFast )
-//			wPause(500);
 		wControlHilite( control, FALSE );
 	}
 }
@@ -2013,6 +2012,9 @@ static void ParamPlayback( char * line )
 				if (p->control) {
 					if (p->type == PD_STRING) {
 						wStringSetValue((wString_p)p->control, line);
+						p->bInvalid =
+						     (p->option & PDO_NOTBLANK) &&
+						     strlen( line ) == 0;
 					} else {
 						wTextClear((wText_p)p->control);
 						wTextAppend((wText_p)p->control, line);

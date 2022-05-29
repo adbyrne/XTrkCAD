@@ -34,6 +34,8 @@
 #include "misc.h"
 #include "common-ui.h"
 
+static int log_cornuturnoutdesigner;
+
 dynArr_t tempSegs_da;
 dynArr_t tempEndPts_da;
 char tempCustom[4096];
@@ -1395,8 +1397,8 @@ static toDesignSchema_t * LoadSegs(
 			radii[1] =  fabs(newTurnRad0); /*Inner*/
 			radii[2] =  fabs(newTurnRad1); /*Outer*/
 			angles[0] = 0.0; 		  /*Base*/
-			angles[1] = newTurnAngle0; /*Inner*/
-			angles[2] = newTurnAngle1; /*Outer*/
+			angles[1] = angle0; /*Inner*/
+			angles[2] = angle1; /*Outer*/
 			pp = &CornuSchema;
 			points[0].x = points[0].y = 0.0;
 			points[1].y = (newTurnOff0); points[1].x = (newTurnLen0); /*Inner*/
@@ -1470,9 +1472,9 @@ static toDesignSchema_t * LoadSegs(
 			radii[2] = (newTurnRad1); /*Right*/
 			radii[3] = (newTurnRad3); /*Center*/
 			angles[0] = 0.0; 		  /*Base*/
-			angles[1] = newTurnAngle0; /*Left*/
-			angles[2] = newTurnAngle1; /*Right*/
-			angles[3] = newTurnAngle3; /*Center*/
+			angles[1] = angle0; /*Left*/
+			angles[2] = angle1; /*Right*/
+			angles[3] = angle3; /*Center*/
 			points[0].x = points[0].y = 0.0; /*Base*/
 			points[1].y = (newTurnOff0);	/* Left */
 			points[1].x = (newTurnLen0);
@@ -1532,9 +1534,9 @@ static toDesignSchema_t * LoadSegs(
 					Rotate(&end_points[i],end_centers[i],end_arcs[i]);
 					end_angles[i] = angles[i]+end_arcs[i];
 				}
-LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n",
-					i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],end_angles[i],radii[i],end_arcs[i],
-					end_centers[i].x,end_centers[i].y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n", \
+					i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],end_angles[i],radii[i],end_arcs[i], \
+					end_centers[i].x,end_centers[i].y) );
 			}
 
 			wBool_t LH_main = TRUE, LH_first = TRUE;
@@ -1786,8 +1788,8 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = zero;
 				temp_p->u.l.pos[1] = cornuData.pos[0];
-LogPrintf( "ctoDes1: P0(%f,%f) P1(%f,%f) \n",
-				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: P0(%f,%f) P1(%f,%f) \n", \
+				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
 				temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
@@ -1804,10 +1806,10 @@ LogPrintf( "ctoDes1: P0(%f,%f) P1(%f,%f) \n",
 				coOrd rp0,rp1;
 				Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
 				Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,temp_p->u.c.radius);
-LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
-		temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y,
-		points[0].x,points[0].y,end_points[0].x,end_points[0].y,
-		rp0.x,rp0.y,rp1.x,rp1.y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n", \
+		temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y, \
+		points[0].x,points[0].y,end_points[0].x,end_points[0].y, \
+		rp0.x,rp0.y,rp1.x,rp1.y) ) ;
 			}
 			//If Radius zero, just a straight to the First Toe if offset
 			if (cornuData.radius[0] == 0.0) {
@@ -1861,8 +1863,8 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 					temp_p->width = 0.0;
 					temp_p->u.l.pos[0] = cornuData.pos[5];
 					temp_p->u.l.pos[1] = points[3];
-	LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
-					temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
+	LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+					temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  )) ;
 				} else {
 					DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
 					temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
@@ -1879,10 +1881,10 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 					coOrd rp0,rp1;
 					Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
 					Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,temp_p->u.c.radius);
-	LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
-						temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y,
-						points[3].x,points[3].y,end_points[3].x,end_points[3].y,
-						rp0.x,rp0.y,rp1.x,rp1.y);
+	LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n", \
+						temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y, \
+						points[3].x,points[3].y,end_points[3].x,end_points[3].y, \
+						rp0.x,rp0.y,rp1.x,rp1.y) );
 				}
 
 				CenterEndSeg = cornuSegs_da.cnt+Toe2Seg;
@@ -1905,8 +1907,8 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[7];
 				temp_p->u.l.pos[1] = points[1];
-LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
-				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
@@ -1923,10 +1925,10 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				coOrd rp0,rp1;
 				Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
 				Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,temp_p->u.c.radius);
-LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
-					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y,
-					points[1].x,points[1].y,end_points[1].x,end_points[1].y,
-					rp0.x,rp0.y,rp1.x,rp1.y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n", \
+					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y, \
+					points[1].x,points[1].y,end_points[1].x,end_points[1].y, \
+					rp0.x,rp0.y,rp1.x,rp1.y) );
 			}
 
 			LeftEndSeg = cornuSegs_da.cnt+CenterEndSeg;
@@ -1947,8 +1949,8 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[9];
 				temp_p->u.l.pos[1] = points[2];
-LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
-				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
@@ -1965,10 +1967,10 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				coOrd rp0,rp1;
 				Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
 				Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,temp_p->u.c.radius);
-LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
-					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y,
-					points[2].x,points[2].y,end_points[2].x,end_points[2].y,
-					rp0.x,rp0.y,rp1.x,rp1.y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n", \
+					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y, \
+					points[2].x,points[2].y,end_points[2].x,end_points[2].y, \
+					rp0.x,rp0.y,rp1.x,rp1.y) );
 			}
 
 			RightEndSeg = cornuSegs_da.cnt+LeftEndSeg;
@@ -2179,9 +2181,9 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 					Rotate(&end_points[i],end_centers[i],(i>0?1:-1)*end_arcs[i]);
 					end_angles[i] = angles[i]-(i>0?1:-1)*end_arcs[i];
 				}
-LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n",
-					i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],end_angles[i],radii[i],end_arcs[i],
-					end_centers[i].x,end_centers[i].y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,%f) \n", \
+					i+1,points[i].x,points[i].y,end_points[i].x,end_points[i].y,angles[i],end_angles[i],radii[i],end_arcs[i], \
+					end_centers[i].x,end_centers[i].y) );
 			}
 
 
@@ -2275,8 +2277,8 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = zero;
 				temp_p->u.l.pos[1] = cornuData.pos[1];
-LogPrintf( "ctoDes1: P0(%f,%f) P1(%f,%f) \n",
-				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: P0(%f,%f) P1(%f,%f) \n", \
+				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
 				temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
@@ -2293,10 +2295,10 @@ LogPrintf( "ctoDes1: P0(%f,%f) P1(%f,%f) \n",
 				coOrd rp0,rp1;
 				Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
 				Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,temp_p->u.c.radius);
-LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
-		temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y,
-		points[0].x,points[0].y,end_points[0].x,end_points[0].y,
-		rp0.x,rp0.y,rp1.x,rp1.y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n", \
+		temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y, \
+		points[0].x,points[0].y,end_points[0].x,end_points[0].y, \
+		rp0.x,rp0.y,rp1.x,rp1.y) );
 
 				/* Base to Toe in tempSegs array */
 				CallCornuNoBez(&cornuData.pos[0],&cornuData.center[0],& cornuData.angle[0],&cornuData.radius[0],&tempSegs_da);
@@ -2317,8 +2319,8 @@ LogPrintf( "ctoDes1: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f), EP(%f,%f) RP0(%f,%f)
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[3];
 				temp_p->u.l.pos[1] = end_points[2];
-LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
-				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
+				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
@@ -2335,10 +2337,10 @@ LogPrintf( "ctoDes2: P0(%f,%f) P1(%f,%f) \n",
 				coOrd rp0,rp1;
 				Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
 				Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,temp_p->u.c.radius);
-LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
-					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y,
-					points[2].x,points[2].y,end_points[2].x,end_points[2].y,
-					rp0.x,rp0.y,rp1.x,rp1.y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n", \
+					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y, \
+					points[2].x,points[2].y,end_points[2].x,end_points[2].y, \
+					rp0.x,rp0.y,rp1.x,rp1.y) );
 			}
 
 			int OuterEndSeg = cornuSegs_da.cnt + ToeSeg;
@@ -2360,8 +2362,8 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				temp_p->width = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[5];
 				temp_p->u.l.pos[1] = points[1];
-LogPrintf( "ctoDes3: P0(%f,%f) P1(%f,%f) \n",
-				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  );
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes3: P0(%f,%f) P1(%f,%f) \n", \
+				temp_p->u.l.pos[0].x,temp_p->u.l.pos[0].y,temp_p->u.l.pos[1].x,temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
@@ -2378,10 +2380,10 @@ LogPrintf( "ctoDes3: P0(%f,%f) P1(%f,%f) \n",
 				coOrd rp0,rp1;
 				Translate(&rp0,temp_p->u.c.center,temp_p->u.c.a0,temp_p->u.c.radius);
 				Translate(&rp1,temp_p->u.c.center,temp_p->u.c.a0+temp_p->u.c.a1,temp_p->u.c.radius);
-LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n",
-					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y,
-					points[1].x,points[1].y,end_points[1].x,end_points[1].y,
-					rp0.x,rp0.y,rp1.x,rp1.y);
+LOG( log_cornuturnoutdesigner, 1, ( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) RP1(%f,%f)\n", \
+					temp_p->u.c.radius,temp_p->u.c.a0,temp_p->u.c.a1,temp_p->u.c.center.x,temp_p->u.c.center.y, \
+					points[1].x,points[1].y,end_points[1].x,end_points[1].y, \
+					rp0.x,rp0.y,rp1.x,rp1.y) );
 			}
 
 			int InnerEndSeg = cornuSegs_da.cnt + OuterEndSeg;
@@ -3248,6 +3250,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 	}
 	newTurnRoadbedColor = wDrawColorBlack;
 	includeNontrackSegments = TRUE;
+	log_cornuturnoutdesigner = LogFindIndex( "cornuturnoutdesigner" );
 }
 #endif
 
