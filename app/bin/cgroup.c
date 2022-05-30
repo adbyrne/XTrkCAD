@@ -247,7 +247,6 @@ LOG( log_group, 1, ( "Ungroup( T%d )\n", GetTrkIndex(trk) ) );
 			track_p trk1 = GetTrkEndTrk( trk, ep );
 			EPINX_T ep1;
 			ep1 = trk1 ? GetEndPtConnectedToMe( trk1, trk ) : -1 ;
-			epp = TempEndPt(ep);
 			SetEndPt( epp, pos, angle );
 			SetEndPtTrack( epp, trk1 );
 			// Remember what EP on trk1 was connecting to me

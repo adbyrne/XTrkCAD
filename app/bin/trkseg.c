@@ -1385,68 +1385,6 @@ EXPORT BOOL_T ReadSegs( void )
 		case SEG_UNCEP:
 		case SEG_CONEP:
 			rc = GetEndPtArg( cp, type, improvedEnds );
-#ifdef LATER_EPP
-			e = TempEndPtsAppend();
-			if (type == SEG_CONEP) {
-				if ( !GetArgs( cp, "dc", &e->index, &cp ) ) {
-									rc = FALSE;
-									/*??*/break;
-				}
-			} else {
-				e->index = -1;
-			}
-			if ( !GetArgs( cp, "pfc",
-				&e->pos, &e->angle, &cp) ) {
-				rc = FALSE;
-				/*??*/break;
-			}
-			e->elev.option = 0;
-			e->elev.u.height = 0.0;
-			e->elev.doff = zero;
-			e->option = 0;
-			if (improvedEnds) {				//E4 and T4
-				if (!GetArgs( cp, "lpc", &option, &e->elev.doff, &cp )) {
-					rc = FALSE;
-					/*??*/break;
-				}
-				switch (option&ELEV_MASK) {
-					case ELEV_STATION:
-						GetArgs( cp, "qc", &e->elev.u.name, &cp);
-						break;
-					default:
-						GetArgs( cp, "fc", &e->elev.u.height, &cp);   //First height
-				}
-				DIST_T height2;
-				if (!GetArgs( cp, "flLlc", &height2, &option2, &e->elev.option, &e->option, &cp ) ) {
-					rc = FALSE;
-					break;
-				}
-				if (option2) e->elev.option |= ELEV_VISIBLE;
-				GetArgs(cp, "fc", &ignoreFloat, &cp);
-				break;
-			}
-			if ( cp != NULL ) {
-				if (paramVersion < 7) {
-					GetArgs( cp, "dfp", &e->elev.option,  &e->elev.u.height, &e->elev.doff, &cp );
-					/*??*/break;
-				}
-				GetArgs( cp, "lpc", &option, &e->elev.doff, &cp );
-				e->option = option >> 8;
-				e->elev.option = (int)(option&0xFF);
-				if ( (e->elev.option&ELEV_MASK) != ELEV_NONE ) {
-					switch (e->elev.option&ELEV_MASK) {
-					case ELEV_DEF:
-						GetArgs( cp, "fc", &e->elev.u.height, &cp );
-						break;
-					case ELEV_STATION:
-						GetArgs( cp, "qc", &e->elev.u.name, &cp );
-						/*??*/break;
-					default:
-						;
-					}
-				}
-			}
-#endif
 			break;
 		case SEG_PATH:
 			while (isspace(*cp)) cp++;

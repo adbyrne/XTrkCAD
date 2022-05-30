@@ -588,7 +588,7 @@ track_p NewHandLaidTurnout(
 	struct extraDataCompound_t* xx;
 	trkSeg_t segs[2];
 	sprintf(message, "\tHand Laid Turnout, Angle=%0.1f\t", frogA);
-	TempEndPtsSet( 2 );
+	TempEndPtsSet( 3 );
 	SetEndPt( TempEndPt(0), p0, a0 );
 	SetEndPt( TempEndPt(1), p1, a1 );
 	SetEndPt( TempEndPt(2), p2, a2 );
