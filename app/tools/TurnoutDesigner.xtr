@@ -872,41 +872,41 @@ END$MESSAGE
 STEP
 
 PARAMETER misc cmdCustmgm
-PARAMETER custmgm inx 0 	Turnout Designer	N	Reg L	Regular Left
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Reg L	Regular Left
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Reg R	Regular Right
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Reg R	Regular Right
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Crv L	Curved Left
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Crv L	Curved Left
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Crv R	Curved Right
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Crv R	Curved Right
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Cor Crv L	Cornu Curved Left
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Cor Crv L	Cornu Curved Left
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Cor Crv R	Cornu Curved Right
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Cor Crv R	Cornu Curved Right
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Wye	Wye
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Wye	Wye
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Cor Wye	Cornu Wye
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Cor Wye	Cornu Wye
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	3 Way	3-Way
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	3 Way	3-Way
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Cor 3 Way	Cornu 3-Way
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Cor 3 Way	Cornu 3-Way
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Xing	Crossing
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Xing	Crossing
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	S Slip	Single Slip
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	S Slip	Single Slip
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	D Slip	Double Slip
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	D Slip	Double Slip
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Xovr R	Right Crossover
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Xovr R	Right Crossover
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Xovr L	Left Crossover
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Xovr L	Left Crossover
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Xovr D	Double Crossover
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Xovr D	Double Crossover
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Str	Straight
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Str	Straight
 PARAMETER custmgm delete
-PARAMETER custmgm inx 0 	Turnout Designer	N	Crv	Curved
+PARAMETER custmgm inx 0 	Turnout Designer	DEMO	Crv	Curved
 PARAMETER custmgm delete
 PARAMETER custmgm ok
 
