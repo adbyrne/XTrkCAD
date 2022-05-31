@@ -129,6 +129,7 @@ EXPORT EPINX_T TempEndPtsCount( void )
 
 EXPORT trkEndPt_p TempEndPt( EPINX_T ep )
 {
+	CHECK( ep < tempEndPts_da.cnt );
 	return &DYNARR_N( trkEndPt_t, tempEndPts_da, ep );
 }
 

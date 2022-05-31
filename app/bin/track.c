@@ -402,6 +402,7 @@ EXPORT EPINX_T GetTrkEndPtCnt( track_cp trk )
 
 EXPORT trkEndPt_p GetTrkEndPt(track_cp trk, EPINX_T ep )
 {
+	CHECK( ep < GetTrkEndPtCnt(trk) );
 	return EndPtIndex( trk->endPt, ep );
 }
 

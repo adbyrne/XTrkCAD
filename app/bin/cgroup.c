@@ -459,7 +459,10 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, pos.x, pos.y, 
 					}
 					REORIGIN1( pos, xx->angle, xx->orig );
 					angle = NormalizeAngle( xx->angle+angle );
-					eps[ep] = FindEP( TempEndPtsCount()-epCnt1, TempEndPt(epCnt1), pos );
+					eps[ep] = -1;
+					if ( TempEndPtsCount()-epCnt1 > 0 ) {
+						eps[ep] = FindEP( TempEndPtsCount()-epCnt1, TempEndPt(epCnt1), pos );
+					}
 					if ( eps[ep] < 0 ) {
 						epp = TempEndPtsAppend();
 						eps[ep] = TempEndPtsCount()-1-epCnt1;

@@ -2163,7 +2163,6 @@ LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,
 
 #ifndef MKTURNOUT
 	if(dp->type == NTO_CORNU) {
-			TempEndPtsSet( 3 );
 
 			DIST_T end_length = MIN_TRACK_LENGTH;
 
