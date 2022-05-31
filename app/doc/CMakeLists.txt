@@ -14,8 +14,6 @@ set_target_properties(
    PROPERTIES FOLDER Appl-Help
 )
 
-add_dependencies(helpsystem messagefiles)
-
 target_sources(helpsystem
 	PRIVATE
 	${CMAKE_CURRENT_BINARY_DIR}/intro.but
