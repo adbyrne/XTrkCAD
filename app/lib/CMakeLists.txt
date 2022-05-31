@@ -56,9 +56,9 @@ if(PANDOC_FOUND)
 	install(FILES ${outfile} ${changelogout}
 			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 			)
-else(PANDOC_FOUND)			
+else()			
 	message(STATUS "Pandoc is not available on this system, Readme.txt is not generated!")
-endif(PANDOC_FOUND)
+endif()
 	
 if(UNIX AND NOT APPLE)
     install(PROGRAMS
@@ -73,4 +73,4 @@ if(UNIX AND NOT APPLE)
 		xtrkcad.png
 		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/pixmaps"
 		)
-endif(UNIX AND NOT APPLE)
+endif()
