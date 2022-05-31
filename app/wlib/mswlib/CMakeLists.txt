@@ -1,11 +1,12 @@
 #
 # build the Win32 variant of the wlib
 #
-# For handlling of bitmaps the FreeImage library is required
-#
 
-find_package(FreeImage REQUIRED)
-target_include_directories(xtrkcad-wlib PRIVATE ${FREEIMAGE_INCLUDE_PATH})
+
+target_include_directories(xtrkcad-wlib 
+	PRIVATE 
+	${xtrkcad-lib_SOURCE_DIR}
+)
 
 if(XTRKCAD_USE_GETTEXT)
 	if(WIN32)
@@ -42,15 +43,17 @@ target_sources(xtrkcad-wlib
 	)
 
 target_link_libraries(xtrkcad-wlib 
+	PRIVATE
 	Htmlhelp 
 	msimg32 
 	shlwapi
-	${FREEIMAGE_LIBRARY})
+	FreeImage::FreeImage
+)
 
 install(FILES
 	${FREEIMAGE_SHAREDLIB}
 	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-	)
+)
 
 if(XTRKCAD_TESTING AND CMOCKA_FOUND)
 	add_subdirectory( unittest )

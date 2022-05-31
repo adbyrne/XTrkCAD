@@ -1,4 +1,12 @@
 # Configure the platform specific settings
+#
+# determine processor target architecture
+
+if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+	set(ARCH64 ON CACHE BOOL "Target Architecture: x64")
+else ()
+	set(ARCH64 OFF CACHE BOOL "Target Architecture: x86")
+endif ()
 
 # Setup high-level build options ...
 if(UNIX)
@@ -6,7 +14,6 @@ if(UNIX)
     set(XTRKCAD_USE_GTK_DEFAULT ON)
 
     # Configure help display and i18n
-
     if(APPLE)
         set(CMAKE_MACOSX_RPATH 0)
 	    set(XTRKCAD_USE_GETTEXT_DEFAULT OFF)
@@ -14,29 +21,27 @@ if(UNIX)
 	    pkg_check_modules(GTK_WEBKIT "webkit-1.0" QUIET)
         if(GTK_WEBKIT_FOUND)
             set(XTRKCAD_USE_BROWSER_DEFAULT OFF)
-        else(GTK_WEBKIT_FOUND)
+        else()
             set(XTRKCAD_USE_BROWSER_DEFAULT ON)
-        endif(GTK_WEBKIT_FOUND)
-    else(APPLE)
+        endif()
+    else()
         set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
         set(XTRKCAD_USE_BROWSER_DEFAULT ON)
-   endif(APPLE)
-endif(UNIX)
+   endif()
+endif()
 
 # Set Win64 flag when a 64 bit build is selected
 if(WIN32)
     set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 
-	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		set(WIN64 ON CACHE BOOL "Win x64")
-        set ( XTRKCAD_ARCH_SUBDIR "x64")
-		if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	if (ARCH64)
+        set( XTRKCAD_ARCH_SUBDIR "x64")
+		if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   			set(CMAKE_INSTALL_PREFIX "C:/Program Files/XTrkCAD" CACHE PATH "WIN64 Install" FORCE)
-		endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-	else (CMAKE_SIZEOF_VOID_P EQUAL 8)
-		set(WIN64 OFF CACHE BOOL "Win x86")
-        set ( XTRKCAD_ARCH_SUBDIR "x86")
-	endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		endif()
+	else ()
+        set( XTRKCAD_ARCH_SUBDIR "x86")
+	endif ()
 
 	set(XTRKCAD_USE_GTK_DEFAULT OFF)
 
@@ -47,4 +52,4 @@ if(WIN32)
 
 	add_definitions(-DWINDOWS)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif(WIN32)
+endif()

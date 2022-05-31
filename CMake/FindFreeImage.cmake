@@ -11,40 +11,21 @@
 # XTrackCAD specific directory tree is assumed
 #
 
-if (WIN32)
+if(WIN32)
     # Folders for x86/x64
-    if (WIN64)
+	set( FREEIMAGEBASEDIR  "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/FreeImage" )
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
-		PATHS
-	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
+		PATHS ${FREEIMAGEBASEDIR}
 		DOC "The directory where FreeImage.h resides")
 	find_library( FREEIMAGE_LIBRARY
 		NAMES FreeImage freeimage
-		PATHS
-	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
+		PATHS ${FREEIMAGEBASEDIR}
 		DOC "The FreeImage library")
 	find_file( FREEIMAGE_SHAREDLIB
 		NAMES freeimage.DLL
-		PATHS
-	        $ENV{XTCEXTERNALROOT}/x64/FreeImage
+		PATHS ${FREEIMAGEBASEDIR}
 	)
-    else (WIN64)
-	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
-		PATHS
-	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
-		DOC "The directory where FreeImage.h resides")
-	find_library( FREEIMAGE_LIBRARY
-		NAMES FreeImage freeimage
-		PATHS
-	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
-		DOC "The FreeImage library")
-	find_file( FREEIMAGE_SHAREDLIB
-		NAMES freeimage.DLL
-		PATHS
-	        $ENV{XTCEXTERNALROOT}/x86/FreeImage
-	)
-    endif (WIN64)
-else (WIN32)
+else()
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		/usr/include
 		/usr/local/include
@@ -61,16 +42,26 @@ else (WIN32)
 		/sw/lib
 		/opt/local/lib
 		DOC "The FreeImage library")
-endif (WIN32)
+endif()
 
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args( FreeImage
-		DEFAULT_MSG
+		REQUIRED_VARS
 		FREEIMAGE_LIBRARY
 		FREEIMAGE_INCLUDE_PATH
 )
 
-mark_as_advanced(
-	FREEIMAGE_FOUND
-	FREEIMAGE_LIBRARY
-	FREEIMAGE_INCLUDE_PATH
-  FREEIMAGE_SHAREDLIB)
+if(FreeImage_FOUND)
+	mark_as_advanced(
+		FREEIMAGE_FOUND
+		FREEIMAGE_LIBRARY
+		FREEIMAGE_INCLUDE_PATH
+  		FREEIMAGE_SHAREDLIB
+	)
+endif()
+
+if(FreeImage_FOUND AND NOT TARGET FreeImage::FreeImage)
+	add_library(FreeImage::FreeImage UNKNOWN IMPORTED)
+	set_property(TARGET FreeImage::FreeImage PROPERTY IMPORTED_LOCATION ${FREEIMAGE_LIBRARY})
+	target_include_directories(FreeImage::FreeImage INTERFACE ${FREEIMAGE_INCLUDE_PATH})
+endif()

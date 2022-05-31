@@ -16,7 +16,7 @@ target_link_libraries(cnvdsgn xtrkcad-wlib)
 
 if(NOT WIN32)
 	target_link_libraries(cnvdsgn m)
-endif(NOT WIN32)
+endif()
 
 add_custom_target(lines
 	DEPENDS cnvdsgn
@@ -35,7 +35,7 @@ if(WIN32)
             ${CMAKE_CURRENT_BINARY_DIR}
         )
     endmacro(COPYDLLTOBUILD)
-endif(WIN32)
+endif()
 
 
 #
@@ -74,20 +74,14 @@ GENERATE_LIN(tocornu3way)
 # put these targets into the folder  LineSymbols
 set_target_properties(lines cnvdsgn PROPERTIES FOLDER LineSymbols)
 
-add_custom_command(
-       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
-       DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.json
-       COMMAND genhelp ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.json ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
-)
-
-add_library(xtrkcad-lib "$<TARGET_OBJECTS:cJSON>")
+add_library(xtrkcad-lib "")
 
 target_sources(xtrkcad-lib
 	PRIVATE
     appdefaults.c
     archive.c
     archive.h
-    bllnhlp.c
+    ${xtrkcad-lib_BINARY_DIR}/bllnhlp.c
     cbezier.c
     cbezier.h
     cblock.c
@@ -219,6 +213,10 @@ target_sources(xtrkcad-lib
     include/utlist.h
 )
 
+set_source_files_properties(${xtrkcad-lib_BINARY_DIR}/bllnhlp.c 
+    GENERATED 
+)
+
 # add UTF-8 conversion utilities on Windows
 
 if(WIN32)
@@ -227,19 +225,38 @@ if(WIN32)
 				utf8convert.c
 				include/utf8convert.h			
 		)
-endif(WIN32)
+endif()
 
 # This ensures that messages.h has been generated before we build xtrkcad-lib
 add_dependencies(xtrkcad-lib 
-	Help 
-	lines)
+    messagefiles
+    balloonhelp
+	lines
+)
+
+target_include_directories(xtrkcad-lib 
+    PRIVATE
+#	${FREEIMAGE_INCLUDE_PATH} 
+	${messagefile_BINARY_DIR}
+    ${MINIXML_INCLUDE_PATH}    
+)
 
 target_link_libraries(xtrkcad-lib
+    PRIVATE
     cJSON
 	dynstring
 	xtrkcad-cornu
 	xtrkcad-wlib
 )
+
+if(UNIX AND NOT APPLE)
+	target_link_libraries(xtrkcad-lib PRIVATE ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
+else()
+    target_link_libraries(xtrkcad-lib 
+        PRIVATE 
+        Libzip::Libzip 
+        FreeImage::FreeImage)
+endif()
 
 #
 # Start building the main program itself
@@ -255,9 +272,11 @@ if(XTRKCAD_CREATE_SVG)
 			svgoutput.c
 	)
 
-	include_directories(${MINIXML_INCLUDE_PATH})
+	#include_directories(${MINIXML_INCLUDE_PATH})
 	if(WIN32)
+        #target_link_libraries(xtrkcad PRIVATE MINIXML::MINIXML)
 		target_link_libraries(xtrkcad 
+                PRIVATE
 				${MINIXML_LIBRARY})
 
 		# copy the MiniXML DLL to the build directory for easier debugging		
@@ -269,18 +288,18 @@ if(XTRKCAD_CREATE_SVG)
 	    install(FILES ${MINIXML_SHAREDLIB}
         	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	    )
-	endif(WIN32)
+	endif()
 	if(UNIX)
 		if (NOT APPLE)
 			target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
 			target_link_libraries(xtrkcad "pthread")
-		else(NOT APPLE)
+		else()
 			target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
-		endif(NOT APPLE)
-#	else(UNIX)
+		endif()
+#	else()
 #		target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
-	endif(UNIX)
-endif(XTRKCAD_CREATE_SVG)
+	endif()
+endif()
 
 target_sources(xtrkcad
 	PRIVATE
@@ -288,22 +307,19 @@ target_sources(xtrkcad
 		xtrkcad.rc
 )
 
+target_include_directories(xtrkcad
+    PRIVATE
+	${messagefile_BINARY_DIR}    
+)
+
 target_link_libraries(xtrkcad
+    PRIVATE
 		xtrkcad-wlib
 		xtrkcad-lib
 )
 
-if(UNIX AND NOT APPLE)
-	target_link_libraries(xtrkcad PRIVATE ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES} ${ZLIB_LIBRARY})
-else(UNIX AND NOT APPLE)
-	target_link_libraries(xtrkcad  ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES})
-endif(UNIX AND NOT APPLE)
-
-include_directories(${help_BINARY_DIR})
-
-include_directories(${FREEIMAGE_INCLUDE_PATH})
-INCLUDE_DIRECTORIES(${LIBZIP_INCLUDE_DIR_ZIP})
-LINK_DIRECTORIES(${LIBZIP_LIBZIP_LIBRARY})
+#INCLUDE_DIRECTORIES(${LIBZIP_INCLUDE_DIR_ZIP})
+#LINK_DIRECTORIES(${LIBZIP_LIBZIP_LIBRARY})
 
 #
 # Create mkturnout utility
@@ -331,7 +347,7 @@ if(NOT WIN32)
 	if(INTL_LIBRARY)
 		target_link_libraries( mkturnout ${INTL_LIBRARY} )
 	endif(INTL_LIBRARY)
-else(NOT WIN32)
+else()
 	# copy dlls into the build dir for easier debugging
     COPYDLLTOBUILD(${FREEIMAGE_SHAREDLIB})
     COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
@@ -353,7 +369,7 @@ else(NOT WIN32)
 	    DESTINATION ${XTRKCAD_BIN_INSTALL_DIR} 
         OPTIONAL
 	)
-endif(NOT WIN32)
+endif()
 
 # for testing only, should be IF(APPLE) ...
 if(APPLE)
@@ -365,7 +381,7 @@ if(APPLE)
 		TARGETS helphelper
 		RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 		)
-endif(APPLE)
+endif()
 
 install(
 	TARGETS xtrkcad

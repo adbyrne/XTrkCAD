@@ -26,7 +26,7 @@ find_package(Libzip)
 find_package(Zlib)
 
 # Optionally enable SVG export
-find_package(MiniXML)
+find_package(MINIXML)
 if(MINIXML_FOUND)
     set(XTRKCAD_CREATE_SVG 1)
 	message( STATUS "MiniXML found: SVG export is enabled")
@@ -54,6 +54,7 @@ endif(UNIX)
 
 if(WIN32 AND NOT XTRKCAD_USE_GTK)
 	find_package(HTMLHelp REQUIRED)
+	find_package(FreeImage REQUIRED)
 endif(WIN32 AND NOT XTRKCAD_USE_GTK)
 
 # 
