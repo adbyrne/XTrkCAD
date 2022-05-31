@@ -28,6 +28,7 @@
 #include "include/paramfile.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "common-ui.h"
 
 /*****************************************************************************
@@ -190,7 +191,7 @@ EXPORT void UpdateTitleMark(
 	}
 	DYNARR_APPEND( updateTitleElement, updateTitles_da, 10 );
 	ut = &updateTitles(updateTitles_da.cnt-1);
-	if ( tempEndPts_da.cnt > 0)
+	if ( TempEndPtsCount() > 0)
 		ut->type = updateTurnout;
 	else
 		ut->type = updateStructure;
@@ -223,13 +224,13 @@ static BOOL_T CheckCompoundEndPoint(
 	pos.y -= xx->orig.y;
 	if ( flip )
 		pos.y = - pos.y;
-	d = FindDistance( pos, to->endPt[toEp].pos );
+	d = FindDistance( pos, GetEndPtPos(EndPtIndex(to->endPt,toEp)));
 	if ( d > connectDistance ) {
 		sprintf( message, _("End-Point #%d of the selected and actual turnouts are not close"), toEp );
 		return FALSE;
 	}
 	a = GetTrkEndAngle( trk, trkEp );
-	a2 = to->endPt[toEp].angle;
+	a2 = GetEndPtAngle(EndPtIndex(to->endPt,toEp));
 	if ( flip )
 		a2 = 180.0 - a2;
 	a = NormalizeAngle( a - xx->angle - a2 + connectAngle/2.0 );

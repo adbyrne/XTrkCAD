@@ -35,6 +35,7 @@
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "common-ui.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
@@ -113,7 +114,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 	trkSeg_p segData,
 	PATHPTR_T paths,
 	EPINX_T endPtCnt,
-	trkEndPt_t* endPts,
+	trkEndPt_p endPts,
 	wBool_t updateList,
 	long options)
 {
@@ -142,7 +143,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 	FixUpBezierSegs(to->segs, to->segCnt);
 	GetSegBounds(zero, 0.0, segCnt, to->segs, &to->orig, &to->size);
 	to->endCnt = endPtCnt;
-	to->endPt = (trkEndPt_t*)memdup(endPts, (sizeof * endPts) * to->endCnt);
+	to->endPt = (trkEndPt_p)memdup(endPts, EndPtSize(to->endCnt));
 
 	if (options & COMPOUND_OPTION_PATH_OVERRIDE)
 		to->pathOverRide = TRUE;
@@ -383,7 +384,7 @@ static BOOL_T ReadTurnoutParam(
 	if (cp != NULL)
 		if (!GetArgs((char*)cp, "l", &options))
 			return FALSE;
-	DYNARR_RESET(trkEndPt_t, tempEndPts_da);
+	TempEndPtsReset();
 	pathCnt = 0;
 	if (!ReadSegs())
 		return FALSE;
@@ -392,7 +393,7 @@ static BOOL_T ReadTurnoutParam(
 		pPaths = pathPtr;
 	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pPaths );
 	to = CreateNewTurnout(scale, title, tempSegs_da.cnt, &tempSegs(0),
-			pPaths, tempEndPts_da.cnt, &tempEndPts(0), FALSE, options );
+			pPaths, TempEndPtsCount(), TempEndPt(0), FALSE, options );
 	MyFree(title);
 	if (to == NULL)
 		return FALSE;
@@ -587,14 +588,10 @@ track_p NewHandLaidTurnout(
 	struct extraDataCompound_t* xx;
 	trkSeg_t segs[2];
 	sprintf(message, "\tHand Laid Turnout, Angle=%0.1f\t", frogA);
-	DYNARR_SET(trkEndPt_t, tempEndPts_da, 2);
-	memset(&tempEndPts(0), 0, tempEndPts_da.cnt * sizeof tempEndPts(0));
-	tempEndPts(0).pos = p0;
-	tempEndPts(0).angle = a0;
-	tempEndPts(1).pos = p1;
-	tempEndPts(1).angle = a1;
-	tempEndPts(2).pos = p2;
-	tempEndPts(2).angle = a2;
+	TempEndPtsSet( 3 );
+	SetEndPt( TempEndPt(0), p0, a0 );
+	SetEndPt( TempEndPt(1), p1, a1 );
+	SetEndPt( TempEndPt(2), p2, a2 );
 	Rotate(&p1, p0, -a0);
 	p1.x -= p0.x;
 	p1.y -= p0.y;
@@ -609,7 +606,7 @@ track_p NewHandLaidTurnout(
 	segs[1].color = wDrawColorBlack;
 	segs[1].u.l.pos[0] = zero;
 	segs[1].u.l.pos[1] = p2;
-	trk = NewCompound(T_TURNOUT, 0, p0, a0, message, 3, &tempEndPts(0), (PATHPTR_T)"Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs);
+	trk = NewCompound(T_TURNOUT, 0, p0, a0, message, 3, TempEndPt(0), (PATHPTR_T)"Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs);
 	xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 	xx->handlaid = TRUE;
 
@@ -1755,7 +1752,6 @@ static BOOL_T MakeParallelTurnout(
 	ANGLE_T angle = GetTrkEndAngle(trk, 1);
 	struct extraDataCompound_t* xx, * yy;
 	coOrd* endPts;
-	trkEndPt_p endPt;
 	int i;
 	int option;
 	DIST_T d;
@@ -1779,18 +1775,17 @@ static BOOL_T MakeParallelTurnout(
 
 	if (newTrk) {
 		if (track) {
-			endPt = MyMalloc(GetTrkEndPtCnt(trk) * sizeof(trkEndPt_t));
-			endPt[0].pos = endPts[0];
-			endPt[0].angle = GetTrkEndAngle(trk, 0);
-			endPt[1].pos = endPts[1];
-			endPt[1].angle = GetTrkEndAngle(trk, 1);
+			TempEndPtsSet(2);
+			SetEndPt( TempEndPt(0), endPts[0], GetTrkEndAngle(trk,0));
+			SetEndPt( TempEndPt(1), endPts[1], GetTrkEndAngle(trk,1));
 
 			yy = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 
 
 			PATHPTR_T paths = GetPaths(trk); // MakeParallelTurnout
-			*newTrk = NewCompound(T_TURNOUT, 0, endPt[0].pos, endPt[0].angle + 90.0,
-				yy->title, 2, endPt, paths,
+			*newTrk = NewCompound(T_TURNOUT, 0,
+				GetEndPtPos(TempEndPt(0)), GetEndPtAngle(TempEndPt(0)) + 90.0,
+				yy->title, 2, TempEndPt(0), paths,
 				yy->segCnt, yy->segs);
 			xx = GET_EXTRA_DATA(*newTrk, T_TURNOUT, extraDataCompound_t);
 			xx->customInfo = yy->customInfo;
@@ -1814,8 +1809,6 @@ static BOOL_T MakeParallelTurnout(
 			SetTrkEndElev(*newTrk, 0, option, d, NULL);
 			GetTrkEndElev(trk, 1, &option, &d);
 			SetTrkEndElev(*newTrk, 1, option, d, NULL);
-
-			MyFree(endPt);
 		}
 		else {
 			tempSegs(0).color = wDrawColorBlack;
@@ -2016,10 +2009,11 @@ static wIndex_t TOpickEndPoint(
 	DIST_T d, dd;
 	coOrd posI;
 
-	d = FindDistance(p, to->endPt[0].pos);
+	d = FindDistance(p, GetEndPtPos(to->endPt));
+
 	inx = 0;
 	for (i = 1; i < to->endCnt; i++) {
-		posI = to->endPt[i].pos;
+		posI = GetEndPtPos(EndPtIndex(to->endPt, i));
 		if ((dd = FindDistance(p, posI)) < d) {
 			d = dd;
 			inx = i;
@@ -2032,8 +2026,9 @@ static wIndex_t TOpickEndPoint(
 static void HilightEndPt(void)
 {
 	coOrd p, s;
-	p.x = curTurnout->endPt[(int)curTurnoutEp].pos.x - trackGauge;
-	p.y = curTurnout->endPt[(int)curTurnoutEp].pos.y - trackGauge;
+	trkEndPt_p epp = EndPtIndex( curTurnout->endPt, (EPINX_T)curTurnoutEp );
+	p.x = GetEndPtPos(epp).x - trackGauge;
+	p.y = GetEndPtPos(epp).y - trackGauge;
 	s.x = s.y = trackGauge * 2.0 /*+ turnoutD.minSize*/;
 	DrawHilight(&turnoutD, p, s, FALSE);
 }
@@ -2139,8 +2134,9 @@ static void PlaceTurnoutTrial(
 		if (NormalizeAngle(FindAngle(pos, *posR) - angle) < 180.0 && ep0 != ep1)
 			angle = NormalizeAngle(angle + 180);
 		*angle2R = angle;
-		epPos = curTurnout->endPt[(int)curTurnoutEp].pos;
-		*angle1R = angle = NormalizeAngle(angle - curTurnout->endPt[(int)curTurnoutEp].angle);
+		trkEndPt_p epp = EndPtIndex( curTurnout->endPt, (EPINX_T)curTurnoutEp );
+		epPos = GetEndPtPos(epp);
+		*angle1R = angle = NormalizeAngle(angle - GetEndPtAngle(epp) );
 		Rotate(&epPos, zero, angle);
 		pos.x -= epPos.x;
 		pos.y -= epPos.y;
@@ -2152,9 +2148,9 @@ static void PlaceTurnoutTrial(
 //		int ccnt = 0;
 //		DIST_T clarge = DIST_INF;
 		for (i = 0; i < curTurnout->endCnt; i++) {
-			posI = curTurnout->endPt[i].pos;
+			posI = GetEndPtPos(EndPtIndex(curTurnout->endPt,(EPINX_T)i));
 			epPos = AddCoOrd(pos, posI, angle);
-			epAngle = NormalizeAngle(curTurnout->endPt[i].angle + angle);
+			epAngle = NormalizeAngle(GetEndPtAngle(EndPtIndex(curTurnout->endPt, (EPINX_T)i)) + angle);
 			conPos = epPos;
 			if ((trk = OnTrack(&conPos, FALSE, TRUE)) != NULL &&
 				!GetLayerFrozen(GetTrkLayer(trk)) &&
@@ -2240,7 +2236,7 @@ static void PlaceTurnout(
 					maxV = V;
 				}
 			}
-			a3 = NormalizeAngle(Dto.angle + curTurnout->endPt[maxV->ep].angle);
+			a3 = NormalizeAngle(Dto.angle + GetEndPtAngle(EndPtIndex(curTurnout->endPt,maxV->ep)));
 			a = NormalizeAngle(a2 - a3);
 			sina = sin(D2R(a));
 			if (fabs(sina) > 0.01) {
@@ -2270,7 +2266,7 @@ static void PlaceTurnout(
 		Dto.trk = NULL;
 		FormatCompoundTitle(listLabels, curTurnout->title);
 		InfoMessage(_("0 connections (%s)"), message);
-		p = curTurnout->endPt[(int)curTurnoutEp].pos;
+		p = GetEndPtPos(EndPtIndex(curTurnout->endPt,(EPINX_T)curTurnoutEp));
 		Rotate(&p, zero, Dto.angle);
 		Dto.pos.x = pos.x - p.x;
 		Dto.pos.y = pos.y - p.y;
@@ -2309,15 +2305,15 @@ static void AddTurnout(void)
 
 	UndoStart(_("Place New Turnout"), "addTurnout");
 
-	DYNARR_SET(trkEndPt_t, tempEndPts_da, curTurnout->endCnt);
+	TempEndPtsSet( curTurnout->endCnt);
 	DYNARR_SET(junk_t, connection_da, curTurnout->endCnt);
 	DYNARR_SET(junk_t, leftover_da, curTurnout->endCnt);
 
 	for (i = 0; i < curTurnout->endCnt; i++) {
 		coOrd posI;
-		posI = curTurnout->endPt[i].pos;
-		tempEndPts(i).pos = AddCoOrd(Dto.pos, posI, Dto.angle);
-		tempEndPts(i).angle = NormalizeAngle(curTurnout->endPt[i].angle + Dto.angle);
+		trkEndPt_p epp = EndPtIndex( curTurnout->endPt, i);
+		posI = GetEndPtPos( epp );
+		SetEndPt( TempEndPt(i), AddCoOrd(Dto.pos, posI, Dto.angle), NormalizeAngle(GetEndPtAngle(epp) + Dto.angle) );
 	}
 
 	AuditTracks("addTurnout begin");
@@ -2328,7 +2324,7 @@ static void AddTurnout(void)
 		connection(i).ep = -1;
 		leftover(i).ep = -1;
 		/* connect each endPt ... */
-		epPos = tempEndPts(i).pos;
+		epPos = GetEndPtPos( TempEndPt(i) );
 		if ((trk = OnTrack(&epPos, FALSE, TRUE)) != NULL &&    //Adjust epPos onto existing track
 			(!GetLayerFrozen(GetTrkLayer(trk))) &&
 			(!GetLayerModule(GetTrkLayer(trk))) &&
@@ -2342,13 +2338,14 @@ static void AddTurnout(void)
 					nearest = -1;
 					goto nextEnd;  //Track already chosen in use
 				}
-				if (dd > FindDistance(epPos, tempEndPts(j).pos)) {
-					dd = FindDistance(epPos, tempEndPts(j).pos);
+				DIST_T dd1 = FindDistance( epPos, GetEndPtPos(TempEndPt(j)));
+				if (dd > dd1) {
+					dd = dd1;
 					nearest = j;
 				}
 			}
 			if (nearest != i) continue;    //Not this one
-			d = FindDistance(tempEndPts(i).pos, epPos);
+			d = FindDistance(GetEndPtPos(TempEndPt(i)), epPos);
 			if (GetTrkType(trk) == T_TURNOUT) {
 				ep0 = ep1 = PickEndPoint(epPos, trk);
 				a = GetTrkEndAngle(trk, ep0);
@@ -2356,7 +2353,7 @@ static void AddTurnout(void)
 			else {
 				a = GetAngleAtPoint(trk, epPos, &ep0, &ep1);
 			}
-			aa = fabs(DifferenceBetweenAngles(a, tempEndPts(i).angle));
+			aa = fabs(DifferenceBetweenAngles(a, GetEndPtAngle(TempEndPt(i))));
 			if ((QueryTrack(trk, Q_IS_CORNU) && (d < trackGauge * 2)) ||
 				((IsClose(d) && (((ep0 != ep1) && (aa <= connectAngle)) || ((aa <= connectAngle) || (aa > 180 - connectAngle))) &&
 					!(GetTrkType(trk) == T_TURNOUT &&
@@ -2416,7 +2413,7 @@ static void AddTurnout(void)
 	/*
 	 * copy data */
 
-	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), GetParamPaths(curTurnout), curTurnout->segCnt, curTurnout->segs);
+	newTrk = NewCompound(T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, TempEndPtsCount(), TempEndPt(0), GetParamPaths(curTurnout), curTurnout->segCnt, curTurnout->segs);
 	xx = GET_EXTRA_DATA(newTrk, T_TURNOUT, extraDataCompound_t);
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {
@@ -2690,7 +2687,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 #ifdef NEWROTATE
 		origAngle = Dto.angle;
 #else
-		Rotate(&origPos, Dto.rot0, -(Dto.angle + curTurnout->endPt[(int)curTurnoutEp].angle));
+		Rotate(&origPos, Dto.rot0, -(Dto.angle + GetEndPtAngle(EndPtIndex(curTurnout->endPt,(EPINX_T)curTurnoutEp))));
 #endif
 		validAngle = FALSE;
 		return C_CONTINUE;
@@ -2714,7 +2711,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 			Dto.angle = NormalizeAngle(origAngle + angle);
 #else
 			angle += 180.0;
-			Dto.angle = angle - curTurnout->endPt[(int)curTurnoutEp].angle;
+			Dto.angle = angle - GetEndPtAngle(EndPtIndex(curTurnout->endPt,(EPINX_T)curTurnoutEp));
 #endif
 			Rotate(&Dto.pos, Dto.rot0, angle);
 			LOG(log_turnout, 1, ("RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y));
@@ -2735,12 +2732,12 @@ EXPORT STATUS_T CmdTurnoutAction(
 		DYNARR_RESET(trkSeg_t, anchors_da);
 		if (curTurnout == NULL) return C_CONTINUE;
 		if (MyGetKeyState() & WKEY_SHIFT) {
-			angle = curTurnout->endPt[(int)curTurnoutEp].angle;
+			angle = GetEndPtAngle( EndPtIndex( curTurnout->endPt, (EPINX_T)curTurnoutEp ) );
 			curTurnoutEp++;
 			if (curTurnoutEp >= (long)curTurnout->endCnt)
 				curTurnoutEp = 0;
 			if (Dto.trk == NULL)
-				Dto.angle = NormalizeAngle(Dto.angle + (angle - curTurnout->endPt[(int)curTurnoutEp].angle));
+				Dto.angle = NormalizeAngle(Dto.angle + (angle - GetEndPtAngle( EndPtIndex( curTurnout->endPt, (EPINX_T)curTurnoutEp))));
 			PlaceTurnout(Dto.place, Dto.trk);
 		}
 		else {

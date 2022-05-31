@@ -32,6 +32,7 @@
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "common-ui.h"
 
 
@@ -99,7 +100,7 @@ static EPINX_T FindEP(
 	DIST_T dist;
 	EPINX_T ep;
 	for ( ep=0; ep<epCnt; ep++ ) {
-		dist = FindDistance( pos, endPts[ep].pos );
+		dist = FindDistance( pos, GetEndPtPos( EndPtIndex( endPts, ep ) ) );
 		if ( dist < connectDistance )
 			return ep;
 	}
@@ -233,22 +234,24 @@ LOG( log_group, 1, ( "Ungroup( T%d )\n", GetTrkIndex(trk) ) );
 
 		/* 1: collect EPs
 		 */
-		DYNARR_SET( trkEndPt_t, tempEndPts_da, epCnt );
+		TempEndPtsSet( epCnt );
 		DYNARR_SET( segTrack_t, segTrack_da, segCnt );
 		memset( segTrack_da.ptr, 0, segCnt * sizeof segTrack(0) );
 		for ( ep=0; ep<epCnt; ep++ ) {
-			epp = &tempEndPts(ep);
-			epp->pos = GetTrkEndPos( trk, ep );
-			epp->angle = GetTrkEndAngle( trk, ep );
-			Rotate( &epp->pos, xx->orig, -xx->angle );
-			epp->pos.x -= xx->orig.x;
-			epp->pos.y -= xx->orig.y;
-			epp->track = GetTrkEndTrk( trk, ep );
-			if ( epp->track )
-				epp->index = GetEndPtConnectedToMe( epp->track, trk );
-			else
-				epp->index = -1;
-LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, epp->pos.y, epp->angle, epp->track?GetTrkIndex(epp->track):-1, epp->track?epp->index:-1 ) );
+			epp = TempEndPt(ep);
+			coOrd pos = GetTrkEndPos( trk, ep );
+			Rotate( &pos, xx->orig, -xx->angle );
+			pos.x -= xx->orig.x;
+			pos.y -= xx->orig.y;
+			ANGLE_T angle = GetTrkEndAngle( trk, ep );
+			track_p trk1 = GetTrkEndTrk( trk, ep );
+			EPINX_T ep1;
+			ep1 = trk1 ? GetEndPtConnectedToMe( trk1, trk ) : -1 ;
+			SetEndPt( epp, pos, angle );
+			SetEndPtTrack( epp, trk1 );
+			// Remember what EP on trk1 was connecting to me
+			SetEndPtEndPt( epp, ep1 );
+LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, pos.x, pos.y, angle, trk1?GetTrkIndex(trk1):-1, ep1 ) );
 		}
 
 		/* 3: Count number of times each segment is referenced
@@ -265,7 +268,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 			while ( cp[0] ) {
 				GetSegInxEP( cp[0], &segInx, &segEP );
 				pos = GetSegEndPt( xx->segs+segInx, segEP, FALSE, NULL );
-				segInx1 = FindEP( tempEndPts_da.cnt, &tempEndPts(0), pos );
+				segInx1 = FindEP( TempEndPtsCount(), TempEndPt(0), pos );
 				if ( segInx1 >= 0 ) {
 					segInx1 += segCnt;
 					if ( segInx1 >= refCount_da.cnt ) {
@@ -274,11 +277,9 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 					}
 					refCount(segInx1)++;
 				} else {
-					DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
+					epp = TempEndPtsAppend();
 					DYNARR_APPEND( int, refCount_da, 10 );
-					epp = &tempEndPts(tempEndPts_da.cnt-1);
-					epp->pos = pos;
-					epp->angle = 0;
+					SetEndPt( epp, pos, 0 );
 					segInx1 = refCount_da.cnt-1;
 					refCount(segInx1) = 2;
 				}
@@ -300,16 +301,14 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				}
 				GetSegInxEP( cp[-1], &segInx, &segEP );
 				pos = GetSegEndPt( xx->segs+segInx, 1-segEP, FALSE, NULL );
-				segInx = FindEP( tempEndPts_da.cnt, &tempEndPts(0), pos );
+				segInx = FindEP( TempEndPtsCount(), TempEndPt(0), pos );
 				if ( segInx >= 0 ) {
 					segInx += segCnt;
 					refCount(segInx)++;
 				} else {
-					DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
+					epp = TempEndPtsAppend();
 					DYNARR_APPEND( int, refCount_da, 10 );
-					epp = &tempEndPts(tempEndPts_da.cnt-1);
-					epp->pos = pos;
-					epp->angle = 0;
+					SetEndPt( epp, pos, 0 );
 					segInx = refCount_da.cnt-1;
 					refCount(segInx) = 2;
 				}
@@ -320,7 +319,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 			}
 			cp++;
 		}
-		epCnt1 = tempEndPts_da.cnt;
+		epCnt1 = TempEndPtsCount();
 	
 		/* 4: For each path element, map segment to a mergePt if the adjacent segment
 		 *    and EP is a mergePt
@@ -335,7 +334,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				GetSegInxEP( cp[0], &segInx, &segEP );
 				pos = GetSegEndPt( xx->segs+segInx, segEP, FALSE, NULL );
 				/*REORIGIN1( pos, xx->angle, xx->orig );*/
-				segInx1 = FindEP( tempEndPts_da.cnt, &tempEndPts(0), pos );
+				segInx1 = FindEP( TempEndPtsCount(), TempEndPt(0), pos );
 				if ( segInx1 >= 0 ) {
 					segInx1 += segCnt;
 				}
@@ -360,7 +359,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				GetSegInxEP( cp[-1], &segInx, &segEP );
 				pos = GetSegEndPt( xx->segs+segInx, 1-segEP, FALSE, NULL );
 				/*REORIGIN1( pos, xx->angle, xx->orig );*/
-				segInx = FindEP( tempEndPts_da.cnt, &tempEndPts(0), pos );
+				segInx = FindEP( TempEndPtsCount(), TempEndPt(0), pos );
 				if ( segInx >= 0 ) {
 					segInx += segCnt;
 					for ( inx=0; inx<mergePt_da.cnt; inx++ ) {
@@ -397,11 +396,13 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 	wDrawDelayUpdate( mainD.d, TRUE );
 	if ( turnoutChanged ) {
 		for ( ep=0; ep<epCnt; ep++ ) {
-			epp = &tempEndPts(ep);
-			if ( epp->track ) {
-				DrawEndPt( &mainD, epp->track, epp->index, wDrawColorWhite );
+			epp = TempEndPt(ep);
+			track_p trk1 = GetEndPtTrack(epp);
+			if ( trk1 ) {
+				EPINX_T ep1 = GetEndPtEndPt(epp);
+				DrawEndPt( &mainD, trk1, ep1, wDrawColorWhite );
 				DrawEndPt( &mainD, trk, ep, wDrawColorWhite );
-				DisconnectTracks( trk, ep, epp->track, epp->index );
+				DisconnectTracks( trk, ep, trk1, ep1 );
 			}
 		}
 	}
@@ -435,7 +436,6 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		if ( mp->inx != inx )
 			continue;
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
-		DYNARR_SET( trkEndPt_t, tempEndPts_da, epCnt1 );
 		DYNARR_RESET( char, pathPtr_da );
 		for ( segInx=0; segInx<segCnt; segInx++ ) {
 			if ( refCount(segInx) == inx ) {
@@ -451,7 +451,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				pathPtr(off+2) = '\0';
 				for ( ep=0; ep<2; ep++ ) {
 					pos = GetSegEndPt( xx->segs+segInx, ep, FALSE, &angle );
-					segEP = FindEP( epCnt1, &tempEndPts(0), pos );
+					segEP = FindEP( epCnt1, TempEndPt(0), pos );
 					if ( segEP >= 0 && segEP >= epCnt && segEP < epCnt1 ) {
 						/* was a bumper: no EP */
 						eps[ep] = -1;
@@ -459,14 +459,14 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 					}
 					REORIGIN1( pos, xx->angle, xx->orig );
 					angle = NormalizeAngle( xx->angle+angle );
-					eps[ep] = FindEP( tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), pos );
+					eps[ep] = -1;
+					if ( TempEndPtsCount()-epCnt1 > 0 ) {
+						eps[ep] = FindEP( TempEndPtsCount()-epCnt1, TempEndPt(epCnt1), pos );
+					}
 					if ( eps[ep] < 0 ) {
-						DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
-						eps[ep] = tempEndPts_da.cnt-1-epCnt1;
-						epp = &tempEndPts(tempEndPts_da.cnt-1);
-						memset( epp, 0, sizeof *epp );
-						epp->pos = pos;
-						epp->angle = angle;
+						epp = TempEndPtsAppend();
+						eps[ep] = TempEndPtsCount()-1-epCnt1;
+						SetEndPt( epp, pos, angle );
 					}
 				}
 				segTrack(segInx).ep[0] = eps[0];
@@ -483,7 +483,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		Rotate( &orig, zero, xx->angle );
 		orig.x = xx->orig.x - orig.x;
 		orig.y = xx->orig.y - orig.y;
-		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), (PATHPTR_T)&pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
+		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, TempEndPtsCount()-epCnt1, TempEndPt(epCnt1), (PATHPTR_T)&pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
 		xx1 = GET_EXTRA_DATA(trk1, T_TURNOUT, extraDataCompound_t);
 		xx1->ungrouped = TRUE;
 		xx1->pathOverRide = xx->pathOverRide;
@@ -525,13 +525,15 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 			/* joint EP to this segment */
 			GetSegInxEP( cp[0], &segInx, &segEP );
 			stp = &segTrack(segInx);
-			ep = FindEP( epCnt, &tempEndPts(0), GetSegEndPt( xx->segs+segInx, segEP, FALSE, NULL ) );
+			ep = FindEP( epCnt, TempEndPt(0), GetSegEndPt( xx->segs+segInx, segEP, FALSE, NULL ) );
 			if ( ep >= 0 ) {
-				epp = &tempEndPts(ep);
-				if ( epp->track ) {
-					ConnectTracks( stp->trk, stp->ep[segEP], epp->track, epp->index );
-					DrawEndPt( &mainD, epp->track, epp->index, GetTrkColor(epp->track,&mainD) );
-					epp->track = NULL;
+				epp = TempEndPt(ep);
+				track_p trk1 = GetEndPtTrack(epp);
+				if ( trk1 ) {
+					EPINX_T ep1 = GetEndPtEndPt(epp);
+					ConnectTracks( stp->trk, stp->ep[segEP], trk1, ep1 );
+					DrawEndPt( &mainD, trk1, ep1, GetTrkColor(trk1, &mainD) );
+					SetEndPtTrack( epp, NULL ); // Finished with this EP
 				}
 			}
 			stp1 = stp;
@@ -555,13 +557,15 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 				cp++;
 			}
 			/* joint EP to last segment */
-			ep = FindEP( epCnt, &tempEndPts(0), GetSegEndPt( xx->segs+segInx, segEP1, FALSE, NULL ) );
+			ep = FindEP( epCnt, TempEndPt(0), GetSegEndPt( xx->segs+segInx, segEP1, FALSE, NULL ) );
 			if ( ep > 0 ) {
-				epp = &tempEndPts(ep);
-				if ( epp->track ) {
-					ConnectTracks( stp1->trk, stp1->ep[segEP1], epp->track, epp->index );
-					DrawEndPt( &mainD, epp->track, epp->index, wDrawColorWhite );
-					epp->track = NULL;
+				epp = TempEndPt(ep);
+				track_p trk1 = GetEndPtTrack( epp );
+				if ( trk1 ) {
+					EPINX_T ep1 = GetEndPtEndPt( epp );
+					ConnectTracks( stp1->trk, stp1->ep[segEP1], trk1, ep1 );
+					DrawEndPt( &mainD, trk1, ep1, wDrawColorWhite );
+					SetEndPtTrack( epp, NULL ); // Finished with this EP
 				}
 			}
 			cp++;
@@ -821,16 +825,16 @@ static int GroupShortestPathFunc(
 		pos2 = GetTrkEndPos( trk, ppp->ep1 );
 		ang2 = GetTrkEndAngle( trk, ppp->ep1 );
 		ep1 = ep2 = -1;
-		for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
+		for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
 			if ( ep1 < 0 ) {
-				dist = FindDistance( pos1, tempEndPts(ep).pos );
-				angle = NormalizeAngle( ang1 - tempEndPts(ep).angle + connectAngle/2.0 );
+				dist = FindDistance( pos1, GetEndPtPos(TempEndPt(ep)));
+				angle = NormalizeAngle( ang1 - GetEndPtAngle(TempEndPt(ep)) + connectAngle/2.0 );
 				if ( dist < connectDistance && angle < connectAngle )
 					ep1 = ep;
 			}
 			if ( ep2 < 0 ) {
-				dist = FindDistance( pos2, tempEndPts(ep).pos );
-				angle = NormalizeAngle( ang2 - tempEndPts(ep).angle + connectAngle/2.0 );
+				dist = FindDistance( pos2, GetEndPtPos(TempEndPt(ep)) );
+				angle = NormalizeAngle( ang2 - GetEndPtAngle(TempEndPt(ep)) + connectAngle/2.0 );
 				if ( dist < connectDistance && angle < connectAngle )
 					ep2 = ep;
 			}
@@ -898,7 +902,7 @@ static int CmpEndPtAngle(
 	trkEndPt_p epp1 = (trkEndPt_p)ptr1;
 	trkEndPt_p epp2 = (trkEndPt_p)ptr2;
 	
-	angle = NormalizeAngle(FindAngle(endPtOrig,epp1->pos)-endPtAngle) - NormalizeAngle(FindAngle(endPtOrig,epp2->pos)-endPtAngle);
+	angle = NormalizeAngle(FindAngle(endPtOrig,GetEndPtPos(epp1))-endPtAngle) - NormalizeAngle(FindAngle(endPtOrig,GetEndPtPos(epp2))-endPtAngle);
 	return (int)angle;
 }
 
@@ -1059,7 +1063,7 @@ static void GroupOk( void * unused )
 	DYNARR_RESET( groupTrk_t, groupTrk_da );
 	DYNARR_RESET( path_t, path_da );
 	DYNARR_RESET( pathElem_t, pathElem_da );
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 	DYNARR_RESET( char, pathPtr_da );
 
 	ParamUpdate( &groupPG );
@@ -1177,38 +1181,37 @@ if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 				trk1 = GetTrkEndTrk(trk,ep);
 				if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
 					/* boundary EP */
-					for ( epN=0; epN<tempEndPts_da.cnt; epN++ ) {
-						dist = FindDistance( GetTrkEndPos(trk,ep), tempEndPts(epN).pos );
-						angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - tempEndPts(epN).angle + connectAngle/2.0 );
+					for ( epN=0; epN<TempEndPtsCount(); epN++ ) {
+						dist = FindDistance( GetTrkEndPos(trk,ep), GetEndPtPos(TempEndPt(epN)) );
+						angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - GetEndPtAngle(TempEndPt(epN)) + connectAngle/2.0 );
 						if ( dist < connectDistance && angle < connectAngle )
 							break;
 					}
-					if ( epN>=tempEndPts_da.cnt ) {
-						DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
-						endPtP = &tempEndPts(tempEndPts_da.cnt-1);
-						memset( endPtP, 0, sizeof *endPtP );
-						endPtP->pos = GetTrkEndPos(trk,ep);
-						endPtP->angle = GetTrkEndAngle(trk,ep);
-						endPtP->track = trk1;
-						endPtP->index = (trk1?GetEndPtConnectedToMe(trk1,trk):-1);
-						endPtOrig.x += endPtP->pos.x;
-						endPtOrig.y += endPtP->pos.y;
+					if ( epN>=TempEndPtsCount() ) {
+						endPtP = TempEndPtsAppend();
+						SetEndPt( endPtP, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep));
+						SetEndPtTrack( endPtP, trk1 );
+						// Remember what EP on trk1 was connecting to me
+						SetEndPtEndPt( endPtP, trk1?GetEndPtConnectedToMe(trk1,trk):-1 );
+						endPtOrig.x += GetEndPtPos(endPtP).x;
+						endPtOrig.y += GetEndPtPos(endPtP).y;
 					}
 				}
 			}
 		}
 if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 	LogPrintf( "EndPts:\n" );
-	for ( int inx=0; inx<tempEndPts_da.cnt; inx++ ) {
-		endPtP = &tempEndPts(inx);
+	for ( int inx=0; inx<TempEndPtsCount(); inx++ ) {
+		endPtP = TempEndPt(inx);
 		LogPrintf( "  [ %0.3f %0.3f ] A:%0.3f, T:%d.%d\n",
-			endPtP->pos.x, endPtP->pos.y, endPtP->angle, endPtP->track?GetTrkIndex(endPtP->track):-1, endPtP->index );
+			GetEndPtPos(endPtP).x, GetEndPtPos(endPtP).y, GetEndPtAngle(endPtP),
+			GetEndPtTrack(endPtP)?GetTrkIndex(GetEndPtTrack(endPtP)):-1, GetEndPtEndPt(endPtP) );
 	}
 }
 		/*
 		 * 2: Collect EndPts
 		 */
-		if ( tempEndPts_da.cnt <= 0 ) {
+		if ( TempEndPtsCount() <= 0 ) {
 			NoticeMessage( _("No endpts"), _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( groupW );
@@ -1244,35 +1247,34 @@ if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 		/*
 		 * Sort EndPts by angle
 		 */
-		endPtOrig.x /= tempEndPts_da.cnt;
-		endPtOrig.y /= tempEndPts_da.cnt;
+		endPtOrig.x /= TempEndPtsCount();
+		endPtOrig.y /= TempEndPtsCount();
 		angleN = 270.0;
 		epN = -1;
-		for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
-			angle = FindAngle(endPtOrig,tempEndPts(ep).pos);
+		for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+			angle = FindAngle(endPtOrig,GetEndPtPos(TempEndPt(ep)));
 			if ( fabs(angle-270.0) < angleN ) {
 				epN = ep;
 				angleN = fabs(angle-270.0);
 				endPtAngle = angle;
 			}
 		}
-		qsort( tempEndPts_da.ptr, tempEndPts_da.cnt, sizeof *endPtP, CmpEndPtAngle );
-		if ( NormalizeAngle( tempEndPts(0).angle - tempEndPts(tempEndPts_da.cnt-1).angle ) >
-			 NormalizeAngle( tempEndPts(1).angle - tempEndPts(0).angle ) ) {
+		qsort( TempEndPt(0), TempEndPtsCount(), EndPtSize(1),  CmpEndPtAngle );
+		if ( NormalizeAngle( GetEndPtAngle(TempEndPt(0)) - GetEndPtAngle(TempEndPt(TempEndPtsCount()-1)) ) >
+			 NormalizeAngle( GetEndPtAngle(TempEndPt(1)) - GetEndPtAngle(TempEndPt(0)) ) ) {
 
-			for ( ep=1; ep<(tempEndPts_da.cnt+1)/2; ep++ ) {
-				trkEndPt_t tempEndPt;
-				tempEndPt = tempEndPts(ep);
-				tempEndPts(ep) = tempEndPts(tempEndPts_da.cnt-ep);
-				tempEndPts(tempEndPts_da.cnt-ep) = tempEndPt;
+			for ( ep=1; ep<(TempEndPtsCount()+1)/2; ep++ ) {
+				SwapEndPts( TempEndPt(0), ep, TempEndPtsCount()-ep );
 			}
 		}
 if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 	LogPrintf( "Sorted EndPts:\n" );
-	for ( int inx=0; inx<tempEndPts_da.cnt; inx++ ) {
-		endPtP = &tempEndPts(inx);
+	for ( int inx=0; inx<TempEndPtsCount(); inx++ ) {
+		endPtP = TempEndPt(inx);
+		track_p trk1 = GetEndPtTrack(endPtP);
 		LogPrintf( "  [ %0.3f %0.3f ] A:%0.3f, T:%d.%d\n",
-			endPtP->pos.x, endPtP->pos.y, endPtP->angle, endPtP->track?GetTrkIndex(endPtP->track):-1, endPtP->index );
+			GetEndPtPos(endPtP).x, GetEndPtPos(endPtP).y, GetEndPtAngle(endPtP),
+			trk1?GetTrkIndex(trk1):-1, GetEndPtEndPt(endPtP) );
 	}
 }
 
@@ -1555,12 +1557,15 @@ LOG( log_group, 3, ( "\n" ) );
 		CloneFilledDraw( outputSegs_da.cnt, outputSegs_da.ptr, FALSE );
 
 		GetSegBounds( zero, 0, outputSegs_da.cnt, &outputSegs(0), &orig, &size );
-		orig.x = - tempEndPts(0).pos.x;
-		orig.y = - tempEndPts(0).pos.y;
+		orig.x = - GetEndPtPos(TempEndPt(0)).x;
+		orig.y = - GetEndPtPos(TempEndPt(0)).y;
 		MoveSegs( outputSegs_da.cnt, &outputSegs(0), orig );
-		for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
-			tempEndPts(ep).pos.x += orig.x;
-			tempEndPts(ep).pos.y += orig.y;
+		for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+			trkEndPt_p epp = TempEndPt(ep);
+			coOrd pos = GetEndPtPos(epp);
+			pos.x += orig.x;
+			pos.y += orig.y;
+			SetEndPt( epp, pos, GetEndPtAngle(epp) );
 		}
 
 		/*
@@ -1573,7 +1578,7 @@ LOG( log_group, 3, ( "\n" ) );
 		long options = 0;
 		if ( groupNoCombine != 0 )
 			options |= COMPOUND_OPTION_PATH_NOCOMBINE;
-		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), pPaths, tempEndPts_da.cnt, &tempEndPts(0), TRUE, options );
+		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), pPaths, TempEndPtsCount(), TempEndPt(0), TRUE, options );
 
 		/*
 		 * 10: Write defn to xtrkcad.cus
@@ -1582,7 +1587,7 @@ LOG( log_group, 3, ( "\n" ) );
 		if (f && to) {
 			SetCLocale();
 			rc &= fprintf( f, "TURNOUT %s \"%s\" %ld\n", curScaleName, PutTitle(to->title), options )>0;
-			rc &= WriteCompoundPathsEndPtsSegs( f, pPaths, outputSegs_da.cnt, &outputSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
+			rc &= WriteCompoundPathsEndPtsSegs( f, pPaths, outputSegs_da.cnt, &outputSegs(0), TempEndPtsCount(), TempEndPt(0) );
 			SetUserLocale();
 		}
 		if ( groupReplace ) {
@@ -1592,17 +1597,21 @@ LOG( log_group, 3, ( "\n" ) );
 			UndoStart( _("Group Tracks"), "group" );
 			orig.x = - orig.x;
 			orig.y = - orig.y;
-			for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
-				endPtP = &tempEndPts(ep);
-				if ( endPtP->track ) {
-					trk = GetTrkEndTrk( endPtP->track, endPtP->index );
-					epN = GetEndPtConnectedToMe( trk, endPtP->track );
-					DrawEndPt( &mainD, endPtP->track, endPtP->index, wDrawColorWhite );
+			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+				endPtP = TempEndPt(ep);
+				track_p trk1 = GetEndPtTrack(endPtP);
+				if ( trk1 ) {
+					EPINX_T ep1 = GetEndPtEndPt(endPtP);
+					trk = GetTrkEndTrk( trk1, ep1 );
+					epN = GetEndPtConnectedToMe( trk, trk1 );
+					DrawEndPt( &mainD, trk1, ep1, wDrawColorWhite );
 					DrawEndPt( &mainD, trk, epN, wDrawColorWhite );
-					DisconnectTracks( trk, epN, endPtP->track, endPtP->index );
+					DisconnectTracks( trk, epN, trk1, ep1 );
 				}
-				endPtP->pos.x += orig.x;
-				endPtP->pos.y += orig.y;
+				coOrd pos = GetEndPtPos(endPtP);
+				pos.x += orig.x;
+				pos.y += orig.y;
+				SetEndPt( endPtP, pos, GetEndPtAngle(endPtP) );
 			}
 			trk = NULL;
 			while ( TrackIterate( &trk ) ) {
@@ -1613,16 +1622,19 @@ LOG( log_group, 3, ( "\n" ) );
 				}
 			}
 			SelectRecount();
-			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), pPaths, outputSegs_da.cnt, &outputSegs(0) );
+			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, TempEndPtsCount(), TempEndPt(0), pPaths, outputSegs_da.cnt, &outputSegs(0) );
 			struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
 			xx->pathOverRide = FALSE;
 			xx->pathNoCombine = groupNoCombine;
 
 			SetTrkVisible( trk, TRUE );
-			for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
-				if ( tempEndPts(ep).track ) {
-					ConnectTracks( trk, ep, tempEndPts(ep).track, (EPINX_T)tempEndPts(ep).index );
-					DrawEndPt( &mainD, tempEndPts(ep).track, (EPINX_T)tempEndPts(ep).index, GetTrkColor( tempEndPts(ep).track, &mainD ) );
+			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
+				trkEndPt_p epp = TempEndPt(ep);
+				track_p trk1 = GetEndPtTrack(epp);
+				if ( trk1 ) {
+					EPINX_T ep1 = GetEndPtEndPt(epp);
+					ConnectTracks( trk, ep, trk1, ep1 );
+					DrawEndPt( &mainD, trk1, ep1, GetTrkColor(trk1, &mainD ) );
 				}
 			}
 			DrawNewTrack( trk );

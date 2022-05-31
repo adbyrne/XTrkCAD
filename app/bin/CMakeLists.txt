@@ -180,6 +180,9 @@ SET(SOURCES
 	track.c
 	track.h
 	trackx.h
+	trkendpt.c
+	trkendpt.h
+	trkendptx.h
 	trknote.c
 	trkseg.c
 	tstraigh.c
@@ -279,6 +282,7 @@ ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}
 	ctodesgn.c
 	utility.c
+	trkendpt.c
 
 	)
 SET_TARGET_PROPERTIES(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
