@@ -152,8 +152,6 @@ SET(SOURCES
 	manifest.h
 	misc.c
 	misc.h
-	misc2.c
-	misc2.h
 	note.h
 	param.c
 	param.h
@@ -163,6 +161,8 @@ SET(SOURCES
 	partcatalog.c
 	paths.c
 	paths.h
+	scale.c
+	scale.h
 	shortentext.c
 	shortentext.h
 	shrtpath.c

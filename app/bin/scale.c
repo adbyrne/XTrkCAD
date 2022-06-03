@@ -1,4 +1,4 @@
-/** \file misc2.c
+/** \file scale.c
  * Management of information about scales and gauges plus rprintf.
  */
 
@@ -20,128 +20,25 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "cjoin.h"
 #include "common.h"
+#include "cjoin.h"
 #include "compound.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc.h"
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
 
-
-EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
-EXPORT long checkPtInterval = 10;
-EXPORT long autosaveChkPoints = 0;
-
-EXPORT DIST_T curScaleRatio;
-EXPORT char * curScaleName;
-EXPORT DIST_T trackGauge;
-EXPORT long labelScale = 8;
-EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
-/** @prefs [draw] label-when=2 Unknown */
-EXPORT long labelWhen = 2;
-EXPORT long colorTrack = 0;
-EXPORT long colorDraw = 0;
-EXPORT long constrainMain = 0;
-EXPORT long dontHideCursor = 0;
-EXPORT long hideSelectionWindow = 0;
-EXPORT long angleSystem = 0;
-EXPORT DIST_T minLength = 0.1;
-EXPORT DIST_T connectDistance = 0.1;
-EXPORT ANGLE_T connectAngle = 1.0;
-EXPORT long twoRailScale = 16;
-EXPORT long mapScale = 64;
-EXPORT long liveMap = 0;
-EXPORT long preSelect = 0;			/**< default command 0 = Describe 1 = Select */
-EXPORT long listLabels = 7;
-EXPORT long layoutLabels = 1;
-EXPORT long descriptionFontSize = 72;
-EXPORT long enableListPrices = 1;
-EXPORT void ScaleLengthEnd(void);
-
-static BOOL_T SetScaleDescGauge(SCALEINX_T scaleInx);
-
-
-/****************************************************************************
- *
- * RPRINTF
- *
- */
-
-
-#define RBUFF_SIZE (8192)
-static char rbuff[RBUFF_SIZE+1];
-static int roff;
-static int rbuff_record = 0;
-
-EXPORT void Rdump( FILE * outf )
-{
-	fprintf( outf, "Record Buffer:\n" );
-	rbuff[RBUFF_SIZE] = '\0';
-	fprintf( outf, "%s", rbuff+roff );
-	rbuff[roff] = '\0';
-	fprintf( outf, "%s", rbuff );
-	memset( rbuff, 0, sizeof rbuff );
-	roff = 0;
-}
-
-
-EXPORT void Rprintf(
-		char * format,
-		... )
-{
-	static char buff[STR_SIZE];
-	char * cp;
-	va_list ap;
-	va_start( ap, format );
-	vsprintf( buff, format, ap );
-	va_end( ap );
-	if (rbuff_record >= 1)
-		lprintf( buff );
-	for ( cp=buff; *cp; cp++ ) {
-		rbuff[roff] = *cp;
-		roff++;
-		if (roff>=RBUFF_SIZE)
-			roff=0;
-	}
-}
-
-/****************************************************************************
- *
- * CHANGE NOTIFICATION
- *
- */
-#define CNCB_COUNT (40)
-
-static changeNotificationCallBack_t changeNotificationCallBacks[CNCB_COUNT];
-static int changeNotificationCallBackCnt = 0;
-
-EXPORT void RegisterChangeNotification(
-		changeNotificationCallBack_t action )
-{
-	CHECK( (changeNotificationCallBackCnt + 1) < CNCB_COUNT );
-	changeNotificationCallBacks[changeNotificationCallBackCnt] = action;
-	changeNotificationCallBackCnt++;
-}
-
-
-EXPORT void DoChangeNotification( long changes )
-{
-	int inx;
-	for (inx=0;inx<changeNotificationCallBackCnt;inx++)
-		changeNotificationCallBacks[inx](changes);
-}
-
-
 /****************************************************************************
  *
  * SCALE
  *
  */
+
+#define SCALE_ANY	(-2)
+#define SCALE_DEMO	(-1)
 
 typedef struct {
 		char * scale;
@@ -902,11 +799,10 @@ static void ScaleChange( long changes )
  *
  */
 
-EXPORT void Misc2Init( void )
+EXPORT void ScaleInit( void )
 {
 	AddParam( "SCALE ", AddScale );
 	AddParam( "SCALEFIT", AddScaleFit);
-	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );
 }

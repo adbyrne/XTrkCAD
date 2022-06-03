@@ -150,9 +150,6 @@ typedef int REGION_T;
 
 enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COMPATIBLE, PARAMFILE_FIT, PARAMFILE_MAXSTATE };
 
-#define SCALE_ANY	(-2)
-#define SCALE_DEMO	(-1)
-
 // DYNARRAY
 
 typedef struct {
@@ -238,12 +235,24 @@ typedef struct extraDataBase_t {
 	((TYPE*)GetTrkExtraData( (TRK), (TRKTYP) ))
 extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
 
+
+typedef struct {
+	BOOL_T valid;
+	DIST_T length;
+	DIST_T width;
+	DIST_T spacing;
+} tieData_t, *tieData_p;
+
 // COMMON INCLUDES
 // If you add includes here, please remove them elsewhere
 
 #include "i18n.h"
 #include "utility.h"
 #include "misc.h"
+
+// TODO - move these includes to the files that need them
+#include "dlayer.h"
+#include "scale.h"
 
 #endif
 

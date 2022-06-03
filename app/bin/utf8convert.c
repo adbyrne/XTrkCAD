@@ -22,7 +22,7 @@
   *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
   */
 
-#include "misc.h"
+#include "common.h"
 #include "include/utf8convert.h"
 
 /**

@@ -20,13 +20,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "common.h"
 #include "cselect.h"
 #include "custom.h"
 #include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc.h"
 #include "param.h"
 #include "track.h"
 #include "include/partcatalog.h"

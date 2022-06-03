@@ -73,6 +73,7 @@
 #include "draw.h"
 #include "cundo.h"
 #include "common-ui.h"
+#include "ctrain.h"
 
 #include <inttypes.h>
 
@@ -80,6 +81,50 @@
 
 #define SLOG_FMT "0x%.12" PRIxPTR
 
+
+/****************************************************************************
+ *
+ * RPRINTF
+ *
+ */
+
+
+#define RBUFF_SIZE (8192)
+static char rbuff[RBUFF_SIZE+1];
+static int roff;
+static int rbuff_record = 0;
+
+EXPORT void Rdump( FILE * outf )
+{
+	fprintf( outf, "Record Buffer:\n" );
+	rbuff[RBUFF_SIZE] = '\0';
+	fprintf( outf, "%s", rbuff+roff );
+	rbuff[roff] = '\0';
+	fprintf( outf, "%s", rbuff );
+	memset( rbuff, 0, sizeof rbuff );
+	roff = 0;
+}
+
+
+static void Rprintf(
+		char * format,
+		... )
+{
+	static char buff[STR_SIZE];
+	char * cp;
+	va_list ap;
+	va_start( ap, format );
+	vsprintf( buff, format, ap );
+	va_end( ap );
+	if (rbuff_record >= 1)
+		lprintf( buff );
+	for ( cp=buff; *cp; cp++ ) {
+		rbuff[roff] = *cp;
+		roff++;
+		if (roff>=RBUFF_SIZE)
+			roff=0;
+	}
+}
 
 /*****************************************************************************
  *

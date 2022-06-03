@@ -42,6 +42,7 @@
 #include "version.h"
 #include "dynstring.h"
 #include "common-ui.h"
+#include "ctrain.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"

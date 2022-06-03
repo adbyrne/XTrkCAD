@@ -26,7 +26,6 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"

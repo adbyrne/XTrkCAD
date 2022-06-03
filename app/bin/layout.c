@@ -24,7 +24,6 @@
 
 #include "custom.h"
 #include "layout.h"
-#include "misc2.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"

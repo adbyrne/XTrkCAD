@@ -157,6 +157,38 @@ static paramData_t menuPLs[101] = { { PD_LONG, &toolbarSet, "toolbarset" }, {
 static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
 
 extern wBool_t wDrawDoTempDraw;
+
+
+EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
+EXPORT long checkPtInterval = 10;
+EXPORT long autosaveChkPoints = 0;
+
+EXPORT DIST_T curScaleRatio;
+EXPORT char * curScaleName;
+EXPORT DIST_T trackGauge;
+EXPORT long labelScale = 8;
+EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
+/** @prefs [draw] label-when=2 Unknown */
+EXPORT long labelWhen = 2;
+EXPORT long colorTrack = 0;
+EXPORT long colorDraw = 0;
+EXPORT long constrainMain = 0;
+EXPORT long dontHideCursor = 0;
+EXPORT long hideSelectionWindow = 0;
+EXPORT long angleSystem = 0;
+EXPORT DIST_T minLength = 0.1;
+EXPORT DIST_T connectDistance = 0.1;
+EXPORT ANGLE_T connectAngle = 1.0;
+EXPORT long twoRailScale = 16;
+EXPORT long mapScale = 64;
+EXPORT long liveMap = 0;
+EXPORT long preSelect = 0;			/**< default command 0 = Describe 1 = Select */
+EXPORT long listLabels = 7;
+EXPORT long layoutLabels = 1;
+EXPORT long descriptionFontSize = 72;
+EXPORT long enableListPrices = 1;
+EXPORT void ScaleLengthEnd(void);
+
 
 /****************************************************************************
  *
@@ -3245,9 +3277,11 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	 */
 	LOG1(log_init, ( "initInfoBar\n" ))
 	InitInfoBar();
-	wSetSplashInfo("Misc2 Init...");
-	LOG1(log_init, ( "misc2Init\n" ))
-	Misc2Init();
+	wSetSplashInfo("Scale Init...");
+	LOG1(log_init, ( "ScaleInit\n" ))
+	ScaleInit();
+	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
+
 
 	RotateDialogInit();
 	MoveDialogInit();
@@ -3402,3 +3436,30 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	}
 	return mainW;
 }
+
+/****************************************************************************
+ *
+ * CHANGE NOTIFICATION
+ *
+ */
+#define CNCB_COUNT (40)
+
+static changeNotificationCallBack_t changeNotificationCallBacks[CNCB_COUNT];
+static int changeNotificationCallBackCnt = 0;
+
+EXPORT void RegisterChangeNotification(
+		changeNotificationCallBack_t action )
+{
+	CHECK( (changeNotificationCallBackCnt + 1) < CNCB_COUNT );
+	changeNotificationCallBacks[changeNotificationCallBackCnt] = action;
+	changeNotificationCallBackCnt++;
+}
+
+
+EXPORT void DoChangeNotification( long changes )
+{
+	int inx;
+	for (inx=0;inx<changeNotificationCallBackCnt;inx++)
+		changeNotificationCallBacks[inx](changes);
+}
+

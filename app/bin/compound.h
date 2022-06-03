@@ -197,10 +197,5 @@ STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
 void DeleteStructures(int fileIndex);
 
-/* cstrdsgn.c */
-void EditCustomStructure( turnoutInfo_t * );
-
-STATUS_T CmdCarDescAction( wAction_t, coOrd );
-BOOL_T CarCustomSave( FILE * );
 
 #endif

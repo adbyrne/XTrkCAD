@@ -426,23 +426,8 @@ BOOL_T CarCustomSave(FILE*);
 typedef int (*contMgmCallBack_p) (int, void *);
 void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
 
-/* dlayer.c */
-void LayerAllDefaults();
-void LayerSetCounts();
-int FindUnusedLayer(unsigned int start);
-void DecrementLayerObjects(unsigned int index);
-void IncrementLayerObjects(unsigned int index);
-
 /* doption.c */
 long GetDistanceFormat( void );
-
-/* ctrain.c */
-BOOL_T WriteCars( FILE * );
-void ClearCars( void );
-void CarDlgAddProto( void );
-void CarDlgAddDesc( void );
-void AttachTrains( void );
-
 
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
@@ -465,6 +450,35 @@ STATUS_T CmdModify(wAction_t action,coOrd pos );
 /* macro.c */
 int RegressionTestAll();
 
-#include "misc2.h"
+
+#define LABEL_MANUF		(1<<0)
+#define LABEL_PARTNO	(1<<1)
+#define LABEL_DESCR		(1<<2)
+#define LABEL_COST		(1<<7)
+#define LABEL_FLIPPED	(1<<8)
+#define LABEL_TABBED	(1<<9)
+#define LABEL_UNGROUPED (1<<10)
+#define LABEL_SPLIT		(1<<11)
+
+typedef struct {
+		char * name;
+		int level;
+		} logTable_t;
+extern dynArr_t logTable_da;
+#define logTable(N) DYNARR_N( logTable_t, logTable_da, N )
+extern time_t logClock;
+void LogOpen( char * );
+void LogClose( void );
+void LogSet( char *, int );
+int LogFindIndex( const char * );
+void LogPrintf( const char *, ... );
+#define LOG( DBINX, DBLVL, DBMSG ) \
+		if ( DBINX > 0 && logTable( DBINX ).level >= DBLVL ) { \
+				LogPrintf DBMSG ; \
+		}
+#define LOG1( DBINX, DBMSG ) LOG( DBINX, 1, DBMSG )
+#define LOGNAME( DBNAME, DBMSG ) LOG( LogFindIndex( DBNAME ), DBMSG )
+
+#define lprintf LogPrintf
 
 #endif

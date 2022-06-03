@@ -29,7 +29,6 @@
 #include "include/paramfile.h"
 #include "fileio.h"
 #include "directory.h"
-#include "misc2.h"
 #include "layout.h"
 
 static ParameterLib *trackLibrary;			/**< Track Library          */
