@@ -236,9 +236,7 @@ add_dependencies(xtrkcad-lib
 
 target_include_directories(xtrkcad-lib 
     PRIVATE
-#	${FREEIMAGE_INCLUDE_PATH} 
 	${messagefile_BINARY_DIR}
-    ${MINIXML_INCLUDE_PATH}    
 )
 
 target_link_libraries(xtrkcad-lib
@@ -272,13 +270,11 @@ if(XTRKCAD_CREATE_SVG)
 			svgoutput.c
 	)
 
-	#include_directories(${MINIXML_INCLUDE_PATH})
 	if(WIN32)
-        #target_link_libraries(xtrkcad PRIVATE MINIXML::MINIXML)
-		target_link_libraries(xtrkcad 
-                PRIVATE
-				${MINIXML_LIBRARY})
-
+        target_link_libraries(xtrkcad-lib 
+            PRIVATE 
+            MiniXML::mxml
+        )
 		# copy the MiniXML DLL to the build directory for easier debugging		
 	    add_custom_command(
 			TARGET xtrkcad POST_BUILD
@@ -318,8 +314,6 @@ target_link_libraries(xtrkcad
 		xtrkcad-lib
 )
 
-#INCLUDE_DIRECTORIES(${LIBZIP_INCLUDE_DIR_ZIP})
-#LINK_DIRECTORIES(${LIBZIP_LIBZIP_LIBRARY})
 
 #
 # Create mkturnout utility

@@ -10,27 +10,23 @@
 # There is no default installation for mini-xml on Windows so a
 # XTrackCAD specific directory tree is assumed
 #
-include(FindPackageHandleStandardArgs)
 
 if (WIN32)
+	set(MXMLBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml" )
 	find_path( MINIXML_INCLUDE_PATH mxml.h
-		PATHS
-		"$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml"
+		PATHS ${MXMLBASEDIR}
 		DOC "The directory where mxml.h resides")
 	find_library( MINIXML_LIBRARY
 		NAMES mxml1
-		PATHS
-		"$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml"
+		PATHS ${MXMLBASEDIR}
 		DOC "The Mini XML shared library")
 	find_file( MINIXML_SHAREDLIB
 		NAMES mxml1.DLL
-		PATHS
-		"$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml"
+		PATHS ${MXMLBASEDIR}
 		DOC "The Mini XML DLL" )
 	find_library( MINIXML_STATIC_LIBRARY
 		NAMES mxmlstat.lib
-		PATHS
-		"$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/mxml"
+		PATHS ${MXMLBASEDIR}
 		DOC "The Mini XML static library")
 else ()
 	find_path( MINIXML_INCLUDE_PATH mxml.h
@@ -61,14 +57,17 @@ else ()
 		DOC "The Mini XML static library")
 endif (WIN32)
 
-find_package_handle_standard_args( MINIXML
-		REQUIRED_VARS
-		MINIXML_LIBRARY
-		MINIXML_STATIC_LIBRARY
-		MINIXML_INCLUDE_PATH
+include(FindPackageHandleStandardArgs)
+
+find_package_handle_standard_args( 
+	MiniXML
+	REQUIRED_VARS
+	MINIXML_LIBRARY
+	MINIXML_STATIC_LIBRARY
+	MINIXML_INCLUDE_PATH
 )
 
-if(MINIXML_FOUND)
+if(MiniXML_FOUND)
 	mark_as_advanced(
 		MINIXML_FOUND
 		MINIXML_LIBRARY
@@ -78,8 +77,21 @@ if(MINIXML_FOUND)
 	)
 endif()
 
-if (MINIXML_FOUND AND NOT TARGET MINIXML::MINIXML)
-  add_library(MINIXML::MINIMXL UNKNOWN IMPORTED)
-  set_property(TARGET MINIXML::MINIMXL PROPERTY IMPORTED_LOCATION ${MINIXML_LIBRARY})
-  target_include_directories(MINIXML::MINIMXL INTERFACE ${MINIXML_INCLUDE_PATH})
+if (MiniXML_FOUND AND NOT TARGET MiniXML::MiniXML)
+  add_library(MiniXML::mxml UNKNOWN IMPORTED)
+  set_property(TARGET MiniXML::mxml PROPERTY IMPORTED_LOCATION ${MINIXML_LIBRARY})
+  target_include_directories(MiniXML::mxml INTERFACE ${MINIXML_INCLUDE_PATH})
+
+  SET(MXML_VERSION_MAJOR)
+  SET(MXML_VERSION_MINOR)
+  FILE(READ "${MINIXML_INCLUDE_PATH}/mxml.h" _mxml_H_CONTENTS)
+
+  STRING(REGEX MATCH "#[ \t]*define[ \t]+MXML_MAJOR_VERSION[ \t]+[0-9]+" MXML_VERSION_MAJOR "${_mxml_H_CONTENTS}")
+  STRING(REGEX MATCH "[0-9]+$" MXML_VERSION_MAJOR ${MXML_VERSION_MAJOR})
+  
+  STRING(REGEX MATCH "#[ \t]*define[ \t]+MXML_MINOR_VERSION[ \t]+[0-9]+" MXML_VERSION_MINOR "${_mxml_H_CONTENTS}")
+  STRING(REGEX MATCH "[0-9]+$" MXML_VERSION_MINOR ${MXML_VERSION_MINOR})
+  SET(MiniXML_VERSION "${MXML_VERSION_MAJOR}.${MXML_VERSION_MINOR}" 
+	  CACHE STRING 
+	  "Version number of MiniXML")
 endif()

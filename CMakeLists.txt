@@ -26,13 +26,13 @@ find_package(Libzip)
 find_package(Zlib)
 
 # Optionally enable SVG export
-find_package(MINIXML)
-if(MINIXML_FOUND)
+find_package(MiniXML)
+if(MiniXML_FOUND)
     set(XTRKCAD_CREATE_SVG 1)
 	message( STATUS "MiniXML found: SVG export is enabled")
-else(MINIXML_FOUND)
+else()
 	message( STATUS "MiniXML not found: no SVG export")
-endif(MINIXML_FOUND)
+endif()
 
 # Find unit testing framework
 find_package(CMocka)
@@ -53,7 +53,9 @@ if(UNIX)
 endif(UNIX)
 
 if(WIN32 AND NOT XTRKCAD_USE_GTK)
+	# use the Windows HTMLHelp tool
 	find_package(HTMLHelp REQUIRED)
+	# For handlling of bitmaps on Windows the FreeImage library is required
 	find_package(FreeImage REQUIRED)
 endif(WIN32 AND NOT XTRKCAD_USE_GTK)
 
