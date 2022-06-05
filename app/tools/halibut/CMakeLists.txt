@@ -27,7 +27,7 @@ add_executable(halibut
 
 set_target_properties(
    halibut
-   PROPERTIES FOLDER Appl-Help
+   PROPERTIES FOLDER HelpDocs
 )
 target_link_libraries(halibut xtrkcad-charset)
 

@@ -18,19 +18,19 @@ install(FILES
 
 # install parameter files 
 install(DIRECTORY params
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 		FILES_MATCHING
 		PATTERN "*.xtp")
 
 # install demos 
 install(DIRECTORY demos 
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/demos
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 		FILES_MATCHING
 		PATTERN "*.xtr")
 
 # install example layouts		
 install(DIRECTORY examples
-		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/examples
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 		FILES_MATCHING
 		PATTERN "*.xtc")
 		

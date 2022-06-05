@@ -35,6 +35,6 @@ add_library(xtrkcad-charset
 
 set_target_properties(
 	xtrkcad-charset
-	PROPERTIES FOLDER Appl-Help
+	PROPERTIES FOLDER HelpDocs
  )
 

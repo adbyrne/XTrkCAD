@@ -220,11 +220,11 @@ set_source_files_properties(${xtrkcad-lib_BINARY_DIR}/bllnhlp.c
 # add UTF-8 conversion utilities on Windows
 
 if(WIN32)
-		target_sources(xtrkcad-lib
-			PRIVATE
-				utf8convert.c
-				include/utf8convert.h			
-		)
+	target_sources(xtrkcad-lib
+		PRIVATE
+			utf8convert.c
+			include/utf8convert.h			
+	)
 endif()
 
 # This ensures that messages.h has been generated before we build xtrkcad-lib
@@ -314,7 +314,6 @@ target_link_libraries(xtrkcad
 		xtrkcad-lib
 )
 
-
 #
 # Create mkturnout utility
 #
@@ -325,12 +324,19 @@ add_executable(mkturnout
 set_target_properties(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
 set_target_properties(mkturnout PROPERTIES FOLDER "Param Files" )
 
+target_include_directories(mkturnout
+    PRIVATE
+	${messagefile_BINARY_DIR}
+)
+
 target_link_libraries(mkturnout 
     xtrkcad-wlib 
 )
 
 add_dependencies(mkturnout
-    lines)
+    messagefiles
+    lines
+)
 
 if(NOT WIN32)
 	target_link_libraries(mkturnout m)

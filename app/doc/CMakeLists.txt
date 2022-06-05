@@ -8,10 +8,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in ${CMAKE_CURRENT_BINARY_D
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html)
 
-add_custom_target(helpsystem ALL )
+add_custom_target(helpsystem ALL)
 set_target_properties(
    helpsystem
-   PROPERTIES FOLDER Appl-Help
+   PROPERTIES FOLDER HelpDocs
 )
 
 target_sources(helpsystem
@@ -125,7 +125,7 @@ else()
 	add_custom_target(help-chm ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
 	set_target_properties(
    		help-chm
-   		PROPERTIES FOLDER Appl-Help
+   		PROPERTIES FOLDER HelpDocs
 )
 	get_target_property(halibut_sources helpsystem SOURCES)
 	add_custom_command(

@@ -68,5 +68,5 @@ set_target_properties(
 	balloonhelp
 	genmessages
 	genhelp
-    PROPERTIES FOLDER Appl-Help
+    PROPERTIES FOLDER HelpDocs
 )
