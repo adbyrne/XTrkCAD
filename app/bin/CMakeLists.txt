@@ -329,7 +329,8 @@ target_include_directories(mkturnout
 	${messagefile_BINARY_DIR}
 )
 
-target_link_libraries(mkturnout 
+target_link_libraries(mkturnout
+    PRIVATE
     xtrkcad-wlib 
 )
 
@@ -339,14 +340,23 @@ add_dependencies(mkturnout
 )
 
 if(NOT WIN32)
-	target_link_libraries(mkturnout m)
-	target_link_libraries(xtrkcad m)
+	target_link_libraries(mkturnout 
+        PRIVATE
+        m
+    )
+	target_link_libraries(xtrkcad
+        PRIVATE
+        m
+    )
 
 	# Link libintl for systems where it is a separate library
 	find_library( INTL_LIBRARY intl )
 	if(INTL_LIBRARY)
-		target_link_libraries( mkturnout ${INTL_LIBRARY} )
-	endif(INTL_LIBRARY)
+		target_link_libraries( mkturnout
+            PRIVATE 
+            ${INTL_LIBRARY}
+        )
+	endif()
 else()
 	# copy dlls into the build dir for easier debugging
     COPYDLLTOBUILD(${FREEIMAGE_SHAREDLIB})
