@@ -45,39 +45,44 @@ set_source_files_properties(${messagefile_BINARY_DIR}/messages.but
 # Add a custom command for cleaning the HTML staging directory
 add_custom_target(clean-html
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/clean-html.cmake
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
 )
 
 # If we're using the GTK back-end, just generate "vanilla" HTML help files for use with gtkhtml
 if(XTRKCAD_USE_GTK)
 
-	IF (APPLE)
-	   SET(HALIBUT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/osxconf.but ${HALIBUT_SOURCES})
-	ELSE(APPLE)
-	   SET(HALIBUT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/linconf.but ${HALIBUT_SOURCES})
-	ENDIF(APPLE)
+	if (APPLE)
+		target_sources(helpsystem
+			PRIVATE 
+			${CMAKE_CURRENT_SOURCE_DIR}/osxconf.but)
+	else()
+		target_sources(helpsystem 
+			PRIVATE
+			${CMAKE_CURRENT_SOURCE_DIR}/linconf.but)
+	endif()
 
-	ADD_CUSTOM_COMMAND(
-		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html
-		DEPENDS halibut ${HALIBUT_SOURCES}
+	get_target_property(halibut_sources helpsystem SOURCES)
+	add_custom_target(help-html ALL DEPENDS halibut ${halibut_sources})
+
+	add_custom_command(
+		TARGET help-html
+		DEPENDS halibut ${halibut_sources}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/clean-html.cmake
-		COMMAND halibut ${HALIBUT_SOURCES}
+		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
+		COMMAND halibut ${halibut_sources}
 		)
 
-	ADD_CUSTOM_TARGET(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
-
-	INSTALL(
+	install(
 		DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 		)
 
-	INSTALL(
+	install(
 		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
 		)
 
-	INSTALL(
+	install(
 		FILES xtrkcad_lin.css
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
         )
@@ -104,7 +109,7 @@ if(XTRKCAD_USE_GTK)
 	        FILES xtrkcad_osx.css
 		    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj/sty
 	)
-    ENDIF(APPLE)
+    ENDIF()
 
 # Otherwise, we're using the Win32 back-end, so generate a compiled HTML help file
 else()

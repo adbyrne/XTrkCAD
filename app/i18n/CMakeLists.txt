@@ -82,7 +82,7 @@ endforeach()
 set(SOURCEFILES 
 	"${xtrkcad-lib_SOURCE_DIR}/misc.c"
 	"${wlib_SOURCE_DIR}/mswlib/mswmisc.c"
-	"${help_BINARY_DIR}/messages.h"
+	"${messagefile_BINARY_DIR}/messages.h"
 	"${CMAKE_CURRENT_BINARY_DIR}/custmsg.h"
 	"${XTrkCAD_BINARY_DIR}/app/bin/bllnhlp.c"
 )
@@ -130,7 +130,7 @@ function(updatepofile locale)
 	set(mofile ${mofile_dir}/${XTRKCAD_PACKAGE}.mo)
 
 	# Merge .pot file changes to .po file
-	add_custom_target(msgmerge-${locale}
+	add_custom_target(msgmerge-${locale} ALL
 		COMMAND ${XTC_MSGMERGE} -U --backup=none ${pofile} ${POTFILE}
       COMMAND ${XTC_MSGFMT} -c -v -o ${mofile} ${pofile}
 		DEPENDS ${POTFILE} ${pofile}
