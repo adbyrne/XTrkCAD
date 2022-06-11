@@ -3,10 +3,6 @@
 #
 
 
-target_include_directories(xtrkcad-wlib 
-	PRIVATE 
-	${xtrkcad-lib_SOURCE_DIR}
-)
 
 if(XTRKCAD_USE_GETTEXT)
 	if(WIN32)

@@ -286,14 +286,15 @@ if(XTRKCAD_CREATE_SVG)
 	    )
 	endif()
 	if(UNIX)
-		if (NOT APPLE)
+		if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
+            target_link_libraries(xtrkcad-lib 
+                PRIVATE 
+                MiniXML::mxml
+            )       
+        else()
 			target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
 			target_link_libraries(xtrkcad "pthread")
-		else()
-			target_link_libraries(xtrkcad ${MINIXML_LIBRARY})
 		endif()
-#	else()
-#		target_link_libraries(xtrkcad ${MINIXML_STATIC_LIBRARY})
 	endif()
 endif()
 

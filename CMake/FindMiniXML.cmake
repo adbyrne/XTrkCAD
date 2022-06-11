@@ -63,7 +63,6 @@ find_package_handle_standard_args(
 	MiniXML
 	REQUIRED_VARS
 	MINIXML_LIBRARY
-	MINIXML_STATIC_LIBRARY
 	MINIXML_INCLUDE_PATH
 )
 
