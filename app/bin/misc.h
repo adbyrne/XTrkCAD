@@ -23,23 +23,8 @@
 #ifndef MISC_H
 #define MISC_H
 
-#define EXPORT
-
-#include "acclkeys.h"
 #include "common.h"
 
-typedef void (*addButtonCallBack_t)(void*);
-
-#define COUNT(A) (sizeof(A)/sizeof(A[0]))
-
-#define STR_SIZE		(256)
-#define STR_SHORT_SIZE	(80)
-#define STR_LONG_SIZE	(1024)
-#define STR_HUGE_SIZE	(10240)
-
-#define CAST_AWAY_CONST (char*)
-
-#define TITLEMAXLEN (40)
 
 /*
  * Globals
@@ -48,11 +33,6 @@ typedef void (*addButtonCallBack_t)(void*);
 extern int iconSize;
 
 extern long adjTimer;
-
-typedef long SCALEINX_T;
-typedef long GAUGEINX_T;
-typedef long SCALEDESCINX_T;
-
 extern int log_error;
 
 extern long toolbarSet;
@@ -124,93 +104,20 @@ extern long programMode;
 #define LABELENABLE_TRACK_ELEV	(1<<3)
 #define LABELENABLE_CARS		(1<<4)
 
-/*
- * Command Action
- */
-#define C_DOWN			wActionLDown
-#define C_MOVE			wActionLDrag
-#define C_UP			wActionLUp
-#define C_RDOWN			wActionRDown
-#define C_RMOVE			wActionRDrag
-#define C_RUP			wActionRUp
-#define C_TEXT			wActionText
-#define C_WUP			wActionWheelUp
-#define C_WDOWN			wActionWheelDown
-#define C_LDOUBLE       wActionLDownDouble
-#define C_MODKEY        wActionModKey
-#define C_SCROLLUP	    wActionScrollUp
-#define C_SCROLLDOWN    wActionScrollDown
-#define C_SCROLLLEFT	wActionScrollLeft
-#define C_SCROLLRIGHT   wActionScrollRight
-#define C_INIT			(wActionLast+1)
-#define C_START			(wActionLast+2)
-#define C_REDRAW		(wActionLast+3)
-#define C_CANCEL		(wActionLast+4)
-#define C_OK			(wActionLast+5)
-#define C_CONFIRM		(wActionLast+6)
-#define C_LCLICK		(wActionLast+7)
-#define C_RCLICK		(wActionLast+8)
-#define C_CMDMENU		(wActionLast+9)
-#define C_FINISH		(wActionLast+10)
-#define C_UPDATE        (wActionLast+11)
 
-#define C_CONTINUE		(100)
-#define C_TERMINATE		(101)
-#define C_INFO			(102)
-#define C_ERROR			(103)
-
-/*
- * Commands
- */
-#define LEVEL0			(0)
-#define LEVEL0_50		(1)
-#define LEVEL1			(2)
-#define LEVEL2			(3)
-
-typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
-
-/*
- * Windows and buttons
- */
-extern wWinPix_t DlgSepLeft;
-extern wWinPix_t DlgSepMid;
-extern wWinPix_t DlgSepRight;
-extern wWinPix_t DlgSepTop;
-extern wWinPix_t DlgSepBottom;
-extern wWinPix_t DlgSepNarrow;
-extern wWinPix_t DlgSepWide;
-extern wWinPix_t DlgSepFrmLeft;
-extern wWinPix_t DlgSepFrmRight;
-extern wWinPix_t DlgSepFrmTop;
-extern wWinPix_t DlgSepFrmBottom;
 
 extern wWin_p mainW;
-extern wWinPix_t toolbarHeight;
 extern wIndex_t changed;
 extern char message[STR_HUGE_SIZE];
-extern REGION_T curRegion;
 extern long paramVersion;
 extern coOrd zero;
 extern wBool_t extraButtons;
-extern wButton_p undoB;
-extern wButton_p redoB;
-extern wButton_p zoomUpB;			/** ZoomUp button on toolbar */
-extern wButton_p zoomDownB;		/** ZoomDown button on toolbar */
 extern wButton_p backgroundB;		/** background visibility control */
-// extern wButton_p easementB;
 extern wIndex_t checkPtMark;
-extern wMenu_p demoM;
-extern wMenu_p popup1M, popup2M;
 
 #define wControlBelow( B )		(wControlGetPosY((wControl_p)(B))+wControlGetHeight((wControl_p)(B)))
 #define wControlBeside( B )		(wControlGetPosX((wControl_p)(B))+wControlGetWidth((wControl_p)(B)))
 
-typedef void (*rotateDialogCallBack_t) ( void * );
-typedef void (*indexDialogCallBack_t) (void * );
-typedef void (*moveDialogCallBack_t) (void *);
-extern void AddRotateMenu( wMenu_p, rotateDialogCallBack_t );
-extern void AddMoveMenu( wMenu_p, moveDialogCallBack_t );
-extern void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func);
 /*
  * Safe Memory etc
  */
@@ -219,6 +126,9 @@ void * MyRealloc( void *, size_t );
 void MyFree( void * );
 void * memdup( void *, size_t );
 char * MyStrdup( const char * );
+
+char * ConvertFromEscapedText(const char * text);
+char * ConvertToEscapedText(const char * text);
 
 const char * AbortMessage( const char *, ... );
 void AbortProg( const char *, const char *, int, const char * );
@@ -231,74 +141,22 @@ void AbortProg( const char *, const char *, int, const char * );
 #endif
 
 char * Strcpytrimed( char *, const char *, BOOL_T );
-char * BuildTrimedTitle( char *, const char *, const char *, const char *, const char * );
-void ErrorMessage( const char *, ... );
+wBool_t CheckHelpTopicExists(const char * topic);
+
 void InfoMessage( const char *, ... );
+void ErrorMessage( const char *, ... );
 int NoticeMessage( const char *, const char*, const char *, ... );
 int NoticeMessage2( int, const char *, const char*, const char *, ... );
+
+bool Confirm( char *, doSaveCallBack_p );
 void DoQuit( void * unused );
+void MapWindowShow( int state );
 
-void SetFileChanged(void);
-char * ConvertFromEscapedText(const char * text);
-char * ConvertToEscapedText(const char * text);
-
-int MagneticSnap( int state );
 void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );
 void DefaultProc( wWin_p, winProcEvent, void * );
-void SelectFont( void * unused );
-
-void CheckRoomSize( BOOL_T );
-const char * GetBalloonHelpStr( const char* );
-const char * GetCurCommandName( void );
-void EnableCommands( void );
-void Reset( void );
-void TryCheckPoint( void );
-wIndex_t GetCurrentCommand(void);
-BOOL_T IsCurCommandSticky(void);
-void ResetIfNotSticky( void );
-wBool_t DoCurCommand( wAction_t, coOrd );
-int ConfirmReset( BOOL_T );
-void LayoutToolBar( void * );
-#define IC_STICKY               (1<<0)
-#define IC_INITNOTSTICKY        (1<<1)
-#define IC_CANCEL               (1<<2)
-#define IC_MENU                 (1<<3)
-#define IC_NORESTART            (1<<4)
-#define IC_SELECTED             (1<<5)
-#define IC_POPUP                (1<<6)
-#define IC_LCLICK               (1<<7)
-#define IC_RCLICK               (1<<8)
-#define IC_CMDMENU              (1<<9)
-#define IC_POPUP2               (1<<10)
-#define IC_ABUT                 (1<<11)
-#define IC_ACCLKEY              (1<<12)
-#define IC_MODETRAIN_TOO        (1<<13)
-#define IC_MODETRAIN_ONLY       (1<<14)
-#define IC_WANT_MOVE            (1<<15)
-#define IC_PLAYBACK_PUSH        (1<<16)
-#define IC_WANT_MODKEYS         (1<<17)
-#define IC_POPUP3				(1<<18)
-wIndex_t InitCommand( wMenu_p, procCommand_t, const char *, const char *,  int, long, long );
-void AddToolbarControl( wControl_p, long );
-BOOL_T CommandEnabled( wIndex_t );
-wButton_p AddToolbarButton( const char*, wIcon_p, long, wButtonCallBack_p, void * context );
-// RWS not found: wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
-wIndex_t AddMenuButton( wMenu_p, procCommand_t, const char*, const char*, wIcon_p, int, long, long, void* );
-void PlaybackButtonMouse( wIndex_t );
-void ButtonGroupBegin( const char *, const char *, const char * );
-void ButtonGroupEnd( void );
-
-void SaveState( void );
-
-void PlaybackCommand( const char *, wIndex_t );
-wMenu_p MenuRegister( const char * label );
-void DoCommandB( void * );
-
-extern void EnumerateTracks( void * unused );
-void InitDebug( const char *, long * );
-
+typedef void (*changeNotificationCallBack_t)( long );
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)
 #define CHANGE_MAIN		(1<<2)
@@ -312,21 +170,23 @@ void InitDebug( const char *, long * );
 #define CHANGE_ICONSIZE	(1<<11)
 #define CHANGE_LAYER    (1<<3)
 #define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_LAYER|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
-typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );
 
-wBool_t CheckHelpTopicExists(const char * topic);
 
 /* foreign externs */
-extern STATUS_T CmdEnumerate( wAction_t, coOrd );
 
 extern wIndex_t modifyCmdInx;
 extern wIndex_t joinCmdInx;
-extern wIndex_t tunnelCmdInx;
+/* chotbar.c */
+extern long showFlexTrack;
+extern long hotBarLabels;
 
 /* ctodesgn.c */
 void InitNewTurn( wMenu_p m );
+
+/* cturntbl.c */
+extern ANGLE_T turntableAngle;
 
 /* cnote.c */
 void ClearNote( void );
@@ -343,8 +203,6 @@ STATUS_T ModifyProtractor( wAction_t, coOrd );
 
 /* dialogs */
 void OutputBitMap( void );
-
-extern wDrawColor snapGridColor;
 
 addButtonCallBack_t ColorInit( void );
 addButtonCallBack_t SettingsInit( void );
@@ -367,9 +225,6 @@ BOOL_T GridIsVisible( void );
 void InitSnapGridButtons( void );
 void SnapGridEnable( void * unused );
 void SnapGridShow( void * unused );
-void MapWindowShow( int state );
-extern wMenuToggle_p snapGridEnableMI;
-extern wMenuToggle_p snapGridShowMI;
 
 void ScaleLengthEnd( void );
 void EnumerateList( long, FLOAT_T, char * , char * );
@@ -447,6 +302,9 @@ void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
 
+/* layout.c */
+void SetFileChanged(void);
+
 /* macro.c */
 int RegressionTestAll();
 
@@ -460,6 +318,7 @@ int RegressionTestAll();
 #define LABEL_UNGROUPED (1<<10)
 #define LABEL_SPLIT		(1<<11)
 
+/* lprintf.c */
 typedef struct {
 		char * name;
 		int level;
@@ -479,6 +338,10 @@ void LogPrintf( const char *, ... );
 #define LOG1( DBINX, DBMSG ) LOG( DBINX, 1, DBMSG )
 #define LOGNAME( DBNAME, DBMSG ) LOG( LogFindIndex( DBNAME ), DBMSG )
 
+#define NUM_FILELIST (5)
 #define lprintf LogPrintf
+
+/* track.c */
+extern void EnumerateTracks( void * unused );
 
 #endif

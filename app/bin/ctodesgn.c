@@ -2638,6 +2638,19 @@ quitPrinting:
 }
 #endif
 
+
+static char * BuildTrimedTitle( char * cp, const char * sep, const char * mfg, const char * desc, const char * partno )
+{
+	cp = Strcpytrimed( cp, mfg, FALSE );
+	strcpy( cp, sep );
+	cp += strlen(cp);
+	cp = Strcpytrimed( cp, desc, FALSE );
+	strcpy( cp, sep );
+	cp += strlen(cp);
+	cp = Strcpytrimed( cp, partno, FALSE );
+	return cp;
+}
+
 static void NewTurnOk( void * context )
 {
 	FILE * f;
@@ -3377,17 +3390,6 @@ EXPORT char * Strcpytrimed( char * dst, const char * src, BOOL_T double_quotes )
 }
 
 
-EXPORT char * BuildTrimedTitle( char * cp, const char * sep, const char * mfg, const char * desc, const char * partno )
-{
-	cp = Strcpytrimed( cp, mfg, FALSE );
-	strcpy( cp, sep );
-	cp += strlen(cp);
-	cp = Strcpytrimed( cp, desc, FALSE );
-	strcpy( cp, sep );
-	cp += strlen(cp);
-	cp = Strcpytrimed( cp, partno, FALSE );
-	return cp;
-}
 
 
 EXPORT char * PutTitle( char * cp )

@@ -2948,11 +2948,51 @@ static void MainLayoutCB(
 }
 
 
+static void InitColor( void )
+{
+	drawColorBlack  = wDrawFindColor( wRGB(  0,  0,  0) );
+	drawColorWhite  = wDrawFindColor( wRGB(255,255,255) );
+	drawColorRed    = wDrawFindColor( wRGB(255,  0,  0) );
+	drawColorBlue   = wDrawFindColor( wRGB(  0,  0,255) );
+	drawColorGreen  = wDrawFindColor( wRGB(  0,255,  0) );
+	drawColorAqua   = wDrawFindColor( wRGB(  0,255,255) );
+
+	// Last component of spectial color must be > 3
+	drawColorPreviewSelected = wDrawFindColor( wRGB ( 6, 6, 255) );   //Special Blue
+	drawColorPreviewUnselected = wDrawFindColor( wRGB( 255, 215, 6)); //Special Yellow
+
+	drawColorPowderedBlue = wDrawFindColor( wRGB(129, 212, 250) );
+	drawColorPurple = wDrawFindColor( wRGB(255,  0,255) );
+	drawColorGold   = wDrawFindColor( wRGB(255,215,  0) );
+	drawColorGrey10  = wDrawFindColor( wRGB(26,26,26) );
+	drawColorGrey20  = wDrawFindColor( wRGB(51,51,51) );
+	drawColorGrey30  = wDrawFindColor( wRGB(72,72,72) );
+	drawColorGrey40  = wDrawFindColor( wRGB(102,102,102) );
+	drawColorGrey50  = wDrawFindColor( wRGB(128,128,128) );
+	drawColorGrey60  = wDrawFindColor( wRGB(153,153,153) );
+	drawColorGrey70  = wDrawFindColor( wRGB(179,179,179) );
+	drawColorGrey80  = wDrawFindColor( wRGB(204,204,204) );
+	drawColorGrey90  = wDrawFindColor( wRGB(230,230,230) );
+	snapGridColor = drawColorGreen;
+	markerColor = drawColorRed;
+	borderColor = drawColorBlack;
+	crossMajorColor = drawColorRed;
+	crossMinorColor = drawColorBlue;
+	selectedColor = drawColorRed;
+	normalColor = drawColorBlack;
+	elevColorIgnore = drawColorBlue;
+	elevColorDefined = drawColorGold;
+	profilePathColor = drawColorPurple;
+	exceptionColor = wDrawFindColor(wRGB(255, 89, 0 ));
+	tieColor = wDrawFindColor(wRGB(153, 89, 68));
+}
+
+
 EXPORT void DrawInit( int initialZoom )
 {
 	wWinPix_t w, h;
 
-
+	InitColor();
 	wWinGetSize( mainW, &w, &h );
 	/*LayoutToolBar();*/
 	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);

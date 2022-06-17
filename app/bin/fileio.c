@@ -37,6 +37,7 @@
 #include "misc.h"
 #include "param.h"
 #include "include/paramfile.h"
+#include "include/paramfilelist.h"
 #include "paths.h"
 #include "track.h"
 #include "version.h"
@@ -54,8 +55,6 @@ EXPORT dynArr_t paramProc_da;
 
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
-
-EXPORT wMenuList_p fileList_ml;
 
 EXPORT char * clipBoardN;
 static coOrd paste_offset, cursor_offset;
@@ -1163,7 +1162,42 @@ static int SaveTracks(
 	return TRUE;
 }
 
-EXPORT void SetAutoSave() {
+/**
+ * Save information about current files and some settings to preferences file.
+ */
+
+EXPORT void SaveState(void) {
+	wWinPix_t width, height;
+	const char * fileName;
+	void * pathName;
+	char file[6];
+	int inx;
+
+	wWinGetSize(mainW, &width, &height);
+	wPrefSetInteger("draw", "mainwidth", (int)width);
+	wPrefSetInteger("draw", "mainheight", (int)height);
+	SaveParamFileList();
+	ParamUpdatePrefs();
+
+	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
+	wPrefSetInteger( "misc", "lastlayoutexample", bExample );
+
+	if (fileList_ml) {
+		strcpy(file, "file");
+		file[5] = 0;
+		for (inx = 0; inx < NUM_FILELIST; inx++) {
+			fileName = wMenuListGet(fileList_ml, inx, &pathName);
+			if (fileName) {
+				file[4] = '0' + inx;
+				sprintf(message, "%s", (char* )pathName);
+				wPrefSetString("filelist", file, message);
+			}
+		}
+	}
+	wPrefFlush("");
+}
+
+static void SetAutoSave() {
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("AutoSave Tracks As"),
 			sSourceFilePattern, SaveTracks, NULL );
@@ -1278,6 +1312,33 @@ EXPORT void DoCheckPoint( void )
 
 	wShow( mainW );
 }
+
+
+static wIndex_t autosave_count = 0;
+EXPORT wIndex_t checkPtMark = 0;
+EXPORT long checkPtInterval = 10;
+EXPORT long autosaveChkPoints = 0;
+
+EXPORT void TryCheckPoint() {
+	if (checkPtInterval > 0
+				&& changed >= checkPtMark + (wIndex_t) checkPtInterval
+				&& !inPlayback) {
+			DoCheckPoint();
+			checkPtMark = changed;
+
+			autosave_count++;
+
+			if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
+				if ( bReadOnly || *(GetLayoutFilename()) == '\0') {
+					SetAutoSave();
+				} else
+					DoSave(NULL);
+				InfoMessage(_("File AutoSaved"));
+				autosave_count = 0;
+			}
+		}
+}
+
 
 /**
  * Remove all temporary files before exiting. When the program terminates
@@ -1620,6 +1681,27 @@ EXPORT void EditClone( void * unused ) {
  * INITIALIZATION
  *
  */
+
+
+EXPORT void LoadFileList(void) {
+	char file[6];
+	int inx;
+	const char * cp;
+	const char *fileName, *pathName;
+	strcpy(file, "fileX");
+	for (inx = NUM_FILELIST - 1; inx >= 0; inx--) {
+		file[4] = '0' + inx;
+		cp = wPrefGetString("filelist", file);
+		if (!cp)
+			continue;
+		pathName = MyStrdup(cp);
+		fileName = FindFilename((char *) pathName);
+		if (fileName)
+			wMenuListAdd(fileList_ml, 0, fileName, pathName);
+	}
+}
+
+
 
 EXPORT void FileInit( void )
 {

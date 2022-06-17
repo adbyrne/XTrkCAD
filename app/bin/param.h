@@ -28,6 +28,11 @@
 
 typedef struct turnoutInfo_t * turnoutInfo_p;
 
+extern wWinPix_t DlgSepTop;
+extern wWinPix_t DlgSepBottom;
+extern wWinPix_t DlgSepLeft;
+extern wWinPix_t DlgSepRight;
+
 typedef enum {
 		PD_LONG,
 		PD_FLOAT,

@@ -147,6 +147,10 @@ typedef signed char TRKTYP_T;
 typedef int TRKINX_T;
 typedef long DEBUGF_T;
 typedef int REGION_T;
+typedef long SCALEINX_T;
+typedef long GAUGEINX_T;
+typedef long SCALEDESCINX_T;
+
 
 enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COMPATIBLE, PARAMFILE_FIT, PARAMFILE_MAXSTATE };
 
@@ -223,6 +227,9 @@ typedef struct track_t * track_cp;
 typedef struct trkSeg_t * trkSeg_p;
 typedef struct traverseTrack_t * traverseTrack_p;
 typedef struct trkEndPt_t * trkEndPt_p;
+typedef void (*doSaveCallBack_p)( void );
+typedef void (*addButtonCallBack_t)(void*);
+
 
 // base class for extraData*_t: each of which must include this struct as the first element
 typedef struct extraDataBase_t {
@@ -243,16 +250,35 @@ typedef struct {
 	DIST_T spacing;
 } tieData_t, *tieData_p;
 
+// Syntactic suger for exported (non-static) objects
+#define EXPORT
+
+#define COUNT(A) (sizeof(A)/sizeof(A[0]))
+
+#define STR_SIZE		(256)
+#define STR_SHORT_SIZE	(80)
+#define STR_LONG_SIZE	(1024)
+#define STR_HUGE_SIZE	(10240)
+
+#define CAST_AWAY_CONST (char*)
+
+#define TITLEMAXLEN (40)
+
+
+
 // COMMON INCLUDES
 // If you add includes here, please remove them elsewhere
 
 #include "i18n.h"
 #include "utility.h"
+#include "acclkeys.h"
 #include "misc.h"
 
 // TODO - move these includes to the files that need them
 #include "dlayer.h"
 #include "scale.h"
+#include "command.h"
+#include "menu.h"
 
 #endif
 

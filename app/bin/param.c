@@ -44,6 +44,18 @@ static BOOL_T paramCheckShowErrors = FALSE;
 static int log_paramLayout = 0;
 static int log_paraminput = 0;
 
+EXPORT wWinPix_t DlgSepLeft = 12;
+EXPORT wWinPix_t DlgSepRight = 12;
+EXPORT wWinPix_t DlgSepTop = 12;
+EXPORT wWinPix_t DlgSepBottom = 12;
+static wWinPix_t DlgSepMid = 18;
+static wWinPix_t DlgSepNarrow = 6;
+static wWinPix_t DlgSepWide = 12;
+static wWinPix_t DlgSepFrmLeft = 4;
+static wWinPix_t DlgSepFrmRight = 4;
+static wWinPix_t DlgSepFrmTop = 4;
+static wWinPix_t DlgSepFrmBottom = 4;
+
 
 /*****************************************************************************
  *
