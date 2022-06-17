@@ -13,7 +13,7 @@ target_include_directories(xtrkcad-wlib
 
 if(XTRKCAD_USE_GTK)
 	add_subdirectory(gtklib)
-else(XTRKCAD_USE_GTK)
+else()
 	add_subdirectory(mswlib)
-endif(XTRKCAD_USE_GTK)
+endif()
 

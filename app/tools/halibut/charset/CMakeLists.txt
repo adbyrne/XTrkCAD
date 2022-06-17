@@ -1,4 +1,5 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+#
+# Character set conversion library as required for halibut
 
 add_library(xtrkcad-charset
 	big5enc.c 
@@ -38,3 +39,4 @@ set_target_properties(
 	PROPERTIES FOLDER HelpDocs
  )
 
+ target_include_directories(xtrkcad-charset PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})	

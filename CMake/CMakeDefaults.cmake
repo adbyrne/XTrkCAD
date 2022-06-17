@@ -14,9 +14,5 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 # since cmake 2.4.0
 set(CMAKE_COLOR_MAKEFILE ON)
 
-# Allow source tree pollution , required by i18n
-set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
-set(CMAKE_DISABLE_IN_SOURCE_BUILD OFF)
-
 # Use folders to organize targets
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

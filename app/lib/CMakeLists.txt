@@ -57,7 +57,7 @@ if(PANDOC_FOUND)
 			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 			)
 else()			
-	message(STATUS "Pandoc is not available on this system, Readme.txt is not generated!")
+	message(STATUS "Pandoc is not available on this system, Readme.txt and CHANGELOG.txt are not generated!")
 endif()
 	
 if(UNIX AND NOT APPLE)

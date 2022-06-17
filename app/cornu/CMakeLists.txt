@@ -22,6 +22,7 @@ target_sources(xtrkcad-cornu
 
 target_link_libraries(xtrkcad-cornu
 	PRIVATE
-		xtrkcad-wlib)
+		xtrkcad-wlib
+)
 
 target_include_directories(xtrkcad-cornu PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

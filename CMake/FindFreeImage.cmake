@@ -65,22 +65,22 @@ if(FreeImage_FOUND AND NOT TARGET FreeImage::FreeImage)
 	set_property(TARGET FreeImage::FreeImage PROPERTY IMPORTED_LOCATION ${FREEIMAGE_LIBRARY})
 	target_include_directories(FreeImage::FreeImage INTERFACE ${FREEIMAGE_INCLUDE_PATH})
 
-	SET(FreeImage_VERSION_MAJOR)
-    SET(FreeImage_VERSION_MINOR)
-    SET(FreeImage_VERSION_PATCH)
-    FILE(READ "${FREEIMAGE_INCLUDE_PATH}/FreeImage.h" _FreeImage_H_CONTENTS)
+	set(FreeImage_VERSION_MAJOR)
+    set(FreeImage_VERSION_MINOR)
+    set(FreeImage_VERSION_PATCH)
+    file(READ "${FREEIMAGE_INCLUDE_PATH}/FreeImage.h" _FreeImage_H_CONTENTS)
 
-    STRING(REGEX MATCH "#define[ \t]+FREEIMAGE_MAJOR_VERSION[ \t]+[0-9]+" FreeImage_VERSION_MAJOR "${_FreeImage_H_CONTENTS}")
-    STRING(REGEX MATCH "[0-9]+$" FreeImage_VERSION_MAJOR ${FreeImage_VERSION_MAJOR})
+    string(REGEX MATCH "#define[ \t]+FREEIMAGE_MAJOR_VERSION[ \t]+[0-9]+" FreeImage_VERSION_MAJOR "${_FreeImage_H_CONTENTS}")
+    string(REGEX MATCH "[0-9]+$" FreeImage_VERSION_MAJOR ${FreeImage_VERSION_MAJOR})
 
-    STRING(REGEX MATCH "#define[ \t]+FREEIMAGE_MINOR_VERSION[ \t]+[0-9]+" FreeImage_VERSION_MINOR "${_FreeImage_H_CONTENTS}")
-    STRING(REGEX MATCH "[0-9]+$" FreeImage_VERSION_MINOR ${FreeImage_VERSION_MINOR})
+    string(REGEX MATCH "#define[ \t]+FREEIMAGE_MINOR_VERSION[ \t]+[0-9]+" FreeImage_VERSION_MINOR "${_FreeImage_H_CONTENTS}")
+    string(REGEX MATCH "[0-9]+$" FreeImage_VERSION_MINOR ${FreeImage_VERSION_MINOR})
 
-    STRING(REGEX MATCH "#define[ \t]+FREEIMAGE_RELEASE_SERIAL[ \t]+[0-9]+" FreeImage_VERSION_PATCH
+    string(REGEX MATCH "#define[ \t]+FREEIMAGE_RELEASE_SERIAL[ \t]+[0-9]+" FreeImage_VERSION_PATCH
            "${_FreeImage_H_CONTENTS}")
-    STRING(REGEX MATCH "[0-9]+$" FreeImage_VERSION_PATCH ${FreeImage_VERSION_PATCH})
+    string(REGEX MATCH "[0-9]+$" FreeImage_VERSION_PATCH ${FreeImage_VERSION_PATCH})
 
-	SET(FreeImage_VERSION "${FreeImage_VERSION_MAJOR}.${FreeImage_VERSION_MINOR}.${FreeImage_VERSION_PATCH}" 
+	set(FreeImage_VERSION "${FreeImage_VERSION_MAJOR}.${FreeImage_VERSION_MINOR}.${FreeImage_VERSION_PATCH}" 
 		CACHE STRING 
 		"Version number of FreeImage")
 endif()

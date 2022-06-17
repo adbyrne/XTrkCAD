@@ -9,4 +9,4 @@ if(WIN32)
     target_sources(xtrkcad-wlib
         PRIVATE
             getopt.h)
-endif(WIN32)
+endif()

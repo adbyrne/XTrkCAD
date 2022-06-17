@@ -1,4 +1,4 @@
-include_directories(charset)
+
 add_executable(halibut 	
 	biblio.c 
 	bk_html.c 

@@ -39,11 +39,6 @@ mark_as_advanced(XTC_XGETTEXT XTC_MSGINIT XTC_MSGMERGE
 # Custom string extractor utility
 add_executable(stripmsg stripmsg.c)
 
-set_target_properties(
-   stripmsg
-   PROPERTIES FOLDER i18n
-)
-
 # Create custom message files list
 file(GLOB_RECURSE XTC_CUSTOM_MSG_FILES
 	${XTrkCAD_SOURCE_DIR}/*.xtq
@@ -51,11 +46,16 @@ file(GLOB_RECURSE XTC_CUSTOM_MSG_FILES
 	${XTrkCAD_SOURCE_DIR}/*.tip)
 
 # Extract translatable strings from custom message files to one temporary file
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
+add_custom_target(
+	custmsg
 	COMMAND stripmsg ${XTC_CUSTOM_MSG_FILES} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
 	DEPENDS stripmsg ${XTC_CUSTOM_MSG_FILES}
-	)
+)
+
+set_target_properties(
+   stripmsg custmsg
+   PROPERTIES FOLDER i18n
+)
 
 #
 # Create the list of the original source files.

@@ -71,7 +71,7 @@ GENERATE_LIN(tocornu)
 GENERATE_LIN(tocornuwye)
 GENERATE_LIN(tocornu3way)
 
-# put these targets into the folder  LineSymbols
+# put these targets into the folder LineSymbols
 set_target_properties(lines cnvdsgn PROPERTIES FOLDER LineSymbols)
 
 add_library(xtrkcad-lib "")
@@ -235,8 +235,10 @@ add_dependencies(xtrkcad-lib
 )
 
 target_include_directories(xtrkcad-lib 
-    PRIVATE
+    PUBLIC
 	${messagefile_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(xtrkcad-lib

@@ -39,7 +39,7 @@ foreach(infile ${infiles})
         DEPENDS "${infile}" mkcarpart 
         COMMAND mkcarpart "${infile}" "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
-        )
+    )
     target_sources(xtpfiles
         PRIVATE
         "${CMAKE_CURRENT_BINARY_DIR}/${outfile}"
@@ -73,13 +73,15 @@ foreach(infile ${infiles})
     )
     cmake_path(ABSOLUTE_PATH 
                 outfile
-                BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" )
+                BASE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" 
+    )
 
     add_custom_command(
         OUTPUT "${outfile}"
         COMMAND mkstruct "${infile}" "${outfile}"
         DEPENDS "${infile}" mkstruct
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" )
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
+    )
 
     target_sources(xtpfiles
        PRIVATE
@@ -87,11 +89,11 @@ foreach(infile ${infiles})
     )
     install(
         FILES "${outfile}"
-        DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
-)
+        DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/params"
+    )
 endforeach()
 
 install(
 	FILES t-trak-notes.txt
-	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
-	)
+	DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/params"
+)

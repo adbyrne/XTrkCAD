@@ -1,6 +1,6 @@
-file(GLOB_RECURSE ALL_FILES *)
+file(GLOB_RECURSE all_files *)
 
-if(ALL_FILES)
-	file(REMOVE ${ALL_FILES})
-endif(ALL_FILES)
+if(all_files)
+	file(REMOVE ${all_files})
+endif(all_files)
 
