@@ -16,7 +16,7 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include "dynstring.h"
@@ -68,11 +68,12 @@ DestroyCatalog(Catalog *catalog)
 {
 	CatalogEntry *current = catalog->head;
 	CatalogEntry *entry = NULL;
-	CatalogEntry *tmp = NULL, *old = NULL;
+	CatalogEntry *tmp = NULL;
+//	CatalogEntry *old = NULL;
 	DL_FOREACH_SAFE(current, entry, tmp)
 	{
 		//if (old) MyFree(old);
-		old = NULL;
+//		old = NULL;
 		for (unsigned int i = 0; i < entry->files; i++) {
 		   MyFree(entry->fullFileName[i]);
 		   entry->fullFileName[i] = NULL;
@@ -82,13 +83,14 @@ DestroyCatalog(Catalog *catalog)
 		entry->contents = NULL;
 		MyFree(entry->tag);
 		entry->tag = NULL;
-		old = entry;
+//		old = entry;
 		DL_DELETE(catalog->head,entry);
 	}
 
 	catalog->head = NULL;
 }
 
+#if 0
 /**
  * Create a new CatalogEntry and add it to the linked list. The newly
  * created entry is inserted into the list after the given position
@@ -110,6 +112,7 @@ InsertIntoCatalogAfter(CatalogEntry *entry)
 
     return (newEntry);
 }
+#endif
 
 /**
  * Count the elements in the linked list
@@ -138,11 +141,12 @@ CatalogDiscard(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
     CatalogEntry *element;
-    CatalogEntry *tmp,*old = NULL;
+    CatalogEntry *tmp;
+//  CatalogEntry *old = NULL;
 
     DL_FOREACH_SAFE(current, element, tmp) {
     	//if (old) MyFree(old);
-    	old = NULL;
+//  	old = NULL;
     	MyFree(element->contents);
     	element->contents = NULL;
     	MyFree(element->tag);
@@ -152,7 +156,7 @@ CatalogDiscard(Catalog *catalog)
     	    element->fullFileName[i] = NULL;
     	}
     	element->files = 0;
-        old = element;
+//      old = element;
         DL_DELETE(catalog->head,element);
     }
 
@@ -355,11 +359,11 @@ StandardizeSpelling(char *word)
     }
 
     if (!strncasecmp(word, "h0", 2)) {
-        strncpy(word, "ho", 2);
+        strcpy(word, "ho");
     }
 
     if (!strncasecmp(word, "00", 2)) {
-        strncpy(word, "oo", 2);
+        strcpy(word, "oo");
     }
 
     if (word[0] == '0') {
@@ -472,7 +476,7 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 		int maxdistance = 1;
 		while (maxdistance <= LDISTANCELIMIT && !result ) {
 			IndexEntry *current;
-			size_t minDistance = LDISTANCELIMIT + 1;
+//			size_t minDistance = LDISTANCELIMIT + 1;
 			int maxProbability = 0;
 			LOG1(log_params, ("Close match for: <%s> maxdistance: %d\n", search, maxdistance));
 				
@@ -835,7 +839,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 {
     CatalogEntry *element;
     IndexEntry *entries;
-    unsigned entryCount = 0;
+//  unsigned entryCount = 0;
     char *searchWord;
     unsigned words = countWords(searchExpression);
     char *searchExp = MyStrdup(searchExpression);

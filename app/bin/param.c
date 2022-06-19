@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
@@ -28,8 +28,6 @@
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
-
-EXPORT int paramHiliteFast = FALSE;
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
@@ -264,9 +262,11 @@ EXPORT FLOAT_T DecodeFloat(
 		BOOL_T * validP )
 {
 	FLOAT_T valF;
-	const char *cp0, *cp1;
+	const char *cp1;
+//	const char *cp0;
     char *cp2;
-	cp0 = cp1 = wStringGetValue( strCtrl );
+//	cp0 = cp1 = wStringGetValue( strCtrl );
+	cp1 = wStringGetValue( strCtrl );
 	while (isspace((unsigned char)*cp1)) cp1++;
 	if ( *cp1 ) {
 		valF = strtod( cp1, &cp2 );
@@ -290,9 +290,9 @@ FLOAT_T DecodeDistance(
     BOOL_T * validP)
 {
     FLOAT_T valF;
-    char *cp0, *cp1, *cpN, c1;
+    char *cp1, *cpN, c1;
     // CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
-    cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
+    cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
     cpN += strlen(cpN)-1;
 
     while (cpN > cp1 && isspace((unsigned char)*cpN)) {
@@ -587,6 +587,8 @@ EXPORT void ParamLoadControl(
 			if ( (p->option & PDO_NOTBLANK) && strlen( p->oldD.s ) == 0 ) {
 				ParamHilite( p->group->win, p->control, TRUE );
 				p->bInvalid = TRUE;
+			} else {
+				p->bInvalid = FALSE;
 			}
 			break;
 		case PD_MESSAGE:
@@ -1381,7 +1383,7 @@ static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 	if ( inPlayback )
 		return TRUE;
 	paramIntegerRange_t * irangeP = (paramIntegerRange_t*)p->winData;
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
 		 ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
 		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
@@ -1409,7 +1411,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	char * cp;
 	const char * value;
 
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1452,7 +1454,7 @@ static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 	if ( inPlayback )
 		return TRUE;
 	paramFloatRange_t * frangeP = (paramFloatRange_t*)p->winData;
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
 		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
 		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
@@ -1492,7 +1494,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	BOOL_T valid;
 	const char * value;
 
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1537,7 +1539,7 @@ static void ParamStringPush( const char * val, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
 	const char * value;
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
 		fflush( recordF );
@@ -1685,10 +1687,11 @@ static void ParamButtonOk( void * groupVP )
 	paramGroup_p group = groupVP;
 	wFlush();
 	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
-	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
+	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) ) {
 		return;
-	if ( recordF && group->nameStr )
-		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); {
+	}
+	if ( recordF && group->nameStr ) {
+		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" );
 		fflush( recordF );
 	}
 
@@ -1806,11 +1809,10 @@ EXPORT void ParamHilite(
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
-		if ( inPlayback && !paramHiliteFast )
-			wPause(500);
+		if ( inPlayback ) {
+			wPause(playbackDelay*4+1);
+		}
 	} else {
-//		if ( inPlayback && !paramHiliteFast )
-//			wPause(500);
 		wControlHilite( control, FALSE );
 	}
 }
@@ -2010,6 +2012,9 @@ static void ParamPlayback( char * line )
 				if (p->control) {
 					if (p->type == PD_STRING) {
 						wStringSetValue((wString_p)p->control, line);
+						p->bInvalid =
+						     (p->option & PDO_NOTBLANK) &&
+						     strlen( line ) == 0;
 					} else {
 						wTextClear((wText_p)p->control);
 						wTextAppend((wText_p)p->control, line);
@@ -2233,8 +2238,9 @@ static void ParamCreateControl(
     char *cq;
 	static wMenu_p menu = NULL;
 
-	if ( ( win = pd->group->win ) == NULL )
+	if ( ( win = pd->group->win ) == NULL ) {
 		win = mainW;
+	}
 
 
 		switch (pd->type) {

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cundo.h"
@@ -122,7 +122,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0 = 0;
-	int oldTrackCount;
+//	int oldTrackCount;
 	int inx, mode, quad;
 	ANGLE_T angle;
 
@@ -160,7 +160,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-			oldTrackCount = trackCount;
+//			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
 			return C_TERMINATE;
@@ -172,7 +172,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			}
 			onTrackInSplit = FALSE;
 			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-			oldTrackCount = trackCount;
+//			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
 			return C_TERMINATE;
@@ -272,7 +272,7 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0 = 0;
-	int oldTrackCount;
+//	int oldTrackCount;
 
 	switch (action) {
 	case C_START:
@@ -295,7 +295,7 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 			}
 			onTrackInSplit = FALSE;
 			UndoStart( _("Split Draw"), "SplitDraw( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-			oldTrackCount = trackCount;
+//			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
 			return C_TERMINATE;

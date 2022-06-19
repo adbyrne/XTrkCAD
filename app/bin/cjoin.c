@@ -20,7 +20,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -1035,10 +1035,10 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				Dj.jRes.type==curveTypeCurve
 			) {
 			ANGLE_T na0=0.0,na1=0.0;
-			coOrd end0, end1;
+//			coOrd end0, end1;
 			ANGLE_T a0,a1;
-			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
-			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
+//			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
+//			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
 				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(Dj.jRes.pos[0], pos));
 				na0 = NormalizeAngle( Dj.inp[0].params.angle +

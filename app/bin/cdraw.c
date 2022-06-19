@@ -17,7 +17,7 @@
   *
   *  You should have received a copy of the GNU General Public License
   *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
   */
 
 #include "common.h"
@@ -1044,7 +1044,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	trkSeg_p segPtr;
 	int inx;
 	char * title = NULL;
-	char * polyType = NULL;
+//	char * polyType = NULL;
 
 
 	DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, &pos, &drawSegInx );
@@ -1477,9 +1477,11 @@ static void RescaleDraw( track_p trk, FLOAT_T ratio )
 	RescaleSegs( xx->segCnt, xx->segs, ratio, ratio, ratio );
 }
 
+#if 0
 static void DoConvertFill(void) {
 
 }
+#endif
 
 static drawModContext_t drawModCmdContext = {
 		InfoMessage,
@@ -1491,9 +1493,9 @@ static BOOL_T infoSubst = FALSE;
 
 static paramIntegerRange_t i100_100 = { -100, 100, 25 };  //Allow negative numbers
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000 };
-static paramFloatRange_t r1_10000 = { 1, 10000 };
+//static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
-static paramFloatRange_t r10000_10000 = {-10000, 10000};
+//static paramFloatRange_t r10000_10000 = {-10000, 10000};
 static paramFloatRange_t r360_360 = { -360, 360, 80 };
 static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramData_t drawModPLs[] = {
@@ -2160,7 +2162,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 				d = DIST_INF;
 				DIST_T dd;
 				BOOL_T onPoint = FALSE;
-				BOOL_T closeSeg = FALSE;
+//				BOOL_T closeSeg = FALSE;
 				coOrd end;
 				int polyInx = -1;
 				for ( int inx=0; inx<xx->segs[0].u.p.cnt-1; inx++ ) {
@@ -2200,7 +2202,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 						d = dd;
 						if (IsClose(d)) {
 							polyInx = xx->segs[0].u.p.cnt-1;
-							closeSeg=TRUE;
+//							closeSeg=TRUE;
 							pos = p0;
 						}
 					}

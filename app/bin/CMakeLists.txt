@@ -195,6 +195,9 @@ target_sources(xtrkcad-lib
     track.c
     track.h
     trackx.h
+    trkendpt.c
+    trkendpt.h
+    trkendptx.h
     trknote.c
     trkseg.c
     tstraigh.c

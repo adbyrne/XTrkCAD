@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -85,7 +85,7 @@ const char * wGetAppLibDir( void )
 	ep = getenv( envvar );
 	if (ep != NULL) {
 		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
-			strncpy( appLibDir, ep, sizeof appLibDir );
+			strncpy( appLibDir, ep, sizeof(appLibDir) -1 );
 			//printf( "wAppLbDir=%s\n", appLibDir );
 			return appLibDir;
 		}
@@ -177,7 +177,7 @@ const char * wGetAppWorkDir(
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
 				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
-				int rc = system( copyConfigCmd );
+				system( copyConfigCmd );
 			}
 		}
 	}
@@ -234,7 +234,7 @@ wBool_t prefInitted = FALSE;
 
 static void readPrefs( char * name, wBool_t update )
 {
-	char tmp[BUFSIZ], *np, *vp, *cp;
+	char tmp[BUFSIZ+32], *np, *vp, *cp;
 	const char * workDir;
 	FILE * prefFile;
 	prefs_t * p;
@@ -469,7 +469,7 @@ void wPrefFlush(
 		char * name )
 {
 	prefs_t * p;
-	char tmp[BUFSIZ];
+	char tmp[BUFSIZ+32];
     const char *workDir;
 	FILE * prefFile;
 

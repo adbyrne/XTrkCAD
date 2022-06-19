@@ -1,9 +1,9 @@
-/** \file smalldlg.h
- * Definitions and declarations for the small dialog box functions. 
+/** \file trkendpt.h
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 
+ *  Copyright (C) 2022 Dave Bullis
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,17 +20,32 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef SMALLDLG_H
-#define SMALLDLG_H
 
-#define SHOWTIP_NEXTTIP (0L)
-#define SHOWTIP_PREVTIP (1L)
-#define SHOWTIP_FORCESHOW (2L)
+#ifndef TRKENDPTX_H
+#define TRKENDPTX_H
 
-extern struct wWin_t * aboutW;
+#include "common.h"
+#include "track.h"
 
-void InitSmallDlg( void );
-void ShowTip( void * flagsVP );
-void CreateAboutW( void *ptr );
+typedef struct {
+		int option;
+		coOrd doff;
+		union {
+			DIST_T height;
+			char * name;
+		} u;
+		BOOL_T cacheSet;
+		double cachedElev;
+		double cachedGrade;
+		} elev_t;
+
+typedef struct trkEndPt_t {
+		coOrd pos;
+		ANGLE_T angle;
+		track_p track;
+		long index;
+		elev_t elev;
+		long option;
+		} trkEndPt_t;
 
 #endif

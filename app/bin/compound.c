@@ -18,7 +18,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "tbezier.h"
@@ -30,6 +30,7 @@
 #include "fileio.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "draw.h"
 #include "include/paramfile.h"
 #include "common-ui.h"
@@ -200,7 +201,7 @@ EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
 		wIndex_t segCnt,
 		trkSeg_p segs,
 		EPINX_T endPtCnt,
-		trkEndPt_t * endPts )
+		trkEndPt_p endPts )
 {
 	int i;
 	PATHPTR_T pp;
@@ -214,9 +215,11 @@ EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
 			rc &= fprintf( f, "\n" )>0;
 		}
 	}
-	for ( i=0; i<endPtCnt; i++ )
+	for ( i=0; i<endPtCnt; i++ ) {
+		trkEndPt_p epp = EndPtIndex( endPts, i );
 		rc &= fprintf( f, "\tE %0.6f %0.6f %0.6f\n",
-				endPts[i].pos.x, endPts[i].pos.y, endPts[i].angle )>0;
+			GetEndPtPos(epp).x, GetEndPtPos(epp).y, GetEndPtAngle(epp) ) > 0;
+	}
 	rc &= WriteSegs( f, segCnt, segs )>0;
 	return rc;
 }
@@ -613,7 +616,8 @@ DIST_T DistanceCompound(
 {
 	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep;
-	DIST_T d0, d1;
+	DIST_T d0;
+//	DIST_T d1;
 	coOrd p0, p2;
 	PATHPTR_T path;
 	int segInx;
@@ -637,7 +641,7 @@ DIST_T DistanceCompound(
 		path = GetCurrPath( t );
 		for ( path += strlen((char *)path)+1; path[0] || path[1]; path++ ) {
 			if ( path[0] != 0 ) {
-				d1 = DIST_INF;
+//				d1 = DIST_INF;
 				GetSegInxEP( *path, &segInx, &segEP );
 				segProcData.distance.pos1 = p0;
 				SegProc( SEGPROC_DISTANCE, &xx->segs[segInx], &segProcData );
@@ -1125,7 +1129,7 @@ BOOL_T WriteCompound(
 	EPINX_T ep, epCnt;
 	int bits;
 	long options;
-	long position = 0;
+//	long position = 0;
 	drawLineType_e lineType = 0;
 	BOOL_T rc = TRUE;
 
@@ -1218,7 +1222,7 @@ EXPORT track_p NewCompound(
 		ANGLE_T angle,
 		char * title,
 		EPINX_T epCnt,
-		trkEndPt_t * epp,
+		trkEndPt_p epp0,
 		PATHPTR_T paths,
 		wIndex_t segCnt,
 		trkSeg_p segs )
@@ -1243,13 +1247,14 @@ EXPORT track_p NewCompound(
 	SetPaths( trk, paths );
 	xx->segCnt = segCnt;
 	xx->segs = memdup( segs, segCnt * sizeof *segs );
-	trkSeg_p p = xx->segs;
+//	trkSeg_p p = xx->segs;
 	CopyPoly(xx->segs, xx->segCnt);
 	FixUpBezierSegs(xx->segs,xx->segCnt);
 	ComputeCompoundBoundingBox( trk );
 	SetDescriptionOrig( trk );
 	for ( ep=0; ep<epCnt; ep++ ) {
-		SetTrkEndPoint( trk, ep, epp[ep].pos, epp[ep].angle );
+		trkEndPt_p epp = EndPtIndex( epp0, ep );
+		SetTrkEndPoint( trk, ep, GetEndPtPos(epp), GetEndPtAngle(epp) );
 	}
 	return trk;
 }
@@ -1289,12 +1294,12 @@ BOOL_T ReadCompound(
 	}
 	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE)
 		strcpy( scale, curScaleName );
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 	pathCnt = 0;
 	if ( !ReadSegs() )
 		return FALSE;
 	if ( trkType == T_TURNOUT ) {
-		if ( tempEndPts_da.cnt <= 0 ) {
+		if ( TempEndPtsCount() <= 0 ) {
 			InputError( "Turnout defn without EndPoints", TRUE );
 			return FALSE;
 		}
@@ -1491,12 +1496,13 @@ void FlipCompound(
 				d1 = 0;
 				a1 = 0;
 				for ( ep=0; ep<epCnt; ep++ ) {
-					d2 = FindDistance( endPos[ep], to->endPt[ep].pos );
+					trkEndPt_p epp = EndPtIndex( to->endPt, ep );
+					d2 = FindDistance( endPos[ep], GetEndPtPos(epp) );
 					if ( d2 > SMALLVALUE )
 						break;
 					if ( d2 > d1 )
 						d1 = d2;
-					a2 = NormalizeAngle( endAngle[ep] - to->endPt[ep].angle + 0.05 );
+					a2 = NormalizeAngle( endAngle[ep] - GetEndPtAngle(epp) + 0.05 );
 					if ( a2 > 0.1 )
 						break;
 					if ( a2 > a1 )

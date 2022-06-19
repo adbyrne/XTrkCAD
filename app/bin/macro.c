@@ -18,7 +18,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
@@ -31,7 +31,6 @@
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
-#include "trackx.h"
 #include "version.h"
 #include "common-ui.h"
 
@@ -530,7 +529,7 @@ static void PlaybackCursor(
 
 	case C_TEXT:
 		proc( action, pos);
-		char c = action>>8;
+//		char c = action>>8;
 		bm = playbackBm;
 		break;
 
@@ -781,7 +780,6 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 * Regression test
 */
 static int log_regression = 0;
-wBool_t bWriteEndPtDirectIndex;
 static int nRegressionFail = 0;
 
 static BOOL_T DoRegression( char * sFileName )
@@ -792,7 +790,7 @@ static BOOL_T DoRegression( char * sFileName )
 	long regressVersion;
 	FILE * fRegression;
 	char * sRegressionFile =  NULL;
-	wBool_t bWroteActualTracks;
+//	wBool_t bWroteActualTracks;
 	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
 	char * cp;
 	regressVersion = strtol( paramLine+16, &cp, 10 );
@@ -825,77 +823,12 @@ static BOOL_T DoRegression( char * sFileName )
 	case REGRESSION_CHECK:
 	case REGRESSION_QUIET:
 		oldParamVersion = paramVersion;
-		paramVersion = regressVersion;
-		bWroteActualTracks = FALSE;
-		track_p to_first_save = to_first;
-		track_p* to_last_save = to_last;
-		while ( GetNextLine() ) {
-			if ( paramLine[0] == '#' )
-				continue;
-			// Read Expected track
-			to_first = NULL;
-			to_last = &to_first;
-			paramVersion = regressVersion;
-			if ( !ReadTrack( paramLine ) ) {
-				if ( paramFile == NULL )
-					return FALSE;
-				break;
-			}
-			if ( to_first == NULL ) {
-				// Something bad happened
-				break;
-			}
-			track_cp tExpected = to_first;
-			to_first = to_first_save;
-			// Find corresponding Actual track
-			track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
-			strcat( message, "Regression " );
-			if ( ! CompareTrack( tActual, tExpected ) ) {
-				nRegressionFail++;
-				// Actual doesn't match Expected
-				LOG( log_regression, 1, ("  FAIL: %s", message) );
-				fRegression = fopen( sRegressionFile, "a" );
-				if ( fRegression == NULL ) {
-					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );
-					break;
-				}
-				fprintf( fRegression, "REGRESSION FAIL %d\n",
-					PARAMVERSION );
-				fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
-				fprintf( fRegression, "# %s", message );
-				if ( !bWroteActualTracks ) {
-					// Print Actual tracks
-					fprintf( fRegression, "Actual Tracks\n" );
-					paramVersion = PARAMVERSION;
-					WriteTracks( fRegression, FALSE );
-					bWroteActualTracks = TRUE;
-				}
-				// Print Expected track
-				to_first = tExpected;
-				fprintf( fRegression, "Expected Track\n" );
-				WriteTracks( fRegression, FALSE );
-				fclose( fRegression );
-				strcat( message, "Continue test?" );
-				if ( eRegression == REGRESSION_CHECK ) {
-					int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
-					if ( !rc ) {
-						while ( GetNextLine() &&
-							strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
-							;
-						break;
-					}
-				}
-			}
-			// Delete Expected track
-			to_first = tExpected;
-			to_last = &to_first;
-			FreeTrack( tExpected );
-		}
-		to_first = to_first_save;
-		to_last = to_last_save;
-		if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
-			InputError( "Expected REGRESSION END", TRUE );
+		int nFail = CheckRegressionResult( regressVersion, sFileName, eRegression == REGRESSION_QUIET );
 		paramVersion = oldParamVersion;
+		if ( nFail < 0 ) {
+			return FALSE;
+		}
+		nRegressionFail += nFail;
 		break;
 	case REGRESSION_NONE:
 	default:
@@ -982,7 +915,7 @@ static void Playback( void )
 	POS_T zoom;
 	wIndex_t inx;
 	long timeout;
-	static enum { pauseCmd, mouseCmd, otherCmd } thisCmd, lastCmd;
+	static enum { pauseCmd, mouseCmd, otherCmd } thisCmd/*, lastCmd*/;
 	size_t len;
 	static wBool_t demoWinOnTop = FALSE;
 	coOrd roomSize;
@@ -992,7 +925,7 @@ static void Playback( void )
 	useCurrentLayer = FALSE;
 	inPlayback = TRUE;
 	EnableButtons( FALSE );
-	lastCmd = otherCmd;
+//	lastCmd = otherCmd;
 	playbackTimer = 0;
 	if (demoWinOnTop) {
 		wWinTop( mainW );
@@ -1282,7 +1215,7 @@ static void Playback( void )
 				NoticeMessage( MSG_PLAYBACK_UNK_CMD, _("Ok"), NULL, paramLineNum, paramLine );
 			}
 		}
-		lastCmd = thisCmd;
+//		lastCmd = thisCmd;
 		wFlush();
 		if (pauseDemo) {
 			EnableButtons( TRUE );
@@ -1338,7 +1271,6 @@ static void DoDemoButton( void * command )
 	case 0:
 		/* step */
 		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
-		paramHiliteFast = (wGetKeyState() & WKEY_CTRL) != 0;
 		Playback();
 		break;
 	case 1:
@@ -1524,10 +1456,8 @@ static void DemoInitValues( void )
 		wNoticeEx( NT_INFORMATION, _("Can not find PARAMETER playback proc"), _("Ok"), NULL );
 		return;
 	}
-	paramHiliteFast = TRUE;
 	for ( cpp = demoInitParams; *cpp; cpp++ )
 		paramPlaybackProc( *cpp );
-	paramHiliteFast = FALSE;
 	// Have to do this manually
 	oldMagneticSnap = MagneticSnap( TRUE );
 }

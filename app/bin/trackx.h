@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -49,5 +49,4 @@ typedef struct track_t {
 
 extern track_p to_first;
 extern track_p * to_last;
-#define TRK_ITERATE(TRK)		for (TRK=to_first; TRK!=NULL; TRK=TRK->next) if (!(TRK->deleted)) 
 #endif

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cstraigh.h"
@@ -237,11 +237,12 @@ STATUS_T StraightDescriptionMove(
 		coOrd pos )
 {
 	extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
-	ANGLE_T a,ap;
+	ANGLE_T ap;
+//	ANGLE_T a;
 	coOrd end0, end1;
     end0 = GetTrkEndPos(trk,0);
     end1 = GetTrkEndPos(trk,1);
-    a = FindAngle(end0,end1);
+//  a = FindAngle(end0,end1);
     ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
 
     xx->descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap))-2*GetTrkGauge(trk);
@@ -344,7 +345,7 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 
 EXPORT void DrawStraightTies(
 	drawCmd_p d,
-	tieData_p td,
+	tieData_t td,
 	coOrd p0,
 	coOrd p1,
 	wDrawColor color )
@@ -363,16 +364,16 @@ EXPORT void DrawStraightTies(
 	len = FindDistance( p0, p1 );
 	len -= tieOff0+tieOff1;
 	angle = FindAngle( p0, p1 );
-	cnt = (int)floor(len/td->spacing+0.5);
-	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 ) {
+	cnt = (int)floor(len / td.spacing+0.5);
+	if ( len - td.spacing*cnt - td.width > (td.spacing - td.width)/2 ) {
 		cnt++;
 	}
 	if ( cnt != 0 ) {
 		dlen = FindDistance( p0, p1 )/cnt;
-		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
+//		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
 		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
 			Translate( &pos, p0, angle, len );
-			DrawTie( d, pos, angle, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
+			DrawTie( d, pos, angle, td.length, td.width, color, tieDrawMode==TIEDRAWMODE_SOLID );
 		}
 	}
 }
@@ -391,7 +392,7 @@ EXPORT void DrawStraightTrack(
 	coOrd pp0, pp1;
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
-	tieData_p td;
+	tieData_t td;
 	long bridge = 0, roadbed = 0;
 	if ( trk ) {
 		bridge = GetTrkBridge(trk);
@@ -435,7 +436,7 @@ EXPORT void DrawStraightTrack(
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td = GetLayerTieData( GetTrkLayer(trk) );
+		td = GetTrkTieData( trk );
 		DrawStraightTies( d, td, p0, p1, color );
 	}
 	if (color == wDrawColorBlack)

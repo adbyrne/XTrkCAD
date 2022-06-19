@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cstraigh.h"
@@ -418,9 +418,9 @@ static BOOL_T FindTurntableEndPt(
 		EPINX_T *epR,
 		BOOL_T *reverseR )
 {
-	EPINX_T ep, ep0, epCnt=GetTrkEndPtCnt(trk);
+	EPINX_T ep, /*ep0,*/ epCnt=GetTrkEndPtCnt(trk);
 	ANGLE_T angle=*angleR, angle0, angle1;
-	for (ep=0,ep0=-1,epCnt=GetTrkEndPtCnt(trk),angle0=370.0; ep<epCnt; ep++) {
+	for (ep=0,/*ep0=-1,*/epCnt=GetTrkEndPtCnt(trk),angle0=370.0; ep<epCnt; ep++) {
 		if ( (GetTrkEndTrk(trk,ep)) == NULL )
 			continue;
 		angle1 = GetTrkEndAngle(trk,ep);
@@ -513,7 +513,7 @@ static BOOL_T TraverseTurntable(
 	coOrd pos0;
 	DIST_T dist, dist1;
 	ANGLE_T angle, angle1;
-	EPINX_T ep;
+	EPINX_T ep = 0;
 	BOOL_T reverse;
 
 	if ( !ValidateTurntablePosition( trk ) )
@@ -725,9 +725,10 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d
 	//Look for empty slot
 	BOOL_T found = FALSE;
 	for (*ep=0; *ep<GetTrkEndPtCnt(*trk); *ep=*ep+1) {
-		if ( (GetTrkEndTrk(*trk,*ep)) == NULL )
+		if ( (GetTrkEndTrk(*trk,*ep)) == NULL ) {
 			found = TRUE;
-			break;
+		}
+		break;
 	}
 	if (!found)
 		*ep = NewTurntableEndPt(*trk,angle0);

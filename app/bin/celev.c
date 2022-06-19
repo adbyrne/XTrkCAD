@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cselect.h"
@@ -98,7 +98,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 }
 
 static void CreateSplitAnchor(coOrd pos, track_p t) {
-	DIST_T d = tempD.scale*0.1;
+//	DIST_T d = tempD.scale*0.1;
 	DIST_T w = tempD.scale/tempD.dpi*4;
 	int i;
 	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
@@ -113,6 +113,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t) {
 }
 
 
+#if 0
 void static CreateMoveAnchor(coOrd pos) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
@@ -121,6 +122,7 @@ void static CreateMoveAnchor(coOrd pos) {
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	CreateSquareAnchor(pos);
 }
+#endif
 
 static void LayoutElevW(
 		paramData_t * pd,
@@ -351,7 +353,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0;
-	int oldTrackCount;
+//	int oldTrackCount;
 
 	switch (action) {
 	case C_START:
@@ -381,10 +383,11 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			CmdMoveDescription( action, pos );
 			return C_CONTINUE;
 		}
-		BOOL_T xing = FALSE;
+//		BOOL_T xing = FALSE;
 		coOrd p0 = pos, p2=pos;
 		if ((trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL)) != NULL) {
-			EPINX_T ep0 = 0, ep1 = 1;
+			EPINX_T ep0 = 0;
+//			EPINX_T ep1 = 1;
 			DIST_T elev0, elev1;
 			if (GetTrkEndPtCnt(trk0) == 2) {
 				if (!GetPointElev(trk0,p0,&elev0)) {
@@ -452,7 +455,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			ep0 = PickEndPoint( p0, trk0 );
 			if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-				oldTrackCount = trackCount;
+//				oldTrackCount = trackCount;
 				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
 					!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
 					return C_CONTINUE;

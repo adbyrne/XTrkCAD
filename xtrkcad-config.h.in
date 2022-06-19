@@ -16,7 +16,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /* Generated file, do not edit! */
@@ -28,8 +28,8 @@
 #define XTRKCAD_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 #define XTRKCAD_PACKAGE "@XTRKCAD_PACKAGE@"
 #define XTRKCAD_VERSION "@XTRKCAD_VERSION@"
-#define XTRKCAD_PARAMVERSION (13)
-#define XTRKCAD_PARAMVERSIONVERSION "5.3.0"
+#define XTRKCAD_PARAMVERSION (12)
+#define XTRKCAD_PARAMVERSIONVERSION "5.2.0"
 #define XTRKCAD_MINPARAMVERSION (1)
 
 #endif // !XTRKCAD_CONFIG_H

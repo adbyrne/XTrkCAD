@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "custom.h"
@@ -307,16 +307,22 @@ static void LoadCustomMgmList( void )
 	wIndex_t curInx, cnt=0;
 	long tempL;
 	custMgmContext_p context;
+#ifdef LATER
 	custMgmContext_t curContext;
+#endif
 
 	curInx = wListGetIndex( customSelL );
+#ifdef LATER
 	curContext.proc = NULL;
 	curContext.data = NULL;
 	curContext.icon = NULL;
+#endif
 	if ( curInx >= 0 ) {
 		context = (custMgmContext_p)wListGetItemContext( customSelL, curInx );
+#ifdef LATER
 		if ( context != NULL )
 			curContext = *context;
+#endif
 	}
 	cnt = wListGetCount( customSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {

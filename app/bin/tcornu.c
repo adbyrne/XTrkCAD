@@ -32,7 +32,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -79,7 +79,7 @@ void SetUpCornuParmFromTracks(track_p trk[2],cornuParm_t * cp, struct extraDataC
 	}
 }
 
-EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct extraDataCornu_t* xx) {
+EXPORT BOOL_T FixUpCornu(coOrd pos[4], track_p trk[2], EPINX_T ep[2], struct extraDataCornu_t* xx) {
 
 	cornuParm_t cp;
 
@@ -110,7 +110,7 @@ EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct ext
 	return TRUE;
 }
 
-EXPORT BOOL_T FixUpCornu0(coOrd pos[2],coOrd center[2],ANGLE_T angle[2],DIST_T radius[2],struct extraDataCornu_t* xx) {
+EXPORT BOOL_T FixUpCornu0(coOrd pos[4],coOrd center[2],ANGLE_T angle[2],DIST_T radius[2],struct extraDataCornu_t* xx) {
 	DIST_T last_c;
 	if (!CallCornu0(pos, center, angle, radius,&xx->arcSegs,FALSE)) return FALSE;
 	xx->minCurveRadius = CornuMinRadius(pos,
@@ -139,6 +139,7 @@ EXPORT char * CreateSegPathList(track_p trk) {
 }
 
 
+#if 0
 static void GetCornuAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
     CHECK( trk != NULL );
@@ -148,6 +149,7 @@ static void GetCornuAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
     
     LOG( log_cornu, 4, ( "getCornuAngles: = %0.3f %0.3f\n", *a0, *a1 ) )
 }
+#endif
 
 
 static void ComputeCornuBoundingBox( track_p trk, struct extraDataCornu_t * xx )
@@ -212,7 +214,6 @@ static void DrawCornuDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	wFont_p fp;
     coOrd epos0, epos1, offpos0, offpos1;
 
 	if (layoutLabels == 0)
@@ -227,7 +228,7 @@ static void DrawCornuDescription(
 	Translate(&offpos0,epos0,a+90,xx->descriptionOff.y);
 	Translate(&offpos1,epos1,a+90,xx->descriptionOff.y);
 
-    fp = wStandardFont( F_TIMES, FALSE, FALSE );
+    wStandardFont( F_TIMES, FALSE, FALSE );
 
     sprintf( message, _("Cornu: L %s A %0.3f L %s MinR %s"),
     		FormatDistance(FindDistance(xx->pos[0], xx->pos[1])),
@@ -254,8 +255,8 @@ STATUS_T CornuDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-	static coOrd p0,p1;
-	static BOOL_T editState;
+//	static coOrd p0,p1;
+//	static BOOL_T editState;
 
 	if (GetTrkType(trk) != T_CORNU) return C_CONTINUE;
 
@@ -416,9 +417,9 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	default:
 		CHECKMSG( FALSE, ( "updateCornu: Bad inx %d", inx ) );
 	}
-	track_p tracks[2];
-	tracks[0] = GetTrkEndTrk(trk,0);
-	tracks[1] = GetTrkEndTrk(trk,1);
+//	track_p tracks[2];
+//	tracks[0] = GetTrkEndTrk(trk,0);
+//	tracks[1] = GetTrkEndTrk(trk,1);
 
 	if (updateEndPts) {
 		if ( GetTrkEndTrk(trk,0) == NULL ) {
@@ -540,7 +541,7 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawCornuDescription( t, d, color );
 	}
-	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
+//	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
 	DrawSegsO(d,t,zero,0.0,xx->arcSegs.ptr,xx->arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
 	DrawEndPt( d, t, 0, color );
@@ -614,7 +615,7 @@ static BOOL_T ReadCornu( char * line )
 	char scale[10];
 	wIndex_t layer;
 	long options;
-	char * cp = NULL;
+//	char * cp = NULL;
 
 	if (!GetArgs( line+6, "dLl00sdpffppffp",
 		&index, &layer, &options, scale, &visible, &p0, &a0, &r0, &c0, &p1, &a1, &r1, &c1 ) ) {
@@ -699,7 +700,7 @@ EXPORT BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center, A
 
 void GetCornuParmsNear(track_p t, int sel, coOrd * pos2, coOrd * center, ANGLE_T * angle2,  DIST_T * radius ) {
 	coOrd pos = *pos2;
-	double dd = DistanceCornu(t, &pos);   //Pos adjusted to be on curve
+//	double dd = DistanceCornu(t, &pos);   //Pos adjusted to be on curve
 	int inx;
 	*radius = 0.0;
 	*angle2 = 0.0;
@@ -785,8 +786,8 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     DIST_T radius = 0.0;
     coOrd center;
     int inx,subinx;
-    BOOL_T track;
-    track = IsTrack(trk);
+//  BOOL_T track;
+//  track = IsTrack(trk);
     
     cornuParm_t new;
 
@@ -1256,7 +1257,7 @@ BOOL_T GetCornuSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
 	return TRUE;
 }
 
-static dynArr_t cornuSegs_da;
+//static dynArr_t cornuSegs_da;
 
 static BOOL_T MakeParallelCornu(
 		track_p trk,

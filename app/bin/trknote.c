@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
@@ -295,6 +295,7 @@ void UpdateText(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStar
 	changed++;
 }
 
+#if 0
 /**
  * Get the delimited marker for the current note. Markers start and end with
  * a delimiter. The marker itself is a single digit number. For plain text notes
@@ -321,6 +322,7 @@ GetNoteMarker(enum noteCommands command )
 	}
 	return(marker);
 }
+#endif
 
 /**
  * Write the note to file. Handles the complete syntax for a note statement
@@ -334,7 +336,9 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 {
     struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
     BOOL_T rc = TRUE;
+#ifdef UTFCONVERT
 	unsigned strings2convert = 1;
+#endif
 
 	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d", GetTrkIndex(t),
 		GetTrkLayer(t),
@@ -348,12 +352,16 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	case OP_NOTELINK:
 		s[0]=ConvertToEscapedText( xx->noteData.linkData.url );
 		s[1]=ConvertToEscapedText( xx->noteData.linkData.title );
+#ifdef UTFCONVERT
 		strings2convert = 2;
+#endif
 		break;
 	case OP_NOTEFILE:
 		s[0]=ConvertToEscapedText( xx->noteData.fileData.path );
 		s[1]=ConvertToEscapedText( xx->noteData.fileData.title );
+#ifdef UTFCONVERT
 		strings2convert = 2;
+#endif
 		break;
 	default:
 		CHECKMSG( FALSE, ( "WriteNote: %d", xx->op ) );

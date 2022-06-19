@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef GTKINT_H
@@ -41,15 +41,6 @@
 #define MENUH	(24)
 
 extern wWin_p gtkMainW;
-
-#ifdef CURSOR_SURFACE
-typedef struct {
-		cairo_surface_t* surface;
-		wWinPix_t width;
-		wWinPix_t height;
-		wBool_t show;
-} wCursorSurface_t, * wSurface_p;
-#endif
 
 
 typedef enum {
@@ -81,7 +72,6 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * widget; \
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
-		/* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/ \
 		wBool_t outline; \
 		void * data;
 

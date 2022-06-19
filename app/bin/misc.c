@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -2413,19 +2413,21 @@ static void SetAccelKeys()
 #include "bitmaps/doc-export.xpm"
 #include "bitmaps/doc-export-bmap.xpm"
 #include "bitmaps/doc-export-dxf.xpm"
+#if XTRKCAD_CREATE_SVG
 #include "bitmaps/doc-export-svg.xpm"
+#endif
 #include "bitmaps/doc-import.xpm"
 #include "bitmaps/doc-import-mod.xpm" 
 #include "bitmaps/doc-new.xpm"
 #include "bitmaps/doc-save.xpm"
 #include "bitmaps/doc-open.xpm"
-#include "bitmaps/doc-print.xpm"
+// #include "bitmaps/doc-print.xpm"
 #include "bitmaps/doc-setup.xpm"
 #include "bitmaps/parameter.xpm"
 #include "bitmaps/map.xpm"
 #include "bitmaps/magnet.xpm"
 
-static wMenu_p toolbarM;
+//static wMenu_p toolbarM;
 static addButtonCallBack_t paramFilesCallback;
 
 static void CreateMenus(void) {

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "ccurve.h"
@@ -436,7 +436,6 @@ static void FindForks( void )
 {
 	int i;
 	defelev_t * dep;
-	int rc;
 	long time0 = wGetTimer();
 
 	DYNARR_RESET( fork_t, fork_da );
@@ -445,7 +444,7 @@ static void FindForks( void )
 			
 		ClrAllTrkBits( TB_PROCESSED );
 LOG( log_fillElev, 3, ( "   findForks from T%d:%d\n", GetTrkIndex(dep->trk), dep->ep ) )
-		rc = FindShortestPath( dep->trk, dep->ep, FALSE, FillElevShortestPathFunc, dep );
+		FindShortestPath( dep->trk, dep->ep, FALSE, FillElevShortestPathFunc, dep );
 	}
 	ClrAllTrkBits( TB_PROCESSED );
 LOG( log_fillElev, 1, ( "%s: findForks [%d] (%ld)\n", elevPrefix, fork_da.cnt, wGetTimer()-time0 ) )
@@ -1179,7 +1178,7 @@ EXPORT void UpdateTrkEndElev(
 	char * oldStation;
 	BOOL_T changed = TRUE;
 	track_p trk1;
-	EPINX_T ep1;
+//	EPINX_T ep1;
 
 	oldMode = GetTrkEndElevUnmaskedMode( trk, ep );
 	if ( (oldMode&ELEV_MASK) == (newMode&ELEV_MASK) ) {
@@ -1217,7 +1216,7 @@ EXPORT void UpdateTrkEndElev(
 	if ( changed ) {
 		ClrTrkElev( trk );
 		if ( trk1 ) {
-			ep1 = GetEndPtConnectedToMe( trk1, trk );
+//			ep1 = GetEndPtConnectedToMe( trk1, trk );
 			ClrTrkElev( trk1 );
 		}
 		UpdateAllElevations();

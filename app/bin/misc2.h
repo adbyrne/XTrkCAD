@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef MISC2_H
@@ -65,7 +65,6 @@ typedef struct {
 	DIST_T spacing;
 } tieData_t, *tieData_p;
 
-extern tieData_t LayoutTieData;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -101,6 +100,7 @@ extern long layerCount;
 void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg);
 wDrawColor GetLayerColor( unsigned int );
+BOOL_T GetLayerUseDefault( unsigned int );
 SCALEINX_T GetLayerScale( unsigned int );
 BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
@@ -109,7 +109,7 @@ BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );
 BOOL_T GetLayerHidden( unsigned int);
-tieData_p GetLayerTieData( unsigned int );
+tieData_t GetLayerTieData( unsigned int );
 DIST_T GetLayerMinTrackRadius( unsigned int layer );
 ANGLE_T GetLayerMaxTrackGrade( unsigned int layer );
 void SetLayerModule(unsigned int, BOOL_T);

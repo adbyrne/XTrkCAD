@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cjoin.h"
@@ -609,13 +609,13 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	scaleDesc_p s = NULL;
 	gaugeInfo_p g;
 	char *cp;
-	DIST_T ratio;
+//	DIST_T ratio;
 	BOOL_T found;
 	char buf[ 80 ];
 	size_t len;
 
 	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
-		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
+//		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
 
 		/* do we already have a description for this scale? */
 		found = 0;

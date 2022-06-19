@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <dynstring.h>
@@ -45,7 +45,6 @@ struct sLayoutProps {
     GAUGEINX_T		curGaugeInx;
     DIST_T			minTrackRadius;
     DIST_T			maxTrackGrade;
-	tieData_t       tieData;
     coOrd			roomSize;
     char            backgroundTextBox[TEXT_FIELD_LEN+1];
     coOrd			backgroundPos;
@@ -54,7 +53,6 @@ struct sLayoutProps {
     double 			backgroundSize;
 };
 
-EXPORT tieData_t LayoutTieData;
 
 /**
  * @brief Layout properties not in dialog, and save values for Cancel
@@ -68,7 +66,7 @@ struct sDataLayout {
 };
 
 static struct sDataLayout thisLayout = {
-    { "", "", -1, 0, 0, 0.0, 0.0, FALSE, 0.0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
+	{ "", "", -1, 0, 0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
     NaS,
 	NaS, 
     NULL,
@@ -78,7 +76,7 @@ static struct sDataLayout thisLayout = {
 EXPORT wIndex_t changed = 0;
 
 static paramFloatRange_t r0_90 = { 0, 90 };
-static paramFloatRange_t r0o05_100 = { 0.05, 100 };
+// static paramFloatRange_t r0o05_100 = { 0.05, 100 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r0_9999999 = { 0, 9999999 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
@@ -215,8 +213,6 @@ void
 SetLayoutCurScale(SCALEINX_T scale)
 {
     thisLayout.props.curScaleInx = scale;
-	thisLayout.props.tieData = GetScaleTieData( scale );
-	LayoutTieData = thisLayout.props.tieData;
 }
 
 /**
@@ -364,16 +360,6 @@ ANGLE_T
 GetLayoutMaxTrackGrade()
 {
     return (thisLayout.props.maxTrackGrade);
-}
-
-/**
-* @brief Returns the layout tie data
-* @return The tie data (tieData_t)
-*/
-tieData_t
-GetLayoutTieData()
-{
-	return (thisLayout.props.tieData);
 }
 
 /**
@@ -544,7 +530,7 @@ LoadBackGroundImage(void)
 	return TRUE;
 }
 
-#define BACKGROUNDFILEENTRY (11)
+#define BACKGROUNDFILEENTRY (8)
 
 /**
 * Callback from File Select for Background Image File
@@ -648,23 +634,19 @@ static paramData_t layoutPLs[] = {
 #define MINRADIUSENTRY (6)
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
-#define TIEDATAENTRY (8)
-	{ PD_FLOAT, &thisLayout.props.tieData.length, "tielength", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF, &r0o05_100, N_("Tie Length"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_FLOAT, &thisLayout.props.tieData.width, "tiewidth", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, &r0o05_100, N_("  Width"), 0, I2VP(CHANGE_MAIN) },
-	{ PD_FLOAT, &thisLayout.props.tieData.spacing, "tiespacing", PDO_DRAW|PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ|PDO_DLGBOXEND, &r0o05_100, N_("  Spacing"), 0, I2VP(CHANGE_MAIN) },
-#define BACKGROUNDFILECHECK (11)  //Note this value used in the file section routines above - if it changes, they will need to change
+#define BACKGROUNDFILECHECK (8)  //Note this value used in the file section routines above - if it changes, they will need to change
 	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
 	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
-#define BACKGROUNDPOSX (14)
+#define BACKGROUNDPOSX (11)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDPOSY (15)
+#define BACKGROUNDPOSY (12)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDWIDTH (16)
+#define BACKGROUNDWIDTH (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background Size"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDSCREEN (17)
+#define BACKGROUNDSCREEN (14)
 	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, I2VP(CHANGE_BACKGROUND) },
-#define BACKGROUNDANGLE (18)
+#define BACKGROUNDANGLE (15)
 	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, I2VP(CHANGE_BACKGROUND) },
 	{ PD_MESSAGE, N_("Named Settings File"), NULL, PDO_DLGRESETMARGIN, I2VP(180) },
 	{ PD_BUTTON, SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, I2VP(0) },
@@ -861,7 +843,7 @@ LayoutDlgUpdate(
 {
     /* did the scale change ? */
     if (inx == SCALEINX) {
-        char prefString[100];
+        char prefString[130];
         char scaleDesc[100];
 
         LoadGaugeList((wList_p)layoutPLs[GAUGEINX].control, *((int *)valueP));
@@ -881,9 +863,6 @@ LayoutDlgUpdate(
         wStringSetValue((wString_p)layoutPLs[MINRADIUSENTRY].control,
                         FormatDistance(thisLayout.props.minTrackRadius));
     }
-	if ( inx >= TIEDATAENTRY && inx <= TIEDATAENTRY + 2 ){
-		LayoutTieData = GetLayoutTieData();
-	}
 	if (inx == BACKGROUNDFILEENTRY) {
 		SetName();
 		MainRedraw();

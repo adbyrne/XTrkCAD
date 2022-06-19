@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef COMMON_H
@@ -165,8 +165,8 @@ typedef struct {
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
-			(DA).max += INCR; \
-			CHECK_SIZE(T,DA) \
+			(DA).max += (INCR); \
+			CHECK_SIZE((T),(DA)) \
 			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
 			if ( (DA).ptr == NULL ) \
 				abort(); \
@@ -181,14 +181,14 @@ typedef struct {
 #define DYNARR_RESET(T,DA) \
 		(DA).cnt=0
 #define DYNARR_SET(T,DA,N) \
-		{ if ((DA).max < N) { \
-			(DA).max = N; \
-			CHECK_SIZE(T,DA) \
+		{ if ((DA).max < (N)) { \
+			(DA).max = (N); \
+			CHECK_SIZE((T),(DA)) \
 			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
 			if ( (DA).ptr == NULL ) \
 				abort(); \
 		} \
-		(DA).cnt = N; }
+		(DA).cnt = (N); }
 #define DYNARR_FREE(T,DA) \
 		{ if ((DA).ptr) { \
 			MyFree( (DA).ptr); \
@@ -198,13 +198,13 @@ typedef struct {
 		(DA).cnt = 0; }
 #define DYNARR_REMOVE(T,DA,I) \
 		{ \
-		 { if ((DA).cnt-1 > I) { \
-				for (int i=I;i<(DA).cnt-1;i++) { \
+		 { if ((DA).cnt-1 > (I)) { \
+				for (int i=(I);i<(DA).cnt-1;i++) { \
 				(((T*)(DA).ptr)[i])= (((T*)(DA).ptr)[i+1]); \
 				} \
 			} \
 		 } \
-		if ((DA.cnt)>=I) (DA).cnt--; \
+		if ((DA).cnt>=(I)) (DA).cnt--; \
 		}
 
 // Base DotsPerInch
@@ -222,6 +222,7 @@ typedef struct {
 // FORWARD TYPE DECLS
 typedef struct drawCmd_t * drawCmd_p;
 typedef struct track_t * track_p;
+typedef struct track_t * track_cp;
 typedef struct trkSeg_t * trkSeg_p;
 typedef struct traverseTrack_t * traverseTrack_p;
 typedef struct trkEndPt_t * trkEndPt_p;

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <cJSON.h>
@@ -822,7 +822,7 @@ int LoadTracks(
   */
 	extOfFile = FindFileExtension( nameOfFile);
 
-	BOOL_T zipped = FALSE;
+//	BOOL_T zipped = FALSE;
 	BOOL_T loadXTC = TRUE;
 	char * full_path = strdup(fileName[0]);
 
@@ -853,7 +853,7 @@ int LoadTracks(
 			    fseek(f, 0, SEEK_SET);
 			    manifest = malloc(length + 1);
 			    if (manifest) {
-			        size_t siz = fread(manifest, 1, length, f);
+			        fread(manifest, 1, length, f);
 			        manifest[length] = '\0';
 			    }
 			    fclose(f);
@@ -899,7 +899,7 @@ int LoadTracks(
 		} else {
 			loadXTC = FALSE; // when unzipping fails, don't attempt loading the trackplan
 		}
-		zipped = TRUE;
+//		zipped = TRUE;
 
 		free(zip_input);
 
@@ -1222,7 +1222,7 @@ EXPORT void DoLoad( void )
 EXPORT void DoExamples( void )
 {
 	if (examplesFile_fs == NULL) {
-		static wBool_t bExample = TRUE;
+//		static wBool_t bExample = TRUE;
 		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
 			sSourceFilePattern, LoadTracks, NULL );
 	}
@@ -1425,7 +1425,7 @@ static int ImportTracks(
 	Reset();
 	SetAllTrackSelect( FALSE );
 	int saveLayer = curLayer;
-	int layer;
+	int layer = 0;
 	if (importAsModule) {
 		layer = FindUnusedLayer(0);
 		if (layer==-1) return FALSE;

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "compound.h"
@@ -267,7 +267,7 @@ static void DoHotBarJump( int inx )
 static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wDrawPix_t w, wDrawPix_t h )
 {
 	int inx;
-	coOrd pos;
+//	coOrd pos;
 	DIST_T x;
 	wWinPix_t px;
 	hotBarMap_t * tbm;
@@ -316,8 +316,8 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wDrawPix_
 	wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
 	switch (action & 0xff) {
 	case wActionLDown:
-		pos.x = mainD.size.x+mainD.orig.x;
-		pos.y = mainD.size.y+mainD.orig.y;
+//		pos.x = mainD.size.x+mainD.orig.x;
+//		pos.y = mainD.size.y+mainD.orig.y;
 		if ( hotBarCurrSelect >= 0 ) {
 			//HotBarHighlight( hotBarCurrSelect );
 			hotBarCurrSelect = -1;
@@ -394,7 +394,7 @@ static BOOL_T HotBarSelectPlayback( char * line )
 				RedrawHotBar( hotBarD.d, NULL, 0, 0 );
 			}
 			DIST_T fixed_x = 0.0;
-			if ( inx > 0 && (hotBarCurrStart > 0 & hotBarMap(0).isFixed) ) {
+			if ( inx > 0 && hotBarCurrStart > 0 && hotBarMap(0).isFixed ) {
 				// Leave room for Flex object
 				fixed_x = hotBarMap(0).w;
 			}
@@ -437,7 +437,7 @@ EXPORT void AddHotBarElement(
 
 		if ( contentsLabel && strncmp(contentsLabel, curContentsLabel, sizeof curContentsLabel) != 0 && !isFixed ) {
 			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, I2VP(hotBarMap_da.cnt) );
-			strncpy( curContentsLabel, contentsLabel, sizeof curContentsLabel );
+			strncpy( curContentsLabel, contentsLabel, sizeof(curContentsLabel)-1 );
 		}
 		if (barScale <= 0) {
 			if (!isTrack)

@@ -38,7 +38,7 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  * 
  *
@@ -55,7 +55,6 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -564,8 +563,7 @@ static void SignalEditOk ( void * junk )
                 (&(xx->aspectList))[ia].aspectScript = NULL;
             }
             newsize = sizeof(signalData_t)+(sizeof(signalAspect_t)*(signalAspect_da.cnt-1))+1;
-            trk->extraData = MyRealloc(trk->extraData,newsize);
-            trk->extraSize = newsize;
+	    ResizeExtraData( trk, newsize );
             xx = GetsignalData(trk);
         }
     }

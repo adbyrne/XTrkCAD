@@ -38,13 +38,13 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  * 
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#) : $Id$";
+//static const char rcsid[] = "@(#) : $Id$";
 
 #include "compound.h"
 #include "cselect.h"
@@ -54,7 +54,6 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -177,7 +176,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
     controlData_p xx = GetcontrolData(trk);
     const char *thename, *theonscript, *theoffscript;
     unsigned int max_str;
-    char *newName, *newOnScript, *newOffScript;
+    char *newName, *newOnScript, *newOffScript=NULL;
     BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
     
     switch (inx) {
@@ -491,9 +490,9 @@ static void EditControlDialog()
         controlEditOffScript[0] = '\0';
     } else {
         xx = GetcontrolData ( controlEditTrack );
-        strncpy(controlEditName,xx->name,STR_SHORT_SIZE);
-        strncpy(controlEditOnScript,xx->onscript,STR_LONG_SIZE);
-        strncpy(controlEditOffScript,xx->offscript,STR_LONG_SIZE);
+        strncpy(controlEditName,xx->name,STR_SHORT_SIZE-1);
+        strncpy(controlEditOnScript,xx->onscript,STR_LONG_SIZE-1);
+        strncpy(controlEditOffScript,xx->offscript,STR_LONG_SIZE-1);
         controlEditOrig = xx->orig;
     }
     ParamLoadControls( &controlEditPG );

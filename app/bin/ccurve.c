@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "ccurve.h"
@@ -145,7 +145,8 @@ EXPORT STATUS_T CreateCurve(
 	track_p t;
 	DIST_T d;
 	ANGLE_T a, angle1, angle2;
-	static coOrd pos0, p;
+	static coOrd p;
+//	static coOrd pos0;
 	int inx;
 
 	switch ( action ) {

@@ -52,13 +52,13 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  * 
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#) : $Id$";
+//static const char rcsid[] = "@(#) : $Id$";
 
 #include "cundo.h"
 #include "custom.h"
@@ -214,16 +214,22 @@ static void LoadControlMgmList( void )
 	wIndex_t curInx, cnt=0;
 	long tempL;
 	contMgmContext_p context;
+#ifdef LATER
 	contMgmContext_t curContext;
+#endif
 
 	curInx = wListGetIndex( controlSelL );
+#ifdef LATER
 	curContext.proc = NULL;
 	curContext.data = NULL;
 	curContext.icon = NULL;
+#endif
 	if ( curInx >= 0 ) {
 		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
+#ifdef LATER
 		if ( context != NULL )
 			curContext = *context;
+#endif
 	}
 	cnt = wListGetCount( controlSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {

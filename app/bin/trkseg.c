@@ -17,13 +17,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
+#include "trkendpt.h"
 #include "misc.h"
 #include "cbezier.h"
 #include "tbezier.h"
@@ -1148,7 +1149,7 @@ EXPORT BOOL_T ReadSegs( void )
 	tempSpecial[0] = '\0';
 	tempCustom[0] = '\0';
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 	pathCnt = 0;
 	AppendPath(0);	// End of all paths
 	while ( rc && ((cp = GetNextLine()) != NULL) ) {
@@ -1383,67 +1384,7 @@ EXPORT BOOL_T ReadSegs( void )
 			break;
 		case SEG_UNCEP:
 		case SEG_CONEP:
-			DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
-			e = &tempEndPts(tempEndPts_da.cnt-1);
-			if (type == SEG_CONEP) {
-				if ( !GetArgs( cp, "dc", &e->index, &cp ) ) {
-									rc = FALSE;
-									/*??*/break;
-				}
-			} else {
-				e->index = -1;
-			}
-			if ( !GetArgs( cp, "pfc",
-				&e->pos, &e->angle, &cp) ) {
-				rc = FALSE;
-				/*??*/break;
-			}
-			e->elev.option = 0;
-			e->elev.u.height = 0.0;
-			e->elev.doff = zero;
-			e->option = 0;
-			if (improvedEnds) {				//E4 and T4
-				if (!GetArgs( cp, "lpc", &option, &e->elev.doff, &cp )) {
-					rc = FALSE;
-					/*??*/break;
-				}
-				switch (option&ELEV_MASK) {
-					case ELEV_STATION:
-						GetArgs( cp, "qc", &e->elev.u.name, &cp);
-						break;
-					default:
-						GetArgs( cp, "fc", &e->elev.u.height, &cp);   //First height
-				}
-				DIST_T height2;
-				if (!GetArgs( cp, "flLlc", &height2, &option2, &e->elev.option, &e->option, &cp ) ) {
-					rc = FALSE;
-					break;
-				}
-				if (option2) e->elev.option |= ELEV_VISIBLE;
-				GetArgs(cp, "fc", &ignoreFloat, &cp);
-				break;
-			}
-			if ( cp != NULL ) {
-				if (paramVersion < 7) {
-					GetArgs( cp, "dfp", &e->elev.option,  &e->elev.u.height, &e->elev.doff, &cp );
-					/*??*/break;
-				}
-				GetArgs( cp, "lpc", &option, &e->elev.doff, &cp );
-				e->option = option >> 8;
-				e->elev.option = (int)(option&0xFF);
-				if ( (e->elev.option&ELEV_MASK) != ELEV_NONE ) {
-					switch (e->elev.option&ELEV_MASK) {
-					case ELEV_DEF:
-						GetArgs( cp, "fc", &e->elev.u.height, &cp );
-						break;
-					case ELEV_STATION:
-						GetArgs( cp, "qc", &e->elev.u.name, &cp );
-						/*??*/break;
-					default:
-						;
-					}
-				}
-			}
+			rc = GetEndPtArg( cp, type, improvedEnds );
 			break;
 		case SEG_PATH:
 			while (isspace(*cp)) cp++;

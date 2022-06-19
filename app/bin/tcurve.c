@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "ccurve.h"
@@ -170,7 +170,8 @@ DIST_T CurveDescriptionDistance(
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
-	coOrd p0,p1,pd;
+	coOrd pd;
+//	coOrd p0,p1;
 	FLOAT_T ratio;
 	ANGLE_T a, a0, a1;
 	if (hidden) *hidden = FALSE;
@@ -184,8 +185,8 @@ DIST_T CurveDescriptionDistance(
 	if ( xx->helixTurns > 0 ) {
 		pd.x = xx->pos.x + offset.x;
 		pd.y = xx->pos.y + offset.y;
-		p0 = pd;
-		p1 = pd;
+//		p0 = pd;
+//		p1 = pd;
 	} else {
 		GetCurveAngles( &a0, &a1, trk );
 		ratio = offset.x;
@@ -306,20 +307,20 @@ STATUS_T CurveDescriptionMove(
 		coOrd pos )
 {
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(trk, T_CURVE, extraDataCurve_t);
-	static coOrd p0,p1;
-	wDrawColor color;
+//	static coOrd p0,p1;
+//	wDrawColor color;
 	ANGLE_T a, a0, a1;
 	DIST_T d;
 
-	p0 = xx->pos;
+//	p0 = xx->pos;
 
-	color = GetTrkColor( trk, &mainD );
+//	color = GetTrkColor( trk, &mainD );
 	if ( xx->helixTurns > 0 ) {
 		xx->descriptionOff.x = (pos.x-xx->pos.x);
 		xx->descriptionOff.y = (pos.y-xx->pos.y);
-		p1 = pos;
+//		p1 = pos;
 	} else {
-		p1 = pos;
+//		p1 = pos;
 		GetCurveAngles( &a0, &a1, trk );
 		if ( a1 < 1 ) a1 = 1.0;
 		a = FindAngle( xx->pos, pos );
@@ -674,14 +675,14 @@ static DIST_T DistanceCurve( track_p t, coOrd * p )
 static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 {
 	ANGLE_T a0, a1;
-	track_p tt = t;
+//	track_p tt = t;
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	struct extraDataCurve_t *xx = GET_EXTRA_DATA(t, T_CURVE, extraDataCurve_t);
 
 	GetCurveAngles( &a0, &a1, t );
-	if (xx->circle) {
-		tt = NULL;
-	}
+//	if (xx->circle) {
+//		tt = NULL;
+//	}
 	if (xx->helixTurns > 0) {
 		a0 = 0.0;
 		a1 = 360.0;
@@ -701,7 +702,7 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 
 static void DrawCurvedTies(
 	drawCmd_p d,
-	tieData_p td,
+	tieData_t td,
 	coOrd p,
 	DIST_T r,
 	ANGLE_T a0,
@@ -719,15 +720,15 @@ static void DrawCurvedTies(
 	if (color == wDrawColorBlack)
 		color = tieColor;
 	len = 2*M_PI*r*a1/360.0;
-	cnt = (int)floor(len/td->spacing+0.5);
-	if ( len-td->spacing*cnt-(td->width/2) > (td->spacing-td->width)/2 ) {
+	cnt = (int)floor(len/td.spacing + 0.5);
+	if ( len - td.spacing*cnt - (td.width/2) > (td.spacing - td.width)/2 ) {
 		cnt++;
 	}
 	if ( cnt != 0 ) {
 		dang = (360.0*(len)/cnt)/(2*M_PI*r);
 		for ( ang=a0+dang/2; cnt; cnt--,ang+=dang ) {
 			PointOnCircle( &pos, p, r, ang );
-			DrawTie( d, pos, ang+90, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
+			DrawTie( d, pos, ang+90, td.length, td.width, color, tieDrawMode==TIEDRAWMODE_SOLID );
 		}
 
 	}
@@ -745,7 +746,7 @@ EXPORT void DrawCurvedTrack(
 {
 	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
-	tieData_p td;
+	tieData_t td;
 	wDrawWidth width=0;
 	trkSeg_p segPtr;
 	long bridge = 0, roadbed = 0;
@@ -787,7 +788,7 @@ EXPORT void DrawCurvedTrack(
 	}
 
 	if ( DoDrawTies( d, trk ) ) {
-		td = GetLayerTieData( GetTrkLayer(trk) );
+		td = GetTrkTieData( trk );
 		DrawCurvedTies( d, td, p, r, a0, a1, color );
 	}
 	if (color == wDrawColorBlack)
@@ -1352,7 +1353,7 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 	params->type = curveTypeCurve;
 	GetTrkCurveCenter( trk, &params->arcP, &params->arcR);
 	GetCurveAngles( &params->arcA0, &params->arcA1, trk );
-	ANGLE_T angle1 = FindAngle(params->arcP,pos);
+//	ANGLE_T angle1 = FindAngle(params->arcP,pos);
 
 	params->track_angle = NormalizeAngle(FindAngle(params->arcP,pos)+90);
 

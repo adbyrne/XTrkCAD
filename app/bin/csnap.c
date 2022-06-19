@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "custom.h"
@@ -121,7 +121,11 @@ void static DrawGridPoint(
 		r = 0.75;
 	}
 	r /= dpi;
-	DrawFillCircle( D, p0, r, Color );
+	DrawFillCircle(D, p0, r, Color);
+	//r = 0.75 / dpi;
+	//coOrd sz; sz.x=2*r;sz.y=2*r;
+	//p0.x -= r; p0.y -= r;
+	//DrawRectangle( D, p0, sz, Color, DRAW_FILL );
 }
 
 

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -67,7 +67,9 @@
 #include "fileio.h"
 #include "paths.h"
 #include "track.h"
-#include "trackx.h"
+// We need to fiddle with the track list
+#include "trackx.h"	// tempTrk, to_first, to_last
+#include "trkendpt.h"
 #include "draw.h"
 #include "cundo.h"
 #include "common-ui.h"
@@ -385,7 +387,7 @@ BOOL_T WriteObject( stream_p stream, char op, track_p trk )
 	if (!WriteStream( stream, &op, sizeof op ) ||
 		!WriteStream( stream, &trk, sizeof trk ) ||
 		!WriteStream( stream, trk, sizeof *trk ) ||
-		!WriteStream( stream, trk->endPt, trk->endCnt * sizeof trk->endPt[0] ) ||
+		!WriteStream( stream, trk->endPt, EndPtSize(trk->endCnt) ) ||
 		!WriteStream( stream, trk->extraData, trk->extraSize ))
 		return FALSE;
 	/* Add a copy of the any type specific data before it is tampered with, for example */
@@ -432,10 +434,10 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 		UASSERT( (op==ModifyOp) && !IsTrackDeleted(&tempTrk), GetTrkIndex(&tempTrk) );
 	// op==DeleteOp doesnot imply that tmpTrk.delete == TRUE: SetDeleteOpInStream
 	if (tempTrk.endCnt != trk->endCnt)
-		tempTrk.endPt = MyRealloc( trk->endPt, tempTrk.endCnt * sizeof tempTrk.endPt[0] );
+		tempTrk.endPt = MyRealloc( trk->endPt, EndPtSize(tempTrk.endCnt) );
 	else
 		tempTrk.endPt = trk->endPt;
-	if (!ReadStream( stream, tempTrk.endPt, tempTrk.endCnt * sizeof tempTrk.endPt[0] ))
+	if (!ReadStream( stream, tempTrk.endPt, EndPtSize(tempTrk.endCnt) ))
 		return FALSE;
 	if (tempTrk.extraSize != trk->extraSize)
 		tempTrk.extraData = (extraDataBase_t*)MyRealloc( trk->extraData, tempTrk.extraSize );
@@ -482,7 +484,7 @@ static BOOL_T RedrawInStream( stream_p stream, uintptr_t start, uintptr_t end, B
 			!ReadStream( stream, &trk, sizeof trk ) ||
 			!ReadStream( stream, &tempTrk, sizeof tempTrk ) )
 			return FALSE;
-		stream->curr += tempTrk.extraSize + tempTrk.endCnt*sizeof tempTrk.endPt[0];;
+		stream->curr += tempTrk.extraSize + EndPtSize(tempTrk.endCnt);
 		long Addsize;
 		if (!ReadStream( stream, &Addsize, sizeof Addsize ))
 				return FALSE;
@@ -525,7 +527,7 @@ static BOOL_T DeleteInStream( stream_p stream, uintptr_t start, uintptr_t end )
 		if (!ReadStream( stream, &trk, sizeof trk ) ||
 			!ReadStream( stream, &tempTrk, sizeof tempTrk ))
 			return FALSE;
-		stream->curr += tempTrk.extraSize + tempTrk.endCnt*sizeof tempTrk.endPt[0];
+		stream->curr += tempTrk.extraSize + EndPtSize(tempTrk.endCnt);
 		long Addsize;
 		if (!ReadStream( stream, &Addsize, sizeof Addsize ))
 			return FALSE;
@@ -597,7 +599,7 @@ static BOOL_T SetDeleteOpInStream( stream_p stream, uintptr_t start, uintptr_t e
 			LOG( log_undo, 3, ( "         -> Delete\n") );
 			return TRUE;
 		}
-		stream->curr += tempTrk.extraSize + tempTrk.endCnt*sizeof tempTrk.endPt[0];
+		stream->curr += tempTrk.extraSize + EndPtSize(tempTrk.endCnt);
 		long Addsize;
 		if (!ReadStream( stream, &Addsize, sizeof Addsize))
 				return FALSE;
@@ -930,7 +932,7 @@ void UndoUndo( void * unused )
 		return;
 	}
 
-	int rc = ConfirmReset( FALSE );
+	ConfirmReset( FALSE );
 	wDrawDelayUpdate( mainD.d, TRUE );
 	us = &undoStack[undoHead];
 LOG( log_undo, 1, ( "    UndoUndo[%d] d:%d u:%d N:%d M:%d D:%d %s\n", undoHead, doCount, undoCount, us->newCnt, us->modCnt, us->delCnt, us->needRedo?"Redo":"" ) )
@@ -1009,7 +1011,7 @@ void UndoRedo( void * unused )
 		return;
 	}
 
-	int rc = ConfirmReset( FALSE );
+	ConfirmReset( FALSE );
 	wDrawDelayUpdate( mainD.d, TRUE );
 	INC_UNDO_INX( undoHead );
 	us = &undoStack[undoHead];

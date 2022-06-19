@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cselect.h"
@@ -36,7 +36,7 @@ static int log_carInvList;
 static int log_carDlgState;
 static int log_carDlgList;
 
-static paramFloatRange_t r0_99999 = { 0, 99999, 80 };
+//static paramFloatRange_t r0_99999 = { 0, 99999, 80 };
 static paramFloatRange_t r0d001_99999 = { 0.001, 99999, 80 };
 static paramFloatRange_t r9999_9999 = {-99999, 99999, 80};
 static paramIntegerRange_t i1_999999999 = { 1, 999999999, 80, PDO_NORANGECHECK_HIGH };
@@ -597,7 +597,7 @@ GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	DIST_T ratio = GetScaleRatio(scaleIndex);
+//	DIST_T ratio = GetScaleRatio(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -1270,8 +1270,8 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	DIST_T ratio = GetScaleRatio(scaleIndex);
-	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
+//	DIST_T ratio = GetScaleRatio(scaleIndex);
+//	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -1959,7 +1959,7 @@ EXPORT void CarItemPlace(
 	dists[0] = dists[1] = CarItemCoupledLength(item)/2.0;
 }
 
-static dynArr_t clearance;
+//static dynArr_t clearance;
 
 static void ClearClearancePoints(void) {
 	//DYNARR_RESET(trkSeg_t,clearance);
@@ -1995,7 +1995,7 @@ EXPORT void CarItemDraw(
 	trkSeg_t simpleSegs[1];
 	pts_t simplePts[4];
 	int dir;
-	DIST_T rad;
+//	DIST_T rad;
 	static int couplerLineWidth = 3;
 	DIST_T scale2rail;
 
@@ -2090,7 +2090,7 @@ EXPORT void CarItemDraw(
 	if ( d->scale >= scale2rail )
 		return;
 	scale2rail /= 2;
-	rad = trackGauge/8.0;
+//	rad = trackGauge/8.0;
 	for ( dir=0; dir<2; dir++ ) {
 		Translate( &pos, coupler[dir].pos, coupler[dir].angle, CarItemCouplerLength(item,dir) );
 		DrawLine( d, coupler[dir].pos, pos, couplerLineWidth, color );
@@ -3368,10 +3368,11 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 				carDlgServiceDateStr[0] = '\0';
 			wTextClear( (wText_p)carDlgPLs[I_CD_NOTES].control );
 			if ( carDlgUpdateItemPtr->data.notes ) {
-			strncpy( message, carDlgUpdateItemPtr->data.notes, sizeof message );
-			message[sizeof message - 1] = '\0';
-			for ( cp=message; *cp; cp++ )
-				if ( *cp == '\n' ) *cp = ' ';
+				strncpy( message, carDlgUpdateItemPtr->data.notes, sizeof message );
+				message[sizeof message - 1] = '\0';
+				for ( cp=message; *cp; cp++ ) {
+					if ( *cp == '\n' ) *cp = ' ';
+				}
 				wTextAppend( (wText_p)carDlgPLs[I_CD_NOTES].control, message );
 			}
 			LoadRoadnameList( &tabs[T_ROADNAME], &tabs[T_REPMARK] );
@@ -3994,7 +3995,7 @@ static void CarDlgOk( void * unused )
 	char * cp;
 	long count;
 	tabString_t tabs[7];
-	char title[STR_LONG_SIZE];
+	char title[STR_LONG_SIZE*2];
 	carItem_p itemP=NULL;
 	carPart_p partP=NULL;
 	carProto_p protoP;

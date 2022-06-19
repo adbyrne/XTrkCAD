@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -398,7 +398,8 @@ static track_p NewJoint(
 	struct extraDataEase_t *xx;
 	coOrd p, p0, p1, q0, q1;
 	static coOrd qZero = { 0.0, 0.0 };
-	ANGLE_T az0, a01, b, b01, b1, d, d1;
+	ANGLE_T az0, a01, b, b01, d, d1;
+//	ANGLE_T b1;
 	trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
 	SetTrkBits(trk, TB_HIDEDESC);					//Suppress Description for new Joint
 	SetTrkScale( trk, GetLayoutCurScale() );
@@ -431,7 +432,7 @@ static track_p NewJoint(
 	if (!e->Scurve) {
 		az0 = FindAngle( qZero, q0 );
 		a01 = FindAngle( q0, q1 );
-		b1 = NormalizeAngle( b01 - (a01+az0) );
+//		b1 = NormalizeAngle( b01 - (a01+az0) );
 		b = NormalizeAngle( b01 - a01 );
 	} else {
 		q1.x = -q1.x;
@@ -810,7 +811,7 @@ static void DrawJointDescription(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	DIST_T grade=0, sep=0;
+//	DIST_T grade=0, sep=0;
 	ANGLE_T a;
 	if (layoutLabels == 0)
 		return;

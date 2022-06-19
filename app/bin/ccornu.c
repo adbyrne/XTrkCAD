@@ -63,7 +63,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -2444,8 +2444,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			EPINX_T ep = 0;
-			BOOL_T found = FALSE;
-			int end = Da.state==POS_1?0:1;
+//			BOOL_T found = FALSE;
+//			int end = Da.state==POS_1?0:1;
 			if(!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
 				InfoMessage(_("Track can't be split - so locked to endpoint"));
 				return C_CONTINUE;
@@ -2624,7 +2624,7 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 			}
 			trk_old = newTracks[1];
 		} else {
-			track_p new_trk;
+			track_p new_trk = NULL;
 			if (seg->type == SEG_CRVTRK)
 				new_trk = NewCurvedTrack(seg->u.c.center,seg->u.c.radius,seg->u.c.a0,seg->u.c.a1,0);
 			else if (seg->type == SEG_STRTRK)
@@ -2935,7 +2935,8 @@ static STATUS_T CmdConvertFrom(
 		coOrd pos )
 {
 	static track_p trk;
-	track_p trk1,trk2;
+	track_p trk1;
+//	track_p trk2;
 	switch (action) {
 
 		case wActionMove:
@@ -2968,15 +2969,16 @@ static STATUS_T CmdConvertFrom(
 					return C_TERMINATE;
 				}
 			}
-			dynArr_t trackSegs_da;
-			DYNARR_RESET(trkSeg_t,trackSegs_da);
+//			dynArr_t trackSegs_da;
+//			DYNARR_RESET(trkSeg_t,trackSegs_da);
 			trk1 = NULL;
-			trk2 = NULL;
+//			trk2 = NULL;
 			trk = NULL;
 			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
 			track_p tracks[2];
 			DYNARR_RESET(track_p,Da.tracks);
-			int converted=0, not_convertable = 0, created=0, deleted=0;
+			int converted=0, not_convertable = 0, deleted=0;
+//			int created=0;
 			while ( TrackIterate( &trk1 ) ) {
 				if ( GetTrkSelected( trk1 ) && IsTrack( trk1 ) ) {
 					//Only Cornu or Bezier

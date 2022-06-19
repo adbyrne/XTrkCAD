@@ -38,7 +38,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -822,10 +822,10 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 	BOOL_T track = TRUE;
 //	double width = 1.0;
 //	long mode = 0;
-	long cmd;
+//	long cmd;
 
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataBezier_t);
-	cmd = VP2L(commandContext);
+//	cmd = VP2L(commandContext);
 	Da.trackGauge = trackG;
 
 	switch (action&0xFF) {
@@ -887,12 +887,12 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 		UndoModify( trk );
 
 		Da.state = NONE;
-		wDrawColor color = wDrawColorBlack;
-		DIST_T width = 0;
-		if ( !Da.track ) {
-			color = xx->segsColor;
-			width = xx->segsWidth;
-		}
+//		wDrawColor color = wDrawColorBlack;
+//		DIST_T width = 0;
+//		if ( !Da.track ) {
+//			color = xx->segsColor;
+//			width = xx->segsWidth;
+//		}
 		SetBezierData( trk, Da.pos, xx->segsColor, xx->segsWidth );
 
 		DrawNewTrack( trk );
@@ -1035,7 +1035,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( Da.state == POS_1 || Da.state == POS_2) {   //Set the first or third point
 			coOrd p = pos;
-			BOOL_T found = FALSE;
+//			BOOL_T found = FALSE;
 			int end = Da.state==POS_1?0:1;
 			EPINX_T ep;
 			if (Da.track) {
@@ -1053,7 +1053,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 								Da.trk[end] = t;
 								Da.ep[end] = ep;
 								pos = GetTrkEndPos(t, ep);
-								found = TRUE;
+//								found = TRUE;
 							}
 						}
 					}
@@ -1219,8 +1219,8 @@ void UpdateParms(wDrawColor color,long width) {
 }
 
 
-#include "bitmaps/bezier-track.xpm"
-#include "bitmaps/bezier-line.xpm"
+//#include "bitmaps/bezier-track.xpm"
+//#include "bitmaps/bezier-line.xpm"
 
 EXPORT void InitCmdBezier( wMenu_p menu )
 {	
