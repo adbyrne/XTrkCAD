@@ -23,27 +23,20 @@
 
 
 #include "misc.h"
-#include "cjoin.h"
-#include "common.h"
-#include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc.h"
 #include "param.h"
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
 #include "common-ui.h"
-#include "ctrain.h"
 
 #include <inttypes.h>
-
-#include <stdint.h>
 
 #define DEFAULT_SCALE ("N")
 
