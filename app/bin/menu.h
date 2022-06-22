@@ -27,8 +27,6 @@
 
 extern wMenu_p demoM;
 extern wMenu_p popup1M, popup2M;
-extern wMenu_p popup1aM, popup2aM;
-extern wMenu_p popup1mM, popup2mM;
 extern wButton_p undoB;
 extern wButton_p redoB;
 extern wButton_p zoomUpB;
@@ -41,6 +39,8 @@ extern wMenuList_p fileList_ml;
 extern wMenuToggle_p snapGridEnableMI;
 extern wMenuToggle_p snapGridShowMI;
 
+extern long stickySet;
+
 extern wMenu_p MenuRegister( const char * label );
 typedef void (*rotateDialogCallBack_t) ( void * );
 typedef void (*indexDialogCallBack_t) (void * );
@@ -49,8 +49,20 @@ extern void AddMoveMenu(wMenu_p m, moveDialogCallBack_t func);
 extern void AddIndexMenu(wMenu_p m, indexDialogCallBack_t func);
 extern void AddRotateMenu(wMenu_p m, rotateDialogCallBack_t func);
 extern int MagneticSnap( int state );
-extern void MessageListAppend( char *, const char * );
 extern void SelectFont(void * unused);
+extern void DoSticky(void * unused);
+
+extern void EnableMenus( void );
+extern void MessageListAppend( char *, const char * );
+extern const char * GetBalloonHelpStr(const char * helpKey);
+extern wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long options,
+				wButtonCallBack_p action, void * context);
+extern void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
+		const char * stickyLabel);
+extern void ButtonGroupEnd(void);
+extern wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
+		const char * helpKey, const char * nameStr, wIcon_p icon, int reqLevel,
+		long options, long acclKey, void * context);
 extern void CreateMenus(void);
 
 #endif

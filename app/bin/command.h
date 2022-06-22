@@ -113,8 +113,10 @@
 #define BG_BIGGAP		(1<<8)
 extern int cmdGroup;
 
-typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
 
+extern int buttonCnt;
+extern int commandCnt;
+extern int cmdGroup;
 extern long toolbarSet;
 extern wWinPix_t toolbarHeight;
 extern long preSelect;
@@ -122,28 +124,23 @@ extern long rightClickMode;
 extern void * commandContext;
 extern coOrd cmdMenuPos;
 
-const char * GetBalloonHelpStr( const char* );
 const char * GetCurCommandName( void );
 void EnableCommands( void );
 wIndex_t GetCurrentCommand(void);
-void TryCheckPoint( void );
 void Reset( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
 int ConfirmReset( BOOL_T );
 void DoCommandB( void * );
 void LayoutToolBar( void * );
 BOOL_T CommandEnabled( wIndex_t );
+#define NUM_CMDMENUS (4)
+wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
+		const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
+		wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS], void * context);
 void AddToolbarControl( wControl_p, long );
-wButton_p AddToolbarButton( const char*, wIcon_p, long, wButtonCallBack_p, void * context );
 void PlaybackButtonMouse( wIndex_t );
-void ButtonGroupBegin( const char *, const char *, const char * );
-void ButtonGroupEnd( void );
-wIndex_t AddMenuButton( wMenu_p, procCommand_t, const char*, const char*, wIcon_p, int, long, long, void* );
-wIndex_t InitCommand( wMenu_p, procCommand_t, const char *, const char *,  int, long, long );
 void PlaybackCommand( const char *, wIndex_t );
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
-void DoSticky( void * );
-
 void CommandInit( void );
 #endif

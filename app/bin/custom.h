@@ -42,6 +42,7 @@ extern char * sClipboardF;
 extern char * sParamQF;
 extern char * sUndoF;
 extern char * sAuditF;
+extern char * sTipF;
 
 extern char * sSourceFilePattern;
 extern char * sSaveFilePattern;

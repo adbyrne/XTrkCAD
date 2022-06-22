@@ -27,13 +27,10 @@
 #include "cselect.h"
 #include "track.h"
 #include "common-ui.h"
+#include "draw.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
-
-extern wIndex_t selectCmdInx;
-extern wIndex_t joinCmdInx;
-extern wIndex_t modifyCmdInx;
 
 static track_p descTrk;
 static descData_p descData;
@@ -675,10 +672,6 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 
 #include "bitmaps/describe.xpm"
-
-extern wIndex_t selectCmdInx;
-extern wIndex_t modifyCmdInx;
-extern wIndex_t panCmdInx;
 
 void InitCmdDescribe(wMenu_p menu)
 {

@@ -53,9 +53,6 @@ static char groupPartno[STR_SIZE];
 static char groupTitle[STR_LONG_SIZE];
 static int groupCompoundCount = 0;
 
-extern TRKTYP_T T_BZRTRK;
-extern TRKTYP_T T_BZRLIN;
-extern TRKTYP_T T_CORNU;
 
 /*****************************************************************************
  *

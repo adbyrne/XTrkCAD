@@ -28,11 +28,21 @@
 
 
 extern TRKTYP_T T_NOTRACK;
+extern TRKTYP_T T_TURNOUT;
+extern TRKTYP_T T_STRUCTURE;
+extern TRKTYP_T T_BEZIER;
+extern TRKTYP_T T_BZRLIN;
+extern TRKTYP_T T_CORNU;
 
 struct track_t ;
 typedef struct track_t * track_p;
 typedef struct track_t * track_cp;
 extern wIndex_t trackCount;
+extern DIST_T trackGauge;
+extern DIST_T minLength;
+extern DIST_T connectDistance;
+extern ANGLE_T connectAngle;
+extern long twoRailScale;
 extern wBool_t bFreeTrack;
 extern long colorTrack;
 extern long colorDraw;
@@ -194,9 +204,6 @@ typedef enum { ELEV_NONE, ELEV_DEF, ELEV_COMP, ELEV_GRADE, ELEV_IGNORE, ELEV_STA
 struct trkEndPt_t;
 typedef struct trkEndPt_t * trkEndPt_p;
 
-
-/* debug.c */
-void SetDebug( char * );
 
 
 /*Remember to add bits to trackx.h if adding here */
@@ -477,6 +484,7 @@ STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 
 /* cmisc.c */
 extern wIndex_t describeCmdInx;
+extern BOOL_T inDescribeCmd;
 typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
@@ -507,6 +515,16 @@ STATUS_T CmdDescribe(wAction_t,coOrd);
 
 		
 /* compound.c */
+#define LABEL_MANUF		(1<<0)
+#define LABEL_PARTNO	(1<<1)
+#define LABEL_DESCR		(1<<2)
+#define LABEL_COST		(1<<7)
+#define LABEL_FLIPPED	(1<<8)
+#define LABEL_TABBED	(1<<9)
+#define LABEL_UNGROUPED (1<<10)
+#define LABEL_SPLIT		(1<<11)
+extern long listLabels;
+extern long layoutLabels;
 DIST_T CompoundDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T CompoundDescriptionMove( track_p, wAction_t, coOrd );
 
@@ -547,6 +565,9 @@ void SetLineType( track_p trk, int width );
 void MenuMode( void * moveVP );
 
 /* chotbar.c */
+extern long showFlexTrack;
+extern long hotBarLabels;
+extern long carHotbarModeInx;
 extern DIST_T curBarScale;
 void InitHotBar( void );
 void HideHotBar( void );

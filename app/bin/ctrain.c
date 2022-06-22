@@ -35,8 +35,7 @@ long programMode;
 long maxCouplingSpeed = 100;
 long hideTrainsInTunnels;
 
-extern int doDrawTurnoutPosition;
-extern void NextTurnoutPosition(track_p);
+static int doDrawTurnoutPosition = 1;
 
 static TRKTYP_T T_CAR = -1;
 
@@ -2563,10 +2562,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             CarItemUpdate(currCarItemPtr);
             HotBarCancel();
 
-            if (currCar == NULL) {
-                LOG1(log_error, ("Train: currCar became NULL 1\n"))
-                return C_CONTINUE;
-            }
+            CHECK(currCar != NULL);
 
             xx = GET_EXTRA_DATA(currCar, T_CAR, extraDataCar_t);
             xx->pencils = FALSE;

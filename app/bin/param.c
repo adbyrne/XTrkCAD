@@ -37,6 +37,7 @@ EXPORT char paramId[100];
 EXPORT BOOL_T paramTogglePlaybackHilite;
 
 EXPORT char *PREFSECT = "DialogItem";
+EXPORT long angleSystem = 0;
 
 static int paramCheckErrorCount = 0;
 static BOOL_T paramCheckShowErrors = FALSE;
@@ -151,7 +152,6 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	}
 	return TRUE;
 }
-//extern wIndex_t distanceFormatInx;   // distanceFormatInx
 
 static BOOL_T GetDistance(char ** cpp, FLOAT_T * distP)
 {

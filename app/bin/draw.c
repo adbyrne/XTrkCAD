@@ -70,6 +70,10 @@ EXPORT long maxArcSegStraightLen = 100;
 EXPORT long drawCount;
 EXPORT BOOL_T drawEnable = TRUE;
 EXPORT long currRedraw = 0;
+EXPORT long constrainMain = 0;
+EXPORT long mapScale = 64;
+EXPORT long liveMap = 0;
+EXPORT long descriptionFontSize = 72;
 
 EXPORT coOrd panCenter;
 EXPORT coOrd menuPos;
@@ -1432,8 +1436,6 @@ EXPORT void SetMainSize( void )
 	tempD.size = mainD.size;
 }
 
-// Hack to switch between TempRedraw and MainRedraw
-extern wBool_t wDrawDoTempDraw;
 
 /* Update temp_surface after executing a command
  */
@@ -3226,10 +3228,6 @@ EXPORT void PanMenuEnter( void * keyVP )
 	CmdPan(action,zero);
 }
 
-extern wIndex_t selectCmdInx;
-extern wIndex_t describeCmdInx;
-extern wIndex_t joinCmdInx;
-extern wIndex_t modifyCmdInx;
 
 EXPORT void InitCmdPan( wMenu_p menu )
 {

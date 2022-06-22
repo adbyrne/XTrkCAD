@@ -30,8 +30,6 @@
 #include "include/stringxtc.h"
 #include "track.h"
 
-extern BOOL_T inDescribeCmd;
-
 #define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
 
 #define DOCUMENTFILEPATTERN "All Files (*.*)|*.*"

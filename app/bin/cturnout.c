@@ -1647,7 +1647,6 @@ static BOOL_T QueryTurnout(track_p trk, int query)
 }
 
 
-EXPORT int doDrawTurnoutPosition = 1;
 static wIndex_t drawTurnoutPositionWidth = 3;
 static void DrawTurnoutPositionIndicator(
 	track_p trk,

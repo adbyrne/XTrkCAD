@@ -56,8 +56,6 @@
 
 EXPORT int iconSize = 0;
 
-EXPORT int log_error;
-
 EXPORT wWin_p mainW;
 
 EXPORT char message[STR_HUGE_SIZE];
@@ -71,52 +69,21 @@ EXPORT wBool_t extraButtons = FALSE;
 
 EXPORT long onStartup; /**< controls behaviour after startup: load last layout if zero, else start with blank canvas */
 
-
-EXPORT wButton_p backgroundB;
-
-
-EXPORT wIndex_t joinCmdInx;
-EXPORT wIndex_t modifyCmdInx;
-EXPORT long selectMode = 0;
-EXPORT long selectZero = 1;
-EXPORT DIST_T easementVal = 0.0;
-EXPORT DIST_T easeR = 0.0;
-EXPORT DIST_T easeL = 0.0;
-
-
 static int verbose = 0;
 
 static BOOL_T inMainW = TRUE;
 
-
-extern wBool_t wDrawDoTempDraw;
-
-
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 
-EXPORT DIST_T curScaleRatio;
-EXPORT char * curScaleName;
-EXPORT DIST_T trackGauge;
 EXPORT long labelScale = 8;
 EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
 /** @prefs [draw] label-when=2 Unknown */
 EXPORT long labelWhen = 2;
-EXPORT long colorTrack = 0;
-EXPORT long colorDraw = 0;
-EXPORT long constrainMain = 0;
+
 EXPORT long dontHideCursor = 0;
+#ifdef HIDESELECTIONWINDOW
 EXPORT long hideSelectionWindow = 0;
-EXPORT long angleSystem = 0;
-EXPORT DIST_T minLength = 0.1;
-EXPORT DIST_T connectDistance = 0.1;
-EXPORT ANGLE_T connectAngle = 1.0;
-EXPORT long twoRailScale = 16;
-EXPORT long mapScale = 64;
-EXPORT long liveMap = 0;
-EXPORT long listLabels = 7;
-EXPORT long layoutLabels = 1;
-EXPORT long descriptionFontSize = 72;
-EXPORT long enableListPrices = 1;
+#endif
 
 
 /****************************************************************************
@@ -1095,7 +1062,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	LogOpen(logFileName);
 	log_init = LogFindIndex("init");
 	log_malloc = LogFindIndex("malloc");
-	log_error = LogFindIndex("error");
 
 	LOG1(log_init, ( "initCustom\n" ))
 	InitCustom();

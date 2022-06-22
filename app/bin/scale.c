@@ -52,7 +52,7 @@ typedef struct {
 		BOOL_T tieDataValid;
 		tieData_t tieData;
 		} scaleInfo_t;
-EXPORT typedef scaleInfo_t * scaleInfo_p;
+typedef scaleInfo_t * scaleInfo_p;
 static dynArr_t scaleInfo_da;
 #define scaleInfo(N) DYNARR_N( scaleInfo_t, scaleInfo_da, N )
 
@@ -62,7 +62,7 @@ typedef struct {
 		char *match_scales;
 		SCALE_FIT_T result;
 } scaleComp_t;
-EXPORT typedef scaleComp_t * scaleComp_p;
+typedef scaleComp_t * scaleComp_p;
 static dynArr_t scaleCompatible_da;
 #define scaleComp(N) DYNARR_N( scaleComp_t, scaleCompatible_da, N )
 
@@ -73,6 +73,8 @@ static tieData_t tieData_demo = {
 		32.0/160.0 };
 
 //EXPORT SCALEINX_T curScaleInx = -1;
+EXPORT DIST_T curScaleRatio;
+EXPORT char * curScaleName;
 static scaleInfo_p curScale;
 /** @prefs [misc] include same gauge turnouts=1 Unknown */
 EXPORT long includeSameGaugeTurnouts = FALSE;

@@ -41,25 +41,16 @@
 #include "common-ui.h"
 #include "ctrain.h"
 
-extern long curTurnoutEp;
 static paramData_t menuPLs[101] = { { PD_LONG, &toolbarSet, "toolbarset" }, {
 		PD_LONG, &curTurnoutEp, "cur-turnout-ep" } };
-EXPORT paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
+static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
 
-extern void TestMallocs( void );
-extern void MapWindowToggleShow( void * );
-//extern void ChkLoad( void * );
-//extern void ChkRevert( void * );
-//extern void ChkFileList( int, const char *, void * );
-extern void DoClear( void * );
-//extern void ChkExamples( void * );
-extern void DoShowWindow( int, const char *, void * );
 static void InitCmdExport( void );
  
 EXPORT wMenu_p demoM;
 EXPORT wMenu_p popup1M, popup2M;
-EXPORT wMenu_p popup1aM, popup2aM;
-EXPORT wMenu_p popup1mM, popup2mM;
+static wMenu_p popup1aM, popup2aM;
+static wMenu_p popup1mM, popup2mM;
 EXPORT wButton_p undoB;
 EXPORT wButton_p redoB;
 EXPORT wButton_p zoomUpB;
@@ -413,6 +404,33 @@ static void MagneticSnapToggle(void * unused) {
 }
 
 
+EXPORT void SelectFont(void * unused)
+{
+	wSelectFont(_("XTrackCAD Font"));
+}
+
+
+EXPORT long stickySet = 0;
+static wWin_p stickyW;
+static const char * stickyLabels[33];
+static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
+		stickyLabels } };
+static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
+		COUNT( stickyPLs ) };
+
+static void StickyOk(void * unused) {
+	wHide(stickyW);
+}
+
+
+EXPORT void DoSticky(void * unused) {
+	if (!stickyW)
+		stickyW = ParamCreateDialog(&stickyPG,
+				MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, wHide,
+				TRUE, NULL, 0, NULL);
+	ParamLoadControls(&stickyPG);
+	wShow(stickyW);
+}
 
 /*****************************************************************************
  *
@@ -494,6 +512,32 @@ static void DebugInit(void * unused) {
 
 /*****************************************************************************
  *
+ * ENABLE MENUS
+ *
+ */
+
+EXPORT void EnableMenus( void )
+{
+	int inx;
+	BOOL_T enable;
+	for (inx = 0; inx < menuPG.paramCnt; inx++) {
+		if (menuPG.paramPtr[inx].control == NULL)
+			continue;
+		if ((menuPG.paramPtr[inx].option & IC_SELECTED) && selectedTrackCount <= 0)
+			enable = FALSE;
+		else if ((programMode == MODE_TRAIN
+				&& (menuPG.paramPtr[inx].option & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY))
+						== 0)
+				|| (programMode != MODE_TRAIN
+						&& (menuPG.paramPtr[inx].option & IC_MODETRAIN_ONLY) != 0))
+			enable = FALSE;
+		else
+			enable = TRUE;
+		wMenuPushEnable((wMenuPush_p) menuPG.paramPtr[inx].control, enable);
+	}
+}
+/*****************************************************************************
+ *
  * RECENT MESSAGES LIST
  *
  */
@@ -530,18 +574,202 @@ static void ShowMessageHelp(int index, const char * label, void * data) {
 	wHelp(msgKey);
 }
 
+/*****************************************************************************
+ *
+ * Balloon Help
+ *
+ */
 
-EXPORT void SelectFont(void * unused)
-{
-	wSelectFont(_("XTrackCAD Font"));
+// defined in ${BUILDIR}/app/bin/bllnhlp.c
+extern wBalloonHelp_t balloonHelp[];
+
+#ifdef DEBUG
+#define CHECK_BALLOONHELP
+/*#define CHECK_UNUSED_BALLOONHELP*/
+#endif
+#ifdef CHECK_UNUSED_BALLOONHELP
+static void ShowUnusedBalloonHelp(void);
+#endif
+
+
+#ifdef CHECK_UNUSED_BALLOONHELP
+int * balloonHelpCnts;
+#endif
+
+EXPORT const char * GetBalloonHelpStr(const char * helpKey) {
+	wBalloonHelp_t * bh;
+#ifdef CHECK_UNUSED_BALLOONHELP
+	if ( balloonHelpCnts == NULL ) {
+		for ( bh=balloonHelp; bh->name; bh++ );
+		balloonHelpCnts = (int*)malloc( (sizeof *(int*)0) * (bh-balloonHelp) );
+		memset( balloonHelpCnts, 0, (sizeof *(int*)0) * (bh-balloonHelp) );
+	}
+#endif
+	for (bh = balloonHelp; bh->name; bh++) {
+		if (strcmp(bh->name, helpKey) == 0) {
+#ifdef CHECK_UNUSED_BALLOONHELP
+			balloonHelpCnts[(bh-balloonHelp)]++;
+#endif
+			return _(bh->value);
+		}
+	}
+#ifdef CHECK_BALLOONHELP
+	fprintf( stderr, _("No balloon help for %s\n"), helpKey );
+#endif
+	return _("No Help");
 }
 
+#ifdef CHECK_UNUSED_BALLOONHELP
+static void ShowUnusedBalloonHelp( void )
+{
+	int cnt;
+	for ( cnt=0; balloonHelp[cnt].name; cnt++ )
+	if ( balloonHelpCnts[cnt] == 0 )
+	fprintf( stderr, "unused BH %s\n", balloonHelp[cnt].name );
+}
+#endif
 
 /*****************************************************************************
  *
  * CREATE MENUS
  *
  */
+
+
+EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long options,
+		wButtonCallBack_p action, void * context) {
+	wButton_p bb;
+	wIndex_t inx;
+
+	GetBalloonHelpStr(helpStr);
+	if (context == NULL) {
+		for (inx = 0; inx < menuPG.paramCnt; inx++) {
+			if (action != DoCommandB && menuPG.paramPtr[inx].valueP == I2VP(action)) {
+				context = &menuPG.paramPtr[inx];
+				action = ParamMenuPush;
+				menuPG.paramPtr[inx].context = I2VP(buttonCnt);
+				menuPG.paramPtr[inx].option |= IC_PLAYBACK_PUSH;
+				break;
+			}
+		}
+	}
+	bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
+	BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
+	AddToolbarControl((wControl_p) bb, options);
+	return bb;
+}
+
+#include "bitmaps/down.xpm"
+static const char * buttonGroupMenuTitle;
+static const char * buttonGroupHelpKey;
+static const char * buttonGroupStickyLabel;
+static wMenu_p buttonGroupPopupM;
+static int stickyCnt = 0;
+
+EXPORT void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
+		const char * stickyLabel) {
+	buttonGroupMenuTitle = menuTitle;
+	buttonGroupHelpKey = helpKey;
+	buttonGroupStickyLabel = stickyLabel;
+	buttonGroupPopupM = NULL;
+}
+
+EXPORT void ButtonGroupEnd(void) {
+	buttonGroupMenuTitle = NULL;
+	buttonGroupHelpKey = NULL;
+	buttonGroupPopupM = NULL;
+}
+
+EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
+		const char * helpKey, const char * nameStr, wIcon_p icon, int reqLevel,
+		long options, long acclKey, void * context)
+{
+	wIndex_t buttInx = -1;
+	wIndex_t cmdInx;
+	wBool_t newButtonGroup = FALSE;
+	wMenu_p tm, p1m, p2m;
+	static wIcon_p openbuttIcon = NULL;
+	static wMenu_p commandsSubmenu;
+	static wMenu_p popup1Submenu;
+	static wMenu_p popup2Submenu;
+
+	if (icon) {
+		if (buttonGroupPopupM != NULL) {
+			buttInx = buttonCnt - 2;
+		} else {
+			buttInx = buttonCnt;
+			AddToolbarButton(helpKey, icon, options,
+					DoCommandB,
+					I2VP(commandCnt));
+		}
+		if (buttonGroupMenuTitle != NULL && buttonGroupPopupM == NULL) {
+			if (openbuttIcon == NULL)
+				openbuttIcon = wIconCreatePixMap(down_xpm[iconSize]);
+			buttonGroupPopupM = wMenuPopupCreate(mainW, buttonGroupMenuTitle);
+			AddToolbarButton(buttonGroupHelpKey, openbuttIcon, IC_ABUT,
+					(wButtonCallBack_p) wMenuPopupShow,
+					buttonGroupPopupM);
+			newButtonGroup = TRUE;
+			commandsSubmenu = wMenuMenuCreate(menu, "", buttonGroupMenuTitle);
+			if (options & IC_POPUP2) {
+				popup1Submenu = wMenuMenuCreate(popup1aM, "",	buttonGroupMenuTitle);
+				popup2Submenu = wMenuMenuCreate(popup2aM, "",	buttonGroupMenuTitle);
+			} else if (options & IC_POPUP3) {
+				popup1Submenu= wMenuMenuCreate(popup1mM, "",	buttonGroupMenuTitle);
+				popup2Submenu = wMenuMenuCreate(popup2mM, "",	buttonGroupMenuTitle);
+
+			} else {
+				popup1Submenu = wMenuMenuCreate(popup1M, "",	buttonGroupMenuTitle);
+				popup2Submenu = wMenuMenuCreate(popup2M, "",	buttonGroupMenuTitle);
+			}
+		}
+	}
+	long stickyMask = 0;
+	wMenuPush_p cmdMenus[NUM_CMDMENUS] = { NULL, NULL, NULL, NULL };
+	if (nameStr[0] != '\0') {
+		if (options & IC_STICKY) {
+			if (buttonGroupPopupM == NULL || newButtonGroup) {
+				CHECK( stickyCnt <= 32 );
+				stickyCnt++;
+			}
+			if (buttonGroupPopupM == NULL) {
+				stickyLabels[stickyCnt - 1] = nameStr;
+			} else {
+				stickyLabels[stickyCnt - 1] = buttonGroupStickyLabel;
+			}
+			stickyLabels[stickyCnt] = NULL;
+			stickyMask = 1L<<(stickyCnt-1);
+			if ( ( options & IC_INITNOTSTICKY ) == 0 )
+				stickySet |= stickyMask;
+		}
+		if (buttonGroupPopupM) {
+			cmdMenus[0] = wMenuPushCreate(buttonGroupPopupM,
+					helpKey, GetBalloonHelpStr(helpKey), 0, DoCommandB,
+					I2VP(commandCnt));
+			tm = commandsSubmenu;
+			p1m = popup1Submenu;
+			p2m = popup2Submenu;
+		} else {
+			tm = menu;
+			p1m = (options & IC_POPUP2) ? popup1aM : (options & IC_POPUP3) ? popup1mM : popup1M;
+			p2m = (options & IC_POPUP2) ? popup2aM : (options & IC_POPUP3) ? popup2mM : popup2M;
+		}
+		cmdMenus[1] = wMenuPushCreate(tm, helpKey, nameStr, acclKey,
+				DoCommandB, I2VP(commandCnt));
+		if ((options & (IC_POPUP | IC_POPUP2 | IC_POPUP3))) {
+			if (!(options & IC_SELECTED)) {
+				cmdMenus[2] = wMenuPushCreate(p1m, helpKey, nameStr,
+						0, DoCommandB, I2VP(commandCnt));
+			}
+			cmdMenus[3] = wMenuPushCreate(p2m, helpKey, nameStr, 0,
+					DoCommandB, I2VP(commandCnt));
+		}
+	}
+
+	cmdInx = AddCommand(command, helpKey, nameStr, icon, reqLevel, options,
+			acclKey, buttInx, stickyMask, cmdMenus, context);
+	return cmdInx;
+}
 
 
 static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
@@ -602,6 +830,7 @@ EXPORT void CreateMenus(void)
 
 	wPrefGetInteger("DialogItem", "pref-iconsize", (long *) &iconSize, 0);
 
+	wSetBalloonHelp( balloonHelp );
 	fileM = wMenuBarAdd(mainW, "menuFile", _("&File"));
 	editM = wMenuBarAdd(mainW, "menuEdit", _("&Edit"));
 	viewM = wMenuBarAdd(mainW, "menuView", _("&View"));
@@ -1161,4 +1390,7 @@ static void InitCmdExport(void) {
 	ButtonGroupEnd();
 	ParamRegister( &menuPG );
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );
+
+	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
+	ParamRegister(&stickyPG);
 }

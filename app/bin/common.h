@@ -229,6 +229,7 @@ typedef struct traverseTrack_t * traverseTrack_p;
 typedef struct trkEndPt_t * trkEndPt_p;
 typedef void (*doSaveCallBack_p)( void );
 typedef void (*addButtonCallBack_t)(void*);
+typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
 
 
 // base class for extraData*_t: each of which must include this struct as the first element

@@ -26,6 +26,7 @@
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
+#include "ctrain.h"
 
 //static paramIntegerRange_t i1_64 = { 1, 64 };
 static paramIntegerRange_t i1_100 = { 1, 100 };
@@ -102,9 +103,6 @@ static char * liveMapLabels[] = { N_("Live Map"), NULL };
 static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
 static char * constrainMainLabels[] = {N_("Constrain Drawing Area to Room boundaries"), NULL};
 static char * dontHideLabels[] = {N_("Don't Hide System Cursor when program cursor is active"), NULL};
-
-extern long trainPause;
-
 
 
 static paramData_t displayPLs[] = {
@@ -242,7 +240,7 @@ static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };
 #endif
 static char * rightClickLabels[] = {N_("Normal: Command List, Shift: Command Options"), N_("Normal: Command Options, Shift: Command List"), NULL };
 
-EXPORT paramData_t cmdoptPLs[] = {
+static paramData_t cmdoptPLs[] = {
 	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, preSelectLabels, N_("Default Command"), BC_HORZ },
 #ifdef HIDESELECTIONWINDOW
 	{ PD_TOGGLE, &hideSelectionWindow, PDO_NOPSHUPD, hideSelectionWindowLabels, N_("Hide Selection Window"), BC_HORZ },

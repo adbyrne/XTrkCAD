@@ -25,6 +25,8 @@
 
 #include "common.h"
 
+extern DIST_T curScaleRatio;
+extern char * curScaleName;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
 DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
@@ -43,6 +45,7 @@ void SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
 BOOL_T DoSetScale( char * );
 
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
+void ScaleLengthEnd( void );
 void LoadScaleList( wList_p );
 void LoadGaugeList( wList_p, SCALEDESCINX_T );
 

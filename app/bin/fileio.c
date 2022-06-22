@@ -1273,7 +1273,7 @@ wIndex_t max_generations_count = 10;
 static char sCheckPointBF[STR_LONG_SIZE];
 
 
-EXPORT void DoCheckPoint( void )
+static void DoCheckPoint( void )
 {
 	int rc;
 

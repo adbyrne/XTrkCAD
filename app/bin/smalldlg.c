@@ -34,7 +34,6 @@
 #include <FreeImage.h>
 #endif
 
-extern char *sTipF;
 EXPORT wWin_p aboutW;
 static wWin_p tipW;					/**< window handle for tip dialog */
 

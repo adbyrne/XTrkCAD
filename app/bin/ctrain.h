@@ -28,6 +28,8 @@
 
 extern wIndex_t trainCmdInx;
 
+extern long trainPause;
+
 struct carItem_t;
 typedef struct carItem_t carItem_t;
 typedef carItem_t * carItem_p;

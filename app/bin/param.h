@@ -206,6 +206,25 @@ wIndex_t ColorTabLookup( wDrawColor );
 
 extern char * PREFSECT;
 // extern char decodeErrorStr[STR_SHORT_SIZE];
+
+
+#define ANGLE_POLAR		(0)
+#define ANGLE_CART		(1)
+extern long angleSystem;
+#define PutAngle(X)		((angleSystem==ANGLE_POLAR)?(X):NormalizeAngle(90.0-(X)))
+
+#define DISTFMT_DECS			0x00FF
+#define DISTFMT_FMT			0x0300
+#define DISTFMT_FMT_NONE		0x0000
+#define DISTFMT_FMT_SHRT		0x0100
+#define DISTFMT_FMT_LONG		0x0200
+#define DISTFMT_FMT_MM			0x0100
+#define DISTFMT_FMT_CM			0x0200
+#define DISTFMT_FMT_M			0x0300
+#define DISTFMT_FRACT			0x0400
+#define DISTFMT_FRACT_NUM		0x0000
+#define DISTFMT_FRACT_FRC		0x0400
+
 FLOAT_T DecodeFloat( wString_p, BOOL_T * );
 FLOAT_T DecodeDistance( wString_p, BOOL_T * );
 char * FormatLong( long );

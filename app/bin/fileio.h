@@ -114,7 +114,7 @@ void DoSaveAs( void * doAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
-void DoCheckPoint( void );
+void TryCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );

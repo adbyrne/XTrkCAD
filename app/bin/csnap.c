@@ -762,7 +762,7 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 	AddRotateMenu( snapGridPopupM, SnapGridRotate );
 	GridButtonUpdate( 0 );
 	log_timedrawgrid = LogFindIndex( "timedrawgrid" );
-	return InitCommand( menu, CmdGrid, N_("Change Grid..."), NULL, LEVEL0, IC_CMDMENU, ACCL_GRIDW );
+	return AddMenuButton( menu, CmdGrid, "cmdChange Grid...", N_("Change Grid..."), NULL, LEVEL0, IC_CMDMENU, ACCL_GRIDW, NULL );
 }
 
 
