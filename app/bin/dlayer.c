@@ -1799,7 +1799,7 @@ void RestoreLayers(void)
 
 	if (layerL) {
 		ParamLoadControls(&layerPG);
-		ParamLoadMessage(&layerPG, I_COUNT, "0");
+		//ParamLoadMessage(&layerPG, I_COUNT, "0");
 	}
 
 	LoadLayerLists();
