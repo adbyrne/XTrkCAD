@@ -2171,8 +2171,8 @@ static drawCmd_t carDlgD = {
 		Pix2CoOrd, CoOrd2Pix };
 static void CarDlgRedraw( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 
-static paramDrawData_t carDlgDrawData = { 455, 100, CarDlgRedraw, NULL, &carDlgD };
-static paramTextData_t notesData = { 440, 100 };
+static paramDrawData_t carDlgDrawData = { 500, 120, CarDlgRedraw, NULL, &carDlgD };
+static paramTextData_t notesData = { 500, 156 };
 static char *multinumLabels[] = { N_("Sequential"), N_("Repeated"), NULL };
 static void CarDlgNewProto( void );
 static void CarDlgUpdate( paramGroup_p, int, void * );
@@ -2253,7 +2253,7 @@ static paramData_t carDlgPLs[] = {
 #define I_CD_MLTNUM             (C+7)
 	{ PD_RADIO, &carDlgMultiNum, "multinum", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, multinumLabels, N_("Numbers"), BC_HORZ|BC_NOBORDER },
 #define I_CD_NOTES              (C+8)
-	{ PD_TEXT, NULL, "notes", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN, &notesData, N_("Notes") },
+	{ PD_TEXT, NULL, "notes", PDO_NOPREF|PDO_DLGWIDE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &notesData, N_("Notes") },
 
 #define D                       (C+9)
 #define I_CD_MSG                (D+0)

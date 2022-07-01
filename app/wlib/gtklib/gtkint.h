@@ -62,7 +62,6 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		wWin_p parent; \
 		wWinPix_t origX, origY; \
 		wWinPix_t realX, realY; \
-		wWinPix_t default_size_x, default_size_y; \
 		wWinPix_t labelW; \
 		wWinPix_t w, h; \
 		int maximize_initially; \

@@ -51,7 +51,7 @@ static paramData_t priceListPLs[] = {
 	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, I2VP(400-80-3), NULL, BO_READONLY, NULL, sizeof priceListEntryV },
 #define I_PRICELSLIST			(2)
 #define priceListSelL			((wList_p)priceListPLs[I_PRICELSLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
+	{	PD_LIST, NULL, "inx", PDO_DLGRESIZE|PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
 #define I_PRICELSFLEXLEN		(3)
 	{	PD_FLOAT, &priceListFlexLengthV, "flexlen", PDO_NOPREF|PDO_NOPSHUPD|PDO_DIM|PDO_DLGRESETMARGIN, &priceListFlexData, N_("Flex Track") },
 	{	PD_MESSAGE, N_("costs"), NULL, PDO_DLGHORZ },
