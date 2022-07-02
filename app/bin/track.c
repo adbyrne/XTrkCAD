@@ -700,8 +700,6 @@ EXPORT EPINX_T GetNearestEndPtConnectedToMe( track_p trk, track_p me, coOrd pos)
 
 EXPORT void SetEndPts( track_p trk, EPINX_T cnt )
 {
-	EPINX_T inx;
-
 LOG1( log_readTracks, ( "SetEndPts( T%d, %d )\n", trk->index, cnt ) )
 	if (cnt > 0 && TempEndPtsCount() != cnt) {
 		InputError( "Incorrect number of End Points for track, read %d, expected %d.\n", FALSE, TempEndPtsCount(), cnt );
@@ -922,7 +920,6 @@ EXPORT void RenumberTracks( void )
 EXPORT track_p NewTrack( TRKINX_T index, TRKTYP_T type, EPINX_T endCnt, CSIZE_T extraSize )
 {
 	track_p trk;
-	EPINX_T ep;
 	trk = (track_p ) MyMalloc( sizeof *trk );
 	*to_last = trk;
 	to_last = &trk->next;
