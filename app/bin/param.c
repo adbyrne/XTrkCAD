@@ -2681,6 +2681,7 @@ static void ParamDlgProc(
 		void * data )
 {
 	paramGroup_p pg = (paramGroup_p)data;
+	static int iResizeCnt = 0;
 	switch (e) {
 	case wClose_e:
 		if ( pg->changeProc )
@@ -2692,7 +2693,7 @@ static void ParamDlgProc(
 		if (win == mapW) {
 			pg->changeProc(pg, wResize_e, NULL);
 		} else {
-			LOG( log_paramLayout, 1, ( "ParamDlgProc/" ) );
+			LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		}
 		break;
@@ -2769,6 +2770,9 @@ wWin_p ParamCreateDialog(
 			LOG( log_paramLayout, 1, ( "    RESIZE+change/" ) );
 			LayoutControls( group, ParamPositionControl, NULL, NULL );
 		}
+ 		wWinPix_t scr_w, scr_h;
+		wGetDisplaySize(&scr_w, &scr_h);
+		wSetGeometry(group->win, group->origW, scr_w-10, group->origH, scr_h, -1, -1, -1);
 	} else {
 		w0 = max(group->origW, w0);
 		h0 = max(group->origH, h0);
