@@ -1132,17 +1132,15 @@ EXPORT BOOL_T ReadSegs( void )
 	char *cp, *cpp;
 	BOOL_T rc=TRUE;
 	trkSeg_p s;
-	trkEndPt_p e;
 	long rgb;
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
 	BOOL_T isPolyV1, isPolyV2;
 	BOOL_T improvedEnds;
-	FLOAT_T ignoreFloat;
 	char type;
 	char * plain_text;
-	long option, option2;
+	long option;
 	BOOL_T subsegs = FALSE;
 
 	descriptionOff = zero;
