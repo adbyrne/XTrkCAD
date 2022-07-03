@@ -59,7 +59,6 @@
 #include "cundo.h"
 #include "compound.h"
 
-extern drawCmd_t tempD;
 
 
 /*

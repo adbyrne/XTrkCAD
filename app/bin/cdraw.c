@@ -30,7 +30,6 @@
 #include "misc.h"
 #include "cselect.h"
 #include "common-ui.h"
-extern TRKTYP_T T_BZRLIN;
 
 static wMenu_p drawModDelMI;
 static wMenu_p drawModLinMI;
@@ -55,8 +54,6 @@ static wMenuPush_p drawModDashDotDot;
 static wMenuPush_p drawModCenterDot;
 static wMenuPush_p drawModPhantom;
 
-
-extern void wSetSelectedFontSize(wFontSize_t size);
 
 static long fontSizeList[] = {
 		4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36,
@@ -1035,7 +1032,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	TempRedraw(); // UpdateDraw
 }
 
-extern BOOL_T inDescribeCmd;
 
 static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 {

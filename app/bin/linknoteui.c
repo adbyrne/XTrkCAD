@@ -29,8 +29,6 @@
 #include "track.h"
 #include "validator.h"
 
-extern BOOL_T inDescribeCmd;
-
 #define DEFAULTLINKURL "http://www.xtrkcad.org/"
 #define DEFAULTLINKTITLE "The XTrackCAD Homepage"
 

@@ -28,7 +28,6 @@
 #include "directory.h"
 #include "dynstring.h"
 #include "misc.h"
-#include "misc2.h"
 #include "paths.h"
 #include "include/utf8convert.h"
 #include "common-ui.h"

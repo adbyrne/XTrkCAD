@@ -85,6 +85,8 @@ SET(SOURCES
 	cmisc.c
 	cmodify.c
 	cnote.c
+	command.c
+	command.h
 	common.h
 	common-ui.h
 	compound.c
@@ -125,6 +127,7 @@ SET(SOURCES
 	directory.c
 	directory.h
 	dlayer.c
+	dlayer.h
 	doption.c
 	dpricels.c
 	dprmfile.c
@@ -150,10 +153,10 @@ SET(SOURCES
 	macro.c
 	manifest.c
 	manifest.h
+	menu.h
+	menu.c
 	misc.c
 	misc.h
-	misc2.c
-	misc2.h
 	note.h
 	param.c
 	param.h
@@ -163,6 +166,8 @@ SET(SOURCES
 	partcatalog.c
 	paths.c
 	paths.h
+	scale.c
+	scale.h
 	shortentext.c
 	shortentext.h
 	shrtpath.c
@@ -184,6 +189,7 @@ SET(SOURCES
 	trkendpt.h
 	trkendptx.h
 	trknote.c
+	trkseg.h
 	trkseg.c
 	tstraigh.c
 	turnout.c

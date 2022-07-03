@@ -259,8 +259,10 @@ EXPORT void ParseCompoundTitle(
 	}
 }
 
+EXPORT long listLabels = 7;
+EXPORT long layoutLabels = 1;
 
-void FormatCompoundTitle(
+EXPORT void FormatCompoundTitle(
 		long format,
 		char * title )
 {

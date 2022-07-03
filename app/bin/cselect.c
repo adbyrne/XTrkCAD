@@ -38,6 +38,7 @@
 #include "draw.h"
 #include "misc.h"
 #include "common-ui.h"
+#include "ctrain.h"
 
 
 #include "bitmaps/bmendpt.xbm"
@@ -52,6 +53,9 @@ EXPORT wIndex_t selectCmdInx;
 EXPORT wIndex_t moveCmdInx;
 EXPORT wIndex_t rotateCmdInx;
 EXPORT wIndex_t flipCmdInx;
+
+EXPORT long selectMode = 0;
+EXPORT long selectZero = 1;
 
 #define MAXMOVEMODE (3)
 static long moveMode = MAXMOVEMODE;
@@ -3062,11 +3066,6 @@ static BOOL_T SelectArea(
 	return FALSE;
 }
 
-extern BOOL_T inDescribeCmd;
-extern wIndex_t modifyCmdInx;
-extern wIndex_t describeCmdInx;
-extern wIndex_t panCmdInx;
-extern wIndex_t trainCmdInx;
 
 static STATUS_T SelectTrack( 
 		coOrd pos )
@@ -3661,7 +3660,6 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS, ACCL_SELECT, NULL );
 }
 
-extern wIndex_t trainCmdInx;
 
 EXPORT void InitCmdSelect2( wMenu_p menu ) {
 

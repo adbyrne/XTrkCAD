@@ -24,11 +24,11 @@
 
 #include "custom.h"
 #include "layout.h"
-#include "misc2.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
 #include "fileio.h"
+#include "cselect.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
@@ -480,6 +480,8 @@ bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
 char * noname = "";
+
+EXPORT wButton_p backgroundB;
 
 /**
  * @brief Enable background visibility toggle from Menu or Button

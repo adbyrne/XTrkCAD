@@ -37,19 +37,9 @@ typedef struct extraDataBezier_t {
 		} extraDataBezier_t;
 
 
-void BezierSplit(coOrd[4], coOrd[4], coOrd[4] , double );
-coOrd BezierPointByParameter(coOrd[4], double);
-double BezierMathLength(coOrd[4], double);
-coOrd  BezierFirstDerivative(coOrd p[4], double);
-coOrd BezierSecondDerivative(coOrd p[4], double);
-double BezierCurvature(coOrd[4], double , coOrd *);
-double BezierMaxCurve(coOrd[4]);
-double BezierMathMinRadius(coOrd[4]);
-coOrd BezierMathFindNearestPoint(coOrd *, coOrd[4] , int );
 void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T width );
 track_p NewBezierTrack(coOrd[4], trkSeg_p , int );
 track_p NewBezierLine(coOrd[4], trkSeg_p , int, wDrawColor, DIST_T);
-DIST_T BezierMathDistance( coOrd *, coOrd[4], int , double * );
 void FixUpBezier(coOrd[4], struct extraDataBezier_t*, BOOL_T);
 void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);
 void FixUpBezierSegs(trkSeg_p p,int segCnt);

@@ -24,7 +24,6 @@
 #include "cJSON.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc2.h"
 #include "paths.h"
 #include "include/utf8convert.h"
 

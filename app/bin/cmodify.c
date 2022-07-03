@@ -34,6 +34,9 @@
 #include "layout.h"
 #include "cselect.h"
 #include "common-ui.h"
+#include "draw.h"
+
+EXPORT wIndex_t modifyCmdInx;
 
 static struct {
 		track_p Trk;
@@ -48,10 +51,6 @@ static struct {
 		} Dex;
 
 static wMenu_p modPopupM;
-
-extern wIndex_t selectCmdInx;
-extern wIndex_t joinCmdInx;
-extern wIndex_t describeCmdInx;
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
@@ -812,10 +811,6 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
  */
 
 #include "bitmaps/extend.xpm"
-extern wIndex_t panCmdInx;
-extern wIndex_t selectCmdInx;
-extern wIndex_t describeCmdInx;
-
 
 void InitCmdModify( wMenu_p menu )
 {

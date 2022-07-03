@@ -129,12 +129,17 @@ extern long minGridSpacing;
 extern long drawCount;
 extern BOOL_T drawEnable;
 extern long currRedraw;
+extern long constrainMain;
+extern long mapScale;
+extern long liveMap;
+extern long descriptionFontSize;
 
 extern coOrd panCenter;
 extern coOrd menuPos;
 
 extern int log_pan;
 
+extern wBool_t wDrawDoTempDraw;
 
 extern wDrawColor drawColorBlack;
 extern wDrawColor drawColorWhite;

@@ -26,6 +26,7 @@
 #include "common.h"
 
 extern wBool_t undoStatus; // Status of the last Undo/Redo command
+void Rdump( FILE * );
 void UndoUndo( void * unused );
 void UndoRedo( void * unused );
 void UndoResume( void );

@@ -70,6 +70,12 @@ static int log_timedrawtracks = 0;
 
 #define CLOSETOTHEEDGE			(10)		/**< minimum distance between paste position and edge of window */
 
+EXPORT DIST_T trackGauge;
+EXPORT DIST_T minLength = 0.1;
+EXPORT DIST_T connectDistance = 0.1;
+EXPORT ANGLE_T connectAngle = 1.0;
+EXPORT long twoRailScale = 16;
+
 EXPORT wIndex_t trackCount;
 
 EXPORT long drawEndPtV = 2;
@@ -106,6 +112,9 @@ EXPORT BOOL_T onTrackInSplit = FALSE;
 static BOOL_T inDrawTracks;
 
 EXPORT wBool_t bFreeTrack = FALSE;
+
+EXPORT long colorTrack = 0;
+EXPORT long colorDraw = 0;
 
 
 /*****************************************************************************

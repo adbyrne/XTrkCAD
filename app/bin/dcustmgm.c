@@ -27,6 +27,7 @@
 #include "track.h"
 #include "include/paramfilelist.h"
 #include "common-ui.h"
+#include "ctrain.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
 #endif

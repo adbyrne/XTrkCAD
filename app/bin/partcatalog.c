@@ -23,7 +23,6 @@
 #include "fileio.h"
 #include "include/levenshtein.h"
 #include "misc.h"
-#include "misc2.h"
 #include "include/paramfile.h"
 #include "include/partcatalog.h"
 #include "paths.h"

@@ -31,9 +31,6 @@
 #include "track.h"
 #include "include/utf8convert.h"
 
-extern BOOL_T inDescribeCmd;
-extern descData_t noteDesc[];
-
 EXPORT TRKTYP_T T_NOTE = -1;
 
 static wDrawBitMap_p note_bm, link_bm, document_bm;

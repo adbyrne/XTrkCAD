@@ -610,7 +610,6 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 }
 
 #if 0
-extern BOOL_T inDescribeCmd;
 
 static STATUS_T CmdSwitchMotorEdit( wAction_t action, coOrd pos )
 {

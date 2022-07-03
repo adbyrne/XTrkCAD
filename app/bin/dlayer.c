@@ -20,13 +20,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "common.h"
 #include "cselect.h"
 #include "custom.h"
 #include "paths.h"
 #include "dynstring.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc.h"
 #include "param.h"
 #include "track.h"
 #include "include/partcatalog.h"
@@ -2267,13 +2267,7 @@ void InitLayers(void)
 		if (i < NUM_BUTTONS) {
 			/* create the layer button */
 			sprintf(message, "cmdLayerShow%u", i);
-			layer_btns[i] = wButtonCreate(mainW, 0, 0, message,
-			                              (char*)(show_layer_bmps[i]),
-			                              BO_ICON, 0, FlipLayer, I2VP(i) );
-			/* add the help text */
-			wControlSetBalloonText((wControl_p)layer_btns[i], _("Show/Hide Layer"));
-			/* put on toolbar */
-			AddToolbarControl((wControl_p)layer_btns[i], IC_MODETRAIN_TOO);
+			layer_btns[i] = AddToolbarButton(message, show_layer_bmps[i], IC_MODETRAIN_TOO, FlipLayer, I2VP(i) );
 			/* set state of button */
 			wButtonSetBusy(layer_btns[i], 1);
 		}

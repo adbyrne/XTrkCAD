@@ -52,6 +52,8 @@ EXPORT TRKTYP_T T_BZRLIN = -1;
 static int log_bezier = 0;
 
 static DIST_T GetLengthBezier( track_p );
+static DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double * t_value);
+static void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4] , double t);
 
 /****************************************
  *
@@ -1674,7 +1676,7 @@ EXPORT void InitTrkBezier( void )
 /**
  * Return point on Bezier using "t" (from 0 to 1)
  */
-extern coOrd BezierPointByParameter(coOrd p[4], double t)
+static coOrd BezierPointByParameter(coOrd p[4], double t)
 {
 
     double a,b,c,d;
@@ -1697,7 +1699,7 @@ extern coOrd BezierPointByParameter(coOrd p[4], double t)
 /**
  * Find distance from point to Bezier. Return also the "t" value of that closest point.
  */
-extern DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double * t_value)
+static DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double * t_value)
 {
     DIST_T dd = DIST_INF;
     double t = 0.0;
@@ -1716,7 +1718,7 @@ extern DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double 
     return dd;
 }
 
-extern coOrd BezierMathFindNearestPoint(coOrd *pos, coOrd p[4], int segments) {
+static coOrd BezierMathFindNearestPoint(coOrd *pos, coOrd p[4], int segments) {
     double t = 0.0;
     BezierMathDistance(pos, p, segments, &t);
     return BezierPointByParameter(p, t);
@@ -1759,7 +1761,7 @@ void BezierSlice(coOrd input[], coOrd output[], double t) {
 /**
  * Split bezier into two parts
  */
-extern void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4] , double t) {
+static void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4] , double t) {
 
 	BezierSlice(input,left,t);
 
@@ -1804,7 +1806,7 @@ double BezierAddLengthIfClose(coOrd start[4], double error) {
  * Use recursive splitting to get close approximation ot length of bezier
  *
  */
-extern double BezierMathLength(coOrd p[4], double error)
+static double BezierMathLength(coOrd p[4], double error)
 {
     if (error == 0.0) error = 0.01;
     return BezierAddLengthIfClose(p, error);  /* kick off recursion */
@@ -1854,7 +1856,7 @@ coOrd BezierSecondDerivative(coOrd p[4], double t)
 /**
  * Get curvature of a Bezier at a point
 */
-extern double BezierCurvature(coOrd p[4], double t, coOrd * center)
+static double BezierCurvature(coOrd p[4], double t, coOrd * center)
 {
     //checkParameterT(t);
 
@@ -1876,7 +1878,7 @@ extern double BezierCurvature(coOrd p[4], double t, coOrd * center)
 /**
  * Get Maximum Curvature
  */
-extern double BezierMaxCurve(coOrd p[4]) {
+static double BezierMaxCurve(coOrd p[4]) {
     double max = 0;
     for (int t = 0;t<100;t++) {
         double curv = BezierCurvature(p, t/100, NULL);
@@ -1888,7 +1890,7 @@ extern double BezierMaxCurve(coOrd p[4]) {
 /**
  * Get Minimum Radius
  */
-extern double BezierMathMinRadius(coOrd p[4]) {
+static double BezierMathMinRadius(coOrd p[4]) {
     double curv = BezierMaxCurve(p);
     if (curv >= 1000.0 || curv <= 0.001 ) return 0.0;
     return 1/curv;
