@@ -87,8 +87,6 @@ static void drawButton(
 	RECT rect;
 	COLORREF color1, color2;
 	wWinPix_t offw=5, offh=5;
-	TRIVERTEX        vert[2] ;
-	GRADIENT_RECT    gRect;
 
 	COLORREF colL;
 	COLORREF colD;

@@ -1196,6 +1196,9 @@ static void Playback( void )
 			if (strncmp( paramLine, "MAP ", 6 ) == 0) {
 				thisCmd = mouseCmd;
 			}
+#ifdef UTFCONVERT
+			ConvertUTF8ToSystem(paramLine);
+#endif
 			for ( inx=0; inx<playbackProc_da.cnt; inx++ ) {
 				len = strlen(playbackProc(inx).label);
 				if (strncmp( paramLine, playbackProc(inx).label, len ) == 0) {

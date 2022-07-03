@@ -2517,7 +2517,7 @@ static void LayoutControls(
 		if ( (group->paramPtr[inx].option&PDO_DLGNOLABELALIGN) != 0 )
 			labelW[inx] = 0;
 
-	LOG( log_paramLayout, 1, ("Layout %s B?=%s\n", group->nameStr, hasBox?"T":"F" ) )
+	LOG( log_paramLayout, 2, ("LayoutControls:%s B?=%s\n", group->nameStr, hasBox?"T":"F" ) )
 
 	windowK.orig.x =  DlgSepLeft + (hasBox?DlgSepFrmLeft:0);
 	windowK.orig.y = DlgSepTop + (hasBox?DlgSepFrmTop:0);
@@ -2526,7 +2526,7 @@ static void LayoutControls(
 	controlK.orig.x += labelW[0];
 
 	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
-		LOG( log_paramLayout, 1, ("%2d: Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n", inx,
+		LOG( log_paramLayout, 2, ("%2d: Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n", inx,
 			columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
 			controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y ) )
 		if ( (pd->option&PDO_DLGIGNORE) != 0 )
@@ -2647,7 +2647,7 @@ SkipControl:
 			}
 			inCmdButtons = TRUE;
 		}
-		LOG( log_paramLayout, 1, ("    Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n",
+		LOG( log_paramLayout, 2, ("    Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n",
 				columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
 				controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y ) )
 		if ( windowK.term.x < columnK.term.x )
@@ -2682,6 +2682,7 @@ SkipControl:
 		*retW = windowK.term.x;
 	if ( retH )
 		*retH = windowK.term.y;
+	LOG( log_paramLayout, 1, ( "LayoutControls:%s orig:%dx%d compute:%dx%d\n", group->nameStr, group->origW, group->origH, windowK.term.x, windowK.term.y ) );
 }
 
 
@@ -2692,6 +2693,7 @@ static void ParamDlgProc(
 		void * data )
 {
 	paramGroup_p pg = (paramGroup_p)data;
+	static int iResizeCnt = 0;
 	switch (e) {
 	case wClose_e:
 		if ( pg->changeProc )
@@ -2700,10 +2702,12 @@ static void ParamDlgProc(
 			DefaultProc( win, wClose_e, data );
 		break;
 	case wResize_e:
-		if (win == mapW)
+		if (win == mapW) {
 			pg->changeProc(pg, wResize_e, NULL);
-		else
+		} else {
+			LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		}
 		break;
 	default:
 		break;
@@ -2765,19 +2769,26 @@ wWin_p ParamCreateDialog(
 		group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 
+	LOG( log_paramLayout, 1, ( "ParamCreateDialog/" ) );
 	LayoutControls( group, ParamCreateControl, &group->origW, &group->origH );
 
 	group->origW += DlgSepRight;
 	group->origH += DlgSepBottom;
 	wWinGetSize( group->win, &w0, &h0 );
+	LOG( log_paramLayout, 1, ( "    winSize: %dx%d\n", w0, h0 ) );
 	if ( (winOption&F_RESIZE) ) {
 		if ( group->origW != w0 ||
 			 group->origH != h0 ) {
+			LOG( log_paramLayout, 1, ( "    RESIZE+change/" ) );
 			LayoutControls( group, ParamPositionControl, NULL, NULL );
 		}
+ 		wWinPix_t scr_w, scr_h;
+		wGetDisplaySize(&scr_w, &scr_h);
+		wSetGeometry(group->win, group->origW, scr_w-10, group->origH, scr_h, -1, -1, -1);
 	} else {
 		w0 = max(group->origW, w0);
 		h0 = max(group->origH, h0);
+		LOG( log_paramLayout, 1, ( "     wWinSetSize( %dx%d )\n", w0, h0 ) );
 		wWinSetSize( group->win, w0, h0 );
 	}
 
@@ -2793,10 +2804,12 @@ EXPORT void ParamLayoutDialog(
 		paramGroup_p pg )
 {
 	wWinPix_t w, h;
+	LOG( log_paramLayout, 1, ( "ParamLayoutDialog/" ) );
 	LayoutControls( pg, ParamPositionControl, &w, &h );
 	w += DlgSepRight;
 	h += DlgSepBottom;
 	if ( w != pg->origW || h != pg->origH ) {
+		LOG( log_paramLayout, 1, ( "     wWinSetSize( %dx%d )\n", w, h ) );
 		wWinSetSize( pg->win, w, h );
 		pg->origW = w;
 		pg->origH = h;

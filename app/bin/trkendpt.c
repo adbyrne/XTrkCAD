@@ -435,7 +435,7 @@ EXPORT STATUS_T EndPtDescriptionMove(
 {
 	static coOrd p0;
 //	static coOrd p1;
-	elev_t *e, *e1;
+	elev_t *e;
 	track_p trk1;
 
 	e = &GetTrkEndPt(trk,ep)->elev;

@@ -1912,11 +1912,13 @@ static void RescaleTurnout(void)
 	DIST_T xscale, yscale;
 	wWinPix_t ww, hh;
 	DIST_T w, h;
+	if ( curTurnout == NULL )
+		return;
 	wDrawGetSize(turnoutD.d, &ww, &hh);
 	w = ww / turnoutD.dpi;
 	h = hh / turnoutD.dpi;
-	xscale = maxTurnoutDim.x / w;
-	yscale = maxTurnoutDim.y / h;
+	xscale = (curTurnout->size.x + trackGauge*2) / w;
+	yscale = (curTurnout->size.y + trackGauge*2) / h;
 	turnoutD.scale = max(xscale, yscale);
 	if (turnoutD.scale == 0.0)
 		turnoutD.scale = 1.0;
