@@ -2337,15 +2337,17 @@ EXPORT void PanHere(void * mode) {
 		panCenter = menuPos;
 		LOG( log_pan, 2, ( "MCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 	}
-	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
-	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
+	wBool_t bLiveMap = TRUE;
+	if ( 2 == VP2L(mode) )
+		bLiveMap = liveMap;
+	if ( bLiveMap ) {
+		mainD.orig.x = panCenter.x - mainD.size.x/2.0;
+		mainD.orig.y = panCenter.y - mainD.size.y/2.0;
+	}
 	wBool_t bNoBorder = (constrainMain != 0);
 	if ( 1 != VP2L(mode) )
 		if ( (MyGetKeyState()&WKEY_CTRL)!= 0 )
 			bNoBorder = !bNoBorder;
-	wBool_t bLiveMap = TRUE;
-	if ( 2 == VP2L(mode) )
-		bLiveMap = liveMap;
 
 	MainLayout( bLiveMap, bNoBorder ); // PanHere
 }
