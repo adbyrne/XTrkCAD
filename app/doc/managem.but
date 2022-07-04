@@ -117,7 +117,17 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \u000
 
-\dd \e{Options} - 2 (Locomotives), 4 (Body Mounted Couplers)
+\dd \e{Options} - bit map of
+
+\lcont{
+
+\b 0x0001 - Locomotive
+
+\b 0x0002 - Body Mounted Couplers
+
+\b Other bits can be ignored
+
+}
 
 \u000
 
@@ -125,7 +135,7 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \u000
 
-\dd \e{Color} - encoded as (Red * 65535 + Green * 256 + Blue)
+\dd \e{Color} - encoded as (Red * 65536 + Green * 256 + Blue)
 
 \u000
 
