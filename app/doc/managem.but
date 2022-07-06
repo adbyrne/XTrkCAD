@@ -352,7 +352,9 @@ The \f{Group} command combines the selected (\K{cmdSelect}) Lines and Shapes (\K
 
 The title will be pre-populated with the title of the last \f{Structure} you \f{ungrouped} (\K{manageM}).
 
-You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks in the selected objects which allows you to add cosmetic details to a \f{Turnout} definitions, or create a new \f{Turnout} definition. This can also be used to if there are fixed track locations on a structure, like on an engine shed. 
+You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks in the selected objects which allows you to add cosmetic details to a \f{Turnout} definitions, or create a new \f{Turnout} definition. This can also be used to if there are fixed track locations on a structure, like on an engine shed.
+
+\f{Group} is intended to operate on simple groups of track segments.  If you intend to group a large number of track segments, you should consider using \f{Import Module} (see \K{cmdLayer}),
 
 To modify a \f{Structure} or \f{Turnout} definition, first place the object on the layout, select and then \f{Ungroup} the object.  Now the parts of the object can be edited using the \f{Modify} (\K{cmdModify}), \f{Draw} (\K{cmdDraw}) or other commands.  Once completed, select the object parts and use the \f{Group} command to update the definition (or create a new one by changing the title).
 
@@ -362,7 +364,26 @@ The definition data will be added to the \c{xtrkcad.cus} (\K{directories}) file 
 
 If you modify a definition from a \e{XTrackCAD} Library parameter file, the new definition will replace the existing definition on the \f{Hot Bar} (\K{cmdHotBar}), otherwise it will be added to the end of the \f{Hot Bar}. You can use the \f{Custom Management} (\K{cmdCustmgm}) dialog to change the title or delete custom definitions.
 
-\f{Note:} There is a limit of 128 track segments in a group.
+\f{Note:} 
+The selected tracks are decomposed into segments, which are simple tracks and drawing object (lines, curves, polygons ... ).
+Any track segments must appear in the first 127 segments.
+This implies a limit of 127 track segments.
+
+\dd You can re-order the segment list by
+
+\lcont{
+
+\b Ungroup the selected tracks
+
+\b Unselect all, and select the tracks you want to group
+
+\b \f{Move selected objects to bottom}
+
+\b Add the non-tracks object to the selected track segments
+
+\b Retry the \f{Group} command
+
+}
 
 \rule
 

@@ -25,6 +25,7 @@
 
 #include "common.h"
 
+#define MAX_PATH_SEGS	(127)
 
 typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;

@@ -999,11 +999,20 @@ END
 
 # cgroup.c:groupOk
 MESSAGE MSG_TOOMANYSEGSINGROUP
-Too many segments in Group.
+Too many track segments in Group.
 HELP
-A group is limited to a maximum of 128 track segments. The number of segments within the selected group of tracks exceed this number. Select a smaller number of tracks then try again.
+A group is limited to a maximum of 127 track segments. The number of track segments within the selected group of tracks exceed this number. Select a smaller number of tracks then try again.
 
-Refer to \k{cmdGroup} for detail.
+Refer to \k{cmdGroup} for details.
+END
+
+# cgroup.c:groupOk
+MESSAGE MSG_TOOMANYSEGSINGROUP2
+Track segments appear too late in Group segment list.
+HELP
+A Group's track segments must be in the first 127 segments.  You can move the track segments to the start of the segment list.
+
+Refer to \k{cmdGroup} for details.
 END
 
 # cmodify.c

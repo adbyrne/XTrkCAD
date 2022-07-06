@@ -309,6 +309,10 @@ EXPORT wIndex_t CheckPaths(
 	if (suppressCheckPaths == 0) {
 		for (int inx = 0; inx < segCnt; inx++) {
 			if (IsSegTrack(&segs[inx])) {
+				if ( inx > MAX_PATH_SEGS ) {
+					InputError("Too many segments %d in Turnout definition", FALSE, inx + 1);
+					return -1;
+				}
 				PATHPTR_T cp = paths;
 				while (*cp) {
 					// 0-9 are x00 to x09 or the negative equivalent (backwards)
