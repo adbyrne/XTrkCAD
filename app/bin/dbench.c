@@ -257,8 +257,8 @@ EXPORT void DrawBench(
 		DrawPoly( d, 4, pp, NULL, color1, 0, DRAW_FILL );
 		/* Draw Outline */
 		if ( /*color1 != color2 &&*/
-			 ( ( d->scale < ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) ) ||	/* big enough scale */
-			   ( d->funcs == &tempSegDrawFuncs ) ) ) {
+			DrawTwoRails(d,1) ||
+			d->funcs == &tempSegDrawFuncs ) {
 			DrawPoly( d, 4, pp, NULL, color2, 0, DRAW_CLOSED );
 			if ( color1 != color2 && type != B_RECT ) {
 				oldOptions = d->options;

@@ -481,7 +481,7 @@ static void PrintEnableControls( void )
 		printRegistrationMarks = 0;
 		ParamControlActive( &printPG, I_REGMARKS, FALSE );
 	}
-	if (printScale <= (twoRailScale*2+1)/2.0) {
+	if ( DrawTwoRails( &print_d, 1 ) ) {
 		ParamLoadControl( &printPG, I_ROADBED );
 		ParamControlActive( &printPG, I_ROADBED, TRUE );
 		ParamControlActive( &printPG, I_ROADBEDWIDTH, TRUE );
@@ -591,7 +591,7 @@ static void DoPrintScale( void )
  * Called whenever print scale or orientation changes.
  */
 {
-	printScale = iPrintScale;
+	print_d.scale = printScale = iPrintScale;
 	PrintMaxPageSize();
 	PrintEnableControls();
 }

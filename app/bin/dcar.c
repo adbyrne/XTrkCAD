@@ -1997,10 +1997,9 @@ EXPORT void CarItemDraw(
 	int dir;
 //	DIST_T rad;
 	static int couplerLineWidth = 3;
-	DIST_T scale2rail;
 
 	CarItemSize( item, &size );
-	if ( d->scale >= ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) ) {
+	if ( !DrawTwoRails( d, 1 ) ) {
 		simplePts[0].pt.x = simplePts[3].pt.x = -size.x/2.0;
 		simplePts[1].pt.x = simplePts[2].pt.x = size.x/2.0;
 		simplePts[0].pt.y = simplePts[1].pt.y = -size.y/2.0;
@@ -2086,15 +2085,13 @@ EXPORT void CarItemDraw(
 	}
 
 	/* draw coupler */
-	scale2rail = ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale);
-	if ( d->scale >= scale2rail )
+	if ( ! DrawTwoRails(d,0.5) )
 		return;
-	scale2rail /= 2;
 //	rad = trackGauge/8.0;
 	for ( dir=0; dir<2; dir++ ) {
 		Translate( &pos, coupler[dir].pos, coupler[dir].angle, CarItemCouplerLength(item,dir) );
 		DrawLine( d, coupler[dir].pos, pos, couplerLineWidth, color );
-		if ( d->scale < scale2rail ) {
+		if ( DrawTwoRails(d,1) ) {
 			/*DrawFillCircle( d, p0, rad, dir==0?color:selectedColor );*/
 			Translate( &pos2, pos, coupler[dir].angle+90.0, trackGauge/3 );
 			DrawLine( d, pos2, pos, couplerLineWidth, color );

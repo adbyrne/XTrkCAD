@@ -340,18 +340,20 @@ static void RedrawSelectedTracksBoundary()
 					len = GetTrkGauge(trk)*2.0;
 					if (len < 0.10*mainD.scale)
 						len = 0.10*mainD.scale;
-					Translate( &p1, p, a+45, len );
-					Translate( &p2, p, a+225, len );
-					DrawLine( &mainD, p1, p2, 2, color );
-					Translate( &p1, p, a-45, len );
-					Translate( &p2, p, a-225, len );
-					DrawLine( &mainD, p1, p2, 2, color );
+					if (DrawTwoRails( &mainD, 1 ) ) {
+						Translate( &p1, p, a+45, len );
+						Translate( &p2, p, a+225, len );
+						DrawLine( &mainD, p1, p2, 2, color );
+						Translate( &p1, p, a-45, len );
+						Translate( &p2, p, a-225, len );
+						DrawLine( &mainD, p1, p2, 2, color );
+					}
 					if ( color == wDrawColorWhite ) {
 						// Fill in holes by undraw cross
 						DIST_T len2 = sqrt( GetTrkGauge(trk)*GetTrkGauge(trk)/2.0 );
 						DIST_T len3 = 0.1*mainD.scale;
 						color = GetTrkColor( trk, &mainD );
-						if ( mainD.scale < twoRailScale ) {
+						if ( DrawTwoRails( &mainD, 1 ) ) {
 							Translate( &p0, p, a-225, len2 );
 							Translate( &p1, p0, a, len3 );
 							Translate( &p2, p0, a+180, len3 );
