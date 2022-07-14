@@ -450,8 +450,9 @@ SetScale( SCALEINX_T newScaleInx )
 	if (!inPlayback)
 		wPrefSetString( "misc", "scale", curScaleName );
 
-	// now load the minimum radius for the newly selected scale
+	// now load the minimum radius and set default max grade for the newly selected scale
 	LoadLayoutMinRadiusPref(curScaleName, curScale->R[0]);
+	LoadLayoutMaxGradePref(curScaleName, 5.0);
 }
 
 /**

@@ -83,7 +83,9 @@ static wButton_p layer_btns[NUM_BUTTONS];	/**< layer buttons on toolbar */
 /** Layer selector on toolbar */
 static wList_p setLayerL;
 
-/** Describe the properties of a layer */
+/** Describe the properties of a layer 
+  * Defaults for layout track grade and min radius are in scale.c: SetScale
+  */
 typedef struct {
 	char name[STR_SHORT_SIZE];			/**< Layer name */
 	wDrawColor color;					/**< layer color, is an index into a color table */
@@ -839,7 +841,6 @@ void PutLayerListArray(int inx, char * list)
 	}
 }
 
-
 /**
  * Set a Layer to System Default
  */
@@ -854,12 +855,10 @@ void LayerSystemDefault( unsigned int inx )
 	layers[inx].button_off = FALSE;
 	layers[inx].inherit = TRUE;
 	layers[inx].scaleInx = 0;
-	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx,
-	              &layers[inx].gaugeInx);
-	// layers[inx].scaleDescInx = GetLayoutCurScaleDesc();
-	layers[inx].gaugeInx = 0;
-	layers[inx].minTrackRadius = 0.0;
-	layers[inx].maxTrackGrade = 0.0;
+	GetScaleGauge(layers[inx].scaleInx, &layers[inx].scaleDescInx, 
+		&layers[inx].gaugeInx);
+	layers[inx].minTrackRadius = GetLayoutMinTrackRadius();
+	layers[inx].maxTrackGrade = GetLayoutMaxTrackGrade();
 	layers[inx].tieData.valid = FALSE;
 	layers[inx].tieData.length = 0.0;
 	layers[inx].tieData.width = 0.0;
@@ -886,8 +885,8 @@ BOOL_T IsLayerDefault( unsigned int inx )
 	       layers[inx].scaleInx == 0 &&
 	       //layers[inx].scaleDescInx != layerScaleDescInx ||
 	       //layers[inx].gaugeInx != layerGaugeInx ||
-	       layers[inx].minTrackRadius == 0.0 &&
-	       layers[inx].maxTrackGrade == 0.0 &&
+	       layers[inx].minTrackRadius == GetLayoutMinTrackRadius() &&
+	       layers[inx].maxTrackGrade == GetLayoutMaxTrackGrade() &&
 		   layers[inx].tieData.valid == FALSE &&
 	       layers[inx].tieData.length == 0.0 &&
 	       layers[inx].tieData.width == 0.0 &&
@@ -1398,8 +1397,8 @@ LayerPrefLoad(void)
 			                GetLayoutCurScaleDesc());
 			layerGetInteger(inx, LAYERPREF_GAUGEINX, &layers[inx].gaugeInx, 0);
 
-			layerGetFloat(inx, LAYERPREF_MINRADIUS, &layers[inx].minTrackRadius, 0.0);
-			layerGetFloat(inx, LAYERPREF_MAXGRADE, &layers[inx].maxTrackGrade, 0.0);
+			layerGetFloat(inx, LAYERPREF_MINRADIUS, &layers[inx].minTrackRadius, GetLayoutMinTrackRadius());
+			layerGetFloat(inx, LAYERPREF_MAXGRADE, &layers[inx].maxTrackGrade, GetLayoutMaxTrackGrade());
 			layerGetFloat(inx, LAYERPREF_TIELENGTH, &layers[inx].tieData.length, 0.0);
 			layerGetFloat(inx, LAYERPREF_TIEWIDTH, &layers[inx].tieData.width, 0.0);
 			layerGetFloat(inx, LAYERPREF_TIESPACING, &layers[inx].tieData.spacing, 0.0);

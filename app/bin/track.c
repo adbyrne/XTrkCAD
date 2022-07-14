@@ -100,9 +100,6 @@ EXPORT coOrd descriptionOff;
 EXPORT DIST_T roadbedWidth = 0.0;
 EXPORT DIST_T roadbedLineWidth = 3.0/BASE_DPI;
 
-//EXPORT DIST_T minTrackRadius;
-//EXPORT DIST_T maxTrackGrade = 5.0;
-
 static int suspendElevUpdates = FALSE;
 
 static track_p * importTrack;
