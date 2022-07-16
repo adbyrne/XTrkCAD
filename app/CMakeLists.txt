@@ -1,3 +1,9 @@
+
+# i18n can be found here
+include_directories(
+	${xtrkcad-lib_SOURCE_DIR}
+)
+
 # Setup the rest of the build ...
 add_subdirectory(cornu)
 add_subdirectory(dynstring)

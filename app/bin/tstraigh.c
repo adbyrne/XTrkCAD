@@ -390,7 +390,6 @@ EXPORT void DrawStraightTrack(
 	long options )
 {
 	coOrd pp0, pp1;
-	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
 	tieData_t td;
 	long bridge = 0, roadbed = 0;
@@ -413,8 +412,6 @@ EXPORT void DrawStraightTrack(
 		segPtr->u.l.option = 0;
 		return;
 	}
-
-	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 
 	width = trk ? GetTrkWidth( trk ): 0;
 	if ((d->options&DC_PRINT) && (d->dpi>2*BASE_DPI))
@@ -441,7 +438,7 @@ EXPORT void DrawStraightTrack(
 	}
 	if (color == wDrawColorBlack)
 		color = normalColor;
-	if ( d->scale >= scale2rail ) {
+	if ( ! DrawTwoRails( d, 1 ) ) {
 		DrawLine( d, p0, p1, width, color );
 	} else {
 		if ( hasTrackCenterline(d)) { 
@@ -458,7 +455,7 @@ EXPORT void DrawStraightTrack(
 		Translate( &pp1, p1, angle-90, trackGauge/2.0 );
 		DrawLine( d, pp0, pp1, width, color );
 
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && d->scale <= scale2rail/2.0) {
+		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && DrawTwoRails(d,1) ) {
 			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			if ( options&DTS_RIGHT ) {
 				Translate( &pp0, p0, angle+90, roadbedWidth/2.0 );

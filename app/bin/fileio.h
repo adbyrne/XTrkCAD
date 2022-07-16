@@ -56,8 +56,6 @@ extern wBool_t inPlaybackQuit;
 extern wWin_p demoW;
 extern int curDemo;
 
-extern wMenuList_p fileList_ml;
-
 #define ZIPFILETYPEEXTENSION "xtce"
 
 #define PARAM_SUBDIR "params"
@@ -110,14 +108,13 @@ void DoParamFiles(void * unused);
 
 int LoadTracks( int cnt, char **fileName, void *data );
 
-typedef void (*doSaveCallBack_p)( void );
-void SetAutoSave(void);
+void SaveState( void );
 void DoSave( void * doAfterSaveVP );
 void DoSaveAs( void * doAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
-void DoCheckPoint( void );
+void TryCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
@@ -145,6 +142,7 @@ int RegLevel( void );
 void ReadKey( void );
 void PopupRegister( void * );
 
+void LoadFileList( void );
 void FileInit( void );
 
 BOOL_T MacroInit( void );

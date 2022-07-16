@@ -105,7 +105,7 @@ add_custom_command(
 			-F 
 			-o ${POTFILE} 
 			--from-code=ISO-8859-15 ${XGT_SOURCE_FILES}
-	DEPENDS xtrkcad ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
+	DEPENDS custmsg
 	WORKING_DIRECTORY ${i18n_SOURCE_DIR}
 )
 
@@ -132,9 +132,9 @@ function(updatepofile locale)
 	# Merge .pot file changes to .po file
 	add_custom_target(msgmerge-${locale} ALL
 		COMMAND ${XTC_MSGMERGE} -U --backup=none ${pofile} ${POTFILE}
-      COMMAND ${XTC_MSGFMT} -c -v -o ${mofile} ${pofile}
-		DEPENDS ${POTFILE} ${pofile}
-		)
+    	COMMAND ${XTC_MSGFMT} -c -v -o ${mofile} ${pofile}
+		DEPENDS messages ${pofile} #${POTFILE} ${pofile} 
+	)
 
 	# If new locale id was added, add .po file creation routine
 	if(NOT EXISTS ${pofile})

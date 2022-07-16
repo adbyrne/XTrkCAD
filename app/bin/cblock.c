@@ -690,7 +690,6 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 }
 
 #if 0
-extern BOOL_T inDescribeCmd;
 
 static STATUS_T CmdBlockEdit( wAction_t action, coOrd pos )
 {

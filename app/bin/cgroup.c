@@ -53,9 +53,6 @@ static char groupPartno[STR_SIZE];
 static char groupTitle[STR_LONG_SIZE];
 static int groupCompoundCount = 0;
 
-extern TRKTYP_T T_BZRTRK;
-extern TRKTYP_T T_BZRLIN;
-extern TRKTYP_T T_CORNU;
 
 /*****************************************************************************
  *
@@ -1086,6 +1083,9 @@ static void GroupOk( void * unused )
 	trk = NULL;
 //	int InInx = -1;
 	BOOL_T hasTracks = FALSE;
+	wIndex_t nTrkSeg = 0;
+	wIndex_t nSeg = 0;
+	wIndex_t iLastTrkSeg = 0;
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			DYNARR_APPEND( groupTrk_t, groupTrk_da, 10 );
@@ -1141,6 +1141,13 @@ static void GroupOk( void * unused )
 				}
 
 			}
+			// Count number of track segs and if any appear after seg 127
+			for ( ; nSeg < trackSegs_da.cnt; nSeg++ ) {
+				if ( IsSegTrack( &trackSegs( nSeg ) ) ) {
+					nTrkSeg++;
+					iLastTrkSeg = nSeg;
+				}
+			}
 			groupP->segEnd = trackSegs_da.cnt-1;
 		}
 	}
@@ -1161,14 +1168,22 @@ if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
 	}
 }
 
-	if ( groupTrk_da.cnt>0 && hasTracks) {
-		if ( groupTrk_da.cnt > 128 ) {
-			NoticeMessage( MSG_TOOMANYSEGSINGROUP, _("Ok"), NULL );
-			wDrawDelayUpdate( mainD.d, FALSE );
-			wHide( groupW );
-			return;
-		}
+	if ( nTrkSeg > MAX_PATH_SEGS ) {
+		// Too many track segs
+		NoticeMessage( MSG_TOOMANYSEGSINGROUP, _("Ok"), NULL );
+		wDrawDelayUpdate( mainD.d, FALSE );
+		wHide( groupW );
+		return;
+	}
+	if ( iLastTrkSeg > MAX_PATH_SEGS ) {
+		// track segs beyond threshold
+		NoticeMessage( MSG_TOOMANYSEGSINGROUP2, _("Ok"), NULL );
+		wDrawDelayUpdate( mainD.d, FALSE );
+		wHide( groupW );
+		return;
+	}
 
+	if ( groupTrk_da.cnt>0 && hasTracks) {
 		/*
 		 * Collect EndPts and find paths
 		 */
@@ -1467,7 +1482,7 @@ if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 		memset( &segFlip(0), 0, trackSegs_da.cnt * sizeof segFlip(0) );
 		for ( pinx=0; pinx<pathElem_da.cnt; pinx++ ) {
 			ppp = &pathElem(pinx);
-			for ( PATHPTR_T pPaths=ppp->path; *pPaths; pPaths++ ) {
+			for ( PATHPTR_T pPaths=ppp->path; pPaths && *pPaths; pPaths++ ) {
 				inx = *pPaths;
 				if ( inx<0 )
 					inx = - inx;

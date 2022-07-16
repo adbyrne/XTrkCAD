@@ -309,6 +309,10 @@ EXPORT wIndex_t CheckPaths(
 	if (suppressCheckPaths == 0) {
 		for (int inx = 0; inx < segCnt; inx++) {
 			if (IsSegTrack(&segs[inx])) {
+				if ( inx > MAX_PATH_SEGS ) {
+					InputError("Too many segments %d in Turnout definition", FALSE, inx + 1);
+					return -1;
+				}
 				PATHPTR_T cp = paths;
 				while (*cp) {
 					// 0-9 are x00 to x09 or the negative equivalent (backwards)
@@ -1647,7 +1651,6 @@ static BOOL_T QueryTurnout(track_p trk, int query)
 }
 
 
-EXPORT int doDrawTurnoutPosition = 1;
 static wIndex_t drawTurnoutPositionWidth = 3;
 static void DrawTurnoutPositionIndicator(
 	track_p trk,
@@ -1913,11 +1916,13 @@ static void RescaleTurnout(void)
 	DIST_T xscale, yscale;
 	wWinPix_t ww, hh;
 	DIST_T w, h;
+	if ( curTurnout == NULL )
+		return;
 	wDrawGetSize(turnoutD.d, &ww, &hh);
 	w = ww / turnoutD.dpi;
 	h = hh / turnoutD.dpi;
-	xscale = maxTurnoutDim.x / w;
-	yscale = maxTurnoutDim.y / h;
+	xscale = (curTurnout->size.x + trackGauge*2) / w;
+	yscale = (curTurnout->size.y + trackGauge*2) / h;
 	turnoutD.scale = max(xscale, yscale);
 	if (turnoutD.scale == 0.0)
 		turnoutD.scale = 1.0;

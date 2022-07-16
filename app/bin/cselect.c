@@ -38,6 +38,7 @@
 #include "draw.h"
 #include "misc.h"
 #include "common-ui.h"
+#include "ctrain.h"
 
 
 #include "bitmaps/bmendpt.xbm"
@@ -52,6 +53,9 @@ EXPORT wIndex_t selectCmdInx;
 EXPORT wIndex_t moveCmdInx;
 EXPORT wIndex_t rotateCmdInx;
 EXPORT wIndex_t flipCmdInx;
+
+EXPORT long selectMode = 0;
+EXPORT long selectZero = 1;
 
 #define MAXMOVEMODE (3)
 static long moveMode = MAXMOVEMODE;
@@ -336,18 +340,20 @@ static void RedrawSelectedTracksBoundary()
 					len = GetTrkGauge(trk)*2.0;
 					if (len < 0.10*mainD.scale)
 						len = 0.10*mainD.scale;
-					Translate( &p1, p, a+45, len );
-					Translate( &p2, p, a+225, len );
-					DrawLine( &mainD, p1, p2, 2, color );
-					Translate( &p1, p, a-45, len );
-					Translate( &p2, p, a-225, len );
-					DrawLine( &mainD, p1, p2, 2, color );
+					if (DrawTwoRails( &mainD, 1 ) ) {
+						Translate( &p1, p, a+45, len );
+						Translate( &p2, p, a+225, len );
+						DrawLine( &mainD, p1, p2, 2, color );
+						Translate( &p1, p, a-45, len );
+						Translate( &p2, p, a-225, len );
+						DrawLine( &mainD, p1, p2, 2, color );
+					}
 					if ( color == wDrawColorWhite ) {
 						// Fill in holes by undraw cross
 						DIST_T len2 = sqrt( GetTrkGauge(trk)*GetTrkGauge(trk)/2.0 );
 						DIST_T len3 = 0.1*mainD.scale;
 						color = GetTrkColor( trk, &mainD );
-						if ( mainD.scale < twoRailScale ) {
+						if ( DrawTwoRails( &mainD, 1 ) ) {
 							Translate( &p0, p, a-225, len2 );
 							Translate( &p1, p0, a, len3 );
 							Translate( &p2, p0, a+180, len3 );
@@ -3062,11 +3068,6 @@ static BOOL_T SelectArea(
 	return FALSE;
 }
 
-extern BOOL_T inDescribeCmd;
-extern wIndex_t modifyCmdInx;
-extern wIndex_t describeCmdInx;
-extern wIndex_t panCmdInx;
-extern wIndex_t trainCmdInx;
 
 static STATUS_T SelectTrack( 
 		coOrd pos )
@@ -3661,7 +3662,6 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS, ACCL_SELECT, NULL );
 }
 
-extern wIndex_t trainCmdInx;
 
 EXPORT void InitCmdSelect2( wMenu_p menu ) {
 

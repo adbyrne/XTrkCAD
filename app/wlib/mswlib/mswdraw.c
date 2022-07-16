@@ -405,7 +405,7 @@ void wDrawArc(
 	int i, cnt;
 	POINT p0, p1, ps, pe, pp0, pp1, pp2, pc;
 	wDrawPix_t psx, psy, pex, pey;
-    double len, aa, ai;
+    double aa, ai;
 	RECT rect;
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
@@ -1204,8 +1204,6 @@ void wDrawFilledCircle(
 	POINT p0, p1;
 	RECT rect;
 	static wDrawPix_t circlePts[MAX_FILLCIRCLE_POINTS][2];
-	int inx, cnt;
-	double dang;
 
 	p0.x = XDRAWPIX2WINPIX(d,x-r);
 	p0.y = YDRAWPIX2WINPIX(d,y+r);

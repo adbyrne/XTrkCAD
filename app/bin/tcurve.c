@@ -744,7 +744,6 @@ EXPORT void DrawCurvedTrack(
 	wDrawColor color,
 	long options )
 {
-	DIST_T scale2rail;
 	DIST_T trackGauge = GetTrkGauge(trk);
 	tieData_t td;
 	wDrawWidth width=0;
@@ -768,7 +767,6 @@ EXPORT void DrawCurvedTrack(
 		return;
 	}
 
-	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	width = trk ? GetTrkWidth( trk ): 0;
 	if ( d->options&DC_THICK )
 		width = 3;
@@ -793,7 +791,7 @@ EXPORT void DrawCurvedTrack(
 	}
 	if (color == wDrawColorBlack)
 		color = normalColor;
-	if ( d->scale >= scale2rail ) {
+	if ( ! DrawTwoRails( d, 1 ) ) {
 		DrawArc( d, p, r, a0, a1, (centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, width, color );
 	} else {
 		if ( hasTrackCenterline(d)) {
@@ -804,7 +802,7 @@ EXPORT void DrawCurvedTrack(
 		}
 		DrawArc( d, p, r+trackGauge/2.0, a0, a1, 0, width, color );
 		DrawArc( d, p, r-trackGauge/2.0, a0, a1, (centerDrawMode && !(options&DTS_NOCENTER) ? 1: 0), width, color );
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && d->scale <= scale2rail/2 ) {
+		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && DrawTwoRails( d, 1 ) ) {
 			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			if ( options&DTS_RIGHT ) {
 				DrawArc( d, p, r+roadbedWidth/2.0, a0, a1, 0, rbw, color );

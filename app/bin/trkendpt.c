@@ -28,10 +28,6 @@
 #include "track.h"
 #include "trkendpt.h"
 #include "trkendptx.h"
-#include "misc.h"
-//#include "cbezier.h"
-//#include "tbezier.h"
-//#include "cjoin.h"
 #include "draw.h"
 
 
@@ -439,7 +435,7 @@ EXPORT STATUS_T EndPtDescriptionMove(
 {
 	static coOrd p0;
 //	static coOrd p1;
-	elev_t *e, *e1;
+	elev_t *e;
 	track_p trk1;
 
 	e = &GetTrkEndPt(trk,ep)->elev;

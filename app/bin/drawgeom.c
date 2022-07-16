@@ -2639,6 +2639,7 @@ STATUS_T DrawGeomModify(
 		context->rotate_state = FALSE;
 		context->last_inx = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		DrawNewTrack( context->trk );
 		return C_TERMINATE;
 	case C_REDRAW:
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);

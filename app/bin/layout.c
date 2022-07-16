@@ -24,13 +24,14 @@
 
 #include "custom.h"
 #include "layout.h"
-#include "misc2.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
 #include "fileio.h"
+#include "cselect.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
+#define MAXTRACKGRADEPREFS "maxTrackGrade"
 
 #define TEXT_FIELD_LEN 40
 
@@ -119,7 +120,6 @@ SetLayoutFullPath(const char *fileName)
 * \param scaleName IN name of the scale/gauge eg. HOn3
 * \param defaltValue IN default value will be used if no preference is set
 */
-
 void
 LoadLayoutMinRadiusPref(char *scaleName, double defaultValue)
 {
@@ -129,6 +129,23 @@ LoadLayoutMinRadiusPref(char *scaleName, double defaultValue)
     wPrefGetFloat("misc", DynStringToCStr(&prefString),
                   &thisLayout.props.minTrackRadius, defaultValue);
     DynStringFree(&prefString);
+}
+
+/**
+* Set the maximum grade for the selected scale/gauge into the dialog
+*
+* \param scaleName IN name of the scale/gauge eg. HOn3
+* \param defaltValue IN default value will be used if no preference is set
+*/
+void
+LoadLayoutMaxGradePref(char* scaleName, double defaultValue)
+{
+	DynString prefString = { NULL };
+
+	DynStringPrintf(&prefString, MAXTRACKGRADEPREFS "-%s", scaleName);
+	wPrefGetFloat("misc", DynStringToCStr(&prefString),
+		&thisLayout.props.maxTrackGrade, defaultValue);
+	DynStringFree(&prefString);
 }
 
 /**
@@ -480,6 +497,8 @@ bool haveBackground = false;
 BOOL_T backgroundVisible = TRUE;
 
 char * noname = "";
+
+EXPORT wButton_p backgroundB;
 
 /**
  * @brief Enable background visibility toggle from Menu or Button

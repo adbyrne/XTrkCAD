@@ -87,9 +87,6 @@
 #include "fileio.h"
 #include "common-ui.h"
 
-extern drawCmd_t tempD;
-extern TRKTYP_T T_BEZIER;
-extern TRKTYP_T T_CORNU;
 
 typedef struct {
 	coOrd end_center;

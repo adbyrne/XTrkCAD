@@ -29,6 +29,10 @@
 #include "param.h"
 #include "track.h"
 
+EXPORT DIST_T easementVal = 0.0;
+EXPORT DIST_T easeR = 0.0;
+EXPORT DIST_T easeL = 0.0;
+
 static wButton_p easementB;
 
 static DIST_T easeX = 0.0;

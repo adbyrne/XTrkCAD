@@ -48,8 +48,6 @@ static wWin_p textEditW;
 
 #define textEntry	((wText_p)textEditPLs[I_TEXT].control)
 
-extern BOOL_T inDescribeCmd;
-
 /**
  * Return the current text 
  * 

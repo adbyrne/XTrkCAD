@@ -2023,8 +2023,7 @@ EXPORT void DrawTurnout(
 	wIndex_t i;
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
-	DIST_T scale2rail = (d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale;
-	BOOL_T omitTies = !DoDrawTies(d, trk) || (d->scale > scale2rail) || ((d->options & DC_SIMPLE) != 0); // || (scaleInx == 0);
+	BOOL_T omitTies = !DoDrawTies(d, trk) || !DrawTwoRails(d,1) || ((d->options & DC_SIMPLE) != 0); // || (scaleInx == 0);
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
@@ -2101,8 +2100,8 @@ EXPORT void DrawTurnout(
 			LabelLengths(d, trk, color);
 	}
 	if (roadbedWidth > GetTrkGauge(trk) &&
-		(((d->options & DC_PRINT) && d->scale <= (twoRailScale * 2 + 1) / 2.0) ||
-			(roadbedOnScreen && d->scale <= twoRailScale)))
+		DrawTwoRails( d, 1 ) &&
+		( (d->options & DC_PRINT) || roadbedOnScreen ) )
 		DrawTurnoutRoadbed(d, color, xx->orig, xx->angle, xx->segs, xx->segCnt);
 
 	// Restore these settings

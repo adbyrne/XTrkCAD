@@ -115,10 +115,9 @@ set(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad")
 add_definitions(-DXTRKCAD_CMAKE_BUILD)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-config.h)
 
-# add common include directories
+# find the config.h include file
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
-	${xtrkcad-lib_SOURCE_DIR}
 )
 
 #

@@ -10,6 +10,8 @@ include( CheckSymbolExists )
 #	4. add individual .lin-files as dependency to "lines"
 #
 
+ADD_SUBDIRECTORY(bitmaps)
+
 add_executable(cnvdsgn cnvdsgn.c utility.c)
 
 target_link_libraries(cnvdsgn xtrkcad-wlib)
@@ -100,6 +102,8 @@ target_sources(xtrkcad-lib
     cmisc.c
     cmodify.c
     cnote.c
+	command.c
+	command.h
     common.h
     common-ui.h
     compound.c
@@ -140,6 +144,7 @@ target_sources(xtrkcad-lib
     directory.c
     directory.h
     dlayer.c
+	dlayer.h
     doption.c
     dpricels.c
     dprmfile.c
@@ -165,10 +170,10 @@ target_sources(xtrkcad-lib
     macro.c
     manifest.c
     manifest.h
+	menu.h
+	menu.c
     misc.c
     misc.h
-    misc2.c
-    misc2.h
     note.h
     param.c
     param.h
@@ -178,6 +183,8 @@ target_sources(xtrkcad-lib
     partcatalog.c
     paths.c
     paths.h
+	scale.c
+	scale.h
     shortentext.c
     shortentext.h
     shrtpath.c
@@ -199,6 +206,7 @@ target_sources(xtrkcad-lib
     trkendpt.h
     trkendptx.h
     trknote.c
+	trkseg.h
     trkseg.c
     tstraigh.c
     turnout.c
@@ -326,6 +334,7 @@ target_link_libraries(xtrkcad
 add_executable(mkturnout
     ctodesgn.c
 	utility.c
+    trkendpt.c
 )
 set_target_properties(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
 set_target_properties(mkturnout PROPERTIES FOLDER "Param Files" )

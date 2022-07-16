@@ -70,6 +70,12 @@ static int log_timedrawtracks = 0;
 
 #define CLOSETOTHEEDGE			(10)		/**< minimum distance between paste position and edge of window */
 
+EXPORT DIST_T trackGauge;
+EXPORT DIST_T minLength = 0.1;
+EXPORT DIST_T connectDistance = 0.1;
+EXPORT ANGLE_T connectAngle = 1.0;
+EXPORT long twoRailScale = 16;
+
 EXPORT wIndex_t trackCount;
 
 EXPORT long drawEndPtV = 2;
@@ -94,9 +100,6 @@ EXPORT coOrd descriptionOff;
 EXPORT DIST_T roadbedWidth = 0.0;
 EXPORT DIST_T roadbedLineWidth = 3.0/BASE_DPI;
 
-//EXPORT DIST_T minTrackRadius;
-//EXPORT DIST_T maxTrackGrade = 5.0;
-
 static int suspendElevUpdates = FALSE;
 
 static track_p * importTrack;
@@ -106,6 +109,9 @@ EXPORT BOOL_T onTrackInSplit = FALSE;
 static BOOL_T inDrawTracks;
 
 EXPORT wBool_t bFreeTrack = FALSE;
+
+EXPORT long colorTrack = 0;
+EXPORT long colorDraw = 0;
 
 
 /*****************************************************************************
@@ -700,8 +706,6 @@ EXPORT EPINX_T GetNearestEndPtConnectedToMe( track_p trk, track_p me, coOrd pos)
 
 EXPORT void SetEndPts( track_p trk, EPINX_T cnt )
 {
-	EPINX_T inx;
-
 LOG1( log_readTracks, ( "SetEndPts( T%d, %d )\n", trk->index, cnt ) )
 	if (cnt > 0 && TempEndPtsCount() != cnt) {
 		InputError( "Incorrect number of End Points for track, read %d, expected %d.\n", FALSE, TempEndPtsCount(), cnt );
@@ -922,7 +926,6 @@ EXPORT void RenumberTracks( void )
 EXPORT track_p NewTrack( TRKINX_T index, TRKTYP_T type, EPINX_T endCnt, CSIZE_T extraSize )
 {
 	track_p trk;
-	EPINX_T ep;
 	trk = (track_p ) MyMalloc( sizeof *trk );
 	*to_last = trk;
 	to_last = &trk->next;
@@ -2528,6 +2531,23 @@ EXPORT wDrawColor bridgeColor;
 EXPORT wDrawColor roadbedColor;
 
 /**
+ * Draw tracks with 2 rails when zoomed in
+ *
+ * \param		d	drawing context
+ * \return	true is we draw tracks with 2 rails
+ */
+EXPORT BOOL_T DrawTwoRails( drawCmd_p d, DIST_T factor )
+{
+	DIST_T scale = twoRailScale;
+	if ( d->options&DC_PRINT ) {
+		scale = scale*2+1;
+	}
+	scale /= factor;
+	return d->scale <= scale;
+}
+
+
+/**
  * Centerline drawing test
  *  
  * \param 		   d    drawing context
@@ -2539,11 +2559,7 @@ hasTrackCenterline( drawCmd_p d )
 {
 	// for printing, drawing of center line depends on the scale
 	if( d->options & DC_CENTERLINE && d->options & DC_PRINT ) {
-		if( d->scale <= ( twoRailScale * 2.0 + 1.0 ) / 2.0 ) {
-			return true;
-		} else {
-			return false;
-		}
+		return DrawTwoRails(d,1);
 	}
 
 	// all other cases of explicit centerline option (ie. bitmap)
@@ -2562,7 +2578,6 @@ hasTrackCenterline( drawCmd_p d )
 EXPORT wBool_t 
 DoDrawTies( drawCmd_p d, track_cp trk )
 {
-	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	if ( !trk )
 		return FALSE;
 	if (GetTrkNoTies(trk))
@@ -2571,7 +2586,7 @@ DoDrawTies( drawCmd_p d, track_cp trk )
 		return FALSE;
 	if ( d == &mapD )
 		return FALSE;
-	if ( d->scale >= scale2rail )
+	if ( !DrawTwoRails(d,1) )
 		return FALSE;
 	if ( !(GetTrkVisible(trk) || drawTunnel==DRAW_TUNNEL_SOLID) )
 		return FALSE;
@@ -2827,10 +2842,7 @@ EXPORT void DrawEndPt(
 	}
 
 	sepBoundary = FALSE;
-	if(d->scale < ((d->options & DC_PRINT) ? (twoRailScale * 2 + 1) : twoRailScale))
-	{
-		// return;
-
+	if ( DrawTwoRails(d,1) ) {
 		if(inDrawTracks && (d->options & DC_PRINT) == 0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
 			DIST_T len;
 			len = trackGauge * 2.0;

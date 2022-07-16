@@ -95,11 +95,6 @@ typedef struct extraDataCompound_t {
 		drawLineType_e lineType;
 		} extraDataCompound_t;
 
-extern TRKTYP_T T_TURNOUT;
-extern TRKTYP_T T_STRUCTURE;
-extern TRKTYP_T T_BEZIER;
-extern TRKTYP_T T_BZRLIN;
-extern TRKTYP_T T_CORNU;
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
 extern dynArr_t structureInfo_da;
@@ -172,6 +167,7 @@ wIndex_t FindListItemByContext( wList_p, void *);
 
 
 /* cturnout.c */
+extern long curTurnoutEp;
 EPINX_T TurnoutPickEndPt( coOrd p, track_p );
 BOOL_T SplitTurnoutCheck(track_p,coOrd,EPINX_T ep,track_p *,EPINX_T *,EPINX_T *,BOOL_T check, coOrd *, ANGLE_T *);
 void GetSegInxEP( signed char, int *, EPINX_T * );
@@ -197,10 +193,5 @@ STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
 void DeleteStructures(int fileIndex);
 
-/* cstrdsgn.c */
-void EditCustomStructure( turnoutInfo_t * );
-
-STATUS_T CmdCarDescAction( wAction_t, coOrd );
-BOOL_T CarCustomSave( FILE * );
 
 #endif

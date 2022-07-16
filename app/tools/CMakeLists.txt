@@ -7,3 +7,4 @@ if (WIN32)
 endif ()
 
 add_subdirectory(halibut)
+add_subdirectory(pngtoxpm)
