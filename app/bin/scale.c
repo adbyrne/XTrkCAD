@@ -79,6 +79,7 @@ static scaleInfo_p curScale;
 /** @prefs [misc] include same gauge turnouts=1 Unknown */
 EXPORT long includeSameGaugeTurnouts = FALSE;
 static SCALEINX_T demoScaleInx = -1;
+static int nUnknownScale = 0;
 
 
 /** this struct holds a gauge description */
@@ -101,6 +102,9 @@ typedef struct {
 EXPORT typedef scaleDesc_t *scaleDesc_p;
 static dynArr_t scaleDesc_da;
 #define scaleDesc(N) DYNARR_N( scaleDesc_t, scaleDesc_da, N )
+
+
+static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx );
 
 
 /**
@@ -288,10 +292,12 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 		}
 	}
 	NoticeMessage( MSG_BAD_SCALE_NAME, "Ok", NULL, name, sProdNameLower );
+	nUnknownScale++;
 	si = scaleInfo_da.cnt;
 	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 10 );
 	scaleInfo(si) = scaleInfo(0);
 	scaleInfo(si).scale = MyStrdup( name );
+	DoSetScaleDesc( si );
 	return si;
 }
 
@@ -500,12 +506,11 @@ EXPORT BOOL_T DoSetScale(
  * \return TRUE
  */
 
-EXPORT BOOL_T DoSetScaleDesc( void )
+static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 {
-	SCALEINX_T scaleInx;
 	SCALEINX_T work;
 	SCALEDESCINX_T descInx;
-	scaleDesc_p s = NULL;
+	scaleDesc_p scaleDescP = NULL;
 	gaugeInfo_p g;
 	char *cp;
 //	DIST_T ratio;
@@ -513,61 +518,57 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	char buf[ 80 ];
 	size_t len;
 
-	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
-//		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
 
-		/* do we already have a description for this scale? */
-		found = 0;
-
-		if( scaleDesc_da.cnt > 0 ) {
-			for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
-				work = scaleDesc(descInx).scale;
-				if( scaleInfo(work).ratio == scaleInfo(scaleInx).ratio ) {
-						if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,	strlen(scaleInfo(work).scale)))
-							found = TRUE;
+	for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
+		work = scaleDesc(descInx).scale;
+		if( scaleInfo(work).ratio == scaleInfo(scaleInx).ratio ) {
+				if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,	strlen(scaleInfo(work).scale))) {
+					scaleDescP = &scaleDesc(descInx);
 				}
-			}
-		}
-
-
-		if( !found ) {
-			/* if no, add as new scale */
-
-			DYNARR_APPEND( scaleDesc_t, scaleDesc_da, 1 );
-
-			s = &(scaleDesc( scaleDesc_da.cnt-1 ));
-
-			s->scale = scaleInx;
-
-			sprintf( buf, "%s (1/%.1f)", scaleInfo(scaleInx).scale, scaleInfo(scaleInx).ratio );
-			s->scaleDesc = MyStrdup( buf );
-
-			/* initialize the array with standard gauge */
-
-			DYNARR_APPEND( gaugeInfo_t, s->gauges_da, 10 );
-
-			g = &(DYNARR_N( gaugeInfo_t, s->gauges_da, (s->gauges_da).cnt - 1 ));
-			g->scale = scaleInx;
-			sprintf( buf, "Standard (%.1fmm)", scaleInfo(scaleInx).gauge*25.4 );
-			g->gauge = MyStrdup( buf );
-
-		} else {
-			/* if yes, is this a new gauge to the scale? */
-			DYNARR_APPEND( gaugeInfo_t, s->gauges_da, 10 );
-			g = &(DYNARR_N( gaugeInfo_t, s->gauges_da, (s->gauges_da).cnt - 1 ));
-			g->scale = scaleInx;
-			cp = strchr( s->scaleDesc, ' ' );
-			if( cp )
-				len = cp - s->scaleDesc;
-			else
-				len = strlen(s->scaleDesc);
-			sprintf( buf, "%s (%.1fmm)", scaleInfo(scaleInx).scale+len,   scaleInfo(scaleInx).gauge*25.4 );
-			g->gauge = MyStrdup( buf );
 		}
 	}
 
+
+	if( scaleDescP == NULL ) {
+		/* if no, add as new scale */
+
+		DYNARR_APPEND( scaleDesc_t, scaleDesc_da, 1 );
+
+		scaleDescP = &(scaleDesc( scaleDesc_da.cnt-1 ));
+
+		scaleDescP->scale = scaleInx;
+
+		sprintf( buf, "%s (1/%.1f)", scaleInfo(scaleInx).scale, scaleInfo(scaleInx).ratio );
+		scaleDescP->scaleDesc = MyStrdup( buf );
+
+		sprintf( buf, "Standard (%.1fmm)", scaleInfo(scaleInx).gauge*25.4 );
+
+	} else {
+		/* if yes, is this a new gauge to the scale? */
+		cp = strchr( scaleDescP->scaleDesc, ' ' );
+		if( cp )
+			len = cp - scaleDescP->scaleDesc;
+		else
+			len = strlen(scaleDescP->scaleDesc);
+		sprintf( buf, "%s (%.1fmm)", scaleInfo(scaleInx).scale+len,   scaleInfo(scaleInx).gauge*25.4 );
+	}
+	DYNARR_APPEND( gaugeInfo_t, scaleDescP->gauges_da, 10 );
+	g = &(DYNARR_N( gaugeInfo_t, scaleDescP->gauges_da, (scaleDescP->gauges_da).cnt - 1 ));
+	g->scale = scaleInx;
+	g->gauge = MyStrdup( buf );
+
 	return( TRUE );
 }
+
+
+EXPORT BOOL_T DoAllSetScaleDesc( void )
+{
+	for( SCALEINX_T scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
+		DoSetScaleDesc( scaleInx );
+	}
+	return TRUE;
+}
+
 
 static BOOL_T AddScale(
 		char * line )
@@ -764,7 +765,7 @@ EXPORT void ScaleLengthEnd( void )
 EXPORT void LoadScaleList( wList_p scaleList )
 {
 	wIndex_t inx;
-	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
+	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1)-nUnknownScale; inx++) {
 		scaleDesc(inx).index =
 				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, I2VP(inx) );
 	}

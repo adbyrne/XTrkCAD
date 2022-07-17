@@ -42,6 +42,9 @@ extern const char * libDir;
 extern wBool_t bReadOnly;
 extern wBool_t bExample;
 
+// Processing an input file, objects may be incomplete so avoid some ops (MapRedraw)
+extern wBool_t bInReadTracks;
+
 #define PARAM_CUSTOM	(-2)
 #define PARAM_LAYOUT	(-3)
 extern int curParamFileIndex;

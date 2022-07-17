@@ -1052,15 +1052,15 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 	}
 }
 
-static char rescaleFromScale[20];
-static char rescaleFromGauge[20];
+static char rescaleFromScaleStr[20];
+static char rescaleFromGaugeStr[20];
 
 static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
 static long rescaleMode;
 static wIndex_t rescaleFromScaleInx;
 static wIndex_t rescaleFromGaugeInx;
-static wIndex_t rescaleToScaleInx;
-static wIndex_t rescaleToGaugeInx;
+static SCALEDESCINX_T rescaleToScaleInx;
+static GAUGEINX_T rescaleToGaugeInx;
 static wIndex_t rescaleToInx;
 static long rescaleNoChangeDim = FALSE;
 static FLOAT_T rescalePercent;
@@ -1070,9 +1070,9 @@ static paramData_t rescalePLs[] = {
 #define I_RESCALE_MODE		(0)
 		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
 #define I_RESCALE_FROM_SCALE		(1)
-		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScale)},
+		{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScaleStr)},
 #define I_RESCALE_FROM_GAUGE		(2)
-		{ PD_STRING, rescaleFromGauge, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGauge)},
+		{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGaugeStr)},
 #define I_RESCALE_TO_SCALE		   (3)
 		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("To: ") },
 #define I_RESCALE_TO_GAUGE		   (4)
@@ -1198,6 +1198,8 @@ static void RescaleDlgOk(
 	wHide( rescalePG.win );
 }
 
+#define SCALE_MULTI -3
+#define SCALE_ANY -2
 
 static void RescaleDlgUpdate(
 		paramGroup_p pg,
@@ -1221,7 +1223,11 @@ static void RescaleDlgUpdate(
 		rescaleToGaugeInx = 0;
 		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
 		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
-		rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
+		if ( rescaleFromScaleInx != SCALE_MULTI ) {
+			rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
+		} else {
+			rescalePercent = 100.0;
+		}
 		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control, (rescaleFromScaleInx != rescaleToScaleInx) );
 		ParamLoadControl( pg, I_RESCALE_PERCENT );
 		break;
@@ -1240,7 +1246,7 @@ static void RescaleDlgUpdate(
 	case -1:
 		break;
 	}
-	ParamDialogOkActive( pg, rescalePercent!=100.0 || rescaleFromGaugeInx != rescaleToGaugeInx );
+	ParamDialogOkActive( pg, rescalePercent!=100.0 || rescaleFromGaugeInx != rescaleToGaugeInx || rescaleFromScaleInx == SCALE_MULTI );
 }
 
 /**
@@ -1263,13 +1269,22 @@ static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
 	scaleName = GetScaleName( scale );
 	if( strcmp( scaleName, "*" )) {
 		GetScaleGauge( scale, &scaleInx, &gaugeInx );
-		strcpy( rescaleFromScale,GetScaleDesc( scaleInx ));
-		strcpy( rescaleFromGauge, GetGaugeDesc( scaleInx, gaugeInx ));
-		
-		rescaleFromScaleInx = scaleInx;
-		rescaleFromGaugeInx = gaugeInx;
-		rescaleToScaleInx = scaleInx;
-		rescaleToGaugeInx = gaugeInx;
+		// Determine scale
+		if ( SCALE_ANY == rescaleFromScaleInx ) {
+			// First time
+			rescaleFromScaleInx = scaleInx;
+			rescaleFromGaugeInx = gaugeInx;
+		} else if ( SCALE_MULTI == rescaleFromScaleInx ) {
+			// we 've seen Mixed scales
+		} else if ( scaleInx != rescaleFromScaleInx ) {
+			// mixed scales
+			rescaleFromScaleInx = SCALE_MULTI;
+			rescaleFromGaugeInx = SCALE_MULTI;
+		} else if ( gaugeInx != rescaleFromGaugeInx ) {
+			// same scale but different gauge
+			rescaleFromGaugeInx = SCALE_MULTI;
+		}
+		CHECK( SCALE_ANY != rescaleFromScaleInx );
 	}	
 	
 	return TRUE;
@@ -1292,18 +1307,37 @@ EXPORT void DoRescale( void * unused )
 		rescalePercent = 100.0;
 	}
 
+	// Get From scale and gauge
+	rescaleFromScaleInx = SCALE_ANY;
+	rescaleFromGaugeInx = SCALE_ANY;
 	DoSelectedTracks( SelectedScaleGauge );
+	if ( SCALE_MULTI == rescaleFromScaleInx ) {
+		strcpy( rescaleFromScaleStr, "Multi-Scale" );
+		strcpy( rescaleFromGaugeStr, "" );
+	} else {
+		strcpy( rescaleFromScaleStr, GetScaleDesc( rescaleFromScaleInx ) );
+		if ( SCALE_MULTI == rescaleFromGaugeInx ) {
+			strcpy( rescaleFromGaugeStr, "Multi-Gauge" );
+		} else {
+			strcpy( rescaleFromGaugeStr, GetGaugeDesc( rescaleFromScaleInx, rescaleFromGaugeInx ));
+		}
+	}
+
+	// get To scale and gauge (current)
+	GetScaleGauge( GetLayoutCurScale(), &rescaleToScaleInx, &rescaleToGaugeInx );
 
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
 
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGauge );
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScale );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScaleStr );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGaugeStr );
 
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
 	
+	InfoMessage( _("%ld Objects to be rescaled"), selectedTrackCount );
 	wShow( rescalePG.win );
+	InfoMessage( "" );
 }
 
 

@@ -61,6 +61,7 @@ static coOrd paste_offset, cursor_offset;
 
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
+EXPORT wBool_t bInReadTracks = FALSE;
 
 
 #ifdef WINDOWS
@@ -660,6 +661,7 @@ static BOOL_T ReadTrackFile(
 		return FALSE;
 	}
 
+	bInReadTracks = TRUE;
 	SetCLocale();
 	checkPtFileNameBackup = NULL;
 	paramLineNum = 0;
@@ -760,6 +762,7 @@ static BOOL_T ReadTrackFile(
 		}
 	}
 
+	bInReadTracks = FALSE;
 	if (paramFile) {
 		fclose(paramFile);
 		paramFile = NULL;
