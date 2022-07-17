@@ -46,6 +46,9 @@ endif()
 # Find document conversion tool
 find_package(Pandoc)
 
+# For handlling and creation of bitmaps the FreeImage library is required
+find_package(FreeImage REQUIRED)
+
 # check for GTK+ 2.0
 if(UNIX)
     pkg_check_modules(GTK REQUIRED "gtk+-2.0")
@@ -55,8 +58,6 @@ endif(UNIX)
 if(WIN32 AND NOT XTRKCAD_USE_GTK)
 	# use the Windows HTMLHelp tool
 	find_package(HTMLHelp REQUIRED)
-	# For handlling of bitmaps on Windows the FreeImage library is required
-	find_package(FreeImage REQUIRED)
 endif(WIN32 AND NOT XTRKCAD_USE_GTK)
 
 # 
