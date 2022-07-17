@@ -1,4 +1,4 @@
-static char *Info_x16[] = {
+static char *info_x16[] = {
 	"16 16 35 1",
 	" 	c	None",
 	"0	c	#0058f8",
@@ -51,7 +51,7 @@ static char *Info_x16[] = {
 	"   R08K33K80R   ",
 	"     S0000S     ",
 	"                "};
-static char *Info_x24[] = {
+static char *info_x24[] = {
 	"24 24 41 1",
 	" 	c	None",
 	"0	c	#0058f8",
@@ -118,7 +118,7 @@ static char *Info_x24[] = {
 	"      7B00000000RJ      ",
 	"         ASBR6Y         ",
 	"                        "};
-static char *Info_x32[] = {
+static char *info_x32[] = {
 	"32 32 41 1",
 	" 	c	None",
 	"0	c	#0058f8",
@@ -194,4 +194,4 @@ static char *Info_x32[] = {
 	"              cI8cE             ",
 	"                                "};
 
-static char **Info_xpm[3] = { Info_x16, Info_x24, Info_x32 };
+static char **info_xpm[3] = { info_x16, info_x24, info_x32 };
