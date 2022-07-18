@@ -484,8 +484,6 @@ static wWin_p gridW;
 static wMenu_p snapGridPopupM;
 static wButton_p snapGridEnable_b;
 static wButton_p snapGridShow_b;
-EXPORT wMenuToggle_p snapGridEnableMI;
-EXPORT wMenuToggle_p snapGridShowMI;
 
 static gridHVData oldGrid;
 
