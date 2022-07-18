@@ -21,6 +21,7 @@
  */
 
 #include "common.h"
+#include "cundo.h"
 #include "cjoin.h"
 #include "compound.h"
 #include "custom.h"
@@ -29,6 +30,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
+#include "cselect.h"
 #include "common-ui.h"
 
 /****************************************************************************
@@ -37,8 +39,9 @@
  *
  */
 
-#define SCALE_ANY	(-2)
 #define SCALE_DEMO	(-1)
+#define SCALE_ANY	(-2)
+#define SCALE_MULTI	(-3)
 
 typedef struct {
 		char * scale;
@@ -836,27 +839,6 @@ static paramData_t rescalePLs[] = {
 static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, COUNT( rescalePLs ) };
 
 
-static long getboundsCount;
-static coOrd getboundsLo, getboundsHi;
-
-static BOOL_T GetboundsDoIt( track_p trk, BOOL_T unused )
-{
-	coOrd hi, lo;
-
-	GetBoundingBox( trk, &hi, &lo );
-	if ( getboundsCount == 0 ) {
-		getboundsLo = lo;
-		getboundsHi = hi;
-	} else {
-		if ( lo.x < getboundsLo.x ) getboundsLo.x = lo.x;
-		if ( lo.y < getboundsLo.y ) getboundsLo.y = lo.y;
-		if ( hi.x > getboundsHi.x ) getboundsHi.x = hi.x;
-		if ( hi.y > getboundsHi.y ) getboundsHi.y = hi.y;
-	}
-	getboundsCount++;
-	return TRUE;
-}
-
 static coOrd rescaleShift;
 static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 {
@@ -879,7 +861,6 @@ static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
 	
 	if ( rescaleMode==0 )
 		SetTrkScale( trk, rescaleToInx );
-	getboundsCount++;
 	DrawNewTrack( trk );
 	return TRUE;
 }
@@ -891,10 +872,10 @@ static void RescaleDlgOk(
 	coOrd center, size;
 	DIST_T d;
 	FLOAT_T ratio = rescalePercent/100.0;
+	coOrd getboundsLo, getboundsHi;
 
 	UndoStart( _("Rescale Tracks"), "Rescale" );
-	getboundsCount = 0;
-	DoSelectedTracks( GetboundsDoIt );
+	GetSelectedBounds( &getboundsLo, &getboundsHi );
 	center.x = (getboundsLo.x+getboundsHi.x)/2.0;
 	center.y = (getboundsLo.y+getboundsHi.y)/2.0;
 	size.x = (getboundsHi.x-getboundsLo.x)/2.0*ratio;
@@ -949,8 +930,6 @@ static void RescaleDlgOk(
 	wHide( rescalePG.win );
 }
 
-#define SCALE_MULTI -3
-#define SCALE_ANY -2
 
 static void RescaleDlgUpdate(
 		paramGroup_p pg,
@@ -1103,4 +1082,5 @@ EXPORT void ScaleInit( void )
 	AddParam( "SCALEFIT", AddScaleFit);
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );
+	ParamRegister( &rescalePG );
 }

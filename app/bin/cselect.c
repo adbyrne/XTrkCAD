@@ -617,7 +617,7 @@ static BOOL_T TestAllSelectedTracks( testSelectedTrackCallBack_t testit, int val
 
 typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
 
-static void DoSelectedTracks( doSelectedTrackCallBack_t doit )
+EXPORT void DoSelectedTracks( doSelectedTrackCallBack_t doit )
 {
 	track_p trk;
 	trk = NULL;
@@ -1095,6 +1095,35 @@ static BOOL_T RemoveSelectedTrack(track_p trk) {
 		}
 	}
 	return FALSE;
+}
+
+static long getSelectedBoundsCount;
+static coOrd getSelectedBoundsLo, getSelectedBoundsHi;
+
+static BOOL_T GetBoundsDoIt( track_p trk, BOOL_T unused )
+{
+	coOrd hi, lo;
+
+	GetBoundingBox( trk, &hi, &lo );
+	if ( getSelectedBoundsCount == 0 ) {
+		getSelectedBoundsLo = lo;
+		getSelectedBoundsHi = hi;
+	} else {
+		if ( lo.x < getSelectedBoundsLo.x ) getSelectedBoundsLo.x = lo.x;
+		if ( lo.y < getSelectedBoundsLo.y ) getSelectedBoundsLo.y = lo.y;
+		if ( hi.x > getSelectedBoundsHi.x ) getSelectedBoundsHi.x = hi.x;
+		if ( hi.y > getSelectedBoundsHi.y ) getSelectedBoundsHi.y = hi.y;
+	}
+	getSelectedBoundsCount++;
+	return TRUE;
+}
+
+EXPORT void GetSelectedBounds( coOrd * low, coOrd * high )
+{
+	getSelectedBoundsCount = 0;
+	DoSelectedTracks( GetBoundsDoIt );
+	*low = getSelectedBoundsLo;
+	*high = getSelectedBoundsHi;
 }
 
 static coOrd moveOrig;
@@ -1911,12 +1940,16 @@ static STATUS_T CmdRotate(
 					if ( !GetTrkSelected(trk) ) {
 						NoticeMessage( MSG_1ST_TRACK_MUST_BE_SELECTED, _("Ok"), NULL );
 					} else {
+						coOrd low, high;
 						base = pos;
 						baseAngle = angle1;
-						getboundsCount = 0;
-						DoSelectedTracks( GetboundsDoIt );
-						orig.x = (getboundsLo.x+getboundsHi.x)/2.0;
-						orig.y = (getboundsLo.y+getboundsHi.y)/2.0;
+						GetSelectedBounds( &low, &high );
+//						getboundsCount = 0;
+//						DoSelectedTracks( GetboundsDoIt );
+//						orig.x = (getboundsLo.x+getboundsHi.x)/2.0;
+//						orig.y = (getboundsLo.y+getboundsHi.y)/2.0;
+						orig.x = (low.x+high.x)/2.0;
+						orig.y = (low.y+high.y)/2.0;
 /*printf( "orig = [%0.3f %0.3f], baseAngle = %0.3f\n", orig.x, orig.y, baseAngle );*/
 					}
 				} else {
@@ -3491,8 +3524,6 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuPushCreate(selectPopup2M, "", _("Group"), 0, DoGroup, I2VP( 0));
 	wMenuPushCreate(selectPopup2M, "", _("UnGroup"), 0, DoUngroup, I2VP( 0));
 	wMenuSeparatorCreate( selectPopup2M );
-
-	ParamRegister( &rescalePG );
 }
 
 
