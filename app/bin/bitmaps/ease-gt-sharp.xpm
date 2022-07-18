@@ -1,5 +1,5 @@
 /* XPM */
-static char * ease_gtsharp_x16[] = {
+static char * ease_gt_sharp_x16[] = {
 "41 16 2 1",
 " 	c None",
 "x	c #000000000000",
@@ -20,7 +20,7 @@ static char * ease_gtsharp_x16[] = {
 "     x     xxxxx  x  x  x x x    x       ",
 "                                 x       "};
 
-static char* ease_gtsharp_x24[] = {
+static char* ease_gt_sharp_x24[] = {
 "56 24 2 1",
 " 	c	None",
 "x	c	#000000",
@@ -49,7 +49,7 @@ static char* ease_gtsharp_x24[] = {
 "                                               xx       ",
 "                                               xx       "};
 
-static char* ease_gtsharp_x32[] = {
+static char* ease_gt_sharp_x32[] = {
 "66 32 2 1",
 " 	c	None",
 "x	c	#000000",
@@ -86,4 +86,4 @@ static char* ease_gtsharp_x32[] = {
 "                                                        xx        ",
 "                                                                  "};
 
-static char **ease_gtsharp_xpm[3] = { ease_gtsharp_x16, ease_gtsharp_x24, ease_gtsharp_x32 };
+static char **ease_gt_sharp_xpm[3] = { ease_gt_sharp_x16, ease_gt_sharp_x24, ease_gt_sharp_x32 };
