@@ -799,6 +799,300 @@ static void ScaleChange( long changes )
 
 /*****************************************************************************
  *
+ * Change Scale Dlg
+ *
+ */
+
+static char rescaleFromScaleStr[20];
+static char rescaleFromGaugeStr[20];
+
+static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
+static long rescaleMode;
+static wIndex_t rescaleFromScaleInx;
+static wIndex_t rescaleFromGaugeInx;
+static SCALEDESCINX_T rescaleToScaleInx;
+static GAUGEINX_T rescaleToGaugeInx;
+static wIndex_t rescaleToInx;
+static long rescaleNoChangeDim = FALSE;
+static FLOAT_T rescalePercent;
+static char * rescaleChangeDimLabels[] = { N_("Do not resize track"), NULL };
+static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
+static paramData_t rescalePLs[] = {
+#define I_RESCALE_MODE		(0)
+		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
+#define I_RESCALE_FROM_SCALE		(1)
+		{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScaleStr)},
+#define I_RESCALE_FROM_GAUGE		(2)
+		{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGaugeStr)},
+#define I_RESCALE_TO_SCALE		   (3)
+		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("To: ") },
+#define I_RESCALE_TO_GAUGE		   (4)
+		{ PD_DROPLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
+#define I_RESCALE_CHANGE	(5)
+		{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORZ|BC_NOBORDER },
+#define I_RESCALE_PERCENT	(6)
+		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
+		{ PD_MESSAGE, "%", NULL, PDO_DLGHORZ } };
+static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, COUNT( rescalePLs ) };
+
+
+static long getboundsCount;
+static coOrd getboundsLo, getboundsHi;
+
+static BOOL_T GetboundsDoIt( track_p trk, BOOL_T unused )
+{
+	coOrd hi, lo;
+
+	GetBoundingBox( trk, &hi, &lo );
+	if ( getboundsCount == 0 ) {
+		getboundsLo = lo;
+		getboundsHi = hi;
+	} else {
+		if ( lo.x < getboundsLo.x ) getboundsLo.x = lo.x;
+		if ( lo.y < getboundsLo.y ) getboundsLo.y = lo.y;
+		if ( hi.x > getboundsHi.x ) getboundsHi.x = hi.x;
+		if ( hi.y > getboundsHi.y ) getboundsHi.y = hi.y;
+	}
+	getboundsCount++;
+	return TRUE;
+}
+
+static coOrd rescaleShift;
+static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
+{
+	EPINX_T ep, ep1;
+	track_p trk1;
+	UndrawNewTrack( trk );
+	UndoModify(trk);
+	if ( rescalePercent != 100.0 ) {
+		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+				!GetTrkSelected(trk1)) {
+				ep1 = GetEndPtConnectedToMe( trk1, trk );
+				DisconnectTracks( trk, ep, trk1, ep1 );
+			}
+		}
+		/* should the track dimensions ie. length or radius be changed as well? */
+		if( rescaleNoChangeDim == 0 )
+			RescaleTrack( trk, rescalePercent/100.0, rescaleShift );
+	}
+	
+	if ( rescaleMode==0 )
+		SetTrkScale( trk, rescaleToInx );
+	getboundsCount++;
+	DrawNewTrack( trk );
+	return TRUE;
+}
+
+
+static void RescaleDlgOk(
+		void * unused )
+{
+	coOrd center, size;
+	DIST_T d;
+	FLOAT_T ratio = rescalePercent/100.0;
+
+	UndoStart( _("Rescale Tracks"), "Rescale" );
+	getboundsCount = 0;
+	DoSelectedTracks( GetboundsDoIt );
+	center.x = (getboundsLo.x+getboundsHi.x)/2.0;
+	center.y = (getboundsLo.y+getboundsHi.y)/2.0;
+	size.x = (getboundsHi.x-getboundsLo.x)/2.0*ratio;
+	size.y = (getboundsHi.y-getboundsLo.y)/2.0*ratio;
+	getboundsLo.x = center.x - size.x;
+	getboundsLo.y = center.y - size.y;
+	getboundsHi.x = center.x + size.x;
+	getboundsHi.y = center.y + size.y;
+	if ( getboundsLo.x < 0 ) {
+		getboundsHi.x -= getboundsLo.x;
+		getboundsLo.x = 0;
+	} else if ( getboundsHi.x > mapD.size.x ) {
+		d = getboundsHi.x - mapD.size.x;
+		if ( getboundsLo.x < d )
+			d = getboundsLo.x;
+		getboundsHi.x -= d;
+		getboundsLo.x -= d;
+	}
+	if ( getboundsLo.y < 0 ) {
+		getboundsHi.y -= getboundsLo.y;
+		getboundsLo.y = 0;
+	} else if ( getboundsHi.y > mapD.size.y ) {
+		d = getboundsHi.y - mapD.size.y;
+		if ( getboundsLo.y < d )
+			d = getboundsLo.y;
+		getboundsHi.y -= d;
+		getboundsLo.y -= d;
+	}
+	if ( rescaleNoChangeDim == 0 && 
+	     (getboundsHi.x > mapD.size.x ||
+		   getboundsHi.y > mapD.size.y )) {
+		NoticeMessage( MSG_RESCALE_TOO_BIG, _("Ok"), NULL, FormatDistance(getboundsHi.x), FormatDistance(getboundsHi.y) );
+	}
+	rescaleShift.x = (getboundsLo.x+getboundsHi.x)/2.0 - center.x*ratio;
+	rescaleShift.y = (getboundsLo.y+getboundsHi.y)/2.0 - center.y*ratio;
+	
+	rescaleToInx = GetScaleInx( rescaleToScaleInx, rescaleToGaugeInx );
+	DoSelectedTracks( RescaleDoIt );
+
+	// rescale the background if it exists and the layout is resized
+	if (HasBackGround() && ratio != 1.0) {
+		coOrd pos = GetLayoutBackGroundPos();
+		double size = GetLayoutBackGroundSize();
+		pos.x = ratio * pos.x + rescaleShift.x;
+		pos.y = ratio * pos.y + rescaleShift.y;
+		SetLayoutBackGroundPos(pos);
+
+		size *= ratio;
+		SetLayoutBackGroundSize(size);
+	}
+	DoRedraw();
+	wHide( rescalePG.win );
+}
+
+#define SCALE_MULTI -3
+#define SCALE_ANY -2
+
+static void RescaleDlgUpdate(
+		paramGroup_p pg,
+		int inx,
+		void * valueP )
+{
+	switch (inx) {
+	case I_RESCALE_MODE:
+		wControlShow( pg->paramPtr[I_RESCALE_FROM_SCALE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_FROM_SCALE].control, FALSE ); 
+		wControlShow( pg->paramPtr[I_RESCALE_TO_SCALE].control, rescaleMode==0 );
+		wControlShow( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, FALSE ); 
+		wControlShow( pg->paramPtr[I_RESCALE_TO_GAUGE].control, rescaleMode==0 );
+		wControlShow( pg->paramPtr[I_RESCALE_CHANGE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_PERCENT].control, rescaleMode==1 );
+		if ( rescaleMode!=0 )
+			break;
+	case I_RESCALE_TO_SCALE:
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, *((int *)valueP) );
+		rescaleToGaugeInx = 0;
+		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
+		if ( rescaleFromScaleInx != SCALE_MULTI ) {
+			rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
+		} else {
+			rescalePercent = 100.0;
+		}
+		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control, (rescaleFromScaleInx != rescaleToScaleInx) );
+		ParamLoadControl( pg, I_RESCALE_PERCENT );
+		break;
+	case I_RESCALE_TO_GAUGE:
+		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+		break;
+	case I_RESCALE_FROM_SCALE:
+		ParamLoadControl( pg, I_RESCALE_FROM_SCALE );
+		break;
+	case I_RESCALE_FROM_GAUGE:	
+		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
+		break;
+	case I_RESCALE_CHANGE:
+		ParamLoadControl( pg, I_RESCALE_CHANGE );
+		break;
+	case -1:
+		break;
+	}
+	ParamDialogOkActive( pg, rescalePercent!=100.0 || rescaleFromGaugeInx != rescaleToGaugeInx || rescaleFromScaleInx == SCALE_MULTI );
+}
+
+/**
+ * Get the scale gauge information for the selected track pieces.  
+ * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
+ *
+ * \param IN trk track element
+ * \param IN unused
+ * \return TRUE;
+ */
+ 
+static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
+{
+	char *scaleName;
+	SCALEINX_T scale;
+	SCALEDESCINX_T scaleInx;
+	GAUGEINX_T gaugeInx;
+	
+	scale = GetTrkScale( trk );
+	scaleName = GetScaleName( scale );
+	if( strcmp( scaleName, "*" )) {
+		GetScaleGauge( scale, &scaleInx, &gaugeInx );
+		// Determine scale
+		if ( SCALE_ANY == rescaleFromScaleInx ) {
+			// First time
+			rescaleFromScaleInx = scaleInx;
+			rescaleFromGaugeInx = gaugeInx;
+		} else if ( SCALE_MULTI == rescaleFromScaleInx ) {
+			// we 've seen Mixed scales
+		} else if ( scaleInx != rescaleFromScaleInx ) {
+			// mixed scales
+			rescaleFromScaleInx = SCALE_MULTI;
+			rescaleFromGaugeInx = SCALE_MULTI;
+		} else if ( gaugeInx != rescaleFromGaugeInx ) {
+			// same scale but different gauge
+			rescaleFromGaugeInx = SCALE_MULTI;
+		}
+		CHECK( SCALE_ANY != rescaleFromScaleInx );
+	}	
+	
+	return TRUE;
+}
+
+/**
+ * Bring up the rescale dialog. The dialog for rescaling the selected pieces
+ * of track is created if necessary and shown. Handling of user input is done via
+ * RescaleDlgUpdate()
+ */
+
+EXPORT void DoRescale( void * unused )
+{
+	if ( rescalePG.win == NULL ) {
+		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"), RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
+		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, GetLayoutCurScaleDesc() ); /* set correct gauge list here */
+		rescaleFromScaleInx = GetLayoutCurScale();
+		rescaleToScaleInx = rescaleFromScaleInx;
+		rescalePercent = 100.0;
+	}
+
+	// Get From scale and gauge
+	rescaleFromScaleInx = SCALE_ANY;
+	rescaleFromGaugeInx = SCALE_ANY;
+	DoSelectedTracks( SelectedScaleGauge );
+	if ( SCALE_MULTI == rescaleFromScaleInx ) {
+		strcpy( rescaleFromScaleStr, "Multi-Scale" );
+		strcpy( rescaleFromGaugeStr, "" );
+	} else {
+		strcpy( rescaleFromScaleStr, GetScaleDesc( rescaleFromScaleInx ) );
+		if ( SCALE_MULTI == rescaleFromGaugeInx ) {
+			strcpy( rescaleFromGaugeStr, "Multi-Gauge" );
+		} else {
+			strcpy( rescaleFromGaugeStr, GetGaugeDesc( rescaleFromScaleInx, rescaleFromGaugeInx ));
+		}
+	}
+
+	// get To scale and gauge (current)
+	GetScaleGauge( GetLayoutCurScale(), &rescaleToScaleInx, &rescaleToGaugeInx );
+
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
+
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScaleStr );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGaugeStr );
+
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
+	
+	InfoMessage( _("%ld Objects to be rescaled"), selectedTrackCount );
+	wShow( rescalePG.win );
+	InfoMessage( "" );
+}
+
+/*****************************************************************************
+ *
  *
  *
  */

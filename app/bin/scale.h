@@ -57,6 +57,8 @@ SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * sca
 
 BOOL_T DoAllSetScaleDesc( void );
 
+void DoRescale( void *unused );
+
 EXPORT void ScaleInit( void );
 
 #endif
