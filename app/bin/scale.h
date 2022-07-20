@@ -33,8 +33,6 @@ DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
 char * GetScaleName( SCALEINX_T );
 SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 
-char *GetScaleDesc( SCALEDESCINX_T inx );
-char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 void GetScaleEasementValues( DIST_T *, DIST_T * );
 DIST_T GetScaleMinRadius( SCALEINX_T );
 void ValidateTieData( tieData_p );

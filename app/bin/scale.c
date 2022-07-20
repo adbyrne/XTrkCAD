@@ -188,22 +188,6 @@ EXPORT DIST_T GetScaleMinRadius( SCALEINX_T si )
 }
 
 
-EXPORT char *GetScaleDesc( SCALEDESCINX_T inx )
-{
-	return scaleDesc(inx).scaleDesc;
-}
-
-EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
-{
-	scaleDesc_t s;
-	gaugeInfo_p g;
-
-	s = scaleDesc(scaleInx);
-    g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
-
-	return g->gauge;
-}
-
 EXPORT void ValidateTieData( tieData_p td ){
 	td->valid = (td->length > 0.05 && td->width > 0.05 && td->spacing > 0.05);
 }
@@ -976,7 +960,16 @@ static void RescaleDlgUpdate(
 	case -1:
 		break;
 	}
-	ParamDialogOkActive( pg, rescalePercent!=100.0 || rescaleFromGaugeInx != rescaleToGaugeInx || rescaleFromScaleInx == SCALE_MULTI );
+	wBool_t bOkActive = TRUE;
+	if ( rescaleMode == 0 ) {
+		// Scale
+		bOkActive = rescaleFromScaleInx != rescaleToScaleInx ||
+			    rescaleFromGaugeInx != rescaleToGaugeInx;
+	} else {
+		// Ratio
+		bOkActive = rescalePercent != 100.0;
+	}
+	ParamDialogOkActive( pg, bOkActive );
 }
 
 /**
@@ -1041,15 +1034,21 @@ EXPORT void DoRescale( void * unused )
 	rescaleFromScaleInx = SCALE_ANY;
 	rescaleFromGaugeInx = SCALE_ANY;
 	DoSelectedTracks( SelectedScaleGauge );
-	if ( SCALE_MULTI == rescaleFromScaleInx ) {
+	if ( SCALE_ANY == rescaleFromScaleInx ) {
+		strcpy( rescaleFromScaleStr, "*" );
+		strcpy( rescaleFromGaugeStr, "" );
+	} else if ( SCALE_MULTI == rescaleFromScaleInx ) {
 		strcpy( rescaleFromScaleStr, "Multi-Scale" );
 		strcpy( rescaleFromGaugeStr, "" );
 	} else {
-		strcpy( rescaleFromScaleStr, GetScaleDesc( rescaleFromScaleInx ) );
+		scaleDesc_t* scaleDescP = &scaleDesc(rescaleFromScaleInx);
+		strcpy( rescaleFromScaleStr, scaleDescP->scaleDesc );
+		CHECK( SCALE_ANY != rescaleFromGaugeInx );
 		if ( SCALE_MULTI == rescaleFromGaugeInx ) {
 			strcpy( rescaleFromGaugeStr, "Multi-Gauge" );
 		} else {
-			strcpy( rescaleFromGaugeStr, GetGaugeDesc( rescaleFromScaleInx, rescaleFromGaugeInx ));
+			gaugeInfo_p gaugeInfoP = &(DYNARR_N(gaugeInfo_t, scaleDescP->gauges_da, rescaleFromGaugeInx));
+			strcpy( rescaleFromGaugeStr, gaugeInfoP->gauge );
 		}
 	}
 
@@ -1062,6 +1061,7 @@ EXPORT void DoRescale( void * unused )
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScaleStr );
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGaugeStr );
 
+	// TODO: rescale demo shows blank because DEMO scale inx is beyond the drop box entries
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
 	
