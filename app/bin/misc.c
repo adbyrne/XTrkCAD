@@ -1173,7 +1173,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	 */
 
 	/* Set up the data for scale and gauge description */
-	DoSetScaleDesc();
+	DoAllSetScaleDesc();
 
 	// get the preferred scale from the configuration file
 	pref = wPrefGetString("misc", "scale");
