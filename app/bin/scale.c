@@ -87,18 +87,15 @@ static int nUnknownScale = 0;
 
 /** this struct holds a gauge description */
 typedef struct {
-		char * gauge;		/** ptr to textual description eg. 'n3' */
-		SCALEINX_T scale;	/** index of complete information in scaleInfo_da */
-		wIndex_t index;
+		char * gaugeStr;		/** ptr to textual description eg. 'n3' */
+		SCALEINX_T scaleInx;	/** index of complete information in scaleInfo_da */
 		} gaugeInfo_t;
 
 EXPORT typedef gaugeInfo_t * gaugeInfo_p;
 
 /** this struct holds a scale description */
 typedef struct {
-		char *scaleDesc;	/** ptr to textual description eg. 'HO' */
-		SCALEINX_T scale;	/** index of complete information (standard gauge) in scaleInfo_da  */
-		wIndex_t index;
+		char *scaleDescStr;	/** ptr to textual description eg. 'HO' */
 		dynArr_t gauges_da;	/** known gauges to this scale */
 		} scaleDesc_t;
 
@@ -109,20 +106,6 @@ static dynArr_t scaleDesc_da;
 
 static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx );
 
-
-/**
- * Get the ratio from a scale description. Each member in the list of scale descriptions is
- * linked to an entry in the simple linear list of all scales/gauges. From there the ratio is
- * fetched and returned. Note that there is no error checking on parameters!
- *
- * \param IN sdi index into list of scale descriptions
- * \return ratio for scale
- */
-
-EXPORT DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi )
-{
-	return GetScaleRatio( scaleDesc(sdi).scale );
-}
 
 /**
  * Get the index into the linear list from a scale description and a gauge. All information about a
@@ -140,9 +123,9 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	gaugeInfo_p g;
 
 	s = scaleDesc(scaleInx);
-   g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
+	g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
 
-	return g->scale;
+	return g->scaleInx;
 
 }
 EXPORT DIST_T GetScaleTrackGauge( SCALEINX_T si )
@@ -222,42 +205,18 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 void
 SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge)
 {
-	dynArr_t gauges_da;
-
-	gauges_da = (scaleDesc(desc)).gauges_da;
-	SetLayoutCurScale( DYNARR_N( gaugeInfo_t, gauges_da, gauge).scale);
+	SetLayoutCurScale( GetScaleInx( desc, gauge ) );
 }
 
 static BOOL_T
 SetScaleDescGauge(SCALEINX_T scaleInx)
 {
-	int i, j;
-	char *scaleName = GetScaleName(scaleInx);
-	DIST_T scaleRatio = GetScaleRatio(scaleInx);
-	dynArr_t gauges_da;
-
-	for (i = 0; i < scaleDesc_da.cnt; i++) {
-		char *t = strchr(scaleDesc(i).scaleDesc, ' ');
-		/* are the first characters (which describe the scale) identical? */
-		if (!strncmp(scaleDesc(i).scaleDesc, scaleName, t - scaleDesc(i).scaleDesc)) {
-			/* if yes, are we talking about the same ratio */
-			if (scaleInfo(scaleDesc(i).scale).ratio == scaleRatio) {
-				/* yes, we found the right scale descriptor, so now look for the gauge */
-				SetLayoutCurScaleDesc( i );
-				gauges_da = scaleDesc(i).gauges_da;
-				SetLayoutCurGauge(0);
-				for (j = 0; j < gauges_da.cnt; j++) {
-					gaugeInfo_p ptr = &(DYNARR_N(gaugeInfo_t, gauges_da, j));
-					if (scaleInfo(ptr->scale).gauge == GetScaleTrackGauge(scaleInx)) {
-						SetLayoutCurGauge( j );
-						break;
-					}
-				}
-				break;
-			}
-		}
+	SCALEDESCINX_T scaleDescInx;
+	GAUGEINX_T gaugeInx;
+	if ( GetScaleGauge( scaleInx, &scaleDescInx, &gaugeInx ) ) {
+		SetLayoutCurScaleDesc( scaleDescInx );
+		SetLayoutCurGauge( gaugeInx );
 	}
-
 	return TRUE;
 }
 
@@ -392,18 +351,18 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 	dynArr_t gauges_da;
 
 	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
-		char *t = strchr( scaleDesc(i).scaleDesc, ' ' );
+		char *t = strchr( scaleDesc(i).scaleDescStr, ' ' );
 		/* are the first characters (which describe the scale) identical? */
-		if( !strncmp( scaleDesc(i).scaleDesc, scaleName, t - scaleDesc(i).scaleDesc )) {
+		if( !strncmp( scaleDesc(i).scaleDescStr, scaleName, t - scaleDesc(i).scaleDescStr )) {
 			/* if yes, are we talking about the same ratio */
-		 	if( scaleInfo(scaleDesc(i).scale).ratio == scaleRatio ) {
+		 	if( GetScaleRatio( GetScaleInx( i, 0 ) ) == scaleRatio ) {
 				/* yes, we found the right scale descriptor, so now look for the gauge */
 				*scaleDescInx = i;
 				gauges_da = scaleDesc(i).gauges_da;
 				*gaugeInx = 0;
 				for( j = 0; j < gauges_da.cnt; j++ ) {
 					gaugeInfo_p ptr = &(DYNARR_N( gaugeInfo_t, gauges_da, j ));
-					if( scaleInfo(ptr->scale).gauge == GetScaleTrackGauge( scaleInx )) {
+					if ( ptr->scaleInx == scaleInx ) {
 						*gaugeInx = j;
 						break;
 					}
@@ -437,7 +396,7 @@ SetScale( SCALEINX_T newScaleInx )
 
 	SetLayoutCurScaleDesc( 0 );
 
-	SetScaleDescGauge((SCALEINX_T)newScaleInx);
+	SetScaleDescGauge(newScaleInx);
 
 
 	if (!inPlayback)
@@ -508,11 +467,11 @@ static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 
 
 	for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
-		work = scaleDesc(descInx).scale;
+		work = GetScaleInx( descInx, 0 );
 		if( scaleInfo(work).ratio == scaleInfo(scaleInx).ratio ) {
-				if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,	strlen(scaleInfo(work).scale))) {
-					scaleDescP = &scaleDesc(descInx);
-				}
+			if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,	strlen(scaleInfo(work).scale))) {
+				scaleDescP = &scaleDesc(descInx);
+			}
 		}
 	}
 
@@ -524,26 +483,24 @@ static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 
 		scaleDescP = &(scaleDesc( scaleDesc_da.cnt-1 ));
 
-		scaleDescP->scale = scaleInx;
-
 		sprintf( buf, "%s (1/%.1f)", scaleInfo(scaleInx).scale, scaleInfo(scaleInx).ratio );
-		scaleDescP->scaleDesc = MyStrdup( buf );
+		scaleDescP->scaleDescStr = MyStrdup( buf );
 
 		sprintf( buf, "Standard (%.1fmm)", scaleInfo(scaleInx).gauge*25.4 );
 
 	} else {
 		/* if yes, is this a new gauge to the scale? */
-		cp = strchr( scaleDescP->scaleDesc, ' ' );
+		cp = strchr( scaleDescP->scaleDescStr, ' ' );
 		if( cp )
-			len = cp - scaleDescP->scaleDesc;
+			len = cp - scaleDescP->scaleDescStr;
 		else
-			len = strlen(scaleDescP->scaleDesc);
+			len = strlen(scaleDescP->scaleDescStr);
 		sprintf( buf, "%s (%.1fmm)", scaleInfo(scaleInx).scale+len,   scaleInfo(scaleInx).gauge*25.4 );
 	}
 	DYNARR_APPEND( gaugeInfo_t, scaleDescP->gauges_da, 10 );
 	g = &(DYNARR_N( gaugeInfo_t, scaleDescP->gauges_da, (scaleDescP->gauges_da).cnt - 1 ));
-	g->scale = scaleInx;
-	g->gauge = MyStrdup( buf );
+	g->scaleInx = scaleInx;
+	g->gaugeStr = MyStrdup( buf );
 
 	return( TRUE );
 }
@@ -754,26 +711,16 @@ EXPORT void LoadScaleList( wList_p scaleList )
 {
 	wIndex_t inx;
 	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1)-nUnknownScale; inx++) {
-		scaleDesc(inx).index =
-				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, I2VP(inx) );
+		wListAddValue( scaleList, scaleDesc(inx).scaleDescStr, NULL, I2VP(inx) );
 	}
 }
 
 EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 {
-	wIndex_t inx;
-	scaleDesc_t s;
-	gaugeInfo_p g;
-	dynArr_t *gauges_da_p;
-
-	s = scaleDesc(scale);
-	gauges_da_p = &(s.gauges_da);
-	g = gauges_da_p->ptr;
-	g = s.gauges_da.ptr;
-
 	wListClear( gaugeList );			/* remove old list in case */
-	for (inx=0; inx<gauges_da_p->cnt; inx++) {
-		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, I2VP(g[inx].scale) );
+	for ( wIndex_t inx=0; inx<scaleDesc(scale).gauges_da.cnt; inx++ ) {
+		gaugeInfo_p g = &DYNARR_N( gaugeInfo_t, scaleDesc(scale).gauges_da, inx );
+		wListAddValue( gaugeList, g->gaugeStr, NULL, I2VP(g->scaleInx) );
 	}
 }
 
@@ -938,7 +885,8 @@ static void RescaleDlgUpdate(
 		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
 		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
 		if ( rescaleFromScaleInx != SCALE_MULTI ) {
-			rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
+			rescalePercent = GetScaleRatio(GetScaleInx(rescaleFromScaleInx,0))/
+					GetScaleRatio(GetScaleInx(rescaleToScaleInx,0))*100.0;
 		} else {
 			rescalePercent = 100.0;
 		}
@@ -1042,13 +990,13 @@ EXPORT void DoRescale( void * unused )
 		strcpy( rescaleFromGaugeStr, "" );
 	} else {
 		scaleDesc_t* scaleDescP = &scaleDesc(rescaleFromScaleInx);
-		strcpy( rescaleFromScaleStr, scaleDescP->scaleDesc );
+		strcpy( rescaleFromScaleStr, scaleDescP->scaleDescStr );
 		CHECK( SCALE_ANY != rescaleFromGaugeInx );
 		if ( SCALE_MULTI == rescaleFromGaugeInx ) {
 			strcpy( rescaleFromGaugeStr, "Multi-Gauge" );
 		} else {
 			gaugeInfo_p gaugeInfoP = &(DYNARR_N(gaugeInfo_t, scaleDescP->gauges_da, rescaleFromGaugeInx));
-			strcpy( rescaleFromGaugeStr, gaugeInfoP->gauge );
+			strcpy( rescaleFromGaugeStr, gaugeInfoP->gaugeStr );
 		}
 	}
 

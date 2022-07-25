@@ -29,7 +29,6 @@ extern DIST_T curScaleRatio;
 extern char * curScaleName;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
-DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
 char * GetScaleName( SCALEINX_T );
 SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 
