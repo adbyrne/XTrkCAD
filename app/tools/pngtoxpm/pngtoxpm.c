@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <string.h>
 #include <math.h>
+#include <string.h>
+
 #include <assert.h>
 
 #include <FreeImage.h>
@@ -437,6 +438,36 @@ char pChar( int j ){
 	return c;
 }
 
+/* Safe version of strcat - will not overflow buffer */
+size_t
+strscat(char* dest, const char* src, size_t count)
+{
+	long sptr = 0;
+	long dptr = strlen(dest);
+	count -= dptr;
+
+	if (count <= 0)
+		return -E2BIG;
+
+	while (count) {
+		char c;
+
+		c = src[sptr];
+		dest[dptr] = c;
+		if (!c)
+			return dptr;
+		sptr++;
+		dptr++;
+		count--;
+	}
+
+	/* Hit buffer length without finding a NUL; force NUL-termination. */
+	if (dptr)
+		dest[dptr - 1] = '\0';
+
+	return -E2BIG;
+}
+
 int genXpm ( int icon, char* name, int width, int height ) {
 	char xpmCode[100]; // XPM object name
 	char tmpBuff[100]; // sprintf
@@ -451,61 +482,61 @@ int genXpm ( int icon, char* name, int width, int height ) {
 		if(xpmCode[i] == '-') 
 			xpmCode[i] = '_';
 	}
-
-	strcat(xpmBuff, "static char *"); 
-	strcat(xpmBuff, xpmCode);
-	strcat(xpmBuff, "_x");
-	sprintf(tmpBuff, "%d", height); strcat(xpmBuff, tmpBuff);
-	strcat(xpmBuff, "[] = {\n");
-	strcat(xpmBuff, "\t\"");
-	sprintf(tmpBuff, "%d %d %d %d", width, height, (K+1), 1); strcat(xpmBuff, tmpBuff);
-	strcat(xpmBuff, "\",\n\t\" \tc\tNone\",\n");
+	
+	strscat(xpmBuff, "static char *", sizeof(xpmBuff));
+	strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
+	strscat(xpmBuff, "_x", sizeof(xpmBuff));
+	sprintf(tmpBuff, "%d", height); strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
+	strscat(xpmBuff, "[] = {\n", sizeof(xpmBuff));
+	strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
+	sprintf(tmpBuff, "%d %d %d %d", width, height, (K+1), 1); strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
+	strscat(xpmBuff, "\",\n\t\" \tc\tNone\",\n", sizeof(xpmBuff));
 	for (i = 0; i < K; i++)
 	{
-		strcat(xpmBuff, "\t\"");
-		sprintf(tmpBuff, "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i],lut_g[i],lut_b[i]); strcat(xpmBuff, tmpBuff);
-		strcat(xpmBuff, "\",\n");
+		strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
+		sprintf(tmpBuff, "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i],lut_g[i],lut_b[i]); strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
+		strscat(xpmBuff, "\",\n", sizeof(xpmBuff));
 	}
 
 	// Write the pixels
 	i = 0;
 	for ( y = height-1; y >= 0; y-- ){
-		strcat_s(xpmBuff, sizeof(xpmBuff), "\t\"");
+		strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
 		for ( x = 0; x < width; x++ ){
 			FreeImage_GetPixelColor( image, x, y, &color );
 			if (color.rgbReserved >= ALPHATHRESH ){
 				j = Qadd[i];
 				c[0] = pChar(j);
-				strcat(xpmBuff, c);
+				strscat(xpmBuff, c, sizeof(xpmBuff));
 				i++;
 			}
 			else
 			{
-				strcat(xpmBuff, " ");
+				strscat(xpmBuff, " ", sizeof(xpmBuff));
 			}
 		}
 
 		if (y > 0)
 		{
-			strcat(xpmBuff, "\",\n");
+			strscat(xpmBuff, "\",\n", sizeof(xpmBuff));
 		}
 		else
 		{
-			strcat(xpmBuff, "\"};\n");
+			strscat(xpmBuff, "\"};\n", sizeof(xpmBuff));
 		}
 	}
 
 	if (icon == 32)
 	{
-		strcat(xpmBuff, "\nstatic char **");
-		strcat(xpmBuff, xpmCode);
-		strcat(xpmBuff, "_xpm[3] = { ");
-		strcat(xpmBuff, xpmCode);
-		strcat(xpmBuff, "_x16, ");
-		strcat(xpmBuff, xpmCode);
-		strcat(xpmBuff, "_x24, ");
-		strcat(xpmBuff, xpmCode);
-		strcat(xpmBuff, "_x32 };\n");
+		strscat(xpmBuff, "\nstatic char **", sizeof(xpmBuff));
+		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
+		strscat(xpmBuff, "_xpm[3] = { ", sizeof(xpmBuff));
+		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
+		strscat(xpmBuff, "_x16, ", sizeof(xpmBuff));
+		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
+		strscat(xpmBuff, "_x24, ", sizeof(xpmBuff));
+		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
+		strscat(xpmBuff, "_x32 };\n", sizeof(xpmBuff));
 	}
 	return 0;
 }

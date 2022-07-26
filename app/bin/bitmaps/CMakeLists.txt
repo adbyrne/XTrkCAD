@@ -8,10 +8,12 @@ find_program( SVG_CONVERTER
 	HINTS "C:/Program Files/Inkscape/bin" "/usr/bin"
 	)
 
+#	ease-broad ease-cornu ease-gt-broad ease-gt-sharp ease-lt-broad 
+#	ease-lt-sharp ease-none ease-normal ease-sharp 
+
 if( ${SVG_CONVERTER} STREQUAL "SVG_CONVERTER-NOTFOUND" )
 	message( SEND_ERROR "SVG Converter not found." )
 endif()
-
 SET (XPMS
 	background benchwork bezier-line bezier-track block bottom box
 	bridge building car-inventory change-grid circle-center
@@ -21,10 +23,8 @@ SET (XPMS
 	curved-end curved-line-chord curved-line-end curved-line-middle
 	curved-line-tangent curved-middle curved-tangent cut delete
 	describe description dimension doc-export-bmap doc-export-dxf
-	doc-export-svg doc-export doc-import-mod doc-import doc-new
-	doc-open doc-print doc-recent doc-revert doc-save-as doc-save
-	doc-setup down ease-broad ease-cornu ease-gt-broad ease-gt-sharp
-	ease-lt-broad ease-lt-sharp ease-none ease-normal ease-sharp
+	doc-export-svg doc-export doc-import-mod doc-import doc-new doc-open 
+	doc-print doc-recent doc-revert doc-save-as doc-save doc-setup down 
 	elevation exit extend filled-box filled-polygon go helix
 	info join-line join layers magnet manage map move
 	new-car ok pan-zoom parallel-line parallel parameter paste

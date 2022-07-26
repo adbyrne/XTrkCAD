@@ -61,6 +61,39 @@ size_t strscpy(char *dest, const char *src, size_t count)
 	return -E2BIG;
 }
 
+/* Safe version of strcat - will not overflow buffer 
+ * Return: The number of characters in buffer (not including the trailing
+ *         % NUL) or -E2BIG if the destination buffer wasn't big enough.
+ */
+size_t
+strscat(char* dest, const char* src, size_t count)
+{
+	long sptr = 0;
+	long dptr = strlen(dest);
+	count -= dptr;
+
+	if (count <= 0)
+		return -E2BIG;
+
+	while (count) {
+		char c;
+
+		c = src[sptr];
+		dest[dptr] = c;
+		if (!c)
+			return dptr;
+		sptr++;
+		dptr++;
+		count--;
+	}
+
+	/* Hit buffer length without finding a NUL; force NUL-termination. */
+	if (dptr)
+		dest[dptr - 1] = '\0';
+
+	return -E2BIG;
+}
+
 /**
  * Convert a string to lower case
  * Taken from https://stackoverflow.com/questions/23618316/undefined-reference-to-strlwr
@@ -102,5 +135,4 @@ XtcStricmp(const char *a, const char *b)
     } while ((ca == cb) && (ca != '\0'));
     return ca - cb;
 }
-
 
