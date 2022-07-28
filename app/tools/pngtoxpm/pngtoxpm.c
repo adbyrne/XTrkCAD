@@ -4,6 +4,8 @@
 #include <malloc.h>
 #include <math.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include <assert.h>
 
@@ -23,6 +25,18 @@
 #define BGMASK       0xF8
 #define NUMPALETTE   40
 
+#if defined(WIN32) || defined(_WIN32) 
+#define ENDLN "\n"
+#else
+// Generate DOS style line ends
+#define ENDLN "\r\n"
+#define E2BIG 1
+double min( double a, double b )
+{
+	if (a<b) return a;
+	return b;
+}
+#endif
 
 FIBITMAP    *image;
 
@@ -487,15 +501,15 @@ int genXpm ( int icon, char* name, int width, int height ) {
 	strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
 	strscat(xpmBuff, "_x", sizeof(xpmBuff));
 	sprintf(tmpBuff, "%d", height); strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
-	strscat(xpmBuff, "[] = {\n", sizeof(xpmBuff));
+	strscat(xpmBuff, "[] = {"ENDLN, sizeof(xpmBuff));
 	strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
 	sprintf(tmpBuff, "%d %d %d %d", width, height, (K+1), 1); strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
-	strscat(xpmBuff, "\",\n\t\" \tc\tNone\",\n", sizeof(xpmBuff));
+	strscat(xpmBuff, "\","ENDLN"\t\" \tc\tNone\","ENDLN, sizeof(xpmBuff));
 	for (i = 0; i < K; i++)
 	{
 		strscat(xpmBuff, "\t\"", sizeof(xpmBuff));
 		sprintf(tmpBuff, "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i],lut_g[i],lut_b[i]); strscat(xpmBuff, tmpBuff, sizeof(xpmBuff));
-		strscat(xpmBuff, "\",\n", sizeof(xpmBuff));
+		strscat(xpmBuff, "\","ENDLN, sizeof(xpmBuff));
 	}
 
 	// Write the pixels
@@ -518,17 +532,17 @@ int genXpm ( int icon, char* name, int width, int height ) {
 
 		if (y > 0)
 		{
-			strscat(xpmBuff, "\",\n", sizeof(xpmBuff));
+			strscat(xpmBuff, "\","ENDLN, sizeof(xpmBuff));
 		}
 		else
 		{
-			strscat(xpmBuff, "\"};\n", sizeof(xpmBuff));
+			strscat(xpmBuff, "\"};"ENDLN, sizeof(xpmBuff));
 		}
 	}
 
 	if (icon == 32)
 	{
-		strscat(xpmBuff, "\nstatic char **", sizeof(xpmBuff));
+		strscat(xpmBuff, ENDLN"static char **", sizeof(xpmBuff));
 		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
 		strscat(xpmBuff, "_xpm[3] = { ", sizeof(xpmBuff));
 		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
@@ -536,7 +550,7 @@ int genXpm ( int icon, char* name, int width, int height ) {
 		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
 		strscat(xpmBuff, "_x24, ", sizeof(xpmBuff));
 		strscat(xpmBuff, xpmCode, sizeof(xpmBuff));
-		strscat(xpmBuff, "_x32 };\n", sizeof(xpmBuff));
+		strscat(xpmBuff, "_x32 };"ENDLN, sizeof(xpmBuff));
 	}
 	return 0;
 }
@@ -560,7 +574,11 @@ int process( char* path, char* name, int icon ){
 
 	/* printf( "FreeImage version %s\n\n",FreeImage_GetVersion( ) ); */
 
-	sprintf( filename,"%s/png/%s%d.png",path,name,icon );
+	// Try override first
+	sprintf( filename,"%s/%dpix/%s.png",path,icon,name );
+	if ( access( filename, R_OK ) != 0 ) {
+		sprintf( filename,"%s/PNG/%s%d.png",path,name,icon );
+	}
 #ifdef DEBUGPRINT
 	fprintf(stdout, "PNG: %s\n", filename );
 #endif
@@ -673,7 +691,7 @@ int main( int argc, char *argv[] )
 	strncpy(name, temp, sizeof(name) - 1);
 
 #ifdef DEBUGPRINT
-	fprintf(stdout, "In: %s %s ", path, name );
+	fprintf(stdout, "In: %s %s\n", path, name );
 #endif
 
 
@@ -694,7 +712,7 @@ int main( int argc, char *argv[] )
 		fprintf(stderr, "xpm file could not be created.\n");
 		exit( 1 );
 	}
-	fprintf( ptr, xpmBuff );
+	fprintf( ptr, "%s", xpmBuff );
 	fclose( ptr );
 
 	return 0;

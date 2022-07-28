@@ -26,7 +26,7 @@ SET (XPMS
 	doc-export-svg doc-export doc-import-mod doc-import doc-new doc-open 
 	doc-print doc-recent doc-revert doc-save-as doc-save doc-setup down 
 	elevation exit extend filled-box filled-polygon go helix
-	info join-line join layers magnet manage map move
+	Info join-line join layers magnet manage map move
 	new-car ok pan-zoom parallel-line parallel parameter paste
 	polygon polyline profile protractor redo reflect roadbed
 	rotate ruler select sensor signal snap-curs snap-grid
@@ -36,17 +36,28 @@ SET (XPMS
 	zoom-choose zoom-extent zoom-in zoom-out
 )
 
+if (WIN32)
+	set( OUTOPT
+		-o
+	)
+else(WIN32)
+	set( OUTOPT
+		-e
+	)
+endif(WIN32)
+
 foreach(xpm ${XPMS})
 	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
-		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
-		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 16 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}16.png
-		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 24 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png
-		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h 32 -o ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}32.png
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/PNG/
+		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}16.png
+		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 24 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}24.png
+		COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 32 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}32.png
 		COMMAND pngtoxpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm	
-		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}16.png
-		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}24.png
-		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}32.png
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}16.png
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}24.png
+		COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}32.png
 	)
 	# build a list of all the depends
 	list(APPEND XPM_RESULTS ${xpm}.xpm)
