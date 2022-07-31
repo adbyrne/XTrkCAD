@@ -65,7 +65,6 @@ static wFontSize_t drawMaxTextFontSize = 100;
 
 // static char FAR message[STR_LONG_SIZE];
 
-EXPORT wDrawPix_t closePixels = 10;
 EXPORT long maxArcSegStraightLen = 100;
 EXPORT long drawCount;
 EXPORT BOOL_T drawEnable = TRUE;
@@ -125,6 +124,8 @@ EXPORT wDrawColor elevColorIgnore;
 EXPORT wDrawColor elevColorDefined;
 EXPORT wDrawColor profilePathColor;
 EXPORT wDrawColor exceptionColor;
+
+DIST_T closeDist = 0.100;
 
 static wFont_p rulerFp;
 
@@ -2519,13 +2520,12 @@ LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale, mainD.ori
 /*
 * IsClose
 * is distance smaller than 10 pixels at 72 DPI?
+* is distance smaller than 0.1" at 1:1?
 */
 EXPORT BOOL_T IsClose(
 		DIST_T d )
 {
-	wDrawPix_t pd;
-	pd = (wDrawPix_t)(d/mainD.scale * mainD.dpi);
-	return pd <= closePixels;
+	return d <= closeDist*mainD.scale;
 }
 
 /*****************************************************************************

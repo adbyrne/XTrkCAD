@@ -120,7 +120,6 @@ extern drawCmd_t mapD;
 extern drawCmd_t tempD;
 #define RoomSize (mapD.size)
 extern coOrd oldMarker;
-extern wDrawPix_t closePixels;
 #define dragDistance	(dragPixels*mainD.scale / mainD.dpi)
 extern long dragPixels;
 extern long dragTimeout;

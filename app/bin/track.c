@@ -1167,10 +1167,13 @@ wBool_t IsWidthClose( DIST_T dist1, DIST_T dist2 )
 	DIST_T dist = fabs( dist1 - dist2 );
 	if ( dist < 0.05 )
 		return TRUE;
-// TODO: This assumes the demo file was written with DPI=72
-//       Note: BASE_DPI is 75 so we fudge on dist (was < 0.01)
-	dist1 *= mainD.dpi/BASE_DPI;
+//	This was using BASE_DPI(=75.0) based on ancient monitors.
+//	96 DPI is more reasonable today
+//	TODO: review BASE_DPI with a plan to change it to 96.0
+//	printf( "WidthClose %s:%d D2:%0.3f D1:%0.3f", paramFileName, paramLineNum, dist2, dist1 );
+	dist1 *= mainD.dpi/96.0;
 	dist = fabs( dist1 - dist2 );
+//	printf( " -> %0.3f D:%0.3f\n", dist1, dist );
 	if ( dist < 0.05 )
 		return TRUE;
 	return FALSE;
