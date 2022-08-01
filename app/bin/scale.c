@@ -122,7 +122,15 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	scaleDesc_t s;
 	gaugeInfo_p g;
 
+	if ( scaleInx < 0 || scaleInx >= scaleDesc_da.cnt ) {
+		lprintf( "GetScaleInx: bad scaleInx %ld (%d)\n", scaleInx, scaleDesc_da.cnt );
+		return 0;
+	}
 	s = scaleDesc(scaleInx);
+	if ( gaugeInx < 0 || gaugeInx >= s.gauges_da.cnt ) {
+		lprintf( "GetScaleInx: bad gaugeInx %ld (%d)\n", gaugeInx, s.gauges_da.cnt );
+		return 0;
+	}
 	g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
 
 	return g->scaleInx;
@@ -884,7 +892,7 @@ static void RescaleDlgUpdate(
 		rescaleToGaugeInx = 0;
 		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
 		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
-		if ( rescaleFromScaleInx != SCALE_MULTI ) {
+		if ( rescaleFromScaleInx >= 0 ) {
 			rescalePercent = GetScaleRatio(GetScaleInx(rescaleFromScaleInx,0))/
 					GetScaleRatio(GetScaleInx(rescaleToScaleInx,0))*100.0;
 		} else {
