@@ -712,7 +712,7 @@ static void wlibDrawFilled(
 	wlibDrawFilled( cairo, color, opt );
 	gtkDrawDestroyCairoContext(cairo);
 
-	if (bd->widget)
+	if (bd->widget && !bd->delayUpdate)
 			gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),x,y,w,h);
 
 }

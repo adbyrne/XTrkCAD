@@ -44,6 +44,8 @@
 #define DC_TEMP			(1<<6)
 // OUTLINE: use outline font
 #define DC_OUTLINE		(1<<7)
+// Round pixel pos for performance
+#define DC_ROUND		(1<<8)
 
 // Line styles
 #define DC_THICK        	(1<<9)

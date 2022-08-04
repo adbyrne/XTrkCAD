@@ -610,6 +610,10 @@ static void DDrawRectangle(
 			opts |= wDrawOptTransparent;
 			// Fallthru
 		case DRAW_FILL:
+			if ( d->options & DC_ROUND ) {
+				x = round(x);
+				y = round(y);
+			}
 			wDrawFilledRectangle( d->d, x, y, w, h, color, opts );
 			break;
 		default:
