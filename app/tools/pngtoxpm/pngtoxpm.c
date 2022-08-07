@@ -5,7 +5,6 @@
 #include <math.h>
 #include <string.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 #include <assert.h>
 
@@ -26,8 +25,10 @@
 #define NUMPALETTE   40
 
 #if defined(WIN32) || defined(_WIN32) 
+#include <io.h>
 #define ENDLN "\n"
 #else
+#include <unistd.h>
 // Generate DOS style line ends
 #define ENDLN "\r\n"
 #define E2BIG 1
@@ -576,7 +577,11 @@ int process( char* path, char* name, int icon ){
 
 	// Try override first
 	sprintf( filename,"%s/%dpix/%s.png",path,icon,name );
+#if defined(WIN32) || defined(_WIN32) 
+	if ( _access(filename, 04) != 0) {
+#else
 	if ( access( filename, R_OK ) != 0 ) {
+#endif
 		sprintf( filename,"%s/PNG/%s%d.png",path,name,icon );
 	}
 #ifdef DEBUGPRINT

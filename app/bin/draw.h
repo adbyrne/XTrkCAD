@@ -66,6 +66,7 @@
 
 typedef enum { DRAW_OPEN, DRAW_CLOSED, DRAW_FILL, DRAW_TRANSPARENT } drawFill_e;
 
+struct drawCmd_t;
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {

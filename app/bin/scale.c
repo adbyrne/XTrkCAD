@@ -469,7 +469,6 @@ static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 	gaugeInfo_p g;
 	char *cp;
 //	DIST_T ratio;
-	BOOL_T found;
 	char buf[ 80 ];
 	size_t len;
 
