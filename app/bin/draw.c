@@ -2580,11 +2580,11 @@ coOrd minIncrementSizes() {
 		}
 	} else {
 		if (units == UNITS_ENGLISH) {
-			x = 1/64;   //<1:1 = 1/64 inch
-			y = 1/64;
+			x = 1.0/64.0;   //<1:1 = 1/64 inch
+			y = 1.0/64.0;
 		} else {
-			x = 1/(25.4*2);  //>1:1 = 0.5 mm
-			y = 1/(25.4*2);
+			x = 1.0/(25.4*2);  //>1:1 = 0.5 mm
+			y = 1.0/(25.4*2);
 		}
 	}
 	coOrd ret;
@@ -3106,15 +3106,15 @@ static STATUS_T CmdPan(
 				double min_inc;
 				if (mainD.scale >= 1.0) {
 					if (units == UNITS_ENGLISH) {
-						min_inc = 1/4;   //>1:1 = 1/4 inch
+						min_inc = 1.0/4.0;   //>1:1 = 1/4 inch
 					} else {
-						min_inc = 1/(2.54*2);  //>1:1 = 0.5 cm
+						min_inc = 1.0/(2.54*2);  //>1:1 = 0.5 cm
 					}
 				} else {
 					if (units == UNITS_ENGLISH) {
-						min_inc = 1/64;   //<1:1 = 1/64 inch
+						min_inc = 1.0/64.0;   //<1:1 = 1/64 inch
 					} else {
-						min_inc = 1/(25.4*2);  //>1:1 = 0.5 mm
+						min_inc = 1.0/(25.4*2);  //>1:1 = 0.5 mm
 					}
 				}
 				if ((fabs(pos.x-start_pos.x) > min_inc) || (fabs(pos.y-start_pos.y) > min_inc)) {
