@@ -293,6 +293,7 @@ void wDestroySplash( void );
 //#define BO_ENTER    (1L<<10)
 #define BO_ENTER    0
 #define BO_REPEAT   (1L<<11)
+#define BO_IGNFOCUS	(1L<<12)
 
 wWinPix_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
