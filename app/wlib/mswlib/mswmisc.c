@@ -201,6 +201,8 @@ static char * filterImageFiles[] = { N_("All image files"),
 							"*",
 							};
 
+static HICON hWindowIcon;
+
 /*
  *****************************************************************************
  *
@@ -795,6 +797,10 @@ static wWin_p winCommonCreate(
 
     win->nameStr = mswStrdup(nameStr);
 
+    //HICON hIcon1 = LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(101), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
+    SendMessage(win->hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hWindowIcon);
+    SendMessage(win->hWnd, WM_SETICON, ICON_BIG, (LPARAM)hWindowIcon);
+
     if (typ == W_MAIN) {
         mswInitColorPalette();
     }
@@ -891,11 +897,6 @@ wWin_p wWinMainCreate(
                         WS_OVERLAPPEDWINDOW, labelStr, winProc, x, y, data,
                         nameStr, &showCmd);
     mswHWnd = w->hWnd;
-
-	//HICON hIcon = LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(0), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
-	//HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(0));
-	//SendMessage(mswHWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-	//SendMessage(mswHWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 
     SendMessage(mswHWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
     hDc = GetDC(mswHWnd);
@@ -3449,6 +3450,7 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
 	mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
     hDc = GetDC(0);
     mswScale = GetDeviceCaps(hDc, LOGPIXELSX) / 96.0;
+    hWindowIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(101));
 
     if (mswScale < 1.0) {
         mswScale = 1.0;

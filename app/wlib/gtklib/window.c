@@ -52,6 +52,9 @@ static wControl_p firstWin = NULL, lastWin;
 static int keyState;
 static wBool_t gtkBlockEnabled = TRUE;
 static wBool_t maximize_at_next_show = FALSE;
+
+#include "../../bin/bitmaps/xtc.xpm"
+static GdkPixbuf *windowIconPixbuf = NULL;
 
 /*
  *****************************************************************************
@@ -1024,6 +1027,11 @@ static wWin_p wWinCommonCreate(
     if (option&F_MAXIMIZE) {
     	maximize_at_next_show = TRUE;
     }
+
+    if ( windowIconPixbuf == NULL ) {
+	    windowIconPixbuf = gdk_pixbuf_new_from_xpm_data((const char**)&xtc_xpm);
+    }
+    gtk_window_set_icon( GTK_WINDOW(w->gtkwin), windowIconPixbuf );
 
     return w;
 }
