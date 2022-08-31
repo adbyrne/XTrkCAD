@@ -43,6 +43,7 @@ extern wControl_p newCarControls[2];
 void DoCarDlg( void * unused );
 BOOL_T CarItemRead( char * );
 track_p NewCar( wIndex_t, carItem_p, coOrd, ANGLE_T );
+void UncoupleCars( track_p, int );
 void CarGetPos( track_p, coOrd *, ANGLE_T * );
 void CarSetVisible( track_p );
 void CarItemUpdate( carItem_p );

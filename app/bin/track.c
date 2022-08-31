@@ -1055,20 +1055,10 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	}
 	/* If Car, simulate Remove Car -> uncouple and mark deleted (no Undo) */
 	if (QueryTrack(trk,Q_ISTRAIN)) {
+		UncoupleCars( trk, 0 );
+		UncoupleCars( trk, 1 );
 		trk->deleted = TRUE;
 		ClrTrkBits( trk, TB_SELECTED ); // Make sure we don't select a deleted car
-#ifdef LATER
-		int dir;
-		for (dir=0; dir<2; dir++) {
-		    if (GetTrkEndTrk(trk,dir)) {
-		    	track_p car = GetTrkEndTrk(trk,dir);
-		    	for (int dir2=0;dir2<2; dir2++) {
-		    		if (car->endPt[dir2].track == trk) car->endPt[dir2].track = NULL;
-		    	}
-		        trk->endPt[dir].track = NULL;
-		    }
-		}
-#endif
 		return TRUE;
 	}
 	for (i=0;i<trk->endCnt;i++) {
