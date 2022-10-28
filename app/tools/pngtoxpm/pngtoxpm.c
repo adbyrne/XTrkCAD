@@ -446,25 +446,25 @@ int genXpm ( int icon, char* name, int width, int height ) {
 	RGBQUAD color;
 	c[1] = 0;
 
-	strncpy_s(xpmCode, sizeof(xpmCode), name, strlen(name));
+	strcpy(xpmCode, name);
 	for ( i = 0; i < strlen( xpmCode ); i++ ){
 		if(xpmCode[i] == '-') 
 			xpmCode[i] = '_';
 	}
 
-	strcat_s(xpmBuff, sizeof(xpmBuff), "static char *"); 
-	strcat_s(xpmBuff, sizeof(xpmBuff), xpmCode);
-	strcat_s(xpmBuff, sizeof(xpmBuff), "_x");
-	sprintf_s(tmpBuff, sizeof(tmpBuff), "%d", height); strcat_s(xpmBuff, sizeof(xpmBuff), tmpBuff);
-	strcat_s(xpmBuff, sizeof(xpmBuff), "[] = {\n");
-	strcat_s(xpmBuff, sizeof(xpmBuff), "\t\"");
-	sprintf_s(tmpBuff, sizeof(tmpBuff), "%d %d %d %d", width, height, (K+1), 1); strcat_s(xpmBuff, sizeof(xpmBuff), tmpBuff);
-	strcat_s(xpmBuff, sizeof(xpmBuff), "\",\n\t\" \tc\tNone\",\n");
+	strcat(xpmBuff, "static char *"); 
+	strcat(xpmBuff, xpmCode);
+	strcat(xpmBuff, "_x");
+	sprintf(tmpBuff, "%d", height); strcat(xpmBuff, tmpBuff);
+	strcat(xpmBuff, "[] = {\n");
+	strcat(xpmBuff, "\t\"");
+	sprintf(tmpBuff, "%d %d %d %d", width, height, (K+1), 1); strcat(xpmBuff, tmpBuff);
+	strcat(xpmBuff, "\",\n\t\" \tc\tNone\",\n");
 	for (i = 0; i < K; i++)
 	{
-		strcat_s(xpmBuff, sizeof(xpmBuff), "\t\"");
-		sprintf_s(tmpBuff, sizeof(tmpBuff), "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i],lut_g[i],lut_b[i]); strcat_s(xpmBuff, sizeof(xpmBuff), tmpBuff);
-		strcat_s(xpmBuff, sizeof(xpmBuff), "\",\n");
+		strcat(xpmBuff, "\t\"");
+		sprintf(tmpBuff, "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i],lut_g[i],lut_b[i]); strcat(xpmBuff, tmpBuff);
+		strcat(xpmBuff, "\",\n");
 	}
 
 	// Write the pixels
@@ -476,36 +476,36 @@ int genXpm ( int icon, char* name, int width, int height ) {
 			if (color.rgbReserved >= ALPHATHRESH ){
 				j = Qadd[i];
 				c[0] = pChar(j);
-				strcat_s(xpmBuff, sizeof(xpmBuff), c);
+				strcat(xpmBuff, c);
 				i++;
 			}
 			else
 			{
-				strcat_s(xpmBuff, sizeof(xpmBuff), " ");
+				strcat(xpmBuff, " ");
 			}
 		}
 
 		if (y > 0)
 		{
-			strcat_s(xpmBuff, sizeof(xpmBuff), "\",\n");
+			strcat(xpmBuff, "\",\n");
 		}
 		else
 		{
-			strcat_s(xpmBuff, sizeof(xpmBuff), "\"};\n");
+			strcat(xpmBuff, "\"};\n");
 		}
 	}
 
 	if (icon == 32)
 	{
-		strcat_s(xpmBuff, sizeof(xpmBuff), "\nstatic char **");
-		strcat_s(xpmBuff, sizeof(xpmBuff), xpmCode);
-		strcat_s(xpmBuff, sizeof(xpmBuff), "_xpm[3] = { ");
-		strcat_s(xpmBuff, sizeof(xpmBuff), xpmCode);
-		strcat_s(xpmBuff, sizeof(xpmBuff), "_x16, ");
-		strcat_s(xpmBuff, sizeof(xpmBuff), xpmCode);
-		strcat_s(xpmBuff, sizeof(xpmBuff), "_x24, ");
-		strcat_s(xpmBuff, sizeof(xpmBuff), xpmCode);
-		strcat_s(xpmBuff, sizeof(xpmBuff), "_x32 };\n");
+		strcat(xpmBuff, "\nstatic char **");
+		strcat(xpmBuff, xpmCode);
+		strcat(xpmBuff, "_xpm[3] = { ");
+		strcat(xpmBuff, xpmCode);
+		strcat(xpmBuff, "_x16, ");
+		strcat(xpmBuff, xpmCode);
+		strcat(xpmBuff, "_x24, ");
+		strcat(xpmBuff, xpmCode);
+		strcat(xpmBuff, "_x32 };\n");
 	}
 	return 0;
 }
@@ -529,7 +529,7 @@ int process( char* path, char* name, int icon ){
 
 	/* printf( "FreeImage version %s\n\n",FreeImage_GetVersion( ) ); */
 
-	sprintf_s( filename,sizeof( filename ),"%s/png/%s%d.png",path,name,icon );
+	sprintf( filename,"%s/png/%s%d.png",path,name,icon );
 #ifdef DEBUGPRINT
 	fprintf(stdout, "PNG: %s\n", filename );
 #endif
@@ -614,9 +614,9 @@ int main( int argc, char *argv[] )
 	}
 
 	// Get the file base name from path/name.ext
-	strcpy_s( buffer, sizeof(buffer), argv[1] );
+	strncpy( buffer, argv[1], sizeof(buffer) - 1);
 
-	strcpy_s( path, sizeof(path), argv[1] );
+	strncpy( path, argv[1], sizeof(path) - 1);
 #ifdef DEBUGPRINT
 	fprintf(stderr, "Path: %s\n", path);
 #endif
@@ -639,7 +639,7 @@ int main( int argc, char *argv[] )
 	ext = strrchr(temp, '.');
 	if (ext != NULL) 
 		*ext = '\0';
-	strcpy_s(name, sizeof(name), temp); 
+	strncpy(name, temp, sizeof(name) - 1);
 
 #ifdef DEBUGPRINT
 	fprintf(stdout, "In: %s %s ", path, name );
@@ -652,13 +652,13 @@ int main( int argc, char *argv[] )
 	}
 
 	// Write the xpm file
-	strcpy_s(buffer, sizeof(buffer), argv[1]);
+	strncpy(buffer, argv[1], sizeof(buffer) - 1);
 #ifdef DEBUGPRINT
 	fprintf(stdout, "XPM: %s\n", buffer );
 #endif
 
 	FILE* ptr; 
-	fopen_s(&ptr, buffer, "w");
+	ptr = fopen(buffer, "w");
 	if ( ptr == NULL ){
 		fprintf(stderr, "xpm file could not be created.\n");
 		exit( 1 );

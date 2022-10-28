@@ -10,7 +10,7 @@ include( CheckSymbolExists )
 #	4. add individual .lin-files as dependency to "lines"
 #
 
-ADD_SUBDIRECTORY(bitmaps)
+add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
 
