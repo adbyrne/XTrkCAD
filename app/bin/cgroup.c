@@ -1130,17 +1130,14 @@ static void GroupOk( void * unused )
 				if (IsTrack(trk)) hasTracks=TRUE;
 				segCnt = tempSegs_da.cnt;
 				DrawTrack( trk, &groupD, wDrawColorBlack );
-				DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
-				segPtr = &trackSegs(trackSegs_da.cnt-1);
-				*segPtr = tempSegs( segCnt );
-
-				if ( tempSegs_da.cnt != segCnt+1  ) {
-					NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, _("Ok"), NULL, GetTrkTypeName(trk));
-					wHide( groupW );
-					return;
+				for ( ; segCnt < tempSegs_da.cnt; segCnt++ ) {
+					// Copy drawn segments
+					DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
+					segPtr = &trackSegs(trackSegs_da.cnt-1);
+					*segPtr = tempSegs( segCnt );
 				}
-
 			}
+
 			// Count number of track segs and if any appear after seg 127
 			for ( ; nSeg < trackSegs_da.cnt; nSeg++ ) {
 				if ( IsSegTrack( &trackSegs( nSeg ) ) ) {

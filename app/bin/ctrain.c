@@ -100,7 +100,7 @@ static wIcon_p stopI, goI;
 static wIcon_p stopB, goB;
 static void RestartTrains(void);
 static void DrawAllCars(void);
-static void UncoupleCars(track_p, track_p);
+//static void UncoupleCars(track_p, track_p);
 static void TrainTimeEndPause(void);
 static void TrainTimeStartPause(void);
 
@@ -1509,21 +1509,15 @@ static track_p PickMasterLoco(
 }
 
 
-static void UncoupleCars(
+EXPORT void UncoupleCars(
     track_p car1,
-    track_p car2)
+    int dir1 )
 {
+    track_p car2 = GetTrkEndTrk(car1,dir1);
+    if ( car2 == NULL )
+	    return;
     track_p loco;
-    int dir1, dir2;
-
-    if (GetTrkEndTrk(car1,0) == car2) {
-        dir1 = 0;
-    } else if (GetTrkEndTrk(car1,1) == car2) {
-        dir1 = 1;
-    } else {
-        ErrorMessage("uncoupleCars - not coupled");
-        return;
-    }
+    int dir2;
 
     if (GetTrkEndTrk(car2,0) == car1) {
         dir2 = 0;
@@ -2842,7 +2836,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
  *
  */
 
-STATUS_T CmdCarDescAction(
+static STATUS_T CmdCarDescAction(
     wAction_t action,
     coOrd pos)
 {
@@ -2925,10 +2919,7 @@ static void TrainFunc(
 
     switch (VP2L(action)) {
     case DO_UNCOUPLE:
-        if (GetTrkEndTrk(trainFuncCar,dir)) {
-            UncoupleCars(trainFuncCar, GetTrkEndTrk(trainFuncCar,dir));
-        }
-
+	UncoupleCars( trainFuncCar, dir );
         break;
 
     case DO_PENCILS_ON:
@@ -2976,11 +2967,8 @@ static void TrainFunc(
         break;
 
     case DO_DELCAR:
-        for (dir=0; dir<2; dir++)
-            if (GetTrkEndTrk(trainFuncCar,dir)) {
-                UncoupleCars(trainFuncCar, GetTrkEndTrk(trainFuncCar,dir));
-            }
-
+	UncoupleCars( trainFuncCar, 0 );
+	UncoupleCars( trainFuncCar, 1 );
         if (CarItemIsLoco(xx->item)) {
             LocoListChangeEntry(trainFuncCar, NULL);
         }

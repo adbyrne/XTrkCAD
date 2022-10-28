@@ -44,6 +44,8 @@
 #define DC_TEMP			(1<<6)
 // OUTLINE: use outline font
 #define DC_OUTLINE		(1<<7)
+// Round pixel pos for performance
+#define DC_ROUND		(1<<8)
 
 // Line styles
 #define DC_THICK        	(1<<9)
@@ -64,6 +66,7 @@
 
 typedef enum { DRAW_OPEN, DRAW_CLOSED, DRAW_FILL, DRAW_TRANSPARENT } drawFill_e;
 
+struct drawCmd_t;
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {
@@ -120,7 +123,6 @@ extern drawCmd_t mapD;
 extern drawCmd_t tempD;
 #define RoomSize (mapD.size)
 extern coOrd oldMarker;
-extern wDrawPix_t closePixels;
 #define dragDistance	(dragPixels*mainD.scale / mainD.dpi)
 extern long dragPixels;
 extern long dragTimeout;

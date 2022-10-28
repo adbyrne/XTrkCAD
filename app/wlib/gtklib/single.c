@@ -72,7 +72,7 @@ void wStringSetValue(
 	
 	// the contents should not be changed programatically while
 	// the user is editing it
-	if( !(gtk_widget_has_focus(b->widget))) {
+	if( (b->option&BO_IGNFOCUS) || !(gtk_widget_has_focus(b->widget))) {
 		if (b->hasSignal) 
 	    	gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
 		gtk_entry_set_text(GTK_ENTRY(b->widget), arg);

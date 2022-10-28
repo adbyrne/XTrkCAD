@@ -21,6 +21,7 @@
  */
 
 #include "common.h"
+#include "cundo.h"
 #include "cjoin.h"
 #include "compound.h"
 #include "custom.h"
@@ -29,6 +30,7 @@
 #include "layout.h"
 #include "param.h"
 #include "track.h"
+#include "cselect.h"
 #include "common-ui.h"
 
 /****************************************************************************
@@ -37,8 +39,9 @@
  *
  */
 
-#define SCALE_ANY	(-2)
 #define SCALE_DEMO	(-1)
+#define SCALE_ANY	(-2)
+#define SCALE_MULTI	(-3)
 
 typedef struct {
 		char * scale;
@@ -79,22 +82,20 @@ static scaleInfo_p curScale;
 /** @prefs [misc] include same gauge turnouts=1 Unknown */
 EXPORT long includeSameGaugeTurnouts = FALSE;
 static SCALEINX_T demoScaleInx = -1;
+static int nUnknownScale = 0;
 
 
 /** this struct holds a gauge description */
 typedef struct {
-		char * gauge;		/** ptr to textual description eg. 'n3' */
-		SCALEINX_T scale;	/** index of complete information in scaleInfo_da */
-		wIndex_t index;
+		char * gaugeStr;		/** ptr to textual description eg. 'n3' */
+		SCALEINX_T scaleInx;	/** index of complete information in scaleInfo_da */
 		} gaugeInfo_t;
 
 EXPORT typedef gaugeInfo_t * gaugeInfo_p;
 
 /** this struct holds a scale description */
 typedef struct {
-		char *scaleDesc;	/** ptr to textual description eg. 'HO' */
-		SCALEINX_T scale;	/** index of complete information (standard gauge) in scaleInfo_da  */
-		wIndex_t index;
+		char *scaleDescStr;	/** ptr to textual description eg. 'HO' */
 		dynArr_t gauges_da;	/** known gauges to this scale */
 		} scaleDesc_t;
 
@@ -103,19 +104,8 @@ static dynArr_t scaleDesc_da;
 #define scaleDesc(N) DYNARR_N( scaleDesc_t, scaleDesc_da, N )
 
 
-/**
- * Get the ratio from a scale description. Each member in the list of scale descriptions is
- * linked to an entry in the simple linear list of all scales/gauges. From there the ratio is
- * fetched and returned. Note that there is no error checking on parameters!
- *
- * \param IN sdi index into list of scale descriptions
- * \return ratio for scale
- */
+static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx );
 
-EXPORT DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi )
-{
-	return GetScaleRatio( scaleDesc(sdi).scale );
-}
 
 /**
  * Get the index into the linear list from a scale description and a gauge. All information about a
@@ -132,10 +122,18 @@ EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
 	scaleDesc_t s;
 	gaugeInfo_p g;
 
+	if ( scaleInx < 0 || scaleInx >= scaleDesc_da.cnt ) {
+		lprintf( "GetScaleInx: bad scaleInx %ld (%d)\n", scaleInx, scaleDesc_da.cnt );
+		return 0;
+	}
 	s = scaleDesc(scaleInx);
-   g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
+	if ( gaugeInx < 0 || gaugeInx >= s.gauges_da.cnt ) {
+		lprintf( "GetScaleInx: bad gaugeInx %ld (%d)\n", gaugeInx, s.gauges_da.cnt );
+		return 0;
+	}
+	g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
 
-	return g->scale;
+	return g->scaleInx;
 
 }
 EXPORT DIST_T GetScaleTrackGauge( SCALEINX_T si )
@@ -181,22 +179,6 @@ EXPORT DIST_T GetScaleMinRadius( SCALEINX_T si )
 }
 
 
-EXPORT char *GetScaleDesc( SCALEDESCINX_T inx )
-{
-	return scaleDesc(inx).scaleDesc;
-}
-
-EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
-{
-	scaleDesc_t s;
-	gaugeInfo_p g;
-
-	s = scaleDesc(scaleInx);
-    g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
-
-	return g->gauge;
-}
-
 EXPORT void ValidateTieData( tieData_p td ){
 	td->valid = (td->length > 0.05 && td->width > 0.05 && td->spacing > 0.05);
 }
@@ -231,42 +213,18 @@ EXPORT tieData_t GetScaleTieData( SCALEINX_T si )
 void
 SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge)
 {
-	dynArr_t gauges_da;
-
-	gauges_da = (scaleDesc(desc)).gauges_da;
-	SetLayoutCurScale( DYNARR_N( gaugeInfo_t, gauges_da, gauge).scale);
+	SetLayoutCurScale( GetScaleInx( desc, gauge ) );
 }
 
 static BOOL_T
 SetScaleDescGauge(SCALEINX_T scaleInx)
 {
-	int i, j;
-	char *scaleName = GetScaleName(scaleInx);
-	DIST_T scaleRatio = GetScaleRatio(scaleInx);
-	dynArr_t gauges_da;
-
-	for (i = 0; i < scaleDesc_da.cnt; i++) {
-		char *t = strchr(scaleDesc(i).scaleDesc, ' ');
-		/* are the first characters (which describe the scale) identical? */
-		if (!strncmp(scaleDesc(i).scaleDesc, scaleName, t - scaleDesc(i).scaleDesc)) {
-			/* if yes, are we talking about the same ratio */
-			if (scaleInfo(scaleDesc(i).scale).ratio == scaleRatio) {
-				/* yes, we found the right scale descriptor, so now look for the gauge */
-				SetLayoutCurScaleDesc( i );
-				gauges_da = scaleDesc(i).gauges_da;
-				SetLayoutCurGauge(0);
-				for (j = 0; j < gauges_da.cnt; j++) {
-					gaugeInfo_p ptr = &(DYNARR_N(gaugeInfo_t, gauges_da, j));
-					if (scaleInfo(ptr->scale).gauge == GetScaleTrackGauge(scaleInx)) {
-						SetLayoutCurGauge( j );
-						break;
-					}
-				}
-				break;
-			}
-		}
+	SCALEDESCINX_T scaleDescInx;
+	GAUGEINX_T gaugeInx;
+	if ( GetScaleGauge( scaleInx, &scaleDescInx, &gaugeInx ) ) {
+		SetLayoutCurScaleDesc( scaleDescInx );
+		SetLayoutCurGauge( gaugeInx );
 	}
-
 	return TRUE;
 }
 
@@ -288,10 +246,12 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 		}
 	}
 	NoticeMessage( MSG_BAD_SCALE_NAME, "Ok", NULL, name, sProdNameLower );
+	nUnknownScale++;
 	si = scaleInfo_da.cnt;
 	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 10 );
 	scaleInfo(si) = scaleInfo(0);
 	scaleInfo(si).scale = MyStrdup( name );
+	DoSetScaleDesc( si );
 	return si;
 }
 
@@ -399,18 +359,18 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 	dynArr_t gauges_da;
 
 	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
-		char *t = strchr( scaleDesc(i).scaleDesc, ' ' );
+		char *t = strchr( scaleDesc(i).scaleDescStr, ' ' );
 		/* are the first characters (which describe the scale) identical? */
-		if( !strncmp( scaleDesc(i).scaleDesc, scaleName, t - scaleDesc(i).scaleDesc )) {
+		if( !strncmp( scaleDesc(i).scaleDescStr, scaleName, t - scaleDesc(i).scaleDescStr )) {
 			/* if yes, are we talking about the same ratio */
-		 	if( scaleInfo(scaleDesc(i).scale).ratio == scaleRatio ) {
+		 	if( GetScaleRatio( GetScaleInx( i, 0 ) ) == scaleRatio ) {
 				/* yes, we found the right scale descriptor, so now look for the gauge */
 				*scaleDescInx = i;
 				gauges_da = scaleDesc(i).gauges_da;
 				*gaugeInx = 0;
 				for( j = 0; j < gauges_da.cnt; j++ ) {
 					gaugeInfo_p ptr = &(DYNARR_N( gaugeInfo_t, gauges_da, j ));
-					if( scaleInfo(ptr->scale).gauge == GetScaleTrackGauge( scaleInx )) {
+					if ( ptr->scaleInx == scaleInx ) {
 						*gaugeInx = j;
 						break;
 					}
@@ -444,7 +404,7 @@ SetScale( SCALEINX_T newScaleInx )
 
 	SetLayoutCurScaleDesc( 0 );
 
-	SetScaleDescGauge((SCALEINX_T)newScaleInx);
+	SetScaleDescGauge(newScaleInx);
 
 
 	if (!inPlayback)
@@ -501,74 +461,66 @@ EXPORT BOOL_T DoSetScale(
  * \return TRUE
  */
 
-EXPORT BOOL_T DoSetScaleDesc( void )
+static BOOL_T DoSetScaleDesc( SCALEINX_T scaleInx )
 {
-	SCALEINX_T scaleInx;
 	SCALEINX_T work;
 	SCALEDESCINX_T descInx;
-	scaleDesc_p s = NULL;
+	scaleDesc_p scaleDescP = NULL;
 	gaugeInfo_p g;
 	char *cp;
 //	DIST_T ratio;
-	BOOL_T found;
 	char buf[ 80 ];
 	size_t len;
 
-	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
-//		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
 
-		/* do we already have a description for this scale? */
-		found = 0;
-
-		if( scaleDesc_da.cnt > 0 ) {
-			for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
-				work = scaleDesc(descInx).scale;
-				if( scaleInfo(work).ratio == scaleInfo(scaleInx).ratio ) {
-						if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,	strlen(scaleInfo(work).scale)))
-							found = TRUE;
-				}
+	for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
+		work = GetScaleInx( descInx, 0 );
+		if( scaleInfo(work).ratio == scaleInfo(scaleInx).ratio ) {
+			if( !strncmp( scaleInfo(work).scale, scaleInfo(scaleInx).scale,	strlen(scaleInfo(work).scale))) {
+				scaleDescP = &scaleDesc(descInx);
 			}
-		}
-
-
-		if( !found ) {
-			/* if no, add as new scale */
-
-			DYNARR_APPEND( scaleDesc_t, scaleDesc_da, 1 );
-
-			s = &(scaleDesc( scaleDesc_da.cnt-1 ));
-
-			s->scale = scaleInx;
-
-			sprintf( buf, "%s (1/%.1f)", scaleInfo(scaleInx).scale, scaleInfo(scaleInx).ratio );
-			s->scaleDesc = MyStrdup( buf );
-
-			/* initialize the array with standard gauge */
-
-			DYNARR_APPEND( gaugeInfo_t, s->gauges_da, 10 );
-
-			g = &(DYNARR_N( gaugeInfo_t, s->gauges_da, (s->gauges_da).cnt - 1 ));
-			g->scale = scaleInx;
-			sprintf( buf, "Standard (%.1fmm)", scaleInfo(scaleInx).gauge*25.4 );
-			g->gauge = MyStrdup( buf );
-
-		} else {
-			/* if yes, is this a new gauge to the scale? */
-			DYNARR_APPEND( gaugeInfo_t, s->gauges_da, 10 );
-			g = &(DYNARR_N( gaugeInfo_t, s->gauges_da, (s->gauges_da).cnt - 1 ));
-			g->scale = scaleInx;
-			cp = strchr( s->scaleDesc, ' ' );
-			if( cp )
-				len = cp - s->scaleDesc;
-			else
-				len = strlen(s->scaleDesc);
-			sprintf( buf, "%s (%.1fmm)", scaleInfo(scaleInx).scale+len,   scaleInfo(scaleInx).gauge*25.4 );
-			g->gauge = MyStrdup( buf );
 		}
 	}
 
+
+	if( scaleDescP == NULL ) {
+		/* if no, add as new scale */
+
+		DYNARR_APPEND( scaleDesc_t, scaleDesc_da, 1 );
+
+		scaleDescP = &(scaleDesc( scaleDesc_da.cnt-1 ));
+
+		sprintf( buf, "%s (1/%.1f)", scaleInfo(scaleInx).scale, scaleInfo(scaleInx).ratio );
+		scaleDescP->scaleDescStr = MyStrdup( buf );
+
+		sprintf( buf, "Standard (%.1fmm)", scaleInfo(scaleInx).gauge*25.4 );
+
+	} else {
+		/* if yes, is this a new gauge to the scale? */
+		cp = strchr( scaleDescP->scaleDescStr, ' ' );
+		if( cp )
+			len = cp - scaleDescP->scaleDescStr;
+		else
+			len = strlen(scaleDescP->scaleDescStr);
+		sprintf( buf, "%s (%.1fmm)", scaleInfo(scaleInx).scale+len,   scaleInfo(scaleInx).gauge*25.4 );
+	}
+	DYNARR_APPEND( gaugeInfo_t, scaleDescP->gauges_da, 10 );
+	g = &(DYNARR_N( gaugeInfo_t, scaleDescP->gauges_da, (scaleDescP->gauges_da).cnt - 1 ));
+	g->scaleInx = scaleInx;
+	g->gaugeStr = MyStrdup( buf );
+
 	return( TRUE );
 }
+
+
+EXPORT BOOL_T DoAllSetScaleDesc( void )
+{
+	for( SCALEINX_T scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
+		DoSetScaleDesc( scaleInx );
+	}
+	return TRUE;
+}
+
 
 static BOOL_T AddScale(
 		char * line )
@@ -765,27 +717,17 @@ EXPORT void ScaleLengthEnd( void )
 EXPORT void LoadScaleList( wList_p scaleList )
 {
 	wIndex_t inx;
-	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
-		scaleDesc(inx).index =
-				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, I2VP(inx) );
+	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1)-nUnknownScale; inx++) {
+		wListAddValue( scaleList, scaleDesc(inx).scaleDescStr, NULL, I2VP(inx) );
 	}
 }
 
 EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 {
-	wIndex_t inx;
-	scaleDesc_t s;
-	gaugeInfo_p g;
-	dynArr_t *gauges_da_p;
-
-	s = scaleDesc(scale);
-	gauges_da_p = &(s.gauges_da);
-	g = gauges_da_p->ptr;
-	g = s.gauges_da.ptr;
-
 	wListClear( gaugeList );			/* remove old list in case */
-	for (inx=0; inx<gauges_da_p->cnt; inx++) {
-		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, I2VP(g[inx].scale) );
+	for ( wIndex_t inx=0; inx<scaleDesc(scale).gauges_da.cnt; inx++ ) {
+		gaugeInfo_p g = &DYNARR_N( gaugeInfo_t, scaleDesc(scale).gauges_da, inx );
+		wListAddValue( gaugeList, g->gaugeStr, NULL, I2VP(g->scaleInx) );
 	}
 }
 
@@ -798,6 +740,293 @@ static void ScaleChange( long changes )
 
 /*****************************************************************************
  *
+ * Change Scale Dlg
+ *
+ */
+
+static char rescaleFromScaleStr[20];
+static char rescaleFromGaugeStr[20];
+
+static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
+static long rescaleMode;
+static wIndex_t rescaleFromScaleInx;
+static wIndex_t rescaleFromGaugeInx;
+static SCALEDESCINX_T rescaleToScaleInx;
+static GAUGEINX_T rescaleToGaugeInx;
+static wIndex_t rescaleToInx;
+static long rescaleNoChangeDim = FALSE;
+static FLOAT_T rescalePercent;
+static char * rescaleChangeDimLabels[] = { N_("Do not resize track"), NULL };
+static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
+static paramData_t rescalePLs[] = {
+#define I_RESCALE_MODE		(0)
+		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
+#define I_RESCALE_FROM_SCALE		(1)
+		{ PD_STRING, rescaleFromScaleStr, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScaleStr)},
+#define I_RESCALE_FROM_GAUGE		(2)
+		{ PD_STRING, rescaleFromGaugeStr, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGaugeStr)},
+#define I_RESCALE_TO_SCALE		   (3)
+		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("To: ") },
+#define I_RESCALE_TO_GAUGE		   (4)
+		{ PD_DROPLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
+#define I_RESCALE_CHANGE	(5)
+		{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORZ|BC_NOBORDER },
+#define I_RESCALE_PERCENT	(6)
+		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
+		{ PD_MESSAGE, "%", NULL, PDO_DLGHORZ } };
+static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, COUNT( rescalePLs ) };
+
+
+static coOrd rescaleShift;
+static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
+{
+	EPINX_T ep, ep1;
+	track_p trk1;
+	UndrawNewTrack( trk );
+	UndoModify(trk);
+	if ( rescalePercent != 100.0 ) {
+		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+				!GetTrkSelected(trk1)) {
+				ep1 = GetEndPtConnectedToMe( trk1, trk );
+				DisconnectTracks( trk, ep, trk1, ep1 );
+			}
+		}
+		/* should the track dimensions ie. length or radius be changed as well? */
+		if( rescaleNoChangeDim == 0 )
+			RescaleTrack( trk, rescalePercent/100.0, rescaleShift );
+	}
+	
+	if ( rescaleMode==0 )
+		SetTrkScale( trk, rescaleToInx );
+	DrawNewTrack( trk );
+	return TRUE;
+}
+
+
+static void RescaleDlgOk(
+		void * unused )
+{
+	coOrd center, size;
+	DIST_T d;
+	FLOAT_T ratio = rescalePercent/100.0;
+	coOrd getboundsLo, getboundsHi;
+
+	UndoStart( _("Rescale Tracks"), "Rescale" );
+	GetSelectedBounds( &getboundsLo, &getboundsHi );
+	center.x = (getboundsLo.x+getboundsHi.x)/2.0;
+	center.y = (getboundsLo.y+getboundsHi.y)/2.0;
+	size.x = (getboundsHi.x-getboundsLo.x)/2.0*ratio;
+	size.y = (getboundsHi.y-getboundsLo.y)/2.0*ratio;
+	getboundsLo.x = center.x - size.x;
+	getboundsLo.y = center.y - size.y;
+	getboundsHi.x = center.x + size.x;
+	getboundsHi.y = center.y + size.y;
+	if ( getboundsLo.x < 0 ) {
+		getboundsHi.x -= getboundsLo.x;
+		getboundsLo.x = 0;
+	} else if ( getboundsHi.x > mapD.size.x ) {
+		d = getboundsHi.x - mapD.size.x;
+		if ( getboundsLo.x < d )
+			d = getboundsLo.x;
+		getboundsHi.x -= d;
+		getboundsLo.x -= d;
+	}
+	if ( getboundsLo.y < 0 ) {
+		getboundsHi.y -= getboundsLo.y;
+		getboundsLo.y = 0;
+	} else if ( getboundsHi.y > mapD.size.y ) {
+		d = getboundsHi.y - mapD.size.y;
+		if ( getboundsLo.y < d )
+			d = getboundsLo.y;
+		getboundsHi.y -= d;
+		getboundsLo.y -= d;
+	}
+	if ( rescaleNoChangeDim == 0 && 
+	     (getboundsHi.x > mapD.size.x ||
+		   getboundsHi.y > mapD.size.y )) {
+		NoticeMessage( MSG_RESCALE_TOO_BIG, _("Ok"), NULL, FormatDistance(getboundsHi.x), FormatDistance(getboundsHi.y) );
+	}
+	rescaleShift.x = (getboundsLo.x+getboundsHi.x)/2.0 - center.x*ratio;
+	rescaleShift.y = (getboundsLo.y+getboundsHi.y)/2.0 - center.y*ratio;
+	
+	rescaleToInx = GetScaleInx( rescaleToScaleInx, rescaleToGaugeInx );
+	DoSelectedTracks( RescaleDoIt );
+
+	// rescale the background if it exists and the layout is resized
+	if (HasBackGround() && ratio != 1.0) {
+		coOrd pos = GetLayoutBackGroundPos();
+		double size = GetLayoutBackGroundSize();
+		pos.x = ratio * pos.x + rescaleShift.x;
+		pos.y = ratio * pos.y + rescaleShift.y;
+		SetLayoutBackGroundPos(pos);
+
+		size *= ratio;
+		SetLayoutBackGroundSize(size);
+	}
+	DoRedraw();
+	wHide( rescalePG.win );
+}
+
+
+static void RescaleDlgUpdate(
+		paramGroup_p pg,
+		int inx,
+		void * valueP )
+{
+	switch (inx) {
+	case I_RESCALE_MODE:
+		wControlShow( pg->paramPtr[I_RESCALE_FROM_SCALE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_FROM_SCALE].control, FALSE ); 
+		wControlShow( pg->paramPtr[I_RESCALE_TO_SCALE].control, rescaleMode==0 );
+		wControlShow( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, FALSE ); 
+		wControlShow( pg->paramPtr[I_RESCALE_TO_GAUGE].control, rescaleMode==0 );
+		wControlShow( pg->paramPtr[I_RESCALE_CHANGE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_PERCENT].control, rescaleMode==1 );
+		if ( rescaleMode!=0 )
+			break;
+	case I_RESCALE_TO_SCALE:
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, *((int *)valueP) );
+		rescaleToGaugeInx = 0;
+		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
+		if ( rescaleFromScaleInx >= 0 ) {
+			rescalePercent = GetScaleRatio(GetScaleInx(rescaleFromScaleInx,0))/
+					GetScaleRatio(GetScaleInx(rescaleToScaleInx,0))*100.0;
+		} else {
+			rescalePercent = 100.0;
+		}
+		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control, (rescaleFromScaleInx != rescaleToScaleInx) );
+		ParamLoadControl( pg, I_RESCALE_PERCENT );
+		break;
+	case I_RESCALE_TO_GAUGE:
+		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+		break;
+	case I_RESCALE_FROM_SCALE:
+		ParamLoadControl( pg, I_RESCALE_FROM_SCALE );
+		break;
+	case I_RESCALE_FROM_GAUGE:	
+		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
+		break;
+	case I_RESCALE_CHANGE:
+		ParamLoadControl( pg, I_RESCALE_CHANGE );
+		break;
+	case -1:
+		break;
+	}
+	wBool_t bOkActive = TRUE;
+	if ( rescaleMode == 0 ) {
+		// Scale
+		bOkActive = rescaleFromScaleInx != rescaleToScaleInx ||
+			    rescaleFromGaugeInx != rescaleToGaugeInx;
+	} else {
+		// Ratio
+		bOkActive = rescalePercent != 100.0;
+	}
+	ParamDialogOkActive( pg, bOkActive );
+}
+
+/**
+ * Get the scale gauge information for the selected track pieces.  
+ * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
+ *
+ * \param IN trk track element
+ * \param IN unused
+ * \return TRUE;
+ */
+ 
+static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
+{
+	char *scaleName;
+	SCALEINX_T scale;
+	SCALEDESCINX_T scaleInx;
+	GAUGEINX_T gaugeInx;
+	
+	scale = GetTrkScale( trk );
+	scaleName = GetScaleName( scale );
+	if( strcmp( scaleName, "*" )) {
+		GetScaleGauge( scale, &scaleInx, &gaugeInx );
+		// Determine scale
+		if ( SCALE_ANY == rescaleFromScaleInx ) {
+			// First time
+			rescaleFromScaleInx = scaleInx;
+			rescaleFromGaugeInx = gaugeInx;
+		} else if ( SCALE_MULTI == rescaleFromScaleInx ) {
+			// we 've seen Mixed scales
+		} else if ( scaleInx != rescaleFromScaleInx ) {
+			// mixed scales
+			rescaleFromScaleInx = SCALE_MULTI;
+			rescaleFromGaugeInx = SCALE_MULTI;
+		} else if ( gaugeInx != rescaleFromGaugeInx ) {
+			// same scale but different gauge
+			rescaleFromGaugeInx = SCALE_MULTI;
+		}
+		CHECK( SCALE_ANY != rescaleFromScaleInx );
+	}	
+	
+	return TRUE;
+}
+
+/**
+ * Bring up the rescale dialog. The dialog for rescaling the selected pieces
+ * of track is created if necessary and shown. Handling of user input is done via
+ * RescaleDlgUpdate()
+ */
+
+EXPORT void DoRescale( void * unused )
+{
+	if ( rescalePG.win == NULL ) {
+		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"), RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
+		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, GetLayoutCurScaleDesc() ); /* set correct gauge list here */
+		rescaleFromScaleInx = GetLayoutCurScale();
+		rescaleToScaleInx = rescaleFromScaleInx;
+		rescalePercent = 100.0;
+	}
+
+	// Get From scale and gauge
+	rescaleFromScaleInx = SCALE_ANY;
+	rescaleFromGaugeInx = SCALE_ANY;
+	DoSelectedTracks( SelectedScaleGauge );
+	if ( SCALE_ANY == rescaleFromScaleInx ) {
+		strcpy( rescaleFromScaleStr, "*" );
+		strcpy( rescaleFromGaugeStr, "" );
+	} else if ( SCALE_MULTI == rescaleFromScaleInx ) {
+		strcpy( rescaleFromScaleStr, "Multi-Scale" );
+		strcpy( rescaleFromGaugeStr, "" );
+	} else {
+		scaleDesc_t* scaleDescP = &scaleDesc(rescaleFromScaleInx);
+		strcpy( rescaleFromScaleStr, scaleDescP->scaleDescStr );
+		CHECK( SCALE_ANY != rescaleFromGaugeInx );
+		if ( SCALE_MULTI == rescaleFromGaugeInx ) {
+			strcpy( rescaleFromGaugeStr, "Multi-Gauge" );
+		} else {
+			gaugeInfo_p gaugeInfoP = &(DYNARR_N(gaugeInfo_t, scaleDescP->gauges_da, rescaleFromGaugeInx));
+			strcpy( rescaleFromGaugeStr, gaugeInfoP->gaugeStr );
+		}
+	}
+
+	// get To scale and gauge (current)
+	GetScaleGauge( GetLayoutCurScale(), &rescaleToScaleInx, &rescaleToGaugeInx );
+
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
+
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScaleStr );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGaugeStr );
+
+	// TODO: rescale demo shows blank because DEMO scale inx is beyond the drop box entries
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
+	
+	InfoMessage( _("%ld Objects to be rescaled"), selectedTrackCount );
+	wShow( rescalePG.win );
+	InfoMessage( "" );
+}
+
+/*****************************************************************************
+ *
  *
  *
  */
@@ -808,4 +1037,5 @@ EXPORT void ScaleInit( void )
 	AddParam( "SCALEFIT", AddScaleFit);
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );
+	ParamRegister( &rescalePG );
 }

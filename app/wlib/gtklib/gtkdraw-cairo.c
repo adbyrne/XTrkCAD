@@ -712,7 +712,7 @@ static void wlibDrawFilled(
 	wlibDrawFilled( cairo, color, opt );
 	gtkDrawDestroyCairoContext(cairo);
 
-	if (bd->widget)
+	if (bd->widget && !bd->delayUpdate)
 			gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),x,y,w,h);
 
 }
@@ -893,8 +893,13 @@ static void wlibDrawFilled(
 	}
 
 	/* Negative values crashes the program */
-	if (w < 0 || h < 0)
-		return;
+	if ( w <= 0 || h <= 0 ) {
+		fprintf( stderr, "wDrawSetSize bad size %ldx%ld\n", w, h );
+		if ( w <= 0 )
+			w = 100;
+		if ( h <= 0 )
+			h = 100;
+	}
 
 	repaint = (w != bd->w || h != bd->h);
 	bd->w = w;
@@ -1400,6 +1405,13 @@ int xw, xh, cw, ch;
 
 	wPrefGetFloat(PREFSECTION, DPISET, &dpi, 96.0);
 
+	if ( width <= 0 || height <= 0 ) {
+		fprintf( stderr, "wDrawCreate bad size %ldx%ld\n", width, height );
+		if ( width <= 0 )
+			width = 100;
+		if ( height <= 0 )
+			height = 100;
+	}
 	bd->dpi = dpi;
 	bd->maxW = bd->w = width;
 	bd->maxH = bd->h = height;

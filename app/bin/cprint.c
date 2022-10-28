@@ -70,7 +70,7 @@ EXPORT ANGLE_T GetPrintAngle() {
 static long printGaudy = 1;
 static long printRegistrationMarks = 1;
 static long printPageNumbers = 1;
-static long printPhysSize = FALSE;
+static long bIgnoreMargins = FALSE;
 static long printFormat = PORTRAIT;
 static long printOrder = 0;
 static long printGrid = 0;
@@ -87,7 +87,7 @@ static coOrd maxPageSize;
 static coOrd realPageSize;
 
 static wWin_p printWin = NULL;
-static wWin_p printMarginWin = NULL;
+static wWin_p customMarginWin = NULL;
 
 static wMenu_p printGridPopupM;
 
@@ -110,7 +110,7 @@ static char * printOrderLabels[] = { N_("Normal"), N_("Reverse"), NULL };
 static char * printGaudyLabels[] = { N_("Engineering Data"), NULL };
 static char * printRegistrationMarksLabels[] = { N_("Registration Marks (in 1:1 scale only)"), NULL };
 static char * printPageNumberLabels[] = { N_("Page Numbers"), NULL };
-static char * printPhysSizeLabels[] = { N_("Ignore Page Margins"), NULL };
+static char * sIgnoreMarginsLabels[] = { N_("Ignore Page Margins"), NULL };
 static char * printGridLabels[] = { N_("Snap Grid"), NULL };
 static char * printRulerLabels[] = { N_("Layout Edge"), N_("Every Page"), N_("None"), NULL };
 static char * printRoadbedLabels[] = { N_("Roadbed Outline"), NULL };
@@ -146,7 +146,7 @@ static paramData_t printPLs[] = {
 /*14*/{ PD_TOGGLE, &printRoadbed, "roadbed", PDO_DLGNOLABELALIGN, printRoadbedLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_ROADBEDWIDTH	(15)
 /*15*/{ PD_FLOAT, &printRoadbedWidth, "roadbedWidth", PDO_DIM , &r0_, N_("    Width") },
-/*16*/ { PD_TOGGLE, &printPhysSize, "physsize", PDO_DLGNOLABELALIGN, printPhysSizeLabels, NULL, BC_HORZ | BC_NOBORDER, I2VP(1) },
+/*16*/ { PD_TOGGLE, &bIgnoreMargins, "physsize", PDO_DLGNOLABELALIGN, sIgnoreMarginsLabels, NULL, BC_HORZ | BC_NOBORDER, I2VP(1) },
 /*17*/ { PD_BUTTON, DoPrintMargin, "margin", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Margins") },
 /*18*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_100_99999, N_("Origin: X"), 0, I2VP(2) },
 /*19*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_100_99999, N_("Y"), 0, I2VP(2) },
@@ -162,9 +162,11 @@ static paramData_t printPLs[] = {
 
 static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, COUNT( printPLs ) };
 
-static struct {
+struct margins_s {
 	double top, right, bottom, left;
-} printMargin = { 0.0, 0.0, 0.0, 0.0 };
+};
+static struct margins_s printerMargin = { 0.0, 0.0, 0.0, 0.0 };
+static struct margins_s customMargin = { 0.0, 0.0, 0.0, 0.0 };
 
 /*****************************************************************************
  *
@@ -523,13 +525,13 @@ static void PrintUpdate( int inx0 )
 }
 
 
-static void SetPageSize( BOOL_T doScale )
+static void SetMaxPageSize( BOOL_T doScale )
 {
 	WDOUBLE_T temp, x, y;
 	wPrintGetPageSize( &x, &y );
-	if (!printPhysSize) {
-		x -= (printMargin.left+printMargin.right);
-		y -= (printMargin.top+printMargin.bottom);
+	if (!bIgnoreMargins) {
+		x -= (customMargin.left+customMargin.right);
+		y -= (customMargin.top+customMargin.bottom);
 	}
 	maxPageSize.x = x;
 	maxPageSize.y = y;
@@ -576,7 +578,7 @@ static void PrintMaxPageSize( void )
  * (depending on paper size, scale and orientation)
  */
 {
-	SetPageSize( TRUE );
+	SetMaxPageSize( TRUE );
 	currPrintGrid.size = maxPageSize;
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
@@ -603,18 +605,18 @@ static void DoPrintScale( void )
 static void PrintMarginReset();
 
 static paramFloatRange_t r0_1 = { 0.0, 1.0, 50 };
-static paramData_t printMarginPLs[] = {
+static paramData_t customMarginPLs[] = {
 #define I_PM_FIRST (0)
-	{ PD_FLOAT, &printMargin.top, "marginT", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
-	{ PD_FLOAT, &printMargin.right, "marginR", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
-	{ PD_FLOAT, &printMargin.bottom, "marginB", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
-	{ PD_FLOAT, &printMargin.left, "marginL", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
+	{ PD_FLOAT, &customMargin.top, "marginT", PDO_DIM|PDO_NOPREF, &r0_1, NULL, BO_IGNFOCUS, NULL },
+	{ PD_FLOAT, &customMargin.right, "marginR", PDO_DIM|PDO_NOPREF, &r0_1, NULL, BO_IGNFOCUS, NULL },
+	{ PD_FLOAT, &customMargin.bottom, "marginB", PDO_DIM|PDO_NOPREF, &r0_1, NULL, BO_IGNFOCUS, NULL },
+	{ PD_FLOAT, &customMargin.left, "marginL", PDO_DIM|PDO_NOPREF, &r0_1, NULL, BO_IGNFOCUS, NULL },
 #define I_PM_COUNT (4)
 #define I_PM_MESSAGE (4)
 	{ PD_MESSAGE, NULL, NULL, 0, NULL },
 #define I_PM_RESET (5)
 	{ PD_BUTTON, PrintMarginReset, "marginReset", PDO_DLGCMDBUTTON, NULL, N_("Reset") } };
-static paramGroup_t printMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC, printMarginPLs, COUNT( printMarginPLs ) };
+static paramGroup_t customMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC, customMarginPLs, COUNT( customMarginPLs ) };
 
 static wLines_t aPmLines[] = {
 		{ 1,  25,  11,  94,  11 },
@@ -634,7 +636,7 @@ static void PrintMarginLayout(
 	if ( index < I_PM_FIRST || index > (I_PM_MESSAGE) )
 		return;
 	if ( index == I_PM_MESSAGE ) {
-		*h = wControlGetPosY( printMarginPLs[I_PM_FIRST+2].control ) + wControlGetHeight( printMarginPLs[I_PM_FIRST+2].control );
+		*h = wControlGetPosY( customMarginPLs[I_PM_FIRST+2].control ) + wControlGetHeight( customMarginPLs[I_PM_FIRST+2].control );
 		return;
 	}
 	wWinPix_t x0, y0;
@@ -642,9 +644,6 @@ static void PrintMarginLayout(
 	y0 = (aPmLines[index-I_PM_FIRST].y0+aPmLines[index-I_PM_FIRST].y1)/2;
 	x0 -= pmxoff;
 	y0 -= pmyoff;
-//	y0 += wControlGetPosY( printMarginPLs[0].control ) + wControlGetHeight( printMarginPLs[0].control );
-//	x0 -= wControlGetWidth( printMarginPLs[index-I_PM_FIRST].control )/2;
-//	y0 -= wControlGetHeight( printMarginPLs[index-I_PM_FIRST].control )/2;
 	*w = x0;
 	*h = y0;
 }
@@ -652,72 +651,80 @@ static void PrintMarginLayout(
 
 static const char * sPrinterName = NULL;
 
-static BOOL_T SetMargins()
+/**
+ * Get saved customMargins (default values = printerMargins)
+ * Return true is any values differ from default
+ */
+static void GetMargins()
 {
-	double top, right, bottom, left;
-	wPrintGetMargins( &top, &right, &bottom, &left );
+	wPrintGetMargins( &printerMargin.top, &printerMargin.right, &printerMargin.bottom, &printerMargin.left );
 	sprintf( message, "%s-marginT", sPrinterName );
-	wPrefGetFloat( "printer", message, &printMargin.top, top );
+	wPrefGetFloat( "printer", message, &customMargin.top, printerMargin.top );
 	sprintf( message, "%s-marginR", sPrinterName );
-	wPrefGetFloat( "printer", message, &printMargin.right, right );
+	wPrefGetFloat( "printer", message, &customMargin.right, printerMargin.right );
 	sprintf( message, "%s-marginB", sPrinterName );
-	wPrefGetFloat( "printer", message, &printMargin.bottom, bottom );
+	wPrefGetFloat( "printer", message, &customMargin.bottom, printerMargin.bottom );
 	sprintf( message, "%s-marginL", sPrinterName );
-	wPrefGetFloat( "printer", message, &printMargin.left, left );
-	ParamLoadControls( &printMarginPG );
-	return
-	     fabs( top - printMargin.top ) >= 0.001 ||
-	     fabs( right - printMargin.right ) >= 0.001 ||
-	     fabs( bottom - printMargin.bottom ) >= 0.001 ||
-	     fabs( left - printMargin.left ) >= 0.001;
+	wPrefGetFloat( "printer", message, &customMargin.left, printerMargin.left );
+	ParamLoadControls( &customMarginPG );
 }
 
 
 
+/**
+ * Process PrintMargin Ok button
+ * Save updates margins
+ * Recalc page size and update dialog items
+ */
 static void DoPrintMarginOk( void * context )
 {
-	wHide( printMarginWin );
+	wHide( customMarginWin );
 	sprintf( message, "%s-marginT", sPrinterName );
-	wPrefSetFloat( "printer", message, printMargin.top );
+	wPrefSetFloat( "printer", message, customMargin.top );
 	sprintf( message, "%s-marginR", sPrinterName );
-	wPrefSetFloat( "printer", message, printMargin.right );
+	wPrefSetFloat( "printer", message, customMargin.right );
 	sprintf( message, "%s-marginB", sPrinterName );
-	wPrefSetFloat( "printer", message, printMargin.bottom );
+	wPrefSetFloat( "printer", message, customMargin.bottom );
 	sprintf( message, "%s-marginL", sPrinterName );
-	wPrefSetFloat( "printer", message, printMargin.left );
-	SetPageSize( TRUE );
+	wPrefSetFloat( "printer", message, customMargin.left );
+	SetMaxPageSize( TRUE );
 	for ( int inx = 0; inx < COUNT( printPLs ); inx++ ) {
 		if ( printPLs[inx].context == I2VP(2) )
 			ParamLoadControl( &printPG, inx );
 	}
+	ParamLoadControls( &customMarginPG );
 	DoPrintScale();
 }
 
 static void PrintMarginDlgUpdate( paramGroup_p pg, int index, void * context )
 {
-	wControlActive( printMarginPLs[I_PM_RESET].control, TRUE );
+	wBool_t bEnable =
+	     fabs( printerMargin.top - customMargin.top ) >= 0.001 ||
+	     fabs( printerMargin.right - customMargin.right ) >= 0.001 ||
+	     fabs( printerMargin.bottom - customMargin.bottom ) >= 0.001 ||
+	     fabs( printerMargin.left - customMargin.left ) >= 0.001;
+	wControlActive( customMarginPLs[I_PM_RESET].control, bEnable );
 }
 
+/**
+ * Reset custom margins to printer margins
+ */
 static void PrintMarginReset()
 {
-	wPrintGetMargins( &printMargin.top, &printMargin.right, &printMargin.bottom, &printMargin.left );
-	ParamLoadControls( &printMarginPG );
-	wControlActive( printMarginPLs[I_PM_RESET].control, FALSE );
+	customMargin = printerMargin;
+	ParamLoadControls( &customMarginPG );
+	wControlActive( customMarginPLs[I_PM_RESET].control, FALSE );
 }
 
+/**
+ * Open PrintMargin dialog
+ */
 static void DoPrintMargin( void )
 {
-	sPrinterName = wPrintGetName();
-	while ( *sPrinterName == '\0' ) {
-		int rc = NoticeMessage( MSG_NO_PRINTER_SELECTED, _("Ok"), _("Cancel") );
-		if ( rc <= 0 )
-			return;
-		DoPrintSetup();
-	}
-	if ( printMarginWin == NULL ) {
+	if ( customMarginWin == NULL ) {
 		int x=10, y=10;
-		printMarginWin = ParamCreateDialog( &printMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
-		if ( printMarginWin == NULL )
+		customMarginWin = ParamCreateDialog( &customMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
+		if ( customMarginWin == NULL )
 			return;
 		for ( int i=0; i<COUNT( aPmLines ); i++ ) {
 			aPmLines[i].x0 += x;
@@ -725,12 +732,11 @@ static void DoPrintMargin( void )
 			aPmLines[i].y0 += y;
 			aPmLines[i].y1 += y;
 		}
-		wLineCreate( printMarginWin, NULL, COUNT( aPmLines ), aPmLines );
+		wLineCreate( customMarginWin, NULL, COUNT( aPmLines ), aPmLines );
 	}
-	wMessageSetValue( (wMessage_p)printMarginPLs[I_PM_MESSAGE].control, sPrinterName );
-	// Enable Reset button if we've changed anything
-	wControlActive( printMarginPLs[I_PM_RESET].control, SetMargins() );
-	wShow( printMarginWin );
+	wMessageSetValue( (wMessage_p)customMarginPLs[I_PM_MESSAGE].control, sPrinterName );
+	ParamLoadControls( &customMarginPG );
+	wShow( customMarginWin );
 
 }
 
@@ -741,7 +747,8 @@ static void DoPrintSetup( void )
 {
 	wPrintSetup( (wPrintSetupCallBack_p)DoPrintScale );
 	sPrinterName = wPrintGetName();
-	SetPageSize( TRUE );
+	GetMargins();
+	SetMaxPageSize( TRUE );
 }
 
 
@@ -778,7 +785,7 @@ static void PrintSnapShot( void )
 	POS_T t;
 
 	PrintClear();
-	SetPageSize( FALSE );
+	SetMaxPageSize( FALSE );
 	pageSize = realPageSize;
 	if (pageSize.x > pageSize.y) {
 		t = pageSize.x;
@@ -819,7 +826,7 @@ static void PrintSnapShot( void )
 		printFormat = LANDSCAPE;
 	}
 
-	SetPageSize( TRUE );
+	SetMaxPageSize( TRUE );
 /*
 	if (printFormat == LANDSCAPE) {
 		currPrintGrid.orig.x = -0.5*printScale;
@@ -1065,9 +1072,11 @@ static BOOL_T PrintPage(
 			if (BITMAP(bm,x,y)) {
 				orig.x = currPrintGrid.orig.x + x*currPrintGrid.size.x;
 				orig.y = currPrintGrid.orig.y + y*currPrintGrid.size.y;
-				if (printPhysSize) {
-					orig.x += printMargin.left;
-					orig.y += printMargin.bottom;
+				orig.x += printerMargin.left;
+				orig.y += printerMargin.bottom;
+				if (!bIgnoreMargins) {
+					orig.x -= customMargin.left;
+					orig.y -= customMargin.bottom;
 				}
 				Rotate( &orig, currPrintGrid.orig, currPrintGrid.angle );
 				p[0] = p[1] = p[2] = p[3] = orig;
@@ -1382,9 +1391,15 @@ static STATUS_T CmdPrint(
 			printWin = ParamCreateDialog( &printPG, MakeWindowTitle(_("Print")), _("Print"), DoPrintPrint, (paramActionCancelProc)Reset, TRUE, NULL, 0, PrintDlgUpdate );
 		}
 		sPrinterName = wPrintGetName();
-		SetMargins();
+		while ( *sPrinterName == '\0' ) {
+			int rc = NoticeMessage( MSG_NO_PRINTER_SELECTED, _("Ok"), _("Cancel") );
+			if ( rc <= 0 )
+				return C_TERMINATE;
+			DoPrintSetup();
+		}
+		GetMargins();
 		wShow( printWin );
-		SetPageSize( TRUE );
+		SetMaxPageSize( TRUE );
 		if (currPrintGrid.size.x == 0.0) {
 			currPrintGrid.size.x = maxPageSize.x;
 			currPrintGrid.size.y = maxPageSize.y;
@@ -1500,7 +1515,7 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	RegisterChangeNotification( PrintChange );
 	printGridPopupM = MenuRegister( "Print Grid Rotate" );
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
-	ParamRegister( &printMarginPG );
+	ParamRegister( &customMarginPG );
 	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."), wIconCreatePixMap(doc_print_xpm[iconSize]), LEVEL0, IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT, NULL );
 }
 

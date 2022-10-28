@@ -29,12 +29,9 @@ extern DIST_T curScaleRatio;
 extern char * curScaleName;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
-DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
 char * GetScaleName( SCALEINX_T );
 SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 
-char *GetScaleDesc( SCALEDESCINX_T inx );
-char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 void GetScaleEasementValues( DIST_T *, DIST_T * );
 DIST_T GetScaleMinRadius( SCALEINX_T );
 void ValidateTieData( tieData_p );
@@ -55,7 +52,9 @@ SCALE_FIT_T CompatibleScale( SCALE_FIT_TYPE_T, SCALEINX_T, SCALEINX_T );
 
 SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * scale2);
 
-BOOL_T DoSetScaleDesc( void );
+BOOL_T DoAllSetScaleDesc( void );
+
+void DoRescale( void *unused );
 
 EXPORT void ScaleInit( void );
 

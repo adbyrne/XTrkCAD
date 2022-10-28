@@ -114,6 +114,9 @@ The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \b by ratio (by 181.5%).
 
+If the selected objects have multiple Scales then the 1st From box will display "Multi-Scale".
+If the selected objects are all of one Scale and but have different Gauges then the 2nd From box will display "Multi-Gauge".
+
 If resizing by modeling scale then track dimensions, e.g., lengths and radii, will be changed as well.  An option is available to disable the resizing of the selected objects.
 
 \rule

@@ -65,7 +65,6 @@ static wFontSize_t drawMaxTextFontSize = 100;
 
 // static char FAR message[STR_LONG_SIZE];
 
-EXPORT wDrawPix_t closePixels = 10;
 EXPORT long maxArcSegStraightLen = 100;
 EXPORT long drawCount;
 EXPORT BOOL_T drawEnable = TRUE;
@@ -125,6 +124,8 @@ EXPORT wDrawColor elevColorIgnore;
 EXPORT wDrawColor elevColorDefined;
 EXPORT wDrawColor profilePathColor;
 EXPORT wDrawColor exceptionColor;
+
+DIST_T closeDist = 0.100;
 
 static wFont_p rulerFp;
 
@@ -609,6 +610,10 @@ static void DDrawRectangle(
 			opts |= wDrawOptTransparent;
 			// Fallthru
 		case DRAW_FILL:
+			if ( d->options & DC_ROUND ) {
+				x = round(x);
+				y = round(y);
+			}
 			wDrawFilledRectangle( d->d, x, y, w, h, color, opts );
 			break;
 		default:
@@ -2340,10 +2345,8 @@ EXPORT void PanHere(void * mode) {
 	wBool_t bLiveMap = TRUE;
 	if ( 2 == VP2L(mode) )
 		bLiveMap = liveMap;
-	if ( bLiveMap ) {
-		mainD.orig.x = panCenter.x - mainD.size.x/2.0;
-		mainD.orig.y = panCenter.y - mainD.size.y/2.0;
-	}
+	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
+	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
 	wBool_t bNoBorder = (constrainMain != 0);
 	if ( 1 != VP2L(mode) )
 		if ( (MyGetKeyState()&WKEY_CTRL)!= 0 )
@@ -2519,13 +2522,12 @@ LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale, mainD.ori
 /*
 * IsClose
 * is distance smaller than 10 pixels at 72 DPI?
+* is distance smaller than 0.1" at 1:1?
 */
 EXPORT BOOL_T IsClose(
 		DIST_T d )
 {
-	wDrawPix_t pd;
-	pd = (wDrawPix_t)(d/mainD.scale * mainD.dpi);
-	return pd <= closePixels;
+	return d <= closeDist*mainD.scale;
 }
 
 /*****************************************************************************
@@ -2576,11 +2578,11 @@ coOrd minIncrementSizes() {
 		}
 	} else {
 		if (units == UNITS_ENGLISH) {
-			x = 1/64;   //<1:1 = 1/64 inch
-			y = 1/64;
+			x = 1.0/64.0;   //<1:1 = 1/64 inch
+			y = 1.0/64.0;
 		} else {
-			x = 1/(25.4*2);  //>1:1 = 0.5 mm
-			y = 1/(25.4*2);
+			x = 1.0/(25.4*2);  //>1:1 = 0.5 mm
+			y = 1.0/(25.4*2);
 		}
 	}
 	coOrd ret;
@@ -3102,15 +3104,15 @@ static STATUS_T CmdPan(
 				double min_inc;
 				if (mainD.scale >= 1.0) {
 					if (units == UNITS_ENGLISH) {
-						min_inc = 1/4;   //>1:1 = 1/4 inch
+						min_inc = 1.0/4.0;   //>1:1 = 1/4 inch
 					} else {
-						min_inc = 1/(2.54*2);  //>1:1 = 0.5 cm
+						min_inc = 1.0/(2.54*2);  //>1:1 = 0.5 cm
 					}
 				} else {
 					if (units == UNITS_ENGLISH) {
-						min_inc = 1/64;   //<1:1 = 1/64 inch
+						min_inc = 1.0/64.0;   //<1:1 = 1/64 inch
 					} else {
-						min_inc = 1/(25.4*2);  //>1:1 = 0.5 mm
+						min_inc = 1.0/(25.4*2);  //>1:1 = 0.5 mm
 					}
 				}
 				if ((fabs(pos.x-start_pos.x) > min_inc) || (fabs(pos.y-start_pos.y) > min_inc)) {

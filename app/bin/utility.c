@@ -524,7 +524,7 @@ static BOOL_T IntersectLine( POS_T *fx0, POS_T *fy0, POS_T x1, POS_T y1, POS_T x
 			rc = FALSE;
 	} else {
 		x0 += (y-y0) * dx/dy;
-		if (x0 < -EPSILON || x0 > x) {
+		if (x0 < -EPSILON || x0 > (x+EPSILON)) {
 			rc = FALSE;
 		} else {
 			*fx0 = x0;

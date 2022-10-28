@@ -1055,19 +1055,10 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	}
 	/* If Car, simulate Remove Car -> uncouple and mark deleted (no Undo) */
 	if (QueryTrack(trk,Q_ISTRAIN)) {
+		UncoupleCars( trk, 0 );
+		UncoupleCars( trk, 1 );
 		trk->deleted = TRUE;
-#ifdef LATER
-		int dir;
-		for (dir=0; dir<2; dir++) {
-		    if (GetTrkEndTrk(trk,dir)) {
-		    	track_p car = GetTrkEndTrk(trk,dir);
-		    	for (int dir2=0;dir2<2; dir2++) {
-		    		if (car->endPt[dir2].track == trk) car->endPt[dir2].track = NULL;
-		    	}
-		        trk->endPt[dir].track = NULL;
-		    }
-		}
-#endif
+		ClrTrkBits( trk, TB_SELECTED ); // Make sure we don't select a deleted car
 		return TRUE;
 	}
 	for (i=0;i<trk->endCnt;i++) {
@@ -1166,10 +1157,13 @@ wBool_t IsWidthClose( DIST_T dist1, DIST_T dist2 )
 	DIST_T dist = fabs( dist1 - dist2 );
 	if ( dist < 0.05 )
 		return TRUE;
-// TODO: This assumes the demo file was written with DPI=72
-//       Note: BASE_DPI is 75 so we fudge on dist (was < 0.01)
-	dist1 *= mainD.dpi/BASE_DPI;
+//	This was using BASE_DPI(=75.0) based on ancient monitors.
+//	96 DPI is more reasonable today
+//	TODO: review BASE_DPI with a plan to change it to 96.0
+//	printf( "WidthClose %s:%d D2:%0.3f D1:%0.3f", paramFileName, paramLineNum, dist2, dist1 );
+	dist1 *= mainD.dpi/96.0;
 	dist = fabs( dist1 - dist2 );
+//	printf( " -> %0.3f D:%0.3f\n", dist1, dist );
 	if ( dist < 0.05 )
 		return TRUE;
 	return FALSE;

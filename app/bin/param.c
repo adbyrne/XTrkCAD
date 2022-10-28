@@ -2526,11 +2526,12 @@ static void LayoutControls(
 	controlK.orig.x += labelW[0];
 
 	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
-		LOG( log_paramLayout, 2, ("%2d: Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n", inx,
-			columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
-			controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y ) )
 		if ( (pd->option&PDO_DLGIGNORE) != 0 )
 			goto SkipControl;
+		LOG( log_paramLayout, 2, ("%2d: Col %dx%d..%dx%d Ctl %dx%d..%dx%d %s\n", inx,
+			columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
+			controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y,
+			pd->nameStr ) )
 		if ( pd->type == PD_MENUITEM ) {
 			proc( pd, helpStr, 0, 0 );
 			continue;
@@ -2647,9 +2648,11 @@ SkipControl:
 			}
 			inCmdButtons = TRUE;
 		}
-		LOG( log_paramLayout, 2, ("    Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n",
+		if ( (pd->option & PDO_DLGIGNORE) == 0 ) {
+			LOG( log_paramLayout, 2, ("    Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n",
 				columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
 				controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y ) )
+		}
 		if ( windowK.term.x < columnK.term.x )
 			windowK.term.x = columnK.term.x;
 		if ( windowK.term.y < columnK.term.y )
@@ -2703,7 +2706,9 @@ static void ParamDlgProc(
 		break;
 	case wResize_e:
 		if (win == mapW) {
-			pg->changeProc(pg, wResize_e, NULL);
+			if ( !bInReadTracks ) {
+				pg->changeProc(pg, wResize_e, NULL);
+			}
 		} else {
 			LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );

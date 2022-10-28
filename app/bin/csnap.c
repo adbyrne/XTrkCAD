@@ -35,7 +35,7 @@ int log_timedrawgrid = 0;
  *
  */
 
-EXPORT long minGridSpacing = 3;
+EXPORT long minGridSpacing = 5;
 
 #define CROSSTICK
 #ifdef CROSSTICK
@@ -95,6 +95,7 @@ EXPORT void MapGrid(
 static DIST_T Gdx, Gdy, Ddx, Ddy;
 static coOrd GDorig;
 static wDrawPix_t lborder, bborder;
+int nDrawGridPoints = 0;
 
 void static DrawGridPoint(
 		drawCmd_p D,
@@ -115,17 +116,17 @@ void static DrawGridPoint(
 		  p0.y < 0.0 || p0.y > size->y ) )
 		return;
 	DIST_T r;
+	nDrawGridPoints++;
 	if ( bigdot ) {
 		r = (bigdot_width+0.5)/2 - 0.5;
 	} else {
 		r = 0.75;
 	}
-	r /= dpi;
-	DrawFillCircle(D, p0, r, Color);
-	//r = 0.75 / dpi;
-	//coOrd sz; sz.x=2*r;sz.y=2*r;
-	//p0.x -= r; p0.y -= r;
-	//DrawRectangle( D, p0, sz, Color, DRAW_FILL );
+	coOrd sz;
+	sz.x = sz.y = (bigdot?2.5:1.5)/dpi;
+	p0.x -= 1.0/dpi;
+	p0.y -= 1.0/dpi;
+	DrawRectangle( D, p0, sz, Color, DRAW_FILL );
 }
 
 
@@ -180,8 +181,11 @@ EXPORT void DrawGrid(
 	if (!cross0_bm)
 		cross0_bm = wDrawBitMapCreate( mainD.d, cross0_width, cross0_height, 2, 2, cross0_bits );
 #endif
+	unsigned long drawOptions = D->options;
+	D->options |= DC_ROUND;
 
 	unsigned long time0 = wGetTimer();
+	nDrawGridPoints = 0;
 	wSetCursor( mainD.d, wCursorWait );
 	dpi = D->dpi/D->scale;
 	Gdx = cos(D2R(Gangle));
@@ -302,8 +306,9 @@ EXPORT void DrawGrid(
     
 
 done:
+	D->options = drawOptions;
 	wSetCursor( mainD.d, defaultCursor );
-	LOG( log_timedrawgrid, 1, ( "DrawGrid time = %lu mS\n", wGetTimer()-time0 ) );
+	LOG( log_timedrawgrid, 1, ( "DrawGrid BD = %d, n = %d, time = %lu mS\n", bigdot, nDrawGridPoints, wGetTimer()-time0 ) );
 }
 
 

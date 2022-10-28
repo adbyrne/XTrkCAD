@@ -95,12 +95,14 @@ static void ComputePause( void )
 	lastTim = tim;
 }
 #else
+#include <sys/types.h>
 #include <sys/timeb.h>
+#include <time.h>
 
-static struct _timeb lastTim;
+static struct __timeb64 lastTim;
 static void ComputePause( void )
 {
-	struct _timeb tim;
+	struct __timeb64 tim;
 	long secs, msecs;
 	_ftime( &tim );
 	secs = (long)(tim.time - lastTim.time);
@@ -1487,7 +1489,7 @@ static void DoDemo( void * demoNumber )
 static BOOL_T ReadDemo(
 		char * line )
 {
-		static wMenu_p m;
+		static wMenu_p m = NULL;
 		char * cp;
 		char *path;
 
