@@ -2,19 +2,18 @@
 
 PROJECT(genbitmaps)
 
+# Find the conversion tool 
 find_program( SVG_CONVERTER
-	NAMES inkscape.exe inkscape rsvg-convert
-#	REQUIRED
+	NAMES inkscape inkscape.exe
 	HINTS "C:/Program Files/Inkscape/bin" "/usr/bin"
-	)
-
-#	ease-broad ease-cornu ease-gt-broad ease-gt-sharp ease-lt-broad 
-#	ease-lt-sharp ease-none ease-normal ease-sharp 
+)
 
 if( ${SVG_CONVERTER} STREQUAL "SVG_CONVERTER-NOTFOUND" )
-	message( STATUS "SVG Converter not found." )
+	message( STATUS "Inkscape not found." )
 else()
-	SET (XPMS
+	message (STATUS "Yes, Inkscape found: ${SVG_CONVERTER}")
+
+	set (XPMS
 		background benchwork bezier-line bezier-track block bottom box
 		bridge building car-inventory change-grid circle-center
 		circle-filled-center circle-filled-tangent circle-line-center
@@ -36,28 +35,18 @@ else()
 		zoom-choose zoom-extent zoom-in zoom-out
 	)
 
-	if (WIN32)
-		set( OUTOPT
-			-o
-		)
-	else(WIN32)
-		set( OUTOPT
-			-e
-		)
-	endif(WIN32)
+	set(OUTOPT -o)
 
 	foreach(xpm ${XPMS})
 		add_custom_command(
-			OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
-			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/PNG/
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}16.png
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 24 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}24.png
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 32 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}32.png
-			COMMAND pngtoxpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm	
-			COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}16.png
-			COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}24.png
-			COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}32.png
+			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
+			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 ${OUTOPT} ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png
+			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 24 ${OUTOPT} ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png
+			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 32 ${OUTOPT} ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png
+			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm	
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm 
 		)
 		# build a list of all the depends
 		list(APPEND XPM_RESULTS ${xpm}.xpm)
@@ -68,8 +57,3 @@ else()
 		DEPENDS ${XPM_RESULTS}
 	)
 endif()
-
-MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
-# MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-# MESSAGE (STATUS "XPMs: ${XPMS}")
-# MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
