@@ -39,7 +39,7 @@ else()
 
 	foreach(xpm ${XPMS})
 		add_custom_command(
-			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm
+			OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
 			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 ${OUTOPT} ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png
