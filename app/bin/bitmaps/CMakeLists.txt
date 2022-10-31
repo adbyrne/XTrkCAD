@@ -3,15 +3,14 @@
 PROJECT(genbitmaps)
 
 # Find the conversion tool 
-find_program( SVG_CONVERTER
-	NAMES inkscape inkscape.exe
-	HINTS "C:/Program Files/Inkscape/bin" "/usr/bin"
-)
 
-if( ${SVG_CONVERTER} STREQUAL "SVG_CONVERTER-NOTFOUND" )
+find_package(Inkscape)
+
+if( NOT Inkscape_FOUND )
 	message( STATUS "Inkscape not found." )
 else()
-	message (STATUS "Yes, Inkscape found: ${SVG_CONVERTER}")
+	message(STATUS "Inkscape is: ${Inkscape_EXECUTABLE}")
+	message(STATUS "Export option is: ${Inkscape_EXPORT}")
 
 	set (XPMS
 		background benchwork bezier-line bezier-track block bottom box
@@ -35,16 +34,14 @@ else()
 		zoom-choose zoom-extent zoom-in zoom-out
 	)
 
-	set(OUTOPT -o)
-
 	foreach(xpm ${XPMS})
 		add_custom_command(
 			OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 ${OUTOPT} ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 24 ${OUTOPT} ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 32 ${OUTOPT} ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png
+			COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png"
+			COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 24 "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png"
+			COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 32 "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png"
 			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm	
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm 
 		)
