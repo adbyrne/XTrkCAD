@@ -36,14 +36,14 @@ else()
 
 	foreach(xpm ${XPMS})
 		add_custom_command(
-			OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm
 			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
 			COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png"
 			COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 24 "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png"
 			COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 32 "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png"
 			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm	
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm 
+#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm 
 		)
 		# build a list of all the depends
 		list(APPEND XPM_RESULTS ${xpm}.xpm)

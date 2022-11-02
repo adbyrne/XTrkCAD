@@ -12,6 +12,7 @@
 find_program(
 	Inkscape_EXECUTABLE
 	NAMES inkscape
+    HINTS "C:/Program Files/Inkscape/bin" 
 	DOC "Inkscape command-line SVG rasterizer"
 )
 

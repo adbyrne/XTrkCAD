@@ -243,6 +243,7 @@ add_dependencies(xtrkcad-lib
     messagefiles
     balloonhelp
 	lines
+    genbitmaps
 )
 
 target_include_directories(xtrkcad-lib 
@@ -316,7 +317,9 @@ target_sources(xtrkcad
 		misc.c
 		xtrkcad.rc
 )
-
+add_dependencies(xtrkcad
+    genbitmaps)
+    
 target_include_directories(xtrkcad
     PRIVATE
 	${messagefile_BINARY_DIR}    
