@@ -64,6 +64,7 @@ else()
 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png
 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png
 			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm	
+#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm 
 		)
 		# build a list of all the depends
 		list(APPEND XPM_RESULTS ${xpm}.xpm)
