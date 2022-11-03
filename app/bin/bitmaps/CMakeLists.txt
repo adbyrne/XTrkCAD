@@ -38,7 +38,7 @@ else()
 
 	foreach(xpm ${XPMS})
 		foreach(pix ${PIXS})
-			IF ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png" )
+			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png" )
 #				MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png" )
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
@@ -46,7 +46,7 @@ else()
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
 					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
 				)
-			ELSE()
+			else()
 #				MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg" )
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
@@ -54,7 +54,7 @@ else()
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
 					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h ${pix} "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png"
 				)
-			ENDIF()
+			endif()
 			# build a list of all the depends
 			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png)
 		endforeach()
@@ -77,8 +77,8 @@ else()
 	)
 endif()
 
-MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
-MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+#MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
+#MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 #MESSAGE (STATUS "XPMs: ${XPMS}")
 #MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
 #MESSAGE (STATUS "PNG_RESULTS: ${PNG_RESULTS}")
