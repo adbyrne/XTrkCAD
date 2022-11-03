@@ -318,6 +318,7 @@ target_sources(xtrkcad
 		xtrkcad.rc
 )
 add_dependencies(xtrkcad
+    messagefiles
     genbitmaps)
     
 target_include_directories(xtrkcad

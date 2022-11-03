@@ -62,7 +62,7 @@ if(XTRKCAD_USE_GTK)
 	endif()
 
 	get_target_property(halibut_sources helpsystem SOURCES)
-	add_custom_target(help-html ALL DEPENDS halibut ${halibut_sources})
+	add_custom_target(help-html ALL DEPENDS messagefiles)
 
 	add_custom_command(
 		TARGET help-html
@@ -131,7 +131,7 @@ else()
 	set_target_properties(
    		help-chm
    		PROPERTIES FOLDER HelpDocs
-)
+	)
 	get_target_property(halibut_sources helpsystem SOURCES)
 	add_custom_command(
 		TARGET help-chm
