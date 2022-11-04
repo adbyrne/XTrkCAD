@@ -109,10 +109,10 @@ add_custom_command(
 	WORKING_DIRECTORY ${i18n_SOURCE_DIR}
 )
 
-# Target to be executed with "make all". Xtrkcad must be built before this to
+# xTrackCAD must be built before this to
 # make sure that the dynamically generated files messages.h and bllnhlp.c are
 # up to date.
-add_custom_target(messages ALL
+add_custom_target(messages 
 	DEPENDS xtrkcad ${POTFILE}
 )
 
@@ -120,6 +120,9 @@ set_target_properties(
    messages
    PROPERTIES FOLDER i18n
 )
+
+# Utility target for building all translations 
+add_custom_target(alltranslations)
 
 #
 # function to create and update the po-file for a locale
@@ -130,7 +133,7 @@ function(updatepofile locale)
 	set(mofile ${mofile_dir}/${XTRKCAD_PACKAGE}.mo)
 
 	# Merge .pot file changes to .po file
-	add_custom_target(msgmerge-${locale} ALL
+	add_custom_target(msgmerge-${locale} 
 		COMMAND ${XTC_MSGMERGE} -U --backup=none ${pofile} ${POTFILE}
     	COMMAND ${XTC_MSGFMT} -c -v -o ${mofile} ${pofile}
 		DEPENDS messages ${pofile} #${POTFILE} ${pofile} 
@@ -164,6 +167,9 @@ function(updatepofile locale)
 	   msgmerge-${locale} 
  	   PROPERTIES FOLDER i18n
    )
+
+   add_dependencies(alltranslations msgmerge-${locale} )
+	
 endfunction()
 
 #
