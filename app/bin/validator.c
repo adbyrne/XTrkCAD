@@ -36,10 +36,10 @@ enum URLSCANSTATE { STATE_SCHEME, STATE_ENDOFSCHEME, STATE_HIER, STATE_PATH, STA
 #define MINURLLENGTH 5 /* 2 chars domain name, dot, 2 chars TLD */
 
 bool
-IsValidURL(char *testString)
+IsValidURL(const char *testString)
 {
-	char *result = testString;
-	char *hostname = testString;
+	const char *result = testString;
+	const char *hostname = testString;
 	enum URLSCANSTATE state = STATE_SCHEME;
 
 	if (!*result) {

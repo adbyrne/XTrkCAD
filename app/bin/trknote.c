@@ -66,7 +66,7 @@ static 	coOrd posSave;
  * NOTE OBJECT
  */
 
-static track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
+EXPORT track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 {
     track_p t;
     struct extraDataNote_t * xx;
@@ -172,125 +172,6 @@ static void DeleteNote(track_p t)
 	}
 }
 
-void
-NoteStateSave(track_p trk)
-{
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-	layerSave = GetTrkLayer(trk);
-	posSave = xx->pos;
-}
-
-/**
-* Handle Cancel button: restore old values for layer and position
-*/
-
-void
-CommonCancelNote(track_p trk)
-{
-	if (inDescribeCmd) {
-		struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-		xx->layer = layerSave;
-		xx->pos = posSave;
-		SetBoundingBox(trk, xx->pos, xx->pos);
-	}
-}
-
-static void
-CommonUpdateNote(track_p trk, int inx, struct extraDataNote_t *noteData )
-{
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-
-	switch (inx) {
-	case OR_NOTE:
-		xx->pos = noteData->pos;
-		SetBoundingBox(trk, xx->pos, xx->pos);
-		break;
-	case LY_NOTE:
-		SetTrkLayer(trk, noteData->layer);
-		break;
-	case CANCEL_NOTE:
-		CommonCancelNote(trk);
-		break;
-	}
-}
-
-
-void UpdateFile(struct extraDataNote_t *noteUIData, int inx,  BOOL_T needUndoStart)
-{
-	track_p trk = noteUIData->trk;
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-
-	switch (inx) {
-	case OR_NOTE:
-	case LY_NOTE:
-	case CANCEL_NOTE:
-		CommonUpdateNote(trk, inx, noteUIData);
-		break;
-	case OK_FILE:
-	{
-		DeleteNote(trk);
-		xx->noteData.fileData.path = MyStrdup(noteUIData->noteData.fileData.path);
-		xx->noteData.fileData.title = MyStrdup(noteUIData->noteData.fileData.title);
-		//result = malloc( maximumSize );
-		//resultSize = File2URI(noteFileData->path, maximumSize, result);
-		//xx->text = (char*)MyMalloc(resultSize + strlen(noteFileData->title) + 2);
-		//sprintf(xx->text, "%s %s", result, noteFileData->title);
-		//if (noteFileData->inArchive) {
-		//	CopyFile(noteFileData->path, archiveDirectory);
-
-		//}
-		//free(result);
-	}
-		break;
-
-	default:
-		break;
-	}
-}
-
-void UpdateLink(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStart)
-{
-	track_p trk = noteUIData->trk;
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-
-	switch (inx) {
-	case OR_NOTE:
-	case LY_NOTE:
-	case CANCEL_NOTE:
-		CommonUpdateNote(trk, inx, noteUIData);
-		break;
-
-	case OK_LINK:
-		DeleteNote(trk);
-		xx->noteData.linkData.title = MyStrdup(noteUIData->noteData.linkData.title);
-		xx->noteData.linkData.url = MyStrdup(noteUIData->noteData.linkData.url);
-		break;
-	default:
-		break;
-	}
-}
-
-void UpdateText(struct extraDataNote_t *noteUIData, int inx, BOOL_T needUndoStart)
-{
-	track_p trk = noteUIData->trk;
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-
-	switch (inx) {
-	case OR_NOTE:
-	case LY_NOTE:
-	case CANCEL_NOTE:
-		CommonUpdateNote(trk, inx, noteUIData);
-		break;
-
-	case OK_TEXT:
-		DeleteNote(trk);
-		xx->noteData.text = MyStrdup(noteUIData->noteData.text);
-		break;
-	default:
-		break;
-	}
-	changed++;
-}
 
 #if 0
 /**
@@ -584,7 +465,6 @@ static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
 	struct extraDataNote_t *xx2 = GET_EXTRA_DATA( trk2, T_NOTE, extraDataNote_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
-	REGRESS_CHECK_INT( "Layer", xx1, xx2, layer )
 	REGRESS_CHECK_INT( "Op", xx1, xx2, op )
 	return TRUE;
 }
@@ -657,24 +537,19 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     case C_UP:
         UndoStart(_("New Note"), "New Note");
         state_on = FALSE;
-        trk = NewNote(-1, pos, curNoteType );
-		inDescribeCmd = TRUE;
-        DrawNewTrack(trk);
 
 		switch (curNoteType)
 		{
 		case OP_NOTETEXT:
-			NewTextNoteUI(trk);
+			NewTextNoteUI(pos);
 			break;
 		case OP_NOTELINK:
-			NewLinkNoteUI(trk);
+			NewLinkNoteUI(pos);
 			break;
 		case OP_NOTEFILE:
-			NewFileNoteUI(trk);
+			NewFileNoteUI(pos);
 			break;
 		}
-
-		inDescribeCmd = FALSE;
 
 		return C_CONTINUE;
 
@@ -686,6 +561,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 				break;
 			case OP_NOTELINK:
 				DrawBitMap(&tempD, oldPos, link_bm, normalColor);
+				break;
+			case OP_NOTEFILE:
+				DrawBitMap(&tempD, oldPos, document_bm, normalColor);
 				break;
 			}
     	}
