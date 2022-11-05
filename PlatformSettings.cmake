@@ -1,13 +1,5 @@
 # Configure the platform specific settings
 #
-# determine processor target architecture
-
-if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-	set(ARCH64 ON CACHE BOOL "Target Architecture: x64")
-else ()
-	set(ARCH64 OFF CACHE BOOL "Target Architecture: x86")
-endif ()
-
 # Setup high-level build options ...
 if(UNIX)
     include(FindPkgConfig)
@@ -32,18 +24,26 @@ endif()
 
 # Set Win64 flag when a 64 bit build is selected
 if(WIN32)
-    set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
+	set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
+	set(XTRKCAD_USE_GTK_DEFAULT OFF)
 
-	if (ARCH64)
-        set( XTRKCAD_ARCH_SUBDIR "x64")
+	# determine processor target architecture
+	if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+		set(Win64Bit ON CACHE BOOL "Target Architecture: x64")
+	else ()
+		set(Win64Bit OFF CACHE BOOL "Target Architecture: x86")
+	endif ()
+
+	mark_as_advanced(Win64Bit)
+
+	if (Win64Bit)
+        set(XTRKCAD_ARCH_SUBDIR "x64")
 		if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   			set(CMAKE_INSTALL_PREFIX "C:/Program Files/XTrkCAD" CACHE PATH "WIN64 Install" FORCE)
 		endif()
 	else ()
         set( XTRKCAD_ARCH_SUBDIR "x86")
 	endif ()
-
-	set(XTRKCAD_USE_GTK_DEFAULT OFF)
 
 	set(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /MT /Zi /Ob0 /Od /RTC1" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
 	set(CMAKE_C_FLAGS_MINSIZEREL "/MT /O1 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release minumum size builds" FORCE)
