@@ -8,7 +8,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/hhc.cmake.in ${CMAKE_CURRENT_BINARY_D
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html)
 
-add_custom_target(helpsystem ALL)
+add_custom_target(helpsystem)
 set_target_properties(
    helpsystem
    PROPERTIES FOLDER HelpDocs
@@ -62,7 +62,7 @@ if(XTRKCAD_USE_GTK)
 	endif()
 
 	get_target_property(halibut_sources helpsystem SOURCES)
-	add_custom_target(help-html ALL DEPENDS messagefiles)
+	add_custom_target(help-html DEPENDS messagefiles)
 
 	add_custom_command(
 		TARGET help-html

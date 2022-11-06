@@ -16,3 +16,7 @@ set(CMAKE_COLOR_MAKEFILE ON)
 
 # Use folders to organize targets
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+#
+# Print Installing but not Up-to-date messages
+set(CMAKE_INSTALL_MESSAGE LAZY)
