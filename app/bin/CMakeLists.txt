@@ -246,6 +246,7 @@ add_dependencies(xtrkcad-lib
     genbitmaps
 )
 
+
 target_include_directories(xtrkcad-lib 
     PUBLIC
 	${messagefile_BINARY_DIR}

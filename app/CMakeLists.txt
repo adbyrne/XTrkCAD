@@ -3,13 +3,13 @@
 
 
 # Setup the rest of the build ...
+add_subdirectory(help)
 add_subdirectory(bin)
 add_subdirectory(cornu)
 add_subdirectory(dynstring)
 add_subdirectory(cJSON)
 add_subdirectory(wlib)
 add_subdirectory(tools)
-add_subdirectory(help)
 add_subdirectory(doc)
 add_subdirectory(lib)
 

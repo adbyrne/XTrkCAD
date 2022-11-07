@@ -107,7 +107,7 @@ endif()
 if(WIN32)
 	set( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX} ${XTRKCAD_VERSION}" )
 endif()
-set(messagefile_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/app/help")
+
 set(XTRKCAD_BIN_INSTALL_DIR "bin")
 set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 set(XTRKCAD_PACKAGE "xtrkcad")
