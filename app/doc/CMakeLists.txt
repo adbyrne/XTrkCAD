@@ -62,15 +62,16 @@ if(XTRKCAD_USE_GTK)
 	endif()
 
 	get_target_property(halibut_sources helpsystem SOURCES)
-	add_custom_target(help-html DEPENDS messagefiles)
 
 	add_custom_command(
-		TARGET help-html
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html
 		DEPENDS halibut ${halibut_sources}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
 		COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/clean-html.cmake
 		COMMAND halibut ${halibut_sources}
 		)
+
+	ADD_CUSTOM_TARGET(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html messagefiles)
 
 	install(
 		DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
