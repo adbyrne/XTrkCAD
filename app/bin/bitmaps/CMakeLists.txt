@@ -2,19 +2,17 @@
 
 PROJECT(genbitmaps)
 
-find_program( SVG_CONVERTER
-	NAMES inkscape.exe inkscape rsvg-convert
-#	REQUIRED
-	HINTS "C:/Program Files/Inkscape/bin" "/usr/bin"
-	)
+# Find the conversion tool 
 
-#	ease-broad ease-cornu ease-gt-broad ease-gt-sharp ease-lt-broad 
-#	ease-lt-sharp ease-none ease-normal ease-sharp 
+find_package(Inkscape)
 
-if( ${SVG_CONVERTER} STREQUAL "SVG_CONVERTER-NOTFOUND" )
-	message( STATUS "SVG Converter not found." )
+if( NOT Inkscape_FOUND )
+	message( STATUS "Inkscape not found." )
 else()
-	SET (XPMS
+	message(STATUS "Inkscape is: ${Inkscape_EXECUTABLE}")
+	message(STATUS "Export option is: ${Inkscape_EXPORT}")
+
+	set (XPMS
 		background benchwork bezier-line bezier-track block bottom box
 		bridge building car-inventory change-grid circle-center
 		circle-filled-center circle-filled-tangent circle-line-center
@@ -36,28 +34,37 @@ else()
 		zoom-choose zoom-extent zoom-in zoom-out
 	)
 
-	if (WIN32)
-		set( OUTOPT
-			-o
-		)
-	else(WIN32)
-		set( OUTOPT
-			-e
-		)
-	endif(WIN32)
+	set( PIXS 16 24 32 )
 
 	foreach(xpm ${XPMS})
+		foreach(pix ${PIXS})
+			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png" )
+#				MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png" )
+				add_custom_command(
+					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
+				)
+			else()
+#				MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg" )
+				add_custom_command(
+					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
+					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h ${pix} "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png"
+				)
+			endif()
+			# build a list of all the depends
+			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png)
+		endforeach()
 		add_custom_command(
-			OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm
-			DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
-			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/PNG/
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 16 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}16.png
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 24 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}24.png
-			COMMAND ${SVG_CONVERTER} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h 32 ${OUTOPT} ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}32.png
-			COMMAND pngtoxpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm	
-			COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}16.png
-			COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}24.png
-			COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}32.png
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm
+			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png
+			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png
+			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png
+			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm	
+#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm 
 		)
 		# build a list of all the depends
 		list(APPEND XPM_RESULTS ${xpm}.xpm)
@@ -66,10 +73,12 @@ else()
 	add_custom_target (
 		genbitmaps 
 		DEPENDS ${XPM_RESULTS}
+		DEPENDS ${PNG_RESULTS}
 	)
 endif()
 
-MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
-# MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-# MESSAGE (STATUS "XPMs: ${XPMS}")
-# MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
+#MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
+#MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+#MESSAGE (STATUS "XPMs: ${XPMS}")
+#MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
+#MESSAGE (STATUS "PNG_RESULTS: ${PNG_RESULTS}")

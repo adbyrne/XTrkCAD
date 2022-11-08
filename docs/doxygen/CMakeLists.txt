@@ -1,18 +1,23 @@
-PROJECT(doxygen)
+project(sourcedoc)
 
-INCLUDE(FindDoxygen)
+#
+# create source documentation using Doxygen 
 
-IF(WIN32)
-	SET( XTrkCAD_WLIB_DIR
+find_package(Doxygen
+	REQUIRED
+)
+
+if(WIN32)
+	set( XTrkCAD_WLIB_DIR
 		"mswlib" )
-ELSE(WIN32)
+else(WIN32)
 	SET( XTrkCAD_WLIB_DIR
 		"gtklib" )
-ENDIF(WIN32)
+endif(WIN32)
 
-CONFIGURE_FILE(${doxygen_SOURCE_DIR}/Doxyfile.in ${doxygen_BINARY_DIR}/Doxyfile)
+configure_file(${sourcedoc_SOURCE_DIR}/Doxyfile.in ${sourcedoc_BINARY_DIR}/Doxyfile)
 
-ADD_CUSTOM_TARGET(docs-doxygen
-	COMMAND ${DOXYGEN_EXECUTABLE} ${doxygen_BINARY_DIR}/Doxyfile
+add_custom_target(docs-doxygen
+	COMMAND ${DOXYGEN_EXECUTABLE} ${sourcedoc_BINARY_DIR}/Doxyfile
 	)
 
