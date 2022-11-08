@@ -1,4 +1,7 @@
-SET(SOURCES 
+#
+# Character set conversion library as required for halibut
+
+add_library(xtrkcad-charset
 	big5enc.c 
 	big5set.c 
 	charset.h 
@@ -29,10 +32,11 @@ SET(SOURCES
 	utf16.c 
 	utf7.c
 	utf8.c 
-	xenc.c
-	)
+	xenc.c)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+set_target_properties(
+	xtrkcad-charset
+	PROPERTIES FOLDER HelpDocs
+ )
 
-ADD_LIBRARY(xtrkcad-charset ${SOURCES})
-
+ target_include_directories(xtrkcad-charset PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})	

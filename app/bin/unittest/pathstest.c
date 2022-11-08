@@ -32,6 +32,9 @@
 #define DEFAULTPATH "/Default/Path"
 
 #endif //WINDOWS
+
+// Dummy functions to satisfy the linker
+
 void
 wPrefSetString(const char *section, const char *key, const char *value)
 {}
@@ -49,6 +52,11 @@ char *wPrefGetString(const char *section, const char *key)
 const char *wGetUserHomeDir(void)
 {
 	return(DEFAULTPATH);
+}
+
+void AbortProg(const char *a, const char *b, int d, const char *c)
+{
+	return;
 }
 
 #include "../paths.c"

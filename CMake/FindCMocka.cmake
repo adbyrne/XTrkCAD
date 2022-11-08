@@ -21,9 +21,8 @@
 #=============================================================================
 #
 
-
-set (CMOCKA_ROOT_DIR
-		"../../external/x86/cmocka")
+set(CMOCKA_ROOT_DIR
+	"$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/cmocka")
 
 find_path(CMOCKA_INCLUDE_DIR
     NAMES

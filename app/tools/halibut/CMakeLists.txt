@@ -1,4 +1,5 @@
-SET(SOURCES
+
+add_executable(halibut 	
 	biblio.c 
 	bk_html.c 
 	contents.c 
@@ -22,11 +23,13 @@ SET(SOURCES
 	ustring.c
 	version.c 
 	wcwidth.c
-	)
+)
 
-INCLUDE_DIRECTORIES(charset)
-ADD_EXECUTABLE(halibut ${SOURCES})
-TARGET_LINK_LIBRARIES(halibut xtrkcad-charset)
+set_target_properties(
+   halibut
+   PROPERTIES FOLDER HelpDocs
+)
+target_link_libraries(halibut xtrkcad-charset)
 
-ADD_SUBDIRECTORY(charset)
+add_subdirectory(charset)
 
