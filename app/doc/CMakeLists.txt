@@ -71,7 +71,7 @@ if(XTRKCAD_USE_GTK)
 		COMMAND halibut ${halibut_sources}
 		)
 
-	ADD_CUSTOM_TARGET(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html messagefiles)
+	add_custom_target(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html msgfiles)
 
 	install(
 		DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
@@ -91,7 +91,7 @@ if(XTRKCAD_USE_GTK)
 	if (APPLE)
         add_custom_command(
         	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex
-        	DEPENDS help-html ${HALIBUT_SOURCES}
+        	DEPENDS help-html ${halibut_sources}
         	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
         	COMMAND hiutil -Cf XTrackCAD.helpindex -gva -e "IndexPage.html" -e "toc.html" ${CMAKE_CURRENT_BINARY_DIR}/html
         )

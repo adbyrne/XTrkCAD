@@ -54,7 +54,7 @@ add_custom_command(
  	COMMAND genmessages ${GENMESSAGES_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/messages.in ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 )
 
-add_custom_target(messagefiles ALL
+add_custom_target(msgfiles ALL
 	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
 )
 
@@ -64,7 +64,7 @@ install(
 )
 
 set_target_properties(
-	messagefiles
+	msgfiles
 	balloonhelp
 	genmessages
 	genhelp

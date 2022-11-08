@@ -240,7 +240,7 @@ endif()
 
 # This ensures that messages.h has been generated before we build xtrkcad-lib
 add_dependencies(xtrkcad-lib 
-    messagefiles
+    msgfiles
     balloonhelp
 	lines
     genbitmaps
@@ -319,7 +319,7 @@ target_sources(xtrkcad
 		xtrkcad.rc
 )
 add_dependencies(xtrkcad
-    messagefiles
+    msgfiles
     genbitmaps)
     
 target_include_directories(xtrkcad
@@ -355,7 +355,7 @@ target_link_libraries(mkturnout
 )
 
 add_dependencies(mkturnout
-    messagefiles
+    msgfiles
     lines
 )
 
