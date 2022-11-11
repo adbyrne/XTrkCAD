@@ -32,7 +32,6 @@ struct {
 	coOrd pos;
 	int layer;
 	track_p trk;
-	BOOL_T busy;
 } textNoteData;
 
 static paramTextData_t noteTextData = { 300, 150 };
@@ -86,7 +85,6 @@ TextEditCancel( wWin_p junk )
 {
 	ResetIfNotSticky();
 	wHide(textEditW);
-	textNoteData.busy = FALSE;
 }
 
 /**
@@ -99,12 +97,6 @@ TextEditCancel( wWin_p junk )
 static void
 TextEditOK(void *junk)
 {
-	if ( !textNoteData.busy ) {
-		printf( "!textNoteData.busy\n" );
-		// wHide below causes recursion here
-		CHECK( FALSE );
-		return;
-	}
 	track_p trk = textNoteData.trk;
 	if ( trk == NULL ) {
 		// new note
@@ -124,7 +116,6 @@ TextEditOK(void *junk)
 	wHide(textEditW);
 	ResetIfNotSticky();
 	SetFileChanged();
-	textNoteData.busy = FALSE;
 }
 
 
@@ -157,7 +148,6 @@ CreateEditTextNote(char *title, char * textData )
 	FillLayerList((wList_p)textEditPLs[I_LAYER].control);
 	ParamLoadControls(&textEditPG);
 	
-	textNoteData.busy = TRUE;
 	// and show the dialog
 	wShow(textEditW);
 }

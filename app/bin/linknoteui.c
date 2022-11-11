@@ -37,7 +37,6 @@ struct {
 	track_p trk;
 	char title[TITLEMAXIMUMLENGTH];
 	char url[URLMAXIMUMLENGTH];
-	BOOL_T busy;
 } linkNoteData;
 
 static void NoteLinkBrowse(void *junk);
@@ -99,29 +98,6 @@ LinkDlgUpdate(
 {
     switch (inx) {
     case I_URL:
-#ifdef LATER
-		if (strlen(linkNoteData.url) > URLMAXIMUMLENGTH) {
-			DynString message;
-
-			DynStringMalloc(&message, 80);
-			DynStringPrintf(&message, _("The entered URL is too long. The maximum allowed length is %d. Please edit the entered value."), URLMAXIMUMLENGTH);
-			wNoticeEx(NT_ERROR,
-				DynStringToCStr(&message),
-				_("Re-edit"),
-				NULL);
-			DynStringFree(&message);
-		}
-
-        if (IsValidURL(linkNoteData.url) && 
-			(strlen(linkNoteData.url) <= URLMAXIMUMLENGTH))
-		{
-            wControlActive(linkEditPLs[I_OPEN].control, TRUE);
-            ParamDialogOkActive(&linkEditPG, TRUE);
-        } else {
-            wControlActive(linkEditPLs[I_OPEN].control, FALSE);
-            ParamDialogOkActive(&linkEditPG, FALSE);
-        }
-#endif
 		if ( ! IsValidURL( linkNoteData.url ) ) {
 			printf( "URL %s is invalid\n", linkNoteData.url );
 			paramData_p p = &linkEditPLs[I_URL];

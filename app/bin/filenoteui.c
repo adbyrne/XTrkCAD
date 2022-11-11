@@ -57,11 +57,11 @@ static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 // static char *toggleLabels[] = { N_("Copy to archive"), NULL };
 static paramData_t fileEditPLs[] = {
 #define I_ORIGX (0)
-    /*0*/ { PD_FLOAT, &fileNoteData.pos.x, "origx", PDO_DIM, &r_1000_1000, N_("Position X") },
+    /*0*/ { PD_FLOAT, &fileNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position X") },
 #define I_ORIGY (1)
-    /*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
+    /*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-    /*2*/ { PD_DROPLIST, &fileNoteData.layer, "layer", 0, I2VP(150), "Layer", 0 },
+    /*2*/ { PD_DROPLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
     /*3*/ { PD_STRING, &fileNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Title"), 0, 0, sizeof fileNoteData.title },
 #define I_PATH (4)
