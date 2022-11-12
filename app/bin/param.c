@@ -1576,8 +1576,18 @@ static void ParamStringPush( const char * val, void * dp )
 	p->bInvalid = FALSE;
 	ParamHilite( p->group->win, p->control, FALSE );
 
-	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
-		strcpy( (char*)p->valueP, value );
+	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
+		strncpy((char*)p->valueP, value, p->max_string-1);
+		((char *)p->valueP)[p->max_string - 1] = '\0';
+		if (strlen(value) > p->max_string-1) {
+			p->bInvalid = TRUE;
+			wControlSetBalloon( p->control, 0, 0, NULL );
+			wWinPix_t h = wControlGetHeight(p->control);
+			sprintf( message, _("String is too long, Max length is %u"), p->max_string-1 );
+			wControlSetBalloon( p->control, 0, -h*3/4, message );
+			ParamHilite( p->group->win, p->control, TRUE );
+		}
+	}
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
 		// CAST_AWAY_CONST: param 3 should be const but its a big change
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );

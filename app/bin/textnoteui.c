@@ -28,17 +28,21 @@
 #include "shortentext.h"
 #include "track.h" 
 
-static struct extraDataNote_t	noteDataInUI;
+struct {
+	coOrd pos;
+	int layer;
+	track_p trk;
+} textNoteData;
 
 static paramTextData_t noteTextData = { 300, 150 };
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static paramData_t textEditPLs[] = {
 #define I_ORIGX (0)
-	/*0*/ { PD_FLOAT, &noteDataInUI.pos.x, "origx", PDO_DIM, &r_1000_1000, N_("Position X") },
+	/*0*/ { PD_FLOAT, &textNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position X") },
 #define I_ORIGY (1)
-	/*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
+	/*1*/ { PD_FLOAT, &textNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-	/*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, I2VP(150), "Layer", 0 },
+	/*2*/ { PD_DROPLIST, &textNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TEXT (3)
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
@@ -47,34 +51,6 @@ static paramGroup_t textEditPG = { "textEdit", 0, textEditPLs, COUNT( textEditPL
 static wWin_p textEditW;
 
 #define textEntry	((wText_p)textEditPLs[I_TEXT].control)
-
-/**
- * Return the current text 
- * 
- */
-static void GetNoteTextData()
-{
-	int len;
-
-	if (noteDataInUI.noteData.text ) {
-		MyFree(noteDataInUI.noteData.text);
-	}
-	len = wTextGetSize(textEntry);
-	noteDataInUI.noteData.text = (char*)MyMalloc(len + 2);
-	wTextGetText(textEntry, noteDataInUI.noteData.text, len);
-	return;
-}
-
-/**
- * Check validity of entered text
- * 
- * \return always TRUE for testing
- */
-BOOL_T
-IsValidText(char * text)
-{
-	return(TRUE);
-}
 
 
 /**
@@ -93,19 +69,7 @@ TextDlgUpdate(
 	switch (inx) {
 	case I_ORIGX:
 	case I_ORIGY:
-		UpdateText(&noteDataInUI, OR_NOTE, FALSE);
-		break;
-	case I_LAYER:
-		UpdateText(&noteDataInUI, LY_NOTE, FALSE);
-		break;
-	case I_TEXT:
-		/** TODO: this is never called, why doesn't text update trigger this callback? */
-		GetNoteTextData();
-		if (IsValidText(noteDataInUI.noteData.text)) {
-			ParamDialogOkActive(&textEditPG, TRUE);
-		} else {
-			ParamDialogOkActive(&textEditPG, FALSE);
-		}
+		// TODO: Redraw bitmap at new location
 		break;
 	default:
 		break;
@@ -119,9 +83,6 @@ TextDlgUpdate(
 static void
 TextEditCancel( wWin_p junk )
 {
-	if (inDescribeCmd) {
-		UpdateText(&noteDataInUI, CANCEL_NOTE, FALSE);
-	}
 	ResetIfNotSticky();
 	wHide(textEditW);
 }
@@ -136,8 +97,22 @@ TextEditCancel( wWin_p junk )
 static void
 TextEditOK(void *junk)
 {
-	GetNoteTextData();
-	UpdateText(&noteDataInUI, OK_TEXT, FALSE);
+	track_p trk = textNoteData.trk;
+	if ( trk == NULL ) {
+		// new note
+		trk = NewNote( -1, textNoteData.pos, OP_NOTETEXT );
+	}
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	xx->pos = textNoteData.pos;
+	SetTrkLayer( trk, textNoteData.layer );
+
+	int len = wTextGetSize(textEntry);
+	MyFree( xx->noteData.text );
+	xx->noteData.text = (char*)MyMalloc(len + 2);
+	wTextGetText(textEntry, xx->noteData.text, len);
+	
+	SetBoundingBox( trk, xx->pos, xx->pos );
+	DrawNewTrack( trk );
 	wHide(textEditW);
 	ResetIfNotSticky();
 	SetFileChanged();
@@ -152,10 +127,8 @@ TextEditOK(void *junk)
  * \param title IN dialog title
  */
 static void
-CreateEditTextNote(track_p trk, char *title)
+CreateEditTextNote(char *title, char * textData )
 {
-	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-
 	// create the dialog if necessary
 	if (!textEditW) {
 		ParamRegister(&textEditPG);
@@ -169,13 +142,8 @@ CreateEditTextNote(track_p trk, char *title)
 
 	wWinSetTitle(textEditPG.win, MakeWindowTitle(title));
 
-	// initialize the dialog fields
-	noteDataInUI.pos = xx->pos;
-	noteDataInUI.layer = xx->layer;
-	noteDataInUI.trk = trk;
-
 	wTextClear(textEntry);
-	wTextAppend(textEntry, xx->noteData.text );
+	wTextAppend(textEntry, textData );
 	wTextSetReadonly(textEntry, FALSE);
 	FillLayerList((wList_p)textEditPLs[I_LAYER].control);
 	ParamLoadControls(&textEditPG);
@@ -210,13 +178,13 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 	strcpy(str, DynStringToCStr(&statusLine));
 
 	DynStringFree(&statusLine);
-	MyFree(noteText);
+	if ( ! inDescribeCmd )
+		return;
+	textNoteData.pos = xx->pos;
+	textNoteData.layer = GetTrkLayer( trk );
+	textNoteData.trk = trk;
 
-	if (inDescribeCmd) {
-		NoteStateSave(trk);
-
-		CreateEditTextNote(trk, _("Update comment"));
-	}
+	CreateEditTextNote(_("Update comment"), xx->noteData.text );
 }
 
 /**
@@ -225,12 +193,14 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
  * \param xx Note object data
  */
 
-void NewTextNoteUI(track_p trk) {
-	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+void NewTextNoteUI(coOrd pos )
+{
 	char *tmpPtrText = _("Replace this text with your note");
 
-	xx->noteData.text = MyStrdup(tmpPtrText);
+	textNoteData.pos = pos;
+	textNoteData.layer = curLayer;
+	textNoteData.trk = NULL;
 
-	CreateEditTextNote(trk, _("Create Text Note"));
+	CreateEditTextNote(_("Create Text Note"), tmpPtrText );
 }
 

@@ -4,7 +4,7 @@ ORIG 8.000 0.000 0.000
 REDRAW
 RESET
 MESSAGE
-The <Note> command lets you attach notes to various spots on the layout.
+The <Text Note> command lets you attach notes to various spots on the layout.
 END
 STEP
 COMMAND TextNote
@@ -14,22 +14,63 @@ MOUSE 4 9.917 7.167
 MESSAGE
 _________________________________________
 
-When you place a note, the Note editor window is displayed which lets you enter the note.
+When you place a note, the Text Note editor window is displayed which lets you enter the note.
 END
 STEP
-RESET
-MOUSE 6920 9.917 7.167
+#RESET
+#MOUSE 6920 9.917 7.167
+#MOUSE 3336 9.917 7.167
+PARAMETER textEdit ok
 MESSAGE
 _________________________________________
 
-If you click on a note in <Describe> mode the Note editor displays the note.
+If you click on a note in <Describe> mode the Text Note editor displays the note allowing you to modify the note..
 END
 STEP
 COMMAND Describe
 MOUSE 2 9.917 7.167
 MOUSE 4 9.917 7.167
 STEP
-MOUSE 6920 9.917 7.167
+#MOUSE 6920 9.917 7.167
+PARAMETER textEdit ok
+
+MESSAGE
+_________________________________________
+
+You can also create a reference to a file or web link.
+
+Choose the type of link by clicking on the down arrow beside the Note commmand.
+END
+STEP
+
+COMMAND FileNote
+MOUSE 2 9.917 7.167
+MOUSE 3 7.917 7.167
+MOUSE 4 7.917 7.167
+MESSAGE
+_________________________________________
+
+This is a File Note.  You can specify the Title of the File and its location
+END
+STEP
+PARAMETER fileEdit cancel
+MOUSE 6920 7.917 7.167
+RESET
+
+COMMAND LinkNote
+MOUSE 2 7.917 7.167
+MOUSE 3 5.917 7.167
+MOUSE 4 5.917 7.167
+MESSAGE
+_________________________________________
+
+This is a Web Link Note.  You can specify the Title of the Link and its URL
+END
+STEP
+PARAMETER linkEdit cancel
+MOUSE 6920 5.917 7.167
+RESET
+
 REGRESSION START 10 - notes
 NOTE 1 0 0 0 9.917000 7.167000 0 32
 Replace this text with your note
