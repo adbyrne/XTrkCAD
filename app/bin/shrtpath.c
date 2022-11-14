@@ -17,10 +17,8 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <string.h>
 
 #include "shrtpath.h"
 #include "track.h"
@@ -153,7 +151,7 @@ LOG( log_shortPath, 2, ( "  AddPath( T%d:%d.%d D=%0.3f B%d ) -> \n", GetTrkIndex
 	while (1) {
 		if ( ep2>=0 ) {
 			AddTrackToNode( trk, ep1, ep2, dist );
-			dist += GetTrkLength( trk, ep1, -1 ) + GetTrkLength( trk, ep2, -1 );
+			dist += GetTrkLength( trk, ep1, ep2 );
 			if ( DoShortPathFunc( func, "MATCH", SPTC_MATCH, trk, ep2, ep1, dist, data ) ) {
 				trk = NULL;
 				ep1 = -1;
@@ -237,7 +235,6 @@ int FindShortestPath(
 	pathNode_p pNext;
 	int pinx=0;
 	DIST_T minDist;
-	int count;
 	int rc = 0;
 	EPINX_T ep2, epCnt, ep3;
 	static dynArr_t ep_da;
@@ -245,7 +242,6 @@ int FindShortestPath(
 
 	DYNARR_RESET( pathNode_t, pathNode_da );
 	DYNARR_RESET( trackep_t, trackep_da );
-	count = 0;
 
 	if ( !log_shortPathInitted ) {
 		log_shortPath = LogFindIndex( "shortPath" );
@@ -265,8 +261,6 @@ LOG( log_shortPath, 1, ( "FindShortestPath( T%d:%d, %s, ... )\n", GetTrkIndex(tr
 		AddPath( -1, shortPathTrk1, shortPathEP1, -1, 0.0, func, data );
 
 	while (1) {
-		InfoMessage( "%d", ++count );
-
 		/* select next final node */
 		minDist = 0.0;
 		inxCurr = -1;

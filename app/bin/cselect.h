@@ -16,42 +16,51 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef CSELECT_H
 #define CSELECT_H
 
 #include "common.h"
-#include "track.h"
 
 #define defaultCursor wCursorCross
 
 extern wIndex_t selectCmdInx;
 extern wIndex_t moveCmdInx;
 extern wIndex_t rotateCmdInx;
+extern wIndex_t flipCmdInx;
+
+extern long selectMode;
+extern long selectZero;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
-void InvertTrackSelect( void * );
-void OrphanedTrackSelect( void * );
+void InvertTrackSelect( void * unused );
+void OrphanedTrackSelect( void * unused );
 void SetAllTrackSelect( BOOL_T );
-void SelectTunnel( void );
-void SelectBridge( void );
-void SelectTies( void );
+void SelectTunnel( void * unused );
+void SelectBridge( void * unused );
+void SelectRoadbed( void * unused );
+void SelectTies( void * unused );
 void SelectRecount( void );
 void SelectTrackWidth( void* );
-void SelectDelete( void );
+int SelectDelete( void );
+void TrySelectDelete( void );
 void MoveToJoin( track_p, EPINX_T, track_p, EPINX_T );
-void MoveSelectedTracksToCurrentLayer( void );
-void SelectCurrentLayer( void );
-void ClearElevations( void );
+void MoveSelectedTracksToCurrentLayer( void * unused );
+void SelectCurrentLayer( void * unused );
+void DeselectLayer( unsigned int );
+void SelectByIndex( void* string);
+void ClearElevations( void * unused );
 void AddElevations( DIST_T );
-void DoRefreshCompound( void );
+void DoRefreshCompound( void * unused );
 void WriteSelectedTracksToTempSegs( void );
-void DoRescale( void );
+void GetSelectedBounds( coOrd *, coOrd * );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
 void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
 void HighlightSelectedTracks(track_p trk_ignore, BOOL_T keep, BOOL_T invert );
+typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
+void DoSelectedTracks( doSelectedTrackCallBack_t doit );
 
 #endif

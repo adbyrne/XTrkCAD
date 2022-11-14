@@ -18,20 +18,17 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <math.h>
 
 #include "ccurve.h"
 #include "cjoin.h"
 #include "compound.h"
 #include "cstraigh.h"
 #include "cundo.h"
-#include "i18n.h"
-#include "messages.h"
 #include "track.h"
-#include "utility.h"
+#include "draw.h"
+#include "common-ui.h"
 
 #define PTRACE(X)
 
@@ -58,7 +55,8 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 	EPINX_T ep, ep1, ep2, ep2a=-1, ep2b=-1, pointEp0, pointEp1;
 	DIST_T dist, reverseD, pointD;
 	coOrd off, intersectP;
-	coOrd pointP, pointC, pointP1, reverseC, point0;
+	coOrd pointP, pointP1, reverseC, point0;
+//	coOrd pointC;
 	track_p trk, trk1, trk2, trk2a=NULL, trk2b=NULL, pointT;
 	trkSeg_p segP;
 	BOOL_T right;
@@ -92,7 +90,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			Dhlt.normalA = GetAngleAtPoint( Dhlt.normalT, Dhlt.normalP, NULL, NULL );
 			InfoMessage( _("Drag to set angle") );
 			Dhlt.state = 1;
-			pointC = pointP = pointP1 = reverseC = zero;
+//			pointC = pointP = pointP1 = reverseC = zero;
 			return C_CONTINUE;
 		}
 
@@ -351,9 +349,9 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 }
 
 
-#include "bitmaps/hndldto.xpm"
+#include "bitmaps/turnout-design.xpm"
 
 EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
+	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(turnout_design_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
 }

@@ -17,19 +17,18 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_LAYOUT_H
 #define HAVE_LAYOUT_H
 
-#include <stdbool.h>
 #include "common.h"
-#include "misc.h"
 
-
+extern wButton_p backgroundB;		/** background visibility control */
 void SetLayoutFullPath(const char *fileName);
 void LoadLayoutMinRadiusPref(char *scaleName, double defaultValue);
+void LoadLayoutMaxGradePref(char *scaleName, double defaultValue);
 void SetLayoutTitle(char *title);
 void SetLayoutSubtitle(char *title);
 void SetLayoutMinTrackRadius(DIST_T radius);
@@ -38,7 +37,6 @@ void SetLayoutRoomSize(coOrd size);
 void SetLayoutCurScale(SCALEINX_T scale);
 void SetLayoutCurScaleDesc(SCALEDESCINX_T desc);
 void SetLayoutCurGauge(GAUGEINX_T gauge);
-void SetLayoutScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
 void SetLayoutBackGroundFullPath(const char *fileName);
 void SetLayoutBackGroundSize(double size);
 void SetLayoutBackGroundPos(coOrd pos);
@@ -52,11 +50,11 @@ char *GetLayoutFilename(void);
 char *GetLayoutTitle(void);
 char *GetLayoutSubtitle(void);
 DIST_T GetLayoutMinTrackRadius(void);
+ANGLE_T GetLayoutMaxTrackGrade(void);
 SCALEINX_T GetLayoutCurScale(void );
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
-//GAUGEINX_T GetLayoutCurGauge(void);
+void GetLayoutRoomSize(coOrd *roomSize);
 
-ANGLE_T GetLayoutMaxTrackGrade(void);
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
 char *GetLayoutBackGroundFullPath(void);
 double GetLayoutBackGroundSize(void);
@@ -68,7 +66,7 @@ bool HasBackGround(void);
 void LayoutBackGroundInit(BOOL_T clear);
 void LayoutBackGroundLoad(void);
 void LayoutBackGroundSave(void);
-void BackgroundToggleShow(void);
-void DoLayout(void * junk);
+void BackgroundToggleShow(void * unused);
+void DoLayout(void * unused);
 int LoadImageFile(int files,char ** fileName,void * data );
 #endif

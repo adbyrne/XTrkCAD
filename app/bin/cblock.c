@@ -40,30 +40,25 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program; if not, write to the Free Software
- *     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  *  T_BLOCK
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-
+#include "common.h"
 #include "compound.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
-#include "utility.h"
+#include "trkendpt.h"
+#include "common-ui.h"
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
@@ -78,19 +73,20 @@ static void NoDrawString( drawCmd_p d, coOrd p, ANGLE_T a, char * s,
 			  wFont_p fp, FONTSIZE_T fontSize, wDrawColor color ) {}
 static void NoDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm,
 			  wDrawColor color) {}
-static void NoDrawFillPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
-			    wDrawColor color, wDrawWidth width, int fill, int open) {}
+static void NoDrawPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
+			    wDrawColor color, wDrawWidth width, drawFill_e eFillOpt ) {}
 static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
 			      wDrawColor color ) {}
+static void NoDrawRectangle( drawCmd_p d, coOrd orig, coOrd size, wDrawColor color, drawFill_e eFill ) {}
 
 static drawFuncs_t noDrawFuncs = {
-	0,
 	NoDrawLine,
 	NoDrawArc,
 	NoDrawString,
 	NoDrawBitMap,
-	NoDrawFillPoly,
-	NoDrawFillCircle };
+	NoDrawPoly,
+	NoDrawFillCircle,
+	NoDrawRectangle};
 
 static drawCmd_t blockD = {
 	NULL,
@@ -108,10 +104,10 @@ static track_p first_block;
 static track_p last_block;
 
 static paramData_t blockPLs[] = {
-/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof( blockName )},
-/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof( blockScript)}
+/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof( blockName )},
+/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof( blockScript)}
 };
-static paramGroup_t blockPG = { "block", 0, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
+static paramGroup_t blockPG = { "block", 0, blockPLs,  COUNT( blockPLs ) };
 static wWin_p blockW;
 
 static char blockEditName[STR_SHORT_SIZE];
@@ -120,11 +116,11 @@ static char blockEditSegs[STR_LONG_SIZE];
 static track_p blockEditTrack;
 
 static paramData_t blockEditPLs[] = {
-/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(blockEditName)},
-/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(blockEditScript)},
-/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY },
+/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(blockEditName)},
+/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, I2VP(350), N_("Script"), 0, 0, sizeof(blockEditScript)},
+/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, I2VP(350), N_("Segments"), BO_READONLY, 0, sizeof(blockEditSegs) },
 };
-static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
+static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  COUNT( blockEditPLs ) };
 static wWin_p blockEditW;
 
 typedef struct btrackinfo_t {
@@ -140,6 +136,7 @@ static dynArr_t blockTrk_da;
 
 
 typedef struct blockData_t {
+    extraDataBase_t base;
     char * name;
     char * script;
     BOOL_T IsHilite;
@@ -150,7 +147,7 @@ typedef struct blockData_t {
 
 static blockData_p GetblockData ( track_p trk )
 {
-	return (blockData_p) GetTrkExtraData(trk);
+	return GET_EXTRA_DATA( trk, T_BLOCK, blockData_t );
 }
 
 static void DrawBlock (track_p t, drawCmd_p d, wDrawColor color )
@@ -249,7 +246,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 {
 	blockData_p xx = GetblockData(trk);
 	wIndex_t tcount = 0;
-	track_p lastTrk = NULL;
+//	track_p lastTrk = NULL;
 	long listLabelsOption = listLabels;
 
 	LOG( log_block, 1, ("*** DescribeBlock(): trk is T%d\n",GetTrkIndex(trk)))
@@ -307,7 +304,7 @@ static int blockDebug (track_p trk)
 	return(0);
 }
 
-static BOOL_T blockCheckContigiousPath()
+static BOOL_T blockCheckContiguousPath()
 {
 	EPINX_T ep, epCnt, epN;
 	int inx;
@@ -318,7 +315,7 @@ static BOOL_T blockCheckContigiousPath()
 	coOrd endPtOrig = zero;
 	BOOL_T IsConnectedP;
 	trkEndPt_p endPtP;
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 
 	for ( inx=0; inx<blockTrk_da.cnt; inx++ ) {
 		trk = blockTrk(inx).t;
@@ -328,26 +325,25 @@ static BOOL_T blockCheckContigiousPath()
 			trk1 = GetTrkEndTrk(trk,ep);
 			if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
 				/* boundary EP */
-				for ( epN=0; epN<tempEndPts_da.cnt; epN++ ) {
-					dist = FindDistance( GetTrkEndPos(trk,ep), tempEndPts(epN).pos );
-					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - tempEndPts(epN).angle + connectAngle/2.0 );
+				for ( epN=0; epN<TempEndPtsCount(); epN++ ) {
+					endPtP = TempEndPt(epN);
+					dist = FindDistance( GetTrkEndPos(trk,ep), GetEndPtPos(endPtP) );
+					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - GetEndPtAngle(endPtP) + connectAngle/2.0 );
 					if ( dist < connectDistance && angle < connectAngle )
 						break;
 				}
-				if ( epN>=tempEndPts_da.cnt ) {
-					DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
-					endPtP = &tempEndPts(tempEndPts_da.cnt-1);
-					memset( endPtP, 0, sizeof *endPtP );
-					endPtP->pos = GetTrkEndPos(trk,ep);
-					endPtP->angle = GetTrkEndAngle(trk,ep);
+				if ( epN>=TempEndPtsCount() ) {
+					endPtP = TempEndPtsAppend();
+					SetEndPt( endPtP, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );
 					/*endPtP->track = trk1;*/
 					/* These End Points are dummies --
 					   we don't want DeleteTrack to look at
 					   them. */
-					endPtP->track = NULL;
-					endPtP->index = (trk1?GetEndPtConnectedToMe(trk1,trk):-1);
-					endPtOrig.x += endPtP->pos.x;
-					endPtOrig.y += endPtP->pos.y;
+					SetEndPtTrack( endPtP, NULL );
+					// TODO-EPP What is this for?
+					SetEndPtEndPt( endPtP, (trk1?GetEndPtConnectedToMe(trk1,trk):-1) );
+					endPtOrig.x += GetEndPtPos(endPtP).x;
+					endPtOrig.y += GetEndPtPos(endPtP).y;
 				}
 			} else {
 				IsConnectedP = TRUE;
@@ -394,9 +390,9 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	blockData_p xx = GetblockData(t);
 	char *blockName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	blockName = Convert2UTF8(blockName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
 		GetTrkIndex(t), blockName, xx->script)>0;
@@ -427,9 +423,9 @@ static BOOL_T ReadBlock ( char * line )
 		return FALSE;
 	}
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
 
 	DYNARR_RESET( btrackinfo_t , blockTrk_da );
@@ -449,10 +445,10 @@ static BOOL_T ReadBlock ( char * line )
 		}
 	}
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
-	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
-		endPtP = &tempEndPts(ep);
-		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
+	trk = NewTrack(index, T_BLOCK, TempEndPtsCount(), sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt))+1);
+	for ( ep=0; ep<TempEndPtsCount(); ep++) {
+		endPtP = TempEndPt(ep);
+		SetTrkEndPoint( trk, ep, GetEndPtPos(endPtP), GetEndPtAngle(endPtP) );
 	}
 	xx = GetblockData( trk );
 	LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
@@ -602,8 +598,8 @@ static void BlockOk ( void * junk )
 		}
 		/* Need to check that all block elements are connected to each
 		   other... */
-		if (!blockCheckContigiousPath()) {
-			NoticeMessage( _("Block is discontigious!"), _("Ok"), NULL );
+		if (!blockCheckContiguousPath()) {
+			NoticeMessage( _("Block is discontiguous!"), _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( blockW );
 			return;
@@ -611,10 +607,10 @@ static void BlockOk ( void * junk )
 		UndoStart( _("Create block"), "Create block" );
 		/* Create a block object */
 		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
-		trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
-		for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
-			endPtP = &tempEndPts(ep);
-			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
+		trk = NewTrack(0, T_BLOCK, TempEndPtsCount(), sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
+		for ( ep=0; ep<TempEndPtsCount(); ep++) {
+			endPtP = TempEndPt(ep);
+			SetTrkEndPoint( trk, ep, GetEndPtPos(endPtP), GetEndPtAngle(endPtP) );
 		}
 
 		xx = GetblockData( trk );
@@ -694,7 +690,6 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 }
 
 #if 0
-extern BOOL_T inDescribeCmd;
 
 static STATUS_T CmdBlockEdit( wAction_t action, coOrd pos )
 {
@@ -773,7 +768,7 @@ static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 {
 	LOG( log_block, 1, ("*** CmdBlock(%08x,{%f,%f})\n",action,pos.x,pos.y))
 
-	switch ((long)commandContext) {
+	switch (VP2L(commandContext)) {
 	case BLOCK_CREATE: return CmdBlockCreate(action,pos);
 	case BLOCK_EDIT:   return CmdBlockEdit(action,pos);
 	case BLOCK_DELETE: return CmdBlockDelete(action,pos);
@@ -859,13 +854,10 @@ static POS_T blkhiliteBorder;
 static wDrawColor blkhiliteColor = 0;
 static void DrawBlockTrackHilite( void )
 {
-	wPos_t x, y, w, h;
 	if (blkhiliteColor==0)
 		blkhiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	// This is incomplete.  We should be in temp drawing mode and clearing temp draw on UN_HILIGHT
+	DrawRectangle( &tempD, blkhiliteOrig, blkhiliteSize, blkhiliteColor, DRAW_TRANSPARENT );
 }
 
 
@@ -986,11 +978,11 @@ EXPORT void BlockMgmLoad( void )
     static wIcon_p blockI = NULL;
     
     if ( blockI == NULL) 
-        blockI = wIconCreatePixMap( block_xpm );
+        blockI = wIconCreatePixMap( block_xpm[iconSize] );
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_BLOCK) continue;
-        ContMgmLoad( blockI, BlockMgmProc, (void *)trk );
+        ContMgmLoad( blockI, BlockMgmProc, trk );
     }
     
 }
@@ -1000,7 +992,7 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
         AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"), 
-                       wIconCreatePixMap( block_xpm ), LEVEL0_50, 
+                       wIconCreatePixMap( block_xpm[iconSize] ), LEVEL0_50, 
                        IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
 	ParamRegister( &blockPG );
 }

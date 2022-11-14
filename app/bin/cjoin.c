@@ -20,7 +20,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -30,16 +30,14 @@
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "ccornu.h"
-#include "i18n.h"
-#include "utility.h"
-#include "math.h"
-#include "messages.h"
 #include "param.h"
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
+#include "common-ui.h"
 
 static BOOL_T debug = 0;
+/** @logcmd @showrefby join=n cjoin.c */
 static int log_join = 0;
 typedef struct {
 				curveType_e type;
@@ -101,7 +99,7 @@ LOG( log_join, 2, (
 /* 3 - cases: */
 	if (b >= 360.0-connectAngle/2.0 || b <= connectAngle/2.0) {
 /* CASE 1: antiparallel */
-		FindPos( &off, NULL, pos1, pos0, a0, 10000.0 );
+		FindPos( &off, NULL, pos1, pos0, a0, DIST_INF );
 		res->arcR = off.y/2.0;
 		res->arcA1 = 180.0;
 LOG( log_join, 3, ("JwL: parallel: off.y=%0.3f\n", off.y ) )
@@ -115,7 +113,7 @@ LOG( log_join, 3, ("JwL: parallel: off.y=%0.3f\n", off.y ) )
 		}
 	} else if (b >= 180.0-connectAngle/2.0 && b <= 180.0+connectAngle/2.0) {
 /* CASE 2: parallel, possibly colinear? */
-		FindPos( &off, &beyond, pos0, pos1, a0, 100000.0 );
+		FindPos( &off, &beyond, pos0, pos1, a0, DIST_INF );
 LOG( log_join, 3, ("JwL: colinear? off.y=%0.3f\n", off.y ) )
 		if (off.y > -connectDistance && off.y < connectDistance) {
 			res->type = curveTypeStraight;
@@ -389,8 +387,8 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		}
 		if ( (Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE )) == NULL )
 			return C_CONTINUE;
-		if (!CheckTrackLayer( Dj.inp[Dj.joinMoveState].trk ) )
-			return C_CONTINUE;
+		// if (Dj.joinMoveState == 0 && !CheckTrackLayerSilent( Dj.inp[Dj.joinMoveState].trk ) )
+		//	return C_CONTINUE;
 		Dj.inp[Dj.joinMoveState].params.ep = PickUnconnectedEndPoint( pos, Dj.inp[Dj.joinMoveState].trk ); /* CHECKME */
 		if ( Dj.inp[Dj.joinMoveState].params.ep == -1 ) {
 #ifdef LATER
@@ -670,7 +668,7 @@ static paramData_t joinPLs[] = {
 #define joinRadI 0
 	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
 };
-static paramGroup_t joinPG = { "join-fixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
+static paramGroup_t joinPG = { "joinfixed", 0, joinPLs, COUNT( joinPLs ) };
 
 
 
@@ -1037,10 +1035,10 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				Dj.jRes.type==curveTypeCurve
 			) {
 			ANGLE_T na0=0.0,na1=0.0;
-			coOrd end0, end1;
+//			coOrd end0, end1;
 			ANGLE_T a0,a1;
-			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
-			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
+//			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
+//			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
 				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(Dj.jRes.pos[0], pos));
 				na0 = NormalizeAngle( Dj.inp[0].params.angle +
@@ -1062,6 +1060,8 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			}
 			coOrd pos1 = pos;
 			if (AdjustPosToRadius(&pos1,desired_radius+(Dj.jointD[0].x), na0, na1)) {
+				// Make sure this is initialized
+				beyond = 1.0;
 				if (Dj.inp[1].params.type == curveTypeStraight) {
 					FindPos( &off, &beyond, pos1, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 										 FindDistance(Dj.inp[1].params.lineOrig,Dj.inp[1].params.lineEnd) );
@@ -1114,7 +1114,7 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			break;
 		case curveTypeStraight:
 			FindPos( &off, &beyond, pos, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
-					 100000 );
+					 DIST_INF );
 			Translate( &Dj.inp[1].pos, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
 					   off.x );
 			normalAngle = NormalizeAngle( Dj.inp[1].params.angle +
@@ -1177,7 +1177,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 		switch ( Dj.inp[0].params.type ) {
 		case curveTypeStraight:
 			FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
-					 Dj.inp[0].params.angle, 100000.0 );
+					 Dj.inp[0].params.angle, DIST_INF );
 			if (beyond < 0.0) {
 				InfoMessage(_("Beyond end of 1st track"));
 				goto errorReturn;
@@ -1188,7 +1188,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			break;
 		case curveTypeCurve:
 			if (IsCurveCircle(Dj.inp[0].trk)) {
-				d = 10000.0;
+				d = DIST_INF;
 			} else {
 				a = FindAngle( Dj.inp[0].params.arcP, Dj.inp_pos[0] );
 				if (Dj.inp[0].params.ep == 0)
@@ -1204,7 +1204,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			InfoMessage( _("First Track Type not supported for non-Cornu Join") );
 			goto errorReturn;
 		default:
-			AbortProg( "cmdJoin - unknown type[0]" );
+			CHECKMSG( FALSE, ( "cmdJoin - unknown type[0] %d", (int)(Dj.inp[0].params.type) ) );
 		}
 		d -= Dj.jointD[0].d0;
 		if ( d <= minLength ) {
@@ -1220,7 +1220,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			break;
 		case curveTypeCurve:
 			if (IsCurveCircle(Dj.inp[1].trk)) {
-				d = 10000.0;
+				d = DIST_INF;
 			} else {
 				a = FindAngle( Dj.inp[1].params.arcP, Dj.inp_pos[1] );
 				if (Dj.inp[1].params.ep == 0)
@@ -1236,7 +1236,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			InfoMessage( _("Second Track Type not supported for non-Cornu Join") );
 			goto errorReturn;
 		default:
-			AbortProg( "cmdJoin - unknown type[1]" );
+			CHECKMSG( FALSE, ( "cmdJoin - unknown type[1]", Dj.inp[1].params.type ) );
 		}
 		d -= Dj.jointD[1].d0;
 		if ( d <= minLength ) {
@@ -1320,7 +1320,7 @@ errorReturn:
 			tempSegs_da.cnt = 0;
 			break;
 		default:
-			AbortProg( "Bad track type %d", Dj.jRes.type );
+			CHECKMSG( FALSE, ( "Bad track type %d", Dj.jRes.type ) );
 		}
 		if (!ok)
 			Dj.jRes.type = curveTypeNone;
@@ -1428,14 +1428,15 @@ errorReturn:
  */
 
 #include "bitmaps/join.xpm"
-#include "bitmaps/joinline.xpm"
+#include "bitmaps/join-line.xpm"
 
 void InitCmdJoin( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
-	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
-	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(joinline_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	AddMenuButton( menu, CmdJoin, "cmdJoinTrack", _("Join Track"), wIconCreatePixMap(join_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(join_line_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	ButtonGroupEnd();
+	/** @logcmd @showrefby join=n cjoin.c Log Join Lines and Tracks command */
 	log_join = LogFindIndex( "join" );
 }
 

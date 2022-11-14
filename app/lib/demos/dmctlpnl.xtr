@@ -117,7 +117,7 @@ RESET
 MESSAGE
 _________________________________________
 
-For our control panel we will use ¼" lines. 
+For our control panel we will use Â¼" lines. 
 Also, we will use a 1/8" grid to lay out our controls.
 
 First, we will set up the Snap Grid for 1" grid lines and 8 divisions.
@@ -495,7 +495,7 @@ MOUSE 4 8.000 3.000
 MESSAGE
 _________________________________________
 
-Notice how the Snap Grid keeps the main line and siding track parallel and the connecting tracks and spur at a 45° angle.
+Notice how the Snap Grid keeps the main line and siding track parallel and the connecting tracks and spur at a 45Â° angle.
 END
 STEP
 RESET
@@ -562,7 +562,7 @@ Now we'll add push buttons to control the turnouts.
 END
 STEP
 ORIG 1 0.0000000 4.000000
-HOTBARSELECT Switch	¼" Push Button	 
+HOTBARSELECT Switch	Â¼" Push Button	 
 MOUSE 2 2.750 6.000
 MOUSE 4 2.750 6.000
 BIGPAUSE
@@ -607,7 +607,7 @@ MOUSE 2 2.953 7.344
 MOUSE 4 1.625 5.578
 MESSAGE
 
-We rotate the signals by Shift-Right-Click and select 90° CW on the popup menu.  We can not show the popup menu in demo mode, but will simulate the effect.
+We rotate the signals by Shift-Right-Click and select 90Â° CW on the popup menu.  We can not show the popup menu in demo mode, but will simulate the effect.
 END
 BIGPAUSE
 MENU 1.625 5.578 "Structure Rotate" "90  CW"
@@ -712,20 +712,20 @@ MESSAGE
 Now for some touch-ups.
 
 Notice when the line meet at an angle there is a gap.
-We will fill this gap with the ¼" dot.
+We will fill this gap with the Â¼" dot.
 
 Note: Win95/Win98/WinME does not support drawing lines with flat end-caps, but only with round end-caps.
 Users on those platforms will not see the gap.
 END
 STEP
 ORIG 1 2.000 4.000
-HOTBARSELECT Symbols	¼" DOT	 
+HOTBARSELECT Symbols	Â¼" DOT	 
 MOUSE 2 3.000 5.000
 MOUSE 4 3.000 5.000
 BIGPAUSE
 MOUSE 8200 3.000 5.000
 ORIG 1 8.000 4.000
-HOTBARSELECT Symbols	¼" DOT	 
+HOTBARSELECT Symbols	Â¼" DOT	 
 MOUSE 2 9.000 5.000
 MOUSE 4 9.000 5.000
 BIGPAUSE
@@ -736,7 +736,7 @@ _________________________________________
 
 Add an arrow head to indicate the tracks that connect to the rest of the layout.
 
-The second arrow will be flipped 180°"
+The second arrow will be flipped 180Â°"
 END
 STEP
 HOTBARSELECT Symbols	Arrow	 
@@ -755,7 +755,7 @@ MOUSE 6920 0.500 6.000
 #MESSAGE
 #_________________________________________
 #
-#Rotate the arrow head by 180° and move into position.
+#Rotate the arrow head by 180Â° and move into position.
 #END
 #MOUSE 2 0.500 6.000
 #MOUSE 4 0.500 6.000
@@ -776,10 +776,12 @@ And add some labels.
 END
 STEP
 COMMAND Text
-PARAMETER text Fontsize 0 18
+PARAMETER text fontsize 0 18
+PARAMETER text boxed 0
 PARAMETER GROUP text
-PARAMETER text Fontsize -1 48
-PARAMETER text Color 0
+PARAMETER text fontsize -1 48
+PARAMETER text boxed 0
+PARAMETER text color 0
 MOUSE 2 4.500 6.969
 MOUSE 4 4.391 6.672
 KEYSTATE 2
@@ -792,9 +794,9 @@ MOUSE 29704 4.391 6.672
 MOUSE 2 4.500 6.656
 MOUSE 4 4.812 6.625
 MOUSE 3336 5.156 6.766
-PARAMETER text Fontsize -1 48
-PARAMETER text Fontsize 11 24
-PARAMETER text Fontsize -1 24
+PARAMETER text fontsize -1 48
+PARAMETER text fontsize 11 24
+PARAMETER text fontsize -1 24
 MOUSE 2 0.500 5.016
 MOUSE 4 0.641 5.016
 KEYSTATE 2
@@ -806,7 +808,7 @@ MOUSE 29704 1.312 5.016
 MOUSE 27656 1.312 5.016
 MOUSE 25864 1.312 5.016
 MOUSE 3336 3.031 3.859
-PARAMETER text Fontsize -1 24
+PARAMETER text fontsize -1 24
 PARAMETER GROUP text
 MOUSE 2 10.375 5.047
 MOUSE 4 10.125 5.047
@@ -825,11 +827,11 @@ MOUSE 28424 10.125 5.047
 MOUSE 2 10.094 5.125
 MOUSE 4 9.891 5.000
 MOUSE 3336 9.906 5.031
-PARAMETER text Fontsize -1 24
+PARAMETER text fontsize -1 24
 PARAMETER GROUP text
 CLEAR
 MESSAGE
-We want to print our control panel onto a 8½x11 page, but the control panel is a bit too wide.
+We want to print our control panel onto a 8Â½x11 page, but the control panel is a bit too wide.
 
 Lets tighten it up a bit.
 
@@ -987,7 +989,7 @@ STRUCTURE 28 0 0 0 0 DEMO 2 5.437000 4.750000 0 0.000000 "LED 	T1 Red LED	 "
 	L3 0 0.000000 0.059000 0.000000 0 -0.059000 0.000000 0
 	L3 0 0.000000 0.000000 0.059000 0 0.000000 -0.059000 0
 	END
-STRUCTURE 29 0 0 0 0 DEMO 2 2.750000 6.000000 0 0.000000 "Switch	¼"" Push Button	 "
+STRUCTURE 29 0 0 0 0 DEMO 2 2.750000 6.000000 0 0.000000 "Switch	Â¼"" Push Button	 "
 	D 0.000000 0.000000
 	G3 16448250 0.000000 0.125000 0.000000 0.000000 0
 	A3 0 0.013889 0.125000 0.000000 0.000000 0 0.000000 360.000000
@@ -995,7 +997,7 @@ STRUCTURE 29 0 0 0 0 DEMO 2 2.750000 6.000000 0 0.000000 "Switch	¼"" Push Button
 	L3 0 0.000000 0.125000 0.000000 0 -0.125000 0.000000 0
 	L3 0 0.000000 0.000000 0.125000 0 0.000000 -0.125000 0
 	END
-STRUCTURE 30 0 0 0 0 DEMO 2 2.500000 5.500000 0 0.000000 "Switch	¼"" Push Button	 "
+STRUCTURE 30 0 0 0 0 DEMO 2 2.500000 5.500000 0 0.000000 "Switch	Â¼"" Push Button	 "
 	D 0.000000 0.000000
 	G3 16448250 0.000000 0.125000 0.000000 0.000000 0
 	A3 0 0.013889 0.125000 0.000000 0.000000 0 0.000000 360.000000
@@ -1003,7 +1005,7 @@ STRUCTURE 30 0 0 0 0 DEMO 2 2.500000 5.500000 0 0.000000 "Switch	¼"" Push Button
 	L3 0 0.000000 0.125000 0.000000 0 -0.125000 0.000000 0
 	L3 0 0.000000 0.000000 0.125000 0 0.000000 -0.125000 0
 	END
-STRUCTURE 31 0 0 0 0 DEMO 2 8.000000 6.000000 0 0.000000 "Switch	¼"" Push Button	 "
+STRUCTURE 31 0 0 0 0 DEMO 2 8.000000 6.000000 0 0.000000 "Switch	Â¼"" Push Button	 "
 	D 0.000000 0.000000
 	G3 16448250 0.000000 0.125000 0.000000 0.000000 0
 	A3 0 0.013889 0.125000 0.000000 0.000000 0 0.000000 360.000000
@@ -1011,7 +1013,7 @@ STRUCTURE 31 0 0 0 0 DEMO 2 8.000000 6.000000 0 0.000000 "Switch	¼"" Push Button
 	L3 0 0.000000 0.125000 0.000000 0 -0.125000 0.000000 0
 	L3 0 0.000000 0.000000 0.125000 0 0.000000 -0.125000 0
 	END
-STRUCTURE 32 0 0 0 0 DEMO 2 8.250000 5.500000 0 0.000000 "Switch	¼"" Push Button	 "
+STRUCTURE 32 0 0 0 0 DEMO 2 8.250000 5.500000 0 0.000000 "Switch	Â¼"" Push Button	 "
 	D 0.000000 0.000000
 	G3 16448250 0.000000 0.125000 0.000000 0.000000 0
 	A3 0 0.013889 0.125000 0.000000 0.000000 0 0.000000 360.000000
@@ -1019,7 +1021,7 @@ STRUCTURE 32 0 0 0 0 DEMO 2 8.250000 5.500000 0 0.000000 "Switch	¼"" Push Button
 	L3 0 0.000000 0.125000 0.000000 0 -0.125000 0.000000 0
 	L3 0 0.000000 0.000000 0.125000 0 0.000000 -0.125000 0
 	END
-STRUCTURE 33 0 0 0 0 DEMO 2 5.937000 5.000000 0 0.000000 "Switch	¼"" Push Button	 "
+STRUCTURE 33 0 0 0 0 DEMO 2 5.937000 5.000000 0 0.000000 "Switch	Â¼"" Push Button	 "
 	D 0.000000 0.000000
 	G3 16448250 0.000000 0.125000 0.000000 0.000000 0
 	A3 0 0.013889 0.125000 0.000000 0.000000 0 0.000000 360.000000
@@ -1027,7 +1029,7 @@ STRUCTURE 33 0 0 0 0 DEMO 2 5.937000 5.000000 0 0.000000 "Switch	¼"" Push Button
 	L3 0 0.000000 0.125000 0.000000 0 -0.125000 0.000000 0
 	L3 0 0.000000 0.000000 0.125000 0 0.000000 -0.125000 0
 	END
-STRUCTURE 34 0 0 0 0 DEMO 2 5.687000 4.500000 0 0.000000 "Switch	¼"" Push Button	 "
+STRUCTURE 34 0 0 0 0 DEMO 2 5.687000 4.500000 0 0.000000 "Switch	Â¼"" Push Button	 "
 	D 0.000000 0.000000
 	G3 16448250 0.000000 0.125000 0.000000 0.000000 0
 	A3 0 0.013889 0.125000 0.000000 0.000000 0 0.000000 360.000000
@@ -1105,11 +1107,11 @@ STRUCTURE 40 0 0 0 0 DEMO 2 7.500000 4.625000 0 90.000000 "Signals 	Sgl Signal	1
 	L3 0 0.027778 0.000000 -0.109375 0 0.000000 -0.600000 0
 	L3 0 0.027778 -0.100000 -0.600000 0 0.100000 -0.600000 0
 	END
-STRUCTURE 41 0 0 0 0 DEMO 2 3.000000 5.000000 0 0.000000 "Symbols	¼"" DOT	 "
+STRUCTURE 41 0 0 0 0 DEMO 2 3.000000 5.000000 0 0.000000 "Symbols	Â¼"" DOT	 "
 	D 0.000000 0.000000
 	G3 0 0.000000 0.125000 0.000000 0.000000 0
 	END
-STRUCTURE 42 0 0 0 0 DEMO 2 7.750000 5.000000 0 0.000000 "Symbols	¼"" DOT	 "
+STRUCTURE 42 0 0 0 0 DEMO 2 7.750000 5.000000 0 0.000000 "Symbols	Â¼"" DOT	 "
 	D 0.000000 0.000000
 	G3 0 0.000000 0.125000 0.000000 0.000000 0
 	END

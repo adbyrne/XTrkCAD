@@ -17,30 +17,13 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <errno.h>
-#include <string.h>
-
-#ifdef WINDOWS
-    #include "include/dirent.h"
-    #include <direct.h>
-    #define unlink(a) _unlink((a))
-    #define rmdir(a) _rmdir((a))
-#else
-    #include <dirent.h>
-    #include <unistd.h>
-    #include <sys/stat.h>
-    #include <sys/types.h>
-#endif
-
-#include <wlib.h>
 #include "directory.h"
 #include "dynstring.h"
-#include "i18n.h"
-#include "messages.h"
 #include "misc.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  * Safe Create Dir
@@ -54,11 +37,7 @@ BOOL_T SafeCreateDir(const char *dir)
 {
     int err;
 
-#ifdef WINDOWS
-    err = _mkdir(dir);
-#else
     err = mkdir(dir, 0755);
-#endif
     if (err < 0) {
         if (errno != EEXIST) {
             NoticeMessage(MSG_DIR_CREATE_FAIL,

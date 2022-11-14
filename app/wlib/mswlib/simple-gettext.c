@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /* This is a simplified version of gettext written by Ulrich Drepper.
@@ -224,7 +224,7 @@ load_domain( const char *filename )
     to_read = size;
     read_ptr = (char *) data;
     do {
-	unsigned long int nb = fread( read_ptr, 1, to_read, fp );
+	unsigned long int nb = (unsigned int)fread( read_ptr, 1, to_read, fp );
 	if( nb < to_read ) {
 	    fclose (fp);
 	    free(data);
@@ -341,7 +341,7 @@ get_string( struct loaded_domain *domain, u32 idx )
       domain->mapped[idx] = 1;
 
       plen = strlen (p);
-      buf = utf8_to_native (p, plen, -1);
+      buf = utf8_to_native (p, (unsigned int)plen, -1);
       buflen = strlen (buf);
 	  if (buflen <= plen){
         strcpy (p, buf);
@@ -392,7 +392,7 @@ gettext( const char *msgid )
     /* Locate the MSGID and its translation.  */
     if( domain->hash_size > 2 && domain->hash_tab ) {
 	/* Use the hashing table.  */
-	u32 len = strlen (msgid);
+	u32 len = (u32)strlen (msgid);
 	u32 hash_val = hash_string (msgid);
 	u32 idx = hash_val % domain->hash_size;
 	u32 incr = 1 + (hash_val % (domain->hash_size - 2));
@@ -444,7 +444,7 @@ gettext( const char *msgid )
 	else if (cmp_val > 0)
 	    bottom = act + 1;
 	else
-	    return (char *)get_string( domain, act );
+	    return (char *)get_string( domain, (int)(act) );
     }
 
   not_found:

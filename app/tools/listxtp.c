@@ -19,7 +19,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -148,8 +148,10 @@ main( int argc, char **argv )
 						/*
 						 * if found, store the restof the line and the filename
 						 */
+						char *bp;
 						buffer[ strlen( buffer ) - 1 ] = '\0';
-						sprintf( buffer, "%s (%s)", buffer + strlen( CONTENTSCOMMAND ) + 1, ent->d_name );
+						bp = buffer;
+						sprintf( buffer, "%s (%s)", bp + strlen( CONTENTSCOMMAND ) + 1, ent->d_name );
 						results[ cnt ] = malloc( strlen( buffer ) + 1 );
 						strcpy( results[ cnt ], buffer );
 						cnt++;

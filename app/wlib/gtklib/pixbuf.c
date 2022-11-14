@@ -65,7 +65,7 @@ GdkPixbuf* wlibMakePixbuf(
         pixmapData = (char**)g_malloc((3+ip->h) * sizeof *pixmapData);
         pixmapData[0] = line0;
         rgb = wDrawGetRGB(ip->color);
-        sprintf(line0, " %d %d 2 1", ip->w, ip->h);
+        sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
         sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb>>16)&0xFF, (rgb>>8)&0xFF,
                 rgb&0xFF);
         pixmapData[1] = ". c None s None";

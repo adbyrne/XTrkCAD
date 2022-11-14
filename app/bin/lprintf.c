@@ -17,26 +17,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#ifndef WINDOWS
-#include <time.h>
-#else
-#include <time.h>
-#include <sys/timeb.h>
-#endif
 
 #include "custom.h"
 #include "fileio.h"
-#include "messages.h"
 #include "paths.h"
 #include "track.h"
+#include "common-ui.h"
 
 
 /****************************************************************************
@@ -117,7 +105,7 @@ EXPORT void LogSet( char * name, int level )
 }
 
 
-EXPORT int LogFindIndex( char * name )
+EXPORT int LogFindIndex( const char * name )
 {
 	int inx;
 	for ( inx=0; inx<logTable_da.cnt; inx++ )
@@ -127,7 +115,7 @@ EXPORT int LogFindIndex( char * name )
 }
 
 EXPORT void LogPrintf(
-		char * format,
+		const char * format,
 		... )
 {
 	va_list ap;

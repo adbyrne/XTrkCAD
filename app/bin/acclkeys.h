@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -62,6 +62,7 @@
 #define ACCL_DELETE		(WCTL+'d')
 #define ACCL_TUNNEL		(WCTL+WSHIFT+'t')
 #define ACCL_BRIDGE     (0)
+#define ACCL_ROADBED    (0)
 #define ACCL_TIES       (0)
 #define ACCL_HNDLDTO	(WCTL+WSHIFT+'i')
 #define ACCL_TEXT		(WCTL+WSHIFT+'x')
@@ -124,6 +125,7 @@
 #define ACCL_IMPORT		(WALT+WCTL+'i')
 #define ACCL_IMPORT_MOD	(0)
 #define ACCL_EXPORTDXF	(0)
+#define ACCL_EXPORTSVG	(0)
 #define ACCL_LOOSEN		(WCTL+WSHIFT+'k')
 #define ACCL_GROUP		(WCTL+WSHIFT+'g')
 #define ACCL_UNGROUP	(WCTL+WSHIFT+'u')

@@ -17,37 +17,13 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef CUSTOM_H
 #define CUSTOM_H
 
-#include "wlib.h"
-#include "misc.h"
-
-#define ICON_WIDTH		(64)
-#define ICON_HEIGHT		(64)
-
-#define BG_SELECT		(0)
-#define BG_ZOOM			(1)
-#define BG_UNDO			(2)
-#define BG_EASE			(3)
-#define BG_TRKCRT		(4)
-#define BG_TRKMOD		(5)
-#define BG_TRKGRP		(6)
-#define BG_MISCCRT		(7)
-#define BG_RULER		(8)
-#define BG_LAYER		(9)
-#define BG_HOTBAR		(10)
-#define BG_SNAP			(11)
-#define BG_TRAIN		(12)
-#define BG_COUNT		(13)
-#define BG_FILE			(14)
-#define BG_CONTROL		(15)
-#define BG_EXPORTIMPORT (16)
-#define BG_BIGGAP		(1<<8)
-extern int cmdGroup;
+#include "common.h"
 
 extern char * sProdName;
 extern char * sProdNameLower;
@@ -66,12 +42,14 @@ extern char * sClipboardF;
 extern char * sParamQF;
 extern char * sUndoF;
 extern char * sAuditF;
+extern char * sTipF;
 
 extern char * sSourceFilePattern;
 extern char * sSaveFilePattern;
 extern char * sImageFilePattern;
 extern char * sImportFilePattern;
 extern char * sDXFFilePattern;
+extern char * sSVGFilePattern;
 extern char * sRecordFilePattern;
 extern char * sNoteFilePattern;
 extern char * sLogFilePattern;
@@ -125,8 +103,10 @@ void InitCmdPan( wMenu_p menu );
 void InitCmdPan2( wMenu_p menu );
 void InitCmdDelete( void );
 void InitCmdSplit( wMenu_p menu );
+void InitCmdTies( void );
 void InitCmdTunnel( void );
 void InitCmdBridge( void );
+void InitCmdRoadbed( void );
 void InitCmdRuler( wMenu_p menu );
 
 void InitCmdParallel( wMenu_p menu );
@@ -140,8 +120,7 @@ void InitCmdNote();
 void InitCmdUndo( void );
 void InitCmdStruct( wMenu_p menu );
 void InitCmdAboveBelow( void );
-void InitCmdEnumerate( void );
-void InitCmdExport( void );
+//void InitCmdEnumerate( void );
 void InitCmdEasement( void );
 
 char * MakeWindowTitle( char * );
@@ -151,7 +130,7 @@ void InitLayers( void );
 void InitHotBar( void );
 void InitCarDlg( void );
 BOOL_T Initialize( void );
-void DoEasementRedir( void );
+void DoEasementRedir( void * unused );
 void DoStructDesignerRedir( void );
 void InitNewTurnRedir( wMenu_p );
 

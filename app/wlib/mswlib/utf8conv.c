@@ -19,7 +19,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <malloc.h>
@@ -43,7 +43,7 @@
 bool
 wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength)
 {
-    unsigned int cnt = 2 * (strlen(inString) + 1);
+    unsigned int cnt = 2 * (unsigned int)(strlen(inString) + 1);
     char *tempBuffer = malloc(cnt);
 
     // convert to wide character (UTF16)
@@ -81,7 +81,7 @@ wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength)
 bool
 wUTF8ToSystem(const char *inString, char *outString, unsigned outStringLength)
 {
-    unsigned int cnt = 2 * (strlen(inString) + 1);
+    unsigned int cnt = 2 * (int)(strlen(inString) + 1);
     char *tempBuffer = malloc(cnt);
 
     // convert to wide character (UTF16)

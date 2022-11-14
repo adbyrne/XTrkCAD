@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
@@ -153,7 +153,7 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 				*cp++ = 'n';
 
 				/* read a line */
-				if (!fgets( cp, (sizeof(line)) - (cp-line), inFile )) {
+				if (!fgets( cp, (int)((sizeof(line)) - (cp-line)), inFile) ) {
 					return;
 				}
 				lineNo++;
@@ -171,7 +171,7 @@ void process( mode_e mode, FILE * inFile, char *fileName )
 			if (strchr(line, '"'))
 			{
 				printf("N_(\"");
-				len = strlen(line);
+				len = (int)(strlen(line));
 				for (i = 0; i < len; i++)
 				{
 					/* Escape double quotation marks */

@@ -17,17 +17,18 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_CTRAIN_H
 #define HAVE_CTRAIN_H
 
 #include "common.h"
-#include "include/paramfile.h"
-#include "track.h"
+#include "track.h" //- traverseTrack
 
 extern wIndex_t trainCmdInx;
+
+extern long trainPause;
 
 struct carItem_t;
 typedef struct carItem_t carItem_t;
@@ -39,9 +40,10 @@ typedef struct {
 
 extern carItem_p currCarItemPtr;
 extern wControl_p newCarControls[2];
-void DoCarDlg( void );
+void DoCarDlg( void * unused );
 BOOL_T CarItemRead( char * );
 track_p NewCar( wIndex_t, carItem_p, coOrd, ANGLE_T );
+void UncoupleCars( track_p, int );
 void CarGetPos( track_p, coOrd *, ANGLE_T * );
 void CarSetVisible( track_p );
 void CarItemUpdate( carItem_p );
@@ -57,6 +59,13 @@ void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
 void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *, BOOL_T, track_p );
+
+BOOL_T WriteCars( FILE * );
+void ClearCars( void );
+void CarDlgAddProto( void );
+void CarDlgAddDesc( void );
+void AttachTrains( void );
+
 BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
 BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
 enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);

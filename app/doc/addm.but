@@ -16,91 +16,107 @@
 
 The \f{Add Menu} has all the actions related to adding track pieces to the layout.
 
-\dd \f{Circle Track} - place a circle of track by selecting radius, tangent and or center (\K{cmdCircle}).
+\dd \i\f{Straight Track} \c{Ctrl+G} - lay straight track pieces of arbitrary lengths
 
 \u000
 
-\dd \f{Curved Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}).
+\dd \i\f{Curve Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}).
+
+\dd \G{png.d/maddcurve.png}
 
 \u000
 
-\dd \f{Hand-laid Turnout} - lay a turnout in place on the layout. (\K{cmdHandLaidTurnout})
+\dd \i\f{Circle Track} \I{Track, Circle} - place a circle of track by selecting radius, tangent and or center (\K{cmdCircle}).
+
+\dd \G{png.d/maddcircle.png}
 
 \u000
 
-\dd \f{Helix} - Add a helix. (\K{cmdHelix})
+\dd \i\f{Parallel} - \I{Parallel Track} \I{Track, Parallel} \I{Parallel Line} \I{Line, Parallel}
+create parallel track or line to existing flex-track, straight or curved track. (\K{cmdParallel})
+
+\dd \G{png.d/maddparallel.png}
 
 \u000
 
-\dd \f{Parallel} - create parallel track or line to existing flex-track, straight or curved track. (\K{cmdParallel})
+\dd \i\f{Predefined Track} \I{Track, Predefined} \c{Ctrl+T} - select a turnout or a piece of fixed track and place on layout.
 
 \u000
 
-\dd \f{Straight Track} - lay straight track pieces of arbitrary lengths
+\dd \i\f{Hand-laid Turnout} \I{Turnout, Hand-laid} \c{Ctrl+Shift+I} - lay a turnout in place on the layout. (\K{cmdHandLaidTurnout})
 
 \u000
 
-\dd \f{Structure} - Add a predefined structure to the layout.
+\dd \i\f{Structure} \c{Ctrl+Shift+C} - Add a predefined structure to the layout.
 
 \u000
 
-\dd \f{Predefined Track} - select a turnout or a piece of fixed track and place on layout.
+\dd \i\f{Helix} \c{Ctrl+Shift+H} - Add a helix. (\K{cmdHelix})
 
 \u000
 
-\dd \f{Custom Turntable} - Place a turntable. (\K{cmdTurntable})
+\dd \i\f{Custom Turntable} \I{Turntable, Custom} \c{Ctrl+Shift+N} - Place a turntable. (\K{cmdTurntable})
 
 \u000
 
-\dd \f{Block} - Create a block. (\K{cmdBlock})
+\dd \i\f{Control Element} - Create a control element.
 
 \u000
 
-\dd \f{Switchmotor} - Create a switchmotor. (\K{cmdSwitchmotor})
+\dd \i\f{Block} \I{Control Element, Block} - Create a block. (\K{cmdBlock})
 
 \u000
 
-\dd \f{Signal} - Create a signal. (\K{cmdSignal})
+\dd \i\f{Switchmotor} \I{Control Element, Switchmotor} - Create a switchmotor. (\K{cmdSwitchmotor})
 
 \u000
 
-\dd \f{Control} - Create a control. (\K{cmdControl})
+\dd \i\f{Signal} \I{Control Element, Signal} - Create a signal. (\K{cmdSignal})
 
 \u000
 
-\dd \f{Sensor} - Create a sensor. (\K{cmdSensor})
+\dd \i\f{Control} \I{Control Element, Control} - Create a control. (\K{cmdControl})
+
+\u000
+
+\dd \i\f{Sensor} \I{Control Element, Sensor} - Create a sensor. (\K{cmdSensor})
+
+\rule
 
 \S{cmdCircle} Circle Track
 
-\G{png.d/bcircle.png}
+\G{png.d/maddcircle.png}
 
-A circle track is a special form of a curved track that extends 360\u00B0 and has no endpoints.  The three methods (with their Shortcut keys) used to create a Circle Track are:
+A circle track \I{Circle Track} \I{Track, Circle} is a special form of a curved track that extends 360\u00B0 and has no endpoints.
+The drop down menu, which allows selection of the Circle Track creation method, is invoked from the down arrow button located on the right side the Circle track button.
 
-\u000
-
-\dd (\K{cmdCircleFixedRadius}). Use the Fixed Radius specified on the \e{Circle Radius} control displayed on the Status Bar (\K{mainW}).  
-\c{Left-Drag} the Circle track into position.
-
-\u000
-
-\dd (\K{cmdCircleTangent}). \c{Left-Drag} from tangent point (Edge) of the Circle track to the Center.
-
-\u000
-
-\dd (\K{cmdCircleCenter}). \c{Left-Drag} from the Center of the Circle track to the edge.
-
-\u000
-
-A drop down menu, which allows selection of the Circle Track creation method, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Circle track button. 
-Dependent upon previous selection, the Circle Track button will look like \G{png.d/bcircl1.png}, \G{png.d/bcircl2.png} or \G{png.d/bcircl3.png}.
+\dd \G{png.d/bcircle.png}
 
 \dd \G{png.d/bmcircle.png}
 
 \dd \e{Circle Track Button Menu}
 
+The three methods (with their Icons and Shortcut keys) used to create a Circle Track are:
+
+\u000
+
+\dd \G{png.d/bcircl1.png} (\K{cmdCircleFixedRadius}) \c{Control+8} - Use the Fixed Radius specified on the \i\e{Circle Radius}
+control displayed on the Status Bar (\K{mainW}). \c{Left-Drag} the Circle track into position.
+
+\u000
+
+\dd \G{png.d/bcircl2.png} (\K{cmdCircleTangent}) \c{Control+9} - \c{Left-Drag} from tangent point (Edge) of the Circle track to the Center.
+
+\u000
+
+\dd \G{png.d/bcircl3.png} (\K{cmdCircleCenter}) \c{Control+0} - \c{Left-Drag} from the Center of the Circle track to the edge.
+
+\u000
+
 If Snap Grid (\K{cmdGrid}) is enabled then circle centers will be constrained to the grid.
 
-Circle tracks are useful for fitting curves into corners and other tight places.  They're also handy when establishing an initial layout and finding out "what will fit".
+Circle tracks are useful for fitting curves into corners and other tight places.  They're also handy when establishing an
+initial layout and finding out "what will fit".
 
 You can join to and from circles, after which they become curved tracks.
 
@@ -110,8 +126,8 @@ You can join to and from circles, after which they become curved tracks.
 
 \G{png.d/bcircl1.png}
 
-(\c{Control-8}) Use the Fixed Radius specified on the \e{Circle Radius} control displayed on the Status Bar (\K{mainW}).  
-\c{Left-Drag} the Circle track into position. 
+(\c{Ctrl+8}) Use the Fixed Radius specified on the \i\e{Circle Radius} control displayed on the Status Bar (\K{mainW}).
+\c{Left-Drag} the Circle track into position.
 
 \rule
 
@@ -119,7 +135,7 @@ You can join to and from circles, after which they become curved tracks.
 
 \G{png.d/bcircl2.png}
 
-(\c{Control-9}) \c{Left-Drag} from tangent point (Edge) of the Circle track to the Center.
+(\c{Ctrl+9}) \c{Left-Drag} from tangent point (Edge) of the Circle track to the Center.
 
 \rule
 
@@ -127,71 +143,82 @@ You can join to and from circles, after which they become curved tracks.
 
 \G{png.d/bcircl3.png}
 
-(\c{Control-0}) \c{Left-Drag} from the Center of the Circle track to the edge.
+(\c{Ctrl+0}) \c{Left-Drag} from the Center of the Circle track to the edge.
 
 \rule
 
 \S{cmdCurve} Curved Track
 
-\G{png.d/bcurve.png}
+\G{png.d/maddcurve.png}
 
-Creating a curve is a two step operation.
+Creating a curve is a two step operation. You will select a point and then \c{Left-Drag} to specify the control point depending on the drawing method.
 
-The five methods (with their Shortcut keys) used to create a Curved Track are:
+A drop-down menu, which allows selection of the Curved Track creation method, is invoked from the down arrow button
+located on the right side the Curved track button.
 
-\dd
-
-\dd \K{cmdCurveEndPt}. Drag out the end and then set its radius by dragging the endpoint.
-
-\u000
-
-\dd \K{cmdCurveTangent}. Drag from the an endpoint to the center and then drag the second enpoint around that center.
-
-\u000
-
-\dd \K{cmdCurveCenter}. Drag from the Center of the Curved track to one of the endpoints. Position the second endpoint around the center.
-
-\u000
-
-\dd \K{cmdCurveChord}. Drag from one endpoint to the other endpoint to form the Chord of the Curve.  Drag the arc out to form the Curve.
-
-\u000
-
-\dd \K{cmdBezier}. Construct a Bezier by placing its four control points.
-
-\u000
-
-A drop-down menu, which allows selection of the Curved Track creation method, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Curved track button. Dependent upon previous selection, the Curved Track button will look like \G{png.d/bcurve1.png}, \G{png.d/bcurve2.png}, \G{png.d/bcurve3.png}, \G{png.d/bcurve4.png}, \G{png.d/bezier.png} or \G{png.d/bcornu.png}.
+\dd \G{png.d/bcurve.png}
 
 \dd \G{png.d/bmcurved.png}
 
 \dd \e{Curved Track Button Menu}
 
-For all but the Bezier Curve, two Red arrow heads will be drawn after the first step to indicate where you can \c{Left-Drag} to complete the second step.
+The six methods (with their Shortcut keys) used to create a Curved Track are:
 
-A straight track will be created if the second endpoint is lined up with the first endpoint except for Bezier tracks.
+\dd
+
+\dd \G{png.d/bcurve1.png} \K{cmdCurveEndPt} \c{Control+4} - \I{End Point, Curved Track} \I{Curved Track, End Point}
+Drag out the end and then set its radius by dragging the endpoint.
+
+\u000
+
+\dd \G{png.d/bcurve2.png} \K{cmdCurveTangent} \c{Control+5} - \I{Tangent, Curved Track} \I{Curved Track, Tangent}
+Drag from the an endpoint to the center and then drag the second enpoint around that center.
+
+\u000
+
+\dd \G{png.d/bcurve3.png} \K{cmdCurveCenter} \c{Control+6} - \I{Center, Curved Track} \I{Curved Track, Center}
+Drag from the Center of the Curved track to one of the endpoints. Position the second endpoint around the center.
+
+\u000
+
+\dd \G{png.d/bcurve4.png} \K{cmdCurveChord} \c{Control+7} - \I{Chord, Curved Track} \I{Curved Track, Chord}
+Drag from one endpoint to the other endpoint to form the Chord of the Curve.  Drag the arc out to form the Curve.
+
+\u000
+
+\dd \G{png.d/bezier.png} \K{cmdBezier} - Construct a \i{Bezier Track} \I{Track, Bezier} by placing its four control points.
+
+\u000
+
+\dd \G{png.d/bcornu.png} \K{cmdCornu} - Construct a \i{Cornu Track} \I{Track, Cornu} curve by selecting the end points and dragging to set the curve values.
+
+\u000
+
+For the first four curve mthods, two Red arrow heads will be drawn after the first step to indicate where you can \c{Left-Drag} to complete the second step.
+
+A straight track will be created if the second endpoint is lined up with the first endpoint except for Bezier and Cornu tracks.
 
 The radius of the curve is designed to be in 1/8" increments unless the \e{desired radius} field is set non-zero and the radius drawn is close to that value, in which case the radius will snap to that value.
 
 If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid if they are not snapped to another object. \c{Shift} ensures that other objects will be ignored.
 
 Optionally, the curve center point and radius can be displayed for the Curve. This is enabled by the Move Label (\K{cmdMoveLabel}) command.
- 
-For Beziers, the active control point will be drawn in red and the available endpoints are shown with circles. 
 
-\f{Note:} You can also create Straight and Curved tracks using \k{cmdModify} by \c{Left-Drag}ing out extra track from an open end-point.
+For Beziers and Cornus, the active control point will be drawn in red and the available endpoints are shown with circles.
+
+\f{Note:} You can also create Straight and Curved tracks using \k{cmdModify} by \c{Left-Drag}ging out extra track from an open end-point.
 
 \rule
 
 \S2{cmdCurveEndPt} Curved Track from End Point
 
-\G{png.d/bcurve1.png} 
+\G{png.d/bcurve1.png}
 
-(\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. \c{Left-Drag} the red arrows to position the second endpoint.
+(\c{Ctrl+4}) Drag from one endpoint in the direction of the Curve at that point and release. \c{Left-Drag} the red arrows to position the second endpoint.
 
-While the first endpoint is being placed, and \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \e{Alt} is held, 
-if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you will drag out the second end in aligned to that track, 
-once you are dragging the second end it will be restricted to an arc that has the same end angle as the first endpoint. 
+While the first endpoint is being placed, and \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \e{Alt} is held,
+if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you will drag out the second end in aligned to that track,
+once you are dragging the second end it will be restricted to an arc that has the same end angle as the first endpoint.
 After a track is competed, the new track will be connected to this first track.
 This will also happen with \f{MagneticSnap} set off - if \e{Alt} is held.
 
@@ -201,12 +228,12 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the ends will 
 
 \S2{cmdCurveTangent} Curved track from Tangent
 
-\G{png.d/bcurve2.png} 
+\G{png.d/bcurve2.png}
 
-(\c{Control-5}) Drag from one of the endpoints (which will behave like the first point in "CurvedTrack From End" to the Center of the Curved track and release.  
+(\c{Ctrl+5}) Drag from one of the endpoints (which will behave like the first point in "CurvedTrack From End" to the Center of the Curved track and release.
 \c{Left-Drag} on the arrows to position the second endpoint.
 
-While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. 
+While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks.
 After the new track is completed, it will be connected to these existing track.
 If \f{MagneticSnap} is disabled, the snap will only happen if \e{Alt} is held.
 If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will snap to the nearest grid point unless \f{Alt} is held.
@@ -215,23 +242,25 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will s
 
 \S2{cmdCurveCenter} Curved Track From Center
 
-\G{png.d/bcurve3.png} 
+\G{png.d/bcurve3.png}
 
-(\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release.  \c{Left-Drag} to position the second endpoint.
+(\c{Ctrl+6}) Drag from the Center of the Curved track to one of the endpoints and release.  \c{Left-Drag} to position the second endpoint.
 
-While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. 
+While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks.
 After the new track is completed, it will be connected to these existing track.
 If \f{MagneticSnap} is disabled, the snap will only happen if \e{Alt} is held.
 If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will snap to the nearest grid point unless \f{Alt} is held.
 
 \rule
 
-\S2{cmdCurveChord} Curved Track from Chord 
+\S2{cmdCurveChord} Curved Track from Chord
 
-\G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  \c{Left-Click} on the center of the track and Drag to form the Curve.
+\G{png.d/bcurve4.png}
+
+(\c{Ctrl+7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  \c{Left-Click} on the center of the track and Drag to form the Curve.
 The first end point acts like "CurvedTrack From End". If an exitsing track end is selected, the Chord will only move along line orthogonal to the track.
 
-While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. 
+While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks.
 After the new track is completed, it will be connected to these existing track.
 If \f{MagneticSnap} is disabled, the snap will only happen if \e{Alt} is held.
 If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will snap to the nearest grid point unless \f{Alt} is held.
@@ -240,40 +269,42 @@ If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will s
 
 \S2{cmdBezier} Curved Bezier Track
 
-\G{png.d/bezier.png} 
+\G{png.d/bezier.png}
 
-\c{Left-Click} to place one endpoint and \c{Left-Drag} out the first control point and release, \c{Left-Click} to place the second Endpoint and \c{Left-Drag} out the second control point and release. 
-Once all 4 points are placed, you can pick one at a time and drag it to move it. 
+\c{Left-Click} to place one endpoint and \c{Left-Drag} out the first control point and release, \c{Left-Click} to place the second Endpoint and \c{Left-Drag} out the second control point and release.
+Once all 4 points are placed, you can pick one at a time and drag it to move it.
 Complete the Curve by pressing \c{Enter|, or Reject it with c\{Esc}.
 
-While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. 
+While the endpoints are being placed, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, unless \c{Alt} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks.
 After the new track is completed, it will be connected to these existing track.
 If \f{MagneticSnap} is disabled, the snap will only happen if \e{Alt} is held.
 If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will snap to the nearest grid point unless \f{Alt} is held.
 
 \rule
 
-\S{cmdCornu} Create Cornu Track
+\S2{cmdCornu} Create Cornu Track
 
-\dd \G{png.d/bcornu.png} \c{Left-Click} to place each endpoint on an open track end or just on the layout.
-During the move to the click, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, an anchor will show when the cursor is near an open end point. This can be inhibited with \e{Alt}. 
+\G{png.d/bcornu.png}
+
+\dd \c{Left-Click} to place each endpoint on an open track end or just on the layout.
+During the move to the click, if \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, an anchor will show when the cursor is near an open end point. This can be inhibited with \e{Alt}.
 If \f{MagneticSnap} is disabled this will only happen if \e{Alt} is held.
 If Magnetic Snap does not find a end, if \f{SnapGrid} is enabled, the end will snap to the nearest grid point unless \f{Alt} is held.
 
-\c{Left-Drag} if the endpoint not on an existing track drags out the end angle of the new track. This is shown by the Cornu endanchor. 
+\c{Left-Drag} if the endpoint not on an existing track drags out the end angle of the new track. This is shown by the Cornu endanchor.
 
 \G{png.d/cornuendanchor.png}
 
-The anchor is only drawn for Cornu ends that are not joined to existing tracks and it shows the position, direction and radius of the track, and has anchors for altering these properties. 
-When the Cornu is joined to a track, it uses the properties of the end of that track instead. 
+The anchor is only drawn for Cornu ends that are not joined to existing tracks and it shows the position, direction and radius of the track, and has anchors for altering these properties.
+When the Cornu is joined to a track, it uses the properties of the end of that track instead.
 Anchor point handles are drawn outside the end of the Cornu track to allow track-pins to be edited on the track itself.
-\c{Left-Click} to place the second Endpoint either on a track endpoint or not. \c{Left-Drag} sets the second end angle like the first for unconnected end-points. 
+\c{Left-Click} to place the second Endpoint either on a track endpoint or not. \c{Left-Drag} sets the second end angle like the first for unconnected end-points.
 
 Complete the Curve by pressing \c{Enter}, or Reject it with \c{Esc}.
 
 The radius and angle of the selected open Cornu end can also be set with text entry boxes in the Status Bar.
 
-When either endpoint is being moved it will "Snap" to an open track endpoint of the tracks underneath the cursor unless \c{Shift} is held. 
+When either endpoint is being moved it will "Snap" to an open track endpoint of the tracks underneath the cursor unless \c{Shift} is held.
 You can then only move the endpoint along that track if it is splitable, or in an extension of it. After the new track is completed, it will be connected to these existing tracks.
 
 Cornu Track Pins are further explained in \K{joinCornu} - they constrain the Cornu curve to smoothly pass through thier position as well as satisfying the end conditions. You can place them by clicking on the Cornu and select, \e{Drag} to move them around or hit \e{Delete} to remove them.
@@ -310,6 +341,8 @@ Note: the drawing is an approximation to show the location of the \e{Points} and
 
 \S{cmdHelix} Helix Track
 
+\G{png.d/bhelix.png}
+
 A helix track is used to change the elevation of track in a restricted space.  A helix is drawn as a circle of track, but in 3 dimensions it would resemble a cork screw or the pattern of threads on a bolt.
 
 \G{png.d/ahelix.png}
@@ -320,7 +353,7 @@ The helix dialog allows you to calculate these values based other parameters suc
 
 In the case where different parameters could be affected (for instance changing \e{Elevation Difference} can affect \e{Radius} or \e{Grade}) the last parameter you changed will be preserved.  If you set the \e{Grade} and then \e{Elevation Difference} then the \e{Radius} will be adjusted.
 
-Changing \e{Vertical Separation} affects \e{Turns} which must be an integer value (no fractions), and this in turn affects the \e{Vertical Separation}.  When you set \e{Vertical Separation} you are specifying the minimum separation which is adjusted upwards to the actual value. 
+Changing \e{Vertical Separation} affects \e{Turns} which must be an integer value (no fractions), and this in turn affects the \e{Vertical Separation}.  When you set \e{Vertical Separation} you are specifying the minimum separation which is adjusted upwards to the actual value.
 
 The separation is rail-head to rail-head and you need to ensure this is enough to provide clearance when track, sleepers, ballast, baseboard/benchwork is included.
 
@@ -332,17 +365,18 @@ You can join to a helix in the same way you join to a circle.  However, once joi
 
 A label for the helix is drawn at it's the center.  If the elevations are set (either by a Defined Elevation point or connecting to a Defined Elevation point) for the two ends of the helix then the label contains the computed grade and vertical separation between layers as well as the number of turns and total length.  The label can be moved or turned off by the Move Label (\K{cmdMoveLabel}) command.
 
-\rule
 
 \S{cmdParallel} Parallel Track or Line
 
-You can pick between two Parallel Commands:
+\dd \G{png.d/maddparallel.png}
 
-\dd
+\rule
+
+You can pick between two Parallel Commands:
 
 \u000
 
-\dd \K{cmdParallelTrack}. You can create a new track parallel to any straight, curved, bezier, cornu or easement track.  
+\dd \K{cmdParallelTrack}. You can create a new track parallel to any straight, curved, bezier, cornu or easement track.
 
 \u000
 
@@ -352,14 +386,14 @@ You can pick between two Parallel Commands:
 
 \S2{cmdParallelTrack} Parallel Track
 
-\G{png.d/bparallel.png} 
+\G{png.d/bparallel.png}
 
 Select the Track you want to parallel with \c{Left-Click}, and the new parallel track will appear beside it.  You control which side the new track will be on by \c{Left-Drag}ging the cursor from one side to the other of the selected track before releasing it.
 
 \G{png.d/statusbarparallel.png}
 
 The \f{Parallel Separation} control (Visible in the Status Bar) displays the intended separation between parallel tracks/line.  This value can be changed before selecting a track.  The value must be greater than 0.0 if the gauges are equal.
- 
+
 \b If the gauges are equal, a value of 0.0 means that the rail of the second track is overlaid on the first to simulate dual guage track. The railside that the new track "shares" is set by which side of center the cursor is on when released.
 The new track will have NoTies set on.
 
@@ -373,7 +407,7 @@ This command is very useful for creating sidings and yards as well as dual track
 
 \b No parallel to a turnouts or a non-straight piece of sectional track is created.
 
-\b It is possible to create tracks that abut (the endpoints are very close and aligned). 
+\b It is possible to create tracks that abut (the endpoints are very close and aligned).
 These endpoints will be automatically connected.
 
 \rule
@@ -507,12 +541,12 @@ could be code snippets or I/O device address information, etc.
 
 \G{png.d/bsignal.png}
 
-A signal is created by selecting \f{Create Signal} from either the Add menu \K{cmdAdd} or
-from the hotbar. Use the mouse to select a location (left button) and then
-draging (left button down) the signal to set its orientation. Once the left
-button is released, a Create/Edit Signal dialog box is displayed, and you can
-fill in the signal's properties: name, fine tune the location and orientation,
-number of heads, and the aspects.
+A signal is created by selecting \f{Create Signal} from either the Add menu
+\K{cmdAdd} or from the hotbar. Use the mouse to select a location (left button)
+and then dragging (left button down) the signal to set its orientation. Once
+the left button is released, a Create/Edit Signal dialog box is displayed, and
+you can fill in the signal's properties: name, fine tune the location and
+orientation, number of heads, and the aspects.
 
 \G{png.d/signal.png}
 

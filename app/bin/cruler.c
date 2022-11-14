@@ -17,19 +17,15 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cundo.h"
 #include "cselect.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
 #include "misc.h"
-
-#include <math.h>
 
 #define AN_OFF (0)
 #define AN_FIRST (1)
@@ -369,12 +365,12 @@ STATUS_T ModifyRuler(
 
 
 #include "bitmaps/ruler.xpm"
-#include "bitmaps/angle.xpm"
+#include "bitmaps/protractor.xpm"
 
 void InitCmdRuler( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Measurement"), "cmdMeasureSetCmd", _("Measurement") );
-	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
-	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(angle_xpm), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
+	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm[iconSize]), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
+	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(protractor_xpm[iconSize]), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
 	ButtonGroupEnd();
 }

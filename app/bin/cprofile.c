@@ -17,21 +17,17 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <math.h>
-#include <stdbool.h>
 
 #include "custom.h"
 #include "cselect.h"
 #include "cundo.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
+#include "common-ui.h"
 
 
 /*
@@ -170,9 +166,6 @@ CreateCopyProfileElements()
     }
 
     copyOfprofElem = MyMalloc(profElem_da.cnt * sizeof(profElem_t));
-    if (!copyOfprofElem) {
-        AbortProg("Couldn't allocate memory for profile copy\n");
-    }
     for (int i = 0; i < profElem_da.cnt; i++) {
         copyOfprofElem[i] = profElem(i);
     }
@@ -268,7 +261,7 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
         DYNARR_APPEND(pts_t, points_da, 10);
         pb.x = 0;
         points(points_da.cnt-1) = pb;
-        DrawPoly(D, points_da.cnt, points_da.ptr, NULL, profileColorFill, 1, 1, 0);
+        DrawPoly(D, points_da.cnt, points_da.ptr, NULL, profileColorFill, 1, DRAW_FILL);
     }
 
     pt.y = prof.minE-(2*LABELH+3.0/mainD.dpi)/prof.scaleY*D->scale;
@@ -386,8 +379,8 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 
 
 
-static void ProfilePix2CoOrd(drawCmd_p, wPos_t, wPos_t, coOrd *);
-static void ProfileCoOrd2Pix(drawCmd_p, coOrd, wPos_t*, wPos_t*);
+static void ProfilePix2CoOrd(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
+static void ProfileCoOrd2Pix(drawCmd_p, coOrd, wDrawPix_t*, wDrawPix_t*);
 static drawCmd_t screenProfileD = {
     NULL,
     &screenDrawFuncs,
@@ -400,8 +393,8 @@ static drawCmd_t screenProfileD = {
 
 static void ProfilePix2CoOrd(
     drawCmd_p d,
-    wPos_t xx,
-    wPos_t yy,
+    wDrawPix_t xx,
+    wDrawPix_t yy,
     coOrd * pos)
 {
     pos->x = (xx/d->dpi+d->orig.x)/prof.scaleX;
@@ -412,12 +405,12 @@ static void ProfilePix2CoOrd(
 static void ProfileCoOrd2Pix(
     drawCmd_p d,
     coOrd pos,
-    wPos_t *xx,
-    wPos_t *yy)
+    wDrawPix_t *xx,
+    wDrawPix_t *yy)
 {
-    wPos_t x, y;
-    x = (wPos_t)((((pos.x*prof.scaleX)/d->scale-d->orig.x)*d->dpi+0.5));
-    y = (wPos_t)(((((pos.y-prof.minE)*prof.scaleY)/d->scale-d->orig.y)*d->dpi+0.5));
+    wDrawPix_t x, y;
+    x = ((((pos.x*prof.scaleX)/d->scale-d->orig.x)*d->dpi+0.5));
+    y = (((((pos.y-prof.minE)*prof.scaleY)/d->scale-d->orig.y)*d->dpi+0.5));
     if (d->angle == 0) {
         *xx = x;
         *yy = y;
@@ -436,9 +429,9 @@ static void ProfileCoOrd2Pix(
  * Redraw profile window 
  */
 
-static void RedrawProfileW(void)
+static void RedrawProfileW( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
-    wPos_t ww, hh;
+    wWinPix_t ww, hh;
     coOrd size;
     int divC;
     DIST_T maxE, rngE;
@@ -676,10 +669,7 @@ static void DoProfilePrint(void * junk)
     p[1].x = p[2].x = PRINT_ABS2PAGEX(size.x+(printVert?PBR(
                                           printProfileFontSize)/4.0:PBR(printProfileFontSize)));
     p[2].y = p[3].y = PRINT_ABS2PAGEY(size.y+(printVert?PBT*2:PBT));
-    DrawLine(&printProfileD, p[0], p[1], 0, drawColorBlack);
-    DrawLine(&printProfileD, p[1], p[2], 0, drawColorBlack);
-    DrawLine(&printProfileD, p[2], p[3], 0, drawColorBlack);
-    DrawLine(&printProfileD, p[3], p[0], 0, drawColorBlack);
+    DrawPoly( &printProfileD, 4, p, NULL, drawColorBlack, 0, DRAW_CLOSED );
 
     DrawProfile(&printProfileD, printProfileFontSize, printVert);
     wPrintPageEnd(printProfileD.d);
@@ -697,28 +687,28 @@ static wWin_p profileW;
 static BOOL_T profileUndo = FALSE;
 static void DoProfileChange(void *junk);
 static void DoProfileReset(void *junk);
-static void DoProfileDone(void *);
-static void DoProfileClear(void *);
-static void DoProfilePrint(void *);
-static void DoProfileChangeMode(void *);
+static void DoProfileDone(void * junk);
+static void DoProfileClear(void * junk);
+static void DoProfilePrint(void * junk);
+static void DoProfileChangeMode(void * junk);
 static void SelProfileW(wIndex_t, coOrd);
 static void CloseProfileWindow(paramGroup_p pg, int event, void *data);
 
-static paramDrawData_t profileDrawData = { 300, 150, (wDrawRedrawCallBack_p)RedrawProfileW, SelProfileW, &screenProfileD };
+static paramDrawData_t profileDrawData = { 300, 150, RedrawProfileW, SelProfileW, &screenProfileD };
 static paramData_t profilePLs[] = {
     {	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
 #define I_PROFILEMSG			(1)
-    {	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void*)300 },
+    {	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(300) },
 #define I_CHANGEBUTTON 2
-    {	PD_BUTTON, (void*)DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
+    {	PD_BUTTON, DoProfileChange, "change", PDO_DLGCMDBUTTON, NULL, N_("Change") },
 #define I_RESETBUTTON 3
-    {	PD_BUTTON, (void*)DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL, N_("Reset") },
+    {	PD_BUTTON, DoProfileReset, "reset", PDO_DLGCMDBUTTON, NULL, N_("Reset") },
 #define I_CLEARBUTTON 4
-    {	PD_BUTTON, (void*)DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
+    {	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
 #define I_PRINTBUTTON 5
-    {	PD_BUTTON, (void*)DoProfilePrint, "print", 0, NULL, N_("Print") }
+    {	PD_BUTTON, DoProfilePrint, "print", 0, NULL, N_("Print") }
 };
-static paramGroup_t profilePG = { "profile", 0, profilePLs, sizeof profilePLs/sizeof profilePLs[0] };
+static paramGroup_t profilePG = { "profile", 0, profilePLs, COUNT( profilePLs ) };
 
 #define CHANGEBUTTON  ((wButton_p)profilePLs[I_CHANGEBUTTON].control)
 #define RESETBUTTON  ((wButton_p)profilePLs[I_RESETBUTTON].control)
@@ -742,6 +732,9 @@ static void SelProfileW(
     elev = pos.y;
 
     switch (action&0xFF) {
+    case C_START:
+    	profileUndo = FALSE;
+    	break;
     case C_DOWN:
         for (inx=0; inx<profElem_da.cnt; inx++) {
             if (dist <= profElem(inx).dist) {
@@ -757,7 +750,7 @@ static void SelProfileW(
         sprintf(message, _("Elev = %0.1f"), round(PutDim(elev)*10.0)/10.0);
         ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
         oldElev = elev;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
         break;
     case C_MOVE:
         if (inx < 0) {
@@ -786,7 +779,7 @@ static void SelProfileW(
         ParamLoadMessage(&profilePG, I_PROFILEMSG, message);
         oldElev = elev;
         profElem(inx).elev = oldElev;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
 		wPause(500l);
 		break;
     case C_UP:
@@ -799,7 +792,7 @@ static void SelProfileW(
                              oldElev, NULL);
         }
         profElem(inx).elev = oldElev;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
         ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
         inx = -1;
         break;
@@ -864,7 +857,7 @@ DoProfileReset(void *junk)
 		UndoStart(_("Profile Command"), "Profile");
 	}
 	ResetChanges();
-	RedrawProfileW();
+	RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     TempRedraw();
 }
 
@@ -895,7 +888,7 @@ static void DoProfileClear(void * junk)
     station_da.cnt = 0;
     ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE);
     pathStartTrk = pathEndTrk = NULL;
-    RedrawProfileW();
+    RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
 }
 
 
@@ -1359,7 +1352,7 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
             LOG(log_profile, 2, ("Flip/Appending Path\n"))
             break;
         default:
-            AbortProg("findPaths:1");
+            CHECK(FALSE);
         }
 
     } else {
@@ -1371,7 +1364,7 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
     ComputeProfElem();
     CreateCopyProfileElements();
 
-    RedrawProfileW();
+    RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     DoProfileChangeMode(NULL);
     if (log_profile>=1) {
         lprintf(" = ");
@@ -1383,9 +1376,9 @@ static void ProfileSelect(track_p trkN, EPINX_T epN)
 
 
 
-static void ProfileSubCommand(wBool_t set, void* pcmd)
+static void ProfileSubCommand(void* pcmd)
 {
-    long cmd = (long)pcmd;
+    long cmd = VP2L(pcmd);
     int mode;
     coOrd pos = oldMarker;
     DIST_T elev;
@@ -1425,7 +1418,7 @@ static void ProfileSubCommand(wBool_t set, void* pcmd)
     }
     UpdateTrkEndElev(profilePopupTrk, profilePopupEp, mode, elev, NULL);
     ComputeProfElem();
-    RedrawProfileW();
+    RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     TempRedraw(); // ProfileSubCommand
 }
 
@@ -1454,7 +1447,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
         ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
         profElem_da.cnt = 0;
         station_da.cnt = 0;
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
         ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE);
         pathStartTrk = NULL;
         SetAllTrackSelect(FALSE);
@@ -1514,7 +1507,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 static void ProfileChange(long changes)
 {
     if ((changes & CHANGE_UNITS) && screenProfileD.d) {
-        RedrawProfileW();
+        RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
     }
 }
 
@@ -1526,14 +1519,14 @@ EXPORT void InitCmdProfile(wMenu_p menu)
     ParamRegister(&profilePG);
 
     AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
-                  wIconCreatePixMap(profile_xpm), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP3,
+                  wIconCreatePixMap(profile_xpm[iconSize]), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP3,
                   ACCL_PROFILE, NULL);
     profilePopupM = MenuRegister("Profile Mode");
     profilePopupToggles[0] = wMenuToggleCreate(profilePopupM, "", _("Define"), 0,
-                             FALSE, ProfileSubCommand, (void*)0);
+                             FALSE, ProfileSubCommand, I2VP(0));
     profilePopupToggles[1] = wMenuToggleCreate(profilePopupM, "", _("Ignore"), 0,
-                             FALSE, ProfileSubCommand, (void*)1);
+                             FALSE, ProfileSubCommand, I2VP(1));
     profilePopupToggles[2] = wMenuToggleCreate(profilePopupM, "", _("None"), 0,
-                             FALSE, ProfileSubCommand, (void*)2);
+                             FALSE, ProfileSubCommand, I2VP(2));
     RegisterChangeNotification(ProfileChange);
 }

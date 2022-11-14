@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -84,7 +84,7 @@ void wlibSetLabel(
     GtkWidget * * imageG)
 {
     wIcon_p bm;
-    GdkBitmap * mask;
+//    GdkBitmap * mask;
 
     if (widget == 0) {
         abort();
@@ -176,6 +176,7 @@ static void pushButt(
         return;
     }
 
+    wlibStringUpdate();
     if (b->action) {
         b->action(b->data);
     }
@@ -235,6 +236,8 @@ static gint pressButt(
 		GdkEventButton *event,
 		wButton_p bb) {
 
+	if ( debugWindow >= 1 )
+		printf( "buttonPress: %s\n", bb->labelStr );
 	if (bb->recursion) {
 		return TRUE;
 
@@ -270,6 +273,8 @@ static gint releaseButt(
 		GdkEventButton *event,
 		wButton_p bb) {
 
+	if ( debugWindow >= 1 )
+		printf( "buttonRelease: %s\n", bb->labelStr );
 	/* Remove any existing timer */
 	if (bb->timer_id) {
 	  g_source_remove(bb->timer_id);
@@ -318,12 +323,12 @@ static wBool_t exposeButt(
 
 wButton_p wButtonCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long 	option,
-    wPos_t 	width,
+    wWinPix_t 	width,
     wButtonCallBack_p action,
     void 	* data)
 {
@@ -590,18 +595,18 @@ static void choiceRepaint(
 
 wChoice_p wRadioCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
-    const char	**labels,
+    const char	* const *labels,
     long	*valueP,
     wChoiceCallBack_p action,
     void 	*data)
 {
     wChoice_p b;
-    const char ** label;
+    const char * const * label;
     GtkWidget *butt0=NULL, *butt;
 
     if ((option & BC_NOBORDER)==0) {
@@ -698,18 +703,18 @@ wChoice_p wRadioCreate(
 
 wChoice_p wToggleCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* helpStr,
     const char	* labelStr,
     long	option,
-    const char	**labels,
+    const char * const * labels,
     long	*valueP,
     wChoiceCallBack_p action,
     void 	*data)
 {
     wChoice_p b;
-    const char ** label;
+    const char * const * label;
 
     if ((option & BC_NOBORDER)==0) {
         if (x>=0) {

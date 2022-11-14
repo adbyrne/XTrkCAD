@@ -16,47 +16,19 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include <assert.h>
-#include <ctype.h>
-#ifdef HAVE_MALLOC_H
-    #include <malloc.h>
-#endif
-#include <search.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-    #include "include/dirent.h"
-#else
-    #include <dirent.h>
-#endif
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "include/levenshtein.h"
 #include "misc.h"
-#include "misc2.h"
 #include "include/paramfile.h"
 #include "include/partcatalog.h"
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "include/utf8convert.h"
 #include "include/utlist.h"
-#include "utility.h"
-
-#if _MSC_VER > 1300
-    #define strnicmp _strnicmp
-    #define stricmp _stricmp
-    #define strdup _strdup
-#endif
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"
@@ -95,11 +67,12 @@ DestroyCatalog(Catalog *catalog)
 {
 	CatalogEntry *current = catalog->head;
 	CatalogEntry *entry = NULL;
-	CatalogEntry *tmp = NULL, *old = NULL;
+	CatalogEntry *tmp = NULL;
+//	CatalogEntry *old = NULL;
 	DL_FOREACH_SAFE(current, entry, tmp)
 	{
 		//if (old) MyFree(old);
-		old = NULL;
+//		old = NULL;
 		for (unsigned int i = 0; i < entry->files; i++) {
 		   MyFree(entry->fullFileName[i]);
 		   entry->fullFileName[i] = NULL;
@@ -109,13 +82,14 @@ DestroyCatalog(Catalog *catalog)
 		entry->contents = NULL;
 		MyFree(entry->tag);
 		entry->tag = NULL;
-		old = entry;
+//		old = entry;
 		DL_DELETE(catalog->head,entry);
 	}
 
 	catalog->head = NULL;
 }
 
+#if 0
 /**
  * Create a new CatalogEntry and add it to the linked list. The newly
  * created entry is inserted into the list after the given position
@@ -137,6 +111,7 @@ InsertIntoCatalogAfter(CatalogEntry *entry)
 
     return (newEntry);
 }
+#endif
 
 /**
  * Count the elements in the linked list
@@ -165,11 +140,12 @@ CatalogDiscard(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
     CatalogEntry *element;
-    CatalogEntry *tmp,*old = NULL;
+    CatalogEntry *tmp;
+//  CatalogEntry *old = NULL;
 
     DL_FOREACH_SAFE(current, element, tmp) {
     	//if (old) MyFree(old);
-    	old = NULL;
+//  	old = NULL;
     	MyFree(element->contents);
     	element->contents = NULL;
     	MyFree(element->tag);
@@ -179,7 +155,7 @@ CatalogDiscard(Catalog *catalog)
     	    element->fullFileName[i] = NULL;
     	}
     	element->files = 0;
-        old = element;
+//      old = element;
         DL_DELETE(catalog->head,element);
     }
 
@@ -281,11 +257,8 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents, char *tag)
     if (tag)
     	entry->tag = MyStrdup(tag);
 
-    if (entry->files < MAXFILESPERCONTENT) {
-        entry->fullFileName[entry->files++] = MyStrdup(path);
-    } else {
-        AbortProg("Number of files with same content too large!", NULL);
-    }
+    CHECK( entry->files < MAXFILESPERCONTENT );
+    entry->fullFileName[entry->files++] = MyStrdup(path);
 }
 
 /**
@@ -385,11 +358,11 @@ StandardizeSpelling(char *word)
     }
 
     if (!strncasecmp(word, "h0", 2)) {
-        strncpy(word, "ho", 2);
+        strcpy(word, "ho");
     }
 
     if (!strncasecmp(word, "00", 2)) {
-        strncpy(word, "oo", 2);
+        strcpy(word, "oo");
     }
 
     if (word[0] == '0') {
@@ -410,7 +383,7 @@ CreateKeywordIndex(ParameterLib *library)
 {
     CatalogEntry *listOfEntries = library->catalog->head;
     CatalogEntry *curParamFile;
-    unsigned totalMemory = 0;
+    size_t totalMemory = 0;
     size_t wordCount = 0;
     char *wordList;
     char *wordListPtr;
@@ -472,7 +445,7 @@ CreateKeywordIndex(ParameterLib *library)
         LOG1(log_params, ("Index Entry: <%s> Count: %d\n", existingEntry->keyWord,
                           existingEntry->references->cnt));
     }
-    return (wordCount);
+    return (unsigned)(wordCount);
 }
 
 /**
@@ -502,7 +475,7 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 		int maxdistance = 1;
 		while (maxdistance <= LDISTANCELIMIT && !result ) {
 			IndexEntry *current;
-			size_t minDistance = LDISTANCELIMIT + 1;
+//			size_t minDistance = LDISTANCELIMIT + 1;
 			int maxProbability = 0;
 			LOG1(log_params, ("Close match for: <%s> maxdistance: %d\n", search, maxdistance));
 				
@@ -865,7 +838,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 {
     CatalogEntry *element;
     IndexEntry *entries;
-    unsigned entryCount = 0;
+//  unsigned entryCount = 0;
     char *searchWord;
     unsigned words = countWords(searchExpression);
     char *searchExp = MyStrdup(searchExpression);
@@ -915,7 +888,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                     newEntry->contents = MyStrdup(foundEntry->contents);
                     newEntry->tag = MyStrdup(foundEntry->tag);
                     newEntry->files = foundEntry->files;
-                    for (int i=0;i<newEntry->files;i++) {
+                    for (unsigned int i=0;i<newEntry->files;i++) {
                     	newEntry->fullFileName[i] = MyStrdup(foundEntry->fullFileName[i]);
                     }
 
@@ -940,7 +913,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
                         DL_DELETE(results->subCatalog.head, current);
                         MyFree(current->contents);
                         MyFree(current->tag);
-                        for (int i=0;i<current->files;i++) {
+                        for (unsigned int i=0;i<current->files;i++) {
                                MyFree(current->fullFileName[i]);
                         }
                         MyFree(current);
@@ -1012,9 +985,9 @@ GetParameterFileContent(char *file)
                     ptr = ptr+strlen(CONTENTSCOMMAND)+1;
                     ptr = strtok(ptr, "\r\n");
                     result = MyStrdup(ptr);
-#ifdef WINDOWS
+#ifdef UTFCONVERT
                     ConvertUTF8ToSystem(result);
-#endif // WINDOWS
+#endif // UTFCONVERT
                     found = true;
                 }
             } else {

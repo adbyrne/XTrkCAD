@@ -17,23 +17,21 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-#include <math.h>
 
 #include "ccurve.h"
 #include "tbezier.h"
 #include "tcornu.h"
 #include "cundo.h"
-#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
-#include "string.h"
+#include "common-ui.h"
 
-EXPORT long oldElevationEvaluation = 0;
+/** @logcmd @showrefby fillElev=n elev.c */
 static int log_fillElev = 0;
+/** @logcmd @showrefby dumpElev=n elev.c */
 static int log_dumpElev = 0;
 static BOOL_T log_fillElev_initted;
 static int checkTrk = 0;
@@ -142,86 +140,53 @@ BOOL_T ComputeElev(
 		DIST_T *gradeR,
 		BOOL_T force )
 {
-	DIST_T grade;
-	DIST_T elev0, elev1, dist0, dist1;
+	DIST_T grade = 0.0;
+	DIST_T elev0;
 	BOOL_T rc = FALSE;
-if (oldElevationEvaluation) {
-	int rc0, rc1;
-	if (GetTrkEndElevMode(trk,ep) == ELEV_DEF) {
-		if (elevR)
-			*elevR = GetTrkEndElevHeight(trk,ep);
-		if (gradeR)
-			*gradeR = 0.0;
-		return TRUE;
-	}
-	rc0 = FindDefinedElev( trk, ep, 0, onpath, &elev0, &dist0 );
-	rc1 = FindDefinedElev( trk, ep, 1, onpath, &elev1, &dist1 );
-	if ( rc0 == FDE_DEF && rc1 == FDE_DEF ) {
-		if (dist0+dist1 > 0.1)
-			grade = (elev1-elev0)/(dist0+dist1);
-		else
-			grade = 0.0;
-		elev0 += grade*dist0;
-		rc = TRUE;
-	} else if ( rc0 == FDE_DEF && rc1 == FDE_END ) {
-		grade = 0.0;
-		rc = TRUE;
-	} else if ( rc1 == FDE_DEF && rc0 == FDE_END ) {
-		grade = 0.0;
-		elev0 = elev1;
-		rc = TRUE;
-	} else if ( rc0 == FDE_END && rc1 == FDE_END ) {
-		grade = 0.0;
-		elev0 = 0.0;
-		rc = TRUE;
-	} else {
-		grade = 0.0;
-		elev0 = 0.0;
-	}
-} else {
 
 	track_p trk1;
 	EPINX_T ep1;
-	grade = -1;
 	rc = TRUE;
 	if ( EndPtIsDefinedElev(trk,ep) ) {
 		elev0 = GetTrkEndElevHeight(trk,ep);
 		rc = FALSE;
-	} else {
-		if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&dist0))) {
-			elev0 = GetElevation( trk );
-			dist0 = GetTrkLength( trk, ep, -1 );
-		}
-		SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
+	} else if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&grade))) {
 		trk1 = GetTrkEndTrk( trk, ep );
 		if (trk1!=NULL) {
+			// Compute weighted average of the 2 track elevation
 			ep1 = GetEndPtConnectedToMe(trk1,trk);
-			if (force || (!GetTrkEndElevCachedHeight(trk1,ep1,&elev1,&dist1))) {
+			if (force || (!GetTrkEndElevCachedHeight(trk1,ep1,&elev0,&grade))) {
+				// Not cached, need to compute
+				DIST_T elev1, dist0, dist1;
+				elev0 = GetElevation( trk );
+				dist0 = GetTrkLength( trk, ep, -1 );
 				elev1 = GetElevation( trk1 );
 				dist1 = GetTrkLength( trk1, ep1, -1 );
-			}
-			SetTrkEndElevCachedHeight(trk1,ep1,elev1,dist1);
-			if (dist0+dist1>0.1) {
-				grade = (elev1-elev0)/(dist0+dist1);
-				elev0 += grade*dist0;
+				if (dist0+dist1>0.1) {
+					grade = (elev1-elev0)/(dist0+dist1);
+					elev0 += grade*dist0;
+				} else {
+					elev0 = (elev0+elev1)/2.0;
+					rc = FALSE;
+				}
+				SetTrkEndElevCachedHeight(trk,ep,elev0,grade);
+				SetTrkEndElevCachedHeight(trk1,ep1,elev0,-grade);
 			} else {
-				elev0 = (elev0+elev1)/2.0;
-				rc = FALSE;
-				SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
-				SetTrkEndElevCachedHeight(trk1,ep1,elev0,dist1);
+				// flip grade from connected EP
+				grade = - grade;
 			}
 		} else {
-			grade = 0.0;
+			// Not connected - use track elevation
+			elev0 = GetElevation( trk );
+			SetTrkEndElevCachedHeight(trk,ep,elev0,0.0);
 		}
-
 	}
-}
-if ( elevR )
-	*elevR = elev0;
-if ( gradeR )
-	*gradeR = grade;
-return rc;
 
+	if ( elevR )
+		*elevR = elev0;
+	if ( gradeR )
+		*gradeR = grade;
+	return rc;
 }
 
 
@@ -471,7 +436,6 @@ static void FindForks( void )
 {
 	int i;
 	defelev_t * dep;
-	int rc;
 	long time0 = wGetTimer();
 
 	DYNARR_RESET( fork_t, fork_da );
@@ -480,7 +444,7 @@ static void FindForks( void )
 			
 		ClrAllTrkBits( TB_PROCESSED );
 LOG( log_fillElev, 3, ( "   findForks from T%d:%d\n", GetTrkIndex(dep->trk), dep->ep ) )
-		rc = FindShortestPath( dep->trk, dep->ep, FALSE, FillElevShortestPathFunc, dep );
+		FindShortestPath( dep->trk, dep->ep, FALSE, FillElevShortestPathFunc, dep );
 	}
 	ClrAllTrkBits( TB_PROCESSED );
 LOG( log_fillElev, 1, ( "%s: findForks [%d] (%ld)\n", elevPrefix, fork_da.cnt, wGetTimer()-time0 ) )
@@ -734,7 +698,7 @@ static void PropogateForkElev(
 					ep1 = epN;
 				}
 nextStep:
-				ASSERT(d1>0.0);
+				CHECK(d1>0.0);
 				e1 = (e1-e)/d1;
 				trk1 = NULL;
 				i3 = elist_da.cnt;
@@ -990,7 +954,7 @@ LOG( log_fillElev, 1, ( "%s: findIslandElevs [%d] (%ld)\n", elevPrefix, islandCn
  *
  */
 
-EXPORT void RecomputeElevations( void )
+EXPORT void RecomputeElevations( void * unused )
 {
 	long time0 = wGetTimer();
 	elevPrefix = "RECELV";
@@ -1013,19 +977,17 @@ LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
 				printf( "%d:%0.2f\n", GetTrkElevMode(trk), elev );
 			else
 				printf( "noelev\n" );
-#ifdef LATER
-		EPINX_T ep;
-		int mode;
+			EPINX_T ep;
+			int mode;
 			for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
 				mode = GetTrkEndElevMode( trk, ep );
-				ComputeElev( trk, ep, FALSE, &elev, NULL );
+				ComputeElev( trk, ep, FALSE, &elev, NULL, FALSE );
 				printf( "T%4.4d[%2.2d] = %s:%0.3f\n",
 						GetTrkIndex(trk), ep,
 						mode==ELEV_NONE?"None":mode==ELEV_DEF?"Def":mode==ELEV_COMP?"Comp":
 						mode==ELEV_GRADE?"Grade":mode==ELEV_IGNORE?"Ignore":mode==ELEV_STATION?"Station":"???",
 						elev );
 			}
-#endif
 		}
 	}
 }
@@ -1216,7 +1178,7 @@ EXPORT void UpdateTrkEndElev(
 	char * oldStation;
 	BOOL_T changed = TRUE;
 	track_p trk1;
-	EPINX_T ep1;
+//	EPINX_T ep1;
 
 	oldMode = GetTrkEndElevUnmaskedMode( trk, ep );
 	if ( (oldMode&ELEV_MASK) == (newMode&ELEV_MASK) ) {
@@ -1254,7 +1216,7 @@ EXPORT void UpdateTrkEndElev(
 	if ( changed ) {
 		ClrTrkElev( trk );
 		if ( trk1 ) {
-			ep1 = GetEndPtConnectedToMe( trk1, trk );
+//			ep1 = GetEndPtConnectedToMe( trk1, trk );
 			ClrTrkElev( trk1 );
 		}
 		UpdateAllElevations();

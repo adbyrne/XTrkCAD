@@ -6,17 +6,37 @@
 #
 project(lib)
 
-add_subdirectory(demos)
-add_subdirectory(examples)
 add_subdirectory(params)
 
 install(FILES 
 	COPYING
 	logo.bmp
 	xtrkcad.xtq
+	xtrkcad.upd
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
-	
+
+# install parameter files 
+install(DIRECTORY params
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		FILES_MATCHING
+		PATTERN "*.xtp")
+
+# install demos 
+install(DIRECTORY demos 
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		FILES_MATCHING
+		PATTERN "*.xtr")
+
+# install example layouts		
+install(DIRECTORY examples
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+		FILES_MATCHING
+		PATTERN "*.xtc")
+		
+# install release documentation Readme and CHANGELOG
+# depends on pandoc
+#
 set( infile "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md" )
 set( outfile "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt" )
 set( changelogin "${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md" )
@@ -37,7 +57,7 @@ if(PANDOC_FOUND)
 			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 			)
 else()			
-	message(STATUS "Pandoc is not available on this system, Readme.txt is not generated!")
+	message(STATUS "Pandoc is not available on this system, Readme.txt and CHANGELOG.txt are not generated!")
 endif()
 	
 if(UNIX AND NOT APPLE)

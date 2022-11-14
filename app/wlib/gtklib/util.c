@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -67,11 +67,13 @@ const char * wNames[] = {
 };
 
 
+#if 0
 static wBool_t reverseIcon =
 #if defined(linux)
     FALSE;
 #else
     TRUE;
+#endif
 #endif
 
 
@@ -108,7 +110,7 @@ GdkPixbuf* wlibPixbufFromXBM(
     pixmapData = (char**) malloc((3 + ip->h) * sizeof *pixmapData);
     pixmapData[0] = line0;
     rgb = wDrawGetRGB(ip->color);
-    sprintf(line0, " %d %d 2 1", ip->w, ip->h);
+    sprintf(line0, " %ld %ld 2 1", ip->w, ip->h);
     sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb >> 16)&0xFF, (rgb >> 8)&0xFF,
             rgb & 0xFF);
     pixmapData[1] = ". c None s None";
@@ -183,8 +185,8 @@ int wlibAddLabel(wControl_p b, const char * labelStr)
 void * wlibAlloc(
                  wWin_p parent,
                  wType_e type,
-                 wPos_t origX,
-                 wPos_t origY,
+                 wWinPix_t origX,
+                 wWinPix_t origY,
                  const char * labelStr,
                  int size,
                  void * data)
@@ -324,11 +326,11 @@ void wlibAddButton(
 
 wControl_p wlibGetControlFromPos(
                                  wWin_p win,
-                                 wPos_t x,
-                                 wPos_t y)
+                                 wWinPix_t x,
+                                 wWinPix_t y)
 {
     wControl_p b;
-    wPos_t xx, yy;
+    wWinPix_t xx, yy;
 
     for (b = win->first; b != NULL; b = b->next) {
         if (b->widget && gtk_widget_get_visible(b->widget)) {
@@ -399,8 +401,8 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 	static GdkCursor * gdkcursors[wCursorQuestion+1];
 	GdkCursor * gdkcursor;
 	//GdkWindow * gdkwindow = gtk_widget_get_window(GTK_WIDGET(win->gtkwin));;
-	GdkWindow * gdkwindow = gdk_get_default_root_window();
-	GdkDisplay * display = gdk_window_get_display(gdkwindow);
+//	GdkWindow * gdkwindow = gdk_get_default_root_window();
+//	GdkDisplay * display = gdk_window_get_display(gdkwindow);
 	if ((cursor == wCursorNone) && dontHideCursor) return;  //Ignore if we dont want to suppress
 	if (!gdkcursors[cursor]) {
 		switch(cursor) {
@@ -485,7 +487,7 @@ const char * wMemStats(void)
  * \param h IN pointer to height
  */
 
-void wGetDisplaySize(wPos_t * w, wPos_t * h)
+void wGetDisplaySize(wWinPix_t * w, wWinPix_t * h)
 {
 	GdkScreen *screen = gdk_screen_get_default();
 	guint monitor = gdk_screen_get_primary_monitor(screen);

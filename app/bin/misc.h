@@ -17,286 +17,92 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef MISC_H
 #define MISC_H
 
-#define EXPORT
-
-#include <stdio.h>
-
-#include "acclkeys.h"
 #include "common.h"
-#include "draw.h"
-#include "wlib.h"
 
-typedef void (*addButtonCallBack_t)(void*);
-
-#ifdef WINDOWS
-/* suppress warning from *.bmp about conversion of int to char */
-#pragma warning( disable : 4305)
-#endif
-
-#define COUNT(A) (sizeof(A)/sizeof(A[0]))
-
-#define STR_SIZE		(256)
-#define STR_SHORT_SIZE	(80)
-#define STR_LONG_SIZE	(1024)
-#define STR_HUGE_SIZE	(10240)
-
-#define CAST_AWAY_CONST (char*)
-
-#define TITLEMAXLEN (40)
 
 /*
  * Globals
  */
 
-extern long adjTimer;
-
-typedef int SCALEINX_T;
-typedef int GAUGEINX_T;
-typedef int SCALEDESCINX_T;
-
-extern int log_error;
-
-extern long toolbarSet;
-extern ANGLE_T turntableAngle;
-extern long maxCouplingSpeed;
-extern long hideSelectionWindow;
-extern long labelWhen;
-extern long labelScale;
-extern long labelEnable;
-extern long colorTrack;
-extern long colorDraw;
-extern long carHotbarModeInx;
-extern DIST_T minLength;
-extern DIST_T connectDistance;
-extern ANGLE_T connectAngle;
-extern long twoRailScale;
-extern long mapScale;
-extern long constrainMain;
-extern long dontHideCursor;
-extern long checkPtInterval;
-extern long autosaveChkPoints;
-extern long liveMap;
-extern long preSelect;
-extern long hideTrainsInTunnels;
-extern long listLabels;
-extern long layoutLabels;
-extern long descriptionFontSize;
-extern long units;
-extern long onStartup;
-extern long angleSystem;
-extern DIST_T trackGauge;
-extern DIST_T curScaleRatio;
-extern char * curScaleName;
-extern int enumerateMaxDescLen;
-extern long enableBalloonHelp;
-extern long showFlexTrack;
-extern long hotBarLabels;
-extern long rightClickMode;
-extern long selectMode;
-extern long selectZero;
-extern void * commandContext;
-extern coOrd cmdMenuPos;
-#define MODE_DESIGN		(0)
-#define MODE_TRAIN		(1)
-extern long programMode;
-#define DISTFMT_DECS			0x00FF
-#define DISTFMT_FMT				0x0300
-#define DISTFMT_FMT_NONE		0x0000
-#define DISTFMT_FMT_SHRT		0x0100
-#define DISTFMT_FMT_LONG		0x0200
-#define DISTFMT_FMT_MM			0x0100
-#define DISTFMT_FMT_CM			0x0200
-#define DISTFMT_FMT_M			0x0300
-#define DISTFMT_FRACT			0x0400
-#define DISTFMT_FRACT_NUM		0x0000
-#define DISTFMT_FRACT_FRC		0x0400
-
-#define UNITS_ENGLISH	(0)
-#define UNITS_METRIC	(1)
-#define GetDim(X) ((units==UNITS_METRIC)?(X)/2.54:(X))
-#define PutDim(X) ((units==UNITS_METRIC)?(X)*2.54:(X))
-#define ANGLE_POLAR		(0)
-#define ANGLE_CART		(1)
-#define GetAngle(X)		((angleSystem==ANGLE_POLAR)?(X):NormalizeAngle(90.0-(X)))
-#define PutAngle(X)		((angleSystem==ANGLE_POLAR)?(X):NormalizeAngle(90.0-(X)))
-#define LABELENABLE_TRKDESC		(1<<0)
-#define LABELENABLE_LENGTHS		(1<<1)
-#define LABELENABLE_ENDPT_ELEV	(1<<2)
-#define LABELENABLE_TRACK_ELEV	(1<<3)
-#define LABELENABLE_CARS		(1<<4)
-
-/*
- * Command Action
- */
-#define C_DOWN			wActionLDown
-#define C_MOVE			wActionLDrag
-#define C_UP			wActionLUp
-#define C_RDOWN			wActionRDown
-#define C_RMOVE			wActionRDrag
-#define C_RUP			wActionRUp
-#define C_TEXT			wActionText
-#define C_WUP			wActionWheelUp
-#define C_WDOWN			wActionWheelDown
-#define C_LDOUBLE       wActionLDownDouble
-#define C_MODKEY        wActionModKey
-#define C_SCROLLUP	    wActionScrollUp
-#define C_SCROLLDOWN    wActionScrollDown
-#define C_SCROLLLEFT	wActionScrollLeft
-#define C_SCROLLRIGHT   wActionScrollRight
-#define C_INIT			(wActionLast+1)
-#define C_START			(wActionLast+2)
-#define C_REDRAW		(wActionLast+3)
-#define C_CANCEL		(wActionLast+4)
-#define C_OK			(wActionLast+5)
-#define C_CONFIRM		(wActionLast+6)
-#define C_LCLICK		(wActionLast+7)
-#define C_RCLICK		(wActionLast+8)
-#define C_CMDMENU		(wActionLast+9)
-#define C_FINISH		(wActionLast+10)
-#define C_UPDATE        (wActionLast+11)
-
-#define C_CONTINUE		(100)
-#define C_TERMINATE		(101)
-#define C_INFO			(102)
-#define C_ERROR			(103)
-
-/*
- * Commands
- */
-#define LEVEL0			(0)
-#define LEVEL0_50		(1)
-#define LEVEL1			(2)
-#define LEVEL2			(3)
-
-typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
-
-/*
- * Windows and buttons
- */
-extern wPos_t DlgSepLeft;
-extern wPos_t DlgSepMid;
-extern wPos_t DlgSepRight;
-extern wPos_t DlgSepTop;
-extern wPos_t DlgSepBottom;
-extern wPos_t DlgSepNarrow;
-extern wPos_t DlgSepWide;
-extern wPos_t DlgSepFrmLeft;
-extern wPos_t DlgSepFrmRight;
-extern wPos_t DlgSepFrmTop;
-extern wPos_t DlgSepFrmBottom;
-
+extern int iconSize;
 extern wWin_p mainW;
-extern wPos_t toolbarHeight;
-extern wIndex_t changed;
 extern char message[STR_HUGE_SIZE];
-extern REGION_T curRegion;
 extern long paramVersion;
 extern coOrd zero;
 extern wBool_t extraButtons;
-extern wButton_p undoB;
-extern wButton_p redoB;
-extern wButton_p zoomUpB;			/** ZoomUp button on toolbar */
-extern wButton_p zoomDownB;		/** ZoomDown button on toolbar */
-extern wButton_p backgroundB;		/** background visibility control */
-// extern wButton_p easementB;
-extern wIndex_t checkPtMark;
-extern wMenu_p demoM;
-extern wMenu_p popup1M, popup2M;
+extern long onStartup;
+#define UNITS_ENGLISH	(0)
+#define UNITS_METRIC	(1)
+extern long units;
+extern long labelScale;
+#define LABELENABLE_TRKDESC	(1<<0)
+#define LABELENABLE_LENGTHS	(1<<1)
+#define LABELENABLE_ENDPT_ELEV	(1<<2)
+#define LABELENABLE_TRACK_ELEV	(1<<3)
+#define LABELENABLE_CARS	(1<<4)
+extern long labelEnable;
+extern long labelWhen;
+
+extern long dontHideCursor;	// not used
+#ifdef HIDESELECTIONWINDOW
+extern long hideSelectionWindow;	// not used
+#endif
+
+#define GetDim(X) ((units==UNITS_METRIC)?(X)/2.54:(X))
+#define PutDim(X) ((units==UNITS_METRIC)?(X)*2.54:(X))
 
 #define wControlBelow( B )		(wControlGetPosY((wControl_p)(B))+wControlGetHeight((wControl_p)(B)))
 #define wControlBeside( B )		(wControlGetPosX((wControl_p)(B))+wControlGetWidth((wControl_p)(B)))
 
-typedef void (*rotateDialogCallBack_t) ( void * );
-typedef void (*moveDialogCallBack_t) (void *);
-extern void AddRotateMenu( wMenu_p, rotateDialogCallBack_t );
-extern void AddMoveMenu( wMenu_p, moveDialogCallBack_t );
-extern void StartRotateDialog( rotateDialogCallBack_t );
-extern void StartMoveDialog(moveDialogCallBack_t );
 /*
  * Safe Memory etc
  */
-void * MyMalloc( long );
-void * MyRealloc( void *, long );
-void MyFree( void * );
-void * memdup( void *, size_t );
-char * MyStrdup( const char * );
-void AbortProg( char *, ... );
-#define ASSERT( X ) if ( !(X) ) AbortProg( "%s: %s:%d", #X, __FILE__, __LINE__ )
-char * Strcpytrimed( char *, char *, BOOL_T );
-char * BuildTrimedTitle( char *, char *, char *, char *, char * );
-void ErrorMessage( char *, ... );
-void InfoMessage( char *, ... );
-int NoticeMessage( char *, char*, char *, ... );
-int NoticeMessage2( int, char *, char*, char *, ... );
-void DoQuit( void );
+extern BOOL_T TestMallocs( void );
+extern void * MyMalloc( size_t );
+extern void * MyRealloc( void *, size_t );
+extern void MyFree( void * );
+extern void * memdup( void *, size_t );
+extern char * MyStrdup( const char * );
 
-void FileIsChanged(void);
-char * ConvertFromEscapedText(const char * text);
-char * ConvertToEscapedText(const char * text);
+extern char * ConvertFromEscapedText(const char * text);
+extern char * ConvertToEscapedText(const char * text);
 
-int MagneticSnap( int state );
-void wShow( wWin_p );
-void wHide( wWin_p );
-void CloseDemoWindows( void );
-void DefaultProc( wWin_p, winProcEvent, void * );
-void SelectFont();
+extern const char * AbortMessage( const char *, ... );
+extern void AbortProg( const char *, const char *, int, const char * );
+#ifdef LOG_CHECK_COVERAGE
+#define CHECK( X ) lprintf( "CHECK %s:%i\n", __FILE__, __LINE__ ); if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, NULL )
+#define CHECKMSG( X, MSG ) lprintf( "CHECK %s:%i\n", __FILE__, __LINE__ ); if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, AbortMessage MSG )
+#else
+#define CHECK( X ) if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, NULL )
+#define CHECKMSG( X, MSG ) if ( !(X) ) AbortProg( #X, __FILE__, __LINE__, AbortMessage MSG )
+#endif
 
-void CheckRoomSize( BOOL_T );
-const char * GetBalloonHelpStr( char* );
-const char * GetCurCommandName( void );
-void EnableCommands( void );
-void Reset( void );
-void TryCheckPoint( void );
-wIndex_t GetCurrentCommand(void);
-BOOL_T IsCurCommandSticky(void);
-void ResetIfNotSticky( void );
-wBool_t DoCurCommand( wAction_t, coOrd );
-void ConfirmReset( BOOL_T );
-void LayoutToolBar( void * );
-#define IC_STICKY               (1<<0)
-#define IC_INITNOTSTICKY        (1<<1)
-#define IC_CANCEL               (1<<2)
-#define IC_MENU                 (1<<3)
-#define IC_NORESTART            (1<<4)
-#define IC_SELECTED             (1<<5)
-#define IC_POPUP                (1<<6)
-#define IC_LCLICK               (1<<7)
-#define IC_RCLICK               (1<<8)
-#define IC_CMDMENU              (1<<9)
-#define IC_POPUP2               (1<<10)
-#define IC_ABUT                 (1<<11)
-#define IC_ACCLKEY              (1<<12)
-#define IC_MODETRAIN_TOO        (1<<13)
-#define IC_MODETRAIN_ONLY       (1<<14)
-#define IC_WANT_MOVE            (1<<15)
-#define IC_PLAYBACK_PUSH        (1<<16)
-#define IC_WANT_MODKEYS         (1<<17)
-#define IC_POPUP3				(1<<18)
-wIndex_t InitCommand( wMenu_p, procCommand_t, char *, char *,  int, long, long );
-void AddToolbarControl( wControl_p, long );
-BOOL_T CommandEnabled( wIndex_t );
-wButton_p AddToolbarButton( char*, wIcon_p, long, wButtonCallBack_p, void * context );
-wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
-wIndex_t AddMenuButton( wMenu_p, procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
-void PlaybackButtonMouse( wIndex_t );
-void ButtonGroupBegin( char *, char *, char * );
-void ButtonGroupEnd( void );
+extern char * Strcpytrimed( char *, const char *, BOOL_T );
+extern wBool_t CheckHelpTopicExists(const char * topic);
 
-void SaveState( void );
+extern void InfoMessage( const char *, ... );
+extern void ErrorMessage( const char *, ... );
+extern int NoticeMessage( const char *, const char*, const char *, ... );
+extern int NoticeMessage2( int, const char *, const char*, const char *, ... );
 
-void PlaybackCommand( char *, wIndex_t );
-wMenu_p MenuRegister( char * label );
-void DoCommandB( void * );
+extern bool Confirm( char *, doSaveCallBack_p );
+extern void DoQuit( void * unused );
+extern void DoClear( void * unused );
+extern void MapWindowToggleShow( void * unused );
+extern void MapWindowShow( int state );
+extern void DoShowWindow(int index, const char * name, void * data);
 
-extern void EnumerateTracks( void );
-void InitDebug( char *, long * );
-
+extern void wShow( wWin_p );
+extern void wHide( wWin_p );
+extern void CloseDemoWindows( void );
+extern void DefaultProc( wWin_p, winProcEvent, void * );
+typedef void (*changeNotificationCallBack_t)( long );
 #define CHANGE_SCALE	(1<<0)
 #define CHANGE_PARAMS	(1<<1)
 #define CHANGE_MAIN		(1<<2)
@@ -307,42 +113,16 @@ void InitDebug( char *, long * );
 #define CHANGE_TOOLBAR	(1<<8)
 #define CHANGE_CMDOPT	(1<<9)
 #define CHANGE_LIMITS	(1<<10)
-#define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
-typedef void (*changeNotificationCallBack_t)( long );
-void RegisterChangeNotification( changeNotificationCallBack_t );
-void DoChangeNotification( long );
+#define CHANGE_ICONSIZE	(1<<11)
+#define CHANGE_LAYER    (1<<3)
+#define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_LAYER|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
+extern void RegisterChangeNotification( changeNotificationCallBack_t );
+extern void DoChangeNotification( long );
 
-wBool_t CheckHelpTopicExists(const char * topic);
 
 /* foreign externs */
-extern drawCmd_t mapD;
-extern STATUS_T CmdEnumerate( wAction_t, coOrd );
 
-extern wIndex_t modifyCmdInx;
-extern wIndex_t joinCmdInx;
-extern wIndex_t tunnelCmdInx;
-
-/* ctodesgn.c */
-void InitNewTurn( wMenu_p m );
-
-/* cnote.c */
-void ClearNote( void );
-
-/* cprintc.c */
-coOrd GetPrintOrig();
-ANGLE_T GetPrintAngle();
-
-
-/* cruler.c */
-void RulerRedraw( BOOL_T );
-STATUS_T ModifyRuler( wAction_t, coOrd );
-STATUS_T ModifyProtractor( wAction_t, coOrd );
-
-/* dialogs */
-void OutputBitMap( void );
-
-extern wDrawColor snapGridColor;
-
+/* Initializers */
 addButtonCallBack_t ColorInit( void );
 addButtonCallBack_t SettingsInit( void );
 addButtonCallBack_t PrefInit( void );
@@ -355,28 +135,37 @@ addButtonCallBack_t PriceListInit( void );
 addButtonCallBack_t ParamFilesInit( void );
 addButtonCallBack_t ControlMgrInit ( void );
 
-wIndex_t InitGrid( wMenu_p menu );
+/* cnote.c */
+void ClearNote( void );
+void DoNote( void  * unused );
+BOOL_T WriteMainNote( FILE * );
+BOOL_T ReadMainNote(char * line);
 
+/* cprintc.c */
+coOrd GetPrintOrig();
+ANGLE_T GetPrintAngle();
+
+
+/* cruler.c */
+void RulerRedraw( BOOL_T );
+STATUS_T ModifyRuler( wAction_t, coOrd );
+STATUS_T ModifyProtractor( wAction_t, coOrd );
+
+/* csnap.c */
+wIndex_t InitGrid( wMenu_p menu );
 BOOL_T SnapPos( coOrd * );
+BOOL_T SnapPosAngle( coOrd *, ANGLE_T * );
 void DrawSnapGrid( drawCmd_p, coOrd, BOOL_T );
 BOOL_T GridIsVisible( void );
 void InitSnapGridButtons( void );
-void SnapGridEnable( void );
-void SnapGridShow( void );
-void MapWindowShow( int state );
-extern wMenuToggle_p snapGridEnableMI;
-extern wMenuToggle_p snapGridShowMI;
+void SnapGridEnable( void * unused );
+void SnapGridShow( void * unused );
 
-void ScaleLengthEnd( void );
-void EnumerateList( long, FLOAT_T, char * );
-void EnumerateStart(void);
-void EnumerateEnd(void);
+/* ctodesgn.c */
+void InitNewTurn( wMenu_p m );
 
-/* cnote.c */
-void DoNote( void );
-BOOL_T WriteMainNote( FILE * );
-
-BOOL_T ReadMainNote(char * line);
+/* cturntbl.c */
+extern ANGLE_T turntableAngle;
 
 /* dbench.c */
 long GetBenchData( long, long );
@@ -422,22 +211,20 @@ BOOL_T CarCustomSave(FILE*);
 typedef int (*contMgmCallBack_p) (int, void *);
 void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
 
-/* dlayer.c */
-void LayerSetCounts();
-int FindUnusedLayer(unsigned int start);
-void DecrementLayerObjects(unsigned int index);
-void IncrementLayerObjects(unsigned int index);
+/* dease.c */
+extern DIST_T easementVal;
+extern DIST_T easeR;
+extern DIST_T easeL;
+
+/* denum.c */
+extern int enumerateMaxDescLen;
+void EnumerateList( long, FLOAT_T, char * , char * );
+void EnumerateStart(void);
+void EnumerateEnd(void);
 
 /* doption.c */
+extern long enableBalloonHelp;
 long GetDistanceFormat( void );
-
-/* ctrain.c */
-BOOL_T WriteCars( FILE * );
-void ClearCars( void );
-void CarDlgAddProto( void );
-void CarDlgAddDesc( void );
-void AttachTrains( void );
-
 
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
@@ -454,8 +241,55 @@ void InitCmdControl ( wMenu_p menu );
 /* csensor.c */
 void SensorMgmLoad ( void );
 void InitCmdSensor ( wMenu_p menu );
+
 /* cmodify.c */
+extern wIndex_t modifyCmdInx;
 STATUS_T CmdModify(wAction_t action,coOrd pos );
 
+/* ctrain.c */
+#define MODE_DESIGN		(0)
+#define MODE_TRAIN		(1)
+extern long programMode;
+extern long maxCouplingSpeed;
+extern long hideTrainsInTunnels;
+
+/* fileio.c */
+extern long checkPtInterval;
+extern long autosaveChkPoints;
+extern wIndex_t checkPtMark;
+
+/* layout.c */
+extern wIndex_t changed;
+void SetFileChanged(void);
+
+/* macro.c */
+extern long adjTimer;
+int RegressionTestAll();
+
+/* lprintf.c */
+typedef struct {
+		char * name;
+		int level;
+		} logTable_t;
+extern dynArr_t logTable_da;
+#define logTable(N) DYNARR_N( logTable_t, logTable_da, N )
+extern time_t logClock;
+void LogOpen( char * );
+void LogClose( void );
+void LogSet( char *, int );
+int LogFindIndex( const char * );
+void LogPrintf( const char *, ... );
+#define LOG( DBINX, DBLVL, DBMSG ) \
+		if ( DBINX > 0 && logTable( DBINX ).level >= DBLVL ) { \
+				LogPrintf DBMSG ; \
+		}
+#define LOG1( DBINX, DBMSG ) LOG( DBINX, 1, DBMSG )
+#define LOGNAME( DBNAME, DBMSG ) LOG( LogFindIndex( DBNAME ), DBMSG )
+
+#define NUM_FILELIST (5)
+#define lprintf LogPrintf
+
+/* track.c */
+extern void EnumerateTracks( void * unused );
 
 #endif

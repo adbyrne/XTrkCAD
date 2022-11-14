@@ -24,7 +24,7 @@ covered by the Creative Commons Attribution-ShareAlike 2.5 License Agreement.
 
 \e{XTrackCAD} is \XTCCopyRight and licensed as free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
-You should have received a copy of the GNU General Public License along with this program; see the file named COPYING or refer to \K{GNUGPLicense}. If not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+You should have received a copy of the GNU General Public License along with this program; see the file named COPYING or refer to \K{GNUGPLicense}. If not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 \e{XTrackCAD} Fork is a project for further development of the original \e{XTrackCAD} software. Refer to the project homepage at http://www.xtrkcad.org/ for news and current releases.
 
@@ -41,13 +41,13 @@ You should have received a copy of the GNU General Public License along with thi
 
 \dd Copyright (C) 1989, 1991 Free Software Foundation, Inc.
 
-\dd 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+\dd 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
 
 \e{Preamble}
 
-The licenses for most software are designed to take away your freedom to share and change it.  By contrast, the GNU General Public License is intended to guarantee your freedom to share and change free software--to make sure the software is free for all its users.  This General Public License applies to most of the Free Software Foundation's software and to any other program whose authors commit to using it.  (Some other Free Software Foundation software is covered by the GNU Library General Public License instead.)  You can apply it to
+The licenses for most software are designed to take away your freedom to share and change it.  By contrast, the GNU General Public License is intended to guarantee your freedom to share and change free software--to make sure the software is free for all its users.  This General Public License applies to most of the Free Software Foundation's software and to any other program whose authors commit to using it.  (Some other Free Software Foundation software is covered by the GNU Lesser General Public License instead.)  You can apply it to
 your programs, too.
 
 When we speak of free software, we are referring to freedom, not price.  Our General Public Licenses are designed to make sure that you have the freedom to distribute copies of free software (and charge for this service if you wish), that you receive source code or can get it
@@ -149,4 +149,136 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE
 
 \f{END OF TERMS AND CONDITIONS}
 
+\f{How to Apply These Terms to Your New Programs}
+
+If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+convey the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+\dd <one line to give the program's name and a brief idea of what it does.> Copyright (C) <year>  <name of author>
+
+\u000
+
+\dd This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+\u000
+
+\dd This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+\u000
+
+\dd You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Also add information on how to contact you by electronic and paper mail.
+
+If the program is interactive, make it output a short notice like this
+when it starts in an interactive mode:
+
+\dd Gnomovision version 69, Copyright (C) year name of author Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.  This is free software, and you are welcome to redistribute it under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, the commands you use may
+be called something other than `show w' and `show c'; they could even be
+mouse-clicks or menu items--whatever suits your program.
+
+You should also get your employer (if you work as a programmer) or your
+school, if any, to sign a "copyright disclaimer" for the program, if
+necessary.  Here is a sample; alter the names:
+
+\dd Yoyodyne, Inc., hereby disclaims all copyright interest in the program
+  `Gnomovision' (which makes passes at compilers) written by James Hacker.
+
+\u000
+
+\dd <signature of Ty Coon>, 1 April 1989
+
+\u000
+
+\dd Ty Coon, President of Vice
+
+This General Public License does not permit incorporating your program into
+proprietary programs.  If your program is a subroutine library, you may
+consider it more useful to permit linking proprietary applications with the
+library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.
+
 \rule
+
+\H{Contributions} \ii{Contributions}
+
+XTrackCAD incorporates the following software:
+
+\c This program uses FreeImage, a free, open source image library supporting all common bitmap formats. 
+\e                   bbbbbbbbb
+\c See http://freeimage.sourceforge.net for details
+
+\u000
+
+\c uthash, utlist 
+\e bbbbbb  bbbbbb
+\c Copyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/
+\c All rights reserved.
+
+\u000
+
+\c CJson - https://github.com/DaveGamble/cJSON/blob/master/README.md#license
+\e bbbbb
+\c Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+
+\u000
+
+\c zlib - https://opensource.org/licenses/zlib-license.php
+\e bbbb
+
+\u000
+
+\c libzip - https://libzip.org/license/
+\e bbbbbb
+\c Copyright (C) 1999-2019 Dieter Baron and Thomas Klausner
+
+\c The authors can be contacted at <libzip@nih.at>
+
+\c Redistribution and use in source and binary forms, with or without
+\c modification, are permitted provided that the following conditions
+\c are met:
+
+\c 1. Redistributions of source code must retain the above copyright
+\c  notice, this list of conditions and the following disclaimer.
+
+\c 2. Redistributions in binary form must reproduce the above copyright
+\c  notice, this list of conditions and the following disclaimer in
+\c  the documentation and/or other materials provided with the
+\c  distribution.
+
+\c 3. The names of the authors may not be used to endorse or promote
+\c  products derived from this software without specific prior
+\c  written permission.
+
+\c THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
+\c OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+\c WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+\c ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+\c DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+\c DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+\c GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+\c INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+\c IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+\c OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+\c IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+\u000
+
+\c minixml - https://github.com/michaelrsweet/mxml/commit/f166ad1977f2f13295689772a5d9e442f73d46f1
+\e bbbbbbb
+
+\c Copyright (C) 2003-2019 by Michael R Sweet.
+\c The Mini-XML library is licensed under the Apache License Version 2.0 with an
+\c exception to allow linking against GPL2/LGPL2-only software.
+
+
+

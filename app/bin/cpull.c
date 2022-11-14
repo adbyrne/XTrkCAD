@@ -17,19 +17,16 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <math.h>
 
 #include "cselect.h"
 #include "compound.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "track.h"
-#include "utility.h"
+#include "draw.h"
+#include "common-ui.h"
 
 int debugPull = 0;
 
@@ -90,9 +87,7 @@ static ending_e GetConnectedTracks(
 		if ( ep2 >= 0 ) {
 			int inx;
 			for (inx=0;inx<section_da.cnt;inx++) {
-				if ( section(inx).trk == trk ) {
-					AbortProg("GetConnectedTracks(T%d already selected)", GetTrkIndex(trk));
-				}
+				CHECKMSG( section(inx).trk != trk, ("GetConnectedTracks(T%d already selected)", GetTrkIndex(trk)) );
 			}
 		}
 		DYNARR_APPEND( section_t, section_da, 10 );
@@ -145,8 +140,7 @@ static void MoveConnectedTracks(
 		ep2 = GetNextTrk( trk1, ep1, &trk, &ep, 0 );
 		if (trk==NULL)
 			return;
-		if (ep2 < 0)
-			AbortProg("MoveConnectedTracks(T%d rooted)", GetTrkIndex(trk1));
+		CHECKMSG( ep2 >= 0, ("MoveConnectedTracks(T%d rooted)", GetTrkIndex(trk1)) );;
 		angle = NormalizeAngle(GetTrkEndAngle( trk1, ep2 )+180.0);
 		pos = GetTrkEndPos( trk1, ep2 );
 		trk1 = trk;
@@ -452,7 +446,8 @@ static void PullTracks(
 	coOrd p1, p2;
 	ANGLE_T a1, a2;
 	coOrd p;
-	int cnt1, cnt2;
+	int cnt1;
+//	int cnt2;
 	int rc;
 
 	if (QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS)) {
@@ -490,7 +485,7 @@ static void PullTracks(
 	if ( e1 != loopEnd ) {
 		e2 = GetConnectedTracks( trk2, ep2, trk1, ep1 );
 	} 
-	cnt2 = section_da.cnt - cnt1;
+//	cnt2 = section_da.cnt - cnt1;
 	if ( e1 == freeEnd && e2 == freeEnd ) {
 		p.x = (p1.x+p2.x)/2.0;
 		p.y = (p1.y+p2.y)/2.0;
@@ -589,8 +584,7 @@ printf("T%d [%0.3f %0.3f %0.3f]\n", GetTrkIndex(trk1), p1.x, p1.y, a1 );
 		ep = GetNextTrk( trk, ep1, &trk1, &ep1, 0 );
 		if (trk1 == NULL)
 			break;
-		if (ep<0)
-			AbortProg( "tightenTracks: can't happen" );
+		CHECK(ep>=0);
 	}
 	InfoMessage( _("%d tracks moved"), cnt );
 }
@@ -706,8 +700,8 @@ static STATUS_T CmdPull(
 	EPINX_T ep2;
 	static BOOL_T turntable;
 
-	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
-	BOOL_T found = FALSE;
+//	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
+//	BOOL_T found = FALSE;
 
 	switch (action&0xFF) {
 
@@ -858,11 +852,13 @@ static STATUS_T CmdPull(
 
 
 
-#include "bitmaps/pull.xpm"
+#include "bitmaps/connect.xpm"
 
 wMenuPush_p pullConnectMultiple;
 
-void pullMenuEnter(int key) {
+void pullMenuEnter( void * keyVP )
+{
+	int key = (int)VP2L(keyVP);
 	int action;
 	action = C_TEXT;
 	action |= key<<8;
@@ -871,7 +867,7 @@ void pullMenuEnter(int key) {
 
 void InitCmdPull( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_LCLICK|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(connect_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_LCLICK|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_CONNECT, NULL );
 	pullPopupM = MenuRegister( "Connect Options" );
-	pullConnectMultiple = wMenuPushCreate( pullPopupM, "", _("Connect All Selected - 'S'"), 0, (wMenuCallBack_p)pullMenuEnter, (void*) 'S');
+	pullConnectMultiple = wMenuPushCreate( pullPopupM, "", _("Connect All Selected - 'S'"), 0, pullMenuEnter, I2VP('S') );
 }

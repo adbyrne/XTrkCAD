@@ -119,6 +119,8 @@ PARAMETER misc cmdRescale
 MESSAGE
 The <Rescale> command will change the size of the selected objects.
 
+Note: due to technical reasons, the To Scale drop down list is blank.  For this demo it should show 'DEMO'.
+
 First we will try rescaling by ratio.
 END
 STEP
@@ -139,7 +141,6 @@ END
 STEP
 PARAMETER misc cmdUndo
 RESET
-PARAMETER misc cmdRescale
 MESSAGE
 _________________________________________
 
@@ -148,9 +149,10 @@ Let's try that again.
 Now we are going to convert from one scale to another.
 END
 STEP
-PARAMETER rescale toggle 0
-PARAMETER rescale toS 4 HO
 PARAMETER misc cmdSelectAll
+PARAMETER misc cmdRescale
+PARAMETER rescale toggle 0
+PARAMETER rescale toS 5 HO
 MESSAGE
 _________________________________________
 

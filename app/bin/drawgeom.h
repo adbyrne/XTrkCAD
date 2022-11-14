@@ -16,17 +16,15 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_DRAWGEOM_H
 #define HAVE_DRAWGEOM_H
 
-#include "ccurve.h"
 #include "common.h"
-#include "draw.h"
-#include "track.h"
-#include "wlib.h"
+#include "track.h" //- drawLineType_e PolyType_e
+#include "ccurve.h" //- curveData_t
 
 #define OP_LINE			(0)
 #define OP_DIMLINE		(1)
@@ -51,9 +49,9 @@
 #define OP_LAST			(OP_POLYLINE)
 
 typedef struct {
-				void (*message)( char *, ... );
+				void (*message)( const char *, ... );
 				void (*Redraw)( void );
-				drawCmd_t *D;
+				drawCmd_p D;
 				long Op;
 				wDrawColor Color;
 				long line_Width;
@@ -70,15 +68,16 @@ typedef struct {
 				int Started;
 				BOOL_T Changed;
 				BOOL_T show;
+				BOOL_T UndoStarted;
 		} drawContext_t;
 
 typedef enum {MOD_NONE, MOD_STARTED, MOD_SELECTED_PT, MOD_AFTER_PT,
 		MOD_ORIGIN, MOD_AFTER_ORIG } ModState_e;
 
 typedef struct {
-				void (*message)( char *, ... );
+				void (*message)( const char *, ... );
 				void (*Redraw)( void );
-				drawCmd_t *D;
+				drawCmd_p D;
 				double length;
 				ANGLE_T rel_angle;
 				double radius;

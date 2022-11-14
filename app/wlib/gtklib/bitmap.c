@@ -16,7 +16,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
@@ -46,7 +46,7 @@ struct wBitmap_t {
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wWinPix_t x, wWinPix_t y, long options, const struct wIcon_t * iconP )
 {
 	wBitmap_p bt;
 	GdkPixbuf *pixbuf;
@@ -93,7 +93,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
  * \returns icon handle
  */
 
-wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor color )
+wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits, wDrawColor color )
 {
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );

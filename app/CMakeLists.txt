@@ -1,20 +1,23 @@
 
-# "bin/i18n.h" is widely used
-INCLUDE_DIRECTORIES(bin)
-include_directories(dynstring)
-include_directories(cornu)
-include_directories(libzip)
+
+
 
 # Setup the rest of the build ...
+add_subdirectory(help)
+add_subdirectory(bin)
+add_subdirectory(cornu)
 add_subdirectory(dynstring)
-ADD_SUBDIRECTORY(wlib)
-ADD_SUBDIRECTORY(tools)
-ADD_SUBDIRECTORY(help)
-ADD_SUBDIRECTORY(doc)
-ADD_SUBDIRECTORY(bin)
-ADD_SUBDIRECTORY(lib)
-ADD_SUBDIRECTORY(cornu)
+add_subdirectory(cJSON)
+add_subdirectory(wlib)
+add_subdirectory(tools)
+add_subdirectory(doc)
+add_subdirectory(lib)
 
-IF(XTRKCAD_USE_GETTEXT)
-	ADD_SUBDIRECTORY(i18n)
-ENDIF(XTRKCAD_USE_GETTEXT)
+# i18n can be found here
+include_directories(
+	${xtrkcad-lib_SOURCE_DIR}
+)
+
+if(XTRKCAD_USE_GETTEXT)
+	add_subdirectory(i18n)
+endif()

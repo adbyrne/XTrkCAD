@@ -72,7 +72,7 @@ wchar_t *ustrfroma(char const *s, wchar_t *outbuf, int size, int charset) {
 	return outbuf;
     }
 
-    len = strlen(s);
+    len = (int)strlen(s);
     size--;			       /* allow for terminating NUL */
     *outbuf = L'\0';
     while (len > 0) {
@@ -155,7 +155,7 @@ wchar_t *ufroma_dup(char const *s, int charset) {
     int len;
     wchar_t *buf = NULL;
 
-    len = strlen(s) + 1;
+    len = (int)strlen(s) + 1;
     do {
 	buf = sresize(buf, len, wchar_t);
 	ustrfroma(s, buf, len, charset);
@@ -184,7 +184,7 @@ char *utoa_locale_dup(wchar_t const *s)
     if (siz) {
 	assert(siz <= (size_t)(MB_CUR_MAX * len));
 	ret[siz] = '\0';
-	ret = sresize(ret, siz+1, char);
+	ret = sresize(ret, (int)siz+1, char);
 	return ret;
     }
 
@@ -206,7 +206,7 @@ wchar_t *ufroma_locale_dup(char const *s)
     int len;
     size_t siz;
 
-    len = strlen(s);
+    len = (int)strlen(s);
 
     ret = snewn(1 + 2*len, wchar_t);  /* be conservative */
 
@@ -215,7 +215,7 @@ wchar_t *ufroma_locale_dup(char const *s)
     if (siz) {
 	assert(siz <= (size_t)(2 * len));
 	ret[siz] = L'\0';
-	ret = sresize(ret, siz+1, wchar_t);
+	ret = sresize(ret, (int)siz+1, wchar_t);
 	return ret;
     }
 
@@ -323,12 +323,12 @@ wchar_t *ustrlow(wchar_t *s) {
 }
 
 int utoi(wchar_t const *s) {
-    int sign = +1;
+//  int sign = +1;
     int n;
 
     if (*s == L'-') {
 	s++;
-	sign = -1;
+//	sign = -1;
     }
 
     n = 0;
@@ -429,7 +429,7 @@ wchar_t *ustrftime(const wchar_t *wfmt, const struct tm *timespec)
 	    rdadd(&rs, L'%');
 	    wfmt += 2;
 	} else if (wfmt[0] == L'%' && wfmt[1]) {
-	    ustrftime_internal(&rs, wfmt[1], timespec);
+	    ustrftime_internal(&rs, (char)(wfmt[1]), timespec);
 	    wfmt += 2;
 	} else {
 	    rdadd(&rs, wfmt[0]);

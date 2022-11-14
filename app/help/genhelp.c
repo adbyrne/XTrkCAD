@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
@@ -42,7 +42,7 @@ int process(mode_e mode, char * json, FILE * outFile)
         goto end;
     }
 
-    fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n * Changes to this file will be overwritten.\n */\n",
+    fputs("/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n * Changes to this file will be overwritten. Edit this: genhelp.json\n */\n",
           outFile);
     fprintf(outFile, "#include <stdio.h>\n");
     fprintf(outFile, "#include \"wlib.h\"\n");

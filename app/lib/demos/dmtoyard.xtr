@@ -2,7 +2,7 @@ VERSION 2
 DEMOINIT
 ORIG 4.000 0.000 0.000
 PARAMETER display description-fontsize 24
-PARAMETER turnout hide 1
+##PARAMETER turnout hide 1
 STRAIGHT 1 DEMO 1
 	E 3.666667 1.833333 270.000000
 	E 41.833333 1.833333 90.000000
@@ -10,19 +10,21 @@ STRAIGHT 1 DEMO 1
 REDRAW
 RESET
 MESSAGE
-This example show how to layout a yard using the <Turnout> and <Parallel> commands.
+This example show how to layout a yard using Turnouts from the HotBar and the <Parallel> command.
 END
 STEP
-COMMAND Turnout
+##COMMAND Turnout
+COMMAND TurnoutHotBar
+HOTBARSELECT Peco-55	Medium Right	SL-E395F
 MESSAGE
 _________________________________________
 
-You can resize and move the Turnout Selection dialog if it obscures the other windows.
+We'll choose a Turnout from the HotBar
 
-First we place a turnout on the main line.
+Then we place the Turnout on the main line.
 END
 STEP
-PARAMETER turnout list 0 Peco-55	SL-E395F	Medium Right
+##PARAMETER turnout list 0 Peco-55	SL-E395F	Medium Right
 MOUSE 2 35.417 1.917
 #BIGPAUSE
 MOUSE 3 36.5 1.917
@@ -30,12 +32,13 @@ MOUSE 3 36.5 1.917
 MOUSE 3 36.5 1.917
 BIGPAUSE
 MOUSE 4 36.5 1.917
-PARAMETER turnout ok
+##PARAMETER turnout ok
+MOUSE 3336 36.5 1.917
 RESET
 MESSAGE
 _________________________________________
 
-Next extend the turnout with the <Modify> command.
+Next extend the Turnout with the <Modify> command.
 END
 STEP
 COMMAND Modify
@@ -62,7 +65,7 @@ RESET
 MESSAGE
 _________________________________________
 
-And place a turnout to connect the new track.
+And place a Turnout to connect the new track.
 
 We'll zoom in here to see what's going on.
 END
@@ -71,14 +74,16 @@ STEP
 #PAN 7 23.333 1.000
 ORIG 2.000 21.333 1.000
 BIGPAUSE
-COMMAND Turnout
-PARAMETER turnout list 0 Peco-55	SL-E396F	Medium Left
+##COMMAND Turnout
+##PARAMETER turnout list 0 Peco-55	SL-E396F	Medium Left
+COMMAND TurnoutHotBar
+HOTBARSELECT Peco-55	Medium Left	SL-E396F
 MOUSE 1 29.500 2.542
 MOUSE 2 29.500 2.542
 MESSAGE
 _________________________________________
 
-Notice how we control which way the turnout is facing by moving the mouse across the center line of the track.
+Notice how we control which way the Turnout is facing by moving the mouse across the center line of the track.
 
 END
 STEP
@@ -94,19 +99,20 @@ MOUSE 3 29.625 2.667
 MESSAGE
 _________________________________________
 
-The Status bar displays the number of auto-connections that will be made and the maximum offset.
+The Status bar displays the number of auto-connections that will be made (3) and the maximum offset (0.000).
 
-XTrackCAD adjusts the turnout position for the best fit to minimize any connection offset
+XTrackCAD adjusts the Turnout position for the best fit to minimize any connection offset
 END
 STEP
 MOUSE 4 29.625 2.667
 #MOUSE 4 27.625 2.9
-PARAMETER turnout ok
-#RESET
+##PARAMETER turnout ok
+MOUSE 3336 29.625 2.667
+RESET
 MESSAGE
 _________________________________________
 
-Note that placing the turnout splits the parallel track.
+Note that placing the Turnout splits the parallel track.
 
 We have to delete the leftover piece by Selecting and Deleting it.
 END
@@ -132,14 +138,17 @@ MOUSE 4 16.417 3.583
 RESET
 BIGPAUSE
 ORIG 2.000 16.000 2.000
-COMMAND Turnout
-PARAMETER turnout list 0 Peco-55	SL-E396F	Medium Left
+##COMMAND Turnout
+##PARAMETER turnout list 0 Peco-55	SL-E396F	Medium Left
+COMMAND TurnoutHotBar
+HOTBARSELECT Peco-55	Medium Left	SL-E396F
 MOUSE 2 22.167 3.938
 MOUSE 3 21.750 4.000
 BIGPAUSE
 MOUSE 4 21.750 4.000
-PARAMETER turnout ok
-#RESET
+##PARAMETER turnout ok
+MOUSE 3336 21.750 4.000
+RESET
 #COMMAND Select
 MOUSE 2 22.688 4.438
 MOUSE 4 22.688 4.438
@@ -149,7 +158,7 @@ ORIG 4.000 0.000 0.000
 MESSAGE
 _________________________________________
 
-For the last track we will join with a curve instead of a turnout.
+For the last track we will join with a curve instead of a Turnout.
 END
 STEP
 BIGPAUSE

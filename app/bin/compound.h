@@ -17,16 +17,16 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef COMPOUND_H
 #define COMPOUND_H
 
 #include "common.h"
-#include "track.h"
+#include "track.h" //- PATHPTR_T drawLineType_e
 
-typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast, TOcurved } TOspecial_e;
+typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast } TOspecial_e;
 
 typedef struct {
 		char * name;
@@ -44,9 +44,6 @@ typedef union {
 				FLOAT_T height;
 				char * name;
 			} pier;
-			struct {
-				dynArr_t radii;
-			} curved;
 		} turnoutInfo_u;
 		
 typedef struct turnoutInfo_t{
@@ -57,7 +54,7 @@ typedef struct turnoutInfo_t{
 		wIndex_t segCnt;
 		trkSeg_p segs;
 		wIndex_t endCnt;
-		trkEndPt_t * endPt;
+		trkEndPt_p endPt;
 		PATHPTR_T paths;
 		int paramFileIndex;
 		char * customInfo;
@@ -73,8 +70,8 @@ typedef struct turnoutInfo_t{
 #define xtitle(X) \
 		(X->title)
 
-#ifndef PRIVATE_EXTRADATA
-struct extraData {
+typedef struct extraDataCompound_t {
+		extraDataBase_t base;
 		coOrd orig;
 		ANGLE_T angle;
 		BOOL_T handlaid;
@@ -94,17 +91,10 @@ struct extraData {
 		PATHPTR_T currPath;
 		long currPathIndex;
 		wIndex_t segCnt;
-		trkSeg_t * segs;
-		DIST_T * radii;
+		trkSeg_p segs;
 		drawLineType_e lineType;
-		};
-#endif
+		} extraDataCompound_t;
 
-extern TRKTYP_T T_TURNOUT;
-extern TRKTYP_T T_STRUCTURE;
-extern TRKTYP_T T_BEZIER;
-extern TRKTYP_T T_BZRLIN;
-extern TRKTYP_T T_CORNU;
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
 extern dynArr_t structureInfo_da;
@@ -135,11 +125,13 @@ void SetPaths( track_p trk, PATHPTR_T paths );
 PATHPTR_T GetCurrPath( track_p trk );
 long GetCurrPathIndex( track_p trk );
 void SetCurrPathIndex( track_p trk, long position );
+PATHPTR_T GetParamPaths( turnoutInfo_t * to );
+void SetParamPaths( turnoutInfo_t * to, PATHPTR_T paths );
 
 #define FIND_TURNOUT	(1<<11)
 #define FIND_STRUCT		(1<<12)
 void FormatCompoundTitle( long, char *); 
-BOOL_T WriteCompoundPathsEndPtsSegs( FILE *, PATHPTR_T, wIndex_t, trkSeg_p, EPINX_T, trkEndPt_t *);
+BOOL_T WriteCompoundPathsEndPtsSegs( FILE *, PATHPTR_T, wIndex_t, trkSeg_p, EPINX_T, trkEndPt_p);
 void ParseCompoundTitle( char *, char **, int *, char **, int *, char **, int * );
 void FormatCompoundTitle( long, char *);
 void ComputeCompoundBoundingBox( track_p);
@@ -152,7 +144,7 @@ void DrawCompoundDescription( track_p, drawCmd_p, wDrawColor );
 DIST_T DistanceCompound( track_p, coOrd * );
 void DescribeCompound( track_p, char *, CSIZE_T );
 void DeleteCompound( track_p );
-track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_t *, DIST_T *, PATHPTR_T, wIndex_t, trkSeg_p );
+track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_p, PATHPTR_T, wIndex_t, trkSeg_p );
 BOOL_T WriteCompound( track_p, FILE * );
 BOOL_T ReadCompound( char *, TRKTYP_T );
 void MoveCompound( track_p, coOrd );
@@ -164,8 +156,8 @@ void SetCompoundLineType( track_p trk, int width );
 
 /* cgroup.c */
 void UngroupCompound( track_p );
-void DoUngroup( void );
-void DoGroup( void );
+void DoUngroup( void * unused );
+void DoGroup( void * unused );
 
 /* dcmpnd.c */
 void UpdateTitleMark( char *, SCALEINX_T );
@@ -175,12 +167,13 @@ wIndex_t FindListItemByContext( wList_p, void *);
 
 
 /* cturnout.c */
+extern long curTurnoutEp;
 EPINX_T TurnoutPickEndPt( coOrd p, track_p );
 BOOL_T SplitTurnoutCheck(track_p,coOrd,EPINX_T ep,track_p *,EPINX_T *,EPINX_T *,BOOL_T check, coOrd *, ANGLE_T *);
 void GetSegInxEP( signed char, int *, EPINX_T * );
 void SetSegInxEP( signed char *, int, EPINX_T) ;
 wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
-turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T, EPINX_T, trkEndPt_t *, DIST_T *, wBool_t, long );
+turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T, EPINX_T, trkEndPt_p, wBool_t, long );
 void DeleteTurnoutParams(int fileInx);
 turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
 STATUS_T CmdTurnoutAction( wAction_t, coOrd );
@@ -200,10 +193,5 @@ STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
 void DeleteStructures(int fileIndex);
 
-/* cstrdsgn.c */
-void EditCustomStructure( turnoutInfo_t * );
-
-STATUS_T CmdCarDescAction( wAction_t, coOrd );
-BOOL_T CarCustomSave( FILE * );
 
 #endif

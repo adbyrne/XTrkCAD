@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #define _WIN32_WINNT 0x0500
@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <htmlhelp.h>
-#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
 #include "FreeImage.h"
@@ -45,6 +44,7 @@
 #define OFN_LONGFILENAMES		0x00200000L
 
 char * mswStrdup(const char *);
+const char * GetCurCommandName(void);
 
 #define PAUSE_TIMER		(901)
 #define ALARM_TIMER		(902)
@@ -61,8 +61,8 @@ char * mswStrdup(const char *);
 #define LABELFONTRESET
 #else
 #define LABELFONTDECL	HFONT hFont;
-#define LABELFONTRESET	if (!mswThickFont) {SelectObject( hDc, hFont );}
-#define LABELFONTSELECT if (!mswThickFont) {hFont = SelectObject( hDc, mswLabelFont );}
+#define LABELFONTRESET	SelectObject( hDc, hFont );
+#define LABELFONTSELECT hFont = SelectObject( hDc, mswLabelFont );
 #endif
 
 /*
@@ -78,15 +78,19 @@ int mswEditHeight;
 int mswAllowBalloonHelp = TRUE;
 HFONT mswOldTextFont;
 HFONT mswLabelFont;
-long mswThickFont = 1;
 double mswScale = 1.0;
-
-double scaleIcon = 1.0;				   /**< Scaling factor for toolbar icons */
 
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
-void closeBalloonHelp(void);
+void closeBalloonHelp(int inx);
 static wControl_p getControlFromCursor(HWND, wWin_p *);
+
+#ifdef BALLOON_TRACE
+// To use:
+// change logFile defn in lprintf.c from static to EXPORT
+// Run with some debug flag set to ensure logFile is set
+extern FILE * logFile;
+#endif
 /*
  * LOCAL VARIABLES
  */
@@ -98,14 +102,14 @@ struct wWin_t {
 	int max_width;
 	int min_height;
 	int max_height;
-    wPos_t lastX, lastY;
-    wPos_t padX, padY;
+    wWinPix_t lastX, lastY;
+    wWinPix_t padX, padY;
     wControl_p first, last;
     wWinCallBack_p winProc;
     BOOL_T busy;
 #ifdef OWNERICON
     HBITMAP wicon_bm;
-    wPos_t wicon_w, wicon_h;
+    wWinPix_t wicon_w, wicon_h;
 #endif
     DWORD baseStyle;
     wControl_p focusChainFirst;
@@ -134,10 +138,10 @@ static wWin_p winFirst, winLast;
 
 static long count51 = 0;
 
-static UINT alarmTimer;
-static UINT pauseTimer;
-static UINT balloonHelpTimer = (UINT)0;
-static UINT triggerTimer;
+static UINT_PTR alarmTimer;
+static UINT_PTR pauseTimer;
+static UINT_PTR balloonHelpTimer = (UINT_PTR)0;
+static UINT_PTR triggerTimer;
 
 static UINT balloonHelpTimeOut = 500;
 static wControl_p balloonHelpButton = NULL;
@@ -175,8 +179,6 @@ static FILE * helpStrF;
 #endif
 static int inMainWndProc = FALSE;
 
-static int newHelp = 1;
-
 static wBool_t mswWinBlockEnabled = TRUE;
 
 static FILE * dumpControlsF;
@@ -198,6 +200,8 @@ static char * filterImageFiles[] = { N_("All image files"),
 							N_("All files (*)"),
 							"*",
 							};
+
+static HICON hWindowIcon;
 
 /*
  *****************************************************************************
@@ -249,8 +253,8 @@ static void doDumpControls(void)
         b = controlMap(inx).b;
 
         if (b) {
-            fprintf(dumpControlsF, "[%0.3d] [%x] %s %s %s\n", inx,
-                    (unsigned int)b->hWnd,
+            fprintf(dumpControlsF, "[%0.3d] [%p] %s %s %s\n", inx,
+                    b->hWnd,
                     (b->type>=0&&b->type<=B_BOX?controlNames[b->type]:"NOTYPE"),
                     (b->labelStr?b->labelStr:"<NULL>"),
                     (b->helpStr?b->helpStr:"<NULL>"));
@@ -301,7 +305,7 @@ void mswRepaintLabel(HWND hWnd, wControl_p b)
         LABELFONTSELECT
         newBrush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
         oldBrush = SelectObject(hDc, newBrush);
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, strlen(b->labelStr));
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, (int)(strlen(b->labelStr)));
         rect.left = b->labelX;
         rect.top = b->labelY;
         rect.right = b->labelX + LOWORD(dw);
@@ -311,7 +315,7 @@ void mswRepaintLabel(HWND hWnd, wControl_p b)
         /*SetBkMode( hDc, OPAQUE );*/
         SetBkColor(hDc, GetSysColor(COLOR_BTNFACE));
 
-        if (!TextOut(hDc, b->labelX, b->labelY, b->labelStr, strlen(b->labelStr))) {
+        if (!TextOut(hDc, b->labelX, b->labelY, b->labelStr, (int)(strlen(b->labelStr)))) {
             mswFail("Repainting text label");
         }
 
@@ -374,14 +378,16 @@ void * mswAlloc(
     w->data = data;
     w->focusChainNext = NULL;
     w->shown = TRUE;
+	w->hilite = FALSE;
+	w->errStr = NULL;
     return w;
 }
 
 
 void mswComputePos(
     wControl_p b,
-    wPos_t origX,
-    wPos_t origY)
+    wWinPix_t origX,
+    wWinPix_t origY)
 {
     wWin_p w = b->parent;
 
@@ -401,14 +407,14 @@ void mswComputePos(
     b->labelY = b->y+2;
 
     if (b->labelStr) {
-        int lab_l;
+        size_t lab_l;
         HDC hDc;
         DWORD dw;
         LABELFONTDECL
         hDc = GetDC(w->hWnd);
         LABELFONTSELECT
         lab_l = strlen(b->labelStr);
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, lab_l);
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, (UINT)lab_l);
         b->labelX -= LOWORD(dw) + 5;
         LABELFONTRESET
         ReleaseDC(w->hWnd, hDc);
@@ -555,7 +561,7 @@ void mswSetFocus(
         b->parent->focusChainNext = b;
     }
 }
-
+
 /*
  ******************************************************************************
  *
@@ -567,10 +573,10 @@ void mswSetFocus(
 static void getSavedSizeAndPos(
     long option,
     const char * nameStr,
-    wPos_t *rw,
-    wPos_t *rh,
-    wPos_t *rx,
-    wPos_t *ry,
+    wWinPix_t *rw,
+    wWinPix_t *rh,
+    wWinPix_t *rx,
+    wWinPix_t *ry,
     int *showCmd)
 {
     char *cq;
@@ -578,14 +584,31 @@ static void getSavedSizeAndPos(
 
     if ((option&F_RECALLPOS) && nameStr) {
         int x, y, w, h;
+		int xadj, yadj;
         const char *cp;
         int state;
+
+		w = h = 0;
+		xadj = 1;
+		yadj = mTitleH + 1;
+		if (option & F_RESIZE) {
+			xadj += mResizeBorderW * 2;
+			yadj += mResizeBorderH * 2;
+		}
+		else
+		{
+			xadj += mFixBorderW * 2;
+			yadj += mFixBorderH * 2;
+		}
+		//if (option & F_MENUBAR) {
+		//	yadj += mMenuH;
+		//}
 
         if ((option & F_RESIZE) &&
                 (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
                 (state = (int)strtol(cp, &cq, 10), cp != cq) &&  // state is not used 
-                (cp = cq, w = (wPos_t)strtod(cp, &cq), cp != cq) &&
-                (cp = cq, h = (int)strtod(cp, &cq), cp != cq)
+                (cp = cq, w = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, h = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
            ) {
             if (w < 10) {
                 w = 10;
@@ -595,12 +618,12 @@ static void getSavedSizeAndPos(
                 h = 10;
             }
 
-            if (w > screenWidth) {
-                w = screenWidth;
+            if (w > screenWidth - xadj) {
+                w = screenWidth - xadj;
             }
 
-            if (h > screenHeight) {
-                h = screenHeight;
+            if (h > screenHeight - yadj) {
+                h = screenHeight - yadj;
             }
 
             *rw = w;
@@ -608,8 +631,8 @@ static void getSavedSizeAndPos(
         }
 
         if ((cp = wPrefGetStringBasic("msw window pos", nameStr)) &&
-                (x = (wPos_t)strtod(cp, &cq), cp != cq) &&
-                (cp = cq, y = (wPos_t)strtod(cp, &cq), cp != cq)
+                (x = (wWinPix_t)(strtod(cp, &cq)), cp != cq) &&
+                (cp = cq, y = (wWinPix_t)(strtod(cp, &cq)), cp != cq)
            ) {
             if (y < 0) {
                 y = 0;
@@ -619,12 +642,12 @@ static void getSavedSizeAndPos(
                 x = 0;
             }
 
-            if (y > screenHeight-40) {
-                y = screenHeight-40;
+            if (y + h > screenHeight - yadj) {
+                y = screenHeight - yadj - h;
             }
 
-            if (x > screenWidth-40) {
-                x = screenWidth-40;
+            if (x + w > screenWidth - xadj) {
+                x = screenWidth - xadj - w;
             }
 
             *rx = x;
@@ -645,12 +668,12 @@ static void getSavedSizeAndPos(
  * \param aspect_ration IN unused on Windows
  */
 void wSetGeometry(wWin_p win,
-	int min_width,
-	int max_width,
-	int min_height,
-	int max_height,
-	int base_width,
-	int base_height,
+	wWinPix_t min_width,
+	wWinPix_t max_width,
+	wWinPix_t min_height,
+	wWinPix_t max_height,
+	wWinPix_t base_width,
+	wWinPix_t base_height,
 	double aspect_ratio)
 {
 	win->validGeometry = TRUE;	//remember that geometry was set
@@ -688,15 +711,15 @@ static wWin_p winCommonCreate(
     long style,
     const char * labelStr,
     wWinCallBack_p winProc,
-    wPos_t w,
-    wPos_t h,
+    wWinPix_t w,
+    wWinPix_t h,
     void * data,
     const char * nameStr,
     int * pShowCmd)
 {
     wWin_p win;
     int index;
-    wPos_t ww, hh, xx, yy;
+    wWinPix_t ww, hh, xx, yy;
     RECT rect;
     win = (wWin_p)mswAlloc(NULL, typ, mswStrdup(labelStr), sizeof *win, data,
                            &index);
@@ -774,6 +797,10 @@ static wWin_p winCommonCreate(
 
     win->nameStr = mswStrdup(nameStr);
 
+    //HICON hIcon1 = LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(101), IMAGE_ICON, 32, 32, LR_DEFAULTSIZE);
+    SendMessage(win->hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hWindowIcon);
+    SendMessage(win->hWnd, WM_SETICON, ICON_BIG, (LPARAM)hWindowIcon);
+
     if (typ == W_MAIN) {
         mswInitColorPalette();
     }
@@ -806,8 +833,8 @@ void wInitAppName(char *_appName)
 
 wWin_p wWinMainCreate(
     const char * name,
-    POS_T x,
-    POS_T y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * helpStr,
     const char * labelStr,
     const char * nameStr,
@@ -816,7 +843,6 @@ wWin_p wWinMainCreate(
     void * data)
 {
     wWin_p w;
-    RECT rect;
     const char * appDir;
     const char * libDir;
     int showCmd;
@@ -862,14 +888,9 @@ wWin_p wWinMainCreate(
     /* length of path + \ + length of filename + . + length of extension + \0 */
     helpFile = (char*)malloc(strlen(libDir) + 1 + strlen(appName) + 1 + 3 + 1);
     wsprintf(helpFile, "%s\\%s.chm", libDir, appName);
-    wPrefGetInteger("msw tweak", "ThickFont", &mswThickFont, 0);
 
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
-
-	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
-	if (scaleIcon < 1.0) scaleIcon = 1.0;
-	if (scaleIcon > 2.0) scaleIcon = 2.0;
 
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",
@@ -877,26 +898,22 @@ wWin_p wWinMainCreate(
                         nameStr, &showCmd);
     mswHWnd = w->hWnd;
 
-    if (!mswThickFont) {
-        SendMessage(w->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L);
-        hDc = GetDC(w->hWnd);
-        GetTextMetrics(hDc, &tm);
-        mswEditHeight = tm.tmHeight+2;
-        ReleaseDC(w->hWnd, hDc);
-    }
+    SendMessage(mswHWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
+    hDc = GetDC(mswHWnd);
+    GetTextMetrics(hDc, &tm);
+    mswEditHeight = tm.tmHeight+2;
+    ReleaseDC(mswHWnd, hDc);
 
-    ShowWindow(w->hWnd, showCmd);
-    UpdateWindow(w->hWnd);
-    GetWindowRect(w->hWnd, &rect);
-    GetClientRect(w->hWnd, &rect);
+    ShowWindow(mswHWnd, showCmd);
+    UpdateWindow(mswHWnd);
     w->busy = FALSE;
     return w;
 }
 
 wWin_p wWinPopupCreate(
     wWin_p parent,
-    POS_T x,
-    POS_T y,
+    wWinPix_t x,
+    wWinPix_t y,
     const char * helpStr,
     const char * labelStr,
     const char * nameStr,
@@ -1091,7 +1108,7 @@ int mswTranslateAccelerator(
         return FALSE;
     }
 
-    acclKey = pMsg->wParam;
+    acclKey = (long)pMsg->wParam;
     b = getControlFromCursor(pMsg->hwnd, &win);
 
     if (win == NULL) {
@@ -1112,7 +1129,7 @@ int mswTranslateAccelerator(
     }
 
     if (acclKey == (long)VK_F1) {
-        closeBalloonHelp();
+        closeBalloonHelp(1);
 
         if (!b && win) {
             wHelp(win->helpStr);
@@ -1162,14 +1179,14 @@ int mswTranslateAccelerator(
 
 
 
-void wGetDisplaySize(POS_T * width, POS_T * height)
+void wGetDisplaySize(wWinPix_t * width, wWinPix_t * height)
 {
     *width = screenWidth;
     *height = screenHeight;
 }
 
 
-void wWinGetSize(wWin_p w, POS_T * width, POS_T * height)
+void wWinGetSize(wWin_p w, wWinPix_t * width, wWinPix_t * height)
 {
     RECT rect;
     GetWindowRect(w->hWnd, &rect);
@@ -1181,7 +1198,7 @@ void wWinGetSize(wWin_p w, POS_T * width, POS_T * height)
 }
 
 
-void wWinSetSize(wWin_p w, POS_T width, POS_T height)
+void wWinSetSize(wWin_p w, wWinPix_t width, wWinPix_t height)
 {
     RECT rect;
     w->w = width;
@@ -1224,33 +1241,24 @@ static void blockingLoop(void)
 
 static void savePos(wWin_p win)
 {
-    WINDOWPLACEMENT windowPlace;
-    wPos_t w, h;
+    wWinPix_t w, h;
     RECT rect;
 
     if (win->nameStr &&
             IsWindowVisible(win->hWnd) /*&& !IsIconic( win->hWnd )*/) {
-        windowPlace.length = sizeof windowPlace;
-        GetWindowPlacement(win->hWnd, &windowPlace);
+		GetWindowRect(win->hWnd, &rect);
 
-        if (win->option&F_RECALLPOS) {
+		if (win->option&F_RECALLPOS) {
             char posStr[20];
-            wsprintf(posStr, "%d %d",
-                     windowPlace.rcNormalPosition.left,
-                     windowPlace.rcNormalPosition.top);
-            wPrefSetString("msw window pos", win->nameStr, posStr);
+			wsprintf(posStr, "%d %d",
+				rect.left,
+				rect.top);
+			wPrefSetString("msw window pos", win->nameStr, posStr);
 
             if (win->option&F_RESIZE) {
-                GetClientRect(win->hWnd, &rect);
-                w = windowPlace.rcNormalPosition.right - windowPlace.rcNormalPosition.left;
-                h = windowPlace.rcNormalPosition.bottom - windowPlace.rcNormalPosition.top;
-                w -= mResizeBorderW*2;
-                h -= mResizeBorderH*2 + mTitleH;
-
-                if (win->option&F_MENUBAR) {
-                    h -= mMenuH;
-                }
-
+				GetClientRect(win->hWnd, &rect);
+				w = rect.right - rect.left;
+				h = rect.bottom - rect.top;
                 wsprintf(posStr, "%d %d %d",
                          0,						// unused
                          w, h);
@@ -1265,7 +1273,7 @@ void wWinShow(
     wWin_p win,
     BOOL_T show)
 {
-    wPos_t x, y;
+    wWinPix_t x, y;
     wWin_p win1;
     win->busy = TRUE;
 
@@ -1291,6 +1299,10 @@ void wWinShow(
 
         win->centerWin = FALSE;
         win->shown = TRUE;
+
+		// Clear hilites
+		for (wControl_p controlP = win->first; controlP; controlP = controlP->next)
+			controlP->hilite = FALSE;
 
         if (mswHWnd == (HWND)0 || !IsIconic(mswHWnd)) {
             ShowWindow(win->hWnd, SW_SHOW);
@@ -1429,10 +1441,10 @@ const char * wWinGetTitle(
 
 void wWinClear(
     wWin_p win,
-    wPos_t x,
-    wPos_t y,
-    wPos_t width,
-    wPos_t height)
+    wWinPix_t x,
+    wWinPix_t y,
+    wWinPix_t width,
+    wWinPix_t height)
 {
 }
 
@@ -1674,44 +1686,44 @@ const char * wControlGetHelp(wControl_p b)
 }
 
 
-wPos_t wLabelWidth(const char * labelStr)
+wWinPix_t wLabelWidth(const char * labelStr)
 {
-    int lab_l;
+    size_t lab_l;
     HDC hDc;
     DWORD dw;
     LABELFONTDECL
     hDc = GetDC(mswHWnd);
     lab_l = strlen(labelStr);
     LABELFONTSELECT
-    dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, lab_l);
+    dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, (UINT)lab_l);
     LABELFONTRESET
     ReleaseDC(mswHWnd, hDc);
     return LOWORD(dw) + 5;
 }
 
 
-wPos_t wControlGetWidth(
+wWinPix_t wControlGetWidth(
     wControl_p b)			/* Control */
 {
     return b->w;
 }
 
 
-wPos_t wControlGetHeight(
+wWinPix_t wControlGetHeight(
     wControl_p b)			/* Control */
 {
     return b->h;
 }
 
 
-wPos_t wControlGetPosX(
+wWinPix_t wControlGetPosX(
     wControl_p b)			/* Control */
 {
     return b->x;
 }
 
 
-wPos_t wControlGetPosY(
+wWinPix_t wControlGetPosY(
     wControl_p b)			/* Control */
 {
     return b->y;
@@ -1720,21 +1732,21 @@ wPos_t wControlGetPosY(
 
 void wControlSetPos(
     wControl_p b,
-    wPos_t x,
-    wPos_t y)
+    wWinPix_t x,
+    wWinPix_t y)
 {
     b->labelX = x;
     b->labelY = y+2;
 
     if (b->labelStr) {
-        int lab_l;
+        size_t lab_l;
         HDC hDc;
         DWORD dw;
         LABELFONTDECL
         hDc = GetDC(b->parent->hWnd);
         LABELFONTSELECT
         lab_l = strlen(b->labelStr);
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, lab_l);
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST b->labelStr, (UINT)lab_l);
         b->labelX -= LOWORD(dw) + 5;
         LABELFONTRESET
         ReleaseDC(b->parent->hWnd, hDc);
@@ -1764,14 +1776,14 @@ void wControlSetLabel(
     if (b->type == B_RADIO ) {
         ;
     } else {
-        int lab_l;
+        size_t lab_l;
         HDC hDc;
         DWORD dw;
         LABELFONTDECL
         hDc = GetDC(b->parent->hWnd);
         lab_l = strlen(labelStr);
         LABELFONTSELECT
-        dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, lab_l);
+        dw = GetTextExtent(hDc, CAST_AWAY_CONST labelStr, (UINT)lab_l);
         LABELFONTRESET
         b->labelX = b->x - LOWORD(dw) - 5;
         ReleaseDC(b->parent->hWnd, hDc);
@@ -1804,13 +1816,14 @@ void wControlHilite(
         return;
     }
 
-    if (!IsWindowVisible(b->parent->hWnd)) {	
+    if ((b->parent==NULL) || (!IsWindowVisible(b->parent->hWnd)) || (!IsWindowVisible(b->hWnd))) {
+		b->hilite = FALSE;
         return;
     }
 
-    if (!IsWindowVisible(b->hWnd)) {
-        return;
-    }
+	if (b->hilite == hilite)
+		return;
+	b->hilite = hilite;
 
     hDc = GetDC(b->parent->hWnd);
 	newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_ROUND | PS_JOIN_BEVEL,
@@ -1847,7 +1860,7 @@ void wMessage(
 {
     HDC hDc;
     int oldRop;
-    POS_T h;
+    wWinPix_t h;
     RECT rect;
     LABELFONTDECL
 
@@ -1862,7 +1875,7 @@ void wMessage(
     Rectangle(hDc, 0, h, w->w, h);
     SetROP2(hDc, oldRop);
     LABELFONTSELECT
-    TextOut(hDc, 0, h, msg, strlen(msg));
+    TextOut(hDc, 0, h, msg, (int)(strlen(msg)));
     LABELFONTRESET
     ReleaseDC(w->hWnd, hDc);
 }
@@ -1880,7 +1893,7 @@ unsigned wOpenFileExternal(char *file)
 
 	res = ShellExecute(mswHWnd, "open", file, NULL, NULL, SW_SHOW);
 
-	if ((int)res <= 32) {
+	if ((UINT_PTR)res <= 32) {
 		wNoticeEx(NT_ERROR, "Error when opening file!", "Cancel", NULL);
 		return(FALSE);
 	}
@@ -1893,7 +1906,6 @@ void wExit(int rc)
     INDEX_T inx;
     wControl_p b;
     mswPutCustomColors();
-    wPrefFlush("");
 
     for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
         b = controlMap(inx).b;
@@ -1910,7 +1922,9 @@ void wExit(int rc)
         }
     }
 
-    for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
+	wPrefFlush("");
+
+	for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
         b = controlMap(inx).b;
 
         if (b != NULL) {
@@ -1923,14 +1937,14 @@ void wExit(int rc)
         controlMap(inx).b = NULL;
     }
 
-    deleteBitmaps();
+	deleteBitmaps();
 
     if (mswOldTextFont != (HFONT)0) {
         DeleteObject(mswOldTextFont);
     }
 
     if (helpInitted) {
-        WinHelp(mswHWnd, helpFile, HELP_QUIT, (DWORD_PTR)0);
+        WinHelp(mswHWnd, helpFile, HELP_QUIT, (DWORD)0);
         helpInitted = FALSE;
     }
 
@@ -2179,7 +2193,7 @@ void wHelp(
 	}
 
     if (!helpInitted) {
-        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
+        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD_PTR)&dwCookie) ;
         helpInitted = TRUE;
     }
 
@@ -2206,11 +2220,12 @@ void doHelpMenu(void * context)
     HH_FTS_QUERY ftsQuery;
 
     if (!helpInitted) {
-        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
+        HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD_PTR)&dwCookie) ;
         helpInitted = TRUE;
     }
 
-    switch ((int)(long)context) {
+	const char * topic;
+    switch ((int)(INT_PTR)context) {
     case 1: /* Contents */
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOC, (DWORD_PTR)NULL);
         break;
@@ -2222,12 +2237,11 @@ void doHelpMenu(void * context)
         ftsQuery.fTitleOnly = FALSE;
         ftsQuery.pszSearchQuery = NULL;
         ftsQuery.pszWindow = NULL;
-        HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD)&ftsQuery);
+        HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD_PTR)&ftsQuery);
         break;
 
 
     case 3: /*Context*/
-    	const char * topic;
     	topic = GetCurCommandName();
     	wHelp(topic);
     	break;
@@ -2274,147 +2288,130 @@ void wControlSetBalloonText(wControl_p b, const char * text)
     b->tipStr = mswStrdup(text);
 }
 
+void openBalloonHelp(wControl_p b, int dx, int dy)
+{
+	HDC hDc;
+	DWORD extent;
+	RECT rect;
+	POINT pt;
+	HFONT hFont;
+	const char * msg;
+	if (b->errStr) {
+		msg = b->errStr;
+	}
+	else {
+		msg = b->tipStr;
+		if (!balloonHelpEnable) {
+#ifdef BALLOON_TRACE
+			fprintf(logFile, "openBalloon !Enable state %d\n", balloonHelpState); fflush(logFile);
+#endif
+			return;
+		}
+	}
+#ifdef BALLOON_TRACE
+	fprintf(logFile, "openBalloon %s state %d\n", msg, balloonHelpState); fflush(logFile);
+#endif
+	if (!balloonHelpHWnd)
+		return;
+	int w, h;
+	hDc = GetDC(balloonHelpHWnd);
+	hFont = SelectObject(hDc, mswLabelFont);
+	extent = GetTextExtent(hDc, CAST_AWAY_CONST msg, (int)(strlen(msg)));
+	w = LOWORD(extent);
+	h = HIWORD(extent);
+
+	if (b->type == B_RADIO ||
+		b->type == B_TOGGLE) {
+		pt.y = b->h;
+	}
+	else {
+		GetClientRect(b->hWnd, &rect);
+		pt.y = rect.bottom;
+	}
+
+	pt.x = dx;
+	pt.y -= dy;
+	ClientToScreen(b->hWnd, &pt);
+
+	if (pt.x + w + 2 > screenWidth) {
+		pt.x = screenWidth - (w + 2);
+	}
+
+	if (pt.x < 0) {
+		pt.x = 0;
+	}
+
+	SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w + 6, h + 4,
+		SWP_SHOWWINDOW | SWP_NOACTIVATE);
+	if (!b->errStr) {
+		SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
+		SetTextColor(hDc, GetSysColor(COLOR_INFOTEXT));
+	} else {
+		SetBkColor(hDc, GetSysColor(COLOR_HIGHLIGHT));
+		SetTextColor(hDc, GetSysColor(COLOR_HIGHLIGHTTEXT));
+	}
+	TextOut(hDc, 2, 1, msg, (int)(strlen(msg)));
+	SelectObject(hDc, hFont);
+	ReleaseDC(balloonHelpHWnd, hDc);
+	balloonHelpState = balloonHelpShow;
+	balloonControlButton = b;
+}
+
+
 
 void startBalloonHelp(void)
 {
-    HDC hDc;
-    DWORD extent;
-    RECT rect;
-    POINT pt;
-    wBalloonHelp_t * bh;
-    const char * hs;
-    HFONT hFont;
+	wBalloonHelp_t * bh;
+	
+	if (!balloonHelpButton->tipStr) {
+		if (!balloonHelpStrings)
+			return;
+		for (bh = balloonHelpStrings; bh->name && strcmp(bh->name, balloonHelpButton->helpStr) != 0; bh++);
+		if (!bh->name || !bh->value)
+			balloonHelpButton->tipStr = _(balloonHelpButton->helpStr);
+		else
+			balloonHelpButton->tipStr = _(bh->value);
+	}
 
-    if (!balloonHelpStrings) {
-        return;
-    }
-
-    if (!balloonHelpEnable) {
-        return;
-    }
-
-    if (balloonHelpHWnd) {
-        if (balloonHelpButton->tipStr) {
-            hs = balloonHelpButton->tipStr;
-        } else {
-            hs = balloonHelpButton->helpStr;
-
-            if (!hs) {
-                return;
-            }
-
-            for (bh = balloonHelpStrings; bh->name && strcmp(bh->name,hs) != 0; bh++);
-
-            if (!bh->name || !bh->value) {
-                return;
-            }
-
-            balloonHelpButton->tipStr = hs = _(bh->value);
-        }
-
-        if (newHelp) {
-            wControlSetBalloon(balloonHelpButton, 0, 0, hs);
-        } else {
-            int w, h;
-            hDc = GetDC(balloonHelpHWnd);
-            hFont = SelectObject(hDc, mswLabelFont);
-            extent = GetTextExtent(hDc, CAST_AWAY_CONST hs, strlen(hs));
-            w = LOWORD(extent);
-            h = HIWORD(extent);
-            pt.x = 0;
-
-            if (balloonHelpButton->type == B_RADIO ||
-                    balloonHelpButton->type == B_TOGGLE) {
-                pt.y = balloonHelpButton->h;
-            } else {
-                GetClientRect(balloonHelpButton->hWnd, &rect);
-                pt.y = rect.bottom;
-            }
-
-            ClientToScreen(balloonHelpButton->hWnd, &pt);
-
-            if (pt.x + w+2 > screenWidth) {
-                pt.x = screenWidth-(w+2);
-            }
-
-            if (pt.x < 0) {
-                pt.x = 0;
-            }
-
-            SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
-                         SWP_SHOWWINDOW|SWP_NOACTIVATE);
-            SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
-            TextOut(hDc, 2, 1, hs, strlen(hs));
-            SelectObject(hDc, hFont);
-            ReleaseDC(balloonHelpHWnd, hDc);
-        }
-    }
+	openBalloonHelp(balloonHelpButton, 0, 0);
 }
 
-void closeBalloonHelp(void)
+
+void closeBalloonHelp(int inx)
 {
-    if (balloonHelpTimer) {
-        KillTimer(mswHWnd, balloonHelpTimer);
-        balloonHelpTimer = 0;
-    }
+#ifdef BALLOON_TRACE
+	fprintf(logFile, "closeBallonHelp %d state=%d\n", inx, balloonHelpState); fflush(logFile);
+#endif
+		if (balloonHelpTimer) {
+			KillTimer(mswHWnd, balloonHelpTimer);
+			balloonHelpTimer = (UINT_PTR)0;
+		}
 
-    if (balloonHelpState == balloonHelpShow)
-        if (balloonHelpHWnd) {
-            ShowWindow(balloonHelpHWnd, SW_HIDE);
-        }
+	if (balloonHelpState == balloonHelpShow)
+		if (balloonHelpHWnd) {
+			ShowWindow(balloonHelpHWnd, SW_HIDE);
+		}
 
-    balloonHelpState = balloonHelpIdle;
+	balloonHelpState = balloonHelpIdle;
 }
 
 
-void wControlSetBalloon(wControl_p b, wPos_t dx, wPos_t dy, const char * msg)
+void wControlSetBalloon(wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * msg)
 {
-    HDC hDc;
-    DWORD extent;
-    RECT rect;
-    POINT pt;
-    HFONT hFont;
-
-    if (msg) {
-        int w, h;
-        hDc = GetDC(balloonHelpHWnd);
-        hFont = SelectObject(hDc, mswLabelFont);
-        extent = GetTextExtent(hDc, CAST_AWAY_CONST msg, strlen(msg));
-        w = LOWORD(extent);
-        h = HIWORD(extent);
-
-        if (b->type == B_RADIO ||
-                b->type == B_TOGGLE) {
-            pt.y = b->h;
-        } else {
-            GetClientRect(b->hWnd, &rect);
-            pt.y = rect.bottom;
-        }
-
-        pt.x = dx;
-        pt.y -= dy;
-        ClientToScreen(b->hWnd, &pt);
-
-        if (pt.x + w+2 > screenWidth) {
-            pt.x = screenWidth-(w+2);
-        }
-
-        if (pt.x < 0) {
-            pt.x = 0;
-        }
-
-        SetWindowPos(balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
-                     SWP_SHOWWINDOW|SWP_NOACTIVATE);
-        SetBkColor(hDc, GetSysColor(COLOR_INFOBK));
-        TextOut(hDc, 2, 1, msg, strlen(msg));
-        SelectObject(hDc, hFont);
-        ReleaseDC(balloonHelpHWnd, hDc);
-        balloonHelpState = balloonHelpShow;
-        balloonControlButton = b;
-    } else {
-        closeBalloonHelp();
-    }
+	if (msg) {
+		if (b->errStr)
+			free(b->errStr);
+		b->errStr = mswStrdup(msg);
+		openBalloonHelp(b, dx, dy);
+	}
+	else {
+		if (b->errStr)
+			free(b->errStr);
+		b->errStr = NULL;
+		closeBalloonHelp(2);
+	}
 }
+
 
 
 int wGetKeyState(void)
@@ -2620,7 +2617,7 @@ struct wFilSel_t * wFilSelCreate(
 {
     char * cp;
     struct wFilSel_t * ret;
-    int len;
+    size_t len;
     ret = (struct wFilSel_t*)malloc(sizeof *ret);
     ret->parent = parent;
     ret->mode = mode;
@@ -2678,7 +2675,7 @@ const char * wMemStats(void)
             ", Unknown Heap Status");
     return msg;
 }
-
+
 /*
  *****************************************************************************
  *
@@ -2757,8 +2754,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     int inx;
     wWin_p w;
     wControl_p b, oldW;
-    int child = ((GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD) != 0);
-    POS_T newW, newH;
+    wWinPix_t newW, newH;
     RECT rect;
     PAINTSTRUCT ps;
     HWND hWnd2;
@@ -2766,9 +2762,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     HDC hDc;
     wAccelKey_e extChar;
 
+	LPMINMAXINFO pMMI;
     switch (message) {
 	case WM_GETMINMAXINFO:
-		LPMINMAXINFO pMMI = (LPMINMAXINFO)lParam;
+		pMMI = (LPMINMAXINFO)lParam;
 		inx = GetWindowWord(hWnd, 0);
 
 		if (inx >= CONTROL_BASE && inx <= controlMap_da.cnt) {
@@ -2782,7 +2779,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 			}
 		}
-		return(0);
+		return (LRESULT)0;
 
     case WM_MOUSEWHEEL:
         inx = GetWindowWord(hWnd, 0);
@@ -2794,12 +2791,12 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 return mswCallBacks[b->type]->messageProc((wControl_p)b, hWnd,
                         message, wParam, lParam);
 
-        return (0);
+        return (LRESULT)0;
 
-    case WM_DRAWITEM:
-    case WM_COMMAND:
+	case WM_COMMAND:
+        closeBalloonHelp(3);
+	case WM_DRAWITEM:
     case WM_MEASUREITEM:
-        closeBalloonHelp();
 
         if (WCMD_PARAM_ID < CONTROL_BASE || WCMD_PARAM_ID > (WPARAM)controlMap_da.cnt) {
             break;
@@ -2815,10 +2812,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // draw the bitmap
             mswDrawIcon(((LPDRAWITEMSTRUCT)lParam)->hDC, 0, 0, (wIcon_p)(b->data), FALSE,
                         (COLORREF)0, (COLORREF)0);
-            return (TRUE);
+            return (LRESULT)TRUE;
         } else {
             mswSetFocus(b);
-            ret = 0L;
+            ret = 0;
 
             if (!inMainWndProc) {
                 inMainWndProc = TRUE;
@@ -2831,7 +2828,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 inMainWndProc = FALSE;
             }
 
-            return ret;
+            return (LRESULT)ret;
         }
 
     case WM_PAINT:
@@ -2853,7 +2850,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
 
             EndPaint(hWnd, &ps);
-            return 1L;
+            return (LRESULT)1;
         }
 
         break;
@@ -2949,9 +2946,19 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         b = getControlFromCursor(hWnd, NULL);
-        closeBalloonHelp();
+        closeBalloonHelp(4);
 
         if (b && b->type == B_DRAW) {
+            // Change Num keypad to a special code to emulate cursor keys
+            if (wParam == VK_UP || 
+                wParam == VK_DOWN ||
+                wParam == VK_RIGHT ||
+                wParam == VK_LEFT ||
+                wParam == VK_INSERT ||
+                wParam == VK_DELETE) 
+            {
+                if ((lParam & 0x1000000) == 0) lParam |= 0x1000000;
+            }
             return SendMessage(b->hWnd, WM_CHAR, wParam, lParam);
         }
 
@@ -2974,7 +2981,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 
-            return 0L;
+            return (LRESULT)0;
 
         case 0x1B:
 
@@ -2995,7 +3002,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
 
             mswSetTrigger((wControl_p)TRIGGER_TIMER, NULL);
-            return 0L;
+            return (LRESULT)0;
 
         case 0x20:
 
@@ -3017,7 +3024,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 
-            return 0L;
+            return (LRESULT)0;
 
         case 0x09:
 
@@ -3048,16 +3055,16 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 
-            return 0L;
+            return (LRESULT)0;
         }
 
         /* Not a Draw control */
         MessageBeep(MB_ICONHAND);
-        return 0L;
+        return (LRESULT)0;
         break;
 
     case WM_ENABLE:
-        if (wParam == 1) {		/* WIN32??? */
+        if (wParam == (WPARAM)1) {
             hWnd2 = SetFocus(hWnd);
         }
 
@@ -3075,9 +3082,9 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
 
-        closeBalloonHelp();
+        closeBalloonHelp(5);
         wHelp(b->helpStr);
-        return 0L;
+        return (LRESULT)0;
 
     case WM_SETCURSOR:
 		if (hWnd == mswHWnd)
@@ -3092,21 +3099,38 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 
 		b = getControlFromCursor(hWnd, NULL);
-
+		
+#ifdef BALLOON_TRACE
+		fprintf(logFile, "SETCURSOR %s\n", b ? b->helpStr : "NULL"); fflush(logFile);
+#endif
 		if (b == balloonControlButton) {
+			//closeBalloonHelp(61);
 			break;
 		}
 
-		if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
-			(!b) || b->type == B_DRAW || b->helpStr == NULL) {
-			closeBalloonHelp();
+		if (GetActiveWindow() != hWnd) {
+			closeBalloonHelp(62);
+			break;
+		}
+		if (!b) {
+			closeBalloonHelp(63);
+			break;
+		}
+		if (b->type == B_DRAW) {
+			closeBalloonHelp(64);
+			break;
+		}
+		if (b->helpStr == NULL) {
+			closeBalloonHelp(65);
 			break;
 		}
 
 		if (b != balloonHelpButton) {
-			closeBalloonHelp();
+			closeBalloonHelp(7);
 		}
-
+#ifdef BALLOON_TRACE
+		fprintf(logFile, "SETCURSOR state %d\n", balloonHelpState); fflush(logFile);
+#endif
 		if (balloonHelpState != balloonHelpIdle) {
 			break;
 		}
@@ -3114,7 +3138,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
 			balloonHelpTimeOut, NULL);
 
-		if (balloonHelpTimer == (UINT)0) {
+		if (balloonHelpTimer == (UINT_PTR)0) {
 			break;
 		}
 
@@ -3153,7 +3177,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         wWinShow(w, FALSE);
-        return 0L;
+        return (LRESULT)0;
 
     case WM_CLOSE:
         inx = GetWindowWord(hWnd, 0);
@@ -3175,13 +3199,13 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (w->winProc(w, wClose_e, NULL, NULL));
             }
 
-            return 0L;
+            return (LRESULT)0;
         }
 
     case WM_DESTROY:
         if (hWnd == mswHWnd) {
             PostQuitMessage(0L);
-            return 0L;
+            return (LRESULT)0;
         }
 
         break;
@@ -3199,15 +3223,15 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         } else if (wParam == BALLOONHELP_TIMER) {
             KillTimer(hWnd, balloonHelpTimer);
-            balloonHelpTimer = (UINT)0;
+            balloonHelpTimer = (UINT_PTR)0;
             startBalloonHelp();
         }
 
-        return 0L;
+        return (LRESULT)0;
 
     case WM_MENUSELECT:
         mswAllowBalloonHelp = TRUE;
-        closeBalloonHelp();
+        closeBalloonHelp(8);
         break;
 
     case WM_WINDOWPOSCHANGED:
@@ -3233,7 +3257,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_PALETTECHANGED:
         if (wParam == (WPARAM)hWnd) {
-            return 0L;
+            return (LRESULT)0;
         }
 
     case WM_QUERYNEWPALETTE:
@@ -3247,12 +3271,12 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 InvalidateRect(hWnd, NULL, TRUE);
             }
 
-            return inx;
+            return (LRESULT)inx;
         }
 
     case WM_ACTIVATE:
         if (LOWORD(wParam) == WA_INACTIVE) {
-            closeBalloonHelp();
+            closeBalloonHelp(9);
         }
 
         break;
@@ -3279,7 +3303,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             inMainWndProc = FALSE;
         }
 
-        return ret;
+        return (LRESULT)ret;
 
     case WM_LBUTTONDOWN:
     case WM_MOUSEMOVE:
@@ -3304,7 +3328,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             inMainWndProc = FALSE;
         }
 
-        return ret;
+        return (LRESULT)ret;
 
     default:
         ;
@@ -3421,11 +3445,12 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
     mResizeBorderW = GetSystemMetrics(SM_CXFRAME);
     mResizeBorderH = GetSystemMetrics(SM_CYFRAME);
     mMenuH = GetSystemMetrics(SM_CYMENU) + 1;
-    screenWidth = GetSystemMetrics(SM_CXSCREEN);
-    screenHeight = GetSystemMetrics(SM_CYSCREEN);
-    mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
+	screenWidth = GetSystemMetrics(SM_CXFULLSCREEN);
+	screenHeight = GetSystemMetrics(SM_CYFULLSCREEN);
+	mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
     hDc = GetDC(0);
     mswScale = GetDeviceCaps(hDc, LOGPIXELSX) / 96.0;
+    hWindowIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(101));
 
     if (mswScale < 1.0) {
         mswScale = 1.0;
@@ -3474,5 +3499,5 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
         HtmlHelp(NULL, NULL, HH_UNINITIALIZE, (DWORD)dwCookie);
     }
 
-    return msg.wParam;
+    return (int)msg.wParam;
 }

@@ -266,6 +266,7 @@ static void lz77_compress(struct LZ77Context *ctx,
     st->npending -= i;
 
     defermatch.len = 0;
+    defermatch.distance = 0;
     deferchr = '\0';
     while (len > 0) {
 
@@ -1203,7 +1204,7 @@ static void outblock(deflate_compress_ctx *out,
      */
     for (i = 0; i < 19; i++)
 	codelen[i] = len3[lenlenmap[i]];
-    for (hclen = 19; hclen > 4 && codelen[hclen-1] == 0; hclen--);
+    for (hclen = 19; hclen > 4 && codelen[hclen-1] == 0; hclen--){};
 
     /*
      * Now work out the exact size of both the dynamic and the
@@ -1786,8 +1787,9 @@ static struct table *mkonetab(int *codes, unsigned char *lengths, int nsyms,
     int pfxmask = (1 << pfxbits) - 1;
     int nbits, i, j, code;
 
-    tab->table = snewn(1 << bits, struct tableentry);
-    tab->mask = (1 << bits) - 1;
+	int bit = 1 << bits;
+    tab->table = snewn(bit, struct tableentry);
+    tab->mask = bit - 1;
 
     for (code = 0; code <= tab->mask; code++) {
 	tab->table[code].code = -1;
@@ -2041,7 +2043,8 @@ int deflate_decompress_data(deflate_decompress_ctx *dctx,
 {
     const coderecord *rec;
     const unsigned char *block = (const unsigned char *)vblock;
-    int code, bfinal, btype, rep, dist, nlen, header, cksum;
+    int code, bfinal, btype, rep, dist, header, cksum;
+//  int nlen;
     int error = 0;
 
     if (len == 0) {
@@ -2440,7 +2443,7 @@ int deflate_decompress_data(deflate_decompress_ctx *dctx,
 	     */
 	    if (dctx->nbits < 16)
 		goto finished;
-	    nlen = dctx->bits & 0xFFFF;
+//	    nlen = dctx->bits & 0xFFFF;
 	    EATBITS(16);
 	    if (dctx->uncomplen == 0)
 		dctx->state = OUTSIDEBLK;	/* block is empty */

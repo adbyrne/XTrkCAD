@@ -17,18 +17,16 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "wlib.h"
 #include "draw.h"
 #include "misc.h"
+#include "common-ui.h"
 
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
 
@@ -63,13 +61,13 @@ static struct {
 static char * boxLabels[] = { "", NULL };
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
-		{ PD_DROPLIST, &Dt.fontSizeInx, "Fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
+		{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
 #define colorPD (textPLs[1])
-        { PD_COLORLIST, &Dt.color, "Color", PDO_NORECORD, NULL, N_("Color") },
+        { PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") },
 #define boxPD (textPLs[2])
-		{ PD_TOGGLE, &Dt.boxed, "Boxed", 0, boxLabels, N_("Boxed"), 0 }
+		{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 }
         };
-static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
+static paramGroup_t textPG = { "text", 0, textPLs, COUNT( textPLs ) };
 
 enum TEXT_POSITION
 {
@@ -267,9 +265,9 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 void InitCmdText( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
+	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
-	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
+	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
     Dt.color = wDrawColorBlack;
 }

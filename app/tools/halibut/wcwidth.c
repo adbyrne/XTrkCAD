@@ -144,12 +144,13 @@ int ustrwid(wchar_t const *s, int charset)
     wid = 0;
 
     while (len > 0) {
-	int err, ret;
+  	int err;
+//	int ret;
 	wchar_t const *s_orig;
 
 	err = 0;
 	s_orig = s;
-	ret = charset_from_unicode(&s, &len, buf, lenof(buf),
+	/*ret =*/ charset_from_unicode(&s, &len, buf, lenof(buf),
 				   charset, &state, &err);
 	wid += wcswidth(s_orig, s - s_orig);
 	if (err) {
@@ -165,7 +166,7 @@ int ustrwid(wchar_t const *s, int charset)
 int strwid(char const *s, int charset)
 {
     wchar_t buf[256];
-    int wid, len = strlen(s);
+    int wid, len = (int)strlen(s);
     charset_state state = CHARSET_INIT_STATE;
 
     wid = 0;

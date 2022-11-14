@@ -18,13 +18,8 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <ctype.h>
-#include <math.h>
-#include <string.h>
-
 
 #include "tbezier.h"
 #include "cjoin.h"
@@ -33,12 +28,12 @@
 #include "cundo.h"
 #include "dynstring.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
-#include "messages.h"
+#include "trkendpt.h"
+#include "draw.h"
 #include "include/paramfile.h"
+#include "common-ui.h"
 
 /*****************************************************************************
  *
@@ -47,57 +42,87 @@
  */
 
 
+#ifndef NEWPATH
+/* GetPaths()
+ *
+ * Return the paths for 'trk'.
+ *
+ * \param trk IN Get paths for track 'trk'
+ */
 EXPORT PATHPTR_T GetPaths( track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
-#ifdef NEWPATH
-	if ( xx->new_paths == NULL ) {
-		xx->new_paths = GenerateTrackPaths( trk );
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
+	if ( GetTrkType(trk) == T_STRUCTURE && xx->paths != NULL ) {
+		LogPrintf( "GetPaths( STRUCTURE, paths!=NULL )\n" );
 	}
-	return xx->new_paths;
-#else
+	if ( GetTrkType(trk) == T_TURNOUT && xx->paths == NULL ) {
+		LogPrintf( "GetPaths( TURNOUT, paths==NULL )\n" );
+	}
 	return xx->paths;
-#endif
 }
+#endif
 
-
+/* GetPathsLength()
+ *
+ * Return the length of the paths object
+ *
+ * \param paths IN paths object
+ */
 EXPORT wIndex_t GetPathsLength( PATHPTR_T paths )
 {
 	PATHPTR_T pp;
-	ASSERT( paths != NULL );
+	CHECK( paths != NULL );
 	for ( pp = paths; pp[0]; pp+=2 )
 		for ( pp += strlen( (char*)pp ); pp[0] || pp[1]; pp++ );
-	return pp - paths + 1;
+	return (wIndex_t)(pp - paths + 1);
 }
 
 
+#ifndef NEWPATH
+/* SetPaths()
+ *
+ * Set the paths for 'trk'.
+ * Called when paths are read from a layout file, copied from a param def'n or
+ * from a Spilt turnout.
+ *
+ * \param trk IN
+ * \param paths IN
+ */
 EXPORT void SetPaths( track_p trk, PATHPTR_T paths )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
-	wIndex_t pathLen = GetPathsLength( paths );
-#ifdef NEWPATH
-	if ( xx->saved_paths )
-		MyFree( xx->saved_paths );
-	xx->saved_paths = memdup( paths, pathLen * sizeof *xx->saved_paths );
-	xx->new_paths = NULL;
-#else
+	if ( GetTrkType(trk) == T_STRUCTURE && paths != NULL ) {
+		LogPrintf( "SetPaths( STRUCTURE, paths!=NULL )\n" );
+	}
+	if ( GetTrkType(trk) == T_TURNOUT && paths == NULL ) {
+		LogPrintf( "SetPaths( TURNOUT, paths==NULL )\n" );
+	}
+
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
 	if ( xx->paths )
 		MyFree( xx->paths );
 	if ( paths == NULL ) {
-		// Structure, but just to be safe
-		paths = (PATHPTR_T)"\0\0\0";
-		pathLen = 3;
+		xx->paths = NULL;
+	} else {
+		wIndex_t pathLen = GetPathsLength( paths );
+		xx->paths = memdup( paths, pathLen * sizeof *xx->paths );
 	}
-	xx->paths = memdup( paths, pathLen * sizeof *xx->paths );
 	xx->currPath = NULL;
-#endif
 	xx->currPathIndex = 0;
 }
+#endif
 
 
+/* GetCurrPath()
+ *
+ * Return the current path for 'trk'.
+ * Current path is the .currPathIndex'th path
+ * If the .currPathIndex is greater then the number of paths, return the first
+ *
+ * \param trk IN
+ */
 EXPORT PATHPTR_T GetCurrPath( track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
 	if ( xx->currPath )
 		return xx->currPath;
 	PATHPTR_T path = GetPaths( trk );
@@ -117,18 +142,52 @@ EXPORT PATHPTR_T GetCurrPath( track_p trk )
 
 EXPORT long GetCurrPathIndex( track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	if ( GetTrkType( trk ) != T_TURNOUT )
+		return 0;
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
 	return xx->currPathIndex;
 }
 
 
 EXPORT void SetCurrPathIndex( track_p trk, long position )
 {
-	struct extraData * xx = GetTrkExtraData( trk );
+	if ( GetTrkType( trk ) != T_TURNOUT )
+		return;
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
 	xx->currPathIndex = position;
 	xx->currPath = NULL;
 }
 
+#ifndef NEWPATH
+/* GetParamPaths()
+ *
+ * Return the paths for turnout parameter 'to'.
+ *
+ * \param to IN
+ */
+PATHPTR_T GetParamPaths( turnoutInfo_t * to )
+{
+	return to->paths;
+}
+
+/* SetParamPaths()
+ *
+ * Set paths for a Turnout Parameter 'to'
+ * Used when creating a new turnout def'n
+ * 
+ * \param to IN
+ * \param paths IN
+ */
+void SetParamPaths( turnoutInfo_t * to, PATHPTR_T paths )
+{
+	if ( paths ) {
+		wIndex_t len = GetPathsLength(paths);
+		to->paths = (PATHPTR_T)memdup( paths, len * ( sizeof * to->paths ) );
+	} else {
+		to->paths = NULL;
+	}
+}
+#endif
 
 /*****************************************************************************
  *
@@ -142,21 +201,25 @@ EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
 		wIndex_t segCnt,
 		trkSeg_p segs,
 		EPINX_T endPtCnt,
-		trkEndPt_t * endPts )
+		trkEndPt_p endPts )
 {
 	int i;
 	PATHPTR_T pp;
 
 	BOOL_T rc = TRUE;
-	for ( pp=paths; *pp; pp+=2 ) {
-		rc &= fprintf( f, "\tP \"%s\"", pp )>0;
-		for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ )
-			rc &= fprintf( f, " %d", pp[0] )>0;
-		rc &= fprintf( f, "\n" )>0;
+	if ( paths ) {
+		for ( pp=paths; *pp; pp+=2 ) {
+			rc &= fprintf( f, "\tP \"%s\"", pp )>0;
+			for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ )
+				rc &= fprintf( f, " %d", pp[0] )>0;
+			rc &= fprintf( f, "\n" )>0;
+		}
 	}
-	for ( i=0; i<endPtCnt; i++ )
+	for ( i=0; i<endPtCnt; i++ ) {
+		trkEndPt_p epp = EndPtIndex( endPts, i );
 		rc &= fprintf( f, "\tE %0.6f %0.6f %0.6f\n",
-				endPts[i].pos.x, endPts[i].pos.y, endPts[i].angle )>0;
+			GetEndPtPos(epp).x, GetEndPtPos(epp).y, GetEndPtAngle(epp) ) > 0;
+	}
 	rc &= WriteSegs( f, segCnt, segs )>0;
 	return rc;
 }
@@ -172,7 +235,7 @@ EXPORT void ParseCompoundTitle(
 		int * partnoL )
 {
 	char * cp1, *cp2;
-	int len;
+	size_t len;
 	*manufP = *nameP = *partnoP = NULL;
 	*manufL = *nameL = *partnoL = 0;
 	len = strlen( title );
@@ -182,27 +245,29 @@ EXPORT void ParseCompoundTitle(
 		if ( cp2 ) {
 			cp2++;
 			*partnoP = cp2;
-			*partnoL = title+len-cp2;
+			*partnoL = (int)(title+len-cp2);
 			len = cp2-title-1;
 		}
 		cp1++;
 		*nameP = cp1;
-		*nameL = title+len-cp1;
+		*nameL = (int)(title+len-cp1);
 		*manufP = title;
-		*manufL = cp1-title-1;
+		*manufL = (int)(cp1-title-1);
 	} else {
 		*nameP = title;
-		*nameL = len;
+		*nameL = (int)len;
 	}
 }
 
+EXPORT long listLabels = 7;
+EXPORT long layoutLabels = 1;
 
-void FormatCompoundTitle(
+EXPORT void FormatCompoundTitle(
 		long format,
 		char * title )
 {
 	char *cp1, *cp2=NULL, *cq;
-	int len;
+	size_t len;
 	FLOAT_T price;
 	BOOL_T needSep;
 	cq = message;
@@ -281,10 +346,10 @@ void FormatCompoundTitle(
 void ComputeCompoundBoundingBox(
 		track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	coOrd hi, lo;
 
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 
 	GetSegBounds( xx->orig, xx->angle, xx->segCnt, xx->segs, &lo, &hi );
 	hi.x += lo.x;
@@ -361,7 +426,7 @@ EXPORT void CompoundClearDemoDefns( void )
 void SetDescriptionOrig(
 		track_p trk )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	int i, j;
 	coOrd p0, p1;
 
@@ -399,7 +464,7 @@ void DrawCompoundDescription(
 {
 	wFont_p fp;
 	coOrd p1;
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	char * desc;
 	long layoutLabelsOption = layoutLabels;
 
@@ -407,24 +472,30 @@ void DrawCompoundDescription(
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-	if ( (d->options&DC_SIMPLE) )
+	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) )
 		return;
-		if ( xx->special == TOpier ) {
-			desc = xx->u.pier.name;
-		} else {
-			if ( xx->flipped )
-				layoutLabelsOption |= LABEL_FLIPPED;
-			if ( xx->ungrouped )
-				layoutLabelsOption |= LABEL_UNGROUPED;
-			if ( xx->split )
-				layoutLabelsOption |= LABEL_SPLIT;
-			FormatCompoundTitle( layoutLabelsOption, xtitle(xx) );
-			desc = message;
-		}
-		p1 = xx->descriptionOrig;
-		Rotate( &p1, zero, xx->angle );
-		p1.x += xx->orig.x + xx->descriptionOff.x;
-		p1.y += xx->orig.y + xx->descriptionOff.y;
+	if ( xx->special == TOpier ) {
+		desc = xx->u.pier.name;
+	} else {
+		if ( xx->flipped )
+			layoutLabelsOption |= LABEL_FLIPPED;
+		if ( xx->ungrouped )
+			layoutLabelsOption |= LABEL_UNGROUPED;
+		if ( xx->split )
+			layoutLabelsOption |= LABEL_SPLIT;
+		FormatCompoundTitle( layoutLabelsOption, xtitle(xx) );
+		desc = message;
+	}
+	p1 = xx->descriptionOrig;
+	Rotate( &p1, zero, xx->angle );
+	coOrd p0;
+	p0.x = p1.x+xx->orig.x;
+	p0.y = p1.y+xx->orig.y;
+	p1.x += xx->orig.x + xx->descriptionOff.x;
+	p1.y += xx->orig.y + xx->descriptionOff.y;
+	if (color == drawColorPreviewSelected) {
+		DrawLine( d, p0, p1, 0, color );
+	}
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_NONE, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
@@ -437,12 +508,12 @@ DIST_T CompoundDescriptionDistance(
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	if (GetTrkType(trk) != T_TURNOUT && GetTrkType(trk) != T_STRUCTURE)
-		return 100000;
+		return DIST_INF;
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	if ( ((GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) && !show_hidden)
-		return 100000;
+		return DIST_INF;
 	p1 = xx->descriptionOrig;
 	coOrd offset = xx->descriptionOff;
 	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) offset = zero;
@@ -451,6 +522,10 @@ DIST_T CompoundDescriptionDistance(
 	p1.y += xx->orig.y + offset.y;
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	*dpos = p1;
+
+	coOrd tpos = pos;
+	if (DistanceCompound(trk,&tpos)<FindDistance( p1, pos ))
+		return DistanceCompound(trk,&pos);
 	return FindDistance( p1, pos );
 }
 
@@ -460,7 +535,7 @@ STATUS_T CompoundDescriptionMove(
 		wAction_t action,
 		coOrd pos )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	static coOrd p0, p1;
 	static BOOL_T editMode;
 	wDrawColor color;
@@ -541,9 +616,10 @@ DIST_T DistanceCompound(
 		track_p t,
 		coOrd * p )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep;
-	DIST_T d0, d1;
+	DIST_T d0;
+//	DIST_T d1;
 	coOrd p0, p2;
 	PATHPTR_T path;
 	int segInx;
@@ -554,7 +630,7 @@ DIST_T DistanceCompound(
 		d0 = DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, p, NULL );
 	} else if ( programMode != MODE_TRAIN || GetTrkEndPtCnt(t) <= 0 ) {
 		d0 = DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, p, NULL );
-		if (programMode != MODE_TRAIN && GetTrkEndPtCnt(t) > 0 && d0 < 10000.0) {
+		if (programMode != MODE_TRAIN && GetTrkEndPtCnt(t) > 0 && d0 < DIST_INF) {
 			ep = PickEndPoint( *p, t );
 			*p = GetTrkEndPos(t,ep);
 		}
@@ -563,11 +639,11 @@ DIST_T DistanceCompound(
 		Rotate( &p0, xx->orig, -xx->angle );
 		p0.x -= xx->orig.x;
 		p0.y -= xx->orig.y;
-		d0 = 1000000.0;
+		d0 = DIST_INF;
 		path = GetCurrPath( t );
 		for ( path += strlen((char *)path)+1; path[0] || path[1]; path++ ) {
 			if ( path[0] != 0 ) {
-				d1 = 1000000.0;
+//				d1 = DIST_INF;
 				GetSegInxEP( *path, &segInx, &segEP );
 				segProcData.distance.pos1 = p0;
 				SegProc( SEGPROC_DISTANCE, &xx->segs[segInx], &segProcData );
@@ -577,7 +653,7 @@ DIST_T DistanceCompound(
 				}
 			}
 		}
-		if ( d0 < 1000000.0 ) {
+		if ( d0 < DIST_INF ) {
 			p2.x += xx->orig.x;
 			p2.y += xx->orig.y;
 			Rotate( &p2, xx->orig, xx->angle );
@@ -646,7 +722,7 @@ static descData_t compoundDesc[] = {
 
 static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	const char * manufS, * nameS, * partnoS;
 	char * mP, *nP, *pP;
 	int mL, nL, pL;
@@ -877,7 +953,7 @@ void DescribeCompound(
 		char * str,
 		CSIZE_T len )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	int fix;
 	EPINX_T ep, epCnt;
 	char * mP, *nP, *pP, *cnP;
@@ -1024,13 +1100,13 @@ void DescribeCompound(
 
 	if (  compoundDesc[LT].control0!=NULL) {
 		wListClear( (wList_p)compoundDesc[LT].control0 );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Solid"), NULL, (void*)0 );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dash"), NULL, (void*)1 );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), NULL, (void*)2 );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Solid"), NULL, I2VP(0) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dash"), NULL, I2VP(1) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), NULL, I2VP(2) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL, I2VP(3) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"), NULL, I2VP(5) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6) );
 		wListSetIndex( (wList_p)compoundDesc[LT].control0, compoundData.linetype );
 	}
 
@@ -1040,9 +1116,9 @@ void DescribeCompound(
 void DeleteCompound(
 		track_p t )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	FreeFilledDraw( xx->segCnt, xx->segs );
-	MyFree( xx->segs );
+	if (xx->segCnt>0) MyFree( xx->segs );
 	xx->segs = NULL;
 }
 
@@ -1051,10 +1127,11 @@ BOOL_T WriteCompound(
 		track_p t,
 		FILE * f )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep, epCnt;
+	int bits;
 	long options;
-	long position = 0;
+//	long position = 0;
 	drawLineType_e lineType = 0;
 	BOOL_T rc = TRUE;
 
@@ -1075,11 +1152,12 @@ BOOL_T WriteCompound(
 		options |= COMPOUND_OPTION_HIDEDESC;
 	epCnt = GetTrkEndPtCnt(t);
 	lineType = xx->lineType;
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				GetTrkTypeName(t),
 				GetTrkIndex(t), GetTrkLayer(t), options,
 				GetCurrPathIndex(t), lineType,
-				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
+				GetTrkScaleName(t), bits,
 				xx->orig.x, xx->orig.y, xx->angle,
 				PutTitle(xtitle(xx)) )>0;
 	for (ep=0; ep<epCnt; ep++ )
@@ -1111,7 +1189,7 @@ BOOL_T WriteCompound(
  */
 
 EXPORT void SetCompoundLineType( track_p trk, int width ) {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	switch(width) {
 	case 0:
 		xx->lineType = DRAWLINESOLID;
@@ -1146,18 +1224,17 @@ EXPORT track_p NewCompound(
 		ANGLE_T angle,
 		char * title,
 		EPINX_T epCnt,
-		trkEndPt_t * epp,
-		DIST_T * radii,
+		trkEndPt_p epp0,
 		PATHPTR_T paths,
 		wIndex_t segCnt,
 		trkSeg_p segs )
 {
 	track_p trk;
-	struct extraData * xx;
+	struct extraDataCompound_t * xx;
 	EPINX_T ep;
 
 	trk = NewTrack( index, trkType, epCnt, sizeof (*xx) + 1 );
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 	xx->orig = pos;
 	xx->angle = angle;
 	xx->handlaid = FALSE;
@@ -1172,22 +1249,14 @@ EXPORT track_p NewCompound(
 	SetPaths( trk, paths );
 	xx->segCnt = segCnt;
 	xx->segs = memdup( segs, segCnt * sizeof *segs );
-	trkSeg_p p = xx->segs;
+//	trkSeg_p p = xx->segs;
 	CopyPoly(xx->segs, xx->segCnt);
 	FixUpBezierSegs(xx->segs,xx->segCnt);
 	ComputeCompoundBoundingBox( trk );
 	SetDescriptionOrig( trk );
-//	if (radii) {
-//		xx->special = TOcurved;
-//		xx->u.curved.radii.max = 0;
-//		xx->u.curved.radii.cnt = 0;
-//		DYNARR_SET(DIST_T,xx->u.curved.radii,epCnt);
-//	}
 	for ( ep=0; ep<epCnt; ep++ ) {
-		SetTrkEndPoint( trk, ep, epp[ep].pos, epp[ep].angle );
-//		if (radii) {
-//			DYNARR_N(DIST_T,xx->u.curved.radii,ep) = radii[ep];
-//		}
+		trkEndPt_p epp = EndPtIndex( epp0, ep );
+		SetTrkEndPoint( trk, ep, GetEndPtPos(epp), GetEndPtAngle(epp) );
 	}
 	return trk;
 }
@@ -1198,7 +1267,7 @@ BOOL_T ReadCompound(
 		TRKTYP_T trkType )
 {
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	TRKINX_T index;
 	BOOL_T visible;
 	coOrd orig;
@@ -1211,7 +1280,6 @@ BOOL_T ReadCompound(
 	long options = 0;
 	long position = 0;
 	long lineType = 0;
-	PATHPTR_T path=NULL;
 
 	if (paramVersion<3) {
 		if ( !GetArgs( line, "dXsdpfq",
@@ -1228,15 +1296,19 @@ BOOL_T ReadCompound(
 	}
 	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE)
 		strcpy( scale, curScaleName );
-	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
+	TempEndPtsReset();
 	pathCnt = 0;
 	if ( !ReadSegs() )
 		return FALSE;
-	path = pathPtr;
-	if ( tempEndPts_da.cnt > 0 && pathCnt <= 1 ) {
-		// A Turnout with no path: fake it
-		pathCnt = 11;
-		path = (PATHPTR_T)"Normal\01\0\0\0";
+	if ( trkType == T_TURNOUT ) {
+		if ( TempEndPtsCount() <= 0 ) {
+			InputError( "Turnout defn without EndPoints", TRUE );
+			return FALSE;
+		}
+		if ( pathCnt <= 1 ) {
+			InputError( "Turnout defn without a Path", TRUE );
+			return FALSE;
+		}
 	}
 	if (paramVersion<6 && strlen( title ) > 2) {
 		cp = strchr( title, '\t' );
@@ -1247,23 +1319,25 @@ BOOL_T ReadCompound(
 			UpdateTitleMark( title, LookupScale(scale) );
 		}
 	}
-	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL, NULL,
-			path,
+	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL,
+			pathCnt > 1 ? pathPtr : NULL,
 			tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
 		SetTrkNoTies(trk, FALSE);
 		SetTrkBridge(trk, FALSE);
+		SetTrkRoadbed(trk, FALSE);
 	} else {
 		SetTrkVisible(trk, visible&2);
 		SetTrkNoTies(trk, visible&4);
 		SetTrkBridge(trk, visible&8);
+		SetTrkRoadbed(trk, visible&16);
 	}
 	SetTrkScale(trk, LookupScale( scale ));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, trkType, extraDataCompound_t);
 	xx->handlaid = (int)((options&COMPOUND_OPTION_HANDLAID)!=0);
 	xx->flipped = (int)((options&COMPOUND_OPTION_FLIPPED)!=0);
 	xx->ungrouped = (int)((options&COMPOUND_OPTION_UNGROUPED)!=0);
@@ -1301,7 +1375,7 @@ void MoveCompound(
 		track_p trk,
 		coOrd orig )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	xx->orig.x += orig.x;
 	xx->orig.y += orig.y;
 	ComputeCompoundBoundingBox( trk );
@@ -1313,7 +1387,7 @@ void RotateCompound(
 		coOrd orig,
 		ANGLE_T angle )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	Rotate( &xx->orig, orig, angle );
 	xx->angle = NormalizeAngle( xx->angle + angle );
 	Rotate( &xx->descriptionOff, zero, angle );
@@ -1325,7 +1399,7 @@ void RescaleCompound(
 		track_p trk,
 		FLOAT_T ratio )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	xx->orig.x *= ratio;
 	xx->orig.y *= ratio;
 	xx->descriptionOff.x *= ratio;
@@ -1341,7 +1415,7 @@ void FlipCompound(
 		coOrd orig,
 		ANGLE_T angle )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 	EPINX_T ep, epCnt;
 	char * mP, *nP, *pP;
 	int mL, nL, pL;
@@ -1424,12 +1498,13 @@ void FlipCompound(
 				d1 = 0;
 				a1 = 0;
 				for ( ep=0; ep<epCnt; ep++ ) {
-					d2 = FindDistance( endPos[ep], to->endPt[ep].pos );
+					trkEndPt_p epp = EndPtIndex( to->endPt, ep );
+					d2 = FindDistance( endPos[ep], GetEndPtPos(epp) );
 					if ( d2 > SMALLVALUE )
 						break;
 					if ( d2 > d1 )
 						d1 = d2;
-					a2 = NormalizeAngle( endAngle[ep] - to->endPt[ep].angle + 0.05 );
+					a2 = NormalizeAngle( endAngle[ep] - GetEndPtAngle(epp) + 0.05 );
 					if ( a2 > 0.1 )
 						break;
 					if ( a2 > a1 )
@@ -1456,19 +1531,21 @@ typedef struct {
 		char * type;
 		char * name;
 		FLOAT_T price;
+		DynString indexes;
 		} enumCompound_t;
 static dynArr_t enumCompound_da;
 #define EnumCompound(N) DYNARR_N( enumCompound_t,enumCompound_da,N)
 
 BOOL_T EnumerateCompound( track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataCompound_t *xx;
 	INT_T inx, inx2;
 	int cmp;
 	long listLabelsOption = listLabels;
+	char * index = MyMalloc(10);
 
 	if ( trk != NULL ) {
-		xx = GetTrkExtraData(trk);
+		xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
 		if ( xx->flipped )
 			listLabelsOption |= LABEL_FLIPPED;
 #ifdef LATER
@@ -1484,6 +1561,9 @@ BOOL_T EnumerateCompound( track_p trk )
 			cmp =  strcmp( EnumCompound(inx).name, message );
 			if ( cmp == 0 ) {
 				EnumCompound(inx).count++;
+				sprintf(index,",%d",GetTrkIndex(trk));
+				DynStringCatCStr(&(EnumCompound(inx).indexes),index);
+				MyFree(index);
 				return TRUE;
 			} else if ( cmp > 0 ) {
 				break;
@@ -1494,9 +1574,11 @@ BOOL_T EnumerateCompound( track_p trk )
 			EnumCompound(inx2) = EnumCompound(inx2-1);
 		EnumCompound(inx).name = MyStrdup( message );
 		if (strlen(message) > (size_t)enumerateMaxDescLen)
-			enumerateMaxDescLen = strlen(message);
+			enumerateMaxDescLen = (int)strlen(message);
 		EnumCompound(inx).type = GetTrkTypeName( trk );
 		EnumCompound(inx).count = 1;
+		DynStringMalloc(&(EnumCompound(inx).indexes),100);
+		DynStringPrintf(&(EnumCompound(inx).indexes),"%d",GetTrkIndex(trk));
 		FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, xtitle(xx) );
 		wPrefGetFloat( "price list", message, &(EnumCompound(inx).price), 0.0 );
 	} else {
@@ -1506,12 +1588,15 @@ BOOL_T EnumerateCompound( track_p trk )
 				if (EnumCompound(inx).type[0] == *type) {
 					EnumerateList( EnumCompound(inx).count,
 						EnumCompound(inx).price,
-						EnumCompound(inx).name );
+						EnumCompound(inx).name,
+						DynStringSize(&(EnumCompound(inx).indexes))?DynStringToCStr(&(EnumCompound(inx).indexes)):NULL);
 				}
+				DynStringFree(&(EnumCompound(inx).indexes));
 			}
 		}
 		DYNARR_RESET( enumCompound_t, enumCompound_da );
 	}
+	MyFree(index);
 	return TRUE;
 }
 

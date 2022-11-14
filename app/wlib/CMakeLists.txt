@@ -1,10 +1,19 @@
-PROJECT(wlib)
+project(wlib)
 
-INCLUDE_DIRECTORIES("${wlib_SOURCE_DIR}/include")
+add_library( xtrkcad-wlib
+			"")		
 
-IF(XTRKCAD_USE_GTK)
-	ADD_SUBDIRECTORY(gtklib)
-ELSE(XTRKCAD_USE_GTK)
-	ADD_SUBDIRECTORY(mswlib)
-ENDIF(XTRKCAD_USE_GTK)
+add_subdirectory(include)
+
+# add i18n.h to include path
+target_include_directories(xtrkcad-wlib 
+	PRIVATE 
+	${xtrkcad-lib_SOURCE_DIR}
+)
+
+if(XTRKCAD_USE_GTK)
+	add_subdirectory(gtklib)
+else()
+	add_subdirectory(mswlib)
+endif()
 

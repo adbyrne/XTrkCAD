@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef UTILITY_H
@@ -44,6 +44,7 @@ double max( double a, double b );
 double min( double a, double b );
 #endif
 double FindDistance( coOrd p0, coOrd p1 );
+int CoOrdEqual(coOrd p0, coOrd p1);
 double NormalizeAngle( double a );
 double DifferenceBetweenAngles(double a, double b);
 int AngleInRange(double a, double start, double size);
@@ -63,6 +64,7 @@ double LineDistance( coOrd *p, coOrd p0, coOrd p1 );
 double CircleDistance( coOrd *p, coOrd c, double r, double a0, double a1 );
 int PickArcEndPt( coOrd, coOrd, coOrd );
 int PickLineEndPt( coOrd, double, coOrd );
+coOrd MidPtCoOrd(coOrd, coOrd);
 coOrd AddCoOrd( coOrd, coOrd, double );
 int ClipLine( coOrd *, coOrd *, coOrd, double, coOrd );
 coOrd FindCentroid(int vertexCount, pts_t vertices[] );

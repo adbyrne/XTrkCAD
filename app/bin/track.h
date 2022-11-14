@@ -17,26 +17,36 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <string.h>
 #include "common.h"
-#include "draw.h"
-#include "misc2.h"
+#include "trkseg.h"
+
 
 extern TRKTYP_T T_NOTRACK;
+extern TRKTYP_T T_TURNOUT;
+extern TRKTYP_T T_STRUCTURE;
+extern TRKTYP_T T_BEZIER;
+extern TRKTYP_T T_BZRLIN;
+extern TRKTYP_T T_CORNU;
 
 struct track_t ;
 typedef struct track_t * track_p;
 typedef struct track_t * track_cp;
-extern track_p tempTrack;
 extern wIndex_t trackCount;
+extern DIST_T trackGauge;
+extern DIST_T minLength;
+extern DIST_T connectDistance;
+extern ANGLE_T connectAngle;
+extern long twoRailScale;
+extern wBool_t bFreeTrack;
 extern long colorTrack;
 extern long colorDraw;
+
 extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
@@ -48,7 +58,6 @@ extern unsigned int curTrackLayer;
 extern coOrd descriptionOff;
 extern DIST_T roadbedWidth;
 extern DIST_T roadbedLineWidth;
-extern long printCenterLines;
 extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
@@ -58,8 +67,8 @@ extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_SOLID		(2)
 extern long tieDrawMode;
 extern wDrawColor tieColor;
-
-
+extern wDrawColor bridgeColor;
+extern wDrawColor roadbedColor;
 extern TRKINX_T max_index;
 
 typedef signed char * PATHPTR_T;
@@ -137,13 +146,14 @@ typedef struct {
 #define Q_IS_TURNOUT                    (31)
 #define Q_GET_NODES						(32)
 
-typedef struct {
+typedef struct traverseTrack_t {
 		track_p trk;							// IN Current Track OUT Next Track
 		DIST_T length;							// IN How far to go
 		DIST_T dist;							// OUT how far left = 0 if found
 		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
 		ANGLE_T angle;							// IN/OUT - angle now
-		} traverseTrack_t, *traverseTrack_p;
+		} traverseTrack_t;
+typedef struct traverseTrack_t *traverseTrack_p;
 
 
 typedef struct {
@@ -151,7 +161,7 @@ typedef struct {
 		void (*draw)( track_p, drawCmd_p, wDrawColor );
 		DIST_T (*distance)( track_p, coOrd * );
 		void (*describe)( track_p, char * line, CSIZE_T len );
-		void (*delete)( track_p );
+		void (*deleteTrk)( track_p );
 		BOOL_T (*write)( track_p, FILE * );
 		BOOL_T (*read)( char * );
 		void (*move)( track_p, coOrd );
@@ -189,239 +199,11 @@ typedef struct {
 typedef enum { ELEV_NONE, ELEV_DEF, ELEV_COMP, ELEV_GRADE, ELEV_IGNORE, ELEV_STATION } elevMode_e;
 #define ELEV_MASK		0x07
 #define ELEV_VISIBLE	0x08
-typedef struct {
-		int option;
-		coOrd doff;
-		union {
-			DIST_T height;
-			char * name;
-		} u;
-		BOOL_T cacheSet;
-		double cachedElev;
-		double cachedLength;
-		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
-typedef struct {
-		coOrd pos;
-		ANGLE_T angle;
-		TRKINX_T index;
-		track_p track;
-		elev_t elev;
-		long option;
-		} trkEndPt_t, * trkEndPt_p;
 
-extern dynArr_t tempEndPts_da;
-#define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
+struct trkEndPt_t;
+typedef struct trkEndPt_t * trkEndPt_p;
 
-typedef enum { FREEFORM, RECTANGLE, POLYLINE
-} PolyType_e;
-
-
-typedef struct {
-		char type;
-		wDrawColor color;
-		DIST_T width;
-		dynArr_t bezSegs;       //placed here to avoid overwrites
-		union {
-			struct {
-				coOrd pos[4];
-				ANGLE_T angle;
-				long option;
-			} l;
-			struct {
-				coOrd pos[4];
-				ANGLE_T angle0;
-				ANGLE_T angle3;
-				DIST_T minRadius;
-				DIST_T radius0;
-				DIST_T radius3;
-				DIST_T length;
-			} b;
-			struct {
-				coOrd center;
-				ANGLE_T a0, a1;
-				DIST_T radius;
-			} c;
-			struct {
-				coOrd pos;
-				ANGLE_T angle;
-				DIST_T R, L;
-				DIST_T l0, l1;
-				unsigned int flip:1;
-				unsigned int negate:1;
-				unsigned int Scurve:1;
-			} j;
-			struct {
-				coOrd pos;
-				ANGLE_T angle;
-				wFont_p fontP;
-				FONTSIZE_T fontSize;
-				BOOL_T boxed;
-				char * string;
-			} t;
-			struct {
-				int cnt;
-				pts_t * pts;
-				coOrd orig;
-				ANGLE_T angle;
-				PolyType_e polyType;
-			} p;
-		} u;
-		} trkSeg_t, * trkSeg_p;
-
-#define SEG_STRTRK		('S')
-#define SEG_CRVTRK		('C')
-#define SEG_BEZTRK      ('W')
-#define SEG_STRLIN		('L')
-#define SEG_CRVLIN		('A')
-#define SEG_BEZLIN      ('H')
-#define SEG_JNTTRK		('J')
-#define SEG_FILCRCL		('G')
-#define SEG_POLY		('Y')
-#define SEG_FILPOLY		('F')
-#define SEG_TEXT		('Z')
-#define SEG_UNCEP		('E')
-#define SEG_CONEP		('T')
-#define SEG_PATH		('P')
-#define SEG_SPEC		('X')
-#define SEG_CUST		('U')
-#define SEG_DOFF		('D')
-#define SEG_BENCH		('B')
-#define SEG_DIMLIN		('M')
-#define SEG_TBLEDGE		('Q')
-
-#define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
-
-extern dynArr_t tempSegs_da;
-
-#define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
-
-extern char tempSpecial[4096];
-extern char tempCustom[4096];
-
-void ComputeCurvedSeg(
-		trkSeg_p s,
-		DIST_T radius,
-		coOrd p0,
-		coOrd p1 );
-
-coOrd GetSegEndPt(
-		trkSeg_p segPtr,
-		EPINX_T ep,
-		BOOL_T bounds,
-		ANGLE_T * );
-
-void GetTextBounds( coOrd, ANGLE_T, char *, FONTSIZE_T, coOrd *, coOrd * );
-void GetSegBounds( coOrd, ANGLE_T, wIndex_t, trkSeg_p, coOrd *, coOrd * );
-void MoveSegs( wIndex_t, trkSeg_p, coOrd );
-void RotateSegs( wIndex_t, trkSeg_p, coOrd, ANGLE_T );
-void FlipSegs( wIndex_t, trkSeg_p, coOrd, ANGLE_T );
-void RescaleSegs( wIndex_t, trkSeg_p, DIST_T, DIST_T, DIST_T );
-void CloneFilledDraw( wIndex_t, trkSeg_p, BOOL_T );
-void FreeFilledDraw( wIndex_t, trkSeg_p );
-DIST_T DistanceSegs( coOrd, ANGLE_T, wIndex_t, trkSeg_p, coOrd *, wIndex_t * );
-void DrawDimLine( drawCmd_p, coOrd, coOrd, char *, wFontSize_t, FLOAT_T, wDrawWidth, wDrawColor, long );
-void DrawSegs(
-		drawCmd_p d,
-		coOrd orig,
-		ANGLE_T angle,
-		trkSeg_p segPtr,
-		wIndex_t segCnt,
-		DIST_T trackGauge,
-		wDrawColor color );
-void DrawSegsO(
-		drawCmd_p d,
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle,
-		trkSeg_p segPtr,
-		wIndex_t segCnt,
-		DIST_T trackGauge,
-		wDrawColor color,
-		long options );
-ANGLE_T GetAngleSegs( wIndex_t, trkSeg_p, coOrd *, wIndex_t *, DIST_T *, BOOL_T *, wIndex_t *, BOOL_T * );
-void RecolorSegs( wIndex_t, trkSeg_p, wDrawColor );
-
-BOOL_T ReadSegs( void );
-BOOL_T WriteSegs( FILE * f, wIndex_t segCnt, trkSeg_p segs );
-BOOL_T WriteSegsEnd(FILE * f, wIndex_t segCnt, trkSeg_p segs, BOOL_T writeEnd);
-typedef union {
-		struct {
-				coOrd pos;				/* IN the point to get to */
-				ANGLE_T angle;			/* IN  is the angle that the object starts at (-ve for forwards) */
-				DIST_T dist;			/* OUT is how far it is along the track to get to pos*/
-				BOOL_T backwards;		/* OUT which way are we going? */
-				BOOL_T reverse_seg;		/* OUT the seg is backwards curve */
-				BOOL_T negative;		/* OUT the curve is negative */
-				int BezSegInx;			/* OUT for Bezier Seg - the segment we are on in Bezier */
-				BOOL_T segs_backwards;  /* OUT for Bezier Seg - the direction of the overall Bezier */
-		} traverse1;				// Find dist between pos and end of track that starts with angle set backwards
-		struct {
-				BOOL_T segDir;			/* IN Direction to go in this seg*/
-				int BezSegInx;			/* IN for Bezier Seg which element to start with*/
-				BOOL_T segs_backwards;  /* IN for Bezier Seg  which way to go down the array*/
-				DIST_T dist;			/* IN/OUT In = distance to go, Out = distance left */
-				coOrd pos;				/* OUT = point reached if dist = 0 */
-				ANGLE_T angle;			/* OUT = angle at point */
-		} traverse2;			//Return distance left (or 0) and angle and pos when going dist from segDir end
-		struct {
-				int first, last;		/* IN */
-				ANGLE_T side;
-				DIST_T roadbedWidth;
-				wDrawWidth rbw;
-				coOrd orig;
-				ANGLE_T angle;
-				wDrawColor color;
-				drawCmd_p d;
-		} drawRoadbedSide;
-		struct {
-				coOrd pos1;				/* IN pos to find */
-				DIST_T dd;				/* OUT distance from nearest point in seg to input pos */
-		} distance;
-		struct {
-				track_p trk;			/* OUT */
-				EPINX_T ep[2];
-		} newTrack;
-		struct {
-				DIST_T length;			/* OUT */
-		} length;
-		struct {
-				coOrd pos;				/* IN */
-				DIST_T length[2];		/* OUT */
-				trkSeg_t newSeg[2];
-		} split;
-		struct {
-				coOrd pos;				/* IN Pos to find nearest to  - OUT found pos on curve*/
-				ANGLE_T angle;			/* OUT angle at pos - (-ve if backwards)*/
-				BOOL_T negative_radius; /* OUT Radius <0? */
-				BOOL_T backwards;		/* OUT Seg is backwards */
-				DIST_T radius;			/* OUT radius at pos */
-				coOrd center;			/* OUT center of curvature at pos (0 = straight)*/
-				int  bezSegInx;			/* OUT if a bezier proc, the index of the sub segment */
-		} getAngle;			// Get pos on seg nearest, angle at that (-ve for forwards)
-		} segProcData_t, *segProcData_p;
-typedef enum {
-		SEGPROC_TRAVERSE1,
-		SEGPROC_TRAVERSE2,
-		SEGPROC_DRAWROADBEDSIDE,
-		SEGPROC_DISTANCE,
-		SEGPROC_FLIP,
-		SEGPROC_NEWTRACK,
-		SEGPROC_LENGTH,
-		SEGPROC_SPLIT,
-		SEGPROC_GETANGLE
-		} segProc_e;
-void SegProc( segProc_e, trkSeg_p, segProcData_p );
-void StraightSegProc( segProc_e, trkSeg_p, segProcData_p );
-void CurveSegProc( segProc_e, trkSeg_p, segProcData_p );
-void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
-void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
-void CleanSegs( dynArr_t *);
-void CopyPoly(trkSeg_p seg_p, wIndex_t segCnt);
-wBool_t CompareSegs( trkSeg_p, int, trkSeg_p, int );
-
-/* debug.c */
-void SetDebug( char * );
 
 
 /*Remember to add bits to trackx.h if adding here */
@@ -435,46 +217,14 @@ void SetDebug( char * );
 #define TB_CARATTACHED	(1<<7)
 #define TB_NOTIES       (1<<8)
 #define TB_BRIDGE       (1<<9)
-#define TB_SELREDRAW	(1<<10)
+#define TB_ROADBED      (1<<10)
+#define TB_SELREDRAW	(1<<11)
 // Track has been undrawn, don't draw it on Redraw
-#define TB_UNDRAWN		(1<<11)
-#define TB_DETAILDESC  	(1<<12)
+#define TB_UNDRAWN		(1<<12)
+#define TB_DETAILDESC  	(1<<13)
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
-#ifdef FASTTRACK
-#include "trackx.h"
-#define GetTrkIndex( T )		((T)->index)
-#define GetTrkType( T )			((T)->type)
-#define GetTrkScale( T )		((T)->scale)
-#define SetTrkScale( T, S )		(T)->scale = ((char)(S))
-/*#define GetTrkSelected( T )	((T)->bits&TB_SELECTED)*/
-/*#define GetTrkVisible( T )	((T)->bits&TB_VISIBLE)*/
-/*#define SetTrkVisible( T, V ) ((V) ? (T)->bits |= TB_VISIBLE : (T)->bits &= !TB_VISIBLE)*/
-#define GetTrkLayer( T )		((T)->layer)
-#define SetBoundingBox( T, HI, LO ) \
-								(T)->hi.x = (float)(HI).x; (T)->hi.y = (float)(HI).y; (T)->lo.x = (float)(LO).x; (T)->lo.x; (T)->lo.x = (float)(LO).y = (float)(LO).y
-#define GetBoundingBox( T, HI, LO ) \
-								(HI)->x = (POS_T)(T)->hi.x; (HI)->y = (POS_T)(T)->hi.y; (LO)->x = (POS_T)(T)->lo.x; (LO)->y = (POS_T)(T)->lo.y;
-#define GetTrkEndPtCnt( T )		((T)->endCnt)
-#define SetTrkEndPoint( T, I, PP, AA ) \
-								Assert((T)->endPt[I].track); \
-								(T)->endPt[I].pos = PP; \
-								(T)->endPt[I].angle = AA
-#define GetTrkEndTrk( T, I )	((T)->endPt[I].track)
-#define GetTrkEndPos( T, I )	((T)->endPt[I].pos)
-#define GetTrkEndPosXY( T, I )	PutDim((T)->endPt[I].pos.x), PutDim((T)->endPt[I].pos.y)
-#define GetTrkEndAngle( T, I )	((T)->endPt[I].angle)
-#define GetTrkEndOption( T, I ) ((T)->endPt[I].option)
-#define SetTrkEndOption( T, I, O )		((T)->endPt[I].option=O)
-#define GetTrkExtraData( T )	((T)->extraData)
-#define GetTrkWidth( T )		(int)((T)->width)
-#define SetTrkWidth( T, W )		(T)->width = (unsigned int)(W)
-#define GetTrkBits(T)			((T)->bits)
-#define SetTrkBits(T,V)			((T)->bits|=(V))
-#define ClrTrkBits(T,V)			((T)->bits&=~(V))
-#define IsTrackDeleted(T)		((T)->deleted)
-#else
 TRKINX_T GetTrkIndex( track_p );
 TRKTYP_T GetTrkType( track_p );
 SCALEINX_T GetTrkScale( track_p );
@@ -483,46 +233,40 @@ BOOL_T GetTrkSelected( track_p );
 BOOL_T GetTrkVisible( track_p );
 void SetTrkVisible( track_p, BOOL_T );
 unsigned int GetTrkLayer( track_p );
+tieData_t GetTrkTieData(track_p);
 void SetBoundingBox( track_p, coOrd, coOrd );
 void GetBoundingBox( track_p, coOrd*, coOrd* );
 EPINX_T GetTrkEndPtCnt( track_p );
-void SetTrkEndPoint( track_p, EPINX_T, coOrd, ANGLE_T );
-track_p GetTrkEndTrk( track_p, EPINX_T );
-coOrd GetTrkEndPos( track_p, EPINX_T );
-#define GetTrkEndPosXY( trk, ep ) PutDim(GetTrkEndPos(trk,ep).x), PutDim(GetTrkEndPos(trk,ep).y)
-ANGLE_T GetTrkEndAngle( track_p, EPINX_T );
-long GetTrkEndOption( track_p, EPINX_T );
-long SetTrkEndOption( track_p, EPINX_T, long );
-struct extraData * GetTrkExtraData( track_p );
+trkEndPt_p GetTrkEndPt( track_cp, EPINX_T );
+struct extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
+void ResizeExtraData( track_p trk, CSIZE_T newSize );
 int GetTrkWidth( track_p );
 void SetTrkWidth( track_p, int );
 int GetTrkBits( track_p );
 int SetTrkBits( track_p, int );
 int ClrTrkBits( track_p, int );
 BOOL_T IsTrackDeleted( track_p );
-#endif
+void TrackInsertLayer( int );
+void TrackDeleteLayer( int );
+
+track_p GetFirstTrack();
+track_p GetNextTrack( track_p );
+
+#define TRK_ITERATE(TRK)		for (TRK=GetFirstTrack(); TRK!=NULL; TRK=GetNextTrack(TRK) ) if (!IsTrackDeleted(TRK)) 
+
 
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
 #define GetTrkVisible(T)		(GetTrkBits(T)&TB_VISIBLE)
 #define GetTrkNoTies(T)			(GetTrkBits(T)&TB_NOTIES)
-#define GetTrkBridge(T)         (GetTrkBits(T)&TB_BRIDGE)
+#define GetTrkBridge(T)         ((T)?GetTrkBits(T)&TB_BRIDGE:0)
+#define GetTrkRoadbed(T)        ((T)?GetTrkBits(T)&TB_ROADBED:0)
 #define SetTrkVisible(T,V)		((V)?SetTrkBits(T,TB_VISIBLE):ClrTrkBits(T,TB_VISIBLE))
 #define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
 #define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
+#define SetTrkRoadbed(T,V)		((V)?SetTrkBits(T,TB_ROADBED):ClrTrkBits(T,TB_ROADBED))
 int ClrAllTrkBits( int );
 int ClrAllTrkBitsRedraw( int, wBool_t );
 
-void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
-void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
-int GetTrkEndElevMode( track_p, EPINX_T );
-int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
-DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
-BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *length);
-void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length);
-char * GetTrkEndElevStation( track_p, EPINX_T );
-#define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
-#define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
-#define EndPtIsStationElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_STATION)
 void SetTrkElev( track_p, int, DIST_T );
 int GetTrkElevMode( track_p );
 DIST_T GetTrkElev( track_p trk );
@@ -536,7 +280,6 @@ void CopyAttributes( track_p, track_p );
 DIST_T GetTrkGauge( track_cp );
 #define GetTrkScaleName( T )	GetScaleName(GetTrkScale(T))
 void SetTrkEndPtCnt( track_p, EPINX_T );
-BOOL_T WriteEndPt( FILE *, track_cp, EPINX_T );
 EPINX_T PickEndPoint( coOrd, track_cp );
 EPINX_T PickUnconnectedEndPoint( coOrd, track_cp );
 EPINX_T PickUnconnectedEndPointSilent( coOrd, track_cp );
@@ -593,7 +336,7 @@ wBool_t IsAngleClose( ANGLE_T, ANGLE_T );
 wBool_t IsDistClose( DIST_T, DIST_T );
 wBool_t IsWidthClose( DIST_T, DIST_T );
 wBool_t IsColorClose( wDrawColor, wDrawColor );
-wBool_t CompareTrack( track_cp, track_cp );
+wBool_t CheckRegressionResult( long regressionVersion, char * sFileName, wBool_t bQuiet );
 
 void MoveTrack( track_p, coOrd );
 void RotateTrack( track_p, coOrd, ANGLE_T );
@@ -616,9 +359,16 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_DASH		(1<<8)
 #define DTS_DASHDOT		(1<<9)
 #define DTS_DASHDOTDOT  (1<<10)
+#define DTS_CENTERONLY  (1<<11)
 
-void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
+BOOL_T DrawTwoRails( drawCmd_p d, DIST_T factor );
+BOOL_T hasTrackCenterline( drawCmd_p d );
+void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
+
+void DrawStraightTies( drawCmd_p d, tieData_t td, coOrd p0, coOrd p1, wDrawColor color );
+wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
+void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width, wDrawColor color, BOOL_T solid);
 
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);
@@ -630,32 +380,29 @@ void ComputeRectBoundingBox( track_p, coOrd, coOrd );
 void ComputeBoundingBox( track_p );
 void DrawEndPt( drawCmd_p, track_p, EPINX_T, wDrawColor ); 
 void DrawEndPt2( drawCmd_p, track_p, EPINX_T, wDrawColor ); 
-void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
 wDrawColor GetTrkColor( track_p, drawCmd_p );
 void DrawTrack( track_cp, drawCmd_p, wDrawColor );
 void DrawTracks( drawCmd_p, DIST_T, coOrd, coOrd );
 void DrawNewTrack( track_cp );
 void DrawOneTrack( track_cp, drawCmd_p );
 void UndrawNewTrack( track_cp );
-void DrawSelectedTracks( drawCmd_p );
+void DrawSelectedTracks( drawCmd_p, BOOL_T );
 void HilightElevations( BOOL_T );
 void HilightSelectedEndPt( BOOL_T, track_p, EPINX_T );
-DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *, BOOL_T show_hidden, BOOL_T * hidden );
-STATUS_T EndPtDescriptionMove( track_p, EPINX_T, wAction_t, coOrd );
 
 track_p FindTrack( TRKINX_T );
 void ResolveIndex( void );
 void RenumberTracks( void );
 BOOL_T ReadTrack( char * );
 BOOL_T WriteTracks( FILE *, wBool_t );
-BOOL_T ExportTracks( FILE * , coOrd *);
+BOOL_T ExportTracks( FILE * , coOrd * );
 void ImportStart( void );
 void ImportEnd( coOrd , wBool_t, wBool_t);
 void FreeTrack( track_p );
 void ClearTracks( void );
 BOOL_T TrackIterate( track_p * );
 
-void LoosenTracks( void );
+void LoosenTracks( void * );
 
 void SaveTrackState( void );
 void RestoreTrackState( void );
@@ -691,16 +438,42 @@ void LabelLengths( drawCmd_p, track_p, wDrawColor );
 DIST_T GetTrkLength( track_p, EPINX_T, EPINX_T );
 void AddTrkDetails(drawCmd_p d, track_p trk, coOrd pos, DIST_T length, wDrawColor color);
 
-void SelectAbove( void );
-void SelectBelow( void );
+void SelectAbove( void * unused );
+void SelectBelow( void * unused );
 
 void FlipPoint( coOrd*, coOrd, ANGLE_T );
 void FlipTrack( track_p, coOrd, ANGLE_T );
 
+void DrawTurnout(track_p, drawCmd_p, wDrawColor);
 void DrawPositionIndicators( void );
 void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
 BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd * , BOOL_T);
+
+/*trkendpt.c*/
+coOrd GetTrkEndPos( track_p, EPINX_T );
+#define GetTrkEndPosXY( trk, ep ) PutDim(GetTrkEndPos(trk,ep).x), PutDim(GetTrkEndPos(trk,ep).y)
+ANGLE_T GetTrkEndAngle( track_p, EPINX_T );
+long GetTrkEndOption( track_p, EPINX_T );
+long SetTrkEndOption( track_p, EPINX_T, long );
+void SetTrkEndPoint( track_p, EPINX_T, coOrd, ANGLE_T );
+void SetTrkEndPointSilent( track_p, EPINX_T, coOrd, ANGLE_T );
+track_p GetTrkEndTrk( track_p, EPINX_T );
+BOOL_T WriteEndPt( FILE *, track_cp, EPINX_T );
+void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
+DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *, BOOL_T show_hidden, BOOL_T * hidden );
+STATUS_T EndPtDescriptionMove( track_p, EPINX_T, wAction_t, coOrd );
+void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
+void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
+int GetTrkEndElevMode( track_p, EPINX_T );
+int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
+DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
+BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *grade);
+void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade);
+char * GetTrkEndElevStation( track_p, EPINX_T );
+#define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
+#define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
+#define EndPtIsStationElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_STATION)
 
 /*tstraight.c*/
 DIST_T StraightDescriptionDistance(coOrd pos, track_p trk, coOrd * dpos, BOOL_T show_hidden, BOOL_T * hidden);
@@ -712,6 +485,7 @@ STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 
 /* cmisc.c */
 extern wIndex_t describeCmdInx;
+extern BOOL_T inDescribeCmd;
 typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
@@ -732,7 +506,7 @@ typedef struct {
 		int mode;
 		wControl_p control0;
 		wControl_p control1;
-		wPos_t posy;
+		wWinPix_t posy;
 		} descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );
@@ -742,6 +516,16 @@ STATUS_T CmdDescribe(wAction_t,coOrd);
 
 		
 /* compound.c */
+#define LABEL_MANUF		(1<<0)
+#define LABEL_PARTNO	(1<<1)
+#define LABEL_DESCR		(1<<2)
+#define LABEL_COST		(1<<7)
+#define LABEL_FLIPPED	(1<<8)
+#define LABEL_TABBED	(1<<9)
+#define LABEL_UNGROUPED (1<<10)
+#define LABEL_SPLIT		(1<<11)
+extern long listLabels;
+extern long layoutLabels;
 DIST_T CompoundDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T CompoundDescriptionMove( track_p, wAction_t, coOrd );
 
@@ -755,7 +539,7 @@ extern long oldElevationEvaluation;
 EPINX_T GetNextTrkOnPath( track_p trk, EPINX_T ep );
 int FindDefinedElev( track_p, EPINX_T, int, BOOL_T, DIST_T *, DIST_T * );
 BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T *, BOOL_T );
-void RecomputeElevations( void );
+void RecomputeElevations( void * unused );
 void UpdateAllElevations( void );
 DIST_T GetElevation( track_p );
 void ClrTrkElev( track_p );
@@ -779,9 +563,12 @@ BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );
 BOOL_T ReadText( char * );
 void SetLineType( track_p trk, int width );
-void MenuMode(int );
+void MenuMode( void * moveVP );
 
 /* chotbar.c */
+extern long showFlexTrack;
+extern long hotBarLabels;
+extern long carHotbarModeInx;
 extern DIST_T curBarScale;
 void InitHotBar( void );
 void HideHotBar( void );

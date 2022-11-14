@@ -41,8 +41,7 @@ static void repaintMessage(
 
 	hDc = GetDC( hWnd );
 
-	if ( !mswThickFont )
-		hFont = SelectObject( hDc, mswLabelFont );
+	hFont = SelectObject( hDc, mswLabelFont );
 
 	switch( wMessageSetFont( ((wMessage_p)b)->flags )) 
 	{
@@ -66,8 +65,7 @@ static void repaintMessage(
 		/* create and activate the new font */
 		hFont = SelectObject( hDc, CreateFontIndirect( &msgFont ) );
 	} else {
-		if ( !mswThickFont )
-			hFont = SelectObject( hDc, mswLabelFont );
+		hFont = SelectObject( hDc, mswLabelFont );
 	}
 
 	GetTextMetrics(hDc, &textMetrics);
@@ -78,14 +76,13 @@ static void repaintMessage(
 	rect.left = bm->x;
 
 	SetBkColor( hDc, GetSysColor( COLOR_BTNFACE ) );
-	ExtTextOut( hDc, bm->x, bm->y + ((bm->h + 2 - textMetrics.tmHeight) / 2), ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
+	ExtTextOut( hDc, bm->x, bm->y + ((bm->h + 2 - textMetrics.tmHeight) / 2), ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, (int)(strlen( bm->message )), NULL );
 
 	if( scale != 1.0 )
 		/* in case we did create a new font earlier, delete it now */
 		DeleteObject( SelectObject( hDc, GetStockObject( DEFAULT_GUI_FONT )));
 	else 
-		if ( !mswThickFont )
-			SelectObject( hDc, hFont );
+		SelectObject( hDc, hFont );
 
 	ReleaseDC( hWnd, hDc );
 }
@@ -107,18 +104,18 @@ void wMessageSetValue(
 
 void wMessageSetWidth(
 		wMessage_p b,
-		wPos_t width )
+		wWinPix_t width )
 {
 	b->w = width;
 
 }
 
-wPos_t wMessageGetWidth(const char *string)
+wWinPix_t wMessageGetWidth(const char *string)
 {
 	return(wLabelWidth(string));
 }
 
-wPos_t wMessageGetHeight( long flags )
+wWinPix_t wMessageGetHeight( long flags )
 {
 	double scale = 1.0;
 
@@ -127,7 +124,7 @@ wPos_t wMessageGetHeight( long flags )
 	if( flags & BM_SMALL )
 		scale = SCALE_SMALL;
 
-	return((wPos_t)((mswEditHeight) * scale ));
+	return((wWinPix_t)((mswEditHeight) * scale ));
 
 }
 
@@ -147,10 +144,10 @@ static callBacks_t messageCallBacks = {
 
 wMessage_p wMessageCreateEx(
 		wWin_p	parent,
-		POS_T	x,
-		POS_T	y,
+		wWinPix_t	x,
+		wWinPix_t	y,
 		const char	* helpStr,
-		POS_T	width,
+		wWinPix_t	width,
 		const char	*message,
 		long	flags )
 {

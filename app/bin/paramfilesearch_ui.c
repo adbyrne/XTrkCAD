@@ -17,19 +17,11 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <assert.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "custom.h"
 #include "dynstring.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "include/partcatalog.h"
 #include "paths.h"
@@ -37,9 +29,7 @@
 #include "include/paramfile.h"
 #include "fileio.h"
 #include "directory.h"
-#include "misc2.h"
 #include "layout.h"
-#include "wlib.h"
 
 static ParameterLib *trackLibrary;			/**< Track Library          */
 static Catalog currentCat;					/**< catalog being shown    */
@@ -66,25 +56,25 @@ static char * searchFitLabels[] = { N_("Fit Any"), N_("Fit Compatible"), N_("Fit
 
 static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
-    { PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGRESIZE, (void*)(340), "", 0, 0, MAXQUERYLENGTH-1 },
+    { PD_STRING, searchUiQuery, "query", PDO_ENTER | PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGRESIZE, I2VP(340), "", 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
-    { PD_BUTTON, (void*)SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
+    { PD_BUTTON, SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_CLEARBUTTON (2)
-    { PD_BUTTON, (void*)SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
+    { PD_BUTTON, SearchUiClearFilter, "clearfilter", PDO_DLGHORZ, 0, NULL,  BO_ICON, NULL },
 #define I_FITRADIO	(3)
     {	PD_RADIO, &searchFitMode, "fit", PDO_NOPREF | PDO_DLGBOXEND, searchFitLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_MESSAGE (4)
-    { PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, (void *)370 },
+    { PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, I2VP(370) },
 #define I_STATISTICS (5)
-    { PD_MESSAGE, "", NULL, PDO_DLGBOXEND, (void *)370 },
+    { PD_MESSAGE, "", NULL, PDO_DLGBOXEND, I2VP(370) },
 #define I_RESULTLIST	(6)
     {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MODETOGGLE	(7)
     {	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_APPLYBUTTON	(8)
-    {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
+    {	PD_BUTTON, SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
 #define I_SELECTALLBUTTON (9)
-    {	PD_BUTTON, (void*)SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+    {	PD_BUTTON, SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
 };
 
 #define SEARCHBUTTON ((wButton_p)searchUiPLs[I_SEARCHBUTTON].control)
@@ -97,7 +87,7 @@ static paramData_t searchUiPLs[] = {
 #define SEARCHSTAT ((wMessage_p)searchUiPLs[I_STATISTICS].control)
 #define FITRADIO ((wChoice_p)searchUiPLs[I_FITRADIO].control)
 
-static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
+static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, COUNT( searchUiPLs ) };
 static wWin_p searchUiW;
 
 #define FILESECTION "file"
@@ -172,7 +162,7 @@ int SearchFileListLoad(Catalog *catalog)
             wListAddValue(RESULTLIST,
                           DynStringToCStr(&description),
                           NULL,
-                          (void*)catalogEntry->fullFileName[i]);
+                          catalogEntry->fullFileName[i]);
         }
     }
 
@@ -217,11 +207,7 @@ SearchUILoadResults(void)
         char **fileNames;
         int found = 0;
         fileNames = MyMalloc(sizeof(char *)*files);
-        if (!fileNames) {
-            AbortProg("Couldn't allocate memory for result list: %s (%d)", __FILE__,
-                      __LINE__, NULL);
-        }
-
+ 
         for (int inx = 0; found < files; inx++) {
             if (wListGetItemSelected(RESULTLIST, inx)) {
                 fileNames[found++] = (char *)wListGetItemContext(RESULTLIST, inx);
@@ -230,7 +216,7 @@ SearchUILoadResults(void)
 
         LoadParamFile(files, fileNames, NULL);
         MyFree(fileNames);
-        SearchUiOk((void *) 0);
+        SearchUiOk(NULL);
     }
 
 }

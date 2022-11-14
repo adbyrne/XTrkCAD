@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
@@ -45,7 +45,7 @@ struct wMessage_t {
     WOBJ_COMMON
     GtkWidget * labelWidget;
     const char * message;
-    wPos_t labelWidth;
+    wWinPix_t labelWidth;
 };
 
 /**
@@ -77,7 +77,7 @@ void wMessageSetValue(
 
 void wMessageSetWidth(
     wMessage_p b,
-    wPos_t width)
+    wWinPix_t width)
 {
     b->labelWidth = width;
     gtk_widget_set_size_request(b->widget, width, -1);
@@ -90,7 +90,7 @@ void wMessageSetWidth(
  * \return text height
  */
 
-wPos_t wMessageGetHeight(
+wWinPix_t wMessageGetHeight(
     long flags)
 {
     GtkWidget * temp;
@@ -149,10 +149,10 @@ wPos_t wMessageGetHeight(
 
 wMessage_p wMessageCreateEx(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* labelStr,
-    wPos_t	width,
+    wWinPix_t	width,
     const char	*message,
     long flags)
 {
@@ -212,11 +212,11 @@ wMessage_p wMessageCreateEx(
  * \return expected width of message box
  */
 
-wPos_t
+wWinPix_t
 wMessageGetWidth(const char *testString)
 {
-    GtkWidget *entry;
-    GtkRequisition requisition;
+//    GtkWidget *entry;
+//    GtkRequisition requisition;
 
     return( wLabelWidth(testString));
 //    entry = gtk_entry_new();

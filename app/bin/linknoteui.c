@@ -17,29 +17,27 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <string.h>
-#include <stdbool.h>
 
 #include "custom.h"
 #include "dynstring.h"
-#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "include/stringxtc.h"
 #include "track.h"
 #include "validator.h"
-#include "wlib.h"
-
-extern BOOL_T inDescribeCmd;
 
 #define DEFAULTLINKURL "http://www.xtrkcad.org/"
 #define DEFAULTLINKTITLE "The XTrackCAD Homepage"
-
-static struct extraDataNote noteDataInUI;
+struct {
+	coOrd pos;
+	int layer;
+	track_p trk;
+	char title[TITLEMAXIMUMLENGTH];
+	char url[URLMAXIMUMLENGTH];
+} linkNoteData;
 
 static void NoteLinkBrowse(void *junk);
 static void NoteLinkOpen(char *url );
@@ -47,26 +45,26 @@ static void NoteLinkOpen(char *url );
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 static paramData_t linkEditPLs[] = {
 #define I_ORIGX (0)
-    /*0*/ { PD_FLOAT, &noteDataInUI.pos.x, "origx", PDO_DIM, &r_1000_1000, N_("Position X") },
+    /*0*/ { PD_FLOAT, &linkNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position X") },
 #define I_ORIGY (1)
-    /*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
+    /*1*/ { PD_FLOAT, &linkNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+    /*2*/ { PD_DROPLIST, &linkNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
-    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
+    /*3*/ { PD_STRING, &linkNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Title"), 0, 0, sizeof(linkNoteData.title ) },
 #define I_URL (4)
-    /*4*/ { PD_STRING, NULL, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("URL"), 0, 0, URLMAXIMUMLENGTH-1 },
+    /*4*/ { PD_STRING, &linkNoteData.url, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("URL"), 0, 0, sizeof(linkNoteData.url ) },
 #define I_OPEN (5)
-	/*5*/{ PD_BUTTON, (void*)NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
+	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
 };
 
-static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, sizeof linkEditPLs / sizeof linkEditPLs[0] };
+static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, COUNT( linkEditPLs ) };
 static wWin_p linkEditW;
 
 BOOL_T
 IsLinkNote(track_p trk)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	return(xx->op == OP_NOTELINK);
 }
@@ -79,7 +77,7 @@ IsLinkNote(track_p trk)
  */
 static void NoteLinkBrowse(void *junk)
 {
-	NoteLinkOpen(noteDataInUI.noteData.linkData.url);
+	NoteLinkOpen(linkNoteData.url);
 }
 
 /**
@@ -100,34 +98,18 @@ LinkDlgUpdate(
 {
     switch (inx) {
     case I_URL:
-		if (strlen(noteDataInUI.noteData.linkData.url) > URLMAXIMUMLENGTH) {
-			DynString message;
-
-			DynStringMalloc(&message, 80);
-			DynStringPrintf(&message, _("The entered URL is too long. The maximum allowed length is %d. Please edit the entered value."), URLMAXIMUMLENGTH);
-			wNoticeEx(NT_ERROR,
-				DynStringToCStr(&message),
-				_("Re-edit"),
-				NULL);
-			DynStringFree(&message);
+		if ( ! IsValidURL( linkNoteData.url ) ) {
+			printf( "URL %s is invalid\n", linkNoteData.url );
+			paramData_p p = &linkEditPLs[I_URL];
+			p->bInvalid = TRUE;
+			wWinPix_t h = wControlGetHeight(p->control);
+			wControlSetBalloon( p->control, 0, -h*3/4, "URL is invalid" );
+			ParamHilite( p->group->win, p->control, TRUE );
 		}
-
-        if (IsValidURL(noteDataInUI.noteData.linkData.url) && 
-			(strlen(noteDataInUI.noteData.linkData.url) <= URLMAXIMUMLENGTH))
-		{
-            wControlActive(linkEditPLs[I_OPEN].control, TRUE);
-            ParamDialogOkActive(&linkEditPG, TRUE);
-        } else {
-            wControlActive(linkEditPLs[I_OPEN].control, FALSE);
-            ParamDialogOkActive(&linkEditPG, FALSE);
-        }
-        break;
+	        break;
 	case I_ORIGX:
 	case I_ORIGY:
-		UpdateLink(&noteDataInUI, OR_NOTE, FALSE);
-		break;
-	case I_LAYER:
-		UpdateLink(&noteDataInUI, LY_NOTE, FALSE);
+		// TODO: Redraw bitmap at new location
 		break;
 	default:
 		break;
@@ -141,9 +123,6 @@ LinkDlgUpdate(
 static void
 LinkEditCancel( wWin_p junk)
 {
-	if (inDescribeCmd) {
-		UpdateFile(&noteDataInUI, CANCEL_NOTE, FALSE);
-	}
 	ResetIfNotSticky();
 	wHide(linkEditW);
 }
@@ -158,24 +137,32 @@ LinkEditCancel( wWin_p junk)
 static void
 LinkEditOK(void *junk)
 {
-    UpdateLink(&noteDataInUI, OK_LINK, FALSE);
-    wHide(linkEditW);
+	track_p trk = linkNoteData.trk;
+	if ( trk == NULL ) {
+		// new note 
+		trk = NewNote( -1, linkNoteData.pos, OP_NOTELINK );
+	}
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	xx->pos = linkNoteData.pos;
+	SetTrkLayer( trk, linkNoteData.layer );
+	MyFree( xx->noteData.linkData.title );
+	xx->noteData.linkData.title = MyStrdup( linkNoteData.title );
+	MyFree( xx->noteData.linkData.url );
+	xx->noteData.linkData.url = MyStrdup( linkNoteData.url );
+	SetBoundingBox( trk, xx->pos, xx->pos );
+	DrawNewTrack( trk );
+	wHide(linkEditW);
 	ResetIfNotSticky();
-	FileIsChanged();
+	SetFileChanged();
 }
 
 
 static void 
-CreateEditLinkDialog(track_p trk, char *title)
+CreateEditLinkDialog(char *title)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
 	// create the dialog if necessary
     if (!linkEditW) {
-		noteDataInUI.noteData.linkData.url = MyMalloc(URLMAXIMUMLENGTH);
-		noteDataInUI.noteData.linkData.title = MyMalloc(TITLEMAXIMUMLENGTH);
-		linkEditPLs[I_TITLE].valueP = noteDataInUI.noteData.linkData.title;
-		linkEditPLs[I_URL].valueP = noteDataInUI.noteData.linkData.url;
         ParamRegister(&linkEditPG);
         linkEditW = ParamCreateDialog(&linkEditPG,
                                       "",
@@ -187,13 +174,6 @@ CreateEditLinkDialog(track_p trk, char *title)
 
     wWinSetTitle(linkEditPG.win, MakeWindowTitle(title));
 
-	// initialize the dialog fields
-    noteDataInUI.pos = xx->pos;
-	noteDataInUI.layer = xx->layer;
-    noteDataInUI.trk = trk;
-	strscpy(noteDataInUI.noteData.linkData.url, xx->noteData.linkData.url,URLMAXIMUMLENGTH );
-	strscpy(noteDataInUI.noteData.linkData.title, xx->noteData.linkData.title, TITLEMAXIMUMLENGTH );
-	
 	FillLayerList((wList_p)linkEditPLs[I_LAYER].control);
 	ParamLoadControls(&linkEditPG);
         
@@ -208,7 +188,7 @@ CreateEditLinkDialog(track_p trk, char *title)
 
 void ActivateLinkNote(track_p trk)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 	NoteLinkOpen(xx->noteData.linkData.url);
 }
 
@@ -223,7 +203,7 @@ void ActivateLinkNote(track_p trk)
 
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     DynString statusLine;
 
     DynStringMalloc(&statusLine, 80);
@@ -232,14 +212,19 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 					GetTrkLayer(trk)+1,
 					xx->noteData.linkData.title, 
 					xx->noteData.linkData.url);
-	strcpy(str, DynStringToCStr(&statusLine));
+	strncpy(str, DynStringToCStr(&statusLine), len-1);
+	str[len-1] = '\0';
     DynStringFree(&statusLine);
+	if ( ! inDescribeCmd )
+		return;
 
-	if (inDescribeCmd) {
-		NoteStateSave(trk);
+	linkNoteData.pos = xx->pos;
+	linkNoteData.layer = GetTrkLayer( trk );
+	linkNoteData.trk = trk;
+	strscpy( linkNoteData.url, xx->noteData.linkData.url, sizeof linkNoteData.url );
+	strscpy( linkNoteData.title, xx->noteData.linkData.title, sizeof linkNoteData.title );
 
-		CreateEditLinkDialog(trk, _("Update link"));
-	}
+	CreateEditLinkDialog(_("Update link"));
 }
 
 /**
@@ -249,12 +234,13 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
  * \param the newly created trk
  */
 
-void NewLinkNoteUI(track_p trk)
+void NewLinkNoteUI( coOrd pos )
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	linkNoteData.pos = pos;
+	linkNoteData.layer = curLayer;
+	linkNoteData.trk = NULL;
+	strscpy( linkNoteData.url, DEFAULTLINKURL, sizeof( linkNoteData.url ) );
+	strscpy( linkNoteData.title, DEFAULTLINKTITLE, sizeof( linkNoteData.title ) );
 
-	xx->noteData.linkData.url = MyStrdup( DEFAULTLINKURL );
-	xx->noteData.linkData.title = MyStrdup( DEFAULTLINKTITLE );
-
-	CreateEditLinkDialog(trk, _("Create link"));
+	CreateEditLinkDialog(_("Create link"));
 }

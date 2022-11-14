@@ -17,25 +17,13 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <stdarg.h>
-
-#ifdef WINDOWS
-#include <windows.h>
-#endif
-
-#include <wlib.h>
 #include <dynstring.h>
 #include "track.h"
 #include "common.h"
-#include "utility.h"
 #include "misc.h"
-#include "i18n.h"
 #include "uthash.h"
 #include "paths.h"
 
@@ -86,6 +74,10 @@ AddPath(const char *type, char*path)
         tableEntry = malloc(sizeof(struct pathTable));
         DynStringMalloc(&tableEntry->path, 16);
         strcpy(tableEntry->type, type);
+#ifdef WINDOWS
+#pragma warning( disable : 4267)
+#endif
+	// This generates warning C4267 on windows
         HASH_ADD_STR(paths, type, tableEntry);
     }
 
@@ -109,8 +101,8 @@ void SetCurrentPath(
 {
     char *path;
     char *copy;
-    assert(fileName != NULL);
-    assert(pathType != NULL);
+    CHECK(fileName != NULL);
+    CHECK(pathType != NULL);
     copy = strdup(fileName);
     path = strrchr(copy, FILE_SEP_CHAR[0]);
 
@@ -140,7 +132,7 @@ char *GetCurrentPath(
 {
     struct pathTable *currentPath;
     const char *path;
-    assert(pathType != NULL);
+    CHECK(pathType != NULL);
     currentPath = FindPath(pathType);
 
     if (currentPath) {

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -26,8 +26,6 @@
 
 #include "common.h"
 #include "track.h"
-
-struct extraData;
 
 typedef struct track_t {
 		struct track_t *next;
@@ -44,12 +42,11 @@ typedef struct track_t {
 		EPINX_T endCnt;
 		trkEndPt_p endPt;
 		struct { float x; float y; } lo, hi;
-		struct extraData * extraData;
+		struct extraDataBase_t * extraData;
 		CSIZE_T extraSize;
 		DIST_T elev;
 		} track_t;
 
 extern track_p to_first;
 extern track_p * to_last;
-#define TRK_ITERATE(TRK)		for (TRK=to_first; TRK!=NULL; TRK=TRK->next) if (!(TRK->deleted)) 
 #endif

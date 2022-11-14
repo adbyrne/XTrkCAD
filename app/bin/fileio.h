@@ -16,16 +16,13 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef FILEIO_H
 #define FILEIO_H
 
-#include <stdio.h>
-
 #include "common.h"
-#include "misc.h"
 
 extern FILE * paramFile;
 extern char *paramFileName;
@@ -45,6 +42,9 @@ extern const char * libDir;
 extern wBool_t bReadOnly;
 extern wBool_t bExample;
 
+// Processing an input file, objects may be incomplete so avoid some ops (MapRedraw)
+extern wBool_t bInReadTracks;
+
 #define PARAM_CUSTOM	(-2)
 #define PARAM_LAYOUT	(-3)
 extern int curParamFileIndex;
@@ -59,8 +59,6 @@ extern wBool_t inPlaybackQuit;
 extern wWin_p demoW;
 extern int curDemo;
 
-extern wMenuList_p fileList_ml;
-
 #define ZIPFILETYPEEXTENSION "xtce"
 
 #define PARAM_SUBDIR "params"
@@ -69,6 +67,7 @@ extern wMenuList_p fileList_ml;
 #define BITMAPPATHKEY "bitmap"
 #define BACKGROUNDPATHKEY "images"
 #define DXFPATHKEY "dxf"
+#define SVGPATHKEY "svg"
 #define PARTLISTPATHKEY "parts"
 #define CARSPATHKEY "cars"
 #define PARAMETERPATHKEY "params"
@@ -104,41 +103,40 @@ void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
 
-#ifdef WINDOWS
-#define fopen( FN, MODE ) wFileOpen( FN, MODE )
-#endif
-
 void SetWindowTitle( void );
 char * PutTitle( char * cp );
 
 void ParamFileListLoad(int paramFileCnt, dynArr_t *paramFiles);
-void DoParamFiles(void * junk);
+void DoParamFiles(void * unused);
 
 int LoadTracks( int cnt, char **fileName, void *data );
 
-typedef void (*doSaveCallBack_p)( void );
-void SetAutoSave(void);
-void DoSave( doSaveCallBack_p );
-void DoSaveAs( doSaveCallBack_p );
+void SaveState( void );
+void DoSave( void * doAfterSaveVP );
+void DoSaveAs( void * doAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
-void DoCheckPoint( void );
+void TryCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
-void DoImport( void * );
-void DoExport( void );
-void DoExportDXF( void );
-BOOL_T EditCopy( void );
-BOOL_T EditCut( void );
-BOOL_T EditPaste( void );
-BOOL_T EditClone( void );
+void DoImport( void * typeVP );
+void DoExport( void * unused );
+void DoExportDXF( void * unused );
+#if XTRKCAD_CREATE_SVG
+void DoExportSVG( void * unused );
+#endif
+extern wBool_t editStatus; // Status of last Edit* command
+void EditCopy( void * unused );
+void EditCut( void * unused );
+void EditPaste( void * unused );
+void EditClone( void * unused );
 
 
 void DoRecord( void * );
 void AddPlaybackProc( char *, playbackProc_p, void * );
-EXPORT void TakeSnapshot( drawCmd_t * );
+EXPORT void TakeSnapshot( drawCmd_p );
 void PlaybackMessage( char * );
 void DoPlayBack( void * );
 int MyGetKeyState( void );
@@ -147,14 +145,15 @@ int RegLevel( void );
 void ReadKey( void );
 void PopupRegister( void * );
 
+void LoadFileList( void );
 void FileInit( void );
 
 BOOL_T MacroInit( void );
 
-char *SaveLocale( char *newLocale );
-void RestoreLocale( char * locale );
+void SetCLocale();
+void SetUserLocale();
 
 // Parameter file search
-void DoSearchParams(void * junk);
+void DoSearchParams(void * unused);
 
 #endif

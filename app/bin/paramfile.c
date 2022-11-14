@@ -17,42 +17,20 @@
   *
   *  You should have received a copy of the GNU General Public License
   *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
   */
-
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define access _access
-#else 
-#include <unistd.h>
-#endif
 
 #include "common.h"
 #include "compound.h"
 #include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
-#include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 #include "include/utf8convert.h"
-
-#if _MSC_VER >1300
-#define stricmp( a, b ) _stricmp(a, b )
-#endif
+#include "common-ui.h"
 
 static long paramCheckSum;
 
@@ -66,7 +44,7 @@ GetCompatibilityFunction GetCompatibility[] = {
 	GetCarPartCompatibility
 };
 
-#define COMPATIBILITYCHECKSCOUNT (sizeof(GetCompatibility)/sizeof(GetCompatibility[0]))
+#define COMPATIBILITYCHECKSCOUNT COUNT(GetCompatibility)
 
 /**
  * Check whether parameter file is still loaded
@@ -177,10 +155,6 @@ void SetParamFileState(int index)
  * \returns True if it succeeds, false if it fails.
  */
  
-#ifdef WINDOWS
-#define R_OK 0x4
-#endif
-
 static bool
 CheckFileReadable(const char *file)
 {
@@ -258,8 +232,8 @@ bool ReadParams(
 	long oldCheckSum;
 	long checkSum = 0;
 	BOOL_T checkSummed;
+	BOOL_T bFoundContents = FALSE;
 	paramVersion = -1;
-	char *oldLocale = NULL;
 
 	if (dirName) {
 		MakeFullpath(&paramFileName, dirName, fileName, NULL);
@@ -273,12 +247,12 @@ bool ReadParams(
 
 	//LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 
-	oldLocale = SaveLocale("C");
+	SetCLocale();
 
 	paramFile = fopen(paramFileName, "r");
 	if (paramFile == NULL) {
 		/* Reset the locale settings */
-		RestoreLocale(oldLocale);
+		SetUserLocale();
 
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName,
 			strerror(errno));
@@ -290,7 +264,7 @@ bool ReadParams(
 	checkSummed = FALSE;
 	BOOL_T skip = false;
 	int skipLines = 0;
-	while (paramFile && (fgets(paramLine, 256, paramFile)) != NULL) {
+	while (paramFile && (fgets(paramLine, 1024, paramFile)) != NULL) {
 		paramLineNum++;
 		Stripcr(paramLine);
 		if (strncmp(paramLine, "CHECKSUM ", 9) == 0) {
@@ -314,16 +288,16 @@ bool ReadParams(
 				/* Close file and reset the locale settings */
 				if (paramFile) {
 					fclose(paramFile);
+					paramFile = NULL;
 				}
-				RestoreLocale(oldLocale);
-
+				SetUserLocale();
 				return FALSE;
 			}
 			oldFile = paramFile;
 			oldLineNum = paramLineNum;
 			oldCheckSum = paramCheckSum;
 			if (!ReadParams(key, dirName, cp)) {
-				RestoreLocale(oldLocale);
+				SetUserLocale();
 				return FALSE;
 			}
 			paramFile = oldFile;
@@ -336,16 +310,20 @@ bool ReadParams(
 			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 9);
 #endif
-			curContents = MyStrdup(paramLine + 9);
-			curSubContents = curContents;
+			if ( bFoundContents == FALSE ) {
+				// Only use the first CONTENTS
+				curContents = MyStrdup(paramLine + 9);
+				curSubContents = curContents;
+				bFoundContents = TRUE;
+			}
 			skip = FALSE;
 		} else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 			ConvertUTF8ToSystem(paramLine + 12);
-#endif // WINDOWS
+#endif // UTFCONVERT
 			curSubContents = MyStrdup(paramLine + 12);
 			skip = FALSE;
 		} else if (strncmp(paramLine, "PARAM ", 6) == 0) {
@@ -394,7 +372,7 @@ bool ReadParams(
 						free(paramFileName);
 						paramFileName = NULL;
 					}
-					RestoreLocale(oldLocale);
+					SetUserLocale();
 					return FALSE;
 				}
 			}
@@ -408,8 +386,9 @@ bool ReadParams(
 			/* Close file and reset the locale settings */
 			if (paramFile) {
 				fclose(paramFile);
+				paramFile = NULL;
 			}
-			RestoreLocale(oldLocale);
+			SetUserLocale();
 
 			NoticeMessage(MSG_PROG_CORRUPTED, _("Ok"), NULL, paramFileName);
 
@@ -420,10 +399,11 @@ bool ReadParams(
 		NoticeMessage(MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
 	if (paramFile) {
 		fclose(paramFile);
+		paramFile = NULL;
 	}
 	free(paramFileName);
 	paramFileName = NULL;
-	RestoreLocale(oldLocale);
+	SetUserLocale();
 
 	return TRUE;
 }

@@ -42,10 +42,15 @@ STEP
 COMMAND DrawFilledBox
 PARAMETER draw linecolor 0
 PARAMETER GROUP draw
+KEYSTATE A
 MOUSE 1 2.600 3.000
+KEYSTATE A
 MOUSE 2 2.600 3.000
+KEYSTATE A
 MOUSE 4 3.100 2.500
+KEYSTATE A
 MOUSE 2 2.600 2.000
+KEYSTATE A
 MOUSE 4 3.100 1.500
 MESSAGE
 _________________________________________
@@ -137,23 +142,23 @@ Now Select the lines and squares.
 END
 STEP
 #KEYSTATE C
-MOUSE 1 2.469 2.812
+MOUSE 1 2.500 2.812
 #KEYSTATE C
-MOUSE 2 2.469 2.812
+MOUSE 2 2.500 2.812
 KEYSTATE C
-MOUSE 4 2.469 2.812
+MOUSE 4 2.500 2.812
 KEYSTATE C
-MOUSE 2 2.688 2.875
+MOUSE 2 2.850 2.500
 KEYSTATE C
-MOUSE 4 2.688 2.875
+MOUSE 4 2.850 2.500
 KEYSTATE C
-MOUSE 2 3.188 2.844
+MOUSE 2 3.200 2.000
 KEYSTATE C
-MOUSE 4 3.188 2.844
+MOUSE 4 3.200 2.000
 KEYSTATE C
-MOUSE 2 2.812 1.656
+MOUSE 2 2.850 1.500
 KEYSTATE C
-MOUSE 4 2.812 1.656
+MOUSE 4 2.850 1.500
 MOUSE 1 5.000 1.000
 MESSAGE
 _________________________________________
@@ -304,7 +309,7 @@ Now draw the green circles...
 END
 STEP
 ORIG 1.0 0.0 0.0
-COMMAND DrawFilledCircleTangent
+COMMAND DrawFilledCircleCenter
 PARAMETER draw linecolor 0
 PARAMETER GROUP draw
 PARAMETER draw linecolor 65280
@@ -459,7 +464,7 @@ PARAMETER describe P1 2
 MESSAGE
 _________________________________________
 
-We want the curve to have a radius of 20" and an angle of 17.5�.
+We want the curve to have a radius of 20" and an angle of 17.5°.
 First change the Radius...
 END
 STEP

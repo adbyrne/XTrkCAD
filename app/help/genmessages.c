@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -171,7 +171,7 @@ int main(int argc, char * argv[])
     FILE *outF;
     char buff[ 4096 ];
     char * cp;
-    int inFileIdx;
+    int inFileIdx = 1;
     enum {m_init, m_title, m_alt, m_help } mode = m_init;
     char msgName[256];
     char msgAlt[256];

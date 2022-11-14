@@ -63,7 +63,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -79,22 +79,14 @@
 #include "cstraigh.h"
 #include "drawgeom.h"
 #include "cjoin.h"
-#include "i18n.h"
 #include "common.h"
-#include "utility.h"
-#include "math.h"
 #include "param.h"
 #include "layout.h"
 #include "cundo.h"
-#include "messages.h"
 #include "cselect.h"
 #include "fileio.h"
+#include "common-ui.h"
 
-#include <stdint.h>
-
-extern drawCmd_t tempD;
-extern TRKTYP_T T_BEZIER;
-extern TRKTYP_T T_CORNU;
 
 typedef struct {
 	coOrd end_center;
@@ -123,7 +115,7 @@ typedef enum {CORNU_MODIFY, CORNU_CREATE} cornuCmdType_e;
 
 static struct {
 		enum Cornu_States state;
-		coOrd pos[2];
+		coOrd pos[4];
 		int number_of_points;
         int selectEndPoint;
         int selectMidPoint;
@@ -194,7 +186,7 @@ static char * CmdCornuHotBarProc(
 	case HB_SELECT:
 		CmdCornu( C_CANCEL, zero );
 		curCornu = trkseg;
-		DoCommandB( (void*)(intptr_t)cornuHotBarCmdInx );
+		DoCommandB( I2VP(cornuHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
 		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
@@ -342,7 +334,7 @@ int createEndPoint(
     	endHandle->end_curve = zero;
     	endHandle->end_valid = TRUE;
     	endHandle->mid_disp = 0.0;
-    	DIST_T end_length = 20*trackGauge;
+    	DIST_T end_length = tempD.scale*2.0;
     	Translate(&endHandle->end_curve,pos0,angle,end_length);
     	Translate(&endHandle->end_center,pos0,angle,end_length/2);
     	if (radius>0.0) {
@@ -991,9 +983,6 @@ track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2]) {
 }
 
 
-struct extraData {
-				cornuData_t cornuData;
-		};
 
 ANGLE_T GetOpenAngle(coOrd pos[2],ANGLE_T angle[2],int moved) {
 	ANGLE_T a = FindAngle(pos[1-moved],pos[moved]);
@@ -1016,12 +1005,12 @@ static paramData_t cornuModPLs[] = {
 
 #define cornuModEndAnglePD			(cornuModPLs[0])
 #define cornuModEndAngle 0
-	{ PD_FLOAT, &cornuModCmdContext.angle, "End Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("End Angle") },
+	{ PD_FLOAT, &cornuModCmdContext.angle, "endangle", PDO_NORECORD|BO_ENTER, &r0_360, N_("End Angle") },
 #define cornuModEndRadiusPD			(cornuModPLs[1])
 #define cornuModEndRadius           1
-	{ PD_FLOAT, &cornuModCmdContext.radius, "End Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
+	{ PD_FLOAT, &cornuModCmdContext.radius, "endradius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r10000_10000, N_("End Radius") },
 };
-static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, sizeof cornuModPLs/sizeof cornuModPLs[0] };
+static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, COUNT( cornuModPLs ) };
 
 /*
  * AdjustCornuCurve
@@ -1049,7 +1038,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 	wControl_p controls[5];				//Always needs a NULL last entry
 	char * labels[4];
 
-	Da.cmdType = (long)commandContext;
+	Da.cmdType = VP2L(commandContext);
 
 
 	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED) return C_CONTINUE;
@@ -1374,7 +1363,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 				if (((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {   //Extend end locked
 					SetUpCornuParms(&cp);
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
-					struct extraData *xx = GetTrkExtraData(Da.selectTrack);
 					if (Da.radius[sel] == 0)  {                //Straight
 						  Da.extendSeg[sel].type = SEG_STRTRK;
 						  Da.extendSeg[sel].width = 0;
@@ -1830,7 +1818,6 @@ static void cornuModDlgUpdate(
  *
  */
 STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG ) {
-	struct extraData *xx = GetTrkExtraData(trk);
 
 	Da.trackGauge = trackG;
 
@@ -1875,11 +1862,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			else Da.ep[0] = -1;
 		}
 		if (prior) {
-			struct extraData *xx0 = GetTrkExtraData(prior);
-			Da.pos[0] = xx0->cornuData.pos[ep0];              //Copy parms from FIRST CORNU trk
-			Da.radius[0] = xx0->cornuData.r[ep0];
-			Da.angle[0] = xx0->cornuData.a[ep0];
-			Da.center[0] = xx0->cornuData.c[ep0];
+			struct extraDataCornu_t *xx0 = GET_EXTRA_DATA(prior, T_CORNU, extraDataCornu_t);
+			Da.pos[0] = xx0->pos[ep0];              //Copy parms from FIRST CORNU trk
+			Da.radius[0] = xx0->r[ep0];
+			Da.angle[0] = xx0->a[ep0];
+			Da.center[0] = xx0->c[ep0];
 		}
 
 		//Move to RHS
@@ -1901,11 +1888,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		}
 
 		if (next) {
-			struct extraData *xx1 = GetTrkExtraData(next);
-			Da.pos[1] = xx1->cornuData.pos[ep1];              //Copy parms from LAST CORNU trk
-			Da.radius[1] = xx1->cornuData.r[ep1];
-			Da.angle[1] = xx1->cornuData.a[ep1];
-			Da.center[1] = xx1->cornuData.c[ep1];
+			struct extraDataCornu_t *xx1 = GET_EXTRA_DATA(next, T_CORNU, extraDataCornu_t);
+			Da.pos[1] = xx1->pos[ep1];              //Copy parms from LAST CORNU trk
+			Da.radius[1] = xx1->r[ep1];
+			Da.angle[1] = xx1->a[ep1];
+			Da.center[1] = xx1->c[ep1];
 		}
 
 		InfoMessage(_("Now Select or Add (+Shift) a Point"));
@@ -2012,7 +1999,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 									Da.center[1].x,Da.center[1].y,
 									Da.angle[0],Da.angle[1],
 									FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
-				UndoUndo();
+				UndoUndo(NULL);
 				Da.state = NONE;
 				return C_TERMINATE;
 			}
@@ -2042,7 +2029,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 								Da.center[1].x,Da.center[1].y,
 								Da.angle[0],Da.angle[1],
 								FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
-			UndoUndo();
+			UndoUndo(NULL);
 			Da.state = NONE;
 			return C_TERMINATE;
 		}
@@ -2077,7 +2064,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 					if (Da.ep[i]>= 0)
 						ConnectTracks(i==0?first_trk:trk1,i,Da.trk[i],Da.ep[i]);
 				} else {
-					UndoUndo();
+					UndoUndo(NULL);
 					wBeep();
 					InfoMessage(_("Connected Track End Adjust for end %d failed"),i);
 					return C_TERMINATE;
@@ -2144,7 +2131,7 @@ DIST_T CornuOffsetLength(dynArr_t segs, double offset) {
 }
 
 DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
-	DIST_T r = 100000.0, rr;
+	DIST_T r = DIST_INF, rr;
 	if (segs.cnt == 0 ) return r;
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
@@ -2152,7 +2139,7 @@ DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
 			rr = fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rr = CornuMinRadius(t.u.b.pos, t.bezSegs);
-		} else rr = 100000.00;
+		} else rr = DIST_INF;
 		if (rr<r) r = rr;
 	}
 	return r;
@@ -2225,7 +2212,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_START:
 		lock = FALSE;
-		Da.cmdType = (long)commandContext;
+		Da.cmdType = VP2L(commandContext);
 		Da.state = NONE;
 		Da.selectEndPoint = -1;
 		Da.selectMidPoint = -1;
@@ -2454,8 +2441,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			EPINX_T ep = 0;
-			BOOL_T found = FALSE;
-			int end = Da.state==POS_1?0:1;
+//			BOOL_T found = FALSE;
+//			int end = Da.state==POS_1?0:1;
 			if(!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
 				InfoMessage(_("Track can't be split - so locked to endpoint"));
 				return C_CONTINUE;
@@ -2607,12 +2594,12 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 	track_p trk_old = NULL;
 	newTracks[0] = NULL, newTracks[1] = NULL;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	if (!IsTrack(trk)) return FALSE;
-	for (int i=0; i<xx->cornuData.arcSegs.cnt;i++) {
+	for (int i=0; i<xx->arcSegs.cnt;i++) {
 		track_p bezTrack[2];
 		bezTrack[0] = NULL, bezTrack[1] = NULL;
-		trkSeg_p seg = &DYNARR_N(trkSeg_t,xx->cornuData.arcSegs,i);
+		trkSeg_p seg = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		if (seg->type == SEG_BEZTRK) {
 			DYNARR_RESET(trkSeg_t,seg->bezSegs);
 			FixUpBezierSeg(seg->u.b.pos,seg,TRUE);
@@ -2634,7 +2621,7 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 			}
 			trk_old = newTracks[1];
 		} else {
-			track_p new_trk;
+			track_p new_trk = NULL;
 			if (seg->type == SEG_CRVTRK)
 				new_trk = NewCurvedTrack(seg->u.c.center,seg->u.c.radius,seg->u.c.a0,seg->u.c.a1,0);
 			else if (seg->type == SEG_STRTRK)
@@ -2708,7 +2695,7 @@ static STATUS_T cmdCornuCreate(
 		/* no break */
 	case C_START:
 		createState = 0;
-		commandContext = (void *)cornuCmdHotBar;
+		commandContext = I2VP(cornuCmdHotBar);
 		rc = CmdCornu(C_START, pos);
 		Da.prevSelected = -1;
 		Da.selectEndHandle = -1;
@@ -2945,7 +2932,8 @@ static STATUS_T CmdConvertFrom(
 		coOrd pos )
 {
 	static track_p trk;
-	track_p trk1,trk2;
+	track_p trk1;
+//	track_p trk2;
 	switch (action) {
 
 		case wActionMove:
@@ -2978,15 +2966,16 @@ static STATUS_T CmdConvertFrom(
 					return C_TERMINATE;
 				}
 			}
-			dynArr_t trackSegs_da;
-			DYNARR_RESET(trkSeg_t,trackSegs_da);
+//			dynArr_t trackSegs_da;
+//			DYNARR_RESET(trkSeg_t,trackSegs_da);
 			trk1 = NULL;
-			trk2 = NULL;
+//			trk2 = NULL;
 			trk = NULL;
 			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
 			track_p tracks[2];
 			DYNARR_RESET(track_p,Da.tracks);
-			int converted=0, not_convertable = 0, created=0, deleted=0;
+			int converted=0, not_convertable = 0, deleted=0;
+//			int created=0;
 			while ( TrackIterate( &trk1 ) ) {
 				if ( GetTrkSelected( trk1 ) && IsTrack( trk1 ) ) {
 					//Only Cornu or Bezier
@@ -3057,14 +3046,14 @@ static STATUS_T CmdConvertFrom(
 		}
 }
 
-#include "bitmaps/convertto.xpm"
-#include "bitmaps/convertfr.xpm"
+#include "bitmaps/convert-to.xpm"
+#include "bitmaps/convert-from.xpm"
 
 EXPORT void InitCmdCornu( wMenu_p menu )
 {	
 	ButtonGroupBegin( _("Convert"), "cmdConvertSetCmd", _("Convert") );
-	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convertto_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
-	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convertfr_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
+	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convert_to_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
+	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convert_from_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
 	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "", NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
 	ButtonGroupEnd();
 	ParamCreateControls( &cornuModPG, cornuModDlgUpdate) ;

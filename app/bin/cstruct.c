@@ -17,34 +17,25 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <ctype.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
 
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
-#include "utility.h"
 #include "ccurve.h"
+#include "common-ui.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
 EXPORT dynArr_t structureInfo_da;
-
-typedef struct compoundData extraData;
 
 
 static wIndex_t pierListInx;
@@ -65,13 +56,13 @@ static drawCmd_t structureD = {
 static wIndex_t structureHotBarCmdInx;
 static wIndex_t structureInx;
 static long hideStructureWindow;
-static void RedrawStructure(void);
+static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y );
 
-static wPos_t structureListWidths[] = { 80, 80, 220 };
+static wWinPix_t structureListWidths[] = { 80, 80, 220 };
 static const char * structureListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, structureListWidths, structureListTitles };
 static const char * hideLabels[] = { N_("Hide"), NULL };
-static paramDrawData_t structureDrawData = { 490, 200, (wDrawRedrawCallBack_p)RedrawStructure, NULL, &structureD };
+static paramDrawData_t structureDrawData = { 490, 200, RedrawStructure, NULL, &structureD };
 static paramData_t structurePLs[] = {
 #define I_LIST	(0)
 #define structureListL	((wList_p)structurePLs[I_LIST].control)
@@ -79,14 +70,14 @@ static paramData_t structurePLs[] = {
 #define I_DRAW	(1)
 	{	PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &structureDrawData, NULL, 0 },
 #define I_HIDE	(2)
-	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(void*)hideLabels, NULL, BC_NOBORDER },
+	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 },
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGWIDTH		(4)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 },
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 } };
-static paramGroup_t structurePG = { "structure", 0, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) } };
+static paramGroup_t structurePG = { "structure", 0, structurePLs, COUNT( structurePLs ) };
 
 
 
@@ -138,7 +129,7 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 	else
 		to->contentsLabel = curSubContents;
 	to->endCnt = 0;
-	to->paths = (PATHPTR_T)"";
+	SetParamPaths( to, NULL );
 	if (updateList && structureListL != NULL) {
 		FormatCompoundTitle( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, to->title );
 		if (message[0] != '\0')
@@ -243,7 +234,6 @@ GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 {
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
-	DIST_T ratio = GetScaleRatio(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -355,7 +345,7 @@ static void DrawStructure(
 		drawCmd_p d,
 		wDrawColor color )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_STRUCTURE, extraDataCompound_t);
 
 	d->options &= ~DC_NOTSOLIDLINE;
 	switch(xx->lineType) {
@@ -404,7 +394,7 @@ static ANGLE_T GetAngleStruct(
 		EPINX_T * ep0,
 		EPINX_T * ep1 )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 	ANGLE_T angle;
 
 	pos.x -= xx->orig.x;
@@ -432,8 +422,8 @@ static BOOL_T QueryStructure( track_p trk, int query )
 
 static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
 {
-	struct extraData *xx1 = GetTrkExtraData( trk1 );
-	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	struct extraDataCompound_t *xx1 = GET_EXTRA_DATA( trk1, T_STRUCTURE, extraDataCompound_t );
+	struct extraDataCompound_t *xx2 = GET_EXTRA_DATA( trk2, T_STRUCTURE, extraDataCompound_t );
 	char * cp = message + strlen(message);
 	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
 	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
@@ -485,8 +475,8 @@ static trackCmd_t structureCmds = {
 		CompareStruct };
 
 static paramData_t pierPLs[] = {
-	{	PD_DROPLIST, &pierListInx, "inx", 0, (void*)50, N_("Pier Number") } };
-static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
+	{	PD_DROPLIST, &pierListInx, "inx", 0, I2VP(50), N_("Pier Number") } };
+static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, COUNT( pierPLs ) };
 #define pierL ((wList_p)pierPLs[0].control)
 
 static void ShowPierL( void )
@@ -534,7 +524,7 @@ static wWin_p structureW;
 static void RescaleStructure( void )
 {
 	DIST_T xscale, yscale;
-	wPos_t ww, hh;
+	wWinPix_t ww, hh;
 	DIST_T w, h;
 	wDrawGetSize( structureD.d, &ww, &hh );
 	w = ww/structureD.dpi - 0.2;
@@ -579,13 +569,13 @@ static void structureChange( long changes )
 	maxStructureDim.x += 2*trackGauge;
 	maxStructureDim.y += 2*trackGauge;
 	/*RescaleStructure();*/
-	RedrawStructure();
+	RedrawStructure( structureD.d, NULL, 0, 0 );
 	return;
 }
 
 
 
-static void RedrawStructure()
+static void RedrawStructure( wDraw_p d, void * context, wWinPix_t x, wWinPix_t y )
 {
 	RescaleStructure();
 LOG( log_structure, 2, ( "SelStructure(%s)\n", (curStructure?curStructure->title:"<NULL>") ) )
@@ -617,7 +607,7 @@ static void StructureDlgUpdate(
 	NewStructure();
 	curStructure = to;
 	ShowPierL();
-	RedrawStructure();
+	RedrawStructure( structureD.d, NULL, 0, 0 );
 	/* ParamDialogOkActive( &structurePG, FALSE ); */
 }
 
@@ -704,12 +694,14 @@ static ANGLE_T PlaceStructure(
 	if (curStructure->special == TOpierInfo) {
 		pierTrk = OnTrack( &p1, FALSE, TRUE );
 		if (pierTrk != NULL) {
-			if (GetTrkType(pierTrk) == T_TURNOUT) {
-				pierEp = PickEndPoint( p1, pierTrk );
-				if (pierEp >= 0) {
-					*resPos = GetTrkEndPos(pierTrk, pierEp);
-					*resAngle = NormalizeAngle(GetTrkEndAngle(pierTrk, pierEp)-90.0);
-					return TRUE;
+			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
+				if (GetTrkType(pierTrk) == T_TURNOUT) {
+					pierEp = PickEndPoint( p1, pierTrk );
+					if (pierEp >= 0) {
+						*resPos = GetTrkEndPos(pierTrk, pierEp);
+						*resAngle = NormalizeAngle(GetTrkEndAngle(pierTrk, pierEp)-90.0);
+						return TRUE;
+					}
 				}
 			}
 			*resAngle = NormalizeAngle(GetAngleAtPoint( pierTrk, p1, NULL, NULL )+90.0);
@@ -728,13 +720,10 @@ static ANGLE_T PlaceStructure(
 static void NewStructure( void )
 {
 	track_p trk;
-	struct extraData *xx;
-	wIndex_t titleLen;
+	struct extraDataCompound_t *xx;
 	wIndex_t pierInx;
 
-	if (curStructure->segCnt < 1) {
-		AbortProg( "newStructure: bad cnt" );
-	}
+	CHECK( curStructure->segCnt >= 1 );
 	if (Dst.state == 0)
 		return;
 	if (curStructure->special == TOpierInfo &&
@@ -743,22 +732,8 @@ static void NewStructure( void )
 		return;
 	}
 	UndoStart( _("Place Structure"), "newStruct" );
-	titleLen = strlen( curStructure->title );
-	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, (PATHPTR_T)"", curStructure->segCnt, curStructure->segs );
-	xx = GetTrkExtraData(trk);
-#ifdef LATER
-	trk = NewTrack( 0, T_STRUCTURE, 0, sizeof (*xx) + 1 );
-	xx->orig = Dst.pos;
-	xx->angle = Dst.angle;
-	xx->segs = MyMalloc( (curStructure->segCnt)*sizeof curStructure->segs[0] );
-
-	/*
-	 * copy data */
-	xx->segCnt = curStructure->segCnt;
-	memcpy( xx->segs, curStructure->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
-	xx->title = curStructure->title;
-	SetPaths( trk, "" );
-#endif
+	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, curStructure->segCnt, curStructure->segs );
+	xx = GET_EXTRA_DATA(trk, T_STRUCTURE, extraDataCompound_t);
 	switch(curStructure->special) {
 		case TOnormal:
 			xx->special = TOnormal;
@@ -779,19 +754,13 @@ static void NewStructure( void )
 			}
 			break;
 		default:
-			AbortProg("bad special");
+			CHECKMSG( FALSE, ("bad special %d", (int) (curStructure->special) ) );
 	}
 		
 	SetTrkVisible( trk, TRUE );
 	SetTrkNoTies( trk, FALSE);
 	SetTrkBridge( trk, FALSE);
-#ifdef LATER
-	ComputeCompoundBoundingBox( trk );
-
-	SetDescriptionOrig( trk );
-	xx->descriptionOff = zero;
-	xx->descriptionSize = zero;
-#endif
+	SetTrkRoadbed( trk, FALSE);
 
 	DrawNewTrack( trk );
 	/*DrawStructure( trk, &mainD, wDrawColorBlack, 0 );*/
@@ -806,7 +775,7 @@ static void StructRotate( void * pangle )
 {
 	if (Dst.state == 0)
 		return;
-	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	ANGLE_T angle = (ANGLE_T)VP2L(pangle);
 	angle /= 1000.0;
 	Dst.pos = cmdMenuPos;
 	Rotate( &Dst.pos, cmdMenuPos, angle );
@@ -830,9 +799,14 @@ EXPORT STATUS_T CmdStructureAction(
 	switch (action & 0xFF) {
 
 	case C_START:
+		if (!magneticSnap)
+			InfoMessage(_("+Alt for Magnetic Snap"));
+		else
+			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
+
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dst.state = 0;
-		Dst.angle = 00.0;
+		Dst.angle = 0.0;
 		ShowPierL();
 		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
@@ -851,6 +825,12 @@ EXPORT STATUS_T CmdStructureAction(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curStructure == NULL ) return C_CONTINUE;
 		ShowPierL();
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			angle = Dst.angle;
+			if (SnapPosAngle(&pos, &angle)) {
+				Dst.angle = angle;
+			}
+		}
 		Dst.pos = pos;
 		rot0 = pos;
 		origPos = Dst.pos;
@@ -863,9 +843,19 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_MOVE:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curStructure == NULL ) return C_CONTINUE;
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			angle = Dst.angle;
+			if (SnapPosAngle(&pos, &angle)) {
+				Dst.angle = angle;
+			}
+		}
 		PlaceStructure( rot0, pos, origPos, &Dst.pos, &Dst.angle );
 		CreateMoveAnchor(pos);
-		InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
+		if (!magneticSnap)
+			InfoMessage(_("+Alt for Magnetic Snap"));
+		else
+			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
+		// InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
 		return C_CONTINUE;
 
 	case C_RDOWN:
@@ -898,7 +888,7 @@ EXPORT STATUS_T CmdStructureAction(
 			Dst.angle = NormalizeAngle( origAngle + angle );
 			Rotate( &Dst.pos, rot0, angle );
 		}
-		InfoMessage( _("Angle = %0.3f"), Dst.angle );
+		// InfoMessage( _("Angle = %0.3f"), Dst.angle );
 		Dst.state = 2;
 		CreateRotateAnchor(rot0);
 		return C_CONTINUE;
@@ -996,7 +986,7 @@ static STATUS_T CmdStructure(
 		if (structureIndex > 0 && structurePtr) {
 			curStructure = structurePtr;
 			wListSetIndex( structureListL, structureIndex );
-			RedrawStructure();
+			RedrawStructure( structureD.d, NULL, 0, 0 );
 		}
 		InfoMessage( _("Select Structure and then drag to place"));
 		ParamLoadControls( &structurePG );
@@ -1047,7 +1037,8 @@ static STATUS_T CmdStructure(
 
 	case C_CANCEL:
 		wHide( structureW );
-		/*no break*/
+		return C_CANCEL;
+
 	case C_REDRAW:
 	case C_TEXT:
 	case C_OK:
@@ -1073,7 +1064,7 @@ static char * CmdStructureHotBarProc(
 	case HB_SELECT:
 		CmdStructureAction( C_FINISH, zero );
 		curStructure = to;
-		DoCommandB( (void*)(intptr_t)structureHotBarCmdInx );
+		DoCommandB( I2VP(structureHotBarCmdInx) );
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );
@@ -1140,12 +1131,18 @@ static STATUS_T CmdStructureHotBar(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RDOWN, pos );
 		}
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			SnapPos(&pos);
+		}
 		return CmdStructureAction( action, pos );
 
 	case C_RMOVE:
 	case C_MOVE:
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RMOVE, pos );
+		}
+		if ((MyGetKeyState()&WKEY_ALT) == 0) {
+			SnapPos(&pos);
 		}
 		return CmdStructureAction( action, pos );
 
@@ -1173,11 +1170,11 @@ static STATUS_T CmdStructureHotBar(
 	}
 }
 
-#include "bitmaps/struct.xpm"
+#include "bitmaps/building.xpm"
 
 EXPORT void InitCmdStruct( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"), wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
+	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"), wIconCreatePixMap(building_xpm[iconSize]), LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar, "cmdStructureHotBar", "", NULL, LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	ParamRegister( &structurePG );
 	if ( structPopupM == NULL ) {

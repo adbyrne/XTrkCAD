@@ -38,32 +38,26 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  * 
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#) : $Id$";
-
-#include <ctype.h>
-#include <string.h>
+//static const char rcsid[] = "@(#) : $Id$";
 
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
-#ifdef WINDOWS
+#include "common-ui.h"
+#ifdef UTFCONVERT
 #include "include/utf8convert.h"
-#endif // WINDOWS
-#include "utility.h"
-#include "messages.h"
+#endif // UTFCONVERT
 
 EXPORT TRKTYP_T T_CONTROL = -1;
 
@@ -86,6 +80,7 @@ static char controlOffScript[STR_LONG_SIZE];
 #endif
 
 typedef struct controlData_t {
+    extraDataBase_t base;
     coOrd orig;
     BOOL_T IsHilite;
     char * name;
@@ -95,7 +90,7 @@ typedef struct controlData_t {
 
 static controlData_p GetcontrolData ( track_p trk )
 {
-    return (controlData_p) GetTrkExtraData(trk);
+    return GET_EXTRA_DATA( trk, T_CONTROL, controlData_t );
 }
 
 #define RADIUS 6
@@ -181,7 +176,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
     controlData_p xx = GetcontrolData(trk);
     const char *thename, *theonscript, *theoffscript;
     unsigned int max_str;
-    char *newName, *newOnScript, *newOffScript;
+    char *newName, *newOnScript, *newOffScript=NULL;
     BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
     
     switch (inx) {
@@ -311,9 +306,9 @@ static BOOL_T WriteControl ( track_p t, FILE * f )
     controlData_p xx = GetcontrolData(t);
 	char *controlName = MyStrdup(xx->name);
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	controlName = Convert2UTF8(controlName);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     rc &= fprintf(f, "CONTROL %d %u %s %d %0.6f %0.6f \"%s\" \"%s\" \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
@@ -341,9 +336,9 @@ static BOOL_T ReadControl ( char * line )
         return FALSE;
     }
 
-#ifdef WINDOWS
+#ifdef UTFCONVERT
 	ConvertUTF8ToSystem(name);
-#endif // WINDOWS
+#endif // UTFCONVERT
 
     trk = NewTrack(index, T_CONTROL, 0, sizeof(controlData_t));
     SetTrkVisible(trk, visible); 
@@ -423,18 +418,18 @@ static char controlEditOffScript[STR_LONG_SIZE];
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t controlEditPLs[] = {
 #define I_CONTROLNAME (0)
-    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(controlEditName) },
+    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Name"), 0, 0, sizeof(controlEditName) },
 #define I_ORIGX (1)
     /*1*/ { PD_FLOAT, &controlEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") },
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &controlEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_CONTROLONSCRIPT (3)
-    /*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
+    /*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF, I2VP(350), N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
 #define I_CONTROLOFFSCRIPT (4)
-    /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
+    /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
-static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, sizeof controlEditPLs/sizeof controlEditPLs[0] };
+static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, COUNT( controlEditPLs ) };
 static wWin_p controlEditW;
 
 static void ControlEditOk ( void * junk )
@@ -495,9 +490,9 @@ static void EditControlDialog()
         controlEditOffScript[0] = '\0';
     } else {
         xx = GetcontrolData ( controlEditTrack );
-        strncpy(controlEditName,xx->name,STR_SHORT_SIZE);
-        strncpy(controlEditOnScript,xx->onscript,STR_LONG_SIZE);
-        strncpy(controlEditOffScript,xx->offscript,STR_LONG_SIZE);
+        strncpy(controlEditName,xx->name,STR_SHORT_SIZE-1);
+        strncpy(controlEditOnScript,xx->onscript,STR_LONG_SIZE-1);
+        strncpy(controlEditOffScript,xx->offscript,STR_LONG_SIZE-1);
         controlEditOrig = xx->orig;
     }
     ParamLoadControls( &controlEditPG );
@@ -555,13 +550,9 @@ static POS_T ctlhiliteBorder;
 static wDrawColor ctlhiliteColor = 0;
 static void DrawControlTrackHilite( void )
 {
-	wPos_t x, y, w, h;
 	if (ctlhiliteColor==0)
 		ctlhiliteColor = wDrawColorGray(87);
-	w = (wPos_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
-	h = (wPos_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
-	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
+	DrawRectangle( &tempD, ctlhiliteOrig, ctlhiliteSize, ctlhiliteColor, DRAW_TRANSPARENT );
 }
 
 static int ControlMgmProc ( int cmd, void * data )
@@ -626,12 +617,12 @@ EXPORT void ControlMgmLoad ( void )
     static wIcon_p controlI = NULL;
     
     if (controlI == NULL) {
-        controlI = wIconCreatePixMap( control_xpm );
+        controlI = wIconCreatePixMap( control_xpm[iconSize] );
     }
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_CONTROL) continue;
-        ContMgmLoad (controlI, ControlMgmProc, (void *) trk );
+        ContMgmLoad (controlI, ControlMgmProc, trk );
     }
 }
 
@@ -640,7 +631,7 @@ EXPORT void ControlMgmLoad ( void )
 EXPORT void InitCmdControl ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdControl, "cmdControl", _("Control"), 
-                   wIconCreatePixMap( control_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CONTROL, NULL );
+                   wIconCreatePixMap( control_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CONTROL, NULL );
 }
 
 EXPORT void InitTrkControl ( void )

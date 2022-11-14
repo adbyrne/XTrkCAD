@@ -17,13 +17,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
-#include "track.h"
+#include "track.h" //- drawLineType
 
-typedef struct {
+typedef struct extraDataBezier_t {
+		extraDataBase_t base;
 		coOrd pos[4];
 		DIST_T minCurveRadius;
 		ANGLE_T a0, a1;
@@ -33,22 +34,13 @@ typedef struct {
 		DIST_T segsWidth;
 		wDrawColor segsColor;
 		drawLineType_e lineType;
-		} BezierData_t;
+		} extraDataBezier_t;
 
 
-void BezierSplit(coOrd[4], coOrd[4], coOrd[4] , double );
-coOrd BezierPointByParameter(coOrd[4], double);
-double BezierMathLength(coOrd[4], double);
-coOrd  BezierFirstDerivative(coOrd p[4], double);
-coOrd BezierSecondDerivative(coOrd p[4], double);
-double BezierCurvature(coOrd[4], double , coOrd *);
-double BezierMaxCurve(coOrd[4]);
-double BezierMathMinRadius(coOrd[4]);
-coOrd BezierMathFindNearestPoint(coOrd *, coOrd[4] , int );
-track_p NewBezierTrack(coOrd[4], trkSeg_t * , int );
-track_p NewBezierLine(coOrd[4], trkSeg_t * , int, wDrawColor, DIST_T);
-DIST_T BezierMathDistance( coOrd *, coOrd[4], int , double * );
-void FixUpBezier(coOrd[4], struct extraData*, BOOL_T);
+void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T width );
+track_p NewBezierTrack(coOrd[4], trkSeg_p , int );
+track_p NewBezierLine(coOrd[4], trkSeg_p , int, wDrawColor, DIST_T);
+void FixUpBezier(coOrd[4], struct extraDataBezier_t*, BOOL_T);
 void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);
 void FixUpBezierSegs(trkSeg_p p,int segCnt);
 BOOL_T GetBezierSegmentFromTrack(track_p, trkSeg_p);

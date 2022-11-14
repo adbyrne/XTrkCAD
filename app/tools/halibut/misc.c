@@ -90,7 +90,7 @@ void rdaddc(rdstringc *rs, char c) {
     rs->text[rs->pos] = 0;
 }
 void rdaddsc(rdstringc *rs, char const *p) {
-    rdaddsn(rs, p, strlen(p));
+    rdaddsn(rs, p, (int)strlen(p));
 }
 void rdaddsn(rdstringc *rs, char const *p, int len) {
     if (rs->pos >= rs->size - len) {
@@ -527,7 +527,7 @@ void cmdline_cfg_add(paragraph *cfg, char *string)
 	ulen += 1 + ustrlen(cfg->keyword+ulen);
     len = 0;
     while (cfg->origkeyword[len])
-	len += 1 + strlen(cfg->origkeyword+len);
+	len += 1 + (int)strlen(cfg->origkeyword+len);
 
     ustring = ufroma_locale_dup(string);
 
@@ -538,7 +538,7 @@ void cmdline_cfg_add(paragraph *cfg, char *string)
     cfg->keyword[ulen-1] = L'\0';
 
     pos = len;
-    len += 2 + strlen(string);
+    len += 2 + (int)strlen(string);
     cfg->origkeyword = sresize(cfg->origkeyword, len, char);
     strcpy(cfg->origkeyword+pos, string);
     cfg->origkeyword[len-1] = '\0';

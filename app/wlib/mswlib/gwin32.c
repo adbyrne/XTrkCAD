@@ -13,9 +13,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -40,7 +39,7 @@
 #include <errno.h>
 #include <ctype.h>
 #if defined(_MSC_VER) || defined(__DMC__)
-#  include <io.h>
+#include <io.h>
 #endif /* _MSC_VER || __DMC__ */
 
 #ifndef SUBLANG_SERBIAN_LATIN_BA

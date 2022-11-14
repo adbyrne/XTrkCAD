@@ -17,17 +17,20 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <limits.h>
 
-#include "misc.h"
+//#include "misc.h"
 
 #include "gtkint.h"
 #include "i18n.h"
+
+extern wBool_t CheckHelpTopicExists(const char * topic);
 
 #include "dynstring.h"
 
@@ -43,7 +46,8 @@
 								"variable.\n Also make sure that the user has sufficient access rights to read these" \
  								"files."
 /**
- * Create a fully qualified url from a topic
+ * Create a fully qualified url from a topic. The library path is converted to 
+ * an absolute path first. The url is then created from that path.
  *
  * \param helpUrl OUT pointer to url, free by caller
  * \param topic IN the help topic
@@ -54,18 +58,27 @@ TopicToUrl(char **helpUrl, const char *topic)
 {
     DynString url;
     DynStringMalloc(&url, 16);
+    char *realPath;
 
-    // build up the url line
-    DynStringCatCStrs(&url,
-                      "file://",
-                      wGetAppLibDir(),
-                      "/html/",
-                      topic,
-                      ".html",
-                      NULL);
+    realPath = realpath(wGetAppLibDir(), NULL);
 
-    *helpUrl = strdup(DynStringToCStr(&url));
-    DynStringFree(&url);
+    if(realPath) {
+       // build up the url line
+        DynStringCatCStrs(&url,
+                          "file://",
+                          realPath,
+                          "/html/",
+                          topic,
+                          ".html",
+                          NULL);
+
+        *helpUrl = strdup(DynStringToCStr(&url));
+        DynStringFree(&url);
+        free(realPath);
+    } else {
+        wNoticeEx( NT_ERROR, _("Not enough memory for realpath()"), _("Exit"), NULL);
+		wExit(0);
+    }
 }
 /**
  * Invoke the system's default browser to display help for <topic>. First the
@@ -79,7 +92,7 @@ void wHelp(const char * topic)
 {
     int rc;
     char *url;
-    char *currentPath;
+//    char *currentPath;
 
     assert(topic != NULL);
     assert(strlen(topic));
@@ -87,7 +100,7 @@ void wHelp(const char * topic)
     if (!CheckHelpTopicExists(topic)) return;
 
     TopicToUrl(&url, topic);
-
+    printf(">%s<\n", url);
 	rc = wOpenFileExternal(url);
 
 	if (!rc) {

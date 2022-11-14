@@ -17,16 +17,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_CCURVE_H
 #define HAVE_CCURVE_H
 
-#include "draw.h"
-#include "track.h"
-#include "wlib.h"
-#include "utility.h"
+#include "common.h"
+#include "track.h" //- curveType_e
 
 typedef struct {
 		curveType_e type;
@@ -48,7 +46,7 @@ typedef struct {
 #define circleCmdFromTangent	(1)
 #define circleCmdFromCenter		(2)
 
-typedef void (*curveMessageProc)( char *, ... );
+typedef void (*curveMessageProc)( const char *, ... );
 STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, dynArr_t *,curveMessageProc );
 int IsCurveCircle( track_p );
 void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T, DIST_T );

@@ -17,25 +17,15 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include <locale.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 #include <wchar.h>
-
-#ifdef WINDOWS
-#include <Windows.h>
-#include <malloc.h>
-#endif
 
 #include "common.h"
 #include "custom.h"
 #include "fileio.h"
 #include "paths.h"
-#include "wlib.h"
 
 enum defaultTypes {
     INTEGERCONSTANT,
@@ -114,7 +104,7 @@ struct appDefault xtcDefaults[] = {
     { "misc.scale", 0, STRINGFUNCTION, { .stringFunction = GetLocalPopularScale}},				/**< the (probably) most popular scale for a region */
 };
 
-#define DEFAULTCOUNT (sizeof(xtcDefaults)/sizeof(xtcDefaults[0]))
+#define DEFAULTCOUNT COUNT(xtcDefaults)
 
 
 static long bFirstRun;						/**< TRUE if appl is run the first time */
@@ -203,6 +193,7 @@ InitializeRegionCode(void)
 {
     strcpy(regionCode, "US");
 
+// TODO Move this to wlib
 #ifdef WINDOWS
     {
         LCID lcid;
@@ -301,7 +292,7 @@ static char *
 GetParamFullPath(struct appDefault *ptrDefault, void *additionalData)
 {
     char *str;
-    MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, (void *)0);
+    MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, I2VP(0));
     return str;
 }
 

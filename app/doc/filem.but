@@ -25,15 +25,20 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed below.
+\dd \G{png.d/bexport.png} \f{Export} - Exports objects to a file in \e{XTrackCAD} (*.xti) format. If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into another layout design. Refer to the Import command listed below.
 
 \u000
 
-\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. The bitmap will be saved in PNG format.
+\dd \G{png.d/bexportbmap.png}\f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. The bitmap can be saved in either JPEG or PNG format.
 
 \u000
 
-\dd \f{Export to DXF} - Exports the selected objects to a file in DXF format (\K{generalTerms}). The exported file can then be imported into other CAD programs.
+\dd \G{png.d/bexportdxf.png}\f{Export to DXF} - Exports objects to a file in DXF format (\K{generalTerms}). If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into other CAD programs.
+
+\u000
+
+\dd \G{png.d/bexportsvg.png} \f{Export to SVG} - Exports objects to a file in SVG format. If no objects are selected, all objects in visible layers are exported. If objects are selected they are exported. The exported file can then be imported into a vector drawing program like Inkscape
+or used for publishing on the web.
 
 \u000
 
@@ -41,11 +46,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
+\dd \G{png.d/bimport.png} \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
 
 \u000
 
-\dd \f{Import Module} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
+\dd \G{png.d/bimportmod.png} \f{Import Module} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
 \u000
 
 \dd \G{png.d/bnew.png} \f{New} - Clears the current layout.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation. After that the Layout Options (\K{cmdLayout}) dialog will be opened.
@@ -60,19 +65,19 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Parameter Files} - Displays the \f{Parameter Files} dialog (\K{cmdPrmfile}) to choose parameter files.
+\dd \G{png.d/bparam.png} \f{Parameter Files} - Displays the \f{Parameter Files} dialog (\K{cmdPrmfile}) to choose parameter files.
 
 \u000
 
-\dd \f{Print Setup} - Shows the Printer Setup Dialog (\K{printSetup}).
+\dd \G{png.d/bsetup.png} \f{Print Setup} - Shows the Printer Setup Dialog (\K{printSetup}).
 
 \u000
 
-\dd \f{Print} - Invokes the Print command (\K{cmdPrint}).
+\dd \G{png.d/bprint.png} \f{Print} - Invokes the Print command (\K{cmdPrint}).
 
 \u000
 
-\dd \f{Revert} - Undoes all changes and returns to the last saved layout plan.
+\dd \G{png.d/brevert.png} \f{Revert} - Undoes all changes and returns to the last saved layout plan.
 
 \u000
 
@@ -80,11 +85,13 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Save As} - This command lets you make a copy of the track plan you are currently working on as an file (.xtc) or an archive (.xtce). It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from in the same filetype. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk and chnage its filetype using the selection box at the bottom of the list of files or by hardcoding the extensions .xtc or .xtce (for an archive).
+\dd \G{png.d/bsaveas.png} \f{Save As} - This command lets you make a copy of the track plan you are currently working on as an file (.xtc) or an archive (.xtce). It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from in the same filetype. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk and chnage its filetype using the selection box at the bottom of the list of files or by hardcoding the extensions .xtc or .xtce (for an archive).
 
 \rule
 
 \S{cmdExport} \i{Export}
+
+\G{png.d/bexport.png}
 
 This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\K{cmdSelect}) objects are exported to the file. The export file will have an \c{xti} extension.
 
@@ -96,18 +103,27 @@ Using the Import command (\k{cmdImport}), an exported file can be imported into 
 
 \S{cmdOutputbitmap} \i{Export to Bitmap}
 
+\G{png.d/bexportbmap.png}
+
 This menu item creates a bitmap file of the layout.
 
 \G{png.d/bitmap.png}
 
-The \f{Bitmap} dialog specifies the style and size of the bitmap.  The three check-boxes (\f{Print Titles}, \f{Print Borders} and \f{Print Centerline}) control whether the Layout Title (\K{cmdLayout}), the borders or the track centerlines are printed on the bitmap.  The size of the bitmap is smaller if these are disabled.
+The \f{Bitmap} dialog specifies the style and size of the bitmap.  The check-boxes (\f{Layout Titles}, \f{Borders}, \f{Centerline of Track} and
+\f{Background Image}) control
+whether the Layout Title (\K{cmdLayout}), the borders or the track centerlines are printed on the bitmap. If a background image is used it will be
+printed if the option is set.
+
+ The size of the bitmap is smaller if these are disabled.
 
 Printing the track centerlines (also seen when zoomed in 1:1) is useful when you later print the bitmap
 full size for laying out track.
 
 If the Snap Grid (\K{cmdGrid}) is visible then it will be printed on the bitmap.
 
-The \f{DPI} (or \f{DPCM} if using metric units (\K{cmdPref})) control specifies the number of pixels per inch (or centimeter) in the bitmap.  You can enter values from 0.1 to 100.  Larger values will result in a larger bitmap file.  bitmaps must be less than 32000 pixels in height or width.
+The \f{DPI} control specifies the number of pixels per inch in the bitmap.  Bitmaps must be less than 32,000 pixels in height or width.
+The upper value you can enter depends on the size of your trackplan. It is made sure that your bitmap does not exceed these limits.
+Larger values will result in a larger bitmap file.
 
 The bitmap width, height and approximate file size is indicated.
 
@@ -115,11 +131,14 @@ Note: This command can create a very large file and consume a lot of memory and 
 
 Pressing the \f{OK} button invokes a \f{File Save} dialog so you can choose the file name for the Bitmap.
 
-The format of the file is PNG on all operating systems.
+You can select to create JPEG or PNG files. As a rule of thumb JPEG results in smaller files  when you use a backgound image, PNG
+does so for trackplans without an image background.
 
 \rule
 
 \S{ExportDXF} \i{Export to DXF}
+
+\G{png.d/bexportdxf.png}
 
 This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\K{cmdSelect}) objects are exported to the file. The export file will have an \c{xti} extension.
 
@@ -129,7 +148,29 @@ Exported files can then be imported into other CAD programs.
 
 \rule
 
+\S{ExportSVG} \i{Export to SVG}
+
+\G{png.d/bexportsvg.png}
+
+This menu item displays a file selection dialog where a file name for exported objects can be entered.  All selected (\K{cmdSelect}) objects are exported to the file. The export file will have an \c{svg} extension.
+
+\G{png.d/exportfilesvg.png}
+
+Files in SVG format can be used for different purposes.
+
+\b SVG files can be loaded into many drawing programs. This makes it possible to enhance and resize the image. Vector images have the advantage of
+allowing lossless resizing.
+
+\b Most modern browsers support SVG as an image format. So the resulting file can directly be used to publish your plan on the web. By adding a bit of
+Javascript, zooming and panning can be enabled. Appropiate scripts can easily be found using your favorite search engine.
+The generated SVG uses the layout description as a title that is shown by some browser. Also the drawing has an 'id' for manipulation by Javascript.
+This id is derived from the filename by removing all spaces and sticking the word 'id' in front. Eg exporting \c{stonega.xtc} the resulting id will be \c{idstonega}.
+
+\rule
+
 \S{cmdImport} Import
+
+\G{png.d/bimport.png}
 
 Importing displays a file selection dialog to specify the file to import.
 
@@ -139,7 +180,21 @@ After importing the objects from the file, the imported objects are in selected 
 
 \rule
 
+\S{cmdImportM} Import as Module
+
+\G{png.d/bimportxtc.png}
+
+Importing displays a file selection dialog to specify the file to import as a module.
+
+\G{png.d/importmod.png}
+
+After importing the objects from the file, the imported objects are in selected state and therefore are drawn in red. This allows you to easily move and rotate the imported objects to their final position.
+
+\rule
+
 \S{cmdPrmfile} \i{Parameter Files}
+
+\G{png.d/bparam.png}
 
 \e{Parameter Files} contain turnout, sectional track and structure definitions.  Loaded Parameter Files are managed with the \f{Parameter Files} dialog.
 
@@ -149,11 +204,11 @@ The dialog contains a list of parameter files. Each file is preceded by a color 
 are usable in the current scale and gauge.
 
 \G{png.d/greendot.png} \G{png.d/greenstar.png} Definitions from this file are a perfect fit for the current layout options. The file has been loaded and will be visible in the \f{HotBar}. For track this means that gauge and scale of the track elements
-are identical to the layout settings. Prototype definitions (Scale "*") are always a perfect fit. Turnouts and Sectional Track must have the same gauge and usually the same scale unless the scale/gauge combination has been defined to fit. 
+are identical to the layout settings. Prototype definitions (Scale "*") are always a perfect fit. Turnouts and Sectional Track must have the same gauge and usually the same scale unless the scale/gauge combination has been defined to fit.
 OO layouts use HO track as an example.
 
 \G{png.d/yellowdot.png} \G{png.d/yellowstar.png} Definitions from this file can be used with this layout but do not fit perfectly. A typical example is On30 where HO scale track can be used because the
-gauge is the same. But differences in scale may make the track look out of scale. Structures are considered compatible if the scale is within +/-20%. Cars are compatible if the gauge is the same, but the scale can be +/-20%. 
+gauge is the same. But differences in scale may make the track look out of scale. Structures are considered compatible if the scale is within +/-20%. Cars are compatible if the gauge is the same, but the scale can be +/-20%.
 Exceptions to this can be defined in the scale definitions.
 
 \G{png.d/reddot.png} \G{png.d/redstar.png} This parameter file doesn't contain any usable definitions with current settings. You may want to change the layout options if you want to use elements from
@@ -161,32 +216,32 @@ this file (for example altering the Layout Scale).
 
 \G{png.d/greydot.png} \G{png.d/greystar.png} This file is loaded but hidden.
 If it is marked as favorite it will be kept on the
-list between runs. 
+list between runs.
 
 Parameter files can be marked as \e{favorite}. The indicator for favorites is a star.
 The meaning of the colors isn't changed.
 
-Loaded definition files that are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  
+Loaded definition files that are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).
 
-If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  
+If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.
 If the unloaded file was marked as a favorite it can be \e{reloaded} by selecting the \f{Reload} button.
 
-Files that are still loaded can be \e{reloaded} as well. In that case the old definitions are refreshed and extended by the 
-rereading the file. This can be useful if you want to check changes you made by hand-editing a parameter file. 
+Files that are still loaded can be \e{reloaded} as well. In that case the old definitions are refreshed and extended by the
+rereading the file. This can be useful if you want to check changes you made by hand-editing a parameter file.
 
 Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
 
 It is possible to change the state of several files at once. The \f{Select All} button allows you to select all parameter files for the next operation.
 
-In case unloaded files are marked as favorite, their state will be preserved 
+In case unloaded files are marked as favorite, their state will be preserved
 between runs of the program.
 This makes it possible to keep a list of preferred parameter sets between
 runs of XTrackCAD but hide temporary unused files from the hotbar. That
 way the hotbar contents can be kept short containing only the currently needed elements.
 
 In order to update the defintion of an already loaded file from disk, you can use the \e{Reload} button. This will reload the file contents - with any changes made.
-It is the equivalent of using \f{Browse} and selecting the file again.  
- 
+It is the equivalent of using \f{Browse} and selecting the file again.
+
 Files can be listed by either their file name or by their contents description.
 This is controlled by the \f{Show File Names} check box.
 
@@ -215,10 +270,10 @@ Using the Search function you can find and select parameter files that are
 part of the XTrackCAD installation.
 Enter a set of one or more words and select the Search button. Search results are
 shown in the list box. Pressing the \i{Clear Filter} button shows the complete
-list again. 
+list again.
 
-You can subset the search to only search for parameter files who start with contents that fit the current Layout Scale using the \f{Fit} Mode. 
-The options are "Fit All", "Fit Compatible" and "Fit Exact".  Fit Compatible means that structures with 
+You can subset the search to only search for parameter files who start with contents that fit the current Layout Scale using the \f{Fit} Mode.
+The options are "Fit All", "Fit Compatible" and "Fit Exact".  Fit Compatible means that structures with
 Note that the code only looks at the first Turnout, Structure or Car entry to decide on the scale for the entire file.
 They will correspond to the color icons on the Parameter Files menu once they are loaded \K{cmdPrmfile} when the same Layout scale is in use.
 
@@ -229,7 +284,13 @@ parameter list.
 
 \S{cmdPrint} \i{Printing}
 
+\G{png.d/bprint.png}
+
 The \f{Print} command (\f{File>Print}) is used to print all or a portion of the layout.
+
+\G{png.d/bsetup.png}
+
+The \f{Print Setup} command (\f{File>Print Setup}) is used to set up the printer properties.
 
 When the \f{Print} command is selected a grid, which represents each printed page, is drawn on the layout. Pages can be selected or unselected for printing by placing the mouse over a grid section and clicking the left mouse button.
 
@@ -285,7 +346,7 @@ Whether tracks are printed with one or two lines (representing the center line a
 
 \u000
 
-\dd \f{Page Numbers} - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y). 
+\dd \f{Page Numbers} - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y).
 x is the page position from left to right, y in from bottom to top, So (1/1) is the page at the bottom left.
 As an additional aid, the numbers of the next pages are printed on each edge.
 
@@ -295,7 +356,7 @@ As an additional aid, the numbers of the next pages are printed on each edge.
 
 \u000
 
-\dd \f{Rulers} - print rulers on all edges of the page.  This option is only enabled if the \f{Angle} is \e{0.000}.
+\dd \f{Rulers} - choose to print rulers at the layout edge, or on all edges of the page, an option is only enabled if the \f{Angle} is \e{0.000}, or None - which means print no rulers.
 
 \u000
 
@@ -386,19 +447,19 @@ The \f{Printer Setup} window contains:
 
 \u000
 
-\e{Note} - 
-Printing uses a default of 600ppi. It scales the print and text from a default size of 72dpi. 
+\e{Note} -
+Printing uses a default of 600ppi. It scales the print and text from a default size of 72dpi.
 This is often the expected value for a standard printer driver to work correctly, but will not work if the driver is not accurately setting the ppi available.
-To override the printer ppi you can use either the configuration file settings for print or environmental variables. 
+To override the printer ppi you can use either the configuration file settings for print or environmental variables.
 These values are set in the Preferences section.
 \u000
 
-\n Preferences.PrintScale - The floating point ratio of the real printer dpi to 72. 
+\n Preferences.PrintScale - The floating point ratio of the real printer dpi to 72.
 
 \n Preferences.PrintTextScale - The floating point ratio of the real printer text support to a dpi of 72. This value has no effect unless PrintScale is set to > 0.0.
 
 \u000
-These values can also be set using environmental variables if the configuration preference values are not set or they are set to <=0.0. 
+These values can also be set using environmental variables if the configuration preference values are not set or they are set to <=0.0.
 \u000
 
 \n XTRKCADPRINTSCALE
@@ -453,7 +514,7 @@ The \f{Printer Setup} window contains:
 
 \G{png.d/printmargin.png}
 
-The \f{Printer Margins} dialog allows you to configure the selected printer's margins. 
+The \f{Printer Margins} dialog allows you to configure the selected printer's margins.
 
 The margins for the four edges of the printed page are displayed.
 The default values are fetched from the Operating System.
@@ -471,7 +532,7 @@ To check your printer's margin:
 
 \u000
 
-\dd Enable \f{Registration Marks} this prints crosshairs every 6" at scale 1:1. 
+\dd Enable \f{Registration Marks} this prints crosshairs every 3" or 10cm at scale 1:1.
 
 \u000
 
@@ -492,5 +553,9 @@ To check your printer's margin:
 \u000
 
 Margins values are stored for each printer.
+
+\u000
+
+You can also load \f{PrinterMarginTest-A4.xtc} or \f{PrinterMarginTest-Letter.xtc} from \f{Help|Examples}.  These files have registration lines in the corners to help determine your printer's margins.
 
 \rule

@@ -196,7 +196,7 @@ MESSAGE
 _________________________________________
 
 Circles can be drawn by clicking on the center or edge and dragging to set the radius.
-Here we will drag from the Center.
+Here we will drag from the edge to the Center.
 END
 STEP
 COMMAND DrawCircleTangent

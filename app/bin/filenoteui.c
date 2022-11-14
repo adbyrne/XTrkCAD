@@ -17,72 +17,70 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <string.h>
-#include <stdbool.h>
-#ifdef WINDOWS
-	#include <io.h>
-	#define access(path,mode) _access(path,mode)
-	#define F_OK (0) 
-#else
-	#include <unistd.h>
-#endif
 #include "custom.h"
 #include "dynstring.h"
 #include "file2uri.h"
-#include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "track.h"
-#include "wlib.h"
-
-extern BOOL_T inDescribeCmd;
 
 #define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
 
 #define DOCUMENTFILEPATTERN "All Files (*.*)|*.*"
 #define DOCUMENTPATHKEY "document"
 
-static struct extraDataNote noteDataInUI;
+struct {
+	coOrd pos;
+	int layer;
+	track_p trk;
+	char title[TITLEMAXIMUMLENGTH];
+	char path[PATHMAXIMUMLENGTH];
+} fileNoteData;
+
 static struct wFilSel_t * documentFile_fs;
 
 static void NoteFileOpenExternal(void * junk);
 static void NoteFileBrowse(void * junk);
+static void FileDlgUpdate(
+    paramGroup_p pg,
+    int inx,
+    void * valueP);
 
 static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
 
 // static char *toggleLabels[] = { N_("Copy to archive"), NULL };
 static paramData_t fileEditPLs[] = {
 #define I_ORIGX (0)
-    /*0*/ { PD_FLOAT, &noteDataInUI.pos.x, "origx", PDO_DIM, &r_1000_1000, N_("Position X") },
+    /*0*/ { PD_FLOAT, &fileNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position X") },
 #define I_ORIGY (1)
-    /*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
+    /*1*/ { PD_FLOAT, &fileNoteData.pos.y, "origy", PDO_DIM|PDO_NOPREF, &r_1000_1000, N_("Position Y") },
 #define I_LAYER (2)
-    /*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+    /*2*/ { PD_DROPLIST, &fileNoteData.layer, "layer", PDO_NOPREF, I2VP(150), "Layer", 0 },
 #define I_TITLE (3)
-    /*3*/ { PD_STRING, NULL, "title", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Title"), 0, 0, TITLEMAXIMUMLENGTH-1 },
+    /*3*/ { PD_STRING, &fileNoteData.title, "title", PDO_NOPREF | PDO_NOTBLANK, I2VP(200), N_("Title"), 0, 0, sizeof fileNoteData.title },
 #define I_PATH (4)
-	{ PD_STRING, NULL, "filename", PDO_NOPSHUPD,   (void*)200, N_("Document"), BO_READONLY, (void *)0L },
+    	{ PD_STRING, &fileNoteData.path, "filename", PDO_NOPREF | PDO_NOTBLANK,   I2VP(200), N_("Document"), BO_READONLY, I2VP(0L), sizeof fileNoteData.path },
 #define I_BROWSE (5)
-	{ PD_BUTTON, (void *)NoteFileBrowse, "browse", 0L, NULL, N_("Select...") },
+	{ PD_BUTTON, NoteFileBrowse, "browse", 0L, NULL, N_("Select...") },
 #define I_OPEN (6)
-	{ PD_BUTTON, (void*)NoteFileOpenExternal, "openfile", PDO_DLGHORZ, NULL, N_("Open...") },
+	{ PD_BUTTON, NoteFileOpenExternal, "openfile", PDO_DLGHORZ, NULL, N_("Open...") },
 //#define I_ARCHIVE (7)
 //	{ PD_TOGGLE, &noteFileData.inArchive, "archive", 0, toggleLabels, NULL },
 
 };
 
-static paramGroup_t fileEditPG = { "fileEdit", 0, fileEditPLs, sizeof fileEditPLs / sizeof fileEditPLs[0] };
+static paramGroup_t fileEditPG = { "fileEdit", 0, fileEditPLs, COUNT( fileEditPLs ) };
 static wWin_p fileEditW;
 
 BOOL_T IsFileNote(track_p trk)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	return(xx->op == OP_NOTEFILE );
 }
@@ -120,7 +118,7 @@ int LoadDocumentFile(
 {
 	wControlActive(fileEditPLs[I_OPEN].control, TRUE);
 	ParamDialogOkActive(&fileEditPG, TRUE);
-	strscpy(noteDataInUI.noteData.fileData.path, *fileName, PATHMAXIMUMLENGTH );
+	strscpy(fileNoteData.path, *fileName, PATHMAXIMUMLENGTH );
 	ParamLoadControl(&fileEditPG, I_PATH);
 
 	return(0);
@@ -138,8 +136,8 @@ static void NoteFileBrowse(void * junk)
 	wFilSelect(documentFile_fs, GetCurrentPath(DOCUMENTPATHKEY));
 
 	wControlActive(fileEditPLs[I_OPEN].control,
-				   (strlen(noteDataInUI.noteData.fileData.path) ? TRUE : FALSE));
-
+				   (strlen(fileNoteData.path) ? TRUE : FALSE));
+	FileDlgUpdate( &fileEditPG, I_PATH, NULL );
 	return;
 }
 
@@ -165,7 +163,7 @@ static void NoteFileOpen(char *fileName)
 static void
 NoteFileOpenExternal(void * junk)
 {
-	NoteFileOpen(noteDataInUI.noteData.fileData.path);
+	NoteFileOpen(fileNoteData.path);
 }
 /**
  * Handle the dialog actions
@@ -179,16 +177,16 @@ FileDlgUpdate(
     switch (inx) {
 	case I_ORIGX:
 	case I_ORIGY:
-		UpdateFile(&noteDataInUI, OR_NOTE, FALSE);
-		break;
-	case I_LAYER:
-		UpdateFile(&noteDataInUI, LY_NOTE, FALSE);
+		// TODO: redraw bitmap at new location
+		//UpdateFile(&noteDataInUI, OR_NOTE, FALSE);
 		break;
     case I_PATH:
-        if (IsFileValid(noteDataInUI.noteData.fileData.path)) {
-            wControlActive(fileEditPLs[I_OPEN].control, TRUE);
-        } else {
-            wControlActive(fileEditPLs[I_OPEN].control, FALSE);
+        if (!IsFileValid(fileNoteData.path)) {
+		paramData_p p = &fileEditPLs[I_PATH];
+		p->bInvalid = TRUE;
+		wWinPix_t h = wControlGetHeight(p->control);
+		wControlSetBalloon( p->control, 0, h, "Document path is invalid" );
+		ParamHilite( p->group->win, p->control, TRUE );
         }
         break;
     default:
@@ -204,9 +202,6 @@ FileDlgUpdate(
 static void
 FileEditCancel( wWin_p junk)
 {
-	if (inDescribeCmd) {
-		UpdateFile(&noteDataInUI, CANCEL_NOTE, FALSE);
-	}
 	ResetIfNotSticky();
 	wHide(fileEditW);
 }
@@ -220,10 +215,23 @@ FileEditCancel( wWin_p junk)
 static void
 FileEditOK(void *junk)
 {
-    UpdateFile(&noteDataInUI, OK_FILE, FALSE);
-    wHide(fileEditW);
+	track_p trk = fileNoteData.trk;
+	if ( trk == NULL ) {
+		// new file note
+		trk = NewNote( -1, fileNoteData.pos, OP_NOTEFILE );
+	}
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	xx->pos = fileNoteData.pos;
+	SetTrkLayer( trk, fileNoteData.layer );
+	MyFree( xx->noteData.fileData.title );
+	xx->noteData.fileData.title = MyStrdup( fileNoteData.title );
+	MyFree( xx->noteData.fileData.path );
+	xx->noteData.fileData.path = MyStrdup( fileNoteData.path );
+	SetBoundingBox( trk, xx->pos, xx->pos );
+	DrawNewTrack( trk );
+	wHide(fileEditW);
 	ResetIfNotSticky();
-	FileIsChanged();
+	SetFileChanged();
 }
 
 /**
@@ -233,16 +241,10 @@ FileEditOK(void *junk)
  * \param windowTitle IN title for the edit dialog window
  */
 
-void CreateEditFileDialog(track_p trk, char * windowTitle)
+static void CreateEditFileDialog(char * windowTitle)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 
     if (!fileEditW) {
-		noteDataInUI.noteData.fileData.path = MyMalloc(PATHMAXIMUMLENGTH);
-		noteDataInUI.noteData.fileData.title = MyMalloc(TITLEMAXIMUMLENGTH);
-		fileEditPLs[I_TITLE].valueP = noteDataInUI.noteData.fileData.title;
-		fileEditPLs[I_PATH].valueP = noteDataInUI.noteData.fileData.path;
-
 		ParamRegister(&fileEditPG);
         fileEditW = ParamCreateDialog(&fileEditPG,
                                       "",
@@ -254,14 +256,9 @@ void CreateEditFileDialog(track_p trk, char * windowTitle)
 
     wWinSetTitle(fileEditPG.win, MakeWindowTitle(windowTitle));
 
-    noteDataInUI.pos = xx->pos;
-	noteDataInUI.layer = xx->layer;
-    noteDataInUI.trk = trk;
-	strscpy(noteDataInUI.noteData.fileData.title, xx->noteData.fileData.title, TITLEMAXIMUMLENGTH);
-	strscpy(noteDataInUI.noteData.fileData.path, xx->noteData.fileData.path, PATHMAXIMUMLENGTH);
 	FillLayerList((wList_p)fileEditPLs[I_LAYER].control);
 	ParamLoadControls(&fileEditPG);
-	wControlActive(fileEditPLs[I_OPEN].control, (IsFileValid(noteDataInUI.noteData.fileData.path)?TRUE:FALSE));
+	wControlActive(fileEditPLs[I_OPEN].control, (IsFileValid(fileNoteData.path)?TRUE:FALSE));
 	
     wShow(fileEditW);
 }
@@ -273,7 +270,7 @@ void CreateEditFileDialog(track_p trk, char * windowTitle)
 
 void ActivateFileNote(track_p trk)
 {
-    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
 
 	NoteFileOpen(xx->noteData.fileData.path);
 }
@@ -288,7 +285,7 @@ void ActivateFileNote(track_p trk)
 
 void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 {
-	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
     DynString statusLine;
 
     DynStringMalloc(&statusLine, 80);
@@ -302,12 +299,17 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
 
     strcpy(str, DynStringToCStr(&statusLine));
     DynStringFree(&statusLine);
+	if ( ! inDescribeCmd )
+		return;
 
-	if (inDescribeCmd) {
-		NoteStateSave(trk);
- 
-		CreateEditFileDialog(trk, _("Update document"));
-	}
+
+	fileNoteData.pos = xx->pos;
+	fileNoteData.layer = GetTrkLayer( trk );
+	fileNoteData.trk = trk;
+	strscpy( fileNoteData.title, xx->noteData.fileData.title, sizeof fileNoteData.title );
+	strscpy( fileNoteData.path, xx->noteData.fileData.path, sizeof fileNoteData.path );
+
+	CreateEditFileDialog(_("Update document"));
 }
 
 /**
@@ -317,14 +319,15 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
  * \param the newly created trk
  */
 
-void NewFileNoteUI(track_p trk)
+void NewFileNoteUI(coOrd pos)
 {
-	struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
 	char *tmpPtrText = _("Describe the file");
 
-	xx->noteData.fileData.title = MyStrdup(tmpPtrText);
-	xx->noteData.fileData.path = MyStrdup("");
+	fileNoteData.pos = pos;
+	fileNoteData.layer = curLayer;
+	fileNoteData.trk = NULL;
+	strscpy( fileNoteData.title, tmpPtrText, sizeof fileNoteData.title );
+	strscpy( fileNoteData.path, "", sizeof fileNoteData.path );
 
-    CreateEditFileDialog(trk, 
-						_("Attach document"));
+    CreateEditFileDialog( _("Attach document"));
 }

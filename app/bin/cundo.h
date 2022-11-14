@@ -17,17 +17,18 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_CUNDO_H
 #define HAVE_CUNDO_H
 
 #include "common.h"
-#include "track.h"
 
-int UndoUndo( void );
-int UndoRedo( void );
+extern wBool_t undoStatus; // Status of the last Undo/Redo command
+void Rdump( FILE * );
+void UndoUndo( void * unused );
+void UndoRedo( void * unused );
 void UndoResume( void );
 void UndoSuspend( void );
 void UndoStart( char *, char *, ... );

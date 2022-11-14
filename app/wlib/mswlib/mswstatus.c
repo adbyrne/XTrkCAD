@@ -59,10 +59,10 @@ void wStatusSetValue(
 
 wStatus_p wStatusCreate(
     wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
+    wWinPix_t	x,
+    wWinPix_t	y,
     const char 	* labelStr,
-    wPos_t	width,
+    wWinPix_t	width,
     const char	*message)
 {
     return (wStatus_p)wMessageCreateEx(parent, x, y, labelStr, width, message, 0);
@@ -75,7 +75,7 @@ wStatus_p wStatusCreate(
  * \return expected width of message box
  */
 
-wPos_t
+wWinPix_t
 wStatusGetWidth(const char *testString)
 {
     return (wMessageGetWidth(testString));
@@ -88,7 +88,7 @@ wStatusGetWidth(const char *testString)
  * \return text height
  */
 
-wPos_t wStatusGetHeight(
+wWinPix_t wStatusGetHeight(
     long flags)
 {
     return (wMessageGetHeight(flags));
@@ -104,7 +104,7 @@ wPos_t wStatusGetHeight(
 
 void wStatusSetWidth(
     wStatus_p b,
-    wPos_t width)
+    wWinPix_t width)
 {
     wMessageSetWidth((wMessage_p)b, width);
 }

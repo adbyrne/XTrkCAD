@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
@@ -79,8 +79,7 @@ extern struct wDraw_t psPrint_d;
 static wBool_t printContinue;	/**< control print job, FALSE for cancelling */
 
 static wIndex_t pageCount;		/**< unused, could be used for progress indicator */
-static wIndex_t
-totalPageCount; /**< unused, could be used for progress indicator */
+//static wIndex_t totalPageCount; /**< unused, could be used for progress indicator */
 
 static double paperWidth;		/**< physical paper width */
 static double paperHeight;		/**< physical paper height */
@@ -92,7 +91,7 @@ static double bBorder;			/**< bottom margin */
 static double scale_adjust = 1.0;
 static double scale_text = 1.0;
 
-static long printFormat = PRINT_LANDSCAPE;
+//static long printFormat = PRINT_LANDSCAPE;
 
 /*****************************************************************************
  *
@@ -242,9 +241,9 @@ WlibSaveSettings(GtkPrintOperation *op)
 void wPrintSetup(wPrintSetupCallBack_p callback)
 {
     GtkPageSetup *new_page_setup;
-    gchar *filename;
-    GError *err;
-    GtkWidget *dialog;
+//    gchar *filename;
+//    GError *err;
+//    GtkWidget *dialog;
 
     if ( !settings )
         WlibApplySettings(NULL);
@@ -272,7 +271,7 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
 static GtkPrinter * pDefaultPrinter = NULL;
 gboolean isDefaultPrinter( GtkPrinter * printer, gpointer data )
 {
-const char * pPrinterName = gtk_printer_get_name( printer );
+//const char * pPrinterName = gtk_printer_get_name( printer );
 	if ( gtk_printer_is_default( printer ) ) {
 		pDefaultPrinter = printer;
 		return TRUE;
@@ -331,8 +330,8 @@ static void setLineType(
 {
     cairo_t *cr = psPrint_d.printContext;
 
-    double dashes[] = { DASH_LENGTH, 3 };							//Reduce gap in between dashes
-    static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+//    double dashes[] = { DASH_LENGTH, 3 };							//Reduce gap in between dashes
+//    static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
 
     if (lineWidth < 0.0) {
         lineWidth = P2I(-lineWidth)*2.0/scale_adjust;
@@ -423,8 +422,8 @@ static void psSetColor(
  */
 
 void psPrintLine(
-    wPos_t x0, wPos_t y0,
-    wPos_t x1, wPos_t y1,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
     wDrawWidth width,
     wDrawLineType_e lineType,
     wDrawColor color,
@@ -462,8 +461,8 @@ void psPrintLine(
  */
 
 void psPrintArc(
-    wPos_t x0, wPos_t y0,
-    wPos_t r,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
     double angle0,
     double angle1,
     wBool_t drawCenter,
@@ -534,8 +533,8 @@ void psPrintArc(
  */
 
 void psPrintFillRectangle(
-    wPos_t x0, wPos_t y0,
-    wPos_t x1, wPos_t y1,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t x1, wDrawPix_t y1,
     wDrawColor color,
     wDrawOpts opts)
 {
@@ -570,7 +569,7 @@ void psPrintFillRectangle(
  */
 
 void psPrintFillPolygon(
-    wPos_t p[][2],
+    wDrawPix_t p[][2],
 	wPolyLine_e type[],
     int cnt,
     wDrawColor color,
@@ -591,7 +590,7 @@ void psPrintFillPolygon(
 
     psSetColor(color);
 
-    wPos_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
+    wDrawPix_t mid0[2], mid1[2], /*mid2[2],*/ mid3[2], mid4[2];
 
     for (inx=0; inx<cnt; inx++) {
     	int j = inx-1;
@@ -623,7 +622,7 @@ void psPrintFillPolygon(
 		mid3[1] = (p[inx][1]-mid0[1])/2+mid0[1];
 		mid4[0] = (mid1[0]-p[inx][0])/2+p[inx][0];
 		mid4[1] = (mid1[1]-p[inx][1])/2+p[inx][1];
-		wPos_t save[2];
+		wDrawPix_t save[2];
 		if (inx==0) {
 			 if (!type || (type && type[0] == wPolyLineStraight) || open) {
 				 cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
@@ -665,8 +664,8 @@ void psPrintFillPolygon(
  */
 
 void psPrintFillCircle(
-    wPos_t x0, wPos_t y0,
-    wPos_t r,
+    wDrawPix_t x0, wDrawPix_t y0,
+    wDrawPix_t r,
     wDrawColor color,
     wDrawOpts opts)
 {
@@ -710,7 +709,7 @@ void psPrintFillCircle(
  */
 
 void psPrintString(
-    wPos_t x, wPos_t y,
+    wDrawPix_t x, wDrawPix_t y,
     double a,
     char * s,
     wFont_p fp,
@@ -718,17 +717,17 @@ void psPrintString(
     wDrawColor color,
     wDrawOpts opts)
 {
-    char * cp;
+//    char * cp;
     double x0 = (double)x, y0 = (double)y;
     int text_height, text_width;
-    double ascent;
+//    double ascent;
 
     cairo_t *cr;
     cairo_matrix_t matrix;
 
     PangoLayout *layout;
     PangoFontDescription *desc;
-    PangoFontMetrics *metrics;
+//    PangoFontMetrics *metrics;
     PangoContext *pcontext;
 
     if (color == wDrawColorWhite) {
@@ -771,10 +770,10 @@ void psPrintString(
 
     // get the height of the string
     pcontext = pango_cairo_create_context(cr);
-    metrics = pango_context_get_metrics(pcontext, desc,
-                                        pango_context_get_language(pcontext));
+//    metrics = pango_context_get_metrics(pcontext, desc,
+//                                        pango_context_get_language(pcontext));
 
-    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
+//    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
 
     int baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
@@ -816,7 +815,7 @@ void psPrintString(
  * \return
  */
 
-void wPrintClip(wPos_t x, wPos_t y, wPos_t w, wPos_t h)
+void wPrintClip(wDrawPix_t x, wDrawPix_t y, wDrawPix_t w, wDrawPix_t h)
 {
     cairo_move_to(psPrint_d.printContext, x, y);
     cairo_rel_line_to(psPrint_d.printContext, w, 0);
@@ -909,11 +908,11 @@ void wPrintGetPageSize(
  * \param context IN unused
  * \return
  */
-static void printAbort(void * context)
-{
-    printContinue = FALSE;
+//static void printAbort(void * context)
+//{
+//    printContinue = FALSE;
 //	wWinShow( printAbortW, FALSE );
-}
+//}
 
 /**
  * Initialize new page.
@@ -972,8 +971,8 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 {
     GtkWidget *printDialog;
     gint res;
-    cairo_surface_type_t surface_type;
-    cairo_matrix_t matrix;
+//    cairo_surface_type_t surface_type;
+//    cairo_matrix_t matrix;
 
 
     printDialog = gtk_print_unix_dialog_new(title, GTK_WINDOW(gtkMainW->gtkwin));
@@ -1020,7 +1019,7 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
         WlibGetPaperSize();
 
         /* for all surfaces including files the resolution is always 72 ppi (as all GTK uses PDF) */
-        surface_type = cairo_surface_get_type(psPrint_d.curPrintSurface);
+        /*surface_type = */cairo_surface_get_type(psPrint_d.curPrintSurface);
 
         /*
          * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
@@ -1112,12 +1111,12 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 void
 doPrintJobFinished(GtkPrintJob *job, void *data, GError *err)
 {
-    GtkWidget *dialog;
+//    GtkWidget *dialog;
 
     cairo_destroy(psPrint_d.printContext);
 
     if (err) {
-        dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
+        /*dialog = */gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
                                         GTK_DIALOG_DESTROY_WITH_PARENT,
                                         GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
                                         "%s",err->message);
