@@ -2224,7 +2224,7 @@ static void DoLayer(void * unused)
 	layoutLayerChanged = FALSE;
 }
 
-#include "bitmaps/background.xpm"
+#include "bitmaps/background.xpm3"
 
 void InitLayers(void)
 {
@@ -2254,7 +2254,7 @@ void InitLayers(void)
 	AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
 
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
-	                               wIconCreatePixMap(background_xpm[iconSize]), 0,
+	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,
 	                               BackgroundToggleShow, NULL);
 	/* add the help text */
 	wControlSetBalloonText((wControl_p)backgroundB, _("Show/Hide Background"));

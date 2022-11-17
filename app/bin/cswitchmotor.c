@@ -824,7 +824,7 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
 //#include "bitmaps/switchmnew.xpm"
 //#include "bitmaps/switchmedit.xpm"
 //#include "bitmaps/switchmdel.xpm"
-#include "bitmaps/switch-motor.xpm"
+#include "bitmaps/switch-motor.xpm3"
 
 EXPORT void SwitchmotorMgmLoad( void )
 {
@@ -832,7 +832,7 @@ EXPORT void SwitchmotorMgmLoad( void )
     static wIcon_p switchmI = NULL;
     
     if ( switchmI == NULL)
-        switchmI = wIconCreatePixMap( switch_motor_xpm[iconSize] );
+        switchmI = wIconCreatePixMap( switch_motor_xpm3[iconSize] );
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SWITCHMOTOR) continue;
@@ -847,7 +847,7 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	switchmotorReverse[0] = '\0';
         switchmotorPointSense[0] = '\0';
         AddMenuButton( menu, CmdSwitchMotorCreate, "cmdSwitchMotorCreate", 
-                       _("Switch Motor"), wIconCreatePixMap( switch_motor_xpm[iconSize] ),
+                       _("Switch Motor"), wIconCreatePixMap( switch_motor_xpm3[iconSize] ),
                        LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SWITCHMOTOR1, 
                        NULL );
 	ParamRegister( &switchmotorPG );

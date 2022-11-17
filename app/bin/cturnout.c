@@ -3022,12 +3022,12 @@ static STATUS_T CmdTurnoutHotBar(
 }
 
 #ifdef TURNOUTCMD
-#include "bitmaps/turnout.xpm"
+#include "bitmaps/turnout.xpm3"
 
 
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
-	AddMenuButton(menu, CmdTurnout, "cmdTurnout", _("Predefined Track"), wIconCreatePixMap(turnout_xpm[iconSize]), LEVEL0_50, IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT, NULL);
+	AddMenuButton(menu, CmdTurnout, "cmdTurnout", _("Predefined Track"), wIconCreatePixMap(turnout_xpm3[iconSize]), LEVEL0_50, IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT, NULL);
 	turnoutHotBarCmdInx = AddMenuButton(menu, CmdTurnoutHotBar, "cmdTurnoutHotBar", "", NULL, LEVEL0_50, IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, 0, NULL);
 	RegisterChangeNotification(TurnoutChange);
 	ParamRegister(&turnoutPG);

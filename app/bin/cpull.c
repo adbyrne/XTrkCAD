@@ -852,7 +852,7 @@ static STATUS_T CmdPull(
 
 
 
-#include "bitmaps/connect.xpm"
+#include "bitmaps/connect.xpm3"
 
 wMenuPush_p pullConnectMultiple;
 
@@ -867,7 +867,7 @@ void pullMenuEnter( void * keyVP )
 
 void InitCmdPull( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(connect_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_LCLICK|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(connect_xpm3[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_LCLICK|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_CONNECT, NULL );
 	pullPopupM = MenuRegister( "Connect Options" );
 	pullConnectMultiple = wMenuPushCreate( pullPopupM, "", _("Connect All Selected - 'S'"), 0, pullMenuEnter, I2VP('S') );
 }

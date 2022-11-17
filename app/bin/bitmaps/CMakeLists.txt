@@ -24,7 +24,7 @@ else()
 		doc-export-svg doc-export doc-import-mod doc-import doc-new doc-open 
 		doc-print doc-recent doc-revert doc-save-as doc-save doc-setup down 
 		elevation exit extend filled-box filled-polygon go helix
-		Info join-line join layers magnet manage map move
+		info join-line join layers magnet manage map move
 		new-car ok pan-zoom parallel-line parallel parameter paste
 		polygon polyline profile protractor redo reflect roadbed
 		rotate ruler select sensor signal snap-curs snap-grid
@@ -38,16 +38,16 @@ else()
 
 	foreach(xpm ${XPMS})
 		foreach(pix ${PIXS})
-			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png" )
-#				MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png" )
+			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
+				MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}${pix}.png
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${pix}pix/${xpm}.png ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
 				)
 			else()
-#				MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg" )
+				MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg" )
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
 					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
@@ -59,15 +59,15 @@ else()
 			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png)
 		endforeach()
 		add_custom_command(
-			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png
 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png
 			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png
-			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm	
-#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm 
+			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
+#			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3 ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm3 
 		)
 		# build a list of all the depends
-		list(APPEND XPM_RESULTS ${xpm}.xpm)
+		list(APPEND XPM_RESULTS ${xpm}.xpm3)
 	endforeach()
 
 	add_custom_target (
@@ -80,5 +80,5 @@ endif()
 #MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
 #MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 #MESSAGE (STATUS "XPMs: ${XPMS}")
-#MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
-#MESSAGE (STATUS "PNG_RESULTS: ${PNG_RESULTS}")
+MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
+MESSAGE (STATUS "PNG_RESULTS: ${PNG_RESULTS}")

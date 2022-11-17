@@ -1505,7 +1505,7 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 }
 
 
-#include "bitmaps/doc-print.xpm"
+#include "bitmaps/doc-print.xpm3"
 
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {
@@ -1516,7 +1516,7 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	printGridPopupM = MenuRegister( "Print Grid Rotate" );
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
 	ParamRegister( &customMarginPG );
-	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."), wIconCreatePixMap(doc_print_xpm[iconSize]), LEVEL0, IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT, NULL );
+	return AddMenuButton( menu, CmdPrint, "cmdPrint", N_("Print..."), wIconCreatePixMap(doc_print_xpm3[iconSize]), LEVEL0, IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT, NULL );
 }
 
 /*****************************************************************************

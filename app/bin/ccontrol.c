@@ -609,7 +609,7 @@ static int ControlMgmProc ( int cmd, void * data )
     return FALSE;
 }
 
-#include "bitmaps/control.xpm"
+#include "bitmaps/control.xpm3"
 
 EXPORT void ControlMgmLoad ( void )
 {
@@ -617,7 +617,7 @@ EXPORT void ControlMgmLoad ( void )
     static wIcon_p controlI = NULL;
     
     if (controlI == NULL) {
-        controlI = wIconCreatePixMap( control_xpm[iconSize] );
+        controlI = wIconCreatePixMap( control_xpm3[iconSize] );
     }
     
     TRK_ITERATE(trk) {
@@ -631,7 +631,7 @@ EXPORT void ControlMgmLoad ( void )
 EXPORT void InitCmdControl ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdControl, "cmdControl", _("Control"), 
-                   wIconCreatePixMap( control_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CONTROL, NULL );
+                   wIconCreatePixMap( control_xpm3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CONTROL, NULL );
 }
 
 EXPORT void InitTrkControl ( void )

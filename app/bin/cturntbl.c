@@ -999,12 +999,12 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/turntable.xpm"
+#include "bitmaps/turntable.xpm3"
 
 
 EXPORT void InitCmdTurntable( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Custom Turntable"), wIconCreatePixMap(turntable_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
+	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Custom Turntable"), wIconCreatePixMap(turntable_xpm3[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
 }
 
 

@@ -1411,15 +1411,15 @@ EXPORT void SelectBelow( void * unused )
 }
 
 
-#include "bitmaps/top.xpm"
-#include "bitmaps/bottom.xpm"
+#include "bitmaps/top.xpm3"
+#include "bitmaps/bottom.xpm3"
 
 EXPORT void InitCmdAboveBelow( void )
 {
 	wIcon_p bm_p;
-	bm_p = wIconCreatePixMap( top_xpm[iconSize] );
+	bm_p = wIconCreatePixMap( top_xpm3[iconSize] );
 	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED|IC_POPUP, SelectAbove, NULL );
-	bm_p = wIconCreatePixMap( bottom_xpm[iconSize] );
+	bm_p = wIconCreatePixMap( bottom_xpm3[iconSize] );
 	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED|IC_POPUP, SelectBelow, NULL );
 }
 

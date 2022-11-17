@@ -3057,7 +3057,7 @@ EXPORT void DrawInit( int initialZoom )
 	RegisterChangeNotification( DrawChange );
 }
 
-#include "bitmaps/pan-zoom.xpm"
+#include "bitmaps/pan-zoom.xpm3"
 
 static wMenu_p panPopupM;
 
@@ -3235,7 +3235,7 @@ EXPORT void PanMenuEnter( void * keyVP )
 
 EXPORT void InitCmdPan( wMenu_p menu )
 {
-	panCmdInx = AddMenuButton( menu, CmdPan, "cmdPan", _("Pan/Zoom"), wIconCreatePixMap(pan_zoom_xpm[iconSize]),
+	panCmdInx = AddMenuButton( menu, CmdPan, "cmdPan", _("Pan/Zoom"), wIconCreatePixMap(pan_zoom_xpm3[iconSize]),
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_PAN, NULL );
 }
 EXPORT void InitCmdPan2( wMenu_p menu )

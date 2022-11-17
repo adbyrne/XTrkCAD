@@ -2843,12 +2843,13 @@ static STATUS_T CmdCarDescAction(
     return CmdTrain(action, pos);
 }
 
-#include "bitmaps/train.xpm"
-#include "bitmaps/exit.xpm"
-#include "bitmaps/new-car.xpm"
+#include "bitmaps/train.xpm3"
+#include "bitmaps/exit.xpm3"
+#include "bitmaps/new-car.xpm3"
+#include "bitmaps/go.xpm3"
+#include "bitmaps/stop.xpm3"
+
 #include "bitmaps/zero.xpm"
-#include "bitmaps/go.xpm"
-#include "bitmaps/stop.xpm"
 #include "bitmaps/greendot.xpm"
 #include "bitmaps/reddot.xpm"
 
@@ -3076,17 +3077,17 @@ void InitCmdTrain(wMenu_p menu)
     trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
     ParamRegister(&trainPG);
     trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
-                  wIconCreatePixMap(train_xpm[iconSize]), LEVEL0_50, IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
+                  wIconCreatePixMap(train_xpm3[iconSize]), LEVEL0_50, IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
                   NULL);
     stopI = wIconCreatePixMap(reddot);
     goI = wIconCreatePixMap(greendot);
-	stopB = wIconCreatePixMap(stop_xpm[iconSize]);
-	goB = wIconCreatePixMap(go_xpm[iconSize]);
+	stopB = wIconCreatePixMap(stop_xpm3[iconSize]);
+	goB = wIconCreatePixMap(go_xpm3[iconSize]);
 	trainPauseB = AddToolbarButton("cmdTrainPause", stopB, IC_MODETRAIN_ONLY,
                                    CmdTrainStopGo, NULL);
-    AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm[iconSize]), IC_MODETRAIN_ONLY,
+    AddToolbarButton("cmdTrainExit", wIconCreatePixMap(exit_xpm3[iconSize]), IC_MODETRAIN_ONLY,
                      CmdTrainExit, NULL);
-    newcarB = AddToolbarButton("cmdTrainNewCar", wIconCreatePixMap(new_car_xpm[iconSize]),
+    newcarB = AddToolbarButton("cmdTrainNewCar", wIconCreatePixMap(new_car_xpm3[iconSize]),
                                IC_MODETRAIN_ONLY, CarItemLoadList, NULL);
     T_CAR = InitObject(&carCmds);
 

@@ -349,9 +349,9 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 }
 
 
-#include "bitmaps/turnout-design.xpm"
+#include "bitmaps/turnout-design.xpm3"
 
 EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(turnout_design_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
+	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(turnout_design_xpm3[iconSize]), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
 }

@@ -1511,7 +1511,7 @@ static void ProfileChange(long changes)
     }
 }
 
-#include "bitmaps/profile.xpm"
+#include "bitmaps/profile.xpm3"
 
 EXPORT void InitCmdProfile(wMenu_p menu)
 {
@@ -1519,7 +1519,7 @@ EXPORT void InitCmdProfile(wMenu_p menu)
     ParamRegister(&profilePG);
 
     AddMenuButton(menu, CmdProfile, "cmdProfile", _("Profile"),
-                  wIconCreatePixMap(profile_xpm[iconSize]), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP3,
+                  wIconCreatePixMap(profile_xpm3[iconSize]), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP3,
                   ACCL_PROFILE, NULL);
     profilePopupM = MenuRegister("Profile Mode");
     profilePopupToggles[0] = wMenuToggleCreate(profilePopupM, "", _("Define"), 0,

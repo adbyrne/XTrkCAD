@@ -882,7 +882,7 @@ static int SignalMgmProc ( int cmd, void * data )
     return FALSE;
 }
 
-#include "bitmaps/signal.xpm"
+#include "bitmaps/signal.xpm3"
 
 EXPORT void SignalMgmLoad ( void )
 {
@@ -890,7 +890,7 @@ EXPORT void SignalMgmLoad ( void )
     static wIcon_p signalI = NULL;
     
     if (signalI == NULL) {
-        signalI = wIconCreatePixMap( signal_xpm[iconSize] );
+        signalI = wIconCreatePixMap( signal_xpm3[iconSize] );
     }
     
     TRK_ITERATE(trk) {
@@ -904,7 +904,7 @@ EXPORT void SignalMgmLoad ( void )
 EXPORT void InitCmdSignal ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdSignal, "cmdSignal", _("Signal"), 
-                   wIconCreatePixMap( signal_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SIGNAL, NULL );
+                   wIconCreatePixMap( signal_xpm3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SIGNAL, NULL );
 }
 
 EXPORT void InitTrkSignal ( void )

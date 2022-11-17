@@ -364,13 +364,13 @@ STATUS_T ModifyRuler(
 }
 
 
-#include "bitmaps/ruler.xpm"
-#include "bitmaps/protractor.xpm"
+#include "bitmaps/ruler.xpm3"
+#include "bitmaps/protractor.xpm3"
 
 void InitCmdRuler( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Measurement"), "cmdMeasureSetCmd", _("Measurement") );
-	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm[iconSize]), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
-	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(protractor_xpm[iconSize]), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
+	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm3[iconSize]), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_RULER, NULL );
+	AddMenuButton( menu, CmdAngle, "cmdAngle", _("Protractor"), wIconCreatePixMap(protractor_xpm3[iconSize]), LEVEL0, IC_STICKY|IC_POPUP|IC_NORESTART, ACCL_ANGLE, NULL );
 	ButtonGroupEnd();
 }

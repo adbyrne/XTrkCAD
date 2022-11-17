@@ -44,14 +44,14 @@ typedef struct {
 	long acclKey;
 } trknoteData_t;
 
-#include "bitmaps/sticky-note.xpm"
-#include "bitmaps/sticky-link.xpm"
-#include "bitmaps/sticky-doc.xpm"
+#include "bitmaps/sticky-note.xpm3"
+#include "bitmaps/sticky-link.xpm3"
+#include "bitmaps/sticky-doc.xpm3"
 
 static trknoteData_t noteTypes[] = {
-	{ sticky_note_xpm, OP_NOTETEXT, N_("Note"), N_("Comment"), "cmdTextNote", 0L },
-	{ sticky_link_xpm, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
-	{ sticky_doc_xpm, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
+	{ sticky_note_xpm3, OP_NOTETEXT, N_("Note"), N_("Comment"), "cmdTextNote", 0L },
+	{ sticky_link_xpm3, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
+	{ sticky_doc_xpm3, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
 };
 
 static long curNoteType;

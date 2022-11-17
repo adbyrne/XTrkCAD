@@ -810,11 +810,11 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
  *
  */
 
-#include "bitmaps/extend.xpm"
+#include "bitmaps/extend.xpm3"
 
 void InitCmdModify( wMenu_p menu )
 {
-	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
+	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm3[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
 	/** @logcmd @showrefby modify=n cmodify.c Log Modify command */
 	log_modify = LogFindIndex( "modify" );
 	modPopupM = MenuRegister( "Modify Context Menu" );
