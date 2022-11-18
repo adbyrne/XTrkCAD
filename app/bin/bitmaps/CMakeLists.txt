@@ -23,6 +23,8 @@ else()
 		describe description dimension doc-export-bmap doc-export-dxf
 		doc-export-svg doc-export doc-import-mod doc-import doc-new doc-open 
 		doc-print doc-recent doc-revert doc-save-as doc-save doc-setup down 
+		ease-broad ease-cornu ease-gt-broad ease-gt-sharp ease-lt-broad 
+		ease-lt-sharp ease-none ease-normal ease-sharp
 		elevation exit extend filled-box filled-polygon go helix
 		info join-line join layers magnet manage map move
 		new-car ok pan-zoom parallel-line parallel parameter paste
@@ -39,7 +41,7 @@ else()
 	foreach(xpm ${XPMS})
 		foreach(pix ${PIXS})
 			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
-				MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
+				# MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
 					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}${pix}.png
@@ -47,7 +49,7 @@ else()
 					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
 				)
 			else()
-				MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg" )
+				# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg" )
 				add_custom_command(
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
 					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
@@ -80,5 +82,5 @@ endif()
 #MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
 #MESSAGE (STATUS "Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 #MESSAGE (STATUS "XPMs: ${XPMS}")
-MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
-MESSAGE (STATUS "PNG_RESULTS: ${PNG_RESULTS}")
+#MESSAGE (STATUS "XPM_RESULTS: ${XPM_RESULTS}")
+#MESSAGE (STATUS "PNG_RESULTS: ${PNG_RESULTS}")
