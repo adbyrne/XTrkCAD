@@ -43,28 +43,28 @@ else()
 			if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
 				# MESSAGE( STATUS "Custom ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png" )
 				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}${pix}.png
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/PNG/${xpm}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
+					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/png/${xpm}${pix}.png ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
 				)
 			else()
-				# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg" )
+				# MESSAGE( STATUS "SVG ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg" )
 				add_custom_command(
-					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/PNG/
-					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/SVG/${xpm}.svg -h ${pix} "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png"
+					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
+					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pix} "${Inkscape_EXPORT}=${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png"
 				)
 			endif()
 			# build a list of all the depends
-			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}${pix}.png)
+			list(APPEND PNG_RESULTS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png)
 		endforeach()
 		add_custom_command(
 			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}16.png
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}24.png
-			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/PNG/${xpm}32.png
+			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}16.png
+			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}24.png
+			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}32.png
 			COMMAND pngtoxpm ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3	
 #			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/${xpm}.xpm3 ${CMAKE_CURRENT_SOURCE_DIR}/${xpm}.xpm3 
 		)
