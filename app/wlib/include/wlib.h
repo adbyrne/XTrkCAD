@@ -484,6 +484,7 @@ typedef int wDrawOpts;
 #define wDrawOptOpaque   (1<<9)
 #endif
 
+#define EXPORTBITMAP (1)
 
 typedef enum {
 	wDrawLineSolid,

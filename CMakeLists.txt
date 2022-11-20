@@ -51,9 +51,17 @@ find_package(FreeImage REQUIRED)
 
 # check for GTK+ 2.0
 if(UNIX)
-    pkg_check_modules(GTK REQUIRED "gtk+-2.0")
-	set(XTRKCAD_USE_GTK_DEFAULT ON)
-endif(UNIX)
+	pkg_check_modules(GTK3 "gtk+-3.0")
+    pkg_check_modules(GTK "gtk+-2.0")
+	if(NOT GTK_FOUND AND NOT GTK3_FOUND)
+		message(FATAL_ERROR "ERROR: no GTK modules found!")
+	else()	
+		set(XTRKCAD_USE_GTK_DEFAULT ON)
+		if(GTK3_FOUND)
+			set(XTRKCAD_GTK3_EXPERIMENT ON)
+		endif()
+	endif()	
+endif()
 
 if(WIN32 AND NOT XTRKCAD_USE_GTK)
 	# use the Windows HTMLHelp tool
@@ -65,6 +73,7 @@ endif(WIN32 AND NOT XTRKCAD_USE_GTK)
 #
 
 option(XTRKCAD_USE_GTK "Use GTK for the graphical user interface back-end" ${XTRKCAD_USE_GTK_DEFAULT})
+option(XTRKCAD_USE_GTK3 "Use GTK3 (experimental)" ${XTRKCAD_GTK3_EXPERIMENT})
 option(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_GETTEXT_DEFAULT})
 option(XTRKCAD_USE_DOXYGEN "Generate internals documentation using doxygen" OFF)
 
