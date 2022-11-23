@@ -2472,7 +2472,7 @@ LOG( log_cornuturnoutdesigner, 1, ( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,
 	AddRoadbed();
 
 #ifndef MKTURNOUT
-	if ( CheckPaths( segCnt, &tempSegs(0), pp->paths ) < 0 )
+	if ( CheckPaths( segCnt, &tempSegs(0), pp->paths, dp->label ) < 0 )
 		return NULL;
 #endif
 	return pp;

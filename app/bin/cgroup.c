@@ -1585,7 +1585,7 @@ LOG( log_group, 3, ( "\n" ) );
 		 */
 
 		PATHPTR_T pPaths = (PATHPTR_T)&pathPtr(0);
-		CheckPaths( outputSegs_da.cnt, &outputSegs(0), pPaths );
+		CheckPaths( outputSegs_da.cnt, &outputSegs(0), pPaths, groupTitle );
 
 		long options = 0;
 		if ( groupNoCombine != 0 )

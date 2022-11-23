@@ -293,7 +293,8 @@ enum paramFileState
 EXPORT wIndex_t CheckPaths(
 	wIndex_t segCnt,
 	trkSeg_p segs,
-	PATHPTR_T paths)
+	PATHPTR_T paths,
+	char * sTitle )
 {
 	if ((segCnt == 0) || !segs) return -1;
 	if (!paths) return -1;
@@ -310,7 +311,7 @@ EXPORT wIndex_t CheckPaths(
 		for (int inx = 0; inx < segCnt; inx++) {
 			if (IsSegTrack(&segs[inx])) {
 				if ( inx > MAX_PATH_SEGS ) {
-					InputError("Too many segments %d in Turnout definition", FALSE, inx + 1);
+					InputError("Too many segments %d in Turnout definition %s", FALSE, inx + 1, PutTitle(sTitle));
 					return -1;
 				}
 				PATHPTR_T cp = paths;
@@ -332,7 +333,8 @@ EXPORT wIndex_t CheckPaths(
 					cp++;  // Go to next path - past two 0s
 				}
 				if (!*cp) {	// we looked through all the paths and didn't find it
-					InputError("Track segment %d not on Path", FALSE, inx + 1);
+//					InputError("Track segment %d not on Path", FALSE, inx + 1);
+					NoticeMessage(MSG_SEGMENT_NOT_ON_PATH, _("OK"), NULL, inx + 1, PutTitle(sTitle));
 					return -1;;
 				}
 			}
@@ -395,7 +397,7 @@ static BOOL_T ReadTurnoutParam(
 	PATHPTR_T pPaths = NULL;
 	if ( pathPtr && pathPtr[0] && pathCnt > 0 )
 		pPaths = pathPtr;
-	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pPaths );
+	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pPaths, title );
 	to = CreateNewTurnout(scale, title, tempSegs_da.cnt, &tempSegs(0),
 			pPaths, TempEndPtsCount(), TempEndPt(0), FALSE, options );
 	MyFree(title);

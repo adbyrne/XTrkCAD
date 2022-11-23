@@ -172,7 +172,7 @@ EPINX_T TurnoutPickEndPt( coOrd p, track_p );
 BOOL_T SplitTurnoutCheck(track_p,coOrd,EPINX_T ep,track_p *,EPINX_T *,EPINX_T *,BOOL_T check, coOrd *, ANGLE_T *);
 void GetSegInxEP( signed char, int *, EPINX_T * );
 void SetSegInxEP( signed char *, int, EPINX_T) ;
-wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
+wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T, char* );
 turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T, EPINX_T, trkEndPt_p, wBool_t, long );
 void DeleteTurnoutParams(int fileInx);
 turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );

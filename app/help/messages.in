@@ -863,6 +863,26 @@ The specified command has been disabled in error.
 Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
+# cturnout.c:CheckPaths
+MESSAGE MSG_SEGMENT_NOT_ON_PATH
+Track segment %d not on any Path for %s
+ALT
+Track segment N not on Path for Turnout
+HELP
+A Path (a sequence of track segments) defines a route through a Turnout from one End Point to another.
+Each segment should be be present in a least one Path.
+
+This can happen when Grouping complex track objects, or when there is more than one path between End Points, for example a siding.
+
+Try simplifying the segments or removing any loops in the connected segments.
+
+This message can be suppressed by passing the command line option 
+
+\b /d suppresscheckpaths (Windows) or
+
+\b -d suppresscheckpaths (Linux/MAC)
+END
+
 # cturnout.c:splitTurnout
 MESSAGE MSG_SPLIT_POS_BTW_MERGEPTS
 Split position between Turnout Points
