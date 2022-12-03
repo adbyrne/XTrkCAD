@@ -1,5 +1,7 @@
 # Setup GTK3 UI library...
 
+add_subdirectory(glade)
+
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 
 	${xtrkcad-lib_SOURCE_DIR}
@@ -10,6 +12,7 @@ target_sources(xtrkcad-wlib
 	basicdraw.c
 	bitmap.c
  	boxes.c
+	builder.c
  	button.c
  	color.c
  	control.c
@@ -112,3 +115,13 @@ else ()
 		)
 	endif()
 endif()
+
+# copy the glade ui definitions into the build tree
+# files are copied unconditionally on every build
+# add_custom_target(gladeui
+#                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                     ${CMAKE_CURRENT_SOURCE_DIR}/glade
+#                     ${CMAKE_BINARY_DIR}/app/bin/ui
+# )
+add_dependencies(xtrkcad-wlib uifiles)
+
