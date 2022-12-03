@@ -572,13 +572,13 @@ int process( char* path, char* name, int icon ){
 	/* printf( "FreeImage version %s\n\n",FreeImage_GetVersion( ) ); */
 
 	// Try override first
-	sprintf(filename, "%sPNG/%s%d.png", path, name, icon);
+	sprintf(filename, "%spng/%s%d.png", path, name, icon);
 	//#if defined(WIN32) || defined(_WIN32) 
 	//	if ( _access(filename, 04) != 0) {
 	//#else
 	//	if ( access( filename, R_OK ) != 0 ) {
 	//#endif
-	//		sprintf( filename,"%s/PNG/%s%d.png",path,name,icon );
+	//		sprintf( filename,"%s/png/%s%d.png",path,name,icon );
 	//	}
 	#ifdef DEBUGPRINT
 		fprintf(stdout, "PNG: %s\n", filename );
