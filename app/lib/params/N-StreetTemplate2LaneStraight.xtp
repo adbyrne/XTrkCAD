@@ -148,5 +148,5 @@ TURNOUT N  "N Street Template	2-Lane Straight(OneWay)	STS-301"
 #StreetCenterLines	
 	L3 16777215 0.025000 0.375000 0.000000 0 1.125000 0.000000 0
 END$SEGS
-TURNOUT N  "N Street Template	2-Lane W/Turn Lane(OneWay)	STS-301"
-END$SEGS
+#TURNOUT N  "N Street Template	2-Lane W/Turn Lane(OneWay)	STS-301"
+#END$SEGS
