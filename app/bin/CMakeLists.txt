@@ -10,6 +10,9 @@ include( CheckSymbolExists )
 #	4. add individual .lin-files as dependency to "lines"
 #
 
+# build GA or Beta executable
+set( XTRKCAD_BIN "xtrkcad${XTRKCAD_BETA}" )
+
 add_subdirectory(bitmaps)
 
 add_executable(cnvdsgn cnvdsgn.c utility.c)
@@ -274,7 +277,7 @@ endif()
 #
 # Start building the main program itself
 #
-add_executable(xtrkcad WIN32 "" )
+add_executable(${XTRKCAD_BIN} WIN32 "" )
 
 # if SVG export is built and source files and dependency on MiniXML
 
@@ -313,21 +316,21 @@ if(XTRKCAD_CREATE_SVG)
 	endif()
 endif()
 
-target_sources(xtrkcad
+target_sources(${XTRKCAD_BIN}
 	PRIVATE
 		misc.c
 		xtrkcad.rc
 )
-add_dependencies(xtrkcad
+add_dependencies(${XTRKCAD_BIN}
     msgfiles
     genbitmaps)
     
-target_include_directories(xtrkcad
+target_include_directories(${XTRKCAD_BIN}
     PRIVATE
 	${messagefile_BINARY_DIR}    
 )
 
-target_link_libraries(xtrkcad
+target_link_libraries(${XTRKCAD_BIN}
     PRIVATE
 		xtrkcad-wlib
 		xtrkcad-lib
@@ -364,7 +367,7 @@ if(NOT WIN32)
         PRIVATE
         m
     )
-	target_link_libraries(xtrkcad
+	target_link_libraries(${XTRKCAD_BIN}
         PRIVATE
         m
     )
@@ -414,7 +417,7 @@ if(APPLE)
 endif()
 
 install(
-	TARGETS xtrkcad
+	TARGETS ${XTRKCAD_BIN}
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 )
 

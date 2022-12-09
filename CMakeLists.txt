@@ -70,7 +70,6 @@ option(XTRKCAD_USE_DOXYGEN "Generate internals documentation using doxygen" OFF)
 
 if(UNIX AND NOT APPLE)
     option(XTRKCAD_USE_BROWSER "Show help in default browser" ${XTRKCAD_USE_BROWSER_DEFAULT})
-    option(XTRKCAD_PACKAGE_GA_RELEASE "Package for a Beta (OFF/Default) or GA (ON) release" OFF)
 endif()
 
 if(APPLE)
@@ -111,7 +110,13 @@ endif()
 set(XTRKCAD_BIN_INSTALL_DIR "bin")
 set(XTRKCAD_LOCALE_INSTALL_DIR "share/locale")
 set(XTRKCAD_PACKAGE "xtrkcad")
-set(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad")
+set(XTRKCAD_BETA "")
+if(UNIX AND NOT APPLE)
+	if(XTRKCAD_VERSION_MODIFIER MATCHES "^Beta")
+		set(XTRKCAD_BETA "-beta")
+	endif()
+endif()
+set(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad${XTRKCAD_BETA}")
 
 # Enable use of a configuration file ...
 add_definitions(-DXTRKCAD_CMAKE_BUILD)

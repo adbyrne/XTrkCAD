@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=XTrackCAD-Beta
+Comment=Design model railroad layouts
+Exec=xtrkcad-beta
+Icon=xtrkcad
+Terminal=false
+Type=Application
+Categories=Graphics
+
