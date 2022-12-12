@@ -66,7 +66,12 @@ if(UNIX AND NOT APPLE)
         DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
         )
 	install(FILES
-		xtrkcad.desktop xtrkcad.xml
+		xtrkcad${XTRKCAD_BETA}.desktop
+		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
+		RENAME xtrkcad.desktop
+		)
+	install(FILES
+		xtrkcad.xml
 		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
 		)
 	install(FILES

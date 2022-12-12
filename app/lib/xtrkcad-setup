@@ -2,6 +2,7 @@
 
 usage() {
 	echo "$0 (install|remove|desktop) <install-dir>"
+	echo
 	echo "install: Sets up file associations and menus for XTrkCad"
 	echo "remove: Removes file associations and menus for XTrkCad"
 	echo "desktop: Installs short cut on the user's desktop"
@@ -18,8 +19,8 @@ if [ $# -ne 2 ] ; then
 	usage
 fi
 
-COMMAND=$1
-export INSTALLDIR=$2
+COMMAND="$1"
+export INSTALLDIR="$2"
 
 if [ ! -d ${INSTALLDIR} ] ; then
 	echo "$0: $INSTALLDIR: not found"
@@ -49,7 +50,8 @@ if [ "$COMMAND" = "install" ] ; then
 	# Set icon for file browser
 	xdg-icon-resource install --context mimetypes --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png xtrkcad
 	# set icon for file browser
-	xdg-icon-resource install --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png application-x-xtrkcad
+	xdg-icon-resource install --context apps --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png xtrkcad
+	xdg-icon-resource install --context apps --novendor --size 64 ${INSTALLDIR}/pixmaps/xtrkcad.png application-x-xtrkcad
 	echo SETUP MIME
 	# mimetype for .xtc files is application/x-xtrkcad
 	xdg-mime install --novendor ${INSTALLDIR}/applications/xtrkcad.xml
@@ -63,11 +65,15 @@ if [ "$COMMAND" = "install" ] ; then
 	chmod 755 ${HOME}/Desktop/xtrkcad.desktop
 
 elif [ "$COMMAND" = "remove" ] ; then
+	echo REMOVE DESKTOP
 	xdg-desktop-icon uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.desktop
 	xdg-desktop-menu uninstall ${INSTALLDIR}/applications/xtrkcad.desktop
+	echo REMOVE MIME
 	xdg-mime uninstall --novendor ${INSTALLDIR}/applications/xtrkcad.xml
-	xdg-icon-resource uninstall --novendor --size 64 xtrkcad
-	xdg-icon-resource uninstall --novendor --context mimetypes --size 64 xtrkcad
+	echo REMOVE ICONS
+	xdg-icon-resource uninstall --context apps --novendor --size 64 application-x-xtrkcad
+	xdg-icon-resource uninstall --context apps --novendor --size 64 xtrkcad
+	xdg-icon-resource uninstall --context mimetypes --novendor --size 64 xtrkcad
 
 elif [ "$COMMAND" = "desktop" ] ; then
 	echo SETUP DESKTOP

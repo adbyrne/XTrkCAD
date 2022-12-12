@@ -100,13 +100,18 @@ const char * wGetAppLibDir( void )
 
 	char * dir1 = "/usr/share/";
 	char * dir2 = "/usr/local/share/";
+	char * beta = "";
 	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
 		dir1 = "/usr/local/share/";
 		dir2 = "/usr/share/";
+#ifndef __APPLE__
+		beta = "-beta";
+#endif
 	}
 
 	strcpy( appLibDir, dir1 );
 	strcat( appLibDir, wlibGetAppName() );
+	strcat( appLibDir, beta );
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 		//printf( "wAppLbDir=%s\n", appLibDir );
 		return appLibDir;
