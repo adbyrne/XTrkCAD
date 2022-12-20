@@ -14,13 +14,13 @@
 
 //#define DEBUGPRINT
 
-#define CHATTY 0 /* 1 = Enable progress messages */
-#define ALPHATHRESH  96
-#define BACKGROUND   208
-#define BGMASK       0xF8
-#define NUMPALETTE   40
+#define CHATTY       0      /* 1 = Enable progress messages */
+#define ALPHATHRESH  96     /* If alpha >= this value the color is not transparent */
+#define BACKGROUND   208    /* The background color RGB = value */
+#define BGMASK       0xF8   /* Mask top 5 bits for partitioning */
+#define NUMPALETTE   40     /* Maximum number of palette entries */
 
-#if defined(WIN32) || defined(_WIN32) 
+#if defined(WIN32) || defined(_WIN32)
 #include <io.h>
 #define ENDLN "\n"
 #else
@@ -28,17 +28,18 @@
 // Generate DOS style line ends
 #define ENDLN "\r\n"
 #define E2BIG 1
-double min( double a, double b )
+double min(double a, double b)
 {
-	if (a<b) return a;
+	if (a < b) { return a; }
 	return b;
 }
 #endif
 
-FIBITMAP    *image;
+FIBITMAP* image;
 
 /* Note that percent does not print so omit that char from the list! */
-char palette[76] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@#$^&=+-<>/";
+char palette[76] =
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@#$^&=+-<>/";
 
 char xpm3Buff[10000];
 
@@ -61,7 +62,7 @@ additional documentation and a cure to a previous bug.
 Free to distribute, comments and suggestions are appreciated.
 
 Code from https://gist.github.com/bert/1192520
-**********************************************************************/	
+**********************************************************************/
 
 #define MAXCOLOR	256
 #define	RED	    2
@@ -69,19 +70,19 @@ Code from https://gist.github.com/bert/1192520
 #define BLUE	0
 
 static float		m2[33][33][33];
-static long int	wt[33][33][33], mr[33][33][33],	mg[33][33][33],	mb[33][33][33];
-unsigned char   *Ir, *Ig, *Ib, *Ia;
+static long int	wt[33][33][33], mr[33][33][33], mg[33][33][33], mb[33][33][33];
+unsigned char* Ir, * Ig, * Ib, * Ia;
 int	        size;    /*image size*/
 int		    K;       /*color look-up table size*/
-unsigned short int *Qadd;
+unsigned short int* Qadd;
 unsigned char	lut_r[MAXCOLOR], lut_g[MAXCOLOR], lut_b[MAXCOLOR];
 
 struct box {
 	int r0;			 /* min value, exclusive */
 	int r1;			 /* max value, inclusive */
-	int g0;  
-	int g1;  
-	int b0;  
+	int g0;
+	int g1;
+	int b0;
 	int b1;
 	int vol;
 };
@@ -92,27 +93,27 @@ struct box {
 */
 
 /* build 3-D color histogram of counts, r/g/b, c^2 */
-void Hist3d(long *vwt, long *vmr, long *vmg, long *vmb, float *m2) 
+void Hist3d(long* vwt, long* vmr, long* vmg, long* vmb, float* m2)
 {
 	register int ind, r, g, b;
 	int	     inr, ing, inb, table[256];
 	register long int i;
 
-	for(i=0; i<256; ++i) table[i]=i*i;
-	Qadd = (unsigned short int *)malloc(sizeof(short int)*size);
-	if (Qadd==NULL) {fprintf(stderr, "Not enough space\n"); exit( 1 ); }
-	for(i=0; i<size; ++i){
+	for (i = 0; i < 256; ++i) { table[i] = i * i; }
+	Qadd = (unsigned short int*)malloc(sizeof(short int) * size);
+	if (Qadd == NULL) { fprintf(stderr, "Not enough space\n"); exit(1); }
+	for (i = 0; i < size; ++i) {
 		r = Ir[i]; g = Ig[i]; b = Ib[i];
-		inr=(r>>3)+1; 
-		ing=(g>>3)+1; 
-		inb=(b>>3)+1; 
-		Qadd[i]=ind=(inr<<10)+(inr<<6)+inr+(ing<<5)+ing+inb;
+		inr = (r >> 3) + 1;
+		ing = (g >> 3) + 1;
+		inb = (b >> 3) + 1;
+		Qadd[i] = ind = (inr << 10) + (inr << 6) + inr + (ing << 5) + ing + inb;
 		/*[inr][ing][inb]*/
 		++vwt[ind];
 		vmr[ind] += r;
 		vmg[ind] += g;
 		vmb[ind] += b;
-		m2[ind] += (float)(table[r]+table[g]+table[b]);
+		m2[ind] += (float)(table[r] + table[g] + table[b]);
 	}
 }
 
@@ -129,24 +130,25 @@ void Hist3d(long *vwt, long *vmr, long *vmg, long *vmb, float *m2)
 */
 
 /* compute cumulative moments. */
-void M3d(long *vwt, long *vmr, long *vmg, long *vmb, float *m2) 
+void M3d(long* vwt, long* vmr, long* vmg, long* vmb, float* m2)
 {
 	register unsigned short int ind1, ind2;
 	register unsigned char i, r, g, b;
 	long int line, line_r, line_g, line_b,
-		area[33], area_r[33], area_g[33], area_b[33];
+	     area[33], area_r[33], area_g[33], area_b[33];
 	float    line2, area2[33];
 
-	for(r=1; r<=32; ++r){
-		for(i=0; i<=32; ++i) 
-			area2[i]=area[i]=area_r[i]=area_g[i]=area_b[i]=0.0f;
-		for(g=1; g<=32; ++g){
+	for (r = 1; r <= 32; ++r) {
+		for (i = 0; i <= 32; ++i) {
+			area2[i] = area[i] = area_r[i] = area_g[i] = area_b[i] = 0.0f;
+		}
+		for (g = 1; g <= 32; ++g) {
 			line2 = line = line_r = line_g = line_b = 0;
-			for(b=1; b<=32; ++b){
-				ind1 = (r<<10) + (r<<6) + r + (g<<5) + g + b; /* [r][g][b] */
+			for (b = 1; b <= 32; ++b) {
+				ind1 = (r << 10) + (r << 6) + r + (g << 5) + g + b; /* [r][g][b] */
 				line += vwt[ind1];
-				line_r += vmr[ind1]; 
-				line_g += vmg[ind1]; 
+				line_r += vmr[ind1];
+				line_g += vmg[ind1];
 				line_b += vmb[ind1];
 				line2 += m2[ind1];
 				area[b] += line;
@@ -167,16 +169,16 @@ void M3d(long *vwt, long *vmr, long *vmg, long *vmb, float *m2)
 
 
 /* Compute sum over a box of any given statistic */
-long int Vol(struct box *cube, long int mmt[33][33][33]) 
+long int Vol(struct box* cube, long int mmt[33][33][33])
 {
-	return( mmt[cube->r1][cube->g1][cube->b1] 
-		-mmt[cube->r1][cube->g1][cube->b0]
-		-mmt[cube->r1][cube->g0][cube->b1]
-		+mmt[cube->r1][cube->g0][cube->b0]
-		-mmt[cube->r0][cube->g1][cube->b1]
-		+mmt[cube->r0][cube->g1][cube->b0]
-		+mmt[cube->r0][cube->g0][cube->b1]
-		-mmt[cube->r0][cube->g0][cube->b0] );
+	return(mmt[cube->r1][cube->g1][cube->b1]
+	       - mmt[cube->r1][cube->g1][cube->b0]
+	       - mmt[cube->r1][cube->g0][cube->b1]
+	       + mmt[cube->r1][cube->g0][cube->b0]
+	       - mmt[cube->r0][cube->g1][cube->b1]
+	       + mmt[cube->r0][cube->g1][cube->b0]
+	       + mmt[cube->r0][cube->g0][cube->b1]
+	       - mmt[cube->r0][cube->g0][cube->b0]);
 }
 
 /* The next two routines allow a slightly more efficient calculation
@@ -187,81 +189,81 @@ long int Vol(struct box *cube, long int mmt[33][33][33])
 
 /* Compute part of Vol(cube, mmt) that doesn't depend on r1, g1, or b1 */
 /* (depending on dir) */
-long int Bottom(struct box *cube, int dir, long int mmt[33][33][33])
+long int Bottom(struct box* cube, int dir, long int mmt[33][33][33])
 {
-	switch(dir){
+	switch (dir) {
 	case RED:
-		return( -mmt[cube->r0][cube->g1][cube->b1]
-			+mmt[cube->r0][cube->g1][cube->b0]
-			+mmt[cube->r0][cube->g0][cube->b1]
-			-mmt[cube->r0][cube->g0][cube->b0] );
+		return(-mmt[cube->r0][cube->g1][cube->b1]
+		       + mmt[cube->r0][cube->g1][cube->b0]
+		       + mmt[cube->r0][cube->g0][cube->b1]
+		       - mmt[cube->r0][cube->g0][cube->b0]);
 		break;
 	case GREEN:
-		return( -mmt[cube->r1][cube->g0][cube->b1]
-			+mmt[cube->r1][cube->g0][cube->b0]
-			+mmt[cube->r0][cube->g0][cube->b1]
-			-mmt[cube->r0][cube->g0][cube->b0] );
+		return(-mmt[cube->r1][cube->g0][cube->b1]
+		       + mmt[cube->r1][cube->g0][cube->b0]
+		       + mmt[cube->r0][cube->g0][cube->b1]
+		       - mmt[cube->r0][cube->g0][cube->b0]);
 		break;
 	case BLUE:
-		return( -mmt[cube->r1][cube->g1][cube->b0]
-			+mmt[cube->r1][cube->g0][cube->b0]
-			+mmt[cube->r0][cube->g1][cube->b0]
-			-mmt[cube->r0][cube->g0][cube->b0] );
+		return(-mmt[cube->r1][cube->g1][cube->b0]
+		       + mmt[cube->r1][cube->g0][cube->b0]
+		       + mmt[cube->r0][cube->g1][cube->b0]
+		       - mmt[cube->r0][cube->g0][cube->b0]);
 		break;
 	}
-	fprintf(stderr, "Bottom: Invalid dir.\n"); 
-	exit( 1 );
+	fprintf(stderr, "Bottom: Invalid dir.\n");
+	exit(1);
 }
 
 
-long int Top(struct box *cube, int dir, int pos, long int mmt[33][33][33])
+long int Top(struct box* cube, int dir, int pos, long int mmt[33][33][33])
 /* Compute remainder of Vol(cube, mmt), substituting pos for */
 /* r1, g1, or b1 (depending on dir) */
 {
-	switch(dir){
+	switch (dir) {
 	case RED:
-		return( mmt[pos][cube->g1][cube->b1] 
-			-mmt[pos][cube->g1][cube->b0]
-			-mmt[pos][cube->g0][cube->b1]
-			+mmt[pos][cube->g0][cube->b0] );
+		return(mmt[pos][cube->g1][cube->b1]
+		       - mmt[pos][cube->g1][cube->b0]
+		       - mmt[pos][cube->g0][cube->b1]
+		       + mmt[pos][cube->g0][cube->b0]);
 		break;
 	case GREEN:
-		return( mmt[cube->r1][pos][cube->b1] 
-			-mmt[cube->r1][pos][cube->b0]
-			-mmt[cube->r0][pos][cube->b1]
-			+mmt[cube->r0][pos][cube->b0] );
+		return(mmt[cube->r1][pos][cube->b1]
+		       - mmt[cube->r1][pos][cube->b0]
+		       - mmt[cube->r0][pos][cube->b1]
+		       + mmt[cube->r0][pos][cube->b0]);
 		break;
 	case BLUE:
-		return( mmt[cube->r1][cube->g1][pos]
-			-mmt[cube->r1][cube->g0][pos]
-			-mmt[cube->r0][cube->g1][pos]
-			+mmt[cube->r0][cube->g0][pos] );
+		return(mmt[cube->r1][cube->g1][pos]
+		       - mmt[cube->r1][cube->g0][pos]
+		       - mmt[cube->r0][cube->g1][pos]
+		       + mmt[cube->r0][cube->g0][pos]);
 		break;
 	}
-	fprintf(stderr, "Top: Invalid dir.\n"); 
-	exit( 1 );
+	fprintf(stderr, "Top: Invalid dir.\n");
+	exit(1);
 }
 
 
 /* Compute the weighted variance of a box */
 /* NB: as with the raw statistics, this is really the variance * size */
-float Var(struct box *cube)
+float Var(struct box* cube)
 {
 	float dr, dg, db, xx;
 
-	dr = Vol(cube, mr); 
-	dg = Vol(cube, mg); 
+	dr = Vol(cube, mr);
+	dg = Vol(cube, mg);
 	db = Vol(cube, mb);
-	xx =  m2[cube->r1][cube->g1][cube->b1] 
-		-m2[cube->r1][cube->g1][cube->b0]
-		-m2[cube->r1][cube->g0][cube->b1]
-		+m2[cube->r1][cube->g0][cube->b0]
-		-m2[cube->r0][cube->g1][cube->b1]
-		+m2[cube->r0][cube->g1][cube->b0]
-		+m2[cube->r0][cube->g0][cube->b1]
-		-m2[cube->r0][cube->g0][cube->b0];
+	xx = m2[cube->r1][cube->g1][cube->b1]
+	     - m2[cube->r1][cube->g1][cube->b0]
+	     - m2[cube->r1][cube->g0][cube->b1]
+	     + m2[cube->r1][cube->g0][cube->b0]
+	     - m2[cube->r0][cube->g1][cube->b1]
+	     + m2[cube->r0][cube->g1][cube->b0]
+	     + m2[cube->r0][cube->g0][cube->b1]
+	     - m2[cube->r0][cube->g0][cube->b0];
 
-	return( xx - (dr*dr+dg*dg+db*db)/(float)Vol(cube,wt) );    
+	return(xx - (dr * dr + dg * dg + db * db) / (float)Vol(cube, wt));
 }
 
 /* We want to minimize the sum of the variances of two subboxes.
@@ -271,8 +273,8 @@ float Var(struct box *cube)
 * so we drop the minus sign and MAXIMIZE the sum of the two terms.
 */
 
-float Maximize(struct box *cube, int dir, int first, int last, int *cut,
-	long whole_r, long whole_g, long whole_b, long whole_w)
+float Maximize(struct box* cube, int dir, int first, int last, int* cut,
+               long whole_r, long whole_g, long whole_b, long whole_w)
 {
 	register long int half_r, half_g, half_b, half_w;
 	long int base_r, base_g, base_b, base_w;
@@ -285,7 +287,7 @@ float Maximize(struct box *cube, int dir, int first, int last, int *cut,
 	base_w = Bottom(cube, dir, wt);
 	max = 0.0;
 	*cut = -1;
-	for(i=first; i<last; ++i){
+	for (i = first; i < last; ++i) {
 		half_r = base_r + Top(cube, dir, i, mr);
 		half_g = base_g + Top(cube, dir, i, mg);
 		half_b = base_b + Top(cube, dir, i, mb);
@@ -294,8 +296,8 @@ float Maximize(struct box *cube, int dir, int first, int last, int *cut,
 		if (half_w == 0) {      /* subbox could be empty of pixels! */
 			continue;             /* never split into an empty box */
 		} else
-			temp = ((float)half_r*half_r + (float)half_g*half_g +
-				(float)half_b*half_b)/half_w;
+			temp = ((float)half_r * half_r + (float)half_g * half_g +
+			        (float)half_b * half_b) / half_w;
 
 		half_r = whole_r - half_r;
 		half_g = whole_g - half_g;
@@ -304,15 +306,15 @@ float Maximize(struct box *cube, int dir, int first, int last, int *cut,
 		if (half_w == 0) {      /* subbox could be empty of pixels! */
 			continue;             /* never split into an empty box */
 		} else
-			temp += ((float)half_r*half_r + (float)half_g*half_g +
-				(float)half_b*half_b)/half_w;
+			temp += ((float)half_r * half_r + (float)half_g * half_g +
+			         (float)half_b * half_b) / half_w;
 
-		if (temp > max) {max=temp; *cut=i;}
+		if (temp > max) { max = temp; *cut = i; }
 	}
 	return(max);
 }
 
-int Cut(struct box *set1, struct box *set2)
+int Cut(struct box* set1, struct box* set2)
 {
 	int dir;
 	int cutr, cutg, cutb;
@@ -324,28 +326,27 @@ int Cut(struct box *set1, struct box *set2)
 	whole_b = Vol(set1, mb);
 	whole_w = Vol(set1, wt);
 
-	maxr = Maximize(set1, RED, set1->r0+1, set1->r1, &cutr,
-		whole_r, whole_g, whole_b, whole_w);
-	maxg = Maximize(set1, GREEN, set1->g0+1, set1->g1, &cutg,
-		whole_r, whole_g, whole_b, whole_w);
-	maxb = Maximize(set1, BLUE, set1->b0+1, set1->b1, &cutb,
-		whole_r, whole_g, whole_b, whole_w);
+	maxr = Maximize(set1, RED, set1->r0 + 1, set1->r1, &cutr,
+	                whole_r, whole_g, whole_b, whole_w);
+	maxg = Maximize(set1, GREEN, set1->g0 + 1, set1->g1, &cutg,
+	                whole_r, whole_g, whole_b, whole_w);
+	maxb = Maximize(set1, BLUE, set1->b0 + 1, set1->b1, &cutb,
+	                whole_r, whole_g, whole_b, whole_w);
 
-	if( (maxr>=maxg)&&(maxr>=maxb) ) {
+	if ((maxr >= maxg) && (maxr >= maxb)) {
 		dir = RED;
-		if (cutr < 0) return 0; /* can't split the box */
+		if (cutr < 0) { return 0; } /* can't split the box */
+	} else if ((maxg >= maxr) && (maxg >= maxb)) {
+		dir = GREEN;
+	} else {
+		dir = BLUE;
 	}
-	else
-		if( (maxg>=maxr)&&(maxg>=maxb) ) 
-			dir = GREEN;
-		else
-			dir = BLUE; 
 
 	set2->r1 = set1->r1;
 	set2->g1 = set1->g1;
 	set2->b1 = set1->b1;
 
-	switch (dir){
+	switch (dir) {
 	case RED:
 		set2->r0 = set1->r1 = cutr;
 		set2->g0 = set1->g0;
@@ -362,27 +363,30 @@ int Cut(struct box *set1, struct box *set2)
 		set2->g0 = set1->g0;
 		break;
 	}
-	set1->vol=(set1->r1-set1->r0)*(set1->g1-set1->g0)*(set1->b1-set1->b0);
-	set2->vol=(set2->r1-set2->r0)*(set2->g1-set2->g0)*(set2->b1-set2->b0);
+	set1->vol = (set1->r1 - set1->r0) * (set1->g1 - set1->g0) *
+	            (set1->b1 - set1->b0);
+	set2->vol = (set2->r1 - set2->r0) * (set2->g1 - set2->g0) *
+	            (set2->b1 - set2->b0);
 	return 1;
 }
 
 
-void Mark(struct box *cube, int label, unsigned char *tag)
+void Mark(struct box* cube, int label, unsigned char* tag)
 {
 	register int r, g, b;
 
-	for(r=cube->r0+1; r<=cube->r1; ++r)
-		for(g=cube->g0+1; g<=cube->g1; ++g)
-			for(b=cube->b0+1; b<=cube->b1; ++b)
-				tag[(r<<10) + (r<<6) + r + (g<<5) + g + b] = label;
+	for (r = cube->r0 + 1; r <= cube->r1; ++r)
+		for (g = cube->g0 + 1; g <= cube->g1; ++g)
+			for (b = cube->b0 + 1; b <= cube->b1; ++b) {
+				tag[(r << 10) + (r << 6) + r + (g << 5) + g + b] = label;
+			}
 }
 
 
-void cq ()
+void cq()
 {
 	struct box	cube[MAXCOLOR];
-	unsigned char	*tag;
+	unsigned char* tag;
 	int		next;
 	register long int	i, weight;
 	register int	k;
@@ -390,59 +394,59 @@ void cq ()
 
 	K = NUMPALETTE;
 
-	Hist3d((long *)wt, (long *)mr, (long *)mg, (long *)mb, (float *)m2); 
-	if (CHATTY) printf("Histogram done\n");
+	Hist3d((long*)wt, (long*)mr, (long*)mg, (long*)mb, (float*)m2);
+	if (CHATTY) { printf("Histogram done\n"); }
 
-	M3d((long *)wt, (long *)mr, (long *)mg, (long *)mb, (float *)m2);    
-	if (CHATTY) printf("Moments done\n");
+	M3d((long*)wt, (long*)mr, (long*)mg, (long*)mb, (float*)m2);
+	if (CHATTY) { printf("Moments done\n"); }
 
 	cube[0].r0 = cube[0].g0 = cube[0].b0 = 0;
 	cube[0].r1 = cube[0].g1 = cube[0].b1 = 32;
 	next = 0;
-	for(i=1; i<K; ++i){
+	for (i = 1; i < K; ++i) {
 		if (Cut(&cube[next], &cube[i])) {
 			/* volume test ensures we won't try to cut one-cell box */
-			vv[next] = (cube[next].vol>1) ? Var(&cube[next]) : 0.0;
-			vv[i] = (cube[i].vol>1) ? Var(&cube[i]) : 0.0;
+			vv[next] = (cube[next].vol > 1) ? Var(&cube[next]) : 0.0;
+			vv[i] = (cube[i].vol > 1) ? Var(&cube[i]) : 0.0;
 		} else {
 			vv[next] = 0.0;   /* don't try to split this box again */
 			i--;              /* didn't create box i */
 		}
 		next = 0; temp = vv[0];
-		for(k=1; k<=i; ++k)
+		for (k = 1; k <= i; ++k)
 			if (vv[k] > temp) {
 				temp = vv[k]; next = k;
 			}
 		if (temp <= 0.0) {
-			K = i+1;
-			if (CHATTY) printf("Only got %d boxes\n", K);
+			K = i + 1;
+			if (CHATTY) { printf("Only got %d boxes\n", K); }
 			break;
 		}
 	}
-	if (CHATTY) printf("Partition done\n");
+	if (CHATTY) { printf("Partition done\n"); }
 
-	tag = (unsigned char *)malloc(33*33*33);
-	if (tag==NULL) {fprintf(stderr, "Not enough space\n"); exit( 1 ); }
-	for(k=0; k<K; ++k){
+	tag = (unsigned char*)malloc(33 * 33 * 33);
+	if (tag == NULL) { fprintf(stderr, "Not enough space\n"); exit(1); }
+	for (k = 0; k < K; ++k) {
 		Mark(&cube[k], k, tag);
 		weight = Vol(&cube[k], wt);
 		if (weight) {
 			lut_r[k] = Vol(&cube[k], mr) / weight;
 			lut_g[k] = Vol(&cube[k], mg) / weight;
 			lut_b[k] = Vol(&cube[k], mb) / weight;
-		}
-		else{
+		} else {
 			fprintf(stderr, "bogus box %d\n", k);
-			lut_r[k] = lut_g[k] = lut_b[k] = 0;		
+			lut_r[k] = lut_g[k] = lut_b[k] = 0;
 		}
 	}
 
-	for(i=0; i<size; ++i) Qadd[i] = tag[Qadd[i]];
+	for (i = 0; i < size; ++i) { Qadd[i] = tag[Qadd[i]]; }
 
-	free( tag );
+	free(tag);
 }
 
-char pChar( int j ){
+char pChar(int j)
+{
 
 	char c = '.';
 	c = palette[j];
@@ -457,29 +461,33 @@ strscat(char* dest, const char* src, size_t count)
 	long dptr = strlen(dest);
 	count -= dptr;
 
-	if (count <= 0)
+	if (count <= 0) {
 		return -E2BIG;
+	}
 
 	while (count) {
 		char c;
 
 		c = src[sptr];
 		dest[dptr] = c;
-		if (!c)
+		if (!c) {
 			return dptr;
+		}
 		sptr++;
 		dptr++;
 		count--;
 	}
 
 	/* Hit buffer length without finding a NUL; force NUL-termination. */
-	if (dptr)
+	if (dptr) {
 		dest[dptr - 1] = '\0';
+	}
 
 	return -E2BIG;
 }
 
-int genXpm ( int icon, char* name, int width, int height ) {
+int genXpm(int icon, char* name, int width, int height)
+{
 	char xpmName[100]; // XPM object name
 	char tmpBuff[100]; // sprintf
 	char c[2];
@@ -489,56 +497,52 @@ int genXpm ( int icon, char* name, int width, int height ) {
 	c[1] = 0;
 
 	strcpy(xpmName, name);
-	for ( i = 0; i < strlen( xpmName ); i++ ){
-		if(xpmName[i] == '-') 
+	for (i = 0; i < strlen(xpmName); i++) {
+		if (xpmName[i] == '-') {
 			xpmName[i] = '_';
+		}
 	}
-	
+
 	strscat(xpm3Buff, "static char *", sizeof(xpm3Buff));
 	strscat(xpm3Buff, xpmName, sizeof(xpm3Buff));
 	strscat(xpm3Buff, "_x", sizeof(xpm3Buff));
 	sprintf(tmpBuff, "%d", height); strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
 	strscat(xpm3Buff, "[] = {"ENDLN, sizeof(xpm3Buff));
 	strscat(xpm3Buff, "\t\"", sizeof(xpm3Buff));
-	sprintf(tmpBuff, "%d %d %d %d", width, height, (K+1), 1); strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
+	sprintf(tmpBuff, "%d %d %d %d", width, height, (K + 1), 1);
+	strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
 	strscat(xpm3Buff, "\","ENDLN"\t\" \tc\tNone\","ENDLN, sizeof(xpm3Buff));
-	for (i = 0; i < K; i++)
-	{
+	for (i = 0; i < K; i++) {
 		strscat(xpm3Buff, "\t\"", sizeof(xpm3Buff));
-		sprintf(tmpBuff, "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i],lut_g[i],lut_b[i]); strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
+		sprintf(tmpBuff, "%c\tc\t#%02x%02x%02x", pChar(i), lut_r[i], lut_g[i],
+		        lut_b[i]); strscat(xpm3Buff, tmpBuff, sizeof(xpm3Buff));
 		strscat(xpm3Buff, "\","ENDLN, sizeof(xpm3Buff));
 	}
 
 	// Write the pixels
 	i = 0;
-	for ( y = height-1; y >= 0; y-- ){
+	for (y = height - 1; y >= 0; y--) {
 		strscat(xpm3Buff, "\t\"", sizeof(xpm3Buff));
-		for ( x = 0; x < width; x++ ){
-			FreeImage_GetPixelColor( image, x, y, &color );
-			if (color.rgbReserved >= ALPHATHRESH ){
+		for (x = 0; x < width; x++) {
+			FreeImage_GetPixelColor(image, x, y, &color);
+			if (color.rgbReserved >= ALPHATHRESH) {
 				j = Qadd[i];
 				c[0] = pChar(j);
 				strscat(xpm3Buff, c, sizeof(xpm3Buff));
 				i++;
-			}
-			else
-			{
+			} else {
 				strscat(xpm3Buff, " ", sizeof(xpm3Buff));
 			}
 		}
 
-		if (y > 0)
-		{
+		if (y > 0) {
 			strscat(xpm3Buff, "\","ENDLN, sizeof(xpm3Buff));
-		}
-		else
-		{
+		} else {
 			strscat(xpm3Buff, "\"};"ENDLN, sizeof(xpm3Buff));
 		}
 	}
 
-	if (icon == 32)
-	{
+	if (icon == 32) {
 		strscat(xpm3Buff, ENDLN"static char **", sizeof(xpm3Buff));
 		strscat(xpm3Buff, xpmName, sizeof(xpm3Buff));
 		strscat(xpm3Buff, "_xpm3[3] = { ", sizeof(xpm3Buff));
@@ -552,7 +556,8 @@ int genXpm ( int icon, char* name, int width, int height ) {
 	return 0;
 }
 
-int process( char* path, char* name, int icon ){
+int process(char* path, char* name, int icon)
+{
 	int i;
 	int w, h;
 	int x, y;
@@ -573,55 +578,54 @@ int process( char* path, char* name, int icon ){
 
 	// Try override first
 	sprintf(filename, "%spng/%s%d.png", path, name, icon);
-	//#if defined(WIN32) || defined(_WIN32) 
+	//#if defined(WIN32) || defined(_WIN32)
 	//	if ( _access(filename, 04) != 0) {
 	//#else
 	//	if ( access( filename, R_OK ) != 0 ) {
 	//#endif
 	//		sprintf( filename,"%s/png/%s%d.png",path,name,icon );
 	//	}
-	#ifdef DEBUGPRINT
-		fprintf(stdout, "PNG: %s\n", filename );
-	#endif
+#ifdef DEBUGPRINT
+	fprintf(stdout, "PNG: %s\n", filename);
+#endif
 
 	image = FreeImage_Load(FIF_PNG, filename, PNG_DEFAULT);
-	if ( image == NULL ){
+	if (image == NULL) {
 		fprintf(stderr, "%s not found.\n", filename);
-		exit( 1 );
+		exit(1);
 	}
 
-	if (FreeImage_GetBPP(image) != 32) 
-	{
+	if (FreeImage_GetBPP(image) != 32) {
 		FIBITMAP* tempImage = image;
 		image = FreeImage_ConvertTo32Bits(tempImage);
 	}
 
-	w = FreeImage_GetWidth( image );
-	h = FreeImage_GetHeight( image );
+	w = FreeImage_GetWidth(image);
+	h = FreeImage_GetHeight(image);
 
 	// Count non-transparent pixels - this is the "size" of the image
 	size = 0;
-	for ( y = 0; y < h; y++ ){
-		for ( x = 0; x < w; x++ ){
-			FreeImage_GetPixelColor( image, x, y, &color );
+	for (y = 0; y < h; y++) {
+		for (x = 0; x < w; x++) {
+			FreeImage_GetPixelColor(image, x, y, &color);
 			a = color.rgbReserved;
-			if ( a >= ALPHATHRESH ){
+			if (a >= ALPHATHRESH) {
 				size++;
 			}
 		}
 	}
 
 	/* input R,G,B components into Ir, Ig, Ib */
-	Ir = (unsigned char *)malloc(size);
-	Ig = (unsigned char *)malloc(size);
-	Ib = (unsigned char *)malloc(size);
+	Ir = (unsigned char*)malloc(size);
+	Ig = (unsigned char*)malloc(size);
+	Ib = (unsigned char*)malloc(size);
 	assert(Ir && Ig && Ib);
 	i = 0;
-	for ( y = h-1; y >= 0; y-- ){
-		for ( x = 0; x < w; x++ ){
-			FreeImage_GetPixelColor( image, x, y, &color );
+	for (y = h - 1; y >= 0; y--) {
+		for (x = 0; x < w; x++) {
+			FreeImage_GetPixelColor(image, x, y, &color);
 			a = color.rgbReserved;
-			if ( a >= ALPHATHRESH ){
+			if (a >= ALPHATHRESH) {
 				frac = (float)a / 255;
 				bg = BACKGROUND * (1.0f - frac);
 				Ir[i] = (unsigned char)min(255, color.rgbRed * frac + bg) & BGMASK;
@@ -632,11 +636,11 @@ int process( char* path, char* name, int icon ){
 		}
 	}
 
-	cq( );
+	cq();
 
-	free( Ig ); free( Ib ); free( Ir ); /* */
+	free(Ig); free(Ib); free(Ir); /* */
 
-	genXpm( icon, name, w, h );
+	genXpm(icon, name, w, h);
 
 	// Delete
 	FreeImage_Unload(image);
@@ -644,13 +648,13 @@ int process( char* path, char* name, int icon ){
 	return 0;
 }
 
-int main( int argc, char *argv[] )
+int main(int argc, char* argv[])
 {
 	char buffer[1000];
 	char path[1000];
 	char name[100];
-	char *temp;
-	char *ext;
+	char* temp;
+	char* ext;
 	int i = 0, j = 0;
 	int icon;
 
@@ -658,25 +662,24 @@ int main( int argc, char *argv[] )
 	fprintf(stderr, "Begin pngtoxpm\n");
 #endif
 
-	if( argc < 2 ){
+	if (argc < 2) {
 		printf("PngToXpm ver 0.2\nUsage: pngtoxpm filename\nfilename is the path to the resultant XPM3\n");
 		return 0;
 	}
 
 	// Get the file base name from path/name.ext
-	strncpy( buffer, argv[1], sizeof(buffer) - 1);
+	strncpy(buffer, argv[1], sizeof(buffer) - 1);
 
-	strncpy( path, argv[1], sizeof(path) - 1);
+	strncpy(path, argv[1], sizeof(path) - 1);
 #ifdef DEBUGPRINT
 	fprintf(stderr, "Filename: %s\n", path);
 #endif
 
-	temp = strrchr( path, '/' );
-	if (temp != NULL){
+	temp = strrchr(path, '/');
+	if (temp != NULL) {
 		temp++;
 		*temp = '\0';
-	}
-	else {
+	} else {
 		path[0] = '\0';
 	}
 
@@ -687,34 +690,34 @@ int main( int argc, char *argv[] )
 	(temp = strrchr(buffer, '/')) ? ++temp : (temp = buffer);
 
 	ext = strrchr(temp, '.');
-	if (ext != NULL) 
+	if (ext != NULL) {
 		*ext = '\0';
+	}
 	strncpy(name, temp, sizeof(name) - 1);
 
 #ifdef DEBUGPRINT
-	fprintf(stdout, "In: %s %s\n", path, name );
+	fprintf(stdout, "In: %s %s\n", path, name);
 #endif
 
 
-	for (icon=16; icon<=32; icon+=8)
-	{
-		process( path, name, icon );
+	for (icon = 16; icon <= 32; icon += 8) {
+		process(path, name, icon);
 	}
 
 	// Write the xpm file
 	strncpy(buffer, argv[1], sizeof(buffer) - 1);
 #ifdef DEBUGPRINT
-	fprintf(stdout, "XPM: %s\n", buffer );
+	fprintf(stdout, "XPM: %s\n", buffer);
 #endif
 
-	FILE* ptr; 
+	FILE* ptr;
 	ptr = fopen(buffer, "w");
-	if ( ptr == NULL ){
+	if (ptr == NULL) {
 		fprintf(stderr, "XPM3 file could not be created.\n");
-		exit( 1 );
+		exit(1);
 	}
-	fprintf( ptr, "%s", xpm3Buff );
-	fclose( ptr );
+	fprintf(ptr, "%s", xpm3Buff);
+	fclose(ptr);
 
 	return 0;
 }
