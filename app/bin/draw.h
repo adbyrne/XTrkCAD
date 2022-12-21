@@ -70,41 +70,44 @@ struct drawCmd_t;
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {
-    void (*drawLine)(drawCmd_p, coOrd, coOrd, wDrawWidth, wDrawColor);
-    void (*drawArc)(drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth,
-                    wDrawColor);
-    void (*drawString)(drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T,
-                       wDrawColor);
-    void (*drawBitMap)(drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor);
-    void (*drawPoly)(drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth, drawFill_e);
-    void (*drawFillCircle)(drawCmd_p, coOrd, DIST_T,  wDrawColor);
-    void (*drawRectangle)(drawCmd_p, coOrd, coOrd, wDrawColor, drawFill_e);
+	void (*drawLine)(drawCmd_p, coOrd, coOrd, wDrawWidth, wDrawColor);
+	void (*drawArc)(drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth,
+	                wDrawColor);
+	void (*drawString)(drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T,
+	                   wDrawColor);
+	void (*drawBitMap)(drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor);
+	void (*drawPoly)(drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth,
+	                 drawFill_e);
+	void (*drawFillCircle)(drawCmd_p, coOrd, DIST_T,  wDrawColor);
+	void (*drawRectangle)(drawCmd_p, coOrd, coOrd, wDrawColor, drawFill_e);
 } drawFuncs_t;
 
-typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
-typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wDrawPix_t *, wDrawPix_t *);
+typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wDrawPix_t, wDrawPix_t,
+                                     coOrd *);
+typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wDrawPix_t *,
+                                     wDrawPix_t *);
 typedef struct drawCmd_t {
-    wDraw_p d;
-    drawFuncs_t * funcs;
-    unsigned long options;
-    DIST_T scale;
-    ANGLE_T angle;
-    coOrd orig;
-    coOrd size;
-    drawConvertPix2CoOrd Pix2CoOrd;
-    drawConvertCoOrd2Pix CoOrd2Pix;
-    FLOAT_T dpi;
+	wDraw_p d;
+	drawFuncs_t * funcs;
+	unsigned long options;
+	DIST_T scale;
+	ANGLE_T angle;
+	coOrd orig;
+	coOrd size;
+	drawConvertPix2CoOrd Pix2CoOrd;
+	drawConvertCoOrd2Pix CoOrd2Pix;
+	FLOAT_T dpi;
 } drawCmd_t;
 
 #define SCALEX(D,X)		((X)/(D).dpi)
 #define SCALEY(D,Y)		((Y)/(D).dpi)
 
 #ifdef WINDOWS
-    #define LBORDER (33)
-    #define BBORDER (32)
+#define LBORDER (33)
+#define BBORDER (32)
 #else
-    #define LBORDER (26)
-    #define BBORDER (27)
+#define LBORDER (26)
+#define BBORDER (27)
 #endif
 #define RBORDER (9)
 #define TBORDER (8)

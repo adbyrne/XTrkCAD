@@ -1,5 +1,5 @@
 /** \file track.h
- * 
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -90,29 +90,29 @@ typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight, curveTypeBezier
 #define PARAMS_LINE     (7)	   //Called on Lines
 
 typedef struct {
-		curveType_e type;			//Straight, Curve, Bezier, Cornu
-		EPINX_T ep;					//End point that is nearby pos
-		dynArr_t nodes;				//Array of nodes -> PARAMS_PARALLEL only
-		DIST_T len;					//Length of track
-		ANGLE_T angle;				//Angle at end of track
-		coOrd lineOrig;				//Start of straight
-		coOrd lineEnd;				//End of Straight (or zero for Turnout)
-		coOrd arcP;					//center or zero
-		DIST_T arcR;				//radius or zero
-		ANGLE_T arcA0, arcA1;		//Start angle and angular length (clockwise)
-		long helixTurns;
-		ANGLE_T	track_angle;
-		BOOL_T circleOrHelix;		//Track is circle or Helix
-		coOrd bezierPoints[4];		//Bezier Ends and CPs
-		coOrd cornuEnd[2];			//Cornu Ends
-		ANGLE_T cornuAngle[2];		//Angle at Cornu Ends
-		DIST_T cornuRadius[2];		//Radius at Cornu Ends
-		coOrd cornuCenter[2];		//Center at Cornu Ends
-		coOrd ttcenter;				//Turntable
-		DIST_T ttradius; 			//Turntable
-		coOrd centroid;				//Turnout
+	curveType_e type;			//Straight, Curve, Bezier, Cornu
+	EPINX_T ep;					//End point that is nearby pos
+	dynArr_t nodes;				//Array of nodes -> PARAMS_PARALLEL only
+	DIST_T len;					//Length of track
+	ANGLE_T angle;				//Angle at end of track
+	coOrd lineOrig;				//Start of straight
+	coOrd lineEnd;				//End of Straight (or zero for Turnout)
+	coOrd arcP;					//center or zero
+	DIST_T arcR;				//radius or zero
+	ANGLE_T arcA0, arcA1;		//Start angle and angular length (clockwise)
+	long helixTurns;
+	ANGLE_T	track_angle;
+	BOOL_T circleOrHelix;		//Track is circle or Helix
+	coOrd bezierPoints[4];		//Bezier Ends and CPs
+	coOrd cornuEnd[2];			//Cornu Ends
+	ANGLE_T cornuAngle[2];		//Angle at Cornu Ends
+	DIST_T cornuRadius[2];		//Radius at Cornu Ends
+	coOrd cornuCenter[2];		//Center at Cornu Ends
+	coOrd ttcenter;				//Turntable
+	DIST_T ttradius; 			//Turntable
+	coOrd centroid;				//Turnout
 
-		} trackParams_t;
+} trackParams_t;
 
 #define Q_CANNOT_BE_ON_END				(1)
 #define Q_IGNORE_EASEMENT_ON_EXTEND		(2)
@@ -147,52 +147,54 @@ typedef struct {
 #define Q_GET_NODES						(32)
 
 typedef struct traverseTrack_t {
-		track_p trk;							// IN Current Track OUT Next Track
-		DIST_T length;							// IN How far to go
-		DIST_T dist;							// OUT how far left = 0 if found
-		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
-		ANGLE_T angle;							// IN/OUT - angle now
-		} traverseTrack_t;
+	track_p trk;							// IN Current Track OUT Next Track
+	DIST_T length;							// IN How far to go
+	DIST_T dist;							// OUT how far left = 0 if found
+	coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
+	ANGLE_T angle;							// IN/OUT - angle now
+} traverseTrack_t;
 typedef struct traverseTrack_t *traverseTrack_p;
 
 
 typedef struct {
-		char * name;
-		void (*draw)( track_p, drawCmd_p, wDrawColor );
-		DIST_T (*distance)( track_p, coOrd * );
-		void (*describe)( track_p, char * line, CSIZE_T len );
-		void (*deleteTrk)( track_p );
-		BOOL_T (*write)( track_p, FILE * );
-		BOOL_T (*read)( char * );
-		void (*move)( track_p, coOrd );
-		void (*rotate)( track_p, coOrd, ANGLE_T );
-		void (*rescale)( track_p, FLOAT_T );
-		BOOL_T (*audit)( track_p, char * );
-		ANGLE_T (*getAngle)( track_p, coOrd, EPINX_T *, EPINX_T * );
-		BOOL_T (*split)( track_p, coOrd, EPINX_T, track_p *, EPINX_T *, EPINX_T * );
-		BOOL_T (*traverse)( traverseTrack_p, DIST_T * );
-		BOOL_T (*enumerate)( track_p );
-		void (*redraw)( void );
-		BOOL_T (*trim)( track_p, EPINX_T, DIST_T, coOrd endpos, ANGLE_T angle, DIST_T endradius, coOrd endcenter );
-		BOOL_T (*merge)( track_p, EPINX_T, track_p, EPINX_T );
-		STATUS_T (*modify)( track_p, wAction_t, coOrd );
-		DIST_T (*getLength)( track_p );
-		BOOL_T (*getTrackParams)( int, track_p, coOrd pos, trackParams_t * );
-		BOOL_T (*moveEndPt)( track_p *, EPINX_T *, coOrd, DIST_T );
-		BOOL_T (*query)( track_p, int );
-		void (*ungroup)( track_p );
-		void (*flip)( track_p, coOrd, ANGLE_T );
-		void (*drawPositionIndicator)( track_p, wDrawColor );
-		void (*advancePositionIndicator)( track_p, coOrd, coOrd *, ANGLE_T * );
-		BOOL_T (*checkTraverse)( track_p, coOrd );
-		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd *, BOOL_T );
-		void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
-		BOOL_T (*rebuildSegs)(track_p);
-		BOOL_T (*replayData)(track_p, void *,long );
-		BOOL_T (*storeData)(track_p, void **,long *);
-		void  (*activate)(track_p);
-		wBool_t (*compare)( track_cp, track_cp );
-		} trackCmd_t;
+	char * name;
+	void (*draw)( track_p, drawCmd_p, wDrawColor );
+	DIST_T (*distance)( track_p, coOrd * );
+	void (*describe)( track_p, char * line, CSIZE_T len );
+	void (*deleteTrk)( track_p );
+	BOOL_T (*write)( track_p, FILE * );
+	BOOL_T (*read)( char * );
+	void (*move)( track_p, coOrd );
+	void (*rotate)( track_p, coOrd, ANGLE_T );
+	void (*rescale)( track_p, FLOAT_T );
+	BOOL_T (*audit)( track_p, char * );
+	ANGLE_T (*getAngle)( track_p, coOrd, EPINX_T *, EPINX_T * );
+	BOOL_T (*split)( track_p, coOrd, EPINX_T, track_p *, EPINX_T *, EPINX_T * );
+	BOOL_T (*traverse)( traverseTrack_p, DIST_T * );
+	BOOL_T (*enumerate)( track_p );
+	void (*redraw)( void );
+	BOOL_T (*trim)( track_p, EPINX_T, DIST_T, coOrd endpos, ANGLE_T angle,
+	                DIST_T endradius, coOrd endcenter );
+	BOOL_T (*merge)( track_p, EPINX_T, track_p, EPINX_T );
+	STATUS_T (*modify)( track_p, wAction_t, coOrd );
+	DIST_T (*getLength)( track_p );
+	BOOL_T (*getTrackParams)( int, track_p, coOrd pos, trackParams_t * );
+	BOOL_T (*moveEndPt)( track_p *, EPINX_T *, coOrd, DIST_T );
+	BOOL_T (*query)( track_p, int );
+	void (*ungroup)( track_p );
+	void (*flip)( track_p, coOrd, ANGLE_T );
+	void (*drawPositionIndicator)( track_p, wDrawColor );
+	void (*advancePositionIndicator)( track_p, coOrd, coOrd *, ANGLE_T * );
+	BOOL_T (*checkTraverse)( track_p, coOrd );
+	BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *,
+	                        coOrd *, BOOL_T );
+	void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
+	BOOL_T (*rebuildSegs)(track_p);
+	BOOL_T (*replayData)(track_p, void *,long );
+	BOOL_T (*storeData)(track_p, void **,long *);
+	void  (*activate)(track_p);
+	wBool_t (*compare)( track_cp, track_cp );
+} trackCmd_t;
 
 
 #define NOELEV (-10000.0)
@@ -252,7 +254,7 @@ void TrackDeleteLayer( int );
 track_p GetFirstTrack();
 track_p GetNextTrack( track_p );
 
-#define TRK_ITERATE(TRK)		for (TRK=GetFirstTrack(); TRK!=NULL; TRK=GetNextTrack(TRK) ) if (!IsTrackDeleted(TRK)) 
+#define TRK_ITERATE(TRK)		for (TRK=GetFirstTrack(); TRK!=NULL; TRK=GetNextTrack(TRK) ) if (!IsTrackDeleted(TRK))
 
 
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
@@ -336,7 +338,8 @@ wBool_t IsAngleClose( ANGLE_T, ANGLE_T );
 wBool_t IsDistClose( DIST_T, DIST_T );
 wBool_t IsWidthClose( DIST_T, DIST_T );
 wBool_t IsColorClose( wDrawColor, wDrawColor );
-wBool_t CheckRegressionResult( long regressionVersion, char * sFileName, wBool_t bQuiet );
+wBool_t CheckRegressionResult( long regressionVersion, char * sFileName,
+                               wBool_t bQuiet );
 
 void MoveTrack( track_p, coOrd );
 void RotateTrack( track_p, coOrd, ANGLE_T );
@@ -350,7 +353,8 @@ EPINX_T GetNextTrkOnPath( track_p, EPINX_T );
 #define FDE_UDF 1
 #define FDE_END 2
 int FindDefinedElev( track_p, EPINX_T, int, BOOL_T, DIST_T *, DIST_T *);
-BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST_T * grade, BOOL_T force);
+BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev,
+                    DIST_T * grade, BOOL_T force);
 
 #define DTS_LEFT		(1<<0)
 #define DTS_RIGHT		(1<<1)
@@ -363,23 +367,27 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 
 BOOL_T DrawTwoRails( drawCmd_p d, DIST_T factor );
 BOOL_T hasTrackCenterline( drawCmd_p d );
-void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp, wDrawColor, long );
-void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
+void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, track_cp,
+                      wDrawColor, long );
+void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor,
+                        long );
 
-void DrawStraightTies( drawCmd_p d, tieData_t td, coOrd p0, coOrd p1, wDrawColor color );
+void DrawStraightTies( drawCmd_p d, tieData_t td, coOrd p0, coOrd p1,
+                       wDrawColor color );
 wBool_t DoDrawTies(drawCmd_p d, track_cp trk);
-void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width, wDrawColor color, BOOL_T solid);
+void DrawTie(drawCmd_p d, coOrd pos, ANGLE_T angle, DIST_T length, DIST_T width,
+             wDrawColor color, BOOL_T solid);
 
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);
 track_p OnTrack( coOrd *, INT_T, BOOL_T );
-track_p OnTrackIgnore(coOrd *, INT_T, BOOL_T , track_p );
+track_p OnTrackIgnore(coOrd *, INT_T, BOOL_T, track_p );
 track_p OnTrack2( coOrd *, INT_T, BOOL_T, BOOL_T, track_p );
 
 void ComputeRectBoundingBox( track_p, coOrd, coOrd );
 void ComputeBoundingBox( track_p );
-void DrawEndPt( drawCmd_p, track_p, EPINX_T, wDrawColor ); 
-void DrawEndPt2( drawCmd_p, track_p, EPINX_T, wDrawColor ); 
+void DrawEndPt( drawCmd_p, track_p, EPINX_T, wDrawColor );
+void DrawEndPt2( drawCmd_p, track_p, EPINX_T, wDrawColor );
 wDrawColor GetTrkColor( track_p, drawCmd_p );
 void DrawTrack( track_cp, drawCmd_p, wDrawColor );
 void DrawTracks( drawCmd_p, DIST_T, coOrd, coOrd );
@@ -395,9 +403,9 @@ void ResolveIndex( void );
 void RenumberTracks( void );
 BOOL_T ReadTrack( char * );
 BOOL_T WriteTracks( FILE *, wBool_t );
-BOOL_T ExportTracks( FILE * , coOrd * );
+BOOL_T ExportTracks( FILE *, coOrd * );
 void ImportStart( void );
-void ImportEnd( coOrd , wBool_t, wBool_t);
+void ImportEnd( coOrd, wBool_t, wBool_t);
 void FreeTrack( track_p );
 void ClearTracks( void );
 BOOL_T TrackIterate( track_p * );
@@ -418,7 +426,8 @@ BOOL_T ConnectTurntableTracks(track_p, EPINX_T,	track_p, EPINX_T  );
 BOOL_T SplitTrack( track_p, coOrd, EPINX_T, track_p *leftover, BOOL_T );
 BOOL_T TraverseTrack( traverseTrack_p, DIST_T * );
 BOOL_T RemoveTrack( track_p*, EPINX_T*, DIST_T* );
-BOOL_T TrimTrack( track_p, EPINX_T, DIST_T, coOrd pos, ANGLE_T angle, DIST_T radius, coOrd center);
+BOOL_T TrimTrack( track_p, EPINX_T, DIST_T, coOrd pos, ANGLE_T angle,
+                  DIST_T radius, coOrd center);
 BOOL_T MergeTracks( track_p, EPINX_T, track_p, EPINX_T );
 STATUS_T ExtendStraightFromOrig( track_p, wAction_t, coOrd );
 STATUS_T ExtendTrackFromOrig( track_p, wAction_t, coOrd );
@@ -436,7 +445,8 @@ BOOL_T ReplayTrackData(track_p, void *, long);
 DIST_T GetFlexLength( track_p, EPINX_T, coOrd * );
 void LabelLengths( drawCmd_p, track_p, wDrawColor );
 DIST_T GetTrkLength( track_p, EPINX_T, EPINX_T );
-void AddTrkDetails(drawCmd_p d, track_p trk, coOrd pos, DIST_T length, wDrawColor color);
+void AddTrkDetails(drawCmd_p d, track_p trk, coOrd pos, DIST_T length,
+                   wDrawColor color);
 
 void SelectAbove( void * unused );
 void SelectBelow( void * unused );
@@ -448,7 +458,8 @@ void DrawTurnout(track_p, drawCmd_p, wDrawColor);
 void DrawPositionIndicators( void );
 void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
-BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd * , BOOL_T);
+BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *,
+                          coOrd *, BOOL_T);
 
 /*trkendpt.c*/
 coOrd GetTrkEndPos( track_p, EPINX_T );
@@ -461,26 +472,31 @@ void SetTrkEndPointSilent( track_p, EPINX_T, coOrd, ANGLE_T );
 track_p GetTrkEndTrk( track_p, EPINX_T );
 BOOL_T WriteEndPt( FILE *, track_cp, EPINX_T );
 void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
-DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *, BOOL_T show_hidden, BOOL_T * hidden );
+DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *,
+                                 BOOL_T show_hidden, BOOL_T * hidden );
 STATUS_T EndPtDescriptionMove( track_p, EPINX_T, wAction_t, coOrd );
 void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
 DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
-BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *grade);
-void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade);
+BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height,
+                                  DIST_T *grade);
+void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height,
+                                 DIST_T grade);
 char * GetTrkEndElevStation( track_p, EPINX_T );
 #define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
 #define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
 #define EndPtIsStationElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_STATION)
 
 /*tstraight.c*/
-DIST_T StraightDescriptionDistance(coOrd pos, track_p trk, coOrd * dpos, BOOL_T show_hidden, BOOL_T * hidden);
+DIST_T StraightDescriptionDistance(coOrd pos, track_p trk, coOrd * dpos,
+                                   BOOL_T show_hidden, BOOL_T * hidden);
 STATUS_T StraightDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 
 /*tease.c*/
-DIST_T JointDescriptionDistance(coOrd pos,track_p trk,coOrd * dpos,BOOL_T show_hidden,BOOL_T * hidden);
+DIST_T JointDescriptionDistance(coOrd pos,track_p trk,coOrd * dpos,
+                                BOOL_T show_hidden,BOOL_T * hidden);
 STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 
 /* cmisc.c */
@@ -495,26 +511,26 @@ typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLO
 typedef enum { DESC_PIVOT_FIRST, DESC_PIVOT_MID, DESC_PIVOT_SECOND, DESC_PIVOT_NONE } descPivot_t;
 #define DESC_PIVOT_1
 typedef struct {
-		coOrd pos;
-		POS_T ang;
-		} descEndPt_t;
+	coOrd pos;
+	POS_T ang;
+} descEndPt_t;
 typedef struct {
-		descType type;
-		char * label;
-		void * valueP;
-		unsigned int max_string;
-		int mode;
-		wControl_p control0;
-		wControl_p control1;
-		wWinPix_t posy;
-		} descData_t, * descData_p;
+	descType type;
+	char * label;
+	void * valueP;
+	unsigned int max_string;
+	int mode;
+	wControl_p control0;
+	wControl_p control1;
+	wWinPix_t posy;
+} descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );
 void DescribeCancel( void );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 STATUS_T CmdDescribe(wAction_t,coOrd);
 
-		
+
 /* compound.c */
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)
@@ -549,12 +565,13 @@ void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 
 /* cdraw.c */
 typedef enum {DRAWLINESOLID,
-			DRAWLINEDASH,
-			DRAWLINEDOT,
-			DRAWLINEDASHDOT,
-			DRAWLINEDASHDOTDOT,
-			DRAWLINECENTER,
-			DRAWLINEPHANTOM } drawLineType_e;
+              DRAWLINEDASH,
+              DRAWLINEDOT,
+              DRAWLINEDASHDOT,
+              DRAWLINEDASHDOTDOT,
+              DRAWLINECENTER,
+              DRAWLINEPHANTOM
+             } drawLineType_e;
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
 track_p MakePolyLineFromSegs( coOrd, ANGLE_T, dynArr_t * );
 void DrawOriginAnchor(track_p);
@@ -575,7 +592,8 @@ void HideHotBar( void );
 void LayoutHotBar ( void *);
 typedef enum { HB_SELECT, HB_DRAW, HB_LISTTITLE, HB_BARTITLE, HB_FULLTITLE } hotBarProc_e;
 typedef char * (*hotBarProc_t)( hotBarProc_e, void *, drawCmd_p, coOrd * );
-void AddHotBarElement( char *, coOrd, coOrd, BOOL_T, BOOL_T, DIST_T, void *, hotBarProc_t );
+void AddHotBarElement( char *, coOrd, coOrd, BOOL_T, BOOL_T, DIST_T, void *,
+                       hotBarProc_t );
 void HotBarCancel( void );
 void AddHotBarTurnouts( void );
 void AddHotBarStructures( void );

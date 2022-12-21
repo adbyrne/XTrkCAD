@@ -1,5 +1,5 @@
 /** \file common-ui.h
- * Defnitions of message and other UI types 
+ * Defnitions of message and other UI types
  */
 
 /*  XTrkCad - Model Railroad CAD

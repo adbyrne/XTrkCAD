@@ -25,8 +25,7 @@
 
 #include "dynstring.h"
 
-enum DXF_DIMENSIONS
-{
+enum DXF_DIMENSIONS {
 	DXF_DIMTEXTSIZE,
 	DXF_DIMARROWSIZE
 };
@@ -35,14 +34,19 @@ void DxfLayerName(DynString *result, char *name, int layer);
 void DxfFormatPosition(DynString *result, int type, double value);
 void DxfLineStyle(DynString *result, int isDashed);
 
-void DxfLineCommand(DynString *result, int layer, double x0, double yo, double x1, double y1, int style, int color);
-void DxfCircleCommand(DynString *result, int layer, double x, double y, double r, int style, int color);
-void DxfArcCommand(DynString *result, int layer, double x, double y, double r, double a0, double a1, int style, int color);
-void DxfTextCommand(DynString *result, int layer, double x, double y, double size, char *text, int color);
+void DxfLineCommand(DynString *result, int layer, double x0, double yo,
+                    double x1, double y1, int style, int color);
+void DxfCircleCommand(DynString *result, int layer, double x, double y,
+                      double r, int style, int color);
+void DxfArcCommand(DynString *result, int layer, double x, double y, double r,
+                   double a0, double a1, int style, int color);
+void DxfTextCommand(DynString *result, int layer, double x, double y,
+                    double size, char *text, int color);
 void DxfUnits(DynString *result);
 void DxfDimensionSize(DynString *result, enum DXF_DIMENSIONS dimension);
 
-void DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1, double y1);
+void DxfPrologue(DynString *result, int layerCount, double x0, double y0,
+                 double x1, double y1);
 void DxfEpilogue(DynString *result);
 #define DXF_INDENT "  "
 

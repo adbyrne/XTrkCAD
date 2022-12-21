@@ -97,7 +97,7 @@ BOOL_T GetArgs( char *, char *, ... );
 char * ReadMultilineText();
 BOOL_T ParseRoomSize( char *, coOrd * );
 int InputError( char *, BOOL_T, ... );
-void SyntaxError( char *, wIndex_t, wIndex_t ); 
+void SyntaxError( char *, wIndex_t, wIndex_t );
 
 void AddParam( char *name, readParam_t proc );
 

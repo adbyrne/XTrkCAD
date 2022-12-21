@@ -55,14 +55,15 @@ extern void DoSticky(void * unused);
 extern void EnableMenus( void );
 extern void MessageListAppend( char *, const char * );
 extern const char * GetBalloonHelpStr(const char * helpKey);
-extern wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long options,
-				wButtonCallBack_p action, void * context);
+extern wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
+                                  long options,
+                                  wButtonCallBack_p action, void * context);
 extern void ButtonGroupBegin(const char * menuTitle, const char * helpKey,
-		const char * stickyLabel);
+                             const char * stickyLabel);
 extern void ButtonGroupEnd(void);
 extern wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
-		const char * helpKey, const char * nameStr, wIcon_p icon, int reqLevel,
-		long options, long acclKey, void * context);
+                              const char * helpKey, const char * nameStr, wIcon_p icon, int reqLevel,
+                              long options, long acclKey, void * context);
 extern void CreateMenus(void);
 
 #endif

@@ -46,7 +46,7 @@ MyMalloc(size_t size)
 	return(malloc(size));
 }
 
-void 
+void
 MyFree(void* memory)
 {
 	free(memory);
@@ -134,7 +134,7 @@ static void FilterTest(void **state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
+	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(CreateLib),
 		cmocka_unit_test(ScanEmptyDir),
 		cmocka_unit_test(ScanTestFiles),
@@ -143,9 +143,9 @@ int main(void)
 		cmocka_unit_test(SearchSingle),
 		cmocka_unit_test(SearchMultiple),
 		cmocka_unit_test(FilterTest),
-    };
+	};
 
 	catalog = InitCatalog();
 
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

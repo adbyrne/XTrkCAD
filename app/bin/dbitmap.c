@@ -81,8 +81,9 @@ static drawCmd_t bitmap_d = {
  * \param 		yPos	 The position.
  */
 
-static void DrawTextCenterXPosY( char *string, wFont_p font, wFontSize_t fontSize,
-                     POS_T yPos )
+static void DrawTextCenterXPosY( char *string, wFont_p font,
+                                 wFontSize_t fontSize,
+                                 POS_T yPos )
 {
 	coOrd textSize;
 	coOrd p;

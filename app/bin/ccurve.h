@@ -27,14 +27,14 @@
 #include "track.h" //- curveType_e
 
 typedef struct {
-		curveType_e type;
-		coOrd curvePos;
-		coOrd pos1;
-		coOrd pos2;
-		DIST_T curveRadius;
-		ANGLE_T a0, a1;
-		BOOL_T negative;
-		} curveData_t;
+	curveType_e type;
+	coOrd curvePos;
+	coOrd pos1;
+	coOrd pos2;
+	DIST_T curveRadius;
+	ANGLE_T a0, a1;
+	BOOL_T negative;
+} curveData_t;
 
 #define crvCmdFromEP1			(0)
 #define crvCmdFromTangent		(1)
@@ -47,14 +47,17 @@ typedef struct {
 #define circleCmdFromCenter		(2)
 
 typedef void (*curveMessageProc)( const char *, ... );
-STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, dynArr_t *,curveMessageProc );
+STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long,
+                      dynArr_t *,curveMessageProc );
 int IsCurveCircle( track_p );
 void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T, DIST_T );
 track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
 DIST_T CurveDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T CurveDescriptionMove( track_p, wAction_t, coOrd );
-BOOL_T GetCurveMiddle( track_p , coOrd * );
-int DrawArrowHeads(trkSeg_p sp, coOrd pos,	ANGLE_T angle, BOOL_T bidirectional, wDrawColor color );
-int DrawArrowHeadsArray(dynArr_t *anchor_array,coOrd pos,ANGLE_T angle,BOOL_T bidirectional,wDrawColor color );
+BOOL_T GetCurveMiddle( track_p, coOrd * );
+int DrawArrowHeads(trkSeg_p sp, coOrd pos,	ANGLE_T angle, BOOL_T bidirectional,
+                   wDrawColor color );
+int DrawArrowHeadsArray(dynArr_t *anchor_array,coOrd pos,ANGLE_T angle,
+                        BOOL_T bidirectional,wDrawColor color );
 
 #endif // !HAVE_CCURVE_H

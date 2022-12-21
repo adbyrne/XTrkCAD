@@ -39,19 +39,19 @@
  * @brief Layout properties in Dialog
 */
 struct sLayoutProps {
-    char			title1[TITLEMAXLEN];
-    char			title2[TITLEMAXLEN];
-    SCALEINX_T		curScaleInx;
-    SCALEDESCINX_T	curScaleDescInx;
-    GAUGEINX_T		curGaugeInx;
-    DIST_T			minTrackRadius;
-    DIST_T			maxTrackGrade;
-    coOrd			roomSize;
-    char            backgroundTextBox[TEXT_FIELD_LEN+1];
-    coOrd			backgroundPos;
-    ANGLE_T			backgroundAngle;
-    int				backgroundScreen;
-    double 			backgroundSize;
+	char			title1[TITLEMAXLEN];
+	char			title2[TITLEMAXLEN];
+	SCALEINX_T		curScaleInx;
+	SCALEDESCINX_T	curScaleDescInx;
+	GAUGEINX_T		curGaugeInx;
+	DIST_T			minTrackRadius;
+	DIST_T			maxTrackGrade;
+	coOrd			roomSize;
+	char            backgroundTextBox[TEXT_FIELD_LEN+1];
+	coOrd			backgroundPos;
+	ANGLE_T			backgroundAngle;
+	int				backgroundScreen;
+	double 			backgroundSize;
 };
 
 
@@ -59,18 +59,21 @@ struct sLayoutProps {
  * @brief Layout properties not in dialog, and save values for Cancel
 */
 struct sDataLayout {
-    struct sLayoutProps props;
-    DynString	fullFileName;
-	DynString   backgroundFileName; /** This is used to hold the entire path string */
-	struct sLayoutProps *copyOfLayoutProps; /** Copy of props used to restore initial values in the event of Cancel */
-	DynString   copyBackgroundFileName; /** Copy of Background Path used to restore initial value in the event of Cancel */
+	struct sLayoutProps props;
+	DynString	fullFileName;
+	DynString
+	backgroundFileName; /** This is used to hold the entire path string */
+	struct sLayoutProps
+		*copyOfLayoutProps; /** Copy of props used to restore initial values in the event of Cancel */
+	DynString
+	copyBackgroundFileName; /** Copy of Background Path used to restore initial value in the event of Cancel */
 };
 
 static struct sDataLayout thisLayout = {
 	{ "", "", -1, 0, 0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
-    NaS,
-	NaS, 
-    NULL,
+	NaS,
+	NaS,
+	NULL,
 	NaS
 };
 
@@ -99,19 +102,19 @@ static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 void
 SetLayoutFullPath(const char *fileName)
 {
-    if (fileName && fileName[0]) {
-    	if (DynStringSize(&thisLayout.fullFileName)) {
-    		if (strcmp(DynStringToCStr(&thisLayout.fullFileName),fileName)==0) {
-    			return;
-    		}
-    		DynStringClear(&thisLayout.fullFileName);
-    	}
-    	DynStringMalloc(&thisLayout.fullFileName, strlen(fileName) + 1);
-    	DynStringCatCStr(&thisLayout.fullFileName, fileName);
-     } else {
-    	 DynStringMalloc(&thisLayout.fullFileName, 2);
-    	 DynStringCatCStr(&thisLayout.fullFileName, "");
-    }
+	if (fileName && fileName[0]) {
+		if (DynStringSize(&thisLayout.fullFileName)) {
+			if (strcmp(DynStringToCStr(&thisLayout.fullFileName),fileName)==0) {
+				return;
+			}
+			DynStringClear(&thisLayout.fullFileName);
+		}
+		DynStringMalloc(&thisLayout.fullFileName, strlen(fileName) + 1);
+		DynStringCatCStr(&thisLayout.fullFileName, fileName);
+	} else {
+		DynStringMalloc(&thisLayout.fullFileName, 2);
+		DynStringCatCStr(&thisLayout.fullFileName, "");
+	}
 }
 
 /**
@@ -123,12 +126,12 @@ SetLayoutFullPath(const char *fileName)
 void
 LoadLayoutMinRadiusPref(char *scaleName, double defaultValue)
 {
-    DynString prefString = { NULL };
+	DynString prefString = { NULL };
 
-    DynStringPrintf(&prefString, MINTRACKRADIUSPREFS "-%s", scaleName);
-    wPrefGetFloat("misc", DynStringToCStr(&prefString),
-                  &thisLayout.props.minTrackRadius, defaultValue);
-    DynStringFree(&prefString);
+	DynStringPrintf(&prefString, MINTRACKRADIUSPREFS "-%s", scaleName);
+	wPrefGetFloat("misc", DynStringToCStr(&prefString),
+	              &thisLayout.props.minTrackRadius, defaultValue);
+	DynStringFree(&prefString);
 }
 
 /**
@@ -144,7 +147,7 @@ LoadLayoutMaxGradePref(char* scaleName, double defaultValue)
 
 	DynStringPrintf(&prefString, MAXTRACKGRADEPREFS "-%s", scaleName);
 	wPrefGetFloat("misc", DynStringToCStr(&prefString),
-		&thisLayout.props.maxTrackGrade, defaultValue);
+	              &thisLayout.props.maxTrackGrade, defaultValue);
 	DynStringFree(&prefString);
 }
 
@@ -156,8 +159,8 @@ LoadLayoutMaxGradePref(char* scaleName, double defaultValue)
 static void
 CopyLayoutTitle(char* dest, char *src)
 {
-    strncpy(dest, src, TITLEMAXLEN);
-    *(dest + TITLEMAXLEN - 1) = '\0';
+	strncpy(dest, src, TITLEMAXLEN);
+	*(dest + TITLEMAXLEN - 1) = '\0';
 }
 
 
@@ -179,7 +182,7 @@ SetFileChanged(void)
 void
 SetLayoutTitle(char *title)
 {
-    CopyLayoutTitle(thisLayout.props.title1, title);
+	CopyLayoutTitle(thisLayout.props.title1, title);
 }
 
 /**
@@ -189,17 +192,17 @@ SetLayoutTitle(char *title)
 void
 SetLayoutSubtitle(char *title)
 {
-    CopyLayoutTitle(thisLayout.props.title2, title);
+	CopyLayoutTitle(thisLayout.props.title2, title);
 }
 
 /**
  * @brief Set the Layout minimum track radius.
- * @param radius 
+ * @param radius
 */
 void
 SetLayoutMinTrackRadius(DIST_T radius)
 {
-    thisLayout.props.minTrackRadius = radius;
+	thisLayout.props.minTrackRadius = radius;
 }
 
 /**
@@ -209,7 +212,7 @@ SetLayoutMinTrackRadius(DIST_T radius)
 void
 SetLayoutMaxTrackGrade(ANGLE_T angle)
 {
-    thisLayout.props.maxTrackGrade = angle;
+	thisLayout.props.maxTrackGrade = angle;
 }
 
 /**
@@ -219,17 +222,17 @@ SetLayoutMaxTrackGrade(ANGLE_T angle)
 void
 SetLayoutRoomSize(coOrd size)
 {
-    thisLayout.props.roomSize = size;
+	thisLayout.props.roomSize = size;
 }
 
 /**
- * @brief Set the Layout scale (index). Also set the default Tie Data. 
+ * @brief Set the Layout scale (index). Also set the default Tie Data.
  * @param scale The Layout scale index.
 */
 void
 SetLayoutCurScale(SCALEINX_T scale)
 {
-    thisLayout.props.curScaleInx = scale;
+	thisLayout.props.curScaleInx = scale;
 }
 
 /**
@@ -239,7 +242,7 @@ SetLayoutCurScale(SCALEINX_T scale)
 void
 SetLayoutCurScaleDesc(SCALEDESCINX_T desc)
 {
-    thisLayout.props.curScaleDescInx = desc;
+	thisLayout.props.curScaleDescInx = desc;
 }
 
 /**
@@ -249,14 +252,15 @@ SetLayoutCurScaleDesc(SCALEDESCINX_T desc)
 void
 SetLayoutCurGauge(GAUGEINX_T gauge)
 {
-    thisLayout.props.curGaugeInx = gauge;
+	thisLayout.props.curGaugeInx = gauge;
 }
 
 /**
  * @brief Set the Layout background full path.
  * @param fileName The Layout background full path string.
 */
-void SetLayoutBackGroundFullPath(const char *fileName) {
+void SetLayoutBackGroundFullPath(const char *fileName)
+{
 	if (fileName && fileName[0]) {
 		if (DynStringSize(&thisLayout.backgroundFileName)) {
 			if (strcmp(DynStringToCStr(&thisLayout.backgroundFileName),fileName)==0) {
@@ -277,15 +281,17 @@ void SetLayoutBackGroundFullPath(const char *fileName) {
  * @brief Set the Layout background size (relative to the layout width)
  * @param size The Layout background size.
 */
-void SetLayoutBackGroundSize(double size) {
-		thisLayout.props.backgroundSize = size;
+void SetLayoutBackGroundSize(double size)
+{
+	thisLayout.props.backgroundSize = size;
 }
 
 /**
  * @brief Set the Layout background position (origin).
  * @param pos The Layout background origin (coOrd).
 */
-void SetLayoutBackGroundPos(coOrd pos) {
+void SetLayoutBackGroundPos(coOrd pos)
+{
 	thisLayout.props.backgroundPos = pos;
 
 }
@@ -294,7 +300,8 @@ void SetLayoutBackGroundPos(coOrd pos) {
  * @brief Set the Layout Background angle.
  * @param angle The Layout Background angle (ANGLE_T).
 */
-void SetLayoutBackGroundAngle(ANGLE_T angle) {
+void SetLayoutBackGroundAngle(ANGLE_T angle)
+{
 	thisLayout.props.backgroundAngle = angle;
 
 }
@@ -303,7 +310,8 @@ void SetLayoutBackGroundAngle(ANGLE_T angle) {
  * @brief Set the Layout Background screen (percent of transparency)
  * @param screen The Screen value (0-100)
 */
-void SetLayoutBackGroundScreen(int screen) {
+void SetLayoutBackGroundScreen(int screen)
+{
 	thisLayout.props.backgroundScreen = screen;
 
 }
@@ -318,7 +326,7 @@ char *
 GetLayoutFullPath()
 {
 	char * s = DynStringToCStr(&thisLayout.fullFileName);
-    return s;
+	return s;
 }
 
 /**
@@ -330,13 +338,13 @@ GetLayoutFullPath()
 char *
 GetLayoutFilename()
 {
-    char *string = DynStringToCStr(&thisLayout.fullFileName);
+	char *string = DynStringToCStr(&thisLayout.fullFileName);
 
-    if (string) {
-        return FindFilename(string);
-    } else {
-        return (NULL);
-    }
+	if (string) {
+		return FindFilename(string);
+	} else {
+		return (NULL);
+	}
 }
 
 /**
@@ -346,7 +354,7 @@ GetLayoutFilename()
 char *
 GetLayoutTitle()
 {
-    return (thisLayout.props.title1);
+	return (thisLayout.props.title1);
 }
 
 /**
@@ -356,7 +364,7 @@ GetLayoutTitle()
 char *
 GetLayoutSubtitle()
 {
-    return (thisLayout.props.title2);
+	return (thisLayout.props.title2);
 }
 
 /**
@@ -366,7 +374,7 @@ GetLayoutSubtitle()
 DIST_T
 GetLayoutMinTrackRadius()
 {
-    return (thisLayout.props.minTrackRadius);
+	return (thisLayout.props.minTrackRadius);
 }
 
 /**
@@ -376,7 +384,7 @@ GetLayoutMinTrackRadius()
 ANGLE_T
 GetLayoutMaxTrackGrade()
 {
-    return (thisLayout.props.maxTrackGrade);
+	return (thisLayout.props.maxTrackGrade);
 }
 
 /**
@@ -386,7 +394,7 @@ GetLayoutMaxTrackGrade()
 SCALEDESCINX_T
 GetLayoutCurScaleDesc()
 {
-    return (thisLayout.props.curScaleDescInx);
+	return (thisLayout.props.curScaleDescInx);
 }
 
 /**
@@ -396,7 +404,7 @@ GetLayoutCurScaleDesc()
 SCALEINX_T
 GetLayoutCurScale()
 {
-    return (thisLayout.props.curScaleInx);
+	return (thisLayout.props.curScaleInx);
 }
 
 /**
@@ -476,15 +484,17 @@ static void LayoutChange(long changes);
 /**
 * Show only the filename in the Dialog
 */
-void SetName() {
+void SetName()
+{
 	char *name = GetLayoutBackGroundFullPath();
 	if (name && name[0]) {									//Ignore ""
 		char *f = FindFilename(name);
-		if ( f )
+		if ( f ) {
 			strncpy( thisLayout.props.backgroundTextBox,f,TEXT_FIELD_LEN );
-		else
+		} else {
 			thisLayout.props.backgroundTextBox[0] = '\0';
-	} else thisLayout.props.backgroundTextBox[0] = '\0';
+		}
+	} else { thisLayout.props.backgroundTextBox[0] = '\0'; }
 }
 
 static struct wFilSel_t * imageFile_fs;
@@ -502,7 +512,7 @@ EXPORT wButton_p backgroundB;
 
 /**
  * @brief Enable background visibility toggle from Menu or Button
- * @param unused 
+ * @param unused
 */
 void
 BackgroundToggleShow( void * unused )
@@ -522,7 +532,7 @@ int GetLayoutBackGroundVisible()
 }
 
 /**
- * @brief Returns status of layout background. 
+ * @brief Returns status of layout background.
  * @return true if a background is defined, false otherwise
 */
 bool HasBackGround()
@@ -531,7 +541,7 @@ bool HasBackGround()
 }
 
 /**
-* Try to load the background image file. Display notice if failed to load. 
+* Try to load the background image file. Display notice if failed to load.
 * @return TRUE if successful, FALSE if not.
 */
 wBool_t
@@ -553,62 +563,63 @@ LoadBackGroundImage(void)
 
 /**
 * Callback from File Select for Background Image File
-* 
+*
 * \param files number of files selected (only first file is used)
 * \param fileName array of pointers to filenames
 * \param data unused
 * \return FALSE
 */
 EXPORT int LoadImageFile(
-		int files,
-		char ** fileName,
-		void * data )
+        int files,
+        char ** fileName,
+        void * data )
 {
-		if (files >0) {
-			SetLayoutBackGroundFullPath( strdup(fileName[0]) );
+	if (files >0) {
+		SetLayoutBackGroundFullPath( strdup(fileName[0]) );
 
-			if (!LoadBackGroundImage()) {
-				SetLayoutBackGroundFullPath(noname);
-				backgroundVisible = FALSE;
-			}
-			else {
-				backgroundVisible = TRUE;
-				SetCurrentPath(BACKGROUNDPATHKEY, fileName[0]);
-
-				file_changed = TRUE;
-				haveBackground = TRUE;
-				ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
-
-				MainRedraw();
-			}
-		} else {
+		if (!LoadBackGroundImage()) {
 			SetLayoutBackGroundFullPath(noname);
 			backgroundVisible = FALSE;
+		} else {
+			backgroundVisible = TRUE;
+			SetCurrentPath(BACKGROUNDPATHKEY, fileName[0]);
+
+			file_changed = TRUE;
+			haveBackground = TRUE;
+			ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
+
+			MainRedraw();
 		}
-		wControlActive((wControl_p)backgroundB, backgroundVisible);
-		wButtonSetBusy(backgroundB, backgroundVisible);
+	} else {
+		SetLayoutBackGroundFullPath(noname);
+		backgroundVisible = FALSE;
+	}
+	wControlActive((wControl_p)backgroundB, backgroundVisible);
+	wButtonSetBusy(backgroundB, backgroundVisible);
 
-		SetName();
-		file_changed = TRUE;
-		ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
-		LayoutChange( CHANGE_BACKGROUND );
+	SetName();
+	file_changed = TRUE;
+	ParamLoadControl(layout_pg_p, BACKGROUNDFILEENTRY);
+	LayoutChange( CHANGE_BACKGROUND );
 
-		return FALSE;
+	return FALSE;
 }
 
 /**
  * Save the Layout Background Parms in section [layout]. Force a write.
 */
-void LayoutBackGroundSave(void) {
-   	char * background = GetLayoutBackGroundFullPath();
+void LayoutBackGroundSave(void)
+{
+	char * background = GetLayoutBackGroundFullPath();
 	wPrefSetString("layout", "BackgroundPath", background);
-   	wPrefSetFloat("layout", "BackgroundPosX", thisLayout.props.backgroundPos.x);
-   	wPrefSetFloat("layout", "BackgroundPosY", thisLayout.props.backgroundPos.y);
-   	wPrefSetFloat("layout", "BackgroundAngle", thisLayout.props.backgroundAngle);
-   	wPrefSetInteger("layout", "BackgroundScreen", thisLayout.props.backgroundScreen);
-   	wPrefSetFloat("layout", "BackgroundSize", thisLayout.props.backgroundSize);
+	wPrefSetFloat("layout", "BackgroundPosX", thisLayout.props.backgroundPos.x);
+	wPrefSetFloat("layout", "BackgroundPosY", thisLayout.props.backgroundPos.y);
+	wPrefSetFloat("layout", "BackgroundAngle", thisLayout.props.backgroundAngle);
+	wPrefSetInteger("layout", "BackgroundScreen",
+	                thisLayout.props.backgroundScreen);
+	wPrefSetFloat("layout", "BackgroundSize", thisLayout.props.backgroundSize);
 
-   	wPrefFlush("");
+	wPrefFlush("");
 }
 
 /**
@@ -616,7 +627,8 @@ void LayoutBackGroundSave(void) {
 */
 static void ImageFileBrowse( void * unused )
 {
-	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), sImageFilePattern, LoadImageFile, NULL );
+	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"),
+	                              sImageFilePattern, LoadImageFile, NULL );
 
 	wFilSelect( imageFile_fs, GetCurrentPath( BACKGROUNDPATHKEY ) );
 	return;
@@ -642,17 +654,17 @@ static void ImageFileClear( void * unused)
 }
 
 static paramData_t layoutPLs[] = {
-    { PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-    { PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
-    { PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
-    { PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
+	{ PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Layout Title"), 0, 0, sizeof(thisLayout.props.title1)},
+	{ PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD | PDO_STRINGLIMITLENGTH, NULL, N_("Subtitle"), 0, 0, sizeof(thisLayout.props.title2)},
 #define SCALEINX (4)
-    { PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
+	{ PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, I2VP(180), N_("Scale"), 0, I2VP(CHANGE_SCALE) },
 #define GAUGEINX (5)
-    { PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
+	{ PD_DROPLIST, &thisLayout.props.curGaugeInx, "gauge", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT | PDO_DLGHORZ, I2VP(180), N_("     Gauge"), 0, I2VP(CHANGE_SCALE) },
 #define MINRADIUSENTRY (6)
-    { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
-    { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r0_10000, N_("Min Track Radius"), 0, I2VP(CHANGE_MAIN | CHANGE_LIMITS) },
+	{ PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_("  Max Track Grade (%)"), 0, I2VP(CHANGE_MAIN) },
 #define BACKGROUNDFILECHECK (8)  //Note this value used in the file section routines above - if it changes, they will need to change
 	{ PD_STRING, &thisLayout.props.backgroundTextBox, "backgroundfile", PDO_NOPSHUPD|PDO_NOPREF|PDO_NORECORD|PDO_STRINGLIMITLENGTH,  NULL, N_("Background File Path"), 0, I2VP(CHANGE_BACKGROUND), TEXT_FIELD_LEN },
 	{ PD_BUTTON, ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
@@ -675,42 +687,43 @@ static paramData_t layoutPLs[] = {
 static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, COUNT( layoutPLs ) };
 
 /**
- * @brief Handle the Layout changes, setting the values of changed items from dialog. 
+ * @brief Handle the Layout changes, setting the values of changed items from dialog.
 */
-static void ChangeLayout() {
+static void ChangeLayout()
+{
 
-    long changes;
+	long changes;
 
-    changes = GetChanges(&layoutPG);
+	changes = GetChanges(&layoutPG);
 
-    /* [mf Nov. 15, 2005] Get the gauge/scale settings */
-    if (changes & CHANGE_SCALE) {
-        SetScaleGauge(thisLayout.props.curScaleDescInx, thisLayout.props.curGaugeInx);
+	/* [mf Nov. 15, 2005] Get the gauge/scale settings */
+	if (changes & CHANGE_SCALE) {
+		SetScaleGauge(thisLayout.props.curScaleDescInx, thisLayout.props.curGaugeInx);
 		file_changed = TRUE;
 	}
 
-    /* [mf Nov. 15, 2005] end */
+	/* [mf Nov. 15, 2005] end */
 
-    if (changes & CHANGE_MAP) {
-        SetRoomSize(thisLayout.props.roomSize);
+	if (changes & CHANGE_MAP) {
+		SetRoomSize(thisLayout.props.roomSize);
 		file_changed = TRUE;
 	}
 
-    DoChangeNotification(changes);
+	DoChangeNotification(changes);
 
-    if (changes & CHANGE_LIMITS) {
-        char prefString[30];
-        // now set the minimum track radius
-        sprintf(prefString, "minTrackRadius-%s", curScaleName);
-        wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
+	if (changes & CHANGE_LIMITS) {
+		char prefString[30];
+		// now set the minimum track radius
+		sprintf(prefString, "minTrackRadius-%s", curScaleName);
+		wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
 		file_changed = TRUE;
 	}
 
-    if (changes & CHANGE_BACKGROUND) {
+	if (changes & CHANGE_BACKGROUND) {
 
-    	LayoutBackGroundSave();
-    	file_changed = TRUE;
-    }
+		LayoutBackGroundSave();
+		file_changed = TRUE;
+	}
 }
 
 /**
@@ -722,18 +735,18 @@ static void ChangeLayout() {
 static void LayoutOk(void * unused)
 {
 	ChangeLayout();
-	if(file_changed){
+	if(file_changed) {
 		LayoutBackGroundSave();
 		SetFileChanged();
 		file_changed = FALSE;
 	}
 
-    free(thisLayout.copyOfLayoutProps);
+	free(thisLayout.copyOfLayoutProps);
 	DynStringFree(&thisLayout.copyBackgroundFileName);
 
-    wHide(layoutW);
+	wHide(layoutW);
 
-    MainLayout( TRUE, TRUE );
+	MainLayout( TRUE, TRUE );
 }
 
 
@@ -746,26 +759,26 @@ static void LayoutOk(void * unused)
 
 static void LayoutCancel(struct wWin_t *unused)
 {
-    // thisLayout.props = *(thisLayout.copyOfLayoutProps);
+	// thisLayout.props = *(thisLayout.copyOfLayoutProps);
 	char* curr = DynStringToCStr(&thisLayout.backgroundFileName);
 	char* prev = DynStringToCStr(&thisLayout.copyBackgroundFileName);
-	if ((curr == NULL && prev != NULL) || (curr != NULL && prev == NULL) || (strcmp(curr, prev) != 0) ) {
+	if ((curr == NULL && prev != NULL) || (curr != NULL && prev == NULL)
+	    || (strcmp(curr, prev) != 0) ) {
 		if (DynStringSize(&thisLayout.backgroundFileName)) {
 			DynStringClear(&thisLayout.backgroundFileName);
 		}
 		size_t bgSize = DynStringSize(&thisLayout.copyBackgroundFileName);
-		if ( bgSize ){
+		if ( bgSize ) {
 			DynStringMalloc(&thisLayout.backgroundFileName, bgSize + 1);
 			char* fileName = DynStringToCStr(&thisLayout.copyBackgroundFileName);
 			DynStringCatCStr(&thisLayout.backgroundFileName, fileName);
 			haveBackground = TRUE;
 			wDrawSetBackground(  mainD.d, fileName, NULL);
-		}
-		else{
+		} else {
 			haveBackground = FALSE;
 			wDrawSetBackground(  mainD.d, NULL, NULL);
 		}
-		SetName(); 
+		SetName();
 		// ChangeLayout();
 	}
 
@@ -781,19 +794,19 @@ static void LayoutCancel(struct wWin_t *unused)
 
 /**
  * @brief Reload Layout parameters if changes
- * @param changes 
+ * @param changes
 */
 static void LayoutChange(long changes)
 {
-    if (changes & (CHANGE_SCALE | CHANGE_UNITS | CHANGE_BACKGROUND))
-        if (layoutW != NULL && wWinIsVisible(layoutW)) {
-            ParamLoadControls(&layoutPG);
-        }
+	if (changes & (CHANGE_SCALE | CHANGE_UNITS | CHANGE_BACKGROUND))
+		if (layoutW != NULL && wWinIsVisible(layoutW)) {
+			ParamLoadControls(&layoutPG);
+		}
 }
 
 /**
  * @brief Initialize Layout dialog
- * @param unused 
+ * @param unused
 */
 void DoLayout(void * unused)
 {
@@ -801,47 +814,47 @@ void DoLayout(void * unused)
 
 	SetLayoutRoomSize(mapD.size);
 
-    if (layoutW == NULL) {
-        layoutW = ParamCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
-                                    _("Ok"), LayoutOk, LayoutCancel, TRUE, NULL, 0, LayoutDlgUpdate);
-        LoadScaleList((wList_p)layoutPLs[4].control);
-    }
+	if (layoutW == NULL) {
+		layoutW = ParamCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
+		                            _("Ok"), LayoutOk, LayoutCancel, TRUE, NULL, 0, LayoutDlgUpdate);
+		LoadScaleList((wList_p)layoutPLs[4].control);
+	}
 
-    ParamControlActive(&layoutPG, BACKGROUNDFILEENTRY, FALSE);
+	ParamControlActive(&layoutPG, BACKGROUNDFILEENTRY, FALSE);
 
-    LoadGaugeList((wList_p)layoutPLs[5].control,
-                  thisLayout.props.curScaleDescInx); /* set correct gauge list here */
-    thisLayout.copyOfLayoutProps = malloc(sizeof(struct sLayoutProps));
+	LoadGaugeList((wList_p)layoutPLs[5].control,
+	              thisLayout.props.curScaleDescInx); /* set correct gauge list here */
+	thisLayout.copyOfLayoutProps = malloc(sizeof(struct sLayoutProps));
 
-    if (!thisLayout.copyOfLayoutProps) {
-        exit(1);
-    }
-    SetName();
-    *(thisLayout.copyOfLayoutProps) = thisLayout.props;
+	if (!thisLayout.copyOfLayoutProps) {
+		exit(1);
+	}
+	SetName();
+	*(thisLayout.copyOfLayoutProps) = thisLayout.props;
 
 	char* curr = DynStringToCStr(&thisLayout.backgroundFileName);
 	size_t bgSize = DynStringSize(&thisLayout.backgroundFileName);
-	if ( bgSize ){
+	if ( bgSize ) {
 		DynStringMalloc(&thisLayout.copyBackgroundFileName, bgSize + 1);
-		DynStringCatCStr(&thisLayout.copyBackgroundFileName, curr);	
+		DynStringCatCStr(&thisLayout.copyBackgroundFileName, curr);
 	}
 
-    ParamLoadControls(&layoutPG);
-    wShow(layoutW);
+	ParamLoadControls(&layoutPG);
+	wShow(layoutW);
 }
 
 /**
  * @brief Callback for Menu and Shortcut key to open Layout Dialog.
- * @param void  
+ * @param void
  * @return Address of layout dialog (DoLayout)
 */
 EXPORT addButtonCallBack_t LayoutInit(void)
 {
-    ParamRegister(&layoutPG);
-    RegisterChangeNotification(LayoutChange);
-    layout_p = layoutPLs;
-    layout_pg_p = &layoutPG;
-    return &DoLayout;
+	ParamRegister(&layoutPG);
+	RegisterChangeNotification(LayoutChange);
+	layout_p = layoutPLs;
+	layout_pg_p = &layoutPG;
+	return &DoLayout;
 }
 
 /**
@@ -856,81 +869,87 @@ EXPORT addButtonCallBack_t LayoutInit(void)
 
 static void
 LayoutDlgUpdate(
-    paramGroup_p pg,
-    int inx,
-    void * valueP)
+        paramGroup_p pg,
+        int inx,
+        void * valueP)
 {
-    /* did the scale change ? */
-    if (inx == SCALEINX) {
-        char prefString[130];
-        char scaleDesc[100];
+	/* did the scale change ? */
+	if (inx == SCALEINX) {
+		char prefString[130];
+		char scaleDesc[100];
 
-        LoadGaugeList((wList_p)layoutPLs[GAUGEINX].control, *((int *)valueP));
-        // set the first entry as default, usually the standard gauge for a scale
-        wListSetIndex((wList_p)layoutPLs[GAUGEINX].control, 0);
+		LoadGaugeList((wList_p)layoutPLs[GAUGEINX].control, *((int *)valueP));
+		// set the first entry as default, usually the standard gauge for a scale
+		wListSetIndex((wList_p)layoutPLs[GAUGEINX].control, 0);
 
-        // get the minimum radius
-        // get the selected scale first
-        wListGetValues((wList_p)layoutPLs[SCALEINX].control, scaleDesc, 99, NULL, NULL);
-        strtok(scaleDesc, " ");
+		// get the minimum radius
+		// get the selected scale first
+		wListGetValues((wList_p)layoutPLs[SCALEINX].control, scaleDesc, 99, NULL, NULL);
+		strtok(scaleDesc, " ");
 
-        // now get the minimum track radius
-        sprintf(prefString, "minTrackRadius-%s", scaleDesc);
-        wPrefGetFloat("misc", prefString, &thisLayout.props.minTrackRadius, 0.0);
+		// now get the minimum track radius
+		sprintf(prefString, "minTrackRadius-%s", scaleDesc);
+		wPrefGetFloat("misc", prefString, &thisLayout.props.minTrackRadius, 0.0);
 
-        // put the scale's minimum value into the dialog
-        wStringSetValue((wString_p)layoutPLs[MINRADIUSENTRY].control,
-                        FormatDistance(thisLayout.props.minTrackRadius));
-    }
+		// put the scale's minimum value into the dialog
+		wStringSetValue((wString_p)layoutPLs[MINRADIUSENTRY].control,
+		                FormatDistance(thisLayout.props.minTrackRadius));
+	}
 	if (inx == BACKGROUNDFILEENTRY) {
 		SetName();
 		MainRedraw();
 	}
 	if (inx == BACKGROUNDPOSX) {
-    	coOrd pos;
-    	pos.x = *(double *)valueP;
-    	pos.y = GetLayoutBackGroundPos().y;
-    	SetLayoutBackGroundPos(pos);
-    	MainRedraw();
-    }
-    if (inx == BACKGROUNDPOSY) {
-    	coOrd pos;
+		coOrd pos;
+		pos.x = *(double *)valueP;
+		pos.y = GetLayoutBackGroundPos().y;
+		SetLayoutBackGroundPos(pos);
+		MainRedraw();
+	}
+	if (inx == BACKGROUNDPOSY) {
+		coOrd pos;
 		pos.y = *(double *)valueP;
 		pos.x = GetLayoutBackGroundPos().x;
 		SetLayoutBackGroundPos(pos);
-    	MainRedraw();
-    }
-    if (inx == BACKGROUNDWIDTH) {
-    	SetLayoutBackGroundSize(*(double *)valueP);
-    	MainRedraw();
-    }
-    if (inx == BACKGROUNDSCREEN) {
-    	SetLayoutBackGroundScreen(*(int *)valueP);
-    	MainRedraw();
-    }
-    if (inx == BACKGROUNDANGLE) {
+		MainRedraw();
+	}
+	if (inx == BACKGROUNDWIDTH) {
+		SetLayoutBackGroundSize(*(double *)valueP);
+		MainRedraw();
+	}
+	if (inx == BACKGROUNDSCREEN) {
+		SetLayoutBackGroundScreen(*(int *)valueP);
+		MainRedraw();
+	}
+	if (inx == BACKGROUNDANGLE) {
 
-    	ANGLE_T angle = NormalizeAngle(*(double *)valueP);
-    	wStringSetValue((wString_p)layoutPLs[BACKGROUNDANGLE].control,FormatFloat(angle));
-    	SetLayoutBackGroundAngle(angle);
-    	MainRedraw();
-    }
+		ANGLE_T angle = NormalizeAngle(*(double *)valueP);
+		wStringSetValue((wString_p)layoutPLs[BACKGROUNDANGLE].control,
+		                FormatFloat(angle));
+		SetLayoutBackGroundAngle(angle);
+		MainRedraw();
+	}
 
 }
 /**
  * Load Background Options from Saved Parms section [layout]
 */
 void
-LayoutBackGroundLoad(void) {
+LayoutBackGroundLoad(void)
+{
 	SetLayoutBackGroundFullPath(wPrefGetString("layout", "BackgroundPath"));
 
-	wPrefGetFloat("layout", "BackgroundPosX", &thisLayout.props.backgroundPos.x, 0.0);
-	wPrefGetFloat("layout", "BackgroundPosY", &thisLayout.props.backgroundPos.y, 0.0);
-	wPrefGetFloat("layout", "BackgroundAngle", &thisLayout.props.backgroundAngle, 0.0);
+	wPrefGetFloat("layout", "BackgroundPosX", &thisLayout.props.backgroundPos.x,
+	              0.0);
+	wPrefGetFloat("layout", "BackgroundPosY", &thisLayout.props.backgroundPos.y,
+	              0.0);
+	wPrefGetFloat("layout", "BackgroundAngle", &thisLayout.props.backgroundAngle,
+	              0.0);
 	long screen_long;
 	wPrefGetInteger("layout", "BackgroundScreen", &screen_long, 0L);
 	thisLayout.props.backgroundScreen = screen_long;
-	wPrefGetFloat("layout", "BackgroundSize", &thisLayout.props.backgroundSize, 0.0);
+	wPrefGetFloat("layout", "BackgroundSize", &thisLayout.props.backgroundSize,
+	              0.0);
 }
 
 static wBool_t inited;
@@ -940,7 +959,8 @@ static wBool_t inited;
  * @param clear TRUE: Background is cleared, FALSE: Background is loaded (if defined)
 */
 void
-LayoutBackGroundInit(BOOL_T clear) {
+LayoutBackGroundInit(BOOL_T clear)
+{
 	if (clear) {
 		SetLayoutBackGroundFullPath(noname);
 		SetLayoutBackGroundPos(zero);
@@ -954,28 +974,27 @@ LayoutBackGroundInit(BOOL_T clear) {
 	}
 	char * str = GetLayoutBackGroundFullPath();
 	if (str && str[0]) {
-        haveBackground = true;
-        if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
+		haveBackground = true;
+		if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
 			SetLayoutBackGroundFullPath(noname);
 			SetLayoutBackGroundPos(zero);
 			SetLayoutBackGroundAngle(0.0);
 			SetLayoutBackGroundScreen(0);
 			SetLayoutBackGroundSize(0.0);
 			LayoutBackGroundSave();
-            haveBackground = false;
+			haveBackground = false;
 		}
 	} else {
 		haveBackground = false;
 	}
 
-	if ( haveBackground ){
+	if ( haveBackground ) {
 		char *error;
 		if (wDrawSetBackground(  mainD.d, str, &error) == -1) {
 			NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
 			haveBackground = false;
 		}
-	}
-	else {
+	} else {
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
 	SetName();
@@ -989,14 +1008,14 @@ LayoutBackGroundInit(BOOL_T clear) {
  * @return TRUE (always)
 */
 EXPORT int DoSettingsRead(
-		int files,
-		char ** fileName,
-		void * data )
+        int files,
+        char ** fileName,
+        void * data )
 {
 	char * pref;
 	CHECK( files == 1 );
-	if (fileName == NULL) wPrefsLoad(NULL);
-	else wPrefsLoad(fileName[0]);
+	if (fileName == NULL) { wPrefsLoad(NULL); }
+	else { wPrefsLoad(fileName[0]); }
 	// get the preferred scale from the new configuration file
 	pref = wPrefGetString("misc", "scale");
 	if (pref) {
@@ -1006,7 +1025,8 @@ EXPORT int DoSettingsRead(
 	}
 	//Get command options
 	wPrefGetInteger("DialogItem","cmdopt-preselect",&preSelect,preSelect);
-	wPrefGetInteger("DialogItem","cmdopt-rightclickmode",&rightClickMode,rightClickMode);
+	wPrefGetInteger("DialogItem","cmdopt-rightclickmode",&rightClickMode,
+	                rightClickMode);
 	wPrefGetInteger("DialogItem","cmdopt-selectmode",&selectMode,selectMode);
 	wPrefGetInteger("DialogItem","cmdopt-selectzero",&selectZero,selectZero);
 
@@ -1024,13 +1044,13 @@ static struct wFilSel_t * settingsRead_fs;
 
 /**
  * @brief Read button in Layout. File Open dialog to read a Settings file (*.xset)
- * @param void 
+ * @param void
  */
 static void SettingsRead( void )
 {
 	if (settingsRead_fs == NULL)
 		settingsRead_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Read Settings"),
-				_("Settings File (*.xset)|*.xset"), DoSettingsRead, NULL );
+		                                 _("Settings File (*.xset)|*.xset"), DoSettingsRead, NULL );
 	bExample = FALSE;
 	wFilSelect( settingsRead_fs, wGetAppWorkDir());
 }
@@ -1043,9 +1063,9 @@ static void SettingsRead( void )
  * @return TRUE (always)
 */
 static int DoSettingsWrite(
-		int files,
-		char ** fileName,
-		void * data )
+        int files,
+        char ** fileName,
+        void * data )
 {
 	CHECK( fileName != NULL );
 	CHECK( files == 1 );
@@ -1057,14 +1077,14 @@ static struct wFilSel_t * settingsWrite_fs;
 
 /**
  * @brief Write button in Layout. File Save dialog for a settings file (*.xset)
- * @param void 
+ * @param void
 */
 static void SettingsWrite( void  )
 {
 	ChangeLayout();
 	if ( settingsWrite_fs == NULL )
 		settingsWrite_fs  = wFilSelCreate( mainW, FS_UPDATE, 0, _("Write Settings"),
-				_("Settings File (*.xset)|*.xset"), DoSettingsWrite, NULL );
+		                                   _("Settings File (*.xset)|*.xset"), DoSettingsWrite, NULL );
 	wFilSelect( settingsWrite_fs, wGetAppWorkDir());
 }
 

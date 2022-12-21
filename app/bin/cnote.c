@@ -34,51 +34,51 @@ static paramTextData_t noteTextData = { 300, 150 };
 static paramData_t notePLs[] = {
 #define I_NOTETEXT		(0)
 #define noteT			((wText_p)notePLs[I_NOTETEXT].control)
-    {	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
+	{	PD_TEXT, NULL, "text", PDO_DLGRESIZE, &noteTextData }
 };
 static paramGroup_t notePG = { "note", 0, notePLs, COUNT( notePLs ) };
 
 
 void ClearNote(void)
 {
-    if (mainText) {
-        MyFree(mainText);
-        mainText = NULL;
-    }
+	if (mainText) {
+		MyFree(mainText);
+		mainText = NULL;
+	}
 }
 
 static void NoteOk(void * unused)
 {
-    if (wTextGetModified(noteT)) {
-        int len;
-        ClearNote();
-        len = wTextGetSize(noteT);
-        mainText = (char*)MyMalloc(len+2);
-        wTextGetText(noteT, mainText, len);
-    }
+	if (wTextGetModified(noteT)) {
+		int len;
+		ClearNote();
+		len = wTextGetSize(noteT);
+		mainText = (char*)MyMalloc(len+2);
+		wTextGetText(noteT, mainText, len);
+	}
 
-    wHide(noteW);
+	wHide(noteW);
 }
 
 
 void DoNote(void * unused)
 {
-    if (noteW == NULL) {
-        noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
-                                  wHide, FALSE, NULL, F_NOTTRANSIENT|F_RESIZE, NULL);
-    }
+	if (noteW == NULL) {
+		noteW = ParamCreateDialog(&notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk,
+		                          wHide, FALSE, NULL, F_NOTTRANSIENT|F_RESIZE, NULL);
+	}
 
-    wTextClear(noteT);
-    wTextAppend(noteT, mainText?mainText:
-                _("Replace this text with your layout notes"));
-    wTextSetReadonly(noteT, FALSE);
-    wShow(noteW);
+	wTextClear(noteT);
+	wTextAppend(noteT, mainText?mainText:
+	            _("Replace this text with your layout notes"));
+	wTextSetReadonly(noteT, FALSE);
+	wShow(noteW);
 }
 
 
 BOOL_T WriteMainNote(FILE* f)
 {
-    BOOL_T rc = TRUE;
+	BOOL_T rc = TRUE;
 	char *noteText = mainText;
 
 	if (noteText && *noteText) {
@@ -93,17 +93,17 @@ BOOL_T WriteMainNote(FILE* f)
 #endif // UTFCONVERT
 
 
-	char * sText = ConvertToEscapedText( noteText );
-        rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
-	MyFree( sText );
+		char * sText = ConvertToEscapedText( noteText );
+		rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
+		MyFree( sText );
 
 #ifdef UTFCONVERT
 		if (out) {
 			MyFree(out);
 		}
 #endif // UTFCONVERT
-    }
-    return rc;
+	}
+	return rc;
 }
 
 /**
@@ -114,28 +114,29 @@ BOOL_T WriteMainNote(FILE* f)
 
 BOOL_T ReadMainNote(char *line)
 {
-    long size;
-    char * sNote = NULL;
+	long size;
+	char * sNote = NULL;
 
-    if (!GetArgs(line + 9,
-	paramVersion < 3 ? "l" :
-	paramVersion < VERSION_INLINENOTE ? "0000l":
-	"0000lq", &size, &sNote)) {
-        return FALSE;
-    }
+	if (!GetArgs(line + 9,
+	             paramVersion < 3 ? "l" :
+	             paramVersion < VERSION_INLINENOTE ? "0000l":
+	             "0000lq", &size, &sNote)) {
+		return FALSE;
+	}
 
-    if (mainText) {
-        MyFree(mainText);
-    }
+	if (mainText) {
+		MyFree(mainText);
+	}
 
-    if ( paramVersion < VERSION_INLINENOTE )
-	mainText = ReadMultilineText();
-    else
-	mainText = sNote;
-    return TRUE;
+	if ( paramVersion < VERSION_INLINENOTE ) {
+		mainText = ReadMultilineText();
+	} else {
+		mainText = sNote;
+	}
+	return TRUE;
 }
 
 void InitCmdNote()
 {
-    ParamRegister(&notePG);
+	ParamRegister(&notePG);
 }

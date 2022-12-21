@@ -1,9 +1,9 @@
 /** \file smalldlg.h
- * Definitions and declarations for the small dialog box functions. 
+ * Definitions and declarations for the small dialog box functions.
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 
+ *  Copyright (C)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

@@ -28,24 +28,24 @@
 #include "track.h"
 
 typedef struct track_t {
-		struct track_t *next;
-		TRKINX_T index;
-		TRKTYP_T type;
-		unsigned int layer;
-		signed char scale;
-		BOOL_T modified:1;
-		BOOL_T deleted:1;
-		BOOL_T new:1;
-		unsigned int width:2;
-		unsigned int elevMode:2;
-		unsigned int bits:13;
-		EPINX_T endCnt;
-		trkEndPt_p endPt;
-		struct { float x; float y; } lo, hi;
-		struct extraDataBase_t * extraData;
-		CSIZE_T extraSize;
-		DIST_T elev;
-		} track_t;
+	struct track_t *next;
+	TRKINX_T index;
+	TRKTYP_T type;
+	unsigned int layer;
+	signed char scale;
+	BOOL_T modified:1;
+	BOOL_T deleted:1;
+	BOOL_T new:1;
+	unsigned int width:2;
+	unsigned int elevMode:2;
+	unsigned int bits:13;
+	EPINX_T endCnt;
+	trkEndPt_p endPt;
+	struct { float x; float y; } lo, hi;
+	struct extraDataBase_t * extraData;
+	CSIZE_T extraSize;
+	DIST_T elev;
+} track_t;
 
 extern track_p to_first;
 extern track_p * to_last;

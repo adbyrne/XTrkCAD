@@ -24,13 +24,13 @@ struct appDefault tests[] = {
 const char *libDir ="Parameter/directory/";
 
 /**
- * A dummy for the real MakePath function 
+ * A dummy for the real MakePath function
  */
 
 void
 MakeFullpath( char **result, ...)
 {
-    *result = libDir;
+	*result = libDir;
 }
 
 #define TESTARRAYSIZE (sizeof(tests) / sizeof(tests[0]) )
@@ -43,14 +43,16 @@ struct appDefault test1[] = {
 
 
 int
-wPrefGetIntegerBasic(const char *section, const char *name, long *result, long defaultValue)
+wPrefGetIntegerBasic(const char *section, const char *name, long *result,
+                     long defaultValue)
 {
 	*result = defaultValue;
 	return(TRUE);
 }
 
 int
-wPrefGetFloatBasic(const char *section, const char *name, double *result, double defaultValue)
+wPrefGetFloatBasic(const char *section, const char *name, double *result,
+                   double defaultValue)
 {
 	*result = defaultValue;
 	return(TRUE);
@@ -62,7 +64,7 @@ char * wPrefGetStringBasic(const char *section, const char *name)
 }
 
 /* dummy to make the linker happy */
-void 
+void
 wPrefSetInteger(const char *section, const char *name,  long value)
 {
 	return;
@@ -108,9 +110,9 @@ static void GetDefaults(void **state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
+	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(BinarySearch),
 		cmocka_unit_test(GetDefaults)
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	};
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

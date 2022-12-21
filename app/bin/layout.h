@@ -1,9 +1,9 @@
 /** \file layout.h
- * Layout data 
+ * Layout data
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 2017 Martin Fischer 
+ *  Copyright (C) 2017 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

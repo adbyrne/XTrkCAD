@@ -60,30 +60,31 @@ static paramGroup_t enumPG = { "enum", 0, enumPLs, COUNT( enumPLs ) };
 static struct wFilSel_t * enumFile_fs;
 
 
-static int count_utf8_chars(char *s) {
+static int count_utf8_chars(char *s)
+{
 	int i = 0, j = 0;
 	while (s[i]) {
-		if ((s[i] & 0xc0) != 0x80) j++;
+		if ((s[i] & 0xc0) != 0x80) { j++; }
 		i++;
 	}
 	return j;
 }
 
 static int DoEnumSave(
-		int files,
-		char **fileName,
-		void * data )
+        int files,
+        char **fileName,
+        void * data )
 {
 	CHECK( fileName != NULL );
 	CHECK( files == 1 );
-	
+
 	SetCurrentPath( PARTLISTPATHKEY, fileName[0] );
 	return wTextSave( enumT, fileName[ 0 ] );
 }
 
 
 static void DoEnumOp(
-		void * data )
+        void * data )
 {
 	switch( VP2L(data) ) {
 	case ENUMOP_SAVE:
@@ -100,11 +101,11 @@ static void DoEnumOp(
 
 
 static void EnumDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
-	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) return;
+	if ( inx != I_ENUMLISTPRICE && inx != I_ENUMLISTINDEXES) { return; }
 	EnumerateTracks( NULL );
 }
 
@@ -113,10 +114,10 @@ int enumerateMaxDescLen;
 static FLOAT_T enumerateTotal;
 
 void EnumerateList(
-		long count,
-		FLOAT_T price,
-		char * desc,
-		char * indexes )
+        long count,
+        FLOAT_T price,
+        char * desc,
+        char * indexes )
 {
 	char * cp;
 	size_t len;
@@ -124,7 +125,7 @@ void EnumerateList(
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
 		len = enumerateMaxDescLen-strlen(desc);
-		if (len<0) len = 0;
+		if (len<0) { len = 0; }
 		memset( cp, ' ', len );
 		cp += len;
 		if (price > 0.0) {
@@ -134,8 +135,9 @@ void EnumerateList(
 			sprintf( cp, " | %-*s |\n", (int) max( 7, count_utf8_chars( _("Each"))), " " );
 		}
 	}
-	if (enableListIndexes && indexes)
+	if (enableListIndexes && indexes) {
 		sprintf( &message[strlen(message)], "%s -> %s \n", N_("Indexes"), indexes);
+	}
 	wTextAppend( enumT, message );
 }
 
@@ -147,8 +149,10 @@ void EnumerateStart(void)
 
 	if (enumW == NULL) {
 		ParamRegister( &enumPG );
-		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), NULL, NULL, wHide, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
-		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"), sPartsListFilePattern, DoEnumSave, NULL );
+		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), NULL,
+		                           NULL, wHide, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
+		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"),
+		                             sPartsListFilePattern, DoEnumSave, NULL );
 	}
 
 	wTextClear( enumT );
@@ -175,37 +179,43 @@ void EnumerateStart(void)
 	}
 
 	time(&clock);
-    tm = localtime(&clock);
+	tm = localtime(&clock);
 	strftime( message, STR_LONG_SIZE, "%x\n", tm );
 	wTextAppend( enumT, message );
 
 	enumerateTotal = 0.0;
 
-	if( count_utf8_chars( _("Description")) > enumerateMaxDescLen )
+	if( count_utf8_chars( _("Description")) > enumerateMaxDescLen ) {
 		enumerateMaxDescLen = count_utf8_chars( _("Description" ));
+	}
 
 	/* create the table header */
-	sprintf( message, "%s | %-*s", _("Count"), enumerateMaxDescLen, _("Description"));
+	sprintf( message, "%s | %-*s", _("Count"), enumerateMaxDescLen,
+	         _("Description"));
 
-	if( enableListPrices )
-		sprintf( message+strlen(message), " | %-*s | %-*s\n", (int) max( 7, count_utf8_chars( _("Each"))), _("Each"), (int) max( 9, count_utf8_chars(_("Extended"))), _("Extended"));
-	else 
+	if( enableListPrices ) {
+		sprintf( message+strlen(message), " | %-*s | %-*s\n", (int) max( 7,
+		                count_utf8_chars( _("Each"))), _("Each"), (int) max( 9,
+		                                count_utf8_chars(_("Extended"))), _("Extended"));
+	} else {
 		strcat( message, "\n" );
+	}
 	wTextAppend( enumT, message );
 
 	/* underline the header */
 	cp = message;
-	while( *cp && *cp != '\n' )			
-		if( *cp == '|' )
+	while( *cp && *cp != '\n' )
+		if( *cp == '|' ) {
 			*cp++ = '+';
-		else
+		} else {
 			*cp++ = '-';
+		}
 
 	wTextAppend( enumT, message );
 }
 /**
  * End of parts list. Print the footer line and the totals if necessary.
- * \todo These formatting instructions could be re-written in an easier 
+ * \todo These formatting instructions could be re-written in an easier
  * to understand fashion using the possibilities of the printf formatting
  * and some string functions.
  */
@@ -215,13 +225,13 @@ void EnumerateEnd(void)
 	size_t len;
 	char * cp;
 	ScaleLengthEnd();
-	
+
 	memset( message, '\0', STR_LONG_SIZE );
 	memset( message, '-', strlen(_("Count")) + 1 );
 	strcpy( message + strlen(_("Count")) + 1, "+");
 	cp = message+strlen(message);
 	memset( cp, '-', enumerateMaxDescLen+2 );
-	if (enableListPrices){
+	if (enableListPrices) {
 		strcpy( cp+enumerateMaxDescLen+2, "+-" );
 		memset( cp+enumerateMaxDescLen+4, '-', max( 7, strlen( _("Each"))));
 		strcat( cp, "-+-");
@@ -234,7 +244,8 @@ void EnumerateEnd(void)
 	wTextAppend( enumT, message );
 
 	if (enableListPrices) {
-		len = strlen( message ) - strlen( _("Total")) - max( 9, strlen(_("Extended"))) - 4 ;
+		len = strlen( message ) - strlen( _("Total")) - max( 9,
+		                strlen(_("Extended"))) - 4 ;
 		memset ( message, ' ', len );
 		cp = message+len;
 		sprintf( cp, ("%s |%9.2f\n"), _("Total"), enumerateTotal );

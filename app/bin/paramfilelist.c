@@ -51,7 +51,7 @@ static char * customPathBak;
 
 int GetParamFileCount()
 {
-    return (paramFileInfo_da.cnt);
+	return (paramFileInfo_da.cnt);
 }
 
 /**
@@ -66,9 +66,9 @@ ReadParamError(char *file)
 	DynString error_msg;
 	DynStringMalloc(&error_msg, 100);
 	DynStringPrintf(&error_msg,
-		_("The parameter file: %s could not be found and was probably deleted or moved. "
-			"The file is removed from the active parameter file list."),
-		file);
+	                _("The parameter file: %s could not be found and was probably deleted or moved. "
+	                  "The file is removed from the active parameter file list."),
+	                file);
 	wNoticeEx(NT_ERROR, DynStringToCStr(&error_msg), "OK", NULL);
 	DynStringFree(&error_msg);
 }
@@ -87,102 +87,106 @@ ReadParamError(char *file)
 
 static BOOL_T UpdateParamFiles(void)
 {
-    char fileName[STR_LONG_SIZE], *fileNameP;
+	char fileName[STR_LONG_SIZE], *fileNameP;
 //  const char * cp;
-    FILE * updateF;
-    long updateTime = -1;
-    long lastTime;
+	FILE * updateF;
+	long updateTime = -1;
+	long lastTime;
 
-    MakeFullpath(&fileNameP, libDir, "xtrkcad.upd", NULL);
-    updateF = fopen(fileNameP, "r");
-    free(fileNameP);
-    if (updateF == NULL) {
-        return FALSE;
-    }
-    wPrefGetInteger("file", "updatetime", &lastTime, 0);
-
-    while ((fgets(fileName, STR_LONG_SIZE, updateF)) != NULL) {
-	if ( fileName[0] == '#' )
-		continue;
-	if ( updateTime == -1 ) {
-    		updateTime = atol(fileName);
-    		LOG1( log_paramupdate, ( "UpdateParamFiles Last: %ld, Update: %ld\n", lastTime, updateTime ) );
-		if ( updateTime == 0 ) {
-			NoticeMessage( "xtrkcad.upd : invalid Update Time", _("OK"), NULL );
-        		fclose(updateF);
-			return FALSE;
-		}
-    		if (lastTime >= updateTime) {
-        		fclose(updateF);
-        		return FALSE;
-    		}
-		continue;
+	MakeFullpath(&fileNameP, libDir, "xtrkcad.upd", NULL);
+	updateF = fopen(fileNameP, "r");
+	free(fileNameP);
+	if (updateF == NULL) {
+		return FALSE;
 	}
-        FILE * paramF;
+	wPrefGetInteger("file", "updatetime", &lastTime, 0);
 
-        Stripcr(fileName);
-        InfoMessage(_("Updating %s"), fileName);
-	LOG1( log_paramupdate, ( "Updating %s\n", fileName ) );
-        MakeFullpath(&fileNameP, libDir, "params", fileName, NULL);
-        paramF = fopen(fileNameP, "r");
-        if (paramF == NULL) {
-            NoticeMessage(MSG_PRMFIL_OPEN_NEW, _("Ok"), NULL, fileNameP);
-            free(fileNameP);
-            continue;
-        }
-        char * newContents = NULL;
-	char * oldContents = NULL;
-        while ((fgets(message, sizeof message, paramF)) != NULL) {
-            if (strncmp(message, "CONTENTS ", 9) == 0) {
-                Stripcr(message);
-		if ( newContents == NULL ) {
-			// first CONTENTS
-                	newContents = MyStrdup(message + 9);
-			// Get old CONTENTS->FILENAME mapping
-			char * cp = wPrefGetString("Parameter File Map", newContents);
-			if ( cp ) {
-				LOG1( log_paramupdate, ( "  Upd CONTENTS %s (was %s)\n", newContents, cp?cp:"<>" ) );
-			} else {
-				LOG1( log_paramupdate, ( "  New CONTENTS %s\n", newContents ) );
-			}
-			// Update CONTENTS->FILENAME mapping
-			wPrefSetString("Parameter File Map", newContents, fileNameP);
-		} else {
-			// Subsequent old CONTENTS
-                	oldContents = message + 9;
-			LOG1( log_paramupdate, ( "  Old CONTENTS %s\n", oldContents ) );
-			// Check 'Parameter Files Names' map
-			for (int fileNo = 1; ; fileNo++) {
-//				char *fileName;
-				char fileNoS[4+9+1];
-				sprintf(fileNoS, "File%d", fileNo);
-				char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
-				if (prevContents == NULL || *prevContents == '\0') {
-					// End of list
-					break;
-				}
-				if ( strcmp( oldContents, prevContents ) == 0 ) {
-					// Update contents index map
-					LOG1( log_paramupdate, ( "  Found at %d\n", fileNo ) );
-					wPrefSetString( "Parameter File Names", fileNoS, newContents );
-					break;
-				}
-		    }
+	while ((fgets(fileName, STR_LONG_SIZE, updateF)) != NULL) {
+		if ( fileName[0] == '#' ) {
+			continue;
 		}
-            }
-        }
-	if ( newContents )
-		MyFree( newContents );
-        fclose(paramF);
-        if (newContents == NULL) {
-            NoticeMessage(MSG_PRMFIL_NO_CONTENTS, _("Ok"), NULL, fileNameP);
-        }
+		if ( updateTime == -1 ) {
+			updateTime = atol(fileName);
+			LOG1( log_paramupdate, ( "UpdateParamFiles Last: %ld, Update: %ld\n", lastTime,
+			                         updateTime ) );
+			if ( updateTime == 0 ) {
+				NoticeMessage( "xtrkcad.upd : invalid Update Time", _("OK"), NULL );
+				fclose(updateF);
+				return FALSE;
+			}
+			if (lastTime >= updateTime) {
+				fclose(updateF);
+				return FALSE;
+			}
+			continue;
+		}
+		FILE * paramF;
 
-        free(fileNameP);
-    }
-    fclose(updateF);
-    wPrefSetInteger("file", "updatetime", updateTime);
-    return TRUE;
+		Stripcr(fileName);
+		InfoMessage(_("Updating %s"), fileName);
+		LOG1( log_paramupdate, ( "Updating %s\n", fileName ) );
+		MakeFullpath(&fileNameP, libDir, "params", fileName, NULL);
+		paramF = fopen(fileNameP, "r");
+		if (paramF == NULL) {
+			NoticeMessage(MSG_PRMFIL_OPEN_NEW, _("Ok"), NULL, fileNameP);
+			free(fileNameP);
+			continue;
+		}
+		char * newContents = NULL;
+		char * oldContents = NULL;
+		while ((fgets(message, sizeof message, paramF)) != NULL) {
+			if (strncmp(message, "CONTENTS ", 9) == 0) {
+				Stripcr(message);
+				if ( newContents == NULL ) {
+					// first CONTENTS
+					newContents = MyStrdup(message + 9);
+					// Get old CONTENTS->FILENAME mapping
+					char * cp = wPrefGetString("Parameter File Map", newContents);
+					if ( cp ) {
+						LOG1( log_paramupdate, ( "  Upd CONTENTS %s (was %s)\n", newContents,
+						                         cp?cp:"<>" ) );
+					} else {
+						LOG1( log_paramupdate, ( "  New CONTENTS %s\n", newContents ) );
+					}
+					// Update CONTENTS->FILENAME mapping
+					wPrefSetString("Parameter File Map", newContents, fileNameP);
+				} else {
+					// Subsequent old CONTENTS
+					oldContents = message + 9;
+					LOG1( log_paramupdate, ( "  Old CONTENTS %s\n", oldContents ) );
+					// Check 'Parameter Files Names' map
+					for (int fileNo = 1; ; fileNo++) {
+//				char *fileName;
+						char fileNoS[4+9+1];
+						sprintf(fileNoS, "File%d", fileNo);
+						char * prevContents = wPrefGetString("Parameter File Names", fileNoS);
+						if (prevContents == NULL || *prevContents == '\0') {
+							// End of list
+							break;
+						}
+						if ( strcmp( oldContents, prevContents ) == 0 ) {
+							// Update contents index map
+							LOG1( log_paramupdate, ( "  Found at %d\n", fileNo ) );
+							wPrefSetString( "Parameter File Names", fileNoS, newContents );
+							break;
+						}
+					}
+				}
+			}
+		}
+		if ( newContents ) {
+			MyFree( newContents );
+		}
+		fclose(paramF);
+		if (newContents == NULL) {
+			NoticeMessage(MSG_PRMFIL_NO_CONTENTS, _("Ok"), NULL, fileNameP);
+		}
+
+		free(fileNameP);
+	}
+	fclose(updateF);
+	wPrefSetInteger("file", "updatetime", updateTime);
+	return TRUE;
 }
 
 /**
@@ -191,54 +195,54 @@ static BOOL_T UpdateParamFiles(void)
  */
 void LoadParamFileList(void)
 {
-    int fileNo;
-    BOOL_T updated = FALSE;
-    long *favoriteList = NULL;
-    long favorites;
-    int nextFavorite = 0;
+	int fileNo;
+	BOOL_T updated = FALSE;
+	long *favoriteList = NULL;
+	long favorites;
+	int nextFavorite = 0;
 
-    updated = UpdateParamFiles();
+	updated = UpdateParamFiles();
 
-    wPrefGetIntegerBasic(FAVORITESECTION, FAVORITETOTALS, &favorites, 0);
-    if (favorites) {
-        DynString topic;
-        favoriteList = MyMalloc(sizeof(long)*favorites);
+	wPrefGetIntegerBasic(FAVORITESECTION, FAVORITETOTALS, &favorites, 0);
+	if (favorites) {
+		DynString topic;
+		favoriteList = MyMalloc(sizeof(long)*favorites);
 
-        DynStringMalloc(&topic, 16);
-        for (int i = 0; i < favorites; i++) {
-            DynStringPrintf(&topic, FAVORITEKEY, i);
-            wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &favoriteList[i],
-                                 0);
-        }
-        DynStringFree(&topic);
-    }
+		DynStringMalloc(&topic, 16);
+		for (int i = 0; i < favorites; i++) {
+			DynStringPrintf(&topic, FAVORITEKEY, i);
+			wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &favoriteList[i],
+			                     0);
+		}
+		DynStringFree(&topic);
+	}
 
-    for (fileNo = 1; ; fileNo++) {
-        char *fileName;
-        const char * contents;
+	for (fileNo = 1; ; fileNo++) {
+		char *fileName;
+		const char * contents;
 //      enum paramFileState structState = PARAMFILE_UNLOADED;
 
 
-        sprintf(message, "File%d", fileNo);
-        contents = wPrefGetString("Parameter File Names", message);
-        if (contents == NULL || *contents == '\0') {
-            break;
-        }
-        InfoMessage("Parameters for %s", contents);
-        fileName = wPrefGetString("Parameter File Map", contents);
-        if (fileName == NULL || *fileName == '\0') {
-            NoticeMessage(MSG_PRMFIL_NO_MAP, _("Ok"), NULL, contents);
-            continue;
-        }
-        char * share;
+		sprintf(message, "File%d", fileNo);
+		contents = wPrefGetString("Parameter File Names", message);
+		if (contents == NULL || *contents == '\0') {
+			break;
+		}
+		InfoMessage("Parameters for %s", contents);
+		fileName = wPrefGetString("Parameter File Map", contents);
+		if (fileName == NULL || *fileName == '\0') {
+			NoticeMessage(MSG_PRMFIL_NO_MAP, _("Ok"), NULL, contents);
+			continue;
+		}
+		char * share;
 
-       // Rewire to the latest system level
+		// Rewire to the latest system level
 #define SHAREPARAMS (PATH_SEPARATOR "share" PATH_SEPARATOR "xtrkcad" PATH_SEPARATOR "params" PATH_SEPARATOR)
-        if ((share= strstr(fileName,SHAREPARAMS))) {
-        	share += strlen(SHAREPARAMS);
-        	MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
-        	wPrefSetString("Parameter File Map", contents, fileName);
-        }
+		if ((share= strstr(fileName,SHAREPARAMS))) {
+			share += strlen(SHAREPARAMS);
+			MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
+			wPrefSetString("Parameter File Map", contents, fileName);
+		}
 
 		if (ReadParamFile(fileName) >= 0) {
 
@@ -263,13 +267,13 @@ void LoadParamFileList(void)
 		} else {
 			ReadParamError(fileName);
 		}
-    }
-    curParamFileIndex = PARAM_CUSTOM;
-    if (updated) {
-        SaveParamFileList();
-    }
+	}
+	curParamFileIndex = PARAM_CUSTOM;
+	if (updated) {
+		SaveParamFileList();
+	}
 
-    MyFree(favoriteList);
+	MyFree(favoriteList);
 }
 
 /**
@@ -280,45 +284,45 @@ void LoadParamFileList(void)
 
 void SaveParamFileList(void)
 {
-    int fileInx;
-    int fileNo;
-    int favorites;
-    char * contents, *cp;
+	int fileInx;
+	int fileNo;
+	int favorites;
+	char * contents, *cp;
 
-    for (fileInx = 0, fileNo = 1, favorites = 0; fileInx < paramFileInfo_da.cnt;
-            fileInx++) {
-        if (paramFileInfo(fileInx).valid && (!paramFileInfo(fileInx).deleted ||
-                                             paramFileInfo(fileInx).favorite)) {
-            sprintf(message, "File%d", fileNo);
-            contents = paramFileInfo(fileInx).contents;
-            for (cp = contents; *cp; cp++) {
-                if (*cp == '=' || *cp == '\'' || *cp == '"' || *cp == ':' || *cp == '.') {
-                    *cp = ' ';
-                }
-            }
-            wPrefSetString("Parameter File Names", message, contents);
-            wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
-            if (paramFileInfo(fileInx).favorite) {
-                sprintf(message, FAVORITEKEY, favorites);
-                wPrefSetInteger(FAVORITESECTION, message, fileNo);
-                sprintf(message, FAVORITEDELETED, fileNo);
-                wPrefSetInteger(FAVORITESECTION, message, paramFileInfo(fileInx).deleted);
-                favorites++;
-            }
-            fileNo++;
-        }
-    }
-    sprintf(message, "File%d", fileNo);
-    wPrefSetString("Parameter File Names", message, "");
-    wPrefSetInteger(FAVORITESECTION, FAVORITETOTALS, favorites);
+	for (fileInx = 0, fileNo = 1, favorites = 0; fileInx < paramFileInfo_da.cnt;
+	     fileInx++) {
+		if (paramFileInfo(fileInx).valid && (!paramFileInfo(fileInx).deleted ||
+		                                     paramFileInfo(fileInx).favorite)) {
+			sprintf(message, "File%d", fileNo);
+			contents = paramFileInfo(fileInx).contents;
+			for (cp = contents; *cp; cp++) {
+				if (*cp == '=' || *cp == '\'' || *cp == '"' || *cp == ':' || *cp == '.') {
+					*cp = ' ';
+				}
+			}
+			wPrefSetString("Parameter File Names", message, contents);
+			wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
+			if (paramFileInfo(fileInx).favorite) {
+				sprintf(message, FAVORITEKEY, favorites);
+				wPrefSetInteger(FAVORITESECTION, message, fileNo);
+				sprintf(message, FAVORITEDELETED, fileNo);
+				wPrefSetInteger(FAVORITESECTION, message, paramFileInfo(fileInx).deleted);
+				favorites++;
+			}
+			fileNo++;
+		}
+	}
+	sprintf(message, "File%d", fileNo);
+	wPrefSetString("Parameter File Names", message, "");
+	wPrefSetInteger(FAVORITESECTION, FAVORITETOTALS, favorites);
 }
 
 void
 UpdateParamFileList(void)
 {
-    for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
-        SetParamFileState((int)i);
-    }
+	for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
+		SetParamFileState((int)i);
+	}
 }
 
 
@@ -343,59 +347,60 @@ UpdateParamFileList(void)
  */
 
 int LoadParamFile(
-    int files,
-    char ** fileName,
-    void * data)
+        int files,
+        char ** fileName,
+        void * data)
 {
-    wIndex_t inx;
-    int i = 0;
+	wIndex_t inx;
+	int i = 0;
 
-    CHECK(fileName != NULL);
-    CHECK(files > 0);
+	CHECK(fileName != NULL);
+	CHECK(files > 0);
 
-    for (i = 0; i < files; i++) {
+	for (i = 0; i < files; i++) {
 //      enum paramFileState structState = PARAMFILE_UNLOADED;
-        int newIndex;
+		int newIndex;
 
-        curContents = curSubContents = NULL;
+		curContents = curSubContents = NULL;
 
-        newIndex = ReadParamFile(fileName[i]);
+		newIndex = ReadParamFile(fileName[i]);
 		if (newIndex >= 0) {
 			// in case the contents is already present, make invalid
 			for (inx = 0; inx < newIndex; inx++) {
 				if (paramFileInfo(inx).valid &&
-					strcmp(paramFileInfo(inx).contents, curContents) == 0) {
+				    strcmp(paramFileInfo(inx).contents, curContents) == 0) {
 					paramFileInfo(inx).valid = FALSE;
 					break;
 				}
 			}
 
 			wPrefSetString("Parameter File Map", curContents,
-				paramFileInfo(curParamFileIndex).name);
+			               paramFileInfo(curParamFileIndex).name);
 		} else {
 			ReadParamError(fileName[i]);
 		}
-    }
-    //Only set the ParamFileDir if not the system directory
-    if (!strstr(fileName[i-1],SHAREPARAMS))
-    	SetParamFileDir(fileName[i - 1]);
-    curParamFileIndex = PARAM_CUSTOM;
-    DoChangeNotification(CHANGE_PARAMS);
-    return TRUE;
+	}
+	//Only set the ParamFileDir if not the system directory
+	if (!strstr(fileName[i-1],SHAREPARAMS)) {
+		SetParamFileDir(fileName[i - 1]);
+	}
+	curParamFileIndex = PARAM_CUSTOM;
+	DoChangeNotification(CHANGE_PARAMS);
+	return TRUE;
 }
 
 static void ReadCustom(void)
 {
-    FILE * f;
-    MakeFullpath(&customPath, workingDir, sCustomF, NULL);
-    customPathBak = MyStrdup(customPath);
-    customPathBak[ strlen(customPathBak)-1 ] = '1';
-    f = fopen(customPath, "r");
-    if (f != NULL) {
-        fclose(f);
-        curParamFileIndex = PARAM_CUSTOM;
-        ReadParams(0, workingDir, sCustomF);
-    }
+	FILE * f;
+	MakeFullpath(&customPath, workingDir, sCustomF, NULL);
+	customPathBak = MyStrdup(customPath);
+	customPathBak[ strlen(customPathBak)-1 ] = '1';
+	f = fopen(customPath, "r");
+	if (f != NULL) {
+		fclose(f);
+		curParamFileIndex = PARAM_CUSTOM;
+		ReadParams(0, workingDir, sCustomF);
+	}
 }
 
 
@@ -405,23 +410,23 @@ static void ReadCustom(void)
 
 FILE * OpenCustom(char *mode)
 {
-    FILE * ret = NULL;
+	FILE * ret = NULL;
 
-    if (inPlayback) {
-        return NULL;
-    }
-    if (*mode == 'w') {
-        rename(customPath, customPathBak);
-    }
-    if (customPath) {
-        ret = fopen(customPath, mode);
-        if (ret == NULL) {
-            NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Custom"), customPath,
-                          strerror(errno));
-        }
-    }
+	if (inPlayback) {
+		return NULL;
+	}
+	if (*mode == 'w') {
+		rename(customPath, customPathBak);
+	}
+	if (customPath) {
+		ret = fopen(customPath, mode);
+		if (ret == NULL) {
+			NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Custom"), customPath,
+			              strerror(errno));
+		}
+	}
 
-    return ret;
+	return ret;
 }
 /**
  * Update and open the parameter files dialog box
@@ -431,47 +436,47 @@ FILE * OpenCustom(char *mode)
 
 static void DoParamFileListDialog(void *junk)
 {
-    DoParamFiles(junk);
-    ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
+	DoParamFiles(junk);
+	ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
 
 }
 
 addButtonCallBack_t ParamFilesInit(void)
 {
 	RegisterChangeNotification(ParamFilesChange);
-    return &DoParamFileListDialog;
+	return &DoParamFileListDialog;
 }
 
 /**
  * Get the initial parameter files. The Xtrkcad.xtq file containing scale and
  * demo definitions is read.
- * 
+ *
  * \return FALSE on error, TRUE otherwise
  */
 BOOL_T ParamFileListInit(void)
 {
-	/** @logcmd @showrefby params=n paramfilelist.c Log ReadParams 
-	 * (including scale file (xtq), custom file (*.cus) and other params (xtp)) 
+	/** @logcmd @showrefby params=n paramfilelist.c Log ReadParams
+	 * (including scale file (xtq), custom file (*.cus) and other params (xtp))
 	 */
-    log_params = LogFindIndex("params");
-    log_paramupdate = LogFindIndex("paramupdate");
+	log_params = LogFindIndex("params");
+	log_paramupdate = LogFindIndex("paramupdate");
 
-    SetCLocale();
+	SetCLocale();
 	// get the default definitions
-    if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
+	if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
 		SetUserLocale();
-        return FALSE;
-    }
+		return FALSE;
+	}
 
-    curParamFileIndex = PARAM_CUSTOM;
+	curParamFileIndex = PARAM_CUSTOM;
 
-    if (lParamKey == 0) {
-        LoadParamFileList();
-        ReadCustom();
-    }
+	if (lParamKey == 0) {
+		LoadParamFileList();
+		ReadCustom();
+	}
 
-    SetUserLocale();
-    return TRUE;
+	SetUserLocale();
+	return TRUE;
 
 }
 
@@ -494,8 +499,8 @@ DeleteAllParamTypes(int index)
 
 /**
  * Unload parameter file: all parameter definitions from this file are deleted
- * from memory. Strings allocated to store the filename and contents 
- * description are free'd as well. 
+ * from memory. Strings allocated to store the filename and contents
+ * description are free'd as well.
  * In order to keep the overall data structures consistent, the file info
  * structure is not removed from the array but flagged as garbage
  *
@@ -507,21 +512,21 @@ DeleteAllParamTypes(int index)
 bool
 UnloadParamFile(wIndex_t fileIndex)
 {
-    paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
-	
+	paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
+
 	DeleteAllParamTypes(fileIndex);
-	
-    MyFree(paramFileI->name);
-    MyFree(paramFileI->contents);
 
-    paramFileI->valid = FALSE;
+	MyFree(paramFileI->name);
+	MyFree(paramFileI->contents);
 
-    for (int i = 0; i < paramFileInfo_da.cnt; i++) {
-        LOG1(log_params, ("UnloadParamFiles: = %s: %d\n", paramFileInfo(i).contents,
-                          paramFileInfo(i).trackState))
-    }
+	paramFileI->valid = FALSE;
 
-    return (true);
+	for (int i = 0; i < paramFileInfo_da.cnt; i++) {
+		LOG1(log_params, ("UnloadParamFiles: = %s: %d\n", paramFileInfo(i).contents,
+		                  paramFileInfo(i).trackState))
+	}
+
+	return (true);
 }
 
 /**
@@ -536,7 +541,7 @@ bool
 ReloadParamFile(wIndex_t index)
 {
 	paramFileInfo_p paramFileI = &paramFileInfo(index);
-	
+
 	DeleteAllParamTypes(index);
 	MyFree(paramFileI->contents);
 

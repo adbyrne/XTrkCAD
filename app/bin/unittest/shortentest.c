@@ -111,7 +111,7 @@ static void EllipsizeText(void **state)
 	EllipsizeString(LONGSTRING, result, strlen(LONGSTRING));
 	assert_string_equal(result, LONGSTRING);
 
-	EllipsizeString(LONGSTRING, result, 40); 
+	EllipsizeString(LONGSTRING, result, 40);
 	assert_string_equal(result, "The strrchr() function in C/C++...");
 
 	EllipsizeString(LONGSTRING, result, 23);
@@ -138,7 +138,7 @@ static void LongText(void **state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
+	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(NoRemoveBlanks),
 		cmocka_unit_test(RemoveMultipleBlanks),
 		cmocka_unit_test(RemoveTabs),
@@ -147,6 +147,6 @@ int main(void)
 		cmocka_unit_test(NoEllipsizeText),
 		cmocka_unit_test(EllipsizeText),
 		cmocka_unit_test(LongText),
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	};
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

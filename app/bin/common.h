@@ -125,8 +125,8 @@ typedef double WDOUBLE_T;
 typedef double FONTSIZE_T;
 
 typedef struct {
-		POS_T x,y;
-		} coOrd;
+	POS_T x,y;
+} coOrd;
 
 typedef struct {
 	coOrd pt;
@@ -157,10 +157,10 @@ enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COM
 // DYNARRAY
 
 typedef struct {
-		int cnt;
-		int max;
-		void * ptr;
-		} dynArr_t;
+	int cnt;
+	int max;
+	void * ptr;
+} dynArr_t;
 
 #define CHECK_SIZE(T,DA)
 
@@ -234,8 +234,8 @@ typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
 
 // base class for extraData*_t: each of which must include this struct as the first element
 typedef struct extraDataBase_t {
-		TRKTYP_T trkType;
-	} extraDataBase_t;
+	TRKTYP_T trkType;
+} extraDataBase_t;
 // We check if TRKTYP_T in trk, trk->extraDataBase and the code context (TRKTYP) match.
 // If TRKTYP is T_NOTRACK then we are dealing with T_TURNOUT/T_STRUCTURE or T_BEZIER/T_BEZLIN which
 // share a log of code and have the same extraData*_t structure.

@@ -60,7 +60,8 @@ EXPORT coOrd zero = { 0.0, 0.0 };
 
 EXPORT wBool_t extraButtons = FALSE;
 
-EXPORT long onStartup; /**< controls behaviour after startup: load last layout if zero, else start with blank canvas */
+EXPORT long
+onStartup; /**< controls behaviour after startup: load last layout if zero, else start with blank canvas */
 
 static int verbose = 0;
 
@@ -110,10 +111,11 @@ static unsigned long guard0 = 0xDEADBEEF;
 static unsigned long guard1 = 0xAF00BA8A;
 static int log_malloc;
 
-static void RecordMalloc(void * p, size_t size) {
+static void RecordMalloc(void * p, size_t size)
+{
 
 
-	if (!StorageLog) StorageLog = malloc(sizeof(slog_t)*LOG_SIZE);
+	if (!StorageLog) { StorageLog = malloc(sizeof(slog_t)*LOG_SIZE); }
 	slog_p log_p = StorageLog;
 	if (StorageLogCurrent<LOG_SIZE) {
 		log_p[StorageLogCurrent].storage_p = p;
@@ -127,10 +129,11 @@ static void RecordMalloc(void * p, size_t size) {
 	}
 }
 
-static void RecordMyFree(void *p) {
+static void RecordMyFree(void *p)
+{
 	slog_p log_p = StorageLog;
 	if (log_p) {
-		for (int i=0;i<StorageLogCurrent;i++) {
+		for (int i=0; i<StorageLogCurrent; i++) {
 			if (!log_p[i].freed && log_p[i].storage_p == p) {
 				log_p[i].freed = TRUE;
 			}
@@ -140,20 +143,21 @@ static void RecordMyFree(void *p) {
 
 #define SLOG_FMT "0x%.12" PRIxPTR
 
-EXPORT BOOL_T TestMallocs() {
+EXPORT BOOL_T TestMallocs()
+{
 	size_t oldSize;
 	size_t testedMallocs = 0;
 	void * old;
 	slog_p log_p = StorageLog;
 	BOOL_T rc = TRUE;
 	if (log_p) {
-		for (int i=0;i<StorageLogCurrent;i++) {
-			if (log_p[i].freed) continue;
+		for (int i=0; i<StorageLogCurrent; i++) {
+			if (log_p[i].freed) { continue; }
 			old = log_p[i].storage_p;
 			oldSize = log_p[i].storage_size;
 			if (*(unsigned long*) ((char*) old - sizeof(unsigned long)) != guard0) {
 				LogPrintf("Guard 0 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
-			  rc = FALSE;
+				rc = FALSE;
 			}
 			if (*(unsigned long*) ((char*) old + oldSize) != guard1) {
 				LogPrintf("Guard 1 hosed, " SLOG_FMT " size: %llu \n", (uintptr_t)old, oldSize);
@@ -163,7 +167,7 @@ EXPORT BOOL_T TestMallocs() {
 		}
 	}
 	LogPrintf("Tested: %llu Mallocs: %llu Total Malloced: %llu Freed: %llu Total Freed: %llu \n",
-			testedMallocs, totalMallocs, totalMalloced, totalFrees, totalFreeed);
+	          testedMallocs, totalMallocs, totalMalloced, totalFrees, totalFreeed);
 	return rc;
 }
 
@@ -178,7 +182,8 @@ EXPORT BOOL_T TestMallocs() {
  * \return Pointer to allocated memory - never NULL
  */
 
-EXPORT void * MyMalloc(size_t size) {
+EXPORT void * MyMalloc(size_t size)
+{
 	void * p;
 	totalMallocs++;
 	totalMalloced += size;
@@ -190,10 +195,10 @@ EXPORT void * MyMalloc(size_t size) {
 	}
 
 	LOG1(log_malloc,
-			( "  Malloc(%ld) = " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
-			size, (size_t)((char*)p+sizeof (size_t) + sizeof (unsigned long)),
-			(size_t)p,
-			(size_t)((char*)p+size+sizeof (size_t) + 2 * sizeof(unsigned long))));
+	     ( "  Malloc(%ld) = " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
+	       size, (size_t)((char*)p+sizeof (size_t) + sizeof (unsigned long)),
+	       (size_t)p,
+	       (size_t)((char*)p+size+sizeof (size_t) + 2 * sizeof(unsigned long))));
 
 	*(size_t*) p = (size_t) size;
 	p = (char*) p + sizeof(size_t);
@@ -201,8 +206,9 @@ EXPORT void * MyMalloc(size_t size) {
 	p = (char*) p + sizeof(unsigned long);
 	*(unsigned long*) ((char*) p + size) = guard1;
 	memset(p, 0, (size_t )size);
-	if (extraButtons)
+	if (extraButtons) {
 		RecordMalloc(p,size);
+	}
 	return p;
 }
 
@@ -218,20 +224,23 @@ EXPORT void * MyMalloc(size_t size) {
  * \return Pointer to reallocated memory - never NULL
  */
 
-EXPORT void * MyRealloc(void * old, size_t size) {
+EXPORT void * MyRealloc(void * old, size_t size)
+{
 	size_t oldSize;
 	void * new;
-	if (old == NULL)
+	if (old == NULL) {
 		return MyMalloc(size);
+	}
 	totalReallocs++;
 	totalRealloced += size;
 	CHECKMSG( (*(unsigned long*) ((char*) old - sizeof(unsigned long)) == guard0),
-		("Guard0 is hosed") );
+	          ("Guard0 is hosed") );
 	oldSize = *(size_t*) ((char*) old - sizeof(unsigned long) - sizeof(size_t));
 	CHECKMSG( (*(unsigned long*) ((char*) old + oldSize) == guard1),
-		( "Guard1 is hosed" ) );
+	          ( "Guard1 is hosed" ) );
 
-	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size, oldSize ))
+	LOG1(log_malloc, ("  Realloc (" SLOG_FMT ",%ld) was %d\n", (size_t)old, size,
+	                  oldSize ))
 
 	if ((long) oldSize == size) {
 		return old;
@@ -242,25 +251,26 @@ EXPORT void * MyRealloc(void * old, size_t size) {
 	return new;
 }
 
-EXPORT void MyFree(void * ptr) {
+EXPORT void MyFree(void * ptr)
+{
 	size_t oldSize;
 	totalFrees++;
 	if (ptr==NULL) {
 		return;
 	}
 	CHECKMSG( (*(unsigned long*) ((char*) ptr - sizeof(unsigned long)) == guard0),
-		( "Guard0 is hosed") );
+	          ( "Guard0 is hosed") );
 	oldSize = *(size_t*) ((char*) ptr - sizeof(unsigned long)
-			- sizeof(size_t));
+	                      - sizeof(size_t));
 	CHECKMSG( (*(unsigned long*) ((char*) ptr + oldSize) == guard1),
-		( "Guard1 is hosed" ) );
+	          ( "Guard1 is hosed" ) );
 
 	LOG1(log_malloc,
-			("  Free %ld at " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
-					oldSize,
-					(size_t)ptr,
-					(size_t)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0),
-					(size_t)((char*)ptr+oldSize+sizeof *(long*)0)));
+	     ("  Free %ld at " SLOG_FMT " (" SLOG_FMT "-" SLOG_FMT ")\n",
+	      oldSize,
+	      (size_t)ptr,
+	      (size_t)((char*)ptr-sizeof *(size_t*)0-sizeof *(long*)0),
+	      (size_t)((char*)ptr+oldSize+sizeof *(long*)0)));
 
 	totalFreeed += oldSize;
 	free((char*) ptr - sizeof *(long*) 0 - sizeof *(size_t*) 0);
@@ -269,14 +279,16 @@ EXPORT void MyFree(void * ptr) {
 	}
 }
 
-EXPORT void * memdup(void * src, size_t size) {
+EXPORT void * memdup(void * src, size_t size)
+{
 	void * p;
 	p = MyMalloc(size);
 	memcpy(p, src, size);
 	return p;
 }
 
-EXPORT char * MyStrdup(const char * str) {
+EXPORT char * MyStrdup(const char * str)
+{
 	char * ret;
 	ret = (char*) MyMalloc(strlen(str) + 1);
 	strcpy(ret, str);
@@ -298,7 +310,8 @@ EXPORT char * MyStrdup(const char * str) {
  *  "" for "  			This is so that a CSV conformant type program can interpret the file output
  *
  */
-EXPORT char * ConvertToEscapedText(const char * text) {
+EXPORT char * ConvertToEscapedText(const char * text)
+{
 	int text_i = 0;
 	int add = 0;   //extra chars for escape
 	while (text[text_i]) {
@@ -375,7 +388,8 @@ EXPORT char * ConvertToEscapedText(const char * text) {
  *  \\ = \ 			The way to still produce backslash
  *
  */
-EXPORT char * ConvertFromEscapedText(const char * text) {
+EXPORT char * ConvertFromEscapedText(const char * text)
+{
 	enum {
 		CHARACTER, ESCAPE
 	} state = CHARACTER;
@@ -435,12 +449,13 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
  * \return address of internal buffer containing formatted message
  */
 EXPORT const char * AbortMessage(
-	const char * sFormat,
-	... )
+        const char * sFormat,
+        ... )
 {
 	static char sMessage[STR_SIZE];
-	if ( sFormat == NULL )
+	if ( sFormat == NULL ) {
 		return "";
+	}
 	va_list ap;
 	va_start(ap, sFormat);
 	vsnprintf(sMessage, sizeof sMessage, sFormat, ap);
@@ -463,13 +478,14 @@ EXPORT const char * AbortMessage(
  * \return No return
  */
 EXPORT void AbortProg(
-	const char * sCond,
-	const char * sFileName,
-	int iLineNumber,
-	const char * sMsg )
+        const char * sCond,
+        const char * sFileName,
+        int iLineNumber,
+        const char * sMsg )
 {
 	static BOOL_T abort2 = FALSE;
-	snprintf( message, sizeof message, "%s: %s:%d %s", sCond, sFileName, iLineNumber, sMsg?sMsg:"" );
+	snprintf( message, sizeof message, "%s: %s:%d %s", sCond, sFileName,
+	          iLineNumber, sMsg?sMsg:"" );
 	if (abort2) {
 		wNoticeEx( NT_ERROR, message, _("ABORT"), NULL);
 	} else {
@@ -484,18 +500,23 @@ EXPORT void AbortProg(
 	}
 }
 
-EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes) {
+EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes)
+{
 	const char * cp;
-	while (*src && isspace((unsigned char) *src))
+	while (*src && isspace((unsigned char) *src)) {
 		src++;
-	if (!*src)
+	}
+	if (!*src) {
 		return dst;
+	}
 	cp = src + strlen(src) - 1;
-	while (cp > src && isspace((unsigned char) *cp))
+	while (cp > src && isspace((unsigned char) *cp)) {
 		cp--;
+	}
 	while (src <= cp) {
-		if (*src == '"' && double_quotes)
+		if (*src == '"' && double_quotes) {
 			*dst++ = '"';
+		}
 		*dst++ = *src++;
 	}
 	*dst = '\0';
@@ -505,40 +526,43 @@ EXPORT char * Strcpytrimed(char * dst, const char * src, BOOL_T double_quotes) {
 // ??? Referenced from gtklib.browserhelp.c ???
 static char * directory;
 
-EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
+EXPORT wBool_t CheckHelpTopicExists(const char * topic)
+{
 
 	char * htmlFile;
 
- 	// Check the file exits in the distro
+	// Check the file exits in the distro
 
-	if (!directory)
+	if (!directory) {
 		directory = malloc(BUFSIZ);
+	}
 
-    if (directory == NULL) return 0;
+	if (directory == NULL) { return 0; }
 
-     sprintf(directory, "%s/html/", wGetAppLibDir());
+	sprintf(directory, "%s/html/", wGetAppLibDir());
 
- 	 htmlFile = malloc(strlen(directory)+strlen(topic) + 6);
+	htmlFile = malloc(strlen(directory)+strlen(topic) + 6);
 
- 	 sprintf(htmlFile, "%s%s.html", directory, topic);
+	sprintf(htmlFile, "%s%s.html", directory, topic);
 
- 	 if( access( htmlFile, F_OK ) == -1 ) {
+	if( access( htmlFile, F_OK ) == -1 ) {
 
-     	printf("Missing help topic %s\n",topic);
+		printf("Missing help topic %s\n",topic);
 
-     	free(htmlFile);
+		free(htmlFile);
 
-     	return 0;
+		return 0;
 
-     }
+	}
 
- 	 free(htmlFile);
+	free(htmlFile);
 
- 	 return 1;
+	return 1;
 
 }
 
-static const char * ParseMessage(const char *msgSrc) {
+static const char * ParseMessage(const char *msgSrc)
+{
 	char *cp1 = NULL, *cp2 = NULL;
 	static char shortMsg[STR_SIZE];
 	cp1 = strchr(_(msgSrc), '\t');
@@ -561,19 +585,22 @@ static const char * ParseMessage(const char *msgSrc) {
 	}
 }
 
-EXPORT void InfoMessage(const char * format, ...) {
+EXPORT void InfoMessage(const char * format, ...)
+{
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
 	va_end(ap);
 	/*InfoSubstituteControl( NULL, NULL );*/
-	if (inError)
+	if (inError) {
 		return;
+	}
 	SetMessage(message2);
 }
 
-EXPORT void ErrorMessage(const char * format, ...) {
+EXPORT void ErrorMessage(const char * format, ...)
+{
 	va_list ap;
 	va_start(ap, format);
 	format = ParseMessage(format);
@@ -585,7 +612,9 @@ EXPORT void ErrorMessage(const char * format, ...) {
 	inError = TRUE;
 }
 
-EXPORT int NoticeMessage(const char * format, const char * yes, const char * no, ...) {
+EXPORT int NoticeMessage(const char * format, const char * yes, const char * no,
+                         ...)
+{
 	va_list ap;
 	va_start(ap, no);
 	format = ParseMessage(format);
@@ -594,11 +623,14 @@ EXPORT int NoticeMessage(const char * format, const char * yes, const char * no,
 	return wNotice(message2, yes, no);
 }
 
-EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes, const char * no,
-		...) {
+EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
+                          const char * no,
+                          ...)
+{
 	va_list ap;
-	if (inPlayback)
+	if (inPlayback) {
 		return playbackRC;
+	}
 	va_start(ap, no);
 	format = ParseMessage(format);
 	vsnprintf(message2, 1020, format, ap);
@@ -612,13 +644,13 @@ EXPORT int NoticeMessage2(int playbackRC, const char * format, const char * yes,
  * MAIN BUTTON HANDLERS
  *
  */
- /**
-  * Confirm a requested operation in case of possible loss of changes.
-  *
-  * \param label2 IN operation to be cancelled, unused at the moment
-  * \param after IN function to be executed on positive confirmation
-  * \return true if proceed, false if cancel operation
-  */
+/**
+ * Confirm a requested operation in case of possible loss of changes.
+ *
+ * \param label2 IN operation to be cancelled, unused at the moment
+ * \param after IN function to be executed on positive confirmation
+ * \return true if proceed, false if cancel operation
+ */
 
 /** TODO: make sensible messages when requesting confirmation */
 
@@ -627,8 +659,8 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 	int rc = -1;
 	if (changed) {
 		rc = wNotice3(_("Save changes to the layout design before closing?\n\n"
-			"If you don't save now, your unsaved changes will be discarded."),
-			_("&Save"), _("&Cancel"), _("&Don't Save"));
+		                "If you don't save now, your unsaved changes will be discarded."),
+		              _("&Save"), _("&Cancel"), _("&Don't Save"));
 	}
 
 	switch (rc) {
@@ -650,7 +682,8 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 /*
  * Clean up before quitting
  */
-static void DoQuitAfter(void) {
+static void DoQuitAfter(void)
+{
 	changed = 0;
 	CleanupFiles();  //Get rid of checkpoint if we quit.
 	SaveState();
@@ -660,7 +693,8 @@ static void DoQuitAfter(void) {
  * to close the application. Before shutting down confirmation is gotten to
  * prevent data loss.
  */
-EXPORT void DoQuit(void * unused) {
+EXPORT void DoQuit(void * unused)
+{
 	if (Confirm(_("Quit"), DoQuitAfter)) {
 
 #ifdef CHECK_UNUSED_BALLOONHELP
@@ -671,7 +705,8 @@ EXPORT void DoQuit(void * unused) {
 	}
 }
 
-static void DoClearAfter(void) {
+static void DoClearAfter(void)
+{
 
 	Reset();
 	ClearTracks();
@@ -687,7 +722,8 @@ static void DoClearAfter(void) {
 	LayoutBackGroundInit(TRUE);
 }
 
-EXPORT void DoClear(void * unused) {
+EXPORT void DoClear(void * unused)
+{
 	Confirm(_("Clear"), DoClearAfter);
 }
 
@@ -695,7 +731,8 @@ EXPORT void DoClear(void * unused) {
  * Toggle visibility state of map window.
  */
 
-EXPORT void MapWindowToggleShow(void * unused) {
+EXPORT void MapWindowToggleShow(void * unused)
+{
 	MapWindowShow(!mapVisible);
 }
 
@@ -705,7 +742,8 @@ EXPORT void MapWindowToggleShow(void * unused) {
  * \param state IN TRUE if visible, FALSE if hidden
  */
 
-EXPORT void MapWindowShow(int state) {
+EXPORT void MapWindowShow(int state)
+{
 	mapVisible = state;
 	wPrefSetInteger("misc", "mapVisible", mapVisible);
 	wMenuToggleSet(mapShowMI, mapVisible);
@@ -719,7 +757,8 @@ EXPORT void MapWindowShow(int state) {
 }
 
 
-EXPORT void DoShowWindow(int index, const char * name, void * data) {
+EXPORT void DoShowWindow(int index, const char * name, void * data)
+{
 	if (data == mapW) {
 		if (mapVisible == FALSE) {
 			MapWindowShow( TRUE);
@@ -732,17 +771,20 @@ EXPORT void DoShowWindow(int index, const char * name, void * data) {
 static dynArr_t demoWindows_da;
 #define demoWindows(N) DYNARR_N( wWin_p, demoWindows_da, N )
 
-EXPORT void wShow(wWin_p win) {
+EXPORT void wShow(wWin_p win)
+{
 	int inx;
 	if (inPlayback && win != demoW) {
 		wWinSetBusy(win, TRUE);
 		for (inx = 0; inx < demoWindows_da.cnt; inx++)
-			if ( demoWindows(inx) == win)
+			if ( demoWindows(inx) == win) {
 				break;
+			}
 		if (inx >= demoWindows_da.cnt) {
 			for (inx = 0; inx < demoWindows_da.cnt; inx++)
-				if ( demoWindows(inx) == NULL)
+				if ( demoWindows(inx) == NULL) {
 					break;
+				}
 			if (inx >= demoWindows_da.cnt) {
 				DYNARR_APPEND(wWin_p, demoWindows_da, 10);
 				inx = demoWindows_da.cnt - 1;
@@ -750,39 +792,47 @@ EXPORT void wShow(wWin_p win) {
 			demoWindows(inx) = win;
 		}
 	}
-	if (win != mainW)
+	if (win != mainW) {
 		wMenuListAdd(winList_mi, -1, wWinGetTitle(win), win);
+	}
 	wWinShow(win, TRUE);
 }
 
-EXPORT void wHide(wWin_p win) {
+EXPORT void wHide(wWin_p win)
+{
 	int inx;
 	wWinShow(win, FALSE);
 	wWinSetBusy(win, FALSE);
-	if (inMainW && win == aboutW)
+	if (inMainW && win == aboutW) {
 		return;
+	}
 	wMenuListDelete(winList_mi, wWinGetTitle(win));
 	ParamResetInvalid( win );
 	if (inPlayback)
 		for (inx = 0; inx < demoWindows_da.cnt; inx++)
-			if ( demoWindows(inx) == win)
+			if ( demoWindows(inx) == win) {
 				demoWindows(inx) = NULL;
+			}
 }
 
-EXPORT void CloseDemoWindows(void) {
+EXPORT void CloseDemoWindows(void)
+{
 	int inx;
 	for (inx = 0; inx < demoWindows_da.cnt; inx++)
-		if ( demoWindows(inx) != NULL)
+		if ( demoWindows(inx) != NULL) {
 			wHide(demoWindows(inx));
+		}
 	demoWindows_da.cnt = 0;
 }
 
-EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data) {
+EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data)
+{
 	switch (e) {
 	case wClose_e:
 		wMenuListDelete(winList_mi, wWinGetTitle(win));
-		if (data != NULL)
+		if (data != NULL) {
 			ConfirmReset( FALSE);
+		}
 		wWinDoCancel(win);
 		break;
 	default:
@@ -790,7 +840,8 @@ EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data) {
 	}
 }
 
-static void NextWindow(void) {
+static void NextWindow(void)
+{
 }
 
 
@@ -807,22 +858,24 @@ struct accelKey_s {
 	wAccelKey_e eKey;
 	int iMode;
 	enum eAccelAction_t iAction;
-	int iContext; } aAccelKeys[] = {
-		{ "zoomUp", wAccelKey_Pgdn, 0, EA_ZOOMUP, 1 },
-		{ "zoomDown", wAccelKey_Pgup, 0, EA_ZOOMDOWN, 1 },
-		{ "redraw", wAccelKey_F5, 0, EA_REDRAW, 0 },
+	int iContext;
+} aAccelKeys[] = {
+	{ "zoomUp", wAccelKey_Pgdn, 0, EA_ZOOMUP, 1 },
+	{ "zoomDown", wAccelKey_Pgup, 0, EA_ZOOMDOWN, 1 },
+	{ "redraw", wAccelKey_F5, 0, EA_REDRAW, 0 },
 #ifdef WINDOWS
-		{ "delete", wAccelKey_Del, 0, EA_DELETE, 0 },
+	{ "delete", wAccelKey_Del, 0, EA_DELETE, 0 },
 #endif
-		{ "undo", wAccelKey_Back, WKEY_SHIFT, EA_UNDO, 0 },
-		{ "copy", wAccelKey_Ins, WKEY_CTRL, EA_COPY, 0 },
-		{ "paste", wAccelKey_Ins, WKEY_SHIFT, EA_PASTE, 0 },
-		{ "cut", wAccelKey_Del, WKEY_SHIFT, EA_CUT, 0 },
-		{ "nextWindow", wAccelKey_F6, 0, EA_NEXT, 0 },
-		{ "zoomUp", wAccelKey_Numpad_Add, WKEY_CTRL, EA_ZOOMUP, 1 },
-		{ "zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL, EA_ZOOMDOWN, 1 },
-		{ "help", wAccelKey_F1, WKEY_SHIFT, EA_HELP, 1 },
-		{ "help-context", wAccelKey_F1, 0, EA_HELP, 3 } };
+	{ "undo", wAccelKey_Back, WKEY_SHIFT, EA_UNDO, 0 },
+	{ "copy", wAccelKey_Ins, WKEY_CTRL, EA_COPY, 0 },
+	{ "paste", wAccelKey_Ins, WKEY_SHIFT, EA_PASTE, 0 },
+	{ "cut", wAccelKey_Del, WKEY_SHIFT, EA_CUT, 0 },
+	{ "nextWindow", wAccelKey_F6, 0, EA_NEXT, 0 },
+	{ "zoomUp", wAccelKey_Numpad_Add, WKEY_CTRL, EA_ZOOMUP, 1 },
+	{ "zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL, EA_ZOOMDOWN, 1 },
+	{ "help", wAccelKey_F1, WKEY_SHIFT, EA_HELP, 1 },
+	{ "help-context", wAccelKey_F1, 0, EA_HELP, 3 }
+};
 
 static void AccelKeyDispatch( wAccelKey_e key, void * accelKeyIndexVP )
 {
@@ -864,13 +917,13 @@ static void AccelKeyDispatch( wAccelKey_e key, void * accelKeyIndexVP )
 }
 
 static char * accelKeyNames[] = { "Del", "Ins", "Home", "End", "Pgup", "Pgdn",
-		"Up", "Down", "Right", "Left", "Back", "F1", "F2", "F3", "F4", "F5",
-		"F6", "F7", "F8", "F9", "F10", "F11", "F12", "NumpadAdd", "NumpadSub" };
+                                  "Up", "Down", "Right", "Left", "Back", "F1", "F2", "F3", "F4", "F5",
+                                  "F6", "F7", "F8", "F9", "F10", "F11", "F12", "NumpadAdd", "NumpadSub"
+                                };
 
 static void SetAccelKeys()
 {
-	for ( int iAccelKey = 0; iAccelKey < COUNT( aAccelKeys ); iAccelKey++ )
-	{
+	for ( int iAccelKey = 0; iAccelKey < COUNT( aAccelKeys ); iAccelKey++ ) {
 		struct accelKey_s * akP = &aAccelKeys[iAccelKey];
 		int eKey = akP->eKey;
 		int iMode = akP->iMode;
@@ -935,17 +988,18 @@ static int OfferCheckpoint( void )
 
 	/* sProdName */
 	ret =
-			wNotice3(
-					_(
-							"Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
-					_("Resume"), _("Resume with New Name"), _("Ignore Checkpoint"));
+	        wNotice3(
+	                _(
+	                        "Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
+	                _("Resume"), _("Resume with New Name"), _("Ignore Checkpoint"));
 	//ret==1 Same, ret==-1 New, ret==0 Ignore
-	if (ret == 1)
+	if (ret == 1) {
 		printf(_("Reload Checkpoint Selected\n"));
-	else if (ret == -1)
+	} else if (ret == -1) {
 		printf(_("Reload Checkpoint With New Name Selected\n"));
-	else
+	} else {
 		printf(_("Ignore Checkpoint Selected\n"));
+	}
 	if (ret>=0) {
 		/* load the checkpoint file */
 		LoadCheckpoint(ret==1);
@@ -955,7 +1009,8 @@ static int OfferCheckpoint( void )
 	return (ret>=0);
 }
 
-EXPORT wWin_p wMain(int argc, char * argv[]) {
+EXPORT wWin_p wMain(int argc, char * argv[])
+{
 	int c;
 	int resumeWork;
 	char * logFileName = NULL;
@@ -1034,7 +1089,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			break;
 		case ':':
 			NoticeMessage("Missing parameter for %s", _("Ok"), NULL,
-					argv[optind - 1]);
+			              argv[optind - 1]);
 			exit(1);
 			break;
 		case 'V': // display version
@@ -1048,8 +1103,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		default:
 			CHECK(FALSE);
 		}
-	if (optind < argc)
+	if (optind < argc) {
 		initialFile = strdup(argv[optind]);
+	}
 
 	extraButtons = (getenv(sEnvExtra) != NULL);
 	LogOpen(logFileName);
@@ -1068,11 +1124,12 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	wGetDisplaySize(&displayWidth, &displayHeight);
 	mainW = wWinMainCreate(buffer, (displayWidth * 2) / 3,
-			(displayHeight * 2) / 3, "xtrkcadW", message, "main",
-			F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_RECALLSIZE | F_HIDE, MainProc,
-			NULL);
-	if (mainW == NULL)
+	                       (displayHeight * 2) / 3, "xtrkcadW", message, "main",
+	                       F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_RECALLSIZE | F_HIDE, MainProc,
+	                       NULL);
+	if (mainW == NULL) {
 		return NULL;
+	}
 
 	InitAppDefaults();
 
@@ -1129,8 +1186,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	SetAccelKeys();
 
 	LOG1(log_init, ( "initialize\n" ))
-	if (!Initialize())
+	if (!Initialize()) {
 		return NULL;
+	}
 
 	/* initialize the layers */
 	DefaultLayerProperties();
@@ -1158,11 +1216,13 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	wSetSplashInfo(_("Reading parameter files"));
 	LOG1(log_init, ( "paramFileInit\n" ))
 
-	SetParamFileDir(GetCurrentPath(LAYOUTPATHKEY));  //Set default for new parms to be the same as the layout
+	SetParamFileDir(GetCurrentPath(
+	                        LAYOUTPATHKEY));  //Set default for new parms to be the same as the layout
 
-	if (!ParamFileListInit())
+	if (!ParamFileListInit()) {
 		return NULL;
-		// LOG1(log_init, ("!ParamFileListInit()\n"))
+	}
+	// LOG1(log_init, ("!ParamFileListInit()\n"))
 
 	CommandInit();
 	LOG1(log_init, ( "Reset\n" ))
@@ -1179,7 +1239,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	pref = wPrefGetString("misc", "scale");
 	if (!pref)
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
+	{
 		pref = DEFAULT_SCALE;
+	}
 	strcpy(buffer, pref);
 	DoSetScale(buffer);
 
@@ -1203,22 +1265,19 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	/* this has to be called before ShowTip() */
 	InitSmallDlg();
 
-    /* Compare the program version and display Beta warning if appropriate */
-    pref = wPrefGetString("misc", "version");
-    if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0))
-    {
-        if(strstr(XTRKCAD_VERSION,"Beta") != NULL)
-        {
-            NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
-        }
-        //else {
-        //    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
-        //}
-        wPrefSetString("misc", "version", XTRKCAD_VERSION);
-    }
-    else {
-        ShowTip(SHOWTIP_NEXTTIP);
-    }
+	/* Compare the program version and display Beta warning if appropriate */
+	pref = wPrefGetString("misc", "version");
+	if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0)) {
+		if(strstr(XTRKCAD_VERSION,"Beta") != NULL) {
+			NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
+		}
+		//else {
+		//    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
+		//}
+		wPrefSetString("misc", "version", XTRKCAD_VERSION);
+	} else {
+		ShowTip(SHOWTIP_NEXTTIP);
+	}
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
@@ -1235,13 +1294,17 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			bExample = (iExample == 1);
 		}
 		if (initialFile && strlen(initialFile)) {
-			DoFileList(0, "1", initialFile);   //Will load Background values, if archive, leave
-			if (onStartup == 1)
-				LayoutBackGroundInit(TRUE);     //Wipe Out Prior Background
-			else
-				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
-		} else
-			LayoutBackGroundInit(TRUE);     // If onStartup==1 and no initial file - Wipe Out Prior Background
+			DoFileList(0, "1",
+			           initialFile);   //Will load Background values, if archive, leave
+			if (onStartup == 1) {
+				LayoutBackGroundInit(TRUE);        //Wipe Out Prior Background
+			} else {
+				LayoutBackGroundInit(FALSE);        //Get Prior BackGround
+			}
+		} else {
+			LayoutBackGroundInit(
+			        TRUE);        // If onStartup==1 and no initial file - Wipe Out Prior Background
+		}
 
 	}
 	MainRedraw();
@@ -1270,7 +1333,7 @@ static changeNotificationCallBack_t changeNotificationCallBacks[CNCB_COUNT];
 static int changeNotificationCallBackCnt = 0;
 
 EXPORT void RegisterChangeNotification(
-		changeNotificationCallBack_t action )
+        changeNotificationCallBack_t action )
 {
 	CHECK( (changeNotificationCallBackCnt + 1) < CNCB_COUNT );
 	changeNotificationCallBacks[changeNotificationCallBackCnt] = action;
@@ -1281,7 +1344,8 @@ EXPORT void RegisterChangeNotification(
 EXPORT void DoChangeNotification( long changes )
 {
 	int inx;
-	for (inx=0;inx<changeNotificationCallBackCnt;inx++)
+	for (inx=0; inx<changeNotificationCallBackCnt; inx++) {
 		changeNotificationCallBacks[inx](changes);
+	}
 }
 

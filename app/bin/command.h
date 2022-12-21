@@ -135,8 +135,9 @@ void LayoutToolBar( void * );
 BOOL_T CommandEnabled( wIndex_t );
 #define NUM_CMDMENUS (4)
 wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
-		const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
-		wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS], void * context);
+                    const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
+                    wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS],
+                    void * context);
 void AddToolbarControl( wControl_p, long );
 void PlaybackButtonMouse( wIndex_t );
 void PlaybackCommand( const char *, wIndex_t );

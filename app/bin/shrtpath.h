@@ -25,15 +25,16 @@
 #include "common.h"
 
 typedef enum {
-		SPTC_MATCH,				/* trk:ep is end of path? */
-		SPTC_MATCHANY,			/* any EP matches? */
-		SPTC_IGNNXTTRK,			/* don't traverse via trk:ep? */
-		SPTC_ADD_TRK,			/* trk:ep is next on current path */
-		SPTC_TERMINATE,			/* stop processing after current path? */
-		SPTC_VALID				/* trk:ep is still valid? */
-		 } SPTF_CMD;
+	SPTC_MATCH,				/* trk:ep is end of path? */
+	SPTC_MATCHANY,			/* any EP matches? */
+	SPTC_IGNNXTTRK,			/* don't traverse via trk:ep? */
+	SPTC_ADD_TRK,			/* trk:ep is next on current path */
+	SPTC_TERMINATE,			/* stop processing after current path? */
+	SPTC_VALID				/* trk:ep is still valid? */
+} SPTF_CMD;
 
-typedef int (*shortestPathFunc_p)( SPTF_CMD cmd, track_p, EPINX_T, EPINX_T, DIST_T, void * );
+typedef int (*shortestPathFunc_p)( SPTF_CMD cmd, track_p, EPINX_T, EPINX_T,
+                                   DIST_T, void * );
 int FindShortestPath( track_p, EPINX_T, BOOL_T, shortestPathFunc_p, void * );
 
 extern int log_shortPath;

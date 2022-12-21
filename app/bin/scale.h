@@ -1,5 +1,5 @@
 /** \file scale.h
- * 
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -37,7 +37,8 @@ DIST_T GetScaleMinRadius( SCALEINX_T );
 void ValidateTieData( tieData_p );
 tieData_t GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
-BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx);
+BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx,
+                      GAUGEINX_T *gaugeInx);
 void SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
 BOOL_T DoSetScale( char * );
 
@@ -50,7 +51,8 @@ typedef enum {FIT_STRUCTURE, FIT_TURNOUT, FIT_CAR} SCALE_FIT_TYPE_T;
 typedef enum {FIT_NONE, FIT_COMPATIBLE, FIT_EXACT} SCALE_FIT_T;
 SCALE_FIT_T CompatibleScale( SCALE_FIT_TYPE_T, SCALEINX_T, SCALEINX_T );
 
-SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1, char * scale2);
+SCALE_FIT_T FindScaleCompatible(SCALE_FIT_TYPE_T type, char * scale1,
+                                char * scale2);
 
 BOOL_T DoAllSetScaleDesc( void );
 

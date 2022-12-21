@@ -41,12 +41,12 @@ static int log_tieList;
 /**
 * @brief Default tie data for a scale in tieLength, tieWidth, tieSpacing
 */
-EXPORT void GetDefaultTieData( SCALEINX_T inx, tieData_p tieData ) 
+EXPORT void GetDefaultTieData( SCALEINX_T inx, tieData_p tieData )
 {
 	SCALEDESCINX_T scaleInx;
 	GAUGEINX_T gaugeInx;
 	GetScaleGauge( inx, &scaleInx, &gaugeInx );
-			
+
 	tieData->length = (96.0-54.0) / GetScaleRatio(inx) + GetScaleTrackGauge(inx);
 	tieData->width = 16.0 / GetScaleRatio(inx);
 	tieData->spacing = 2 * (tieData->width);

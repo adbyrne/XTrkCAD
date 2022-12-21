@@ -46,9 +46,10 @@ static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 	pts_t * pts;
 	int inx;
 
-	if (context->State==0 || cnt == 0)
+	if (context->State==0 || cnt == 0) {
 		return;
-	
+	}
+
 	if ( cnt < 3 ) {
 		tempSegs_da.cnt = 0;
 		ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
@@ -61,7 +62,8 @@ static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 	}
 	DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 	segPtr = &tempSegs(0);
-	segPtr->type = ( (context->Op == OP_POLY || context->Op == OP_POLYLINE )? SEG_POLY:SEG_FILPOLY );
+	segPtr->type = ( (context->Op == OP_POLY
+	                  || context->Op == OP_POLYLINE )? SEG_POLY:SEG_FILPOLY );
 	segPtr->u.p.cnt = cnt;
 	segPtr->u.p.pts = pts;
 	segPtr->u.p.angle = 0.0;
@@ -80,10 +82,12 @@ static void DrawGeomOk( BOOL_T started )
 	track_p trk;
 	int inx;
 
-	if (tempSegs_da.cnt <= 0)
+	if (tempSegs_da.cnt <= 0) {
 		return;
-	if (!started)
+	}
+	if (!started) {
 		UndoStart( _("Create Lines"), "newDraw" );
+	}
 	for ( inx=0; inx<tempSegs_da.cnt; inx++ ) {
 		trk = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
 		DrawNewTrack( trk );
@@ -91,7 +95,8 @@ static void DrawGeomOk( BOOL_T started )
 	tempSegs_da.cnt = 0;
 }
 
-static void CreateEndAnchor(coOrd p, wBool_t lock) {
+static void CreateEndAnchor(coOrd p, wBool_t lock)
+{
 	DIST_T d = tempD.scale*0.15;
 
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -105,7 +110,8 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
-static void CreateLineAnchor(coOrd p, coOrd p0) {
+static void CreateLineAnchor(coOrd p, coOrd p0)
+{
 	DIST_T d = tempD.scale*0.15;
 	coOrd p1;
 	ANGLE_T a = FindAngle(p0,p);
@@ -119,59 +125,64 @@ static void CreateLineAnchor(coOrd p, coOrd p0) {
 	anchors(i).width = 0;
 }
 
-static void CreateSquareAnchor(coOrd p) {
+static void CreateSquareAnchor(coOrd p)
+{
 	DIST_T d = tempD.scale*0.15;
 	int i = anchors_da.cnt;
 	DYNARR_SET(trkSeg_t,anchors_da,i+4);
-	for (int j =0; j<4;j++) {
+	for (int j =0; j<4; j++) {
 		anchors(i+j).type = SEG_STRLIN;
 		anchors(i+j).color = wDrawColorBlue;
 		anchors(i+j).width = 0;
 	}
 	anchors(i).u.l.pos[0].x = anchors(i+2).u.l.pos[1].x =
-	anchors(i+3).u.l.pos[0].x = anchors(i+3).u.l.pos[1].x = p.x-d/2;
+	                                  anchors(i+3).u.l.pos[0].x = anchors(i+3).u.l.pos[1].x = p.x-d/2;
 
 	anchors(i).u.l.pos[0].y = anchors(i).u.l.pos[1].y =
-	anchors(i+1).u.l.pos[0].y =	anchors(i+3).u.l.pos[1].y = p.y-d/2;
+	                                  anchors(i+1).u.l.pos[0].y =	anchors(i+3).u.l.pos[1].y = p.y-d/2;
 
 	anchors(i).u.l.pos[1].x =
-	anchors(i+1).u.l.pos[0].x = anchors(i+1).u.l.pos[1].x =
-	anchors(i+2).u.l.pos[0].x = p.x+d/2;
+	        anchors(i+1).u.l.pos[0].x = anchors(i+1).u.l.pos[1].x =
+	                        anchors(i+2).u.l.pos[0].x = p.x+d/2;
 
 	anchors(i+1).u.l.pos[1].y =
-	anchors(i+2).u.l.pos[0].y = anchors(i+2).u.l.pos[1].y =
-	anchors(i+3).u.l.pos[0].y = p.y+d/2;
+	        anchors(i+2).u.l.pos[0].y = anchors(i+2).u.l.pos[1].y =
+	                        anchors(i+3).u.l.pos[0].y = p.y+d/2;
 }
 
-BOOL_T FindTempNear(drawContext_t *context, coOrd *p) {
+BOOL_T FindTempNear(drawContext_t *context, coOrd *p)
+{
 	if (context->State == 2) {
 		if ((context->Op >= OP_CURVE1) && (context->Op <= OP_CURVE4)) {
 			if (context->ArcData.type == curveTypeCurve) {
 				ANGLE_T a = FindAngle(context->ArcData.curvePos,*p);
-				if (IsClose(FindDistance(context->ArcData.curvePos,*p)-context->ArcData.curveRadius) &&
-						(a>=context->ArcData.a0) && (a<=context->ArcData.a0+context->ArcData.a1)) {
+				if (IsClose(FindDistance(context->ArcData.curvePos,
+				                         *p)-context->ArcData.curveRadius) &&
+				    (a>=context->ArcData.a0) && (a<=context->ArcData.a0+context->ArcData.a1)) {
 					Translate(p,context->ArcData.curvePos,a,context->ArcData.curveRadius);
 					return TRUE;
 				}
 			} else {
-				if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
+				if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]))) {
 					return TRUE;
+				}
 			}
 		} else if ( (context->Op >=OP_LINE) && (context->Op <= OP_BENCH)) {
-			if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
+			if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]))) {
 				return TRUE;
+			}
 		}
 	}
 	return FALSE;
 }
 
 /**
- * Create and draw a graphics primitive (lines, arc, circle). The complete handling of mouse 
- * movements and clicks during the editing process is done here. 
+ * Create and draw a graphics primitive (lines, arc, circle). The complete handling of mouse
+ * movements and clicks during the editing process is done here.
  *
- * \param action IN mouse action 
+ * \param action IN mouse action
  * \param pos IN position of mouse pointer
- * \param context IN/OUT parameters for drawing op 
+ * \param context IN/OUT parameters for drawing op
  * \return next command state
  *
  * Note - Poly supports both clicking points and/or dragging sides. Close is space or enter.
@@ -180,9 +191,9 @@ BOOL_T FindTempNear(drawContext_t *context, coOrd *p) {
  */
 
 STATUS_T DrawGeomMouse(
-		wAction_t action,
-		coOrd pos,
-		drawContext_t *context)
+        wAction_t action,
+        coOrd pos,
+        drawContext_t *context)
 {
 //	static int lastValid = FALSE;
 	static BOOL_T locked;
@@ -202,8 +213,9 @@ STATUS_T DrawGeomMouse(
 	switch (action&0xFF) {
 
 	case C_UPDATE:
-		if (context->State == 0 ) return C_TERMINATE;
-		if (context->Op != OP_POLY && context->Op != OP_FILLPOLY && context->Op != OP_POLYLINE && context->State == 1) return C_TERMINATE;
+		if (context->State == 0 ) { return C_TERMINATE; }
+		if (context->Op != OP_POLY && context->Op != OP_FILLPOLY
+		    && context->Op != OP_POLYLINE && context->State == 1) { return C_TERMINATE; }
 		switch (context->Op) {
 		case OP_CIRCLE1:
 		case OP_CIRCLE2:
@@ -212,7 +224,7 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:
 			tempSegs(0).u.c.radius = context->radius;
-		break;
+			break;
 		case OP_CURVE1:
 		case OP_CURVE2:
 		case OP_CURVE3:
@@ -220,7 +232,8 @@ STATUS_T DrawGeomMouse(
 			if (context->ArcData.type == curveTypeCurve) {
 				if (tempSegs(0).u.c.radius != context->radius) {
 					coOrd end;
-					Translate(&end,context->ArcData.curvePos,context->ArcData.a0,context->ArcData.curveRadius);
+					Translate(&end,context->ArcData.curvePos,context->ArcData.a0,
+					          context->ArcData.curveRadius);
 					tempSegs(0).u.c.radius = context->radius;
 					Translate(&tempSegs(0).u.c.center,end,context->ArcData.a0+180,context->radius);
 					context->ArcData.curvePos = tempSegs(0).u.c.center;
@@ -228,20 +241,25 @@ STATUS_T DrawGeomMouse(
 				}
 				tempSegs(0).u.c.a1 = context->angle;
 				context->ArcData.a1 = tempSegs(0).u.c.a1;
-				Translate(&context->ArcData.pos1,context->ArcData.curvePos,context->ArcData.a0,context->ArcData.curveRadius);
-				Translate(&context->ArcData.pos2,context->ArcData.curvePos,context->ArcData.a0+context->ArcData.a1,context->ArcData.curveRadius);
-			} else
-				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
-		break;
+				Translate(&context->ArcData.pos1,context->ArcData.curvePos,context->ArcData.a0,
+				          context->ArcData.curveRadius);
+				Translate(&context->ArcData.pos2,context->ArcData.curvePos,
+				          context->ArcData.a0+context->ArcData.a1,context->ArcData.curveRadius);
+			} else {
+				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,
+				          context->length);
+			}
+			break;
 		case OP_LINE:
 		case OP_BENCH:
 		case OP_TBLEDGE:
 			a1 = FindAngle(pos0,pos1);
-			Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
+			Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,
+			          context->length);
 			lastPos = pos1 = tempSegs(0).u.l.pos[1];
 			tempSegs_da.cnt = 1;
 			context->angle = NormalizeAngle(context->angle);
-		break;
+			break;
 		case OP_BOX:
 		case OP_FILLBOX:
 			pts = tempSegs(0).u.p.pts;
@@ -251,24 +269,27 @@ STATUS_T DrawGeomMouse(
 			Translate(&pts[2].pt,pts[1].pt,a2,context->width);
 			Translate(&pts[3].pt,pts[0].pt,a2,context->width);
 			tempSegs_da.cnt = 1;
-		break;
+			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
 		case OP_POLYLINE:
 			tempSegs_da.cnt = segCnt;
 			if (segCnt>1) {
-				ANGLE_T an = FindAngle(tempSegs(segCnt-2).u.l.pos[0],tempSegs(segCnt-2).u.l.pos[1]);
+				ANGLE_T an = FindAngle(tempSegs(segCnt-2).u.l.pos[0],
+				                       tempSegs(segCnt-2).u.l.pos[1]);
 				an = an+context->angle;
-				Translate(&tempSegs(segCnt-1).u.l.pos[1],tempSegs(segCnt-1).u.l.pos[0],an,context->length);
+				Translate(&tempSegs(segCnt-1).u.l.pos[1],tempSegs(segCnt-1).u.l.pos[0],an,
+				          context->length);
 			} else {
-				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
+				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,
+				          context->length);
 			}
 			pos1 = lastPos = tempSegs(segCnt-1).u.l.pos[1];
 			context->angle = fabs(context->angle);
-			if (context->angle >180) context->angle = context->angle - 180.0;
-		break;
+			if (context->angle >180) { context->angle = context->angle - 180.0; }
+			break;
 		default:
-		break;
+			break;
 		}
 		context->Changed = TRUE;					//Update made
 		MainRedraw();
@@ -283,10 +304,11 @@ STATUS_T DrawGeomMouse(
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		locked = FALSE;
-		if (!magneticSnap)
+		if (!magneticSnap) {
 			InfoMessage(_("+Alt for Magnetic Snap"));
-		else
+		} else {
 			InfoMessage(_("+Alt to inhibit Magnetic Snap"));
+		}
 		wSetCursor(mainD.d,defaultCursor);
 		movePos = zero;
 		context->UndoStarted = FALSE;
@@ -296,56 +318,57 @@ STATUS_T DrawGeomMouse(
 		locked = FALSE;
 		wSetCursor(mainD.d,defaultCursor);
 		if ((context->State == 0 &&
-				context->Op != OP_FILLCIRCLE2 && context->Op != OP_CIRCLE2) ||
-			context->State ==2 ||
-		   (context->State == 1 &&
-					(context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE))) {
+		     context->Op != OP_FILLCIRCLE2 && context->Op != OP_CIRCLE2) ||
+		    context->State ==2 ||
+		    (context->State == 1 &&
+		     (context->Op == OP_POLY || context->Op == OP_FILLPOLY
+		      || context->Op == OP_POLYLINE))) {
 			DYNARR_RESET( trkSeg_t, anchors_da );
 			wSetCursor(mainD.d,defaultCursor);
 			switch (context->Op) {  	//Snap pos to nearest line for lines and some curves
-				case OP_CURVE1:
-				case OP_CURVE2:
-				case OP_CURVE3:
-				case OP_CURVE4:
-				case OP_CIRCLE2:
-				case OP_CIRCLE3:
-				case OP_FILLCIRCLE2:
-				case OP_FILLCIRCLE3:
-				case OP_LINE:
-				case OP_DIMLINE:
-				case OP_BENCH:
-				case OP_TBLEDGE:
-				case OP_BOX:
-				case OP_FILLBOX:
-				case OP_POLY:
-				case OP_FILLPOLY:
-				case OP_POLYLINE:;
-					if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
-						coOrd p = pos;
-						track_p t;
-						if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
-							if (context->Op == OP_DIMLINE ) {
-								CreateEndAnchor(p,FALSE);
-								// wSetCursor(mainD.d,wCursorNone);
-								movePos = p;
-								locked = TRUE;
-							} else if (!IsTrack(t)) {
-								CreateEndAnchor(p,FALSE);
-								// wSetCursor(mainD.d,wCursorNone);
-								movePos = p;
-								locked = TRUE;
-							}
+			case OP_CURVE1:
+			case OP_CURVE2:
+			case OP_CURVE3:
+			case OP_CURVE4:
+			case OP_CIRCLE2:
+			case OP_CIRCLE3:
+			case OP_FILLCIRCLE2:
+			case OP_FILLCIRCLE3:
+			case OP_LINE:
+			case OP_DIMLINE:
+			case OP_BENCH:
+			case OP_TBLEDGE:
+			case OP_BOX:
+			case OP_FILLBOX:
+			case OP_POLY:
+			case OP_FILLPOLY:
+			case OP_POLYLINE:;
+				if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap ) {
+					coOrd p = pos;
+					track_p t;
+					if (((t=OnTrack(&p,FALSE,FALSE))!=NULL) && (IsClose(FindDistance(p,pos))) ) {
+						if (context->Op == OP_DIMLINE ) {
+							CreateEndAnchor(p,FALSE);
+							// wSetCursor(mainD.d,wCursorNone);
+							movePos = p;
+							locked = TRUE;
+						} else if (!IsTrack(t)) {
+							CreateEndAnchor(p,FALSE);
+							// wSetCursor(mainD.d,wCursorNone);
+							movePos = p;
+							locked = TRUE;
 						}
 					}
-					if (!locked && SnapPos(&pos)) {
-						CreateEndAnchor(pos,FALSE);
-						// wSetCursor(mainD.d,wCursorNone);
-						movePos = pos;
-						locked = TRUE;
-					}
-					break;
-				default:
-					;
+				}
+				if (!locked && SnapPos(&pos)) {
+					CreateEndAnchor(pos,FALSE);
+					// wSetCursor(mainD.d,wCursorNone);
+					movePos = pos;
+					locked = TRUE;
+				}
+				break;
+			default:
+				;
 			}
 		}
 		return C_CONTINUE;
@@ -356,7 +379,8 @@ STATUS_T DrawGeomMouse(
 		wSetCursor(mainD.d,defaultCursor);
 		if (context->State == 2) {
 			tempSegs_da.cnt = segCnt;
-			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE)) {
+			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY
+			     || context->Op == OP_POLYLINE)) {
 				EndPoly(context, segCnt, context->Op==OP_POLYLINE);
 			} else {
 				DrawGeomOk(TRUE);
@@ -370,21 +394,24 @@ STATUS_T DrawGeomMouse(
 		context->Started = TRUE;
 		line_angle = 90.0;
 		if ((context->Op == OP_CURVE1 && context->State != 2) ||
-			(context->Op == OP_CURVE2 && context->State == 0) ||
-			(context->Op == OP_CURVE3 && context->State != 0) ||
-			(context->Op == OP_CURVE4 && context->State != 2) ||
-			(context->Op == OP_CIRCLE2 && context->State != 0) ||
-			(context->Op == OP_CIRCLE3 && context->State == 0) ||
-			(context->Op == OP_FILLCIRCLE2 && context->State != 0) ||
-			(context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
-			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
-			(context->Op == OP_BENCH) || (context->Op == OP_TBLEDGE) ||
-			(context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ||
-			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
-			if (locked) pos = movePos;
+		    (context->Op == OP_CURVE2 && context->State == 0) ||
+		    (context->Op == OP_CURVE3 && context->State != 0) ||
+		    (context->Op == OP_CURVE4 && context->State != 2) ||
+		    (context->Op == OP_CIRCLE2 && context->State != 0) ||
+		    (context->Op == OP_CIRCLE3 && context->State == 0) ||
+		    (context->Op == OP_FILLCIRCLE2 && context->State != 0) ||
+		    (context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
+		    (context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
+		    (context->Op == OP_BENCH) || (context->Op == OP_TBLEDGE) ||
+		    (context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ||
+		    (context->Op == OP_POLY) || (context->Op == OP_POLYLINE)
+		    || (context->Op == OP_FILLPOLY) ) {
+			if (locked) { pos = movePos; }
 		}
-		if ((context->Op == OP_CURVE1 || context->Op == OP_CURVE2 || context->Op == OP_CURVE3 || context->Op == OP_CURVE4) && context->State == 1) {
-		;
+		if ((context->Op == OP_CURVE1 || context->Op == OP_CURVE2
+		     || context->Op == OP_CURVE3 || context->Op == OP_CURVE4)
+		    && context->State == 1) {
+			;
 		} else {
 			pos0 = pos;
 			pos1 = pos;
@@ -409,7 +436,8 @@ STATUS_T DrawGeomMouse(
 				tempSegs(0).u.l.option = 0;
 			}
 			tempSegs_da.cnt = 0;
-			context->message( _("Drag next point, +Alt reverse Magnetic Snap or +Ctrl lock to 90 deg") );
+			context->message(
+			        _("Drag next point, +Alt reverse Magnetic Snap or +Ctrl lock to 90 deg") );
 			break;
 		case OP_TBLEDGE:
 			OnTableEdgeEndPt( NULL, &pos );
@@ -420,7 +448,8 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			tempSegs(0).u.l.option = 0;
 			tempSegs_da.cnt = 0;
-			context->message( _("Drag next point, +Alt reverse Magnetic Snap, or +Ctrl to lock to 90 degrees") );
+			context->message(
+			        _("Drag next point, +Alt reverse Magnetic Snap, or +Ctrl to lock to 90 degrees") );
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
@@ -430,8 +459,10 @@ STATUS_T DrawGeomMouse(
 				case OP_CURVE3: drawGeomCurveMode = crvCmdFromCenter; break;
 				case OP_CURVE4: drawGeomCurveMode = crvCmdFromChord; break;
 				}
-				CreateCurve( C_START, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
-				CreateCurve( C_DOWN, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
+				CreateCurve( C_START, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				             &anchors_da, context->message );
+				CreateCurve( C_DOWN, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				             &anchors_da, context->message );
 			}
 			break;
 		case OP_CIRCLE1:
@@ -443,10 +474,11 @@ STATUS_T DrawGeomMouse(
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_CRVLIN;
 			tempSegs(0).color = context->Color;
-			if ( context->Op >= OP_CIRCLE1 && context->Op <= OP_CIRCLE3 )
+			if ( context->Op >= OP_CIRCLE1 && context->Op <= OP_CIRCLE3 ) {
 				tempSegs(0).width = width;
-			else
+			} else {
 				tempSegs(0).width = 0;
+			}
 			tempSegs(0).u.c.a0 = 0;
 			tempSegs(0).u.c.a1 = 360;
 			tempSegs(0).u.c.radius = 0;
@@ -456,7 +488,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_FILLBOX:
 			width = 0;
-			/* no break */
+		/* no break */
 		case OP_BOX:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 4 );
 			for ( inx=0; inx<4; inx++ ) {
@@ -517,17 +549,18 @@ STATUS_T DrawGeomMouse(
 		coOrd p = pos1 = pos;
 		BOOL_T locked = FALSE, poslocked = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
-			(context->Op == OP_CURVE2 && context->State == 0) ||
-			(context->Op == OP_CURVE4 && context->State != 1) ||
-			(context->Op == OP_CIRCLE2 && context->State != 0) ||
-			(context->Op == OP_CIRCLE3 && context->State == 0) ||
-			(context->Op == OP_FILLCIRCLE2 && context->State != 0) ||
-			(context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
-			(context->Op == OP_BOX ) ||
-			(context->Op == OP_FILLBOX ) ||
-			(context->Op == OP_DIMLINE ) || (context->Op == OP_TBLEDGE) ||
-			(context->Op == OP_LINE ) || (context->Op == OP_BENCH) ||
-			(context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY) ) {
+		    (context->Op == OP_CURVE2 && context->State == 0) ||
+		    (context->Op == OP_CURVE4 && context->State != 1) ||
+		    (context->Op == OP_CIRCLE2 && context->State != 0) ||
+		    (context->Op == OP_CIRCLE3 && context->State == 0) ||
+		    (context->Op == OP_FILLCIRCLE2 && context->State != 0) ||
+		    (context->Op == OP_FILLCIRCLE3 && context->State == 0) ||
+		    (context->Op == OP_BOX ) ||
+		    (context->Op == OP_FILLBOX ) ||
+		    (context->Op == OP_DIMLINE ) || (context->Op == OP_TBLEDGE) ||
+		    (context->Op == OP_LINE ) || (context->Op == OP_BENCH) ||
+		    (context->Op == OP_POLY) || (context->Op == OP_POLYLINE)
+		    || (context->Op == OP_FILLPOLY) ) {
 			if ( ( (MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
 				p = pos;
 				if ((OnTrack( &p, FALSE, FALSE )!=NULL) && (IsClose(FindDistance(p,pos)))) {
@@ -547,18 +580,20 @@ STATUS_T DrawGeomMouse(
 
 		switch (context->Op) {
 		case OP_TBLEDGE:
-			if ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL) {  //If +Ctrl, snap to table edge end
+			if ((MyGetKeyState() & WKEY_CTRL) ==
+			    WKEY_CTRL) {  //If +Ctrl, snap to table edge end
 				p = pos;
 				if (OnTableEdgeEndPt( NULL, &p )) {
 					locked = TRUE;
 					pos1 = p;
 				}
 			}
-			/* no break */
+		/* no break */
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
-			if (!locked && ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL )) { //If not found already +Ctl = Right Angle
+			if (!locked
+			    && ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL )) { //If not found already +Ctl = Right Angle
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(pos0, pos);
 				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
@@ -566,22 +601,28 @@ STATUS_T DrawGeomMouse(
 				if (tempSegs_da.cnt != 1 && (quad == 2)) {
 					pos1 = pos0;
 				} else if (quad == 1 || quad == 3) {
-					if (tempSegs_da.cnt != 1)
-						l = fabs(l*cos(D2R(((quad==1)?line_angle+90.0:line_angle-90.0)-FindAngle(pos,pos0))));
-					Translate( &pos1, pos0, NormalizeAngle(quad==1?line_angle+90.0:line_angle-90.0), l );
+					if (tempSegs_da.cnt != 1) {
+						l = fabs(l*cos(D2R(((quad==1)?line_angle+90.0:line_angle-90.0)-FindAngle(pos,
+						                   pos0))));
+					}
+					Translate( &pos1, pos0, NormalizeAngle(quad==1?line_angle+90.0:line_angle-90.0),
+					           l );
 				} else {
-					if (tempSegs_da.cnt != 1)
-						l = fabs(l*cos(D2R(((quad==0||quad==4)?line_angle:line_angle+180.0)-FindAngle(pos,pos0))));
-					Translate( &pos1, pos0, NormalizeAngle((quad==0||quad==4)?line_angle:line_angle+180.0), l );
+					if (tempSegs_da.cnt != 1) {
+						l = fabs(l*cos(D2R(((quad==0
+						                     ||quad==4)?line_angle:line_angle+180.0)-FindAngle(pos,pos0))));
+					}
+					Translate( &pos1, pos0, NormalizeAngle((quad==0
+					                                        ||quad==4)?line_angle:line_angle+180.0), l );
 				}
 				CreateLineAnchor(pos1,pos0);
 			}
 			tempSegs(0).u.l.pos[1] = pos1;
 			context->message( _("Length = %s, Angle = %0.2f"),
-						FormatDistance(FindDistance( pos0, pos1 )),
-						PutAngle(FindAngle( pos0, pos1 )) );
+			                  FormatDistance(FindDistance( pos0, pos1 )),
+			                  PutAngle(FindAngle( pos0, pos1 )) );
 			tempSegs_da.cnt = 1;
-			if (anchors_da.cnt == 0) CreateEndAnchor(pos1, FALSE);
+			if (anchors_da.cnt == 0) { CreateEndAnchor(pos1, FALSE); }
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
@@ -596,31 +637,40 @@ STATUS_T DrawGeomMouse(
 //					initial_angle = 90.0;
 				} else {
 					last_point = tempSegs(tempSegs_da.cnt-2).u.l.pos[1];
-					last_angle = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[0],tempSegs(tempSegs_da.cnt-2).u.l.pos[1]);
+					last_angle = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[0],
+					                       tempSegs(tempSegs_da.cnt-2).u.l.pos[1]);
 //					initial_angle = FindAngle(tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]);
 				}
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos);
-				ANGLE_T angle2 = NormalizeAngle(FindAngle(tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos)-last_angle);
+				ANGLE_T angle2 = NormalizeAngle(FindAngle(tempSegs(tempSegs_da.cnt
+				                                -1).u.l.pos[0], pos)-last_angle);
 				int quad = (int)((angle2+45.0)/90.0);
 				if (tempSegs_da.cnt != 1 && (quad == 2)) {
 					pos = tempSegs(tempSegs_da.cnt-1).u.l.pos[0];
 				} else if (quad == 1 || quad == 3) {
-					if (tempSegs_da.cnt != 1)
-						l = fabs(l*cos(D2R(((quad==1)?last_angle+90.0:last_angle-90.0)-FindAngle(pos,last_point))));
-					Translate( &pos, tempSegs(tempSegs_da.cnt-1).u.l.pos[0], NormalizeAngle(quad==1?last_angle+90.0:last_angle-90.0), l );
+					if (tempSegs_da.cnt != 1) {
+						l = fabs(l*cos(D2R(((quad==1)?last_angle+90.0:last_angle-90.0)-FindAngle(pos,
+						                   last_point))));
+					}
+					Translate( &pos, tempSegs(tempSegs_da.cnt-1).u.l.pos[0],
+					           NormalizeAngle(quad==1?last_angle+90.0:last_angle-90.0), l );
 				} else {
-					if (tempSegs_da.cnt != 1)
-						l = fabs(l*cos(D2R(((quad==0||quad==4)?last_angle:last_angle+180.0)-FindAngle(pos,last_point))));
-					Translate( &pos, tempSegs(tempSegs_da.cnt-1).u.l.pos[0], NormalizeAngle((quad==0||quad==4)?last_angle:last_angle+180.0), l );
+					if (tempSegs_da.cnt != 1) {
+						l = fabs(l*cos(D2R(((quad==0
+						                     ||quad==4)?last_angle:last_angle+180.0)-FindAngle(pos,last_point))));
+					}
+					Translate( &pos, tempSegs(tempSegs_da.cnt-1).u.l.pos[0], NormalizeAngle((quad==0
+					                ||quad==4)?last_angle:last_angle+180.0), l );
 				}
 				CreateEndAnchor(pos,TRUE);
-				if (FindDistance(pos,last_point)>0.0) CreateLineAnchor(pos,last_point);
+				if (FindDistance(pos,last_point)>0.0) { CreateLineAnchor(pos,last_point); }
 				//If there is any point on this line that will give a 90 degree return to the first point, show it
 				if (tempSegs_da.cnt > 1) {
 					coOrd intersect;
 					ANGLE_T an_this = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],pos);
-					if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],an_this+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],an_this)) {
+					if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],an_this+90.0,
+					                     tempSegs(tempSegs_da.cnt-2).u.l.pos[1],an_this)) {
 						ANGLE_T an_inter = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],intersect);
 						if (fabs(DifferenceBetweenAngles(an_inter,an_this))<90.0) {
 							CreateSquareAnchor(intersect);
@@ -631,21 +681,23 @@ STATUS_T DrawGeomMouse(
 						}
 					}
 				}
-			} else if (poslocked) pos = pos1;
+			} else if (poslocked) { pos = pos1; }
 
 			tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
 			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
 			context->message( _("Length = %s, Angle = %0.2f"),
-						FormatDistance(FindDistance( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )),
-						PutAngle(FindAngle( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )) );
+			                  FormatDistance(FindDistance( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )),
+			                  PutAngle(FindAngle( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )) );
 			segCnt = tempSegs_da.cnt;
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
 				pos0x = pos1;
-				CreateCurve( C_MOVE, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
+				CreateCurve( C_MOVE, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				             &anchors_da, context->message );
 			} else {
-				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE, 0.0 );
+				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE,
+				           0.0 );
 				tempSegs(0).color = context->Color;
 				tempSegs(0).width = width;
 				DYNARR_SET(trkSeg_t,tempSegs_da,1);
@@ -657,8 +709,8 @@ STATUS_T DrawGeomMouse(
 					CreateEndAnchor(pos0, FALSE);
 					CreateEndAnchor(context->ArcData.pos1, FALSE);
 					context->message( _("Straight Line: Length=%s Angle=%0.3f"),
-							FormatDistance(FindDistance( pos0, context->ArcData.pos1 )),
-							PutAngle(FindAngle( pos0, context->ArcData.pos1 )) );
+					                  FormatDistance(FindDistance( pos0, context->ArcData.pos1 )),
+					                  PutAngle(FindAngle( pos0, context->ArcData.pos1 )) );
 				} else if (context->ArcData.type == curveTypeNone) {
 					tempSegs_da.cnt = 0;
 					context->message( _("Back") );
@@ -670,8 +722,9 @@ STATUS_T DrawGeomMouse(
 					tempSegs(0).u.c.a1 = context->ArcData.a1;
 					tempSegs_da.cnt = 1;
 					d = D2R(context->ArcData.a1);
-					if (d < 0.0)
+					if (d < 0.0) {
 						d = 2*M_PI+d;
+					}
 					if ( d*context->ArcData.curveRadius > mapD.size.x+mapD.size.y ) {
 						ErrorMessage( MSG_CURVE_TOO_LARGE );
 						tempSegs_da.cnt = 0;
@@ -679,18 +732,21 @@ STATUS_T DrawGeomMouse(
 						return C_CONTINUE;
 					}
 					context->message( _("Curved Line: Radius=%s Angle=%0.3f Length=%s"),
-							FormatDistance(context->ArcData.curveRadius), context->ArcData.a1,
-							FormatDistance(context->ArcData.curveRadius*d) );
-					if (context->Op == OP_CURVE1 || context->Op == OP_CURVE4 )
-						DrawArrowHeadsArray(&anchors_da,pos1,FindAngle(context->ArcData.curvePos,pos),TRUE,wDrawColorRed);
-					else if (context->Op == OP_CURVE2 || context->Op == OP_CURVE3 ) {
+					                  FormatDistance(context->ArcData.curveRadius), context->ArcData.a1,
+					                  FormatDistance(context->ArcData.curveRadius*d) );
+					if (context->Op == OP_CURVE1 || context->Op == OP_CURVE4 ) {
+						DrawArrowHeadsArray(&anchors_da,pos1,FindAngle(context->ArcData.curvePos,pos),
+						                    TRUE,wDrawColorRed);
+					} else if (context->Op == OP_CURVE2 || context->Op == OP_CURVE3 ) {
 						CreateEndAnchor(context->ArcData.pos2,FALSE);
-						DrawArrowHeadsArray(&anchors_da,context->ArcData.pos2,FindAngle(context->ArcData.curvePos,context->ArcData.pos2)+90,TRUE,wDrawColorRed);
+						DrawArrowHeadsArray(&anchors_da,context->ArcData.pos2,
+						                    FindAngle(context->ArcData.curvePos,context->ArcData.pos2)+90,TRUE,
+						                    wDrawColorRed);
 					}
 					CreateEndAnchor(context->ArcData.curvePos,TRUE);
 				}
 			}
-			if (anchors_da.cnt == 0) CreateEndAnchor(pos, FALSE);
+			if (anchors_da.cnt == 0) { CreateEndAnchor(pos, FALSE); }
 			break;
 		case OP_CIRCLE1:
 		case OP_FILLCIRCLE1:
@@ -698,30 +754,30 @@ STATUS_T DrawGeomMouse(
 		case OP_CIRCLE2:
 		case OP_FILLCIRCLE2:
 			tempSegs(0).u.c.center = pos1;
-			if (context->State == 1 && locked) CreateEndAnchor(pos1, FALSE);
-			else wSetCursor(mainD.d,defaultCursor);
+			if (context->State == 1 && locked) { CreateEndAnchor(pos1, FALSE); }
+			else { wSetCursor(mainD.d,defaultCursor); }
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
 			context->message( _("Radius = %s"),
-			FormatDistance(FindDistance( pos0, pos1 )) );
+			                  FormatDistance(FindDistance( pos0, pos1 )) );
 			break;
 		case OP_CIRCLE3:
 		case OP_FILLCIRCLE3:
-			if (context->State == 1) CreateEndAnchor(pos0, TRUE);
+			if (context->State == 1) { CreateEndAnchor(pos0, TRUE); }
 			wSetCursor(mainD.d,defaultCursor);
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
 			context->message( _("Radius = %s"),
-						FormatDistance(FindDistance( pos0, pos1 )) );
+			                  FormatDistance(FindDistance( pos0, pos1 )) );
 			break;
 		case OP_BOX:
 		case OP_FILLBOX:
 			tempSegs_da.cnt = 4;
-			tempSegs(0).u.l.pos[1].x = tempSegs(1).u.l.pos[0].x = 
-			tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos1.x;
-			tempSegs(1).u.l.pos[1].y = tempSegs(2).u.l.pos[0].y = 
-			tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos1.y;
-			if (locked) CreateEndAnchor(pos1,FALSE);
+			tempSegs(0).u.l.pos[1].x = tempSegs(1).u.l.pos[0].x =
+			                                   tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos1.x;
+			tempSegs(1).u.l.pos[1].y = tempSegs(2).u.l.pos[0].y =
+			                                   tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos1.y;
+			if (locked) { CreateEndAnchor(pos1,FALSE); }
 			context->message( _("Width = %s, Height = %s"),
-						FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
+			                  FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;
 		}
 		wSetCursor(mainD.d,wCursorNone);
@@ -733,16 +789,19 @@ STATUS_T DrawGeomMouse(
 //		createTrack = FALSE;
 		//Note - pos1 is last drag point
 		wSetCursor(mainD.d,defaultCursor);
-		if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE) || (context->Op == OP_FILLPOLY )
-			|| (context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ){ ;
+		if ((context->Op == OP_POLY) || (context->Op == OP_POLYLINE)
+		    || (context->Op == OP_FILLPOLY )
+		    || (context->Op == OP_BOX) || (context->Op == OP_FILLBOX) ) {
+			;
 		} else if (context->Op == OP_LINE || context->Op == OP_DIMLINE ||
-				   context->Op == OP_BENCH || context->Op == OP_TBLEDGE ) {
+		           context->Op == OP_BENCH || context->Op == OP_TBLEDGE ) {
 			tempSegs(0).u.l.pos[1] = pos1;
 		} else if ((context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3) ||
-				(context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3)) {
+		           (context->Op>=OP_CIRCLE1 && context->Op<=OP_CIRCLE3)) {
 			;
 		} else {
-			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE, 0.0 );
+			PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE,
+			           0.0 );
 			if (context->ArcData.type == curveTypeStraight) {
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
@@ -780,7 +839,8 @@ STATUS_T DrawGeomMouse(
 				context->State = 1;
 				context->ArcAngle = FindAngle( pos0, pos1 );
 				pos0x = pos1;
-				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
+				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				             &anchors_da, context->message );
 				context->message( _("Drag on Red arrows to adjust curve") );
 				context->show = FALSE;
 				return C_CONTINUE;
@@ -811,11 +871,14 @@ STATUS_T DrawGeomMouse(
 //				lastValid = TRUE;
 				lastPos = pos1;
 				context->State = 2;
-				if (context->Op == OP_CURVE1 || context->Op == OP_CURVE4 )
-					DrawArrowHeadsArray(&anchors_da,pos1,FindAngle(context->ArcData.curvePos,pos),TRUE,wDrawColorRed);
-				else if (context->Op == OP_CURVE2 || context->Op == OP_CURVE3 ) {
+				if (context->Op == OP_CURVE1 || context->Op == OP_CURVE4 ) {
+					DrawArrowHeadsArray(&anchors_da,pos1,FindAngle(context->ArcData.curvePos,pos),
+					                    TRUE,wDrawColorRed);
+				} else if (context->Op == OP_CURVE2 || context->Op == OP_CURVE3 ) {
 					CreateEndAnchor(context->ArcData.pos2,FALSE);
-					DrawArrowHeadsArray(&anchors_da,context->ArcData.pos2,FindAngle(context->ArcData.curvePos,context->ArcData.pos2)+90,TRUE,wDrawColorRed);
+					DrawArrowHeadsArray(&anchors_da,context->ArcData.pos2,
+					                    FindAngle(context->ArcData.curvePos,context->ArcData.pos2)+90,TRUE,
+					                    wDrawColorRed);
 				}
 				CreateEndAnchor(context->ArcData.curvePos,TRUE);
 				/*drawContext = context;
@@ -828,8 +891,9 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLCIRCLE1:
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:
-			if ( context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3 )
+			if ( context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3 ) {
 				tempSegs(0).type = SEG_FILCRCL;
+			}
 			tempSegs_da.cnt = 1;
 			context->State = 2;
 			context->radius = tempSegs(0).u.c.radius;
@@ -887,12 +951,16 @@ STATUS_T DrawGeomMouse(
 			}
 			int text_inx = tempSegs_da.cnt-1;
 			//tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
-			context->length = FindDistance(tempSegs(text_inx).u.l.pos[0],tempSegs(text_inx).u.l.pos[1]);
+			context->length = FindDistance(tempSegs(text_inx).u.l.pos[0],
+			                               tempSegs(text_inx).u.l.pos[1]);
 			if (text_inx>1) {
-				ANGLE_T an = FindAngle(tempSegs(text_inx-1).u.l.pos[0],tempSegs(text_inx-1).u.l.pos[1]);
-				context->angle = NormalizeAngle(FindAngle(tempSegs(text_inx).u.l.pos[0],tempSegs(text_inx).u.l.pos[1])-an);
-			} else
+				ANGLE_T an = FindAngle(tempSegs(text_inx-1).u.l.pos[0],
+				                       tempSegs(text_inx-1).u.l.pos[1]);
+				context->angle = NormalizeAngle(FindAngle(tempSegs(text_inx).u.l.pos[0],
+				                                tempSegs(text_inx).u.l.pos[1])-an);
+			} else {
 				context->angle = FindAngle(tempSegs(1).u.l.pos[0],tempSegs(1).u.l.pos[1]);
+			}
 			context->State = 1;
 			context->index = text_inx;
 			segCnt = tempSegs_da.cnt;
@@ -916,20 +984,24 @@ STATUS_T DrawGeomMouse(
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		int key = (action>>8&0xFF);
 		if ( key == 0x0D ||
-			 key == ' ' ||
-			(key == 0x09  && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT))) {   //Tab continue
-			if ((context->Op == OP_POLY) || (context->Op == OP_FILLPOLY) || (context->Op == OP_POLYLINE)) {
+		     key == ' ' ||
+		     (key == 0x09
+		      && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) !=
+		          WKEY_SHIFT))) {   //Tab continue
+			if ((context->Op == OP_POLY) || (context->Op == OP_FILLPOLY)
+			    || (context->Op == OP_POLYLINE)) {
 				tempSegs_da.cnt = segCnt;
 				//If last segment wasn't just a point, add another starting on its end
-				if (!IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],tempSegs(segCnt-1).u.l.pos[1]))) {
+				if (!IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],
+				                          tempSegs(segCnt-1).u.l.pos[1]))) {
 					DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
 					segPtr = &tempSegs(tempSegs_da.cnt-1);
 					segPtr->type = SEG_STRLIN;
 					segPtr->u.l.pos[0] = segPtr[-1].u.l.pos[1];
 					segPtr->u.l.pos[1] = tempSegs(0).u.l.pos[0];
 				}
-                EndPoly(context, tempSegs_da.cnt, context->Op == OP_POLYLINE);
-                DYNARR_RESET(pts_t, points_da);
+				EndPoly(context, tempSegs_da.cnt, context->Op == OP_POLYLINE);
+				DYNARR_RESET(pts_t, points_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 			} else {
 				if (context->State == 2) {
@@ -941,9 +1013,11 @@ STATUS_T DrawGeomMouse(
 			}
 			context->State = 0;
 			segCnt = 0;
-			if (key == 0x0D) return C_CONTINUE;					//Esc - go to Reset
-			else return C_TERMINATE;							//Space/Enter/Tab - end command
-		} else if (key == 0x09 && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT)) {  //Tab plus shift - abandon
+			if (key == 0x0D) { return C_CONTINUE; }					//Esc - go to Reset
+			else { return C_TERMINATE; }							//Space/Enter/Tab - end command
+		} else if (key == 0x09
+		           && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) ==
+		               WKEY_SHIFT)) {  //Tab plus shift - abandon
 			context->State = 0;
 			segCnt = 0;
 			return C_TERMINATE;
@@ -968,12 +1042,14 @@ STATUS_T DrawGeomMouse(
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
+		          wDrawColorBlack );
 		if (anchors_da.cnt > 0) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, 0.0, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, 0.0,
+			          wDrawColorBlack );
 		}
 		return C_CONTINUE;
-		
+
 	case C_CMDMENU:
 
 		return C_CONTINUE;
@@ -993,7 +1069,9 @@ static ANGLE_T rotate_angle;
 //static dynArr_t origin_da;
 
 
-void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad, ANGLE_T angle) {
+void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad,
+                               ANGLE_T angle)
+{
 	DYNARR_RESET(trkSeg_t,anchors_da);
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,2);
@@ -1004,7 +1082,8 @@ void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad, ANGLE_
 	PointOnCircle(&anchors(0).u.c.center,center,rad,angle);
 }
 
-void static CreateLineAnchors(int index, coOrd p0, coOrd p1) {
+void static CreateLineAnchors(int index, coOrd p0, coOrd p1)
+{
 	DYNARR_RESET(trkSeg_t,anchors_da);
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,2);
@@ -1019,29 +1098,35 @@ void static CreateLineAnchors(int index, coOrd p0, coOrd p1) {
 	anchors(1).color = wDrawColorBlue;
 	anchors(1).u.c.radius = d/2;
 	anchors(1).u.c.center = p1;
-	if (index>=0) wSetCursor(mainD.d,wCursorNone);
+	if (index>=0) { wSetCursor(mainD.d,wCursorNone); }
 }
-void static CreateBoxAnchors(int index, pts_t pt[4]) {
+void static CreateBoxAnchors(int index, pts_t pt[4])
+{
 	DYNARR_RESET(trkSeg_t,anchors_da);
 //	double d = tempD.scale*0.15;
 	ANGLE_T a = FindAngle(pt[0].pt,pt[1].pt);
 	ANGLE_T diag = FindAngle(pt[0].pt,pt[2].pt);
-	if (index>=0) wSetCursor(mainD.d,wCursorNone);
-	for (int i=0;i<4;i++) {
+	if (index>=0) { wSetCursor(mainD.d,wCursorNone); }
+	for (int i=0; i<4; i++) {
 		DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pt[i].pt,(diag>a?45.0:-45.0)+a+(90.0*(i)),TRUE,i==index?wDrawColorRed:wDrawColorBlue);
+		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pt[i].pt,
+		               (diag>a?45.0:-45.0)+a+(90.0*(i)),TRUE,i==index?wDrawColorRed:wDrawColorBlue);
 	}
 	coOrd pp;
-	for (int i=0;i<4;i++) {
-		pp.x = (i==3?((((pt[0].pt.x - pt[i].pt.x)/2))+pt[i].pt.x):((pt[i+1].pt.x - pt[i].pt.x)/2)+pt[i].pt.x);
-		pp.y = (i==3?((((pt[0].pt.y - pt[i].pt.y)/2))+pt[i].pt.y):((pt[i+1].pt.y - pt[i].pt.y)/2)+pt[i].pt.y);
+	for (int i=0; i<4; i++) {
+		pp.x = (i==3?((((pt[0].pt.x - pt[i].pt.x)/2))+pt[i].pt.x):((
+		                        pt[i+1].pt.x - pt[i].pt.x)/2)+pt[i].pt.x);
+		pp.y = (i==3?((((pt[0].pt.y - pt[i].pt.y)/2))+pt[i].pt.y):((
+		                        pt[i+1].pt.y - pt[i].pt.y)/2)+pt[i].pt.y);
 
 		DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pp,90.0*(i-1)+a,TRUE,i==index+5?wDrawColorRed:wDrawColorBlue);
+		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pp,90.0*(i-1)+a,
+		               TRUE,i==index+5?wDrawColorRed:wDrawColorBlue);
 	}
 }
 
-void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected) {
+void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
+{
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,2);
 	int i = anchors_da.cnt-1;
@@ -1062,10 +1147,12 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected) {
 	anchors(i).u.l.pos[1] = p1;
 	anchors(i).color = wDrawColorBlue;
 	anchors(i).width = 0;
-	if (trans_selected) wSetCursor(mainD.d,wCursorNone);
+	if (trans_selected) { wSetCursor(mainD.d,wCursorNone); }
 }
 
-void static CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0, coOrd p1) {
+void static CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0,
+                               coOrd p1)
+{
 	DYNARR_RESET(trkSeg_t,anchors_da);
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,9);
@@ -1083,53 +1170,57 @@ void static CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0, coOrd p1
 	anchors(1).u.c.center = p1;
 	anchors(1).width = 0;
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pm,FindAngle(pm,pc),TRUE,index==2?wDrawColorAqua:wDrawColorBlue);
-	if (index>=0) wSetCursor(mainD.d,wCursorNone);
-	else wSetCursor(mainD.d,defaultCursor);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pm,FindAngle(pm,
+	                pc),TRUE,index==2?wDrawColorAqua:wDrawColorBlue);
+	if (index>=0) { wSetCursor(mainD.d,wCursorNone); }
+	else { wSetCursor(mainD.d,defaultCursor); }
 }
 
-void static CreatePolyAnchors(int index) {
-		DYNARR_RESET(trkSeg_t,anchors_da);
-		double d = tempD.scale*0.15;
-		for ( int inx=0; inx<points_da.cnt; inx++ ) {
-			DYNARR_APPEND(trkSeg_t,anchors_da,3);
+void static CreatePolyAnchors(int index)
+{
+	DYNARR_RESET(trkSeg_t,anchors_da);
+	double d = tempD.scale*0.15;
+	for ( int inx=0; inx<points_da.cnt; inx++ ) {
+		DYNARR_APPEND(trkSeg_t,anchors_da,3);
 
-			anchors(inx).type = point_selected(inx)?SEG_FILCRCL:SEG_CRVLIN;
-			anchors(inx).u.c.a0 = 0.0;
-			anchors(inx).u.c.a1 = 360.0;
-			anchors(inx).width = 0;
-			anchors(inx).color = wDrawColorBlue;
-			anchors(inx).u.c.radius = d/2;
-			anchors(inx).u.c.center = points(inx).pt;
+		anchors(inx).type = point_selected(inx)?SEG_FILCRCL:SEG_CRVLIN;
+		anchors(inx).u.c.a0 = 0.0;
+		anchors(inx).u.c.a1 = 360.0;
+		anchors(inx).width = 0;
+		anchors(inx).color = wDrawColorBlue;
+		anchors(inx).u.c.radius = d/2;
+		anchors(inx).u.c.center = points(inx).pt;
+	}
+	if (index>=0) {
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		int inx = anchors_da.cnt-1;
+		anchors(inx).type = SEG_STRLIN;
+		anchors(inx).u.l.pos[0] = points(index==0?points_da.cnt-1:index-1).pt;
+		anchors(inx).u.l.pos[1] = points(index).pt;
+		anchors(inx).color = wDrawColorBlue;
+		anchors(inx).width = 0;
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		inx = anchors_da.cnt-1;
+		int index0 = index==0?points_da.cnt-1:index-1;
+		ANGLE_T an0 = FindAngle(points(index0).pt, points(index).pt);
+		ANGLE_T an1 = FindAngle(points(index0==0?points_da.cnt-1:index0-1).pt,
+		                        points(index0).pt);
+		anchors(inx).type = SEG_CRVLIN;
+		if (DifferenceBetweenAngles(an0,an1)<=0) {
+			anchors(inx).u.c.a1 = DifferenceBetweenAngles(an0,an1)-180;
+			anchors(inx).u.c.a0 = an0;
+		} else {
+			anchors(inx).u.c.a1 = 180-DifferenceBetweenAngles(an0,an1);
+			anchors(inx).u.c.a0 = NormalizeAngle(180+an1);
 		}
-		if (index>=0) {
-			DYNARR_APPEND(trkSeg_t,anchors_da,1);
-			int inx = anchors_da.cnt-1;
-			anchors(inx).type = SEG_STRLIN;
-			anchors(inx).u.l.pos[0] = points(index==0?points_da.cnt-1:index-1).pt;
-			anchors(inx).u.l.pos[1] = points(index).pt;
-			anchors(inx).color = wDrawColorBlue;
-			anchors(inx).width = 0;
-			DYNARR_APPEND(trkSeg_t,anchors_da,1);
-			inx = anchors_da.cnt-1;
-			int index0 = index==0?points_da.cnt-1:index-1;
-			ANGLE_T an0 = FindAngle(points(index0).pt, points(index).pt);
-			ANGLE_T an1 = FindAngle(points(index0==0?points_da.cnt-1:index0-1).pt, points(index0).pt);
-			anchors(inx).type = SEG_CRVLIN;
-			if (DifferenceBetweenAngles(an0,an1)<=0) {
-				anchors(inx).u.c.a1 = DifferenceBetweenAngles(an0,an1)-180;
-				anchors(inx).u.c.a0 = an0;
-			} else {
-				anchors(inx).u.c.a1 = 180-DifferenceBetweenAngles(an0,an1);
-				anchors(inx).u.c.a0 = NormalizeAngle(180+an1);
-			}
-			anchors(inx).color = wDrawColorBlue;
-			anchors(inx).u.c.radius = d;
-			anchors(inx).u.c.center = points(index0).pt;
-		}
+		anchors(inx).color = wDrawColorBlue;
+		anchors(inx).u.c.radius = d;
+		anchors(inx).u.c.center = points(index0).pt;
+	}
 }
 
-void CreateMovingAnchor(coOrd pos,BOOL_T fill) {
+void CreateMovingAnchor(coOrd pos,BOOL_T fill)
+{
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int inx = anchors_da.cnt-1;
@@ -1152,9 +1243,10 @@ void CreateMovingAnchor(coOrd pos,BOOL_T fill) {
  *
  */
 STATUS_T DrawGeomPolyModify(
-				wAction_t action,
-				coOrd pos,
-				drawModContext_t *context) {
+        wAction_t action,
+        coOrd pos,
+        drawModContext_t *context)
+{
 	double d;
 	static int selected_count;
 	static int segInx;
@@ -1166,533 +1258,568 @@ STATUS_T DrawGeomPolyModify(
 //	static BOOL_T lock;
 
 	switch ( action&0xFF ) {
-		case C_START:
+	case C_START:
 //			lock = FALSE;
-			DistanceSegs( context->orig, context->angle, context->segCnt, context->segPtr, &pos, &segInx );
-			if (segInx == -1)
-				return C_ERROR;
-			if (context->type != SEG_POLY && context->type != SEG_FILPOLY)
-				return C_ERROR;
-			prev_inx = -1;
-			polyState = POLY_SELECTED;
-			polyInx = -1;
-			//Copy points
-			DYNARR_RESET( pts_t, points_da);
-			DYNARR_RESET( wBool_t, select_da);
-			for (int inx=0;inx<context->segPtr->u.p.cnt;inx++) {
-				DYNARR_APPEND(pts_t, points_da,3);
-				DYNARR_APPEND(wBool_t,select_da,3);
-				REORIGIN( points(inx).pt, context->segPtr[segInx].u.p.pts[inx].pt, context->angle, context->orig );
-				points(inx).pt_type = context->segPtr[segInx].u.p.pts[inx].pt_type;
-				point_selected(inx) = FALSE;
-			}
-			context->prev_inx = -1;
-			context->max_inx = points_da.cnt-1;
-			selected_count=0;
-			rotate_origin = context->orig;
-			rotate_angle = context->angle;
-			context->p0 = points(0).pt;
-			context->p1 = points(1).pt;
-			//Show points
-			tempSegs_da.cnt = 1;
-			tempSegs(0).width = context->segPtr->width;
+		DistanceSegs( context->orig, context->angle, context->segCnt, context->segPtr,
+		              &pos, &segInx );
+		if (segInx == -1) {
+			return C_ERROR;
+		}
+		if (context->type != SEG_POLY && context->type != SEG_FILPOLY) {
+			return C_ERROR;
+		}
+		prev_inx = -1;
+		polyState = POLY_SELECTED;
+		polyInx = -1;
+		//Copy points
+		DYNARR_RESET( pts_t, points_da);
+		DYNARR_RESET( wBool_t, select_da);
+		for (int inx=0; inx<context->segPtr->u.p.cnt; inx++) {
+			DYNARR_APPEND(pts_t, points_da,3);
+			DYNARR_APPEND(wBool_t,select_da,3);
+			REORIGIN( points(inx).pt, context->segPtr[segInx].u.p.pts[inx].pt,
+			          context->angle, context->orig );
+			points(inx).pt_type = context->segPtr[segInx].u.p.pts[inx].pt_type;
+			point_selected(inx) = FALSE;
+		}
+		context->prev_inx = -1;
+		context->max_inx = points_da.cnt-1;
+		selected_count=0;
+		rotate_origin = context->orig;
+		rotate_angle = context->angle;
+		context->p0 = points(0).pt;
+		context->p1 = points(1).pt;
+		//Show points
+		tempSegs_da.cnt = 1;
+		tempSegs(0).width = context->segPtr->width;
 //			save_color = context->segPtr->color;
-			tempSegs(0).color = wDrawColorRed;
-			tempSegs(0).type = context->type;
-			tempSegs(0).u.p.cnt = context->segPtr[segInx].u.p.cnt;
-			tempSegs(0).u.p.angle = 0.0;
-			tempSegs(0).u.p.orig = zero;
-			tempSegs(0).u.p.polyType = context->segPtr[segInx].u.p.polyType;
-			tempSegs(0).u.p.pts = &points(0);
-			CreatePolyAnchors( -1);
-			InfoMessage(_("Select points or use context menu"));
-			ClrAllTrkBitsRedraw( TB_UNDRAWN, TRUE );
-			UndrawNewTrack( context->trk );
-			return C_CONTINUE;
-		case wActionMove:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			CreatePolyAnchors(context->prev_inx);
-			for (int i = 0; i<points_da.cnt; i++) {
-				if (IsClose(FindDistance(pos,points(i).pt))) {
-					CreateMovingAnchor(points(i).pt,TRUE);
-					return C_CONTINUE;
-				}
-			}
-			wSetCursor(mainD.d,defaultCursor);
-			int pInx=0;
-			coOrd pm0,pm1;
-			DIST_T dm = DIST_INF;
-			for ( int inx=0; inx<points_da.cnt; inx++ ) {
-				pm0 = pos;
-				DIST_T ddm = LineDistance( &pm0, points( inx==0?points_da.cnt-1:inx-1).pt, points(inx).pt );
-				if ( dm > ddm ) {
-					dm = ddm;
-					pm1 = pm0;
-					pInx = inx;
-				}
-			}
-			if (!IsClose(dm)) return C_CONTINUE;
-			int inxm = pInx==0?points_da.cnt-1:pInx-1;
-			dm = FindDistance( points(inxm).pt, pm1 );
-			DIST_T ddm = FindDistance( points(inxm).pt, points(pInx).pt );
-			if ( (dm > 0.25*ddm) && (dm < 0.75*ddm)) {
-				CreateMovingAnchor(pm1,FALSE);
-			} else {
-				if (dm < FindDistance( points(pInx).pt, pm1 ))
-					CreateMovingAnchor(points(inxm).pt,TRUE);
-				else
-					CreateMovingAnchor(points(pInx).pt,TRUE);
-			}
-			return C_CONTINUE;
-			break;
-		case C_DOWN:
-			d = DIST_INF;
-			polyInx = -1;
-			coOrd p0;
-			double dd;
-			int inx;
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT) {
-				if (selected_count <2 ) {
-					//Wipe out selection(s) if we don't have multiple already (i,e. move with >1 selected)
-					for (int i=0;i<points_da.cnt;i++) {
-						point_selected(i) = FALSE;
-					}
-					selected_count = 0;
-				} else {
-					for (int i=0;i<points_da.cnt;i++) {
-						if (IsClose(FindDistance(pos,points(i).pt)) && point_selected(i)==TRUE) {
-							point_selected(i) = FALSE;
-							selected_count--;
-						}
-					}
-				}
-			}
-			//Select Point (polyInx)
-			for ( int inx=0; inx<points_da.cnt; inx++ ) {
-				p0 = pos;
-				dd = LineDistance( &p0, points( inx==0?points_da.cnt-1:inx-1).pt, points(inx).pt );
-				if ( d > dd ) {
-					d = dd;
-					polyInx = inx;
-				}
-			}
-			if (!IsClose(d)) {	//Not on/near object - de-select all points
-				for (int i=0;i<points_da.cnt;i++) {
-					point_selected(i) = FALSE;
-				}
-				polyInx = -1;
-				selected_count = 0;
-				CreatePolyAnchors( -1);
-				context->prev_inx = -1;
-				return C_CONTINUE; //Not close to any line
-			}
-			polyState = POLYPOINT_SELECTED;
-			inx = polyInx==0?points_da.cnt-1:polyInx-1;
-			//Find if the point is to be added
-			d = FindDistance( points(inx).pt, pos );
-			dd = FindDistance( points(inx).pt, points(polyInx).pt );
-			if ( d < 0.25*dd ) {
-				polyInx = inx;
-			} else if ( d > 0.75*dd ) {
-				;
-			} else {
-				if (selected_count == 0) {					//Only add a new point if no points are already selected!
-					DYNARR_APPEND(wBool_t,select_da,1);
-					for (int i=0;i<select_da.cnt;i++) {
-						if (i == polyInx) point_selected(i) = TRUE;
-						else point_selected(i) = FALSE;
-					}
-					selected_count=1;
-					DYNARR_APPEND(pts_t,points_da,1);
-					tempSegs(0).u.p.pts = &points(0);
-					for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
-						points(inx) = points(inx-1);
-					}
-					points(polyInx).pt_type = wPolyLineStraight;
-					tempSegs(0).u.p.cnt = points_da.cnt;
-					context->max_inx = points_da.cnt-1;
-				}
-			}
-			//If already selected (multiple points), not using shift (to add) select, and on object move to first point
-			if (selected_count>0 && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT)) {
-				for (int i=0; i<points_da.cnt;i++) {
-					if (IsClose(FindDistance(pos,points(i).pt))) {
-
-						point_selected(i) = FALSE;
-
-					}
-					if (point_selected(i) == TRUE) {
-						polyInx = i;
-					}
-				}
-			}
-			pos = points(polyInx).pt;  		//Move to point
-			if (point_selected(polyInx)) {					//Already selected
-			} else {
-				point_selected(polyInx) = TRUE;
-				++selected_count;
-			}
-			//Work out before and after point
-			int first_inx = -1;
-			if (selected_count >0 && selected_count < points_da.cnt-2) {
-				for (int i=0; i<points_da.cnt;i++) {
-					if (point_selected(i)) {
-						first_inx = i;
-						break;
-					}
-				}
-			}
-			int last_inx = -1;
-//			int  next_inx = -1;
-			ANGLE_T an1, an0;
-			if (first_inx >=0) {
-				if (first_inx == 0) {
-					last_inx = points_da.cnt-1;
-				} else {
-					last_inx = first_inx-1;
-				}
-//				if (first_inx == points_da.cnt-1) {
-//					next_inx = 0;
-//				} else {
-//					next_inx = first_inx+1;
-//				}
-				context->length = FindDistance(points(last_inx).pt,points(first_inx).pt);
-				an1 = FindAngle(points(last_inx).pt,points(first_inx).pt);
-				an0 = FindAngle(points(last_inx==0?(points_da.cnt-1):(last_inx-1)).pt,points(last_inx).pt);
-				if (DifferenceBetweenAngles(an0,an1)<=0) {
-					context->rel_angle = 180+DifferenceBetweenAngles(an0,an1);
-				} else {
-					context->rel_angle = 180-DifferenceBetweenAngles(an0,an1);
-				}
-			} else {
-
-			}
-			context->prev_inx = first_inx;
-			context->p0 = points(0).pt;
-			context->p1 = points(1).pt;
-			//Show three anchors only
-			CreatePolyAnchors(first_inx);
-			return C_CONTINUE;
-		case C_LDOUBLE:
-			return C_CONTINUE;
-		case C_MOVE:
-			tempSegs_da.cnt = 1;
-			if (polyState != POLYPOINT_SELECTED) {
+		tempSegs(0).color = wDrawColorRed;
+		tempSegs(0).type = context->type;
+		tempSegs(0).u.p.cnt = context->segPtr[segInx].u.p.cnt;
+		tempSegs(0).u.p.angle = 0.0;
+		tempSegs(0).u.p.orig = zero;
+		tempSegs(0).u.p.polyType = context->segPtr[segInx].u.p.polyType;
+		tempSegs(0).u.p.pts = &points(0);
+		CreatePolyAnchors( -1);
+		InfoMessage(_("Select points or use context menu"));
+		ClrAllTrkBitsRedraw( TB_UNDRAWN, TRUE );
+		UndrawNewTrack( context->trk );
+		return C_CONTINUE;
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		CreatePolyAnchors(context->prev_inx);
+		for (int i = 0; i<points_da.cnt; i++) {
+			if (IsClose(FindDistance(pos,points(i).pt))) {
+				CreateMovingAnchor(points(i).pt,TRUE);
 				return C_CONTINUE;
 			}
-			//Moving with Point Selected
-			if (polyInx<0) return C_ERROR;
-			first_inx = -1;
-			if (selected_count >0 && selected_count < points_da.cnt-2) {
-				for (int i=0; i<points_da.cnt;i++) {
-					if (point_selected(i)) {
-						first_inx = i;
-						break;
+		}
+		wSetCursor(mainD.d,defaultCursor);
+		int pInx=0;
+		coOrd pm0,pm1;
+		DIST_T dm = DIST_INF;
+		for ( int inx=0; inx<points_da.cnt; inx++ ) {
+			pm0 = pos;
+			DIST_T ddm = LineDistance( &pm0, points( inx==0?points_da.cnt-1:inx-1).pt,
+			                           points(inx).pt );
+			if ( dm > ddm ) {
+				dm = ddm;
+				pm1 = pm0;
+				pInx = inx;
+			}
+		}
+		if (!IsClose(dm)) { return C_CONTINUE; }
+		int inxm = pInx==0?points_da.cnt-1:pInx-1;
+		dm = FindDistance( points(inxm).pt, pm1 );
+		DIST_T ddm = FindDistance( points(inxm).pt, points(pInx).pt );
+		if ( (dm > 0.25*ddm) && (dm < 0.75*ddm)) {
+			CreateMovingAnchor(pm1,FALSE);
+		} else {
+			if (dm < FindDistance( points(pInx).pt, pm1 )) {
+				CreateMovingAnchor(points(inxm).pt,TRUE);
+			} else {
+				CreateMovingAnchor(points(pInx).pt,TRUE);
+			}
+		}
+		return C_CONTINUE;
+		break;
+	case C_DOWN:
+		d = DIST_INF;
+		polyInx = -1;
+		coOrd p0;
+		double dd;
+		int inx;
+		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT) {
+			if (selected_count <2 ) {
+				//Wipe out selection(s) if we don't have multiple already (i,e. move with >1 selected)
+				for (int i=0; i<points_da.cnt; i++) {
+					point_selected(i) = FALSE;
+				}
+				selected_count = 0;
+			} else {
+				for (int i=0; i<points_da.cnt; i++) {
+					if (IsClose(FindDistance(pos,points(i).pt)) && point_selected(i)==TRUE) {
+						point_selected(i) = FALSE;
+						selected_count--;
 					}
 				}
 			}
-			last_inx = -1;
-//			next_inx = -1;
-			coOrd intersect;
-			wBool_t show_intersect = FALSE;
-			if (first_inx >=0) {
-				if (first_inx == 0) {
-					last_inx = points_da.cnt-1;
-				} else {
-					last_inx = first_inx-1;
-				}
-//				if (first_inx == points_da.cnt-1) {
-//					next_inx = 0;
-//				} else {
-//					next_inx = first_inx+1;
-//				}
-				//Lock to 90 degrees first/last point
-				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
-					ANGLE_T last_angle;
-//					ANGLE_T next_angle;
-					coOrd last_point,next_point;
-					if (first_inx == 0) {
-						last_point = points(points_da.cnt-1).pt;
-						last_angle = FindAngle(points(points_da.cnt-2).pt,last_point);
-					} else if (first_inx == 1) {
-						last_point = points(0).pt;
-						last_angle = FindAngle(points(points_da.cnt-1).pt,last_point);
-					} else {
-						last_point = points(first_inx-1).pt;
-						last_angle = FindAngle(points(first_inx-2).pt,last_point);
-					}
-					if (first_inx == points_da.cnt-1) {
-						next_point = points(0).pt;
-//						next_angle = FindAngle(next_point,points(1).pt);
-					} else if (first_inx == points_da.cnt-2){
-						next_point = points(points_da.cnt-1).pt;
-//						next_angle = FindAngle(next_point,points(0).pt);
-					} else {
-						next_point = points(first_inx+1).pt;
-//						next_angle = FindAngle(next_point,points(first_inx+2).pt);
-					}
-					coOrd diff;
-					diff.x = pos.x - points(polyInx).pt.x;
-					diff.y = pos.y - points(polyInx).pt.y;
-					coOrd pos_lock = points(first_inx).pt;
-					pos_lock.x += diff.x;
-					pos_lock.y += diff.y;
-					//Snap to Right-Angle from previous or from 0
-					DIST_T l = FindDistance(last_point, pos_lock);
-					ANGLE_T angle2 = NormalizeAngle(FindAngle(last_point, pos_lock)-last_angle);
-					int quad = (int)((angle2+45.0)/90.0);
-					if (tempSegs_da.cnt != 1 && (quad == 2)) {
-						pos_lock = last_point;
-					} else if (quad == 1 || quad == 3) {
-						l = fabs(l*cos(D2R(((quad==1)?last_angle+90.0:last_angle-90.0)-FindAngle(pos_lock,last_point))));
-						Translate( &pos_lock, last_point, NormalizeAngle((quad==1)?last_angle+90.0:last_angle-90.0), l );
-					} else {
-						l = fabs(l*cos(D2R(((quad==0||quad==4)?last_angle:last_angle+180.0)-FindAngle(pos_lock,last_point))));
-						Translate( &pos_lock, last_point, NormalizeAngle((quad==0||quad==4)?last_angle:last_angle+180.0), l );
-					}
-					diff.x = pos_lock.x - points(first_inx).pt.x;
-					diff.y = pos_lock.y - points(first_inx).pt.y;
-					pos.x 	= points(polyInx).pt.x+diff.x;
-					pos.y 	= points(polyInx).pt.y+diff.y;
-					if (selected_count<2) {
-						if (FindIntersection(&intersect,last_point,last_angle+90.0,next_point,last_angle+180.0)) {
-							show_intersect = TRUE;
-						}
-					}
-					d = FindDistance(intersect,pos_lock);
-					if (IsClose(d)) {
-						pos = intersect;
-					}
-					InfoMessage( _("Length = %s, Last angle = %0.2f"),
-							FormatDistance(FindDistance(pos_lock,last_point)),
-							PutAngle(FindAngle(pos_lock,last_point)));
-
-				} else SnapPos(&pos);  //If not using CTL and snap enabled
+		}
+		//Select Point (polyInx)
+		for ( int inx=0; inx<points_da.cnt; inx++ ) {
+			p0 = pos;
+			dd = LineDistance( &p0, points( inx==0?points_da.cnt-1:inx-1).pt,
+			                   points(inx).pt );
+			if ( d > dd ) {
+				d = dd;
+				polyInx = inx;
 			}
-			context->prev_inx = first_inx;
-			coOrd diff;
-			diff.x = pos.x - points(polyInx).pt.x;
-			diff.y = pos.y - points(polyInx).pt.y;
-			//points(polyInx) = pos;
-			for (int i=0;i<points_da.cnt;i++) {
-				if (point_selected(i)) {
-					points(i).pt.x = points(i).pt.x + diff.x;
-					points(i).pt.y = points(i).pt.y + diff.y;
-				}
+		}
+		if (!IsClose(d)) {	//Not on/near object - de-select all points
+			for (int i=0; i<points_da.cnt; i++) {
+				point_selected(i) = FALSE;
 			}
-			if (first_inx>=0) {
-				context->length = FindDistance(points(first_inx).pt,points(last_inx).pt);
-				an1 = FindAngle(points(last_inx).pt,points(first_inx).pt);
-				an0 = FindAngle(points(first_inx==0?(points_da.cnt-1):(first_inx-1)).pt,points(first_inx).pt);
-				context->rel_angle = NormalizeAngle(180-(an1-an0));
-			}
-			CreatePolyAnchors(first_inx);
-			if (show_intersect)
-				CreateSquareAnchor(intersect);
-			context->p0 = points(0).pt;
-			context->p1 = points(1).pt;
-			return C_CONTINUE;
-		case C_UP:
+			polyInx = -1;
+			selected_count = 0;
+			CreatePolyAnchors( -1);
 			context->prev_inx = -1;
-			if (segInx == -1 || polyState != POLYPOINT_SELECTED)
-				return C_CONTINUE;   //Didn't get a point selected/added
-			polyState = POLY_SELECTED;  //Return to base state
-			anchors_da.cnt = 0;
-			CreatePolyAnchors(polyInx);  //Show last selection
-			prev_inx = polyInx;
-			for (int i=0;i<points_da.cnt;i++) {
+			return C_CONTINUE; //Not close to any line
+		}
+		polyState = POLYPOINT_SELECTED;
+		inx = polyInx==0?points_da.cnt-1:polyInx-1;
+		//Find if the point is to be added
+		d = FindDistance( points(inx).pt, pos );
+		dd = FindDistance( points(inx).pt, points(polyInx).pt );
+		if ( d < 0.25*dd ) {
+			polyInx = inx;
+		} else if ( d > 0.75*dd ) {
+			;
+		} else {
+			if (selected_count ==
+			    0) {					//Only add a new point if no points are already selected!
+				DYNARR_APPEND(wBool_t,select_da,1);
+				for (int i=0; i<select_da.cnt; i++) {
+					if (i == polyInx) { point_selected(i) = TRUE; }
+					else { point_selected(i) = FALSE; }
+				}
+				selected_count=1;
+				DYNARR_APPEND(pts_t,points_da,1);
+				tempSegs(0).u.p.pts = &points(0);
+				for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
+					points(inx) = points(inx-1);
+				}
+				points(polyInx).pt_type = wPolyLineStraight;
+				tempSegs(0).u.p.cnt = points_da.cnt;
+				context->max_inx = points_da.cnt-1;
+			}
+		}
+		//If already selected (multiple points), not using shift (to add) select, and on object move to first point
+		if (selected_count>0
+		    && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT)) {
+			for (int i=0; i<points_da.cnt; i++) {
+				if (IsClose(FindDistance(pos,points(i).pt))) {
+
+					point_selected(i) = FALSE;
+
+				}
+				if (point_selected(i) == TRUE) {
+					polyInx = i;
+				}
+			}
+		}
+		pos = points(polyInx).pt;  		//Move to point
+		if (point_selected(polyInx)) {					//Already selected
+		} else {
+			point_selected(polyInx) = TRUE;
+			++selected_count;
+		}
+		//Work out before and after point
+		int first_inx = -1;
+		if (selected_count >0 && selected_count < points_da.cnt-2) {
+			for (int i=0; i<points_da.cnt; i++) {
 				if (point_selected(i)) {
 					first_inx = i;
 					break;
 				}
 			}
-			last_inx = first_inx==0?(points_da.cnt-1):(first_inx-1);
-			if (first_inx>=0) {
-				context->length = FindDistance(points(first_inx).pt,points(last_inx).pt);
-				an1 = FindAngle(points(last_inx).pt,points(first_inx).pt);
-				an0 = FindAngle(points(last_inx==0?(points_da.cnt-1):(last_inx-1)).pt,points(last_inx).pt);
-				if (DifferenceBetweenAngles(an0,an1)<=0) {
-					context->rel_angle = 180+DifferenceBetweenAngles(an0,an1);
-				} else {
-					context->rel_angle = 180-DifferenceBetweenAngles(an0,an1);
-				}
+		}
+		int last_inx = -1;
+//			int  next_inx = -1;
+		ANGLE_T an1, an0;
+		if (first_inx >=0) {
+			if (first_inx == 0) {
+				last_inx = points_da.cnt-1;
+			} else {
+				last_inx = first_inx-1;
 			}
-			context->prev_inx = first_inx;
-			context->p0 = points(0).pt;
-			context->p1 = points(1).pt;
-			polyInx = -1;
+//				if (first_inx == points_da.cnt-1) {
+//					next_inx = 0;
+//				} else {
+//					next_inx = first_inx+1;
+//				}
+			context->length = FindDistance(points(last_inx).pt,points(first_inx).pt);
+			an1 = FindAngle(points(last_inx).pt,points(first_inx).pt);
+			an0 = FindAngle(points(last_inx==0?(points_da.cnt-1):(last_inx-1)).pt,
+			                points(last_inx).pt);
+			if (DifferenceBetweenAngles(an0,an1)<=0) {
+				context->rel_angle = 180+DifferenceBetweenAngles(an0,an1);
+			} else {
+				context->rel_angle = 180-DifferenceBetweenAngles(an0,an1);
+			}
+		} else {
+
+		}
+		context->prev_inx = first_inx;
+		context->p0 = points(0).pt;
+		context->p1 = points(1).pt;
+		//Show three anchors only
+		CreatePolyAnchors(first_inx);
+		return C_CONTINUE;
+	case C_LDOUBLE:
+		return C_CONTINUE;
+	case C_MOVE:
+		tempSegs_da.cnt = 1;
+		if (polyState != POLYPOINT_SELECTED) {
 			return C_CONTINUE;
-		case C_UPDATE:
-			if (context->prev_inx>=0) {
-				int last_index = context->prev_inx==0?(points_da.cnt-1):(context->prev_inx-1);
-				an0 = FindAngle(points(last_index==0?(points_da.cnt-1):(last_index-1)).pt,points(last_index).pt);
-				an1 = FindAngle(points(last_index).pt,points(context->prev_inx).pt);
-				if (DifferenceBetweenAngles(an0,an1)<=0) {
-					an1 = NormalizeAngle(an0-(180-context->rel_angle));
+		}
+		//Moving with Point Selected
+		if (polyInx<0) { return C_ERROR; }
+		first_inx = -1;
+		if (selected_count >0 && selected_count < points_da.cnt-2) {
+			for (int i=0; i<points_da.cnt; i++) {
+				if (point_selected(i)) {
+					first_inx = i;
+					break;
+				}
+			}
+		}
+		last_inx = -1;
+//			next_inx = -1;
+		coOrd intersect;
+		wBool_t show_intersect = FALSE;
+		if (first_inx >=0) {
+			if (first_inx == 0) {
+				last_inx = points_da.cnt-1;
+			} else {
+				last_inx = first_inx-1;
+			}
+//				if (first_inx == points_da.cnt-1) {
+//					next_inx = 0;
+//				} else {
+//					next_inx = first_inx+1;
+//				}
+			//Lock to 90 degrees first/last point
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
+				ANGLE_T last_angle;
+//					ANGLE_T next_angle;
+				coOrd last_point,next_point;
+				if (first_inx == 0) {
+					last_point = points(points_da.cnt-1).pt;
+					last_angle = FindAngle(points(points_da.cnt-2).pt,last_point);
+				} else if (first_inx == 1) {
+					last_point = points(0).pt;
+					last_angle = FindAngle(points(points_da.cnt-1).pt,last_point);
 				} else {
-					an1 = NormalizeAngle((180-context->rel_angle)+an0);
+					last_point = points(first_inx-1).pt;
+					last_angle = FindAngle(points(first_inx-2).pt,last_point);
 				}
-				Translate(&points(prev_inx).pt,points(last_index).pt,an1,context->length);
-			}
-			context->rel_angle = fabs(context->rel_angle);
-			if (context->rel_angle >180) context->rel_angle = context->rel_angle - 180.0;
-			CreatePolyAnchors(prev_inx);
-			context->p0 = points(0).pt;
-			context->p1 = points(1).pt;
-			break;
-		case C_TEXT:
-			if (action>>8 == 'o') {  //"o" -> origin mode
-				MenuMode(I2VP(1));
-				InfoMessage("Move Origin Mode: Place Origin, p for Points, Enter or Esc");
-				return C_CONTINUE;
-			}
-			if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) ||
-				((tempSegs(0).u.p.polyType == POLYLINE) && (prev_inx>=1) && (prev_inx<=points_da.cnt-2)) ) &&
-					((action>>8 == 's') || (action>>8 == 'v') || (action>>8 == 'r')))  {
-				switch(action>>8) {
-				case 's':
-					points(context->prev_inx).pt_type = wPolyLineSmooth;
-					return C_CONTINUE;
-				case 'v':
-					points(context->prev_inx).pt_type = wPolyLineStraight;
-					return C_CONTINUE;
-				case 'r':
-					points(context->prev_inx).pt_type = wPolyLineRound;
-					return C_CONTINUE;
-				default:;
-				}
-			}
-			if ((action>>8 == 'g') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == POLYLINE) ) {
-				tempSegs(0).u.p.polyType = FREEFORM;
-				context->subtype=FREEFORM;
-				context->open = FALSE;
-				CreatePolyAnchors( -1);
-				return C_CONTINUE;
-			}
-			if ((action>>8 == 'l') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == FREEFORM)) {
-				tempSegs(0).u.p.polyType = POLYLINE;
-				context->subtype=POLYLINE;
-				context->open = TRUE;
-				CreatePolyAnchors( -1);
-				return C_CONTINUE;
-			}
-			if ((action>>8 == 'f') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType != POLYLINE )) {
-				tempSegs(0).type = SEG_FILPOLY;
-				tempSegs(0).u.p.polyType = FREEFORM;
-				context->type =  SEG_FILPOLY;
-				context->subtype=FREEFORM;
-				context->filled = TRUE;
-				CreatePolyAnchors( -1);
-				return C_CONTINUE;
-			}
-			if ((action>>8 == 'u') && (tempSegs(0).type == SEG_FILPOLY) ) {
-				tempSegs(0).type = SEG_POLY;
-				tempSegs(0).u.p.polyType = FREEFORM;
-				context->type =  SEG_POLY;
-				context->subtype=FREEFORM;
-				context->filled = FALSE;
-				CreatePolyAnchors( -1);
-				return C_CONTINUE;
-			}
-			//Delete or backspace deletes last selected index
-			if (action>>8 == 127 || action>>8 == 8) {
-				if (polyState == POLY_SELECTED && prev_inx >=0) {
-					if (selected_count >1) {
-						ErrorMessage( MSG_POLY_MULTIPLE_SELECTED );
-						return C_CONTINUE;
-					}
-					if (points_da.cnt <= 3) {
-						ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
-						return C_CONTINUE;
-					}
-					for (int i=0;i<points_da.cnt;i++) {
-						point_selected(i) = FALSE;
-						if (i>=prev_inx && i<points_da.cnt-1)
-							points(i) = points(i+1);
-					}
-					points_da.cnt--;
-					select_da.cnt--;
-					selected_count=0;
-					tempSegs(0).u.p.cnt = points_da.cnt;
-					context->max_inx = points_da.cnt-1;
+				if (first_inx == points_da.cnt-1) {
+					next_point = points(0).pt;
+//						next_angle = FindAngle(next_point,points(1).pt);
+				} else if (first_inx == points_da.cnt-2) {
+					next_point = points(points_da.cnt-1).pt;
+//						next_angle = FindAngle(next_point,points(0).pt);
 				} else {
-					ErrorMessage( MSG_POLY_NOTHING_SELECTED );
+					next_point = points(first_inx+1).pt;
+//						next_angle = FindAngle(next_point,points(first_inx+2).pt);
 				}
-				prev_inx = -1;
-				context->prev_inx = -1;
-				polyInx = -1;
-				polyState = POLY_SELECTED;
-				CreatePolyAnchors( -1);
-				InfoMessage(_("Point Deleted"));
+				coOrd diff;
+				diff.x = pos.x - points(polyInx).pt.x;
+				diff.y = pos.y - points(polyInx).pt.y;
+				coOrd pos_lock = points(first_inx).pt;
+				pos_lock.x += diff.x;
+				pos_lock.y += diff.y;
+				//Snap to Right-Angle from previous or from 0
+				DIST_T l = FindDistance(last_point, pos_lock);
+				ANGLE_T angle2 = NormalizeAngle(FindAngle(last_point, pos_lock)-last_angle);
+				int quad = (int)((angle2+45.0)/90.0);
+				if (tempSegs_da.cnt != 1 && (quad == 2)) {
+					pos_lock = last_point;
+				} else if (quad == 1 || quad == 3) {
+					l = fabs(l*cos(D2R(((quad==1)?last_angle+90.0:last_angle-90.0)-FindAngle(
+					                           pos_lock,last_point))));
+					Translate( &pos_lock, last_point,
+					           NormalizeAngle((quad==1)?last_angle+90.0:last_angle-90.0), l );
+				} else {
+					l = fabs(l*cos(D2R(((quad==0
+					                     ||quad==4)?last_angle:last_angle+180.0)-FindAngle(pos_lock,last_point))));
+					Translate( &pos_lock, last_point, NormalizeAngle((quad==0
+					                ||quad==4)?last_angle:last_angle+180.0), l );
+				}
+				diff.x = pos_lock.x - points(first_inx).pt.x;
+				diff.y = pos_lock.y - points(first_inx).pt.y;
+				pos.x 	= points(polyInx).pt.x+diff.x;
+				pos.y 	= points(polyInx).pt.y+diff.y;
+				if (selected_count<2) {
+					if (FindIntersection(&intersect,last_point,last_angle+90.0,next_point,
+					                     last_angle+180.0)) {
+						show_intersect = TRUE;
+					}
+				}
+				d = FindDistance(intersect,pos_lock);
+				if (IsClose(d)) {
+					pos = intersect;
+				}
+				InfoMessage( _("Length = %s, Last angle = %0.2f"),
+				             FormatDistance(FindDistance(pos_lock,last_point)),
+				             PutAngle(FindAngle(pos_lock,last_point)));
+
+			} else { SnapPos(&pos); }  //If not using CTL and snap enabled
+		}
+		context->prev_inx = first_inx;
+		coOrd diff;
+		diff.x = pos.x - points(polyInx).pt.x;
+		diff.y = pos.y - points(polyInx).pt.y;
+		//points(polyInx) = pos;
+		for (int i=0; i<points_da.cnt; i++) {
+			if (point_selected(i)) {
+				points(i).pt.x = points(i).pt.x + diff.x;
+				points(i).pt.y = points(i).pt.y + diff.y;
+			}
+		}
+		if (first_inx>=0) {
+			context->length = FindDistance(points(first_inx).pt,points(last_inx).pt);
+			an1 = FindAngle(points(last_inx).pt,points(first_inx).pt);
+			an0 = FindAngle(points(first_inx==0?(points_da.cnt-1):(first_inx-1)).pt,
+			                points(first_inx).pt);
+			context->rel_angle = NormalizeAngle(180-(an1-an0));
+		}
+		CreatePolyAnchors(first_inx);
+		if (show_intersect) {
+			CreateSquareAnchor(intersect);
+		}
+		context->p0 = points(0).pt;
+		context->p1 = points(1).pt;
+		return C_CONTINUE;
+	case C_UP:
+		context->prev_inx = -1;
+		if (segInx == -1 || polyState != POLYPOINT_SELECTED) {
+			return C_CONTINUE;        //Didn't get a point selected/added
+		}
+		polyState = POLY_SELECTED;  //Return to base state
+		anchors_da.cnt = 0;
+		CreatePolyAnchors(polyInx);  //Show last selection
+		prev_inx = polyInx;
+		for (int i=0; i<points_da.cnt; i++) {
+			if (point_selected(i)) {
+				first_inx = i;
+				break;
+			}
+		}
+		last_inx = first_inx==0?(points_da.cnt-1):(first_inx-1);
+		if (first_inx>=0) {
+			context->length = FindDistance(points(first_inx).pt,points(last_inx).pt);
+			an1 = FindAngle(points(last_inx).pt,points(first_inx).pt);
+			an0 = FindAngle(points(last_inx==0?(points_da.cnt-1):(last_inx-1)).pt,
+			                points(last_inx).pt);
+			if (DifferenceBetweenAngles(an0,an1)<=0) {
+				context->rel_angle = 180+DifferenceBetweenAngles(an0,an1);
+			} else {
+				context->rel_angle = 180-DifferenceBetweenAngles(an0,an1);
+			}
+		}
+		context->prev_inx = first_inx;
+		context->p0 = points(0).pt;
+		context->p1 = points(1).pt;
+		polyInx = -1;
+		return C_CONTINUE;
+	case C_UPDATE:
+		if (context->prev_inx>=0) {
+			int last_index = context->prev_inx==0?(points_da.cnt-1):(context->prev_inx-1);
+			an0 = FindAngle(points(last_index==0?(points_da.cnt-1):(last_index-1)).pt,
+			                points(last_index).pt);
+			an1 = FindAngle(points(last_index).pt,points(context->prev_inx).pt);
+			if (DifferenceBetweenAngles(an0,an1)<=0) {
+				an1 = NormalizeAngle(an0-(180-context->rel_angle));
+			} else {
+				an1 = NormalizeAngle((180-context->rel_angle)+an0);
+			}
+			Translate(&points(prev_inx).pt,points(last_index).pt,an1,context->length);
+		}
+		context->rel_angle = fabs(context->rel_angle);
+		if (context->rel_angle >180) { context->rel_angle = context->rel_angle - 180.0; }
+		CreatePolyAnchors(prev_inx);
+		context->p0 = points(0).pt;
+		context->p1 = points(1).pt;
+		break;
+	case C_TEXT:
+		if (action>>8 == 'o') {  //"o" -> origin mode
+			MenuMode(I2VP(1));
+			InfoMessage("Move Origin Mode: Place Origin, p for Points, Enter or Esc");
+			return C_CONTINUE;
+		}
+		if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) ||
+		     ((tempSegs(0).u.p.polyType == POLYLINE) && (prev_inx>=1)
+		      && (prev_inx<=points_da.cnt-2)) ) &&
+		    ((action>>8 == 's') || (action>>8 == 'v') || (action>>8 == 'r')))  {
+			switch(action>>8) {
+			case 's':
+				points(context->prev_inx).pt_type = wPolyLineSmooth;
 				return C_CONTINUE;
+			case 'v':
+				points(context->prev_inx).pt_type = wPolyLineStraight;
+				return C_CONTINUE;
+			case 'r':
+				points(context->prev_inx).pt_type = wPolyLineRound;
+				return C_CONTINUE;
+			default:;
 			}
-			if (action>>8 != 32 && action>>8 != 13 && action>>8 !=9) return C_CONTINUE;
-			if (action>>8 == 9 && (MyGetKeyState() & WKEY_SHIFT) != 0) return C_TERMINATE;
-			/* no break */
-		case C_CONFIRM:
-		case C_OK:
-		case C_FINISH:
-			//copy changes back into track
-			if (polyState != POLY_SELECTED) {
-				polyState = POLY_NONE;
-				DYNARR_RESET(trkSeg_t,anchors_da);
-				DYNARR_RESET(trkSeg_t,tempSegs_da);
-				return C_TERMINATE;
-			}
-			//If ends overlap precisely remove last segment and close if >3 points
-			DIST_T dist = FindDistance(points(0).pt,points(points_da.cnt-1).pt);
-			if (IsClose(dist*4) && points_da.cnt>3 && tempSegs(0).u.p.polyType == POLYLINE) {
-				tempSegs(0).u.p.polyType = FREEFORM;
-				context->subtype=FREEFORM;
-				context->open = FALSE;
+		}
+		if ((action>>8 == 'g') && (tempSegs(0).type == SEG_POLY)
+		    && (tempSegs(0).u.p.polyType == POLYLINE) ) {
+			tempSegs(0).u.p.polyType = FREEFORM;
+			context->subtype=FREEFORM;
+			context->open = FALSE;
+			CreatePolyAnchors( -1);
+			return C_CONTINUE;
+		}
+		if ((action>>8 == 'l') && (tempSegs(0).type == SEG_POLY)
+		    && (tempSegs(0).u.p.polyType == FREEFORM)) {
+			tempSegs(0).u.p.polyType = POLYLINE;
+			context->subtype=POLYLINE;
+			context->open = TRUE;
+			CreatePolyAnchors( -1);
+			return C_CONTINUE;
+		}
+		if ((action>>8 == 'f') && (tempSegs(0).type == SEG_POLY)
+		    && (tempSegs(0).u.p.polyType != POLYLINE )) {
+			tempSegs(0).type = SEG_FILPOLY;
+			tempSegs(0).u.p.polyType = FREEFORM;
+			context->type =  SEG_FILPOLY;
+			context->subtype=FREEFORM;
+			context->filled = TRUE;
+			CreatePolyAnchors( -1);
+			return C_CONTINUE;
+		}
+		if ((action>>8 == 'u') && (tempSegs(0).type == SEG_FILPOLY) ) {
+			tempSegs(0).type = SEG_POLY;
+			tempSegs(0).u.p.polyType = FREEFORM;
+			context->type =  SEG_POLY;
+			context->subtype=FREEFORM;
+			context->filled = FALSE;
+			CreatePolyAnchors( -1);
+			return C_CONTINUE;
+		}
+		//Delete or backspace deletes last selected index
+		if (action>>8 == 127 || action>>8 == 8) {
+			if (polyState == POLY_SELECTED && prev_inx >=0) {
+				if (selected_count >1) {
+					ErrorMessage( MSG_POLY_MULTIPLE_SELECTED );
+					return C_CONTINUE;
+				}
+				if (points_da.cnt <= 3) {
+					ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
+					return C_CONTINUE;
+				}
+				for (int i=0; i<points_da.cnt; i++) {
+					point_selected(i) = FALSE;
+					if (i>=prev_inx && i<points_da.cnt-1) {
+						points(i) = points(i+1);
+					}
+				}
 				points_da.cnt--;
 				select_da.cnt--;
 				selected_count=0;
 				tempSegs(0).u.p.cnt = points_da.cnt;
 				context->max_inx = points_da.cnt-1;
+			} else {
+				ErrorMessage( MSG_POLY_NOTHING_SELECTED );
 			}
-			pts_t * oldPts = context->segPtr[segInx].u.p.pts;
-			void * newPts = (pts_t*)MyMalloc( points_da.cnt * sizeof (pts_t) );
-			context->segPtr[segInx].u.p.pts = newPts;
-			context->segPtr[segInx].u.p.cnt = points_da.cnt;
-			context->orig = rotate_origin;
-			context->angle = rotate_angle;
-			for (int i=0; i<points_da.cnt; i++) {
-				pos = points(i).pt;
-				pos.x -= context->orig.x;
-				pos.y -= context->orig.y;
-				Rotate( &pos, zero, -context->angle );
-				context->segPtr[segInx].u.p.pts[i].pt = pos;
-				context->segPtr[segInx].u.p.pts[i].pt_type = points(i).pt_type;
-			}
-			MyFree(oldPts);
+			prev_inx = -1;
+			context->prev_inx = -1;
+			polyInx = -1;
+			polyState = POLY_SELECTED;
+			CreatePolyAnchors( -1);
+			InfoMessage(_("Point Deleted"));
+			return C_CONTINUE;
+		}
+		if (action>>8 != 32 && action>>8 != 13 && action>>8 !=9) { return C_CONTINUE; }
+		if (action>>8 == 9 && (MyGetKeyState() & WKEY_SHIFT) != 0) { return C_TERMINATE; }
+	/* no break */
+	case C_CONFIRM:
+	case C_OK:
+	case C_FINISH:
+		//copy changes back into track
+		if (polyState != POLY_SELECTED) {
 			polyState = POLY_NONE;
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			DYNARR_RESET(trkSeg_t,points_da);
 			DYNARR_RESET(trkSeg_t,tempSegs_da);
-			if ((action&0xFF)==C_CONFIRM) return C_CONTINUE;
-			else return C_TERMINATE;
-		case C_REDRAW:
-			if (polyState == POLY_NONE) return C_CONTINUE;
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt,trackGauge, wDrawColorBlack);
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-			break;
-		default:
-			;
+			return C_TERMINATE;
 		}
-		return C_CONTINUE;
+		//If ends overlap precisely remove last segment and close if >3 points
+		DIST_T dist = FindDistance(points(0).pt,points(points_da.cnt-1).pt);
+		if (IsClose(dist*4) && points_da.cnt>3
+		    && tempSegs(0).u.p.polyType == POLYLINE) {
+			tempSegs(0).u.p.polyType = FREEFORM;
+			context->subtype=FREEFORM;
+			context->open = FALSE;
+			points_da.cnt--;
+			select_da.cnt--;
+			selected_count=0;
+			tempSegs(0).u.p.cnt = points_da.cnt;
+			context->max_inx = points_da.cnt-1;
+		}
+		pts_t * oldPts = context->segPtr[segInx].u.p.pts;
+		void * newPts = (pts_t*)MyMalloc( points_da.cnt * sizeof (pts_t) );
+		context->segPtr[segInx].u.p.pts = newPts;
+		context->segPtr[segInx].u.p.cnt = points_da.cnt;
+		context->orig = rotate_origin;
+		context->angle = rotate_angle;
+		for (int i=0; i<points_da.cnt; i++) {
+			pos = points(i).pt;
+			pos.x -= context->orig.x;
+			pos.y -= context->orig.y;
+			Rotate( &pos, zero, -context->angle );
+			context->segPtr[segInx].u.p.pts[i].pt = pos;
+			context->segPtr[segInx].u.p.pts[i].pt_type = points(i).pt_type;
+		}
+		MyFree(oldPts);
+		polyState = POLY_NONE;
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		DYNARR_RESET(trkSeg_t,points_da);
+		DYNARR_RESET(trkSeg_t,tempSegs_da);
+		if ((action&0xFF)==C_CONFIRM) { return C_CONTINUE; }
+		else { return C_TERMINATE; }
+	case C_REDRAW:
+		if (polyState == POLY_NONE) { return C_CONTINUE; }
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt,trackGauge,
+		          wDrawColorBlack);
+		DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+		          wDrawColorBlack );
+		break;
+	default:
+		;
+	}
+	return C_CONTINUE;
 }
 
-void BuildCircleContext(drawModContext_t * context,int segInx) {
+void BuildCircleContext(drawModContext_t * context,int segInx)
+{
 	context->radius = fabs(context->segPtr[segInx].u.c.radius);
-	REORIGIN( context->pc, context->segPtr[segInx].u.c.center, context->angle, context->orig );
-	PointOnCircle( &context->p0, context->segPtr[segInx].u.c.center, fabs(context->segPtr[segInx].u.c.radius), context->segPtr[segInx].u.c.a0 );
+	REORIGIN( context->pc, context->segPtr[segInx].u.c.center, context->angle,
+	          context->orig );
+	PointOnCircle( &context->p0, context->segPtr[segInx].u.c.center,
+	               fabs(context->segPtr[segInx].u.c.radius), context->segPtr[segInx].u.c.a0 );
 	REORIGIN( context->p0, context->p0, context->angle, context->orig );
-	PointOnCircle( &context->p1, context->segPtr[segInx].u.c.center, fabs(context->segPtr[segInx].u.c.radius), context->segPtr[segInx].u.c.a0 + context->segPtr[segInx].u.c.a1);
+	PointOnCircle( &context->p1, context->segPtr[segInx].u.c.center,
+	               fabs(context->segPtr[segInx].u.c.radius),
+	               context->segPtr[segInx].u.c.a0 + context->segPtr[segInx].u.c.a1);
 	REORIGIN( context->p1, context->p1, context->angle, context->orig );
 	if (context->segPtr[segInx].u.c.a1<360) {
 		context->arc_angle = context->segPtr[segInx].u.c.a1;
-		PointOnCircle( &context->pm, context->segPtr[segInx].u.c.center, fabs(context->segPtr[segInx].u.c.radius), context->segPtr[segInx].u.c.a0 + (context->segPtr[segInx].u.c.a1/2));
+		PointOnCircle( &context->pm, context->segPtr[segInx].u.c.center,
+		               fabs(context->segPtr[segInx].u.c.radius),
+		               context->segPtr[segInx].u.c.a0 + (context->segPtr[segInx].u.c.a1/2));
 		REORIGIN( context->pm, context->pm, context->angle, context->orig );
 		coOrd cm;
 		cm = context->pm;
@@ -1706,7 +1833,8 @@ void BuildCircleContext(drawModContext_t * context,int segInx) {
 	}
 }
 
-void CreateSelectedAnchor(coOrd pos) {
+void CreateSelectedAnchor(coOrd pos)
+{
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int inx = anchors_da.cnt-1;
@@ -1731,125 +1859,134 @@ void CreateSelectedAnchor(coOrd pos) {
  **/
 
 STATUS_T DrawGeomOriginMove(
-		wAction_t action,
-		coOrd pos,
-		drawModContext_t * context) {
+        wAction_t action,
+        coOrd pos,
+        drawModContext_t * context)
+{
 
 	switch ( action&0xFF ) {
-		case C_START:
+	case C_START:
+		context->state = MOD_ORIGIN;
+		context->rotate_state = TRUE;
+		context->rot_moved = TRUE;
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		CreateOriginAnchor(context->rot_center,FALSE);
+		if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY)
+		    && (context->prev_inx>=0)) {
+			CreateSelectedAnchor(points(context->prev_inx).pt);
+		}
+		InfoMessage("Move Origin Mode: Place Origin, 0-4, c or l, Enter or Esc");
+		return C_CONTINUE;
+		break;
+	case wActionMove:
+		CreateOriginAnchor(context->rot_center, FALSE);
+		if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY)
+		    && (context->prev_inx>=0)) {
+			CreateSelectedAnchor(points(context->prev_inx).pt);
+		}
+		return C_CONTINUE;
+		break;
+	case C_DOWN:
+		if (context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) {
 			context->state = MOD_ORIGIN;
-			context->rotate_state = TRUE;
-			context->rot_moved = TRUE;
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			CreateOriginAnchor(context->rot_center,FALSE);
-			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
-				CreateSelectedAnchor(points(context->prev_inx).pt);
-			}
-			InfoMessage("Move Origin Mode: Place Origin, 0-4, c or l, Enter or Esc");
-			return C_CONTINUE;
-			break;
-		case wActionMove:
-			CreateOriginAnchor(context->rot_center, FALSE);
-			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
-				CreateSelectedAnchor(points(context->prev_inx).pt);
-			}
-			return C_CONTINUE;
-			break;
-		case C_DOWN:
-			if (context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) {
-				context->state = MOD_ORIGIN;
-				DYNARR_RESET(trkSeg_t,anchors_da);
-				if (IsClose(FindDistance(pos,context->rot_center))) {
-					pos = context->rot_center;
-				} else {
-					context->rot_center = pos;
-				}
-				CreateOriginAnchor(context->rot_center, TRUE);
-				if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
-					CreateSelectedAnchor(points(context->prev_inx).pt);
-				}
-			}
-			return C_CONTINUE;
-			break;
-		case C_MOVE:
-			if (context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG){
+			if (IsClose(FindDistance(pos,context->rot_center))) {
+				pos = context->rot_center;
+			} else {
 				context->rot_center = pos;
-				DYNARR_RESET(trkSeg_t,anchors_da);
-				CreateOriginAnchor(context->rot_center, TRUE);
-				if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
-					CreateSelectedAnchor(points(context->prev_inx).pt);
-				}
 			}
-			return C_CONTINUE;
-			break;
-		case C_UP:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			if (context->state == MOD_ORIGIN) {
-				context->state = MOD_AFTER_ORIG;
-			}
-			CreateOriginAnchor(context->rot_center,FALSE);
-			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
+			CreateOriginAnchor(context->rot_center, TRUE);
+			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY)
+			    && (context->prev_inx>=0)) {
 				CreateSelectedAnchor(points(context->prev_inx).pt);
 			}
-			return C_CONTINUE;
-			break;
-		case C_UPDATE:
+		}
+		return C_CONTINUE;
+		break;
+	case C_MOVE:
+		if (context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) {
+			context->rot_center = pos;
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			if (context->state == MOD_AFTER_ORIG) {
-				if (context->rot_center.x != context->rel_center.x &&
-					context->rot_center.y != context->rel_center.y ) {
-					context->rel_center = context->rot_center;
-					CreateOriginAnchor(context->rot_center, FALSE);
-					if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
-						CreateSelectedAnchor(points(context->prev_inx).pt);
-					}
-				}
+			CreateOriginAnchor(context->rot_center, TRUE);
+			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY)
+			    && (context->prev_inx>=0)) {
+				CreateSelectedAnchor(points(context->prev_inx).pt);
 			}
-			return C_CONTINUE;
-			break;
-		case C_TEXT:
-			if ((context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) &&
-				((action>>8 >= '0' && action>>8 <= '1') || action>>8 == 'l' || action>>8 == 'm' || action>>8 == 'p')) {
-				// 0,1,2,3,4 -> reset rot center
-				if (action>>8 == '0') {
-					context->rot_center = zero;
-				} else if (action>>8 == '1') {
-					context->rot_center = context->p0;
-				} else if (action>>8 == '2') {
-					context->rot_center = context->p1;
-				} else if (tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) {
-					if (action>>8 == '3' || action>>8 == '4') {
-						context->rot_center = action>>8 == '3'?points(2).pt:points(3).pt;
-					} else if (action>>8 == 'l') {   //"l" - last selected
-						if (context->prev_inx !=-1) {
-							context->rot_center = points(context->prev_inx).pt;
-						}
-					} else if (action>>8 == 'm') {
-						context->rot_center = FindCentroid(points_da.cnt,&points(0));
-					}
-				}
-				if (action>>8 == 'p') {     //"p" - points mode
-					MenuMode(I2VP(0));
-					return C_CONTINUE;
-				}
+		}
+		return C_CONTINUE;
+		break;
+	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (context->state == MOD_ORIGIN) {
+			context->state = MOD_AFTER_ORIG;
+		}
+		CreateOriginAnchor(context->rot_center,FALSE);
+		if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY)
+		    && (context->prev_inx>=0)) {
+			CreateSelectedAnchor(points(context->prev_inx).pt);
+		}
+		return C_CONTINUE;
+		break;
+	case C_UPDATE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (context->state == MOD_AFTER_ORIG) {
+			if (context->rot_center.x != context->rel_center.x &&
+			    context->rot_center.y != context->rel_center.y ) {
 				context->rel_center = context->rot_center;
-				context->rot_angle = 0;
-				DYNARR_RESET(trkSeg_t,anchors_da);
-				context->state = MOD_AFTER_ORIG;
 				CreateOriginAnchor(context->rot_center, FALSE);
-				if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
+				if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY)
+				    && (context->prev_inx>=0)) {
 					CreateSelectedAnchor(points(context->prev_inx).pt);
 				}
+			}
+		}
+		return C_CONTINUE;
+		break;
+	case C_TEXT:
+		if ((context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) &&
+		    ((action>>8 >= '0' && action>>8 <= '1') || action>>8 == 'l' || action>>8 == 'm'
+		     || action>>8 == 'p')) {
+			// 0,1,2,3,4 -> reset rot center
+			if (action>>8 == '0') {
+				context->rot_center = zero;
+			} else if (action>>8 == '1') {
+				context->rot_center = context->p0;
+			} else if (action>>8 == '2') {
+				context->rot_center = context->p1;
+			} else if (tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) {
+				if (action>>8 == '3' || action>>8 == '4') {
+					context->rot_center = action>>8 == '3'?points(2).pt:points(3).pt;
+				} else if (action>>8 == 'l') {   //"l" - last selected
+					if (context->prev_inx !=-1) {
+						context->rot_center = points(context->prev_inx).pt;
+					}
+				} else if (action>>8 == 'm') {
+					context->rot_center = FindCentroid(points_da.cnt,&points(0));
+				}
+			}
+			if (action>>8 == 'p') {     //"p" - points mode
+				MenuMode(I2VP(0));
 				return C_CONTINUE;
 			}
-			break;
-		case C_FINISH:
-			context->rotate_state = FALSE;
-			context->state = MOD_STARTED;
+			context->rel_center = context->rot_center;
+			context->rot_angle = 0;
+			DYNARR_RESET(trkSeg_t,anchors_da);
+			context->state = MOD_AFTER_ORIG;
+			CreateOriginAnchor(context->rot_center, FALSE);
+			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY)
+			    && (context->prev_inx>=0)) {
+				CreateSelectedAnchor(points(context->prev_inx).pt);
+			}
 			return C_CONTINUE;
-			break;
-		default:
-			break;
+		}
+		break;
+	case C_FINISH:
+		context->rotate_state = FALSE;
+		context->state = MOD_STARTED;
+		return C_CONTINUE;
+		break;
+	default:
+		break;
 	}
 	return C_CONTINUE;
 
@@ -1860,9 +1997,9 @@ STATUS_T DrawGeomOriginMove(
  * Base Modify function for Draw objects.
  */
 STATUS_T DrawGeomModify(
-		wAction_t action,
-		coOrd pos,
-		drawModContext_t * context)
+        wAction_t action,
+        coOrd pos,
+        drawModContext_t * context)
 {
 	ANGLE_T a;
 	coOrd p0, p1, pc, pm;
@@ -1893,81 +2030,88 @@ STATUS_T DrawGeomModify(
 		curveInx = -1;
 		segInx = -1;
 		polyMode = FALSE;
-		DistanceSegs( context->orig, context->angle, context->segCnt, context->segPtr, &pos, &segInx );
-		if (segInx == -1)
+		DistanceSegs( context->orig, context->angle, context->segCnt, context->segPtr,
+		              &pos, &segInx );
+		if (segInx == -1) {
 			return C_ERROR;
+		}
 		context->type = context->segPtr[segInx].type;
 		switch(context->type) {
-			case SEG_TBLEDGE:
-			case SEG_STRLIN:
-			case SEG_DIMLIN:
-			case SEG_BENCH:
-				REORIGIN( p0, context->segPtr[segInx].u.l.pos[0], context->angle, context->orig );
-				REORIGIN( p1, context->segPtr[segInx].u.l.pos[1], context->angle, context->orig );
-				tempSegs(0).type = SEG_STRLIN;
+		case SEG_TBLEDGE:
+		case SEG_STRLIN:
+		case SEG_DIMLIN:
+		case SEG_BENCH:
+			REORIGIN( p0, context->segPtr[segInx].u.l.pos[0], context->angle,
+			          context->orig );
+			REORIGIN( p1, context->segPtr[segInx].u.l.pos[1], context->angle,
+			          context->orig );
+			tempSegs(0).type = SEG_STRLIN;
+			tempSegs(0).color = wDrawColorRed;
+			tempSegs(0).u.l.pos[0] = p0;
+			tempSegs(0).u.l.pos[1] = p1;
+			tempSegs(0).width = 0;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).u.l.option = context->segPtr[segInx].u.l.option;
+			context->p0 = p0;
+			context->p1 = p1;
+			CreateLineAnchors(-1,p0,p1);
+			break;
+		case SEG_CRVLIN:
+		case SEG_FILCRCL:
+			BuildCircleContext(context,segInx);
+			tempSegs(0).type = SEG_CRVLIN;
+			tempSegs(0).color = wDrawColorRed;
+			tempSegs(0).u.c.center = context->pc;
+			tempSegs(0).u.c.radius = context->radius;
+			tempSegs(0).u.c.a0 = context->segPtr[segInx].u.c.a0;
+			tempSegs(0).u.c.a1 = context->segPtr[segInx].u.c.a1;
+			tempSegs(0).width = 0;
+			tempSegs_da.cnt = 1;
+			if (tempSegs(0).u.c.a1<360.0) {
+				CreateCurveAnchors(-1,context->pm,context->pc,context->p0,context->p1);
+			} else {
+				CreateCircleAnchor(FALSE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,
+				                   FindAngle(tempSegs(0).u.c.center,pos));
+			}
+			context->last_inx = 2;
+			break;
+		case SEG_POLY:
+		case SEG_FILPOLY:
+			if (context->segPtr[segInx].u.p.polyType !=RECTANGLE) {
+				polyMode = TRUE;
+				return DrawGeomPolyModify(action,pos,context);
+			} else {
+				tempSegs(0).type = SEG_POLY;
 				tempSegs(0).color = wDrawColorRed;
-				tempSegs(0).u.l.pos[0] = p0;
-				tempSegs(0).u.l.pos[1] = p1;
-				tempSegs(0).width = 0;
-				tempSegs_da.cnt = 1;
-				tempSegs(0).u.l.option = context->segPtr[segInx].u.l.option;
-				context->p0 = p0;
-				context->p1 = p1;
-				CreateLineAnchors(-1,p0,p1);
-				break;
-			case SEG_CRVLIN:
-			case SEG_FILCRCL:
-				BuildCircleContext(context,segInx);
-				tempSegs(0).type = SEG_CRVLIN;
-				tempSegs(0).color = wDrawColorRed;
-				tempSegs(0).u.c.center = context->pc;
-				tempSegs(0).u.c.radius = context->radius;
-				tempSegs(0).u.c.a0 = context->segPtr[segInx].u.c.a0;
-				tempSegs(0).u.c.a1 = context->segPtr[segInx].u.c.a1;
-				tempSegs(0).width = 0;
-				tempSegs_da.cnt = 1;
-				if (tempSegs(0).u.c.a1<360.0) {
-					CreateCurveAnchors(-1,context->pm,context->pc,context->p0,context->p1);
-				} else
-					CreateCircleAnchor(FALSE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
-				context->last_inx = 2;
-				break;
-			case SEG_POLY:
-			case SEG_FILPOLY:
-				if (context->segPtr[segInx].u.p.polyType !=RECTANGLE) {
-					polyMode = TRUE;
-					return DrawGeomPolyModify(action,pos,context);
-				} else {
-					tempSegs(0).type = SEG_POLY;
-					tempSegs(0).color = wDrawColorRed;
-					DYNARR_RESET( pts_t, points_da);
-					for (int inx=0;inx<context->segPtr->u.p.cnt;inx++) {
-						DYNARR_APPEND(pts_t, points_da,3);
-						REORIGIN( points(inx).pt, context->segPtr[segInx].u.p.pts[inx].pt, context->angle, context->orig );
-					}
-					tempSegs(0).u.p.pts = &points(0);
-					tempSegs(0).u.p.cnt = points_da.cnt;
-					tempSegs(0).width = 0;
-					tempSegs_da.cnt = 1;
-					context->p0 = points(0).pt;
-					CreateBoxAnchors(-1,&context->segPtr[segInx].u.p.pts[0]);
-					context->p0 = points(0).pt;
-					context->p1 = points(1).pt;
+				DYNARR_RESET( pts_t, points_da);
+				for (int inx=0; inx<context->segPtr->u.p.cnt; inx++) {
+					DYNARR_APPEND(pts_t, points_da,3);
+					REORIGIN( points(inx).pt, context->segPtr[segInx].u.p.pts[inx].pt,
+					          context->angle, context->orig );
 				}
-				break;
-			case SEG_TEXT:
-				InfoMessage("Text can only be modified with Describe");
-				wBeep();
-				return C_ERROR;
-			default:
-				;
+				tempSegs(0).u.p.pts = &points(0);
+				tempSegs(0).u.p.cnt = points_da.cnt;
+				tempSegs(0).width = 0;
+				tempSegs_da.cnt = 1;
+				context->p0 = points(0).pt;
+				CreateBoxAnchors(-1,&context->segPtr[segInx].u.p.pts[0]);
+				context->p0 = points(0).pt;
+				context->p1 = points(1).pt;
+			}
+			break;
+		case SEG_TEXT:
+			InfoMessage("Text can only be modified with Describe");
+			wBeep();
+			return C_ERROR;
+		default:
+			;
 		}
 		InfoMessage("Points Mode - Select and drag Anchor Point");
 		return C_CONTINUE;
 		break;
 	case wActionMove:
-		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		if (context->rotate_state) { return DrawGeomOriginMove(action,pos,context); }
+		if (polyMode) { return DrawGeomPolyModify(action,pos,context); }
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		wSetCursor(mainD.d,defaultCursor);
 		switch( context->type) {
@@ -1986,7 +2130,7 @@ STATUS_T DrawGeomModify(
 					CreateMovingAnchor(context->p1,TRUE);
 				}
 			}
-		break;
+			break;
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
 			DYNARR_RESET(trkSeg_t,anchors_da);
@@ -1996,7 +2140,8 @@ STATUS_T DrawGeomModify(
 					Translate(&p,context->pc,FindAngle(context->pc,pos),context->radius);
 					CreateMovingAnchor(p,TRUE);
 					DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-					DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,FindAngle(context->pc,pos),TRUE,wDrawColorBlue);
+					DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,
+					               FindAngle(context->pc,pos),TRUE,wDrawColorBlue);
 				}
 			} else {
 				CreateCurveAnchors(curveInx,context->pm,context->pc,context->p0,context->p1);
@@ -2015,7 +2160,7 @@ STATUS_T DrawGeomModify(
 					}
 				}
 			}
-		break;
+			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:;
 			CreateBoxAnchors(-1,&points(0));
@@ -2025,8 +2170,8 @@ STATUS_T DrawGeomModify(
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
-		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		if (context->rotate_state) { return DrawGeomOriginMove(action,pos,context); }
+		if (polyMode) { return DrawGeomPolyModify(action,pos,context); }
 		corner_mode = FALSE;
 		segInx = 0;
 		context->state = MOD_STARTED;
@@ -2052,10 +2197,11 @@ STATUS_T DrawGeomModify(
 			if (lineInx < 0 ) {
 				InfoMessage( _("Not close to end of line"));
 			} else {
-				if (context->type == SEG_TBLEDGE)
+				if (context->type == SEG_TBLEDGE) {
 					InfoMessage("End selected, drag to move +Ctl to lock to other edge end, +Shift lock to line");
-				else
+				} else {
 					InfoMessage("End selected, drag to reposition +Shift lock to line");
+				}
 				context->state = MOD_SELECTED_PT;
 			}
 			tempSegs(0).color = wDrawColorBlack;
@@ -2080,14 +2226,16 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).u.c.a0 = 0.0;
 				tempSegs(0).u.c.a1 = 360.0;
 				InfoMessage("Drag to Change Radius");
-				CreateCircleAnchor(TRUE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
+				CreateCircleAnchor(TRUE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,
+				                   FindAngle(tempSegs(0).u.c.center,pos));
 			} else {
 				p0 = context->p0;
 				p1 = context->p1;
 				pm = context->pm;
 				pc = context->pc;
 				tempSegs(0).u.c.a0 = FindAngle(context->pc,context->p0);
-				tempSegs(0).u.c.a1 = DifferenceBetweenAngles(FindAngle(context->pc,context->p0),FindAngle(context->pc,context->p1));
+				tempSegs(0).u.c.a1 = DifferenceBetweenAngles(FindAngle(context->pc,context->p0),
+				                     FindAngle(context->pc,context->p1));
 				tempSegs(0).u.c.center = context->pc;
 				tempSegs(0).u.c.radius = context->radius;
 				curveInx = -1;
@@ -2109,14 +2257,16 @@ STATUS_T DrawGeomModify(
 					InfoMessage( _("Not close to ends or middle of mine, reselect"));
 					return C_CONTINUE;
 				} else {
-					if (curveInx <2 )
+					if (curveInx <2 ) {
 						InfoMessage("Drag to move end, +Ctrl to lock to other objects");
-					else
+					} else {
 						InfoMessage("Drag to change radius");
+					}
 				}
 				tempSegs_da.cnt = 1;
-				if (tempSegs(0).u.c.a1 < 360.0)
+				if (tempSegs(0).u.c.a1 < 360.0) {
 					CreateCurveAnchors(curveInx,pm,pc,p0,p1);
+				}
 			}
 			context->state = MOD_SELECTED_PT;
 			break;
@@ -2154,14 +2304,16 @@ STATUS_T DrawGeomModify(
 				start_pos = pos;
 				pos = points(inx).pt;
 				DYNARR_SET(trkSeg_t,anchors_da,5);
-				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,points(inx_origin).pt), TRUE, wDrawColorRed );
+				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,
+				                points(inx_origin).pt), TRUE, wDrawColorRed );
 				InfoMessage( _("Drag to Move Corner Point"));
 			} else {
 				start_pos = pos;
 				pos.x = (points(inx_line).pt.x + points(inx_line==0?3:inx_line-1).pt.x)/2;
 				pos.y = (points(inx_line).pt.y + points(inx_line==0?3:inx_line-1).pt.y)/2;
 				DYNARR_SET(trkSeg_t,anchors_da,5);
-				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,pos)+90, TRUE, wDrawColorRed );
+				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,pos)+90, TRUE,
+				                wDrawColorRed );
 				InfoMessage( _("Drag to Move Edge "));
 			}
 			context->state = MOD_SELECTED_PT;
@@ -2189,18 +2341,19 @@ STATUS_T DrawGeomModify(
 		return C_CONTINUE;
 	case C_MOVE:
 
-		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
-		if (context->state != MOD_SELECTED_PT) return C_CONTINUE;
+		if (context->rotate_state) { return DrawGeomOriginMove(action,pos,context); }
+		if (polyMode) { return DrawGeomPolyModify(action,pos,context); }
+		if (context->state != MOD_SELECTED_PT) { return C_CONTINUE; }
 		BOOL_T locked = FALSE;
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
-			if ( (MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL ) { //Special Snap to Table End Point if Ctrl
-			    if (OnTableEdgeEndPt( NULL, &pos )) {
+			if ( (MyGetKeyState() & WKEY_CTRL) ==
+			     WKEY_CTRL ) { //Special Snap to Table End Point if Ctrl
+				if (OnTableEdgeEndPt( NULL, &pos )) {
 					locked = TRUE;
-			    }
+				}
 			}
-			/* No Break*/
+		/* No Break*/
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
@@ -2209,7 +2362,8 @@ STATUS_T DrawGeomModify(
 					d = FindDistance( pos, tempSegs(0).u.l.pos[1-lineInx] );
 					Translate( &pos, tempSegs(0).u.l.pos[1-lineInx], segA1, d );
 					locked = TRUE;
-				} else if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap )  {  //M.S. Either on or Off
+				} else if (((MyGetKeyState() & WKEY_ALT) == 0) ==
+				           magneticSnap )  {  //M.S. Either on or Off
 					if (OnTrack( &pos, FALSE, FALSE )!=NULL) {
 						CreateEndAnchor(pos,TRUE);
 						locked = TRUE;
@@ -2217,7 +2371,7 @@ STATUS_T DrawGeomModify(
 				}
 			};
 			if (!locked) {
-				if (SnapPos(&pos)) locked = TRUE;
+				if (SnapPos(&pos)) { locked = TRUE; }
 			}
 			break;
 		default:
@@ -2231,9 +2385,11 @@ STATUS_T DrawGeomModify(
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
-			if (lineInx<0 || lineInx>1) return C_CONTINUE;
+			if (lineInx<0 || lineInx>1) { return C_CONTINUE; }
 			tempSegs(0).u.l.pos[lineInx] = pos;
-			InfoMessage( _("Length = %0.3f Angle = %0.3f"), FindDistance( tempSegs(0).u.l.pos[lineInx], tempSegs(0).u.l.pos[1-lineInx] ), FindAngle( tempSegs(0).u.l.pos[1-lineInx], tempSegs(0).u.l.pos[lineInx] ) );
+			InfoMessage( _("Length = %0.3f Angle = %0.3f"),
+			             FindDistance( tempSegs(0).u.l.pos[lineInx], tempSegs(0).u.l.pos[1-lineInx] ),
+			             FindAngle( tempSegs(0).u.l.pos[1-lineInx], tempSegs(0).u.l.pos[lineInx] ) );
 			tempSegs_da.cnt = 1;
 			context->p0 = tempSegs(0).u.l.pos[0];
 			context->p1 = tempSegs(0).u.l.pos[1];
@@ -2245,10 +2401,11 @@ STATUS_T DrawGeomModify(
 		case SEG_FILCRCL:
 			if (tempSegs(0).u.c.a1 >= 360.0) {
 				tempSegs(0).u.c.radius = FindDistance( context->pc, pos );
-				CreateCircleAnchor(TRUE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
+				CreateCircleAnchor(TRUE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,
+				                   FindAngle(tempSegs(0).u.c.center,pos));
 			} else {
-				if (context->state != MOD_SELECTED_PT) return C_CONTINUE;
-				if (curveInx < 0 || curveInx > 2) return C_CONTINUE;
+				if (context->state != MOD_SELECTED_PT) { return C_CONTINUE; }
+				if (curveInx < 0 || curveInx > 2) { return C_CONTINUE; }
 				wSetCursor(mainD.d,wCursorNone);
 				p0 = context->p0;
 				p1 = context->p1;
@@ -2289,8 +2446,9 @@ STATUS_T DrawGeomModify(
 						if ( fabs(d) >= 0.01 ) {
 							d2 = sqrt( d0*d0 + d*d )/2.0;
 							r = d2*d2*2.0/d;
-							if ( fabs(r) > 1000.0 )
+							if ( fabs(r) > 1000.0 ) {
 								r = ((r > 0)? 1 : -1) *1000.0;
+							}
 						} else {
 							r = ((r > 0) ? 1 : -1 ) *1000.0;
 						}
@@ -2304,10 +2462,12 @@ STATUS_T DrawGeomModify(
 						context->radius = tempSegs(0).u.c.radius = fabs(r);
 						Translate( &pc, posx, a0, fabs(r)-fabs(d) );
 						context->pc = tempSegs(0).u.c.center = pc;
-					    tempSegs(0).u.c.a0 = FindAngle(pc,p0);
-					    context->arc_angle = tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(pc,p1)-FindAngle(pc,p0));
-					    PointOnCircle(&pm,pc,context->radius,tempSegs(0).u.c.a0+(tempSegs(0).u.c.a1/2.0));
-					    context->pm = pm;
+						tempSegs(0).u.c.a0 = FindAngle(pc,p0);
+						context->arc_angle = tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(pc,
+						                     p1)-FindAngle(pc,p0));
+						PointOnCircle(&pm,pc,context->radius,
+						              tempSegs(0).u.c.a0+(tempSegs(0).u.c.a1/2.0));
+						context->pm = pm;
 					} else {
 						//Change radius using chord
 						p0 = context->p0;
@@ -2322,8 +2482,9 @@ STATUS_T DrawGeomModify(
 						if ( fabs(pos2.x) >= 0.01 ) {
 							d2 = sqrt( d0*d0 + pos2.x*pos2.x )/2.0;
 							r = d2*d2*2.0/pos2.x;
-							if ( fabs(r) > 1000.0 )
+							if ( fabs(r) > 1000.0 ) {
 								r = ((r > 0) ? 1 :  -1 ) *1000.0;
+							}
 						} else {
 							r = ((r > 0) ? 1 :  -1 ) *1000.0;
 						}
@@ -2351,8 +2512,9 @@ STATUS_T DrawGeomModify(
 						context->disp = pos2.x;
 					}
 				}
-				if (tempSegs(0).u.c.a1 < 360.0)
+				if (tempSegs(0).u.c.a1 < 360.0) {
 					CreateCurveAnchors(curveInx,pm,pc,p0,p1);
+				}
 			}
 			break;
 		case SEG_POLY:
@@ -2361,7 +2523,8 @@ STATUS_T DrawGeomModify(
 			if (!corner_mode) {
 				/* Constrain movement to be perpendicular */
 				d = FindDistance(start_pos, pos);
-				line_angle = NormalizeAngle(FindAngle(points(inx_line).pt,points(inx_line==3?0:inx_line+1).pt));
+				line_angle = NormalizeAngle(FindAngle(points(inx_line).pt,
+				                                      points(inx_line==3?0:inx_line+1).pt));
 				a = FindAngle(pos,start_pos);
 				Translate( &pos, start_pos, line_angle, - d*cos(D2R(line_angle-a)));
 			}
@@ -2375,19 +2538,23 @@ STATUS_T DrawGeomModify(
 			d = FindDistance(points(orig_pnt).pt,points(polyInx).pt);
 			a = FindAngle(points(orig_pnt).pt,points(polyInx).pt);
 			prior_angle = FindAngle(points(orig_pnt).pt,points(prior_pnt).pt);
-			Translate( &points(prior_pnt).pt, points(orig_pnt).pt, prior_angle, d*cos(D2R(prior_angle-a)));
+			Translate( &points(prior_pnt).pt, points(orig_pnt).pt, prior_angle,
+			           d*cos(D2R(prior_angle-a)));
 			next_angle = FindAngle(points(orig_pnt).pt,points(next_pnt).pt);
-			Translate( &points(next_pnt).pt, points(orig_pnt).pt, next_angle, d*cos(D2R(next_angle-a)));
+			Translate( &points(next_pnt).pt, points(orig_pnt).pt, next_angle,
+			           d*cos(D2R(next_angle-a)));
 			if (!corner_mode) {
 				pos.x = (points(inx_line).pt.x + points(inx_line==0?3:inx_line-1).pt.x)/2;
 				pos.y = (points(inx_line).pt.y + points(inx_line==0?3:inx_line-1).pt.y)/2;
 				DYNARR_SET(trkSeg_t,anchors_da,5);
-				DrawArrowHeads( &anchors(0), pos, FindAngle(points(inx_line).pt,points(inx_line==0?3:inx_line-1).pt)+90, TRUE, wDrawColorRed );
+				DrawArrowHeads( &anchors(0), pos, FindAngle(points(inx_line).pt,
+				                points(inx_line==0?3:inx_line-1).pt)+90, TRUE, wDrawColorRed );
 				InfoMessage( _("Drag to Move Edge"));
 			} else {
 				pos = points(polyInx).pt;
 				DYNARR_SET(trkSeg_t,anchors_da,5);
-				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,points(inx_origin).pt), TRUE, wDrawColorRed );
+				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,
+				                points(inx_origin).pt), TRUE, wDrawColorRed );
 				InfoMessage( _("Drag to Move Corner Point"));
 			}
 			context->p0 = points(0).pt;
@@ -2398,17 +2565,19 @@ STATUS_T DrawGeomModify(
 		}
 		return C_CONTINUE;
 	case C_UP:
-		if (context->rotate_state) return DrawGeomOriginMove(action, pos, context);
+		if (context->rotate_state) { return DrawGeomOriginMove(action, pos, context); }
 		if (polyMode) {
 			int rc;
 			rc = DrawGeomPolyModify(action,pos,context);
-			if (context->prev_inx != -1)
+			if (context->prev_inx != -1) {
 				context->state = MOD_AFTER_PT;
+			}
 			return rc;
 		}
 		wSetCursor(mainD.d,defaultCursor);
-		if (segInx == -1)
+		if (segInx == -1) {
 			return C_CONTINUE;
+		}
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
 		case SEG_STRLIN:
@@ -2423,10 +2592,12 @@ STATUS_T DrawGeomModify(
 			break;
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
-			if ( (tempSegs(0).type == SEG_FILCRCL) || (tempSegs(0).u.c.a1 == 360.0 || tempSegs(0).u.c.a1 == 0.0) ) {
+			if ( (tempSegs(0).type == SEG_FILCRCL) || (tempSegs(0).u.c.a1 == 360.0
+			                || tempSegs(0).u.c.a1 == 0.0) ) {
 				context->radius = fabs(tempSegs(0).u.c.radius);
 				context->arc_angle = 360.0;
-				CreateCircleAnchor(FALSE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
+				CreateCircleAnchor(FALSE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,
+				                   FindAngle(tempSegs(0).u.c.center,pos));
 			} else {
 				p0 = context->p0;
 				p1 = context->p1;
@@ -2444,10 +2615,12 @@ STATUS_T DrawGeomModify(
 		case SEG_POLY:
 		case SEG_FILPOLY:
 			CreateBoxAnchors(-1,tempSegs(0).u.p.pts);
-			context->width = FindDistance(tempSegs(0).u.p.pts[0].pt,tempSegs(0).u.p.pts[1].pt);
-			context->height = FindDistance(tempSegs(0).u.p.pts[1].pt,tempSegs(0).u.p.pts[2].pt);
+			context->width = FindDistance(tempSegs(0).u.p.pts[0].pt,
+			                              tempSegs(0).u.p.pts[1].pt);
+			context->height = FindDistance(tempSegs(0).u.p.pts[1].pt,
+			                               tempSegs(0).u.p.pts[2].pt);
 			context->last_inx = polyInx;
-			if (corner_mode) context->last_inx +=5;
+			if (corner_mode) { context->last_inx +=5; }
 			break;
 		default:
 			;
@@ -2459,122 +2632,134 @@ STATUS_T DrawGeomModify(
 		InfoMessage("Enter/Space to Accept, ESC to Reject");
 		return C_CONTINUE;
 	case C_UPDATE:
-		if (context->rotate_state) return DrawGeomOriginMove(action, pos, context);
+		if (context->rotate_state) { return DrawGeomOriginMove(action, pos, context); }
 
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		if (polyMode) { return DrawGeomPolyModify(action,pos,context); }
 		if (context->state == MOD_AFTER_PT) {
 			switch (tempSegs(0).type) {
-				case SEG_TBLEDGE:
-				case SEG_STRLIN:
-				case SEG_DIMLIN:
-				case SEG_BENCH:
-					context->abs_angle = NormalizeAngle(context->abs_angle);
-					Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->abs_angle,context->length);
-					CreateLineAnchors(context->last_inx,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]);
-					context->p0 = tempSegs(0).u.l.pos[0];
-					context->p1 = tempSegs(0).u.l.pos[1];
-					break;
-				case SEG_CRVLIN:
-				case SEG_FILCRCL:
-					if (tempSegs(0).u.c.a1 == 360.0 || tempSegs(0).u.c.a1 == 0.0) {
-						tempSegs(0).u.c.a1 = 360.0;
-						tempSegs(0).u.c.radius = context->radius;
-						Translate(&p0,tempSegs(0).u.c.center,tempSegs(0).u.c.a0,tempSegs(0).u.c.radius);
-						context->p0 = p0;
-						context->p1 = p0;
-						context->pm = p0;
-						context->pc = tempSegs(0).u.c.center;
-						break;
-					}
-					if (context->radius < 0) { //swap ends
-						context->radius = fabs(context->radius);
-						p1 = context->p0;
-						p0 = context->p1;
-						a = FindAngle(context->pc,context->pm);
-						Translate(&pm,context->pm,a+180,2*context->disp);
-						Translate(&pc,pm,a,context->radius);
-						context->pm = pm;
-						context->pc = pc;
-						context->p0 = p0;
-						context->p1 = p1;
-					} else {
-						pm = context->pm;
-						pc = context->pc;
-						p0 = context->p0;
-						p1 = context->p1;
-					}
-					if (context->last_inx == 0) {
-						p1 = context->p1;
-						pc = context->pc;
-						a = FindAngle(p1,pc);
-						Translate(&pc,p1,a,context->radius);
-						context->pc = pc;
-						PointOnCircle( &p0, context->pc, context->radius, NormalizeAngle(a+180-context->arc_angle) );
-						context->p0 = p0;
-						PointOnCircle( &pm, context->pc, context->radius, NormalizeAngle(a+180-(context->arc_angle/2)));
-						context->pm = pm;
-					} else if (context->last_inx == 1) {
-						p0 = context->p0;
-						pc = context->pc;
-						a = FindAngle(p0,pc);
-						Translate(&pc,p0,a,context->radius);
-						context->pc = pc;
-						PointOnCircle( &p1, context->pc, context->radius, NormalizeAngle(a+180+context->arc_angle) );
-						context->p1 = p1;
-						PointOnCircle( &pm, context->pc, context->radius, NormalizeAngle(a+180+(context->arc_angle/2)));
-						context->pm = pm;
-					} else {   // Middle if neither
-						a = FindAngle(context->pm,context->pc);
-						Translate(&pc,context->pm,a,context->radius);
-						context->pc = pc;
-						PointOnCircle( &p1, context->pc, context->radius, NormalizeAngle(FindAngle(context->pc,context->pm)+(context->arc_angle/2)) );
-						PointOnCircle( &p0, context->pc, context->radius, NormalizeAngle(FindAngle(context->pc,context->pm)-(context->arc_angle/2)) );
-						context->p1 = p1;
-						context->p0 = p0;
-					}
-					a = FindAngle(p1,p0);
-					Rotate(&pm,p1,-a);
-					context->disp = pm.x-p1.x;
-					tempSegs(0).u.c.center = context->pc;
-					tempSegs(0).u.c.a0 = FindAngle(context->pc,context->p0);
-					tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(context->pc,context->p1)-tempSegs(0).u.c.a0);
-					if (tempSegs(0).u.c.a1 == 0.0) tempSegs(0).u.c.a1 = 360.0;
+			case SEG_TBLEDGE:
+			case SEG_STRLIN:
+			case SEG_DIMLIN:
+			case SEG_BENCH:
+				context->abs_angle = NormalizeAngle(context->abs_angle);
+				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->abs_angle,
+				          context->length);
+				CreateLineAnchors(context->last_inx,tempSegs(0).u.l.pos[0],
+				                  tempSegs(0).u.l.pos[1]);
+				context->p0 = tempSegs(0).u.l.pos[0];
+				context->p1 = tempSegs(0).u.l.pos[1];
+				break;
+			case SEG_CRVLIN:
+			case SEG_FILCRCL:
+				if (tempSegs(0).u.c.a1 == 360.0 || tempSegs(0).u.c.a1 == 0.0) {
+					tempSegs(0).u.c.a1 = 360.0;
 					tempSegs(0).u.c.radius = context->radius;
-					CreateCurveAnchors(context->last_inx,context->pm,context->pc,context->p0,context->p1);
+					Translate(&p0,tempSegs(0).u.c.center,tempSegs(0).u.c.a0,tempSegs(0).u.c.radius);
+					context->p0 = p0;
+					context->p1 = p0;
+					context->pm = p0;
+					context->pc = tempSegs(0).u.c.center;
 					break;
-				case SEG_POLY:
-				case SEG_FILPOLY:
-					a = NormalizeAngle(FindAngle(points(0).pt,points(3).pt));
-					Translate( &points(3).pt, points(0).pt, a, context->height);
-					Translate( &points(2).pt, points(1).pt, a, context->height);
-					a = NormalizeAngle(FindAngle(points(0).pt,points(1).pt));;
-					Translate( &points(1).pt, points(0).pt, a, context->width);
-					Translate( &points(2).pt, points(3).pt, a, context->width);
-					CreateBoxAnchors(context->last_inx,&points(0));
-					break;
-				default:
-					break;
+				}
+				if (context->radius < 0) { //swap ends
+					context->radius = fabs(context->radius);
+					p1 = context->p0;
+					p0 = context->p1;
+					a = FindAngle(context->pc,context->pm);
+					Translate(&pm,context->pm,a+180,2*context->disp);
+					Translate(&pc,pm,a,context->radius);
+					context->pm = pm;
+					context->pc = pc;
+					context->p0 = p0;
+					context->p1 = p1;
+				} else {
+					pm = context->pm;
+					pc = context->pc;
+					p0 = context->p0;
+					p1 = context->p1;
+				}
+				if (context->last_inx == 0) {
+					p1 = context->p1;
+					pc = context->pc;
+					a = FindAngle(p1,pc);
+					Translate(&pc,p1,a,context->radius);
+					context->pc = pc;
+					PointOnCircle( &p0, context->pc, context->radius,
+					               NormalizeAngle(a+180-context->arc_angle) );
+					context->p0 = p0;
+					PointOnCircle( &pm, context->pc, context->radius,
+					               NormalizeAngle(a+180-(context->arc_angle/2)));
+					context->pm = pm;
+				} else if (context->last_inx == 1) {
+					p0 = context->p0;
+					pc = context->pc;
+					a = FindAngle(p0,pc);
+					Translate(&pc,p0,a,context->radius);
+					context->pc = pc;
+					PointOnCircle( &p1, context->pc, context->radius,
+					               NormalizeAngle(a+180+context->arc_angle) );
+					context->p1 = p1;
+					PointOnCircle( &pm, context->pc, context->radius,
+					               NormalizeAngle(a+180+(context->arc_angle/2)));
+					context->pm = pm;
+				} else {   // Middle if neither
+					a = FindAngle(context->pm,context->pc);
+					Translate(&pc,context->pm,a,context->radius);
+					context->pc = pc;
+					PointOnCircle( &p1, context->pc, context->radius,
+					               NormalizeAngle(FindAngle(context->pc,context->pm)+(context->arc_angle/2)) );
+					PointOnCircle( &p0, context->pc, context->radius,
+					               NormalizeAngle(FindAngle(context->pc,context->pm)-(context->arc_angle/2)) );
+					context->p1 = p1;
+					context->p0 = p0;
+				}
+				a = FindAngle(p1,p0);
+				Rotate(&pm,p1,-a);
+				context->disp = pm.x-p1.x;
+				tempSegs(0).u.c.center = context->pc;
+				tempSegs(0).u.c.a0 = FindAngle(context->pc,context->p0);
+				tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(context->pc,
+				                                    context->p1)-tempSegs(0).u.c.a0);
+				if (tempSegs(0).u.c.a1 == 0.0) { tempSegs(0).u.c.a1 = 360.0; }
+				tempSegs(0).u.c.radius = context->radius;
+				CreateCurveAnchors(context->last_inx,context->pm,context->pc,context->p0,
+				                   context->p1);
+				break;
+			case SEG_POLY:
+			case SEG_FILPOLY:
+				a = NormalizeAngle(FindAngle(points(0).pt,points(3).pt));
+				Translate( &points(3).pt, points(0).pt, a, context->height);
+				Translate( &points(2).pt, points(1).pt, a, context->height);
+				a = NormalizeAngle(FindAngle(points(0).pt,points(1).pt));;
+				Translate( &points(1).pt, points(0).pt, a, context->width);
+				Translate( &points(2).pt, points(3).pt, a, context->width);
+				CreateBoxAnchors(context->last_inx,&points(0));
+				break;
+			default:
+				break;
 			}
 		}
 		break;
 	case wActionExtKey:
-		if ((((action>>8)&0xFF)== wAccelKey_Del) && polyMode) //Convert Del key to be BackSpace in PolyModify
+		if ((((action>>8)&0xFF)== wAccelKey_Del)
+		    && polyMode) { //Convert Del key to be BackSpace in PolyModify
 			return DrawGeomPolyModify(C_TEXT+((int)(127<<8)),pos,context);
+		}
 		break;
 	case C_TEXT:
-		if (context->rotate_state) DrawGeomOriginMove(action, pos, context);
+		if (context->rotate_state) { DrawGeomOriginMove(action, pos, context); }
 
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		if (polyMode) { return DrawGeomPolyModify(action,pos,context); }
 
 		if (action>>8 == 'o') {
 			MenuMode(I2VP(1));
 		}
 
-		if (action>>8 != 32 && action>>8 != 13) return C_CONTINUE;
-		/* no break */
+		if (action>>8 != 32 && action>>8 != 13) { return C_CONTINUE; }
+	/* no break */
 	case C_CONFIRM:
 		return C_CONTINUE;
-		/* no break*/
+	/* no break*/
 	case C_OK:
 	case C_FINISH:
 		UndoStart("Modify Draw", "OK");
@@ -2583,8 +2768,10 @@ STATUS_T DrawGeomModify(
 			DrawGeomPolyModify(action,pos,context);
 			context->segPtr[segInx].type = context->type;
 			context->segPtr[segInx].u.p.polyType = context->subtype;
-			if (context->segPtr[segInx].type == SEG_FILPOLY)
-				context->segPtr[segInx].u.p.polyType = FREEFORM;  //Ensure Filled is closed
+			if (context->segPtr[segInx].type == SEG_FILPOLY) {
+				context->segPtr[segInx].u.p.polyType =
+				        FREEFORM;        //Ensure Filled is closed
+			}
 			context->state = MOD_NONE;
 			DrawNewTrack( context->trk );
 			return C_TERMINATE;
@@ -2595,45 +2782,46 @@ STATUS_T DrawGeomModify(
 		context->rot_moved = FALSE;
 		context->angle = 0.0;
 		switch (tempSegs(0).type) {
-			case SEG_TBLEDGE:
-			case SEG_STRLIN:
-			case SEG_DIMLIN:
-			case SEG_BENCH:
-				for (int i=0;i<2;i++) {
-					pos = i==0?context->p0:context->p1;
-					pos.x -= context->rot_center.x;
-					pos.y -= context->rot_center.y;
-					context->segPtr[segInx].u.l.pos[i] = pos;
-				}
-				break;
-			case SEG_CRVLIN:
-			case SEG_FILCRCL:
-				pc = context->pc;
-				pc.x -= context->rot_center.x;
-				pc.y -= context->rot_center.y;
-				context->segPtr[segInx].u.c.center = pc;
-				p0 = context->p0;
-				p0.x -= context->rot_center.x;
-				p0.y -= context->rot_center.y;
-				p1 = context->p1;
-				p1.x -= context->rot_center.x;
-				p1.y -= context->rot_center.y;
-				context->segPtr[segInx].u.c.a0 = FindAngle(pc,p0);
-				context->segPtr[segInx].u.c.a1 = NormalizeAngle(FindAngle(pc,p1)-FindAngle(pc,p0));
-				if (context->segPtr[segInx].u.c.a1 == 0) context->segPtr[segInx].u.c.a1 = 360.0;
-				context->segPtr[segInx].u.c.radius = context->radius;
-				break;
-			case SEG_POLY:
-			case SEG_FILPOLY:
-				for (int i=0;i<4;i++) {
-					pos = points(i).pt;
-					pos.x -= context->rot_center.x;
-					pos.y -= context->rot_center.y;
-					context->segPtr[segInx].u.p.pts[i].pt = pos;
-				}
-				break;
-			default:
-				break;
+		case SEG_TBLEDGE:
+		case SEG_STRLIN:
+		case SEG_DIMLIN:
+		case SEG_BENCH:
+			for (int i=0; i<2; i++) {
+				pos = i==0?context->p0:context->p1;
+				pos.x -= context->rot_center.x;
+				pos.y -= context->rot_center.y;
+				context->segPtr[segInx].u.l.pos[i] = pos;
+			}
+			break;
+		case SEG_CRVLIN:
+		case SEG_FILCRCL:
+			pc = context->pc;
+			pc.x -= context->rot_center.x;
+			pc.y -= context->rot_center.y;
+			context->segPtr[segInx].u.c.center = pc;
+			p0 = context->p0;
+			p0.x -= context->rot_center.x;
+			p0.y -= context->rot_center.y;
+			p1 = context->p1;
+			p1.x -= context->rot_center.x;
+			p1.y -= context->rot_center.y;
+			context->segPtr[segInx].u.c.a0 = FindAngle(pc,p0);
+			context->segPtr[segInx].u.c.a1 = NormalizeAngle(FindAngle(pc,p1)-FindAngle(pc,
+			                                 p0));
+			if (context->segPtr[segInx].u.c.a1 == 0) { context->segPtr[segInx].u.c.a1 = 360.0; }
+			context->segPtr[segInx].u.c.radius = context->radius;
+			break;
+		case SEG_POLY:
+		case SEG_FILPOLY:
+			for (int i=0; i<4; i++) {
+				pos = points(i).pt;
+				pos.x -= context->rot_center.x;
+				pos.y -= context->rot_center.y;
+				context->segPtr[segInx].u.p.pts[i].pt = pos;
+			}
+			break;
+		default:
+			break;
 		}
 		context->state = MOD_NONE;
 		context->rotate_state = FALSE;
@@ -2642,10 +2830,12 @@ STATUS_T DrawGeomModify(
 		DrawNewTrack( context->trk );
 		return C_TERMINATE;
 	case C_REDRAW:
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
-		if (context->state == MOD_NONE) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack);
-		DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		if (polyMode) { return DrawGeomPolyModify(action,pos,context); }
+		if (context->state == MOD_NONE) { return C_CONTINUE; }
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
+		          wDrawColorBlack);
+		DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+		          wDrawColorBlack );
 		break;
 	case C_CANCEL:
 		context->state = MOD_NONE;

@@ -34,9 +34,9 @@ struct carItem_t;
 typedef struct carItem_t carItem_t;
 typedef carItem_t * carItem_p;
 typedef struct {
-		coOrd pos;
-		ANGLE_T angle;
-		} vector_t;
+	coOrd pos;
+	ANGLE_T angle;
+} vector_t;
 
 extern carItem_p currCarItemPtr;
 extern wControl_p newCarControls[2];
@@ -58,7 +58,8 @@ BOOL_T CarItemIsLocoMaster( carItem_p );
 void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
-void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *, BOOL_T, track_p );
+void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *,
+                  BOOL_T, track_p );
 
 BOOL_T WriteCars( FILE * );
 void ClearCars( void );
@@ -68,8 +69,10 @@ void AttachTrains( void );
 
 BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
 BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
-enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
-enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+enum paramFileState	GetCarPartCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
+enum paramFileState	GetCarProtoCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );

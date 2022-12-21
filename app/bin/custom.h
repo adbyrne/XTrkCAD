@@ -1,5 +1,5 @@
 /** \file custom.h
- * 
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD

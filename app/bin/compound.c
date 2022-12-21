@@ -51,7 +51,8 @@
  */
 EXPORT PATHPTR_T GetPaths( track_p trk )
 {
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK,
+	                                  extraDataCompound_t );
 	if ( GetTrkType(trk) == T_STRUCTURE && xx->paths != NULL ) {
 		LogPrintf( "GetPaths( STRUCTURE, paths!=NULL )\n" );
 	}
@@ -97,9 +98,11 @@ EXPORT void SetPaths( track_p trk, PATHPTR_T paths )
 		LogPrintf( "SetPaths( TURNOUT, paths==NULL )\n" );
 	}
 
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK, extraDataCompound_t );
-	if ( xx->paths )
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_NOTRACK,
+	                                  extraDataCompound_t );
+	if ( xx->paths ) {
 		MyFree( xx->paths );
+	}
 	if ( paths == NULL ) {
 		xx->paths = NULL;
 	} else {
@@ -122,13 +125,15 @@ EXPORT void SetPaths( track_p trk, PATHPTR_T paths )
  */
 EXPORT PATHPTR_T GetCurrPath( track_p trk )
 {
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
-	if ( xx->currPath )
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT,
+	                                  extraDataCompound_t );
+	if ( xx->currPath ) {
 		return xx->currPath;
+	}
 	PATHPTR_T path = GetPaths( trk );
 	for ( wIndex_t position = xx->currPathIndex;
-		position > 0 && path[0];
-		path+=2, position-- ) {
+	      position > 0 && path[0];
+	      path+=2, position-- ) {
 		for ( path += strlen( (char*)path ); path[0] || path[1]; path++ );
 	}
 	if ( !path[0] ) {
@@ -142,18 +147,22 @@ EXPORT PATHPTR_T GetCurrPath( track_p trk )
 
 EXPORT long GetCurrPathIndex( track_p trk )
 {
-	if ( GetTrkType( trk ) != T_TURNOUT )
+	if ( GetTrkType( trk ) != T_TURNOUT ) {
 		return 0;
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
+	}
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT,
+	                                  extraDataCompound_t );
 	return xx->currPathIndex;
 }
 
 
 EXPORT void SetCurrPathIndex( track_p trk, long position )
 {
-	if ( GetTrkType( trk ) != T_TURNOUT )
+	if ( GetTrkType( trk ) != T_TURNOUT ) {
 		return;
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT, extraDataCompound_t );
+	}
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA( trk, T_TURNOUT,
+	                                  extraDataCompound_t );
 	xx->currPathIndex = position;
 	xx->currPath = NULL;
 }
@@ -174,7 +183,7 @@ PATHPTR_T GetParamPaths( turnoutInfo_t * to )
  *
  * Set paths for a Turnout Parameter 'to'
  * Used when creating a new turnout def'n
- * 
+ *
  * \param to IN
  * \param paths IN
  */
@@ -196,12 +205,12 @@ void SetParamPaths( turnoutInfo_t * to, PATHPTR_T paths )
  */
 
 EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
-		FILE * f,
-		PATHPTR_T paths,
-		wIndex_t segCnt,
-		trkSeg_p segs,
-		EPINX_T endPtCnt,
-		trkEndPt_p endPts )
+        FILE * f,
+        PATHPTR_T paths,
+        wIndex_t segCnt,
+        trkSeg_p segs,
+        EPINX_T endPtCnt,
+        trkEndPt_p endPts )
 {
 	int i;
 	PATHPTR_T pp;
@@ -210,15 +219,16 @@ EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
 	if ( paths ) {
 		for ( pp=paths; *pp; pp+=2 ) {
 			rc &= fprintf( f, "\tP \"%s\"", pp )>0;
-			for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ )
+			for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ ) {
 				rc &= fprintf( f, " %d", pp[0] )>0;
+			}
 			rc &= fprintf( f, "\n" )>0;
 		}
 	}
 	for ( i=0; i<endPtCnt; i++ ) {
 		trkEndPt_p epp = EndPtIndex( endPts, i );
 		rc &= fprintf( f, "\tE %0.6f %0.6f %0.6f\n",
-			GetEndPtPos(epp).x, GetEndPtPos(epp).y, GetEndPtAngle(epp) ) > 0;
+		               GetEndPtPos(epp).x, GetEndPtPos(epp).y, GetEndPtAngle(epp) ) > 0;
 	}
 	rc &= WriteSegs( f, segCnt, segs )>0;
 	return rc;
@@ -226,13 +236,13 @@ EXPORT BOOL_T WriteCompoundPathsEndPtsSegs(
 
 
 EXPORT void ParseCompoundTitle(
-		char * title,
-		char * * manufP,
-		int * manufL,
-		char * * nameP,
-		int * nameL,
-		char * * partnoP,
-		int * partnoL )
+        char * title,
+        char * * manufP,
+        int * manufL,
+        char * * nameP,
+        int * nameL,
+        char * * partnoP,
+        int * partnoL )
 {
 	char * cp1, *cp2;
 	size_t len;
@@ -263,8 +273,8 @@ EXPORT long listLabels = 7;
 EXPORT long layoutLabels = 1;
 
 EXPORT void FormatCompoundTitle(
-		long format,
-		char * title )
+        long format,
+        char * title )
 {
 	char *cp1, *cp2=NULL, *cq;
 	size_t len;
@@ -282,8 +292,9 @@ EXPORT void FormatCompoundTitle(
 		cq += strlen(cq);
 	}
 	cp1 = strchr( title, '\t' );
-	if ( cp1 != NULL )
+	if ( cp1 != NULL ) {
 		cp2 = strchr( cp1+1, '\t' );
+	}
 	if (cp2 == NULL) {
 		if ( (format&LABEL_TABBED) ) {
 			*cq++ = '\t';
@@ -344,7 +355,7 @@ EXPORT void FormatCompoundTitle(
 
 
 void ComputeCompoundBoundingBox(
-		track_p trk )
+        track_p trk )
 {
 	struct extraDataCompound_t *xx;
 	coOrd hi, lo;
@@ -364,32 +375,33 @@ turnoutInfo_t * FindCompound( long type, char * scale, char * title )
 	wIndex_t inx;
 	SCALEINX_T scaleInx;
 
-	if ( scale )
+	if ( scale ) {
 		scaleInx = LookupScale( scale );
-	else
+	} else {
 		scaleInx = -1;
+	}
 	if ( type&FIND_TURNOUT )
-	for (inx=0; inx<turnoutInfo_da.cnt; inx++) {
-		to = turnoutInfo(inx);
-		if ( IsParamValid(to->paramFileIndex) &&
-			 to->segCnt > 0 &&
-			 (scaleInx == -1 || to->scaleInx == scaleInx ) &&
-			 to->segCnt != 0 &&
-			 strcmp( to->title, title ) == 0 ) {
-			return to;
+		for (inx=0; inx<turnoutInfo_da.cnt; inx++) {
+			to = turnoutInfo(inx);
+			if ( IsParamValid(to->paramFileIndex) &&
+			     to->segCnt > 0 &&
+			     (scaleInx == -1 || to->scaleInx == scaleInx ) &&
+			     to->segCnt != 0 &&
+			     strcmp( to->title, title ) == 0 ) {
+				return to;
+			}
 		}
-	}
 	if ( type&FIND_STRUCT )
-	for (inx=0; inx<structureInfo_da.cnt; inx++) {
-		to = structureInfo(inx);
-		if ( IsParamValid(to->paramFileIndex) &&
-			 to->segCnt > 0 &&
-			 (scaleInx == -1 || to->scaleInx == scaleInx ) &&
-			 to->segCnt != 0 &&
-			 strcmp( to->title, title ) == 0 ) {
-			return to;
+		for (inx=0; inx<structureInfo_da.cnt; inx++) {
+			to = structureInfo(inx);
+			if ( IsParamValid(to->paramFileIndex) &&
+			     to->segCnt > 0 &&
+			     (scaleInx == -1 || to->scaleInx == scaleInx ) &&
+			     to->segCnt != 0 &&
+			     strcmp( to->title, title ) == 0 ) {
+				return to;
+			}
 		}
-	}
 	return NULL;
 }
 
@@ -407,13 +419,17 @@ EXPORT void CompoundClearDemoDefns( void )
 
 	for (inx=0; inx<turnoutInfo_da.cnt; inx++) {
 		to = turnoutInfo(inx);
-		if ( to->paramFileIndex == PARAM_CUSTOM && strcasecmp( GetScaleName(to->scaleInx), "DEMO" ) == 0 )
+		if ( to->paramFileIndex == PARAM_CUSTOM
+		     && strcasecmp( GetScaleName(to->scaleInx), "DEMO" ) == 0 ) {
 			to->segCnt = 0;
+		}
 	}
 	for (inx=0; inx<structureInfo_da.cnt; inx++) {
 		to = structureInfo(inx);
-		if ( to->paramFileIndex == PARAM_CUSTOM	 && strcasecmp( GetScaleName(to->scaleInx), "DEMO" ) == 0 )
+		if ( to->paramFileIndex == PARAM_CUSTOM
+		     && strcasecmp( GetScaleName(to->scaleInx), "DEMO" ) == 0 ) {
 			to->segCnt = 0;
+		}
 	}
 }
 
@@ -424,13 +440,14 @@ EXPORT void CompoundClearDemoDefns( void )
  */
 
 void SetDescriptionOrig(
-		track_p trk )
+        track_p trk )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	int i, j;
 	coOrd p0, p1;
 
-	for (i=0,j=-1;i<xx->segCnt;i++) {
+	for (i=0,j=-1; i<xx->segCnt; i++) {
 		if ( IsSegTrack( &xx->segs[i] ) ) {
 			if (j == -1) {
 				j = i;
@@ -443,8 +460,8 @@ void SetDescriptionOrig(
 	if (j != -1 && xx->segs[j].type == SEG_CRVTRK) {
 		REORIGIN( p0, xx->segs[j].u.c.center, xx->angle, xx->orig )
 		Translate( &p0, p0,
-				xx->segs[j].u.c.a0 + xx->segs[j].u.c.a1/2.0 + xx->angle,
-				fabs(xx->segs[j].u.c.radius) );
+		           xx->segs[j].u.c.a0 + xx->segs[j].u.c.a1/2.0 + xx->angle,
+		           fabs(xx->segs[j].u.c.radius) );
 
 	} else {
 		GetBoundingBox( trk, (&p0), (&p1) );
@@ -458,31 +475,38 @@ void SetDescriptionOrig(
 
 
 void DrawCompoundDescription(
-		track_p trk,
-		drawCmd_p d,
-		wDrawColor color )
+        track_p trk,
+        drawCmd_p d,
+        wDrawColor color )
 {
 	wFont_p fp;
 	coOrd p1;
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	char * desc;
 	long layoutLabelsOption = layoutLabels;
 
-	if (layoutLabels == 0)
+	if (layoutLabels == 0) {
 		return;
-	if ((labelEnable&LABELENABLE_TRKDESC)==0)
+	}
+	if ((labelEnable&LABELENABLE_TRKDESC)==0) {
 		return;
-	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) )
+	}
+	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) ) {
 		return;
+	}
 	if ( xx->special == TOpier ) {
 		desc = xx->u.pier.name;
 	} else {
-		if ( xx->flipped )
+		if ( xx->flipped ) {
 			layoutLabelsOption |= LABEL_FLIPPED;
-		if ( xx->ungrouped )
+		}
+		if ( xx->ungrouped ) {
 			layoutLabelsOption |= LABEL_UNGROUPED;
-		if ( xx->split )
+		}
+		if ( xx->split ) {
 			layoutLabelsOption |= LABEL_SPLIT;
+		}
 		FormatCompoundTitle( layoutLabelsOption, xtitle(xx) );
 		desc = message;
 	}
@@ -497,45 +521,51 @@ void DrawCompoundDescription(
 		DrawLine( d, p0, p1, 0, color );
 	}
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
-	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_NONE, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
+	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_NONE, d, p1, desc, fp,
+	                 (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
 
 
 DIST_T CompoundDescriptionDistance(
-		coOrd pos,
-		track_p trk,
-		coOrd * dpos,
-		BOOL_T show_hidden,
-		BOOL_T * hidden)
+        coOrd pos,
+        track_p trk,
+        coOrd * dpos,
+        BOOL_T show_hidden,
+        BOOL_T * hidden)
 {
 	coOrd p1;
-	if (GetTrkType(trk) != T_TURNOUT && GetTrkType(trk) != T_STRUCTURE)
+	if (GetTrkType(trk) != T_TURNOUT && GetTrkType(trk) != T_STRUCTURE) {
 		return DIST_INF;
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
-	if ( ((GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) && !show_hidden)
+	}
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
+	if ( ((GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) && !show_hidden) {
 		return DIST_INF;
+	}
 	p1 = xx->descriptionOrig;
 	coOrd offset = xx->descriptionOff;
-	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) offset = zero;
+	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) { offset = zero; }
 	Rotate( &p1, zero, xx->angle );
 	p1.x += xx->orig.x + offset.x;
 	p1.y += xx->orig.y + offset.y;
-	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
+	if (hidden) { *hidden = (GetTrkBits( trk ) & TB_HIDEDESC); }
 	*dpos = p1;
 
 	coOrd tpos = pos;
-	if (DistanceCompound(trk,&tpos)<FindDistance( p1, pos ))
+	if (DistanceCompound(trk,&tpos)<FindDistance( p1, pos )) {
 		return DistanceCompound(trk,&pos);
+	}
 	return FindDistance( p1, pos );
 }
 
 
 STATUS_T CompoundDescriptionMove(
-		track_p trk,
-		wAction_t action,
-		coOrd pos )
+        track_p trk,
+        wAction_t action,
+        coOrd pos )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	static coOrd p0, p1;
 	static BOOL_T editMode;
 	wDrawColor color;
@@ -583,9 +613,9 @@ STATUS_T CompoundDescriptionMove(
  */
 
 EXPORT void SetSegInxEP(
-		signed char * segChar,
-		int segInx,
-		EPINX_T segEP )
+        signed char * segChar,
+        int segInx,
+        EPINX_T segEP )
 {
 	if (segEP == 1) {
 		* segChar = -(segInx+1);
@@ -596,9 +626,9 @@ EXPORT void SetSegInxEP(
 }
 
 EXPORT void GetSegInxEP(
-		signed char segChar,
-		int * segInx,
-		EPINX_T * segEP )
+        signed char segChar,
+        int * segInx,
+        EPINX_T * segEP )
 {
 	int inx;
 	inx = segChar;
@@ -613,10 +643,11 @@ EXPORT void GetSegInxEP(
 
 
 DIST_T DistanceCompound(
-		track_p t,
-		coOrd * p )
+        track_p t,
+        coOrd * p )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK,
+	                                 extraDataCompound_t);
 	EPINX_T ep;
 	DIST_T d0;
 //	DIST_T d1;
@@ -665,64 +696,67 @@ DIST_T DistanceCompound(
 
 
 static struct {
-		coOrd endPt[4];
-		ANGLE_T endAngle[4];
-		DIST_T endRadius[4];
-		coOrd endCenter[4];
-		FLOAT_T elev[4];
-		coOrd orig;
-		ANGLE_T angle;
-		descPivot_t pivot;
-		char manuf[STR_SIZE];
-		char name[STR_SIZE];
-		char partno[STR_SIZE];
-		long epCnt;
-		long segCnt;
-		long pathCnt;
-		FLOAT_T grade;
-		DIST_T length;
-		drawLineType_e linetype;
-		unsigned int layerNumber;
-		} compoundData;
+	coOrd endPt[4];
+	ANGLE_T endAngle[4];
+	DIST_T endRadius[4];
+	coOrd endCenter[4];
+	FLOAT_T elev[4];
+	coOrd orig;
+	ANGLE_T angle;
+	descPivot_t pivot;
+	char manuf[STR_SIZE];
+	char name[STR_SIZE];
+	char partno[STR_SIZE];
+	long epCnt;
+	long segCnt;
+	long pathCnt;
+	FLOAT_T grade;
+	DIST_T length;
+	drawLineType_e linetype;
+	unsigned int layerNumber;
+} compoundData;
 typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, PV, MN, NM, PN, LT, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0] },
-/*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0] },
-/*C0*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[0] },
-/*R0*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[0] },
-/*Z0*/	{ DESC_DIM, N_("Z1"), &compoundData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &compoundData.endPt[1] },
-/*A1*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[1] },
-/*C1*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[1] },
-/*R1*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[1] },
-/*Z1*/	{ DESC_DIM, N_("Z2"), &compoundData.elev[1] },
-/*E2*/	{ DESC_POS, N_("End Pt 3: X,Y"), &compoundData.endPt[2] },
-/*A2*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[2] },
-/*C2*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[2] },
-/*R2*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[2] },
-/*Z2*/	{ DESC_DIM, N_("Z3"), &compoundData.elev[2] },
-/*E3*/	{ DESC_POS, N_("End Pt 4: X,Y"), &compoundData.endPt[3] },
-/*A3*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[3] },
-/*C3*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[3] },
-/*R3*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[3] },
-/*Z3*/	{ DESC_DIM, N_("Z4"), &compoundData.elev[3] },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade },
-/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &compoundData.orig },
-/*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &compoundData.pivot },
-/*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, sizeof(compoundData.manuf)},
-/*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, sizeof(compoundData.name) },
-/*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, sizeof(compoundData.partno)},
-/*LT*/  { DESC_LIST, N_("LineType"), &compoundData.linetype },
-/*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
-		{ DESC_NULL } };
+	/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0] },
+	/*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0] },
+	/*C0*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[0] },
+	/*R0*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[0] },
+	/*Z0*/	{ DESC_DIM, N_("Z1"), &compoundData.elev[0] },
+	/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &compoundData.endPt[1] },
+	/*A1*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[1] },
+	/*C1*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[1] },
+	/*R1*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[1] },
+	/*Z1*/	{ DESC_DIM, N_("Z2"), &compoundData.elev[1] },
+	/*E2*/	{ DESC_POS, N_("End Pt 3: X,Y"), &compoundData.endPt[2] },
+	/*A2*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[2] },
+	/*C2*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[2] },
+	/*R2*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[2] },
+	/*Z2*/	{ DESC_DIM, N_("Z3"), &compoundData.elev[2] },
+	/*E3*/	{ DESC_POS, N_("End Pt 4: X,Y"), &compoundData.endPt[3] },
+	/*A3*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[3] },
+	/*C3*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[3] },
+	/*R3*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[3] },
+	/*Z3*/	{ DESC_DIM, N_("Z4"), &compoundData.elev[3] },
+	/*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade },
+	/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &compoundData.orig },
+	/*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle },
+	/*PV*/	{ DESC_PIVOT, N_("Pivot"), &compoundData.pivot },
+	/*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, sizeof(compoundData.manuf)},
+	/*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, sizeof(compoundData.name) },
+	/*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, sizeof(compoundData.partno)},
+	/*LT*/  { DESC_LIST, N_("LineType"), &compoundData.linetype },
+	/*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
+	/*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
+	{ DESC_NULL }
+};
 #define MAX_DESCRIBE_ENDS 4
 
 
-static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )
+static void UpdateCompound( track_p trk, int inx, descData_p descUpd,
+                            BOOL_T needUndoStart )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	const char * manufS, * nameS, * partnoS;
 	char * mP, *nP, *pP;
 	int mL, nL, pL;
@@ -739,18 +773,19 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	case PN:
 		titleChanged = FALSE;
 		ParseCompoundTitle( xtitle(xx), &mP, &mL, &nP, &nL, &pP, &pL );
-		if (mP == NULL) mP = "";
-		if (nP == NULL) nP = "";
-		if (pP == NULL) pP = "";
+		if (mP == NULL) { mP = ""; }
+		if (nP == NULL) { nP = ""; }
+		if (pP == NULL) { pP = ""; }
 		manufS = wStringGetValue( (wString_p)compoundDesc[MN].control0 );
 		size_t max_manustr = 256, max_partstr = 256, max_namestr = 256;
-		if (compoundDesc[MN].max_string)
+		if (compoundDesc[MN].max_string) {
 			max_manustr = compoundDesc[MN].max_string-1;
+		}
 		if (strlen(manufS)>max_manustr) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_manustr-1);
 		}
 		message[0] = '\0';
- 		strncat( message, manufS, max_manustr-1 );
+		strncat( message, manufS, max_manustr-1 );
 		if ( strncmp( manufS, mP, mL ) != 0 || mL != strlen(manufS) ) {
 			titleChanged = TRUE;
 		}
@@ -759,8 +794,9 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		split = xx->split;
 		nameS = wStringGetValue( (wString_p)compoundDesc[NM].control0 );
 		max_namestr = 256;
-		if (compoundDesc[NM].max_string)
+		if (compoundDesc[NM].max_string) {
 			max_namestr = compoundDesc[NM].max_string;
+		}
 		if (strlen(nameS)>max_namestr) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_namestr-1);
 		}
@@ -783,17 +819,18 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 			split = FALSE;
 		}
 		if ( strncmp( nameS, nP, nL ) != 0 || nL != strlen(nameS) ||
-			 xx->flipped != flipped ||
-			 xx->ungrouped != ungrouped ||
-			 xx->split != split ) {
+		     xx->flipped != flipped ||
+		     xx->ungrouped != ungrouped ||
+		     xx->split != split ) {
 			titleChanged = TRUE;
 		}
 		strcat( message, "\t" );
 		strncat( message, nameS, max_namestr-1 );
 		partnoS = wStringGetValue( (wString_p)compoundDesc[PN].control0 );
 		max_partstr = 256;
-		if (compoundDesc[PN].max_string)
+		if (compoundDesc[PN].max_string) {
 			max_partstr = compoundDesc[PN].max_string;
+		}
 		if (strlen(partnoS)>max_partstr) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_partstr-1);
 		}
@@ -807,22 +844,23 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 			MyFree(newTitle);
 			return;
 		}
-		if ( needUndoStart )
-		   UndoStart( _("Change Track"), "Change Track" );
+		if ( needUndoStart ) {
+			UndoStart( _("Change Track"), "Change Track" );
+		}
 		UndoModify( trk );
 		GetBoundingBox( trk, &hi, &lo );
 		if ( labelScale >= mainD.scale &&
-			 !OFF_MAIND( lo, hi ) ) {
+		     !OFF_MAIND( lo, hi ) ) {
 			DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
 		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
-		if (xx->title) MyFree(xx->title);
+		if (xx->title) { MyFree(xx->title); }
 		xx->title = newTitle;
 		xx->flipped = flipped;
 		xx->ungrouped = ungrouped;
 		xx->split = split;
 		if ( labelScale >= mainD.scale &&
-			 !OFF_MAIND( lo, hi ) ) {
+		     !OFF_MAIND( lo, hi ) ) {
 			DrawCompoundDescription( trk, &mainD, GetTrkColor(trk,&tempD) );
 		}
 		return;
@@ -841,29 +879,30 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	case A1:
 	case A2:
 	case A3:
-		if (inx==A3) ep=3;
-		else if (inx==A2) ep=2;
-		else if (inx==A1) ep=1;
-		else ep=0;
-		RotateTrack( trk, GetTrkEndPos(trk,ep), NormalizeAngle( compoundData.endAngle[ep]-GetTrkEndAngle(trk,ep) ) );
+		if (inx==A3) { ep=3; }
+		else if (inx==A2) { ep=2; }
+		else if (inx==A1) { ep=1; }
+		else { ep=0; }
+		RotateTrack( trk, GetTrkEndPos(trk,ep),
+		             NormalizeAngle( compoundData.endAngle[ep]-GetTrkEndAngle(trk,ep) ) );
 		ComputeCompoundBoundingBox( trk );
 		break;
 	case AN:
 		orig = xx->orig;
 		GetBoundingBox(trk,&hi,&lo);
 		switch (compoundData.pivot) {
-			case DESC_PIVOT_MID:
-				orig.x = (hi.x-lo.x)/2+lo.x;
-				orig.y = (hi.y-lo.y)/2+lo.y;
-				break;
-			case DESC_PIVOT_SECOND:
-				orig.x = (hi.x-lo.x)/2+lo.x;
-				orig.y = (hi.y-lo.y)/2+lo.y;
-				orig.x = (orig.x - xx->orig.x)*2+xx->orig.x;
-				orig.y = (orig.y - xx->orig.y)*2+xx->orig.y;
-				break;
-			default:
-				break;
+		case DESC_PIVOT_MID:
+			orig.x = (hi.x-lo.x)/2+lo.x;
+			orig.y = (hi.y-lo.y)/2+lo.y;
+			break;
+		case DESC_PIVOT_SECOND:
+			orig.x = (hi.x-lo.x)/2+lo.x;
+			orig.y = (hi.y-lo.y)/2+lo.y;
+			orig.x = (orig.x - xx->orig.x)*2+xx->orig.x;
+			orig.y = (orig.y - xx->orig.y)*2+xx->orig.y;
+			break;
+		default:
+			break;
 		}
 		RotateTrack( trk, orig, NormalizeAngle( compoundData.angle-xx->angle ) );
 		ComputeCompoundBoundingBox( trk );
@@ -872,10 +911,10 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	case E1:
 	case E2:
 	case E3:
-		if (inx==E3) ep=3;
-		else if (inx==E2) ep=2;
-		else if (inx==E1) ep=1;
-		else ep=0;
+		if (inx==E3) { ep=3; }
+		else if (inx==E2) { ep=2; }
+		else if (inx==E1) { ep=1; }
+		else { ep=0; }
 		pos = GetTrkEndPos(trk,ep);
 		pos.x = compoundData.endPt[ep].x - pos.x;
 		pos.y = compoundData.endPt[ep].y - pos.y;
@@ -887,17 +926,21 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	case Z2:
 	case Z3:
 		ep = (inx==Z0?0:(inx==Z1?1:(inx==Z2?2:3)));
-		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), compoundData.elev[ep], NULL );
-		if ( GetTrkEndPtCnt(trk) == 1 )
-			 break;
-		for (int i=0;i<compoundData.epCnt;i++) {
-			if (i==ep) continue;
+		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep),
+		                  compoundData.elev[ep], NULL );
+		if ( GetTrkEndPtCnt(trk) == 1 ) {
+			break;
+		}
+		for (int i=0; i<compoundData.epCnt; i++) {
+			if (i==ep) { continue; }
 			ComputeElev( trk, i, FALSE, &compoundData.elev[i], NULL, TRUE );
 		}
-		if ( compoundData.length > minLength )
-			compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
-		else
+		if ( compoundData.length > minLength ) {
+			compoundData.grade = fabs( (compoundData.elev[0]
+			                            -compoundData.elev[1])/compoundData.length )*100.0;
+		} else {
 			compoundData.grade = 0.0;
+		}
 		compoundDesc[GR].mode |= DESC_CHANGE;
 		compoundDesc[Z0+(E1-E0)*inx].mode |= DESC_CHANGE;
 		break;
@@ -907,18 +950,18 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	default:
 		break;
 	}
-    switch ( inx ) {
-    case A0:
-    case A1:
-    case A2:
-    case A3:
-    case E0:
-    case E1:
-    case E2:
-    case E3:
-    case AN:
-    case OR:
-		for (int i=0;(i<compoundData.epCnt)&&(i<MAX_DESCRIBE_ENDS);i++) {
+	switch ( inx ) {
+	case A0:
+	case A1:
+	case A2:
+	case A3:
+	case E0:
+	case E1:
+	case E2:
+	case E3:
+	case AN:
+	case OR:
+		for (int i=0; (i<compoundData.epCnt)&&(i<MAX_DESCRIBE_ENDS); i++) {
 			compoundData.endPt[i] = GetTrkEndPos(trk,i);
 			compoundDesc[i*(E1-E0)+E0].mode |= DESC_CHANGE;
 			trackParams_t params;
@@ -927,20 +970,20 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 			GetTrackParams(PARAMS_CORNU,trk,compoundData.endPt[i],&params);
 			compoundData.endRadius[i] = params.arcR;
 			if (params.arcR != 0.0) {
-				  compoundData.endCenter[i] = params.arcP;
-				  compoundDesc[i*(E1-E0)+C0].mode |= DESC_CHANGE;
+				compoundData.endCenter[i] = params.arcP;
+				compoundDesc[i*(E1-E0)+C0].mode |= DESC_CHANGE;
 			}
 		}
 		compoundData.orig = xx->orig;
 		compoundDesc[OR].mode |= DESC_CHANGE;
 		compoundData.angle = xx->angle;
 		compoundDesc[AN].mode |= DESC_CHANGE;
-    	break;
-    case LT:
-    	xx->lineType = compoundData.linetype;
-    	break;
-    default:
-    	break;
+		break;
+	case LT:
+		xx->lineType = compoundData.linetype;
+		break;
+	default:
+		break;
 	};
 
 	DrawNewTrack( trk );
@@ -949,11 +992,12 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 
 
 void DescribeCompound(
-		track_p trk,
-		char * str,
-		CSIZE_T len )
+        track_p trk,
+        char * str,
+        CSIZE_T len )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	int fix;
 	EPINX_T ep, epCnt;
 	char * mP, *nP, *pP, *cnP;
@@ -961,17 +1005,21 @@ void DescribeCompound(
 	long mode;
 	long listLabelsOption = listLabels;
 	DynString description;
-	char *trackType; 
+	char *trackType;
 
-	if ( xx->flipped )
+	if ( xx->flipped ) {
 		listLabelsOption |= LABEL_FLIPPED;
-	if ( xx->ungrouped )
+	}
+	if ( xx->ungrouped ) {
 		listLabelsOption |= LABEL_UNGROUPED;
-	if ( xx->split )
+	}
+	if ( xx->split ) {
 		listLabelsOption |= LABEL_SPLIT;
+	}
 	FormatCompoundTitle( listLabelsOption, xtitle(xx) );
-	if (message[0] == '\0')
+	if (message[0] == '\0') {
 		FormatCompoundTitle( listLabelsOption|LABEL_DESCR, xtitle(xx) );
+	}
 
 	if (GetTrkEndPtCnt(trk) <= 1) {
 		trackType = _("Structure");
@@ -980,12 +1028,12 @@ void DescribeCompound(
 	}
 	DynStringMalloc(&description, len);
 	DynStringPrintf(&description,
-		_("%s (%d) Layer= %d %s"),
-		trackType,
-		GetTrkIndex(trk),
-		GetTrkLayer(trk) + 1,
-		message);
-	
+	                _("%s (%d) Layer= %d %s"),
+	                trackType,
+	                GetTrkIndex(trk),
+	                GetTrkLayer(trk) + 1,
+	                message);
+
 	if (DynStringSize(&description) > (unsigned)len) {
 		strncpy(str, DynStringToCStr(&description), len - 1);
 		strcpy(str + len - 4, "...");
@@ -1046,7 +1094,7 @@ void DescribeCompound(
 
 	for ( int i=0 ; i<4 ; i++) {
 		compoundDesc[E0+(E1-E0)*i].mode = DESC_IGNORE;
-        compoundDesc[A0+(E1-E0)*i].mode = DESC_IGNORE;
+		compoundDesc[A0+(E1-E0)*i].mode = DESC_IGNORE;
 		compoundDesc[R0+(E1-E0)*i].mode = DESC_IGNORE;
 		compoundDesc[C0+(E1-E0)*i].mode = DESC_IGNORE;
 		compoundDesc[Z0+(E1-E0)*i].mode = DESC_IGNORE;
@@ -1054,16 +1102,16 @@ void DescribeCompound(
 
 	compoundDesc[GR].mode = DESC_IGNORE;
 	compoundDesc[OR].mode =
-	compoundDesc[AN].mode = fix?DESC_RO:0;
+	        compoundDesc[AN].mode = fix?DESC_RO:0;
 	compoundDesc[MN].mode =
-	compoundDesc[NM].mode =
-	compoundDesc[PN].mode = 0 /*DESC_NOREDRAW*/;
+	        compoundDesc[NM].mode =
+	                compoundDesc[PN].mode = 0 /*DESC_NOREDRAW*/;
 	compoundDesc[SC].mode = DESC_RO;
 	compoundDesc[LY].mode = DESC_NOREDRAW;
 	compoundDesc[PV].mode = 0;
 	compoundData.pivot = DESC_PIVOT_FIRST;
 	if (compoundData.epCnt >0) {
-		for (int i=0;(i<compoundData.epCnt)&&(i<MAX_DESCRIBE_ENDS);i++) {
+		for (int i=0; (i<compoundData.epCnt)&&(i<MAX_DESCRIBE_ENDS); i++) {
 			compoundDesc[A0+(E1-E0)*i].mode = (int)mode;
 			compoundDesc[R0+(E1-E0)*i].mode = DESC_RO;
 			compoundDesc[C0+(E1-E0)*i].mode = DESC_RO;
@@ -1080,21 +1128,26 @@ void DescribeCompound(
 				compoundDesc[R0+(E1-E0)*i].mode = DESC_IGNORE;
 			}
 			ComputeElev( trk, i, FALSE, &compoundData.elev[i], NULL, FALSE );
-			compoundDesc[Z0+(E1-E0)*i].mode = (EndPtIsDefinedElev(trk,i)?0:DESC_RO)|DESC_NOREDRAW;
+			compoundDesc[Z0+(E1-E0)*i].mode = (EndPtIsDefinedElev(trk,
+			                                   i)?0:DESC_RO)|DESC_NOREDRAW;
 		}
 		compoundDesc[GR].mode = DESC_RO;
 	}
-	if ( compoundData.epCnt == 2 )
+	if ( compoundData.epCnt == 2 ) {
 		compoundData.length = GetTrkLength( trk, 0, 1 );
-	if ( compoundData.length > minLength && compoundData.epCnt > 1)
-		compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
-	else
+	}
+	if ( compoundData.length > minLength && compoundData.epCnt > 1) {
+		compoundData.grade = fabs( (compoundData.elev[0]
+		                            -compoundData.elev[1])/compoundData.length )*100.0;
+	} else {
 		compoundData.grade = 0.0;
+	}
 
 	if (GetTrkEndPtCnt(trk) == 0) {
 		compoundDesc[LT].mode = 0;
-	} else
+	} else {
 		compoundDesc[LT].mode = DESC_IGNORE;
+	}
 
 	DoDescribe(trackType, trk, compoundDesc, UpdateCompound);
 
@@ -1103,10 +1156,14 @@ void DescribeCompound(
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Solid"), NULL, I2VP(0) );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dash"), NULL, I2VP(1) );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), NULL, I2VP(2) );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL, I2VP(3) );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL, I2VP(4) );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"), NULL, I2VP(5) );
-		wListAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"), NULL, I2VP(6) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL,
+		               I2VP(3) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL,
+		               I2VP(4) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"), NULL,
+		               I2VP(5) );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"), NULL,
+		               I2VP(6) );
 		wListSetIndex( (wList_p)compoundDesc[LT].control0, compoundData.linetype );
 	}
 
@@ -1114,20 +1171,22 @@ void DescribeCompound(
 
 
 void DeleteCompound(
-		track_p t )
+        track_p t )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK,
+	                                 extraDataCompound_t);
 	FreeFilledDraw( xx->segCnt, xx->segs );
-	if (xx->segCnt>0) MyFree( xx->segs );
+	if (xx->segCnt>0) { MyFree( xx->segs ); }
 	xx->segs = NULL;
 }
 
 
 BOOL_T WriteCompound(
-		track_p t,
-		FILE * f )
+        track_p t,
+        FILE * f )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(t, T_NOTRACK,
+	                                 extraDataCompound_t);
 	EPINX_T ep, epCnt;
 	int bits;
 	long options;
@@ -1136,46 +1195,58 @@ BOOL_T WriteCompound(
 	BOOL_T rc = TRUE;
 
 	options = (long)GetTrkWidth(t);
-	if (xx->handlaid)
+	if (xx->handlaid) {
 		options |= COMPOUND_OPTION_HANDLAID;
-	if (xx->flipped)
+	}
+	if (xx->flipped) {
 		options |= COMPOUND_OPTION_FLIPPED;
-	if (xx->ungrouped)
+	}
+	if (xx->ungrouped) {
 		options |= COMPOUND_OPTION_UNGROUPED;
-	if (xx->split)
+	}
+	if (xx->split) {
 		options |= COMPOUND_OPTION_SPLIT;
-	if (xx->pathOverRide)
+	}
+	if (xx->pathOverRide) {
 		options |= COMPOUND_OPTION_PATH_OVERRIDE;
-	if (xx->pathNoCombine)
+	}
+	if (xx->pathNoCombine) {
 		options |= COMPOUND_OPTION_PATH_NOCOMBINE;
-	if ( ( GetTrkBits( t ) & TB_HIDEDESC ) != 0 )
+	}
+	if ( ( GetTrkBits( t ) & TB_HIDEDESC ) != 0 ) {
 		options |= COMPOUND_OPTION_HIDEDESC;
+	}
 	epCnt = GetTrkEndPtCnt(t);
 	lineType = xx->lineType;
-	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|(GetTrkRoadbed(t)?1<<4:0);
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
+	       (GetTrkRoadbed(t)?1<<4:0);
 	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
-				GetTrkTypeName(t),
-				GetTrkIndex(t), GetTrkLayer(t), options,
-				GetCurrPathIndex(t), lineType,
-				GetTrkScaleName(t), bits,
-				xx->orig.x, xx->orig.y, xx->angle,
-				PutTitle(xtitle(xx)) )>0;
-	for (ep=0; ep<epCnt; ep++ )
+	              GetTrkTypeName(t),
+	              GetTrkIndex(t), GetTrkLayer(t), options,
+	              GetCurrPathIndex(t), lineType,
+	              GetTrkScaleName(t), bits,
+	              xx->orig.x, xx->orig.y, xx->angle,
+	              PutTitle(xtitle(xx)) )>0;
+	for (ep=0; ep<epCnt; ep++ ) {
 		WriteEndPt( f, t, ep );
+	}
 	switch ( xx->special ) {
 	case TOadjustable:
 		rc &= fprintf( f, "\tX %s %0.3f %0.3f\n", ADJUSTABLE,
-				xx->u.adjustable.minD, xx->u.adjustable.maxD )>0;
+		               xx->u.adjustable.minD, xx->u.adjustable.maxD )>0;
 		break;
 	case TOpier:
-		rc &= fprintf( f, "\tX %s %0.6f \"%s\"\n", PIER, xx->u.pier.height, xx->u.pier.name )>0;
+		rc &= fprintf( f, "\tX %s %0.6f \"%s\"\n", PIER, xx->u.pier.height,
+		               xx->u.pier.name )>0;
 		break;
 
 	default:
 		;
 	}
-	rc &= fprintf( f, "\tD %0.6f %0.6f\n", xx->descriptionOff.x, xx->descriptionOff.y )>0;
-	rc &= WriteCompoundPathsEndPtsSegs( f, GetPaths( t ), xx->segCnt, xx->segs, 0, NULL );
+	rc &= fprintf( f, "\tD %0.6f %0.6f\n", xx->descriptionOff.x,
+	               xx->descriptionOff.y )>0;
+	rc &= WriteCompoundPathsEndPtsSegs( f, GetPaths( t ), xx->segCnt, xx->segs, 0,
+	                                    NULL );
 	return rc;
 }
 
@@ -1188,8 +1259,10 @@ BOOL_T WriteCompound(
  *
  */
 
-EXPORT void SetCompoundLineType( track_p trk, int width ) {
-	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+EXPORT void SetCompoundLineType( track_p trk, int width )
+{
+	struct extraDataCompound_t * xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                  extraDataCompound_t);
 	switch(width) {
 	case 0:
 		xx->lineType = DRAWLINESOLID;
@@ -1218,16 +1291,16 @@ EXPORT void SetCompoundLineType( track_p trk, int width ) {
 
 
 EXPORT track_p NewCompound(
-		TRKTYP_T trkType,
-		TRKINX_T index,
-		coOrd pos,
-		ANGLE_T angle,
-		char * title,
-		EPINX_T epCnt,
-		trkEndPt_p epp0,
-		PATHPTR_T paths,
-		wIndex_t segCnt,
-		trkSeg_p segs )
+        TRKTYP_T trkType,
+        TRKINX_T index,
+        coOrd pos,
+        ANGLE_T angle,
+        char * title,
+        EPINX_T epCnt,
+        trkEndPt_p epp0,
+        PATHPTR_T paths,
+        wIndex_t segCnt,
+        trkSeg_p segs )
 {
 	track_p trk;
 	struct extraDataCompound_t * xx;
@@ -1263,8 +1336,8 @@ EXPORT track_p NewCompound(
 
 
 BOOL_T ReadCompound(
-		char * line,
-		TRKTYP_T trkType )
+        char * line,
+        TRKTYP_T trkType )
 {
 	track_p trk;
 	struct extraDataCompound_t *xx;
@@ -1283,23 +1356,29 @@ BOOL_T ReadCompound(
 
 	if (paramVersion<3) {
 		if ( !GetArgs( line, "dXsdpfq",
-			&index, &layer, scale, &visible, &orig, &angle, &title ) )
+		               &index, &layer, scale, &visible, &orig, &angle, &title ) ) {
 			return FALSE;
+		}
 	} else if (paramVersion <= 5 && trkType == T_STRUCTURE) {
 		if ( !GetArgs( line, "dL00sdpfq",
-			&index, &layer, scale, &visible, &orig, &angle, &title ) )
+		               &index, &layer, scale, &visible, &orig, &angle, &title ) ) {
 			return FALSE;
+		}
 	} else {
 		if ( !GetArgs( line, paramVersion<9?"dLlldsdpYfq":"dLlldsdpffq",
-			&index, &layer, &options, &position, &lineType, scale, &visible, &orig, &elev, &angle, &title ) )
+		               &index, &layer, &options, &position, &lineType, scale, &visible, &orig, &elev,
+		               &angle, &title ) ) {
 			return FALSE;
+		}
 	}
-	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE)
+	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE) {
 		strcpy( scale, curScaleName );
+	}
 	TempEndPtsReset();
 	pathCnt = 0;
-	if ( !ReadSegs() )
+	if ( !ReadSegs() ) {
 		return FALSE;
+	}
 	if ( trkType == T_TURNOUT ) {
 		if ( TempEndPtsCount() <= 0 ) {
 			InputError( "Turnout defn without EndPoints", TRUE );
@@ -1320,8 +1399,8 @@ BOOL_T ReadCompound(
 		}
 	}
 	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL,
-			pathCnt > 1 ? pathPtr : NULL,
-			tempSegs_da.cnt, &tempSegs(0) );
+	                   pathCnt > 1 ? pathPtr : NULL,
+	                   tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(trk, visible!=0);
@@ -1346,21 +1425,24 @@ BOOL_T ReadCompound(
 	xx->pathNoCombine = (int)((options&COMPOUND_OPTION_PATH_NOCOMBINE)!=0);
 	xx->lineType = lineType;
 	xx->descriptionOff = descriptionOff;
-	if ( ( options & COMPOUND_OPTION_HIDEDESC ) != 0 )
+	if ( ( options & COMPOUND_OPTION_HIDEDESC ) != 0 ) {
 		SetTrkBits( trk, TB_HIDEDESC );
+	}
 
 	if (tempSpecial[0] != '\0') {
 		if (strncmp( tempSpecial, ADJUSTABLE, strlen(ADJUSTABLE) ) == 0) {
 			xx->special = TOadjustable;
 			if ( !GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
-						&xx->u.adjustable.minD, &xx->u.adjustable.maxD ) )
+			               &xx->u.adjustable.minD, &xx->u.adjustable.maxD ) ) {
 				return FALSE;
+			}
 
 		} else if (strncmp( tempSpecial, PIER, strlen(PIER) ) == 0) {
 			xx->special = TOpier;
 			if ( !GetArgs( tempSpecial+strlen(PIER), "fq",
-						&xx->u.pier.height, &xx->u.pier.name ) )
+			               &xx->u.pier.height, &xx->u.pier.name ) ) {
 				return FALSE;
+			}
 
 		} else {
 			InputError("Unknown special case", TRUE);
@@ -1372,10 +1454,11 @@ BOOL_T ReadCompound(
 }
 
 void MoveCompound(
-		track_p trk,
-		coOrd orig )
+        track_p trk,
+        coOrd orig )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	xx->orig.x += orig.x;
 	xx->orig.y += orig.y;
 	ComputeCompoundBoundingBox( trk );
@@ -1383,11 +1466,12 @@ void MoveCompound(
 
 
 void RotateCompound(
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle )
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	Rotate( &xx->orig, orig, angle );
 	xx->angle = NormalizeAngle( xx->angle + angle );
 	Rotate( &xx->descriptionOff, zero, angle );
@@ -1396,10 +1480,11 @@ void RotateCompound(
 
 
 void RescaleCompound(
-		track_p trk,
-		FLOAT_T ratio )
+        track_p trk,
+        FLOAT_T ratio )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	xx->orig.x *= ratio;
 	xx->orig.y *= ratio;
 	xx->descriptionOff.x *= ratio;
@@ -1411,11 +1496,12 @@ void RescaleCompound(
 
 
 void FlipCompound(
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle )
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle )
 {
-	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
+	struct extraDataCompound_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
+	                                 extraDataCompound_t);
 	EPINX_T ep, epCnt;
 	char * mP, *nP, *pP;
 	int mL, nL, pL;
@@ -1435,16 +1521,18 @@ void FlipCompound(
 	xx->descriptionOrig.y = - xx->descriptionOrig.y;
 	ComputeCompoundBoundingBox( trk );
 	epCnt = GetTrkEndPtCnt( trk );
-	if ( epCnt >= 1 && epCnt <= 2 )
+	if ( epCnt >= 1 && epCnt <= 2 ) {
 		return;
+	}
 	ParseCompoundTitle( xtitle(xx), &mP, &mL, &nP, &nL, &pP, &pL );
-	to = FindCompound( epCnt==0?FIND_STRUCT:FIND_TURNOUT, GetScaleName(GetTrkScale(trk)), xx->title );
+	to = FindCompound( epCnt==0?FIND_STRUCT:FIND_TURNOUT,
+	                   GetScaleName(GetTrkScale(trk)), xx->title );
 	if ( epCnt!=0 && to && to->customInfo ) {
 		if ( GetArgs( to->customInfo, "qc", &type, &cp ) ) {
 			if ( strcmp( type, "Regular Turnout" ) == 0 ||
-				 strcmp( type, "Curved Turnout" ) == 0 ) {
+			     strcmp( type, "Curved Turnout" ) == 0 ) {
 				if ( GetArgs( cp, "qqqqq", &mfg, &descL, &partL, &descR, &partR ) &&
-					 mP && strcmp( mP, mfg ) == 0 && nP && pP ) {
+				     mP && strcmp( mP, mfg ) == 0 && nP && pP ) {
 					if ( strcmp( nP, descL ) == 0 && strcmp( pP, partL ) == 0 ) {
 						sprintf( message, "%s\t%s\t%s", mfg, descR, partR );
 						xx->title = MyStrdup( message );
@@ -1456,7 +1544,7 @@ void FlipCompound(
 						return;
 					}
 				}
-		   }
+			}
 		}
 	}
 	if ( epCnt == 3 || epCnt == 4 ) {
@@ -1470,55 +1558,66 @@ void FlipCompound(
 		if ( epCnt == 3 ) {
 			/* Wye? */
 			if ( fabs(endPos[1].x-endPos[2].x) < SMALLVALUE &&
-				 fabs(endPos[1].y+endPos[2].y) < SMALLVALUE )
+			     fabs(endPos[1].y+endPos[2].y) < SMALLVALUE ) {
 				return;
+			}
 		} else {
 			/* Crossing */
-			if ( fabs( (endPos[1].x-endPos[3].x) - (endPos[2].x-endPos[0].x ) ) < SMALLVALUE &&
-				 fabs( (endPos[2].y+endPos[3].y) ) < SMALLVALUE &&
-				 fabs( (endPos[0].y-endPos[1].y) ) < SMALLVALUE &&
-				 NormalizeAngle( (endAngle[2]-endAngle[3]-180+0.05) ) < 0.10 )
+			if ( fabs( (endPos[1].x-endPos[3].x) - (endPos[2].x-endPos[0].x ) ) < SMALLVALUE
+			     &&
+			     fabs( (endPos[2].y+endPos[3].y) ) < SMALLVALUE &&
+			     fabs( (endPos[0].y-endPos[1].y) ) < SMALLVALUE &&
+			     NormalizeAngle( (endAngle[2]-endAngle[3]-180+0.05) ) < 0.10 ) {
 				return;
+			}
 			/* 3 way */
 			if ( fabs( (endPos[1].x-endPos[2].x) ) < SMALLVALUE &&
-				 fabs( (endPos[1].y+endPos[2].y) ) < SMALLVALUE &&
-				 fabs( (endPos[0].y-endPos[3].y) ) < SMALLVALUE &&
-				 NormalizeAngle( (endAngle[1]+endAngle[2]-180+0.05) ) < 0.10 )
+			     fabs( (endPos[1].y+endPos[2].y) ) < SMALLVALUE &&
+			     fabs( (endPos[0].y-endPos[3].y) ) < SMALLVALUE &&
+			     NormalizeAngle( (endAngle[1]+endAngle[2]-180+0.05) ) < 0.10 ) {
 				return;
+			}
 		}
 		toBest = NULL;
 		d0 = 0.0;
 		for (inx=0; inx<turnoutInfo_da.cnt; inx++) {
 			to = turnoutInfo(inx);
 			if ( IsParamValid(to->paramFileIndex) &&
-				 to->segCnt > 0 &&
-				 to->scaleInx == GetTrkScale(trk) &&
-				 to->segCnt != 0 &&
-				 to->endCnt == epCnt ) {
+			     to->segCnt > 0 &&
+			     to->scaleInx == GetTrkScale(trk) &&
+			     to->segCnt != 0 &&
+			     to->endCnt == epCnt ) {
 				d1 = 0;
 				a1 = 0;
 				for ( ep=0; ep<epCnt; ep++ ) {
 					trkEndPt_p epp = EndPtIndex( to->endPt, ep );
 					d2 = FindDistance( endPos[ep], GetEndPtPos(epp) );
-					if ( d2 > SMALLVALUE )
+					if ( d2 > SMALLVALUE ) {
 						break;
-					if ( d2 > d1 )
+					}
+					if ( d2 > d1 ) {
 						d1 = d2;
+					}
 					a2 = NormalizeAngle( endAngle[ep] - GetEndPtAngle(epp) + 0.05 );
-					if ( a2 > 0.1 )
+					if ( a2 > 0.1 ) {
 						break;
-					if ( a2 > a1 )
+					}
+					if ( a2 > a1 ) {
 						a1 = a2;
+					}
 				}
-				if ( ep<epCnt )
+				if ( ep<epCnt ) {
 					continue;
-				if ( toBest == NULL || d1 < d0 )
+				}
+				if ( toBest == NULL || d1 < d0 ) {
 					toBest = to;
+				}
 			}
 		}
 		if ( toBest ) {
-			if ( strcmp( xx->title, toBest->title ) != 0 )
+			if ( strcmp( xx->title, toBest->title ) != 0 ) {
 				xx->title = MyStrdup( toBest->title );
+			}
 			return;
 		}
 	}
@@ -1527,12 +1626,12 @@ void FlipCompound(
 
 
 typedef struct {
-		long count;
-		char * type;
-		char * name;
-		FLOAT_T price;
-		DynString indexes;
-		} enumCompound_t;
+	long count;
+	char * type;
+	char * name;
+	FLOAT_T price;
+	DynString indexes;
+} enumCompound_t;
 static dynArr_t enumCompound_da;
 #define EnumCompound(N) DYNARR_N( enumCompound_t,enumCompound_da,N)
 
@@ -1546,17 +1645,21 @@ BOOL_T EnumerateCompound( track_p trk )
 
 	if ( trk != NULL ) {
 		xx = GET_EXTRA_DATA(trk, T_NOTRACK, extraDataCompound_t);
-		if ( xx->flipped )
+		if ( xx->flipped ) {
 			listLabelsOption |= LABEL_FLIPPED;
+		}
 #ifdef LATER
-		if ( xx->ungrouped )
+		if ( xx->ungrouped ) {
 			listLabelsOption |= LABEL_UNGROUPED;
-		if ( xx->split )
+		}
+		if ( xx->split ) {
 			listLabelsOption |= LABEL_SPLIT;
+		}
 #endif
 		FormatCompoundTitle( listLabelsOption, xtitle(xx) );
-		if (message[0] == '\0')
-			return FALSE;  //No content
+		if (message[0] == '\0') {
+			return FALSE;        //No content
+		}
 		for (inx = 0; inx < enumCompound_da.cnt; inx++ ) {
 			cmp =  strcmp( EnumCompound(inx).name, message );
 			if ( cmp == 0 ) {
@@ -1570,11 +1673,13 @@ BOOL_T EnumerateCompound( track_p trk )
 			}
 		}
 		DYNARR_APPEND( enumCompound_t, enumCompound_da, 10 );
-		for ( inx2 = enumCompound_da.cnt-1; inx2 > inx; inx2-- )
+		for ( inx2 = enumCompound_da.cnt-1; inx2 > inx; inx2-- ) {
 			EnumCompound(inx2) = EnumCompound(inx2-1);
+		}
 		EnumCompound(inx).name = MyStrdup( message );
-		if (strlen(message) > (size_t)enumerateMaxDescLen)
+		if (strlen(message) > (size_t)enumerateMaxDescLen) {
 			enumerateMaxDescLen = (int)strlen(message);
+		}
 		EnumCompound(inx).type = GetTrkTypeName( trk );
 		EnumCompound(inx).count = 1;
 		DynStringMalloc(&(EnumCompound(inx).indexes),100);
@@ -1587,9 +1692,10 @@ BOOL_T EnumerateCompound( track_p trk )
 			for (inx = 0; inx < enumCompound_da.cnt; inx++ ) {
 				if (EnumCompound(inx).type[0] == *type) {
 					EnumerateList( EnumCompound(inx).count,
-						EnumCompound(inx).price,
-						EnumCompound(inx).name,
-						DynStringSize(&(EnumCompound(inx).indexes))?DynStringToCStr(&(EnumCompound(inx).indexes)):NULL);
+					               EnumCompound(inx).price,
+					               EnumCompound(inx).name,
+					               DynStringSize(&(EnumCompound(inx).indexes))?DynStringToCStr(&(EnumCompound(
+					                                       inx).indexes)):NULL);
 				}
 				DynStringFree(&(EnumCompound(inx).indexes));
 			}

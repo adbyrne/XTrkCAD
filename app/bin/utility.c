@@ -44,7 +44,7 @@ DEBUGF_T debugIntersection = 0;
 #ifndef min
 double max( double a, double b )
 {
-	if (a>b) return a;
+	if (a>b) { return a; }
 	return b;
 }
 
@@ -52,7 +52,7 @@ double max( double a, double b )
 
 double min( double a, double b )
 {
-	if (a<b) return a;
+	if (a<b) { return a; }
 	return b;
 }
 #endif
@@ -77,23 +77,25 @@ double FindDistance( coOrd p0, coOrd p1 )
 
 double NormalizeAngle( double a )
 {
-	while (a<0.0) a += 360.0;
-	while (a>=360.0) a -= 360.0;
+	while (a<0.0) { a += 360.0; }
+	while (a>=360.0) { a -= 360.0; }
 	return a;
 }
 
-double DifferenceBetweenAngles(double a, double b) {
-	 double difference = b - a;
-	 while (difference < -180) difference += 360;
-	 while (difference > 180) difference -= 360;
-	 return difference;
+double DifferenceBetweenAngles(double a, double b)
+{
+	double difference = b - a;
+	while (difference < -180) { difference += 360; }
+	while (difference > 180) { difference -= 360; }
+	return difference;
 }
 
-int AngleInRange(double a, double start, double size) {
+int AngleInRange(double a, double start, double size)
+{
 	if (DifferenceBetweenAngles(start+size,a)<=0.0) {
-		if (DifferenceBetweenAngles(start,a)>=0.0)
+		if (DifferenceBetweenAngles(start,a)>=0.0) {
 			return 0;
-		else return 1;
+		} else { return 1; }
 	}
 	return -1;
 }
@@ -110,7 +112,7 @@ int IsAligned( double a1, double a2 )
 double D2R( double D )
 {
 	D = NormalizeAngle(D);
-	if (D >= 180.0) D = D - 360.0;
+	if (D >= 180.0) { D = D - 360.0; }
 	return D * (M_PI*2) / 360.0;
 }
 
@@ -157,7 +159,9 @@ double FindAngle( coOrd p0, coOrd p1 )
 	double dx = p1.x-p0.x, dy = p1.y-p0.y;
 	if ( dx == 0.0 && dy == 0.0 )
 		// Avoid implementation defined behavior
+	{
 		return 0.0;
+	}
 	return R2D(atan2( dx,dy ));
 }
 
@@ -187,7 +191,8 @@ double ConstrainR( double r )
 
 
 
-void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle, double length )
+void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle,
+              double length )
 {
 	double a0, a1;
 	double d;
@@ -207,7 +212,7 @@ void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle,
 	} else {
 		res->x = (POS_T)x;
 	}
-	if (beyond) *beyond = x - res->x;
+	if (beyond) { *beyond = x - res->x; }
 	res->y = (POS_T)(d * sin( D2R( a1 )) );
 }
 
@@ -216,15 +221,18 @@ void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle,
  * Given two circles described by centers and radius (C1, R1) (C2, R2) Find the zero, one or two intersection points
  *
  */
-BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radius1, coOrd center2, DIST_T radius2) {
+BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1,
+                              DIST_T radius1, coOrd center2, DIST_T radius2)
+{
 	double d,a,h;
 
-	d = sqrt((center2.x-center1.x)*(center2.x-center1.x)+(center2.y-center1.y)*(center2.y-center1.y));
-	if (d >(radius1+radius2)) return FALSE; 		//Too far apart
-	if (d<fabs(radius1-radius2)) return FALSE;  	//Inside each other
-	if ((d == 0) && (radius1 == radius2)) return FALSE;  // Coincident and the same
+	d = sqrt((center2.x-center1.x)*(center2.x-center1.x)+(center2.y-center1.y)*
+	         (center2.y-center1.y));
+	if (d >(radius1+radius2)) { return FALSE; } 		//Too far apart
+	if (d<fabs(radius1-radius2)) { return FALSE; }  	//Inside each other
+	if ((d == 0) && (radius1 == radius2)) { return FALSE; }  // Coincident and the same
 	a=((radius1*radius1)-(radius2*radius2)+(d*d))/(2*d);
-	if ((radius1*radius1)<(a*a)) return FALSE;
+	if ((radius1*radius1)<(a*a)) { return FALSE; }
 	h = sqrt((radius1*radius1)-(a*a));
 
 	coOrd center_c;
@@ -249,36 +257,38 @@ BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radiu
  * Find two intersect points on secant by triangle formed between middle, center and arc point
  *
  */
-BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2, coOrd c, DIST_T radius,
-                                        coOrd point1, coOrd point2 )
+BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2,
+                                   coOrd c, DIST_T radius,
+                                   coOrd point1, coOrd point2 )
 {
 
 	double la, lb, lc;   //Line equation
 
-    la = point1.y - point2.y;
-    lb = point2.x - point1.x;
-    lc = (point1.x-c.x)*(point2.y-c.y) - (point2.x-c.x)*(point1.y-c.y);  //Move by c(x,y)
+	la = point1.y - point2.y;
+	lb = point2.x - point1.x;
+	lc = (point1.x-c.x)*(point2.y-c.y) - (point2.x-c.x)*(point1.y
+	                -c.y);  //Move by c(x,y)
 
-    double x0 = -la*lc/(la*la+lb*lb), y0 = -lb*lc/(la*la+lb*lb);
+	double x0 = -la*lc/(la*la+lb*lb), y0 = -lb*lc/(la*la+lb*lb);
 
-    double dis = radius*radius*(la*la+lb*lb);
+	double dis = radius*radius*(la*la+lb*lb);
 
-    if (lc*lc > dis) {
-    	return FALSE;
-    } else if (fabs(lc*lc - dis) < EPSILON) {
-    	(*intersection1).x = x0+c.x;
-    	(*intersection1).y = y0+c.y;
-    	*intersection2 = *intersection1;
-    	return TRUE;
-    } else {
-    	double d = radius*radius - lc*lc/(la*la+lb*lb);
-    	double mult = sqrt(d/(la*la+lb*lb));
-    	(*intersection1).x = x0+lb*mult+c.x;
-    	(*intersection2).x = x0-lb*mult+c.x;
-    	(*intersection1).y = y0-la*mult+c.y;
-    	(*intersection2).y = y0+la*mult+c.y;
-    	return TRUE;
-    }
+	if (lc*lc > dis) {
+		return FALSE;
+	} else if (fabs(lc*lc - dis) < EPSILON) {
+		(*intersection1).x = x0+c.x;
+		(*intersection1).y = y0+c.y;
+		*intersection2 = *intersection1;
+		return TRUE;
+	} else {
+		double d = radius*radius - lc*lc/(la*la+lb*lb);
+		double mult = sqrt(d/(la*la+lb*lb));
+		(*intersection1).x = x0+lb*mult+c.x;
+		(*intersection2).x = x0-lb*mult+c.x;
+		(*intersection1).y = y0-la*mult+c.y;
+		(*intersection2).y = y0+la*mult+c.y;
+		return TRUE;
+	}
 }
 
 /* Find intersection:
@@ -368,7 +378,7 @@ BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2, c
 				   d1x*d0y - d1y*d0x
 
    if (d1x*d0y - d1y*d0x) = 0 then lines are parallel
-*/          
+*/
 
 BOOL_T FindIntersection( coOrd *Pc, coOrd P0, double A0, coOrd P1, double A1 )
 {
@@ -378,7 +388,7 @@ BOOL_T FindIntersection( coOrd *Pc, coOrd P0, double A0, coOrd P1, double A1 )
 #ifndef WINDOWS
 	if (debugIntersection >= 3)
 		printf("FindIntersection( [%0.3f %0.3f] A%0.3f  [%0.3f %0.3f] A%0.3f\n",
-				P0.x, P0.y, A0, P1.x, P1.y, A1 );
+		       P0.x, P0.y, A0, P1.x, P1.y, A1 );
 #endif
 
 	dx0 = sin( D2R( A0 ) );
@@ -388,21 +398,21 @@ BOOL_T FindIntersection( coOrd *Pc, coOrd P0, double A0, coOrd P1, double A1 )
 	d = dx1 * dy0 - dx0 * dy1;
 	if (d < EPSILON && d > -EPSILON) {
 #ifndef WINDOWS
-		if (debugIntersection >=3 ) printf("dx1 * dy0 - dx0 * dy1 = %0.3f\n", d );
+		if (debugIntersection >=3 ) { printf("dx1 * dy0 - dx0 * dy1 = %0.3f\n", d ); }
 #endif
 		return FALSE;
 	}
-/*
- *       (P0.x - P1.x) * d0y + (P1.y - P0.y) * d0x
- *  N1 = =============================================
- *                  d1x*d0y - d1y*d0x
- */
+	/*
+	 *       (P0.x - P1.x) * d0y + (P1.y - P0.y) * d0x
+	 *  N1 = =============================================
+	 *                  d1x*d0y - d1y*d0x
+	 */
 	N1 = dy0 * (P0.x - P1.x) + dx0 * (P1.y - P0.y );
 	N1 = N1 / d;
 	Pc->x = P1.x + (POS_T)(N1*dx1);
 	Pc->y = P1.y + (POS_T)(N1*dy1);
 #ifndef WINDOWS
-	if (debugIntersection >=3 ) printf( "     [%0.3f,%0.3f]\n", Pc->x, Pc->y );
+	if (debugIntersection >=3 ) { printf( "     [%0.3f,%0.3f]\n", Pc->x, Pc->y ); }
 #endif
 	return TRUE;
 }
@@ -412,20 +422,22 @@ EPINX_T PickArcEndPt( coOrd pc, coOrd p0, coOrd p1 )
 {
 	double a;
 	a = NormalizeAngle( FindAngle( pc, p1 ) - FindAngle( pc, p0 ) );
-	if (a > 180.0)
+	if (a > 180.0) {
 		return 0;
-	else
+	} else {
 		return 1;
+	}
 }
 
 EPINX_T PickLineEndPt( coOrd p0, double a0, coOrd p1 )
 {
 	double a;
 	a = NormalizeAngle( FindAngle( p0, p1 ) - a0 );
-	if (a < 90.0 || a > 270 )
+	if (a < 90.0 || a > 270 ) {
 		return 0;
-	else
+	} else {
 		return 1;
+	}
 }
 
 double LineDistance( coOrd *p, coOrd p0, coOrd p1 )
@@ -500,28 +512,31 @@ coOrd AddCoOrd( coOrd p0, coOrd p1, double a )
 
 BOOL_T InRect( coOrd pos, coOrd rect )
 {
-	if (pos.x >= 0.0 && pos.x <= rect.x && pos.y >= 0.0 && pos.y <= rect.y)
+	if (pos.x >= 0.0 && pos.x <= rect.x && pos.y >= 0.0 && pos.y <= rect.y) {
 		return 1;
-	else
+	} else {
 		return 0;
+	}
 }
 
 
-static BOOL_T IntersectLine( POS_T *fx0, POS_T *fy0, POS_T x1, POS_T y1, POS_T x, POS_T y )
+static BOOL_T IntersectLine( POS_T *fx0, POS_T *fy0, POS_T x1, POS_T y1,
+                             POS_T x, POS_T y )
 {
 	POS_T x0=*fx0, y0=*fy0, dx, dy;
 	BOOL_T rc;
 #ifdef TEST
 	printf("        IntersectLine( P0=[%0.2f %0.2f] P1=[%0.2f %0.2f] X=%0.2f Y=%0.2f\n",
-		x0, y0, x1, y1, x, y );
+	       x0, y0, x1, y1, x, y );
 #endif
 	dx = x1-x0;
 	dy = y1-y0;
 	if (dy==0.0) {
-		if (y0 == y)
+		if (y0 == y) {
 			rc = TRUE;
-		else
+		} else {
 			rc = FALSE;
+		}
 	} else {
 		x0 += (y-y0) * dx/dy;
 		if (x0 < -EPSILON || x0 > (x+EPSILON)) {
@@ -533,10 +548,11 @@ static BOOL_T IntersectLine( POS_T *fx0, POS_T *fy0, POS_T x1, POS_T y1, POS_T x
 		}
 	}
 #ifdef TEST
-	if (rc)
+	if (rc) {
 		printf("        = TRUE [%0.2f %0.2f]\n", *fx0, *fy0 );
-	else
+	} else {
 		printf("        = FALSE\n");
+	}
 #endif
 	return rc;
 }
@@ -549,13 +565,15 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 {
 #ifdef TEST
 	printf("    IntersectBox( P1=[%0.2f %0.2f] P0=[%0.2f %0.2f] S=[%0.2f %0.2f] X1=%d Y1=%d\n",
-		p1->x, p1->y, p0.x, p0.y, size.x, size.y, x1, y1 );
+	       p1->x, p1->y, p0.x, p0.y, size.x, size.y, x1, y1 );
 #endif
 	if ( y1!=0 &&
-		 IntersectLine( &p1->x, &p1->y, p0.x, p0.y, size.x, (y1==-1?(POS_T)0.0:size.y) )) {
+	     IntersectLine( &p1->x, &p1->y, p0.x, p0.y, size.x,
+	                    (y1==-1?(POS_T)0.0:size.y) )) {
 		return;
 	} else if ( x1!=0 &&
-		 IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y, (x1==-1?(POS_T)0.0:size.x) )) {
+	            IntersectLine( &p1->y, &p1->x, p0.y, p0.x, size.y,
+	                           (x1==-1?(POS_T)0.0:size.x) )) {
 		return;
 	}
 	printf("      intersectBox bogus\n" );
@@ -568,7 +586,7 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 
 #ifdef TEST
 	printf("ClipLine( P0=[%0.2f %0.2f] P1=[%0.2f %0.2f] O=[%0.2f %0.2f] A=%0.2f S=[%0.2f %0.2f]\n",
-		p0.x, p0.y, p1.x, p1.y, orig.x, orig.y, angle, size.x, size.y );
+	       p0.x, p0.y, p1.x, p1.y, orig.x, orig.y, angle, size.x, size.y );
 #endif
 
 	Rotate( &p0, orig, -angle );
@@ -583,18 +601,18 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 	 ------------O-------------+----------
 		-1,-1    |    0,-1     +     1,-1
 	*/
-	if ( p0.x < 0.0-EPSILON )         x0 = -1;
-	else if ( p0.x > size.x+EPSILON ) x0 = 1;
-	else                              x0 = 0;
-	if ( p0.y < 0.0-EPSILON )         y0 = -1;
-	else if ( p0.y > size.y+EPSILON ) y0 = 1;
-	else                              y0 = 0;
-	if ( p1.x < 0.0-EPSILON )         x1 = -1;
-	else if ( p1.x > size.x+EPSILON ) x1 = 1;
-	else                              x1 = 0;
-	if ( p1.y < 0.0-EPSILON )         y1 = -1;
-	else if ( p1.y > size.y+EPSILON ) y1 = 1;
-	else                              y1 = 0;
+	if ( p0.x < 0.0-EPSILON ) { x0 = -1; }
+	else if ( p0.x > size.x+EPSILON ) { x0 = 1; }
+	else { x0 = 0; }
+	if ( p0.y < 0.0-EPSILON ) { y0 = -1; }
+	else if ( p0.y > size.y+EPSILON ) { y0 = 1; }
+	else { y0 = 0; }
+	if ( p1.x < 0.0-EPSILON ) { x1 = -1; }
+	else if ( p1.x > size.x+EPSILON ) { x1 = 1; }
+	else { x1 = 0; }
+	if ( p1.y < 0.0-EPSILON ) { y1 = -1; }
+	else if ( p1.y > size.y+EPSILON ) { y1 = 1; }
+	else { y1 = 0; }
 
 #ifdef TEST
 	printf("  X0=%d Y0=%d X1=%d Y1=%d\n", x0, y0, x1, y1 );
@@ -624,10 +642,12 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 	}
 
 	/* both points without box and cannot intersect */
-	if ( (x0==x1 && y0==y1 && x0!=0 && y0!=0) || /* within same sector (but not the middle one) */
-		 (x0!=0 && x0==x1) ||  /* both right or left */
-		 (y0!=0 && y0==y1) )   /* both above or below */
+	if ( (x0==x1 && y0==y1 && x0!=0 && y0!=0)
+	     || /* within same sector (but not the middle one) */
+	     (x0!=0 && x0==x1) ||  /* both right or left */
+	     (y0!=0 && y0==y1) ) { /* both above or below */
 		return 0;
+	}
 
 #ifdef TEST
 	printf("  complex intersection\n");
@@ -635,18 +655,18 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 
 	/* possible intersection */
 	if ( y0!=0 &&
-		 IntersectLine( &p0.x, &p0.y, p1.x, p1.y, size.x, (y0==-1?(POS_T)0.0:size.y) ))
+	     IntersectLine( &p0.x, &p0.y, p1.x, p1.y, size.x, (y0==-1?(POS_T)0.0:size.y) )) {
 		IntersectBox( &p1, p0, size, x1, y1 );
-	else if ( y1!=0 &&
-		 IntersectLine( &p1.x, &p1.y, p0.x, p0.y, size.x, (y1==-1?(POS_T)0.0:size.y) ))
+	} else if ( y1!=0 &&
+	            IntersectLine( &p1.x, &p1.y, p0.x, p0.y, size.x, (y1==-1?(POS_T)0.0:size.y) )) {
 		IntersectBox( &p0, p1, size, x0, y0 );
-	else if ( x0!=0 &&
-		 IntersectLine( &p0.y, &p0.x, p1.y, p1.x, size.y, (x0==-1?(POS_T)0.0:size.x) ))
+	} else if ( x0!=0 &&
+	            IntersectLine( &p0.y, &p0.x, p1.y, p1.x, size.y, (x0==-1?(POS_T)0.0:size.x) )) {
 		IntersectBox( &p1, p0, size, x1, y1 );
-	else if ( x1!=0 &&
-		 IntersectLine( &p1.y, &p1.x, p0.y, p0.x, size.y, (x1==-1?(POS_T)0.0:size.x) ))
+	} else if ( x1!=0 &&
+	            IntersectLine( &p1.y, &p1.x, p0.y, p0.x, size.y, (x1==-1?(POS_T)0.0:size.x) )) {
 		IntersectBox( &p0, p1, size, x0, y0 );
-	else {
+	} else {
 		return 0;
 	}
 	p0.x += orig.x; p0.y += orig.y;
@@ -660,59 +680,59 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 
 coOrd FindCentroid(int vertexCount, pts_t vertices[] )
 {
-    coOrd centroid = {0, 0};
-    double signedArea = 0.0;
-    double x0 = 0.0; // Current vertex X
-    double y0 = 0.0; // Current vertex Y
-    double x1 = 0.0; // Next vertex X
-    double y1 = 0.0; // Next vertex Y
-    double a = 0.0;  // Partial signed area
+	coOrd centroid = {0, 0};
+	double signedArea = 0.0;
+	double x0 = 0.0; // Current vertex X
+	double y0 = 0.0; // Current vertex Y
+	double x1 = 0.0; // Next vertex X
+	double y1 = 0.0; // Next vertex Y
+	double a = 0.0;  // Partial signed area
 
-    // For all vertices except last
-    int i=0;
-    for (i=0; i<vertexCount-1; ++i)
-    {
-        x0 = vertices[i].pt.x;
-        y0 = vertices[i].pt.y;
-        x1 = vertices[i+1].pt.x;
-        y1 = vertices[i+1].pt.y;
-        a = x0*y1 - x1*y0;
-        signedArea += a;
-        centroid.x += (x0 + x1)*a;
-        centroid.y += (y0 + y1)*a;
-    }
+	// For all vertices except last
+	int i=0;
+	for (i=0; i<vertexCount-1; ++i) {
+		x0 = vertices[i].pt.x;
+		y0 = vertices[i].pt.y;
+		x1 = vertices[i+1].pt.x;
+		y1 = vertices[i+1].pt.y;
+		a = x0*y1 - x1*y0;
+		signedArea += a;
+		centroid.x += (x0 + x1)*a;
+		centroid.y += (y0 + y1)*a;
+	}
 
-    // Do last vertex separately to avoid performing an expensive
-    // modulus operation in each iteration.
-    x0 = vertices[i].pt.x;
-    y0 = vertices[i].pt.y;
-    x1 = vertices[0].pt.x;
-    y1 = vertices[0].pt.y;
-    a = x0*y1 - x1*y0;
-    signedArea += a;
-    centroid.x += (x0 + x1)*a;
-    centroid.y += (y0 + y1)*a;
+	// Do last vertex separately to avoid performing an expensive
+	// modulus operation in each iteration.
+	x0 = vertices[i].pt.x;
+	y0 = vertices[i].pt.y;
+	x1 = vertices[0].pt.x;
+	y1 = vertices[0].pt.y;
+	a = x0*y1 - x1*y0;
+	signedArea += a;
+	centroid.x += (x0 + x1)*a;
+	centroid.y += (y0 + y1)*a;
 
-    signedArea *= 0.5;
-    centroid.x /= (6.0*signedArea);
-    centroid.y /= (6.0*signedArea);
+	signedArea *= 0.5;
+	centroid.x /= (6.0*signedArea);
+	centroid.y /= (6.0*signedArea);
 
-    return centroid;
+	return centroid;
 }
 
 double FindArcCenter(
-		coOrd * pos,
-		coOrd p0,
-		coOrd p1,
-		double radius )
+        coOrd * pos,
+        coOrd p0,
+        coOrd p1,
+        double radius )
 {
 	double d;
 	double a0, a1;
 	d = FindDistance( p0, p1 )/2.0;
 	a0 = FindAngle( p0, p1 );
 	a1 = NormalizeAngle(R2D(asin( d/radius )));
-	if (a1 > 180)
+	if (a1 > 180) {
 		a1 -= 360;
+	}
 	a0 = NormalizeAngle( a0 + (90.0-a1) );
 	Translate( pos, p0, a0, radius );
 	return a1*2.0;
@@ -720,21 +740,24 @@ double FindArcCenter(
 
 
 #ifdef LATER
-BOOL_T ClipArc( double a0, double a1, coOrd pos, double radius, coOrd orig, double angle, double size )
+BOOL_T ClipArc( double a0, double a1, coOrd pos, double radius, coOrd orig,
+                double angle, double size )
 {
 	i = -1;
 	state = unknown;
 	if (pos.y + radius < 0.0 ||
-		pos.y - radius > size.y ||
-		pos.x + radius < 0.0 ||
-		pos.x - radius > size.x )
+	    pos.y - radius > size.y ||
+	    pos.x + radius < 0.0 ||
+	    pos.x - radius > size.x ) {
 		return 0;
+	}
 
 	if (pos.y + radius <= size.y ||
-		pos.y - radius >= 0.0 ||
-		pos.x + radius <= size.x ||
-		pos.x - radius >= 0.0 )
+	    pos.y - radius >= 0.0 ||
+	    pos.x + radius <= size.x ||
+	    pos.x - radius >= 0.0 ) {
 		return 1;
+	}
 
 	if (pos.y + radius > size.y) {
 		a = R2D(acos( (size.y-pos.y) / radius ) ));
@@ -754,7 +777,8 @@ BOOL_T ClipArc( double a0, double a1, coOrd pos, double radius, coOrd orig, doub
 #endif
 
 #ifdef TEST
-void Test( double p0x, double p0y, double p1x, double p1y, double origx, double origy, double angle, double sizex, double sizey )
+void Test( double p0x, double p0y, double p1x, double p1y, double origx,
+           double origy, double angle, double sizex, double sizey )
 {
 
 	coOrd p0, p1, orig, size, p0a, p1a;
@@ -765,7 +789,7 @@ void Test( double p0x, double p0y, double p1x, double p1y, double origx, double 
 	p0a = p0; p1a = p1;
 	rc = ClipLine( &p0, &p1, orig, angle, size );
 	printf("clipLine=%d P0=[%0.3f %0.3f] P1=[%0.3f %0.3f]\n", rc,
-		p0.x, p0.y, p1.x, p1.y );
+	       p0.x, p0.y, p1.x, p1.y );
 }
 
 INT_T Main( INT_T argc, char *argv[] )
@@ -777,8 +801,9 @@ INT_T Main( INT_T argc, char *argv[] )
 		Exit(1);
 	}
 	argv++;
-	for (i=0;i<9;i++)
+	for (i=0; i<9; i++) {
 		a[i] = atof( *argv++ );
+	}
 
 	Test( a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8] );
 }

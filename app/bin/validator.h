@@ -1,4 +1,4 @@
-/** \file validator.h 
+/** \file validator.h
  * Validators for misc textformats
 */
 

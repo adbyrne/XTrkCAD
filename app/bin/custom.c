@@ -88,16 +88,18 @@ void InitCmdEasement( void )
 }
 void DoEasementRedir( void * unused )
 {
-	if (easementP)
+	if (easementP) {
 		easementP(NULL);
+	}
 }
 
 #ifdef STRUCTDESIGNER
 static addButtonCallBack_t structDesignerP;
 void DoStructDesignerRedir( void )
 {
-	if (structDesignerP)
+	if (structDesignerP) {
 		structDesignerP(NULL);
+	}
 }
 #endif
 
@@ -121,10 +123,10 @@ BOOL_T Initialize( void )
 	InitTrkDraw();
 
 	InitTrkBlock();
-        InitTrkSwitchMotor();
-        InitTrkSignal();
-        InitTrkControl();
-        InitTrkSensor();
+	InitTrkSwitchMotor();
+	InitTrkSignal();
+	InitTrkControl();
+	InitTrkSensor();
 	InitCarDlg();
 	InitCmdNote();
 
@@ -142,72 +144,61 @@ void InitCustom( void )
 	char *buf = malloc(1024);
 
 	/* Initialize some localized strings */
-	if (sTurnoutDesignerW == NULL)
-	{
+	if (sTurnoutDesignerW == NULL) {
 		sprintf(buf, _("%s Turnout Designer"), Product);
 		sTurnoutDesignerW = strdup(buf);
 	}
-	if (sAboutProd == NULL)
-	{
+	if (sAboutProd == NULL) {
 		sprintf(buf, _("%s Version %s"), Product, Version);
 		sAboutProd = strdup(buf);
 	}
-	if (sSourceFilePattern == NULL)
-	{
+	if (sSourceFilePattern == NULL) {
 		sprintf(buf, _("All %s Files (*.xtc,*.xtce)|*.xtc;*.xtce|"
-					   "%s Trackplan (*.xtc)|*.xtc|"
-					   "%s Extended Trackplan (*.xtce)|*.xtce|"
-					   "All Files (*)|*"),
-						Product,
-						Product,
-						Product );
+		               "%s Trackplan (*.xtc)|*.xtc|"
+		               "%s Extended Trackplan (*.xtce)|*.xtce|"
+		               "All Files (*)|*"),
+		        Product,
+		        Product,
+		        Product );
 		sSourceFilePattern = strdup(buf);
 	}
-	if (sSaveFilePattern == NULL)
-	{
+	if (sSaveFilePattern == NULL) {
 		sprintf(buf, _("%s Trackplan (*.xtc)|*.xtc|"
-					   "%s Extended Trackplan (*.xtce)|*.xtce|"
-					   "All Files (*)|*"),
-						Product,
-						Product );
+		               "%s Extended Trackplan (*.xtce)|*.xtce|"
+		               "All Files (*)|*"),
+		        Product,
+		        Product );
 		sSaveFilePattern = strdup(buf);
 	}
-	if (sImageFilePattern == NULL)
-	{
+	if (sImageFilePattern == NULL) {
 		sprintf(buf,_("All Files (*)|*"));
 		sImageFilePattern = strdup(buf);
 	}
-	if (sImportFilePattern == NULL)
-	{
+	if (sImportFilePattern == NULL) {
 		sprintf(buf, _("%s Import Files (*.xti)|*.xti"), Product );
 		sImportFilePattern = strdup(buf);
 	}
-	if (sDXFFilePattern == NULL)
-	{
+	if (sDXFFilePattern == NULL) {
 		sDXFFilePattern = strdup(_("Data Exchange Format Files (*.dxf)|*.dxf"));
 	}
-	if (sSVGFilePattern == NULL)
-	{
-		sSVGFilePattern = strdup(_("Scalable Vector Graphics Format Files (*.svg)|*.svg" ));
+	if (sSVGFilePattern == NULL) {
+		sSVGFilePattern = strdup(
+		                          _("Scalable Vector Graphics Format Files (*.svg)|*.svg" ));
 	}
 
-	if (sRecordFilePattern == NULL)
-	{
+	if (sRecordFilePattern == NULL) {
 		sprintf(buf, _("%s Record Files (*.xtr)|*.xtr"), Product);
 		sRecordFilePattern = strdup(buf);
 	}
-	if (sNoteFilePattern == NULL)
-	{
+	if (sNoteFilePattern == NULL) {
 		sprintf(buf, _("%s Note Files (*.not)|*.not"), Product);
 		sNoteFilePattern = strdup(buf);
 	}
-	if (sLogFilePattern == NULL)
-	{
+	if (sLogFilePattern == NULL) {
 		sprintf(buf, _("%s Log Files (*.log)|*.log"), Product);
 		sLogFilePattern = strdup(buf);
 	}
-	if (sPartsListFilePattern == NULL)
-	{
+	if (sPartsListFilePattern == NULL) {
 		sprintf(buf, _("%s PartsList Files (*.txt)|*.txt"), Product);
 		sPartsListFilePattern = strdup(buf);
 	}
@@ -219,28 +210,23 @@ void InitCustom( void )
 void CleanupCustom( void )
 {
 	/* Free dynamically allocated strings */
-	if (sTurnoutDesignerW)
-	{
+	if (sTurnoutDesignerW) {
 		free(sTurnoutDesignerW);
 		sTurnoutDesignerW = NULL;
 	}
-	if (sAboutProd)
-	{
+	if (sAboutProd) {
 		free(sAboutProd);
 		sAboutProd = NULL;
 	}
-	if (sSourceFilePattern)
-	{
+	if (sSourceFilePattern) {
 		free(sSourceFilePattern);
 		sSourceFilePattern = NULL;
 	}
-	if (sImportFilePattern)
-	{
+	if (sImportFilePattern) {
 		free(sImportFilePattern);
 		sImportFilePattern = NULL;
 	}
-	if (sDXFFilePattern)
-	{
+	if (sDXFFilePattern) {
 		free(sDXFFilePattern);
 		sDXFFilePattern = NULL;
 	}
@@ -248,23 +234,19 @@ void CleanupCustom( void )
 		free(sSVGFilePattern);
 		sSVGFilePattern = NULL;
 	}
-	if (sRecordFilePattern)
-	{
+	if (sRecordFilePattern) {
 		free(sRecordFilePattern);
 		sRecordFilePattern = NULL;
 	}
-	if (sNoteFilePattern)
-	{
+	if (sNoteFilePattern) {
 		free(sNoteFilePattern);
 		sNoteFilePattern = NULL;
 	}
-	if (sLogFilePattern)
-	{
+	if (sLogFilePattern) {
 		free(sLogFilePattern);
 		sLogFilePattern = NULL;
 	}
-	if (sPartsListFilePattern)
-	{
+	if (sPartsListFilePattern) {
 		free(sPartsListFilePattern);
 		sPartsListFilePattern = NULL;
 	}

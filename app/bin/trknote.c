@@ -68,14 +68,14 @@ static 	coOrd posSave;
 
 EXPORT track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 {
-    track_p t;
-    struct extraDataNote_t * xx;
-    t = NewTrack(index, T_NOTE, 0, sizeof *xx);
-    xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
-    xx->pos = p;
+	track_p t;
+	struct extraDataNote_t * xx;
+	t = NewTrack(index, T_NOTE, 0, sizeof *xx);
+	xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+	xx->pos = p;
 	xx->op = command;
-    SetBoundingBox(t, p, p);
-    return t;
+	SetBoundingBox(t, p, p);
+	return t;
 }
 
 /**
@@ -88,9 +88,9 @@ EXPORT track_p NewNote(wIndex_t index, coOrd p, enum noteCommands command )
 
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
-    coOrd p[5];
-    int type[5];
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+	coOrd p[5];
+	int type[5];
 
 
 	if ((d->options & DC_SIMPLE) || mainD.scale >= 16) {
@@ -106,7 +106,7 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 		p[3].y = p[3].y - (dist/2);
 		p[4].x = p[4].x - (dist/2);
 
-		for (int i=0;i<5;i++) {
+		for (int i=0; i<5; i++) {
 			type[i] = 0;
 		}
 		DrawPoly(d, 5, p, type, color, 0, DRAW_CLOSED);
@@ -124,21 +124,21 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 				bm = note_bm;
 			}
 		}
-    	DrawBitMap(d, xx->pos, bm, color);
-    }
+		DrawBitMap(d, xx->pos, bm, color);
+	}
 }
 
 static DIST_T DistanceNote(track_p t, coOrd * p)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
-    DIST_T d;
-    d = FindDistance(*p, xx->pos);
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+	DIST_T d;
+	d = FindDistance(*p, xx->pos);
 
-    if (d < 3.0*(mainD.scale/12.0)) {
-        return d;
-    }
+	if (d < 3.0*(mainD.scale/12.0)) {
+		return d;
+	}
 
-    return DIST_INF;
+	return DIST_INF;
 }
 
 static void DeleteNote(track_p t)
@@ -212,15 +212,15 @@ GetNoteMarker(enum noteCommands command )
 
 static BOOL_T WriteNote(track_p t, FILE * f)
 {
-    struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
-    BOOL_T rc = TRUE;
+	struct extraDataNote_t *xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+	BOOL_T rc = TRUE;
 #ifdef UTFCONVERT
 	unsigned strings2convert = 1;
 #endif
 
 	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d", GetTrkIndex(t),
-		GetTrkLayer(t),
-		xx->pos.x, xx->pos.y, xx->op )>0;
+	              GetTrkLayer(t),
+	              xx->pos.x, xx->pos.y, xx->op )>0;
 
 	char *s[2] = { NULL, NULL };
 	switch (xx->op) {
@@ -260,7 +260,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 		MyFree( s[1] );
 	}
 	rc &= fprintf( f, "\n" )>0;
-	
+
 	return rc;
 }
 
@@ -273,62 +273,67 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 static BOOL_T
 ReadTrackNote(char *line)
 {
-    track_p t;
-    int size;
-    char * cp;
-    struct extraDataNote_t *xx;
-    wIndex_t index;
-    wIndex_t layer;
-    coOrd pos;
-    DIST_T elev;
+	track_p t;
+	int size;
+	char * cp;
+	struct extraDataNote_t *xx;
+	wIndex_t index;
+	wIndex_t layer;
+	coOrd pos;
+	DIST_T elev;
 	char *noteText;
 	enum noteCommands noteType;
 	char * sText;
 
-    if (!GetArgs(line + 5, paramVersion < 3 ? "XXpYdc" : paramVersion < 9 ?
-                 "dL00pYdc" : "dL00pfdc",
-                 &index, &layer, &pos, &elev, &size, &cp)) {
-        return FALSE;
-    }
+	if (!GetArgs(line + 5, paramVersion < 3 ? "XXpYdc" : paramVersion < 9 ?
+	             "dL00pYdc" : "dL00pfdc",
+	             &index, &layer, &pos, &elev, &size, &cp)) {
+		return FALSE;
+	}
 
 	if ( paramVersion >= VERSION_INLINENOTE ) {
 		noteType = size;
 		t = NewNote(index, pos, noteType);
-   		SetTrkLayer(t, layer);
-	   
-   		xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+		SetTrkLayer(t, layer);
+
+		xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
 		switch (noteType) {
 		case OP_NOTETEXT:
-			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
+			}
 #ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.text = sText;
 			break;
 		case OP_NOTELINK:
-			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
+			}
 #ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.linkData.url = sText;
-			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
+			}
 #ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.linkData.title = sText;
 			break;
 		case OP_NOTEFILE:
-			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
+			}
 #ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.fileData.path = sText;
-			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+			if ( !GetArgs( cp, "qc", &sText, &cp ) ) {
 				return FALSE;
+			}
 #ifdef UTFCONVERT
 			ConvertUTF8ToSystem( sText );
 #endif
@@ -339,48 +344,45 @@ ReadTrackNote(char *line)
 			CHECKMSG( FALSE, ( "ReadNote: %d", noteType ) );
 		}
 	} else {
-	noteText = ReadMultilineText();
+		noteText = ReadMultilineText();
 
-	noteType = OP_NOTETEXT;
+		noteType = OP_NOTETEXT;
 
-	if( !strncmp(noteText, DELIMITER, strlen( DELIMITER )) &&
-		!strncmp(noteText + strlen(DELIMITER) + 1, DELIMITER, strlen(DELIMITER)) &&
-			noteText[strlen(DELIMITER)] - '0' > 0 &&
-			noteText[strlen(DELIMITER)] - '0' <= OP_NOTEFILE)
-	{
-		noteType = noteText[strlen(DELIMITER)] - '0';
+		if( !strncmp(noteText, DELIMITER, strlen( DELIMITER )) &&
+		    !strncmp(noteText + strlen(DELIMITER) + 1, DELIMITER, strlen(DELIMITER)) &&
+		    noteText[strlen(DELIMITER)] - '0' > 0 &&
+		    noteText[strlen(DELIMITER)] - '0' <= OP_NOTEFILE) {
+			noteType = noteText[strlen(DELIMITER)] - '0';
+		}
+
+		t = NewNote(index, pos, noteType);
+		SetTrkLayer(t, layer);
+
+		xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
+
+		switch (noteType) {
+		case OP_NOTETEXT:
+			xx->noteData.text = MyStrdup(noteText);
+			break;
+		case OP_NOTELINK: {
+			char *ptr;
+			ptr = strtok(noteText, " ");
+			xx->noteData.linkData.url = MyStrdup(ptr + 2 * strlen(DELIMITER) + 1);
+			xx->noteData.linkData.title = MyStrdup(noteText + strlen(ptr) + 1);
+			break;
+		}
+		case OP_NOTEFILE: {
+			char *ptr;
+			ptr = strtok(noteText + 2 * strlen(DELIMITER) + 1, "\"");
+			xx->noteData.fileData.path = MyStrdup(ptr);
+			xx->noteData.fileData.title = MyStrdup(ptr + strlen(ptr) + 2 );
+			xx->noteData.fileData.inArchive = FALSE;
+			break;
+		}
+
+		}
+		MyFree(noteText);
 	}
-
-    t = NewNote(index, pos, noteType);
-    SetTrkLayer(t, layer);
-	   
-    xx = GET_EXTRA_DATA( t, T_NOTE, extraDataNote_t );
-
-	switch (noteType) {
-	case OP_NOTETEXT:
-		xx->noteData.text = MyStrdup(noteText);
-		break;
-	case OP_NOTELINK:
-	{
-		char *ptr;
-		ptr = strtok(noteText, " ");
-		xx->noteData.linkData.url = MyStrdup(ptr + 2 * strlen(DELIMITER) + 1);
-		xx->noteData.linkData.title = MyStrdup(noteText + strlen(ptr) + 1);
-		break;
-	}
-	case OP_NOTEFILE:
-	{
-		char *ptr;
-		ptr = strtok(noteText + 2 * strlen(DELIMITER) + 1, "\"");
-		xx->noteData.fileData.path = MyStrdup(ptr);
-		xx->noteData.fileData.title = MyStrdup(ptr + strlen(ptr) + 2 );
-		xx->noteData.fileData.inArchive = FALSE;
-		break;
-	}
-
-	}
-    MyFree(noteText);
-    }
 	return TRUE;
 }
 
@@ -393,42 +395,41 @@ ReadTrackNote(char *line)
 static BOOL_T
 ReadNote(char * line)
 {
-    if (strncmp(line, "NOTE MAIN", 9) == 0) {
-        return ReadMainNote(line);
-    } else {
-        return ReadTrackNote(line);
-    }
+	if (strncmp(line, "NOTE MAIN", 9) == 0) {
+		return ReadMainNote(line);
+	} else {
+		return ReadTrackNote(line);
+	}
 }
 
 static void MoveNote(track_p trk, coOrd orig)
 {
-    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-    xx->pos.x += orig.x;
-    xx->pos.y += orig.y;
-    SetBoundingBox(trk, xx->pos, xx->pos);
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	xx->pos.x += orig.x;
+	xx->pos.y += orig.y;
+	SetBoundingBox(trk, xx->pos, xx->pos);
 }
 
 
 static void RotateNote(track_p trk, coOrd orig, ANGLE_T angle)
 {
-    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-    Rotate(&xx->pos, orig, angle);
-    SetBoundingBox(trk, xx->pos, xx->pos);
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	Rotate(&xx->pos, orig, angle);
+	SetBoundingBox(trk, xx->pos, xx->pos);
 }
 
 static void RescaleNote(track_p trk, FLOAT_T ratio)
 {
-    struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
-    xx->pos.x *= ratio;
-    xx->pos.y *= ratio;
+	struct extraDataNote_t * xx = GET_EXTRA_DATA( trk, T_NOTE, extraDataNote_t );
+	xx->pos.x *= ratio;
+	xx->pos.y *= ratio;
 }
 
 static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 {
 	if (IsLinkNote(trk)) {
 		DescribeLinkNote(trk, str, len);
-	}
-	else {
+	} else {
 		if (IsFileNote(trk)) {
 			DescribeFileNote(trk, str, len);
 		} else {
@@ -437,7 +438,8 @@ static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 	}
 }
 
-static void ActivateNote(track_p trk) {
+static void ActivateNote(track_p trk)
+{
 	if (IsLinkNote(trk) ) {
 		ActivateLinkNote(trk);
 	}
@@ -450,8 +452,8 @@ static BOOL_T QueryNote( track_p trk, int query )
 {
 	switch ( query ) {
 	case Q_IS_ACTIVATEABLE:;
-		if (IsFileNote(trk)) return TRUE;
-		if (IsLinkNote(trk)) return TRUE;
+		if (IsFileNote(trk)) { return TRUE; }
+		if (IsLinkNote(trk)) { return TRUE; }
 		break;
 	default:
 		return FALSE;
@@ -470,22 +472,22 @@ static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
 }
 
 static trackCmd_t noteCmds = {
-    "NOTE",
-    DrawNote,
-    DistanceNote,
-    DescribeNote,
-    DeleteNote,
-    WriteNote,
-    ReadNote,
-    MoveNote,
-    RotateNote,
-    RescaleNote,
-    NULL,		/* audit */
-    NULL,		/* getAngle */
-    NULL,		/* split */
-    NULL,		/* traverse */
-    NULL,		/* enumerate */
-    NULL,		/* redraw */
+	"NOTE",
+	DrawNote,
+	DistanceNote,
+	DescribeNote,
+	DeleteNote,
+	WriteNote,
+	ReadNote,
+	MoveNote,
+	RotateNote,
+	RescaleNote,
+	NULL,		/* audit */
+	NULL,		/* getAngle */
+	NULL,		/* split */
+	NULL,		/* traverse */
+	NULL,		/* enumerate */
+	NULL,		/* redraw */
 	NULL,       /*trim*/
 	NULL,       /*merge*/
 	NULL,       /*modify*/
@@ -515,31 +517,30 @@ static trackCmd_t noteCmds = {
 
 static STATUS_T CmdNote(wAction_t action, coOrd pos)
 {
-    static coOrd oldPos;
-    static int state_on = FALSE;
-    track_p trk;
+	static coOrd oldPos;
+	static int state_on = FALSE;
+	track_p trk;
 
-    switch (action) {
-    case C_START:
-        InfoMessage(_("Place a note on the layout"));
+	switch (action) {
+	case C_START:
+		InfoMessage(_("Place a note on the layout"));
 		curNoteType = VP2L(commandContext);
-        return C_CONTINUE;
+		return C_CONTINUE;
 
-    case C_DOWN:
-        state_on = TRUE;
-        oldPos = pos;
-        return C_CONTINUE;
+	case C_DOWN:
+		state_on = TRUE;
+		oldPos = pos;
+		return C_CONTINUE;
 
-    case C_MOVE:
-        oldPos = pos;
-        return C_CONTINUE;
+	case C_MOVE:
+		oldPos = pos;
+		return C_CONTINUE;
 
-    case C_UP:
-        UndoStart(_("New Note"), "New Note");
-        state_on = FALSE;
+	case C_UP:
+		UndoStart(_("New Note"), "New Note");
+		state_on = FALSE;
 
-		switch (curNoteType)
-		{
+		switch (curNoteType) {
 		case OP_NOTETEXT:
 			NewTextNoteUI(pos);
 			break;
@@ -553,8 +554,8 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 
 		return C_CONTINUE;
 
-    case C_REDRAW:
-    	if (state_on) {
+	case C_REDRAW:
+		if (state_on) {
 			switch (curNoteType) {
 			case OP_NOTETEXT:
 				DrawBitMap(&tempD, oldPos, note_bm, normalColor);
@@ -566,16 +567,16 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 				DrawBitMap(&tempD, oldPos, document_bm, normalColor);
 				break;
 			}
-    	}
-        return C_CONTINUE;
+		}
+		return C_CONTINUE;
 
-    case C_CANCEL:
-        DescribeCancel();
-        state_on = FALSE;
-        return C_CONTINUE;
-    }
+	case C_CANCEL:
+		DescribeCancel();
+		state_on = FALSE;
+		return C_CONTINUE;
+	}
 
-    return C_INFO;
+	return C_INFO;
 }
 
 #include "bitmaps/note.xbm"
@@ -585,9 +586,10 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 
 void InitTrkNote(wMenu_p menu)
 {
-    note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
-    link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
-	document_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, clip_bits);
+	note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
+	link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
+	document_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8,
+	                                clip_bits);
 
 	ButtonGroupBegin(_("Notes"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {
@@ -596,7 +598,8 @@ void InitTrkNote(wMenu_p menu)
 
 		nt = noteTypes + i;
 		icon = wIconCreatePixMap(nt->xpm[iconSize]);
-		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, I2VP(nt->OP));
+		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50,
+		              IC_STICKY | IC_POPUP2, nt->acclKey, I2VP(nt->OP));
 	}
 	ButtonGroupEnd();
 
