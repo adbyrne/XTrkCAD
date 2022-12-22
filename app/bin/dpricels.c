@@ -56,7 +56,8 @@ static paramData_t priceListPLs[] = {
 	{	PD_FLOAT, &priceListFlexLengthV, "flexlen", PDO_NOPREF|PDO_NOPSHUPD|PDO_DIM|PDO_DLGRESETMARGIN, &priceListFlexData, N_("Flex Track") },
 	{	PD_MESSAGE, N_("costs"), NULL, PDO_DLGHORZ },
 #define I_PRICELSFLEXCOST		(6)
-	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData } };
+	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData }
+};
 static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, COUNT( priceListPLs ) };
 
 
@@ -64,16 +65,21 @@ static void PriceListUpdate()
 {
 	DIST_T oldPrice;
 	ParamLoadData( &priceListPG );
-	if (priceListCurrent == NULL)
+	if (priceListCurrent == NULL) {
 		return;
-	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, priceListCurrent->title );
+	}
+	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO,
+	                     priceListCurrent->title );
 	wPrefGetFloat( "price list", message, &oldPrice, 0.0 );
-	if (oldPrice == priceListCostV)
+	if (oldPrice == priceListCostV) {
 		return;
+	}
 	wPrefSetFloat( "price list", message, priceListCostV );
 	FormatCompoundTitle( listLabels|LABEL_COST, priceListCurrent->title );
-	if (message[0] != '\0')
-		wListSetValues( priceListSelL, wListGetIndex(priceListSelL), message, NULL, priceListCurrent );
+	if (message[0] != '\0') {
+		wListSetValues( priceListSelL, wListGetIndex(priceListSelL), message, NULL,
+		                priceListCurrent );
+	}
 }
 
 
@@ -88,14 +94,16 @@ static void PriceListOk( void * action )
 
 
 static void PriceListSel(
-		turnoutInfo_t * to )
+        turnoutInfo_t * to )
 {
 	FLOAT_T price;
 	PriceListUpdate();
 	priceListCurrent = to;
-	if (priceListCurrent == NULL)
+	if (priceListCurrent == NULL) {
 		return;
-	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, priceListCurrent->title );
+	}
+	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO,
+	                     priceListCurrent->title );
 	wPrefGetFloat( "price list", message, &price, 0.00 );
 	priceListCostV = price;
 	strcpy( priceListEntryV, message );
@@ -108,18 +116,24 @@ static void PriceListChange( long changes )
 {
 	turnoutInfo_t * to1, * to2;
 	if ((changes & (CHANGE_SCALE|CHANGE_PARAMS)) == 0 ||
-		priceListW == NULL || !wWinIsVisible( priceListW ) ) 
+	    priceListW == NULL || !wWinIsVisible( priceListW ) ) {
 		return;
+	}
 	wListClear( priceListSelL );
-	to1 = TurnoutAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL, -1 );
-	to2 = StructAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL );
-	if (to1 == NULL)
+	to1 = TurnoutAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL,
+	                  NULL, -1 );
+	to2 = StructAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL,
+	                 NULL );
+	if (to1 == NULL) {
 		to1 = to2;
+	}
 	priceListCurrent = NULL;
-	if (to1)
+	if (to1) {
 		PriceListSel( to1 );
-	if ((changes & CHANGE_SCALE) == 0)
+	}
+	if ((changes & CHANGE_SCALE) == 0) {
 		return;
+	}
 	sprintf( message, "price list %s", curScaleName );
 	wPrefGetFloat( message, "flex length", &priceListFlexLengthV, 0.0 );
 	wPrefGetFloat( message, "flex cost", &priceListFlexCostV, 0.0 );
@@ -128,9 +142,9 @@ static void PriceListChange( long changes )
 
 
 static void PriceListDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
 	turnoutInfo_t * to;
 	switch( inx ) {
@@ -138,7 +152,8 @@ static void PriceListDlgUpdate(
 		PriceListUpdate();
 		break;
 	case I_PRICELSLIST:
-		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, (wIndex_t)*(long*)valueP );
+		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)pg->paramPtr[inx].control,
+		                (wIndex_t)*(long*)valueP );
 		PriceListSel( to );
 		break;
 	}
@@ -147,8 +162,10 @@ static void PriceListDlgUpdate(
 
 static void DoPriceList( void * junk )
 {
-	if (priceListW == NULL)
-		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle(_("Price List")), _("Done"), PriceListOk, wHide, TRUE, NULL, F_RESIZE, PriceListDlgUpdate );
+	if (priceListW == NULL) {
+		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle(_("Price List")),
+		                                _("Done"), PriceListOk, wHide, TRUE, NULL, F_RESIZE, PriceListDlgUpdate );
+	}
 	wShow( priceListW );
 	PriceListChange( CHANGE_SCALE|CHANGE_PARAMS );
 }

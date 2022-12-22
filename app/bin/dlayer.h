@@ -1,6 +1,6 @@
 
 /** \file dlayer.h
- * 
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,7 +28,7 @@
 extern unsigned int curLayer;
 extern long layerCount;
 void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
-                         void * listContext, void * arg);
+                  void * listContext, void * arg);
 wDrawColor GetLayerColor( unsigned int );
 BOOL_T GetLayerUseDefault( unsigned int );
 SCALEINX_T GetLayerScale( unsigned int );

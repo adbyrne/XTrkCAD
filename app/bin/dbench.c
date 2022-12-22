@@ -53,42 +53,45 @@ static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 #include "bitmaps/bo_ti.xpm"
 
 typedef struct {
-		char * name;
-		char ** xpm;
-		wIcon_p icon;
-		} orientData_t;
+	char * name;
+	char ** xpm;
+	wIcon_p icon;
+} orientData_t;
 static orientData_t rectOrientD[] = {
-		{ N_("On Edge"), bo_edge_xpm },
-		{ N_("Flat"), bo_flat_xpm } };
+	{ N_("On Edge"), bo_edge_xpm },
+	{ N_("Flat"), bo_flat_xpm }
+};
 static orientData_t lgirderOrientD[] = {
-		{ N_("Left"), bo_ll_xpm },
-		{ N_("Right"), bo_lr_xpm },
-		{ N_("Left-Down"), bo_lld_xpm },
-		{ N_("Right-Down"), bo_lrd_xpm },
-		{ N_("Left-Up"), bo_llu_xpm },
-		{ N_("Right-Up"), bo_lru_xpm },
-		{ N_("Left-Inverted"), bo_lli_xpm },
-		{ N_("Right-Inverted"), bo_lri_xpm } };
+	{ N_("Left"), bo_ll_xpm },
+	{ N_("Right"), bo_lr_xpm },
+	{ N_("Left-Down"), bo_lld_xpm },
+	{ N_("Right-Down"), bo_lrd_xpm },
+	{ N_("Left-Up"), bo_llu_xpm },
+	{ N_("Right-Up"), bo_lru_xpm },
+	{ N_("Left-Inverted"), bo_lli_xpm },
+	{ N_("Right-Inverted"), bo_lri_xpm }
+};
 static orientData_t tgirderOrientD[] = {
-		{ N_("Normal"), bo_t_xpm },
-		{ N_("Right"), bo_tr_xpm },
-		{ N_("Left"), bo_tl_xpm },
-		{ N_("Inverted"), bo_ti_xpm } };
+	{ N_("Normal"), bo_t_xpm },
+	{ N_("Right"), bo_tr_xpm },
+	{ N_("Left"), bo_tl_xpm },
+	{ N_("Inverted"), bo_ti_xpm }
+};
 
 static struct {
-		int cnt;
-		orientData_t *data;
-		} orientD[] = { {2, rectOrientD}, {8, lgirderOrientD}, {4, tgirderOrientD} };
+	int cnt;
+	orientData_t *data;
+} orientD[] = { {2, rectOrientD}, {8, lgirderOrientD}, {4, tgirderOrientD} };
 
-		
+
 /*										L-N R-N L-D R-D L-U R-U L-I R-I */
 static BOOL_T lgirderFlangeLeft[]	= {	 1,	 0,	 0,	 1,	 1,	 0,	 0,	 1 };
 static BOOL_T lgirderFlangeDashed[] = {	 1,	 1,	 1,	 1,	 0,	 0,	 0,	 0 };
 static BOOL_T lgirderNarrow[]		= {	 1,	 1,	 0,	 0,	 0,	 0,	 1,	 1 };
 
 EXPORT void BenchUpdateOrientationList(
-		long benchData,
-		wList_p list )
+        long benchData,
+        wList_p list )
 {
 	long type;
 	orientData_t *op;
@@ -99,29 +102,30 @@ EXPORT void BenchUpdateOrientationList(
 	op = orientD[type].data;
 	for (cnt=orientD[type].cnt-1; cnt>=0; cnt--,op++) {
 #ifdef WINDOWS
-		if (op->icon == NULL)
+		if (op->icon == NULL) {
 			op->icon = wIconCreatePixMap( op->xpm );
+		}
 		wListAddValue( list, NULL, op->icon, op );
 #else
 		/* gtk_combo_find is upset if we try to put anything other that a label on a list */
 		wListAddValue( list, _(op->name), NULL, op );
 #endif
-   }
-   wListSetIndex( list, 0 );
+	}
+	wListSetIndex( list, 0 );
 }
 
 typedef struct {
-		long type;
-		long width;
-		long height0, height1;
-		} benchType_t, *benchType_p;
+	long type;
+	long width;
+	long height0, height1;
+} benchType_t, *benchType_p;
 static dynArr_t benchType_da;
 #define benchType(N) DYNARR_N( benchType_t, benchType_da, N )
 
 static void AddBenchTypes(
-		long type,
-		const char * key,
-		const char * defvalue )
+        long type,
+        const char * key,
+        const char * defvalue )
 {
 	benchType_p bt;
 	const char *value, *cp;
@@ -140,7 +144,8 @@ static void AddBenchTypes(
 		bt->height0 = strtol( cp=cq, &cq, 10 );
 		bt->height1 = strtol( cp=cq, &cq, 10 );
 		if ( cp == cq ) {
-			NoticeMessage( _("Bad BenchType for %s:\n%s"), _("Continue"), NULL, key, value );
+			NoticeMessage( _("Bad BenchType for %s:\n%s"), _("Continue"), NULL, key,
+			               value );
 			benchType_da.cnt--;
 			return;
 		}
@@ -167,12 +172,14 @@ EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
 		bt = &benchType(inx);
 		for (height=bt->height0; height<=bt->height1; height++ ) {
 			benchData = bt->type<<24 | bt->width<<17 | height<<9;
-			sprintf( message, "%s", (bt->type==B_LGRIDER?"L-":bt->type==B_TGRIDER?"T-":"") );
+			sprintf( message, "%s", (bt->type==B_LGRIDER?"L-":bt->type==B_TGRIDER
+			                         ?"T-":"") );
 			cp = message+strlen(message);
-			if ( units==UNITS_ENGLISH )
+			if ( units==UNITS_ENGLISH ) {
 				sprintf( cp, "%ld\"x%ld\"", bt->width, height );
-			else
+			} else {
 				sprintf( cp, "%ldmm x %ldmm", height*25, bt->width*25 );
+			}
 			wListAddValue( choiceL, message, NULL, I2VP(benchData) );
 		}
 	}
@@ -182,15 +189,15 @@ EXPORT void BenchLoadLists( wList_p choiceL, wList_p orientL )
 
 
 EXPORT long GetBenchData(
-		long benchData,
-		long orient )
+        long benchData,
+        long orient )
 {
 	return (benchData&0xFFFFFF00)|(orient&0xFF);
 }
 
 
 EXPORT wIndex_t GetBenchListIndex(
-		long benchData )
+        long benchData )
 {
 	wIndex_t inx, cnt;
 	benchType_p bt;
@@ -204,11 +211,12 @@ EXPORT wIndex_t GetBenchListIndex(
 	for ( inx=cnt=0; inx<benchType_da.cnt; inx++ ) {
 		bt = &benchType(inx);
 		if ( bt->type == type &&
-			 bt->width == iwidth ) {
-			if ( iheight < bt->height0 )
+		     bt->width == iwidth ) {
+			if ( iheight < bt->height0 ) {
 				bt->height0 = iheight;
-			else if ( iheight > bt->height1 )
+			} else if ( iheight > bt->height1 ) {
 				bt->height1 = iheight;
+			}
 			cnt += (wIndex_t)(iheight - bt->height0);
 			return cnt;
 		}
@@ -224,13 +232,13 @@ EXPORT wIndex_t GetBenchListIndex(
 
 
 EXPORT void DrawBench(
-		drawCmd_p d,
-		coOrd p0,
-		coOrd p1,
-		wDrawColor color1,
-		wDrawColor color2,
-		long option,
-		long benchData )
+        drawCmd_p d,
+        coOrd p0,
+        coOrd p1,
+        wDrawColor color1,
+        wDrawColor color2,
+        long option,
+        long benchData )
 {
 	long orient;
 	coOrd pp[4];
@@ -257,16 +265,17 @@ EXPORT void DrawBench(
 		DrawPoly( d, 4, pp, NULL, color1, 0, DRAW_FILL );
 		/* Draw Outline */
 		if ( /*color1 != color2 &&*/
-			DrawTwoRails(d,1) ||
-			d->funcs == &tempSegDrawFuncs ) {
+		        DrawTwoRails(d,1) ||
+		        d->funcs == &tempSegDrawFuncs ) {
 			DrawPoly( d, 4, pp, NULL, color2, 0, DRAW_CLOSED );
 			if ( color1 != color2 && type != B_RECT ) {
 				oldOptions = d->options;
 				if ( type == B_LGRIDER || orient == 1 || orient == 2 ) {
-					if ( type == B_LGRIDER && lgirderFlangeDashed[orient] )
+					if ( type == B_LGRIDER && lgirderFlangeDashed[orient] ) {
 						d->options |= DC_DASH;
+					}
 					if ( (type == B_LGRIDER && lgirderFlangeLeft[orient]) ||
-						 (type == B_TGRIDER && orient == 1) ) {
+					     (type == B_TGRIDER && orient == 1) ) {
 						Translate( &pp[0], pp[1], a+90, thickness );
 						Translate( &pp[3], pp[2], a+90, thickness );
 					} else {
@@ -275,14 +284,15 @@ EXPORT void DrawBench(
 					}
 					DrawLine( d, pp[0], pp[3], 0, color2 );
 				} else {
-				   Translate( &pp[0], p0, a+90, thickness/2.0 );
-				   Translate( &pp[1], p0, a-90, thickness/2.0 );
-				   Translate( &pp[2], p1, a-90, thickness/2.0 );
-				   Translate( &pp[3], p1, a+90, thickness/2.0 );
-				   if ( orient == 0 )
-					   d->options |= DC_DASH;
-				   DrawLine( d, pp[0], pp[3], 0, color2 );
-				   DrawLine( d, pp[1], pp[2], 0, color2 );
+					Translate( &pp[0], p0, a+90, thickness/2.0 );
+					Translate( &pp[1], p0, a-90, thickness/2.0 );
+					Translate( &pp[2], p1, a-90, thickness/2.0 );
+					Translate( &pp[3], p1, a+90, thickness/2.0 );
+					if ( orient == 0 ) {
+						d->options |= DC_DASH;
+					}
+					DrawLine( d, pp[0], pp[3], 0, color2 );
+					DrawLine( d, pp[1], pp[2], 0, color2 );
 				}
 				d->options = oldOptions;
 			}
@@ -301,8 +311,8 @@ EXPORT addButtonCallBack_t InitBenchDialog( void )
 
 
 EXPORT void BenchGetDesc(
-		long benchData,
-		char * desc )
+        long benchData,
+        char * desc )
 {
 	long orient;
 	long type;
@@ -314,41 +324,44 @@ EXPORT void BenchGetDesc(
 	iwidth = (benchData>>17)&0x7f;
 	type = (benchData>>24)&0xff;
 
-	if ( units==UNITS_ENGLISH )
+	if ( units==UNITS_ENGLISH ) {
 		sprintf( name, "%ld\"x%ld\"", iwidth, iheight );
-	else
+	} else {
 		sprintf( name, "%ldmm x %ldmm", iheight*25, iwidth*25 );
+	}
 
 	sprintf( desc, "%s%s %s",
-		(type==B_LGRIDER?"L - ":type==B_TGRIDER?"T - ":""),
-		name,
-		_(orientD[type].data[(int)orient].name) );
+	         (type==B_LGRIDER?"L - ":type==B_TGRIDER?"T - ":""),
+	         name,
+	         _(orientD[type].data[(int)orient].name) );
 }
 
 typedef struct {
-		long type;
-		long width;
-		long height;
-		DIST_T length;
-		} benchEnum_t, *benchEnum_p;
+	long type;
+	long width;
+	long height;
+	DIST_T length;
+} benchEnum_t, *benchEnum_p;
 static dynArr_t benchEnum_da;
 #define benchEnum(N) DYNARR_N( benchEnum_t, benchEnum_da, N )
 
 static void PrintBenchLine(
-		char * line,
-		benchEnum_p bp )
+        char * line,
+        benchEnum_p bp )
 {
 	char name[40];
-	if ( units==UNITS_ENGLISH )
+	if ( units==UNITS_ENGLISH ) {
 		sprintf( name, "%ld\"x%ld\"", bp->width, bp->height );
-	else
+	} else {
 		sprintf( name, "%ldmm x %ldmm", bp->height*25, bp->width*25 );
-	sprintf( line, "%s - %s%s", FormatDistance(bp->length), name, benchTypeS[bp->type] );
+	}
+	sprintf( line, "%s - %s%s", FormatDistance(bp->length), name,
+	         benchTypeS[bp->type] );
 }
 
 EXPORT void CountBench(
-		long benchData,
-		DIST_T length )
+        long benchData,
+        DIST_T length )
 {
 	int inx;
 //	long orient;
@@ -364,8 +377,8 @@ EXPORT void CountBench(
 	for ( inx=0; inx<benchEnum_da.cnt; inx++ ) {
 		bp = &benchEnum(inx);
 		if ( bp->type == type &&
-			 bp->width == iwidth &&
-			 bp->height == iheight ) {
+		     bp->width == iwidth &&
+		     bp->height == iheight ) {
 			bp->length += length;
 			goto foundBenchEnum;
 		}
@@ -379,20 +392,21 @@ EXPORT void CountBench(
 foundBenchEnum:
 	PrintBenchLine( message, bp );
 	size_t width = strlen(message);
-	if ( width > enumerateMaxDescLen)
+	if ( width > enumerateMaxDescLen) {
 		enumerateMaxDescLen = (int)width;
+	}
 }
 
 static int Cmp_benchEnum(
-		const void *p1,
-		const void *p2 )
+        const void *p1,
+        const void *p2 )
 {
 	benchEnum_p bp1 = (benchEnum_p)p1;
 	benchEnum_p bp2 = (benchEnum_p)p2;
 	long diff;
-	if ( ( diff = bp1->type-bp2->type ) != 0 ) return (int)diff;
-	if ( ( diff = bp1->width-bp2->width ) != 0 ) return (int)diff;
-	if ( ( diff = bp1->height-bp2->height ) != 0 ) return (int)diff;
+	if ( ( diff = bp1->type-bp2->type ) != 0 ) { return (int)diff; }
+	if ( ( diff = bp1->width-bp2->width ) != 0 ) { return (int)diff; }
+	if ( ( diff = bp1->height-bp2->height ) != 0 ) { return (int)diff; }
 	return 0;
 }
 

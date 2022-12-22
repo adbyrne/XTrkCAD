@@ -20,24 +20,24 @@
 
 #ifdef XTRKCAD_USE_GETTEXT
 /* Use gettext */
-	#ifndef USE_SIMPLE_GETTEXT
-		#include <libintl.h>
-	#endif
+#ifndef USE_SIMPLE_GETTEXT
+#include <libintl.h>
+#endif
 
-	#include <string.h>
+#include <string.h>
 
-	#define _(String)             ((String && strlen(String) > 0) \
+#define _(String)             ((String && strlen(String) > 0) \
 		                          ? gettext(String) : String)
-	#define p_(Context, String)   ((Context && strlen(Context) > 0) \
+#define p_(Context, String)   ((Context && strlen(Context) > 0) \
 								  ? pgettext(Context, String) : _(String))
-	#define gettext_noop(String)  String
-	#define N_(String)            gettext_noop(String)
+#define gettext_noop(String)  String
+#define N_(String)            gettext_noop(String)
 
 #else
-	/* Don't use gettext */
-	#define _(String)             String
-	#define gettext_noop(String)  String
-	#define N_(String)            String
+/* Don't use gettext */
+#define _(String)             String
+#define gettext_noop(String)  String
+#define N_(String)            String
 #endif /* XTRKCAD_USE_GETTEXT */
 
 void InitGettext( void );

@@ -15,7 +15,8 @@ size_t
 levenshtein(const char *a, const char *b);
 
 size_t
-levenshtein_n (const char *a, const size_t length, const char *b, const size_t bLength);
+levenshtein_n (const char *a, const size_t length, const char *b,
+               const size_t bLength);
 
 #ifdef __cplusplus
 }

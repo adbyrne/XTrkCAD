@@ -46,8 +46,9 @@ static void LogInit( void )
 {
 	int inx=0;
 
-	if ( logTable_da.cnt != 0 )
+	if ( logTable_da.cnt != 0 ) {
 		return;
+	}
 	DYNARR_APPEND( logTable_t, logTable_da,10);
 	logTable(inx).name = "";
 	logTable(inx).level = 0;
@@ -74,14 +75,17 @@ static void LogDoOpen( void )
 	if ( logFileName ) {
 		logFile = fopen( logFileName, "a" );
 		if ( logFile == NULL ) {
-			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Log", logFileName, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Log", logFileName,
+			               strerror(errno) );
 			perror( logFileName );
 			return;
 		}
 	}
-	fprintf( logFile, "# %s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&logClock) );
-	if ( recordF )
+	fprintf( logFile, "# %s Version: %s, Date: %s\n", sProdName, sVersion,
+	         ctime(&logClock) );
+	if ( recordF ) {
 		fprintf( recordF, "# LOG CLOCK %s\n", ctime(&logClock) );
+	}
 }
 
 EXPORT void LogClose( void )
@@ -90,10 +94,11 @@ EXPORT void LogClose( void )
 	if ( logFile ) {
 		time(&clock);
 		fprintf( logFile, "LOG END %s\n", ctime(&clock) );
-		if ( logFile != stdout )
+		if ( logFile != stdout ) {
 			fclose( logFile );
-	 }
-	 logFile = NULL;
+		}
+	}
+	logFile = NULL;
 }
 
 EXPORT void LogSet( char * name, int level )
@@ -109,22 +114,24 @@ EXPORT int LogFindIndex( const char * name )
 {
 	int inx;
 	for ( inx=0; inx<logTable_da.cnt; inx++ )
-		if ( strcasecmp( logTable(inx).name, name ) == 0 )
+		if ( strcasecmp( logTable(inx).name, name ) == 0 ) {
 			return inx;
+		}
 	return 0;
 }
 
 EXPORT void LogPrintf(
-		const char * format,
-		... )
+        const char * format,
+        ... )
 {
 	va_list ap;
 	if (!logInitted) {
 		LogDoOpen();
 		logInitted = TRUE;
 	}
-	if ( logFile == NULL )
+	if ( logFile == NULL ) {
 		return;
+	}
 	logLineNumber++;
 	if ( logLineNumber % 100 == 0 ) {
 		if ( recordF ) {

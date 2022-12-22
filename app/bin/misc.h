@@ -218,7 +218,7 @@ extern DIST_T easeL;
 
 /* denum.c */
 extern int enumerateMaxDescLen;
-void EnumerateList( long, FLOAT_T, char * , char * );
+void EnumerateList( long, FLOAT_T, char *, char * );
 void EnumerateStart(void);
 void EnumerateEnd(void);
 
@@ -268,9 +268,9 @@ int RegressionTestAll();
 
 /* lprintf.c */
 typedef struct {
-		char * name;
-		int level;
-		} logTable_t;
+	char * name;
+	int level;
+} logTable_t;
 extern dynArr_t logTable_da;
 #define logTable(N) DYNARR_N( logTable_t, logTable_da, N )
 extern time_t logClock;

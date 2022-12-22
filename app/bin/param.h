@@ -34,23 +34,23 @@ extern wWinPix_t DlgSepLeft;
 extern wWinPix_t DlgSepRight;
 
 typedef enum {
-		PD_LONG,
-		PD_FLOAT,
-		PD_RADIO,
-		PD_TOGGLE,
-		PD_STRING,
-		PD_LIST,
-		PD_DROPLIST,
-		PD_COMBOLIST,
-		PD_BUTTON,
-		PD_COLORLIST,
-		PD_MESSAGE,					/* static text */
-		PD_DRAW,
-		PD_TEXT,
-		PD_MENU,
-		PD_MENUITEM,
-		PD_BITMAP
-		} parameterType;
+	PD_LONG,
+	PD_FLOAT,
+	PD_RADIO,
+	PD_TOGGLE,
+	PD_STRING,
+	PD_LIST,
+	PD_DROPLIST,
+	PD_COMBOLIST,
+	PD_BUTTON,
+	PD_COLORLIST,
+	PD_MESSAGE,					/* static text */
+	PD_DRAW,
+	PD_TEXT,
+	PD_MENU,
+	PD_MENUITEM,
+	PD_BITMAP
+} parameterType;
 
 // PD_FLOAT modifiers
 #define PDO_DIM				(1L<<0)
@@ -107,60 +107,60 @@ typedef struct paramGroup_t *paramGroup_p;
 #define PDO_NORANGECHECK_LOW			(1<<0)
 #define PDO_NORANGECHECK_HIGH	(1<<1)
 typedef struct {
-		long low;
-		long high;
-		wWinPix_t width;
-		int rangechecks;
-		} paramIntegerRange_t;
+	long low;
+	long high;
+	wWinPix_t width;
+	int rangechecks;
+} paramIntegerRange_t;
 typedef struct {
-		FLOAT_T low;
-		FLOAT_T high;
-		wWinPix_t width;
-		int rangechecks;
-		} paramFloatRange_t;
+	FLOAT_T low;
+	FLOAT_T high;
+	wWinPix_t width;
+	int rangechecks;
+} paramFloatRange_t;
 typedef struct {
-		wWinPix_t width;
-		wWinPix_t height;
-		wDrawRedrawCallBack_p redraw;
-		playbackProc action;
-		drawCmd_p d;
-		} paramDrawData_t;
+	wWinPix_t width;
+	wWinPix_t height;
+	wDrawRedrawCallBack_p redraw;
+	playbackProc action;
+	drawCmd_p d;
+} paramDrawData_t;
 typedef struct {
-		wIndex_t number;
-		wWinPix_t width;
-		int colCnt;
-		wWinPix_t * colWidths;
-		const char * * colTitles;
-		wWinPix_t height;
-		} paramListData_t;
+	wIndex_t number;
+	wWinPix_t width;
+	int colCnt;
+	wWinPix_t * colWidths;
+	const char * * colTitles;
+	wWinPix_t height;
+} paramListData_t;
 typedef struct {
-		wWinPix_t width;
-		wWinPix_t height; 
-		} paramTextData_t;
+	wWinPix_t width;
+	wWinPix_t height;
+} paramTextData_t;
 
 typedef union {
-				long l; 
-				FLOAT_T f;
-				char * s;
-				turnoutInfo_p p;
-				wDrawColor dc;
-		} paramOldData_t;
+	long l;
+	FLOAT_T f;
+	char * s;
+	turnoutInfo_p p;
+	wDrawColor dc;
+} paramOldData_t;
 typedef struct {
-		parameterType type;
-		void * valueP;
-		const char * nameStr;
-		long option;
-		const void * winData;
-		const char * winLabel;
-		long winOption;
-		void * context;
-        unsigned int max_string;
-		wControl_p control;
-		paramGroup_p group;
-		paramOldData_t oldD, demoD;
-		wBool_t enter_pressed;
-		wBool_t bInvalid;
-		} paramData_t, *paramData_p;
+	parameterType type;
+	void * valueP;
+	const char * nameStr;
+	long option;
+	const void * winData;
+	const char * winLabel;
+	long winOption;
+	void * context;
+	unsigned int max_string;
+	wControl_p control;
+	paramGroup_p group;
+	paramOldData_t oldD, demoD;
+	wBool_t enter_pressed;
+	wBool_t bInvalid;
+} paramData_t, *paramData_p;
 
 
 typedef void (*paramGroupProc_t) ( long, long );
@@ -176,31 +176,32 @@ typedef void (*paramGroupProc_t) ( long, long );
 #define PGO_PREFDRAWGROUP		(1<<9)
 #define PGO_PREFMISC			(1<<10)
 
-typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *, wWinPix_t * );
+typedef void (*paramLayoutProc)( paramData_t *, int, wWinPix_t, wWinPix_t *,
+                                 wWinPix_t * );
 typedef void (*paramActionOkProc)( void * );
 typedef void (*paramActionCancelProc)( wWin_p );
 typedef void (*paramChangeProc)( paramGroup_p, int, void * );
 
 typedef struct paramGroup_t {
-		char * nameStr;
-		long options;
-		paramData_p paramPtr;
-		int paramCnt;
-		paramActionOkProc okProc;
-		paramActionCancelProc cancelProc;
-		paramLayoutProc layoutProc;
-		long winOption;
-		paramChangeProc changeProc;
-		long action;
-		paramGroupProc_t proc;
-		wWin_p win;
-		wButton_p okB;
-		wButton_p cancelB;
-		wButton_p helpB;
-		wWinPix_t origW;
-		wWinPix_t origH;
-		wBox_p * boxs;
-		} paramGroup_t;
+	char * nameStr;
+	long options;
+	paramData_p paramPtr;
+	int paramCnt;
+	paramActionOkProc okProc;
+	paramActionCancelProc cancelProc;
+	paramLayoutProc layoutProc;
+	long winOption;
+	paramChangeProc changeProc;
+	long action;
+	paramGroupProc_t proc;
+	wWin_p win;
+	wButton_p okB;
+	wButton_p cancelB;
+	wButton_p helpB;
+	wWinPix_t origW;
+	wWinPix_t origH;
+	wBox_p * boxs;
+} paramGroup_t;
 
 wIndex_t ColorTabLookup( wDrawColor );
 
@@ -267,7 +268,8 @@ long GetChanges(paramGroup_p pg);
 		if ( HS ) GetBalloonHelpStr(HS);
 
 #define PD_F_ALT_CANCELLABEL	(1L<<30)		/**<use Close or Cancel for the discard button */
-wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc, paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
+wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc,
+                          paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
 void ParamCreateControls( paramGroup_p, paramChangeProc );
 void ParamLayoutDialog( paramGroup_p );
 

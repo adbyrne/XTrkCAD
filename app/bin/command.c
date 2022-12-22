@@ -85,37 +85,41 @@ EXPORT void * commandContext;
 EXPORT coOrd cmdMenuPos;
 
 /*--------------------------------------------------------------------*/
-EXPORT const char* GetCurCommandName() {
+EXPORT const char* GetCurCommandName()
+{
 	return commandList[curCommand].helpKey;
 }
 
-EXPORT void EnableCommands(void) {
+EXPORT void EnableCommands(void)
+{
 	int inx, minx;
 	wBool_t enable;
 
 	LOG(log_command, 5,
-			( "COMMAND enable S%d M%d\n", selectedTrackCount, programMode ))
+	    ( "COMMAND enable S%d M%d\n", selectedTrackCount, programMode ))
 	for (inx = 0; inx < commandCnt; inx++) {
 		if (commandList[inx].buttInx) {
 			if ((commandList[inx].options & IC_SELECTED)
-					&& selectedTrackCount <= 0)
+			    && selectedTrackCount <= 0) {
 				enable = FALSE;
-			else if ((programMode == MODE_TRAIN
-					&& (commandList[inx].options
-							& (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)) == 0)
-					|| (programMode != MODE_TRAIN
-							&& (commandList[inx].options & IC_MODETRAIN_ONLY)
-									!= 0))
+			} else if ((programMode == MODE_TRAIN
+			            && (commandList[inx].options
+			                & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)) == 0)
+			           || (programMode != MODE_TRAIN
+			               && (commandList[inx].options & IC_MODETRAIN_ONLY)
+			               != 0)) {
 				enable = FALSE;
-			else
+			} else {
 				enable = TRUE;
+			}
 			if (commandList[inx].enabled != enable) {
 				if (commandList[inx].buttInx >= 0)
 					wControlActive(buttonList[commandList[inx].buttInx].control,
-							enable);
+					               enable);
 				for (minx = 0; minx < NUM_CMDMENUS; minx++)
-					if (commandList[inx].menu[minx])
+					if (commandList[inx].menu[minx]) {
 						wMenuPushEnable(commandList[inx].menu[minx], enable);
+					}
 				commandList[inx].enabled = enable;
 			}
 		}
@@ -125,34 +129,37 @@ EXPORT void EnableCommands(void) {
 
 	for (inx = 0; inx < buttonCnt; inx++) {
 		if (buttonList[inx].cmdInx < 0
-				&& (buttonList[inx].options & IC_SELECTED))
+		    && (buttonList[inx].options & IC_SELECTED)) {
 			wControlActive(buttonList[inx].control, selectedTrackCount > 0);
+		}
 	}
 }
 
-EXPORT wIndex_t GetCurrentCommand() {
+EXPORT wIndex_t GetCurrentCommand()
+{
 	return curCommand;
 }
 
-EXPORT void Reset(void) {
+EXPORT void Reset(void)
+{
 	if (recordF) {
 		fprintf(recordF, "RESET\n");
 		fflush(recordF);
 	}
 	LOG(log_command, 2,
-			( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
+	    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_CANCEL, zero);
 	if (commandList[curCommand].buttInx >= 0)
 		wButtonSetBusy(
-				(wButton_p) buttonList[commandList[curCommand].buttInx].control,
-				FALSE);
+		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
+		        FALSE);
 	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
 	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
 	commandContext = commandList[curCommand].context;
 	if (commandList[curCommand].buttInx >= 0)
 		wButtonSetBusy(
-				(wButton_p) buttonList[commandList[curCommand].buttInx].control,
-				TRUE);
+		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
+		        TRUE);
 	tempSegs_da.cnt = 0;
 
 	TryCheckPoint();
@@ -162,12 +169,13 @@ EXPORT void Reset(void) {
 	EnableCommands();
 	ResetMouseState();
 	LOG(log_command, 1,
-			( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
+	    ( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
 	(void) commandList[curCommand].cmdProc( C_START, zero);
 }
 
 static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
-		BOOL_T checkRight) {
+                         BOOL_T checkRight)
+{
 	static long time0;
 	static coOrd pos0;
 	long time1;
@@ -176,19 +184,22 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 
 	switch (*action) {
 	case C_LDOUBLE:
-		if (!checkLeft)
+		if (!checkLeft) {
 			return TRUE;
+		}
 		time0 = 0;
 		break;
 	case C_DOWN:
-		if (!checkLeft)
+		if (!checkLeft) {
 			return TRUE;
+		}
 		time0 = wGetTimer() - adjTimer;
 		pos0 = *pos;
 		return FALSE;
 	case C_MOVE:
-		if (!checkLeft)
+		if (!checkLeft) {
 			return TRUE;
+		}
 		if (time0 != 0) {
 			time1 = wGetTimer() - adjTimer;
 			timeDelta = time1 - time0;
@@ -203,8 +214,9 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 		}
 		break;
 	case C_UP:
-		if (!checkLeft)
+		if (!checkLeft) {
 			return TRUE;
+		}
 		if (time0 != 0) {
 			time1 = wGetTimer() - adjTimer;
 			timeDelta = time1 - time0;
@@ -214,14 +226,16 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 		}
 		break;
 	case C_RDOWN:
-		if (!checkRight)
+		if (!checkRight) {
 			return TRUE;
+		}
 		time0 = wGetTimer() - adjTimer;
 		pos0 = *pos;
 		return FALSE;
 	case C_RMOVE:
-		if (!checkRight)
+		if (!checkRight) {
 			return TRUE;
+		}
 		if (time0 != 0) {
 			time1 = wGetTimer() - adjTimer;
 			timeDelta = time1 - time0;
@@ -236,8 +250,9 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 		}
 		break;
 	case C_RUP:
-		if (!checkRight)
+		if (!checkRight) {
 			return TRUE;
+		}
 		if (time0 != 0) {
 			time0 = 0;
 			*action = C_RCLICK;
@@ -247,7 +262,8 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 	return TRUE;
 }
 
-EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
+EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
+{
 	wAction_t rc;
 	int mode;
 	wBool_t bExit = FALSE;
@@ -261,10 +277,10 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			bExit = TRUE;
 		}
 	} else if (!CheckClick(&action, &pos,
-			(int) (commandList[curCommand].options & IC_LCLICK), TRUE)) {
+	                       (int) (commandList[curCommand].options & IC_LCLICK), TRUE)) {
 		bExit = TRUE;
 	} else if (action == C_RCLICK
-			&& (commandList[curCommand].options & IC_RCLICK) == 0) {
+	           && (commandList[curCommand].options & IC_RCLICK) == 0) {
 		if (!inPlayback) {
 			mode = MyGetKeyState();
 			if ((mode & (~WKEY_SHIFT)) != 0) {
@@ -296,7 +312,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 	}
 
 	LOG(log_command, 2,
-			( "COMMAND MOUSE %s %d @ %0.3f %0.3f\n", commandList[curCommand].helpKey, (int)action, pos.x, pos.y ))
+	    ( "COMMAND MOUSE %s %d @ %0.3f %0.3f\n", commandList[curCommand].helpKey,
+	      (int)action, pos.x, pos.y ))
 	rc = commandList[curCommand].cmdProc(action, pos);
 	LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
 	switch ( action & 0xFF ) {
@@ -312,15 +329,15 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 	case C_RCLICK:
 	case C_TEXT:
 	case C_OK:
-		if (rc== C_TERMINATE) MainRedraw();
-		else TempRedraw(); // DoCurCommand: postcommand
+		if (rc== C_TERMINATE) { MainRedraw(); }
+		else { TempRedraw(); } // DoCurCommand: postcommand
 		break;
 	default:
 		break;
 	}
 	if ((rc == C_TERMINATE || rc == C_INFO)
-			&& (commandList[curCommand].options & IC_STICKY)
-			&& (commandList[curCommand].stickyMask & stickySet)) {
+	    && (commandList[curCommand].options & IC_STICKY)
+	    && (commandList[curCommand].stickyMask & stickySet)) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
 		if (commandList[curCommand].options & IC_NORESTART) {
@@ -329,7 +346,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 		//Make sure we checkpoint even sticky commands
 		TryCheckPoint();
 		LOG(log_command, 1,
-				( "COMMAND START %s\n", commandList[curCommand].helpKey ))
+		    ( "COMMAND START %s\n", commandList[curCommand].helpKey ))
 		wSetCursor(mainD.d,defaultCursor);
 		rc = commandList[curCommand].cmdProc( C_START, pos);
 		LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
@@ -355,31 +372,32 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 /*
  * \parm reset says if the user used Esc rather than undo/redo
  */
-EXPORT int ConfirmReset(BOOL_T retry) {
+EXPORT int ConfirmReset(BOOL_T retry)
+{
 	wAction_t rc;
 	if (curCommand != describeCmdInx) {
 		LOG(log_command, 3,
-				( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
+		    ( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_CONFIRM, zero);
 		LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
 		if (rc == C_ERROR) {
 			if (retry)
 				rc =
-						wNotice3(
-								_(
-										"Cancelling the current command will undo the changes\n"
-												"you are currently making. Do you want to do the update instead?"),
-								_("Yes"), _("No"), _("Cancel"));
+				        wNotice3(
+				                _(
+				                        "Cancelling the current command will undo the changes\n"
+				                        "you are currently making. Do you want to do the update instead?"),
+				                _("Yes"), _("No"), _("Cancel"));
 			else
 				rc =
-						wNoticeEx( NT_WARNING,
-								_(
-										"Cancelling the current command will undo the changes\n"
-												"you are currently making. Do you want to do the update instead?"),
-								_("Yes"), _("No"));
+				        wNoticeEx( NT_WARNING,
+				                   _(
+				                           "Cancelling the current command will undo the changes\n"
+				                           "you are currently making. Do you want to do the update instead?"),
+				                   _("Yes"), _("No"));
 			if (rc == 1) {
 				LOG(log_command, 3,
-						( "COMMAND OK %s\n", commandList[curCommand].helpKey ))
+				    ( "COMMAND OK %s\n", commandList[curCommand].helpKey ))
 				commandList[curCommand].cmdProc( C_OK, zero);
 				return C_OK;
 			} else if (rc == -1) {
@@ -395,20 +413,22 @@ EXPORT int ConfirmReset(BOOL_T retry) {
 	}
 	Reset();
 	LOG(log_command, 1,
-			( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
+	    ( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_START, zero);
 	return C_CONTINUE;
 }
 
-EXPORT void DoCommandB(void * data) {
+EXPORT void DoCommandB(void * data)
+{
 	wIndex_t inx = (wIndex_t)VP2L(data);
 	STATUS_T rc;
 	static coOrd pos = { 0, 0 };
 	static int inDoCommandB = FALSE;
 	wIndex_t buttInx;
 
-	if (inDoCommandB)
+	if (inDoCommandB) {
 		return;
+	}
 	inDoCommandB = TRUE;
 
 	if (inx < 0 || inx >= commandCnt) {
@@ -425,37 +445,37 @@ EXPORT void DoCommandB(void * data) {
 	InfoMessage("");
 	if (curCommand != selectCmdInx) {
 		LOG(log_command, 3,
-				( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
+		    ( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_FINISH, zero);
 		LOG(log_command, 3,
-				( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
+		    ( "COMMAND CONFIRM %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_CONFIRM, zero);
 		LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
 		if (rc == C_ERROR) {
 			rc = wNotice3(
-					_("Cancelling the current command will undo the changes\n"
-							"you are currently making. Do you want to update?"),
-					_("Yes"), _("No"), _("Cancel"));
-			if (rc == 1)
+			             _("Cancelling the current command will undo the changes\n"
+			               "you are currently making. Do you want to update?"),
+			             _("Yes"), _("No"), _("Cancel"));
+			if (rc == 1) {
 				commandList[curCommand].cmdProc( C_OK, zero);
-			else if (rc == -1) {
+			} else if (rc == -1) {
 				inDoCommandB = FALSE;
 				return;
 			}
 		}
 		LOG(log_command, 3,
-				( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
+		    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 		commandList[curCommand].cmdProc( C_CANCEL, pos);
 		tempSegs_da.cnt = 0;
 	} else {
 		LOG(log_command, 3,
-				( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
+		    ( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
 		rc = commandList[curCommand].cmdProc( C_FINISH, zero);
 	}
 	if (commandList[curCommand].buttInx >= 0)
 		wButtonSetBusy(
-				(wButton_p) buttonList[commandList[curCommand].buttInx].control,
-				FALSE);
+		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
+		        FALSE);
 
 	if (recordF) {
 		fprintf(recordF, "COMMAND %s\n", commandList[inx].helpKey + 3);
@@ -467,19 +487,19 @@ EXPORT void DoCommandB(void * data) {
 	if ((buttInx = commandList[curCommand].buttInx) >= 0) {
 		if (buttonList[buttInx].cmdInx != curCommand) {
 			wButtonSetLabel((wButton_p) buttonList[buttInx].control,
-					(char*) commandList[curCommand].icon);
+			                (char*) commandList[curCommand].icon);
 			wControlSetHelp(buttonList[buttInx].control,
-					GetBalloonHelpStr(commandList[curCommand].helpKey));
+			                GetBalloonHelpStr(commandList[curCommand].helpKey));
 			wControlSetContext(buttonList[buttInx].control,
-					I2VP(curCommand));
+			                   I2VP(curCommand));
 			buttonList[buttInx].cmdInx = curCommand;
 		}
 		wButtonSetBusy(
-				(wButton_p) buttonList[commandList[curCommand].buttInx].control,
-				TRUE);
+		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
+		        TRUE);
 	}
 	LOG(log_command, 1,
-			( "COMMAND START %s\n", commandList[curCommand].helpKey ))
+	    ( "COMMAND START %s\n", commandList[curCommand].helpKey ))
 	wSetCursor(mainD.d,defaultCursor);
 	rc = commandList[curCommand].cmdProc( C_START, pos);
 	LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
@@ -495,15 +515,17 @@ EXPORT void DoCommandB(void * data) {
 		break;
 	case C_TERMINATE:
 	case C_INFO:
-		if (rc == C_TERMINATE)
+		if (rc == C_TERMINATE) {
 			InfoMessage("");
+		}
 		Reset();
 		break;
 	}
 	inDoCommandB = FALSE;
 }
 
-static void LayoutSetPos(wIndex_t inx) {
+static void LayoutSetPos(wIndex_t inx)
+{
 	wWinPix_t w, h, offset;
 	static wWinPix_t toolbarRowHeight = 0;
 	static wWinPix_t width;
@@ -524,21 +546,22 @@ static void LayoutSetPos(wIndex_t inx) {
 	}
 
 	if (buttonList[inx].control) {
-		if (toolbarRowHeight <= 0)
+		if (toolbarRowHeight <= 0) {
 			toolbarRowHeight = wControlGetHeight(buttonList[inx].control);
+		}
 
 		currGroup = buttonList[inx].group & ~BG_BIGGAP;
 		if (currGroup != lastGroup && (buttonList[inx].group & BG_BIGGAP)) {
 			gap = 15;
 		}
 		if ((toolbarSet & (1 << currGroup))
-				&& (programMode != MODE_TRAIN
-						|| (buttonList[inx].options
-								& (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
-				&& (programMode == MODE_TRAIN
-						|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
-				&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-						|| layerButtCnt < layerCount)) {
+		    && (programMode != MODE_TRAIN
+		        || (buttonList[inx].options
+		            & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
+		    && (programMode == MODE_TRAIN
+		        || (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
+		    && ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
+		        || layerButtCnt < layerCount)) {
 			if (currGroup != lastGroup) {
 				toolbarWidth += gap;
 				lastGroup = currGroup;
@@ -549,23 +572,25 @@ static void LayoutSetPos(wIndex_t inx) {
 			if (h<toolbarRowHeight) {
 				offset = (h-toolbarRowHeight)/2;
 				h = toolbarRowHeight;  //Uniform
-			} else offset = 0;
-			if (inx < buttonCnt - 1 && (buttonList[inx + 1].options & IC_ABUT))
+			} else { offset = 0; }
+			if (inx < buttonCnt - 1 && (buttonList[inx + 1].options & IC_ABUT)) {
 				w += wControlGetWidth(buttonList[inx + 1].control);
+			}
 			if (toolbarWidth + w > width - 20) {
 				toolbarWidth = 0;
 				toolbarHeight += h + 5;
 			}
-			if ((currGroup == BG_LAYER) && layerButtNumber>1 && GetLayerHidden(layerButtNumber-2) ) {
+			if ((currGroup == BG_LAYER) && layerButtNumber>1
+			    && GetLayerHidden(layerButtNumber-2) ) {
 				wControlShow(buttonList[inx].control, FALSE);
 				layerButtNumber++;
 			} else {
 				if (currGroup == BG_LAYER ) {
-					if (layerButtNumber>1) layerButtCnt++; // Ignore List and Background
+					if (layerButtNumber>1) { layerButtCnt++; } // Ignore List and Background
 					layerButtNumber++;
 				}
 				wControlSetPos(buttonList[inx].control, toolbarWidth,
-					toolbarHeight - (h + 5 +offset));
+				               toolbarHeight - (h + 5 +offset));
 				buttonList[inx].x = toolbarWidth;
 				buttonList[inx].y = toolbarHeight - (h + 5 + offset);
 				toolbarWidth += wControlGetWidth(buttonList[inx].control);
@@ -591,10 +616,11 @@ EXPORT void LayoutToolBar( void * data )
 	}
 }
 
-static void ToolbarChange(long changes) {
+static void ToolbarChange(long changes)
+{
 	if ((changes & CHANGE_TOOLBAR)) {
 		/*if ( !(changes&CHANGE_MAIN) )*/
-				MainProc( mainW, wResize_e, NULL, NULL );
+		MainProc( mainW, wResize_e, NULL, NULL );
 		/*else
 		 LayoutToolBar();*/
 	}
@@ -606,14 +632,17 @@ static void ToolbarChange(long changes) {
  *
  */
 
-EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx) {
+EXPORT BOOL_T CommandEnabled(wIndex_t cmdInx)
+{
 	return commandList[cmdInx].enabled;
 }
 
 
 EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
-		const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
-		wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS], void * context) {
+                           const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
+                           wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS],
+                           void * context)
+{
 	CHECK( commandCnt < COMMAND_MAX - 1 );
 	commandList[commandCnt].labelStr = MyStrdup(nameStr);
 	commandList[commandCnt].helpKey = MyStrdup(helpKey);
@@ -638,7 +667,8 @@ EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 	return commandCnt - 1;
 }
 
-EXPORT void AddToolbarControl(wControl_p control, long options) {
+EXPORT void AddToolbarControl(wControl_p control, long options)
+{
 	CHECK( buttonCnt < COMMAND_MAX - 1 );
 	buttonList[buttonCnt].enabled = TRUE;
 	buttonList[buttonCnt].options = options;
@@ -654,17 +684,20 @@ EXPORT void AddToolbarControl(wControl_p control, long options) {
 
 /*--------------------------------------------------------------------*/
 
-EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
+EXPORT void PlaybackButtonMouse(wIndex_t buttInx)
+{
 	wWinPix_t cmdX, cmdY;
 	coOrd pos;
 
-	if (buttInx < 0 || buttInx >= buttonCnt)
+	if (buttInx < 0 || buttInx >= buttonCnt) {
 		return;
-	if (buttonList[buttInx].control == NULL)
+	}
+	if (buttonList[buttInx].control == NULL) {
 		return;
+	}
 	cmdX = buttonList[buttInx].x + 17;
 	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-			+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
+	       + (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
 
 	mainD.Pix2CoOrd( &mainD, cmdX, cmdY, &pos );
 	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
@@ -678,7 +711,8 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 }
 
 
-EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
+EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
+{
 	size_t inx;
 	wIndex_t buttInx;
 	size_t len1, len2;
@@ -686,20 +720,20 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
 	for (inx = 0; inx < commandCnt; inx++) {
 		len2 = strlen(commandList[inx].helpKey + 3);
 		if (len1 == len2
-				&& strncmp(line + 8, commandList[inx].helpKey + 3, len2) == 0) {
+		    && strncmp(line + 8, commandList[inx].helpKey + 3, len2) == 0) {
 			break;
 		}
 	}
 	if (inx >= commandCnt) {
 		fprintf(stderr, "Unknown playback COMMAND command %d : %s\n", lineNum,
-				line);
+		        line);
 	} else {
 		wWinPix_t cmdX, cmdY;
 		coOrd pos;
 		if ((buttInx = commandList[inx].buttInx) >= 0) {
 			cmdX = buttonList[buttInx].x + 17;
 			cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-					+ (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
+			       + (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
 			mainD.Pix2CoOrd( &mainD, cmdX, cmdY, &pos );
 			MovePlaybackCursor(&mainD, pos,TRUE,buttonList[buttInx].control);
 		}
@@ -737,17 +771,21 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum) {
 /*--------------------------------------------------------------------*/
 
 
-EXPORT BOOL_T IsCurCommandSticky(void) {
+EXPORT BOOL_T IsCurCommandSticky(void)
+{
 	if ((commandList[curCommand].options & IC_STICKY) != 0
-		&& (commandList[curCommand].stickyMask & stickySet) != 0)
+	    && (commandList[curCommand].stickyMask & stickySet) != 0) {
 		return TRUE;
+	}
 	return FALSE;
 }
 
-EXPORT void ResetIfNotSticky(void) {
+EXPORT void ResetIfNotSticky(void)
+{
 	if ((commandList[curCommand].options & IC_STICKY) == 0
-			|| (commandList[curCommand].stickyMask & stickySet) == 0)
+	    || (commandList[curCommand].stickyMask & stickySet) == 0) {
 		Reset();
+	}
 }
 
 

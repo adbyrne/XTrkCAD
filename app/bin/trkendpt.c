@@ -36,7 +36,7 @@
  */
 
 EXPORT CSIZE_T EndPtSize(
-	EPINX_T epCnt )
+        EPINX_T epCnt )
 {
 	return epCnt * sizeof *(trkEndPt_p)NULL;
 }
@@ -142,9 +142,9 @@ EXPORT trkEndPt_p TempEndPtsAppend( void )
 
 
 EXPORT void SwapEndPts(
-	trkEndPt_p epp,
-	EPINX_T ep0,
-	EPINX_T ep1 )
+        trkEndPt_p epp,
+        EPINX_T ep0,
+        EPINX_T ep1 )
 {
 	trkEndPt_t tempEP;
 	tempEP = epp[ep0];
@@ -166,7 +166,8 @@ EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 }
 
 
-EXPORT void SetTrkEndPointSilent( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
+EXPORT void SetTrkEndPointSilent( track_p trk, EPINX_T ep, coOrd pos,
+                                  ANGLE_T angle )
 {
 	CHECK( ep < GetTrkEndPtCnt(trk) );
 	SetEndPt( GetTrkEndPt( trk, ep ), pos, angle );
@@ -212,7 +213,8 @@ EXPORT long SetTrkEndOption( track_p trk, EPINX_T ep, long option )
  * Elevations
  */
 
-EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height, char * station )
+EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height,
+                           char * station )
 {
 	track_p trk1;
 	EPINX_T ep1;
@@ -222,8 +224,9 @@ EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height, c
 	if (EndPtIsDefinedElev(trk,ep)) {
 		epp->elev.u.height = height;
 	} else if (EndPtIsStationElev(trk,ep)) {
-		if (station == NULL)
+		if (station == NULL) {
 			station = "";
+		}
 		epp->elev.u.name = MyStrdup(station);
 	}
 	if ( (trk1=GetTrkEndTrk(trk, ep)) != NULL ) {
@@ -232,10 +235,11 @@ EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height, c
 			trkEndPt_p epp1 = GetTrkEndPt( trk1, ep1 );
 			epp1->elev.option = option;
 			epp1->elev.u.height = height;
-			if (EndPtIsDefinedElev(trk1,ep1))
+			if (EndPtIsDefinedElev(trk1,ep1)) {
 				epp1->elev.u.height = height;
-			else if (EndPtIsStationElev(trk,ep))
+			} else if (EndPtIsStationElev(trk,ep)) {
 				epp1->elev.u.name = MyStrdup(station);
+			}
 		}
 	}
 }
@@ -272,8 +276,8 @@ EXPORT DIST_T GetTrkEndElevHeight( track_p trk, EPINX_T e )
 
 
 EXPORT void ClrEndPtElevCache(
-	EPINX_T epCnt, 
-	trkEndPt_p epPts )
+        EPINX_T epCnt,
+        trkEndPt_p epPts )
 {
 	for ( EPINX_T ep = 0; ep < epCnt; ep++ ) {
 		epPts[ep].elev.cacheSet = FALSE;
@@ -283,10 +287,12 @@ EXPORT void ClrEndPtElevCache(
 
 static BOOL_T bCacheElev = TRUE;
 
-EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T * height, DIST_T * grade)
+EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e,
+                DIST_T * height, DIST_T * grade)
 {
-	if ( ! bCacheElev )
+	if ( ! bCacheElev ) {
 		return FALSE;
+	}
 	trkEndPt_p epp = GetTrkEndPt( trk, e );
 	if (epp->elev.cacheSet) {
 		*height = epp->elev.cachedElev;
@@ -296,7 +302,8 @@ EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T * height
 	return FALSE;
 }
 
-EXPORT void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T grade)
+EXPORT void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height,
+                                        DIST_T grade)
 {
 	trkEndPt_p epp = GetTrkEndPt( trk, e );
 	epp->elev.cachedElev = height;
@@ -309,14 +316,16 @@ EXPORT char * GetTrkEndElevStation( track_p trk, EPINX_T e )
 {
 	CHECK( EndPtIsStationElev(trk,e) );
 	trkEndPt_p epp = GetTrkEndPt( trk, e );
-	if ( epp->elev.u.name == NULL )
+	if ( epp->elev.u.name == NULL ) {
 		return "";
-	else
+	} else {
 		return epp->elev.u.name;
+	}
 }
 
 
-EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color )
+EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep,
+                         wDrawColor color )
 {
 	coOrd pp;
 	wFont_p fp;
@@ -328,14 +337,17 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	BOOL_T gradeOk = TRUE;
 	char *elevStr;
 
-	if ((labelEnable&LABELENABLE_ENDPT_ELEV)==0)
+	if ((labelEnable&LABELENABLE_ENDPT_ELEV)==0) {
 		return;
+	}
 	elev = &GetTrkEndPt(trk,ep)->elev;
 	if ( (elev->option&ELEV_MASK)==ELEV_NONE ||
-		 (elev->option&ELEV_VISIBLE)==0 )
+	     (elev->option&ELEV_VISIBLE)==0 ) {
 		return;
-	if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) )
+	}
+	if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
 		return;
+	}
 
 	fp = wStandardFont( F_HELV, FALSE, FALSE );
 	pp = GetTrkEndPos( trk, ep );
@@ -356,10 +368,11 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 			elevStr = message;
 			a = GetTrkEndAngle( trk, ep );
 			style = BOX_ARROW_BACKGROUND;
-			if (grade <= -0.001)
+			if (grade <= -0.001) {
 				a = NormalizeAngle( a+180.0 );
-			else if ( grade < 0.001 )
+			} else if ( grade < 0.001 ) {
 				style = BOX_BOX_BACKGROUND;
+			}
 			elev->u.height = grade;
 		} else {
 			elevStr = "????%%";
@@ -381,7 +394,8 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 		Translate(&endLine,pp,FindAngle(pp,startLine),descriptionFontSize/d->dpi);
 		DrawLine( d, startLine, endLine, 0, color );
 	}
-	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize, color, a );
+	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize,
+	                 color, a );
 
 }
 
@@ -391,27 +405,30 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
  */
 
 EXPORT DIST_T EndPtDescriptionDistance(
-		coOrd pos,
-		track_p trk,
-		EPINX_T ep,
-		coOrd *dpos,
-		BOOL_T show_hidden,
-		BOOL_T * hidden)
+        coOrd pos,
+        track_p trk,
+        EPINX_T ep,
+        coOrd *dpos,
+        BOOL_T show_hidden,
+        BOOL_T * hidden)
 {
 	elev_t *e;
 	coOrd pos1;
 	track_p trk1;
 	*dpos = pos;
-	if (hidden) *hidden = FALSE;
+	if (hidden) { *hidden = FALSE; }
 	e = &GetTrkEndPt(trk,ep)->elev;
-	if ((e->option&ELEV_MASK)==ELEV_NONE)
+	if ((e->option&ELEV_MASK)==ELEV_NONE) {
 		return DIST_INF;
-	if (((e->option&ELEV_VISIBLE)==0) && !show_hidden)
+	}
+	if (((e->option&ELEV_VISIBLE)==0) && !show_hidden) {
 		return DIST_INF;
-	if ((trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk))
+	}
+	if ((trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
 		return DIST_INF;
+	}
 	if ((e->option&ELEV_VISIBLE)==0) {					//Hidden - disregard offset
-		if (hidden) *hidden = TRUE;
+		if (hidden) { *hidden = TRUE; }
 		return FindDistance( GetTrkEndPos(trk,ep), pos );
 	}
 	/*REORIGIN( pos1, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
@@ -420,18 +437,19 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	pos1.x += e->doff.x;
 	pos1.y += e->doff.y;
 	*dpos = pos1;
-	if (hidden) *hidden = !(e->option&ELEV_VISIBLE);
-	if (FindDistance(tpos,pos)<FindDistance( pos1, pos ))
+	if (hidden) { *hidden = !(e->option&ELEV_VISIBLE); }
+	if (FindDistance(tpos,pos)<FindDistance( pos1, pos )) {
 		return FindDistance(tpos,pos);
+	}
 	return FindDistance( pos1, pos );
 }
 
 
 EXPORT STATUS_T EndPtDescriptionMove(
-		track_p trk,
-		EPINX_T ep,
-		wAction_t action,
-		coOrd pos )
+        track_p trk,
+        EPINX_T ep,
+        wAction_t action,
+        coOrd pos )
 {
 	static coOrd p0;
 //	static coOrd p1;
@@ -445,7 +463,7 @@ EXPORT STATUS_T EndPtDescriptionMove(
 //		p1 = pos;
 		e->option |= ELEV_VISIBLE; //Make sure we make visible
 		DrawEndElev( &mainD, trk, ep, wDrawColorWhite );
-		/*no break*/
+	/*no break*/
 	case C_MOVE:
 	case C_UP:
 //		p1 = pos;
@@ -476,9 +494,9 @@ EXPORT STATUS_T EndPtDescriptionMove(
  */
 
 EXPORT BOOL_T GetEndPtArg(
-	char * cp,
-	char type,
-	BOOL_T bImprovedEnds )
+        char * cp,
+        char type,
+        BOOL_T bImprovedEnds )
 {
 	long option;
 	long option2;
@@ -487,13 +505,13 @@ EXPORT BOOL_T GetEndPtArg(
 
 	if (type == SEG_CONEP) {
 		if ( !GetArgs( cp, "dc", &e->index, &cp ) ) {
-							/*??*/return FALSE;
+			/*??*/return FALSE;
 		}
 	} else {
 		e->index = -1;
 	}
 	if ( !GetArgs( cp, "pfc",
-		&e->pos, &e->angle, &cp) ) {
+	               &e->pos, &e->angle, &cp) ) {
 		/*??*/return FALSE;
 	}
 	e->elev.option = 0;
@@ -505,17 +523,18 @@ EXPORT BOOL_T GetEndPtArg(
 			/*??*/return FALSE;
 		}
 		switch (option&ELEV_MASK) {
-			case ELEV_STATION:
-				GetArgs( cp, "qc", &e->elev.u.name, &cp);
-				break;
-			default:
-				GetArgs( cp, "fc", &e->elev.u.height, &cp);   //First height
+		case ELEV_STATION:
+			GetArgs( cp, "qc", &e->elev.u.name, &cp);
+			break;
+		default:
+			GetArgs( cp, "fc", &e->elev.u.height, &cp);   //First height
 		}
 		DIST_T height2;
-		if (!GetArgs( cp, "flLlc", &height2, &option2, &e->elev.option, &e->option, &cp ) ) {
+		if (!GetArgs( cp, "flLlc", &height2, &option2, &e->elev.option, &e->option,
+		              &cp ) ) {
 			return FALSE;
 		}
-		if (option2) e->elev.option |= ELEV_VISIBLE;
+		if (option2) { e->elev.option |= ELEV_VISIBLE; }
 		GetArgs(cp, "fc", &ignoreFloat, &cp);
 		return TRUE;
 	}
@@ -558,15 +577,17 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	if (bWriteEndPtDirectIndex && endPt->index > 0) {
 		rc &= fprintf( f, "\tT4 %ld ", endPt->index )>0;
 	} else if (endPt->track == NULL ||
-		( bWriteEndPtExporting && !GetTrkSelected(endPt->track) ) ) {
+	           ( bWriteEndPtExporting && !GetTrkSelected(endPt->track) ) ) {
 		rc &= fprintf( f, "\tE4 " )>0;
 	} else {
 		rc &= fprintf( f, "\tT4 %d ", GetTrkIndex(endPt->track) )>0;
 	}
-	rc &= fprintf( f, "%0.6f %0.6f %0.6f", endPt->pos.x, endPt->pos.y, endPt->angle )>0; 
+	rc &= fprintf( f, "%0.6f %0.6f %0.6f", endPt->pos.x, endPt->pos.y,
+	               endPt->angle )>0;
 	option = (endPt->option<<8) | (endPt->elev.option&0xFF);
 	if ( option != 0 ) {
-		rc &= fprintf( f, " %ld %0.6f %0.6f", option, endPt->elev.doff.x, endPt->elev.doff.y )>0;
+		rc &= fprintf( f, " %ld %0.6f %0.6f", option, endPt->elev.doff.x,
+		               endPt->elev.doff.y )>0;
 		switch ( endPt->elev.option&ELEV_MASK ) {
 		case ELEV_DEF:
 			rc &= fprintf( f, " %0.6f ", endPt->elev.u.height )>0;
@@ -580,10 +601,11 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	} else {
 		rc &= fprintf( f, " 0 0.0 0.0 0.0 ")>0;
 	}
-	if ((endPt->elev.option&ELEV_MASK) == ELEV_DEF)
+	if ((endPt->elev.option&ELEV_MASK) == ELEV_DEF) {
 		rc &= fprintf( f, "%0.6f ",endPt->elev.u.height)>0;
-	else
+	} else {
 		rc &= fprintf( f, "0.0 ")>0;
+	}
 	long elevVisible = (endPt->elev.option&ELEV_VISIBLE)?1:0;
 	long elevType = endPt->elev.option&ELEV_MASK;
 	long gapType = endPt->option;
@@ -599,10 +621,10 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 */
 
 wBool_t CompareEndPt(
-	char * cp,
-	track_p trk1,
-	track_p trk2,
-	EPINX_T ep )
+        char * cp,
+        track_p trk1,
+        track_p trk2,
+        EPINX_T ep )
 {
 	trkEndPt_p epp1 = GetTrkEndPt( trk1, ep );
 	trkEndPt_p epp2 = GetTrkEndPt( trk2, ep );
@@ -610,8 +632,9 @@ wBool_t CompareEndPt(
 	REGRESS_CHECK_ANGLE( "Angle", epp1, epp2, angle )
 	// Actual EP connection
 	int inx1 = -1;
-	if ( epp1->track )
+	if ( epp1->track ) {
 		inx1 = GetTrkIndex( epp1->track );
+	}
 	// Expected EP connection.  endPt[inx].track is not resolved
 	int inx2 = epp2->index;
 	if ( inx1 != inx2 ) {

@@ -2,23 +2,23 @@
  * Turnout drawing
  */
 
- /*  XTrkCad - Model Railroad CAD
-  *  Copyright (C) 2005 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include "common.h"
 #include "common-ui.h"
@@ -29,7 +29,7 @@
 
 /* Draw turnout data */
 
-/** 
+/**
  * The types of turnouts that get enhanced drawing methods
  */
 enum dtoType {
@@ -48,7 +48,7 @@ enum dtoType {
 	DTO_LCROSS,
 	DTO_RCROSS,
 	DTO_DCROSS
-}; 
+};
 
 // Define to plot control points (DTO_NORMAL, DTO_CURVED, DTO_XING, DTO_LCROSS)
 // #define DTO_DEBUG DTO_XING
@@ -61,7 +61,7 @@ static struct DrawToData_t {
 	enum dtoType toType;
 	track_p trk;
 	tieData_t td;
-	int bridge; 
+	int bridge;
 	int roadbed;
 	int endCnt;
 	int pathCnt;
@@ -106,16 +106,19 @@ static struct DrawTo_t dto[DTO_DIM];
 int roadbedOnScreen = 0;
 
 
-void DrawTurnoutRoadbedSide(drawCmd_p d, wDrawColor color, coOrd orig, ANGLE_T angle, trkSeg_p sp, ANGLE_T side, int first, int last)
+void DrawTurnoutRoadbedSide(drawCmd_p d, wDrawColor color, coOrd orig,
+                            ANGLE_T angle, trkSeg_p sp, ANGLE_T side, int first, int last)
 {
 	segProcData_t data;
-	if (last <= first)
+	if (last <= first) {
 		return;
+	}
 	data.drawRoadbedSide.first = first;
 	data.drawRoadbedSide.last = last;
 	data.drawRoadbedSide.side = side;
 	data.drawRoadbedSide.roadbedWidth = roadbedWidth;
-	data.drawRoadbedSide.rbw = (wDrawWidth)floor(roadbedLineWidth * (d->dpi / d->scale) + 0.5);
+	data.drawRoadbedSide.rbw = (wDrawWidth)floor(roadbedLineWidth *
+	                           (d->dpi / d->scale) + 0.5);
 	data.drawRoadbedSide.orig = orig;
 	data.drawRoadbedSide.angle = angle;
 	data.drawRoadbedSide.color = color;
@@ -125,24 +128,22 @@ void DrawTurnoutRoadbedSide(drawCmd_p d, wDrawColor color, coOrd orig, ANGLE_T a
 
 
 static void ComputeAndDrawTurnoutRoadbedSide(
-	drawCmd_p d,
-	wDrawColor color,
-	coOrd orig,
-	ANGLE_T angle,
-	trkSeg_p segPtr,
-	int segCnt,
-	int segInx,
-	ANGLE_T side)
+        drawCmd_p d,
+        wDrawColor color,
+        coOrd orig,
+        ANGLE_T angle,
+        trkSeg_p segPtr,
+        int segCnt,
+        int segInx,
+        ANGLE_T side)
 {
 	unsigned long res, res1;
 	int b0, b1;
 	res = ComputeTurnoutRoadbedSide(segPtr, segCnt, segInx, side, roadbedWidth);
 	if (res == 0L) {
-	}
-	else if (res == 0xFFFFFFFF) {
+	} else if (res == 0xFFFFFFFF) {
 		DrawTurnoutRoadbedSide(d, color, orig, angle, &segPtr[segInx], side, 0, 32);
-	}
-	else {
+	} else {
 		for (b0 = 0, res1 = 0x00000001; res1 && (res1 & res); b0++, res1 <<= 1);
 		for (b1 = 32, res1 = 0x80000000; res1 && (res1 & res); b1--, res1 >>= 1);
 		DrawTurnoutRoadbedSide(d, color, orig, angle, &segPtr[segInx], side, 0, b0);
@@ -152,33 +153,36 @@ static void ComputeAndDrawTurnoutRoadbedSide(
 
 
 static void DrawTurnoutRoadbed(
-	drawCmd_p d,
-	wDrawColor color,
-	coOrd orig,
-	ANGLE_T angle,
-	trkSeg_p segPtr,
-	int segCnt)
+        drawCmd_p d,
+        wDrawColor color,
+        coOrd orig,
+        ANGLE_T angle,
+        trkSeg_p segPtr,
+        int segCnt)
 {
 	int inx, trkCnt = 0, segInx = 0;
 	for (inx = 0; inx < segCnt; inx++) {
 		if (IsSegTrack(&segPtr[inx])) {
 			segInx = inx;
 			trkCnt++;
-			if (trkCnt > 1)
+			if (trkCnt > 1) {
 				break;
+			}
 		}
 	}
-	if (trkCnt == 0)
+	if (trkCnt == 0) {
 		return;
+	}
 	if (trkCnt == 1) {
 		DrawTurnoutRoadbedSide(d, color, orig, angle, &segPtr[segInx], +90, 0, 32);
 		DrawTurnoutRoadbedSide(d, color, orig, angle, &segPtr[segInx], -90, 0, 32);
-	}
-	else {
+	} else {
 		for (inx = 0; inx < segCnt; inx++) {
 			if (IsSegTrack(&segPtr[inx])) {
-				ComputeAndDrawTurnoutRoadbedSide(d, color, orig, angle, segPtr, segCnt, inx, +90);
-				ComputeAndDrawTurnoutRoadbedSide(d, color, orig, angle, segPtr, segCnt, inx, -90);
+				ComputeAndDrawTurnoutRoadbedSide(d, color, orig, angle, segPtr, segCnt, inx,
+				                                 +90);
+				ComputeAndDrawTurnoutRoadbedSide(d, color, orig, angle, segPtr, segCnt, inx,
+				                                 -90);
 			}
 		}
 	}
@@ -191,16 +195,17 @@ static void DrawTurnoutRoadbed(
  *
  */
 
- /**
- * Get the paths from the turnout definition. Puts the results into static dto structure.
- * Curved segments are broken up into short sections of the lesser of 5 degrees or 5 * tie spacing. 
- *
- * \param trk track_p pointer to a track
- * \param xx  pointer to the extraDataCompound struct
- *
- * \returns the number of paths
- */
-int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
+/**
+* Get the paths from the turnout definition. Puts the results into static dto structure.
+* Curved segments are broken up into short sections of the lesser of 5 degrees or 5 * tie spacing.
+*
+* \param trk track_p pointer to a track
+* \param xx  pointer to the extraDataCompound struct
+*
+* \returns the number of paths
+*/
+int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
+{
 	wIndex_t segInx;
 	wIndex_t segEP;
 
@@ -219,8 +224,9 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 	int pathCnt = 0, routeCnt = 0;
 
-	for (i = 0; i < DTO_DIM; i++)
+	for (i = 0; i < DTO_DIM; i++) {
 		dto[i].n = 0;
+	}
 
 	// Validate that the first segment starts at (0, 0)
 	// and if STR p1.y == 0, if CRV angle == 0 or angle == 180
@@ -230,8 +236,9 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	case SEG_STRTRK:
 		p0 = segPtr->u.l.pos[0];
 		p1 = segPtr->u.l.pos[1];
-		if ((FindDistance(p0, zero) > EPSILON) || (fabs(p1.y) > EPSILON))
+		if ((FindDistance(p0, zero) > EPSILON) || (fabs(p1.y) > EPSILON)) {
 			return -1;
+		}
 		break;
 	case SEG_CRVTRK:
 		r = fabs(segPtr->u.c.radius);
@@ -240,14 +247,14 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 		if (segPtr->u.c.radius > 0) {
 			aa0 = a0;
-		}
-		else {
+		} else {
 			aa0 = a0 + a1;
 		}
 		PointOnCircle(&p0, segPtr->u.c.center, r, aa0);
 		if ((FindDistance(p0, zero) > EPSILON)
-			|| ((fabs(aa0 - 180) > EPSILON) && (fabs(aa0) > EPSILON)))
+		    || ((fabs(aa0 - 180) > EPSILON) && (fabs(aa0) > EPSILON))) {
 			return -1;
+		}
 		break;
 	}
 
@@ -257,12 +264,11 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 
 		ANGLE_T angle = 0;
 		while (pp[0]) {
-			if (pathCnt < DTO_DIM)
-			{
+			if (pathCnt < DTO_DIM) {
 				dto[pathCnt].type = 'S';
 				while (pp[0]) {
 					GetSegInxEP(pp[0], &segInx, &segEP);
-					// trkSeg_p 
+					// trkSeg_p
 					segPtr = &xx->segs[segInx];
 					switch (segPtr->type) {
 					case SEG_STRTRK:
@@ -278,7 +284,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 						// n++;
 						dto[pathCnt].n = n;
 
-						if (n >= DTO_SEGS - 1) return -1;
+						if (n >= DTO_SEGS - 1) { return -1; }
 
 						break;
 					case SEG_CRVTRK:
@@ -295,14 +301,13 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 						// Every 5 degrees or 5 * tie spacing
 						int cnt = (int)floor(a1 / 5.0);
 						int cnt2 = (int)floor(len / 5 / dtod.td.spacing);
-						if (cnt2 > cnt) cnt = cnt2;
-						if (cnt <= 0) cnt = 1;
+						if (cnt2 > cnt) { cnt = cnt2; }
+						if (cnt <= 0) { cnt = 1; }
 
 						aa1 = a1 / cnt;
 						if (dto[pathCnt].type == 'R') {
 							aa0 = a0;
-						}
-						else {
+						} else {
 							aa0 = a0 + a1;
 							aa1 = -aa1;
 						}
@@ -322,7 +327,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 							dto[pathCnt].base[n] = p0;
 							n++;
 
-							if (n >= DTO_SEGS - 1) return -1;
+							if (n >= DTO_SEGS - 1) { return -1; }
 
 							cnt--;
 						}
@@ -337,7 +342,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 			}
 
 			pathCnt++;
-			if (pathCnt > DTO_DIM) return -1;
+			if (pathCnt > DTO_DIM) { return -1; }
 			pp++;
 		}
 		routeCnt++;
@@ -348,8 +353,9 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 	dtod.endCnt = GetTrkEndPtCnt( trk );
 
 	// Guard value: n < DTO_SEGS - 2
-	for (i = 0; i < pathCnt; i++)
+	for (i = 0; i < pathCnt; i++) {
 		dto[i].pts[dto[i].n].x = DIST_INF;
+	}
 
 	return pathCnt;
 }
@@ -360,7 +366,8 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx) {
 * stored in the dtod.toType. DTO_INVALID (0) if the enhanced methods cannot handle
 * it.
 */
-void GetTurnoutType() {
+void GetTurnoutType()
+{
 	dtod.strPath = -1;
 	dtod.str2Path = -1;
 	dtod.crvPath = -1;
@@ -385,13 +392,15 @@ void GetTurnoutType() {
 			}
 		}
 		if (eq == 0) {
-			if (dtod.origCnt < DTO_DIM)
+			if (dtod.origCnt < DTO_DIM) {
 				dtod.origins[dtod.origCnt] = i;
+			}
 			dtod.origCnt++;
 		}
 
-		if (dtod.origCnt >= DTO_DIM)
+		if (dtod.origCnt >= DTO_DIM) {
 			return;
+		}
 	}
 
 	// Determine the path type
@@ -399,26 +408,29 @@ void GetTurnoutType() {
 		switch (dto[i].type) {
 		case 'S':
 			strCnt++;
-			if (strCnt == 1)
+			if (strCnt == 1) {
 				dtod.strPath = i;
-			else
+			} else {
 				dtod.str2Path = i;
+			}
 			break;
 		case 'L':
 			lftCnt++;
 			crvCnt++;
-			if (crvCnt == 1)
+			if (crvCnt == 1) {
 				dtod.crvPath = i;
-			else
+			} else {
 				dtod.crv2Path = i;
+			}
 			break;
 		case 'R':
 			rgtCnt++;
 			crvCnt++;
-			if (crvCnt == 1)
+			if (crvCnt == 1) {
 				dtod.crvPath = i;
-			else
+			} else {
 				dtod.crv2Path = i;
+			}
 			break;
 		}
 	}
@@ -433,32 +445,28 @@ void GetTurnoutType() {
 		if (dtod.pathCnt == 2) {
 			if (strCnt == 1 && crvCnt == 1) {
 				dtod.toType = DTO_NORMAL;
-			}
-			else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
+			} else if ((strCnt == 0) && ((lftCnt == 2) || (rgtCnt == 2))) {
 				// Assumes outer curve is [0] and inner is [1]
-				if ((dto[0].crvAngle <= 20) && (dto[1].crvAngle - dto[0].crvAngle <= 15))
+				if ((dto[0].crvAngle <= 20) && (dto[1].crvAngle - dto[0].crvAngle <= 15)) {
 					dtod.toType = DTO_CURVED;
-			}
-			else if (lftCnt == 1 && rgtCnt == 1) {
+				}
+			} else if (lftCnt == 1 && rgtCnt == 1) {
 				dtod.toType = DTO_WYE;
 			}
-		}
-		else if ((dtod.pathCnt == 3) && (strCnt == 1)
-			&& (lftCnt == 1) && (rgtCnt == 1)) {
+		} else if ((dtod.pathCnt == 3) && (strCnt == 1)
+		           && (lftCnt == 1) && (rgtCnt == 1)) {
 			dtod.toType = DTO_THREE;
 		}
-	}
-	else
+	} else
 		// Crossing, single- and double-slip
 		if ((dtod.origCnt == 2) && (dtod.endCnt == 4)
-			&& strCnt == 2) {
+		    && strCnt == 2) {
 
 			ANGLE_T a0, a1, a2;
 			a1 = FindAngle(dto[dtod.strPath].base[0], dto[dtod.strPath].base[1]);
 			a2 = FindAngle(dto[dtod.str2Path].base[0], dto[dtod.str2Path].base[1]);
 			// Swap the ends of the strPath if large angle
-			if((a1 > 180.0) && (dto[dtod.strPath].n == 2))
-			{
+			if((a1 > 180.0) && (dto[dtod.strPath].n == 2)) {
 				coOrd tmp = dto[dtod.strPath].base[0];
 				dto[dtod.strPath].base[0] = dto[dtod.strPath].base[1];
 				dto[dtod.strPath].base[1] = tmp;
@@ -468,34 +476,33 @@ void GetTurnoutType() {
 				dto[dtod.strPath].pts[0] = dto[dtod.strPath].pts[i];
 				dto[dtod.strPath].pts[i] = tmp;
 
-				a1 = a1 - 180.0; 
+				a1 = a1 - 180.0;
 				dto[dtod.strPath].angle = a1;
 			}
 			// Swap the ends of the str2Path if large angle
-			if((a2 > 180.0) && (dto[dtod.str2Path].n == 2))
-			{
+			if((a2 > 180.0) && (dto[dtod.str2Path].n == 2)) {
 				coOrd tmp = dto[dtod.str2Path].base[0];
 				dto[dtod.str2Path].base[0] = dto[dtod.str2Path].base[1];
 				dto[dtod.str2Path].base[1] = tmp;
-				
+
 				i = dto[dtod.str2Path].n - 1;
 				tmp = dto[dtod.str2Path].pts[0];
 				dto[dtod.str2Path].pts[0] = dto[dtod.str2Path].pts[i];
 				dto[dtod.str2Path].pts[i] = tmp;
 
-				a2 = a2 - 180.0; 
+				a2 = a2 - 180.0;
 				dto[dtod.str2Path].angle = a2;
 			}
 			a0 = DifferenceBetweenAngles(a1, a2);
-			if(a0 < 0)
-			{
+			if(a0 < 0) {
 				int tmp = dtod.strPath;
 				dtod.strPath = dtod.str2Path;
 				dtod.str2Path = tmp;
 				a0 = NormalizeAngle(-a0);
 			}
-			if ((a0 > 90.0) || (a0 < 0.0))
+			if ((a0 > 90.0) || (a0 < 0.0)) {
 				return;
+			}
 
 			coOrd p1 = dto[dtod.strPath].base[0];
 			coOrd p2 = dto[dtod.str2Path].base[0];
@@ -503,16 +510,15 @@ void GetTurnoutType() {
 			int intersect = FindIntersection(&pos, p1, a1, p2, a2);
 
 			if (intersect) {
-				if(strCnt == 2 && dtod.pathCnt == 2){
-					if((a0 <= 61) && (a0 >= -61))
+				if(strCnt == 2 && dtod.pathCnt == 2) {
+					if((a0 <= 61) && (a0 >= -61)) {
 						dtod.toType = DTO_XING;
-					else
+					} else {
 						dtod.toType = DTO_XNG9;
-				}
-				else if(dtod.pathCnt == 3 && (lftCnt == 1 || rgtCnt == 1)){
+					}
+				} else if(dtod.pathCnt == 3 && (lftCnt == 1 || rgtCnt == 1)) {
 					dtod.toType = DTO_SSLIP;
-				}
-				else if(dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1){
+				} else if(dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1) {
 					dtod.toType = DTO_DSLIP;
 				}
 			}
@@ -520,16 +526,13 @@ void GetTurnoutType() {
 			else if (strCnt == 2) {
 				if (dtod.pathCnt == 4 && lftCnt == 1 && rgtCnt == 1) {
 					dtod.toType = DTO_DCROSS;
-				}
-				else if(dtod.pathCnt == 3){
+				} else if(dtod.pathCnt == 3) {
 					// Perverse test because the cross paths go Left then Right, for example
-					if(lftCnt == 1){
+					if(lftCnt == 1) {
 						dtod.toType = DTO_RCROSS;
-					}
-					else if(rgtCnt == 1){
+					} else if(rgtCnt == 1) {
 						dtod.toType = DTO_LCROSS;
-					}
-					else{
+					} else {
 						dtod.toType = DTO_INVALID;
 					}
 				}
@@ -540,13 +543,13 @@ void GetTurnoutType() {
 #if 0
 /**
  * Draw Layout lines and points
- * 
+ *
  * \param d The drawing object
  * \param scaleInx The layout/track scale index
  */
 static void DrawDtoLayout(
-	drawCmd_p d,
-	SCALEINX_T scaleInx
+        drawCmd_p d,
+        SCALEINX_T scaleInx
 )
 {
 #ifdef DTO_DEBUG
@@ -558,8 +561,9 @@ static void DrawDtoLayout(
 	for (i = 0; i < DTO_DIM; i++) {
 		for (j = 0; j < dto[i].n; j++) {
 			DrawFillCircle(d, dto[i].pts[j], r, drawColorPurple);
-			if (j < dto[i].n - 1)
+			if (j < dto[i].n - 1) {
 				DrawLine(d, dto[i].pts[j], dto[i].pts[j + 1], 0, drawColorPurple);
+			}
 		}
 	}
 #endif
@@ -567,9 +571,9 @@ static void DrawDtoLayout(
 #endif
 
 /**
-* Use the coOrds to build a polygon and draw the bridge fill. Note that the coordinates are 
-* passed as pairs, and rearranged into a polygon with the 1,2,4,3 order. 
-* 
+* Use the coOrds to build a polygon and draw the bridge fill. Note that the coordinates are
+* passed as pairs, and rearranged into a polygon with the 1,2,4,3 order.
+*
 * \param d The drawing object
 * \param c The color
 * \param b1 The first coordinate
@@ -578,66 +582,67 @@ static void DrawDtoLayout(
 * \param b4 The fourth coordinate
 */
 static void DrawFill(
-	drawCmd_p d, 
-	wDrawColor c,
-	coOrd b1,
-	coOrd b2,
-	coOrd b3,
-	coOrd b4
-	) 
+        drawCmd_p d,
+        wDrawColor c,
+        coOrd b1,
+        coOrd b2,
+        coOrd b3,
+        coOrd b4
+)
 {
 	coOrd p[4] = {b1, b2, b4, b3};
-	DrawPoly(d,4,p,NULL,c,0,DRAW_FILL ); 
+	DrawPoly(d,4,p,NULL,c,0,DRAW_FILL );
 }
 
 /**
 * Draw Bridge parapets and background or Roadbed for a turnout
-* 
+*
 * \param d The drawing object
 * \param fillType 0 for bridge, 1 for roadbed
 * \param path1 The first path
 * \param path2 The second path
 */
 static void DrawTurnoutFill(
-    drawCmd_p d,
-	int fillType, 
-    int path1,
-    int path2
+        drawCmd_p d,
+        int fillType,
+        int path1,
+        int path2
 )
 {
-    DIST_T trackGauge = GetTrkGauge(dtod.trk);
-    wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
-	if (d->options&DC_PRINT)
+	DIST_T trackGauge = GetTrkGauge(dtod.trk);
+	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
+	if (d->options&DC_PRINT) {
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
+	}
 
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
 	double fillWidth = 1.5;
 	coOrd b1,b2,b3,b4,b5,b6;
-    ANGLE_T angle = dtod.xx->angle,a = 0.0;
-    int i,j,i1,i2;
-    i1 = path1;
-    i2 = path2;
-    if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
-        i1 = path2;
-        i2 = path1;
-        // a = -a;
-    }
+	ANGLE_T angle = dtod.xx->angle,a = 0.0;
+	int i,j,i1,i2;
+	i1 = path1;
+	i2 = path2;
+	if(dto[i1].base[dto[i1].n - 1].y < dto[i2].base[dto[i2].n - 1].y) {
+		i1 = path2;
+		i2 = path1;
+		// a = -a;
+	}
 
-    if(dtod.toType == DTO_THREE) {
-        i = dtod.strPath;
-        DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
-        b1 = dto[i].pts[0];
-        Translate(&b3,b1,(angle + a),dy);
-        b1 = dto[i].pts[dto[i].n - 1];
-        Translate(&b4,b1,(angle + a),dy);
-        b2 = dto[i].pts[0];
-        Translate(&b5,b2,(angle + a),-dy);
-        b2 = dto[i].pts[dto[i].n - 1];
-        Translate(&b6,b2,(angle + a),-dy);
+	if(dtod.toType == DTO_THREE) {
+		i = dtod.strPath;
+		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
+		b1 = dto[i].pts[0];
+		Translate(&b3,b1,(angle + a),dy);
+		b1 = dto[i].pts[dto[i].n - 1];
+		Translate(&b4,b1,(angle + a),dy);
+		b2 = dto[i].pts[0];
+		Translate(&b5,b2,(angle + a),-dy);
+		b2 = dto[i].pts[dto[i].n - 1];
+		Translate(&b6,b2,(angle + a),-dy);
 
-        // Draw the background
-        DrawFill(d,color,b3,b4,b5,b6);
-    }
+		// Draw the background
+		DrawFill(d,color,b3,b4,b5,b6);
+	}
 
 	for(i = i1; 1; i = i2,a = 180.0) {
 		DIST_T dy = fabs(dto[i].dy[0]) + trackGauge * fillWidth;
@@ -663,14 +668,15 @@ static void DrawTurnoutFill(
 			b5 = b6;
 		}
 
-		if(i == i2)
+		if(i == i2) {
 			break;
+		}
 	}
 
-    EPINX_T ep;
-    coOrd p;
-    track_p trk1;
-    coOrd p0,p1;
+	EPINX_T ep;
+	coOrd p;
+	track_p trk1;
+	coOrd p0,p1;
 
 	// Bridge parapet ends
 	if(fillType==0) {
@@ -700,23 +706,24 @@ static void DrawTurnoutFill(
 
 /**
 * Draw Bridge parapets and background or Roadbed for a cross-over
-* 
+*
 * \param d The drawing object
 * \param fillType 0 for bridge, 1 for roadbed
 * \param path1 The first path, straight
 * \param path2 The second path, straight
 */
 static void DrawCrossFill(
-	drawCmd_p d, 
-	int fillType, 
-	int path1,
-	int path2
+        drawCmd_p d,
+        int fillType,
+        int path1,
+        int path2
 )
 {
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
-	if (d->options&DC_PRINT)
+	if (d->options&DC_PRINT) {
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
+	}
 
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
 	double fillWidth = 1.5;
@@ -750,10 +757,10 @@ static void DrawCrossFill(
 		DrawLine(d,b5,b6,width2,drawColorBlack);
 	}
 
-    EPINX_T ep;
-    coOrd p;
-    track_p trk1;
-    coOrd p0,p1;
+	EPINX_T ep;
+	coOrd p;
+	track_p trk1;
+	coOrd p0,p1;
 
 	// Bridge parapet ends
 	if(fillType==0) {
@@ -781,23 +788,24 @@ static void DrawCrossFill(
 
 /**
 * Draw Bridge parapets and background or Roadbed for a crossing
-* 
+*
 * \param d The drawing object
 * \param fillType 0 for bridge, 1 for roadbed
 * \param path1 The first path
 * \param path2 The second path
 */
 static void DrawXingFill(
-	drawCmd_p d, 
-	int fillType, 
-	int path1,
-	int path2
+        drawCmd_p d,
+        int fillType,
+        int path1,
+        int path2
 )
 {
 	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 	wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
-	if (d->options&DC_PRINT)
+	if (d->options&DC_PRINT) {
 		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
+	}
 
 	double fillWidth = 1.5;
 	coOrd b0, b1, b2, b3, b4, b5, b6;
@@ -806,7 +814,8 @@ static void DrawXingFill(
 	i2 = dtod.str2Path;
 
 	// Fill both straight sections
-	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 2 * fillWidth * d->dpi / d->scale); 
+	wDrawWidth width3 = (wDrawWidth)round(trackGauge * 2 * fillWidth * d->dpi /
+	                                      d->scale);
 	wDrawColor color = (fillType==0?bridgeColor:roadbedColor);
 	b1 = dto[i1].pts[0];
 	b2 = dto[i1].pts[dto[i1].n-1];
@@ -831,10 +840,11 @@ static void DrawXingFill(
 		Translate(&b3,b1,(angle + a),dy);
 		Translate(&b5,b1,(angle + a),-(dy * 0.75));
 		if(dto[i].type != 'S') {
-			if(dto[i].type == 'L')
+			if(dto[i].type == 'L') {
 				hasLeft = 1;
-			else if(dto[i].type == 'R')
+			} else if(dto[i].type == 'R') {
 				hasRgt = 1;
+			}
 			for(j = 1; j < dto[i].n; j++) {
 				dy = fabs(dto[i].dy[j]) + trackGauge * fillWidth;
 				b2 = dto[i].pts[j];
@@ -853,8 +863,9 @@ static void DrawXingFill(
 				b5 = b6;
 			}
 		}
-		if(i == i2)
+		if(i == i2) {
 			break;
+		}
 	}
 
 	if(dtod.strPath >= 0 && dtod.str2Path >= 0) {
@@ -864,11 +875,11 @@ static void DrawXingFill(
 			DIST_T dy = trackGauge * 1.5;
 			ANGLE_T a1, a2;
 			b1 = dto[i1].pts[0];
-            a1 = dto[i1].angle + 90;
+			a1 = dto[i1].angle + 90;
 			Translate(&b3,b1,a1,dy);
 
 			b2 = dto[i2].pts[dto[i2].n - 1];
-            a2 = dto[i2].angle + 90;
+			a2 = dto[i2].angle + 90;
 			Translate(&b4,b2,a2,dy);
 
 			FindIntersection(&b0, b3, a1-90.0, b4, a2-90.0);
@@ -929,11 +940,11 @@ static void DrawXingFill(
 		}
 	}
 
-    // Bridge wings
-    EPINX_T ep;
-    coOrd p;
-    track_p trk1;
-    coOrd p0,p1;
+	// Bridge wings
+	EPINX_T ep;
+	coOrd p;
+	track_p trk1;
+	coOrd p0,p1;
 
 	if(fillType==0) {
 		for(ep = 0; ep < 4; ep++) {
@@ -975,8 +986,10 @@ static void DrawDtoInit()
 		for(j = 0; j < n; j++) {
 			REORIGIN(p1,dto[i].base[j],xx->angle,xx->orig);
 			dto[i].pts[j] = p1;
-			if(j < n - 1)
-				dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
+			if(j < n - 1) {
+				dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) /
+				               (dto[i].base[j + 1].x - dto[i].base[j].x);
+			}
 		}
 		dto[i].ptsLast = dto[i].pts[n - 1];
 		dto[i].baseLast = dto[i].base[n - 1];
@@ -991,10 +1004,10 @@ static void DrawDtoInit()
  * \param color The tie color. If black the color is read from the global tieColor.
  */
 static void DrawNormalTurnout(
-	drawCmd_p d,
-	SCALEINX_T scaleInx,
-	BOOL_T omitTies,
-	wDrawColor color)
+        drawCmd_p d,
+        SCALEINX_T scaleInx,
+        BOOL_T omitTies,
+        wDrawColor color)
 {
 	DIST_T len;
 	coOrd pos;
@@ -1005,8 +1018,9 @@ static void DrawNormalTurnout(
 //	int s0;
 	ANGLE_T a0;
 
-	if (color == wDrawColorBlack)
+	if (color == wDrawColorBlack) {
 		color = tieColor;
+	}
 
 //	DIST_T trackGauge = GetTrkGauge(dtod.trk);
 
@@ -1014,7 +1028,7 @@ static void DrawNormalTurnout(
 
 	// draw the points
 #ifdef DTO_DEBUG
-	if (DTO_DEBUG == DTO_NORMAL) DrawDtoLayout(d, scaleInx);
+	if (DTO_DEBUG == DTO_NORMAL) { DrawDtoLayout(d, scaleInx); }
 #endif
 
 	int strPath = dtod.strPath, othPath = 0, secPath = 1;
@@ -1047,20 +1061,18 @@ static void DrawNormalTurnout(
 
 	if(dtod.bridge) {
 		DrawTurnoutFill(d,0,othPath,secPath);
+	} else if(dtod.roadbed) {
+		DrawTurnoutFill( d,1,othPath,secPath );
 	}
-	else 
-		if(dtod.roadbed) {
-			DrawTurnoutFill( d,1,othPath,secPath );
-		}
-	if (omitTies)
+	if (omitTies) {
 		return;
+	}
 
 	// Straight vector for tie angle
 	if (toType == DTO_WYE) {
 		s1 = dto[othPath].pts[0];
 		s2 = MidPtCoOrd(dto[othPath].ptsLast, dto[secPath].ptsLast);
-	}
-	else {
+	} else {
 		s1 = dto[strPath].pts[0];
 		s2 = dto[strPath].ptsLast;
 	}
@@ -1086,20 +1098,25 @@ static void DrawNormalTurnout(
 
 		cnt = cnt > 1 ? cnt - 1 : 1;
 		for (px = dlenx; cnt; cnt--, px += dx) {
-			if (px >= dto[othPath].base[p0 + 1].x) p0++;
-			if (px >= dto[secPath].base[q0 + 1].x) q0++;
-			if (p0 >= pn || q0 >= qn)
-				break;
-
-			if ((px + dx >= dto[othPath].baseLast.x) || (px + dx >= dto[secPath].baseLast.x)) {
+			if (px >= dto[othPath].base[p0 + 1].x) { p0++; }
+			if (px >= dto[secPath].base[q0 + 1].x) { q0++; }
+			if (p0 >= pn || q0 >= qn) {
 				break;
 			}
 
-			DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
-			DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-			tdlen = dtod.td.length + fabs(dy1) + fabs(dy2);
-			if (tdlen > tdmax)
+			if ((px + dx >= dto[othPath].baseLast.x)
+			    || (px + dx >= dto[secPath].baseLast.x)) {
 				break;
+			}
+
+			DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+			             dto[othPath].dy[p0];
+			DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) *
+			             dto[secPath].dy[q0];
+			tdlen = dtod.td.length + fabs(dy1) + fabs(dy2);
+			if (tdlen > tdmax) {
+				break;
+			}
 
 			DIST_T dy = dy1 + dy2;
 			Translate(&pos, s1, angle, px);
@@ -1111,21 +1128,24 @@ static void DrawNormalTurnout(
 		// Asymmetric? Use longer ties for remaining two tracks (strPath, othPath)
 		DIST_T sx = px; // Save these values for second code block
 		int s0 = p0;
-		if((dtod.toType == DTO_THREE) && (px + dx >= dto[secPath].baseLast.x)){
+		if((dtod.toType == DTO_THREE) && (px + dx >= dto[secPath].baseLast.x)) {
 			for ( ; cnt; cnt--, px += dx) {
-				if (px >= dto[othPath].base[p0 + 1].x) p0++;
+				if (px >= dto[othPath].base[p0 + 1].x) { p0++; }
 				// if (px >= dto[secPath].base[q0 + 1].x) q0++;
-				if (p0 >= pn)
+				if (p0 >= pn) {
 					break;
+				}
 
 				if (px + dx >= dto[othPath].baseLast.x) {
 					break;
 				}
 
-				DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+				DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+				             dto[othPath].dy[p0];
 				tdlen = dtod.td.length + fabs(dy1);
-				if (tdlen > tdmax)
+				if (tdlen > tdmax) {
 					break;
+				}
 
 				DIST_T dy = dy1;
 				Translate(&pos, s1, angle, px);
@@ -1136,7 +1156,7 @@ static void DrawNormalTurnout(
 		}
 
 		// Draw remaining ties, if any
-		if (px + dx < dto[othPath].baseLast.x){
+		if (px + dx < dto[othPath].baseLast.x) {
 			p1 = dto[othPath].pts[p0];
 			p2 = dto[othPath].ptsLast;
 			angle = FindAngle(p1, p2);
@@ -1144,35 +1164,38 @@ static void DrawNormalTurnout(
 			DIST_T lenr = (dto[othPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&p1, p2, angle, -lenr);
 			DrawStraightTies(d, dtod.td, p1, p2, color);
-		}
-		else {
+		} else {
 			p1 = dto[othPath].pts[pn - 2];
 			a0 = FindAngle(p1, p2);
 			Translate(&pos, p2, a0, -dx / 2);
-			DrawTie(d, pos, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
+			        tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 		// Restore saved values
-		if(dtod.toType == DTO_THREE){
+		if(dtod.toType == DTO_THREE) {
 			px = sx;
 			p0 = s0;
 		}
 
 		// Asymmetric? Use longer ties for remaining two tracks (strPath, secPath)
-		if((dtod.toType == DTO_THREE) && (px + dx >= dto[othPath].baseLast.x)){
+		if((dtod.toType == DTO_THREE) && (px + dx >= dto[othPath].baseLast.x)) {
 			for ( ; cnt; cnt--, px += dx) {
 				// if (px >= dto[othPath].base[p0 + 1].x) p0++;
-				if (px >= dto[secPath].base[q0 + 1].x) q0++;
-				if (q0 >= qn)
+				if (px >= dto[secPath].base[q0 + 1].x) { q0++; }
+				if (q0 >= qn) {
 					break;
+				}
 
 				if (px + dx >= dto[secPath].baseLast.x) {
 					break;
 				}
 
-				DIST_T dy1 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+				DIST_T dy1 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) *
+				             dto[secPath].dy[q0];
 				tdlen = dtod.td.length + fabs(dy1);
-				if (tdlen > tdmax)
+				if (tdlen > tdmax) {
 					break;
+				}
 
 				DIST_T dy = dy1;
 				Translate(&pos, s1, angle, px);
@@ -1189,12 +1212,12 @@ static void DrawNormalTurnout(
 			DIST_T lenr = (dto[secPath].baseLast.x - px + dlenx) / cos(D2R(90.0 - a0));
 			Translate(&q1, q2, angle, -lenr);
 			DrawStraightTies(d, dtod.td, q1, q2, color);
-		}
-		else {
+		} else {
 			q1 = dto[secPath].pts[qn - 2];
 			a0 = FindAngle(q1, q2);
 			Translate(&pos, q2, a0, -dx / 2);
-			DrawTie(d, pos, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+			DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
+			        tieDrawMode == TIEDRAWMODE_SOLID);
 		}
 
 		// Final ties at end
@@ -1206,13 +1229,13 @@ static void DrawNormalTurnout(
 				DIST_T lenr = len - px + dlenx;
 				Translate(&s1, s2, angle, -lenr);
 				DrawStraightTies(d, dtod.td, s1, s2, color);
-			}
-			else {
+			} else {
 				n = dto[strPath].n;
 				s1 = dto[strPath].pts[n - 2];
 				a0 = FindAngle(s1, s2);
 				Translate(&pos, s2, a0, -dx / 2);
-				DrawTie(d, pos, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
+				        tieDrawMode == TIEDRAWMODE_SOLID);
 			}
 		}
 	}
@@ -1226,10 +1249,10 @@ static void DrawNormalTurnout(
  * \param color The tie color. If black the color is read from the global tieColor.
  */
 static void DrawCurvedTurnout(
-	drawCmd_p d,
-	SCALEINX_T scaleInx,
-	BOOL_T omitTies,
-	wDrawColor color)
+        drawCmd_p d,
+        SCALEINX_T scaleInx,
+        BOOL_T omitTies,
+        wDrawColor color)
 {
 	DIST_T len, r;
 	coOrd pos;
@@ -1240,14 +1263,15 @@ static void DrawCurvedTurnout(
 	ANGLE_T a0, a1, a2;
 	struct extraDataCompound_t* xx = dtod.xx;
 
-	if (color == wDrawColorBlack)
+	if (color == wDrawColorBlack) {
 		color = tieColor;
+	}
 
 	DrawDtoInit();
 
 	// draw the points
 #ifdef DTO_DEBUG
-	if (DTO_DEBUG == DTO_CURVED) DrawDtoLayout(d, scaleInx);
+	if (DTO_DEBUG == DTO_CURVED) { DrawDtoLayout(d, scaleInx); }
 #endif
 
 	int othPath = 0, secPath = 1;
@@ -1255,13 +1279,12 @@ static void DrawCurvedTurnout(
 
 	if(dtod.bridge) {
 		DrawTurnoutFill(d,0,othPath,secPath);
+	} else if(dtod.roadbed) {
+		DrawTurnoutFill(d,1,othPath,secPath);
 	}
-	else
-		if(dtod.roadbed) {
-			DrawTurnoutFill(d,1,othPath,secPath);
-		}
-	if (omitTies)
+	if (omitTies) {
 		return;
+	}
 
 	// Save the ending coordinates
 	coOrd othEnd = zero, secEnd = zero;
@@ -1285,10 +1308,12 @@ static void DrawCurvedTurnout(
 	int segs = max(dto[othPath].n, dto[secPath].n);
 	for (; segs > 0; segs--) {
 
-		if (px >= dto[othPath].base[p0 + 1].x)
+		if (px >= dto[othPath].base[p0 + 1].x) {
 			p0++;
-		if (qx >= dto[secPath].base[q0 + 1].x)
+		}
+		if (qx >= dto[secPath].base[q0 + 1].x) {
 			q0++;
+		}
 		if ((p0 >= pn - 1) || (q0 >= qn - 1)) {
 			break;
 		}
@@ -1318,8 +1343,7 @@ static void DrawCurvedTurnout(
 
 				if (dto[othPath].type == 'R') {
 					a2 = a0 + dang / 2;
-				}
-				else {
+				} else {
 					a2 = a0 + a1 - dang / 2;
 					dang = -dang;
 				}
@@ -1330,10 +1354,12 @@ static void DrawCurvedTurnout(
 				qx += dx2 * cosAdj;
 
 				for (; cnt; cnt--, a2 += dang, angle += dang) {
-					if (px >= dto[othPath].base[p0 + 1].x)
+					if (px >= dto[othPath].base[p0 + 1].x) {
 						p0++;
-					if (qx >= dto[secPath].base[q0 + 1].x)
+					}
+					if (qx >= dto[secPath].base[q0 + 1].x) {
 						q0++;
+					}
 					if ((p0 >= pn - 1) || (q0 >= qn - 1)) {
 						break;
 					}
@@ -1353,7 +1379,8 @@ static void DrawCurvedTurnout(
 					}
 
 					Translate(&pos, e1, a2, -dy / 2);
-					DrawTie(d, pos, angle + xx->angle + 90, tlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+					DrawTie(d, pos, angle + xx->angle + 90, tlen, tdwid, color,
+					        tieDrawMode == TIEDRAWMODE_SOLID);
 
 					// Assures that these ends are the last point drawn before break
 					othEnd = e1;
@@ -1363,15 +1390,13 @@ static void DrawCurvedTurnout(
 					if (cnt > 1) {
 						px += dx * cosAdj;
 						qx += dx * cosAdj;
-					}
-					else {
+					} else {
 						px += dx2 * cosAdj;
 						qx += dx2 * cosAdj;
 					}
 				}
 			}
-		}
-		else {
+		} else {
 			cosAdj = fabs(cos(D2R(angle)));
 
 			p1 = dto[othPath].base[p0];
@@ -1382,10 +1407,12 @@ static void DrawCurvedTurnout(
 				DIST_T dx = len / cnt/*, dx2 = dx / 2*/;
 
 				for (; cnt; cnt--) {
-					if (px >= dto[othPath].base[p0 + 1].x)
+					if (px >= dto[othPath].base[p0 + 1].x) {
 						p0++;
-					if (qx >= dto[secPath].base[q0 + 1].x)
+					}
+					if (qx >= dto[secPath].base[q0 + 1].x) {
 						q0++;
+					}
 					if ((p0 >= pn - 1) || (q0 >= qn - 1)) {
 						break;
 					}
@@ -1394,12 +1421,14 @@ static void DrawCurvedTurnout(
 					p2 = dto[othPath].base[p0 + 1];
 
 					if ((px >= dto[othPath].baseLast.x)
-						|| (qx >= dto[secPath].baseLast.x)) {
+					    || (qx >= dto[secPath].baseLast.x)) {
 						break;
 					}
 
-					dy1 = dto[secPath].base[q0].y + (qx - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-					dy2 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy1 = dto[secPath].base[q0].y + (qx - dto[secPath].base[q0].x) *
+					      dto[secPath].dy[q0];
+					dy2 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+					      dto[othPath].dy[p0];
 					dy = dy1 - dy2;
 					DIST_T tlen = tdlen + fabs(cosAdj * dy);
 					if (tlen > tdmax) {
@@ -1427,8 +1456,7 @@ static void DrawCurvedTurnout(
 					px += dx * cosAdj;
 					qx += dx * cosAdj;
 				}
-			}
-			else {
+			} else {
 				break;
 			}
 		}
@@ -1452,10 +1480,10 @@ static void DrawCurvedTurnout(
 	if (len >= 2 * tdspc) {
 		Translate(&p1, p1, a0, tdspc2);
 		DrawStraightTies(d, dtod.td, p1, p2, color);
-	}
-	else if (len > tdspc2) { 
+	} else if (len > tdspc2) {
 		Translate(&p2, p2, a0, -tdspc2);
-		DrawTie(d, p2, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, p2, a0, dtod.td.length, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 
 	q1 = secEnd;
@@ -1465,10 +1493,10 @@ static void DrawCurvedTurnout(
 	if (len >= 2 * tdspc) {
 		Translate(&q1, q1, a0, tdspc2);
 		DrawStraightTies(d, dtod.td, q1, q2, color);
-	}
-	else if (len > tdspc2) {
+	} else if (len > tdspc2) {
 		Translate(&q2, q2, a0, -tdspc2);
-		DrawTie(d, q2, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, q2, a0, dtod.td.length, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 }
 
@@ -1480,18 +1508,19 @@ static void DrawCurvedTurnout(
   * \param color The tie color. If black the color is read from the global tieColor.
   */
 static void DrawXingTurnout(
-	drawCmd_p d,
-	SCALEINX_T scaleInx,
-	BOOL_T omitTies,
-	wDrawColor color)
+        drawCmd_p d,
+        SCALEINX_T scaleInx,
+        BOOL_T omitTies,
+        wDrawColor color)
 {
 	DIST_T len;
 	coOrd pos;
 	int cnt;
 	ANGLE_T cAngle;
 
-	if (color == wDrawColorBlack)
+	if (color == wDrawColorBlack) {
 		color = tieColor;
+	}
 
 	coOrd c1, c2, s1, s2, p1, p2, q1;
 	int p0, q0;
@@ -1525,8 +1554,7 @@ static void DrawXingTurnout(
 		for (i = 0; i < dtod.pathCnt; i++) {
 			if (dto[i].type == 'L') {
 				othPath = i;
-			}
-			else if (dto[i].type == 'R') {
+			} else if (dto[i].type == 'R') {
 				secPath = i;
 			}
 		}
@@ -1535,19 +1563,18 @@ static void DrawXingTurnout(
 
 	if(dtod.bridge) {
 		DrawXingFill(d,0,othPath,secPath);
+	} else if(dtod.roadbed) {
+		DrawXingFill(d,1,othPath,secPath);
 	}
-	else
-		if(dtod.roadbed) {
-			DrawXingFill(d,1,othPath,secPath);
-		}
 
 	// draw the points
 #ifdef DTO_DEBUG
-	if (DTO_DEBUG == DTO_XING) DrawDtoLayout(d, scaleInx);
+	if (DTO_DEBUG == DTO_XING) { DrawDtoLayout(d, scaleInx); }
 #endif
 
-	if (omitTies)
+	if (omitTies) {
 		return;
+	}
 
 	DIST_T tdlen = dtod.td.length, tdmax = 2.0 * tdlen;
 	DIST_T tdwid = dtod.td.width;
@@ -1564,8 +1591,7 @@ static void DrawXingTurnout(
 	dtod.midPt = pos;
 
 #ifdef DTO_DEBUG
-	if(DTO_DEBUG == DTO_XING)
-	{
+	if(DTO_DEBUG == DTO_XING) {
 		double r = td->width / 2;
 		DrawFillCircle(d,p1,r,drawColorPurple);
 		DrawFillCircle(d,q1,r,drawColorPurple);
@@ -1585,7 +1611,7 @@ static void DrawXingTurnout(
 
 		p1 = dto[str2Path].pts[0];
 		p2 = dto[str2Path].ptsLast;
-		
+
 		// Omit the center ties
 		magic = 1 / cos(D2R(90 - dAngle));
 		DIST_T tdadj = (tdlen / 2) * magic;
@@ -1593,13 +1619,15 @@ static void DrawXingTurnout(
 
 		dAngle = (dAngle - 90) / 2;
 		Translate(&pos, dtod.midPt, a2, -tdadj - tdadj2);
-		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 
 		Translate(&pos, dtod.midPt, a2, -tdadj - tdspc);
 		DrawStraightTies(d, dtod.td, p1, pos, color);
 
 		Translate(&pos, dtod.midPt, a2, tdadj + tdadj2);
-		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a2 - dAngle, tdlen, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 
 		Translate(&pos, dtod.midPt, a2, tdadj + tdspc);
 		DrawStraightTies(d, dtod.td, pos, p2, color);
@@ -1621,10 +1649,12 @@ static void DrawXingTurnout(
 
 	for (i = 0; i < DTO_DIM; i++) {
 		for (j = 0; j < dto[i].n - 1; j++) {
-			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) / (dto[i].base[j + 1].x - dto[i].base[j].x);
+			dto[i].dy[j] = (dto[i].base[j + 1].y - dto[i].base[j].y) /
+			               (dto[i].base[j + 1].x - dto[i].base[j].x);
 		}
-		if (dto[i].type == 'S')
+		if (dto[i].type == 'S') {
 			dto[i].angle = FindAngle(dto[i].pts[0], dto[i].ptsLast);
+		}
 	}
 
 	// Tie center line in drawing coordinates
@@ -1638,13 +1668,14 @@ static void DrawXingTurnout(
 	// Tie length adjust
 	magic = 1 / cos(0.5 * D2R(dAngle));
 	// Extra ties length adjust
-	double magic2 =	1.0 / cos(0.5 * D2R(dAngle)); 
+	double magic2 =	1.0 / cos(0.5 * D2R(dAngle));
 
 	// Draw right half
 	len = FindDistance(dtod.midPt, c2);
 	cnt = (int)floor(len / dtod.td.spacing + 0.5);
-	if (cnt <= 0)
+	if (cnt <= 0) {
 		return;
+	}
 
 	DIST_T dx = len / cnt;
 	p0 = q0 = 0;
@@ -1652,30 +1683,32 @@ static void DrawXingTurnout(
 	DIST_T px = len + dx2;
 	DIST_T lenx = 0;
 
-	while (p0 < pn && px > dto[othPath].base[p0 + 1].x) p0++;
-	while (q0 < qn && px > dto[secPath].base[q0 + 1].x) q0++;
+	while (p0 < pn && px > dto[othPath].base[p0 + 1].x) { p0++; }
+	while (q0 < qn && px > dto[secPath].base[q0 + 1].x) { q0++; }
 	while (p0 < pn && q0 < qn) {
-		if (px > dto[othPath].base[p0 + 1].x) p0++;
-		if (px > dto[secPath].base[q0 + 1].x) q0++;
-		if (p0 >= pn || q0 >= qn)
+		if (px > dto[othPath].base[p0 + 1].x) { p0++; }
+		if (px > dto[secPath].base[q0 + 1].x) { q0++; }
+		if (p0 >= pn || q0 >= qn) {
 			break;
+		}
 		// Dont use baseLast, as base coOrds have been rotated
 		if ((px + dx >= dto[othPath].base[pn - 1].x)
-			|| (px + dx >= dto[secPath].base[qn - 1].x)) {
+		    || (px + dx >= dto[secPath].base[qn - 1].x)) {
 			break;
 		}
 
-		DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
-		DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+		DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+		             dto[othPath].dy[p0];
+		DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) *
+		             dto[secPath].dy[q0];
 		tdlen = (dtod.td.length + fabs(dy1) + fabs(dy2)) * magic;
-		if(tdlen > tdmax)
-		{
-			if(dAngle >= 30)
-			{
+		if(tdlen > tdmax) {
+			if(dAngle >= 30) {
 				DIST_T dy = (dy1 + dy2) / 2;
 				Translate(&pos,dtod.midPt,cAngle,px - len);
 				Translate(&pos,pos,(cAngle - 90.0),dy);
-				DrawTie(d,pos,cAngle,tdlen - dtod.td.length * magic,tdwid,color,tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d,pos,cAngle,tdlen - dtod.td.length * magic,tdwid,color,
+				        tieDrawMode == TIEDRAWMODE_SOLID);
 				lenx += dx2 * magic2;
 			}
 			break;
@@ -1697,10 +1730,10 @@ static void DrawXingTurnout(
 	if (lenr > dx) {
 		Translate(&pos, p2, a0, -lenr);
 		DrawStraightTies(d, dtod.td, pos, p2, color);
-	}
-	else {
+	} else {
 		Translate(&pos, p2, a0, -dx2);
-		DrawTie(d, pos, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 
 	// p1 = dtod.midPt;
@@ -1710,10 +1743,10 @@ static void DrawXingTurnout(
 	if (lenr > dx) {
 		Translate(&pos, p2, a0, -lenr);
 		DrawStraightTies(d, dtod.td, pos, p2, color);
-	}
-	else {
+	} else {
 		Translate(&pos, p2, a0, -dx2);
-		DrawTie(d, pos, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 
 	// Draw left half
@@ -1724,8 +1757,9 @@ static void DrawXingTurnout(
 
 	len = FindDistance(c1, dtod.midPt);
 	cnt = (int)floor(len / dtod.td.spacing + 0.5);
-	if (cnt <= 0)
+	if (cnt <= 0) {
 		return;
+	}
 
 	p0 = q0 = 0;
 	tdlen = dtod.td.length;
@@ -1735,30 +1769,32 @@ static void DrawXingTurnout(
 	px = len - dx2;
 	lenx = 0;
 
-	while (p0 < pn && px > dto[othPath].base[p0 + 1].x) p0++;
-	while (q0 < qn && px > dto[secPath].base[q0 + 1].x) q0++;
+	while (p0 < pn && px > dto[othPath].base[p0 + 1].x) { p0++; }
+	while (q0 < qn && px > dto[secPath].base[q0 + 1].x) { q0++; }
 	while (p0 >= 0 && q0 >= 0) {
-		if (px < dto[othPath].base[p0].x) p0--;
-		if (px < dto[secPath].base[q0].x) q0--;
-		if (p0 < 0 || q0 < 0)
-			break;
-
-		if ((px - dx < dto[othPath].base[0].x)
-			|| (px - dx < dto[secPath].base[0].x)) {
+		if (px < dto[othPath].base[p0].x) { p0--; }
+		if (px < dto[secPath].base[q0].x) { q0--; }
+		if (p0 < 0 || q0 < 0) {
 			break;
 		}
 
-		DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
-		DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+		if ((px - dx < dto[othPath].base[0].x)
+		    || (px - dx < dto[secPath].base[0].x)) {
+			break;
+		}
+
+		DIST_T dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+		             dto[othPath].dy[p0];
+		DIST_T dy2 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) *
+		             dto[secPath].dy[q0];
 		tdlen = (dtod.td.length + fabs(dy1) + fabs(dy2)) * magic;
-		if(tdlen > tdmax)
-		{
-			if(dAngle >= 30)
-			{
+		if(tdlen > tdmax) {
+			if(dAngle >= 30) {
 				DIST_T dy = (dy1 + dy2) / 2;
 				Translate(&pos,dtod.midPt,cAngle,px - len);
 				Translate(&pos,pos,(cAngle - 90.0),dy);
-				DrawTie(d,pos,cAngle,tdlen - dtod.td.length * magic,tdwid,color,tieDrawMode == TIEDRAWMODE_SOLID);
+				DrawTie(d,pos,cAngle,tdlen - dtod.td.length * magic,tdwid,color,
+				        tieDrawMode == TIEDRAWMODE_SOLID);
 				lenx += dx2 * magic2;
 			}
 			break;
@@ -1780,10 +1816,10 @@ static void DrawXingTurnout(
 	if (lenr > dx) {
 		Translate(&pos, p1, a0, lenr);
 		DrawStraightTies(d, dtod.td, p1, pos, color);
-	}
-	else {
+	} else {
 		Translate(&pos, p1, a0, dx2);
-		DrawTie(d, pos, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 	p1 = dto[str2Path].pts[0];
 	// p2 = dtod.midPt;
@@ -1792,10 +1828,10 @@ static void DrawXingTurnout(
 	if (lenr > dx) {
 		Translate(&pos, p1, a0, lenr);
 		DrawStraightTies(d, dtod.td, p1, pos, color);
-	}
-	else {
+	} else {
 		Translate(&pos, p1, a0, dx2);
-		DrawTie(d, pos, a0, dtod.td.length, tdwid, color, tieDrawMode == TIEDRAWMODE_SOLID);
+		DrawTie(d, pos, a0, dtod.td.length, tdwid, color,
+		        tieDrawMode == TIEDRAWMODE_SOLID);
 	}
 }
 
@@ -1807,18 +1843,19 @@ static void DrawXingTurnout(
  * \param color The tie color. If black the color is read from the global tieColor.
  */
 static void DrawCrossTurnout(
-	drawCmd_p d,
-	SCALEINX_T scaleInx,
-	BOOL_T omitTies,
-	wDrawColor color)
+        drawCmd_p d,
+        SCALEINX_T scaleInx,
+        BOOL_T omitTies,
+        wDrawColor color)
 {
 	DIST_T len, dx;
 	coOrd pos;
 	int cnt;
 	ANGLE_T angle;
 
-	if (color == wDrawColorBlack)
+	if (color == wDrawColorBlack) {
 		color = tieColor;
+	}
 
 //	struct extraDataCompound_t* xx = dtod.xx;
 
@@ -1826,26 +1863,25 @@ static void DrawCrossTurnout(
 
 	// draw the points
 #ifdef DTO_DEBUG
-	if (DTO_DEBUG == DTO_LCROSS) DrawDtoLayout(d, scaleInx);
+	if (DTO_DEBUG == DTO_LCROSS) { DrawDtoLayout(d, scaleInx); }
 #endif
 
 	int strPath = dtod.strPath, str2Path = dtod.str2Path;
 	// Bad assumption
 	int othPath = 2, secPath = 2;
-	if (dtod.pathCnt == 4) secPath = 3;
+	if (dtod.pathCnt == 4) { secPath = 3; }
 
 	dto[strPath].angle = FindAngle(dto[strPath].pts[0], dto[strPath].ptsLast);
 	dto[str2Path].angle = FindAngle(dto[str2Path].pts[0], dto[str2Path].ptsLast);
 
 	if(dtod.bridge) {
 		DrawCrossFill(d,0,strPath,str2Path);
+	} else if(dtod.roadbed) {
+		DrawCrossFill(d,1,strPath,str2Path);
 	}
-	else
-		if(dtod.roadbed) {
-			DrawCrossFill(d,1,strPath,str2Path);
-		}
-	if (omitTies)
+	if (omitTies) {
 		return;
+	}
 
 	coOrd s1, s2, t1;
 //	coOrd t2, p1, p2, q1, q2;
@@ -1860,7 +1896,7 @@ static void DrawCrossTurnout(
 	s2 = dto[strPath].ptsLast;
 	t1 = dto[str2Path].pts[0];
 //	t2 = dto[str2Path].ptsLast;
-	angle = dto[strPath].angle; 
+	angle = dto[strPath].angle;
 
 //	p1 = dto[othPath].base[0];
 //	p2 = dto[othPath].baseLast;
@@ -1884,18 +1920,19 @@ static void DrawCrossTurnout(
 		DIST_T dlenx = dx / 2;
 
 		DIST_T px1 = len / 2 - dlenx * 5,
-			px2 = len / 2 + dlenx * 4;
+		       px2 = len / 2 + dlenx * 4;
 
 		for (px = dlenx; cnt; cnt--, px += dx) {
-			if (px >= dto[strPath].base[s0 + 1].x) s0++;
-			if (px >= dto[str2Path].base[t0 + 1].x) t0++;
-			if (px >= dto[othPath].base[p0 + 1].x) p0++;
-			if (px >= dto[secPath].base[q0 + 1].x) q0++;
-			if (s0 >= sn || t0 >= tn || p0 >= pn || q0 >= qn)
+			if (px >= dto[strPath].base[s0 + 1].x) { s0++; }
+			if (px >= dto[str2Path].base[t0 + 1].x) { t0++; }
+			if (px >= dto[othPath].base[p0 + 1].x) { p0++; }
+			if (px >= dto[secPath].base[q0 + 1].x) { q0++; }
+			if (s0 >= sn || t0 >= tn || p0 >= pn || q0 >= qn) {
 				break;
+			}
 
 			if ((px >= dto[strPath].baseLast.x)
-				|| (px >= dto[str2Path].baseLast.x)) {
+			    || (px >= dto[str2Path].baseLast.x)) {
 				break;
 			}
 
@@ -1904,38 +1941,44 @@ static void DrawCrossTurnout(
 			if (px < px1) {
 				switch (dtod.toType) {
 				case DTO_DCROSS:
-					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
-					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+					      dto[othPath].dy[p0];
+					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) *
+					      dto[secPath].dy[q0];
 					break;
 				case DTO_LCROSS:
-					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+					      dto[othPath].dy[p0];
 					dy2 = 0;
 					break;
 				case DTO_RCROSS:
 					dy1 = 0;
-					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) *
+					      dto[secPath].dy[q0];
 					break;
 				default:
 					break;
 				}
-			}
-			else if (px < px2) {
+			} else if (px < px2) {
 				dy1 = (dto[str2Path].base[s0].y - dto[strPath].base[t0].y);
 				dy2 = 0;
 				cflag = 1;
-			}
-			else {
+			} else {
 				switch (dtod.toType) {
 				case DTO_DCROSS:
-					dy1 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
-					dy2 = dy - dto[othPath].base[p0].y - (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy1 = dto[secPath].base[q0].y + (px - dto[secPath].base[q0].x) *
+					      dto[secPath].dy[q0];
+					dy2 = dy - dto[othPath].base[p0].y - (px - dto[othPath].base[p0].x) *
+					      dto[othPath].dy[p0];
 					break;
 				case DTO_LCROSS:
 					dy1 = 0;
-					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) * dto[secPath].dy[q0];
+					dy2 = dy - dto[secPath].base[q0].y - (px - dto[secPath].base[q0].x) *
+					      dto[secPath].dy[q0];
 					break;
 				case DTO_RCROSS:
-					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) * dto[othPath].dy[p0];
+					dy1 = dto[othPath].base[p0].y + (px - dto[othPath].base[p0].x) *
+					      dto[othPath].dy[p0];
 					dy2 = 0;
 					break;
 				default:
@@ -2002,12 +2045,12 @@ static void DrawCrossTurnout(
 }
 
 /**
-  * Draw all turnout components: ties, rail, roadbed, etc. 
+  * Draw all turnout components: ties, rail, roadbed, etc.
   *
-  * The turnout is checked to see if the enhanced methods can be used. 
-  * If so the ties are drawn and the TB_NOTIES bit is set so that the 
-  * rails and such are drawn on top of the ties. Similarly the bridge 
-  * and roadbed bits are cleared so the enhanced method can be used. 
+  * The turnout is checked to see if the enhanced methods can be used.
+  * If so the ties are drawn and the TB_NOTIES bit is set so that the
+  * rails and such are drawn on top of the ties. Similarly the bridge
+  * and roadbed bits are cleared so the enhanced method can be used.
   * Those bits are restored to the previous state before return.
   *
   * \param trk Pointer to the track object
@@ -2015,15 +2058,17 @@ static void DrawCrossTurnout(
   * \param color The turnout color.
   */
 EXPORT void DrawTurnout(
-	track_p trk,
-	drawCmd_p d,
-	wDrawColor color)
+        track_p trk,
+        drawCmd_p d,
+        wDrawColor color)
 {
-	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT, extraDataCompound_t);
+	struct extraDataCompound_t* xx = GET_EXTRA_DATA(trk, T_TURNOUT,
+	                                 extraDataCompound_t);
 	wIndex_t i;
 	long widthOptions = 0;
 	SCALEINX_T scaleInx = GetTrkScale(trk);
-	BOOL_T omitTies = !DoDrawTies(d, trk) || !DrawTwoRails(d,1) || ((d->options & DC_SIMPLE) != 0); // || (scaleInx == 0);
+	BOOL_T omitTies = !DoDrawTies(d, trk) || !DrawTwoRails(d,1)
+	                  || ((d->options & DC_SIMPLE) != 0); // || (scaleInx == 0);
 
 	widthOptions = DTS_LEFT | DTS_RIGHT;
 
@@ -2039,11 +2084,10 @@ EXPORT void DrawTurnout(
 	int pathCnt = (skip == 0 ? GetTurnoutPaths(trk, xx) : 0);
 
 	if ( (pathCnt > 1) && (pathCnt <= DTO_DIM)
-		&& ( GetTrkEndPtCnt( trk ) <= 4)
-		&& (xx->special == TOnormal) )
-		{
+	     && ( GetTrkEndPtCnt( trk ) <= 4)
+	     && (xx->special == TOnormal) ) {
 
-		dtod.bridge = bridge; 
+		dtod.bridge = bridge;
 		dtod.roadbed = roadbed;
 
 //		int strPath = -1;
@@ -2051,8 +2095,7 @@ EXPORT void DrawTurnout(
 
 		if (dtod.toType != DTO_INVALID) {
 
-			switch (dtod.toType)
-			{
+			switch (dtod.toType) {
 			case DTO_NORMAL:
 			case DTO_THREE:
 			case DTO_WYE:
@@ -2076,7 +2119,7 @@ EXPORT void DrawTurnout(
 				break;
 			}
 			// Ignore these settings
-			SetTrkNoTies(trk, 1); 
+			SetTrkNoTies(trk, 1);
 			ClrTrkBits( trk,TB_BRIDGE );
 			ClrTrkBits(trk, TB_ROADBED);
 		}
@@ -2085,27 +2128,30 @@ EXPORT void DrawTurnout(
 	// Begin standard DrawTurnout code to draw rails or centerline
 	// no curve center for turnouts, leave centerline for sectional curved
 	long opts = widthOptions | (xx->segCnt > 1 ? DTS_NOCENTER : 0);
-	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, opts);  
+	DrawSegsO(d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk),
+	          color, opts);
 
 
 	for (i = 0; i < GetTrkEndPtCnt(trk); i++) {
 		DrawEndPt(d, trk, i, color);
 	}
 	if ((d->options & DC_SIMPLE) == 0 &&
-		(labelWhen == 2 || (labelWhen == 1 && (d->options & DC_PRINT))) &&
-		labelScale >= d->scale &&
-		(GetTrkBits(trk) & TB_HIDEDESC) == 0) {
+	    (labelWhen == 2 || (labelWhen == 1 && (d->options & DC_PRINT))) &&
+	    labelScale >= d->scale &&
+	    (GetTrkBits(trk) & TB_HIDEDESC) == 0) {
 		DrawCompoundDescription(trk, d, color);
-		if (!xx->handlaid)
+		if (!xx->handlaid) {
 			LabelLengths(d, trk, color);
+		}
 	}
 	if (roadbedWidth > GetTrkGauge(trk) &&
-		DrawTwoRails( d, 1 ) &&
-		( (d->options & DC_PRINT) || roadbedOnScreen ) )
+	    DrawTwoRails( d, 1 ) &&
+	    ( (d->options & DC_PRINT) || roadbedOnScreen ) ) {
 		DrawTurnoutRoadbed(d, color, xx->orig, xx->angle, xx->segs, xx->segCnt);
+	}
 
 	// Restore these settings
-	if (noTies == 0) ClrTrkBits(trk, TB_NOTIES);
-	if (bridge) SetTrkBits(trk, TB_BRIDGE);
-	if (roadbed) SetTrkBits(trk, TB_ROADBED);
+	if (noTies == 0) { ClrTrkBits(trk, TB_NOTIES); }
+	if (bridge) { SetTrkBits(trk, TB_BRIDGE); }
+	if (roadbed) { SetTrkBits(trk, TB_ROADBED); }
 }

@@ -24,31 +24,33 @@
 #include "track.h" //- drawLineType
 
 typedef struct extraDataBezier_t {
-		extraDataBase_t base;
-		coOrd pos[4];
-		DIST_T minCurveRadius;
-		ANGLE_T a0, a1;
-		DIST_T length;
-		dynArr_t arcSegs;
-		coOrd descriptionOff;
-		DIST_T segsWidth;
-		wDrawColor segsColor;
-		drawLineType_e lineType;
-		} extraDataBezier_t;
+	extraDataBase_t base;
+	coOrd pos[4];
+	DIST_T minCurveRadius;
+	ANGLE_T a0, a1;
+	DIST_T length;
+	dynArr_t arcSegs;
+	coOrd descriptionOff;
+	DIST_T segsWidth;
+	wDrawColor segsColor;
+	drawLineType_e lineType;
+} extraDataBezier_t;
 
 
 void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T width );
-track_p NewBezierTrack(coOrd[4], trkSeg_p , int );
-track_p NewBezierLine(coOrd[4], trkSeg_p , int, wDrawColor, DIST_T);
+track_p NewBezierTrack(coOrd[4], trkSeg_p, int );
+track_p NewBezierLine(coOrd[4], trkSeg_p, int, wDrawColor, DIST_T);
 void FixUpBezier(coOrd[4], struct extraDataBezier_t*, BOOL_T);
-void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);
+void FixUpBezierSeg(coOrd[4], trkSeg_p, BOOL_T);
 void FixUpBezierSegs(trkSeg_p p,int segCnt);
 BOOL_T GetBezierSegmentFromTrack(track_p, trkSeg_p);
 BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]);
-BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2], track_p old);
+BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
+                                  track_p old);
 void SetBezierLineType( track_p trk, int width );
 BOOL_T GetBezierMiddle( track_p, coOrd * );
 
-DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T, BOOL_T * );
+DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T,
+                                  BOOL_T * );
 STATUS_T BezierDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 

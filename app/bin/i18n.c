@@ -26,9 +26,9 @@
 #include "wlib.h"
 
 /**
- * Initialize gettext environment. By default, the language files are installed 
- * in <install_dir>\share\locale\<language> 
- * The install dir is derived from the library directory by removing the last 
+ * Initialize gettext environment. By default, the language files are installed
+ * in <install_dir>\share\locale\<language>
+ * The install dir is derived from the library directory by removing the last
  * directory in the path (xtrkcad)
  * Directory layout on Windows is:
  * <install_dir>\bin\
@@ -39,15 +39,15 @@ void InitGettext( void )
 {
 #ifdef XTRKCAD_USE_GETTEXT
 	char directory[2048];
-	
+
 	setlocale(LC_ALL, "");
-	
+
 	// build the correct directory path
 	strcpy(directory, wGetAppLibDir());
 	strcat( directory, "/../locale" );
 #ifdef WINDOWS
 	_fullpath( directory, directory, 2048 );
-#endif	
+#endif
 	// initialize gettext
 	bindtextdomain(XTRKCAD_PACKAGE, directory);
 	bind_textdomain_codeset(XTRKCAD_PACKAGE, "UTF-8");
@@ -55,7 +55,7 @@ void InitGettext( void )
 
 #ifdef VERBOSE
 	printf(_("Gettext initialized (PACKAGE=%s, LOCALEDIR=%s, LC_ALL=%s).\n"),
-			XTRKCAD_PACKAGE, directory, setlocale(LC_ALL, NULL));
+	       XTRKCAD_PACKAGE, directory, setlocale(LC_ALL, NULL));
 #endif
 
 #endif /* XTRKCAD_USE_GETTEXT */

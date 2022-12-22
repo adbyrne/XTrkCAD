@@ -2,31 +2,31 @@
  * View for the text note
  */
 
- /*  XTrkCad - Model Railroad CAD
-  *  Copyright (C) 2018 Martin Fischer
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-  */
-  
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2018 Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 #include "custom.h"
 #include "dynstring.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
 #include "shortentext.h"
-#include "track.h" 
+#include "track.h"
 
 struct {
 	coOrd pos;
@@ -62,9 +62,9 @@ static wWin_p textEditW;
  */
 static void
 TextDlgUpdate(
-	paramGroup_p pg,
-	int inx,
-	void * valueP)
+        paramGroup_p pg,
+        int inx,
+        void * valueP)
 {
 	switch (inx) {
 	case I_ORIGX:
@@ -110,7 +110,7 @@ TextEditOK(void *junk)
 	MyFree( xx->noteData.text );
 	xx->noteData.text = (char*)MyMalloc(len + 2);
 	wTextGetText(textEntry, xx->noteData.text, len);
-	
+
 	SetBoundingBox( trk, xx->pos, xx->pos );
 	DrawNewTrack( trk );
 	wHide(textEditW);
@@ -122,7 +122,7 @@ TextEditOK(void *junk)
 
 /**
  * Create the edit dialog for text notes.
- * 
+ *
  * \param trk IN selected note
  * \param title IN dialog title
  */
@@ -133,11 +133,11 @@ CreateEditTextNote(char *title, char * textData )
 	if (!textEditW) {
 		ParamRegister(&textEditPG);
 		textEditW = ParamCreateDialog(&textEditPG,
-			"",
-			_("Done"), TextEditOK,
-			TextEditCancel, TRUE, NULL,
-			F_BLOCK,
-			TextDlgUpdate);
+		                              "",
+		                              _("Done"), TextEditOK,
+		                              TextEditCancel, TRUE, NULL,
+		                              F_BLOCK,
+		                              TextDlgUpdate);
 	}
 
 	wWinSetTitle(textEditPG.win, MakeWindowTitle(title));
@@ -147,7 +147,7 @@ CreateEditTextNote(char *title, char * textData )
 	wTextSetReadonly(textEntry, FALSE);
 	FillLayerList((wList_p)textEditPLs[I_LAYER].control);
 	ParamLoadControls(&textEditPG);
-	
+
 	// and show the dialog
 	wShow(textEditW);
 }
@@ -170,16 +170,17 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 	RemoveFormatChars(xx->noteData.text, noteText);
 	EllipsizeString(noteText, NULL, 80);
 	DynStringMalloc(&statusLine, 100);
-	   
-	DynStringPrintf(&statusLine, 
-					_("Note: Layer=%d %-.80s"), 
-					GetTrkLayer(trk)+1, 
-					noteText );
+
+	DynStringPrintf(&statusLine,
+	                _("Note: Layer=%d %-.80s"),
+	                GetTrkLayer(trk)+1,
+	                noteText );
 	strcpy(str, DynStringToCStr(&statusLine));
 
 	DynStringFree(&statusLine);
-	if ( ! inDescribeCmd )
+	if ( ! inDescribeCmd ) {
 		return;
+	}
 	textNoteData.pos = xx->pos;
 	textNoteData.layer = GetTrkLayer( trk );
 	textNoteData.trk = trk;
@@ -189,7 +190,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 
 /**
  * Show the UI for entering new text notes
- * 
+ *
  * \param xx Note object data
  */
 

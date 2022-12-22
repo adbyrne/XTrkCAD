@@ -28,9 +28,9 @@
 #include "paths.h"
 
 struct pathTable {
-    char type[ PATH_TYPE_SIZE]; 			/**< type of path */
-    DynString path;							/**< path */
-    UT_hash_handle hh; 						/**< makes this structure hashable */
+	char type[ PATH_TYPE_SIZE]; 			/**< type of path */
+	DynString path;							/**< path */
+	UT_hash_handle hh; 						/**< makes this structure hashable */
 };
 
 static struct pathTable *paths;
@@ -51,9 +51,9 @@ static struct pathTable *FindPath(const char *type);
 static struct pathTable *
 FindPath(const char *type)
 {
-    struct pathTable *entry;
-    HASH_FIND_STR(paths, type, entry);
-    return (entry);
+	struct pathTable *entry;
+	HASH_FIND_STR(paths, type, entry);
+	return (entry);
 }
 
 /**
@@ -65,23 +65,23 @@ FindPath(const char *type)
 static void
 AddPath(const char *type, char*path)
 {
-    struct pathTable *tableEntry;
-    tableEntry = FindPath(type);
+	struct pathTable *tableEntry;
+	tableEntry = FindPath(type);
 
-    if (tableEntry) {
-        DynStringClear(&(tableEntry->path));
-    } else {
-        tableEntry = malloc(sizeof(struct pathTable));
-        DynStringMalloc(&tableEntry->path, 16);
-        strcpy(tableEntry->type, type);
+	if (tableEntry) {
+		DynStringClear(&(tableEntry->path));
+	} else {
+		tableEntry = malloc(sizeof(struct pathTable));
+		DynStringMalloc(&tableEntry->path, 16);
+		strcpy(tableEntry->type, type);
 #ifdef WINDOWS
 #pragma warning( disable : 4267)
 #endif
-	// This generates warning C4267 on windows
-        HASH_ADD_STR(paths, type, tableEntry);
-    }
+		// This generates warning C4267 on windows
+		HASH_ADD_STR(paths, type, tableEntry);
+	}
 
-    DynStringCatCStr(&(tableEntry->path), path);
+	DynStringCatCStr(&(tableEntry->path), path);
 }
 
 /**
@@ -96,23 +96,23 @@ AddPath(const char *type, char*path)
  */
 
 void SetCurrentPath(
-    const char * pathType,
-    const char * fileName)
+        const char * pathType,
+        const char * fileName)
 {
-    char *path;
-    char *copy;
-    CHECK(fileName != NULL);
-    CHECK(pathType != NULL);
-    copy = strdup(fileName);
-    path = strrchr(copy, FILE_SEP_CHAR[0]);
+	char *path;
+	char *copy;
+	CHECK(fileName != NULL);
+	CHECK(pathType != NULL);
+	copy = strdup(fileName);
+	path = strrchr(copy, FILE_SEP_CHAR[0]);
 
-    if (path) {
-        *path = '\0';
-        AddPath(pathType, copy);
-        wPrefSetString(PATHS_SECTION, pathType, copy);
-    }
+	if (path) {
+		*path = '\0';
+		AddPath(pathType, copy);
+		wPrefSetString(PATHS_SECTION, pathType, copy);
+	}
 
-    free(copy);
+	free(copy);
 }
 
 /**
@@ -128,29 +128,29 @@ void SetCurrentPath(
  */
 
 char *GetCurrentPath(
-    const char *pathType)
+        const char *pathType)
 {
-    struct pathTable *currentPath;
-    const char *path;
-    CHECK(pathType != NULL);
-    currentPath = FindPath(pathType);
+	struct pathTable *currentPath;
+	const char *path;
+	CHECK(pathType != NULL);
+	currentPath = FindPath(pathType);
 
-    if (currentPath) {
-        return (DynStringToCStr(&(currentPath->path)));
-    }
+	if (currentPath) {
+		return (DynStringToCStr(&(currentPath->path)));
+	}
 
-    path = wPrefGetString(PATHS_SECTION, pathType);
+	path = wPrefGetString(PATHS_SECTION, pathType);
 
-    if (!path) {
-        path = wPrefGetString("file", "directory");
-    }
+	if (!path) {
+		path = wPrefGetString("file", "directory");
+	}
 
-    if (!path) {
-        path = wGetUserHomeDir();
-    }
+	if (!path) {
+		path = wGetUserHomeDir();
+	}
 
-    AddPath(pathType, (char *)path);
-    return ((char *)path);
+	AddPath(pathType, (char *)path);
+	return ((char *)path);
 }
 
 /**
@@ -177,16 +177,16 @@ void ConvertPathForward(char *string)
 
 char *FindFilename(char *path)
 {
-    char *name;
-    name = strrchr(path, FILE_SEP_CHAR[0]);
+	char *name;
+	name = strrchr(path, FILE_SEP_CHAR[0]);
 
-    if (name) {
-        name++;
-    } else {
-        name = path;
-    }
+	if (name) {
+		name++;
+	} else {
+		name = path;
+	}
 
-    return (name);
+	return (name);
 }
 
 /**
@@ -196,7 +196,8 @@ char *FindFilename(char *path)
  * \return pointer to the file extension part, empty string if no extension present
  */
 
-char *FindFileExtension(char *path) {
+char *FindFileExtension(char *path)
+{
 	char *ext;
 	ext = strrchr(path, '.');
 
@@ -223,25 +224,25 @@ char *FindFileExtension(char *path) {
 void
 MakeFullpath(char **str, ...)
 {
-    va_list valist;
-    const char *part;
-    char *separator = FILE_SEP_CHAR;
-    char lastchar = '\0';
-    DynString path;
-    DynStringMalloc(&path, 0);
-    va_start(valist, str);
+	va_list valist;
+	const char *part;
+	char *separator = FILE_SEP_CHAR;
+	char lastchar = '\0';
+	DynString path;
+	DynStringMalloc(&path, 0);
+	va_start(valist, str);
 
-    while ((part = va_arg(valist, const char *))) {
-        if (part[0] !=separator[0] && lastchar && lastchar != separator[0] &&
-                lastchar != ':') {
-            DynStringNCatCStr(&path, 1, separator);
-        }
+	while ((part = va_arg(valist, const char *))) {
+		if (part[0] !=separator[0] && lastchar && lastchar != separator[0] &&
+		    lastchar != ':') {
+			DynStringNCatCStr(&path, 1, separator);
+		}
 
-        DynStringCatCStr(&path, part);
-        lastchar = part[strlen(part) - 1];
-    }
+		DynStringCatCStr(&path, part);
+		lastchar = part[strlen(part) - 1];
+	}
 
-    *str = strdup(DynStringToCStr(&path));
-    DynStringFree(&path);
+	*str = strdup(DynStringToCStr(&path));
+	DynStringFree(&path);
 	va_end(valist);
 }

@@ -28,24 +28,24 @@
 #include "track.h"
 
 typedef struct {
-		int option;
-		coOrd doff;
-		union {
-			DIST_T height;
-			char * name;
-		} u;
-		BOOL_T cacheSet;
-		double cachedElev;
-		double cachedGrade;
-		} elev_t;
+	int option;
+	coOrd doff;
+	union {
+		DIST_T height;
+		char * name;
+	} u;
+	BOOL_T cacheSet;
+	double cachedElev;
+	double cachedGrade;
+} elev_t;
 
 typedef struct trkEndPt_t {
-		coOrd pos;
-		ANGLE_T angle;
-		track_p track;
-		long index;
-		elev_t elev;
-		long option;
-		} trkEndPt_t;
+	coOrd pos;
+	ANGLE_T angle;
+	track_p track;
+	long index;
+	elev_t elev;
+	long option;
+} trkEndPt_t;
 
 #endif
