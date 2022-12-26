@@ -1,7 +1,7 @@
 /** \file mswedit.c
  * Text entry widgets
  */
- 
+
 /*  XTrackCAD - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
@@ -19,7 +19,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
- 
+
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -31,29 +31,29 @@
 
 
 struct wString_t {
-		WOBJ_COMMON
-		char * valueP;
-		wIndex_t valueL;
-		wStringCallBack_p action;
-		wBool_t enter_pressed;	/**< flag if enter was pressed */
-		};
+	WOBJ_COMMON
+	char * valueP;
+	wIndex_t valueL;
+	wStringCallBack_p action;
+	wBool_t enter_pressed;	/**< flag if enter was pressed */
+};
 
 #ifdef LATER
 struct wInteger_t {
-		WOBJ_COMMON
-		long low, high;
-		long * valueP;
-		long oldValue;
-		wIntegerCallBack_p action;
-		};
+	WOBJ_COMMON
+	long low, high;
+	long * valueP;
+	long oldValue;
+	wIntegerCallBack_p action;
+};
 
 struct wFloat_t {
-		WOBJ_COMMON
-		double low, high;
-		double * valueP;
-		double oldValue;
-		wFloatCallBack_p action;
-		};
+	WOBJ_COMMON
+	double low, high;
+	double * valueP;
+	double oldValue;
+	wFloatCallBack_p action;
+};
 #endif // LATER
 
 
@@ -67,33 +67,32 @@ static void triggerFloat( wControl_p b );
 
 
 LRESULT FAR PASCAL _export pushEdit(
-		HWND hWnd,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+        HWND hWnd,
+        UINT message,
+        WPARAM wParam,
+        LPARAM lParam )
 {
 
 	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wString_p b = (wString_p)mswMapIndex(inx);
 
-	switch (message)
-	{
+	switch (message) {
 	case WM_CHAR:
-	    if (b != NULL) {
-	        switch (wParam) {
-	        case VK_RETURN:
-	            triggerString(b);
-	            return (LRESULT)0;
-	            break;
-	        case 0x1B:
-	        case 0x09:
-	            SetFocus(((wControl_p)(b->parent))->hWnd);
-	            SendMessage(((wControl_p)(b->parent))->hWnd, WM_CHAR,
-	                        wParam, lParam);
-	            return (LRESULT)0;
-	        }
-	    }
-	    break;
+		if (b != NULL) {
+			switch (wParam) {
+			case VK_RETURN:
+				triggerString(b);
+				return (LRESULT)0;
+				break;
+			case 0x1B:
+			case 0x09:
+				SetFocus(((wControl_p)(b->parent))->hWnd);
+				SendMessage(((wControl_p)(b->parent))->hWnd, WM_CHAR,
+				            wParam, lParam);
+				return (LRESULT)0;
+			}
+		}
+		break;
 
 	}
 	return CallWindowProc(oldEditProc, hWnd, message, wParam, lParam);
@@ -109,8 +108,8 @@ LRESULT FAR PASCAL _export pushEdit(
 
 
 void wStringSetValue(
-		wString_p b,
-		const char * arg )
+        wString_p b,
+        const char * arg )
 {
 	WORD len = (WORD)strlen( arg );
 	SendMessage( b->hWnd, WM_SETTEXT, (WPARAM)0, (LPARAM)arg );
@@ -121,18 +120,18 @@ void wStringSetValue(
 
 
 void wStringSetWidth(
-		wString_p b,
-		wWinPix_t w )
+        wString_p b,
+        wWinPix_t w )
 {
 	int rc;
 	b->w = w;
 	rc = SetWindowPos( b->hWnd, HWND_TOP, 0, 0,
-		b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
+	                   b->w, b->h, SWP_NOMOVE|SWP_NOZORDER );
 }
 
 
 const char * wStringGetValue(
-		wString_p b )
+        wString_p b )
 {
 	static char buff[1024];
 	SendMessage( b->hWnd, WM_GETTEXT, (WPARAM)sizeof buff, (LPARAM)buff );
@@ -141,29 +140,29 @@ const char * wStringGetValue(
 
 /**
  * Get the string from a entry field. The returned pointer has to be free() after processing is complete.
- * 
+ *
  * \param bs IN string entry field
- * 
+ *
  * \return    pointer to entered string or NULL if entry field is empty.
  */
 
 static char *getString(wString_p bs)
 {
-    char *tmpBuffer = NULL;
-    UINT chars = (UINT)SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, (LPARAM)0);
+	char *tmpBuffer = NULL;
+	UINT chars = (UINT)SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, (LPARAM)0);
 
-    if (chars) {
-        tmpBuffer = malloc(chars > sizeof(WORD)? chars + 1 : sizeof(WORD) + 1);
-        *(WORD *)tmpBuffer = chars;
-        SendMessage(bs->hWnd, (UINT)EM_GETLINE, (WPARAM)0, (LPARAM)tmpBuffer);
-        tmpBuffer[chars] = '\0';
-    } else {
-	    tmpBuffer = malloc(2);
-	    tmpBuffer[0] = '\n';
-	    tmpBuffer[1] = '\0';
-    }
+	if (chars) {
+		tmpBuffer = malloc(chars > sizeof(WORD)? chars + 1 : sizeof(WORD) + 1);
+		*(WORD *)tmpBuffer = chars;
+		SendMessage(bs->hWnd, (UINT)EM_GETLINE, (WPARAM)0, (LPARAM)tmpBuffer);
+		tmpBuffer[chars] = '\0';
+	} else {
+		tmpBuffer = malloc(2);
+		tmpBuffer[0] = '\n';
+		tmpBuffer[1] = '\0';
+	}
 
-    return (tmpBuffer);
+	return (tmpBuffer);
 }
 
 /**
@@ -174,20 +173,19 @@ static char *getString(wString_p bs)
  */
 
 static void triggerString(
-    wString_p b)
+        wString_p b)
 {
 	const char *output = "\n";
 
-    char *enteredString = getString(b);
-    if (enteredString)
-    {
-        if (b->valueP) {
-            strcpy(b->valueP, enteredString);
-        }
+	char *enteredString = getString(b);
+	if (enteredString) {
+		if (b->valueP) {
+			strcpy(b->valueP, enteredString);
+		}
 		if (b->action) {
 			b->enter_pressed = TRUE;
 			b->action(output, b->data);
-        }
+		}
 
 		free(enteredString);
 	}
@@ -195,84 +193,87 @@ static void triggerString(
 
 
 LRESULT stringProc(
-    wControl_p b,
-    HWND hWnd,
-    UINT message,
-    WPARAM wParam,
-    LPARAM lParam)
+        wControl_p b,
+        HWND hWnd,
+        UINT message,
+        WPARAM wParam,
+        LPARAM lParam)
 {
-    wString_p bs = (wString_p)b;
-    int modified;
+	wString_p bs = (wString_p)b;
+	int modified;
 
-    switch (message) {
+	switch (message) {
 
-    case WM_COMMAND:
-        switch (WCMD_PARAM_NOTF) {
-        case EN_KILLFOCUS:
-            modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, (WPARAM)0, (LPARAM)0);
-            if (!modified) {
-                break;
-            }
+	case WM_COMMAND:
+		switch (WCMD_PARAM_NOTF) {
+		case EN_KILLFOCUS:
+			modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, (WPARAM)0, (LPARAM)0);
+			if (!modified) {
+				break;
+			}
 
-            char *enteredString = getString(bs);
-            if (enteredString) {
-                if (bs->valueP) {
-                    strcpy(bs->valueP, enteredString);
-                }
-                if (bs->action) {
-                    bs->action(enteredString, bs->data);
-                    mswSetTrigger(NULL, NULL);
-                }
-                free(enteredString);
-            }
-            SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0);
-        }
-        break;
-    }
+			char *enteredString = getString(bs);
+			if (enteredString) {
+				if (bs->valueP) {
+					strcpy(bs->valueP, enteredString);
+				}
+				if (bs->action) {
+					bs->action(enteredString, bs->data);
+					mswSetTrigger(NULL, NULL);
+				}
+				free(enteredString);
+			}
+			SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, (WPARAM)FALSE, (LPARAM)0);
+		}
+		break;
+	}
 
-    return DefWindowProc(hWnd, message, wParam, lParam);
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 
 static callBacks_t stringCallBacks = {
-		mswRepaintLabel,
-		NULL,
-		stringProc };
+	mswRepaintLabel,
+	NULL,
+	stringProc
+};
 
 
 wString_p wStringCreate(
-		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
-		const char	* helpStr,
-		const char	* labelStr,
-		long	option,
-		wWinPix_t	width,
-		char	*valueP,
-		wIndex_t valueL,
-		wStringCallBack_p action,
-		void	*data )
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char	* helpStr,
+        const char	* labelStr,
+        long	option,
+        wWinPix_t	width,
+        char	*valueP,
+        wIndex_t valueL,
+        wStringCallBack_p action,
+        void	*data )
 {
 	wString_p b;
 	RECT rect;
 	int index;
 	DWORD style = 0;
 
-	b = (wString_p)mswAlloc( parent, B_STRING, mswStrdup(labelStr), sizeof *b, data, &index );
+	b = (wString_p)mswAlloc( parent, B_STRING, mswStrdup(labelStr), sizeof *b, data,
+	                         &index );
 	mswComputePos( (wControl_p)b, x, y );
 	b->option = option;
 	b->valueP =	 valueP;
 	b->valueL = valueL;
 	b->labelY += 2;
 	b->action = action;
-	if (option & BO_READONLY)
+	if (option & BO_READONLY) {
 		style |= ES_READONLY;
+	}
 
 	b->hWnd = CreateWindowEx( WS_EX_CLIENTEDGE, "EDIT", NULL,
-						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
-						b->x, b->y,
-						width, mswEditHeight,
-						((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
+	                          ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
+	                          b->x, b->y,
+	                          width, mswEditHeight,
+	                          ((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(STRING)");
 		return b;
@@ -317,8 +318,8 @@ wString_p wStringCreate(
 
 
 void wIntegerSetValue(
-		wInteger_p b,
-		long arg )
+        wInteger_p b,
+        long arg )
 {
 	b->oldValue = arg;
 	wsprintf( mswTmpBuff, "%ld", arg );
@@ -328,14 +329,14 @@ void wIntegerSetValue(
 
 
 long wIntegerGetValue(
-		wInteger_p b )
+        wInteger_p b )
 {
 	return b->oldValue;
 }
 
 
 static void triggerInteger(
-		wControl_p b )
+        wControl_p b )
 {
 	wInteger_p bi = (wInteger_p)b;
 	int cnt;
@@ -344,17 +345,22 @@ static void triggerInteger(
 
 	if (bi->action) {
 		*(WPARAM*)&mswTmpBuff[0] = 78;
-		cnt = (int)SendMessage( bi->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
+		cnt = (int)SendMessage( bi->hWnd, (UINT)EM_GETLINE, 0,
+		                        (DWORD)(LPSTR)mswTmpBuff );
 		mswTmpBuff[cnt] = '\0';
-		if (strcmp( mswTmpBuff, "-" )==0 )
+		if (strcmp( mswTmpBuff, "-" )==0 ) {
 			return;
+		}
 		value = strtol( mswTmpBuff, &cp, 10 );
-		if (*cp != '\0' || value < bi->low || value > bi->high )
+		if (*cp != '\0' || value < bi->low || value > bi->high ) {
 			return;
-		if (bi->oldValue == value)
+		}
+		if (bi->oldValue == value) {
 			return;
-		if (bi->valueP)
+		}
+		if (bi->valueP) {
 			*bi->valueP = value;
+		}
 		bi->oldValue = value;
 		bi->action( value, bi->data );
 	}
@@ -362,31 +368,33 @@ static void triggerInteger(
 
 
 LRESULT integerProc(
-		wControl_p b,
-		HWND hWnd,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
-{			   
+        wControl_p b,
+        HWND hWnd,
+        UINT message,
+        WPARAM wParam,
+        LPARAM lParam )
+{
 	wInteger_p bi = (wInteger_p)b;
 	int inx;
 	int cnt;
 	long value;
-	char * cp;				
+	char * cp;
 	wBool_t ok;
 	int modified;
-		
+
 	switch( message ) {
-	
+
 	case WM_COMMAND:
 		switch (WCMD_PARAM_NOTF) {
 		case EN_KILLFOCUS:
 			ok = TRUE;
 			modified = (int)SendMessage( bi->hWnd, (UINT)EM_GETMODIFY, 0, 0L );
-			if (!modified)
+			if (!modified) {
 				break;
+			}
 			*(WPARAM*)&mswTmpBuff[0] = 78;
-			cnt = (int)SendMessage( bi->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
+			cnt = (int)SendMessage( bi->hWnd, (UINT)EM_GETLINE, 0,
+			                        (DWORD)(LPSTR)mswTmpBuff );
 			mswTmpBuff[cnt] = '\0';
 			if (strcmp( mswTmpBuff, "-" )==0 && 0 >= bi->low && 0 <= bi->high ) {
 				value = 0;
@@ -395,23 +403,25 @@ LRESULT integerProc(
 				if (*cp != '\0' || value < bi->low || value > bi->high ) {
 					inx = GetWindowWord( bi->hWnd, GWW_ID );
 					if (wWinIsVisible(bi->parent)) {
-						PostMessage( ((wControl_p)(bi->parent))->hWnd, 
-							WM_NOTVALID, inx, 0L );
+						PostMessage( ((wControl_p)(bi->parent))->hWnd,
+						             WM_NOTVALID, inx, 0L );
 						return TRUE;
 					} else {
-						if (value < bi->low)
+						if (value < bi->low) {
 							value = bi->low;
-						else
+						} else {
 							value = bi->high;
+						}
 						sprintf( mswTmpBuff, "%ld", value );
 						SendMessage( bi->hWnd, (UINT)WM_SETTEXT, 0,
-									(DWORD)(LPSTR)mswTmpBuff );
+						             (DWORD)(LPSTR)mswTmpBuff );
 					}
 				}
 			}
 			bi->oldValue = value;
-			if (bi->valueP)
+			if (bi->valueP) {
 				*bi->valueP = value;
+			}
 			if (bi->action) {
 				bi->action( value, bi->data );
 				mswSetTrigger( NULL, NULL );
@@ -422,21 +432,22 @@ LRESULT integerProc(
 
 	case WM_NOTVALID:
 		wsprintf( mswTmpBuff, "Please enter a value between %ld and %ld",
-						bi->low, bi->high );
+		          bi->low, bi->high );
 		if (bi->low > MININT && bi->high < MAXINT)
 			sprintf( mswTmpBuff,
-					 "Please enter an integer value between %ld and %ld",
-					 bi->low, bi->high );
+			         "Please enter an integer value between %ld and %ld",
+			         bi->low, bi->high );
 		else if (bi->low > MININT)
 			sprintf( mswTmpBuff,
-					 "Please enter an integer value greater or equal to %ld",
-					 bi->low );
+			         "Please enter an integer value greater or equal to %ld",
+			         bi->low );
 		else if (bi->high < MAXINT)
 			sprintf( mswTmpBuff,
-					 "Please enter an integer value less or equal to %ld",
-					 bi->high );
-		else
+			         "Please enter an integer value less or equal to %ld",
+			         bi->high );
+		else {
 			strcpy( mswTmpBuff, "Please enter an integer value" );
+		}
 		MessageBox( bi->hWnd, mswTmpBuff, "Invalid entry", MB_OK );
 		SetFocus( bi->hWnd );
 #ifdef WIN32
@@ -447,31 +458,32 @@ LRESULT integerProc(
 #endif
 		return TRUE;
 
-	}													  
- 
+	}
+
 	return DefWindowProc( hWnd, message, wParam, lParam );
-}					
+}
 
 
 static callBacks_t integerCallBacks = {
-		mswRepaintLabel,
-		NULL,
-		integerProc };
+	mswRepaintLabel,
+	NULL,
+	integerProc
+};
 
 
 wInteger_p wIntegerCreate(
-		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
-		const char	* helpStr,
-		const char	* labelStr,
-		long	option,
-		wWinPix_t	width,
-		long	low,
-		long	high,
-		long	*valueP,
-		wIntegerCallBack_p action,
-		void	*data )
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char	* helpStr,
+        const char	* labelStr,
+        long	option,
+        wWinPix_t	width,
+        long	low,
+        long	high,
+        long	*valueP,
+        wIntegerCallBack_p action,
+        void	*data )
 {
 	wInteger_p b;
 	RECT rect;
@@ -486,32 +498,35 @@ wInteger_p wIntegerCreate(
 	b->valueP = valueP;
 	b->labelY += 2;
 	b->action = action;
-	if (option & BO_READONLY)
+	if (option & BO_READONLY) {
 		style |= ES_READONLY;
+	}
 
 	b->hWnd = CreateWindow( "EDIT", NULL,
-						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
-						b->x, b->y,
-						width, mswEditHeight,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+	                        ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
+	                        b->x, b->y,
+	                        width, mswEditHeight,
+	                        ((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(INTEGER)");
 		return b;
 	}
 
-	  
+
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
 	oldEditProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC );
 	SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newEditProc );
 
-	if ( !mswThickFont )
+	if ( !mswThickFont ) {
 		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
+	}
 	if (b->valueP) {
 		wsprintf( mswTmpBuff, "%ld", *b->valueP );
 		SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)(LPSTR)mswTmpBuff );
 		b->oldValue = *b->valueP;
-	} else
+	} else {
 		b->oldValue = 0;
+	}
 	SendMessage( b->hWnd, EM_SETMODIFY, FALSE, 0L );
 
 	GetWindowRect( b->hWnd, &rect );
@@ -539,8 +554,8 @@ wInteger_p wIntegerCreate(
 
 
 void wFloatSetValue(
-		wFloat_p b,
-		double arg )
+        wFloat_p b,
+        double arg )
 {
 	b->oldValue = arg;
 	sprintf( mswTmpBuff, "%0.3f", arg );
@@ -550,67 +565,72 @@ void wFloatSetValue(
 
 
 double wFloatGetValue(
-		wFloat_p b )
+        wFloat_p b )
 {
 	return b->oldValue;
 }
 
 
 static void triggerFloat(
-		wControl_p b )
+        wControl_p b )
 {
 	wFloat_p bf = (wFloat_p)b;
 	int cnt;
 	double value;
-	char * cp;				
+	char * cp;
 
 	if (bf->action) {
 		*(WPARAM*)&mswTmpBuff[0] = 78;
 		cnt = (int)SendMessage( bf->hWnd, (UINT)EM_GETLINE, 0,
-									(DWORD)(LPSTR)mswTmpBuff );
+		                        (DWORD)(LPSTR)mswTmpBuff );
 		mswTmpBuff[cnt] = '\0';
-		if (strcmp( mswTmpBuff, "-" )==0)
+		if (strcmp( mswTmpBuff, "-" )==0) {
 			return;
+		}
 		value = strtod( mswTmpBuff, &cp );
-		if (*cp != '\0' || value < bf->low || value > bf->high )
+		if (*cp != '\0' || value < bf->low || value > bf->high ) {
 			return;
-		if (bf->oldValue == value)
+		}
+		if (bf->oldValue == value) {
 			return;
+		}
 		bf->oldValue = value;
-		if (bf->valueP)
-		   *bf->valueP = value;
+		if (bf->valueP) {
+			*bf->valueP = value;
+		}
 		bf->action( wFloatGetValue(bf), bf->data );
 	}
 }
 
 
 LRESULT floatProc(
-		wControl_p b,
-		HWND hWnd,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
-{			   
+        wControl_p b,
+        HWND hWnd,
+        UINT message,
+        WPARAM wParam,
+        LPARAM lParam )
+{
 	wFloat_p bf = (wFloat_p)b;
 	int inx;
 	int cnt;
 	double value;
-	char * cp;				
+	char * cp;
 	wBool_t ok;
 	int modified;
 
 	switch( message ) {
-	
+
 	case WM_COMMAND:
 		switch (HIWORD(lParam)) {
 		case EN_KILLFOCUS:
 			ok = TRUE;
 			modified = (int)SendMessage( bf->hWnd, (UINT)EM_GETMODIFY, 0, 0L );
-			if (!modified)
+			if (!modified) {
 				break;
+			}
 			*(WPARAM*)&mswTmpBuff[0] = 78;
 			cnt = (int)SendMessage( bf->hWnd, (UINT)EM_GETLINE, 0,
-									(DWORD)(LPSTR)mswTmpBuff );
+			                        (DWORD)(LPSTR)mswTmpBuff );
 			mswTmpBuff[cnt] = '\0';
 			if (strcmp( mswTmpBuff, "-" )==0 && 0 >= bf->low && 0 <= bf->high ) {
 				value = 0;
@@ -619,23 +639,25 @@ LRESULT floatProc(
 				if (*cp != '\0' || value < bf->low || value > bf->high ) {
 					inx = GetWindowWord( bf->hWnd, GWW_ID );
 					if (wWinIsVisible(bf->parent)) {
-						PostMessage( ((wControl_p)(bf->parent))->hWnd, 
-							WM_NOTVALID, inx, 0L );
+						PostMessage( ((wControl_p)(bf->parent))->hWnd,
+						             WM_NOTVALID, inx, 0L );
 						return TRUE;
 					} else {
-						if (value < bf->low)
+						if (value < bf->low) {
 							value = bf->low;
-						else
+						} else {
 							value = bf->high;
+						}
 						sprintf( mswTmpBuff, "%0.3f", value );
 						SendMessage( bf->hWnd, (UINT)WM_SETTEXT, 0,
-									(DWORD)(LPSTR)mswTmpBuff );
+						             (DWORD)(LPSTR)mswTmpBuff );
 					}
 				}
 			}
 			bf->oldValue = value;
-			if (bf->valueP)
+			if (bf->valueP) {
 				*bf->valueP = value;
+			}
 			if (bf->action) {
 				bf->action( value, bf->data );
 				mswSetTrigger( NULL, NULL );
@@ -647,18 +669,19 @@ LRESULT floatProc(
 	case WM_NOTVALID:
 		if (bf->low > MINFLT && bf->high < MAXFLT)
 			sprintf( mswTmpBuff,
-					 "Please enter an float value between %0.3f and %0.3f",
-					 bf->low, bf->high );
+			         "Please enter an float value between %0.3f and %0.3f",
+			         bf->low, bf->high );
 		else if (bf->low > MINFLT)
 			sprintf( mswTmpBuff,
-					 "Please enter an float value greater or equal to %0.3f",
-					 bf->low );
+			         "Please enter an float value greater or equal to %0.3f",
+			         bf->low );
 		else if (bf->high < MAXFLT)
 			sprintf( mswTmpBuff,
-					 "Please enter an float value less or equal to %0.3f",
-					 bf->high );
-		else
+			         "Please enter an float value less or equal to %0.3f",
+			         bf->high );
+		else {
 			strcpy( mswTmpBuff, "Please enter an float value" );
+		}
 		MessageBox( bf->hWnd, mswTmpBuff, "Invalid entry", MB_OK );
 		SetFocus( bf->hWnd );
 #ifdef WIN32
@@ -669,30 +692,31 @@ LRESULT floatProc(
 #endif
 		return TRUE;
 
-	}													  
+	}
 	return DefWindowProc( hWnd, message, wParam, lParam );
-}					
+}
 
 
 static callBacks_t floatCallBacks = {
-		mswRepaintLabel,
-		NULL,
-		floatProc };
+	mswRepaintLabel,
+	NULL,
+	floatProc
+};
 
 
 wFloat_p wFloatCreate(
-		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
-		const char	* helpStr,
-		const char	* labelStr,
-		long	option,
-		wWinPix_t	width,
-		double	low,
-		double	high,
-		double	*valueP,
-		wFloatCallBack_p action,
-		void	*data )
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char	* helpStr,
+        const char	* labelStr,
+        long	option,
+        wWinPix_t	width,
+        double	low,
+        double	high,
+        double	*valueP,
+        wFloatCallBack_p action,
+        void	*data )
 {
 	wFloat_p b;
 	RECT rect;
@@ -707,34 +731,38 @@ wFloat_p wFloatCreate(
 	b->valueP = valueP;
 	b->labelY += 2;
 	b->action = action;
-	if (option & BO_READONLY)
+	if (option & BO_READONLY) {
 		style |= ES_READONLY;
+	}
 
 	b->hWnd = CreateWindow( "EDIT", NULL,
-						ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
-						b->x, b->y,
-						width, mswEditHeight,
-						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
+	                        ES_LEFT | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_BORDER | style,
+	                        b->x, b->y,
+	                        width, mswEditHeight,
+	                        ((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(FLOAT)");
 		return b;
 	}
 
-	
+
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
 	oldEditProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC );
 	SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newEditProc );
 
 	if (b->valueP) {
-			b->oldValue = *b->valueP;
-	} else
-			b->oldValue = 0.0;
-	if (b->valueP)
-			sprintf( mswTmpBuff, "%0.3f", *b->valueP );
-	else
-			strcpy( mswTmpBuff, "0.000" );
-	if ( !mswThickFont )
+		b->oldValue = *b->valueP;
+	} else {
+		b->oldValue = 0.0;
+	}
+	if (b->valueP) {
+		sprintf( mswTmpBuff, "%0.3f", *b->valueP );
+	} else {
+		strcpy( mswTmpBuff, "0.000" );
+	}
+	if ( !mswThickFont ) {
 		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
+	}
 	SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)(LPSTR)mswTmpBuff );
 	SendMessage( b->hWnd, EM_SETMODIFY, FALSE, 0L );
 

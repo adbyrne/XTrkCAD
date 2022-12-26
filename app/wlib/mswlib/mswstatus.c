@@ -39,10 +39,10 @@
  */
 
 void wStatusSetValue(
-    wStatus_p b,
-    const char * arg)
+        wStatus_p b,
+        const char * arg)
 {
-    wMessageSetValue((wMessage_p)b, arg);
+	wMessageSetValue((wMessage_p)b, arg);
 }
 /**
  * Create a window for a simple text.
@@ -58,14 +58,14 @@ void wStatusSetValue(
  */
 
 wStatus_p wStatusCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	* labelStr,
-    wWinPix_t	width,
-    const char	*message)
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char 	* labelStr,
+        wWinPix_t	width,
+        const char	*message)
 {
-    return (wStatus_p)wMessageCreateEx(parent, x, y, labelStr, width, message, 0);
+	return (wStatus_p)wMessageCreateEx(parent, x, y, labelStr, width, message, 0);
 }
 
 /**
@@ -78,7 +78,7 @@ wStatus_p wStatusCreate(
 wWinPix_t
 wStatusGetWidth(const char *testString)
 {
-    return (wMessageGetWidth(testString));
+	return (wMessageGetWidth(testString));
 }
 
 /**
@@ -89,9 +89,9 @@ wStatusGetWidth(const char *testString)
  */
 
 wWinPix_t wStatusGetHeight(
-    long flags)
+        long flags)
 {
-    return (wMessageGetHeight(flags));
+	return (wMessageGetHeight(flags));
 }
 
 /**
@@ -103,8 +103,8 @@ wWinPix_t wStatusGetHeight(
  */
 
 void wStatusSetWidth(
-    wStatus_p b,
-    wWinPix_t width)
+        wStatus_p b,
+        wWinPix_t width)
 {
-    wMessageSetWidth((wMessage_p)b, width);
+	wMessageSetWidth((wMessage_p)b, width);
 }

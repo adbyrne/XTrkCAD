@@ -38,38 +38,38 @@
  */
 
 static LOGFONT fixedFont = {
-    /* Initial default values */
-    -18, 0, /* H, W */
-    0,		/* A */
-    0,
-    FW_REGULAR,
-    0, 0, 0,/* I, U, SO */
-    ANSI_CHARSET,
-    0,		/* OP */
-    0,		/* CP */
-    0,		/* Q */
-    FIXED_PITCH|FF_MODERN,	/* P&F */
-    "Courier"
-};
+	/* Initial default values */
+	-18, 0, /* H, W */
+	        0,		/* A */
+	        0,
+	        FW_REGULAR,
+	        0, 0, 0,/* I, U, SO */
+	        ANSI_CHARSET,
+	        0,		/* OP */
+	        0,		/* CP */
+	        0,		/* Q */
+	        FIXED_PITCH|FF_MODERN,	/* P&F */
+	        "Courier"
+        };
 static HFONT fixedTextFont, prevTextFont;
 
 struct wText_t {
-    WOBJ_COMMON
-    HANDLE hText;
+	WOBJ_COMMON
+	HANDLE hText;
 };
 
 
 void wTextClear(
-    wText_p b)
+        wText_p b)
 {
-    LRESULT rc;
-    rc = SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)0, (LPARAM)0);
-    rc = SendMessage(b->hWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1);
-    rc = SendMessage(b->hWnd, WM_CLEAR, (WPARAM)0, (LPARAM)0);
+	LRESULT rc;
+	rc = SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)0, (LPARAM)0);
+	rc = SendMessage(b->hWnd, EM_SETSEL, (WPARAM)0, (LPARAM)-1);
+	rc = SendMessage(b->hWnd, WM_CLEAR, (WPARAM)0, (LPARAM)0);
 
-    if (b->option&BO_READONLY) {
-        rc = SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
-    }
+	if (b->option&BO_READONLY) {
+		rc = SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
+	}
 }
 
 /**
@@ -84,53 +84,53 @@ void wTextClear(
  */
 
 void wTextAppend(
-    wText_p b,
-    const char * text)
+        wText_p b,
+        const char * text)
 {
-    char *cp;
-    char *buffer;
-    char *extText;
-    int textSize;
-    size_t len = strlen(text);
+	char *cp;
+	char *buffer;
+	char *extText;
+	int textSize;
+	size_t len = strlen(text);
 
-    if (!len) {
-        return;
-    }
+	if (!len) {
+		return;
+	}
 
-    for (cp = (char *)text; *cp; cp++) {
-        if (*cp == '\n') {
-            len++;
-        }
-    }
+	for (cp = (char *)text; *cp; cp++) {
+		if (*cp == '\n') {
+			len++;
+		}
+	}
 
-    extText = malloc(len + 1 + 10);
+	extText = malloc(len + 1 + 10);
 
-    for (cp=extText; *text; cp++,text++) {
-        if (*text == '\n') {
-            *cp++ = '\r';
-            *cp = '\n';
-        } else {
-            *cp = *text;
-        }
-    }
+	for (cp=extText; *text; cp++,text++) {
+		if (*text == '\n') {
+			*cp++ = '\r';
+			*cp = '\n';
+		} else {
+			*cp = *text;
+		}
+	}
 
-    *cp = '\0';
-    textSize = GetWindowTextLength(b->hWnd);
-    buffer = malloc((textSize + len + 1) * sizeof(char));
+	*cp = '\0';
+	textSize = GetWindowTextLength(b->hWnd);
+	buffer = malloc((textSize + len + 1) * sizeof(char));
 
-    if (buffer) {
-        GetWindowText(b->hWnd, buffer, textSize + 1);
-        strcat(buffer, extText);
-        SetWindowText(b->hWnd, buffer);
-        free(extText);
-        free(buffer);
-    } else {
-        abort();
-    }
+	if (buffer) {
+		GetWindowText(b->hWnd, buffer, textSize + 1);
+		strcat(buffer, extText);
+		SetWindowText(b->hWnd, buffer);
+		free(extText);
+		free(buffer);
+	} else {
+		abort();
+	}
 
-    if (b->option&BO_READONLY) {
-        SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
-    }
+	if (b->option&BO_READONLY) {
+		SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
+	}
 
 	// scroll to bottom of text box
 	SendMessage(b->hWnd, EM_LINESCROLL, (WPARAM)0, (LPARAM)10000);
@@ -138,146 +138,146 @@ void wTextAppend(
 
 
 BOOL_T wTextSave(
-    wText_p b,
-    const char * fileName)
+        wText_p b,
+        const char * fileName)
 {
-    FILE * f;
-    int lc, l, len;
-    char line[255];
-    f = wFileOpen(fileName, "w");
+	FILE * f;
+	int lc, l, len;
+	char line[255];
+	f = wFileOpen(fileName, "w");
 
-    if (f == NULL) {
-        MessageBox(((wControl_p)(b->parent))->hWnd, "TextSave", "", MB_OK|MB_ICONHAND);
-        return FALSE;
-    }
+	if (f == NULL) {
+		MessageBox(((wControl_p)(b->parent))->hWnd, "TextSave", "", MB_OK|MB_ICONHAND);
+		return FALSE;
+	}
 
-    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+	lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
 
-    for (l=0; l<lc; l++) {
-        *(WORD*)line = sizeof(line)-1;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPARAM)line);
-        line[len] = '\0';
-        fprintf(f, "%s\n", line);
-    }
+	for (l=0; l<lc; l++) {
+		*(WORD*)line = sizeof(line)-1;
+		len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPARAM)line);
+		line[len] = '\0';
+		fprintf(f, "%s\n", line);
+	}
 
-    fclose(f);
-    return TRUE;
+	fclose(f);
+	return TRUE;
 }
 
 
 BOOL_T wTextPrint(
-    wText_p b)
+        wText_p b)
 {
-    int lc, l, len;
-    char line[255];
-    HDC hDc;
-    int lineSpace;
-    int linesPerPage;
-    int currentLine;
-    int IOStatus;
-    TEXTMETRIC textMetric;
-    DOCINFO docInfo;
-    hDc = mswGetPrinterDC();
+	int lc, l, len;
+	char line[255];
+	HDC hDc;
+	int lineSpace;
+	int linesPerPage;
+	int currentLine;
+	int IOStatus;
+	TEXTMETRIC textMetric;
+	DOCINFO docInfo;
+	hDc = mswGetPrinterDC();
 	HFONT hFont, hOldFont;
 
-    if (hDc == (HDC)0) {
-        MessageBox(((wControl_p)(b->parent))->hWnd, "Print", "Cannot print",
-                   MB_OK|MB_ICONHAND);
-        return FALSE;
-    }
+	if (hDc == (HDC)0) {
+		MessageBox(((wControl_p)(b->parent))->hWnd, "Print", "Cannot print",
+		           MB_OK|MB_ICONHAND);
+		return FALSE;
+	}
 
-    docInfo.cbSize = sizeof(DOCINFO);
-    docInfo.lpszDocName = "XTrkcad Log";
-    docInfo.lpszOutput = (LPSTR)NULL;
+	docInfo.cbSize = sizeof(DOCINFO);
+	docInfo.lpszDocName = "XTrkcad Log";
+	docInfo.lpszOutput = (LPSTR)NULL;
 
-	// Retrieve a handle to the monospaced stock font.  
+	// Retrieve a handle to the monospaced stock font.
 	hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
 	hOldFont = (HFONT)SelectObject(hDc, hFont);
 
-    if (StartDoc(hDc, &docInfo) < 0) {
-        MessageBox(((wControl_p)(b->parent))->hWnd, "Unable to start print job", NULL,
-                   MB_OK|MB_ICONHAND);
-        DeleteDC(hDc);
-        return FALSE;
-    }
+	if (StartDoc(hDc, &docInfo) < 0) {
+		MessageBox(((wControl_p)(b->parent))->hWnd, "Unable to start print job", NULL,
+		           MB_OK|MB_ICONHAND);
+		DeleteDC(hDc);
+		return FALSE;
+	}
 
-    StartPage(hDc);
+	StartPage(hDc);
 
-    GetTextMetrics(hDc, &textMetric);
-    lineSpace = textMetric.tmHeight + textMetric.tmExternalLeading;
-    linesPerPage = GetDeviceCaps(hDc, VERTRES) / lineSpace;
-    currentLine = 1;
-    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
-    IOStatus = 0;
+	GetTextMetrics(hDc, &textMetric);
+	lineSpace = textMetric.tmHeight + textMetric.tmExternalLeading;
+	linesPerPage = GetDeviceCaps(hDc, VERTRES) / lineSpace;
+	currentLine = 1;
+	lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, (WPARAM)0, (LPARAM)0);
+	IOStatus = 0;
 
-    for (l=0; l<lc; l++) {
-        *(WORD*)line = sizeof(line)-1;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPARAM)line);
-        TextOut(hDc, 0, currentLine*lineSpace, line, len);
+	for (l=0; l<lc; l++) {
+		*(WORD*)line = sizeof(line)-1;
+		len = (int)SendMessage(b->hWnd, EM_GETLINE, (WPARAM)l, (LPARAM)line);
+		TextOut(hDc, 0, currentLine*lineSpace, line, len);
 
-        if (++currentLine > linesPerPage) {
-            IOStatus = EndPage(hDc);
-            if (IOStatus < 0 ) {
-                break;
-            }
-            StartPage(hDc);
+		if (++currentLine > linesPerPage) {
+			IOStatus = EndPage(hDc);
+			if (IOStatus < 0 ) {
+				break;
+			}
+			StartPage(hDc);
 			currentLine = 1;
 		}
-    }
+	}
 
-    if (IOStatus >= 0 ) {
-        EndPage(hDc);
-        EndDoc(hDc);
-    }
+	if (IOStatus >= 0 ) {
+		EndPage(hDc);
+		EndDoc(hDc);
+	}
 
 	SelectObject(hDc, hOldFont);
-    DeleteDC(hDc);
-    return TRUE;
+	DeleteDC(hDc);
+	return TRUE;
 }
 
 
 wBool_t wTextGetModified(
-    wText_p b)
+        wText_p b)
 {
-    int rc;
-    rc = (int)SendMessage(b->hWnd, EM_GETMODIFY, (WPARAM)0, (LPARAM)0);
-    return (wBool_t)rc;
+	int rc;
+	rc = (int)SendMessage(b->hWnd, EM_GETMODIFY, (WPARAM)0, (LPARAM)0);
+	return (wBool_t)rc;
 }
 
 /**
  * Get the size of the text in the text control including terminating '\0'. Note that
  * the text actually might be shorter if the text includes CRs.
- * 
+ *
  * \param b IN text control
  * \return required buffer size
  */
 int wTextGetSize(
-    wText_p b)
+        wText_p b)
 {
 	int len;
 
 	len = GetWindowTextLength(b->hWnd);
 
-    return len + 1;
+	return len + 1;
 }
 
-/** 
+/**
  * Get the text from a textentry. The buffer must be large enough for the text and
  * the terminating \0.
  * In case the string contains carriage returns these are removed. The returned string
- * will be shortened accordingly. 
+ * will be shortened accordingly.
  * To get the complete contents the buffer size must be equal or greater then the return
  * value of wTextGetSize()
- * 
+ *
  * \param b IN text entry
  * \param t IN/OUT buffer for text
- * \param s IN size of buffer 
+ * \param s IN size of buffer
  */
- 
+
 void wTextGetText(
-    wText_p b,
-    char * t,
-    int s)
+        wText_p b,
+        char * t,
+        int s)
 {
 	char *buffer = malloc(s);
 	char *ptr = buffer;
@@ -296,153 +296,154 @@ void wTextGetText(
 
 
 void wTextSetReadonly(
-    wText_p b,
-    wBool_t ro)
+        wText_p b,
+        wBool_t ro)
 {
-    if (ro) {
-        b->option |= BO_READONLY;
-    } else {
-        b->option &= ~BO_READONLY;
-    }
+	if (ro) {
+		b->option |= BO_READONLY;
+	} else {
+		b->option &= ~BO_READONLY;
+	}
 
-    SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)ro, (LPARAM)0);
+	SendMessage(b->hWnd, EM_SETREADONLY, (WPARAM)ro, (LPARAM)0);
 }
 
 
 void wTextSetSize(
-    wText_p bt,
-    wWinPix_t width,
-    wWinPix_t height)
+        wText_p bt,
+        wWinPix_t width,
+        wWinPix_t height)
 {
-    bt->w = width;
-    bt->h = height;
+	bt->w = width;
+	bt->h = height;
 
-    if (!SetWindowPos(bt->hWnd, HWND_TOP, 0, 0,
-                      bt->w, bt->h, SWP_NOMOVE|SWP_NOZORDER)) {
-        mswFail("wTextSetSize: SetWindowPos");
-    }
+	if (!SetWindowPos(bt->hWnd, HWND_TOP, 0, 0,
+	                  bt->w, bt->h, SWP_NOMOVE|SWP_NOZORDER)) {
+		mswFail("wTextSetSize: SetWindowPos");
+	}
 }
 
 
 void wTextComputeSize(
-    wText_p bt,
-    wWinPix_t rows,
-    wWinPix_t lines,
-    wWinPix_t * w,
-    wWinPix_t * h)
+        wText_p bt,
+        wWinPix_t rows,
+        wWinPix_t lines,
+        wWinPix_t * w,
+        wWinPix_t * h)
 {
-    static wWinPix_t scrollV_w = -1;
-    static wWinPix_t scrollH_h = -1;
-    HDC hDc;
-    TEXTMETRIC metrics;
+	static wWinPix_t scrollV_w = -1;
+	static wWinPix_t scrollH_h = -1;
+	HDC hDc;
+	TEXTMETRIC metrics;
 
-    if (scrollV_w < 0) {
-        scrollV_w = GetSystemMetrics(SM_CXVSCROLL);
-    }
+	if (scrollV_w < 0) {
+		scrollV_w = GetSystemMetrics(SM_CXVSCROLL);
+	}
 
-    if (scrollH_h < 0) {
-        scrollH_h = GetSystemMetrics(SM_CYHSCROLL);
-    }
+	if (scrollH_h < 0) {
+		scrollH_h = GetSystemMetrics(SM_CYHSCROLL);
+	}
 
-    hDc = GetDC(bt->hWnd);
-    GetTextMetrics(hDc, &metrics);
-    *w = rows * metrics.tmAveCharWidth + scrollV_w;
-    *h = lines * (metrics.tmHeight + metrics.tmExternalLeading);
-    ReleaseDC(bt->hWnd, hDc);
+	hDc = GetDC(bt->hWnd);
+	GetTextMetrics(hDc, &metrics);
+	*w = rows * metrics.tmAveCharWidth + scrollV_w;
+	*h = lines * (metrics.tmHeight + metrics.tmExternalLeading);
+	ReleaseDC(bt->hWnd, hDc);
 
-    if (bt->option&BT_HSCROLL) {
-        *h += scrollH_h;
-    }
+	if (bt->option&BT_HSCROLL) {
+		*h += scrollH_h;
+	}
 }
 
 
 void wTextSetPosition(
-    wText_p bt,
-    int pos)
+        wText_p bt,
+        int pos)
 {
-    LRESULT rc;
-    rc = SendMessage(bt->hWnd, EM_LINESCROLL, (WPARAM)0, (LPARAM)MAKELONG(-65535, 0));
+	LRESULT rc;
+	rc = SendMessage(bt->hWnd, EM_LINESCROLL, (WPARAM)0, (LPARAM)MAKELONG(-65535,
+	                 0));
 }
 
 static void textDoneProc(wControl_p b)
 {
-    wText_p t = (wText_p)b;
-    HDC hDc;
-    hDc = GetDC(t->hWnd);
-    SelectObject(hDc, mswOldTextFont);
-    ReleaseDC(t->hWnd, hDc);
+	wText_p t = (wText_p)b;
+	HDC hDc;
+	hDc = GetDC(t->hWnd);
+	SelectObject(hDc, mswOldTextFont);
+	ReleaseDC(t->hWnd, hDc);
 }
 
 static callBacks_t textCallBacks = {
-    mswRepaintLabel,
-    textDoneProc,
-    NULL
+	mswRepaintLabel,
+	textDoneProc,
+	NULL
 };
 
 wText_p wTextCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char	* helpStr,
-    const char	* labelStr,
-    long	option,
-    wWinPix_t	width,
-    wWinPix_t	height)
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char	* helpStr,
+        const char	* labelStr,
+        long	option,
+        wWinPix_t	width,
+        wWinPix_t	height)
 {
-    wText_p b;
-    DWORD style;
-    RECT rect;
-    int index;
-    b = mswAlloc(parent, B_TEXT, labelStr, sizeof *b, NULL, &index);
-    mswComputePos((wControl_p)b, x, y);
-    b->option = option;
-    style = ES_MULTILINE | ES_LEFT | ES_AUTOVSCROLL | ES_WANTRETURN |
-            WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL;
+	wText_p b;
+	DWORD style;
+	RECT rect;
+	int index;
+	b = mswAlloc(parent, B_TEXT, labelStr, sizeof *b, NULL, &index);
+	mswComputePos((wControl_p)b, x, y);
+	b->option = option;
+	style = ES_MULTILINE | ES_LEFT | ES_AUTOVSCROLL | ES_WANTRETURN |
+	        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL;
 #ifdef BT_HSCROLL
 
-    if (option & BT_HSCROLL) {
-        style |= WS_HSCROLL | ES_AUTOHSCROLL;
-    }
+	if (option & BT_HSCROLL) {
+		style |= WS_HSCROLL | ES_AUTOHSCROLL;
+	}
 
 #endif
-    /*	  if (option & BO_READONLY)
-    		style |= ES_READONLY;*/
-    b->hWnd = CreateWindow("EDIT", NULL,
-                           style, b->x, b->y,
-                           width, height,
-                           ((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL);
+	/*	  if (option & BO_READONLY)
+			style |= ES_READONLY;*/
+	b->hWnd = CreateWindow("EDIT", NULL,
+	                       style, b->x, b->y,
+	                       width, height,
+	                       ((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL);
 
-    if (b->hWnd == NULL) {
-        mswFail("CreateWindow(TEXT)");
-        return b;
-    }
+	if (b->hWnd == NULL) {
+		mswFail("CreateWindow(TEXT)");
+		return b;
+	}
 
-    if (option & BT_FIXEDFONT) {
-        if (fixedTextFont == (HFONT)0) {
-            fixedTextFont =	 CreateFontIndirect(&fixedFont);
-        }
+	if (option & BT_FIXEDFONT) {
+		if (fixedTextFont == (HFONT)0) {
+			fixedTextFont =	 CreateFontIndirect(&fixedFont);
+		}
 
-        SendMessage(b->hWnd, WM_SETFONT, (WPARAM)fixedTextFont, (LPARAM)MAKELONG(1, 0));
-    } else {
-        SendMessage(b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
-    }
+		SendMessage(b->hWnd, WM_SETFONT, (WPARAM)fixedTextFont, (LPARAM)MAKELONG(1, 0));
+	} else {
+		SendMessage(b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, (LPARAM)0);
+	}
 
-    b->hText = (HANDLE)SendMessage(b->hWnd, EM_GETHANDLE, (WPARAM)0, (LPARAM)0);
+	b->hText = (HANDLE)SendMessage(b->hWnd, EM_GETHANDLE, (WPARAM)0, (LPARAM)0);
 
-    if (option & BT_CHARUNITS) {
-        wWinPix_t w, h;
-        wTextComputeSize(b, width, height, &w, &h);
+	if (option & BT_CHARUNITS) {
+		wWinPix_t w, h;
+		wTextComputeSize(b, width, height, &w, &h);
 
-        if (!SetWindowPos(b->hWnd, HWND_TOP, 0, 0,
-                          w, h, SWP_NOMOVE|SWP_NOZORDER)) {
-            mswFail("wTextCreate: SetWindowPos");
-        }
-    }
+		if (!SetWindowPos(b->hWnd, HWND_TOP, 0, 0,
+		                  w, h, SWP_NOMOVE|SWP_NOZORDER)) {
+			mswFail("wTextCreate: SetWindowPos");
+		}
+	}
 
-    GetWindowRect(b->hWnd, &rect);
-    b->w = rect.right - rect.left;
-    b->h = rect.bottom - rect.top;
-    mswAddButton((wControl_p)b, FALSE, helpStr);
-    mswCallBacks[B_TEXT] = &textCallBacks;
-    return b;
+	GetWindowRect(b->hWnd, &rect);
+	b->w = rect.right - rect.left;
+	b->h = rect.bottom - rect.top;
+	mswAddButton((wControl_p)b, FALSE, helpStr);
+	mswCallBacks[B_TEXT] = &textCallBacks;
+	return b;
 }
