@@ -637,6 +637,11 @@ static int fixed_expose_event(
 
 static int resizeTime(wWin_p win) {
 
+	if (debugWindow >= 2) {
+		printf( "resizeTime idleCnt %d, busyCnt %d [%d %d] [%ld %ld]\n",
+				win->timer_idle_count, win->timer_busy_count,
+				win->resizeW, win->resizeH, win->w, win->h );
+	}
 	if (win->resizeW == win->w && win->resizeH == win->h) {  // If hasn't changed since last
 		if (win->timer_idle_count>3) {
 			win->winProc(win, wResize_e, NULL, win->data);  //Trigger Redraw on last occasion if one-third of a second has elapsed
@@ -670,6 +675,9 @@ static int window_configure_event(
         return FALSE;
     }
 
+    if (debugWindow >= 2) {
+    	printf( "config/resize: [%d %d]\n", event->width, event->height );
+    }
     if (win->option&F_RESIZE) {
         if (event->width < 10 || event->height < 10) {
             return TRUE;
@@ -679,6 +687,9 @@ static int window_configure_event(
 
 
         if (win->w != event->width || win->h != event->height) {
+	if (debugWindow >= 2) {
+		printf( "   Update [%ld %ld]\n", event->width-win->w, event->height-win->h );
+	}
             win->w = event->width;
             win->h = event->height;
 
