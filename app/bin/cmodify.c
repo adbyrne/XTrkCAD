@@ -611,7 +611,8 @@ extendTrackMove:
 		curveType = Dex.curveData.type;
 		if ( curveType == curveTypeStraight ) {
 			Dex.r1 = 0.0;
-			if (Dex.params.type == curveTypeCurve) {
+			if (Dex.params.type == curveTypeCurve &&
+			    !QueryTrack( Dex.Trk, Q_IGNORE_EASEMENT_ON_EXTEND ) ) {
 				if (ComputeJoint( Dex.params.arcR, Dex.r1, &Dex.jointD ) == E_ERROR) {
 					return C_CONTINUE;
 				}
