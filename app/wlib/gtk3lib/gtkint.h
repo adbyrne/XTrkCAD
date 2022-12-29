@@ -94,7 +94,10 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		cairo_t * cr; \
 		/* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/ \
 		wBool_t outline; \
-		void * data;
+		void * data; \
+		int fromTemplate;               /**< widget was build from ui template */  \
+        char * template_id; \
+
 
 struct wWin_t {
 		WOBJ_COMMON
@@ -105,6 +108,7 @@ struct wWin_t {
 		wBool_t shown;                 /**< visibility state */
 		const char * nameStr;          /**< window name (not title) */
 		GtkWidget * menubar;           /**< menubar handle (if exists) */
+		GtkWidget * toolbar;
 		int menu_height;
 		int gc_linewidth;              /**< ??? */
 		wBool_t busy;
@@ -113,6 +117,7 @@ struct wWin_t {
 		int timer_idle_count;
 		int timer_busy_count;
 		int modalLevel;
+        GtkBuilder *builder;
 		};
 
 struct wControl_t {
@@ -230,6 +235,15 @@ void wlibBasicDrawFillCircle(
 /* boxes.c */
 void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y, wWinPix_t w, wWinPix_t h);
 
+/* builder.c */
+wWin_p wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data );
+GString *wlibFileNameFromDialog( const char *dialog );
+GtkWidget *wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
+GtkWidget *wlibWidgetFromId( wWin_p win, const char *id );
+GtkWidget *wlibWidgetFromIdWarn( wWin_p win, const char *id );
+void wlibAddContentFromTemplate( wWin_p win, const char *nameStr);
+bool wlibExistsTemplate(const char *name);
+
 /* button.c */
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wButton_p bb);
@@ -244,6 +258,9 @@ struct wButton_t {
     long timer_id;
     int timer_count;
     int timer_state;
+	GtkRevealer * reveal; 
+	int inToolbar; 
+	GtkWidget * separator;
 };
 
 /* color.c */
@@ -419,6 +436,10 @@ void *wTreeViewGetItemContext(wList_p b, int row);
 /* window.c */
 void wlibDoModal(wWin_p win0, wBool_t modal);
 wBool_t catch_shift_ctrl_alt_keys(GtkWidget *widget, GdkEventKey *event, void *data);
+wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wWinPix_t x, wWinPix_t y,
+    const char * labelStr, const char * nameStr, long option,
+    wWinCallBack_p winProc, void * data);
+void wlibAddButtonToolbar(wButton_p button);
 
 /* wpref.c */
 

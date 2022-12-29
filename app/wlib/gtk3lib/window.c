@@ -37,6 +37,8 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
+#include "wrapbox/eggwrapbox.h"
+
 #include "gtkint.h"
 
 wWin_p gtkMainW;
@@ -56,6 +58,7 @@ static wControl_p firstWin = NULL, lastWin;
 static int keyState;
 static wBool_t gtkBlockEnabled = TRUE;
 static wBool_t maximize_at_next_show = FALSE;
+static dynArr_t toolbar_da;
 
 /*
  *****************************************************************************
@@ -652,6 +655,7 @@ static int fixed_draw_event(
 	int rc;
 
 //   if (event->count==0) {
+        win->cr = cr;
         rc = window_redraw(win, TRUE);
 //    } else {
 //        rc = FALSE;
@@ -887,6 +891,29 @@ void wSetGeometry(wWin_p win, wWinPix_t min_width, wWinPix_t max_width, wWinPix_
 			hintMask);
 }
 
+static char * xtcCustomStyle = " \
+	    .errorHighlight { background-color: shade( red, 1.8); background-image: none; } \
+		.noHighlight { background-color: white; background-image: none; } \
+		";
+/**
+ * Styles for further usage in the application are created from a static
+ * CSS definition
+ * 
+ */
+
+void
+wlibCreateCustomStyle(void)
+{
+	GtkStyleContext *context;
+	GError * error = NULL;
+
+    GtkCssProvider *provider = gtk_css_provider_new();
+	gtk_css_provider_load_from_data( provider, xtcCustomStyle, -1, &error );
+
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+									GTK_STYLE_PROVIDER(provider),
+									GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
 
 /*
  *******************************************************************************
@@ -975,9 +1002,12 @@ static wWin_p wWinCommonCreate(
         gtk_container_add(GTK_CONTAINER(w->widget), w->menubar);
         gtk_widget_show(w->menubar);
         GtkAllocation allocation;
+        GtkRequisition minSize, natSize;
+        gtk_widget_get_preferred_size (w->menubar, &minSize, &natSize );
+
         gtk_widget_get_allocation(w->menubar, &allocation);
         w->menu_height = allocation.height;
-        gtk_widget_set_size_request(w->menubar, -1, w->menu_height);
+//        gtk_widget_set_size_request(w->menubar, -1, w->menu_height);
     }
 
     gtk_container_add(GTK_CONTAINER(w->gtkwin), w->widget);
@@ -1076,6 +1106,55 @@ static wWin_p wWinCommonCreate(
     return w;
 }
 
+typedef struct {
+	wButton_p button;
+} toolbar_t;
+
+/**
+ * \brief Add a button to the list of elements in toolbar
+ * 
+ * \param button the new button
+ */
+
+void
+wlibAddButtonToolbar(wButton_p button)
+{
+	DYNARR_APPEND(toolbar_t,toolbar_da,20);
+	(((toolbar_t *)toolbar_da.ptr)[toolbar_da.cnt-1]).button = button;
+}
+
+/**
+ * \brief Create a Toolbar object
+ * 
+ * \param container holding the newly created toolbar
+ * \return GtkWidget* 
+ */
+
+static GtkWidget *
+createToolbar(GtkContainer *container)
+{
+    GtkWidget *toolbar;
+	toolbar = egg_wrap_box_new (EGG_WRAP_ALLOCATE_FREE,
+	                            EGG_WRAP_BOX_SPREAD_START,
+	                            EGG_WRAP_BOX_SPREAD_START,
+	                            2, 2);
+	egg_wrap_box_set_minimum_line_children (EGG_WRAP_BOX (toolbar), 15);
+	egg_wrap_box_set_natural_line_children (EGG_WRAP_BOX (toolbar), 60);
+	gtk_widget_set_hexpand(toolbar,TRUE);
+    gtk_container_add(container, toolbar);
+
+	GdkScreen * screen = gdk_screen_get_default();
+	GtkCssProvider * provider = gtk_css_provider_new();
+	GtkStyleContext * context = gtk_widget_get_style_context(toolbar);
+		
+    static const char style[] = ".image-button {min-width:5px } ";
+	gtk_css_provider_load_from_data(provider, style, strlen(style), NULL);
+	gtk_style_context_add_provider_for_screen(screen,
+	                GTK_STYLE_PROVIDER(provider),
+	                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    return(toolbar);
+}
 
 /**
  * Initialize the application's main window. This function does the necessary initialization
@@ -1104,28 +1183,165 @@ wWin_p wWinMainCreate(
     wWinCallBack_p winProc,	/* Call back function */
     void * data)			/* User context */
 {
-    char *pos;
-    long isMaximized;
+	char *pos;
+	long isMaximized;
 
-    pos = strchr(name, ';');
+	pos = strchr(name, ';');
 
-    if (pos) {
-        /* if found, split application name and configuration name */
-        strcpy(wConfigName, pos + 1);
-    } else {
-        /* if not found, application name and configuration name are same */
-        strcpy(wConfigName, name);
-    }
+	if (pos) {
+		/* if found, split application name and configuration name */
+		strcpy(wConfigName, pos + 1);
+	} else {
+		/* if not found, application name and configuration name are same */
+		strcpy(wConfigName, name);
+	}
 
-    wPrefGetInteger("draw", "maximized", &isMaximized, 0);
-    option = option | (isMaximized?F_MAXIMIZE:0);
+	wPrefGetInteger("draw", "maximized", &isMaximized, 0);
+	option = option | (isMaximized?F_MAXIMIZE:0);
 
-    gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
-                                winProc, data);
+	if (wlibExistsTemplate(nameStr)) {
+        GtkContainer *toolbarContainer;
 
-    wDrawColorWhite = wDrawFindColor(0xFFFFFF);
-    wDrawColorBlack = wDrawFindColor(0x000000);
-    return gtkMainW;
+		gtkMainW = wlibCreateFromTemplate(
+            		       NULL,
+		                   W_MAIN,
+		                   x,
+		                   y,
+		                   labelStr,
+		                   nameStr,
+		                   option,
+                           winProc,
+		                   data);
+		if (option&F_MENUBAR) {
+			gtkMainW->menubar = wlibWidgetFromIdWarn(gtkMainW, "menubar");
+		}
+
+        toolbarContainer = (GtkContainer *)wlibWidgetFromIdWarn( gtkMainW, "toolbar");
+        if(toolbarContainer) {
+            gtkMainW->toolbar =  createToolbar(toolbarContainer); 
+            if(gtkMainW->toolbar) {
+               	DYNARR_RESET(toolbar_t,toolbar_da);
+            } else {
+                abort();
+            }
+        }
+
+	} else {
+		gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
+		                            winProc, data);
+	}
+
+	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
+	wDrawColorBlack = wDrawFindColor(0x000000);
+	
+	wlibCreateCustomStyle();
+
+	return gtkMainW;
+}
+
+/**
+ * Create a window.
+ * Default width and height are replaced by values stored in the configuration
+ * file (.rc)
+ *
+ * \param parent IN parent window
+ * \param winType IN type of window
+ * \param x IN default width
+ * \param y IN default height
+ * \param labelStr IN window title
+ * \param nameStr IN name of window
+ * \param option IN misc options for placement and sizing of window
+ * \param winProc IN window procedure
+ * \param data IN additional data to pass to the window procedure
+ * \return  the newly created window
+ */
+
+wWin_p wlibCreateFromTemplate(
+        wWin_p parent,
+        int winType,
+        wWinPix_t x,
+        wWinPix_t y,
+        const char * labelStr,
+        const char * nameStr,
+        long option,
+        wWinCallBack_p winProc,
+        void * data)
+{
+	wWin_p w;
+
+	w=wlibDialogFromTemplate( winType, labelStr, nameStr, option, data );
+
+	/*Find out if there is a fixed element */
+	//w->fixed = GTK_FIXED(wlibGetWidgetFromName(w,nameStr,"fixed",TRUE));
+
+	if (gtkMainW) {
+		gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
+		                             GTK_WINDOW(gtkMainW->gtkwin));
+	}
+
+	if (winType != W_MAIN) {
+		getWinSize(w, nameStr);
+	}
+
+	if (option & F_HIDE) {
+		gtk_widget_hide(w->gtkwin);
+	}
+
+	/* center window on top of parent window */
+	if (option & F_CENTER) {
+		gtk_window_set_position(GTK_WINDOW(w->gtkwin), GTK_WIN_POS_CENTER_ON_PARENT);
+	}
+
+
+	if (w->option&F_AUTOSIZE) {
+		w->realX = 0;
+		w->w = 0;
+		w->realY = 0;
+		w->h = 0;
+	} else if (w->origX != 0) {
+		w->w = w->realX = w->origX;
+		w->h = w->realY = w->origY;
+
+		w->default_size_x = w->w;
+		w->default_size_y = w->h;
+		gtk_widget_set_size_request(w->gtkwin, w->w-20, w->h);
+
+		if (w->option&F_MENUBAR) {
+			gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
+		}
+	}
+	// if (w->option&F_CONSTRAINRESIZE) {
+ 	w->winProc = winProc;
+	// 	g_signal_connect(w->gtkwin, "configure_event",
+	// 	                 G_CALLBACK(window_configure_event), w);
+	// 	w->realX = 0;
+	// 	w->realY = 0;
+	// }
+
+	g_signal_connect(w->gtkwin, "delete_event",
+	                 G_CALLBACK(window_delete_event), w);
+
+
+	w->nameStr = nameStr?strdup(nameStr):NULL;
+
+	if (labelStr) {
+		gtk_window_set_title(GTK_WINDOW(w->gtkwin), labelStr);
+	}
+
+	if (listHelpStrings) {
+		printf("WINDOW - %s\n", nameStr?nameStr:"<NULL>");
+	}
+
+	if (firstWin) {
+		lastWin->next = (wControl_p)w;
+	} else {
+		firstWin = (wControl_p)w;
+	}
+
+	lastWin = (wControl_p)w;
+	gtk_widget_show_all(w->gtkwin);
+
+	return w;
 }
 
 /**
@@ -1197,6 +1413,6 @@ void wExit(
     if (gtkMainW && gtkMainW->winProc != NULL) {
         gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);
     }
-
-    exit(rc);
+    gtk_main_quit();
+    //exit(rc);
 }

@@ -31,10 +31,12 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+#include "wrapbox/eggwrapbox.h"
 #include "gtkint.h"
 #include "i18n.h"
 
 #define MIN_BUTTON_WIDTH (80)
+#define MIN_BUTTON_HEIGHT (30)
 
 /*
  *****************************************************************************
@@ -184,6 +186,11 @@ static void pushButt(
 
 }
 
+void wButtonToolBarRedraw(wWin_p win)
+{
+	gtk_widget_queue_resize(win->toolbar);
+}
+
 #define REPEAT_STAGE0_DELAY 500
 #define REPEAT_STAGE1_DELAY 150
 #define REPEAT_STAGE2_DELAY 100
@@ -303,6 +310,107 @@ static wBool_t drawButton(
         gpointer g)
 {
 	return wControlExpose(widget, cr, (wControl_p)g);
+}
+
+static GtkWidget * last_inner_box;
+
+/**
+ * \brief Create button to go into a toolbar
+ * 
+ * \param w 
+ * \param x 
+ * \param y 
+ * \param helpStr 
+ * \param labelStr 
+ * \param option 
+ * \param width 
+ * \param action 
+ * \param data 
+ * \return wButton_p 
+ */
+wButton_p wButtonCreateForToolbar(
+        wWin_p  w,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char 	* helpStr,
+        const char	* labelStr,
+        long 	option,
+        wWinPix_t width,
+        wButtonCallBack_p action,
+        void 	* data)
+{
+	wButton_p b;
+	b = wlibAlloc(w, B_BUTTON, x, y, labelStr, sizeof *b, data);
+
+    wlibAddButtonToolbar(b);
+
+	b->option = option;
+	b->action = action;
+
+	b->widget = (GtkWidget *)gtk_toggle_button_new();
+
+	// b->reveal = (GtkRevealer *)gtk_revealer_new();
+	// gtk_container_add(GTK_CONTAINER(b->reveal),
+	//                    b->widget);  /*Add a revealer to allow show/noshow */
+    // gtk_revealer_set_reveal_child (b->reveal, TRUE );
+
+	if ((option&BO_ABUT) && last_inner_box) { /* Add revealer into last Child Box if ABUT */
+		gtk_box_pack_start(GTK_BOX(last_inner_box),GTK_WIDGET(b->widget),FALSE, FALSE,
+		                   0);
+	} else {
+		last_inner_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0); /*New Box*/
+		if (option&BO_GAP) {
+			b->separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+			gtk_box_pack_start(GTK_BOX(last_inner_box),b->separator,FALSE,FALSE,0);
+		}
+		gtk_box_pack_start(GTK_BOX(last_inner_box),GTK_WIDGET(b->widget),FALSE, FALSE,
+		                   0);
+		egg_wrap_box_insert_child(EGG_WRAP_BOX(w->toolbar), last_inner_box, -1, 0 );
+	}
+    
+	b->inToolbar = TRUE;
+
+	if (option&BO_ICON) {
+		GdkPixbuf *pixbuf;
+
+		wIcon_p bm;
+
+		bm = (wIcon_p)labelStr;
+
+		if (bm->gtkIconType == gtkIcon_pixmap) {
+			pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
+		} else {
+			pixbuf = wlibPixbufFromXBM( bm );
+		}
+		b->imageG = gtk_image_new_from_pixbuf(pixbuf);
+		gtk_button_set_image(GTK_BUTTON(b->widget),b->imageG);
+		g_object_unref((gpointer)pixbuf);
+
+	} else {
+
+		gtk_button_set_label(GTK_BUTTON(b->widget),wlibConvertInput(labelStr));
+	}
+
+	if (option & BB_DEFAULT) {
+		gtk_widget_set_can_default(b->widget, TRUE);
+		gtk_widget_grab_default(b->widget);
+		gtk_window_set_default(GTK_WINDOW(w->gtkwin), b->widget);
+	}
+
+	wlibAddHelpString(b->widget, helpStr);
+	wlibAddButton((wControl_p)b);
+
+	g_signal_connect(b->widget, "clicked",
+	                 G_CALLBACK(pushButt), b);
+
+	if (!b->inToolbar) {
+		gtk_widget_set_size_request(b->widget, MIN_BUTTON_WIDTH, MIN_BUTTON_HEIGHT);
+	}
+
+ //   gtk_widget_show_all(b->widget);
+    gtk_widget_show_all(w->toolbar);
+	return b;
+
 }
 
 /**

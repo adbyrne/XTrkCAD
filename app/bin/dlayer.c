@@ -2248,7 +2248,7 @@ void InitLayers(void)
 	}
 
 	/* layer list for toolbar */
-	setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
+	setLayerL = wDropListCreateForToolbar(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
 	                            SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
 	AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);

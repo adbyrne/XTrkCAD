@@ -32,6 +32,8 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+
+#include "wrapbox/eggwrapbox.h"
 #include "gtkint.h"
 #include "i18n.h"
 
@@ -333,6 +335,247 @@ wlibNewDropList(GtkListStore *ls, int editable)
     }
 
     return (widget);
+}
+
+/**
+ * Signal handler for the "changed"-signal in drop list's entry field.
+ * Get the entered text and calls the 'action' for handling of entered
+ * value.
+ * *
+ * \param entry IN entry field of the droplist
+ * \param data IN the drop list handle
+ * \return
+ */
+
+static void DropListEntryEntered(
+    GtkEntry *entry,
+    gpointer userData)
+{
+    const gchar *text;
+
+    text = gtk_entry_get_text(entry);
+
+    if (text && *text != '\0')
+    {
+        gchar *copyOfText = g_strdup(text);
+        ((wList_p)userData)->editted = TRUE;
+        ((wList_p)userData)->action(-1, copyOfText, 1, ((wList_p)userData)->data, NULL);
+        g_free((gpointer)copyOfText);
+    }
+    else
+    {
+        wBeep();
+    }
+}
+
+/**
+ * Signal handler for the "changed"-signal in drop list. Gets the selected
+ * text and determines the selected row in the tree model.
+ *
+ * \param comboBox IN the combo_box
+ * \param data IN the drop list handle
+ * \return
+ */
+
+static int DropListSelectChild(
+    GtkComboBox *comboBox,
+    gpointer data)
+{
+    wList_p bl = (wList_p)data;
+    GtkTreeIter iter;
+
+    wIndex_t inx = 0;
+    gchar *string = NULL;
+    wListItem_p addData = NULL;
+
+    if (bl->recursion)
+    {
+        return 0;
+    }
+
+    bl->editted = FALSE;
+
+    /* Obtain currently selected item from combo box.
+     * If nothing is selected, do nothing. */
+    if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter))
+    {
+        GtkTreeModel *model;
+
+        /* Obtain data model from combo box. */
+        model = gtk_combo_box_get_model(comboBox);
+
+        /* get the selected row */
+        string = gtk_tree_model_get_string_from_iter(model,
+                                                     &iter);
+        inx = atoi(string);
+        g_free(string);
+        string = NULL;
+
+        /* Obtain string from model. */
+        gtk_tree_model_get(model, &iter,
+                           LISTCOL_TEXT, &string,
+                           LISTCOL_DATA, (void *)&addData,
+                           -1);
+        bl->editted = FALSE;
+    }
+    else
+    {
+        /* Nothing selected, user is entering text directly */
+        inx = -1;
+        GtkEntry *entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget)));
+        if (entry == NULL)
+        {
+            return 0;
+        }
+        const char *string1 = gtk_entry_get_text(entry);
+        if (string1 == NULL)
+        {
+            return 0;
+        }
+        string = g_strdup(string1);
+        bl->editted = TRUE;
+    }
+
+    /* selection changed, store new selections and call back */
+    if (bl->last != inx || bl->editted == TRUE)
+    {
+
+        bl->last = inx;
+
+        if (bl->valueP)
+        {
+            *bl->valueP = inx;
+        }
+
+        /* selection changed -> callback */
+        if (string && bl->action)
+        {
+            bl->action(inx, string, 1, bl->data, addData->itemData);
+        }
+    }
+
+    if (string)
+    {
+        g_free(string);
+    }
+    return 1;
+}
+
+/**
+ * Create a drop down list for the toolbat. The drop down is created and intialized with the supplied values.
+ *
+ *	\param IN parent Parent window
+ *	\param IN x, X-position
+ *	\param IN y	 Y-position
+ *	\param IN helpStr Help string
+ *	\param IN labelStr Label
+ *	\param IN option Options
+ *	\param IN number Number of displayed entries
+ *	\param IN width Width
+ *	\param IN valueP Selected index
+ *	\param IN action Callback
+ *	\param IN data Context
+ */
+
+wList_p wDropListCreateForToolbar(
+    wWin_p parent,
+    wWinPix_t x,
+    wWinPix_t y,
+    const char *helpStr,
+    const char *labelStr,
+    long option,
+    long number,
+    wWinPix_t width,
+    long *valueP,
+    wListCallBack_p action,
+    void *data)
+{
+    wList_p b;
+
+    b = (wList_p)wlibAlloc(parent, B_DROPLIST, x, y, labelStr, sizeof *b, data);
+    b->option = option;
+    b->number = number;
+    b->count = 0;
+    b->last = -1;
+    b->valueP = valueP;
+    b->action = action;
+    b->listX = b->realX;
+    b->colCnt = 0;
+    b->colWidths = NULL;
+    b->colRightJust = NULL;
+    b->editable = ((option & BL_EDITABLE) != 0);
+
+    assert(width != 0);
+
+    wlibComputePos((wControl_p)b);
+
+    // create tree store for storing the contents
+    b->listStore = wlibNewListStore(DROPLIST_TEXTCOLUMNS);
+
+    if (!b->listStore)
+    {
+        abort();
+    }
+
+    // create the droplist
+    b->widget = wlibNewDropList(b->listStore,
+                                option & BL_EDITABLE);
+    if (b->widget == 0)
+    {
+        abort();
+    }
+
+    g_object_ref_sink(b->listStore);
+    g_object_unref(G_OBJECT(b->listStore));
+
+    wlibDropListAddColumns(b->widget, DROPLIST_TEXTCOLUMNS);
+
+    if (option & BL_EDITABLE)
+        gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
+                                            LISTCOL_TEXT);
+
+    // combo's style
+    GtkCssProvider *provider = gtk_css_provider_new();
+    GtkStyleContext *context = gtk_widget_get_style_context(GTK_WIDGET(
+        b->widget));
+    static const char style[] =
+        ""
+        "#toolbarcombo GtkComboBox { -GtkComboBox-appears-as-list: 1; } "
+        "";
+    gtk_css_provider_load_from_data(provider, style, -1, NULL);
+    gtk_style_context_add_provider(context,
+                                   GTK_STYLE_PROVIDER(provider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    gtk_style_context_save(context);
+
+    // gtk_widget_class_set_css_name (GTK_WIDGET_CLASS(b->widget), "dropcombo");
+    gtk_widget_set_name(b->widget, "toolbarcombo");
+
+    g_signal_connect(b->widget, "changed",
+                     G_CALLBACK(DropListSelectChild), b);
+
+    if (option & BL_EDITABLE)
+    {
+        g_signal_connect(gtk_bin_get_child(GTK_BIN(b->widget)),
+                         "changed",
+                         G_CALLBACK(DropListEntryEntered),
+                         b);
+    }
+
+    gtk_widget_set_size_request(b->widget, width, -1);
+
+    egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->toolbar), b->widget, -1, 0);
+
+    if (labelStr)
+    {
+        b->labelW = wlibAddLabel((wControl_p)b, labelStr);
+    }
+
+    gtk_widget_show(b->widget);
+    wlibAddButton((wControl_p)b);
+    wlibAddHelpString(b->widget, helpStr);
+
+    return b;
 }
 
 /**

@@ -12,7 +12,7 @@ target_include_directories(xtrkcad-wlib
 )
 
 if(XTRKCAD_USE_GTK)
-	if(XTRKCAD_GTK3_EXPERIMENT)
+	if(XTRKCAD_GTK3_WLIB)
 		add_subdirectory(gtk3lib)
 	else()
 		add_subdirectory(gtklib)

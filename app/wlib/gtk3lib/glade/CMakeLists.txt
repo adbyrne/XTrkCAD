@@ -1,12 +1,12 @@
-# copy glade definitions to binary
+# copy glade definitions to binary's subdir
 
 set (UIDEFS
-		main.glade
-        map.glade
-    )    
+    about.glade
+	main.glade
+    map.glade
+)    
 
 foreach(gladefile ${UIDEFS})
-    message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}/${gladefile} >> ${xtrkcad-lib_BINARY_DIR}/ui")
     add_custom_command(
 					OUTPUT ${xtrkcad-lib_BINARY_DIR}/ui/${gladefile}
 					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${gladefile}
@@ -20,4 +20,4 @@ add_custom_target( uifiles
     DEPENDS ${GLADE_RESULTS}
 )
 
-install(DIRECTORY ${CMAKE_XTRKCAD_BINARY_DIR} DESTINATION bin/ui/)
+install(DIRECTORY "${xtrkcad-lib_BINARY_DIR}/ui" DESTINATION bin/ui/)

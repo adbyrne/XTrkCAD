@@ -83,37 +83,28 @@ void wStatusSetValue(
  */
 
 wStatus_p wStatusCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	* labelStr,
-    wWinPix_t	width,
-    const char	*message)
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char 	* labelStr,
+        wWinPix_t	width,
+        const char	*message)
 {
-    wStatus_p b;
-    b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
-    wlibComputePos((wControl_p)b);
-    b->message = message;
-    b->labelWidth = width;
-    b->labelWidget = gtk_entry_new();
-    gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
-    gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
-    gtk_widget_set_can_focus(b->labelWidget, FALSE);
-    gtk_widget_set_sensitive(b->labelWidget, FALSE);
-    GdkRGBA black = {0.0, 0.0, 0.0, 1.0 };
-    gtk_widget_override_color(b->labelWidget,GTK_STATE_FLAG_INSENSITIVE,&black);
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
-                       message?wlibConvertInput(message):"");
+	wStatus_p b;
+	GtkRequisition requisition;
 
-    b->widget = gtk_fixed_new();
-    gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
-    wlibControlGetSize((wControl_p)b);
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-    gtk_widget_show(b->widget);
-    gtk_widget_show(b->labelWidget);
-    wlibAddButton((wControl_p)b);
+	b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
+    b->labelWidget = wlibWidgetFromIdWarn(b->parent, labelStr);
+	b->fromTemplate = TRUE;
+	b->template_id = strdup(labelStr);
+	b->message = message;
+	gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
+		                   message?wlibConvertInput(message):"");
+//	gtk_widget_show_all(b->labelWidget);
+	b->widget = wlibGetWidgetFromName(b->parent, labelStr, "box", FALSE);
+	gtk_widget_show_all(b->widget);
 
-    return b;
+	return b;
 }
 
 /**
@@ -127,7 +118,7 @@ wWinPix_t
 wStatusGetWidth(const char *testString)
 {
     GtkWidget *entry;
-    GtkRequisition requisition;
+    GtkRequisition min_req, nat_req;
 
     entry = gtk_entry_new();
     g_object_ref_sink(entry);
@@ -136,12 +127,12 @@ wStatusGetWidth(const char *testString)
     gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
     gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
 
-    gtk_widget_get_preferred_size(entry, NULL, &requisition);
-
+ //   gtk_widget_get_preferred_size(entry, NULL, &requisition);
+    gtk_widget_get_preferred_size(entry, &min_req, &nat_req);
     gtk_widget_destroy(entry);
     g_object_unref(entry);
 
-    return (requisition.width);
+    return (nat_req.width);
 }
 
 /**

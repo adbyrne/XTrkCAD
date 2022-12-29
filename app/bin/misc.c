@@ -1073,7 +1073,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			NULL);
 	if (mainW == NULL)
 		return NULL;
-
+	wWinShow(mainW, TRUE);
 	InitAppDefaults();
 
 	newToolbarMax = (1 << BG_COUNT) - 1;
@@ -1126,136 +1126,137 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	LOG1(log_init, ( "createMenus\n" ))
 	CreateMenus();
 
-	SetAccelKeys();
+// 	SetAccelKeys();
 
-	LOG1(log_init, ( "initialize\n" ))
-	if (!Initialize())
-		return NULL;
+// 	LOG1(log_init, ( "initialize\n" ))
+// //	if (!Initialize())
+// //		return NULL;
 
-	/* initialize the layers */
-	DefaultLayerProperties();
-	LOG1(log_init, ( "loadFileList\n" ))
-	LoadFileList();
-	//CreateDebugW();
+// 	/* initialize the layers */
+// 	DefaultLayerProperties();
+// 	LOG1(log_init, ( "loadFileList\n" ))
+// //	LoadFileList();
+// 	//CreateDebugW();
 
-	/*
-	 * TIDY UP
-	 */
+// 	/*
+// 	 * TIDY UP
+// 	 */
 
-	/*
-	 * READ PARAMETERS
-	 */
-	if (toolbarSet&(1<<BG_HOTBAR)) {
-		LayoutHotBar( NULL );
-	} else {
-		LayoutHotBar( NULL );   /* Must run once to set it up */
-		HideHotBar();           /* Then hide */
-	}
-	LOG1(log_init, ( "drawInit\n" ))
-	DrawInit(initialZoom);
+// 	/*
+// 	 * READ PARAMETERS
+// 	 */
+// 	if (toolbarSet&(1<<BG_HOTBAR)) {
+// 		LayoutHotBar( NULL );
+// 	} else {
+// 		LayoutHotBar( NULL );   /* Must run once to set it up */
+// 		HideHotBar();           /* Then hide */
+// 	}
+// 	LOG1(log_init, ( "drawInit\n" ))
+// 	DrawInit(initialZoom);
 
-	MacroInit();
-	wSetSplashInfo(_("Reading parameter files"));
-	LOG1(log_init, ( "paramFileInit\n" ))
+// 	MacroInit();
+// 	wSetSplashInfo(_("Reading parameter files"));
+// 	LOG1(log_init, ( "paramFileInit\n" ))
 
-	SetParamFileDir(GetCurrentPath(LAYOUTPATHKEY));  //Set default for new parms to be the same as the layout
+// 	SetParamFileDir(GetCurrentPath(LAYOUTPATHKEY));  //Set default for new parms to be the same as the layout
 
-	if (!ParamFileListInit())
-		return NULL;
-		// LOG1(log_init, ("!ParamFileListInit()\n"))
+// 	if (!ParamFileListInit())
+// 		return NULL;
+// 		// LOG1(log_init, ("!ParamFileListInit()\n"))
 
-	CommandInit();
-	LOG1(log_init, ( "Reset\n" ))
-	Reset();
+// 	CommandInit();
+// 	LOG1(log_init, ( "Reset\n" ))
+// 	Reset();
 
-	/*
-	 * SCALE
-	 */
+// 	/*
+// 	 * SCALE
+// 	 */
 
-	/* Set up the data for scale and gauge description */
-	DoAllSetScaleDesc();
+// 	/* Set up the data for scale and gauge description */
+// 	DoAllSetScaleDesc();
 
-	// get the preferred scale from the configuration file
-	pref = wPrefGetString("misc", "scale");
-	if (!pref)
-		// if preferred scale was not set (eg. during initial run), initialize to a default value
-		pref = DEFAULT_SCALE;
-	strcpy(buffer, pref);
-	DoSetScale(buffer);
+// 	// get the preferred scale from the configuration file
+// 	pref = wPrefGetString("misc", "scale");
+// 	if (!pref)
+// 		// if preferred scale was not set (eg. during initial run), initialize to a default value
+// 		pref = DEFAULT_SCALE;
+// 	strcpy(buffer, pref);
+// 	DoSetScale(buffer);
 
-	/* see whether last layout should be reopened on startup */
-	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);
+// 	/* see whether last layout should be reopened on startup */
+// 	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);
 
-	/*
-	 * THE END
-	 */
+// 	/*
+// 	 * THE END
+// 	 */
 
-	LOG1(log_init, ( "the end\n" ))
-	EnableCommands();
-	LOG1(log_init, ( "Initialization complete\n" ))
-	wSetSplashInfo(_("Initialization complete"));
-	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
+// 	LOG1(log_init, ( "the end\n" ))
+// 	EnableCommands();
+// 	LOG1(log_init, ( "Initialization complete\n" ))
+// 	wSetSplashInfo(_("Initialization complete"));
+// 	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
-	wWinShow(mainW, TRUE);
-	wWinShow(mapW, mapVisible);
-	wDestroySplash();
+// 	wWinShow(mainW, TRUE);
+// 	wWinShow(mapW, mapVisible);
+ 	wDestroySplash();
 
-	/* this has to be called before ShowTip() */
-	InitSmallDlg();
+// 	/* this has to be called before ShowTip() */
+// 	InitSmallDlg();
 
-    /* Compare the program version and display Beta warning if appropriate */
-    pref = wPrefGetString("misc", "version");
-    if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0))
-    {
-        if(strstr(XTRKCAD_VERSION,"Beta") != NULL)
-        {
-            NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
-        }
-        //else {
-        //    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
-        //}
-        wPrefSetString("misc", "version", XTRKCAD_VERSION);
-    }
-    else {
-        ShowTip(SHOWTIP_NEXTTIP);
-    }
+//     /* Compare the program version and display Beta warning if appropriate */
+//     pref = wPrefGetString("misc", "version");
+//     if((!pref) || (strcmp(pref,XTRKCAD_VERSION) != 0))
+//     {
+//         if(strstr(XTRKCAD_VERSION,"Beta") != NULL)
+//         {
+//             NoticeMessage(MSG_BETA_NOTICE, _("Ok"),NULL, XTRKCAD_VERSION);
+//         }
+//         //else {
+//         //    NoticeMessage(_("New version welcome..."),_("Ok"),NULL);
+//         //}
+//         wPrefSetString("misc", "version", XTRKCAD_VERSION);
+//     }
+//     else {
+//         ShowTip(SHOWTIP_NEXTTIP);
+//     }
 
-	/* check for existing checkpoint file */
-	resumeWork = FALSE;
-	if (ExistsCheckpoint()) {
-		resumeWork = OfferCheckpoint();
-	}
+// 	/* check for existing checkpoint file */
+// 	resumeWork = FALSE;
+// 	if (ExistsCheckpoint()) {
+// 		resumeWork = OfferCheckpoint();
+// 	}
 
-	if (!resumeWork) {
-		/* if work is not to be resumed and no filename was given on startup, load last layout */
-		if ((onStartup == 0) && (!initialFile || !strlen(initialFile))) {
-			long iExample;
-			initialFile = (char*)wPrefGetString("misc", "lastlayout");
-			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
-			bExample = (iExample == 1);
-		}
-		if (initialFile && strlen(initialFile)) {
-			DoFileList(0, "1", initialFile);   //Will load Background values, if archive, leave
-			if (onStartup == 1)
-				LayoutBackGroundInit(TRUE);     //Wipe Out Prior Background
-			else
-				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
-		} else
-			LayoutBackGroundInit(TRUE);     // If onStartup==1 and no initial file - Wipe Out Prior Background
+// 	if (!resumeWork) {
+// 		/* if work is not to be resumed and no filename was given on startup, load last layout */
+// 		if ((onStartup == 0) && (!initialFile || !strlen(initialFile))) {
+// 			long iExample;
+// 			initialFile = (char*)wPrefGetString("misc", "lastlayout");
+// 			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
+// 			bExample = (iExample == 1);
+// 		}
+// 		if (initialFile && strlen(initialFile)) {
+// 			DoFileList(0, "1", initialFile);   //Will load Background values, if archive, leave
+// 			if (onStartup == 1)
+// 				LayoutBackGroundInit(TRUE);     //Wipe Out Prior Background
+// 			else
+// 				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
+// 		} else
+// 			LayoutBackGroundInit(TRUE);     // If onStartup==1 and no initial file - Wipe Out Prior Background
 
-	}
-	MainRedraw();
-	inMainW = FALSE;
-	if ( bRunTests ) {
-		int nFail = RegressionTestAll();
-		if ( nFail == 0 ) {
-			lprintf( "Regression Tests Pass\n" );
-			exit( 0 );
-		} else {
-			lprintf( "%d Regression Tests Fail\n", nFail );
-			exit( 1 );
-		}
-	}
+// 	}
+// 	MainRedraw();
+// 	inMainW = FALSE;
+// 	if ( bRunTests ) {
+// 		int nFail = RegressionTestAll();
+// 		if ( nFail == 0 ) {
+// 			lprintf( "Regression Tests Pass\n" );
+// 			exit( 0 );
+// 		} else {
+// 			lprintf( "%d Regression Tests Fail\n", nFail );
+// 			exit( 1 );
+// 		}
+// 	}
+//	
 	return mainW;
 }
 

@@ -656,7 +656,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     case C_CANCEL:
         DescribeCancel();
-        wSetCursor(mainD.d,defaultCursor);
+ //       wSetCursor(mainD.d,defaultCursor);
         return C_CONTINUE;
 
     case C_CMDMENU:

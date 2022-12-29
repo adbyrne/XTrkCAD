@@ -1600,7 +1600,7 @@ EXPORT void MainLayout(
 	DrawMapBoundingBox( TRUE );
 
 	if ( bRedraw )
-		MainRedraw();
+//		MainRedraw();
 
 	if ( bRedraw && wDrawDoTempDraw ) { // Temporary until mswlib supports TempDraw
 		wAction_t action = wActionMove;
@@ -3051,9 +3051,9 @@ EXPORT void DrawInit( int initialZoom )
 	rulerFp = wStandardFont( F_HELV, FALSE, FALSE );
 
 	SetZoomRadio( mainD.scale ); 
-	InfoScale();
-	SetInfoBar();
-	InfoPos( zero );
+	// InfoScale();
+	// SetInfoBar();
+	// InfoPos( zero );
 	RegisterChangeNotification( DrawChange );
 }
 

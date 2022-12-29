@@ -142,6 +142,8 @@ void wToggleSetValue(wChoice_p bc, long value);
 long wToggleGetValue(wChoice_p b);
 wChoice_p wRadioCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
 wChoice_p wToggleCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, const char * const *labels, long *valueP, wChoiceCallBack_p action, void *data);
+void wButtonToolBarRedraw(wWin_p win);
+wButton_p wButtonCreateForToolbar(wWin_p  w, wWinPix_t x, wWinPix_t	y,const char *helpStr, const char *labelStr, long option, wWinPix_t width, wButtonCallBack_p action, void * data);
 
 
 /*------------------------------------------------------------------------------
@@ -288,6 +290,8 @@ void wDestroySplash( void );
 #define BO_ICON		(1L<<0)
 #define BO_DISABLED	(1L<<1)
 #define BO_READONLY	(1L<<2)
+#define BO_ABUT     (1L<<6)
+#define BO_GAP      (1L<<7)
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
 //#define BO_ENTER    (1L<<10)
@@ -375,9 +379,21 @@ typedef void (*wListCallBack_p)( wIndex_t, const char *, wIndex_t, void *, void 
 
 wList_p wListCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *, const char *, long,
 				long, wWinPix_t, int, wWinPix_t *, wBool_t *, const char **, long *, wListCallBack_p, void * );
-wList_p wDropListCreate(	wWin_p, wWinPix_t, wWinPix_t, const char *, const char *, long,
-				long, wWinPix_t, long *, wListCallBack_p, void * );
-				
+wList_p wDropListCreateForToolbar(
+	wWin_p parent,
+	wWinPix_t x,
+	wWinPix_t y,
+	const char *helpStr,
+	const char *labelStr,
+	long option,
+	long number,
+	wWinPix_t width,
+	long *valueP,
+	wListCallBack_p action,
+	void *data);
+wList_p wDropListCreate(wWin_p, wWinPix_t, wWinPix_t, const char *, const char *, long,
+						long, wWinPix_t, long *, wListCallBack_p, void *);
+
 wList_p wComboListCreate(wWin_p parent, wWinPix_t x, wWinPix_t y, const char *helpStr, const char *labelStr, long option, long number, wWinPix_t width, long *valueP, wListCallBack_p action, void *data);	
 void wListClear(wList_p b);
 void wListSetIndex(wList_p b, int element);

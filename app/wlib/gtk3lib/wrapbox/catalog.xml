@@ -1,0 +1,8 @@
+<glade-catalog name="eggwrapbox" domain="glade-3" 
+               depends="gtk+" version="3.0">
+  <glade-widget-classes>
+    <glade-widget-class title="Wrap Box" name="EggWrapBox" 
+                        generic-name="EggWrapBox" parent="GtkContainer"
+                        icon-name="widget-gtk-container"/>
+  </glade-widget-classes>
+</glade-catalog>

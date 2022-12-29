@@ -1,6 +1,7 @@
 # Setup GTK3 UI library...
 
 add_subdirectory(glade)
+add_subdirectory(wrapbox)
 
 target_include_directories(xtrkcad-wlib 
 	PRIVATE 
@@ -25,13 +26,13 @@ target_sources(xtrkcad-wlib
  	list.c
  	liststore.c
  	main.c
- 	menu.c	
  	message.c
  	notice.c
  	opendocument.c
  	pixbuf.c
  	print.c
- 	single.c
+ 	pulldnmenu.c	
+	single.c
  	splash.c
     statusbar.c
  	text.c
@@ -87,6 +88,7 @@ target_include_directories(xtrkcad-wlib
 target_link_libraries(xtrkcad-wlib 
 	PRIVATE
 	dynstring
+	wrapbox
 	${GTK_UNIX_PRINT3_LIBRARIES}
 	${GTK3_LIBRARIES}
 )

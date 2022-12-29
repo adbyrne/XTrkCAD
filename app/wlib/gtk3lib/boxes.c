@@ -115,8 +115,8 @@ void wlibDrawBox(
     	rectangle.width = w;
     	rectangle.height = h;
     	region = cairo_region_create_rectangle(&rectangle);
-    	context = gdk_window_begin_draw_frame(window, region);
-    	cr = gdk_drawing_context_get_cairo_context(context);
+//    	context = gdk_window_begin_draw_frame(window, region);
+//    	cr = gdk_drawing_context_get_cairo_context(context);
     }
 
     cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);

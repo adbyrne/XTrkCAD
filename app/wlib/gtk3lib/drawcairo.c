@@ -1202,7 +1202,7 @@ static gboolean draw_configure_event(
 		clear_surface (bd->temp_surface);
 
 		/* Kick off a full redraw to make sure we have something after resize */
-		bd->redraw( bd, bd->context, bd->w, bd->h );
+		// bd->redraw( bd, bd->context, bd->w, bd->h );
 	}
 
 	/* We've handled the configure event, no need for further processing. */
@@ -1556,6 +1556,15 @@ static gint draw_char_event(
 	}
 }
 
+void
+draw_realize(GtkWidget *widget,
+			gpointer data)
+{
+	GdkCursor * cursor;
+	cursor = gdk_cursor_new_for_display ( gdk_display_get_default(), GDK_TCROSS );
+	gdk_window_set_cursor ( gtk_widget_get_window(widget), cursor);
+	g_object_unref (cursor);	
+}			
 
 /*******************************************************************************
  *
@@ -1597,6 +1606,8 @@ wDraw_p wDrawCreate(
 	bd->widget = gtk_drawing_area_new();
 
 	gtk_widget_set_size_request( GTK_WIDGET(bd->widget), width, height );
+	g_signal_connect((bd->widget), "realize",
+					G_CALLBACK(draw_realize), bd );
 	g_signal_connect ((bd->widget), "draw",
 	                  G_CALLBACK(draw_event), bd);
 	g_signal_connect ((bd->widget),"configure_event",
@@ -1641,16 +1652,16 @@ wDraw_p wDrawCreate(
 	wlibControlGetSize( (wControl_p)bd );
 	
 	gtk_widget_realize( bd->widget );
-	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window(
-	                        bd->widget), CAIRO_CONTENT_COLOR_ALPHA, width, height);
-	bd->temp_surface = gdk_window_create_similar_surface( gtk_widget_get_window(
-	                           bd->widget), CAIRO_CONTENT_COLOR_ALPHA, width, height );
+	// bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window(
+	//                         bd->widget), CAIRO_CONTENT_COLOR_ALPHA, width, height);
+	// bd->temp_surface = gdk_window_create_similar_surface( gtk_widget_get_window(
+	//                            bd->widget), CAIRO_CONTENT_COLOR_ALPHA, width, height );
 
-	GdkCursor * cursor;
-	cursor = gdk_cursor_new_for_display ( gdk_display_get_default(), GDK_TCROSS );
-	gdk_window_set_cursor ( gtk_widget_get_window(GTK_WIDGET(bd->widget)), cursor);
-	g_object_unref (cursor);
-
+	// GdkCursor * cursor;
+	// cursor = gdk_cursor_new_for_display ( gdk_display_get_default(), GDK_TCROSS );
+	// gdk_window_set_cursor ( gtk_widget_get_window(GTK_WIDGET(bd->widget)), cursor);
+	// g_object_unref (cursor);
+//	bd->redraw( bd, bd->context, bd->w, bd->h );
 	gtk_widget_show( bd->widget );
 	wlibAddButton( (wControl_p)bd );
 	gtkAddHelpString( bd->widget, helpStr );
