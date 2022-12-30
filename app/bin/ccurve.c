@@ -317,12 +317,10 @@ EXPORT STATUS_T CreateCurve(
 			tempSegs(0).u.c.center.y = (pos.y+Da.pos0.y)/2.0;
 			tempSegs(0).u.c.radius = FindDistance(pos,Da.pos0)/2;
 			ANGLE_T a0 = FindAngle(tempSegs(0).u.c.center,Da.pos0);
-			ANGLE_T a1 = FindAngle(tempSegs(0).u.c.center,pos);
-			if (NormalizeAngle(a0+90-GetTrkEndAngle(Da.trk,Da.ep))<90) {
-				tempSegs(0).u.c.a0 = a0;
-			} else {
-				tempSegs(0).u.c.a0 = a1;
+			if ( NormalizeAngle( GetTrkEndAngle(Da.trk,Da.ep) - a0 ) > 180.0 ) {
+				a0 = NormalizeAngle( a0 + 180.0 );
 			}
+			tempSegs(0).u.c.a0 = a0;
 			tempSegs(0).u.c.a1 = 180.0;
 		} else { tempSegs(0).u.l.pos[1] = pos; }
 		Da.pos1 = pos;
