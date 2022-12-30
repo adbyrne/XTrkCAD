@@ -37,10 +37,6 @@
 #include <sys/types.h>
 #include <time.h>
 
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "wlib.h"
 
 #ifndef WINDOWS

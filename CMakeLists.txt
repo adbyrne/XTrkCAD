@@ -88,10 +88,10 @@ mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
 mark_as_advanced(LIBRARY_OUTPUT_PATH)
 
 # Test for headers and libraries for portability ...
-check_include_files (malloc.h HAVE_MALLOC_H)
-if(HAVE_MALLOC_H)
-  add_definitions(-DHAVE_MALLOC_H)
-endif()
+# check_include_files (malloc.h HAVE_MALLOC_H)
+# if(HAVE_MALLOC_H)
+#   add_definitions(-DHAVE_MALLOC_H)
+# endif()
 
 #packaging related stuff
 

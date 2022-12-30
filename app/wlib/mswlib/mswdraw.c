@@ -23,7 +23,6 @@
 #define _WIN32_WINNT 0x0600		/* for wheel mouse supposrt */
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>

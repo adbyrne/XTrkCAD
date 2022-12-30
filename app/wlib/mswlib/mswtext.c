@@ -22,7 +22,6 @@
 
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>

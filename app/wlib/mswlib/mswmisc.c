@@ -24,7 +24,7 @@
 #include <windows.h>
 #include <shellapi.h>
 #include <string.h>
-#include <malloc.h>
+#include <malloc.h> // required for heapinfo in function wMemStats
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
