@@ -3457,8 +3457,8 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
 	mResizeBorderW = GetSystemMetrics(SM_CXFRAME);
 	mResizeBorderH = GetSystemMetrics(SM_CYFRAME);
 	mMenuH = GetSystemMetrics(SM_CYMENU) + 1;
-	screenWidth = GetSystemMetrics(SM_CXFULLSCREEN);
-	screenHeight = GetSystemMetrics(SM_CYFULLSCREEN);
+	screenWidth = GetSystemMetrics(SM_CXMAXTRACK);
+	screenHeight = GetSystemMetrics(SM_CYMAXTRACK);
 	mswLabelFont = GetStockObject(DEFAULT_GUI_FONT);
 	hDc = GetDC(0);
 	mswScale = GetDeviceCaps(hDc, LOGPIXELSX) / 96.0;
