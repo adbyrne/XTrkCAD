@@ -1390,6 +1390,92 @@ void wRedraw( wDraw_p d )
 		d->drawRepaint( d, d->data, 0, 0 );
 	}
 }
+
+/*
+ *****************************************************************************
+ *
+ * Cursor handling
+ *
+ *****************************************************************************
+ */
+
+
+extern long dontHideCursor;
+static wCursor_t curCursor = wCursorNormal;
+
+void DoSetCursor()
+{
+	switch (curCursor) {
+	case wCursorNormal:
+	default:
+		SetCursor(LoadCursor(NULL, IDC_ARROW));
+		break;
+
+	case wCursorWait:
+		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		break;
+
+	case wCursorCross:
+		SetCursor(LoadCursor(NULL, IDC_CROSS));
+		break;
+
+	case wCursorIBeam:
+		SetCursor(LoadCursor(NULL, IDC_IBEAM));
+		break;
+
+	case wCursorQuestion:
+		SetCursor(LoadCursor(NULL, IDC_HELP));
+		break;
+
+	case wCursorHand:
+		SetCursor(LoadCursor(NULL, IDC_HAND));
+		break;
+
+	case wCursorNo:
+		SetCursor(LoadCursor(NULL, IDC_NO));
+		break;
+
+	case wCursorSizeAll:
+		SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+		break;
+
+	case wCursorSizeNESW:
+		SetCursor(LoadCursor(NULL, IDC_SIZENESW));
+		break;
+
+	case wCursorSizeNWSE:
+		SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+		break;
+
+	case wCursorSizeNS:
+		SetCursor(LoadCursor(NULL, IDC_SIZENS));
+		break;
+
+	case wCursorSizeWE:
+		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+		break;
+
+	case wCursorAppStart:
+		SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
+		break;
+
+	case wCursorNone:
+		if (!dontHideCursor) {
+			SetCursor(NULL);
+		}
+		break;
+	}
+
+}
+
+void wSetCursor(wDraw_p win,
+	wCursor_t cursor)
+{
+	curCursor = cursor;
+	DoSetCursor();
+}
+
+
 
 /*
  *****************************************************************************
@@ -1737,6 +1823,13 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			}
 		}
 		break;
+
+	case WM_SETCURSOR:
+		// Set cursor based on wSetCursor
+		DoSetCursor();
+		// return TRUE to suppress my parent from overriding me
+		return TRUE;
+
 	default:
 		break;
 	}

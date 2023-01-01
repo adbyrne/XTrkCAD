@@ -172,8 +172,6 @@ char *mswProfileFile;
 
 static wBalloonHelp_t * balloonHelpStrings;
 
-static wCursor_t curCursor = wCursorNormal;
-
 #ifdef HELPSTR
 static FILE * helpStrF;
 #endif
@@ -1449,74 +1447,6 @@ void wWinClear(
 {
 }
 
-extern long dontHideCursor;
-
-void wSetCursor(wDraw_p win,
-                wCursor_t cursor)
-{
-	switch (cursor) {
-	case wCursorNormal:
-	default:
-		SetCursor(LoadCursor(NULL, IDC_ARROW));
-		break;
-
-	case wCursorWait:
-		SetCursor(LoadCursor(NULL, IDC_WAIT));
-		break;
-
-	case wCursorCross:
-		SetCursor(LoadCursor(NULL, IDC_CROSS));
-		break;
-
-	case wCursorIBeam:
-		SetCursor(LoadCursor(NULL, IDC_IBEAM));
-		break;
-
-	case wCursorQuestion:
-		SetCursor(LoadCursor(NULL, IDC_HELP));
-		break;
-
-	case wCursorHand:
-		SetCursor(LoadCursor(NULL, IDC_HAND));
-		break;
-
-	case wCursorNo:
-		SetCursor(LoadCursor(NULL, IDC_NO));
-		break;
-
-	case wCursorSizeAll:
-		SetCursor(LoadCursor(NULL, IDC_SIZEALL));
-		break;
-
-	case wCursorSizeNESW:
-		SetCursor(LoadCursor(NULL, IDC_SIZENESW));
-		break;
-
-	case wCursorSizeNWSE:
-		SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
-		break;
-
-	case wCursorSizeNS:
-		SetCursor(LoadCursor(NULL, IDC_SIZENS));
-		break;
-
-	case wCursorSizeWE:
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-		break;
-
-	case wCursorAppStart:
-		SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
-		break;
-
-	case wCursorNone:
-		if (!dontHideCursor) {
-			SetCursor(NULL);
-		}
-		break;
-	}
-
-	curCursor = cursor;
-}
 
 void wWinDoCancel(wWin_p win)
 {
@@ -3098,9 +3028,8 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return (LRESULT)0;
 
 	case WM_SETCURSOR:
-		if (hWnd == mswHWnd) {
-			wSetCursor(NULL, curCursor);
-		}
+		// Set normal Arrow cursor, DefWindowProc can override it
+		SetCursor(LoadCursor(NULL, IDC_ARROW));
 
 		if (!mswAllowBalloonHelp) {
 			break;
