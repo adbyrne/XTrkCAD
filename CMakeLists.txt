@@ -1,6 +1,6 @@
 project(XTrkCAD)
 
-cmake_minimum_required(VERSION 3.17.0)
+cmake_minimum_required(VERSION 3.20.0)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 

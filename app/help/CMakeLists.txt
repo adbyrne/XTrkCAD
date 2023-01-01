@@ -39,13 +39,13 @@ else()
 endif()
 
 add_custom_command(
-       OUTPUT ${xtrkcad-lib_BINARY_DIR}/bllnhlp.c
+       OUTPUT bllnhlp.c
        DEPENDS genhelp genhelp.json
-       COMMAND genhelp ${GENHELP_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/genhelp.json ${xtrkcad-lib_BINARY_DIR}/bllnhlp.c
+       COMMAND genhelp ${GENHELP_OPTS} ${CMAKE_CURRENT_SOURCE_DIR}/genhelp.json ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
 )
 
 add_custom_target(balloonhelp ALL
-	DEPENDS ${xtrkcad-lib_BINARY_DIR}/bllnhlp.c
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
 )
 
 add_custom_command(

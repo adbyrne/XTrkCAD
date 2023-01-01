@@ -86,7 +86,6 @@ target_sources(xtrkcad-lib
     appdefaults.c
     archive.c
     archive.h
-    ${xtrkcad-lib_BINARY_DIR}/bllnhlp.c
     cbezier.c
     cbezier.h
     cblock.c
@@ -227,10 +226,6 @@ target_sources(xtrkcad-lib
     include/utlist.h
 )
 
-set_source_files_properties(${xtrkcad-lib_BINARY_DIR}/bllnhlp.c 
-    GENERATED 
-)
-
 # add UTF-8 conversion utilities on Windows
 
 if(WIN32)
@@ -244,7 +239,6 @@ endif()
 # This ensures that messages.h has been generated before we build xtrkcad-lib
 add_dependencies(xtrkcad-lib 
     msgfiles
-    balloonhelp
 	lines
     genbitmaps
 )
@@ -319,9 +313,11 @@ endif()
 target_sources(${XTRKCAD_BIN}
 	PRIVATE
 		misc.c
+        ${messagefile_BINARY_DIR}/bllnhlp.c
 		xtrkcad.rc
 )
 add_dependencies(${XTRKCAD_BIN}
+    balloonhelp
     msgfiles
     genbitmaps)
     
