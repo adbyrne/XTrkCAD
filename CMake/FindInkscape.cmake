@@ -4,6 +4,7 @@
 #
 # Inkscape_FOUND
 # Inkscape_EXECUTABLE   Where to find Inkscape
+# Inkscape_VERSION      The Inkscape version number
 # Inkscape_EXPORT       Option to specify the destination file
 # Inkscape_GUI          Option to disable the GUI if needed
 #
@@ -16,6 +17,11 @@ find_program(
 	DOC "Inkscape command-line SVG rasterizer"
 )
 
+execute_process(COMMAND ${Inkscape_EXECUTABLE} "--version" OUTPUT_VARIABLE _Inkscape_VERSION ERROR_QUIET)
+STRING(REGEX MATCH "[1-9]\.[0-9\+\.[0-9]+" _Inkscape_VERSION ${_Inkscape_VERSION})
+
+set(Inkscape_VERSION ${_Inkscape_VERSION} CACHE STRING "Inkscape Version")
+
 execute_process(COMMAND ${Inkscape_EXECUTABLE} "--help" OUTPUT_VARIABLE _Inkscape_HELP ERROR_QUIET)
 
 if(_Inkscape_HELP MATCHES "--without-gui")
@@ -23,15 +29,15 @@ if(_Inkscape_HELP MATCHES "--without-gui")
 endif()
 
 if(NOT DEFINED Inkscape_EXPORT)
-	foreach(option IN ITEMS "--export-file" "--export-filename" "--export-png")
-		if(_Inkscape_HELP MATCHES "${option}=")
+	foreach(option IN ITEMS "--export-filename=" "--export-file=" "--export-png=")
+		if(_Inkscape_HELP MATCHES "${option}")
 			set(Inkscape_EXPORT "${option}" CACHE STRING "Inkscape option to specify the export filename")
 			break()
 		endif()
 	endforeach()
 	if(NOT DEFINED Inkscape_EXPORT)
-		message(WARNING "Could not determine Inkscape export file option, assuming --export-file")
-		set(Inkscape_EXPORT "--export-file" CACHE STRING "Inkscape option to specify the export filename")
+		message(WARNING "Could not determine Inkscape export file option, assuming -o")
+		set(Inkscape_EXPORT "-o " CACHE STRING "Inkscape option to specify the export filename")
 	endif()
 endif()
 

@@ -54,7 +54,7 @@ else()
 					OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
 					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/png/
-					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pix} -o ${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
+					COMMAND ${Inkscape_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/svg/${xpm}.svg -h ${pix} ${Inkscape_EXPORT}${CMAKE_CURRENT_BINARY_DIR}/png/${xpm}${pix}.png
 				)
 			endif()
 			# build a list of all the depends
