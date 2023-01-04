@@ -621,17 +621,17 @@ static char * show_layer_bits[3][NUM_BUTTONS] = {
 
 
 static  long layerRawColorTab[] = {
-	wRGB(0,  0, 255),       /* blue */
-	wRGB(0,  0, 128),       /* dk blue */
-	wRGB(0, 128,  0),       /* dk green */
-	wRGB(255, 255,  0),     /* yellow */
-	wRGB(0, 255,  0),       /* green */
-	wRGB(0, 255, 255),      /* lt cyan */
-	wRGB(128,  0,  0),      /* brown */
-	wRGB(128,  0, 128),     /* purple */
-	wRGB(128, 128,  0),     /* green-brown */
-	wRGB(255,  0, 255)
-};     /* lt-purple */
+	wRGB(  0,   0, 192),    /* blue */
+	wRGB(  0, 192,   0),    /* green */
+	wRGB(192,   0,   0),    /* red */
+	wRGB(128, 128,   0),    /* yellow */
+	wRGB(  0, 128, 128),    /* cyan */
+	wRGB(  0,   0, 128),    /* dk blue */
+	wRGB(  0, 128,   0),    /* dk green */
+	wRGB(128,   0,   0),    /* dk red */
+	wRGB( 96,  96,   0),    /* green-brown */
+	wRGB(  0,  96,  96)     /* dk cyan */
+};
 static  wDrawColor layerColorTab[COUNT(layerRawColorTab)];
 
 
