@@ -50,7 +50,7 @@ static drawCmd_t hotBarD = {
 	Pix2CoOrd, CoOrd2Pix
 };
 static wWinPix_t hotBarDrawHeight[] = {26, 32, 40};
-static wFontSize_t hotBarFontSize[] = {7, 8, 9};
+static wFontSize_t hotBarFontSize[] = {7, 11, 14};
 typedef struct {
 	DIST_T x;
 	DIST_T w;

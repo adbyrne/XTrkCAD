@@ -710,8 +710,8 @@ static void DoClearAfter(void)
 
 	Reset();
 	ClearTracks();
+	ResetLayers(); // set all layers to their default properties and set current layer to 0
 
-	/* set all layers to their default properties and set current layer to 0 */
 	DoLayout(NULL);
 	checkPtMark = changed = 0;
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
