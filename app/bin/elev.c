@@ -1339,13 +1339,13 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 
 	switch ( GetTrkElevMode(trk) ) {
 	case ELEV_FORK:
-		color = drawColorBlue;
+		color = drawColorDkBlue;
 		break;
 	case ELEV_BRANCH:
 		color = drawColorPurple;
 		break;
 	case ELEV_ISLAND:
-		color = drawColorGold;
+		color = drawColorDkAqua;
 		break;
 	case ELEV_ALONE:
 		return;

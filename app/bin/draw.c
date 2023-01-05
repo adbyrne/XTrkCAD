@@ -83,10 +83,15 @@ EXPORT wDrawColor drawColorRed;
 EXPORT wDrawColor drawColorBlue;
 EXPORT wDrawColor drawColorGreen;
 EXPORT wDrawColor drawColorAqua;
+EXPORT wDrawColor drawColorDkRed;
+EXPORT wDrawColor drawColorDkBlue;
+EXPORT wDrawColor drawColorDkGreen;
+EXPORT wDrawColor drawColorDkAqua;
 EXPORT wDrawColor drawColorPreviewSelected;
 EXPORT wDrawColor drawColorPreviewUnselected;
 EXPORT wDrawColor drawColorPowderedBlue;
 EXPORT wDrawColor drawColorPurple;
+EXPORT wDrawColor drawColorMagenta;
 EXPORT wDrawColor drawColorGold;
 EXPORT wDrawColor drawColorGrey10;
 EXPORT wDrawColor drawColorGrey20;
@@ -3127,6 +3132,10 @@ static void InitColor( void )
 	drawColorBlue   = wDrawFindColor( wRGB(  0,  0,255) );
 	drawColorGreen  = wDrawFindColor( wRGB(  0,255,  0) );
 	drawColorAqua   = wDrawFindColor( wRGB(  0,255,255) );
+	drawColorDkRed  = wDrawFindColor( wRGB(128,  0,  0) );
+	drawColorDkBlue = wDrawFindColor( wRGB(  0,  0,128) );
+	drawColorDkGreen= wDrawFindColor( wRGB(  0,128,  0) );
+	drawColorDkAqua = wDrawFindColor( wRGB(  0,128,128) );
 
 	// Last component of spectial color must be > 3
 	drawColorPreviewSelected = wDrawFindColor( wRGB ( 6, 6, 255) );   //Special Blue
@@ -3134,8 +3143,9 @@ static void InitColor( void )
 	                             6)); //Special Yellow
 
 	drawColorPowderedBlue = wDrawFindColor( wRGB(129, 212, 250) );
-	drawColorPurple = wDrawFindColor( wRGB(255,  0,255) );
-	drawColorGold   = wDrawFindColor( wRGB(255,215,  0) );
+	drawColorPurple  = wDrawFindColor( wRGB(128,  0,128) );
+	drawColorMagenta = wDrawFindColor( wRGB(255, 0, 255) );
+	drawColorGold    = wDrawFindColor( wRGB(255,215,  0) );
 	drawColorGrey10  = wDrawFindColor( wRGB(26,26,26) );
 	drawColorGrey20  = wDrawFindColor( wRGB(51,51,51) );
 	drawColorGrey30  = wDrawFindColor( wRGB(72,72,72) );

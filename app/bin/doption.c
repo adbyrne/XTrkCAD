@@ -120,7 +120,7 @@ static paramData_t displayPLs[] = {
 	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
-#define labelSelect (12)
+#define labelSelect (13)
 	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_256, N_("Label Scale"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, I2VP(CHANGE_MAIN) },
