@@ -17,14 +17,13 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef COMMON_H
 #define COMMON_H
 
 // INCLUDES
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <locale.h>
@@ -37,10 +36,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
-
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 
 #include "wlib.h"
 
@@ -126,8 +121,8 @@ typedef double WDOUBLE_T;
 typedef double FONTSIZE_T;
 
 typedef struct {
-		POS_T x,y;
-		} coOrd;
+	POS_T x,y;
+} coOrd;
 
 typedef struct {
 	coOrd pt;
@@ -148,26 +143,27 @@ typedef signed char TRKTYP_T;
 typedef int TRKINX_T;
 typedef long DEBUGF_T;
 typedef int REGION_T;
+typedef long SCALEINX_T;
+typedef long GAUGEINX_T;
+typedef long SCALEDESCINX_T;
+
 
 enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COMPATIBLE, PARAMFILE_FIT, PARAMFILE_MAXSTATE };
-
-#define SCALE_ANY	(-2)
-#define SCALE_DEMO	(-1)
 
 // DYNARRAY
 
 typedef struct {
-		int cnt;
-		int max;
-		void * ptr;
-		} dynArr_t;
+	int cnt;
+	int max;
+	void * ptr;
+} dynArr_t;
 
 #define CHECK_SIZE(T,DA)
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
-			(DA).max += INCR; \
-			CHECK_SIZE(T,DA) \
+			(DA).max += (INCR); \
+			CHECK_SIZE((T),(DA)) \
 			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
 			if ( (DA).ptr == NULL ) \
 				abort(); \
@@ -182,14 +178,14 @@ typedef struct {
 #define DYNARR_RESET(T,DA) \
 		(DA).cnt=0
 #define DYNARR_SET(T,DA,N) \
-		{ if ((DA).max < N) { \
-			(DA).max = N; \
-			CHECK_SIZE(T,DA) \
+		{ if ((DA).max < (N)) { \
+			(DA).max = (N); \
+			CHECK_SIZE((T),(DA)) \
 			(DA).ptr = MyRealloc( (DA).ptr, (DA).max * sizeof *(T*)NULL ); \
 			if ( (DA).ptr == NULL ) \
 				abort(); \
 		} \
-		(DA).cnt = N; }
+		(DA).cnt = (N); }
 #define DYNARR_FREE(T,DA) \
 		{ if ((DA).ptr) { \
 			MyFree( (DA).ptr); \
@@ -199,13 +195,13 @@ typedef struct {
 		(DA).cnt = 0; }
 #define DYNARR_REMOVE(T,DA,I) \
 		{ \
-		 { if ((DA).cnt-1 > I) { \
-				for (int i=I;i<(DA).cnt-1;i++) { \
+		 { if ((DA).cnt-1 > (I)) { \
+				for (int i=(I);i<(DA).cnt-1;i++) { \
 				(((T*)(DA).ptr)[i])= (((T*)(DA).ptr)[i+1]); \
 				} \
 			} \
 		 } \
-		if ((DA.cnt)>=I) (DA).cnt--; \
+		if ((DA).cnt>=(I)) (DA).cnt--; \
 		}
 
 // Base DotsPerInch
@@ -223,14 +219,19 @@ typedef struct {
 // FORWARD TYPE DECLS
 typedef struct drawCmd_t * drawCmd_p;
 typedef struct track_t * track_p;
+typedef struct track_t * track_cp;
 typedef struct trkSeg_t * trkSeg_p;
 typedef struct traverseTrack_t * traverseTrack_p;
 typedef struct trkEndPt_t * trkEndPt_p;
+typedef void (*doSaveCallBack_p)( void );
+typedef void (*addButtonCallBack_t)(void*);
+typedef STATUS_T (*procCommand_t) (wAction_t, coOrd);
+
 
 // base class for extraData*_t: each of which must include this struct as the first element
 typedef struct extraDataBase_t {
-		TRKTYP_T trkType;
-	} extraDataBase_t;
+	TRKTYP_T trkType;
+} extraDataBase_t;
 // We check if TRKTYP_T in trk, trk->extraDataBase and the code context (TRKTYP) match.
 // If TRKTYP is T_NOTRACK then we are dealing with T_TURNOUT/T_STRUCTURE or T_BEZIER/T_BEZLIN which
 // share a log of code and have the same extraData*_t structure.
@@ -238,12 +239,43 @@ typedef struct extraDataBase_t {
 	((TYPE*)GetTrkExtraData( (TRK), (TRKTYP) ))
 extraDataBase_t * GetTrkExtraData( track_p, TRKTYP_T );
 
+
+typedef struct {
+	BOOL_T valid;
+	DIST_T length;
+	DIST_T width;
+	DIST_T spacing;
+} tieData_t, *tieData_p;
+
+// Syntactic suger for exported (non-static) objects
+#define EXPORT
+
+#define COUNT(A) (sizeof(A)/sizeof(A[0]))
+
+#define STR_SIZE		(256)
+#define STR_SHORT_SIZE	(80)
+#define STR_LONG_SIZE	(1024)
+#define STR_HUGE_SIZE	(10240)
+
+#define CAST_AWAY_CONST (char*)
+
+#define TITLEMAXLEN (40)
+
+
+
 // COMMON INCLUDES
 // If you add includes here, please remove them elsewhere
 
 #include "i18n.h"
 #include "utility.h"
+#include "acclkeys.h"
 #include "misc.h"
+
+// TODO - move these includes to the files that need them
+#include "dlayer.h"
+#include "scale.h"
+#include "command.h"
+#include "menu.h"
 
 #endif
 

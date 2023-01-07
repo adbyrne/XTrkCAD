@@ -180,7 +180,7 @@ After importing the objects from the file, the imported objects are in selected 
 
 \rule
 
-\S{cmdImport} Import as Module
+\S{cmdImportM} Import as Module
 
 \G{png.d/bimportxtc.png}
 
@@ -532,7 +532,7 @@ To check your printer's margin:
 
 \u000
 
-\dd Enable \f{Registration Marks} this prints crosshairs every 6" at scale 1:1.
+\dd Enable \f{Registration Marks} this prints crosshairs every 3" or 10cm at scale 1:1.
 
 \u000
 
@@ -553,5 +553,9 @@ To check your printer's margin:
 \u000
 
 Margins values are stored for each printer.
+
+\u000
+
+You can also load \f{PrinterMarginTest-A4.xtc} or \f{PrinterMarginTest-Letter.xtc} from \f{Help|Examples}.  These files have registration lines in the corners to help determine your printer's margins.
 
 \rule

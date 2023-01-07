@@ -17,7 +17,7 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #define _USE_MATH_DEFINES
@@ -26,35 +26,32 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef HAVE_MALLOC_H
-    #include <malloc.h>
-#endif
-
 #include "dynstring.h"
 #include "mxml.h"
 #include "include/svgformat.h"
 #include "include/utlist.h"
+#include "common.h"
 
 #define SVGDPIFACTOR 90.0					/**< the assumed resolution of the svg, 90 is what Inkscape uses */
 #define ROUND2PIXEL( value ) ((int)floor(value * SVGDPIFACTOR + 0.5))
 
 typedef struct sCssStyle {
-    DynString name;
-    DynString style;
-    struct sCssStyle *next;
+	DynString name;
+	DynString style;
+	struct sCssStyle *next;
 } sCssStyle;
 
 static sCssStyle *styleCache = NULL;
 static unsigned cacheCount;
 
 static char *lineStyleCSS[] = {				/**< The css class names for line styles */
-    NULL,										// no style needed for solid line
-    "linedash",
-    "linedot",
-    "linedashdot",
-    "linedashdot",
-    "linecenter",
-    "linephantom"
+	NULL,										// no style needed for solid line
+	"linedash",
+	"linedot",
+	"linedashdot",
+	"linedashdot",
+	"linecenter",
+	"linephantom"
 };
 
 #define LINESTYLECLASSES \
@@ -73,23 +70,23 @@ static char *lineStyleCSS[] = {				/**< The css class names for line styles */
 static void
 SvgInitStyleCache(void)
 {
-    sCssStyle *style;
+	sCssStyle *style;
 
-    style = malloc(sizeof(sCssStyle));
-    DynStringMalloc(&(style->name), 2);
-    DynStringCatCStr(&(style->name), "*");
+	style = malloc(sizeof(sCssStyle));
+	DynStringMalloc(&(style->name), 2);
+	DynStringCatCStr(&(style->name), "*");
 
-    DynStringMalloc(&(style->style), 16);
-    DynStringCatCStr(&(style->style), "stroke-width:1; stroke:#000000; fill:none;");
-    LL_APPEND(styleCache, style);
+	DynStringMalloc(&(style->style), 16);
+	DynStringCatCStr(&(style->style), "stroke-width:1; stroke:#000000; fill:none;");
+	LL_APPEND(styleCache, style);
 
-    cacheCount = 1;
+	cacheCount = 1;
 }
 
 static int
 CompareStyle(sCssStyle *a, sCssStyle *b)
 {
-    return (strcmp(DynStringToCStr(&(a->style)), DynStringToCStr(&(b->style))));
+	return (strcmp(DynStringToCStr(&(a->style)), DynStringToCStr(&(b->style))));
 }
 
 /**
@@ -106,27 +103,27 @@ CompareStyle(sCssStyle *a, sCssStyle *b)
 static char *
 SvgAddStyleToCache(DynString *styleDef)
 {
-    sCssStyle *style;
-    sCssStyle *result;
+	sCssStyle *style;
+	sCssStyle *result;
 
-    style = malloc(sizeof(sCssStyle));
-    style->style = *styleDef;
+	style = malloc(sizeof(sCssStyle));
+	style->style = *styleDef;
 
-    LL_SEARCH(styleCache, result, style, CompareStyle);
-    if (result) {
-        if (!strcmp(DynStringToCStr(&(result->name)), "*")) {
-            return (NULL);
-        } else {
-            return (DynStringToCStr(&(result->name)) + 1);
-        }
-    } else {
-        DynString className;
-        DynStringMalloc(&className, 16);
-        DynStringPrintf(&className, ".xtc%u", cacheCount++);
-        style->name = className;
-        LL_APPEND(styleCache, style);
-        return (DynStringToCStr(&className) + 1);		//skip leading dot in class name
-    }
+	LL_SEARCH(styleCache, result, style, CompareStyle);
+	if (result) {
+		if (!strcmp(DynStringToCStr(&(result->name)), "*")) {
+			return (NULL);
+		} else {
+			return (DynStringToCStr(&(result->name)) + 1);
+		}
+	} else {
+		DynString className;
+		DynStringMalloc(&className, 16);
+		DynStringPrintf(&className, ".xtc%u", cacheCount++);
+		style->name = className;
+		LL_APPEND(styleCache, style);
+		return (DynStringToCStr(&className) + 1);		//skip leading dot in class name
+	}
 }
 
 /**
@@ -136,16 +133,16 @@ SvgAddStyleToCache(DynString *styleDef)
 static void
 SvgDestroyStyleCache(void)
 {
-    sCssStyle *style;
-    sCssStyle *tmp;
+	sCssStyle *style;
+	sCssStyle *tmp;
 
-    LL_FOREACH_SAFE(styleCache, style, tmp) {
-        DynStringFree(&(style->name));
-        DynStringFree(&(style->style));
-        free(style);
-    }
+	LL_FOREACH_SAFE(styleCache, style, tmp) {
+		DynStringFree(&(style->name));
+		DynStringFree(&(style->style));
+		free(style);
+	}
 
-    styleCache = NULL;
+	styleCache = NULL;
 }
 
 /**
@@ -161,36 +158,36 @@ static void
 SvgCreateStyle(mxml_node_t *element, unsigned long colorRGB, double width,
                bool fill, unsigned lineStyle)
 {
-    DynString style;
-    char color[10];
-    char *className = NULL;
-    char *classLineStyle = NULL;
+	DynString style;
+	char color[10];
+	char *className = NULL;
+	char *classLineStyle = NULL;
 
-    assert(lineStyle < 7);
+	CHECK(lineStyle < 7);
 
-    sprintf(color, "#%2.2x%2.2x%2.2x", ((unsigned int)colorRGB >> 16) & 0xFF,
-            ((unsigned int)colorRGB >> 8) & 0xFF, (unsigned int)colorRGB & 0xFF);
+	sprintf(color, "#%2.2x%2.2x%2.2x", ((unsigned int)colorRGB >> 16) & 0xFF,
+	        ((unsigned int)colorRGB >> 8) & 0xFF, (unsigned int)colorRGB & 0xFF);
 
-    DynStringMalloc(&style, 32);
+	DynStringMalloc(&style, 32);
 
-    DynStringPrintf(&style,
-                    "stroke-width:%d; stroke:%s; fill:%s;",
-                    (int)(width + 0.5),
-                    color,
-                    (fill ? color: "none"));
+	DynStringPrintf(&style,
+	                "stroke-width:%d; stroke:%s; fill:%s;",
+	                (int)(width + 0.5),
+	                color,
+	                (fill ? color: "none"));
 
-    className = SvgAddStyleToCache(&style);
-    classLineStyle = lineStyleCSS[lineStyle];
+	className = SvgAddStyleToCache(&style);
+	classLineStyle = lineStyleCSS[lineStyle];
 
-    if (className && classLineStyle) {
-        mxmlElementSetAttrf(element, "class", "%s %s", className, classLineStyle);
-    } else {
-        if (className || classLineStyle) {
-            mxmlElementSetAttr(element, "class", (className? className:classLineStyle));
-        } else {
-            // strict default, nothing to add
-        }
-    }
+	if (className && classLineStyle) {
+		mxmlElementSetAttrf(element, "class", "%s %s", className, classLineStyle);
+	} else {
+		if (className || classLineStyle) {
+			mxmlElementSetAttr(element, "class", (className? className:classLineStyle));
+		} else {
+			// strict default, nothing to add
+		}
+	}
 }
 
 /**
@@ -204,7 +201,7 @@ SvgCreateStyle(mxml_node_t *element, unsigned long colorRGB, double width,
 static void
 SvgAddRealUnit(mxml_node_t *node, char *name, double value)
 {
-    mxmlElementSetAttrf(node, name, "%d", (int)(value+0.5));
+	mxmlElementSetAttrf(node, name, "%d", (int)(value+0.5));
 }
 
 /**
@@ -220,7 +217,7 @@ SvgAddRealUnit(mxml_node_t *node, char *name, double value)
 static void
 SvgAddCoordinate(mxml_node_t *node, char *name, double value)
 {
-    mxmlElementSetAttrf(node, name, "%d", ROUND2PIXEL(value));
+	mxmlElementSetAttrf(node, name, "%d", ROUND2PIXEL(value));
 }
 
 /**
@@ -239,17 +236,17 @@ void
 SvgLineCommand(SVGParent *svg, double x0,
                double y0, double x1, double y1, double w, long c, unsigned lineStyle)
 {
-    mxml_node_t *xmlData;
+	mxml_node_t *xmlData;
 
-    xmlData = mxmlNewElement(svg, "line");
+	xmlData = mxmlNewElement(svg, "line");
 
-    // line end points
-    SvgAddCoordinate(xmlData, "x1", x0);
-    SvgAddCoordinate(xmlData, "y1", y0);
-    SvgAddCoordinate(xmlData, "x2", x1);
-    SvgAddCoordinate(xmlData, "y2", y1);
+	// line end points
+	SvgAddCoordinate(xmlData, "x1", x0);
+	SvgAddCoordinate(xmlData, "y1", y0);
+	SvgAddCoordinate(xmlData, "x2", x1);
+	SvgAddCoordinate(xmlData, "y2", y1);
 
-    SvgCreateStyle(xmlData, c, w, false, lineStyle);
+	SvgCreateStyle(xmlData, c, w, false, lineStyle);
 }
 
 /**
@@ -268,17 +265,17 @@ void
 SvgRectCommand(SVGParent *svg, double x0, double y0, double x1, double y1,
                int color, unsigned lineStyle)
 {
-    mxml_node_t *xmlData;
+	mxml_node_t *xmlData;
 
-    xmlData = mxmlNewElement(svg, "rect");
+	xmlData = mxmlNewElement(svg, "rect");
 
-    // line end points
-    SvgAddCoordinate(xmlData, "x1", x0);
-    SvgAddCoordinate(xmlData, "y1", y0);
-    SvgAddCoordinate(xmlData, "x2", x1);
-    SvgAddCoordinate(xmlData, "y2", y1);
+	// line end points
+	SvgAddCoordinate(xmlData, "x1", x0);
+	SvgAddCoordinate(xmlData, "y1", y0);
+	SvgAddCoordinate(xmlData, "x2", x1);
+	SvgAddCoordinate(xmlData, "y2", y1);
 
-    SvgCreateStyle(xmlData, color, 1, false, lineStyle);
+	SvgCreateStyle(xmlData, color, 1, false, lineStyle);
 
 }
 
@@ -298,31 +295,31 @@ void
 SvgPolyLineCommand(SVGParent *svg, int cnt, double *points, int color,
                    double width, bool fill, unsigned lineStyle)
 {
-    mxml_node_t *xmlData;
-    DynString pointList;
-    DynString pos;
+	mxml_node_t *xmlData;
+	DynString pointList;
+	DynString pos;
 
-    DynStringMalloc(&pointList, 64);
-    DynStringMalloc(&pos, 20);
+	DynStringMalloc(&pointList, 64);
+	DynStringMalloc(&pos, 20);
 
 
-    for (int i = 0; i < cnt; i++) {
-        DynStringPrintf(&pos,
-                        "%d,%d ",
-                        (int)floor(points[i * 2] * SVGDPIFACTOR + 0.5),
-                        (int)floor(points[ i * 2 + 1] * SVGDPIFACTOR + 0.5));
+	for (int i = 0; i < cnt; i++) {
+		DynStringPrintf(&pos,
+		                "%d,%d ",
+		                (int)floor(points[i * 2] * SVGDPIFACTOR + 0.5),
+		                (int)floor(points[ i * 2 + 1] * SVGDPIFACTOR + 0.5));
 
-        DynStringCatStr(&pointList, &pos);
-        DynStringClear(&pos);
-    }
+		DynStringCatStr(&pointList, &pos);
+		DynStringClear(&pos);
+	}
 
-    xmlData = mxmlNewElement(svg, "polyline");
-    mxmlElementSetAttr(xmlData, "points", DynStringToCStr(&pointList));
+	xmlData = mxmlNewElement(svg, "polyline");
+	mxmlElementSetAttr(xmlData, "points", DynStringToCStr(&pointList));
 
-    SvgCreateStyle(xmlData, color, width, fill, lineStyle);
+	SvgCreateStyle(xmlData, color, width, fill, lineStyle);
 
-    DynStringFree(&pos);
-    DynStringFree(&pointList);
+	DynStringFree(&pos);
+	DynStringFree(&pointList);
 }
 
 /**
@@ -342,17 +339,17 @@ void
 SvgCircleCommand(SVGParent *svg, double x,
                  double y, double r, double w, long c, bool fill, unsigned lineStyle)
 {
-    mxml_node_t *xmlData;
+	mxml_node_t *xmlData;
 
-    xmlData = mxmlNewElement(svg, "circle");
+	xmlData = mxmlNewElement(svg, "circle");
 
-    // line end points
-    SvgAddCoordinate(xmlData, "cx", x);
-    SvgAddCoordinate(xmlData, "cy", y);
+	// line end points
+	SvgAddCoordinate(xmlData, "cx", x);
+	SvgAddCoordinate(xmlData, "cy", y);
 
-    SvgAddCoordinate(xmlData, "r", r);
+	SvgAddCoordinate(xmlData, "r", r);
 
-    SvgCreateStyle(xmlData, c, w, fill, lineStyle);
+	SvgCreateStyle(xmlData, c, w, fill, lineStyle);
 
 }
 
@@ -371,10 +368,10 @@ static void
 PolarToCartesian(double cx, double cy, double radius, double angle, double *px,
                  double *py)
 {
-    double angleInRadians = ((angle) * M_PI) / 180.0;
+	double angleInRadians = ((angle) * M_PI) / 180.0;
 
-    *px = cx + (radius * cos(angleInRadians));
-    *py = cy + (radius * sin(angleInRadians));
+	*px = cx + (radius * cos(angleInRadians));
+	*py = cy + (radius * sin(angleInRadians));
 }
 
 /**
@@ -398,35 +395,35 @@ SvgArcCommand(SVGParent *svg, double x, double y,
               double r, double a0, double a1, bool center, double w, long c,
               unsigned lineStyle)
 {
-    double startX;
-    double startY;
-    double endX;
-    double endY;
-    char largeArcFlag = (a1 - a0 <= 180 ? '0' : '1');
-    DynString pathArc;
-    mxml_node_t *xmlData;
+	double startX;
+	double startY;
+	double endX;
+	double endY;
+	char largeArcFlag = (a1 - a0 <= 180 ? '0' : '1');
+	DynString pathArc;
+	mxml_node_t *xmlData;
 
-    xmlData = mxmlNewElement(svg, "path");
+	xmlData = mxmlNewElement(svg, "path");
 
-    PolarToCartesian(x, y, r, a0+a1-90, &startX, &startY);
-    PolarToCartesian(x, y, r, a0-90, &endX, &endY);
+	PolarToCartesian(x, y, r, a0+a1-90, &startX, &startY);
+	PolarToCartesian(x, y, r, a0-90, &endX, &endY);
 
-    DynStringMalloc(&pathArc, 64);
-    DynStringPrintf(&pathArc,
-                    "M %d %d A %d %d 0 %c 0 %d %d",
-                    ROUND2PIXEL(startX),
-                    ROUND2PIXEL(startY),
-                    ROUND2PIXEL(r),
-                    ROUND2PIXEL(r),
-                    largeArcFlag,
-                    ROUND2PIXEL(endX),
-                    ROUND2PIXEL(endY));
+	DynStringMalloc(&pathArc, 64);
+	DynStringPrintf(&pathArc,
+	                "M %d %d A %d %d 0 %c 0 %d %d",
+	                ROUND2PIXEL(startX),
+	                ROUND2PIXEL(startY),
+	                ROUND2PIXEL(r),
+	                ROUND2PIXEL(r),
+	                largeArcFlag,
+	                ROUND2PIXEL(endX),
+	                ROUND2PIXEL(endY));
 
-    mxmlElementSetAttr(xmlData, "d", DynStringToCStr(&pathArc));
+	mxmlElementSetAttr(xmlData, "d", DynStringToCStr(&pathArc));
 
-    DynStringFree(&pathArc);
+	DynStringFree(&pathArc);
 
-    SvgCreateStyle(xmlData, c, w, false, lineStyle);
+	SvgCreateStyle(xmlData, c, w, false, lineStyle);
 }
 
 /**
@@ -444,18 +441,18 @@ void
 SvgTextCommand(SVGParent *svg, double x,
                double y, double size, long c, char *text)
 {
-    mxml_node_t *xmlData;
+	mxml_node_t *xmlData;
 
-    xmlData = mxmlNewElement(svg, "text");
-    // starting point
-    SvgAddCoordinate(xmlData, "x", x);
-    SvgAddCoordinate(xmlData, "y", y);
+	xmlData = mxmlNewElement(svg, "text");
+	// starting point
+	SvgAddCoordinate(xmlData, "x", x);
+	SvgAddCoordinate(xmlData, "y", y);
 
-    SvgCreateStyle(xmlData, c, 1, 1, 0);
+	SvgCreateStyle(xmlData, c, 1, 1, 0);
 
-    SvgAddRealUnit(xmlData, "font-size", size);
+	SvgAddRealUnit(xmlData, "font-size", size);
 
-    mxmlNewText(xmlData, false, text);
+	mxmlNewText(xmlData, false, text);
 }
 
 /**
@@ -468,13 +465,13 @@ SvgTextCommand(SVGParent *svg, double x,
 void
 SvgAddTitle(SVGParent *svg, char *title)
 {
-    mxml_node_t *titleNode;
-    if (title) {
-        titleNode = mxmlNewElement(MXML_NO_PARENT, "title");
-        mxmlNewText(titleNode, false, title);
+	mxml_node_t *titleNode;
+	if (title) {
+		titleNode = mxmlNewElement(MXML_NO_PARENT, "title");
+		mxmlNewText(titleNode, false, title);
 
-        mxmlAdd(svg, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT, titleNode);
-    }
+		mxmlAdd(svg, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT, titleNode);
+	}
 }
 
 /**
@@ -490,30 +487,30 @@ SvgAddTitle(SVGParent *svg, char *title)
 void
 SvgAddCSSStyle(SVGParent *svg)
 {
-    mxml_node_t *cssNode;
-    DynString cssDefs;
-    DynString tmp;
-    sCssStyle *style;
+	mxml_node_t *cssNode;
+	DynString cssDefs;
+	DynString tmp;
+	sCssStyle *style;
 
-    cssNode = mxmlNewElement(MXML_NO_PARENT, "style");
-    mxmlElementSetAttr(cssNode, "type", "text/css");
+	cssNode = mxmlNewElement(MXML_NO_PARENT, "style");
+	mxmlElementSetAttr(cssNode, "type", "text/css");
 
-    DynStringMalloc(&cssDefs, 64);
-    DynStringMalloc(&tmp, 64);
-    LL_FOREACH(styleCache, style) {
-        DynStringPrintf(&tmp, "%s { %s }\n",
-                        DynStringToCStr(&(style->name)),
-                        DynStringToCStr(&(style->style)));
+	DynStringMalloc(&cssDefs, 64);
+	DynStringMalloc(&tmp, 64);
+	LL_FOREACH(styleCache, style) {
+		DynStringPrintf(&tmp, "%s { %s }\n",
+		                DynStringToCStr(&(style->name)),
+		                DynStringToCStr(&(style->style)));
 
-        DynStringCatStr(&cssDefs, &tmp);
-    }
+		DynStringCatStr(&cssDefs, &tmp);
+	}
 
-    DynStringCatCStr(&cssDefs, LINESTYLECLASSES);
-    mxmlNewCDATA(cssNode, DynStringToCStr(&cssDefs));
+	DynStringCatCStr(&cssDefs, LINESTYLECLASSES);
+	mxmlNewCDATA(cssNode, DynStringToCStr(&cssDefs));
 
-    mxmlAdd(svg, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT, cssNode);
-    DynStringFree(&tmp);
-    DynStringFree(&cssDefs);
+	mxmlAdd(svg, MXML_ADD_BEFORE, MXML_ADD_TO_PARENT, cssNode);
+	DynStringFree(&tmp);
+	DynStringFree(&cssDefs);
 }
 
 /**
@@ -525,9 +522,9 @@ SvgAddCSSStyle(SVGParent *svg)
 SVGDocument *
 SvgCreateDocument()
 {
-    SvgInitStyleCache();
+	SvgInitStyleCache();
 
-    return ((SVGDocument *)mxmlNewXML("1.0"));
+	return ((SVGDocument *)mxmlNewXML("1.0"));
 }
 
 /**
@@ -539,9 +536,9 @@ SvgCreateDocument()
 void
 SvgDestroyDocument(SVGDocument *xml)
 {
-    mxmlDelete((mxml_node_t *)xml);
+	mxmlDelete((mxml_node_t *)xml);
 
-    SvgDestroyStyleCache();
+	SvgDestroyStyleCache();
 }
 
 /**
@@ -563,23 +560,23 @@ SvgPrologue(SVGDocument *parent, char *id, int layerCount, double x0, double y0,
             double x1,
             double y1)
 {
-    mxml_node_t *xmlData;
+	mxml_node_t *xmlData;
 
-    xmlData = mxmlNewElement(parent,
-                             "!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\""
-                             " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"");
-    xmlData = mxmlNewElement(parent, "svg");
-    mxmlElementSetAttr(xmlData, "xmlns", "http://www.w3.org/2000/svg");
+	xmlData = mxmlNewElement(parent,
+	                         "!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\""
+	                         " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"");
+	xmlData = mxmlNewElement(parent, "svg");
+	mxmlElementSetAttr(xmlData, "xmlns", "http://www.w3.org/2000/svg");
 
-    if (id) {
-        mxmlElementSetAttr(xmlData, "id", id);
-    }
-    SvgAddCoordinate(xmlData, "x", x0);
-    SvgAddCoordinate(xmlData, "y", y0);
-    SvgAddCoordinate(xmlData, "width", x1);
-    SvgAddCoordinate(xmlData, "height", y1);
+	if (id) {
+		mxmlElementSetAttr(xmlData, "id", id);
+	}
+	SvgAddCoordinate(xmlData, "x", x0);
+	SvgAddCoordinate(xmlData, "y", y0);
+	SvgAddCoordinate(xmlData, "width", x1);
+	SvgAddCoordinate(xmlData, "height", y1);
 
-    return ((SVGParent *)xmlData);
+	return ((SVGParent *)xmlData);
 }
 
 /**
@@ -594,61 +591,61 @@ SvgPrologue(SVGDocument *parent, char *id, int layerCount, double x0, double y0,
 const char *
 whitespace_cb(mxml_node_t *node, int where)
 {
-    const char *element;
+	const char *element;
 
-    /*
-     * We can conditionally break to a new line before or after
-     * any element.  These are just common HTML elements...
-     */
+	/*
+	 * We can conditionally break to a new line before or after
+	 * any element.  These are just common HTML elements...
+	 */
 
-    element = mxmlGetElement(node);
+	element = mxmlGetElement(node);
 
-    if (!strcmp(element, "svg") ||
-            !strncmp(element, "!DOCTYPE", strlen("!DOCTYPE"))) {
-        /*
-         * Newlines before open and after close...
-         */
+	if (!strcmp(element, "svg") ||
+	    !strncmp(element, "!DOCTYPE", strlen("!DOCTYPE"))) {
+		/*
+		 * Newlines before open and after close...
+		 */
 
-        if (where == MXML_WS_BEFORE_OPEN ||
-                where == MXML_WS_BEFORE_CLOSE) {
-            return ("\n");
-        }
-    } else {
-        if (!strcmp(element, "line") ||
-                !strcmp(element, "circle") ||
-                !strcmp(element, "path") ||
-                !strcmp(element, "polyline")) {
-            if (where == MXML_WS_BEFORE_OPEN ||
-                    where == MXML_WS_AFTER_CLOSE) {
-                return ("\n\t");
-            }
-        } else {
-            if (!strcmp(element, "style") ||
-                    !strcmp(element, "title") ||
-                    !strcmp(element, "text")) {
-                if (where == MXML_WS_BEFORE_OPEN) {
-                    return ("\n\t");
-                } else {
-                    if (where == MXML_WS_AFTER_OPEN) {
-                        return ("\n\t\t");
-                    } else {
-                        if (where == MXML_WS_AFTER_CLOSE) {
-                            return ("");
-                        } else {
-                            return ("\n\t");
-                        }
-                    }
-                }
+		if (where == MXML_WS_BEFORE_OPEN ||
+		    where == MXML_WS_BEFORE_CLOSE) {
+			return ("\n");
+		}
+	} else {
+		if (!strcmp(element, "line") ||
+		    !strcmp(element, "circle") ||
+		    !strcmp(element, "path") ||
+		    !strcmp(element, "polyline")) {
+			if (where == MXML_WS_BEFORE_OPEN ||
+			    where == MXML_WS_AFTER_CLOSE) {
+				return ("\n\t");
+			}
+		} else {
+			if (!strcmp(element, "style") ||
+			    !strcmp(element, "title") ||
+			    !strcmp(element, "text")) {
+				if (where == MXML_WS_BEFORE_OPEN) {
+					return ("\n\t");
+				} else {
+					if (where == MXML_WS_AFTER_OPEN) {
+						return ("\n\t\t");
+					} else {
+						if (where == MXML_WS_AFTER_CLOSE) {
+							return ("");
+						} else {
+							return ("\n\t");
+						}
+					}
+				}
 
-            }
-        }
-    }
+			}
+		}
+	}
 
-    /*
-     * Otherwise return NULL for no added whitespace...
-     */
+	/*
+	 * Otherwise return NULL for no added whitespace...
+	 */
 
-    return (NULL);
+	return (NULL);
 }
 
 /**
@@ -663,15 +660,15 @@ whitespace_cb(mxml_node_t *node, int where)
 bool
 SvgSaveFile(SVGDocument *svg, char *filename)
 {
-    FILE *svgF;
+	FILE *svgF;
 
-    svgF = fopen(filename, "w");
-    if (svgF) {
-        mxmlSetWrapMargin(0);
-        mxmlSaveFile(svg, svgF, whitespace_cb);
-        fclose(svgF);
+	svgF = fopen(filename, "w");
+	if (svgF) {
+		mxmlSetWrapMargin(0);
+		mxmlSaveFile(svg, svgF, whitespace_cb);
+		fclose(svgF);
 
-        return (true);
-    }
-    return (false);
+		return (true);
+	}
+	return (false);
 }

@@ -3,13 +3,14 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
- /*
-  * stupid library routines.
-  */
+/*
+ * stupid library routines.
+ */
 
 #include <ctype.h>
-#include <stddef.h>  
+#include <stddef.h>
 #include <errno.h>
+#include <string.h>
 #include "include/stringxtc.h"
 
 /**
@@ -35,28 +36,67 @@
  * Return: The number of characters copied (not including the trailing
  *         %NUL) or -E2BIG if the destination buffer wasn't big enough.
  */
- 
+
 size_t strscpy(char *dest, const char *src, size_t count)
 {
 	long res = 0;
 
-	if (count == 0)
+	if (count == 0) {
 		return -E2BIG;
+	}
 
 	while (count) {
 		char c;
 
 		c = src[res];
 		dest[res] = c;
-		if (!c)
+		if (!c) {
 			return res;
+		}
 		res++;
 		count--;
 	}
 
 	/* Hit buffer length without finding a NUL; force NUL-termination. */
-	if (res)
+	if (res) {
 		dest[res - 1] = '\0';
+	}
+
+	return -E2BIG;
+}
+
+/* Safe version of strcat - will not overflow buffer
+ * Return: The number of characters in buffer (not including the trailing
+ *         % NUL) or -E2BIG if the destination buffer wasn't big enough.
+ */
+size_t
+strscat(char* dest, const char* src, size_t count)
+{
+	long sptr = 0;
+	long dptr = strlen(dest);
+	count -= dptr;
+
+	if (count <= 0) {
+		return -E2BIG;
+	}
+
+	while (count) {
+		char c;
+
+		c = src[sptr];
+		dest[dptr] = c;
+		if (!c) {
+			return dptr;
+		}
+		sptr++;
+		dptr++;
+		count--;
+	}
+
+	/* Hit buffer length without finding a NUL; force NUL-termination. */
+	if (dptr) {
+		dest[dptr - 1] = '\0';
+	}
 
 	return -E2BIG;
 }
@@ -64,7 +104,7 @@ size_t strscpy(char *dest, const char *src, size_t count)
 /**
  * Convert a string to lower case
  * Taken from https://stackoverflow.com/questions/23618316/undefined-reference-to-strlwr
- * 
+ *
  * \param str IN string to convert
  * \return pointer to converted string
  */
@@ -85,22 +125,21 @@ XtcStrlwr(char *str)
 /**
  * Compare two strings case insensitive
  * Taken from https://stackoverflow.com/questions/30733786/c99-remove-stricmp-and-strnicmp
- * 
+ *
  * \param a, b IN strings to compare
-  * \return 
+  * \return
  */
- 
+
 int
 XtcStricmp(const char *a, const char *b)
 {
-    int ca, cb;
-    do {
-        ca = (unsigned char) *a++;
-        cb = (unsigned char) *b++;
-        ca = tolower(toupper(ca));
-        cb = tolower(toupper(cb));
-    } while ((ca == cb) && (ca != '\0'));
-    return ca - cb;
+	int ca, cb;
+	do {
+		ca = (unsigned char) *a++;
+		cb = (unsigned char) *b++;
+		ca = tolower(toupper(ca));
+		cb = tolower(toupper(cb));
+	} while ((ca == cb) && (ca != '\0'));
+	return ca - cb;
 }
-
 

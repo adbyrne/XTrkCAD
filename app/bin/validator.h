@@ -1,4 +1,4 @@
-/** \file validator.h 
+/** \file validator.h
  * Validators for misc textformats
 */
 
@@ -23,7 +23,7 @@
 #define HAVE_VALIDATOR_H
 
 #include <stdbool.h>
-bool IsValidURL(char *testString);
+bool IsValidURL(const char *testString);
 
 #endif // !HAVE_VALIDATOR_H
 

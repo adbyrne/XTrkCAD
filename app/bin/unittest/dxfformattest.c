@@ -45,9 +45,10 @@ static void LineCommand(void **state)
 
 	DynStringMalloc(&string, 0);
 
-	DxfLineCommand( &string, 0, 1.0, 2.0, 1.1, 2.2, 1);
+	DxfLineCommand( &string, 0, 1.0, 2.0, 1.1, 2.2, 1, 1);
 	assert_string_equal(DynStringToCStr(&string),
-		DXF_INDENT "0\nLINE\n  8\nXTRKCAD0\n  10\n1.000000\n  20\n2.000000\n  11\n1.100000\n  21\n2.200000\n  6\nDASHED\n");
+	                    DXF_INDENT "0\nLINE\n  8\nXTRKCAD0\n  10\n1.000000\n  20\n2.000000"
+	                    "\n  11\n1.100000\n  21\n2.200000\n  6\nDASHEDTINY\n  420\n1\n");
 
 	DynStringFree(&string);
 }
@@ -60,9 +61,10 @@ static void CircleCommand(void **state)
 
 	DynStringMalloc(&string, 0);
 
-	DxfCircleCommand(&string, 0, 1.0, 2.0, 1.1, 1);
+	DxfCircleCommand(&string, 0, 1.0, 2.0, 1.1, 1, 1);
 	assert_string_equal(DynStringToCStr(&string),
-		DXF_INDENT "0\nCIRCLE\n  10\n1.000000\n  20\n2.000000\n  40\n1.100000\n  8\nXTRKCAD0\n  6\nDASHED\n");
+	                    DXF_INDENT "0\nCIRCLE\n  10\n1.000000\n  20\n2.000000\n"
+	                    "  40\n1.100000\n  8\nXTRKCAD0\n  6\nDASHEDTINY\n  420\n1\n");
 
 	DynStringFree(&string);
 }
@@ -75,9 +77,10 @@ static void ArcCommand(void **state)
 
 	DynStringMalloc(&string, 0);
 
-	DxfArcCommand(&string, 0, 1.0, 2.0, 1.1, 10.0, 180.0, 1);
+	DxfArcCommand(&string, 0, 1.0, 2.0, 1.1, 10.0, 180.0, 1, 1);
 	assert_string_equal(DynStringToCStr(&string),
-		DXF_INDENT "0\nARC\n  10\n1.000000\n  20\n2.000000\n  40\n1.100000\n  50\n10.000000\n  51\n190.000000\n  8\nXTRKCAD0\n  6\nDASHED\n");
+	                    DXF_INDENT "0\nARC\n  10\n1.000000\n  20\n2.000000\n  40\n1.100000\n"
+	                    "  50\n10.000000\n  51\n190.000000\n  8\nXTRKCAD0\n  6\nDASHEDTINY\n  420\n1\n");
 
 	DynStringFree(&string);
 }
@@ -91,10 +94,11 @@ static void TextCommand(void **state)
 
 	DynStringMalloc(&string, 0);
 
-	DxfTextCommand(&string, 0, 10.0, 12.0, 144.0, TESTSTRING);
+	DxfTextCommand(&string, 0, 10.0, 12.0, 144.0, TESTSTRING, 1);
 
 	assert_string_equal(DynStringToCStr(&string),
-		DXF_INDENT "0\nTEXT\n  1\n" TESTSTRING "\n  10\n10.000000\n  20\n12.000000\n  40\n2.000000\n  8\nXTRKCAD0\n");
+	                    DXF_INDENT "0\nTEXT\n  1\n" TESTSTRING "\n  10\n10.000000\n  20\n12.000000\n"
+	                    "  40\n2.000000\n  8\nXTRKCAD0\n  420\n1\n");
 
 	DynStringFree(&string);
 }
@@ -109,36 +113,40 @@ static void Units(void **state)
 	/* test English units */
 	units = 0;
 	DxfUnits(&string);
-	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$MEASUREMENT\n  70\n0\n" DXF_INDENT "9\n$INSUNITS\n  70\n1\n");
+	assert_string_equal(DynStringToCStr(&string),
+	                    DXF_INDENT "9\n$MEASUREMENT\n  70\n0\n" DXF_INDENT "9\n$INSUNITS\n  70\n1\n");
 	DxfFormatPosition(&string, 20, 1.23456789);
 	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "20\n1.234568\n");
-	
+
 	DynStringClear(&string);
 	DxfDimensionSize(&string, DXF_DIMTEXTSIZE);
-	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$DIMTXT\n  40\n1.0\n");
+	assert_string_equal(DynStringToCStr(&string),
+	                    DXF_INDENT "9\n$DIMTXT\n  40\n1.0\n");
 
 	/* test metric units */
 	units = 1;
 	DynStringClear(&string);
 	DxfUnits(&string);
-	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$MEASUREMENT\n  70\n1\n" DXF_INDENT "9\n$INSUNITS\n  70\n4\n");
+	assert_string_equal(DynStringToCStr(&string),
+	                    DXF_INDENT "9\n$MEASUREMENT\n  70\n1\n" DXF_INDENT "9\n$INSUNITS\n  70\n4\n");
 	DxfFormatPosition(&string, 20, 1.23456789);
 	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "20\n31.358024\n");
 
 	DynStringClear(&string);
 	DxfDimensionSize(&string, DXF_DIMTEXTSIZE);
-	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$DIMTXT\n  40\n25.0\n");
+	assert_string_equal(DynStringToCStr(&string),
+	                    DXF_INDENT "9\n$DIMTXT\n  40\n25.0\n");
 
 }
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
+	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(BasicFormatting),
 		cmocka_unit_test(LineCommand),
 		cmocka_unit_test(CircleCommand),
 		cmocka_unit_test(ArcCommand),
 		cmocka_unit_test(TextCommand),
 		cmocka_unit_test(Units)
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	};
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

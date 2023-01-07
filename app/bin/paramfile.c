@@ -2,23 +2,23 @@
  * Handling of parameter files
  */
 
- /*  XTrackkCad - Model Railroad CAD
-  *  Copyright (C) 2019 Martin Fischer
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-  */
+/*  XTrackkCad - Model Railroad CAD
+ *  Copyright (C) 2019 Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include "common.h"
 #include "compound.h"
@@ -26,7 +26,6 @@
 #include "custom.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc2.h"
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
@@ -36,7 +35,7 @@
 static long paramCheckSum;
 
 typedef enum paramFileState(*GetCompatibilityFunction)(int index,
-	SCALEINX_T scale);
+                SCALEINX_T scale);
 
 GetCompatibilityFunction GetCompatibility[] = {
 	GetTrackCompatibility,
@@ -55,7 +54,7 @@ GetCompatibilityFunction GetCompatibility[] = {
  */
 
 wBool_t IsParamValid(
-	int fileInx)
+        int fileInx)
 {
 	if (fileInx == PARAM_DEMO) {
 		return (curDemo >= 0);
@@ -82,13 +81,13 @@ SetParamFileDir(char *fullPath)
 }
 
 char * GetParamFileName(
-	int fileInx)
+        int fileInx)
 {
 	return paramFileInfo(fileInx).name;
 }
 
 char * GetParamFileContents(
-	int fileInx)
+        int fileInx)
 {
 	return paramFileInfo(fileInx).contents;
 }
@@ -137,7 +136,7 @@ void SetParamFileState(int index)
 	//Set yet?
 	if (scale>=0) {
 		for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
-			state != PARAMFILE_UNLOADED; i++) {
+		     state != PARAMFILE_UNLOADED; i++) {
 			newState = (*GetCompatibility[i])(index, scale);
 			if (newState > state || newState == PARAMFILE_UNLOADED) {
 				state = newState;
@@ -155,12 +154,12 @@ void SetParamFileState(int index)
  *
  * \returns True if it succeeds, false if it fails.
  */
- 
+
 static bool
 CheckFileReadable(const char *file)
 {
 	if(!access( file, R_OK )) {
-			return TRUE;
+		return TRUE;
 	} else {
 		return FALSE;
 	}
@@ -204,7 +203,8 @@ ReloadDeletedParamFile(int fileindex)
 {
 	curParamFileIndex = fileindex;
 	paramFileInfo(curParamFileIndex).valid = TRUE;
-	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, paramFileInfo(curParamFileIndex).name);
+	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL,
+	                paramFileInfo(curParamFileIndex).name);
 	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
 	SetParamFileState(curParamFileIndex);
@@ -222,9 +222,9 @@ ReloadDeletedParamFile(int fileindex)
  */
 
 bool ReadParams(
-	long key,
-	const char * dirName,
-	const char * fileName)
+        long key,
+        const char * dirName,
+        const char * fileName)
 {
 	FILE * oldFile;
 	char *cp;
@@ -256,7 +256,7 @@ bool ReadParams(
 		SetUserLocale();
 
 		NoticeMessage(MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName,
-			strerror(errno));
+		              strerror(errno));
 
 		return FALSE;
 	}
@@ -289,6 +289,7 @@ bool ReadParams(
 				/* Close file and reset the locale settings */
 				if (paramFile) {
 					fclose(paramFile);
+					paramFile = NULL;
 				}
 				SetUserLocale();
 				return FALSE;
@@ -329,17 +330,20 @@ bool ReadParams(
 		} else if (strncmp(paramLine, "PARAM ", 6) == 0) {
 			paramVersion = strtol(paramLine + 6, &cp, 10);
 			if (cp)
-				while (*cp && isspace((unsigned char)*cp)) cp++;
+				while (*cp && isspace((unsigned char)*cp)) { cp++; }
 			if (paramVersion > iParamVersion) {
 				if (cp && *cp) {
-					NoticeMessage(MSG_PARAM_UPGRADE_VERSION1, _("Ok"), NULL, paramVersion, iParamVersion, sProdName, cp);
+					NoticeMessage(MSG_PARAM_UPGRADE_VERSION1, _("Ok"), NULL, paramVersion,
+					              iParamVersion, sProdName, cp);
 				} else {
-					NoticeMessage(MSG_PARAM_UPGRADE_VERSION2, _("Ok"), NULL, paramVersion, iParamVersion, sProdName);
+					NoticeMessage(MSG_PARAM_UPGRADE_VERSION2, _("Ok"), NULL, paramVersion,
+					              iParamVersion, sProdName);
 				}
 				break;
 			}
 			if (paramVersion < iMinParamVersion) {
-				NoticeMessage(MSG_PARAM_BAD_FILE_VERSION, _("Ok"), NULL, paramVersion, iMinParamVersion, sProdName);
+				NoticeMessage(MSG_PARAM_BAD_FILE_VERSION, _("Ok"), NULL, paramVersion,
+				              iMinParamVersion, sProdName);
 				break;
 			}
 		} else if (skip && (strncmp(paramLine, "  ", 1) == 0)) {
@@ -349,21 +353,24 @@ bool ReadParams(
 		} else {
 			for (pc = 0; pc < paramProc_da.cnt; pc++) {
 				if (strncmp(paramLine, paramProc(pc).name,
-					strlen(paramProc(pc).name)) == 0) {
+				            strlen(paramProc(pc).name)) == 0) {
 					skip = FALSE;					//Stop skip so we re-message
 					paramProc(pc).proc(paramLine);
 					goto nextLine;
 				}
 			}
 			if (!skip) {
-				if (InputError(_("Unknown param file line - skip until next good object?"), TRUE)) {   //OK to carry on
+				if (InputError(_("Unknown param file line - skip until next good object?"),
+				               TRUE)) {   //OK to carry on
 					/* SKIP until next main line we recognize */
 					skip = TRUE;
 					skipLines++;
 					goto nextLine;
 				} else {
-					if (skipLines > 0)
-						NoticeMessage(MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
+					if (skipLines > 0) {
+						NoticeMessage(MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName,
+						              skipLines);
+					}
 					if (paramFile) {
 						fclose(paramFile);
 						paramFile = NULL;
@@ -378,7 +385,7 @@ bool ReadParams(
 			}
 			skipLines++;
 		}
-	nextLine:
+nextLine:
 		;
 	}
 	if (key) {
@@ -386,6 +393,7 @@ bool ReadParams(
 			/* Close file and reset the locale settings */
 			if (paramFile) {
 				fclose(paramFile);
+				paramFile = NULL;
 			}
 			SetUserLocale();
 
@@ -394,10 +402,13 @@ bool ReadParams(
 			return FALSE;
 		}
 	}
-	if (skipLines > 0)
-		NoticeMessage(MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
+	if (skipLines > 0) {
+		NoticeMessage(MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName,
+		              skipLines);
+	}
 	if (paramFile) {
 		fclose(paramFile);
+		paramFile = NULL;
 	}
 	free(paramFileName);
 	paramFileName = NULL;

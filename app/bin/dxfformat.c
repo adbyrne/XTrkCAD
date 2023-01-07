@@ -17,7 +17,7 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include <dynstring.h>
@@ -26,8 +26,9 @@
 extern char *sProdNameUpper;
 extern long units;						   /**< meaning is 0 = English, 1 = metric */
 
-static char *dxfDimensionDefaults[][3] = { /**< default values for dimensions, English, metric and DXF variable name */
-	{ "1.0", "25.0", "$DIMTXT" },			
+static char *dxfDimensionDefaults[][3] =
+{ /**< default values for dimensions, English, metric and DXF variable name */
+	{ "1.0", "25.0", "$DIMTXT" },
 	{ "0.8", "20.0", "$DIMASZ"}
 };
 
@@ -42,11 +43,11 @@ static char *dxfDimensionDefaults[][3] = { /**< default values for dimensions, E
 
 void DxfLayerName(DynString *result, char *name, int layer)
 {
-    DynStringPrintf(result, DXF_INDENT "8\n%s%d\n", name, layer);
+	DynStringPrintf(result, DXF_INDENT "8\n%s%d\n", name, layer);
 }
 
 /**
-* Build and format an integer. 
+* Build and format an integer.
 *
 * \param result OUT buffer for result
 * \param type IN type of integer following DXF specs
@@ -55,14 +56,14 @@ void DxfLayerName(DynString *result, char *name, int layer)
 
 void DxfFormatInteger(DynString *result, int type, int value)
 {
-    DynStringPrintf(result, DXF_INDENT "%d\n%d\n", type, value);
+	DynStringPrintf(result, DXF_INDENT "%d\n%d\n", type, value);
 }
 
 /**
 * Build and format a position. If it specifies a point the value
 * is assumed to be in inches and will be converted to millimeters
 * if the metric system is active.
-* If it is an angle (group codes 50 to 59) it is not converted. 
+* If it is an angle (group codes 50 to 59) it is not converted.
 *
 * \param result OUT buffer for result
 * \param type IN type of position following DXF specs
@@ -71,10 +72,10 @@ void DxfFormatInteger(DynString *result, int type, int value)
 
 void DxfFormatPosition(DynString *result, int type, double value)
 {
-	if (units == 1)
-	{
-		if( type < 50 || type > 58 )
+	if (units == 1) {
+		if( type < 50 || type > 58 ) {
 			value *= 25.4;
+		}
 	}
 
 	DynStringPrintf(result, DXF_INDENT "%d\n%0.6f\n", type, value);
@@ -90,11 +91,11 @@ void DxfFormatPosition(DynString *result, int type, double value)
 void DxfLineStyle(DynString *result, int style)
 {
 	char* s = "CONTINUOUS";
-	switch ( style ){
+	switch ( style ) {
 	case 1: s = "DASHEDTINY"; break;
 	case 2: s = "DOTTINY"; break;
 	}
-    DynStringPrintf(result, DXF_INDENT "6\n%s\n", s);
+	DynStringPrintf(result, DXF_INDENT "6\n%s\n", s);
 }
 
 /**
@@ -109,11 +110,11 @@ void DxfLineStyle(DynString *result, int style)
 static void
 DxfAppendLayerName(DynString *output, int layer)
 {
-    DynString formatted = NaS;
-    DynStringMalloc(&formatted, 0);
-    DxfLayerName(&formatted, sProdNameUpper, layer);
-    DynStringCatStr(output, &formatted);
-    DynStringFree(&formatted);
+	DynString formatted = NaS;
+	DynStringMalloc(&formatted, 0);
+	DxfLayerName(&formatted, sProdNameUpper, layer);
+	DynStringCatStr(output, &formatted);
+	DynStringFree(&formatted);
 }
 
 /**
@@ -127,11 +128,11 @@ DxfAppendLayerName(DynString *output, int layer)
 static void
 DxfAppendPosition(DynString *output, int type, double value)
 {
-    DynString formatted = NaS;
-    DynStringMalloc(&formatted, 0);
-    DxfFormatPosition(&formatted, type, value);
-    DynStringCatStr(output, &formatted);
-    DynStringFree(&formatted);
+	DynString formatted = NaS;
+	DynStringMalloc(&formatted, 0);
+	DxfFormatPosition(&formatted, type, value);
+	DynStringCatStr(output, &formatted);
+	DynStringFree(&formatted);
 }
 
 /**
@@ -162,11 +163,11 @@ DxfAppendInteger(DynString *output, int type, int value)
 static void
 DxfAppendLineStyle(DynString *output, int style)
 {
-    DynString formatted = NaS;
-    DynStringMalloc(&formatted, 0);
-    DxfLineStyle(&formatted, style);
-    DynStringCatStr(output, &formatted);
-    DynStringFree(&formatted);
+	DynString formatted = NaS;
+	DynStringMalloc(&formatted, 0);
+	DxfLineStyle(&formatted, style);
+	DynStringCatStr(output, &formatted);
+	DynStringFree(&formatted);
 }
 
 /**
@@ -184,13 +185,13 @@ void
 DxfLineCommand(DynString *result, int layer, double x0,
                double y0, double x1, double y1, int style, int color)
 {
-    DynStringCatCStr(result, DXF_INDENT "0\nLINE\n");
-    DxfAppendLayerName(result, layer);
-    DxfAppendPosition(result, 10, x0);
-    DxfAppendPosition(result, 20, y0);
-    DxfAppendPosition(result, 11, x1);
-    DxfAppendPosition(result, 21, y1);
-    DxfAppendLineStyle(result, style);
+	DynStringCatCStr(result, DXF_INDENT "0\nLINE\n");
+	DxfAppendLayerName(result, layer);
+	DxfAppendPosition(result, 10, x0);
+	DxfAppendPosition(result, 20, y0);
+	DxfAppendPosition(result, 11, x1);
+	DxfAppendPosition(result, 21, y1);
+	DxfAppendLineStyle(result, style);
 	DxfAppendInteger(result, 420, color);
 }
 
@@ -209,12 +210,12 @@ void
 DxfCircleCommand(DynString *result, int layer, double x,
                  double y, double r, int style, int color)
 {
-    DynStringCatCStr(result, DXF_INDENT "0\nCIRCLE\n");
-    DxfAppendPosition(result, 10, x);
-    DxfAppendPosition(result, 20, y);
-    DxfAppendPosition(result, 40, r);
-    DxfAppendLayerName(result, layer);
-    DxfAppendLineStyle(result, style);
+	DynStringCatCStr(result, DXF_INDENT "0\nCIRCLE\n");
+	DxfAppendPosition(result, 10, x);
+	DxfAppendPosition(result, 20, y);
+	DxfAppendPosition(result, 40, r);
+	DxfAppendLayerName(result, layer);
+	DxfAppendLineStyle(result, style);
 	DxfAppendInteger(result, 420, color);
 }
 
@@ -235,14 +236,14 @@ void
 DxfArcCommand(DynString *result, int layer, double x, double y,
               double r, double a0, double a1, int style, int color)
 {
-    DynStringCatCStr(result, DXF_INDENT "0\nARC\n");
-    DxfAppendPosition(result, 10, x);
-    DxfAppendPosition(result, 20, y);
-    DxfAppendPosition(result, 40, r);
-    DxfAppendPosition(result, 50, a0);
-    DxfAppendPosition(result, 51, a0+a1);
-    DxfAppendLayerName(result, layer);
-    DxfAppendLineStyle(result, style);
+	DynStringCatCStr(result, DXF_INDENT "0\nARC\n");
+	DxfAppendPosition(result, 10, x);
+	DxfAppendPosition(result, 20, y);
+	DxfAppendPosition(result, 40, r);
+	DxfAppendPosition(result, 50, a0);
+	DxfAppendPosition(result, 51, a0+a1);
+	DxfAppendLayerName(result, layer);
+	DxfAppendLineStyle(result, style);
 	DxfAppendInteger(result, 420, color);
 }
 
@@ -261,12 +262,12 @@ void
 DxfTextCommand(DynString *result, int layer, double x,
                double y, double size, char *text, int color)
 {
-    DynStringCatCStr(result, DXF_INDENT "0\nTEXT\n");
-    DynStringCatCStrs(result, DXF_INDENT "1\n", text, "\n", NULL);
-    DxfAppendPosition(result, 10, x);
-    DxfAppendPosition(result, 20, y);
-    DxfAppendPosition(result, 40, size/72.0);
-    DxfAppendLayerName(result, layer);
+	DynStringCatCStr(result, DXF_INDENT "0\nTEXT\n");
+	DynStringCatCStrs(result, DXF_INDENT "1\n", text, "\n", NULL);
+	DxfAppendPosition(result, 10, x);
+	DxfAppendPosition(result, 20, y);
+	DxfAppendPosition(result, 40, size/72.0);
+	DxfAppendLayerName(result, layer);
 	DxfAppendInteger(result, 420, color);
 }
 
@@ -281,29 +282,29 @@ DxfTextCommand(DynString *result, int layer, double x,
 void
 DxfUnits(DynString *result)
 {
-    char *value;
-    DynStringCatCStr(result, DXF_INDENT "9\n$MEASUREMENT\n  70\n");
+	char *value;
+	DynStringCatCStr(result, DXF_INDENT "9\n$MEASUREMENT\n  70\n");
 
-    if (units == 1) {
-        value = "1\n";
-    } else {
-        value = "0\n";
-    }
+	if (units == 1) {
+		value = "1\n";
+	} else {
+		value = "0\n";
+	}
 
-    DynStringCatCStr(result, value);
-    DynStringCatCStr(result, DXF_INDENT "9\n$INSUNITS\n  70\n");
+	DynStringCatCStr(result, value);
+	DynStringCatCStr(result, DXF_INDENT "9\n$INSUNITS\n  70\n");
 
-    if (units == 1) {
-        value = "4\n";
-    } else {
-        value = "1\n";
-    }
+	if (units == 1) {
+		value = "4\n";
+	} else {
+		value = "1\n";
+	}
 
-    DynStringCatCStr(result, value);
+	DynStringCatCStr(result, value);
 }
 
 /**
-* Define a size of dimensions. The default values are taken from  
+* Define a size of dimensions. The default values are taken from
 * static array dxfDimensionDefaults
 *
 * \PARAM result OUT the completed command is appended to this buffer
@@ -316,10 +317,10 @@ DxfDimensionSize(DynString *result, enum DXF_DIMENSIONS dimension )
 	DynString formatted;
 	DynStringMalloc(&formatted, 0);
 
-    DynStringPrintf(&formatted, 
-					DXF_INDENT "9\n%s\n  40\n%s\n", 
-					dxfDimensionDefaults[dimension][2], 
-					dxfDimensionDefaults[dimension][units]);
+	DynStringPrintf(&formatted,
+	                DXF_INDENT "9\n%s\n  40\n%s\n",
+	                dxfDimensionDefaults[dimension][2],
+	                dxfDimensionDefaults[dimension][units]);
 
 	DynStringCatStr(result, &formatted);
 	DynStringFree(&formatted);
@@ -339,24 +340,24 @@ void
 DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1,
             double y1)
 {
-    int i;
-    DynString layer = NaS;
-    DynStringMalloc(&layer, 0);
-    DynStringCatCStr(result, "\
+	int i;
+	DynString layer = NaS;
+	DynStringMalloc(&layer, 0);
+	DynStringCatCStr(result, "\
   0\nSECTION\n\
   2\nHEADER\n\
   9\n$ACADVER\n  1\nAC1009\n");
 	DxfUnits(result);
 	DxfDimensionSize(result, DXF_DIMTEXTSIZE);
 	DxfDimensionSize(result, DXF_DIMARROWSIZE);
-	
-    DynStringCatCStr(result, "  9\n$EXTMIN\n");
-    DxfAppendPosition(result, 10, x0);
-    DxfAppendPosition(result, 20, y0);
-    DynStringCatCStr(result, "  9\n$EXTMAX\n");
-    DxfAppendPosition(result, 10, x1);
-    DxfAppendPosition(result, 20, y1);
-    DynStringCatCStr(result, "\
+
+	DynStringCatCStr(result, "  9\n$EXTMIN\n");
+	DxfAppendPosition(result, 10, x0);
+	DxfAppendPosition(result, 20, y0);
+	DynStringCatCStr(result, "  9\n$EXTMAX\n");
+	DxfAppendPosition(result, 10, x1);
+	DxfAppendPosition(result, 20, y1);
+	DynStringCatCStr(result, "\
   9\n$TEXTSTYLE\n  7\nSTANDARD\n\
   0\nENDSEC\n\
   0\nSECTION\n\
@@ -377,14 +378,14 @@ DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1,
   2\nLAYER\n\
   70\n0\n");
 
-    for (i = 0; i < layerCount; i++) {
-        DynStringPrintf(&layer,
-                        DXF_INDENT"0\nLAYER\n  2\n%s%d\n  6\nCONTINUOUS\n  62\n7\n  70\n0\n",
-                        sProdNameUpper, i + 1);
-        DynStringCatStr(result, &layer);
-    }
+	for (i = 0; i < layerCount; i++) {
+		DynStringPrintf(&layer,
+		                DXF_INDENT"0\nLAYER\n  2\n%s%d\n  6\nCONTINUOUS\n  62\n7\n  70\n0\n",
+		                sProdNameUpper, i + 1);
+		DynStringCatStr(result, &layer);
+	}
 
-    DynStringCatCStr(result, "\
+	DynStringCatCStr(result, "\
   0\nENDTAB\n\
   0\nENDSEC\n\
   0\nSECTION\n\
@@ -401,5 +402,5 @@ DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1,
 void
 DxfEpilogue(DynString *result)
 {
-    DynStringCatCStr(result, DXF_INDENT "0\nENDSEC\n" DXF_INDENT "0\nEOF\n");
+	DynStringCatCStr(result, DXF_INDENT "0\nENDSEC\n" DXF_INDENT "0\nEOF\n");
 }

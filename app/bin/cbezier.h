@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
@@ -39,7 +39,8 @@ typedef void (*bezMessageProc)( const char *, ... );
 STATUS_T CmdBezCurve( wAction_t, coOrd);
 STATUS_T CmdBezModify(track_p, wAction_t, coOrd, DIST_T);
 
-STATUS_T CreateBezier( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, bezMessageProc );
+STATUS_T CreateBezier( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long,
+                       bezMessageProc );
 DIST_T BezierDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T BezierDescriptionMove( track_p, wAction_t, coOrd );
 

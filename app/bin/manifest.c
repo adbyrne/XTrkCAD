@@ -1,55 +1,54 @@
 /** \file manifest.c
  * JSON routines
  */
- /*  XTrkCad - Model Railroad CAD
-  *  Copyright (C) 2018 Adam Richards and Martin Fischer
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-  */
-  
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2018 Adam Richards and Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 #include <string.h>
 
 #include "cJSON.h"
 #include "fileio.h"
 #include "layout.h"
-#include "misc2.h"
 #include "paths.h"
 #include "include/utf8convert.h"
 
 extern int log_zip;
 
- /**********************************************************
-  * Build JSON Manifest -  manifest.json
-  * There are only two objects in the root -
-  * - The layout object defines the correct filename for the layout
-  * - The dependencies object is an arraylist of included elements
-  *
-  * Each element has a name, a filename and an arch-path (where in the archive it is located)
-  * It may have other values - a common one the copy-path is where it was copied from the originators machine (info only)
-  *
-  * There is one reserved name - "background" which is for the image file that is used as a layout background
-  *
-  *\param IN nameOfLayout - the layout this is a manifest for
-  *\param IN background - the full filepath to the background image (or NULL) -> TODO this will become an array with a count
-  *\param IN DependencyDir - the relative path in the archive to the directory in which the included object(s) will be stored
-  *
-  *\returns a String containing the JSON object
-  */
+/**********************************************************
+ * Build JSON Manifest -  manifest.json
+ * There are only two objects in the root -
+ * - The layout object defines the correct filename for the layout
+ * - The dependencies object is an arraylist of included elements
+ *
+ * Each element has a name, a filename and an arch-path (where in the archive it is located)
+ * It may have other values - a common one the copy-path is where it was copied from the originators machine (info only)
+ *
+ * There is one reserved name - "background" which is for the image file that is used as a layout background
+ *
+ *\param IN nameOfLayout - the layout this is a manifest for
+ *\param IN background - the full filepath to the background image (or NULL) -> TODO this will become an array with a count
+ *\param IN DependencyDir - the relative path in the archive to the directory in which the included object(s) will be stored
+ *
+ *\returns a String containing the JSON object
+ */
 
 char* CreateManifest(char* nameOfLayout, char* background,
-	char* dependencyDir)
+                     char* dependencyDir)
 {
 	cJSON* manifest = cJSON_CreateObject();
 	if (manifest != NULL) {
@@ -121,11 +120,11 @@ char* ParseManifest(char* manifest, char* zip_directory)
 
 	LOG(log_zip, 1, ("Zip-Manifest %s \n", layoutname))
 #if DEBUG
-		fprintf(stderr, "Layout name %s \n", layoutname);
+	fprintf(stderr, "Layout name %s \n", layoutname);
 #endif
 
 	cJSON* dependencies = cJSON_GetObjectItemCaseSensitive(json_manifest,
-		"dependencies");
+	                      "dependencies");
 	cJSON* dependency;
 	cJSON_ArrayForEach(dependency, dependencies) {
 		cJSON* name = cJSON_GetObjectItemCaseSensitive(dependency, "name");
@@ -141,7 +140,7 @@ char* ParseManifest(char* manifest, char* zip_directory)
 			ConvertUTF8ToSystem(path);
 #endif
 			MakeFullpath(&background_file[0], zip_directory, path,
-				file, NULL);
+			             file, NULL);
 			MyFree(file);
 			MyFree(path);
 #if DEBUG

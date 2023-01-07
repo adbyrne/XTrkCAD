@@ -1,15 +1,10 @@
 
-set ( sources listxtp.c )
+add_executable(listxtp listxtp.c)
+set_target_properties(listxtp PROPERTIES FOLDER "Param Files")
 
 if (WIN32)
-	set ( sources
-		  ${sources}	
-		  dirent.c)
-		  
-	include_directories( before ${CMAKE_CURRENT_SOURCE_DIR})	  
+	target_sources(listxtp PRIVATE dirent.c )
 endif ()
-				 
-add_executable( listxtp ${sources})
 
 add_subdirectory(halibut)
-
+add_subdirectory(pngtoxpm)

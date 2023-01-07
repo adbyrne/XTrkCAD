@@ -38,13 +38,13 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  * 
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#) : $Id$";
+//static const char rcsid[] = "@(#) : $Id$";
 
 
 #include "compound.h"
@@ -55,7 +55,6 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "layout.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -564,8 +563,7 @@ static void SignalEditOk ( void * junk )
                 (&(xx->aspectList))[ia].aspectScript = NULL;
             }
             newsize = sizeof(signalData_t)+(sizeof(signalAspect_t)*(signalAspect_da.cnt-1))+1;
-            trk->extraData = MyRealloc(trk->extraData,newsize);
-            trk->extraSize = newsize;
+	    ResizeExtraData( trk, newsize );
             xx = GetsignalData(trk);
         }
     }
@@ -884,7 +882,7 @@ static int SignalMgmProc ( int cmd, void * data )
     return FALSE;
 }
 
-#include "bitmaps/signal.xpm"
+#include "bitmaps/signal.xpm3"
 
 EXPORT void SignalMgmLoad ( void )
 {
@@ -892,7 +890,7 @@ EXPORT void SignalMgmLoad ( void )
     static wIcon_p signalI = NULL;
     
     if (signalI == NULL) {
-        signalI = wIconCreatePixMap( signal_xpm[iconSize] );
+        signalI = wIconCreatePixMap( signal_xpm3[iconSize] );
     }
     
     TRK_ITERATE(trk) {
@@ -906,7 +904,7 @@ EXPORT void SignalMgmLoad ( void )
 EXPORT void InitCmdSignal ( wMenu_p menu )
 {
     AddMenuButton( menu, CmdSignal, "cmdSignal", _("Signal"), 
-                   wIconCreatePixMap( signal_xpm[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SIGNAL, NULL );
+                   wIconCreatePixMap( signal_xpm3[iconSize] ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SIGNAL, NULL );
 }
 
 EXPORT void InitTrkSignal ( void )

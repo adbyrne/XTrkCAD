@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "ccurve.h"
@@ -26,8 +26,9 @@
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
+#include "ctrain.h"
 
-static paramIntegerRange_t i1_64 = { 1, 64 };
+//static paramIntegerRange_t i1_64 = { 1, 64 };
 static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i0_256 = { 0, 256 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
@@ -39,7 +40,7 @@ static paramIntegerRange_t i10_1000 = { 10, 1000 };
 static paramIntegerRange_t i10_100 = { 10, 100 };
 static paramFloatRange_t r0o1_1 = { 0.1, 1 };
 static paramFloatRange_t r1_10 = { 1, 10 };
-static paramFloatRange_t r1_1000 = { 1, 1000 };
+//static paramFloatRange_t r1_1000 = { 1, 1000 };
 static paramFloatRange_t r0_180 = { 0, 180 };
 
 static void UpdatePrefD( void );
@@ -59,8 +60,9 @@ long GetChanges( paramGroup_p pg )
 	long changed;
 	int inx;
 	for ( changed=ParamUpdate(pg),inx=0,changes=0; changed; changed>>=1,inx++ ) {
-		if ( changed&1 )
+		if ( changed&1 ) {
 			changes |= VP2L(pg->paramPtr[inx].context);
+		}
 	}
 	return changes;
 }
@@ -72,7 +74,7 @@ static paramGroup_t prefPG;
 
 
 static void OptionDlgCancel(
-		wWin_p win )
+        wWin_p win )
 {
 	wEnableBalloonHelp( (int)enableBalloonHelp );
 	wHide( win );
@@ -103,9 +105,6 @@ static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"),
 static char * constrainMainLabels[] = {N_("Constrain Drawing Area to Room boundaries"), NULL};
 static char * dontHideLabels[] = {N_("Don't Hide System Cursor when program cursor is active"), NULL};
 
-extern long trainPause;
-
-
 
 static paramData_t displayPLs[] = {
 	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, colorTrackLabels, N_("Color Track"), BC_HORZ, I2VP(CHANGE_MAIN) },
@@ -121,20 +120,20 @@ static paramData_t displayPLs[] = {
 	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
-#define labelSelect (12)
+#define labelSelect (13)
 	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_256, N_("Label Scale"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, I2VP(CHANGE_TOOLBAR) },
 	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, I2VP(CHANGE_MAIN) },
 	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, I2VP(CHANGE_PARAMS) },
-/* ATTENTION: update the define below if you add entries above */
+	/* ATTENTION: update the define below if you add entries above */
 #define I_HOTBARLABELS	(19)
 	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, I2VP(250), N_("Car Labels"), 0, I2VP(CHANGE_SCALE) },
-	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
+	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000, N_("Train Update Delay"), 0, 0 },
 	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORZ }
- };
-static paramGroup_t displayPG = { "display", PGO_DIALOGTEMPLATE |PGO_RECORD|PGO_PREFMISC, displayPLs, COUNT( displayPLs ) };
+};
+static paramGroup_t displayPG = { "display", PGO_RECORD|PGO_PREFMISC, displayPLs, COUNT( displayPLs ) };
 
 
 static void DisplayOk( void * junk )
@@ -147,11 +146,11 @@ static void DisplayOk( void * junk )
 
 
 static void OptionDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
-	if ( inx < 0 ) return;
+	if ( inx < 0 ) { return; }
 	if ( pg->paramPtr[inx].valueP == &enableBalloonHelp ) {
 		wEnableBalloonHelp((wBool_t)*(long*)valueP);
 	} else {
@@ -173,7 +172,8 @@ static void OptionDlgUpdate(
 			checkPtInterval = *(long *)valueP;
 			if (checkPtInterval == 0 ) {
 				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, h*3/4, _("Turning off AutoSave") );
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, h*3/4,
+				                    _("Turning off AutoSave") );
 				UpdateAutoSaveInterval(0);
 			} else {
 				wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
@@ -183,7 +183,8 @@ static void OptionDlgUpdate(
 			autosaveChkPoints = *(long *)valueP;
 			if (checkPtInterval == 0 && autosaveChkPoints>0 ) {
 				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
-				wControlSetBalloon( pg->paramPtr[inx].control, 0, -h*3/4, _("Turning on CheckPointing") );
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -h*3/4,
+				                    _("Turning on CheckPointing") );
 				UpdateChkPtInterval(10);
 			} else {
 				wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
@@ -197,14 +198,22 @@ static void OptionDlgUpdate(
 static void DoDisplay( void * junk )
 {
 	if (displayW == NULL) {
-		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")), _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL, I2VP(0x0002) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"), NULL, I2VP(0x0012) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Part Number"), NULL, I2VP(0x0312) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Partno/Item"), NULL, I2VP(0x4312) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"), NULL, I2VP(0x0021) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Part Number"), NULL, I2VP(0x0321) );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Partno/Item"), NULL, I2VP(0x4321) );
+		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")),
+		                              _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL,
+		               I2VP(0x0002) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"),
+		               NULL, I2VP(0x0012) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Proto/Manuf/Part Number"), NULL, I2VP(0x0312) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Proto/Manuf/Partno/Item"), NULL, I2VP(0x4312) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"),
+		               NULL, I2VP(0x0021) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Manuf/Proto/Part Number"), NULL, I2VP(0x0321) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Manuf/Proto/Partno/Item"), NULL, I2VP(0x4321) );
 	}
 
 	ParamLoadControls( &displayPG );
@@ -242,7 +251,7 @@ static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };
 #endif
 static char * rightClickLabels[] = {N_("Normal: Command List, Shift: Command Options"), N_("Normal: Command Options, Shift: Command List"), NULL };
 
-EXPORT paramData_t cmdoptPLs[] = {
+static paramData_t cmdoptPLs[] = {
 	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, preSelectLabels, N_("Default Command"), BC_HORZ },
 #ifdef HIDESELECTIONWINDOW
 	{ PD_TOGGLE, &hideSelectionWindow, PDO_NOPSHUPD, hideSelectionWindowLabels, N_("Hide Selection Window"), BC_HORZ },
@@ -250,7 +259,7 @@ EXPORT paramData_t cmdoptPLs[] = {
 	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 },
 	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, selectLabels, N_("Select Mode"), 0},
 	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, selectZeroLabels, "", 0 }
-	};
+};
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_DIALOGTEMPLATE | PGO_RECORD|PGO_PREFMISC, cmdoptPLs, COUNT( cmdoptPLs ) };
 
 static void CmdoptOk( void * junk )
@@ -265,15 +274,17 @@ static void CmdoptOk( void * junk )
 static void CmdoptChange( long changes )
 {
 	if (changes & CHANGE_CMDOPT)
-		if (cmdoptW != NULL && wWinIsVisible(cmdoptW) )
+		if (cmdoptW != NULL && wWinIsVisible(cmdoptW) ) {
 			ParamLoadControls( &cmdoptPG );
+		}
 }
 
 
 static void DoCmdopt( void * junk )
 {
 	if (cmdoptW == NULL) {
-		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")), _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")),
+		                             _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
 	}
 	ParamLoadControls( &cmdoptPG );
 	wShow( cmdoptW );
@@ -324,54 +335,56 @@ static paramData_t prefPLs[] = {
 #define I_AUTOSAVE		(15)
 	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD|PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
 	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
-	};
-static paramGroup_t prefPG = { "pref", PGO_DIALOGTEMPLATE |PGO_RECORD|PGO_PREFMISC, prefPLs, COUNT( prefPLs ) };
+};
+static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, COUNT( prefPLs ) };
 
 
 typedef struct {
-		char * name;
-		long fmt;
-	} dstFmts_t;
+	char * name;
+	long fmt;
+} dstFmts_t;
 static dstFmts_t englishDstFmts[] = {
-		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
-		{ N_("999.99999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|5 },
-		{ N_("999.9999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|4 },
-		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
-		{ N_("999 7/8"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|3 },
-		{ N_("999 63/64"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|6 },
-		{ N_("999' 11.999\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|3 },
-		{ N_("999' 11.99\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|2 },
-		{ N_("999' 11.9\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|1 },
-		{ N_("999' 11 7/8\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|3 },
-		{ N_("999' 11 63/64\""),	DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|6 },
-		{ N_("999ft 11.999in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|3 },
-		{ N_("999ft 11.99in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|2 },
-		{ N_("999ft 11.9in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
-		{ N_("999ft 11 7/8in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|3 },
-		{ N_("999ft 11 63/64in"),	DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|6 },
-		{ NULL, 0 } };
+	{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
+	{ N_("999.99999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|5 },
+	{ N_("999.9999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|4 },
+	{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
+	{ N_("999 7/8"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|3 },
+	{ N_("999 63/64"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|6 },
+	{ N_("999' 11.999\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|3 },
+	{ N_("999' 11.99\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|2 },
+	{ N_("999' 11.9\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|1 },
+	{ N_("999' 11 7/8\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|3 },
+	{ N_("999' 11 63/64\""),	DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|6 },
+	{ N_("999ft 11.999in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|3 },
+	{ N_("999ft 11.99in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|2 },
+	{ N_("999ft 11.9in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
+	{ N_("999ft 11 7/8in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|3 },
+	{ N_("999ft 11 63/64in"),	DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|6 },
+	{ NULL, 0 }
+};
 static dstFmts_t metricDstFmts[] = {
-		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9m"),				DISTFMT_FMT_M|DISTFMT_FRACT_NUM|1 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 } };
+	{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
+	{ N_("999.999mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|1 },
+	{ N_("999.999cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|1 },
+	{ N_("999.999m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9m"),				DISTFMT_FMT_M|DISTFMT_FRACT_NUM|1 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 }
+};
 static dstFmts_t *dstFmts[] = { englishDstFmts, metricDstFmts };
 
 void UpdateAutoSaveInterval(long value)
@@ -390,19 +403,21 @@ void UpdateChkPtInterval(long value)
 
 /**
  * Load the selection list for number formats with the appropriate list of variants.
- */		
-		
+ */
+
 static void LoadDstFmtList( void )
 {
 	int inx;
 	wListClear( (wList_p)prefPLs[I_DSTFMT].control );
-	for ( inx=0; dstFmts[units][inx].name; inx++ )
-		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name), NULL, I2VP(dstFmts[units][inx].fmt) );
+	for ( inx=0; dstFmts[units][inx].name; inx++ ) {
+		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name),
+		               NULL, I2VP(dstFmts[units][inx].fmt) );
+	}
 }
 
 /**
-* Handle changing of measurement system. The list of number formats is loaded 
-* and the first entry is selected as default value. 
+* Handle changing of measurement system. The list of number formats is loaded
+* and the first entry is selected as default value.
 */
 
 static void UpdatePrefD( void )
@@ -410,8 +425,9 @@ static void UpdatePrefD( void )
 	long newUnits, oldUnits;
 	int inx;
 
-	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[1].control==NULL )
+	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[1].control==NULL ) {
 		return;
+	}
 	newUnits = wRadioGetValue( (wChoice_p)prefPLs[1].control );
 	if (newUnits != displayUnits) {
 		oldUnits = units;
@@ -437,7 +453,7 @@ static void UpdatePrefD( void )
 
 static void UpdateMeasureFmt()
 {
-	int inx; 
+	int inx;
 
 	distanceFormatInx = wListGetIndex((wList_p)prefPLs[I_DSTFMT].control);
 	units = wRadioGetValue((wChoice_p)prefPLs[1].control);
@@ -482,8 +498,9 @@ static void PrefOk( void * junk )
 		NoticeMessage2( 0, MSG_CONN_PARAMS_TOO_BIG, _("Ok"), NULL ) ;
 	}
 
-	if(changes & CHANGE_ICONSIZE)
+	if(changes & CHANGE_ICONSIZE) {
 		NoticeMessage( MSG_ICON_SIZE_RESTART, _("Ok"), NULL ) ;
+	}
 
 	wHide( prefW );
 	DoChangeNotification(changes);
@@ -494,7 +511,8 @@ static void PrefOk( void * junk )
 static void DoPref( void * junk )
 {
 	if (prefW == NULL) {
-		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"), PrefOk, wHide, TRUE, NULL, 0, OptionDlgUpdate );
+		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"),
+		                           PrefOk, wHide, TRUE, NULL, 0, OptionDlgUpdate );
 		LoadDstFmtList();
 	}
 	ParamLoadControls( &prefPG );
@@ -506,21 +524,25 @@ static void DoPref( void * junk )
 EXPORT addButtonCallBack_t PrefInit( void )
 {
 	ParamRegister( &prefPG );
-	if (connectAngle < 1.0)
+	if (connectAngle < 1.0) {
 		connectAngle = 1.0;
-	if (connectDistance < 0.1)
+	}
+	if (connectDistance < 0.1) {
 		connectDistance = 0.1;
-	if (minLength < 0.1)
+	}
+	if (minLength < 0.1) {
 		minLength = 0.1;
+	}
 	return &DoPref;
 }
 
 
 EXPORT long GetDistanceFormat( void )
 {
-	 while ( dstFmts[units][distanceFormatInx].name == NULL )
+	while ( dstFmts[units][distanceFormatInx].name == NULL ) {
 		distanceFormatInx--;
-	 return dstFmts[units][distanceFormatInx].fmt;
+	}
+	return dstFmts[units][distanceFormatInx].fmt;
 }
 
 /*****************************************************************************
@@ -545,7 +567,7 @@ static paramData_t colorPLs[] = {
 	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, N_("Bridge Base"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, N_("Track Roadbed"), 0, I2VP(CHANGE_MAIN) }
 };
-static paramGroup_t colorPG = { "rgbcolor", PGO_DIALOGTEMPLATE |PGO_RECORD|PGO_PREFGROUP, colorPLs, COUNT( colorPLs ) };
+static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP, colorPLs, COUNT( colorPLs ) };
 
 
 
@@ -554,16 +576,19 @@ static void ColorOk( void * junk )
 	long changes;
 	changes = GetChanges( &colorPG );
 	wHide( colorW );
-	if ( (changes&CHANGE_GRID) && GridIsVisible() )
+	if ( (changes&CHANGE_GRID) && GridIsVisible() ) {
 		changes |= CHANGE_MAIN;
+	}
 	DoChangeNotification( changes );
 }
 
 
 static void DoColor( void * junk )
 {
-	if (colorW == NULL)
-		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"), ColorOk, wHide, TRUE, NULL, 0, NULL );
+	if (colorW == NULL) {
+		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"),
+		                            ColorOk, wHide, TRUE, NULL, 0, NULL );
+	}
 	ParamLoadControls( &colorPG );
 	wShow( colorW );
 }

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -72,11 +72,13 @@ wBool_t wUITemplates(void) {
 }
 
 
+#if 0
 static wBool_t reverseIcon =
 #if defined(linux)
     FALSE;
 #else
     TRUE;
+#endif
 #endif
 
 
@@ -416,8 +418,8 @@ void wSetCursor(wDraw_p bd, wCursor_t cursor)
 	static GdkCursor * gdkcursors[wCursorQuestion+1];
 	GdkCursor * gdkcursor;
 	//GdkWindow * gdkwindow = gtk_widget_get_window(GTK_WIDGET(win->gtkwin));;
-	GdkWindow * gdkwindow = gdk_get_default_root_window();
-	GdkDisplay * display = gdk_window_get_display(gdkwindow);
+//	GdkWindow * gdkwindow = gdk_get_default_root_window();
+//	GdkDisplay * display = gdk_window_get_display(gdkwindow);
 	if ((cursor == wCursorNone) && dontHideCursor) return;  //Ignore if we dont want to suppress
 	if (!gdkcursors[cursor]) {
 		switch(cursor) {

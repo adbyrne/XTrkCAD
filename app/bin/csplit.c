@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cundo.h"
@@ -50,8 +50,9 @@ static void ChangeSplitEPMode( wBool_t set, void * mode )
 		UndoModify( splitTrkTrk[inx] );
 		option = GetTrkEndOption( splitTrkTrk[inx], splitTrkEP[inx] );
 		option &= ~EPOPT_GAPPED;
-		if ( (imode&1) != 0 )
+		if ( (imode&1) != 0 ) {
 			option |= EPOPT_GAPPED;
+		}
 		SetTrkEndOption( splitTrkTrk[inx], splitTrkEP[inx], option );
 		imode >>= 1;
 	}
@@ -59,7 +60,9 @@ static void ChangeSplitEPMode( wBool_t set, void * mode )
 	DrawEndPt( &mainD, splitTrkTrk[1], splitTrkEP[1], wDrawColorBlack );
 }
 
-static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a, BOOL_T trim) {
+static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a,
+                                   BOOL_T trim)
+{
 	DIST_T d = tempD.scale*0.1;
 	DIST_T w = tempD.scale/tempD.dpi*4;
 	int i;
@@ -93,13 +96,14 @@ static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a, 
 	}
 }
 
-static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
+static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end)
+{
 	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
 	CreateSplitAnchorAngle(pos,t,end,a,FALSE);
 }
 
-static void CreateTrimAnchorLeg(coOrd pos, ANGLE_T a, track_p t) {
-	DIST_T d = tempD.scale*0.1;
+static void CreateTrimAnchorLeg(coOrd pos, ANGLE_T a, track_p t)
+{
 	DIST_T w = tempD.scale/tempD.dpi*4;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
@@ -111,7 +115,8 @@ static void CreateTrimAnchorLeg(coOrd pos, ANGLE_T a, track_p t) {
 
 }
 
-static void CreateTrimAnchor(coOrd pos, track_p t, track_p s, coOrd cursor) {
+static void CreateTrimAnchor(coOrd pos, track_p t, track_p s, coOrd cursor)
+{
 	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(s,pos,NULL,NULL));
 	CreateSplitAnchorAngle(pos,t,FALSE,a,TRUE);
 	ANGLE_T aa = FindAngle(pos,cursor);
@@ -123,7 +128,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0 = 0;
-	int oldTrackCount;
+//	int oldTrackCount;
 	int inx, mode, quad;
 	ANGLE_T angle;
 
@@ -132,7 +137,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		InfoMessage( _("Select track to split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		SetAllTrackSelect( FALSE );
-		/* no break */
+	/* no break */
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;
@@ -146,7 +151,8 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				return C_TERMINATE;
 			}
 			ep0 = PickEndPoint( pos, trk0 );
-			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
+			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))
+			    && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
 				pos = GetTrkEndPos(trk0,ep0);
 			} else {
 				if (!IsTrack(trk0) ||
@@ -161,11 +167,12 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-			oldTrackCount = trackCount;
+//			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
 			return C_TERMINATE;
-		} else if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
+		} else if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+		           && CheckTrackLayerSilent( trk0 )) {
 			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 				onTrackInSplit = FALSE;
 				InfoMessage(_("Can't Split that Draw Object"));
@@ -173,7 +180,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			}
 			onTrackInSplit = FALSE;
 			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-			oldTrackCount = trackCount;
+//			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
 			return C_TERMINATE;
@@ -186,56 +193,75 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		break;
 	case C_CMDMENU:
 		splitTrkTrk[0] = OnTrack( &pos, TRUE, TRUE );
-		if ( splitTrkTrk[0] == NULL )
+		if ( splitTrkTrk[0] == NULL ) {
 			return C_CONTINUE;
+		}
 		if ( splitPopupM[0] == NULL ) {
 			splitPopupM[0] = MenuRegister( "End Point Mode R-L" );
-			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", _("None"), 0, TRUE, ChangeSplitEPMode, I2VP(0) );
-			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", _("Left"), 0, FALSE, ChangeSplitEPMode, I2VP(1) );
-			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", _("Right"), 0, FALSE, ChangeSplitEPMode, I2VP(2) );
-			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", _("Both"), 0, FALSE, ChangeSplitEPMode, I2VP(3) );
+			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", _("None"), 0, TRUE,
+			                                        ChangeSplitEPMode, I2VP(0) );
+			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", _("Left"), 0, FALSE,
+			                                        ChangeSplitEPMode, I2VP(1) );
+			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", _("Right"), 0,
+			                                        FALSE, ChangeSplitEPMode, I2VP(2) );
+			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", _("Both"), 0, FALSE,
+			                                        ChangeSplitEPMode, I2VP(3) );
 			splitPopupM[1] = MenuRegister( "End Point Mode T-B" );
-			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", _("None"), 0, TRUE, ChangeSplitEPMode, I2VP(0) );
-			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", _("Top"), 0, FALSE, ChangeSplitEPMode, I2VP(1) );
-			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", _("Bottom"), 0, FALSE, ChangeSplitEPMode, I2VP(2) );
-			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", _("Both"), 0, FALSE, ChangeSplitEPMode, I2VP(3) );
+			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", _("None"), 0, TRUE,
+			                                        ChangeSplitEPMode, I2VP(0) );
+			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", _("Top"), 0, FALSE,
+			                                        ChangeSplitEPMode, I2VP(1) );
+			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", _("Bottom"), 0,
+			                                        FALSE, ChangeSplitEPMode, I2VP(2) );
+			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", _("Both"), 0, FALSE,
+			                                        ChangeSplitEPMode, I2VP(3) );
 		}
 		splitTrkEP[0] = PickEndPoint( pos, splitTrkTrk[0] );
 		angle = NormalizeAngle(GetTrkEndAngle( splitTrkTrk[0], splitTrkEP[0] ));
-		if ( angle <= 45.0 )
+		if ( angle <= 45.0 ) {
 			quad = 0;
-		else if ( angle <= 135.0 )
+		} else if ( angle <= 135.0 ) {
 			quad = 1;
-		else if ( angle <= 225.0 )
+		} else if ( angle <= 225.0 ) {
 			quad = 2;
-		else if ( angle <= 315.0 )
+		} else if ( angle <= 315.0 ) {
 			quad = 3;
-		else
+		} else {
 			quad = 0;
+		}
 		splitTrkFlip = (quad<2);
-		if ( (splitTrkTrk[1] = GetTrkEndTrk( splitTrkTrk[0], splitTrkEP[0] ) ) == NULL ) {
+		if ( (splitTrkTrk[1] = GetTrkEndTrk( splitTrkTrk[0],
+		                                     splitTrkEP[0] ) ) == NULL ) {
 			ErrorMessage( MSG_BAD_BLOCKGAP );
 			return C_CONTINUE;
 		}
 		splitTrkEP[1] = GetEndPtConnectedToMe( splitTrkTrk[1], splitTrkTrk[0] );
 		mode = 0;
-		if ( GetTrkEndOption( splitTrkTrk[1-splitTrkFlip], splitTrkEP[1-splitTrkFlip] ) & EPOPT_GAPPED )
+		if ( GetTrkEndOption( splitTrkTrk[1-splitTrkFlip],
+		                      splitTrkEP[1-splitTrkFlip] ) & EPOPT_GAPPED ) {
 			mode |= 2;
-		if ( GetTrkEndOption( splitTrkTrk[splitTrkFlip], splitTrkEP[splitTrkFlip] ) & EPOPT_GAPPED )
+		}
+		if ( GetTrkEndOption( splitTrkTrk[splitTrkFlip],
+		                      splitTrkEP[splitTrkFlip] ) & EPOPT_GAPPED ) {
 			mode |= 1;
-		for ( inx=0; inx<4; inx++ )
+		}
+		for ( inx=0; inx<4; inx++ ) {
 			wMenuToggleSet( splitPopupMI[quad&1][inx], mode == inx );
+		}
 		menuPos = pos;
 		wMenuPopupShow( splitPopupM[quad&1] );
 		break;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		onTrackInSplit = TRUE;
-		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayerSilent( trk0 )) {
+		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL
+		    && CheckTrackLayerSilent( trk0 )) {
 			ep0 = PickEndPoint( pos, trk0 );
-			if ( ep0 < 0 )
+			if ( ep0 < 0 ) {
 				break;
-			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
+			}
+			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))
+			    && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
 				CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
 			} else if (QueryTrack(trk0,Q_IS_TURNOUT)) {
 				if ((MyGetKeyState()&WKEY_SHIFT) != 0 ) {
@@ -251,7 +277,8 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				CreateSplitAnchor(pos,trk0,FALSE);
 			}
 		} else {
-			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
+			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+			    && CheckTrackLayerSilent( trk0 )) {
 				if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 					CreateSplitAnchor(pos,trk0, FALSE);
 				}
@@ -261,8 +288,10 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 
 		break;
 	case C_REDRAW:
-		if (anchors_da.cnt)
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
 		break;
 	}
 
@@ -273,22 +302,23 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0 = 0;
-	int oldTrackCount;
+//	int oldTrackCount;
 
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select draw to split") );
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		SetAllTrackSelect( FALSE );
-		/* no break */
+	/* no break */
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;
 		break;
 	case C_UP:
 		onTrackInSplit = TRUE;
-		if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
-			if (IsTrack(trk0)) return C_CONTINUE;
+		if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+		    && CheckTrackLayerSilent( trk0 )) {
+			if (IsTrack(trk0)) { return C_CONTINUE; }
 			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 				onTrackInSplit = FALSE;
 				InfoMessage(_("Can't Split that Draw Object"));
@@ -296,7 +326,7 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 			}
 			onTrackInSplit = FALSE;
 			UndoStart( _("Split Draw"), "SplitDraw( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-			oldTrackCount = trackCount;
+//			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
 			return C_TERMINATE;
@@ -310,8 +340,9 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		onTrackInSplit = TRUE;
-		if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
-			if (IsTrack(trk0)) break;
+		if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+		    && CheckTrackLayerSilent( trk0 )) {
+			if (IsTrack(trk0)) { break; }
 			if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 				CreateSplitAnchor(pos,trk0, FALSE);
 			}
@@ -319,8 +350,10 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 		onTrackInSplit = FALSE;
 		break;
 	case C_REDRAW:
-		if (anchors_da.cnt)
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
 		break;
 	}
 
@@ -345,14 +378,15 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		trimLine = NULL;
 		trk = NULL;
 		SetAllTrackSelect( FALSE );
-		/* no break */
+	/* no break */
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;
 		break;
 	case C_UP:
 		if (trimState == TRIM_NONE) {
-			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
+			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+			    && CheckTrackLayerSilent( trk0 )) {
 				if (IsTrack(trk0))  {
 					InfoMessage(_("Can't Trim with a Track"));
 					return C_CONTINUE;
@@ -361,8 +395,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 				trimLine = trk0;
 				InfoMessage( _("Select an intersecting draw object to Trim") );
 				return C_CONTINUE;
-			}
-			else return C_CONTINUE;
+			} else { return C_CONTINUE; }
 		}
 		if (!trimLine) {
 			InfoMessage(_("No Draw to Trim with"));
@@ -382,27 +415,27 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			pos1 = pos;
-		    if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
+			if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 				if ( IsClose(GetTrkDistance(trk1,&pos1)*4)) {
 					//Iterate twice
-					for (int i=0; i<2;i++) {
+					for (int i=0; i<2; i++) {
 						GetTrkDistance(trimLine,&pos1);
 						GetTrkDistance(trk1,&pos1);
 					}
-				} else return C_CONTINUE;
+				} else { return C_CONTINUE; }
 			} else {
 				return C_CONTINUE;
 			}
-		} else return C_CONTINUE;
+		} else { return C_CONTINUE; }
 
 		ANGLE_T a = GetAngleAtPoint(trk1,pos1,NULL,NULL);
 		ANGLE_T aa = DifferenceBetweenAngles(a,FindAngle(pos1,pos));
-		if (fabs(aa)<90 ) ep0 = 1;
-		else ep0 = 0;
+		if (fabs(aa)<90 ) { ep0 = 1; }
+		else { ep0 = 0; }
 
 		UndoStart( _("Trim Draw"), "TrimDraw( T%d[%d] )", GetTrkIndex(trimLine), ep0 );
 		SplitTrack( trk1, pos1, ep0, &trk2, FALSE );
-		if (trk2 ) DeleteTrack(trk2, FALSE);
+		if (trk2 ) { DeleteTrack(trk2, FALSE); }
 		UndoEnd();
 		MainRedraw();
 		InfoMessage( _("Select another draw object to Trim, or Space to Deselect") );
@@ -412,8 +445,9 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		trk = NULL;
 		if (trimState == TRIM_NONE) {
-			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
-				if (IsTrack(trk0)) break;
+			if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL
+			    && CheckTrackLayerSilent( trk0 )) {
+				if (IsTrack(trk0)) { break; }
 				if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 					trk = trk0;
 				}
@@ -429,7 +463,7 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 				if (IsClose(GetTrkDistance(trimLine,&pos1)*4)) {
 					if (IsClose(GetTrkDistance(trk1,&pos1)*4)) {
 						//Iterate Twice
-						for (int i=0; i<2;i++) {
+						for (int i=0; i<2; i++) {
 							GetTrkDistance(trimLine,&pos1);
 							GetTrkDistance(trk1,&pos1);
 						}
@@ -446,12 +480,15 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		if (trimLine) {
 			DrawTrack(trimLine,&tempD,selectedColor);
 		}
-		if (anchors_da.cnt)
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
 		break;
 	case C_TEXT:
-		if (action>>8 != ' ' && action>>8 != 13 )
+		if (action>>8 != ' ' && action>>8 != 13 ) {
 			return C_CONTINUE;
+		}
 		trimLine = NULL;
 		trk = NULL;
 		trimState = TRIM_NONE;
@@ -464,16 +501,22 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/split.xpm"
-#include "bitmaps/split-draw.xpm"
-#include "bitmaps/trim.xpm"
+#include "bitmaps/split.xpm3"
+#include "bitmaps/split-draw.xpm3"
+#include "bitmaps/trim.xpm3"
 
 void InitCmdSplit( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Split"), "cmdSplitSetCmd", _("Split") );
-	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(split_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
-	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"), wIconCreatePixMap(split_draw_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
-	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"), wIconCreatePixMap(trim_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
+	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"),
+	               wIconCreatePixMap(split_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT,  NULL);
+	AddMenuButton( menu, CmdSplitDraw, "cmdSplitDraw", _("Split Draw"),
+	               wIconCreatePixMap(split_draw_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_SPLITDRAW, NULL);
+	AddMenuButton( menu, CmdTrimDraw, "cmdTrimDraw", _("Trim Draw"),
+	               wIconCreatePixMap(trim_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_TRIMDRAW, NULL);
 	ButtonGroupEnd();
 }
 

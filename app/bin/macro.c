@@ -1,5 +1,5 @@
 /** \file macro.c
-
+ *
  * Macros
  */
 
@@ -18,7 +18,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
@@ -28,12 +28,15 @@
 #include "draw.h"
 #include "fileio.h"
 #include "misc.h"
-#include "param.h" 
+#include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "trackx.h"
 #include "version.h"
 #include "common-ui.h"
+
+#ifdef UTFCONVERT
+#include "include/utf8convert.h"
+#endif // UTFCONVERT
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );
@@ -67,8 +70,9 @@ static paramData_t recordPLs[] = {
 	{   PD_BUTTON, DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), BO_DISABLED, I2VP(4) },
 #define I_RECTEXT		(3)
 #define recordT			((wText_p)recordPLs[I_RECTEXT].control)
-	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY} };
-static paramGroup_t recordPG = { "record", PGO_DIALOGTEMPLATE, recordPLs, COUNT( recordPLs ) };
+	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY}
+};
+static paramGroup_t recordPG = { "record", 0, recordPLs, COUNT( recordPLs ) };
 
 
 #ifndef WINDOWS
@@ -82,37 +86,45 @@ static void ComputePause( void )
 	long msecs;
 	gettimeofday( &tim, NULL );
 	secs = tim.tv_sec-lastTim.tv_sec;
-	if (secs > 10 || secs < 0)
+	if (secs > 10 || secs < 0) {
 		return;
+	}
 	msecs = secs * 1000 + (tim.tv_usec - lastTim.tv_usec)/1000;
-	if (msecs > 5000)
+	if (msecs > 5000) {
 		msecs = 5000;
-	if (msecs > 1)
+	}
+	if (msecs > 1) {
 		fprintf( recordF, "PAUSE %ld\n", msecs );
+	}
 	lastTim = tim;
 }
 #else
+#include <sys/types.h>
 #include <sys/timeb.h>
+#include <time.h>
 
-static struct _timeb lastTim;
+static struct __timeb64 lastTim;
 static void ComputePause( void )
 {
-	struct _timeb tim;
+	struct __timeb64 tim;
 	long secs, msecs;
 	_ftime( &tim );
 	secs = (long)(tim.time - lastTim.time);
-	if (secs > 10 || secs < 0)
+	if (secs > 10 || secs < 0) {
 		return;
+	}
 	msecs = secs * 1000;
 	if (tim.millitm >= lastTim.millitm) {
 		msecs += (tim.millitm - lastTim.millitm);
 	} else {
 		msecs -= (lastTim.millitm - tim.millitm);
 	}
-	if (msecs > 5000)
+	if (msecs > 5000) {
 		msecs = 5000;
-	if (msecs > 1)
+	}
+	if (msecs > 1) {
 		fprintf( recordF, "PAUSE %ld\n", msecs );
+	}
 	lastTim = tim;
 }
 #endif
@@ -121,19 +133,21 @@ static void ComputePause( void )
 EXPORT void RecordMouse( char * name, wAction_t action, POS_T px, POS_T py )
 {
 	int keyState;
-	if ( action == C_MOVE || action == C_RMOVE || (action&0xFF) == C_TEXT )
+	if ( action == C_MOVE || action == C_RMOVE || (action&0xFF) == C_TEXT ) {
 		ComputePause();
-	else if ( action == C_DOWN || action == C_RDOWN )
+	} else if ( action == C_DOWN || action == C_RDOWN )
 #ifndef WINDOWS
 		gettimeofday( &lastTim, NULL );
 #else
 		_ftime( &lastTim );
 #endif
-	if (action == wActionMove && !recordMouseMoves)
+	if (action == wActionMove && !recordMouseMoves) {
 		return;
+	}
 	keyState = wGetKeyState();
-	if (keyState)
+	if (keyState) {
 		fprintf( recordF, "KEYSTATE %d\n", keyState );
+	}
 	fprintf( recordF, "%s %d %0.3f %0.3f\n", name, (int)action, px, py );
 	fflush( recordF );
 }
@@ -143,25 +157,30 @@ static int StartRecord( int cnt, char ** pathName, void * context )
 {
 	time_t clock;
 
-	assert( pathName != NULL );
-	assert( cnt == 1 );
+	CHECK( pathName != NULL );
+	CHECK( cnt == 1 );
 
 	SetCurrentPath( MACROPATHKEY, pathName[0] );
 	recordF = fopen(pathName[0], "w");
 	if (recordF==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Recording"), pathName[0], strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Recording"), pathName[0],
+		               strerror(errno) );
 		return FALSE;
 	}
 	time(&clock);
-	fprintf(recordF, "# %s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
+	fprintf(recordF, "# %s Version: %s, Date: %s\n", sProdName, sVersion,
+	        ctime(&clock) );
 	fprintf(recordF, "VERSION %d\n", iParamVersion );
 	fprintf(recordF, "ROOMSIZE %0.1f x %0.1f\n", mapD.size.x, mapD.size.y );
 	fprintf(recordF, "SCALE %s\n", curScaleName );
-	fprintf(recordF, "ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x, mainD.orig.y );
-	if ( logClock != 0 )
+	fprintf(recordF, "ORIG %0.3f %0.3f %0.3f\n", mainD.scale, mainD.orig.x,
+	        mainD.orig.y );
+	if ( logClock != 0 ) {
 		fprintf( recordF, "# LOG CLOCK %s\n", ctime(&logClock) );
-	if ( logTable_da.cnt > 11 )
+	}
+	if ( logTable_da.cnt > 11 ) {
 		lprintf( "StartRecord( %s ) @ %s\n", pathName, ctime(&clock) );
+	}
 	ParamStartRecord();
 	WriteTracks( recordF, TRUE );
 	WriteLayers( recordF );
@@ -181,7 +200,7 @@ static void DoRecordButton( void * context )
 	char * cp;
 	int len;
 
-	switch( (int)VP2L(context) ){
+	switch( (int)VP2L(context) ) {
 	case 0: /* Stop */
 		fprintf( recordF, "CLEAR\nMESSAGE\n");
 		fprintf( recordF, N_("End of Playback.  Hit Step to exit\n"));
@@ -198,11 +217,12 @@ static void DoRecordButton( void * context )
 	case 4: /* End */
 		if (recordingMessage) {
 			len = wTextGetSize( recordT );
-			if (len == 0)
+			if (len == 0) {
 				break;
+			}
 			cp = (char*)MyMalloc( len+2 );
 			wTextGetText( recordT, cp, len );
-			if ( cp[len-1] == '\n' ) len--;
+			if ( cp[len-1] == '\n' ) { len--; }
 			cp[len] = '\0';
 			fprintf( recordF, "%s\n%s\nSTEP\n", cp, END_MESSAGE );
 			MyFree( cp );
@@ -249,8 +269,10 @@ EXPORT void DoRecord( void * context )
 {
 	if (recordW == NULL) {
 		char * title = MakeWindowTitle(_("Record"));
-		recordW = ParamCreateDialog( &recordPG, title, NULL, NULL, NULL, FALSE, NULL, F_RESIZE, NULL );
-		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern, StartRecord, NULL );
+		recordW = ParamCreateDialog( &recordPG, title, NULL, NULL, NULL, FALSE, NULL,
+		                             F_RESIZE, NULL );
+		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern,
+		                               StartRecord, NULL );
 	}
 	wTextClear( recordT );
 	wFilSelect( recordFile_fs, GetCurrentPath(MACROPATHKEY ));
@@ -308,7 +330,8 @@ int DBMCount=0;
 #define DRAWALL
 typedef enum { FLASH_PLUS, FLASH_MINUS, REDRAW, CLEAR, DRAW, RESET, ORIG, MOVE_PLYBCK1, MOVE_PLYBCK2, MOVE_PLYBCK3, MOVE_PLYBCK4, QUIT } DrawBitMap_e;
 
-char * DrawBitMapToString(DrawBitMap_e dbm) {
+char * DrawBitMapToString(DrawBitMap_e dbm)
+{
 	switch(dbm) {
 	case FLASH_PLUS:
 		return "Flsh+";
@@ -340,15 +363,16 @@ char * DrawBitMapToString(DrawBitMap_e dbm) {
 }
 
 static void MacroDrawBitMap(
-		DrawBitMap_e dbm,
-		wDrawBitMap_p bm,
-		coOrd pos,
-		wDrawColor color )
+        DrawBitMap_e dbm,
+        wDrawBitMap_p bm,
+        coOrd pos,
+        wDrawColor color )
 {
 	DrawBitMap( playbackD, pos, bm, color );
 //	wFlush();
 
-	LOG( log_playbackCursor, 2, ("%s %d DrawBitMap( %p %p [%0.3f %0.3f] %d )\n", DrawBitMapToString(dbm), DBMCount++, playbackD->d, bm, pos, color ) );
+	LOG( log_playbackCursor, 2, ("%s %d DrawBitMap( %p %p [%0.3f %0.3f] %d )\n",
+	                             DrawBitMapToString(dbm), DBMCount++, playbackD->d, bm, pos, color ) );
 }
 
 
@@ -363,7 +387,7 @@ EXPORT long playbackDelay = 100;
 static long playbackSpeed = 2;
 
 static void SetPlaybackSpeed(
-		wIndex_t inx )
+        wIndex_t inx )
 {
 	switch (inx) {
 	case 0: playbackDelay = 500; break;
@@ -378,7 +402,8 @@ static void SetPlaybackSpeed(
 }
 
 
-EXPORT void RedrawPlaybackCursor() {
+EXPORT void RedrawPlaybackCursor()
+{
 	if ( playbackD && playbackBm && inPlayback) {
 		unsigned long options = playbackD->options;
 		playbackD->options |= DC_TEMP;
@@ -404,26 +429,29 @@ EXPORT void RedrawPlaybackCursor() {
 }
 
 static void MoveCursor(
-		drawCmd_p d,
-		playbackProc proc,
-		wAction_t action,
-		coOrd pos,
-		wDrawBitMap_p bm,
-		wDrawColor color )
+        drawCmd_p d,
+        playbackProc proc,
+        wAction_t action,
+        coOrd pos,
+        wDrawBitMap_p bm,
+        wDrawColor color )
 {
 	DIST_T dist;
-        coOrd dpos;
+	coOrd dpos;
 	int i, steps;
 
-	if (d == NULL)
+	if (d == NULL) {
 		return;
+	}
 
 	if (playbackTimer == 0 /*&& !didPause*/) {
 		playbackBm = bm;
 		playbackColor = color;
 		dist = FindDistance( playbackPos, pos );
 		steps = (int)(dist / (PixelsPerStep*d->scale/d->dpi)) + 1;
-		LOG( log_playbackCursor, 1, ( "PBC: [%0.3f %0.3f] - [%0.3f %0.3f] Dist:%0.3f Steps:%d\n", playbackPos.x, playbackPos.y, pos.x, pos.y, dist, steps ) );
+		LOG( log_playbackCursor, 1,
+		     ( "PBC: [%0.3f %0.3f] - [%0.3f %0.3f] Dist:%0.3f Steps:%d\n", playbackPos.x,
+		       playbackPos.y, pos.x, pos.y, dist, steps ) );
 
 		dpos.x = (pos.x-playbackPos.x)/steps;
 		dpos.y = (pos.y-playbackPos.y)/steps;
@@ -454,11 +482,11 @@ static void MoveCursor(
 
 
 static void PlaybackCursor(
-		drawCmd_p d,
-		playbackProc proc,
-		wAction_t action,
-		coOrd pos,
-		wDrawColor color )
+        drawCmd_p d,
+        playbackProc proc,
+        wAction_t action,
+        coOrd pos,
+        wDrawColor color )
 {
 	wDrawBitMap_p bm = playbackBm;
 	playbackD = d;
@@ -469,51 +497,62 @@ static void PlaybackCursor(
 	switch( action&0xFF ) {
 
 	case wActionMove:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm); //0 is normal, shift, ctrl
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow0_ctl_bm:arrow0_bm); //0 is normal, shift, ctrl
 		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );
 		break;
 
 	case C_DOWN:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow0_ctl_bm:arrow0_bm);
 		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow3_ctl_bm:arrow3_bm);
 		Flash( playbackColor=rightDragColor );
 		proc( action, pos );
-		/* no break */
+	/* no break */
 
 	case C_MOVE:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow3_ctl_bm:arrow3_bm);
 		MoveCursor( d, proc, C_MOVE, pos, bm, rightDragColor );
 		break;
 
 	case C_UP:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow0_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow3_ctl_bm:arrow0_bm);
 		MoveCursor( d, proc, C_MOVE, pos, bm, rightDragColor );
 		Flash( rightDragColor );
 		proc( action, pos );
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow0_ctl_bm:arrow0_bm);
 		MoveCursor( d, NULL, 0, pos, bm, wDrawColorBlack );
 		break;
 
 	case C_RDOWN:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow0_ctl_bm:arrow0_bm);
 		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrowr3_ctl_bm:arrowr3_bm);
 		Flash( playbackColor=leftDragColor );
 		proc( action, pos );
-		/* no break */
+	/* no break */
 
 	case C_RMOVE:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrowr3_ctl_bm:arrowr3_bm);
 		MoveCursor( d, proc, C_RMOVE, pos, bm, leftDragColor );
 		break;
 
 	case C_RUP:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrowr3_ctl_bm:arrowr3_bm);
 		MoveCursor( d, proc, C_RMOVE, pos, bm, leftDragColor );
 		Flash( leftDragColor );
 		proc( action, pos );
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)
+		      ?arrow0_ctl_bm:arrow0_bm);
 		MoveCursor( d, NULL, 0, pos, bm, wDrawColorBlack );
 		break;
 
@@ -526,7 +565,7 @@ static void PlaybackCursor(
 
 	case C_TEXT:
 		proc( action, pos);
-		char c = action>>8;
+//		char c = action>>8;
 		bm = playbackBm;
 		break;
 
@@ -542,11 +581,11 @@ static void PlaybackCursor(
 
 
 EXPORT void PlaybackMouse(
-		playbackProc proc,
-		drawCmd_p d,
-		wAction_t action,
-		coOrd pos,
-		wDrawColor color )
+        playbackProc proc,
+        drawCmd_p d,
+        wAction_t action,
+        coOrd pos,
+        wDrawColor color )
 {
 	PlaybackCursor( d, proc, action, pos, wDrawColorBlack );
 	didPause = FALSE;
@@ -554,16 +593,17 @@ EXPORT void PlaybackMouse(
 
 
 EXPORT void MovePlaybackCursor(
-		drawCmd_p d,
-		coOrd pos,
-		wBool_t direct, wControl_p control)
+        drawCmd_p d,
+        coOrd pos,
+        wBool_t direct, wControl_p control)
 {
 #ifdef MOVECURSORTOCOMMANDBUTTON
 	// Show the cursor clicking on the command button
 	// Not possile with current structure
 	playbackD = &tempD;
-	if (!direct)
+	if (!direct) {
 		MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
+	}
 	unsigned long options = d->options;
 	d->options |= DC_TEMP;
 	wBool_t bTemp = wDrawSetTempMode( d->d, TRUE );
@@ -605,18 +645,18 @@ EXPORT wWin_p demoW;
 EXPORT int curDemo = -1;
 
 typedef struct {
-		char * title;
-		char * fileName;
-		} demoList_t;
+	char * title;
+	char * fileName;
+} demoList_t;
 static dynArr_t demoList_da;
 #define demoList(N) DYNARR_N( demoList_t, demoList_da, N )
 static struct wFilSel_t * playbackFile_fs;
 
 typedef struct {
-		char * label;
-		playbackProc_p proc;
-		void * data;
-		} playbackProc_t;
+	char * label;
+	playbackProc_p proc;
+	void * data;
+} playbackProc_t;
 static dynArr_t playbackProc_da;
 #define playbackProc(N) DYNARR_N( playbackProc_t, playbackProc_da, N )
 
@@ -655,15 +695,17 @@ static paramData_t demoPLs[] = {
 	{   PD_DROPLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, I2VP(80), N_("Speed") },
 #define I_DEMOTEXT		(4)
 #define demoT			((wText_p)demoPLs[I_DEMOTEXT].control)
-	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY} };
-static paramGroup_t demoPG = { "demo", PGO_DIALOGTEMPLATE, demoPLs, COUNT( demoPLs ) };
+	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY}
+};
+static paramGroup_t demoPG = { "demo", 0, demoPLs, COUNT( demoPLs ) };
 
 EXPORT int MyGetKeyState( void )
 {
-	if (inPlayback)
+	if (inPlayback) {
 		return playbackKeyState;
-	else
+	} else {
 		return wGetKeyState();
+	}
 }
 
 
@@ -679,8 +721,9 @@ EXPORT void AddPlaybackProc( char * label, playbackProc_p proc, void * data )
 static void PlaybackQuit( void )
 {
 	long playbackSpeed1 = playbackSpeed;
-	if (paramFile)
+	if (paramFile) {
 		fclose( paramFile );
+	}
 	paramFile = NULL;
 	inPlaybackQuit = TRUE;
 	wPrefReset();
@@ -719,13 +762,14 @@ static int documentEnable = 0;
 static int documentAutoSnapshot = 0;
 
 static drawCmd_t snapshot_d = {
-		NULL,
-		&screenDrawFuncs,
-		0,
-		16.0,
-		0,
-		{0.0, 0.0}, {1.0, 1.0},
-		Pix2CoOrd, CoOrd2Pix };
+	NULL,
+	&screenDrawFuncs,
+	0,
+	16.0,
+	0,
+	{0.0, 0.0}, {1.0, 1.0},
+	Pix2CoOrd, CoOrd2Pix
+};
 static int documentSnapshotNum = 1;
 static int documentCopy = 0;
 static FILE * documentFile;
@@ -735,14 +779,18 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 {
 	char * cp;
 	wWinPix_t ix, iy;
-	if (d->dpi < 0)
+	if (d->dpi < 0) {
 		d->dpi = mainD.dpi;
-	if (d->scale < 0)
+	}
+	if (d->scale < 0) {
 		d->scale = mainD.scale;
-	if (d->orig.x < 0 || d->orig.y < 0)
+	}
+	if (d->orig.x < 0 || d->orig.y < 0) {
 		d->orig = mainD.orig;
-	if (d->size.x < 0 || d->size.y < 0)
+	}
+	if (d->size.x < 0 || d->size.y < 0) {
 		d->size = mainD.size;
+	}
 	ix = (wWinPix_t)(d->dpi*d->size.x/d->scale);
 	iy = (wWinPix_t)(d->dpi*d->size.y/d->scale);
 	d->d = wBitMapCreate( ix, iy, 8 );
@@ -777,7 +825,6 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 * Regression test
 */
 static int log_regression = 0;
-wBool_t bWriteEndPtDirectIndex;
 static int nRegressionFail = 0;
 
 static BOOL_T DoRegression( char * sFileName )
@@ -788,116 +835,56 @@ static BOOL_T DoRegression( char * sFileName )
 	long regressVersion;
 	FILE * fRegression;
 	char * sRegressionFile =  NULL;
-	wBool_t bWroteActualTracks;
+//	wBool_t bWroteActualTracks;
 	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
 	char * cp;
 	regressVersion = strtol( paramLine+16, &cp, 10 );
-	if (cp == paramLine+16 )
+	if (cp == paramLine+16 ) {
 		regressVersion = PARAMVERSION;
+	}
 	LOG( log_regression, 1, ("REGRESSION %s %d %s:%d %s\n",
-				eRegression==REGRESSION_SAVE?"SAVE":"CHECK",
-				regressVersion,
-				sFileName, paramLineNum,
-				cp ) );
+	                         eRegression==REGRESSION_SAVE?"SAVE":"CHECK",
+	                         regressVersion,
+	                         sFileName, paramLineNum,
+	                         cp ) );
 	MakeFullpath( &sRegressionFile, workingDir, "xtrkcad.regress", NULL );
-	switch ( eRegression ){
+	switch ( eRegression ) {
 	case REGRESSION_SAVE:
 		fRegression = fopen( sRegressionFile, "a" );
 		if ( fRegression == NULL ) {
-			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sFileName, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sFileName,
+			               strerror(errno) );
 		} else {
 			fprintf( fRegression, "REGRESSION START %d %s\n",
-				PARAMVERSION, cp );
+			         PARAMVERSION, cp );
 			fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
 			WriteTracks( fRegression, FALSE );
 			fprintf( fRegression, "REGRESSION END\n" );
 			fclose( fRegression );
 		}
 		while ( fgets(paramLine, STR_LONG_SIZE, paramFile) != NULL ) {
-			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0)
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0) {
 				break;
+			}
 		}
 		break;
 	case REGRESSION_CHECK:
 	case REGRESSION_QUIET:
 		oldParamVersion = paramVersion;
-		paramVersion = regressVersion;
-		bWroteActualTracks = FALSE;
-		track_p to_first_save = to_first;
-		track_p* to_last_save = to_last;
-		while ( GetNextLine() ) {
-			if ( paramLine[0] == '#' )
-				continue;
-			// Read Expected track
-			to_first = NULL;
-			to_last = &to_first;
-			paramVersion = regressVersion;
-			if ( !ReadTrack( paramLine ) ) {
-				if ( paramFile == NULL )
-					return FALSE;
-				break;
-			}
-			if ( to_first == NULL ) {
-				// Something bad happened
-				break;
-			}
-			track_cp tExpected = to_first;
-			to_first = to_first_save;
-			// Find corresponding Actual track
-			track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
-			strcat( message, "Regression " );
-			if ( ! CompareTrack( tActual, tExpected ) ) {
-				nRegressionFail++;
-				// Actual doesn't match Expected
-				LOG( log_regression, 1, ("  FAIL: %s", message) );
-				fRegression = fopen( sRegressionFile, "a" );
-				if ( fRegression == NULL ) {
-					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );
-					break;
-				}
-				fprintf( fRegression, "REGRESSION FAIL %d\n",
-					PARAMVERSION );
-				fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
-				fprintf( fRegression, "# %s", message );
-				if ( !bWroteActualTracks ) {
-					// Print Actual tracks
-					fprintf( fRegression, "Actual Tracks\n" );
-					paramVersion = PARAMVERSION;
-					WriteTracks( fRegression, FALSE );
-					bWroteActualTracks = TRUE;
-				}
-				// Print Expected track
-				to_first = tExpected;
-				fprintf( fRegression, "Expected Track\n" );
-				WriteTracks( fRegression, FALSE );
-				fclose( fRegression );
-				strcat( message, "Continue test?" );
-				if ( eRegression == REGRESSION_CHECK ) {
-					int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
-					if ( !rc ) {
-						while ( GetNextLine() &&
-							strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
-							;
-						break;
-					}
-				}
-			}
-			// Delete Expected track
-			to_first = tExpected;
-			to_last = &to_first;
-			FreeTrack( tExpected );
-		}
-		to_first = to_first_save;
-		to_last = to_last_save;
-		if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
-			InputError( "Expected REGRESSION END", TRUE );
+		int nFail = CheckRegressionResult( regressVersion, sFileName,
+		                                   eRegression == REGRESSION_QUIET );
 		paramVersion = oldParamVersion;
+		if ( nFail < 0 ) {
+			return FALSE;
+		}
+		nRegressionFail += nFail;
 		break;
 	case REGRESSION_NONE:
 	default:
 		while ( GetNextLine() ) {
-			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0 )
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0 ) {
 				break;
+			}
 		}
 		break;
 	}
@@ -907,7 +894,7 @@ static BOOL_T DoRegression( char * sFileName )
 }
 
 static void EnableButtons(
-		BOOL_T enable )
+        BOOL_T enable )
 {
 	wButtonSetBusy( demoStep, !enable );
 	wButtonSetBusy( demoNext, !enable );
@@ -919,7 +906,7 @@ static void EnableButtons(
 }
 
 EXPORT void PlaybackMessage(
-		char * line )
+        char * line )
 {
 	char * cp;
 	wTextAppend( demoT, _(line) );
@@ -978,7 +965,7 @@ static void Playback( void )
 	POS_T zoom;
 	wIndex_t inx;
 	long timeout;
-	static enum { pauseCmd, mouseCmd, otherCmd } thisCmd, lastCmd;
+	static enum { pauseCmd, mouseCmd, otherCmd } thisCmd/*, lastCmd*/;
 	size_t len;
 	static wBool_t demoWinOnTop = FALSE;
 	coOrd roomSize;
@@ -988,7 +975,7 @@ static void Playback( void )
 	useCurrentLayer = FALSE;
 	inPlayback = TRUE;
 	EnableButtons( FALSE );
-	lastCmd = otherCmd;
+//	lastCmd = otherCmd;
 	playbackTimer = 0;
 	if (demoWinOnTop) {
 		wWinTop( mainW );
@@ -998,9 +985,11 @@ static void Playback( void )
 	while (TRUE) {
 		if ( ! inPlayback )
 			// User pressed Quit
+		{
 			break;
+		}
 		if ( paramFile == NULL ||
-			 fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
+		     fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
 			paramTogglePlaybackHilite = FALSE;
 			CloseDemoWindows();
 			if (paramFile) {
@@ -1012,17 +1001,19 @@ static void Playback( void )
 				documentFile = NULL;
 			}
 			Reset();
-			if (curDemo < 0 || curDemo >= demoList_da.cnt)
+			if (curDemo < 0 || curDemo >= demoList_da.cnt) {
 				break;
+			}
 			demoFileName = strdup(demoList(curDemo).fileName );
 			paramFile = fopen( demoFileName, "r" );
 			if ( paramFile == NULL ) {
-				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName, strerror(errno) );
+				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName,
+				               strerror(errno) );
 				inPlayback = FALSE;
 				SetUserLocale();
 				return;
 			}
-			
+
 			paramFileName = strdup( demoFileName );
 			playbackColor=wDrawColorBlack;
 			paramLineNum = 0;
@@ -1035,7 +1026,8 @@ static void Playback( void )
 			DoChangeNotification( CHANGE_ALL );
 			CompoundClearDemoDefns();
 			if ( fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
-				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName, demoFileName );
+				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName,
+				               demoFileName );
 				fclose( paramFile );
 				paramFile = NULL;
 				inPlayback = FALSE;
@@ -1057,8 +1049,9 @@ static void Playback( void )
 		}
 		thisCmd = otherCmd;
 		paramLineNum++;
-		if (showParamLineNum)
+		if (showParamLineNum) {
 			InfoCount( paramLineNum );
+		}
 		Stripcr( paramLine );
 		if (paramLine[0] == '#') {
 			/* comment */
@@ -1080,7 +1073,8 @@ static void Playback( void )
 				demoWinOnTop = TRUE;
 			}
 			if ( documentAutoSnapshot ) {
-				snapshot_d.dpi=snapshot_d.scale=snapshot_d.orig.x=snapshot_d.orig.y=snapshot_d.size.x=snapshot_d.size.y=-1;
+				snapshot_d.dpi=snapshot_d.scale=snapshot_d.orig.x=snapshot_d.orig.y=
+				                                        snapshot_d.size.x=snapshot_d.size.y=-1;
 				TakeSnapshot(&snapshot_d);
 			}
 			if (playbackNonStop) {
@@ -1099,8 +1093,12 @@ static void Playback( void )
 			demoWinOnTop = TRUE;
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( IsEND( END_MESSAGE ) )
+#ifdef UTFCONVERT
+				ConvertUTF8ToSystem(paramLine);
+#endif
+				if ( IsEND( END_MESSAGE ) ) {
 					break;
+				}
 				if ( strncmp(paramLine, "STEP", 3) == 0 ) {
 					wWinTop( demoW );
 					demoWinOnTop = TRUE;
@@ -1112,8 +1110,9 @@ static void Playback( void )
 				PlaybackMessage( paramLine );
 			}
 		} else if (strncmp( paramLine, "ROOMSIZE ", 9 ) == 0) {
-			if (ParseRoomSize( paramLine+9, &roomSize ))
+			if (ParseRoomSize( paramLine+9, &roomSize )) {
 				SetRoomSize( roomSize );
+			}
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
 			DoSetScale( paramLine+6 );
 		} else if (strncmp( paramLine, "REDRAW", 6 ) == 0) {
@@ -1131,24 +1130,28 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "VERSION", 7 ) == 0) {
 			paramVersion = atol( paramLine+8 );
 			if ( paramVersion > iParamVersion ) {
-				NoticeMessage( MSG_PLAYBACK_VERSION_UPGRADE, _("Ok"), NULL, paramVersion, iParamVersion, sProdName );
+				NoticeMessage( MSG_PLAYBACK_VERSION_UPGRADE, _("Ok"), NULL, paramVersion,
+				               iParamVersion, sProdName );
 				break;
 			}
 			if ( paramVersion < iMinParamVersion ) {
-				NoticeMessage( MSG_PLAYBACK_VERSION_DOWNGRADE, _("Ok"), NULL, paramVersion, iMinParamVersion, sProdName );
+				NoticeMessage( MSG_PLAYBACK_VERSION_DOWNGRADE, _("Ok"), NULL, paramVersion,
+				               iMinParamVersion, sProdName );
 				break;
 			}
 		} else if (strncmp( paramLine, "ORIG ", 5 ) == 0) {
-			if ( !GetArgs( paramLine+5, "fff", &zoom, &x, &y ) )
+			if ( !GetArgs( paramLine+5, "fff", &zoom, &x, &y ) ) {
 				continue;
+			}
 			if (zoom == 0.0) {
 				double scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
 				double scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
-				if (scale_x<scale_y)
+				if (scale_x<scale_y) {
 					scale_x = scale_y;
+				}
 				scale_x = ceil(scale_x);
-				if (scale_x < 1) scale_x = 1;
-				if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+				if (scale_x < 1) { scale_x = 1; }
+				if (scale_x > MAX_MAIN_SCALE) { scale_x = MAX_MAIN_SCALE; }
 				zoom = scale_x;
 			}
 			mainD.scale = zoom;
@@ -1166,12 +1169,15 @@ static void Playback( void )
 			paramTogglePlaybackHilite = TRUE;
 			didPause = TRUE;
 
-			if ( !GetArgs( paramLine+6, "l", &timeout ) )
+			if ( !GetArgs( paramLine+6, "l", &timeout ) ) {
 				continue;
-			if (timeout > 10000)
+			}
+			if (timeout > 10000) {
 				timeout = 1000;
-			if (playbackTimer == 0)
+			}
+			if (playbackTimer == 0) {
 				wPause( timeout*playbackDelay/100 );
+			}
 			wFlush();
 			if (demoWinOnTop) {
 				wWinTop( mainW );
@@ -1183,8 +1189,9 @@ static void Playback( void )
 
 			if (playbackTimer == 0) {
 				timeout = bigPause*playbackDelay/100;
-				if (timeout <= dragTimeout)
+				if (timeout <= dragTimeout) {
 					timeout = dragTimeout+1;
+				}
 				wPause( timeout );
 			}
 		} else if (strncmp( paramLine, "KEYSTATE ", 9 ) == 0 ) {
@@ -1192,12 +1199,15 @@ static void Playback( void )
 				playbackKeyState = atoi( paramLine+9 );
 			} else {
 				playbackKeyState = 0;
-				if ( strchr( paramLine+9, 'S' ) )
+				if ( strchr( paramLine+9, 'S' ) ) {
 					playbackKeyState |= WKEY_SHIFT;
-				if ( strchr( paramLine+9, 'C' ) )
+				}
+				if ( strchr( paramLine+9, 'C' ) ) {
 					playbackKeyState |= WKEY_CTRL;
-				if ( strchr( paramLine+9, 'A' ) )
+				}
+				if ( strchr( paramLine+9, 'A' ) ) {
 					playbackKeyState |= WKEY_ALT;
+				}
 			}
 		} else if (strncmp( paramLine, "TIMESTART", 9 ) == 0 ) {
 			playbackTimer = wGetTimer();
@@ -1214,23 +1224,26 @@ static void Playback( void )
 			wTextAppend( demoT, wMemStats() );
 			wTextAppend( demoT, "\n" );
 		} else if (strncmp( paramLine, "SNAPSHOT", 8 ) == 0 ) {
-			if ( !documentEnable )
+			if ( !documentEnable ) {
 				continue;
-			snapshot_d.dpi=snapshot_d.scale=snapshot_d.orig.x=snapshot_d.orig.y=snapshot_d.size.x=snapshot_d.size.y=-1;
+			}
+			snapshot_d.dpi=snapshot_d.scale=snapshot_d.orig.x=snapshot_d.orig.y=
+			                                        snapshot_d.size.x=snapshot_d.size.y=-1;
 			cp = paramLine+8;
-			while (*cp && isspace((unsigned char)*cp)) cp++;
-			if (snapshot_d.dpi = strtod( cp, &cq ), cp == cq)
+			while (*cp && isspace((unsigned char)*cp)) { cp++; }
+			if (snapshot_d.dpi = strtod( cp, &cq ), cp == cq) {
 				snapshot_d.dpi = -1;
-			else if (snapshot_d.scale = strtod( cq, &cp ), cp == cq)
+			} else if (snapshot_d.scale = strtod( cq, &cp ), cp == cq) {
 				snapshot_d.scale = -1;
-			else if (snapshot_d.orig.x = strtod( cp, &cq ), cp == cq)
+			} else if (snapshot_d.orig.x = strtod( cp, &cq ), cp == cq) {
 				snapshot_d.orig.x = -1;
-			else if (snapshot_d.orig.y = strtod( cq, &cp ), cp == cq)
+			} else if (snapshot_d.orig.y = strtod( cq, &cp ), cp == cq) {
 				snapshot_d.orig.y = -1;
-			else if (snapshot_d.size.x = strtod( cp, &cq ), cp == cq)
+			} else if (snapshot_d.size.x = strtod( cp, &cq ), cp == cq) {
 				snapshot_d.size.x = -1;
-			else if (snapshot_d.size.y = strtod( cq, &cp ), cp == cq)
+			} else if (snapshot_d.size.y = strtod( cq, &cp ), cp == cq) {
 				snapshot_d.size.y = -1;
+			}
 			TakeSnapshot(&snapshot_d);
 		} else if (strncmp( paramLine, "DOCUMENT ON", 11 ) == 0 ) {
 			documentCopy = documentEnable;
@@ -1239,16 +1252,18 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "DOCUMENT COPY", 13 ) == 0 ) {
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( IsEND( END_MESSAGE ) )
+				if ( IsEND( END_MESSAGE ) ) {
 					break;
-				if ( documentCopy && documentFile )
+				}
+				if ( documentCopy && documentFile ) {
 					fprintf( documentFile, "%s", paramLine );
+				}
 			}
 		} else if ( strncmp( paramLine, "DEMOINIT", 8 ) == 0 ) {
 			DemoInitValues();
 		} else if ( strncmp( paramLine, "REGRESSION START", 16 ) == 0 ) {
 			DoRegression( curDemo < 1 ? paramFileName :
-					            demoList(curDemo-1).fileName );
+			              demoList(curDemo-1).fileName );
 		} else {
 			if (strncmp( paramLine, "MOUSE ", 6 ) == 0) {
 				thisCmd = mouseCmd;
@@ -1256,14 +1271,18 @@ static void Playback( void )
 			if (strncmp( paramLine, "MAP ", 6 ) == 0) {
 				thisCmd = mouseCmd;
 			}
+#ifdef UTFCONVERT
+			ConvertUTF8ToSystem(paramLine);
+#endif
 			for ( inx=0; inx<playbackProc_da.cnt; inx++ ) {
 				len = strlen(playbackProc(inx).label);
 				if (strncmp( paramLine, playbackProc(inx).label, len ) == 0) {
 					if (playbackProc(inx).data == NULL) {
-						while (paramLine[len] == ' ') len++;
+						while (paramLine[len] == ' ') { len++; }
 						playbackProc(inx).proc( paramLine+len );
-					} else
+					} else {
 						playbackProc(inx).proc( (char*)playbackProc(inx).data );
+					}
 					break;
 				}
 			}
@@ -1275,7 +1294,7 @@ static void Playback( void )
 				NoticeMessage( MSG_PLAYBACK_UNK_CMD, _("Ok"), NULL, paramLineNum, paramLine );
 			}
 		}
-		lastCmd = thisCmd;
+//		lastCmd = thisCmd;
 		wFlush();
 		if (pauseDemo) {
 			EnableButtons( TRUE );
@@ -1301,13 +1320,14 @@ static void Playback( void )
 
 static int StartPlayback( int cnt, char **pathName, void * context )
 {
-	assert( pathName != NULL );
-	assert( cnt ==1 );
+	CHECK( pathName != NULL );
+	CHECK( cnt ==1 );
 
 	SetCurrentPath( MACROPATHKEY, pathName[0] );
 	paramFile = fopen( pathName[0], "r" );
 	if ( paramFile == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Playback"), pathName[0], strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Playback"), pathName[0],
+		               strerror(errno) );
 		return FALSE;
 	}
 
@@ -1331,7 +1351,6 @@ static void DoDemoButton( void * command )
 	case 0:
 		/* step */
 		playbackNonStop = (wGetKeyState() & WKEY_SHIFT) != 0;
-		paramHiliteFast = (wGetKeyState() & WKEY_CTRL) != 0;
 		Playback();
 		break;
 	case 1:
@@ -1339,15 +1358,17 @@ static void DoDemoButton( void * command )
 			DoSaveAs( NULL );
 		} else {
 			/* next */
-			if (paramFile)
+			if (paramFile) {
 				fclose(paramFile);
+			}
 			paramFile = NULL;
 			wTextClear( demoT );
 			if ( (wGetKeyState()&WKEY_SHIFT)!=0 ) {
-				if ( curDemo >= 2 )
+				if ( curDemo >= 2 ) {
 					curDemo -= 2;
-				else
+				} else {
 					curDemo = 0;
+				}
 			}
 			Playback();
 		}
@@ -1375,11 +1396,11 @@ static void DoDemoButton( void * command )
 
 
 static void DemoDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
-	if ( inx != I_DEMOSPEED ) return;
+	if ( inx != I_DEMOSPEED ) { return; }
 	SetPlaybackSpeed( (wIndex_t)*(long*)valueP );
 }
 
@@ -1387,7 +1408,8 @@ static void DemoDlgUpdate(
 static void CreateDemoW( void )
 {
 	char * title = MakeWindowTitle(_("Demo"));
-	demoW = ParamCreateDialog( &demoPG, title, NULL, NULL, NULL, FALSE, NULL, F_RESIZE, DemoDlgUpdate );
+	demoW = ParamCreateDialog( &demoPG, title, NULL, NULL, NULL, FALSE, NULL,
+	                           F_RESIZE, DemoDlgUpdate );
 
 	wListAddValue( demoSpeedL, _("Slowest"), NULL, I2VP(0) );
 	wListAddValue( demoSpeedL, _("Slow"), NULL, I2VP(1) );
@@ -1396,14 +1418,16 @@ static void CreateDemoW( void )
 	wListAddValue( demoSpeedL, _("Faster"), NULL, I2VP(4) );
 	wListAddValue( demoSpeedL, _("Fastest"), NULL, I2VP(5) );
 	wListSetIndex( demoSpeedL, (wIndex_t)playbackSpeed );
-	playbackFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, title, sRecordFilePattern, StartPlayback, NULL );
+	playbackFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, title, sRecordFilePattern,
+	                                 StartPlayback, NULL );
 }
 
 
 EXPORT void DoPlayBack( void * context )
 {
-	if (demoW == NULL)
+	if (demoW == NULL) {
 		CreateDemoW();
+	}
 	wButtonSetLabel( demoNext, _("Save") );
 	wFilSelect( playbackFile_fs, GetCurrentPath(MACROPATHKEY));
 }
@@ -1417,83 +1441,84 @@ EXPORT void DoPlayBack( void * context )
  */
 
 static char * demoInitParams[] = {
-		"layout title1 XTrackCAD",
-		"layout title2 Demo",
-		"GROUP layout",
-		"display tunnels 1",
-		"display endpt 2",
-		"display labelenable 0",
-		"display description-fontsize 48",
-		"display labelscale 8",
-		"display layoutlabels 6",
-		"display tworailscale 16",
-		"display tiedraw 0",
-		"pref mingridspacing 5",
-		"pref balloonhelp 1",
-		"display hotbarlabels 1",
-		"display mapscale 64",
-		"display livemap 0",
-		"display carhotbarlabels 1",
-		"display hideTrainsInTunnels 0",
-		"GROUP display",
-		"pref turntable-angle 15.00",
-		"cmdopt preselect 1",
-		"pref coupling-speed-max 100",
-		"cmdopt rightclickmode 0",
-		"GROUP cmdopt",
-		"pref checkpoint 0",
-		"pref units 0",
-		"pref dstfmt 1",
-		"pref anglesystem 0",
-		"pref minlength 0.100",
-		"pref connectdistance 0.100",
-		"pref connectangle 1.000",
-		"pref dragpixels 20",
-		"pref dragtimeout 500",
-		"display autoPan 0",
-		"display listlabels 7",
-		"layout mintrackradius 1.000",
-		"layout maxtrackgrade 5.000",
-		"display trainpause 300",
-		"GROUP pref",
-		"rgbcolor snapgrid 65280",
-		"rgbcolor marker 16711680",
-		"rgbcolor border 0",
-		"rgbcolor crossmajor 16711680",
-		"rgbcolor crossminor 255",
-		"rgbcolor normal 0",
-		"rgbcolor selected 16711680",
-		"rgbcolor profile 16711935",
-		"rgbcolor exception 16711808",
-		"rgbcolor tie 16744448",
-		"GROUP rgbcolor",
-		"easement val 0.000",
-		"easement r 0.000",
-		"easement x 0.000",
-		"easement l 0.000",
-		"GROUP easement",
-		"grid horzspacing 12.000",
-		"grid horzdivision 12",
-		"grid horzenable 0",
-		"grid vertspacing 12.000",
-		"grid vertdivision 12",
-		"grid vertenable 0",
-		"grid origx 0.000",
-		"grid origy 0.000",
-		"grid origa 0.000",
-		"grid show 0",
-		"GROUP grid",
-		"misc toolbarset 65535",
-		"misc cur-turnout-ep 0",
-		"GROUP misc",
-		"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
-		"GROUP sticky",
-		"turnout hide 0",
-		"layer button-count 10",
-		"cmdopt selectmode 0",
-		"cmdopt selectzero 1",
-		"rescale change-dim 0",
-		NULL };
+	"layout title1 XTrackCAD",
+	"layout title2 Demo",
+	"GROUP layout",
+	"display tunnels 1",
+	"display endpt 2",
+	"display labelenable 0",
+	"display description-fontsize 48",
+	"display labelscale 8",
+	"display layoutlabels 6",
+	"display tworailscale 16",
+	"display tiedraw 0",
+	"pref mingridspacing 5",
+	"pref balloonhelp 1",
+	"display hotbarlabels 1",
+	"display mapscale 64",
+	"display livemap 0",
+	"display carhotbarlabels 1",
+	"display hideTrainsInTunnels 0",
+	"GROUP display",
+	"pref turntable-angle 15.00",
+	"cmdopt preselect 1",
+	"pref coupling-speed-max 100",
+	"cmdopt rightclickmode 0",
+	"GROUP cmdopt",
+	"pref checkpoint 0",
+	"pref units 0",
+	"pref dstfmt 1",
+	"pref anglesystem 0",
+	"pref minlength 0.100",
+	"pref connectdistance 0.100",
+	"pref connectangle 1.000",
+	"pref dragpixels 20",
+	"pref dragtimeout 500",
+	"display autoPan 0",
+	"display listlabels 7",
+	"layout mintrackradius 1.000",
+	"layout maxtrackgrade 5.000",
+	"display trainpause 300",
+	"GROUP pref",
+	"rgbcolor snapgrid 65280",
+	"rgbcolor marker 16711680",
+	"rgbcolor border 0",
+	"rgbcolor crossmajor 16711680",
+	"rgbcolor crossminor 255",
+	"rgbcolor normal 0",
+	"rgbcolor selected 16711680",
+	"rgbcolor profile 16711935",
+	"rgbcolor exception 16711808",
+	"rgbcolor tie 16744448",
+	"GROUP rgbcolor",
+	"easement val 0.000",
+	"easement r 0.000",
+	"easement x 0.000",
+	"easement l 0.000",
+	"GROUP easement",
+	"grid horzspacing 12.000",
+	"grid horzdivision 12",
+	"grid horzenable 0",
+	"grid vertspacing 12.000",
+	"grid vertdivision 12",
+	"grid vertenable 0",
+	"grid origx 0.000",
+	"grid origy 0.000",
+	"grid origa 0.000",
+	"grid show 0",
+	"GROUP grid",
+	"misc toolbarset 65535",
+	"misc cur-turnout-ep 0",
+	"GROUP misc",
+	"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
+	"GROUP sticky",
+	"turnout hide 0",
+	"layer button-count 10",
+	"cmdopt selectmode 0",
+	"cmdopt selectzero 1",
+	"rescale change-dim 0",
+	NULL
+};
 
 static void DemoInitValues( void )
 {
@@ -1514,13 +1539,13 @@ static void DemoInitValues( void )
 	strcpy( scaleName, "DEMO" );
 	DoSetScale( scaleName );
 	if ( paramPlaybackProc == NULL ) {
-		wNoticeEx( NT_INFORMATION, _("Can not find PARAMETER playback proc"), _("Ok"), NULL );
+		wNoticeEx( NT_INFORMATION, _("Can not find PARAMETER playback proc"), _("Ok"),
+		           NULL );
 		return;
 	}
-	paramHiliteFast = TRUE;
-	for ( cpp = demoInitParams; *cpp; cpp++ )
+	for ( cpp = demoInitParams; *cpp; cpp++ ) {
 		paramPlaybackProc( *cpp );
-	paramHiliteFast = FALSE;
+	}
 	// Have to do this manually
 	oldMagneticSnap = MagneticSnap( TRUE );
 }
@@ -1529,8 +1554,9 @@ static void DemoInitValues( void )
 static void DoDemo( void * demoNumber )
 {
 
-	if (demoW == NULL)
+	if (demoW == NULL) {
 		CreateDemoW();
+	}
 	wButtonSetLabel( demoNext, _("Next") );
 	curDemo = (int)VP2L(demoNumber);
 	if ( curDemo < 0 || curDemo >= demoList_da.cnt ) {
@@ -1545,39 +1571,43 @@ static void DoDemo( void * demoNumber )
 
 
 static BOOL_T ReadDemo(
-		char * line )
+        char * line )
 {
-		static wMenu_p m;
-		char * cp;
-		char *path;
+	static wMenu_p m = NULL;
+	char * cp;
+	char *path;
 
-		if ( m == NULL )
-			m = demoM;
+	if ( m == NULL ) {
+		m = demoM;
+	}
 
-		if ( strncmp( line, "DEMOGROUP ", 10 ) == 0 ) {
-			m = wMenuMenuCreate( demoM, NULL, _(line+10) );
+	if ( strncmp( line, "DEMOGROUP ", 10 ) == 0 ) {
+		m = wMenuMenuCreate( demoM, NULL, _(line+10) );
 
-		} else if ( strncmp( line, "DEMO ", 5 ) == 0 ) {
-			if (line[5] != '"')
-				goto error;
-			cp = line+6;
-			while (*cp && *cp != '"') cp++;
-			if ( !*cp )
-				goto error;
-			*cp++ = '\0';
-			while (*cp && *cp == ' ') cp++;
-			if ( strlen(cp)==0 )
-				goto error;
-			DYNARR_APPEND( demoList_t, demoList_da, 10 );
-			demoList( demoList_da.cnt-1 ).title = MyStrdup( _(line+6) );
-			MakeFullpath(&path, libDir, "demos", cp, NULL);
-			demoList(demoList_da.cnt - 1).fileName = path;
-			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, I2VP(demoList_da.cnt-1) );
+	} else if ( strncmp( line, "DEMO ", 5 ) == 0 ) {
+		if (line[5] != '"') {
+			goto error;
 		}
-		return TRUE;
+		cp = line+6;
+		while (*cp && *cp != '"') { cp++; }
+		if ( !*cp ) {
+			goto error;
+		}
+		*cp++ = '\0';
+		while (*cp && *cp == ' ') { cp++; }
+		if ( strlen(cp)==0 ) {
+			goto error;
+		}
+		DYNARR_APPEND( demoList_t, demoList_da, 10 );
+		demoList( demoList_da.cnt-1 ).title = MyStrdup( _(line+6) );
+		MakeFullpath(&path, libDir, "demos", cp, NULL);
+		demoList(demoList_da.cnt - 1).fileName = path;
+		wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, I2VP(demoList_da.cnt-1) );
+	}
+	return TRUE;
 error:
-		InputError( "Expected 'DEMO \"<Demo Name>\" <File Name>'", TRUE );
-		return FALSE;
+	InputError( "Expected 'DEMO \"<Demo Name>\" <File Name>'", TRUE );
+	return FALSE;
 }
 
 
@@ -1592,17 +1622,28 @@ EXPORT BOOL_T MacroInit( void )
 	rightDragColor = drawColorRed;
 	leftDragColor = drawColorBlue;
 
-	arrow0_bm = wDrawBitMapCreate( mainD.d, arrow0_width, arrow0_height, 12, 12, arrow0_bits );
-	arrow0_shift_bm = wDrawBitMapCreate( mainD.d, arrow0_shift_width, arrow0_shift_height, 12, 12, arrow0_shift_bits );
-	arrow0_ctl_bm = wDrawBitMapCreate( mainD.d, arrow0_ctl_width, arrow0_ctl_height, 12, 12, arrow0_ctl_bits );
-	arrow3_bm = wDrawBitMapCreate( mainD.d, arrow3_width, arrow3_height, 12, 12, arrow3_bits );
-	arrow3_shift_bm = wDrawBitMapCreate( mainD.d, arrow3_shift_width, arrow3_shift_height, 12, 12, arrow3_shift_bits );
-	arrow3_ctl_bm = wDrawBitMapCreate( mainD.d, arrow3_ctl_width, arrow3_ctl_height, 12, 12, arrow3_ctl_bits );
-	arrowr3_bm = wDrawBitMapCreate( mainD.d, arrowr3_width, arrowr3_height, 12, 12, arrowr3_bits );
-    arrowr3_shift_bm = wDrawBitMapCreate( mainD.d, arrowr3_shift_width, arrowr3_shift_height, 12, 12, arrowr3_shift_bits );
-	arrowr3_ctl_bm = wDrawBitMapCreate( mainD.d, arrowr3_ctl_width, arrowr3_ctl_height, 12, 12, arrowr3_ctl_bits );
-	arrows_bm = wDrawBitMapCreate( mainD.d, arrows_width, arrows_height, 12, 12, arrows_bits );
-	flash_bm = wDrawBitMapCreate( mainD.d, flash_width, flash_height, 12, 12, flash_bits );
+	arrow0_bm = wDrawBitMapCreate( mainD.d, arrow0_width, arrow0_height, 12, 12,
+	                               arrow0_bits );
+	arrow0_shift_bm = wDrawBitMapCreate( mainD.d, arrow0_shift_width,
+	                                     arrow0_shift_height, 12, 12, arrow0_shift_bits );
+	arrow0_ctl_bm = wDrawBitMapCreate( mainD.d, arrow0_ctl_width, arrow0_ctl_height,
+	                                   12, 12, arrow0_ctl_bits );
+	arrow3_bm = wDrawBitMapCreate( mainD.d, arrow3_width, arrow3_height, 12, 12,
+	                               arrow3_bits );
+	arrow3_shift_bm = wDrawBitMapCreate( mainD.d, arrow3_shift_width,
+	                                     arrow3_shift_height, 12, 12, arrow3_shift_bits );
+	arrow3_ctl_bm = wDrawBitMapCreate( mainD.d, arrow3_ctl_width, arrow3_ctl_height,
+	                                   12, 12, arrow3_ctl_bits );
+	arrowr3_bm = wDrawBitMapCreate( mainD.d, arrowr3_width, arrowr3_height, 12, 12,
+	                                arrowr3_bits );
+	arrowr3_shift_bm = wDrawBitMapCreate( mainD.d, arrowr3_shift_width,
+	                                      arrowr3_shift_height, 12, 12, arrowr3_shift_bits );
+	arrowr3_ctl_bm = wDrawBitMapCreate( mainD.d, arrowr3_ctl_width,
+	                                    arrowr3_ctl_height, 12, 12, arrowr3_ctl_bits );
+	arrows_bm = wDrawBitMapCreate( mainD.d, arrows_width, arrows_height, 12, 12,
+	                               arrows_bits );
+	flash_bm = wDrawBitMapCreate( mainD.d, flash_width, flash_height, 12, 12,
+	                              flash_bits );
 
 	ParamRegister( &recordPG );
 	ParamRegister( &demoPG );

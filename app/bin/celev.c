@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cselect.h"
@@ -40,7 +40,8 @@ static EPINX_T elevEp;
 static BOOL_T elevUndo = FALSE;
 
 static char * elevModeLabels[] = { N_("None"), N_("Defined"), N_("Hidden"),
-	N_("Computed"), N_("Grade"), N_("Station"), N_("Ignore"), NULL };
+                                   N_("Computed"), N_("Grade"), N_("Station"), N_("Ignore"), NULL
+                                 };
 static paramFloatRange_t r_1000_1000 = { -1000, 1000 };
 
 static paramData_t elevationPLs[] = {
@@ -53,37 +54,40 @@ static paramData_t elevationPLs[] = {
 #define I_GRADE			(3)
 	{ PD_MESSAGE, NULL, "grade", 0, I2VP(80) },
 #define I_STATION			(4)
-	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(200), NULL, 0, 0, sizeof(elevStationV)} };
-static paramGroup_t elevationPG = { "elev", PGO_DIALOGTEMPLATE, elevationPLs, COUNT( elevationPLs ) };
+	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, I2VP(200), NULL, 0, 0, sizeof(elevStationV)}
+};
+static paramGroup_t elevationPG = { "elev", 0, elevationPLs, COUNT( elevationPLs ) };
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-static void CreateSquareAnchor(coOrd p) {
+static void CreateSquareAnchor(coOrd p)
+{
 	DIST_T d = tempD.scale*0.25;
 	int i = anchors_da.cnt;
 	DYNARR_SET(trkSeg_t,anchors_da,i+4);
-	for (int j =0; j<4;j++) {
+	for (int j =0; j<4; j++) {
 		anchors(i+j).type = SEG_STRLIN;
 		anchors(i+j).color = wDrawColorBlue;
 		anchors(i+j).width = 0;
 	}
 	anchors(i).u.l.pos[0].x = anchors(i+2).u.l.pos[1].x =
-	anchors(i+3).u.l.pos[0].x = anchors(i+3).u.l.pos[1].x = p.x-d/2;
+	                                  anchors(i+3).u.l.pos[0].x = anchors(i+3).u.l.pos[1].x = p.x-d/2;
 
 	anchors(i).u.l.pos[0].y = anchors(i).u.l.pos[1].y =
-	anchors(i+1).u.l.pos[0].y =	anchors(i+3).u.l.pos[1].y = p.y-d/2;
+	                                  anchors(i+1).u.l.pos[0].y =	anchors(i+3).u.l.pos[1].y = p.y-d/2;
 
 	anchors(i).u.l.pos[1].x =
-	anchors(i+1).u.l.pos[0].x = anchors(i+1).u.l.pos[1].x =
-	anchors(i+2).u.l.pos[0].x = p.x+d/2;
+	        anchors(i+1).u.l.pos[0].x = anchors(i+1).u.l.pos[1].x =
+	                        anchors(i+2).u.l.pos[0].x = p.x+d/2;
 
 	anchors(i+1).u.l.pos[1].y =
-	anchors(i+2).u.l.pos[0].y = anchors(i+2).u.l.pos[1].y =
-	anchors(i+3).u.l.pos[0].y = p.y+d/2;
+	        anchors(i+2).u.l.pos[0].y = anchors(i+2).u.l.pos[1].y =
+	                        anchors(i+3).u.l.pos[0].y = p.y+d/2;
 }
 
-static void CreateEndAnchor(coOrd p, wBool_t lock) {
+static void CreateEndAnchor(coOrd p, wBool_t lock)
+{
 	DIST_T d = tempD.scale*0.15;
 
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -97,8 +101,9 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
-static void CreateSplitAnchor(coOrd pos, track_p t) {
-	DIST_T d = tempD.scale*0.1;
+static void CreateSplitAnchor(coOrd pos, track_p t)
+{
+//	DIST_T d = tempD.scale*0.1;
 	DIST_T w = tempD.scale/tempD.dpi*4;
 	int i;
 	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
@@ -113,26 +118,32 @@ static void CreateSplitAnchor(coOrd pos, track_p t) {
 }
 
 
-void static CreateMoveAnchor(coOrd pos) {
+#if 0
+void static CreateMoveAnchor(coOrd pos)
+{
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,
+	               wDrawColorBlue);
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,wDrawColorBlue);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,
+	               wDrawColorBlue);
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	CreateSquareAnchor(pos);
 }
+#endif
 
 static void LayoutElevW(
-		paramData_t * pd,
-		int inx,
-		wWinPix_t colX,
-		wWinPix_t * x,
-		wWinPix_t * y )
+        paramData_t * pd,
+        int inx,
+        wWinPix_t colX,
+        wWinPix_t * x,
+        wWinPix_t * y )
 {
 	static wWinPix_t h = 0;
 	switch ( inx ) {
 	case I_HEIGHT:
-		h = wControlGetHeight( elevationPLs[I_MODE].control )/(COUNT( elevModeLabels )-1);
+		h = wControlGetHeight( elevationPLs[I_MODE].control )/(COUNT(
+		                        elevModeLabels )-1);
 #ifndef WINDOWS
 		h += 3;
 #endif
@@ -153,8 +164,9 @@ static int GetElevMode( void )
 	int newMode;
 	static int modeMap[7] = { ELEV_NONE, ELEV_DEF|ELEV_VISIBLE, ELEV_DEF, ELEV_COMP|ELEV_VISIBLE, ELEV_GRADE|ELEV_VISIBLE, ELEV_STATION|ELEV_VISIBLE, ELEV_IGNORE };
 	mode = (int)elevModeV;
-	if (mode<0||mode>=7)
+	if (mode<0||mode>=7) {
 		return -1;
+	}
 	newMode = modeMap[mode];
 	return newMode;
 }
@@ -168,8 +180,9 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 
 	if ( inx == 0 ) {
 		long mode = *(long*)valueP;
-		if ( mode < 0 || mode >= 7 )
+		if ( mode < 0 || mode >= 7 ) {
 			return;
+		}
 		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
 		switch ( mode ) {
@@ -190,23 +203,28 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 	}
 	ParamLoadData( &elevationPG );
 	newMode = GetElevMode();
-	if (newMode == -1)
+	if (newMode == -1) {
 		return;
-	if (elevTrk == NULL)
+	}
+	if (elevTrk == NULL) {
 		return;
+	}
 	oldMode = GetTrkEndElevUnmaskedMode( elevTrk, elevEp );
 	elevNewValue = 0.0;
-	if ((newMode&ELEV_MASK) == ELEV_DEF)
+	if ((newMode&ELEV_MASK) == ELEV_DEF) {
 		elevNewValue = elevHeightV;
+	}
 	if (oldMode == newMode) {
 		if ((newMode&ELEV_MASK) == ELEV_DEF) {
 			elevOldValue = GetTrkEndElevHeight( elevTrk, elevEp );
 			diff = fabs( elevOldValue-elevNewValue );
-			if ( diff < 0.02 )
+			if ( diff < 0.02 ) {
 				return;
+			}
 		} else if ((newMode&ELEV_MASK) == ELEV_STATION) {
-			if ( strcmp(elevStationV, GetTrkEndElevStation( elevTrk, elevEp ) ) == 0)
+			if ( strcmp(elevStationV, GetTrkEndElevStation( elevTrk, elevEp ) ) == 0) {
 				return;
+			}
 		} else {
 			return;
 		}
@@ -261,10 +279,11 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 		radio = 0;
 		break;
 	case ELEV_DEF:
-		if ( mode & ELEV_VISIBLE )
+		if ( mode & ELEV_VISIBLE ) {
 			radio = 1;
-		else
+		} else {
 			radio = 2;
+		}
 		elevHeightV = GetTrkEndElevHeight(trk,ep);
 		elevOldValue = elevHeightV;
 		ParamLoadControl( &elevationPG, I_HEIGHT );
@@ -291,7 +310,8 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	elevModeV = radio;
 	ParamLoadControl( &elevationPG, I_MODE );
 	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
-	sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0, (units==UNITS_METRIC?"cm":"\"") );
+	sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0,
+	         (units==UNITS_METRIC?"cm":"\"") );
 	ParamLoadMessage( &elevationPG, I_COMPUTED, message );
 	if (gradeOk) {
 		sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
@@ -299,17 +319,20 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 		if ( EndPtIsDefinedElev(trk,ep) ) {
 			elev = GetElevation(trk);
 			dist = GetTrkLength(trk,ep,-1);
-			if (dist>0.1)
+			if (dist>0.1) {
 				sprintf( message, "%0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
-			else
+			} else {
 				sprintf( message, _("Undefined") );
+			}
 			if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
 				elev = GetElevation(trk1);
 				dist = GetTrkLength(trk1,ep1,-1);
-				if (dist>0.1)
-					sprintf( message+strlen(message), " - %0.1f%%", fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
-				else
+				if (dist>0.1) {
+					sprintf( message+strlen(message), " - %0.1f%%",
+					         fabs(round(((elev-elevX)/dist)*1000.0))/10.0 );
+				} else {
 					sprintf( message+strlen(message), " - %s", _("Undefined") );
+				}
 			}
 		} else {
 			strcpy( message, _("Undefined") );
@@ -323,11 +346,13 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	wShow(elevW);
 }
 
-static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
+static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height)
+{
 	DIST_T elev0, elev1, dist0, dist1;
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
-		if ( GetTrkLength( trk, 0, 1 ) < 0.1 )
+		if ( GetTrkLength( trk, 0, 1 ) < 0.1 ) {
 			return FALSE;
+		}
 		dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
 		dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
 		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
@@ -338,8 +363,8 @@ static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
 		}
 		*height = ((elev1-elev0)*(dist0/(dist0+dist1)))+elev0;
 		return TRUE;
-	} else if (GetTrkEndPtCnt(trk) == 1 && 
-		  ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE ) ) {
+	} else if (GetTrkEndPtCnt(trk) == 1 &&
+	           ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE ) ) {
 		*height = elev0;
 		return TRUE;
 	}
@@ -351,12 +376,14 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0;
-	int oldTrackCount;
+//	int oldTrackCount;
 
 	switch (action) {
 	case C_START:
-		if ( elevW == NULL )
-			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")), _("Done"), DoElevDone, wHide, TRUE, LayoutElevW, 0, DoElevUpdate );
+		if ( elevW == NULL ) {
+			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")),
+			                           _("Done"), DoElevDone, wHide, TRUE, LayoutElevW, 0, DoElevUpdate );
+		}
 		elevModeV = 0;
 		elevHeightV = 0.0;
 		elevStationV[0] = 0;
@@ -368,7 +395,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
 		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
 		ParamLoadMessage( &elevationPG, I_GRADE, "" );
-		InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description, +Alt to show elevation") );
+		InfoMessage(
+		        _("Click on end, +Shift to split, +Ctrl to move description, +Alt to show elevation") );
 		elevTrk = NULL;
 		elevUndo = FALSE;
 		CmdMoveDescription( action, pos );
@@ -381,10 +409,11 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			CmdMoveDescription( action, pos );
 			return C_CONTINUE;
 		}
-		BOOL_T xing = FALSE;
+//		BOOL_T xing = FALSE;
 		coOrd p0 = pos, p2=pos;
 		if ((trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL)) != NULL) {
-			EPINX_T ep0 = 0, ep1 = 1;
+			EPINX_T ep0 = 0;
+//			EPINX_T ep1 = 1;
 			DIST_T elev0, elev1;
 			if (GetTrkEndPtCnt(trk0) == 2) {
 				if (!GetPointElev(trk0,p0,&elev0)) {
@@ -398,13 +427,18 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			if (((MyGetKeyState()&WKEY_ALT))) {   //Add square with Alt
 				if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
 					if (IsClose(FindDistance(p0,p2))) {
-						if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
+						if (GetEndPtConnectedToMe(trk0,
+						                          trk1) == -1) {	//Not simply connected to each other!!!
 							if (GetTrkEndPtCnt(trk1) == 2) {
 								if (GetPointElev(trk1,p2,&elev1)) {
 									if (MyGetKeyState()&WKEY_SHIFT) {
-										InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
-									} else
-										InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+										InfoMessage (
+										        _("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f - Click to Split"),
+										        PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+									} else {
+										InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f"),
+										             PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+									}
 								}
 								CreateSquareAnchor(p2);
 								return C_CONTINUE;
@@ -414,21 +448,23 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				}
 			}
 			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
-			    if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
-						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
+				if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
+				    && !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
 					CreateSplitAnchor(p0,trk0);
-			   } else if ((IsClose(FindDistance(GetTrkEndPos(trk0,ep0),p0))
-					   || (FindDistance(GetTrkEndPos(trk0,ep0),p0)<minLength))) {
+				} else if ((IsClose(FindDistance(GetTrkEndPos(trk0,ep0),p0))
+				            || (FindDistance(GetTrkEndPos(trk0,ep0),p0)<minLength))) {
 					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
 					InfoMessage (_("Track End elevation %0.3f - snap End Pt"), PutDim(elev0));
 				} else if (MyGetKeyState()&WKEY_ALT) {
 					CreateEndAnchor(p0,TRUE);
 					InfoMessage (_("Track End elevation %0.3f"), PutDim(elev0));
 				}
-			} else InfoMessage( _("Click on End Pt, +Shift to split, +Ctrl to move description, +Alt show Elevation") );
-		} else
-			InfoMessage( _("Click on End Pt, +Shift to split, +Ctrl to move description, +Alt show Elevation") );
+			} else { InfoMessage( _("Click on End Pt, +Shift to split, +Ctrl to move description, +Alt show Elevation") ); }
+		} else {
+			InfoMessage(
+			        _("Click on End Pt, +Shift to split, +Ctrl to move description, +Alt show Elevation") );
+		}
 		return C_CONTINUE;
 	case C_DOWN:
 	case C_MOVE:
@@ -440,7 +476,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			elevTrk = NULL;
 			return C_CONTINUE;
 		}
-		/*no break*/
+	/*no break*/
 	case C_LCLICK:
 		;
 		p0= pos;
@@ -452,16 +488,18 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			ep0 = PickEndPoint( p0, trk0 );
 			if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-				oldTrackCount = trackCount;
+//				oldTrackCount = trackCount;
 				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
-					!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
+				    !SplitTrack( trk0, p0, ep0, &trk1, FALSE )) {
 					return C_CONTINUE;
+				}
 				InfoMessage( _("Track split!") );
 				ElevSelect( trk0, ep0 );
 				UndoEnd();
 				elevUndo = FALSE;
 			} else if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),p0)) ||
-					  (FindDistance(GetTrkEndPos(trk0,ep0),p0)<minLength)) {   //Snap if close visually or track
+			           (FindDistance(GetTrkEndPos(trk0,ep0),
+			                         p0)<minLength)) {   //Snap if close visually or track
 				InfoMessage( _("Point selected!") );
 				ElevSelect( trk0, ep0 );
 			}
@@ -482,8 +520,9 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		DoElevHilight( NULL );
 		HilightSelectedEndPt( TRUE, elevTrk, elevEp );
 		if (anchors_da.cnt) {
-					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-					wSetCursor(mainD.d,wCursorNone);
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+			wSetCursor(mainD.d,wCursorNone);
 		}
 		CmdMoveDescription( action, pos );
 		return C_CONTINUE;
@@ -494,11 +533,13 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 
 
 
-#include "bitmaps/elevation.xpm"
+#include "bitmaps/elevation.xpm3"
 
 EXPORT void InitCmdElevation( wMenu_p menu )
 {
 	ParamRegister( &elevationPG );
-	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"), wIconCreatePixMap(elevation_xpm[iconSize]), LEVEL0_50, IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
+	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"),
+	               wIconCreatePixMap(elevation_xpm3[iconSize]), LEVEL0_50,
+	               IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
 }
 

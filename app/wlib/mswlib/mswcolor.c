@@ -4,7 +4,6 @@
 
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
@@ -34,16 +33,17 @@ static void mswGetCustomColors( void );
 
 
 static struct {
-		WORD palVersion;
-		WORD palNumEntries;
-		PALETTEENTRY palPalEntry[NUM_COLORS];
-		} colorPalette = {
-		0x300,
-		2,
-		{
+	WORD palVersion;
+	WORD palNumEntries;
+	PALETTEENTRY palPalEntry[NUM_COLORS];
+} colorPalette = {
+	0x300,
+	2,
+	{
 		{ 255, 255, 255 },		/* White */
 		{	0,	 0,	  0 }		/* Black */
-		} };
+	}
+};
 
 
 static long flipRGB( long rgb )
@@ -68,8 +68,10 @@ static void getpalette( void )
 	cnt = GetDeviceCaps(hdc, SIZEPALETTE);
 	GetSystemPaletteEntries( hdc, 0, cnt, pe );
 	f = fopen( "palette.txt", "w" );
-	for (inx=0;inx<cnt;inx++)
-		fprintf(f, "%d [ %d %d %d %d ]\n", inx, pe[inx].peRed, pe[inx].peGreen, pe[inx].peBlue, pe[inx].peFlags );
+	for (inx=0; inx<cnt; inx++) {
+		fprintf(f, "%d [ %d %d %d %d ]\n", inx, pe[inx].peRed, pe[inx].peGreen,
+		        pe[inx].peBlue, pe[inx].peFlags );
+	}
 	fclose(f);
 	ReleaseDC( mswHWnd, hdc );
 }
@@ -91,8 +93,9 @@ static int findColor( int r0, int g0, int b0 )
 		b1 = pal[c].peBlue;
 		g1 = pal[c].peGreen;
 		d1 = abs(r0-r1) + abs(g0-g1) + abs(b0-b1);
-		if (d1 == 0)
+		if (d1 == 0) {
 			return c;
+		}
 		if (d1 < d0) {
 			d0 = d1;
 			cc = c;
@@ -104,7 +107,8 @@ static int findColor( int r0, int g0, int b0 )
 		pal[colorPalette.palNumEntries].peBlue = b0;
 		if ( mswPalette ) {
 			ResizePalette( mswPalette, colorPalette.palNumEntries+1 );
-			SetPaletteEntries( mswPalette, colorPalette.palNumEntries, 1, &pal[colorPalette.palNumEntries] );
+			SetPaletteEntries( mswPalette, colorPalette.palNumEntries, 1,
+			                   &pal[colorPalette.palNumEntries] );
 		}
 		return colorPalette.palNumEntries++;
 	}
@@ -130,8 +134,9 @@ void mswInitColorPalette( void )
 		PALETTEENTRY palPalEntry[256];
 	} pe;
 
-	if (initted)
+	if (initted) {
 		return;
+	}
 
 	initted = TRUE;
 	mswGetCustomColors();
@@ -158,7 +163,7 @@ HPALETTE mswCreatePalette( void )
 int mswGetColorList( RGBQUAD * colors )
 {
 	int i;
-	for (i=0;i<(int)colorPalette.palNumEntries;i++) {
+	for (i=0; i<(int)colorPalette.palNumEntries; i++) {
 		colors[i].rgbBlue = colorPalette.palPalEntry[i].peBlue;
 		colors[i].rgbGreen = colorPalette.palPalEntry[i].peGreen;
 		colors[i].rgbRed = colorPalette.palPalEntry[i].peRed;
@@ -170,37 +175,41 @@ int mswGetColorList( RGBQUAD * colors )
 
 COLORREF mswGetColor( wBool_t hasPalette, wDrawColor color )
 {
-	if ( hasPalette )
+	if ( hasPalette ) {
 		return PALETTEINDEX(color);
-	else
-		return RGB( colorPalette.palPalEntry[color].peRed,	colorPalette.palPalEntry[color].peGreen,  colorPalette.palPalEntry[color].peBlue );
+	} else {
+		return RGB( colorPalette.palPalEntry[color].peRed,
+		            colorPalette.palPalEntry[color].peGreen,
+		            colorPalette.palPalEntry[color].peBlue );
+	}
 }
 
 
 wDrawColor wDrawColorGray(
-		int percent )
+        int percent )
 {
 	int n;
 	n = (percent * NUM_GRAYS) / 100;
-	if ( n <= 0 )
+	if ( n <= 0 ) {
 		return wDrawColorBlack;
-	else if ( n > NUM_GRAYS )
+	} else if ( n > NUM_GRAYS ) {
 		return wDrawColorWhite;
-	else {
+	} else {
 		n = (n*256)/NUM_GRAYS;
 		return wDrawFindColor( wRGB(n,n,n) );
 	}
 }
 
 wDrawColor wDrawFindColor(
-		long rgb0 )
+        long rgb0 )
 {
 	static long saved_rgb = wRGB(255,255,255);
 	static wDrawColor saved_color = 0;
 	int r0, g0, b0;
 
-	if (rgb0 == saved_rgb)
+	if (rgb0 == saved_rgb) {
 		return saved_color;
+	}
 	r0 = (int)(rgb0>>16)&0xFF;
 	g0 = (int)(rgb0>>8)&0xFF;
 	b0 = (int)(rgb0)&0xFF;
@@ -210,7 +219,7 @@ wDrawColor wDrawFindColor(
 
 
 long wDrawGetRGB(
-		wDrawColor color )
+        wDrawColor color )
 {
 	long rgb;
 	int r, g, b;
@@ -259,8 +268,8 @@ void mswPutCustomColors( void )
 
 
 wBool_t wColorSelect(
-		const char * title,
-		wDrawColor * color )
+        const char * title,
+        wDrawColor * color )
 {
 	long rgb;
 
@@ -285,18 +294,18 @@ wBool_t wColorSelect(
 
 
 typedef struct {
-		wDrawColor * valueP;
-		wColorSelectButtonCallBack_p action;
-		const char * labelStr;
-		void * data;
-		wDrawColor color;
-		wButton_p button;
-		wIcon_p bm;
-		} colorData_t;
+	wDrawColor * valueP;
+	wColorSelectButtonCallBack_p action;
+	const char * labelStr;
+	void * data;
+	wDrawColor color;
+	wButton_p button;
+	wIcon_p bm;
+} colorData_t;
 
 
 static void doColorButton(
-		void * data )
+        void * data )
 {
 	colorData_t * cd = (colorData_t*)data;
 	wDrawColor newColor;
@@ -305,30 +314,33 @@ static void doColorButton(
 	if (wColorSelect( cd->labelStr, &newColor )) {
 		cd->color = newColor;
 		wColorSelectButtonSetColor( cd->button, newColor );
-		if (cd->valueP)
+		if (cd->valueP) {
 			*cd->valueP = newColor;
-		if (cd->action)
+		}
+		if (cd->action) {
 			cd->action( cd->data, newColor );
+		}
 	}
 }
 
 
 wButton_p wColorSelectButtonCreate(
-		wWin_p win,
-		wWinPix_t x,
-		wWinPix_t y,
-		const char * helpStr,
-		const char * labelStr,
-		long option,
-		wWinPix_t width,
-		wDrawColor * color,
-		wColorSelectButtonCallBack_p action,
-		void * data )
+        wWin_p win,
+        wWinPix_t x,
+        wWinPix_t y,
+        const char * helpStr,
+        const char * labelStr,
+        long option,
+        wWinPix_t width,
+        wDrawColor * color,
+        wColorSelectButtonCallBack_p action,
+        void * data )
 {
 	wButton_p bb;
 	wIcon_p bm;
 	colorData_t * cd;
-	bm = wIconCreateBitMap( square10_width, square10_height, square10_bits, (color?*color:0) );
+	bm = wIconCreateBitMap( square10_width, square10_height, square10_bits,
+	                        (color?*color:0) );
 	cd = malloc( sizeof *cd );
 	cd->valueP = color;
 	cd->action = action;
@@ -336,17 +348,19 @@ wButton_p wColorSelectButtonCreate(
 	cd->labelStr = labelStr;
 	cd->color = (color?*color:0);
 	cd->bm = bm;
-	bb = wButtonCreate( win, x, y, helpStr, (char*)bm, option|BO_ICON, width, doColorButton, cd );
+	bb = wButtonCreate( win, x, y, helpStr, (char*)bm, option|BO_ICON, width,
+	                    doColorButton, cd );
 	cd->button = bb;
-	if ( labelStr )
-				wControlSetLabel( (wControl_p)bb, labelStr );
+	if ( labelStr ) {
+		wControlSetLabel( (wControl_p)bb, labelStr );
+	}
 	return bb;
 }
 
 
 void wColorSelectButtonSetColor(
-		wButton_p bb,
-		wDrawColor color )
+        wButton_p bb,
+        wDrawColor color )
 {
 	((colorData_t*)((wControl_p)bb)->data)->color = color;
 	wIconSetColor( ((colorData_t*)((wControl_p)bb)->data)->bm, color );
@@ -355,7 +369,7 @@ void wColorSelectButtonSetColor(
 
 
 wDrawColor wColorSelectButtonGetColor(
-		wButton_p bb )
+        wButton_p bb )
 {
 	return ((colorData_t*)((wControl_p)bb)->data)->color;
 }

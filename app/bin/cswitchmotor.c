@@ -44,7 +44,7 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program; if not, write to the Free Software
- *     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  *
  */
@@ -56,7 +56,6 @@
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
-#include "trackx.h"
 #include "common-ui.h"
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"
@@ -611,7 +610,6 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 }
 
 #if 0
-extern BOOL_T inDescribeCmd;
 
 static STATUS_T CmdSwitchMotorEdit( wAction_t action, coOrd pos )
 {
@@ -826,7 +824,7 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
 //#include "bitmaps/switchmnew.xpm"
 //#include "bitmaps/switchmedit.xpm"
 //#include "bitmaps/switchmdel.xpm"
-#include "bitmaps/switch-motor.xpm"
+#include "bitmaps/switch-motor.xpm3"
 
 EXPORT void SwitchmotorMgmLoad( void )
 {
@@ -834,7 +832,7 @@ EXPORT void SwitchmotorMgmLoad( void )
     static wIcon_p switchmI = NULL;
     
     if ( switchmI == NULL)
-        switchmI = wIconCreatePixMap( switch_motor_xpm[iconSize] );
+        switchmI = wIconCreatePixMap( switch_motor_xpm3[iconSize] );
     
     TRK_ITERATE(trk) {
         if (GetTrkType(trk) != T_SWITCHMOTOR) continue;
@@ -849,7 +847,7 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	switchmotorReverse[0] = '\0';
         switchmotorPointSense[0] = '\0';
         AddMenuButton( menu, CmdSwitchMotorCreate, "cmdSwitchMotorCreate", 
-                       _("Switch Motor"), wIconCreatePixMap( switch_motor_xpm[iconSize] ),
+                       _("Switch Motor"), wIconCreatePixMap( switch_motor_xpm3[iconSize] ),
                        LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SWITCHMOTOR1, 
                        NULL );
 	ParamRegister( &switchmotorPG );

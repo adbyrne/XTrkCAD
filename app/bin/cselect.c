@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
@@ -37,8 +37,8 @@
 #include "cjoin.h"
 #include "draw.h"
 #include "misc.h"
-#include "trackx.h"
 #include "common-ui.h"
+#include "ctrain.h"
 
 
 #include "bitmaps/bmendpt.xbm"
@@ -53,6 +53,9 @@ EXPORT wIndex_t selectCmdInx;
 EXPORT wIndex_t moveCmdInx;
 EXPORT wIndex_t rotateCmdInx;
 EXPORT wIndex_t flipCmdInx;
+
+EXPORT long selectMode = 0;
+EXPORT long selectZero = 1;
 
 #define MAXMOVEMODE (3)
 static long moveMode = MAXMOVEMODE;
@@ -76,17 +79,17 @@ static dynArr_t tlist_da;
 		{ DYNARR_APPEND( track_p, tlist_da, 10 );\
 		  Tlist(tlist_da.cnt-1) = T; }
 
-BOOL_T TListSearch(track_p T) {
-	for (int i=0;i<tlist_da.cnt-1;i++) { \
-		if (Tlist(i) == T) return TRUE;
+BOOL_T TListSearch(track_p T)
+{
+	for (int i=0; i<tlist_da.cnt-1; i++) {
+		\
+		if (Tlist(i) == T) { return TRUE; }
 	}
 	return FALSE;
 }
 
 static wMenu_p selectPopup1M;
-static wMenu_p selectPopup1CM;
 static wMenu_p selectPopup2M;
-static wMenu_p selectPopup2CM;
 static wMenu_p selectPopup2RM;
 static wMenu_p selectPopup2TM;
 static wMenu_p selectPopup2TYM;
@@ -104,32 +107,34 @@ static BOOL_T doingAlign = FALSE;
 static enum { AREA, MOVE } mode;
 
 static void SelectOneTrack(
-		track_p trk,
-		wBool_t selected );
+        track_p trk,
+        wBool_t selected );
 static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color );
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len) {
-		DYNARR_APPEND(trkSeg_t,anchors_da,1);
-		int i = anchors_da.cnt-1;
-		anchors(i).type = SEG_STRLIN;
-		anchors(i).width = 0;
-		anchors(i).u.l.pos[0] = pos;
-		Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a+135),len);
-		anchors(i).color = wDrawColorBlue;
-		DYNARR_APPEND(trkSeg_t,anchors_da,1);
-		i = anchors_da.cnt-1;
-		anchors(i).type = SEG_STRLIN;
-		anchors(i).width = 0;
-		anchors(i).u.l.pos[0] = pos;
-		Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a-135),len);
-		anchors(i).color = wDrawColorBlue;
-		wSetCursor(mainD.d,wCursorNone);
+void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len)
+{
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).width = 0;
+	anchors(i).u.l.pos[0] = pos;
+	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a+135),len);
+	anchors(i).color = wDrawColorBlue;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).width = 0;
+	anchors(i).u.l.pos[0] = pos;
+	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a-135),len);
+	anchors(i).color = wDrawColorBlue;
+	wSetCursor(mainD.d,wCursorNone);
 }
 
-void static CreateRotateAnchor(coOrd pos) {
+void static CreateRotateAnchor(coOrd pos)
+{
 	DIST_T d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
@@ -141,7 +146,7 @@ void static CreateRotateAnchor(coOrd pos) {
 	anchors(i).u.c.radius = d*2;
 	anchors(i).color = wDrawColorAqua;
 	coOrd head;					//Arrows
-	for (int j=0;j<3;j++) {
+	for (int j=0; j<3; j++) {
 		Translate(&head,pos,j*120,d*2);
 		CreateArrowAnchor(head,NormalizeAngle((j*120)+90),d);
 	}
@@ -157,7 +162,8 @@ void static CreateRotateAnchor(coOrd pos) {
 	wSetCursor(mainD.d,wCursorNone);
 }
 
-void static CreateModifyAnchor(coOrd pos) {
+void static CreateModifyAnchor(coOrd pos)
+{
 	DIST_T d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
@@ -181,9 +187,10 @@ void static CreateModifyAnchor(coOrd pos) {
 
 }
 
-void CreateDescribeAnchor(coOrd pos) {
+void CreateDescribeAnchor(coOrd pos)
+{
 	DIST_T d = tempD.scale*0.15;
-	for (int j=0;j<2;j++) {
+	for (int j=0; j<2; j++) {
 		pos.x += j*d*3/4;
 		pos.y += j*d/2;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -206,7 +213,8 @@ void CreateDescribeAnchor(coOrd pos) {
 	wSetCursor(mainD.d,wCursorNone);
 }
 
-void CreateActivateAnchor(coOrd pos) {
+void CreateActivateAnchor(coOrd pos)
+{
 	DIST_T d = tempD.scale*0.15;
 	coOrd c = pos;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -232,15 +240,19 @@ void CreateActivateAnchor(coOrd pos) {
 	wSetCursor(mainD.d,wCursorNone);
 }
 
-void static CreateMoveAnchor(coOrd pos) {
+void static CreateMoveAnchor(coOrd pos)
+{
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,
+	               wDrawColorBlue);
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,wDrawColorBlue);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,
+	               wDrawColorBlue);
 	wSetCursor(mainD.d,wCursorNone);
 }
 
-void CreateEndAnchor(coOrd p, wBool_t lock) {
+void CreateEndAnchor(coOrd p, wBool_t lock)
+{
 	DIST_T d = tempD.scale*0.15;
 
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -262,7 +274,8 @@ void CreateEndAnchor(coOrd p, wBool_t lock) {
  *
  */
 
-EXPORT long selectedTrackCount = 0;	/**< number of currently selected track components */
+EXPORT long selectedTrackCount =
+        0;	/**< number of currently selected track components */
 
 static void SelectedTrackCountChange( void )
 {
@@ -281,20 +294,20 @@ static void SelectedTrackCountChange( void )
 
 
 static void DrawTrackAndEndPts(
-		track_p trk,
-		wDrawColor color )
+        track_p trk,
+        wDrawColor color )
 {
 	EPINX_T ep, ep2;
 	track_p trk2;
 
 	DrawTrack( trk, &mainD, color );
-	for (ep=0;ep<GetTrkEndPtCnt(trk);ep++) {
+	for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 		if ((trk2=GetTrkEndTrk(trk,ep)) != NULL) {
-			ASSERT( !IsTrackDeleted(trk) );
+			CHECK( !IsTrackDeleted(trk) );
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
 			DrawEndPt( &mainD, trk2, ep2,
-						(color==wDrawColorBlack && GetTrkSelected(trk2))?
-								selectedColor:color );
+			           (color==wDrawColorBlack && GetTrkSelected(trk2))?
+			           selectedColor:color );
 		}
 	}
 }
@@ -303,14 +316,14 @@ static void DrawTrackAndEndPts(
 
 static void RedrawSelectedTracksBoundary()
 {
-/* Truth table: 4 cases for a track trk, connected to trk1
- *           SELREDRAW
- * trk, trk1:  F, F   - No changes, nothing to draw
- *             T, F   - trk changes but trk1 didn't, flip drawing of select boundary marker
- *             F, T   - trk didn't change but trk1 did, handle redrawing when we get to 2nd track
- *             T, T   - both changed, but we don't need to redraw anything
- *                      unfortunately we will do a redundant redraw when we get to the 2nd track
- */
+	/* Truth table: 4 cases for a track trk, connected to trk1
+	 *           SELREDRAW
+	 * trk, trk1:  F, F   - No changes, nothing to draw
+	 *             T, F   - trk changes but trk1 didn't, flip drawing of select boundary marker
+	 *             F, T   - trk didn't change but trk1 did, handle redrawing when we get to 2nd track
+	 *             T, T   - both changed, but we don't need to redraw anything
+	 *                      unfortunately we will do a redundant redraw when we get to the 2nd track
+	 */
 //	if (importTrack != NULL)
 //		return;
 	track_p trk;
@@ -319,8 +332,9 @@ static void RedrawSelectedTracksBoundary()
 			// This track has changed
 			for ( EPINX_T ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
 				track_p trk1 = GetTrkEndTrk( trk, ep );
-				if ( trk1 == NULL )
+				if ( trk1 == NULL ) {
 					continue;
+				}
 
 //				if ( GetTrkIndex( trk ) < GetTrkIndex( trk1 )
 //					continue;
@@ -337,20 +351,23 @@ static void RedrawSelectedTracksBoundary()
 					ANGLE_T a = GetTrkEndAngle( trk, ep );
 					coOrd p0, p1, p2;
 					len = GetTrkGauge(trk)*2.0;
-					if (len < 0.10*mainD.scale)
+					if (len < 0.10*mainD.scale) {
 						len = 0.10*mainD.scale;
-					Translate( &p1, p, a+45, len );
-					Translate( &p2, p, a+225, len );
-					DrawLine( &mainD, p1, p2, 2, color );
-					Translate( &p1, p, a-45, len );
-					Translate( &p2, p, a-225, len );
-					DrawLine( &mainD, p1, p2, 2, color );
+					}
+					if (DrawTwoRails( &mainD, 1 ) ) {
+						Translate( &p1, p, a+45, len );
+						Translate( &p2, p, a+225, len );
+						DrawLine( &mainD, p1, p2, 2, color );
+						Translate( &p1, p, a-45, len );
+						Translate( &p2, p, a-225, len );
+						DrawLine( &mainD, p1, p2, 2, color );
+					}
 					if ( color == wDrawColorWhite ) {
 						// Fill in holes by undraw cross
 						DIST_T len2 = sqrt( GetTrkGauge(trk)*GetTrkGauge(trk)/2.0 );
 						DIST_T len3 = 0.1*mainD.scale;
 						color = GetTrkColor( trk, &mainD );
-						if ( mainD.scale < twoRailScale ) {
+						if ( DrawTwoRails( &mainD, 1 ) ) {
 							Translate( &p0, p, a-225, len2 );
 							Translate( &p1, p0, a, len3 );
 							Translate( &p2, p0, a+180, len3 );
@@ -395,16 +412,20 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	selectedTrackCount = 0;
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
-		if ((!select) || (GetLayerVisible( GetTrkLayer( trk )) && !GetLayerFrozen(GetTrkLayer( trk )) )) {
-			if (select)
+		if ((!select) || (GetLayerVisible( GetTrkLayer( trk ))
+		                  && !GetLayerFrozen(GetTrkLayer( trk )) )) {
+			if (select) {
 				selectedTrackCount++;
+			}
 			if ((GetTrkSelected(trk)!=0) != select) {
-				if (select)
+				if (select) {
 					SetTrkBits( trk, TB_SELECTED );
-				else
+				} else {
 					ClrTrkBits( trk, TB_SELECTED );
-				if (!doRedraw)
+				}
+				if (!doRedraw) {
 					SetTrkBits( trk, TB_SELREDRAW );
+				}
 				DrawTrackAndEndPts( trk, wDrawColorBlack );
 			}
 		}
@@ -423,7 +444,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
  * \param none
  * \return none
  */
- 
+
 EXPORT void InvertTrackSelect( void * unused )
 {
 	track_p trk;
@@ -431,11 +452,11 @@ EXPORT void InvertTrackSelect( void * unused )
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
 		if (GetLayerVisible( GetTrkLayer( trk )) &&
-			!GetLayerModule(GetTrkLayer( trk )) && !GetLayerFrozen(GetTrkLayer( trk )) ) {
+		    !GetLayerModule(GetTrkLayer( trk )) && !GetLayerFrozen(GetTrkLayer( trk )) ) {
 			SelectOneTrack( trk, GetTrkSelected(trk)==0 );
 		}
 	}
-	
+
 	RedrawSelectedTracksBoundary();
 	SelectedTrackCountChange();
 	MainRedraw(); // InvertTrackSelect
@@ -446,28 +467,30 @@ EXPORT void InvertTrackSelect( void * unused )
  * \param none
  * \return none
  */
- 
+
 EXPORT void OrphanedTrackSelect( void *ptr )
 {
 	track_p trk;
 	EPINX_T ep;
 	int cnt ;
-		
+
 	trk = NULL;
-	
+
 	while( TrackIterate( &trk ) ) {
 		cnt = 0;
-		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk)) && !GetLayerFrozen(GetTrkLayer(trk)))) {
+		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk))
+		                     && !GetLayerFrozen(GetTrkLayer(trk)))) {
 			for( ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
-				if( GetTrkEndTrk( trk, ep ) )
-					cnt++;				
+				if( GetTrkEndTrk( trk, ep ) ) {
+					cnt++;
+				}
 			}
-			
+
 			if( !cnt && GetTrkEndPtCnt( trk )) {
 				SetTrkBits( trk, TB_SELECTED );
 				DrawTrackAndEndPts( trk, wDrawColorBlack );
-				selectedTrackCount++;			
-			}		
+				selectedTrackCount++;
+			}
 		}
 	}
 	RedrawSelectedTracksBoundary();
@@ -476,43 +499,45 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 }
 
 static void SelectOneTrack(
-		track_p trk,
-		wBool_t selected )
+        track_p trk,
+        wBool_t selected )
 {
-		BOOL_T bRedraw = (GetTrkSelected(trk) != 0) != selected;
-		if ( !bRedraw ) {
-			ClrTrkBits( trk, TB_SELREDRAW );
-			return;
-		}
-		SetTrkBits( trk, TB_SELREDRAW );
-		if (selected) {
-			SetTrkBits( trk, TB_SELECTED );
-			selectedTrackCount++;
-		} else {
-			ClrTrkBits( trk, TB_SELECTED );
-			selectedTrackCount--;
-		}
-		SelectedTrackCountChange();
+	BOOL_T bRedraw = (GetTrkSelected(trk) != 0) != selected;
+	if ( !bRedraw ) {
+		ClrTrkBits( trk, TB_SELREDRAW );
+		return;
+	}
+	SetTrkBits( trk, TB_SELREDRAW );
+	if (selected) {
+		SetTrkBits( trk, TB_SELECTED );
+		selectedTrackCount++;
+	} else {
+		ClrTrkBits( trk, TB_SELECTED );
+		selectedTrackCount--;
+	}
+	SelectedTrackCountChange();
 }
 
 
 EXPORT void HighlightSelectedTracks(
-		track_p trk_ignore, BOOL_T keep, BOOL_T invert )
+        track_p trk_ignore, BOOL_T keep, BOOL_T invert )
 {
 	track_p trk = NULL;
-	if ( selectedTrackCount == 0 )
+	if ( selectedTrackCount == 0 ) {
 		return;
+	}
 	while ( TrackIterate( &trk ) ) {
-		if (trk == trk_ignore) continue;
-	    if(GetTrkSelected(trk)) {
-	    	if (!GetLayerVisible( GetTrkLayer( trk ))) continue;
-	    	if (keep)
-	    		DrawTrack(trk,&tempD,selectedColor);
-	    	else if (invert)
-	    		DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
-	    	else
-	    		DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
-	    }
+		if (trk == trk_ignore) { continue; }
+		if(GetTrkSelected(trk)) {
+			if (!GetLayerVisible( GetTrkLayer( trk ))) { continue; }
+			if (keep) {
+				DrawTrack(trk,&tempD,selectedColor);
+			} else if (invert) {
+				DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
+			} else {
+				DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
+			}
+		}
 	}
 
 }
@@ -523,7 +548,7 @@ EXPORT void HighlightSelectedTracks(
  * Ignore Frozen Tracks
  */
 static void SelectConnectedTracks(
-		track_p trk, BOOL_T display_only )
+        track_p trk, BOOL_T display_only )
 {
 	track_p trk1;
 	int inx;
@@ -531,20 +556,23 @@ static void SelectConnectedTracks(
 	tlist_da.cnt = 0;
 	TlistAppend( trk );
 	InfoCount( 0 );
-	if (!display_only) wDrawDelayUpdate( mainD.d, FALSE );
+	if (!display_only) { wDrawDelayUpdate( mainD.d, FALSE ); }
 	for (inx=0; inx<tlist_da.cnt; inx++) {
-		if ( inx > 0 && (selectedTrackCount == 0) && !display_only )
+		if ( inx > 0 && (selectedTrackCount == 0) && !display_only ) {
 			return;
+		}
 		trk = Tlist(inx);
 		if (!GetLayerFrozen(GetTrkLayer(trk))) {
 			if (inx!=0 &&
-				GetTrkSelected(trk)) {
-				if (display_only)
+			    GetTrkSelected(trk)) {
+				if (display_only) {
 					DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
+				}
 				continue;
 			} else if (GetTrkSelected(trk)) {
-				if (display_only)
+				if (display_only) {
 					DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
+				}
 				continue;
 			}
 		}
@@ -552,11 +580,11 @@ static void SelectConnectedTracks(
 			trk1 = GetTrkEndTrk( trk, ep );
 			if (trk1 && !TListSearch(trk1) && GetLayerVisible( GetTrkLayer( trk1 ))) {
 				if (GetTrkSelected(trk1)) {
-					if (display_only) DrawTrack(trk1,&tempD,wDrawColorPreviewSelected );
-				} else TlistAppend( trk1 );
+					if (display_only) { DrawTrack(trk1,&tempD,wDrawColorPreviewSelected ); }
+				} else { TlistAppend( trk1 ); }
 			}
 		}
-		if (display_only && !GetLayerFrozen(GetTrkLayer(trk))) DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
+		if (display_only && !GetLayerFrozen(GetTrkLayer(trk))) { DrawTrack(trk,&tempD,wDrawColorPreviewSelected ); }
 		else if (!GetTrkSelected(trk)) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
 				continue;
@@ -577,44 +605,47 @@ static void SelectConnectedTracks(
 }
 
 typedef void (*doModuleTrackCallBack_t)(track_p, BOOL_T);
-static int DoModuleTracks( int moduleLayer, doModuleTrackCallBack_t doit, BOOL_T val)
+static int DoModuleTracks( int moduleLayer, doModuleTrackCallBack_t doit,
+                           BOOL_T val)
 {
 	track_p trk;
 	trk = NULL;
 	int cnt = 0;
 	while ( TrackIterate( &trk ) ) {
 		if (GetTrkLayer(trk) == moduleLayer) {
-			 doit( trk, val );
-			 cnt++;
+			doit( trk, val );
+			cnt++;
 		}
 	}
 	return cnt;
 }
 
-static void DrawSingleTrack(track_p trk, BOOL_T bit) {
+static void DrawSingleTrack(track_p trk, BOOL_T bit)
+{
 	DrawTrack(trk,&tempD,bit?wDrawColorPreviewSelected:wDrawColorPreviewUnselected);
 }
 
 typedef BOOL_T (*testSelectedTrackCallBack_t)(track_p, int);
 
 
-static BOOL_T TestAllSelectedTracks( testSelectedTrackCallBack_t testit, int value)
+static BOOL_T TestAllSelectedTracks( testSelectedTrackCallBack_t testit,
+                                     int value)
 {
 	track_p trk;
-		trk = NULL;
-		while ( TrackIterate( &trk ) ) {
-			if (GetTrkSelected(trk)) {
-				if ( !testit( trk, value ) ) {
-					return FALSE;
-				}
+	trk = NULL;
+	while ( TrackIterate( &trk ) ) {
+		if (GetTrkSelected(trk)) {
+			if ( !testit( trk, value ) ) {
+				return FALSE;
 			}
 		}
+	}
 	return TRUE;
 }
 
 typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
 
-static void DoSelectedTracks( doSelectedTrackCallBack_t doit )
+EXPORT void DoSelectedTracks( doSelectedTrackCallBack_t doit )
 {
 	track_p trk;
 	trk = NULL;
@@ -647,8 +678,9 @@ static BOOL_T SelectedTracksAreFrozen( void )
 EXPORT void SelectTrackWidth( void* width )
 {
 	track_p trk;
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount<=0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return;
@@ -672,8 +704,9 @@ static void SelectLineType( void* widthVP )
 {
 	int width = (int)VP2L(widthVP);
 	track_p trk;
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount<=0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return;
@@ -684,11 +717,11 @@ static void SelectLineType( void* widthVP )
 	while ( TrackIterate( &trk ) ) {
 		if (GetTrkSelected(trk)) {
 			UndoModify( trk );
-			if (QueryTrack(trk, Q_CAN_MODIFY_CONTROL_POINTS))
+			if (QueryTrack(trk, Q_CAN_MODIFY_CONTROL_POINTS)) {
 				SetBezierLineType(trk, width);
-			else if (QueryTrack(trk, Q_IS_DRAW))
+			} else if (QueryTrack(trk, Q_IS_DRAW)) {
 				SetLineType( trk, width );
-			else if (QueryTrack(trk, Q_IS_STRUCTURE)) {
+			} else if (QueryTrack(trk, Q_IS_STRUCTURE)) {
 				SetCompoundLineType(trk, width);
 			}
 		}
@@ -709,13 +742,15 @@ EXPORT int SelectDelete( void )
 		}
 	}
 
-	if (doingDouble || (GetCurrentCommand() == modifyCmdInx)) return 1;
+	if (doingDouble || (GetCurrentCommand() == modifyCmdInx)) { return 1; }
 
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return 0;
+	}
 	if (selectedTrackCount>0) {
 		BOOL_T UndoStarted = FALSE;
-		if (!TestAllSelectedTracks(QueryTrack,(int)Q_ISTRAIN)) {  // If all Cars, don't bother with UndoStart as there will be nothing to delete
+		if (!TestAllSelectedTracks(QueryTrack,
+		                           (int)Q_ISTRAIN)) {  // If all Cars, don't bother with UndoStart as there will be nothing to delete
 			UndoStarted = TRUE;
 			UndoStart( _("Delete Tracks"), "delete" );
 		}
@@ -727,8 +762,9 @@ EXPORT int SelectDelete( void )
 		wDrawDelayUpdate( mapD.d, FALSE );
 		selectedTrackCount = 0;
 		SelectedTrackCountChange();
-		if (UndoStarted)
+		if (UndoStarted) {
 			UndoEnd();
+		}
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
@@ -738,7 +774,8 @@ EXPORT int SelectDelete( void )
 /*
  * Called By Windows directly with Delete Key. We first try a simple Delete, and if that doesn't work saying "In Modify" we call Modify with a Text key for Delete
  */
-EXPORT void TrySelectDelete( void ) {
+EXPORT void TrySelectDelete( void )
+{
 	if(SelectDelete() == 1) {
 		CmdModify((C_TEXT+(int)(127<<8)),zero);
 	}
@@ -758,13 +795,15 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T unused )
 			UndrawNewTrack( trk2 );
 		}*/
 	UndoModify( trk );
-	if ( drawTunnel == 0 )
+	if ( drawTunnel == 0 ) {
 		flipHiddenDoSelectRecount = TRUE;
+	}
 	if (GetTrkVisible(trk)) {
 		ClrTrkBits( trk, TB_VISIBLE|(drawTunnel==0?(TB_SELECTED|TB_SELREDRAW):0) );
 		ClrTrkBits (trk, TB_BRIDGE);
 		ClrTrkBits (trk, TB_NOTIES);
-;	} else {
+		;
+	} else {
 		SetTrkBits( trk, TB_VISIBLE );
 	}
 	/*DrawNewTrack( trk );*/
@@ -815,8 +854,9 @@ static BOOL_T FlipTies( track_p trk, BOOL_T unused )
 
 EXPORT void SelectTunnel( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount>0) {
 		flipHiddenDoSelectRecount = FALSE;
 		UndoStart( _("Hide Tracks (Tunnel)"), "tunnel" );
@@ -827,14 +867,16 @@ EXPORT void SelectTunnel( void * unused )
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
-	if ( flipHiddenDoSelectRecount )
+	if ( flipHiddenDoSelectRecount ) {
 		SelectRecount();
+	}
 }
 
 EXPORT void SelectBridge( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount>0) {
 		flipHiddenDoSelectRecount = FALSE;
 		UndoStart( _("Bridge Tracks "), "bridge" );
@@ -850,8 +892,9 @@ EXPORT void SelectBridge( void * unused )
 
 EXPORT void SelectRoadbed( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount>0) {
 		flipHiddenDoSelectRecount = FALSE;
 		UndoStart( _("Roadbed Tracks "), "roadbed" );
@@ -867,8 +910,9 @@ EXPORT void SelectRoadbed( void * unused )
 
 EXPORT void SelectTies( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount>0) {
 		flipHiddenDoSelectRecount = FALSE;
 		UndoStart( _("Ties Tracks "), "noties" );
@@ -905,22 +949,23 @@ static BOOL_T SetLayer( track_p trk, BOOL_T unused )
 
 EXPORT void MoveSelectedTracksToCurrentLayer( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
-		if (selectedTrackCount>0) {
-			UndoStart( _("Move To Current Layer"), "changeLayer" );
-			DoSelectedTracks( SetLayer );
-			UndoEnd();
-		} else {
-			ErrorMessage( MSG_NO_SELECTED_TRK );
-		}
+	}
+	if (selectedTrackCount>0) {
+		UndoStart( _("Move To Current Layer"), "changeLayer" );
+		DoSelectedTracks( SetLayer );
+		UndoEnd();
+	} else {
+		ErrorMessage( MSG_NO_SELECTED_TRK );
+	}
 }
 
 EXPORT void SelectCurrentLayer( void * unused )
 {
 	track_p trk;
 	trk = NULL;
-	if (GetLayerFrozen(curLayer)) return;
+	if (GetLayerFrozen(curLayer)) { return; }
 	while ( TrackIterate( &trk ) ) {
 		if ((!GetTrkSelected(trk)) && GetTrkLayer(trk) == curLayer) {
 			SelectOneTrack( trk, TRUE );
@@ -929,7 +974,8 @@ EXPORT void SelectCurrentLayer( void * unused )
 	RedrawSelectedTracksBoundary();
 }
 
-EXPORT void DeselectLayer( unsigned int layer ) {
+EXPORT void DeselectLayer( unsigned int layer )
+{
 	track_p trk;
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
@@ -957,8 +1003,9 @@ static BOOL_T ClearElevation( track_p trk, BOOL_T unused )
 
 EXPORT void ClearElevations( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount>0) {
 		UndoStart( _("Clear Elevations"), "clear elevations" );
 		DoSelectedTracks( ClearElevation );
@@ -982,8 +1029,9 @@ static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 		if ((trk1=GetTrkEndTrk(trk,ep))) {
 			ep1 = GetEndPtConnectedToMe( trk1, trk );
 			if (ep1 >= 0) {
-				if (GetTrkSelected(trk1) && GetTrkIndex(trk1)<GetTrkIndex(trk))
+				if (GetTrkSelected(trk1) && GetTrkIndex(trk1)<GetTrkIndex(trk)) {
 					continue;
+				}
 			}
 		}
 		if (EndPtIsDefinedElev(trk,ep)) {
@@ -1000,8 +1048,9 @@ static BOOL_T AddElevation( track_p trk, BOOL_T unused )
 
 EXPORT void AddElevations( DIST_T delta )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount>0) {
 		elevDelta = delta;
 		UndoStart( _("Add Elevations"), "add elevations" );
@@ -1016,8 +1065,9 @@ EXPORT void AddElevations( DIST_T delta )
 
 EXPORT void DoRefreshCompound( void * unused )
 {
-	if (SelectedTracksAreFrozen())
+	if (SelectedTracksAreFrozen()) {
 		return;
+	}
 	if (selectedTrackCount>0) {
 		UndoStart( _("Refresh Compound"), "refresh compound" );
 		DoSelectedTracks( RefreshCompound );
@@ -1031,7 +1081,8 @@ EXPORT void DoRefreshCompound( void * unused )
 
 
 static drawCmd_t tempSegsD = {
-		NULL, &tempSegDrawFuncs, 0, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
+	NULL, &tempSegDrawFuncs, 0, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix
+};
 EXPORT void WriteSelectedTracksToTempSegs( void )
 {
 	track_p trk;
@@ -1039,8 +1090,9 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 	tempSegsD.dpi = mainD.dpi;
 	for ( trk=NULL; TrackIterate(&trk); ) {
 		if ( GetTrkSelected( trk ) ) {
-			if ( IsTrack( trk ) )
+			if ( IsTrack( trk ) ) {
 				continue;
+			}
 			ClrTrkBits( trk, TB_SELECTED );
 			DrawTrack( trk, &tempSegsD, wDrawColorBlack );
 			SetTrkBits( trk, TB_SELECTED );
@@ -1048,260 +1100,260 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 	}
 }
 
-static char rescaleFromScale[20];
-static char rescaleFromGauge[20];
-
-static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
-static long rescaleMode;
-static wIndex_t rescaleFromScaleInx;
-static wIndex_t rescaleFromGaugeInx;
-static wIndex_t rescaleToScaleInx;
-static wIndex_t rescaleToGaugeInx;
-static wIndex_t rescaleToInx;
-static long rescaleNoChangeDim = FALSE;
-static FLOAT_T rescalePercent;
-static char * rescaleChangeDimLabels[] = { N_("Do not resize track"), NULL };
-static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
-static paramData_t rescalePLs[] = {
-#define I_RESCALE_MODE		(0)
-		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
-#define I_RESCALE_FROM_SCALE		(1)
-		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScale)},
-#define I_RESCALE_FROM_GAUGE		(2)
-		{ PD_STRING, rescaleFromGauge, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGauge)},
-#define I_RESCALE_TO_SCALE		   (3)
-		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("To: ") },
-#define I_RESCALE_TO_GAUGE		   (4)
-		{ PD_DROPLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
-#define I_RESCALE_CHANGE	(5)
-		{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORZ|BC_NOBORDER },
-#define I_RESCALE_PERCENT	(6)
-		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
-		{ PD_MESSAGE, "%", "percent", PDO_DLGHORZ } };
-static paramGroup_t rescalePG = { "rescale", PGO_DIALOGTEMPLATE, rescalePLs, COUNT( rescalePLs ) };
-
-
-static long getboundsCount;
-static coOrd getboundsLo, getboundsHi;
-
-static BOOL_T GetboundsDoIt( track_p trk, BOOL_T unused )
-{
-	coOrd hi, lo;
-
-	GetBoundingBox( trk, &hi, &lo );
-	if ( getboundsCount == 0 ) {
-		getboundsLo = lo;
-		getboundsHi = hi;
-	} else {
-		if ( lo.x < getboundsLo.x ) getboundsLo.x = lo.x;
-		if ( lo.y < getboundsLo.y ) getboundsLo.y = lo.y;
-		if ( hi.x > getboundsHi.x ) getboundsHi.x = hi.x;
-		if ( hi.y > getboundsHi.y ) getboundsHi.y = hi.y;
-	}
-	getboundsCount++;
-	return TRUE;
-}
-
-static coOrd rescaleShift;
-static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
-{
-	EPINX_T ep, ep1;
-	track_p trk1;
-	UndrawNewTrack( trk );
-	UndoModify(trk);
-	if ( rescalePercent != 100.0 ) {
-		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
-				!GetTrkSelected(trk1)) {
-				ep1 = GetEndPtConnectedToMe( trk1, trk );
-				DisconnectTracks( trk, ep, trk1, ep1 );
-			}
-		}
-		/* should the track dimensions ie. length or radius be changed as well? */
-		if( rescaleNoChangeDim == 0 )
-			RescaleTrack( trk, rescalePercent/100.0, rescaleShift );
-	}
-	
-	if ( rescaleMode==0 )
-		SetTrkScale( trk, rescaleToInx );
-	getboundsCount++;
-	DrawNewTrack( trk );
-	return TRUE;
-}
-
-
-static void RescaleDlgOk(
-		void * unused )
-{
-	coOrd center, size;
-	DIST_T d;
-	FLOAT_T ratio = rescalePercent/100.0;
-
-	UndoStart( _("Rescale Tracks"), "Rescale" );
-	getboundsCount = 0;
-	DoSelectedTracks( GetboundsDoIt );
-	center.x = (getboundsLo.x+getboundsHi.x)/2.0;
-	center.y = (getboundsLo.y+getboundsHi.y)/2.0;
-	size.x = (getboundsHi.x-getboundsLo.x)/2.0*ratio;
-	size.y = (getboundsHi.y-getboundsLo.y)/2.0*ratio;
-	getboundsLo.x = center.x - size.x;
-	getboundsLo.y = center.y - size.y;
-	getboundsHi.x = center.x + size.x;
-	getboundsHi.y = center.y + size.y;
-	if ( getboundsLo.x < 0 ) {
-		getboundsHi.x -= getboundsLo.x;
-		getboundsLo.x = 0;
-	} else if ( getboundsHi.x > mapD.size.x ) {
-		d = getboundsHi.x - mapD.size.x;
-		if ( getboundsLo.x < d )
-			d = getboundsLo.x;
-		getboundsHi.x -= d;
-		getboundsLo.x -= d;
-	}
-	if ( getboundsLo.y < 0 ) {
-		getboundsHi.y -= getboundsLo.y;
-		getboundsLo.y = 0;
-	} else if ( getboundsHi.y > mapD.size.y ) {
-		d = getboundsHi.y - mapD.size.y;
-		if ( getboundsLo.y < d )
-			d = getboundsLo.y;
-		getboundsHi.y -= d;
-		getboundsLo.y -= d;
-	}
-	if ( rescaleNoChangeDim == 0 && 
-	     (getboundsHi.x > mapD.size.x ||
-		   getboundsHi.y > mapD.size.y )) {
-		NoticeMessage( MSG_RESCALE_TOO_BIG, _("Ok"), NULL, FormatDistance(getboundsHi.x), FormatDistance(getboundsHi.y) );
-	}
-	rescaleShift.x = (getboundsLo.x+getboundsHi.x)/2.0 - center.x*ratio;
-	rescaleShift.y = (getboundsLo.y+getboundsHi.y)/2.0 - center.y*ratio;
-	
-	rescaleToInx = GetScaleInx( rescaleToScaleInx, rescaleToGaugeInx );
-	DoSelectedTracks( RescaleDoIt );
-
-	// rescale the background if it exists and the layout is resized
-	if (HasBackGround() && ratio != 1.0) {
-		coOrd pos = GetLayoutBackGroundPos();
-		double size = GetLayoutBackGroundSize();
-		pos.x = ratio * pos.x + rescaleShift.x;
-		pos.y = ratio * pos.y + rescaleShift.y;
-		SetLayoutBackGroundPos(pos);
-
-		size *= ratio;
-		SetLayoutBackGroundSize(size);
-	}
-	DoRedraw();
-	wHide( rescalePG.win );
-}
-
-
-static void RescaleDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
-{
-	switch (inx) {
-	case I_RESCALE_MODE:
-		wControlShow( pg->paramPtr[I_RESCALE_FROM_SCALE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_FROM_SCALE].control, FALSE ); 
-		wControlShow( pg->paramPtr[I_RESCALE_TO_SCALE].control, rescaleMode==0 );
-		wControlShow( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, FALSE ); 
-		wControlShow( pg->paramPtr[I_RESCALE_TO_GAUGE].control, rescaleMode==0 );
-		wControlShow( pg->paramPtr[I_RESCALE_CHANGE].control, rescaleMode==0 );
-		wControlActive( pg->paramPtr[I_RESCALE_PERCENT].control, rescaleMode==1 );
-		if ( rescaleMode!=0 )
-			break;
-	case I_RESCALE_TO_SCALE:
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, *((int *)valueP) );
-		rescaleToGaugeInx = 0;
-		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
-		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
-		rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
-		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control, (rescaleFromScaleInx != rescaleToScaleInx) );
-		ParamLoadControl( pg, I_RESCALE_PERCENT );
-		break;
-	case I_RESCALE_TO_GAUGE:
-		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
-		break;
-	case I_RESCALE_FROM_SCALE:
-		ParamLoadControl( pg, I_RESCALE_FROM_SCALE );
-		break;
-	case I_RESCALE_FROM_GAUGE:	
-		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
-		break;
-	case I_RESCALE_CHANGE:
-		ParamLoadControl( pg, I_RESCALE_CHANGE );
-		break;
-	case -1:
-		break;
-	}
-	ParamDialogOkActive( pg, rescalePercent!=100.0 || rescaleFromGaugeInx != rescaleToGaugeInx );
-}
-
-/**
- * Get the scale gauge information for the selected track pieces.  
- * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
- *
- * \param IN trk track element
- * \param IN unused
- * \return TRUE;
- */
- 
-static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
-{
-	char *scaleName;
-	SCALEINX_T scale;
-	SCALEDESCINX_T scaleInx;
-	GAUGEINX_T gaugeInx;
-	
-	scale = GetTrkScale( trk );
-	scaleName = GetScaleName( scale );
-	if( strcmp( scaleName, "*" )) {
-		GetScaleGauge( scale, &scaleInx, &gaugeInx );
-		strcpy( rescaleFromScale,GetScaleDesc( scaleInx ));
-		strcpy( rescaleFromGauge, GetGaugeDesc( scaleInx, gaugeInx ));
-		
-		rescaleFromScaleInx = scaleInx;
-		rescaleFromGaugeInx = gaugeInx;
-		rescaleToScaleInx = scaleInx;
-		rescaleToGaugeInx = gaugeInx;
-	}	
-	
-	return TRUE;
-}
-
-/**
- * Bring up the rescale dialog. The dialog for rescaling the selected pieces
- * of track is created if necessary and shown. Handling of user input is done via
- * RescaleDlgUpdate()
- */
-
-EXPORT void DoRescale( void * unused )
-{
-	if ( rescalePG.win == NULL ) {
-		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"), RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
-		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, GetLayoutCurScaleDesc() ); /* set correct gauge list here */
-		rescaleFromScaleInx = GetLayoutCurScale();
-		rescaleToScaleInx = rescaleFromScaleInx;
-		rescalePercent = 100.0;
-	}
-
-	DoSelectedTracks( SelectedScaleGauge );
-
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
-
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGauge );
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScale );
-
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
-	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
-	
-	wShow( rescalePG.win );
-}
-
+(??)static char rescaleFromScale[20];
+(??)static char rescaleFromGauge[20];
+(??)
+(??)static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
+(??)static long rescaleMode;
+(??)static wIndex_t rescaleFromScaleInx;
+(??)static wIndex_t rescaleFromGaugeInx;
+(??)static wIndex_t rescaleToScaleInx;
+(??)static wIndex_t rescaleToGaugeInx;
+(??)static wIndex_t rescaleToInx;
+(??)static long rescaleNoChangeDim = FALSE;
+(??)static FLOAT_T rescalePercent;
+(??)static char * rescaleChangeDimLabels[] = { N_("Do not resize track"), NULL };
+(??)static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
+(??)static paramData_t rescalePLs[] = {
+(??)#define I_RESCALE_MODE		(0)
+(??)		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
+(??)#define I_RESCALE_FROM_SCALE		(1)
+(??)		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, I2VP(100), N_("From:"),0, 0, sizeof(rescaleFromScale)},
+(??)#define I_RESCALE_FROM_GAUGE		(2)
+(??)		{ PD_STRING, rescaleFromGauge, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, I2VP(100), " / ", 0, 0, sizeof(rescaleFromGauge)},
+(??)#define I_RESCALE_TO_SCALE		   (3)
+(??)		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, I2VP(100), N_("To: ") },
+(??)#define I_RESCALE_TO_GAUGE		   (4)
+(??)		{ PD_DROPLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
+(??)#define I_RESCALE_CHANGE	(5)
+(??)		{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORZ|BC_NOBORDER },
+(??)#define I_RESCALE_PERCENT	(6)
+(??)		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
+(??)		{ PD_MESSAGE, "%", NULL, PDO_DLGHORZ } };
+(??)static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, COUNT( rescalePLs ) };
+(??)
+(??)
+(??)static long getboundsCount;
+(??)static coOrd getboundsLo, getboundsHi;
+(??)
+(??)static BOOL_T GetboundsDoIt( track_p trk, BOOL_T unused )
+(??){
+(??)	coOrd hi, lo;
+(??)
+(??)	GetBoundingBox( trk, &hi, &lo );
+(??)	if ( getboundsCount == 0 ) {
+(??)		getboundsLo = lo;
+(??)		getboundsHi = hi;
+(??)	} else {
+(??)		if ( lo.x < getboundsLo.x ) getboundsLo.x = lo.x;
+(??)		if ( lo.y < getboundsLo.y ) getboundsLo.y = lo.y;
+(??)		if ( hi.x > getboundsHi.x ) getboundsHi.x = hi.x;
+(??)		if ( hi.y > getboundsHi.y ) getboundsHi.y = hi.y;
+(??)	}
+(??)	getboundsCount++;
+(??)	return TRUE;
+(??)}
+(??)
+(??)static coOrd rescaleShift;
+(??)static BOOL_T RescaleDoIt( track_p trk, BOOL_T unused )
+(??){
+(??)	EPINX_T ep, ep1;
+(??)	track_p trk1;
+(??)	UndrawNewTrack( trk );
+(??)	UndoModify(trk);
+(??)	if ( rescalePercent != 100.0 ) {
+(??)		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+(??)			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+(??)				!GetTrkSelected(trk1)) {
+(??)				ep1 = GetEndPtConnectedToMe( trk1, trk );
+(??)				DisconnectTracks( trk, ep, trk1, ep1 );
+(??)			}
+(??)		}
+(??)		/* should the track dimensions ie. length or radius be changed as well? */
+(??)		if( rescaleNoChangeDim == 0 )
+(??)			RescaleTrack( trk, rescalePercent/100.0, rescaleShift );
+(??)	}
+(??)	
+(??)	if ( rescaleMode==0 )
+(??)		SetTrkScale( trk, rescaleToInx );
+(??)	getboundsCount++;
+(??)	DrawNewTrack( trk );
+(??)	return TRUE;
+(??)}
+(??)
+(??)
+(??)static void RescaleDlgOk(
+(??)		void * unused )
+(??){
+(??)	coOrd center, size;
+(??)	DIST_T d;
+(??)	FLOAT_T ratio = rescalePercent/100.0;
+(??)
+(??)	UndoStart( _("Rescale Tracks"), "Rescale" );
+(??)	getboundsCount = 0;
+(??)	DoSelectedTracks( GetboundsDoIt );
+(??)	center.x = (getboundsLo.x+getboundsHi.x)/2.0;
+(??)	center.y = (getboundsLo.y+getboundsHi.y)/2.0;
+(??)	size.x = (getboundsHi.x-getboundsLo.x)/2.0*ratio;
+(??)	size.y = (getboundsHi.y-getboundsLo.y)/2.0*ratio;
+(??)	getboundsLo.x = center.x - size.x;
+(??)	getboundsLo.y = center.y - size.y;
+(??)	getboundsHi.x = center.x + size.x;
+(??)	getboundsHi.y = center.y + size.y;
+(??)	if ( getboundsLo.x < 0 ) {
+(??)		getboundsHi.x -= getboundsLo.x;
+(??)		getboundsLo.x = 0;
+(??)	} else if ( getboundsHi.x > mapD.size.x ) {
+(??)		d = getboundsHi.x - mapD.size.x;
+(??)		if ( getboundsLo.x < d )
+(??)			d = getboundsLo.x;
+(??)		getboundsHi.x -= d;
+(??)		getboundsLo.x -= d;
+(??)	}
+(??)	if ( getboundsLo.y < 0 ) {
+(??)		getboundsHi.y -= getboundsLo.y;
+(??)		getboundsLo.y = 0;
+(??)	} else if ( getboundsHi.y > mapD.size.y ) {
+(??)		d = getboundsHi.y - mapD.size.y;
+(??)		if ( getboundsLo.y < d )
+(??)			d = getboundsLo.y;
+(??)		getboundsHi.y -= d;
+(??)		getboundsLo.y -= d;
+(??)	}
+(??)	if ( rescaleNoChangeDim == 0 && 
+(??)	     (getboundsHi.x > mapD.size.x ||
+(??)		   getboundsHi.y > mapD.size.y )) {
+(??)		NoticeMessage( MSG_RESCALE_TOO_BIG, _("Ok"), NULL, FormatDistance(getboundsHi.x), FormatDistance(getboundsHi.y) );
+(??)	}
+(??)	rescaleShift.x = (getboundsLo.x+getboundsHi.x)/2.0 - center.x*ratio;
+(??)	rescaleShift.y = (getboundsLo.y+getboundsHi.y)/2.0 - center.y*ratio;
+(??)	
+(??)	rescaleToInx = GetScaleInx( rescaleToScaleInx, rescaleToGaugeInx );
+(??)	DoSelectedTracks( RescaleDoIt );
+(??)
+(??)	// rescale the background if it exists and the layout is resized
+(??)	if (HasBackGround() && ratio != 1.0) {
+(??)		coOrd pos = GetLayoutBackGroundPos();
+(??)		double size = GetLayoutBackGroundSize();
+(??)		pos.x = ratio * pos.x + rescaleShift.x;
+(??)		pos.y = ratio * pos.y + rescaleShift.y;
+(??)		SetLayoutBackGroundPos(pos);
+(??)
+(??)		size *= ratio;
+(??)		SetLayoutBackGroundSize(size);
+(??)	}
+(??)	DoRedraw();
+(??)	wHide( rescalePG.win );
+(??)}
+(??)
+(??)
+(??)static void RescaleDlgUpdate(
+(??)		paramGroup_p pg,
+(??)		int inx,
+(??)		void * valueP )
+(??){
+(??)	switch (inx) {
+(??)	case I_RESCALE_MODE:
+(??)		wControlShow( pg->paramPtr[I_RESCALE_FROM_SCALE].control, rescaleMode==0 );
+(??)		wControlActive( pg->paramPtr[I_RESCALE_FROM_SCALE].control, FALSE ); 
+(??)		wControlShow( pg->paramPtr[I_RESCALE_TO_SCALE].control, rescaleMode==0 );
+(??)		wControlShow( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, rescaleMode==0 );
+(??)		wControlActive( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, FALSE ); 
+(??)		wControlShow( pg->paramPtr[I_RESCALE_TO_GAUGE].control, rescaleMode==0 );
+(??)		wControlShow( pg->paramPtr[I_RESCALE_CHANGE].control, rescaleMode==0 );
+(??)		wControlActive( pg->paramPtr[I_RESCALE_PERCENT].control, rescaleMode==1 );
+(??)		if ( rescaleMode!=0 )
+(??)			break;
+(??)	case I_RESCALE_TO_SCALE:
+(??)		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, *((int *)valueP) );
+(??)		rescaleToGaugeInx = 0;
+(??)		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+(??)		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
+(??)		rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
+(??)		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control, (rescaleFromScaleInx != rescaleToScaleInx) );
+(??)		ParamLoadControl( pg, I_RESCALE_PERCENT );
+(??)		break;
+(??)	case I_RESCALE_TO_GAUGE:
+(??)		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+(??)		break;
+(??)	case I_RESCALE_FROM_SCALE:
+(??)		ParamLoadControl( pg, I_RESCALE_FROM_SCALE );
+(??)		break;
+(??)	case I_RESCALE_FROM_GAUGE:	
+(??)		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
+(??)		break;
+(??)	case I_RESCALE_CHANGE:
+(??)		ParamLoadControl( pg, I_RESCALE_CHANGE );
+(??)		break;
+(??)	case -1:
+(??)		break;
+(??)	}
+(??)	ParamDialogOkActive( pg, rescalePercent!=100.0 || rescaleFromGaugeInx != rescaleToGaugeInx );
+(??)}
+(??)
+(??)/**
+(??) * Get the scale gauge information for the selected track pieces.  
+(??) * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
+(??) *
+(??) * \param IN trk track element
+(??) * \param IN unused
+(??) * \return TRUE;
+(??) */
+(??) 
+(??)static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T unused )
+(??){
+(??)	char *scaleName;
+(??)	SCALEINX_T scale;
+(??)	SCALEDESCINX_T scaleInx;
+(??)	GAUGEINX_T gaugeInx;
+(??)	
+(??)	scale = GetTrkScale( trk );
+(??)	scaleName = GetScaleName( scale );
+(??)	if( strcmp( scaleName, "*" )) {
+(??)		GetScaleGauge( scale, &scaleInx, &gaugeInx );
+(??)		strcpy( rescaleFromScale,GetScaleDesc( scaleInx ));
+(??)		strcpy( rescaleFromGauge, GetGaugeDesc( scaleInx, gaugeInx ));
+(??)		
+(??)		rescaleFromScaleInx = scaleInx;
+(??)		rescaleFromGaugeInx = gaugeInx;
+(??)		rescaleToScaleInx = scaleInx;
+(??)		rescaleToGaugeInx = gaugeInx;
+(??)	}	
+(??)	
+(??)	return TRUE;
+(??)}
+(??)
+(??)/**
+(??) * Bring up the rescale dialog. The dialog for rescaling the selected pieces
+(??) * of track is created if necessary and shown. Handling of user input is done via
+(??) * RescaleDlgUpdate()
+(??) */
+(??)
+(??)EXPORT void DoRescale( void * unused )
+(??){
+(??)	if ( rescalePG.win == NULL ) {
+(??)		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"), RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
+(??)		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
+(??)		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, GetLayoutCurScaleDesc() ); /* set correct gauge list here */
+(??)		rescaleFromScaleInx = GetLayoutCurScale();
+(??)		rescaleToScaleInx = rescaleFromScaleInx;
+(??)		rescalePercent = 100.0;
+(??)	}
+(??)
+(??)	DoSelectedTracks( SelectedScaleGauge );
+(??)
+(??)	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
+(??)	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
+(??)
+(??)	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGauge );
+(??)	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScale );
+(??)
+(??)	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
+(??)	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
+(??)	
+(??)	wShow( rescalePG.win );
+(??)}
+(??)
 
 static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
 {
@@ -1313,31 +1365,35 @@ static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
 		trk = Tlist(inx);
 		if (d != &mapD) {
 			GetBoundingBox( trk, &hi, &lo );
-			if ( OFF_D( d->orig, d->size, lo, hi ) )
+			if ( OFF_D( d->orig, d->size, lo, hi ) ) {
 				continue;
+			}
 		}
-		if (color != wDrawColorWhite)
+		if (color != wDrawColorWhite) {
 			ClrTrkBits(trk, TB_UNDRAWN);
-		if (color == wDrawColorWhite)
+		}
+		if (color == wDrawColorWhite) {
 			SetTrkBits( trk, TB_UNDRAWN );
+		}
 	}
 	MainRedraw();  //Omitting all the tracks with TB_UNDRAWN set
 	/*wDrawDelayUpdate( d->d, FALSE );*/
 }
 
 static BOOL_T AddSelectedTrack(
-		track_p trk, BOOL_T unused )
+        track_p trk, BOOL_T unused )
 {
 	DYNARR_APPEND( track_p, tlist_da, 10 );
 	DYNARR_LAST( track_p, tlist_da ) = trk;
 	return TRUE;
 }
 
-static BOOL_T RemoveSelectedTrack(track_p trk) {
+static BOOL_T RemoveSelectedTrack(track_p trk)
+{
 
-	for(int i=0;i<tlist_da.cnt; i++) {
+	for(int i=0; i<tlist_da.cnt; i++) {
 		if (DYNARR_N(track_p,tlist_da,i) == trk) {
-			for (int j=i;j<tlist_da.cnt-1;j++) {
+			for (int j=i; j<tlist_da.cnt-1; j++) {
 				DYNARR_N(track_p,tlist_da,j) = DYNARR_N(track_p,tlist_da,j+1);
 			}
 			tlist_da.cnt--;
@@ -1347,13 +1403,43 @@ static BOOL_T RemoveSelectedTrack(track_p trk) {
 	return FALSE;
 }
 
+static long getSelectedBoundsCount;
+static coOrd getSelectedBoundsLo, getSelectedBoundsHi;
+
+static BOOL_T GetBoundsDoIt( track_p trk, BOOL_T unused )
+{
+	coOrd hi, lo;
+
+	GetBoundingBox( trk, &hi, &lo );
+	if ( getSelectedBoundsCount == 0 ) {
+		getSelectedBoundsLo = lo;
+		getSelectedBoundsHi = hi;
+	} else {
+		if ( lo.x < getSelectedBoundsLo.x ) { getSelectedBoundsLo.x = lo.x; }
+		if ( lo.y < getSelectedBoundsLo.y ) { getSelectedBoundsLo.y = lo.y; }
+		if ( hi.x > getSelectedBoundsHi.x ) { getSelectedBoundsHi.x = hi.x; }
+		if ( hi.y > getSelectedBoundsHi.y ) { getSelectedBoundsHi.y = hi.y; }
+	}
+	getSelectedBoundsCount++;
+	return TRUE;
+}
+
+EXPORT void GetSelectedBounds( coOrd * low, coOrd * high )
+{
+	getSelectedBoundsCount = 0;
+	DoSelectedTracks( GetBoundsDoIt );
+	*low = getSelectedBoundsLo;
+	*high = getSelectedBoundsHi;
+}
+
 static coOrd moveOrig;
 static ANGLE_T moveAngle;
 
 static coOrd moveD_hi, moveD_lo;
 
 static drawCmd_t moveD = {
-		NULL, &tempSegDrawFuncs, DC_SIMPLE, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
+	NULL, &tempSegDrawFuncs, DC_SIMPLE, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix
+};
 
 
 
@@ -1378,12 +1464,13 @@ static void AccumulateTracks( void )
 		if (trk) {
 			GetBoundingBox( trk, &hi, &lo );
 			if (lo.x <= moveD_hi.x && hi.x >= moveD_lo.x &&
-				lo.y <= moveD_hi.y && hi.y >= moveD_lo.y ) {
-					if (!QueryTrack(trk,Q_IS_CORNU))
-						DrawTrack( trk, &moveD, wDrawColorBlack );
+			    lo.y <= moveD_hi.y && hi.y >= moveD_lo.y ) {
+				if (!QueryTrack(trk,Q_IS_CORNU)) {
+					DrawTrack( trk, &moveD, wDrawColorBlack );
 				}
-				movedCnt++;
 			}
+			movedCnt++;
+		}
 	}
 	InfoCount( movedCnt );
 	/*wDrawDelayUpdate( moveD.d, FALSE );*/
@@ -1391,13 +1478,15 @@ static void AccumulateTracks( void )
 
 static dynArr_t auto_select_da;
 
-static void AddEndCornus() {
-	for (int i=0;i<tlist_da.cnt;i++) {
+static void AddEndCornus()
+{
+	for (int i=0; i<tlist_da.cnt; i++) {
 		track_p trk = DYNARR_N(track_p,tlist_da,i);
 		track_p tc;
-		for (int j=GetTrkEndPtCnt(trk)-1;j>=0;j--) {
+		for (int j=GetTrkEndPtCnt(trk)-1; j>=0; j--) {
 			tc = GetTrkEndTrk(trk,j);
-			if (tc && !GetTrkSelected(tc) && QueryTrack(tc,Q_IS_CORNU) && !QueryTrack(trk,Q_IS_CORNU)) {  //On end and cornu
+			if (tc && !GetTrkSelected(tc) && QueryTrack(tc,Q_IS_CORNU)
+			    && !QueryTrack(trk,Q_IS_CORNU)) {  //On end and cornu
 				SelectOneTrack( tc, TRUE );
 				DYNARR_APPEND(track_p,tlist_da,1);	//Add to selected list
 				DYNARR_LAST(track_p,tlist_da) = tc;
@@ -1408,9 +1497,10 @@ static void AddEndCornus() {
 	}
 }
 
-static void RemoveEndCornus() {
+static void RemoveEndCornus()
+{
 	track_p tc;
-	for (int i=0;i<auto_select_da.cnt;i++) {
+	for (int i=0; i<auto_select_da.cnt; i++) {
 		tc = DYNARR_N(track_p,auto_select_da,i);
 		SelectOneTrack( tc, FALSE );
 		RemoveSelectedTrack(tc);
@@ -1466,16 +1556,20 @@ static void SetMoveD( BOOL_T moveB, coOrd orig, ANGLE_T angle )
 		moveD_hi = mainD.orig;
 		Rotate( &moveD_hi, orig, -angle );
 		moveD_lo = moveD_hi;
-		for (inx=0;inx<3;inx++) {
+		for (inx=0; inx<3; inx++) {
 			Rotate( &corner[inx], orig, -angle );
-			if (corner[inx].x < moveD_lo.x)
+			if (corner[inx].x < moveD_lo.x) {
 				moveD_lo.x = corner[inx].x;
-			if (corner[inx].y < moveD_lo.y)
+			}
+			if (corner[inx].y < moveD_lo.y) {
 				moveD_lo.y = corner[inx].y;
-			if (corner[inx].x > moveD_hi.x)
+			}
+			if (corner[inx].x > moveD_hi.x) {
 				moveD_hi.x = corner[inx].x;
-			if (corner[inx].y > moveD_hi.y)
+			}
+			if (corner[inx].y > moveD_hi.y) {
 				moveD_hi.y = corner[inx].y;
+			}
 		}
 	}
 	AccumulateTracks();
@@ -1489,7 +1583,7 @@ static void DrawMovedTracks( void )
 	dynArr_t cornu_segs;
 
 	DrawSegs( &tempD, moveOrig, moveAngle, &tempSegs(0), tempSegs_da.cnt,
-					0.0, selectedColor );
+	          0.0, selectedColor );
 
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
@@ -1501,13 +1595,13 @@ static void DrawMovedTracks( void )
 			coOrd center[2];
 			trackParams_t trackParams;
 			if (GetTrackParams(PARAMS_CORNU, trk, zero, &trackParams)) {
-				for (int i=0;i<2;i++) {
+				for (int i=0; i<2; i++) {
 					pos[i] = trackParams.cornuEnd[i];
 					center[i] = trackParams.cornuCenter[i];
 					angle[i] = trackParams.cornuAngle[i];
 					radius[i] = trackParams.cornuRadius[i];
 					if (!GetTrkEndTrk(trk,i) ||
-						(GetTrkEndTrk(trk,i) && GetTrkSelected(GetTrkEndTrk(trk,i)))) {
+					    (GetTrkEndTrk(trk,i) && GetTrkSelected(GetTrkEndTrk(trk,i)))) {
 						if (!move0B) {
 							Rotate( &pos[i], zero, moveAngle );
 							Rotate( &center[i],zero, moveAngle );
@@ -1523,7 +1617,7 @@ static void DrawMovedTracks( void )
 				trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
 
 				DrawSegsO(&tempD, trk, zero, 0.0, cornu_p,cornu_segs.cnt,
-						GetTrkGauge(trk), selectedColor, DTS_LEFT|DTS_RIGHT );
+				          GetTrkGauge(trk), selectedColor, DTS_LEFT|DTS_RIGHT );
 			}
 
 		}
@@ -1535,13 +1629,13 @@ static void DrawMovedTracks( void )
 
 
 static void MoveTracks(
-		BOOL_T eraseFirst,
-		BOOL_T move,
-		BOOL_T rotate,
-		coOrd base,
-		coOrd orig,
-		ANGLE_T angle,
-		BOOL_T undo)
+        BOOL_T eraseFirst,
+        BOOL_T move,
+        BOOL_T rotate,
+        coOrd base,
+        coOrd orig,
+        ANGLE_T angle,
+        BOOL_T undo)
 {
 	track_p trk, trk1;
 	EPINX_T ep, ep1;
@@ -1561,21 +1655,23 @@ static void MoveTracks(
 	}
 	//Do non-Cornu first to establish new end-points
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
-			trk = Tlist(inx);
-			UndoModify( trk );
-			if (QueryTrack(trk, Q_IS_CORNU)) continue;
-			if (move)
-				MoveTrack( trk, base );
-			if (rotate)
-				RotateTrack( trk, orig, angle );
-			for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-				if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
-						!GetTrkSelected(trk1)) {
-					ep1 = GetEndPtConnectedToMe( trk1, trk );
-					DisconnectTracks( trk, ep, trk1, ep1 );
-					DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
-				}
+		trk = Tlist(inx);
+		UndoModify( trk );
+		if (QueryTrack(trk, Q_IS_CORNU)) { continue; }
+		if (move) {
+			MoveTrack( trk, base );
+		}
+		if (rotate) {
+			RotateTrack( trk, orig, angle );
+		}
+		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+			    !GetTrkSelected(trk1)) {
+				ep1 = GetEndPtConnectedToMe( trk1, trk );
+				DisconnectTracks( trk, ep, trk1, ep1 );
+				DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
 			}
+		}
 	}
 	//Now do the just Cornus - to reset to where the fixed parts ended up
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
@@ -1583,28 +1679,30 @@ static void MoveTracks(
 		UndoModify( trk );
 		BOOL_T fixed_end;
 		fixed_end = FALSE;
-		if (!QueryTrack(trk, Q_IS_CORNU)) continue;
-		for (int i=0;i<2;i++) {
+		if (!QueryTrack(trk, Q_IS_CORNU)) { continue; }
+		for (int i=0; i<2; i++) {
 			track_p te;
 			if ((te = GetTrkEndTrk(trk,i)) && !GetTrkSelected(te)) {
 				fixed_end = TRUE;
 			}
 		}
-	    if (!fixed_end) {
-			if (move)
+		if (!fixed_end) {
+			if (move) {
 				MoveTrack( trk, base );
-			if (rotate)
+			}
+			if (rotate) {
 				RotateTrack( trk, orig, angle );
+			}
 			for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 				if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
-						!GetTrkSelected(trk1)) {
+				    !GetTrkSelected(trk1)) {
 					ep1 = GetEndPtConnectedToMe( trk1, trk );
 					DisconnectTracks( trk, ep, trk1, ep1 );
 					DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
 				}
 			}
-	    } else {
-			for (int i=0;i<2;i++) {
+		} else {
+			for (int i=0; i<2; i++) {
 				if ((trk1 = GetTrkEndTrk(trk,i)) && GetTrkSelected(trk1)) {
 					ep1 = GetEndPtConnectedToMe( trk1, trk );
 					DisconnectTracks(trk,i,trk1,ep1);
@@ -1641,7 +1739,8 @@ static void MoveTracks(
 						end_center = trackParms.cornuCenter[i];
 						end_center.x += base.x;
 						end_center.y += base.y;
-						SetCornuEndPt(trk,i,end_pos,end_center,trackParms.cornuAngle[i],trackParms.cornuRadius[i]);
+						SetCornuEndPt(trk,i,end_pos,end_center,trackParms.cornuAngle[i],
+						              trackParms.cornuRadius[i]);
 					}
 					if (rotate) {
 						coOrd end_pos, end_center;
@@ -1657,7 +1756,7 @@ static void MoveTracks(
 					DrawTrack(trk,&mapD,wDrawColorBlack);
 				}
 			}
-	    }
+		}
 
 		InfoCount( inx );
 	}
@@ -1665,52 +1764,56 @@ static void MoveTracks(
 	ClrAllTrkBits(TB_UNDRAWN);
 	DoRedraw();
 	wSetCursor( mainD.d, defaultCursor );
-	if (undo) UndoEnd();
+	if (undo) { UndoEnd(); }
 	InfoCount( trackCount );
 }
 
 
 void MoveToJoin(
-		track_p trk0,
-		EPINX_T ep0,
-		track_p trk1,
-		EPINX_T ep1 )
+        track_p trk0,
+        EPINX_T ep0,
+        track_p trk1,
+        EPINX_T ep1 )
 {
 	coOrd orig;
 	coOrd base;
 	ANGLE_T angle;
 
 	UndoStart( _("Move To Join"), "Move To Join" );
-		base = GetTrkEndPos(trk0,ep0);
-		orig = GetTrkEndPos(trk1, ep1 );
-		base.x = orig.x - base.x;
-		base.y = orig.y - base.y;
-		angle = GetTrkEndAngle(trk1,ep1);
-		angle -= GetTrkEndAngle(trk0,ep0);
-		angle += 180.0;
-		angle = NormalizeAngle( angle );
-		GetMovedTracks( FALSE );
-		MoveTracks( TRUE, TRUE, TRUE, base, orig, angle, TRUE );
-		UndrawNewTrack( trk0 );
-		UndrawNewTrack( trk1 );
-		ConnectTracks( trk0, ep0, trk1, ep1 );
-		DrawNewTrack( trk0 );
-		DrawNewTrack( trk1 );
-		RemoveEndCornus();
+	base = GetTrkEndPos(trk0,ep0);
+	orig = GetTrkEndPos(trk1, ep1 );
+	base.x = orig.x - base.x;
+	base.y = orig.y - base.y;
+	angle = GetTrkEndAngle(trk1,ep1);
+	angle -= GetTrkEndAngle(trk0,ep0);
+	angle += 180.0;
+	angle = NormalizeAngle( angle );
+	GetMovedTracks( FALSE );
+	MoveTracks( TRUE, TRUE, TRUE, base, orig, angle, TRUE );
+	UndrawNewTrack( trk0 );
+	UndrawNewTrack( trk1 );
+	ConnectTracks( trk0, ep0, trk1, ep1 );
+	DrawNewTrack( trk0 );
+	DrawNewTrack( trk1 );
+	RemoveEndCornus();
 }
 
-void FreeTempStrings() {
+void FreeTempStrings()
+{
 	for (int i = 0; i<tempSegs_da.cnt; i++) {
 		if (tempSegs(i).type == SEG_TEXT) {
-			if (tempSegs(i).u.t.string)
+			if (tempSegs(i).u.t.string) {
 				MyFree(tempSegs(i).u.t.string);
+			}
 			tempSegs(i).u.t.string = NULL;
 		}
 	}
 }
 
 
-wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1, EPINX_T * ep1, track_p * t2, EPINX_T * ep2) {
+wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
+                            EPINX_T * ep1, track_p * t2, EPINX_T * ep2)
+{
 	*ep1 = -1;
 	*ep2 = -1;
 	*t1 = NULL;
@@ -1720,13 +1823,13 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 		for (int i=0; i<GetTrkEndPtCnt(ts); i++) { //All EndPoints
 			track_p ct;
 			if ((ct = GetTrkEndTrk(ts,i))!=NULL) {
-				if (GetTrkSelected(ct) || QueryTrack(ts,Q_IS_CORNU)) continue;   // Another selected track or Cornu - ignore
+				if (GetTrkSelected(ct) || QueryTrack(ts,Q_IS_CORNU)) { continue; }   // Another selected track or Cornu - ignore
 			}
 
 			coOrd pos1 = GetTrkEndPos(ts,i);
-			if (angle != 0.0)
+			if (angle != 0.0) {
 				Rotate(&pos1,orig,angle);
-			else {
+			} else {
 				pos1.x +=base.x;
 				pos1.y +=base.y;
 			}
@@ -1734,7 +1837,7 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 			pos2 = pos1;
 			track_p tt;
 			if ((tt=OnTrackIgnore(&pos2,FALSE,TRUE,ts))!=NULL) {
-				if (GetTrkGauge(ts) != GetTrkGauge(tt)) continue;	//Ignore if different gauges
+				if (GetTrkGauge(ts) != GetTrkGauge(tt)) { continue; }	//Ignore if different gauges
 				if (!GetTrkSelected(tt)) {							//Ignore if new track is selected
 					EPINX_T epp = PickUnconnectedEndPointSilent(pos2, tt);
 					if (epp>=0) {
@@ -1750,7 +1853,8 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 						epp = PickEndPoint(pos2,tt);      //Any close end point (even joined)
 						if (epp>=0) {
 							ct = GetTrkEndTrk(tt,epp);
-							if (ct && GetTrkSelected(ct)) {  //Point is junction to selected track - so will be broken
+							if (ct && GetTrkSelected(
+							            ct)) {  //Point is junction to selected track - so will be broken
 								DIST_T d = FindDistance(pos1,GetTrkEndPos(tt,epp));
 								if (IsClose(d)) {
 									*ep1 = epp;
@@ -1769,14 +1873,15 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 	return FALSE;
 }
 
-void DrawHighlightLayer(int layer) {
+void DrawHighlightLayer(int layer)
+{
 	track_p ts = NULL;
 	BOOL_T initial = TRUE;
 	coOrd layer_hi = zero,layer_lo = zero;
 	while ( TrackIterate( &ts ) ) {
-		if ( !GetLayerVisible( GetTrkLayer( ts))) continue;
-		if (!GetTrkSelected(ts)) continue;
-		if (GetTrkLayer(ts) != layer) continue;
+		if ( !GetLayerVisible( GetTrkLayer( ts))) { continue; }
+		if (!GetTrkSelected(ts)) { continue; }
+		if (GetTrkLayer(ts) != layer) { continue; }
 		coOrd hi,lo;
 		GetBoundingBox(ts, &hi, &lo);
 		if (initial) {
@@ -1784,10 +1889,10 @@ void DrawHighlightLayer(int layer) {
 			layer_lo = lo;
 			initial = FALSE;
 		} else {
-			if (layer_hi.x < hi.x ) layer_hi.x = hi.x;
-			if (layer_hi.y < hi.y ) layer_hi.y = hi.y;
-			if (layer_lo.x > lo.x ) layer_lo.x = lo.x;
-			if (layer_lo.y > lo.y ) layer_lo.y = lo.y;
+			if (layer_hi.x < hi.x ) { layer_hi.x = hi.x; }
+			if (layer_hi.y < hi.y ) { layer_hi.y = hi.y; }
+			if (layer_lo.x > lo.x ) { layer_lo.x = lo.x; }
+			if (layer_lo.y > lo.y ) { layer_lo.y = lo.y; }
 		}
 	}
 	wDrawPix_t margin = (10.5*mainD.scale/mainD.dpi);
@@ -1808,7 +1913,8 @@ void DrawHighlightLayer(int layer) {
 	DrawPoly(&tempD,4,rect,type,wDrawColorPowderedBlue,wDrawLineDash,DRAW_CLOSED);
 }
 
-void SetUpMenu2(coOrd pos, track_p trk) {
+void SetUpMenu2(coOrd pos, track_p trk)
+{
 	wMenuPushEnable( menuPushModify,FALSE);
 	wMenuPushEnable(descriptionMI,FALSE);
 	wMenuPushEnable( rotateAlignMI, FALSE );
@@ -1816,12 +1922,13 @@ void SetUpMenu2(coOrd pos, track_p trk) {
 	wMenuPushEnable( bridgeMI, FALSE );
 	wMenuPushEnable( tiesMI, FALSE );
 	if ((trk) &&
-		QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+	    QueryTrack(trk,
+	               Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
 		trackParams_t trackParams;
 		if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
 			DIST_T dist = FindDistance(pos, trackParams.ttcenter);
 			if (dist < trackParams.ttradius/4) {
-					cmdMenuPos = trackParams.ttcenter;
+				cmdMenuPos = trackParams.ttcenter;
 			}
 		}
 	}
@@ -1832,24 +1939,25 @@ void SetUpMenu2(coOrd pos, track_p trk) {
 	}
 	if (trk) {
 		wMenuPushEnable( menuPushModify,
-					(QueryTrack( trk, Q_CAN_MODIFY_CONTROL_POINTS ) ||
-					QueryTrack( trk, Q_IS_CORNU ) ||
-					(QueryTrack( trk, Q_IS_DRAW ) && !QueryTrack( trk, Q_IS_TEXT )) ||
-					QueryTrack( trk, Q_IS_ACTIVATEABLE)));
+		                 (QueryTrack( trk, Q_CAN_MODIFY_CONTROL_POINTS ) ||
+		                  QueryTrack( trk, Q_IS_CORNU ) ||
+		                  (QueryTrack( trk, Q_IS_DRAW ) && !QueryTrack( trk, Q_IS_TEXT )) ||
+		                  QueryTrack( trk, Q_IS_ACTIVATEABLE)));
 	}
 	if ((trk)) {
 		wMenuPushEnable(descriptionMI, QueryTrack( trk, Q_HAS_DESC ));
 		moveDescTrk = trk;
 		moveDescPos = pos;
 	}
-	if (selectedTrackCount>0)
+	if (selectedTrackCount>0) {
 		wMenuPushEnable( rotateAlignMI, TRUE );
+	}
 }
 
 
 static STATUS_T CmdMove(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	static coOrd base;
 	static coOrd orig;
@@ -1863,166 +1971,174 @@ static STATUS_T CmdMove(
 
 	switch( action & 0xFF) {
 
-		case C_START:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			if (selectedTrackCount == 0) {
-				ErrorMessage( MSG_NO_SELECTED_TRK );
-				return C_TERMINATE;
-			}
-			if (SelectedTracksAreFrozen()) {
-				return C_TERMINATE;
-			}
-			InfoMessage( _("Drag to move selected tracks - Shift+Ctrl+Arrow micro-steps the move") );
-			state = 0;
-			ep1 = -1;
-			ep2 = -1;
-			doingMove = FALSE;
-			break;
-
-		case wActionMove:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			CreateMoveAnchor(pos);
-			break;
-		case C_DOWN:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			if (doingMove) {
-				doingMove = FALSE;
-				UndoEnd();
-			}
-
-			if (SelectedTracksAreFrozen()) {
-				return C_TERMINATE;
-			}
-			UndoStart( _("Move Tracks"), "move" );
-			base = zero;
-			orig = pos;
-			DYNARR_RESET(track_p,auto_select_da);
-			GetMovedTracks(TRUE);
-			SetMoveD( TRUE, base, 0.0 );
-			drawCount = 0;
-			state = 1;
-			return C_CONTINUE;
-		case C_MOVE:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			ep1=-1;
-			ep2=-1;
-			drawEnable = enableMoveDraw;
-			base.x = pos.x - orig.x;
-			base.y = pos.y - orig.y;
-			if ((MyGetKeyState() & WKEY_ALT) == 0) SnapPos( &base );
-			SetMoveD( TRUE, base, 0.0 );
-			if (((MyGetKeyState()&(WKEY_ALT)) == 0) == magneticSnap) {  // ALT
-				if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {
-					coOrd pos2 = GetTrkEndPos(t2,ep2);
-					pos2.x +=base.x;
-					pos2.y +=base.y;
-					CreateEndAnchor(pos2,FALSE);
-					CreateEndAnchor(GetTrkEndPos(t1,ep1),TRUE);
-				}
-			}
-#ifdef DRAWCOUNT
-			InfoMessage( "   [%s %s] #%ld", FormatDistance(base.x), FormatDistance(base.y), drawCount );
-#else
-			InfoMessage( "   [%s %s]", FormatDistance(base.x), FormatDistance(base.y) );
-#endif
-			drawEnable = TRUE;
-			return C_CONTINUE;
-		case C_UP:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			state = 0;
-			FreeTempStrings();
-			if (t1 && ep1>=0 && t2 && ep2>=0) {
-				MoveToJoin(t2,ep2,t1,ep1);
-			} else {
-				MoveTracks( FALSE, TRUE, FALSE, base, zero, 0.0, TRUE );
-			}
-			ep1 = -1;
-			ep2 = -1;
-			RemoveEndCornus();
-			tlist_da.cnt = 0;
+	case C_START:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (selectedTrackCount == 0) {
+			ErrorMessage( MSG_NO_SELECTED_TRK );
 			return C_TERMINATE;
+		}
+		if (SelectedTracksAreFrozen()) {
+			return C_TERMINATE;
+		}
+		InfoMessage(
+		        _("Drag to move selected tracks - Shift+Ctrl+Arrow micro-steps the move") );
+		state = 0;
+		ep1 = -1;
+		ep2 = -1;
+		doingMove = FALSE;
+		break;
 
-		case C_CMDMENU:
-			if (doingMove) UndoEnd();
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		CreateMoveAnchor(pos);
+		break;
+	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (doingMove) {
 			doingMove = FALSE;
-			base = pos;
-			track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
-			if ((trk) &&
-				QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
-				trackParams_t trackParams;
-				if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
-					DIST_T dist = FindDistance(base, trackParams.ttcenter);
-					if (dist < trackParams.ttradius/4) {
-							cmdMenuPos = trackParams.ttcenter;
-					}
+			UndoEnd();
+		}
+
+		if (SelectedTracksAreFrozen()) {
+			return C_TERMINATE;
+		}
+		UndoStart( _("Move Tracks"), "move" );
+		base = zero;
+		orig = pos;
+		DYNARR_RESET(track_p,auto_select_da);
+		GetMovedTracks(TRUE);
+		SetMoveD( TRUE, base, 0.0 );
+		drawCount = 0;
+		state = 1;
+		return C_CONTINUE;
+	case C_MOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		ep1=-1;
+		ep2=-1;
+		drawEnable = enableMoveDraw;
+		base.x = pos.x - orig.x;
+		base.y = pos.y - orig.y;
+		if ((MyGetKeyState() & WKEY_ALT) == 0) { SnapPos( &base ); }
+		SetMoveD( TRUE, base, 0.0 );
+		if (((MyGetKeyState()&(WKEY_ALT)) == 0) == magneticSnap) {  // ALT
+			if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {
+				coOrd pos2 = GetTrkEndPos(t2,ep2);
+				pos2.x +=base.x;
+				pos2.y +=base.y;
+				CreateEndAnchor(pos2,FALSE);
+				CreateEndAnchor(GetTrkEndPos(t1,ep1),TRUE);
+			}
+		}
+#ifdef DRAWCOUNT
+		InfoMessage( "   [%s %s] #%ld", FormatDistance(base.x), FormatDistance(base.y),
+		             drawCount );
+#else
+		InfoMessage( "   [%s %s]", FormatDistance(base.x), FormatDistance(base.y) );
+#endif
+		drawEnable = TRUE;
+		return C_CONTINUE;
+	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		state = 0;
+		FreeTempStrings();
+		if (t1 && ep1>=0 && t2 && ep2>=0) {
+			MoveToJoin(t2,ep2,t1,ep1);
+		} else {
+			MoveTracks( FALSE, TRUE, FALSE, base, zero, 0.0, TRUE );
+		}
+		ep1 = -1;
+		ep2 = -1;
+		RemoveEndCornus();
+		tlist_da.cnt = 0;
+		return C_TERMINATE;
+
+	case C_CMDMENU:
+		if (doingMove) { UndoEnd(); }
+		doingMove = FALSE;
+		base = pos;
+		track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+		if ((trk) &&
+		    QueryTrack(trk,
+		               Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+			trackParams_t trackParams;
+			if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
+				DIST_T dist = FindDistance(base, trackParams.ttcenter);
+				if (dist < trackParams.ttradius/4) {
+					cmdMenuPos = trackParams.ttcenter;
 				}
 			}
-			moveDescPos = pos;
-			moveDescTrk = trk;
-			SetUpMenu2(pos,trk);
-			menuPos = pos;
-			wMenuPopupShow( selectPopup2M );
-			return C_CONTINUE;
+		}
+		moveDescPos = pos;
+		moveDescTrk = trk;
+		SetUpMenu2(pos,trk);
+		menuPos = pos;
+		wMenuPopupShow( selectPopup2M );
+		return C_CONTINUE;
 
-		case C_TEXT:
-			if ((action>>8) == 'c') {
-				panCenter = pos;
-				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-				PanHere(I2VP(0));
-			}
-			if ((action>>8) == 'e') {
-				DoZoomExtents(I2VP(0));
-			}
-			if ((action>>8 == 's')) {
-				DoZoomExtents(I2VP(1));
-			}
-			if ((action>>8) == '0' || (action>>8 == 'o')) {
-				PanMenuEnter(I2VP('o'));
-			}
-			if ((action>>8) == 127 || (action>>8) == 8)
-				SelectDelete();
+	case C_TEXT:
+		if ((action>>8) == 'c') {
+			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x,
+			                   panCenter.y ) );
+			PanHere(I2VP(0));
+		}
+		if ((action>>8) == 'e') {
+			DoZoomExtents(I2VP(0));
+		}
+		if ((action>>8 == 's')) {
+			DoZoomExtents(I2VP(1));
+		}
+		if ((action>>8) == '0' || (action>>8 == 'o')) {
+			PanMenuEnter(I2VP('o'));
+		}
+		if ((action>>8) == 127 || (action>>8) == 8) {
+			SelectDelete();
+		}
+		break;
+	case C_REDRAW:
+		/* DO_REDRAW */
+		//Draw all existing highlight boxes only
+		DrawHighlightBoxes(FALSE, FALSE, NULL);
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
+		if ( state == 0 ) {
 			break;
-		case C_REDRAW:
-			/* DO_REDRAW */
-			//Draw all existing highlight boxes only
-			DrawHighlightBoxes(FALSE, FALSE, NULL);
-			HighlightSelectedTracks(NULL, TRUE, TRUE);
-			if (anchors_da.cnt)
-				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-			if ( state == 0 )
+		}
+		DrawMovedTracks();
+
+		break;
+
+	case wActionExtKey:
+		if (state) { return C_CONTINUE; }
+		if (SelectedTracksAreFrozen()) { return C_TERMINATE; }
+		if ((MyGetKeyState() &
+		     (WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) {  //Both
+			base = zero;
+			DIST_T w = tempD.scale/tempD.dpi;
+			switch((wAccelKey_e) action>>8) {
+			case wAccelKey_Up:
+				base.y = w;
 				break;
-			DrawMovedTracks();
-
-			break;
-
-		case wActionExtKey:
-			if (state) return C_CONTINUE;
-			if (SelectedTracksAreFrozen()) return C_TERMINATE;
-			if ((MyGetKeyState() &
-					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) {  //Both
-				base = zero;
-				DIST_T w = tempD.scale/tempD.dpi;
-				switch((wAccelKey_e) action>>8) {
-					case wAccelKey_Up:
-						base.y = w;
-						break;
-					case wAccelKey_Down:
-						base.y = -w;
-						break;
-					case wAccelKey_Left:
-						base.x = -w;
-						break;
-					case wAccelKey_Right:
-						base.x = w;
-						break;
-					default:
-						return C_CONTINUE;
-						break;
-				}
+			case wAccelKey_Down:
+				base.y = -w;
+				break;
+			case wAccelKey_Left:
+				base.x = -w;
+				break;
+			case wAccelKey_Right:
+				base.x = w;
+				break;
+			default:
+				return C_CONTINUE;
+				break;
+			}
 
 			drawEnable = enableMoveDraw;
 			GetMovedTracks(TRUE);
-			if (!doingMove) UndoStart( _("Move Tracks"), "move" );
+			if (!doingMove) { UndoStart( _("Move Tracks"), "move" ); }
 			doingMove = TRUE;
 			SetMoveD( TRUE, base, 0.0 );
 			MoveTracks( FALSE, TRUE, FALSE, base, zero, 0.0, FALSE );
@@ -2033,28 +2149,28 @@ static STATUS_T CmdMove(
 			}
 			RemoveEndCornus();
 			return C_CONTINUE;
-			}
-			break;
+		}
+		break;
 
-		case C_FINISH:
-			if (doingMove) {
-				doingMove = FALSE;
-				UndoEnd();
-			}
-			RemoveEndCornus();
-			tlist_da.cnt = 0;
-			break;
-		case C_CONFIRM:
-		case C_CANCEL:
-			if (doingMove) {
-				doingMove = FALSE;
-				UndoUndo(NULL);
-			}
-			RemoveEndCornus();
-			tlist_da.cnt = 0;
-			break;
-		default:
-			break;
+	case C_FINISH:
+		if (doingMove) {
+			doingMove = FALSE;
+			UndoEnd();
+		}
+		RemoveEndCornus();
+		tlist_da.cnt = 0;
+		break;
+	case C_CONFIRM:
+	case C_CANCEL:
+		if (doingMove) {
+			doingMove = FALSE;
+			UndoUndo(NULL);
+		}
+		RemoveEndCornus();
+		tlist_da.cnt = 0;
+		break;
+	default:
+		break;
 	}
 	return C_CONTINUE;
 }
@@ -2076,8 +2192,8 @@ static void RotateAlign( void * alignVP )
 }
 
 static STATUS_T CmdRotate(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	static coOrd base;
 	static coOrd orig_base;
@@ -2099,303 +2215,334 @@ static STATUS_T CmdRotate(
 
 	switch( action ) {
 
-		case C_START:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			state = 0;
-			if (selectedTrackCount == 0) {
-				ErrorMessage( MSG_NO_SELECTED_TRK );
-				return C_TERMINATE;
-			}
-			if (SelectedTracksAreFrozen()) {
-				return C_TERMINATE;
-			}
-			InfoMessage( _("Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu") );
-			wMenuPushEnable( rotateAlignMI, TRUE );
-			rotateAlignState = 0;
-			ep1 = -1;
-			ep2 = -1;
-			break;
-		case wActionMove:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			CreateRotateAnchor(pos);
-			break;
-		case C_DOWN:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			state = 1;
-			if (SelectedTracksAreFrozen()) {
-				return C_TERMINATE;
-			}
-			UndoStart( _("Rotate Tracks"), "rotate" );
-			DYNARR_RESET(track_p,auto_select_da);
-			if ( rotateAlignState == 0 ) {
-				drawnAngle = FALSE;
-				angle = 0.0;
-				base = orig = pos;
-				trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
-				if ((trk) &&
-					QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
-					trackParams_t trackParams;
-					if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
-						DIST_T dist = FindDistance(base, trackParams.ttcenter);
-						if (dist < trackParams.ttradius/4) {
-								base = orig = trackParams.ttcenter;
-								InfoMessage( _("Center of Rotation snapped to Turntable center") );
-						}
-					}
-				}
-				CreateRotateAnchor(orig);
-				GetMovedTracks(TRUE);
-				SetMoveD( FALSE, base, angle );
-
-				/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
-				DrawMovedTracks(FALSE, orig, angle);*/
-			} else {
-				pos1 = pos;
-				drawnAngle = FALSE;
-				onTrackInSplit = TRUE;
-				trk = OnTrack( &pos, TRUE, FALSE );
-				onTrackInSplit = FALSE;
-				if ( trk == NULL ) return C_CONTINUE;
-				angle1 = NormalizeAngle( GetAngleAtPoint( trk, pos, NULL, NULL ) );
-				if ( rotateAlignState == 1 ) {
-					if ( !GetTrkSelected(trk) ) {
-						NoticeMessage( MSG_1ST_TRACK_MUST_BE_SELECTED, _("Ok"), NULL );
-					} else {
-						base = pos;
-						baseAngle = angle1;
-						getboundsCount = 0;
-						DoSelectedTracks( GetboundsDoIt );
-						orig.x = (getboundsLo.x+getboundsHi.x)/2.0;
-						orig.y = (getboundsLo.y+getboundsHi.y)/2.0;
-/*printf( "orig = [%0.3f %0.3f], baseAngle = %0.3f\n", orig.x, orig.y, baseAngle );*/
-					}
-				} else {
-					if ( GetTrkSelected(trk) ) {
-						ErrorMessage( MSG_2ND_TRACK_MUST_BE_UNSELECTED );
-						angle = 0;
-					} else {
-						angle = NormalizeAngle(angle1-baseAngle);
-						//if ( angle > 90 && angle < 270 )
-						//	angle = NormalizeAngle( angle + 180.0 );
-						//if ( NormalizeAngle( FindAngle( base, pos1 ) - angle1 ) < 180.0 )
-						//	angle = NormalizeAngle( angle + 180.0 );
-/*printf( "angle 1 = %0.3f\n", angle );*/
-						if ( angle1 > 180.0 ) angle1 -= 180.0;
-						InfoMessage( _("Angle %0.3f"), angle1 );
-					}
-					GetMovedTracks(TRUE);
-					SetMoveD( FALSE, orig, angle );
-				}
-			}
-			return C_CONTINUE;
-		case C_MOVE:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			ep1=-1;
-			ep2=-1;
-			if ( rotateAlignState == 1 )
-				return C_CONTINUE;
-			if ( rotateAlignState == 2 ) {
-				pos1 = pos;
-				onTrackInSplit = TRUE;
-				trk = OnTrack( &pos, TRUE, FALSE );
-				onTrackInSplit = FALSE;
-				if ( trk == NULL )
-					return C_CONTINUE;
-				if ( GetTrkSelected(trk) ) {
-					ErrorMessage( MSG_2ND_TRACK_MUST_BE_UNSELECTED );
-					return C_CONTINUE;
-				}
-				angle1 = NormalizeAngle( GetAngleAtPoint( trk, pos, NULL, NULL ) );
-				angle = NormalizeAngle(angle1-baseAngle);
-				if ( angle > 90 && angle < 270 )
-					angle = NormalizeAngle( angle + 180.0 );
-				if ( NormalizeAngle( FindAngle( pos, pos1 ) - angle1 ) < 180.0 )
-					angle = NormalizeAngle( angle + 180.0 );
-				if ( angle1 > 180.0 ) angle1 -= 180.0;
-				InfoMessage( _("Angle %0.3f"), angle1 );
-				SetMoveD( FALSE, orig, angle );
-/*printf( "angle 2 = %0.3f\n", angle );*/
-				return C_CONTINUE;
-			}
-			ANGLE_T diff_angle = 0.0;
-			base = pos;
-			drawEnable = enableMoveDraw;
-			if ( FindDistance( orig, pos ) > (20.0/BASE_DPI)*mainD.scale ) {
-				ANGLE_T old_angle = angle;
-				angle = FindAngle( orig, pos );
-				if (!drawnAngle) {
-					baseAngle = angle;
-					drawnAngle = TRUE;
-					direction_set = FALSE;
-				} else {
-					if (!direction_set) {
-						if (DifferenceBetweenAngles(baseAngle,angle)>=0) clockwise = TRUE;
-						else clockwise = FALSE;
-						direction_set = TRUE;
-					} else {
-						if (clockwise) {
-							if (DifferenceBetweenAngles(baseAngle,angle)<0 && fabs(DifferenceBetweenAngles(baseAngle, old_angle))<5)
-								clockwise = FALSE;
-						} else {
-							if (DifferenceBetweenAngles(baseAngle,angle)>=0 && fabs(DifferenceBetweenAngles(baseAngle,old_angle))<5)
-								clockwise = TRUE;
-						}
-					}
-				}
-				orig_base = base = pos;
-				//angle = NormalizeAngle( angle-baseAngle );
-				diff_angle = DifferenceBetweenAngles(baseAngle,angle);
-				if ( (MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == (WKEY_CTRL|WKEY_SHIFT) ) {  //Both Shift+Ctrl
-					if (clockwise) {
-						if (diff_angle<0) diff_angle+=360;
-					} else {
-						if (diff_angle>0) diff_angle-=360;
-					}
-					diff_angle = floor((diff_angle+7.5)/15.0)*15.0;
-					angle = baseAngle+diff_angle;
-				}
-				Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
-				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos)<=(60.0/BASE_DPI*mainD.scale)?FindDistance(orig,pos):60.0/BASE_DPI*mainD.scale ); //Line two
-				SetMoveD( FALSE, orig, NormalizeAngle( angle-baseAngle ) );
-				if (((MyGetKeyState()&(WKEY_ALT)) == WKEY_ALT) != magneticSnap) {  //Just Shift
-					if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,&t2,&ep2)) {
-						coOrd pos2 = GetTrkEndPos(t2,ep2);
-						coOrd pos1 = GetTrkEndPos(t1,ep1);
-						Rotate(&pos2,orig,NormalizeAngle( angle-baseAngle ));
-						CreateEndAnchor(pos2,FALSE);
-						CreateEndAnchor(pos1,TRUE);
-					}
-				}
-
-#ifdef DRAWCOUNT
-				InfoMessage( _("Angle %0.3f #%ld"), fabs(diff_angle), drawCount );
-#else
-				InfoMessage( _("Angle %0.3f %s"), fabs(diff_angle), clockwise?"Clockwise":"Counter-Clockwise" );
-#endif
-				wFlush();
-				drawEnable = TRUE;
-			} else
-				InfoMessage( _("Origin Set. Drag away to set start angle"));
-
-			return C_CONTINUE;
-
-		case C_UP:
-			DYNARR_RESET(trkSeg_t,anchors_da);
-			state = 0;
-			if (t1 && ep1>=0 && t2 && ep2>=0) {
-				MoveToJoin(t2,ep2,t1,ep1);
-				CleanSegs(&tempSegs_da);
-				rotateAlignState = 0;
-			} else {
-				if ( rotateAlignState == 1 ) {
-					if ( trk && GetTrkSelected(trk) ) {
-						InfoMessage( _("Align: Click on the 2nd unselected object") );
-						rotateAlignState = 2;
-					}
-					return C_CONTINUE;
-				}
-				CleanSegs(&tempSegs_da);
-				if ( rotateAlignState == 2 ) {
-					MoveTracks( FALSE, FALSE, TRUE, zero, orig, angle, TRUE );
-					rotateAlignState = 0;
-				} else if (drawnAngle) {
-					MoveTracks( FALSE, FALSE, TRUE, zero, orig, NormalizeAngle( angle-baseAngle ), TRUE );
-				}
-			}
-			UndoEnd();
-			RemoveEndCornus();
-			tlist_da.cnt = 0;
+	case C_START:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		state = 0;
+		if (selectedTrackCount == 0) {
+			ErrorMessage( MSG_NO_SELECTED_TRK );
 			return C_TERMINATE;
-
-		case C_CMDMENU:
-			base = pos;
+		}
+		if (SelectedTracksAreFrozen()) {
+			return C_TERMINATE;
+		}
+		InfoMessage(
+		        _("Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu") );
+		wMenuPushEnable( rotateAlignMI, TRUE );
+		rotateAlignState = 0;
+		ep1 = -1;
+		ep2 = -1;
+		break;
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		CreateRotateAnchor(pos);
+		break;
+	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		state = 1;
+		if (SelectedTracksAreFrozen()) {
+			return C_TERMINATE;
+		}
+		UndoStart( _("Rotate Tracks"), "rotate" );
+		DYNARR_RESET(track_p,auto_select_da);
+		if ( rotateAlignState == 0 ) {
+			drawnAngle = FALSE;
+			angle = 0.0;
+			base = orig = pos;
 			trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
 			if ((trk) &&
-				QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+			    QueryTrack(trk,
+			               Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
 				trackParams_t trackParams;
 				if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
 					DIST_T dist = FindDistance(base, trackParams.ttcenter);
 					if (dist < trackParams.ttradius/4) {
-							cmdMenuPos = trackParams.ttcenter;
+						base = orig = trackParams.ttcenter;
+						InfoMessage( _("Center of Rotation snapped to Turntable center") );
 					}
 				}
 			}
-			moveDescPos = pos;
-			moveDescTrk = trk;
-			SetUpMenu2(pos,trk);
-			menuPos = pos;
-			wMenuPopupShow( selectPopup2M );
+			CreateRotateAnchor(orig);
+			GetMovedTracks(TRUE);
+			SetMoveD( FALSE, base, angle );
+
+			/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
+			DrawMovedTracks(FALSE, orig, angle);*/
+		} else {
+			pos1 = pos;
+			drawnAngle = FALSE;
+			onTrackInSplit = TRUE;
+			trk = OnTrack( &pos, TRUE, FALSE );
+			onTrackInSplit = FALSE;
+			if ( trk == NULL ) { return C_CONTINUE; }
+			angle1 = NormalizeAngle( GetAngleAtPoint( trk, pos, NULL, NULL ) );
+			if ( rotateAlignState == 1 ) {
+				if ( !GetTrkSelected(trk) ) {
+					NoticeMessage( MSG_1ST_TRACK_MUST_BE_SELECTED, _("Ok"), NULL );
+				} else {
+					coOrd low, high;
+					base = pos;
+					baseAngle = angle1;
+					GetSelectedBounds( &low, &high );
+//						getboundsCount = 0;
+//						DoSelectedTracks( GetboundsDoIt );
+//						orig.x = (getboundsLo.x+getboundsHi.x)/2.0;
+//						orig.y = (getboundsLo.y+getboundsHi.y)/2.0;
+					orig.x = (low.x+high.x)/2.0;
+					orig.y = (low.y+high.y)/2.0;
+					/*printf( "orig = [%0.3f %0.3f], baseAngle = %0.3f\n", orig.x, orig.y, baseAngle );*/
+				}
+			} else {
+				if ( GetTrkSelected(trk) ) {
+					ErrorMessage( MSG_2ND_TRACK_MUST_BE_UNSELECTED );
+					angle = 0;
+				} else {
+					angle = NormalizeAngle(angle1-baseAngle);
+					//if ( angle > 90 && angle < 270 )
+					//	angle = NormalizeAngle( angle + 180.0 );
+					//if ( NormalizeAngle( FindAngle( base, pos1 ) - angle1 ) < 180.0 )
+					//	angle = NormalizeAngle( angle + 180.0 );
+					/*printf( "angle 1 = %0.3f\n", angle );*/
+					if ( angle1 > 180.0 ) { angle1 -= 180.0; }
+					InfoMessage( _("Angle %0.3f"), angle1 );
+				}
+				GetMovedTracks(TRUE);
+				SetMoveD( FALSE, orig, angle );
+			}
+		}
+		return C_CONTINUE;
+	case C_MOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		ep1=-1;
+		ep2=-1;
+		if ( rotateAlignState == 1 ) {
 			return C_CONTINUE;
-
-		case C_TEXT:
-			if ((action>>8) == 'd') {
-				panCenter = pos;
-				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-				PanHere(I2VP(0));
+		}
+		if ( rotateAlignState == 2 ) {
+			pos1 = pos;
+			onTrackInSplit = TRUE;
+			trk = OnTrack( &pos, TRUE, FALSE );
+			onTrackInSplit = FALSE;
+			if ( trk == NULL ) {
+				return C_CONTINUE;
 			}
-			if ((action>>8) == 'e') {
-				DoZoomExtents(I2VP(0));
+			if ( GetTrkSelected(trk) ) {
+				ErrorMessage( MSG_2ND_TRACK_MUST_BE_UNSELECTED );
+				return C_CONTINUE;
 			}
-			if ((action>>8) == 's') {
-				DoZoomExtents(I2VP(1));
+			angle1 = NormalizeAngle( GetAngleAtPoint( trk, pos, NULL, NULL ) );
+			angle = NormalizeAngle(angle1-baseAngle);
+			if ( angle > 90 && angle < 270 ) {
+				angle = NormalizeAngle( angle + 180.0 );
 			}
-			if ((action>>8) == '0' || (action>>8 == 'o')) {
-				PanMenuEnter(I2VP('o'));
+			if ( NormalizeAngle( FindAngle( pos, pos1 ) - angle1 ) < 180.0 ) {
+				angle = NormalizeAngle( angle + 180.0 );
 			}
-			break;
-		case C_REDRAW:
-			DrawHighlightBoxes(FALSE,FALSE,NULL);
-			HighlightSelectedTracks(NULL, TRUE, TRUE);
-			if (anchors_da.cnt)
-				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-			/* DO_REDRAW */
-			if ( state == 0 )
-				break;
-			if ( rotateAlignState != 2 ) {
-				DIST_T width = tempD.scale*0.15;
-				DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
-				if (drawnAngle) {
-					DrawLine( &tempD, orig_base, orig, (wDrawWidth)width/2, wDrawColorBlue );
-					ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
-
-					DIST_T dist = FindDistance(orig,base);
-					if (dist>(60.0/BASE_DPI)*mainD.scale) dist = (60.0/BASE_DPI)*mainD.scale;
-
-					if (direction_set) {
-						if (clockwise) {
-							if (a<0) a = a + 360;
-							DrawArc( &tempD, orig, dist/2, FindAngle(orig,orig_base), a, FALSE, 0, wDrawColorBlue);
-						} else {
-							if (a>0) a = a - 360;
-							DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, 0, wDrawColorBlue);
+			if ( angle1 > 180.0 ) { angle1 -= 180.0; }
+			InfoMessage( _("Angle %0.3f"), angle1 );
+			SetMoveD( FALSE, orig, angle );
+			/*printf( "angle 2 = %0.3f\n", angle );*/
+			return C_CONTINUE;
+		}
+		ANGLE_T diff_angle = 0.0;
+		base = pos;
+		drawEnable = enableMoveDraw;
+		if ( FindDistance( orig, pos ) > (20.0/BASE_DPI)*mainD.scale ) {
+			ANGLE_T old_angle = angle;
+			angle = FindAngle( orig, pos );
+			if (!drawnAngle) {
+				baseAngle = angle;
+				drawnAngle = TRUE;
+				direction_set = FALSE;
+			} else {
+				if (!direction_set) {
+					if (DifferenceBetweenAngles(baseAngle,angle)>=0) { clockwise = TRUE; }
+					else { clockwise = FALSE; }
+					direction_set = TRUE;
+				} else {
+					if (clockwise) {
+						if (DifferenceBetweenAngles(baseAngle,angle)<0
+						    && fabs(DifferenceBetweenAngles(baseAngle, old_angle))<5) {
+							clockwise = FALSE;
 						}
-						DIST_T d;
-						d = mainD.scale*0.25;
-						ANGLE_T arrow_a = NormalizeAngle(FindAngle(orig,orig_base)+a/2);
-						coOrd arr1,arr2,arr3;
-						Translate(&arr2,orig,arrow_a,dist/2);
-						if (clockwise) arrow_a +=90;
-						else arrow_a -=90;
-						Translate(&arr1,arr2,arrow_a+135,d/2);
-						Translate(&arr3,arr2,arrow_a-135,d/2);
-						DrawLine( &tempD, arr1, arr2, 0, wDrawColorBlue );
-						DrawLine( &tempD, arr2, arr3, 0, wDrawColorBlue );
+					} else {
+						if (DifferenceBetweenAngles(baseAngle,angle)>=0
+						    && fabs(DifferenceBetweenAngles(baseAngle,old_angle))<5) {
+							clockwise = TRUE;
+						}
 					}
 				}
-
 			}
-			DrawMovedTracks();
+			orig_base = base = pos;
+			//angle = NormalizeAngle( angle-baseAngle );
+			diff_angle = DifferenceBetweenAngles(baseAngle,angle);
+			if ( (MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) ==
+			     (WKEY_CTRL|WKEY_SHIFT) ) {  //Both Shift+Ctrl
+				if (clockwise) {
+					if (diff_angle<0) { diff_angle+=360; }
+				} else {
+					if (diff_angle>0) { diff_angle-=360; }
+				}
+				diff_angle = floor((diff_angle+7.5)/15.0)*15.0;
+				angle = baseAngle+diff_angle;
+			}
+			Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
+			Translate( &orig_base,orig, baseAngle, FindDistance(orig,
+			                pos)<=(60.0/BASE_DPI*mainD.scale)?FindDistance(orig,
+			                                pos):60.0/BASE_DPI*mainD.scale ); //Line two
+			SetMoveD( FALSE, orig, NormalizeAngle( angle-baseAngle ) );
+			if (((MyGetKeyState()&(WKEY_ALT)) == WKEY_ALT) != magneticSnap) {  //Just Shift
+				if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,
+				                        &t2,&ep2)) {
+					coOrd pos2 = GetTrkEndPos(t2,ep2);
+					coOrd pos1 = GetTrkEndPos(t1,ep1);
+					Rotate(&pos2,orig,NormalizeAngle( angle-baseAngle ));
+					CreateEndAnchor(pos2,FALSE);
+					CreateEndAnchor(pos1,TRUE);
+				}
+			}
+
+#ifdef DRAWCOUNT
+			InfoMessage( _("Angle %0.3f #%ld"), fabs(diff_angle), drawCount );
+#else
+			InfoMessage( _("Angle %0.3f %s"), fabs(diff_angle),
+			             clockwise?"Clockwise":"Counter-Clockwise" );
+#endif
+			wFlush();
+			drawEnable = TRUE;
+		} else {
+			InfoMessage( _("Origin Set. Drag away to set start angle"));
+		}
+
+		return C_CONTINUE;
+
+	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		state = 0;
+		if (t1 && ep1>=0 && t2 && ep2>=0) {
+			MoveToJoin(t2,ep2,t1,ep1);
+			CleanSegs(&tempSegs_da);
+			rotateAlignState = 0;
+		} else {
+			if ( rotateAlignState == 1 ) {
+				if ( trk && GetTrkSelected(trk) ) {
+					InfoMessage( _("Align: Click on the 2nd unselected object") );
+					rotateAlignState = 2;
+				}
+				return C_CONTINUE;
+			}
+			CleanSegs(&tempSegs_da);
+			if ( rotateAlignState == 2 ) {
+				MoveTracks( FALSE, FALSE, TRUE, zero, orig, angle, TRUE );
+				rotateAlignState = 0;
+			} else if (drawnAngle) {
+				MoveTracks( FALSE, FALSE, TRUE, zero, orig, NormalizeAngle( angle-baseAngle ),
+				            TRUE );
+			}
+		}
+		UndoEnd();
+		RemoveEndCornus();
+		tlist_da.cnt = 0;
+		return C_TERMINATE;
+
+	case C_CMDMENU:
+		base = pos;
+		trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+		if ((trk) &&
+		    QueryTrack(trk,
+		               Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+			trackParams_t trackParams;
+			if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
+				DIST_T dist = FindDistance(base, trackParams.ttcenter);
+				if (dist < trackParams.ttradius/4) {
+					cmdMenuPos = trackParams.ttcenter;
+				}
+			}
+		}
+		moveDescPos = pos;
+		moveDescTrk = trk;
+		SetUpMenu2(pos,trk);
+		menuPos = pos;
+		wMenuPopupShow( selectPopup2M );
+		return C_CONTINUE;
+
+	case C_TEXT:
+		if ((action>>8) == 'd') {
+			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x,
+			                   panCenter.y ) );
+			PanHere(I2VP(0));
+		}
+		if ((action>>8) == 'e') {
+			DoZoomExtents(I2VP(0));
+		}
+		if ((action>>8) == 's') {
+			DoZoomExtents(I2VP(1));
+		}
+		if ((action>>8) == '0' || (action>>8 == 'o')) {
+			PanMenuEnter(I2VP('o'));
+		}
+		break;
+	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
+		/* DO_REDRAW */
+		if ( state == 0 ) {
 			break;
+		}
+		if ( rotateAlignState != 2 ) {
+			DIST_T width = tempD.scale*0.15;
+			DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
+			if (drawnAngle) {
+				DrawLine( &tempD, orig_base, orig, (wDrawWidth)width/2, wDrawColorBlue );
+				ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig,
+				                                    base));
+
+				DIST_T dist = FindDistance(orig,base);
+				if (dist>(60.0/BASE_DPI)*mainD.scale) { dist = (60.0/BASE_DPI)*mainD.scale; }
+
+				if (direction_set) {
+					if (clockwise) {
+						if (a<0) { a = a + 360; }
+						DrawArc( &tempD, orig, dist/2, FindAngle(orig,orig_base), a, FALSE, 0,
+						         wDrawColorBlue);
+					} else {
+						if (a>0) { a = a - 360; }
+						DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, 0,
+						         wDrawColorBlue);
+					}
+					DIST_T d;
+					d = mainD.scale*0.25;
+					ANGLE_T arrow_a = NormalizeAngle(FindAngle(orig,orig_base)+a/2);
+					coOrd arr1,arr2,arr3;
+					Translate(&arr2,orig,arrow_a,dist/2);
+					if (clockwise) { arrow_a +=90; }
+					else { arrow_a -=90; }
+					Translate(&arr1,arr2,arrow_a+135,d/2);
+					Translate(&arr3,arr2,arrow_a-135,d/2);
+					DrawLine( &tempD, arr1, arr2, 0, wDrawColorBlue );
+					DrawLine( &tempD, arr2, arr3, 0, wDrawColorBlue );
+				}
+			}
 
 		}
+		DrawMovedTracks();
+		break;
+
+	}
 	return C_CONTINUE;
 }
 
-static void QuickMove( void* pos) {
+static void QuickMove( void* pos)
+{
 	coOrd move_pos = *(coOrd*)pos;
 	DYNARR_RESET(track_p,auto_select_da);
-	if ( SelectedTracksAreFrozen() )
+	if ( SelectedTracksAreFrozen() ) {
 		return;
+	}
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
 	UndoStart( _("Move Tracks"), "Move Tracks" );
@@ -2403,16 +2550,18 @@ static void QuickMove( void* pos) {
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
-static track_p SelectTrackByIndex(TRKINX_T ti, char * message ) {
+static track_p SelectTrackByIndex(TRKINX_T ti, char * message )
+{
 	track_p trk = FindTrack(ti);
 	if (trk) {
 		if (!GetLayerFrozen( GetTrkLayer( trk ) ) ) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
-				snprintf(message, STR_LONG_SIZE, "%s %d",_("In module layer:"),GetTrkLayer(trk)+1);
+				snprintf(message, STR_LONG_SIZE, "%s %d",_("In module layer:"),
+				         GetTrkLayer(trk)+1);
 			} else {
-				if (!GetLayerVisible(GetTrkLayer(trk))) FlipLayer(I2VP(GetTrkLayer(trk)));
-				if (!GetTrkVisible(trk) && drawTunnel==0 ) drawTunnel = 1; //Force DRAW_TUNNEL_DASH
+				if (!GetLayerVisible(GetTrkLayer(trk))) { FlipLayer(I2VP(GetTrkLayer(trk))); }
+				if (!GetTrkVisible(trk) && drawTunnel==0 ) { drawTunnel = 1; } //Force DRAW_TUNNEL_DASH
 				SelectOneTrack(trk,TRUE);
 			}
 		} else {
@@ -2425,7 +2574,8 @@ static track_p SelectTrackByIndex(TRKINX_T ti, char * message ) {
 	return trk;
 }
 
-EXPORT void SelectByIndex( void* string) {
+EXPORT void SelectByIndex( void* string)
+{
 	char result[STR_LONG_SIZE] = "";
 	char * message;
 	SetAllTrackSelect(FALSE);
@@ -2445,13 +2595,13 @@ EXPORT void SelectByIndex( void* string) {
 			}
 		}
 		cp = strtok(NULL,",");
-		if (cp) single = FALSE;
+		if (cp) { single = FALSE; }
 	}
 
 	DoZoomExtents(I2VP(1));
-	if (strlen(result))
+	if (strlen(result)) {
 		InfoMessage(result);
-	else if (single && trk) {
+	} else if (single && trk) {
 		char msg[STR_SIZE];
 		DescribeTrack( trk, msg, sizeof msg );
 		InfoMessage( msg );
@@ -2464,8 +2614,9 @@ static void QuickRotate( void* pangle )
 {
 	ANGLE_T angle = (ANGLE_T)VP2L(pangle);
 	DYNARR_RESET(track_p,auto_select_da);
-	if ( SelectedTracksAreFrozen() )
+	if ( SelectedTracksAreFrozen() ) {
 		return;
+	}
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
 	//DrawSelectedTracksD( &mainD, wDrawColorWhite );
@@ -2479,7 +2630,7 @@ static wMenu_p moveDescM;
 static wMenuToggle_p moveDescMI;
 static wMenuToggle_p moveDetailDescMI;
 
-static void ChangeDetailedFlag( wBool_t set, void * mode )
+static void ChangeDetailedFlag( void * mode )
 {
 	wDrawDelayUpdate( mainD.d, TRUE );
 	UndoStart( _("Toggle Detail"), "Modedetail( T%d )", GetTrkIndex(moveDescTrk) );
@@ -2488,22 +2639,24 @@ static void ChangeDetailedFlag( wBool_t set, void * mode )
 	if ( ( GetTrkBits( moveDescTrk ) & TB_DETAILDESC ) == 0 ) {
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 		SetTrkBits( moveDescTrk, TB_DETAILDESC );
-	} else
+	} else {
 		ClrTrkBits( moveDescTrk, TB_DETAILDESC );
+	}
 	DrawNewTrack( moveDescTrk );
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
-static void ChangeDescFlag( wBool_t set, void * mode )
+static void ChangeDescFlag( void * mode )
 {
 	wDrawDelayUpdate( mainD.d, TRUE );
 	UndoStart( _("Toggle Label"), "Modedesc( T%d )", GetTrkIndex(moveDescTrk) );
 	UndoModify( moveDescTrk );
 	UndrawNewTrack( moveDescTrk );
-	if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 )
+	if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 ) {
 		SetTrkBits( moveDescTrk, TB_HIDEDESC );
-	else
+	} else {
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
+	}
 	DrawNewTrack( moveDescTrk );
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
@@ -2512,134 +2665,142 @@ static void ChangeDescFlag( wBool_t set, void * mode )
  * Mode_o -1 = everything, 0 = elevations only, 1 = descriptions only
  */
 
-track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T show_hidden, BOOL_T * hidden_o)  {
-	 	track_p trk = NULL;
-		DIST_T d, dd = DIST_INF;
-		track_p trk1 = NULL;
-		EPINX_T ep1=-1, ep=-1;
-		BOOL_T hidden_t, hidden;
-		coOrd dpos = pos;
-		coOrd cpos;
-		int mode = -1;
-		while ( TrackIterate( &trk1 ) ) {
-			if ( !GetLayerVisible(GetTrkLayer(trk1)) )
-				continue;
-			if ( (!GetTrkVisible(trk1)) && drawTunnel==0 )
-				continue;
-			if ( GetLayerFrozen( GetTrkLayer( trk1 ) ))
-				continue;
-			if ( (labelEnable&LABELENABLE_ENDPT_ELEV)!=0 && *mode_o <= 0) {
-				for ( ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++ ) {
-					d = EndPtDescriptionDistance( pos, trk1, ep1, &dpos, FALSE, NULL );  //No hidden
-					if ( d < dd ) {
-						dd = d;
-						trk = trk1;
-						ep = ep1;
-						mode = 0;
-						hidden = FALSE;
-						cpos= dpos;
-					}
+track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o,
+                             BOOL_T show_hidden, BOOL_T * hidden_o)
+{
+	track_p trk = NULL;
+	DIST_T d, dd = DIST_INF;
+	track_p trk1 = NULL;
+	EPINX_T ep1=-1, ep=-1;
+	BOOL_T hidden_t, hidden;
+	coOrd dpos = pos;
+//		coOrd cpos;
+	int mode = -1;
+	while ( TrackIterate( &trk1 ) ) {
+		if ( !GetLayerVisible(GetTrkLayer(trk1)) ) {
+			continue;
+		}
+		if ( (!GetTrkVisible(trk1)) && drawTunnel==0 ) {
+			continue;
+		}
+		if ( GetLayerFrozen( GetTrkLayer( trk1 ) )) {
+			continue;
+		}
+		if ( (labelEnable&LABELENABLE_ENDPT_ELEV)!=0 && *mode_o <= 0) {
+			for ( ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++ ) {
+				d = EndPtDescriptionDistance( pos, trk1, ep1, &dpos, FALSE, NULL );  //No hidden
+				if ( d < dd ) {
+					dd = d;
+					trk = trk1;
+					ep = ep1;
+					mode = 0;
+					hidden = FALSE;
+//						cpos= dpos;
 				}
 			}
-			if (IsClose(dd)) break;
-			if ( *mode_o == 0 || !QueryTrack( trk1, Q_HAS_DESC ) )
-				continue;
-			if ((labelEnable&LABELENABLE_TRKDESC)==0)
-				continue;
-			if ( ( GetTrkBits( trk1 ) & TB_HIDEDESC ) != 0 ) {
-				if ( !show_hidden ) continue;
-			}
-			d = CompoundDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 1;
-				hidden = hidden_t;
-				cpos = dpos;
-			}
-			d = CurveDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 2;
-				hidden = hidden_t;
-				cpos = dpos;
-			}
-			d = CornuDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 3;
-				hidden = hidden_t;
-				cpos = dpos;
-			}
-			d = BezierDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 4;
-				hidden = hidden_t;
-				cpos = dpos;
-			}
-			d = StraightDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
-			if (d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 5;
-				hidden = hidden_t;
-				cpos = dpos;
-			}
-			d = JointDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
-			if (d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 6;
-				hidden = hidden_t;
-				cpos = dpos;
-			}
-
+		}
+		if (IsClose(dd)) { break; }
+		if ( *mode_o == 0 || !QueryTrack( trk1, Q_HAS_DESC ) ) {
+			continue;
+		}
+		if ((labelEnable&LABELENABLE_TRKDESC)==0) {
+			continue;
+		}
+		if ( ( GetTrkBits( trk1 ) & TB_HIDEDESC ) != 0 ) {
+			if ( !show_hidden ) { continue; }
+		}
+		d = CompoundDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+		if ( d < dd ) {
+			dd = d;
+			trk = trk1;
+			ep = -1;
+			mode = 1;
+			hidden = hidden_t;
+//				cpos = dpos;
+		}
+		d = CurveDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+		if ( d < dd ) {
+			dd = d;
+			trk = trk1;
+			ep = -1;
+			mode = 2;
+			hidden = hidden_t;
+//				cpos = dpos;
+		}
+		d = CornuDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+		if ( d < dd ) {
+			dd = d;
+			trk = trk1;
+			ep = -1;
+			mode = 3;
+			hidden = hidden_t;
+//				cpos = dpos;
+		}
+		d = BezierDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+		if ( d < dd ) {
+			dd = d;
+			trk = trk1;
+			ep = -1;
+			mode = 4;
+			hidden = hidden_t;
+//				cpos = dpos;
+		}
+		d = StraightDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+		if (d < dd ) {
+			dd = d;
+			trk = trk1;
+			ep = -1;
+			mode = 5;
+			hidden = hidden_t;
+//				cpos = dpos;
+		}
+		d = JointDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
+		if (d < dd ) {
+			dd = d;
+			trk = trk1;
+			ep = -1;
+			mode = 6;
+			hidden = hidden_t;
+//				cpos = dpos;
 		}
 
-		coOrd pos1 = pos;
+	}
 
-		if ((trk != NULL) && IsClose(dd) ) {
-			if (ep_o) *ep_o = ep;
-			if (mode_o) *mode_o = mode;
-			if (hidden_o) *hidden_o = hidden;
-			return trk;
-		} else {  // Return other track for description (not near to description but nearest to track)
-			if ((trk1 = OnTrack(&pos1, FALSE, FALSE))==NULL) return NULL;
-			if (!QueryTrack( trk1, Q_HAS_DESC )) return NULL;
-			if (GetLayerFrozen(GetTrkLayer(trk1))) return NULL;
-			if (IsClose(FindDistance(pos,pos1))) {
-				if (mode_o) *mode_o = -1;
-				if (ep_o) *ep_o = -1;
-				if (hidden_o) *hidden_o = GetTrkBits( trk1 ) & TB_HIDEDESC;
-				return trk1;
-			}
+	coOrd pos1 = pos;
+
+	if ((trk != NULL) && IsClose(dd) ) {
+		if (ep_o) { *ep_o = ep; }
+		if (mode_o) { *mode_o = mode; }
+		if (hidden_o) { *hidden_o = hidden; }
+		return trk;
+	} else {  // Return other track for description (not near to description but nearest to track)
+		if ((trk1 = OnTrack(&pos1, FALSE, FALSE))==NULL) { return NULL; }
+		if (!QueryTrack( trk1, Q_HAS_DESC )) { return NULL; }
+		if (GetLayerFrozen(GetTrkLayer(trk1))) { return NULL; }
+		if (IsClose(FindDistance(pos,pos1))) {
+			if (mode_o) { *mode_o = -1; }
+			if (ep_o) { *ep_o = -1; }
+			if (hidden_o) { *hidden_o = GetTrkBits( trk1 ) & TB_HIDEDESC; }
+			return trk1;
 		}
+	}
 
-		return NULL;
+	return NULL;
 }
 
 static long moveDescMode;
 
 STATUS_T CmdMoveDescription(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	static EPINX_T ep;
 	static BOOL_T hidden;
 	static int mode;
 	BOOL_T bChanged;
 
-	moveDescMode = VP2L(commandContext);   //Context 0 = everything, 1 means elevations, 2 means descriptions
+	moveDescMode = VP2L(
+	                       commandContext);   //Context 0 = everything, 1 means elevations, 2 means descriptions
 
 	bChanged = FALSE;
 	switch (action&0xFF) {
@@ -2649,55 +2810,58 @@ STATUS_T CmdMoveDescription(
 		hidden = FALSE;
 		mode = -1;
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
-			 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
+		     (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_ERROR;
 		}
 		SetAllTrackSelect( FALSE );
-		/* no break */
+	/* no break */
 	case wActionMove:
-			if ( labelWhen < 2 || mainD.scale > labelScale ) return C_CONTINUE;
-			mode = moveDescMode-1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
-			if ((moveDescTrk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
-				if (mode==0) {
-					InfoMessage(_("Elevation description"));
-				} else {
-					if (moveDescMode == 1) {
-						moveDescTrk = NULL;
-						return C_CONTINUE;   //Ignore other tracks if only looking for elevations
-					}
-					if (hidden) {
-						InfoMessage(_("Hidden description - 's' to Show, 'd' Details"));
-						moveDescPos = pos;
-					} else {
-						InfoMessage(_("Shown description - 'h' to Hide"));
-						moveDescPos = pos;
-					}
-				}
-				return C_CONTINUE;
+		if ( labelWhen < 2 || mainD.scale > labelScale ) { return C_CONTINUE; }
+		mode = moveDescMode
+		       -1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
+		if ((moveDescTrk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
+			if (mode==0) {
+				InfoMessage(_("Elevation description"));
 			} else {
-				moveDescTrk = NULL;
+				if (moveDescMode == 1) {
+					moveDescTrk = NULL;
+					return C_CONTINUE;   //Ignore other tracks if only looking for elevations
+				}
+				if (hidden) {
+					InfoMessage(_("Hidden description - 's' to Show, 'd' Details"));
+					moveDescPos = pos;
+				} else {
+					InfoMessage(_("Shown description - 'h' to Hide"));
+					moveDescPos = pos;
+				}
 			}
-			InfoMessage( _("Select and drag a description") );
-			break;
+			return C_CONTINUE;
+		} else {
+			moveDescTrk = NULL;
+		}
+		InfoMessage( _("Select and drag a description") );
+		break;
 	case C_TEXT:
-		if (!moveDescTrk) return C_CONTINUE;
-		if (mode == 0) return C_CONTINUE;
+		if (!moveDescTrk) { return C_CONTINUE; }
+		if (mode == 0) { return C_CONTINUE; }
 		bChanged = FALSE;
 		if (action>>8 == 's') {
-			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) != 0 )
+			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) != 0 ) {
 				bChanged = TRUE;
+			}
 			ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 		} else if (action>>8 == 'h')  {
-			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) == 0 )
+			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) == 0 ) {
 				bChanged = TRUE;
+			}
 			SetTrkBits( moveDescTrk, TB_HIDEDESC );
 			ClrTrkBits( moveDescTrk, TB_DETAILDESC );
 		} else if (action>>8 == 'd') {				//Toggle Detailed
 			bChanged = TRUE;
-			if ((GetTrkBits( moveDescTrk ) & TB_DETAILDESC) != 0)
+			if ((GetTrkBits( moveDescTrk ) & TB_DETAILDESC) != 0) {
 				ClrTrkBits( moveDescTrk, TB_DETAILDESC);
-			else {
+			} else {
 				ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 				SetTrkBits( moveDescTrk, TB_DETAILDESC );
 			}
@@ -2708,57 +2872,62 @@ STATUS_T CmdMoveDescription(
 		break;
 	case C_DOWN:
 		if (( labelWhen < 2 || mainD.scale > labelScale ) ||
-		 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
-			 	 ErrorMessage( MSG_DESC_NOT_VISIBLE );
+		    (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
+			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_ERROR;
-		 }
+		}
 		mode = moveDescMode-1;
 		moveDescTrk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
-		if (moveDescTrk == NULL )
+		if (moveDescTrk == NULL ) {
 			return C_CONTINUE;
+		}
 		if (hidden) {
 			InfoMessage(_("Hidden Label - Drag to reveal"));
 		} else {
 			InfoMessage(_("Drag label"));
 		}
-		if (ep == -1 )
+		if (ep == -1 ) {
 			DrawTrack( moveDescTrk, &mainD, wDrawColorWhite );
-		/* no break */
+		}
+	/* no break */
 	case C_MOVE:
-		if (moveDescTrk == NULL )
-				return C_CONTINUE;
+		if (moveDescTrk == NULL ) {
+			return C_CONTINUE;
+		}
 		UndoStart( _("Move Label"), "Modedesc( T%d )", GetTrkIndex(moveDescTrk) );
 		UndoModify( moveDescTrk );
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 		hidden = FALSE;
-		/* no break */
+	/* no break */
 	case C_UP:
-		if ( labelWhen < 2 || mainD.scale > labelScale )
+		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
-		if ( moveDescTrk == NULL )
+		}
+		if ( moveDescTrk == NULL ) {
 			return C_CONTINUE;
-		int rc = C_CONTINUE;
+		}
+//		int rc = C_CONTINUE;
 		switch (mode) {
 		case 0:
-			rc = EndPtDescriptionMove( moveDescTrk, ep, action, pos );
+			EndPtDescriptionMove( moveDescTrk, ep, action, pos );
 			break;
 		case 1:
-			rc = CompoundDescriptionMove( moveDescTrk, action, pos );
+			CompoundDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 2:
-			rc = CurveDescriptionMove( moveDescTrk, action, pos );
+			CurveDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 3:
-			rc = CornuDescriptionMove( moveDescTrk, action, pos );
+			CornuDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 4:
-			rc = BezierDescriptionMove( moveDescTrk, action, pos );
+			BezierDescriptionMove( moveDescTrk, action, pos );
 			break;
 		case 5:
-			rc = StraightDescriptionMove( moveDescTrk, action, pos);
+			StraightDescriptionMove( moveDescTrk, action, pos);
 			break;
 		case 6:
-			rc = JointDescriptionMove( moveDescTrk, action, pos);
+			JointDescriptionMove( moveDescTrk, action, pos);
 			break;
 		}
 		hidden = FALSE;
@@ -2769,8 +2938,9 @@ STATUS_T CmdMoveDescription(
 		}
 		break;
 	case C_REDRAW:
-		if ( labelWhen < 2 || mainD.scale > labelScale )
+		if ( labelWhen < 2 || mainD.scale > labelScale ) {
 			return C_CONTINUE;
+		}
 		if ( moveDescTrk ) {
 			if (mode==0) {
 				DrawEndPt2( &tempD, moveDescTrk, ep, drawColorPreviewSelected );
@@ -2793,15 +2963,18 @@ STATUS_T CmdMoveDescription(
 		} else {
 			moveDescPos = pos;
 		}
-		if ( moveDescTrk == NULL ) break;
-		if ( ! QueryTrack( moveDescTrk, Q_HAS_DESC ) ) break;
+		if ( moveDescTrk == NULL ) { break; }
+		if ( ! QueryTrack( moveDescTrk, Q_HAS_DESC ) ) { break; }
 		if ( moveDescM == NULL ) {
 			moveDescM = MenuRegister( "Move Desc Toggle" );
-			moveDescMI = wMenuToggleCreate( moveDescM, "", _("Show/Hide Description"), 0, TRUE, ChangeDescFlag, NULL );
-			moveDetailDescMI = wMenuToggleCreate( moveDescM, "", _("Toggle Detailed Description"), 0, TRUE, ChangeDetailedFlag, NULL );
+			moveDescMI = wMenuToggleCreate( moveDescM, "", _("Show/Hide Description"), 0,
+			                                TRUE, ChangeDescFlag, NULL );
+			moveDetailDescMI = wMenuToggleCreate( moveDescM, "",
+			                                      _("Toggle Detailed Description"), 0, TRUE, ChangeDetailedFlag, NULL );
 		}
 		wMenuToggleSet( moveDescMI, !( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) );
-		wMenuToggleSet( moveDetailDescMI, ( GetTrkBits( moveDescTrk ) & TB_DETAILDESC ) );
+		wMenuToggleSet( moveDetailDescMI,
+		                ( GetTrkBits( moveDescTrk ) & TB_DETAILDESC ) );
 		menuPos = pos;
 		wMenuPopupShow( moveDescM );
 		break;
@@ -2809,14 +2982,14 @@ STATUS_T CmdMoveDescription(
 	default:
 		;
 	}
-		
+
 	return C_CONTINUE;
 }
 
 
 static void FlipTracks(
-		coOrd orig,
-		ANGLE_T angle )
+        coOrd orig,
+        ANGLE_T angle )
 {
 	track_p trk, trk1;
 	EPINX_T ep, ep1;
@@ -2828,16 +3001,17 @@ static void FlipTracks(
 		wDrawDelayUpdate( mapD.d, TRUE );
 	}
 	for ( trk=NULL; TrackIterate(&trk); ) {
-		if ( !GetTrkSelected(trk) )
+		if ( !GetTrkSelected(trk) ) {
 			continue;
+		}
 		UndoModify( trk );
 		if (selectedTrackCount <= incrementalDrawLimit) {
-			 DrawTrack( trk, &mainD, wDrawColorWhite );
-			 DrawTrack( trk, &mapD, wDrawColorWhite );
+			DrawTrack( trk, &mainD, wDrawColorWhite );
+			DrawTrack( trk, &mapD, wDrawColorWhite );
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
-				!GetTrkSelected(trk1)) {
+			    !GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
 				DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
@@ -2845,8 +3019,8 @@ static void FlipTracks(
 		}
 		FlipTrack( trk, orig, angle );
 		if (selectedTrackCount <= incrementalDrawLimit) {
-			 DrawTrack( trk, &mainD, wDrawColorBlack );
-			 DrawTrack( trk, &mapD, wDrawColorBlack );
+			DrawTrack( trk, &mainD, wDrawColorBlack );
+			DrawTrack( trk, &mapD, wDrawColorBlack );
 		}
 	}
 	if (selectedTrackCount > incrementalDrawLimit) {
@@ -2862,8 +3036,8 @@ static void FlipTracks(
 
 
 static STATUS_T CmdFlip(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	static coOrd pos0;
 	static coOrd pos1;
@@ -2871,53 +3045,55 @@ static STATUS_T CmdFlip(
 
 	switch( action ) {
 
-		case C_START:
-			state = 0;
-			if (selectedTrackCount == 0) {
-				ErrorMessage( MSG_NO_SELECTED_TRK );
-				return C_TERMINATE;
-			}
-			if (SelectedTracksAreFrozen())
-				return C_TERMINATE;
-			InfoMessage( _("Drag to mark mirror line") );
-			break;
-		case C_DOWN:
-			state = 1;
-			if (SelectedTracksAreFrozen()) {
-				return C_TERMINATE;
-			}
-			pos0 = pos1 = pos;
-			return C_CONTINUE;
-		case C_MOVE:
-			pos1 = pos;
-			InfoMessage( _("Angle %0.2f"), FindAngle( pos0, pos1 ) );
-			return C_CONTINUE;
-		case C_UP:
-			UndoStart( _("Flip Tracks"), "flip" );
-			FlipTracks( pos0, FindAngle( pos0, pos1 ) );
-			state = 0;
+	case C_START:
+		state = 0;
+		if (selectedTrackCount == 0) {
+			ErrorMessage( MSG_NO_SELECTED_TRK );
 			return C_TERMINATE;
+		}
+		if (SelectedTracksAreFrozen()) {
+			return C_TERMINATE;
+		}
+		InfoMessage( _("Drag to mark mirror line") );
+		break;
+	case C_DOWN:
+		state = 1;
+		if (SelectedTracksAreFrozen()) {
+			return C_TERMINATE;
+		}
+		pos0 = pos1 = pos;
+		return C_CONTINUE;
+	case C_MOVE:
+		pos1 = pos;
+		InfoMessage( _("Angle %0.2f"), FindAngle( pos0, pos1 ) );
+		return C_CONTINUE;
+	case C_UP:
+		UndoStart( _("Flip Tracks"), "flip" );
+		FlipTracks( pos0, FindAngle( pos0, pos1 ) );
+		state = 0;
+		return C_TERMINATE;
 
 #ifdef LATER
-		case C_CANCEL:
+	case C_CANCEL:
 #endif
-		case C_REDRAW:
-			DrawHighlightBoxes(FALSE,FALSE,NULL);
-			HighlightSelectedTracks(NULL, TRUE, TRUE);
-			if ( state == 0 )
-				return C_CONTINUE;
-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
+	case C_REDRAW:
+		DrawHighlightBoxes(FALSE,FALSE,NULL);
+		HighlightSelectedTracks(NULL, TRUE, TRUE);
+		if ( state == 0 ) {
 			return C_CONTINUE;
+		}
+		DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
+		return C_CONTINUE;
 
-		default:
-			break;
+	default:
+		break;
 	}
 	return C_CONTINUE;
 }
 
 static BOOL_T SelectArea(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	static coOrd pos0;
 	static int state;
@@ -2969,36 +3145,39 @@ static BOOL_T SelectArea(
 			subtract = (action == C_RUP);
 			cnt = 0;
 			trk = NULL;
-			if (add && (selectMode == 0)) SetAllTrackSelect( FALSE );		//Remove all tracks first
+			if (add && (selectMode == 0)) { SetAllTrackSelect( FALSE ); }		//Remove all tracks first
 			while ( TrackIterate( &trk ) ) {
 				GetBoundingBox( trk, &hi, &lo );
 				if (GetLayerVisible( GetTrkLayer( trk ) ) &&
-					lo.x >= base.x && hi.x <= base.x+size.x &&
-					lo.y >= base.y && hi.y <= base.y+size.y) {
-					if ( (GetTrkSelected( trk )==0) == (action==C_UP) )
-					  cnt++;
+				    lo.x >= base.x && hi.x <= base.x+size.x &&
+				    lo.y >= base.y && hi.y <= base.y+size.y) {
+					if ( (GetTrkSelected( trk )==0) == (action==C_UP) ) {
+						cnt++;
+					}
 				}
 			}
 			trk = NULL;
 			while ( TrackIterate( &trk ) ) {
 				GetBoundingBox( trk, &hi, &lo );
 				if (GetLayerVisible( GetTrkLayer( trk ) ) &&
-					lo.x >= base.x && hi.x <= base.x+size.x &&
-					lo.y >= base.y && hi.y <= base.y+size.y) {
+				    lo.x >= base.x && hi.x <= base.x+size.x &&
+				    lo.y >= base.y && hi.y <= base.y+size.y) {
 					if ( (GetTrkSelected( trk )==0) == (action==C_UP) ) {
 						if (GetLayerFrozen(GetTrkLayer(trk))) {
 							continue;
 						} else if (GetLayerModule(GetTrkLayer(trk))) {
-							if (add)
+							if (add) {
 								DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
-							else
+							} else {
 								DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,FALSE);
+							}
 						} else if (cnt > incrementalDrawLimit) {
 							selectedTrackCount += (action==C_UP?1:-1);
-							if (add)
+							if (add) {
 								SetTrkBits( trk, TB_SELECTED );
-							else
+							} else {
 								ClrTrkBits( trk, TB_SELECTED );
+							}
 						} else {
 							SelectOneTrack( trk, add );
 						}
@@ -3023,33 +3202,38 @@ static BOOL_T SelectArea(
 		break;
 
 	case C_REDRAW:
-		if (state == 0)
+		if (state == 0) {
 			break;
+		}
 		//Draw to-be selected tracks versus not.
 		trk = NULL;
-		if (selectMode == 1 && add) HighlightSelectedTracks(NULL, TRUE, TRUE);
+		if (selectMode == 1 && add) { HighlightSelectedTracks(NULL, TRUE, TRUE); }
 		while ( TrackIterate( &trk ) ) {
 			GetBoundingBox( trk, &hi, &lo );
 			if (GetLayerVisible( GetTrkLayer( trk ) ) &&
-				lo.x >= base.x && hi.x <= base.x+size.x &&
-				lo.y >= base.y && hi.y <= base.y+size.y) {
-				if (GetLayerFrozen(GetTrkLayer(trk)))
+			    lo.x >= base.x && hi.x <= base.x+size.x &&
+			    lo.y >= base.y && hi.y <= base.y+size.y) {
+				if (GetLayerFrozen(GetTrkLayer(trk))) {
 					continue;
+				}
 				if (GetLayerModule(GetTrkLayer(trk))) {
-					if (add)
+					if (add) {
 						DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
-					else if (subtract)
+					} else if (subtract) {
 						DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,FALSE);
+					}
 				} else {
 					if (add) {
-						if (selectMode == 0 && add)
+						if (selectMode == 0 && add) {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
-						if (!GetTrkSelected(trk))
+						}
+						if (!GetTrkSelected(trk)) {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
-					}
-					else if (subtract) {
-						if (GetTrkSelected(trk))
+						}
+					} else if (subtract) {
+						if (GetTrkSelected(trk)) {
 							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
+						}
 					}
 				}
 			}
@@ -3064,23 +3248,19 @@ static BOOL_T SelectArea(
 	return FALSE;
 }
 
-extern BOOL_T inDescribeCmd;
-extern wIndex_t modifyCmdInx;
-extern wIndex_t describeCmdInx;
-extern wIndex_t panCmdInx;
-extern wIndex_t trainCmdInx;
 
-static STATUS_T SelectTrack( 
-		coOrd pos )
+static STATUS_T SelectTrack(
+        coOrd pos )
 {
 	track_p trk;
 	char msg[STR_SIZE];
 
-	if (((trk = OnTrack( &pos, FALSE, FALSE )) == NULL) && selectZero) {   //If option set and !ctrl or unset and ctrl
+	if (((trk = OnTrack( &pos, FALSE, FALSE )) == NULL)
+	    && selectZero) {   //If option set and !ctrl or unset and ctrl
 		SetAllTrackSelect( FALSE );							//Unselect all
 		return C_CONTINUE;
 	}
-	if (trk == NULL) return C_CONTINUE;
+	if (trk == NULL) { return C_CONTINUE; }
 	if (!CheckTrackLayerSilent( trk ) ) {
 		if (GetLayerFrozen(GetTrkLayer(trk)) ) {
 			trk = NULL;
@@ -3092,10 +3272,12 @@ static STATUS_T SelectTrack(
 	DescribeTrack( trk, msg, sizeof msg );
 	InfoMessage( msg );
 	if (GetLayerModule(GetTrkLayer(trk))) {
-		if (((MyGetKeyState() & WKEY_CTRL) && (selectMode==0)) || (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1)) )  {
+		if (((MyGetKeyState() & WKEY_CTRL) && (selectMode==0))
+		    || (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1)) )  {
 			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,!GetTrkSelected(trk));
 		} else {
-			SetAllTrackSelect( FALSE );	 //Just this Track if selectMode = 0 and !CTRL or selectMode = 1 and CTRL
+			SetAllTrackSelect(
+			        FALSE );	 //Just this Track if selectMode = 0 and !CTRL or selectMode = 1 and CTRL
 			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
 		}
 		RedrawSelectedTracksBoundary();
@@ -3116,57 +3298,62 @@ static STATUS_T SelectTrack(
 	return C_CONTINUE;
 }
 
-static STATUS_T Activate( coOrd pos) {
+static STATUS_T Activate( coOrd pos)
+{
 	track_p trk;
 	if ((trk = OnTrack( &pos, TRUE, FALSE )) == NULL) {
-				return C_CONTINUE;
+		return C_CONTINUE;
 	}
 	if (GetLayerModule(GetTrkLayer(trk))) {
 		return C_CONTINUE;
 	}
-	if (QueryTrack(trk,Q_IS_ACTIVATEABLE)) ActivateTrack(trk);
+	if (QueryTrack(trk,Q_IS_ACTIVATEABLE)) { ActivateTrack(trk); }
 
 	return C_CONTINUE;
 
 }
 
-track_p IsInsideABox(coOrd pos) {
+track_p IsInsideABox(coOrd pos)
+{
 	track_p ts = NULL;
 	while ( TrackIterate( &ts ) ) {
-		if (!GetLayerVisible( GetTrkLayer( ts))) continue;
-		if (!GetTrkSelected(ts)) continue;
+		if (!GetLayerVisible( GetTrkLayer( ts))) { continue; }
+		if (!GetTrkSelected(ts)) { continue; }
 		coOrd hi,lo;
 		GetBoundingBox(ts, &hi, &lo);
 		double boundary = mainD.scale*5/mainD.dpi;
-		if ((pos.x>=lo.x-boundary && pos.x<=hi.x+boundary) && (pos.y>=lo.y-boundary && pos.y<=hi.y+boundary)) {
+		if ((pos.x>=lo.x-boundary && pos.x<=hi.x+boundary) && (pos.y>=lo.y-boundary
+		                && pos.y<=hi.y+boundary)) {
 			return ts;
 		}
 	}
 	return NULL;
 }
 
-void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select, track_p not_this) {
+void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select,
+                        track_p not_this)
+{
 	track_p ts = NULL;
 	coOrd origin,max;
 	BOOL_T first = TRUE;
 	while ( TrackIterate( &ts ) ) {
-		if ( !GetLayerVisible( GetTrkLayer( ts))) continue;
-		if (!GetTrkSelected(ts)) continue;
+		if ( !GetLayerVisible( GetTrkLayer( ts))) { continue; }
+		if (!GetTrkSelected(ts)) { continue; }
 		if (GetLayerModule(GetTrkLayer(ts))) {
 			DrawHighlightLayer(GetTrkLayer(ts));
 		}
 		coOrd hi,lo;
-		if (highlight_selected && (ts != not_this)) DrawTrack(ts,&tempD,select?wDrawColorPreviewSelected:wDrawColorPreviewUnselected );
+		if (highlight_selected && (ts != not_this)) { DrawTrack(ts,&tempD,select?wDrawColorPreviewSelected:wDrawColorPreviewUnselected ); }
 		GetBoundingBox(ts, &hi, &lo);
 		if (first) {
 			origin = lo;
 			max = hi;
 			first = FALSE;
 		} else {
-			if (lo.x <origin.x) origin.x = lo.x;
-			if (lo.y <origin.y) origin.y = lo.y;
-			if (hi.x >max.x) max.x = hi.x;
-			if (hi.y >max.y) max.y = hi.y;
+			if (lo.x <origin.x) { origin.x = lo.x; }
+			if (lo.y <origin.y) { origin.y = lo.y; }
+			if (hi.x >max.x) { max.x = hi.x; }
+			if (hi.y >max.y) { max.y = hi.y; }
 		}
 	}
 	if (!first) {
@@ -3183,19 +3370,23 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select, track_p not_th
 }
 
 static STATUS_T CallModify(wAction_t action,
-		coOrd pos ) {
+                           coOrd pos )
+{
 	int rc = CmdModify(action,pos);
-	if (rc != C_CONTINUE)
+	if (rc != C_CONTINUE) {
 		doingDouble = FALSE;
+	}
 	return rc;
 }
 
-static STATUS_T CallDescribe(wAction_t action, coOrd pos) {
+static STATUS_T CallDescribe(wAction_t action, coOrd pos)
+{
 	int rc = CmdDescribe(action, pos);
 	return rc;
 }
 
-static void CallPushDescribe(void * unused) {
+static void CallPushDescribe(void * unused)
+{
 	if (moveDescTrk) {
 		CallDescribe(C_START, moveDescPos);
 		CallDescribe(C_DOWN, moveDescPos);
@@ -3206,7 +3397,8 @@ static void CallPushDescribe(void * unused) {
 
 static STATUS_T CmdSelect(wAction_t,coOrd);
 
-static void CallPushModify(void * unused) {
+static void CallPushModify(void * unused)
+{
 	if (moveDescTrk) {
 		CmdSelect(C_LDOUBLE, moveDescPos);
 	}
@@ -3214,8 +3406,8 @@ static void CallPushModify(void * unused) {
 }
 
 static STATUS_T CmdSelect(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 
 	static BOOL_T doingMove;
@@ -3226,17 +3418,19 @@ static STATUS_T CmdSelect(
 	STATUS_T rc=C_CONTINUE;
 	static track_p trk = NULL;
 	typedef enum {NOSHOW,SHOWMOVE,SHOWROTATE,SHOWMODIFY,SHOWACTIVATE} showType;
-	static showType showMode;
+//	static showType showMode;
 
 	mode = AREA;
-	if (doingAlign || doingRotate || doingMove )
+	if (doingAlign || doingRotate || doingMove ) {
 		mode = MOVE;
-	else {
-		if ( (action == C_DOWN) || (action == C_RDOWN) || ((action&0xFF) == wActionExtKey) ) {
+	} else {
+		if ( (action == C_DOWN) || (action == C_RDOWN)
+		     || ((action&0xFF) == wActionExtKey) ) {
 			mode = AREA;
-			if ( ((action&0xFF) == wActionExtKey) || (						//Moves don't need to be in a box
-				 ( MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) && IsInsideABox(pos)) )  //But cursors do
-			{
+			if ( ((action&0xFF) == wActionExtKey)
+			     || (						//Moves don't need to be in a box
+			             ( MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT))
+			             && IsInsideABox(pos)) ) { //But cursors do
 				mode = MOVE;
 			}
 		}
@@ -3249,7 +3443,7 @@ static STATUS_T CmdSelect(
 		doingRotate = FALSE;
 		doingAlign = FALSE;
 		doingDouble = FALSE;
-		showMode = NOSHOW;
+//		showMode = NOSHOW;
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
@@ -3262,12 +3456,12 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
-		showMode = NOSHOW;
+//		showMode = NOSHOW;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		coOrd p = pos;
 		trk = OnTrack( &p, FALSE, FALSE );
 		track_p ht;
-		if ((selectedTrackCount==0) && (trk == NULL)) return C_CONTINUE;
+		if ((selectedTrackCount==0) && (trk == NULL)) { return C_CONTINUE; }
 		if (trk && !CheckTrackLayerSilent( trk ) ) {
 			if (GetLayerFrozen(GetTrkLayer(trk)) ) {
 				trk = NULL;
@@ -3279,25 +3473,25 @@ static STATUS_T CmdSelect(
 			if ((ht = IsInsideABox(pos)) != NULL) {
 				if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
-					showMode = SHOWMOVE;
+//					showMode = SHOWMOVE;
 				} else if ((MyGetKeyState()&WKEY_CTRL)) {
 					CreateRotateAnchor(pos);
-					showMode = SHOWROTATE;
+//					showMode = SHOWROTATE;
 				} else if (!GetLayerModule(GetTrkLayer(ht))) {
 					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
-					QueryTrack( ht, Q_IS_CORNU ) ||
-					(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT))) {
+					    QueryTrack( ht, Q_IS_CORNU ) ||
+					    (QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT))) {
 						CreateModifyAnchor(pos);
-						showMode = SHOWMODIFY;
+//						showMode = SHOWMODIFY;
 					} else {
 						if (QueryTrack(ht,Q_IS_ACTIVATEABLE)) {
 							CreateActivateAnchor(pos);
-							showMode = SHOWACTIVATE;
-						} else wSetCursor(mainD.d,defaultCursor);
+//							showMode = SHOWACTIVATE;
+						} else { wSetCursor(mainD.d,defaultCursor); }
 					}
-				} else wSetCursor(mainD.d,defaultCursor);
-			} else wSetCursor(mainD.d,defaultCursor);
-		} else wSetCursor(mainD.d,defaultCursor);
+				} else { wSetCursor(mainD.d,defaultCursor); }
+			} else { wSetCursor(mainD.d,defaultCursor); }
+		} else { wSetCursor(mainD.d,defaultCursor); }
 		break;
 
 	case C_DOWN:
@@ -3337,13 +3531,15 @@ static STATUS_T CmdSelect(
 			SelectDelete();
 			break;
 		}
-		/* No Break */
+	/* No Break */
 	case C_RMOVE:
 	case C_MOVE:
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
-		if ((action&0xFF) == wActionExtKey && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) == (WKEY_SHIFT|WKEY_CTRL))) { //Both + arrow
+		if ((action&0xFF) == wActionExtKey
+		    && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) ==
+		        (WKEY_SHIFT|WKEY_CTRL))) { //Both + arrow
 			doingMove = TRUE;
 			mode = MOVE;
 		}
@@ -3369,8 +3565,11 @@ static STATUS_T CmdSelect(
 			break;
 		default: ;
 		}
-		if ((action&0xFF) == wActionExtKey && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) == (WKEY_SHIFT|WKEY_CTRL)))  //Both
+		if ((action&0xFF) == wActionExtKey
+		    && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) ==
+		        (WKEY_SHIFT|WKEY_CTRL))) { //Both
 			doingMove = FALSE;
+		}
 		return rc;
 		break;
 	case C_RUP:
@@ -3424,23 +3623,27 @@ static STATUS_T CmdSelect(
 		//Once doing a move or a rotate, make an early exit
 		if (doingMove || doingRotate) {
 			if (anchors_da.cnt) {
-				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+				          wDrawColorBlack );
 			}
 			return C_CONTINUE;
 		}
 		BOOL_T AreaSelect = FALSE;
 		// Draw the selected area, no-op if none selected
 		if (mode==AREA) {
-	    	AreaSelect = SelectArea( action, pos );
-	    	if (AreaSelect) return C_CONTINUE;
+			AreaSelect = SelectArea( action, pos );
+			if (AreaSelect) { return C_CONTINUE; }
 		}
 
 		// Highlight a whole Module's worth of tracks if we are hovering over one
 		if (trk && GetLayerModule(GetTrkLayer(trk))) {
-			if ( (selectMode == 1) && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) )
-				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,!GetTrkSelected(trk));   //Toggle
-			else
+			if ( (selectMode == 1)
+			     && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) ) {
+				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,
+				               !GetTrkSelected(trk));        //Toggle
+			} else {
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+			}
 			DrawHighlightLayer(GetTrkLayer(trk));
 		}
 
@@ -3456,65 +3659,78 @@ static STATUS_T CmdSelect(
 			}
 		} else {
 			//Handle the SHIFT+ which means SelectAllConnected case
-			if ((MyGetKeyState() & WKEY_SHIFT) )
-				SelectConnectedTracks(trk, TRUE);        	 //Highlight all connected
+			if ((MyGetKeyState() & WKEY_SHIFT) ) {
+				SelectConnectedTracks(trk, TRUE);        //Highlight all connected
+			}
 			//Normal case - handle track we are hovering over
 			else {
 				//Select=Add
 				if (selectMode == 1) {
 					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {
 						//Only Highlight if adding otherwise show already selected
-						if (!GetTrkSelected(trk))
+						if (!GetTrkSelected(trk)) {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
-						else
+						} else {
 							DrawTrack(trk,&tempD,selectedColor);
+						}
 					} else {
-						if (GetTrkSelected(trk))
-							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);           //Toggle
-						else
+						if (GetTrkSelected(trk)) {
+							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);        //Toggle
+						} else {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+						}
 					}
-				//Select=Only
+					//Select=Only
 				} else {
 					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {
-						if (GetTrkSelected(trk))
-							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);           //Toggle
-						else
+						if (GetTrkSelected(trk)) {
+							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);        //Toggle
+						} else {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+						}
 					} else {
 						//Only Highlight if adding
-						if (!GetTrkSelected(trk))
+						if (!GetTrkSelected(trk)) {
 							DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
-						else
+						} else {
 							DrawTrack(trk,&tempD,selectedColor);
+						}
 					}
 				}
 			}
 			// Now Highlight the rest of the tracks or Module
 			if (GetLayerModule(GetTrkLayer(trk))) {
-				if (selectMode == 1 && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) )
-					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,!GetTrkSelected(trk));             //Toggle
-				else
+				if (selectMode == 1
+				    && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) ) {
+					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,
+					               !GetTrkSelected(trk));        //Toggle
+				} else {
 					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+				}
 				DrawHighlightLayer(GetTrkLayer(trk));
 			}
 			//Select=Add
 			if (selectMode == 1) {
-				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
+				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL)) {
 					HighlightSelectedTracks(trk, FALSE, TRUE);
-				else
-					HighlightSelectedTracks(trk, TRUE, FALSE); // Highlight all others selected
-			//Select=Only
+				} else {
+					HighlightSelectedTracks(trk, TRUE,
+					                        FALSE);        // Highlight all others selected
+				}
+				//Select=Only
 			} else {
-				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL))
+				if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL)) {
 					HighlightSelectedTracks(trk, FALSE, TRUE);
-				else
-					HighlightSelectedTracks(trk, TRUE, FALSE); // Highlight all others selected
+				} else {
+					HighlightSelectedTracks(trk, TRUE,
+					                        FALSE);        // Highlight all others selected
+				}
 			}
 		}
 		//Finally add the anchors for any actions or snaps
 		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
 		}
 
 		return rc;
@@ -3529,8 +3745,9 @@ static STATUS_T CmdSelect(
 			if (doingAlign) {
 				rc = CmdRotate (C_DOWN, pos);
 				rc = CmdRotate (C_UP, pos);
-			} else
+			} else {
 				rc = SelectTrack( pos );
+			}
 			doingRotate = FALSE;
 			doingMove = FALSE;
 			return rc;
@@ -3543,23 +3760,23 @@ static STATUS_T CmdSelect(
 			return C_CONTINUE;
 		}
 		switch (mode) {
-			case AREA:
-				if ((ht = OnTrack(&pos,FALSE,FALSE))!=NULL) {
-					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
-						QueryTrack( ht, Q_IS_CORNU ) ||
-						(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT ))) {
-						doingDouble = TRUE;
-						CallModify(C_START,pos);
-						if (doingDouble == FALSE) return C_CONTINUE;
-						CallModify(C_LDOUBLE,pos);
-					} else if (QueryTrack( ht, Q_IS_ACTIVATEABLE)){
-						return Activate(pos);
-					}
+		case AREA:
+			if ((ht = OnTrack(&pos,FALSE,FALSE))!=NULL) {
+				if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
+				    QueryTrack( ht, Q_IS_CORNU ) ||
+				    (QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT ))) {
+					doingDouble = TRUE;
+					CallModify(C_START,pos);
+					if (doingDouble == FALSE) { return C_CONTINUE; }
+					CallModify(C_LDOUBLE,pos);
+				} else if (QueryTrack( ht, Q_IS_ACTIVATEABLE)) {
+					return Activate(pos);
 				}
-				break;
-			case MOVE:
-			default:
-				break;
+			}
+			break;
+		case MOVE:
+		default:
+			break;
 		}
 		break;
 
@@ -3571,7 +3788,7 @@ static STATUS_T CmdSelect(
 		if (selectedTrackCount <= 0) {
 			wMenuPopupShow( selectPopup1M );
 		} else {
-		    track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+			track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
 			SetUpMenu2(pos,trk);
 			wMenuPopupShow( selectPopup2M );
 		}
@@ -3586,7 +3803,8 @@ static STATUS_T CmdSelect(
 		}
 		if ((action>>8) == 'c') {
 			panCenter = pos;
-			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x,
+			                   panCenter.y ) );
 			PanHere(I2VP(0));
 		}
 		if ((action>>8) == 'e') {
@@ -3596,122 +3814,149 @@ static STATUS_T CmdSelect(
 			PanMenuEnter(I2VP('o'));
 		}
 		if ((action>>8) == '?') {
-			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL)
+			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL) {
 				moveDescPos = pos;
-				CallPushDescribe(I2VP(0));
+			}
+			CallPushDescribe(I2VP(0));
 			wSetCursor(mainD.d,defaultCursor);
 			moveDescTrk = NULL;
 		}
 		break;
 	case C_CONFIRM:
-		if (doingDouble)
+		if (doingDouble) {
 			return CallModify(action,pos);
+		}
 		return C_CONTINUE;
 	case C_FINISH:
 		if (doingDouble) {
 			CallModify(C_OK,pos);
 			CallModify(C_FINISH,pos);
 		}
-		if (doingMove) UndoEnd();
+		if (doingMove) { UndoEnd(); }
 		doingDouble = FALSE;
 		wSetCursor(mainD.d,defaultCursor);
 		break;
 	default:
-		if (doingDouble) return CallModify(action, pos);
+		if (doingDouble) { return CallModify(action, pos); }
 	}
 
 	return C_CONTINUE;
 }
 
 
-#include "bitmaps/select.xpm"
-#include "bitmaps/delete.xpm"
-#include "bitmaps/tunnel.xpm"
-#include "bitmaps/ties.xpm"
-#include "bitmaps/bridge.xpm"
-#include "bitmaps/roadbed.xpm"
-#include "bitmaps/move.xpm"
-#include "bitmaps/rotate.xpm"
-#include "bitmaps/reflect.xpm"
-#include "bitmaps/description.xpm"
+#include "bitmaps/select.xpm3"
+#include "bitmaps/delete.xpm3"
+#include "bitmaps/tunnel.xpm3"
+#include "bitmaps/ties.xpm3"
+#include "bitmaps/bridge.xpm3"
+#include "bitmaps/roadbed.xpm3"
+#include "bitmaps/move.xpm3"
+#include "bitmaps/rotate.xpm3"
+#include "bitmaps/reflect.xpm3"
+#include "bitmaps/description.xpm3"
 
 
 static void SetMoveMode( char * line )
 {
 	long tmp = atol( line );
 	moveMode = tmp & 0x0F;
-	if (moveMode < 0 || moveMode > MAXMOVEMODE)
+	if (moveMode < 0 || moveMode > MAXMOVEMODE) {
 		moveMode = MAXMOVEMODE;
+	}
 	enableMoveDraw = ((tmp&0x10) == 0);
 }
 
-static void moveDescription( void * unused ) {
-	if (!moveDescTrk) return;
+static void moveDescription( void * unused )
+{
+	if (!moveDescTrk) { return; }
 	int hidden = GetTrkBits( moveDescTrk) &TB_HIDEDESC ;
-	if (hidden)
+	if (hidden) {
 		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
-	else
+	} else {
 		SetTrkBits( moveDescTrk, TB_HIDEDESC );
+	}
 	MainRedraw();
 }
 
 
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
-	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"), wIconCreatePixMap(select_xpm[iconSize]),
-				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS, ACCL_SELECT, NULL );
+	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"),
+	                              wIconCreatePixMap(select_xpm3[iconSize]),
+	                              LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS,
+	                              ACCL_SELECT, NULL );
 }
 
-extern wIndex_t trainCmdInx;
 
-EXPORT void InitCmdSelect2( wMenu_p menu ) {
+EXPORT void InitCmdSelect2( wMenu_p menu )
+{
 
 
-	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7, bmendpt_bits );
-	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7, bma90_bits );
-	angle_bm[1] = wDrawBitMapCreate( mainD.d, bma135_width, bma135_width, 7, 7, bma135_bits );
-	angle_bm[2] = wDrawBitMapCreate( mainD.d, bma0_width, bma0_width, 7, 7, bma0_bits );
-	angle_bm[3] = wDrawBitMapCreate( mainD.d, bma45_width, bma45_width, 7, 7, bma45_bits );
+	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7,
+	                              bmendpt_bits );
+	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7,
+	                                 bma90_bits );
+	angle_bm[1] = wDrawBitMapCreate( mainD.d, bma135_width, bma135_width, 7, 7,
+	                                 bma135_bits );
+	angle_bm[2] = wDrawBitMapCreate( mainD.d, bma0_width, bma0_width, 7, 7,
+	                                 bma0_bits );
+	angle_bm[3] = wDrawBitMapCreate( mainD.d, bma45_width, bma45_width, 7, 7,
+	                                 bma45_bits );
 	AddPlaybackProc( SETMOVEMODE, (playbackProc_p)SetMoveMode, NULL );
 	wPrefGetInteger( "draw", "movemode", &moveMode, MAXMOVEMODE );
-	if (moveMode > MAXMOVEMODE || moveMode < 0)
+	if (moveMode > MAXMOVEMODE || moveMode < 0) {
 		moveMode = MAXMOVEMODE;
+	}
 	selectPopup1M = MenuRegister( "Select Mode Menu" );
 	wMenuPushCreate(selectPopup1M, "", _("Undo"), 0, UndoUndo, NULL);
 	wMenuPushCreate(selectPopup1M, "", _("Redo"), 0, UndoRedo, NULL);
 	wMenuSeparatorCreate( selectPopup1M );
-	wMenuPushCreate(selectPopup1M, "cmdDescribeMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
-	wMenuPushCreate(selectPopup1M, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, I2VP(panCmdInx));
-	wMenuPushCreate(selectPopup1M, "cmdTrainMode", GetBalloonHelpStr("cmdTrainMode"), 0, DoCommandB, I2VP(trainCmdInx));
+	wMenuPushCreate(selectPopup1M, "cmdDescribeMode",
+	                GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, I2VP(modifyCmdInx));
+	wMenuPushCreate(selectPopup1M, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0,
+	                DoCommandB, I2VP(panCmdInx));
+	wMenuPushCreate(selectPopup1M, "cmdTrainMode",
+	                GetBalloonHelpStr("cmdTrainMode"), 0, DoCommandB, I2VP(trainCmdInx));
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Zoom In"), 0, DoZoomUp, I2VP(1));
-	wMenuPushCreate( selectPopup1M, "", _("Zoom to extents - 'e'"), 0, DoZoomExtents, I2VP(0) );
+	wMenuPushCreate( selectPopup1M, "", _("Zoom to extents - 'e'"), 0,
+	                 DoZoomExtents, I2VP(0) );
 	wMenu_p zoomPop1 = wMenuMenuCreate(selectPopup1M, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, zoomPop1, NULL);
 	wMenuPushCreate(selectPopup1M, "", _("Zoom Out"), 0, DoZoomDown, I2VP(1));
-	wMenuPushCreate(selectPopup1M, "", _("Pan to Origin - 'o'/'0'"), 0, PanMenuEnter, I2VP( 'o'));
-	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - 'c'"), 0, PanHere, I2VP( 3));
+	wMenuPushCreate(selectPopup1M, "", _("Pan to Origin - 'o'/'0'"), 0,
+	                PanMenuEnter, I2VP( 'o'));
+	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - 'c'"), 0, PanHere,
+	                I2VP( 3));
 	wMenuSeparatorCreate( selectPopup1M );
-	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, I2VP( 1));
-	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0, SelectCurrentLayer, I2VP( 0));
+	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,
+	                (wMenuCallBack_p) SetAllTrackSelect, I2VP( 1));
+	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,
+	                SelectCurrentLayer, I2VP( 0));
 	AddIndexMenu( selectPopup1M, SelectByIndex);
 	wMenuSeparatorCreate( selectPopup1M );
 
 	selectPopup2M = MenuRegister( "Track Selected Menu " );
-	wMenuPushCreate(selectPopup2M, "", _("Undo"), 0, UndoUndo , NULL);
-	wMenuPushCreate(selectPopup2M, "", _("Redo"), 0, UndoRedo , NULL);
+	wMenuPushCreate(selectPopup2M, "", _("Undo"), 0, UndoUndo, NULL);
+	wMenuPushCreate(selectPopup2M, "", _("Redo"), 0, UndoRedo, NULL);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0, DoZoomUp, I2VP( 1));
 	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0, DoZoomDown, I2VP( 1));
-	wMenuPushCreate( selectPopup2M, "", _("Zoom to extents - 'e'"), 0, DoZoomExtents, I2VP( 0));
-	wMenuPushCreate( selectPopup2M, "", _("Zoom to selected - 's'"), 0, DoZoomExtents, I2VP( 1));
-	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - 'c'"), 0, PanHere, I2VP( 3));
+	wMenuPushCreate( selectPopup2M, "", _("Zoom to extents - 'e'"), 0,
+	                 DoZoomExtents, I2VP( 0));
+	wMenuPushCreate( selectPopup2M, "", _("Zoom to selected - 's'"), 0,
+	                 DoZoomExtents, I2VP( 1));
+	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - 'c'"), 0, PanHere,
+	                I2VP( 3));
 	wMenuSeparatorCreate( selectPopup2M );
 	AddIndexMenu( selectPopup2M, SelectByIndex);
-	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, I2VP( 0));
+	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0,
+	                (wMenuCallBack_p) SetAllTrackSelect, I2VP( 0));
 	wMenuSeparatorCreate( selectPopup2M );
-	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0, CallPushDescribe, I2VP(0));
-	menuPushModify = wMenuPushCreate(selectPopup2M, "", _("Modify/Activate Track"), 0, CallPushModify, I2VP(0));
+	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0, CallPushDescribe,
+	                I2VP(0));
+	menuPushModify = wMenuPushCreate(selectPopup2M, "", _("Modify/Activate Track"),
+	                                 0, CallPushModify, I2VP(0));
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Cut"), 0, EditCut, I2VP( 0));
 	wMenuPushCreate(selectPopup2M, "", _("Copy"), 0, EditCopy, I2VP( 0));
@@ -3720,25 +3965,40 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	AddMoveMenu( selectPopup2M, QuickMove);
 	selectPopup2RM = wMenuMenuCreate(selectPopup2M, "", _("Rotate..."));
 	AddRotateMenu( selectPopup2RM, QuickRotate );
-	rotateAlignMI = wMenuPushCreate( selectPopup2RM, "", _("Align"), 0, RotateAlign, I2VP(1) );
+	rotateAlignMI = wMenuPushCreate( selectPopup2RM, "", _("Align"), 0, RotateAlign,
+	                                 I2VP(1) );
 	wMenuSeparatorCreate( selectPopup2M );
-	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Show/Hide Description"), 0, moveDescription, I2VP(0));
+	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel",
+	                                _("Show/Hide Description"), 0, moveDescription, I2VP(0));
 	wMenuSeparatorCreate( selectPopup2M );
-	tiesMI = wMenuPushCreate(selectPopup2M, "", _("Ties/NoTies"), 0, SelectTies, I2VP( 0));
-	hideMI = wMenuPushCreate(selectPopup2M, "", _("Hide/NoHide"), 0, SelectTunnel, I2VP( 0));
-	bridgeMI = wMenuPushCreate(selectPopup2M, "", _("Bridge/NoBridge"), 0, SelectBridge, I2VP( 0));
-	roadbedMI = wMenuPushCreate(selectPopup2M, "", _("Roadbed/NoRoadbed"), 0, SelectRoadbed, I2VP( 0));
-	tiesMI = wMenuPushCreate(selectPopup2M, "", _("NoTies/Ties"), 0, SelectTies, I2VP( 0));
+	tiesMI = wMenuPushCreate(selectPopup2M, "", _("Ties/NoTies"), 0, SelectTies,
+	                         I2VP( 0));
+	hideMI = wMenuPushCreate(selectPopup2M, "", _("Hide/NoHide"), 0, SelectTunnel,
+	                         I2VP( 0));
+	bridgeMI = wMenuPushCreate(selectPopup2M, "", _("Bridge/NoBridge"), 0,
+	                           SelectBridge, I2VP( 0));
+	roadbedMI = wMenuPushCreate(selectPopup2M, "", _("Roadbed/NoRoadbed"), 0,
+	                            SelectRoadbed, I2VP( 0));
+	tiesMI = wMenuPushCreate(selectPopup2M, "", _("NoTies/Ties"), 0, SelectTies,
+	                         I2VP( 0));
 	selectPopup2TM = wMenuMenuCreate(selectPopup2M, "", _("Thickness..."));
-	wMenuPushCreate( selectPopup2TM, "", _("Thin Tracks"), 0, SelectTrackWidth, I2VP(0 ));
-	wMenuPushCreate( selectPopup2TM, "", _("Medium Tracks"), 0, SelectTrackWidth, I2VP(2 ));
-	wMenuPushCreate( selectPopup2TM, "", _("Thick Tracks"), 0, SelectTrackWidth, I2VP(3 ));
+	wMenuPushCreate( selectPopup2TM, "", _("Thin Tracks"), 0, SelectTrackWidth,
+	                 I2VP(0 ));
+	wMenuPushCreate( selectPopup2TM, "", _("Medium Tracks"), 0, SelectTrackWidth,
+	                 I2VP(2 ));
+	wMenuPushCreate( selectPopup2TM, "", _("Thick Tracks"), 0, SelectTrackWidth,
+	                 I2VP(3 ));
 	selectPopup2TYM = wMenuMenuCreate( selectPopup2M, "", _("LineType...") );
-	wMenuPushCreate( selectPopup2TYM, "", _("Solid Line"), 0, SelectLineType, I2VP(0 ));
-	wMenuPushCreate( selectPopup2TYM, "", _("Dashed Line"), 0, SelectLineType, I2VP(1 ));
-	wMenuPushCreate( selectPopup2TYM, "", _("Dotted Line"), 0, SelectLineType, I2VP(2 ));
-	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dotted Line"), 0, SelectLineType, I2VP(3 ));
-	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dot-Dotted Line"), 0, SelectLineType, I2VP(4 ));
+	wMenuPushCreate( selectPopup2TYM, "", _("Solid Line"), 0, SelectLineType,
+	                 I2VP(0 ));
+	wMenuPushCreate( selectPopup2TYM, "", _("Dashed Line"), 0, SelectLineType,
+	                 I2VP(1 ));
+	wMenuPushCreate( selectPopup2TYM, "", _("Dotted Line"), 0, SelectLineType,
+	                 I2VP(2 ));
+	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dotted Line"), 0, SelectLineType,
+	                 I2VP(3 ));
+	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dot-Dotted Line"), 0,
+	                 SelectLineType, I2VP(4 ));
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Move To Front"), 0, SelectAbove,I2VP( 0));
 	wMenuPushCreate(selectPopup2M, "", _("Move To Back"), 0, SelectBelow, I2VP( 0));
@@ -3746,8 +4006,6 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuPushCreate(selectPopup2M, "", _("Group"), 0, DoGroup, I2VP( 0));
 	wMenuPushCreate(selectPopup2M, "", _("UnGroup"), 0, DoUngroup, I2VP( 0));
 	wMenuSeparatorCreate( selectPopup2M );
-
-	ParamRegister( &rescalePG );
 }
 
 
@@ -3755,52 +4013,58 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 EXPORT void InitCmdDelete( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( delete_xpm[iconSize] );
-	AddToolbarButton( "cmdDelete", icon, IC_SELECTED, (wButtonCallBack_p)SelectDelete, 0 );
+	icon = wIconCreatePixMap( delete_xpm3[iconSize] );
+	AddToolbarButton( "cmdDelete", icon, IC_SELECTED,
+	                  (wButtonCallBack_p)SelectDelete, 0 );
 }
 
 EXPORT void InitCmdTies( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( ties_xpm[iconSize] );
+	icon = wIconCreatePixMap( ties_xpm3[iconSize] );
 	AddToolbarButton( "cmdTies", icon, IC_SELECTED|IC_POPUP, SelectTies, NULL );
 }
 
 EXPORT void InitCmdTunnel( void )
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( tunnel_xpm[iconSize] );
+	icon = wIconCreatePixMap( tunnel_xpm3[iconSize] );
 	AddToolbarButton( "cmdTunnel", icon, IC_SELECTED|IC_POPUP, SelectTunnel, NULL );
 }
 
 EXPORT void InitCmdBridge( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( bridge_xpm[iconSize] );
+	icon = wIconCreatePixMap( bridge_xpm3[iconSize] );
 	AddToolbarButton( "cmdBridge", icon, IC_SELECTED|IC_POPUP, SelectBridge, NULL );
 }
 
 EXPORT void InitCmdRoadbed( void)
 {
 	wIcon_p icon;
-	icon = wIconCreatePixMap( roadbed_xpm[iconSize] );
-	AddToolbarButton( "cmdRoadbed", icon, IC_SELECTED|IC_POPUP, SelectRoadbed, NULL );
+	icon = wIconCreatePixMap( roadbed_xpm3[iconSize] );
+	AddToolbarButton( "cmdRoadbed", icon, IC_SELECTED|IC_POPUP, SelectRoadbed,
+	                  NULL );
 }
 
 
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(description_xpm[iconSize]),
-				LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, I2VP( 0 ));
+	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"),
+	               wIconCreatePixMap(description_xpm3[iconSize]),
+	               LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, I2VP( 0 ));
 }
 
 
 EXPORT void InitCmdMove( wMenu_p menu )
 {
-	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"), wIconCreatePixMap(move_xpm[iconSize]),
-				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
-	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm[iconSize]),
-				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
-	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(reflect_xpm[iconSize]),
-				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
+	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"),
+	                            wIconCreatePixMap(move_xpm3[iconSize]),
+	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
+	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"),
+	                              wIconCreatePixMap(rotate_xpm3[iconSize]),
+	                              LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
+	flipCmdInx = AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"),
+	                            wIconCreatePixMap(reflect_xpm3[iconSize]),
+	                            LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

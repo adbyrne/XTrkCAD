@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
@@ -42,11 +41,11 @@ void getPageDim( HDC hDc )
 	int res_w, res_h, size_w, size_h;
 	rc = Escape( hDc, GETPHYSPAGESIZE, 0, NULL, (LPPOINT)&dims );
 	if (rc <0) {
-	   mswFail( "GETPHYPAGESIZE" );
+		mswFail( "GETPHYPAGESIZE" );
 	}
 	rc = Escape( hDc, GETPRINTINGOFFSET, 0, NULL, (LPPOINT)&offs );
 	if (rc <0) {
-	   mswFail( "GETPRINTINGOFFSET" );
+		mswFail( "GETPRINTINGOFFSET" );
 	}
 	print_d.wFactor = (double)GetDeviceCaps( hDc, LOGPIXELSX );
 	print_d.hFactor = (double)GetDeviceCaps( hDc, LOGPIXELSY );
@@ -115,17 +114,18 @@ static wBool_t printInit( void )
 	while (*temp) {
 		if (*temp == ',') {
 			*temp++ = 0;
-			while( *temp == ' ' )
+			while( *temp == ' ' ) {
 				temp++;
-			if (!ptrDrvr)
+			}
+			if (!ptrDrvr) {
 				ptrDrvr = temp;
-			else {
+			} else {
 				ptrPort = temp;
 				break;
 			}
-		}
-		else
+		} else {
 			temp = AnsiNext(temp);
+		}
 	}
 	strcpy( ptrDrvrDvr, ptrDrvr );
 	strcat( ptrDrvrDvr, ".drv" );
@@ -134,9 +134,11 @@ static wBool_t printInit( void )
 		return FALSE;
 	}
 	if (( extDeviceMode = GetProcAddress( hDriver, "ExtDeviceMode" )) != NULL) {
-		size = extDeviceMode( mswHWnd, (HANDLE)hDriver, (LPDEVMODE)NULL, (LPSTR)ptrDevice, (LPSTR)ptrPort, (LPDEVMODE)NULL, (LPSTR)NULL, 0 );
+		size = extDeviceMode( mswHWnd, (HANDLE)hDriver, (LPDEVMODE)NULL,
+		                      (LPSTR)ptrDevice, (LPSTR)ptrPort, (LPDEVMODE)NULL, (LPSTR)NULL, 0 );
 		printMode = (DEVMODE*)malloc( size );
-		rc = extDeviceMode( mswHWnd, (HANDLE)hDriver, (LPDEVMODE)printMode, (LPSTR)ptrDevice, (LPSTR)ptrPort, (LPDEVMODE)NULL, (LPSTR)NULL, DM_OUT_BUFFER );
+		rc = extDeviceMode( mswHWnd, (HANDLE)hDriver, (LPDEVMODE)printMode,
+		                    (LPSTR)ptrDevice, (LPSTR)ptrPort, (LPDEVMODE)NULL, (LPSTR)NULL, DM_OUT_BUFFER );
 #ifdef LATER
 		if (rc != IDOK && rc != IDCANCEL) {
 			mswFail( "printInit: extDeviceMode" );
@@ -160,7 +162,7 @@ static wBool_t printInit( void )
 	}
 	getPageDim( hDc );
 	DeleteDC( hDc );
-	
+
 	FreeLibrary( hDriver );
 #endif
 	printerOk = TRUE;
@@ -201,9 +203,9 @@ const char* wPrintGetName()
 	DEVNAMES* pDevNames = GlobalLock(hDevNames);
 	if (pDevNames == NULL) {
 		strcpy(sPrinterName, "Printer");
-	}
-	else {
-		strncpy(sPrinterName, (char*)pDevNames + pDevNames->wDeviceOffset, sizeof sPrinterName - 1);
+	} else {
+		strncpy(sPrinterName, (char*)pDevNames + pDevNames->wDeviceOffset,
+		        sizeof sPrinterName - 1);
 		sPrinterName[sizeof sPrinterName - 1] = '\0';
 	}
 	GlobalUnlock( hDevNames );
@@ -211,15 +213,15 @@ const char* wPrintGetName()
 }
 
 void wPrintGetMargins(
-	double * tMargin,
-	double * rMargin,
-	double * bMargin,
-	double * lMargin )
+        double * tMargin,
+        double * rMargin,
+        double * bMargin,
+        double * lMargin )
 {
-	if ( tMargin ) *tMargin = tBorder;
-	if ( rMargin ) *rMargin = rBorder;
-	if ( bMargin ) *bMargin = bBorder;
-	if ( lMargin ) *lMargin = lBorder;
+	if ( tMargin ) { *tMargin = tBorder; }
+	if ( rMargin ) { *rMargin = rBorder; }
+	if ( bMargin ) { *bMargin = bBorder; }
+	if ( lMargin ) { *lMargin = lBorder; }
 }
 
 
@@ -240,10 +242,11 @@ HDC mswGetPrinterDC( void )
 	printDlg.lStructSize = sizeof printDlg;
 	printDlg.hwndOwner = NULL;
 	printDlg.Flags = PD_RETURNDC|PD_NOPAGENUMS|PD_NOSELECTION;
-	if (PrintDlg(&printDlg) != 0)
+	if (PrintDlg(&printDlg) != 0) {
 		return printDlg.hDC;
-	else
+	} else {
 		return (HDC)0;
+	}
 }
 
 
@@ -290,51 +293,55 @@ wBool_t wPrintDocStart( const char * title, int fpageCount, int * copiesP )
 	if (print_d.hDc == (HDC)0) {
 		return FALSE;
 	}
-		printStatus = TRUE;
-		docInfo.cbSize = sizeof docInfo;
-		docInfo.lpszDocName = title;
-		docInfo.lpszOutput = NULL;
-		lpAbortDlg = MakeProcInstance( (FARPROC)mswAbortDlg, mswHInst );
-		lpAbortProc = MakeProcInstance( (FARPROC)mswAbortProc, mswHInst );
-		SetAbortProc( print_d.hDc, (ABORTPROC)lpAbortProc );
-		if (StartDoc( print_d.hDc, &docInfo ) < 0) {
-			MessageBox( mswHWnd, "Unable to start print job",
-						NULL, MB_OK|MB_ICONHAND );
-			FreeProcInstance( lpAbortDlg );
-			FreeProcInstance( lpAbortProc );
-			DeleteDC( print_d.hDc );
-			return FALSE;
-		}
-		printAbort = FALSE;
-		hAbortDlgWnd = CreateDialog( mswHInst, "MswAbortDlg", mswHWnd,
-						(DLGPROC)lpAbortDlg );
-		/*SetDlgItemText( hAbortDlgWnd, IDM_PRINTAPP, title );*/
-		SetWindowText( hAbortDlgWnd, title );
-		ShowWindow( hAbortDlgWnd, SW_NORMAL );
-		UpdateWindow( hAbortDlgWnd );
-		EnableWindow( mswHWnd, FALSE );
-		if (copiesP)
-			*copiesP = printDlg.nCopies;
-		if (printDlg.nCopies>1)
-			pageCount *= printDlg.nCopies;
-		if ( (GetDeviceCaps( printDlg.hDC, RASTERCAPS ) & RC_PALETTE) ) {
-			newPrintPalette = mswCreatePalette();
-			oldPrintPalette = SelectPalette( printDlg.hDC, newPrintPalette, 0 );
-			RealizePalette( printDlg.hDC );
-		}
-		return TRUE;
+	printStatus = TRUE;
+	docInfo.cbSize = sizeof docInfo;
+	docInfo.lpszDocName = title;
+	docInfo.lpszOutput = NULL;
+	lpAbortDlg = MakeProcInstance( (FARPROC)mswAbortDlg, mswHInst );
+	lpAbortProc = MakeProcInstance( (FARPROC)mswAbortProc, mswHInst );
+	SetAbortProc( print_d.hDc, (ABORTPROC)lpAbortProc );
+	if (StartDoc( print_d.hDc, &docInfo ) < 0) {
+		MessageBox( mswHWnd, "Unable to start print job",
+		            NULL, MB_OK|MB_ICONHAND );
+		FreeProcInstance( lpAbortDlg );
+		FreeProcInstance( lpAbortProc );
+		DeleteDC( print_d.hDc );
+		return FALSE;
+	}
+	printAbort = FALSE;
+	hAbortDlgWnd = CreateDialog( mswHInst, "MswAbortDlg", mswHWnd,
+	                             (DLGPROC)lpAbortDlg );
+	/*SetDlgItemText( hAbortDlgWnd, IDM_PRINTAPP, title );*/
+	SetWindowText( hAbortDlgWnd, title );
+	ShowWindow( hAbortDlgWnd, SW_NORMAL );
+	UpdateWindow( hAbortDlgWnd );
+	EnableWindow( mswHWnd, FALSE );
+	if (copiesP) {
+		*copiesP = printDlg.nCopies;
+	}
+	if (printDlg.nCopies>1) {
+		pageCount *= printDlg.nCopies;
+	}
+	if ( (GetDeviceCaps( printDlg.hDC, RASTERCAPS ) & RC_PALETTE) ) {
+		newPrintPalette = mswCreatePalette();
+		oldPrintPalette = SelectPalette( printDlg.hDC, newPrintPalette, 0 );
+		RealizePalette( printDlg.hDC );
+	}
+	return TRUE;
 }
 
 wDraw_p wPrintPageStart( void )
 {
 	char pageL[80];
-	if (!printStatus)
+	if (!printStatus) {
 		return NULL;
+	}
 	pageNumber++;
-	if (pageCount > 0)
+	if (pageCount > 0) {
 		wsprintf( pageL, "Page %d of %d", pageNumber, pageCount );
-	else
+	} else {
 		wsprintf( pageL, "Page %d", pageNumber );
+	}
 	SetDlgItemText( hAbortDlgWnd, IDM_PRINTPAGE, pageL );
 	StartPage( printDlg.hDC );
 #ifdef LATER
@@ -367,15 +374,16 @@ wBool_t wPrintQuit( void )
 
 void wPrintDocEnd( void )
 {
-	if (!printStatus)
+	if (!printStatus) {
 		return;
+	}
 	EndDoc( printDlg.hDC );
 	if ( newPrintPalette ) {
 		SelectPalette( printDlg.hDC, oldPrintPalette, 0 );
 		DeleteObject( newPrintPalette );
 		newPrintPalette = (HPALETTE)0;
 	}
-		
+
 	EnableWindow( mswHWnd, TRUE );
 	DestroyWindow( hAbortDlgWnd );
 	FreeProcInstance( lpAbortDlg );
@@ -394,7 +402,8 @@ wBool_t wPrintNewPrinter( const char * printer )
 	return TRUE;
 }
 
-wBool_t wPrintNewMargin( const char * name, double t, double b, double l, double r )
+wBool_t wPrintNewMargin( const char * name, double t, double b, double l,
+                         double r )
 {
 	return TRUE;
 }

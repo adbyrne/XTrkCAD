@@ -1,7 +1,10 @@
-PROJECT(i18n)
+#
+# handle translation using gettext
+#
+project(i18n)
 
 # List of the supported locales.
-SET(XTRKCAD_LOCALE_IDS
+set(xtrkcad_locale_ids
 	cy_GB
 	de_DE
 	fi
@@ -11,121 +14,182 @@ SET(XTRKCAD_LOCALE_IDS
 	)
 
 # Misc variables
-SET(XTC_LOCALE_TARGETS )
-SET(POTFILE "${i18n_BINARY_DIR}/${XTRKCAD_PACKAGE}.pot")
-SET(XGTKEYWORDS
+set(xtc_locale_targets)
+set(potfile "${i18n_BINARY_DIR}/${XTRKCAD_PACKAGE}.pot")
+set(xgtkeywords
 	--keyword=_
 	--keyword=p_
-	--keyword=N_)
+	--keyword=N_
+)
 
-# Programs
-FIND_PROGRAM(XTC_XGETTEXT xgettext PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
-FIND_PROGRAM(XTC_MSGINIT msginit PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
-FIND_PROGRAM(XTC_MSGMERGE msgmerge PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
-FIND_PROGRAM(XTC_MSGFMT msgfmt PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
-SET(XTC_TRANSLATOR "" CACHE FILEPATH "Translator program for editing the .po files.")
-MARK_AS_ADVANCED(XTC_XGETTEXT XTC_MSGINIT XTC_MSGMERGE
-                 XTC_MSGFMT XTC_TRANSLATOR)
+#
+# Find programs, registry is used on Windows to find the installation path
 
-# Create the list of the original source files.
-FILE(GLOB_RECURSE XGT_SOURCE_FILES
-	RELATIVE ${i18n_SOURCE_DIR}
-	${XTrkCAD_SOURCE_DIR}/*.c
-	${XTrkCAD_SOURCE_DIR}/*.h)
+find_program(xtc_xgettext xgettext PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
+find_program(xtc_msginit msginit PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
+find_program(xtc_msgmerge msgmerge PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
+find_program(xtc_msgfmt msgfmt PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\;InstallPath]/bin )
+set(xtc_translator "" CACHE FILEPATH "Translator program for editing the .po files.")
+mark_as_advanced(xtc_xgettext xtc_msginit xtc_msgmerge
+                 xtc_msgfmt xtc_translator)
 
-# add wlib files that have translatable strings
-FILE(RELATIVE_PATH TEMP_FILENAME ${i18n_SOURCE_DIR} "${wlib_SOURCE_DIR}/mswlib/mswmisc.c")
-LIST(APPEND XGT_SOURCE_FILES ${TEMP_FILENAME})
+# 
+# Extract the translatable strings from text files
+#
+# Custom string extractor utility
+add_executable(stripmsg stripmsg.c)
 
-# Dynamically generated files, such as messages.h and bllnhlp.c, must be added
-# to the list manually to make sure that everything works properly.
-# "FILE(RELATIVE_PATH ..." is used to get rid of the absolute paths like
-# "/home/my_funny_username/very_long_path_to_my_projects/source_file.c"
-# in the .pot and .po files.
-FILE(RELATIVE_PATH TEMP_FILENAME ${i18n_SOURCE_DIR} "${help_BINARY_DIR}/messages.h")
-LIST(APPEND XGT_SOURCE_FILES ${TEMP_FILENAME})
-FILE(RELATIVE_PATH TEMP_FILENAME ${i18n_SOURCE_DIR} "${XTrkCAD_BINARY_DIR}/app/bin/bllnhlp.c")
-LIST(APPEND XGT_SOURCE_FILES ${TEMP_FILENAME})
-FILE(RELATIVE_PATH TEMP_FILENAME ${i18n_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/custmsg.h")
-LIST(APPEND XGT_SOURCE_FILES ${TEMP_FILENAME})
-
-# Extract strings and create xtrkcad.pot
-ADD_CUSTOM_COMMAND(
-	OUTPUT ${POTFILE}
-	COMMAND ${XTC_XGETTEXT} ${XGTKEYWORDS} --add-comments=i18n -d ${GETTEXT_PACKAGE} -F -o ${POTFILE} --from-code=ISO-8859-15 ${XGT_SOURCE_FILES}
-	DEPENDS xtrkcad ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
-	WORKING_DIRECTORY ${i18n_SOURCE_DIR}
-	)
-
-# Loop through the list of the supported locales
-FOREACH(localeid ${XTRKCAD_LOCALE_IDS})
-	SET(POFILE ${i18n_SOURCE_DIR}/${localeid}.po)
-	SET(MOFILE_DIR ${i18n_BINARY_DIR}/${localeid}/LC_MESSAGES)
-	SET(MOFILE ${MOFILE_DIR}/${XTRKCAD_PACKAGE}.mo)
-
-	# Merge .pot file changes to .po file
-	ADD_CUSTOM_TARGET(msgmerge-${localeid}
-		COMMAND ${XTC_MSGMERGE} -U --backup=none ${POFILE} ${POTFILE}
-		DEPENDS ${POTFILE} ${POFILE}
-		)
-
-	# If new locale id was added, add .po file creation routine
-	IF(NOT EXISTS ${POFILE})
-		ADD_CUSTOM_COMMAND(
-			OUTPUT ${POFILE}
-			COMMAND ${XTC_MSGINIT} -l ${localeid} -o ${POFILE} -i ${POTFILE}
-			DEPENDS ${POTFILE}
-			)
-	ENDIF(NOT EXISTS ${POFILE})
-
-	FILE(MAKE_DIRECTORY ${MOFILE_DIR})
-
-	# Compile .po file to binary format .mo file
-	ADD_CUSTOM_COMMAND(
-		OUTPUT ${MOFILE}
-		COMMAND ${XTC_MSGFMT} -c -v -o ${MOFILE} ${POFILE}
-		DEPENDS ${POFILE}
-		)
-
-	# If translator program was given, add target to edit .po files with it
-	IF(XTC_TRANSLATOR)
-		ADD_CUSTOM_TARGET(msgtranslate-${localeid}
-			COMMAND ${XTC_TRANSLATOR} ${POFILE}
-			)
-	ENDIF(XTC_TRANSLATOR)
-
-	# Install all .mo files
-	INSTALL(
-		FILES ${MOFILE}
-		DESTINATION ${XTRKCAD_LOCALE_INSTALL_DIR}/${localeid}/LC_MESSAGES
-		)
-
-	SET(XTC_LOCALE_TARGETS
-		${XTC_LOCALE_TARGETS}
-		${i18n_BINARY_DIR}/${localeid}/LC_MESSAGES/xtrkcad.mo
-		)
-
-ENDFOREACH(localeid)
-
-# Target to be executed with "make all". Xtrkcad must be built before this to
-# make sure that the dynamically generated files messages.h and bllnhlp.c are
-# up to date.
-ADD_CUSTOM_TARGET(messages ALL
-	DEPENDS xtrkcad ${POTFILE} ${XTC_LOCALE_TARGETS}
-	)
-
-# Custom message files list
-FILE(GLOB_RECURSE XTC_CUSTOM_MSG_FILES
+# Create custom message files list
+file(GLOB_RECURSE xtc_custom_msg_files
 	${XTrkCAD_SOURCE_DIR}/*.xtq
 	${XTrkCAD_SOURCE_DIR}/*.xtr
 	${XTrkCAD_SOURCE_DIR}/*.tip)
 
-# Custom string extractor utility
-ADD_EXECUTABLE(stripmsg stripmsg.c)
-
 # Extract translatable strings from custom message files to one temporary file
-ADD_CUSTOM_COMMAND(
-	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
-	COMMAND stripmsg ${XTC_CUSTOM_MSG_FILES} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
-	DEPENDS stripmsg ${XTC_CUSTOM_MSG_FILES}
+add_custom_target(
+	custmsg
+	COMMAND stripmsg ${xtc_custom_msg_files} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
+	DEPENDS stripmsg ${xtc_custom_msg_files}
+)
+
+set_target_properties(
+   stripmsg custmsg
+   PROPERTIES FOLDER i18n
+)
+
+#
+# Create the list of the original source files.
+
+get_target_property(sourcefiles xtrkcad-lib SOURCES)
+foreach( file ${sourcefiles})
+	#
+	# do not scan dependent objects / libraries for translatable strings
+	string(FIND "${file}" "TARGET_OBJECTS:" result)
+	if(result EQUAL -1)
+	#
+	# bllnhlp is generated in the build directory and has to be special cased
+		string(COMPARE NOTEQUAL ${file} "bllnhlp.c" RESULT)
+		if(RESULT)
+			cmake_path(ABSOLUTE_PATH file BASE_DIRECTORY ${xtrkcad-lib_SOURCE_DIR} )
+			cmake_path(RELATIVE_PATH file BASE_DIRECTORY ${i18n_SOURCE_DIR})
+			list(APPEND xgt_source_files ${file})
+		endif()
+	endif()
+endforeach()
+
+#
+# add file with translatable strings 
+set(SOURCEFILES 
+	"${xtrkcad-lib_SOURCE_DIR}/misc.c"
+	"${wlib_SOURCE_DIR}/mswlib/mswmisc.c"
+	"${messagefile_BINARY_DIR}/messages.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/custmsg.h"
+	"${XTrkCAD_BINARY_DIR}/app/bin/bllnhlp.c"
+)
+
+foreach( file ${SOURCEFILES})
+	cmake_path(RELATIVE_PATH 
+		file 
+		BASE_DIRECTORY ${i18n_SOURCE_DIR}
 	)
+	list(APPEND xgt_source_files ${file})
+endforeach()
+
+# Extract strings and create xtrkcad.pot
+add_custom_command(
+	OUTPUT ${potfile}
+	COMMAND ${xtc_xgettext} 
+			${xgtkeywords} 
+			--add-comments=i18n 
+			-d ${GETTEXT_PACKAGE} 
+			-F 
+			-o ${potfile} 
+			--from-code=ISO-8859-15 ${xgt_source_files}
+	DEPENDS custmsg
+	WORKING_DIRECTORY ${i18n_SOURCE_DIR}
+)
+
+
+#
+# function to create and update the po-file for a locale
+
+function(updatepofile locale)
+	set(pofile ${i18n_SOURCE_DIR}/${locale}.po)
+	set(mofile_dir ${i18n_BINARY_DIR}/${locale}/LC_MESSAGES)
+	set(mofile ${mofile_dir}/${XTRKCAD_PACKAGE}.mo)
+
+	# Merge .pot file changes to .po file
+	add_custom_target(msgmerge-${locale} 
+		COMMAND ${xtc_msgmerge} -U --backup=none ${pofile} ${potfile}
+    	COMMAND ${xtc_msgfmt} -c -v -o ${mofile} ${pofile}
+		DEPENDS messages ${pofile} 
+	)
+
+	# If new locale id was added, add .po file creation routine
+	if(NOT EXISTS ${pofile})
+		add_custom_command(
+			OUTPUT ${pofile}
+			COMMAND ${xtc_msginit} -l ${locale} -o ${pofile} -i ${potfile}
+			DEPENDS ${potfile}
+			)
+	endif()
+
+	file(MAKE_DIRECTORY ${mofile_dir})
+
+	# If translator program was given, add target to edit .po files with it
+	if(xtc_translator)
+		add_custom_target(msgtranslate-${locale}
+			COMMAND ${xtc_translator} ${pofile}
+		)
+	endif()
+	
+	# Compile .po file to binary format .mo file
+	add_custom_command(
+		OUTPUT ${mofile}
+		COMMAND ${xtc_msgfmt} -c -v -o ${mofile} ${pofile}
+		DEPENDS ${pofile}
+	)
+
+	# Install all .mo files
+	install(
+		FILES ${mofile}
+		DESTINATION ${XTRKCAD_LOCALE_INSTALL_DIR}/${locale}/LC_MESSAGES
+		)
+
+    set_target_properties(
+	    msgmerge-${locale} 
+ 	    PROPERTIES FOLDER i18n
+    )
+
+    set(xtc_locale_targets
+		${xtc_locale_targets}
+		${i18n_BINARY_DIR}/${localeid}/LC_MESSAGES/xtrkcad.mo
+		PARENT_SCOPE
+   	)	
+endfunction()
+
+#
+# Loop through the list of the supported locales
+
+foreach(localeid ${xtrkcad_locale_ids})
+   updatepofile(${localeid})   
+endforeach(localeid)
+
+
+# xTrackCAD must be built before this to
+# make sure that the dynamically generated files messages.h and bllnhlp.c are
+# up to date.
+add_custom_target(messages 
+	DEPENDS xtrkcad ${potfile}
+)
+
+set_target_properties(
+   messages
+   PROPERTIES FOLDER i18n
+)
+
+# Utility target for building all translations 
+add_custom_target(alltranslations ALL
+	DEPENDS ${xtc_locale_targets}
+)
+

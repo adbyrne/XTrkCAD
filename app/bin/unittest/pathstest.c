@@ -32,6 +32,9 @@
 #define DEFAULTPATH "/Default/Path"
 
 #endif //WINDOWS
+
+// Dummy functions to satisfy the linker
+
 void
 wPrefSetString(const char *section, const char *key, const char *value)
 {}
@@ -51,6 +54,11 @@ const char *wGetUserHomeDir(void)
 	return(DEFAULTPATH);
 }
 
+void AbortProg(const char *a, const char *b, int d, const char *c)
+{
+	return;
+}
+
 #include "../paths.c"
 
 static void SetGetPath(void **state)
@@ -67,7 +75,7 @@ static void SetGetPath(void **state)
 
 	SetCurrentPath("Test", TESTFILE2);
 	string = GetCurrentPath("Test");
-	assert_string_equal(string, TESTPATH2);	
+	assert_string_equal(string, TESTPATH2);
 }
 
 static void Makepath(void **state)
@@ -76,38 +84,38 @@ static void Makepath(void **state)
 	char *path;
 
 #ifdef WINDOWS
-		MakeFullpath(&path,
-		"C:",
-		TESTRELATIVEPATH,
-		TESTFILENAME,
-		NULL);
+	MakeFullpath(&path,
+	             "C:",
+	             TESTRELATIVEPATH,
+	             TESTFILENAME,
+	             NULL);
 
-		assert_string_equal(path, "C:" TESTRELATIVEPATH "\\" TESTFILENAME);
+	assert_string_equal(path, "C:" TESTRELATIVEPATH "\\" TESTFILENAME);
 #else
-		MakeFullpath(&path,
-		TESTRELATIVEPATH,
-		TESTFILENAME,
-		NULL);
+	MakeFullpath(&path,
+	             TESTRELATIVEPATH,
+	             TESTFILENAME,
+	             NULL);
 
-		assert_string_equal(path, TESTRELATIVEPATH "/" TESTFILENAME);
+	assert_string_equal(path, TESTRELATIVEPATH "/" TESTFILENAME);
 #endif // WINDOWS
 
 	free(path);
 
 #ifdef WINDOWS
 	MakeFullpath(&path,
-		"C:",
-		"test",
-		"\\subdir",
-		TESTFILENAME,
-		NULL);
+	             "C:",
+	             "test",
+	             "\\subdir",
+	             TESTFILENAME,
+	             NULL);
 	assert_string_equal(path, "C:test\\subdir\\" TESTFILENAME);
 #else
 	MakeFullpath(&path,
-		"test",
-		"/subdir",
-		TESTFILENAME,
-		NULL);
+	             "test",
+	             "/subdir",
+	             TESTFILENAME,
+	             NULL);
 	assert_string_equal(path, "test/subdir/" TESTFILENAME);
 
 #endif // WINDOWS
@@ -118,9 +126,9 @@ static void Makepath(void **state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
+	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(SetGetPath),
 		cmocka_unit_test(Makepath),
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	};
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

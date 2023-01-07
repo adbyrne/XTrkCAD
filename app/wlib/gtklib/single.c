@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -72,7 +72,7 @@ void wStringSetValue(
 	
 	// the contents should not be changed programatically while
 	// the user is editing it
-	if( !(gtk_widget_has_focus(b->widget))) {
+	if( (b->option&BO_IGNFOCUS) || !(gtk_widget_has_focus(b->widget))) {
 		if (b->hasSignal) 
 	    	gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
 		gtk_entry_set_text(GTK_ENTRY(b->widget), arg);

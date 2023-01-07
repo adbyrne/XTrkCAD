@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef DRAW_H
@@ -44,6 +44,8 @@
 #define DC_TEMP			(1<<6)
 // OUTLINE: use outline font
 #define DC_OUTLINE		(1<<7)
+// Round pixel pos for performance
+#define DC_ROUND		(1<<8)
 
 // Line styles
 #define DC_THICK        	(1<<9)
@@ -64,44 +66,48 @@
 
 typedef enum { DRAW_OPEN, DRAW_CLOSED, DRAW_FILL, DRAW_TRANSPARENT } drawFill_e;
 
+struct drawCmd_t;
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {
-    void (*drawLine)(drawCmd_p, coOrd, coOrd, wDrawWidth, wDrawColor);
-    void (*drawArc)(drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth,
-                    wDrawColor);
-    void (*drawString)(drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T,
-                       wDrawColor);
-    void (*drawBitMap)(drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor);
-    void (*drawPoly)(drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth, drawFill_e);
-    void (*drawFillCircle)(drawCmd_p, coOrd, DIST_T,  wDrawColor);
-    void (*drawRectangle)(drawCmd_p, coOrd, coOrd, wDrawColor, drawFill_e);
+	void (*drawLine)(drawCmd_p, coOrd, coOrd, wDrawWidth, wDrawColor);
+	void (*drawArc)(drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth,
+	                wDrawColor);
+	void (*drawString)(drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T,
+	                   wDrawColor);
+	void (*drawBitMap)(drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor);
+	void (*drawPoly)(drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth,
+	                 drawFill_e);
+	void (*drawFillCircle)(drawCmd_p, coOrd, DIST_T,  wDrawColor);
+	void (*drawRectangle)(drawCmd_p, coOrd, coOrd, wDrawColor, drawFill_e);
 } drawFuncs_t;
 
-typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wDrawPix_t, wDrawPix_t, coOrd *);
-typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wDrawPix_t *, wDrawPix_t *);
+typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wDrawPix_t, wDrawPix_t,
+                                     coOrd *);
+typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wDrawPix_t *,
+                                     wDrawPix_t *);
 typedef struct drawCmd_t {
-    wDraw_p d;
-    drawFuncs_t * funcs;
-    unsigned long options;
-    DIST_T scale;
-    ANGLE_T angle;
-    coOrd orig;
-    coOrd size;
-    drawConvertPix2CoOrd Pix2CoOrd;
-    drawConvertCoOrd2Pix CoOrd2Pix;
-    FLOAT_T dpi;
+	wDraw_p d;
+	drawFuncs_t * funcs;
+	unsigned long options;
+	DIST_T scale;
+	ANGLE_T angle;
+	coOrd orig;
+	coOrd size;
+	drawConvertPix2CoOrd Pix2CoOrd;
+	drawConvertCoOrd2Pix CoOrd2Pix;
+	FLOAT_T dpi;
 } drawCmd_t;
 
 #define SCALEX(D,X)		((X)/(D).dpi)
 #define SCALEY(D,Y)		((Y)/(D).dpi)
 
 #ifdef WINDOWS
-    #define LBORDER (33)
-    #define BBORDER (32)
+#define LBORDER (33)
+#define BBORDER (32)
 #else
-    #define LBORDER (26)
-    #define BBORDER (27)
+#define LBORDER (26)
+#define BBORDER (27)
 #endif
 #define RBORDER (9)
 #define TBORDER (8)
@@ -120,7 +126,6 @@ extern drawCmd_t mapD;
 extern drawCmd_t tempD;
 #define RoomSize (mapD.size)
 extern coOrd oldMarker;
-extern wDrawPix_t closePixels;
 #define dragDistance	(dragPixels*mainD.scale / mainD.dpi)
 extern long dragPixels;
 extern long dragTimeout;
@@ -129,12 +134,17 @@ extern long minGridSpacing;
 extern long drawCount;
 extern BOOL_T drawEnable;
 extern long currRedraw;
+extern long constrainMain;
+extern long mapScale;
+extern long liveMap;
+extern long descriptionFontSize;
 
 extern coOrd panCenter;
 extern coOrd menuPos;
 
 extern int log_pan;
 
+extern wBool_t wDrawDoTempDraw;
 
 extern wDrawColor drawColorBlack;
 extern wDrawColor drawColorWhite;
@@ -142,8 +152,13 @@ extern wDrawColor drawColorRed;
 extern wDrawColor drawColorBlue;
 extern wDrawColor drawColorGreen;
 extern wDrawColor drawColorAqua;
+extern wDrawColor drawColorDkRed;
+extern wDrawColor drawColorDkBlue;
+extern wDrawColor drawColorDkGreen;
+extern wDrawColor drawColorDkAqua;
 extern wDrawColor drawColorPowderedBlue;
 extern wDrawColor drawColorPurple;
+extern wDrawColor drawColorMagenta;
 extern wDrawColor drawColorGold;
 extern wDrawColor drawColorGrey10;
 extern wDrawColor drawColorGrey20;

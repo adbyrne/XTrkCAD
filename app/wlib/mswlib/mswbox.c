@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
@@ -15,9 +14,9 @@
  */
 
 struct wBox_t {
-		WOBJ_COMMON
-		wBoxType_e boxTyp;
-		};
+	WOBJ_COMMON
+	wBoxType_e boxTyp;
+};
 
 #define B (1)
 #define W (2)
@@ -29,9 +28,9 @@ struct wBox_t {
 
 
 void wBoxSetSize(
-		wBox_p bb,
-		wWinPix_t w,
-		wWinPix_t h )
+        wBox_p bb,
+        wWinPix_t w,
+        wWinPix_t h )
 {
 	bb->w = w;
 	bb->h = h;
@@ -39,7 +38,7 @@ void wBoxSetSize(
 
 
 static void repaintBox( HWND hWnd, wControl_p b )
-{						  
+{
 	HDC hDc;
 	wBox_p bb = (wBox_p)(b);
 	wWinPix_t x0, y0, x1, y1;
@@ -53,7 +52,8 @@ static void repaintBox( HWND hWnd, wControl_p b )
 		{ /* ThickB */ {B,B}, {B,B}, {B,B}, {B,B} },
 		{ /* ThickW */ {W,W}, {W,W}, {W,W}, {W,W} },
 		{ /* RidgeW */ {W,B}, {W,B}, {B,W}, {B,W} },
-		{ /* TroughW*/ {B,W}, {B,W}, {W,B}, {W,B} } };
+		{ /* TroughW*/ {B,W}, {B,W}, {W,B}, {W,B} }
+	};
 
 	x0 = bb->x;
 	x1 = bb->x+bb->w;
@@ -89,18 +89,19 @@ static void repaintBox( HWND hWnd, wControl_p b )
 
 
 static callBacks_t boxCallBacks = {
-		repaintBox,
-		NULL,
-		NULL };
+	repaintBox,
+	NULL,
+	NULL
+};
 
 wBox_p wBoxCreate(
-		wWin_p	parent,
-		wWinPix_t	origX,
-		wWinPix_t	origY,
-		const char	* labelStr,
-		wBoxType_e typ,
-		wWinPix_t	width,
-		wWinPix_t	height )
+        wWin_p	parent,
+        wWinPix_t	origX,
+        wWinPix_t	origY,
+        const char	* labelStr,
+        wBoxType_e typ,
+        wWinPix_t	width,
+        wWinPix_t	height )
 {
 	wBox_p b;
 	int index;
@@ -113,7 +114,7 @@ wBox_p wBoxCreate(
 	b->w = width;
 	b->h = height;
 	mswAddButton( (wControl_p)b, FALSE, NULL );
-	mswCallBacks[B_BOX] = &boxCallBacks; 
+	mswCallBacks[B_BOX] = &boxCallBacks;
 	repaintBox( ((wControl_p)parent)->hWnd, (wControl_p)b );
 	return b;
-} 
+}

@@ -20,15 +20,19 @@ int main( int argc, char *argv[] )
 		set = 0;
 		fp = openfile( argv[1], "rb", &FileSize );
 	}
-	if (fp == NULL)
+	if (fp == NULL) {
 		exit(1);
-	
+	}
+
 	fprintf( stderr, "File Size = %ld (%lx)\n", FileSize, FileSize );
 	sum16computed = mswCheck16( fp, FileSize, &sum16stored );
-	if (!mswCheck32( fp, FileSize, &sum32off, &sum32computed, &sum32stored ))
+	if (!mswCheck32( fp, FileSize, &sum32off, &sum32computed, &sum32stored )) {
 		fprintf( stderr, "mswCheck32 error\n" );
-	fprintf( stderr, "sum16: stored = %x, computed = %x, sum = %x, expected FFFF\n", sum16stored, sum16computed, sum16stored+sum16computed );
-	fprintf( stderr, "sum32: stored = %lx, computed = %lx, expected %lx\n", sum32stored, sum32computed, sum32stored );
+	}
+	fprintf( stderr, "sum16: stored = %x, computed = %x, sum = %x, expected FFFF\n",
+	         sum16stored, sum16computed, sum16stored+sum16computed );
+	fprintf( stderr, "sum32: stored = %lx, computed = %lx, expected %lx\n",
+	         sum32stored, sum32computed, sum32stored );
 	if (set) {
 		fseek( fp, 0x12, SEEK_SET );
 		sum16computed = 0xFFFF - sum16computed;

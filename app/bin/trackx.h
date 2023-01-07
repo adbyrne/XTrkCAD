@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -28,26 +28,25 @@
 #include "track.h"
 
 typedef struct track_t {
-		struct track_t *next;
-		TRKINX_T index;
-		TRKTYP_T type;
-		unsigned int layer;
-		signed char scale;
-		BOOL_T modified:1;
-		BOOL_T deleted:1;
-		BOOL_T new:1;
-		unsigned int width:2;
-		unsigned int elevMode:2;
-		unsigned int bits:13;
-		EPINX_T endCnt;
-		trkEndPt_p endPt;
-		struct { float x; float y; } lo, hi;
-		struct extraDataBase_t * extraData;
-		CSIZE_T extraSize;
-		DIST_T elev;
-		} track_t;
+	struct track_t *next;
+	TRKINX_T index;
+	TRKTYP_T type;
+	unsigned int layer;
+	signed char scale;
+	BOOL_T modified:1;
+	BOOL_T deleted:1;
+	BOOL_T new:1;
+	unsigned int width:2;
+	unsigned int elevMode:2;
+	unsigned int bits:13;
+	EPINX_T endCnt;
+	trkEndPt_p endPt;
+	struct { float x; float y; } lo, hi;
+	struct extraDataBase_t * extraData;
+	CSIZE_T extraSize;
+	DIST_T elev;
+} track_t;
 
 extern track_p to_first;
 extern track_p * to_last;
-#define TRK_ITERATE(TRK)		for (TRK=to_first; TRK!=NULL; TRK=TRK->next) if (!(TRK->deleted)) 
 #endif

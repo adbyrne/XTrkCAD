@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -130,8 +130,6 @@ void wControlSetBalloonText(
 
 void wControlSetBalloon( wControl_p b, wWinPix_t dx, wWinPix_t dy, const char * msg )
 {
-    PangoLayout * layout;
-
     gint x, y;
     gint w, h;
     wWinPix_t xx, yy;

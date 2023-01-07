@@ -2,24 +2,24 @@
  * Some assorted string handling functions
  */
 
- /*  XTrackCAD - Model Railroad CAD
-  *  Copyright (C) 2019 Martin Fischer
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-  */
- 
+/*  XTrackCAD - Model Railroad CAD
+ *  Copyright (C) 2019 Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 #include <string.h>
 #include "shortentext.h"
 
@@ -28,7 +28,7 @@
 
 /**
  * Replace all whitespace characters with blanks. Successive occurences are reduced to a single blank.
- * 
+ *
  * \param source IN string to convert
  * \param dest IN buffer for converted string, minimum size is the size of the source string
  */
@@ -64,15 +64,16 @@ EllipsizeString(char *source, char *dest, size_t length)
 
 
 	// trivial case: nothing to do if source is shorter and no inplace
-	if( strlen(source)  <= length )
-	{
-		if( dest )
+	if( strlen(source)  <= length ) {
+		if( dest ) {
 			strcpy(dest, source);
+		}
 		return;
 	}
 
-	if ( dest )
+	if ( dest ) {
 		strncpy(resultString, source, length);
+	}
 
 	resultString[ length ] = '\0';
 
@@ -86,9 +87,10 @@ EllipsizeString(char *source, char *dest, size_t length)
 		}
 	}
 
-	// no blank in string, replace the last n chars 
+	// no blank in string, replace the last n chars
 	if (!position) {
-		strcpy(resultString + (strlen(resultString) - sizeof(ELLIPSIZE) + 1), ELLIPSIZE);
+		strcpy(resultString + (strlen(resultString) - sizeof(ELLIPSIZE) + 1),
+		       ELLIPSIZE);
 	}
 	return;
 }

@@ -16,7 +16,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef FILEIO_H
@@ -42,6 +42,9 @@ extern const char * libDir;
 extern wBool_t bReadOnly;
 extern wBool_t bExample;
 
+// Processing an input file, objects may be incomplete so avoid some ops (MapRedraw)
+extern wBool_t bInReadTracks;
+
 #define PARAM_CUSTOM	(-2)
 #define PARAM_LAYOUT	(-3)
 extern int curParamFileIndex;
@@ -55,8 +58,6 @@ extern wBool_t inPlayback;
 extern wBool_t inPlaybackQuit;
 extern wWin_p demoW;
 extern int curDemo;
-
-extern wMenuList_p fileList_ml;
 
 #define ZIPFILETYPEEXTENSION "xtce"
 
@@ -96,7 +97,7 @@ BOOL_T GetArgs( char *, char *, ... );
 char * ReadMultilineText();
 BOOL_T ParseRoomSize( char *, coOrd * );
 int InputError( char *, BOOL_T, ... );
-void SyntaxError( char *, wIndex_t, wIndex_t ); 
+void SyntaxError( char *, wIndex_t, wIndex_t );
 
 void AddParam( char *name, readParam_t proc );
 
@@ -110,14 +111,13 @@ void DoParamFiles(void * unused);
 
 int LoadTracks( int cnt, char **fileName, void *data );
 
-typedef void (*doSaveCallBack_p)( void );
-void SetAutoSave(void);
+void SaveState( void );
 void DoSave( void * doAfterSaveVP );
 void DoSaveAs( void * doAfterSaveVP );
 void DoLoad( void );
 void DoExamples( void );
 void DoFileList( int, char *, void * );
-void DoCheckPoint( void );
+void TryCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( BOOL_T );
@@ -145,6 +145,7 @@ int RegLevel( void );
 void ReadKey( void );
 void PopupRegister( void * );
 
+void LoadFileList( void );
 void FileInit( void );
 
 BOOL_T MacroInit( void );

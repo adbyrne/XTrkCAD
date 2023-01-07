@@ -63,7 +63,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -87,9 +87,6 @@
 #include "fileio.h"
 #include "common-ui.h"
 
-extern drawCmd_t tempD;
-extern TRKTYP_T T_BEZIER;
-extern TRKTYP_T T_CORNU;
 
 typedef struct {
 	coOrd end_center;
@@ -106,66 +103,67 @@ typedef struct {
  * STATE INFO
  */
 enum Cornu_States { NONE,
-	POS_1,
-	LOC_2,
-	POS_2,
-	PICK_POINT,
-	POINT_PICKED,
-	TRACK_SELECTED };
+                    POS_1,
+                    LOC_2,
+                    POS_2,
+                    PICK_POINT,
+                    POINT_PICKED,
+                    TRACK_SELECTED
+                  };
 
 typedef enum {CORNU_MODIFY, CORNU_CREATE} cornuCmdType_e;
 
 
 static struct {
-		enum Cornu_States state;
-		coOrd pos[2];
-		int number_of_points;
-        int selectEndPoint;
-        int selectMidPoint;
-        int selectEndHandle;
-        int prevSelected;
-        int prevEndPoint;
-        DIST_T width;
-		track_p trk[2];
-		EPINX_T ep[2];
-		DIST_T radius[2];
-		ANGLE_T angle[2];
-		ANGLE_T arcA0[2];
-		ANGLE_T arcA1[2];
-		coOrd center[2];
-		curveType_e trackType[2];
+	enum Cornu_States state;
+	coOrd pos[4];
+	int number_of_points;
+	int selectEndPoint;
+	int selectMidPoint;
+	int selectEndHandle;
+	int prevSelected;
+	int prevEndPoint;
+	DIST_T width;
+	track_p trk[2];
+	EPINX_T ep[2];
+	DIST_T radius[2];
+	ANGLE_T angle[2];
+	ANGLE_T arcA0[2];
+	ANGLE_T arcA1[2];
+	coOrd center[2];
+	curveType_e trackType[2];
 
-		BOOL_T extend[2];
-		trkSeg_t extendSeg[2];
+	BOOL_T extend[2];
+	trkSeg_t extendSeg[2];
 
-		trkSeg_t ep1Segs[11];
-		int ep1Segs_da_cnt;
-		trkSeg_t ep2Segs[11];
-		int ep2Segs_da_cnt;
-		dynArr_t crvSegs_da;
-		int crvSegs_da_cnt;
-		trkSeg_t trk1Seg;
-		trkSeg_t trk2Seg;
-		track_p selectTrack;
-		DIST_T minRadius;
-		BOOL_T circleorHelix[2];
-		DIST_T trackGauge;
+	trkSeg_t ep1Segs[11];
+	int ep1Segs_da_cnt;
+	trkSeg_t ep2Segs[11];
+	int ep2Segs_da_cnt;
+	dynArr_t crvSegs_da;
+	int crvSegs_da_cnt;
+	trkSeg_t trk1Seg;
+	trkSeg_t trk2Seg;
+	track_p selectTrack;
+	DIST_T minRadius;
+	BOOL_T circleorHelix[2];
+	DIST_T trackGauge;
 
-		int cmdType;
+	int cmdType;
 
-		dynArr_t midSegs;
+	dynArr_t midSegs;
 
-		dynArr_t mid_points;
-		dynArr_t tracks;
-		BOOL_T ends[2];
+	dynArr_t mid_points;
+	dynArr_t tracks;
+	BOOL_T ends[2];
 
-		endHandle endHandle[2];
+	endHandle endHandle[2];
 
-		bezctx * bezc;
+	bezctx * bezc;
 
-		cornuCmdType_e commandType;
+	cornuCmdType_e commandType;
 
-		} Da;
+} Da;
 
 static trkSeg_p curCornu;
 static wIndex_t cornuHotBarCmdInx;
@@ -179,10 +177,10 @@ static struct {
 
 
 static char * CmdCornuHotBarProc(
-				hotBarProc_e op,
-				void * data,
-				drawCmd_p d,
-				coOrd * origP )
+        hotBarProc_e op,
+        void * data,
+        drawCmd_p d,
+        coOrd * origP )
 {
 	trkSeg_p trkseg = &hotB.st;
 	switch ( op ) {
@@ -259,15 +257,16 @@ EXPORT void AddHotBarCornu( void )
 	//end.y = 21.25;
 	hotB.count = 3;
 	//hotB.st.u.l.pos[1] = end;
-	AddHotBarElement( label, end, zero, TRUE, TRUE, curBarScale>0?curBarScale:-1, &hotB, CmdCornuHotBarProc );
+	AddHotBarElement( label, end, zero, TRUE, TRUE, curBarScale>0?curBarScale:-1,
+	                  &hotB, CmdCornuHotBarProc );
 }
 
 int createMidPoint(dynArr_t * ap,
-				 coOrd pos0,     //end on curve
-				 BOOL_T point_selected,
-				 BOOL_T point_selectable,
-				 BOOL_T track_modifyable
-				  )
+                   coOrd pos0,     //end on curve
+                   BOOL_T point_selected,
+                   BOOL_T point_selectable,
+                   BOOL_T track_modifyable
+                  )
 {
 	DIST_T d, w;
 	d = tempD.scale*0.25;
@@ -295,24 +294,24 @@ int createMidPoint(dynArr_t * ap,
  * A Cornu end Point has a filled circle surrounded by another circle for endpoint
  */
 int createEndPoint(
-                     trkSeg_t sp[],   //seg pointer for up to 2 trkSegs (ends and line)
-                     coOrd pos0,     //end on curve
-				     BOOL_T point_selected,
-					 BOOL_T point_selectable,
-					 BOOL_T track_modifyable,
-					 BOOL_T track_present,
-					 ANGLE_T angle,
-					 DIST_T radius,
-					 coOrd centert,
-					 endHandle * endHandle
-                      )
+        trkSeg_t sp[],   //seg pointer for up to 2 trkSegs (ends and line)
+        coOrd pos0,     //end on curve
+        BOOL_T point_selected,
+        BOOL_T point_selectable,
+        BOOL_T track_modifyable,
+        BOOL_T track_present,
+        ANGLE_T angle,
+        DIST_T radius,
+        coOrd centert,
+        endHandle * endHandle
+)
 {
-    DIST_T d, w;
-    int num =0;
-    d = tempD.scale*0.25;
-    w = tempD.scale/tempD.dpi; /*double width*/
-    num = 1;
-    if (point_selectable) {
+	DIST_T d, w;
+	int num =0;
+	d = tempD.scale*0.25;
+	w = tempD.scale/tempD.dpi; /*double width*/
+	num = 1;
+	if (point_selectable) {
 		sp[1].u.c.center = pos0;
 		sp[1].u.c.a0 = 0.0;
 		sp[1].u.c.a1 = 360.0;
@@ -321,56 +320,66 @@ int createEndPoint(
 		sp[1].width = w;
 		sp[1].color = point_selected?drawColorBlue:drawColorRed;
 		num = 2;
-    }
-    sp[0].u.c.center = pos0;
-    sp[0].u.c.a0 = 0.0;
-    sp[0].u.c.a1 = 360.0;
-    sp[0].width = w;
-    sp[0].u.c.radius = d/4;
-    sp[0].color = point_selected?drawColorBlue:drawColorRed;
-    if (track_modifyable)
-        sp[0].type = SEG_CRVLIN;
-    else
-        sp[0].type = SEG_FILCRCL;
-    if (!track_present && endHandle ) {
-    	endHandle->end_center = zero;
-    	endHandle->end_curve = zero;
-    	endHandle->end_valid = TRUE;
-    	endHandle->mid_disp = 0.0;
-    	DIST_T end_length = tempD.scale*2.0;
-    	Translate(&endHandle->end_curve,pos0,angle,end_length);
-    	Translate(&endHandle->end_center,pos0,angle,end_length/2);
-    	if (radius>0.0) {
-    		ANGLE_T a1 = R2D(end_length/radius);
-    		if (DifferenceBetweenAngles(angle,FindAngle(centert,pos0))>0.0) {
-    			a1 = -a1;
-    		}
-			PointOnCircle( &endHandle->end_curve, centert,radius,NormalizeAngle(FindAngle(centert,pos0)+a1));
-			PointOnCircle( &endHandle->end_center,centert,radius,NormalizeAngle(FindAngle(centert,pos0)+(a1/2.0)));
+	}
+	sp[0].u.c.center = pos0;
+	sp[0].u.c.a0 = 0.0;
+	sp[0].u.c.a1 = 360.0;
+	sp[0].width = w;
+	sp[0].u.c.radius = d/4;
+	sp[0].color = point_selected?drawColorBlue:drawColorRed;
+	if (track_modifyable) {
+		sp[0].type = SEG_CRVLIN;
+	} else {
+		sp[0].type = SEG_FILCRCL;
+	}
+	if (!track_present && endHandle ) {
+		endHandle->end_center = zero;
+		endHandle->end_curve = zero;
+		endHandle->end_valid = TRUE;
+		endHandle->mid_disp = 0.0;
+		DIST_T end_length = tempD.scale*2.0;
+		Translate(&endHandle->end_curve,pos0,angle,end_length);
+		Translate(&endHandle->end_center,pos0,angle,end_length/2);
+		if (radius>0.0) {
+			ANGLE_T a1 = R2D(end_length/radius);
+			if (DifferenceBetweenAngles(angle,FindAngle(centert,pos0))>0.0) {
+				a1 = -a1;
+			}
+			PointOnCircle( &endHandle->end_curve, centert,radius,
+			               NormalizeAngle(FindAngle(centert,pos0)+a1));
+			PointOnCircle( &endHandle->end_center,centert,radius,
+			               NormalizeAngle(FindAngle(centert,pos0)+(a1/2.0)));
 			coOrd cm;
 			cm = endHandle->end_center;
 			ANGLE_T a = FindAngle(endHandle->end_curve,pos0);
 			Rotate(&cm,endHandle->end_curve,-a );
 			endHandle->mid_disp = cm.x-endHandle->end_curve.x;
 			curveData_t curveData;
-			PlotCurve(crvCmdFromCenter,pos0,endHandle->end_center, endHandle->end_curve, &curveData, FALSE, 0.0);
+			PlotCurve(crvCmdFromCenter,pos0,endHandle->end_center, endHandle->end_curve,
+			          &curveData, FALSE, 0.0);
 			if (curveData.type == curveTypeStraight) {
 				coOrd pos_line[2];
-				Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)+90,trackGauge/2);
-				Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,endHandle->end_curve)+90,trackGauge/2);
+				Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)+90,
+				          trackGauge/2);
+				Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
+				                endHandle->end_curve)+90,trackGauge/2);
 				sp[num].type = SEG_STRLIN;
 				sp[num].width = w;
 				sp[num].u.l.pos[0] = pos_line[0];
 				sp[num].u.l.pos[1] = pos_line[1];
-				sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
+				sp[num].color = (endHandle->last_selected
+				                 ||endHandle->radius_selected)?drawColorBlue:drawColorRed;
 				num++;
-				Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)-90,trackGauge/2);
-				Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,endHandle->end_curve)-90,trackGauge/2);
+				Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)-90,
+				          trackGauge/2);
+				Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
+				                endHandle->end_curve)-90,trackGauge/2);
 				sp[num].type = SEG_STRLIN;
 				sp[num].width = w;
 				sp[num].u.l.pos[0] = pos_line[0];
 				sp[num].u.l.pos[1] = pos_line[1];
-				sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
+				sp[num].color = (endHandle->last_selected
+				                 ||endHandle->radius_selected)?drawColorBlue:drawColorRed;
 				num++;
 				pos_line[0]= pos0;
 				Translate(&pos_line[1],pos0,-FindAngle(pos0,endHandle->end_curve),end_length);
@@ -397,7 +406,8 @@ int createEndPoint(
 					sp[num].u.c.a0 = an1;
 				}
 				endHandle->arc_angle = sp[num].u.c.a1;
-				sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
+				sp[num].color = (endHandle->last_selected
+				                 ||endHandle->radius_selected)?drawColorBlue:drawColorRed;
 				num++;
 				pos_rad = radius-trackGauge/2;
 				sp[num].type = SEG_CRVLIN;
@@ -406,31 +416,38 @@ int createEndPoint(
 				sp[num].u.c.radius = pos_rad;
 				sp[num].u.c.a1 = sp[num-1].u.c.a1;
 				sp[num].u.c.a0 = sp[num-1].u.c.a0;
-				sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
+				sp[num].color = (endHandle->last_selected
+				                 ||endHandle->radius_selected)?drawColorBlue:drawColorRed;
 				num++;
 			}
-    	} else {
-    		coOrd pos_line[2];
-    		Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)+90,trackGauge/2);
-    		Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,endHandle->end_curve)+90,trackGauge/2);
-    		sp[num].type = SEG_STRLIN;
-			sp[num].width = w;
-			sp[num].u.l.pos[0] = pos_line[0];
-			sp[num].u.l.pos[1] = pos_line[1];
-			sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
-			num++;
-			Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)-90,trackGauge/2);
-			Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,endHandle->end_curve)-90,trackGauge/2);
+		} else {
+			coOrd pos_line[2];
+			Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)+90,
+			          trackGauge/2);
+			Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
+			                endHandle->end_curve)+90,trackGauge/2);
 			sp[num].type = SEG_STRLIN;
 			sp[num].width = w;
 			sp[num].u.l.pos[0] = pos_line[0];
 			sp[num].u.l.pos[1] = pos_line[1];
-			sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
+			sp[num].color = (endHandle->last_selected
+			                 ||endHandle->radius_selected)?drawColorBlue:drawColorRed;
+			num++;
+			Translate(&pos_line[0],pos0,FindAngle(pos0,endHandle->end_curve)-90,
+			          trackGauge/2);
+			Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
+			                endHandle->end_curve)-90,trackGauge/2);
+			sp[num].type = SEG_STRLIN;
+			sp[num].width = w;
+			sp[num].u.l.pos[0] = pos_line[0];
+			sp[num].u.l.pos[1] = pos_line[1];
+			sp[num].color = (endHandle->last_selected
+			                 ||endHandle->radius_selected)?drawColorBlue:drawColorRed;
 			num++;
 
-    	}
-    	coOrd pos_line[2];
-    	pos_line[0]= pos0;
+		}
+		coOrd pos_line[2];
+		pos_line[0]= pos0;
 		Translate(&pos_line[1],pos0,angle+180,end_length);
 		sp[num].type = SEG_STRLIN;
 		sp[num].width = w;
@@ -446,21 +463,26 @@ int createEndPoint(
 		sp[num].u.c.radius = d/4;
 		sp[num].color = endHandle->angle_selected?drawColorBlue:drawColorRed;
 		num++;
-		if (radius<=0.0)
-			DrawArrowHeads(&sp[num],endHandle->end_center,angle+90.0,TRUE,endHandle->radius_selected?drawColorBlue:drawColorRed);
-		else
-			DrawArrowHeads(&sp[num],endHandle->end_center,FindAngle(centert,endHandle->end_center),TRUE,endHandle->radius_selected?drawColorBlue:drawColorRed);
+		if (radius<=0.0) {
+			DrawArrowHeads(&sp[num],endHandle->end_center,angle+90.0,TRUE,
+			               endHandle->radius_selected?drawColorBlue:drawColorRed);
+		} else {
+			DrawArrowHeads(&sp[num],endHandle->end_center,FindAngle(centert,
+			                endHandle->end_center),TRUE,
+			               endHandle->radius_selected?drawColorBlue:drawColorRed);
+		}
 		num=num+5;
-    } else if (endHandle) {
-    	endHandle->end_valid=FALSE;
-    }
-    return num;
+	} else if (endHandle) {
+		endHandle->end_valid=FALSE;
+	}
+	return num;
 }
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-static void CreateCornuEndAnchor(coOrd p, wBool_t lock) {
+static void CreateCornuEndAnchor(coOrd p, wBool_t lock)
+{
 	DIST_T d = tempD.scale*0.15;
 
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -483,12 +505,15 @@ static void CreateCornuEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
-static void CreateCornuExtendAnchor(coOrd p, ANGLE_T a, wBool_t selected) {
+static void CreateCornuExtendAnchor(coOrd p, ANGLE_T a, wBool_t selected)
+{
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,FALSE,wDrawColorBlue);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,FALSE,
+	               wDrawColorBlue);
 }
 
-static void CreateCornuAnchor(coOrd p, wBool_t open) {
+static void CreateCornuAnchor(coOrd p, wBool_t open)
+{
 	DIST_T d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
@@ -504,7 +529,8 @@ static void CreateCornuAnchor(coOrd p, wBool_t open) {
 /*
  * Add element to DYNARR pointed to by caller from segment handed in
  */
-void addSegCornu(dynArr_t * const array_p, trkSeg_p seg) {
+void addSegCornu(dynArr_t * const array_p, trkSeg_p seg)
+{
 	trkSeg_p s;
 
 	DYNARR_APPEND(trkSeg_t, * array_p, 10);          //Adds 1 to cnt
@@ -512,7 +538,7 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg) {
 	s->type = seg->type;
 	s->bezSegs.max = 0;
 	s->bezSegs.cnt = 0;
-	if (s->bezSegs.ptr) MyFree(s->bezSegs.ptr);
+	if (s->bezSegs.ptr) { MyFree(s->bezSegs.ptr); }
 	s->bezSegs.ptr = NULL;
 	s->color = seg->color;
 	s->width = seg->width;
@@ -521,16 +547,18 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg) {
 		s->u.b.angle3 = seg->u.b.angle3;
 		s->u.b.length = seg->u.b.length;
 		s->u.b.minRadius = seg->u.b.minRadius;
-		for (int i=0;i<4;i++) s->u.b.pos[i] = seg->u.b.pos[i];
+		for (int i=0; i<4; i++) { s->u.b.pos[i] = seg->u.b.pos[i]; }
 		s->u.b.radius0 = seg->u.b.radius3;
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
-			addSegCornu(&s->bezSegs, (((trkSeg_p)seg->bezSegs.ptr) + i)); //recurse for copying embedded Beziers as in Cornu joint
+			addSegCornu(&s->bezSegs,
+			            (((trkSeg_p)seg->bezSegs.ptr) + i)); //recurse for copying embedded Beziers as in Cornu joint
 		}
 	} else {
 		s->u = seg->u;
 	}
 }
-EXPORT void SetKnots(spiro_cp knots[], coOrd posk[], char type[], int count) {
+EXPORT void SetKnots(spiro_cp knots[], coOrd posk[], char type[], int count)
+{
 	for (int i = 0; i < count; i++) {
 		knots[i].x = posk[i].x;
 		knots[i].y = posk[i].y;
@@ -547,7 +575,9 @@ typedef struct {
 // G2 (position only k1'' = k2'' = 0); Also Cornu <-> Cornu
 // G4 (position only - splitable for Cornu - a G4 point) k1''= k2''
 
-BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_t * cp, dynArr_t * array_p, BOOL_T spots) {
+BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2],
+                  cornuParm_t * cp, dynArr_t * array_p, BOOL_T spots)
+{
 	array_p->cnt = 0;
 	//Create LH knots
 	//Find remote end point of track, create start knot
@@ -562,7 +592,7 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 	BOOL_T back;
 	ANGLE_T angle1;
 
-	if (Da.bezc) free(Da.bezc);
+	if (Da.bezc) { free(Da.bezc); }
 
 	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots,tempD.scale*0.15/4);
 
@@ -577,8 +607,8 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 			Translate(&posk[1],pos0,cp->angle[0],5);
 		} else {
 			angle1 = FindAngle(cp->center[0],pos[0]);
-			if (NormalizeAngle(angle1 - cp->angle[0])<180) back = TRUE;
-			else back = FALSE;
+			if (NormalizeAngle(angle1 - cp->angle[0])<180) { back = TRUE; }
+			else { back = FALSE; }
 			posk[0] = pos[0];
 			Rotate(&posk[0],cp->center[0],(back)?-10:10);
 			posk[1] = pos[0];
@@ -590,12 +620,12 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 		posk[0] = pos[0];
 	}
 
-    for (int i=0;i<extra_points.cnt;i++) {
-    	posk[(end[0]?3:1)+i] = DYNARR_N(coOrd,extra_points,i);
-    	type[(end[0]?3:1)+i] = SPIRO_G4;
-    }
+	for (int i=0; i<extra_points.cnt; i++) {
+		posk[(end[0]?3:1)+i] = DYNARR_N(coOrd,extra_points,i);
+		type[(end[0]?3:1)+i] = SPIRO_G4;
+	}
 
-    posk[(end[0]?3:1)+extra_points.cnt] = pos[1];
+	posk[(end[0]?3:1)+extra_points.cnt] = pos[1];
 	coOrd pos1 = pos[1];
 
 	if (end[1]) {
@@ -607,8 +637,8 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 			Translate(&posk[(end[0]?3:1)+extra_points.cnt+2],pos1,cp->angle[1],10);
 		} else {
 			angle1 = FindAngle(cp->center[1],pos[1]);
-			if (NormalizeAngle(angle1 - cp->angle[1])>180) back = TRUE;
-			else back = FALSE;
+			if (NormalizeAngle(angle1 - cp->angle[1])>180) { back = TRUE; }
+			else { back = FALSE; }
 			posk[(end[0]?3:1)+extra_points.cnt+1] = pos[1];
 			Rotate(&posk[(end[0]?3:1)+extra_points.cnt+1],cp->center[1],(back)?5:-5);
 			posk[(end[0]?3:1)+extra_points.cnt+2] = pos[1];
@@ -628,7 +658,9 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 	return TRUE;
 }
 
-EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], dynArr_t * array_p, BOOL_T spots) {
+EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
+                         DIST_T radius[2], dynArr_t * array_p, BOOL_T spots)
+{
 	array_p->cnt = 0;
 	//Create LH knots
 	//Find remote end point of track, create start knot
@@ -640,7 +672,7 @@ EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T
 	BOOL_T back;
 	ANGLE_T angle1;
 
-	if (Da.bezc) free(Da.bezc);
+	if (Da.bezc) { free(Da.bezc); }
 
 	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots,tempD.scale*0.15/4);
 
@@ -653,8 +685,8 @@ EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T
 		Translate(&posk[1],pos0,angle[0],5);
 	} else {
 		angle1 = FindAngle(center[0],pos[0]);
-		if (NormalizeAngle(angle1 - angle[0])<180) back = TRUE;
-		else back = FALSE;
+		if (NormalizeAngle(angle1 - angle[0])<180) { back = TRUE; }
+		else { back = FALSE; }
 		posk[0] = pos[0];
 		Rotate(&posk[0],center[0],(back)?-10:10);
 		posk[1] = pos[0];
@@ -674,8 +706,8 @@ EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T
 		Translate(&posk[5],pos1,angle[1],10);
 	} else {
 		angle1 = FindAngle(center[1],pos[1]);
-		if (NormalizeAngle(angle1 - angle[1])>180) back = TRUE;
-		else back = FALSE;
+		if (NormalizeAngle(angle1 - angle[1])>180) { back = TRUE; }
+		else { back = FALSE; }
 		posk[4] = pos[1];
 		Rotate(&posk[4],center[1],(back)?5:-5);
 		posk[5] = pos[1];
@@ -695,36 +727,41 @@ EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T
 /*
  * Set up the call to Cornu0. Take the conditions of the two ends from the connected tracks.
  */
-BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p, cornuParm_t * cp) {
+BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2],
+                 dynArr_t * array_p, cornuParm_t * cp)
+{
 
 	trackParams_t params;
 	ANGLE_T angle;
-	for (int i=0;i<2;i++) {
+	for (int i=0; i<2; i++) {
 		if (trk[i]) {
-			if (!GetTrackParams(PARAMS_CORNU,trk[i],pos[i],&params)) return FALSE;
+			if (!GetTrackParams(PARAMS_CORNU,trk[i],pos[i],&params)) { return FALSE; }
 			cp->pos[i] = pos[i];
-			if (ep && ep[i]>=0) angle = GetTrkEndAngle(trk[i],ep[i]);
-			else angle = params.angle; //Turntable only
+			if (ep && ep[i]>=0) { angle = GetTrkEndAngle(trk[i],ep[i]); }
+			else { angle = params.angle; } //Turntable only
 			if (Da.circleorHelix[i]) { //Helix/Circle only
 				cp->radius[i] = params.arcR;
 				cp->center[i] = params.arcP;
-				if (ep && ep[i]>=0) cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
+				if (ep && ep[i]>=0) { cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0)); }
 			} else if (params.type == curveTypeStraight) {
 				cp->angle[i] = NormalizeAngle(angle+180);       //Because end always backwards
 				cp->radius[i] = 0.0;
-			} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR == 0.0 ) {
+			} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier)
+			           && params.arcR == 0.0 ) {
 				cp->radius[i] = 0.0;
-				if (ep && ep[i]>=0) cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));  //Use point not end
+				if (ep && ep[i]>=0) { cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0)); }  //Use point not end
 			} else if (params.type == curveTypeCurve) {
-				if (ep && ep[i]>=0) cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
+				if (ep && ep[i]>=0) { cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0)); }
 				cp->radius[i] = params.arcR;
 				cp->center[i] = params.arcP;
-			} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR != 0.0 ){
-				if (ep && ep[i]>=0) cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
+			} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier)
+			           && params.arcR != 0.0 ) {
+				if (ep && ep[i]>=0) { cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0)); }
 				cp->radius[i] = params.arcR;
 				cp->center[i] = params.arcP;
 			} else {
-				cp->angle[i] = NormalizeAngle(angle+180);             //Unknown - treat like straight
+				cp->angle[i] = NormalizeAngle(angle
+				                              +180);             //Unknown - treat like straight
 				cp->radius[i] = params.arcR;
 				cp->center[i] = params.arcP;
 			}
@@ -742,67 +779,85 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
  */
 
 EXPORT void DrawCornuCurve(
-							trkSeg_p first_trk,
-							trkSeg_p point1,
-							int ep1Segs_cnt,
-							trkSeg_p curveSegs,
-							int crvSegs_cnt,
-							trkSeg_p point2,
-							int ep2Segs_cnt,
-							trkSeg_p second_trk,
-							trkSeg_p extend1_trk,
-							trkSeg_p extend2_trk,
-							trkSeg_p mids,
-							int midSegs_cnt,
-							wDrawColor color
-					) {
-	if (first_trk)
+        trkSeg_p first_trk,
+        trkSeg_p point1,
+        int ep1Segs_cnt,
+        trkSeg_p curveSegs,
+        int crvSegs_cnt,
+        trkSeg_p point2,
+        int ep2Segs_cnt,
+        trkSeg_p second_trk,
+        trkSeg_p extend1_trk,
+        trkSeg_p extend2_trk,
+        trkSeg_p mids,
+        int midSegs_cnt,
+        wDrawColor color
+)
+{
+	if (first_trk) {
 		DrawSegs( &tempD, zero, 0.0, first_trk, 1, Da.trackGauge, drawColorBlack );
-	if (crvSegs_cnt>0 && curveSegs)
+	}
+	if (crvSegs_cnt>0 && curveSegs) {
 		DrawSegs( &tempD, zero, 0.0, curveSegs, crvSegs_cnt, Da.trackGauge, color );
-	if (second_trk)
+	}
+	if (second_trk) {
 		DrawSegs( &tempD, zero, 0.0, second_trk, 1, Da.trackGauge, drawColorBlack );
-	if (ep1Segs_cnt>0 && point1)
-		DrawSegs( &tempD, zero, 0.0, point1, ep1Segs_cnt, Da.trackGauge, drawColorBlack );
-	if (ep2Segs_cnt>0 && point2)
-		DrawSegs( &tempD, zero, 0.0, point2, ep2Segs_cnt, Da.trackGauge, drawColorBlack );
-	if (midSegs_cnt>0 && mids)
-		DrawSegs( &tempD, zero, 0.0, mids, midSegs_cnt, Da.trackGauge, drawColorBlack );
-	if (extend1_trk)
+	}
+	if (ep1Segs_cnt>0 && point1) {
+		DrawSegs( &tempD, zero, 0.0, point1, ep1Segs_cnt, Da.trackGauge,
+		          drawColorBlack );
+	}
+	if (ep2Segs_cnt>0 && point2) {
+		DrawSegs( &tempD, zero, 0.0, point2, ep2Segs_cnt, Da.trackGauge,
+		          drawColorBlack );
+	}
+	if (midSegs_cnt>0 && mids) {
+		DrawSegs( &tempD, zero, 0.0, mids, midSegs_cnt, Da.trackGauge,
+		          drawColorBlack );
+	}
+	if (extend1_trk) {
 		DrawSegs( &tempD, zero, 0.0, extend1_trk, 1, Da.trackGauge, drawColorBlack);
-	if (extend2_trk)
+	}
+	if (extend2_trk) {
 		DrawSegs( &tempD, zero, 0.0, extend2_trk, 1, Da.trackGauge, drawColorBlack);
+	}
 
 }
 
 /*
  * If Track, make it red if the radius is below minimum
  */
-void DrawTempCornu() {
+void DrawTempCornu()
+{
 
 
-  DrawCornuCurve(&Da.trk1Seg,
-		  	  	  &Da.ep1Segs[0],Da.ep1Segs_da_cnt,
-				  (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
-				  &Da.ep2Segs[0],Da.ep2Segs_da_cnt,
-				  &Da.trk2Seg,
-				  Da.extend[0]?&Da.extendSeg[0]:NULL,
-				  Da.extend[1]?&Da.extendSeg[1]:NULL,
-				  (trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,
-				  fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:normalColor);
+	DrawCornuCurve(&Da.trk1Seg,
+	               &Da.ep1Segs[0],Da.ep1Segs_da_cnt,
+	               (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
+	               &Da.ep2Segs[0],Da.ep2Segs_da_cnt,
+	               &Da.trk2Seg,
+	               Da.extend[0]?&Da.extendSeg[0]:NULL,
+	               Da.extend[1]?&Da.extendSeg[1]:NULL,
+	               (trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,
+	               fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:
+	               normalColor);
 
 }
 
-void CreateBothEnds(int selectEndPoint, int selectMidPoint, int selectEndHandle, int lastSelected ) {
+void CreateBothEnds(int selectEndPoint, int selectMidPoint, int selectEndHandle,
+                    int lastSelected )
+{
 	BOOL_T selectable[2],modifyable[2];
 	selectable[0] = !Da.trk[0] || (
-			Da.trk[0] && !QueryTrack(Da.trk[0],Q_IS_CORNU) && !QueryTrack(Da.trk[0],Q_CAN_MODIFY_CONTROL_POINTS));
+	                        Da.trk[0] && !QueryTrack(Da.trk[0],Q_IS_CORNU)
+	                        && !QueryTrack(Da.trk[0],Q_CAN_MODIFY_CONTROL_POINTS));
 	modifyable[0] = !Da.trk[0] || (
-			Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
+	                        Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
 	selectable[1] = !Da.trk[1] || (
-			Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU) && !QueryTrack(Da.trk[1],Q_CAN_MODIFY_CONTROL_POINTS));
+	                        Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU)
+	                        && !QueryTrack(Da.trk[1],Q_CAN_MODIFY_CONTROL_POINTS));
 	modifyable[1] = !Da.trk[1] || (
-			Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY));
+	                        Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY));
 
 	Da.endHandle[0].angle_selected = (selectEndHandle==1)?TRUE:FALSE;
 	Da.endHandle[0].radius_selected = (selectEndHandle==0)?TRUE:FALSE;
@@ -811,30 +866,41 @@ void CreateBothEnds(int selectEndPoint, int selectMidPoint, int selectEndHandle,
 	Da.endHandle[0].last_selected = lastSelected==0?TRUE:FALSE;
 	Da.endHandle[1].last_selected = lastSelected==1?TRUE:FALSE;
 	if (selectEndPoint == -1) {
-		Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,selectable[0],modifyable[0],Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],Da.extend[0]?NULL:&Da.endHandle[0]);
-		Da.ep2Segs_da_cnt = createEndPoint(Da.ep2Segs, Da.pos[1],FALSE,selectable[1],modifyable[1],Da.trk[1]!=NULL,Da.angle[1],Da.radius[1],Da.center[1],Da.extend[1]?NULL:&Da.endHandle[1]);
+		Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,selectable[0],
+		                                   modifyable[0],Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],
+		                                   Da.extend[0]?NULL:&Da.endHandle[0]);
+		Da.ep2Segs_da_cnt = createEndPoint(Da.ep2Segs, Da.pos[1],FALSE,selectable[1],
+		                                   modifyable[1],Da.trk[1]!=NULL,Da.angle[1],Da.radius[1],Da.center[1],
+		                                   Da.extend[1]?NULL:&Da.endHandle[1]);
 	} else {
-		Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],selectEndPoint == 0,selectable[0],modifyable[0],Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],Da.extend[0]?NULL:&Da.endHandle[0]);
-		Da.ep2Segs_da_cnt = createEndPoint(Da.ep2Segs, Da.pos[1],selectEndPoint == 1,selectable[1],modifyable[1],Da.trk[1]!=NULL,Da.angle[1],Da.radius[1],Da.center[1],Da.extend[1]?NULL:&Da.endHandle[1]);
+		Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],selectEndPoint == 0,
+		                                   selectable[0],modifyable[0],Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],
+		                                   Da.center[0],Da.extend[0]?NULL:&Da.endHandle[0]);
+		Da.ep2Segs_da_cnt = createEndPoint(Da.ep2Segs, Da.pos[1],selectEndPoint == 1,
+		                                   selectable[1],modifyable[1],Da.trk[1]!=NULL,Da.angle[1],Da.radius[1],
+		                                   Da.center[1],Da.extend[1]?NULL:&Da.endHandle[1]);
 	}
 	Da.endHandle[0].end_valid = !Da.extend[0];
 	Da.endHandle[1].end_valid = !Da.extend[1];
 	DYNARR_RESET(trkSeg_t,Da.midSegs);
-	for (int i=0;i<Da.mid_points.cnt;i++) {
-		createMidPoint(&Da.midSegs, DYNARR_N(coOrd,Da.mid_points,i),selectMidPoint == i,TRUE, TRUE );
+	for (int i=0; i<Da.mid_points.cnt; i++) {
+		createMidPoint(&Da.midSegs, DYNARR_N(coOrd,Da.mid_points,i),selectMidPoint == i,
+		               TRUE, TRUE );
 	}
-	if (Da.radius[0] >=0.0) Da.ends[0] = TRUE;
-	else Da.ends[0] = FALSE;
-	if (Da.radius[1] >=0.0) Da.ends[1] = TRUE;
-	else Da.ends[1] = FALSE;
+	if (Da.radius[0] >=0.0) { Da.ends[0] = TRUE; }
+	else { Da.ends[0] = FALSE; }
+	if (Da.radius[1] >=0.0) { Da.ends[1] = TRUE; }
+	else { Da.ends[1] = FALSE; }
 }
 
-BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track_end, wBool_t extend) {
+BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end,
+                              EPINX_T track_end, wBool_t extend)
+{
 	trackParams_t trackParams;
 	coOrd pos1;
-	if ((track_end>=0) && extend) pos1 = GetTrkEndPos(t,track_end);
-	else pos1 = pos;
-	if (!GetTrackParams(PARAMS_CORNU, t, pos1, &trackParams)) return FALSE;
+	if ((track_end>=0) && extend) { pos1 = GetTrkEndPos(t,track_end); }
+	else { pos1 = pos; }
+	if (!GetTrackParams(PARAMS_CORNU, t, pos1, &trackParams)) { return FALSE; }
 	Da.radius[end] = 0.0;
 	Da.center[end] = zero;
 	Da.circleorHelix[end] = FALSE;
@@ -869,9 +935,10 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 		Da.pos[end] = trackParams.cornuEnd[ep];
 		Da.center[end] = trackParams.cornuCenter[ep];
 	} else if (trackParams.type == curveTypeStraight) {
-		if (trackParams.ep>=0)
-			Da.angle[end] = NormalizeAngle(GetTrkEndAngle(t,track_end)+180);  //Ignore params.angle because it gives from nearest end
-		else {
+		if (trackParams.ep>=0) {
+			Da.angle[end] = NormalizeAngle(GetTrkEndAngle(t,
+			                               track_end)+180);        //Ignore params.angle because it gives from nearest end
+		} else {
 			Da.angle[end] = NormalizeAngle(trackParams.angle+180);            //Turntable
 			Da.pos[end] = trackParams.lineEnd;								  //End moved to constrain angle
 		}
@@ -879,18 +946,20 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 	return TRUE;
 }
 
-void CorrectHelixAngles() {
+void CorrectHelixAngles()
+{
 	if ( Da.circleorHelix[0] ) {
 		Da.ep[0] = PickArcEndPt( Da.center[0], Da.pos[0], Da.pos[1] );
-		if (Da.ep[0] == 1) Da.angle[0] = NormalizeAngle(Da.angle[0]+180);
+		if (Da.ep[0] == 1) { Da.angle[0] = NormalizeAngle(Da.angle[0]+180); }
 	}
 	if ( Da.circleorHelix[1] ) {
 		Da.ep[1] = PickArcEndPt( Da.center[1], Da.pos[1], Da.pos[0] );
-		if (Da.ep[1] == 1) Da.angle[1] = NormalizeAngle(Da.angle[1]+180);
+		if (Da.ep[1] == 1) { Da.angle[1] = NormalizeAngle(Da.angle[1]+180); }
 	}
 }
 
-BOOL_T CheckHelix(track_p trk) {
+BOOL_T CheckHelix(track_p trk)
+{
 	if ( Da.trk[0] && QueryTrack(Da.trk[0],Q_HAS_VARIABLE_ENDPOINTS)) {
 		track_p t = GetTrkEndTrk(Da.trk[0],Da.ep[0]);
 		if ( t != NULL && t != trk)  {
@@ -908,86 +977,92 @@ BOOL_T CheckHelix(track_p trk) {
 	return TRUE;
 }
 
-void SetUpCornuParms(cornuParm_t * cp) {
-		cp->center[0] = Da.center[0];
-		cp->angle[0] = Da.angle[0];
-		cp->radius[0] = Da.radius[0];
-		cp->center[1] = Da.center[1];
-		cp->angle[1] = Da.angle[1];
-		cp->radius[1] = Da.radius[1];
+void SetUpCornuParms(cornuParm_t * cp)
+{
+	cp->center[0] = Da.center[0];
+	cp->angle[0] = Da.angle[0];
+	cp->radius[0] = Da.radius[0];
+	cp->center[1] = Da.center[1];
+	cp->angle[1] = Da.angle[1];
+	cp->radius[1] = Da.radius[1];
 }
 
-track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2]) {
-		coOrd center[2];
-		DIST_T radius[2];
-		ANGLE_T angle[2];
-		BOOL_T back, neg;
-		cornuParm_t new;
-		int inx,subinx;
-		coOrd pos_temp[2];
+track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2])
+{
+	coOrd center[2];
+	DIST_T radius[2];
+	ANGLE_T angle[2];
+	BOOL_T back, neg;
+	cornuParm_t new;
+	int inx,subinx;
+	coOrd pos_temp[2];
 
-		for (int i=0;i<2;i++) {
-			pos_temp[i] = pos[i];
+	for (int i=0; i<2; i++) {
+		pos_temp[i] = pos[i];
 
-			if (!track_end[i] || (Da.radius[i]==-1.0)) {
+		if (!track_end[i] || (Da.radius[i]==-1.0)) {
 
-				angle[i] = GetAngleSegs(Da.crvSegs_da.cnt,(trkSeg_t *)(Da.crvSegs_da.ptr),&pos_temp[i],&inx,NULL,&back,&subinx,&neg);
+			angle[i] = GetAngleSegs(Da.crvSegs_da.cnt,(trkSeg_t *)(Da.crvSegs_da.ptr),
+			                        &pos_temp[i],&inx,NULL,&back,&subinx,&neg);
 
-				trkSeg_p segPtr = &DYNARR_N(trkSeg_t, Da.crvSegs_da, inx);
+			trkSeg_p segPtr = &DYNARR_N(trkSeg_t, Da.crvSegs_da, inx);
 
-				if (segPtr->type == SEG_BEZTRK)
-					segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, subinx);
-
-				if (i==0) {
-					if (neg==back) angle[i] = NormalizeAngle(angle[i]+180);
-				} else {
-					if (!(neg==back)) angle[i] = NormalizeAngle(angle[i]+180);
-				}
-
-				if (segPtr->type == SEG_STRTRK) {
-					radius[i] = 0.0;
-					center[i] = zero;
-				} else if (segPtr->type == SEG_CRVTRK) {
-					center[i] = segPtr->u.c.center;
-					radius[i] = fabs(segPtr->u.c.radius);
-				}
-			} else {
-				pos[i] = Da.pos[i];
-				radius[i] = Da.radius[i];
-				center[i] = Da.center[i];
-				angle[i] = Da.angle[i];
-				neg = FALSE;
-				back = FALSE;
+			if (segPtr->type == SEG_BEZTRK) {
+				segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, subinx);
 			}
-		}
-		new.pos[0] = pos[0];
-		new.pos[1] = pos[1];
-		new.angle[0] = angle[0];
-		new.angle[1] = angle[1];
-		new.center[0] = center[0];
-		new.center[1] = center[1];
-		new.radius[0] = radius[0];
-		new.radius[1] = radius[1];
 
-		track_p trk1 = NewCornuTrack(new.pos,new.center,new.angle,new.radius,NULL,0);
-		if (trk1==NULL) {
-			wBeep();
-			InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
-					new.pos[0].x,new.pos[0].y,
-					new.pos[1].x,new.pos[1].y,
-					new.center[0].x,new.center[0].y,
-					new.center[1].x,new.center[1].y,
-					new.angle[0],new.angle[1],
-					FormatDistance(new.radius[0]),FormatDistance(new.radius[1]));
-			UndoEnd();
-			return NULL;
+			if (i==0) {
+				if (neg==back) { angle[i] = NormalizeAngle(angle[i]+180); }
+			} else {
+				if (!(neg==back)) { angle[i] = NormalizeAngle(angle[i]+180); }
+			}
+
+			if (segPtr->type == SEG_STRTRK) {
+				radius[i] = 0.0;
+				center[i] = zero;
+			} else if (segPtr->type == SEG_CRVTRK) {
+				center[i] = segPtr->u.c.center;
+				radius[i] = fabs(segPtr->u.c.radius);
+			}
+		} else {
+			pos[i] = Da.pos[i];
+			radius[i] = Da.radius[i];
+			center[i] = Da.center[i];
+			angle[i] = Da.angle[i];
+			neg = FALSE;
+			back = FALSE;
 		}
-		return trk1;
+	}
+	new.pos[0] = pos[0];
+	new.pos[1] = pos[1];
+	new.angle[0] = angle[0];
+	new.angle[1] = angle[1];
+	new.center[0] = center[0];
+	new.center[1] = center[1];
+	new.radius[0] = radius[0];
+	new.radius[1] = radius[1];
+
+	track_p trk1 = NewCornuTrack(new.pos,new.center,new.angle,new.radius,NULL,0);
+	if (trk1==NULL) {
+		wBeep();
+		InfoMessage(
+		        _("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
+		        new.pos[0].x,new.pos[0].y,
+		        new.pos[1].x,new.pos[1].y,
+		        new.center[0].x,new.center[0].y,
+		        new.center[1].x,new.center[1].y,
+		        new.angle[0],new.angle[1],
+		        FormatDistance(new.radius[0]),FormatDistance(new.radius[1]));
+		UndoEnd();
+		return NULL;
+	}
+	return trk1;
 }
 
 
 
-ANGLE_T GetOpenAngle(coOrd pos[2],ANGLE_T angle[2],int moved) {
+ANGLE_T GetOpenAngle(coOrd pos[2],ANGLE_T angle[2],int moved)
+{
 	ANGLE_T a = FindAngle(pos[1-moved],pos[moved]);
 	ANGLE_T diff = (180+a)-angle[1-moved];  					//Difference between input and line
 	return a+diff;												//Change to line plus this at the other end
@@ -1028,9 +1103,9 @@ static paramGroup_t cornuModPG = { "cornuMod", 0, cornuModPLs, COUNT( cornuModPL
  *
  */
 EXPORT STATUS_T AdjustCornuCurve(
-		wAction_t action,
-		coOrd pos,
-		cornuMessageProc message )
+        wAction_t action,
+        coOrd pos,
+        cornuMessageProc message )
 {
 	track_p t;
 	DIST_T d;
@@ -1044,7 +1119,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 	Da.cmdType = VP2L(commandContext);
 
 
-	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED) return C_CONTINUE;
+	if (Da.state != PICK_POINT && Da.state != POINT_PICKED
+	    && Da.state != TRACK_SELECTED) { return C_CONTINUE; }
 
 	switch ( action & 0xFF) {
 
@@ -1058,28 +1134,31 @@ EXPORT STATUS_T AdjustCornuCurve(
 		Da.prevEndPoint = -1;
 		Da.extend[0] = FALSE;
 		Da.extend[1] = FALSE;
-		CreateBothEnds(Da.selectEndPoint, Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+		CreateBothEnds(Da.selectEndPoint, Da.selectMidPoint,Da.selectEndHandle,
+		               Da.prevSelected);
 		Da.crvSegs_da.cnt = 0;
 		SetUpCornuParms(&cp);
-		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-		else Da.crvSegs_da_cnt = 0;
+		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		InfoMessage( _("Select Point, or Add Point") );
 		TempRedraw(); // AdjustCornuCurve C_START
 		return C_CONTINUE;
 
 	case C_UPDATE:
-		if (Da.state != PICK_POINT && Da.prevSelected>-1) return C_CONTINUE;
+		if (Da.state != PICK_POINT && Da.prevSelected>-1) { return C_CONTINUE; }
 		int sel = Da.prevSelected;
-		if (Da.trk[sel]) return C_CONTINUE;    //Track Here - should never happen
+		if (Da.trk[sel]) { return C_CONTINUE; }    //Track Here - should never happen
 		Da.radius[sel] = fabs(cornuModCmdContext.radius);
 		Da.angle[sel] = cornuModCmdContext.angle;
-		if (cornuModCmdContext.radius!=0)
-			Translate(&Da.center[sel],Da.pos[sel],Da.angle[sel]+90,cornuModCmdContext.radius);
+		if (cornuModCmdContext.radius!=0) {
+			Translate(&Da.center[sel],Da.pos[sel],Da.angle[sel]+90,
+			          cornuModCmdContext.radius);
+		}
 		CreateBothEnds(Da.prevSelected,-1,-1,Da.prevSelected);
 		SetUpCornuParms(&cp);
-		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-		else Da.crvSegs_da_cnt = 0;
+		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		return C_CONTINUE;
 		break;
@@ -1088,7 +1167,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (Da.state == NONE || Da.state == PICK_POINT) {
 			wSetCursor(mainD.d,defaultCursor);
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			for(int i=0;i<2;i++) {
+			for(int i=0; i<2; i++) {
 				if (IsClose(FindDistance(pos,Da.pos[i]))) {
 					if (((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {
 						CreateCornuExtendAnchor(Da.pos[i], Da.angle[i], FALSE);
@@ -1099,9 +1178,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 					}
 				}
 			}
-			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+			               Da.prevSelected);
 			Da.selectEndPoint = -1;
-			for (int i=0;i<Da.mid_points.cnt;i++) {
+			for (int i=0; i<Da.mid_points.cnt; i++) {
 				d = FindDistance(DYNARR_N(coOrd,Da.mid_points,i),pos);
 				if (IsClose(d)) {
 					CreateCornuAnchor(DYNARR_N(coOrd,Da.mid_points,i),FALSE);
@@ -1109,8 +1189,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 					return C_CONTINUE;
 				}
 			}
-			for (int i=0;i<2;i++) {
-				if (Da.endHandle[i].end_valid == FALSE) continue;
+			for (int i=0; i<2; i++) {
+				if (Da.endHandle[i].end_valid == FALSE) { continue; }
 				d = FindDistance(Da.endHandle[i].end_center,pos);
 				if (IsClose(d)) {
 					CreateCornuAnchor(Da.endHandle[i].end_center, FALSE);
@@ -1118,8 +1198,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 					return C_CONTINUE;
 				}
 			}
-			for (int i=0;i<2;i++) {
-				if (Da.endHandle[i].end_valid == FALSE) continue;
+			for (int i=0; i<2; i++) {
+				if (Da.endHandle[i].end_valid == FALSE) { continue; }
 				d = FindDistance(Da.endHandle[i].end_curve,pos);
 				if (IsClose(d)) {
 					CreateCornuAnchor(Da.endHandle[i].end_curve, FALSE);
@@ -1128,15 +1208,16 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 			}
 			coOrd temp_pos = pos;
-			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,NULL))) {
+			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,
+			                         &temp_pos,NULL))) {
 				CreateCornuAnchor(temp_pos, TRUE);
-			} else wSetCursor(mainD.d,defaultCursor);
+			} else { wSetCursor(mainD.d,defaultCursor); }
 		}
 		return C_CONTINUE;
 
 	case C_DOWN:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (Da.state != PICK_POINT) return C_CONTINUE;
+		if (Da.state != PICK_POINT) { return C_CONTINUE; }
 		Da.selectEndPoint = -1;
 		Da.selectMidPoint = -1;
 		Da.selectEndHandle = -1;
@@ -1145,7 +1226,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
-		for (int i=0;i<2;i++) {
+		for (int i=0; i<2; i++) {
 			d = FindDistance(Da.pos[i],pos);
 			if (IsClose(d)) {
 				Da.selectEndPoint = i;
@@ -1154,7 +1235,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			}
 		}
 		if (Da.selectEndPoint == -1) {
-			for (int i=0;i<Da.mid_points.cnt;i++) {
+			for (int i=0; i<Da.mid_points.cnt; i++) {
 				d = FindDistance(DYNARR_N(coOrd,Da.mid_points,i),pos);
 				if (IsClose(d)) {
 					Da.selectMidPoint = i;
@@ -1164,8 +1245,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 			}
 			if (Da.selectMidPoint == -1 ) {
-				for (int i=0;i<2;i++) {
-					if (Da.endHandle[i].end_valid == FALSE) continue;
+				for (int i=0; i<2; i++) {
+					if (Da.endHandle[i].end_valid == FALSE) { continue; }
 					d = FindDistance(Da.endHandle[i].end_center,pos);
 					if (IsClose(d)) {
 						Da.selectEndHandle = i*2;
@@ -1176,8 +1257,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 					}
 				}
 				if (Da.selectEndHandle == -1) {
-					for (int i=0;i<2;i++) {
-						if (Da.endHandle[i].end_valid == FALSE) continue;
+					for (int i=0; i<2; i++) {
+						if (Da.endHandle[i].end_valid == FALSE) { continue; }
 						d = FindDistance(Da.endHandle[i].end_curve,pos);
 						if (IsClose(d)) {
 							Da.selectEndHandle = 1+i*2;
@@ -1190,26 +1271,32 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 			}
 		} else {      //We picked an end point
-			if (!Da.trk[Da.selectEndPoint] && ((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {	//With Shift no track -> Extend
+			if (!Da.trk[Da.selectEndPoint] && ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			    && Da.selectTrack) {	//With Shift no track -> Extend
 				Da.extend[Da.selectEndPoint] = TRUE;		//Adding to end Point
 				DYNARR_RESET(trkSeg_t,anchors_da);
-				CreateCornuExtendAnchor(Da.pos[Da.selectEndPoint], Da.angle[Da.selectEndPoint], FALSE);
+				CreateCornuExtendAnchor(Da.pos[Da.selectEndPoint], Da.angle[Da.selectEndPoint],
+				                        FALSE);
 			}
 		}
-		if (Da.selectMidPoint ==-1 && Da.selectEndPoint ==-1 && Da.selectEndHandle ==-1) {
+		if (Da.selectMidPoint ==-1 && Da.selectEndPoint ==-1
+		    && Da.selectEndHandle ==-1) {
 			coOrd temp_pos = pos;
 			wIndex_t index;
-			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&index))) {
+			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,
+			                         &temp_pos,&index))) {
 				//Add Point between two other points
 				//Find closest two points along Track
 				int closest = -1;
 				wIndex_t pIndex, nIndex;
 				temp_pos = Da.pos[0];
-				DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&pIndex);
+				DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,
+				             &pIndex);
 				if (Da.mid_points.cnt>0) {
-					for (int i=0;i<Da.mid_points.cnt;i++) {
-						temp_pos = DYNARR_N(coOrd ,Da.mid_points,i);
-						DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&nIndex);
+					for (int i=0; i<Da.mid_points.cnt; i++) {
+						temp_pos = DYNARR_N(coOrd,Da.mid_points,i);
+						DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,
+						             &nIndex);
 						if (((pIndex<=index) && (nIndex>=index))) {
 							closest = i;
 							break;
@@ -1217,14 +1304,16 @@ EXPORT STATUS_T AdjustCornuCurve(
 						pIndex = nIndex;
 					}
 					temp_pos = Da.pos[1];
-					DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&nIndex);
-					if (index == nIndex) closest = Da.mid_points.cnt;
-					if (closest == -1)
+					DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,
+					             &nIndex);
+					if (index == nIndex) { closest = Da.mid_points.cnt; }
+					if (closest == -1) {
 						closest = Da.mid_points.cnt;
-				} else closest = 0;
+					}
+				} else { closest = 0; }
 				DYNARR_APPEND(coOrd,Da.mid_points,1);
-				for (int i=Da.mid_points.cnt-1;i>closest;i--) {
-					DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd ,Da.mid_points,i-1);
+				for (int i=Da.mid_points.cnt-1; i>closest; i--) {
+					DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd,Da.mid_points,i-1);
 				}
 				DYNARR_N(coOrd,Da.mid_points,closest) = pos;
 				Da.selectMidPoint = closest;
@@ -1237,19 +1326,21 @@ EXPORT STATUS_T AdjustCornuCurve(
 				return C_CONTINUE;
 			}
 		}
-		if (Da.selectEndPoint == -1  && Da.selectMidPoint == -1 && Da.selectEndHandle ==-1) {
+		if (Da.selectEndPoint == -1  && Da.selectMidPoint == -1
+		    && Da.selectEndHandle ==-1) {
 			wBeep();
 			InfoMessage( _("Not close enough to track or point, reselect") );
 			return C_CONTINUE;
 		} else {
 			if (Da.selectEndPoint >=0 ) {
 				pos = Da.pos[Da.selectEndPoint];
-				if (Da.extend[Da.selectEndPoint])
+				if (Da.extend[Da.selectEndPoint]) {
 					InfoMessage( _("Drag out end of Cornu"));
-				else if (Da.trk[Da.selectEndPoint]) {
+				} else if (Da.trk[Da.selectEndPoint]) {
 					InfoMessage( _("Drag along end of track"));
-				} else
+				} else {
 					InfoMessage( _("Drag to move"));
+				}
 			} else if (Da.selectMidPoint >=0 ) {
 				pos = DYNARR_N(coOrd,Da.mid_points,Da.selectMidPoint);
 				InfoMessage( _("Drag point to new location, Delete to remove"));
@@ -1264,17 +1355,19 @@ EXPORT STATUS_T AdjustCornuCurve(
 			}
 			Da.state = POINT_PICKED;
 		}
-		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+		               Da.prevSelected);
 		SetUpCornuParms(&cp);
-		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-		else Da.crvSegs_da_cnt = 0;
+		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos, Da.crvSegs_da);
 		return C_CONTINUE;
 
 	case C_MOVE:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != POINT_PICKED) {
-			InfoMessage(_("Pick any circle to adjust or add - Enter to accept, Esc to cancel"));
+			InfoMessage(
+			        _("Pick any circle to adjust or add - Enter to accept, Esc to cancel"));
 			return C_CONTINUE;
 		}
 		if (Da.selectEndPoint >= 0) {
@@ -1291,16 +1384,16 @@ EXPORT STATUS_T AdjustCornuCurve(
 						if (Da.ep[sel]>=0)	{										//If not turntable
 							Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 						} else {
-							if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)){     //Turntable
+							if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 								trackParams_t tp;
-								if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) return C_CONTINUE;
+								if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) { return C_CONTINUE; }
 								ANGLE_T a = tp.angle;
 								Translate(&pos,tp.ttcenter,a,tp.ttradius);
 								Da.angle[sel] = NormalizeAngle(a+180);
 								SetUpCornuParms(&cp);
-								if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-								else Da.crvSegs_da_cnt = 0;
-							} else return C_CONTINUE;
+								if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+								else { Da.crvSegs_da_cnt = 0; }
+							} else { return C_CONTINUE; }
 						}
 					}
 				} else {
@@ -1308,16 +1401,19 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 				if (!inside) {
 					if (Da.ep[sel]>=0) {				//Track defined end point
-						ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(Da.trk[sel],Da.ep[sel])-FindAngle(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos));
-						if (diff>90.0 && diff<270.0) {  //The point is not on track but outside cone of end angle+/-90
+						ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(Da.trk[sel],
+						                              Da.ep[sel])-FindAngle(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos));
+						if (diff>90.0
+						    && diff<270.0) {  //The point is not on track but outside cone of end angle+/-90
 							Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
-							CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+							CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+							               Da.prevSelected);
 							return C_CONTINUE;
 						}
 					} else {							//Not an end point
-						if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)){     //Turntable
+						if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)) {    //Turntable
 							trackParams_t tp;
-							if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) return C_CONTINUE;
+							if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) { return C_CONTINUE; }
 							ANGLE_T a = tp.angle;
 							coOrd edge;
 							Translate(&edge,tp.ttcenter,a,tp.ttradius);
@@ -1326,7 +1422,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 							Translate(&pos,edge,a,d);
 							Da.angle[sel] = NormalizeAngle(a+180);
 							Da.pos[sel] = pos;
-							CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+							CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+							               Da.prevSelected);
 							Da.extendSeg[sel].type = SEG_STRTRK;
 							Da.extendSeg[sel].width = 0;
 							Da.extendSeg[sel].color = wDrawColorBlack;
@@ -1334,17 +1431,21 @@ EXPORT STATUS_T AdjustCornuCurve(
 							Da.extendSeg[sel].u.l.pos[sel] = edge;
 							Da.extend[sel] = TRUE;
 							SetUpCornuParms(&cp);
-							if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-							else Da.crvSegs_da_cnt = 0;
+							if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+							else { Da.crvSegs_da_cnt = 0; }
 							return C_CONTINUE;        //Stop moving end point
-						} else return C_CONTINUE;
+						} else { return C_CONTINUE; }
 					}
 				}
 				// Stop the user extending right through the other track
-				if (Da.ep[sel]>=0 && QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY)) { //For non-turnouts
-					if ((!QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS))        // Not Turntable - may not be needed
-					&& (!QueryTrack(Da.trk[sel],Q_HAS_VARIABLE_ENDPOINTS))) { // Not Helix or a Circle
-						DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
+				if (Da.ep[sel]>=0
+				    && QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY)) { //For non-turnouts
+					if ((!QueryTrack(Da.trk[sel],
+					                 Q_CAN_ADD_ENDPOINTS))        // Not Turntable - may not be needed
+					    && (!QueryTrack(Da.trk[sel],
+					                    Q_HAS_VARIABLE_ENDPOINTS))) { // Not Helix or a Circle
+						DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),
+						                         GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
 						DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
 						DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]),pos);
 						if (cb<minLength) {
@@ -1355,31 +1456,35 @@ EXPORT STATUS_T AdjustCornuCurve(
 							pos = GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]);  //Make other end of track
 						}
 					}
-				} else if (Da.ep[sel]>=0 && inside) {                     //Has a point and inside track
-					InfoMessage(_("Can't move end inside a turnout"));	  //Turnouts are stuck to end-point
+				} else if (Da.ep[sel]>=0
+				           && inside) {                     //Has a point and inside track
+					InfoMessage(
+					        _("Can't move end inside a turnout"));	  //Turnouts are stuck to end-point
 					Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
-					CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+					CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+					               Da.prevSelected);
 					return C_CONTINUE;
 				}
 			}
 			if(!Da.trk[sel]) {			//Cornu with no end
-				if (((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {   //Extend end locked
+				if (((MyGetKeyState() & WKEY_SHIFT) != 0)
+				    && Da.selectTrack) {   //Extend end locked
 					SetUpCornuParms(&cp);
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
 					if (Da.radius[sel] == 0)  {                //Straight
-						  Da.extendSeg[sel].type = SEG_STRTRK;
-						  Da.extendSeg[sel].width = 0;
-						  Da.extendSeg[sel].color = wDrawColorBlack;
-						  Da.extendSeg[sel].u.l.pos[1-sel] = Da.pos[sel];
-						  d = FindDistance( Da.extendSeg[sel].u.l.pos[1-sel], pos );
-						  a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
-						  if (cos(D2R(a))<=0) {
-							 Translate( &Da.extendSeg[sel].u.l.pos[sel],
-									 Da.extendSeg[sel].u.l.pos[1-sel],
-									 Da.angle[sel], - d * cos(D2R(a)));
-							 pos = Da.extendSeg[sel].u.l.pos[sel];
-							 Da.extend[sel] = TRUE;
-						 } else Da.extend[sel] = FALSE;
+						Da.extendSeg[sel].type = SEG_STRTRK;
+						Da.extendSeg[sel].width = 0;
+						Da.extendSeg[sel].color = wDrawColorBlack;
+						Da.extendSeg[sel].u.l.pos[1-sel] = Da.pos[sel];
+						d = FindDistance( Da.extendSeg[sel].u.l.pos[1-sel], pos );
+						a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
+						if (cos(D2R(a))<=0) {
+							Translate( &Da.extendSeg[sel].u.l.pos[sel],
+							           Da.extendSeg[sel].u.l.pos[1-sel],
+							           Da.angle[sel], - d * cos(D2R(a)));
+							pos = Da.extendSeg[sel].u.l.pos[sel];
+							Da.extend[sel] = TRUE;
+						} else { Da.extend[sel] = FALSE; }
 					} else {                                //Curve
 						Da.extendSeg[sel].type = SEG_CRVTRK;
 						Da.extendSeg[sel].width = 0;
@@ -1390,17 +1495,18 @@ EXPORT STATUS_T AdjustCornuCurve(
 						PointOnCircle( &pos, Da.extendSeg[sel].u.c.center, Da.radius[sel], a );
 						a2 = FindAngle(Da.extendSeg[sel].u.c.center,Da.pos[sel]);
 						if (((Da.angle[sel] < 180) && (a2>90 && a2<270)) ||
-							((Da.angle[sel] > 180) && (a2<90 || a2>270))) {
+						    ((Da.angle[sel] > 180) && (a2<90 || a2>270))) {
 							Da.extendSeg[sel].u.c.a0 = a;
 							Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a2-a);
 						} else {
 							Da.extendSeg[sel].u.c.a0 = a2;
 							Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-a2);
 						}
-						if (Da.extendSeg[sel].u.c.a1 == 0 || Da.extendSeg[sel].u.c.a1 >180 )
+						if (Da.extendSeg[sel].u.c.a1 == 0 || Da.extendSeg[sel].u.c.a1 >180 ) {
 							Da.extend[sel] = FALSE;
-						else
+						} else {
 							Da.extend[sel] = TRUE;
+						}
 					}
 				} else {
 					Da.extend[sel] = FALSE;
@@ -1413,7 +1519,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.center[sel].y += offset.y;
 					}
 					if (Da.selectTrack) {					//We have track
-						if (!Da.trk[sel] && ((t = OnTrackIgnore(&pos,FALSE,TRUE,Da.selectTrack))!= NULL) ) {
+						if (!Da.trk[sel]
+						    && ((t = OnTrackIgnore(&pos,FALSE,TRUE,Da.selectTrack))!= NULL) ) {
 							if ((ep = PickUnconnectedEndPointSilent(pos,t))>=0) {
 								pos = GetTrkEndPos(t,ep);
 								if (IsClose(FindDistance(pos,pos)/2)) {
@@ -1435,7 +1542,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					}
 				}
 			} else {									//Cornu with ends
-				if (inside) Da.pos[sel] = pos;
+				if (inside) { Da.pos[sel] = pos; }
 				if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel],inside?FALSE:TRUE)) {
 					wBeep();
 					return C_CONTINUE;											//Stop drawing
@@ -1448,23 +1555,25 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.extendSeg[sel].color = wDrawColorBlack;
 						if (Da.ep[sel]>=0) {
 							Da.extendSeg[sel].u.l.pos[0] = GetTrkEndPos( Da.trk[sel], Da.ep[sel] );
-							a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,GetTrkEndPos(Da.trk[sel],Da.ep[sel])));
+							a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,GetTrkEndPos(Da.trk[sel],
+							                   Da.ep[sel])));
 						} else {												//Turntable when unconnected
 							Da.extendSeg[sel].u.l.pos[0] = Da.pos[sel];
 							a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
 						}
 						// Remove any extend in opposite direction for Turntable/Turnouts
 						if ((QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)  && Da.ep[sel]>=0)
-								&& (!QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY))
-								&& (a>90 && a<270)) {
-							Da.extend[sel] = FALSE;    //Turntable with point and extension is other side of well
+						    && (!QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY))
+						    && (a>90 && a<270)) {
+							Da.extend[sel] =
+							        FALSE;    //Turntable with point and extension is other side of well
 							Da.pos[sel] = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 						} else {
 							Da.extend[sel] = TRUE;
 							d = FindDistance( Da.extendSeg[sel].u.l.pos[0], pos );
 							Translate( &Da.extendSeg[sel].u.l.pos[1],
-									Da.extendSeg[sel].u.l.pos[0],
-									Da.angle[sel], -d * cos(D2R(a)));
+							           Da.extendSeg[sel].u.l.pos[0],
+							           Da.angle[sel], -d * cos(D2R(a)));
 							Da.pos[sel] = pos = Da.extendSeg[sel].u.l.pos[1];
 						}
 					} else if (Da.trackType[sel] == curveTypeCurve) {       //Extend with temp curve
@@ -1477,7 +1586,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						PointOnCircle( &pos, Da.center[sel], Da.radius[sel], a );
 						a2 = FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
 						if ((Da.angle[sel] < 180 && (a2>90 && a2 <270))  ||
-								(Da.angle[sel] > 180 && (a2<90 || a2 >270))) {
+						    (Da.angle[sel] > 180 && (a2<90 || a2 >270))) {
 							Da.extendSeg[sel].u.c.a0 = a2;
 							Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-a2);
 						} else {
@@ -1485,9 +1594,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 							Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a2-a);
 						}
 						if (Da.extendSeg[sel].u.c.a1 == 0.0 || Da.extendSeg[sel].u.c.a1 >180
-								|| (Da.extendSeg[sel].u.c.a0 >= Da.arcA0[sel] && Da.extendSeg[sel].u.c.a0 < Da.arcA0[sel]+Da.arcA1[sel]
-									&& Da.extendSeg[sel].u.c.a0 + Da.extendSeg[sel].u.c.a1 <= Da.arcA0[sel] + Da.arcA1[sel])
-							) {
+						    || (Da.extendSeg[sel].u.c.a0 >= Da.arcA0[sel]
+						        && Da.extendSeg[sel].u.c.a0 < Da.arcA0[sel]+Da.arcA1[sel]
+						        && Da.extendSeg[sel].u.c.a0 + Da.extendSeg[sel].u.c.a1 <= Da.arcA0[sel] +
+						        Da.arcA1[sel])
+						   ) {
 							Da.extend[sel] = FALSE;
 							Da.pos[sel] = pos;
 						} else {
@@ -1501,9 +1612,9 @@ EXPORT STATUS_T AdjustCornuCurve(
 						pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 						return C_CONTINUE;
 					}
-				} else Da.pos[sel] = pos;
+				} else { Da.pos[sel] = pos; }
 			}
-		} else if (Da.selectMidPoint >=0){
+		} else if (Da.selectMidPoint >=0) {
 			DYNARR_N(coOrd,Da.mid_points,Da.selectMidPoint) = pos;
 		} else if (Da.selectEndHandle >=0) {						//Cornu has no end, so has handles
 			int end = Da.selectEndHandle/2;
@@ -1511,7 +1622,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 				coOrd p0 = Da.pos[end];								//Start
 				coOrd p1 = Da.endHandle[end].end_curve;				//End
 				ANGLE_T a0 = FindAngle( p1, p0 );
-				DIST_T d0 = FindDistance( p0, p1 )/2.0;             //Distance to Middle of Chord
+				DIST_T d0 = FindDistance( p0,
+				                          p1 )/2.0;             //Distance to Middle of Chord
 				coOrd pos2 = pos;									//New pos
 				Rotate( &pos2, p1, -a0 );
 				pos2.x -= p1.x;										//Deflection at right angles to Chord
@@ -1543,37 +1655,46 @@ EXPORT STATUS_T AdjustCornuCurve(
 					Da.radius[end] = 0.0;
 					Da.angle[end] = FindAngle(Da.pos[end],Da.endHandle[end].end_curve);
 				} else {
-					Translate( &pc, posx, a0, fabs(r) - fabs(pos2.x) );	//Move Radius less Deflection to get to center
+					Translate( &pc, posx, a0,
+					           fabs(r) - fabs(pos2.x) );	//Move Radius less Deflection to get to center
 					Da.center[end] = pc;
-					if (DifferenceBetweenAngles(FindAngle(Da.center[end],Da.pos[end]),FindAngle(Da.center[end],Da.endHandle[end].end_curve))>0.0)
+					if (DifferenceBetweenAngles(FindAngle(Da.center[end],Da.pos[end]),
+					                            FindAngle(Da.center[end],Da.endHandle[end].end_curve))>0.0) {
 						Da.angle[end] = NormalizeAngle(FindAngle(Da.center[end],Da.pos[end])+90.0);
-					else
+					} else {
 						Da.angle[end] = NormalizeAngle(FindAngle(Da.center[end],Da.pos[end])-90.0);
+					}
 					Da.radius[end] = fabs(r);
 				}
 			} else {
 				Da.angle[end] = FindAngle(Da.pos[end],pos);
 				Da.radius[end] = 0.0;
-				Translate(&Da.center[end],Da.pos[end],NormalizeAngle(Da.angle[end]+90.0),Da.radius[end]);
+				Translate(&Da.center[end],Da.pos[end],NormalizeAngle(Da.angle[end]+90.0),
+				          Da.radius[end]);
 			}
 		}
-		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
-		SetUpCornuParms(&cp);    //In case we want to use these because the ends are not on the track
-		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-		else Da.crvSegs_da_cnt = 0;
-		for (int i=0;i<2;i++) {
-			if (Da.trk[i] || Da.ends[i]) continue;
+		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+		               Da.prevSelected);
+		SetUpCornuParms(
+		        &cp);    //In case we want to use these because the ends are not on the track
+		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		else { Da.crvSegs_da_cnt = 0; }
+		for (int i=0; i<2; i++) {
+			if (Da.trk[i] || Da.ends[i]) { continue; }
 			coOrd p = Da.pos[i];
-			Da.angle[i] = NormalizeAngle((i?0:180)+GetAngleSegs( Da.crvSegs_da_cnt, Da.crvSegs_da.ptr, &p, NULL, NULL, NULL, NULL, NULL));
+			Da.angle[i] = NormalizeAngle((i?0:180)+GetAngleSegs( Da.crvSegs_da_cnt,
+			                             Da.crvSegs_da.ptr, &p, NULL, NULL, NULL, NULL, NULL));
 			Da.radius[i] = 0.0;
 		}
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		DIST_T rin = Da.radius[0];
-		InfoMessage( _("Cornu : Min Radius=%s MaxRateofCurveChange/Scale=%s Length=%s Winding Arc=%s"),
-									FormatDistance(Da.minRadius),
-									FormatFloat(CornuMaxRateofChangeofCurvature(Da.pos,Da.crvSegs_da,&rin)*GetScaleRatio(GetLayoutCurScale())),
-									FormatDistance(CornuLength(Da.pos,Da.crvSegs_da)),
-									FormatDistance(CornuTotalWindingArc(Da.pos,Da.crvSegs_da)));
+		InfoMessage(
+		        _("Cornu : Min Radius=%s MaxRateofCurveChange/Scale=%s Length=%s Winding Arc=%s"),
+		        FormatDistance(Da.minRadius),
+		        FormatFloat(CornuMaxRateofChangeofCurvature(Da.pos,Da.crvSegs_da,
+		                        &rin)*GetScaleRatio(GetLayoutCurScale())),
+		        FormatDistance(CornuLength(Da.pos,Da.crvSegs_da)),
+		        FormatDistance(CornuTotalWindingArc(Da.pos,Da.crvSegs_da)));
 		return C_CONTINUE;
 
 	case C_UP:
@@ -1583,27 +1704,30 @@ EXPORT STATUS_T AdjustCornuCurve(
 			return C_CONTINUE;
 		}
 		ep = 0;
-		if (Da.selectMidPoint!=-1) Da.prevSelected = Da.selectMidPoint;
+		if (Da.selectMidPoint!=-1) { Da.prevSelected = Da.selectMidPoint; }
 		else if (Da.selectEndPoint!=-1) {
 			if (!Da.trk[Da.selectEndPoint] &&
-				(t=OnTrack(&pos,FALSE,TRUE)) != NULL && t != Da.selectTrack	) {
+			    (t=OnTrack(&pos,FALSE,TRUE)) != NULL && t != Da.selectTrack	) {
 				EPINX_T ep = PickUnconnectedEndPoint(pos,t);
 				if (ep>=0) {
-					if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
-							if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
-								InfoMessage(_("Helix Already Connected"));
-								return C_CONTINUE;
-							}
-							ep = -1;                                            //Not a real ep yet
-					} else ep = PickUnconnectedEndPointSilent(pos, t);		//EP
+					if (QueryTrack(t,
+					               Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
+						if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
+							InfoMessage(_("Helix Already Connected"));
+							return C_CONTINUE;
+						}
+						ep = -1;                                            //Not a real ep yet
+					} else { ep = PickUnconnectedEndPointSilent(pos, t); }		//EP
 					if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
 						ep=-1;  		            //Don't attach to Turntable
 						trackParams_t tp;
-						if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+						if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
 						ANGLE_T a = tp.angle;
 						Translate(&pos,tp.ttcenter,a,tp.ttradius);
 					}
-					if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+					if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS)
+					                && !QueryTrack(t,
+					                               Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
 						wBeep();
 						InfoMessage(_("No Valid end point on that track"));
 						return C_CONTINUE;
@@ -1619,13 +1743,15 @@ EXPORT STATUS_T AdjustCornuCurve(
 					Da.ep[Da.selectEndPoint] = ep;           // Note: -1 for Turntable or Circle
 					pos = GetTrkEndPos(t,ep);
 					Da.pos[Da.selectEndPoint] = pos;
-					if (!GetConnectedTrackParms(t,pos,Da.selectEndPoint,ep,FALSE)) return C_CONTINUE;
+					if (!GetConnectedTrackParms(t,pos,Da.selectEndPoint,ep,FALSE)) { return C_CONTINUE; }
 				}
 			} else {
 				cornuModCmdContext.angle = NormalizeAngle(Da.angle[Da.selectEndPoint]);
 				cornuModCmdContext.radius = Da.radius[Da.selectEndPoint];
-				if (DifferenceBetweenAngles(FindAngle(Da.center[Da.selectEndPoint],Da.pos[Da.selectEndPoint]),Da.angle[Da.selectEndPoint])<0.0)
+				if (DifferenceBetweenAngles(FindAngle(Da.center[Da.selectEndPoint],
+				                                      Da.pos[Da.selectEndPoint]),Da.angle[Da.selectEndPoint])<0.0) {
 					cornuModCmdContext.radius = -cornuModCmdContext.radius;
+				}
 				controls[0] = cornuModEndRadiusPD.control;
 				controls[1] = cornuModEndAnglePD.control;
 				controls[2] = NULL;
@@ -1643,8 +1769,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 			Da.prevSelected = Da.selectEndHandle>2?1:0;
 			cornuModCmdContext.angle = NormalizeAngle(Da.angle[Da.prevSelected]);
 			cornuModCmdContext.radius = Da.radius[Da.prevSelected];
-			if (DifferenceBetweenAngles(FindAngle(Da.center[Da.prevSelected],Da.pos[Da.prevSelected]),Da.angle[Da.prevSelected])<0.0)
+			if (DifferenceBetweenAngles(FindAngle(Da.center[Da.prevSelected],
+			                                      Da.pos[Da.prevSelected]),Da.angle[Da.prevSelected])<0.0) {
 				cornuModCmdContext.radius = -cornuModCmdContext.radius;
+			}
 			controls[0] = cornuModEndRadiusPD.control;
 			controls[1] = cornuModEndAnglePD.control;
 			controls[2] = NULL;
@@ -1658,12 +1786,14 @@ EXPORT STATUS_T AdjustCornuCurve(
 			Da.selectEndHandle = -1;
 		}
 		Da.selectEndPoint = -1; Da.selectMidPoint = -1;
-		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+		CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+		               Da.prevSelected);
 		SetUpCornuParms(&cp);
-		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-		else Da.crvSegs_da_cnt = 0;
+		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		else { Da.crvSegs_da_cnt = 0; }
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
-		InfoMessage(_("Pick on point to adjust it along track - Delete to remove, Enter to confirm, ESC to abort"));
+		InfoMessage(
+		        _("Pick on point to adjust it along track - Delete to remove, Enter to confirm, ESC to abort"));
 		Da.state = PICK_POINT;
 		return C_CONTINUE;
 
@@ -1672,17 +1802,18 @@ EXPORT STATUS_T AdjustCornuCurve(
 		//Delete or backspace deletes last selected index
 		if (action>>8 == 127 || action>>8 == 8) {
 			if ((Da.state == PICK_POINT) && Da.prevSelected !=-1) {
-				for (int i=Da.prevSelected;i<Da.mid_points.cnt;i++) {
+				for (int i=Da.prevSelected; i<Da.mid_points.cnt; i++) {
 					DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd,Da.mid_points,i+1);
 				}
 				Da.mid_points.cnt--;
 			}
 			Da.prevSelected = -1;
-			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,Da.prevSelected);
+			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
+			               Da.prevSelected);
 			cornuParm_t cp;
 			SetUpCornuParms(&cp);
-			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-			else Da.crvSegs_da_cnt = 0;
+			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+			else { Da.crvSegs_da_cnt = 0; }
 			return C_CONTINUE;
 		}
 		return C_CONTINUE;
@@ -1700,12 +1831,15 @@ EXPORT STATUS_T AdjustCornuCurve(
 				wBeep();
 				return C_CONTINUE;
 			}
-			for (int i=0;i<2;i++) {
-				if (Da.trk[i] && !(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
+			for (int i=0; i<2; i++) {
+				if (Da.trk[i]
+				    && !(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
 					if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
-					wBeep();
-					InfoMessage(_("Cornu point %d too close to other end of connect track - reposition it"),i+1);
-					return C_CONTINUE;
+						wBeep();
+						InfoMessage(
+						        _("Cornu point %d too close to other end of connect track - reposition it"),
+						        i+1);
+						return C_CONTINUE;
 					}
 				}
 			}
@@ -1715,12 +1849,12 @@ EXPORT STATUS_T AdjustCornuCurve(
 			end_point[1] = FALSE;
 			coOrd sub_pos[2];
 			sub_pos[0] = Da.pos[0];
-			if (Da.radius[0] == -1) end_point[0] = FALSE;
+			if (Da.radius[0] == -1) { end_point[0] = FALSE; }
 			track_p first_trk= NULL,trk1=NULL,trk2 = NULL;
 
-			for (int i=0;i<Da.mid_points.cnt;i++) {
+			for (int i=0; i<Da.mid_points.cnt; i++) {
 				sub_pos[1] = DYNARR_N(coOrd,Da.mid_points,i);
-				if ((trk1 = CreateCornuFromPoints(sub_pos,end_point))== NULL) return C_TERMINATE;
+				if ((trk1 = CreateCornuFromPoints(sub_pos,end_point))== NULL) { return C_TERMINATE; }
 				if (Da.trk[0]) {
 					CopyAttributes( Da.trk[0], trk1 );
 				} else if (Da.trk[1]) {
@@ -1730,38 +1864,41 @@ EXPORT STATUS_T AdjustCornuCurve(
 					SetTrkBits( trk1, TB_HIDEDESC );
 				}
 				DrawNewTrack(trk1);
-				if (first_trk == NULL) first_trk = trk1;
-				if (trk2) ConnectTracks(trk1,0,trk2,1);
+				if (first_trk == NULL) { first_trk = trk1; }
+				if (trk2) { ConnectTracks(trk1,0,trk2,1); }
 				trk2 = trk1;
 				end_point[0] = FALSE;
 				sub_pos[0] = DYNARR_N(coOrd,Da.mid_points,i);
 			}
 			sub_pos[1] = Da.pos[1];
 			end_point[1] = TRUE;
-			if (Da.radius[1] == -1) end_point[1] = FALSE;
-			if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) return C_TERMINATE;
+			if (Da.radius[1] == -1) { end_point[1] = FALSE; }
+			if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) { return C_TERMINATE; }
 			if (Da.trk[0]) {
 				CopyAttributes( Da.trk[0], trk1 );
-			} else if (Da.trk[1]){
+			} else if (Da.trk[1]) {
 				CopyAttributes( Da.trk[1], trk1 );
 			} else {
 				SetTrkScale( trk1, GetLayoutCurScale() );
 				SetTrkBits( trk1, TB_HIDEDESC );
 			}
-			if (trk2) ConnectTracks(trk1,0,trk2,1);
-			if (first_trk == NULL) first_trk = trk1;
+			if (trk2) { ConnectTracks(trk1,0,trk2,1); }
+			if (first_trk == NULL) { first_trk = trk1; }
 			//t = NewCornuTrack( Da.pos, Da.center, Da.angle, Da.radius,(trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
 
-			for (int i=0;i<2;i++) {
+			for (int i=0; i<2; i++) {
 				if (Da.trk[i]) {
 					UndoModify(Da.trk[i]);
 					MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
-				    //End position not precise, so readjust Cornu
-					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
+					//End position not precise, so readjust Cornu
+					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],
+					                       FALSE);
 					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
-					SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
-					if (Da.ep[i]>=0)
+					SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),
+					              Da.center[i],endAngle,Da.radius[i]);
+					if (Da.ep[i]>=0) {
 						ConnectTracks(Da.trk[i],Da.ep[i],i==0?first_trk:trk1,i);
+					}
 				}
 			}
 			UndoEnd();
@@ -1775,12 +1912,13 @@ EXPORT STATUS_T AdjustCornuCurve(
 		return C_CONTINUE;
 
 	case C_REDRAW:
-		if (Da.state == NONE) return C_CONTINUE;
+		if (Da.state == NONE) { return C_CONTINUE; }
 		DrawTempCornu();
 		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
 		}
-		if (Da.state == POINT_PICKED) wSetCursor(mainD.d,wCursorNone);
+		if (Da.state == POINT_PICKED) { wSetCursor(mainD.d,wCursorNone); }
 		return C_CONTINUE;
 	case C_CANCEL:
 	case C_FINISH:
@@ -1795,14 +1933,14 @@ EXPORT STATUS_T AdjustCornuCurve(
 }
 
 static void cornuModDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
-	 AdjustCornuCurve(C_UPDATE, zero, InfoMessage);
-	 ParamLoadControl(&cornuModPG,cornuModEndRadius);			 	// Make sure Radius updated
-	 ParamLoadControl(&cornuModPG,cornuModEndAngle);				//Relative Angle as well
-	 TempRedraw();
+	AdjustCornuCurve(C_UPDATE, zero, InfoMessage);
+	ParamLoadControl(&cornuModPG,cornuModEndRadius);			 	// Make sure Radius updated
+	ParamLoadControl(&cornuModPG,cornuModEndAngle);				//Relative Angle as well
+	TempRedraw();
 
 }
 
@@ -1820,7 +1958,9 @@ static void cornuModDlgUpdate(
  * - C_CANCEL (Esc) sets the state to NONE and reshows the original track unchanged.
  *
  */
-STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG ) {
+STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
+                         DIST_T trackG )
+{
 
 	Da.trackGauge = trackG;
 
@@ -1835,7 +1975,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		Da.crvSegs_da_cnt = 0;
 		Da.midSegs.cnt = 0;
 		Da.extend[0] = FALSE;
-	    Da.extend[1] = FALSE;
+		Da.extend[1] = FALSE;
 		Da.selectEndPoint = -1;
 		Da.selectTrack = NULL;
 		DYNARR_RESET(coOrd,Da.mid_points);
@@ -1845,9 +1985,9 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		Da.selectTrack = trk;
 		DYNARR_APPEND(track_p,Da.tracks,1);
 		DYNARR_LAST(track_p,Da.tracks) = trk;
-	    Da.trk[0] = GetTrkEndTrk( trk, 0 );
-	    track_p prior = trk;
-		if (Da.trk[0]) Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],trk);
+		Da.trk[0] = GetTrkEndTrk( trk, 0 );
+		track_p prior = trk;
+		if (Da.trk[0]) { Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],trk); }
 		EPINX_T ep0 = 0;
 		//Move down the LHS adding tracks until no more Cornu
 		while (Da.trk[0] && QueryTrack(Da.trk[0],Q_IS_CORNU)) {
@@ -1856,13 +1996,13 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			DYNARR_APPEND(track_p,Da.tracks,1);
 			DYNARR_LAST(track_p,Da.tracks) = prior;
 			DYNARR_APPEND(coOrd,Da.mid_points,1);
-			for (int i=Da.mid_points.cnt-1;i>0;i--) {
+			for (int i=Da.mid_points.cnt-1; i>0; i--) {
 				DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd,Da.mid_points,i-1);
 			}
 			DYNARR_N(coOrd,Da.mid_points,0) = GetTrkEndPos(prior,1-ep0);
 			Da.trk[0] = GetTrkEndTrk( prior, ep0 );
-			if (Da.trk[0]) Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],prior);
-			else Da.ep[0] = -1;
+			if (Da.trk[0]) { Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],prior); }
+			else { Da.ep[0] = -1; }
 		}
 		if (prior) {
 			struct extraDataCornu_t *xx0 = GET_EXTRA_DATA(prior, T_CORNU, extraDataCornu_t);
@@ -1877,7 +2017,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		Da.trk[1] = GetTrkEndTrk( trk, 1 );
 		track_p next = trk;
 		EPINX_T ep1 = 1;
-		if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk);
+		if (Da.trk[1]) { Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk); }
 		//Move down RHS adding tracks until no more Cornu
 		while (Da.trk[1] && QueryTrack(Da.trk[1],Q_IS_CORNU)) {
 			next = Da.trk[1];
@@ -1887,7 +2027,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			DYNARR_APPEND(coOrd,Da.mid_points,1);
 			DYNARR_LAST(coOrd,Da.mid_points) = GetTrkEndPos(next,1-ep1);
 			Da.trk[1] = GetTrkEndTrk( next, ep1 );
-			if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],next);
+			if (Da.trk[1]) { Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],next); }
 		}
 
 		if (next) {
@@ -1900,8 +2040,9 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 
 		InfoMessage(_("Now Select or Add (+Shift) a Point"));
 		Da.state = TRACK_SELECTED;
-		for (int i=0;i<Da.tracks.cnt;i++) {
-			DrawTrack(DYNARR_N(track_p,Da.tracks,i),&mainD,wDrawColorWhite);  //Wipe out real tracks, draw replacement
+		for (int i=0; i<Da.tracks.cnt; i++) {
+			DrawTrack(DYNARR_N(track_p,Da.tracks,i),&mainD,
+			          wDrawColorWhite);  //Wipe out real tracks, draw replacement
 		}
 		return AdjustCornuCurve(C_START, pos, InfoMessage);
 
@@ -1910,21 +2051,22 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		break;
 
 	case C_DOWN:
-		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up
+		if (Da.state == TRACK_SELECTED) { return C_CONTINUE; }                   //Ignore until first up
 		return AdjustCornuCurve(C_DOWN, pos, InfoMessage);
 
 	case C_LCLICK:
-		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up
+		if (Da.state == TRACK_SELECTED) { return C_CONTINUE; }                   //Ignore until first up
 		AdjustCornuCurve(C_DOWN, pos, InfoMessage);
 		return AdjustCornuCurve(C_UP, pos, InfoMessage);
 
 	case C_MOVE:
-		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up and down
+		if (Da.state == TRACK_SELECTED) { return C_CONTINUE; }                   //Ignore until first up and down
 		return AdjustCornuCurve(C_MOVE, pos, InfoMessage);
 
 	case C_UP:
 		if (Da.state == TRACK_SELECTED) {
-			Da.state = PICK_POINT;                                           //First time up, next time pick a point
+			Da.state =
+			        PICK_POINT;                                           //First time up, next time pick a point
 		}
 		return AdjustCornuCurve(C_UP, pos, InfoMessage);					//Run Adjust
 
@@ -1934,9 +2076,10 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			return AdjustCornuCurve(action, pos, InfoMessage);
 		}
 		//Space bar or enter means done
-		if ( (action>>8 != ' ') && (action>>8 != 13) )
+		if ( (action>>8 != ' ') && (action>>8 != 13) ) {
 			return C_CONTINUE;
-		/* no break */
+		}
+	/* no break */
 	case C_OK:
 		if (infoSubst) {
 			InfoSubstituteControls( NULL, NULL );
@@ -1952,28 +2095,31 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			wBeep();
 			return C_CONTINUE;
 		}
-		for (int i=0;i<2;i++) {
+		for (int i=0; i<2; i++) {
 			if (Da.trk[i] &&
-				!(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
+			    !(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
 				if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
 					wBeep();
-					InfoMessage(_("Cornu end %d too close to other end of connect track - reposition it"),i+1);
+					InfoMessage(
+					        _("Cornu end %d too close to other end of connect track - reposition it"),i+1);
 					return C_CONTINUE;
 				}
 			}
 		}
 		UndoStart( _("Modify Cornu"), "newCornu - CR" );
-		for (int i=0;i<2;i++) {
+		for (int i=0; i<2; i++) {
 			if (!Da.trk[i] && Da.extend[i]) {
 				if (Da.extendSeg[i].type == SEG_STRTRK) {
-					Da.trk[i] = NewStraightTrack(Da.extendSeg[i].u.l.pos[0],Da.extendSeg[i].u.l.pos[1]);
-					if (Da.trk[i]) Da.ep[i] = 1-i;
+					Da.trk[i] = NewStraightTrack(Da.extendSeg[i].u.l.pos[0],
+					                             Da.extendSeg[i].u.l.pos[1]);
+					if (Da.trk[i]) { Da.ep[i] = 1-i; }
 				} else {
-					Da.trk[i] = NewCurvedTrack(Da.extendSeg[i].u.c.center,fabs(Da.extendSeg[i].u.c.radius),
-							Da.extendSeg[i].u.c.a0,Da.extendSeg[i].u.c.a1,FALSE);
+					Da.trk[i] = NewCurvedTrack(Da.extendSeg[i].u.c.center,
+					                           fabs(Da.extendSeg[i].u.c.radius),
+					                           Da.extendSeg[i].u.c.a0,Da.extendSeg[i].u.c.a1,FALSE);
 					if (FindDistance(GetTrkEndPos(Da.trk[i],0),Da.pos[i])<=connectDistance) {
 						Da.ep[i] = 0;
-					} else Da.ep[i] = 1;
+					} else { Da.ep[i] = 1; }
 				}
 				if (!Da.trk[i]) {
 					wBeep();
@@ -1991,17 +2137,18 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		sub_pos[0] = Da.pos[0];
 
 		track_p first_trk= NULL,trk1=NULL,trk2 = NULL;
-		for (int i=0;i<Da.mid_points.cnt;i++) {
+		for (int i=0; i<Da.mid_points.cnt; i++) {
 			sub_pos[1] = DYNARR_N(coOrd,Da.mid_points,i);
 			if ((trk1 = CreateCornuFromPoints(sub_pos, end_point))== NULL) {
 				wBeep();
-				InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
-									Da.pos[0].x,Da.pos[0].y,
-									Da.pos[1].x,Da.pos[1].y,
-									Da.center[0].x,Da.center[0].y,
-									Da.center[1].x,Da.center[1].y,
-									Da.angle[0],Da.angle[1],
-									FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
+				InfoMessage(
+				        _("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
+				        Da.pos[0].x,Da.pos[0].y,
+				        Da.pos[1].x,Da.pos[1].y,
+				        Da.center[0].x,Da.center[0].y,
+				        Da.center[1].x,Da.center[1].y,
+				        Da.angle[0],Da.angle[1],
+				        FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
 				UndoUndo(NULL);
 				Da.state = NONE;
 				return C_TERMINATE;
@@ -2015,8 +2162,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 				SetTrkBits( trk1, TB_HIDEDESC );
 			}
 			DrawNewTrack(trk1);
-			if (first_trk == NULL) first_trk = trk1;
-			if (trk2) ConnectTracks(trk1,0,trk2,1);
+			if (first_trk == NULL) { first_trk = trk1; }
+			if (trk2) { ConnectTracks(trk1,0,trk2,1); }
 			trk2 = trk1;
 			end_point[0] = FALSE;
 			sub_pos[0] = DYNARR_N(coOrd,Da.mid_points,i);
@@ -2025,13 +2172,14 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		end_point[1] = TRUE;
 		if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) {
 			wBeep();
-			InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
-								Da.pos[0].x,Da.pos[0].y,
-								Da.pos[1].x,Da.pos[1].y,
-								Da.center[0].x,Da.center[0].y,
-								Da.center[1].x,Da.center[1].y,
-								Da.angle[0],Da.angle[1],
-								FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
+			InfoMessage(
+			        _("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
+			        Da.pos[0].x,Da.pos[0].y,
+			        Da.pos[1].x,Da.pos[1].y,
+			        Da.center[0].x,Da.center[0].y,
+			        Da.center[1].x,Da.center[1].y,
+			        Da.angle[0],Da.angle[1],
+			        FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
 			UndoUndo(NULL);
 			Da.state = NONE;
 			return C_TERMINATE;
@@ -2045,27 +2193,30 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			SetTrkScale( trk1, GetLayoutCurScale() );
 			SetTrkBits( trk1, TB_HIDEDESC );
 		}
-		if (trk2) ConnectTracks(trk1,0,trk2,1);
-		if (first_trk == NULL) first_trk = trk1;
+		if (trk2) { ConnectTracks(trk1,0,trk2,1); }
+		if (first_trk == NULL) { first_trk = trk1; }
 
 		Da.state = NONE;       //Must do before Delete
 
-		for (int i=0;i<Da.tracks.cnt;i++) {
+		for (int i=0; i<Da.tracks.cnt; i++) {
 			DeleteTrack(DYNARR_N(track_p,Da.tracks,i), TRUE);
 		}
 
-		if (Da.trk[0]) UndoModify(Da.trk[0]);
-		if (Da.trk[1]) UndoModify(Da.trk[1]);
+		if (Da.trk[0]) { UndoModify(Da.trk[0]); }
+		if (Da.trk[1]) { UndoModify(Da.trk[1]); }
 
-		for (int i=0;i<2;i++) {										//Attach new track
+		for (int i=0; i<2; i++) {										//Attach new track
 			if (Da.trk[i] && Da.ep[i] != -1) {						//Like the old track
 				if (MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0)) {
 					//Bezier split position not precise, so readjust Cornu
-					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
+					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],
+					                       FALSE);
 					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
-					SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
-					if (Da.ep[i]>= 0)
+					SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),
+					              Da.center[i],endAngle,Da.radius[i]);
+					if (Da.ep[i]>= 0) {
 						ConnectTracks(i==0?first_trk:trk1,i,Da.trk[i],Da.ep[i]);
+					}
 				} else {
 					UndoUndo(NULL);
 					wBeep();
@@ -2100,11 +2251,12 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 /*
  * Find length by adding up the underlying segments. The segments can be straights, curves or bezier.
  */
-DIST_T CornuLength(coOrd pos[4],dynArr_t segs) {
+DIST_T CornuLength(coOrd pos[4],dynArr_t segs)
+{
 
 	DIST_T dd = 0.0;
-	if (segs.cnt == 0 ) return dd;
-	for (int i = 0;i<segs.cnt;i++) {
+	if (segs.cnt == 0 ) { return dd; }
+	for (int i = 0; i<segs.cnt; i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
 			dd += fabs(t.u.c.radius*D2R(t.u.c.a1));
@@ -2117,10 +2269,11 @@ DIST_T CornuLength(coOrd pos[4],dynArr_t segs) {
 	return dd;
 }
 
-DIST_T CornuOffsetLength(dynArr_t segs, double offset) {
+DIST_T CornuOffsetLength(dynArr_t segs, double offset)
+{
 	DIST_T dd = 0.0;
-	if (segs.cnt == 0 ) return dd;
-	for (int i = 0;i<segs.cnt;i++) {
+	if (segs.cnt == 0 ) { return dd; }
+	for (int i = 0; i<segs.cnt; i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
 			dd += fabs((t.u.c.radius+(t.u.c.radius>0?offset:-offset))*D2R(t.u.c.a1));
@@ -2133,25 +2286,27 @@ DIST_T CornuOffsetLength(dynArr_t segs, double offset) {
 	return dd;
 }
 
-DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
+DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs)
+{
 	DIST_T r = DIST_INF, rr;
-	if (segs.cnt == 0 ) return r;
-	for (int i = 0;i<segs.cnt;i++) {
+	if (segs.cnt == 0 ) { return r; }
+	for (int i = 0; i<segs.cnt; i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
 			rr = fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rr = CornuMinRadius(t.u.b.pos, t.bezSegs);
-		} else rr = DIST_INF;
-		if (rr<r) r = rr;
+		} else { rr = DIST_INF; }
+		if (rr<r) { r = rr; }
 	}
 	return r;
 }
 
-DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs) {
+DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs)
+{
 	DIST_T rr = 0;
-	if (segs.cnt == 0 ) return 0;
-	for (int i = 0;i<segs.cnt;i++) {
+	if (segs.cnt == 0 ) { return 0; }
+	for (int i = 0; i<segs.cnt; i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
 			rr += t.u.c.a1;
@@ -2162,14 +2317,16 @@ DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs) {
 	return rr;
 }
 
-DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * last_c) {
+DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs,
+                                       DIST_T * last_c)
+{
 	DIST_T r_max = 0.0, rc, lc = 0.0;
 	lc = * last_c;
 	segProcData_t segProcData;
-	if (segs.cnt == 0 ) return r_max;
-	for (int i = 0;i<segs.cnt;i++) {
+	if (segs.cnt == 0 ) { return r_max; }
+	for (int i = 0; i<segs.cnt; i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
-		if (t.type == SEG_FILCRCL) continue;
+		if (t.type == SEG_FILCRCL) { continue; }
 		SegProc(SEGPROC_LENGTH,&t,&segProcData);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
 			rc = fabs(1/fabs(t.u.c.radius) - lc)/segProcData.length.length/2;
@@ -2180,7 +2337,7 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 			rc = fabs(0.0-lc)/segProcData.length.length/2;
 			lc = 0.0;
 		}
-		if (rc > r_max) r_max = rc;
+		if (rc > r_max) { r_max = rc; }
 	}
 	* last_c = lc;
 	return r_max;
@@ -2221,7 +2378,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		Da.selectMidPoint = -1;
 		Da.endHandle[0].end_valid = FALSE;
 		Da.endHandle[1].end_valid = FALSE;
-		for (int i=0;i<2;i++) {
+		for (int i=0; i<2; i++) {
 			Da.ends[i] = FALSE;
 			Da.pos[i] = zero;
 			Da.angle[i] = 0.0;
@@ -2239,15 +2396,17 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		Da.extend[0] = FALSE;
 		Da.extend[1] = FALSE;
-		if (Da.cmdType == cornuCmdCreateTrack)
+		if (Da.cmdType == cornuCmdCreateTrack) {
 			InfoMessage( _("Left click - Start Cornu track") );
-		else if (Da.cmdType == cornuCmdHotBar) {
+		} else if (Da.cmdType == cornuCmdHotBar) {
 			InfoMessage( _("Left click - Place Flextrack") );
 		} else {
-			if (selectedTrackCount==0)
+			if (selectedTrackCount==0) {
 				InfoMessage( _("Left click - join with Cornu track") );
-			else
-				InfoMessage( _("Left click - join with Cornu track, Shift Left click - move to join") );
+			} else {
+				InfoMessage(
+				        _("Left click - join with Cornu track, Shift Left click - move to join") );
+			}
 		}
 		return C_CONTINUE;
 
@@ -2257,11 +2416,12 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			coOrd p = pos;
 			t = NULL;
 			int end = 0;
-			if (Da.state != NONE) end=1;
+			if (Da.state != NONE) { end=1; }
 			EPINX_T ep = -1;
 			//Lock to endpoint if one is available and under pointer
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
-				if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
+				if (QueryTrack(t,
+				               Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
 					if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
 						wBeep();
 						InfoMessage(_("Helix Already Connected"));
@@ -2271,12 +2431,14 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
 					ep=-1;  		            //Don't attach to existing Turntable ep
 					trackParams_t tp;
-					if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+					if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
 					ANGLE_T a = tp.angle;
 					Translate(&pos,tp.ttcenter,a,tp.ttradius);
 					p = pos;										//Fix to wall of turntable initially
-				} else ep = PickUnconnectedEndPointSilent(p, t);		//EP
-				if ( t && ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+				} else { ep = PickUnconnectedEndPointSilent(p, t); }		//EP
+				if ( t && ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS)
+				                     && !QueryTrack(t,
+				                                    Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
 					wBeep();
 					InfoMessage(_("No valid open endpoint on that track"));
 					t = NULL;
@@ -2293,9 +2455,10 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				pos = GetTrkEndPos(t,ep);
 				Da.pos[end] = pos;
 				Da.angle[end] = GetTrkEndAngle(t,ep);
-			} else if (t == NULL) {      //end not on Track, OK for CreateCornu -> empty end point
+			} else if (t ==
+			           NULL) {      //end not on Track, OK for CreateCornu -> empty end point
 				pos = p;	//Reset to initial
-				if (lock) SnapPos( &pos );  //Only snap if snapped in move
+				if (lock) { SnapPos( &pos ); }  //Only snap if snapped in move
 				if (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) {
 					Da.trk[end] = NULL;
 					Da.pos[end] = pos;
@@ -2304,7 +2467,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 						Da.state = POS_1;
 						Da.angle[0] = 270.0;
 						Da.radius[0] = 0.0;
-						Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,TRUE,TRUE,FALSE,Da.angle[0],Da.radius[0],zero,&Da.endHandle[0]);
+						Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,TRUE,TRUE,FALSE,
+						                                   Da.angle[0],Da.radius[0],zero,&Da.endHandle[0]);
 						Da.ep2Segs_da_cnt = 0;
 						InfoMessage( _("Drag arm in the direction of track") );
 						return C_CONTINUE;
@@ -2316,13 +2480,15 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 					Da.radius[1] = 0.0;
 					CreateBothEnds(1,-1,-1,-1);
 					SetUpCornuParms(&cp);
-					if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE))
-							Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
+					if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) {
+						Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
+					}
 					InfoMessage( _("Drag arm in the direction of track") );
 					return C_CONTINUE;
 				}
 				wBeep();
-				InfoMessage(_("No Unconnected Track End there"));  //Not creating a Cornu - Join can't be open
+				InfoMessage(
+				        _("No Unconnected Track End there"));  //Not creating a Cornu - Join can't be open
 				return C_CONTINUE;
 			} else {
 				Da.pos[end] = p;
@@ -2343,16 +2509,17 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				}
 				Da.state = POS_1;
 				Da.selectEndPoint = 0;        //Select first end point
-				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE, !QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY),
-						Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],NULL);
+				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,
+				                                   !QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY),
+				                                   Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],NULL);
 				InfoMessage( _("Locked - Move 1st end point of Cornu track along track 1") );
 				return C_CONTINUE;
 			} else {					//Second Point
 				if (Da.trk[0] == t) {
-				   ErrorMessage( MSG_JOIN_CORNU_SAME );
-				   Da.trk[1] = NULL;
-				   Da.ep[1] = -1;
-				   return C_CONTINUE;
+					ErrorMessage( MSG_JOIN_CORNU_SAME );
+					Da.trk[1] = NULL;
+					Da.ep[1] = -1;
+					return C_CONTINUE;
 				}
 				if (!GetConnectedTrackParms(t, pos, 1, Da.ep[1],FALSE)) {
 					Da.trk[1] = NULL;								//Turntable Fail
@@ -2373,8 +2540,9 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			}
 			CreateBothEnds(1,-1,-1,-1);
 			SetUpCornuParms(&cp);
-			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE))
+			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) {
 				Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
+			}
 			return C_CONTINUE;
 		} else  {					//This is after both ends exist
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
@@ -2384,27 +2552,30 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	case wActionMove:
 		lock = FALSE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (Da.state != NONE && Da.state != LOC_2) return C_CONTINUE;
-		if (Da.trk[0] && Da.trk[1]) return C_CONTINUE;
+		if (Da.state != NONE && Da.state != LOC_2) { return C_CONTINUE; }
+		if (Da.trk[0] && Da.trk[1]) { return C_CONTINUE; }
 		EPINX_T ep = -1;
 		t = NULL;
 		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 			//Lock to endpoint if one is available and under pointer
 			if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
-				if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
+				if (QueryTrack(t,
+				               Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
 					if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
 						return C_CONTINUE;
 					}
 					ep = -1;                                            //Not a real ep yet
-				} else ep = PickUnconnectedEndPointSilent(pos, t);		//EP
-				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
-				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+				} else { ep = PickUnconnectedEndPointSilent(pos, t); }		//EP
+				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) { ep=-1; }  		//Don't attach to Turntable
+				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS)
+				                && !QueryTrack(t,
+				                               Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
 					return C_CONTINUE;
 				}
 				if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
 					return C_CONTINUE;
 				}
-				if (Da.state != NONE && t==Da.trk[0]) return C_CONTINUE;
+				if (Da.state != NONE && t==Da.trk[0]) { return C_CONTINUE; }
 			}
 		}
 		if (ep>=0 && t) {
@@ -2412,41 +2583,45 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			CreateCornuEndAnchor(pos,TRUE);
 		} else if (t) {
 			trackParams_t tp;        //Turntable or extendable track
-			if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+			if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
 			if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
-				if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+				if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) { return C_CONTINUE; }
 				ANGLE_T a = tp.angle;
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateCornuEndAnchor(pos,TRUE);
-			} else CreateCornuEndAnchor(pos,TRUE);
+			} else { CreateCornuEndAnchor(pos,TRUE); }
 		} else if (SnapPos(&pos)) {
 			CreateCornuEndAnchor(pos,FALSE);
 			lock = TRUE;
 		}
 
 		return C_CONTINUE;
-			
+
 	case C_MOVE:
 		if (Da.state == NONE) {    //First point not created
 			if (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) {
 				InfoMessage("Place 1st end point of Cornu track");
-			} else
+			} else {
 				InfoMessage("Place 1st end point of Cornu track on unconnected end-point");
+			}
 			return C_CONTINUE;
 		}
 		if (Da.state == POS_1) {	//First point has been created
-			if ((Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) && !Da.trk[0]) {  //OK for CreateCornu -> No track selected
-				if (IsClose(FindDistance(pos,Da.pos[0]))) return C_CONTINUE;
+			if ((Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar)
+			    && !Da.trk[0]) {  //OK for CreateCornu -> No track selected
+				if (IsClose(FindDistance(pos,Da.pos[0]))) { return C_CONTINUE; }
 				Da.selectEndPoint = 0;
 				Da.angle[0] = NormalizeAngle(FindAngle(Da.pos[0],pos)+180);
-				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,TRUE,TRUE,FALSE,Da.angle[0],0.0,zero,&Da.endHandle[0]);
+				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,TRUE,TRUE,FALSE,
+				                                   Da.angle[0],0.0,zero,&Da.endHandle[0]);
 				Da.radius[1] = -1.0;  /*No end*/
 				return C_CONTINUE;
 			}
 			EPINX_T ep = 0;
-			BOOL_T found = FALSE;
-			int end = Da.state==POS_1?0:1;
-			if(!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
+//			BOOL_T found = FALSE;
+//			int end = Da.state==POS_1?0:1;
+			if(!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY)
+			   && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
 				InfoMessage(_("Track can't be split - so locked to endpoint"));
 				return C_CONTINUE;
 			}
@@ -2464,18 +2639,21 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			Da.pos[ep] = pos;
-			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs,Da.pos[0],TRUE,!QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY),
-					Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],NULL);
+			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs,Da.pos[0],TRUE,
+			                                   !QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY),
+			                                   Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],NULL);
 		} else if (Da.state == POS_2 &&
-			(Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) && !Da.trk[1]) {  //OK for CreateCornu -> No track selected
-			if (IsClose(FindDistance(pos,Da.pos[1]))) return C_CONTINUE;
+		           (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar)
+		           && !Da.trk[1]) {  //OK for CreateCornu -> No track selected
+			if (IsClose(FindDistance(pos,Da.pos[1]))) { return C_CONTINUE; }
 			Da.selectEndPoint = 1;
 			Da.angle[1] = NormalizeAngle(FindAngle(Da.pos[1],pos)+180);
 			Da.radius[1] = 0.0;  /*No end*/
-			Da.ep1Segs_da_cnt = createEndPoint(Da.ep2Segs,Da.pos[1],TRUE,TRUE,TRUE,FALSE,Da.angle[1],0.0,zero,&Da.endHandle[1]);
+			Da.ep1Segs_da_cnt = createEndPoint(Da.ep2Segs,Da.pos[1],TRUE,TRUE,TRUE,FALSE,
+			                                   Da.angle[1],0.0,zero,&Da.endHandle[1]);
 			SetUpCornuParms(&cp);
-			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-			else Da.crvSegs_da_cnt = 0;
+			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+			else { Da.crvSegs_da_cnt = 0; }
 			CreateBothEnds(-1,-1,-1,-1);
 			Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 			return C_CONTINUE;
@@ -2485,32 +2663,41 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_UP:
-		if (Da.state == POS_1 && (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar || Da.trk[0])) {
+		if (Da.state == POS_1 && (Da.cmdType == cornuCmdCreateTrack
+		                          || Da.cmdType == cornuCmdHotBar || Da.trk[0])) {
 			Da.state = LOC_2;
 			Da.selectEndPoint = -1;
 			if (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) {
-				if (Da.cmdType == cornuCmdCreateTrack)
+				if (Da.cmdType == cornuCmdCreateTrack) {
 					InfoMessage( _("Pick other end of Cornu") );
-				else
-					InfoMessage( _("Select flextrack ends or anchors and drag, Enter to approve, Esc to Cancel") );
-				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,TRUE,TRUE,FALSE,0.0,0.0,zero,NULL);
+				} else {
+					InfoMessage(
+					        _("Select flextrack ends or anchors and drag, Enter to approve, Esc to Cancel") );
+				}
+				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,TRUE,TRUE,FALSE,
+				                                   0.0,0.0,zero,NULL);
 				return C_CONTINUE;
 			}
-			InfoMessage( _("Put other end of Cornu on a track with an unconnected end point") );
+			InfoMessage(
+			        _("Put other end of Cornu on a track with an unconnected end point") );
 			if (Da.trk[0])
-				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,!QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY),
-						Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],NULL);
-			else
-				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,TRUE,TRUE,FALSE, Da.angle[0],Da.radius[0],Da.center[0],&Da.endHandle[0]);
+				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,
+				                                   !QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY),
+				                                   Da.trk[0]!=NULL,Da.angle[0],Da.radius[0],Da.center[0],NULL);
+			else {
+				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,TRUE,TRUE,FALSE,
+				                                   Da.angle[0],Da.radius[0],Da.center[0],&Da.endHandle[0]);
+			}
 			return C_CONTINUE;
-		} else if (Da.state == POS_2 && (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar || Da.trk[1] )){
+		} else if (Da.state == POS_2 && (Da.cmdType == cornuCmdCreateTrack
+		                                 || Da.cmdType == cornuCmdHotBar || Da.trk[1] )) {
 			Da.state = PICK_POINT;
 			Da.selectEndPoint = -1;
 			Da.prevEndPoint = 1;
 			Da.prevSelected = -1;
 			SetUpCornuParms(&cp);
-			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-			else Da.crvSegs_da_cnt = 0;
+			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+			else { Da.crvSegs_da_cnt = 0; }
 			CreateBothEnds(-1,-1,-1,-1);
 			Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 			return C_CONTINUE;
@@ -2520,21 +2707,23 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 		break;
 	case C_TEXT:
-			if (Da.state != PICK_POINT)	return C_CONTINUE;
-			if ((action>>8 == 127) || (action>>8 == 8))   //
-				return AdjustCornuCurve(action, pos, InfoMessage);
-			if (!(action>>8 == 32 )) //Space is same as Enter.
-				return C_CONTINUE;
-			/* no break */
-    case C_OK:
-    	if (Da.state != PICK_POINT) return C_CONTINUE;
-    	STATUS_T rc = AdjustCornuCurve( C_OK, pos, InfoMessage);
-    	if (rc == C_TERMINATE) {
-    		Da.state = NONE;
-    		Da.ep1Segs_da_cnt = 0;
+		if (Da.state != PICK_POINT)	{ return C_CONTINUE; }
+		if ((action>>8 == 127) || (action>>8 == 8)) { //
+			return AdjustCornuCurve(action, pos, InfoMessage);
+		}
+		if (!(action>>8 == 32 )) { //Space is same as Enter.
+			return C_CONTINUE;
+		}
+	/* no break */
+	case C_OK:
+		if (Da.state != PICK_POINT) { return C_CONTINUE; }
+		STATUS_T rc = AdjustCornuCurve( C_OK, pos, InfoMessage);
+		if (rc == C_TERMINATE) {
+			Da.state = NONE;
+			Da.ep1Segs_da_cnt = 0;
 			Da.ep2Segs_da_cnt = 0;
 			Da.crvSegs_da_cnt = 0;
-			for (int i=0;i<2;i++) {
+			for (int i=0; i<2; i++) {
 				Da.radius[i] = 0.0;
 				Da.angle[i] = 0.0;
 				Da.center[i] = zero;
@@ -2544,22 +2733,26 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.endHandle[i].end_valid = FALSE;
 			}
 			SetAllTrackSelect( FALSE );
-    	}
-    	return rc;
+		}
+		return rc;
 
 	case C_REDRAW:
 		wSetCursor(mainD.d,defaultCursor);
 		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
 		if ( Da.state != NONE ) {
-			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,
-					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
+			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,
+			               (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,
+			               Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,
+			               (trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
 		}
-		if (anchors_da.cnt)
-					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		if (MyGetKeyState()&WKEY_SHIFT) DrawHighlightBoxes(FALSE,FALSE,NULL);
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
+		if (MyGetKeyState()&WKEY_SHIFT) { DrawHighlightBoxes(FALSE,FALSE,NULL); }
 
-		if (Da.state == POINT_PICKED) wSetCursor(mainD.d,wCursorNone);
+		if (Da.state == POINT_PICKED) { wSetCursor(mainD.d,wCursorNone); }
 
 		return C_CONTINUE;
 
@@ -2568,7 +2761,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			Da.ep1Segs_da_cnt = 0;
 			Da.ep2Segs_da_cnt = 0;
 			Da.crvSegs_da_cnt = 0;
-			for (int i=0;i<2;i++) {
+			for (int i=0; i<2; i++) {
 				Da.radius[i] = 0.0;
 				Da.angle[i] = 0.0;
 				Da.center[i] = zero;
@@ -2586,20 +2779,21 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			infoSubst = FALSE;
 		}
 		return C_CONTINUE;
-		
+
 	default:
 
-	return C_CONTINUE;
+		return C_CONTINUE;
 	}
 	return C_CONTINUE;
 }
 
-BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
+BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2])
+{
 	track_p trk_old = NULL;
 	newTracks[0] = NULL, newTracks[1] = NULL;
 	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
-	if (!IsTrack(trk)) return FALSE;
-	for (int i=0; i<xx->arcSegs.cnt;i++) {
+	if (!IsTrack(trk)) { return FALSE; }
+	for (int i=0; i<xx->arcSegs.cnt; i++) {
 		track_p bezTrack[2];
 		bezTrack[0] = NULL, bezTrack[1] = NULL;
 		trkSeg_p seg = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
@@ -2607,15 +2801,17 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 			DYNARR_RESET(trkSeg_t,seg->bezSegs);
 			FixUpBezierSeg(seg->u.b.pos,seg,TRUE);
 			GetTracksFromBezierSegment(seg, bezTrack, trk);
-			if (newTracks[0] == NULL) newTracks[0] = bezTrack[0];
+			if (newTracks[0] == NULL) { newTracks[0] = bezTrack[0]; }
 			newTracks[1] = bezTrack[1];
 			if (trk_old) {
-				for (int i=0;i<2;i++) {
+				for (int i=0; i<2; i++) {
 					if (GetTrkEndTrk(trk_old,i)==NULL) {
 						coOrd pos = GetTrkEndPos(trk_old,i);
 						EPINX_T ep_n = PickUnconnectedEndPoint(pos,bezTrack[0]);
-						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),GetTrkEndPos(bezTrack[0],ep_n))) &&
-							(connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),GetTrkEndAngle(bezTrack[0],ep_n)+180))) ) {
+						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),
+						                                     GetTrkEndPos(bezTrack[0],ep_n))) &&
+						    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),
+						                          GetTrkEndAngle(bezTrack[0],ep_n)+180))) ) {
 							ConnectTracks(trk_old,i,bezTrack[0],ep_n);
 							break;
 						}
@@ -2624,21 +2820,25 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 			}
 			trk_old = newTracks[1];
 		} else {
-			track_p new_trk;
-			if (seg->type == SEG_CRVTRK)
-				new_trk = NewCurvedTrack(seg->u.c.center,seg->u.c.radius,seg->u.c.a0,seg->u.c.a1,0);
-			else if (seg->type == SEG_STRTRK)
+			track_p new_trk = NULL;
+			if (seg->type == SEG_CRVTRK) {
+				new_trk = NewCurvedTrack(seg->u.c.center,seg->u.c.radius,seg->u.c.a0,
+				                         seg->u.c.a1,0);
+			} else if (seg->type == SEG_STRTRK) {
 				new_trk = NewStraightTrack(seg->u.l.pos[0],seg->u.l.pos[1]);
-			if (newTracks[0] == NULL) newTracks[0] = new_trk;
+			}
+			if (newTracks[0] == NULL) { newTracks[0] = new_trk; }
 			CopyAttributes( trk, new_trk );
 			newTracks[1] = new_trk;
 			if (trk_old) {
-				for (int i=0;i<2;i++) {
+				for (int i=0; i<2; i++) {
 					if (GetTrkEndTrk(trk_old,i)==NULL) {
 						coOrd pos = GetTrkEndPos(trk_old,i);
 						EPINX_T ep_n = PickUnconnectedEndPoint(pos,new_trk);
-						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),GetTrkEndPos(new_trk,ep_n))) &&
-							(connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),GetTrkEndAngle(new_trk,ep_n)+180)))) {
+						if ((connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),
+						                                     GetTrkEndPos(new_trk,ep_n))) &&
+						    (connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk_old,i),
+						                          GetTrkEndAngle(new_trk,ep_n)+180)))) {
 							ConnectTracks(trk_old,i,new_trk,ep_n);
 							break;
 						}
@@ -2653,8 +2853,9 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 }
 
 static STATUS_T cmdCornuCreate(
-				wAction_t action,
-				coOrd pos ) {
+        wAction_t action,
+        coOrd pos )
+{
 	static int createState = 0;
 	int rc = 0;
 
@@ -2669,8 +2870,9 @@ static STATUS_T cmdCornuCreate(
 		if (createState != 0 ) {
 			createState = 0;
 			CmdCornu( C_OK, pos );
-		} else
+		} else {
 			CmdCornu( C_CANCEL, pos );
+		}
 		Da.prevSelected = -1;
 		Da.selectEndHandle = -1;
 		Da.selectEndPoint = -1;
@@ -2683,9 +2885,10 @@ static STATUS_T cmdCornuCreate(
 		Da.endHandle[0].end_valid = Da.endHandle[1].end_valid = FALSE;
 		return C_TERMINATE;
 	case C_TEXT:
-		if ((action>>8) != ' ' && (action>>8) != 32)
+		if ((action>>8) != ' ' && (action>>8) != 32) {
 			return CmdCornu(action,pos);
-		/*no break*/
+		}
+	/*no break*/
 	case C_OK:
 		CmdCornu(C_OK,pos);
 		MainRedraw();
@@ -2695,7 +2898,7 @@ static STATUS_T cmdCornuCreate(
 		CmdCornu(C_CANCEL, pos);
 		createState = 0;
 		rc = C_TERMINATE;
-		/* no break */
+	/* no break */
 	case C_START:
 		createState = 0;
 		commandContext = I2VP(cornuCmdHotBar);
@@ -2718,344 +2921,364 @@ static STATUS_T cmdCornuCreate(
 }
 
 static STATUS_T CmdConvertTo(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	static track_p trk;
 	cornuParm_t cp;
 	switch (action) {
 
 	case wActionMove:
-		if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) return C_CONTINUE;
+		if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) { return C_CONTINUE; }
 		if (!QueryTrack(trk, Q_CORNU_CAN_MODIFY) &&  //Not Fixed Track/Turnout/Turntable
-			!QueryTrack(trk, Q_IGNORE_EASEMENT_ON_EXTEND ))
+		    !QueryTrack(trk, Q_IGNORE_EASEMENT_ON_EXTEND )) {
 			trk = NULL;
+		}
 		return C_CONTINUE;
 
 	case C_LCLICK:
-			if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
-				SetTrkBits(trk,TB_SELECTED);
-				selectedTrackCount = 1;
-			} else {
-				wBeep();
-				InfoMessage( _("Not on a Track") );
-				return C_CONTINUE;
-			}
-			trk = NULL;
+		if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
+			SetTrkBits(trk,TB_SELECTED);
+			selectedTrackCount = 1;
+		} else {
+			wBeep();
+			InfoMessage( _("Not on a Track") );
+			return C_CONTINUE;
+		}
+		trk = NULL;
 
-			/* no break */
+	/* no break */
 	case C_START:
-			if (selectedTrackCount==0) {
-				InfoMessage( _("Select a Track To Convert") );
-				return C_CONTINUE;
+		if (selectedTrackCount==0) {
+			InfoMessage( _("Select a Track To Convert") );
+			return C_CONTINUE;
+		} else if (selectedTrackCount>1) {
+			if (NoticeMessage(_("Convert all Selected Tracks to Cornu Tracks?"), _("Yes"),
+			                  _("No"))<=0) {
+				SetAllTrackSelect(FALSE);
+				return C_TERMINATE;
 			}
-			else if (selectedTrackCount>1) {
-				if (NoticeMessage(_("Convert all Selected Tracks to Cornu Tracks?"), _("Yes"), _("No"))<=0) {
-					SetAllTrackSelect(FALSE);
-					return C_TERMINATE;
-				}
+		}
+		UndoStart( _("Convert Cornu"),"newCornu curves");
+		trk = NULL;
+		int converted=0, not_convertable = 0, created=0, deleted=0;
+		DYNARR_RESET(track_p,Da.tracks);
+		while ( TrackIterate( &trk ) ) {
+			if (!GetTrkSelected( trk )) { continue; }		//Only selected
+			if (!QueryTrack(trk, Q_CORNU_CAN_MODIFY) &&  //Not Fixed Track/Turnout/Turntable
+			    !QueryTrack( trk, Q_IGNORE_EASEMENT_ON_EXTEND )) { //But Yes to Easement
+				not_convertable++;
+				continue;
 			}
-			UndoStart( _("Convert Cornu"),"newCornu curves");
-			trk = NULL;
-			int converted=0, not_convertable = 0, created=0, deleted=0;
-			DYNARR_RESET(track_p,Da.tracks);
-			while ( TrackIterate( &trk ) ) {
-				if (!GetTrkSelected( trk )) continue;		//Only selected
-				if (!QueryTrack(trk, Q_CORNU_CAN_MODIFY) &&  //Not Fixed Track/Turnout/Turntable
-					!QueryTrack( trk, Q_IGNORE_EASEMENT_ON_EXTEND )) { //But Yes to Easement
-					not_convertable++;
-					continue;
-				}
-				converted++;
-				DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
-				Da.ep1Segs_da_cnt = 0;
-				Da.ep2Segs_da_cnt = 0;
-				Da.midSegs.cnt = 0;
-				Da.extend[0] = FALSE;
-				Da.extend[1] = FALSE;
-				Da.selectEndPoint = -1;
-				Da.selectTrack = NULL;
-				DYNARR_RESET(coOrd,Da.mid_points);
-				ClrTrkBits( trk, TB_SELECTED );          //Done with this one
-				Da.selectTrack = trk;
+			converted++;
+			DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
+			Da.ep1Segs_da_cnt = 0;
+			Da.ep2Segs_da_cnt = 0;
+			Da.midSegs.cnt = 0;
+			Da.extend[0] = FALSE;
+			Da.extend[1] = FALSE;
+			Da.selectEndPoint = -1;
+			Da.selectTrack = NULL;
+			DYNARR_RESET(coOrd,Da.mid_points);
+			ClrTrkBits( trk, TB_SELECTED );          //Done with this one
+			Da.selectTrack = trk;
+			DYNARR_APPEND(track_p,Da.tracks,1);
+			DYNARR_LAST(track_p,Da.tracks) = trk;
+			Da.trk[0] = GetTrkEndTrk( trk, 0 );
+			track_p prior = trk;
+			if (Da.trk[0]) { Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],trk); }
+			else { Da.ep[0] = -1; }
+			EPINX_T ep0 = 0;
+			//Move down the LHS adding tracks until no more Selected or not modifyable
+			while (Da.trk[0] && GetTrkSelected( Da.trk[0]) && IsTrack(Da.trk[0])
+			       && (QueryTrack(Da.trk[0], Q_CORNU_CAN_MODIFY)
+			           || QueryTrack(Da.trk[0], Q_IS_CORNU)) ) {
+				prior = Da.trk[0];
+				ep0 = 1-Da.ep[0];
+				ClrTrkBits( Da.trk[0], TB_SELECTED );          //Done with this one
+				if (selectedTrackCount>0) { selectedTrackCount--; }
 				DYNARR_APPEND(track_p,Da.tracks,1);
-				DYNARR_LAST(track_p,Da.tracks) = trk;
-				Da.trk[0] = GetTrkEndTrk( trk, 0 );
-				track_p prior = trk;
-				if (Da.trk[0]) Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],trk);
-				else Da.ep[0] = -1;
-				EPINX_T ep0 = 0;
-				//Move down the LHS adding tracks until no more Selected or not modifyable
-				while (Da.trk[0] && GetTrkSelected( Da.trk[0]) && IsTrack(Da.trk[0]) && (QueryTrack(Da.trk[0], Q_CORNU_CAN_MODIFY) || QueryTrack(Da.trk[0], Q_IS_CORNU)) ) {
-					prior = Da.trk[0];
-					ep0 = 1-Da.ep[0];
-					ClrTrkBits( Da.trk[0], TB_SELECTED );          //Done with this one
-					if (selectedTrackCount>0) selectedTrackCount--;
-					DYNARR_APPEND(track_p,Da.tracks,1);
-					DYNARR_LAST(track_p,Da.tracks) = prior;
-					DYNARR_APPEND(coOrd,Da.mid_points,1);
-					for (int i=Da.mid_points.cnt-1;i>1;i--) {
-						DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd,Da.mid_points,i-1);
-					}
-					DYNARR_N(coOrd,Da.mid_points,0) = GetTrkEndPos(prior,1-ep0);
-					Da.trk[0] = GetTrkEndTrk( prior, ep0 );
-					if (Da.trk[0]) Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],prior);
-					else Da.ep[0] = -1;
-					converted++;
+				DYNARR_LAST(track_p,Da.tracks) = prior;
+				DYNARR_APPEND(coOrd,Da.mid_points,1);
+				for (int i=Da.mid_points.cnt-1; i>1; i--) {
+					DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd,Da.mid_points,i-1);
 				}
-				Da.radius[0] = -1.0; //Initialize with no end
-				Da.ends[0] = FALSE;
-				Da.center[0] = zero;
-				Da.pos[0] = GetTrkEndPos(prior,ep0);
-				if (Da.trk[0] && Da.ep[0]>=0) {
-					GetConnectedTrackParms(Da.trk[0],GetTrkEndPos(Da.trk[0],Da.ep[0]),0,Da.ep[0],FALSE);
-				}
+				DYNARR_N(coOrd,Da.mid_points,0) = GetTrkEndPos(prior,1-ep0);
+				Da.trk[0] = GetTrkEndTrk( prior, ep0 );
+				if (Da.trk[0]) { Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],prior); }
+				else { Da.ep[0] = -1; }
+				converted++;
+			}
+			Da.radius[0] = -1.0; //Initialize with no end
+			Da.ends[0] = FALSE;
+			Da.center[0] = zero;
+			Da.pos[0] = GetTrkEndPos(prior,ep0);
+			if (Da.trk[0] && Da.ep[0]>=0) {
+				GetConnectedTrackParms(Da.trk[0],GetTrkEndPos(Da.trk[0],Da.ep[0]),0,Da.ep[0],
+				                       FALSE);
+			}
 
-				//Move to RHS
+			//Move to RHS
 
-				Da.trk[1] = GetTrkEndTrk( trk, 1 );
-				track_p next = trk;
-				EPINX_T ep1 = 1;
-				if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk);
-				else Da.ep[1] = -1;
-				//Move down RHS adding tracks until no more Selected or not modifyable
-				while (Da.trk[1] && GetTrkSelected( Da.trk[1]) && (QueryTrack(Da.trk[1], Q_CORNU_CAN_MODIFY) || QueryTrack(Da.trk[1], Q_IS_CORNU))) {
-					next = Da.trk[1];
-					ep1 = 1-Da.ep[1];
-					if (selectedTrackCount>0) selectedTrackCount--;
-					ClrTrkBits( Da.trk[1], TB_SELECTED );          //Done with this one
-					DYNARR_APPEND(track_p,Da.tracks,1);
-					DYNARR_LAST(track_p,Da.tracks) = next;
-					DYNARR_APPEND(coOrd,Da.mid_points,1);
-					DYNARR_LAST(coOrd,Da.mid_points) = GetTrkEndPos(next,1-ep1);
-					Da.trk[1] = GetTrkEndTrk( next, ep1 );
-					if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],next);
-					converted++;
-				}
-				Da.radius[1] = -1.0; //Initialize with no end
-				Da.ends[1] = FALSE;
-				Da.center[1] = zero;
-				Da.pos[1] = GetTrkEndPos(next,ep1);
-				if (Da.trk[1] && Da.ep[1]>=0) {
-					GetConnectedTrackParms(Da.trk[1],GetTrkEndPos(Da.trk[1],Da.ep[1]),1,Da.ep[1],FALSE);
-				}
-				SetUpCornuParms(&cp);
-				if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-				else continue;   //Checks that a solution can be found
+			Da.trk[1] = GetTrkEndTrk( trk, 1 );
+			track_p next = trk;
+			EPINX_T ep1 = 1;
+			if (Da.trk[1]) { Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk); }
+			else { Da.ep[1] = -1; }
+			//Move down RHS adding tracks until no more Selected or not modifyable
+			while (Da.trk[1] && GetTrkSelected( Da.trk[1])
+			       && (QueryTrack(Da.trk[1], Q_CORNU_CAN_MODIFY)
+			           || QueryTrack(Da.trk[1], Q_IS_CORNU))) {
+				next = Da.trk[1];
+				ep1 = 1-Da.ep[1];
+				if (selectedTrackCount>0) { selectedTrackCount--; }
+				ClrTrkBits( Da.trk[1], TB_SELECTED );          //Done with this one
+				DYNARR_APPEND(track_p,Da.tracks,1);
+				DYNARR_LAST(track_p,Da.tracks) = next;
+				DYNARR_APPEND(coOrd,Da.mid_points,1);
+				DYNARR_LAST(coOrd,Da.mid_points) = GetTrkEndPos(next,1-ep1);
+				Da.trk[1] = GetTrkEndTrk( next, ep1 );
+				if (Da.trk[1]) { Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],next); }
+				converted++;
+			}
+			Da.radius[1] = -1.0; //Initialize with no end
+			Da.ends[1] = FALSE;
+			Da.center[1] = zero;
+			Da.pos[1] = GetTrkEndPos(next,ep1);
+			if (Da.trk[1] && Da.ep[1]>=0) {
+				GetConnectedTrackParms(Da.trk[1],GetTrkEndPos(Da.trk[1],Da.ep[1]),1,Da.ep[1],
+				                       FALSE);
+			}
+			SetUpCornuParms(&cp);
+			if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+			else { continue; }   //Checks that a solution can be found
 
-				// Do the deed - Create a replacement Cornu
+			// Do the deed - Create a replacement Cornu
 
-				BOOL_T end_point[2];
-				end_point[0] = TRUE;
-				end_point[1] = FALSE;
-				coOrd sub_pos[2];
-				sub_pos[0] = Da.pos[0];
-				if (Da.radius[0] == -1) end_point[0] = FALSE;
-				track_p first_trk= NULL,trk1=NULL,trk2 = NULL;
+			BOOL_T end_point[2];
+			end_point[0] = TRUE;
+			end_point[1] = FALSE;
+			coOrd sub_pos[2];
+			sub_pos[0] = Da.pos[0];
+			if (Da.radius[0] == -1) { end_point[0] = FALSE; }
+			track_p first_trk= NULL,trk1=NULL,trk2 = NULL;
 
-				for (int i=0;i<Da.mid_points.cnt;i++) {
-					sub_pos[1] = DYNARR_N(coOrd,Da.mid_points,i);
-					if ((trk1 = CreateCornuFromPoints(sub_pos,end_point))== NULL) continue;
-					if (Da.trk[0]) {
-						CopyAttributes( Da.trk[0], trk1 );
-					} else if (Da.trk[1]) {
-						CopyAttributes( Da.trk[1], trk1 );
-					} else {
-						SetTrkScale( trk1, GetLayoutCurScale() );
-						SetTrkBits( trk1, TB_HIDEDESC );
-					}
-					DrawNewTrack(trk1);
-					if (first_trk == NULL) first_trk = trk1;
-					if (trk2) ConnectTracks(trk1,0,trk2,1);
-					trk2 = trk1;
-					end_point[0] = FALSE;
-					sub_pos[0] = DYNARR_N(coOrd,Da.mid_points,i);
-				}
-				sub_pos[1] = Da.pos[1];
-				end_point[1] = TRUE;
-				if (Da.radius[1] == -1) end_point[1] = FALSE;
-				if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) continue;
-				created++;
-				DrawNewTrack(trk1);
+			for (int i=0; i<Da.mid_points.cnt; i++) {
+				sub_pos[1] = DYNARR_N(coOrd,Da.mid_points,i);
+				if ((trk1 = CreateCornuFromPoints(sub_pos,end_point))== NULL) { continue; }
 				if (Da.trk[0]) {
 					CopyAttributes( Da.trk[0], trk1 );
-				} else if (Da.trk[1]){
+				} else if (Da.trk[1]) {
 					CopyAttributes( Da.trk[1], trk1 );
 				} else {
 					SetTrkScale( trk1, GetLayoutCurScale() );
 					SetTrkBits( trk1, TB_HIDEDESC );
 				}
-				if (trk2) ConnectTracks(trk1,0,trk2,1);
-				if (first_trk == NULL) first_trk = trk1;
+				DrawNewTrack(trk1);
+				if (first_trk == NULL) { first_trk = trk1; }
+				if (trk2) { ConnectTracks(trk1,0,trk2,1); }
+				trk2 = trk1;
+				end_point[0] = FALSE;
+				sub_pos[0] = DYNARR_N(coOrd,Da.mid_points,i);
+			}
+			sub_pos[1] = Da.pos[1];
+			end_point[1] = TRUE;
+			if (Da.radius[1] == -1) { end_point[1] = FALSE; }
+			if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) { continue; }
+			created++;
+			DrawNewTrack(trk1);
+			if (Da.trk[0]) {
+				CopyAttributes( Da.trk[0], trk1 );
+			} else if (Da.trk[1]) {
+				CopyAttributes( Da.trk[1], trk1 );
+			} else {
+				SetTrkScale( trk1, GetLayoutCurScale() );
+				SetTrkBits( trk1, TB_HIDEDESC );
+			}
+			if (trk2) { ConnectTracks(trk1,0,trk2,1); }
+			if (first_trk == NULL) { first_trk = trk1; }
 
-				for (int i=0;i<2;i++) {
+			for (int i=0; i<2; i++) {
+				if (Da.ep[i]>=0 && Da.trk[i]) {
+					track_p trk_old = GetTrkEndTrk(Da.trk[i],Da.ep[i]);
+					EPINX_T old_ep = GetEndPtConnectedToMe(trk_old,Da.trk[i]);
+					DisconnectTracks(Da.trk[i],Da.ep[i],trk_old,old_ep);
 					if (Da.ep[i]>=0 && Da.trk[i]) {
-						track_p trk_old = GetTrkEndTrk(Da.trk[i],Da.ep[i]);
-						EPINX_T old_ep = GetEndPtConnectedToMe(trk_old,Da.trk[i]);
-						DisconnectTracks(Da.trk[i],Da.ep[i],trk_old,old_ep);
-						if (Da.ep[i]>=0 && Da.trk[i])
-							ConnectTracks(Da.trk[i],Da.ep[i],i==0?first_trk:trk1,i);
+						ConnectTracks(Da.trk[i],Da.ep[i],i==0?first_trk:trk1,i);
 					}
 				}
-
-			}			//Find next track
-			SetAllTrackSelect(FALSE);
-			//Get rid of old tracks
-			for (int i = 0; i<Da.tracks.cnt;i++) {
-				DeleteTrack(DYNARR_N(track_p,Da.tracks,i),FALSE);
-				deleted++;
 			}
 
-			UndoEnd();  //Stop accumulating
-			NoticeMessage(_("Tracks Counts: %d converted %d unconvertible %d created %d deleted"),_("OK"),NULL,converted,not_convertable,created,deleted);
-
-			return C_TERMINATE;
-
-		case C_REDRAW:
-			if (trk) {
-				DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
-			}
-			return C_CONTINUE;
-
-		case C_CANCEL:
-			return C_TERMINATE;
-
-		case C_OK:
-			return C_TERMINATE;
-
-		case C_CONFIRM:
-			return C_CONTINUE;
-
-		default:
-			return C_CONTINUE;
+		}			//Find next track
+		SetAllTrackSelect(FALSE);
+		//Get rid of old tracks
+		for (int i = 0; i<Da.tracks.cnt; i++) {
+			DeleteTrack(DYNARR_N(track_p,Da.tracks,i),FALSE);
+			deleted++;
 		}
+
+		UndoEnd();  //Stop accumulating
+		NoticeMessage(
+		        _("Tracks Counts: %d converted %d unconvertible %d created %d deleted"),_("OK"),
+		        NULL,converted,not_convertable,created,deleted);
+
+		return C_TERMINATE;
+
+	case C_REDRAW:
+		if (trk) {
+			DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+		}
+		return C_CONTINUE;
+
+	case C_CANCEL:
+		return C_TERMINATE;
+
+	case C_OK:
+		return C_TERMINATE;
+
+	case C_CONFIRM:
+		return C_CONTINUE;
+
+	default:
+		return C_CONTINUE;
+	}
 }
 static STATUS_T CmdConvertFrom(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	static track_p trk;
-	track_p trk1,trk2;
+	track_p trk1;
+//	track_p trk2;
 	switch (action) {
 
-		case wActionMove:
-			if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) return C_CONTINUE;
-			if ((!(GetTrkType(trk) == T_CORNU)) ||
-				(!(GetTrkType(trk) == T_BEZIER)))
-				trk = NULL;
-			return C_CONTINUE;
-
-		case C_LCLICK:
-			if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
-				SetTrkBits(trk,TB_SELECTED);
-				selectedTrackCount = 1;
-				trk = NULL;
-			} else {
-				wBeep();
-				InfoMessage( _("Not on a Track") );
-				trk = NULL;
-				return C_CONTINUE;
-			}
-			/* no break */
-		case C_START:
-			if (selectedTrackCount==0) {
-				InfoMessage( _("Select a Cornu or Bezier Track To Convert to Fixed") );
-				return C_CONTINUE;
-			}
-			else if (selectedTrackCount>1) {
-				 if (NoticeMessage(_("Convert all Selected Tracks to Fixed Tracks?"), _("Yes"), _("No"))<=0) {
-					SetAllTrackSelect(FALSE);
-					return C_TERMINATE;
-				}
-			}
-			dynArr_t trackSegs_da;
-			DYNARR_RESET(trkSeg_t,trackSegs_da);
-			trk1 = NULL;
-			trk2 = NULL;
+	case wActionMove:
+		if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) { return C_CONTINUE; }
+		if ((!(GetTrkType(trk) == T_CORNU)) ||
+		    (!(GetTrkType(trk) == T_BEZIER))) {
 			trk = NULL;
-			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
-			track_p tracks[2];
-			DYNARR_RESET(track_p,Da.tracks);
-			int converted=0, not_convertable = 0, created=0, deleted=0;
-			while ( TrackIterate( &trk1 ) ) {
-				if ( GetTrkSelected( trk1 ) && IsTrack( trk1 ) ) {
-					//Only Cornu or Bezier
-					tracks[0] = NULL, tracks[1] = NULL;
-					if (selectedTrackCount>0) selectedTrackCount--;
-					ClrTrkBits( trk1, TB_SELECTED );          //Done with this one
-					if (GetTrkType(trk1) == T_CORNU) {
-						GetTracksFromCornuTrack(trk1,tracks);
-						DYNARR_APPEND(track_p,Da.tracks,1);
-						DYNARR_LAST(track_p,Da.tracks) = trk1;
-						converted++;
-					} else if (GetTrkType(trk1) == T_BEZIER) {
-						GetTracksFromBezierTrack(trk1,tracks);
-						DYNARR_APPEND(track_p,Da.tracks,1);
-						DYNARR_LAST(track_p,Da.tracks) = trk1;
-						converted++;
-					} else {
-						not_convertable++;
-						continue;
-					}
-					for (int i=0;i<2;i++) {
-						track_p trk2 = GetTrkEndTrk(trk1,i);
-						if (trk2) {
-							EPINX_T ep1 = GetEndPtConnectedToMe( trk2, trk1 );
-							DisconnectTracks(trk2,ep1,trk1,i);
-							pos = GetTrkEndPos(trk2,ep1);
-							for (int j=0;j<2;j++) {
-								EPINX_T ep2 = PickUnconnectedEndPointSilent( pos, tracks[j] );
-								coOrd ep_pos;
-								if (ep2<0) continue;
-								ep_pos = GetTrkEndPos(tracks[j],ep2);
-								if (connectDistance>=FindDistance(pos,ep_pos) &&
-									connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(tracks[j],ep2),GetTrkEndAngle(trk2,ep1)+180))) {
-									ConnectTracks(trk2,ep1,tracks[j],ep2);
-									break;
-								}
+		}
+		return C_CONTINUE;
+
+	case C_LCLICK:
+		if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
+			SetTrkBits(trk,TB_SELECTED);
+			selectedTrackCount = 1;
+			trk = NULL;
+		} else {
+			wBeep();
+			InfoMessage( _("Not on a Track") );
+			trk = NULL;
+			return C_CONTINUE;
+		}
+	/* no break */
+	case C_START:
+		if (selectedTrackCount==0) {
+			InfoMessage( _("Select a Cornu or Bezier Track To Convert to Fixed") );
+			return C_CONTINUE;
+		} else if (selectedTrackCount>1) {
+			if (NoticeMessage(_("Convert all Selected Tracks to Fixed Tracks?"), _("Yes"),
+			                  _("No"))<=0) {
+				SetAllTrackSelect(FALSE);
+				return C_TERMINATE;
+			}
+		}
+//			dynArr_t trackSegs_da;
+//			DYNARR_RESET(trkSeg_t,trackSegs_da);
+		trk1 = NULL;
+//			trk2 = NULL;
+		trk = NULL;
+		UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
+		track_p tracks[2];
+		DYNARR_RESET(track_p,Da.tracks);
+		int converted=0, not_convertable = 0, deleted=0;
+//			int created=0;
+		while ( TrackIterate( &trk1 ) ) {
+			if ( GetTrkSelected( trk1 ) && IsTrack( trk1 ) ) {
+				//Only Cornu or Bezier
+				tracks[0] = NULL, tracks[1] = NULL;
+				if (selectedTrackCount>0) { selectedTrackCount--; }
+				ClrTrkBits( trk1, TB_SELECTED );          //Done with this one
+				if (GetTrkType(trk1) == T_CORNU) {
+					GetTracksFromCornuTrack(trk1,tracks);
+					DYNARR_APPEND(track_p,Da.tracks,1);
+					DYNARR_LAST(track_p,Da.tracks) = trk1;
+					converted++;
+				} else if (GetTrkType(trk1) == T_BEZIER) {
+					GetTracksFromBezierTrack(trk1,tracks);
+					DYNARR_APPEND(track_p,Da.tracks,1);
+					DYNARR_LAST(track_p,Da.tracks) = trk1;
+					converted++;
+				} else {
+					not_convertable++;
+					continue;
+				}
+				for (int i=0; i<2; i++) {
+					track_p trk2 = GetTrkEndTrk(trk1,i);
+					if (trk2) {
+						EPINX_T ep1 = GetEndPtConnectedToMe( trk2, trk1 );
+						DisconnectTracks(trk2,ep1,trk1,i);
+						pos = GetTrkEndPos(trk2,ep1);
+						for (int j=0; j<2; j++) {
+							EPINX_T ep2 = PickUnconnectedEndPointSilent( pos, tracks[j] );
+							coOrd ep_pos;
+							if (ep2<0) { continue; }
+							ep_pos = GetTrkEndPos(tracks[j],ep2);
+							if (connectDistance>=FindDistance(pos,ep_pos) &&
+							    connectAngle >= fabs(DifferenceBetweenAngles(GetTrkEndAngle(tracks[j],ep2),
+							                         GetTrkEndAngle(trk2,ep1)+180))) {
+								ConnectTracks(trk2,ep1,tracks[j],ep2);
+								break;
 							}
 						}
 					}
 				}
 			}
-			SetAllTrackSelect(FALSE);
-			for (int i = 0; i<Da.tracks.cnt;i++) {
-				DeleteTrack(DYNARR_N(track_p,Da.tracks,i),FALSE);
-				deleted++;
-			}
-			UndoEnd();
-			NoticeMessage(_("Tracks Counts: %d converted %d unconvertible %d deleted"),_("OK"),NULL,converted,not_convertable,deleted);
-			return C_TERMINATE;
-
-		case C_REDRAW:
-			if (trk) {
-				DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
-			}
-			return C_CONTINUE;
-
-		case C_CANCEL:
-			return C_TERMINATE;
-
-		case C_OK:
-			return C_TERMINATE;
-
-		case C_CONFIRM:
-			return C_CONTINUE;
-
-		default:
-			return C_CONTINUE;
 		}
+		SetAllTrackSelect(FALSE);
+		for (int i = 0; i<Da.tracks.cnt; i++) {
+			DeleteTrack(DYNARR_N(track_p,Da.tracks,i),FALSE);
+			deleted++;
+		}
+		UndoEnd();
+		NoticeMessage(_("Tracks Counts: %d converted %d unconvertible %d deleted"),
+		              _("OK"),NULL,converted,not_convertable,deleted);
+		return C_TERMINATE;
+
+	case C_REDRAW:
+		if (trk) {
+			DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+		}
+		return C_CONTINUE;
+
+	case C_CANCEL:
+		return C_TERMINATE;
+
+	case C_OK:
+		return C_TERMINATE;
+
+	case C_CONFIRM:
+		return C_CONTINUE;
+
+	default:
+		return C_CONTINUE;
+	}
 }
 
-#include "bitmaps/convert-to.xpm"
-#include "bitmaps/convert-from.xpm"
+#include "bitmaps/convert-to.xpm3"
+#include "bitmaps/convert-from.xpm3"
 
 EXPORT void InitCmdCornu( wMenu_p menu )
-{	
+{
 	ButtonGroupBegin( _("Convert"), "cmdConvertSetCmd", _("Convert") );
-	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convert_to_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
-	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convert_from_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
-	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "", NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
+	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"),
+	               wIconCreatePixMap(convert_to_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
+	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"),
+	               wIconCreatePixMap(convert_from_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
+	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "",
+	                                  NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
 	ButtonGroupEnd();
 	ParamCreateControls( &cornuModPG, cornuModDlgUpdate) ;
 }

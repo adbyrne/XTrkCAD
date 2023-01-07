@@ -9,7 +9,9 @@ extern const char *workingDir;
 struct zip;
 
 char *GetZipDirectoryName(enum ArchiveOps op);
-BOOL_T AddDirectoryToArchive(struct zip * za, const char * dir_path, const char * prefix);
+BOOL_T AddDirectoryToArchive(struct zip * za, const char * dir_path,
+                             const char * prefix);
 BOOL_T CreateArchive(const char * dir_path, const char * fileName);
-BOOL_T UnpackArchiveFor(const char * pathName, const char * fileName, const char * tempDir, BOOL_T file_only);
+BOOL_T UnpackArchiveFor(const char * pathName, const char * fileName,
+                        const char * tempDir, BOOL_T file_only);
 #endif

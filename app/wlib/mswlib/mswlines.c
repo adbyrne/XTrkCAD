@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
@@ -15,10 +14,10 @@
  */
 
 struct wLine_t {
-		WOBJ_COMMON
-		int count;
-		wLines_t * lines;
-		};
+	WOBJ_COMMON
+	int count;
+	wLines_t * lines;
+};
 
 static void repaintLines( HWND hWnd, wControl_p b )
 {
@@ -45,24 +44,26 @@ static void repaintLines( HWND hWnd, wControl_p b )
 
 
 static callBacks_t linesCallBacks = {
-		repaintLines,
-		NULL,
-		NULL };
+	repaintLines,
+	NULL,
+	NULL
+};
 
 
 wLine_p wLineCreate(
-		wWin_p	parent,
-		const char	* labelStr,
-		int		count,
-		wLines_t * lines )
+        wWin_p	parent,
+        const char	* labelStr,
+        int		count,
+        wLines_t * lines )
 {
 	wLine_p b;
 	wLines_p lp;
 	wWinPix_t minX, maxX, minY, maxY;
 	int index;
 
-	if (count <= 0)
+	if (count <= 0) {
 		return NULL;
+	}
 	b = (wLine_p)mswAlloc( parent, B_LINES, labelStr, sizeof *b, NULL, &index );
 	b->count = count;
 	b->lines = lines;
@@ -71,22 +72,30 @@ wLine_p wLineCreate(
 	minX = maxX = lp->x0;
 	minY = maxY = lp->y0;
 	for (lp=lines; lp<&b->lines[count]; lp++) {
-		if (minX > lp->x0)
+		if (minX > lp->x0) {
 			minX = lp->x0;
-		if (maxX < lp->x0)
+		}
+		if (maxX < lp->x0) {
 			maxX = lp->x0;
-		if (minY > lp->y0)
+		}
+		if (minY > lp->y0) {
 			minY = lp->y0;
-		if (maxY < lp->y0)
+		}
+		if (maxY < lp->y0) {
 			maxY = lp->y0;
-		if (minX > lp->x1)
+		}
+		if (minX > lp->x1) {
 			minX = lp->x1;
-		if (maxX < lp->x1)
+		}
+		if (maxX < lp->x1) {
 			maxX = lp->x1;
-		if (minY > lp->y1)
+		}
+		if (minY > lp->y1) {
 			minY = lp->y1;
-		if (maxY < lp->y1)
+		}
+		if (maxY < lp->y1) {
 			maxY = lp->y1;
+		}
 	}
 	b->x = minX;
 	b->y = minY;

@@ -17,7 +17,7 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include "validator.h"
@@ -36,10 +36,10 @@ enum URLSCANSTATE { STATE_SCHEME, STATE_ENDOFSCHEME, STATE_HIER, STATE_PATH, STA
 #define MINURLLENGTH 5 /* 2 chars domain name, dot, 2 chars TLD */
 
 bool
-IsValidURL(char *testString)
+IsValidURL(const char *testString)
 {
-	char *result = testString;
-	char *hostname = testString;
+	const char *result = testString;
+	const char *hostname = testString;
 	enum URLSCANSTATE state = STATE_SCHEME;
 
 	if (!*result) {

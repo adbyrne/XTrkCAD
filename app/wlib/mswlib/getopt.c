@@ -20,7 +20,7 @@
 
     You should have received a copy of the GNU General Public License
     along with ASPEX; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 ----------------------------------------------------------------------*/
 
@@ -39,49 +39,50 @@ int optind = 1, opterr, optopt;
 
 int getopt(int argc, char *argv[], const char *optstring)
 {
-    static int pos = 0;
-    char *str;
-    
-    if (pos == 0) {
-	if ((optind >= argc) || (*argv[optind] != OPTCHAR))
-	    return EOF;
-	pos = 1;
-	if (argv[optind][pos] == '\0')
-	    return EOF;
-    }
-    
-    str = strchr(optstring, argv[optind][pos]);
-    if (str == NULL) {
-	optopt = argv[optind][pos];
-	if (opterr)
-	    fprintf(stderr, "%s: illegal option -- %c\n", argv[0],
-		    optopt);
-	return '?';
-    }
-    
-    if (str[1] == ':') {
-	if (argv[optind][pos+1] != '\0') {
-	    optarg = &argv[optind][pos+1];
-	    return *str;
+	static int pos = 0;
+	char *str;
+
+	if (pos == 0) {
+		if ((optind >= argc) || (*argv[optind] != OPTCHAR)) {
+			return EOF;
+		}
+		pos = 1;
+		if (argv[optind][pos] == '\0') {
+			return EOF;
+		}
 	}
-	optind++;
-	if (optind >= argc) {
-	    optopt = *str;
-	    if (opterr)
-		fprintf(stderr, "%s: option requires an argument -- %c\n",
-			argv[0], optopt);
-	    return '?';
+
+	str = strchr(optstring, argv[optind][pos]);
+	if (str == NULL) {
+		optopt = argv[optind][pos];
+		if (opterr)
+			fprintf(stderr, "%s: illegal option -- %c\n", argv[0],
+			        optopt);
+		return '?';
 	}
-	optarg = argv[optind];
-	optind++; pos = 0;
-	return *str;
-    }
-    else {
-	pos++;
-	if (argv[optind][pos] == '\0') {
-	    optind++;
-	    pos = 0;
+
+	if (str[1] == ':') {
+		if (argv[optind][pos+1] != '\0') {
+			optarg = &argv[optind][pos+1];
+			return *str;
+		}
+		optind++;
+		if (optind >= argc) {
+			optopt = *str;
+			if (opterr)
+				fprintf(stderr, "%s: option requires an argument -- %c\n",
+				        argv[0], optopt);
+			return '?';
+		}
+		optarg = argv[optind];
+		optind++; pos = 0;
+		return *str;
+	} else {
+		pos++;
+		if (argv[optind][pos] == '\0') {
+			optind++;
+			pos = 0;
+		}
+		return *str;
 	}
-	return *str;
-    }
 }

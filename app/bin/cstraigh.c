@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cstraigh.h"
@@ -33,16 +33,17 @@
  * STATE INFO
  */
 static struct {
-		coOrd pos0, pos1;
-		track_p trk;
-		EPINX_T ep;
-		BOOL_T down;
-		} Dl;
+	coOrd pos0, pos1;
+	track_p trk;
+	EPINX_T ep;
+	BOOL_T down;
+} Dl;
 
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-static void CreateEndAnchor(coOrd p, wBool_t lock) {
+static void CreateEndAnchor(coOrd p, wBool_t lock)
+{
 	DIST_T d = tempD.scale*0.15;
 
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -72,7 +73,8 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.trk = NULL;
 		Dl.ep=-1;
 		Dl.down = FALSE;
-		InfoMessage( _("Place 1st endpoint of straight track, snap to unconnected endpoint") );
+		InfoMessage(
+		        _("Place 1st endpoint of straight track, snap to unconnected endpoint") );
 		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
@@ -83,22 +85,22 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.trk = NULL;
 		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
-			   EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
-			   if (ep != -1) {
-				   if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
-				   		wBeep();
-				   		InfoMessage(_("Track is different gauge"));
-				   		return C_CONTINUE;
-				   	}
-			   		Dl.trk = t;
-			   		Dl.ep = ep;
-			   		pos = GetTrkEndPos(t, ep);
-			   		found = TRUE;
-			   }
+				EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
+				if (ep != -1) {
+					if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
+						wBeep();
+						InfoMessage(_("Track is different gauge"));
+						return C_CONTINUE;
+					}
+					Dl.trk = t;
+					Dl.ep = ep;
+					pos = GetTrkEndPos(t, ep);
+					found = TRUE;
+				}
 			}
 		}
-		Dl.down = TRUE;	
-		if (!found) SnapPos( &pos );
+		Dl.down = TRUE;
+		if (!found) { SnapPos( &pos ); }
 		Dl.pos0 = pos;
 		InfoMessage( _("Drag to place 2nd end point") );
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
@@ -118,13 +120,13 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 				p = pos;
 				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
-					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
-					   if (ep != -1) {
-						   if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
-							   CreateEndAnchor(GetTrkEndPos(t,ep),FALSE);
-							   found = TRUE;
-						   }
-					   }
+						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+						if (ep != -1) {
+							if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
+								CreateEndAnchor(GetTrkEndPos(t,ep),FALSE);
+								found = TRUE;
+							}
+						}
 					}
 				}
 			}
@@ -138,35 +140,35 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
-			if (angle2 > 90.0 && angle2 < 270.0)
+			if (angle2 > 90.0 && angle2 < 270.0) {
 				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ) );
-			else pos = Dl.pos0;	
+			} else { pos = Dl.pos0; }
 		} else if (SnapPos( &pos )) {
-			 CreateEndAnchor(pos,FALSE);
-			 found = TRUE;
+			CreateEndAnchor(pos,FALSE);
+			found = TRUE;
 		}
-		
+
 		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),
-				FormatDistance(FindDistance( Dl.pos0, pos )),
-				PutAngle(FindAngle( Dl.pos0, pos )) );
+		             FormatDistance(FindDistance( Dl.pos0, pos )),
+		             PutAngle(FindAngle( Dl.pos0, pos )) );
 		tempSegs(0).u.l.pos[1] = pos;
 		tempSegs_da.cnt = 1;
 		return C_CONTINUE;
 
 	case C_UP:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (!Dl.down) return C_CONTINUE;
+		if (!Dl.down) { return C_CONTINUE; }
 		tempSegs_da.cnt = 0;
 		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
-			if (angle2 > 90.0 && angle2 < 270.0)
+			if (angle2 > 90.0 && angle2 < 270.0) {
 				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ));
-			else pos = Dl.pos0;	
-		} else 	SnapPos( &pos );
+			} else { pos = Dl.pos0; }
+		} else { SnapPos( &pos ); }
 		if ((dist=FindDistance( Dl.pos0, pos )) <= minLength) {
-		   ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-dist)) );
-		   return C_TERMINATE;
+			ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-dist)) );
+			return C_TERMINATE;
 		}
 		UndoStart( _("Create Straight Track"), "newStraight" );
 		t = NewStraightTrack( Dl.pos0, pos );
@@ -178,10 +180,14 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		if (anchors_da.cnt)
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		if (Dl.down)
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
+		if (Dl.down) {
+			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
+			          wDrawColorBlack );
+		}
 		return C_CONTINUE;
 	case C_CANCEL:
 		Dl.down = FALSE;
@@ -193,9 +199,11 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/straight.xpm"
+#include "bitmaps/straight.xpm3"
 
 void InitCmdStraight( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"), wIconCreatePixMap(straight_xpm[iconSize]), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_STRAIGHT, NULL );
+	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"),
+	               wIconCreatePixMap(straight_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_STRAIGHT, NULL );
 }

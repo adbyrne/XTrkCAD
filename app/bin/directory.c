@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "directory.h"
@@ -35,18 +35,18 @@
 
 BOOL_T SafeCreateDir(const char *dir)
 {
-    int err;
+	int err;
 
-    err = mkdir(dir, 0755);
-    if (err < 0) {
-        if (errno != EEXIST) {
-            NoticeMessage(MSG_DIR_CREATE_FAIL,
-                          _("Continue"), NULL, dir, strerror(errno));
-            perror(dir);
-            return FALSE;
-        }
-    }
-    return TRUE;
+	err = mkdir(dir, 0755);
+	if (err < 0) {
+		if (errno != EEXIST) {
+			NoticeMessage(MSG_DIR_CREATE_FAIL,
+			              _("Continue"), NULL, dir, strerror(errno));
+			perror(dir);
+			return FALSE;
+		}
+	}
+	return TRUE;
 }
 
 /************************************************
@@ -59,83 +59,83 @@ BOOL_T SafeCreateDir(const char *dir)
  */
 BOOL_T DeleteDirectory(const char *dir_path)
 {
-    size_t path_len;
-    char *full_path = NULL;
-    DIR *dir;
-    struct stat stat_path, stat_entry;
-    struct dirent *entry;
-    DynString path;
+	size_t path_len;
+	char *full_path = NULL;
+	DIR *dir;
+	struct stat stat_path, stat_entry;
+	struct dirent *entry;
+	DynString path;
 
-    // stat for the path
-    int resp = stat(dir_path, &stat_path);
+	// stat for the path
+	int resp = stat(dir_path, &stat_path);
 
-    if (resp != 0 && errno == ENOENT) {
-        return TRUE;    //Does not Exist
-    }
+	if (resp != 0 && errno == ENOENT) {
+		return TRUE;    //Does not Exist
+	}
 
-    // if path is not dir - exit
-    if (!(S_ISDIR(stat_path.st_mode))) {
-        NoticeMessage(MSG_NOT_DIR_FAIL,
-                      _("Continue"), NULL, dir_path);
-        return FALSE;
-    }
+	// if path is not dir - exit
+	if (!(S_ISDIR(stat_path.st_mode))) {
+		NoticeMessage(MSG_NOT_DIR_FAIL,
+		              _("Continue"), NULL, dir_path);
+		return FALSE;
+	}
 
-    // if not possible to read the directory for this user
-    if ((dir = opendir(dir_path)) == NULL) {
-        NoticeMessage(MSG_DIR_OPEN_FAIL,
-                      _("Continue"), NULL, dir_path);
-        return FALSE;
-    }
+	// if not possible to read the directory for this user
+	if ((dir = opendir(dir_path)) == NULL) {
+		NoticeMessage(MSG_DIR_OPEN_FAIL,
+		              _("Continue"), NULL, dir_path);
+		return FALSE;
+	}
 
-    // the length of the path
-    path_len = strlen(dir_path) + 1;
-    DynStringMalloc(&path, path_len + 16);	//guessing the total path length
+	// the length of the path
+	path_len = strlen(dir_path) + 1;
+	DynStringMalloc(&path, path_len + 16);	//guessing the total path length
 
-    // iteration through entries in the directory
-    while ((entry = readdir(dir)) != NULL) {
+	// iteration through entries in the directory
+	while ((entry = readdir(dir)) != NULL) {
 
-        // skip entries "." and ".."
-        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
-            continue;
-        }
+		// skip entries "." and ".."
+		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
+			continue;
+		}
 
-        // determinate a full path of an entry
-        DynStringReset(&path);
-        DynStringCatCStrs(&path, dir_path, FILE_SEP_CHAR, entry->d_name, NULL);
-        full_path = DynStringToCStr(&path);
-        // stat for the entry
-        stat(full_path, &stat_entry);
+		// determinate a full path of an entry
+		DynStringReset(&path);
+		DynStringCatCStrs(&path, dir_path, FILE_SEP_CHAR, entry->d_name, NULL);
+		full_path = DynStringToCStr(&path);
+		// stat for the entry
+		stat(full_path, &stat_entry);
 
-        // recursively remove a nested directory
-        if (S_ISDIR(stat_entry.st_mode) != 0) {
-            DeleteDirectory(full_path);
-            continue;
-        }
+		// recursively remove a nested directory
+		if (S_ISDIR(stat_entry.st_mode) != 0) {
+			DeleteDirectory(full_path);
+			continue;
+		}
 
-        // remove a file object
-        if (unlink(full_path)) {
-            NoticeMessage(MSG_UNLINK_FAIL, _("Continue"), NULL, full_path);
-            DynStringFree(&path);
-            closedir(dir);
-            return FALSE;
-        } else {
+		// remove a file object
+		if (unlink(full_path)) {
+			NoticeMessage(MSG_UNLINK_FAIL, _("Continue"), NULL, full_path);
+			DynStringFree(&path);
+			closedir(dir);
+			return FALSE;
+		} else {
 #if DEBUG
-            printf("Removed a file: %s \n", full_path);
+			printf("Removed a file: %s \n", full_path);
 #endif
-        }
-    }
+		}
+	}
 
-    closedir(dir);
-    DynStringFree(&path);
+	closedir(dir);
+	DynStringFree(&path);
 
-    // remove the devastated directory and close the object of it
-    if (rmdir(dir_path)) {
-        NoticeMessage(MSG_RMDIR_FAIL, _("Continue"), NULL, dir_path);
-        return FALSE;
-    } else {
+	// remove the devastated directory and close the object of it
+	if (rmdir(dir_path)) {
+		NoticeMessage(MSG_RMDIR_FAIL, _("Continue"), NULL, dir_path);
+		return FALSE;
+	} else {
 #if DEBUG
-        printf("Removed a directory: %s \n", dir_path);
+		printf("Removed a directory: %s \n", dir_path);
 #endif
-    }
-    return TRUE;
+	}
+	return TRUE;
 }

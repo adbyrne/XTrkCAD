@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -272,10 +272,10 @@ void processFile(
 	char desc[256];
 	long color;
 	char scale[256];
-	double length;
-	double width;
-	double couplerLength;
-	double truckCenter;
+	double length = 0.0;
+	double width = 0.0;
+	double couplerLength = 0.0;
+	double truckCenter = 0.0;
 	double ratio = 0.0;
 	int option = 0;
 	int type = 30100;
@@ -436,8 +436,6 @@ void processFile(
 
 int main ( int argc, char * argv[] )
 {
-	char *exename = argv[ 0 ];
-
 	argv++;
 	argc--;
 	

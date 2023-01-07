@@ -16,7 +16,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_DRAWGEOM_H
@@ -49,72 +49,73 @@
 #define OP_LAST			(OP_POLYLINE)
 
 typedef struct {
-				void (*message)( const char *, ... );
-				void (*Redraw)( void );
-				drawCmd_p D;
-				long Op;
-				wDrawColor Color;
-				long line_Width;
-				double width;
-				ANGLE_T angle;
-				double length;
-				double radius;
-				long benchOption;
-				drawLineType_e lineType;
-				int State;
-				int index;
-				curveData_t ArcData;
-				ANGLE_T ArcAngle;
-				int Started;
-				BOOL_T Changed;
-				BOOL_T show;
-				BOOL_T UndoStarted;
-		} drawContext_t;
+	void (*message)( const char *, ... );
+	void (*Redraw)( void );
+	drawCmd_p D;
+	long Op;
+	wDrawColor Color;
+	long line_Width;
+	double width;
+	ANGLE_T angle;
+	double length;
+	double radius;
+	long benchOption;
+	drawLineType_e lineType;
+	int State;
+	int index;
+	curveData_t ArcData;
+	ANGLE_T ArcAngle;
+	int Started;
+	BOOL_T Changed;
+	BOOL_T show;
+	BOOL_T UndoStarted;
+} drawContext_t;
 
 typedef enum {MOD_NONE, MOD_STARTED, MOD_SELECTED_PT, MOD_AFTER_PT,
-		MOD_ORIGIN, MOD_AFTER_ORIG } ModState_e;
+              MOD_ORIGIN, MOD_AFTER_ORIG
+             } ModState_e;
 
 typedef struct {
-				void (*message)( const char *, ... );
-				void (*Redraw)( void );
-				drawCmd_p D;
-				double length;
-				ANGLE_T rel_angle;
-				double radius;
-				ANGLE_T arc_angle;
-				int last_inx;
-				ANGLE_T abs_angle;
-				double height;
-				double width;
-				int prev_inx;
-				int max_inx;
-				track_p trk;
-				char type;
-				coOrd orig;			//Origin Pos
-				ANGLE_T angle;      //Origin Angle
-				wIndex_t segCnt;
-				trkSeg_p segPtr;
-				wBool_t selected;
-				wBool_t circle;
-				ModState_e state;
-				coOrd rel_center;
-				coOrd rot_center;
-				wBool_t rot_moved;
-				coOrd translate_center;
-				coOrd moved;
-				coOrd arm;
-				coOrd new_arm;
-				ANGLE_T rot_angle;
-				coOrd p0;
-				coOrd p1;
-				coOrd pm;
-				coOrd pc;
-				DIST_T disp;
-				wBool_t rotate_state;
-				wBool_t open;
-				wBool_t filled;
-				PolyType_e subtype;
-		} drawModContext_t;
+	void (*message)( const char *, ... );
+	void (*Redraw)( void );
+	drawCmd_p D;
+	double length;
+	ANGLE_T rel_angle;
+	double radius;
+	ANGLE_T arc_angle;
+	int last_inx;
+	ANGLE_T abs_angle;
+	double height;
+	double width;
+	int prev_inx;
+	int max_inx;
+	track_p trk;
+	char type;
+	coOrd orig;			//Origin Pos
+	ANGLE_T angle;      //Origin Angle
+	wIndex_t segCnt;
+	trkSeg_p segPtr;
+	wBool_t selected;
+	wBool_t circle;
+	ModState_e state;
+	coOrd rel_center;
+	coOrd rot_center;
+	wBool_t rot_moved;
+	coOrd translate_center;
+	coOrd moved;
+	coOrd arm;
+	coOrd new_arm;
+	ANGLE_T rot_angle;
+	coOrd p0;
+	coOrd p1;
+	coOrd pm;
+	coOrd pc;
+	DIST_T disp;
+	wBool_t rotate_state;
+	wBool_t open;
+	wBool_t filled;
+	PolyType_e subtype;
+} drawModContext_t;
 
 typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
 

@@ -17,12 +17,11 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
@@ -48,28 +47,29 @@
 static XWNDPROC oldButtProc = NULL;
 
 struct wButton_t {
-		WOBJ_COMMON
-		wButtonCallBack_p action;
-		wBool_t busy;
-		wBool_t selected;
-		wIcon_p icon;
-		UINT_PTR timer_id;
-		int timer_count;
-		int timer_state;
-		};
+	WOBJ_COMMON
+	wButtonCallBack_p action;
+	wBool_t busy;
+	wBool_t selected;
+	wIcon_p icon;
+	UINT_PTR timer_id;
+	int timer_count;
+	int timer_state;
+};
 
 
 
 void mswButtPush(
-		wControl_p b )
+        wControl_p b )
 {
-	if ( ((wButton_p)b)->action )
+	if ( ((wButton_p)b)->action ) {
 		((wButton_p)b)->action( ((wButton_p)b)->data );
+	}
 }
 
 /**
  * Paint function for toolbar buttons
- * 
+ *
  * \param hButtDc IN valid device context
  * \param bm IN bitmap to add to button
  * \param selected IN selected state of button
@@ -77,18 +77,16 @@ void mswButtPush(
  */
 
 static void drawButton(
-		HDC hButtDc,
-		wIcon_p bm,
-		BOOL_T selected,
-		BOOL_T disabled )
+        HDC hButtDc,
+        wIcon_p bm,
+        BOOL_T selected,
+        BOOL_T disabled )
 {
 	HGDIOBJ oldBrush, newBrush;
 	HPEN oldPen, newPen;
 	RECT rect;
 	COLORREF color1, color2;
 	wWinPix_t offw=5, offh=5;
-	TRIVERTEX        vert[2] ;
-	GRADIENT_RECT    gRect;
 
 	COLORREF colL;
 	COLORREF colD;
@@ -117,8 +115,7 @@ static void drawButton(
 	DeleteObject( SelectObject( hButtDc, oldBrush ) );
 
 	/* disabled button remain flat */
-	if( !disabled )
-	{
+	if( !disabled ) {
 		/* select colors for the gradient */
 		if( selected ) {
 			color1 = colD;
@@ -147,7 +144,8 @@ static void drawButton(
 	}
 
 	color2 = GetSysColor( COLOR_BTNSHADOW );
-	color1 = RGB( bm->colormap[ 1 ].rgbRed, bm->colormap[ 1 ].rgbGreen, bm->colormap[ 1 ].rgbBlue );
+	color1 = RGB( bm->colormap[ 1 ].rgbRed, bm->colormap[ 1 ].rgbGreen,
+	              bm->colormap[ 1 ].rgbBlue );
 
 	if (selected) {
 		offw++; offh++;
@@ -157,45 +155,46 @@ static void drawButton(
 
 
 static void buttDrawIcon(
-		wButton_p b,
-		HDC butt_hDc )
+        wButton_p b,
+        HDC butt_hDc )
 {
-		wIcon_p bm = b->icon;
-		wWinPix_t offw=5, offh=5;
+	wIcon_p bm = b->icon;
+	wWinPix_t offw=5, offh=5;
 
-		if (b->selected || b->busy) {
-			offw++; offh++;
-		} else if ( (b->option & BO_DISABLED) != 0 ) {
-			;
-		} else {
-			;
-		}
-		drawButton( butt_hDc, bm, b->selected || b->busy, (b->option & BO_DISABLED) != 0 );
+	if (b->selected || b->busy) {
+		offw++; offh++;
+	} else if ( (b->option & BO_DISABLED) != 0 ) {
+		;
+	} else {
+		;
+	}
+	drawButton( butt_hDc, bm, b->selected
+	            || b->busy, (b->option & BO_DISABLED) != 0 );
 }
 
 void wButtonSetBusy(
-    wButton_p b,
-    int value)
+        wButton_p b,
+        int value)
 {
-    b->busy = value;
-    if (!value) {
-        b->selected = FALSE;
-    }
+	b->busy = value;
+	if (!value) {
+		b->selected = FALSE;
+	}
 
-    // in case a timer is associated with the button, kill it
-    if (b->timer_id) {
-        KillTimer(b->hWnd, b->timer_id);
-        b->timer_id = 0;
-        b->timer_state = STOP_TIMER;
-    }
+	// in case a timer is associated with the button, kill it
+	if (b->timer_id) {
+		KillTimer(b->hWnd, b->timer_id);
+		b->timer_id = 0;
+		b->timer_state = STOP_TIMER;
+	}
 
-    InvalidateRgn(b->hWnd, NULL, FALSE);
+	InvalidateRgn(b->hWnd, NULL, FALSE);
 }
 
 
 void wButtonSetLabel(
-		wButton_p b,
-		const char * label )
+        wButton_p b,
+        const char * label )
 {
 	if ((b->option&BO_ICON) == 0) {
 		/*b->labelStr = label;*/
@@ -207,11 +206,11 @@ void wButtonSetLabel(
 }
 
 /**
- * Button timer: handle timer events for buttons. These are used for 
+ * Button timer: handle timer events for buttons. These are used for
  * auto-repeating presses. Three phases used are
- * - initial delay before repetitions begin  
- * - slow repeats for a few cycles  
- * - fast repeats therafter  
+ * - initial delay before repetitions begin
+ * - slow repeats for a few cycles
+ * - fast repeats therafter
  * - stop timer
  *
  * \param  hWnd	    Handle of the window, unused
@@ -223,45 +222,46 @@ void wButtonSetLabel(
 void CALLBACK buttTimer(HWND hWnd, UINT message, UINT_PTR timer,
                         DWORD timepast)
 {
-    wButton_p b = (wButton_p)timer;
-    if (b->timer_id == 0) {
-        b->timer_state = STOP_TIMER;
-        return ;
-    }
+	wButton_p b = (wButton_p)timer;
+	if (b->timer_id == 0) {
+		b->timer_state = STOP_TIMER;
+		return ;
+	}
 
-    /* Autorepeat state machine */
-    switch (b->timer_state) {
-    case INITIAL_WAIT:
-        b->timer_state = SLOW_REPEATS;
-        b->timer_count = 0;
-        KillTimer(hWnd, (UINT_PTR)b);
-        SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE1_DELAY, buttTimer);
-        break;
-    case SLOW_REPEATS: /* Enable slow auto-repeat */
-        if (b->timer_count++ > 10) {
-            /* Start fast auto-repeat */
-            b->timer_state = FAST_REPEATS;
-            KillTimer(hWnd, (UINT_PTR)b);
-            SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE2_DELAY, buttTimer);
-        }
-        break;
-    case FAST_REPEATS:
-        break;
-    case STOP_TIMER:
-    default:
-        KillTimer(hWnd, (UINT_PTR)b);
-        b->timer_id = 0;
-        return;
-        break;
-    }
-    if (b->action) {
-        b->action(b->data);
-    }
-    return;
+	/* Autorepeat state machine */
+	switch (b->timer_state) {
+	case INITIAL_WAIT:
+		b->timer_state = SLOW_REPEATS;
+		b->timer_count = 0;
+		KillTimer(hWnd, (UINT_PTR)b);
+		SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE1_DELAY, buttTimer);
+		break;
+	case SLOW_REPEATS: /* Enable slow auto-repeat */
+		if (b->timer_count++ > 10) {
+			/* Start fast auto-repeat */
+			b->timer_state = FAST_REPEATS;
+			KillTimer(hWnd, (UINT_PTR)b);
+			SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE2_DELAY, buttTimer);
+		}
+		break;
+	case FAST_REPEATS:
+		break;
+	case STOP_TIMER:
+	default:
+		KillTimer(hWnd, (UINT_PTR)b);
+		b->timer_id = 0;
+		return;
+		break;
+	}
+	if (b->action) {
+		b->action(b->data);
+	}
+	return;
 }
-				   
 
-static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+
+static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam,
+                         LPARAM lParam )
 {
 	wButton_p bb = (wButton_p)b;
 	DRAWITEMSTRUCT * di = (DRAWITEMSTRUCT *)lParam;
@@ -278,13 +278,14 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 
 	case WM_MEASUREITEM: {
 		MEASUREITEMSTRUCT * mi = (MEASUREITEMSTRUCT *)lParam;
-		if (bb->type != B_BUTTON || (bb->option & BO_ICON) == 0)
+		if (bb->type != B_BUTTON || (bb->option & BO_ICON) == 0) {
 			break;
+		}
 		mi->CtlType = ODT_BUTTON;
 		mi->CtlID = (UINT)wParam;
 		mi->itemWidth = (UINT)bb->w;
 		mi->itemHeight = (UINT)bb->h;
-		} return (LRESULT)0;
+	} return (LRESULT)0;
 
 	case WM_DRAWITEM:
 		if (bb->type == B_BUTTON && (bb->option & BO_ICON) != 0) {
@@ -302,16 +303,16 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 
 
 static void buttDone(
-		wControl_p b )
+        wControl_p b )
 {
 	free(b);
 }
 
 LRESULT CALLBACK pushButt(
-		HWND hWnd,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+        HWND hWnd,
+        UINT message,
+        WPARAM wParam,
+        LPARAM lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
 
@@ -336,7 +337,7 @@ LRESULT CALLBACK pushButt(
 			case 0x09:
 				/*SetFocus( ((wControl_p)(b->parent))->hWnd );*/
 				SendMessage( ((wControl_p)(b->parent))->hWnd, WM_CHAR,
-						wParam, lParam );
+				             wParam, lParam );
 				/*SendMessage( ((wControl_p)(b->parent))->hWnd, WM_COMMAND,
 						inx, MAKELONG( hWnd, EN_KILLFOCUS ) );*/
 				return (LONG_PTR)0;
@@ -344,8 +345,9 @@ LRESULT CALLBACK pushButt(
 		}
 		break;
 	case WM_KILLFOCUS:
-		if ( b )
+		if ( b ) {
 			InvalidateRect( b->hWnd, NULL, TRUE );
+		}
 		return (LRESULT)0;
 		break;
 	case WM_LBUTTONDOWN:
@@ -355,11 +357,12 @@ LRESULT CALLBACK pushButt(
 			b->timer_id = (UINT_PTR)b;
 		}
 		break;
-   case WM_LBUTTONUP:
-	   /* don't know why but this solves a problem with color selection */
-	    Sleep( 0 );
-		if (b->timer_id)
+	case WM_LBUTTONUP:
+		/* don't know why but this solves a problem with color selection */
+		Sleep( 0 );
+		if (b->timer_id) {
 			KillTimer(hWnd, (UINT_PTR)b);
+		}
 		b->timer_id = 0;
 		b->timer_state = STOP_TIMER;
 		break;
@@ -368,20 +371,21 @@ LRESULT CALLBACK pushButt(
 }
 
 static callBacks_t buttonCallBacks = {
-		mswRepaintLabel,
-		buttDone,
-		buttPush };
+	mswRepaintLabel,
+	buttDone,
+	buttPush
+};
 
 wButton_p wButtonCreate(
-		wWin_p	parent,
-		wWinPix_t	x,
-		wWinPix_t	y,
-		const char	* helpStr,
-		const char	* labelStr,
-		long	option,
-		wWinPix_t	width,
-		wButtonCallBack_p action,
-		void	* data )
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char	* helpStr,
+        const char	* labelStr,
+        long	option,
+        wWinPix_t	width,
+        wButtonCallBack_p action,
+        void	* data )
 {
 	wButton_p b;
 	RECT rect;
@@ -391,8 +395,9 @@ wButton_p wButtonCreate(
 	HDC hDc;
 	wIcon_p bm;
 
-	if (width <= 0)
+	if (width <= 0) {
 		width = 80;
+	}
 	if ((option&BO_ICON) == 0) {
 		labelStr = mswStrdup( labelStr );
 	} else {
@@ -412,13 +417,14 @@ wButton_p wButtonCreate(
 		width = (wWinPix_t)(width*mswScale);
 	}
 	style = ((b->option&BO_ICON)? BS_OWNERDRAW : BS_PUSHBUTTON) |
-				WS_CHILD | WS_VISIBLE |
-				mswGetBaseStyle(parent);
-	if ((b->option&BB_DEFAULT) != 0)
+	        WS_CHILD | WS_VISIBLE |
+	        mswGetBaseStyle(parent);
+	if ((b->option&BB_DEFAULT) != 0) {
 		style |= BS_DEFPUSHBUTTON;
+	}
 	b->hWnd = CreateWindow( "BUTTON", labelStr, style, b->x, b->y,
-				/*CW_USEDEFAULT, CW_USEDEFAULT,*/ width, h,
-				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
+	                        /*CW_USEDEFAULT, CW_USEDEFAULT,*/ width, h,
+	                        ((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 	if (b->hWnd == NULL) {
 		mswFail("CreateWindow(BUTTON)");
 		return b;
@@ -432,7 +438,8 @@ wButton_p wButtonCreate(
 	mswCallBacks[B_BUTTON] = &buttonCallBacks;
 	mswChainFocus( (wControl_p)b );
 
-	oldButtProc = (WNDPROC)SetWindowLongPtr(b->hWnd, GWLP_WNDPROC, (LONG_PTR)&pushButt);
+	oldButtProc = (WNDPROC)SetWindowLongPtr(b->hWnd, GWLP_WNDPROC,
+	                                        (LONG_PTR)&pushButt);
 	if (mswPalette) {
 		hDc = GetDC( b->hWnd );
 		SelectPalette( hDc, mswPalette, 0 );

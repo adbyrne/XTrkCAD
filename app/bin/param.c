@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
@@ -29,8 +29,6 @@
 #include "track.h"
 #include "common-ui.h"
 
-EXPORT int paramHiliteFast = FALSE;
-
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;
 EXPORT int paramLen;
@@ -39,12 +37,25 @@ EXPORT char paramId[100];
 EXPORT BOOL_T paramTogglePlaybackHilite;
 
 EXPORT char *PREFSECT = "DialogItem";
+EXPORT long angleSystem = 0;
 
 static int paramCheckErrorCount = 0;
 static BOOL_T paramCheckShowErrors = FALSE;
 
 static int log_paramLayout = 0;
 static int log_paraminput = 0;
+
+EXPORT wWinPix_t DlgSepLeft = 12;
+EXPORT wWinPix_t DlgSepRight = 12;
+EXPORT wWinPix_t DlgSepTop = 12;
+EXPORT wWinPix_t DlgSepBottom = 12;
+static wWinPix_t DlgSepMid = 18;
+static wWinPix_t DlgSepNarrow = 6;
+static wWinPix_t DlgSepWide = 12;
+static wWinPix_t DlgSepFrmLeft = 4;
+static wWinPix_t DlgSepFrmRight = 4;
+static wWinPix_t DlgSepFrmTop = 4;
+static wWinPix_t DlgSepFrmBottom = 4;
 
 
 /*****************************************************************************
@@ -65,7 +76,7 @@ static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 		getNumberError = N_("Unexpected End Of String");
 		return FALSE;
 	}
-	while ( isspace((unsigned char)*cp) ) cp++;
+	while ( isspace((unsigned char)*cp) ) { cp++; }
 	*numP = strtol( cp, &cq, 10 );
 	if ( cp==cq ) {
 		*cpp = cp;
@@ -73,13 +84,14 @@ static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 		return FALSE;
 	}
 	len = cq-cp;
-	if ( lenP )
+	if ( lenP ) {
 		*lenP = (int)len;
+	}
 	if ( len > 9 ) {
 		getNumberError = N_("Overflow");
 		return FALSE;
 	}
-	while ( isspace((unsigned char)*cq) ) cq++;
+	while ( isspace((unsigned char)*cq) ) { cq++; }
 	*cpp = cq;
 	return TRUE;
 }
@@ -91,14 +103,15 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	char * cp = NULL;
 	struct lconv *lc;
 
-	while ( isspace((unsigned char)**cpp) ) (*cpp)++;
+	while ( isspace((unsigned char)**cpp) ) { (*cpp)++; }
 
 	/* Find out the decimal separator of the current locale */
 	lc = localeconv();
 
 	if ( **cpp != lc->decimal_point[0]
-			&& !GetDigitStr( cpp, &n0, NULL ) )
+	     && !GetDigitStr( cpp, &n0, NULL ) ) {
 		return FALSE;
+	}
 	if ( **cpp == lc->decimal_point[0] ) {
 		(*cpp)++;
 		if ( !isdigit((unsigned char)**cpp) ) {
@@ -106,22 +119,22 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 			*numP = (FLOAT_T)n0;
 			return TRUE;
 		}
-		if ( !GetDigitStr( cpp, &f1, &l1 ) ) return FALSE;
-		for ( f2=1; l1>0; l1-- ) f2 *= 10;
+		if ( !GetDigitStr( cpp, &f1, &l1 ) ) { return FALSE; }
+		for ( f2=1; l1>0; l1-- ) { f2 *= 10; }
 		*numP = ((FLOAT_T)n0)+((FLOAT_T)f1)/((FLOAT_T)f2);
 		*hasFract = TRUE;
 		return TRUE;  /* 999.999 */
 	}
 	if ( isdigit( (unsigned char)**cpp ) ) {
 		cp = *cpp;
-		if ( !GetDigitStr( cpp, &f1, NULL ) ) return FALSE;
+		if ( !GetDigitStr( cpp, &f1, NULL ) ) { return FALSE; }
 	} else {
 		f1 = n0;
 		n0 = 0;
 	}
 	if ( **cpp == '/' ) {
 		(*cpp)++;
-		if ( !GetDigitStr( cpp, &f2, &l1 ) ) return FALSE;
+		if ( !GetDigitStr( cpp, &f2, &l1 ) ) { return FALSE; }
 		if ( f2 == 0 ) {
 			(*cpp) -= l1;
 			getNumberError = N_("Divide by 0");
@@ -141,133 +154,134 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	}
 	return TRUE;
 }
-//extern wIndex_t distanceFormatInx;   // distanceFormatInx
 
 static BOOL_T GetDistance(char ** cpp, FLOAT_T * distP)
 {
-    FLOAT_T n1, n2;
-    BOOL_T neg = FALSE;
-    BOOL_T hasFract;
-    BOOL_T expectInch = FALSE;
-    long distanceFormat;
+	FLOAT_T n1, n2;
+	BOOL_T neg = FALSE;
+	BOOL_T hasFract;
+	BOOL_T expectInch = FALSE;
+	long distanceFormat;
 
-    while (isspace((unsigned char)**cpp)) {
-        (*cpp)++;
-    }
+	while (isspace((unsigned char)**cpp)) {
+		(*cpp)++;
+	}
 
-    if ((*cpp)[0] == '\0') {
-        *distP = 0.0;
-        return TRUE;
-    }
+	if ((*cpp)[0] == '\0') {
+		*distP = 0.0;
+		return TRUE;
+	}
 
-    if ((*cpp)[0] == '-') {
-        neg = TRUE;
-        (*cpp)++;
-    }
+	if ((*cpp)[0] == '-') {
+		neg = TRUE;
+		(*cpp)++;
+	}
 
-    if (!GetNumberStr(cpp, &n1, &hasFract)) {
-        return FALSE;
-    }
+	if (!GetNumberStr(cpp, &n1, &hasFract)) {
+		return FALSE;
+	}
 
-    distanceFormat = GetDistanceFormat();
+	distanceFormat = GetDistanceFormat();
 
-    if ((*cpp)[0] == '\0') {   /* EOL */
-        if (units==UNITS_METRIC) {
-            n1 = n1/2.54;
+	if ((*cpp)[0] == '\0') {   /* EOL */
+		if (units==UNITS_METRIC) {
+			n1 = n1/2.54;
 
-            if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_MM) {
-                n1 /= 10;
-            }
+			if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_MM) {
+				n1 /= 10;
+			}
 
-            if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_M) {
-                n1 *= 100;
-            }
-        }
+			if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_M) {
+				n1 *= 100;
+			}
+		}
 
-        if (neg) {
-            n1 = -n1;
-        }
+		if (neg) {
+			n1 = -n1;
+		}
 
-        *distP = n1;
-        return TRUE;
-    }
+		*distP = n1;
+		return TRUE;
+	}
 
-    if ((*cpp)[0] == '\'') {
-        n1 *= 12.0;
-        (*cpp) += 1;
-        expectInch = !hasFract;
-    } else if (tolower((unsigned char)(*cpp)[0]) == 'f' &&
-               tolower((unsigned char)(*cpp)[1]) == 't') {
-        n1 *= 12.0;
-        (*cpp) += 2;
-        expectInch = !hasFract;
-    } else if (tolower((unsigned char)(*cpp)[0]) == 'c' &&
-               tolower((unsigned char)(*cpp)[1]) == 'm') {
-        n1 /= 2.54;
-        (*cpp) += 2;
-    } else if (tolower((unsigned char)(*cpp)[0]) == 'm' &&
-               tolower((unsigned char)(*cpp)[1]) == 'm') {
-        n1 /= 25.4;
-        (*cpp) += 2;
-    } else if (tolower((unsigned char)(*cpp)[0]) == 'm') {
-        n1 *= 100.0/2.54;
-        (*cpp) += 1;
-    } else if ((*cpp)[0] == '"') {
-        (*cpp) += 1;
-    } else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
-               tolower((unsigned char)(*cpp)[1]) == 'n') {
-        (*cpp) += 2;
-    } else {
-        getNumberError = N_("Invalid Units Indicator");
-        return FALSE;
-    }
+	if ((*cpp)[0] == '\'') {
+		n1 *= 12.0;
+		(*cpp) += 1;
+		expectInch = !hasFract;
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'f' &&
+	           tolower((unsigned char)(*cpp)[1]) == 't') {
+		n1 *= 12.0;
+		(*cpp) += 2;
+		expectInch = !hasFract;
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'c' &&
+	           tolower((unsigned char)(*cpp)[1]) == 'm') {
+		n1 /= 2.54;
+		(*cpp) += 2;
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'm' &&
+	           tolower((unsigned char)(*cpp)[1]) == 'm') {
+		n1 /= 25.4;
+		(*cpp) += 2;
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'm') {
+		n1 *= 100.0/2.54;
+		(*cpp) += 1;
+	} else if ((*cpp)[0] == '"') {
+		(*cpp) += 1;
+	} else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
+	           tolower((unsigned char)(*cpp)[1]) == 'n') {
+		(*cpp) += 2;
+	} else {
+		getNumberError = N_("Invalid Units Indicator");
+		return FALSE;
+	}
 
-    while (isspace((unsigned char)**cpp)) {
-        (*cpp)++;
-    }
+	while (isspace((unsigned char)**cpp)) {
+		(*cpp)++;
+	}
 
-    if (expectInch && isdigit((unsigned char)**cpp)) {
-        if (!GetNumberStr(cpp, &n2, &hasFract)) {
-            return FALSE;
-        }
+	if (expectInch && isdigit((unsigned char)**cpp)) {
+		if (!GetNumberStr(cpp, &n2, &hasFract)) {
+			return FALSE;
+		}
 
-        n1 += n2;
+		n1 += n2;
 
-        if ((*cpp)[0] == '"') {
-            (*cpp) += 1;
-        } else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
-                   tolower((unsigned char)(*cpp)[1]) == 'n') {
-            (*cpp) += 2;
-        }
+		if ((*cpp)[0] == '"') {
+			(*cpp) += 1;
+		} else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
+		           tolower((unsigned char)(*cpp)[1]) == 'n') {
+			(*cpp) += 2;
+		}
 
-        while (isspace((unsigned char)**cpp)) {
-            (*cpp)++;
-        }
-    }
+		while (isspace((unsigned char)**cpp)) {
+			(*cpp)++;
+		}
+	}
 
-    if (**cpp) {
-        getNumberError = N_("Expected End Of String");
-        return FALSE;
-    }
+	if (**cpp) {
+		getNumberError = N_("Expected End Of String");
+		return FALSE;
+	}
 
-    if (neg) {
-        n1 = -n1;
-    }
+	if (neg) {
+		n1 = -n1;
+	}
 
-    *distP = n1;
-    return TRUE;
+	*distP = n1;
+	return TRUE;
 }
 
 
 EXPORT FLOAT_T DecodeFloat(
-		wString_p strCtrl,
-		BOOL_T * validP )
+        wString_p strCtrl,
+        BOOL_T * validP )
 {
 	FLOAT_T valF;
-	const char *cp0, *cp1;
-    char *cp2;
-	cp0 = cp1 = wStringGetValue( strCtrl );
-	while (isspace((unsigned char)*cp1)) cp1++;
+	const char *cp1;
+//	const char *cp0;
+	char *cp2;
+//	cp0 = cp1 = wStringGetValue( strCtrl );
+	cp1 = wStringGetValue( strCtrl );
+	while (isspace((unsigned char)*cp1)) { cp1++; }
 	if ( *cp1 ) {
 		valF = strtod( cp1, &cp2 );
 		if ( *cp2 != 0 ) {
@@ -286,57 +300,57 @@ EXPORT FLOAT_T DecodeFloat(
 
 
 FLOAT_T DecodeDistance(
-    wString_p strCtrl,
-    BOOL_T * validP)
+        wString_p strCtrl,
+        BOOL_T * validP)
 {
-    FLOAT_T valF;
-    char *cp0, *cp1, *cpN, c1;
-    // CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
-    cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
-    cpN += strlen(cpN)-1;
+	FLOAT_T valF;
+	char *cp1, *cpN, c1;
+	// CAST_AWAY_CONST: we temporarily replace *cpN with a NULL and later restore
+	cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
+	cpN += strlen(cpN)-1;
 
-    while (cpN > cp1 && isspace((unsigned char)*cpN)) {
-        cpN--;
-    }
+	while (cpN > cp1 && isspace((unsigned char)*cpN)) {
+		cpN--;
+	}
 
-    c1 = *cpN;
+	c1 = *cpN;
 
-    switch (c1) {
-    case '=':
-    case 's':
-    case 'S':
-    case 'p':
-    case 'P':
-        *cpN = '\0';
-        break;
+	switch (c1) {
+	case '=':
+	case 's':
+	case 'S':
+	case 'p':
+	case 'P':
+		*cpN = '\0';
+		break;
 
-    default:
-        cpN = NULL;
-    }
+	default:
+		cpN = NULL;
+	}
 
-    *validP = (GetDistance(&cp1, &valF));
+	*validP = (GetDistance(&cp1, &valF));
 
-    if (cpN) {
-        *cpN = c1;
-    }
+	if (cpN) {
+		*cpN = c1;
+	}
 
-    if (*validP) {
-        if (c1 == 's' || c1 == 'S') {
-            valF *= curScaleRatio;
-        } else if (c1 == 'p' || c1 == 'P') {
-            valF /= curScaleRatio;
-        }
+	if (*validP) {
+		if (c1 == 's' || c1 == 'S') {
+			valF *= curScaleRatio;
+		} else if (c1 == 'p' || c1 == 'P') {
+			valF /= curScaleRatio;
+		}
 
-        if (cpN) {
-            wStringSetValue(strCtrl, FormatDistance(valF));
-        }
-    } else {
-        snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(getNumberError),
-                *cp1?cp1:_("End Of String"));
-        valF =	0.0;
-    }
+		if (cpN) {
+			wStringSetValue(strCtrl, FormatDistance(valF));
+		}
+	} else {
+		snprintf(decodeErrorStr, sizeof(decodeErrorStr), "%s @ %s", _(getNumberError),
+		         *cp1?cp1:_("End Of String"));
+		valF =	0.0;
+	}
 
-    return valF;
+	return valF;
 }
 
 
@@ -346,32 +360,34 @@ static char formatStrings[N_STRING+1][80];  //Add safety
 
 
 EXPORT char * FormatLong(
-		long valL )
+        long valL )
 {
-	if ( ++formatStringInx >= N_STRING )
+	if ( ++formatStringInx >= N_STRING ) {
 		formatStringInx = 0;
+	}
 	sprintf( formatStrings[formatStringInx], "%ld", valL );
 	return formatStrings[formatStringInx];
 }
 
 
 EXPORT char * FormatFloat(
-		FLOAT_T valF )
+        FLOAT_T valF )
 {
-	if ( ++formatStringInx >= N_STRING )
+	if ( ++formatStringInx >= N_STRING ) {
 		formatStringInx = 0;
+	}
 	sprintf( formatStrings[formatStringInx], "%0.3f", valF );
 	return formatStrings[formatStringInx];
 }
 
 
 static void FormatFraction(
-		char ** cpp,
-		BOOL_T printZero,
-		int digits,
-		BOOL_T rational,
-		FLOAT_T valF,
-		char * unitFmt )
+        char ** cpp,
+        BOOL_T printZero,
+        int digits,
+        BOOL_T rational,
+        FLOAT_T valF,
+        char * unitFmt )
 {
 	char * cp = *cpp;
 	long integ;
@@ -414,16 +430,17 @@ static void FormatFraction(
 
 
 EXPORT char * FormatDistanceEx(
-		FLOAT_T valF,
-		long distanceFormat )
+        FLOAT_T valF,
+        long distanceFormat )
 {
 	char * cp;
 	int digits;
 	long feet;
 	char * metricInd;
 
-	if ( ++formatStringInx >= N_STRING )
+	if ( ++formatStringInx >= N_STRING ) {
 		formatStringInx = 0;
+	}
 	cp = formatStrings[formatStringInx];
 	digits = (int)(distanceFormat&DISTFMT_DECS);
 	valF = PutDim(valF);
@@ -432,18 +449,21 @@ EXPORT char * FormatDistanceEx(
 		valF = -valF;
 	}
 	if ( (distanceFormat&DISTFMT_FMT) == DISTFMT_FMT_NONE ) {
-		FormatFraction( &cp, FALSE, digits, (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, "" );
+		FormatFraction( &cp, FALSE, digits,
+		                (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, "" );
 		return formatStrings[formatStringInx];
 	} else if ( units == UNITS_ENGLISH ) {
 		feet = (long)(floor)(valF/12.0);
 		valF -= feet*12.0;
 		if ( feet != 0 ) {
-			sprintf( cp, "%ld%s", feet, (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_SHRT?"' ":"ft " );
+			sprintf( cp, "%ld%s", feet,
+			         (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_SHRT?"' ":"ft " );
 			cp += strlen(cp);
 		}
 		if ( feet==0 || valF != 0 ) {
-		FormatFraction( &cp, feet==0, digits, (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF,
-				(distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_SHRT?"\"":"in" );
+			FormatFraction( &cp, feet==0, digits,
+			                (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF,
+			                (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_SHRT?"\"":"in" );
 		}
 	} else {
 		if ( (distanceFormat&DISTFMT_FMT)==DISTFMT_FMT_M ) {
@@ -455,20 +475,21 @@ EXPORT char * FormatDistanceEx(
 		} else {
 			metricInd = "cm";
 		}
-		FormatFraction( &cp, FALSE, digits, (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, metricInd );
+		FormatFraction( &cp, FALSE, digits,
+		                (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, metricInd );
 	}
 	return formatStrings[formatStringInx];
 }
 
 
 EXPORT char * FormatDistance(
-		FLOAT_T valF )
+        FLOAT_T valF )
 {
 	return FormatDistanceEx( valF, GetDistanceFormat() );
 }
 
 EXPORT char * FormatSmallDistance(
-		FLOAT_T valF )
+        FLOAT_T valF )
 {
 	long format = GetDistanceFormat();
 	format &= ~(DISTFMT_FRACT_FRC|DISTFMT_DECS);
@@ -486,122 +507,131 @@ static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL );
 static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF );
 
 EXPORT void ParamControlActive(
-		paramGroup_p pg,
-		int inx,
-		BOOL_T active )
+        paramGroup_p pg,
+        int inx,
+        BOOL_T active )
 {
 	paramData_p p = &pg->paramPtr[inx];
-	if ( p->control )
+	if ( p->control ) {
 		wControlActive( p->control, active );
+	}
 }
 
 
 EXPORT void ParamLoadMessage(
-		paramGroup_p pg,
-		int inx,
-		char * message )
+        paramGroup_p pg,
+        int inx,
+        char * message )
 {
 	paramData_p p = &pg->paramPtr[inx];
 	if ( p->control ) {
-		if ( p->type == PD_MESSAGE )
+		if ( p->type == PD_MESSAGE ) {
 			wMessageSetValue( (wMessage_p)p->control, message );
-		else if ( p->type == PD_STRING )
+		} else if ( p->type == PD_STRING ) {
 			wStringSetValue( (wString_p)p->control, message );
-		else
-			AbortProg( "paramLoadMessage: not a PD_MESSAGE or PD_STRING" );
+		} else {
+			CHECKMSG( FALSE, ("p->tytpe %d", (int)p->type) );
+		}
 	}
 }
 
 
 EXPORT void ParamLoadControl(
-		paramGroup_p pg,
-		int inx )
+        paramGroup_p pg,
+        int inx )
 {
 	paramData_p p = &pg->paramPtr[inx];
 	FLOAT_T tmpR;
 	char * valS;
 
-		if ( (p->option&PDO_DLGIGNORE) != 0 ) {
-			p->bInvalid = FALSE;
+	if ( (p->option&PDO_DLGIGNORE) != 0 ) {
+		p->bInvalid = FALSE;
+		return;
+	}
+	if (p->control == NULL || p->valueP == NULL) {
+		return;
+	}
+	switch ( p->type ) {
+	case PD_LONG:
+		wStringSetValue( (wString_p)p->control, FormatLong( *(long*)p->valueP ) );
+		if ( !ParamIntegerRangeCheck( p, *(long*)p->valueP ) ) {
 			return;
 		}
-		if (p->control == NULL || p->valueP == NULL)
-			return;
-		switch ( p->type ) {
-		case PD_LONG:
-			wStringSetValue( (wString_p)p->control, FormatLong( *(long*)p->valueP ) );
-			if ( !ParamIntegerRangeCheck( p, *(long*)p->valueP ) )
-				return;
-			p->oldD.l = *(long*)p->valueP;
-			break;
-		case PD_RADIO:
-			wRadioSetValue( (wChoice_p)p->control, *(long*)p->valueP );
-			p->oldD.l = *(long*)p->valueP;
-			break;
-		case PD_TOGGLE:
-			wToggleSetValue( (wChoice_p)p->control, *(long*)p->valueP );
-			p->oldD.l = *(long*)p->valueP;
-			break;
-		case PD_LIST:
-		case PD_DROPLIST:
-		case PD_COMBOLIST:
-			wListSetIndex( (wList_p)p->control, *(wIndex_t*)p->valueP );
-			p->oldD.l = *(wIndex_t*)p->valueP;
-			break;
-		case PD_COLORLIST:
-			wColorSelectButtonSetColor( (wButton_p)p->control, *(wDrawColor*)p->valueP );
-			p->oldD.dc = *(wDrawColor*)p->valueP;
-			break;
-		case PD_FLOAT:
-			tmpR = *(FLOAT_T*)p->valueP;
-			if (p->option&PDO_DIM) {
-				if (p->option&PDO_SMALLDIM)
-					valS = FormatSmallDistance( tmpR );
-				else
-					valS = FormatDistance( tmpR );
+		p->oldD.l = *(long*)p->valueP;
+		break;
+	case PD_RADIO:
+		wRadioSetValue( (wChoice_p)p->control, *(long*)p->valueP );
+		p->oldD.l = *(long*)p->valueP;
+		break;
+	case PD_TOGGLE:
+		wToggleSetValue( (wChoice_p)p->control, *(long*)p->valueP );
+		p->oldD.l = *(long*)p->valueP;
+		break;
+	case PD_LIST:
+	case PD_DROPLIST:
+	case PD_COMBOLIST:
+		wListSetIndex( (wList_p)p->control, *(wIndex_t*)p->valueP );
+		p->oldD.l = *(wIndex_t*)p->valueP;
+		break;
+	case PD_COLORLIST:
+		wColorSelectButtonSetColor( (wButton_p)p->control, *(wDrawColor*)p->valueP );
+		p->oldD.dc = *(wDrawColor*)p->valueP;
+		break;
+	case PD_FLOAT:
+		tmpR = *(FLOAT_T*)p->valueP;
+		if (p->option&PDO_DIM) {
+			if (p->option&PDO_SMALLDIM) {
+				valS = FormatSmallDistance( tmpR );
 			} else {
-				if (p->option&PDO_ANGLE)
-					tmpR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?tmpR:-tmpR );
-				valS = FormatFloat( tmpR );
+				valS = FormatDistance( tmpR );
 			}
-			wStringSetValue( (wString_p)p->control, valS );
-			if ( !ParamFloatRangeCheck( p, tmpR ) )
-				break;
-			p->oldD.f = tmpR;
-			break;
-		case PD_STRING:
-			if (p->oldD.s)
-				MyFree( p->oldD.s );
-			ASSERT( p->max_string > 0 );
-			if (p->max_string) {
-                p->oldD.s = MyMalloc(p->max_string);
-				strncpy(p->oldD.s, (char*)p->valueP, p->max_string-1);
-				*(p->oldD.s + (uint32_t)p->max_string - 1) = '\0';
-				wStringSetValue((wString_p)p->control, (char*)p->oldD.s);
+		} else {
+			if (p->option&PDO_ANGLE) {
+				tmpR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?tmpR:-tmpR );
 			}
-			else {
-				p->oldD.s = MyStrdup((char *)p->valueP);
-				wStringSetValue((wString_p)p->control, (char*)p->valueP);
-			}
-			if ( (p->option & PDO_NOTBLANK) && strlen( p->oldD.s ) == 0 ) {
-				ParamHilite( p->group->win, p->control, TRUE );
-				p->bInvalid = TRUE;
-			}
-			break;
-		case PD_MESSAGE:
-			wMessageSetValue( (wMessage_p)p->control, _((char*)p->valueP) );
-			break;
-		case PD_TEXT:
-			wTextClear( (wText_p)p->control );
-			wTextAppend( (wText_p)p->control, (char*)p->valueP );
-			break;
-		case PD_BUTTON:
-		case PD_DRAW:
-		case PD_MENU:
-		case PD_MENUITEM:
-		case PD_BITMAP:
+			valS = FormatFloat( tmpR );
+		}
+		wStringSetValue( (wString_p)p->control, valS );
+		if ( !ParamFloatRangeCheck( p, tmpR ) ) {
 			break;
 		}
+		p->oldD.f = tmpR;
+		break;
+	case PD_STRING:
+		if (p->oldD.s) {
+			MyFree( p->oldD.s );
+		}
+		CHECK( p->max_string > 0 );
+		if (p->max_string) {
+			p->oldD.s = MyMalloc(p->max_string);
+			strncpy(p->oldD.s, (char*)p->valueP, p->max_string-1);
+			*(p->oldD.s + (uint32_t)p->max_string - 1) = '\0';
+			wStringSetValue((wString_p)p->control, (char*)p->oldD.s);
+		} else {
+			p->oldD.s = MyStrdup((char *)p->valueP);
+			wStringSetValue((wString_p)p->control, (char*)p->valueP);
+		}
+		if ( (p->option & PDO_NOTBLANK) && strlen( p->oldD.s ) == 0 ) {
+			ParamHilite( p->group->win, p->control, TRUE );
+			p->bInvalid = TRUE;
+		} else {
+			p->bInvalid = FALSE;
+		}
+		break;
+	case PD_MESSAGE:
+		wMessageSetValue( (wMessage_p)p->control, _((char*)p->valueP) );
+		break;
+	case PD_TEXT:
+		wTextClear( (wText_p)p->control );
+		wTextAppend( (wText_p)p->control, (char*)p->valueP );
+		break;
+	case PD_BUTTON:
+	case PD_DRAW:
+	case PD_MENU:
+	case PD_MENUITEM:
+	case PD_BITMAP:
+		break;
+	}
 }
 
 
@@ -609,17 +639,18 @@ EXPORT void ParamLoadControl(
 * \param IN pointer to parameter group to be loaded
 */
 EXPORT void ParamLoadControls(
-		paramGroup_p pg )
+        paramGroup_p pg )
 {
 	int inx;
 	LOG( log_paraminput, 1, ( "ParamLoadControls( %s )\n", pg->nameStr ) );
-	for ( inx=0; inx<pg->paramCnt; inx++ )
+	for ( inx=0; inx<pg->paramCnt; inx++ ) {
 		ParamLoadControl( pg, inx );
+	}
 }
 
 
 EXPORT long ParamUpdate(
-		paramGroup_p pg )
+        paramGroup_p pg )
 {
 	long longV;
 	FLOAT_T floatV;
@@ -631,24 +662,30 @@ EXPORT long ParamUpdate(
 	BOOL_T valid;
 
 	for ( p=pg->paramPtr,inx=0; p<&pg->paramPtr[pg->paramCnt]; p++,inx++ ) {
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
+		if ( (p->option&PDO_DLGIGNORE) != 0 ) {
 			continue;
-		if ( p->control == NULL )
+		}
+		if ( p->control == NULL ) {
 			continue;
-		if ( p->bInvalid == TRUE )
+		}
+		if ( p->bInvalid == TRUE ) {
 			break;
+		}
 		switch ( p->type ) {
 		case PD_LONG:
 			stringV = wStringGetValue( (wString_p)p->control );
 			longV = atol( stringV );
-			if ( ! ParamIntegerRangeCheck( p, longV ) )
+			if ( ! ParamIntegerRangeCheck( p, longV ) ) {
 				break;
+			}
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( p->valueP)
+				if ( p->valueP) {
 					*(long*)p->valueP = longV;
-				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
-					 pg->changeProc( pg, inx, &longV );
+				}
+				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
+					pg->changeProc( pg, inx, &longV );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -656,10 +693,12 @@ EXPORT long ParamUpdate(
 			longV = wRadioGetValue( (wChoice_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( p->valueP)
+				if ( p->valueP) {
 					*(long*)p->valueP = longV;
-				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
-					 pg->changeProc( pg, inx, &longV );
+				}
+				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
+					pg->changeProc( pg, inx, &longV );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -667,10 +706,12 @@ EXPORT long ParamUpdate(
 			longV = wToggleGetValue( (wChoice_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( p->valueP)
+				if ( p->valueP) {
 					*(long*)p->valueP = longV;
-				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
-					 pg->changeProc( pg, inx, &longV );
+				}
+				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
+					pg->changeProc( pg, inx, &longV );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -680,10 +721,12 @@ EXPORT long ParamUpdate(
 			longV = wListGetIndex( (wList_p)p->control );
 			if (longV != p->oldD.l) {
 				p->oldD.l = longV;
-				if ( p->valueP)
+				if ( p->valueP) {
 					*(wIndex_t*)p->valueP = (wIndex_t)longV;
-				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
-					 pg->changeProc( pg, inx, &longV );
+				}
+				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
+					pg->changeProc( pg, inx, &longV );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -691,8 +734,9 @@ EXPORT long ParamUpdate(
 			dc = wColorSelectButtonGetColor( (wButton_p)p->control );
 			if (dc != p->oldD.dc) {
 				p->oldD.dc = dc;
-				if ( p->valueP)
+				if ( p->valueP) {
 					*(wDrawColor*)p->valueP = dc;
+				}
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
 					pg->changeProc( pg, inx, &longV ); /* COLORNOP */
 				}
@@ -704,19 +748,24 @@ EXPORT long ParamUpdate(
 				floatV = DecodeDistance( (wString_p)p->control, &valid );
 			} else {
 				floatV = DecodeFloat( (wString_p)p->control, &valid );
-				if (valid && (p->option & PDO_ANGLE) )
+				if (valid && (p->option & PDO_ANGLE) ) {
 					floatV = NormalizeAngle( (angleSystem==ANGLE_POLAR)?floatV:-floatV );
+				}
 			}
-			if ( !valid )
+			if ( !valid ) {
 				break;
-			if ( ! ParamFloatRangeCheck( p, floatV ) )
+			}
+			if ( ! ParamFloatRangeCheck( p, floatV ) ) {
 				break;
+			}
 			if (floatV != p->oldD.f) {
 				p->oldD.f = floatV;
-				if ( p->valueP)
+				if ( p->valueP) {
 					*(FLOAT_T*)p->valueP = floatV;
-				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
-					 pg->changeProc( pg, inx, &floatV );
+				}
+				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc) {
+					pg->changeProc( pg, inx, &floatV );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -727,8 +776,9 @@ EXPORT long ParamUpdate(
 				break;
 			}
 			if ( strcmp( stringV, p->oldD.s ) != 0 ) {
-				if (p->oldD.s)
+				if (p->oldD.s) {
 					MyFree( p->oldD.s );
+				}
 				p->oldD.s = MyStrdup( stringV );
 				if ( p->valueP ) {
 					strncpy((char*)p->valueP, stringV, p->max_string-1);
@@ -740,7 +790,9 @@ EXPORT long ParamUpdate(
 
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					// CAST_AWAY_CONST: param 3 should be const but its a big change
-					 pg->changeProc( pg, inx, CAST_AWAY_CONST stringV );
+				{
+					pg->changeProc( pg, inx, CAST_AWAY_CONST stringV );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -755,113 +807,114 @@ EXPORT long ParamUpdate(
 		}
 	}
 #ifdef PGPROC
-	if (pg->proc)
+	if (pg->proc) {
 		pg->proc( PGACT_UPDATE, change );
+	}
 #endif
 	return change;
 }
 
 
 void ParamLoadData(
-    paramGroup_p pg)
+        paramGroup_p pg)
 {
-    FLOAT_T floatV;
-    const char * stringV;
-    paramData_p p;
-    BOOL_T valid;
-    BOOL_T inRange;
+	FLOAT_T floatV;
+	const char * stringV;
+	paramData_p p;
+	BOOL_T valid;
+	BOOL_T inRange;
 
-    for (p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++) {
-        if ((p->option&PDO_DLGIGNORE) != 0) {
-            continue;
-        }
+	for (p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++) {
+		if ((p->option&PDO_DLGIGNORE) != 0) {
+			continue;
+		}
 
-        if (p->control == NULL || p->valueP == NULL) {
-            continue;
-        }
+		if (p->control == NULL || p->valueP == NULL) {
+			continue;
+		}
 
-        switch (p->type) {
-            long longV;
+		switch (p->type) {
+			long longV;
 
-        case PD_LONG:
-            longV = atol(wStringGetValue((wString_p)p->control));
+		case PD_LONG:
+			longV = atol(wStringGetValue((wString_p)p->control));
 
-            if (p->winData) {
-                inRange = (longV <= ((paramIntegerRange_t *)p->winData)->high) &&
-                          (longV >= ((paramIntegerRange_t *)p->winData)->low);
-            } else {
-                inRange = TRUE;
-            }
+			if (p->winData) {
+				inRange = (longV <= ((paramIntegerRange_t *)p->winData)->high) &&
+				          (longV >= ((paramIntegerRange_t *)p->winData)->low);
+			} else {
+				inRange = TRUE;
+			}
 
-            if (inRange) {
-                *(long*)p->valueP = longV;
-            }
+			if (inRange) {
+				*(long*)p->valueP = longV;
+			}
 
-            break;
+			break;
 
-        case PD_RADIO:
-            *(long*)p->valueP = wRadioGetValue((wChoice_p)p->control);
-            break;
+		case PD_RADIO:
+			*(long*)p->valueP = wRadioGetValue((wChoice_p)p->control);
+			break;
 
-        case PD_TOGGLE:
-            *(long*)p->valueP = wToggleGetValue((wChoice_p)p->control);
-            break;
+		case PD_TOGGLE:
+			*(long*)p->valueP = wToggleGetValue((wChoice_p)p->control);
+			break;
 
-        case PD_LIST:
-        case PD_DROPLIST:
-        case PD_COMBOLIST:
-            *(wIndex_t*)p->valueP = wListGetIndex((wList_p)p->control);
-            break;
+		case PD_LIST:
+		case PD_DROPLIST:
+		case PD_COMBOLIST:
+			*(wIndex_t*)p->valueP = wListGetIndex((wList_p)p->control);
+			break;
 
-        case PD_COLORLIST:
-            *(wDrawColor*)p->valueP = wColorSelectButtonGetColor((wButton_p)p->control);
-            break;
+		case PD_COLORLIST:
+			*(wDrawColor*)p->valueP = wColorSelectButtonGetColor((wButton_p)p->control);
+			break;
 
-        case PD_FLOAT:
-            if (p->option & PDO_DIM) {
-                floatV = DecodeDistance((wString_p)p->control, &valid);
-            } else {
-                floatV = DecodeFloat((wString_p)p->control, &valid);
+		case PD_FLOAT:
+			if (p->option & PDO_DIM) {
+				floatV = DecodeDistance((wString_p)p->control, &valid);
+			} else {
+				floatV = DecodeFloat((wString_p)p->control, &valid);
 
-                if (valid && (p->option & PDO_ANGLE)) {
-                    floatV = NormalizeAngle((angleSystem==ANGLE_POLAR)?floatV:-floatV);
-                }
-            }
+				if (valid && (p->option & PDO_ANGLE)) {
+					floatV = NormalizeAngle((angleSystem==ANGLE_POLAR)?floatV:-floatV);
+				}
+			}
 
-            if (p->winData) {
-                inRange = (floatV <= ((paramFloatRange_t *)p->winData)->high) &&
-                          (floatV >= ((paramFloatRange_t *)p->winData)->low);
-            } else {
-                inRange = TRUE;
-            }
+			if (p->winData) {
+				inRange = (floatV <= ((paramFloatRange_t *)p->winData)->high) &&
+				          (floatV >= ((paramFloatRange_t *)p->winData)->low);
+			} else {
+				inRange = TRUE;
+			}
 
-            if (valid && inRange) {
-                *(FLOAT_T*)p->valueP = floatV;
-            }
+			if (valid && inRange) {
+				*(FLOAT_T*)p->valueP = floatV;
+			}
 
-            break;
+			break;
 
-        case PD_STRING:
-            stringV = wStringGetValue((wString_p)p->control);
-            strcpy((char*)p->valueP, stringV);
-            break;
+		case PD_STRING:
+			stringV = wStringGetValue((wString_p)p->control);
+			strcpy((char*)p->valueP, stringV);
+			break;
 
-        case PD_MESSAGE:
-        case PD_BUTTON:
-        case PD_DRAW:
-        case PD_TEXT:
-        case PD_MENU:
-        case PD_MENUITEM:
-        case PD_BITMAP:
-            break;
-        }
-    }
+		case PD_MESSAGE:
+		case PD_BUTTON:
+		case PD_DRAW:
+		case PD_TEXT:
+		case PD_MENU:
+		case PD_MENUITEM:
+		case PD_BITMAP:
+			break;
+		}
+	}
 }
 
 
 static long ParamIntRestore(
-		paramGroup_p pg,
-		int class )
+        paramGroup_p pg,
+        int class )
 {
 	long change = 0;
 	int inx;
@@ -872,15 +925,17 @@ static long ParamIntRestore(
 
 	for ( p=pg->paramPtr,inx=0; p<&pg->paramPtr[pg->paramCnt]; p++,inx++ ) {
 		oldP = (class==0)?&p->oldD:&p->demoD;
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
+		if ( (p->option&PDO_DLGIGNORE) != 0 ) {
 			continue;
-		if (p->valueP == NULL)
+		}
+		if (p->valueP == NULL) {
 			continue;
+		}
 		switch ( p->type ) {
 		case PD_LONG:
 			if ( *(long*)p->valueP != oldP->l ) {
 				/*if ((p->option&PDO_NORSTUPD)==0)*/
-					*(long*)p->valueP = oldP->l;
+				*(long*)p->valueP = oldP->l;
 				if (p->control) {
 					wStringSetValue( (wString_p)p->control, FormatLong( oldP->l ) );
 				}
@@ -890,18 +945,20 @@ static long ParamIntRestore(
 		case PD_RADIO:
 			if ( *(long*)p->valueP != oldP->l ) {
 				/*if ((p->option&PDO_NORSTUPD)==0)*/
-					*(long*)p->valueP = oldP->l;
-				if (p->control)
+				*(long*)p->valueP = oldP->l;
+				if (p->control) {
 					wRadioSetValue( (wChoice_p)p->control, oldP->l );
+				}
 				change |= (1L<<inx);
 			}
 			break;
 		case PD_TOGGLE:
 			if ( *(long*)p->valueP != oldP->l ) {
 				/*if ((p->option&PDO_NORSTUPD)==0)*/
-					*(long*)p->valueP = oldP->l;
-				if (p->control)
+				*(long*)p->valueP = oldP->l;
+				if (p->control) {
 					wToggleSetValue( (wChoice_p)p->control, oldP->l );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -910,35 +967,40 @@ static long ParamIntRestore(
 		case PD_COMBOLIST:
 			if ( *(wIndex_t*)p->valueP != (wIndex_t)oldP->l ) {
 				/*if ((p->option&PDO_NORSTUPD)==0)*/
-					*(wIndex_t*)p->valueP = (wIndex_t)oldP->l;
-				if (p->control)
+				*(wIndex_t*)p->valueP = (wIndex_t)oldP->l;
+				if (p->control) {
 					wListSetIndex( (wList_p)p->control, (wIndex_t)oldP->l );
+				}
 				change |= (1L<<inx);
 			}
 			break;
 		case PD_COLORLIST:
 			if ( *(wDrawColor*)p->valueP != oldP->dc ) {
 				/*if ((p->option&PDO_NORSTUPD)==0)*/
-					*(wDrawColor*)p->valueP = oldP->dc;
-				if (p->control)
-					wColorSelectButtonSetColor( (wButton_p)p->control, oldP->dc ); /* COLORNOP */
+				*(wDrawColor*)p->valueP = oldP->dc;
+				if (p->control) {
+					wColorSelectButtonSetColor( (wButton_p)p->control,
+					                            oldP->dc );        /* COLORNOP */
+				}
 				change |= (1L<<inx);
 			}
 			break;
 		case PD_FLOAT:
 			if ( *(FLOAT_T*)p->valueP != oldP->f ) {
 				/*if ((p->option&PDO_NORSTUPD)==0)*/
-					*(FLOAT_T*)p->valueP = oldP->f;
+				*(FLOAT_T*)p->valueP = oldP->f;
 				if (p->control) {
 					valR = oldP->f;
 					if (p->option & PDO_DIM) {
-						if (p->option & PDO_SMALLDIM)
+						if (p->option & PDO_SMALLDIM) {
 							valS = FormatSmallDistance( valR );
-						else
+						} else {
 							valS = FormatDistance( valR );
+						}
 					} else {
-						if (p->option & PDO_ANGLE)
+						if (p->option & PDO_ANGLE) {
 							valR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valR:-valR );
+						}
 						valS = FormatFloat( valR );
 					}
 					wStringSetValue( (wString_p)p->control, valS );
@@ -950,8 +1012,9 @@ static long ParamIntRestore(
 			if ( oldP->s && strcmp((char*)p->valueP,oldP->s) != 0 ) {
 				((char*)p->valueP)[0] = '\0';
 				strncat((char*)p->valueP,oldP->s,p->max_string-1);
-				if (p->control)
+				if (p->control) {
 					wStringSetValue( (wString_p)p->control, (char*)p->valueP );
+				}
 				change |= (1L<<inx);
 			}
 			break;
@@ -966,16 +1029,17 @@ static long ParamIntRestore(
 		}
 	}
 #ifdef PGPROC
-	if (pg->proc)
+	if (pg->proc) {
 		pg->proc( PGACT_RESTORE, change );
+	}
 #endif
 	return change;
 }
 
 
 static void ParamIntSave(
-		paramGroup_p pg,
-		int class )
+        paramGroup_p pg,
+        int class )
 {
 	paramData_p p;
 	paramOldData_t * oldP;
@@ -1001,8 +1065,9 @@ static void ParamIntSave(
 				oldP->f = *(FLOAT_T*)p->valueP;
 				break;
 			case PD_STRING:
-				if (oldP->s)
+				if (oldP->s) {
 					MyFree(oldP->s);
+				}
 				oldP->s = MyStrdup( (char*)p->valueP );
 				break;
 			case PD_MESSAGE:
@@ -1052,21 +1117,23 @@ EXPORT void ParamRegister( paramGroup_p pg )
 	char prefName1[STR_SHORT_SIZE];
 	const char *prefSect2, *prefName2;
 
-	if (!paramGroups_init) ParamInit();
+	if (!paramGroups_init) { ParamInit(); }
 
 	DYNARR_APPEND( paramGroup_p, paramGroups_da, 10 );
 	paramGroups(paramGroups_da.cnt-1) = pg;
 	int i;
 	for ( i=0, p=pg->paramPtr; i<(pg->paramCnt); p++, i++ ) {
 		p->group = pg;
-		if ( p->nameStr == NULL )
+		if ( p->nameStr == NULL ) {
 			continue;
+		}
 		snprintf( prefName1, sizeof(prefName1), "%s-%s", pg->nameStr, p->nameStr );
 		if ( p->type != PD_MENUITEM ) {
 			(void)GetBalloonHelpStr( prefName1 );
 		}
-		if (p->valueP == NULL || (p->option&PDO_NOPREF) != 0)
+		if (p->valueP == NULL || (p->option&PDO_NOPREF) != 0) {
 			continue;
+		}
 		prefSect2 = PREFSECT;
 		prefName2 = prefName1;
 		if ( (p->option&PDO_MISC) ) {
@@ -1103,48 +1170,58 @@ EXPORT void ParamRegister( paramGroup_p pg )
 		case PD_LONG:
 		case PD_RADIO:
 		case PD_TOGGLE:
-			if ( !wPrefGetInteger( PREFSECT, prefName1, p->valueP, *(long*)p->valueP ))
+			if ( !wPrefGetInteger( PREFSECT, prefName1, p->valueP, *(long*)p->valueP )) {
 				wPrefGetInteger( prefSect2, prefName2, p->valueP, *(long*)p->valueP );
+			}
 			break;
 		case PD_LIST:
 		case PD_DROPLIST:
 		case PD_COMBOLIST:
 			if ( (p->option&PDO_LISTINDEX) ) {
-				if (!wPrefGetInteger( PREFSECT, prefName1, &valL, *(wIndex_t*)p->valueP ))
+				if (!wPrefGetInteger( PREFSECT, prefName1, &valL, *(wIndex_t*)p->valueP )) {
 					wPrefGetInteger( prefSect2, prefName2, &valL, valL );
-				if ( p->control )
+				}
+				if ( p->control ) {
 					wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
+				}
 				*(wIndex_t*)p->valueP = (wIndex_t)valL;
 			} else {
-				if (!p->control)
+				if (!p->control) {
 					break;
+				}
 				cp = wPrefGetString( PREFSECT, prefName1 );
-				if ( !cp )
+				if ( !cp ) {
 					cp = wPrefGetString( prefSect2, prefName2 );
-				if ( !cp )
+				}
+				if ( !cp ) {
 					break;
+				}
 				*(wIndex_t*)p->valueP = wListFindValue( (wList_p)p->control, cp );
 			}
 			break;
 		case PD_COLORLIST:
 			rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
-			if (!wPrefGetInteger( PREFSECT, prefName1, &rgb, rgb ))
+			if (!wPrefGetInteger( PREFSECT, prefName1, &rgb, rgb )) {
 				wPrefGetInteger( prefSect2, prefName2, &rgb, rgb );
+			}
 			*(wDrawColor*)p->valueP = wDrawFindColor( rgb );
 			break;
 		case PD_FLOAT:
-			if (!wPrefGetFloat( PREFSECT, prefName1, &tmpR, *(FLOAT_T*)p->valueP ))
+			if (!wPrefGetFloat( PREFSECT, prefName1, &tmpR, *(FLOAT_T*)p->valueP )) {
 				wPrefGetFloat( prefSect2, prefName2, &tmpR, *(FLOAT_T*)p->valueP );
+			}
 			*(FLOAT_T*)p->valueP = tmpR;
 			break;
 		case PD_STRING:
 			cp = wPrefGetString( PREFSECT, prefName1 );
-			if (!cp)
+			if (!cp) {
 				wPrefGetString( prefSect2, prefName2 );
-			if (cp)
+			}
+			if (cp) {
 				strcpy( p->valueP, cp );
-			else
+			} else {
 				((char*)p->valueP)[0] = '\0';
+			}
 			break;
 		case PD_MESSAGE:
 		case PD_BUTTON:
@@ -1176,114 +1253,127 @@ EXPORT void ParamUpdatePrefs( void )
 	paramListData_t * listDataP;
 
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
-	  pg = paramGroups(inx);
-	  if (pg->nameStr == NULL) continue;
-	  for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
-		if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 )
-			continue;
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
-			continue;
-		snprintf( prefName, sizeof(prefName), "%s-%s", pg->nameStr, p->nameStr );
-		switch ( p->type ) {
-		case PD_LONG:
-		case PD_RADIO:
-		case PD_TOGGLE:
-			wPrefSetInteger( PREFSECT, prefName, *(long*)p->valueP );
-			break;
-		case PD_LIST:
-			listDataP = (paramListData_t*)p->winData;
-			if ( p->control && listDataP->colCnt > 0 ) {
-				if ( maxColCnt < listDataP->colCnt ) {
-					if ( maxColCnt == 0 )
-						colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
-					else
-						colWidths = (wWinPix_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof * colWidths );
-					maxColCnt = listDataP->colCnt;
-				}
-				len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
-				cp = message;
-				for ( col=0; col<len; col++ ) {
-					sprintf( cp, "%ld ", colWidths[col] );
-					cp += strlen(cp);
-				}
-				*cp = '\0';
-				len = strlen( prefName );
-				strcpy( prefName+len, "-columnwidths" );
-				wPrefSetString( PREFSECT, prefName, message );
-				prefName[len] = '\0';
+		pg = paramGroups(inx);
+		if (pg->nameStr == NULL) { continue; }
+		for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
+			if (p->valueP == NULL || p->nameStr == NULL || (p->option&PDO_NOPREF)!=0 ) {
+				continue;
 			}
-		case PD_DROPLIST:
-		case PD_COMBOLIST:
-			if ( (p->option&PDO_LISTINDEX) ) {
-				wPrefSetInteger( PREFSECT, prefName, *(wIndex_t*)p->valueP );
-			} else {
-				if (p->control) {
-					wListGetValues( (wList_p)p->control, message, sizeof message, NULL, NULL );
+			if ( (p->option&PDO_DLGIGNORE) != 0 ) {
+				continue;
+			}
+			snprintf( prefName, sizeof(prefName), "%s-%s", pg->nameStr, p->nameStr );
+			switch ( p->type ) {
+			case PD_LONG:
+			case PD_RADIO:
+			case PD_TOGGLE:
+				wPrefSetInteger( PREFSECT, prefName, *(long*)p->valueP );
+				break;
+			case PD_LIST:
+				listDataP = (paramListData_t*)p->winData;
+				if ( p->control && listDataP->colCnt > 0 ) {
+					if ( maxColCnt < listDataP->colCnt ) {
+						if ( maxColCnt == 0 ) {
+							colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof * colWidths );
+						} else {
+							colWidths = (wWinPix_t*)MyRealloc( colWidths,
+							                                   listDataP->colCnt * sizeof * colWidths );
+						}
+						maxColCnt = listDataP->colCnt;
+					}
+					len = wListGetColumnWidths( (wList_p)p->control, listDataP->colCnt, colWidths );
+					cp = message;
+					for ( col=0; col<len; col++ ) {
+						sprintf( cp, "%ld ", colWidths[col] );
+						cp += strlen(cp);
+					}
+					*cp = '\0';
+					len = strlen( prefName );
+					strcpy( prefName+len, "-columnwidths" );
 					wPrefSetString( PREFSECT, prefName, message );
+					prefName[len] = '\0';
 				}
+			case PD_DROPLIST:
+			case PD_COMBOLIST:
+				if ( (p->option&PDO_LISTINDEX) ) {
+					wPrefSetInteger( PREFSECT, prefName, *(wIndex_t*)p->valueP );
+				} else {
+					if (p->control) {
+						wListGetValues( (wList_p)p->control, message, sizeof message, NULL, NULL );
+						wPrefSetString( PREFSECT, prefName, message );
+					}
+				}
+				break;
+			case PD_COLORLIST:
+				rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
+				wPrefSetInteger( PREFSECT, prefName, rgb );
+				break;
+			case PD_FLOAT:
+				wPrefSetFloat( PREFSECT, prefName, *(FLOAT_T*)p->valueP );
+				break;
+			case PD_STRING:
+				wPrefSetString( PREFSECT, prefName, (char*)p->valueP );
+				break;
+			case PD_MESSAGE:
+			case PD_BUTTON:
+			case PD_DRAW:
+			case PD_TEXT:
+			case PD_MENU:
+			case PD_MENUITEM:
+			case PD_BITMAP:
+				break;
 			}
-			break;
-		case PD_COLORLIST:
-			rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
-			wPrefSetInteger( PREFSECT, prefName, rgb );
-			break;
-		case PD_FLOAT:
-			wPrefSetFloat( PREFSECT, prefName, *(FLOAT_T*)p->valueP );
-			break;
-		case PD_STRING:
-			wPrefSetString( PREFSECT, prefName, (char*)p->valueP );
-			break;
-		case PD_MESSAGE:
-		case PD_BUTTON:
-		case PD_DRAW:
-		case PD_TEXT:
-		case PD_MENU:
-		case PD_MENUITEM:
-		case PD_BITMAP:
-			break;
 		}
-	  }
 	}
 }
 
 EXPORT void ParamGroupRecord(
-		paramGroup_p pg )
+        paramGroup_p pg )
 {
 	paramData_p p;
 	long rgb;
 
-	if (recordF == NULL)
+	if (recordF == NULL) {
 		return;
+	}
 	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
-		if ( (p->option&PDO_NORECORD) != 0 || p->valueP == NULL || p->nameStr == NULL )
+		if ( (p->option&PDO_NORECORD) != 0 || p->valueP == NULL
+		     || p->nameStr == NULL ) {
 			continue;
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
+		}
+		if ( (p->option&PDO_DLGIGNORE) != 0 ) {
 			continue;
+		}
 		switch ( p->type ) {
 		case PD_LONG:
 		case PD_RADIO:
 		case PD_TOGGLE:
-			fprintf( recordF, "PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr, *(long*)p->valueP );
+			fprintf( recordF, "PARAMETER %s %s %ld\n", pg->nameStr, p->nameStr,
+			         *(long*)p->valueP );
 			break;
 		case PD_LIST:
 		case PD_DROPLIST:
 		case PD_COMBOLIST:
-			if (p->control)
+			if (p->control) {
 				wListGetValues( (wList_p)p->control, message, sizeof message, NULL, NULL );
-			else
+			} else {
 				message[0] = '\0';
-			fprintf( recordF, "PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr, *(wIndex_t*)p->valueP, message );
+			}
+			fprintf( recordF, "PARAMETER %s %s %d %s\n", pg->nameStr, p->nameStr,
+			         *(wIndex_t*)p->valueP, message );
 			break;
 		case PD_COLORLIST:
 			rgb = wDrawGetRGB( *(wDrawColor*)p->valueP );
 			fprintf( recordF, "PARAMETER %s %s %ld\n",
-				pg->nameStr, p->nameStr, rgb );
+			         pg->nameStr, p->nameStr, rgb );
 			break;
 		case PD_FLOAT:
-			fprintf( recordF, "PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr, *(FLOAT_T*)p->valueP );
+			fprintf( recordF, "PARAMETER %s %s %0.3f\n", pg->nameStr, p->nameStr,
+			         *(FLOAT_T*)p->valueP );
 			break;
 		case PD_STRING:
-			fprintf( recordF, "PARAMETER %s %s %s\n", pg->nameStr, p->nameStr, (char*)p->valueP );
+			fprintf( recordF, "PARAMETER %s %s %s\n", pg->nameStr, p->nameStr,
+			         (char*)p->valueP );
 			break;
 		case PD_MESSAGE:
 		case PD_BUTTON:
@@ -1295,8 +1385,9 @@ EXPORT void ParamGroupRecord(
 			break;
 		}
 	}
-	if (pg->nameStr)
+	if (pg->nameStr) {
 		fprintf( recordF, "PARAMETER GROUP %s\n", pg->nameStr );
+	}
 	fflush( recordF );
 }
 
@@ -1306,8 +1397,9 @@ EXPORT void ParamStartRecord( void )
 	int inx;
 	paramGroup_p pg;
 
-	if (recordF == NULL)
+	if (recordF == NULL) {
 		return;
+	}
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
 		pg = paramGroups(inx);
 		if (pg->options&PGO_RECORD) {
@@ -1352,10 +1444,11 @@ static void ParamButtonPush( void * dp )
 		fflush( recordF );
 	}
 	if ( (p->option&PDO_NOPSHACT)==0 ) {
-		if ( p->valueP )
+		if ( p->valueP ) {
 			((wButtonCallBack_p)(p->valueP))( p->context );
-		else if ( p->group->changeProc)
-			 p->group->changeProc( p->group, (int)(p-p->group->paramPtr), NULL);
+		} else if ( p->group->changeProc) {
+			p->group->changeProc( p->group, (int)(p-p->group->paramPtr), NULL);
+		}
 	}
 }
 
@@ -1365,30 +1458,39 @@ static void ParamChoicePush( long valL, void * dp )
 	paramData_p p = (paramData_p)dp;
 
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, valL );
+		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+		         valL );
 		fflush( recordF );
 	}
-	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
+	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*((long*)(p->valueP)) = valL;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
+	}
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc) {
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL);
+	}
 }
 
 
 static wBool_t ParamIntegerRangeCheck( paramData_p p, long valL )
 {
-	if ( inPlayback )
+	if ( inPlayback ) {
 		return TRUE;
+	}
 	paramIntegerRange_t * irangeP = (paramIntegerRange_t*)p->winData;
-	wBool_t bInvalid = p->bInvalid;
-	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
-		 ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
-		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
+//	wBool_t bInvalid = p->bInvalid;
+	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0
+	       && valL > irangeP->high ) ||
+	     ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
+		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) ==
+		     PDO_NORANGECHECK_HIGH ) {
 			sprintf( message, _("Enter a value > %ld"), irangeP->low );
-		else if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
-			 sprintf( message, _("Enter a value < %ld"), irangeP->high );
-		else
-			 sprintf( message, _("Enter a value between %ld and %ld"), irangeP->low, irangeP->high );
+		} else if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW))
+		            == PDO_NORANGECHECK_LOW ) {
+			sprintf( message, _("Enter a value < %ld"), irangeP->high );
+		} else {
+			sprintf( message, _("Enter a value between %ld and %ld"), irangeP->low,
+			         irangeP->high );
+		}
 		wWinPix_t h = wControlGetHeight(p->control);
 		wControlSetBalloon( p->control, 0, -h*3/4, message );
 		p->bInvalid = TRUE;
@@ -1408,7 +1510,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	char * cp;
 	const char * value;
 
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1416,7 +1518,8 @@ static void ParamIntegerPush( const char * val, void * dp )
 		value = val;
 		p->enter_pressed = FALSE;
 	}
-	LOG( log_paraminput, 1, ( "ParamIntegerPush( %s Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
+	LOG( log_paraminput, 1, ( "ParamIntegerPush( %s Enter:%d Val:%s )\n",
+	                          p->nameStr, p->enter_pressed, value ) );
 
 	valL = strtol( value, &cp, 10 );
 	for ( ; isspace( (unsigned char)*cp); cp++ );
@@ -1428,19 +1531,23 @@ static void ParamIntegerPush( const char * val, void * dp )
 		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
-	if ( ! ParamIntegerRangeCheck( p, valL ) )
+	if ( ! ParamIntegerRangeCheck( p, valL ) ) {
 		return;
+	}
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, valL );
+		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+		         valL );
 		fflush( recordF );
 	}
-	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
+	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*((long*)(p->valueP)) = valL;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
+	}
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc) {
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL);
+	}
 	ParamHilite( p->group->win, p->control, p->bInvalid );
 	LOG( log_paraminput, 1, ( " -> %ld\n", valL ) );
 }
@@ -1448,22 +1555,26 @@ static void ParamIntegerPush( const char * val, void * dp )
 
 static wBool_t ParamFloatRangeCheck( paramData_p p, FLOAT_T valF )
 {
-	if ( inPlayback )
+	if ( inPlayback ) {
 		return TRUE;
+	}
 	paramFloatRange_t * frangeP = (paramFloatRange_t*)p->winData;
-	wBool_t bInvalid = p->bInvalid;
-	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
-		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
-		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
+//	wBool_t bInvalid = p->bInvalid;
+	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0
+	       && valF > frangeP->high ) ||
+	     ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
+		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) ==
+		     PDO_NORANGECHECK_HIGH )
 			sprintf( message, _("Enter a value > %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low) );
-		else if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
-			 sprintf( message, _("Enter a value < %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
+			         (p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low) );
+		else if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) ==
+		          PDO_NORANGECHECK_LOW )
+			sprintf( message, _("Enter a value < %s"),
+			         (p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
 		else
-			 sprintf( message, _("Enter a value between %s and %s"),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
-				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
+			sprintf( message, _("Enter a value between %s and %s"),
+			         (p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
+			         (p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
 		wWinPix_t h = wControlGetHeight(p->control);
 		wControlSetBalloon( p->control, 0, -h*3/4, message );
 		p->bInvalid = TRUE;
@@ -1491,7 +1602,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	BOOL_T valid;
 	const char * value;
 
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (strlen(val) == 1 && val[strlen(val)-1] == '\n') {
 		value = wStringGetValue((wString_p)p->control);
 		p->enter_pressed = TRUE;
@@ -1499,14 +1610,16 @@ static void ParamFloatPush( const char * val, void * dp )
 		value = val;
 		p->enter_pressed = FALSE;
 	}
-	LOG( log_paraminput, 1, ( "ParamFloatPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
+	LOG( log_paraminput, 1, ( "ParamFloatPush( %s: Enter:%d Val:%s )\n", p->nameStr,
+	                          p->enter_pressed, value ) );
 
 	if (p->option & PDO_DIM) {
 		valF = DecodeDistance( (wString_p)p->control, &valid );
 	} else {
 		valF = DecodeFloat( (wString_p)p->control, &valid );
-		if (p->option & PDO_ANGLE)
+		if (p->option & PDO_ANGLE) {
 			valF = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF:-valF );
+		}
 	}
 	if ( !valid ) {
 		wWinPix_t h = wControlGetHeight(p->control);
@@ -1515,19 +1628,23 @@ static void ParamFloatPush( const char * val, void * dp )
 		ParamHilite( p->group->win, p->control, p->bInvalid );
 		return;
 	}
-	if ( !ParamFloatRangeCheck( p, valF ) )
+	if ( !ParamFloatRangeCheck( p, valF ) ) {
 		return;
+	}
 	wControlSetBalloon( p->control, 0, 0, NULL );
 	p->bInvalid = FALSE;
 
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr, valF );
+		fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr,
+		         valF );
 		fflush( recordF );
 	}
-	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
+	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*((FLOAT_T*)(p->valueP)) = valF;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value ))
+	}
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value )) {
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valF );
+	}
 	ParamHilite( p->group->win, p->control, p->bInvalid );
 }
 
@@ -1536,7 +1653,7 @@ static void ParamStringPush( const char * val, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
 	const char * value;
-	wBool_t bInvalid = p->bInvalid;
+//	wBool_t bInvalid = p->bInvalid;
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
 		fflush( recordF );
@@ -1548,7 +1665,8 @@ static void ParamStringPush( const char * val, void * dp )
 		value = val;
 		p->enter_pressed = FALSE;
 	}
-	LOG( log_paraminput, 1, ( "ParamStringPush( %s: Enter:%d Val:%s )\n", p->nameStr, p->enter_pressed, value ) );
+	LOG( log_paraminput, 1, ( "ParamStringPush( %s: Enter:%d Val:%s )\n",
+	                          p->nameStr, p->enter_pressed, value ) );
 	if ( ((!inPlayback) && p->option & PDO_NOTBLANK) && value[0] == '\0' ) {
 		p->bInvalid = TRUE;
 		wControlSetBalloon( p->control, 0, 0, NULL );
@@ -1561,15 +1679,29 @@ static void ParamStringPush( const char * val, void * dp )
 	p->bInvalid = FALSE;
 	ParamHilite( p->group->win, p->control, FALSE );
 
-	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
-		strcpy( (char*)p->valueP, value );
+	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
+		strncpy((char*)p->valueP, value, p->max_string-1);
+		((char *)p->valueP)[p->max_string - 1] = '\0';
+		if (strlen(value) > p->max_string-1) {
+			p->bInvalid = TRUE;
+			wControlSetBalloon( p->control, 0, 0, NULL );
+			wWinPix_t h = wControlGetHeight(p->control);
+			sprintf( message, _("String is too long, Max length is %u"), p->max_string-1 );
+			wControlSetBalloon( p->control, 0, -h*3/4, message );
+			ParamHilite( p->group->win, p->control, TRUE );
+		}
+	}
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
 		// CAST_AWAY_CONST: param 3 should be const but its a big change
-		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), CAST_AWAY_CONST value );
+	{
+		p->group->changeProc( p->group, (int)(p-p->group->paramPtr),
+		                      CAST_AWAY_CONST value );
+	}
 }
 
 
-static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op, void * dp, void * itemContext )
+static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op,
+                           void * dp, void * itemContext )
 {
 	paramData_p p = (paramData_p)dp;
 	long valL;
@@ -1579,11 +1711,13 @@ static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op, void * d
 	case PD_DROPLIST:
 	case PD_COMBOLIST:
 		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, inx, val );
+			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, inx,
+			         val );
 			fflush( recordF );
 		}
-		if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
+		if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 			*(wIndex_t*)(p->valueP) = inx;
+		}
 		if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc ) {
 			valL = inx;
 			p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &valL );
@@ -1603,8 +1737,9 @@ EXPORT void ParamMenuPush( void * dp )
 		fprintf( recordF, "PARAMETER %s %s\n", p->group->nameStr, p->nameStr );
 		fflush( recordF );
 	}
-	if ( (p->option&PDO_NOPSHACT)==0 && p->valueP )
+	if ( (p->option&PDO_NOPSHACT)==0 && p->valueP ) {
 		((wMenuCallBack_p)(p->valueP))( p->context );
+	}
 }
 
 
@@ -1617,17 +1752,22 @@ static void ParamColorSelectPush( void * dp, wDrawColor dc )
 		rgb -= 1; // Make it very close but different
 		if ( ( rgb & 0xFF ) == 0 )
 			// Ran out of room - bail
+		{
 			break;
+		}
 		dc = wDrawFindColor( rgb );
 	}
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, wDrawGetRGB(dc) );
+		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+		         wDrawGetRGB(dc) );
 		fflush( recordF );
 	}
-	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
+	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP) {
 		*(wDrawColor*)(p->valueP) = dc;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc )
+	}
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc ) {
 		p->group->changeProc( p->group, (int)(p-p->group->paramPtr), &dc );
+	}
 }
 
 
@@ -1635,43 +1775,51 @@ static void ParamDrawRedraw( wDraw_p d, void * dp, wWinPix_t w, wWinPix_t h )
 {
 	paramData_p p = (paramData_p)dp;
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;
-	if ( ddp->redraw )
+	if ( ddp->redraw ) {
 		ddp->redraw( d, p->context, w, h );
+	}
 }
 
 
-static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w, wDrawPix_t h )
+static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wDrawPix_t w,
+                             wDrawPix_t h )
 {
 	paramData_p p = (paramData_p)dp;
 	paramDrawData_t * ddp = (paramDrawData_t*)p->winData;
 	coOrd pos;
 	ddp->d->Pix2CoOrd( ddp->d, w, h, &pos );
-	if ( recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s %d %0.3f %0.3f\n", p->group->nameStr, p->nameStr, a, pos.x, pos.y );
+	if ( recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr
+	     && p->nameStr) {
+		fprintf( recordF, "PARAMETER %s %s %d %0.3f %0.3f\n", p->group->nameStr,
+		         p->nameStr, a, pos.x, pos.y );
 		fflush( recordF );
 	}
-	if ( (p->option&PDO_NOPSHACT)== 0 && ddp->action )
+	if ( (p->option&PDO_NOPSHACT)== 0 && ddp->action ) {
 		ddp->action( a, pos );
+	}
 }
 
 
 EXPORT wBool_t ParamCheckInputs(
-	paramGroup_p group,
-	wControl_p b )
+        paramGroup_p group,
+        wControl_p b )
 {
 	wBool_t bInvalid = FALSE;
 	// Check for invalid entries
-	for ( paramData_p p = group->paramPtr; p < &group->paramPtr[group->paramCnt]; p++ ) {
+	for ( paramData_p p = group->paramPtr; p < &group->paramPtr[group->paramCnt];
+	      p++ ) {
 		ParamHilite( group->win, p->control, p->bInvalid );
-		if ( p->bInvalid == FALSE )
+		if ( p->bInvalid == FALSE ) {
 			continue;
+		}
 		LOG( log_paraminput, 1, ( "   %s: Invalid\n", p->nameStr ) );
 		bInvalid = TRUE;
 	}
 	if ( bInvalid ) {
 		// At least 1 invalid entry
 		LOG( log_paraminput, 1, ( "  Group %s Invalid\n", group->nameStr ) );
-		wControlSetBalloon( b, 0, -29, _("Invalid input(s), please correct the hilighted field(s)") );
+		wControlSetBalloon( b, 0, -29,
+		                    _("Invalid input(s), please correct the hilighted field(s)") );
 		wFlush();
 		return FALSE;
 	}
@@ -1684,15 +1832,17 @@ static void ParamButtonOk( void * groupVP )
 	paramGroup_p group = groupVP;
 	wFlush();
 	LOG( log_paraminput, 1, ( "ParamButtonOk: %s\n", group->nameStr ) );
-	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) )
+	if ( ! ParamCheckInputs( group, (wControl_p)group->okB ) ) {
 		return;
+	}
 	if ( recordF && group->nameStr ) {
-		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); 
+		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" );
 		fflush( recordF );
 	}
 
-	if ( group->okProc )
+	if ( group->okProc ) {
 		group->okProc( group );
+	}
 
 	wControlSetBalloon( (wControl_p)group->okB, 0, 0, NULL );
 	wFlush();
@@ -1708,8 +1858,9 @@ static void ParamButtonCancel( void * groupVP )
 		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "cancel" );
 		fflush( recordF );
 	}
-	if ( group->cancelProc )
+	if ( group->cancelProc ) {
 		group->cancelProc( group->win );
+	}
 }
 
 
@@ -1718,13 +1869,16 @@ EXPORT void ParamChange( paramData_p p )
 {
 	FLOAT_T tmpR;
 
-	if (p->valueP==NULL)
+	if (p->valueP==NULL) {
 		return;
+	}
 
 	switch (p->type) {
 	case PD_LONG:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr)
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, *(long*)p->valueP );
+		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
+			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+			         *(long*)p->valueP );
+		}
 #ifdef LATER
 		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
 			wStringSetValue( (wString_p)p->control, FormatLong( *(long*)p->valueP ) );
@@ -1732,55 +1886,71 @@ EXPORT void ParamChange( paramData_p p )
 #endif
 		break;
 	case PD_RADIO:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr)
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, *(long*)p->valueP );
+		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
+			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+			         *(long*)p->valueP );
+		}
 #ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 )
+		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
 			wRadioSetValue( (wChoice_p)p->control, *(long*)p->valueP );
+		}
 #endif
 		break;
 	case PD_TOGGLE:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr)
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, *(long*)p->valueP );
+		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
+			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+			         *(long*)p->valueP );
+		}
 #ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 )
+		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
 			wToggleSetValue( (wChoice_p)p->control, *(long*)p->valueP );
+		}
 #endif
 		break;
 	case PD_LIST:
 	case PD_DROPLIST:
 	case PD_COMBOLIST:
 		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, *(wIndex_t*)p->valueP, "???" );
+			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr,
+			         *(wIndex_t*)p->valueP, "???" );
 		}
 #ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 )
+		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
 			wListSetIndex( (wList_p)p->control, *(wIndex_t*)p->valueP );
+		}
 #endif
 		break;
 	case PD_COLORLIST:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr)
-			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, rgb );
+		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
+			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr,
+			         rgb );
+		}
 		break;
 	case PD_FLOAT:
 		tmpR = *(FLOAT_T*)p->valueP;
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr)
-			fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr, tmpR );
+		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
+			fprintf( recordF, "PARAMETER %s %s %0.6f\n", p->group->nameStr, p->nameStr,
+			         tmpR );
+		}
 #ifdef LATER
 		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
 			if (p->option&PDO_DIM)
 #endif
-			if (p->option&PDO_ANGLE)
-				tmpR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?tmpR:-tmpR );
+				if (p->option&PDO_ANGLE) {
+					tmpR = NormalizeAngle( (angleSystem==ANGLE_POLAR)?tmpR:-tmpR );
+				}
 			wStringSetValue( (wString_p)p->control, tmpR );
 		}
 		break;
 	case PD_STRING:
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr)
-			fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, (char*)p->valueP );
+		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
+			fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr,
+			         (char*)p->valueP );
+		}
 #ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 )
+		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 ) {
 			wStringSetValue( (wString_p)p->control, (char*)p->valueP );
+		}
 #endif
 		break;
 	case PD_MESSAGE:
@@ -1796,34 +1966,34 @@ EXPORT void ParamChange( paramData_p p )
 
 
 EXPORT void ParamHilite(
-		wWin_p win,
-		wControl_p control,
-		BOOL_T hilite )
+        wWin_p win,
+        wControl_p control,
+        BOOL_T hilite )
 {
-	if ( control == NULL ) return;
+	if ( control == NULL ) { return; }
 	LOG(log_paraminput, 2, ("ParamHilite %s\n", hilite?"Set":"Clr" ));
 	if ( hilite ) {
 		wControlHilite( control, TRUE );
 		wFlush();
-		if ( inPlayback && !paramHiliteFast )
-			wPause(500);
+		if ( inPlayback ) {
+			wPause(playbackDelay*4+1);
+		}
 	} else {
-//		if ( inPlayback && !paramHiliteFast )
-//			wPause(500);
 		wControlHilite( control, FALSE );
 	}
 }
 
 EXPORT void ParamResetInvalid(
-	wWin_p win )
+        wWin_p win )
 {
 	for ( int inx=0; inx<paramGroups_da.cnt; inx++ ) {
 		paramGroup_p pg = paramGroups(inx);
 		if ( pg->win == win ) {
 			LOG( log_paraminput, 1, ( "Reset Invalid: %s\n", pg->nameStr ) );
 			for ( paramData_p p = &pg->paramPtr[0]; p < &pg->paramPtr[pg->paramCnt]; p++ ) {
-				if ( p->bInvalid )
+				if ( p->bInvalid ) {
 					LOG( log_paraminput, 1, ( "  %s Invalid\n", p->nameStr ) );
+				}
 				ParamHilite( win, p->control, FALSE );
 				wControlSetBalloon( p->control, 0, 0, NULL );
 				p->bInvalid = FALSE;
@@ -1866,27 +2036,34 @@ static void ParamPlayback( char * line )
 	}
 
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
-	  pg = paramGroups(inx);
-	  if ( pg->nameStr == NULL )
-		  continue;
-	  len1 = strlen( pg->nameStr );
-	  if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
-		   line[len1] != ' ' )
-		  continue;
-	  for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
-		if ( p->nameStr == NULL )
+		pg = paramGroups(inx);
+		if ( pg->nameStr == NULL ) {
 			continue;
-		len2 = strlen( p->nameStr );
-		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
-			 (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') )
+		}
+		len1 = strlen( pg->nameStr );
+		if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
+		     line[len1] != ' ' ) {
 			continue;
-		len = len1 + 1 + len2 + 1;
-		if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU && p->type != PD_MENUITEM )
-			ParamHilite( p->group->win, p->control, TRUE );
-		switch (p->type) {
+		}
+		for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
+			if ( p->nameStr == NULL ) {
+				continue;
+			}
+			len2 = strlen( p->nameStr );
+			if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
+			     (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') ) {
+				continue;
+			}
+			len = len1 + 1 + len2 + 1;
+			if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU
+			     && p->type != PD_MENUITEM ) {
+				ParamHilite( p->group->win, p->control, TRUE );
+			}
+			switch (p->type) {
 			case PD_BUTTON:
-				if (p->valueP)
-					 ((wButtonCallBack_p)(p->valueP))( p->context );
+				if (p->valueP) {
+					((wButtonCallBack_p)(p->valueP))( p->context );
+				}
 				if (playbackTimer == 0 && p->control) {
 					wButtonSetBusy( (wButton_p)p->control, TRUE );
 					wFlush();
@@ -1897,46 +2074,53 @@ static void ParamPlayback( char * line )
 				break;
 			case PD_LONG:
 				valL = atol( line+len );
-				if (p->valueP)
+				if (p->valueP) {
 					*(long*)p->valueP = valL;
+				}
 				if (p->control) {
 					wStringSetValue( (wString_p)p->control, FormatLong( valL ) );
 					wFlush();
 				}
-				if (pg->changeProc)
+				if (pg->changeProc) {
 					pg->changeProc( pg, inx, &valL );
+				}
 				break;
 			case PD_RADIO:
 				valL = atol( line+len );
-				if (p->valueP)
+				if (p->valueP) {
 					*(long*)p->valueP = valL;
+				}
 				if (p->control) {
 					wRadioSetValue( (wChoice_p)p->control, valL );
 					wFlush();
 				}
-				if (pg->changeProc)
+				if (pg->changeProc) {
 					pg->changeProc( pg, inx, &valL );
+				}
 				break;
 			case PD_TOGGLE:
 				valL = atol( line+len );
-				if (p->valueP)
+				if (p->valueP) {
 					*(long*)p->valueP = valL;
+				}
 				if (p->control) {
 					wToggleSetValue( (wChoice_p)p->control, valL );
 					wFlush();
 				}
-				if (pg->changeProc)
+				if (pg->changeProc) {
 					pg->changeProc( pg, inx, &valL );
+				}
 				break;
 			case PD_LIST:
 			case PD_DROPLIST:
 			case PD_COMBOLIST:
 				line += len;
 				valL = strtol( line, &valS, 10 );
-				if ( valS )
+				if ( valS ) {
 					valS++;
-				else
+				} else {
 					valS = "";
+				}
 				if ( p->control != NULL ) {
 					if ( (p->option&PDO_LISTINDEX) == 0 ) {
 						if ( valL < 0 ) {
@@ -1953,12 +2137,14 @@ static void ParamPlayback( char * line )
 						wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
 					}
 					wFlush();
-					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext, &itemContext );
+					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext,
+					                &itemContext );
 				} else if ( (p->option&PDO_LISTINDEX) == 0 ) {
 					break;
 				}
-				if (p->valueP)
+				if (p->valueP) {
 					*(wIndex_t*)p->valueP = (wIndex_t)valL;
+				}
 				if (pg->changeProc) {
 					pg->changeProc( pg, inx, &valL );
 				}
@@ -1967,10 +2153,12 @@ static void ParamPlayback( char * line )
 				line += len;
 				rgb = atol( line );
 				dc = wDrawFindColor( rgb );
-				if ( p->control)
+				if ( p->control) {
 					wColorSelectButtonSetColor( (wButton_p)p->control, dc );
-				if (p->valueP)
+				}
+				if (p->valueP) {
 					*(wDrawColor*)p->valueP = dc;
+				}
 				if (pg->changeProc) {
 					/* COLORNOP */
 					pg->changeProc( pg, inx, &valL );
@@ -1980,48 +2168,58 @@ static void ParamPlayback( char * line )
 				SetCLocale();
 				valF = valF1 = atof( line+len );
 				SetUserLocale();
-				if (p->valueP)
+				if (p->valueP) {
 					*(FLOAT_T*)p->valueP = valF;
+				}
 				if (p->option&PDO_DIM) {
-					if ( p->option&PDO_SMALLDIM )
+					if ( p->option&PDO_SMALLDIM ) {
 						valS = FormatSmallDistance( valF );
-					else
+					} else {
 						valS = FormatDistance( valF );
+					}
 				} else {
-					if (p->option&PDO_ANGLE)
+					if (p->option&PDO_ANGLE) {
 						valF1 = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF1:-valF1 );
+					}
 					valS = FormatFloat( valF );
 				}
 				if (p->control) {
 					wStringSetValue( (wString_p)p->control, valS );
 					wFlush();
 				}
-				if (pg->changeProc)
+				if (pg->changeProc) {
 					pg->changeProc( pg, inx, &valF );
+				}
 				break;
 			case PD_STRING:
 			case PD_TEXT:
 				line += len;
-				while ( *line == ' ' ) line++;
+				while ( *line == ' ' ) { line++; }
 				Stripcr( line );
-				if (p->valueP)
+				if (p->valueP) {
 					strcpy( (char*)p->valueP, line );
+				}
 				if (p->control) {
 					if (p->type == PD_STRING) {
 						wStringSetValue((wString_p)p->control, line);
+						p->bInvalid =
+						        (p->option & PDO_NOTBLANK) &&
+						        strlen( line ) == 0;
 					} else {
 						wTextClear((wText_p)p->control);
 						wTextAppend((wText_p)p->control, line);
 					}
 					wFlush();
 				}
-				if (pg->changeProc)
+				if (pg->changeProc) {
 					pg->changeProc( pg, inx, line );
+				}
 				break;
 			case PD_DRAW:
 				ddp = (paramDrawData_t*)p->winData;
-				if ( ddp->action == NULL )
+				if ( ddp->action == NULL ) {
 					break;
+				}
 				a = (wAction_t)strtol( line+len, &line, 10 );
 				pos.x = strtod( line, &line );
 				pos.y = strtod( line, NULL );
@@ -2033,44 +2231,50 @@ static void ParamPlayback( char * line )
 				break;
 			case PD_MENUITEM:
 				if (p->valueP) {
-					if ( (p->option&IC_PLAYBACK_PUSH) != 0 )
+					if ( (p->option&IC_PLAYBACK_PUSH) != 0 ) {
 						PlaybackButtonMouse( (wIndex_t)VP2L(p->context) );
+					}
 					((wButtonCallBack_p)(p->valueP))( p->context );
 				}
 				break;
 			}
-		if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU && p->type != PD_MENUITEM )
-			ParamHilite( p->group->win, p->control, FALSE );
+			if ( p->type != PD_DRAW && p->type != PD_MESSAGE && p->type != PD_MENU
+			     && p->type != PD_MENUITEM ) {
+				ParamHilite( p->group->win, p->control, FALSE );
+			}
 #ifdef HUH
-		pg->action |= p->change;
+			pg->action |= p->change;
 #endif
+			return;
+		}
+		button = NULL;
+		if ( strcmp("ok", line+len1+1) == 0 ) {
+			ParamHilite( pg->win, (wControl_p)pg->okB, TRUE );
+			if ( pg->okProc ) {
+				pg->okProc( pg );
+			}
+			button = pg->okB;
+		} else if ( strcmp("cancel", line+len1+1) == 0 ) {
+			ParamHilite( pg->win, (wControl_p)pg->cancelB, TRUE );
+			if ( pg->cancelProc ) {
+				pg->cancelProc( pg->win );
+			}
+			button = pg->cancelB;
+		}
+		if ( playbackTimer == 0 && button ) {
+			wButtonSetBusy( button, TRUE );
+			wFlush();
+			wPause( 500 );
+			wButtonSetBusy( button, FALSE );
+			wFlush();
+		}
+		ParamHilite( pg->win, (wControl_p)button, FALSE );
+		if ( !button ) {
+			NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
+		}
 		return;
 	}
-	button = NULL;
-	if ( strcmp("ok", line+len1+1) == 0 ) {
-		ParamHilite( pg->win, (wControl_p)pg->okB, TRUE );
-		if ( pg->okProc )
-			pg->okProc( pg );
-		button = pg->okB;
-	} else if ( strcmp("cancel", line+len1+1) == 0 ) {
-		ParamHilite( pg->win, (wControl_p)pg->cancelB, TRUE );
-		if ( pg->cancelProc )
-			pg->cancelProc( pg->win );
-		button = pg->cancelB;
-	}
-	if ( playbackTimer == 0 && button ) {
-		wButtonSetBusy( button, TRUE );
-		wFlush();
-		wPause( 500 );
-		wButtonSetBusy( button, FALSE );
-		wFlush();
-	}
-	ParamHilite( pg->win, (wControl_p)button, FALSE );
-	if ( !button )
-		NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
-	return;
-  }
-  NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
+	NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
 }
 
 
@@ -2090,24 +2294,29 @@ static void ParamCheck( char * line )
 	FILE * f;
 
 	for ( inx=0; inx<paramGroups_da.cnt; inx++ ) {
-	  pg = paramGroups(inx);
-	  if ( pg->nameStr == NULL )
-		  continue;
-	  len1 = strlen( pg->nameStr );
-	  if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
-		   line[len1] != ' ' )
-		  continue;
-	  for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
-		if ( p->nameStr == NULL )
+		pg = paramGroups(inx);
+		if ( pg->nameStr == NULL ) {
 			continue;
-		len2 = strlen( p->nameStr );
-		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
-			 (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') )
+		}
+		len1 = strlen( pg->nameStr );
+		if ( strncmp( pg->nameStr, line, len1 ) != 0 ||
+		     line[len1] != ' ' ) {
 			continue;
-		if ( p->valueP == NULL )
-			return;
-		len = len1 + 1 + len2 + 1;
-		switch (p->type) {
+		}
+		for ( p=pg->paramPtr,inx=0; inx<pg->paramCnt; p++,inx++ ) {
+			if ( p->nameStr == NULL ) {
+				continue;
+			}
+			len2 = strlen( p->nameStr );
+			if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
+			     (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') ) {
+				continue;
+			}
+			if ( p->valueP == NULL ) {
+				return;
+			}
+			len = len1 + 1 + len2 + 1;
+			switch (p->type) {
 			case PD_BUTTON:
 				break;
 			case PD_LONG:
@@ -2126,12 +2335,14 @@ static void ParamCheck( char * line )
 			case PD_DROPLIST:
 			case PD_COMBOLIST:
 				line += len;
-				if ( p->control == NULL )
+				if ( p->control == NULL ) {
 					break;
+				}
 				valL = strtol( line, &valS, 10 );
 				if ( valS ) {
-					if ( valS[0] == ' ' )
+					if ( valS[0] == ' ' ) {
 						valS++;
+					}
 				} else {
 					valS = "";
 				}
@@ -2144,7 +2355,8 @@ static void ParamCheck( char * line )
 						hasError = TRUE;
 					}
 				} else {
-					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext, &itemContext );
+					wListGetValues( (wList_p)p->control, message, sizeof message, &listContext,
+					                &itemContext );
 					if ( strcasecmp( message, valS ) != 0 ) {
 						expVal = valS;
 						actVal = message;
@@ -2167,7 +2379,7 @@ static void ParamCheck( char * line )
 				break;
 			case PD_STRING:
 				line += len;
-				while ( *line == ' ' ) line++;
+				while ( *line == ' ' ) { line++; }
 				wStringGetValue( (wString_p)p->control );
 				if ( strcasecmp( line, (char*)p->valueP ) != 0 ) {
 					expVal = line;
@@ -2182,24 +2394,27 @@ static void ParamCheck( char * line )
 			case PD_MENUITEM:
 			case PD_BITMAP:
 				break;
-		}
-		if ( hasError ) {
-			f = fopen( "error.log", "a" );
-			if ( f==NULL ) {
-				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG", "error.log", strerror(errno) );
-			} else {
-				fprintf( f, "CHECK: %s:%d: %s-%s: exp: %s, act=%s\n",
-						paramFileName, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
-				fclose( f );
 			}
-			if ( paramCheckShowErrors )
-				NoticeMessage( "CHECK: %d: %s-%s: exp: %s, act=%s", _("Ok"), NULL, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
-			paramCheckErrorCount++;
+			if ( hasError ) {
+				f = fopen( "error.log", "a" );
+				if ( f==NULL ) {
+					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG",
+					               "error.log", strerror(errno) );
+				} else {
+					fprintf( f, "CHECK: %s:%d: %s-%s: exp: %s, act=%s\n",
+					         paramFileName, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
+					fclose( f );
+				}
+				if ( paramCheckShowErrors ) {
+					NoticeMessage( "CHECK: %d: %s-%s: exp: %s, act=%s", _("Ok"), NULL, paramLineNum,
+					               pg->nameStr, p->nameStr, expVal, actVal );
+				}
+				paramCheckErrorCount++;
+			}
+			return;
 		}
-		return;
-	 }
-  }
-  NoticeMessage( "Unknown PARAMCHECK: %s", _("Ok"), NULL, line );
+	}
+	NoticeMessage( "Unknown PARAMCHECK: %s", _("Ok"), NULL, line );
 }
 
 /*
@@ -2209,10 +2424,10 @@ static void ParamCheck( char * line )
 
 
 static void ParamCreateControl(
-		paramData_p pd,
-		char * helpStr,
-		wWinPix_t xx,
-		wWinPix_t yy )
+        paramData_p pd,
+        char * helpStr,
+        wWinPix_t xx,
+        wWinPix_t yy )
 {
 	const paramFloatRange_t * floatRangeP;
 	const paramIntegerRange_t * integerRangeP;
@@ -2229,140 +2444,161 @@ static void ParamCreateControl(
 	static wBool_t maxColCnt = 0;
 	int col;
 	const char *cp;
-    char *cq;
+	char *cq;
 	static wMenu_p menu = NULL;
 
 	if ( ( win = pd->group->win ) == NULL ) {
 		win = mainW;
-		pd->winOption |= BO_USETEMPLATE;        /* Force template to be used for main window controls */
 	}
 
-		switch (pd->type) {
-		case PD_FLOAT:
-			floatRangeP = pd->winData;
-			w = floatRangeP->width?floatRangeP->width:100;
-			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, NULL, 0, ParamFloatPush, pd );
-			break;
-		case PD_LONG:
-			integerRangeP = pd->winData;
-			w = integerRangeP->width?integerRangeP->width:100;
-			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
-			break;
-		case PD_STRING:
-			w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
-			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush, pd );
-			break;
-		case PD_RADIO:
-			pd->control = (wControl_p)wRadioCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
-			break;
-		case PD_TOGGLE:
-			pd->control = (wControl_p)wToggleCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
-			break;
-		case PD_LIST:
-			listDataP = (paramListData_t*)pd->winData;
-			if ( listDataP->colCnt > 1 ) {
-				if ( maxColCnt < listDataP->colCnt ) {
-					if ( maxColCnt == 0 ) {
-						colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof *colWidths );
-						colRightJust = (wBool_t*)MyMalloc( listDataP->colCnt * sizeof *colRightJust );
-					} else {
-						colWidths = (wWinPix_t*)MyRealloc( colWidths, listDataP->colCnt * sizeof *colWidths );
-						colRightJust = (wBool_t*)MyRealloc( colRightJust, listDataP->colCnt * sizeof *colRightJust );
-					}
-					maxColCnt = listDataP->colCnt;
+
+	switch (pd->type) {
+	case PD_FLOAT:
+		floatRangeP = pd->winData;
+		w = floatRangeP->width?floatRangeP->width:100;
+		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
+		                pd->winOption, w, NULL, 0, ParamFloatPush, pd );
+		break;
+	case PD_LONG:
+		integerRangeP = pd->winData;
+		w = integerRangeP->width?integerRangeP->width:100;
+		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
+		                pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
+		break;
+	case PD_STRING:
+		w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)250;
+		pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel),
+		                pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush,
+		                pd );
+		break;
+	case PD_RADIO:
+		pd->control = (wControl_p)wRadioCreate( win, xx, yy, helpStr, _(pd->winLabel),
+		                                        pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
+		break;
+	case PD_TOGGLE:
+		pd->control = (wControl_p)wToggleCreate( win, xx, yy, helpStr, _(pd->winLabel),
+		                pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
+		break;
+	case PD_LIST:
+		listDataP = (paramListData_t*)pd->winData;
+		if ( listDataP->colCnt > 1 ) {
+			if ( maxColCnt < listDataP->colCnt ) {
+				if ( maxColCnt == 0 ) {
+					colWidths = (wWinPix_t*)MyMalloc( listDataP->colCnt * sizeof *colWidths );
+					colRightJust = (wBool_t*)MyMalloc( listDataP->colCnt * sizeof *colRightJust );
+				} else {
+					colWidths = (wWinPix_t*)MyRealloc( colWidths,
+					                                   listDataP->colCnt * sizeof *colWidths );
+					colRightJust = (wBool_t*)MyRealloc( colRightJust,
+					                                    listDataP->colCnt * sizeof *colRightJust );
 				}
-				for ( col=0; col<listDataP->colCnt; col++ ) {
-					colRightJust[col] = listDataP->colWidths[col]<0;
-					colWidths[col] = labs(listDataP->colWidths[col]);
-				}
-				sprintf( message, "%s-%s-%s", pd->group->nameStr, pd->nameStr, "columnwidths" );
-				cp = wPrefGetString( PREFSECT, message );
-				if ( cp != NULL ) {
+				maxColCnt = listDataP->colCnt;
+			}
+			for ( col=0; col<listDataP->colCnt; col++ ) {
+				colRightJust[col] = listDataP->colWidths[col]<0;
+				colWidths[col] = labs(listDataP->colWidths[col]);
+			}
+			sprintf( message, "%s-%s-%s", pd->group->nameStr, pd->nameStr, "columnwidths" );
+			cp = wPrefGetString( PREFSECT, message );
+			if ( cp != NULL ) {
 				for ( col=0; col<listDataP->colCnt; col++ ) {
 					colWidth = (wWinPix_t)strtol( cp, &cq, 10 );
-					if ( cp == cq )
+					if ( cp == cq ) {
 						break;
+					}
 					colWidths[col] = colWidth;
 					cp = cq;
-					}
 				}
 			}
-			pd->control = (wControl_p)wListCreate( win, xx, yy, helpStr, _(pd->winLabel),
-				pd->winOption, listDataP->number, listDataP->width, listDataP->colCnt,
-				(listDataP->colCnt>1?colWidths:NULL),
-				(listDataP->colCnt>1?colRightJust:NULL),
-				listDataP->colTitles, NULL, ParamListPush, pd );
-			listDataP->height = wControlGetHeight( pd->control );
-			break;
-		case PD_DROPLIST:
-			w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
-			pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
-			break;
-		case PD_COMBOLIST:
-			listDataP = (paramListData_t*)pd->winData;
-			pd->control = (wControl_p)wComboListCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL, ParamListPush, pd );
-			listDataP->height = wControlGetHeight( pd->control );
-			break;
-		case PD_COLORLIST:
-			pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
-            break;
-		case PD_MESSAGE:
-			if ( pd->winData != 0 )
-				w = (wWinPix_t)VP2L(pd->winData);
-			else if (pd->valueP)
-				w = wLabelWidth( _(pd->valueP) );
-			else
-				w = 150;
-			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, helpStr, helpStr, w, pd->valueP?_(pd->valueP):" ", pd->winOption );
-			break;
-		case PD_BUTTON:
-			pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, ParamButtonPush, pd );
-			break;
-		case PD_MENU:
-			menu = wMenuCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption );
-			pd->control = (wControl_p)menu;
-			break;
-		case PD_MENUITEM:
-			pd->control = (wControl_p)wMenuPushCreate( menu, helpStr, _(pd->winLabel), 0, ParamMenuPush, pd );
-			break;
-		case PD_DRAW:
-			drawDataP = pd->winData;
-			pd->control = (wControl_p)wDrawCreate( win, xx, yy, helpStr, pd->winOption, drawDataP->width, drawDataP->height, pd, ParamDrawRedraw, ParamDrawAction );
-			if ( drawDataP->d ) {
-				drawDataP->d->d = (wDraw_p)pd->control;
-				drawDataP->d->dpi = wDrawGetDPI( drawDataP->d->d );
-			}
-			break;
-		case PD_TEXT:
-			textDataP = pd->winData;
-			pd->control = (wControl_p)wTextCreate( win, xx, yy, helpStr, NULL, pd->winOption, textDataP->width, textDataP->height );
-			if ( (pd->winOption&BO_READONLY) == 0 )
-				wTextSetReadonly( (wText_p)pd->control, FALSE );
-			break;
-		case PD_BITMAP:
-			iconP = pd->winData;
-			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, helpStr, pd->winOption, iconP );
-			break;
-		default:
-			AbortProg( "paramCreatePG" );
 		}
+		pd->control = (wControl_p)wListCreate( win, xx, yy, helpStr, _(pd->winLabel),
+		                                       pd->winOption, listDataP->number, listDataP->width, listDataP->colCnt,
+		                                       (listDataP->colCnt>1?colWidths:NULL),
+		                                       (listDataP->colCnt>1?colRightJust:NULL),
+		                                       listDataP->colTitles, NULL, ParamListPush, pd );
+		listDataP->height = wControlGetHeight( pd->control );
+		break;
+	case PD_DROPLIST:
+		w = pd->winData?(wWinPix_t)VP2L(pd->winData):(wWinPix_t)100;
+		pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr,
+		                _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
+		break;
+	case PD_COMBOLIST:
+		listDataP = (paramListData_t*)pd->winData;
+		pd->control = (wControl_p)wComboListCreate( win, xx, yy, helpStr,
+		                _(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL,
+		                ParamListPush, pd );
+		listDataP->height = wControlGetHeight( pd->control );
+		break;
+	case PD_COLORLIST:
+		pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr,
+		                _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
+		break;
+	case PD_MESSAGE:
+		if ( pd->winData != 0 ) {
+			w = (wWinPix_t)VP2L(pd->winData);
+		} else if (pd->valueP) {
+			w = wLabelWidth( _(pd->valueP) );
+		} else {
+			w = 150;
+		}
+		pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, _(pd->winLabel), w,
+		                pd->valueP?_(pd->valueP):" ", pd->winOption );
+		break;
+	case PD_BUTTON:
+		pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel),
+		                pd->winOption, 0, ParamButtonPush, pd );
+		break;
+	case PD_MENU:
+		menu = wMenuCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption );
+		pd->control = (wControl_p)menu;
+		break;
+	case PD_MENUITEM:
+		pd->control = (wControl_p)wMenuPushCreate( menu, helpStr, _(pd->winLabel), 0,
+		                ParamMenuPush, pd );
+		break;
+	case PD_DRAW:
+		drawDataP = pd->winData;
+		pd->control = (wControl_p)wDrawCreate( win, xx, yy, helpStr, pd->winOption,
+		                                       drawDataP->width, drawDataP->height, pd, ParamDrawRedraw, ParamDrawAction );
+		if ( drawDataP->d ) {
+			drawDataP->d->d = (wDraw_p)pd->control;
+			drawDataP->d->dpi = wDrawGetDPI( drawDataP->d->d );
+		}
+		break;
+	case PD_TEXT:
+		textDataP = pd->winData;
+		pd->control = (wControl_p)wTextCreate( win, xx, yy, helpStr, NULL,
+		                                       pd->winOption, textDataP->width, textDataP->height );
+		if ( (pd->winOption&BO_READONLY) == 0 ) {
+			wTextSetReadonly( (wText_p)pd->control, FALSE );
+		}
+		break;
+	case PD_BITMAP:
+		iconP = pd->winData;
+		pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
+		break;
+	default:
+		CHECK(FALSE);
+	}
 
 }
 
 
 static void ParamPositionControl(
-		paramData_p pd,
-		char * helpStr,
-		wWinPix_t xx,
-		wWinPix_t yy )
+        paramData_p pd,
+        char * helpStr,
+        wWinPix_t xx,
+        wWinPix_t yy )
 {
 	const paramDrawData_t * drawDataP;
 	const paramTextData_t * textDataP;
 	const paramListData_t * listDataP;
 	wWinPix_t winW, winH, ctlW, ctlH;
 
-	if ( pd->type != PD_MENUITEM )
+	if ( pd->type != PD_MENUITEM ) {
 		wControlSetPos( pd->control, xx, yy );
+	}
 	if ( pd->option&PDO_DLGRESIZE ) {
 		wWinGetSize( pd->group->win, &winW, &winH );
 		switch (pd->type) {
@@ -2377,42 +2613,51 @@ static void ParamPositionControl(
 				ctlW = listDataP->width;
 				ctlH = listDataP->height;
 			}
-			if ( (pd->option&PDO_DLGRESIZE) == 0 )
+			if ( (pd->option&PDO_DLGRESIZE) == 0 ) {
 				break;
-			if ( (pd->option&PDO_DLGRESIZEW) != 0 )
+			}
+			if ( (pd->option&PDO_DLGRESIZEW) != 0 ) {
 				ctlW = winW - (pd->group->origW-ctlW);
-			if ( (pd->option&PDO_DLGRESIZEH) != 0 )
+			}
+			if ( (pd->option&PDO_DLGRESIZEH) != 0 ) {
 				ctlH = winH - (pd->group->origH-ctlH);
+			}
 			wListSetSize( (wList_p)pd->control, ctlW, ctlH );
 			break;
 		case PD_DRAW:
 			drawDataP = pd->winData;
-			if ( (pd->option&PDO_DLGRESIZEW) )
+			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-drawDataP->width);
-			else
+			} else {
 				ctlW = wControlGetWidth( pd->control );
-			if ( (pd->option&PDO_DLGRESIZEH) )
+			}
+			if ( (pd->option&PDO_DLGRESIZEH) ) {
 				ctlH = winH - (pd->group->origH-drawDataP->height);
-			else
+			} else {
 				ctlH = wControlGetHeight( pd->control );
+			}
 			wDrawSetSize( (wDraw_p)pd->control, ctlW, ctlH, NULL );
-			if ( drawDataP->redraw )
+			if ( drawDataP->redraw ) {
 				drawDataP->redraw( (wDraw_p)pd->control, pd->context, ctlW, ctlH );
+			}
 			break;
 		case PD_TEXT:
 			textDataP = pd->winData;
 			ctlW = textDataP->width;
 			ctlH = textDataP->height;
-			if ( (pd->winOption&BT_CHARUNITS) )
+			if ( (pd->winOption&BT_CHARUNITS) ) {
 				wTextComputeSize( (wText_p)pd->control, ctlW, ctlH, &ctlW, &ctlH );
-			if ( (pd->option&PDO_DLGRESIZEW) )
+			}
+			if ( (pd->option&PDO_DLGRESIZEW) ) {
 				ctlW = winW - (pd->group->origW-ctlW);
-			else
+			} else {
 				ctlW = wControlGetWidth( pd->control );
-			if ( (pd->option&PDO_DLGRESIZEH) )
+			}
+			if ( (pd->option&PDO_DLGRESIZEH) ) {
 				ctlH = winH - (pd->group->origH-ctlH);
-			else
+			} else {
 				ctlH = wControlGetHeight( pd->control );
+			}
 			wTextSetSize( (wText_p)pd->control, ctlW, ctlH );
 			break;
 		case PD_STRING:
@@ -2430,7 +2675,7 @@ static void ParamPositionControl(
 			}
 			break;
 		default:
-			AbortProg( "paramPositionControl" );
+			CHECK(FALSE);
 		}
 	}
 }
@@ -2492,10 +2737,10 @@ static void LayoutControlTemplate(
 
 
 static void LayoutControls(
-		paramGroup_p group,
-		layoutControlsProc proc,
-		wWinPix_t * retW,
-		wWinPix_t * retH )
+        paramGroup_p group,
+        layoutControlsProc proc,
+        wWinPix_t * retW,
+        wWinPix_t * retH )
 {
 	/* Use definitions for Template Layout including Describe */
 	if (group->winOption&BO_USETEMPLATE) {
@@ -2537,33 +2782,41 @@ static void LayoutControls(
 	memset( labelW, 0, sizeof labelW );
 	lastLabelPos = 0;
 	currLabelPos = 0;
-	for ( pd=group->paramPtr; pd<&group->paramPtr[group->paramCnt]; pd++,currLabelPos++ ) {
-		if ( (pd->option&PDO_DLGIGNORE) != 0 )
+	for ( pd=group->paramPtr; pd<&group->paramPtr[group->paramCnt];
+	      pd++,currLabelPos++ ) {
+		if ( (pd->option&PDO_DLGIGNORE) != 0 ) {
 			continue;
-		if ( (pd->option&PDO_DLGBOXEND) )
+		}
+		if ( (pd->option&PDO_DLGBOXEND) ) {
 			hasBox = TRUE;
+		}
 		if ( (pd->option&(PDO_DLGRESETMARGIN|PDO_DLGNEWCOLUMN|PDO_DLGCMDBUTTON)) ) {
-			for ( inx=lastLabelPos; inx<currLabelPos; inx++ )
+			for ( inx=lastLabelPos; inx<currLabelPos; inx++ ) {
 				labelW[inx] = controlK.orig.x;
+			}
 			controlK.orig.x = 0;
 			lastLabelPos = currLabelPos;
 		}
 		if ( pd->winLabel && (pd->option&(PDO_DLGIGNORELABELWIDTH|PDO_DLGHORZ))==0 &&
-			 pd->type!=PD_BUTTON &&
-			 pd->type!=PD_MENU &&
-			 pd->type!=PD_MENUITEM) {
+		     pd->type!=PD_BUTTON &&
+		     pd->type!=PD_MENU &&
+		     pd->type!=PD_MENUITEM) {
 			w = wLabelWidth( _(pd->winLabel) );
-			if ( w > controlK.orig.x )
+			if ( w > controlK.orig.x ) {
 				controlK.orig.x = w;
+			}
 		}
 	}
-	for ( inx=lastLabelPos; inx<group->paramCnt; inx++ )
+	for ( inx=lastLabelPos; inx<group->paramCnt; inx++ ) {
 		labelW[inx] = controlK.orig.x;
+	}
 	for ( inx=0; inx<group->paramCnt; inx++ )
-		if ( (group->paramPtr[inx].option&PDO_DLGNOLABELALIGN) != 0 )
+		if ( (group->paramPtr[inx].option&PDO_DLGNOLABELALIGN) != 0 ) {
 			labelW[inx] = 0;
+		}
 
-	LOG( log_paramLayout, 1, ("Layout %s B?=%s\n", group->nameStr, hasBox?"T":"F" ) )
+	LOG( log_paramLayout, 2, ("LayoutControls:%s B?=%s\n", group->nameStr,
+	                          hasBox?"T":"F" ) )
 
 	windowK.orig.x =  DlgSepLeft + (hasBox?DlgSepFrmLeft:0);
 	windowK.orig.y = DlgSepTop + (hasBox?DlgSepFrmTop:0);
@@ -2571,12 +2824,15 @@ static void LayoutControls(
 	controlK = columnK = windowK;
 	controlK.orig.x += labelW[0];
 
-	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
-		LOG( log_paramLayout, 1, ("%2d: Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n", inx,
-			columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
-			controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y ) )
-		if ( (pd->option&PDO_DLGIGNORE) != 0 )
+	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt];
+	      pd++,inx++ ) {
+		if ( (pd->option&PDO_DLGIGNORE) != 0 ) {
 			goto SkipControl;
+		}
+		LOG( log_paramLayout, 2, ("%2d: Col %dx%d..%dx%d Ctl %dx%d..%dx%d %s\n", inx,
+		                          columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
+		                          controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y,
+		                          pd->nameStr ) )
 		if ( pd->type == PD_MENUITEM ) {
 			proc( pd, helpStr, 0, 0 );
 			continue;
@@ -2592,19 +2848,22 @@ static void LayoutControls(
 			controlK.orig.y = columnK.orig.y;
 		} else if ( (pd->option&PDO_DLGHORZ) ) {
 			controlK.orig.x = controlK.term.x;
-			if ( (pd->option&PDO_DLGWIDE) )
+			if ( (pd->option&PDO_DLGWIDE) ) {
 				controlK.orig.x += 10;
-			else if ( (pd->option&PDO_DLGNARROW)== 0)
+			} else if ( (pd->option&PDO_DLGNARROW)== 0) {
 				controlK.orig.x += 3;
-			if ( pd->winLabel && ( pd->type!=PD_BUTTON ) )
+			}
+			if ( pd->winLabel && ( pd->type!=PD_BUTTON ) ) {
 				controlK.orig.x += wLabelWidth( _(pd->winLabel) );
+			}
 		} else if ( inx != 0 ) {
 			controlK.orig.x = columnK.orig.x + labelW[inx];
 			controlK.orig.y = controlK.term.y;
-			if ( (pd->option&PDO_DLGWIDE) )
+			if ( (pd->option&PDO_DLGWIDE) ) {
 				controlK.orig.y += 10;
-			else if ( (pd->option&PDO_DLGNARROW)== 0)
+			} else if ( (pd->option&PDO_DLGNARROW)== 0) {
 				controlK.orig.y += 3;
+			}
 		}
 		if ( (pd->option&PDO_DLGSETY) ) {
 			columnK.term.x = controlK.orig.x;
@@ -2613,15 +2872,13 @@ static void LayoutControls(
 		/*
 		 * Custom layout and create/postion control
 		 */
-		if (group->layoutProc)
-			group->layoutProc( pd, inx, columnK.orig.x+labelW[inx], &controlK.orig.x, &controlK.orig.y );
-		if ( pd->nameStr )
+		if (group->layoutProc) {
+			group->layoutProc( pd, inx, columnK.orig.x+labelW[inx], &controlK.orig.x,
+			                   &controlK.orig.y );
+		}
+		if ( pd->nameStr ) {
 			strcpy( helpStrP, pd->nameStr );
-        
-        // if the dialog is created from a UI design, set the relevant option
-        if(group->options & PGO_DIALOGTEMPLATE ) {
-            pd->winOption |= F_USETEMPLATE;
-        }
+		}
 		proc( pd, helpStr, controlK.orig.x, controlK.orig.y );
 		/*
 		 * Set control term
@@ -2630,30 +2887,35 @@ static void LayoutControls(
 		controlSize_y = wControlGetHeight( pd->control );
 		controlK.term.x = controlK.orig.x+controlSize_x;
 		if ( (pd->option&PDO_DLGHORZ)==0 ||
-			 controlK.term.y < controlK.orig.y+controlSize_y )
+		     controlK.term.y < controlK.orig.y+controlSize_y ) {
 			controlK.term.y = controlK.orig.y+controlSize_y;
+		}
 		if ( retW && pd->nameStr ) {
 			char * cp;
 			strcpy( message, pd->nameStr );
-			for ( cp=message; *cp; cp++ ) if ( *cp == '-' ) *cp = '_';
+			for ( cp=message; *cp; cp++ ) if ( *cp == '-' ) { *cp = '_'; }
 		}
 		/*
 		 * Set column term
 		 */
 		if ( (pd->option&PDO_DLGIGNOREX) == 0 ) {
 			if ( (pd->option&PDO_DLGUNDERCMDBUTT) == 0 ) {
-				if ( columnK.term.x < controlK.term.x )
+				if ( columnK.term.x < controlK.term.x ) {
 					columnK.term.x = controlK.term.x;
+				}
 			} else {
-				if ( columnK.term.x < controlK.term.x-90 )
+				if ( columnK.term.x < controlK.term.x-90 ) {
 					columnK.term.x = controlK.term.x-90;
+				}
 			}
 		}
-		if ( columnK.term.y < controlK.term.y )
+		if ( columnK.term.y < controlK.term.y ) {
 			columnK.term.y = controlK.term.y;
+		}
 		if ( hasBox )
-			if ( boxPos[boxCnt] < columnK.term.y+2 )
+			if ( boxPos[boxCnt] < columnK.term.y+2 ) {
 				boxPos[boxCnt] = columnK.term.y+2;
+			}
 		if ( (pd->option&PDO_DLGBOXEND) ) {
 			columnK.term.y += 8;
 			boxCnt++;
@@ -2662,22 +2924,26 @@ static void LayoutControls(
 		/*
 		 * Set window term
 		 */
-		if ( windowK.term.x < columnK.term.x )
+		if ( windowK.term.x < columnK.term.x ) {
 			windowK.term.x = columnK.term.x;
-		if ( windowK.term.y < columnK.term.y )
+		}
+		if ( windowK.term.y < columnK.term.y ) {
 			windowK.term.y = columnK.term.y;
-		if ( (pd[1].option&PDO_DLGCMDBUTTON) )
+		}
+		if ( (pd[1].option&PDO_DLGCMDBUTTON) ) {
 			areCmdButtons = TRUE;
+		}
 SkipControl:
 		if ( (!inCmdButtons) &&
-			 (pd==&group->paramPtr[group->paramCnt-1] || (pd[1].option&PDO_DLGCMDBUTTON)) ) {
+		     (pd==&group->paramPtr[group->paramCnt-1] || (pd[1].option&PDO_DLGCMDBUTTON)) ) {
 			columnK.orig.x = columnK.term.x + DlgSepMid;
 			if ( boxCnt ) {
 				boxTop = DlgSepTop;
 				if ( group->boxs == NULL ) {
 					group->boxs = (wBox_p*)MyMalloc( boxCnt * sizeof *(wBox_p*)0 );
 					for ( box=0; box<boxCnt; box++ ) {
-						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxThickW, columnK.term.x, boxPos[box]-boxTop );
+						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxThickW,
+						                               columnK.term.x, boxPos[box]-boxTop );
 						boxTop = boxPos[box] + 4;
 					}
 				} else {
@@ -2692,69 +2958,91 @@ SkipControl:
 			columnK.orig.y = columnK.term.y = DlgSepTop;
 			controlK = columnK;
 			if ( group->okB ) {
-				wControlSetPos( (wControl_p)(lastB=group->okB), columnK.orig.x, columnK.orig.y );
+				wControlSetPos( (wControl_p)(lastB=group->okB), columnK.orig.x,
+				                columnK.orig.y );
 				controlK.term.y += wControlGetHeight((wControl_p)group->okB);
 				columnK.term.y = controlK.term.y + 3;
 			}
 			inCmdButtons = TRUE;
 		}
-		LOG( log_paramLayout, 1, ("    Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n",
-				columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
-				controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y ) )
-		if ( windowK.term.x < columnK.term.x )
+		if ( (pd->option & PDO_DLGIGNORE) == 0 ) {
+			LOG( log_paramLayout, 2, ("    Col %dx%d..%dx%d Ctl %dx%d..%dx%d\n",
+			                          columnK.orig.x, columnK.orig.y, columnK.term.x, columnK.term.y,
+			                          controlK.orig.x, controlK.orig.y, controlK.term.x, controlK.term.y ) )
+		}
+		if ( windowK.term.x < columnK.term.x ) {
 			windowK.term.x = columnK.term.x;
-		if ( windowK.term.y < columnK.term.y )
+		}
+		if ( windowK.term.y < columnK.term.y ) {
 			windowK.term.y = columnK.term.y;
+		}
 	}
 	if ( group->cancelB ) {
-		if ( areCmdButtons )
+		if ( areCmdButtons ) {
 			columnK.term.y += 10;
-		else if ( group->okB )
+		} else if ( group->okB ) {
 			columnK.term.y += 3;
-		wControlSetPos( (wControl_p)(lastB=group->cancelB), columnK.orig.x, columnK.term.y );
+		}
+		wControlSetPos( (wControl_p)(lastB=group->cancelB), columnK.orig.x,
+		                columnK.term.y );
 		columnK.term.y += wControlGetHeight((wControl_p)group->cancelB);
 	}
 	if ( group->helpB ) {
 		columnK.term.y += 10;
-		wControlSetPos( (wControl_p)(lastB=group->helpB), columnK.orig.x, columnK.term.y );
+		wControlSetPos( (wControl_p)(lastB=group->helpB), columnK.orig.x,
+		                columnK.term.y );
 		columnK.term.y += wControlGetHeight((wControl_p)group->helpB);
 	}
 	if ( lastB ) {
 		controlK.term.x = controlK.orig.x + wControlGetWidth((wControl_p)lastB);
-		if ( columnK.term.x < controlK.term.x )
+		if ( columnK.term.x < controlK.term.x ) {
 			columnK.term.x = controlK.term.x;
+		}
 	}
-	if ( windowK.term.x < columnK.term.x )
+	if ( windowK.term.x < columnK.term.x ) {
 		windowK.term.x = columnK.term.x;
-	if ( windowK.term.y < columnK.term.y )
+	}
+	if ( windowK.term.y < columnK.term.y ) {
 		windowK.term.y = columnK.term.y;
+	}
 
-	if ( retW )
+	if ( retW ) {
 		*retW = windowK.term.x;
-	if ( retH )
+	}
+	if ( retH ) {
 		*retH = windowK.term.y;
+	}
+	LOG( log_paramLayout, 1, ( "LayoutControls:%s orig:%dx%d compute:%dx%d\n",
+	                           group->nameStr, group->origW, group->origH, windowK.term.x, windowK.term.y ) );
 }
 
 
 static void ParamDlgProc(
-		wWin_p win,
-		winProcEvent e,
-		void * refresh,
-		void * data )
+        wWin_p win,
+        winProcEvent e,
+        void * refresh,
+        void * data )
 {
 	paramGroup_p pg = (paramGroup_p)data;
+	static int iResizeCnt = 0;
 	switch (e) {
 	case wClose_e:
-		if ( pg->changeProc )
+		if ( pg->changeProc ) {
 			pg->changeProc( pg, -1, NULL );
-		if ( (pg->options&PGO_NODEFAULTPROC) == 0 )
+		}
+		if ( (pg->options&PGO_NODEFAULTPROC) == 0 ) {
 			DefaultProc( win, wClose_e, data );
+		}
 		break;
 	case wResize_e:
-		if (win == mapW)
-			pg->changeProc(pg, wResize_e, NULL);
-		else
+		if (win == mapW) {
+			if ( !bInReadTracks ) {
+				pg->changeProc(pg, wResize_e, NULL);
+			}
+		} else {
+			LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		}
 		break;
 	default:
 		break;
@@ -2762,7 +3050,7 @@ static void ParamDlgProc(
 }
 
 /**
- * Create a dialog box from data definition. 
+ * Create a dialog box from data definition.
  *
  * \param IN group	data definition for the dialog
  * \param IN title  title of the new dialog
@@ -2776,100 +3064,73 @@ static void ParamDlgProc(
  */
 
 wWin_p ParamCreateDialog(
-		paramGroup_p group,
-		char * title,
-		char * okLabel,
-		paramActionOkProc okProc,
-		paramActionCancelProc cancelProc,
-		BOOL_T needHelpButton,
-		paramLayoutProc layoutProc,
-		long WinOptionsIn,		/* F_ flags pass through */
-		paramChangeProc changeProc )
+        paramGroup_p group,
+        char * title,
+        char * okLabel,
+        paramActionOkProc okProc,
+        paramActionCancelProc cancelProc,
+        BOOL_T needHelpButton,
+        paramLayoutProc layoutProc,
+        long winOption,
+        paramChangeProc changeProc )
 {
 	char helpStr[STR_SHORT_SIZE];
 	wWinPix_t w0, h0;
-	char * cancelLabel = (WinOptionsIn&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
-    long useTemplate = 0L;
+	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
 
-
-
-	WinOptionsIn &= ~PD_F_ALT_CANCELLABEL;
+	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
 	group->cancelProc = cancelProc;
 	group->layoutProc = layoutProc;
 	group->changeProc = changeProc;
-
-	if ( (WinOptionsIn&F_CENTER) == 0 )
-		WinOptionsIn |= F_RECALLPOS;
-	if ( (WinOptionsIn&F_RESIZE) != 0 )
-		WinOptionsIn |= F_RECALLSIZE;
-
-	/* Now set up output parms for the calls */
-    long winOptionsOut = WinOptionsIn;  /*Copy options for the PopUp call */
-    long butOptions = 0L;				/*Clear Options for the Button call */
-    
-    if( group->options & PGO_DIALOGTEMPLATE) {    
-        useTemplate = TRUE;
-        winOptionsOut |= F_USETEMPLATE;
-    } else {
-        winOptionsOut |= F_AUTOSIZE;
-    }
-    if (group->options & PGO_DYNAMICTEMPLATE) {
-    	winOptionsOut |= F_DESCTEMPLATE;
-    }
-
-    if (winOptionsOut&F_DESCTEMPLATE) {
-    	sprintf(helpStr,"%s",group->template_id);
-    } else
-    	sprintf(helpStr,"%s",group->nameStr);
-
-
-    /* Copy output to buttons and the group winOptions */
-    if (winOptionsOut & F_USETEMPLATE) {
-    	butOptions |= BO_USETEMPLATE;
-    	group->winOption |= BO_USETEMPLATE;
+	group->winOption = winOption;
+	if ( (winOption&F_CENTER) == 0 ) {
+		winOption |= F_RECALLPOS;
 	}
-	if (winOptionsOut & F_DESCTEMPLATE) {
-		butOptions |= BO_DESCTEMPLATE;
-		group->winOption |= BO_DESCTEMPLATE;
+	if ( (winOption&F_RESIZE) != 0 ) {
+		winOption |= F_RECALLSIZE;
 	}
 
-	/* If we are just adding content, don't worry about windows or buttons */
-	if (winOptionsOut & F_DESCADDTEMPLATE) {
-		winOptionsOut |= BO_DESCADDTEMPLATE;
-		wWinPopupCreate( group->win, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptionsOut, ParamDlgProc, group );
-	} else {
-		group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptionsOut, ParamDlgProc, group );
+	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr,
+	                              title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
 
-		if ( okLabel && okProc ) {
-			sprintf( helpStr, "%s-ok", group->nameStr );
-			group->okB = wButtonCreate( group->win, 0, 0, "id-ok", okLabel, BB_DEFAULT|butOptions, 0, (wButtonCallBack_p)ParamButtonOk, group );
-		}
-		if ( group->cancelProc ) {
-			sprintf( helpStr, "%s-cancel", group->nameStr );
-			group->cancelB = wButtonCreate( group->win, 0, 0, "id-cancel", cancelLabel, BB_CANCEL|butOptions, 0, (wButtonCallBack_p)ParamButtonCancel, group );
-		}
-		if ( needHelpButton ) {
-			sprintf( helpStr, "cmd%s", group->nameStr );
-			helpStr[3] = toupper((unsigned char)helpStr[3]);
-			group->helpB = wButtonCreate( group->win, 0, 0, "id-help", _("Help"), BB_HELP|butOptions, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
-		}
-
+	if ( okLabel && okProc ) {
+		sprintf( helpStr, "%s-ok", group->nameStr );
+		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0,
+		                            ParamButtonOk, group );
+	}
+	if ( group->cancelProc ) {
+		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL,
+		                                0, ParamButtonCancel, group );
+	}
+	if ( needHelpButton ) {
+		sprintf( helpStr, "cmd%s", group->nameStr );
+		helpStr[3] = toupper((unsigned char)helpStr[3]);
+		group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP, 0,
+		                              (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 
+	LOG( log_paramLayout, 1, ( "ParamCreateDialog/" ) );
 	LayoutControls( group, ParamCreateControl, &group->origW, &group->origH );
 
 	group->origW += DlgSepRight;
 	group->origH += DlgSepBottom;
 	wWinGetSize( group->win, &w0, &h0 );
+	LOG( log_paramLayout, 1, ( "    winSize: %dx%d\n", w0, h0 ) );
 	if ( (WinOptionsIn&F_RESIZE) ) {
 		if ( group->origW != w0 ||
-			 group->origH != h0 ) {
+		     group->origH != h0 ) {
+			LOG( log_paramLayout, 1, ( "    RESIZE+change/" ) );
 			LayoutControls( group, ParamPositionControl, NULL, NULL );
 		}
+		wWinPix_t scr_w, scr_h;
+		wGetDisplaySize(&scr_w, &scr_h);
+		wSetGeometry(group->win, group->origW, scr_w-10, group->origH, scr_h, -1, -1,
+		             -1);
 	} else {
 		w0 = max(group->origW, w0);
 		h0 = max(group->origH, h0);
+		LOG( log_paramLayout, 1, ( "     wWinSetSize( %dx%d )\n", w0, h0 ) );
 		wWinSetSize( group->win, w0, h0 );
 	}
 
@@ -2882,13 +3143,15 @@ wWin_p ParamCreateDialog(
 *
 */
 EXPORT void ParamLayoutDialog(
-		paramGroup_p pg )
+        paramGroup_p pg )
 {
 	wWinPix_t w, h;
+	LOG( log_paramLayout, 1, ( "ParamLayoutDialog/" ) );
 	LayoutControls( pg, ParamPositionControl, &w, &h );
 	w += DlgSepRight;
 	h += DlgSepBottom;
 	if ( w != pg->origW || h != pg->origH ) {
+		LOG( log_paramLayout, 1, ( "     wWinSetSize( %dx%d )\n", w, h ) );
 		wWinSetSize( pg->win, w, h );
 		pg->origW = w;
 		pg->origH = h;
@@ -2897,11 +3160,12 @@ EXPORT void ParamLayoutDialog(
 
 
 EXPORT void ParamDialogOkActive(
-		paramGroup_p pg,
-		int active )
+        paramGroup_p pg,
+        int active )
 {
-	if ( pg->okB )
+	if ( pg->okB ) {
 		wControlActive( (wControl_p)pg->okB, active );
+	}
 }
 
 /*
@@ -2910,19 +3174,21 @@ EXPORT void ParamDialogOkActive(
  */
 
 EXPORT void ParamCreateControls(
-		paramGroup_p pg,
-		paramChangeProc changeProc )
+        paramGroup_p pg,
+        paramChangeProc changeProc )
 {
 	paramData_p pd;
-	char prefix[STR_SHORT_SIZE], helpStr[STR_SHORT_SIZE];
-	sprintf(prefix,"main-%s",pg->nameStr);  /*the area like "parallel" */
+	char helpStr[STR_SHORT_SIZE], * helpStrP;
+	strcpy( helpStr, pg->nameStr );
+	helpStrP = helpStr+strlen(helpStr);
+	*helpStrP++ = '-';
 	for ( pd=pg->paramPtr; pd<&pg->paramPtr[pg->paramCnt]; pd++ ) {
 		pd->group = pg;
-		pd->winOption |= BO_USETEMPLATE;
-		sprintf( helpStr, "%s-%s",prefix,pd->nameStr ); /*the field name like "separation" */
+		strcpy( helpStrP, pd->nameStr );
 		ParamCreateControl( pd, helpStr, 0, 0 );
-		if ( pd->type != PD_MENUITEM && pd->control )
+		if ( pd->type != PD_MENUITEM && pd->control ) {
 			wControlShow( pd->control, FALSE );
+		}
 	}
 	pg->changeProc = changeProc;
 }
@@ -2930,7 +3196,7 @@ EXPORT void ParamCreateControls(
 
 EXPORT void ParamInit( void )
 {
-	if (paramGroups_init) return;
+	if (paramGroups_init) { return; }
 
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );

@@ -10,31 +10,58 @@
 #include <setjmp.h>
 #include <cmocka.h>
 
+//#include "../common.h"
 #include "../include/partcatalog.h"
 
-TrackLibrary *trackLib;
-CatalogEntry *catalog;
+ParameterLib *trackLib;
+Catalog *catalog;
+SearchResult* result;
 
 
 // some dummy functions to suppress linking problems
+const char *
 wGetUserHomeDir()
 {
-
+	return("");
 }
 
-wPrefSetString()
+void wPrefSetString(const char* a, const char* b, const char* c)
 {
 
 }
 
-wPrefGetString()
+char* wPrefGetString(const char* section, const char* name)
+{
+	return("");
+}
+
+void AbortProg(const char* a, const char* b, int c, const char*d)
 {
 
 }
 
-AbortProg()
+void *
+MyMalloc(size_t size)
 {
+	return(malloc(size));
+}
 
+void
+MyFree(void* memory)
+{
+	free(memory);
+}
+
+char *
+MyStrdup(const char* string)
+{
+	return(strdup(string));
+}
+
+void *
+MyRealloc(void *memory, size_t size)
+{
+	return(realloc(memory, size));
 }
 
 static void
@@ -49,8 +76,8 @@ static void ScanEmptyDir(void **state)
 {
 	(void)state;
 	bool success;
-	EmptyCatalog(trackLib->catalog);
-	success = GetTrackFiles(trackLib, "//");
+	DestroyCatalog(trackLib->catalog);
+	success = CreateCatalogFromDir(trackLib, "//");
 	assert_false(success);
 }
 
@@ -58,8 +85,8 @@ static void ScanTestFiles(void **state)
 {
 	(void)state;
 	bool success;
-	EmptyCatalog(trackLib->catalog);
-	success = GetTrackFiles(trackLib, ".");
+	DestroyCatalog(trackLib->catalog);
+	success = CreateCatalogFromDir(trackLib, ".");
 	assert_true(success);
 }
 
@@ -73,25 +100,25 @@ static void CreateIndex(void **state)
 static void SearchNothing(void **state)
 {
 	(void)state;
-	unsigned int files = SearchLibrary(trackLib, "djfhdkljhf", catalog);
+	unsigned int files = SearchLibrary(trackLib, "djfhdkljhf", result);
 	assert_true(files == 0);
-	EmptyCatalog(catalog);
+	SearchDiscardResult(result);
 }
 
 static void SearchSingle(void **state)
 {
 	(void)state;
-	int files = SearchLibrary(trackLib, "peco", catalog );
+	int files = SearchLibrary(trackLib, "peco", result );
 	assert_true(files==1);
-	EmptyCatalog(catalog);
+	SearchDiscardResult(result);
 }
 
 static void SearchMultiple(void **state)
 {
 	(void)state;
-	int files = SearchLibrary(trackLib, "atlas", catalog);
+	int files = SearchLibrary(trackLib, "atlas", result);
 	assert_true(files == 2);
-	EmptyCatalog(catalog);
+	SearchDiscardResult(result);
 }
 
 static void FilterTest(void **state)
@@ -107,7 +134,7 @@ static void FilterTest(void **state)
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
+	const struct CMUnitTest tests[] = {
 		cmocka_unit_test(CreateLib),
 		cmocka_unit_test(ScanEmptyDir),
 		cmocka_unit_test(ScanTestFiles),
@@ -116,9 +143,9 @@ int main(void)
 		cmocka_unit_test(SearchSingle),
 		cmocka_unit_test(SearchMultiple),
 		cmocka_unit_test(FilterTest),
-    };
+	};
 
 	catalog = InitCatalog();
 
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }

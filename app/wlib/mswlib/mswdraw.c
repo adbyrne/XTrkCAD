@@ -17,13 +17,12 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */	
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #define _WIN32_WINNT 0x0600		/* for wheel mouse supposrt */
 #include <windows.h>
 #include <string.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
@@ -114,14 +113,14 @@ static wWinPix_t YDRAWPIX2WINPIX( wDraw_p d, wDrawPix_t y )
 
 
 void wDrawDelayUpdate(
-		wDraw_p d,
-		wBool_t delay )
+        wDraw_p d,
+        wBool_t delay )
 {
 }
 
 wBool_t wDrawSetTempMode(
-	wDraw_p bd,
-	wBool_t bTemp )
+        wDraw_p bd,
+        wBool_t bTemp )
 {
 	wBool_t rc = bd->bTempMode;
 	bd->bTempMode = bTemp;
@@ -129,14 +128,14 @@ wBool_t wDrawSetTempMode(
 		// Main to Temp drawing
 		// Copy mainBM to tempBM
 		wDrawClearTemp( bd );
-		if (bDrawMainBM) return rc;
+		if (bDrawMainBM) { return rc; }
 		HDC hDcOld = CreateCompatibleDC(bd->hDc);
 		HBITMAP hBmOld = SelectObject(hDcOld, bd->hBmMain);
 		SelectObject(bd->hDc, bd->hBmTemp);
 		BitBlt(bd->hDc, 0, 0,
-			bd->w, bd->h,
-			hDcOld, 0, 0,
-			SRCCOPY);
+		       bd->w, bd->h,
+		       hDcOld, 0, 0,
+		       SRCCOPY);
 		SelectObject(hDcOld, hBmOld);
 		DeleteDC(hDcOld);
 		bd->bCopiedMain = TRUE;
@@ -146,7 +145,7 @@ wBool_t wDrawSetTempMode(
 
 /**
  * Sets the proper pen and composition for the next drawing operation
- * 
+ *
  *
  * \param d IN drawing context
  * \param dw IN line width
@@ -155,11 +154,11 @@ wBool_t wDrawSetTempMode(
  * \param dopt IN drawing options
  */
 static void setDrawMode(
-		wDraw_p d,
-		wDrawWidth dw,
-		wDrawLineType_e lt,
-		wDrawColor dc,
-		wDrawOpts dopt )
+        wDraw_p d,
+        wDrawWidth dw,
+        wDrawLineType_e lt,
+        wDrawColor dc,
+        wDrawOpts dopt )
 {
 	long centerPen[] = {40,10,20,10};
 	long phantomPen[] = {40,10,20,10,20,10};
@@ -172,10 +171,11 @@ static void setDrawMode(
 	static LOGBRUSH logBrush = { 0, 0, 0 };
 	DWORD penStyle;
 
-	if ( wDrawDoTempDraw && (dopt & wDrawOptTemp) )
+	if ( wDrawDoTempDraw && (dopt & wDrawOptTemp) ) {
 		SelectObject(d->hDc, d->hBmTemp);
-	else
+	} else {
 		SelectObject(d->hDc, d->hBmMain);
+	}
 
 	if ( d->hasPalette ) {
 		int winPaletteClock = mswGetPaletteClock();
@@ -186,12 +186,14 @@ static void setDrawMode(
 	}
 
 	SetROP2( d->hDc, R2_COPYPEN );
-	if ( d == d0 && dw0 == dw && lt == lt0 && dc == dc0 )
+	if ( d == d0 && dw0 == dw && lt == lt0 && dc == dc0 ) {
 		return;
+	}
 
 	// make sure that the line width is at least 1!
-	if( !dw ) 
+	if( !dw ) {
 		dw++;
+	}
 
 	d0 = d; dw0 = dw; lt0 = lt; dc0 = dc;
 
@@ -207,7 +209,7 @@ static void setDrawMode(
 		penStyle = PS_GEOMETRIC | PS_DASH;
 	} else if (lt == wDrawLineDashDot) {
 		penStyle = PS_GEOMETRIC | PS_DASHDOT;
-	} else if ( lt == wDrawLineDashDotDot){
+	} else if ( lt == wDrawLineDashDotDot) {
 		penStyle = PS_GEOMETRIC | PS_DASHDOTDOT;
 	} else if (  lt == wDrawLineCenter) {
 		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
@@ -217,47 +219,49 @@ static void setDrawMode(
 		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
 		penarray = &phantomPen;
 		penarray_size = sizeof(phantomPen) / sizeof(long);
-	} else
+	} else {
 		penStyle = PS_GEOMETRIC | PS_SOLID;
+	}
 	d->hPen = ExtCreatePen( penStyle,
-					dw,
-					&logBrush,
-					penarray_size,
-					penarray );
+	                        dw,
+	                        &logBrush,
+	                        penarray_size,
+	                        penarray );
 	hOldPen = SelectObject( d->hDc, d->hPen );
 	DeleteObject( hOldPen );
 }
 
 static void setDrawBrush(
-		wDraw_p d,
-		wDrawColor dc,
-		wDrawOpts dopt )
+        wDraw_p d,
+        wDrawColor dc,
+        wDrawOpts dopt )
 {
 	HBRUSH hOldBrush;
 	static wDraw_p d0;
 	static wDrawColor dc0 = -1;
 
 	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
-	if ( d == d0 && dc == dc0 )
+	if ( d == d0 && dc == dc0 ) {
 		return;
+	}
 
 	d0 = d; dc0 = dc;
 
-	d->hBrush = CreateSolidBrush( 
-				mswGetColor(d->hasPalette,dc) );
+	d->hBrush = CreateSolidBrush(
+	                    mswGetColor(d->hasPalette,dc) );
 	hOldBrush = SelectObject( d->hDc, d->hBrush );
 	DeleteObject( hOldBrush );
 }
 
 
 static void myInvalidateRect(
-		wDraw_p d,
-		RECT * prect )
+        wDraw_p d,
+        RECT * prect )
 {
-	if ( prect->top < 0 ) prect->top = 0;
-	if ( prect->left < 0 ) prect->left = 0;
-	if ( prect->bottom > d->h ) prect->bottom = d->h;
-	if ( prect->right > d->w ) prect->right = d->w;
+	if ( prect->top < 0 ) { prect->top = 0; }
+	if ( prect->left < 0 ) { prect->left = 0; }
+	if ( prect->bottom > d->h ) { prect->bottom = d->h; }
+	if ( prect->right > d->w ) { prect->right = d->w; }
 	InvalidateRect( d->hWnd, prect, FALSE );
 }
 
@@ -266,8 +270,8 @@ static int clip0( POINT * p0, POINT * p1, wDraw_p d )
 {
 	long int x0=p0->x, y0=p0->y, x1=p1->x, y1=p1->y;
 	long int dx, dy;
-	if ( x0<0 && x1<0 ) return 0;
-	if ( y0<0 && y1<0 ) return 0;
+	if ( x0<0 && x1<0 ) { return 0; }
+	if ( y0<0 && y1<0 ) { return 0; }
 	dx=x1-x0;
 	dy=y1-y0;
 	if ( x0 < 0 ) {
@@ -275,7 +279,7 @@ static int clip0( POINT * p0, POINT * p1, wDraw_p d )
 		x0 = 0;
 	}
 	if ( y0 < 0 ) {
-		if ( (x0 -= y0*dx/dy) < 0 ) return 0;
+		if ( (x0 -= y0*dx/dy) < 0 ) { return 0; }
 		y0 = 0;
 	}
 	if ( x1 < 0 ) {
@@ -283,7 +287,7 @@ static int clip0( POINT * p0, POINT * p1, wDraw_p d )
 		x1 = 0;
 	}
 	if ( y1 < 0 ) {
-		if ( (x1 -= y1*dx/dy) < 0 ) return 0;
+		if ( (x1 -= y1*dx/dy) < 0 ) { return 0; }
 		y1 = 0;
 	}
 	p0->x = (int)x0;
@@ -295,15 +299,15 @@ static int clip0( POINT * p0, POINT * p1, wDraw_p d )
 
 
 void wDrawLine(
-		wDraw_p d,
-		wDrawPix_t p0x,
-		wDrawPix_t p0y,
-		wDrawPix_t p1x,
-		wDrawPix_t p1y,
-		wDrawWidth dw,
-		wDrawLineType_e lt,
-		wDrawColor dc,
-		wDrawOpts dopt )
+        wDraw_p d,
+        wDrawPix_t p0x,
+        wDrawPix_t p0y,
+        wDrawPix_t p1x,
+        wDrawPix_t p1y,
+        wDrawWidth dw,
+        wDrawLineType_e lt,
+        wDrawColor dc,
+        wDrawOpts dopt )
 {
 	POINT p0, p1;
 	RECT rect;
@@ -316,24 +320,25 @@ void wDrawLine(
 	MoveTo( d->hDc, p0.x, p0.y );
 	LineTo( d->hDc, p1.x, p1.y );
 	if (d->hWnd) {
-		if (dw==0)
+		if (dw==0) {
 			dw = 1;
+		}
 		dw++;
-	if (p0.y<p1.y) {
-		rect.top = p0.y-dw;
-		rect.bottom = p1.y+dw;
-	} else {
-		rect.top = p1.y-dw;
-		rect.bottom = p0.y+dw;
-	}
-	if (p0.x<p1.x) {
-		rect.left = p0.x-dw;
-		rect.right = p1.x+dw;
-	} else {
-		rect.left = p1.x-dw;
-		rect.right = p0.x+dw;
-	}
-	myInvalidateRect( d, &rect );
+		if (p0.y<p1.y) {
+			rect.top = p0.y-dw;
+			rect.bottom = p1.y+dw;
+		} else {
+			rect.top = p1.y-dw;
+			rect.bottom = p0.y+dw;
+		}
+		if (p0.x<p1.x) {
+			rect.left = p0.x-dw;
+			rect.right = p1.x+dw;
+		} else {
+			rect.left = p1.x-dw;
+			rect.right = p0.x+dw;
+		}
+		myInvalidateRect( d, &rect );
 	}
 }
 
@@ -345,16 +350,16 @@ static double d2r(double angle)
 
 static double mswsin( double angle )
 {
-	while (angle < 0.0) angle += 360.0;
-	while (angle >= 360.0) angle -= 360.0;
+	while (angle < 0.0) { angle += 360.0; }
+	while (angle >= 360.0) { angle -= 360.0; }
 	angle *= (M_PI*2.0)/360.0;
 	return sin( angle );
 }
 
 static double mswcos( double angle )
 {
-	while (angle < 0.0) angle += 360.0;
-	while (angle >= 360.0) angle -= 360.0;
+	while (angle < 0.0) { angle += 360.0; }
+	while (angle >= 360.0) { angle -= 360.0; }
 	angle *= (M_PI*2.0)/360.0;
 	return cos( angle );
 }
@@ -369,8 +374,8 @@ static double mswasin( double x, double h )
 
 static double mswNormalizeAngle( double a )
 {
-	while (a<0.0) a += 360.0;
-	while (a>=360.0) a -= 360.0;
+	while (a<0.0) { a += 360.0; }
+	while (a>=360.0) { a -= 360.0; }
 	return a;
 }
 
@@ -390,29 +395,25 @@ static double mswNormalizeAngle( double a )
 
 
 void wDrawArc(
-		wDraw_p d,
-		wDrawPix_t px,
-		wDrawPix_t py,
-		wDrawPix_t r,
-		double a0,
-		double a1,
-		int sizeCenter,
-		wDrawWidth dw,
-		wDrawLineType_e lt,
-		wDrawColor dc,
-		wDrawOpts dopt )
+        wDraw_p d,
+        wDrawPix_t px,
+        wDrawPix_t py,
+        wDrawPix_t r,
+        double a0,
+        double a1,
+        int sizeCenter,
+        wDrawWidth dw,
+        wDrawLineType_e lt,
+        wDrawColor dc,
+        wDrawOpts dopt )
 {
 	int i, cnt;
 	POINT p0, p1, ps, pe, pp0, pp1, pp2, pc;
 	wDrawPix_t psx, psy, pex, pey;
-    double len, aa, ai;
+	double aa, ai;
 	RECT rect;
 	int needMoveTo;
 	wBool_t fakeArc = FALSE;
-
-	len = d2r(a1) * r;
-	if (len < 3)
-		return;
 
 	// calculate the center coordinates
 	pc.x = XDRAWPIX2WINPIX( d, px );
@@ -436,11 +437,12 @@ void wDrawArc(
 	pe.y = YDRAWPIX2WINPIX(d,pey);
 
 	setDrawMode( d, dw, lt, dc, dopt );
-	
-	if (dw == 0)
-		dw = 1;
 
-	if ( r > 30000 || a1 < 1.0 ) { 
+	if (dw == 0) {
+		dw = 1;
+	}
+
+	if ( r > 30000 || a1 < 1.0 ) {
 		/* The book says 32K but experience says otherwise */
 		fakeArc = TRUE;
 	}
@@ -453,8 +455,8 @@ void wDrawArc(
 
 	if ( fakeArc ) {
 		cnt = (int)(a1 / 2);
-		if ( cnt <= 0 ) cnt = 1;
-		if ( cnt > 180 ) cnt = 180;
+		if ( cnt <= 0 ) { cnt = 1; }
+		if ( cnt > 180 ) { cnt = 180; }
 
 		ai = d2r(a1) / cnt;
 		aa = d2r(a0);
@@ -488,52 +490,58 @@ void wDrawArc(
 			pp2.y = YDRAWPIX2WINPIX( d, py + r * mswcos(a0+a2) );
 
 			MoveTo( d->hDc, pp2.x, pp2.y );
-			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)), (float)(-a2) );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)),
+			          (float)(-a2) );
 			MoveTo( d->hDc, pp2.x, pp2.y );
-			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)), (float)(a2) );
-		}
-		else {
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - (a0+a2)),
+			          (float)(a2) );
+		} else {
 			MoveTo( d->hDc, pp0.x, pp0.y );
-			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - a0), (float)(-a1) );
+			AngleArc( d->hDc, pc.x, pc.y, rr, (float)mswNormalizeAngle(90 - a0),
+			          (float)(-a1) );
 		}
 	}
 
 	// should the center of the arc be drawn?
 	if( sizeCenter ) {
-			
-			// now draw the crosshair
-			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH*sizeCenter, pc.y );
-			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH*sizeCenter, pc.y );
-			MoveTo( d->hDc, pc.x, pc.y - CENTERMARK_LENGTH*sizeCenter );
-			LineTo( d->hDc, pc.x, pc.y + CENTERMARK_LENGTH*sizeCenter );
-			
-			// invalidate the area of the crosshair
-			rect.top  = pc.y - CENTERMARK_LENGTH*sizeCenter - 1;
-			rect.bottom  = pc.y + CENTERMARK_LENGTH*sizeCenter + 1;
-			rect.left = pc.x - CENTERMARK_LENGTH*sizeCenter - 1;
-			rect.right = pc.x + CENTERMARK_LENGTH*sizeCenter + 1;
-			myInvalidateRect( d, &rect );
+
+		// now draw the crosshair
+		MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH*sizeCenter, pc.y );
+		LineTo( d->hDc, pc.x + CENTERMARK_LENGTH*sizeCenter, pc.y );
+		MoveTo( d->hDc, pc.x, pc.y - CENTERMARK_LENGTH*sizeCenter );
+		LineTo( d->hDc, pc.x, pc.y + CENTERMARK_LENGTH*sizeCenter );
+
+		// invalidate the area of the crosshair
+		rect.top  = pc.y - CENTERMARK_LENGTH*sizeCenter - 1;
+		rect.bottom  = pc.y + CENTERMARK_LENGTH*sizeCenter + 1;
+		rect.left = pc.x - CENTERMARK_LENGTH*sizeCenter - 1;
+		rect.right = pc.x + CENTERMARK_LENGTH*sizeCenter + 1;
+		myInvalidateRect( d, &rect );
 	}
 
 	if (d->hWnd) {
 		dw++;
 		a1 += a0;
-		if (a1>360.0)
+		if (a1>360.0) {
 			rect.top = p0.y;
-		else
+		} else {
 			rect.top = min(pe.y,ps.y);
-		if (a1>(a0>180?360.0:0.0)+180)
+		}
+		if (a1>(a0>180?360.0:0.0)+180) {
 			rect.bottom = p1.y;
-		else
+		} else {
 			rect.bottom = max(pe.y,ps.y);
-		if (a1>(a0>270?360.0:0.0)+270)
+		}
+		if (a1>(a0>270?360.0:0.0)+270) {
 			rect.left = p0.x;
-		else
+		} else {
 			rect.left = min(pe.x,ps.x);
-		if (a1>(a0>90?360.0:0.0)+90)
+		}
+		if (a1>(a0>90?360.0:0.0)+90) {
 			rect.right = p1.x;
-		else
+		} else {
 			rect.right = max(pe.x,ps.x);
+		}
 		rect.top -= dw;
 		rect.bottom += dw;
 		rect.left -= dw;
@@ -544,11 +552,11 @@ void wDrawArc(
 }
 
 void wDrawPoint(
-		wDraw_p d,
-		wDrawPix_t px,
-		wDrawPix_t py,
-		wDrawColor dc,
-		wDrawOpts dopt )
+        wDraw_p d,
+        wDrawPix_t px,
+        wDrawPix_t py,
+        wDrawColor dc,
+        wDrawOpts dopt )
 {
 	POINT p0;
 	RECT rect;
@@ -556,13 +564,16 @@ void wDrawPoint(
 	p0.x = XDRAWPIX2WINPIX(d,px);
 	p0.y = YDRAWPIX2WINPIX(d,py);
 
-	if ( p0.x < 0 || p0.y < 0 )
+	if ( p0.x < 0 || p0.y < 0 ) {
 		return;
-	if ( p0.x >= d->w || p0.y >= d->h )
+	}
+	if ( p0.x >= d->w || p0.y >= d->h ) {
 		return;
+	}
 	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 
-	SetPixel( d->hDc, p0.x, p0.y, mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/ );
+	SetPixel( d->hDc, p0.x, p0.y, mswGetColor(d->hasPalette,
+	                dc) /*colorPalette.palPalEntry[dc]*/ );
 	if (d->hWnd) {
 		rect.top = p0.y-1;
 		rect.bottom = p0.y+1;
@@ -582,126 +593,141 @@ void wDrawPoint(
 
 
 static LOGFONT logFont = {
-		/* Initial default values */
-		-24, 0, /* H, W */
-		0,		/* A */
-		0,
-		FW_REGULAR,
-		0, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Arial" };
+	/* Initial default values */
+	-24, 0, /* H, W */
+	        0,		/* A */
+	        0,
+	        FW_REGULAR,
+	        0, 0, 0,/* I, U, SO */
+	        ANSI_CHARSET,
+	        0,		/* OP */
+	        0,		/* CP */
+	        0,		/* Q */
+	        0,		/* P&F */
+	        "Arial"
+        };
 
 static LOGFONT timesFont[2][2] = {
-		{ {
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_REGULAR,
-		0, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Times" },
+	{ {
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_REGULAR,
+			0, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Times"
+		},
 		{
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_REGULAR,
-		1, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Times" } },
-		{ {
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_BOLD,
-		0, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Times" },
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_REGULAR,
+			1, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Times"
+		}
+	},
+	{ {
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_BOLD,
+			0, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Times"
+		},
 		{
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_BOLD,
-		1, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Times" } } };
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_BOLD,
+			1, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Times"
+		}
+	}
+};
 
 static LOGFONT helvFont[2][2] = {
-		{ {
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_REGULAR,
-		0, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Arial" },
+	{ {
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_REGULAR,
+			0, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Arial"
+		},
 		{
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_REGULAR,
-		1, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Arial" } },
-		{ {
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_BOLD,
-		0, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Arial" },
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_REGULAR,
+			1, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Arial"
+		}
+	},
+	{ {
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_BOLD,
+			0, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Arial"
+		},
 		{
-		/* Initial default values */
-		0, 0,	/* H, W */
-		0,		/* A */
-		0,
-		FW_BOLD,
-		1, 0, 0,/* I, U, SO */
-		ANSI_CHARSET,
-		0,		/* OP */
-		0,		/* CP */
-		0,		/* Q */
-		0,		/* P&F */
-		"Hevletica" } } };
+			/* Initial default values */
+			0, 0,	/* H, W */
+			0,		/* A */
+			0,
+			FW_BOLD,
+			1, 0, 0,/* I, U, SO */
+			ANSI_CHARSET,
+			0,		/* OP */
+			0,		/* CP */
+			0,		/* Q */
+			0,		/* P&F */
+			"Hevletica"
+		}
+	}
+};
 
 
 void mswFontInit( void )
@@ -735,8 +761,9 @@ static void doChooseFont( void )
 	rc = ChooseFont( &chooseFont );
 	if (rc) {
 		fontSize = (wFontSize_t)(-logFont.lfHeight * 72) / 96.0 / fontFactor;
-		if (fontSize < 1)
+		if (fontSize < 1) {
 			fontSize = 1;
+		}
 		wPrefSetString( "msw window font", "face", logFont.lfFaceName );
 		wPrefSetInteger( "msw window font", "size", logFont.lfHeight );
 	}
@@ -747,20 +774,21 @@ static int computeFontSize( wDraw_p d, double siz )
 	int ret;
 	siz = (siz * d->DPI) / 72.0;
 	ret = (int)(siz * fontFactor);
-	if (ret < 1)
+	if (ret < 1) {
 		ret = 1;
+	}
 	return -ret;
 }
 
 void wDrawGetTextSize(
-		wDrawPix_t *w,
-		wDrawPix_t *h,
-		wDrawPix_t *d,
-		wDrawPix_t *a,
-		wDraw_p bd,
-		const char * text,
-		wFont_p fp,
-		double siz )
+        wDrawPix_t *w,
+        wDrawPix_t *h,
+        wDrawPix_t *d,
+        wDrawPix_t *a,
+        wDraw_p bd,
+        const char * text,
+        wFont_p fp,
+        double siz )
 {
 	wWinPix_t x, y;
 	HFONT newFont, prevFont;
@@ -768,8 +796,9 @@ void wDrawGetTextSize(
 	int oldLfHeight;
 	TEXTMETRIC textMetric;
 
-	if (fp == NULL)
+	if (fp == NULL) {
 		fp = &logFont;
+	}
 	fp->lfEscapement = 0;
 	oldLfHeight = fp->lfHeight;
 	fp->lfHeight = computeFontSize( bd, siz );
@@ -793,7 +822,7 @@ void wDrawGetTextSize(
 }
 /**
  * Draw text
- * 
+ *
  * \param d	device context
  * \param px position x
  * \param py position y
@@ -805,74 +834,74 @@ void wDrawGetTextSize(
  * \param dopts drawing options
  */
 void wDrawString(
-    wDraw_p d,
-    wDrawPix_t px,
-    wDrawPix_t py,
-    double angle,
-    const char * text,
-    wFont_p fp,
-    double siz,
-    wDrawColor dc,
-    wDrawOpts dopts)
+        wDraw_p d,
+        wDrawPix_t px,
+        wDrawPix_t py,
+        double angle,
+        const char * text,
+        wFont_p fp,
+        double siz,
+        wDrawColor dc,
+        wDrawOpts dopts)
 {
-    int x, y;
-    HFONT newFont, prevFont;
-    DWORD extent;
-    int w, h;
-    RECT rect;
-    int oldLfHeight;
+	int x, y;
+	HFONT newFont, prevFont;
+	DWORD extent;
+	int w, h;
+	RECT rect;
+	int oldLfHeight;
 
-    if (fp == NULL) {
-        fp = &logFont;
-    }
+	if (fp == NULL) {
+		fp = &logFont;
+	}
 
-    oldLfHeight = fp->lfHeight;
-    fp->lfEscapement = (int)(angle*10.0);
-    fp->lfHeight = computeFontSize(d, siz);
-    fp->lfWidth = 0;
-    newFont = CreateFontIndirect(fp);
-    x = XDRAWPIX2WINPIX(d,px) + (int)(mswsin(angle)*fp->lfHeight-0.5);
-    y = YDRAWPIX2WINPIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
+	oldLfHeight = fp->lfHeight;
+	fp->lfEscapement = (int)(angle*10.0);
+	fp->lfHeight = computeFontSize(d, siz);
+	fp->lfWidth = 0;
+	newFont = CreateFontIndirect(fp);
+	x = XDRAWPIX2WINPIX(d,px) + (int)(mswsin(angle)*fp->lfHeight-0.5);
+	y = YDRAWPIX2WINPIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
 
-  	setDrawMode( d, 0, wDrawLineSolid, dc, dopts );
+	setDrawMode( d, 0, wDrawLineSolid, dc, dopts );
 	prevFont = SelectObject(d->hDc, newFont);
-    SetBkMode(d->hDc, TRANSPARENT);
+	SetBkMode(d->hDc, TRANSPARENT);
 
-    if (dopts & wDrawOutlineFont) {
-        HPEN oldPen;
-        BeginPath(d->hDc);
-        TextOut(d->hDc, x, y, text, (int)strlen(text));
-        EndPath(d->hDc);
+	if (dopts & wDrawOutlineFont) {
+		HPEN oldPen;
+		BeginPath(d->hDc);
+		TextOut(d->hDc, x, y, text, (int)strlen(text));
+		EndPath(d->hDc);
 
-        // Now draw outline text
-        oldPen = SelectObject(d->hDc,
-                              CreatePen(PS_SOLID, 1,
-                              mswGetColor(d->hasPalette, dc)));
-        StrokePath(d->hDc);
-        SelectObject(d->hDc, oldPen);
-    } else {
-        COLORREF old;
+		// Now draw outline text
+		oldPen = SelectObject(d->hDc,
+		                      CreatePen(PS_SOLID, 1,
+		                                mswGetColor(d->hasPalette, dc)));
+		StrokePath(d->hDc);
+		SelectObject(d->hDc, oldPen);
+	} else {
+		COLORREF old;
 
-        old = SetTextColor(d->hDc, mswGetColor(d->hasPalette, dc));
-        TextOut(d->hDc, x, y, text, (int)(strlen(text)));
-        SetTextColor(d->hDc, old);
-    }
+		old = SetTextColor(d->hDc, mswGetColor(d->hasPalette, dc));
+		TextOut(d->hDc, x, y, text, (int)(strlen(text)));
+		SetTextColor(d->hDc, old);
+	}
 
-    extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, (int)(strlen(text)));
-    SelectObject(d->hDc, prevFont);
-    w = LOWORD(extent);
-    h = HIWORD(extent);
+	extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, (int)(strlen(text)));
+	SelectObject(d->hDc, prevFont);
+	w = LOWORD(extent);
+	h = HIWORD(extent);
 
-    if (d->hWnd) {
-        rect.top = y - (w + h + 1);
-        rect.bottom = y + (w + h + 1);
-        rect.left = x - (w + h + 1);
-        rect.right = x + (w + h + 1);
-        myInvalidateRect(d, &rect);
-    }
+	if (d->hWnd) {
+		rect.top = y - (w + h + 1);
+		rect.bottom = y + (w + h + 1);
+		rect.left = x - (w + h + 1);
+		rect.right = x + (w + h + 1);
+		myInvalidateRect(d, &rect);
+	}
 
-    DeleteObject(newFont);
-    fp->lfHeight = oldLfHeight;
+	DeleteObject(newFont);
+	fp->lfHeight = oldLfHeight;
 }
 
 static const char * wCurFont( void )
@@ -886,12 +915,13 @@ void wInitializeFonts()
 
 wFont_p wStandardFont( int family, wBool_t bold, wBool_t italic )
 {
-	if (family == F_TIMES)
+	if (family == F_TIMES) {
 		return &timesFont[bold][italic];
-	else if (family == F_HELV)
+	} else if (family == F_HELV) {
 		return &helvFont[bold][italic];
-	else
+	} else {
 		return NULL;
+	}
 }
 
 void wSelectFont( const char * title )
@@ -921,23 +951,23 @@ void wSetSelectedFontSize(wFontSize_t size)
 
 
 void wDrawFilledRectangle(
-		wDraw_p d,
-		wDrawPix_t px,
-		wDrawPix_t py,
-		wDrawPix_t sx,
-		wDrawPix_t sy,
-		wDrawColor color,
-		wDrawOpts opts )
+        wDraw_p d,
+        wDrawPix_t px,
+        wDrawPix_t py,
+        wDrawPix_t sx,
+        wDrawPix_t sy,
+        wDrawColor color,
+        wDrawOpts opts )
 {
 	int mode;
 	RECT rect;
-	if (d == NULL)
+	if (d == NULL) {
 		return;
+	}
 	setDrawBrush( d, color, opts );
 	if (opts & wDrawOptTransparent) {
 		mode = R2_NOTXORPEN;
-	}
-	else {
+	} else {
 		mode = R2_COPYPEN;
 	}
 	SetROP2(d->hDc, mode);
@@ -946,19 +976,25 @@ void wDrawFilledRectangle(
 	rect.top = YDRAWPIX2WINPIX(d,py+sy);
 	rect.bottom = YDRAWPIX2WINPIX(d,py);
 	if ( rect.right < 0 ||
-		 rect.bottom < 0 )
+	     rect.bottom < 0 ) {
 		return;
-	if ( rect.left < 0 )
+	}
+	if ( rect.left < 0 ) {
 		rect.left = 0;
-	if ( rect.top < 0 )
+	}
+	if ( rect.top < 0 ) {
 		rect.top = 0;
+	}
 	if ( rect.left > d->w ||
-		 rect.top > d->h )
+	     rect.top > d->h ) {
 		return;
-	if ( rect.right > d->w )
+	}
+	if ( rect.right > d->w ) {
 		rect.right = d->w;
-	if ( rect.bottom > d->h )
+	}
+	if ( rect.bottom > d->h ) {
 		rect.bottom = d->h;
+	}
 	Rectangle( d->hDc, rect.left, rect.top, rect.right, rect.bottom );
 	if (d->hWnd) {
 		rect.top--;
@@ -970,7 +1006,7 @@ void wDrawFilledRectangle(
 }
 
 #ifdef DRAWFILLPOLYLOG
-    static FILE * logF;
+static FILE * logF;
 #endif
 
 static dynArr_t wFillPoints_da;
@@ -991,34 +1027,34 @@ static dynArr_t wFillType_da;
  */
 
 static void addPoint(
-    wDraw_p d,
-    int pk,
-    coOrd * pp,
-    BYTE type, RECT * pr)
+        wDraw_p d,
+        int pk,
+        coOrd * pp,
+        BYTE type, RECT * pr)
 {
-    POINT p;
-    p.x = XDRAWPIX2WINPIX(d, pp->x);
-    p.y = YDRAWPIX2WINPIX(d, pp->y);
+	POINT p;
+	p.x = XDRAWPIX2WINPIX(d, pp->x);
+	p.y = YDRAWPIX2WINPIX(d, pp->y);
 
 #ifdef DRAWFILLPOLYLOG
-    fprintf(logF, "	q[%d] = {%d,%d}\n", pk, p.x, p.y);
+	fprintf(logF, "	q[%d] = {%d,%d}\n", pk, p.x, p.y);
 #endif
 
-    DYNARR_N(POINT, wFillPoints_da, pk) = p;
-    DYNARR_N(BYTE, wFillType_da, pk) = type;
+	DYNARR_N(POINT, wFillPoints_da, pk) = p;
+	DYNARR_N(BYTE, wFillType_da, pk) = type;
 
-    if (p.x < pr->left) {
-        pr->left = p.x;
-    }
-    if (p.x > pr->right) {
-        pr->right = p.x;
-    }
-    if (p.y < pr->top) {
-        pr->top = p.y;
-    }
-    if (p.y > pr->bottom) {
-        pr->bottom = p.y;
-    }
+	if (p.x < pr->left) {
+		pr->left = p.x;
+	}
+	if (p.x > pr->right) {
+		pr->right = p.x;
+	}
+	if (p.y < pr->top) {
+		pr->top = p.y;
+	}
+	if (p.y > pr->bottom) {
+		pr->bottom = p.y;
+	}
 }
 
 /**
@@ -1038,185 +1074,183 @@ static void addPoint(
  */
 
 void wDrawPolygon(
-    wDraw_p d,
-    wDrawPix_t node[][2],
-    wPolyLine_e type[],
-    wIndex_t cnt,
-    wDrawColor color,
-    wDrawWidth dw,
-    wDrawLineType_e lt,
-    wDrawOpts opts,
-    int fill,
-    int open)
+        wDraw_p d,
+        wDrawPix_t node[][2],
+        wPolyLine_e type[],
+        wIndex_t cnt,
+        wDrawColor color,
+        wDrawWidth dw,
+        wDrawLineType_e lt,
+        wDrawOpts opts,
+        int fill,
+        int open)
 {
-    RECT rect;
-    int i, prevNode, nextNode;
-    int pointCount = 0;
-    coOrd endPoint0, endPoint1, controlPoint0, controlPoint1;
-    coOrd point, startingPoint;
-    BOOL rc;
-    int closed = 0;
+	RECT rect;
+	int i, prevNode, nextNode;
+	int pointCount = 0;
+	coOrd endPoint0, endPoint1, controlPoint0, controlPoint1;
+	coOrd point, startingPoint;
+	BOOL rc;
+	int closed = 0;
 
-    if (d == NULL) {
-        return;
-    }
+	if (d == NULL) {
+		return;
+	}
 
-    // make sure the array for the points is large enough
-    // worst case are rounded corners that require 4 points
-    DYNARR_RESET(POINT,wFillPoints_da);
-    DYNARR_SET(POINT,wFillPoints_da,(cnt + 1) * 4);
-    DYNARR_RESET(BYTE,wFillType_da);
-    DYNARR_SET(POINT,wFillType_da, (cnt + 1) * 4);
+	// make sure the array for the points is large enough
+	// worst case are rounded corners that require 4 points
+	DYNARR_RESET(POINT,wFillPoints_da);
+	DYNARR_SET(POINT,wFillPoints_da,(cnt + 1) * 4);
+	DYNARR_RESET(BYTE,wFillType_da);
+	DYNARR_SET(POINT,wFillType_da, (cnt + 1) * 4);
 
-    BeginPath(d->hDc);
+	BeginPath(d->hDc);
 
-    if (fill) {
+	if (fill) {
 		int mode;
-        setDrawBrush(d, color, opts);
+		setDrawBrush(d, color, opts);
 		if (opts & wDrawOptTransparent) {
 			mode = R2_NOTXORPEN;
-		}
-		else {
+		} else {
 			mode = R2_COPYPEN;
 		}
 		SetROP2(d->hDc, mode);
 
-    } else {
-        setDrawMode(d, dw, lt, color, opts);
-    }
+	} else {
+		setDrawMode(d, dw, lt, color, opts);
+	}
 
-    rect.left = rect.right = XDRAWPIX2WINPIX(d,node[cnt-1][0]-1);
-    rect.top = rect.bottom = YDRAWPIX2WINPIX(d,node[cnt-1][1]+1);
+	rect.left = rect.right = XDRAWPIX2WINPIX(d,node[cnt-1][0]-1);
+	rect.top = rect.bottom = YDRAWPIX2WINPIX(d,node[cnt-1][1]+1);
 
 #ifdef DRAWFILLPOLYLOG
-    logF = fopen("log.txt", "a");
-    fprintf(logF, "\np[%d] = {%d,%d}\n", cnt-1, node[0][0], node[0][1]);
+	logF = fopen("log.txt", "a");
+	fprintf(logF, "\np[%d] = {%d,%d}\n", cnt-1, node[0][0], node[0][1]);
 #endif
 
-    for (i=0; i<cnt; i++) {
-        wPolyLine_e type1;
-        point.x = node[i][0];
-        point.y = node[i][1];
-		if (type != NULL)
+	for (i=0; i<cnt; i++) {
+		wPolyLine_e type1;
+		point.x = node[i][0];
+		point.y = node[i][1];
+		if (type != NULL) {
 			type1 = type[i];
-		else
+		} else {
 			type1 = wPolyLineStraight;
+		}
 
-        if (type1 == wPolyLineRound || type1 == wPolyLineSmooth) {
-            prevNode = (i == 0) ? cnt - 1 : i - 1;
-            nextNode = (i == cnt - 1) ? 0 : i + 1;
+		if (type1 == wPolyLineRound || type1 == wPolyLineSmooth) {
+			prevNode = (i == 0) ? cnt - 1 : i - 1;
+			nextNode = (i == cnt - 1) ? 0 : i + 1;
 
-            // calculate distance to neighboring nodes
-            int prevXDistance = (wWinPix_t)(node[i][0] - node[prevNode][0]);
-            int prevYDistance = (wWinPix_t)(node[i][1] - node[prevNode][1]);
-            int nextXDistance = (wWinPix_t)(node[nextNode][0]-node[i][0]);
-            int nextYDistance = (wWinPix_t)(node[nextNode][1]-node[i][1]);
+			// calculate distance to neighboring nodes
+			int prevXDistance = (wWinPix_t)(node[i][0] - node[prevNode][0]);
+			int prevYDistance = (wWinPix_t)(node[i][1] - node[prevNode][1]);
+			int nextXDistance = (wWinPix_t)(node[nextNode][0]-node[i][0]);
+			int nextYDistance = (wWinPix_t)(node[nextNode][1]-node[i][1]);
 
-            // distance from node to endpoints of curve is half the line length
-            endPoint0.x = (prevXDistance/2)+node[prevNode][0];
-            endPoint0.y = (prevYDistance/2)+node[prevNode][1];
-            endPoint1.x = (nextXDistance/2)+node[i][0];
-            endPoint1.y = (nextYDistance/2)+node[i][1];
+			// distance from node to endpoints of curve is half the line length
+			endPoint0.x = (prevXDistance/2)+node[prevNode][0];
+			endPoint0.y = (prevYDistance/2)+node[prevNode][1];
+			endPoint1.x = (nextXDistance/2)+node[i][0];
+			endPoint1.y = (nextYDistance/2)+node[i][1];
 
-            if (type1 == wPolyLineRound) {
-                double distNext = (nextXDistance*nextXDistance + nextYDistance * nextYDistance);
-                double distPrev = (prevXDistance*prevXDistance + prevYDistance * prevYDistance);
-                // but should be half of the shortest line length (equidistant from node) for round
-                if ((distPrev > 0) && (distNext > 0)) {
-                    double ratio = sqrt(distPrev / distNext);
-                    if (distPrev < distNext) {
-                        endPoint1.x = ((nextXDistance*ratio) / 2) + node[i][0];
-                        endPoint1.y = ((nextYDistance*ratio) / 2) + node[i][1];
-                    } else {
-                        endPoint0.x = node[i][0] - (prevXDistance / (2 * ratio));
-                        endPoint0.y = node[i][1] - (prevYDistance / (2 * ratio));
-                    }
-                }
-                // experience says that the best look is achieved if the
-                // control points are in the middle between end point and node
-                controlPoint0.x = (node[i][0] - endPoint0.x) / 2 + endPoint0.x;
-                controlPoint0.y = (node[i][1] - endPoint0.y) / 2 + endPoint0.y;
+			if (type1 == wPolyLineRound) {
+				double distNext = (nextXDistance*nextXDistance + nextYDistance * nextYDistance);
+				double distPrev = (prevXDistance*prevXDistance + prevYDistance * prevYDistance);
+				// but should be half of the shortest line length (equidistant from node) for round
+				if ((distPrev > 0) && (distNext > 0)) {
+					double ratio = sqrt(distPrev / distNext);
+					if (distPrev < distNext) {
+						endPoint1.x = ((nextXDistance*ratio) / 2) + node[i][0];
+						endPoint1.y = ((nextYDistance*ratio) / 2) + node[i][1];
+					} else {
+						endPoint0.x = node[i][0] - (prevXDistance / (2 * ratio));
+						endPoint0.y = node[i][1] - (prevYDistance / (2 * ratio));
+					}
+				}
+				// experience says that the best look is achieved if the
+				// control points are in the middle between end point and node
+				controlPoint0.x = (node[i][0] - endPoint0.x) / 2 + endPoint0.x;
+				controlPoint0.y = (node[i][1] - endPoint0.y) / 2 + endPoint0.y;
 
-                controlPoint1.x = (endPoint1.x - node[i][0]) / 2 + node[i][0];
-                controlPoint1.y = (endPoint1.y - node[i][1]) / 2 + node[i][1];
-            } else {
-                controlPoint0 = point;
-                controlPoint1 = point;
-            }
-        }
+				controlPoint1.x = (endPoint1.x - node[i][0]) / 2 + node[i][0];
+				controlPoint1.y = (endPoint1.y - node[i][1]) / 2 + node[i][1];
+			} else {
+				controlPoint0 = point;
+				controlPoint1 = point;
+			}
+		}
 
-        if (i==0) {
-            if (type1 == wPolyLineStraight || open) {
-                // for straight lines or open shapes use the starting point as passed
-                addPoint(d, pointCount++, &point, PT_MOVETO, &rect);
-                startingPoint = point;
-            } else {
-                // for Bezier begin with the calculated starting point
-                addPoint(d, pointCount++, &endPoint0, PT_MOVETO, &rect);
-                addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
-                addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
-                addPoint(d, pointCount++, &endPoint1, PT_BEZIERTO, &rect);
-                startingPoint = endPoint0;
-            }
-        } else {
-            if (type1 == wPolyLineStraight || (open && (i==cnt-1))) {
-                addPoint(d, pointCount++, &point, PT_LINETO, &rect);
-            } else {
-                if (i==cnt-1 && !open) {
-                    closed = TRUE;
-                }
-                addPoint(d, pointCount++, &endPoint0, PT_LINETO, &rect);
-                addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
-                addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
-                addPoint(d, pointCount++, &endPoint1,
-                         PT_BEZIERTO | (closed ? PT_CLOSEFIGURE : 0), &rect);
-            }
-        }
-    }
+		if (i==0) {
+			if (type1 == wPolyLineStraight || open) {
+				// for straight lines or open shapes use the starting point as passed
+				addPoint(d, pointCount++, &point, PT_MOVETO, &rect);
+				startingPoint = point;
+			} else {
+				// for Bezier begin with the calculated starting point
+				addPoint(d, pointCount++, &endPoint0, PT_MOVETO, &rect);
+				addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
+				addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
+				addPoint(d, pointCount++, &endPoint1, PT_BEZIERTO, &rect);
+				startingPoint = endPoint0;
+			}
+		} else {
+			if (type1 == wPolyLineStraight || (open && (i==cnt-1))) {
+				addPoint(d, pointCount++, &point, PT_LINETO, &rect);
+			} else {
+				if (i==cnt-1 && !open) {
+					closed = TRUE;
+				}
+				addPoint(d, pointCount++, &endPoint0, PT_LINETO, &rect);
+				addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
+				addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
+				addPoint(d, pointCount++, &endPoint1,
+				         PT_BEZIERTO | (closed ? PT_CLOSEFIGURE : 0), &rect);
+			}
+		}
+	}
 
-    if (!open && !closed) {
-        addPoint(d, pointCount++, &startingPoint, PT_LINETO, &rect);
-    }
-    rc = PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, pointCount);
+	if (!open && !closed) {
+		addPoint(d, pointCount++, &startingPoint, PT_LINETO, &rect);
+	}
+	rc = PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, pointCount);
 
-    EndPath(d->hDc);
+	EndPath(d->hDc);
 
-    if (fill && !open) {
-        FillPath(d->hDc);
-    } else {
-        StrokePath(d->hDc);
-    }
+	if (fill && !open) {
+		FillPath(d->hDc);
+	} else {
+		StrokePath(d->hDc);
+	}
 
-    if (d->hWnd) {
-        rect.top--;
-        rect.left--;
-        rect.bottom++;
-        rect.right++;
-        myInvalidateRect(d, &rect);
-    }
+	if (d->hWnd) {
+		rect.top--;
+		rect.left--;
+		rect.bottom++;
+		rect.right++;
+		myInvalidateRect(d, &rect);
+	}
 }
 
 #define MAX_FILLCIRCLE_POINTS	(30)
 void wDrawFilledCircle(
-		wDraw_p d,
-		wDrawPix_t x,
-		wDrawPix_t y,
-		wDrawPix_t r,
-		wDrawColor color,
-		wDrawOpts opts )
+        wDraw_p d,
+        wDrawPix_t x,
+        wDrawPix_t y,
+        wDrawPix_t r,
+        wDrawColor color,
+        wDrawOpts opts )
 {
 	POINT p0, p1;
 	RECT rect;
 	static wDrawPix_t circlePts[MAX_FILLCIRCLE_POINTS][2];
-	int inx, cnt;
-	double dang;
 
 	p0.x = XDRAWPIX2WINPIX(d,x-r);
 	p0.y = YDRAWPIX2WINPIX(d,y+r);
 	p1.x = XDRAWPIX2WINPIX(d,x+r);
 	p1.y = YDRAWPIX2WINPIX(d,y-r);
-						   
-	setDrawBrush( d, color, opts );						  
+
+	setDrawBrush( d, color, opts );
 	Ellipse( d->hDc, p0.x, p0.y, p1.x, p1.y );
 	if (d->hWnd) {
 		rect.top = p0.y;
@@ -1237,22 +1271,23 @@ void wDrawFilledCircle(
 
 
 void wDrawSaveImage(
-		wDraw_p bd )
+        wDraw_p bd )
 {
-	if ( bd->hBmBackup ) {			
+	if ( bd->hBmBackup ) {
 		SelectObject( bd->hDcBackup, bd->hBmBackupOld );
 		DeleteObject( bd->hBmBackup );
 		bd->hBmBackup = (HBITMAP)0;
 	}
-	if ( bd->hDcBackup == (HDC)0 )
-		bd->hDcBackup = CreateCompatibleDC( bd->hDc ); 
+	if ( bd->hDcBackup == (HDC)0 ) {
+		bd->hDcBackup = CreateCompatibleDC( bd->hDc );
+	}
 	bd->hBmBackup = CreateCompatibleBitmap( bd->hDc, bd->w, bd->h );
 	bd->hBmBackupOld = SelectObject( bd->hDcBackup, bd->hBmBackup );
 	BitBlt( bd->hDcBackup, 0, 0, bd->w, bd->h, bd->hDc, 0, 0, SRCCOPY );
 }
 
 void wDrawRestoreImage(
-		wDraw_p bd )
+        wDraw_p bd )
 {
 	if ( bd->hBmBackup == (HBITMAP)0 ) {
 		mswFail( "wDrawRestoreImage: hBmBackup == 0" );
@@ -1288,14 +1323,14 @@ void wDrawClear( wDraw_p d )
 
 
 void wDrawSetSize(
-		wDraw_p d,
-		wWinPix_t width,
-		wWinPix_t height, void * redraw)
+        wDraw_p d,
+        wWinPix_t width,
+        wWinPix_t height, void * redraw)
 {
 	d->w = width;
 	d->h = height;
 	if (!SetWindowPos( d->hWnd, HWND_TOP, 0, 0,
-		d->w, d->h, SWP_NOMOVE|SWP_NOZORDER)) {
+	                   d->w, d->h, SWP_NOMOVE|SWP_NOZORDER)) {
 		mswFail("wDrawSetSize: SetWindowPos");
 	}
 	/*wRedraw( d );*/
@@ -1303,9 +1338,9 @@ void wDrawSetSize(
 
 
 void wDrawGetSize(
-		wDraw_p d,
-		wWinPix_t * width,
-		wWinPix_t * height )
+        wDraw_p d,
+        wWinPix_t * width,
+        wWinPix_t * height )
 {
 	*width = d->w-2;
 	*height = d->h-2;
@@ -1329,11 +1364,11 @@ double wDrawGetMaxRadius( wDraw_p d )
 }
 
 void wDrawClip(
-		wDraw_p d,
-		wDrawPix_t x,
-		wDrawPix_t y,
-		wDrawPix_t w,
-		wDrawPix_t h )
+        wDraw_p d,
+        wDrawPix_t x,
+        wDrawPix_t y,
+        wDrawPix_t w,
+        wDrawPix_t h )
 {
 	wWinPix_t ix0, iy0, ix1, iy1;
 	HRGN hRgnClip;
@@ -1351,9 +1386,96 @@ void wDrawClip(
 void wRedraw( wDraw_p d )
 {
 	wDrawClear( d );
-	if (d->drawRepaint)
+	if (d->drawRepaint) {
 		d->drawRepaint( d, d->data, 0, 0 );
+	}
 }
+
+/*
+ *****************************************************************************
+ *
+ * Cursor handling
+ *
+ *****************************************************************************
+ */
+
+
+extern long dontHideCursor;
+static wCursor_t curCursor = wCursorNormal;
+
+void DoSetCursor()
+{
+	switch (curCursor) {
+	case wCursorNormal:
+	default:
+		SetCursor(LoadCursor(NULL, IDC_ARROW));
+		break;
+
+	case wCursorWait:
+		SetCursor(LoadCursor(NULL, IDC_WAIT));
+		break;
+
+	case wCursorCross:
+		SetCursor(LoadCursor(NULL, IDC_CROSS));
+		break;
+
+	case wCursorIBeam:
+		SetCursor(LoadCursor(NULL, IDC_IBEAM));
+		break;
+
+	case wCursorQuestion:
+		SetCursor(LoadCursor(NULL, IDC_HELP));
+		break;
+
+	case wCursorHand:
+		SetCursor(LoadCursor(NULL, IDC_HAND));
+		break;
+
+	case wCursorNo:
+		SetCursor(LoadCursor(NULL, IDC_NO));
+		break;
+
+	case wCursorSizeAll:
+		SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+		break;
+
+	case wCursorSizeNESW:
+		SetCursor(LoadCursor(NULL, IDC_SIZENESW));
+		break;
+
+	case wCursorSizeNWSE:
+		SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+		break;
+
+	case wCursorSizeNS:
+		SetCursor(LoadCursor(NULL, IDC_SIZENS));
+		break;
+
+	case wCursorSizeWE:
+		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+		break;
+
+	case wCursorAppStart:
+		SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
+		break;
+
+	case wCursorNone:
+		if (!dontHideCursor) {
+			SetCursor(NULL);
+		}
+		break;
+	}
+
+}
+
+void wSetCursor(wDraw_p win,
+	wCursor_t cursor)
+{
+	curCursor = cursor;
+	DoSetCursor();
+}
+
+
 
 /*
  *****************************************************************************
@@ -1364,27 +1486,27 @@ void wRedraw( wDraw_p d )
  */
 
 struct wDrawBitMap_t {
-		wDrawBitMap_p next;
-		wDrawPix_t x;
-		wDrawPix_t y;
-		wDrawPix_t w;
-		wDrawPix_t h;
-		char * bmx;
-		wDrawColor color;
-		HBITMAP bm;
-		};
+	wDrawBitMap_p next;
+	wDrawPix_t x;
+	wDrawPix_t y;
+	wDrawPix_t w;
+	wDrawPix_t h;
+	char * bmx;
+	wDrawColor color;
+	HBITMAP bm;
+};
 static wDrawBitMap_p bmRoot = NULL;
 
 extern wDrawColor drawColorWhite;
 extern wDrawColor drawColorBlack;
 
 void wDrawBitMap(
-		wDraw_p d,
-		wDrawBitMap_p bm,
-		wDrawPix_t px,
-		wDrawPix_t py,
-		wDrawColor dc,
-		wDrawOpts dopt )
+        wDraw_p d,
+        wDrawBitMap_p bm,
+        wDrawPix_t px,
+        wDrawPix_t py,
+        wDrawColor dc,
+        wDrawOpts dopt )
 {
 	HDC bmDc;
 	HBITMAP oldBm;
@@ -1395,8 +1517,9 @@ void wDrawBitMap(
 	x0 = XDRAWPIX2WINPIX(d,px-bm->x);
 	y0 = YDRAWPIX2WINPIX(d,py-bm->y+bm->h);
 #ifdef LATER
-	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
+	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) ) {
 		return;
+	}
 #endif
 	if (dc == drawColorWhite) {
 		mode = clrOp;
@@ -1406,10 +1529,12 @@ void wDrawBitMap(
 	}
 
 	if ( bm->color != dc ) {
-		if ( bm->bm )
+		if ( bm->bm ) {
 			DeleteObject( bm->bm );
-		bm->bm = mswCreateBitMap( mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/, RGB( 255, 255, 255 ),
-				RGB( 255, 255, 255 ), (wWinPix_t)bm->w, (wWinPix_t)bm->h, bm->bmx );
+		}
+		bm->bm = mswCreateBitMap( mswGetColor(d->hasPalette,
+		                                      dc) /*colorPalette.palPalEntry[dc]*/, RGB( 255, 255, 255 ),
+		                          RGB( 255, 255, 255 ), (wWinPix_t)bm->w, (wWinPix_t)bm->h, bm->bmx );
 		bm->color = dc;
 	}
 
@@ -1420,22 +1545,22 @@ void wDrawBitMap(
 	SelectObject( bmDc, oldBm );
 	DeleteDC( bmDc );
 	if (d->hWnd) {
-	rect.top = y0-1;
-	rect.bottom = rect.top+ (wWinPix_t)bm->h+1;
-	rect.left = x0-1;
-	rect.right = rect.left+ (wWinPix_t)bm->w+1;
-	myInvalidateRect( d, &rect );
+		rect.top = y0-1;
+		rect.bottom = rect.top+ (wWinPix_t)bm->h+1;
+		rect.left = x0-1;
+		rect.right = rect.left+ (wWinPix_t)bm->w+1;
+		myInvalidateRect( d, &rect );
 	}
 }
 
 
 wDrawBitMap_p wDrawBitMapCreate(
-		wDraw_p d,
-		int w,
-		int h,
-		int x,
-		int y,
-		const unsigned char * bits )
+        wDraw_p d,
+        int w,
+        int h,
+        int x,
+        int y,
+        const unsigned char * bits )
 {
 	wDrawBitMap_p bm;
 	int bmSize = ((w+7)/8) * h;
@@ -1470,10 +1595,10 @@ wDrawBitMap_p wDrawBitMapCreate(
 static int doSetFocus = 1;
 
 LRESULT FAR PASCAL XEXPORT mswDrawPush(
-		HWND hWnd,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+        HWND hWnd,
+        UINT message,
+        WPARAM wParam,
+        LPARAM lParam )
 {
 	wIndex_t inx = (wIndex_t)GetWindowLongPtr( hWnd, GWL_ID );
 	wDraw_p b;
@@ -1497,7 +1622,7 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			b->hBmTemp = 0;
 			b->hBmOld = 0;
 		} else {
-			b->hDc = CreateCompatibleDC( hDc ); 
+			b->hDc = CreateCompatibleDC( hDc );
 			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
 			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
 			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
@@ -1530,68 +1655,76 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		if (b->hWnd) {
 			if ( b->option & BD_DIRECT ) {
 			} else {
-			hDc = GetDC( b->hWnd );
+				hDc = GetDC( b->hWnd );
 //-			DeleteObject( b->hBmOld );
-			DeleteObject( b->hBmMain );
-			DeleteObject( b->hBmTemp );
-			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
-			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
+				DeleteObject( b->hBmMain );
+				DeleteObject( b->hBmTemp );
+				b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
+				b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
 //-			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
-			ReleaseDC( b->hWnd, hDc );
-			SetROP2( b->hDc, R2_WHITE );
-			Rectangle( b->hDc, 0, 0, b->w, b->h );
+				ReleaseDC( b->hWnd, hDc );
+				SetROP2( b->hDc, R2_WHITE );
+				Rectangle( b->hDc, 0, 0, b->w, b->h );
 			}
 		}
 		/*if (b->drawResize)
 			b->drawResize( b, b->size );*/
-		if (b->drawRepaint)
+		if (b->drawRepaint) {
 			b->drawRepaint( b, b->data, 0, 0 );
+		}
 		return (LRESULT)0;
 	case WM_MOUSEMOVE:
 		activeWnd = GetActiveWindow();
 		focusWnd = GetFocus();
 		if (focusWnd != hWnd) {
 			b = (wDraw_p)mswMapIndex( inx );
-			if (!b)
+			if (!b) {
 				break;
-			if ( !((wControl_p)b->parent) )
+			}
+			if ( !((wControl_p)b->parent) ) {
 				break;
-			if ( ((wControl_p)b->parent)->hWnd != activeWnd )
+			}
+			if ( ((wControl_p)b->parent)->hWnd != activeWnd ) {
 				break;
+			}
 		}
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_LBUTTONDBLCLK:
-		if (message == WM_LBUTTONDOWN)
+		if (message == WM_LBUTTONDOWN) {
 			action = wActionLDown;
-		else if (message == WM_RBUTTONDOWN)
+		} else if (message == WM_RBUTTONDOWN) {
 			action = wActionRDown;
-		else if (message == WM_LBUTTONUP)
+		} else if (message == WM_LBUTTONUP) {
 			action = wActionLUp;
-		else if (message == WM_RBUTTONUP)
+		} else if (message == WM_RBUTTONUP) {
 			action = wActionRUp;
-		else if (message == WM_LBUTTONDBLCLK)
+		} else if (message == WM_LBUTTONDBLCLK) {
 			action = wActionLDownDouble;
-		else {
-			if ( (wParam & MK_LBUTTON) != 0)
+		} else {
+			if ( (wParam & MK_LBUTTON) != 0) {
 				action = wActionLDrag;
-			else if ( (wParam & MK_RBUTTON) != 0)
+			} else if ( (wParam & MK_RBUTTON) != 0) {
 				action = wActionRDrag;
-			else
+			} else {
 				action = wActionMove;
+			}
 		}
 		b = (wDraw_p)mswMapIndex( inx );
-		if (!b)
+		if (!b) {
 			break;
-		if (doSetFocus && message != WM_MOUSEMOVE)
+		}
+		if (doSetFocus && message != WM_MOUSEMOVE) {
 			SetFocus( ((wControl_p)b->parent)->hWnd );
+		}
 		if ( (b->option&BD_NOCAPTURE) == 0 ) {
-			if (message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN)
+			if (message == WM_LBUTTONDOWN || message == WM_RBUTTONDOWN) {
 				SetCapture( b->hWnd );
-			else if (message == WM_LBUTTONUP || message == WM_RBUTTONUP)
+			} else if (message == WM_LBUTTONUP || message == WM_RBUTTONUP) {
 				ReleaseCapture();
+			}
 		}
 		ix = LOWORD( lParam );
 		iy = HIWORD( lParam );
@@ -1599,45 +1732,50 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 		y = YWINPIX2DRAWPIX( b, iy );
 		b->lastX = x;
 		b->lastY = y;
-		if (b->action)
+		if (b->action) {
 			b->action( b, b->data, action, x, y );
-		if (b->hWnd)
+		}
+		if (b->hWnd) {
 			UpdateWindow(b->hWnd);
+		}
 		return (LRESULT)0;
 	case WM_CHAR:
 		b = (wDraw_p)mswMapIndex( inx );
 		extChar = wAccelKey_None;
 		if (lParam & 0x01000000L)
-		switch( wParam ) {
-		case VK_DELETE: extChar = wAccelKey_Del; break;
-		case VK_INSERT: extChar = wAccelKey_Ins; break;
-		case VK_HOME:	extChar = wAccelKey_Home; break;
-		case VK_END:	extChar = wAccelKey_End; break;
-		case VK_PRIOR:	extChar = wAccelKey_Pgup; break;
-		case VK_NEXT:	extChar = wAccelKey_Pgdn; break;
-		case VK_UP:		extChar = wAccelKey_Up; break;
-		case VK_DOWN:	extChar = wAccelKey_Down; break;
-		case VK_RIGHT:	extChar = wAccelKey_Right; break;				
-		case VK_LEFT:	extChar = wAccelKey_Left; break;
-		case VK_BACK:	extChar = wAccelKey_Back; break;
-		case VK_F1:		extChar = wAccelKey_F1; break;
-		case VK_F2:		extChar = wAccelKey_F2; break;
-		case VK_F3:		extChar = wAccelKey_F3; break;
-		case VK_F4:		extChar = wAccelKey_F4; break;
-		case VK_F5:		extChar = wAccelKey_F5; break;
-		case VK_F6:		extChar = wAccelKey_F6; break;
-		case VK_F7:		extChar = wAccelKey_F7; break;
-		case VK_F8:		extChar = wAccelKey_F8; break;
-		case VK_F9:		extChar = wAccelKey_F9; break;
-		case VK_F10:	extChar = wAccelKey_F10; break;
-		case VK_F11:	extChar = wAccelKey_F11; break;
-		case VK_F12:	extChar = wAccelKey_F12; break;
-		}
+			switch( wParam ) {
+			case VK_DELETE: extChar = wAccelKey_Del; break;
+			case VK_INSERT: extChar = wAccelKey_Ins; break;
+			case VK_HOME:	extChar = wAccelKey_Home; break;
+			case VK_END:	extChar = wAccelKey_End; break;
+			case VK_PRIOR:	extChar = wAccelKey_Pgup; break;
+			case VK_NEXT:	extChar = wAccelKey_Pgdn; break;
+			case VK_UP:		extChar = wAccelKey_Up; break;
+			case VK_DOWN:	extChar = wAccelKey_Down; break;
+			case VK_RIGHT:	extChar = wAccelKey_Right; break;
+			case VK_LEFT:	extChar = wAccelKey_Left; break;
+			case VK_BACK:	extChar = wAccelKey_Back; break;
+			case VK_F1:		extChar = wAccelKey_F1; break;
+			case VK_F2:		extChar = wAccelKey_F2; break;
+			case VK_F3:		extChar = wAccelKey_F3; break;
+			case VK_F4:		extChar = wAccelKey_F4; break;
+			case VK_F5:		extChar = wAccelKey_F5; break;
+			case VK_F6:		extChar = wAccelKey_F6; break;
+			case VK_F7:		extChar = wAccelKey_F7; break;
+			case VK_F8:		extChar = wAccelKey_F8; break;
+			case VK_F9:		extChar = wAccelKey_F9; break;
+			case VK_F10:	extChar = wAccelKey_F10; break;
+			case VK_F11:	extChar = wAccelKey_F11; break;
+			case VK_F12:	extChar = wAccelKey_F12; break;
+			}
 		if (b && b->action) {
-			if (extChar != wAccelKey_None)
-				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), b->lastX, b->lastY );
-			else
-				b->action( b, b->data, wActionText + ( (int)wParam << 8 ), b->lastX, b->lastY );
+			if (extChar != wAccelKey_None) {
+				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), b->lastX,
+				           b->lastY );
+			} else {
+				b->action( b, b->data, wActionText + ( (int)wParam << 8 ), b->lastX,
+				           b->lastY );
+			}
 		}
 		return (LRESULT)0;
 
@@ -1655,17 +1793,17 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 				}
 				HBITMAP hBmOld = SelectObject( b->hDc, b->hBmMain );
 
-			if (bDrawMainBM) {
-				BitBlt(hDc, rect.left, rect.top,
-					rect.right - rect.left, rect.bottom - rect.top,
-					b->hDc, rect.left, rect.top,
-					SRCCOPY);
-			}
+				if (bDrawMainBM) {
+					BitBlt(hDc, rect.left, rect.top,
+					       rect.right - rect.left, rect.bottom - rect.top,
+					       b->hDc, rect.left, rect.top,
+					       SRCCOPY);
+				}
 				SelectObject( b->hDc, b->bCopiedMain?b->hBmTemp:b->hBmMain );
 				BitBlt( hDc, rect.left, rect.top,
-						rect.right-rect.left, rect.bottom-rect.top,
-						b->hDc, rect.left, rect.top,
-						bDrawMainBM?SRCAND:SRCCOPY);
+				        rect.right-rect.left, rect.bottom-rect.top,
+				        b->hDc, rect.left, rect.top,
+				        bDrawMainBM?SRCAND:SRCCOPY);
 				SelectObject( b->hDc, hBmOld );
 				EndPaint( hWnd, &ps );
 				b->bCopiedMain = FALSE;
@@ -1685,6 +1823,13 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			}
 		}
 		break;
+
+	case WM_SETCURSOR:
+		// Set cursor based on wSetCursor
+		DoSetCursor();
+		// return TRUE to suppress my parent from overriding me
+		return TRUE;
+
 	default:
 		break;
 	}
@@ -1692,10 +1837,11 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 }
 
 
-static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam,
+                            LPARAM lParam )
 {
 	wAction_t action;
-	
+
 	switch( message ) {
 	case WM_MOUSEWHEEL:
 		/* handle mouse wheel events */
@@ -1720,8 +1866,9 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 				action = wActionWheelDown;
 			}
 		}
-		if (b->action)
+		if (b->action) {
 			b->action( b, b->data, action, b->lastX, b->lastY );
+		}
 		return (LRESULT)0;
 	case WM_MOUSEHWHEEL:
 		if ( GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON)) {
@@ -1731,8 +1878,9 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 				action = wActionScrollLeft;
 			}
 		}
-		if (b->action)
+		if (b->action) {
 			b->action( b, b->data, action, b->lastX, b->lastY );
+		}
 		return (LRESULT)0;
 	}
 
@@ -1769,17 +1917,19 @@ static void drawDoneProc( wControl_p b )
 		d->hDcBackup = (HDC)0;
 	}
 	while (bmRoot) {
-		if (bmRoot->bm)
+		if (bmRoot->bm) {
 			DeleteObject( bmRoot->bm );
+		}
 		bmRoot = bmRoot->next;
 	}
 }
 
 
 static callBacks_t drawCallBacks = {
-		NULL,
-		drawDoneProc,
-		(messageCallback_p)drawMsgProc };
+	NULL,
+	drawDoneProc,
+	(messageCallback_p)drawMsgProc
+};
 
 static wDraw_p drawList = NULL;
 
@@ -1788,8 +1938,9 @@ void mswRedrawAll( void )
 {
 	wDraw_p p;
 	for ( p=drawList; p; p=p->drawNext ) {
-		if (p->drawRepaint)
+		if (p->drawRepaint) {
 			p->drawRepaint( p, p->data, 0, 0 );
+		}
 	}
 }
 
@@ -1806,14 +1957,14 @@ void mswRepaintAll( void )
 			hDc = BeginPaint( b->hWnd, &ps );
 			HBITMAP hBmOld = SelectObject( b->hDc, b->hBmMain );
 			BitBlt( hDc, rect.left, rect.top,
-						rect.right-rect.left, rect.bottom-rect.top,
-						b->hDc, rect.left, rect.top,
-						SRCCOPY );
+			        rect.right-rect.left, rect.bottom-rect.top,
+			        b->hDc, rect.left, rect.top,
+			        SRCCOPY );
 			SelectObject( b->hDc, b->hBmTemp );
 			BitBlt( hDc, rect.left, rect.top,
-						rect.right-rect.left, rect.bottom-rect.top,
-						b->hDc, rect.left, rect.top,
-						SRCAND );
+			        rect.right-rect.left, rect.bottom-rect.top,
+			        b->hDc, rect.left, rect.top,
+			        SRCAND );
 			SelectObject( b->hDc, hBmOld );
 			EndPaint( b->hWnd, &ps );
 		}
@@ -1822,16 +1973,16 @@ void mswRepaintAll( void )
 
 
 wDraw_p wDrawCreate(
-		wWin_p parent,
-		wWinPix_t x,
-		wWinPix_t y,
-		const char * helpStr,
-		long option,
-		wWinPix_t w,
-		wWinPix_t h,
-		void * data,
-		wDrawRedrawCallBack_p redrawProc,
-		wDrawActionCallBack_p action )
+        wWin_p parent,
+        wWinPix_t x,
+        wWinPix_t y,
+        const char * helpStr,
+        long option,
+        wWinPix_t w,
+        wWinPix_t h,
+        void * data,
+        wDrawRedrawCallBack_p redrawProc,
+        wDrawActionCallBack_p action )
 {
 	wDraw_p d;
 	RECT rect;
@@ -1847,9 +1998,9 @@ wDraw_p wDrawCreate(
 	d->option = option;
 
 	d->hWnd = CreateWindow( mswDrawWindowClassName, NULL,
-				WS_CHILDWINDOW|WS_VISIBLE|WS_BORDER,
-				d->x, d->y, w, h,
-				((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
+	                        WS_CHILDWINDOW|WS_VISIBLE|WS_BORDER,
+	                        d->x, d->y, w, h,
+	                        ((wControl_p)parent)->hWnd, (HMENU)(UINT_PTR)index, mswHInst, NULL );
 
 	if (d->hWnd == (HWND)0) {
 		mswFail( "CreateWindow(DRAW)" );
@@ -1903,7 +2054,7 @@ wDraw_p wBitMapCreate( wWinPix_t w, wWinPix_t h, int planes )
 	d->option = 0;
 
 	hDc = GetDC(mswHWnd);
-	d->hDc = CreateCompatibleDC( hDc ); 
+	d->hDc = CreateCompatibleDC( hDc );
 	if ( d->hDc == (HDC)0 ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateDC fails", "Ok", NULL );
 		return FALSE;
@@ -1971,57 +2122,57 @@ wBool_t wBitMapDelete( wDraw_p d )
 wBool_t
 wBitMapWriteFile(wDraw_p d, const char * fileName)
 {
-    FIBITMAP *dib = NULL;
-    FIBITMAP *dib2 = NULL;
-    FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
-    BOOL bSuccess = FALSE;
+	FIBITMAP *dib = NULL;
+	FIBITMAP *dib2 = NULL;
+	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+	BOOL bSuccess = FALSE;
 
-    if (d->hBmMain) {
+	if (d->hBmMain) {
 
-        BITMAP bm;
-        GetObject(d->hBmMain, sizeof(BITMAP), (LPSTR)&bm);
-        dib = FreeImage_Allocate(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0, 0, 0);
-        // The GetDIBits function clears the biClrUsed and biClrImportant BITMAPINFO members (dont't know why)
-        // So we save these infos below. This is needed for palettized images only.
-        int nColors = FreeImage_GetColorsUsed(dib);
-        HDC dc = GetDC(NULL);
-        GetDIBits(dc,
-                  d->hBmMain,
-                  0,
-                  FreeImage_GetHeight(dib),
-                  FreeImage_GetBits(dib),
-                  FreeImage_GetInfo(dib),
-                  DIB_RGB_COLORS);
-        ReleaseDC(NULL, dc);
+		BITMAP bm;
+		GetObject(d->hBmMain, sizeof(BITMAP), (LPSTR)&bm);
+		dib = FreeImage_Allocate(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0, 0, 0);
+		// The GetDIBits function clears the biClrUsed and biClrImportant BITMAPINFO members (dont't know why)
+		// So we save these infos below. This is needed for palettized images only.
+		int nColors = FreeImage_GetColorsUsed(dib);
+		HDC dc = GetDC(NULL);
+		GetDIBits(dc,
+		          d->hBmMain,
+		          0,
+		          FreeImage_GetHeight(dib),
+		          FreeImage_GetBits(dib),
+		          FreeImage_GetInfo(dib),
+		          DIB_RGB_COLORS);
+		ReleaseDC(NULL, dc);
 
-        // restore BITMAPINFO members
-        FreeImage_GetInfoHeader(dib)->biClrUsed = nColors;
-        FreeImage_GetInfoHeader(dib)->biClrImportant = nColors;
-        // we will get a 32 bit bitmap on Windows systems with invalid alpha
-        // so it needs to be converted to 24 bits.
-        // (see: https://sourceforge.net/p/freeimage/discussion/36110/thread/0699ce8e/ )
-        dib2 = FreeImage_ConvertTo24Bits(dib);
-        FreeImage_Unload(dib);
-    }
+		// restore BITMAPINFO members
+		FreeImage_GetInfoHeader(dib)->biClrUsed = nColors;
+		FreeImage_GetInfoHeader(dib)->biClrImportant = nColors;
+		// we will get a 32 bit bitmap on Windows systems with invalid alpha
+		// so it needs to be converted to 24 bits.
+		// (see: https://sourceforge.net/p/freeimage/discussion/36110/thread/0699ce8e/ )
+		dib2 = FreeImage_ConvertTo24Bits(dib);
+		FreeImage_Unload(dib);
+	}
 
-    // Try to guess the file format from the file extension
-    fif = FreeImage_GetFIFFromFilename(fileName);
-    if (fif != FIF_UNKNOWN) {
-        // Check that the dib can be saved in this format
-        BOOL bCanSave;
+	// Try to guess the file format from the file extension
+	fif = FreeImage_GetFIFFromFilename(fileName);
+	if (fif != FIF_UNKNOWN) {
+		// Check that the dib can be saved in this format
+		BOOL bCanSave;
 
-        FREE_IMAGE_TYPE image_type = FreeImage_GetImageType(dib2);
-        if (image_type == FIT_BITMAP) {
-            // standard bitmap type
-            WORD bpp = FreeImage_GetBPP(dib2);
-            bCanSave = (FreeImage_FIFSupportsWriting(fif) &&
-                        FreeImage_FIFSupportsExportBPP(fif, bpp));
-        } else {
-            // special bitmap type
-            bCanSave = FreeImage_FIFSupportsExportType(fif, image_type);
-        }
+		FREE_IMAGE_TYPE image_type = FreeImage_GetImageType(dib2);
+		if (image_type == FIT_BITMAP) {
+			// standard bitmap type
+			WORD bpp = FreeImage_GetBPP(dib2);
+			bCanSave = (FreeImage_FIFSupportsWriting(fif) &&
+			            FreeImage_FIFSupportsExportBPP(fif, bpp));
+		} else {
+			// special bitmap type
+			bCanSave = FreeImage_FIFSupportsExportType(fif, image_type);
+		}
 
-        if (bCanSave) {
+		if (bCanSave) {
 			int flags;
 
 			switch (fif) {
@@ -2034,11 +2185,11 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
 			default:
 				flags = 0;		// whatver the default is for the file format
 			}
-            bSuccess = FreeImage_Save(fif, dib2, fileName, flags);
-        }
-    }
-    FreeImage_Unload(dib2);
+			bSuccess = FreeImage_Save(fif, dib2, fileName, flags);
+		}
+	}
+	FreeImage_Unload(dib2);
 
-    return bSuccess;
+	return bSuccess;
 }
 

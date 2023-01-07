@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_CTRAIN_H
@@ -28,19 +28,22 @@
 
 extern wIndex_t trainCmdInx;
 
+extern long trainPause;
+
 struct carItem_t;
 typedef struct carItem_t carItem_t;
 typedef carItem_t * carItem_p;
 typedef struct {
-		coOrd pos;
-		ANGLE_T angle;
-		} vector_t;
+	coOrd pos;
+	ANGLE_T angle;
+} vector_t;
 
 extern carItem_p currCarItemPtr;
 extern wControl_p newCarControls[2];
 void DoCarDlg( void * unused );
 BOOL_T CarItemRead( char * );
 track_p NewCar( wIndex_t, carItem_p, coOrd, ANGLE_T );
+void UncoupleCars( track_p, int );
 void CarGetPos( track_p, coOrd *, ANGLE_T * );
 void CarSetVisible( track_p );
 void CarItemUpdate( carItem_p );
@@ -55,11 +58,21 @@ BOOL_T CarItemIsLocoMaster( carItem_p );
 void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
-void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *, BOOL_T, track_p );
+void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *,
+                  BOOL_T, track_p );
+
+BOOL_T WriteCars( FILE * );
+void ClearCars( void );
+void CarDlgAddProto( void );
+void CarDlgAddDesc( void );
+void AttachTrains( void );
+
 BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
 BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
-enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
-enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+enum paramFileState	GetCarPartCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
+enum paramFileState	GetCarProtoCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );

@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef GTKINT_H
@@ -42,15 +42,6 @@
 
 extern wWin_p gtkMainW;
 
-#ifdef CURSOR_SURFACE
-typedef struct {
-		cairo_surface_t* surface;
-		wWinPix_t width;
-		wWinPix_t height;
-		wBool_t show;
-} wCursorSurface_t, * wSurface_p;
-#endif
-
 
 typedef enum {
 		W_MAIN, W_POPUP,
@@ -71,7 +62,6 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		wWin_p parent; \
 		wWinPix_t origX, origY; \
 		wWinPix_t realX, realY; \
-		wWinPix_t default_size_x, default_size_y; \
 		wWinPix_t labelW; \
 		wWinPix_t w, h; \
 		int maximize_initially; \
@@ -81,7 +71,6 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * widget; \
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
-		/* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/ \
 		wBool_t outline; \
 		void * data;
 
@@ -297,7 +286,7 @@ void psPrintFillRectangle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_
 void psPrintFillPolygon(wDrawPix_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
 void psPrintFillCircle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, wDrawColor color, wDrawOpts opts);
 void psPrintString(wDrawPix_t x, wDrawPix_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
-static void WlibGetPaperSize(void);
+//static void WlibGetPaperSize(void);
 
 /* single.c */
 void wlibStringUpdate();

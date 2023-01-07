@@ -8,19 +8,24 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## Bugs
 
++ Fixed Layout Background handling in Dialog (if Cancelled)
++ Fixed Fault if Run Trains with no Cars and no Prototype loaded
++ Made sure UTF-8 handled correctly in Windows Macros (demos)
 + Add > Structure dialog caused weird artifact when closed
 + Cornu Turnout Designer misplaces points or fails
 + Add check for max connect angle to Bezier Segment
 
 ## Added
 
-+ Exports default to All if nothing selected
++ Layout has additional settings for Tie data: Length, Width, Spacing
++ Layers have additional settings that can override the layout configuration: 
+  Scale, Min Track Radius, Max Track Grade, Tie data: Length, Width, Spacing 
 + Enhanced DXF export to include color and DOT line style
 + Bitmap export to JPEG and PNG formats
 + Include background bitmap in bitmap export
 + Improved and Updated Help file
 + Structures snap to grid (if enabled) and respect grid angle
-+ Refactured Windows arc drawing
++ Refactored Windows arc drawing
 + Draw centers enabled for sectional curved tracks
 + Roadbed option to track
 + Color selection for Bridge fill and Roadbed
@@ -32,12 +37,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Walthers HO DCC Code 83 Turnouts
 + Walthers HO DCC Code 100 Turnouts
 + HO Piko A Roadbed Track Components
-+ HO Piko A Track revision
++ HO Piko A Track update
++ Sn3 Fast Tracks Turnouts
++ HO Lionel MagLock FasTrack
++ O LionelFasTrack update
++ HOn30_Minitrains update
++ G Lionel Ready-To-Play Track
++ S Jakks PowerTrains Track (2012)
 
 ## Examples
 
-+ G Scale Folded Dogbone
++ Ondaville Franklin and Carolina RR
++ A Scale Folded Dogbone
 + Mianne Benchwork
+
+
+## [5.2.2 GA]
+
+## Bugs
+
++ Windows circle drawing fix
 
 
 ## [5.2.2 Beta 3]

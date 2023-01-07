@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "custom.h"
@@ -81,8 +81,9 @@ static drawCmd_t bitmap_d = {
  * \param 		yPos	 The position.
  */
 
-static void DrawTextCenterXPosY( char *string, wFont_p font, wFontSize_t fontSize,
-                     POS_T yPos )
+static void DrawTextCenterXPosY( char *string, wFont_p font,
+                                 wFontSize_t fontSize,
+                                 POS_T yPos )
 {
 	coOrd textSize;
 	coOrd p;
@@ -142,8 +143,8 @@ static int SaveBitmapFile(
 {
 	bool result;
 
-	assert( fileName != NULL );
-	assert( files == 1 );
+	CHECK( fileName != NULL );
+	CHECK( files == 1 );
 
 	wSetCursor( mainD.d, wCursorWait );
 	InfoMessage( _( "Drawing tracks to bitmap" ) );
@@ -270,7 +271,7 @@ static paramData_t outputBitMapPLs[] = {
 	{ PD_MESSAGE, N_( "999.9Mb" ), "filesize", PDO_DLGHORZ | PDO_DLGUNDERCMDBUTT | PDO_DLGBOXEND, I2VP( 180 ) },
 };
 
-static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_DIALOGTEMPLATE, outputBitMapPLs, COUNT( outputBitMapPLs ) };
+static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, COUNT( outputBitMapPLs ) };
 
 /**
  * The upper limit for the dpi setting is calculated. The limit is set

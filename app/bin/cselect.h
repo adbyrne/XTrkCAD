@@ -16,7 +16,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef CSELECT_H
@@ -29,6 +29,10 @@
 extern wIndex_t selectCmdInx;
 extern wIndex_t moveCmdInx;
 extern wIndex_t rotateCmdInx;
+extern wIndex_t flipCmdInx;
+
+extern long selectMode;
+extern long selectZero;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
@@ -52,9 +56,11 @@ void ClearElevations( void * unused );
 void AddElevations( DIST_T );
 void DoRefreshCompound( void * unused );
 void WriteSelectedTracksToTempSegs( void );
-void DoRescale( void *unused );
+void GetSelectedBounds( coOrd *, coOrd * );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
 void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
 void HighlightSelectedTracks(track_p trk_ignore, BOOL_T keep, BOOL_T invert );
+typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
+void DoSelectedTracks( doSelectedTrackCallBack_t doit );
 
 #endif

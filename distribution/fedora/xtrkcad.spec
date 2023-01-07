@@ -1,16 +1,29 @@
-Summary: XTrkCad CAD for Model Railroad layout
 Name: xtrkcad
+Summary: CAD for Model Railroad layout
 Version: 5.2.2
 Release: 1%{?dist}
-License: GPLv2+
+License: GPLv2
 URL: https://sourceforge.net/projects/xtrkcad-fork
-Source0: https://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20%{version}%20/xtrkcad-source-%{version}.zip
-BuildRoot: %{_tmppath}/%{name}-root
-BuildRequires: gcc, gcc-c++, cmake >= 2.4.7, pkgconfig, gtk2-devel
-BuildRequires: libcmocka, libcmocka-devel, libzip, libzip-devel
-BuildRequires: tinyxml, tinyxml-devel, pandoc
-BuildRequires: gettext, gettext-devel, glibc-devel
-Requires: libcmocka, libzip, tinyxml
+Source0: https://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20%{version}/xtrkcad-source-%{version}GA.tar.gz
+# patch (to be removed on next GA release)
+# patch0 adds xtrkcad.desktop to build - Changed upstream
+# It also uses cJSON and xdg-utils packages
+Patch0: xtrkcad-5.2.2GA-xtrkcad.desktop.patch
+
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: cmake >= 2.4.7
+BuildRequires: pkgconfig
+BuildRequires: gtk2-devel
+BuildRequires: libzip-devel
+BuildRequires: desktop-file-utils
+BuildRequires: gettext-devel
+BuildRequires: glibc-devel
+BuildRequires: pandoc
+BuildRequires: doxygen
+BuildRequires: cjson-devel
+
+Requires: xdg-utils
 
 %description
 XTrkCad is a CAD program for designing Model Railroad layouts.
@@ -25,26 +38,60 @@ benchwork, 'Print to BitMap', elevations, train simulation and
 car inventory.
 
 %prep
-%setup -n xtrkcad-source-%{version}/usr/local -q
+%setup -n xtrkcad-source-%{version}GA -q
+
+# removed on next GA release
+%patch0 -p1
+
+%package doc
+Summary: Documentation for %{name}
+BuildArch: noarch
+
+%description doc
+This package contains user documentation for XTrkCad,
+in HTML format. It also contains demos, and examples.
 
 %build
-cmake -D CMAKE_INSTALL_PREFIX:PATH=%{_prefix} -D CMAKE_BUILD_TYPE=Debug  .
-make
+%cmake -DBUILD_SHARED_LIBS=OFF -DXTRKCAD_USE_DOXYGEN=ON
+%cmake_build
 
 %install
-rm -rf $RPM_BUILD_ROOT/*
-make DESTDIR=$RPM_BUILD_ROOT install
+%cmake_install
 
-%check
-make test
+desktop-file-install --dir=%{buildroot}/%{_datadir}/applications \
+	%{buildroot}/%{_datadir}/%{name}/applications/xtrkcad.desktop
+rm %{buildroot}/%{_datadir}/%{name}/applications/xtrkcad.desktop
+
+mkdir -p %{buildroot}/%{_datadir}/pixmaps
+mv %{buildroot}/%{_datadir}/%{name}/pixmaps/xtrkcad.png \
+	%{buildroot}/%{_datadir}/pixmaps/xtrkcad.png
+rm -rf %{buildroot}/%{_datadir}/%{name}/pixmaps
+
+mkdir -p %{buildroot}/%{_datadir}/mime/packages
+mv %{buildroot}/%{_datadir}/%{name}/applications/xtrkcad.xml \
+	%{buildroot}/%{_datadir}/mime/packages/xtrkcad.xml
+
+# Tests require a feature in the next release
+#%check
+#%ctest
 
 %files
 %license app/COPYING
-%defattr(-, root, root)
-%{_bindir}/xtrkcad
-%{_datadir}
+%{_bindir}/%{name}
+%{_datadir}/applications/xtrkcad.desktop
+%{_datadir}/pixmaps/xtrkcad.png
+%{_datadir}/mime/packages/xtrkcad.xml
+%{_datadir}/%{name}
+%exclude %{_datadir}/%{name}/demos
+%exclude %{_datadir}/%{name}/examples
+%exclude %{_datadir}/%{name}/html
+
+%files doc
+%{_datadir}/%{name}/demos
+%{_datadir}/%{name}/examples
+%{_datadir}/%{name}/html
 
 %changelog
-* Tue Dec 14 2021 Phil Cameron
+* Mon Feb 21 2022 Phil Cameron <pecameron1 -at- gmail.com> 5.2.2-1
 - V5.2.2 GA
 

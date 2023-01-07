@@ -17,26 +17,26 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_VERSION_H
 #define HAVE_VERSION_H
 #ifdef XTRKCAD_CMAKE_BUILD
 
-	#include "xtrkcad-config.h"
+#include "xtrkcad-config.h"
 
-	#define VERSION XTRKCAD_VERSION
-	#define PARAMVERSION XTRKCAD_PARAMVERSION
-	#define PARAMVERSIONVERSION XTRKCAD_PARAMVERSIONVERSION
-	#define MINPARAMVERSION XTRKCAD_MINPARAMVERSION
+#define VERSION XTRKCAD_VERSION
+#define PARAMVERSION XTRKCAD_PARAMVERSION
+#define PARAMVERSIONVERSION XTRKCAD_PARAMVERSIONVERSION
+#define MINPARAMVERSION XTRKCAD_MINPARAMVERSION
 
 #else
 
-	#define VERSION "4.1.0b1"
-	#define PARAMVERSION (10)
-	#define PARAMVERSIONVERSION "3.0.0"
-	#define MINPARAMVERSION (1)
+#define VERSION "4.1.0b1"
+#define PARAMVERSION (10)
+#define PARAMVERSIONVERSION "3.0.0"
+#define MINPARAMVERSION (1)
 
 #endif
 #endif //HAVE_VERSION_H

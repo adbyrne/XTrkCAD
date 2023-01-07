@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -44,9 +44,6 @@ wWin_p gtkMainW;
 #define MIN_WIN_WIDTH 150
 #define MIN_WIN_HEIGHT 150
 
-#define MIN_WIN_WIDTH_MAIN 400
-#define MIN_WIN_HEIGHT_MAIN 400
-
 #define SECTIONWINDOWSIZE  "gtklib window size"
 #define SECTIONWINDOWPOS   "gtklib window pos"
 
@@ -56,6 +53,9 @@ static wControl_p firstWin = NULL, lastWin;
 static int keyState;
 static wBool_t gtkBlockEnabled = TRUE;
 static wBool_t maximize_at_next_show = FALSE;
+
+#include "../../bin/bitmaps/xtc.xpm"
+static GdkPixbuf *windowIconPixbuf = NULL;
 
 /*
  *****************************************************************************
@@ -116,46 +116,39 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 static void getWinSize(wWin_p win, const char * nameStr)
 {
-    int w=50, h=50;
-    const char *cp;
-    char *cp1, *cp2;
+	/*
+	 * original w/h values in .origX/Y
+	 */
+	int w = win->w = win->origX;
+	int h = win->h = win->origY;
 
-
-    /*
-     * Clamp window to be no bigger than one monitor size (to start - the user can always maximize)
-     */
-
-    GdkRectangle monitor_dimensions = getMonitorDimensions(GTK_WIDGET(win->gtkwin));
-
-    wWinPix_t maxDisplayWidth = monitor_dimensions.width-10;
-    wWinPix_t maxDisplayHeight = monitor_dimensions.height-50;
-
-
-
-    if ((win->option&F_RECALLSIZE) &&
-            (win->option&F_RECALLPOS) &&
+	/*
+	 * Take values from Prefs if possible
+	 */
+	const char *cp;
+	char *cp1, *cp2;
+	if ((win->option&F_RESIZE) &&
+            (win->option&F_RECALLSIZE) &&
             (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
             (h = strtod(cp1, &cp2), cp1 != cp2)) {
-    	win->option &= ~F_AUTOSIZE;
+		win->option &= ~F_AUTOSIZE;
 
-		if (w < 50) {
-			w = 50;
-		}
+		/*
+		 * Clamp window to be no bigger than one monitor size (to start - the user can always maximize)
+		 */
+		GdkRectangle monitor_dimensions = getMonitorDimensions(GTK_WIDGET(win->gtkwin));
+		wWinPix_t maxDisplayWidth = monitor_dimensions.width-10;
+		wWinPix_t maxDisplayHeight = monitor_dimensions.height-50;
+		if (w > maxDisplayWidth) w = maxDisplayWidth;
+		if (h > maxDisplayHeight) h = maxDisplayHeight;
 
-		if (h < 50) {
-			h = 50;
-		}
-    }
+		if (w<MIN_WIDTH) w = MIN_WIDTH;
+		if (h<MIN_HEIGHT) h = MIN_HEIGHT;
 
-	if (w > maxDisplayWidth) w = maxDisplayWidth;
-	if (h > maxDisplayHeight) h = maxDisplayHeight;
-
-	if (w<MIN_WIDTH) w = MIN_WIDTH;
-	if (h<MIN_HEIGHT) h = MIN_HEIGHT;
-
-	win->w = win->origX = w;
-	win->h = win->origY = h;
+		win->w = win->origX = w;
+		win->h = win->origY = h;
+	}
 
 }
 
@@ -171,7 +164,7 @@ static void saveSize(wWin_p win)
 
     if ((win->option&F_RECALLSIZE) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
-        char pos_s[20];
+        char pos_s[32];
 
         sprintf(pos_s, "%ld %ld", win->w,
                 (win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0))));
@@ -226,7 +219,6 @@ static void getPos(wWin_p win)
             }
 
             gtk_window_move(GTK_WINDOW(win->gtkwin), x, y);
-            //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
         }
     }
 }
@@ -243,7 +235,7 @@ static void savePos(wWin_p win)
     int x, y;
 
     if ((win->option&F_RECALLPOS)) {
-        char pos_s[20];
+        char pos_s[32];
 
         gdk_window_get_position(gtk_widget_get_window(GTK_WIDGET(win->gtkwin)), &x, &y);
         x -= 5;
@@ -275,17 +267,6 @@ void wWinGetSize(
     gtk_widget_size_request(win->gtkwin, &requisition);
     w = win->w;
     h = win->h;
-
-    if (win->option&F_AUTOSIZE) {
-        if (win->realX > w) {
-            w = win->realX;
-        }
-
-        if (win->realY > h) {
-            h = win->realY;
-        }
-    }
-
     *width = w;
     *height = h - BORDERSIZE - ((win->option&F_MENUBAR)?win->menu_height:0);
 }
@@ -656,21 +637,16 @@ static int fixed_expose_event(
     } else {
         rc = FALSE;
     }
-    cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
-#ifdef CURSOR_SURFACE
-    if (win && win->cursor_surface.surface && win->cursor_surface.show) {
-		cairo_set_source_surface(cr,win->cursor_surface.surface,event->area.x, event->area.y);
-		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
-		cairo_rectangle(cr,event->area.x, event->area.y,
-				event->area.width, event->area.height);
-		cairo_fill(cr);
-	}
-#endif
     return rc;
 }
 
 static int resizeTime(wWin_p win) {
 
+	if (debugWindow >= 2) {
+		printf( "resizeTime idleCnt %d, busyCnt %d [%d %d] [%ld %ld]\n",
+				win->timer_idle_count, win->timer_busy_count,
+				win->resizeW, win->resizeH, win->w, win->h );
+	}
 	if (win->resizeW == win->w && win->resizeH == win->h) {  // If hasn't changed since last
 		if (win->timer_idle_count>3) {
 			win->winProc(win, wResize_e, NULL, win->data);  //Trigger Redraw on last occasion if one-third of a second has elapsed
@@ -704,6 +680,9 @@ static int window_configure_event(
         return FALSE;
     }
 
+    if (debugWindow >= 2) {
+    	printf( "config/resize: [%d %d]\n", event->width, event->height );
+    }
     if (win->option&F_RESIZE) {
         if (event->width < 10 || event->height < 10) {
             return TRUE;
@@ -713,6 +692,9 @@ static int window_configure_event(
 
 
         if (win->w != event->width || win->h != event->height) {
+	if (debugWindow >= 2) {
+		printf( "   Update [%ld %ld]\n", event->width-win->w, event->height-win->h );
+	}
             win->w = event->width;
             win->h = event->height;
 
@@ -988,34 +970,19 @@ static wWin_p wWinCommonCreate(
 
     if (w->option&F_AUTOSIZE) {
         w->realX = 0;
-        w->w = MIN_WIN_WIDTH+20;
+        w->w = 0;
         w->realY = h;
-        w->h = MIN_WIN_HEIGHT;
+        w->h = 0;
     } else if (w->origX != 0){
         w->realX = w->origX;
         w->realY = w->origY+h;
 
-        w->default_size_x = w->w;
-        w->default_size_y = w->h;
         //gtk_widget_set_size_request(w->widget, w->w-20, w->h);
 
         if (w->option&F_MENUBAR) {
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
         }
     }
-    wWinPix_t scr_w, scr_h;
-	wGetDisplaySize(&scr_w, &scr_h);
-	if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
-	if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
-	if (winType != W_MAIN) {
-		wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
-	} else {
-		if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
-		if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
-		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
-     }
-
-
 
     w->first = w->last = NULL;
     w->winProc = winProc;
@@ -1037,7 +1004,9 @@ static wWin_p wWinCommonCreate(
 
     if (w->option & F_RESIZE) {
         gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), TRUE);
-        gtk_window_resize(GTK_WINDOW(w->gtkwin), w->w, w->h);
+	if ( ( w->option & F_AUTOSIZE ) == 0 ) {
+        	gtk_window_resize(GTK_WINDOW(w->gtkwin), w->w, w->h);
+	}
     } else {
         gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), FALSE);
     }
@@ -1073,6 +1042,11 @@ static wWin_p wWinCommonCreate(
     if (option&F_MAXIMIZE) {
     	maximize_at_next_show = TRUE;
     }
+
+    if ( windowIconPixbuf == NULL ) {
+	    windowIconPixbuf = gdk_pixbuf_new_from_xpm_data((const char**)&xtc_xpm);
+    }
+    gtk_window_set_icon( GTK_WINDOW(w->gtkwin), windowIconPixbuf );
 
     return w;
 }

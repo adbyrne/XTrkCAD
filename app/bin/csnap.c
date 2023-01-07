@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "custom.h"
@@ -31,11 +31,11 @@ int log_timedrawgrid = 0;
 
 /*****************************************************************************
  *
- 
+
  *
  */
 
-EXPORT long minGridSpacing = 3;
+EXPORT long minGridSpacing = 5;
 
 #define CROSSTICK
 #ifdef CROSSTICK
@@ -46,17 +46,17 @@ static wDrawBitMap_p cross0_bm;
 #define DEFAULTGRIDSPACING (1.0)
 
 EXPORT void MapGrid(
-		coOrd orig,
-		coOrd size,
-		ANGLE_T angle,
-		coOrd gridOrig,
-		ANGLE_T gridAngle,
-		POS_T Xspacing,
-		POS_T Yspacing,
-		int * x0,
-		int * x1,
-		int * y0,
-		int * y1 )
+        coOrd orig,
+        coOrd size,
+        ANGLE_T angle,
+        coOrd gridOrig,
+        ANGLE_T gridAngle,
+        POS_T Xspacing,
+        POS_T Yspacing,
+        int * x0,
+        int * x1,
+        int * y0,
+        int * y1 )
 {
 	coOrd p[4], hi, lo;
 	int i;
@@ -76,14 +76,18 @@ EXPORT void MapGrid(
 	}
 	hi = lo = p[0];
 	for (i=1; i<4; i++) {
-		if (hi.x < p[i].x)
+		if (hi.x < p[i].x) {
 			hi.x = p[i].x;
-		if (hi.y < p[i].y)
+		}
+		if (hi.y < p[i].y) {
 			hi.y = p[i].y;
-		if (lo.x > p[i].x)
+		}
+		if (lo.x > p[i].x) {
 			lo.x = p[i].x;
-		if (lo.y > p[i].y)
+		}
+		if (lo.y > p[i].y) {
 			lo.y = p[i].y;
+		}
 	}
 	*x0 = (int)floor( lo.x / Xspacing );
 	*y0 = (int)floor( lo.y / Yspacing );
@@ -95,15 +99,16 @@ EXPORT void MapGrid(
 static DIST_T Gdx, Gdy, Ddx, Ddy;
 static coOrd GDorig;
 static wDrawPix_t lborder, bborder;
+int nDrawGridPoints = 0;
 
 void static DrawGridPoint(
-		drawCmd_p D,
-		wDrawColor Color,
-		coOrd orig,
-		coOrd * size,
-		DIST_T dpi,
-		coOrd p0,
-		BOOL_T bigdot )
+        drawCmd_p D,
+        wDrawColor Color,
+        coOrd orig,
+        coOrd * size,
+        DIST_T dpi,
+        coOrd p0,
+        BOOL_T bigdot )
 {
 	// Map Grid index to Layout pos
 	POS_T x;
@@ -111,29 +116,34 @@ void static DrawGridPoint(
 	p0.y = (p0.y*Gdx - p0.x*Gdy) + orig.y;
 	p0.x = x;
 	if (size &&
-		( p0.x < 0.0 || p0.x > size->x ||
-		  p0.y < 0.0 || p0.y > size->y ) )
+	    ( p0.x < 0.0 || p0.x > size->x ||
+	      p0.y < 0.0 || p0.y > size->y ) ) {
 		return;
+	}
 	DIST_T r;
+	nDrawGridPoints++;
 	if ( bigdot ) {
 		r = (bigdot_width+0.5)/2 - 0.5;
 	} else {
 		r = 0.75;
 	}
-	r /= dpi;
-	DrawFillCircle( D, p0, r, Color );
+	coOrd sz;
+	sz.x = sz.y = (bigdot?2.5:1.5)/dpi;
+	p0.x -= 1.0/dpi;
+	p0.y -= 1.0/dpi;
+	DrawRectangle( D, p0, sz, Color, DRAW_FILL );
 }
 
 
 static void DrawGridLine(
-		drawCmd_p D,
-		wDrawColor Color,
-		coOrd orig,
-		coOrd * size,
-		DIST_T dpi,
-		BOOL_T clip,
-		coOrd p0,
-		coOrd p1 )
+        drawCmd_p D,
+        wDrawColor Color,
+        coOrd orig,
+        coOrd * size,
+        DIST_T dpi,
+        BOOL_T clip,
+        coOrd p0,
+        coOrd p1 )
 {
 	POS_T x;
 	x = (p0.x*Gdx + p0.y*Gdy) + orig.x;
@@ -142,23 +152,24 @@ static void DrawGridLine(
 	x = (p1.x*Gdx + p1.y*Gdy) + orig.x;
 	p1.y = (p1.y*Gdx - p1.x*Gdy) + orig.y;
 	p1.x = x;
-	if (size && clip && !ClipLine( &p0, &p1, zero, 0.0, *size ))
+	if (size && clip && !ClipLine( &p0, &p1, zero, 0.0, *size )) {
 		return;
+	}
 	DrawLine( D, p0, p1, 0, Color );
 }
 
 
 EXPORT void DrawGrid(
-		drawCmd_p D,
-		coOrd * size,
-		POS_T hMajSpacing,
-		POS_T vMajSpacing,
-		long Hdivision,
-		long Vdivision,
-		coOrd Gorig,
-		ANGLE_T Gangle,
-		wDrawColor Color,
-		BOOL_T clip )
+        drawCmd_p D,
+        coOrd * size,
+        POS_T hMajSpacing,
+        POS_T vMajSpacing,
+        long Hdivision,
+        long Vdivision,
+        coOrd Gorig,
+        ANGLE_T Gangle,
+        wDrawColor Color,
+        BOOL_T clip )
 {
 	int hMaj, hMajCnt0, hMajCnt1, vMaj, vMajCnt0, vMajCnt1;
 	coOrd p0, p1;
@@ -169,15 +180,21 @@ EXPORT void DrawGrid(
 	POS_T hMajSpacing_dpi, vMajSpacing_dpi;
 	BOOL_T bigdot;
 
-	if (hMajSpacing <= 0 && vMajSpacing <= 0)
+	if (hMajSpacing <= 0 && vMajSpacing <= 0) {
 		return;
+	}
 
 #ifdef CROSSTICK
-	if (!cross0_bm)
-		cross0_bm = wDrawBitMapCreate( mainD.d, cross0_width, cross0_height, 2, 2, cross0_bits );
+	if (!cross0_bm) {
+		cross0_bm = wDrawBitMapCreate( mainD.d, cross0_width, cross0_height, 2, 2,
+		                               cross0_bits );
+	}
 #endif
+	unsigned long drawOptions = D->options;
+	D->options |= DC_ROUND;
 
 	unsigned long time0 = wGetTimer();
+	nDrawGridPoints = 0;
 	wSetCursor( mainD.d, wCursorWait );
 	dpi = D->dpi/D->scale;
 	Gdx = cos(D2R(Gangle));
@@ -196,9 +213,9 @@ EXPORT void DrawGrid(
 	vMajSpacing_dpi = vMajSpacing*dpi;
 
 	MapGrid( D->orig, D->size, D->angle, Gorig, Gangle,
-				(hMajSpacing>0?hMajSpacing:vMajSpacing),
-				(vMajSpacing>0?vMajSpacing:hMajSpacing),
-				&hMajCnt0, &hMajCnt1, &vMajCnt0, &vMajCnt1 );
+	         (hMajSpacing>0?hMajSpacing:vMajSpacing),
+	         (vMajSpacing>0?vMajSpacing:hMajSpacing),
+	         &hMajCnt0, &hMajCnt1, &vMajCnt0, &vMajCnt1 );
 
 	hMinCnt1 = vMinCnt1 = 0;
 
@@ -213,8 +230,9 @@ EXPORT void DrawGrid(
 		}
 		if ( Hdivision > 0 ) {
 			hMinSpacing = hMajSpacing/Hdivision;
-			if (hMinSpacing*dpi > minGridSpacing)
+			if (hMinSpacing*dpi > minGridSpacing) {
 				hMinCnt1 = (int)Hdivision;
+			}
 		}
 	}
 
@@ -229,13 +247,15 @@ EXPORT void DrawGrid(
 		}
 		if ( Vdivision > 0 ) {
 			vMinSpacing = vMajSpacing/Vdivision;
-			if (vMinSpacing*dpi > minGridSpacing)
+			if (vMinSpacing*dpi > minGridSpacing) {
 				vMinCnt1 = (int)Vdivision;
+			}
 		}
 	}
 
-	if (hMinCnt1 <= 0 && vMinCnt1 <= 0)
+	if (hMinCnt1 <= 0 && vMinCnt1 <= 0) {
 		goto done;
+	}
 
 	if (hMajSpacing <= 0) {
 		hMinCnt1 = vMinCnt1+1;
@@ -282,7 +302,7 @@ EXPORT void DrawGrid(
 		vMinCnt1 = (int)(Vdivision/f);
 		vMinSpacing *= f;
 	}
-    
+
 	bigdot = ( hMinSpacing*dpi > 10 && vMinSpacing*dpi > 10 );
 	for ( hMaj=hMajCnt0; hMaj<hMajCnt1; hMaj++ ) {
 		for ( vMaj=vMajCnt0; vMaj<vMajCnt1; vMaj++ ) {
@@ -295,11 +315,13 @@ EXPORT void DrawGrid(
 			}
 		}
 	}
-    
+
 
 done:
+	D->options = drawOptions;
 	wSetCursor( mainD.d, defaultCursor );
-	LOG( log_timedrawgrid, 1, ( "DrawGrid time = %lu mS\n", wGetTimer()-time0 ) );
+	LOG( log_timedrawgrid, 1, ( "DrawGrid BD = %d, n = %d, time = %lu mS\n", bigdot,
+	                            nDrawGridPoints, wGetTimer()-time0 ) );
 }
 
 
@@ -308,8 +330,9 @@ static void DrawBigCross( coOrd pos, ANGLE_T angle )
 {
 	coOrd p0, p1;
 	DIST_T d;
-	if (angleSystem!=ANGLE_POLAR)
+	if (angleSystem!=ANGLE_POLAR) {
 		angle += 90.0;
+	}
 	d = max( mainD.size.x, mainD.size.y );
 	Translate( &p0, pos, angle, d );
 	Translate( &p1, pos, angle+180, d );
@@ -326,10 +349,10 @@ static void DrawBigCross( coOrd pos, ANGLE_T angle )
 
 
 EXPORT STATUS_T GridAction(
-		wAction_t action,
-		coOrd pos,
-		coOrd *orig,
-		DIST_T *angle )
+        wAction_t action,
+        coOrd pos,
+        coOrd *orig,
+        DIST_T *angle )
 {
 
 	static coOrd pos0, pos1;
@@ -357,8 +380,9 @@ EXPORT STATUS_T GridAction(
 		if ( FindDistance(pos0, pos) > 0.1*mainD.scale ) {
 			pos1 = pos;
 			newAngle = FindAngle( pos0, pos1 );
-			if (angleSystem!=ANGLE_POLAR)
+			if (angleSystem!=ANGLE_POLAR) {
 				newAngle = newAngle-90.0;
+			}
 			newAngle = NormalizeAngle( floor( newAngle*10.0 ) / 10.0 );
 			*angle = newAngle;
 		}
@@ -386,48 +410,55 @@ EXPORT STATUS_T GridAction(
 EXPORT wDrawColor snapGridColor;
 
 typedef struct {
-		DIST_T Spacing;
-		long Division;
-		long Enable;
-		} gridData;
+	DIST_T Spacing;
+	long Division;
+	long Enable;
+} gridData;
 typedef struct {
-		gridData Horz;
-		gridData Vert;
-		coOrd Orig;
-		ANGLE_T Angle;
-		long Show;
-		} gridHVData;
+	gridData Horz;
+	gridData Vert;
+	coOrd Orig;
+	ANGLE_T Angle;
+	long Show;
+} gridHVData;
 
 static gridHVData grid = { { 1.0, 0, 1 },
-						   { 1.0, 0, 1 } };
+	{ 1.0, 0, 1 }
+};
 
 EXPORT BOOL_T SnapPos( coOrd * pos )
 {
 	coOrd p;
 	DIST_T spacing;
-	if ((MyGetKeyState() & WKEY_ALT) != 0)
+	if ((MyGetKeyState() & WKEY_ALT) != 0) {
 		return FALSE;
-	if ( grid.Vert.Enable == FALSE && grid.Horz.Enable == FALSE )
+	}
+	if ( grid.Vert.Enable == FALSE && grid.Horz.Enable == FALSE ) {
 		return FALSE;
+	}
 	p = *pos;
 	p.x -= grid.Orig.x;
 	p.y -= grid.Orig.y;
 	Rotate( &p, zero, -grid.Angle );
 	if ( grid.Horz.Enable ) {
-		if ( grid.Horz.Division > 0 )
+		if ( grid.Horz.Division > 0 ) {
 			spacing = grid.Horz.Spacing / grid.Horz.Division;
-		else
+		} else {
 			spacing = grid.Horz.Spacing;
-		if (spacing > 0.001)
+		}
+		if (spacing > 0.001) {
 			p.x = floor(p.x/spacing+0.5) * spacing;
+		}
 	}
 	if ( grid.Vert.Enable ) {
-		if ( grid.Vert.Division > 0 )
+		if ( grid.Vert.Division > 0 ) {
 			spacing = grid.Vert.Spacing / grid.Vert.Division;
-		else
+		} else {
 			spacing = grid.Vert.Spacing;
-		if (spacing > 0.001)
+		}
+		if (spacing > 0.001) {
 			p.y = floor(p.y/spacing+0.5) * spacing;
+		}
 	}
 	REORIGIN1( p, grid.Angle, grid.Orig );
 	*pos = p;
@@ -445,17 +476,20 @@ EXPORT BOOL_T SnapPosAngle( coOrd * pos, ANGLE_T * angle )
 }
 
 
-static void DrawASnapGrid( gridHVData * gridP, drawCmd_p d, coOrd size, BOOL_T drawDivisions )
+static void DrawASnapGrid( gridHVData * gridP, drawCmd_p d, coOrd size,
+                           BOOL_T drawDivisions )
 {
-	if (gridP->Horz.Spacing <= 0.0 && gridP->Vert.Spacing <= 0.0)
+	if (gridP->Horz.Spacing <= 0.0 && gridP->Vert.Spacing <= 0.0) {
 		return;
-	if (gridP->Show == FALSE)
+	}
+	if (gridP->Show == FALSE) {
 		return;
+	}
 	DrawGrid( d, &size,
-				gridP->Horz.Spacing, gridP->Vert.Spacing,
-				drawDivisions?gridP->Horz.Division:0,
-				drawDivisions?gridP->Vert.Division:0,
-				gridP->Orig, gridP->Angle, snapGridColor, TRUE );
+	          gridP->Horz.Spacing, gridP->Vert.Spacing,
+	          drawDivisions?gridP->Horz.Division:0,
+	          drawDivisions?gridP->Vert.Division:0,
+	          gridP->Orig, gridP->Angle, snapGridColor, TRUE );
 }
 
 
@@ -480,8 +514,6 @@ static wWin_p gridW;
 static wMenu_p snapGridPopupM;
 static wButton_p snapGridEnable_b;
 static wButton_p snapGridShow_b;
-EXPORT wMenuToggle_p snapGridEnableMI;
-EXPORT wMenuToggle_p snapGridShowMI;
 
 static gridHVData oldGrid;
 
@@ -519,28 +551,29 @@ static paramData_t gridPLs[] = {
 	{	PD_FLOAT, &grid.Angle, "origa", PDO_ANGLE, &r0_360, N_("A") },
 #define I_SHOW			(11)
 #define gridShowT		((wChoice_p)gridPLs[I_SHOW].control)
-	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORZ|BC_NOBORDER } };
+	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORZ|BC_NOBORDER }
+};
 
-static paramGroup_t gridPG = { "grid", PGO_RECORD | PGO_DIALOGTEMPLATE, gridPLs, COUNT( gridPLs ) };
+static paramGroup_t gridPG = { "grid", PGO_RECORD, gridPLs, COUNT( gridPLs ) };
 
 
 static BOOL_T GridChanged( void )
 {
 	return
-		grid.Horz.Spacing != oldGrid.Horz.Spacing ||
-		grid.Horz.Division != oldGrid.Horz.Division ||
-		grid.Vert.Spacing != oldGrid.Vert.Spacing ||
-		grid.Vert.Division != oldGrid.Vert.Division ||
-		grid.Orig.x != oldGrid.Orig.x ||
-		grid.Orig.y != oldGrid.Orig.y ||
-		grid.Angle != oldGrid.Angle ||
-		grid.Horz.Division != oldGrid.Horz.Division;
+	        grid.Horz.Spacing != oldGrid.Horz.Spacing ||
+	        grid.Horz.Division != oldGrid.Horz.Division ||
+	        grid.Vert.Spacing != oldGrid.Vert.Spacing ||
+	        grid.Vert.Division != oldGrid.Vert.Division ||
+	        grid.Orig.x != oldGrid.Orig.x ||
+	        grid.Orig.y != oldGrid.Orig.y ||
+	        grid.Angle != oldGrid.Angle ||
+	        grid.Horz.Division != oldGrid.Horz.Division;
 }
 
 static void RedrawGrid( void )
 {
 	if (grid.Show != oldGrid.Show ||
-		GridChanged() ) {
+	    GridChanged() ) {
 		wDrawDelayUpdate( tempD.d, TRUE );
 		MainRedraw(); // RedrawGrid
 		wDrawDelayUpdate( tempD.d, FALSE );
@@ -554,19 +587,22 @@ static void GridOk( void * unused )
 
 	ParamLoadData( &gridPG );
 	if ( ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0) ||
-		 ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0) ) {
+	     ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0) ) {
 		NoticeMessage( MSG_GRID_ENABLE_SPACE_GTR_0, _("Ok"), NULL );
 		return;
 	}
 	if ( grid.Horz.Spacing <= 0.0 &&
-		 grid.Vert.Spacing <= 0.0 )
+	     grid.Vert.Spacing <= 0.0 ) {
 		grid.Show = FALSE;
+	}
 
 	changes = 0;
-	if ( GridChanged() )
+	if ( GridChanged() ) {
 		changes |= CHANGE_GRID;
-	if (grid.Show != oldGrid.Show || changes != 0)
+	}
+	if (grid.Show != oldGrid.Show || changes != 0) {
 		changes |= CHANGE_MAIN;
+	}
 	DoChangeNotification( changes );
 	oldGrid = grid;
 	Reset();
@@ -578,44 +614,55 @@ static void GridButtonUpdate( long mode0 )
 	long mode1;
 	mode1 = 0;
 	if ( grid.Show &&
-		 grid.Horz.Spacing <= 0.0 &&
-		 grid.Vert.Spacing <= 0.0 ) {
+	     grid.Horz.Spacing <= 0.0 &&
+	     grid.Vert.Spacing <= 0.0 ) {
 		grid.Show = FALSE;
-		if ( mode0&CHK_SHOW )
+		if ( mode0&CHK_SHOW ) {
 			ErrorMessage( MSG_GRID_SHOW_SPACE_GTR_0 );
+		}
 	}
 	if ( grid.Horz.Enable &&
-		 grid.Horz.Spacing <= 0.0 ) {
+	     grid.Horz.Spacing <= 0.0 ) {
 		grid.Horz.Enable = FALSE;
-		if ( mode0&CHK_HENABLE )
+		if ( mode0&CHK_HENABLE ) {
 			mode1 |= CHK_HENABLE;
+		}
 	}
 	if ( grid.Vert.Enable &&
-		 grid.Vert.Spacing <= 0.0 ) {
+	     grid.Vert.Spacing <= 0.0 ) {
 		grid.Vert.Enable = FALSE;
-		if ( mode0&CHK_VENABLE )
+		if ( mode0&CHK_VENABLE ) {
 			mode1 |= CHK_VENABLE;
+		}
 	}
 	if ( mode1 &&
-		(mode0&(CHK_HENABLE|CHK_VENABLE)) == mode1 )
+	     (mode0&(CHK_HENABLE|CHK_VENABLE)) == mode1 ) {
 		ErrorMessage( MSG_GRID_ENABLE_SPACE_GTR_0 );
+	}
 	if ( gridShowT &&
-		 grid.Show != (wToggleGetValue( gridShowT ) != 0) )
+	     grid.Show != (wToggleGetValue( gridShowT ) != 0) ) {
 		ParamLoadControl( &gridPG, I_SHOW );
+	}
 	if ( gridHorzEnableT &&
-		 grid.Horz.Enable != (wToggleGetValue( gridHorzEnableT ) != 0) )
+	     grid.Horz.Enable != (wToggleGetValue( gridHorzEnableT ) != 0) ) {
 		ParamLoadControl( &gridPG, I_HORZENABLE );
+	}
 	if ( gridVertEnableT &&
-		 grid.Vert.Enable != (wToggleGetValue( gridVertEnableT ) != 0) )
+	     grid.Vert.Enable != (wToggleGetValue( gridVertEnableT ) != 0) ) {
 		ParamLoadControl( &gridPG, I_VERTENABLE );
-	if (snapGridEnable_b)
+	}
+	if (snapGridEnable_b) {
 		wButtonSetBusy( snapGridEnable_b, grid.Horz.Enable||grid.Vert.Enable );
-	if (snapGridShow_b)
+	}
+	if (snapGridShow_b) {
 		wButtonSetBusy( snapGridShow_b, (wBool_t)grid.Show );
-	if (snapGridEnableMI)
+	}
+	if (snapGridEnableMI) {
 		wMenuToggleSet( snapGridEnableMI, grid.Horz.Enable||grid.Vert.Enable );
-	if (snapGridShowMI)
+	}
+	if (snapGridShowMI) {
 		wMenuToggleSet( snapGridShowMI, (wBool_t)grid.Show );
+	}
 
 	if ( mode0&CHK_SHOW ) {
 		RedrawGrid();
@@ -626,19 +673,21 @@ static void GridButtonUpdate( long mode0 )
 
 static void GridChange( long changes )
 {
-	if ( (changes&(CHANGE_GRID|CHANGE_UNITS))==0 )
+	if ( (changes&(CHANGE_GRID|CHANGE_UNITS))==0 ) {
 		return;
+	}
 	GridButtonUpdate( 0 );
-	if (gridW==NULL || !wWinIsVisible(gridW))
+	if (gridW==NULL || !wWinIsVisible(gridW)) {
 		return;
+	}
 	ParamLoadControls( &gridPG );
 }
 
 
 static void GridDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
 	switch ( inx ) {
 	case I_HORZENABLE:
@@ -672,8 +721,8 @@ static void SnapGridRotate( void * pangle )
 
 
 EXPORT STATUS_T CmdGrid(
-		wAction_t action,
-		coOrd pos )
+        wAction_t action,
+        coOrd pos )
 {
 	STATUS_T rc;
 
@@ -681,7 +730,8 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_START:
 		if (gridW == NULL) {
-			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")), _("Ok"), GridOk, (paramActionCancelProc)Reset, TRUE, NULL, 0, GridDlgUpdate );
+			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")), _("Ok"),
+			                           GridOk, (paramActionCancelProc)Reset, TRUE, NULL, 0, GridDlgUpdate );
 		}
 		oldGrid = grid;
 		ParamLoadControls( &gridPG );
@@ -703,10 +753,11 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_CONFIRM:
 		if (GridChanged() ||
-			grid.Show != oldGrid.Show ) 
+		    grid.Show != oldGrid.Show ) {
 			return C_ERROR;
-		else
+		} else {
 			return C_CONTINUE;
+		}
 
 	case C_DOWN:
 	case C_RDOWN:
@@ -737,7 +788,7 @@ EXPORT STATUS_T CmdGrid(
 
 
 /**
- * Initialize the user interface for the grid functions. 
+ * Initialize the user interface for the grid functions.
  *
  * \param menu IN pulldown to which the grid function will be added
  * \return    created command button
@@ -747,39 +798,46 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 {
 	ParamRegister( &gridPG );
 	RegisterChangeNotification( GridChange );
-	if ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0 )
+	if ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0 ) {
 		grid.Horz.Enable = FALSE;
-	if ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0 )
+	}
+	if ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0 ) {
 		grid.Vert.Enable = FALSE;
+	}
 	if ( grid.Horz.Spacing <= 0.0 &&
-		 grid.Vert.Spacing <= 0.0 )
+	     grid.Vert.Spacing <= 0.0 ) {
 		grid.Show = FALSE;
+	}
 	snapGridPopupM = MenuRegister( "Snap Grid Rotate" );
 	AddRotateMenu( snapGridPopupM, SnapGridRotate );
 	GridButtonUpdate( 0 );
 	log_timedrawgrid = LogFindIndex( "timedrawgrid" );
-	return InitCommand( menu, CmdGrid, N_("Change Grid..."), NULL, LEVEL0, IC_CMDMENU, ACCL_GRIDW );
+	return AddMenuButton( menu, CmdGrid, "cmdChange Grid...", N_("Change Grid..."),
+	                      NULL, LEVEL0, IC_CMDMENU, ACCL_GRIDW, NULL );
 }
 
 
-EXPORT void SnapGridEnable( void )
+EXPORT void SnapGridEnable( void * unused )
 {
 	grid.Vert.Enable = grid.Horz.Enable = !( grid.Vert.Enable || grid.Horz.Enable );
 	GridButtonUpdate( (CHK_HENABLE|CHK_VENABLE) );
 }
 
 
-EXPORT void SnapGridShow( void )
+EXPORT void SnapGridShow( void * unused )
 {
 	grid.Show = !grid.Show;
 	GridButtonUpdate( CHK_SHOW );
 }
 
-#include "bitmaps/snap-curs.xpm"
-#include "bitmaps/snap-grid.xpm"
+#include "bitmaps/snap-curs.xpm3"
+#include "bitmaps/snap-grid.xpm3"
 
 EXPORT void InitSnapGridButtons( void )
 {
-	snapGridEnable_b = AddToolbarButton( "cmdGridEnable", wIconCreatePixMap(snap_curs_xpm[iconSize]), 0, (addButtonCallBack_t)SnapGridEnable, NULL );
-	snapGridShow_b = AddToolbarButton( "cmdGridShow", wIconCreatePixMap(snap_grid_xpm[iconSize]), IC_MODETRAIN_TOO, (addButtonCallBack_t)SnapGridShow, NULL );
+	snapGridEnable_b = AddToolbarButton( "cmdGridEnable",
+	                                     wIconCreatePixMap(snap_curs_xpm3[iconSize] ), 0, SnapGridEnable, NULL );
+	snapGridShow_b = AddToolbarButton( "cmdGridShow",
+	                                   wIconCreatePixMap(snap_grid_xpm3[iconSize] ), IC_MODETRAIN_TOO, SnapGridShow,
+	                                   NULL );
 }
