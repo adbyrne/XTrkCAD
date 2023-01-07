@@ -54,11 +54,11 @@ static wBool_t balloonVisible = FALSE;
 /**
  * Hide the currently displayed Balloon Help.
  */
-
+ 
 void
 wlibHelpHideBalloon()
 {
-	wControlSetBalloon( balloonB, 0, 0, NULL );
+    wControlSetBalloon( balloonB, 0, 0, NULL );
 }
 
 /**
@@ -70,7 +70,7 @@ wlibHelpHideBalloon()
 
 void wSetBalloonHelp( wBalloonHelp_t * bh )
 {
-	balloonHelpStrings = bh;
+    balloonHelpStrings = bh;
 }
 
 /**
@@ -82,7 +82,7 @@ void wSetBalloonHelp( wBalloonHelp_t * bh )
 
 void wEnableBalloonHelp( int enable )
 {
-	enableBalloonHelp = enable;
+    enableBalloonHelp = enable;
 }
 
 /**
@@ -93,10 +93,10 @@ void wEnableBalloonHelp( int enable )
  */
 
 void wControlSetHelp(
-        wControl_p b,
-        const char * help )
+    wControl_p b,
+    const char * help )
 {
-	wControlSetBalloonText( b, help );
+    wControlSetBalloonText( b, help );
 }
 
 /**
@@ -107,13 +107,13 @@ void wControlSetHelp(
  */
 
 void wControlSetBalloonText(
-        wControl_p b,
-        const char * label )
+    wControl_p b,
+    const char * label )
 {
-	assert(b->widget != NULL);
+    assert(b->widget != NULL);
 
 
-	gtk_widget_set_tooltip_text( b->widget, label );
+    gtk_widget_set_tooltip_text( b->widget, label );
 }
 
 /**
@@ -240,41 +240,36 @@ void wBalloonHelpUpdate( void )
  */
 
 void wlibAddHelpString(
-        GtkWidget * widget,
-        const char * helpStr )
+    GtkWidget * widget,
+    const char * helpStr )
 {
-	char *string;
-	char *wAppName = wlibGetAppName();
-	wBalloonHelp_t * bhp;
+    char *string;
+    char *wAppName = wlibGetAppName();
+    wBalloonHelp_t * bhp;
 
-	if (helpStr==NULL || *helpStr==0) {
-		return;
-	}
-	if ( balloonHelpStrings == NULL ) {
-		return;
-	}
+    if (helpStr==NULL || *helpStr==0)
+        return;
+    if ( balloonHelpStrings == NULL )
+        return;
 
-	// search for the helpStr, bhp points to the entry when found
-	for ( bhp = balloonHelpStrings; bhp->name
-	      && strcmp(bhp->name,helpStr) != 0; bhp++ )
-		;
+    // search for the helpStr, bhp points to the entry when found
+    for ( bhp = balloonHelpStrings; bhp->name && strcmp(bhp->name,helpStr) != 0; bhp++ )
+        ;
 
-	if (listMissingHelpStrings && !bhp->name) {
-		printf( "Missing Help String: %s\n", helpStr );
-		return;
-	}
+    if (listMissingHelpStrings && !bhp->name) {
+        printf( "Missing Help String: %s\n", helpStr );
+        return;
+    }
 
-	string = malloc( strlen(wAppName) + 5 + strlen(helpStr) + 1 );
-	sprintf( string, "%sHelp/%s", wAppName, helpStr );
+    string = malloc( strlen(wAppName) + 5 + strlen(helpStr) + 1 );
+    sprintf( string, "%sHelp/%s", wAppName, helpStr );
 
-	if(bhp->value) {
+	if(bhp->value)
 		gtk_widget_set_tooltip_text( widget, wlibConvertInput(_(bhp->value)) );
-	}
 
-	g_object_set_data( G_OBJECT( widget ), HELPDATAKEY, string );
+    g_object_set_data( G_OBJECT( widget ), HELPDATAKEY, string );
 
-	if (listHelpStrings) {
-		printf( "HELPSTR - %s\n", string );
-	}
+    if (listHelpStrings)
+        printf( "HELPSTR - %s\n", string );
 
 }

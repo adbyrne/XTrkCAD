@@ -55,24 +55,24 @@
 static char *
 ExtendPath(void)
 {
-	char *path = strdup(getenv("PATH"));
-	DynString newPath;
-	DynStringMalloc(&newPath, 16);
+    char *path = strdup(getenv("PATH"));
+    DynString newPath;
+    DynStringMalloc(&newPath, 16);
 
-	// append XTrackCAD's directory to the path as a fallback
-	DynStringCatCStrs(&newPath,
-	                  path,
-	                  ":",
-	                  wGetAppLibDir(),
-	                  NULL);
+    // append XTrackCAD's directory to the path as a fallback
+    DynStringCatCStrs(&newPath,
+                      path,
+                      ":",
+                      wGetAppLibDir(),
+                      NULL);
 
-	setenv("PATH",
-	       DynStringToCStr(&newPath),
-	       TRUE);
+    setenv("PATH",
+           DynStringToCStr(&newPath),
+           TRUE);
 
-	DynStringFree(&newPath);
+    DynStringFree(&newPath);
 
-	return (path);
+    return (path);
 }
 
 /**
@@ -85,33 +85,33 @@ ExtendPath(void)
 
 unsigned wOpenFileExternal(char * filename)
 {
-	int rc;
-	DynString commandLine;
-	char *currentPath;
+    int rc;
+    DynString commandLine;
+    char *currentPath;
 
-	assert(filename != NULL);
-	assert(strlen(filename));
+    assert(filename != NULL);
+    assert(strlen(filename));
 
-	currentPath = ExtendPath();
+    currentPath = ExtendPath();
+    
+    DynStringMalloc(&commandLine, 16);
+    DynStringCatCStrs(&commandLine,
+                      DEFAULTOPENCOMMAND,
+                      " \"",
+                      filename,
+					  "\"",
+                      NULL);
 
-	DynStringMalloc(&commandLine, 16);
-	DynStringCatCStrs(&commandLine,
-	                  DEFAULTOPENCOMMAND,
-	                  " \"",
-	                  filename,
-	                  "\"",
-	                  NULL);
+    // the command should be found via the PATH
+    rc = system(DynStringToCStr(&commandLine));
 
-	// the command should be found via the PATH
-	rc = system(DynStringToCStr(&commandLine));
+    // restore the PATH
+    setenv("PATH",
+           currentPath,
+           TRUE);
 
-	// restore the PATH
-	setenv("PATH",
-	       currentPath,
-	       TRUE);
-
-	free(currentPath);
-	DynStringFree(&commandLine);
-
-	return(rc==0);
+    free(currentPath);
+    DynStringFree(&commandLine);
+    
+    return(rc==0);
 }

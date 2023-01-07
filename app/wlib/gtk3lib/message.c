@@ -155,7 +155,7 @@ wWinPix_t wMessageGetHeight(
  * \param IN parent Handle of parent window
  * \param IN x position in x direction
  * \param IN y position in y direction
- * \param IN helpStr - name of field
+ * \param IN labelStr ???
  * \param IN width horizontal size of window
  * \param IN message message to display ( null terminated )
  * \param IN flags display options
@@ -163,14 +163,13 @@ wWinPix_t wMessageGetHeight(
  */
 
 wMessage_p wMessageCreateEx(
-        wWin_p	parent,
-        wWinPix_t	x,
-        wWinPix_t	y,
-        const char 	* helpStr,
-        const char  * labelStr,
-        wWinPix_t	width,
-        const char	*message,
-        long flags)
+    wWin_p	parent,
+    wWinPix_t	x,
+    wWinPix_t	y,
+    const char 	* labelStr,
+    wWinPix_t	width,
+    const char	*message,
+    long flags)
 {
 	wMessage_p b;
 	GtkRequisition requisition;
@@ -181,18 +180,6 @@ wMessage_p wMessageCreateEx(
 	wlibComputePos((wControl_p)b);
 	b->message = message;
 	b->labelWidth = width;
-	if (flags&BO_USETEMPLATE) {
-		b->labelWidget = wlibWidgetFromIdWarn( parent, labelStr);
-		b->fromTemplate = TRUE;
-		b->template_id = strdup(helpStr);
-		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
-		b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, helpStr, "reveal",
-		                TRUE );
-	}
-	if (!b->labelWidget) {
-		b->labelWidget = gtk_label_new(message?wlibConvertInput(message):"");
-	}
-
 	/* do we need to set a special font? */
 	if (wMessageSetFont(flags))	{
 		if (!fonts_set) {
@@ -229,7 +216,7 @@ wMessage_p wMessageCreateEx(
 		}
 	}
 
-	if (!b->fromTemplate) {
+
 		b->widget = gtk_fixed_new();
 		GtkRequisition min_requisition,natural_requisition;
 		gtk_widget_get_preferred_size (b->labelWidget,&min_requisition,
@@ -246,10 +233,6 @@ wMessage_p wMessageCreateEx(
 		if (wMessageSetFont(flags))	{
 			pango_font_description_set_size(fontDesc, fontSize * PANGO_SCALE);
 		}
-	} else {
-		b->widget = wlibWidgetFromIdWarn( parent, helpStr);
-		gtk_widget_show_all(b->labelWidget);
-	}
 
 	return b;
 }

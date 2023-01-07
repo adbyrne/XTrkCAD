@@ -1,7 +1,7 @@
 /** \file control.c
  * Control Utilities
  */
-/*
+/* 
  * Copyright 2016 Martin Fischer <m_fischer@sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@
 
 #include "gtkint.h"
 
-#define  GTKCONTROLHILITEWIDTH (3)
+#define  GTKCONTROLHILITEWIDTH (4)
 
 /**
  * Cause the control <b> to be displayed or hidden.
@@ -46,60 +46,31 @@
  */
 
 void wControlShow(
-        wControl_p b,
-        wBool_t show)
+    wControl_p b,
+    wBool_t show)
 {
-	if (b->type == B_LINES) {
-		wlibLineShow((wLine_p)b, show);
-		return;
-	}
+    if (b->type == B_LINES) {
+        wlibLineShow((wLine_p)b, show);
+        return;
+    }
 
-	if (b->widget == NULL) {
-		abort();
-	}
+    if (b->widget == NULL) {
+        abort();
+    }
 
-	if (b->inToolbar) {
-		gtk_widget_set_visible(b->widget,show);
-		if (b->reveal) {
-			gtk_widget_set_visible(GTK_WIDGET(b->reveal),show);
-			gtk_revealer_set_reveal_child(GTK_REVEALER(b->reveal),show);
-			gtk_widget_set_visible(gtk_widget_get_parent(GTK_WIDGET(b->reveal)),
-			                       show); // Box - assume all in box are hid/revealed
-		}
-		if (b->separator) {
-			gtk_widget_set_visible(GTK_WIDGET(b->separator),show);
-		}
+    if (show) {
+        gtk_widget_show(b->widget);
 
-		return;
-	}
+        if (b->label) {
+            gtk_widget_show(b->label);
+        }
+    } else {
+        gtk_widget_hide(b->widget);
 
-	if (b->reveal) {
-		if (show == gtk_revealer_get_reveal_child(b->reveal)) {
-		} else {
-			gtk_revealer_set_reveal_child(b->reveal, show);
-		}
-	}
-
-
-	if (show) {
-		gtk_widget_show(b->widget);
-
-		if (b->label) {
-			gtk_widget_show(b->label);
-		}
-		if (b->box) {
-			gtk_widget_show(GTK_WIDGET(b->box));
-		}
-	} else {
-		gtk_widget_hide(b->widget);
-
-		if (b->label) {
-			gtk_widget_hide(b->label);
-		}
-		if (b->box) {
-			gtk_widget_hide(GTK_WIDGET(b->box));
-		}
-	}
+        if (b->label) {
+            gtk_widget_hide(b->label);
+        }
+    }
 }
 
 /**
@@ -111,32 +82,25 @@ void wControlShow(
  */
 
 void wControlActive(
-        wControl_p b,
-        int active)
+    wControl_p b,
+    int active)
 {
-	if (b->widget == NULL) {
-		abort();
-	}
+    if (b->widget == NULL) {
+        abort();
+    }
 
-	if (b->type == B_LIST || b->type == B_DROPLIST ) {
+    if (b->type == B_LIST || b->type == B_DROPLIST ) {
 
-		gtk_widget_set_sensitive(gtk_bin_get_child(GTK_BIN(b->widget)), active);
-		gtk_combo_box_set_button_sensitivity(GTK_COMBO_BOX(b->widget),
-		                                     active?GTK_SENSITIVITY_ON:GTK_SENSITIVITY_OFF);
+    	gtk_widget_set_sensitive(gtk_bin_get_child(GTK_BIN(b->widget)), active);
+    	gtk_combo_box_set_button_sensitivity(GTK_COMBO_BOX(b->widget),
+    	  		active?GTK_SENSITIVITY_ON:GTK_SENSITIVITY_OFF);
 
-	} else {
+    } else {
 
-		gtk_widget_set_sensitive(GTK_WIDGET(b->widget), active);
+    	gtk_widget_set_sensitive(GTK_WIDGET(b->widget), active);
 
-	}
+    }
 }
-
-wBool_t
-wControlExpose (GtkWidget * widget, GdkEventExpose * event, wControl_p b)
-{
-	return TRUE;
-}
-
 
 /**
  * Returns the width of <label>.
@@ -149,16 +113,16 @@ wControlExpose (GtkWidget * widget, GdkEventExpose * event, wControl_p b)
 */
 
 wWinPix_t wLabelWidth(
-        const char * label)
+    const char * label)
 {
-	GtkWidget * widget;
-	GtkRequisition min_requisition, nat_requisition;
-	widget = gtk_label_new(wlibConvertInput(label));
-	gtk_widget_get_preferred_size(widget, &min_requisition, &nat_requisition);
-	gtk_widget_destroy(widget);
-	//g_object_ref_sink(widget);
-	//g_object_unref(widget);
-	return nat_requisition.width+8;
+    GtkWidget * widget;
+    GtkRequisition requisition;
+    widget = gtk_label_new(wlibConvertInput(label));
+    gtk_widget_get_preferred_size(widget, NULL, &requisition);
+    g_object_ref_sink (widget);
+    gtk_widget_destroy(widget);
+    g_object_unref(widget);
+    return requisition.width+8;
 }
 
 /**
@@ -169,9 +133,9 @@ wWinPix_t wLabelWidth(
  */
 
 wWinPix_t wControlGetWidth(
-        wControl_p b)
+    wControl_p b)
 {
-	return b->w;
+    return b->w;
 }
 
 /**
@@ -182,9 +146,9 @@ wWinPix_t wControlGetWidth(
  */
 
 wWinPix_t wControlGetHeight(
-        wControl_p b)
+    wControl_p b)
 {
-	return b->h;
+    return b->h;
 }
 
 /**
@@ -195,9 +159,9 @@ wWinPix_t wControlGetHeight(
  */
 
 wWinPix_t wControlGetPosX(
-        wControl_p b)		/* Control */
+    wControl_p b)		/* Control */
 {
-	return b->realX;
+    return b->realX;
 }
 
 /**
@@ -208,57 +172,41 @@ wWinPix_t wControlGetPosX(
  */
 
 wWinPix_t wControlGetPosY(
-        wControl_p b)		/* Control */
+    wControl_p b)		/* Control */
 {
-	return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?MENUH:0);
+    return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
 }
-
 
 /**
  * Set the fixed position of a control within its parent window
+ *
  * \param b IN control
  * \param x IN x position
  * \param y IN y position
  */
 
 void wControlSetPos(
-        wControl_p b,
-        wWinPix_t x,
-        wWinPix_t y)
+    wControl_p b,
+    wWinPix_t x,
+    wWinPix_t y)
 {
+    b->realX = x;
+    b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
 
-	if (b->inToolbar) {
-		return;
-	}
-	if(!b->fromTemplate) {
-		b->realX = x;
-		b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?MENUH:0);
+    if (b->widget) {
+        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
+    }
 
-		if (b->widget) {
-			gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
-		}
-
-		if (b->label) {
-			GtkRequisition min_requisition, nat_requisition, min_reqwidget, nat_reqwidget;
-			gtk_widget_get_preferred_size(b->label, &min_requisition, &nat_requisition);
-			if (b->widget) {
-				gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
-			} else {
-				nat_reqwidget.height = nat_requisition.height;
-			}
-			gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-			               b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
-		}
-	}
-
-	/* Special case for turnout designer window ->
-	 * still use Fixed for input fields located over drawing
-	 */
-	if (b->useGrid) {
-		if (b->reveal && b->fixed) {
-			gtk_fixed_move(GTK_FIXED(b->fixed), GTK_WIDGET(b->reveal), x-45, y-5);
-		}
-	}
+    if (b->label) {
+    	GtkRequisition requisition, reqwidget;
+    	gtk_widget_get_preferred_size(b->label, NULL, &requisition);
+    	if (b->widget)
+    	   	gtk_widget_get_preferred_size(b->widget, NULL, &reqwidget);
+    	else
+    	  	reqwidget.height = requisition.height;
+        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+                       b->realY+(reqwidget.height/2 - requisition.height/2));
+    }
 }
 
 /**
@@ -269,26 +217,24 @@ void wControlSetPos(
  */
 
 void wControlSetLabel(
-        wControl_p b,
-        const char * labelStr)
+    wControl_p b,
+    const char * labelStr)
 {
-	GtkRequisition min_requisition,nat_requisition, min_reqwidget, nat_reqwidget;
+    GtkRequisition requisition,reqwidget;
 
-	if (b->label) {
-		gtk_label_set_text(GTK_LABEL(b->label), wlibConvertInput(labelStr));
-		gtk_widget_get_preferred_size(b->label, &min_requisition, &nat_requisition);
-		if (b->widget) {
-			gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
-		} else {
-			nat_reqwidget.height = nat_requisition.height;
-		}
-		b->labelW = nat_requisition.width+8;
-		if (!b->fromTemplate)
-			gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-			               b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
-	} else {
-		b->labelW = wlibAddLabel(b, labelStr);
-	}
+    if (b->label) {
+        gtk_label_set_text(GTK_LABEL(b->label), wlibConvertInput(labelStr));
+        gtk_widget_get_preferred_size(b->label, NULL, &requisition);
+        if (b->widget)
+        	gtk_widget_get_preferred_size(b->widget, NULL, &reqwidget);
+        else
+        	reqwidget.height = requisition.height;
+        b->labelW = requisition.width+8;
+        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+                       b->realY+(reqwidget.height/2 - requisition.height/2));
+    } else {
+        b->labelW = wlibAddLabel(b, labelStr);
+    }
 }
 
 /**
@@ -299,10 +245,10 @@ void wControlSetLabel(
  */
 
 void wControlSetContext(
-        wControl_p b,
-        void * context)
+    wControl_p b,
+    void * context)
 {
-	b->data = context;
+    b->data = context;
 }
 
 /**
@@ -312,8 +258,35 @@ void wControlSetContext(
  */
 
 void wControlSetFocus(
-        wControl_p b)
+    wControl_p b)
 {
+}
+
+wBool_t wControlExpose (
+		 GtkWidget * widget,
+		 cairo_t * cr,
+		 wControl_p b
+		)
+{
+	GdkWindow * win = gtk_widget_get_window(b->widget);
+    int width = gtk_widget_get_allocated_width ( widget );
+    int height = gtk_widget_get_allocated_height ( widget );
+
+	if (b->outline) {
+		cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);
+		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+		cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
+		cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
+		cairo_rectangle(cr, 2, 2, width - 2, height - 2 );
+		cairo_stroke(cr);
+	}
+
+
+	cairo_destroy(cr);
+
+
+    return FALSE;
 }
 
 /**
@@ -325,28 +298,19 @@ void wControlSetFocus(
  *
  */
 void wControlHilite(
-        wControl_p b,
-        wBool_t hilite)
+    wControl_p b,
+    wBool_t hilite)
 {
-	GtkStyleContext *styleContext;
+//    cairo_t *cr;
+//    int off = GTKCONTROLHILITEWIDTH/2+1;
+    if ( debugWindow >= 1 )
+	    printf( "wControlHIlite( %s, %d )\n", b->labelStr, hilite );
 
-	if (b->widget == NULL) {
-		return;
-	}
+    if (b->widget == NULL) {
+        return;
+    }
+    b->outline = hilite;
 
-	if (! gtk_widget_get_visible(b->widget)) {
-		return;
-	}
-
-	if (! gtk_widget_get_visible(b->parent->widget)) {
-		return;
-	}
-
-	styleContext = gtk_widget_get_style_context(b->widget);
-
-	if(hilite) {
-		gtk_style_context_add_class( styleContext, "errorHighlight");
-	} else {
-		gtk_style_context_add_class( styleContext, "noHighlight");
-	}
+    if (b->widget)
+    	gtk_widget_queue_draw(b->widget);
 }

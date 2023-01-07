@@ -2,7 +2,7 @@
  * Gtk.Builder functions
  */
 
-
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,6 +66,29 @@ wlibFileNameFromDialog( const char *dialog )
 #endif
 
 	return( filename );
+}
+
+/**
+ * Check for the existance of a ui definition
+ * 
+ * \param name IN name of ui definition
+ * \return true if exists, false otherwise
+ */
+
+
+bool
+wlibExistsTemplate(const char *name)
+{
+	GString *filename;
+	bool exists = false;
+
+	filename = wlibFileNameFromDialog( name );
+	if(g_file_test(filename->str, G_FILE_TEST_EXISTS)) {
+		exists = true;
+	}
+	g_string_free(filename, true);
+
+	return(exists);
 }
 
 /*

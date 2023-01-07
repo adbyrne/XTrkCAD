@@ -52,14 +52,14 @@ static setTriggerCallback_p triggerFunc = NULL;
  */
 
 static gint doAlarm(
-        gpointer data)
+    gpointer data)
 {
-	wAlarmCallBack_p func = (wAlarmCallBack_p)data;
+    wAlarmCallBack_p func = (wAlarmCallBack_p)data;
 
-	func();
+    func();
 
-	alarmTimer = 0;
-	return FALSE;
+    alarmTimer = 0;
+    return FALSE;
 }
 
 /**
@@ -70,34 +70,34 @@ static gint doAlarm(
  */
 
 void wAlarm(
-        long count,
-        wAlarmCallBack_p func)		/* milliseconds */
+    long count,
+    wAlarmCallBack_p func)		/* milliseconds */
 {
-	gtkPaused = TRUE;
+    gtkPaused = TRUE;
 
-	if (alarmTimer) {
-		g_source_remove(alarmTimer);
-	}
+    if (alarmTimer) {
+        g_source_remove(alarmTimer);
+    }
 
-	alarmTimer = g_timeout_add(count, doAlarm, (void *)(GSourceFunc)func);
+    alarmTimer = g_timeout_add(count, doAlarm, (void *)(GSourceFunc)func);
 }
 
 static void doTrigger(void)
 {
-	if (triggerControl && triggerFunc) {
-		triggerFunc(triggerControl);
-		triggerFunc = NULL;
-		triggerControl = NULL;
-	}
+    if (triggerControl && triggerFunc) {
+        triggerFunc(triggerControl);
+        triggerFunc = NULL;
+        triggerControl = NULL;
+    }
 }
 
 void wlibSetTrigger(
-        wControl_p b,
-        setTriggerCallback_p trigger)
+    wControl_p b,
+    setTriggerCallback_p trigger)
 {
-	triggerControl = b;
-	triggerFunc = trigger;
-	wAlarm(500, doTrigger);
+    triggerControl = b;
+    triggerFunc = trigger;
+    wAlarm(500, doTrigger);
 }
 
 /**
@@ -107,28 +107,27 @@ void wlibSetTrigger(
  */
 
 void wPause(
-        long count)		/* milliseconds */
+    long count)		/* milliseconds */
 {
-	while (gtk_events_pending()) {
-		gtk_main_iteration();        //Allow GTK to finish before pausing
-	}
+	while (gtk_events_pending())
+	    gtk_main_iteration();			//Allow GTK to finish before pausing
 
-	struct timeval timeout;
-	sigset_t signal_mask;
-	sigset_t oldsignal_mask;
-	gdk_display_sync(gdk_display_get_default());
-	timeout.tv_sec = count/1000;
-	timeout.tv_usec = (count%1000)*1000;
-	sigemptyset(&signal_mask);
-	sigaddset(&signal_mask, SIGIO);
-	sigaddset(&signal_mask, SIGALRM);
-	sigprocmask(SIG_BLOCK, &signal_mask, &oldsignal_mask);
+    struct timeval timeout;
+    sigset_t signal_mask;
+    sigset_t oldsignal_mask;
+    gdk_display_sync(gdk_display_get_default());
+    timeout.tv_sec = count/1000;
+    timeout.tv_usec = (count%1000)*1000;
+    sigemptyset(&signal_mask);
+    sigaddset(&signal_mask, SIGIO);
+    sigaddset(&signal_mask, SIGALRM);
+    sigprocmask(SIG_BLOCK, &signal_mask, &oldsignal_mask);
 
-	if (select(0, NULL, NULL, NULL, &timeout) == -1) {
-		perror("wPause:select");
-	}
+    if (select(0, NULL, NULL, NULL, &timeout) == -1) {
+        perror("wPause:select");
+    }
 
-	sigprocmask(SIG_BLOCK, &oldsignal_mask, NULL);
+    sigprocmask(SIG_BLOCK, &oldsignal_mask, NULL);
 }
 
 /**
@@ -140,9 +139,9 @@ void wPause(
 
 unsigned long wGetTimer(void)
 {
-	struct timeval tv;
-	struct timezone tz;
-
-	gettimeofday(&tv, &tz);
-	return (tv.tv_sec-startTime.tv_sec+1) * 1000 + tv.tv_usec /1000;
+    struct timeval tv;
+    struct timezone tz;
+    
+    gettimeofday(&tv, &tz);
+    return (tv.tv_sec-startTime.tv_sec+1) * 1000 + tv.tv_usec /1000;
 }

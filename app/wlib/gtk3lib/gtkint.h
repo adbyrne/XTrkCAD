@@ -40,19 +40,17 @@
 #define LABEL_OFFSET	(3)
 #define MENUH	(24)
 
-#define PRINT_PORTRAIT  (0)
-#define PRINT_LANDSCAPE (1)
-
 #define PPI (72.0)
 #define P2I( P ) ((P)/PPI)
 
 #define CENTERMARK_LENGTH (60)				/**< size of cross marking center of circles */
-#define DASH_LENGTH (8.0)					/**< length of single dash */
+#define DASH_LENGTH (8.0)
 
 #define MINLINEWIDTHBITMAP (1.0)
 #define MINLINEWIDTHPRINT (0.09)
 
 extern wWin_p gtkMainW;
+
 
 #ifdef CURSOR_SURFACE
 typedef struct {
@@ -94,20 +92,12 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
 		cairo_t * cr; \
-		void * data; \
+		/* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/ \
 		wBool_t outline; \
-        int fromTemplate;               /**< widget was build from ui template */ \
-        int useGrid;                    /**< widget still uses a fixed layout */ \
-        GtkBox * box;                   /**< box with label and widget */ \
-        GtkFixed * fixed;               /**< fixed container for grid  */ \
+		void * data; \
+		int fromTemplate;               /**< widget was build from ui template */  \
         char * template_id; \
-		GtkRevealer * reveal;  \
-		int looked_for_reveal; \
-		int inToolbar; \
-		GtkWidget * separator; \
-		int row;	\
-		int col;	\
-		int label_col;
+
 
 struct wWin_t {
 		WOBJ_COMMON
@@ -118,8 +108,9 @@ struct wWin_t {
 		wBool_t shown;                 /**< visibility state */
 		const char * nameStr;          /**< window name (not title) */
 		GtkWidget * menubar;           /**< menubar handle (if exists) */
+		GtkWidget * toolbar;
 		int menu_height;
-        int gc_linewidth;              /**< ??? */
+		int gc_linewidth;              /**< ??? */
 		wBool_t busy;
 		int resizeTimer;		       /** resizing **/
 		int resizeW,resizeH;
@@ -127,9 +118,6 @@ struct wWin_t {
 		int timer_busy_count;
 		int modalLevel;
         GtkBuilder *builder;
-        GtkWidget *grid;
-        GtkWidget *toolbar;
-
 		};
 
 struct wControl_t {
@@ -247,12 +235,18 @@ void wlibBasicDrawFillCircle(
 /* boxes.c */
 void wlibDrawBox(wWin_p win, wBoxType_e style, wWinPix_t x, wWinPix_t y, wWinPix_t w, wWinPix_t h);
 
+/* builder.c */
+wWin_p wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data );
+GString *wlibFileNameFromDialog( const char *dialog );
+GtkWidget *wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
+GtkWidget *wlibWidgetFromId( wWin_p win, const char *id );
+GtkWidget *wlibWidgetFromIdWarn( wWin_p win, const char *id );
+void wlibAddContentFromTemplate( wWin_p win, const char *nameStr);
+bool wlibExistsTemplate(const char *name);
+
 /* button.c */
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wButton_p bb);
-wButton_p wButtonCreateForToolbar(wWin_p w, wWinPix_t x, wWinPix_t y,
-		const char * helpStr, const char * labelStr,
-        long option, wWinPix_t width, wButtonCallBack_p action, void * data);
 
 struct wButton_t {
     WOBJ_COMMON
@@ -264,14 +258,27 @@ struct wButton_t {
     long timer_id;
     int timer_count;
     int timer_state;
+	GtkRevealer * reveal; 
+	int inToolbar; 
+	GtkWidget * separator;
 };
 
 /* color.c */
 
+typedef struct {
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+    GdkColor normalColor;
+    GdkColor invertColor;
+    long rgb;
+    int colorChar;
+} colorMap_t;
+
 GdkRGBA wlibGetColor(wDrawColor color, wBool_t normal);
 
 /* control.c */
-wBool_t wControlExpose (GtkWidget * widget, GdkEventExpose * event, wControl_p b);
+wBool_t wControlExpose (GtkWidget * widget, cairo_t *cr, wControl_p b);
 
 /* droplist.c */
 enum columns {
@@ -347,7 +354,6 @@ GdkPixbuf *wlibMakePixbuf(wIcon_p ip);
 
 /* png.c */
 
-
 /* print.c */
 struct wDraw_t {
 		WOBJ_COMMON
@@ -357,6 +363,9 @@ struct wDraw_t {
 
 		cairo_surface_t * surface;
 		cairo_surface_t * temp_surface;
+		
+		cairo_t *printContext;
+		cairo_surface_t * curPrintSurface;
 
 		wBool_t clip_set;
 		GdkRectangle rect;
@@ -388,9 +397,16 @@ struct wDraw_t {
 
 void WlibApplySettings(GtkPrintOperation *op);
 void WlibSaveSettings(GtkPrintOperation *op);
+void psPrintLine(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintArc(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintFillRectangle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t x1, wDrawPix_t y1, wDrawColor color, wDrawOpts opts);
+void psPrintFillPolygon(wDrawPix_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
+void psPrintFillCircle(wDrawPix_t x0, wDrawPix_t y0, wDrawPix_t r, wDrawColor color, wDrawOpts opts);
+void psPrintString(wDrawPix_t x, wDrawPix_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
 static void WlibGetPaperSize(void);
 
 /* single.c */
+void wlibStringUpdate();
 
 /* splash.c */
 
@@ -423,16 +439,8 @@ wBool_t catch_shift_ctrl_alt_keys(GtkWidget *widget, GdkEventKey *event, void *d
 wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wWinPix_t x, wWinPix_t y,
     const char * labelStr, const char * nameStr, long option,
     wWinCallBack_p winProc, void * data);
+void wlibAddButtonToolbar(wButton_p button);
 
 /* wpref.c */
-
-/* builder.c */
-wWin_p wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data );
-GString *wlibFileNameFromDialog( const char *dialog );
-GtkWidget *wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
-GtkWidget *wlibWidgetFromId( wWin_p win, const char *id );
-GtkWidget *wlibWidgetFromIdWarn( wWin_p win, const char *id );
-void wlibAddContentFromTemplate( wWin_p win, const char *nameStr);
-
 
 #endif

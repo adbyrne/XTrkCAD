@@ -3,7 +3,7 @@
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 2005 Dave Bullis, 2020 Martin Fischer
+ *  Copyright (C) 2005 Dave Bullis
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,11 +32,13 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
 #include "wlib.h"
 #include "gtkint.h"
+#include "dynarr.h"
 #include "i18n.h"
 
 #include "xtrkcad-config.h"
@@ -45,6 +47,7 @@ extern char wConfigName[];
 static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
+
 
 /*
  *******************************************************************************
@@ -54,17 +57,18 @@ static char userHomeDir[BUFSIZ];
  *******************************************************************************
  */
 
-/** Find the directory where configuration files, help, demos etc are installed.
+
+/** Find the directory where configuration files, help, demos etc are installed. 
  *  The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
  *  2. Directory specified by XTRKCAD_INSTALL_PREFIX/share/xtrkcad
- *  3. /usr/lib/xtrkcad
- *  4. /usr/local/lib/xtrkcad
- *
+ *  3. /usr/share/xtrkcad
+ *  4. /usr/local/share/xtrkcad
+ *  
  *  \return pointer to directory name
  */
 
-const char * wGetAppLibDir(void)
+const char * wGetAppLibDir( void )
 {
 	char * cp, *ep;
 	char msg[BUFSIZ*2];
@@ -75,52 +79,56 @@ const char * wGetAppLibDir(void)
 		return appLibDir;
 	}
 
-	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++) {
+	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++)
 		*ep = toupper(*cp);
-	}
-
-	strcpy(ep, "LIB");
-	ep = getenv(envvar);
-
+	strcpy( ep, "LIB" );
+	ep = getenv( envvar );
 	if (ep != NULL) {
-		if ((stat(ep, &buf) == 0) && S_ISDIR(buf.st_mode)) {
-			strncpy(appLibDir, ep, sizeof appLibDir);
+		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+			strncpy( appLibDir, ep, sizeof appLibDir );
+			//printf( "wAppLbDir=%s\n", appLibDir );
 			return appLibDir;
 		}
 	}
 
-	strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX);
-	strcat(appLibDir, "/share/");
+	strcpy(appLibDir, "../share/");
 	strcat(appLibDir, wlibGetAppName());
-
-	if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
+	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+		//printf( "wAppLbDir=%s\n", appLibDir );
 		return appLibDir;
 	}
 
-	strcpy(appLibDir, "/usr/lib/");
-	strcat(appLibDir, wlibGetAppName());
+	char * dir1 = "/usr/share/";
+	char * dir2 = "/usr/local/share/";
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		dir1 = "/usr/local/share/";
+		dir2 = "/usr/share/";
+	}
 
-	if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
+	strcpy( appLibDir, dir1 );
+	strcat( appLibDir, wlibGetAppName() );
+	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+		//printf( "wAppLbDir=%s\n", appLibDir );
 		return appLibDir;
 	}
 
-	strcpy(appLibDir, "/usr/local/lib/");
-	strcat(appLibDir, wlibGetAppName());
-
-	if ((stat(appLibDir, &buf) == 0) && S_ISDIR(buf.st_mode)) {
+	strcpy( appLibDir, dir2 );
+	strcat( appLibDir, wlibGetAppName() );
+	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+		//printf( "wAppLbDir=%s\n", appLibDir );
 		return appLibDir;
 	}
 
-	sprintf(msg,
-	        _("The required configuration files could not be located in the expected location.\n\n"
-	          "Usually this is an installation problem. Make sure that these files are installed in either \n"
-	          "  %s/share/xtrkcad or\n"
-	          "  /usr/lib/%s or\n"
-	          "  /usr/local/lib/%s\n"
-	          "If this is not possible, the environment variable %s must contain "
-	          "the name of the correct directory."),
-	        XTRKCAD_INSTALL_PREFIX, wlibGetAppName(), wlibGetAppName(), envvar);
-	wNoticeEx(NT_ERROR, msg, _("Ok"), NULL);
+	sprintf( msg,
+		_("The required configuration files could not be located in the expected location.\n\n"
+		"Usually this is an installation problem. Make sure that these files are installed in either \n"
+		"  ../share/xtrkcad or\n"
+		"  /usr/share/%s or\n"
+		"  /usr/local/share/%s\n"
+		"If this is not possible, the environment variable %s must contain "
+		"the name of the correct directory."),
+		wlibGetAppName(), wlibGetAppName(), envvar );
+	wNoticeEx( NT_ERROR, msg, _("Ok"), NULL );
 	appLibDir[0] = '\0';
 	wExit(0);
 	return NULL;
@@ -136,47 +144,43 @@ const char * wGetAppLibDir(void)
 
 
 const char * wGetAppWorkDir(
-        void)
+		void )
 {
 	char tmp[BUFSIZ+20];
 	char * homeDir;
 	DIR *dirp;
-
-	if (appWorkDir[0] != '\0') {
+	
+	if (appWorkDir[0] != '\0')
 		return appWorkDir;
-	}
 
-	if ((homeDir = getenv("HOME")) == NULL) {
-		wNoticeEx(NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
+	if ((homeDir = getenv( "HOME" )) == NULL) {
+		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	}
-
-	sprintf(appWorkDir, "%s/.%s", homeDir, wlibGetAppName());
-
-	if ((dirp = opendir(appWorkDir)) != NULL) {
+	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
+	if ( (dirp = opendir(appWorkDir)) != NULL ) {
 		closedir(dirp);
 	} else {
-		if (mkdir(appWorkDir, 0777) == -1) {
-			sprintf(tmp, _("Cannot create %s"), appWorkDir);
-			wNoticeEx(NT_ERROR, tmp, _("Exit"), NULL);
+		if ( mkdir( appWorkDir, 0777 ) == -1 ) {
+			sprintf( tmp, _("Cannot create %s"), appWorkDir );
+			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
 			wExit(0);
 		} else {
-			/*
-			 * check for default configuration file and copy to
+			/* 
+			 * check for default configuration file and copy to 
 			 * the workdir if it exists
 			 */
 			struct stat stFileInfo;
 			char appEtcConfig[BUFSIZ];
-			sprintf(appEtcConfig, "/etc/%s.rc", wlibGetAppName());
-
-			if (stat(appEtcConfig, &stFileInfo) == 0) {
+			sprintf( appEtcConfig, "/etc/%s.rc", wlibGetAppName());
+			
+			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
-				sprintf(copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir);
-				system(copyConfigCmd);
+				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
+				int rc = system( copyConfigCmd );
 			}
 		}
 	}
-
 	return appWorkDir;
 }
 
@@ -187,24 +191,24 @@ const char * wGetAppWorkDir(
  * \return    pointer to the user's home directory
  */
 
-const char *wGetUserHomeDir(void)
+const char *wGetUserHomeDir( void )
 {
 	char *homeDir;
-
-	if (userHomeDir[ 0 ] != '\0') {
+	
+	if( userHomeDir[ 0 ] != '\0' )
 		return userHomeDir;
-	}
-
-	if ((homeDir = getenv("HOME")) == NULL) {
-		wNoticeEx(NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
+		
+	if ((homeDir = getenv( "HOME" )) == NULL) {
+		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {
-		strcpy(userHomeDir, homeDir);
-	}
+		strcpy( userHomeDir, homeDir );
+	}	
 
 	return userHomeDir;
 }
 
+
 /*
  *******************************************************************************
  *
@@ -213,108 +217,80 @@ const char *wGetUserHomeDir(void)
  *******************************************************************************
  */
 
-static wBool_t prefInitted = FALSE;
-static GKeyFile *keyFile = NULL;
-static gchar *stringBuffer = NULL;
-static GHashTable *hashTable;
+typedef struct {
+		char * section;
+		char * name;
+		wBool_t present;
+		wBool_t dirty;
+		char * val;
+		} prefs_t;
+dynArr_t prefs_da;
+#define prefs(N) DYNARR_N(prefs_t,prefs_da,N)
+wBool_t prefInitted = FALSE;
 
-static void
-FreeHashKey( gpointer key )
-{
-	//printf("Free key: >%s<\n", (char *)key );
-	g_free(key);
-}
-
-static void
-FreeHashValue( gpointer value )
-{
-	//printf("Free value: >%s<\n", (char *)value );
-	g_free( value );
-}
-
-static void
-CreateStringSet(void)
-{
-	hashTable = g_hash_table_new_full ( NULL,
-	                                    NULL,
-	                                    FreeHashKey,
-	                                    FreeHashValue);
-
-}
-
-static gchar *
-BuildConfigFileName()
-{
-	gchar *tmp;
-	gchar *result;
-	const char * workDir;
-
-	workDir = wGetAppWorkDir();
-	tmp = g_build_filename(workDir,
-	                       wConfigName,
-	                       NULL);
-
-	result = g_strconcat(tmp, ".ini", NULL);
-	g_free(tmp);
-
-	return (result);
-}
 /**
  * Read the configuration file into memory
  */
 
-static void readPrefs(void)
+static void readPrefs( char * name, wBool_t update )
 {
-	gchar *tmp;
-	GError *error = NULL;
+	char tmp[BUFSIZ], *np, *vp, *cp;
+	const char * workDir;
+	FILE * prefFile;
+	prefs_t * p;
 
 	prefInitted = TRUE;
-
-	tmp = BuildConfigFileName();
-
-	keyFile = g_key_file_new();
-
-	if (keyFile) {
-		g_key_file_load_from_file(keyFile,
-		                          tmp,
-		                          G_KEY_FILE_KEEP_COMMENTS,
-		                          &error);
-
-		if (error) {
-			if (!g_error_matches(error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-				g_warning("Error loading key file: %s", error->message);
+	workDir = wGetAppWorkDir();
+	if (name && name[0])
+		sprintf( tmp, "%s", name );
+	else
+		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+	prefFile = fopen( tmp, "r" );
+	if (prefFile == NULL)
+		return;
+	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
+		char *sp;
+		
+		sp = tmp;
+		while ( *sp==' ' || *sp=='\t' ) sp++;
+		if ( *sp == '\n' || *sp == '#' )
+			continue;
+		np = strchr( sp, '.' );
+		if (np == NULL) {
+			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
+			continue;
+		}
+		*np++ = '\0';
+		while ( *np==' ' || *np=='\t' ) np++;
+		vp = strchr( np, ':' );
+		if (vp == NULL) {
+			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
+			continue;
+		}
+		*vp++ = '\0';
+		while ( *vp==' ' || *vp=='\t' ) vp++;
+		cp = vp + strlen(vp) -1;
+		while ( cp >= vp && (*cp=='\n' || *cp==' ' || *cp=='\t') ) cp--;
+		cp[1] = '\0';
+		if (update) {
+			for (int i=0;i<prefs_da.cnt;i++) {
+				p = &DYNARR_N(prefs_t,prefs_da,i);
+				if (strcmp(p->name,np)==0 && strcmp(p->section,sp)==0) {
+					p->val = strdup(vp);
+					p->dirty = TRUE;
+					break;
+				}
 			}
+		} else {
+			DYNARR_APPEND( prefs_t, prefs_da, 10 );
+			p = &prefs(prefs_da.cnt-1);
+			p->name = strdup(np);
+			p->section = strdup(sp);
+			p->dirty = FALSE;
+			p->val = strdup(vp);
 		}
 	}
-
-	g_free(tmp);
-
-	CreateStringSet();
-}
-
-/**
- * make sure that the name for a preference has only valid chars (a-zA-Z0-9-)
- * see the specification at freedesktop.org
- *
- * \param name the preference name to be checked
- * \return pointer to a valid name string, g_free() after usage
- */
-
-static gchar *
-wlibConvertName( const char *name )
-{
-	gchar *result = g_malloc( strlen(name) + 2 );
-	gchar *tmp = result;
-
-	while(*name) {
-		if(g_ascii_isalnum(*name ) || *name =='-' ) {
-			*tmp++ = *name;
-		}
-		name++;
-	}
-	*tmp = '\0';
-
-	return(result);
+	fclose( prefFile );
 }
 
 /**
@@ -326,26 +302,30 @@ wlibConvertName( const char *name )
  */
 
 void wPrefSetString(
-        const char * section,		/* Section */
-        const char * name,		/* Name */
-        const char * sval)		/* Value */
+		const char * section,		/* Section */
+		const char * name,		/* Name */
+		const char * sval )		/* Value */
 {
-	gchar *prefName;
+	prefs_t * p;
 
-	if (!prefInitted) {
-		readPrefs();
+	if (!prefInitted)
+		readPrefs("", FALSE);
+	
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
+			if (p->val)
+				free(p->val);
+			p->dirty = TRUE;
+			p->val = (sval?strdup( sval ):NULL);
+			return;
+		}
 	}
-
-	if (!sval) {
-		return;
-	}
-
-	prefName = wlibConvertName(name);
-	g_key_file_set_string(keyFile,
-	                      section,
-	                      prefName,
-	                      sval);
-	g_free(prefName);
+	DYNARR_APPEND( prefs_t, prefs_da, 10 );
+	p = &prefs(prefs_da.cnt-1);
+	p->name = strdup(name);
+	p->section = strdup(section);
+	p->dirty = TRUE;
+	p->val = (sval?strdup(sval):NULL);
 }
 
 /**
@@ -356,27 +336,20 @@ void wPrefSetString(
  */
 
 char * wPrefGetStringBasic(
-        const char * section,			/* Section */
-        const char * name)			/* Name */
+		const char * section,			/* Section */
+		const char * name )			/* Name */
 {
-	GError *error = NULL;
-	gchar *value;
-	gchar *prefName;
-	gchar *result;
+	prefs_t * p;
 
-	if (!prefInitted) {
-		readPrefs();
+	if (!prefInitted)
+		readPrefs("", FALSE);
+	
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
+			return p->val;
+		}
 	}
-
-	prefName = wlibConvertName(name);
-	value = g_key_file_get_string(keyFile,
-	                              section,
-	                              prefName,
-	                              &error);
-	result = g_strdup( value );
-	g_hash_table_add(hashTable, result);
-
-	return (result);
+	return NULL;
 }
 
 /**
@@ -387,23 +360,15 @@ char * wPrefGetStringBasic(
  * \param lval IN value to save
  */
 
-void wPrefSetInteger(
-        const char * section,		/* Section */
-        const char * name,		/* Name */
-        long lval)		/* Value */
+ void wPrefSetInteger(
+		const char * section,		/* Section */
+		const char * name,		/* Name */
+		long lval )		/* Value */
 {
-	gchar *prefName;
+	char tmp[20];
 
-	if (!prefInitted) {
-		readPrefs();
-	}
-
-	prefName = wlibConvertName(name);
-	g_key_file_set_int64(keyFile,
-	                     section,
-	                     prefName,
-	                     lval);
-	g_free(prefName);
+	snprintf(tmp, sizeof(tmp), "%ld", lval );
+	wPrefSetString( section, name, tmp );
 }
 
 /**
@@ -417,60 +382,44 @@ void wPrefSetInteger(
  */
 
 wBool_t wPrefGetIntegerBasic(
-        const char * section,		/* Section */
-        const char * name,		/* Name */
-        long * res,		/* Address of result */
-        long def)		/* Default value */
+		const char * section,		/* Section */
+		const char * name,		/* Name */
+		long * res,		/* Address of result */
+		long def )		/* Default value */
 {
-	GError *error = NULL;
-	gint64 value;
-	gchar *prefName;
+	const char * cp;
+    char *cp1;
 
-	if (!prefInitted) {
-		readPrefs();
-	}
-
-	prefName = wlibConvertName(name);
-	value = g_key_file_get_int64(keyFile,
-	                             section,
-	                             prefName,
-	                             &error);
-	g_free(prefName);
-
-	if (error || (value == def)) {
+	cp = wPrefGetStringBasic( section, name );
+	if (cp == NULL) {
 		*res = def;
-		return (FALSE);
-	} else {
-		*res= value;
-		return (TRUE);
+		return FALSE;
 	}
+	*res = strtol(cp,&cp1,0);
+	if (cp==cp1) {
+		*res = def;
+		return FALSE;
+	}
+	return TRUE;
 }
 
 /**
- * Save a float value in the preferences file.
+ * Save a float value in the preferences file. 
  *
  * \param section IN the file section into which the value should be saved
  * \param name IN the name of the preference
  * \param lval IN the value
  */
 
-void wPrefSetFloat(
-        const char * section,		/* Section */
-        const char * name,		/* Name */
-        double lval)		/* Value */
+ void wPrefSetFloat(
+		const char * section,		/* Section */
+		const char * name,		/* Name */
+		double lval )		/* Value */
 {
-	gchar *prefName;
+	char tmp[20];
 
-	if (!prefInitted) {
-		readPrefs();
-	}
-
-	prefName = wlibConvertName(name);
-	g_key_file_set_double(keyFile,
-	                      section,
-	                      prefName,
-	                      lval);
-	g_free(prefName);
+	snprintf(tmp, sizeof(tmp), "%0.6f", lval );
+	wPrefSetString( section, name, tmp );
 }
 
 /**
@@ -485,82 +434,83 @@ void wPrefSetFloat(
 
 
 wBool_t wPrefGetFloatBasic(
-        const char * section,		/* Section */
-        const char * name,		/* Name */
-        double * res,		/* Address of result */
-        double def)		/* Default value */
+		const char * section,		/* Section */
+		const char * name,		/* Name */
+		double * res,		/* Address of result */
+		double def )		/* Default value */
 {
-	GError *error = NULL;
-	gdouble value;
-	gchar *prefName;
+	const char * cp;
+    char *cp1;
 
-	if (!prefInitted) {
-		readPrefs();
-	}
-
-	prefName = wlibConvertName(name);
-	value = g_key_file_get_double(keyFile,
-	                              section,
-	                              prefName,
-	                              &error);
-	g_free(prefName);
-
-	if (error || value == def) {
+	cp = wPrefGetStringBasic( section, name );
+	if (cp == NULL) {
 		*res = def;
-		return (FALSE);
-	} else {
-		*res= value;
-		return (TRUE);
+		return FALSE;
 	}
+	*res = strtod(cp, &cp1);
+	if (cp == cp1) {
+		*res = def;
+		return FALSE;
+	}
+	return TRUE;
 }
 
-void wPrefsLoad(char * name)
-{
-	readPrefs();
+void wPrefsLoad(char * name) {
+	readPrefs(name,TRUE);
 }
 
 /**
- * Save the configuration to a file. The parameter name is ignored but kept in place
- * for compatibility reasons.
+ * Save the configuration to a file. The config parameters are held and updated in an array.
+ * To make the settings persistant, this function has to be called. 
  *
- * \param name ignored
- * \return
  */
 
 void wPrefFlush(
-        char * name)
+		char * name )
 {
-	gchar *tmp;
-	GError *error = NULL;
+	prefs_t * p;
+	char tmp[BUFSIZ];
+    const char *workDir;
+	FILE * prefFile;
 
-	if (!prefInitted) {
+	if (!prefInitted)
 		return;
+	
+	workDir = wGetAppWorkDir();
+	if (name && name[0])
+		snprintf( tmp, sizeof(tmp), "%s", name );
+	else
+		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
+	prefFile = fopen( tmp, "w" );
+	if (prefFile == NULL)
+		return;
+
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if(p->val) {
+			fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
+		}	
 	}
-
-	tmp = BuildConfigFileName();
-
-	if (tmp && keyFile) {
-		g_key_file_save_to_file(keyFile,
-		                        tmp,
-		                        &error);
-
-		if (error) {
-			if (!g_error_matches(error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-				g_warning("Error saving key file: %s", error->message);
-			}
-		}
-	}
-
-	g_free(tmp);
+	fclose( prefFile );
 }
 
 /**
  * Clear the preferences from memory
- * \return
+ * \return  
  */
 
-void wPrefReset(void)
+void wPrefReset(
+		void )
 {
+	prefs_t * p;
+
 	prefInitted = FALSE;
-	g_key_file_free(keyFile);
+	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
+		if (p->section)
+			free( p->section );
+		if (p->name)
+			free( p->name );
+		if (p->val)
+			free( p->val );
+	}
+	prefs_da.cnt = 0;
 }

@@ -52,39 +52,6 @@ struct wLine_t {
 
 static dynArr_t lines_array;
 
-/**
- * Redraw Templated window
- */
-
-static gboolean linesTemplateRepaint(
-        GtkWidget * widget,
-        cairo_t *cr,
-        wLine_p bl
-)
-{
-
-	wWin_p w = bl->parent;
-
-	for (int i=0; i<lines_array.cnt; i++) {
-
-		bl = DYNARR_N(wLine_p, lines_array, i);
-
-		if(!bl->visible) { continue; }
-
-		cairo_set_source_rgb(cr, 0, 0, 0);
-		cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-		cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
-
-		for (int i=0; i<bl->count; i++) {
-			cairo_set_line_width(cr, bl->lines[i].width);
-			cairo_move_to(cr, bl->lines[i].x0, bl->lines[i].y0);
-			cairo_line_to(cr, bl->lines[i].x1, bl->lines[i].y1);
-			cairo_stroke(cr);
-		}
-	}
-	return TRUE;
-}
-
 
 /**
  * Perform redrawing of the lines window
@@ -204,17 +171,9 @@ wLine_p wLineCreate(
 		}
 	}
 
-	if (parent->fromTemplate) {
-		linesWindow->widget = wlibGetWidgetFromName(parent,labelStr,"draw",FALSE);
-		if (!draw_connected) {
-			g_signal_connect(linesWindow->widget, "draw",
-			                 G_CALLBACK(linesTemplateRepaint), linesWindow);
-			draw_connected = TRUE;
-		}
-	} else {
-		linesWindow->repaintProc = linesRepaint;
-		wlibAddButton((wControl_p)linesWindow);
-		linesWindow->widget = NULL;
-	}
+	linesWindow->repaintProc = linesRepaint;
+	wlibAddButton((wControl_p)linesWindow);
+	linesWindow->widget = NULL;
+
 	return linesWindow;
 }
