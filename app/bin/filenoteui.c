@@ -75,7 +75,7 @@ static paramData_t fileEditPLs[] = {
 
 };
 
-static paramGroup_t fileEditPG = { "fileEdit", PGO_DIALOGTEMPLATE, fileEditPLs, COUNT( fileEditPLs ) };
+static paramGroup_t fileEditPG = { "fileEdit", 0, fileEditPLs, COUNT( fileEditPLs ) };
 static wWin_p fileEditW;
 
 BOOL_T IsFileNote(track_p trk)

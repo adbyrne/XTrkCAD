@@ -2682,76 +2682,12 @@ static void ParamPositionControl(
 
 
 typedef void (*layoutControlsProc)(paramData_p, char *, wWinPix_t, wWinPix_t );
-
-/* Special Layout for Templated window only - also used in Describe
- *
- * \param IN group	data definition for the dialog
- * \param IN proc   callback to create the Dialog Controls
- *
- *
- *
- */
-
-static void LayoutControlTemplate(
-		paramGroup_p group,
-		layoutControlsProc proc) {
-	int inx;
-	paramData_p pd = group->paramPtr;
-
-	/*Set up Prefix of HelpStr to find content by concatenated field name*/
-	char prefixStr[STR_SHORT_SIZE], helpStr[STR_SHORT_SIZE];
-	if (group->winOption&BO_DESCTEMPLATE) {
-			/* For Describe, use the current template e.g., describe-cornu- as prefix*/
-		sprintf(prefixStr,"%s",group->template_id);
-	} else {
-			/* Otherwise use the dialog name e.g., tip- */
-		sprintf(prefixStr,"%s",group->nameStr);
-	}
-
-	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
-			pd->group->win = group->win;
-			pd->winOption |= BO_USETEMPLATE;				/* Yes Always Template */
-			if ( (pd->option&PDO_DLGIGNORE) != 0 ) {
-				wControlShow(pd->control,FALSE);
-				continue; /*Ignore unused */
-			}
-
-			if ((pd->option&PDO_GRID) !=0 )
-				pd->winOption |= BO_GRID;                  /* Make sure that we place */
-
-			if ( pd->assigned_helpStr )
-				sprintf( helpStr, "%s-%s", prefixStr, pd->assigned_helpStr );  /* Add name of field */
-			else
-				sprintf( helpStr, "%s-%s", prefixStr, pd->nameStr);
-            wWinPix_t x=0,y=0;
-			if (group->layoutProc)
-						group->layoutProc( pd, inx, 0, &x, &y );
-			if ((pd->option&PDO_GRID) == 0) {
-				x = y = 0;
-			}
-			/* Callback the Create or Update routine */
-			proc( pd, helpStr, x, y );  /* Note -> This is the first time where the controls may be built, or associated */
-	}
-
-}
-
-
 static void LayoutControls(
         paramGroup_p group,
         layoutControlsProc proc,
         wWinPix_t * retW,
         wWinPix_t * retH )
 {
-	/* Use definitions for Template Layout including Describe */
-	if (group->winOption&BO_USETEMPLATE) {
-		LayoutControlTemplate(group, proc);
-		if ( retW )
-			*retW = -1;
-		if ( retH )
-			*retH = -1;
-		return;
-	}
-
 	struct {
 		struct { wWinPix_t x, y; } orig, term;
 	} controlK, columnK, windowK;
@@ -3117,7 +3053,7 @@ wWin_p ParamCreateDialog(
 	group->origH += DlgSepBottom;
 	wWinGetSize( group->win, &w0, &h0 );
 	LOG( log_paramLayout, 1, ( "    winSize: %dx%d\n", w0, h0 ) );
-	if ( (WinOptionsIn&F_RESIZE) ) {
+	if ( (winOption&F_RESIZE) ) {
 		if ( group->origW != w0 ||
 		     group->origH != h0 ) {
 			LOG( log_paramLayout, 1, ( "    RESIZE+change/" ) );
@@ -3168,10 +3104,6 @@ EXPORT void ParamDialogOkActive(
 	}
 }
 
-/*
- * ParamCreateControls is used to put controls onto the main screen (currently on the bottom rail
- * The parms are named as the name of the parmlist followed by the name of the parm
- */
 
 EXPORT void ParamCreateControls(
         paramGroup_p pg,

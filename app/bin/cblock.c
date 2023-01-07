@@ -107,7 +107,7 @@ static paramData_t blockPLs[] = {
 /*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_NOTBLANK | PDO_STRINGLIMITLENGTH, I2VP(200), N_("Name"), 0, 0, sizeof( blockName )},
 /*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF |PDO_STRINGLIMITLENGTH, I2VP(350), N_("Script"), 0, 0, sizeof( blockScript)}
 };
-static paramGroup_t blockPG = { "block", PGO_DIALOGTEMPLATE, blockPLs,  COUNT(blockPLs)};
+static paramGroup_t blockPG = { "block", 0, blockPLs,  COUNT(blockPLs)};
 static wWin_p blockW;
 
 static char blockEditName[STR_SHORT_SIZE];
@@ -163,11 +163,11 @@ static struct {
 
 typedef enum { NM, SC, LN, E0, E1 } blockDesc_e;
 static descData_t blockDesc[] = {
-/*NM*/	{ DESC_STRING, N_("Name"), &blockData.name, "name", sizeof(blockData.name) },
-/*SC*/  { DESC_STRING, N_("Script"), &blockData.script, "script", sizeof(blockData.script) },
-/*LN*/  { DESC_DIM, N_("Length"), &blockData.length, "length" },
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &blockData.endPt[0], "endpt1" },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &blockData.endPt[1], "endpt2" },
+/*NM*/	{ DESC_STRING, N_("Name"), &blockData.name, sizeof(blockData.name) },
+/*SC*/  { DESC_STRING, N_("Script"), &blockData.script, sizeof(blockData.script) },
+/*LN*/  { DESC_DIM, N_("Length"), &blockData.length },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &blockData.endPt[0]},
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &blockData.endPt[1]},
 	{ DESC_NULL } };
 
 static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )
@@ -283,7 +283,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	blockDesc[LN].mode = DESC_RO;
 	blockDesc[NM].mode =
 	blockDesc[SC].mode = DESC_NOREDRAW;
-	DoDescribe(_("Block"), "describe-block", trk, blockDesc, UpdateBlock );
+	DoDescribe(_("Block"), trk, blockDesc, UpdateBlock );
 
 }
 
@@ -669,7 +669,7 @@ static void NewBlockDialog()
 	if ( log_block < 0 ) log_block = LogFindIndex( "block" );
 	if ( !blockW ) {
 		ParamRegister( &blockPG );
-		blockW = ParamCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")), _("Ok"), BlockOk, wHide, TRUE, NULL, F_BLOCK|F_USETEMPLATE, NULL );
+		blockW = ParamCreateDialog (&blockPG, MakeWindowTitle(_("Create Block")), _("Ok"), BlockOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		blockD.dpi = mainD.dpi;
 	}
 	ParamLoadControls( &blockPG );

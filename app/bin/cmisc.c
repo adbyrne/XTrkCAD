@@ -357,36 +357,6 @@ static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP,
                 wWinPix_t sep)
 {
 	int inx;
-    paramData_t * param;
-    /*Check to see if we already set up the linkage*/
-    if (ddp->param0) {		// Has a link in the first and possibly second part
-    	if (!ddp->control0) {
-			param = ((paramData_t *)ddp->param0);
-    	} else {
-    		param = ((paramData_t *)ddp->param1);
-    	}
-		param->valueP = valueP;
-		param->context = ddp;
-		param->option = descTypeMap[ddp->type].option;
-
-		if (ddp->type == DESC_POS) {
-			char helpStr[STR_SHORT_SIZE];
-			if (!ddp->control0)
-				sprintf(helpStr, "%sx",ddp->helpStr);
-			else
-				sprintf(helpStr, "%sy",ddp->helpStr);
-			param->assigned_helpStr = strdup(helpStr);
-		} else {
-			param->assigned_helpStr = strdup(ddp->helpStr);
-		}
-
-		if ((ddp->type == DESC_STRING) && ddp->max_string) {
-			param->max_string = ddp->max_string;
-			param->option |= PDO_STRINGLIMITLENGTH;
-		}
-
-		return param->control;
-    }
 
 	for (inx = descTypeMap[ddp->type].first; inx<descTypeMap[ddp->type].last;
 	     inx++) {
@@ -457,14 +427,12 @@ static void DescribeLayout(
 	wControlShow(pd->control, TRUE);
 }
 
-
 /**
  * Creation and modification of the Describe dialog box is handled here. As the number
  * of values for a track element depends on the specific type, this dialog is dynamically
  * updated to hsow the changable parameters only
  *
  * \param IN title Description of the selected part, shown in window title bar
- * \param IN template-id the name of the describe template to add to the window
  * \param IN trk Track element to be described
  * \param IN data
  * \param IN update
@@ -478,7 +446,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	descData_p ddp;
 	char * label;
 	int ro_mode;
-    paramGroup_t * pg = NULL;
 
 	if (!inDescribeCmd) {
 		return;
@@ -489,7 +456,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	descData = data;
 	descUpdateFunc = update;
 	describeW_posy = 0;
-    describe_row = 1;
 
 	if (describePG.win == NULL) {
 		/* SDB 5.13.2005 */
@@ -504,8 +470,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 		describePLs[inx].option = PDO_DLGIGNORE;
 		wControlShow(describePLs[inx].control, FALSE);
 	}
-
-    wlibHideAllRevealsExcept(pg->win,template_id);
 
 	ro_mode = (GetLayerFrozen(GetTrkLayer(trk))?DESC_RO:0);
 
@@ -564,8 +528,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 				wControlActive(ddp->control0, TRUE);
 			}
 
-            *(int *)(ddp->valueP) = SearchEditableLayerList(*(int *)(ddp->valueP));
-            layerValue = (int *)(ddp->valueP);
 			break;
 
 		default:
@@ -579,7 +541,6 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 	wWinSetTitle(describePG.win, message);
 	wShow(describePG.win);
 }
-
 
 static void DescChange(long changes)
 {

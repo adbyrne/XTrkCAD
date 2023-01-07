@@ -164,12 +164,12 @@ static struct {
 
 typedef enum { NM, PS, ON, OF } controlDesc_e;
 static descData_t controlDesc[] = {
-    /* NM */ { DESC_STRING, N_("Name"),      &controlProperties.name, "name",
+    /* NM */ { DESC_STRING, N_("Name"),      &controlProperties.name, 
                 sizeof(controlProperties.name) },
-    /* PS */ { DESC_POS,    N_("Position"),  &controlProperties.pos, "position" },
-    /* ON */ { DESC_STRING, N_("On Script"), &controlProperties.onscript, "on", 
+    /* PS */ { DESC_POS,    N_("Position"),  &controlProperties.pos  },
+    /* ON */ { DESC_STRING, N_("On Script"), &controlProperties.onscript, 
                 sizeof(controlProperties.onscript) },
-    /* OF */ { DESC_STRING, N_("Off Script"),&controlProperties.offscript, "off", 
+    /* OF */ { DESC_STRING, N_("Off Script"),&controlProperties.offscript,
     sizeof(controlProperties.offscript) },
     { DESC_NULL } };
 
@@ -291,7 +291,7 @@ static void DescribeControl (track_p trk, char * str, CSIZE_T len )
     controlDesc[NM].mode = 
           controlDesc[ON].mode = 
           controlDesc[OF].mode = DESC_NOREDRAW;
-    DoDescribe( _("Control"), "describe-control", trk, controlDesc, 
+    DoDescribe( _("Control"), trk, controlDesc, 
                 UpdateControlProperties );
     
 }
@@ -433,7 +433,7 @@ static paramData_t controlEditPLs[] = {
     /*4*/ { PD_STRING, controlEditOffScript, "offscript", PDO_NOPREF, I2VP(350), N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
-static paramGroup_t controlEditPG = { "controlEdit", PGO_DIALOGTEMPLATE, controlEditPLs, COUNT( controlEditPLs ) };
+static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, COUNT( controlEditPLs ) };
 static wWin_p controlEditW;
 
 static void ControlEditOk ( void * junk )

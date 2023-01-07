@@ -177,7 +177,6 @@ target_sources(xtrkcad-lib
     misc.c
     misc.h
     note.h
-    param.c
     param.h
     paramfile.c
     paramfilelist.c
@@ -225,6 +224,18 @@ target_sources(xtrkcad-lib
     include/stringxtc.h
     include/utlist.h
 )
+
+if(XTRKCAD_GTK3_WLIB)
+    target_sources(xtrkcad-lib
+        PRIVATE
+        paramgrid.c
+    )    
+else()
+    target_sources(xtrkcad-lib
+	    PRIVATE
+        param.c
+    )    
+endif()
 
 # add UTF-8 conversion utilities on Windows
 

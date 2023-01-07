@@ -260,7 +260,7 @@ static paramData_t cmdoptPLs[] = {
 	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, selectLabels, N_("Select Mode"), 0},
 	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, selectZeroLabels, "", 0 }
 };
-static paramGroup_t cmdoptPG = { "cmdopt", PGO_DIALOGTEMPLATE | PGO_RECORD|PGO_PREFMISC, cmdoptPLs, COUNT( cmdoptPLs ) };
+static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD|PGO_PREFMISC, cmdoptPLs, COUNT( cmdoptPLs ) };
 
 static void CmdoptOk( void * junk )
 {

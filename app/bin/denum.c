@@ -55,7 +55,7 @@ static paramData_t enumPLs[] = {
 #define I_ENUMLISTINDEXES  (5)
 	{   PD_TOGGLE, &enableListIndexes, "list-indexes", PDO_DLGRESETMARGIN, indexLabels, NULL, BC_HORZ|BC_NOBORDER }
 };
-static paramGroup_t enumPG = { "enum", PGO_DIALOGTEMPLATE, enumPLs, COUNT( enumPLs ) };
+static paramGroup_t enumPG = { "enum", 0, enumPLs, COUNT( enumPLs ) };
 
 static struct wFilSel_t * enumFile_fs;
 

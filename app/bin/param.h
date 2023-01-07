@@ -160,6 +160,7 @@ typedef struct {
 	paramOldData_t oldD, demoD;
 	wBool_t enter_pressed;
 	wBool_t bInvalid;
+	unsigned posColumn, posRow; 	
 } paramData_t, *paramData_p;
 
 

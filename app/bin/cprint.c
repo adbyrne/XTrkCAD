@@ -162,7 +162,7 @@ static paramData_t printPLs[] = {
 /*26*/ { PD_MESSAGE, N_("selected"), "mess2", 0, I2VP(80) }
 };
 
-static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP | PGO_DIALOGTEMPLATE, printPLs, COUNT( printPLs ) };
+static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, COUNT( printPLs ) };
 
 struct margins_s {
 	double top, right, bottom, left;
