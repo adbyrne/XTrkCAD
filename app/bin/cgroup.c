@@ -35,6 +35,15 @@
 #include "trkendpt.h"
 #include "common-ui.h"
 
+/*
+ * Note: Bumper support
+ * Currently Ungroup will convert 1 ended Turnouts (Bumpers) to simple 2-ended Straight
+ * Group will remove any Bumpers from the Selected track list
+ * See TODO-BUMPER
+ *
+ * The remaining issue is that the ShortestPath logic aborts if it gets to the end of a
+ * path elem list and can't find the corresponing EP.
+ */
 
 /*****************************************************************************
  *
@@ -172,6 +181,11 @@ static void GroupCopyTitle(
 	}
 }
 
+// TODO-BUMPER - handle paths which don't end on an EP
+// Set GROUP_BUMPER_REFCOUT
+//   to 1 to convert Bumper tracks to Straight tracks with 2 EP
+//   to 2 to create 1 EP Turnout tracks
+#define GROUP_BUMPER_REFCOUNT (1)
 
 EXPORT void UngroupCompound(
         track_p trk )
@@ -266,7 +280,7 @@ EXPORT void UngroupCompound(
 		 *    If the refcount differs between adjacent segments
 		 *       add segment with smaller count to mergePts
 		 *    Treat EndPts as a phantom segment with inx above segCnt
-		 *    Path ends that don't map onto a real EndPt (bumpers) get a fake EP
+		 *    Path ends that don't map onto a real EndPt (bumpers) get a virtual EP
 		 */
 		DYNARR_SET( int, refCount_da, segCnt+epCnt );
 		memset( refCount_da.ptr, 0, refCount_da.cnt * sizeof *(int*)0 );
@@ -274,10 +288,13 @@ EXPORT void UngroupCompound(
 		while ( cp[0] ) {
 			cp += strlen(cp)+1;
 			while ( cp[0] ) {
+				// Process 1st seg in sub-path
 				GetSegInxEP( cp[0], &segInx, &segEP );
+				// Find EP its connected to
 				pos = GetSegEndPt( xx->segs+segInx, segEP, FALSE, NULL );
 				segInx1 = FindEP( TempEndPtsCount(), TempEndPt(0), pos );
 				if ( segInx1 >= 0 ) {
+					// Found existing EP, incr it's refCount
 					segInx1 += segCnt;
 					if ( segInx1 >= refCount_da.cnt ) {
 						InputError( "Invalid segInx1 %d", TRUE, segInx1 );
@@ -285,42 +302,52 @@ EXPORT void UngroupCompound(
 					}
 					refCount(segInx1)++;
 				} else {
+					// No existing EP: must be a bumper, add virtual EP
 					epp = TempEndPtsAppend();
 					DYNARR_APPEND( int, refCount_da, 10 );
 					SetEndPt( epp, pos, 0 );
 					segInx1 = refCount_da.cnt-1;
-					refCount(segInx1) = 2;
+					refCount(segInx1) = GROUP_BUMPER_REFCOUNT;
 				}
 				segEP1 = 0;
 				while ( cp[0] ) {
+					// Process remaining segs
 					GetSegInxEP( cp[0], &segInx, &segEP );
 					if ( segInx1 >= refCount_da.cnt ) {
 						InputError( "Invalid segInx1 %d", TRUE, segInx1 );
 						return;
 					}
+					// Incr it's refCoount
 					refCount(segInx)++;
+					// Is my refCount > then previous seg/EP?
 					if ( refCount(segInx) > refCount(segInx1) ) {
 						AddMergePt( segInx, segEP );
 					}
+					// Is previous seg/EP refCount > my refCount
 					if ( refCount(segInx1) > refCount(segInx) ) {
 						AddMergePt( segInx1, segEP1 );
 					}
+					// Advance to next seg
 					segInx1 = segInx;
 					segEP1 = 1-segEP;
 					cp++;
 				}
+				// Process last seg in sub-path
 				GetSegInxEP( cp[-1], &segInx, &segEP );
+				// Find EP its connected to
 				pos = GetSegEndPt( xx->segs+segInx, 1-segEP, FALSE, NULL );
 				segInx = FindEP( TempEndPtsCount(), TempEndPt(0), pos );
 				if ( segInx >= 0 ) {
+					// Found EP, incr refCount
 					segInx += segCnt;
 					refCount(segInx)++;
 				} else {
+					// No existing EP: must be a bumper, add virtual EP
 					epp = TempEndPtsAppend();
 					DYNARR_APPEND( int, refCount_da, 10 );
 					SetEndPt( epp, pos, 0 );
 					segInx = refCount_da.cnt-1;
-					refCount(segInx) = 2;
+					refCount(segInx) = GROUP_BUMPER_REFCOUNT;
 				}
 				if ( refCount(segInx) > refCount(segInx1) ) {
 					AddMergePt( segInx, 0 );
@@ -329,7 +356,6 @@ EXPORT void UngroupCompound(
 			}
 			cp++;
 		}
-		epCnt1 = TempEndPtsCount();
 
 		/* 4: For each path element, map segment to a mergePt if the adjacent segment
 		 *    and EP is a mergePt
@@ -449,6 +475,8 @@ EXPORT void UngroupCompound(
 		}
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET( char, pathPtr_da );
+		// Mark start of virtual EPs for this MergePt
+		epCnt1 = TempEndPtsCount();
 		for ( segInx=0; segInx<segCnt; segInx++ ) {
 			if ( refCount(segInx) == inx ) {
 				DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
@@ -467,6 +495,7 @@ EXPORT void UngroupCompound(
 					if ( segEP >= 0 && segEP >= epCnt && segEP < epCnt1 ) {
 						/* was a bumper: no EP */
 						eps[ep] = -1;
+						// TODO-BUMPER To support Bumpers remove this continue
 						continue;
 					}
 					REORIGIN1( pos, xx->angle, xx->orig );
@@ -558,6 +587,10 @@ EXPORT void UngroupCompound(
 			while ( cp[0] ) {
 				GetSegInxEP( cp[0], &segInx, &segEP );
 				stp = &segTrack(segInx);
+				// Check EPs are not virtual (Bumpers)
+				// TODO-BUMPER May not be necessary
+				CHECK( stp->ep[segEP] >= 0 );
+				CHECK( stp1->ep[segEP1] >= 0 );
 				trk0 = GetTrkEndTrk( stp->trk, stp->ep[segEP] );
 				trk1 = GetTrkEndTrk( stp1->trk, stp1->ep[segEP1] );
 				if ( trk0 == NULL ) {
@@ -658,6 +691,7 @@ static long groupNoCombine;
 static double groupOriginX;
 static double groupOriginY;
 char * groupReplaceLabels[] = { N_("Replace with new group?"), NULL };
+char * groupNoCombineLabels[] = { N_("Turntable/TransferTable/DblSlipSwith?"), NULL };
 
 static wWin_p groupW;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
@@ -670,7 +704,8 @@ static paramData_t groupPLs[] = {
 #define I_GROUP_ORIGIN_OFFSET 4  /* Need to change if add above */
 	/*4*/ { PD_FLOAT, &groupOriginX, "orig", PDO_DIM, &r_1000_1000, N_("Offset X,Y:")},
 	/*5*/ { PD_FLOAT, &groupOriginY, "origy",PDO_DIM | PDO_DLGHORZ, &r_1000_1000, ""},
-	/*6*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ|BC_NOBORDER }
+	/*6*/ { PD_TOGGLE, &groupNoCombine, "noCombine", 0, groupNoCombineLabels, "", BC_HORZ|BC_NOBORDER },
+	/*7*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ|BC_NOBORDER }
 };
 static paramGroup_t groupPG = { "group", 0, groupPLs, COUNT( groupPLs ) };
 
@@ -819,6 +854,10 @@ static int GroupShortestPathFunc(
 	case SPTC_MATCH:
 		if ( !GetTrkSelected(trk) ) {
 			return 0;
+		}
+		// TODO-BUMPER may not be necessary
+		if ( GetTrkEndPtCnt(trk) < 2 && ep1 >= 1 ) {
+			return 1;
 		}
 		trk1 = GetTrkEndTrk(trk,ep1);
 		if ( trk1 == NULL ) {
@@ -1285,7 +1324,8 @@ static void GroupOk( void * unused )
 		}
 
 		/* Make sure no turnouts in groupTrk list have a path end which is not an EndPt */
-		//TODO Add Trap Points (which are Turnouts with a bumper track)
+		// TODO-BUMPER Add Trap Points (which are Turnouts with a bumper track)
+		// for Bumper support remove this loop
 		for ( inx=0; inx<groupTrk_da.cnt; inx++ ) {
 			trk = groupTrk(0).trk;
 			if ( GetTrkType( trk ) == T_TURNOUT ) {
@@ -1326,6 +1366,7 @@ static void GroupOk( void * unused )
 			}
 		}
 		qsort( TempEndPt(0), TempEndPtsCount(), EndPtSize(1),  CmpEndPtAngle );
+		// TODO-BUMPER - handle TempEndPt(1)
 		if ( NormalizeAngle( GetEndPtAngle(TempEndPt(0)) - GetEndPtAngle(TempEndPt(
 		                             TempEndPtsCount()-1)) ) >
 		     NormalizeAngle( GetEndPtAngle(TempEndPt(1)) - GetEndPtAngle(TempEndPt(0)) ) ) {
@@ -1372,8 +1413,12 @@ static void GroupOk( void * unused )
 				ppp = &pathElem(inx);
 				LogPrintf( "    %d: GTx: %d, EP: %d %d, F:%s, P:",
 				           inx, ppp->groupInx, ppp->ep1, ppp->ep2, ppp->flip?"T":"F" );
-				for ( PATHPTR_T cp = ppp->path; cp[0] || cp[1]; cp++ ) {
-					LogPrintf( " %d", *cp );
+				if ( ppp->path == NULL ) {
+					LogPrintf( "No Paths!\n" );
+				} else {
+					for ( PATHPTR_T cp = ppp->path; cp[0] || cp[1]; cp++ ) {
+						LogPrintf( " %d", *cp );
+					}
 				}
 				LogPrintf( " 0\n" );
 			}
@@ -1389,7 +1434,7 @@ static void GroupOk( void * unused )
 		 * 4: Flip paths so they align
 		 */
 		if ( path_da.cnt == 0 ) {
-			NoticeMessage( _("No paths"), _("Ok"), NULL );
+			NoticeMessage( MSG_GROUP_NO_PATHS, _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( groupW );
 			return;
@@ -1593,8 +1638,12 @@ static void GroupOk( void * unused )
 					groupP = &groupTrk( ppp->groupInx );
 					PATHPTR_T pPaths = ppp->path;
 					flip = ppp->flip;
-					CHECKMSG(  pPaths,
-					           ( "Missing Path T%d:%d.%d", GetTrkIndex(groupP->trk), ppp->ep2, ppp->ep1 ) );
+					if ( pPaths == NULL ) {
+						ErrorMessage( MSG_GROUP_NO_PATHS, _("Ok"), NULL );
+						wDrawDelayUpdate( mainD.d, FALSE );
+						wHide( groupW );
+						return;
+					}
 					if ( flip ) { pPaths += strlen((char *)pPaths)-1; }
 					while ( *pPaths && (pPaths >= ppp->path) ) {      //Add Guard for flip backwards
 						DYNARR_APPEND( char, pathPtr_da, 10 );
