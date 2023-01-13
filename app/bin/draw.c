@@ -1567,7 +1567,8 @@ EXPORT void MainRedraw( void )
 	coOrd orig, size;
 
 	static int cMR = 0;
-	LOG( log_redraw, 1, ( "MainRedraw: %d %0.1fx%0.1f\n", cMR++, mainD.size.x, mainD.size.y ) );
+	LOG( log_redraw, 1, ( "MainRedraw: %d %0.1fx%0.1f\n", cMR++, mainD.size.x,
+	                      mainD.size.y ) );
 	unsigned long time0 = wGetTimer();
 	if (delayUpdate) {
 		wDrawDelayUpdate( mainD.d, TRUE );
@@ -1640,7 +1641,8 @@ EXPORT void MainLayout(
 		return;
 	}
 	static int cML = 0;
-	LOG( log_redraw, 1, ( "MainLayout: %d %s %s\n", cML++, bRedraw?"RDW":"---", bNoBorder?"NBR":"---" ) );
+	LOG( log_redraw, 1, ( "MainLayout: %d %s %s\n", cML++, bRedraw?"RDW":"---",
+	                      bNoBorder?"NBR":"---" ) );
 
 	SetMainSize();
 	t1 = mainD.dpi/mainD.scale;
@@ -1716,7 +1718,8 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			return;
 		}
 		wWinGetSize( mainW, &width, &height );
-		LOG( log_redraw, 1, ( "MainProc/Resize: %d %s %ld %ld\n", cMP++, refresh==NULL?"RDW":"---", width, height ) );
+		LOG( log_redraw, 1, ( "MainProc/Resize: %d %s %ld %ld\n", cMP++,
+		                      refresh==NULL?"RDW":"---", width, height ) );
 		LayoutToolBar(refresh);
 		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
 		if (height >= 0) {

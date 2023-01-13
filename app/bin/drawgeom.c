@@ -593,7 +593,8 @@ STATUS_T DrawGeomMouse(
 		case OP_DIMLINE:
 		case OP_BENCH:
 			if (!locked
-			    && ((MyGetKeyState() & WKEY_CTRL) == WKEY_CTRL )) { //If not found already +Ctl = Right Angle
+			    && ((MyGetKeyState() & WKEY_CTRL) ==
+			        WKEY_CTRL )) { //If not found already +Ctl = Right Angle
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(pos0, pos);
 				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
