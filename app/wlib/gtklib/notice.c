@@ -41,9 +41,9 @@
 static char * wlibChgMnemonic(char *label);
 
 typedef struct {
-    GtkWidget * win;
-    GtkWidget * label;
-    GtkWidget * butt[3];
+	GtkWidget * win;
+	GtkWidget * label;
+	GtkWidget * butt[3];
 } notice_win;
 static notice_win noticeW;
 static long noticeValue;
@@ -55,17 +55,17 @@ static long noticeValue;
  */
 
 static void doNotice(
-    GtkWidget * widget,
-    long value)
+        GtkWidget * widget,
+        long value)
 {
-    if (value != 2) {
-	// event not from from closing the window but from a button press
-	// Close the Notice dialog
-    	gtk_widget_destroy(noticeW.win);
-	// Remember the button
-        noticeValue = value;
-    }
-    wlibDoModal(NULL, FALSE);
+	if (value != 2) {
+		// event not from from closing the window but from a button press
+		// Close the Notice dialog
+		gtk_widget_destroy(noticeW.win);
+		// Remember the button
+		noticeValue = value;
+	}
+	wlibDoModal(NULL, FALSE);
 }
 
 /**
@@ -84,48 +84,48 @@ int wNoticeEx(int type,
               const char * no)
 {
 
-    int res;
-    unsigned flag = GTK_MESSAGE_ERROR;
-    char *headline = _("Error");
-    GtkWidget *dialog;
-    GtkWindow *parent = NULL;
+	int res;
+	unsigned flag = GTK_MESSAGE_ERROR;
+	char *headline = _("Error");
+	GtkWidget *dialog;
+	GtkWindow *parent = NULL;
 
-    switch (type) {
-    case NT_INFORMATION:
-        flag = GTK_MESSAGE_INFO;
-        headline = _("Information");
-        break;
+	switch (type) {
+	case NT_INFORMATION:
+		flag = GTK_MESSAGE_INFO;
+		headline = _("Information");
+		break;
 
-    case NT_WARNING:
-        flag = GTK_MESSAGE_WARNING;
-        headline = _("Warning");
-        break;
+	case NT_WARNING:
+		flag = GTK_MESSAGE_WARNING;
+		headline = _("Warning");
+		break;
 
-    case NT_ERROR:
-        flag = GTK_MESSAGE_ERROR;
-        headline = _("Error");
-        break;
-    }
+	case NT_ERROR:
+		flag = GTK_MESSAGE_ERROR;
+		headline = _("Error");
+		break;
+	}
 
-    if (gtkMainW) {
-        parent = GTK_WINDOW(gtkMainW->gtkwin);
-    }
+	if (gtkMainW) {
+		parent = GTK_WINDOW(gtkMainW->gtkwin);
+	}
 
-    wDestroySplash();
+	wDestroySplash();
 
-    dialog = gtk_message_dialog_new(parent,
-                                    GTK_DIALOG_DESTROY_WITH_PARENT,
-                                    flag,
-                                    ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
-                                    "%s", msg);
-    gtk_window_set_title(GTK_WINDOW(dialog), headline);
+	dialog = gtk_message_dialog_new(parent,
+	                                GTK_DIALOG_DESTROY_WITH_PARENT,
+	                                flag,
+	                                ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
+	                                "%s", msg);
+	gtk_window_set_title(GTK_WINDOW(dialog), headline);
 
-    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
-    res = gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+	res = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
 
-    return res == GTK_RESPONSE_OK  || res == GTK_RESPONSE_YES;
+	return res == GTK_RESPONSE_OK  || res == GTK_RESPONSE_YES;
 }
 
 
@@ -141,11 +141,11 @@ int wNoticeEx(int type,
  */
 
 int wNotice(
-    const char * msg,		/* Message */
-    const char * yes,		/* First button label */
-    const char * no)		/* Second label (or 'NULL') */
+        const char * msg,		/* Message */
+        const char * yes,		/* First button label */
+        const char * no)		/* Second label (or 'NULL') */
 {
-    return wNotice3(msg, yes, no, NULL);
+	return wNotice3(msg, yes, no, NULL);
 }
 
 /** \brief Popup a notice box with three buttons.
@@ -167,121 +167,121 @@ int wNotice(
  */
 
 int wNotice3(
-    const char * msg,		/* Message */
-    const char * affirmative,		/* First button label */
-    const char * cancel,		/* Second label (or 'NULL') */
-    const char * alternate)
+        const char * msg,		/* Message */
+        const char * affirmative,		/* First button label */
+        const char * cancel,		/* Second label (or 'NULL') */
+        const char * alternate)
 {
-    notice_win *nw;
-    GtkWidget * vbox;
-    GtkWidget * hbox;
-    GtkWidget * hbox1;
-    GtkWidget * image;
-    nw = &noticeW;
+	notice_win *nw;
+	GtkWidget * vbox;
+	GtkWidget * hbox;
+	GtkWidget * hbox1;
+	GtkWidget * image;
+	nw = &noticeW;
 
-    char *aff = NULL;
-    char *can = NULL;
-    char *alt = NULL;
+	char *aff = NULL;
+	char *can = NULL;
+	char *alt = NULL;
 
-    wDestroySplash();
+	wDestroySplash();
 
-    nw->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	nw->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-    gtk_window_set_position(GTK_WINDOW(nw->win), GTK_WIN_POS_CENTER);
-    gtk_container_set_border_width(GTK_CONTAINER(nw->win), 0);
-    gtk_window_set_resizable(GTK_WINDOW(nw->win), FALSE);
-    gtk_window_set_modal(GTK_WINDOW(nw->win), TRUE);
-    gtk_window_set_type_hint(GTK_WINDOW(nw->win), GDK_WINDOW_TYPE_HINT_DIALOG);
+	gtk_window_set_position(GTK_WINDOW(nw->win), GTK_WIN_POS_CENTER);
+	gtk_container_set_border_width(GTK_CONTAINER(nw->win), 0);
+	gtk_window_set_resizable(GTK_WINDOW(nw->win), FALSE);
+	gtk_window_set_modal(GTK_WINDOW(nw->win), TRUE);
+	gtk_window_set_type_hint(GTK_WINDOW(nw->win), GDK_WINDOW_TYPE_HINT_DIALOG);
 
-    vbox = gtk_vbox_new(FALSE, 12);
-    gtk_widget_show(vbox);
-    gtk_container_add(GTK_CONTAINER(nw->win), vbox);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
+	vbox = gtk_vbox_new(FALSE, 12);
+	gtk_widget_show(vbox);
+	gtk_container_add(GTK_CONTAINER(nw->win), vbox);
+	gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
 
-    hbox = gtk_hbox_new(FALSE, 12);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
-    gtk_widget_show(hbox);
+	hbox = gtk_hbox_new(FALSE, 12);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+	gtk_widget_show(hbox);
 
-    image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_WARNING,
-                                     GTK_ICON_SIZE_DIALOG);
-    gtk_widget_show(image);
-    gtk_box_pack_start(GTK_BOX(hbox), image, TRUE, TRUE, 0);
-    gtk_misc_set_alignment(GTK_MISC(image), 0, 0);
+	image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_WARNING,
+	                                 GTK_ICON_SIZE_DIALOG);
+	gtk_widget_show(image);
+	gtk_box_pack_start(GTK_BOX(hbox), image, TRUE, TRUE, 0);
+	gtk_misc_set_alignment(GTK_MISC(image), 0, 0);
 
-    /* create the text label, allow GTK to wrap and allow for markup (for future enhancements) */
-    nw->label = gtk_label_new(msg);
-    gtk_widget_show(nw->label);
-    gtk_box_pack_end(GTK_BOX(hbox), nw->label, TRUE, TRUE, 0);
-    gtk_label_set_use_markup(GTK_LABEL(nw->label), FALSE);
-    gtk_label_set_line_wrap(GTK_LABEL(nw->label), TRUE);
-    gtk_misc_set_alignment(GTK_MISC(nw->label), 0, 0);
+	/* create the text label, allow GTK to wrap and allow for markup (for future enhancements) */
+	nw->label = gtk_label_new(msg);
+	gtk_widget_show(nw->label);
+	gtk_box_pack_end(GTK_BOX(hbox), nw->label, TRUE, TRUE, 0);
+	gtk_label_set_use_markup(GTK_LABEL(nw->label), FALSE);
+	gtk_label_set_line_wrap(GTK_LABEL(nw->label), TRUE);
+	gtk_misc_set_alignment(GTK_MISC(nw->label), 0, 0);
 
-    /* this hbox will include the button bar */
-    hbox1 = gtk_hbox_new(TRUE, 0);
-    gtk_widget_show(hbox1);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, TRUE, 0);
+	/* this hbox will include the button bar */
+	hbox1 = gtk_hbox_new(TRUE, 0);
+	gtk_widget_show(hbox1);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, TRUE, 0);
 
-    /* add the respective buttons */
-    aff = wlibChgMnemonic((char *) affirmative);
-    nw->butt[ 0 ] = gtk_button_new_with_mnemonic(aff);
-    gtk_widget_show(nw->butt[ 0 ]);
-    gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 0 ], TRUE, TRUE, 0);
-    gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 0 ]), 3);
-    g_signal_connect(GTK_OBJECT(nw->butt[0]), "clicked", G_CALLBACK(doNotice),
-                     (void*)1);
-    gtk_widget_set_can_default(nw->butt[ 0 ], TRUE);
+	/* add the respective buttons */
+	aff = wlibChgMnemonic((char *) affirmative);
+	nw->butt[ 0 ] = gtk_button_new_with_mnemonic(aff);
+	gtk_widget_show(nw->butt[ 0 ]);
+	gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 0 ], TRUE, TRUE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 0 ]), 3);
+	g_signal_connect(GTK_OBJECT(nw->butt[0]), "clicked", G_CALLBACK(doNotice),
+	                 (void*)1);
+	gtk_widget_set_can_default(nw->butt[ 0 ], TRUE);
 
-    if (cancel) {
-        can = wlibChgMnemonic((char *) cancel);
-        nw->butt[ 1 ] = gtk_button_new_with_mnemonic(can);
-        gtk_widget_show(nw->butt[ 1 ]);
-        gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 1 ], TRUE, TRUE, 0);
-        gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 1 ]), 3);
-        g_signal_connect(GTK_OBJECT(nw->butt[1]), "clicked", G_CALLBACK(doNotice),
-                         (void*)0);
-        gtk_widget_set_can_default(nw->butt[ 1 ], TRUE);
+	if (cancel) {
+		can = wlibChgMnemonic((char *) cancel);
+		nw->butt[ 1 ] = gtk_button_new_with_mnemonic(can);
+		gtk_widget_show(nw->butt[ 1 ]);
+		gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 1 ], TRUE, TRUE, 0);
+		gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 1 ]), 3);
+		g_signal_connect(GTK_OBJECT(nw->butt[1]), "clicked", G_CALLBACK(doNotice),
+		                 (void*)0);
+		gtk_widget_set_can_default(nw->butt[ 1 ], TRUE);
 
-        if (alternate) {
-            alt = wlibChgMnemonic((char *) alternate);
-            nw->butt[ 2 ] = gtk_button_new_with_mnemonic(alt);
-            gtk_widget_show(nw->butt[ 2 ]);
-            gtk_box_pack_start(GTK_BOX(hbox1), nw->butt[ 2 ], TRUE, TRUE, 0);
-            gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 2 ]), 3);
-            g_signal_connect(GTK_OBJECT(nw->butt[2]), "clicked", G_CALLBACK(doNotice),
-                             (void*)-1);
-            gtk_widget_set_can_default(nw->butt[ 2 ], TRUE);
-        }
-    }
+		if (alternate) {
+			alt = wlibChgMnemonic((char *) alternate);
+			nw->butt[ 2 ] = gtk_button_new_with_mnemonic(alt);
+			gtk_widget_show(nw->butt[ 2 ]);
+			gtk_box_pack_start(GTK_BOX(hbox1), nw->butt[ 2 ], TRUE, TRUE, 0);
+			gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 2 ]), 3);
+			g_signal_connect(GTK_OBJECT(nw->butt[2]), "clicked", G_CALLBACK(doNotice),
+			                 (void*)-1);
+			gtk_widget_set_can_default(nw->butt[ 2 ], TRUE);
+		}
+	}
 
-    g_signal_connect(GTK_WINDOW(nw->win),
-            "destroy", G_CALLBACK(doNotice), (void*)2);
+	g_signal_connect(GTK_WINDOW(nw->win),
+	                 "destroy", G_CALLBACK(doNotice), (void*)2);
 
-    gtk_widget_grab_default(nw->butt[ 0 ]);
-    gtk_widget_grab_focus(nw->butt[ 0 ]);
+	gtk_widget_grab_default(nw->butt[ 0 ]);
+	gtk_widget_grab_focus(nw->butt[ 0 ]);
 
-    gtk_widget_show(nw->win);
+	gtk_widget_show(nw->win);
 
-    if (gtkMainW) {
-        gtk_window_set_transient_for(GTK_WINDOW(nw->win), GTK_WINDOW(gtkMainW->gtkwin));
-        /*		gdk_window_set_group( nw->win->window, gtkMainW->gtkwin->window ); */
-    }
+	if (gtkMainW) {
+		gtk_window_set_transient_for(GTK_WINDOW(nw->win), GTK_WINDOW(gtkMainW->gtkwin));
+		/*		gdk_window_set_group( nw->win->window, gtkMainW->gtkwin->window ); */
+	}
 
-    noticeValue = 0; // Default: Cancel
-    wlibDoModal(NULL, TRUE);
+	noticeValue = 0; // Default: Cancel
+	wlibDoModal(NULL, TRUE);
 
-    if (aff) {
-        free(aff);
-    }
+	if (aff) {
+		free(aff);
+	}
 
-    if (can) {
-        free(can);
-    }
+	if (can) {
+		free(can);
+	}
 
-    if (alt) {
-        free(alt);
-    }
+	if (alt) {
+		free(alt);
+	}
 
-    return noticeValue;
+	return noticeValue;
 }
 
 /* \brief Convert label string from Windows mnemonic to GTK
@@ -295,18 +295,18 @@ int wNotice3(
 static
 char * wlibChgMnemonic(char *label)
 {
-    char *ptr;
-    char *cp;
+	char *ptr;
+	char *cp;
 
-    cp = strdup(label);
+	cp = strdup(label);
 
-    ptr = strchr(cp, '&');
+	ptr = strchr(cp, '&');
 
-    if (ptr) {
-        *ptr = '_';
-    }
+	if (ptr) {
+		*ptr = '_';
+	}
 
-    return (cp);
+	return (cp);
 }
 
 

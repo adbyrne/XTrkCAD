@@ -44,10 +44,10 @@
  */
 
 struct wLine_t {
-    WOBJ_COMMON
-    wBool_t visible;
-    int count;
-    wLines_t * lines;
+	WOBJ_COMMON
+	wBool_t visible;
+	int count;
+	wLines_t * lines;
 };
 
 /**
@@ -59,30 +59,30 @@ struct wLine_t {
 
 static void linesRepaint(wControl_p b)
 {
-    wLine_p bl = (wLine_p)(b);
-    int i;
-    wWin_p win = (wWin_p)(bl->parent);
-    GdkDrawable * window;
-    cairo_t *cr;
+	wLine_p bl = (wLine_p)(b);
+	int i;
+	wWin_p win = (wWin_p)(bl->parent);
+	GdkDrawable * window;
+	cairo_t *cr;
 
-    if (!bl->visible) {
-        return;
-    }
+	if (!bl->visible) {
+		return;
+	}
 
-    window = gtk_widget_get_window(win->widget);
-    cr = gdk_cairo_create(window);
-    cairo_set_source_rgb(cr, 0, 0, 0);
-    cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-    cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
+	window = gtk_widget_get_window(win->widget);
+	cr = gdk_cairo_create(window);
+	cairo_set_source_rgb(cr, 0, 0, 0);
+	cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+	cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
 
-    for (i=0; i<bl->count; i++) {
-        cairo_set_line_width(cr, bl->lines[i].width);
-        cairo_move_to(cr, bl->lines[i].x0, bl->lines[i].y0);
-        cairo_line_to(cr, bl->lines[i].x1, bl->lines[i].y1);
-        cairo_stroke(cr);
-    }
+	for (i=0; i<bl->count; i++) {
+		cairo_set_line_width(cr, bl->lines[i].width);
+		cairo_move_to(cr, bl->lines[i].x0, bl->lines[i].y0);
+		cairo_line_to(cr, bl->lines[i].x1, bl->lines[i].y1);
+		cairo_stroke(cr);
+	}
 
-    cairo_destroy(cr);
+	cairo_destroy(cr);
 }
 
 /**
@@ -94,10 +94,10 @@ static void linesRepaint(wControl_p b)
  */
 
 void wlibLineShow(
-    wLine_p bl,
-    wBool_t visible)
+        wLine_p bl,
+        wBool_t visible)
 {
-    bl->visible = visible;
+	bl->visible = visible;
 }
 
 /**
@@ -111,40 +111,40 @@ void wlibLineShow(
  */
 
 wLine_p wLineCreate(
-    wWin_p	parent,
-    const char	* labelStr,
-    int	count,
-    wLines_t * lines)
+        wWin_p	parent,
+        const char	* labelStr,
+        int	count,
+        wLines_t * lines)
 {
-    wLine_p linesWindow;
-    int i;
-    linesWindow = (wLine_p)wlibAlloc(parent, B_LINES, 0, 0, labelStr,
-                                    sizeof *linesWindow, NULL);
-    linesWindow->visible = TRUE;
-    linesWindow->count = count;
-    linesWindow->lines = lines;
-    linesWindow->w = linesWindow->h = 0;
+	wLine_p linesWindow;
+	int i;
+	linesWindow = (wLine_p)wlibAlloc(parent, B_LINES, 0, 0, labelStr,
+	                                 sizeof *linesWindow, NULL);
+	linesWindow->visible = TRUE;
+	linesWindow->count = count;
+	linesWindow->lines = lines;
+	linesWindow->w = linesWindow->h = 0;
 
-    for (i=0; i<count; i++) {
-        if (lines[i].x0 > linesWindow->w) {
-            linesWindow->w = lines[i].x0;
-        }
+	for (i=0; i<count; i++) {
+		if (lines[i].x0 > linesWindow->w) {
+			linesWindow->w = lines[i].x0;
+		}
 
-        if (lines[i].y0 > linesWindow->h) {
-            linesWindow->h = lines[i].y0;
-        }
+		if (lines[i].y0 > linesWindow->h) {
+			linesWindow->h = lines[i].y0;
+		}
 
-        if (lines[i].x1 > linesWindow->w) {
-            linesWindow->w = lines[i].x1;
-        }
+		if (lines[i].x1 > linesWindow->w) {
+			linesWindow->w = lines[i].x1;
+		}
 
-        if (lines[i].y1 > linesWindow->h) {
-            linesWindow->h = lines[i].y1;
-        }
-    }
+		if (lines[i].y1 > linesWindow->h) {
+			linesWindow->h = lines[i].y1;
+		}
+	}
 
-    linesWindow->repaintProc = linesRepaint;
-    wlibAddButton((wControl_p)linesWindow);
-    linesWindow->widget = NULL;
-    return linesWindow;
+	linesWindow->repaintProc = linesRepaint;
+	wlibAddButton((wControl_p)linesWindow);
+	linesWindow->widget = NULL;
+	return linesWindow;
 }

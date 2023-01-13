@@ -46,10 +46,10 @@ char *wExecutableName;
  * Initialize the application name for later use
  *
  * \param _appName IN Name of application
- * \return   
+ * \return
  */
- 
-void 
+
+void
 wInitAppName(char *_appName)
 {
 	appName = g_strdup( _appName );
@@ -59,7 +59,7 @@ char *
 wlibGetAppName()
 {
 	return( appName );
-}	
+}
 
 /*
  *******************************************************************************
@@ -76,17 +76,19 @@ int main( int argc, char *argv[] )
 	wWin_p win;
 	const char *ld;
 
-	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 )
+	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 ) {
 		setlocale( LC_ALL, "en_US" );
+	}
 	gtk_init( &argc, &argv );
 
-	if ((win=wMain( argc, argv )) == NULL)
+	if ((win=wMain( argc, argv )) == NULL) {
 		exit(1);
-    wExecutableName = argv[ 0 ];
+	}
+	wExecutableName = argv[ 0 ];
 	ld = wGetAppLibDir();
-	
+
 #ifdef WINDOWS
-	
+
 #else
 	// set up help search path on unix boxes
 	if (ld != NULL) {
@@ -94,14 +96,16 @@ int main( int argc, char *argv[] )
 		const char *hp;
 
 		sprintf( buff, "HELPPATH=/usr/lib/help:%s:", ld );
-		if ( (hp = getenv("HELPPATH")) != NULL )
+		if ( (hp = getenv("HELPPATH")) != NULL ) {
 			strcat( buff, hp );
+		}
 		putenv( buff );
 	}
 #endif
-	
-	if (!win->shown)
+
+	if (!win->shown) {
 		wWinShow( win, TRUE );
+	}
 
 	gtk_main();
 	exit(0);

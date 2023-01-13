@@ -1,5 +1,5 @@
 /** \file writebitmap.c
- * Bitmap file creation 
+ * Bitmap file creation
  */
 
 /*  XTrackCad - Model Railroad CAD
@@ -34,21 +34,21 @@
 
 /**
  * Get the Extension part of a filename
- * 
+ *
  * /param fname the filename
- * 
+ *
  * /return char* point to the extension
  */
 
 static const char *
 GetExtension(const char *fname)
 {
-    const char *end = fname + strlen(fname);
+	const char *end = fname + strlen(fname);
 
-    while (end > fname && *end != '.') {
-        --end;
-    }
-    return( end + 1 );
+	while (end > fname && *end != '.') {
+		--end;
+	}
+	return( end + 1 );
 }
 
 /**
@@ -61,42 +61,42 @@ GetExtension(const char *fname)
 
 wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName)
 {
-    GdkPixbuf *pixbuf;
-    GError *error;
-    gboolean res;
-    const char *fileFormat = GetExtension(fileName);
-    char *writeFormat = NULL; 
+	GdkPixbuf *pixbuf;
+	GError *error;
+	gboolean res;
+	const char *fileFormat = GetExtension(fileName);
+	char *writeFormat = NULL;
 
-    if(!strcasecmp(fileFormat, PNGFORMAT )){
-        writeFormat = PNGFORMAT;
-    } 
-    if( !strcasecmp(fileFormat, "jpg") || 
-        !strcasecmp(fileFormat, "jpeg")){
-        writeFormat = JPEGFORMAT;
-    }
+	if(!strcasecmp(fileFormat, PNGFORMAT )) {
+		writeFormat = PNGFORMAT;
+	}
+	if( !strcasecmp(fileFormat, "jpg") ||
+	    !strcasecmp(fileFormat, "jpeg")) {
+		writeFormat = JPEGFORMAT;
+	}
 
-    if(!writeFormat) {
-        wNoticeEx(NT_ERROR, "WriteBitMap: invalid file format!", "Ok", NULL);
-        return FALSE;        
-    }
+	if(!writeFormat) {
+		wNoticeEx(NT_ERROR, "WriteBitMap: invalid file format!", "Ok", NULL);
+		return FALSE;
+	}
 
-    pixbuf = gdk_pixbuf_get_from_drawable(NULL, (GdkWindow*)d->pixmap, NULL, 0, 0,
-                                          0, 0, d->w, d->h);
+	pixbuf = gdk_pixbuf_get_from_drawable(NULL, (GdkWindow*)d->pixmap, NULL, 0, 0,
+	                                      0, 0, d->w, d->h);
 
-    if (!pixbuf) {
-        wNoticeEx(NT_ERROR, "WriteBitMap: pixbuf_get failed", "Ok", NULL);
-        return FALSE;
-    }
+	if (!pixbuf) {
+		wNoticeEx(NT_ERROR, "WriteBitMap: pixbuf_get failed", "Ok", NULL);
+		return FALSE;
+	}
 
-    error = NULL;
-    res = gdk_pixbuf_save(pixbuf, fileName, writeFormat, &error, NULL);
+	error = NULL;
+	res = gdk_pixbuf_save(pixbuf, fileName, writeFormat, &error, NULL);
 
-    if (res == FALSE) {
-        wNoticeEx(NT_ERROR, "WriteBitMap: pixbuf_save failed", "Ok", NULL);
-        return FALSE;
-    }
+	if (res == FALSE) {
+		wNoticeEx(NT_ERROR, "WriteBitMap: pixbuf_save failed", "Ok", NULL);
+		return FALSE;
+	}
 
-    g_object_ref_sink(pixbuf);
-    g_object_unref(pixbuf);
-    return TRUE;
+	g_object_ref_sink(pixbuf);
+	g_object_unref(pixbuf);
+	return TRUE;
 }

@@ -60,24 +60,27 @@ struct wString_t {
  *
  * \param b 	IN widget to be updated
  * \param arg 	IN new string value
- * \return 
+ * \return
  */
 
 void wStringSetValue(
-    wString_p b,
-    const char *arg) 
+        wString_p b,
+        const char *arg)
 {
-	if (b->widget == NULL)
+	if (b->widget == NULL) {
 		abort();
-	
+	}
+
 	// the contents should not be changed programatically while
 	// the user is editing it
 	if( (b->option&BO_IGNFOCUS) || !(gtk_widget_has_focus(b->widget))) {
-		if (b->hasSignal) 
-	    	gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
+		if (b->hasSignal) {
+			gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
+		}
 		gtk_entry_set_text(GTK_ENTRY(b->widget), arg);
-		if (b->hasSignal)
+		if (b->hasSignal) {
 			gtk_signal_handler_unblock_by_data(GTK_OBJECT(b->widget), b);
+		}
 	}
 }
 
@@ -86,12 +89,12 @@ void wStringSetValue(
  *
  * \param b 	IN widget to be updated
  * \param w 	IN new width
- * \return 
+ * \return
  */
 
 void wStringSetWidth(
-    wString_p b,
-    wWinPix_t w) 
+        wString_p b,
+        wWinPix_t w)
 {
 	gtk_widget_set_size_request(b->widget, w, -1);
 	b->w = w;
@@ -105,11 +108,12 @@ void wStringSetWidth(
  */
 
 const char *wStringGetValue(
-    wString_p b) 
+        wString_p b)
 {
-	if ( !b->widget ) 
+	if ( !b->widget ) {
 		abort();
-	
+	}
+
 	return gtk_entry_get_text(GTK_ENTRY(b->widget));
 }
 
@@ -134,37 +138,41 @@ void wlibStringUpdate()
  *
  * \param widget 	IN the edit field
  * \param b 		IN the widget data structure
- * \return 
+ * \return
  */
 
 static gboolean stringActivated(
-    GtkEntry *widget,
-    wString_p b) 
+        GtkEntry *widget,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringActivated: %s\n", b->labelStr );
+	}
 	const char *s;
 	const char * output = "\n";
 
-	if ( !b )
+	if ( !b ) {
 		return( FALSE );
-	
+	}
+
 	s = wStringGetValue(b);
 
-	if (b->valueP)
+	if (b->valueP) {
 		strcpy(b->valueP, s);
+	}
 
 	if (b->action) {
 		b->enter_pressed = TRUE;
 		b->action( output, b->data);
 	}
-	
+
 	// select the complete default value to make editing it easier
 	gtk_editable_select_region( GTK_EDITABLE( widget ), 0, -1 );
 	return( TRUE );
 }
 
-static gboolean stringExposed(GtkWidget* widget, GdkEventExpose * event, gpointer g )
+static gboolean stringExposed(GtkWidget* widget, GdkEventExpose * event,
+                              gpointer g )
 {
 	wControl_p b = (wControl_p)g;
 	return wControlExpose(widget,event,b);
@@ -176,34 +184,37 @@ static gboolean stringExposed(GtkWidget* widget, GdkEventExpose * event, gpointe
  *
  * \param widget 		IN
  * \param entry field 	IN
- * \return 
+ * \return
  */
 
 static int stringChanged(
-    GtkEntry *widget,
-    wString_p b) 
+        GtkEntry *widget,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringChanged: %s\n", b->labelStr);
+	}
 	stringControl = b;
 	return FALSE;
 }
 
 static int stringPreeditChanged(
-    GtkEntry *widget,
-    wString_p b) 
+        GtkEntry *widget,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringPreeditChanged: %s\n", b->labelStr );
+	}
 	return FALSE;
 }
 static int stringFocusOutEvent(
-    GtkEntry *widget,
-    GdkEvent * event,
-    wString_p b) 
+        GtkEntry *widget,
+        GdkEvent * event,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringFocusOut: %s\n", b->labelStr );
+	}
 	if (b->action) {
 		const char *s;
 		s = gtk_entry_get_text(GTK_ENTRY(b->widget));
@@ -213,64 +224,71 @@ static int stringFocusOutEvent(
 	return FALSE;
 }
 static int stringFocusInEvent(
-    GtkEntry *widget,
-    GdkEvent * event,
-    wString_p b) 
+        GtkEntry *widget,
+        GdkEvent * event,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringFocusIn: %s\n", b->labelStr );
+	}
 	stringControl = b;
 	return FALSE;
 }
 static int stringLeaveNotifyEvent(
-    GtkEntry *widget,
-    GdkEvent * event,
-    wString_p b) 
+        GtkEntry *widget,
+        GdkEvent * event,
+        wString_p b)
 {
-	if ( debugWindow >= 3 )
+	if ( debugWindow >= 3 ) {
 		printf( "stringLeaveNotfyEvent: %s\n", b->labelStr );
+	}
 	return FALSE;
 }
 static int stringEventAfter(
-    GtkEntry *widget,
-    wString_p b) 
+        GtkEntry *widget,
+        wString_p b)
 {
-	if ( debugWindow >= 3 )
+	if ( debugWindow >= 3 ) {
 		printf( "stringEventAfter: %s\n", b->labelStr );
+	}
 	return FALSE;
 }
 static int stringEvent(
-    GtkEntry *widget,
-    wString_p b) 
+        GtkEntry *widget,
+        wString_p b)
 {
-	if ( debugWindow >= 3 )
+	if ( debugWindow >= 3 ) {
 		printf( "stringEvent: %s\n", b->labelStr );
+	}
 	return FALSE;
 }
 static int stringKeyPressEvent(
-    GtkEntry *widget,
-    GdkEvent * event,
-    wString_p b) 
+        GtkEntry *widget,
+        GdkEvent * event,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringKeyPressEvent: %s\n", b->labelStr );
+	}
 	return FALSE;
 }
 static int stringStateChanged(
-    GtkEntry *widget,
-    int state,
-    wString_p b) 
+        GtkEntry *widget,
+        int state,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringStateChanged: %s\n", b->labelStr );
+	}
 	return FALSE;
 }
 static int stringActivate(
-    GtkEntry *widget,
-    wString_p b) 
+        GtkEntry *widget,
+        wString_p b)
 {
-	if ( debugWindow >= 1 )
+	if ( debugWindow >= 1 ) {
 		printf( "stringActivate: %s\n", b->labelStr );
+	}
 	return stringChanged( widget, b );
 }
 /**
@@ -282,30 +300,30 @@ static int stringActivate(
  * \param 	helpStr	IN	help anchor
  * \param 	labelStr IN label
  * \param	option	IN	option (supported BO_READONLY )
- * \param	width	IN	width of entry field	
+ * \param	width	IN	width of entry field
  * \param	valueP	IN	default value
- * \param	valueL	IN 	maximum length of entry 
+ * \param	valueL	IN 	maximum length of entry
  * \param	action	IN	application callback function
  * \param 	data	IN	application data
  * \return  the created widget
  */
 
 wString_p wStringCreate(
-    wWin_p	parent,
-    wWinPix_t	x,
-    wWinPix_t	y,
-    const char 	 *helpStr,
-    const char	 *labelStr,
-    long	option,
-    wWinPix_t	width,
-    char	*valueP,
-    wIndex_t valueL,
-    wStringCallBack_p action,
-    void 	*data) 
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char 	 *helpStr,
+        const char	 *labelStr,
+        long	option,
+        wWinPix_t	width,
+        char	*valueP,
+        wIndex_t valueL,
+        wStringCallBack_p action,
+        void 	*data)
 {
 	wString_p b;
 
-	// create and initialize the widget	
+	// create and initialize the widget
 	b = (wString_p)wlibAlloc(parent, B_TEXT, x, y, labelStr, sizeof *b, data);
 	b->valueP = valueP;
 	b->action = action;
@@ -314,63 +332,77 @@ wString_p wStringCreate(
 	b->hasSignal = 0;
 	wlibComputePos((wControl_p)b);
 
-	// create the gtk entry field and set maximum length if desired	
+	// create the gtk entry field and set maximum length if desired
 	b->widget = (GtkWidget *)gtk_entry_new();
-	if (b->widget == NULL) abort();
+	if (b->widget == NULL) { abort(); }
 
-	if( valueL )
+	if( valueL ) {
 		gtk_entry_set_max_length( GTK_ENTRY( b->widget ), valueL );
-	
+	}
+
 	// it is assumed that the parent is a fixed layout widget and the entry can
 	// be placed at a specific position
 	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-	
-	// set minimum size for widget	
-	if (width)
+
+	// set minimum size for widget
+	if (width) {
 		gtk_widget_set_size_request(b->widget, width, -1);
-	
+	}
+
 	// get the resulting size
 	wlibControlGetSize((wControl_p)b);
 
 	// if desired, place a label in front of the created widget
-	if (labelStr)
+	if (labelStr) {
 		b->labelW = wlibAddLabel((wControl_p)b, labelStr);
-	
-	if (option & BO_READONLY)
+	}
+
+	if (option & BO_READONLY) {
 		gtk_editable_set_editable(GTK_EDITABLE(b->widget), FALSE);
-	
+	}
+
 	// set the default text	and select it to make replacing it easier
 	if (b->valueP) {
 		wStringSetValue(b, b->valueP);
 		// select the text only if text is editable
 	}
-	
+
 	// show
 	gtk_widget_show(b->widget);
-	
+
 	// add the new widget to the list of created widgets
 	wlibAddButton((wControl_p)b);
-	
-	// link into help 
+
+	// link into help
 	wlibAddHelpString(b->widget, helpStr);
-	
-	g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "preedit-changed", G_CALLBACK(stringPreeditChanged), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "focus-out-event", G_CALLBACK(stringFocusOutEvent), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "focus-in-event", G_CALLBACK(stringFocusInEvent), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "leave-notify-event", G_CALLBACK(stringLeaveNotifyEvent), b);
+
+	g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged),
+	                 b);
+	g_signal_connect(GTK_OBJECT(b->widget), "preedit-changed",
+	                 G_CALLBACK(stringPreeditChanged), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "focus-out-event",
+	                 G_CALLBACK(stringFocusOutEvent), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "focus-in-event",
+	                 G_CALLBACK(stringFocusInEvent), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "leave-notify-event",
+	                 G_CALLBACK(stringLeaveNotifyEvent), b);
 	g_signal_connect(GTK_OBJECT(b->widget), "event", G_CALLBACK(stringEvent), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "event-after", G_CALLBACK(stringEventAfter), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "key-press-event", G_CALLBACK(stringKeyPressEvent), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "state-changed", G_CALLBACK(stringStateChanged), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivate), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "event-after",
+	                 G_CALLBACK(stringEventAfter), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "key-press-event",
+	                 G_CALLBACK(stringKeyPressEvent), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "state-changed",
+	                 G_CALLBACK(stringStateChanged), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivate),
+	                 b);
 
 	//if (option&BO_ENTER)
-		g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
+	g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated),
+	                 b);
 	b->hasSignal = 1;
-		g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
-	    							G_CALLBACK(stringExposed), b);
-	
+	g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
+	                       G_CALLBACK(stringExposed), b);
+
 	// set the default text	and select it to make replacing it easier
 	if (b->valueP) {
 		wStringSetValue(b, b->valueP);
@@ -378,6 +410,6 @@ wString_p wStringCreate(
 	}
 
 	gtk_widget_add_events( b->widget, GDK_FOCUS_CHANGE_MASK );
-	
+
 	return b;
 }

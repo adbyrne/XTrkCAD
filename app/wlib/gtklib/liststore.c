@@ -47,25 +47,25 @@
  */
 
 wListItem_p wlibListItemGet(
-    GtkListStore *ls,
-    wIndex_t inx,
-    GList ** childR)
+        GtkListStore *ls,
+        wIndex_t inx,
+        GList ** childR)
 {
-    wListItem_p id_p;
+	wListItem_p id_p;
 
-    assert(ls != NULL);
+	assert(ls != NULL);
 
-    if (childR) {
-        *childR = NULL;
-    }
+	if (childR) {
+		*childR = NULL;
+	}
 
-    if (inx < 0) {
-        return NULL;
-    }
+	if (inx < 0) {
+		return NULL;
+	}
 
-    id_p = wlibListStoreGetContext(ls, inx);
+	id_p = wlibListStoreGetContext(ls, inx);
 
-    return id_p;
+	return id_p;
 }
 
 /**
@@ -79,33 +79,33 @@ wListItem_p wlibListItemGet(
 void *
 wlibListStoreGetContext(GtkListStore *ls, int inx)
 {
-    GtkTreeIter iter;
-    gchar *string = NULL;
-    gboolean result;
-    gint childs;
+	GtkTreeIter iter;
+	gchar *string = NULL;
+	gboolean result;
+	gint childs;
 
-    childs = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(ls),
-                                            NULL);
+	childs = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(ls),
+	                                        NULL);
 
-    if (inx < childs) {
-        result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
-                                               &iter,
-                                               NULL,
-                                               inx);
+	if (inx < childs) {
+		result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
+		                                       &iter,
+		                                       NULL,
+		                                       inx);
 
-        if (result) {
-            gtk_tree_model_get(GTK_TREE_MODEL(ls),
-                               &iter,
-                               LISTCOL_DATA,
-                               &string,
-                               -1);
-        } else {
-            printf("Invalid index %d for list!\n", inx);
+		if (result) {
+			gtk_tree_model_get(GTK_TREE_MODEL(ls),
+			                   &iter,
+			                   LISTCOL_DATA,
+			                   &string,
+			                   -1);
+		} else {
+			printf("Invalid index %d for list!\n", inx);
 
-        }
-    }
+		}
+	}
 
-    return (string);
+	return (string);
 }
 
 
@@ -119,21 +119,22 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
 void
 wlibListStoreClear(GtkListStore *listStore)
 {
-    wListItem_p id_p;
-    int i = 0;
+	wListItem_p id_p;
+	int i = 0;
 
-    assert(listStore != NULL);
+	assert(listStore != NULL);
 
-    id_p = wlibListStoreGetContext(listStore, i++);
+	id_p = wlibListStoreGetContext(listStore, i++);
 
-    while (id_p) {
-        if (id_p->label)
-            g_free(id_p->label);
-        g_free(id_p);
-        id_p = wlibListStoreGetContext(listStore, i++);
-    }
+	while (id_p) {
+		if (id_p->label) {
+			g_free(id_p->label);
+		}
+		g_free(id_p);
+		id_p = wlibListStoreGetContext(listStore, i++);
+	}
 
-    gtk_list_store_clear(listStore);
+	gtk_list_store_clear(listStore);
 }
 
 /**
@@ -148,23 +149,23 @@ wlibListStoreClear(GtkListStore *listStore)
 GtkListStore *
 wlibNewListStore(int colCnt)
 {
-    GtkListStore *ls;
-    GType *colTypes;
-    int i;
+	GtkListStore *ls;
+	GType *colTypes;
+	int i;
 
-    /* create the list store, using strings for all columns */
-    colTypes = g_malloc(sizeof(GType) * (colCnt + LISTCOL_TEXT));
-    colTypes[ LISTCOL_BITMAP ] = GDK_TYPE_PIXBUF;
-    colTypes[ LISTCOL_DATA ] = G_TYPE_POINTER;
+	/* create the list store, using strings for all columns */
+	colTypes = g_malloc(sizeof(GType) * (colCnt + LISTCOL_TEXT));
+	colTypes[ LISTCOL_BITMAP ] = GDK_TYPE_PIXBUF;
+	colTypes[ LISTCOL_DATA ] = G_TYPE_POINTER;
 
-    for (i = 0; i < colCnt; i++) {
-        colTypes[ LISTCOL_TEXT + i ] = G_TYPE_STRING;
-    }
+	for (i = 0; i < colCnt; i++) {
+		colTypes[ LISTCOL_TEXT + i ] = G_TYPE_STRING;
+	}
 
-    ls = gtk_list_store_newv(colCnt + LISTCOL_TEXT, colTypes);
-    g_free(colTypes);
+	ls = gtk_list_store_newv(colCnt + LISTCOL_TEXT, colTypes);
+	g_free(colTypes);
 
-    return (ls);
+	return (ls);
 }
 
 /**
@@ -179,26 +180,26 @@ wlibNewListStore(int colCnt)
 static int
 wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 {
-    char *convertedLabels;
-    char *text;
-    char *start;
-    int current = 0;
+	char *convertedLabels;
+	char *text;
+	char *start;
+	int current = 0;
 
-    convertedLabels = strdup(wlibConvertInput(labels));
-    start = convertedLabels;
+	convertedLabels = strdup(wlibConvertInput(labels));
+	start = convertedLabels;
 
-    while ((text = strchr(start, '\t')) != NULL) {
-        *text = '\0';
-        gtk_list_store_set(ls, iter, LISTCOL_TEXT + current, start, -1);
-        start = text + 1;
-        current++;
-    }
+	while ((text = strchr(start, '\t')) != NULL) {
+		*text = '\0';
+		gtk_list_store_set(ls, iter, LISTCOL_TEXT + current, start, -1);
+		start = text + 1;
+		current++;
+	}
 
-    /* add the last piece of the string */
-    gtk_list_store_set(ls, iter, LISTCOL_TEXT + current, start, -1);
+	/* add the last piece of the string */
+	gtk_list_store_set(ls, iter, LISTCOL_TEXT + current, start, -1);
 
-    free(convertedLabels);
-    return (current+1);
+	free(convertedLabels);
+	return (current+1);
 }
 
 /**
@@ -213,9 +214,9 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 void
 wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf)
 {
-    gtk_list_store_set(ls, iter, LISTCOL_BITMAP, pixbuf, -1);
-    g_object_ref_sink(pixbuf);
-    g_object_unref(pixbuf);
+	gtk_list_store_set(ls, iter, LISTCOL_BITMAP, pixbuf, -1);
+	g_object_ref_sink(pixbuf);
+	g_object_unref(pixbuf);
 }
 /**
  * Add a row to the list store
@@ -230,19 +231,19 @@ int
 wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, int cols,
                      wListItem_p id)
 {
-    GtkTreeIter iter;
-    int count;
+	GtkTreeIter iter;
+	int count;
 
-    gtk_list_store_append(ls, &iter);
-    gtk_list_store_set(ls, &iter, LISTCOL_DATA, id, -1);
+	gtk_list_store_append(ls, &iter);
+	gtk_list_store_set(ls, &iter, LISTCOL_DATA, id, -1);
 
-    if (pixbuf) {
-        wlibListStoreSetPixbuf(ls, &iter, pixbuf);
-    }
+	if (pixbuf) {
+		wlibListStoreSetPixbuf(ls, &iter, pixbuf);
+	}
 
-    count = wlibListStoreUpdateIter(ls, &iter, (char *)id->label);
+	count = wlibListStoreUpdateIter(ls, &iter, (char *)id->label);
 
-    return (count);
+	return (count);
 }
 
 /**
@@ -261,23 +262,23 @@ int
 wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels,
                           wIcon_p bm)
 {
-    GtkTreeIter iter;
-    int count;
+	GtkTreeIter iter;
+	int count;
 
-    gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
-                                  &iter,
-                                  NULL,
-                                  row);
+	gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
+	                              &iter,
+	                              NULL,
+	                              row);
 
-    count = wlibListStoreUpdateIter(ls, &iter, labels);
+	count = wlibListStoreUpdateIter(ls, &iter, labels);
 
-    if (bm) {
-        GdkPixbuf *pixbuf;
+	if (bm) {
+		GdkPixbuf *pixbuf;
 
-        pixbuf = wlibMakePixbuf(bm);
-        wlibListStoreSetPixbuf(ls, &iter, pixbuf);
-    }
+		pixbuf = wlibMakePixbuf(bm);
+		wlibListStoreSetPixbuf(ls, &iter, pixbuf);
+	}
 
-    return (count);
+	return (count);
 }
 
