@@ -2118,6 +2118,9 @@ void InitLayers(void)
 		layerColorTab[i] = wDrawFindColor(layerRawColorTab[i]);
 	}
 
+	/* build the adjust table for starting bit */
+	int dx_table[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+
 	/* create the bitmaps for the layer buttons */
 	/* all bitmaps have to have the same dimensions */
 	for (int i = 0; i < NUM_LAYERS; i++) {
@@ -2126,7 +2129,7 @@ void InitLayers(void)
 		int wb = w / 8; // width in bytes
 		int h = lbits_height[iconSize];
 
-		show_layer_bits = MyMalloc(w*w);
+		show_layer_bits = MyMalloc(w * wb);
 
 		if (n < 10) {
 			// width of char
@@ -2137,11 +2140,14 @@ void InitLayers(void)
 				wc = lbit0_width[iconSize];
 			}
 
+			// X-adjust
+			int dx = (w - wc) / 2;
+
 			char** cp = show_layer_digits[iconSize][n];
 
 			for (int y = 0; y < h; y++)
 			{
-				int v = 1; // power of two
+				int v = dx_table[dx]; // power of two
 				char b = 0; // bits
 
 				int yy = wb * (y + (w - h) / 2);
@@ -2168,8 +2174,8 @@ void InitLayers(void)
 					show_layer_bits[xx + yy] = b;
 				}
 			}
-		}
-		else {
+
+		} else {
 			// width of chars
 			int wc1 = 0;
 			int wc0 = 0;
@@ -2186,12 +2192,15 @@ void InitLayers(void)
 				wc0 = lbit0_width[iconSize];
 			}
 
+			// X-adjust
+			int dx = (w - wc1 - wc0) / 2;
+
 			char** cp1 = show_layer_digits[iconSize][n / 10];
 			char** cp0 = show_layer_digits[iconSize][n % 10];
 
 			for (int y = 0; y < h; y++)
 			{
-				int v = 1; // powers of two
+				int v = dx_table[dx]; // powers of two
 				char b = 0; // bits
 
 				int yy = wb * (y + (w - h) / 2);
