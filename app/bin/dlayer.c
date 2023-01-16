@@ -476,28 +476,6 @@ FormatLayerName(unsigned int layerNumber)
 	return result;
 }
 
-static int lbmap_width[3] = {16, 24, 32};
-
-static int lbit0_width[3] = { 8, 12, 16 };
-static int lbit1_width[3] = { 6, 8, 10 };
-
-static int lbits_top[3] = { 3, 4, 6 };
-static int lbits_height[3] = {10, 15, 20};
-
-#include "bitmaps/layer_num.xbm"
-
-static char **show_layer_digits[3][10] = {
-	{
-		n0_x16, n1_x16, n2_x16, n3_x16, n4_x16, n5_x16, n6_x16, n7_x16, n8_x16, n9_x16
-	},
-	{
-		n0_x24, n1_x24, n2_x24, n3_x24, n4_x24, n5_x24, n6_x24, n7_x24, n8_x24, n9_x24
-	},
-	{
-		n0_x32, n1_x32, n2_x32, n3_x32, n4_x32, n5_x32, n6_x32, n7_x32, n8_x32, n9_x32
-	}
-};
-
 static char *show_layer_bits;
 
 static  long layerRawColorTab[] = {
@@ -2109,6 +2087,36 @@ static void DoLayer(void * unused)
 
 #include "bitmaps/background.xpm3"
 
+#if NUM_BUTTONS > 99
+static int lbmap_width[3] = { 16, 24, 32 }; // For numbers < 100
+#else
+static int lbmap_width[3] = { 20, 28, 36 }; // For numbers > 99
+#endif
+static int lbmap_height[3] = { 16, 24, 32 };
+
+static int lbit0_width[3] = { 6, 10, 14 };
+static int lbit1_width[3] = { 4, 5, 6 };
+
+static int lbits_top[3] = { 3, 4, 6 };
+static int lbits_height[3] = { 10, 15, 20 };
+
+#include "bitmaps/layer_num.xbm"
+
+static char** show_layer_digits[3][10] = {
+	{
+		n0_x16, n1_x16, n2_x16, n3_x16, n4_x16, n5_x16, n6_x16, n7_x16, n8_x16, n9_x16
+	},
+	{
+		n0_x24, n1_x24, n2_x24, n3_x24, n4_x24, n5_x24, n6_x24, n7_x24, n8_x24, n9_x24
+	},
+	{
+		n0_x32, n1_x32, n2_x32, n3_x32, n4_x32, n5_x32, n6_x32, n7_x32, n8_x32, n9_x32
+	}
+};
+
+
+#define ONE_PIXEL v *= 2; if (v > 128) { show_layer_bits[xx + yy] = b; xx += 1; v = 1; b = 0; }
+
 void InitLayers(void)
 {
 	unsigned int i;
@@ -2125,11 +2133,14 @@ void InitLayers(void)
 	/* all bitmaps have to have the same dimensions */
 	for (int i = 0; i < NUM_LAYERS; i++) {
 		int n = i + 1;
-		int w = lbmap_width[iconSize];
-		int wb = w / 8; // width in bytes
+		int bwid = lbmap_width[iconSize];
+		int wb = (bwid + 7) / 8; // width in bytes
+		int bhgt = lbmap_height[iconSize];
 		int h = lbits_height[iconSize];
 
-		show_layer_bits = MyMalloc(w * wb);
+		// if (n > 30) n = n + 70; for testing > 100
+
+		show_layer_bits = MyMalloc(bhgt * wb);
 
 		if (n < 10) {
 			// width of char
@@ -2141,7 +2152,12 @@ void InitLayers(void)
 			}
 
 			// X-adjust
-			int dx = (w - wc) / 2;
+			int dx = (bwid - wc) / 2;
+			int x0 = 0;
+			if (dx > 7) {
+				dx -= 8;
+				x0++;
+			}
 
 			char** cp = show_layer_digits[iconSize][n];
 
@@ -2150,9 +2166,9 @@ void InitLayers(void)
 				int v = dx_table[dx]; // power of two
 				char b = 0; // bits
 
-				int yy = wb * (y + (w - h) / 2);
+				int yy = wb * (y + (bhgt - h) / 2);
 
-				int xx = 0; // byte
+				int xx = x0; // starting byte
 				for (int x = 0; x < wc; x++)
 				{
 					char z = *(*cp + x + y * wc);
@@ -2160,22 +2176,15 @@ void InitLayers(void)
 					{
 						b |= v;
 					}
-					v *= 2;
-					// cp++;
-
-					if (v > 128) {
-						show_layer_bits[xx + yy] = b;
-						xx += 1;
-						v = 1;
-						b = 0;
-					}
+					ONE_PIXEL
 				}
 				if (v <= 128) {
 					show_layer_bits[xx + yy] = b;
 				}
 			}
 
-		} else {
+		}
+		else if (n < 100) {
 			// width of chars
 			int wc1 = 0;
 			int wc0 = 0;
@@ -2193,7 +2202,12 @@ void InitLayers(void)
 			}
 
 			// X-adjust
-			int dx = (w - wc1 - wc0) / 2;
+			int dx = (bwid - wc1 - wc0 - (iconSize >= 1 ? 2 : 1)) / 2;
+			int x0 = 0;
+			if (dx > 7) {
+				dx -= 8;
+				x0++;
+			}
 
 			char** cp1 = show_layer_digits[iconSize][n / 10];
 			char** cp0 = show_layer_digits[iconSize][n % 10];
@@ -2203,9 +2217,9 @@ void InitLayers(void)
 				int v = dx_table[dx]; // powers of two
 				char b = 0; // bits
 
-				int yy = wb * (y + (w - h) / 2);
+				int yy = wb * (y + (bhgt - h) / 2);
 
-				int xx = 0; // byte
+				int xx = x0; // starting byte
 				for (int x = 0; x < wc1; x++)
 				{
 					char z = *(*cp1 + x + y * wc1);
@@ -2213,14 +2227,11 @@ void InitLayers(void)
 					{
 						b |= v;
 					}
-					v *= 2;
-
-					if (v > 128) {
-						show_layer_bits[xx + yy] = b;
-						xx += 1;
-						v = 1;
-						b = 0;
-					}
+					ONE_PIXEL
+				}
+				ONE_PIXEL
+				if (iconSize >= 1) {
+						ONE_PIXEL
 				}
 				for (int x = 0; x < wc0; x++)
 				{
@@ -2229,14 +2240,86 @@ void InitLayers(void)
 					{
 						b |= v;
 					}
-					v *= 2;
+					ONE_PIXEL
+				}
+				if (v <= 128) {
+					show_layer_bits[xx + yy] = b;
+				}
+			}
 
-					if (v > 128) {
-						show_layer_bits[xx + yy] = b;
-						xx += 1;
-						v = 1;
-						b = 0;
+		}
+		else { // n >= 100
+			// width of chars
+			int wc2 = 0;
+			int wc1 = 0;
+			int wc0 = 0;
+			if ((n / 100) == 1) {
+				wc2 = lbit1_width[iconSize];
+			}
+			else {
+				wc2 = lbit0_width[iconSize];
+			}
+			if (((n / 10) % 10) == 1) {
+				wc1 = lbit1_width[iconSize];
+			}
+			else {
+				wc1 = lbit0_width[iconSize];
+			}
+			if ((n % 10) == 1) {
+				wc0 = lbit1_width[iconSize];
+			}
+			else {
+				wc0 = lbit0_width[iconSize];
+			}
+
+			// X-adjust and start
+			int dx = (bwid - wc2 - wc1 - wc0 - 2) / 2;
+			int x0 = 0;
+			if (dx > 7) {
+				dx -= 8;
+				x0++;
+			}
+
+			char** cp2 = show_layer_digits[iconSize][n / 100];
+			char** cp1 = show_layer_digits[iconSize][(n / 10) % 10];
+			char** cp0 = show_layer_digits[iconSize][n % 10];
+
+			for (int y = 0; y < h; y++)
+			{
+				int v = dx_table[dx]; // powers of two
+				char b = 0; // bits
+
+				int yy = wb * (y + (bhgt - h) / 2);
+
+				int xx = x0; // byte
+				for (int x = 0; x < wc2; x++)
+				{
+					char z = *(*cp2 + x + y * wc2);
+					if (z == '1')
+					{
+						b |= v;
 					}
+					ONE_PIXEL
+				}
+				ONE_PIXEL
+				for (int x = 0; x < wc1; x++)
+				{
+					char z = *(*cp1 + x + y * wc1);
+					if (z == '1')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
+				}
+				ONE_PIXEL
+				for (int x = 0; x < wc0; x++)
+				{
+					char z = *(*cp0 + x + y * wc0);
+					if (z == '1')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
 				}
 				if (v <= 128) {
 					show_layer_bits[xx + yy] = b;
@@ -2244,11 +2327,11 @@ void InitLayers(void)
 			}
 		}
 
-		// char *bits = (show_layer_bits[i] + iconSize * sizeof(char*)));
-		show_layer_bmps[i] = wIconCreateBitMap(w,
-											   w,
-		                                       show_layer_bits,
-		                                       layerColorTab[i % (COUNT(layerColorTab))]);
+		show_layer_bmps[i] = wIconCreateBitMap(
+			bwid,
+			bhgt,
+			show_layer_bits,
+			layerColorTab[i % (COUNT(layerColorTab))]);
 		layers[i].color = layerColorTab[i % (COUNT(layerColorTab))];
 		layers[i].useColor = TRUE;
 
