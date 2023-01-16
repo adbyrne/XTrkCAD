@@ -476,13 +476,17 @@ FormatLayerName(unsigned int layerNumber)
 	return result;
 }
 
-static int lbits_width[3] = {16, 24, 32};
-static int lbits_top[3] = { 3, 5, 8 };
+static int lbmap_width[3] = {16, 24, 32};
+
+static int lbit0_width[3] = { 8, 12, 16 };
+static int lbit1_width[3] = { 6, 8, 10 };
+
+static int lbits_top[3] = { 3, 4, 6 };
 static int lbits_height[3] = {10, 15, 20};
 
 #include "bitmaps/layer_num.xbm"
 
-static char * show_layer_digits[3][10] = {
+static char **show_layer_digits[3][10] = {
 	{
 		n0_x16, n1_x16, n2_x16, n3_x16, n4_x16, n5_x16, n6_x16, n7_x16, n8_x16, n9_x16
 	},
@@ -494,7 +498,7 @@ static char * show_layer_digits[3][10] = {
 	}
 };
 
-static char* show_layer_bits;
+static char *show_layer_bits;
 
 static  long layerRawColorTab[] = {
 	wRGB(  0,   0, 192),    /* blue */
@@ -2117,51 +2121,116 @@ void InitLayers(void)
 	/* create the bitmaps for the layer buttons */
 	/* all bitmaps have to have the same dimensions */
 	for (int i = 0; i < NUM_LAYERS; i++) {
-		int w = lbits_width[iconSize];
+		int n = i + 1;
+		int w = lbmap_width[iconSize];
 		int wb = w / 8; // width in bytes
-		int wc = (wb + 1) / 2; // width of char
 		int h = lbits_height[iconSize];
+
 		show_layer_bits = MyMalloc(w*w);
-		if (i < 10) {
+
+		if (n < 10) {
+			// width of char
+			int wc = 0;     // width of char
+			if (n == 1) {
+				wc = lbit1_width[iconSize];
+			} else {
+				wc = lbit0_width[iconSize];
+			}
+
+			char** cp = show_layer_digits[iconSize][n];
+
 			for (int y = 0; y < h; y++)
 			{
-				int yy = (y + (w - h) / 2) * wb + wc / 2;
-				for (int x = 0; x < wc; x++) {
-					show_layer_bits[yy + x] = show_layer_digits[iconSize][i % 10][x + y * wc];
+				int v = 1; // power of two
+				char b = 0; // bits
+
+				int yy = wb * (y + (w - h) / 2);
+
+				int xx = 0; // byte
+				for (int x = 0; x < wc; x++)
+				{
+					char z = *(*cp + x + y * wc);
+					if (z == '1')
+					{
+						b |= v;
+					}
+					v *= 2;
+					// cp++;
+
+					if (v > 128) {
+						show_layer_bits[xx + yy] = b;
+						xx += 1;
+						v = 1;
+						b = 0;
+					}
+				}
+				if (v <= 128) {
+					show_layer_bits[xx + yy] = b;
 				}
 			}
 		}
 		else {
-			if (w == 24) {
-				// Offset the units icon by four pixels
-				// wb == 3, wc == 2
-				for (int y = 0; y < h; y++)
-				{
-					int yy = (y + (w - h) / 2) * wb;
-					for (int x = 0; x < 2; x++) {
-						show_layer_bits[yy + x] = show_layer_digits[iconSize][i / 10][x + y * wc];
-					}
-
-					char v = show_layer_digits[iconSize][i % 10][y * wc];
-					show_layer_bits[yy + 1] |= (v << 4) & 0xF0; 
-					show_layer_bits[yy + 2] |= (v >> 4) & 0x0F;
-					show_layer_bits[yy + 2] |= (show_layer_digits[iconSize][i % 10][1 + y * wc] << 4);
-				}
+			// width of chars
+			int wc1 = 0;
+			int wc0 = 0;
+			if ((n / 10) == 1) {
+				wc1 = lbit1_width[iconSize];
 			}
 			else {
-				for (int y = 0; y < h; y++)
+				wc1 = lbit0_width[iconSize];
+			}
+			if ((n % 10) == 1) {
+				wc0 = lbit1_width[iconSize];
+			}
+			else {
+				wc0 = lbit0_width[iconSize];
+			}
+
+			char** cp1 = show_layer_digits[iconSize][n / 10];
+			char** cp0 = show_layer_digits[iconSize][n % 10];
+
+			for (int y = 0; y < h; y++)
+			{
+				int v = 1; // powers of two
+				char b = 0; // bits
+
+				int yy = wb * (y + (w - h) / 2);
+
+				int xx = 0; // byte
+				for (int x = 0; x < wc1; x++)
 				{
-					int yy = (y + (w - h) / 2) * wb;
-					for (int x = 0; x < wc; x++) {
-						show_layer_bits[yy + x] = show_layer_digits[iconSize][i / 10][x + y * wc];
+					char z = *(*cp1 + x + y * wc1);
+					if (z == '1')
+					{
+						b |= v;
+					}
+					v *= 2;
+
+					if (v > 128) {
+						show_layer_bits[xx + yy] = b;
+						xx += 1;
+						v = 1;
+						b = 0;
 					}
 				}
-				for (int y = 0; y < h; y++)
+				for (int x = 0; x < wc0; x++)
 				{
-					int yy = (y + (w - h) / 2) * wb + wc;
-					for (int x = 0; x < wc; x++) {
-						show_layer_bits[yy + x] = show_layer_digits[iconSize][i % 10][x + y * wc];
+					char z = *(*cp0 + x + y * wc0);
+					if (z == '1')
+					{
+						b |= v;
 					}
+					v *= 2;
+
+					if (v > 128) {
+						show_layer_bits[xx + yy] = b;
+						xx += 1;
+						v = 1;
+						b = 0;
+					}
+				}
+				if (v <= 128) {
+					show_layer_bits[xx + yy] = b;
 				}
 			}
 		}
