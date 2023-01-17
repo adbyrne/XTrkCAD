@@ -2087,7 +2087,7 @@ static void DoLayer(void * unused)
 
 #include "bitmaps/background.xpm3"
 
-#if NUM_BUTTONS > 99
+#if NUM_BUTTONS < 100
 static int lbmap_width[3] = { 16, 24, 32 }; // For numbers < 100
 #else
 static int lbmap_width[3] = { 20, 28, 36 }; // For numbers > 99
@@ -2100,7 +2100,7 @@ static int lbit1_width[3] = { 4, 5, 6 };
 static int lbits_top[3] = { 3, 4, 6 };
 static int lbits_height[3] = { 10, 15, 20 };
 
-#include "bitmaps/layer_num.xbm"
+#include "bitmaps/layer_num.inc"
 
 static char** show_layer_digits[3][10] = {
 	{
@@ -2114,7 +2114,10 @@ static char** show_layer_digits[3][10] = {
 	}
 };
 
-
+/* Note: If the number of buttons is increased to > ~120, you should 
+ *       also increase COMMAND_MAX and BUTTON_MAX in command.c 
+ *       NUM_LAYERS is defined in common.h
+ */
 #define ONE_PIXEL v *= 2; if (v > 128) { show_layer_bits[xx + yy] = b; xx += 1; v = 1; b = 0; }
 
 void InitLayers(void)
@@ -2172,7 +2175,7 @@ void InitLayers(void)
 				for (int x = 0; x < wc; x++)
 				{
 					char z = *(*cp + x + y * wc);
-					if (z == '1')
+					if (z != ' ')
 					{
 						b |= v;
 					}
@@ -2223,7 +2226,7 @@ void InitLayers(void)
 				for (int x = 0; x < wc1; x++)
 				{
 					char z = *(*cp1 + x + y * wc1);
-					if (z == '1')
+					if (z != ' ')
 					{
 						b |= v;
 					}
@@ -2236,7 +2239,7 @@ void InitLayers(void)
 				for (int x = 0; x < wc0; x++)
 				{
 					char z = *(*cp0 + x + y * wc0);
-					if (z == '1')
+					if (z != ' ')
 					{
 						b |= v;
 					}
@@ -2295,7 +2298,7 @@ void InitLayers(void)
 				for (int x = 0; x < wc2; x++)
 				{
 					char z = *(*cp2 + x + y * wc2);
-					if (z == '1')
+					if (z != ' ')
 					{
 						b |= v;
 					}
@@ -2305,7 +2308,7 @@ void InitLayers(void)
 				for (int x = 0; x < wc1; x++)
 				{
 					char z = *(*cp1 + x + y * wc1);
-					if (z == '1')
+					if (z != ' ')
 					{
 						b |= v;
 					}
@@ -2315,7 +2318,7 @@ void InitLayers(void)
 				for (int x = 0; x < wc0; x++)
 				{
 					char z = *(*cp0 + x + y * wc0);
-					if (z == '1')
+					if (z != ' ')
 					{
 						b |= v;
 					}

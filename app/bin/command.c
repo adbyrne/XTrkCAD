@@ -38,8 +38,8 @@
  *
  */
 
-#define COMMAND_MAX (180)
-#define BUTTON_MAX (180)
+#define COMMAND_MAX (250)
+#define BUTTON_MAX (250)
 
 static struct {
 	wControl_p control;
