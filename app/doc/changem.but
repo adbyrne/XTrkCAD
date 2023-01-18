@@ -1520,7 +1520,7 @@ It gives an idea of the "sharpness" of the curve.
 
 \dd The number of degrees that the curve executes - this number will rise if there are loops in the curve.
 
-\S3{trackDescribeBezier} Cornu Track Describe Fields
+\S3{trackDescribeBezier} Bezier Track Describe Fields
 
 \dt Ctl Pt
 
