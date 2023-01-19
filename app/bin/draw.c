@@ -3127,7 +3127,7 @@ static void MainLayoutCB(
 }
 
 
-static void InitColor( void )
+EXPORT void InitColor( void )
 {
 	drawColorBlack  = wDrawFindColor( wRGB(  0,  0,  0) );
 	drawColorWhite  = wDrawFindColor( wRGB(255,255,255) );
@@ -3177,7 +3177,7 @@ EXPORT void DrawInit( int initialZoom )
 {
 	wWinPix_t w, h;
 
-	InitColor();
+//	InitColor();
 	wWinGetSize( mainW, &w, &h );
 	/*LayoutToolBar();*/
 	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);

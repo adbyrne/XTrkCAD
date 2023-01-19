@@ -1201,10 +1201,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
-
-	/*
-	 * READ PARAMETERS
-	 */
+	InitColor();
 	if (toolbarSet&(1<<BG_HOTBAR)) {
 		LayoutHotBar( NULL );
 	} else {
@@ -1215,6 +1212,10 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	DrawInit(initialZoom);
 
 	MacroInit();
+
+	/*
+	 * READ PARAMETERS
+	 */
 	wSetSplashInfo(_("Reading parameter files"));
 	LOG1(log_init, ( "paramFileInit\n" ))
 

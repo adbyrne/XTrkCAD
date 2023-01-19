@@ -265,6 +265,7 @@ void TempRedraw(void);
 void DrawRuler(drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor);
 void MainProc(wWin_p, winProcEvent, void *, void *);
 void InitInfoBar(void);
+void InitColor(void);
 void DrawInit(int);
 void DoZoomUp(void * modeVP);
 void DoZoomDown(void * modeVP);
