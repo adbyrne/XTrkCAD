@@ -104,7 +104,10 @@ wIcon_p wIconCreateBitMap( wWinPix_t w, wWinPix_t h, const char * bits,
 	ip->w = w;
 	ip->h = h;
 	ip->color = color;
-	ip->bits = bits;
+	// Copy bits
+	int nBytes = ( ( w + 7 ) / 8 ) * h;
+	ip->bits = (char*)malloc( nBytes );
+	memcpy( (void*)ip->bits, bits, nBytes );
 	return ip;
 }
 
