@@ -1792,7 +1792,7 @@ EXPORT void DrawSegsO(
 			case SEG_STRLIN:;
 				wDrawWidth w;
 				if (segPtr->width <0) {
-					w = (int)floor(fabs(segPtr->width)+0.5);
+					w = (int)floor(fabs(segPtr->width)*d->dpi+0.5);
 				} else {
 					w = (int)floor(fabs(segPtr->width*factor)+0.5);
 				}
@@ -1853,7 +1853,7 @@ EXPORT void DrawSegsO(
 			} else {
 				wDrawWidth w;
 				if (segPtr->width <0) {
-					w = (int)floor(fabs(segPtr->width)+0.5);
+					w = (int)floor(fabs(segPtr->width)*d->dpi+0.5);
 				} else {
 					w = (int)floor(segPtr->width*factor+0.5);
 				}
@@ -1902,7 +1902,7 @@ EXPORT void DrawSegsO(
 					} else if (tempPtr->type == SEG_CRVLIN) {
 						wDrawWidth w;
 						if (tempPtr->width <0) {
-							w = (int)floor(fabs(tempPtr->width)+0.5);
+							w = (int)floor(fabs(tempPtr->width*d->dpi)+0.5);
 						} else {
 							w = (int)floor(tempPtr->width*factor+0.5);
 						}
@@ -1928,7 +1928,7 @@ EXPORT void DrawSegsO(
 					REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
 					wDrawWidth w;
 					if (tempPtr->width <0) {
-						w = (int)floor(fabs(tempPtr->width)+0.5);
+						w = (int)floor(fabs(tempPtr->width*d->dpi)+0.5);
 					} else {
 						w = (int)floor(tempPtr->width*factor+0.5);
 					}
