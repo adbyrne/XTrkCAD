@@ -54,7 +54,7 @@ typedef struct {
 	drawCmd_p D;
 	long Op;
 	wDrawColor Color;
-	long line_Width;
+	DIST_T line_Width;
 	double width;
 	ANGLE_T angle;
 	double length;
@@ -121,7 +121,7 @@ typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
 
 extern drawContext_t * drawContext;
 extern wDrawColor lineColor;
-extern long lineWidth;
+extern DIST_T lineWidth;
 
 void DrawGeomOp( void * );
 STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t *);
