@@ -617,11 +617,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	coOrd off;
 	switch ( inx ) {
 	case LW:
-		if (drawData.lineWidth<0) {
-			segPtr->width = drawData.lineWidth;
-		} else {
-			segPtr->width = drawData.lineWidth/75.0;        //Replace with absolute pixel
-		}
+		segPtr->width = drawData.lineWidth/mainD.dpi;        //Replace with absolute pixel
 		break;
 	case CO:
 		segPtr->color = drawData.color;
@@ -1103,11 +1099,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawData.color = segPtr->color;
 	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
-	if (drawData.lineWidth<0) {
-		drawData.lineWidth = (long)segPtr->width;
-	} else {
-		drawData.lineWidth = (long)floor(segPtr->width*75.0+0.5);
-	}
+	drawData.lineWidth = (long)floor(segPtr->width*mainD.dpi+0.5);
 	drawDesc[LW].mode = 0;
 	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
