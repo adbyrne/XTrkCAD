@@ -1099,7 +1099,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawData.color = segPtr->color;
 	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
-	drawData.lineWidth = (long)floor(segPtr->width*mainD.dpi+0.5);
+	drawData.lineWidth = (long)floor(segPtr->width+0.5);
 	drawDesc[LW].mode = 0;
 	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
