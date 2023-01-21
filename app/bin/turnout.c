@@ -342,7 +342,7 @@ int GetTurnoutPaths(track_p trk, struct extraDataCompound_t* xx)
 			}
 
 			pathCnt++;
-			if (pathCnt > DTO_DIM) { return -1; }
+			if (pathCnt >= DTO_DIM) { return -1; }
 			pp++;
 		}
 		routeCnt++;
@@ -537,6 +537,9 @@ void GetTurnoutType()
 					}
 				}
 			}
+		}
+		else {
+			dtod.toType = DTO_INVALID;
 		}
 }
 
