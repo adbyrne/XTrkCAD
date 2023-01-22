@@ -33,7 +33,7 @@ extern dynArr_t tempEndPts_da;
 #define bezCmdCreateLine	(4)
 
 extern wDrawColor lineColor;
-extern DIST_T lineWidth;
+extern long lineWidth;
 
 typedef void (*bezMessageProc)( const char *, ... );
 STATUS_T CmdBezCurve( wAction_t, coOrd);
@@ -49,7 +49,7 @@ track_p NewBezierTrack(coOrd[4], trkSeg_p, int);
 double BezierLength(coOrd[4], dynArr_t);
 double BezierOffsetLength(dynArr_t,double offset);
 double BezierMinRadius(coOrd[4],dynArr_t);
-void UpdateParms(wDrawColor color,DIST_T width);
+void UpdateParms(wDrawColor color,long width);
 
 void addSegBezier(dynArr_t * array_p, trkSeg_p seg);
 

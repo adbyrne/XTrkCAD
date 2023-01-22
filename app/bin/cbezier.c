@@ -1069,7 +1069,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		cmd = action>>8;
 	} else { cmd = VP2L(commandContext); }
 
-	Da.width = lineWidth/mainD.dpi;
+	Da.width = (double)lineWidth/mainD.dpi;
 
 	Da.trackGauge = trackGauge;
 
@@ -1295,10 +1295,10 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 }
 
-void UpdateParms(wDrawColor color,double width)
+void UpdateParms(wDrawColor color,long width)
 {
 	Da.color = lineColor;
-	Da.width = lineWidth/mainD.dpi;
+	Da.width = (double)lineWidth/mainD.dpi;
 	if (Da.crvSegs_da.cnt) {
 		ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.width);
 	}
