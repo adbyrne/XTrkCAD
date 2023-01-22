@@ -201,14 +201,13 @@ STATUS_T DrawGeomMouse(
 	trkSeg_p segPtr;
 	pts_t *pts;
 	int inx;
-	DIST_T width;
 	static int segCnt;
 	DIST_T d;
 	ANGLE_T a1,a2;
 	static ANGLE_T line_angle;
 //	BOOL_T createTrack;
 
-	width = context->line_Width/context->D->dpi;
+	lineWidth = context->line_Width;
 
 	switch (action&0xFF) {
 
@@ -428,7 +427,7 @@ STATUS_T DrawGeomMouse(
 			case OP_BENCH: tempSegs(0).type = SEG_BENCH; break;
 			}
 			tempSegs(0).color = context->Color;
-			tempSegs(0).width = width;
+			tempSegs(0).width = lineWidth;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			if ( context->Op == OP_BENCH || context->Op == OP_DIMLINE ) {
 				tempSegs(0).u.l.option = context->benchOption;
@@ -459,9 +458,9 @@ STATUS_T DrawGeomMouse(
 				case OP_CURVE3: drawGeomCurveMode = crvCmdFromCenter; break;
 				case OP_CURVE4: drawGeomCurveMode = crvCmdFromChord; break;
 				}
-				CreateCurve( C_START, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_START, pos, FALSE, context->Color, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
-				CreateCurve( C_DOWN, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_DOWN, pos, FALSE, context->Color, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
 			}
 			break;
@@ -475,7 +474,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).type = SEG_CRVLIN;
 			tempSegs(0).color = context->Color;
 			if ( context->Op >= OP_CIRCLE1 && context->Op <= OP_CIRCLE3 ) {
-				tempSegs(0).width = width;
+				tempSegs(0).width = lineWidth;
 			} else {
 				tempSegs(0).width = 0;
 			}
@@ -487,14 +486,14 @@ STATUS_T DrawGeomMouse(
 			context->State = 1;
 			break;
 		case OP_FILLBOX:
-			width = 0;
+			lineWidth = 0;
 		/* no break */
 		case OP_BOX:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 4 );
 			for ( inx=0; inx<4; inx++ ) {
 				tempSegs(inx).type = SEG_STRLIN;
 				tempSegs(inx).color = context->Color;
-				tempSegs(inx).width = width;
+				tempSegs(inx).width = lineWidth;
 				tempSegs(inx).u.l.pos[0] = tempSegs(inx).u.l.pos[1] = pos;
 			}
 			context->message( _("Drag set box size") );
@@ -516,7 +515,7 @@ STATUS_T DrawGeomMouse(
 			segPtr = &tempSegs(tempSegs_da.cnt-1);
 			segPtr->type = SEG_STRLIN;
 			segPtr->color = context->Color;
-			segPtr->width = (context->Op==OP_POLY?width:0);
+			segPtr->width = (context->Op==OP_POLY?lineWidth:0);
 			//End if over start
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos ))) {
 				segPtr->u.l.pos[0] = tempSegs(segCnt-1).u.l.pos[1];
@@ -694,13 +693,13 @@ STATUS_T DrawGeomMouse(
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
 				pos0x = pos1;
-				CreateCurve( C_MOVE, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_MOVE, pos, FALSE, context->Color, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
 			} else {
 				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE,
 				           0.0 );
 				tempSegs(0).color = context->Color;
-				tempSegs(0).width = width;
+				tempSegs(0).width = lineWidth;
 				DYNARR_SET(trkSeg_t,tempSegs_da,1);
 				if (context->ArcData.type == curveTypeStraight) {
 					tempSegs(0).type = SEG_STRLIN;
@@ -840,7 +839,7 @@ STATUS_T DrawGeomMouse(
 				context->State = 1;
 				context->ArcAngle = FindAngle( pos0, pos1 );
 				pos0x = pos1;
-				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_UP, pos, FALSE, context->Color, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
 				context->message( _("Drag on Red arrows to adjust curve") );
 				context->show = FALSE;
@@ -851,7 +850,7 @@ STATUS_T DrawGeomMouse(
 					segPtr = &tempSegs(0);
 					segPtr->type = SEG_CRVLIN;
 					segPtr->color = context->Color;
-					segPtr->width = width;
+					segPtr->width = lineWidth;
 					segPtr->u.c.center = context->ArcData.curvePos;
 					segPtr->u.c.radius = context->ArcData.curveRadius;
 					segPtr->u.c.a0 = context->ArcData.a0;
@@ -862,7 +861,7 @@ STATUS_T DrawGeomMouse(
 					segPtr = &tempSegs(0);
 					segPtr->type = SEG_STRLIN;
 					segPtr->color = context->Color;
-					segPtr->width = width;
+					segPtr->width = lineWidth;
 					segPtr->u.l.pos[0] = pos0;
 					segPtr->u.l.pos[1] = pos1;
 					context->radius = 0;
