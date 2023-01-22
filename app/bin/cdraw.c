@@ -617,7 +617,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	coOrd off;
 	switch ( inx ) {
 	case LW:
-		segPtr->width = drawData.lineWidth;
+		segPtr->width = drawData.lineWidth/mainD.dpi;        //Replace with absolute pixel
 		break;
 	case CO:
 		segPtr->color = drawData.color;
