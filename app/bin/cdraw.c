@@ -431,6 +431,7 @@ EXPORT track_p MakePolyLineFromSegs(
 			first = FALSE;
 		}
 		CHECK(j<=cnt);
+
 	}
 	xx->segs[0].u.p.cnt = j;
 
