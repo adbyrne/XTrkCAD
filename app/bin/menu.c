@@ -676,10 +676,8 @@ static void ShowUnusedBalloonHelp( void )
  */
 
 
-EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
-                                  long options,
-                                  wButtonCallBack_p action, void * context)
-{
+EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon, long options,
+		wButtonCallBack_p action, void * context) {
 	wButton_p bb;
 	wIndex_t inx;
 
@@ -695,8 +693,19 @@ EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
 			}
 		}
 	}
-	bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
-	                   BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
+#ifdef XTRKCAD_GTK3_WLIB
+		long opt = 0L;
+		if (options&IC_ABUT)
+			opt = BO_ABUT;
+		if (cmdGroup&BG_BIGGAP)
+			opt = BO_GAP;
+		bb = wButtonCreateForToolbar(mainW,0,0,helpStr, (char*) icon,
+				opt|BO_ICON, 0, action, context);
+#else
+		bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
+		BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
+	}
+#endif 
 	AddToolbarControl((wControl_p) bb, options);
 	return bb;
 }
