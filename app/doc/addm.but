@@ -563,7 +563,7 @@ causes the aspect to be displayed.
 
 \S{cmdControl} Control
 
-\G{png.d/bControl.png}
+\G{png.d/bcontrol.png}
 
 A control is created by selecting \f{Create Control} from either the Add menu \K{cmdAdd} or
 from the hotbar. Use the mouse to select a location (left button) and then
@@ -583,7 +583,7 @@ software to actually effect the state on the control (on or off).
 
 \S{cmdSensor} Sensor
 
-\G{png.d/bSensor.png}
+\G{png.d/bsensor.png}
 
 A sensor is created by selecting \f{Create Sensor} from either the Add menu \K{cmdAdd} or
 from the hotbar. Use the mouse to select a location (left button) and then

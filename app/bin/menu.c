@@ -1454,6 +1454,11 @@ EXPORT void CreateMenus(void)
 	ParamRegister(&rotatePG);
 	ParamRegister(&movePG);
 	ParamRegister(&indexPG);
+
+	// stickySet is initialized by AddMenuButton based on IC_STICKY flag
+	// Now check to see if there is saved value
+	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
+	ParamRegister(&stickyPG);
 }
 
 
@@ -1484,7 +1489,4 @@ static void InitCmdExport(void)
 	ButtonGroupEnd();
 	ParamRegister( &menuPG );
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );
-
-	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
-	ParamRegister(&stickyPG);
 }

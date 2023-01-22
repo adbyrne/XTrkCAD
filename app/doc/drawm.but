@@ -424,7 +424,7 @@ On the first polygon side this will be at a multiple of 90 degrees to the axes. 
 
 \S2{cmdDrawPolyline} Draw PolyLine
 
-\G{png.d/dpolyline} 
+\G{png.d/dpolylin.png} 
 
 Before the polygon is started the line width and color can be set. 
 The \f{Polyline Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.

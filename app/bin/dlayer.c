@@ -476,149 +476,7 @@ FormatLayerName(unsigned int layerNumber)
 	return result;
 }
 
-static int lbits_width[3] = {14, 20, 26};
-static int lbits_height[3] = {16, 24, 32};
-
-#include "bitmaps/l1.xbm"
-#include "bitmaps/l2.xbm"
-#include "bitmaps/l3.xbm"
-#include "bitmaps/l4.xbm"
-#include "bitmaps/l5.xbm"
-#include "bitmaps/l6.xbm"
-#include "bitmaps/l7.xbm"
-#include "bitmaps/l8.xbm"
-#include "bitmaps/l9.xbm"
-#include "bitmaps/l10.xbm"
-#include "bitmaps/l11.xbm"
-#include "bitmaps/l12.xbm"
-#include "bitmaps/l13.xbm"
-#include "bitmaps/l14.xbm"
-#include "bitmaps/l15.xbm"
-#include "bitmaps/l16.xbm"
-#include "bitmaps/l17.xbm"
-#include "bitmaps/l18.xbm"
-#include "bitmaps/l19.xbm"
-#include "bitmaps/l20.xbm"
-#include "bitmaps/l21.xbm"
-#include "bitmaps/l22.xbm"
-#include "bitmaps/l23.xbm"
-#include "bitmaps/l24.xbm"
-#include "bitmaps/l25.xbm"
-#include "bitmaps/l26.xbm"
-#include "bitmaps/l27.xbm"
-#include "bitmaps/l28.xbm"
-#include "bitmaps/l29.xbm"
-#include "bitmaps/l30.xbm"
-#include "bitmaps/l31.xbm"
-#include "bitmaps/l32.xbm"
-#include "bitmaps/l33.xbm"
-#include "bitmaps/l34.xbm"
-#include "bitmaps/l35.xbm"
-#include "bitmaps/l36.xbm"
-#include "bitmaps/l37.xbm"
-#include "bitmaps/l38.xbm"
-#include "bitmaps/l39.xbm"
-#include "bitmaps/l40.xbm"
-#include "bitmaps/l41.xbm"
-#include "bitmaps/l42.xbm"
-#include "bitmaps/l43.xbm"
-#include "bitmaps/l44.xbm"
-#include "bitmaps/l45.xbm"
-#include "bitmaps/l46.xbm"
-#include "bitmaps/l47.xbm"
-#include "bitmaps/l48.xbm"
-#include "bitmaps/l49.xbm"
-#include "bitmaps/l50.xbm"
-#include "bitmaps/l51.xbm"
-#include "bitmaps/l52.xbm"
-#include "bitmaps/l53.xbm"
-#include "bitmaps/l54.xbm"
-#include "bitmaps/l55.xbm"
-#include "bitmaps/l56.xbm"
-#include "bitmaps/l57.xbm"
-#include "bitmaps/l58.xbm"
-#include "bitmaps/l59.xbm"
-#include "bitmaps/l60.xbm"
-#include "bitmaps/l61.xbm"
-#include "bitmaps/l62.xbm"
-#include "bitmaps/l63.xbm"
-#include "bitmaps/l64.xbm"
-#include "bitmaps/l65.xbm"
-#include "bitmaps/l66.xbm"
-#include "bitmaps/l67.xbm"
-#include "bitmaps/l68.xbm"
-#include "bitmaps/l69.xbm"
-#include "bitmaps/l70.xbm"
-#include "bitmaps/l71.xbm"
-#include "bitmaps/l72.xbm"
-#include "bitmaps/l73.xbm"
-#include "bitmaps/l74.xbm"
-#include "bitmaps/l75.xbm"
-#include "bitmaps/l76.xbm"
-#include "bitmaps/l77.xbm"
-#include "bitmaps/l78.xbm"
-#include "bitmaps/l79.xbm"
-#include "bitmaps/l80.xbm"
-#include "bitmaps/l81.xbm"
-#include "bitmaps/l82.xbm"
-#include "bitmaps/l83.xbm"
-#include "bitmaps/l84.xbm"
-#include "bitmaps/l85.xbm"
-#include "bitmaps/l86.xbm"
-#include "bitmaps/l87.xbm"
-#include "bitmaps/l88.xbm"
-#include "bitmaps/l89.xbm"
-#include "bitmaps/l90.xbm"
-#include "bitmaps/l91.xbm"
-#include "bitmaps/l92.xbm"
-#include "bitmaps/l93.xbm"
-#include "bitmaps/l94.xbm"
-#include "bitmaps/l95.xbm"
-#include "bitmaps/l96.xbm"
-#include "bitmaps/l97.xbm"
-#include "bitmaps/l98.xbm"
-#include "bitmaps/l99.xbm"
-
-
-static char * show_layer_bits[3][NUM_BUTTONS] = {
-	{
-		l1_x16, l2_x16, l3_x16, l4_x16, l5_x16, l6_x16, l7_x16, l8_x16, l9_x16, l10_x16,
-		l11_x16, l12_x16, l13_x16, l14_x16, l15_x16, l16_x16, l17_x16, l18_x16, l19_x16, l20_x16,
-		l21_x16, l22_x16, l23_x16, l24_x16, l25_x16, l26_x16, l27_x16, l28_x16, l29_x16, l30_x16,
-		l31_x16, l32_x16, l33_x16, l34_x16, l35_x16, l36_x16, l37_x16, l38_x16, l39_x16, l40_x16,
-		l41_x16, l42_x16, l43_x16, l44_x16, l45_x16, l46_x16, l47_x16, l48_x16, l49_x16, l50_x16,
-		l51_x16, l52_x16, l53_x16, l54_x16, l55_x16, l56_x16, l57_x16, l58_x16, l59_x16, l60_x16,
-		l61_x16, l62_x16, l63_x16, l64_x16, l65_x16, l66_x16, l67_x16, l68_x16, l69_x16, l70_x16,
-		l71_x16, l72_x16, l73_x16, l74_x16, l75_x16, l76_x16, l77_x16, l78_x16, l79_x16, l80_x16,
-		l81_x16, l82_x16, l83_x16, l84_x16, l85_x16, l86_x16, l87_x16, l88_x16, l89_x16, l90_x16,
-		l91_x16, l92_x16, l93_x16, l94_x16, l95_x16, l96_x16, l97_x16, l98_x16, l99_x16,
-	},
-	{
-		l1_x24, l2_x24, l3_x24, l4_x24, l5_x24, l6_x24, l7_x24, l8_x24, l9_x24, l10_x24,
-		l11_x24, l12_x24, l13_x24, l14_x24, l15_x24, l16_x24, l17_x24, l18_x24, l19_x24, l20_x24,
-		l21_x24, l22_x24, l23_x24, l24_x24, l25_x24, l26_x24, l27_x24, l28_x24, l29_x24, l30_x24,
-		l31_x24, l32_x24, l33_x24, l34_x24, l35_x24, l36_x24, l37_x24, l38_x24, l39_x24, l40_x24,
-		l41_x24, l42_x24, l43_x24, l44_x24, l45_x24, l46_x24, l47_x24, l48_x24, l49_x24, l50_x24,
-		l51_x24, l52_x24, l53_x24, l54_x24, l55_x24, l56_x24, l57_x24, l58_x24, l59_x24, l60_x24,
-		l61_x24, l62_x24, l63_x24, l64_x24, l65_x24, l66_x24, l67_x24, l68_x24, l69_x24, l70_x24,
-		l71_x24, l72_x24, l73_x24, l74_x24, l75_x24, l76_x24, l77_x24, l78_x24, l79_x24, l80_x24,
-		l81_x24, l82_x24, l83_x24, l84_x24, l85_x24, l86_x24, l87_x24, l88_x24, l89_x24, l90_x24,
-		l91_x24, l92_x24, l93_x24, l94_x24, l95_x24, l96_x24, l97_x24, l98_x24, l99_x24,
-	},
-	{
-		l1_x32, l2_x32, l3_x32, l4_x32, l5_x32, l6_x32, l7_x32, l8_x32, l9_x32, l10_x32,
-		l11_x32, l12_x32, l13_x32, l14_x32, l15_x32, l16_x32, l17_x32, l18_x32, l19_x32, l20_x32,
-		l21_x32, l22_x32, l23_x32, l24_x32, l25_x32, l26_x32, l27_x32, l28_x32, l29_x32, l30_x32,
-		l31_x32, l32_x32, l33_x32, l34_x32, l35_x32, l36_x32, l37_x32, l38_x32, l39_x32, l40_x32,
-		l41_x32, l42_x32, l43_x32, l44_x32, l45_x32, l46_x32, l47_x32, l48_x32, l49_x32, l50_x32,
-		l51_x32, l52_x32, l53_x32, l54_x32, l55_x32, l56_x32, l57_x32, l58_x32, l59_x32, l60_x32,
-		l61_x32, l62_x32, l63_x32, l64_x32, l65_x32, l66_x32, l67_x32, l68_x32, l69_x32, l70_x32,
-		l71_x32, l72_x32, l73_x32, l74_x32, l75_x32, l76_x32, l77_x32, l78_x32, l79_x32, l80_x32,
-		l81_x32, l82_x32, l83_x32, l84_x32, l85_x32, l86_x32, l87_x32, l88_x32, l89_x32, l90_x32,
-		l91_x32, l92_x32, l93_x32, l94_x32, l95_x32, l96_x32, l97_x32, l98_x32, l99_x32,
-	}
-};
-
+static char *show_layer_bits;
 
 static  long layerRawColorTab[] = {
 	wRGB(  0,   0, 192),    /* blue */
@@ -2229,6 +2087,39 @@ static void DoLayer(void * unused)
 
 #include "bitmaps/background.xpm3"
 
+#if NUM_BUTTONS < 100
+static int lbmap_width[3] = { 16, 24, 32 }; // For numbers < 100
+#else
+static int lbmap_width[3] = { 20, 28, 36 }; // For numbers > 99
+#endif
+static int lbmap_height[3] = { 16, 24, 32 };
+
+static int lbit0_width[3] = { 6, 10, 14 };
+static int lbit1_width[3] = { 4, 5, 6 };
+
+static int lbits_top[3] = { 3, 4, 6 };
+static int lbits_height[3] = { 10, 15, 20 };
+
+#include "bitmaps/layer_num.inc"
+
+static char** show_layer_digits[3][10] = {
+	{
+		n0_x16, n1_x16, n2_x16, n3_x16, n4_x16, n5_x16, n6_x16, n7_x16, n8_x16, n9_x16
+	},
+	{
+		n0_x24, n1_x24, n2_x24, n3_x24, n4_x24, n5_x24, n6_x24, n7_x24, n8_x24, n9_x24
+	},
+	{
+		n0_x32, n1_x32, n2_x32, n3_x32, n4_x32, n5_x32, n6_x32, n7_x32, n8_x32, n9_x32
+	}
+};
+
+/* Note: If the number of buttons is increased to > ~120, you should 
+ *       also increase COMMAND_MAX and BUTTON_MAX in command.c 
+ *       NUM_LAYERS is defined in common.h
+ */
+#define ONE_PIXEL v *= 2; if (v > 128) { show_layer_bits[xx + yy] = b; xx += 1; v = 1; b = 0; }
+
 void InitLayers(void)
 {
 	unsigned int i;
@@ -2238,16 +2129,216 @@ void InitLayers(void)
 		layerColorTab[i] = wDrawFindColor(layerRawColorTab[i]);
 	}
 
+	/* build the adjust table for starting bit */
+	int dx_table[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+
 	/* create the bitmaps for the layer buttons */
 	/* all bitmaps have to have the same dimensions */
 	for (int i = 0; i < NUM_LAYERS; i++) {
-		// char *bits = (show_layer_bits[i] + iconSize * sizeof(char*)));
-		show_layer_bmps[i] = wIconCreateBitMap(lbits_width[iconSize],
-		                                       lbits_height[iconSize],
-		                                       show_layer_bits[iconSize][i],
-		                                       layerColorTab[i % (COUNT(layerColorTab))]);
+		int n = i + 1;
+		int bwid = lbmap_width[iconSize];
+		int wb = (bwid + 7) / 8; // width in bytes
+		int bhgt = lbmap_height[iconSize];
+		int h = lbits_height[iconSize];
+
+		// if (n > 30) n = n + 70; for testing > 100
+
+		show_layer_bits = MyMalloc(bhgt * wb);
+
+		if (n < 10) {
+			// width of char
+			int wc = 0;     // width of char
+			if (n == 1) {
+				wc = lbit1_width[iconSize];
+			} else {
+				wc = lbit0_width[iconSize];
+			}
+
+			// X-adjust
+			int dx = (bwid - wc) / 2;
+			int x0 = 0;
+			if (dx > 7) {
+				dx -= 8;
+				x0++;
+			}
+
+			char** cp = show_layer_digits[iconSize][n];
+
+			for (int y = 0; y < h; y++)
+			{
+				int v = dx_table[dx]; // power of two
+				char b = 0; // bits
+
+				int yy = wb * (y + (bhgt - h) / 2);
+
+				int xx = x0; // starting byte
+				for (int x = 0; x < wc; x++)
+				{
+					char z = *(*cp + x + y * wc);
+					if (z != ' ')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
+				}
+				if (v <= 128) {
+					show_layer_bits[xx + yy] = b;
+				}
+			}
+
+		}
+		else if (n < 100) {
+			// width of chars
+			int wc1 = 0;
+			int wc0 = 0;
+			if ((n / 10) == 1) {
+				wc1 = lbit1_width[iconSize];
+			}
+			else {
+				wc1 = lbit0_width[iconSize];
+			}
+			if ((n % 10) == 1) {
+				wc0 = lbit1_width[iconSize];
+			}
+			else {
+				wc0 = lbit0_width[iconSize];
+			}
+
+			// X-adjust
+			int dx = (bwid - wc1 - wc0 - (iconSize >= 1 ? 2 : 1)) / 2;
+			int x0 = 0;
+			if (dx > 7) {
+				dx -= 8;
+				x0++;
+			}
+
+			char** cp1 = show_layer_digits[iconSize][n / 10];
+			char** cp0 = show_layer_digits[iconSize][n % 10];
+
+			for (int y = 0; y < h; y++)
+			{
+				int v = dx_table[dx]; // powers of two
+				char b = 0; // bits
+
+				int yy = wb * (y + (bhgt - h) / 2);
+
+				int xx = x0; // starting byte
+				for (int x = 0; x < wc1; x++)
+				{
+					char z = *(*cp1 + x + y * wc1);
+					if (z != ' ')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
+				}
+				ONE_PIXEL
+				if (iconSize >= 1) {
+						ONE_PIXEL
+				}
+				for (int x = 0; x < wc0; x++)
+				{
+					char z = *(*cp0 + x + y * wc0);
+					if (z != ' ')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
+				}
+				if (v <= 128) {
+					show_layer_bits[xx + yy] = b;
+				}
+			}
+
+		}
+		else { // n >= 100
+			// width of chars
+			int wc2 = 0;
+			int wc1 = 0;
+			int wc0 = 0;
+			if ((n / 100) == 1) {
+				wc2 = lbit1_width[iconSize];
+			}
+			else {
+				wc2 = lbit0_width[iconSize];
+			}
+			if (((n / 10) % 10) == 1) {
+				wc1 = lbit1_width[iconSize];
+			}
+			else {
+				wc1 = lbit0_width[iconSize];
+			}
+			if ((n % 10) == 1) {
+				wc0 = lbit1_width[iconSize];
+			}
+			else {
+				wc0 = lbit0_width[iconSize];
+			}
+
+			// X-adjust and start
+			int dx = (bwid - wc2 - wc1 - wc0 - 2) / 2;
+			int x0 = 0;
+			if (dx > 7) {
+				dx -= 8;
+				x0++;
+			}
+
+			char** cp2 = show_layer_digits[iconSize][n / 100];
+			char** cp1 = show_layer_digits[iconSize][(n / 10) % 10];
+			char** cp0 = show_layer_digits[iconSize][n % 10];
+
+			for (int y = 0; y < h; y++)
+			{
+				int v = dx_table[dx]; // powers of two
+				char b = 0; // bits
+
+				int yy = wb * (y + (bhgt - h) / 2);
+
+				int xx = x0; // byte
+				for (int x = 0; x < wc2; x++)
+				{
+					char z = *(*cp2 + x + y * wc2);
+					if (z != ' ')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
+				}
+				ONE_PIXEL
+				for (int x = 0; x < wc1; x++)
+				{
+					char z = *(*cp1 + x + y * wc1);
+					if (z != ' ')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
+				}
+				ONE_PIXEL
+				for (int x = 0; x < wc0; x++)
+				{
+					char z = *(*cp0 + x + y * wc0);
+					if (z != ' ')
+					{
+						b |= v;
+					}
+					ONE_PIXEL
+				}
+				if (v <= 128) {
+					show_layer_bits[xx + yy] = b;
+				}
+			}
+		}
+
+		show_layer_bmps[i] = wIconCreateBitMap(
+			bwid,
+			bhgt,
+			show_layer_bits,
+			layerColorTab[i % (COUNT(layerColorTab))]);
 		layers[i].color = layerColorTab[i % (COUNT(layerColorTab))];
 		layers[i].useColor = TRUE;
+
+		MyFree(show_layer_bits);
 	}
 
 	/* layer list for toolbar */

@@ -517,7 +517,7 @@ static struct {
 	ANGLE_T rotate_angle;
 	ANGLE_T oldAngle;
 	long pointCount;
-	long lineWidth;
+	DIST_T lineWidth;
 	BOOL_T boxed;
 	BOOL_T filled;
 	BOOL_T open;
@@ -548,7 +548,7 @@ static descData_t drawDesc[] = {
 	/*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width },
 	/*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
 	/*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
-	/*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth },
+	/*LW*/	{ DESC_FLOAT, N_("Line Width"), &drawData.lineWidth },
 	/*LT*/  { DESC_LIST, N_("Line Type"), &drawData.lineType },
 	/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
 	/*FL*/	{ DESC_BOXED, N_("Filled"), &drawData.filled },
@@ -617,11 +617,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	coOrd off;
 	switch ( inx ) {
 	case LW:
-		if (drawData.lineWidth<0) {
-			segPtr->width = drawData.lineWidth;
-		} else {
-			segPtr->width = drawData.lineWidth/75.0;        //Replace with absolute pixel
-		}
+		segPtr->width = drawData.lineWidth;
 		break;
 	case CO:
 		segPtr->color = drawData.color;
@@ -1104,11 +1100,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawData.color = segPtr->color;
 	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
-	if (drawData.lineWidth<0) {
-		drawData.lineWidth = (long)segPtr->width;
-	} else {
-		drawData.lineWidth = (long)floor(segPtr->width*75.0+0.5);
-	}
+	drawData.lineWidth = segPtr->width;
 	drawDesc[LW].mode = 0;
 	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
@@ -1550,7 +1542,7 @@ static drawModContext_t drawModCmdContext = {
 
 static BOOL_T infoSubst = FALSE;
 
-static paramIntegerRange_t i100_100 = { -100, 100, 25 };  //Allow negative numbers
+static paramFloatRange_t r100_100 = { -100.0, 100.0, 25 };  //Allow negative numbers
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000 };
 //static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
@@ -2801,14 +2793,14 @@ static wIndex_t benchChoice;
 static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
 wDrawColor lineColor = 1;
-long lineWidth = 0;
+DIST_T lineWidth = 0;
 static wDrawColor benchColor;
 
 
 
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
-	{ PD_LONG, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &i100_100, N_("Line Width") },
+	{ PD_FLOAT, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &r100_100, N_("Line Width") },
 #define drawColorPD				(drawPLs[1])
 	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchColorPD		(drawPLs[2])
