@@ -536,7 +536,10 @@ static void DrawBezCurve(trkSeg_p control_arm1,
  */
 void DrawTempBezier(BOOL_T track)
 {
-	if (track) { DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:normalColor); }
+	if (track) { 
+		DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, 
+					 (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
+					 fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:normalColor); }
 	else {
 		DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,
 		             (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
@@ -1069,7 +1072,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		cmd = action>>8;
 	} else { cmd = VP2L(commandContext); }
 
-	Da.width = (double)lineWidth/mainD.dpi;
+	Da.width = lineWidth;
 
 	Da.trackGauge = trackGauge;
 
@@ -1295,10 +1298,10 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 }
 
-void UpdateParms(wDrawColor color,long width)
+void UpdateParms(wDrawColor color,double width)
 {
 	Da.color = lineColor;
-	Da.width = (double)lineWidth/mainD.dpi;
+	Da.width = lineWidth; 
 	if (Da.crvSegs_da.cnt) {
 		ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.width);
 	}
