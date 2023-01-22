@@ -551,7 +551,8 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg)
 		s->u.b.radius0 = seg->u.b.radius3;
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
 			addSegCornu(&s->bezSegs,
-			            (((trkSeg_p)seg->bezSegs.ptr) + i)); //recurse for copying embedded Beziers as in Cornu joint
+			            (((trkSeg_p)seg->bezSegs.ptr) +
+			             i)); //recurse for copying embedded Beziers as in Cornu joint
 		}
 	} else {
 		s->u = seg->u;

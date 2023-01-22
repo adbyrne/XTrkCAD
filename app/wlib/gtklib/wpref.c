@@ -58,13 +58,13 @@ static char userHomeDir[BUFSIZ];
  */
 
 
-/** Find the directory where configuration files, help, demos etc are installed. 
+/** Find the directory where configuration files, help, demos etc are installed.
  *  The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
  *  2. Directory specified by XTRKCAD_INSTALL_PREFIX/share/xtrkcad
  *  3. /usr/share/xtrkcad
  *  4. /usr/local/share/xtrkcad
- *  
+ *
  *  \return pointer to directory name
  */
 
@@ -79,8 +79,9 @@ const char * wGetAppLibDir( void )
 		return appLibDir;
 	}
 
-	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++)
+	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
+	}
 	strcpy( ep, "LIB" );
 	ep = getenv( envvar );
 	if (ep != NULL) {
@@ -125,14 +126,14 @@ const char * wGetAppLibDir( void )
 	}
 
 	sprintf( msg,
-		_("The required configuration files could not be located in the expected location.\n\n"
-		"Usually this is an installation problem. Make sure that these files are installed in either \n"
-		"  ../share/xtrkcad or\n"
-		"  /usr/share/%s or\n"
-		"  /usr/local/share/%s\n"
-		"If this is not possible, the environment variable %s must contain "
-		"the name of the correct directory."),
-		wlibGetAppName(), wlibGetAppName(), envvar );
+	         _("The required configuration files could not be located in the expected location.\n\n"
+	           "Usually this is an installation problem. Make sure that these files are installed in either \n"
+	           "  ../share/xtrkcad or\n"
+	           "  /usr/share/%s or\n"
+	           "  /usr/local/share/%s\n"
+	           "If this is not possible, the environment variable %s must contain "
+	           "the name of the correct directory."),
+	         wlibGetAppName(), wlibGetAppName(), envvar );
 	wNoticeEx( NT_ERROR, msg, _("Ok"), NULL );
 	appLibDir[0] = '\0';
 	wExit(0);
@@ -149,14 +150,15 @@ const char * wGetAppLibDir( void )
 
 
 const char * wGetAppWorkDir(
-		void )
+        void )
 {
 	char tmp[BUFSIZ+20];
 	char * homeDir;
 	DIR *dirp;
-	
-	if (appWorkDir[0] != '\0')
+
+	if (appWorkDir[0] != '\0') {
 		return appWorkDir;
+	}
 
 	if ((homeDir = getenv( "HOME" )) == NULL) {
 		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
@@ -171,14 +173,14 @@ const char * wGetAppWorkDir(
 			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
 			wExit(0);
 		} else {
-			/* 
-			 * check for default configuration file and copy to 
+			/*
+			 * check for default configuration file and copy to
 			 * the workdir if it exists
 			 */
 			struct stat stFileInfo;
 			char appEtcConfig[BUFSIZ];
 			sprintf( appEtcConfig, "/etc/%s.rc", wlibGetAppName());
-			
+
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
 				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
@@ -199,16 +201,17 @@ const char * wGetAppWorkDir(
 const char *wGetUserHomeDir( void )
 {
 	char *homeDir;
-	
-	if( userHomeDir[ 0 ] != '\0' )
+
+	if( userHomeDir[ 0 ] != '\0' ) {
 		return userHomeDir;
-		
+	}
+
 	if ((homeDir = getenv( "HOME" )) == NULL) {
 		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {
 		strcpy( userHomeDir, homeDir );
-	}	
+	}
 
 	return userHomeDir;
 }
@@ -223,12 +226,12 @@ const char *wGetUserHomeDir( void )
  */
 
 typedef struct {
-		char * section;
-		char * name;
-		wBool_t present;
-		wBool_t dirty;
-		char * val;
-		} prefs_t;
+	char * section;
+	char * name;
+	wBool_t present;
+	wBool_t dirty;
+	char * val;
+} prefs_t;
 dynArr_t prefs_da;
 #define prefs(N) DYNARR_N(prefs_t,prefs_da,N)
 wBool_t prefInitted = FALSE;
@@ -246,39 +249,42 @@ static void readPrefs( char * name, wBool_t update )
 
 	prefInitted = TRUE;
 	workDir = wGetAppWorkDir();
-	if (name && name[0])
+	if (name && name[0]) {
 		sprintf( tmp, "%s", name );
-	else
+	} else {
 		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+	}
 	prefFile = fopen( tmp, "r" );
-	if (prefFile == NULL)
+	if (prefFile == NULL) {
 		return;
+	}
 	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
 		char *sp;
-		
+
 		sp = tmp;
-		while ( *sp==' ' || *sp=='\t' ) sp++;
-		if ( *sp == '\n' || *sp == '#' )
+		while ( *sp==' ' || *sp=='\t' ) { sp++; }
+		if ( *sp == '\n' || *sp == '#' ) {
 			continue;
+		}
 		np = strchr( sp, '.' );
 		if (np == NULL) {
 			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
 			continue;
 		}
 		*np++ = '\0';
-		while ( *np==' ' || *np=='\t' ) np++;
+		while ( *np==' ' || *np=='\t' ) { np++; }
 		vp = strchr( np, ':' );
 		if (vp == NULL) {
 			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
 			continue;
 		}
 		*vp++ = '\0';
-		while ( *vp==' ' || *vp=='\t' ) vp++;
+		while ( *vp==' ' || *vp=='\t' ) { vp++; }
 		cp = vp + strlen(vp) -1;
-		while ( cp >= vp && (*cp=='\n' || *cp==' ' || *cp=='\t') ) cp--;
+		while ( cp >= vp && (*cp=='\n' || *cp==' ' || *cp=='\t') ) { cp--; }
 		cp[1] = '\0';
 		if (update) {
-			for (int i=0;i<prefs_da.cnt;i++) {
+			for (int i=0; i<prefs_da.cnt; i++) {
 				p = &DYNARR_N(prefs_t,prefs_da,i);
 				if (strcmp(p->name,np)==0 && strcmp(p->section,sp)==0) {
 					p->val = strdup(vp);
@@ -307,19 +313,21 @@ static void readPrefs( char * name, wBool_t update )
  */
 
 void wPrefSetString(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		const char * sval )		/* Value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        const char * sval )		/* Value */
 {
 	prefs_t * p;
 
-	if (!prefInitted)
+	if (!prefInitted) {
 		readPrefs("", FALSE);
-	
+	}
+
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
 		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
-			if (p->val)
+			if (p->val) {
 				free(p->val);
+			}
 			p->dirty = TRUE;
 			p->val = (sval?strdup( sval ):NULL);
 			return;
@@ -341,14 +349,15 @@ void wPrefSetString(
  */
 
 char * wPrefGetStringBasic(
-		const char * section,			/* Section */
-		const char * name )			/* Name */
+        const char * section,			/* Section */
+        const char * name )			/* Name */
 {
 	prefs_t * p;
 
-	if (!prefInitted)
+	if (!prefInitted) {
 		readPrefs("", FALSE);
-	
+	}
+
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
 		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
 			return p->val;
@@ -365,10 +374,10 @@ char * wPrefGetStringBasic(
  * \param lval IN value to save
  */
 
- void wPrefSetInteger(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		long lval )		/* Value */
+void wPrefSetInteger(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long lval )		/* Value */
 {
 	char tmp[20];
 
@@ -387,13 +396,13 @@ char * wPrefGetStringBasic(
  */
 
 wBool_t wPrefGetIntegerBasic(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		long * res,		/* Address of result */
-		long def )		/* Default value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long * res,		/* Address of result */
+        long def )		/* Default value */
 {
 	const char * cp;
-    char *cp1;
+	char *cp1;
 
 	cp = wPrefGetStringBasic( section, name );
 	if (cp == NULL) {
@@ -409,17 +418,17 @@ wBool_t wPrefGetIntegerBasic(
 }
 
 /**
- * Save a float value in the preferences file. 
+ * Save a float value in the preferences file.
  *
  * \param section IN the file section into which the value should be saved
  * \param name IN the name of the preference
  * \param lval IN the value
  */
 
- void wPrefSetFloat(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		double lval )		/* Value */
+void wPrefSetFloat(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double lval )		/* Value */
 {
 	char tmp[20];
 
@@ -439,13 +448,13 @@ wBool_t wPrefGetIntegerBasic(
 
 
 wBool_t wPrefGetFloatBasic(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		double * res,		/* Address of result */
-		double def )		/* Default value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double * res,		/* Address of result */
+        double def )		/* Default value */
 {
 	const char * cp;
-    char *cp1;
+	char *cp1;
 
 	cp = wPrefGetStringBasic( section, name );
 	if (cp == NULL) {
@@ -460,62 +469,69 @@ wBool_t wPrefGetFloatBasic(
 	return TRUE;
 }
 
-void wPrefsLoad(char * name) {
+void wPrefsLoad(char * name)
+{
 	readPrefs(name,TRUE);
 }
 
 /**
  * Save the configuration to a file. The config parameters are held and updated in an array.
- * To make the settings persistant, this function has to be called. 
+ * To make the settings persistant, this function has to be called.
  *
  */
 
 void wPrefFlush(
-		char * name )
+        char * name )
 {
 	prefs_t * p;
 	char tmp[BUFSIZ+32];
-    const char *workDir;
+	const char *workDir;
 	FILE * prefFile;
 
-	if (!prefInitted)
+	if (!prefInitted) {
 		return;
-	
+	}
+
 	workDir = wGetAppWorkDir();
-	if (name && name[0])
+	if (name && name[0]) {
 		snprintf( tmp, sizeof(tmp), "%s", name );
-	else
+	} else {
 		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
+	}
 	prefFile = fopen( tmp, "w" );
-	if (prefFile == NULL)
+	if (prefFile == NULL) {
 		return;
+	}
 
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
 		if(p->val) {
 			fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
-		}	
+		}
 	}
 	fclose( prefFile );
 }
 
 /**
  * Clear the preferences from memory
- * \return  
+ * \return
  */
 
 void wPrefReset(
-		void )
+        void )
 {
 	prefs_t * p;
 
 	prefInitted = FALSE;
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-		if (p->section)
+		if (p->section) {
 			free( p->section );
-		if (p->name)
+		}
+		if (p->name) {
 			free( p->name );
-		if (p->val)
+		}
+		if (p->val) {
 			free( p->val );
+		}
 	}
 	prefs_da.cnt = 0;
 }

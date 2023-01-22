@@ -1116,7 +1116,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 		return NULL;
 	}
 
-	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2, displayHeight, -1, -1, -1);
+	wSetGeometry(mainW, displayWidth/2, displayWidth, displayHeight/2,
+	             displayHeight, -1, -1, -1);
 	InitAppDefaults();
 
 	newToolbarMax = (1 << BG_COUNT) - 1;

@@ -1021,7 +1021,7 @@ void DescribeCompound(
 		FormatCompoundTitle( listLabelsOption|LABEL_DESCR, xtitle(xx) );
 	}
 
-	if (GetTrkEndPtCnt(trk) <= 1) {
+	if (GetTrkEndPtCnt(trk) < 1) {
 		trackType = _("Structure");
 	} else {
 		trackType = GetTrkEndPtCnt(trk) > 2 ? _("Turnout") : _("Sectional Track");

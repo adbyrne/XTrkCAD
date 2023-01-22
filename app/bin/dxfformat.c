@@ -26,8 +26,8 @@
 extern char *sProdNameUpper;
 extern long units;						   /**< meaning is 0 = English, 1 = metric */
 
-static char *dxfDimensionDefaults[][3] =
-{ /**< default values for dimensions, English, metric and DXF variable name */
+static char *dxfDimensionDefaults[][3] = {
+	/**< default values for dimensions, English, metric and DXF variable name */
 	{ "1.0", "25.0", "$DIMTXT" },
 	{ "0.8", "20.0", "$DIMASZ"}
 };

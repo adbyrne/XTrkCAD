@@ -46,7 +46,7 @@ extern wBool_t CheckHelpTopicExists(const char * topic);
 								"variable.\n Also make sure that the user has sufficient access rights to read these" \
  								"files."
 /**
- * Create a fully qualified url from a topic. The library path is converted to 
+ * Create a fully qualified url from a topic. The library path is converted to
  * an absolute path first. The url is then created from that path.
  *
  * \param helpUrl OUT pointer to url, free by caller
@@ -56,29 +56,29 @@ extern wBool_t CheckHelpTopicExists(const char * topic);
 static void
 TopicToUrl(char **helpUrl, const char *topic)
 {
-    DynString url;
-    DynStringMalloc(&url, 16);
-    char *realPath;
+	DynString url;
+	DynStringMalloc(&url, 16);
+	char *realPath;
 
-    realPath = realpath(wGetAppLibDir(), NULL);
+	realPath = realpath(wGetAppLibDir(), NULL);
 
-    if(realPath) {
-       // build up the url line
-        DynStringCatCStrs(&url,
-                          "file://",
-                          realPath,
-                          "/html/",
-                          topic,
-                          ".html",
-                          NULL);
+	if(realPath) {
+		// build up the url line
+		DynStringCatCStrs(&url,
+		                  "file://",
+		                  realPath,
+		                  "/html/",
+		                  topic,
+		                  ".html",
+		                  NULL);
 
-        *helpUrl = strdup(DynStringToCStr(&url));
-        DynStringFree(&url);
-        free(realPath);
-    } else {
-        wNoticeEx( NT_ERROR, _("Not enough memory for realpath()"), _("Exit"), NULL);
+		*helpUrl = strdup(DynStringToCStr(&url));
+		DynStringFree(&url);
+		free(realPath);
+	} else {
+		wNoticeEx( NT_ERROR, _("Not enough memory for realpath()"), _("Exit"), NULL);
 		wExit(0);
-    }
+	}
 }
 /**
  * Invoke the system's default browser to display help for <topic>. First the
@@ -90,22 +90,22 @@ TopicToUrl(char **helpUrl, const char *topic)
 
 void wHelp(const char * topic)
 {
-    int rc;
-    char *url;
+	int rc;
+	char *url;
 //    char *currentPath;
 
-    assert(topic != NULL);
-    assert(strlen(topic));
+	assert(topic != NULL);
+	assert(strlen(topic));
 
-    if (!CheckHelpTopicExists(topic)) return;
+	if (!CheckHelpTopicExists(topic)) { return; }
 
-    TopicToUrl(&url, topic);
-    printf(">%s<\n", url);
+	TopicToUrl(&url, topic);
+	printf(">%s<\n", url);
 	rc = wOpenFileExternal(url);
 
 	if (!rc) {
-        wNotice(HELPERRORTEXT, _("Cancel"), NULL);
-    }
+		wNotice(HELPERRORTEXT, _("Cancel"), NULL);
+	}
 
-    free(url);
+	free(url);
 }

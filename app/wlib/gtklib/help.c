@@ -46,29 +46,31 @@ extern const char * GetCurCommandName();
 static void
 DoHelpMenu(void *data)
 {
-    int func = (intptr_t)data;
+	int func = (intptr_t)data;
 
-    const char * topic;
+	const char * topic;
 
-    switch (func) {
-    case 1:
-        wHelp("contents");
-        break;
+	switch (func) {
+	case 1:
+		wHelp("contents");
+		break;
 
-    case 3:
-    	topic = GetCurCommandName();
-    	if (topic && topic[0])
-    		wHelp(topic);
-    	break;
+	case 3:
+		topic = GetCurCommandName();
+		if (topic && topic[0]) {
+			wHelp(topic);
+		}
+		break;
 
-    default:
-        break;
-    }
+	default:
+		break;
+	}
 
-    return;
+	return;
 }
 
-void wDoAccelHelp(wAccelKey_e key, void * context) {
+void wDoAccelHelp(wAccelKey_e key, void * context)
+{
 	DoHelpMenu(context);
 }
 
@@ -81,6 +83,6 @@ void wDoAccelHelp(wAccelKey_e key, void * context) {
 
 void wMenuAddHelp(wMenu_p m)
 {
-    wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1);
-    wMenuPushCreate(m, NULL, _("Co&mmand Context help"), 0, DoHelpMenu, (void*)3);
+	wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1);
+	wMenuPushCreate(m, NULL, _("Co&mmand Context help"), 0, DoHelpMenu, (void*)3);
 }

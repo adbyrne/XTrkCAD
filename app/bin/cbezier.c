@@ -267,7 +267,8 @@ void addSegBezier(dynArr_t * array_p, trkSeg_p seg)
 		s->bezSegs.ptr = NULL; //Make sure new space as addr copied in earlier from seg
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
 			addSegBezier(&s->bezSegs,
-			             (((trkSeg_p)seg->bezSegs.ptr)+i)); //recurse for copying embedded Beziers as in Cornu joint
+			             (((trkSeg_p)seg->bezSegs.ptr)
+			              +i)); //recurse for copying embedded Beziers as in Cornu joint
 		}
 	} else {
 		s->u = seg->u;

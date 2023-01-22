@@ -159,11 +159,19 @@ The current \f{Layer} is where most new objects are created. It's not possible t
 Refer to \k{cmdLayer} for detail.
 END
 
+# cgroup.c:GroupOk
+MESSAGE MSG_GROUP_NO_PATHS
+No Paths were detected when grouping selected Tracks.
+HELP
+Please contact development
+END
+
 # cgroup.c:doGroup
 MESSAGE MSG_CANT_GROUP_BUMPER1
 Cannot Group Bumper Track. The track has been unselected.
 HELP
 Bumper tracks (tracks with 1 endpoint) are not supported by the Group command.
+Convert the Bumper track to a Straight track by Ungrouping \k{cmdUngroup} it first.
 END
 
 # cgroup.c:doGroup
