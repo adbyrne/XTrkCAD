@@ -217,7 +217,6 @@ target_sources(xtrkcad-lib
     utility.h
     validator.c
     validator.h
-    bitmaps/layer_num.inc
     include/dirent.h
     include/levenshtein.h
     include/paramfile.h
