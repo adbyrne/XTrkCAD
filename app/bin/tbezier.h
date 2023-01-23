@@ -31,7 +31,7 @@ typedef struct extraDataBezier_t {
 	DIST_T length;
 	dynArr_t arcSegs;
 	coOrd descriptionOff;
-	DIST_T segsWidth;
+	LWIDTH_T segsWidth;
 	wDrawColor segsColor;
 	drawLineType_e lineType;
 } extraDataBezier_t;

@@ -87,7 +87,7 @@ static struct {
 	coOrd pos[4];
 	int selectPoint;
 	wDrawColor color;
-	DIST_T width;
+	LWIDTH_T width;
 	track_p trk[2];
 	EPINX_T ep[2];
 	dynArr_t crvSegs_da;

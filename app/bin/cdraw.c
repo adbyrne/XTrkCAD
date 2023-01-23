@@ -516,7 +516,7 @@ static struct {
 	ANGLE_T rotate_angle;
 	ANGLE_T oldAngle;
 	long pointCount;
-	DIST_T lineWidth;
+	LWIDTH_T lineWidth;
 	BOOL_T boxed;
 	BOOL_T filled;
 	BOOL_T open;
@@ -2791,7 +2791,7 @@ static wIndex_t benchChoice;
 static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
 wDrawColor lineColor = 1;
-DIST_T lineWidth = 0;
+LWIDTH_T lineWidth = 0;
 static wDrawColor benchColor;
 
 

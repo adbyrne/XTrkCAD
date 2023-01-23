@@ -54,7 +54,7 @@ typedef struct {
 	drawCmd_p D;
 	long Op;
 	wDrawColor Color;
-	DIST_T line_Width;
+	LWIDTH_T line_Width;
 	double width;
 	ANGLE_T angle;
 	double length;
