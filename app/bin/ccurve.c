@@ -139,7 +139,7 @@ EXPORT STATUS_T CreateCurve(
         coOrd pos,
         BOOL_T track,
         wDrawColor color,
-        DIST_T width,
+        LWIDTH_T width,
         long mode,
         dynArr_t * anchor_array,
         curveMessageProc message )

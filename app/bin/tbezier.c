@@ -1202,6 +1202,7 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p)
 	seg_p->type = IsTrack(trk)?SEG_BEZTRK:SEG_BEZLIN;
 	for (int i=0; i<4; i++) { seg_p->u.b.pos[i] = xx->pos[i]; }
 	seg_p->color = xx->segsColor;
+	seg_p->width = xx->segsWidth;
 	seg_p->bezSegs.cnt = 0;
 	if (seg_p->bezSegs.ptr) { MyFree(seg_p->bezSegs.ptr); }
 	seg_p->bezSegs.max = 0;
