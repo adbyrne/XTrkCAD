@@ -187,7 +187,7 @@ EXPORT STATUS_T CreateCurve(
 		DYNARR_RESET(trkSeg_t, *anchor_array);
 		for ( inx=0; inx<8; inx++ ) {
 			tempSegs(inx).color = wDrawColorBlack;
-			tempSegs(inx).width = 0;
+			tempSegs(inx).width = width;
 		}
 		tempSegs_da.cnt = 0;
 		p = pos;

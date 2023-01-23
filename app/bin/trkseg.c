@@ -1762,9 +1762,9 @@ EXPORT void DrawSegsO(
 		} else {
 			color1 = color2 = color;
 		}
-		wDrawWidth thick = 3;
+		LWIDTH_T thick = 3;
 #ifdef WINDOWS
-		thick *= (wDrawWidth)(d->dpi/75.0);
+		thick *= (LWIDTH_T)(d->dpi/75.0);
 #endif
 		switch (segPtr->type) {
 		case SEG_STRLIN:
@@ -1790,11 +1790,11 @@ EXPORT void DrawSegsO(
 				                   trk, color1, options );
 				break;
 			case SEG_STRLIN:;
-				wDrawWidth w;
+				LWIDTH_T w;
 				if (segPtr->width < 0) {
-					w = (int)floor(fabs(segPtr->width)+0.5);
+					w = segPtr->width;
 				} else {
-					w = (int)floor(fabs(segPtr->width*factor)+0.5);
+					w = segPtr->width * factor;
 				}
 				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 				break;
@@ -1851,11 +1851,11 @@ EXPORT void DrawSegsO(
 				                 a0, segPtr->u.c.a1,
 				                 trk, color1, options );
 			} else {
-				wDrawWidth w;
+				LWIDTH_T w;
 				if (segPtr->width < 0) {
-					w = (int)floor(fabs(segPtr->width)+0.5);
+					w = segPtr->width;
 				} else {
-					w = (int)floor(segPtr->width*factor+0.5);
+					w = segPtr->width * factor;
 				}
 				DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
 				         FALSE, (d->options&DC_THICK)?thick:w, color1 );
@@ -1975,11 +1975,11 @@ EXPORT void DrawSegsO(
 				bThick = TRUE;
 			}
 
-			wDrawWidth w;
+			LWIDTH_T w;
 			if (segPtr->width < 0) {
-				w = (int)floor(fabs(segPtr->width)+0.5);
+				w = segPtr->width;
 			} else {
-				w = (int)floor(segPtr->width*factor+0.5);
+				w = segPtr->width * factor;
 			}
 			drawFill_e eOptFill;
 			if ( bFill ) {
