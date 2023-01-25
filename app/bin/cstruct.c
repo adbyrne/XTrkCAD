@@ -682,14 +682,14 @@ void static CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_STRLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.l.pos[0] = pos;
 	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a+135),len);
 	anchors(i).color = wDrawColorBlue;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	i = anchors_da.cnt-1;
 	anchors(i).type = SEG_STRLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.l.pos[0] = pos;
 	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a-135),len);
 	anchors(i).color = wDrawColorBlue;
@@ -701,7 +701,7 @@ void static CreateRotateAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = 0.5;
+	anchors(i).lineWidth = 0.5;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 180.0;
 	anchors(i).u.c.a1 = 360.0;

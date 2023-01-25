@@ -258,7 +258,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		if ( (segPtr->type == SEG_CRVTRK) ||
 		     (segPtr->type == SEG_CRVLIN) ) {
 			/* TODO: be more precise about curved line width */
-			width.x = width.y = fabs(segPtr->width)/2.0;
+			width.x = width.y = fabs(segPtr->lineWidth)/2.0;
 			REORIGIN( pc, segPtr->u.c.center, angle, xlat );
 			a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
 			a1 = segPtr->u.c.a1;
@@ -294,8 +294,8 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 			}
 		}
 		if ( segPtr->type == SEG_STRLIN ) {
-			width.x = fabs(segPtr->width) * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
-			width.y = fabs(segPtr->width) * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
+			width.x = fabs(segPtr->lineWidth) * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
+			width.y = fabs(segPtr->lineWidth) * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
 		} else if ( segPtr->type == SEG_BENCH ) {
 			width.x = BenchGetWidth( segPtr->u.l.option ) * fabs(cos( D2R( FindAngle(p0,
 			                p1) ) ) ) / 2.0;
@@ -305,7 +305,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		break;
 	case SEG_POLY:
 		/* TODO: be more precise about poly line width */
-		width.x = width.y = fabs(segPtr->width)/2.0;
+		width.x = width.y = fabs(segPtr->lineWidth)/2.0;
 	case SEG_FILPOLY:
 		for (inx=0; inx<segPtr->u.p.cnt; inx++ ) {
 			REORIGIN( p0, segPtr->u.p.pts[inx].pt, angle, xlat )
@@ -353,7 +353,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 			hi->x = hi->x<pBez[i].x?pBez[i].x:hi->x;
 			hi->y = hi->y<pBez[i].y?pBez[i].y:hi->y;
 		}
-		width.x = width.y = fabs(segPtr->width)/2.0;
+		width.x = width.y = fabs(segPtr->lineWidth)/2.0;
 		break;
 	default:
 		;
@@ -601,8 +601,8 @@ EXPORT void RescaleSegs(
 	int inx;
 
 	for (s=segs; s<&segs[segCnt]; s++) {
-		if (s->width>0) {
-			s->width *= scale_w;
+		if (s->lineWidth>0) {
+			s->lineWidth *= scale_w;
 		}
 		switch (s->type) {
 		case SEG_STRLIN:
@@ -1239,7 +1239,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			if ( !GetArgs( cp, hasElev?"lwpfpf":"lwpYpY",
-			               &rgb, &s->width, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1 ) ) {
+			               &rgb, &s->lineWidth, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1 ) ) {
 				rc = FALSE;
 				break;
 			}
@@ -1252,7 +1252,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			if ( !GetArgs( cp, hasElev?"lwpfpfl":"lwpYpYZ",
-			               &rgb, &s->width, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1, &option ) ) {
+			               &rgb, &s->lineWidth, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1, &option ) ) {
 				rc = FALSE;
 				break;
 			}
@@ -1268,7 +1268,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_CRVLIN;
 			if ( !GetArgs( cp, hasElev?"lwfpfff":"lwfpYff",
-			               &rgb, &s->width,
+			               &rgb, &s->lineWidth,
 			               &s->u.c.radius,
 			               &s->u.c.center,
 			               &elev0,
@@ -1286,7 +1286,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->bezSegs.cnt = 0;
 			s->bezSegs.ptr = NULL;
 			if ( !GetArgs( cp, hasElev?"lwpfpf":"lwpYpY",
-			               &rgb, &s->width,
+			               &rgb, &s->lineWidth,
 			               &s->u.l.pos[0], &elev0,
 			               &s->u.l.pos[1], &elev1 ) ) {
 				rc = FALSE;
@@ -1302,7 +1302,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->bezSegs.cnt = 0;
 			s->bezSegs.ptr = NULL;
 			if ( !GetArgs( cp, hasElev?"lwfpfff":"lwfpYff",
-			               &rgb, &s->width,
+			               &rgb, &s->lineWidth,
 			               &s->u.c.radius,
 			               &s->u.c.center,
 			               &elev0,
@@ -1317,7 +1317,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_JNTTRK;
 			if ( !GetArgs( cp, hasElev?"lwpffffffl":"lwpYfffffl",
-			               &rgb, &s->width,
+			               &rgb, &s->lineWidth,
 			               &s->u.j.pos,
 			               &elev0,
 			               &s->u.j.angle,
@@ -1342,7 +1342,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->bezSegs.ptr= NULL;
 			s->bezSegs.cnt=0;
 			if ( !GetArgs( cp, "lwpppp",
-			               &rgb, &s->width,
+			               &rgb, &s->lineWidth,
 			               &s->u.b.pos[0],
 			               &s->u.b.pos[1],
 			               &s->u.b.pos[2],
@@ -1360,7 +1360,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->bezSegs.ptr= NULL;
 			s->bezSegs.cnt=0;
 			if ( !GetArgs( cp, "lwpppp",
-			               &rgb, &s->width,
+			               &rgb, &s->lineWidth,
 			               &s->u.b.pos[0],
 			               &s->u.b.pos[1],
 			               &s->u.b.pos[2],
@@ -1375,7 +1375,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_FILCRCL;
 			if ( !GetArgs( cp, hasElev?"lwfpf":"lwfpY",
-			               &rgb, &s->width,
+			               &rgb, &s->lineWidth,
 			               &s->u.c.radius,
 			               &s->u.c.center,
 			               &elev0 ) ) {
@@ -1395,7 +1395,7 @@ EXPORT BOOL_T ReadSegs( void )
 			if ( !GetArgs( cp,
 			               isPolyV2?"lwdd":"lwdX",
 			               &rgb,
-			               &s->width,
+			               &s->lineWidth,
 			               &s->u.p.cnt,
 			               &s->u.p.polyType) ) {
 				rc = FALSE;
@@ -1505,34 +1505,34 @@ EXPORT BOOL_T WriteSegsEnd(
 		switch ( segs[i].type ) {
 		case SEG_STRTRK:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;
 		case SEG_STRLIN:
 		case SEG_TBLEDGE:
 			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;
 		case SEG_DIMLIN:
 			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
 			               segs[i].u.l.option ) > 0;
 			break;
 		case SEG_BENCH:
 			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f 0 %0.6f %0.6f 0 %ld\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
 			               BenchOutputOption(segs[i].u.l.option) ) > 0;
 			break;
 		case SEG_CRVTRK:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y,
 			               segs[i].u.c.a0, segs[i].u.c.a1 ) > 0;
@@ -1542,7 +1542,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			         (segs[i].u.j.Scurve?4:0);
 			rc &= fprintf( f,
 			               "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.j.pos.x, segs[i].u.j.pos.y,
 			               segs[i].u.j.angle,
 			               segs[i].u.j.l0,
@@ -1556,7 +1556,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			rc &= fprintf( f,
 			               "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, wDrawGetRGB(segs[i].color),
-			               segs[i].width,
+			               segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
 			               segs[i].u.l.pos[2].x, segs[i].u.l.pos[2].y,
@@ -1567,7 +1567,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_CRVLIN:
 			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y,
 			               segs[i].u.c.a0, segs[i].u.c.a1 ) > 0;
@@ -1575,7 +1575,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_FILCRCL:
 			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0\n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.c.radius,
 			               segs[i].u.c.center.x, segs[i].u.c.center.y ) > 0;
 			break;
@@ -1583,7 +1583,7 @@ EXPORT BOOL_T WriteSegsEnd(
 		case SEG_FILPOLY:
 // TODO: to be consistent, we should add a dummy 0 for elev. See ReadSegs/SEG_POLY
 			rc &= fprintf( f, "\t%c4 %ld %0.6f %d %d \n",
-			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			               segs[i].type, wDrawGetRGB(segs[i].color), segs[i].lineWidth,
 			               segs[i].u.p.cnt, segs[i].u.p.polyType ) > 0;
 			for ( j=0; j<segs[i].u.p.cnt; j++ )
 				rc &= fprintf( f, "\t\t%0.6f %0.6f %d\n",
@@ -1791,10 +1791,10 @@ EXPORT void DrawSegsO(
 				break;
 			case SEG_STRLIN:;
 				LWIDTH_T w;
-				if (segPtr->width < 0) {
-					w = segPtr->width;
+				if (segPtr->lineWidth < 0) {
+					w = segPtr->lineWidth;
 				} else {
-					w = segPtr->width * factor;
+					w = segPtr->lineWidth * factor;
 				}
 				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 				break;
@@ -1852,10 +1852,10 @@ EXPORT void DrawSegsO(
 				                 trk, color1, options );
 			} else {
 				LWIDTH_T w;
-				if (segPtr->width < 0) {
-					w = segPtr->width;
+				if (segPtr->lineWidth < 0) {
+					w = segPtr->lineWidth;
 				} else {
-					w = segPtr->width * factor;
+					w = segPtr->lineWidth * factor;
 				}
 				DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
 				         FALSE, (d->options&DC_THICK)?thick:w, color1 );
@@ -1901,10 +1901,10 @@ EXPORT void DrawSegsO(
 						                 trk, color1, options );
 					} else if (tempPtr->type == SEG_CRVLIN) {
 						wDrawWidth w;
-						if (tempPtr->width < 0) {
-							w = (int)floor(fabs(tempPtr->width)+0.5);
+						if (tempPtr->lineWidth < 0) {
+							w = (int)floor(fabs(tempPtr->lineWidth)+0.5);
 						} else {
-							w = (int)floor(tempPtr->width*factor+0.5);
+							w = (int)floor(tempPtr->lineWidth*factor+0.5);
 						}
 						DrawArc( d, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1,
 						         FALSE, (d->options&DC_THICK)?thick:w, color1 );
@@ -1927,10 +1927,10 @@ EXPORT void DrawSegsO(
 					REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
 					REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
 					wDrawWidth w;
-					if (tempPtr->width < 0) {
-						w = (int)floor(fabs(tempPtr->width)+0.5);
+					if (tempPtr->lineWidth < 0) {
+						w = (int)floor(fabs(tempPtr->lineWidth)+0.5);
 					} else {
-						w = (int)floor(tempPtr->width*factor+0.5);
+						w = (int)floor(tempPtr->lineWidth*factor+0.5);
 					}
 					DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 					break;
@@ -1976,10 +1976,10 @@ EXPORT void DrawSegsO(
 			}
 
 			LWIDTH_T w;
-			if (segPtr->width < 0) {
-				w = segPtr->width;
+			if (segPtr->lineWidth < 0) {
+				w = segPtr->lineWidth;
 			} else {
-				w = segPtr->width * factor;
+				w = segPtr->lineWidth * factor;
 			}
 			drawFill_e eOptFill;
 			if ( bFill ) {
@@ -2108,7 +2108,7 @@ EXPORT wBool_t CompareSegs(
 			// These don't have widths
 			break;
 		default:
-			REGRESS_CHECK_WIDTH( "Width", segP1, segP2, width );
+			REGRESS_CHECK_WIDTH( "Width", segP1, segP2, lineWidth );
 		}
 		switch( segP1->type ) {
 		case SEG_DIMLIN:

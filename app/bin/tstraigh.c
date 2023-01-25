@@ -436,7 +436,7 @@ EXPORT void DrawStraightTrack(
 		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 		segPtr = &tempSegs(tempSegs_da.cnt-1);
 		segPtr->type = SEG_STRTRK;
-		segPtr->width = 0;
+		segPtr->lineWidth = 0;
 		segPtr->color = wDrawColorBlack;
 		segPtr->u.l.pos[0] = p0;
 		segPtr->u.l.pos[1] = p1;
@@ -832,7 +832,7 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		}
 		UndrawNewTrack( trk );
 		tempSegs(0).type = SEG_STRTRK;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, 1-ep );
 		tempSegs_da.cnt = 1;
 		InfoMessage( _("Drag to change track length") );
@@ -968,7 +968,7 @@ static BOOL_T MakeParallelStraight(
 			*newTrkR = NewStraightTrack( p0, p1 );
 		} else {
 			tempSegs(0).color = wDrawColorBlack;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = p0;
@@ -979,7 +979,7 @@ static BOOL_T MakeParallelStraight(
 
 	} else {
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_STRTRK:SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = p0;

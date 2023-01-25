@@ -130,7 +130,7 @@ int createControlArm(
 	sp[0].u.l.pos[0] = pos0;
 	sp[0].u.l.pos[1] = pos1;
 	sp[0].type = SEG_STRLIN;
-	sp[0].width = w;
+	sp[0].lineWidth = w;
 	sp[0].color = (point_selected>=0)?drawColorRed:drawColorBlack;
 	int n = 0;
 	if (selectable) {
@@ -139,7 +139,7 @@ int createControlArm(
 			n++;
 			sp[n].u.c.center = j==0?pos0:pos1;
 			sp[n].u.c.radius = d/4;
-			sp[n].width = w;
+			sp[n].lineWidth = w;
 			sp[n].color = (j==point_selected)?drawColorRed:drawColorBlack;
 			if (j==point_selected && cp_direction_locked) {
 				sp[n].type = SEG_FILCRCL;
@@ -250,7 +250,7 @@ void addSegBezier(dynArr_t * array_p, trkSeg_p seg)
 	s = &DYNARR_N(trkSeg_t,*array_p,(array_p->cnt)-1);
 	s->type = seg->type;
 	s->color = seg->color;
-	s->width = seg->width;
+	s->lineWidth = seg->lineWidth;
 	s->bezSegs.cnt = 0;
 	s->bezSegs.ptr=NULL;
 	s->bezSegs.max = 0;
@@ -463,7 +463,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 		}
 		prev_arc = prev_arc.end==0.0?arc:prev_arc;
 		trkSeg_t curveSeg;  			//Now set up tempSeg to copy into array
-		curveSeg.width = track?0:width;
+		curveSeg.lineWidth = track?0:width;
 		if ( prev_arc.curveData.type == curveTypeCurve ) {
 			if (track) {
 				curveSeg.color = (fabs(prev_arc.curveData.curveRadius)<
@@ -581,7 +581,7 @@ void CreateMoveAnchor(coOrd pos,BOOL_T fill)
 	anchors(inx).type = fill?SEG_FILCRCL:SEG_CRVLIN;
 	anchors(inx).u.c.a0 = 0.0;
 	anchors(inx).u.c.a1 = 360.0;
-	anchors(inx).width = 0;
+	anchors(inx).lineWidth = 0;
 	anchors(inx).color = wDrawColorBlue;
 	anchors(inx).u.c.radius = d/4;
 	anchors(inx).u.c.center = pos;
@@ -1046,7 +1046,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 /*

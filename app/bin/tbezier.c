@@ -87,7 +87,7 @@ EXPORT void FixUpBezierSeg(coOrd pos[4], trkSeg_p p, BOOL_T track)
 	p->u.b.angle0 = NormalizeAngle(FindAngle(pos[1], pos[0]));
 	p->u.b.angle3 = NormalizeAngle(FindAngle(pos[2], pos[3]));
 	ConvertToArcs(pos, &p->bezSegs, track, p->color,
-	              p->width);
+	              p->lineWidth);
 	p->u.b.minRadius = BezierMinRadius(pos,
 	                                   p->bezSegs);
 	p->u.b.length = BezierLength(pos, p->bezSegs);
@@ -1202,7 +1202,7 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p)
 	seg_p->type = IsTrack(trk)?SEG_BEZTRK:SEG_BEZLIN;
 	for (int i=0; i<4; i++) { seg_p->u.b.pos[i] = xx->pos[i]; }
 	seg_p->color = xx->segsColor;
-	seg_p->width = xx->segsWidth;
+	seg_p->lineWidth = xx->segsWidth;
 	seg_p->bezSegs.cnt = 0;
 	if (seg_p->bezSegs.ptr) { MyFree(seg_p->bezSegs.ptr); }
 	seg_p->bezSegs.max = 0;
@@ -1328,7 +1328,7 @@ static BOOL_T MakeParallelBezier(
 	} else {
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_BEZTRK:SEG_BEZLIN;
 		if (tempSegs(0).bezSegs.ptr) { MyFree(tempSegs(0).bezSegs.ptr); }
@@ -1680,7 +1680,7 @@ EXPORT void BezierSegProc(
 		for (int i=0; i<2; i++) {
 			data->split.newSeg[i].type = segPtr->type;
 			data->split.newSeg[i].color = segPtr->color;
-			data->split.newSeg[i].width = segPtr->width;
+			data->split.newSeg[i].lineWidth = segPtr->lineWidth;
 			data->split.newSeg[i].bezSegs.ptr = NULL;
 			data->split.newSeg[i].bezSegs.cnt = 0;
 			data->split.newSeg[i].bezSegs.max = 0;

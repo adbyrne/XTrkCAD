@@ -233,7 +233,7 @@ EXPORT track_p MakePolyLineFromSegs(
 	xx->lineType = DRAWLINESOLID;
 	xx->segCnt = 1;
 	xx->segs[0].type = SEG_POLY;
-	xx->segs[0].width = 0;
+	xx->segs[0].lineWidth = 0;
 	xx->segs[0].u.p.polyType = POLYLINE;
 	xx->segs[0].color = wDrawColorBlack;
 	coOrd last;
@@ -460,7 +460,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 	anchors(i).u.l.pos[0] = p0;
 	anchors(i).u.l.pos[1] = p1;
 	anchors(i).color = wDrawColorBlue;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	Translate(&p0,origin,90,d*4);
 	Translate(&p1,origin,90,-d*4);
@@ -469,7 +469,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 	anchors(i).u.l.pos[0] = p0;
 	anchors(i).u.l.pos[1] = p1;
 	anchors(i).color = wDrawColorBlue;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 EXPORT void DrawOriginAnchor(track_p trk)
@@ -616,7 +616,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	coOrd off;
 	switch ( inx ) {
 	case LW:
-		segPtr->width = drawData.lineWidth;
+		segPtr->lineWidth = drawData.lineWidth;
 		break;
 	case CO:
 		segPtr->color = drawData.color;
@@ -1098,7 +1098,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawData.color = segPtr->color;
 	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
-	drawData.lineWidth = segPtr->width;
+	drawData.lineWidth = segPtr->lineWidth;
 	drawDesc[LW].mode = 0;
 	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
@@ -2196,7 +2196,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		REORIGIN(p0,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
 		REORIGIN(p1,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = xx->segs[0].type;
 		tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
@@ -2221,7 +2221,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 			Translate(&c1,c,xx->segs[0].u.c.a1+xx->segs[0].u.c.a0+xx->angle,
 			          xx->segs[0].u.c.radius);
 			tempSegs(0).color = xx->segs[0].color;
-			tempSegs(0).width = xx->segs[0].width;
+			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_CRVLIN;
 			tempSegs(0).u.c.center = c;
@@ -2355,7 +2355,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 				}
 			}
 			tempSegs(0).color = xx->segs[0].color;
-			tempSegs(0).width = xx->segs[0].width;
+			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = pos;
@@ -2380,7 +2380,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 				}
 			}
 			tempSegs(0).color = xx->segs[0].color;
-			tempSegs(0).width = xx->segs[0].width;
+			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = end;
@@ -2391,7 +2391,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 			//Check that new line will have >=3 spots if not -> reject
 			if (xx->segs[0].u.p.cnt >3) {
 				tempSegs(0).color = xx->segs[0].color;
-				tempSegs(0).width = xx->segs[0].width;
+				tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 				tempSegs_da.cnt = 1;
 				tempSegs(0).type = SEG_POLY;
 				tempSegs(0).u.p.polyType = POLYLINE;
@@ -2523,7 +2523,7 @@ static BOOL_T MakeParallelDraw(
 		Translate(&p0,p0, angle, sep);
 		Translate(&p1,p1, angle, sep);
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = p0;
@@ -2549,7 +2549,7 @@ static BOOL_T MakeParallelDraw(
 			rad = xx->segs[0].u.c.radius - sep;
 		}
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_CRVLIN;
 		tempSegs(0).u.c.center = c;
@@ -2580,7 +2580,7 @@ static BOOL_T MakeParallelDraw(
 			angle = -90.0;
 		}
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_POLY;
 		tempSegs(0).u.p.polyType = xx->segs[0].type==SEG_POLY?xx->segs[0].u.p.polyType:
@@ -3342,7 +3342,7 @@ BOOL_T ReadTableEdge( char * line )
 	}
 	seg.type = SEG_TBLEDGE;
 	seg.color = wDrawColorBlack;
-	seg.width = 0;
+	seg.lineWidth = 0;
 	trk = MakeDrawFromSeg1( index, zero, 0.0, &seg );
 	SetTrkLayer(trk, layer);
 	return TRUE;
@@ -3374,7 +3374,7 @@ EXPORT track_p NewText(
 	track_p trk;
 	tempSeg.type = SEG_TEXT;
 	tempSeg.color = color;
-	tempSeg.width = 0;
+	tempSeg.lineWidth = 0;
 	tempSeg.u.t.pos = pos;
 	tempSeg.u.t.angle = angle;
 	tempSeg.u.t.fontP = NULL;

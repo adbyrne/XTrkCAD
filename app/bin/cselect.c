@@ -119,14 +119,14 @@ void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_STRLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.l.pos[0] = pos;
 	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a+135),len);
 	anchors(i).color = wDrawColorBlue;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	i = anchors_da.cnt-1;
 	anchors(i).type = SEG_STRLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.l.pos[0] = pos;
 	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a-135),len);
 	anchors(i).color = wDrawColorBlue;
@@ -139,7 +139,7 @@ void static CreateRotateAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = d/8;
+	anchors(i).lineWidth = d/8;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 180.0;
 	anchors(i).u.c.a1 = 360.0;
@@ -153,7 +153,7 @@ void static CreateRotateAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = d/8;
+	anchors(i).lineWidth = d/8;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 180.0;
 	anchors(i).u.c.a1 = 360.0;
@@ -168,7 +168,7 @@ void static CreateModifyAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_FILCRCL;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 180.0;
 	anchors(i).u.c.a1 = 360.0;
@@ -177,7 +177,7 @@ void static CreateModifyAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 180.0;
 	anchors(i).u.c.a1 = 360.0;
@@ -196,7 +196,7 @@ void CreateDescribeAnchor(coOrd pos)
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		int i = anchors_da.cnt-1;
 		anchors(i).type = SEG_CRVLIN;
-		anchors(i).width = d/4;
+		anchors(i).lineWidth = d/4;
 		anchors(i).u.c.center = pos;
 		anchors(i).u.c.a0 = 270.0;
 		anchors(i).u.c.a1 = 270.0;
@@ -205,7 +205,7 @@ void CreateDescribeAnchor(coOrd pos)
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
-		anchors(i).width = d/4;
+		anchors(i).lineWidth = d/4;
 		Translate(&anchors(i).u.l.pos[0],pos,180.0,d*3/4);
 		Translate(&anchors(i).u.l.pos[1],pos,180.0,d*1.5);
 		anchors(i).color = wDrawColorPowderedBlue;
@@ -220,7 +220,7 @@ void CreateActivateAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	c.x -= d*3/4;
 	anchors(i).u.c.center = c;
 	anchors(i).u.c.a0 = 0.0;
@@ -231,7 +231,7 @@ void CreateActivateAnchor(coOrd pos)
 	i = anchors_da.cnt-1;
 	c.x += d*1.5;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
@@ -263,7 +263,7 @@ void CreateEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 

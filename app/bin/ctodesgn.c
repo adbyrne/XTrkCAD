@@ -1219,7 +1219,7 @@ static void AddRoadbedPieces(
 	DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 	sp = &tempSegs(inx);
 	sq = &tempSegs(tempSegs_da.cnt-1);
-	sq->width = newTurnRoadbedLineWidth/(_DPI);
+	sq->lineWidth = newTurnRoadbedLineWidth/(_DPI);
 	sq->color = newTurnRoadbedColor;
 	if (sp->type == SEG_STRTRK) {
 		sq->type = SEG_STRLIN;
@@ -1379,7 +1379,7 @@ BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
 				to_seg->u = sub_seg->u;
 				to_seg->type = sub_seg->type;
 				to_seg->color = wDrawColorBlack;
-				to_seg->width = sub_seg->width;
+				to_seg->lineWidth = sub_seg->lineWidth;
 			}
 		} else {
 			DYNARR_APPEND(trkSeg_t,*array_p,5);
@@ -1387,7 +1387,7 @@ BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
 			to_seg->u = from_seg->u;
 			to_seg->type = from_seg->type;
 			to_seg->color = wDrawColorBlack;
-			to_seg->width = from_seg->width;
+			to_seg->lineWidth = from_seg->lineWidth;
 		}
 	}
 
@@ -1918,7 +1918,7 @@ static toDesignSchema_t * LoadSegs(
 				temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 				temp_p->type = SEG_STRTRK;
 				temp_p->color = wDrawColorBlack;
-				temp_p->width = 0.0;
+				temp_p->lineWidth = 0.0;
 				temp_p->u.l.pos[0] = zero;
 				temp_p->u.l.pos[1] = cornuData.pos[0];
 				LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: P0(%f,%f) P1(%f,%f) \n", \
@@ -1929,7 +1929,7 @@ static toDesignSchema_t * LoadSegs(
 				temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
-				temp_p->width = 0.0;
+				temp_p->lineWidth = 0.0;
 				temp_p->u.c.radius = fabs(radii[0]);;
 				if (radii[0]>0.0) {
 					temp_p->u.c.a0 = FindAngle(end_centers[0],end_points[0]);
@@ -1958,7 +1958,7 @@ static toDesignSchema_t * LoadSegs(
 					temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 					temp_p->type = SEG_STRTRK;
 					temp_p->color = wDrawColorBlack;
-					temp_p->width = 0.0;
+					temp_p->lineWidth = 0.0;
 					temp_p->u.l.pos[0] = cornuData.pos[0];
 					temp_p->u.l.pos[1] = cornuData.pos[1];
 				}
@@ -1978,7 +1978,7 @@ static toDesignSchema_t * LoadSegs(
 						temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 						temp_p->type = SEG_STRTRK;
 						temp_p->color = wDrawColorBlack;
-						temp_p->width = 0.0;
+						temp_p->lineWidth = 0.0;
 						temp_p->u.l.pos[0] = cornuData.pos[2];
 						temp_p->u.l.pos[1] = cornuData.pos[3];
 					} else if ((cornuData.pos[2].x != cornuData.pos[3].x) ||
@@ -2004,7 +2004,7 @@ static toDesignSchema_t * LoadSegs(
 					temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 					temp_p->type = SEG_STRTRK;
 					temp_p->color = wDrawColorBlack;
-					temp_p->width = 0.0;
+					temp_p->lineWidth = 0.0;
 					temp_p->u.l.pos[0] = cornuData.pos[5];
 					temp_p->u.l.pos[1] = points[3];
 					LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
@@ -2015,7 +2015,7 @@ static toDesignSchema_t * LoadSegs(
 					temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 					temp_p->type = SEG_CRVTRK;
 					temp_p->color = wDrawColorBlack;
-					temp_p->width = 0.0;
+					temp_p->lineWidth = 0.0;
 					temp_p->u.c.radius = -radii[3];   //Assumed Left
 					if (radii[3]>0) {
 						temp_p->u.c.a0 = FindAngle(end_centers[3],points[3]);
@@ -2055,7 +2055,7 @@ static toDesignSchema_t * LoadSegs(
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_STRTRK;
 				temp_p->color = wDrawColorBlack;
-				temp_p->width = 0.0;
+				temp_p->lineWidth = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[7];
 				temp_p->u.l.pos[1] = points[1];
 				LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
@@ -2066,7 +2066,7 @@ static toDesignSchema_t * LoadSegs(
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
-				temp_p->width = 0.0;
+				temp_p->lineWidth = 0.0;
 				temp_p->u.c.radius = -radii[1];  //Negative relative to left
 				if (radii[1]>0) {
 					temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
@@ -2104,7 +2104,7 @@ static toDesignSchema_t * LoadSegs(
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_STRTRK;
 				temp_p->color = wDrawColorBlack;
-				temp_p->width = 0.0;
+				temp_p->lineWidth = 0.0;
 				temp_p->u.l.pos[0] = cornuData.pos[9];
 				temp_p->u.l.pos[1] = points[2];
 				LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
@@ -2115,7 +2115,7 @@ static toDesignSchema_t * LoadSegs(
 				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
-				temp_p->width = 0.0;
+				temp_p->lineWidth = 0.0;
 				temp_p->u.c.radius = radii[2];
 				if (radii[2]>0) {
 					temp_p->u.c.a0 = FindAngle(end_centers[2],cornuData.pos[9]);
@@ -2448,7 +2448,7 @@ static toDesignSchema_t * LoadSegs(
 			temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 			temp_p->type = SEG_STRTRK;
 			temp_p->color = wDrawColorBlack;
-			temp_p->width = 0.0;
+			temp_p->lineWidth = 0.0;
 			temp_p->u.l.pos[0] = zero;
 			temp_p->u.l.pos[1] = cornuData.pos[1];
 			LOG( log_cornuturnoutdesigner, 1, ( "ctoDes1: P0(%f,%f) P1(%f,%f) \n", \
@@ -2459,7 +2459,7 @@ static toDesignSchema_t * LoadSegs(
 			temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 			temp_p->type = SEG_CRVTRK;
 			temp_p->color = wDrawColorBlack;
-			temp_p->width = 0.0;
+			temp_p->lineWidth = 0.0;
 			temp_p->u.c.radius = -radii[0];
 			if (radii[0]>0.0) {
 				temp_p->u.c.a0 = FindAngle(end_centers[0],end_points[0]);
@@ -2498,7 +2498,7 @@ static toDesignSchema_t * LoadSegs(
 			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_STRTRK;
 			temp_p->color = wDrawColorBlack;
-			temp_p->width = 0.0;
+			temp_p->lineWidth = 0.0;
 			temp_p->u.l.pos[0] = cornuData.pos[3];
 			temp_p->u.l.pos[1] = end_points[2];
 			LOG( log_cornuturnoutdesigner, 1, ( "ctoDes2: P0(%f,%f) P1(%f,%f) \n", \
@@ -2509,7 +2509,7 @@ static toDesignSchema_t * LoadSegs(
 			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_CRVTRK;
 			temp_p->color = wDrawColorBlack;
-			temp_p->width = 0.0;
+			temp_p->lineWidth = 0.0;
 			temp_p->u.c.radius = -radii[2];
 			if (radii[2]>0) {
 				temp_p->u.c.a0 = FindAngle(end_centers[2],points[2]);
@@ -2548,7 +2548,7 @@ static toDesignSchema_t * LoadSegs(
 			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_STRTRK;
 			temp_p->color = wDrawColorBlack;
-			temp_p->width = 0.0;
+			temp_p->lineWidth = 0.0;
 			temp_p->u.l.pos[0] = cornuData.pos[5];
 			temp_p->u.l.pos[1] = points[1];
 			LOG( log_cornuturnoutdesigner, 1, ( "ctoDes3: P0(%f,%f) P1(%f,%f) \n", \
@@ -2559,7 +2559,7 @@ static toDesignSchema_t * LoadSegs(
 			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_CRVTRK;
 			temp_p->color = wDrawColorBlack;
-			temp_p->width = 0.0;
+			temp_p->lineWidth = 0.0;
 			temp_p->u.c.radius = -radii[1];
 			if (radii[1]>0) {
 				temp_p->u.c.a0 = FindAngle(end_centers[1],points[1]);
@@ -3403,7 +3403,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_STRLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->width-width) ||
+					    NotClose(sp0->lineWidth-width) ||
 					    NotClose(sp0->u.l.pos[0].x-sp1->u.l.pos[0].x) ||
 					    NotClose(sp0->u.l.pos[0].y-sp1->u.l.pos[0].y) ||
 					    NotClose(sp0->u.l.pos[1].x-sp1->u.l.pos[1].x) ||
@@ -3414,7 +3414,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_CRVLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->width-width) ||
+					    NotClose(sp0->lineWidth-width) ||
 					    NotClose(sp0->u.c.center.x-sp1->u.c.center.x) ||
 					    NotClose(sp0->u.c.center.y-sp1->u.c.center.y) ||
 					    NotClose(sp0->u.c.radius-sp1->u.c.radius) ||
@@ -3483,7 +3483,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_STRLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->width-width) ||
+					    NotClose(sp0->lineWidth-width) ||
 					    NotClose(sp0->u.l.pos[0].x-sp1->u.l.pos[0].x) ||
 					    NotClose(sp0->u.l.pos[0].y-sp1->u.l.pos[0].y) ||
 					    NotClose(sp0->u.l.pos[1].x-sp1->u.l.pos[1].x) ||
@@ -3494,7 +3494,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_CRVLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->width-width) ||
+					    NotClose(sp0->lineWidth-width) ||
 					    NotClose(sp0->u.c.center.x-sp1->u.c.center.x) ||
 					    NotClose(sp0->u.c.center.y-sp1->u.c.center.y) ||
 					    NotClose(sp0->u.c.radius-sp1->u.c.radius) ||

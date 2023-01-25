@@ -69,7 +69,7 @@ static void CreateSquareAnchor(coOrd p)
 	for (int j =0; j<4; j++) {
 		anchors(i+j).type = SEG_STRLIN;
 		anchors(i+j).color = wDrawColorBlue;
-		anchors(i+j).width = 0;
+		anchors(i+j).lineWidth = 0;
 	}
 	anchors(i).u.l.pos[0].x = anchors(i+2).u.l.pos[1].x =
 	                                  anchors(i+3).u.l.pos[0].x = anchors(i+3).u.l.pos[1].x = p.x-d/2;
@@ -98,7 +98,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 static void CreateSplitAnchor(coOrd pos, track_p t)
@@ -113,7 +113,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t)
 	anchors(i).color = wDrawColorBlue;
 	Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
 	Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
-	anchors(i).width = w;
+	anchors(i).lineWidth = w;
 
 }
 

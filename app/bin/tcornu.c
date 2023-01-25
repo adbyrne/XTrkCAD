@@ -1092,7 +1092,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 				trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
 				segPtr->type = SEG_BEZTRK;
 				segPtr->color = wDrawColorBlack;
-				segPtr->width = 0;
+				segPtr->lineWidth = 0;
 				if (segPtr->bezSegs.ptr) { MyFree(segPtr->bezSegs.ptr); }
 				segPtr->bezSegs.cnt = 0;
 				segPtr->bezSegs.max = 0;
@@ -1107,7 +1107,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 					if (bez_p->type == SEG_CRVTRK) { segPtr->type = SEG_CRVLIN; }
 					if (bez_p->type == SEG_STRTRK) { segPtr->type = SEG_STRLIN; }
 					segPtr->u = bez_p->u;
-					segPtr->width = bez_p->width;
+					segPtr->lineWidth = bez_p->lineWidth;
 					segPtr->color = bez_p->color;
 				}
 			}
@@ -1116,7 +1116,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
 			segPtr->type = track?SEG_STRTRK:SEG_STRLIN;
 			segPtr->color = wDrawColorBlack;
-			segPtr->width = 0;
+			segPtr->lineWidth = 0;
 			for (int j=0; j<2; j++) { segPtr->u.l.pos[i] = p->u.l.pos[i]; }
 			segPtr->u.l.angle = p->u.l.angle;
 			segPtr->u.l.option = 0;
@@ -1125,7 +1125,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
 			segPtr->type = track?SEG_CRVTRK:SEG_CRVLIN;
 			segPtr->color = wDrawColorBlack;
-			segPtr->width = 0;
+			segPtr->lineWidth = 0;
 			segPtr->u.c.a0 = p->u.c.a0;
 			segPtr->u.c.a1 = p->u.c.a1;
 			segPtr->u.c.center = p->u.c.center;
@@ -1419,12 +1419,12 @@ static BOOL_T MakeParallelCornu(
 				if (seg->type == SEG_STRTRK) {
 					seg->type = SEG_STRLIN;
 					seg->color = wDrawColorBlack;
-					seg->width = 0;
+					seg->lineWidth = 0;
 				}
 				if (seg->type == SEG_CRVTRK) {
 					seg->type = SEG_CRVLIN;
 					seg->color = wDrawColorBlack;
-					seg->width = 0;
+					seg->lineWidth = 0;
 				}
 				if (seg->type == SEG_BEZTRK) {
 					for (int j=0; j<seg->bezSegs.cnt; j++) {
@@ -1432,17 +1432,17 @@ static BOOL_T MakeParallelCornu(
 						if (bseg->type == SEG_STRTRK) {
 							bseg->type = SEG_STRLIN;
 							bseg->color = wDrawColorBlack;
-							bseg->width = 0;
+							bseg->lineWidth = 0;
 						}
 						if (bseg->type == SEG_CRVTRK) {
 							bseg->type = SEG_CRVLIN;
 							bseg->color = wDrawColorBlack;
-							bseg->width = 0;
+							bseg->lineWidth = 0;
 						}
 					}
 					seg->type = SEG_BEZLIN;
 					seg->color = wDrawColorBlack;
-					seg->width = 0;
+					seg->lineWidth = 0;
 				}
 			}
 		}
