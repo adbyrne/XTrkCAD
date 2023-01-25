@@ -119,6 +119,7 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 	to->segCnt = segCnt;
 	to->segs = (trkSeg_p)memdup( segData, (sizeof *segData) * segCnt );
 	CopyPoly(to->segs,segCnt);
+	FixUpBezierSegs(to->segs, segCnt);
 	GetSegBounds( zero, 0.0, to->segCnt, to->segs, &to->orig, &to->size );
 #ifdef REORIGSTRUCT
 	GetSegBounds( zero, 0.0, to->segCnt, to->segs, &orig, &to->size );
