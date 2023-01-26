@@ -3707,7 +3707,7 @@ EXPORT BOOL_T WriteSegs(
 		case SEG_STRTRK:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, (segs[i].type==SEG_STRTRK?0:newTurnRoadbedColorRGB),
-			               segs[i].width,
+			               segs[i].lineWidth,
 			               segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 			               segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y )>0;
 			break;
@@ -3715,21 +3715,21 @@ EXPORT BOOL_T WriteSegs(
 		case SEG_CRVLIN:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 			               segs[i].type, (segs[i].type==SEG_CRVTRK?0:newTurnRoadbedColorRGB),
-			               segs[i].width,
+			               segs[i].lineWidth,
 			               fabs(segs[i].u.c.radius),
 			               segs[i].u.c.center.x, segs[i].u.c.center.y,
 			               segs[i].u.c.a0, segs[i].u.c.a1 )>0;
 			break;
 		case SEG_FILCRCL:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f\n",
-			               segs[i].type, newTurnRoadbedColorRGB, segs[i].width,
+			               segs[i].type, newTurnRoadbedColorRGB, segs[i].lineWidth,
 			               fabs(segs[i].u.c.radius),
 			               segs[i].u.c.center.x, segs[i].u.c.center.y )>0;
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
 			rc &= fprintf( f, "\t%c %ld %0.6f %d\n",
-			               segs[i].type, newTurnRoadbedColorRGB, segs[i].width,
+			               segs[i].type, newTurnRoadbedColorRGB, segs[i].lineWidth,
 			               segs[i].u.p.cnt )>0;
 			for ( j=0; j<segs[i].u.p.cnt; j++ )
 				rc &= fprintf( f, "\t\t%0.6f %0.6f\n",

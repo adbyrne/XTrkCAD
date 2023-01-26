@@ -94,7 +94,7 @@ _________________________________________
 You also draw in various colors and line widths.
 END
 PARAMETER draw linecolor 255
-PARAMETER draw linewidth 6
+PARAMETER draw linewidth 0.055555
 STEP
 KEYSTATE A
 MOUSE 2 0.747 4.693

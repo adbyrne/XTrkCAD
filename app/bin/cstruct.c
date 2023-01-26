@@ -30,6 +30,7 @@
 #include "cselect.h"
 #include "include/paramfile.h"
 #include "track.h"
+#include "tbezier.h"
 #include "ccurve.h"
 #include "common-ui.h"
 
