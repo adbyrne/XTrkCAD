@@ -910,23 +910,23 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 		Da.state = TRACK_SELECTED;
 		DrawTrack(Da.selectTrack,&mainD,
 		          wDrawColorWhite);                    //Wipe out real track, draw replacement
-		return AdjustBezCurve(C_START, pos, Da.track, xx->segsColor, xx->segsWidth,
+		return AdjustBezCurve(C_START, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);
 
 	case wActionMove:
 		if (Da.state == NONE) { return C_CONTINUE; }
-		return AdjustBezCurve(wActionMove, pos, Da.track, xx->segsColor, xx->segsWidth,
+		return AdjustBezCurve(wActionMove, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);
 	case C_DOWN:
 		if (Da.state == TRACK_SELECTED) { return C_CONTINUE; }                   //Ignore until first up
 		UndrawNewTrack( Da.selectTrack );
-		return AdjustBezCurve(C_DOWN, pos, Da.track, xx->segsColor, xx->segsWidth,
+		return AdjustBezCurve(C_DOWN, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);
 
 
 	case C_MOVE:
 		if (Da.state == TRACK_SELECTED) { return C_CONTINUE; }                   //Ignore until first up and down
-		return AdjustBezCurve(C_MOVE, pos, Da.track, xx->segsColor, xx->segsWidth,
+		return AdjustBezCurve(C_MOVE, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);
 
 	case C_UP:
@@ -934,7 +934,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 			Da.state =
 			        PICK_POINT;                                           //First time up, next time pick a point
 		}
-		return AdjustBezCurve(C_UP, pos, Da.track, xx->segsColor, xx->segsWidth,
+		return AdjustBezCurve(C_UP, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);					//Run Adjust
 
 	case C_TEXT:
@@ -958,7 +958,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 //			color = xx->segsColor;
 //			width = xx->segsWidth;
 //		}
-		SetBezierData( trk, Da.pos, xx->segsColor, xx->segsWidth );
+		SetBezierData( trk, Da.pos, xx->segsColor, xx->segsLineWidth );
 
 		DrawNewTrack( trk );
 		UndoEnd();
@@ -971,7 +971,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		return AdjustBezCurve(C_REDRAW, pos, Da.track, xx->segsColor, xx->segsWidth,
+		return AdjustBezCurve(C_REDRAW, pos, Da.track, xx->segsColor, xx->segsLineWidth,
 		                      InfoMessage);
 	}
 

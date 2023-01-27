@@ -347,9 +347,9 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		GetTextBounds( p0, angle+segPtr->u.t.angle, segPtr->u.t.string,
 		               segPtr->u.t.fontSize, lo, hi );
 		break;
+	/* The following code is executed only for Cornu track */
 	case SEG_BEZLIN:
-	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve
-		// The following code is never executed?
+	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve		
 		REORIGIN( pBez, segPtr->u.b.pos[0], angle, xlat )
 		lo->x = hi->x = pBez.x;
 		lo->y = hi->y = pBez.y;
