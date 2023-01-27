@@ -222,12 +222,20 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
                            coOrd *lo, coOrd *hi )
 {
 	int inx;
-	coOrd p0, p1, pBez[4], pc;
+	coOrd p0, p1, pBez, pc;
 	ANGLE_T a0, a1;
 	coOrd width;
 	DIST_T radius;
+	DIST_T lwidth;
 
 	width = zero;
+	if (segPtr->lineWidth < 0) {
+		lwidth = -(DIST_T)segPtr->lineWidth / mainD.scale;
+	}
+	else {
+		lwidth = (DIST_T)segPtr->lineWidth;
+	}
+
 	switch ( segPtr->type ) {
 	case ' ':
 		return;
@@ -258,7 +266,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		if ( (segPtr->type == SEG_CRVTRK) ||
 		     (segPtr->type == SEG_CRVLIN) ) {
 			/* TODO: be more precise about curved line width */
-			width.x = width.y = fabs(segPtr->lineWidth)/2.0;
+			width.x = width.y = lwidth;
 			REORIGIN( pc, segPtr->u.c.center, angle, xlat );
 			a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
 			a1 = segPtr->u.c.a1;
@@ -294,8 +302,8 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 			}
 		}
 		if ( segPtr->type == SEG_STRLIN ) {
-			width.x = fabs(segPtr->lineWidth) * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
-			width.y = fabs(segPtr->lineWidth) * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
+			width.x = lwidth * fabs(cos(D2R(FindAngle(p0, p1))));
+			width.y = lwidth * fabs(sin(D2R(FindAngle(p0, p1))));
 		} else if ( segPtr->type == SEG_BENCH ) {
 			width.x = BenchGetWidth( segPtr->u.l.option ) * fabs(cos( D2R( FindAngle(p0,
 			                p1) ) ) ) / 2.0;
@@ -305,7 +313,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		break;
 	case SEG_POLY:
 		/* TODO: be more precise about poly line width */
-		width.x = width.y = fabs(segPtr->lineWidth)/2.0;
+		width.x = width.y = lwidth;
 	case SEG_FILPOLY:
 		for (inx=0; inx<segPtr->u.p.cnt; inx++ ) {
 			REORIGIN( p0, segPtr->u.p.pts[inx].pt, angle, xlat )
@@ -341,19 +349,18 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		break;
 	case SEG_BEZLIN:
 	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve
-		REORIGIN( pBez[0], segPtr->u.b.pos[0], angle, xlat )
-		REORIGIN( pBez[1], segPtr->u.b.pos[1], angle, xlat )
-		REORIGIN( pBez[2], segPtr->u.b.pos[2], angle, xlat )
-		REORIGIN( pBez[3], segPtr->u.b.pos[3], angle, xlat )
-		lo->x = hi->x = pBez[0].x;
-		lo->y = hi->y = pBez[0].y;
+		// The following code is never executed?
+		REORIGIN( pBez, segPtr->u.b.pos[0], angle, xlat )
+		lo->x = hi->x = pBez.x;
+		lo->y = hi->y = pBez.y;
 		for (int i=1; i<4; i++) {
-			lo->x = lo->x>pBez[i].x?pBez[i].x:lo->x;
-			lo->y = lo->y>pBez[i].y?pBez[i].y:lo->y;
-			hi->x = hi->x<pBez[i].x?pBez[i].x:hi->x;
-			hi->y = hi->y<pBez[i].y?pBez[i].y:hi->y;
+			REORIGIN(pBez, segPtr->u.b.pos[i], angle, xlat)
+			lo->x = lo->x>pBez.x?pBez.x:lo->x;
+			lo->y = lo->y>pBez.y?pBez.y:lo->y;
+			hi->x = hi->x<pBez.x?pBez.x:hi->x;
+			hi->y = hi->y<pBez.y?pBez.y:hi->y;
 		}
-		width.x = width.y = fabs(segPtr->lineWidth)/2.0;
+		width.x = width.y = lwidth;
 		break;
 	default:
 		;
@@ -382,6 +389,7 @@ EXPORT void GetSegBounds(
 		if (s->type == ' ') {
 			continue;
 		}
+
 		if (first) {
 			Get1SegBounds( s, xlat, angle, &lo, &hi );
 			first = FALSE;

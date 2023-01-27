@@ -120,6 +120,16 @@ static void ComputeBezierBoundingBox( track_p trk,
                                       struct extraDataBezier_t * xx )
 {
 	coOrd hi, lo;
+	LWIDTH_T lineWidth = xx->segsWidth;
+	LWIDTH_T lwidth = 0;
+
+	if (lineWidth < 0) {
+		lwidth = -lineWidth / mainD.scale;
+	}
+	else {
+		lwidth = lineWidth;
+	}
+
 	hi.x = lo.x = xx->pos[0].x;
 	hi.y = lo.y = xx->pos[0].y;
 
@@ -129,6 +139,11 @@ static void ComputeBezierBoundingBox( track_p trk,
 		lo.x = lo.x > xx->pos[i].x ? xx->pos[i].x : lo.x;
 		lo.y = lo.y > xx->pos[i].y ? xx->pos[i].y : lo.y;
 	}
+	lo.x -= lwidth;
+	lo.y -= lwidth;
+	hi.x += lwidth;
+	hi.y += lwidth;
+
 	SetBoundingBox( trk, hi, lo );
 }
 
