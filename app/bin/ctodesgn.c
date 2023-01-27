@@ -139,7 +139,7 @@ static char newTurnManufacturer[STR_SIZE];
 static char *newTurnAngleModeLabels[] = { N_("Frog #"), N_("Degrees"), NULL };
 static char *newTurnSlipModeLabels[] = { N_("Dual Path"), N_("Quad Path"), NULL };
 static DIST_T newTurnRoadbedWidth;
-static long newTurnRoadbedLineWidth = 0;
+static LWIDTH_T newTurnRoadbedLineWidth = 0;
 static wDrawColor newTurnRoadbedColor;
 static DIST_T newTurnTrackGauge;
 static char * newTurnScaleName;
@@ -1219,7 +1219,7 @@ static void AddRoadbedPieces(
 	DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 	sp = &tempSegs(inx);
 	sq = &tempSegs(tempSegs_da.cnt-1);
-	sq->lineWidth = newTurnRoadbedLineWidth/(_DPI);
+	sq->lineWidth = newTurnRoadbedLineWidth;
 	sq->color = newTurnRoadbedColor;
 	if (sp->type == SEG_STRTRK) {
 		sq->type = SEG_STRLIN;
@@ -3325,7 +3325,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 	long rgb;
 	trkSeg_p sp0, sp1;
 	BOOL_T segsDiff;
-	DIST_T width;
+	LWIDTH_T lineWidth;
 
 	if ( ! GetArgs( to->customInfo, "qqqqqc", &type, &name, &mfg, &descL, &partL,
 	                &cp ) ) {
@@ -3380,9 +3380,9 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		}
 	}
 	rgb = 0;
-	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &width, &rgb ) ) {
+	if ( cp && GetArgs( cp, "ffl", &newTurnRoadbedWidth, &lineWidth, &rgb ) ) {
 		newTurnRoadbedColor = wDrawFindColor(rgb);
-		newTurnRoadbedLineWidth = (long)floor(width*mainD.dpi+0.5);
+		newTurnRoadbedLineWidth = lineWidth;
 	} else {
 		newTurnRoadbedWidth = 0;
 		newTurnRoadbedLineWidth = 0;
@@ -3403,7 +3403,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_STRLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->lineWidth-width) ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
 					    NotClose(sp0->u.l.pos[0].x-sp1->u.l.pos[0].x) ||
 					    NotClose(sp0->u.l.pos[0].y-sp1->u.l.pos[0].y) ||
 					    NotClose(sp0->u.l.pos[1].x-sp1->u.l.pos[1].x) ||
@@ -3414,7 +3414,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_CRVLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->lineWidth-width) ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
 					    NotClose(sp0->u.c.center.x-sp1->u.c.center.x) ||
 					    NotClose(sp0->u.c.center.y-sp1->u.c.center.y) ||
 					    NotClose(sp0->u.c.radius-sp1->u.c.radius) ||
@@ -3483,7 +3483,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_STRLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->lineWidth-width) ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
 					    NotClose(sp0->u.l.pos[0].x-sp1->u.l.pos[0].x) ||
 					    NotClose(sp0->u.l.pos[0].y-sp1->u.l.pos[0].y) ||
 					    NotClose(sp0->u.l.pos[1].x-sp1->u.l.pos[1].x) ||
@@ -3494,7 +3494,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 				case SEG_CRVLIN:
 					if (sp0->type != sp1->type ||
 					    sp0->color != sp1->color ||
-					    NotClose(sp0->lineWidth-width) ||
+					    NotClose(sp0->lineWidth-lineWidth) ||
 					    NotClose(sp0->u.c.center.x-sp1->u.c.center.x) ||
 					    NotClose(sp0->u.c.center.y-sp1->u.c.center.y) ||
 					    NotClose(sp0->u.c.radius-sp1->u.c.radius) ||

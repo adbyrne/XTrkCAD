@@ -1540,7 +1540,7 @@ static drawModContext_t drawModCmdContext = {
 
 static BOOL_T infoSubst = FALSE;
 
-static paramFloatRange_t r100_100 = { -100.0, 100.0, 25 };  //Allow negative numbers
+static paramFloatRange_t r100_100 = { -100.0, 100.0, 50 };  //Allow negative numbers
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000 };
 //static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
