@@ -1170,11 +1170,6 @@ static void AddRoadbedPieces(
 	ANGLE_T a0, a1;
 	coOrd p0, p1;
 	trkSeg_p sp, sq;
-#ifdef MKTURNOUT
-#define _DPI (76.0)
-#else
-#define _DPI mainD.dpi
-#endif
 
 	if (last<=first) {
 		return;
@@ -2959,7 +2954,7 @@ static void NewTurnOk( void * context )
 		cp += strlen(cp);
 	}
 	sprintf( cp, " %0.6f %0.6f %ld", newTurnRoadbedWidth,
-	         newTurnRoadbedLineWidth/(_DPI), wDrawGetRGB(newTurnRoadbedColor) );
+	         newTurnRoadbedLineWidth, wDrawGetRGB(newTurnRoadbedColor) );
 	customInfoP = MyStrdup( tempCustom );
 	strcpy( tempCustom, message );
 
