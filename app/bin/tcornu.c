@@ -309,7 +309,7 @@ static struct {
 	ANGLE_T windingAngle;
 	unsigned int layerNumber;
 	dynArr_t segs;
-	long width;
+	long lineWidth;
 	wDrawColor color;
 } cornData;
 

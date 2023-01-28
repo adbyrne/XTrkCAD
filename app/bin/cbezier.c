@@ -87,7 +87,7 @@ static struct {
 	coOrd pos[4];
 	int selectPoint;
 	wDrawColor color;
-	LWIDTH_T width;
+	LWIDTH_T lineWidth;
 	track_p trk[2];
 	EPINX_T ep[2];
 	dynArr_t crvSegs_da;
@@ -367,7 +367,7 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy,
  *
  */
 EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
-                             wDrawColor color, DIST_T width)
+                             wDrawColor color, LWIDTH_T lineWidth)
 {
 	double t_s = 0.0, t_e = 1.0;
 	double errorThreshold = 0.05;
@@ -463,7 +463,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 		}
 		prev_arc = prev_arc.end==0.0?arc:prev_arc;
 		trkSeg_t curveSeg;  			//Now set up tempSeg to copy into array
-		curveSeg.lineWidth = track?0:width;
+		curveSeg.lineWidth = track?0:lineWidth;
 		if ( prev_arc.curveData.type == curveTypeCurve ) {
 			if (track) {
 				curveSeg.color = (fabs(prev_arc.curveData.curveRadius)<
@@ -607,7 +607,7 @@ EXPORT STATUS_T AdjustBezCurve(
         coOrd pos,
         BOOL_T track,
         wDrawColor color,
-        DIST_T width,
+        LWIDTH_T lineWidth,
         bezMessageProc message )
 {
 	track_p t;
@@ -629,7 +629,7 @@ EXPORT STATUS_T AdjustBezCurve(
 	case C_START:
 		Da.selectPoint = -1;
 		CreateBothControlArms(Da.selectPoint, track);
-		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track,color,Da.width)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track,color,Da.lineWidth)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
 		Da.unlocked = FALSE;
 		if (track) {
@@ -678,7 +678,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			             Da.selectPoint+1 );
 		}
 		CreateBothControlArms(Da.selectPoint, track);
-		if (ConvertToArcs(Da.pos, &Da.crvSegs_da, track, color,Da.width)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		if (ConvertToArcs(Da.pos, &Da.crvSegs_da, track, color,Da.lineWidth)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		Da.minRadius = BezierMinRadius(Da.pos, Da.crvSegs_da);
 		return C_CONTINUE;
 
@@ -703,7 +703,7 @@ EXPORT STATUS_T AdjustBezCurve(
 		Da.pos[Da.selectPoint] = pos;
 		CreateMoveAnchor(pos,TRUE);
 		CreateBothControlArms(Da.selectPoint, track);
-		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track, color, Da.width)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track, color, Da.lineWidth)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
 		if (Da.track) {
 			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
@@ -768,7 +768,7 @@ EXPORT STATUS_T AdjustBezCurve(
 
 		Da.selectPoint = -1;
 		CreateBothControlArms(Da.selectPoint,track);
-		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track,color,Da.width)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track,color,Da.lineWidth)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
 		if (Da.track) {
 			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
@@ -825,7 +825,7 @@ EXPORT STATUS_T AdjustBezCurve(
 				t = NewBezierTrack( Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
 				for (int i=0; i<2; i++)
 					if (Da.trk[i] != NULL) { ConnectAbuttingTracks(t,i,Da.trk[i],Da.ep[i]); }
-			} else { t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,color,width); }
+			} else { t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,color,lineWidth); }
 			UndoEnd();
 			if (Da.crvSegs_da.ptr) { MyFree(Da.crvSegs_da.ptr); }
 			DYNARR_RESET(trkSeg_t,anchors_da);
@@ -953,10 +953,10 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 
 		Da.state = NONE;
 //		wDrawColor color = wDrawColorBlack;
-//		DIST_T width = 0;
+//		LWIDTH_T lineWidth = 0;
 //		if ( !Da.track ) {
 //			color = xx->segsColor;
-//			width = xx->segsWidth;
+//			lineWidth = xx->segsLineWidth;
 //		}
 		SetBezierData( trk, Da.pos, xx->segsColor, xx->segsLineWidth );
 
@@ -1072,7 +1072,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		cmd = action>>8;
 	} else { cmd = VP2L(commandContext); }
 
-	Da.width = lineWidth;
+	Da.lineWidth = lineWidth;
 
 	Da.trackGauge = trackGauge;
 
@@ -1153,11 +1153,11 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				                                     Da.track,FALSE,Da.trk[0]!=NULL,-1,wDrawColorBlack);
 				Da.cp2Segs_da_cnt = createControlArm(Da.cp2Segs_da, Da.pos[3], Da.pos[2],
 				                                     Da.track,TRUE,Da.trk[1]!=NULL,1,wDrawColorBlack);
-				if (ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.width)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
+				if (ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.lineWidth)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 			}
 			return C_CONTINUE;
 		} else  {
-			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.width,
+			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.lineWidth,
 			                       InfoMessage );
 		}
 		return C_CONTINUE;
@@ -1221,7 +1221,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1],
 			                                     Da.track, TRUE, Da.trk[0]!=NULL, 1, wDrawColorBlack);
 		} else {
-			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.width,
+			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.lineWidth,
 			                       InfoMessage );
 		}
 		return C_CONTINUE;
@@ -1251,7 +1251,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			                                     Da.track, FALSE, Da.trk[0]!=NULL, -1, wDrawColorBlack);
 			return C_CONTINUE;
 		} else {
-			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.width,
+			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.lineWidth,
 			                       InfoMessage );
 		}
 	case C_TEXT:
@@ -1261,7 +1261,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 	/* no break */
 	case C_OK:
 		if (Da.state != PICK_POINT) { return C_CONTINUE; }
-		return AdjustBezCurve( C_OK, pos, Da.track, Da.color, Da.width, InfoMessage);
+		return AdjustBezCurve( C_OK, pos, Da.track, Da.color, Da.lineWidth, InfoMessage);
 
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
@@ -1301,9 +1301,9 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 void UpdateParms(wDrawColor color,double width)
 {
 	Da.color = lineColor;
-	Da.width = lineWidth; 
+	Da.lineWidth = lineWidth; 
 	if (Da.crvSegs_da.cnt) {
-		ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.width);
+		ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.lineWidth);
 	}
 	DrawTempBezier(Da.track);
 

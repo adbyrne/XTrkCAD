@@ -275,7 +275,7 @@ static struct {
 	DIST_T radius[2];
 	coOrd center[2];
 	dynArr_t segs;
-	LWIDTH_T width;
+	LWIDTH_T lineWidth;
 	wDrawColor color;
 	long lineType;
 } bezData;
@@ -297,7 +297,7 @@ static descData_t bezDesc[] = {
 	/*LN*/	{ DESC_DIM, N_("Length"), &bezData.length },
 	/*GR*/	{ DESC_FLOAT, N_("Grade"), &bezData.grade },
 	/*LT*/  { DESC_LIST, N_("Line Type"), &bezData.lineType},
-	/*WI*/  { DESC_FLOAT, N_("Line Width"), &bezData.width},
+	/*WI*/  { DESC_FLOAT, N_("Line Width"), &bezData.lineWidth},
 	/*CO*/  { DESC_COLOR, N_("Line Color"), &bezData.color},
 	/*LY*/	{ DESC_LAYER, N_("Layer"), &bezData.layerNumber },
 	{ DESC_NULL }
@@ -385,7 +385,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd,
 		SetTrkLayer( trk, bezData.layerNumber);
 		break;
 	case WI:
-		xx->segsLineWidth = bezData.width;
+		xx->segsLineWidth = bezData.lineWidth;
 		break;
 	case CO:
 		xx->segsColor = bezData.color;
@@ -506,7 +506,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	bezDesc[GR].mode = DESC_RO;
 	bezDesc[RA].mode = DESC_RO;
 	bezDesc[LY].mode = DESC_NOREDRAW;
-	bezData.width = xx->segsLineWidth;
+	bezData.lineWidth = xx->segsLineWidth;
 	bezDesc[WI].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	bezData.color = xx->segsColor;
 	bezDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
@@ -677,11 +677,11 @@ static BOOL_T ReadBezier( char * line )
 	int lt;
 //	char * cp = NULL;
 	unsigned long rgb;
-	DIST_T width;
+	LWIDTH_T lineWidth;
 
 	TRKTYP_T trkTyp = strncmp(line,"BEZIER",6)==0?T_BEZIER:T_BZRLIN;
 	if (!GetArgs( line+6, "dLluwsdppppdp",
-	              &index, &layer, &options, &rgb, &width, scale, &visible, &p0, &c1, &c2, &p1,
+	              &index, &layer, &options, &rgb, &lineWidth, scale, &visible, &p0, &c1, &c2, &p1,
 	              &lt, &dp ) ) {
 		return FALSE;
 	}
@@ -704,7 +704,7 @@ static BOOL_T ReadBezier( char * line )
 	xx->pos[3] = p1;
 	xx->lineType = lt;
 	xx->descriptionOff = dp;
-	xx->segsLineWidth = width;
+	xx->segsLineWidth = lineWidth;
 	xx->segsColor = wDrawFindColor( rgb );
 	FixUpBezier(xx->pos,xx,GetTrkType(t) == T_BEZIER);
 	ComputeBezierBoundingBox(t,xx);

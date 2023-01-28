@@ -123,7 +123,7 @@ static struct {
 	int selectEndHandle;
 	int prevSelected;
 	int prevEndPoint;
-	DIST_T width;
+	LWIDTH_T lineWidth;
 	track_p trk[2];
 	EPINX_T ep[2];
 	DIST_T radius[2];
@@ -2364,7 +2364,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	Da.commandType = CORNU_CREATE;
 
-	Da.width = (double)lineWidth/mainD.dpi;
+	Da.lineWidth = (double)lineWidth;
 
 	Da.trackGauge = trackGauge;
 	Da.selectTrack = NULL;
