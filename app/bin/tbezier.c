@@ -714,7 +714,7 @@ static BOOL_T ReadBezier( char * line )
 	return TRUE;
 }
 
-static void MoveBezier( track_p trk, coOrd orig )
+EXPORT void MoveBezier( track_p trk, coOrd orig )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
 	                               extraDataBezier_t);
@@ -727,7 +727,7 @@ static void MoveBezier( track_p trk, coOrd orig )
 
 }
 
-static void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
+EXPORT void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
 	                               extraDataBezier_t);
@@ -1789,12 +1789,12 @@ track_p NewBezierTrack(coOrd pos[4], trkSeg_t * tempsegs, int count)
 
 
 EXPORT track_p NewBezierLine( coOrd pos[4], trkSeg_t * tempsegs, int count,
-                              wDrawColor color, DIST_T width )
+                              wDrawColor color, LWIDTH_T lineWidth )
 {
 	track_p p;
 	p = NewTrack( 0, T_BZRLIN, 0,
 	              sizeof *(extraDataBezier_t*)NULL );  //No endpoints
-	SetBezierData( p, pos, color, width );
+	SetBezierData( p, pos, color, lineWidth );
 	LOG( log_bezier, 1,
 	     ( "NewBezierLine( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %0.3f, %0.3f, EP2 %0.3f, %0.3f)  = %d\n",
 	       pos[0].x, pos[0].y, pos[1].x, pos[1].y, pos[2].x, pos[2].y, pos[3].x, pos[3].y,

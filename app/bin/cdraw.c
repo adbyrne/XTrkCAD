@@ -27,6 +27,7 @@
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
+#include "tbezier.h"
 #include "misc.h"
 #include "cselect.h"
 #include "common-ui.h"
@@ -182,8 +183,15 @@ static track_p MakeDrawFromSeg1(
 	if ( sp->type == ' ' ) {
 		return NULL;
 	}
+	if (sp->type == SEG_BEZLIN) {
+		trk = NewBezierLine(sp->u.l.pos, NULL, 0, sp->color, sp->lineWidth);
+		FixUpBezierSegs(trk, sp->bezSegs.cnt);
+		MoveBezier(trk, pos);
+		RotateBezier(trk, pos, angle);
+		return trk;
+	}
 	trk = NewTrack( index, T_DRAW, 0, sizeof *xx );
-	xx = GET_EXTRA_DATA( trk, T_DRAW, extraDataDraw_t );
+	xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	xx->orig = pos;
 	xx->angle = angle;
 	xx->segCnt = 1;

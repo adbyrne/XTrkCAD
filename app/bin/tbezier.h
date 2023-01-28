@@ -50,6 +50,9 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
 void SetBezierLineType( track_p trk, int width );
 BOOL_T GetBezierMiddle( track_p, coOrd * );
 
+void MoveBezier( track_p trk, coOrd orig );
+void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle );
+
 DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T,
                                   BOOL_T * );
 STATUS_T BezierDescriptionMove(track_p trk,wAction_t action,coOrd pos );
