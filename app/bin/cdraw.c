@@ -185,7 +185,8 @@ static track_p MakeDrawFromSeg1(
 	}
 	if (sp->type == SEG_BEZLIN) {
 		trk = NewBezierLine(sp->u.l.pos, NULL, 0, sp->color, sp->lineWidth);
-		FixUpBezierSegs(trk, sp->bezSegs.cnt);
+		trkSeg_p spb = &DYNARR_N(trkSeg_t, sp->bezSegs, 0);
+		FixUpBezierSegs(spb, sp->bezSegs.cnt);
 		MoveBezier(trk, pos);
 		RotateBezier(trk, pos, angle);
 		return trk;
