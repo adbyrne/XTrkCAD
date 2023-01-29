@@ -2801,7 +2801,7 @@ static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
 wDrawColor lineColor = 1;
 LWIDTH_T lineWidth = 0;
-static wDrawColor benchColor;
+wDrawColor benchColor;
 
 
 
@@ -3244,16 +3244,6 @@ static void DrawDlgUpdate(
         int inx,
         void * valueP )
 {
-	// This is not used
-	if (inx==3) {
-		if (drawCmdContext.Op == OP_BEZLIN) {
-			if ( (inx == 0  && pg->paramPtr[inx].valueP == &lineWidth) ||
-			     (inx == 1 && pg->paramPtr[inx].valueP == &lineColor)) {
-//				lineWidth = drawCmdContext.lineWidth;
-				UpdateParms(lineColor, lineWidth);
-			}
-		}
-	}
 	if (inx >=6 ) {
 		if (drawCmdContext.Op == OP_CIRCLE1 ||
 		    drawCmdContext.Op == OP_FILLCIRCLE1 ||
@@ -3312,7 +3302,6 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 	drawData_t * ddp;
 	wIcon_p icon;
 
-	//drawCmdContext.Color = wDrawColorBlack;
 	lineColor = wDrawColorBlack;
 	benchColor = wDrawFindColor( wRGB(255,192,0) );
 	ParamCreateControls( &drawPG, DrawDlgUpdate );

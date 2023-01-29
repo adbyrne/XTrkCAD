@@ -86,8 +86,6 @@ static struct {
 	enum Bezier_States state;
 	coOrd pos[4];
 	int selectPoint;
-//	wDrawColor color;
-//	LWIDTH_T lineWidth;
 	track_p trk[2];
 	EPINX_T ep[2];
 	dynArr_t crvSegs_da;
@@ -1072,8 +1070,6 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		cmd = action>>8;
 	} else { cmd = VP2L(commandContext); }
 
-//	Da.lineWidth = lineWidth;
-
 	Da.trackGauge = trackGauge;
 
 	switch (action&0xFF) {
@@ -1083,8 +1079,6 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		Da.track = (cmd == bezCmdModifyTrack || cmd == bezCmdCreateTrack)?TRUE:FALSE;
 		if (Da.track ) {
 			lineColor = wDrawColorBlack;
-//		} else {
-//			Da.color = lineColor;
 		}
 
 		Da.state = POS_1;
@@ -1295,17 +1289,6 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 		return C_CONTINUE;
 	}
-
-}
-
-void UpdateParms(wDrawColor color,double width)
-{
-//	Da.color = lineColor;
-//	Da.lineWidth = lineWidth; 
-	if (Da.crvSegs_da.cnt) {
-		ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,lineColor,lineWidth);
-	}
-	DrawTempBezier(Da.track);
 
 }
 

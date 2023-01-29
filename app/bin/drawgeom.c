@@ -207,8 +207,6 @@ STATUS_T DrawGeomMouse(
 	static ANGLE_T line_angle;
 //	BOOL_T createTrack;
 
-//	lineWidth = context->line_Width;
-
 	switch (action&0xFF) {
 
 	case C_UPDATE:
@@ -422,11 +420,19 @@ STATUS_T DrawGeomMouse(
 		case OP_BENCH:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			switch (context->Op) {
-			case OP_LINE: tempSegs(0).type = SEG_STRLIN; break;
-			case OP_DIMLINE: tempSegs(0).type = SEG_DIMLIN; break;
-			case OP_BENCH: tempSegs(0).type = SEG_BENCH; break;
+			case OP_LINE:
+				tempSegs(0).type = SEG_STRLIN;
+				tempSegs(0).color = lineColor;
+				break;
+			case OP_DIMLINE:
+				tempSegs(0).type = SEG_DIMLIN;
+				tempSegs(0).color = wDrawColorBlack;
+				break;
+			case OP_BENCH:
+				tempSegs(0).type = SEG_BENCH;
+				tempSegs(0).color = benchColor;
+				break;
 			}
-			tempSegs(0).color = lineColor;
 			tempSegs(0).lineWidth = lineWidth;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			if ( context->Op == OP_BENCH || context->Op == OP_DIMLINE ) {

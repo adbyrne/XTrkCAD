@@ -32,9 +32,6 @@ extern dynArr_t tempEndPts_da;
 #define bezCmdCreateTrack   (3)
 #define bezCmdCreateLine	(4)
 
-//extern wDrawColor lineColor;
-//extern DIST_T lineWidth;
-
 typedef void (*bezMessageProc)( const char *, ... );
 STATUS_T CmdBezCurve( wAction_t, coOrd);
 STATUS_T CmdBezModify(track_p, wAction_t, coOrd, DIST_T);
