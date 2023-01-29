@@ -53,8 +53,8 @@ typedef struct {
 	void (*Redraw)( void );
 	drawCmd_p D;
 	long Op;
-	wDrawColor Color;
-	LWIDTH_T line_Width;
+//	wDrawColor Color;
+//	LWIDTH_T line_Width;
 	double width;
 	ANGLE_T angle;
 	double length;
