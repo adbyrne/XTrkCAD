@@ -2801,13 +2801,13 @@ static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
 wDrawColor lineColor = 1;
 LWIDTH_T lineWidth = 0;
-static wDrawColor benchColor;
+wDrawColor benchColor;
 
 
 
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
-	{ PD_FLOAT, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &r100_100, N_("Line Width") },
+	{ PD_FLOAT, &lineWidth, "linewidth", PDO_NORECORD, &r100_100, N_("Line Width") },
 #define drawColorPD				(drawPLs[1])
 	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchColorPD		(drawPLs[2])
@@ -2995,15 +2995,15 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		if ( drawCmdContext.Op == OP_BENCH ) {
 			drawCmdContext.benchOption = GetBenchData( VP2L(wListGetItemContext((
 			                                     wList_p)drawBenchChoicePD.control, benchChoice )), benchOrient );
-			drawCmdContext.Color = benchColor;
+			lineColor = benchColor;
 
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
-			drawCmdContext.Color = wDrawColorBlack;
+			lineColor = wDrawColorBlack;
 			drawCmdContext.benchOption = dimArrowSize;
 		} else if ( drawCmdContext.Op == OP_TBLEDGE ) {
-			drawCmdContext.Color = wDrawColorBlack;
+			lineColor = wDrawColorBlack;
 		} else {
-			drawCmdContext.Color = lineColor;
+			lineColor = lineColor;
 		}
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
@@ -3244,15 +3244,6 @@ static void DrawDlgUpdate(
         int inx,
         void * valueP )
 {
-	if (inx==3) {
-		if (drawCmdContext.Op == OP_BEZLIN) {
-			if ( (inx == 0  && pg->paramPtr[inx].valueP == &drawCmdContext.line_Width) ||
-			     (inx == 1 && pg->paramPtr[inx].valueP == &lineColor)) {
-				lineWidth = drawCmdContext.line_Width;
-				UpdateParms(lineColor, lineWidth);
-			}
-		}
-	}
 	if (inx >=6 ) {
 		if (drawCmdContext.Op == OP_CIRCLE1 ||
 		    drawCmdContext.Op == OP_FILLCIRCLE1 ||
@@ -3311,7 +3302,6 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 	drawData_t * ddp;
 	wIcon_p icon;
 
-	drawCmdContext.Color = wDrawColorBlack;
 	lineColor = wDrawColorBlack;
 	benchColor = wDrawFindColor( wRGB(255,192,0) );
 	ParamCreateControls( &drawPG, DrawDlgUpdate );
