@@ -226,14 +226,16 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 	ANGLE_T a0, a1;
 	coOrd width;
 	DIST_T radius;
-	DIST_T lwidth;
+	LWIDTH_T lwidth;
 
 	width = zero;
 	if (segPtr->lineWidth < 0) {
-		lwidth = -(DIST_T)segPtr->lineWidth / mainD.scale;
+		// TO DO: Using scale is correct, but the correct context may not be mainD
+		// For now, we're assuming it will be close enough to zero
+		lwidth = 0; // -(DIST_T)segPtr->lineWidth / mainD.scale;
 	}
 	else {
-		lwidth = (DIST_T)segPtr->lineWidth;
+		lwidth = (LWIDTH_T)segPtr->lineWidth;
 	}
 
 	switch ( segPtr->type ) {
@@ -1771,9 +1773,9 @@ EXPORT void DrawSegsO(
 			color1 = color2 = color;
 		}
 		LWIDTH_T thick = 3;
-#ifdef WINDOWS
-		thick *= (LWIDTH_T)(d->dpi/75.0);
-#endif
+//#ifdef WINDOWS
+//		thick *= (LWIDTH_T)(d->dpi/BASE_DPI);
+//#endif
 		switch (segPtr->type) {
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
@@ -1831,7 +1833,8 @@ EXPORT void DrawSegsO(
 						DrawBench( d, p0, p1, color1, color2, options, segPtr->u.l.option );
 						break;
 					case SEG_TBLEDGE:
-						DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/BASE_DPI*d->dpi+0.5), color );
+						// DrawLine( d, p0, p1, (wDrawWidth)floor(3.0/BASE_DPI*d->dpi+0.5), color );
+						DrawLine(d, p0, p1, 3, color);
 						break;
 					}
 				}
