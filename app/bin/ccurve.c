@@ -78,7 +78,7 @@ EXPORT int DrawArrowHeads(
 	w = mainD.scale/mainD.dpi*2;
 	for ( inx=0; inx<5; inx++ ) {
 		sp[inx].type = SEG_STRLIN;
-		sp[inx].width = w;
+		sp[inx].lineWidth = w;
 		sp[inx].color = color;
 	}
 	Translate( &p0, pos, angle, d );
@@ -129,7 +129,7 @@ static void CreateEndAnchor(coOrd p, dynArr_t * anchor_array, wBool_t lock)
 	array_anchor(i).u.c.radius = d/2;
 	array_anchor(i).u.c.a0 = 0.0;
 	array_anchor(i).u.c.a1 = 360.0;
-	array_anchor(i).width = 0;
+	array_anchor(i).lineWidth = 0;
 }
 
 
@@ -139,7 +139,7 @@ EXPORT STATUS_T CreateCurve(
         coOrd pos,
         BOOL_T track,
         wDrawColor color,
-        DIST_T width,
+        LWIDTH_T width,
         long mode,
         dynArr_t * anchor_array,
         curveMessageProc message )
@@ -187,7 +187,7 @@ EXPORT STATUS_T CreateCurve(
 		DYNARR_RESET(trkSeg_t, *anchor_array);
 		for ( inx=0; inx<8; inx++ ) {
 			tempSegs(inx).color = wDrawColorBlack;
-			tempSegs(inx).width = 0;
+			tempSegs(inx).lineWidth = width;
 		}
 		tempSegs_da.cnt = 0;
 		p = pos;
@@ -236,7 +236,7 @@ EXPORT STATUS_T CreateCurve(
 		case crvCmdFromEP1:
 			tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
 			tempSegs(0).color = color;
-			tempSegs(0).width = width;
+			tempSegs(0).lineWidth = width;
 			Da.create_state = FIRSTEND_DEF;
 			Da.end0 = pos;
 			CreateEndAnchor(pos,anchor_array,found);
@@ -264,7 +264,7 @@ EXPORT STATUS_T CreateCurve(
 		case crvCmdFromChord:
 			tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
 			tempSegs(0).color = color;
-			tempSegs(0).width = width;
+			tempSegs(0).lineWidth = width;
 			CreateEndAnchor(pos,anchor_array,FALSE);
 			Da.create_state = FIRSTEND_DEF;
 			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
@@ -920,7 +920,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		SnapPos(&pos);
 		tempSegs(0).u.c.center = pos0 = pos;
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		return C_CONTINUE;
 
 	case C_MOVE:

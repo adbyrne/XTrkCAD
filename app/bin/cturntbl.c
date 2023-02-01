@@ -666,7 +666,7 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 	case C_DOWN:
 		TurntableGetCenter( trk, &ttCenter, &ttRadius );
 		tempSegs(0).type = SEG_STRTRK;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		InfoMessage( _("Drag to create stall track") );
 
 	case C_MOVE:

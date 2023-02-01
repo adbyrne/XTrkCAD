@@ -791,7 +791,7 @@ EXPORT void DrawCurvedTrack(
 		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 		segPtr = &tempSegs(tempSegs_da.cnt-1);
 		segPtr->type = SEG_CRVTRK;
-		segPtr->width = 0;
+		segPtr->lineWidth = 0;
 		segPtr->color = wDrawColorBlack;
 		segPtr->u.c.center = p;
 		segPtr->u.c.a0 = a0;
@@ -1297,7 +1297,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 		GetTrkCurveCenter( trk, &arcPos, &arcRadius );
 		UndrawNewTrack( trk );
 		tempSegs(0).type = SEG_CRVTRK;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.c.center = arcPos;
 		tempSegs(0).u.c.radius = arcRadius;
 		tempSegs(0).u.c.a0 = arcA0;
@@ -1348,7 +1348,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			tempSegs(1).type = SEG_STRTRK;
-			tempSegs(1).width = 0;
+			tempSegs(1).lineWidth = 0;
 			tempSegs(1).u.l.pos[0] = tangentOrig;
 			tempSegs(1).u.l.pos[1] = tangentEnd;
 			tempSegs_da.cnt = 2;
@@ -1577,7 +1577,7 @@ static BOOL_T MakeParallelCurve(
 			xx1->circle = xx->circle;
 		} else {
 			tempSegs(0).color = wDrawColorBlack;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_CRVLIN;
 			tempSegs(0).u.c.center = xx->pos;
@@ -1595,7 +1595,7 @@ static BOOL_T MakeParallelCurve(
 			a1 = 360.0;
 		}
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_CRVTRK:SEG_CRVLIN;
 		tempSegs(0).u.c.center = xx->pos;

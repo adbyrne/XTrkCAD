@@ -477,7 +477,7 @@ void AddAnchorEnd(coOrd p)
 	DYNARR_APPEND(trkSeg_t,Dl.anchors_da,1);
 	trkSeg_p a = &DYNARR_LAST(trkSeg_t,Dl.anchors_da);
 	a->type = SEG_CRVLIN;
-	a->width = 0;
+	a->lineWidth = 0;
 	a->u.c.a0 = 0.0;
 	a->u.c.a1 = 360.0;
 	a->u.c.center = p;
@@ -549,7 +549,7 @@ static STATUS_T CmdJoinLine(
 
 			DYNARR_LAST(trkSeg_t,Dl.newLine).type = SEG_POLY;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).color = wDrawColorBlack;
-			DYNARR_LAST(trkSeg_t,Dl.newLine).width = 0;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).lineWidth = 0;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.polyType = POLYLINE;
 			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyMalloc(sizeof(
 			                        pts_t)*Dl.params.nodes.cnt);
@@ -671,7 +671,7 @@ void AnchorTempLine(coOrd p0, coOrd p1)
 	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
 	p->type = SEG_STRLIN;
 	p->color = wDrawColorBlue;
-	p->width = 0.0;
+	p->lineWidth = 0.0;
 	p->u.l.pos[0] = p0;
 	p->u.l.pos[1] = p1;
 }
@@ -682,7 +682,7 @@ void AnchorTempCircle(coOrd center,DIST_T radius, ANGLE_T a0, ANGLE_T a1)
 	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
 	p->type = SEG_CRVLIN;
 	p->color = wDrawColorBlue;
-	p->width = 0.0;
+	p->lineWidth = 0.0;
 	p->u.c.a0 =a0;
 	p->u.c.a1 = a1;
 	p->u.c.radius = radius;
@@ -695,7 +695,7 @@ void AnchorPoint(coOrd center)
 	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
 	p->type = SEG_CRVLIN;
 	p->color = wDrawColorAqua;
-	p->width = 0.0;
+	p->lineWidth = 0.0;
 	p->u.c.a0 =0.0;
 	p->u.c.a1 = 360.0;
 	p->u.c.radius = mainD.scale/4;
@@ -861,7 +861,7 @@ void AddAnchorJoin(coOrd pos, ANGLE_T angle)
 	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
 	trkSeg_p a = &DYNARR_LAST(trkSeg_t,Dj.anchors);
 	a->type = SEG_CRVLIN;
-	a->width = 0;
+	a->lineWidth = 0;
 	a->u.c.a0 = 0.0;
 	a->u.c.a1 = 360.0;
 	a->u.c.center = pos;
@@ -972,11 +972,11 @@ static STATUS_T CmdJoin(
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(1).color = drawColorBlack;
-		tempSegs(1).width = 0;
+		tempSegs(1).lineWidth = 0;
 		tempSegs(2).color = drawColorBlack;
-		tempSegs(2).width = 0;
+		tempSegs(2).lineWidth = 0;
 		tempSegs_da.cnt = 0;
 		Dj.joinMoveState = 0;
 		/* Populate (Dj.inp[0]) and check for connecting abutting tracks */
@@ -1184,7 +1184,7 @@ static STATUS_T CmdJoin(
 					DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
 					trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
 					p->type= SEG_CRVLIN;
-					p->width = 0;
+					p->lineWidth = 0;
 					p->color = wDrawColorBlue;
 					p->u.c.center = pos;
 					p->u.c.a1= 360.0;

@@ -76,7 +76,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	wSetCursor(mainD.d,wCursorNone);
 }
 
@@ -92,7 +92,7 @@ static void CreateCornuAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
@@ -101,7 +101,7 @@ static void CreateCornuAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	wSetCursor(mainD.d,wCursorNone);
 }
 
@@ -306,9 +306,9 @@ STATUS_T CmdModify(
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(1).color = wDrawColorBlack;
-		tempSegs(1).width = 0;
+		tempSegs(1).lineWidth = 0;
 		tempSegs_da.cnt = 0;
 		Dex.Trk = OnTrack( &pos, FALSE, FALSE );
 		//Dex.Trk = trk;
@@ -625,7 +625,7 @@ extendTrackMove:
 				Dex.jointD.d1 = 0.0;
 			}
 			tempSegs(0).type = SEG_STRTRK;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.l.pos[0] = Dex.pos01;
 			tempSegs(0).u.l.pos[1] = Dex.curveData.pos1;
 			d = FindDistance( Dex.pos01, Dex.curveData.pos1 );
@@ -703,7 +703,7 @@ extendTrackMove:
 				return C_CONTINUE;
 			}
 			tempSegs(0).type = SEG_CRVTRK;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.c.center = Dex.curveData.curvePos;
 			tempSegs(0).u.c.radius = Dex.curveData.curveRadius,
 			           tempSegs(0).u.c.a0 = Dex.curveData.a0;

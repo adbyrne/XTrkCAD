@@ -28,7 +28,7 @@ COMMAND DrawLine
 PARAMETER draw linewidth 0
 PARAMETER draw linecolor 0
 PARAMETER GROUP draw
-PARAMETER draw linewidth 4
+PARAMETER draw linewidth 0.055555
 MOUSE 1 2.500 3.000
 COMMAND DrawLine
 MOUSE 2 2.500 3.000

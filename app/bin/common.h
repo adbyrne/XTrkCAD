@@ -114,6 +114,8 @@ typedef double FLOAT_T;
 typedef double POS_T;
 typedef double DIST_T;
 typedef double ANGLE_T;
+typedef double LWIDTH_T;
+
 #define SCANF_FLOAT_FORMAT "%lf"
 
 typedef double DOUBLE_T;

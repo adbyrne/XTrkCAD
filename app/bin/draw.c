@@ -962,11 +962,11 @@ static void TempSegLine(
 	tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE) {
-		tempSegs(tempSegs_da.cnt-1).width = 0;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = 0;
 	} else if (width<0) {
-		tempSegs(tempSegs_da.cnt-1).width = width;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = width;
 	} else {
-		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = width*d->scale/d->dpi;
 	}
 	tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = p0;
 	tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = p1;
@@ -987,11 +987,11 @@ static void TempSegArc(
 	tempSegs(tempSegs_da.cnt-1).type = SEG_CRVLIN;
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE) {
-		tempSegs(tempSegs_da.cnt-1).width = 0;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = 0;
 	} else if (width<0) {
-		tempSegs(tempSegs_da.cnt-1).width = width;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = width;
 	} else {
-		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = width*d->scale/d->dpi;
 	}
 	tempSegs(tempSegs_da.cnt-1).u.c.center = p;
 	tempSegs(tempSegs_da.cnt-1).u.c.radius = r;
@@ -1013,7 +1013,7 @@ static void TempSegString(
 	tempSegs(tempSegs_da.cnt-1).type = SEG_TEXT;
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	tempSegs(tempSegs_da.cnt-1).u.t.boxed = FALSE;
-	tempSegs(tempSegs_da.cnt-1).width = 0;
+	tempSegs(tempSegs_da.cnt-1).lineWidth = 0;
 	tempSegs(tempSegs_da.cnt-1).u.t.pos = p;
 	tempSegs(tempSegs_da.cnt-1).u.t.angle = a;
 	tempSegs(tempSegs_da.cnt-1).u.t.fontP = fp;
@@ -1052,11 +1052,11 @@ static void TempSegPoly(
 	tempSegs(tempSegs_da.cnt-1).type = fill?SEG_FILPOLY:SEG_POLY;
 	tempSegs(tempSegs_da.cnt-1).color = color;
 	if (d->options&DC_SIMPLE) {
-		tempSegs(tempSegs_da.cnt-1).width = 0;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = 0;
 	} else if (width<0) {
-		tempSegs(tempSegs_da.cnt-1).width = width;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = width;
 	} else {
-		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
+		tempSegs(tempSegs_da.cnt-1).lineWidth = width*d->scale/d->dpi;
 	}
 	tempSegs(tempSegs_da.cnt-1).u.p.polyType = open?POLYLINE:FREEFORM;
 	tempSegs(tempSegs_da.cnt-1).u.p.cnt = cnt;
@@ -1080,7 +1080,7 @@ static void TempSegFillCircle(
 	DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 	tempSegs(tempSegs_da.cnt-1).type = SEG_FILCRCL;
 	tempSegs(tempSegs_da.cnt-1).color = color;
-	tempSegs(tempSegs_da.cnt-1).width = 0;
+	tempSegs(tempSegs_da.cnt-1).lineWidth = 0;
 	tempSegs(tempSegs_da.cnt-1).u.c.center = p;
 	tempSegs(tempSegs_da.cnt-1).u.c.radius = r;
 	tempSegs(tempSegs_da.cnt-1).u.c.a0 = 0.0;

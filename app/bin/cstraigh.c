@@ -54,7 +54,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 
@@ -105,7 +105,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		InfoMessage( _("Drag to place 2nd end point") );
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs_da.cnt = 0;
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).u.l.pos[0] = pos;

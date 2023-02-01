@@ -910,7 +910,7 @@ EXPORT void DrawJointTrack(
 		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 		segPtr = &tempSegs(tempSegs_da.cnt-1);
 		segPtr->type = SEG_JNTTRK;
-		segPtr->width = 0;
+		segPtr->lineWidth = 0;
 		segPtr->color = wDrawColorBlack;
 		segPtr->u.j.pos = pos;
 		segPtr->u.j.angle = angle;
@@ -1592,7 +1592,7 @@ static BOOL_T MakeParallelJoint(
 			DYNARR_SET( trkSeg_t, tempSegs_da, cnt );
 			for ( inx=0; inx<cnt; inx++ ) {
 				tempSegs(inx).color = wDrawColorBlack;
-				tempSegs(inx).width = 0;
+				tempSegs(inx).lineWidth = 0;
 				tempSegs(inx).type = track?SEG_STRTRK:SEG_STRLIN;
 				if ( inx == 0 ) {
 					GetJointPos( &tempSegs(inx).u.l.pos[0], NULL, l0, R, L, P, A, xx->negate );
@@ -1615,7 +1615,7 @@ static BOOL_T MakeParallelJoint(
 		DYNARR_SET( trkSeg_t, tempSegs_da, cnt );
 		for ( inx=0; inx<cnt; inx++ ) {
 			tempSegs(inx).color = wDrawColorBlack;
-			tempSegs(inx).width = 0;
+			tempSegs(inx).lineWidth = 0;
 			tempSegs(inx).type = track?SEG_STRTRK:SEG_STRLIN;
 			if ( inx == 0 ) {
 				GetJointPos( &tempSegs(inx).u.l.pos[0], NULL, l0, R, L, P, A, xx->negate );
