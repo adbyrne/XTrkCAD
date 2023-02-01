@@ -1772,7 +1772,7 @@ EXPORT void DrawSegsO(
 		} else {
 			color1 = color2 = color;
 		}
-		LWIDTH_T thick = 3;
+		wDrawWidth thick = 3;
 //#ifdef WINDOWS
 //		thick *= (LWIDTH_T)(d->dpi/BASE_DPI);
 //#endif
@@ -1800,11 +1800,11 @@ EXPORT void DrawSegsO(
 				                   trk, color1, options );
 				break;
 			case SEG_STRLIN:;
-				LWIDTH_T w;
+				wDrawWidth w;
 				if (segPtr->lineWidth < 0) {
-					w = segPtr->lineWidth;
+					w = (int)floor(-segPtr->lineWidth + 0.5);
 				} else {
-					w = segPtr->lineWidth * factor;
+					w = (int)floor(segPtr->lineWidth * factor + 0.5);
 				}
 				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:w, color1 );
 				break;
@@ -1862,11 +1862,11 @@ EXPORT void DrawSegsO(
 				                 a0, segPtr->u.c.a1,
 				                 trk, color1, options );
 			} else {
-				LWIDTH_T w;
+				wDrawWidth w;
 				if (segPtr->lineWidth < 0) {
-					w = segPtr->lineWidth;
+					w = (int)floor(-segPtr->lineWidth + 0.5);
 				} else {
-					w = segPtr->lineWidth * factor;
+					w = (int)floor(segPtr->lineWidth * factor + 0.5);
 				}
 				DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
 				         FALSE, (d->options&DC_THICK)?thick:w, color1 );
@@ -1913,7 +1913,7 @@ EXPORT void DrawSegsO(
 					} else if (tempPtr->type == SEG_CRVLIN) {
 						wDrawWidth w;
 						if (tempPtr->lineWidth < 0) {
-							w = (int)floor(fabs(tempPtr->lineWidth)+0.5);
+							w = (int)floor(-tempPtr->lineWidth + 0.5);
 						} else {
 							w = (int)floor(tempPtr->lineWidth*factor+0.5);
 						}
@@ -1939,7 +1939,7 @@ EXPORT void DrawSegsO(
 					REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
 					wDrawWidth w;
 					if (tempPtr->lineWidth < 0) {
-						w = (int)floor(fabs(tempPtr->lineWidth)+0.5);
+						w = (int)floor(-tempPtr->lineWidth+0.5);
 					} else {
 						w = (int)floor(tempPtr->lineWidth*factor+0.5);
 					}
@@ -1986,11 +1986,11 @@ EXPORT void DrawSegsO(
 				bThick = TRUE;
 			}
 
-			LWIDTH_T w;
+			wDrawWidth w;
 			if (segPtr->lineWidth < 0) {
-				w = segPtr->lineWidth;
+				w = (int)floor(-segPtr->lineWidth + 0.5);
 			} else {
-				w = segPtr->lineWidth * factor;
+				w = (int)floor(segPtr->lineWidth * factor + 0.5);
 			}
 			drawFill_e eOptFill;
 			if ( bFill ) {

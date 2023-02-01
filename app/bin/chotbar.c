@@ -113,6 +113,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wWinPix_t w, wWinPix_t h  )
 	                            2)/hotBarD.dpi;
 	DIST_T barWidth = (DIST_T)(wControlGetWidth( (wControl_p)hotBarD.d ) -
 	                           2)/hotBarD.dpi;
+
 	DIST_T barScale;
 	DIST_T x;
 
@@ -575,8 +576,7 @@ EXPORT void LayoutHotBar( void * redraw )
 	BOOL_T initialize = FALSE;
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
-	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.5 +
-	                                    (double)iconSize / 10.0));
+	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.6 + 0.4 * (double)iconSize));
 
 	if ( hotBarLabels) {
 		hbHeight += hotBarTextHeight;
