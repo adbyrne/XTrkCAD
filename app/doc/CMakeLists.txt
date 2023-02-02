@@ -31,9 +31,9 @@ target_sources(helpsystem
 	${CMAKE_CURRENT_SOURCE_DIR}/view_winm.but
 	${CMAKE_CURRENT_SOURCE_DIR}/navigation.but
 	${CMAKE_CURRENT_SOURCE_DIR}/appendix.but
+	${messagefile_BINARY_DIR}/messages.but
 	${CMAKE_CURRENT_SOURCE_DIR}/upgrade.but
 	${CMAKE_CURRENT_SOURCE_DIR}/warranty.but
-	${messagefile_BINARY_DIR}/messages.but
 )
 
 #
