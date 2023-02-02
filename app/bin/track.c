@@ -163,7 +163,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
                          BOOL_T ignoreHidden, track_p t )
 {
 	track_p trk;
-	DIST_T distance, closestDistance = 1000000;
+	DIST_T distance, closestDistance = DIST_INF;
 	track_p closestTrack = NULL;
 	coOrd p, closestPos, q0, q1;
 
