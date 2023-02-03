@@ -188,18 +188,24 @@ wlibGetWidgetFromName( wWin_p parent, const char *dialogname,
 }
 
 GtkWidget *
-wlibWidgetFromIdWarn( wWin_p win, const char *id)
+wlibWidgetFromIdWarn(wWin_p win, const char *id)
 {
-	GtkWidget * wi = wlibWidgetFromId(win,id);
-	if (wi) { return wi; }
-	GString *errorMessage = g_string_new("Could not find widget with id: ");
-	g_string_append_printf(errorMessage, "%s", id);
-	wNoticeEx( NT_ERROR,
-	           errorMessage->str,
-	           "OK",
-	           NULL );
-	g_string_free(errorMessage, TRUE);
-	return NULL;
+	GtkWidget *wi = wlibWidgetFromId(win, id);
+	if (!wi)
+	{
+		GString *errorMessage = g_string_new("Could not find widget with id: ");
+		g_string_append_printf(errorMessage, "%s", id);
+		wNoticeEx(NT_ERROR,
+				  errorMessage->str,
+				  "OK",
+				  NULL);
+		g_string_free(errorMessage, TRUE);
+		return NULL;
+	}
+	else
+	{
+		return wi;
+	}
 }
 
 /*
