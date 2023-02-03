@@ -27,6 +27,7 @@
 #include "fileio.h"
 #include "param.h"
 #include "track.h"
+#include "tbezier.h"
 #include "misc.h"
 #include "cselect.h"
 #include "common-ui.h"
@@ -182,8 +183,16 @@ static track_p MakeDrawFromSeg1(
 	if ( sp->type == ' ' ) {
 		return NULL;
 	}
+	if (sp->type == SEG_BEZLIN) {
+		trk = NewBezierLine(sp->u.l.pos, NULL, 0, sp->color, sp->lineWidth);
+		trkSeg_p spb = &DYNARR_N(trkSeg_t, sp->bezSegs, 0);
+		FixUpBezierSegs(spb, sp->bezSegs.cnt);
+		MoveBezier(trk, pos);
+		RotateBezier(trk, pos, angle);
+		return trk;
+	}
 	trk = NewTrack( index, T_DRAW, 0, sizeof *xx );
-	xx = GET_EXTRA_DATA( trk, T_DRAW, extraDataDraw_t );
+	xx = GET_EXTRA_DATA(trk, T_DRAW, extraDataDraw_t);
 	xx->orig = pos;
 	xx->angle = angle;
 	xx->segCnt = 1;
@@ -233,7 +242,7 @@ EXPORT track_p MakePolyLineFromSegs(
 	xx->lineType = DRAWLINESOLID;
 	xx->segCnt = 1;
 	xx->segs[0].type = SEG_POLY;
-	xx->segs[0].width = 0;
+	xx->segs[0].lineWidth = 0;
 	xx->segs[0].u.p.polyType = POLYLINE;
 	xx->segs[0].color = wDrawColorBlack;
 	coOrd last;
@@ -431,7 +440,6 @@ EXPORT track_p MakePolyLineFromSegs(
 			first = FALSE;
 		}
 		CHECK(j<=cnt);
-
 	}
 	xx->segs[0].u.p.cnt = j;
 
@@ -461,7 +469,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 	anchors(i).u.l.pos[0] = p0;
 	anchors(i).u.l.pos[1] = p1;
 	anchors(i).color = wDrawColorBlue;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	Translate(&p0,origin,90,d*4);
 	Translate(&p1,origin,90,-d*4);
@@ -470,7 +478,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 	anchors(i).u.l.pos[0] = p0;
 	anchors(i).u.l.pos[1] = p1;
 	anchors(i).color = wDrawColorBlue;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 EXPORT void DrawOriginAnchor(track_p trk)
@@ -517,7 +525,7 @@ static struct {
 	ANGLE_T rotate_angle;
 	ANGLE_T oldAngle;
 	long pointCount;
-	DIST_T lineWidth;
+	LWIDTH_T lineWidth;
 	BOOL_T boxed;
 	BOOL_T filled;
 	BOOL_T open;
@@ -617,7 +625,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	coOrd off;
 	switch ( inx ) {
 	case LW:
-		segPtr->width = drawData.lineWidth;
+		segPtr->lineWidth = drawData.lineWidth;
 		break;
 	case CO:
 		segPtr->color = drawData.color;
@@ -1100,7 +1108,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawData.color = segPtr->color;
 	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
-	drawData.lineWidth = segPtr->width;
+	drawData.lineWidth = segPtr->lineWidth;
 	drawDesc[LW].mode = 0;
 	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
@@ -1542,7 +1550,7 @@ static drawModContext_t drawModCmdContext = {
 
 static BOOL_T infoSubst = FALSE;
 
-static paramFloatRange_t r100_100 = { -100.0, 100.0, 25 };  //Allow negative numbers
+static paramFloatRange_t r100_100 = { -100.0, 100.0, 50 };  //Allow negative numbers
 static paramFloatRange_t r0d001_10000 = { 0.001, 10000 };
 //static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
@@ -2198,7 +2206,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		REORIGIN(p0,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
 		REORIGIN(p1,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = xx->segs[0].type;
 		tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
@@ -2223,7 +2231,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 			Translate(&c1,c,xx->segs[0].u.c.a1+xx->segs[0].u.c.a0+xx->angle,
 			          xx->segs[0].u.c.radius);
 			tempSegs(0).color = xx->segs[0].color;
-			tempSegs(0).width = xx->segs[0].width;
+			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_CRVLIN;
 			tempSegs(0).u.c.center = c;
@@ -2357,7 +2365,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 				}
 			}
 			tempSegs(0).color = xx->segs[0].color;
-			tempSegs(0).width = xx->segs[0].width;
+			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = pos;
@@ -2382,7 +2390,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 				}
 			}
 			tempSegs(0).color = xx->segs[0].color;
-			tempSegs(0).width = xx->segs[0].width;
+			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = end;
@@ -2393,7 +2401,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 			//Check that new line will have >=3 spots if not -> reject
 			if (xx->segs[0].u.p.cnt >3) {
 				tempSegs(0).color = xx->segs[0].color;
-				tempSegs(0).width = xx->segs[0].width;
+				tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 				tempSegs_da.cnt = 1;
 				tempSegs(0).type = SEG_POLY;
 				tempSegs(0).u.p.polyType = POLYLINE;
@@ -2525,7 +2533,7 @@ static BOOL_T MakeParallelDraw(
 		Translate(&p0,p0, angle, sep);
 		Translate(&p1,p1, angle, sep);
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = p0;
@@ -2551,7 +2559,7 @@ static BOOL_T MakeParallelDraw(
 			rad = xx->segs[0].u.c.radius - sep;
 		}
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_CRVLIN;
 		tempSegs(0).u.c.center = c;
@@ -2582,7 +2590,7 @@ static BOOL_T MakeParallelDraw(
 			angle = -90.0;
 		}
 		tempSegs(0).color = xx->segs[0].color;
-		tempSegs(0).width = xx->segs[0].width;
+		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_POLY;
 		tempSegs(0).u.p.polyType = xx->segs[0].type==SEG_POLY?xx->segs[0].u.p.polyType:
@@ -2793,14 +2801,14 @@ static wIndex_t benchChoice;
 static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
 wDrawColor lineColor = 1;
-DIST_T lineWidth = 0;
-static wDrawColor benchColor;
+LWIDTH_T lineWidth = 0;
+wDrawColor benchColor;
 
 
 
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
-	{ PD_FLOAT, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &r100_100, N_("Line Width") },
+	{ PD_FLOAT, &lineWidth, "linewidth", PDO_NORECORD, &r100_100, N_("Line Width") },
 #define drawColorPD				(drawPLs[1])
 	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchColorPD		(drawPLs[2])
@@ -2988,15 +2996,15 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		if ( drawCmdContext.Op == OP_BENCH ) {
 			drawCmdContext.benchOption = GetBenchData( VP2L(wListGetItemContext((
 			                                     wList_p)drawBenchChoicePD.control, benchChoice )), benchOrient );
-			drawCmdContext.Color = benchColor;
+			lineColor = benchColor;
 
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
-			drawCmdContext.Color = wDrawColorBlack;
+			lineColor = wDrawColorBlack;
 			drawCmdContext.benchOption = dimArrowSize;
 		} else if ( drawCmdContext.Op == OP_TBLEDGE ) {
-			drawCmdContext.Color = wDrawColorBlack;
+			lineColor = wDrawColorBlack;
 		} else {
-			drawCmdContext.Color = lineColor;
+			lineColor = lineColor;
 		}
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
@@ -3237,15 +3245,6 @@ static void DrawDlgUpdate(
         int inx,
         void * valueP )
 {
-	if (inx==3) {
-		if (drawCmdContext.Op == OP_BEZLIN) {
-			if ( (inx == 0  && pg->paramPtr[inx].valueP == &drawCmdContext.line_Width) ||
-			     (inx == 1 && pg->paramPtr[inx].valueP == &lineColor)) {
-				lineWidth = drawCmdContext.line_Width;
-				UpdateParms(lineColor, lineWidth);
-			}
-		}
-	}
 	if (inx >=6 ) {
 		if (drawCmdContext.Op == OP_CIRCLE1 ||
 		    drawCmdContext.Op == OP_FILLCIRCLE1 ||
@@ -3304,7 +3303,6 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 	drawData_t * ddp;
 	wIcon_p icon;
 
-	drawCmdContext.Color = wDrawColorBlack;
 	lineColor = wDrawColorBlack;
 	benchColor = wDrawFindColor( wRGB(255,192,0) );
 	ParamCreateControls( &drawPG, DrawDlgUpdate );
@@ -3344,7 +3342,7 @@ BOOL_T ReadTableEdge( char * line )
 	}
 	seg.type = SEG_TBLEDGE;
 	seg.color = wDrawColorBlack;
-	seg.width = 0;
+	seg.lineWidth = 0;
 	trk = MakeDrawFromSeg1( index, zero, 0.0, &seg );
 	SetTrkLayer(trk, layer);
 	return TRUE;
@@ -3376,7 +3374,7 @@ EXPORT track_p NewText(
 	track_p trk;
 	tempSeg.type = SEG_TEXT;
 	tempSeg.color = color;
-	tempSeg.width = 0;
+	tempSeg.lineWidth = 0;
 	tempSeg.u.t.pos = pos;
 	tempSeg.u.t.angle = angle;
 	tempSeg.u.t.fontP = NULL;

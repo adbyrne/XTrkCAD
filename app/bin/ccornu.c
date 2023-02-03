@@ -123,7 +123,7 @@ static struct {
 	int selectEndHandle;
 	int prevSelected;
 	int prevEndPoint;
-	DIST_T width;
+	LWIDTH_T lineWidth;
 	track_p trk[2];
 	EPINX_T ep[2];
 	DIST_T radius[2];
@@ -281,7 +281,7 @@ int createMidPoint(dynArr_t * ap,
 	sp->u.c.a1 = 360.0;
 	sp->u.c.radius = d/2;
 	sp->type = point_selected?SEG_FILCRCL:SEG_CRVLIN;
-	sp->width = w;
+	sp->lineWidth = w;
 	sp->color = drawColorBlack;
 
 	return 1;
@@ -317,14 +317,14 @@ int createEndPoint(
 		sp[1].u.c.a1 = 360.0;
 		sp[1].u.c.radius = d/2;
 		sp[1].type = SEG_CRVLIN;
-		sp[1].width = w;
+		sp[1].lineWidth = w;
 		sp[1].color = point_selected?drawColorBlue:drawColorRed;
 		num = 2;
 	}
 	sp[0].u.c.center = pos0;
 	sp[0].u.c.a0 = 0.0;
 	sp[0].u.c.a1 = 360.0;
-	sp[0].width = w;
+	sp[0].lineWidth = w;
 	sp[0].u.c.radius = d/4;
 	sp[0].color = point_selected?drawColorBlue:drawColorRed;
 	if (track_modifyable) {
@@ -364,7 +364,7 @@ int createEndPoint(
 				Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
 				                endHandle->end_curve)+90,trackGauge/2);
 				sp[num].type = SEG_STRLIN;
-				sp[num].width = w;
+				sp[num].lineWidth = w;
 				sp[num].u.l.pos[0] = pos_line[0];
 				sp[num].u.l.pos[1] = pos_line[1];
 				sp[num].color = (endHandle->last_selected
@@ -375,7 +375,7 @@ int createEndPoint(
 				Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
 				                endHandle->end_curve)-90,trackGauge/2);
 				sp[num].type = SEG_STRLIN;
-				sp[num].width = w;
+				sp[num].lineWidth = w;
 				sp[num].u.l.pos[0] = pos_line[0];
 				sp[num].u.l.pos[1] = pos_line[1];
 				sp[num].color = (endHandle->last_selected
@@ -384,7 +384,7 @@ int createEndPoint(
 				pos_line[0]= pos0;
 				Translate(&pos_line[1],pos0,-FindAngle(pos0,endHandle->end_curve),end_length);
 				sp[num].type = SEG_STRLIN;
-				sp[num].width = w;
+				sp[num].lineWidth = w;
 				sp[num].u.l.pos[0] = pos_line[0];
 				sp[num].u.l.pos[1] = pos_line[1];
 				sp[num].color = drawColorRed;
@@ -393,7 +393,7 @@ int createEndPoint(
 				DIST_T pos_rad;
 				pos_rad = radius+trackGauge/2;
 				sp[num].type = SEG_CRVLIN;
-				sp[num].width = w;
+				sp[num].lineWidth = w;
 				sp[num].u.c.center = centert;
 				sp[num].u.c.radius = pos_rad;
 				ANGLE_T an0 = FindAngle(centert,pos0);
@@ -411,7 +411,7 @@ int createEndPoint(
 				num++;
 				pos_rad = radius-trackGauge/2;
 				sp[num].type = SEG_CRVLIN;
-				sp[num].width = w;
+				sp[num].lineWidth = w;
 				sp[num].u.c.center = centert;
 				sp[num].u.c.radius = pos_rad;
 				sp[num].u.c.a1 = sp[num-1].u.c.a1;
@@ -427,7 +427,7 @@ int createEndPoint(
 			Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
 			                endHandle->end_curve)+90,trackGauge/2);
 			sp[num].type = SEG_STRLIN;
-			sp[num].width = w;
+			sp[num].lineWidth = w;
 			sp[num].u.l.pos[0] = pos_line[0];
 			sp[num].u.l.pos[1] = pos_line[1];
 			sp[num].color = (endHandle->last_selected
@@ -438,7 +438,7 @@ int createEndPoint(
 			Translate(&pos_line[1],endHandle->end_curve,FindAngle(pos0,
 			                endHandle->end_curve)-90,trackGauge/2);
 			sp[num].type = SEG_STRLIN;
-			sp[num].width = w;
+			sp[num].lineWidth = w;
 			sp[num].u.l.pos[0] = pos_line[0];
 			sp[num].u.l.pos[1] = pos_line[1];
 			sp[num].color = (endHandle->last_selected
@@ -450,7 +450,7 @@ int createEndPoint(
 		pos_line[0]= pos0;
 		Translate(&pos_line[1],pos0,angle+180,end_length);
 		sp[num].type = SEG_STRLIN;
-		sp[num].width = w;
+		sp[num].lineWidth = w;
 		sp[num].u.l.pos[0] = pos_line[0];
 		sp[num].u.l.pos[1] = pos_line[1];
 		sp[num].color = drawColorRed;
@@ -459,7 +459,7 @@ int createEndPoint(
 		sp[num].u.c.center = endHandle->end_curve;
 		sp[num].u.c.a0 = 0.0;
 		sp[num].u.c.a1 = 360.0;
-		sp[num].width = w;
+		sp[num].lineWidth = w;
 		sp[num].u.c.radius = d/4;
 		sp[num].color = endHandle->angle_selected?drawColorBlue:drawColorRed;
 		num++;
@@ -493,7 +493,7 @@ static void CreateCornuEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
@@ -502,7 +502,7 @@ static void CreateCornuEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 static void CreateCornuExtendAnchor(coOrd p, ANGLE_T a, wBool_t selected)
@@ -523,7 +523,7 @@ static void CreateCornuAnchor(coOrd p, wBool_t open)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 /*
@@ -541,7 +541,7 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg)
 	if (s->bezSegs.ptr) { MyFree(s->bezSegs.ptr); }
 	s->bezSegs.ptr = NULL;
 	s->color = seg->color;
-	s->width = seg->width;
+	s->lineWidth = seg->lineWidth;
 	if ((s->type == SEG_BEZLIN || s->type == SEG_BEZTRK) && seg->bezSegs.cnt) {
 		s->u.b.angle0 = seg->u.b.angle0;  //Copy all the rest
 		s->u.b.angle3 = seg->u.b.angle3;
@@ -1426,7 +1426,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 							CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint,Da.selectEndHandle,
 							               Da.prevSelected);
 							Da.extendSeg[sel].type = SEG_STRTRK;
-							Da.extendSeg[sel].width = 0;
+							Da.extendSeg[sel].lineWidth = 0;
 							Da.extendSeg[sel].color = wDrawColorBlack;
 							Da.extendSeg[sel].u.l.pos[1-sel] = pos;
 							Da.extendSeg[sel].u.l.pos[sel] = edge;
@@ -1474,7 +1474,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
 					if (Da.radius[sel] == 0)  {                //Straight
 						Da.extendSeg[sel].type = SEG_STRTRK;
-						Da.extendSeg[sel].width = 0;
+						Da.extendSeg[sel].lineWidth = 0;
 						Da.extendSeg[sel].color = wDrawColorBlack;
 						Da.extendSeg[sel].u.l.pos[1-sel] = Da.pos[sel];
 						d = FindDistance( Da.extendSeg[sel].u.l.pos[1-sel], pos );
@@ -1488,7 +1488,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						} else { Da.extend[sel] = FALSE; }
 					} else {                                //Curve
 						Da.extendSeg[sel].type = SEG_CRVTRK;
-						Da.extendSeg[sel].width = 0;
+						Da.extendSeg[sel].lineWidth = 0;
 						Da.extendSeg[sel].color = wDrawColorBlack;
 						Da.extendSeg[sel].u.c.center = Da.center[sel];
 						Da.extendSeg[sel].u.c.radius = Da.radius[sel];
@@ -1552,7 +1552,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				if (!inside) {										 //Extend the track
 					if (Da.trackType[sel] == curveTypeStraight) {    //Extend with a straight
 						Da.extendSeg[sel].type = SEG_STRTRK;
-						Da.extendSeg[sel].width = 0;
+						Da.extendSeg[sel].lineWidth = 0;
 						Da.extendSeg[sel].color = wDrawColorBlack;
 						if (Da.ep[sel]>=0) {
 							Da.extendSeg[sel].u.l.pos[0] = GetTrkEndPos( Da.trk[sel], Da.ep[sel] );
@@ -1579,7 +1579,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						}
 					} else if (Da.trackType[sel] == curveTypeCurve) {       //Extend with temp curve
 						Da.extendSeg[sel].type = SEG_CRVTRK;
-						Da.extendSeg[sel].width = 0;
+						Da.extendSeg[sel].lineWidth = 0;
 						Da.extendSeg[sel].color = wDrawColorBlack;
 						Da.extendSeg[sel].u.c.center = Da.center[sel];
 						Da.extendSeg[sel].u.c.radius = Da.radius[sel];
@@ -2364,7 +2364,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	Da.commandType = CORNU_CREATE;
 
-	Da.width = (double)lineWidth/mainD.dpi;
+	Da.lineWidth = (double)lineWidth;
 
 	Da.trackGauge = trackGauge;
 	Da.selectTrack = NULL;

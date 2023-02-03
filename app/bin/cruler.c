@@ -49,7 +49,7 @@ void DrawAngle(drawCmd_p d, coOrd p0, coOrd p1, coOrd p2, wDrawColor color)
 	trkSeg_t seg;
 	if ((An.state != AN_OFF) && !IsClose(FindDistance(p0,p1))) {
 		seg.type = SEG_STRLIN;
-		seg.width = 0;
+		seg.lineWidth = 0;
 		seg.color = wDrawColorBlack;
 		seg.u.l.pos[0] = p0;
 		seg.u.l.pos[1] = p1;
@@ -57,7 +57,7 @@ void DrawAngle(drawCmd_p d, coOrd p0, coOrd p1, coOrd p2, wDrawColor color)
 
 		if (!(IsClose(FindDistance(p0,p2)))) {
 			seg.type = SEG_STRLIN;
-			seg.width = 0;
+			seg.lineWidth = 0;
 			seg.color = wDrawColorBlack;
 			seg.u.l.pos[0] = p0;
 			seg.u.l.pos[1] = p2;

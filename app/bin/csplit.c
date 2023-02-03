@@ -73,7 +73,7 @@ static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a,
 		anchors(i).color = wDrawColorBlue;
 		Translate(&anchors(i).u.l.pos[0],pos,a,trim?2*GetTrkGauge(t):GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],pos,a,trim?2*-GetTrkGauge(t):-GetTrkGauge(t));
-		anchors(i).width = w;
+		anchors(i).lineWidth = w;
 	} else {
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
@@ -83,7 +83,7 @@ static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a,
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,d);
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,-d);
-		anchors(i).width = w;
+		anchors(i).lineWidth = w;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
@@ -92,7 +92,7 @@ static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a,
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,-d);
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,d);
-		anchors(i).width = w;
+		anchors(i).lineWidth = w;
 	}
 }
 
@@ -111,7 +111,7 @@ static void CreateTrimAnchorLeg(coOrd pos, ANGLE_T a, track_p t)
 	anchors(i).color = wDrawColorBlue;
 	anchors(i).u.l.pos[0] = pos;
 	Translate(&anchors(i).u.l.pos[1],pos,a,GetTrkGauge(t)*2);
-	anchors(i).width = w;
+	anchors(i).lineWidth = w;
 
 }
 

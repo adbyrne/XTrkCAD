@@ -53,8 +53,6 @@ typedef struct {
 	void (*Redraw)( void );
 	drawCmd_p D;
 	long Op;
-	wDrawColor Color;
-	DIST_T line_Width;
 	double width;
 	ANGLE_T angle;
 	double length;
@@ -121,6 +119,7 @@ typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
 
 extern drawContext_t * drawContext;
 extern wDrawColor lineColor;
+extern wDrawColor benchColor;
 extern DIST_T lineWidth;
 
 void DrawGeomOp( void * );

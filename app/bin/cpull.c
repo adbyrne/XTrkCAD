@@ -631,7 +631,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift)
 		anchors(i).u.l.pos[0] = pos;
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
-		anchors(i).width = w;
+		anchors(i).lineWidth = w;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
@@ -639,7 +639,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift)
 		anchors(i).u.l.pos[0] = pos;
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
-		anchors(i).width = w;
+		anchors(i).lineWidth = w;
 	} else {
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
@@ -649,7 +649,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift)
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a,d);
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
-		anchors(i).width = w;
+		anchors(i).lineWidth = w;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
@@ -658,7 +658,7 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift)
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a,-d);
 		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,d);
-		anchors(i).width = w;
+		anchors(i).lineWidth = w;
 	}
 }
 

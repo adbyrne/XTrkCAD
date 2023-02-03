@@ -78,7 +78,7 @@ bezctx_xtrkcad_lineto(bezctx *z, double x, double y) {
     seg->u.l.pos[1].x = x;
     seg->u.l.pos[1].y = y;
     seg->u.l.option = 0;
-    seg->width = 0.0;
+    seg->lineWidth = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_STRTRK;
     if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
@@ -114,7 +114,7 @@ bezctx_xtrkcad_quadto(bezctx *z, double x1, double y1, double x2, double y2)
     seg->u.b.pos[2].y = y1;
     seg->u.b.pos[3].x = x2;
     seg->u.b.pos[3].y = y2;
-    seg->width = 0.0;
+    seg->lineWidth = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_BEZTRK;
     if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
@@ -152,7 +152,7 @@ static void
 	    seg->u.b.pos[2].y = y2;
 	    seg->u.b.pos[3].x = x3;
 	    seg->u.b.pos[3].y = y3;
-	    seg->width = 0.0;
+	    seg->lineWidth = 0.0;
 	    seg->color = wDrawColorBlack;
 	    seg->type = SEG_BEZTRK;
 	    if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
@@ -171,7 +171,7 @@ static void
 	 	 seg->u.c.center.x = bc->last_pos.x;
 	 	 seg->u.c.center.y = bc->last_pos.y;
 	 	 seg->u.c.radius = bc->spot_size;
-	 	 seg->width = 0.0;
+	 	 seg->lineWidth = 0.0;
 	 	 seg->color = wDrawColorGrey40;
 	 }
 

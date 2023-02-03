@@ -2333,7 +2333,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		if (params.type == curveTypeCurve) {
 			curved = TRUE;
 			tempSegs(0).type = SEG_CRVTRK;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.c.radius = params.arcR;
 			tempSegs(0).u.c.center = params.arcP;
 			tempSegs(0).u.c.a0 = FindAngle(params.arcP,GetTrkEndPos(trk,ep));
@@ -2341,7 +2341,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		} else {
 			curved = FALSE;
 			tempSegs(0).type = SEG_STRTRK;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = GetTrkEndPos( trk, ep );
 		}
 		valid = FALSE;
@@ -2460,7 +2460,7 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action,
 			return C_ERROR;
 		}
 		tempSegs(0).type = SEG_STRTRK;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, ep );
 		InfoMessage( _("Drag to change track length") );
 

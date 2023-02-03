@@ -107,7 +107,7 @@ static void CreateEndAnchor(coOrd p, wBool_t lock)
 	anchors(i).u.c.radius = d/2;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 static void CreateLineAnchor(coOrd p, coOrd p0)
@@ -122,7 +122,7 @@ static void CreateLineAnchor(coOrd p, coOrd p0)
 	anchors(i).color = wDrawColorBlue;
 	anchors(i).u.l.pos[0] = p;
 	anchors(i).u.l.pos[1] = p0;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 }
 
 static void CreateSquareAnchor(coOrd p)
@@ -133,7 +133,7 @@ static void CreateSquareAnchor(coOrd p)
 	for (int j =0; j<4; j++) {
 		anchors(i+j).type = SEG_STRLIN;
 		anchors(i+j).color = wDrawColorBlue;
-		anchors(i+j).width = 0;
+		anchors(i+j).lineWidth = 0;
 	}
 	anchors(i).u.l.pos[0].x = anchors(i+2).u.l.pos[1].x =
 	                                  anchors(i+3).u.l.pos[0].x = anchors(i+3).u.l.pos[1].x = p.x-d/2;
@@ -201,14 +201,11 @@ STATUS_T DrawGeomMouse(
 	trkSeg_p segPtr;
 	pts_t *pts;
 	int inx;
-	DIST_T width;
 	static int segCnt;
 	DIST_T d;
 	ANGLE_T a1,a2;
 	static ANGLE_T line_angle;
 //	BOOL_T createTrack;
-
-	width = context->line_Width/context->D->dpi;
 
 	switch (action&0xFF) {
 
@@ -423,12 +420,20 @@ STATUS_T DrawGeomMouse(
 		case OP_BENCH:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			switch (context->Op) {
-			case OP_LINE: tempSegs(0).type = SEG_STRLIN; break;
-			case OP_DIMLINE: tempSegs(0).type = SEG_DIMLIN; break;
-			case OP_BENCH: tempSegs(0).type = SEG_BENCH; break;
+			case OP_LINE:
+				tempSegs(0).type = SEG_STRLIN;
+				tempSegs(0).color = lineColor;
+				break;
+			case OP_DIMLINE:
+				tempSegs(0).type = SEG_DIMLIN;
+				tempSegs(0).color = wDrawColorBlack;
+				break;
+			case OP_BENCH:
+				tempSegs(0).type = SEG_BENCH;
+				tempSegs(0).color = benchColor;
+				break;
 			}
-			tempSegs(0).color = context->Color;
-			tempSegs(0).width = width;
+			tempSegs(0).lineWidth = lineWidth;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			if ( context->Op == OP_BENCH || context->Op == OP_DIMLINE ) {
 				tempSegs(0).u.l.option = context->benchOption;
@@ -443,8 +448,8 @@ STATUS_T DrawGeomMouse(
 			OnTableEdgeEndPt( NULL, &pos );
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_TBLEDGE;
-			tempSegs(0).color = context->Color;
-			tempSegs(0).width = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale):0;
+			tempSegs(0).color = lineColor;
+			tempSegs(0).lineWidth = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale):0;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			tempSegs(0).u.l.option = 0;
 			tempSegs_da.cnt = 0;
@@ -459,9 +464,9 @@ STATUS_T DrawGeomMouse(
 				case OP_CURVE3: drawGeomCurveMode = crvCmdFromCenter; break;
 				case OP_CURVE4: drawGeomCurveMode = crvCmdFromChord; break;
 				}
-				CreateCurve( C_START, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_START, pos, FALSE, lineColor, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
-				CreateCurve( C_DOWN, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_DOWN, pos, FALSE, lineColor, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
 			}
 			break;
@@ -473,11 +478,11 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLCIRCLE3:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_CRVLIN;
-			tempSegs(0).color = context->Color;
+			tempSegs(0).color = lineColor;
 			if ( context->Op >= OP_CIRCLE1 && context->Op <= OP_CIRCLE3 ) {
-				tempSegs(0).width = width;
+				tempSegs(0).lineWidth = lineWidth;
 			} else {
-				tempSegs(0).width = 0;
+				tempSegs(0).lineWidth = 0;
 			}
 			tempSegs(0).u.c.a0 = 0;
 			tempSegs(0).u.c.a1 = 360;
@@ -487,14 +492,14 @@ STATUS_T DrawGeomMouse(
 			context->State = 1;
 			break;
 		case OP_FILLBOX:
-			width = 0;
+			lineWidth = 0;
 		/* no break */
 		case OP_BOX:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 4 );
 			for ( inx=0; inx<4; inx++ ) {
 				tempSegs(inx).type = SEG_STRLIN;
-				tempSegs(inx).color = context->Color;
-				tempSegs(inx).width = width;
+				tempSegs(inx).color = lineColor;
+				tempSegs(inx).lineWidth = lineWidth;
 				tempSegs(inx).u.l.pos[0] = tempSegs(inx).u.l.pos[1] = pos;
 			}
 			context->message( _("Drag set box size") );
@@ -515,8 +520,8 @@ STATUS_T DrawGeomMouse(
 			}
 			segPtr = &tempSegs(tempSegs_da.cnt-1);
 			segPtr->type = SEG_STRLIN;
-			segPtr->color = context->Color;
-			segPtr->width = (context->Op==OP_POLY?width:0);
+			segPtr->color = lineColor;
+			segPtr->lineWidth = (context->Op==OP_POLY || context->Op==OP_POLYLINE ? lineWidth : 0);
 			//End if over start
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos ))) {
 				segPtr->u.l.pos[0] = tempSegs(segCnt-1).u.l.pos[1];
@@ -694,13 +699,13 @@ STATUS_T DrawGeomMouse(
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
 				pos0x = pos1;
-				CreateCurve( C_MOVE, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_MOVE, pos, FALSE, lineColor, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
 			} else {
 				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE,
 				           0.0 );
-				tempSegs(0).color = context->Color;
-				tempSegs(0).width = width;
+				tempSegs(0).color = lineColor;
+				tempSegs(0).lineWidth = lineWidth;
 				DYNARR_SET(trkSeg_t,tempSegs_da,1);
 				if (context->ArcData.type == curveTypeStraight) {
 					tempSegs(0).type = SEG_STRLIN;
@@ -840,7 +845,7 @@ STATUS_T DrawGeomMouse(
 				context->State = 1;
 				context->ArcAngle = FindAngle( pos0, pos1 );
 				pos0x = pos1;
-				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode,
+				CreateCurve( C_UP, pos, FALSE, lineColor, lineWidth, drawGeomCurveMode,
 				             &anchors_da, context->message );
 				context->message( _("Drag on Red arrows to adjust curve") );
 				context->show = FALSE;
@@ -850,8 +855,8 @@ STATUS_T DrawGeomMouse(
 				if (context->ArcData.type == curveTypeCurve) {
 					segPtr = &tempSegs(0);
 					segPtr->type = SEG_CRVLIN;
-					segPtr->color = context->Color;
-					segPtr->width = width;
+					segPtr->color = lineColor;
+					segPtr->lineWidth = lineWidth;
 					segPtr->u.c.center = context->ArcData.curvePos;
 					segPtr->u.c.radius = context->ArcData.curveRadius;
 					segPtr->u.c.a0 = context->ArcData.a0;
@@ -861,8 +866,8 @@ STATUS_T DrawGeomMouse(
 				} else if (context->ArcData.type == curveTypeStraight) {
 					segPtr = &tempSegs(0);
 					segPtr->type = SEG_STRLIN;
-					segPtr->color = context->Color;
-					segPtr->width = width;
+					segPtr->color = lineColor;
+					segPtr->lineWidth = lineWidth;
 					segPtr->u.l.pos[0] = pos0;
 					segPtr->u.l.pos[1] = pos1;
 					context->radius = 0;
@@ -1138,7 +1143,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 	anchors(i).u.l.pos[0] = p0;
 	anchors(i).u.l.pos[1] = p1;
 	anchors(i).color = trans_selected?wDrawColorAqua:wDrawColorBlue;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	Translate(&p0,origin,90,d*4);
 	Translate(&p1,origin,90,-d*4);
@@ -1147,7 +1152,7 @@ void static CreateOriginAnchor(coOrd origin, wBool_t trans_selected)
 	anchors(i).u.l.pos[0] = p0;
 	anchors(i).u.l.pos[1] = p1;
 	anchors(i).color = wDrawColorBlue;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	if (trans_selected) { wSetCursor(mainD.d,wCursorNone); }
 }
 
@@ -1162,14 +1167,14 @@ void static CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0,
 	anchors(0).color = wDrawColorBlue;
 	anchors(0).u.c.radius = d/2;
 	anchors(0).u.c.center = p0;
-	anchors(0).width = 0;
+	anchors(0).lineWidth = 0;
 	DYNARR_APPEND(trkSeg_t,anchors_da,8);
 	anchors(1).type = (index ==1)?SEG_FILCRCL:SEG_CRVLIN;
 	anchors(1).u.c.a1 = 360.0;
 	anchors(1).color = wDrawColorBlue;
 	anchors(1).u.c.radius = d/2;
 	anchors(1).u.c.center = p1;
-	anchors(1).width = 0;
+	anchors(1).lineWidth = 0;
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pm,FindAngle(pm,
 	                pc),TRUE,index==2?wDrawColorAqua:wDrawColorBlue);
@@ -1187,7 +1192,7 @@ void static CreatePolyAnchors(int index)
 		anchors(inx).type = point_selected(inx)?SEG_FILCRCL:SEG_CRVLIN;
 		anchors(inx).u.c.a0 = 0.0;
 		anchors(inx).u.c.a1 = 360.0;
-		anchors(inx).width = 0;
+		anchors(inx).lineWidth = 0;
 		anchors(inx).color = wDrawColorBlue;
 		anchors(inx).u.c.radius = d/2;
 		anchors(inx).u.c.center = points(inx).pt;
@@ -1199,7 +1204,7 @@ void static CreatePolyAnchors(int index)
 		anchors(inx).u.l.pos[0] = points(index==0?points_da.cnt-1:index-1).pt;
 		anchors(inx).u.l.pos[1] = points(index).pt;
 		anchors(inx).color = wDrawColorBlue;
-		anchors(inx).width = 0;
+		anchors(inx).lineWidth = 0;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		inx = anchors_da.cnt-1;
 		int index0 = index==0?points_da.cnt-1:index-1;
@@ -1228,7 +1233,7 @@ void CreateMovingAnchor(coOrd pos,BOOL_T fill)
 	anchors(inx).type = fill?SEG_FILCRCL:SEG_CRVLIN;
 	anchors(inx).u.c.a0 = 0.0;
 	anchors(inx).u.c.a1 = 360.0;
-	anchors(inx).width = 0;
+	anchors(inx).lineWidth = 0;
 	anchors(inx).color = wDrawColorBlue;
 	anchors(inx).u.c.radius = d/4;
 	anchors(inx).u.c.center = pos;
@@ -1292,7 +1297,7 @@ STATUS_T DrawGeomPolyModify(
 		context->p1 = points(1).pt;
 		//Show points
 		tempSegs_da.cnt = 1;
-		tempSegs(0).width = context->segPtr->width;
+		tempSegs(0).lineWidth = context->segPtr->lineWidth;
 //			save_color = context->segPtr->color;
 		tempSegs(0).color = wDrawColorRed;
 		tempSegs(0).type = context->type;
@@ -2050,7 +2055,7 @@ STATUS_T DrawGeomModify(
 			tempSegs(0).color = wDrawColorRed;
 			tempSegs(0).u.l.pos[0] = p0;
 			tempSegs(0).u.l.pos[1] = p1;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).u.l.option = context->segPtr[segInx].u.l.option;
 			context->p0 = p0;
@@ -2066,7 +2071,7 @@ STATUS_T DrawGeomModify(
 			tempSegs(0).u.c.radius = context->radius;
 			tempSegs(0).u.c.a0 = context->segPtr[segInx].u.c.a0;
 			tempSegs(0).u.c.a1 = context->segPtr[segInx].u.c.a1;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs_da.cnt = 1;
 			if (tempSegs(0).u.c.a1<360.0) {
 				CreateCurveAnchors(-1,context->pm,context->pc,context->p0,context->p1);
@@ -2092,7 +2097,7 @@ STATUS_T DrawGeomModify(
 				}
 				tempSegs(0).u.p.pts = &points(0);
 				tempSegs(0).u.p.cnt = points_da.cnt;
-				tempSegs(0).width = 0;
+				tempSegs(0).lineWidth = 0;
 				tempSegs_da.cnt = 1;
 				context->p0 = points(0).pt;
 				CreateBoxAnchors(-1,&context->segPtr[segInx].u.p.pts[0]);
@@ -2176,7 +2181,7 @@ STATUS_T DrawGeomModify(
 		corner_mode = FALSE;
 		segInx = 0;
 		context->state = MOD_STARTED;
-		tempSegs(0).width = context->segPtr[segInx].width;
+		tempSegs(0).lineWidth = context->segPtr[segInx].lineWidth;
 		tempSegs(0).color = context->segPtr[segInx].color;
 		switch ( context->type ) {
 		case SEG_TBLEDGE:
@@ -2206,7 +2211,7 @@ STATUS_T DrawGeomModify(
 				context->state = MOD_SELECTED_PT;
 			}
 			tempSegs(0).color = wDrawColorBlack;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs(0).type = context->type;
 			tempSegs(0).u.l.pos[0] = p0;
 			tempSegs(0).u.l.pos[1] = p1;
@@ -2219,7 +2224,7 @@ STATUS_T DrawGeomModify(
 		case SEG_FILCRCL:
 			curveInx = -1;
 			tempSegs(0).color = wDrawColorBlack;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs(0).type = context->type;
 			tempSegs(0).u.c.center = context->pc;
 			tempSegs(0).u.c.radius = context->radius;

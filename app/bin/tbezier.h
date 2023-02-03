@@ -31,13 +31,13 @@ typedef struct extraDataBezier_t {
 	DIST_T length;
 	dynArr_t arcSegs;
 	coOrd descriptionOff;
-	DIST_T segsWidth;
+	LWIDTH_T segsLineWidth;
 	wDrawColor segsColor;
 	drawLineType_e lineType;
 } extraDataBezier_t;
 
 
-void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, DIST_T width );
+void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, LWIDTH_T lineWidth );
 track_p NewBezierTrack(coOrd[4], trkSeg_p, int );
 track_p NewBezierLine(coOrd[4], trkSeg_p, int, wDrawColor, DIST_T);
 void FixUpBezier(coOrd[4], struct extraDataBezier_t*, BOOL_T);
@@ -49,6 +49,9 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
                                   track_p old);
 void SetBezierLineType( track_p trk, int width );
 BOOL_T GetBezierMiddle( track_p, coOrd * );
+
+void MoveBezier( track_p trk, coOrd orig );
+void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle );
 
 DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T,
                                   BOOL_T * );

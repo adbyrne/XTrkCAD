@@ -72,9 +72,9 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = drawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(1).color = drawColorBlack;
-		tempSegs(1).width = 0;
+		tempSegs(1).lineWidth = 0;
 		return C_CONTINUE;
 
 	case C_DOWN:

@@ -73,7 +73,7 @@ EXPORT void FixUpBezier(coOrd pos[4], struct extraDataBezier_t * xx,
 	xx->a1 = NormalizeAngle(FindAngle(pos[2], pos[3]));
 
 	ConvertToArcs(pos, &xx->arcSegs, track, xx->segsColor,
-	              xx->segsWidth);
+	              xx->segsLineWidth);
 	xx->minCurveRadius = BezierMinRadius(pos,
 	                                     xx->arcSegs);
 	xx->length = BezierLength(pos, xx->arcSegs);
@@ -87,7 +87,7 @@ EXPORT void FixUpBezierSeg(coOrd pos[4], trkSeg_p p, BOOL_T track)
 	p->u.b.angle0 = NormalizeAngle(FindAngle(pos[1], pos[0]));
 	p->u.b.angle3 = NormalizeAngle(FindAngle(pos[2], pos[3]));
 	ConvertToArcs(pos, &p->bezSegs, track, p->color,
-	              p->width);
+	              p->lineWidth);
 	p->u.b.minRadius = BezierMinRadius(pos,
 	                                   p->bezSegs);
 	p->u.b.length = BezierLength(pos, p->bezSegs);
@@ -120,6 +120,16 @@ static void ComputeBezierBoundingBox( track_p trk,
                                       struct extraDataBezier_t * xx )
 {
 	coOrd hi, lo;
+	LWIDTH_T lineWidth = xx->segsLineWidth;
+	LWIDTH_T lwidth = 0;
+
+	if (lineWidth < 0) {
+		lwidth = -lineWidth / mainD.scale;
+	}
+	else {
+		lwidth = lineWidth;
+	}
+
 	hi.x = lo.x = xx->pos[0].x;
 	hi.y = lo.y = xx->pos[0].y;
 
@@ -129,6 +139,11 @@ static void ComputeBezierBoundingBox( track_p trk,
 		lo.x = lo.x > xx->pos[i].x ? xx->pos[i].x : lo.x;
 		lo.y = lo.y > xx->pos[i].y ? xx->pos[i].y : lo.y;
 	}
+	lo.x -= lwidth;
+	lo.y -= lwidth;
+	hi.x += lwidth;
+	hi.y += lwidth;
+
 	SetBoundingBox( trk, hi, lo );
 }
 
@@ -260,7 +275,7 @@ static struct {
 	DIST_T radius[2];
 	coOrd center[2];
 	dynArr_t segs;
-	long width;
+	LWIDTH_T lineWidth;
 	wDrawColor color;
 	long lineType;
 } bezData;
@@ -282,7 +297,7 @@ static descData_t bezDesc[] = {
 	/*LN*/	{ DESC_DIM, N_("Length"), &bezData.length },
 	/*GR*/	{ DESC_FLOAT, N_("Grade"), &bezData.grade },
 	/*LT*/  { DESC_LIST, N_("Line Type"), &bezData.lineType},
-	/*WI*/  { DESC_LONG, N_("Line Width"), &bezData.width},
+	/*WI*/  { DESC_FLOAT, N_("Line Width"), &bezData.lineWidth},
 	/*CO*/  { DESC_COLOR, N_("Line Color"), &bezData.color},
 	/*LY*/	{ DESC_LAYER, N_("Layer"), &bezData.layerNumber },
 	{ DESC_NULL }
@@ -370,7 +385,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd,
 		SetTrkLayer( trk, bezData.layerNumber);
 		break;
 	case WI:
-		xx->segsWidth = bezData.width/75.0;
+		xx->segsLineWidth = bezData.lineWidth;
 		break;
 	case CO:
 		xx->segsColor = bezData.color;
@@ -382,7 +397,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd,
 		CHECKMSG( FALSE, ( "updateBezier: Bad inx %d", inx ) );
 	}
 	ConvertToArcs(xx->pos, &xx->arcSegs, IsTrack(trk)?TRUE:FALSE, xx->segsColor,
-	              xx->segsWidth);
+	              xx->segsLineWidth);
 	trackParams_t params;
 	for (int i=0; i<2; i++) {
 		GetTrackParams(0,trk,xx->pos[i],&params);
@@ -491,7 +506,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	bezDesc[GR].mode = DESC_RO;
 	bezDesc[RA].mode = DESC_RO;
 	bezDesc[LY].mode = DESC_NOREDRAW;
-	bezData.width = (long)floor(xx->segsWidth*75.0+0.5);
+	bezData.lineWidth = xx->segsLineWidth;
 	bezDesc[WI].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	bezData.color = xx->segsColor;
 	bezDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
@@ -633,7 +648,7 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	rc &= fprintf(f,
 	              "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %d %0.6f %0.6f \n",
 	              track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options,
-	              wDrawGetRGB(xx->segsColor), xx->segsWidth,
+	              wDrawGetRGB(xx->segsColor), xx->segsLineWidth,
 	              GetTrkScaleName(t), bits,
 	              xx->pos[0].x, xx->pos[0].y,
 	              xx->pos[1].x, xx->pos[1].y,
@@ -662,11 +677,11 @@ static BOOL_T ReadBezier( char * line )
 	int lt;
 //	char * cp = NULL;
 	unsigned long rgb;
-	DIST_T width;
+	LWIDTH_T lineWidth;
 
 	TRKTYP_T trkTyp = strncmp(line,"BEZIER",6)==0?T_BEZIER:T_BZRLIN;
 	if (!GetArgs( line+6, "dLluwsdppppdp",
-	              &index, &layer, &options, &rgb, &width, scale, &visible, &p0, &c1, &c2, &p1,
+	              &index, &layer, &options, &rgb, &lineWidth, scale, &visible, &p0, &c1, &c2, &p1,
 	              &lt, &dp ) ) {
 		return FALSE;
 	}
@@ -689,7 +704,7 @@ static BOOL_T ReadBezier( char * line )
 	xx->pos[3] = p1;
 	xx->lineType = lt;
 	xx->descriptionOff = dp;
-	xx->segsWidth = width;
+	xx->segsLineWidth = lineWidth;
 	xx->segsColor = wDrawFindColor( rgb );
 	FixUpBezier(xx->pos,xx,GetTrkType(t) == T_BEZIER);
 	ComputeBezierBoundingBox(t,xx);
@@ -699,7 +714,7 @@ static BOOL_T ReadBezier( char * line )
 	return TRUE;
 }
 
-static void MoveBezier( track_p trk, coOrd orig )
+EXPORT void MoveBezier( track_p trk, coOrd orig )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
 	                               extraDataBezier_t);
@@ -712,7 +727,7 @@ static void MoveBezier( track_p trk, coOrd orig )
 
 }
 
-static void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
+EXPORT void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(trk, T_NOTRACK,
 	                               extraDataBezier_t);
@@ -791,7 +806,7 @@ static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep,
 		trk1 = NewBezierTrack(ep?newr:newl,NULL,0);
 		//Move elev data from ep
 	} else {
-		trk1 = NewBezierLine(ep?newr:newl,NULL,0, xx->segsColor,xx->segsWidth);
+		trk1 = NewBezierLine(ep?newr:newl,NULL,0, xx->segsColor,xx->segsLineWidth);
 	}
 	DIST_T height;
 	int opt;
@@ -1202,6 +1217,7 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p)
 	seg_p->type = IsTrack(trk)?SEG_BEZTRK:SEG_BEZLIN;
 	for (int i=0; i<4; i++) { seg_p->u.b.pos[i] = xx->pos[i]; }
 	seg_p->color = xx->segsColor;
+	seg_p->lineWidth = xx->segsLineWidth;
 	seg_p->bezSegs.cnt = 0;
 	if (seg_p->bezSegs.ptr) { MyFree(seg_p->bezSegs.ptr); }
 	seg_p->bezSegs.max = 0;
@@ -1327,7 +1343,7 @@ static BOOL_T MakeParallelBezier(
 	} else {
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_BEZTRK:SEG_BEZLIN;
 		if (tempSegs(0).bezSegs.ptr) { MyFree(tempSegs(0).bezSegs.ptr); }
@@ -1396,7 +1412,7 @@ static wBool_t CompareBezier( track_cp trk1, track_cp trk2 )
 	// Check arcSegs
 	REGRESS_CHECK_DIST( "Length", xx1, xx2, length )
 	REGRESS_CHECK_POS( "DescOff", xx1, xx2, descriptionOff )
-	REGRESS_CHECK_WIDTH( "SegsWidth", xx1, xx2, segsWidth )
+	REGRESS_CHECK_WIDTH( "SegsLineWidth", xx1, xx2, segsLineWidth )
 	REGRESS_CHECK_COLOR( "SegsColor", xx1, xx2, segsColor )
 	REGRESS_CHECK_INT( "LineType", xx1, xx2, lineType )
 	return TRUE;
@@ -1679,7 +1695,7 @@ EXPORT void BezierSegProc(
 		for (int i=0; i<2; i++) {
 			data->split.newSeg[i].type = segPtr->type;
 			data->split.newSeg[i].color = segPtr->color;
-			data->split.newSeg[i].width = segPtr->width;
+			data->split.newSeg[i].lineWidth = segPtr->lineWidth;
 			data->split.newSeg[i].bezSegs.ptr = NULL;
 			data->split.newSeg[i].bezSegs.cnt = 0;
 			data->split.newSeg[i].bezSegs.max = 0;
@@ -1736,7 +1752,7 @@ EXPORT void BezierSegProc(
 
 
 EXPORT void SetBezierData( track_p p, coOrd pos[4], wDrawColor color,
-                           DIST_T width )
+                           LWIDTH_T lineWidth )
 {
 	BOOL_T bTrack = (GetTrkType(p) == T_BEZIER);
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(p, T_NOTRACK, extraDataBezier_t);
@@ -1747,7 +1763,7 @@ EXPORT void SetBezierData( track_p p, coOrd pos[4], wDrawColor color,
 	xx->a0 = FindAngle(pos[1],pos[0]);
 	xx->a1 = FindAngle(pos[2],pos[3]);
 	xx->segsColor = color;
-	xx->segsWidth = width;
+	xx->segsLineWidth = lineWidth;
 	FixUpBezier(pos, xx, bTrack);
 	ComputeBezierBoundingBox( p, xx );
 	if ( bTrack ) {
@@ -1773,12 +1789,12 @@ track_p NewBezierTrack(coOrd pos[4], trkSeg_t * tempsegs, int count)
 
 
 EXPORT track_p NewBezierLine( coOrd pos[4], trkSeg_t * tempsegs, int count,
-                              wDrawColor color, DIST_T width )
+                              wDrawColor color, LWIDTH_T lineWidth )
 {
 	track_p p;
 	p = NewTrack( 0, T_BZRLIN, 0,
 	              sizeof *(extraDataBezier_t*)NULL );  //No endpoints
-	SetBezierData( p, pos, color, width );
+	SetBezierData( p, pos, color, lineWidth );
 	LOG( log_bezier, 1,
 	     ( "NewBezierLine( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %0.3f, %0.3f, EP2 %0.3f, %0.3f)  = %d\n",
 	       pos[0].x, pos[0].y, pos[1].x, pos[1].y, pos[2].x, pos[2].y, pos[3].x, pos[3].y,

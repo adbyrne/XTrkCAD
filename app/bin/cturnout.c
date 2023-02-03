@@ -1504,7 +1504,7 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 			}
 			UndrawNewTrack(trk);
 			tempSegs(0).type = SEG_STRTRK;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.l.pos[0] = GetTrkEndPos(trk, 1 - ep);
 			tempSegs_da.cnt = 1;
 			InfoMessage(_("Drag to change track length"));
@@ -1918,7 +1918,7 @@ static BOOL_T MakeParallelTurnout(
 			SetTrkEndElev(*newTrk, 1, option, d, NULL);
 		} else {
 			tempSegs(0).color = wDrawColorBlack;
-			tempSegs(0).width = 0;
+			tempSegs(0).lineWidth = 0;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = track ? SEG_STRTRK : SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = endPts[0];
@@ -1928,7 +1928,7 @@ static BOOL_T MakeParallelTurnout(
 	} else {
 		/* draw some temporary track while command is in process */
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track ? SEG_STRTRK : SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = endPts[0];
@@ -2711,14 +2711,14 @@ void static CreateArrowAnchor(coOrd pos, ANGLE_T a, DIST_T len)
 	DYNARR_APPEND(trkSeg_t, anchors_da, 1);
 	int i = anchors_da.cnt - 1;
 	anchors(i).type = SEG_STRLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.l.pos[0] = pos;
 	Translate(&anchors(i).u.l.pos[1], pos, NormalizeAngle(a + 135), len);
 	anchors(i).color = wDrawColorBlue;
 	DYNARR_APPEND(trkSeg_t, anchors_da, 1);
 	i = anchors_da.cnt - 1;
 	anchors(i).type = SEG_STRLIN;
-	anchors(i).width = 0;
+	anchors(i).lineWidth = 0;
 	anchors(i).u.l.pos[0] = pos;
 	Translate(&anchors(i).u.l.pos[1], pos, NormalizeAngle(a - 135), len);
 	anchors(i).color = wDrawColorBlue;
@@ -2730,7 +2730,7 @@ void static CreateRotateAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t, anchors_da, 1);
 	int i = anchors_da.cnt - 1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = 0.5;
+	anchors(i).lineWidth = 0.5;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 180.0;
 	anchors(i).u.c.a1 = 360.0;

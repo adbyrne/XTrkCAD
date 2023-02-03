@@ -43,7 +43,11 @@ fi
 
 extract() {
 	grep '^\\[ACHS]' $1 |\
-	sed -e 's/^\\[ACHS][0-9]*{//' -e 's/}.*/.html/' ;
+	sed \
+		-e 's/^\\[ACHS][0-9]*{//' \
+		-e 's/}.*//' \
+		-e '/^$/d' \
+	       	-e 's/$/.html/' ;
 }
 
 cd $SRCDIR

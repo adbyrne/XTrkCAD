@@ -510,7 +510,7 @@ static void CarProtoDlgCreateDummyOutline(
 
 	segPtr->type = SEG_FILPOLY;
 	segPtr->color = color;
-	segPtr->width = 0;
+	segPtr->lineWidth = 0;
 	segPtr->u.p.cnt = isLoco?5:4;
 	segPtr->u.p.pts = pts = dummyOutlineSegPts;
 	segPtr->u.p.orig.x = 0;
@@ -2154,7 +2154,7 @@ EXPORT void CarItemDraw(
 		simplePts[3].pt_type = 0;
 		simpleSegs[0].type = SEG_FILPOLY;
 		simpleSegs[0].color = item->color;
-		simpleSegs[0].width = 0;
+		simpleSegs[0].lineWidth = 0;
 		simpleSegs[0].u.p.cnt = 4;
 		simpleSegs[0].u.p.pts = simplePts;
 		simpleSegs[0].u.p.orig = zero;
