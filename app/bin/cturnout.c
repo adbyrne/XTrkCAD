@@ -2531,7 +2531,7 @@ static void AddTurnout(void)
 				}
 			}
 		}
-nextEnd:;
+// nextEnd:;
 	}
 
 	AuditTracks("addTurnout after loop");

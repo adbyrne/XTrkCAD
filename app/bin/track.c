@@ -177,6 +177,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 			continue;
 		}
 		if (trk == t) { continue; }
+		// Bounding box check
 		if (trk->hi.x < q0.x ||
 		    trk->lo.x > q1.x ||
 		    trk->hi.y < q0.y ||
@@ -657,22 +658,9 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 
 EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 {
-	EPINX_T inx, i;
-	DIST_T d=0, dd;
-	coOrd pos;
-	inx = -1;
+	EPINX_T inx;
 
-	for ( i=0; i<trk->endCnt; i++ ) {
-		trkEndPt_p epp = EndPtIndex( trk->endPt, i );
-		if (GetEndPtTrack( epp ) == NULL) {
-			pos = GetEndPtPos( epp  );
-			dd=FindDistance(p, pos);
-			if (inx == -1 || dd <= d) {
-				d = dd;
-				inx = i;
-			}
-		}
-	}
+	inx = PickUnconnectedEndPointSilent( p, trk );
 
 	if (inx == -1) {
 		ErrorMessage( MSG_NO_UNCONN_EP );

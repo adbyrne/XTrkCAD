@@ -1514,7 +1514,6 @@ static void MoveTracks(
 	InfoCount( trackCount );
 }
 
-
 void MoveToJoin(
         track_p trk0,
         EPINX_T ep0,
@@ -1524,6 +1523,10 @@ void MoveToJoin(
 	coOrd orig;
 	coOrd base;
 	ANGLE_T angle;
+
+	EPINX_T ep2;
+	track_p trk2;
+	ANGLE_T baseAngle;
 
 	UndoStart( _("Move To Join"), "Move To Join" );
 	base = GetTrkEndPos(trk0,ep0);
@@ -1542,6 +1545,22 @@ void MoveToJoin(
 	DrawNewTrack( trk0 );
 	DrawNewTrack( trk1 );
 	RemoveEndCornus();
+
+	// Connect any other end points
+	EPINX_T i = 0;
+	coOrd pos0 = zero;
+	
+	for (i = 0; i < GetTrkEndPtCnt(trk0); i++) {
+		if (i != ep1) {
+			pos0 = GetTrkEndPos(trk0, i);
+			trk2 = OnTrack2( &pos0, FALSE, TRUE, TRUE, trk0 );
+			ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
+			coOrd pos2 = GetTrkEndPos(trk2, ep2);
+			if (FindDistance(pos0, pos2) < 0.01) {
+				ConnectTracks(trk0, i, trk2, ep2);
+			}
+		}
+	}
 }
 
 void FreeTempStrings()
