@@ -1552,15 +1552,15 @@ void MoveToJoin(
 	
 	for (i = 0; i < GetTrkEndPtCnt(trk0); i++) {
 		if (i != ep1) {
-			trkEndPt_p epp = EndPtIndex(trk0->endPt, i);
-			if (GetEndPtTrack(epp) == NULL) {
+			if (GetTrkEndTrk(trk0, i) == NULL) {
 				pos0 = GetTrkEndPos(trk0, i);
 				trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
 				ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
 				coOrd pos2 = GetTrkEndPos(trk2, ep2);
 				if (FindDistance(pos0, pos2) < 0.01) {
 					ConnectTracks(trk0, i, trk2, ep2);
-					DrawNewTrack(trk2);
+					if (trk2 != trk1)
+						DrawNewTrack(trk2);
 				}
 			}
 		}
