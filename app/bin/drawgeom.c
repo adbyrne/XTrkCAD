@@ -448,7 +448,7 @@ STATUS_T DrawGeomMouse(
 			OnTableEdgeEndPt( NULL, &pos );
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_TBLEDGE;
-			tempSegs(0).color = lineColor;
+			tempSegs(0).color = wDrawColorBlack;
 			tempSegs(0).lineWidth = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale):0;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			tempSegs(0).u.l.option = 0;
