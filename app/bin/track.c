@@ -656,6 +656,11 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 }
 
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p.
+ *  Returns index of endpoint or displays a message 
+ *  and returns -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 {
 	EPINX_T inx;
@@ -668,6 +673,10 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 	return inx;
 }
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p. 
+ *  Returns index of endpoint or -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
@@ -691,25 +700,37 @@ EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 }
 
 
-// Connect all the end points that are very close
-EXPORT void ConnectAllEndPts(track_p trk0, EPINX_T ep0) 
+/** 
+ *  Connect all the end points to this track (trk0) that are close enough
+ *  (distance and angle) to another track's unconnected endpoint.
+ */
+EXPORT void ConnectAllEndPts(track_p trk0) 
 {
-	EPINX_T i = 0;
-	coOrd pos0 = zero;
-	EPINX_T ep2;
-	track_p trk2;
+	for (EPINX_T ep0 = 0; ep0 < GetTrkEndPtCnt(trk0); ep0++) {
+		// Skip if already connected
+		if (GetTrkEndTrk(trk0, ep0) != NULL) { continue; }
 
-	for (i = 0; i < GetTrkEndPtCnt(trk0); i++) {
-		if (GetTrkEndTrk(trk0, i) == NULL) {
-			pos0 = GetTrkEndPos(trk0, i);
-			trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
-			ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
-			coOrd pos2 = GetTrkEndPos(trk2, ep2);
-			if (FindDistance(pos0, pos2) < 0.01) {
-				ConnectTracks(trk0, i, trk2, ep2);
-				DrawNewTrack(trk2);
-			}
-		}
+		coOrd pos0 = GetTrkEndPos(trk0, ep0);
+		track_p trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
+
+		// Not near another track?
+		if (trk2 == NULL) { continue; }
+		EPINX_T ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
+
+		// Close enough?
+		coOrd pos2 = GetTrkEndPos(trk2, ep2);
+		DIST_T distance = FindDistance(pos0, pos2);
+		if (distance > connectDistance) { continue; }
+
+		// Aligned?
+		ANGLE_T a = fabs(DifferenceBetweenAngles(
+			GetTrkEndAngle(trk0, ep0),
+			GetTrkEndAngle(trk2, ep2) + 180.0));
+		if (a > connectAngle) { continue; }
+
+		// Make the connection
+		ConnectTracks(trk0, ep0, trk2, ep2);
+		DrawNewTrack(trk2);
 	}
 }
 

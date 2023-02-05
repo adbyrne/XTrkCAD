@@ -1545,7 +1545,7 @@ void MoveToJoin(
 	track_p trk = NULL;
 	while (TrackIterate(&trk)) {
 		if (GetTrkSelected(trk)) {
-			ConnectAllEndPts(trk, ep0);
+			ConnectAllEndPts(trk);
 		}
 	}
 }
