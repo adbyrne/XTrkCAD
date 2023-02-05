@@ -691,6 +691,27 @@ EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 }
 
 
+// Connect all the end points that are very close
+EXPORT void ConnectAllEndPts(track_p trk0, EPINX_T ep0) 
+{
+	EPINX_T i = 0;
+	coOrd pos0 = zero;
+	EPINX_T ep2;
+	track_p trk2;
+
+	for (i = 0; i < GetTrkEndPtCnt(trk0); i++) {
+		if (GetTrkEndTrk(trk0, i) == NULL) {
+			pos0 = GetTrkEndPos(trk0, i);
+			trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
+			ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
+			coOrd pos2 = GetTrkEndPos(trk2, ep2);
+			if (FindDistance(pos0, pos2) < 0.01) {
+				ConnectTracks(trk0, i, trk2, ep2);
+				DrawNewTrack(trk2);
+			}
+		}
+	}
+}
 
 EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 {

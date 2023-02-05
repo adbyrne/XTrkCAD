@@ -2461,10 +2461,6 @@ static void AddTurnout(void)
 			DIST_T dd = DIST_INF;
 			int nearest = -1;
 			for (int j = 0; j < curTurnout->endCnt; j++) {
-				//if (j < i && (connection(j).trk == trk)) {
-				//	nearest = -1;
-				//	goto nextEnd;  //Track already chosen in use
-				//}
 				DIST_T dd1 = FindDistance( epPos, GetEndPtPos(TempEndPt(j)));
 				if (dd > dd1) {
 					dd = dd1;
@@ -2531,7 +2527,6 @@ static void AddTurnout(void)
 				}
 			}
 		}
-// nextEnd:;
 	}
 
 	AuditTracks("addTurnout after loop");

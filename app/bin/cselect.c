@@ -1515,30 +1515,26 @@ static void MoveTracks(
 }
 
 void MoveToJoin(
-        track_p trk0,
-        EPINX_T ep0,
-        track_p trk1,
-        EPINX_T ep1 )
+	track_p trk0,
+	EPINX_T ep0,
+	track_p trk1,
+	EPINX_T ep1 )
 {
 	coOrd orig;
 	coOrd base;
 	ANGLE_T angle;
 
-	EPINX_T ep2;
-	track_p trk2;
-	ANGLE_T baseAngle;
-
-	UndoStart( _("Move To Join"), "Move To Join" );
-	base = GetTrkEndPos(trk0,ep0);
-	orig = GetTrkEndPos(trk1, ep1 );
+	UndoStart(_("Move To Join"), "Move To Join");
+	base = GetTrkEndPos(trk0, ep0);
+	orig = GetTrkEndPos(trk1, ep1);
 	base.x = orig.x - base.x;
 	base.y = orig.y - base.y;
-	angle = GetTrkEndAngle(trk1,ep1);
-	angle -= GetTrkEndAngle(trk0,ep0);
+	angle = GetTrkEndAngle(trk1, ep1);
+	angle -= GetTrkEndAngle(trk0, ep0);
 	angle += 180.0;
-	angle = NormalizeAngle( angle );
-	GetMovedTracks( FALSE );
-	MoveTracks( TRUE, TRUE, TRUE, base, orig, angle, TRUE );
+	angle = NormalizeAngle(angle);
+	GetMovedTracks(FALSE);
+	MoveTracks(TRUE, TRUE, TRUE, base, orig, angle, TRUE);
 	UndrawNewTrack( trk0 );
 	UndrawNewTrack( trk1 );
 	ConnectTracks( trk0, ep0, trk1, ep1 );
@@ -1546,23 +1542,10 @@ void MoveToJoin(
 	DrawNewTrack( trk1 );
 	RemoveEndCornus();
 
-	// Connect all the end points
-	EPINX_T i = 0;
-	coOrd pos0 = zero;
-	
-	for (i = 0; i < GetTrkEndPtCnt(trk0); i++) {
-		if (i != ep1) {
-			if (GetTrkEndTrk(trk0, i) == NULL) {
-				pos0 = GetTrkEndPos(trk0, i);
-				trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
-				ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
-				coOrd pos2 = GetTrkEndPos(trk2, ep2);
-				if (FindDistance(pos0, pos2) < 0.01) {
-					ConnectTracks(trk0, i, trk2, ep2);
-					if (trk2 != trk1)
-						DrawNewTrack(trk2);
-				}
-			}
+	track_p trk = NULL;
+	while (TrackIterate(&trk)) {
+		if (GetTrkSelected(trk)) {
+			ConnectAllEndPts(trk, ep0);
 		}
 	}
 }
