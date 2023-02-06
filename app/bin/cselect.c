@@ -1514,34 +1514,40 @@ static void MoveTracks(
 	InfoCount( trackCount );
 }
 
-
 void MoveToJoin(
-        track_p trk0,
-        EPINX_T ep0,
-        track_p trk1,
-        EPINX_T ep1 )
+	track_p trk0,
+	EPINX_T ep0,
+	track_p trk1,
+	EPINX_T ep1 )
 {
 	coOrd orig;
 	coOrd base;
 	ANGLE_T angle;
 
-	UndoStart( _("Move To Join"), "Move To Join" );
-	base = GetTrkEndPos(trk0,ep0);
-	orig = GetTrkEndPos(trk1, ep1 );
+	UndoStart(_("Move To Join"), "Move To Join");
+	base = GetTrkEndPos(trk0, ep0);
+	orig = GetTrkEndPos(trk1, ep1);
 	base.x = orig.x - base.x;
 	base.y = orig.y - base.y;
-	angle = GetTrkEndAngle(trk1,ep1);
-	angle -= GetTrkEndAngle(trk0,ep0);
+	angle = GetTrkEndAngle(trk1, ep1);
+	angle -= GetTrkEndAngle(trk0, ep0);
 	angle += 180.0;
-	angle = NormalizeAngle( angle );
-	GetMovedTracks( FALSE );
-	MoveTracks( TRUE, TRUE, TRUE, base, orig, angle, TRUE );
+	angle = NormalizeAngle(angle);
+	GetMovedTracks(FALSE);
+	MoveTracks(TRUE, TRUE, TRUE, base, orig, angle, TRUE);
 	UndrawNewTrack( trk0 );
 	UndrawNewTrack( trk1 );
 	ConnectTracks( trk0, ep0, trk1, ep1 );
 	DrawNewTrack( trk0 );
 	DrawNewTrack( trk1 );
 	RemoveEndCornus();
+
+	track_p trk = NULL;
+	while (TrackIterate(&trk)) {
+		if (GetTrkSelected(trk)) {
+			ConnectAllEndPts(trk);
+		}
+	}
 }
 
 void FreeTempStrings()

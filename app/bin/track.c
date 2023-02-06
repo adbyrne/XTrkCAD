@@ -163,7 +163,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
                          BOOL_T ignoreHidden, track_p t )
 {
 	track_p trk;
-	DIST_T distance, closestDistance = 1000000;
+	DIST_T distance, closestDistance = DIST_INF;
 	track_p closestTrack = NULL;
 	coOrd p, closestPos, q0, q1;
 
@@ -177,6 +177,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 			continue;
 		}
 		if (trk == t) { continue; }
+		// Bounding box check
 		if (trk->hi.x < q0.x ||
 		    trk->lo.x > q1.x ||
 		    trk->hi.y < q0.y ||
@@ -655,24 +656,16 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 }
 
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p.
+ *  Returns index of endpoint or displays a message 
+ *  and returns -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 {
-	EPINX_T inx, i;
-	DIST_T d=0, dd;
-	coOrd pos;
-	inx = -1;
+	EPINX_T inx;
 
-	for ( i=0; i<trk->endCnt; i++ ) {
-		trkEndPt_p epp = EndPtIndex( trk->endPt, i );
-		if (GetEndPtTrack( epp ) == NULL) {
-			pos = GetEndPtPos( epp  );
-			dd=FindDistance(p, pos);
-			if (inx == -1 || dd <= d) {
-				d = dd;
-				inx = i;
-			}
-		}
-	}
+	inx = PickUnconnectedEndPointSilent( p, trk );
 
 	if (inx == -1) {
 		ErrorMessage( MSG_NO_UNCONN_EP );
@@ -680,6 +673,10 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 	return inx;
 }
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p. 
+ *  Returns index of endpoint or -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
@@ -703,6 +700,39 @@ EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 }
 
 
+/** 
+ *  Connect all the end points to this track (trk0) that are close enough
+ *  (distance and angle) to another track's unconnected endpoint.
+ */
+EXPORT void ConnectAllEndPts(track_p trk0) 
+{
+	for (EPINX_T ep0 = 0; ep0 < GetTrkEndPtCnt(trk0); ep0++) {
+		// Skip if already connected
+		if (GetTrkEndTrk(trk0, ep0) != NULL) { continue; }
+
+		coOrd pos0 = GetTrkEndPos(trk0, ep0);
+		track_p trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
+
+		// Not near another track?
+		if (trk2 == NULL) { continue; }
+		EPINX_T ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
+
+		// Close enough?
+		coOrd pos2 = GetTrkEndPos(trk2, ep2);
+		DIST_T distance = FindDistance(pos0, pos2);
+		if (distance > connectDistance) { continue; }
+
+		// Aligned?
+		ANGLE_T a = fabs(DifferenceBetweenAngles(
+			GetTrkEndAngle(trk0, ep0),
+			GetTrkEndAngle(trk2, ep2) + 180.0));
+		if (a > connectAngle) { continue; }
+
+		// Make the connection
+		ConnectTracks(trk0, ep0, trk2, ep2);
+		DrawNewTrack(trk2);
+	}
+}
 
 EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 {
