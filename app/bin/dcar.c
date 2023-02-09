@@ -846,8 +846,6 @@ struct roadnameMap_t {
 static dynArr_t roadnameMap_da;
 #define roadnameMap(N) DYNARR_N(roadnameMap_p, roadnameMap_da, N)
 static BOOL_T roadnameMapChanged;
-static long carPartChangeLevel = 0;
-
 
 
 static int Cmp_part(
@@ -4713,7 +4711,7 @@ static wIndex_t carInvSort[] = { 0, 1, 2, 3 };
 
 static void CarInvDlgAdd( void );
 static void CarInvDlgEdit( void );
-static void CarInvDlgDelete( void );
+static void CarInvDlgDeleteShelve( void );
 static void CarInvDlgImportCsv( void );
 static void CarInvDlgExportCsv( void );
 static void CarInvDlgSaveText( void );
@@ -4762,7 +4760,7 @@ static paramData_t carInvPLs[] = {
 #define I_CI_ADD		(S+2)
 	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL, N_("Add"), 0, 0 },
 #define I_CI_DELETE		(S+3)
-	{ PD_BUTTON, CarInvDlgDelete, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
+	{ PD_BUTTON, CarInvDlgDeleteShelve, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
 #define I_CI_IMPORT_CSV	(S+4)
 	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL, N_("Import") },
 #define I_CI_EXPORT_CSV	(S+5)
@@ -4825,18 +4823,34 @@ static void CarInvDlgEdit( void )
 	DoCarPartDlg( itemUpdActions );
 }
 
+/**
+ * Move a CarItem from the layout to the Shelf
+ *
+ * \item car item to be moved
+ */
+EXPORT void CarItemShelve(
+	carItem_p item )
+{
+	if ( item->car == NULL || IsTrackDeleted( item->car ) ) { return; }
+	DeleteTrack( item->car, FALSE );
+	if (CarItemIsLoco(item)) {
+		LocoListChangeEntry(item->car, NULL);
+	}
+	CarItemUpdate(item);
+	HotBarCancel();
+	InfoSubstituteControls(NULL, NULL);
+}
 
-static void CarInvDlgDelete( void )
+
+static void CarInvDlgDeleteShelve( void )
 {
 	carItem_p item;
 	wIndex_t inx, inx1, cnt, selcnt;
+	wBool_t bShowMsg = FALSE;
+	wBool_t bNeedReload = FALSE;
 
 	selcnt = wListGetSelectedCount( (wList_p)carInvPLs[I_CI_LIST].control );
 	if ( selcnt == 0 ) {
-		return;
-	}
-	if ( NoticeMessage( MSG_CARINV_DELETE_CONFIRM, _("Yes"), _("No"),
-	                    selcnt ) <= 0 ) {
 		return;
 	}
 	cnt = wListGetCount( (wList_p)carInvPLs[I_CI_LIST].control );
@@ -4850,24 +4864,40 @@ static void CarInvDlgDelete( void )
 			continue;
 		}
 		if ( item->car && !IsTrackDeleted(item->car) ) {
-			continue;
+			// Shelve car from Layout
+			CarItemShelve( item );
+			bNeedReload = TRUE;
+		} else {
+			// Delete car from Inventory
+			if ( ! bShowMsg ) {
+				if ( NoticeMessage( MSG_CARINV_DELETE_CONFIRM,
+				                    _("Yes"), _("No"), selcnt ) <= 0 ) {
+					return;
+				}
+				bShowMsg = TRUE;
+			}
+			wListDelete( (wList_p)carInvPLs[I_CI_LIST].control, inx );
+			if ( item->title ) { MyFree( item->title ); }
+			if ( item->data.number ) { MyFree( item->data.number ); }
+			MyFree( item );
+			for ( inx1=inx; inx1<carItemInfo_da.cnt-1; inx1++ ) {
+				carItemInfo(inx1) = carItemInfo(inx1+1);
+			}
+			carItemInfo_da.cnt -= 1;
+			inx--;
+			cnt--;
 		}
-		wListDelete( (wList_p)carInvPLs[I_CI_LIST].control, inx );
-		if ( item->title ) { MyFree( item->title ); }
-		if ( item->data.number ) { MyFree( item->data.number ); }
-		MyFree( item );
-		for ( inx1=inx; inx1<carItemInfo_da.cnt-1; inx1++ ) {
-			carItemInfo(inx1) = carItemInfo(inx1+1);
-		}
-		carItemInfo_da.cnt -= 1;
-		inx--;
-		cnt--;
+	}
+	if ( bNeedReload ) {
+		CarInvListLoad();
+		MainRedraw(); // Shelve Car from layout
 	}
 	SetFileChanged();
 	carInvInx = -1;
 	ParamLoadControl( &carInvPG, I_CI_LIST );
 	ParamControlActive( &carInvPG, I_CI_EDIT, FALSE );
 	ParamControlActive( &carInvPG, I_CI_DELETE, FALSE );
+	wButtonSetLabel( (wButton_p)(carInvPLs[I_CI_DELETE].control), "" );
 	ParamControlActive( &carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0 );
 	ParamDialogOkActive( &carInvPG, FALSE );
 }
@@ -5483,8 +5513,14 @@ static void CarInvLoadItem(
 	        (item->data.condition < 90) ? N_("Excellent"):
 	        N_("Mint");
 
+	char carLocation[30];
 	if ( item->car && !IsTrackDeleted(item->car) ) {
-		location = N_("Layout");
+		coOrd hi, lo;
+		GetBoundingBox( item->car, &hi, &lo );
+		snprintf( carLocation, sizeof carLocation, "%0.0fx%0.0f",
+		          PutDim((lo.x+hi.x)/2.0),
+		          PutDim((lo.y+hi.y)/2.0) );
+		location = carLocation;
 	} else {
 		location = N_("Shelf");
 	}
@@ -5596,6 +5632,7 @@ static void CarInvListLoad( void )
 	ParamControlShow( &carInvPG, I_CI_LIST, TRUE );
 	ParamControlActive( &carInvPG, I_CI_EDIT, FALSE );
 	ParamControlActive( &carInvPG, I_CI_DELETE, FALSE );
+	wButtonSetLabel( (wButton_p)(carInvPLs[I_CI_DELETE].control), "" );
 	ParamControlActive( &carInvPG, I_CI_EXPORT_CSV, carItemInfo_da.cnt > 0 );
 	ParamDialogOkActive( &carInvPG, FALSE );
 }
@@ -5608,7 +5645,6 @@ static void CarInvDlgUpdate(
 {
 	carItem_p item = NULL;
 	wIndex_t cnt, selinx, selcnt;
-	wBool_t enableDelete;
 
 	if ( inx >= I_CI_SORT && inx < I_CI_SORT+N_SORT ) {
 		item = CarInvDlgFindCurrentItem();
@@ -5621,24 +5657,32 @@ static void CarInvDlgUpdate(
 		}
 	} else if ( inx == I_CI_LIST ) {
 		cnt = wListGetCount( (wList_p)carInvPLs[I_CI_LIST].control );
-		enableDelete = TRUE;
+		wIndex_t nOnShelf = 0;
+		wIndex_t nOnLayout = 0;
 		for ( selinx=selcnt=0; selinx<cnt; selinx++ ) {
 			if ( wListGetItemSelected( (wList_p)carInvPLs[I_CI_LIST].control, selinx ) ) {
 				selcnt++;
 				item = (carItem_p)wListGetItemContext( (wList_p)carInvPLs[I_CI_LIST].control,
 				                                       selinx );
-				if ( item && item->car && !IsTrackDeleted( item->car ) ) {
-					enableDelete = FALSE;
-					break;
+				if ( ! item ) { continue; }
+				if ( item->car && !IsTrackDeleted( item->car ) ) {
+					nOnLayout++;
+				} else {
+					nOnShelf++;
 				}
 			}
 		}
-		item = CarInvDlgFindCurrentItem();
-		ParamDialogOkActive( pg, selcnt==1 && item && item->car
-		                     && !IsTrackDeleted(item->car) );
-		ParamControlActive( &carInvPG, I_CI_EDIT, selcnt==1 && item && (item->car==NULL
-		                    || IsTrackDeleted(item->car)) );
-		ParamControlActive( &carInvPG, I_CI_DELETE, selcnt>0 && enableDelete );
+		// Enable Find if 1 selected car is on Layout
+		ParamDialogOkActive( pg, nOnLayout == 1 && nOnShelf == 0 );
+		// Enable Edit if 1 selected car is on Shelf
+		ParamControlActive( &carInvPG, I_CI_EDIT, nOnLayout == 0 && nOnShelf == 1 );
+		wBool_t bEnableDelete = nOnLayout+nOnShelf > 0 &&
+		                        ( nOnLayout == 0 || nOnShelf == 0 );
+		wButtonSetLabel( (wButton_p)(carInvPLs[I_CI_DELETE].control),
+		                 bEnableDelete == FALSE ? "" :
+		                 nOnLayout > 0 ? _("Shelve") :
+		                 _("Delete") );
+		ParamControlActive( &carInvPG, I_CI_DELETE, bEnableDelete );
 	}
 }
 
@@ -5689,7 +5733,6 @@ EXPORT void DoCarDlg( void * unused )
 static void CarDlgChange( long changes )
 {
 	if ( (changes&CHANGE_SCALE) ) {
-		carPartChangeLevel = 0;
 		carDlgCouplerLength = 0.0;
 	}
 }

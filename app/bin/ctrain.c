@@ -636,7 +636,6 @@ static trainControlDlg_t * curTrainDlg;
 
 static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
 static void SpeedAction(wAction_t, coOrd);
-static void LocoListChangeEntry(track_p, track_p);
 static void CmdTrainExit(void * unused);
 
 drawCmd_t speedD = {
@@ -990,7 +989,7 @@ static void ControllerDialogSyncAll(void)
 }
 
 
-static void LocoListChangeEntry(
+EXPORT void LocoListChangeEntry(
         track_p oldLoco,
         track_p newLoco)
 {
@@ -2978,17 +2977,7 @@ static void TrainFunc(
 		break;
 
 	case DO_DELCAR:
-		UncoupleCars( trainFuncCar, 0 );
-		UncoupleCars( trainFuncCar, 1 );
-		if (CarItemIsLoco(xx->item)) {
-			LocoListChangeEntry(trainFuncCar, NULL);
-		}
-
-		//trainFuncCar->deleted = TRUE;
-		DeleteTrack( trainFuncCar, FALSE );
-		CarItemUpdate(xx->item);
-		HotBarCancel();
-		InfoSubstituteControls(NULL, NULL);
+		CarItemShelve( xx->item );
 		break;
 
 	case DO_DELTRAIN:
