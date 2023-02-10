@@ -4829,7 +4829,7 @@ static void CarInvDlgEdit( void )
  * \item car item to be moved
  */
 EXPORT void CarItemShelve(
-	carItem_p item )
+        carItem_p item )
 {
 	if ( item->car == NULL || IsTrackDeleted( item->car ) ) { return; }
 	DeleteTrack( item->car, FALSE );
