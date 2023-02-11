@@ -409,16 +409,14 @@ changeSelection(GtkTreeSelection *selection,
 	id_p = g_value_get_pointer(&value);
 	id_p->selected = !path_currently_selected;
 
-	if (id_p->selected) {
-		bl->last = row;
+	bl->last = row;
 
-		if (bl->valueP) {
-			*bl->valueP = row;
-		}
+	if (bl->valueP) {
+		*bl->valueP = row;
+	}
 
-		if (bl->action) {
-			bl->action(row, id_p->label, 1, bl->data, id_p->itemData);
-		}
+	if (bl->action) {
+		bl->action(row, id_p->label, id_p->selected, bl->data, id_p->itemData);
 	}
 
 	return TRUE;

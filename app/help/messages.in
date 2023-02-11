@@ -1188,7 +1188,7 @@ END
 
 # various
 MESSAGE MSG_CARINV_DELETE_CONFIRM
-Are you sure you want to delete these %d car(s)?
+Are you sure you want to delete these %d car(s) from your inventory?
 #NOHELP
 END
 
