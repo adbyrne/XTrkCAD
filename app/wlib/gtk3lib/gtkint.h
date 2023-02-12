@@ -443,4 +443,7 @@ void wlibAddButtonToolbar(wButton_p button);
 
 /* wpref.c */
 
+/* wlibpaths.c */
+void wlibSetHelpPath();
+
 #endif

@@ -24,8 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <dirent.h>
-#include <sys/stat.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -44,169 +42,6 @@
 #include "xtrkcad-config.h"
 
 extern char wConfigName[];
-static char appLibDir[BUFSIZ];
-static char appWorkDir[BUFSIZ];
-static char userHomeDir[BUFSIZ];
-
-
-/*
- *******************************************************************************
- *
- * Get Dir Names
- *
- *******************************************************************************
- */
-
-
-/** Find the directory where configuration files, help, demos etc are installed. 
- *  The search order is:
- *  1. Directory specified by the XTRKCADLIB environment variable
- *  2. Directory specified by XTRKCAD_INSTALL_PREFIX/share/xtrkcad
- *  3. /usr/share/xtrkcad
- *  4. /usr/local/share/xtrkcad
- *  
- *  \return pointer to directory name
- */
-
-const char * wGetAppLibDir( void )
-{
-	char * cp, *ep;
-	char msg[BUFSIZ*2];
-	char envvar[80];
-	struct stat buf;
-
-	if (appLibDir[0] != '\0') {
-		return appLibDir;
-	}
-
-	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++)
-		*ep = toupper(*cp);
-	strcpy( ep, "LIB" );
-	ep = getenv( envvar );
-	if (ep != NULL) {
-		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
-			strncpy( appLibDir, ep, sizeof appLibDir );
-			//printf( "wAppLbDir=%s\n", appLibDir );
-			return appLibDir;
-		}
-	}
-
-	strcpy(appLibDir, "../share/");
-	strcat(appLibDir, wlibGetAppName());
-	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
-		//printf( "wAppLbDir=%s\n", appLibDir );
-		return appLibDir;
-	}
-
-	char * dir1 = "/usr/share/";
-	char * dir2 = "/usr/local/share/";
-	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
-		dir1 = "/usr/local/share/";
-		dir2 = "/usr/share/";
-	}
-
-	strcpy( appLibDir, dir1 );
-	strcat( appLibDir, wlibGetAppName() );
-	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
-		//printf( "wAppLbDir=%s\n", appLibDir );
-		return appLibDir;
-	}
-
-	strcpy( appLibDir, dir2 );
-	strcat( appLibDir, wlibGetAppName() );
-	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
-		//printf( "wAppLbDir=%s\n", appLibDir );
-		return appLibDir;
-	}
-
-	sprintf( msg,
-		_("The required configuration files could not be located in the expected location.\n\n"
-		"Usually this is an installation problem. Make sure that these files are installed in either \n"
-		"  ../share/xtrkcad or\n"
-		"  /usr/share/%s or\n"
-		"  /usr/local/share/%s\n"
-		"If this is not possible, the environment variable %s must contain "
-		"the name of the correct directory."),
-		wlibGetAppName(), wlibGetAppName(), envvar );
-	wNoticeEx( NT_ERROR, msg, _("Ok"), NULL );
-	appLibDir[0] = '\0';
-	wExit(0);
-	return NULL;
-}
-
-/**
- * Get the working directory for the application. This directory is used for storing
- * internal files including rc files. If it doesn't exist, the directory is created
- * silently.
- *
- * \return    pointer to the working directory
- */
-
-
-const char * wGetAppWorkDir(
-		void )
-{
-	char tmp[BUFSIZ+20];
-	char * homeDir;
-	DIR *dirp;
-	
-	if (appWorkDir[0] != '\0')
-		return appWorkDir;
-
-	if ((homeDir = getenv( "HOME" )) == NULL) {
-		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
-		wExit(0);
-	}
-	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
-	if ( (dirp = opendir(appWorkDir)) != NULL ) {
-		closedir(dirp);
-	} else {
-		if ( mkdir( appWorkDir, 0777 ) == -1 ) {
-			sprintf( tmp, _("Cannot create %s"), appWorkDir );
-			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
-			wExit(0);
-		} else {
-			/* 
-			 * check for default configuration file and copy to 
-			 * the workdir if it exists
-			 */
-			struct stat stFileInfo;
-			char appEtcConfig[BUFSIZ];
-			sprintf( appEtcConfig, "/etc/%s.rc", wlibGetAppName());
-			
-			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
-				char copyConfigCmd[(BUFSIZ * 2) + 3];
-				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
-				int rc = system( copyConfigCmd );
-			}
-		}
-	}
-	return appWorkDir;
-}
-
-/**
- * Get the user's home directory. The environment variable HOME is
- * assumed to contain the proper directory.
- *
- * \return    pointer to the user's home directory
- */
-
-const char *wGetUserHomeDir( void )
-{
-	char *homeDir;
-	
-	if( userHomeDir[ 0 ] != '\0' )
-		return userHomeDir;
-		
-	if ((homeDir = getenv( "HOME" )) == NULL) {
-		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
-		wExit(0);
-	} else {
-		strcpy( userHomeDir, homeDir );
-	}	
-
-	return userHomeDir;
-}
 
 
 /*
@@ -217,80 +52,45 @@ const char *wGetUserHomeDir( void )
  *******************************************************************************
  */
 
-typedef struct {
-		char * section;
-		char * name;
-		wBool_t present;
-		wBool_t dirty;
-		char * val;
-		} prefs_t;
-dynArr_t prefs_da;
-#define prefs(N) DYNARR_N(prefs_t,prefs_da,N)
-wBool_t prefInitted = FALSE;
+static bool prefInitted = false;
+static GKeyFile *prefs;
 
 /**
- * Read the configuration file into memory
+ * Read the preferences from an ini file iinto memory
+ *
+ * \param name name of file, if NULL or empty string, the default file is used
+ * \param update force update (ignored)
+ * \return
  */
 
 static void readPrefs( char * name, wBool_t update )
 {
-	char tmp[BUFSIZ], *np, *vp, *cp;
+	gchar *tmp;
 	const char * workDir;
-	FILE * prefFile;
-	prefs_t * p;
+	GError *error = NULL;
 
 	prefInitted = TRUE;
 	workDir = wGetAppWorkDir();
-	if (name && name[0])
-		sprintf( tmp, "%s", name );
-	else
-		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
-	prefFile = fopen( tmp, "r" );
-	if (prefFile == NULL)
-		return;
-	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
-		char *sp;
-		
-		sp = tmp;
-		while ( *sp==' ' || *sp=='\t' ) sp++;
-		if ( *sp == '\n' || *sp == '#' )
-			continue;
-		np = strchr( sp, '.' );
-		if (np == NULL) {
-			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
-			continue;
-		}
-		*np++ = '\0';
-		while ( *np==' ' || *np=='\t' ) np++;
-		vp = strchr( np, ':' );
-		if (vp == NULL) {
-			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
-			continue;
-		}
-		*vp++ = '\0';
-		while ( *vp==' ' || *vp=='\t' ) vp++;
-		cp = vp + strlen(vp) -1;
-		while ( cp >= vp && (*cp=='\n' || *cp==' ' || *cp=='\t') ) cp--;
-		cp[1] = '\0';
-		if (update) {
-			for (int i=0;i<prefs_da.cnt;i++) {
-				p = &DYNARR_N(prefs_t,prefs_da,i);
-				if (strcmp(p->name,np)==0 && strcmp(p->section,sp)==0) {
-					p->val = strdup(vp);
-					p->dirty = TRUE;
-					break;
-				}
-			}
-		} else {
-			DYNARR_APPEND( prefs_t, prefs_da, 10 );
-			p = &prefs(prefs_da.cnt-1);
-			p->name = strdup(np);
-			p->section = strdup(sp);
-			p->dirty = FALSE;
-			p->val = strdup(vp);
+
+	if (name && name[0]) {
+		tmp = g_strdup( name );
+	} else {
+		tmp = g_strdup_printf("%s/%s.ini", workDir, wConfigName );
+	}
+
+	prefs = g_key_file_new();
+
+	g_key_file_load_from_file(prefs,
+	                          tmp,
+	                          G_KEY_FILE_KEEP_COMMENTS,
+	                          &error);
+	if(error) {
+		// ignore file does not exist condition, it will be created later
+		if(error->code != G_FILE_ERROR_NOENT) {
+			wNoticeEx( NT_ERROR, error->message, _("Exit"), NULL);
 		}
 	}
-	fclose( prefFile );
+	g_free( tmp );
 }
 
 /**
@@ -302,30 +102,18 @@ static void readPrefs( char * name, wBool_t update )
  */
 
 void wPrefSetString(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		const char * sval )		/* Value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        const char * sval )		/* Value */
 {
-	prefs_t * p;
-
-	if (!prefInitted)
+	if (!prefInitted) {
 		readPrefs("", FALSE);
-	
-	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
-			if (p->val)
-				free(p->val);
-			p->dirty = TRUE;
-			p->val = (sval?strdup( sval ):NULL);
-			return;
-		}
 	}
-	DYNARR_APPEND( prefs_t, prefs_da, 10 );
-	p = &prefs(prefs_da.cnt-1);
-	p->name = strdup(name);
-	p->section = strdup(section);
-	p->dirty = TRUE;
-	p->val = (sval?strdup(sval):NULL);
+
+	g_key_file_set_string(prefs,
+	                      section,
+	                      name,
+	                      sval);
 }
 
 /**
@@ -336,20 +124,18 @@ void wPrefSetString(
  */
 
 char * wPrefGetStringBasic(
-		const char * section,			/* Section */
-		const char * name )			/* Name */
+        const char * section,			/* Section */
+        const char * name )			/* Name */
 {
-	prefs_t * p;
 
-	if (!prefInitted)
+	if (!prefInitted) {
 		readPrefs("", FALSE);
-	
-	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
-			return p->val;
-		}
 	}
-	return NULL;
+
+	return g_key_file_get_string (prefs,
+	                              section,
+	                              name,
+	                              NULL);
 }
 
 /**
@@ -360,15 +146,19 @@ char * wPrefGetStringBasic(
  * \param lval IN value to save
  */
 
- void wPrefSetInteger(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		long lval )		/* Value */
+void wPrefSetInteger(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long lval )		/* Value */
 {
-	char tmp[20];
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
 
-	snprintf(tmp, sizeof(tmp), "%ld", lval );
-	wPrefSetString( section, name, tmp );
+	g_key_file_set_integer(prefs,
+	                       section,
+	                       name,
+	                       lval);
 }
 
 /**
@@ -378,48 +168,57 @@ char * wPrefGetStringBasic(
  * \param name IN name of parameter
  * \param res OUT resulting value
  * \param default IN default value
- * \return TRUE if value differs from default, FALSE if the same
+ * \return TRUE if value was found, FALSE if default is returned
  */
 
 wBool_t wPrefGetIntegerBasic(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		long * res,		/* Address of result */
-		long def )		/* Default value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        long * res,		/* Address of result */
+        long def )		/* Default value */
 {
-	const char * cp;
-    char *cp1;
+	GError *error = NULL;
+	int result;
 
-	cp = wPrefGetStringBasic( section, name );
-	if (cp == NULL) {
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	result = g_key_file_get_integer (prefs,
+	                                 section,
+	                                 name,
+	                                 &error);
+
+	if(error) {
 		*res = def;
 		return FALSE;
+	} else {
+		*res= result;
+		return TRUE;
 	}
-	*res = strtol(cp,&cp1,0);
-	if (cp==cp1) {
-		*res = def;
-		return FALSE;
-	}
-	return TRUE;
 }
 
 /**
- * Save a float value in the preferences file. 
+ * Save a float value in the preferences file.
  *
  * \param section IN the file section into which the value should be saved
  * \param name IN the name of the preference
  * \param lval IN the value
  */
 
- void wPrefSetFloat(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		double lval )		/* Value */
+void wPrefSetFloat(
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double lval )		/* Value */
 {
-	char tmp[20];
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
 
-	snprintf(tmp, sizeof(tmp), "%0.6f", lval );
-	wPrefSetString( section, name, tmp );
+	g_key_file_set_double(prefs,
+	                      section,
+	                      name,
+	                      lval);
 }
 
 /**
@@ -434,83 +233,75 @@ wBool_t wPrefGetIntegerBasic(
 
 
 wBool_t wPrefGetFloatBasic(
-		const char * section,		/* Section */
-		const char * name,		/* Name */
-		double * res,		/* Address of result */
-		double def )		/* Default value */
+        const char * section,		/* Section */
+        const char * name,		/* Name */
+        double * res,		/* Address of result */
+        double def )		/* Default value */
 {
-	const char * cp;
-    char *cp1;
+	GError *error = NULL;
+	double result;
 
-	cp = wPrefGetStringBasic( section, name );
-	if (cp == NULL) {
+	if (!prefInitted) {
+		readPrefs("", FALSE);
+	}
+
+	result = g_key_file_get_double(prefs,
+	                               section,
+	                               name,
+	                               &error);
+
+	if(error) {
 		*res = def;
 		return FALSE;
+	} else {
+		*res= result;
+		return TRUE;
 	}
-	*res = strtod(cp, &cp1);
-	if (cp == cp1) {
-		*res = def;
-		return FALSE;
-	}
-	return TRUE;
 }
 
-void wPrefsLoad(char * name) {
+void wPrefsLoad(char * name)
+{
 	readPrefs(name,TRUE);
 }
 
 /**
- * Save the configuration to a file. The config parameters are held and updated in an array.
- * To make the settings persistant, this function has to be called. 
+ * Save the preferences to a key-value file (ini file)
  *
+ * \param name if NULL use default filename, otherwise points to the name and
+ * path for the ini file
  */
-
-void wPrefFlush(
-		char * name )
+void
+wPrefFlush(	char *name )
 {
-	prefs_t * p;
-	char tmp[BUFSIZ];
-    const char *workDir;
-	FILE * prefFile;
+	GError *error = NULL;
+	const char *workDir;
+	char *tmp;
 
-	if (!prefInitted)
+	if (!prefInitted) {
 		return;
-	
-	workDir = wGetAppWorkDir();
-	if (name && name[0])
-		snprintf( tmp, sizeof(tmp), "%s", name );
-	else
-		snprintf( tmp, sizeof(tmp), "%s/%s.rc", workDir, wConfigName );
-	prefFile = fopen( tmp, "w" );
-	if (prefFile == NULL)
-		return;
-
-	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-		if(p->val) {
-			fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
-		}	
 	}
-	fclose( prefFile );
+
+	workDir = wGetAppWorkDir();
+	if (name && name[0]) {
+		tmp = g_strdup(name);
+	} else {
+		tmp = g_strdup_printf("%s/%s.ini", workDir, wConfigName );
+	}
+
+	g_key_file_save_to_file(prefs,
+	                        (const char *)tmp,
+	                        &error);
+
+	g_free(tmp);
 }
 
 /**
  * Clear the preferences from memory
- * \return  
  */
 
-void wPrefReset(
-		void )
+void
+wPrefReset(void )
 {
-	prefs_t * p;
-
 	prefInitted = FALSE;
-	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-		if (p->section)
-			free( p->section );
-		if (p->name)
-			free( p->name );
-		if (p->val)
-			free( p->val );
-	}
-	prefs_da.cnt = 0;
+	g_key_file_free (prefs);
 }

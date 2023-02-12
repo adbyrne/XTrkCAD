@@ -33,7 +33,7 @@ find_path(CMOCKA_INCLUDE_DIR
 
 find_library(CMOCKA_LIBRARY
     NAMES
-        cmocka-static
+        cmocka
     PATHS
         ${CMOCKA_ROOT_DIR}/lib
 )

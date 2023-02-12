@@ -42,6 +42,7 @@ target_sources(xtrkcad-wlib
  	util.c
  	window.c
  	wpref.c
+	wlibpaths.c
 )
 
 # help system is OS and build specific, add appropriate source files
@@ -127,3 +128,4 @@ endif()
 # )
 add_dependencies(xtrkcad-wlib uifiles)
 
+add_subdirectory(unittests)

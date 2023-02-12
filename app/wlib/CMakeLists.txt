@@ -21,3 +21,4 @@ else()
 	add_subdirectory(mswlib)
 endif()
 
+add_subdirectory(test)
