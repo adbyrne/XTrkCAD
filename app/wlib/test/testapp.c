@@ -26,11 +26,13 @@
 #include <stdio.h>
 #include "wlib.h"
 
-#define APPNAME "TESTAPP"
+#define APPNAME "testapp"
 #define WINDOWTITLE "Test Application"
 
 #define TRUE	(1)
 #define FALSE (0)
+
+long dontHideCursor = 0;
 
 /**
  *	doFile: callback funtion for file submenu 
@@ -55,6 +57,10 @@ wWin_p wMain( int argc, char * argv[] )
 	wMenu_p menu2;
 	int i;
 	char buffer[ 80 ];
+
+	wInitAppName(APPNAME);
+
+	printf("%s\n", wGetUserHomeDir());
 
 	/* add a splash window */
 	wCreateSplash( WINDOWTITLE,			/* name of application to show */

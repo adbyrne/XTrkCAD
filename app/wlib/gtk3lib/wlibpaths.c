@@ -139,10 +139,6 @@ const char * wGetAppLibDir( void )
 		}
 	}
 
-	for(int i = 0; i < option; i++) {
-		g_free(searchDirs[ i ]);
-	}
-
 	if(!appLibDir) {
 		gchar *msg;
 
@@ -164,6 +160,9 @@ const char * wGetAppLibDir( void )
 		wExit(1);
 	}
 
+	for(int i = 0; i < option; i++) {
+		g_free(searchDirs[ i ]);
+	}
 	return(appLibDir);
 }
 

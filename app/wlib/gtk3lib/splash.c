@@ -20,10 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
 #define GTK_DISABLE_DEPRECATED
@@ -36,7 +32,7 @@
 #define LOGOFILENAME "logo.bmp"
 
 static GtkWidget *window;	/**< splash window handle */
-static GtkWidget *message;	/**< window handle for progress message */
+static GtkLabel *message;	/**< window handle for progress message */
 
 /**
  * Create the splash window shown during startup. The function loads the logo
@@ -50,69 +46,58 @@ static GtkWidget *message;	/**< window handle for progress message */
 int
 wCreateSplash(char *appName, char *appVer)
 {
-    GtkWidget *grid;
-    GtkWidget *image;
-    GtkWidget *label, *label_temp;
-    char *temp;
-    char logoPath[BUFSIZ];
+	GtkWidget *grid;
+	GtkWidget *image;
+	GtkWidget *label, *label_temp;
+	char *temp;
+	char *logoPath;
 
-    /* create the basic window */
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
-    gtk_window_set_title(GTK_WINDOW(window), appName);
-    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
-    gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_SPLASHSCREEN);
-#if GTK_MAJOR_VERSION > 1 || GTK_MINOR_VERSION > 5
-    gtk_window_set_focus_on_map(GTK_WINDOW(window), FALSE);
-#endif
+	/* create the basic window */
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
+	gtk_window_set_title(GTK_WINDOW(window), appName);
+	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+	gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
+	gtk_window_set_type_hint(GTK_WINDOW(window),
+	                         GDK_WINDOW_TYPE_HINT_SPLASHSCREEN);
 
-    grid = gtk_grid_new();
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 6);
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
+	gtk_window_set_focus_on_map(GTK_WINDOW(window), FALSE);
 
+	grid = gtk_grid_new();
+	gtk_grid_set_row_spacing(GTK_GRID(grid), 6);
+	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
+	gtk_widget_set_margin_bottom(GTK_WIDGET(grid), 12);
 
-    gtk_widget_show(grid);
-    gtk_container_add(GTK_CONTAINER(window), grid);
+	gtk_widget_show(grid);
+	gtk_container_add(GTK_CONTAINER(window), grid);
 
-    /* add the logo image to the top of the splash window */
-    sprintf(logoPath, "%s/" LOGOFILENAME, wGetAppLibDir());
-    image = gtk_image_new_from_file(logoPath);
-    gtk_widget_show(image);
-    gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 1, 1);
+	/* add the logo image to the top of the splash window */
+	logoPath = g_strdup_printf("%s/" LOGOFILENAME, wGetAppLibDir());
+	image = gtk_image_new_from_file(logoPath);
+	gtk_widget_show(image);
+	g_free(logoPath);
+	gtk_grid_attach(GTK_GRID(grid), image, 0, 0, 1, 1);
 
-    /* put the product name into the window */
+	/* put the product name into the window */
+	temp = g_strdup_printf("%s %s", appName, appVer);
+	label = gtk_label_new(temp);
+	g_free(temp);
 
-    temp = malloc(strlen(appName) + strlen(appVer) + 2);
+	gtk_widget_show(label);
+	gtk_grid_attach_next_to(GTK_GRID(grid), label, image, GTK_POS_BOTTOM, 1, 1);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_FILL);
+	gtk_label_set_selectable(GTK_LABEL(label), FALSE);
 
-    if (!temp) {
-        return (FALSE);
-    }
+	message = GTK_LABEL(gtk_label_new("Application is starting..."));
+	gtk_widget_show(GTK_WIDGET(message));
+	gtk_grid_attach_next_to(GTK_GRID(grid), GTK_WIDGET(message), label,
+	                        GTK_POS_BOTTOM, 1, 1);
+	gtk_label_set_line_wrap(message, FALSE);
+	gtk_label_set_ellipsize(message, PANGO_ELLIPSIZE_END);
 
-    sprintf(temp, "%s %s", appName, appVer);
+	gtk_widget_show(window);
 
-    label = gtk_label_new(temp);
-    gtk_widget_show(label);
-    gtk_grid_attach_next_to(GTK_GRID(grid), label, image, GTK_POS_BOTTOM, 1, 1);
-    gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_FILL);
-    gtk_label_set_selectable(GTK_LABEL(label), FALSE);
-    gtk_misc_set_padding(GTK_MISC(label), 6, 2);
-
-    free(temp);
-
-    label_temp = gtk_label_new("Application is starting...");
-    gtk_widget_show(label_temp);
-    gtk_grid_attach_next_to(GTK_GRID(grid), label_temp, label, GTK_POS_BOTTOM, 1, 1);
-    gtk_label_set_line_wrap(GTK_LABEL(label_temp), FALSE);
-
-    message = label_temp;
-#if GTK_MINOR_VERSION > 5
-    gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_START);
-#endif
-
-    gtk_widget_show(window);
-
-    return (TRUE);
+	return (TRUE);
 }
 
 /**
@@ -124,13 +109,13 @@ wCreateSplash(char *appName, char *appVer)
 int
 wSetSplashInfo(char *msg)
 {
-	if (!window) return FALSE;
-    if (msg && message) {
-        gtk_label_set_text(GTK_LABEL(message), msg);
-        return TRUE;
-    }
+	if (!window) { return FALSE; }
+	if (msg && message) {
+		gtk_label_set_text(GTK_LABEL(message), msg);
+		return TRUE;
+	}
 
-    return FALSE;
+	return FALSE;
 }
 
 /**
@@ -141,9 +126,9 @@ wSetSplashInfo(char *msg)
 void
 wDestroySplash(void)
 {
-    /* kill window */
-    if (window) gtk_widget_destroy(window);
-    window = NULL;
+	/* kill window */
+	if (window) { gtk_widget_destroy(window); }
+	window = NULL;
 
-    return;
+	return;
 }
