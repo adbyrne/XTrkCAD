@@ -125,8 +125,7 @@ static void ComputeBezierBoundingBox( track_p trk,
 
 	if (lineWidth < 0) {
 		lwidth = -lineWidth / mainD.scale;
-	}
-	else {
+	} else {
 		lwidth = lineWidth;
 	}
 

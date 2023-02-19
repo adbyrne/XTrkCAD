@@ -233,8 +233,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		// TO DO: Using scale is correct, but the correct context may not be mainD
 		// For now, we're assuming it will be close enough to zero
 		lwidth = 0; // -(DIST_T)segPtr->lineWidth / mainD.scale;
-	}
-	else {
+	} else {
 		lwidth = (LWIDTH_T)segPtr->lineWidth;
 	}
 
@@ -351,7 +350,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		break;
 	/* The following code is executed only for Cornu track */
 	case SEG_BEZLIN:
-	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve		
+	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve
 		REORIGIN( pBez, segPtr->u.b.pos[0], angle, xlat )
 		lo->x = hi->x = pBez.x;
 		lo->y = hi->y = pBez.y;
@@ -1262,7 +1261,8 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			if ( !GetArgs( cp, hasElev?"lwpfpfl":"lwpYpYZ",
-			               &rgb, &s->lineWidth, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1, &option ) ) {
+			               &rgb, &s->lineWidth, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1,
+			               &option ) ) {
 				rc = FALSE;
 				break;
 			}

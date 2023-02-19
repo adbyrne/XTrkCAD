@@ -449,7 +449,8 @@ STATUS_T DrawGeomMouse(
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_TBLEDGE;
 			tempSegs(0).color = wDrawColorBlack;
-			tempSegs(0).lineWidth = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale):0;
+			tempSegs(0).lineWidth = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale)
+			                        :0;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			tempSegs(0).u.l.option = 0;
 			tempSegs_da.cnt = 0;
@@ -521,7 +522,8 @@ STATUS_T DrawGeomMouse(
 			segPtr = &tempSegs(tempSegs_da.cnt-1);
 			segPtr->type = SEG_STRLIN;
 			segPtr->color = lineColor;
-			segPtr->lineWidth = (context->Op==OP_POLY || context->Op==OP_POLYLINE ? lineWidth : 0);
+			segPtr->lineWidth = (context->Op==OP_POLY
+			                     || context->Op==OP_POLYLINE ? lineWidth : 0);
 			//End if over start
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos ))) {
 				segPtr->u.l.pos[0] = tempSegs(segCnt-1).u.l.pos[1];

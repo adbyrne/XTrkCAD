@@ -534,11 +534,12 @@ static void DrawBezCurve(trkSeg_p control_arm1,
  */
 void DrawTempBezier(BOOL_T track)
 {
-	if (track) { 
-		DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, 
-					 (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
-					 fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:normalColor); }
-	else {
+	if (track) {
+		DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,
+		             (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
+		             fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:
+		             normalColor);
+	} else {
 		DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,
 		             (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
 		             drawColorBlack);        //Add Second Arm
@@ -913,7 +914,8 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG)
 
 	case wActionMove:
 		if (Da.state == NONE) { return C_CONTINUE; }
-		return AdjustBezCurve(wActionMove, pos, Da.track, xx->segsColor, xx->segsLineWidth,
+		return AdjustBezCurve(wActionMove, pos, Da.track, xx->segsColor,
+		                      xx->segsLineWidth,
 		                      InfoMessage);
 	case C_DOWN:
 		if (Da.state == TRACK_SELECTED) { return C_CONTINUE; }                   //Ignore until first up

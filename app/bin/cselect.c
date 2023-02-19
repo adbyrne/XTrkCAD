@@ -1515,10 +1515,10 @@ static void MoveTracks(
 }
 
 void MoveToJoin(
-	track_p trk0,
-	EPINX_T ep0,
-	track_p trk1,
-	EPINX_T ep1 )
+        track_p trk0,
+        EPINX_T ep0,
+        track_p trk1,
+        EPINX_T ep1 )
 {
 	coOrd orig;
 	coOrd base;

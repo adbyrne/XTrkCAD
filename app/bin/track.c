@@ -658,7 +658,7 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 
 /**
  *  Find an endpoint of trk that is close to coOrd p.
- *  Returns index of endpoint or displays a message 
+ *  Returns index of endpoint or displays a message
  *  and returns -1 if none found.
  */
 EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
@@ -674,7 +674,7 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 }
 
 /**
- *  Find an endpoint of trk that is close to coOrd p. 
+ *  Find an endpoint of trk that is close to coOrd p.
  *  Returns index of endpoint or -1 if none found.
  */
 EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
@@ -700,11 +700,11 @@ EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 }
 
 
-/** 
+/**
  *  Connect all the end points to this track (trk0) that are close enough
  *  (distance and angle) to another track's unconnected endpoint.
  */
-EXPORT void ConnectAllEndPts(track_p trk0) 
+EXPORT void ConnectAllEndPts(track_p trk0)
 {
 	for (EPINX_T ep0 = 0; ep0 < GetTrkEndPtCnt(trk0); ep0++) {
 		// Skip if already connected
@@ -724,8 +724,8 @@ EXPORT void ConnectAllEndPts(track_p trk0)
 
 		// Aligned?
 		ANGLE_T a = fabs(DifferenceBetweenAngles(
-			GetTrkEndAngle(trk0, ep0),
-			GetTrkEndAngle(trk2, ep2) + 180.0));
+		                         GetTrkEndAngle(trk0, ep0),
+		                         GetTrkEndAngle(trk2, ep2) + 180.0));
 		if (a > connectAngle) { continue; }
 
 		// Make the connection

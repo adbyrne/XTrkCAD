@@ -2114,8 +2114,8 @@ static char** show_layer_digits[3][10] = {
 	}
 };
 
-/* Note: If the number of buttons is increased to > ~120, you should 
- *       also increase COMMAND_MAX and BUTTON_MAX in command.c 
+/* Note: If the number of buttons is increased to > ~120, you should
+ *       also increase COMMAND_MAX and BUTTON_MAX in command.c
  *       NUM_LAYERS is defined in common.h
  */
 #define ONE_PIXEL v *= 2; if (v > 128) { show_layer_bits[xx + yy] = b; xx += 1; v = 1; b = 0; }
@@ -2164,19 +2164,16 @@ void InitLayers(void)
 
 			char** cp = show_layer_digits[iconSize][n];
 
-			for (int y = 0; y < h; y++)
-			{
+			for (int y = 0; y < h; y++) {
 				int v = dx_table[dx]; // power of two
 				char b = 0; // bits
 
 				int yy = wb * (y + (bhgt - h) / 2);
 
 				int xx = x0; // starting byte
-				for (int x = 0; x < wc; x++)
-				{
+				for (int x = 0; x < wc; x++) {
 					char z = *(*cp + x + y * wc);
-					if (z != ' ')
-					{
+					if (z != ' ') {
 						b |= v;
 					}
 					ONE_PIXEL
@@ -2186,21 +2183,18 @@ void InitLayers(void)
 				}
 			}
 
-		}
-		else if (n < 100) {
+		} else if (n < 100) {
 			// width of chars
 			int wc1 = 0;
 			int wc0 = 0;
 			if ((n / 10) == 1) {
 				wc1 = lbit1_width[iconSize];
-			}
-			else {
+			} else {
 				wc1 = lbit0_width[iconSize];
 			}
 			if ((n % 10) == 1) {
 				wc0 = lbit1_width[iconSize];
-			}
-			else {
+			} else {
 				wc0 = lbit0_width[iconSize];
 			}
 
@@ -2215,32 +2209,27 @@ void InitLayers(void)
 			char** cp1 = show_layer_digits[iconSize][n / 10];
 			char** cp0 = show_layer_digits[iconSize][n % 10];
 
-			for (int y = 0; y < h; y++)
-			{
+			for (int y = 0; y < h; y++) {
 				int v = dx_table[dx]; // powers of two
 				char b = 0; // bits
 
 				int yy = wb * (y + (bhgt - h) / 2);
 
 				int xx = x0; // starting byte
-				for (int x = 0; x < wc1; x++)
-				{
+				for (int x = 0; x < wc1; x++) {
 					char z = *(*cp1 + x + y * wc1);
-					if (z != ' ')
-					{
+					if (z != ' ') {
 						b |= v;
 					}
 					ONE_PIXEL
 				}
 				ONE_PIXEL
 				if (iconSize >= 1) {
-						ONE_PIXEL
+					ONE_PIXEL
 				}
-				for (int x = 0; x < wc0; x++)
-				{
+				for (int x = 0; x < wc0; x++) {
 					char z = *(*cp0 + x + y * wc0);
-					if (z != ' ')
-					{
+					if (z != ' ') {
 						b |= v;
 					}
 					ONE_PIXEL
@@ -2250,28 +2239,24 @@ void InitLayers(void)
 				}
 			}
 
-		}
-		else { // n >= 100
+		} else { // n >= 100
 			// width of chars
 			int wc2 = 0;
 			int wc1 = 0;
 			int wc0 = 0;
 			if ((n / 100) == 1) {
 				wc2 = lbit1_width[iconSize];
-			}
-			else {
+			} else {
 				wc2 = lbit0_width[iconSize];
 			}
 			if (((n / 10) % 10) == 1) {
 				wc1 = lbit1_width[iconSize];
-			}
-			else {
+			} else {
 				wc1 = lbit0_width[iconSize];
 			}
 			if ((n % 10) == 1) {
 				wc0 = lbit1_width[iconSize];
-			}
-			else {
+			} else {
 				wc0 = lbit0_width[iconSize];
 			}
 
@@ -2287,39 +2272,32 @@ void InitLayers(void)
 			char** cp1 = show_layer_digits[iconSize][(n / 10) % 10];
 			char** cp0 = show_layer_digits[iconSize][n % 10];
 
-			for (int y = 0; y < h; y++)
-			{
+			for (int y = 0; y < h; y++) {
 				int v = dx_table[dx]; // powers of two
 				char b = 0; // bits
 
 				int yy = wb * (y + (bhgt - h) / 2);
 
 				int xx = x0; // byte
-				for (int x = 0; x < wc2; x++)
-				{
+				for (int x = 0; x < wc2; x++) {
 					char z = *(*cp2 + x + y * wc2);
-					if (z != ' ')
-					{
+					if (z != ' ') {
 						b |= v;
 					}
 					ONE_PIXEL
 				}
 				ONE_PIXEL
-				for (int x = 0; x < wc1; x++)
-				{
+				for (int x = 0; x < wc1; x++) {
 					char z = *(*cp1 + x + y * wc1);
-					if (z != ' ')
-					{
+					if (z != ' ') {
 						b |= v;
 					}
 					ONE_PIXEL
 				}
 				ONE_PIXEL
-				for (int x = 0; x < wc0; x++)
-				{
+				for (int x = 0; x < wc0; x++) {
 					char z = *(*cp0 + x + y * wc0);
-					if (z != ' ')
-					{
+					if (z != ' ') {
 						b |= v;
 					}
 					ONE_PIXEL
@@ -2331,10 +2309,10 @@ void InitLayers(void)
 		}
 
 		show_layer_bmps[i] = wIconCreateBitMap(
-			bwid,
-			bhgt,
-			show_layer_bits,
-			layerColorTab[i % (COUNT(layerColorTab))]);
+		                             bwid,
+		                             bhgt,
+		                             show_layer_bits,
+		                             layerColorTab[i % (COUNT(layerColorTab))]);
 		layers[i].color = layerColorTab[i % (COUNT(layerColorTab))];
 		layers[i].useColor = TRUE;
 
