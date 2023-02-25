@@ -58,6 +58,11 @@ wWin_p wMain( int argc, char * argv[] )
 	int i;
 	char buffer[ 80 ];
 
+	printf("testapp: argc: %d\n", argc);
+
+	for(int i = 0; i< argc; i++)
+		printf("%s\n", argv[i]);
+
 	wInitAppName(APPNAME);
 
 	printf("%s\n", wGetUserHomeDir());

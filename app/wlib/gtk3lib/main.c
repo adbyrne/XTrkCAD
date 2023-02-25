@@ -21,10 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <locale.h>
-#include <string.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -38,6 +35,8 @@
 #include "i18n.h"
 
 static char *appName;		/**< application name */
+static int argc;			/**< count of command line options */
+static char **argv;			/**< command line options */
 
 /**
  * Initialize the application name for later use
@@ -58,6 +57,45 @@ wlibGetAppName()
 	return( appName );
 }
 
+/**
+ * Activate the application by calling the main program
+ *
+ * \param app 			see activate signal
+ * \param user_data 	unused
+ */
+
+static void
+activate(GtkApplication* app, gpointer user_data)
+{
+	wWin_p window;
+
+	window = wMain(argc, argv );
+
+	g_strfreev(argv);
+}
+
+/**
+ * Get the command line parameters and make them available to the main program.
+ * argc and argv are retrieved and stored in globals for further usage
+ *
+ * \param self 	 	see command_line signal
+ * \param cmdLine 	see command_line signal
+ * \param user_data not used
+ * \return gint always 0 as parameters aren't checked
+ */
+
+static gint
+command_line( GApplication* self, GApplicationCommandLine* cmdLine,
+               gpointer user_data )
+{
+	argv = g_application_command_line_get_arguments(
+	               cmdLine,
+	               &argc);
+
+	g_application_activate( self );
+	return( 0 );
+}
+
 /*
  *******************************************************************************
  *
@@ -66,25 +104,23 @@ wlibGetAppName()
  *******************************************************************************
  */
 
-
-
 int main( int argc, char *argv[] )
 {
-	wWin_p win;
+	GtkApplication *app;
+	int status;
 
 	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 ) {
 		setlocale( LC_ALL, "en_US" );
 	}
-	gtk_init( &argc, &argv );
 
-	if ((win=wMain( argc, argv )) == NULL) {
-		exit(1);
-	}
+	app = gtk_application_new("org.xtrackcad.wlib",
+	                           G_APPLICATION_HANDLES_COMMAND_LINE);
+	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+	g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
 
-	if (!win->shown) {
-		wWinShow( win, TRUE );
-	}
+	status = g_application_run(G_APPLICATION (app), argc, argv);
 
-	gtk_main();
-	exit(0);
+	g_object_unref (app);
+
+	return status;
 }
