@@ -2360,6 +2360,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		pos = GetTrkEndPos(trk,ep);
 		if (!GetTrackParams(PARAMS_CORNU,trk,pos,&params)) { return C_ERROR; }
 		end_pos = pos;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		if (params.type == curveTypeCurve) {
 			curved = TRUE;
 			tempSegs(0).type = SEG_CRVTRK;
@@ -2377,7 +2378,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		valid = FALSE;
 		InfoMessage( _("Drag to change track length") );
 		return C_CONTINUE;
-	/*no break*/
+
 	case C_MOVE:
 		if (curved) {
 			//Normalize pos
@@ -2414,7 +2415,6 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 				tempSegs(0).u.c.a0 = a;
 				tempSegs(0).u.c.a1 = NormalizeAngle(a2-a);
 			}
-			tempSegs_da.cnt = 1;
 			valid = TRUE;
 			if (action == C_MOVE)
 				InfoMessage( _("Curve: Length=%s Radius=%0.3f Arc=%0.3f"),
@@ -2442,7 +2442,6 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 			}
 			Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
 			                ep ), d );
-			tempSegs_da.cnt = 1;
 			if (action == C_MOVE)
 				InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 				             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
@@ -2489,6 +2488,7 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action,
 		if ( ep == -1 ) {
 			return C_ERROR;
 		}
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, ep );
@@ -2506,7 +2506,6 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action,
 		}
 		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
 		                ep ), d );
-		tempSegs_da.cnt = 1;
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 			             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );

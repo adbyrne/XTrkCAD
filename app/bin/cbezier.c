@@ -842,10 +842,8 @@ EXPORT STATUS_T AdjustBezCurve(
 		if (Da.state != NONE) {
 			DrawTempBezier(Da.track);
 		}
-		if (anchors_da.cnt>0) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		return C_CONTINUE;
 
 	default:
@@ -1264,10 +1262,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,
 			             (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, lineColor);
 		}
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		return C_CONTINUE;
 
 	case C_CANCEL:

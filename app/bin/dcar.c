@@ -2770,8 +2770,8 @@ static void CarDlgRedraw(
 	}
 	orig.x = 0.50*carDlgD.scale;
 	orig.y = 0.25*carDlgD.scale;
-	DrawSegs( &carDlgD, orig, 0.0, &carDlgSegs(0), carDlgSegs_da.cnt, 0.0,
-	          wDrawColorBlack );
+	DrawSegsDA( &carDlgD, NULL, orig, 0.0, &carDlgSegs_da, 0.0, wDrawColorBlack,
+	            0 );
 	pos.y = orig.y+carDlgDim.carWidth/2.0;
 
 	if ( carDlgDim.truckCenter > 0.0 ) {

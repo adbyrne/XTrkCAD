@@ -1915,10 +1915,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 	case C_REDRAW:
 		if (Da.state == NONE) { return C_CONTINUE; }
 		DrawTempCornu();
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		if (Da.state == POINT_PICKED) { wSetCursor(mainD.d,wCursorNone); }
 		return C_CONTINUE;
 	case C_CANCEL:
@@ -2747,10 +2745,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			               Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,
 			               (trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
 		}
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		if (MyGetKeyState()&WKEY_SHIFT) { DrawHighlightBoxes(FALSE,FALSE,NULL); }
 
 		if (Da.state == POINT_PICKED) { wSetCursor(mainD.d,wCursorNone); }

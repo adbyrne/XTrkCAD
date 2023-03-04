@@ -216,7 +216,7 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos)
 		rc = ModifyTrack( Dex.Trk, action, pos );
 		Dex.Trk = NULL;
 		modifyDrawMode = FALSE;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		rc = C_CONTINUE;
 		break;
 	case C_REDRAW:
@@ -275,7 +275,7 @@ STATUS_T CmdModify(
 		InfoMessage(
 		        _("Select a track to modify, Left-Click change length, Right-Click to add flextrack") );
 		Dex.Trk = NULL;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		/*ChangeParameter( &easementPD );*/
 		trackGauge = 0.0;
 		changeTrackMode = modifyRulerMode = FALSE;
@@ -309,7 +309,7 @@ STATUS_T CmdModify(
 		tempSegs(0).lineWidth = 0;
 		tempSegs(1).color = wDrawColorBlack;
 		tempSegs(1).lineWidth = 0;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		Dex.Trk = OnTrack( &pos, FALSE, FALSE );
 		//Dex.Trk = trk;
 		if (Dex.Trk == NULL) {
@@ -334,7 +334,7 @@ STATUS_T CmdModify(
 			if (ModifyBezier(C_START, pos) != C_CONTINUE) {			//Call Start with track
 				modifyBezierMode = FALSE;							//Function rejected Bezier
 				Dex.Trk =NULL;
-				tempSegs_da.cnt = 0;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 			}
 			return C_CONTINUE;										//That's it
 		}
@@ -343,7 +343,7 @@ STATUS_T CmdModify(
 			if (ModifyCornu(C_START, pos) != C_CONTINUE) {			//Call Start with track
 				modifyCornuMode = FALSE;							//Function rejected Cornu
 				Dex.Trk =NULL;
-				tempSegs_da.cnt = 0;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 
 			}
 			return C_CONTINUE;										//That's it
@@ -354,7 +354,7 @@ STATUS_T CmdModify(
 			if (ModifyDraw(C_START, pos) != C_CONTINUE) {
 				modifyDrawMode = FALSE;
 				Dex.Trk = NULL;
-				tempSegs_da.cnt = 0;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 			}
 			return C_CONTINUE;
 		}
@@ -484,7 +484,6 @@ STATUS_T CmdModify(
 		if (modifyExtendMode && (MyGetKeyState()&WKEY_CTRL)) {
 			goto extendTrackMove;
 		}
-		tempSegs_da.cnt = 0;
 
 		if ((MyGetKeyState() & WKEY_ALT) == 0) { SnapPos( &pos ); }
 		rc = ModifyTrack( Dex.Trk, C_MOVE, pos );
@@ -516,13 +515,13 @@ STATUS_T CmdModify(
 		}
 		if ((MyGetKeyState()&WKEY_CTRL)) { goto extendTrackUp; }
 
-		tempSegs_da.cnt = 0;
 
 		if ((MyGetKeyState() & WKEY_ALT) == 0) { SnapPos( &pos ); }
 		UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk),
 		           Dex.params.ep );
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UndoEnd();
 		Dex.Trk = NULL;
 		return rc;
@@ -579,7 +578,7 @@ CHANGE_TRACK:
 	case C_RMOVE:
 extendTrackMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		Dex.valid = FALSE;
 		if (Dex.Trk == NULL) { return C_CONTINUE; }
 		if ((MyGetKeyState() & WKEY_ALT) == 0) { SnapPos( &pos ); }
@@ -624,6 +623,7 @@ extendTrackMove:
 			} else {
 				Dex.jointD.d1 = 0.0;
 			}
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_STRTRK;
 			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.l.pos[0] = Dex.pos01;
@@ -634,7 +634,6 @@ extendTrackMove:
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Extending ", PutDim(fabs(minLength-d)) );
 				return C_CONTINUE;
 			}
-			tempSegs_da.cnt = 1;
 			Dex.valid = TRUE;
 			if (action != C_RDOWN)
 				InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
@@ -702,13 +701,13 @@ extendTrackMove:
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Extending ", PutDim(fabs(minLength-d)) );
 				return C_CONTINUE;
 			}
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_CRVTRK;
 			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.c.center = Dex.curveData.curvePos;
 			tempSegs(0).u.c.radius = Dex.curveData.curveRadius,
 			           tempSegs(0).u.c.a0 = Dex.curveData.a0;
 			tempSegs(0).u.c.a1 = Dex.curveData.a1;
-			tempSegs_da.cnt = 1;
 			double da = D2R(Dex.curveData.a1);
 			if (da < 0.0) {
 				da = 2*M_PI + da;
@@ -733,7 +732,7 @@ extendTrackMove:
 extendTrackUp:
 		changeTrackMode = FALSE;
 		modifyExtendMode = FALSE;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		if (Dex.Trk == NULL) { return C_CONTINUE; }
 		if (!Dex.valid) {
 			return C_CONTINUE;
@@ -784,7 +783,6 @@ extendTrackUp:
 			DrawNewTrack( Dex.Trk );
 		}
 		UndoEnd();
-		tempSegs_da.cnt = 0;
 		DrawNewTrack( trk );
 		return C_TERMINATE;
 
@@ -792,12 +790,10 @@ extendTrackUp:
 		if (modifyBezierMode) { return ModifyBezier(C_REDRAW, pos); }
 		if (modifyCornuMode) { return ModifyCornu(C_REDRAW, pos); }
 		if (modifyDrawMode) { return ModifyDraw(C_REDRAW, pos); }
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
-		          wDrawColorBlack );
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+		            0 );
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 
 		return C_CONTINUE;
 

@@ -1328,8 +1328,8 @@ static void DrawMovedTracks( void )
 	track_p trk;
 	dynArr_t cornu_segs;
 
-	DrawSegs( &tempD, moveOrig, moveAngle, &tempSegs(0), tempSegs_da.cnt,
-	          0.0, selectedColor );
+	DrawSegsDA( &tempD, NULL, moveOrig, moveAngle, &tempSegs_da, 0.0, selectedColor,
+	            0 );
 
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
@@ -1360,10 +1360,8 @@ static void DrawMovedTracks( void )
 					}
 				}
 				CallCornu0(&pos[0],&center[0],&angle[0],&radius[0],&cornu_segs, FALSE);
-				trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
-
-				DrawSegsO(&tempD, trk, zero, 0.0, cornu_p,cornu_segs.cnt,
-				          GetTrkGauge(trk), selectedColor, DTS_LEFT|DTS_RIGHT );
+				DrawSegsDA(&tempD, trk, zero, 0.0, &cornu_segs,
+				           GetTrkGauge(trk), selectedColor, DTS_LEFT|DTS_RIGHT );
 			}
 
 		}
@@ -1852,10 +1850,8 @@ static STATUS_T CmdMove(
 		//Draw all existing highlight boxes only
 		DrawHighlightBoxes(FALSE, FALSE, NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		if ( state == 0 ) {
 			break;
 		}
@@ -2237,10 +2233,8 @@ static STATUS_T CmdRotate(
 	case C_REDRAW:
 		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		/* DO_REDRAW */
 		if ( state == 0 ) {
 			break;
@@ -3374,10 +3368,8 @@ static STATUS_T CmdSelect(
 
 		//Once doing a move or a rotate, make an early exit
 		if (doingMove || doingRotate) {
-			if (anchors_da.cnt) {
-				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-				          wDrawColorBlack );
-			}
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+			            0 );
 			return C_CONTINUE;
 		}
 		BOOL_T AreaSelect = FALSE;
@@ -3480,10 +3472,8 @@ static STATUS_T CmdSelect(
 			}
 		}
 		//Finally add the anchors for any actions or snaps
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 
 		return rc;
 

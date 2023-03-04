@@ -1503,10 +1503,10 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 				return C_ERROR;
 			}
 			UndrawNewTrack(trk);
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).type = SEG_STRTRK;
 			tempSegs(0).lineWidth = 0;
 			tempSegs(0).u.l.pos[0] = GetTrkEndPos(trk, 1 - ep);
-			tempSegs_da.cnt = 1;
 			InfoMessage(_("Drag to change track length"));
 			return C_CONTINUE;
 		case C_MOVE:
@@ -1518,7 +1518,7 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 			}
 			Translate(&tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle(trk,
 			                ep), d);
-			tempSegs_da.cnt = 1;
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			if (action == C_MOVE) {
 				InfoMessage(_("Length=%s"), FormatDistance(d));
 			}
@@ -1917,9 +1917,9 @@ static BOOL_T MakeParallelTurnout(
 			GetTrkEndElev(trk, 1, &option, &d);
 			SetTrkEndElev(*newTrk, 1, option, d, NULL);
 		} else {
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).color = wDrawColorBlack;
 			tempSegs(0).lineWidth = 0;
-			tempSegs_da.cnt = 1;
 			tempSegs(0).type = track ? SEG_STRTRK : SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = endPts[0];
 			tempSegs(0).u.l.pos[1] = endPts[1];
@@ -1927,9 +1927,9 @@ static BOOL_T MakeParallelTurnout(
 		}
 	} else {
 		/* draw some temporary track while command is in process */
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track ? SEG_STRTRK : SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = endPts[0];
 		tempSegs(0).u.l.pos[1] = endPts[1];
@@ -2895,9 +2895,9 @@ EXPORT STATUS_T CmdTurnoutAction(
 			DrawSegs(&tempD, Dto.pos, Dto.angle,
 			         curTurnout->segs, curTurnout->segCnt, trackGauge, selectedColor);
 		}
+		DrawSegsDA(&tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		           0 );
 		if (anchors_da.cnt > 0) {
-			DrawSegs(&tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			         wDrawColorBlack);
 			wSetCursor(mainD.d, wCursorNone);
 		}
 		if (Dto.state == 2) {

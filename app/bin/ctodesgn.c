@@ -2634,7 +2634,6 @@ static toDesignSchema_t * LoadSegs(
 		CHECKMSG( segCnt%3 == 0, ( "%s", dp->label ) );
 		segCnt /= 3;
 		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
-		tempSegs_da.cnt = segCnt;
 		memset( &tempSegs(0), 0, segCnt * sizeof tempSegs(0) );
 		for ( s=0; s<segCnt; s++ ) {
 			segPtr = &tempSegs(s);
@@ -2820,8 +2819,8 @@ static void NewTurnPrint(
 			DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size,
 			               wDrawColorBlack, DRAW_CLOSED );
 
-			DrawSegs( &newTurnout_d, zero, 270.0, &tempSegs(0), tempSegs_da.cnt,
-			          newTurnTrackGauge, wDrawColorBlack );
+			DrawSegsDA( &newTurnout_d, NULL, zero, 270.0, &tempSegs_da, newTurnTrackGauge,
+			            wDrawColorBlack, 0 );
 
 			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
 				pos.x = - GetEndPtPos( TempEndPt(ep) ).y;
@@ -3008,7 +3007,7 @@ static void NewTurnOk( void * context )
 		SetEndPt(TempEndPt(2), pos, angle );
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc,
 		                  newTurnRightPartno );
-		tempSegs_da.cnt = segCnt;
+		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 #ifndef MKTURNOUT
 		if (includeNontrackSegments && customTurnout2) {
 			CopyNonTracks( customTurnout2 );

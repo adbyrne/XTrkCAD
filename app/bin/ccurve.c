@@ -156,7 +156,6 @@ EXPORT STATUS_T CreateCurve(
 		DYNARR_RESET(trkSeg_t,*anchor_array);
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		Da.create_state = NOCURVE;
-		tempSegs_da.cnt = 0;
 		Da.down = FALSE;  						//Not got a valid start yet
 		Da.pos0 = zero;
 		Da.pos1 = zero;
@@ -189,7 +188,7 @@ EXPORT STATUS_T CreateCurve(
 			tempSegs(inx).color = wDrawColorBlack;
 			tempSegs(inx).lineWidth = width;
 		}
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		p = pos;
 		BOOL_T found = FALSE;
 		Da.trk = NULL;
@@ -231,7 +230,7 @@ EXPORT STATUS_T CreateCurve(
 			Da.pos1 = pos;
 		}
 
-		tempSegs_da.cnt = 1;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		switch (mode) {
 		case crvCmdFromEP1:
 			tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
@@ -310,7 +309,7 @@ EXPORT STATUS_T CreateCurve(
 				Translate( &pos, Da.pos0, angle1-90.0, dp );
 			}
 		} else if (track) { SnapPos(&pos); }
-		tempSegs_da.cnt =1;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		if (Da.trk && mode == crvCmdFromChord) {
 			tempSegs(0).type = SEG_CRVTRK;
 			tempSegs(0).u.c.center.x = (pos.x+Da.pos0.x)/2.0;
@@ -334,7 +333,7 @@ EXPORT STATUS_T CreateCurve(
 			CreateEndAnchor(Da.pos0,anchor_array,Da.lock0);
 			DrawArrowHeadsArray( anchor_array, pos, FindAngle(Da.pos0,Da.pos1)+90, TRUE,
 			                     wDrawColorBlue );
-			tempSegs_da.cnt = 1;
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			break;
 		case crvCmdFromTangent:
 			if (Da.trk) { message( _("Tangent locked: Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) ); }
@@ -342,7 +341,7 @@ EXPORT STATUS_T CreateCurve(
 			CreateEndAnchor(Da.pos1,anchor_array,TRUE);
 			DrawArrowHeadsArray( anchor_array, Da.pos0, FindAngle(Da.pos0,Da.pos1)+90, TRUE,
 			                     wDrawColorBlue );
-			tempSegs_da.cnt = 1;
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			break;
 		case crvCmdFromCenter:
 			message( _("Drag to Edge: Radius=%s Angle=%0.3f"), FormatDistance(d),
@@ -350,7 +349,7 @@ EXPORT STATUS_T CreateCurve(
 			CreateEndAnchor(Da.pos0,anchor_array,Da.lock0);
 			DrawArrowHeadsArray( anchor_array, Da.pos1, FindAngle(Da.pos1,Da.pos0)+90, TRUE,
 			                     wDrawColorBlue );
-			tempSegs_da.cnt = 1;
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			break;
 		case crvCmdFromChord:
 			if (Da.trk) { message( _("Start locked: Drag out chord length=%s angle=%0.3f"), FormatDistance(d), PutAngle(a) ); }
@@ -453,7 +452,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		curveMode = VP2L(commandContext);
 		Da.state = -1;
 		Da.pos0 = pos;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		segCnt = 0;
 		STATUS_T rcode;
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -483,7 +482,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		}
 		infoSubst = FALSE;
 		//This is where the user could adjust - if we allow that?
-		tempSegs_da.cnt = segCnt;
+		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 		return C_CONTINUE;
 
 
@@ -522,14 +521,14 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		} else {
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			// SnapPos( &pos );
-			tempSegs_da.cnt = segCnt;
+			DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
 			if (Da.trk) { PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, FALSE, desired_radius ); }
 			else { PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, TRUE, desired_radius ); }
 			if (Da.curveData.type == curveTypeStraight) {
+				DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 				tempSegs(0).type = SEG_STRTRK;
 				tempSegs(0).u.l.pos[0] = Da.pos0;
 				tempSegs(0).u.l.pos[1] = Da.curveData.pos1;
-				tempSegs_da.cnt = 1;
 				segCnt = 1;
 				InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
 				             FormatDistance(FindDistance( Da.pos0, Da.curveData.pos1 )),
@@ -537,16 +536,16 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				DrawArrowHeadsArray(&anchors_da,Da.curveData.pos1,FindAngle(Da.pos0,
 				                    Da.curveData.pos1)+90,TRUE,wDrawColorRed);
 			} else if (Da.curveData.type == curveTypeNone) {
-				tempSegs_da.cnt = 0;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				segCnt = 0;
 				InfoMessage( _("Back") );
 			} else if (Da.curveData.type == curveTypeCurve) {
+				DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 				tempSegs(0).type = SEG_CRVTRK;
 				tempSegs(0).u.c.center = Da.curveData.curvePos;
 				tempSegs(0).u.c.radius = Da.curveData.curveRadius;
 				tempSegs(0).u.c.a0 = Da.curveData.a0;
 				tempSegs(0).u.c.a1 = Da.curveData.a1;
-				tempSegs_da.cnt = 1;
 				segCnt = 1;
 
 				d = D2R(Da.curveData.a1);
@@ -556,7 +555,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				}
 				if ( d*Da.curveData.curveRadius > mapD.size.x+mapD.size.y ) {
 					ErrorMessage( MSG_CURVE_TOO_LARGE );
-					tempSegs_da.cnt = 0;
+					DYNARR_RESET( trkSeg_t, tempSegs_da );
 					Da.curveData.type = curveTypeNone;
 					return C_CONTINUE;
 				}
@@ -605,7 +604,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			Da.state = 1;
 			CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da,
 			             InfoMessage );
-			tempSegs_da.cnt = 1;
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			segCnt = tempSegs_da.cnt;
 
 			sprintf(message, "desired_radius-%s", curScaleName);
@@ -630,7 +629,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE,
 			           desired_radius );
 		}
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		segCnt = 0;
 		Da.state = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one
@@ -669,18 +668,16 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		if ( Da.state >= 0 ) {
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
-			          wDrawColorBlack );
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+			            0 );
 		}
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		if (Da.state == 1) {
-			tempSegs_da.cnt = 0;
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			Da.trk = NULL;
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -882,12 +879,10 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 			}
 		}
 		SetAllTrackSelect( FALSE );
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_CONTINUE;
 
 	case C_DOWN:
-		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
-		tempSegs_da.cnt = 0;
 		if (helix) {
 			if (helixRadius <= 0.0) {
 				ErrorMessage(MSG_RADIUS_GTR_0);
@@ -918,6 +913,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 			}
 		}
 		SnapPos(&pos);
+		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
 		tempSegs(0).u.c.center = pos0 = pos;
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
@@ -941,11 +937,11 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				break;
 			}
 		}
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).type = SEG_CRVTRK;
 		tempSegs(0).u.c.radius = helix ? helixRadius : circleRadius;
 		tempSegs(0).u.c.a0 = 0.0;
 		tempSegs(0).u.c.a1 = 360.0;
-		tempSegs_da.cnt = 1;
 		return C_CONTINUE;
 
 	case C_UP:
@@ -983,12 +979,12 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		} else {
 			InfoSubstituteControls( NULL, NULL );
 		}
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
-		          wDrawColorBlack );
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+		            0 );
 		return C_CONTINUE;
 
 	case C_CANCEL:

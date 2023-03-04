@@ -2051,6 +2051,27 @@ EXPORT void DrawSegs(
 }
 
 /*
+ * Draw Segments from a DynArr without setting DTS_ options.
+ */
+
+EXPORT void DrawSegsDA(
+        drawCmd_p d,
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle,
+        dynArr_t *da,
+        DIST_T trackGauge,
+        wDrawColor color,
+        long options )
+{
+
+	if ( da->cnt > 0 ) {
+		DrawSegsO( d, trk, orig, angle, &DYNARR_N(trkSeg_t,*da,0), da->cnt,
+		           trackGauge, color, options );
+	}
+}
+
+/*
  * Free dynamic storage added to each of an array of Track Segments.
  */
 EXPORT void CleanSegs(dynArr_t * seg_p)

@@ -567,8 +567,7 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 		DrawCornuDescription( t, d, color );
 	}
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
-	DrawSegsO(d,t,zero,0.0,xx->arcSegs.ptr,xx->arcSegs.cnt, GetTrkGauge(t), color,
-	          widthOptions);
+	DrawSegsDA(d,t,zero,0.0,&xx->arcSegs, GetTrkGauge(t), color, widthOptions);
 	DrawEndPt( d, t, 0, color );
 	DrawEndPt( d, t, 1, color );
 }
@@ -1405,13 +1404,13 @@ static BOOL_T MakeParallelCornu(
 				return FALSE;
 			}
 		} else {
-			tempSegs_da.cnt = 0;
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			CallCornu0(np,nc,na,nr,&tempSegs_da,FALSE);
 			*newTrkR = MakePolyLineFromSegs( zero, 0.0, &tempSegs_da );
 		}
 
 	} else {
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		CallCornu0(np,nc,na,nr,&tempSegs_da,FALSE);
 		if (!track) {
 			for (int i=0; i<tempSegs_da.cnt; i++) {

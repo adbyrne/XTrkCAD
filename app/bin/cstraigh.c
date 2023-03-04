@@ -106,9 +106,9 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
-		tempSegs_da.cnt = 0;
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).u.l.pos[0] = pos;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -151,14 +151,14 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),
 		             FormatDistance(FindDistance( Dl.pos0, pos )),
 		             PutAngle(FindAngle( Dl.pos0, pos )) );
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).u.l.pos[1] = pos;
-		tempSegs_da.cnt = 1;
 		return C_CONTINUE;
 
 	case C_UP:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (!Dl.down) { return C_CONTINUE; }
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
@@ -180,13 +180,11 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		if (Dl.down) {
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
-			          wDrawColorBlack );
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+			            0 );
 		}
 		return C_CONTINUE;
 	case C_CANCEL:

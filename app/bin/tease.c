@@ -1603,7 +1603,6 @@ static BOOL_T MakeParallelJoint(
 				GetJointPos( &tempSegs(inx).u.l.pos[1], NULL, l0, R, L, P, A, xx->negate );
 				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
 			}
-			tempSegs_da.cnt = cnt;
 		}
 	} else {
 		/* print segments about 0.20" long */
@@ -1625,7 +1624,6 @@ static BOOL_T MakeParallelJoint(
 			l0 += dl;
 			GetJointPos( &tempSegs(inx).u.l.pos[1], NULL, l0, R, L, P, A, xx->negate );
 		}
-		tempSegs_da.cnt = cnt;
 	}
 	if ( p0R ) { *p0R = p0; }
 	if ( p1R ) { *p1R = p1; }

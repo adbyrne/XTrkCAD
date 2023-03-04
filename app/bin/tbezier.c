@@ -595,7 +595,7 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 		else if (xx->lineType == DRAWLINEDASHDOTDOT) { d->options |= DC_DASHDOTDOT; }
 		else if (xx->lineType == DRAWLINECENTER) { d->options |= DC_CENTER; }
 		else if (xx->lineType == DRAWLINEPHANTOM) { d->options |= DC_PHANTOM; }
-		DrawSegsO(d,t,zero,0.0,xx->arcSegs.ptr,xx->arcSegs.cnt, 0.0, color, 0);
+		DrawSegsDA(d,t,zero,0.0,&xx->arcSegs, 0.0, color, 0);
 		d->options &= NotSolid;
 		return;
 	}
@@ -606,8 +606,7 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 	     ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawBezierDescription( t, d, color );
 	}
-	DrawSegsO(d,t,zero,0.0,xx->arcSegs.ptr,xx->arcSegs.cnt, GetTrkGauge(t), color,
-	          widthOptions);
+	DrawSegsDA(d,t,zero,0.0,&xx->arcSegs, GetTrkGauge(t), color, widthOptions);
 	DrawEndPt( d, t, 0, color );
 	DrawEndPt( d, t, 1, color );
 }
@@ -1343,7 +1342,6 @@ static BOOL_T MakeParallelBezier(
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_BEZTRK:SEG_BEZLIN;
 		if (tempSegs(0).bezSegs.ptr) { MyFree(tempSegs(0).bezSegs.ptr); }
 		tempSegs(0).bezSegs.ptr = 0;

@@ -160,7 +160,7 @@ EXPORT void Reset(void)
 		wButtonSetBusy(
 		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
 		        TRUE);
-	tempSegs_da.cnt = 0;
+	DYNARR_RESET( trkSeg_t, tempSegs_da );
 
 	TryCheckPoint();
 
@@ -338,7 +338,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 	if ((rc == C_TERMINATE || rc == C_INFO)
 	    && (commandList[curCommand].options & IC_STICKY)
 	    && (commandList[curCommand].stickyMask & stickySet)) {
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UpdateAllElevations();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
@@ -466,7 +466,7 @@ EXPORT void DoCommandB(void * data)
 		LOG(log_command, 3,
 		    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 		commandList[curCommand].cmdProc( C_CANCEL, pos);
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 	} else {
 		LOG(log_command, 3,
 		    ( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
