@@ -38,7 +38,7 @@ typedef struct track_t {
 	BOOL_T new:1;
 	unsigned int width:2;
 	unsigned int elevMode:2;
-	unsigned int bits:13;
+	unsigned int bits:14;	// Make sure all TB_ flags can fit
 	EPINX_T endCnt;
 	trkEndPt_p endPt;
 	struct { float x; float y; } lo, hi;

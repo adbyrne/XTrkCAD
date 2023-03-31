@@ -3357,7 +3357,8 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 		    || IsClose(FindDistance(tt.pos,GetTrkEndPos(trk,1)))) {
 			DYNARR_N(pos_angle_t,pos_array,i).pos = GetTrkEndPos(trk,1);
 			DYNARR_N(pos_angle_t,pos_array,i).angle = GetTrkEndAngle(trk,1);
-			pos_array.cnt = i;
+			// Truncate pos_array
+			pos_array.cnt = i+1;
 			break;
 		}
 		DYNARR_N(pos_angle_t,pos_array,i).pos = tt.pos;
