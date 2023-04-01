@@ -1106,10 +1106,10 @@ static STATUS_T CmdJoin(
 			Dj.state = 2;
 			Dj.jRes.flip = FALSE;
 		}
-		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		/* no break */
 		
 	case C_MOVE:
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		if (easementVal < 0 && Dj.cornuMode) {
 			return CmdCornu(action, pos);
 		}
@@ -1198,7 +1198,6 @@ static STATUS_T CmdJoin(
 			}
 
 		}
-
 
 		ok = FALSE;
 
@@ -1382,7 +1381,6 @@ static STATUS_T CmdJoin(
 		}
 
 		/* Setup temp track */
-		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		for ( ep=0; ep<2; ep++ ) {
 			switch( Dj.inp[ep].params.type ) {
 			case curveTypeCurve:
@@ -1533,7 +1531,7 @@ errorReturn:
 		} else if (easementVal<0 && Dj.joinMoveState == 0) {
 			return CmdCornu(action,pos);
 		}
-		DrawSegsDA(&tempD, NULL, zero, 0.0, &Dl.anchors_da, trackGauge, wDrawColorBlack,
+		DrawSegsDA(&tempD, NULL, zero, 0.0, &Dj.anchors, trackGauge, wDrawColorBlack,
 		           0);
 		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
 		            0 );

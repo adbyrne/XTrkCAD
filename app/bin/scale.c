@@ -382,6 +382,7 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx,
 	char *scaleName = GetScaleName( scaleInx );
 	DIST_T scaleRatio = GetScaleRatio( scaleInx );
 	dynArr_t gauges_da;
+	DYNARR_INIT( gaugeInfo_t, gauges_da );
 
 	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
 		char *t = strchr( scaleDesc(i).scaleDescStr, ' ' );

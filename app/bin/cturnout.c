@@ -138,9 +138,7 @@ EXPORT turnoutInfo_t* CreateNewTurnout(
 	to->segs = (trkSeg_p)memdup(segData, (sizeof(*segData) * segCnt));
 	seg_p = to->segs;
 	for (int i = 0; i < segCnt; i++) {
-		seg_p[i].bezSegs.ptr = NULL;
-		seg_p[i].bezSegs.cnt = 0;
-		seg_p[i].bezSegs.max = 0;
+		DYNARR_INIT( trackSeg_t, seg_p[i].bezSegs );
 	}
 	CopyPoly(to->segs, segCnt);
 	FixUpBezierSegs(to->segs, to->segCnt);
@@ -1516,9 +1514,9 @@ static STATUS_T ModifyTurnout(track_p trk, wAction_t action, coOrd pos)
 			} else if (d > xx->u.adjustable.maxD) {
 				d = xx->u.adjustable.maxD;
 			}
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			Translate(&tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle(trk,
 			                ep), d);
-			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			if (action == C_MOVE) {
 				InfoMessage(_("Length=%s"), FormatDistance(d));
 			}

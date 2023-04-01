@@ -1047,7 +1047,7 @@ static void LocoListInit(void)
 {
 	track_p train;
 	struct extraDataCar_t * xx;
-	locoList_da.cnt = 0;
+	DYNARR_RESET( locoList_t, locoList_da );
 
 	for (train=NULL; TrackIterate(&train);) {
 		if (GetTrkType(train) != T_CAR) {

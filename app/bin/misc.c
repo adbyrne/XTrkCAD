@@ -822,7 +822,7 @@ EXPORT void CloseDemoWindows(void)
 		if ( demoWindows(inx) != NULL) {
 			wHide(demoWindows(inx));
 		}
-	demoWindows_da.cnt = 0;
+	DYNARR_RESET( wWin_p, demoWindows_da );
 }
 
 EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data)

@@ -5744,12 +5744,7 @@ EXPORT void ClearCars( void )
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ ) {
 		MyFree( carItemInfo(inx) );
 	}
-	carItemInfo_da.cnt = 0;
-	carItemInfo_da.max = 0;
-	if ( carItemInfo_da.ptr ) {
-		MyFree( carItemInfo_da.ptr );
-	}
-	carItemInfo_da.ptr = NULL;
+	DYNARR_FREE( carItem_t*, carItemInfo_da );
 }
 
 
@@ -5764,8 +5759,7 @@ EXPORT void SaveCarState( void )
 	savedCarState.carProto_da = carProto_da;
 	savedCarState.carPartParent_da = carPartParent_da;
 	savedCarState.carItemInfo_da = carItemInfo_da;
-	carItemInfo_da.cnt = carItemInfo_da.max = 0;
-	carItemInfo_da.ptr = NULL;
+	DYNARR_INIT( carItem_t*, carItemInfo_da );
 }
 
 

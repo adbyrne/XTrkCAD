@@ -228,7 +228,7 @@ makeNode:
 skipNode:
 	LOG( log_shortPath, 2, ( "  -> FAIL: %s @ T%d:%d.%d\n", msg, GetTrkIndex(trk),
 	                         ep1, ep2 ) )
-	trackep_da.cnt = startTrack;
+	DYNARR_SET( trackep_t, trackep_da, startTrack );
 	return FALSE;
 }
 

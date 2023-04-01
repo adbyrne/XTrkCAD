@@ -842,7 +842,7 @@ STATUS_T DrawGeomMouse(
 				context->show = FALSE;
 				return C_CONTINUE;
 			} else {
-				//DYNARR_SET(trkSeg_t,tempSegs_da,1);
+				DYNARR_SET(trkSeg_t,tempSegs_da,1);
 				if (context->ArcData.type == curveTypeCurve) {
 					segPtr = &tempSegs(0);
 					segPtr->type = SEG_CRVLIN;

@@ -553,7 +553,7 @@ static void SelectConnectedTracks(
 	track_p trk1;
 	int inx;
 	EPINX_T ep;
-	tlist_da.cnt = 0;
+	DYNARR_RESET( track_p, tlist_da );
 	TlistAppend( trk );
 	InfoCount( 0 );
 	if (!display_only) { wDrawDelayUpdate( mainD.d, FALSE ); }
@@ -1327,6 +1327,7 @@ static void DrawMovedTracks( void )
 	int inx;
 	track_p trk;
 	dynArr_t cornu_segs;
+	DYNARR_INIT( trkSeg_t, cornu_segs );
 
 	DrawSegsDA( &tempD, NULL, moveOrig, moveAngle, &tempSegs_da, 0.0, selectedColor,
 	            0 );
@@ -1799,7 +1800,7 @@ static STATUS_T CmdMove(
 		ep1 = -1;
 		ep2 = -1;
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		return C_TERMINATE;
 
 	case C_CMDMENU:
@@ -1906,7 +1907,7 @@ static STATUS_T CmdMove(
 			UndoEnd();
 		}
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		break;
 	case C_CONFIRM:
 	case C_CANCEL:
@@ -1915,7 +1916,7 @@ static STATUS_T CmdMove(
 			UndoUndo(NULL);
 		}
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		break;
 	default:
 		break;
@@ -2189,7 +2190,7 @@ static STATUS_T CmdRotate(
 		}
 		UndoEnd();
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		return C_TERMINATE;
 
 	case C_CMDMENU:
@@ -3294,7 +3295,7 @@ static STATUS_T CmdSelect(
 		case MOVE:
 			if (SelectedTracksAreFrozen() || (selectedTrackCount==0)) {
 				rc = C_TERMINATE;
-				tlist_da.cnt = 0;
+				DYNARR_RESET( track_p, tlist_da );
 				doingMove = FALSE;
 				doingRotate = FALSE;
 			} else if (doingRotate == TRUE) {

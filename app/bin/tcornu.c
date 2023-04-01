@@ -575,12 +575,7 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 void FreeSubSegs(trkSeg_t* s)
 {
 	if (s->type == SEG_BEZTRK || s->type == SEG_BEZLIN) {
-		if (s->bezSegs.ptr) {
-			MyFree(s->bezSegs.ptr);
-		}
-		s->bezSegs.max = 0;
-		s->bezSegs.cnt = 0;
-		s->bezSegs.ptr = NULL;
+		DYNARR_FREE( trkSeg_t, s->bezSegs );
 	}
 }
 
@@ -592,12 +587,8 @@ static void DeleteCornu( track_p t )
 		trkSeg_t s = DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		FreeSubSegs(&s);
 	}
-	if (xx->arcSegs.ptr) {
-		MyFree(xx->arcSegs.ptr);
-	}
-	xx->arcSegs.max = 0;
-	xx->arcSegs.cnt = 0;
-	xx->arcSegs.ptr = NULL;
+
+	DYNARR_FREE( trkSeg_t, xx->arcSegs );
 }
 
 static BOOL_T WriteCornu( track_p t, FILE * f )
@@ -1092,10 +1083,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 				segPtr->type = SEG_BEZTRK;
 				segPtr->color = wDrawColorBlack;
 				segPtr->lineWidth = 0;
-				if (segPtr->bezSegs.ptr) { MyFree(segPtr->bezSegs.ptr); }
-				segPtr->bezSegs.cnt = 0;
-				segPtr->bezSegs.max = 0;
-				segPtr->bezSegs.ptr = NULL;
+				DYNARR_FREE( trkSeg_t, segPtr->bezSegs );
 				for (int j=0; j<4; j++) { segPtr->u.b.pos[j] = p->u.b.pos[j]; }
 				FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
 			} else {
@@ -1484,10 +1472,8 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 {
 	struct extraDataCornu_t *xx;
 	xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
-	xx->arcSegs.max = 0;
-	xx->arcSegs.cnt = 0;
-	//if (xx->arcSegs.ptr) MyFree(xx->arcSegs.ptr);
-	xx->arcSegs.ptr = NULL;
+	//NOTE - Original code did not Free .ptr? See CS:c1b85944f448
+	DYNARR_INIT( trkSeg_t, xx->arcSegs );
 	if (!FixUpCornu0(xx->pos,xx->c,xx->a,xx->r, xx)) { return FALSE; }
 	ComputeCornuBoundingBox(trk, xx);
 	return TRUE;

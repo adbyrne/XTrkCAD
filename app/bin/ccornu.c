@@ -536,10 +536,7 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg)
 	DYNARR_APPEND(trkSeg_t, * array_p, 10);          //Adds 1 to cnt
 	s = &DYNARR_N(trkSeg_t,* array_p,array_p->cnt-1);
 	s->type = seg->type;
-	s->bezSegs.max = 0;
-	s->bezSegs.cnt = 0;
-	if (s->bezSegs.ptr) { MyFree(s->bezSegs.ptr); }
-	s->bezSegs.ptr = NULL;
+	DYNARR_FREE( trkSeg, s->bezSegs );
 	s->color = seg->color;
 	s->lineWidth = seg->lineWidth;
 	if ((s->type == SEG_BEZLIN || s->type == SEG_BEZTRK) && seg->bezSegs.cnt) {
@@ -579,7 +576,7 @@ typedef struct {
 BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2],
                   cornuParm_t * cp, dynArr_t * array_p, BOOL_T spots)
 {
-	array_p->cnt = 0;
+	DYNARR_RESET( trkSeg_t, *array_p );
 	//Create LH knots
 	//Find remote end point of track, create start knot
 	int ends[2];
@@ -662,7 +659,7 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2],
 EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
                          DIST_T radius[2], dynArr_t * array_p, BOOL_T spots)
 {
-	array_p->cnt = 0;
+	DYNARR_RESET( trkSeg_t, *array_p );
 	//Create LH knots
 	//Find remote end point of track, create start knot
 	int ends[2];
@@ -1137,7 +1134,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		Da.extend[1] = FALSE;
 		CreateBothEnds(Da.selectEndPoint, Da.selectMidPoint,Da.selectEndHandle,
 		               Da.prevSelected);
-		Da.crvSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, Da.crvSegs_da );
 		SetUpCornuParms(&cp);
 		if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) { Da.crvSegs_da_cnt = Da.crvSegs_da.cnt; }
 		else { Da.crvSegs_da_cnt = 0; }
@@ -1972,7 +1969,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos,
 		Da.ep1Segs_da_cnt = 0;
 		Da.ep2Segs_da_cnt = 0;
 		Da.crvSegs_da_cnt = 0;
-		Da.midSegs.cnt = 0;
+		DYNARR_RESET( trkSeg_t*, Da.midSegs );
 		Da.extend[0] = FALSE;
 		Da.extend[1] = FALSE;
 		Da.selectEndPoint = -1;
@@ -2389,7 +2386,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		Da.ep1Segs_da_cnt = 0;
 		Da.ep2Segs_da_cnt = 0;
 		Da.crvSegs_da_cnt = 0;
-		Da.midSegs.cnt = 0;
+		DYNARR_RESET( trkSeg_t*, Da.midSegs );
 		DYNARR_RESET(coOrd,Da.mid_points);
 		DYNARR_RESET(track_p,Da.tracks);
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -2474,7 +2471,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 					}
 					Da.state = POS_2;    //Now this is second end and it is open
 					Da.selectEndPoint = 1;
-					Da.mid_points.cnt=0;
+					DYNARR_RESET( trkSeg_t*, Da.midSegs );
 					Da.angle[1] = GetOpenAngle(Da.pos,Da.angle,1);
 					Da.radius[1] = 0.0;
 					CreateBothEnds(1,-1,-1,-1);
@@ -2971,7 +2968,7 @@ static STATUS_T CmdConvertTo(
 			DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
 			Da.ep1Segs_da_cnt = 0;
 			Da.ep2Segs_da_cnt = 0;
-			Da.midSegs.cnt = 0;
+			DYNARR_RESET( trkSeg_t*, Da.midSegs );
 			Da.extend[0] = FALSE;
 			Da.extend[1] = FALSE;
 			Da.selectEndPoint = -1;

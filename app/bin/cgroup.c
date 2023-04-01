@@ -918,7 +918,7 @@ static int GroupShortestPathFunc(
 		}
 		if ( ep1<0 || ep2<0 ) {
 			LOG( log_group, 4, ( " Remove: ep not found\n" ) )
-			pathElem_da.cnt = pathElemStart;
+			DYNARR_SET( pathElem_t, pathElem_da, pathElemStart );
 			return 0;
 		}
 		for ( inx=0; inx<path_da.cnt; inx++ ) {
@@ -926,7 +926,7 @@ static int GroupShortestPathFunc(
 			if ( ( ep1 < 0 || ( pp->ep1 == ep1 || pp->ep2 == ep1 ) ) &&
 			     ( ep2 < 0 || ( pp->ep1 == ep2 || pp->ep2 == ep2 ) ) ) {
 				LOG( log_group, 4, ( " Remove: duplicate path P%d\n", inx ) )
-				pathElem_da.cnt = pathElemStart;
+				DYNARR_SET( pathElem_t, pathElem_da, pathElemStart );
 				return 0;
 			}
 		}

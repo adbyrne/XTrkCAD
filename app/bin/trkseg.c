@@ -701,10 +701,8 @@ EXPORT void CloneFilledDraw(
 			break;
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
-			sp->bezSegs.cnt = 0;
-			//if (sp->bezSegs.ptr) MyFree(sp->bezSegs.ptr);  Make sure no update to static
-			sp->bezSegs.ptr = NULL;
-			sp->bezSegs.max = 0;
+			// NOTE Don't free storage See CS:036e709b4ca9
+			DYNARR_INIT( trkSeg_t, sp->bezSegs );
 			FixUpBezierSeg(sp->u.b.pos,sp,sp->type == SEG_BEZTRK);
 			break;
 		default:
@@ -1292,9 +1290,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_STRTRK;
-			s->bezSegs.max = 0;
-			s->bezSegs.cnt = 0;
-			s->bezSegs.ptr = NULL;
+			DYNARR_INIT( trkSeg_t, s->bezSegs );
 			if ( !GetArgs( cp, hasElev?"lwpfpf":"lwpYpY",
 			               &rgb, &s->lineWidth,
 			               &s->u.l.pos[0], &elev0,
@@ -1308,9 +1304,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_CRVTRK;
-			s->bezSegs.max = 0;
-			s->bezSegs.cnt = 0;
-			s->bezSegs.ptr = NULL;
+			DYNARR_INIT( trkSeg_t, s->bezSegs );
 			if ( !GetArgs( cp, hasElev?"lwfpfff":"lwfpYff",
 			               &rgb, &s->lineWidth,
 			               &s->u.c.radius,
@@ -1348,9 +1342,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type=SEG_BEZTRK;
-			s->bezSegs.max=0;
-			s->bezSegs.ptr= NULL;
-			s->bezSegs.cnt=0;
+			DYNARR_INIT( trkSet_t, s->bezSegs );
 			if ( !GetArgs( cp, "lwpppp",
 			               &rgb, &s->lineWidth,
 			               &s->u.b.pos[0],
@@ -1366,9 +1358,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type=SEG_BEZLIN;
-			s->bezSegs.max=0;
-			s->bezSegs.ptr= NULL;
-			s->bezSegs.cnt=0;
+			DYNARR_INIT( trkSet_t, s->bezSegs );
 			if ( !GetArgs( cp, "lwpppp",
 			               &rgb, &s->lineWidth,
 			               &s->u.b.pos[0],
@@ -2051,7 +2041,7 @@ EXPORT void DrawSegs(
 }
 
 /*
- * Draw Segments from a DynArr without setting DTS_ options.
+ * Draw Segments from a DynArr
  */
 
 EXPORT void DrawSegsDA(
@@ -2080,10 +2070,7 @@ EXPORT void CleanSegs(dynArr_t * seg_p)
 	for (int i=0; i<seg_p->cnt; i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t,* seg_p,i);
 		if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
-			if (t.bezSegs.ptr) { MyFree(t.bezSegs.ptr); }
-			t.bezSegs.cnt = 0;
-			t.bezSegs.max = 0;
-			t.bezSegs.ptr = NULL;
+			DYNARR_FREE( trkSeg_t, t.bezSegs );
 		}
 		if (t.type == SEG_POLY || t.type == SEG_FILPOLY) {
 			if (t.u.p.pts) { MyFree(t.u.p.pts); }
@@ -2091,10 +2078,8 @@ EXPORT void CleanSegs(dynArr_t * seg_p)
 			t.u.p.pts = NULL;
 		}
 	}
-	seg_p->cnt = 0;
-	if (seg_p->ptr) { MyFree(seg_p->ptr); }
-	seg_p->ptr = NULL;
-	seg_p->max = 0;
+
+	DYNARR_FREE( trkSeg_t, *seg_p );
 }
 
 

@@ -2377,9 +2377,11 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		}
 		valid = FALSE;
 		InfoMessage( _("Drag to change track length") );
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_CONTINUE;
 
 	case C_MOVE:
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		if (curved) {
 			//Normalize pos
 			PointOnCircle( &pos, tempSegs(0).u.c.center, tempSegs(0).u.c.radius,
@@ -2392,6 +2394,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
 				}
 				valid = FALSE;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
 			//Restrict to outside track
@@ -2401,6 +2404,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 				tempSegs(0).u.c.a1 = 0;
 				tempSegs(0).u.c.a0 = end_angle;
 				InfoMessage( _("Inside turnout track"));
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
 			end_angle = GetTrkEndAngle( trk, ep );
@@ -2429,17 +2433,18 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
 				}
 				valid = FALSE;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
 			ANGLE_T diff = NormalizeAngle(GetTrkEndAngle( trk, ep )-FindAngle(end_pos,
 			                              pos));
 			if (diff>=90.0 && diff<=270.0) {
 				valid = FALSE;
-				tempSegs(0).u.c.a1 = 0;
-				tempSegs(0).u.c.a0 = end_angle;
 				InfoMessage( _("Inside turnout track"));
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
+
 			Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
 			                ep ), d );
 			if (action == C_MOVE)
@@ -2452,6 +2457,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		if (!valid) {
 			return C_TERMINATE;
 		}
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UndrawNewTrack( trk );
 		EPINX_T jp;
 		if (curved) {
@@ -3335,9 +3341,7 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 	tt.pos = GetTrkEndPos(trk,0);
 
 	dynArr_t pos_array;
-	pos_array.max = 0;
-	pos_array.cnt = 0;
-	pos_array.ptr = NULL;
+	DYNARR_INIT( pos_angle_t, pos_array );
 
 	typedef struct {
 		coOrd pos;
@@ -3356,7 +3360,8 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 		    || IsClose(FindDistance(tt.pos,GetTrkEndPos(trk,1)))) {
 			DYNARR_N(pos_angle_t,pos_array,i).pos = GetTrkEndPos(trk,1);
 			DYNARR_N(pos_angle_t,pos_array,i).angle = GetTrkEndAngle(trk,1);
-			pos_array.cnt = i;
+			// Truncate pos_array
+			DYNARR_SET( pos_angle_t, pos_array, i+1 );
 			break;
 		}
 		DYNARR_N(pos_angle_t,pos_array,i).pos = tt.pos;
@@ -3377,11 +3382,6 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,
 	                0.0);
-	if (pos_array.ptr) {
-		MyFree(pos_array.ptr);
-	}
-	pos_array.ptr = 0;
-	pos_array.max = 0;
-	pos_array.cnt = 0;
+	DYNARR_FREE( pos_angle_t, pos_array );
 }
 

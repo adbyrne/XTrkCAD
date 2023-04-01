@@ -249,9 +249,7 @@ void addSegBezier(dynArr_t * array_p, trkSeg_p seg)
 	s->type = seg->type;
 	s->color = seg->color;
 	s->lineWidth = seg->lineWidth;
-	s->bezSegs.cnt = 0;
-	s->bezSegs.ptr=NULL;
-	s->bezSegs.max = 0;
+	DYNARR_INIT( trkSeg_t, s->bezSegs );
 	if ((s->type == SEG_BEZLIN || s->type == SEG_BEZTRK) && seg->bezSegs.cnt) {
 		s->u.b.angle0 = seg->u.b.angle0;  //Copy all the rest
 		s->u.b.angle3 = seg->u.b.angle3;
@@ -259,10 +257,9 @@ void addSegBezier(dynArr_t * array_p, trkSeg_p seg)
 		s->u.b.minRadius = seg->u.b.minRadius;
 		for (int i=0; i<4; i++) { s->u.b.pos[i] = seg->u.b.pos[i]; }
 		s->u.b.radius0 = seg->u.b.radius3;
-		s->bezSegs.cnt = 0;
-		if (s->bezSegs.ptr) { MyFree(s->bezSegs.ptr); }
-		s->bezSegs.max = 0;
-		s->bezSegs.ptr = NULL; //Make sure new space as addr copied in earlier from seg
+		// TODO we init'd the DA above, why free it now?
+		DYNARR_FREE( trkSeg_t, s->bezSegs );
+		//Make sure new space as addr copied in earlier from seg
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
 			addSegBezier(&s->bezSegs,
 			             (((trkSeg_p)seg->bezSegs.ptr)
@@ -372,7 +369,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track,
 	bCurveData_t prev_arc;
 	prev_arc.end = 0.0;
 	bCurveData_t arc;
-	segs->cnt = 0; //wipe out
+	DYNARR_RESET( trkSeg_t, *segs ); // wipe out
 	BOOL_T safety;
 	int col = 0;
 
@@ -826,11 +823,8 @@ EXPORT STATUS_T AdjustBezCurve(
 					if (Da.trk[i] != NULL) { ConnectAbuttingTracks(t,i,Da.trk[i],Da.ep[i]); }
 			} else { t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,color,lineWidth); }
 			UndoEnd();
-			if (Da.crvSegs_da.ptr) { MyFree(Da.crvSegs_da.ptr); }
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			Da.crvSegs_da.ptr = NULL;
-			Da.crvSegs_da.cnt = 0;
-			Da.crvSegs_da.max = 0;
+			DYNARR_FREE( trkSeg_t, Da.crvSegs_da );
 			DrawNewTrack(t);
 			Da.state = NONE;
 			return C_TERMINATE;
@@ -1275,10 +1269,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				Da.trk[i] = NULL;
 				Da.ep[i] = -1;
 			}
-			if (Da.crvSegs_da.ptr) { MyFree(Da.crvSegs_da.ptr); }
-			Da.crvSegs_da.ptr = NULL;
-			Da.crvSegs_da.cnt = 0;
-			Da.crvSegs_da.max = 0;
+			DYNARR_FREE( trkSeg_t, Da.crvSegs_da );
 		}
 		Da.state = NONE;
 		return C_CONTINUE;

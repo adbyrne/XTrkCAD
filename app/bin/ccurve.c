@@ -154,7 +154,7 @@ EXPORT STATUS_T CreateCurve(
 	switch ( action ) {
 	case C_START:
 		DYNARR_RESET(trkSeg_t,*anchor_array);
-		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		Da.create_state = NOCURVE;
 		Da.down = FALSE;  						//Not got a valid start yet
 		Da.pos0 = zero;
@@ -184,6 +184,7 @@ EXPORT STATUS_T CreateCurve(
 		return C_CONTINUE;
 	case C_DOWN:
 		DYNARR_RESET(trkSeg_t, *anchor_array);
+		DYNARR_SET( trkSeg_t, tempSegs_da, 8 );
 		for ( inx=0; inx<8; inx++ ) {
 			tempSegs(inx).color = wDrawColorBlack;
 			tempSegs(inx).lineWidth = width;
@@ -677,7 +678,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 	case C_CANCEL:
 		if (Da.state == 1) {
-			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			Da.trk = NULL;
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -913,14 +913,14 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 			}
 		}
 		SnapPos(&pos);
-		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
-		tempSegs(0).u.c.center = pos0 = pos;
-		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).lineWidth = 0;
+		DYNARR_RESET(trkSeg_t, tempSegs_da);
+		pos0 = pos;
 		return C_CONTINUE;
 
 	case C_MOVE:
 		SnapPos(&pos);
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		tempSegs(0).type = SEG_CRVTRK;
 		tempSegs(0).u.c.center = pos;
 		if (!helix) {
 			switch (circleMode) {
@@ -937,8 +937,8 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 				break;
 			}
 		}
-		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
-		tempSegs(0).type = SEG_CRVTRK;
+		tempSegs(0).color = wDrawColorBlack;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.c.radius = helix ? helixRadius : circleRadius;
 		tempSegs(0).u.c.a0 = 0.0;
 		tempSegs(0).u.c.a1 = 360.0;

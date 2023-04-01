@@ -1274,7 +1274,6 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 	static easementData_t jointD;
 	static BOOL_T valid;
 
-	DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 	ANGLE_T a, aa1, aa2;
 	DIST_T r, d;
 	track_p trk1;
