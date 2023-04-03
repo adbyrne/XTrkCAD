@@ -108,7 +108,10 @@ EXPORT void SetCLocale()
 	}
 	if ( lCLocale == 0 ) {
 		LOG( log_locale, 1, ( "Set C Locale: %ld\n", ++nCLocale ) );
-		setlocale( LC_ALL, "C" );
+		setlocale(  LC_ALL, "C" );
+#ifdef LC_MESSAGES		
+		setlocale( LC_MESSAGES, "");
+#endif		
 	}
 	lCLocale++;
 	if ( lCLocale > 1 ) {

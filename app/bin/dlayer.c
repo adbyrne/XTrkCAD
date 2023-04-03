@@ -1774,7 +1774,7 @@ BOOL_T ReadLayers(char * line)
 	/* set the current layer */
 
 	if (strncmp(line, "CURRENT", 7) == 0) {
-		curLayer = atoi(line + 7) - 1;
+		curLayer = atoi(line + 7);
 
 		if (!IsLayerValid(curLayer)) {
 
@@ -1960,7 +1960,7 @@ BOOL_T WriteLayers(FILE * f)
 		}
 	}
 
-	fprintf(f, "LAYERS CURRENT %u\n", (curLayer + 1));
+	fprintf(f, "LAYERS CURRENT %u\n", curLayer);
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
 		unsigned int layerInx = inx + 1;
