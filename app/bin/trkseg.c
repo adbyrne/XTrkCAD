@@ -1562,7 +1562,8 @@ EXPORT BOOL_T WriteSegsEnd(
 			               segs[i].u.l.pos[2].x, segs[i].u.l.pos[2].y,
 			               segs[i].u.l.pos[3].x, segs[i].u.l.pos[3].y ) > 0;
 			rc &= fprintf(f,"\tSUBSEGS\n");
-			rc &= WriteSegsEnd(f,segs[i].bezSegs.cnt,segs[i].bezSegs.ptr,FALSE);
+			rc &= WriteSegsEnd(f,segs[i].bezSegs.cnt,
+			                   &DYNARR_N(trkSeg_t,segs[i].bezSegs,0), FALSE);
 			rc &= fprintf(f,"\tSUBSEND\n");
 			break;
 		case SEG_CRVLIN:

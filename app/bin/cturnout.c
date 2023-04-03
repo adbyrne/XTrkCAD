@@ -1628,7 +1628,7 @@ static BOOL_T GetParamsTurnout(int inx, track_p trk, coOrd pos,
 		case SEG_BEZTRK:
 			if (negative != back) { params->track_angle = NormalizeAngle(params->track_angle + 180); }  //Bezier is in reverse
 			segPtr = xx->segs + segInx;
-			trkSeg_p subSegPtr = (trkSeg_p)segPtr->bezSegs.ptr + subSegInx;
+			trkSeg_p subSegPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSegInx);
 			if (subSegPtr->type == SEG_CRVTRK) {
 				params->type = curveTypeCurve;
 				params->arcR = fabs(subSegPtr->u.c.radius);

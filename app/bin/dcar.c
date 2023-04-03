@@ -1749,8 +1749,8 @@ EXPORT void CarItemLoadList( void * unused )
 	wWinPix_t w, h;
 
 	DYNARR_SET( carItem_t*, carItemHotbar_da, carItemInfo_da.cnt );
-	memcpy( carItemHotbar_da.ptr, carItemInfo_da.ptr,
-	        carItemInfo_da.cnt * sizeof item );
+	memcpy( &carItemHotbar(0), &carItemInfo(0),
+	        carItemInfo_da.cnt * sizeof carItemHotbar(0) );
 	wListClear( (wList_p)newCarPLs[0].control );
 	for ( inx=0; inx<carItemHotbar_da.cnt; inx++ ) {
 		item = carItemHotbar(inx);
@@ -1870,9 +1870,9 @@ EXPORT void AddHotBarCarDesc( void )
 	coOrd size;
 
 	DYNARR_SET( carItem_t*, carItemHotbar_da, carItemInfo_da.cnt );
-	memcpy( carItemHotbar_da.ptr, carItemInfo_da.ptr,
-	        carItemInfo_da.cnt * sizeof item0 );
-	qsort( carItemHotbar_da.ptr, carItemHotbar_da.cnt, sizeof item0,
+	memcpy( &carItemHotbar(0), &carItemInfo(0),
+	        carItemInfo_da.cnt * sizeof carItemHotbar(0) );
+	qsort( &carItemHotbar(0), carItemHotbar_da.cnt, sizeof carItemHotbar(0),
 	       Cmp_carHotbar );
 	for ( inx=0,item0=NULL; inx < carItemHotbar_da.cnt; inx ++ ) {
 		item1 = carItemHotbar(inx);
@@ -2742,7 +2742,7 @@ static void CarDlgRedraw(
 		}
 	}
 	DYNARR_SET( trkSeg_t, carDlgSegs_da, segCnt );
-	memcpy( &carDlgSegs(0), segPtr, segCnt * sizeof *(trkSeg_t*)0 );
+	memcpy( &carDlgSegs(0), segPtr, segCnt * sizeof carDlgSegs(0) );
 	CloneFilledDraw( carDlgSegs_da.cnt, &carDlgSegs(0), TRUE );
 	GetSegBounds( zero, 0.0, carDlgSegs_da.cnt, &carDlgSegs(0), &orig, &size );
 	scale_w = carDlgDim.carLength/size.x;
@@ -4148,7 +4148,7 @@ static void CarDlgUpdate(
 		carDlgChanged++;
 		WriteSelectedTracksToTempSegs();
 		carProtoSegCnt = tempSegs_da.cnt;
-		carProtoSegPtr = (trkSeg_t*)tempSegs_da.ptr;
+		carProtoSegPtr = &tempSegs(0);
 		CloneFilledDraw( carProtoSegCnt, carProtoSegPtr, TRUE );
 		GetSegBounds( zero, 0.0, carProtoSegCnt, carProtoSegPtr, &orig, &size );
 		if ( size.x <= 0.0 ||
@@ -5622,7 +5622,8 @@ static void CarInvListLoad( void )
 	int inx;
 	carItem_p item;
 
-	qsort( carItemInfo_da.ptr, carItemInfo_da.cnt, sizeof item, Cmp_carInvItem );
+	qsort( &carItemInfo(0), carItemInfo_da.cnt, sizeof carItemInfo(0),
+	       Cmp_carInvItem );
 	ParamControlShow( &carInvPG, I_CI_LIST, FALSE );
 	wListClear( (wList_p)carInvPLs[I_CI_LIST].control );
 	for ( inx=0; inx<carItemInfo_da.cnt; inx++ ) {

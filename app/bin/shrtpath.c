@@ -308,7 +308,7 @@ int FindShortestPath(
 		} else {
 			epCnt = GetTrkEndPtCnt(pCurr->contTrk);
 			DYNARR_SET( pathNode_p, ep_da, epCnt );
-			memset( ep_da.ptr, 0, epCnt * sizeof pNext );
+			memset( &ep(0), 0, epCnt * sizeof pNext );
 			if ( (GetTrkBits(pCurr->contTrk) & TB_SHRTPATH) ) {
 				for ( pinx=0; pinx<pathNode_da.cnt; pinx++ ) {
 					pNext = &pathNode(pinx);

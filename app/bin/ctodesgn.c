@@ -1776,7 +1776,7 @@ static toDesignSchema_t * LoadSegs(
 				/*Get ToeAngle/Radius/Center for first toe */
 				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
 				pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-				angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,
+				angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,&inx,
 				                     NULL,&back,&subSeg,&neg);
 				segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
 
@@ -1840,7 +1840,7 @@ static toDesignSchema_t * LoadSegs(
 					} else {
 						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
 						pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-						angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,
+						angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,&inx,
 						                     NULL,&back,&subSeg,&neg);
 						segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
 
@@ -2396,7 +2396,7 @@ static toDesignSchema_t * LoadSegs(
 		coOrd center;
 		pos.x = end_points[0].x+newTurnToeL-MIN_TRACK_LENGTH;
 		pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-		ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,
+		ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,
 		                             &inx,NULL,&back,&subSeg,&neg);
 		segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
 
@@ -2477,9 +2477,6 @@ static toDesignSchema_t * LoadSegs(
 		/* Toe to Outer in cornuSegs array */
 		CallCornuNoBez(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],
 		               &cornuData.radius[2],&cornuSegs_da);
-
-//			cornu_p = (trkSeg_p)cornuSegs_da.ptr;
-
 		if (cornuData.radius[3] == 0.0) {
 			DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
 			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);

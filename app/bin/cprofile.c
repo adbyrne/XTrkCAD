@@ -261,7 +261,7 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 		DYNARR_APPEND(pts_t, points_da, 10);
 		pb.x = 0;
 		points(points_da.cnt-1) = pb;
-		DrawPoly(D, points_da.cnt, points_da.ptr, NULL, profileColorFill, 1, DRAW_FILL);
+		DrawPoly(D, points_da.cnt, &points(0), NULL, profileColorFill, 1, DRAW_FILL);
 	}
 
 	pt.y = prof.minE-(2*LABELH+3.0/mainD.dpi)/prof.scaleY*D->scale;

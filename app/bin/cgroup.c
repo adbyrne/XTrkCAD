@@ -257,7 +257,7 @@ EXPORT void UngroupCompound(
 		 */
 		TempEndPtsSet( epCnt );
 		DYNARR_SET( segTrack_t, segTrack_da, segCnt );
-		memset( segTrack_da.ptr, 0, segCnt * sizeof segTrack(0) );
+		memset( &segTrack(0), 0, segCnt * sizeof segTrack(0) );
 		for ( ep=0; ep<epCnt; ep++ ) {
 			epp = TempEndPt(ep);
 			coOrd pos = GetTrkEndPos( trk, ep );
@@ -283,7 +283,7 @@ EXPORT void UngroupCompound(
 		 *    Path ends that don't map onto a real EndPt (bumpers) get a virtual EP
 		 */
 		DYNARR_SET( int, refCount_da, segCnt+epCnt );
-		memset( refCount_da.ptr, 0, refCount_da.cnt * sizeof *(int*)0 );
+		memset( &refCount(0), 0, refCount_da.cnt * sizeof *(int*)0 );
 		cp = (char *)GetPaths( trk );
 		while ( cp[0] ) {
 			cp += strlen(cp)+1;
@@ -362,7 +362,7 @@ EXPORT void UngroupCompound(
 		 *    If segment is already mapped then merge mergePts
 		 */
 		DYNARR_SET( int, refCount_da, segCnt );
-		memset( refCount_da.ptr, -1, segCnt * sizeof *(int*)0 );
+		memset( &refCount(0), -1, segCnt * sizeof *(int*)0 );
 		cp = (char *)GetPaths( trk );
 		while ( cp[0] ) {
 			cp += strlen(cp)+1;
@@ -1510,7 +1510,7 @@ static void GroupOk( void * unused )
 		 * 5: Create Conflict Map
 		 */
 		DYNARR_SET( int, conflictMap_da, path_da.cnt*path_da.cnt );
-		memset( conflictMap_da.ptr, 0, conflictMap_da.max * sizeof conflictMap(0,0) );
+		memset( &conflictMap(0,0), 0, conflictMap_da.cnt * sizeof conflictMap(0,0) );
 		for ( pinx=0; pinx<path_da.cnt; pinx++ ) {
 			for ( pinx2=pinx+1; pinx2<path_da.cnt; pinx2++ ) {
 				if ( ConflictPaths( &path(pinx), &path(pinx2) ) ) {
@@ -1526,13 +1526,13 @@ static void GroupOk( void * unused )
 		 */
 		DYNARR_SET( int, groupOrder_da, path_da.cnt );
 		for ( pinx=0; pinx<path_da.cnt; pinx++ ) { groupOrder(pinx) = pinx; }
-		qsort( groupOrder_da.ptr, path_da.cnt, sizeof groupOrder(0), CmpGroupOrder );
+		qsort( &groupOrder(0), path_da.cnt, sizeof groupOrder(0), CmpGroupOrder );
 
 		/*
 		 * Group Paths, 1st pass:
 		 */
 		DYNARR_SET( int, groupMap_da, path_da.cnt*(path_da.cnt+1) );
-		memset( groupMap_da.ptr, -1, groupMap_da.max * sizeof groupMap(0,0) );
+		memset( &groupMap(0,0), -1, groupMap_da.cnt * sizeof groupMap(0,0) );
 		groupCnt = 0;
 		for ( pinx=0; pinx<path_da.cnt; pinx++ ) {
 			pp = &path(groupOrder(pinx));
@@ -1685,7 +1685,7 @@ static void GroupOk( void * unused )
 			trkSeg_p to_p = &DYNARR_LAST(trkSeg_t, outputSegs_da);
 			memcpy(to_p,from_p,sizeof( trkSeg_t));
 		}
-		CloneFilledDraw( outputSegs_da.cnt, outputSegs_da.ptr, FALSE );
+		CloneFilledDraw( outputSegs_da.cnt, &outputSegs(0), FALSE );
 
 		GetSegBounds( zero, 0, outputSegs_da.cnt, &outputSegs(0), &orig, &size );
 		orig.x = - GetEndPtPos(TempEndPt(0)).x;

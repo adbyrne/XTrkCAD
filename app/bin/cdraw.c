@@ -1438,7 +1438,7 @@ static BOOL_T ReadDraw( char * header )
 		xx->angle = angle;
 		xx->segCnt = tempSegs_da.cnt;
 		xx->lineType = lineType;
-		memcpy( xx->segs, tempSegs_da.ptr, tempSegs_da.cnt * sizeof *(trkSeg_p)0 );
+		memcpy( xx->segs, &tempSegs(0), tempSegs_da.cnt * sizeof *(trkSeg_p)0 );
 		ComputeDrawBoundingBox( trk );
 	}
 	return TRUE;

@@ -261,9 +261,8 @@ void addSegBezier(dynArr_t * array_p, trkSeg_p seg)
 		DYNARR_FREE( trkSeg_t, s->bezSegs );
 		//Make sure new space as addr copied in earlier from seg
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
-			addSegBezier(&s->bezSegs,
-			             (((trkSeg_p)seg->bezSegs.ptr)
-			              +i)); //recurse for copying embedded Beziers as in Cornu joint
+			//recurse for copying embedded Beziers as in Cornu joint
+			addSegBezier(&s->bezSegs, &DYNARR_N( trkSeg_t, seg->bezSegs, i ) );
 		}
 	} else {
 		s->u = seg->u;
@@ -533,12 +532,12 @@ void DrawTempBezier(BOOL_T track)
 {
 	if (track) {
 		DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,
-		             (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
+		             &DYNARR_N(trkSeg_t,Da.crvSegs_da,0),Da.crvSegs_da_cnt,
 		             fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:
 		             normalColor);
 	} else {
 		DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,
-		             (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,
+		             &DYNARR_N(trkSeg_t,Da.crvSegs_da,0),Da.crvSegs_da_cnt,
 		             drawColorBlack);        //Add Second Arm
 	}
 }
@@ -818,10 +817,11 @@ EXPORT STATUS_T AdjustBezCurve(
 			Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
 			UndoStart( _("Create Bezier"), "newBezier - CR" );
 			if (Da.track) {
-				t = NewBezierTrack( Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
+				t = NewBezierTrack( Da.pos, &DYNARR_N(trkSeg_t,Da.crvSegs_da,0),
+				                    Da.crvSegs_da.cnt);
 				for (int i=0; i<2; i++)
 					if (Da.trk[i] != NULL) { ConnectAbuttingTracks(t,i,Da.trk[i],Da.ep[i]); }
-			} else { t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,color,lineWidth); }
+			} else { t = NewBezierLine(Da.pos, &DYNARR_N(trkSeg_t,Da.crvSegs_da,0), Da.crvSegs_da.cnt,color,lineWidth); }
 			UndoEnd();
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			DYNARR_FREE( trkSeg_t, Da.crvSegs_da );
@@ -1254,7 +1254,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,
-			             (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, lineColor);
+			             &DYNARR_N( trkSeg_t, Da.crvSegs_da, 0 ),
+			             Da.crvSegs_da.cnt, lineColor);
 		}
 		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
 		            0 );
