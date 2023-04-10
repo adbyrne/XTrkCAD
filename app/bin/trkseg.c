@@ -1411,7 +1411,6 @@ EXPORT BOOL_T ReadSegs( void )
 				rc = FALSE;
 				/*??*/break;
 			}
-			if (s->type == SEG_FILPOLY) { s->u.p.polyType = FREEFORM; }  //Ensure closed if filled
 			s->color = wDrawFindColor( rgb );
 			s->u.p.pts = (pts_t*)MyMalloc( s->u.p.cnt * sizeof (pts_t) );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
