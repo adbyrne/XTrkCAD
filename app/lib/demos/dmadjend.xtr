@@ -109,15 +109,26 @@ It's possible to almost create a complete circle.
 If you drag the mouse beyond the start of the curve the track becomes very short.
 END
 STEP
-MOUSE 4 7.500 3.167
+#MOUSE 4 7.500 3.167
+MOUSE 3 7.500 3.167
 MESSAGE
 _________________________________________
 
 Here you are warned that the track will be too short.
 END
-MOUSE 1 7.60 3.167
-BIGPAUSE
+STEP
+MOUSE 4 7.500 3.167
+MESSAGE
+_________________________________________
+
+Because the modified track is too short, the modification is abandoned the original track is restored.
+END
+STEP
 MOUSE 2 7.60 3.167
+MOUSE 3 7.60 3.167
+BIGPAUSE
+#MOUSE 2 7.60 3.167
+MOUSE 3 7.60 3.167
 STEP
 MOUSE 3 8.417 3.167
 PAUSE 60
@@ -172,8 +183,7 @@ END
 STEP
 CLEAR
 MESSAGE
-If you adjust the endpoint of a turnout or sectional track the track is extended by a similar track segment. The extension can be 
-a straight or a curve.
+If you adjust the endpoint of a turnout or sectional track the track is extended by a similar track segment. The extension can be a straight or a curve.
 END
 STEP
 MOUSE 1 19.750 10.583

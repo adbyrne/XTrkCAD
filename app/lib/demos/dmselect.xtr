@@ -177,10 +177,34 @@ Selected tracks can be moved or rotated during the <Select> command.
 
 Selected tracks can also be deleted, hidden, listed and exported.
 
-When you move the cursor near a track that could be selected, the track is drawn with think blue lines.
+When you move the cursor near a track that could be selected, the track is drawn with thick blue lines.
 END
 STEP
 COMMAND Select
+MESSAGE
+_________________________________________
+The Select operates in two modes which are controled by the Options|Command menu.
+END
+PARAMETER misc cmdCmdopt
+BIGPAUSE
+PARAMETER cmdopt selectmode 1
+MESSAGE
+
+In 'classic' mode, clicking on an object adds it to set of selected objects.
+END
+STEP
+PARAMETER cmdopt selectmode 0
+MESSAGE
+
+In the 'new' mode, clicking on an object deselectes all other objects, leaving just the newly selected object.
+Holding down the Ctrl key reverses this behavior.
+
+This demo will use the 'new' mode.
+
+There is also an option to the control the behavior of clicking on empty space: do nothing or deselecting all objects.
+END
+STEP
+PARAMETER cmdopt ok
 MESSAGE
 _________________________________________
 
@@ -263,8 +287,12 @@ _________________________________________
 Be careful with this because its very easy to select all tracks this way
 END
 STEP
-MOUSE 2 19.840 2.560
-MOUSE 4 19.840 2.560
+MOUSE 2 12.000 5.560
+MOUSE 4 12.000 5.560
+#KEYSTATE C
+#MOUSE 2 19.840 2.560
+#KEYSTATE C
+#MOUSE 4 19.840 2.560
 BIGPAUSE
 KEYSTATE 2
 MOUSE 2 19.840 2.560
