@@ -615,6 +615,7 @@ static void DeleteBezier( track_p t )
 {
 	struct extraDataBezier_t *xx = GET_EXTRA_DATA(t, T_NOTRACK, extraDataBezier_t);
 
+	// NOTE - should use trkSeg_p so we free seg in orig trk, instead of copy
 	for (int i=0; i<xx->arcSegs.cnt; i++) {
 		trkSeg_t s = DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		if (s.type == SEG_BEZTRK || s.type == SEG_BEZLIN) {
@@ -1328,6 +1329,7 @@ static BOOL_T MakeParallelBezier(
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).type = track?SEG_BEZTRK:SEG_BEZLIN;
+		DYNARR_INIT( trkSeg_t, tempSegs(0).bezSegs );
 		for (int i=0; i<4; i++) { tempSegs(0).u.b.pos[i] = np[i]; }
 		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),track);
 	}
