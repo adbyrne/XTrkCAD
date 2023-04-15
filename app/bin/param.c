@@ -1733,8 +1733,9 @@ static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op,
 EXPORT void ParamMenuPush( void * dp )
 {
 	paramData_p p = (paramData_p)dp;
-	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-		fprintf( recordF, "PARAMETER %s %s\n", p->group->nameStr, p->nameStr );
+	const char * groupNameStr = p->group ? p->group->nameStr : "misc";
+	if (recordF && (p->option&PDO_NORECORD)==0 && groupNameStr && p->nameStr) {
+		fprintf( recordF, "PARAMETER %s %s\n", groupNameStr, p->nameStr );
 		fflush( recordF );
 	}
 	if ( (p->option&PDO_NOPSHACT)==0 && p->valueP ) {
