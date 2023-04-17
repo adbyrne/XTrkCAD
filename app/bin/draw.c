@@ -2815,7 +2815,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 	switch ( action&0xFF ) {
 	case C_DOWN:
 	case C_RDOWN:
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		break;
 	case wActionMove:
 		InfoPos( pos );

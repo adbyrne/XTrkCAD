@@ -1047,7 +1047,7 @@ static void LocoListInit(void)
 {
 	track_p train;
 	struct extraDataCar_t * xx;
-	locoList_da.cnt = 0;
+	DYNARR_RESET( locoList_t, locoList_da );
 
 	for (train=NULL; TrackIterate(&train);) {
 		if (GetTrkType(train) != T_CAR) {
@@ -2524,7 +2524,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		wListClear((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control);
 		Dtrain.state = 0;
 		trk0 = NULL;
-		tempSegs_da.cnt = 0;
 		DYNARR_SET(trkSeg_t, tempSegs_da, 8);
 		RestartTrains();
 		wButtonSetLabel(trainPauseB, (char*)goB);
@@ -2660,7 +2659,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			xx->trvTrk.angle = angle1;
 		}
 
-		tempSegs_da.cnt = 1;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		PlaceTrainInit(currCar, trk0, pos0, xx->trvTrk.angle,
 		               (MyGetKeyState()&WKEY_SHIFT) == 0);
 		ControllerDialogSync(curTrainDlg);

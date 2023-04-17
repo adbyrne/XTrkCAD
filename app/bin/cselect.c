@@ -553,7 +553,7 @@ static void SelectConnectedTracks(
 	track_p trk1;
 	int inx;
 	EPINX_T ep;
-	tlist_da.cnt = 0;
+	DYNARR_RESET( track_p, tlist_da );
 	TlistAppend( trk );
 	InfoCount( 0 );
 	if (!display_only) { wDrawDelayUpdate( mainD.d, FALSE ); }
@@ -1327,9 +1327,10 @@ static void DrawMovedTracks( void )
 	int inx;
 	track_p trk;
 	dynArr_t cornu_segs;
+	DYNARR_INIT( trkSeg_t, cornu_segs );
 
-	DrawSegs( &tempD, moveOrig, moveAngle, &tempSegs(0), tempSegs_da.cnt,
-	          0.0, selectedColor );
+	DrawSegsDA( &tempD, NULL, moveOrig, moveAngle, &tempSegs_da, 0.0, selectedColor,
+	            0 );
 
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
@@ -1360,10 +1361,8 @@ static void DrawMovedTracks( void )
 					}
 				}
 				CallCornu0(&pos[0],&center[0],&angle[0],&radius[0],&cornu_segs, FALSE);
-				trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
-
-				DrawSegsO(&tempD, trk, zero, 0.0, cornu_p,cornu_segs.cnt,
-				          GetTrkGauge(trk), selectedColor, DTS_LEFT|DTS_RIGHT );
+				DrawSegsDA(&tempD, trk, zero, 0.0, &cornu_segs,
+				           GetTrkGauge(trk), selectedColor, DTS_LEFT|DTS_RIGHT );
 			}
 
 		}
@@ -1801,7 +1800,7 @@ static STATUS_T CmdMove(
 		ep1 = -1;
 		ep2 = -1;
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		return C_TERMINATE;
 
 	case C_CMDMENU:
@@ -1852,10 +1851,8 @@ static STATUS_T CmdMove(
 		//Draw all existing highlight boxes only
 		DrawHighlightBoxes(FALSE, FALSE, NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		if ( state == 0 ) {
 			break;
 		}
@@ -1910,7 +1907,7 @@ static STATUS_T CmdMove(
 			UndoEnd();
 		}
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		break;
 	case C_CONFIRM:
 	case C_CANCEL:
@@ -1919,7 +1916,7 @@ static STATUS_T CmdMove(
 			UndoUndo(NULL);
 		}
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		break;
 	default:
 		break;
@@ -2193,7 +2190,7 @@ static STATUS_T CmdRotate(
 		}
 		UndoEnd();
 		RemoveEndCornus();
-		tlist_da.cnt = 0;
+		DYNARR_RESET( track_p, tlist_da );
 		return C_TERMINATE;
 
 	case C_CMDMENU:
@@ -2237,10 +2234,8 @@ static STATUS_T CmdRotate(
 	case C_REDRAW:
 		DrawHighlightBoxes(FALSE,FALSE,NULL);
 		HighlightSelectedTracks(NULL, TRUE, TRUE);
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		/* DO_REDRAW */
 		if ( state == 0 ) {
 			break;
@@ -3300,7 +3295,7 @@ static STATUS_T CmdSelect(
 		case MOVE:
 			if (SelectedTracksAreFrozen() || (selectedTrackCount==0)) {
 				rc = C_TERMINATE;
-				tlist_da.cnt = 0;
+				DYNARR_RESET( track_p, tlist_da );
 				doingMove = FALSE;
 				doingRotate = FALSE;
 			} else if (doingRotate == TRUE) {
@@ -3374,10 +3369,8 @@ static STATUS_T CmdSelect(
 
 		//Once doing a move or a rotate, make an early exit
 		if (doingMove || doingRotate) {
-			if (anchors_da.cnt) {
-				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-				          wDrawColorBlack );
-			}
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+			            0 );
 			return C_CONTINUE;
 		}
 		BOOL_T AreaSelect = FALSE;
@@ -3480,10 +3473,8 @@ static STATUS_T CmdSelect(
 			}
 		}
 		//Finally add the anchors for any actions or snaps
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 
 		return rc;
 

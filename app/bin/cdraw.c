@@ -488,8 +488,7 @@ EXPORT void DrawOriginAnchor(track_p trk)
 	if ((xx->orig.x != 0.0) || (xx->orig.y !=0.0) ) {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		CreateOriginAnchor(xx->orig,FALSE);
-		DrawSegs(&tempD, zero, 0.0, anchors_da.ptr, anchors_da.cnt, trackGauge,
-		         wDrawColorBlue);
+		DrawSegsDA(&tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlue, 0);
 	}
 }
 
@@ -1439,7 +1438,7 @@ static BOOL_T ReadDraw( char * header )
 		xx->angle = angle;
 		xx->segCnt = tempSegs_da.cnt;
 		xx->lineType = lineType;
-		memcpy( xx->segs, tempSegs_da.ptr, tempSegs_da.cnt * sizeof *(trkSeg_p)0 );
+		memcpy( xx->segs, &tempSegs(0), tempSegs_da.cnt * sizeof *(trkSeg_p)0 );
 		ComputeDrawBoundingBox( trk );
 	}
 	return TRUE;
@@ -2204,9 +2203,9 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	case SEG_TBLEDGE:
 		REORIGIN(p0,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
 		REORIGIN(p1,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = xx->segs[0].color;
 		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = xx->segs[0].type;
 		tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
 		tempSegs(0).u.l.pos[1] = 1-ep?pos:p1;
@@ -2229,9 +2228,9 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 			Translate(&c0,c,xx->segs[0].u.c.a0+xx->angle,xx->segs[0].u.c.radius);
 			Translate(&c1,c,xx->segs[0].u.c.a1+xx->segs[0].u.c.a0+xx->angle,
 			          xx->segs[0].u.c.radius);
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).color = xx->segs[0].color;
 			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_CRVLIN;
 			tempSegs(0).u.c.center = c;
 			tempSegs(0).u.c.radius = xx->segs[0].u.c.radius;
@@ -2363,9 +2362,9 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 					         xx->orig);
 				}
 			}
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).color = xx->segs[0].color;
 			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = pos;
 			tempSegs(0).u.l.pos[1] = end;
@@ -2388,9 +2387,9 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 					         xx->orig);
 				}
 			}
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).color = xx->segs[0].color;
 			tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = end;
 			tempSegs(0).u.l.pos[1] = pos;
@@ -2399,9 +2398,9 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		} else {
 			//Check that new line will have >=3 spots if not -> reject
 			if (xx->segs[0].u.p.cnt >3) {
+				DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 				tempSegs(0).color = xx->segs[0].color;
 				tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-				tempSegs_da.cnt = 1;
 				tempSegs(0).type = SEG_POLY;
 				tempSegs(0).u.p.polyType = POLYLINE;
 				if (1-ep) {
@@ -2531,9 +2530,9 @@ static BOOL_T MakeParallelDraw(
 		REORIGIN(p1,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
 		Translate(&p0,p0, angle, sep);
 		Translate(&p1,p1, angle, sep);
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = xx->segs[0].color;
 		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = p0;
 		tempSegs(0).u.l.pos[1] = p1;
@@ -2557,9 +2556,9 @@ static BOOL_T MakeParallelDraw(
 		} else {
 			rad = xx->segs[0].u.c.radius - sep;
 		}
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = xx->segs[0].color;
 		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_CRVLIN;
 		tempSegs(0).u.c.center = c;
 		tempSegs(0).u.c.radius = rad;
@@ -2588,9 +2587,9 @@ static BOOL_T MakeParallelDraw(
 		} else {
 			angle = -90.0;
 		}
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = xx->segs[0].color;
 		tempSegs(0).lineWidth = xx->segs[0].lineWidth;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_POLY;
 		tempSegs(0).u.p.polyType = xx->segs[0].type==SEG_POLY?xx->segs[0].u.p.polyType:
 		                           POLYLINE;

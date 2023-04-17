@@ -101,12 +101,12 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		parSepPD.option &= ~PDO_NORECORD;
 		parFactorPD.option &= ~PDO_NORECORD;
 		Dpa.anchor_Trk = NULL;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		SetAllTrackSelect( FALSE );
 		return C_CONTINUE;
 
 	case wActionMove:
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		Dpa.anchor_Trk = NULL;
 		if (parType == PAR_TRACK) {
 			Dpa.anchor_Trk = OnTrack(&pos, FALSE, TRUE);
@@ -128,7 +128,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		break;
 	case C_DOWN:
 		Dpa.anchor_Trk = NULL;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		if (parSeparation < 0.0) {
 			ErrorMessage(MSG_PARALLEL_SEP_GTR_0);
 			return C_ERROR;
@@ -177,14 +177,14 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		 * until further investigation shows the necessity
 		 */
 		//Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE );
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 	/* no break */
 
 	case C_MOVE:
 		if (Dpa.Trk == NULL) {
 			return C_CONTINUE;
 		}
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		if (!MakeParallelTrack(Dpa.Trk, pos, parSeparation, parRFactor, NULL, &p0, &p1,
 		                       parType == PAR_TRACK)) {
 			Dpa.Trk = NULL;
@@ -200,7 +200,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		t0=t1=NULL;
 		if (parType == PAR_TRACK) {
 			p = p0;
-			tempSegs_da.cnt = 0;
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			if ((t0=OnTrack(&p, FALSE, TRUE)) != NULL) {
 				ep0 = PickEndPoint(p, t0);
 				if (ep0 < 0 || GetTrkEndTrk(t0,ep0) != NULL) {
@@ -230,7 +230,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 		UndoStart(_("Create Parallel Track"), "newParallel");
 		if (!MakeParallelTrack(Dpa.Trk, pos, parSeparation, parRFactor, &t, NULL, NULL,
 		                       parType == PAR_TRACK)) {
-			tempSegs_da.cnt = 0;
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			return C_TERMINATE;
 		}
 		if (parType == PAR_TRACK) {
@@ -268,7 +268,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			sprintf(message, "parallel-line-separation-%s", curScaleName);
 		}
 		wPrefSetFloat("misc", message, parSeparation);
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_TERMINATE;
 
 	case C_REDRAW:
@@ -276,15 +276,13 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 			DrawTrack(Dpa.anchor_Trk,&tempD,
 			          wDrawColorPreviewSelected);    //Special color means THICK3 as well
 		}
-		if (tempSegs_da.cnt>0) {
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+		            0 );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		Dpa.anchor_Trk = NULL;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		InfoSubstituteControls(NULL, NULL);
 		return C_TERMINATE;
 

@@ -1035,9 +1035,7 @@ EXPORT void InitTrkBlock( void )
 {
 	T_BLOCK = InitObject ( &blockCmds );
 	log_block = LogFindIndex ( "block" );
-	blockTrk_da.max = 0;
-	blockTrk_da.cnt = 0;
-	blockTrk_da.ptr = NULL;
+	DYNARR_INIT( btrackinfo_t, blockTrk_da );
 	last_block = NULL;
 }
 

@@ -261,7 +261,7 @@ static void DrawProfile(drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert)
 		DYNARR_APPEND(pts_t, points_da, 10);
 		pb.x = 0;
 		points(points_da.cnt-1) = pb;
-		DrawPoly(D, points_da.cnt, points_da.ptr, NULL, profileColorFill, 1, DRAW_FILL);
+		DrawPoly(D, points_da.cnt, &points(0), NULL, profileColorFill, 1, DRAW_FILL);
 	}
 
 	pt.y = prof.minE-(2*LABELH+3.0/mainD.dpi)/prof.scaleY*D->scale;
@@ -885,8 +885,8 @@ static void DoProfileDone(void * junk)
 static void DoProfileClear(void * junk)
 {
 	ResetChanges();
-	profElem_da.cnt = 0;
-	station_da.cnt = 0;
+	DYNARR_RESET( profElem_t, profElem_da );
+	DYNARR_RESET( station_t, station_da );
 	ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE);
 	pathStartTrk = pathEndTrk = NULL;
 	RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
@@ -1199,8 +1199,8 @@ static void ComputeProfElem(void)
 	DIST_T dist;
 	BOOL_T defined;
 
-	profElem_da.cnt = 0;
-	station_da.cnt = 0;
+	DYNARR_RESET( profElem_t, profElem_da );
+	DYNARR_RESET( station_t, station_da );
 	dist = 0;
 	defined = TRUE;
 	if (PathListEmpty()) {
@@ -1446,8 +1446,8 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
 		ParamGroupRecord(&profilePG);
 		wShow(profileW);
 		ParamLoadMessage(&profilePG, I_PROFILEMSG, _("Drag to change Elevation"));
-		profElem_da.cnt = 0;
-		station_da.cnt = 0;
+		DYNARR_RESET( profElem_t, profElem_da );
+		DYNARR_RESET( station_t, station_da );
 		RedrawProfileW( screenProfileD.d, NULL, 0, 0 );
 		ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE);
 		pathStartTrk = NULL;

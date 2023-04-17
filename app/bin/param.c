@@ -3135,9 +3135,7 @@ EXPORT void ParamInit( void )
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
 	log_paramLayout = LogFindIndex( "paramlayout" );
 	log_paraminput = LogFindIndex( "paraminput" );
-	paramGroups_da.cnt = 0;
-	paramGroups_da.max = 0;
-	paramGroups_da.ptr = NULL;
+	DYNARR_INIT( paramGroup_p, paramGroups_da );
 	paramGroups_init = TRUE;
 
 }

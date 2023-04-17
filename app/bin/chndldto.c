@@ -69,7 +69,6 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		Dhlt.state = 0;
 		Dhlt.normalT = NULL;
-		tempSegs_da.cnt = 0;
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = drawColorBlack;
 		tempSegs(0).lineWidth = 0;
@@ -144,7 +143,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			}
 			return C_CONTINUE;
 		} else if ( Dhlt.state == 2 ) {
-			tempSegs_da.cnt = 0;
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			pointP = pos;
 			if ((pointT = OnTrack( &pointP, TRUE, TRUE )) == NULL) {
 				break;
@@ -201,6 +200,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			PTRACE(( "a2=%0.1f\n", angle2 ))
 			if (angle < 0.5) {
 				if ( off.x < connectDistance ) {
+					DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 					tempSegs(0).type = SEG_STRTRK;
 					tempSegs(0).color = wDrawColorBlack;
 					tempSegs(0).u.l.pos[0] = pointP;
@@ -209,7 +209,6 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 					tempSegs(1).color = wDrawColorBlack;
 					tempSegs(1).u.l.pos[0] = Dhlt.reverseP;
 					Translate( &tempSegs(1).u.l.pos[1], Dhlt.reverseP, Dhlt.reverseA, trackGauge );
-					tempSegs_da.cnt = 2;
 				} else {
 					ErrorMessage( MSG_MOVE_POINTS_AWAY_NO_INTERSECTION );
 					break;
@@ -228,6 +227,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 					reverseR = pointD/tan(D2R(angle/2.0));
 					Translate( &reverseC, pointP, pointA+(right?-90:+90), reverseR );
 					PTRACE(( "rR=%0.3f rC=[%0.3f %0.3f]\n", reverseR, reverseC.x, reverseC.y ))
+					DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 					tempSegs(0).type = SEG_CRVTRK;
 					tempSegs(0).color = wDrawColorBlack;
 					tempSegs(0).u.c.center = reverseC;
@@ -243,7 +243,6 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 					tempSegs(2).color = wDrawColorBlack;
 					tempSegs(2).u.l.pos[0] = Dhlt.reverseP;
 					Translate( &tempSegs(2).u.l.pos[1], Dhlt.reverseP, Dhlt.reverseA, trackGauge );
-					tempSegs_da.cnt = 3;
 				} else {
 					reverseR = reverseD/tan(D2R(angle/2.0));
 					reverseR *= sqrt(reverseD/pointD);
@@ -259,6 +258,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 					}
 					reverseA1 = angle-angle2;
 					PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
+					DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 					tempSegs(0).type = SEG_STRTRK;
 					tempSegs(0).color = wDrawColorBlack;
 					tempSegs(0).u.l.pos[0] = pointP;
@@ -275,7 +275,6 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 					tempSegs(2).color = wDrawColorBlack;
 					tempSegs(2).u.l.pos[0] = Dhlt.reverseP;
 					Translate( &tempSegs(2).u.l.pos[1], Dhlt.reverseP, Dhlt.reverseA, trackGauge );
-					tempSegs_da.cnt = 3;
 				}
 			}
 			if (action != C_UP) {
@@ -359,8 +358,8 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
 		}
 		if (Dhlt.state >= 2) {
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
-			          wDrawColorBlack );
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+			            0 );
 		}
 		return C_CONTINUE;
 

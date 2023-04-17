@@ -418,7 +418,7 @@ void ClearStream( stream_p stream )
 		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
-	stream->stream_da.cnt = 0;
+	DYNARR_RESET( streamBlocks_p, stream->stream_da );
 	stream->startBInx = 0;
 	stream->end = stream->curr = 0;
 }
@@ -448,7 +448,7 @@ BOOL_T TruncateStream( stream_p stream, uintptr_t off )
 		blk = DYNARR_N( streamBlocks_p, stream->stream_da, inx );
 		MyFree( blk );
 	}
-	stream->stream_da.cnt = (wIndex_t)binx;
+	DYNARR_SET( streamBlocks_p, stream->stream_da, (wIndex_t)binx );
 	stream->end = off;
 	UASSERT( stream->stream_da.cnt >= 0, stream->stream_da.cnt );
 	return TRUE;

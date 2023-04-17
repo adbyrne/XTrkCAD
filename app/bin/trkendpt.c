@@ -113,7 +113,8 @@ EXPORT void TempEndPtsReset( void )
 EXPORT void TempEndPtsSet( EPINX_T ep )
 {
 	DYNARR_SET( trkEndPt_t, tempEndPts_da, ep );
-	memset( tempEndPts_da.ptr, 0, ep * sizeof *(trkEndPt_p)NULL );
+	memset( &DYNARR_N(trkEndPt_t,tempEndPts_da,0), 0,
+	        ep * sizeof *(trkEndPt_p)NULL );
 }
 
 

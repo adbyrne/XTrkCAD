@@ -831,10 +831,10 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 			return C_ERROR;
 		}
 		UndrawNewTrack( trk );
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, 1-ep );
-		tempSegs_da.cnt = 1;
 		InfoMessage( _("Drag to change track length") );
 
 	case C_MOVE:
@@ -849,7 +849,6 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		}
 		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
 		                ep ), d );
-		tempSegs_da.cnt = 1;
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 			             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
@@ -859,7 +858,7 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		if (valid) {
 			AdjustStraightEndPt( trk, ep, tempSegs(0).u.l.pos[1] );
 		}
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DrawNewTrack( trk );
 		return C_TERMINATE;
 
@@ -967,9 +966,9 @@ static BOOL_T MakeParallelStraight(
 		if (track) {
 			*newTrkR = NewStraightTrack( p0, p1 );
 		} else {
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).color = wDrawColorBlack;
 			tempSegs(0).lineWidth = 0;
-			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_STRLIN;
 			tempSegs(0).u.l.pos[0] = p0;
 			tempSegs(0).u.l.pos[1] = p1;
@@ -978,9 +977,9 @@ static BOOL_T MakeParallelStraight(
 		}
 
 	} else {
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_STRTRK:SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = p0;
 		tempSegs(0).u.l.pos[1] = p1;
