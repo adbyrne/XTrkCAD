@@ -163,7 +163,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
                          BOOL_T ignoreHidden, track_p t )
 {
 	track_p trk;
-	DIST_T distance, closestDistance = 1000000;
+	DIST_T distance, closestDistance = DIST_INF;
 	track_p closestTrack = NULL;
 	coOrd p, closestPos, q0, q1;
 
@@ -177,6 +177,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 			continue;
 		}
 		if (trk == t) { continue; }
+		// Bounding box check
 		if (trk->hi.x < q0.x ||
 		    trk->lo.x > q1.x ||
 		    trk->hi.y < q0.y ||
@@ -655,24 +656,16 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 }
 
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p.
+ *  Returns index of endpoint or displays a message
+ *  and returns -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 {
-	EPINX_T inx, i;
-	DIST_T d=0, dd;
-	coOrd pos;
-	inx = -1;
+	EPINX_T inx;
 
-	for ( i=0; i<trk->endCnt; i++ ) {
-		trkEndPt_p epp = EndPtIndex( trk->endPt, i );
-		if (GetEndPtTrack( epp ) == NULL) {
-			pos = GetEndPtPos( epp  );
-			dd=FindDistance(p, pos);
-			if (inx == -1 || dd <= d) {
-				d = dd;
-				inx = i;
-			}
-		}
-	}
+	inx = PickUnconnectedEndPointSilent( p, trk );
 
 	if (inx == -1) {
 		ErrorMessage( MSG_NO_UNCONN_EP );
@@ -680,6 +673,10 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 	return inx;
 }
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p.
+ *  Returns index of endpoint or -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
@@ -703,6 +700,39 @@ EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 }
 
 
+/**
+ *  Connect all the end points to this track (trk0) that are close enough
+ *  (distance and angle) to another track's unconnected endpoint.
+ */
+EXPORT void ConnectAllEndPts(track_p trk0)
+{
+	for (EPINX_T ep0 = 0; ep0 < GetTrkEndPtCnt(trk0); ep0++) {
+		// Skip if already connected
+		if (GetTrkEndTrk(trk0, ep0) != NULL) { continue; }
+
+		coOrd pos0 = GetTrkEndPos(trk0, ep0);
+		track_p trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
+
+		// Not near another track?
+		if (trk2 == NULL) { continue; }
+		EPINX_T ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
+
+		// Close enough?
+		coOrd pos2 = GetTrkEndPos(trk2, ep2);
+		DIST_T distance = FindDistance(pos0, pos2);
+		if (distance > connectDistance) { continue; }
+
+		// Aligned?
+		ANGLE_T a = fabs(DifferenceBetweenAngles(
+		                         GetTrkEndAngle(trk0, ep0),
+		                         GetTrkEndAngle(trk2, ep2) + 180.0));
+		if (a > connectAngle) { continue; }
+
+		// Make the connection
+		ConnectTracks(trk0, ep0, trk2, ep2);
+		DrawNewTrack(trk2);
+	}
+}
 
 EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 {
@@ -2330,6 +2360,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		pos = GetTrkEndPos(trk,ep);
 		if (!GetTrackParams(PARAMS_CORNU,trk,pos,&params)) { return C_ERROR; }
 		end_pos = pos;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		if (params.type == curveTypeCurve) {
 			curved = TRUE;
 			tempSegs(0).type = SEG_CRVTRK;
@@ -2346,9 +2377,11 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		}
 		valid = FALSE;
 		InfoMessage( _("Drag to change track length") );
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_CONTINUE;
-	/*no break*/
+
 	case C_MOVE:
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		if (curved) {
 			//Normalize pos
 			PointOnCircle( &pos, tempSegs(0).u.c.center, tempSegs(0).u.c.radius,
@@ -2361,6 +2394,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
 				}
 				valid = FALSE;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
 			//Restrict to outside track
@@ -2370,6 +2404,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 				tempSegs(0).u.c.a1 = 0;
 				tempSegs(0).u.c.a0 = end_angle;
 				InfoMessage( _("Inside turnout track"));
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
 			end_angle = GetTrkEndAngle( trk, ep );
@@ -2384,7 +2419,6 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 				tempSegs(0).u.c.a0 = a;
 				tempSegs(0).u.c.a1 = NormalizeAngle(a2-a);
 			}
-			tempSegs_da.cnt = 1;
 			valid = TRUE;
 			if (action == C_MOVE)
 				InfoMessage( _("Curve: Length=%s Radius=%0.3f Arc=%0.3f"),
@@ -2399,20 +2433,20 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
 				}
 				valid = FALSE;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
 			ANGLE_T diff = NormalizeAngle(GetTrkEndAngle( trk, ep )-FindAngle(end_pos,
 			                              pos));
 			if (diff>=90.0 && diff<=270.0) {
 				valid = FALSE;
-				tempSegs(0).u.c.a1 = 0;
-				tempSegs(0).u.c.a0 = end_angle;
 				InfoMessage( _("Inside turnout track"));
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
 				return C_CONTINUE;
 			}
+
 			Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
 			                ep ), d );
-			tempSegs_da.cnt = 1;
 			if (action == C_MOVE)
 				InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 				             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
@@ -2423,6 +2457,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 		if (!valid) {
 			return C_TERMINATE;
 		}
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UndrawNewTrack( trk );
 		EPINX_T jp;
 		if (curved) {
@@ -2459,6 +2494,7 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action,
 		if ( ep == -1 ) {
 			return C_ERROR;
 		}
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, ep );
@@ -2476,7 +2512,6 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action,
 		}
 		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
 		                ep ), d );
-		tempSegs_da.cnt = 1;
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 			             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
@@ -3306,9 +3341,7 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 	tt.pos = GetTrkEndPos(trk,0);
 
 	dynArr_t pos_array;
-	pos_array.max = 0;
-	pos_array.cnt = 0;
-	pos_array.ptr = NULL;
+	DYNARR_INIT( pos_angle_t, pos_array );
 
 	typedef struct {
 		coOrd pos;
@@ -3327,7 +3360,8 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 		    || IsClose(FindDistance(tt.pos,GetTrkEndPos(trk,1)))) {
 			DYNARR_N(pos_angle_t,pos_array,i).pos = GetTrkEndPos(trk,1);
 			DYNARR_N(pos_angle_t,pos_array,i).angle = GetTrkEndAngle(trk,1);
-			pos_array.cnt = i;
+			// Truncate pos_array
+			DYNARR_SET( pos_angle_t, pos_array, i+1 );
 			break;
 		}
 		DYNARR_N(pos_angle_t,pos_array,i).pos = tt.pos;
@@ -3348,11 +3382,6 @@ EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
 	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,
 	                0.0);
-	if (pos_array.ptr) {
-		MyFree(pos_array.ptr);
-	}
-	pos_array.ptr = 0;
-	pos_array.max = 0;
-	pos_array.cnt = 0;
+	DYNARR_FREE( pos_angle_t, pos_array );
 }
 

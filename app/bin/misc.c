@@ -66,7 +66,6 @@ onStartup; /**< controls behaviour after startup: load last layout if zero, else
 static int verbose = 0;
 
 static BOOL_T inMainW = TRUE;
-static BOOL_T MainWindowTemplated = FALSE;
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 
@@ -823,7 +822,7 @@ EXPORT void CloseDemoWindows(void)
 		if ( demoWindows(inx) != NULL) {
 			wHide(demoWindows(inx));
 		}
-	demoWindows_da.cnt = 0;
+	DYNARR_RESET( wWin_p, demoWindows_da );
 }
 
 EXPORT void DefaultProc(wWin_p win, winProcEvent e, void * data)
@@ -845,6 +844,7 @@ static void NextWindow(void)
 {
 }
 
+
 
 /*****************************************************************************
  *
@@ -959,23 +959,38 @@ static void SetAccelKeys()
 }
 
 
+//EXPORT void InitCmdEnumerate(void) {
+//	AddToolbarButton("cmdEnumerate", wIconCreatePixMap(partlist_xpm),
+//			IC_SELECTED | IC_ACCLKEY, EnumerateTracks,
+//			NULL);
+//}
+
+
+
 /****************************************************************************
-*
-* WMAIN
-*
-* Give user the option to continue work after crash. This function gives the user
-* the option to load the checkpoint file to continue working after a crash.
-*
-* \param none
-* \return TRUE for resume, FALSE otherwise
-*
-*/
+ *
+ * WMAIN
+ *
+ */
+
+/* Give user the option to continue work after crash. This function gives the user
+ * the option to load the checkpoint file to continue working after a crash.
+ *
+ * \param none
+ * \return TRUE for resume, FALSE otherwise
+ *
+ */
+
+
 static int OfferCheckpoint( void )
 {
 	int ret = FALSE;
 
 	/* sProdName */
-	ret = wNotice3(_( "Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
+	ret =
+	        wNotice3(
+	                _(
+	                        "Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
 	                _("Resume"), _("Resume with New Name"), _("Ignore Checkpoint"));
 	//ret==1 Same, ret==-1 New, ret==0 Ignore
 	if (ret == 1) {

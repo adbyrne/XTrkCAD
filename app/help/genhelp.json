@@ -274,7 +274,7 @@
 		{"line": "carinv-list", "contents": "" },
 		{"line": "carinv-edit", "contents": "Edit the selected Car Item" },
 		{"line": "carinv-add", "contents": "Add a new Car Item" },
-		{"line": "carinv-delete", "contents": "Delete the selected Car Items" },
+		{"line": "carinv-delete", "contents": "Delete from Inventory or return to Shelf" },
 		{"line": "carinv-import", "contents": "Import a Car Item .csv file" },
 		{"line": "carinv-export", "contents": "Export a Car Item .csv file" },
 		{"line": "carinv-savetext", "contents": "Create a text list of the Car Items" },

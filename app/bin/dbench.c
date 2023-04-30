@@ -416,7 +416,7 @@ EXPORT void TotalBench( void )
 	char title[STR_SIZE];
 	benchEnum_p bp;
 
-	qsort( benchEnum_da.ptr, benchEnum_da.cnt, sizeof *bp, Cmp_benchEnum );
+	qsort( &benchEnum(0), benchEnum_da.cnt, sizeof *bp, Cmp_benchEnum );
 	for ( inx=0; inx<benchEnum_da.cnt; inx++ ) {
 		bp = &benchEnum(inx);
 		if ( bp->length > 0 ) {

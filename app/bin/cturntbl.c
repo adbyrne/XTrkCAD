@@ -686,7 +686,7 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 			if (action == C_MOVE)
 				InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
 				             FormatDistance( r-ttRadius ), PutAngle( angle ) );
-			tempSegs_da.cnt = 1;
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			valid = TRUE;
 		}
 		return C_CONTINUE;

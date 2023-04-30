@@ -75,11 +75,12 @@ static paramData_t structurePLs[] = {
 #define I_HIDE	(2)
 	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
-	{	PD_MESSAGE, NULL, "mess1", 0, I2VP(80) },
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGWIDTH		(4)
-	{	PD_MESSAGE, NULL, "mess2", 0, I2VP(80) },
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) },
 #define I_MSGHEIGHT		(5)
-	{	PD_MESSAGE, NULL, "mess3", 0, I2VP(80) } };
+	{	PD_MESSAGE, NULL, NULL, 0, I2VP(80) }
+};
 static paramGroup_t structurePG = { "structure", 0, structurePLs, COUNT( structurePLs ) };
 
 
@@ -959,12 +960,13 @@ EXPORT STATUS_T CmdStructureAction(
 
 	case C_REDRAW:
 		wSetCursor(mainD.d,defaultCursor);
-		if (Dst.state)
+		if (Dst.state) {
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
 			          curStructure->segs, curStructure->segCnt, 0.0, selectedColor );
+		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		if (anchors_da.cnt>0) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
 			wSetCursor(mainD.d,wCursorNone);
 		}
 		if (Dst.state == 2) {

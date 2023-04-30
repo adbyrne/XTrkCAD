@@ -37,7 +37,8 @@ typedef struct extraDataBezier_t {
 } extraDataBezier_t;
 
 
-void SetBezierData( track_p p, coOrd pos[4], wDrawColor color, LWIDTH_T lineWidth );
+void SetBezierData( track_p p, coOrd pos[4], wDrawColor color,
+                    LWIDTH_T lineWidth );
 track_p NewBezierTrack(coOrd[4], trkSeg_p, int );
 track_p NewBezierLine(coOrd[4], trkSeg_p, int, wDrawColor, DIST_T);
 void FixUpBezier(coOrd[4], struct extraDataBezier_t*, BOOL_T);

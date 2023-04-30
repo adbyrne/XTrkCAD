@@ -160,7 +160,7 @@ EXPORT void Reset(void)
 		wButtonSetBusy(
 		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
 		        TRUE);
-	tempSegs_da.cnt = 0;
+	DYNARR_RESET( trkSeg_t, tempSegs_da );
 
 	TryCheckPoint();
 
@@ -338,7 +338,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos)
 	if ((rc == C_TERMINATE || rc == C_INFO)
 	    && (commandList[curCommand].options & IC_STICKY)
 	    && (commandList[curCommand].stickyMask & stickySet)) {
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		UpdateAllElevations();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
@@ -466,7 +466,7 @@ EXPORT void DoCommandB(void * data)
 		LOG(log_command, 3,
 		    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 		commandList[curCommand].cmdProc( C_CANCEL, pos);
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 	} else {
 		LOG(log_command, 3,
 		    ( "COMMAND FINISH %s\n", commandList[curCommand].helpKey ))
@@ -524,7 +524,8 @@ EXPORT void DoCommandB(void * data)
 	inDoCommandB = FALSE;
 }
 
-static void LayoutSetPos(wIndex_t inx, BOOL_T force) {
+static void LayoutSetPos(wIndex_t inx)
+{
 	wWinPix_t w, h, offset;
 	static wWinPix_t toolbarRowHeight = 0;
 	static wWinPix_t width;
@@ -543,92 +544,62 @@ static void LayoutSetPos(wIndex_t inx, BOOL_T force) {
 		layerButtNumber = 0;
 		toolbarHeight = 0;
 	}
-#ifdef XTRKCAD_GTK3_WLIB
-	BOOL_T seperator = FALSE;
-	if (buttonList[inx].control) {
-		currGroup = buttonList[inx].group & ~BG_BIGGAP;
-		if (currGroup != lastGroup && (buttonList[inx].group & BG_BIGGAP)) {
-			seperator = currGroup+1;
-		}
-		if (currGroup != lastGroup) {
-			lastGroup = currGroup;
-		}
-		if (force) {
-			if ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER) {
-				wControlShow(buttonList[inx].control, FALSE);
-			}
-		} else {
-			if ((toolbarSet & (1 << currGroup))
-				&& (programMode != MODE_TRAIN
-					|| (buttonList[inx].options
-							& (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
-				&& (programMode == MODE_TRAIN
-						|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
-				&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-						|| layerButtCnt++ <= layerCount)) {
-					wControlShow(buttonList[inx].control, TRUE);
-			} else {
-				wControlShow(buttonList[inx].control, FALSE);
-			}
-		}
-
-	}
-	return;
-
-#else
-	offset = 0;
 
 	if (buttonList[inx].control) {
-		if (toolbarRowHeight <= 0)
-		toolbarRowHeight = wControlGetHeight(buttonList[inx].control);
+		if (toolbarRowHeight <= 0) {
+			toolbarRowHeight = wControlGetHeight(buttonList[inx].control);
+		}
+
 		currGroup = buttonList[inx].group & ~BG_BIGGAP;
 		if (currGroup != lastGroup && (buttonList[inx].group & BG_BIGGAP)) {
 			gap = 15;
 		}
 		if ((toolbarSet & (1 << currGroup))
-			&& (programMode != MODE_TRAIN
-					|| (buttonList[inx].options
-							& (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
-			&& (programMode == MODE_TRAIN
-				|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
-			&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-				|| layerButtCnt < layerCount)) {
-		if (currGroup != lastGroup) {
-			toolbarWidth += gap;
-			lastGroup = currGroup;
-			gap = 5;
-		}
-		w = wControlGetWidth(buttonList[inx].control);
-		h = wControlGetHeight(buttonList[inx].control);
-		if (h<toolbarRowHeight) {
-			offset = (h-toolbarRowHeight)/2;
-			h = toolbarRowHeight;  //Uniform
-		} else offset = 0;
-		if (inx < buttonCnt - 1 && (buttonList[inx + 1].options & IC_ABUT))
-			w += wControlGetWidth(buttonList[inx + 1].control);
-		if (toolbarWidth + w > width - 20) {
-			toolbarWidth = 0;
-			toolbarHeight += h + 5;
-		}
-		if ((currGroup == BG_LAYER) && layerButtNumber>1 && GetLayerHidden(layerButtNumber-2) ) {
-			wControlShow(buttonList[inx].control, FALSE);
-			layerButtNumber++;
-		} else {
-			if (currGroup == BG_LAYER ) {
-				if (layerButtNumber>1) layerButtCnt++; // Ignore List and Background
-				layerButtNumber++;
+		    && (programMode != MODE_TRAIN
+		        || (buttonList[inx].options
+		            & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
+		    && (programMode == MODE_TRAIN
+		        || (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
+		    && ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
+		        || layerButtCnt < layerCount)) {
+			if (currGroup != lastGroup) {
+				toolbarWidth += gap;
+				lastGroup = currGroup;
+				gap = 5;
 			}
-			wControlSetPos(buttonList[inx].control, toolbarWidth,
-				toolbarHeight - (h + 5 +offset));
-			buttonList[inx].x = toolbarWidth;
-			buttonList[inx].y = toolbarHeight - (h + 5 + offset);
-			toolbarWidth += wControlGetWidth(buttonList[inx].control);
-			wControlShow(buttonList[inx].control, TRUE);
+			w = wControlGetWidth(buttonList[inx].control);
+			h = wControlGetHeight(buttonList[inx].control);
+			if (h<toolbarRowHeight) {
+				offset = (h-toolbarRowHeight)/2;
+				h = toolbarRowHeight;  //Uniform
+			} else { offset = 0; }
+			if (inx < buttonCnt - 1 && (buttonList[inx + 1].options & IC_ABUT)) {
+				w += wControlGetWidth(buttonList[inx + 1].control);
+			}
+			if (toolbarWidth + w > width - 20) {
+				toolbarWidth = 0;
+				toolbarHeight += h + 5;
+			}
+			if ((currGroup == BG_LAYER) && layerButtNumber>1
+			    && GetLayerHidden(layerButtNumber-2) ) {
+				wControlShow(buttonList[inx].control, FALSE);
+				layerButtNumber++;
+			} else {
+				if (currGroup == BG_LAYER ) {
+					if (layerButtNumber>1) { layerButtCnt++; } // Ignore List and Background
+					layerButtNumber++;
+				}
+				wControlSetPos(buttonList[inx].control, toolbarWidth,
+				               toolbarHeight - (h + 5 +offset));
+				buttonList[inx].x = toolbarWidth;
+				buttonList[inx].y = toolbarHeight - (h + 5 + offset);
+				toolbarWidth += wControlGetWidth(buttonList[inx].control);
+				wControlShow(buttonList[inx].control, TRUE);
+			}
+		} else {
+			wControlShow(buttonList[inx].control, FALSE);
 		}
-	} else {
-		wControlShow(buttonList[inx].control, FALSE);
 	}
-#endif
 }
 
 EXPORT void LayoutToolBar( void * data )
@@ -636,12 +607,8 @@ EXPORT void LayoutToolBar( void * data )
 	int inx;
 
 	for (inx = 0; inx < buttonCnt; inx++) {
-		LayoutSetPos(inx, FALSE);
+		LayoutSetPos(inx);
 	}
-#ifdef XTRKCAD_GTK3_WLIB	
-		wButtonToolBarRedraw(mainW);
-#endif
-
 	if (toolbarSet&(1<<BG_HOTBAR)) {
 		LayoutHotBar(data);
 	} else {
@@ -710,11 +677,7 @@ EXPORT void AddToolbarControl(wControl_p control, long options)
 	buttonList[buttonCnt].y = 0;
 	buttonList[buttonCnt].control = control;
 	buttonList[buttonCnt].cmdInx = -1;
-#ifdef XTRKCAD_GTK3_WLIB
-	LayoutSetPos(buttonCnt, TRUE );
-#else
 	LayoutSetPos(buttonCnt);
-#endif	
 	buttonCnt++;
 }
 

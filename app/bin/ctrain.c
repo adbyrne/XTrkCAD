@@ -636,7 +636,6 @@ static trainControlDlg_t * curTrainDlg;
 
 static void SpeedRedraw(wDraw_p, void *, wWinPix_t, wWinPix_t);
 static void SpeedAction(wAction_t, coOrd);
-static void LocoListChangeEntry(track_p, track_p);
 static void CmdTrainExit(void * unused);
 
 drawCmd_t speedD = {
@@ -664,9 +663,9 @@ static paramData_t trainPLs[] = {
 	/*0*/ { PD_LIST, NULL, "list", PDO_NOPREF|PDO_NOPSHUPD, &listData, NULL, 0 },
 #endif
 #define I_STATUS			(1)
-    { PD_MESSAGE, NULL, "mess1", 0, I2VP(120) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(120) },
 #define I_POS				(2)
-    { PD_MESSAGE, NULL, "mess2", 0, I2VP(120) },
+	{ PD_MESSAGE, NULL, NULL, 0, I2VP(120) },
 #define I_SLIDER			(3)
 	{ PD_DRAW, NULL, "speed", PDO_NOPSHUPD|PDO_DLGSETY, &speedParamData },
 #define I_DIST				(4)
@@ -684,7 +683,7 @@ static paramData_t trainPLs[] = {
 #define I_STOP				(10)
 	{ PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, N_("Stop") },
 #define I_SPEED				(11)
-    { PD_MESSAGE, NULL, "mess3", PDO_DLGIGNOREX, I2VP(120) }
+	{ PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, I2VP(120) }
 };
 
 static paramGroup_t trainPG = { "train", 0, trainPLs, COUNT( trainPLs ) };
@@ -990,7 +989,7 @@ static void ControllerDialogSyncAll(void)
 }
 
 
-static void LocoListChangeEntry(
+EXPORT void LocoListChangeEntry(
         track_p oldLoco,
         track_p newLoco)
 {
@@ -1048,7 +1047,7 @@ static void LocoListInit(void)
 {
 	track_p train;
 	struct extraDataCar_t * xx;
-	locoList_da.cnt = 0;
+	DYNARR_RESET( locoList_t, locoList_da );
 
 	for (train=NULL; TrackIterate(&train);) {
 		if (GetTrkType(train) != T_CAR) {
@@ -2525,7 +2524,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		wListClear((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control);
 		Dtrain.state = 0;
 		trk0 = NULL;
-		tempSegs_da.cnt = 0;
 		DYNARR_SET(trkSeg_t, tempSegs_da, 8);
 		RestartTrains();
 		wButtonSetLabel(trainPauseB, (char*)goB);
@@ -2661,7 +2659,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			xx->trvTrk.angle = angle1;
 		}
 
-		tempSegs_da.cnt = 1;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		PlaceTrainInit(currCar, trk0, pos0, xx->trvTrk.angle,
 		               (MyGetKeyState()&WKEY_SHIFT) == 0);
 		ControllerDialogSync(curTrainDlg);
@@ -2978,17 +2976,7 @@ static void TrainFunc(
 		break;
 
 	case DO_DELCAR:
-		UncoupleCars( trainFuncCar, 0 );
-		UncoupleCars( trainFuncCar, 1 );
-		if (CarItemIsLoco(xx->item)) {
-			LocoListChangeEntry(trainFuncCar, NULL);
-		}
-
-		//trainFuncCar->deleted = TRUE;
-		DeleteTrack( trainFuncCar, FALSE );
-		CarItemUpdate(xx->item);
-		HotBarCancel();
-		InfoSubstituteControls(NULL, NULL);
+		CarItemShelve( xx->item );
 		break;
 
 	case DO_DELTRAIN:

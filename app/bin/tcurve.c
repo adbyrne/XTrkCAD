@@ -1296,13 +1296,13 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 		}
 		GetTrkCurveCenter( trk, &arcPos, &arcRadius );
 		UndrawNewTrack( trk );
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).type = SEG_CRVTRK;
 		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.c.center = arcPos;
 		tempSegs(0).u.c.radius = arcRadius;
 		tempSegs(0).u.c.a0 = arcA0;
 		tempSegs(0).u.c.a1 = arcA1;
-		tempSegs_da.cnt = 1;
 		InfoMessage( _("Drag to change angle or create tangent") );
 	case C_MOVE:
 		if (xx->helixTurns>0) {
@@ -1347,16 +1347,17 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 				ErrorMessage( MSG_TRK_TOO_SHORT, _("Tangent "), PutDim(fabs(minLength-d)) );
 				return C_CONTINUE;
 			}
+			DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 			tempSegs(1).type = SEG_STRTRK;
 			tempSegs(1).lineWidth = 0;
 			tempSegs(1).u.l.pos[0] = tangentOrig;
 			tempSegs(1).u.l.pos[1] = tangentEnd;
-			tempSegs_da.cnt = 2;
 			if (action == C_MOVE)
 				InfoMessage( _("Tangent track: Length %s Angle %0.3f"),
 				             FormatDistance( d ),
 				             PutAngle( FindAngle( tangentOrig, tangentEnd ) ) );
 		} else {
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			arcTangent = FALSE;
 			angle = NormalizeAngle( a +
 			                        ((ep==0)?-90:90));
@@ -1373,7 +1374,6 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 				ErrorMessage( MSG_TRK_TOO_SHORT, _("Curved "), PutDim( fabs(minLength-d) ) );
 				return C_CONTINUE;
 			}
-			tempSegs_da.cnt = 1;
 			if (action == C_MOVE)
 				InfoMessage( _("Curved: Radius=%s Length=%s Angle=%0.3f"),
 				             FormatDistance( arcRadius ), FormatDistance( d ),
@@ -1576,9 +1576,9 @@ static BOOL_T MakeParallelCurve(
 			xx1->helixTurns = xx->helixTurns;
 			xx1->circle = xx->circle;
 		} else {
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			tempSegs(0).color = wDrawColorBlack;
 			tempSegs(0).lineWidth = 0;
-			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_CRVLIN;
 			tempSegs(0).u.c.center = xx->pos;
 			tempSegs(0).u.c.radius = rad;
@@ -1594,9 +1594,9 @@ static BOOL_T MakeParallelCurve(
 			a0 = 0;
 			a1 = 360.0;
 		}
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).lineWidth = 0;
-		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_CRVTRK:SEG_CRVLIN;
 		tempSegs(0).u.c.center = xx->pos;
 		tempSegs(0).u.c.radius = rad;

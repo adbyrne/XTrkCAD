@@ -36,7 +36,7 @@ static BOOL_T splitTrkFlip;
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-static void ChangeSplitEPMode( wBool_t set, void * mode )
+static void ChangeSplitEPMode( void * mode )
 {
 	long imode = VP2L(mode);
 	long option;
@@ -288,10 +288,8 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 
 		break;
 	case C_REDRAW:
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		break;
 	}
 
@@ -350,10 +348,8 @@ static STATUS_T CmdSplitDraw( wAction_t action, coOrd pos )
 		onTrackInSplit = FALSE;
 		break;
 	case C_REDRAW:
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		break;
 	}
 
@@ -480,10 +476,8 @@ static STATUS_T CmdTrimDraw( wAction_t action, coOrd pos )
 		if (trimLine) {
 			DrawTrack(trimLine,&tempD,selectedColor);
 		}
-		if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge,
-			          wDrawColorBlack );
-		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		break;
 	case C_TEXT:
 		if (action>>8 != ' ' && action>>8 != 13 ) {

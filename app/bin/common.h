@@ -162,6 +162,12 @@ typedef struct {
 
 #define CHECK_SIZE(T,DA)
 
+/**
+ * Append INCR mambers to DA
+ * INCR is > 1 if we plan to add more members soon
+ * Increments .cnt for the next member
+ * Note: new members may not be empty
+ */
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
 			(DA).max += (INCR); \
@@ -171,14 +177,27 @@ typedef struct {
 				abort(); \
 		} \
 		(DA).cnt++; }
-#define DYNARR_ADD(T,DA,INCR) DYNARR_APPEND(T,DA,INCR)
 
+/**
+ * Return Last member of DA
+ */
 #define DYNARR_LAST(T,DA) \
 		(((T*)(DA).ptr)[(DA).cnt-1])
+/**
+ * Return N't member of DA
+ */
 #define DYNARR_N(T,DA,N) \
 		(((T*)(DA).ptr)[N])
+/**
+ * Logically empty the DA
+ * .max and .ptr are untouched
+ */
 #define DYNARR_RESET(T,DA) \
 		(DA).cnt=0
+/**
+ * Set number of members to N
+ * If extending (.cnt > .max ), new values will be 0'd, otherwise not
+ */
 #define DYNARR_SET(T,DA,N) \
 		{ if ((DA).max < (N)) { \
 			(DA).max = (N); \
@@ -188,6 +207,18 @@ typedef struct {
 				abort(); \
 		} \
 		(DA).cnt = (N); }
+/**
+ * Initializes DA to empty when .ptr might be garbage (ie local vars)
+ * All fields are cleared
+ */
+#define DYNARR_INIT(T,DA) \
+		{ (DA).ptr = NULL; \
+		(DA).max = 0; \
+		(DA).cnt = 0; \
+		}
+/**
+ * Initializes DA to empty and frees .ptr
+ */
 #define DYNARR_FREE(T,DA) \
 		{ if ((DA).ptr) { \
 			MyFree( (DA).ptr); \
@@ -195,15 +226,19 @@ typedef struct {
 		} \
 		(DA).max = 0; \
 		(DA).cnt = 0; }
-#define DYNARR_REMOVE(T,DA,I) \
+/**
+ * Removes N'th member from DA
+ * (Not used)
+ */
+#define DYNARR_REMOVE(T,DA,N) \
 		{ \
-		 { if ((DA).cnt-1 > (I)) { \
-				for (int i=(I);i<(DA).cnt-1;i++) { \
+		 { if ((DA).cnt-1 > (N)) { \
+				for (int i=(N);i<(DA).cnt-1;i++) { \
 				(((T*)(DA).ptr)[i])= (((T*)(DA).ptr)[i+1]); \
 				} \
 			} \
 		 } \
-		if ((DA).cnt>=(I)) (DA).cnt--; \
+		if ((DA).cnt>=(N)) (DA).cnt--; \
 		}
 
 // Base DotsPerInch

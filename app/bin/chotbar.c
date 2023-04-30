@@ -576,7 +576,8 @@ EXPORT void LayoutHotBar( void * redraw )
 	BOOL_T initialize = FALSE;
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
-	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.6 + 0.4 * (double)iconSize));
+	hotBarTextHeight = (wWinPix_t)round(wMessageGetHeight(0L) * (0.6 + 0.4 *
+	                                    (double)iconSize));
 
 	if ( hotBarLabels) {
 		hbHeight += hotBarTextHeight;

@@ -1341,11 +1341,13 @@ void AppendSegs(dynArr_t * target, dynArr_t * source)
 void ClearSegs(dynArr_t * target)
 {
 	for (int i=0; i<(*target).cnt; i++) {
-		if (targetSegs(i).type == SEG_BEZTRK)
-			if (targetSegs(i).bezSegs.ptr) { MyFree(targetSegs(i).bezSegs.ptr); }
-		targetSegs(i).bezSegs.ptr = NULL;
-		targetSegs(i).bezSegs.cnt = 0;
-		targetSegs(i).bezSegs.max = 0;
+		if (targetSegs(i).type == SEG_BEZTRK) {
+			// Free DA if a BEZTRK
+			DYNARR_FREE( trkSeg_t, targetSegs(i).bezSegs );
+		} else {
+			// Otherwise just clear it
+			DYNARR_INIT( trkSeg_t, targetSegs(i).bezSegs );
+		}
 	}
 	DYNARR_RESET( trkSeg_t, *target );
 }
@@ -1355,10 +1357,7 @@ BOOL_T CallCornuNoBez(coOrd pos[2], coOrd center[2], ANGLE_T angle[2],
 {
 
 	dynArr_t temp_array;
-	DYNARR_RESET(trkSeg_t,temp_array);
-	temp_array.ptr=0;
-	temp_array.max=0;
-
+	DYNARR_INIT(trkSeg_t,temp_array);
 
 	wBool_t rc = CallCornu0(pos,center,angle,radius, &temp_array, FALSE);
 
@@ -1754,10 +1753,6 @@ static toDesignSchema_t * LoadSegs(
 			/* Ready to find Toe points */
 
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
-			trkSeg_t * temp_p;
-			temp_p = &tempSegs(0);
-
-
 			DIST_T radius = 0.0;
 			coOrd center;
 			ANGLE_T angle;
@@ -1781,7 +1776,7 @@ static toDesignSchema_t * LoadSegs(
 				/*Get ToeAngle/Radius/Center for first toe */
 				pos.x = end_points[0].x+(LH_first?newTurnToeL:newTurnToeR);
 				pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-				angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,
+				angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,&inx,
 				                     NULL,&back,&subSeg,&neg);
 				segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
 
@@ -1845,7 +1840,7 @@ static toDesignSchema_t * LoadSegs(
 					} else {
 						pos.x = end_points[0].x+(LH_first?newTurnToeR:newTurnToeL);
 						pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-						angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,
+						angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,&inx,
 						                     NULL,&back,&subSeg,&neg);
 						segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
 
@@ -1910,7 +1905,7 @@ static toDesignSchema_t * LoadSegs(
 			/* Override if at zero radius at base don't compute end */
 			if (cornuData.radius[0] == 0.0) {
 				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-				temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+				trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 				temp_p->type = SEG_STRTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->lineWidth = 0.0;
@@ -1921,7 +1916,7 @@ static toDesignSchema_t * LoadSegs(
 				                                    temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-				temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+				trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->lineWidth = 0.0;
@@ -1950,7 +1945,7 @@ static toDesignSchema_t * LoadSegs(
 				if ((cornuData.pos[0].x != cornuData.pos[1].x) ||
 				    (cornuData.pos[0].y != cornuData.pos[1].y)) {
 					DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-					temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+					trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 					temp_p->type = SEG_STRTRK;
 					temp_p->color = wDrawColorBlack;
 					temp_p->lineWidth = 0.0;
@@ -1970,7 +1965,7 @@ static toDesignSchema_t * LoadSegs(
 					/* Toe1 to Toe2 in tempSegs array */
 					if (cornuData.radius[0] == 0.0) {
 						DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-						temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+						trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 						temp_p->type = SEG_STRTRK;
 						temp_p->color = wDrawColorBlack;
 						temp_p->lineWidth = 0.0;
@@ -1996,7 +1991,7 @@ static toDesignSchema_t * LoadSegs(
 
 				if (cornuData.radius[5] == 0.0) {
 					DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-					temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+					trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 					temp_p->type = SEG_STRTRK;
 					temp_p->color = wDrawColorBlack;
 					temp_p->lineWidth = 0.0;
@@ -2007,7 +2002,7 @@ static toDesignSchema_t * LoadSegs(
 					                                    temp_p->u.l.pos[1].y  )) ;
 				} else {
 					DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-					temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+					trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 					temp_p->type = SEG_CRVTRK;
 					temp_p->color = wDrawColorBlack;
 					temp_p->lineWidth = 0.0;
@@ -2047,7 +2042,7 @@ static toDesignSchema_t * LoadSegs(
 
 			if (cornuData.radius[7] == 0.0) {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+				trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_STRTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->lineWidth = 0.0;
@@ -2058,7 +2053,7 @@ static toDesignSchema_t * LoadSegs(
 				                                    temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+				trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->lineWidth = 0.0;
@@ -2096,7 +2091,7 @@ static toDesignSchema_t * LoadSegs(
 
 			if (cornuData.radius[9] == 0.0) {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+				trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_STRTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->lineWidth = 0.0;
@@ -2107,7 +2102,7 @@ static toDesignSchema_t * LoadSegs(
 				                                    temp_p->u.l.pos[1].y  ) );
 			} else {
 				DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-				temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+				trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 				temp_p->type = SEG_CRVTRK;
 				temp_p->color = wDrawColorBlack;
 				temp_p->lineWidth = 0.0;
@@ -2388,9 +2383,6 @@ static toDesignSchema_t * LoadSegs(
 		cornuData.radius[5] = fabs(radii[1]);        /*Inner*/
 
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
-		trkSeg_t * temp_p;
-//			trkSeg_t * cornu_p;
-		temp_p = &tempSegs(0);
 
 		/*Map out the full outer curve */
 
@@ -2404,7 +2396,7 @@ static toDesignSchema_t * LoadSegs(
 		coOrd center;
 		pos.x = end_points[0].x+newTurnToeL-MIN_TRACK_LENGTH;
 		pos.y = end_points[0].y; 				/* This will be close to but not on the curve */
-		ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,
+		ANGLE_T angle = GetAngleSegs(tempSegs_da.cnt,&tempSegs(0),&pos,
 		                             &inx,NULL,&back,&subSeg,&neg);
 		segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
 
@@ -2440,7 +2432,7 @@ static toDesignSchema_t * LoadSegs(
 		/* Override if at zero radius at base don't compute end */
 		if (cornuData.radius[0] == 0.0) {
 			DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-			temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 			temp_p->type = SEG_STRTRK;
 			temp_p->color = wDrawColorBlack;
 			temp_p->lineWidth = 0.0;
@@ -2451,7 +2443,7 @@ static toDesignSchema_t * LoadSegs(
 			                                    temp_p->u.l.pos[1].y  ) );
 		} else {
 			DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
-			temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,tempSegs_da);
 			temp_p->type = SEG_CRVTRK;
 			temp_p->color = wDrawColorBlack;
 			temp_p->lineWidth = 0.0;
@@ -2485,12 +2477,9 @@ static toDesignSchema_t * LoadSegs(
 		/* Toe to Outer in cornuSegs array */
 		CallCornuNoBez(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],
 		               &cornuData.radius[2],&cornuSegs_da);
-
-//			cornu_p = (trkSeg_p)cornuSegs_da.ptr;
-
 		if (cornuData.radius[3] == 0.0) {
 			DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_STRTRK;
 			temp_p->color = wDrawColorBlack;
 			temp_p->lineWidth = 0.0;
@@ -2501,7 +2490,7 @@ static toDesignSchema_t * LoadSegs(
 			                                    temp_p->u.l.pos[1].y  ) );
 		} else {
 			DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_CRVTRK;
 			temp_p->color = wDrawColorBlack;
 			temp_p->lineWidth = 0.0;
@@ -2540,7 +2529,7 @@ static toDesignSchema_t * LoadSegs(
 
 		if (cornuData.radius[5] == 0.0) {
 			DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_STRTRK;
 			temp_p->color = wDrawColorBlack;
 			temp_p->lineWidth = 0.0;
@@ -2551,7 +2540,7 @@ static toDesignSchema_t * LoadSegs(
 			                                    temp_p->u.l.pos[1].y  ) );
 		} else {
 			DYNARR_APPEND(trkSeg_t,cornuSegs_da,1);
-			temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
+			trkSeg_p temp_p = &DYNARR_LAST(trkSeg_t,cornuSegs_da);
 			temp_p->type = SEG_CRVTRK;
 			temp_p->color = wDrawColorBlack;
 			temp_p->lineWidth = 0.0;
@@ -2634,7 +2623,6 @@ static toDesignSchema_t * LoadSegs(
 		CHECKMSG( segCnt%3 == 0, ( "%s", dp->label ) );
 		segCnt /= 3;
 		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
-		tempSegs_da.cnt = segCnt;
 		memset( &tempSegs(0), 0, segCnt * sizeof tempSegs(0) );
 		for ( s=0; s<segCnt; s++ ) {
 			segPtr = &tempSegs(s);
@@ -2820,8 +2808,8 @@ static void NewTurnPrint(
 			DrawRectangle( &newTurnout_d, newTurnout_d.orig, newTurnout_d.size,
 			               wDrawColorBlack, DRAW_CLOSED );
 
-			DrawSegs( &newTurnout_d, zero, 270.0, &tempSegs(0), tempSegs_da.cnt,
-			          newTurnTrackGauge, wDrawColorBlack );
+			DrawSegsDA( &newTurnout_d, NULL, zero, 270.0, &tempSegs_da, newTurnTrackGauge,
+			            wDrawColorBlack, 0 );
 
 			for ( ep=0; ep<TempEndPtsCount(); ep++ ) {
 				pos.x = - GetEndPtPos( TempEndPt(ep) ).y;
@@ -2874,7 +2862,6 @@ static void NewTurnOk( void * context )
 	turnoutInfo_t *to;
 #endif
 	FLOAT_T flt;
-	wIndex_t segCnt;
 	char * customInfoP;
 
 	coOrd pos;
@@ -2958,7 +2945,6 @@ static void NewTurnOk( void * context )
 	customInfoP = MyStrdup( tempCustom );
 	strcpy( tempCustom, message );
 
-	segCnt = tempSegs_da.cnt;
 	long options = 0;
 	if ( curDesign->type == NTO_D_SLIP && newTurnSlipMode == 1) {
 		options |= COMPOUND_OPTION_PATH_NOCOMBINE;
@@ -3008,7 +2994,6 @@ static void NewTurnOk( void * context )
 		SetEndPt(TempEndPt(2), pos, angle );
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc,
 		                  newTurnRightPartno );
-		tempSegs_da.cnt = segCnt;
 #ifndef MKTURNOUT
 		if (includeNontrackSegments && customTurnout2) {
 			CopyNonTracks( customTurnout2 );
@@ -3067,7 +3052,6 @@ static void NewTurnOk( void * context )
 		SetEndPt( TempEndPt(2), pos, angle );
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc,
 		                  newTurnRightPartno );
-		//tempSegs_da.cnt = segCnt;
 #ifndef MKTURNOUT
 		if (includeNontrackSegments && customTurnout2) {
 			CopyNonTracks( customTurnout2 );

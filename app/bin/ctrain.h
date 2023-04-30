@@ -42,6 +42,7 @@ extern carItem_p currCarItemPtr;
 extern wControl_p newCarControls[2];
 void DoCarDlg( void * unused );
 BOOL_T CarItemRead( char * );
+void CarItemShelve( carItem_p );
 track_p NewCar( wIndex_t, carItem_p, coOrd, ANGLE_T );
 void UncoupleCars( track_p, int );
 void CarGetPos( track_p, coOrd *, ANGLE_T * );
@@ -77,7 +78,9 @@ int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
 void CheckCarTraverse( track_p trk);
+
 void DeleteCarProto(int fileIndex);
 void DeleteCarPart(int fileIndex);
+void LocoListChangeEntry( track_p, track_p );
 
 #endif // !HAVE_CTRAIN_H

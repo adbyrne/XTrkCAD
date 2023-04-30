@@ -221,6 +221,15 @@ void DrawSegs(
         wIndex_t segCnt,
         DIST_T trackGauge,
         wDrawColor color );
+void DrawSegsDA(
+        drawCmd_p d,
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle,
+        dynArr_t * da,
+        DIST_T trackGauge,
+        wDrawColor color,
+        long options );
 void DrawSegsO(
         drawCmd_p d,
         track_p trk,

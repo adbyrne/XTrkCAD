@@ -163,7 +163,8 @@ static void ComputeCornuBoundingBox( track_p trk, struct extraDataCornu_t * xx )
 {
 	coOrd orig, size;
 
-	GetSegBounds(zero,0,xx->arcSegs.cnt,xx->arcSegs.ptr, &orig, &size);
+	GetSegBounds(zero,0,xx->arcSegs.cnt,&DYNARR_N(trkSeg_t,xx->arcSegs,0), &orig,
+	             &size);
 
 	coOrd hi, lo;
 
@@ -567,8 +568,7 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 		DrawCornuDescription( t, d, color );
 	}
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
-	DrawSegsO(d,t,zero,0.0,xx->arcSegs.ptr,xx->arcSegs.cnt, GetTrkGauge(t), color,
-	          widthOptions);
+	DrawSegsDA(d,t,zero,0.0,&xx->arcSegs, GetTrkGauge(t), color, widthOptions);
 	DrawEndPt( d, t, 0, color );
 	DrawEndPt( d, t, 1, color );
 }
@@ -576,12 +576,7 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 void FreeSubSegs(trkSeg_t* s)
 {
 	if (s->type == SEG_BEZTRK || s->type == SEG_BEZLIN) {
-		if (s->bezSegs.ptr) {
-			MyFree(s->bezSegs.ptr);
-		}
-		s->bezSegs.max = 0;
-		s->bezSegs.cnt = 0;
-		s->bezSegs.ptr = NULL;
+		DYNARR_FREE( trkSeg_t, s->bezSegs );
 	}
 }
 
@@ -593,12 +588,8 @@ static void DeleteCornu( track_p t )
 		trkSeg_t s = DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		FreeSubSegs(&s);
 	}
-	if (xx->arcSegs.ptr) {
-		MyFree(xx->arcSegs.ptr);
-	}
-	xx->arcSegs.max = 0;
-	xx->arcSegs.cnt = 0;
-	xx->arcSegs.ptr = NULL;
+
+	DYNARR_FREE( trkSeg_t, xx->arcSegs );
 }
 
 static BOOL_T WriteCornu( track_p t, FILE * f )
@@ -628,7 +619,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 		rc &= WriteEndPt( f, t, 0 );
 		rc &= WriteEndPt( f, t, 1 );
 	}
-	rc &= WriteSegs( f, xx->arcSegs.cnt, xx->arcSegs.ptr );
+	rc &= WriteSegs( f, xx->arcSegs.cnt, &DYNARR_N(trkSeg_t,xx->arcSegs,0) );
 	return rc;
 }
 
@@ -742,8 +733,8 @@ void GetCornuParmsNear(track_p t, int sel, coOrd * pos2, coOrd * center,
 	*center = zero;
 	wBool_t back,neg;
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(t, T_CORNU, extraDataCornu_t);
-	ANGLE_T angle = GetAngleSegs(xx->arcSegs.cnt,(trkSeg_t *)(xx->arcSegs.ptr),&pos,
-	                             &inx,NULL,&back,NULL,&neg);
+	ANGLE_T angle = GetAngleSegs(xx->arcSegs.cnt,&DYNARR_N(trkSeg_t,xx->arcSegs,0),
+	                             &pos,&inx,NULL,&back,NULL,&neg);
 
 	if (inx == -1) {
 		return;    //Error in GetAngle
@@ -752,8 +743,8 @@ void GetCornuParmsNear(track_p t, int sel, coOrd * pos2, coOrd * center,
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->arcSegs, inx);
 
 	if (segPtr->type == SEG_BEZTRK) {
-		GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,
-		             NULL,&back,NULL,&neg);
+		GetAngleSegs(segPtr->bezSegs.cnt,&DYNARR_N(trkSeg_t,segPtr->bezSegs,0),&pos,
+		             &inx,NULL,&back,NULL,&neg);
 		if (inx ==-1) { return; }
 		segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
 	}
@@ -785,8 +776,8 @@ void GetCornuParmsTemp(dynArr_t * array_p, int sel, coOrd * pos2,
 	*center = zero;
 	*angle2 = 0.0;
 
-	ANGLE_T angle = GetAngleSegs(array_p->cnt,(trkSeg_p)array_p->ptr,&pos,&inx,NULL,
-	                             &back,NULL,&neg);
+	ANGLE_T angle = GetAngleSegs(array_p->cnt,&DYNARR_N(trkSeg_t,*array_p,0),&pos,
+	                             &inx,NULL,&back,NULL,&neg);
 
 	if (inx==-1) { return; }
 
@@ -794,8 +785,8 @@ void GetCornuParmsTemp(dynArr_t * array_p, int sel, coOrd * pos2,
 
 	if (segPtr->type == SEG_BEZTRK) {
 
-		GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,
-		             NULL,&back,NULL,&neg);
+		GetAngleSegs(segPtr->bezSegs.cnt,&DYNARR_N(trkSeg_t,segPtr->bezSegs,0),&pos,
+		             &inx,NULL,&back,NULL,&neg);
 
 		if (inx ==-1) { return; }
 
@@ -840,8 +831,8 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	BOOL_T back, neg;
 
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
-	ANGLE_T angle = GetAngleSegs(xx->arcSegs.cnt,(trkSeg_t *)(xx->arcSegs.ptr),&pos,
-	                             &inx,NULL,&back,&subinx,&neg);
+	ANGLE_T angle = GetAngleSegs(xx->arcSegs.cnt,&DYNARR_N(trkSeg_t,xx->arcSegs,0),
+	                             &pos, &inx,NULL,&back,&subinx,&neg);
 
 	if (inx == -1) { return FALSE; }
 
@@ -969,7 +960,7 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	LOG( log_traverseCornu, 1, ( "TravCornu-In [%0.3f %0.3f] A%0.3f D%0.3f \n",
 	                             trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
 	struct extraDataCornu_t *xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
-	trkSeg_p segPtr = (trkSeg_p)xx->arcSegs.ptr;
+	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->arcSegs,0);
 
 	a2 = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 	             xx->arcSegs.cnt,segPtr,
@@ -1085,7 +1076,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 {
 	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
 	for (int i=0; i<xx->arcSegs.cnt; i++) {
-		trkSeg_p p = (trkSeg_t *) xx->arcSegs.ptr+i;
+		trkSeg_p p = &DYNARR_N(trkSeg_t,xx->arcSegs,i);
 		if (p->type == SEG_BEZTRK) {
 			if (track) {
 				DYNARR_APPEND(trkSeg_t, * segs, 10);
@@ -1093,10 +1084,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track)
 				segPtr->type = SEG_BEZTRK;
 				segPtr->color = wDrawColorBlack;
 				segPtr->lineWidth = 0;
-				if (segPtr->bezSegs.ptr) { MyFree(segPtr->bezSegs.ptr); }
-				segPtr->bezSegs.cnt = 0;
-				segPtr->bezSegs.max = 0;
-				segPtr->bezSegs.ptr = NULL;
+				DYNARR_FREE( trkSeg_t, segPtr->bezSegs );
 				for (int j=0; j<4; j++) { segPtr->u.b.pos[j] = p->u.b.pos[j]; }
 				FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
 			} else {
@@ -1183,7 +1171,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos,
 	params->type = curveTypeCornu;
 	params->track_angle =
 	        GetAngleSegs(		  						//Find correct Segment and nearest point in it
-	                xx->arcSegs.cnt,xx->arcSegs.ptr,
+	                xx->arcSegs.cnt,&DYNARR_N(trkSeg_t,xx->arcSegs,0),
 	                &pos, &segInx, &d, &back, &segInx2, &negative );
 	if (segInx ==-1) { return FALSE; }
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->arcSegs,segInx);
@@ -1314,8 +1302,8 @@ static ANGLE_T GetAngleCornu(
 	ANGLE_T angle;
 	BOOL_T back, neg;
 	int indx;
-	angle = GetAngleSegs( xx->arcSegs.cnt, (trkSeg_p)xx->arcSegs.ptr, &pos, &indx,
-	                      NULL, &back, NULL, &neg );
+	angle = GetAngleSegs( xx->arcSegs.cnt, &DYNARR_N(trkSeg_t,xx->arcSegs,0), &pos,
+	                      &indx, NULL, &back, NULL, &neg );
 	if (!back) { angle = NormalizeAngle(angle+180); }
 	if ( ep0 ) { *ep0 = neg?1:0; }
 	if ( ep1 ) { *ep1 = neg?0:1; }
@@ -1353,8 +1341,8 @@ static BOOL_T MakeParallelCornu(
 	p = pos;
 	DistanceCornu(trk, &p);  //Find nearest point on curve
 	struct extraDataCornu_t * xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
-	atrk = GetAngleSegs(xx->arcSegs.cnt,(trkSeg_t *)(xx->arcSegs.ptr),&p,NULL,NULL,
-	                    NULL,NULL, NULL);
+	atrk = GetAngleSegs(xx->arcSegs.cnt,&DYNARR_N(trkSeg_t,xx->arcSegs,0),&p,
+	                    NULL, NULL, NULL,NULL, NULL);
 	diff_a = NormalizeAngle(FindAngle(pos,p)-atrk);  //we know it will be +/-90...
 	//find parallel move x and y for points
 	BOOL_T above = FALSE;
@@ -1405,13 +1393,13 @@ static BOOL_T MakeParallelCornu(
 				return FALSE;
 			}
 		} else {
-			tempSegs_da.cnt = 0;
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			CallCornu0(np,nc,na,nr,&tempSegs_da,FALSE);
 			*newTrkR = MakePolyLineFromSegs( zero, 0.0, &tempSegs_da );
 		}
 
 	} else {
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		CallCornu0(np,nc,na,nr,&tempSegs_da,FALSE);
 		if (!track) {
 			for (int i=0; i<tempSegs_da.cnt; i++) {
@@ -1428,7 +1416,7 @@ static BOOL_T MakeParallelCornu(
 				}
 				if (seg->type == SEG_BEZTRK) {
 					for (int j=0; j<seg->bezSegs.cnt; j++) {
-						trkSeg_p bseg = &(((trkSeg_t *)seg->bezSegs.ptr)[j]);
+						trkSeg_p bseg = &DYNARR_N(trkSeg_t,seg->bezSegs,j);
 						if (bseg->type == SEG_STRTRK) {
 							bseg->type = SEG_STRLIN;
 							bseg->color = wDrawColorBlack;
@@ -1485,10 +1473,8 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 {
 	struct extraDataCornu_t *xx;
 	xx = GET_EXTRA_DATA(trk, T_CORNU, extraDataCornu_t);
-	xx->arcSegs.max = 0;
-	xx->arcSegs.cnt = 0;
-	//if (xx->arcSegs.ptr) MyFree(xx->arcSegs.ptr);
-	xx->arcSegs.ptr = NULL;
+	//NOTE - Original code did not Free .ptr? See CS:c1b85944f448
+	DYNARR_INIT( trkSeg_t, xx->arcSegs );
 	if (!FixUpCornu0(xx->pos,xx->c,xx->a,xx->r, xx)) { return FALSE; }
 	ComputeCornuBoundingBox(trk, xx);
 	return TRUE;

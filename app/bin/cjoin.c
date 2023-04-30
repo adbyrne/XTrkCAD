@@ -499,7 +499,7 @@ static STATUS_T CmdJoinLine(
 		InfoMessage( _("Left click - Select first draw object end") );
 		Dl.line_state = NO_LINE;
 		Dl.joinMoveState = 0;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET(trkSeg_t,Dl.newLine);
 		Dl.curr_line = NULL;
 		SetAllTrackSelect( FALSE );
@@ -647,12 +647,15 @@ static STATUS_T CmdJoinLine(
 		Dl.curr_line = NULL;
 		break;
 	case C_REDRAW:
-		if (Dl.line_state != NO_LINE) { DrawSegs(&tempD,zero,0.0,((trkSeg_t*)Dl.newLine.ptr), Dl.newLine.cnt, trackGauge, wDrawColorPreviewSelected); }
-		if (Dl.curr_line) { DrawTrack(Dl.curr_line,&tempD,wDrawColorPreviewSelected); }
-		if (Dl.anchors_da.cnt>0) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), Dl.anchors_da.cnt, trackGauge,
-			          wDrawColorPreviewSelected );
+		if (Dl.line_state != NO_LINE) {
+			DrawSegsDA(&tempD,NULL,zero,0.0,&Dl.newLine, trackGauge,
+			           wDrawColorPreviewSelected,0);
 		}
+		if (Dl.curr_line) {
+			DrawTrack(Dl.curr_line,&tempD,wDrawColorPreviewSelected);
+		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &Dl.anchors_da, trackGauge,
+		            wDrawColorPreviewSelected, 0 );
 		break;
 	case C_TEXT:
 	case C_OK:
@@ -898,6 +901,7 @@ static STATUS_T CmdJoin(
 	BOOL_T ok;
 	wControl_p controls[2];
 	char * labels[1];
+	trkSeg_p p;
 
 	switch (action&0xFF) {
 
@@ -977,7 +981,7 @@ static STATUS_T CmdJoin(
 		tempSegs(1).lineWidth = 0;
 		tempSegs(2).color = drawColorBlack;
 		tempSegs(2).lineWidth = 0;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		Dj.joinMoveState = 0;
 		/* Populate (Dj.inp[0]) and check for connecting abutting tracks */
 		if (Dj.state == 0) {
@@ -1102,10 +1106,10 @@ static STATUS_T CmdJoin(
 			Dj.state = 2;
 			Dj.jRes.flip = FALSE;
 		}
-		tempSegs_da.cnt = 0;
 		/* no break */
 		
 	case C_MOVE:
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		if (easementVal < 0 && Dj.cornuMode) {
 			return CmdCornu(action, pos);
 		}
@@ -1182,7 +1186,7 @@ static STATUS_T CmdJoin(
 				if (beyond>-0.01 && IsClose(FindDistance(pos,pos1))) {
 					pos = pos1;
 					DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
-					trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+					p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
 					p->type= SEG_CRVLIN;
 					p->lineWidth = 0;
 					p->color = wDrawColorBlue;
@@ -1195,9 +1199,6 @@ static STATUS_T CmdJoin(
 
 		}
 
-
-		tempSegs_da.cnt = 0;
-		tempSegs(0).color = drawColorBlack;
 		ok = FALSE;
 
 		/* Populate (Dj.inp[1]) */
@@ -1383,9 +1384,12 @@ static STATUS_T CmdJoin(
 		for ( ep=0; ep<2; ep++ ) {
 			switch( Dj.inp[ep].params.type ) {
 			case curveTypeCurve:
-				tempSegs(tempSegs_da.cnt).type = SEG_CRVTRK;
-				tempSegs(tempSegs_da.cnt).u.c.center = Dj.inp[ep].params.arcP;
-				tempSegs(tempSegs_da.cnt).u.c.radius = Dj.inp[ep].params.arcR;
+				DYNARR_APPEND( trkSeg_t, tempSegs_da, 1 );
+				p = &DYNARR_LAST( trkSeg_t, tempSegs_da );
+				p->type = SEG_CRVTRK;
+				p->color = drawColorBlack;
+				p->u.c.center = Dj.inp[ep].params.arcP;
+				p->u.c.radius = Dj.inp[ep].params.arcR;
 				if (IsCurveCircle( Dj.inp[ep].trk )) {
 					break;
 				}
@@ -1395,22 +1399,23 @@ static STATUS_T CmdJoin(
 					break;
 				}
 				if (Dj.inp[ep].params.ep == 0) {
-					tempSegs(tempSegs_da.cnt).u.c.a0 = a;
-					tempSegs(tempSegs_da.cnt).u.c.a1 = NormalizeAngle(Dj.inp[ep].params.arcA0-a);
+					p->u.c.a0 = a;
+					p->u.c.a1 = NormalizeAngle(Dj.inp[ep].params.arcA0-a);
 				} else {
-					tempSegs(tempSegs_da.cnt).u.c.a0 = Dj.inp[ep].params.arcA0
-					                                   +Dj.inp[ep].params.arcA1;
-					tempSegs(tempSegs_da.cnt).u.c.a1 = a1-Dj.inp[ep].params.arcA1;
+					p->u.c.a0 = Dj.inp[ep].params.arcA0
+					            +Dj.inp[ep].params.arcA1;
+					p->u.c.a1 = a1-Dj.inp[ep].params.arcA1;
 				}
-				tempSegs_da.cnt++;
 				break;
 			case curveTypeStraight:
 				if ( FindDistance( Dj.inp[ep].params.lineOrig, Dj.inp[ep].params.lineEnd ) <
 				     FindDistance( Dj.inp[ep].params.lineOrig, Dj.inp_pos[ep] ) ) {
-					tempSegs(tempSegs_da.cnt).type = SEG_STRTRK;
-					tempSegs(tempSegs_da.cnt).u.l.pos[0] = Dj.inp[ep].params.lineEnd;
-					tempSegs(tempSegs_da.cnt).u.l.pos[1] = Dj.inp_pos[ep];
-					tempSegs_da.cnt++;
+					DYNARR_APPEND( trkSeg_t, tempSegs_da, 1 );
+					p = &DYNARR_LAST( trkSeg_t, tempSegs_da );
+					p->type = SEG_STRTRK;
+					p->color = drawColorBlack;
+					p->u.l.pos[0] = Dj.inp[ep].params.lineEnd;
+					p->u.l.pos[1] = Dj.inp_pos[ep];
 				}
 				break;
 			default:
@@ -1420,26 +1425,24 @@ static STATUS_T CmdJoin(
 
 		ok = TRUE;
 errorReturn:
-		if (!ok) {
-			tempSegs(tempSegs_da.cnt).color = drawColorRed;
-		}
+		DYNARR_APPEND( trkSeg_t, tempSegs_da, 1 );
+		p = &DYNARR_LAST( trkSeg_t, tempSegs_da );
+		p->color = ok ? drawColorBlack : drawColorRed;
 		switch( Dj.jRes.type ) {
 		case curveTypeCurve:
-			tempSegs(tempSegs_da.cnt).type = SEG_CRVTRK;
-			tempSegs(tempSegs_da.cnt).u.c.center = Dj.jRes.arcP;
-			tempSegs(tempSegs_da.cnt).u.c.radius = Dj.jRes.arcR;
-			tempSegs(tempSegs_da.cnt).u.c.a0 = Dj.jRes.arcA0;
-			tempSegs(tempSegs_da.cnt).u.c.a1 = Dj.jRes.arcA1;
-			tempSegs_da.cnt++;
+			p->type = SEG_CRVTRK;
+			p->u.c.center = Dj.jRes.arcP;
+			p->u.c.radius = Dj.jRes.arcR;
+			p->u.c.a0 = Dj.jRes.arcA0;
+			p->u.c.a1 = Dj.jRes.arcA1;
 			break;
 		case curveTypeStraight:
-			tempSegs(tempSegs_da.cnt).type = SEG_STRTRK;
-			tempSegs(tempSegs_da.cnt).u.l.pos[0] = Dj.jRes.pos[0];
-			tempSegs(tempSegs_da.cnt).u.l.pos[1] = Dj.jRes.pos[1];
-			tempSegs_da.cnt++;
+			p->type = SEG_STRTRK;
+			p->u.l.pos[0] = Dj.jRes.pos[0];
+			p->u.l.pos[1] = Dj.jRes.pos[1];
 			break;
 		case curveTypeNone:
-			tempSegs_da.cnt = 0;
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			break;
 		default:
 			CHECKMSG( FALSE, ( "Bad track type %d", Dj.jRes.type ) );
@@ -1462,7 +1465,7 @@ errorReturn:
 			return C_CONTINUE;
 		}
 		tempSegs(0).color = drawColorBlack;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		if (Dj.jRes.type == curveTypeNone) {
 			Dj.state = 1;
 			InfoMessage( _("Select 2nd track") );
@@ -1528,12 +1531,10 @@ errorReturn:
 		} else if (easementVal<0 && Dj.joinMoveState == 0) {
 			return CmdCornu(action,pos);
 		}
-		if (Dj.anchors.cnt) {
-			DrawSegs(&tempD, zero, 0.0, &(((trkSeg_t *)Dj.anchors.ptr)[0]), Dj.anchors.cnt,
-			         trackGauge,wDrawColorBlack);
-		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,
-		          wDrawColorBlack );
+		DrawSegsDA(&tempD, NULL, zero, 0.0, &Dj.anchors, trackGauge, wDrawColorBlack,
+		           0);
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+		            0 );
 		break;
 
 	case C_TEXT:

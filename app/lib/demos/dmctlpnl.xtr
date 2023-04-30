@@ -147,19 +147,16 @@ PARAMETER misc cmdDelete
 MESSAGE
 First step: draw the lines representing the tracks.
 
-We specify the line width in pixels when at 1:1 zoom.
+We specify the line width in inches.
 
-To create a 1/4" line, divide the dots-per-inch (DPI) of your display by 4.
-
-For MS-Windows the DPI is usually 98, so choose: 98/4 = 24 (approximately).
-For Linux, the DPI is usually 72, so choose: 72/4 = 18.
+To create a 1/4" line, enter 0.250 in the "Straight Line Width" box at the bottom of the window.
 END
 STEP
 COMMAND DrawLine
 PARAMETER draw linewidth 0
 PARAMETER draw linecolor 0
 PARAMETER GROUP draw
-PARAMETER draw linewidth 0.333333
+PARAMETER draw linewidth 0.250
 STEP
 KEYSTATE 2
 MOUSE 2 1.000 6.000

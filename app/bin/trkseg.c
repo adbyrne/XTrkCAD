@@ -233,8 +233,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		// TO DO: Using scale is correct, but the correct context may not be mainD
 		// For now, we're assuming it will be close enough to zero
 		lwidth = 0; // -(DIST_T)segPtr->lineWidth / mainD.scale;
-	}
-	else {
+	} else {
 		lwidth = (LWIDTH_T)segPtr->lineWidth;
 	}
 
@@ -351,7 +350,7 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle,
 		break;
 	/* The following code is executed only for Cornu track */
 	case SEG_BEZLIN:
-	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve		
+	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve
 		REORIGIN( pBez, segPtr->u.b.pos[0], angle, xlat )
 		lo->x = hi->x = pBez.x;
 		lo->y = hi->y = pBez.y;
@@ -702,10 +701,8 @@ EXPORT void CloneFilledDraw(
 			break;
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
-			sp->bezSegs.cnt = 0;
-			//if (sp->bezSegs.ptr) MyFree(sp->bezSegs.ptr);  Make sure no update to static
-			sp->bezSegs.ptr = NULL;
-			sp->bezSegs.max = 0;
+			// NOTE Don't free storage See CS:036e709b4ca9
+			DYNARR_INIT( trkSeg_t, sp->bezSegs );
 			FixUpBezierSeg(sp->u.b.pos,sp,sp->type == SEG_BEZTRK);
 			break;
 		default:
@@ -1262,7 +1259,8 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			if ( !GetArgs( cp, hasElev?"lwpfpfl":"lwpYpYZ",
-			               &rgb, &s->lineWidth, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1, &option ) ) {
+			               &rgb, &s->lineWidth, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1,
+			               &option ) ) {
 				rc = FALSE;
 				break;
 			}
@@ -1292,9 +1290,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_STRTRK;
-			s->bezSegs.max = 0;
-			s->bezSegs.cnt = 0;
-			s->bezSegs.ptr = NULL;
+			DYNARR_INIT( trkSeg_t, s->bezSegs );
 			if ( !GetArgs( cp, hasElev?"lwpfpf":"lwpYpY",
 			               &rgb, &s->lineWidth,
 			               &s->u.l.pos[0], &elev0,
@@ -1308,9 +1304,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_CRVTRK;
-			s->bezSegs.max = 0;
-			s->bezSegs.cnt = 0;
-			s->bezSegs.ptr = NULL;
+			DYNARR_INIT( trkSeg_t, s->bezSegs );
 			if ( !GetArgs( cp, hasElev?"lwfpfff":"lwfpYff",
 			               &rgb, &s->lineWidth,
 			               &s->u.c.radius,
@@ -1348,9 +1342,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type=SEG_BEZTRK;
-			s->bezSegs.max=0;
-			s->bezSegs.ptr= NULL;
-			s->bezSegs.cnt=0;
+			DYNARR_INIT( trkSet_t, s->bezSegs );
 			if ( !GetArgs( cp, "lwpppp",
 			               &rgb, &s->lineWidth,
 			               &s->u.b.pos[0],
@@ -1366,9 +1358,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type=SEG_BEZLIN;
-			s->bezSegs.max=0;
-			s->bezSegs.ptr= NULL;
-			s->bezSegs.cnt=0;
+			DYNARR_INIT( trkSet_t, s->bezSegs );
 			if ( !GetArgs( cp, "lwpppp",
 			               &rgb, &s->lineWidth,
 			               &s->u.b.pos[0],
@@ -1411,7 +1401,6 @@ EXPORT BOOL_T ReadSegs( void )
 				rc = FALSE;
 				/*??*/break;
 			}
-			if (s->type == SEG_FILPOLY) { s->u.p.polyType = FREEFORM; }  //Ensure closed if filled
 			s->color = wDrawFindColor( rgb );
 			s->u.p.pts = (pts_t*)MyMalloc( s->u.p.cnt * sizeof (pts_t) );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
@@ -1572,7 +1561,8 @@ EXPORT BOOL_T WriteSegsEnd(
 			               segs[i].u.l.pos[2].x, segs[i].u.l.pos[2].y,
 			               segs[i].u.l.pos[3].x, segs[i].u.l.pos[3].y ) > 0;
 			rc &= fprintf(f,"\tSUBSEGS\n");
-			rc &= WriteSegsEnd(f,segs[i].bezSegs.cnt,segs[i].bezSegs.ptr,FALSE);
+			rc &= WriteSegsEnd(f,segs[i].bezSegs.cnt,
+			                   &DYNARR_N(trkSeg_t,segs[i].bezSegs,0), FALSE);
 			rc &= fprintf(f,"\tSUBSEND\n");
 			break;
 		case SEG_CRVLIN:
@@ -2051,6 +2041,27 @@ EXPORT void DrawSegs(
 }
 
 /*
+ * Draw Segments from a DynArr
+ */
+
+EXPORT void DrawSegsDA(
+        drawCmd_p d,
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle,
+        dynArr_t *da,
+        DIST_T trackGauge,
+        wDrawColor color,
+        long options )
+{
+
+	if ( da->cnt > 0 ) {
+		DrawSegsO( d, trk, orig, angle, &DYNARR_N(trkSeg_t,*da,0), da->cnt,
+		           trackGauge, color, options );
+	}
+}
+
+/*
  * Free dynamic storage added to each of an array of Track Segments.
  */
 EXPORT void CleanSegs(dynArr_t * seg_p)
@@ -2059,10 +2070,7 @@ EXPORT void CleanSegs(dynArr_t * seg_p)
 	for (int i=0; i<seg_p->cnt; i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t,* seg_p,i);
 		if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
-			if (t.bezSegs.ptr) { MyFree(t.bezSegs.ptr); }
-			t.bezSegs.cnt = 0;
-			t.bezSegs.max = 0;
-			t.bezSegs.ptr = NULL;
+			DYNARR_FREE( trkSeg_t, t.bezSegs );
 		}
 		if (t.type == SEG_POLY || t.type == SEG_FILPOLY) {
 			if (t.u.p.pts) { MyFree(t.u.p.pts); }
@@ -2070,10 +2078,8 @@ EXPORT void CleanSegs(dynArr_t * seg_p)
 			t.u.p.pts = NULL;
 		}
 	}
-	seg_p->cnt = 0;
-	if (seg_p->ptr) { MyFree(seg_p->ptr); }
-	seg_p->ptr = NULL;
-	seg_p->max = 0;
+
+	DYNARR_FREE( trkSeg_t, *seg_p );
 }
 
 

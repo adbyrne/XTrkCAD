@@ -65,13 +65,16 @@ The main part of this dialog contains a detailed list of each car and locomotive
 
 Cars are placed on the layout by using the \f{Train Simulation} (\K{cmdTrain}) command.
 
-The \f{Find} button will center the \f{Main Window} (\K{mainW}) on the selected car.  This button is only enabled for cars which are on the Layout (indicated by \f{Layout} in the Location column).  If the car on a track that is hidden and \f{Trains on Hidden Track} (\K{cmdDisplay}) is set to \f{Hide}, then the car (and any attached cars) will be made visible.
+The \f{Find} button will center the \f{Main Window} (\K{mainW}) on the selected car.  This button is only enabled for cars which are on the Layout (indicated by co-ordinates in the Location column).  If the car on a track that is hidden and \f{Trains on Hidden Track} (\K{cmdDisplay}) is set to \f{Hide}, then the car (and any attached cars) will be made visible.
 
 The \f{Edit} button invokes the \f{Car} dialog (\K{cmdCarpart}) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  
 
 The \f{Add} button is to add a new Car. Refer to \K{faqsPrototype} if an error occurs when attempting to add inventory to this list.
 
-The \f{Delete} button removes the selected cars from your inventory.  This button is disabled if any of the selected cars are on the layout.
+The \f{Delete|Shelve} button serves two functions: 
+If all selected cars are on the layout then this button shows \f{Shelve} and it moves them from the layout and returns them to the \f{Shelf}.
+If all selected cars are on the \f{Shelf} then this button shows \f{Delete} and they will be deleted from the Inventory.
+Otherwise, the button is blank and disabled.
 
 The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value (CSV)} file.  This file format can be read and written by many applications. It can be used to transfer car inventory data between different applications. This file contains the following columns (the first four are required when Importing):
 
@@ -503,6 +506,7 @@ The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{
 \G{png.d/btrain.png} The \f{Train} command lets you place and run Trains on the layout.
 
 \I{Run Trains}During this command, the Tool Bar and Hot Bar are changed.  Most of the Tool Bar buttons are replaced by the \e{Go/Stop} and \e{Exit} buttons.  The \e{Go/Stop} button toggles between Pausing all Trains and allowing Trains to Run.  The \e{Exit} button terminates the Train Simulation and returns to Layout Design mode.
+The Hot Bar becomes the \f{Shelf}.
 
 \G{png.d/trainbar.png}
 
@@ -510,19 +514,19 @@ The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{
 
 \dt \e{Selecting New Cars}
 
-\dd The Hot Bar contains the Cars and Locomotives which are have not been placed on the Layout.  Cars are created and managed using the Car Inventory (\K{cmdCarinv}) dialog.
+\dd The \f{Shelf} contains the Cars and Locomotives which have not been placed on the Layout.  Cars are created and managed using the Car Inventory (\K{cmdCarinv}) dialog.
 
 \u000
 
-\dd Each item on the Hot Bar can represent a group of Cars.  Cars can be grouped by Prototype, Manufacturer and/or Part Number.  They can also be listed as individual Car Items.  This grouping is controlled by \e{Car Labels} Drop Down List on the Display (\K{cmdDisplay}) dialog.
+\dd Each item on the \f{Shelf} can represent a group of Cars.  Cars can be grouped by Prototype, Manufacturer and/or Part Number.  They can also be listed as individual Car Items.  This grouping is controlled by \e{Car Labels} Drop Down List on the Display (\K{cmdDisplay}) dialog.
 
 \u000
 
-\dd To place a Car, select it from the Hot Bar.  If the Hot Bar is displaying Cars in groups (and not as individual Car Items) then a Drop Down List is displayed on the Status Bar (\K{mainW}) containing the individual Car Items in that group.
+\dd To place a Car, select it from the \f{Shelf}.  If the \f{Shelf} is displaying Cars in groups (and not as individual Car Items) then a Drop Down List is displayed on the Status Bar (\K{mainW}) containing the individual Car Items in that group.
 
 \u000
 
-\dd If you are not displaying the Hot Bar, then the \e{New Car} button (\G{png.d/bnewcar.png}) will be shown on the Tool Bar.  Pressing this button will display the Drop Down List on the Status Bar (\K{mainW}) containing all of your Car Items that have not yet been placed on the layout.
+\dd If you are not displaying the \f{Shelf}, then the \e{New Car} button (\G{png.d/bnewcar.png}) will be shown on the Tool Bar.  Pressing this button will display the Drop Down List on the Status Bar (\K{mainW}) containing all of your Car Items that have not yet been placed on the layout.
 
 \u000
 
