@@ -137,7 +137,7 @@ static void getWinSize(wWin_p win, const char * nameStr)
 
     if ((win->option&F_RECALLSIZE) &&
             (win->option&F_RECALLPOS) &&
-            (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
+            (cp = wPrefGetStringBasic(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
             (h = strtod(cp1, &cp2), cp1 != cp2)) {
     	win->option &= ~F_AUTOSIZE;
@@ -197,7 +197,7 @@ static void getPos(wWin_p win)
     if ((win->option&F_RECALLPOS) && (!win->shown)) {
         const char *cp;
 
-        if ((cp = wPrefGetString(SECTIONWINDOWPOS, win->nameStr))) {
+        if ((cp = wPrefGetStringBasic(SECTIONWINDOWPOS, win->nameStr))) {
             int x, y;
 
             x = strtod(cp, &cp1);
@@ -1154,89 +1154,6 @@ createToolbar(GtkContainer *container)
 	                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
     return(toolbar);
-}
-
-/**
- * Initialize the application's main window. This function does the necessary initialization
- * of the application including creation of the main window.
- *
- * \param name IN internal name of the application. Used for filenames etc.
- * \param x    IN Initial window width
- * \param y    IN Initial window height
- * \param helpStr IN Help topic string
- * \param labelStr IN window title
- * \param nameStr IN Window name
- * \param option IN options for window creation
- * \param winProc IN pointer to main window procedure
- * \param data IN User context
- * \return    window handle or NULL on error
- */
-
-wWin_p wWinMainCreate(
-    const char * name,		/* Application name */
-    wWinPix_t x,				/* Initial window width */
-    wWinPix_t y,				/* Initial window height */
-    const char * helpStr,	/* Help topic string */
-    const char * labelStr,	/* Window title */
-    const char * nameStr,	/* Window name */
-    long option,			/* Options */
-    wWinCallBack_p winProc,	/* Call back function */
-    void * data)			/* User context */
-{
-	char *pos;
-	long isMaximized;
-
-	pos = strchr(name, ';');
-
-	if (pos) {
-		/* if found, split application name and configuration name */
-		strcpy(wConfigName, pos + 1);
-	} else {
-		/* if not found, application name and configuration name are same */
-		strcpy(wConfigName, name);
-	}
-
-	wPrefGetInteger("draw", "maximized", &isMaximized, 0);
-	option = option | (isMaximized?F_MAXIMIZE:0);
-
-	if (wlibExistsTemplate(nameStr)) {
-        GtkContainer *toolbarContainer;
-
-		gtkMainW = wlibCreateFromTemplate(
-            		       NULL,
-		                   W_MAIN,
-		                   x,
-		                   y,
-		                   labelStr,
-		                   nameStr,
-		                   option,
-                           winProc,
-		                   data);
-		if (option&F_MENUBAR) {
-			gtkMainW->menubar = wlibWidgetFromIdWarn(gtkMainW, "menubar");
-		}
-
-        toolbarContainer = (GtkContainer *)wlibWidgetFromIdWarn( gtkMainW, "toolbar");
-        if(toolbarContainer) {
-            gtkMainW->toolbar =  createToolbar(toolbarContainer); 
-            if(gtkMainW->toolbar) {
-               	DYNARR_RESET(toolbar_t,toolbar_da);
-            } else {
-                abort();
-            }
-        }
-
-	} else {
-		gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
-		                            winProc, data);
-	}
-
-	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
-	wDrawColorBlack = wDrawFindColor(0x000000);
-	
-	wlibCreateCustomStyle();
-
-	return gtkMainW;
 }
 
 /**

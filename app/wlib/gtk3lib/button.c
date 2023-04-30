@@ -104,7 +104,7 @@ void wlibSetLabel(
                 pixbuf = wlibPixbufFromXBM( bm );
             }
             double scaleicon;
-            wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+            wPrefGetFloatBasic(PREFSECTION, LARGEICON, &scaleicon, 1.0);
             if (scaleicon<1.0) scaleicon=1.0;
             if (scaleicon>2.0) scaleicon=2.0;
             GdkPixbuf *pixbuf2 =

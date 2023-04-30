@@ -139,6 +139,7 @@ wDrawColor wDrawColorGray(
  * Find the closest color from the palette and add a new color if there
  * is no close match
  * \todo improve method for finding best match (squared distances)
+ * \todo eliminate as we're not using a palete anymore
  *
  * \param rgb0 IN desired color
  * \return palette index of matching color
