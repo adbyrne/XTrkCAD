@@ -1,23 +1,63 @@
-# copy glade definitions to binary's subdir
+# create resource file to be compiled into the program
 
-set (UIDEFS
-    about.glade
-	main.glade
-    map.glade
-)    
+set (RESOURCE_XML wlib.gresource.xml)
+set (RESOURCES_C resources.c)
+set (RESOURCES_H resources.h)
 
-foreach(gladefile ${UIDEFS})
-    add_custom_command(
-					OUTPUT ${xtrkcad-lib_BINARY_DIR}/ui/${gladefile}
-					DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${gladefile}
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${gladefile} "${xtrkcad-lib_BINARY_DIR}/ui"
-    )
-    list(APPEND GLADE_RESULTS "${gladefile}")
+# find the tool
+find_program(RESOURCE_COMPILER NAMES glib-compile-resources REQUIRED)
 
-endforeach()
+#create the XML file
+configure_file(${RESOURCE_XML}.in  ${RESOURCE_XML})
 
-add_custom_target( uifiles
-    DEPENDS ${GLADE_RESULTS}
+# use the XML file to create a include file
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCES_H}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${RESOURCE_COMPILER}
+    ARGS
+        --generate
+        --target=${CMAKE_CURRENT_BINARY_DIR}/${RESOURCES_H}
+        ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_XML}
+    VERBATIM
+    MAIN_DEPENDENCY ${RESOURCE_XML}   
 )
 
-install(DIRECTORY "${xtrkcad-lib_BINARY_DIR}/ui" DESTINATION bin/ui/)
+#use the XML file to compile the resources into a source
+add_custom_command(
+    OUTPUT ${RESOURCES_C}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${RESOURCE_COMPILER}
+    ARGS
+        --generate
+        --target=${CMAKE_CURRENT_BINARY_DIR}/${RESOURCES_C}
+        ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_XML}
+    VERBATIM
+    MAIN_DEPENDENCY ${RESOURCE_XML}
+    DEPENDS
+        appwindow.ui
+)
+
+# define target
+add_custom_target(
+    resource-target
+    DEPENDS 
+        ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_XML}
+        ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCES_C} 
+        ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCES_H}
+)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCES_C}
+    PROPERTIES GENERATED TRUE
+)
+
+target_sources(xtrkcad-wlib
+    PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCES_C}
+)
+
+target_include_directories(xtrkcad-wlib
+	PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}
+)    

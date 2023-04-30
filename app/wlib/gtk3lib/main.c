@@ -34,7 +34,10 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+#include "resources.h"
+
 static char *appName;		/**< application name */
+static GtkApplication *app;
 static int argc;			/**< count of command line options */
 static char **argv;			/**< command line options */
 
@@ -57,8 +60,16 @@ wlibGetAppName()
 	return( appName );
 }
 
+GtkApplication *
+wlibGetApp()
+{
+	return(app);
+}
+
+
 /**
- * Activate the application by calling the main program
+ * Activate the application by calling the main program after registering
+ * the binary resources
  *
  * \param app 			see activate signal
  * \param user_data 	unused
@@ -69,6 +80,7 @@ activate(GtkApplication* app, gpointer user_data)
 {
 	wWin_p window;
 
+    g_resources_register( wlib_get_resource());
 	window = wMain(argc, argv );
 
 	g_strfreev(argv);
@@ -106,7 +118,7 @@ command_line( GApplication* self, GApplicationCommandLine* cmdLine,
 
 int main( int argc, char *argv[] )
 {
-	GtkApplication *app;
+
 	int status;
 
 	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 ) {

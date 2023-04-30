@@ -26,6 +26,9 @@
 #cmakedefine XTRKCAD_CREATE_SVG 1
 #cmakedefine XTRKCAD_GTK3_WLIB 
 
+// root path used for GTK resources, used in GTK3 library only
+#define XTRKCAD_RESOURCE_PATH "@XTRKCAD_RESOURCE_ROOT@/"
+
 #define XTRKCAD_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 #define XTRKCAD_PACKAGE "@XTRKCAD_PACKAGE@"
 #define XTRKCAD_VERSION "@XTRKCAD_VERSION@"

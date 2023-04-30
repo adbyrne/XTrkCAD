@@ -10,6 +10,7 @@ target_include_directories(xtrkcad-wlib
 
 target_sources(xtrkcad-wlib
 	PRIVATE 
+	appwindow.c
 	basicdraw.c
 	bitmap.c
  	boxes.c
@@ -31,7 +32,7 @@ target_sources(xtrkcad-wlib
  	opendocument.c
  	pixbuf.c
  	print.c
- 	pulldnmenu.c	
+ 	pulldnmenu.c
 	single.c
  	splash.c
     statusbar.c
@@ -126,6 +127,6 @@ endif()
 #                     ${CMAKE_CURRENT_SOURCE_DIR}/glade
 #                     ${CMAKE_BINARY_DIR}/app/bin/ui
 # )
-add_dependencies(xtrkcad-wlib uifiles)
+add_dependencies(xtrkcad-wlib resource-target)
 
 add_subdirectory(unittests)

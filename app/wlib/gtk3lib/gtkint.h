@@ -74,6 +74,24 @@ typedef enum {
 typedef void (*repaintProcCallback_p)( wControl_p );
 typedef void (*doneProcCallback_p)( wControl_p b );
 typedef void (*setTriggerCallback_p)( wControl_p b );
+
+struct wObjCommon {
+	wType_e type;			/**< type of control */
+	wWin_p parent;			/**< parent control */
+	long option;			/**< creation options*/
+	void * data;			/**< application additional data */
+	GtkWidget * widget;		/**< GTK widget */
+	gchar *helpTopic;
+	gchar *name;
+};
+
+typedef struct  {
+	struct wObjCommon oc;
+	wWinCallBack_p winProc;        /**< window procedure */
+} wWindow_t;
+
+typedef wWindow_t * wWindow_p;
+
 #define WOBJ_COMMON \
 		wType_e type; \
 		wControl_p next; \
@@ -322,6 +340,7 @@ int wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels,
 
 /* main.c */
 char *wlibGetAppName(void);
+GtkApplication *wlibGetApp(void);
 
 /* menu.c */
 int getMlistOrigin(wMenuList_p ml, GList **pChildren);
@@ -444,6 +463,5 @@ void wlibAddButtonToolbar(wButton_p button);
 /* wpref.c */
 
 /* wlibpaths.c */
-void wlibSetHelpPath();
 
 #endif
