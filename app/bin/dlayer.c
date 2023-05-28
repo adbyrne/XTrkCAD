@@ -103,7 +103,7 @@ typedef struct {
 	ANGLE_T maxTrackGrade;              /**< maximum track grade */
 	tieData_t tieData;                  /**< tie data structure */
 	long objCount;						/**< number of objects on layer */
-	dynArr_t layerLinkList;				/**< other layers that show/hide with this one */
+	dynArr_t layerLinkList;				/**< other layers that show/hide with this one, 1-based index */
 	char settingsName[STR_SHORT_SIZE];  /**< name of settings file to load when this is current */
 } layer_t;
 
@@ -350,6 +350,7 @@ EXPORT void FlipLayer( void * layerVP )
 
 	/* Set visible on related layers other than current */
 	for (int i = 0; i < layers[layer].layerLinkList.cnt; i++) {
+		// .layerLinkList values are 1-based layer indices
 		int l = DYNARR_N(int, layers[layer].layerLinkList, i) - 1;
 		if ((l != curLayer) && (l >= 0) && (l < NUM_LAYERS)) {
 			layers[l].visible = layers[layer].visible;
@@ -405,6 +406,7 @@ void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 
 	/* Set visible on related layers other than current */
 	for (int i = 0; i < layers[curLayer].layerLinkList.cnt; i++) {
+		// .layerLinkList values are 1-based layer indices
 		int l = DYNARR_N(int, layers[curLayer].layerLinkList, i) - 1;
 		if (l != curLayer && l >= 0 && l < NUM_LAYERS) {
 			layers[l].visible = layers[curLayer].visible;
@@ -1801,7 +1803,7 @@ BOOL_T ReadLayers(char * line)
 		if (!GetArgs(line + 4, "dq", &inx, &layerLinkList)) {
 			return FALSE;
 		}
-		PutLayerListArray(inx - 1, layerLinkList);
+		PutLayerListArray(inx, layerLinkList);
 		return TRUE;
 	}
 
@@ -1963,7 +1965,7 @@ BOOL_T WriteLayers(FILE * f)
 	fprintf(f, "LAYERS CURRENT %u\n", curLayer);
 
 	for (inx = 0; inx < NUM_LAYERS; inx++) {
-		unsigned int layerInx = inx + 1;
+		unsigned int layerInx = inx;
 		GetLayerLinkString(inx, layerLinkList);
 		if (IsLayerConfigured(inx) && strlen(layerLinkList) > 0) {
 			fprintf(f, "LAYERS LINK %u \"%s\"\n", layerInx, layerLinkList);
