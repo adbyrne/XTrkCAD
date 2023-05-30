@@ -1,3 +1,4 @@
+
 /** \file dynstring.h
 * Definitions and prototypes for variable length strings
 */
@@ -17,7 +18,7 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program; if not, write to the Free Software
-*  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
 #ifndef HAVE_DYNSTRING_H
@@ -60,5 +61,5 @@ void DynStringCatStr(DynString * s, const DynString * s2);
 void DynStringCatCStrs(DynString * s, ...);
 void DynStringCatStrs(DynString * s1, ...);
 void DynStringPrintf(DynString * s, const char * fmt, ...);
-
+void DynStringReset(DynString * s);
 #endif // !HAVE_DYNSTRING_H

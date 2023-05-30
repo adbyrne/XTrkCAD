@@ -17,41 +17,44 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
-#include "track.h"
+#include "track.h" //- drawLineType
 
-typedef struct {
-		coOrd pos[4];
-		DIST_T minCurveRadius;
-		ANGLE_T a0, a1;
-		DIST_T length;
-		dynArr_t arcSegs;
-		coOrd descriptionOff;
-		DIST_T segsWidth;
-		wDrawColor segsColor;
-		} BezierData_t;
+typedef struct extraDataBezier_t {
+	extraDataBase_t base;
+	coOrd pos[4];
+	DIST_T minCurveRadius;
+	ANGLE_T a0, a1;
+	DIST_T length;
+	dynArr_t arcSegs;
+	coOrd descriptionOff;
+	LWIDTH_T segsLineWidth;
+	wDrawColor segsColor;
+	drawLineType_e lineType;
+} extraDataBezier_t;
 
 
-void BezierSplit(coOrd[4], coOrd[4], coOrd[4] , double );
-coOrd BezierPointByParameter(coOrd[4], double);
-double BezierMathLength(coOrd[4], double);
-coOrd  BezierFirstDerivative(coOrd p[4], double);
-coOrd BezierSecondDerivative(coOrd p[4], double);
-double BezierCurvature(coOrd[4], double , coOrd *);
-double BezierMaxCurve(coOrd[4]);
-double BezierMathMinRadius(coOrd[4]);
-coOrd BezierMathFindNearestPoint(coOrd *, coOrd[4] , int );
-track_p NewBezierTrack(coOrd[4], trkSeg_t * , int );
-track_p NewBezierLine(coOrd[4], trkSeg_t * , int, wDrawColor, DIST_T);
-DIST_T BezierMathDistance( coOrd *, coOrd[4], int , double * );
-void FixUpBezier(coOrd[4], struct extraData*, BOOL_T);
-void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);
+void SetBezierData( track_p p, coOrd pos[4], wDrawColor color,
+                    LWIDTH_T lineWidth );
+track_p NewBezierTrack(coOrd[4], trkSeg_p, int );
+track_p NewBezierLine(coOrd[4], trkSeg_p, int, wDrawColor, DIST_T);
+void FixUpBezier(coOrd[4], struct extraDataBezier_t*, BOOL_T);
+void FixUpBezierSeg(coOrd[4], trkSeg_p, BOOL_T);
 void FixUpBezierSegs(trkSeg_p p,int segCnt);
 BOOL_T GetBezierSegmentFromTrack(track_p, trkSeg_p);
+BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]);
+BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2],
+                                  track_p old);
+void SetBezierLineType( track_p trk, int width );
+BOOL_T GetBezierMiddle( track_p, coOrd * );
 
-DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk );
+void MoveBezier( track_p trk, coOrd orig );
+void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle );
+
+DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T,
+                                  BOOL_T * );
 STATUS_T BezierDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 

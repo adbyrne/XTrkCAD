@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -39,6 +39,8 @@ static pid_t pidOfChild;
 static int handleOfPipe;
 extern char *wExecutableName;
 
+extern wBool_t CheckHelpTopicExists(const char *);
+
 /**
  * Create the fully qualified filename for the help helper
  *
@@ -49,15 +51,15 @@ extern char *wExecutableName;
 static
 char *ChildProgramFile(char *parentProgram)
 {
-    char *startOfFilename;
-    char *childProgram;
+	char *startOfFilename;
+	char *childProgram;
 
-    childProgram = malloc(strlen(parentProgram)+ sizeof(HELPERPROGRAM) + 1);
-    strcpy(childProgram, parentProgram);
-    startOfFilename = strrchr(childProgram, '/');
-    strcpy(startOfFilename + 1, HELPERPROGRAM);
+	childProgram = malloc(strlen(parentProgram)+ sizeof(HELPERPROGRAM) + 1);
+	strcpy(childProgram, parentProgram);
+	startOfFilename = strrchr(childProgram, '/');
+	strcpy(startOfFilename + 1, HELPERPROGRAM);
 
-    return (childProgram);
+	return (childProgram);
 }
 
 
@@ -69,65 +71,93 @@ char *ChildProgramFile(char *parentProgram)
 
 void wHelp(const char * topic)
 {
-    pid_t newPid;
-    int len;
-    int status;
-    const char html[] = ".html";
-    char *page;
-    
-    // check whether child already exists
-    if (pidOfChild != 0) {
-        if (waitpid(pidOfChild, &status, WNOHANG) > 0) {
-            // child exited -> clean up
-            close(handleOfPipe);
-            unlink(HELPCOMMANDPIPE);
-            handleOfPipe = 0;
-            pidOfChild = 0;		// child exited
-        }
-    }
+	pid_t newPid;
+	int status;
+	const char html[] = ".html";
+	static char *directory;				/**< base directory for HTML files */
+	char * htmlFile;
 
-    // (re)start child
-    if (pidOfChild == 0) {
-        mkfifo(HELPCOMMANDPIPE, 0666);
-        newPid = fork();  /* New process starts here */
+	struct {
+		int length;
+		char *page;
+	} buffer;
 
-        if (newPid > 0) {
-            pidOfChild = newPid;
-        } else if (newPid == 0) {
+	if (!CheckHelpTopicExists(topic)) { return; }
+
+	// check whether child already exists
+	if (pidOfChild != 0) {
+		if (waitpid(pidOfChild, &status, WNOHANG) < 0) {
+			// child exited -> clean up
+			close(handleOfPipe);
+			unlink(HELPCOMMANDPIPE);
+			handleOfPipe = 0;
+			pidOfChild = 0;		// child exited
+		}
+	}
+
+	// (re)start child
+	if (pidOfChild == 0) {
+		unlink(HELPCOMMANDPIPE);
+		int rc = mkfifo(HELPCOMMANDPIPE, 0666);
+		newPid = fork();  /* New process starts here */
+
+		if (newPid > 0) {
+			pidOfChild = newPid;
+		} else if (newPid == 0) {
 			char *child = ChildProgramFile(wExecutableName);
-            
-            if (execlp(child, child, NULL) < 0) {   /* never normally returns */
-                exit(8);
-            }
-            
-            free(child);
-        } else { /* -1 signifies fork failure */
-            pidOfChild = 0;
-            return;
-        }
-    }
 
-    if (!handleOfPipe) {
-        handleOfPipe = open(HELPCOMMANDPIPE, O_WRONLY);
+			if (execlp(child, child, NULL) < 0) {   /* never normally returns */
+				exit(8);
+			}
 
-        if (handleOfPipe < 0) {
-            kill(pidOfChild, SIGKILL);  /* tidy up on next call */
-        }
+			free(child);
+		} else { /* -1 signifies fork failure */
+			pidOfChild = 0;
+			return;
+		}
+	}
 
-    }
+	buffer.page = malloc(sizeof(int)+strlen(topic) + strlen(html) + 1);
 
-    page = malloc(strlen(topic) + strlen(html) + 1);
+	if (!buffer.page) {
+		return;
+	}
 
-    if (!page) {
-        return;
-    }
+	strcpy(buffer.page, topic);
+	strcat(buffer.page, html);
+	buffer.length = strlen(buffer.page);
 
-    strcpy(page, topic);
-    strcat(page, html);
-    len = strlen(page);
+	if (buffer.length>255) {
+		printf("Help Topic too long %s", buffer.page);
+		return;
+	}
 
-    write(handleOfPipe, &len, sizeof(int));
-    write(handleOfPipe, page, strlen(page)+1);
+	if (!handleOfPipe) {
+		handleOfPipe = open(HELPCOMMANDPIPE, O_WRONLY);
 
-    free(page);
+		if (handleOfPipe < 0) {
+			if (pidOfChild) {
+				kill(pidOfChild, SIGKILL);        /* tidy up on next call */
+			}
+			handleOfPipe = 0;
+			return;
+		}
+
+	}
+
+	int written = 0;
+	int towrite = sizeof(int);
+
+	while (written < towrite) {
+		written += write(handleOfPipe, &buffer.length, sizeof(int));
+	}
+	written =0;
+	towrite = strlen(buffer.page);
+	while (written < towrite) {
+		written += write(handleOfPipe, buffer.page+written, towrite-written);
+	}
+
+	fsync(handleOfPipe);
+
+	free(buffer.page);
 }

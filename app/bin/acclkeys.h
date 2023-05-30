@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -40,6 +40,9 @@
 #define ACCL_CIRCLE2	(WCTL+'9')
 #define ACCL_CIRCLE3	(WCTL+'0')
 #define ACCL_BEZIER     (0)
+#define ACCL_CORNU      (0)
+#define ACCL_CONVERTTO  (0)
+#define ACCL_CONVERTFR  (0)
 #define ACCL_TURNOUT	(WCTL+'t')
 #define ACCL_TURNTABLE	(WCTL+WSHIFT+'n')
 #define ACCL_PARALLEL	(WCTL+WSHIFT+'p')
@@ -52,10 +55,15 @@
 #define ACCL_CONNECT	(WCTL+WSHIFT+'j')
 #define ACCL_HELIX		(WCTL+WSHIFT+'h')
 #define ACCL_SPLIT		(WCTL+WSHIFT+'s')
+#define ACCL_SPLITDRAW  (0)
+#define ACCL_TRIMDRAW   (0)
 #define ACCL_ELEVATION	(WCTL+WSHIFT+'e')
 #define ACCL_PROFILE	(WCTL+WSHIFT+'f')
 #define ACCL_DELETE		(WCTL+'d')
 #define ACCL_TUNNEL		(WCTL+WSHIFT+'t')
+#define ACCL_BRIDGE     (0)
+#define ACCL_ROADBED    (0)
+#define ACCL_TIES       (0)
 #define ACCL_HNDLDTO	(WCTL+WSHIFT+'i')
 #define ACCL_TEXT		(WCTL+WSHIFT+'x')
 #define ACCL_DRAWLINE	(WCTL+WSHIFT+'1')
@@ -75,13 +83,16 @@
 #define ACCL_DRAWBEZLINE        (0)
 #define ACCL_DRAWBOX	(WCTL+WSHIFT+'[')
 #define ACCL_DRAWFILLBOX		(WALT+WCTL+'[')
-#define ACCL_DRAWPOLYLINE		(WCTL+WSHIFT+'2')
+#define ACCL_DRAWPOLYLINE		(0)
 #define ACCL_DRAWPOLYGON		(WALT+WCTL+'2')
+#define ACCL_DRAWPOLY			(0)
+#define ACCL_DRAWFILLPOLYGON    (WCTL+WSHIFT+'2')
 #define ACCL_NOTE		(WALT+WCTL+'n')
 #define ACCL_STRUCTURE	(WCTL+WSHIFT+'c')
 #define ACCL_ABOVE		(WCTL+WSHIFT+'b')
 #define ACCL_BELOW		(WCTL+WSHIFT+'w')
 #define ACCL_RULER		(0)
+#define ACCL_ANGLE      (0)
 
 /* fileM */
 #define ACCL_NEW		(WCTL+'n')
@@ -104,6 +115,7 @@
 #define ACCL_COPY		(WCTL+'c')
 #define ACCL_CUT		(WCTL+'x')
 #define ACCL_PASTE		(WCTL+'v')
+#define ACCL_CLONE      (0)
 #define ACCL_SELECTALL	(WCTL+WSHIFT+'a')
 #define ACCL_DESELECTALL	(0)
 #define ACCL_THIN		(WCTL+'1')
@@ -111,7 +123,9 @@
 #define ACCL_THICK		(WCTL+'3')
 #define ACCL_EXPORT		(WALT+WCTL+'x')
 #define ACCL_IMPORT		(WALT+WCTL+'i')
+#define ACCL_IMPORT_MOD	(0)
 #define ACCL_EXPORTDXF	(0)
+#define ACCL_EXPORTSVG	(0)
 #define ACCL_LOOSEN		(WCTL+WSHIFT+'k')
 #define ACCL_GROUP		(WCTL+WSHIFT+'g')
 #define ACCL_UNGROUP	(WCTL+WSHIFT+'u')
@@ -149,6 +163,7 @@
 #define ACCL_PLAYBACK	(WALT+WCTL+'b')
 
 #define ACCL_BRIDGE		(0)
+#define ACCL_TIES		(0)
 
 /* Blocks */
 #define ACCL_BLOCK1	(0)

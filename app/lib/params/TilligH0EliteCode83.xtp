@@ -1,4 +1,4 @@
-CONTENTS Tillig H0 Elite Code 83
+CONTENTS Tillig HO Elite Code 83
 TURNOUT HO "Tillig	Holzschwellen-Flexgleis, 890 mm	85125"
 	U "Straight Section" "" "Tillig" "Holzschwellen-Flexgleis, 890 mm" "85125" 35.039370 1.811024 0.000000 13276512
 	P "Normal" 1
@@ -485,10 +485,12 @@ TURNOUT HO "Tillig	Einfache Kreuzungsweiche - EKW I - 15°	85395"
 	L3 13276512 0.000000 7.334207 -1.700026 0 8.589075 -2.036277 0
 	A3 13276512 0.000000 23.316822 1.299226 -24.222333 0 0.000076 15.000152
 	END
-TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW I - 15°	85390"
+TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW I - 15°	85390" 512
 	U "Double Slipswitch" "" "Tillig" "Doppelkreuzungsweiche - DKW I - 15°" "85390" 8.976378 15.000000 8.976378 1.811024 0.000000 13276512
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 8.976378 0.000000 90.000000
 	E 0.152930 1.161622 285.000000
@@ -508,10 +510,12 @@ TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW I - 15°	85390"
 	A3 13276512 0.000000 23.316822 1.299226 -24.222333 0 0.000076 15.000152
 	A3 13276512 0.000000 23.316822 7.677086 24.222325 0 180.000076 15.000152
 	END
-TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW II (Bauart Baeseler) - 15°	85391"
+TURNOUT HO "Tillig	Doppelkreuzungsweiche - DKW II (Bauart Baeseler) - 15°	85391" 512
 	U "Double Slipswitch" "" "Tillig" "Doppelkreuzungsweiche - DKW II (Bauart Baeseler) - 15°" "85391" 10.866142 15.000000 10.866142 1.811024 0.000000 13276512
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 10.866142 0.000000 90.000000
 	E 0.185125 1.406174 285.000000

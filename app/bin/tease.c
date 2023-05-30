@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -29,7 +29,7 @@ L is the length along the tangent of the curve and
 R is the radius of an arc at the end of the curve.
 At any point (l) along the tangent the arc at that point has radius
 r=(R*L)/l.
-The transition curve offset (x) is the closest distance between the arc 
+The transition curve offset (x) is the closest distance between the arc
 and the tangent.
 The center of any arc is at (l/2, r+x).
 See 'ComputeJointPos()' for details on this.
@@ -60,44 +60,35 @@ For a better representation of this, build 'testjoin' and
 do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 */
 
-#include <math.h>
-
+#include "common.h"
+#include "track.h"
+#include "tcornu.h"
 #include "ccurve.h"
 #include "cselect.h"
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
-#include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 static TRKTYP_T T_EASEMENT = -1;
 
 static ANGLE_T JOINT_ANGLE_INCR = 2.0;
 
-struct extraData {
-		DIST_T l0, l1;			/* curve start and end parameter */
-		DIST_T R, L;			/* curve control parameters */
-		BOOL_T flip;			/* T: endPt[1] - is l0 */
-		BOOL_T negate;			/* T: curves to the left */
-		BOOL_T Scurve;			/* T: is an S-curve */
-		coOrd pos;				/* Pos of origin */
-		ANGLE_T angle;			/* Angle of curve tangent */
-		};
+typedef struct extraDataEase_t {
+	extraDataBase_t base;
+	DIST_T l0, l1;			/* curve start and end parameter */
+	DIST_T R, L;			/* curve control parameters */
+	BOOL_T flip;			/* T: endPt[1] - is l0 */
+	BOOL_T negate;			/* T: curves to the left */
+	BOOL_T Scurve;			/* T: is an S-curve */
+	coOrd pos;				/* Pos of origin */
+	ANGLE_T angle;			/* Angle of curve tangent */
+	coOrd descriptionOff;   /* Offset of description */
+} extraDataEase_t;
 
-#define xl0			extraData->l0
-#define xl1			extraData->l1
-#define xR			extraData->R
-#define xL			extraData->L
-#define xflip		extraData->flip
-#define xnegate		extraData->negate
-#define xScurve		extraData->Scurve
-#define xpos		extraData->pos
-#define xangle		extraData->angle
 
 #define EASE_MIN_X	(0.01)
 
@@ -106,9 +97,9 @@ static int log_traverseJoint;
 
 
 static DIST_T FindL(
-		DIST_T r,
-		DIST_T R,
-		DIST_T L )
+        DIST_T r,
+        DIST_T R,
+        DIST_T L )
 /*
  * Given a radius (r) return control value (l).
  * This function is it's inverse!
@@ -119,15 +110,15 @@ static DIST_T FindL(
 
 
 static void GetLandD(
-		DIST_T *RL,
-		DIST_T *RD,
-		coOrd q,
-		coOrd p,
-		ANGLE_T a,
-		DIST_T R,
-		DIST_T L,
-		BOOL_T negate,
-		BOOL_T Scurve )
+        DIST_T *RL,
+        DIST_T *RD,
+        coOrd q,
+        coOrd p,
+        ANGLE_T a,
+        DIST_T R,
+        DIST_T L,
+        BOOL_T negate,
+        BOOL_T Scurve )
 {
 	DIST_T l, d, x;
 
@@ -141,22 +132,24 @@ static void GetLandD(
 	} else {
 		d = q.x + x;
 	}
-	if (RL)
+	if (RL) {
 		*RL = l;
-	if (RD)
+	}
+	if (RD) {
 		*RD = d;
+	}
 }
 
 
 int OLDEASE = 0;
 static void ComputeJoinPos(
-		DIST_T l,
-		DIST_T R,
-		DIST_T L,
-		DIST_T *RR,
-		ANGLE_T *RA,
-		coOrd *P,
-		coOrd *PC )
+        DIST_T l,
+        DIST_T R,
+        DIST_T L,
+        DIST_T *RR,
+        ANGLE_T *RA,
+        coOrd *P,
+        coOrd *PC )
 /*
  * Compute position along transition-curve.
  * Also compute angle and position of tangent circle's center.
@@ -165,35 +158,40 @@ static void ComputeJoinPos(
 	ANGLE_T a;
 	DIST_T r;
 	coOrd pp, pc;
-	if (l==0.0)
-		r = 100000.0;
-	else
+	if (l==0.0) {
+		r = DIST_INF;
+	} else {
 		r = (R*L)/l;
+	}
 	pp.y = l;
 	pc.y = l/2.0;
 	a = asin( l/2.0 / r );
-if (OLDEASE){
-	pc.x = l*l / (24*r) + r;
-	pp.x = pc.x - r*cos(a);
-}else{
-	pp.x = (l*l*l)/(6*R*L);
-	pc.x = pp.x + r*cos(a);
-}
-/*lprintf( "A %0.3f %0.3f %0.3f [%0.3f %0.3f]\n", a, aa, aaa, q.x, q.y );*/
-	if (P)
+	if (OLDEASE) {
+		pc.x = l*l / (24*r) + r;
+		pp.x = pc.x - r*cos(a);
+	} else {
+		pp.x = (l*l*l)/(6*R*L);
+		pc.x = pp.x + r*cos(a);
+	}
+	/*lprintf( "A %0.3f %0.3f %0.3f [%0.3f %0.3f]\n", a, aa, aaa, q.x, q.y );*/
+	if (P) {
 		*P = pp;
-	if (PC)
+	}
+	if (PC) {
 		*PC = pc;
-	if (RR)
+	}
+	if (RR) {
 		*RR = r;
-	if (RA)
+	}
+	if (RA) {
 		*RA = R2D(a);
+	}
 }
 
 static DIST_T JoinD(
-		DIST_T l,
-		DIST_T R,
-		DIST_T L )
+        DIST_T l,
+        DIST_T R,
+        DIST_T L )
 /*
  * Compute distance from transition-curve origin to specified point.
  * Distance is approximately equal to length of arc from origin
@@ -218,9 +216,9 @@ static DIST_T JoinD(
 
 
 static DIST_T GetLfromD(
-		DIST_T D,
-		DIST_T R,
-		DIST_T L )
+        DIST_T D,
+        DIST_T R,
+        DIST_T L )
 {
 	DIST_T deltaD, d, l, deltaL;
 	l = L/2.0;
@@ -232,28 +230,30 @@ static DIST_T GetLfromD(
 		} else {
 			deltaD = d-D;
 		}
-		if ( deltaD < 0.000001 )
+		if ( deltaD < 0.000001 ) {
 			return l;
-		if ( d < D )
+		}
+		if ( d < D ) {
 			l += deltaL;
-		else
+		} else {
 			l -= deltaL;
+		}
 		deltaL /= 2.0;
 	}
-/*printf( "GetLfromD( %0.3f %0.3f %0.3f ) = %0.3f\n", D, R, L, l );*/
+	/*printf( "GetLfromD( %0.3f %0.3f %0.3f ) = %0.3f\n", D, R, L, l );*/
 	return l;
 }
 
 
 #ifdef LATER
 static void JoinDistance(
-		DIST_T r,
-		DIST_T R,
-		DIST_T X,
-		DIST_T L,
-		DIST_T *dr,
-		DIST_T *xr,
-		DIST_T *lr )
+        DIST_T r,
+        DIST_T R,
+        DIST_T X,
+        DIST_T L,
+        DIST_T *dr,
+        DIST_T *xr,
+        DIST_T *lr )
 {
 	DIST_T l, d, rr;
 	coOrd p, pc;
@@ -265,7 +265,7 @@ static void JoinDistance(
 	l = FindL( r, R, L );
 	d = JoinD( l, R, L );
 	ComputeJoinPos( l, R, L, NULL, NULL, &p, NULL );
-LOG( log_ease, 2, ( "joinDistance r=%0.3f rr=%0.3f\n", r, rr ) )
+	LOG( log_ease, 2, ( "joinDistance r=%0.3f rr=%0.3f\n", r, rr ) )
 	*xr = pc.x - rr;
 	*dr = d;
 	*lr = pc.y;
@@ -273,10 +273,10 @@ LOG( log_ease, 2, ( "joinDistance r=%0.3f rr=%0.3f\n", r, rr ) )
 #endif
 
 EXPORT STATUS_T ComputeJoint(
-		DIST_T r0,
-		DIST_T r1,
-		easementData_t * e )
-/* 
+        DIST_T r0,
+        DIST_T r1,
+        easementData_t * e )
+/*
  * Compute joint data given radius of the 2 curves being joined.
  * Radius is =0 for straight tracks and <0 for left-handed curves.
  * S-curves are handled by treating them as 2 transition-curves joined
@@ -287,7 +287,7 @@ EXPORT STATUS_T ComputeJoint(
 	ANGLE_T a, a0, a1;
 	coOrd rp0, rpc0, rp1, rpc1;
 
-LOG( log_ease, 4, ( "ComputeJoint( %0.3f, %0.3f )\n", r0, r1 ) )
+	LOG( log_ease, 4, ( "ComputeJoint( %0.3f, %0.3f )\n", r0, r1 ) )
 
 	if (easementVal <= 0.1) {
 		e->d0 = e->d1 = e->x = 0.0;
@@ -295,17 +295,18 @@ LOG( log_ease, 4, ( "ComputeJoint( %0.3f, %0.3f )\n", r0, r1 ) )
 	}
 	if (r0 != 0.0 && fabs(r0) < easeR) {
 		ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
-				FormatDistance(fabs(r0)), FormatDistance(easeR) );
+		              FormatDistance(fabs(r0)), FormatDistance(easeR) );
 		e->d0 = e->d1 = e->x = 0.0;
 		return E_ERROR;
 	}
 	if (r1 != 0.0 && fabs(r1) < easeR) {
-		ErrorMessage( MSG_RADIUS_LSS_EASE_MIN, FormatDistance(fabs(r1)), FormatDistance(easeR) );
+		ErrorMessage( MSG_RADIUS_LSS_EASE_MIN, FormatDistance(fabs(r1)),
+		              FormatDistance(easeR) );
 		e->d0 = e->d1 = e->x = 0.0;
 		return E_ERROR;
 	}
 	if (r0 == 0.0 && r1 == 0.0) {
-		/* ASSERT( FALSE );  CHECKME */
+		/* CHECK( FALSE );  CHECKME */
 		e->d0 = e->d1 = e->x = 0.0;
 		return E_NOTREQ;
 	}
@@ -365,8 +366,9 @@ LOG( log_ease, 4, ( "ComputeJoint( %0.3f, %0.3f )\n", r0, r1 ) )
 			d1 = rr1 * D2R(a1);
 		}
 	}
-LOG( log_ease, 2, ( "CJoint(%0.3f %0.3f) l0=%0.3f d0=%0.3f l1=%0.3f d1=%0.3f x=%0.3f S%d F%d N%d\n",
-				e->r0, e->r1, l0, d0, l1, d1, xx, e->Scurve, e->flip, e->negate ) )
+	LOG( log_ease, 2,
+	     ( "CJoint(%0.3f %0.3f) l0=%0.3f d0=%0.3f l1=%0.3f d1=%0.3f x=%0.3f S%d F%d N%d\n",
+	       e->r0, e->r1, l0, d0, l1, d1, xx, e->Scurve, e->flip, e->negate ) )
 	if (xx < EASE_MIN_X || d0+d1<=minLength) {
 		e->d0 = e->d1 = e->x = 0.0;
 		return E_NOTREQ;
@@ -388,14 +390,14 @@ LOG( log_ease, 2, ( "CJoint(%0.3f %0.3f) l0=%0.3f d0=%0.3f l1=%0.3f d1=%0.3f x=%
 }
 
 static track_p NewJoint(
-		coOrd pos0,
-		ANGLE_T angle0,
-		coOrd pos1,
-		ANGLE_T angle1,
-		DIST_T trackGauge,
-		DIST_T R,
-		DIST_T L,
-		easementData_t * e )
+        coOrd pos0,
+        ANGLE_T angle0,
+        coOrd pos1,
+        ANGLE_T angle1,
+        DIST_T trackGauge,
+        DIST_T R,
+        DIST_T L,
+        easementData_t * e )
 /*
  * Allocate a joint track segment.
  * Allocate a track, save relevant data from (*e),
@@ -404,13 +406,15 @@ static track_p NewJoint(
  */
 {
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataEase_t *xx;
 	coOrd p, p0, p1, q0, q1;
 	static coOrd qZero = { 0.0, 0.0 };
-	ANGLE_T az0, a01, b, b01, b1, d, d1;
+	ANGLE_T az0, a01, b, b01, d, d1;
+//	ANGLE_T b1;
 	trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
+	SetTrkBits(trk, TB_HIDEDESC);					//Suppress Description for new Joint
 	SetTrkScale( trk, GetLayoutCurScale() );
-	xx = GetTrkExtraData( trk );
+	xx = GET_EXTRA_DATA( trk, T_EASEMENT, extraDataEase_t );
 	SetTrkEndPoint( trk, 0, pos0, NormalizeAngle(angle0+180.0) );
 	SetTrkEndPoint( trk, 1, pos1, NormalizeAngle(angle1+180.0) );
 	xx->R = R;
@@ -439,7 +443,7 @@ static track_p NewJoint(
 	if (!e->Scurve) {
 		az0 = FindAngle( qZero, q0 );
 		a01 = FindAngle( q0, q1 );
-		b1 = NormalizeAngle( b01 - (a01+az0) );
+//		b1 = NormalizeAngle( b01 - (a01+az0) );
 		b = NormalizeAngle( b01 - a01 );
 	} else {
 		q1.x = -q1.x;
@@ -457,9 +461,10 @@ static track_p NewJoint(
 	ComputeBoundingBox( trk );
 	d = FindDistance( p0, p1 );
 	d1 = FindDistance( q0, q1 );
-LOG( log_ease, 1, ( "NewJoint( [%0.3f %0.3f] A%0.3f, [%0.3f %0.3f] A%0.3f\n    B01=%0.3f AZ0=%0.3f A01=%0.3f B=%0.3f D0=%0.3f D1=%0.3f\n",
-				pos0.x, pos0.y, angle0, pos1.x, pos1.y, angle1,
-				b01, az0, a01, b, d, d1 ) )
+	LOG( log_ease, 1,
+	     ( "NewJoint( [%0.3f %0.3f] A%0.3f, [%0.3f %0.3f] A%0.3f\n    B01=%0.3f AZ0=%0.3f A01=%0.3f B=%0.3f D0=%0.3f D1=%0.3f\n",
+	       pos0.x, pos0.y, angle0, pos1.x, pos1.y, angle1,
+	       b01, az0, a01, b, d, d1 ) )
 	CheckTrackLength( trk );
 	return trk;
 }
@@ -472,62 +477,83 @@ LOG( log_ease, 1, ( "NewJoint( [%0.3f %0.3f] A%0.3f, [%0.3f %0.3f] A%0.3f\n    B
 
 static DIST_T GetLengthJoint( track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataEase_t *xx;
 	DIST_T d0, d1;
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	d0 = JoinD( xx->l0, xx->R, xx->L );
 	d1 = JoinD( xx->l1, xx->R, xx->L );
-	if (xx->Scurve)
+	if (xx->Scurve) {
 		return d0+d1;
-	else 
+	} else {
 		return fabs( d0-d1 );
+	}
+}
+
+static DIST_T GetFlexLengthJoint( track_p trk )
+{
+	struct extraDataEase_t *xx;
+	DIST_T d0, d1, d3;
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	d0 = JoinD( xx->l0, xx->R+(GetTrkGauge(trk)/2.0), xx->L );
+	d1 = JoinD( xx->l1, xx->R+(GetTrkGauge(trk)/2.0), xx->L );
+	d3 = JoinD( xx->l1, xx->R-(GetTrkGauge(trk)/2.0), xx->L );
+	if (xx->Scurve) {
+		return d0+d3;
+	} else {
+		return fabs( d0-d1 );
+	}
 }
 
 
 static struct {
-		coOrd endPt[2];
-		DIST_T elev[2];
-		FLOAT_T length;
-		coOrd orig;
-		ANGLE_T angle;
-		DIST_T r;
-		DIST_T l;
-		DIST_T l0;
-		DIST_T l1;
-		FLOAT_T grade;
-		descPivot_t pivot;
-		unsigned int layerNumber;
-		} jointData;
+	coOrd endPt[2];
+	DIST_T elev[2];
+	FLOAT_T length;
+	coOrd orig;
+	ANGLE_T angle;
+	DIST_T r;
+	DIST_T l;
+	DIST_T l0;
+	DIST_T l1;
+	FLOAT_T grade;
+	descPivot_t pivot;
+	unsigned int layerNumber;
+} jointData;
 typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &jointData.endPt[0] },
-/*Z0*/	{ DESC_DIM, N_("Z"), &jointData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &jointData.endPt[1] },
-/*Z1*/	{ DESC_DIM, N_("Z"), &jointData.elev[1] },
-/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &jointData.orig },
-/*AL*/	{ DESC_ANGLE, N_("Angle"), &jointData.angle },
-/*RR*/	{ DESC_DIM, N_("R"), &jointData.r },
-/*LL*/	{ DESC_DIM, N_("L"), &jointData.l },
-/*L0*/	{ DESC_DIM, N_("l0"), &jointData.l0 },
-/*L1*/	{ DESC_DIM, N_("l1"), &jointData.l1 },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &jointData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &jointData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &jointData.layerNumber },
-		{ DESC_NULL } };
+	/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &jointData.endPt[0] },
+	/*Z0*/	{ DESC_DIM, N_("Z"), &jointData.elev[0] },
+	/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &jointData.endPt[1] },
+	/*Z1*/	{ DESC_DIM, N_("Z"), &jointData.elev[1] },
+	/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &jointData.orig },
+	/*AL*/	{ DESC_ANGLE, N_("Angle"), &jointData.angle },
+	/*RR*/	{ DESC_DIM, N_("R"), &jointData.r },
+	/*LL*/	{ DESC_DIM, N_("L"), &jointData.l },
+	/*L0*/	{ DESC_DIM, N_("l0"), &jointData.l0 },
+	/*L1*/	{ DESC_DIM, N_("l1"), &jointData.l1 },
+	/*GR*/	{ DESC_FLOAT, N_("Grade"), &jointData.grade },
+	/*PV*/	{ DESC_PIVOT, N_("Lock"), &jointData.pivot },
+	/*LY*/	{ DESC_LAYER, N_("Layer"), &jointData.layerNumber },
+	{ DESC_NULL }
+};
 
-static void UpdateJoint( track_p trk, int inx, descData_p descUpd, BOOL_T final )
+static void UpdateJoint( track_p trk, int inx, descData_p descUpd,
+                         BOOL_T final )
 {
 	EPINX_T ep;
 	switch (inx) {
 	case Z0:
 	case Z1:
 		ep = (inx==Z0?0:1);
-		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), jointData.elev[ep], NULL );
-		ComputeElev( trk, 1-ep, FALSE, &jointData.elev[1-ep], NULL );
-		if ( jointData.length > minLength )
-			jointData.grade = fabs( (jointData.elev[0]-jointData.elev[1])/jointData.length )*100.0;
-		else
+		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep),
+		                  jointData.elev[ep], NULL );
+		ComputeElev( trk, 1-ep, FALSE, &jointData.elev[1-ep], NULL, TRUE );
+		if ( jointData.length > minLength ) {
+			jointData.grade = fabs( (jointData.elev[0]-jointData.elev[1])/jointData.length )
+			                  *100.0;
+		} else {
 			jointData.grade = 0.0;
+		}
 		jointDesc[GR].mode |= DESC_CHANGE;
 		jointDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
 		return;
@@ -541,21 +567,23 @@ static void UpdateJoint( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 
 
 static void DescribeJoint(
-		track_p trk,
-		char * str,
-		CSIZE_T len )
+        track_p trk,
+        char * str,
+        CSIZE_T len )
 /*
  * Print some interesting info about the track.
  */
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	int fix0, fix1;
 
-	sprintf( str, _("Joint Track(%d): Layer=%d Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"), GetTrkIndex(trk),
-		GetTrkLayer(trk)+1,
-		GetLengthJoint( trk ),
-		GetTrkEndPosXY(trk,0), GetTrkEndAngle(trk,0),
-		GetTrkEndPosXY(trk,1), GetTrkEndAngle(trk,1) );
+	sprintf( str,
+	         _("Joint Track(%d): Layer=%d Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+	         GetTrkIndex(trk),
+	         GetTrkLayer(trk)+1,
+	         GetLengthJoint( trk ),
+	         GetTrkEndPosXY(trk,0), GetTrkEndAngle(trk,0),
+	         GetTrkEndPosXY(trk,1), GetTrkEndAngle(trk,1) );
 
 	fix0 = GetTrkEndTrk(trk,0)!=NULL;
 	fix1 = GetTrkEndTrk(trk,1)!=NULL;
@@ -570,44 +598,46 @@ static void DescribeJoint(
 	jointData.l0 = xx->l0;
 	jointData.l1 = xx->l1;
 	jointData.layerNumber = GetTrkLayer(trk);
-	ComputeElev( trk, 0, FALSE, &jointData.elev[0], NULL );
-	ComputeElev( trk, 1, FALSE, &jointData.elev[1], NULL );
-	if ( jointData.length > minLength )
-		jointData.grade = fabs( (jointData.elev[0]-jointData.elev[1])/jointData.length )*100.0;
-	else
+	ComputeElev( trk, 0, FALSE, &jointData.elev[0], NULL, FALSE );
+	ComputeElev( trk, 1, FALSE, &jointData.elev[1], NULL, FALSE );
+	if ( jointData.length > minLength ) {
+		jointData.grade = fabs( (jointData.elev[0]-jointData.elev[1])/jointData.length )
+		                  *100.0;
+	} else {
 		jointData.grade = 0.0;
+	}
 
 	jointDesc[E0].mode =
-	jointDesc[E1].mode = 
-	jointDesc[OR].mode = 
-	jointDesc[AL].mode = 
-	jointDesc[RR].mode = 
-	jointDesc[LL].mode = 
-	jointDesc[L0].mode = 
-	jointDesc[L1].mode = 
-		DESC_RO;
+	        jointDesc[E1].mode =
+	                jointDesc[OR].mode =
+	                        jointDesc[AL].mode =
+	                                jointDesc[RR].mode =
+	                                        jointDesc[LL].mode =
+	                                                        jointDesc[L0].mode =
+	                                                                        jointDesc[L1].mode =
+	                                                                                        DESC_RO;
 	jointDesc[Z0].mode = (EndPtIsDefinedElev(trk,0)?0:DESC_RO)|DESC_NOREDRAW;
 	jointDesc[Z1].mode = (EndPtIsDefinedElev(trk,1)?0:DESC_RO)|DESC_NOREDRAW;
 	jointDesc[GR].mode = DESC_RO;
 	jointDesc[PV].mode = (fix0|fix1)?DESC_IGNORE:0;
 	jointDesc[LY].mode = DESC_NOREDRAW;
 	jointData.pivot = (fix0&fix1)?DESC_PIVOT_NONE:
-						fix0?DESC_PIVOT_FIRST:
-						fix1?DESC_PIVOT_SECOND:
-						DESC_PIVOT_MID;
+	                  fix0?DESC_PIVOT_FIRST:
+	                  fix1?DESC_PIVOT_SECOND:
+	                  DESC_PIVOT_MID;
 
 	DoDescribe( _("Easement Track"), trk, jointDesc, UpdateJoint );
 }
 
 static void GetJointPos(
-		coOrd * RP,
-		ANGLE_T * RA,
-		DIST_T l,
-		DIST_T R,
-		DIST_T L,
-		coOrd P,
-		ANGLE_T A,
-		BOOL_T N )
+        coOrd * RP,
+        ANGLE_T * RA,
+        DIST_T l,
+        DIST_T R,
+        DIST_T L,
+        coOrd P,
+        ANGLE_T A,
+        BOOL_T N )
 /*
  * Compute position of point on transition-curve.
  */
@@ -615,42 +645,46 @@ static void GetJointPos(
 	coOrd p1;
 	static coOrd pZero = {0.0,0.0};
 	ComputeJoinPos( l, R, L, NULL, RA, &p1, NULL );
-	if (N)
+	if (N) {
 		p1.x = -p1.x;
+	}
 	Rotate( &p1, pZero, A );
 	if (RP) {
 		RP->x = P.x + p1.x;
 		RP->y = P.y + p1.y;
 	}
-	if (RA)
+	if (RA) {
 		*RA = NormalizeAngle( A + (N?-*RA:*RA) );
+	}
 }
 
 
 EXPORT DIST_T JointDistance(
-		coOrd * q,
-		coOrd pos,
-		ANGLE_T angle,
-		DIST_T l0,
-		DIST_T l1,
-		DIST_T R,
-		DIST_T L,
-		BOOL_T negate,
-		BOOL_T Scurve )
+        coOrd * q,
+        coOrd pos,
+        ANGLE_T angle,
+        DIST_T l0,
+        DIST_T l1,
+        DIST_T R,
+        DIST_T L,
+        BOOL_T negate,
+        BOOL_T Scurve )
 {
 	DIST_T d, l;
 	coOrd p0 = *q;
 	GetLandD( &l, &d, p0, pos, angle, R, L, negate, Scurve );
 	if (Scurve) {
-		if ( l < -l1 )
+		if ( l < -l1 ) {
 			l = -l1;
-		else if ( l > l0 )
+		} else if ( l > l0 ) {
 			l = l0;
+		}
 	} else {
-		if ( l < l0 )
+		if ( l < l0 ) {
 			l = l0;
-		else if ( l > l1 )
+		} else if ( l > l1 ) {
 			l = l1;
+		}
 	}
 	GetJointPos( q, NULL, l, R, L, pos, angle, negate );
 	d = FindDistance( p0, *q );
@@ -659,73 +693,32 @@ EXPORT DIST_T JointDistance(
 
 
 static DIST_T DistanceJoint(
-		track_p trk,
-		coOrd * p )
+        track_p trk,
+        coOrd * p )
 /*
  * Determine how close (p) is to (t).
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
-	return JointDistance( p, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, xx->Scurve );
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	return JointDistance( p, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L,
+	                      xx->negate, xx->Scurve );
 }
 
-
-#ifdef LATER
-static void DrawJointSegment1(
-		drawCmd_p d,
-		wIndex_t cnt,
-		DIST_T l0,
-		DIST_T l1,
-		DIST_T R,
-		DIST_T L,
-		coOrd P,
-		ANGLE_T A,
-		BOOL_T N,
-		track_p trk,
-		DIST_T trackGauge,
-		wDrawColor color )
-/*
- * Draw a transition-curve from (l0) to (l1),
- * at angle (A) from origin (P).
- */
-{
-	DIST_T l, lincr;
-	wIndex_t i;
-	coOrd p0, p1;
-	long widthOptions = DTS_RIGHT|DTS_LEFT|DTS_TIES;
-
-	if (GetTrkWidth(trk) == 2)
-		widthOptions |= DTS_THICK2;
-	if (GetTrkWidth(trk) == 3)
-		widthOptions |= DTS_THICK3;
-
-	l = l0;
-	lincr = (l1-l0)/cnt;
-	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
-	for (i=1; i<=cnt; i++) {
-		l += lincr;
-		GetJointPos( &p1, NULL, l, R, L, P, A, N );
-		DrawStraightTrack( d, p0, p1,
-				FindAngle( p1, p0 ), trk, trackGauge, color, widthOptions );
-		p0 = p1;
-	}
-}
-#endif
 
 static void DrawJointSegment(
-		drawCmd_p d,
-		wIndex_t cnt,
-		DIST_T l0,
-		DIST_T l1,
-		DIST_T R,
-		DIST_T L,
-		coOrd P,
-		ANGLE_T A,
-		BOOL_T N,
-		DIST_T trackGauge,
-		wDrawColor color,
-		long widthOptions,
-		track_p trk )
+        drawCmd_p d,
+        wIndex_t cnt,
+        DIST_T l0,
+        DIST_T l1,
+        DIST_T R,
+        DIST_T L,
+        coOrd P,
+        ANGLE_T A,
+        BOOL_T N,
+        DIST_T trackGauge,
+        wDrawColor color,
+        long widthOptions,
+        track_p trk )
 /*
  * Draw a transition-curve from (l0) to (l1),
  * at angle (A) from origin (P).
@@ -736,78 +729,178 @@ static void DrawJointSegment(
 	coOrd p0, p1;
 	ANGLE_T a0, a1;
 	int cnt1;
+	wDrawWidth thick = 3;
 
 	ComputeJoinPos( l0, R, L, NULL, &a0, NULL, NULL );
 	ComputeJoinPos( l1, R, L, NULL, &a1, NULL, NULL );
 	a1 = a1-a0;
-	if ( (d->options&DC_QUICK) ) {
-		cnt1 = 1;
-	} else {
-		cnt1 = (int)floor(a1/JOINT_ANGLE_INCR) + 1;
-		a1 /= cnt1;
-	}
+	cnt1 = (int)floor(a1/JOINT_ANGLE_INCR) + 1;
+	a1 /= cnt1;
 
-	widthOptions |= DTS_RIGHT|DTS_LEFT|DTS_TIES;
+	widthOptions |= DTS_RIGHT|DTS_LEFT;
 	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
 	for (i=1; i<=cnt1; i++) {
 		a0 += a1;
 		ll = sqrt( sin(D2R(a0)) * 2 * R * L );
 		GetJointPos( &p1, NULL, ll, R, L, P, A, N );
-		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk, trackGauge,
-								color, widthOptions );
+		if (widthOptions&DTS_CENTERONLY) {
+			DrawLine(d,p0,p1,thick,color);
+		}
+		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk,
+		                   color, widthOptions );
 		p0 = p1;
 	}
 }
 
 
 EXPORT coOrd GetJointSegEndPos(
-		coOrd pos,
-		ANGLE_T angle,
-		DIST_T l0,
-		DIST_T l1,
-		DIST_T R,
-		DIST_T L,
-		BOOL_T negate,
-		BOOL_T flip,
-		BOOL_T Scurve,
-		EPINX_T ep,
-		ANGLE_T * angleR )
+        coOrd pos,
+        ANGLE_T angle,
+        DIST_T l0,
+        DIST_T l1,
+        DIST_T R,
+        DIST_T L,
+        BOOL_T negate,
+        BOOL_T flip,
+        BOOL_T Scurve,
+        EPINX_T ep,
+        ANGLE_T * angleR )
 {
 	coOrd p1;
 	DIST_T ll;
-	if ( flip ) ep = 1-ep;
+	if ( flip ) { ep = 1-ep; }
 	ll = (ep==0?l0:l1);
 	if ( Scurve ) {
-		if ( ep==1 )
+		if ( ep==1 ) {
 			angle += 180;
+		}
 	}
 	GetJointPos( &p1, &angle, ll, R, L, pos, angle, negate );
 	if ( angleR ) {
-		if ( (!Scurve) && ep==0 )
+		if ( (!Scurve) && ep==0 ) {
 			angle = NormalizeAngle(angle+180);
+		}
 		*angleR = angle;
 	}
 	return p1;
 }
 
+STATUS_T JointDescriptionMove(
+        track_p trk,
+        wAction_t action,
+        coOrd pos )
+{
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	ANGLE_T ap;
+	coOrd end0, end1;
+	end0 = GetTrkEndPos(trk,0);;
+	end1 = GetTrkEndPos(trk,1);
+	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
+
+	xx->descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap));
+	xx->descriptionOff.x = -0.5 + FindDistance(end0,
+	                       pos)*cos(D2R(ap))/FindDistance(end0,end1);
+	if (xx->descriptionOff.x > 0.5) { xx->descriptionOff.x = 0.5; }
+	if (xx->descriptionOff.x < -0.5) { xx->descriptionOff.x = -0.5; }
+
+	return C_CONTINUE;
+}
+
+DIST_T JointDescriptionDistance(
+        coOrd pos,
+        track_p trk,
+        coOrd * dpos,
+        BOOL_T show_hidden,
+        BOOL_T * hidden)
+{
+	coOrd p1;
+	if (hidden) { *hidden = FALSE; }
+	if ( GetTrkType( trk ) != T_EASEMENT
+	     || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden)) {
+		return DIST_INF;
+	}
+
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	ANGLE_T a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,xx->descriptionOff.y);
+	Translate(&end1off,end1,a+90,xx->descriptionOff.y);
+
+	p1.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+	p1.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y;
+
+	if (hidden) { *hidden = (GetTrkBits( trk ) & TB_HIDEDESC); }
+	*dpos = p1;
+
+	coOrd tpos = pos;
+	if (DistanceJoint(trk,&tpos)<FindDistance( p1, pos )) {
+		return DistanceJoint(trk,&pos);
+	}
+	return FindDistance( p1, pos );
+}
+static void DrawJointDescription(
+        track_p trk,
+        drawCmd_p d,
+        wDrawColor color )
+{
+//	DIST_T grade=0, sep=0;
+	ANGLE_T a;
+	if (layoutLabels == 0) {
+		return;
+	}
+	if ((labelEnable&LABELENABLE_TRKDESC)==0 ) {
+		return;
+	}
+
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	Translate(&end0off,end0,a+90,xx->descriptionOff.y);
+	Translate(&end1off,end1,a+90,xx->descriptionOff.y);
+
+	sprintf( message, "Joint: L %s A %0.3f, l0 %s l1 %s R %s L %s\n",
+	         FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1),
+	         FormatDistance(xx->l0), FormatDistance(xx->l1), FormatDistance(xx->R),
+	         FormatDistance(xx->L));
+	DrawLine(d,end0,end0off,0,color);
+	DrawLine(d,end1,end1off,0,color);
+	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize,
+	             xx->descriptionOff.x+0.5, 0, color, 0x00 );
+
+	if (GetTrkBits( trk ) & TB_DETAILDESC) {
+		coOrd details_pos;
+		details_pos.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+		details_pos.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y
+		                - (2*descriptionFontSize/mainD.dpi);
+
+		AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
+	}
+
+
+}
+
 
 EXPORT void DrawJointTrack(
-		drawCmd_p d,
-		coOrd pos,
-		ANGLE_T angle,
-		DIST_T l0,
-		DIST_T l1,
-		DIST_T R,
-		DIST_T L,
-		BOOL_T negate,
-		BOOL_T flip,
-		BOOL_T Scurve,
-		track_p trk,
-		EPINX_T ep0,
-		EPINX_T ep1,
-		DIST_T trackGauge,
-		wDrawColor color,
-		long options )
+        drawCmd_p d,
+        coOrd pos,
+        ANGLE_T angle,
+        DIST_T l0,
+        DIST_T l1,
+        DIST_T R,
+        DIST_T L,
+        BOOL_T negate,
+        BOOL_T flip,
+        BOOL_T Scurve,
+        track_p trk,
+        EPINX_T ep0,
+        EPINX_T ep1,
+        DIST_T trackGauge,
+        wDrawColor color,
+        long options )
 {
 	wIndex_t cnt;
 	DIST_T len;
@@ -817,7 +910,7 @@ EXPORT void DrawJointTrack(
 		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 		segPtr = &tempSegs(tempSegs_da.cnt-1);
 		segPtr->type = SEG_JNTTRK;
-		segPtr->width = 0;
+		segPtr->lineWidth = 0;
 		segPtr->color = wDrawColorBlack;
 		segPtr->u.j.pos = pos;
 		segPtr->u.j.angle = angle;
@@ -830,94 +923,94 @@ EXPORT void DrawJointTrack(
 		segPtr->u.j.Scurve = Scurve;
 		return;
 	}
-LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
-#ifdef LATER
-	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-
-	if (options&DTS_THICK2)
-		width = 2;
-	if (options&DTS_THICK3)
-		width = 3;
-#ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/mainD.dpi);
-#else
-	if (d->options&DC_PRINT)
-		width *= 300/75;
-#endif
-#endif
-	if (color == wDrawColorBlack)
+	LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
+	if (color == wDrawColorBlack) {
 		color = normalColor;
+	}
 	if (!Scurve) {
 		/* print segments about 0.20" long */
 		len = (l0-l1)/(0.20*d->scale);
 		cnt = (int)ceil(fabs(len));
-		if (cnt == 0 || (d->options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) { cnt = 1; }
 		DrawJointSegment( d, cnt, l0, l1, R, L, pos,
-						angle, negate, trackGauge, color, options, trk );
+		                  angle, negate, trackGauge, color, options, trk );
 	} else {
 		/* print segments about 0.20" long */
 		cnt = (int)ceil((l0)/(0.20*d->scale));
-		if (cnt == 0 || (d->options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) { cnt = 1; }
 		DrawJointSegment( d, cnt, 0, l0, R, L, pos,
-						angle, negate, trackGauge, color, options, trk );
+		                  angle, negate, trackGauge, color, options, trk );
 		cnt = (int)ceil((l1)/(0.20*d->scale));
-		if (cnt == 0 || (d->options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) { cnt = 1; }
 		DrawJointSegment( d, cnt, 0, l1, R, L, pos,
-						angle+180, negate, trackGauge, color, options, trk );
+		                  angle+180, negate, trackGauge, color, options, trk );
 	}
-	if ( (d->funcs->options & wDrawOptTemp) == 0 && (d->options&DC_QUICK) == 0 ) {
-		DrawEndPt( d, trk, ep0, color );
-		DrawEndPt( d, trk, ep1, color );
+	DrawEndPt( d, trk, ep0, color );
+	DrawEndPt( d, trk, ep1, color );
+	if (((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
+	    (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+	    labelScale >= d->scale &&
+	    ( GetTrkBits( trk ) & TB_HIDEDESC ) == 0 ) {
+		DrawJointDescription( trk, d, color );
 	}
+
 }
 
 
 static void DrawJoint(
-		track_p trk,
-		drawCmd_p d,
-		wDrawColor color )
+        track_p trk,
+        drawCmd_p d,
+        wDrawColor color )
 /*
  * Draw a transition-curve.
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	long widthOptions = 0;
 
-	if (GetTrkWidth(trk) == 2)
-		widthOptions = DTS_THICK2;
-	if (GetTrkWidth(trk) == 3)
-		widthOptions = DTS_THICK3;
-	DrawJointTrack( d, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, xx->flip, xx->Scurve, trk, 0, 1, GetTrkGauge(trk), color, widthOptions );
+	DrawJointTrack( d, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate,
+	                xx->flip, xx->Scurve, trk, 0, 1, GetTrkGauge(trk), color, widthOptions );
 }
 
 
 static void DeleteJoint(
-		track_p t )
+        track_p t )
 /* Delete track - nothing to do */
 {
 }
 
 static BOOL_T WriteJoint(
-		track_p t,
-		FILE * f )
+        track_p t,
+        FILE * f )
 /*
  * Write track data to a file (f).
  */
 {
-	struct extraData * xx = GetTrkExtraData(t);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(t, T_EASEMENT, extraDataEase_t);
 	BOOL_T rc = TRUE;
-	rc &= fprintf(f, "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f\n",
-		GetTrkIndex(t), GetTrkLayer(t), (long)GetTrkWidth(t),
-		GetTrkScaleName(t), GetTrkVisible(t), xx->l0, xx->l1, xx->R, xx->L,
-		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle )>0;
+	int bits;
+	long options = (long)GetTrkWidth(t);
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
+		// 0x80 means Show Description
+	{
+		options |= 0x80;
+	}
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
+	       (GetTrkRoadbed(t)?1<<4:0);
+	rc &= fprintf(f,
+	              "JOINT %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %d %d %d %0.6f %0.6f 0 %0.6f %0.6f %0.6f\n",
+	              GetTrkIndex(t), GetTrkLayer(t), options,
+	              GetTrkScaleName(t), bits, xx->l0, xx->l1, xx->R, xx->L,
+	              xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle,
+	              xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
-	rc &= fprintf(f, "\tEND\n" )>0;
+	rc &= fprintf(f, "\t%s\n", END_SEGS )>0;
 	return rc;
 }
 
-static void ReadJoint(
-		char * line )
+static BOOL_T ReadJoint(
+        char * line )
 /*
  * Read track data from a file (f).
  */
@@ -925,50 +1018,77 @@ static void ReadJoint(
 	track_p trk;
 	TRKINX_T index;
 	BOOL_T visible;
-	struct extraData e, *xx;
+	struct extraDataEase_t e, *xx;
 	char scale[10];
 	wIndex_t layer;
 	long options;
 	DIST_T elev;
+	char * cp = NULL;
+	coOrd descriptionOff = {0.0,0.0};
 
-	if ( !GetArgs( line+6, paramVersion<3?"dXZsdffffdddpYf":paramVersion<9?"dLl00sdffffdddpYf":"dLl00sdffffdddpff",
-		&index, &layer, &options, scale, &visible, &e.l0, &e.l1, &e.R, &e.L,
-		&e.flip, &e.negate, &e.Scurve, &e.pos, &elev, &e.angle) )
-		return;
+	if ( !GetArgs( line+6, paramVersion<3?"dXZsdffffdddpYfc":paramVersion<9
+	               ?"dLl00sdffffdddpYfc":"dLl00sdffffdddpffc",
+	               &index, &layer, &options, scale, &visible, &e.l0, &e.l1, &e.R, &e.L,
+	               &e.flip, &e.negate, &e.Scurve, &e.pos, &elev, &e.angle, &cp) ) {
+		return FALSE;
+	}
+	if (cp) {
+		if (!GetArgs(cp,"p",&descriptionOff)) {
+			return FALSE;
+		}
+	}
+	if ( !ReadSegs() ) {
+		return FALSE;
+	}
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
-	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible);
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
+	xx->descriptionOff = descriptionOff;
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+		SetTrkNoTies(trk, FALSE);
+		SetTrkBridge(trk, FALSE);
+		SetTrkRoadbed(trk, FALSE);
+	} else {
+		SetTrkVisible(trk, visible&2);
+		SetTrkNoTies(trk, visible&4);
+		SetTrkBridge(trk, visible&8);
+		SetTrkRoadbed(trk, visible&16);
+	}
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) ) {
+		SetTrkBits(trk,TB_HIDEDESC);
+	}
+	e.base.trkType = T_EASEMENT;
 	*xx = e;
-	ReadSegs();
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
+	return TRUE;
 }
 
 static void MoveJoint(
-		track_p trk,
-		coOrd orig )
+        track_p trk,
+        coOrd orig )
 /*
  * Move a track.
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	xx->pos.x += orig.x;
 	xx->pos.y += orig.y;
 	ComputeBoundingBox( trk );
 }
 
 static void RotateJoint(
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle )
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle )
 /*
  * Rotate a track.
  */
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	Rotate( &xx->pos, orig, angle );
 	xx->angle = NormalizeAngle( xx->angle+angle );
 	ComputeBoundingBox( trk );
@@ -977,7 +1097,7 @@ static void RotateJoint(
 
 static void RescaleJoint( track_p trk, FLOAT_T ratio )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataEase_t *xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	xx->pos.x *= ratio;
 	xx->pos.y *= ratio;
 	xx->R *= ratio;
@@ -987,11 +1107,12 @@ static void RescaleJoint( track_p trk, FLOAT_T ratio )
 }
 
 
-static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * ep1 )
+static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0,
+                              EPINX_T * ep1 )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
 	DIST_T l;
 	ANGLE_T a;
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	if ( ep0 && ep1 ) {
 		if (xx->flip) {
 			*ep0 = 1;
@@ -1001,11 +1122,12 @@ static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * e
 			*ep1 = 1;
 		}
 	}
-	GetLandD( &l, NULL, pos, xx->pos, xx->angle, xx->R, xx->L, xx->negate, xx->Scurve );
+	GetLandD( &l, NULL, pos, xx->pos, xx->angle, xx->R, xx->L, xx->negate,
+	          xx->Scurve );
 	if (small(l)) {
 		a = xx->angle;
 	} else {
-/*    if (xx->Scurve && NormalizeAngle(FindAngle(xx->pos,pos)-xx->angle+90.0) > 180.0)*/
+		/*    if (xx->Scurve && NormalizeAngle(FindAngle(xx->pos,pos)-xx->angle+90.0) > 180.0)*/
 		if (xx->Scurve && l < 0.0) {
 			GetJointPos( NULL, &a, -l, xx->R, xx->L, xx->pos, xx->angle+180.0, xx->negate );
 			a = NormalizeAngle( a-180.0 );
@@ -1018,13 +1140,13 @@ static ANGLE_T GetAngleJoint( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * e
 
 
 static void SplitJointA(
-		coOrd * posR,
-		EPINX_T ep,
-		struct extraData * xx,
-		struct extraData * xx1,
-		ANGLE_T * aR )
+        coOrd * posR,
+        EPINX_T ep,
+        struct extraDataEase_t * xx,
+        struct extraDataEase_t * xx1,
+        ANGLE_T * aR )
 {
-	struct extraData * xx0;
+	struct extraDataEase_t * xx0;
 	BOOL_T flip;
 	DIST_T l;
 
@@ -1037,17 +1159,19 @@ static void SplitJointA(
 		xx1 = xx;
 		flip = TRUE;
 	}
-	GetLandD( &l, NULL, *posR, xx->pos, xx->angle, xx->R, xx->L, xx->negate, xx->Scurve );
+	GetLandD( &l, NULL, *posR, xx->pos, xx->angle, xx->R, xx->L, xx->negate,
+	          xx->Scurve );
 
 	if (!xx->Scurve) {
 		if (l < xx->l0 || l > xx->l1) {
-			NoticeMessage2( 0, "splitJoint: ! %0.3f <= %0.3f <= %0.3f", _("Ok"), NULL, xx->l0, l, xx->l1 );
-			if ( l < xx->l0 ) l = xx->l0;
-			else if ( l > xx->l1 ) l = xx->l1;
+			NoticeMessage2( 0, "splitJoint: ! %0.3f <= %0.3f <= %0.3f", _("Ok"), NULL,
+			                xx->l0, l, xx->l1 );
+			if ( l < xx->l0 ) { l = xx->l0; }
+			else if ( l > xx->l1 ) { l = xx->l1; }
 		}
 		GetJointPos( posR, aR, l, xx->R, xx->L, xx->pos, xx->angle, xx->negate );
 		xx0->l1 = xx1->l0 = l;
-	} else if (small(l)){
+	} else if (small(l)) {
 		xx0->Scurve = xx1->Scurve = 0;
 		xx0->l1 = xx0->l0;
 		xx0->flip = !xx0->flip;
@@ -1071,20 +1195,22 @@ static void SplitJointA(
 		}
 		*aR = NormalizeAngle( *aR+180.0 );
 	}
-	if (flip)
+	if (flip) {
 		*aR = NormalizeAngle( *aR + 180.0 );
+	}
 }
 
 
-static BOOL_T SplitJoint( track_p trk, coOrd pos, EPINX_T ep, track_p * leftover, EPINX_T *ep0, EPINX_T *ep1 )
+static BOOL_T SplitJoint( track_p trk, coOrd pos, EPINX_T ep,
+                          track_p * leftover, EPINX_T *ep0, EPINX_T *ep1 )
 {
-	struct extraData *xx, *xx1;
+	struct extraDataEase_t *xx, *xx1;
 	track_p trk1;
 	ANGLE_T a;
 
-	xx = GetTrkExtraData(trk);
+	xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	trk1 = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-	xx1 = GetTrkExtraData(trk1);
+	xx1 = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
 	*xx1 = *xx;
 	SetTrkEndPoint( trk1, ep, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );
 	*leftover = trk1;
@@ -1101,34 +1227,36 @@ static BOOL_T SplitJoint( track_p trk, coOrd pos, EPINX_T ep, track_p * leftover
 
 
 static BOOL_T TraverseJoint(
-		coOrd * posR,
-		ANGLE_T *angleR,
-		DIST_T *distR,
-		coOrd pos,
-		ANGLE_T angle,
-		DIST_T l0,
-		DIST_T l1,
-		DIST_T R,
-		DIST_T L,
-		BOOL_T negate,
-		BOOL_T flip,
-		BOOL_T Scurve )
+        coOrd * posR,
+        ANGLE_T *angleR,
+        DIST_T *distR,
+        coOrd pos,
+        ANGLE_T angle,
+        DIST_T l0,
+        DIST_T l1,
+        DIST_T R,
+        DIST_T L,
+        BOOL_T negate,
+        BOOL_T flip,
+        BOOL_T Scurve )
 {
-		
+
 	DIST_T l, lx, d, dx, ll0, ll1, d0, d1;
 	BOOL_T from_tangent, flip_angle;
 
 	GetLandD( &l, &d, *posR, pos, angle, R, L, negate, Scurve );
 
-LOG( log_traverseJoint, 2, ( "TJ: [%0.3f %0.3f] D%0.3f l0:%0.3f l1:%0.3f [%0.3f %0.3f] A%0.3f N%d F%d S%d = l:%0.3f ",
-		posR->x, posR->y, *distR, l0, l1, pos.x, pos.y, angle, negate, flip, Scurve, l ) )
+	LOG( log_traverseJoint, 2,
+	     ( "TJ: [%0.3f %0.3f] D%0.3f l0:%0.3f l1:%0.3f [%0.3f %0.3f] A%0.3f N%d F%d S%d = l:%0.3f ",
+	       posR->x, posR->y, *distR, l0, l1, pos.x, pos.y, angle, negate, flip, Scurve,
+	       l ) )
 
 	if ( (!Scurve) ) {
-		if ( l < l0 ) l = l0;
-		else if ( l > l1 ) l = l1;
+		if ( l < l0 ) { l = l0; }
+		else if ( l > l1 ) { l = l1; }
 	} else {
-		if ( l > l0 ) l = l0;
-		else if ( l < -l1 ) l = -l1;
+		if ( l > l0 ) { l = l0; }
+		else if ( l < -l1 ) { l = -l1; }
 	}
 
 	lx = l;
@@ -1149,10 +1277,11 @@ LOG( log_traverseJoint, 2, ( "TJ: [%0.3f %0.3f] D%0.3f l0:%0.3f l1:%0.3f [%0.3f 
 	dx = JoinD( lx, R, L );
 	d0 = JoinD( ll0, R, L );
 	d1 = JoinD( ll1, R, L );
-	if ( from_tangent )
+	if ( from_tangent ) {
 		d = d1 - dx;
-	else
+	} else {
 		d = dx - d0;
+	}
 	if ( *distR < d ) {
 		if ( from_tangent ) {
 			d = dx + *distR;
@@ -1160,46 +1289,52 @@ LOG( log_traverseJoint, 2, ( "TJ: [%0.3f %0.3f] D%0.3f l0:%0.3f l1:%0.3f [%0.3f 
 			d = dx - *distR;
 		}
 		lx = GetLfromD( d, R, L );
-		if ( l < 0 )
+		if ( l < 0 ) {
 			lx = - lx;
+		}
 		/* compute posR and angleR */
 		GetJointPos( posR, angleR, lx, R, L, pos, angle, negate );
-		if ( ! flip_angle )
+		if ( ! flip_angle ) {
 			*angleR = NormalizeAngle( *angleR + 180.0 );
+		}
 		*distR = 0;
 		goto doreturn;
 	}
 	*distR -= d;
 	if ( Scurve && (!from_tangent) ) {
 		/* skip over midpoint */
-		if ( l > 0 )
+		if ( l > 0 ) {
 			d = JoinD( l1, R, L );
-		else
+		} else {
 			d = JoinD( l0, R, L );
+		}
 		if ( *distR < d ) {
 			lx = GetLfromD( *distR, R, L );
-			if ( l > 0 )
+			if ( l > 0 ) {
 				lx = - lx;
+			}
 			GetJointPos( posR, angleR, lx, R, L, pos, angle, negate );
-			if ( ! flip_angle )
+			if ( ! flip_angle ) {
 				*angleR = NormalizeAngle( *angleR + 180.0 );
+			}
 			*distR = 0;
 			goto doreturn;
 		}
 		*distR -= d;
 	}
 doreturn:
-LOG( log_traverseJoint, 2, ( " [%0.3f %0.3f] A%0.3f D%0.3f\n", posR->x, posR->y, *angleR, *distR ) )
+	LOG( log_traverseJoint, 2, ( " [%0.3f %0.3f] A%0.3f D%0.3f\n", posR->x, posR->y,
+	                             *angleR, *distR ) )
 	return TRUE;
 }
 
 
 static BOOL_T TraverseJointTrack(
-		traverseTrack_p trvTrk,
-		DIST_T * distR )
+        traverseTrack_p trvTrk,
+        DIST_T * distR )
 {
 	track_p trk = trvTrk->trk;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	BOOL_T rc;
 	EPINX_T ep;
 	ANGLE_T angle;
@@ -1207,13 +1342,16 @@ static BOOL_T TraverseJointTrack(
 
 	angle = NormalizeAngle( xx->angle-trvTrk->angle );
 	flip = ( angle < 270 && angle > 90 );
-	rc = TraverseJoint( &trvTrk->pos, &trvTrk->angle, distR, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, flip, xx->Scurve );
+	rc = TraverseJoint( &trvTrk->pos, &trvTrk->angle, distR, xx->pos, xx->angle,
+	                    xx->l0, xx->l1, xx->R, xx->L, xx->negate, flip, xx->Scurve );
 	if ( *distR > 0 ) {
 		ep = (flip?0:1);
-		if ( xx->flip )
+		if ( xx->flip ) {
 			ep = 1-ep;
-		if ( xx->Scurve )
+		}
+		if ( xx->Scurve ) {
 			ep = 1-ep;
+		}
 		trvTrk->pos = GetTrkEndPos( trk, ep );
 		trvTrk->angle = GetTrkEndAngle( trk, ep );
 		trvTrk->trk = GetTrkEndTrk( trk, ep );
@@ -1225,12 +1363,14 @@ static BOOL_T TraverseJointTrack(
 static BOOL_T EnumerateJoint( track_p trk )
 {
 	if (trk != NULL) {
-		ScaleLengthIncrement( GetTrkScale(trk), GetLengthJoint(trk) );
+		ScaleLengthIncrement( GetTrkScale(trk), GetFlexLengthJoint(trk) );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
-static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX )
+static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX, coOrd endpos,
+                         ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	DeleteTrack( trk, FALSE );
 	return TRUE;
@@ -1238,31 +1378,34 @@ static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX )
 
 
 static BOOL_T MergeJoint(
-		track_p trk0,
-		EPINX_T ep0,
-		track_p trk1,
-		EPINX_T ep1 )
+        track_p trk0,
+        EPINX_T ep0,
+        track_p trk1,
+        EPINX_T ep1 )
 {
 	track_p trk2;
 	EPINX_T ep2=-1;
 	coOrd pos;
 	ANGLE_T a;
-	struct extraData *xx0 = GetTrkExtraData(trk0);
-	struct extraData *xx1 = GetTrkExtraData(trk1);
+	struct extraDataEase_t *xx0 = GET_EXTRA_DATA(trk0, T_EASEMENT, extraDataEase_t);
+	struct extraDataEase_t *xx1 = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
 
-	if ( ep0 == ep1 )
+	if ( ep0 == ep1 ) {
 		return FALSE;
+	}
 	if ( xx0->R != xx1->R ||
-		 xx0->L != xx1->L ||
-		 xx0->flip != xx1->flip ||
-		 xx0->negate != xx1->negate ||
-		 xx0->angle != xx1->angle ||
-		 xx0->Scurve ||
-		 xx1->Scurve ||
-		 FindDistance( xx0->pos, xx1->pos ) > connectDistance )
+	     xx0->L != xx1->L ||
+	     xx0->flip != xx1->flip ||
+	     xx0->negate != xx1->negate ||
+	     xx0->angle != xx1->angle ||
+	     xx0->Scurve ||
+	     xx1->Scurve ||
+	     FindDistance( xx0->pos, xx1->pos ) > connectDistance ) {
 		return FALSE;
+	}
 
-	UndoStart( _("Merge Easements"), "MergeJoint( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
+	UndoStart( _("Merge Easements"), "MergeJoint( T%d[%d] T%d[%d] )",
+	           GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndrawNewTrack( trk0 );
 	trk2 = GetTrkEndTrk( trk1, 1-ep1 );
@@ -1291,16 +1434,23 @@ static BOOL_T MergeJoint(
 }
 
 
-static BOOL_T GetParamsJoint( int inx, track_p trk, coOrd pos, trackParams_t * params )
+static BOOL_T GetParamsJoint( int inx, track_p trk, coOrd pos,
+                              trackParams_t * params )
 {
 	params->type = curveTypeStraight;
-	params->ep = PickUnconnectedEndPointSilent( pos, trk );
-	if (params->ep == -1)
-		 return FALSE;
+	if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN)
+	    || (inx == PARAMS_2ND_JOIN))\
+		params->ep = PickEndPoint(pos, trk);
+	else {
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
+	}
+	if (params->ep == -1) {
+		return FALSE;
+	}
 	params->lineOrig = GetTrkEndPos(trk,params->ep);
 	params->lineEnd = params->lineOrig;
 	params->angle = GetTrkEndAngle(trk,params->ep);
-	params->len = 0.0;
+	params->len = GetLengthJoint(trk);
 	params->arcR = 0.0;
 	return TRUE;
 }
@@ -1314,7 +1464,7 @@ static BOOL_T MoveEndPtJoint( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d )
 
 static BOOL_T QueryJoint( track_p trk, int query )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	track_p trk1;
 
 	switch ( query ) {
@@ -1325,11 +1475,15 @@ static BOOL_T QueryJoint( track_p trk, int query )
 	case Q_CAN_PARALLEL:
 		if ( xx->Scurve ) {
 			if ( FindDistance( xx->pos, GetTrkEndPos(trk,0) ) <= minLength ||
-				 FindDistance( xx->pos, GetTrkEndPos(trk,1) ) <= minLength )
+			     FindDistance( xx->pos, GetTrkEndPos(trk,1) ) <= minLength ) {
 				return FALSE;
-			UndoStart( _("Split Easement Curve"), "queryJoint T%d Scurve", GetTrkIndex(trk) );
+			}
+			UndoStart( _("Split Easement Curve"), "queryJoint T%d Scurve",
+			           GetTrkIndex(trk) );
 			SplitTrack( trk, xx->pos, 0, &trk1, FALSE );
 		}
+		return TRUE;
+	case Q_HAS_DESC:
 		return TRUE;
 	default:
 		return FALSE;
@@ -1338,11 +1492,11 @@ static BOOL_T QueryJoint( track_p trk, int query )
 
 
 static void FlipJoint(
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle )
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t);
 	FlipPoint( &xx->pos, orig, angle );
 	xx->angle = NormalizeAngle( 2*angle - xx->angle );
 	xx->negate = !xx->negate;
@@ -1351,87 +1505,117 @@ static void FlipJoint(
 
 
 static BOOL_T MakeParallelJoint(
-		track_p trk,
-		coOrd pos,
-		DIST_T sep,
-		track_p * newTrkR,
-		coOrd * p0R,
-		coOrd * p1R )
+        track_p trk,
+        coOrd pos,
+        DIST_T sep,
+        DIST_T factor,
+        track_p * newTrkR,
+        coOrd * p0R,
+        coOrd * p1R,
+        BOOL_T track)
 {
-	struct extraData * xx = GetTrkExtraData(trk), *xx1;
+	struct extraDataEase_t * xx = GET_EXTRA_DATA(trk, T_EASEMENT, extraDataEase_t),
+	                         *xx1;
 	ANGLE_T angle, A;
 	coOrd p0, p1, P, q1, r1;
 	DIST_T d, d0;
 	DIST_T R, L, l0, l1, len, dl;
 	int cnt, inx;
 
-	if ( xx->Scurve )
+	if ( xx->Scurve ) {
 		return FALSE;
+	}
 	GetLandD( NULL, &d, pos, xx->pos, xx->angle, xx->R, xx->L, xx->negate, FALSE );
 	angle = 90.0;
-	if ( (d < 0) == xx->negate )
+	if ( (d < 0) == xx->negate ) {
 		sep = -sep;
-	if ( xx->negate )
+	}
+	if ( xx->negate ) {
 		angle = -90.0;
-	if ( xx->flip )
+	}
+	if ( xx->flip ) {
 		angle = -angle;
+	}
 	p0 = GetTrkEndPos(trk,0);
 	p1 = GetTrkEndPos(trk,1);
 	d0 = FindDistance( p0, p1 );
+	sep = sep+factor/(xx->R);
 	Translate( &p0, p0, GetTrkEndAngle(trk,0)+angle, sep );
 	Translate( &p1, p1, GetTrkEndAngle(trk,1)-angle, sep );
 	d = FindDistance( p0, p1 );
 	angle = R2D(asin(xx->L/2/xx->R));
 	A = xx->angle;
 	R = xx->R + sep*sin(D2R(angle));
-
 	dl = JoinD( xx->l1, xx->R, xx->L ) - JoinD( xx->l0, xx->R, xx->L );
-/*printf( "D = %0.3f %0.3f\n", d, dl );*/
+	/*printf( "D = %0.3f %0.3f\n", d, dl );*/
 	d /= d0;
 	R = xx->R * d;
 	L = xx->L * d;
 	l0 = xx->l0 * d;
 	l1 = xx->l1 * d;
-/*printf( "  R=%0.3f, L=%0.3f, l0=%0.3f, l1=%0.3f\n", R, L, l0, l1 );*/
+	/*printf( "  R=%0.3f, L=%0.3f, l0=%0.3f, l1=%0.3f\n", R, L, l0, l1 );*/
 	Translate( &P, xx->pos, xx->angle+(xx->negate?90:-90), sep );
 	ComputeJoinPos( l1, R, L, NULL, NULL, &q1, NULL );
 	r1 = (xx->flip?p0:p1);
 	r1.x -= P.x;
 	r1.y -= P.y;
 	Rotate( &r1, zero, -A );
-	if ( xx->negate )
+	if ( xx->negate ) {
 		r1.x = -r1.x;
+	}
 	if ( r1.x > 0 && q1.x > 0 ) {
-/*printf( "    %0.3f %0.3f, R=%0.3f ", q1.x, r1.x, R );*/
+		/*printf( "    %0.3f %0.3f, R=%0.3f ", q1.x, r1.x, R );*/
 		R *= q1.x/r1.x;
-/*printf( " %0.3f\n", R );*/
+		/*printf( " %0.3f\n", R );*/
 	}
 
 	if ( newTrkR ) {
-		*newTrkR = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-		xx1 = GetTrkExtraData( *newTrkR );
-		*xx1 = *xx;
-		xx1->angle = A;
-		xx1->R = R;
-		xx1->L = L;
-		xx1->l0 = l0;
-		xx1->l1 = l1;
-		xx1->pos = P;
-		SetTrkEndPoint( *newTrkR, 0, p0, GetTrkEndAngle(trk,0) );
-		SetTrkEndPoint( *newTrkR, 1, p1, GetTrkEndAngle(trk,1) );
-		ComputeBoundingBox( *newTrkR );
+		if (track) {
+			*newTrkR = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
+			xx1 = GET_EXTRA_DATA( *newTrkR, T_EASEMENT, extraDataEase_t );
+			*xx1 = *xx;
+			xx1->angle = A;
+			xx1->R = R;
+			xx1->L = L;
+			xx1->l0 = l0;
+			xx1->l1 = l1;
+			xx1->pos = P;
+			SetTrkEndPoint( *newTrkR, 0, p0, GetTrkEndAngle(trk,0) );
+			SetTrkEndPoint( *newTrkR, 1, p1, GetTrkEndAngle(trk,1) );
+			ComputeBoundingBox( *newTrkR );
+		} else {
+			dl = fabs(l0-l1);
+			len = dl/(0.20*mainD.scale);
+			cnt = (int)ceil(len);
+			if (cnt == 0) { cnt = 1; }
+			dl /= cnt;
+			DYNARR_SET( trkSeg_t, tempSegs_da, cnt );
+			for ( inx=0; inx<cnt; inx++ ) {
+				tempSegs(inx).color = wDrawColorBlack;
+				tempSegs(inx).lineWidth = 0;
+				tempSegs(inx).type = track?SEG_STRTRK:SEG_STRLIN;
+				if ( inx == 0 ) {
+					GetJointPos( &tempSegs(inx).u.l.pos[0], NULL, l0, R, L, P, A, xx->negate );
+				} else {
+					tempSegs(inx).u.l.pos[0] = tempSegs(inx-1).u.l.pos[1];
+				}
+				l0 += dl;
+				GetJointPos( &tempSegs(inx).u.l.pos[1], NULL, l0, R, L, P, A, xx->negate );
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
+			}
+		}
 	} else {
 		/* print segments about 0.20" long */
 		dl = fabs(l0-l1);
 		len = dl/(0.20*mainD.scale);
 		cnt = (int)ceil(len);
-		if (cnt == 0 || (mainD.options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) { cnt = 1; }
 		dl /= cnt;
 		DYNARR_SET( trkSeg_t, tempSegs_da, cnt );
 		for ( inx=0; inx<cnt; inx++ ) {
 			tempSegs(inx).color = wDrawColorBlack;
-			tempSegs(inx).width = 0;
-			tempSegs(inx).type = SEG_STRTRK;
+			tempSegs(inx).lineWidth = 0;
+			tempSegs(inx).type = track?SEG_STRTRK:SEG_STRLIN;
 			if ( inx == 0 ) {
 				GetJointPos( &tempSegs(inx).u.l.pos[0], NULL, l0, R, L, P, A, xx->negate );
 			} else {
@@ -1440,55 +1624,78 @@ static BOOL_T MakeParallelJoint(
 			l0 += dl;
 			GetJointPos( &tempSegs(inx).u.l.pos[1], NULL, l0, R, L, P, A, xx->negate );
 		}
-		tempSegs_da.cnt = cnt;
 	}
-	if ( p0R ) *p0R = p0;
-	if ( p1R ) *p1R = p1;
+	if ( p0R ) { *p0R = p0; }
+	if ( p1R ) { *p1R = p1; }
+	return TRUE;
+}
+
+static wBool_t CompareJoint( track_cp trk1, track_cp trk2 )
+{
+	struct extraDataEase_t *xx1 = GET_EXTRA_DATA( trk1, T_EASEMENT,
+	                              extraDataEase_t );
+	struct extraDataEase_t *xx2 = GET_EXTRA_DATA( trk2, T_EASEMENT,
+	                              extraDataEase_t );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_DIST( "L0", xx1, xx2, l0 );
+	REGRESS_CHECK_DIST( "L1", xx1, xx2, l1 );
+	REGRESS_CHECK_INT( "Flip", xx1, xx2, flip );
+	REGRESS_CHECK_INT( "Negate", xx1, xx2, negate );
+	REGRESS_CHECK_INT( "Scurve", xx1, xx2, Scurve );
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos );
+	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle );
 	return TRUE;
 }
 
 
 static trackCmd_t easementCmds = {
-		"JOINT",
-		DrawJoint,
-		DistanceJoint,
-		DescribeJoint,
-		DeleteJoint,
-		WriteJoint,
-		ReadJoint,
-		MoveJoint,
-		RotateJoint,
-		RescaleJoint,
-		NULL,		/* audit */
-		GetAngleJoint,
-		SplitJoint,
-		TraverseJointTrack,
-		EnumerateJoint,
-		NULL,		/* redraw */
-		TrimJoint,
-		MergeJoint,
-		ExtendStraightFromOrig,
-		GetLengthJoint,
-		GetParamsJoint,
-		MoveEndPtJoint,
-		QueryJoint,
-		NULL,		/* ungroup */
-		FlipJoint,
-		NULL,
-		NULL,
-		NULL,
-		MakeParallelJoint };
+	"JOINT",
+	DrawJoint,
+	DistanceJoint,
+	DescribeJoint,
+	DeleteJoint,
+	WriteJoint,
+	ReadJoint,
+	MoveJoint,
+	RotateJoint,
+	RescaleJoint,
+	NULL,		/* audit */
+	GetAngleJoint,
+	SplitJoint,
+	TraverseJointTrack,
+	EnumerateJoint,
+	NULL,		/* redraw */
+	TrimJoint,
+	MergeJoint,
+	ExtendStraightFromOrig,
+	GetLengthJoint,
+	GetParamsJoint,
+	MoveEndPtJoint,
+	QueryJoint,
+	NULL,		/* ungroup */
+	FlipJoint,
+	NULL,
+	NULL,
+	NULL,
+	MakeParallelJoint,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	CompareJoint
+};
 
 
 EXPORT void JointSegProc(
-		segProc_e cmd,
-		trkSeg_p segPtr,
-		segProcData_p data )
+        segProc_e cmd,
+        trkSeg_p segPtr,
+        segProcData_p data )
 {
 	DIST_T l;
 	ANGLE_T a;
 	BOOL_T flip;
-	struct extraData * xx, xxx[2];
+	struct extraDataEase_t * xx, xxx[2];
 	coOrd p;
 	int inx;
 	EPINX_T ep0;
@@ -1496,43 +1703,53 @@ EXPORT void JointSegProc(
 	switch (cmd) {
 
 	case SEGPROC_TRAVERSE1:
-		GetLandD( &l, NULL, data->traverse1.pos, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
+		GetLandD( &l, NULL, data->traverse1.pos, segPtr->u.j.pos, segPtr->u.j.angle,
+		          segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
 		if (small(l)) {
 			a = segPtr->u.j.angle;
 		} else {
 			if (segPtr->u.j.Scurve && l < 0.0) {
-				GetJointPos( NULL, &a, -l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos, segPtr->u.j.angle+180.0, segPtr->u.j.negate );
+				GetJointPos( NULL, &a, -l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos,
+				             segPtr->u.j.angle+180.0, segPtr->u.j.negate );
 				a = NormalizeAngle( a-180.0 );
 			} else {
-				GetJointPos( NULL, &a, l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.negate );
+				GetJointPos( NULL, &a, l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos,
+				             segPtr->u.j.angle, segPtr->u.j.negate );
 			}
 		}
 		a = NormalizeAngle( data->traverse1.angle+a );
 		data->traverse1.backwards = (a < 270 && a > 90 );
 		if ( !segPtr->u.j.Scurve ) {
-			if ( data->traverse1.backwards==0 )
-				data->traverse1.dist = JoinD( l, segPtr->u.j.R, segPtr->u.j.L ) - JoinD( segPtr->u.j.l0, segPtr->u.j.R, segPtr->u.j.L );
-			else
-				data->traverse1.dist = JoinD( segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L ) - JoinD( l, segPtr->u.j.R, segPtr->u.j.L );
+			if ( data->traverse1.backwards==0 ) {
+				data->traverse1.dist = JoinD( l, segPtr->u.j.R,
+				                              segPtr->u.j.L ) - JoinD( segPtr->u.j.l0, segPtr->u.j.R, segPtr->u.j.L );
+			} else {
+				data->traverse1.dist = JoinD( segPtr->u.j.l1, segPtr->u.j.R,
+				                              segPtr->u.j.L ) - JoinD( l, segPtr->u.j.R, segPtr->u.j.L );
+			}
 		} else {
 			data->traverse1.backwards = !data->traverse1.backwards;
-			if ( data->traverse1.backwards==0 )
-				data->traverse1.dist = JoinD( segPtr->u.j.l0, segPtr->u.j.R, segPtr->u.j.L ) - JoinD( l, segPtr->u.j.R, segPtr->u.j.L );
-			else
-				data->traverse1.dist = JoinD( segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L ) + JoinD( l, segPtr->u.j.R, segPtr->u.j.L );
+			if ( data->traverse1.backwards==0 ) {
+				data->traverse1.dist = JoinD( segPtr->u.j.l0, segPtr->u.j.R,
+				                              segPtr->u.j.L ) - JoinD( l, segPtr->u.j.R, segPtr->u.j.L );
+			} else {
+				data->traverse1.dist = JoinD( segPtr->u.j.l1, segPtr->u.j.R,
+				                              segPtr->u.j.L ) + JoinD( l, segPtr->u.j.R, segPtr->u.j.L );
+			}
 		}
 		data->traverse1.reverse_seg = FALSE;
 		if ( segPtr->u.j.flip ) {
 			data->traverse1.backwards = !data->traverse1.backwards;
 			data->traverse1.reverse_seg = TRUE;
 		}
-LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f] A=%0.3f l0=%0.3f l1=%0.3f R=%0.3f L=%0.3f N:%d F:%d S:%d = a=%0.3f D=%0.3f B=%d\n",
-		data->traverse1.pos.x, data->traverse1.pos.y, data->traverse1.angle,
-		l,
-		segPtr->u.j.pos.x, segPtr->u.j.pos.y, segPtr->u.j.angle,
-		segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L,
-		segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve,
-		a, data->traverse1.dist, data->traverse1.backwards ) );
+		LOG( log_traverseJoint, 1,
+		     ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f] A=%0.3f l0=%0.3f l1=%0.3f R=%0.3f L=%0.3f N:%d F:%d S:%d = a=%0.3f D=%0.3f B=%d\n",
+		       data->traverse1.pos.x, data->traverse1.pos.y, data->traverse1.angle,
+		       l,
+		       segPtr->u.j.pos.x, segPtr->u.j.pos.y, segPtr->u.j.angle,
+		       segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L,
+		       segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve,
+		       a, data->traverse1.dist, data->traverse1.backwards ) );
 		data->traverse1.negative = FALSE;
 		data->traverse1.BezSegInx = 0;
 		data->traverse1.segs_backwards = FALSE;
@@ -1540,12 +1757,18 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 
 	case SEGPROC_TRAVERSE2:
 		flip = segPtr->u.j.flip;
-		if (data->traverse2.segDir!=0)
+		if (data->traverse2.segDir!=0) {
 			flip = !flip;
-		if (segPtr->u.j.Scurve)
+		}
+		if (segPtr->u.j.Scurve) {
 			flip = !flip;
-		data->traverse2.pos = GetSegEndPt( segPtr, data->traverse2.segDir, FALSE, NULL );
-		TraverseJoint( &data->traverse2.pos, &data->traverse2.angle, &data->traverse2.dist, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, flip, segPtr->u.j.Scurve );
+		}
+		data->traverse2.pos = GetSegEndPt( segPtr, data->traverse2.segDir, FALSE,
+		                                   NULL );
+		TraverseJoint( &data->traverse2.pos, &data->traverse2.angle,
+		               &data->traverse2.dist, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.l0,
+		               segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, flip,
+		               segPtr->u.j.Scurve );
 		break;
 
 	case SEGPROC_DRAWROADBEDSIDE:
@@ -1553,7 +1776,9 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 		break;
 
 	case SEGPROC_DISTANCE:
-		data->distance.dd = JointDistance( &data->distance.pos1, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
+		data->distance.dd = JointDistance( &data->distance.pos1, segPtr->u.j.pos,
+		                                   segPtr->u.j.angle, segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L,
+		                                   segPtr->u.j.negate, segPtr->u.j.Scurve );
 		break;
 
 	case SEGPROC_FLIP:
@@ -1562,7 +1787,7 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 
 	case SEGPROC_NEWTRACK:
 		data->newTrack.trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-		xx = GetTrkExtraData(data->newTrack.trk);
+		xx = GET_EXTRA_DATA(data->newTrack.trk, T_EASEMENT, extraDataEase_t);
 		xx->pos = segPtr->u.j.pos;
 		xx->angle = segPtr->u.j.angle;
 		xx->l0 = segPtr->u.j.l0;
@@ -1573,20 +1798,25 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 		xx->flip = segPtr->u.j.flip;
 		xx->Scurve = segPtr->u.j.Scurve;
 		ep0 = 0;
-		if ( xx->flip )
+		if ( xx->flip ) {
 			ep0 = 1-ep0;
-		if ( xx->Scurve )
+		}
+		if ( xx->Scurve ) {
 			ep0 = 1-ep0;
+		}
 		GetJointPos( &p, &a, xx->l0, xx->R, xx->L, xx->pos, xx->angle, xx->negate );
-		if ( !xx->Scurve )
+		if ( !xx->Scurve ) {
 			a = NormalizeAngle(a+180.0);
+		}
 		SetTrkEndPoint( data->newTrack.trk, ep0, p, a );
 		a = xx->angle;
-		if ( xx->Scurve )
+		if ( xx->Scurve ) {
 			a = NormalizeAngle(a+180.0);
+		}
 		GetJointPos( &p, &a, xx->l1, xx->R, xx->L, xx->pos, a, xx->negate );
-		if ( xx->Scurve )
+		if ( xx->Scurve ) {
 			a = NormalizeAngle(a+180.0);
+		}
 		SetTrkEndPoint( data->newTrack.trk, 1-ep0, p, a );
 		ComputeBoundingBox( data->newTrack.trk );
 		data->newTrack.ep[0] = 0;
@@ -1594,13 +1824,18 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 		break;
 
 	case SEGPROC_LENGTH:
-		if ( !segPtr->u.j.Scurve )
-			data->length.length = JoinD( segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L ) - JoinD( segPtr->u.j.l0, segPtr->u.j.R, segPtr->u.j.L );
-		else
-			data->length.length = JoinD( segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L ) + JoinD( segPtr->u.j.l0, segPtr->u.j.R, segPtr->u.j.L );
+		if ( !segPtr->u.j.Scurve ) {
+			data->length.length = JoinD( segPtr->u.j.l1, segPtr->u.j.R,
+			                             segPtr->u.j.L ) - JoinD( segPtr->u.j.l0, segPtr->u.j.R, segPtr->u.j.L );
+		} else {
+			data->length.length = JoinD( segPtr->u.j.l1, segPtr->u.j.R,
+			                             segPtr->u.j.L ) + JoinD( segPtr->u.j.l0, segPtr->u.j.R, segPtr->u.j.L );
+		}
 		break;
 
 	case SEGPROC_SPLIT:
+		xxx[0].base.trkType = T_EASEMENT;
+		xxx[1].base.trkType = T_EASEMENT;
 		xxx[0].pos = segPtr->u.j.pos;
 		xxx[0].angle = segPtr->u.j.angle;
 		xxx[0].l0 = segPtr->u.j.l0;
@@ -1623,23 +1858,29 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 			data->split.newSeg[inx].u.j.negate = xx->negate;
 			data->split.newSeg[inx].u.j.flip = xx->flip;
 			data->split.newSeg[inx].u.j.Scurve = xx->Scurve;
-			if ( !xx->Scurve )
-				data->split.length[inx] = JoinD( xx->l1, xx->R, xx->L ) - JoinD( xx->l0, xx->R, xx->L );
-			else
-				data->split.length[inx] = JoinD( xx->l1, xx->R, xx->L ) + JoinD( xx->l0, xx->R, xx->L );
+			if ( !xx->Scurve ) {
+				data->split.length[inx] = JoinD( xx->l1, xx->R, xx->L ) - JoinD( xx->l0, xx->R,
+				                          xx->L );
+			} else {
+				data->split.length[inx] = JoinD( xx->l1, xx->R, xx->L ) + JoinD( xx->l0, xx->R,
+				                          xx->L );
+			}
 		}
 		break;
 
 	case SEGPROC_GETANGLE:
-		GetLandD( &l, NULL, data->getAngle.pos, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
+		GetLandD( &l, NULL, data->getAngle.pos, segPtr->u.j.pos, segPtr->u.j.angle,
+		          segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.Scurve );
 		if (small(l)) {
 			a = segPtr->u.j.angle;
 		} else {
 			if (segPtr->u.j.Scurve && l < 0.0) {
-				GetJointPos( NULL, &a, -l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos, segPtr->u.j.angle+180.0, segPtr->u.j.negate );
+				GetJointPos( NULL, &a, -l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos,
+				             segPtr->u.j.angle+180.0, segPtr->u.j.negate );
 				a = NormalizeAngle( a-180.0 );
 			} else {
-				GetJointPos( NULL, &a, l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos, segPtr->u.j.angle, segPtr->u.j.negate );
+				GetJointPos( NULL, &a, l, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.pos,
+				             segPtr->u.j.angle, segPtr->u.j.negate );
 			}
 		}
 		data->getAngle.angle = a;
@@ -1652,13 +1893,13 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 
 #ifndef TEST
 BOOL_T JoinTracks(
-		track_p trk0,
-		EPINX_T ep0,
-		coOrd pos0,
-		track_p trk1,
-		EPINX_T ep1,
-		coOrd pos1,
-		easementData_t * e )
+        track_p trk0,
+        EPINX_T ep0,
+        coOrd pos0,
+        track_p trk1,
+        EPINX_T ep1,
+        coOrd pos1,
+        easementData_t * e )
 /*
  * Join 2 tracks with joint described in (e).
  * (pos0) and (pos1) are points that would be connected if there was no
@@ -1672,14 +1913,16 @@ BOOL_T JoinTracks(
 {
 	track_p joint;
 
-LOG( log_ease, 1, ( "join T%d[%d] @[%0.3f %0.3f], T%d[%d] @[%0.3f %0.3f]\n",
-				GetTrkIndex(trk0), ep0, pos0.x, pos0.y, GetTrkIndex(trk1), ep1, pos1.x, pos1.y ) )
+	LOG( log_ease, 1, ( "join T%d[%d] @[%0.3f %0.3f], T%d[%d] @[%0.3f %0.3f]\n",
+	                    GetTrkIndex(trk0), ep0, pos0.x, pos0.y, GetTrkIndex(trk1), ep1, pos1.x,
+	                    pos1.y ) )
 
 	if ( GetTrkType(trk0) == T_EASEMENT ) {
 		DIST_T d;
 		ANGLE_T aa;
 		d = FindDistance( GetTrkEndPos(trk0,ep0), GetTrkEndPos(trk1,ep1) );
-		aa = NormalizeAngle( GetTrkEndAngle(trk0,ep0) - GetTrkEndAngle(trk1,ep1) + 180.0 + connectAngle/2.0 );
+		aa = NormalizeAngle( GetTrkEndAngle(trk0,ep0) - GetTrkEndAngle(trk1,
+		                     ep1) + 180.0 + connectAngle/2.0 );
 		if ( d <= connectDistance && aa <= connectAngle ) {
 			ConnectTracks( trk0, ep0, trk1, ep1 );
 		}
@@ -1687,15 +1930,17 @@ LOG( log_ease, 1, ( "join T%d[%d] @[%0.3f %0.3f], T%d[%d] @[%0.3f %0.3f]\n",
 	}
 
 	/* Move the endPoint for (trk0) */
-	if (!MoveEndPt( &trk0, &ep0, pos0, e->d0 ))
+	if (!MoveEndPt( &trk0, &ep0, pos0, e->d0 )) {
 		return FALSE;
+	}
 
 	/* Move the endPoint for (trk1) */
-	if (!MoveEndPt( &trk1, &ep1, pos1, e->d1 ))
+	if (!MoveEndPt( &trk1, &ep1, pos1, e->d1 )) {
 		return FALSE;
+	}
 
-LOG( log_ease, 1, ( "   EASE R%0.3f..%0.3f L%0.3f..%0.3f\n",
-				e->r0, e->r1, e->d0, e->d1 ) )
+	LOG( log_ease, 1, ( "   EASE R%0.3f..%0.3f L%0.3f..%0.3f\n",
+	                    e->r0, e->r1, e->d0, e->d1 ) )
 
 	/* Connect the tracks */
 	if (e->x == 0.0) {
@@ -1703,9 +1948,28 @@ LOG( log_ease, 1, ( "   EASE R%0.3f..%0.3f L%0.3f..%0.3f\n",
 		ConnectTracks( trk0, ep0, trk1, ep1 );
 	} else {
 		/* Connect with transition-curve */
-		joint = NewJoint( GetTrkEndPos(trk0,ep0), GetTrkEndAngle(trk0,ep0),
-						 GetTrkEndPos(trk1,ep1), GetTrkEndAngle(trk1,ep1),
-						 GetTrkGauge(trk0), easeR, easeL, e );
+		if (easementVal<0.0) {   //Cornu Easements
+			coOrd pos[2];
+			pos[0] = GetTrkEndPos(trk0,ep0);
+			pos[1] = GetTrkEndPos(trk1,ep1);
+			DIST_T radius[2];
+			trackParams_t params0, params1;
+			GetTrackParams(PARAMS_CORNU,trk0,pos0,&params0);
+			GetTrackParams(PARAMS_CORNU,trk1,pos1,&params1);
+			radius[0] = params0.arcR;
+			radius[1] = params1.arcR;
+			coOrd center[2];
+			center[0] = params0.arcP;
+			center[1] = params1.arcP;
+			ANGLE_T angle[2];
+			angle[0] = NormalizeAngle(GetTrkEndAngle(trk0,ep0)+180.0);
+			angle[1] = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180.0);
+			joint = NewCornuTrack(pos,center,angle,radius, NULL, 0);
+		} else {
+			joint = NewJoint( GetTrkEndPos(trk0,ep0), GetTrkEndAngle(trk0,ep0),
+			                  GetTrkEndPos(trk1,ep1), GetTrkEndAngle(trk1,ep1),
+			                  GetTrkGauge(trk0), easeR, easeL, e );
+		}
 		CopyAttributes( trk0, joint );
 		ConnectTracks( trk1, ep1, joint, 1 );
 		ConnectTracks( trk0, ep0, joint, 0 );
@@ -1716,23 +1980,26 @@ LOG( log_ease, 1, ( "   EASE R%0.3f..%0.3f L%0.3f..%0.3f\n",
 
 
 EXPORT void UndoJoint(
-		track_p trk,
-		EPINX_T ep,
-		track_p trk1,
-		EPINX_T ep1 )
+        track_p trk,
+        EPINX_T ep,
+        track_p trk1,
+        EPINX_T ep1 )
 {
-	struct extraData * xx;
+	struct extraDataEase_t * xx;
 	DIST_T d;
 
-	if ( GetTrkType(trk1) != T_EASEMENT ) 
+	if ( GetTrkType(trk1) != T_EASEMENT ) {
 		return;
-	xx = GetTrkExtraData(trk1);
-	if ( ep1 == 0 )
+	}
+	xx = GET_EXTRA_DATA(trk1, T_EASEMENT, extraDataEase_t);
+	if ( ep1 == 0 ) {
 		d = xx->L/2.0 - xx->l0;
-	else
+	} else {
 		d = xx->l1 - xx->L/2.0;
-	if ( d < 0.01 )
+	}
+	if ( d < 0.01 ) {
 		return;
+	}
 	UndrawNewTrack( trk );
 	MoveEndPt( &trk, &ep, GetTrkEndPos(trk,ep), -d );
 	DrawNewTrack( trk );
@@ -1782,7 +2049,7 @@ track_p NewTrack( TRKINX_T a, TRKTYP_T b, EPINX_T c, TRKTYP_T d )
 }
 
 void DrawStraightTrack( drawCmd_p a, coOrd b, coOrd c, ANGLE_T d,
-						DIST_T trackGauge, wDrawColor color, int opts )
+                        track_p trk, wDrawColor color, int opts )
 {
 }
 
@@ -1791,9 +2058,9 @@ void DrawNewTrack( track_p t )
 }
 
 static DIST_T JoinDalt(
-		DIST_T x,
-		DIST_T R,
-		DIST_T L )
+        DIST_T x,
+        DIST_T R,
+        DIST_T L )
 /*
  * Alternative distance computation, integrate over the curve.
  */
@@ -1804,7 +2071,7 @@ static DIST_T JoinDalt(
 	coOrd p0, p1;
 	d = 0.0;
 	p0.x = p0.y = 0.0;
-	for ( i=1;i<=DCNT; i++) {
+	for ( i=1; i<=DCNT; i++) {
 		ComputeJoinPos( x*((DIST_T)i)/((DIST_T)DCNT), R, L, NULL, NULL, &p1, NULL );
 		d += FindDistance( p0, p1 );
 		p0 = p1;
@@ -1828,14 +2095,14 @@ test_plot( INT_T argc, char * argv[] )
 	C = atol( *argv++ );
 	X = L*L/(24*R);
 	lprintf("R=%0.3f X=%0.3f L=%0.3f\n", R, X, L );
-	
-	for (i=0;i<=C;i++) {
+
+	for (i=0; i<=C; i++) {
 		l = L*((DIST_T)i)/((DIST_T)C);
 		d = JoinD( l, R, L );
 		d1 = JoinDalt( l, R, L );
 		ComputeJoinPos( l, R, L, &rr, &ra, &p, &pc );
 		lprintf("d: [%0.3f %0.3f] [%0.3f %03f] R=%0.3f A=%0.3f D=%0.3f D1=%0.3f X=%0.4f\n",
-		i, p.x, p.y, pc.x, pc.y, rr, ra, d, d1, pc.x-rr );
+		        i, p.x, p.y, pc.x, pc.y, rr, ra, d, d1, pc.x-rr );
 	}
 }
 
@@ -1854,25 +2121,26 @@ test_psplot( INT_T argc, char * argv[] )
 	C = atol( *argv++ );
 	S = atof( *argv++ );
 	X = L*L/(24*R);
-	
-lprintf("%%! kvjfv\nsave\n0 setlinewidth\n");
-lprintf("/Times-BoldItalic findfont 16 scalefont setfont\n");
-lprintf("36 36 moveto (R=%0.3f X=%0.3f L=%0.3f S=%0.3f) show\n", easeR, X, L, S );
-/*lprintf("24 768 translate -90 rotate\n");*/
-lprintf("gsave\n72 72 translate\n");
-lprintf("%0.3f %0.3f scale\n", 72.0/S, 72.0/S );
-lprintf("%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n", 0.0, 0.0, L, 0.0 );
-lprintf("%0.3f %0.3f %0.3f 270.0 90.0 arc stroke\n", L/2.0, easeR+X, easeR );
-lprintf("%0.3f %0.3f %0.3f 0.0 360.0 arc stroke\n", 0.0, 0.0, 0.25 );
+
+	lprintf("%%! kvjfv\nsave\n0 setlinewidth\n");
+	lprintf("/Times-BoldItalic findfont 16 scalefont setfont\n");
+	lprintf("36 36 moveto (R=%0.3f X=%0.3f L=%0.3f S=%0.3f) show\n", easeR, X, L,
+	        S );
+	/*lprintf("24 768 translate -90 rotate\n");*/
+	lprintf("gsave\n72 72 translate\n");
+	lprintf("%0.3f %0.3f scale\n", 72.0/S, 72.0/S );
+	lprintf("%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n", 0.0, 0.0, L, 0.0 );
+	lprintf("%0.3f %0.3f %0.3f 270.0 90.0 arc stroke\n", L/2.0, easeR+X, easeR );
+	lprintf("%0.3f %0.3f %0.3f 0.0 360.0 arc stroke\n", 0.0, 0.0, 0.25 );
 	q.x = q.y = 0.0;
-	for (i=0;i<=C;i++) {
+	for (i=0; i<=C; i++) {
 		l = L*((DIST_T)i)/((DIST_T)C);
 		ComputeJoinPos( l, R, L, &rr, &ra, &p, &pc );
-lprintf("%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n", q.x, q.y, p.x, p.y );
+		lprintf("%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n", q.x, q.y, p.x, p.y );
 		q = p;
 	}
-lprintf("%0.3f %0.3f %0.3f 0.0 360.0 arc stroke\n", p.x, p.y, 0.25 );
-lprintf("grestore\nrestore\nshowpage\n%%Trailer\n%%Pages: 1\n");
+	lprintf("%0.3f %0.3f %0.3f 0.0 360.0 arc stroke\n", p.x, p.y, 0.25 );
+	lprintf("grestore\nrestore\nshowpage\n%%Trailer\n%%Pages: 1\n");
 }
 
 void Test_compute( INT_T argc, char * argv[] )
@@ -1902,7 +2170,7 @@ void Test_compute( INT_T argc, char * argv[] )
 	lprintf("ENDPT  [%0.3f %0.3f] [%0.3f %0.3f]\n", q0.x, q0.y, q1.x, q1.y );
 	lprintf("CENTER [%0.3f %0.3f] [%0.3f %0.3f]\n", qc0.x, qc0.y, qc1.x, qc1.y );
 	lprintf("ComputeJoint( %0.3f %0.3f) { %0.3f %0.3f %0.3f } D0=%0.5f D1=%0.5f, D=%0.3f\n",
-				r0, r1, easeR, easeL, e.x, e.d0, e.d1, d );
+	        r0, r1, easeR, easeL, e.x, e.d0, e.d1, d );
 }
 
 void Test_findL( INT_T argc, char * argv[] )
@@ -1924,8 +2192,8 @@ void Test_findL( INT_T argc, char * argv[] )
 
 main( INT_T argc, char * argv[] )
 {
-INT_T flagX = 0;
-INT_T flagV = 0;
+	INT_T flagX = 0;
+	INT_T flagV = 0;
 	if (argc<1) {
 		lprintf("plot|compute\n");
 		Exit(1);
@@ -1935,15 +2203,15 @@ INT_T flagV = 0;
 		switch (argv[0][1]) {
 		case 'x':
 			flagX++;
-			argc--;argv++;
+			argc--; argv++;
 			break;
 		case 'v':
 			flagV++;
-			argc--;argv++;
+			argc--; argv++;
 			break;
 		default:
 			lprintf("Huh: %s\n", *argv );
-			argc--;argv++;
+			argc--; argv++;
 			break;
 		}
 	}

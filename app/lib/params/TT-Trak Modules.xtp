@@ -1,4 +1,4 @@
-CONTENTS TT Scale TT-Track Standard Modules
+CONTENTS TT Scale TT Track Standard Modules
 SUBCONTENTS TT-Scale TT-Trak Modules - Straight Modules
 TURNOUT TT "TT-Trak	Base - Straight - 300mm x 497mm	TTT-S01"
 	P "P0" 2 3 6 0 1 4 5
@@ -416,4 +416,3 @@ TURNOUT TT "TT-Trak	Base - Junction Broad - 634mm x 1028mm	TTT-J02"
 	L3 11579568 0.052083 16.653542 -2.322864 0 13.070864 -2.322854 0
 	L3 11579568 0.052083 16.653546 -1.063022 0 13.070868 -1.063012 0
 	END
-

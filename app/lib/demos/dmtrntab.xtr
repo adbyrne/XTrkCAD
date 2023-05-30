@@ -23,4 +23,8 @@ MESSAGE
 =========================================
 END
 STEP
+REGRESSION START 10 - turntable
+TURNTABLE 1 0 0 0 0 DEMO 2 6.000000 6.000000 0 3.750000 0
+	END
+REGRESSION END
 CLEAR

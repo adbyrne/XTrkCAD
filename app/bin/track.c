@@ -1,5 +1,5 @@
 /** \file track.c
- * Track 
+ * Track
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -17,15 +17,8 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <assert.h>
-#include <time.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <math.h>
-#include <string.h>
 
 #include "ccurve.h"
 #include "cjoin.h"
@@ -36,32 +29,36 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "utility.h"
-
-#ifndef TRACKDEP
-#ifndef FASTTRACK
 #include "trackx.h"
-#endif
-#endif
+#include "trkendpt.h"
+#include "misc.h"
+#include "ctrain.h"
+#include "common-ui.h"
+#include "version.h"
 
-#ifndef WINDOWS
-#include <errno.h>
-#else
-// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
-#if ( _MSC_VER < 1900 )
-#define round(x) floor((x)+0.5)
-#endif
-#endif
+#include <inttypes.h>
 
+#include <stdint.h>
+
+#define SLOG_FMT "0x%.12" PRIxPTR
+
+EXPORT char tempSpecial[4096];
+
+/** @logcmd @showrefby track=n track.c */
 static int log_track = 0;
+/** @logcmd @showrefby endPt=n track.c */
 static int log_endPt = 0;
+/** @logcmd @showrefby readTracks=n track.c */
 static int log_readTracks = 0;
+/** @logcmd @showrefby timedrawtracks=n track.c */
+static int log_timedrawtracks = 0;
+
+// Enable trkType checks on extraData*_t
+#define CHECK_EXTRA_DATA
 
 /*****************************************************************************
  *
@@ -73,15 +70,20 @@ static int log_readTracks = 0;
 
 #define CLOSETOTHEEDGE			(10)		/**< minimum distance between paste position and edge of window */
 
+EXPORT DIST_T trackGauge;
+EXPORT DIST_T minLength = 0.1;
+EXPORT DIST_T connectDistance = 0.1;
+EXPORT ANGLE_T connectAngle = 1.0;
+EXPORT long twoRailScale = 16;
+
 EXPORT wIndex_t trackCount;
 
 EXPORT long drawEndPtV = 2;
 EXPORT long drawUnconnectedEndPt = 0;		/**< How do we draw Unconnected EndPts */
 
-EXPORT long centerDrawMode = FALSE;			/**< flag to control drawing of circle centers */
-EXPORT long printCenterLines = FALSE; 		/**< flag to control drawing of centerline in Print */
+EXPORT long centerDrawMode =
+        FALSE;			/**< flag to control drawing of circle centers */
 
-static BOOL_T exportingTracks = FALSE;
 
 EXPORT signed char * pathPtr;
 EXPORT int pathCnt = 0;
@@ -97,10 +99,7 @@ EXPORT unsigned int curTrackLayer;
 EXPORT coOrd descriptionOff;
 
 EXPORT DIST_T roadbedWidth = 0.0;
-EXPORT DIST_T roadbedLineWidth = 3.0/75.0;
-
-//EXPORT DIST_T minTrackRadius;
-//EXPORT DIST_T maxTrackGrade = 5.0;
+EXPORT DIST_T roadbedLineWidth = 3.0/BASE_DPI;
 
 static int suspendElevUpdates = FALSE;
 
@@ -110,17 +109,30 @@ EXPORT BOOL_T onTrackInSplit = FALSE;
 
 static BOOL_T inDrawTracks;
 
-#ifndef TRACKDEP
+EXPORT wBool_t bFreeTrack = FALSE;
+
+EXPORT long colorTrack = 0;
+EXPORT long colorDraw = 0;
+
 
 /*****************************************************************************
  *
- * 
+ *
  *
  */
+EXPORT void ActivateTrack( track_cp trk)
+{
+	int inx = GetTrkType(trk);
+	if (trackCmds( inx )->activate != NULL) {
+		trackCmds( inx )->activate (trk);
+	}
+
+}
 
 
 EXPORT void DescribeTrack( track_cp trk, char * str, CSIZE_T len )
 {
+
 	trackCmds( GetTrkType(trk) )->describe ( trk, str, len );
 	/*epCnt = GetTrkEndPtCnt(trk);
 	if (debugTrack >= 2)
@@ -131,26 +143,27 @@ EXPORT void DescribeTrack( track_cp trk, char * str, CSIZE_T len )
 
 EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd * pos )
 {
-	return trackCmds( GetTrkType(trk) )->distance( trk, pos );
+	return fabs(trackCmds( GetTrkType(trk) )->distance( trk, pos ));
 }
 
 /**
  * Check whether the track passed as parameter is close to an existing piece. Track
  * pieces that aren't visible (in a tunnel or on an invisble layer) can be ignored,
- * depending on flag. If there is a track closeby, the passed track is moved to that 
+ * depending on flag. If there is a track closeby, the passed track is moved to that
  * position. This implements the snap feature.
  *
  * \param fp IN/OUT the old and the new position
  * \param complain IN show error message if there is no other piece of track
- * \param track IN 
+ * \param track IN
  * \param ignoreHidden IN decide whether hidden track is ignored or not
- * \return   NULL if there is no track, pointer to track otherwise 
+ * \return   NULL if there is no track, pointer to track otherwise
  */
 
-EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignoreHidden, track_p t )
+EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
+                         BOOL_T ignoreHidden, track_p t )
 {
 	track_p trk;
-	DIST_T distance, closestDistance = 1000000;
+	DIST_T distance, closestDistance = DIST_INF;
 	track_p closestTrack = NULL;
 	coOrd p, closestPos, q0, q1;
 
@@ -160,29 +173,37 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 	q0.y -= 1.0;
 	q1.y += 1.0;
 	TRK_ITERATE( trk ) {
-		if ( track && !IsTrack(trk) )
+		if ( track && !IsTrack(trk) ) {
 			continue;
-		if (trk == t) continue;
+		}
+		if (trk == t) { continue; }
+		// Bounding box check
 		if (trk->hi.x < q0.x ||
-			trk->lo.x > q1.x ||
-			trk->hi.y < q0.y ||
-			trk->lo.y > q1.y )
+		    trk->lo.x > q1.x ||
+		    trk->hi.y < q0.y ||
+		    trk->lo.y > q1.y ) {
 			continue;
+		}
 		if ( ignoreHidden ) {
-			if ( (!GetTrkVisible(trk)) && drawTunnel == DRAW_TUNNEL_NONE)
+			if ( (!GetTrkVisible(trk)) && drawTunnel == DRAW_TUNNEL_NONE) {
 				continue;
-			if ( !GetLayerVisible( GetTrkLayer( trk ) ) )
+			}
+			if ( !GetLayerVisible( GetTrkLayer( trk ) ) ) {
 				continue;
+			}
 		}
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		if (distance < closestDistance) {
+		if (fabs(distance) <= fabs(
+		            closestDistance)) { //Make the last (highest) preferred
 			closestDistance = distance;
 			closestTrack = trk;
 			closestPos = p;
 		}
 	}
-	if (closestTrack && (closestDistance <= mainD.scale*0.25 || closestDistance <= trackGauge*2.0) ) {
+	if (closestTrack && closestDistance <0 ) { closestDistance = 0.0; }  //Turntable was closest - inside well
+	if (closestTrack && ((closestDistance <= mainD.scale*0.25)
+	                     || (closestDistance <= trackGauge*2.0) )) {
 		*fp = closestPos;
 		return closestTrack;
 	}
@@ -204,7 +225,9 @@ EXPORT track_p OnTrack( coOrd * fp, BOOL_T complain, BOOL_T track )
 	return OnTrack2( fp, complain, track, TRUE, NULL );
 }
 
-EXPORT track_p OnTrackIgnore (coOrd * fp, BOOL_T complain, BOOL_T track, track_p t ) {
+EXPORT track_p OnTrackIgnore (coOrd * fp, BOOL_T complain, BOOL_T track,
+                              track_p t )
+{
 	return OnTrack2(fp, complain, track, TRUE, t);
 }
 
@@ -213,6 +236,20 @@ EXPORT BOOL_T CheckTrackLayer( track_p trk )
 {
 	if (GetLayerFrozen( GetTrkLayer( trk ) ) ) {
 		ErrorMessage( MSG_CANT_MODIFY_FROZEN_TRK );
+		return FALSE;
+	} else if (GetLayerModule( GetTrkLayer( trk ) ) ) {
+		ErrorMessage( MSG_CANT_MODIFY_MODULE_TRK );
+		return FALSE;
+	} else {
+		return TRUE;
+	}
+}
+
+EXPORT BOOL_T CheckTrackLayerSilent( track_p trk )
+{
+	if (GetLayerFrozen( GetTrkLayer( trk ) ) ) {
+		return FALSE;
+	} else if (GetLayerModule( GetTrkLayer( trk ) ) ) {
 		return FALSE;
 	} else {
 		return TRUE;
@@ -226,30 +263,44 @@ EXPORT BOOL_T CheckTrackLayer( track_p trk )
  */
 
 
-EXPORT void EnumerateTracks( void )
+EXPORT void EnumerateTracks( void * unused )
 {
 	track_p trk;
 	TRKINX_T inx;
 
-	enumerateMaxDescLen = strlen("Description");
+	enumerateMaxDescLen = (int)strlen("Description");
+
+	BOOL_T content = FALSE;
 
 	TRK_ITERATE( trk ) {
-		/* 
+		/*
 		 *	process track piece if none are selected (list all) or if it is one of the
 		 *	selected pieces (list only selected )
 		 */
-		if ((!selectedTrackCount || GetTrkSelected(trk)) && trackCmds(trk->type)->enumerate != NULL)
-			trackCmds(trk->type)->enumerate( trk );
+		if ((!selectedTrackCount || GetTrkSelected(trk))
+		    && trackCmds(trk->type)->enumerate != NULL) {
+			if (trackCmds(trk->type)->enumerate( trk )==TRUE) { content = TRUE; }
+		}
+	}
+
+	if (content == FALSE) {
+		wBeep();
+		if (selectedTrackCount == 0) {
+			InfoMessage(_("No track or structure pieces are present in layout"));
+		} else {
+			InfoMessage(_("No track or structure pieces are selected"));
+		}
+		return;
 	}
 
 	EnumerateStart();
 
 	for (inx=1; inx<trackCmds_da.cnt; inx++)
-		if (trackCmds(inx)->enumerate != NULL)
+		if (trackCmds(inx)->enumerate != NULL) {
 			trackCmds(inx)->enumerate( NULL );
+		}
 
 	EnumerateEnd();
-	Reset();
 }
 
 /*****************************************************************************
@@ -260,32 +311,33 @@ EXPORT void EnumerateTracks( void )
 
 static void AbortNoTrack( void )
 {
-	AbortProg( "No Track Op called" );
+	CHECKMSG( FALSE, ( "No Track Op called" ) );
 }
 
 static trackCmd_t notrackCmds = {
-		"NOTRACK",
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack,
-		(void*)AbortNoTrack };
+	"NOTRACK",
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack,
+	(void*)AbortNoTrack
+};
 
 EXPORT TRKTYP_T InitObject( trackCmd_t * cmds )
 {
@@ -303,6 +355,7 @@ EXPORT void InitTrkTrack( void )
 	log_track = LogFindIndex( "track" );
 	log_endPt = LogFindIndex( "endPt" );
 	log_readTracks = LogFindIndex( "readTracks" );
+	log_timedrawtracks = LogFindIndex( "timedrawtracks" );
 }
 
 /*****************************************************************************
@@ -312,7 +365,6 @@ EXPORT void InitTrkTrack( void )
  */
 
 
-#ifndef FASTTRACK
 
 EXPORT TRKINX_T GetTrkIndex( track_p trk )
 {
@@ -321,13 +373,16 @@ EXPORT TRKINX_T GetTrkIndex( track_p trk )
 
 EXPORT TRKTYP_T GetTrkType( track_p trk )
 {
-	ASSERT( trk->type != T_NOTRACK && !IsTrackDeleted(trk) );
+	CHECK( trk->type != T_NOTRACK && !IsTrackDeleted(trk) );
 	return trk->type;
 }
 
 EXPORT SCALEINX_T GetTrkScale( track_p trk )
 {
-	return (SCALEINX_T)trk->scale;
+	if ( trk ) {
+		return (SCALEINX_T)trk->scale;
+	}
+	return 0;
 }
 
 EXPORT void SetTrkScale( track_p trk, SCALEINX_T si )
@@ -338,6 +393,14 @@ EXPORT void SetTrkScale( track_p trk, SCALEINX_T si )
 EXPORT unsigned int GetTrkLayer( track_p trk )
 {
 	return trk->layer;
+}
+
+EXPORT tieData_t GetTrkTieData( track_p trk )
+{
+	if (!GetLayerUseDefault(GetTrkLayer(trk))) {
+		return GetLayerTieData(GetTrkLayer(trk));
+	}
+	return GetScaleTieData(GetTrkScale(trk));
 }
 
 EXPORT void SetBoundingBox( track_p trk, coOrd hi, coOrd lo )
@@ -362,43 +425,53 @@ EXPORT EPINX_T GetTrkEndPtCnt( track_cp trk )
 	return trk->endCnt;
 }
 
-EXPORT struct extraData * GetTrkExtraData( track_cp trk )
+
+EXPORT trkEndPt_p GetTrkEndPt(track_cp trk, EPINX_T ep )
 {
+	CHECK( ep < GetTrkEndPtCnt(trk) );
+	return EndPtIndex( trk->endPt, ep );
+}
+
+
+EXPORT struct extraDataBase_t * GetTrkExtraData( track_cp trk,
+                TRKTYP_T trkType )
+{
+//printf( "GTXD T%d TY%d\n", GetTrkIndex(trk), trkType );
+	if ( IsTrackDeleted(trk) ) {
+		// We've been called by FreeTracks() which is called from
+		// - ClearTracks to remove all tracks
+		// - DoRegression to remove expected track
+		// - UndoStart / UndoDelete
+		// Anywhere else: needs investigation
+		if ( bFreeTrack == FALSE ) {
+			printf( "GetExtraData T%d is deleted!\n", trk->index );
+		}
+		return trk->extraData;
+	}
+#ifdef CHECK_EXTRA_DATA
+	CHECK( trk->extraData );
+	CHECK( trk->type == trk->extraData->trkType );
+	CHECK( trkType == T_NOTRACK || trk->type == trkType );
+#endif
 	return trk->extraData;
 }
 
-EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
+
+EXPORT void ResizeExtraData( track_p trk, CSIZE_T newSize )
 {
-	if (trk->endPt[ep].track != NULL) {
-		AbortProg( "setTrkEndPoint: endPt is connected" );
+	trk->extraData = MyRealloc( trk->extraData, newSize );
+	trk->extraSize = newSize;
+}
+
+
+EXPORT DIST_T GetTrkGauge(
+        track_cp trk )
+{
+	if (trk) {
+		return GetScaleTrackGauge( GetTrkScale( trk ) );
+	} else {
+		return trackGauge;
 	}
-	trk->endPt[ep].pos = pos;
-	trk->endPt[ep].angle = angle;
-}
-
-EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T e )
-{
-	return trk->endPt[e].pos;
-}
-
-EXPORT ANGLE_T GetTrkEndAngle( track_p trk, EPINX_T e )
-{
-	return trk->endPt[e].angle;
-}
-
-EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T e )
-{
-	return trk->endPt[e].track;
-}
-
-EXPORT long GetTrkEndOption( track_p trk, EPINX_T e )
-{
-	return trk->endPt[e].option;
-}
-
-EXPORT long SetTrkEndOption( track_p trk, EPINX_T e, long option )
-{
-	return trk->endPt[e].option = option;
 }
 
 EXPORT int GetTrkWidth( track_p trk )
@@ -413,7 +486,11 @@ EXPORT void SetTrkWidth( track_p trk, int width )
 
 EXPORT int GetTrkBits( track_p trk )
 {
-	return trk->bits;
+	if (trk) {
+		return trk->bits;
+	} else {
+		return 0;
+	}
 }
 
 EXPORT int SetTrkBits( track_p trk, int bits )
@@ -434,83 +511,25 @@ EXPORT BOOL_T IsTrackDeleted( track_p trk )
 {
 	return trk->deleted;
 }
-#endif
-
-EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height, char * station )
-{
-	track_p trk1;
-	EPINX_T ep1;
-	trk->endPt[ep].elev.option = option;
-	if (EndPtIsDefinedElev(trk,ep)) {
-		trk->endPt[ep].elev.u.height = height;
-	} else if (EndPtIsStationElev(trk,ep)) {
-		if (station == NULL)
-			station = "";
-		trk->endPt[ep].elev.u.name = MyStrdup(station);
-	}
-	if ( (trk1=GetTrkEndTrk(trk, ep)) != NULL ) {
-		ep1 = GetEndPtConnectedToMe( trk1, trk );
-		if (ep1 >= 0) {
-			trk1->endPt[ep1].elev.option = option;
-			trk1->endPt[ep1].elev.u.height = height;
-			if (EndPtIsDefinedElev(trk1,ep1))
-				trk1->endPt[ep1].elev.u.height = height;
-			else if (EndPtIsStationElev(trk,ep))
-				trk1->endPt[ep1].elev.u.name = MyStrdup(station);
-		}
-	}
-}
-
-
-EXPORT void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height )
-{
-	*option = trk->endPt[e].elev.option;
-	*height = trk->endPt[e].elev.u.height;
-}
-
-
-EXPORT int GetTrkEndElevUnmaskedMode( track_p trk, EPINX_T e )
-{
-	return trk->endPt[e].elev.option;
-}
-
-
-EXPORT int GetTrkEndElevMode( track_p trk, EPINX_T e )
-{
-	return trk->endPt[e].elev.option&ELEV_MASK;
-}
-
-
-EXPORT DIST_T GetTrkEndElevHeight( track_p trk, EPINX_T e )
-{
-	ASSERT( EndPtIsDefinedElev(trk,e) );
-	return trk->endPt[e].elev.u.height;
-}
-
-
-EXPORT char * GetTrkEndElevStation( track_p trk, EPINX_T e )
-{
-	ASSERT( EndPtIsStationElev(trk,e) );
-	if ( trk->endPt[e].elev.u.name == NULL )
-		return "";
-	else
-		return trk->endPt[e].elev.u.name;
-}
 
 
 EXPORT void SetTrkEndPtCnt( track_p trk, EPINX_T cnt )
 {
 	EPINX_T oldCnt = trk->endCnt;
 	trk->endCnt = cnt;
-	if ((trk->endPt = MyRealloc( trk->endPt, trk->endCnt * sizeof trk->endPt[0] )) == NULL) {
-		AbortProg("setTrkEndPtCnt: No memory" );
+	trk->endPt = MyRealloc( trk->endPt, EndPtSize(trk->endCnt) );
+	if (oldCnt < cnt) {
+		memset( GetTrkEndPt( trk, oldCnt ), 0, EndPtSize(cnt-oldCnt) );
+		for ( EPINX_T ep = oldCnt; ep<cnt; ep++ ) {
+			// Set .index to -1
+			SetEndPtTrack( GetTrkEndPt( trk, ep ), NULL );
+		}
 	}
-	if (oldCnt < cnt)
-		memset( &trk->endPt[oldCnt], 0, (cnt-oldCnt) * sizeof *trk->endPt );
 }
 
+
 /**
- * Set the layer for a track. 
+ * Set the layer for a track.
  *
  * \param trk IN the layer to change the layer for
  * \param layer IN  the new layer for the track
@@ -519,10 +538,11 @@ void SetTrkLayer( track_p trk, int layer )
 {
 	DecrementLayerObjects(trk->layer);
 
-	if (useCurrentLayer)
+	if (useCurrentLayer) {
 		trk->layer = (unsigned int)curLayer;
-	else
+	} else {
 		trk->layer = (unsigned int)layer;
+	}
 
 	IncrementLayerObjects(trk->layer);
 }
@@ -531,13 +551,22 @@ void SetTrkLayer( track_p trk, int layer )
 
 EXPORT int ClrAllTrkBits( int bits )
 {
+	return ClrAllTrkBitsRedraw( bits, FALSE );
+}
+
+
+EXPORT int ClrAllTrkBitsRedraw( int bits, wBool_t bRedraw )
+{
 	track_p trk;
-	int cnt;
-	cnt = 0;
+	int cnt = 0;
 	TRK_ITERATE( trk ) {
-		if (trk->bits&bits)
+		if (trk->bits&bits) {
 			cnt++;
-		trk->bits &= ~bits;
+			trk->bits &= ~bits;
+			if ( bRedraw ) {
+				DrawNewTrack( trk );
+			}
+		}
 	}
 	return cnt;
 }
@@ -549,6 +578,7 @@ EXPORT void SetTrkElev( track_p trk, int mode, DIST_T elev )
 	SetTrkBits( trk, TB_ELEVPATH );
 	trk->elev = elev;
 	trk->elevMode = mode;
+	ClrEndPtElevCache( trk->endCnt, trk->endPt );
 }
 
 
@@ -576,7 +606,7 @@ EXPORT void ClearElevPath( void )
 EXPORT BOOL_T GetTrkOnElevPath( track_p trk, DIST_T * elev )
 {
 	if (trk->bits&TB_ELEVPATH) {
-		if ( elev ) *elev = trk->elev;
+		if ( elev ) { *elev = trk->elev; }
 		return TRUE;
 	} else {
 		return FALSE;
@@ -599,65 +629,23 @@ EXPORT void CopyAttributes( track_p src, track_p dst )
  */
 
 
-EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
-{
-	trkEndPt_p endPt = &trk->endPt[ep];
-	BOOL_T rc = TRUE;
-	long option;
-
-	assert ( endPt != NULL );
-	if (endPt->track == NULL ||
-		( exportingTracks && !GetTrkSelected(endPt->track) ) ) {
-		rc &= fprintf( f, "\tE4 " )>0;
-	} else {
-		rc &= fprintf( f, "\tT4 %d ", endPt->track->index )>0;
-	}
-	rc &= fprintf( f, "%0.6f %0.6f %0.6f", endPt->pos.x, endPt->pos.y, endPt->angle )>0; 
-	option = (endPt->option<<8) | (endPt->elev.option&0xFF);
-	if ( option != 0 ) {
-		rc &= fprintf( f, " %ld %0.6f %0.6f", option, endPt->elev.doff.x, endPt->elev.doff.y )>0;
-		switch ( endPt->elev.option&ELEV_MASK ) {
-		case ELEV_DEF:
-			rc &= fprintf( f, " %0.6f ", endPt->elev.u.height )>0;
-			break;
-		case ELEV_STATION:
-			rc &= fprintf( f, " \"%s\" ", PutTitle( endPt->elev.u.name ) )>0;
-			break;
-		default:
-			rc &= fprintf( f, " 0.0 ")>0;
-		}
-	} else {
-		rc &= fprintf( f, " 0 0.0 0.0 0.0 ")>0;
-	}
-	if ((endPt->elev.option&ELEV_MASK) == ELEV_DEF)
-		rc &= fprintf( f, "%0.6f ",endPt->elev.u.height)>0;
-	else
-		rc &= fprintf( f, "0.0 ")>0;
-	long elevVisible = (endPt->elev.option&ELEV_VISIBLE)?1:0;
-	long elevType = endPt->elev.option&ELEV_MASK;
-	long gapType = endPt->option;
-	rc &= fprintf( f, "%ld %ld %ld ", elevVisible, elevType, gapType)>0;
-	rc &= fprintf( f, "%0.6f ", trk->elev)>0;
-	rc &= fprintf( f, "\n" )>0;
-	return rc;
-}
-
-
 EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
 	DIST_T d, dd;
 	coOrd pos;
-	if (trk->endCnt <= 0)
+	if (trk->endCnt <= 0) {
 		return -1;
-	if ( onTrackInSplit && trk->endCnt > 2 ) {
-		if (GetTrkType(trk) != T_TURNOUT)
-			return TurnoutPickEndPt( p, trk );
 	}
-	d = FindDistance( p, trk->endPt[0].pos );
+	if ( onTrackInSplit && trk->endCnt > 2 ) {
+		if (GetTrkType(trk) == T_TURNOUT) {
+			return TurnoutPickEndPt( p, trk );
+		}
+	}
+	d = FindDistance( p, GetEndPtPos( trk->endPt ) );
 	inx = 0;
 	for ( i=1; i<trk->endCnt; i++ ) {
-		pos = trk->endPt[i].pos;
+		pos = GetEndPtPos( EndPtIndex( trk->endPt, i ) );
 		dd=FindDistance(p, pos);
 		if (dd < d) {
 			d = dd;
@@ -668,39 +656,38 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 }
 
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p.
+ *  Returns index of endpoint or displays a message
+ *  and returns -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 {
-	EPINX_T inx, i;
-	DIST_T d=0, dd;
-	coOrd pos;
-	inx = -1;
+	EPINX_T inx;
 
-	for ( i=0; i<trk->endCnt; i++ ) {
-		if (trk->endPt[i].track == NULL) {
-			pos = trk->endPt[i].pos;
-			dd=FindDistance(p, pos);
-			if (inx == -1 || dd <= d) {
-				d = dd;
-				inx = i;
-			}
-		}
-	}
+	inx = PickUnconnectedEndPointSilent( p, trk );
 
-	if (inx == -1)
+	if (inx == -1) {
 		ErrorMessage( MSG_NO_UNCONN_EP );
+	}
 	return inx;
 }
 
+/**
+ *  Find an endpoint of trk that is close to coOrd p.
+ *  Returns index of endpoint or -1 if none found.
+ */
 EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
-	DIST_T d=10000.0, dd;
+	DIST_T d=DIST_INF, dd;
 	coOrd pos;
 	inx = -1;
 
 	for ( i=0; i<trk->endCnt; i++ ) {
-		if (trk->endPt[i].track == NULL) {
-			pos = trk->endPt[i].pos;
+		trkEndPt_p epp = EndPtIndex( trk->endPt, i );
+		if (GetEndPtTrack( epp ) == NULL) {
+			pos = GetEndPtPos( epp );
 			dd=FindDistance(p, pos);
 			if (inx == -1 || dd <= d) {
 				d = dd;
@@ -713,55 +700,85 @@ EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 }
 
 
+/**
+ *  Connect all the end points to this track (trk0) that are close enough
+ *  (distance and angle) to another track's unconnected endpoint.
+ */
+EXPORT void ConnectAllEndPts(track_p trk0)
+{
+	for (EPINX_T ep0 = 0; ep0 < GetTrkEndPtCnt(trk0); ep0++) {
+		// Skip if already connected
+		if (GetTrkEndTrk(trk0, ep0) != NULL) { continue; }
+
+		coOrd pos0 = GetTrkEndPos(trk0, ep0);
+		track_p trk2 = OnTrack2(&pos0, FALSE, TRUE, TRUE, trk0);
+
+		// Not near another track?
+		if (trk2 == NULL) { continue; }
+		EPINX_T ep2 = PickUnconnectedEndPointSilent(pos0, trk2);
+
+		// Close enough?
+		coOrd pos2 = GetTrkEndPos(trk2, ep2);
+		DIST_T distance = FindDistance(pos0, pos2);
+		if (distance > connectDistance) { continue; }
+
+		// Aligned?
+		ANGLE_T a = fabs(DifferenceBetweenAngles(
+		                         GetTrkEndAngle(trk0, ep0),
+		                         GetTrkEndAngle(trk2, ep2) + 180.0));
+		if (a > connectAngle) { continue; }
+
+		// Make the connection
+		ConnectTracks(trk0, ep0, trk2, ep2);
+		DrawNewTrack(trk2);
+	}
+}
 
 EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 {
 	EPINX_T ep;
 	for (ep=0; ep<trk->endCnt; ep++)
-		if (trk->endPt[ep].track == me)
+		if (GetEndPtTrack( EndPtIndex( trk->endPt, ep ) ) == me) {
 			return ep;
+		}
 	return -1;
 }
 
-EXPORT EPINX_T GetNearestEndPtConnectedToMe( track_p trk, track_p me, coOrd pos) {
+EXPORT EPINX_T GetNearestEndPtConnectedToMe( track_p trk, track_p me,
+                coOrd pos)
+{
 	EPINX_T ep, found = -1;
-	DIST_T d = 10000;
+	DIST_T d = DIST_INF;
 	DIST_T dd;
-		for (ep=0; ep<trk->endCnt; ep++) {
-			if (trk->endPt[ep].track == me) {
-				dd = FindDistance(pos,trk->endPt[ep].pos);
-				if (dd<d) {
-					found = ep;
-					d = dd;
-				}
+	for (ep=0; ep<trk->endCnt; ep++) {
+		trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
+		if (GetEndPtTrack( epp ) == me) {
+			coOrd pos1 = GetEndPtPos( epp );
+			dd = FindDistance(pos, pos1 );
+			if (dd<d) {
+				found = ep;
+				d = dd;
 			}
 		}
-		return found;
+	}
+	return found;
 }
 
 
 EXPORT void SetEndPts( track_p trk, EPINX_T cnt )
 {
-	EPINX_T inx;
-
-LOG1( log_readTracks, ( "SetEndPts( T%d, %d )\n", trk->index, cnt ) )
-	if (cnt > 0 && tempEndPts_da.cnt != cnt) {
-		InputError( "Incorrect number of End Points for track, read %d, expected %d.\n", FALSE, tempEndPts_da.cnt, cnt );
+	LOG1( log_readTracks, ( "SetEndPts( T%d, %d )\n", trk->index, cnt ) )
+	if (cnt > 0 && TempEndPtsCount() != cnt) {
+		InputError( "Incorrect number of End Points for track, read %d, expected %d.\n",
+		            FALSE, TempEndPtsCount(), cnt );
 		return;
 	}
-	if (tempEndPts_da.cnt) {
-		trk->endPt = (trkEndPt_p)MyMalloc( tempEndPts_da.cnt * sizeof *trk->endPt );
-	} else {
+	trk->endCnt = TempEndPtsCount();
+	if ( trk->endCnt <= 0 ) {
 		trk->endPt = NULL;
+	} else {
+		trk->endPt = (trkEndPt_p)memdup( TempEndPt(0), EndPtSize( trk->endCnt ) );
 	}
-	for ( inx=0; inx<tempEndPts_da.cnt; inx++ ) {
-		trk->endPt[inx].index = tempEndPts(inx).index;
-		trk->endPt[inx].pos = tempEndPts(inx).pos;
-		trk->endPt[inx].angle = tempEndPts(inx).angle;
-		trk->endPt[inx].elev = tempEndPts(inx).elev;
-		trk->endPt[inx].option = tempEndPts(inx).option;
-	}
-	trk->endCnt = tempEndPts_da.cnt;
 }
 
 
@@ -769,8 +786,11 @@ EXPORT void MoveTrack( track_p trk, coOrd orig )
 {
 	EPINX_T ep;
 	for (ep=0; ep<trk->endCnt; ep++) {
-		trk->endPt[ep].pos.x += orig.x;
-		trk->endPt[ep].pos.y += orig.y;
+		trkEndPt_p epp =  EndPtIndex( trk->endPt, ep );
+		coOrd pos = GetEndPtPos( epp );
+		pos.x += orig.x;
+		pos.y += orig.y;
+		SetEndPt( epp, pos, GetEndPtAngle( epp ) );
 	}
 	trackCmds( trk->type )->move( trk, orig );
 }
@@ -779,11 +799,14 @@ EXPORT void MoveTrack( track_p trk, coOrd orig )
 EXPORT void RotateTrack( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	EPINX_T ep;
-	if ( trackCmds( trk->type )->rotate == NULL )
-			return;
+	if ( trackCmds( trk->type )->rotate == NULL ) {
+		return;
+	}
 	for (ep=0; ep<trk->endCnt; ep++) {
-		Rotate( &trk->endPt[ep].pos, orig, angle );
-		trk->endPt[ep].angle = NormalizeAngle( trk->endPt[ep].angle + angle );
+		trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
+		coOrd pos = GetEndPtPos( epp );
+		Rotate( &pos, orig, angle );
+		SetEndPt( epp, pos, NormalizeAngle( GetEndPtAngle(epp) + angle ) );
 	}
 	trackCmds( trk->type )->rotate( trk, orig, angle );
 }
@@ -792,11 +815,15 @@ EXPORT void RotateTrack( track_p trk, coOrd orig, ANGLE_T angle )
 EXPORT void RescaleTrack( track_p trk, FLOAT_T ratio, coOrd shift )
 {
 	EPINX_T ep;
-	if ( trackCmds( trk->type )->rescale == NULL )
+	if ( trackCmds( trk->type )->rescale == NULL ) {
 		return;
+	}
 	for (ep=0; ep<trk->endCnt; ep++) {
-		trk->endPt[ep].pos.x *= ratio;
-		trk->endPt[ep].pos.y *= ratio;
+		trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
+		coOrd pos = GetEndPtPos( epp );
+		pos.x *= ratio;
+		pos.y *= ratio;
+		SetEndPt( epp, pos, GetEndPtAngle(epp) );
 	}
 	trackCmds( trk->type )->rescale( trk, ratio );
 	MoveTrack( trk, shift );
@@ -804,9 +831,9 @@ EXPORT void RescaleTrack( track_p trk, FLOAT_T ratio, coOrd shift )
 
 
 EXPORT void FlipPoint(
-		coOrd * pos,
-		coOrd orig,
-		ANGLE_T angle )
+        coOrd * pos,
+        coOrd orig,
+        ANGLE_T angle )
 {
 	Rotate( pos, orig, -angle );
 	pos->x = 2*orig.x - pos->x;
@@ -815,33 +842,35 @@ EXPORT void FlipPoint(
 
 
 EXPORT void FlipTrack(
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle )
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle )
 {
 	EPINX_T ep;
-	trkEndPt_t endPt;
 
 	for ( ep=0; ep<trk->endCnt; ep++ ) {
-		FlipPoint( &trk->endPt[ep].pos, orig, angle );
-		trk->endPt[ep].angle = NormalizeAngle( 2*angle - trk->endPt[ep].angle );
+		trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
+		coOrd pos1 = GetEndPtPos( epp );
+		FlipPoint( &pos1, orig, angle );
+		ANGLE_T angle1 = GetEndPtAngle( epp );
+		angle1 = NormalizeAngle( 2*angle - angle1 );
+		SetEndPt( epp, pos1, angle1 );
 	}
-	if ( trackCmds(trk->type)->flip )
+	if ( trackCmds(trk->type)->flip ) {
 		trackCmds(trk->type)->flip( trk, orig, angle );
+	}
 	if ( QueryTrack( trk, Q_FLIP_ENDPTS ) ) {
-		endPt = trk->endPt[0];
-		trk->endPt[0] = trk->endPt[1];
-		trk->endPt[1] = endPt;
+		SwapEndPts( trk->endPt, 0, 1 );
 	}
 }
 
 
-EXPORT EPINX_T GetNextTrk( 
-		track_p trk1,
-		EPINX_T ep1,
-		track_p *Rtrk,
-		EPINX_T *Rep,
-		int mode )
+EXPORT EPINX_T GetNextTrk(
+        track_p trk1,
+        EPINX_T ep1,
+        track_p *Rtrk,
+        EPINX_T *Rep,
+        int mode )
 {
 	EPINX_T ep, epCnt = GetTrkEndPtCnt(trk1), epRet=-1;
 	track_p trk;
@@ -849,21 +878,25 @@ EXPORT EPINX_T GetNextTrk(
 	*Rtrk = NULL;
 	*Rep = 0;
 	for (ep=0; ep<epCnt; ep++) {
-		if (ep==ep1)
+		if (ep==ep1) {
 			continue;
+		}
 		trk = GetTrkEndTrk( trk1, ep );
 		if (trk==NULL) {
 #ifdef LATER
-			if (isElev)
+			if (isElev) {
 				epRet = ep;
+			}
 #endif
 			continue;
 		}
 		if ( (mode&GNTignoreIgnore) &&
-			 ((trk1->endPt[ep].elev.option&ELEV_MASK)==ELEV_IGNORE))
+		     ((GetTrkEndElevMode(trk1,ep) == ELEV_IGNORE)) ) {
 			continue;
-		if (*Rtrk != NULL)
+		}
+		if (*Rtrk != NULL) {
 			return -1;
+		}
 		*Rtrk = trk;
 		*Rep = GetEndPtConnectedToMe( trk, trk1 );
 		epRet = ep;
@@ -872,44 +905,51 @@ EXPORT EPINX_T GetNextTrk(
 }
 
 EXPORT BOOL_T MakeParallelTrack(
-		track_p trk,
-		coOrd pos,
-		DIST_T dist,
-		track_p * newTrkR,
-		coOrd * p0R,
-		coOrd * p1R )
+        track_p trk,
+        coOrd pos,
+        DIST_T dist,
+        DIST_T factor,
+        track_p * newTrkR,
+        coOrd * p0R,
+        coOrd * p1R,
+        BOOL_T track)
 {
-	if ( trackCmds(trk->type)->makeParallel )
-		return trackCmds(trk->type)->makeParallel( trk, pos, dist, newTrkR, p0R, p1R );
+	if ( trackCmds(trk->type)->makeParallel ) {
+		return trackCmds(trk->type)->makeParallel( trk, pos, dist, factor, newTrkR, p0R,
+		                p1R, track);
+	}
 	return FALSE;
 }
 
 EXPORT BOOL_T RebuildTrackSegs(
-		track_p trk)
+        track_p trk)
 {
-	if (trackCmds(trk->type)->rebuildSegs)
+	if (trackCmds(trk->type)->rebuildSegs) {
 		return trackCmds(trk->type)->rebuildSegs(trk);
+	}
 	return FALSE;
 }
 
 EXPORT BOOL_T ReplayTrackData(
-		track_p trk,
-		void * data,
-		long length)
+        track_p trk,
+        void * data,
+        long length)
 {
-	if (trackCmds(trk->type)->replayData)
-			return trackCmds(trk->type)->replayData(trk,data,length);
-		return FALSE;
+	if (trackCmds(trk->type)->replayData) {
+		return trackCmds(trk->type)->replayData(trk,data,length);
+	}
+	return FALSE;
 }
 
 EXPORT BOOL_T StoreTrackData(
-		track_p trk,
-		void ** data,
-		long * length)
+        track_p trk,
+        void ** data,
+        long * length)
 {
-	if (trackCmds(trk->type)->storeData)
+	if (trackCmds(trk->type)->storeData) {
 		return trackCmds(trk->type)->storeData(trk,data,length);
-			return FALSE;
+	}
+	return FALSE;
 }
 
 
@@ -921,19 +961,29 @@ EXPORT BOOL_T StoreTrackData(
  */
 
 
-
 EXPORT track_p to_first = NULL;
-
 EXPORT TRKINX_T max_index = 0;
 EXPORT track_p * to_last = &to_first;
 
+EXPORT track_p GetFirstTrack()
+{
+	return to_first;
+}
+
+EXPORT track_p GetNextTrack( track_p trk )
+{
+	return trk->next;
+}
+
+
+
 static struct {
-		track_p first;
-		track_p *last;
-		wIndex_t count;
-		wIndex_t changed;
-		TRKINX_T max_index;
-		} savedTrackState;
+	track_p first;
+	track_p *last;
+	wIndex_t count;
+	wIndex_t changed;
+	TRKINX_T max_index;
+} savedTrackState;
 
 
 EXPORT void RenumberTracks( void )
@@ -946,10 +996,10 @@ EXPORT void RenumberTracks( void )
 }
 
 
-EXPORT track_p NewTrack( TRKINX_T index, TRKTYP_T type, EPINX_T endCnt, CSIZE_T extraSize )
+EXPORT track_p NewTrack( TRKINX_T index, TRKTYP_T type, EPINX_T endCnt,
+                         CSIZE_T extraSize )
 {
 	track_p trk;
-	EPINX_T ep;
 	trk = (track_p ) MyMalloc( sizeof *trk );
 	*to_last = trk;
 	to_last = &trk->next;
@@ -959,26 +1009,31 @@ EXPORT track_p NewTrack( TRKINX_T index, TRKTYP_T type, EPINX_T endCnt, CSIZE_T 
 	} else if (max_index < index) {
 		max_index = index;
 	}
-LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, extraSize ) )
+	LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt,
+	                     extraSize ) )
 	trk->index = index;
 	trk->type = type;
 	trk->layer = curLayer;
-	trk->scale = (char)GetLayoutCurScale();
+	trk->scale = (char)GetLayerScale(curLayer); // (char)GetLayoutCurScale();
 	trk->bits = TB_VISIBLE;
 	trk->elevMode = ELEV_ALONE;
 	trk->elev = 0;
-	trk->endCnt = endCnt;
 	trk->hi.x = trk->hi.y = trk->lo.x = trk->lo.y = (float)0.0;
+	trk->endCnt = endCnt;
 	if (endCnt) {
-		trk->endPt = (trkEndPt_p)MyMalloc( endCnt * sizeof *trk->endPt );
-		for ( ep = 0; ep < endCnt; ep++ )
-			trk->endPt[ep].index = -1;
-	} else
+		trk->endPt = (trkEndPt_p)MyMalloc( EndPtSize(endCnt) );
+		for ( EPINX_T ep = 0; ep<endCnt; ep++ ) {
+			SetEndPtTrack( GetTrkEndPt( trk, ep ), NULL );
+		}
+	} else {
 		trk->endPt = NULL;
+	}
 	if (extraSize) {
-		trk->extraData = MyMalloc( extraSize );
-	} else
+		trk->extraData = (struct extraDataBase_t*)MyMalloc( extraSize );
+		trk->extraData->trkType = type;
+	} else {
 		trk->extraData = NULL;
+	}
 	trk->extraSize = extraSize;
 	UndoNew( trk );
 	trackCount++;
@@ -990,12 +1045,16 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 
 EXPORT void FreeTrack( track_p trk )
 {
-	trackCmds(trk->type)->delete( trk );
-	if (trk->endPt)
+	bFreeTrack = TRUE;
+	trackCmds(trk->type)->deleteTrk( trk );
+	if (trk->endPt) {
 		MyFree(trk->endPt);
-	if (trk->extraData)
+	}
+	if (trk->extraData) {
 		MyFree(trk->extraData);
+	}
 	MyFree(trk);
+	bFreeTrack = FALSE;
 }
 
 
@@ -1011,7 +1070,7 @@ EXPORT void ClearTracks( void )
 	to_first = NULL;
 	to_last = &to_first;
 	max_index = 0;
-	changed = 0;
+	changed = checkPtMark = 0;
 	trackCount = 0;
 	ClearCars();
 	InfoCount( trackCount );
@@ -1022,7 +1081,7 @@ EXPORT track_p FindTrack( TRKINX_T index )
 {
 	track_p trk;
 	TRK_ITERATE(trk) {
-		if (trk->index == index) return trk;
+		if (trk->index == index) { return trk; }
 	}
 	return NULL;
 }
@@ -1033,16 +1092,26 @@ EXPORT void ResolveIndex( void )
 	track_p trk;
 	EPINX_T ep;
 	TRK_ITERATE(trk) {
-		for (ep=0; ep<trk->endCnt; ep++)
-			if (trk->endPt[ep].index >= 0) {
-				trk->endPt[ep].track = FindTrack( trk->endPt[ep].index );
-				if (trk->endPt[ep].track == NULL) {
-					NoticeMessage( MSG_RESOLV_INDEX_BAD_TRK, _("Continue"), NULL, trk->index, ep, trk->endPt[ep].index );
+		LOG (log_track, 1, ( "ResNextTrack( T%d, t%d, E%d, X%ld)\n", trk->index,
+		                     trk->type, trk->endCnt, trk->extraSize ));
+		for (ep=0; ep<trk->endCnt; ep++) {
+			trkEndPt_p epp = GetTrkEndPt( trk, ep );
+			TRKINX_T index = GetEndPtIndex( epp );
+			if (index >= 0) {
+				track_p track = FindTrack( index );
+				if (track == NULL) {
+					int rc = NoticeMessage( MSG_RESOLV_INDEX_BAD_TRK, _("Continue"), _("Quit"),
+					                        trk->index, ep, index );
+					if ( rc != 1 ) {
+						return;
+					}
 				}
+				SetEndPtTrack( epp, track );
 			}
-                ResolveBlockTrack (trk);
-                ResolveSwitchmotorTurnout (trk);
-        }
+		}
+		ResolveBlockTrack (trk);
+		ResolveSwitchmotorTurnout (trk);
+	}
 	AuditTracks( "readTracks" );
 }
 
@@ -1051,11 +1120,13 @@ EXPORT BOOL_T DeleteTrack( track_p trk, BOOL_T all )
 {
 	EPINX_T i, ep2;
 	track_p trk2;
-LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
+	LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	if (all) {
 		if (!QueryTrack(trk,Q_CANNOT_BE_ON_END)) {
-			for (i=0;i<trk->endCnt;i++) {
-				if ((trk2=trk->endPt[i].track) != NULL) {
+			for (i=0; i<trk->endCnt; i++) {
+				trkEndPt_p epp = EndPtIndex( trk->endPt, i );
+				trk2 = GetEndPtTrack(epp);
+				if (trk2 != NULL) {
 					if (QueryTrack(trk2,Q_CANNOT_BE_ON_END)) {
 						DeleteTrack( trk2, FALSE );
 					}
@@ -1063,29 +1134,31 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 			}
 		}
 	}
-	UndrawNewTrack( trk );
-	for (i=0;i<trk->endCnt;i++) {
-		if ((trk2=trk->endPt[i].track) != NULL) {
+	/* If Car, simulate Remove Car -> uncouple and mark deleted (no Undo) */
+	if (QueryTrack(trk,Q_ISTRAIN)) {
+		UncoupleCars( trk, 0 );
+		UncoupleCars( trk, 1 );
+		trk->deleted = TRUE;
+		ClrTrkBits( trk, TB_SELECTED ); // Make sure we don't select a deleted car
+		return TRUE;
+	}
+	for (i=0; i<trk->endCnt; i++) {
+		trkEndPt_p epp = EndPtIndex( trk->endPt, i );
+		if ((trk2=GetEndPtTrack(epp)) != NULL) {
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
-			/*UndrawNewTrack( trk2 );*/
-			DrawEndPt( &mainD, trk2, ep2, wDrawColorWhite );
 			DisconnectTracks( trk2, ep2, trk, i );
-			/*DrawNewTrack( trk2 );*/
-			if (!QueryTrack(trk2,Q_DONT_DRAW_ENDPOINT))
-				DrawEndPt( &mainD, trk2, ep2, wDrawColorBlack );
-			if ( QueryTrack(trk,Q_CANNOT_BE_ON_END) )
+			if ( QueryTrack(trk,Q_CANNOT_BE_ON_END) ) {
 				UndoJoint( trk2, ep2, trk, i );
-			ClrTrkElev( trk2 );
+			}
 		}
 	}
-        CheckDeleteSwitchmotor( trk );
-        CheckDeleteBlock( trk );
+	CheckDeleteSwitchmotor( trk );
+	CheckDeleteBlock( trk );
+	CheckCarTraverse( trk );
 	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
 	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
-	MainRedraw();
-	MapRedraw();
 	InfoCount( trackCount );
 	return TRUE;
 }
@@ -1121,16 +1194,235 @@ EXPORT void RestoreTrackState( void )
 BOOL_T TrackIterate( track_p * trk )
 {
 	track_p trk1;
-	if (!*trk)
+	if (!*trk) {
 		trk1 = to_first;
-	else
+	} else {
 		trk1 = (*trk)->next;
-	while (trk1 && IsTrackDeleted(trk1))
+	}
+	while (trk1 && IsTrackDeleted(trk1)) {
 		trk1 = trk1->next;
+	}
 	*trk = trk1;
 	return trk1 != NULL;
 }
-
+
+
+/*****************************************************************************
+*
+* REGRESSION
+*
+*/
+
+wBool_t IsPosClose( coOrd pos1, coOrd pos2 )
+{
+	DIST_T d = FindDistance( pos1, pos2 );
+	return d < 0.1;
+}
+
+
+wBool_t IsAngleClose( ANGLE_T angle1, ANGLE_T angle2 )
+{
+	ANGLE_T angle = NormalizeAngle( angle1 - angle2 );
+	if (angle > 180) {
+		angle = 360-angle;
+	}
+	return angle < 0.01;
+}
+
+
+wBool_t IsDistClose( DIST_T dist1, DIST_T dist2 )
+{
+	DIST_T dist = fabs( dist1 - dist2 );
+	return dist < 0.01;
+}
+
+wBool_t IsWidthClose( DIST_T dist1, DIST_T dist2 )
+{
+	// width is computed by pixels/dpi
+	// problem is when widths are computed on platforms with differing dpi
+	DIST_T dist = fabs( dist1 - dist2 );
+	if ( dist < 0.05 ) {
+		return TRUE;
+	}
+//	This was using BASE_DPI(=75.0) based on ancient monitors.
+//	96 DPI is more reasonable today
+//	TODO: review BASE_DPI with a plan to change it to 96.0
+//	printf( "WidthClose %s:%d D2:%0.3f D1:%0.3f", paramFileName, paramLineNum, dist2, dist1 );
+	dist1 *= mainD.dpi/96.0;
+	dist = fabs( dist1 - dist2 );
+//	printf( " -> %0.3f D:%0.3f\n", dist1, dist );
+	if ( dist < 0.05 ) {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+wBool_t IsColorClose( wDrawColor color1, wDrawColor color2 )
+{
+	long rgb1 = wDrawGetRGB( color1 );
+	long rgb2 = wDrawGetRGB( color2 );
+	int r1 = (rgb1 >> 16) & 0xff;
+	int g1 = (rgb1 >> 8) & 0xff;
+	int b1 = rgb1 & 0xff;
+	int r2 = (rgb2 >> 16) & 0xff;
+	int g2 = (rgb2 >> 8) & 0xff;
+	int b2 = rgb2 & 0xff;
+	long diff = abs(r1-r2) + abs(g1-g2) + abs(b1-b2);
+	return (diff < 7);
+}
+
+static wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
+{
+//	wBool_t rc = FALSE;
+	if ( trk1 == NULL ) {
+		sprintf( message, "Compare: T%d not found\n", trk2->index );
+		return FALSE;
+	}
+	sprintf( message, "Compare T:%d - ", GetTrkIndex(trk1) );
+	char * cp = message+strlen(message);
+	REGRESS_CHECK_INT( "Type", trk1, trk2, type )
+	REGRESS_CHECK_INT( "Index", trk1, trk2, index )
+	REGRESS_CHECK_INT( "Layer", trk1, trk2, layer )
+	REGRESS_CHECK_INT( "Scale", trk1, trk2, scale )
+	REGRESS_CHECK_INT( "EndPtCnt", trk1, trk2, endCnt )
+	char * cq = cp-2;
+	for ( int inx=0; inx<GetTrkEndPtCnt( trk1 ); inx++ ) {
+		cp = cq;
+		sprintf( cp, "EP:%d - ", inx );
+		cp += strlen(cp);
+		if ( ! CompareEndPt( cp, trk1, trk2, inx ) ) {
+			return FALSE;
+		}
+	}
+	if ( trackCmds( GetTrkType( trk1 ) )->compare == NULL ) {
+		return TRUE;
+	}
+	return trackCmds( GetTrkType( trk1 ) )->compare( trk1, trk2 );
+}
+
+EXPORT int CheckRegressionResult( long regressVersion,char * sFileName,
+                                  wBool_t bQuiet )
+{
+	wBool_t bWroteActualTracks = FALSE;
+	int nFail = 0;
+	FILE * fRegression = NULL;
+	char * sRegressionFile = NULL;
+	track_p to_first_save = to_first;
+	track_p* to_last_save = to_last;
+	MakeFullpath( &sRegressionFile, workingDir, "xtrkcad.regress", NULL );
+
+	while ( GetNextLine() ) {
+		if ( paramLine[0] == '#' ) {
+			continue;
+		}
+		// Read Expected track
+		to_first = NULL;
+		to_last = &to_first;
+		paramVersion = regressVersion;
+		if ( !ReadTrack( paramLine ) ) {
+			if ( paramFile == NULL ) {
+				return -1;
+			}
+			break;
+		}
+		if ( to_first == NULL ) {
+			// Something bad happened
+			break;
+		}
+		track_cp tExpected = to_first;
+		to_first = to_first_save;
+		// Find corresponding Actual track
+		track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
+		strcat( message, "Regression " );
+		if ( ! CompareTrack( tActual, tExpected ) ) {
+			nFail++;
+			// Actual doesn't match Expected
+			lprintf( "  FAIL: %s\n", message);
+			fRegression = fopen( sRegressionFile, "a" );
+			if ( fRegression == NULL ) {
+				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"),
+				               sRegressionFile, strerror(errno) );
+				break;
+			}
+			fprintf( fRegression, "REGRESSION FAIL %d\n",
+			         PARAMVERSION );
+			fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+			fprintf( fRegression, "# %s", message );
+			if ( !bWroteActualTracks ) {
+				// Print Actual tracks
+				fprintf( fRegression, "Actual Tracks\n" );
+				paramVersion = PARAMVERSION;
+				WriteTracks( fRegression, FALSE );
+				bWroteActualTracks = TRUE;
+			}
+			// Print Expected track
+			to_first = tExpected;
+			fprintf( fRegression, "Expected Track\n" );
+			WriteTracks( fRegression, FALSE );
+			fclose( fRegression );
+			strcat( message, "Continue test?" );
+			if ( ! bQuiet ) {
+				int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
+				if ( !rc ) {
+					while ( GetNextLine() &&
+					        strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+						;
+					break;
+				}
+			}
+		}
+		// Delete Expected track
+		to_first = tExpected;
+		to_last = &to_first;
+		FreeTrack( tExpected );
+	}
+	to_first = to_first_save;
+	to_last = to_last_save;
+	if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 ) {
+		InputError( "Expected REGRESSION END", TRUE );
+	}
+	return nFail;
+}
+
+
+/*****************************************************************************
+*
+* LAYER
+*
+*/
+
+/**
+ * @brief Add 1 to track layer numbers that are greater than or equal to New Layer
+ * @param newLayer
+*/
+EXPORT void TrackInsertLayer( int newLayer )
+{
+	track_p trk;
+
+	TRK_ITERATE( trk ) {
+		int layer = GetTrkLayer(trk);
+		if (layer >= newLayer) {
+			SetTrkLayer(trk, layer + 1);
+		}
+	}
+}
+
+/**
+* @brief Subtract 1 from track layer numbers that are greater than Removed Layer
+* @param removeLayer
+*/
+EXPORT void TrackDeleteLayer( int removeLayer )
+{
+	track_p trk;
+
+	TRK_ITERATE( trk ) {
+		int layer = GetTrkLayer(trk);
+		if (layer > removeLayer) {
+			SetTrkLayer(trk, layer - 1);
+		}
+	}
+}
+
 /*****************************************************************************
  *
  * ABOVE / BELOW
@@ -1142,10 +1434,11 @@ static void ExciseSelectedTracks( track_p * pxtrk, track_p * pltrk )
 	track_p trk, *ptrk;
 	for (ptrk=&to_first; *ptrk!=NULL; ) {
 		trk = *ptrk;
-		if (IsTrackDeleted(trk) || !GetTrkSelected(trk)) {
+		if (!GetTrkSelected(trk)) {
 			ptrk = &(*ptrk)->next;
 			continue;
 		}
+		CHECK( !IsTrackDeleted(trk) );
 		UndoModify( *ptrk );
 		UndoModify( trk );
 		*ptrk = trk->next;
@@ -1157,7 +1450,7 @@ static void ExciseSelectedTracks( track_p * pxtrk, track_p * pltrk )
 }
 
 
-EXPORT void SelectAbove( void )
+EXPORT void SelectAbove( void * unused )
 {
 	track_p xtrk, ltrk;
 	if (selectedTrackCount<=0) {
@@ -1172,11 +1465,11 @@ EXPORT void SelectAbove( void )
 		to_last = &ltrk->next;
 	}
 	UndoEnd();
-	DrawSelectedTracks( &mainD );
+	DrawSelectedTracks( &mainD, false );
 }
 
 
-EXPORT void SelectBelow( void )
+EXPORT void SelectBelow( void * unused )
 {
 	track_p xtrk, ltrk, trk;
 	coOrd lo, hi, lowest, highest;
@@ -1193,14 +1486,18 @@ EXPORT void SelectBelow( void )
 				GetBoundingBox( trk, &highest, &lowest );
 			} else {
 				GetBoundingBox( trk, &hi, &lo );
-				if (highest.x < hi.x)
+				if (highest.x < hi.x) {
 					highest.x = hi.x;
-				if (highest.y < hi.y)
+				}
+				if (highest.y < hi.y) {
 					highest.y = hi.y;
-				if (lowest.x > lo.x)
+				}
+				if (lowest.x > lo.x) {
 					lowest.x = lo.x;
-				if (lowest.y > lo.y)
+				}
+				if (lowest.y > lo.y) {
 					lowest.y = lo.y;
+				}
 			}
 			ClrTrkBits( trk, TB_SELECTED );
 		}
@@ -1214,16 +1511,16 @@ EXPORT void SelectBelow( void )
 }
 
 
-#include "bitmaps/above.xpm"
-#include "bitmaps/below.xpm"
+#include "bitmaps/top.xpm3"
+#include "bitmaps/bottom.xpm3"
 
 EXPORT void InitCmdAboveBelow( void )
 {
 	wIcon_p bm_p;
-	bm_p = wIconCreatePixMap( above_xpm );
-	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED, (addButtonCallBack_t)SelectAbove, NULL );
-	bm_p = wIconCreatePixMap( below_xpm );
-	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED, (addButtonCallBack_t)SelectBelow, NULL );
+	bm_p = wIconCreatePixMap( top_xpm3[iconSize] );
+	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED|IC_POPUP, SelectAbove, NULL );
+	bm_p = wIconCreatePixMap( bottom_xpm3[iconSize] );
+	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED|IC_POPUP, SelectBelow, NULL );
 }
 
 /*****************************************************************************
@@ -1244,53 +1541,71 @@ EXPORT BOOL_T ReadTrack( char * line )
 {
 	TRKINX_T inx, lo, hi;
 	int cmp;
-if (bsearchRead) {
-	if (sortedCmds == NULL) {
-		sortedCmds = (trackCmd_t**)MyMalloc( (trackCmds_da.cnt-1) * sizeof *(trackCmd_t*)0 );
-		for (inx=1; inx<trackCmds_da.cnt; inx++)
-			sortedCmds[inx-1] = trackCmds(inx);
-		qsort( sortedCmds, trackCmds_da.cnt-1, sizeof *(trackCmd_t**)0, CompareCmds );
+	if (strncmp( paramLine, "TABLEEDGE ", 10 ) == 0) {
+		ReadTableEdge( paramLine+10 );
+		return TRUE;
+	}
+	if (strncmp( paramLine, "TEXT ", 5 ) == 0) {
+		ReadText( paramLine+5 );
+		return TRUE;
 	}
 
-	lo = 0;
-	hi = trackCmds_da.cnt-2;
-	do {
-		inx = (lo+hi)/2;
-		cmp = strncmp( line, sortedCmds[inx]->name, strlen(sortedCmds[inx]->name) );
-		if (cmp == 0) {
-			sortedCmds[inx]->read(line);
-			return TRUE;
-		} else if (cmp < 0) {
-			hi = inx-1;
-		} else {
-			lo = inx+1;
+	if (bsearchRead) {
+		if (sortedCmds == NULL) {
+			sortedCmds = (trackCmd_t**)MyMalloc( (trackCmds_da.cnt-1) * sizeof *
+			                                     (trackCmd_t*)0 );
+			for (inx=1; inx<trackCmds_da.cnt; inx++) {
+				sortedCmds[inx-1] = trackCmds(inx);
+			}
+			qsort( sortedCmds, trackCmds_da.cnt-1, sizeof *(trackCmd_t**)0, CompareCmds );
 		}
-	} while ( lo <= hi );
-} else {
-	for (inx=1; inx<trackCmds_da.cnt; inx++) {
-		 if (strncmp( line, trackCmds(inx)->name, strlen(trackCmds(inx)->name) ) == 0 ) {
-			 trackCmds(inx)->read( line );
-			 return TRUE;
-		 }
+
+		lo = 0;
+		hi = trackCmds_da.cnt-2;
+		do {
+			inx = (lo+hi)/2;
+			cmp = strncmp( line, sortedCmds[inx]->name, strlen(sortedCmds[inx]->name) );
+			if (cmp == 0) {
+				return sortedCmds[inx]->read(line);
+			} else if (cmp < 0) {
+				hi = inx-1;
+			} else {
+				lo = inx+1;
+			}
+		} while ( lo <= hi );
+	} else {
+		for (inx=1; inx<trackCmds_da.cnt; inx++) {
+			if (strncmp( line, trackCmds(inx)->name, strlen(trackCmds(inx)->name) ) == 0 ) {
+				trackCmds(inx)->read( line );
+				// Return TRUE means we found the object type and processed it
+				// Any errors will be handled by the callee's:
+				// Either skip the definition (ReadSegs) or skip the remainder of the file (InputError)
+				return TRUE;
+			}
+		}
 	}
-}
-	if (strncmp( paramLine, "TABLEEDGE ", 10 ) == 0)
-		return ReadTableEdge( paramLine+10 );
-	if (strncmp( paramLine, "TEXT ", 5 ) == 0)
-		return ReadText( paramLine+5 );
+	// Object type not found
 	return FALSE;
 }
 
 
-EXPORT BOOL_T WriteTracks( FILE * f )
+EXPORT BOOL_T WriteTracks( FILE * f, wBool_t bFull )
 {
 	track_p trk;
 	BOOL_T rc = TRUE;
-	RenumberTracks();
+	if ( bFull ) {
+		RenumberTracks();
+	}
+	if ( !bFull ) {
+		bWriteEndPtDirectIndex = TRUE;
+	}
 	TRK_ITERATE( trk ) {
 		rc &= trackCmds(GetTrkType(trk))->write( trk, f );
 	}
-	rc &= WriteCars( f );
+	bWriteEndPtDirectIndex = FALSE;
+	if ( bFull ) {
+		rc &= WriteCars( f );
+	}
 	return rc;
 }
 
@@ -1302,85 +1617,139 @@ EXPORT void ImportStart( void )
 }
 
 
-EXPORT void ImportEnd( void )
+
+
+EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 {
 	track_p to_firstOld;
 	wIndex_t trackCountOld;
 	track_p trk;
 	coOrd pos;
-	wPos_t x, y;
-	wPos_t ww, hh;
+	wDrawPix_t x, y;
+	wWinPix_t ww, hh;
+	wBool_t offscreen = FALSE;
+
+	double xmin = 0.0;
+	double xmax = 0.0;
+	double ymin = 0.0;
 	double ymax = 0.0;
 
 	// get the current mouse position
 	GetMousePosition( &x, &y );
 	mainD.Pix2CoOrd( &mainD, x, y, &pos );
-	
+
+
 	// get the size of the drawing area
 	wDrawGetSize( mainD.d, &ww, &hh );
 
-	// in case the pointer is close to the edge or above the drawing area
-	// recalculate the destination position so the pasted part remains visible
-	if( abs( y - hh ) < CLOSETOTHEEDGE  ) {
-		for ( trk=*importTrack; trk; trk=trk->next ) {
-			if (!IsTrackDeleted(trk) && trk->hi.y > ymax ) {
-				ymax = trk->hi.y;
-			}
-		}
-		pos.y -= ymax;
+	coOrd middle_screen;
+	wDrawPix_t mx,my;
+
+	mx = ww/2.0;
+	my = hh/2.0;
+
+	mainD.Pix2CoOrd( &mainD, mx, my, &middle_screen );
+
+
+	for ( trk=*importTrack; trk; trk=trk->next ) {
+		CHECK(!IsTrackDeleted(trk)); // Export ignores deleted tracks
+		if (trk->hi.y > ymax ) { ymax = trk->hi.y; }
+		if (trk->lo.y < ymin ) { ymin = trk->lo.y; }
+		if (trk->hi.x > xmax ) { xmax = trk->hi.x; }
+		if (trk->lo.x < xmin ) { xmin = trk->lo.x; }
 	}
-	
+
+	coOrd size = {xmax-xmin,ymax-ymin};
+
+
+
+	if (import) {
+		offset = zero;
+	} else if (!inPlace) {
+		//If cursor is off drawing area - cursor is in middle screen
+		if ((x<LBORDER) || (x>(ww-RBORDER)) || (y<BBORDER) || (y>(hh-TBORDER))) {
+			pos.x = middle_screen.x;
+			pos.y = middle_screen.y;
+		}
+		offset.x += pos.x;
+		offset.y += pos.y;
+	}
+
+	coOrd middle_object;
+
+	middle_object.x = offset.x + (size.x/2);
+	middle_object.y = offset.y + (size.y/2);
+
+	wDrawPix_t ox,oy;
+	mainD.CoOrd2Pix( &mainD, middle_object, &ox, &oy );
+
+	if ((ox<0) || (ox>ww) || (oy<0) || (oy>hh) ) { offscreen = TRUE; }
+
 	to_firstOld = to_first;
 	to_first = *importTrack;
 	trackCountOld = trackCount;
 	ResolveIndex();
 	to_first = to_firstOld;
 	RenumberTracks();
-	DrawMapBoundingBox( FALSE );
 
 	// move the imported track into place
-	for ( trk=*importTrack; trk; trk=trk->next ) if (!IsTrackDeleted(trk)) {
-		MoveTrack( trk, pos );// mainD.orig );
+	for ( trk=*importTrack; trk; trk=trk->next ) {
+		CHECK( !IsTrackDeleted(trk) );
+		coOrd move;
+		move.x = offset.x;
+		move.y = offset.y;
+		MoveTrack( trk, move );// mainD.orig );
 		trk->bits |= TB_SELECTED;
 		DrawTrack( trk, &mainD, wDrawColorBlack );
 	}
-	DrawMapBoundingBox( TRUE );
-	importTrack = NULL; 
+	importTrack = NULL;
 	trackCount = trackCountOld;
 	InfoCount( trackCount );
+	// Pan screen if needed to center of new
+	if (offscreen) {
+		panCenter = middle_object;
+		PanHere(I2VP(0));
+	}
 }
 
-
-EXPORT BOOL_T ExportTracks( FILE * f )
+/*******
+ * Move Selected Tracks to origin zero and write out
+ *******/
+EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset )
 {
 	track_p trk;
-	coOrd xlat, orig;
-	
-	exportingTracks = TRUE;
+	coOrd xlat,orig;
+
+	bWriteEndPtExporting = TRUE;
 	orig = mapD.size;
 	max_index = 0;
 	TRK_ITERATE(trk) {
 		if ( GetTrkSelected(trk) ) {
-			if (trk->lo.x < orig.x)
+			if (QueryTrack(trk,Q_ISTRAIN)) { continue; } //Don't bother with CARs
+			if (trk->lo.x < orig.x) {
 				orig.x = trk->lo.x;
-			if (trk->lo.y < orig.y)
+			}
+			if (trk->lo.y < orig.y) {
 				orig.y = trk->lo.y;
+			}
 			trk->index = ++max_index;
 		}
 	}
-	orig.x -= trackGauge;
-	orig.y -= trackGauge;
+
+	*offset = orig;
+
 	xlat.x = - orig.x;
 	xlat.y = - orig.y;
 	TRK_ITERATE( trk ) {
 		if ( GetTrkSelected(trk) ) {
+			if (QueryTrack(trk,Q_ISTRAIN)) { continue; } //Don't bother with CARs
 			MoveTrack( trk, xlat );
 			trackCmds(GetTrkType(trk))->write( trk, f );
 			MoveTrack( trk, orig );
 		}
 	}
 	RenumberTracks();
-	exportingTracks = FALSE;
+	bWriteEndPtExporting = FALSE;
 	return TRUE;
 }
 
@@ -1412,7 +1781,8 @@ static void AuditPrint( char * msg )
 		auditFile = fopen( path, "a+" );
 		free(path);
 		if (auditFile == NULL) {
-			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Audit"), message, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Audit"), message,
+			               strerror(errno) );
 			auditIgnore = TRUE;
 			return;
 		}
@@ -1424,12 +1794,14 @@ static void AuditPrint( char * msg )
 	}
 	fprintf(auditFile, "# " );
 	fprintf(auditFile, "%s", msg );
-	if (auditIgnore)
+	if (auditIgnore) {
 		return;
+	}
 	NoticeMessage( MSG_AUDIT_PRINT_MSG, _("Ok"), NULL, msg );
 	if (++auditCount>10) {
-		if (NoticeMessage( MSG_AUDIT_PRINT_IGNORE, _("Yes"), _("No") ) )
+		if (NoticeMessage( MSG_AUDIT_PRINT_IGNORE, _("Yes"), _("No") ) ) {
 			auditIgnore = TRUE;
+		}
 		auditCount = 0;
 	}
 }
@@ -1438,7 +1810,7 @@ static void AuditPrint( char * msg )
 EXPORT void CheckTrackLength( track_cp trk )
 {
 	DIST_T dist;
-	
+
 	if (trackCmds(trk->type)->getLength) {
 		dist = trackCmds(trk->type)->getLength( trk );
 	} else {
@@ -1468,11 +1840,11 @@ EXPORT void AuditTracks( char * event, ... )
 	*msgp++ = '\n';
 
 	trackCount = 0;
-	for (i=0;i<sizeof used;i++) {
+	for (i=0; i<sizeof used; i++) {
 		used[i] = 0;
 	}
 	if (*to_last) {
-		sprintf( msgp, "*to_last is not NULL (%lx)", (long)*to_last );
+		sprintf( msgp, "*to_last is not NULL ("SLOG_FMT")", (uintptr_t)*to_last );
 		AuditPrint( msg );
 	}
 	TRK_ITERATE( trk ) {
@@ -1487,8 +1859,9 @@ EXPORT void AuditTracks( char * event, ... )
 			AuditPrint( msg );
 		}
 		if ((auditCmd = trackCmds( trk->type )->audit) != NULL) {
-			if (!auditCmd( trk, msgp ))
+			if (!auditCmd( trk, msgp )) {
 				AuditPrint( msg );
+			}
 		}
 		if (trk->index < 8*sizeof used) {
 			if (BIT_SET(used,trk->index)) {
@@ -1498,45 +1871,52 @@ EXPORT void AuditTracks( char * event, ... )
 			SET_BIT(used, trk->index);
 		}
 		for (i=0; i<trk->endCnt; i++) {
-			if ( (tn = trk->endPt[i].track) != NULL ) {
-				if (IsTrackDeleted(trk)) {
+			trkEndPt_p epp = EndPtIndex( trk->endPt, i );
+			if ( (tn = GetEndPtTrack(epp)) != NULL ) {
+				if (IsTrackDeleted(tn)) {
 					sprintf( msgp, "T%d[%d]: T%d is deleted\n", trk->index, i, tn->index );
 					AuditPrint( msg );
-					trk->endPt[i].track = NULL;
+					SetEndPtTrack( epp, NULL );
 				} else {
-					for (j=0;j<tn->endCnt;j++)
-						if (tn->endPt[j].track == trk)
+					for (j=0; j<tn->endCnt; j++) {
+						if (GetEndPtTrack( EndPtIndex( tn->endPt, j ) ) == trk) {
 							goto nextEndPt;
+						}
+					}
 					sprintf( msgp, "T%d[%d]: T%d doesn\'t point back\n", trk->index, i, tn->index );
 					AuditPrint( msg );
-					trk->endPt[i].track = NULL;
+					SetEndPtTrack( epp, NULL );
 				}
 			}
 nextEndPt:;
 		}
 		if (!trk->next) {
 			if (to_last != &trk->next) {
-				sprintf( msgp, "last track (T%d @ %lx) is not to_last (%lx)\n",
-						trk->index, (long)trk, (long)to_last );
+				sprintf( msgp, "last track (T%d @ "SLOG_FMT") is not to_last ("SLOG_FMT")\n",
+				         trk->index, (uintptr_t)trk, (uintptr_t)to_last );
 				AuditPrint( msg );
 			}
 		}
 	}
 	InfoCount( trackCount );
 	if (auditFile != NULL) {
-	if (auditStop)
-		if (NoticeMessage( MSG_AUDIT_WRITE_FILE, _("Yes"), _("No"))) {
-			fprintf( auditFile, "# before undo\n" );
-			WriteTracks(auditFile);
-			Rdump( auditFile );
-			if (strcmp("undoUndo",event)==0) {
-				fprintf( auditFile, "# failure in undo\n" );
-			} else if (UndoUndo()) {
-				fprintf( auditFile, "# after undo\n" );
-				WriteTracks(auditFile);
+		if (auditStop) {
+			if (NoticeMessage( MSG_AUDIT_WRITE_FILE, _("Yes"), _("No"))) {
+				fprintf( auditFile, "# before undo\n" );
+				WriteTracks(auditFile, TRUE);
 				Rdump( auditFile );
-			} else {
-				fprintf( auditFile, "# undo stack is empty\n" );
+				if (strcmp("undoUndo",event)==0) {
+					fprintf( auditFile, "# failure in undo\n" );
+				} else {
+					UndoUndo( NULL );
+					if ( undoStatus ) {
+						fprintf( auditFile, "# after undo\n" );
+						WriteTracks(auditFile, TRUE);
+						Rdump( auditFile );
+					} else {
+						fprintf( auditFile, "# undo stack is empty\n" );
+					}
+				}
 			}
 		}
 		if (NoticeMessage( MSG_AUDIT_ABORT, _("Yes"), _("No"))) {
@@ -1562,89 +1942,26 @@ EXPORT void ComputeBoundingBox( track_p trk )
 {
 	EPINX_T i;
 
-	if (trk->endCnt <= 0)
-		AbortProg("computeBoundingBox - endCnt<=0");
+	CHECK( trk->endCnt > 0 );
 
-	trk->hi.x = trk->lo.x = (float)trk->endPt[0].pos.x;
-	trk->hi.y = trk->lo.y = (float)trk->endPt[0].pos.y;
+	coOrd pos = GetEndPtPos( trk->endPt );
+	trk->hi.x = trk->lo.x = (float)pos.x;
+	trk->hi.y = trk->lo.y = (float)pos.y;
 	for ( i=1; i<trk->endCnt; i++ ) {
-		if (trk->endPt[i].pos.x > trk->hi.x)
-			trk->hi.x = (float)trk->endPt[i].pos.x;
-		if (trk->endPt[i].pos.y > trk->hi.y)
-			trk->hi.y = (float)trk->endPt[i].pos.y;
-		if (trk->endPt[i].pos.x < trk->lo.x)
-			trk->lo.x = (float)trk->endPt[i].pos.x;
-		if (trk->endPt[i].pos.y < trk->lo.y)
-			trk->lo.y = (float)trk->endPt[i].pos.y;
-	}
-}
-
-
-
-EXPORT DIST_T EndPtDescriptionDistance(
-		coOrd pos,
-		track_p trk,
-		EPINX_T ep )
-{
-	elev_t *e;
-	coOrd pos1;
-	track_p trk1;
-	e = &trk->endPt[ep].elev;
-	if ((e->option&ELEV_MASK)==ELEV_NONE ||
-		(e->option&ELEV_VISIBLE)==0 )
-		return 100000;
-	if ((trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk))
-		return 100000;
-	/*REORIGIN( pos1, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
-	pos1 = GetTrkEndPos(trk,ep);
-	pos1.x += e->doff.x;
-	pos1.y += e->doff.y;
-	return FindDistance( pos1, pos );
-}
-
-
-EXPORT STATUS_T EndPtDescriptionMove(
-		track_p trk,
-		EPINX_T ep,
-		wAction_t action,
-		coOrd pos )
-{
-	static coOrd p0, p1;
-	elev_t *e, *e1;
-	wDrawColor color;
-	track_p trk1;
-
-	e = &trk->endPt[ep].elev;
-	switch (action) {
-	case C_DOWN:
-		p0 = GetTrkEndPos(trk,ep);
-		/*REORIGIN( p0, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
-		
-	case C_MOVE:
-	case C_UP:
-		if (action != C_DOWN)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-		color = GetTrkColor( trk, &mainD );
-		DrawEndElev( &tempD, trk, ep, color );
-		p1 = pos;
-		e->doff.x = (pos.x-p0.x);
-		e->doff.y = (pos.y-p0.y);
-		if ((trk1=GetTrkEndTrk(trk,ep))) {
-			e1 = &trk1->endPt[GetEndPtConnectedToMe(trk1,trk)].elev;
-			e1->doff = e->doff;
+		pos = GetEndPtPos( EndPtIndex( trk->endPt, i ) );
+		if (pos.x > trk->hi.x) {
+			trk->hi.x = (float)pos.x;
 		}
-		DrawEndElev( &tempD, trk, ep, color );
-		if (action != C_UP)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-        MainRedraw();
-        MapRedraw();
-		return action==C_UP?C_TERMINATE:C_CONTINUE;
-
-	case C_REDRAW:
-		DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-		break;
+		if (pos.y > trk->hi.y) {
+			trk->hi.y = (float)pos.y;
+		}
+		if (pos.x < trk->lo.x) {
+			trk->lo.x = (float)pos.x;
+		}
+		if (pos.y < trk->lo.y) {
+			trk->lo.y = (float)pos.y;
+		}
 	}
-	return C_CONTINUE;
 }
 
 
@@ -1655,126 +1972,118 @@ EXPORT STATUS_T EndPtDescriptionMove(
  */
 
 
-static DIST_T distanceEpsilon = 0.0;
-static ANGLE_T angleEpsilon = 0.0;
+//static DIST_T distanceEpsilon = 0.0;
+//static ANGLE_T angleEpsilon = 0.0;
 
-EXPORT void LoosenTracks( void )
+EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1,
+                          EPINX_T inx1 )
 {
-	track_p trk, trk1;
-	EPINX_T ep0, ep1;
-	ANGLE_T angle0, angle1;
-	coOrd pos0, pos1;
 	DIST_T d;
 	ANGLE_T a;
-	int count;
+	coOrd pos0, pos1;
+	trkEndPt_p epp0 = EndPtIndex( trk0->endPt, inx0 );
+	trkEndPt_p epp1 = EndPtIndex( trk1->endPt, inx1 );
 
-	count = 0;
-	TRK_ITERATE(trk) {
-		for (ep0=0; ep0<trk->endCnt; ep0++) {
-			trk1 = GetTrkEndTrk( trk, ep0 );
-			if (trk1 == NULL)
-				continue;
-			ASSERT( !IsTrackDeleted(trk1) );
-			ep1 = GetEndPtConnectedToMe( trk1, trk );
-			if (ep1 < 0)
-				continue;
-			pos0 = GetTrkEndPos( trk, ep0 );
-			pos1 = GetTrkEndPos( trk1, ep1 );
-			angle0 = GetTrkEndAngle( trk, ep0 );
-			angle1 = GetTrkEndAngle( trk1, ep1 );
-			d = FindDistance( pos0, pos1 );
-			a = NormalizeAngle( 180+angle0-angle1+angleEpsilon );
-			if (d > distanceEpsilon || a > angleEpsilon*2.0) {
-				DisconnectTracks( trk, ep0, trk1, ep1 );
-				count++;
-				InfoMessage( _("%d Track(s) loosened"), count );
-			}
+	if (QueryTrack(trk0,Q_ISTRAIN)) {
+		if (!QueryTrack(trk1,Q_ISTRAIN)) {
+			NoticeMessage( _("Connecting a car to a non-car T%d T%d"), _("Continue"), NULL,
+			               GetTrkIndex(trk0), GetTrkIndex(trk1) );
+			return -1;
 		}
+		SetEndPtTrack( epp0, trk1 );
+		SetEndPtTrack( epp1, trk0 );
+		return 0;
 	}
-	if (count)
-		MainRedraw();
-	else
-		InfoMessage(_("No tracks loosened"));
-}
-
-EXPORT void ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1 )
-{
-	DIST_T d;
-	ANGLE_T a;
-	coOrd pos0, pos1;
 
 	if ( !IsTrack(trk0) ) {
-		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
-		return;
+		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL,
+		               GetTrkIndex(trk0), GetTrkIndex(trk1) );
+		return -1;
 	}
 	if ( !IsTrack(trk1) ) {
-		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk1), GetTrkIndex(trk0) );
-		return;
+		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL,
+		               GetTrkIndex(trk1), GetTrkIndex(trk0) );
+		return -1;
 	}
-	pos0 = trk0->endPt[inx0].pos;
-	pos1 = trk1->endPt[inx1].pos;
-LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f %0.3f]\n", trk0->index, inx0, pos0.x, pos0.y, trk1->index, inx1, pos1.x, pos1.y ) )
+	pos0 = GetEndPtPos( epp0 );
+	pos1 = GetEndPtPos( epp1 );
+	LOG( log_track, 3,
+	     ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f %0.3f]\n",
+	       trk0->index, inx0, pos0.x, pos0.y, trk1->index, inx1, pos1.x, pos1.y ) )
 	d = FindDistance( pos0, pos1 );
-	a = NormalizeAngle( trk0->endPt[inx0].angle -
-						trk1->endPt[inx1].angle + 180.0 );
-	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) || (log_endPt>0 && logTable(log_endPt).level>=1)) {
-#ifndef WINDOWS
-		LogPrintf( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n   %d ",
-				trk0->index, inx0, trk1->index, inx1, d, a, trk0->index );
-		/*PrintEndPt( logFile, trk0, 0 );
-		PrintEndPt( logFile, trk0, 1 );???*/
-		LogPrintf( "\n   %d ", trk1->index );
-		/*PrintEndPt( logFile, trk1, 0 );
-		PrintEndPt( logFile, trk1, 1 );???*/
-		LogPrintf("\n");
-#endif
-		if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle))
-			NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
+	a = fabs(DifferenceBetweenAngles( GetEndPtAngle(epp0),
+	                                  GetEndPtAngle(epp1) + 180.0 ));
+	if (d > connectDistance || (a > connectAngle ) ) {
+		LOG( log_endPt, 1, ( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n",
+		                     trk0->index, inx0, trk1->index, inx1, d, a ) );
+		NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0,
+		               trk1->index, inx1, d, a );
+		return -1; /* Stop connecting out of alignment tracks! */
 	}
 	UndoModify( trk0 );
 	UndoModify( trk1 );
-	if (!suspendElevUpdates)
+	if (!suspendElevUpdates) {
 		SetTrkElevModes( TRUE, trk0, inx0, trk1, inx1 );
-	trk0->endPt[inx0].track = trk1;
-	trk1->endPt[inx1].track = trk0;
-	AuditTracks( "connectTracks T%d[%d], T%d[%d]", trk0->index, inx0, trk1->index, inx1 );
+	}
+	SetEndPtTrack( epp0, trk1 );
+	SetEndPtTrack( epp1, trk0 );
+	AuditTracks( "connectTracks T%d[%d], T%d[%d]", trk0->index, inx0, trk1->index,
+	             inx1 );
+	return 0;
 }
 
 
-EXPORT void DisconnectTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T ep2 )
+EXPORT void DisconnectTracks( track_p trk1, EPINX_T ep1, track_p trk2,
+                              EPINX_T ep2 )
 {
-	if (trk1->endPt[ep1].track != trk2 ||
-		trk2->endPt[ep2].track != trk1 )
-		AbortProg("disconnectTracks: tracks not connected" );
+	trkEndPt_p epp1 = EndPtIndex( trk1->endPt, ep1 );
+	trkEndPt_p epp2 = EndPtIndex( trk2->endPt, ep2 );
+	// Check tracks are connected
+	CHECK( GetEndPtTrack(epp1) == trk2 );
+	CHECK( GetEndPtTrack(epp2) == trk1 );
+	if (QueryTrack(trk1,Q_ISTRAIN)) {
+		if (!QueryTrack(trk2,Q_ISTRAIN)) {
+			NoticeMessage( _("Disconnecting a car from a non-car T%d T%d"), _("Continue"),
+			               NULL, GetTrkIndex(trk1), GetTrkIndex(trk2) );
+			return;
+		}
+		SetEndPtTrack( epp1, NULL );
+		SetEndPtTrack( epp2, NULL );
+		return;
+	}
+
 	UndoModify( trk1 );
 	UndoModify( trk2 );
-	trk1->endPt[ep1].track = NULL;
-	trk2->endPt[ep2].track = NULL;
-	if (!suspendElevUpdates)
+	SetEndPtTrack( epp1, NULL );
+	SetEndPtTrack( epp2, NULL );
+	if (!suspendElevUpdates) {
 		SetTrkElevModes( FALSE, trk1, ep1, trk2, ep2 );
+	}
 }
 
 
 EXPORT BOOL_T ConnectAbuttingTracks(
-		track_p trk0,
-		EPINX_T ep0,
-		track_p trk1,
-		EPINX_T ep1 )
+        track_p trk0,
+        EPINX_T ep0,
+        track_p trk1,
+        EPINX_T ep1 )
 {
 	DIST_T d;
 	ANGLE_T a;
 	d = FindDistance( GetTrkEndPos(trk0,ep0),
-					  GetTrkEndPos(trk1,ep1 ) );
+	                  GetTrkEndPos(trk1,ep1 ) );
 	a = NormalizeAngle( GetTrkEndAngle(trk0,ep0) -
-						GetTrkEndAngle(trk1,ep1) +
-						(180.0+connectAngle/2.0) );
-	if ( a < connectAngle && 
-		 d < connectDistance ) {
-		UndoStart( _("Join Abutting Tracks"), "ConnectAbuttingTracks( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
+	                    GetTrkEndAngle(trk1,ep1) +
+	                    (180.0+connectAngle/2.0) );
+	if ( a < connectAngle &&
+	     d < connectDistance ) {
+		UndoStart( _("Join Abutting Tracks"),
+		           "ConnectAbuttingTracks( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0,
+		           GetTrkIndex(trk1), ep1 );
 		DrawEndPt( &mainD, trk0, ep0, wDrawColorWhite );
 		DrawEndPt( &mainD, trk1, ep1, wDrawColorWhite );
 		ConnectTracks( trk0, ep0,
-					   trk1, ep1 );
+		               trk1, ep1 );
 		DrawEndPt( &mainD, trk0, ep0, wDrawColorBlack );
 		DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
 		UndoEnd();
@@ -1784,20 +2093,22 @@ EXPORT BOOL_T ConnectAbuttingTracks(
 }
 
 
-EXPORT ANGLE_T GetAngleAtPoint( track_p trk, coOrd pos, EPINX_T *ep0, EPINX_T *ep1 )
+EXPORT ANGLE_T GetAngleAtPoint( track_p trk, coOrd pos, EPINX_T *ep0,
+                                EPINX_T *ep1 )
 {
 	ANGLE_T (*getAngleCmd)( track_p, coOrd, EPINX_T *, EPINX_T * );
 
-	if ((getAngleCmd = trackCmds(trk->type)->getAngle) != NULL)
+	if ((getAngleCmd = trackCmds(trk->type)->getAngle) != NULL) {
 		return getAngleCmd( trk, pos, ep0, ep1 );
-	else {
+	} else {
 		NoticeMessage( MSG_GAAP_BAD_TYPE, _("Continue"), NULL, trk->type, trk->index );
 		return 0;
 	}
 }
 
 
-EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, BOOL_T disconnect )
+EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
+                          BOOL_T disconnect )
 {
 	DIST_T d;
 	track_p trk0, trk2, trkl;
@@ -1806,46 +2117,64 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	BOOL_T (*splitCmd)( track_p, coOrd, EPINX_T, track_p *, EPINX_T *, EPINX_T * );
 	coOrd pos0;
 
+	if (!IsTrack(trk)) {
+		if ((splitCmd = trackCmds(trk->type)->split) == NULL) { return FALSE; }
+		UndrawNewTrack( trk );
+		UndoModify( trk );
+		rc = splitCmd( trk, pos, ep, leftover, &epl, &ep1 );
+		if (*leftover) {
+			SetTrkLayer(*leftover,GetTrkLayer( trk ));
+			DrawNewTrack( *leftover );
+		}
+		DrawNewTrack( trk );
+		return rc;
+	}
+
 	trk0 = trk;
 	epl = ep;
 	epCnt = GetTrkEndPtCnt(trk);
 	*leftover = NULL;
-LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos.x, pos.y ) )
+	LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep,
+	                     pos.x, pos.y ) )
 
+	trkEndPt_p epp = EndPtIndex( trk->endPt, ep );
+	pos0 = GetEndPtPos( epp );
 	if (((splitCmd = trackCmds(trk->type)->split) == NULL)) {
-			if (!(FindDistance( trk->endPt[ep].pos, pos) <= minLength)) {
-				ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
-				return FALSE;
+		if (!(FindDistance( pos0, pos) <= minLength)) {
+			ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
+			return FALSE;
 		}
 	}
 	UndrawNewTrack( trk );
 	UndoModify( trk );
-	pos0 = trk->endPt[ep].pos;
 	if ((d = FindDistance( pos0, pos )) <= minLength) {
 		/* easy: just disconnect */
-		if ((trk2=trk->endPt[ep].track) != NULL) {
+		trk2 = GetEndPtTrack(epp);
+		if (trk2 != NULL) {
 			UndrawNewTrack( trk2 );
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
-			if (ep2 < 0)
+			if (ep2 < 0) {
 				return FALSE;
+			}
 			DisconnectTracks( trk, ep, trk2, ep2 );
 			LOG( log_track, 2, ( "    at endPt with T%d[%d]\n", trk2->index, ep2 ) )
 			DrawNewTrack( trk2 );
 		} else {
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
-		*leftover = trk2;
 		DrawNewTrack( trk );
 
 
 	} else if ( epCnt == 2 &&
-				(d = FindDistance( trk->endPt[1-ep].pos, pos )) <= minLength) {
+	            (d = FindDistance( GetEndPtPos(EndPtIndex(trk->endPt,1-ep)),
+	                               pos )) <= minLength) {
 		/* easy: just disconnect */
-		if ((trk2=trk->endPt[1-ep].track) != NULL) {
+		if ((trk2=GetEndPtTrack(EndPtIndex(trk->endPt,1-ep))) != NULL) {
 			UndrawNewTrack( trk2 );
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
-			if (ep2 < 0)
+			if (ep2 < 0) {
 				return FALSE;
+			}
 			DisconnectTracks( trk, 1-ep, trk2, ep2 );
 			LOG( log_track, 2, ( "    at endPt with T%d[%d]\n", trk2->index, ep2 ) )
 			DrawNewTrack( trk2 );
@@ -1855,20 +2184,21 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
 		DrawNewTrack( trk );
-
 	} else {
 		/* TODO circle's don't have ep's */
 		trk2 = GetTrkEndTrk( trk, ep );
-		if ( !disconnect )
+		if ( !disconnect ) {
 			suspendElevUpdates = TRUE;
+		}
 		if (trk2 != NULL) {
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
 			DisconnectTracks( trk, ep, trk2, ep2 );
 		}
 		rc = splitCmd( trk, pos, ep, leftover, &epl, &ep1 );
 		if (!rc) {
-			if ( trk2 != NULL )
+			if ( trk2 != NULL ) {
 				ConnectTracks( trk, ep, trk2, ep2 );
+			}
 			suspendElevUpdates = FALSE;
 			DrawNewTrack( trk );
 			return FALSE;
@@ -1877,20 +2207,23 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 		if (*leftover) {
 			trkl = *leftover;
 			ep0 = epl;
-			if ( !disconnect )
-				ConnectTracks( trk, ep, trkl, ep0 );
-			ep0 = 1-ep0;
+			if ( !disconnect ) {
+				ConnectTracks( trk, ep, trkl, epl );
+			}
+			ep0 = 1-epl;
 			while ( 1 ) {
 				CopyAttributes( trk, trkl );
 				ClrTrkElev( trkl );
 				trk0 = GetTrkEndTrk(trkl,ep0);
-				if ( trk0 == NULL )
+				if ( trk0 == NULL || trk0->type == T_TURNOUT ) {
 					break;
+				}
 				ep0 = 1-GetEndPtConnectedToMe(trk0,trkl);
 				trkl = trk0;
 			}
-			if (trk2)
+			if (trk2) {
 				ConnectTracks( trkl, ep0, trk2, ep2 );
+			}
 			LOG( log_track, 2, ( "    midTrack (leftover = T%d)\n", (trkl)->index ) )
 		}
 		suspendElevUpdates = FALSE;
@@ -1901,8 +2234,9 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			while ( 1 ) {
 				DrawNewTrack( trkl );
 				trk0 = GetTrkEndTrk(trkl,ep0);
-				if ( trk0 == NULL || trk0 == trk2 )
+				if ( trk0 == NULL || trk0 == trk2 || trk0->type == T_TURNOUT) {
 					break;
+				}
 				ep0 = 1-GetEndPtConnectedToMe(trk0,trkl);
 				trkl = trk0;
 			}
@@ -1913,30 +2247,35 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 
 
 EXPORT BOOL_T TraverseTrack(
-		traverseTrack_p trvTrk,
-		DIST_T * distR )
+        traverseTrack_p trvTrk,
+        DIST_T * distR )
 {
 	track_p oldTrk;
 	EPINX_T ep;
 
 	while ( *distR > 0.0 && trvTrk->trk ) {
-		if ( trackCmds((trvTrk->trk)->type)->traverse == NULL )
+		if ( trackCmds((trvTrk->trk)->type)->traverse == NULL ) {
 			return FALSE;
+		}
 		oldTrk = trvTrk->trk;
-		if ( !trackCmds((trvTrk->trk)->type)->traverse( trvTrk, distR ) )
+		if ( !trackCmds((trvTrk->trk)->type)->traverse( trvTrk, distR ) ) {
 			return FALSE;
-		if ( *distR <= 0.0 )
+		}
+		if ( *distR <= 0.0 ) {
 			return TRUE;
-		if ( !trvTrk->trk )
+		}
+		if ( !trvTrk->trk ) {
 			return FALSE;
+		}
 		ep = GetNearestEndPtConnectedToMe( trvTrk->trk, oldTrk, trvTrk->pos );
 		if ( ep != -1 ) {
 			trvTrk->pos = GetTrkEndPos( trvTrk->trk, ep );
 			trvTrk->angle = NormalizeAngle( GetTrkEndAngle( trvTrk->trk, ep ) + 180.0 );
 		}
 		if ( trackCmds((trvTrk->trk)->type)->checkTraverse &&
-			 !trackCmds((trvTrk->trk)->type)->checkTraverse( trvTrk->trk, trvTrk->pos ) )
+		     !trackCmds((trvTrk->trk)->type)->checkTraverse( trvTrk->trk, trvTrk->pos ) ) {
 			return FALSE;
+		}
 		trvTrk->length = -1;
 		trvTrk->dist = 0.0;
 
@@ -1951,49 +2290,198 @@ EXPORT BOOL_T RemoveTrack( track_p * trk, EPINX_T * ep, DIST_T *dist )
 	track_p trk1;
 	EPINX_T ep1=-1;
 	while ( *dist > 0.0 ) {
-		if (trackCmds((*trk)->type)->getLength == NULL)
+		if (trackCmds((*trk)->type)->getLength == NULL) {
 			return FALSE;
-		if (GetTrkEndPtCnt(*trk) != 2)
+		}
+		if (GetTrkEndPtCnt(*trk) != 2) {
 			return FALSE;
+		}
 		dist1 = trackCmds((*trk)->type)->getLength(*trk);
-		if ( dist1 > *dist )
+		if ( dist1 > *dist ) {
 			break;
+		}
 		*dist -= dist1;
 		trk1 = GetTrkEndTrk( *trk, 1-*ep );
-		if (trk1)
+		if (trk1) {
 			ep1 = GetEndPtConnectedToMe( trk1, *trk );
+		}
 		DeleteTrack( *trk, FALSE );
-		if (!trk1)
+		if (!trk1) {
 			return FALSE;
+		}
 		*trk = trk1;
 		*ep = ep1;
 	}
 	dist1 = *dist;
 	*dist = 0.0;
-	return TrimTrack( *trk, *ep, dist1 );
+	return TrimTrack( *trk, *ep, dist1, zero, 0.0, 0.0, zero );
 }
 
 
-EXPORT BOOL_T TrimTrack( track_p trk, EPINX_T ep, DIST_T dist )
+EXPORT BOOL_T TrimTrack( track_p trk, EPINX_T ep, DIST_T dist, coOrd pos,
+                         ANGLE_T angle, DIST_T radius, coOrd center )
 {
-	if (trackCmds(trk->type)->trim)
-		return trackCmds(trk->type)->trim( trk, ep, dist );
-	else
+	if (trackCmds(trk->type)->trim) {
+		return trackCmds(trk->type)->trim( trk, ep, dist, pos, angle, radius, center );
+	} else {
 		return FALSE;
+	}
 }
 
 
-EXPORT BOOL_T MergeTracks( track_p trk0, EPINX_T ep0, track_p trk1, EPINX_T ep1 )
+EXPORT BOOL_T MergeTracks( track_p trk0, EPINX_T ep0, track_p trk1,
+                           EPINX_T ep1 )
 {
 	if (trk0->type == trk1->type &&
-		trackCmds(trk0->type)->merge)
+	    trackCmds(trk0->type)->merge) {
 		return trackCmds(trk0->type)->merge( trk0, ep0, trk1, ep1 );
-	else
+	} else {
 		return FALSE;
+	}
 }
 
+EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
+{
+	static EPINX_T ep;
+	static coOrd end_pos;
+	static BOOL_T valid;
+	DIST_T d;
+	track_p trk1;
+	trackParams_t params;
+	static wBool_t curved;
+	static ANGLE_T end_angle;
 
-EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action, coOrd pos )
+	switch ( action ) {
+	case C_DOWN:
+		ep = PickUnconnectedEndPoint( pos, trk );
+		if ( ep == -1 ) {
+			return C_ERROR;
+		}
+		pos = GetTrkEndPos(trk,ep);
+		if (!GetTrackParams(PARAMS_CORNU,trk,pos,&params)) { return C_ERROR; }
+		end_pos = pos;
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		if (params.type == curveTypeCurve) {
+			curved = TRUE;
+			tempSegs(0).type = SEG_CRVTRK;
+			tempSegs(0).lineWidth = 0;
+			tempSegs(0).u.c.radius = params.arcR;
+			tempSegs(0).u.c.center = params.arcP;
+			tempSegs(0).u.c.a0 = FindAngle(params.arcP,GetTrkEndPos(trk,ep));
+			tempSegs(0).u.c.a1 = 0;
+		} else {
+			curved = FALSE;
+			tempSegs(0).type = SEG_STRTRK;
+			tempSegs(0).lineWidth = 0;
+			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = GetTrkEndPos( trk, ep );
+		}
+		valid = FALSE;
+		InfoMessage( _("Drag to change track length") );
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		return C_CONTINUE;
+
+	case C_MOVE:
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		if (curved) {
+			//Normalize pos
+			PointOnCircle( &pos, tempSegs(0).u.c.center, tempSegs(0).u.c.radius,
+			               FindAngle(tempSegs(0).u.c.center,pos) );
+			ANGLE_T a = FindAngle(tempSegs(0).u.c.center,
+			                      pos)-FindAngle(tempSegs(0).u.c.center,end_pos);
+			d = fabs(a)*2*M_PI/360*tempSegs(0).u.c.radius;
+			if ( d <= minLength ) {
+				if (action == C_MOVE) {
+					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
+				}
+				valid = FALSE;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
+				return C_CONTINUE;
+			}
+			//Restrict to outside track
+			ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(trk, ep)-FindAngle(end_pos,pos));
+			if (diff>90.0 && diff<270.0) {
+				valid = FALSE;
+				tempSegs(0).u.c.a1 = 0;
+				tempSegs(0).u.c.a0 = end_angle;
+				InfoMessage( _("Inside turnout track"));
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
+				return C_CONTINUE;
+			}
+			end_angle = GetTrkEndAngle( trk, ep );
+			a = FindAngle(tempSegs(0).u.c.center, pos );
+			PointOnCircle( &pos, tempSegs(0).u.c.center, tempSegs(0).u.c.radius, a );
+			ANGLE_T a2 = FindAngle(tempSegs(0).u.c.center,end_pos);
+			if ((end_angle > 180 && (a2>90 && a2 <270))  ||
+			    (end_angle < 180 && (a2<90 || a2 >270))) {
+				tempSegs(0).u.c.a0 = a2;
+				tempSegs(0).u.c.a1 = NormalizeAngle(a-a2);
+			} else {
+				tempSegs(0).u.c.a0 = a;
+				tempSegs(0).u.c.a1 = NormalizeAngle(a2-a);
+			}
+			valid = TRUE;
+			if (action == C_MOVE)
+				InfoMessage( _("Curve: Length=%s Radius=%0.3f Arc=%0.3f"),
+				             FormatDistance( d ), FormatDistance(tempSegs(0).u.c.radius),
+				             PutAngle( tempSegs(0).u.c.a1 ));
+			return C_CONTINUE;
+		} else {
+			d = FindDistance( end_pos, pos );
+			valid = TRUE;
+			if ( d <= minLength ) {
+				if (action == C_MOVE) {
+					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
+				}
+				valid = FALSE;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
+				return C_CONTINUE;
+			}
+			ANGLE_T diff = NormalizeAngle(GetTrkEndAngle( trk, ep )-FindAngle(end_pos,
+			                              pos));
+			if (diff>=90.0 && diff<=270.0) {
+				valid = FALSE;
+				InfoMessage( _("Inside turnout track"));
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
+				return C_CONTINUE;
+			}
+
+			Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
+			                ep ), d );
+			if (action == C_MOVE)
+				InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
+				             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
+		}
+		return C_CONTINUE;
+
+	case C_UP:
+		if (!valid) {
+			return C_TERMINATE;
+		}
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		UndrawNewTrack( trk );
+		EPINX_T jp;
+		if (curved) {
+			trk1 = NewCurvedTrack(tempSegs(0).u.c.center, tempSegs(0).u.c.radius,
+			                      tempSegs(0).u.c.a0, tempSegs(0).u.c.a1, 0);
+			jp = PickUnconnectedEndPoint(end_pos,trk1);
+		} else {
+			trk1 = NewStraightTrack( tempSegs(0).u.l.pos[0], tempSegs(0).u.l.pos[1] );
+			jp = 0;
+		}
+		CopyAttributes( trk, trk1 );
+		ConnectTracks( trk, ep, trk1, jp );
+		DrawNewTrack( trk );
+		DrawNewTrack( trk1 );
+		return C_TERMINATE;
+
+	default:
+		;
+	}
+	return C_ERROR;
+}
+
+EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action,
+                                        coOrd pos )
 {
 	static EPINX_T ep;
 	static BOOL_T valid;
@@ -2003,10 +2491,12 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action, coOrd pos
 	switch ( action ) {
 	case C_DOWN:
 		ep = PickUnconnectedEndPoint( pos, trk );
-		if ( ep == -1 )
+		if ( ep == -1 ) {
 			return C_ERROR;
+		}
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).type = SEG_STRTRK;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, ep );
 		InfoMessage( _("Drag to change track length") );
 
@@ -2014,21 +2504,23 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action, coOrd pos
 		d = FindDistance( tempSegs(0).u.l.pos[0], pos );
 		valid = TRUE;
 		if ( d <= minLength ) {
-			if (action == C_MOVE)
+			if (action == C_MOVE) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
+			}
 			valid = FALSE;
 			return C_CONTINUE;
 		}
-		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk, ep ), d );
-		tempSegs_da.cnt = 1;
+		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
+		                ep ), d );
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
-					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
+			             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
 		return C_CONTINUE;
 
 	case C_UP:
-		if (!valid)
+		if (!valid) {
 			return C_TERMINATE;
+		}
 		UndrawNewTrack( trk );
 		trk1 = NewStraightTrack( tempSegs(0).u.l.pos[0], tempSegs(0).u.l.pos[1] );
 		CopyAttributes( trk, trk1 );
@@ -2055,12 +2547,13 @@ EXPORT STATUS_T ModifyTrack( track_p trk, wAction_t action, coOrd pos )
 }
 
 
-EXPORT BOOL_T GetTrackParams( int inx, track_p trk, coOrd pos, trackParams_t * params )
+EXPORT BOOL_T GetTrackParams( int inx, track_p trk, coOrd pos,
+                              trackParams_t * params )
 {
 	if ( trackCmds(trk->type)->getTrackParams ) {
 		return trackCmds(trk->type)->getTrackParams( inx, trk, pos, params );
 	} else {
-		ASSERT( FALSE ); /* CHECKME */
+		CHECK( FALSE ); /* CHECKME */
 		return FALSE;
 	}
 }
@@ -2106,6 +2599,9 @@ EXPORT char * GetTrkTypeName( track_p trk )
 	return trackCmds(trk->type)->name;
 }
 
+/*
+ * Note Misnomer - this function also gets the normal length - enumerate deals with flextrack length
+ */
 
 EXPORT DIST_T GetFlexLength( track_p trk0, EPINX_T ep, coOrd * pos )
 {
@@ -2116,23 +2612,29 @@ EXPORT DIST_T GetFlexLength( track_p trk0, EPINX_T ep, coOrd * pos )
 	d = 0.0;
 	while(1) {
 		trk1 = GetTrkEndTrk( trk, ep );
-		if (trk1 == NULL)
+		if (trk1 == NULL) {
 			break;
-		if (trk1 == trk0)
+		}
+		if (trk1 == trk0) {
 			break;
+		}
 		ep1 = GetEndPtConnectedToMe( trk1, trk );
-		if (ep1 < 0 || ep1 > 1)
+		if (ep1 < 0 || ep1 > 1) {
 			break;
-		if (trackCmds(trk1->type)->getLength == NULL)
+		}
+		if (trackCmds(trk1->type)->getLength == NULL) {
 			break;
+		}
 		dd = trackCmds(trk1->type)->getLength(trk1);
-		if (dd <= 0.0)
+		if (dd <= 0.0) {
 			break;
+		}
 		d += dd;
 		trk = trk1;
 		ep = 1-ep1;
-		if (d>1000000.0)
+		if (d>DIST_INF) {
 			break;
+		}
 	}
 	*pos = GetTrkEndPos( trk, ep );
 	return d;
@@ -2143,19 +2645,44 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 {
 	coOrd pos0, pos1;
 	DIST_T d;
-	if (ep0 == ep1)
+	if (ep0 == ep1) {
 		return 0.0;
-	else if (trackCmds(trk->type)->getLength != NULL) {
+	} else if (trackCmds(trk->type)->getLength != NULL) {
 		d = trackCmds(trk->type)->getLength(trk);
-		if (ep1==-1)
-			d /= 2.0;
+		if (ep1==-1) {
+			d = d/2.0;
+		}
 		return d;
 	} else {
 		pos0 = GetTrkEndPos(trk,ep0);
 		if (ep1==-1) {
+			// Usual case for asking about distance to center of turnout for grades
+			if (trk->type==T_TURNOUT) {
+				trackParams_t trackParamsData;
+				trackParamsData.ep = ep0;
+				if (trackCmds(trk->type)->getTrackParams != NULL) {
+					//Find distance to centroid of end points * 2 or actual length if epCnt < 3
+					trackCmds(trk->type)->getTrackParams(PARAMS_TURNOUT,trk,pos0,&trackParamsData);
+					return trackParamsData.len/2.0;
+				}
+			}
 			pos1.x = (trk->hi.x+trk->lo.x)/2.0;
 			pos1.y = (trk->hi.y+trk->lo.y)/2.0;
 		} else {
+			if (trk->type==T_TURNOUT) {
+				pos1 = GetTrkEndPos(trk,ep1);
+				trackParams_t trackParamsData;
+				trackParamsData.ep = ep0;
+				if (trackCmds(trk->type)->getTrackParams != NULL) {
+					//Find distance via centroid of end points or actual length if epCnt < 3
+					trackCmds(trk->type)->getTrackParams(PARAMS_TURNOUT,trk,pos0,&trackParamsData);
+					d = trackParamsData.len/2.0;
+					trackParamsData.ep = ep1;
+					trackCmds(trk->type)->getTrackParams(PARAMS_TURNOUT,trk,pos1,&trackParamsData);
+					d += trackParamsData.len/2.0;
+					return d;
+				}
+			}
 			pos1 = GetTrkEndPos(trk,ep1);
 		}
 		pos1.x -= pos0.x;
@@ -2164,7 +2691,6 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 		return fabs(pos1.y);
 	}
 }
-#endif
 /*#define DRAW_TUNNEL_NONE		(0)*/
 #define DRAW_TUNNEL_DASH		(1)
 #define DRAW_TUNNEL_SOLID		(2)
@@ -2178,17 +2704,90 @@ EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
 
 EXPORT long tieDrawMode = TIEDRAWMODE_SOLID;
 EXPORT wDrawColor tieColor;
+EXPORT wDrawColor bridgeColor;
+EXPORT wDrawColor roadbedColor;
+
+/**
+ * Draw tracks with 2 rails when zoomed in
+ *
+ * \param		d	drawing context
+ * \return	true is we draw tracks with 2 rails
+ */
+EXPORT BOOL_T DrawTwoRails( drawCmd_p d, DIST_T factor )
+{
+	DIST_T scale = twoRailScale;
+	if ( d->options&DC_PRINT ) {
+		scale = scale*2+1;
+	}
+	scale /= factor;
+	return d->scale <= scale;
+}
+
+
+/**
+ * Centerline drawing test
+ *
+ * \param 		   d    drawing context
+ * \return	true for centerline, false if no centerline to draw
+ */
+
+EXPORT BOOL_T
+hasTrackCenterline( drawCmd_p d )
+{
+	// for printing, drawing of center line depends on the scale
+	if( d->options & DC_CENTERLINE && d->options & DC_PRINT ) {
+		return DrawTwoRails(d,1);
+	}
+
+	// all other cases of explicit centerline option (ie. bitmap)
+	if( d->options & DC_CENTERLINE ) {
+		return true;
+	}
+
+	// if zoomed in beyond 1:1 draw centerline when not doing a simple draw
+	if( ( d->scale <= 1.0 ) && !( d->options & DC_SIMPLE ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+EXPORT wBool_t
+DoDrawTies( drawCmd_p d, track_cp trk )
+{
+	if ( !trk ) {
+		return FALSE;
+	}
+	if (GetTrkNoTies(trk)) {
+		return FALSE;        //No Ties for this Track
+	}
+	if ( tieDrawMode == TIEDRAWMODE_NONE ) {
+		return FALSE;
+	}
+	if ( d == &mapD ) {
+		return FALSE;
+	}
+	if ( !DrawTwoRails(d,1) ) {
+		return FALSE;
+	}
+	if ( !(GetTrkVisible(trk) || drawTunnel==DRAW_TUNNEL_SOLID) ) {
+		return FALSE;
+	}
+	return TRUE;
+}
 
 EXPORT void DrawTie(
-		drawCmd_p d,
-		coOrd pos,
-		ANGLE_T angle,
-		DIST_T length,
-		DIST_T width,
-		wDrawColor color,
-		BOOL_T solid )
+        drawCmd_p d,
+        coOrd pos,
+        ANGLE_T angle,
+        DIST_T length,
+        DIST_T width,
+        wDrawColor color,
+        BOOL_T solid )
 {
-	coOrd p[4], lo, hi;
+	coOrd lo, hi;
+	coOrd p[4];
+	int t[4];
 
 	length /= 2;
 	width /= 2;
@@ -2198,6 +2797,7 @@ EXPORT void DrawTie(
 	hi.x += length;
 	hi.y += length;
 	angle += 90;
+
 	Translate( &p[0], pos, angle, length );
 	Translate( &p[1], p[0], angle+90, width );
 	Translate( &p[0], p[0], angle-90, width );
@@ -2205,266 +2805,23 @@ EXPORT void DrawTie(
 	Translate( &p[3], p[2], angle-90, width );
 	Translate( &p[2], p[2], angle+90, width );
 
+	for (int i=0; i<4; i++) {
+		t[i] = 0;
+	}
+
 	if ( d == &mainD ) {
 		lo.x -= RBORDER/mainD.dpi*mainD.scale;
 		lo.y -= TBORDER/mainD.dpi*mainD.scale;
 		hi.x += LBORDER/mainD.dpi*mainD.scale;
 		hi.y += BBORDER/mainD.dpi*mainD.scale;
-		if ( OFF_D( d->orig, d->size, lo, hi ) )
+		if ( OFF_D( d->orig, d->size, lo, hi ) ) {
 			return;
+		}
 	}
 	if ( solid ) {
-		DrawFillPoly( d, 4, p, color );
+		DrawPoly( d, 4, p, t, color, 0, DRAW_FILL );
 	} else {
-		DrawLine( d, p[0], p[1], 0, color );
-		DrawLine( d, p[1], p[2], 0, color );
-		DrawLine( d, p[2], p[3], 0, color );
-		DrawLine( d, p[3], p[0], 0, color );
-	}
-}
-
-
-EXPORT void DrawCurvedTies(
-		drawCmd_p d,
-		track_p trk,
-		coOrd p,
-		DIST_T r,
-		ANGLE_T a0,
-		ANGLE_T a1,
-		wDrawColor color )
-{
-	tieData_p td; 
-	DIST_T len;
-	ANGLE_T ang, dang;
-	coOrd pos;
-	int cnt;
-
-	if ( (d->funcs->options&wDrawOptTemp) != 0 )
-		return;
-	if ( trk == NULL )
-		return;
-
-	td = GetScaleTieData(GetTrkScale(trk));
-
-	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
-		return;
-	if (color == wDrawColorBlack)
-		color = tieColor;
-	len = 2*M_PI*r*a1/360.0;
-	cnt = (int)(len/td->spacing);
-	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 )
-		cnt++;
-	if ( cnt != 0 ) {
-		dang = a1/cnt;
-		for ( ang=a0+dang/2; cnt; cnt--,ang+=dang ) {
-			PointOnCircle( &pos, p, r, ang );
-			DrawTie( d, pos, ang+90, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
-		}
-	}
-}
-
-
-EXPORT void DrawCurvedTrack(
-		drawCmd_p d,
-		coOrd p,
-		DIST_T r,
-		ANGLE_T a0,
-		ANGLE_T a1,
-		coOrd p0,
-		coOrd p1,
-		track_p trk,
-		DIST_T trackGauge,
-		wDrawColor color,
-		long options )
-{
-	DIST_T scale2rail;
-	wDrawWidth width=0;
-	trkSeg_p segPtr;
-
-	if ( (d->options&DC_SEGTRACK) ) {
-		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
-		segPtr = &tempSegs(tempSegs_da.cnt-1);
-		segPtr->type = SEG_CRVTRK;
-		segPtr->width = 0;
-		segPtr->color = wDrawColorBlack;
-		segPtr->u.c.center = p;
-		segPtr->u.c.a0 = a0;
-		segPtr->u.c.a1 = a1;
-		segPtr->u.c.radius = r;
-		return;
-	}
-
-	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-	if (options&DTS_THICK2)
-		width = 2;
-	if (options&DTS_THICK3)
-		width = 3;
-#ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/mainD.dpi);
-#else
-	if (d->options&DC_PRINT)
-		width *= 300/75;
-#endif
-
-LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
-				p.x, p.y, r, a0, a1 ) )
-	if ( (options&DTS_TIES) != 0 && trk &&
-		 tieDrawMode!=TIEDRAWMODE_NONE &&
-		 d!=&mapD &&
-		 (d->options&DC_TIES)!=0 &&
-		 d->scale<scale2rail/2 )
-		DrawCurvedTies( d, trk, p, r, a0, a1, color );
-	if (color == wDrawColorBlack)
-		color = normalColor;
-	if ( d->scale >= scale2rail ) {
-		DrawArc( d, p, r, a0, a1, ((d->scale<32) && centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, width, color );
-	} else if (d->options & DC_QUICK) {
-		DrawArc( d, p, r, a0, a1, ((d->scale<32) && centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, 0, color );
-	} else {
-		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0
-				|| (d->scale <= scale2rail/2 && d->options&DC_PRINT && printCenterLines)) {  // if printing two rails respect print CenterLine option
-			long options = d->options;
-			d->options |= DC_DASH;
-			DrawArc( d, p, r, a0, a1, 0, 0, color );
-			d->options = options;
-		}
-		DrawArc( d, p, r+trackGauge/2.0, a0, a1, 0, width, color );
-		DrawArc( d, p, r-trackGauge/2.0, a0, a1, (centerDrawMode && !(options&DTS_NOCENTER) ? 1: 0), width, color );
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && d->scale <= scale2rail/2 ) {
-			 wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
-			 if ( options&DTS_RIGHT ) {
-				DrawArc( d, p, r+roadbedWidth/2.0, a0, a1, 0, rbw, color );
-			 }
-			 if ( options&DTS_LEFT ) {
-				DrawArc( d, p, r-roadbedWidth/2.0, a0, a1, 0, rbw, color );
-			 }
-		}
-	}
-}
-
-
-EXPORT void DrawStraightTies(
-		drawCmd_p d,
-		track_p trk,
-		coOrd p0,
-		coOrd p1,
-		wDrawColor color )
-{
-	tieData_p td;
-	DIST_T tieOff0=0.0, tieOff1=0.0;
-	DIST_T len, dlen;
-	coOrd pos;
-	int cnt;
-	ANGLE_T angle;
-
-	if ( (d->funcs->options&wDrawOptTemp) != 0 )
-		return;
-	if ( trk == NULL )
-		return;
-
-	td = GetScaleTieData(GetTrkScale(trk));
-	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
-		return;
-	if ( color == wDrawColorBlack )
-		color = tieColor;
-	td = GetScaleTieData( GetTrkScale(trk) );
-	len = FindDistance( p0, p1 );
-	len -= tieOff0+tieOff1;
-	angle = FindAngle( p0, p1 );
-	cnt = (int)(len/td->spacing);
-	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 )
-		cnt++;
-	if ( cnt != 0 ) {
-		dlen = len/cnt;
-		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
-			Translate( &pos, p0, angle, len );
-			DrawTie( d, pos, angle, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
-		}
-	}
-}
-
-
-EXPORT void DrawStraightTrack(
-		drawCmd_p d,
-		coOrd p0,
-		coOrd p1,
-		ANGLE_T angle,
-		track_p trk,
-		DIST_T trackGauge,
-		wDrawColor color,
-		long options )
-{
-	coOrd pp0, pp1;
-	DIST_T scale2rail;
-	wDrawWidth width=0;
-	trkSeg_p segPtr;
-
-	if ( (d->options&DC_SEGTRACK) ) {
-		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
-		segPtr = &tempSegs(tempSegs_da.cnt-1);
-		segPtr->type = SEG_STRTRK;
-		segPtr->width = 0;
-		segPtr->color = wDrawColorBlack;
-		segPtr->u.l.pos[0] = p0;
-		segPtr->u.l.pos[1] = p1;
-		segPtr->u.l.angle = angle;
-		segPtr->u.l.option = 0;
-		return;
-	}
-
-	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-
-	if (options&DTS_THICK2)
-		width = 2;
-	if (options&DTS_THICK3)
-		width = 3;
-#ifdef WINDOWS
-	width *= (wDrawWidth)(d->dpi/mainD.dpi);
-#else
-	if (d->options&DC_PRINT)
-		width *= 300/75;
-#endif
-LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
-				p0.x, p0.y, p1.x, p1.y ) )
-	if ( (options&DTS_TIES) != 0 && trk &&
-		 tieDrawMode!=TIEDRAWMODE_NONE &&
-		 d!=&mapD &&
-		 (d->options&DC_TIES)!=0 &&
-		 d->scale<scale2rail/2 )
-		DrawStraightTies( d, trk, p0, p1, color );
-	if (color == wDrawColorBlack)
-		color = normalColor;
-	if ( d->scale >= scale2rail ) {
-		DrawLine( d, p0, p1, width, color );
-	} else if (d->options&DC_QUICK) {
-		DrawLine( d, p0, p1, 0, color );
-	} else {
-		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0
-				|| (d->scale <= scale2rail/2 && d->options&DC_PRINT && printCenterLines)) {  // if printing two rails respect print CenterLine option
-			long options = d->options;
-			d->options |= DC_DASH;
-			DrawLine( d, p0, p1, 0, color );
-			d->options = options;
-		}
-		Translate( &pp0, p0, angle+90, trackGauge/2.0 );
-		Translate( &pp1, p1, angle+90, trackGauge/2.0 );
-		DrawLine( d, pp0, pp1, width, color );
-		Translate( &pp0, p0, angle-90, trackGauge/2.0 );
-		Translate( &pp1, p1, angle-90, trackGauge/2.0 );
-		DrawLine( d, pp0, pp1, width, color );
-		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && d->scale <= scale2rail/2.0) {
-			 wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
-			 if ( options&DTS_RIGHT ) {
-				Translate( &pp0, p0, angle+90, roadbedWidth/2.0 );
-				Translate( &pp1, p1, angle+90, roadbedWidth/2.0 );
-				DrawLine( d, pp0, pp1, rbw, color );
-			 }
-			 if ( options&DTS_LEFT ) {
-				Translate( &pp0, p0, angle-90, roadbedWidth/2.0 );
-				Translate( &pp1, p1, angle-90, roadbedWidth/2.0 );
-				DrawLine( d, pp0, pp1, rbw, color );
-			 }
-		}
+		DrawPoly( d, 4, p, t, color, 0, DRAW_CLOSED);
 	}
 }
 
@@ -2475,28 +2832,35 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	ANGLE_T grade = 0.0;
 
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
+		ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
 		len = GetTrkLength( trk, 0, 1 );
+		ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
 		if (len>0.1) {
-			ComputeElev( trk, 0, FALSE, &elev0, NULL );
-			ComputeElev( trk, 1, FALSE, &elev1, NULL );
-			grade = fabs( (elev1-elev0)/len )*100.0;
+			grade = fabs( (elev1-elev0)/len)*100.0;
 		}
 	}
-	if ( (d->options&(DC_GROUP)) == 0 ) {
-		if ( grade > GetLayoutMaxTrackGrade())
-			return exceptionColor;
-		if ( QueryTrack( trk, Q_EXCEPTION ) )
-			return exceptionColor;
+	if ( (d->options&(DC_SIMPLE|DC_SEGTRACK)) != 0 ) {
+		return wDrawColorBlack;
 	}
-	if ( (d->options&(DC_PRINT|DC_GROUP)) == 0 ) {
-		if (GetTrkBits(trk)&TB_PROFILEPATH)
+	if ( grade > GetLayerMaxTrackGrade(GetTrkLayer(trk))) {
+		return exceptionColor;
+	}
+	if ( QueryTrack( trk, Q_EXCEPTION ) ) {
+		return exceptionColor;
+	}
+	if ( (d->options&(DC_PRINT)) == 0 ) {
+		if (GetTrkBits(trk)&TB_PROFILEPATH) {
 			return profilePathColor;
-		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk))
+		}
+		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk) && d == &tempD) {
 			return selectedColor;
+		}
 	}
-	if ( (d->options&(DC_GROUP)) == 0 ) {
-		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) )
-			return GetLayerColor((unsigned int)curTrackLayer);
+	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) ) {
+		unsigned int iLayer = GetTrkLayer( trk );
+		if (GetLayerUseColor( iLayer ) ) {
+			return GetLayerColor( iLayer );
+		}
 	}
 	return wDrawColorBlack;
 }
@@ -2504,41 +2868,44 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 
 EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 {
-	DIST_T scale2rail;
 	TRKTYP_T trkTyp;
 
+	// Hack for WINDOWS
+	if ( trk->bits & TB_UNDRAWN ) {
+		return;
+	}
 	trkTyp = GetTrkType(trk);
 	curTrackLayer = GetTrkLayer(trk);
 	if (d != &mapD ) {
 		if ( (!GetTrkVisible(trk)) ) {
-			if ( drawTunnel==DRAW_TUNNEL_NONE )
+			if ( drawTunnel==DRAW_TUNNEL_NONE ) {
 				return;
-			if ( drawTunnel==DRAW_TUNNEL_DASH )
+			}
+			if ( drawTunnel==DRAW_TUNNEL_DASH ) {
 				d->options |= DC_DASH;
+			}
 		}
 		if (color == wDrawColorBlack) {
 			color = GetTrkColor( trk, d );
 		}
+		if (color == wDrawColorPreviewSelected
+		    || color == wDrawColorPreviewUnselected ) {
+			d->options |= DC_THICK;
+		}
 	}
-	if (d == &mapD && !GetLayerOnMap(curTrackLayer))
+
+	if (d == &mapD && !GetLayerOnMap(curTrackLayer)) {
 		return;
-	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
-		d != &mapD && color == wDrawColorBlack )
-		color = GetLayerColor((unsigned int)curTrackLayer);
-	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-	if ( (!inDrawTracks) &&
-		 tieDrawMode!=TIEDRAWMODE_NONE &&
-		 d != &mapD &&
-		 d->scale<scale2rail/2 &&
-		 QueryTrack(trk, Q_ISTRACK) &&
-		 (GetTrkVisible(trk) || drawTunnel==DRAW_TUNNEL_SOLID) ) {
-		d->options |= DC_TIES;
 	}
+	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) &&
+	     (d != &mapD) && (color == wDrawColorBlack) )
+		if (GetLayerUseColor((unsigned int)curTrackLayer)) {
+			color = GetLayerColor((unsigned int)curTrackLayer);
+		}
 	trackCmds(trkTyp)->draw( trk, d, color );
-	if ( (!inDrawTracks) ) {
-		d->options &= ~DC_TIES;
-	}
 	d->options &= ~DC_DASH;
+
+	d->options &= ~DC_THICK;
 
 	DrawTrackElev( trk, d, color!=wDrawColorWhite );
 }
@@ -2546,21 +2913,21 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 
 static void DrawATrack( track_cp trk, wDrawColor color )
 {
-	DrawMapBoundingBox( FALSE );
 	DrawTrack( trk, &mapD, color );
 	DrawTrack( trk, &mainD, color );
-	DrawMapBoundingBox( TRUE );
 }
 
 
 EXPORT void DrawNewTrack( track_cp t )
 {
+	t->bits &= ~TB_UNDRAWN;
 	DrawATrack( t, wDrawColorBlack );
 }
 
 EXPORT void UndrawNewTrack( track_cp t )
 {
 	DrawATrack( t, wDrawColorWhite );
+	t->bits |= TB_UNDRAWN;
 }
 
 EXPORT int doDrawPositionIndicator = 1;
@@ -2568,17 +2935,21 @@ EXPORT void DrawPositionIndicators( void )
 {
 	track_p trk;
 	coOrd hi, lo;
-	if ( !doDrawPositionIndicator )
+	if ( !doDrawPositionIndicator ) {
 		return;
+	}
 	TRK_ITERATE( trk ) {
 		if ( trackCmds(trk->type)->drawPositionIndicator ) {
-			if ( drawTunnel==DRAW_TUNNEL_NONE && (!GetTrkVisible(trk)) )
+			if ( drawTunnel==DRAW_TUNNEL_NONE && (!GetTrkVisible(trk)) ) {
 				continue;
+			}
 			GetBoundingBox( trk, &hi, &lo );
-			if ( OFF_MAIND( lo, hi ) )
+			if ( OFF_MAIND( lo, hi ) ) {
 				continue;
-			if (!GetLayerVisible( GetTrkLayer(trk) ) )
+			}
+			if (!GetLayerVisible( GetTrkLayer(trk) ) ) {
 				continue;
+			}
 			trackCmds(trk->type)->drawPositionIndicator( trk, selectedColor );
 		}
 	}
@@ -2586,13 +2957,14 @@ EXPORT void DrawPositionIndicators( void )
 
 
 EXPORT void AdvancePositionIndicator(
-		track_p trk,
-		coOrd pos,
-		coOrd * posR,
-		ANGLE_T * angleR )
+        track_p trk,
+        coOrd pos,
+        coOrd * posR,
+        ANGLE_T * angleR )
 {
-	if ( trackCmds(trk->type)->advancePositionIndicator )
+	if ( trackCmds(trk->type)->advancePositionIndicator ) {
 		trackCmds(trk->type)->advancePositionIndicator( trk, pos, posR, angleR );
+	}
 }
 /*****************************************************************************
  *
@@ -2600,83 +2972,22 @@ EXPORT void AdvancePositionIndicator(
  *
  */
 
-static void DrawUnconnectedEndPt( drawCmd_p d, coOrd p, ANGLE_T a, DIST_T trackGauge, wDrawColor color )
+static void DrawUnconnectedEndPt( drawCmd_p d, coOrd p, ANGLE_T a,
+                                  DIST_T trackGauge, wDrawColor color )
 {
 	coOrd p0, p1;
+	Translate( &p0, p, a, trackGauge );
+	Translate( &p1, p, a-180.0, trackGauge );
+	DrawLine( d, p0, p1, 0, color );
+	if (d->scale < 8 || drawUnconnectedEndPt > 0) {
+		Translate( &p, p, a+90.0, 0.2 );
 		Translate( &p0, p, a, trackGauge );
 		Translate( &p1, p, a-180.0, trackGauge );
-		DrawLine( d, p0, p1, 0, color );
-		if (d->scale < 8 || drawUnconnectedEndPt > 0) {
-			Translate( &p, p, a+90.0, 0.2 );
-			Translate( &p0, p, a, trackGauge );
-			Translate( &p1, p, a-180.0, trackGauge );
-			DrawLine( d, p0, p1, (drawUnconnectedEndPt>0)?4:0, (drawUnconnectedEndPt>1)?exceptionColor:color );
-		}
-}
-
-
-EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color )
-{
-	coOrd pp;
-	wFont_p fp;
-	elev_t * elev;
-	track_p trk1;
-	DIST_T elev0, grade;
-	ANGLE_T a=0;
-	int style = BOX_BOX;
-	BOOL_T gradeOk = TRUE;
-	char *elevStr;
-
-	if ((labelEnable&LABELENABLE_ENDPT_ELEV)==0)
-		return;
-	elev = &trk->endPt[ep].elev;		/* TRACKDEP */
-	if ( (elev->option&ELEV_MASK)==ELEV_NONE ||
-		 (elev->option&ELEV_VISIBLE)==0 )
-		return;
-	if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) )
-		return;
-
-	fp = wStandardFont( F_HELV, FALSE, FALSE );
-	pp = GetTrkEndPos( trk, ep );
-	switch ((elev->option&ELEV_MASK)) {
-	case ELEV_COMP:
-	case ELEV_GRADE:
-		if ( color == wDrawColorWhite ) {
-			elev0 = grade = elev->u.height;
-		} else if ( !ComputeElev( trk, ep, FALSE, &elev0, &grade ) ) {
-			elev0 = grade = 0;
-			gradeOk = FALSE;
-		}
-		if ((elev->option&ELEV_MASK)==ELEV_COMP) {
-			elevStr = FormatDistance(elev0);
-			elev->u.height = elev0;
-		} else if (gradeOk) {
-			sprintf( message, "%0.1f%%", fabs(grade*100.0) );
-			elevStr = message;
-			a = GetTrkEndAngle( trk, ep );
-			style = BOX_ARROW;
-			if (grade <= -0.001)
-				a = NormalizeAngle( a+180.0 );
-			else if ( grade < 0.001 )
-				style = BOX_BOX;
-			elev->u.height = grade;
-		} else {
-			elevStr = "????%%";
-		}
-		break;
-	case ELEV_DEF:
-		elevStr = FormatDistance( elev->u.height);
-		break;
-	case ELEV_STATION:
-		elevStr = elev->u.name;
-		break;
-	default:
-		return;
+		DrawLine( d, p0, p1, (drawUnconnectedEndPt>0)?4:0,
+		          (color==wDrawColorWhite)?color:(drawUnconnectedEndPt>1)?exceptionColor:color );
 	}
-	pp.x += elev->doff.x;
-	pp.y += elev->doff.y;
-	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize, color, a );
 }
+
 
 /**
  * Draw track endpoints. The correct track endpoint (connected, unconnected etc.)
@@ -2690,124 +3001,154 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
  */
 
 EXPORT void DrawEndPt(
-		drawCmd_p d,
-		track_p trk,
-		EPINX_T ep,
-		wDrawColor color )
+        drawCmd_p d,
+        track_p trk,
+        EPINX_T ep,
+        wDrawColor color)
 {
 	coOrd p;
 	ANGLE_T a;
 	track_p trk1;
-	coOrd p0, p1, p2;
+	coOrd p0,p1,p2;
 	BOOL_T sepBoundary;
+	BOOL_T showBridge = 1;
 	DIST_T trackGauge;
 	wDrawWidth width;
 	wDrawWidth width2;
 
-	// line width for the tunnel portal, make sure it is rounded correctly
-	width2 = (wDrawWidth)round((2.0 * d->dpi)/75.0);
-	if (d->funcs->options&wDrawOptTemp)
+	if((d->options & (DC_SIMPLE | DC_SEGTRACK)) != 0) {
 		return;
-	if ( trk && QueryTrack( trk, Q_NODRAWENDPT ) )
+	}
+	if(trk && QueryTrack(trk,Q_NODRAWENDPT)) {
 		return;
-
-	if (trk == NULL || ep < 0)
-		return;
-
-	if (color == wDrawColorBlack)
-		color = normalColor;
-
-	if (labelScale >= d->scale)
-		DrawEndElev( d, trk, ep, color );
-
-	trk1 = GetTrkEndTrk(trk,ep);
-	p = GetTrkEndPos( trk, ep );
-	a = GetTrkEndAngle( trk, ep ) + 90.0;
-
-	trackGauge = GetTrkGauge(trk);
-	if (trk1 == NULL) {
-		DrawUnconnectedEndPt( d, p, a, trackGauge, color );
+	}
+	if(trk == NULL || ep < 0) {
 		return;
 	}
 
-	if ( d->scale >= ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) )
-			return;
+	// line width for the tunnel portal and bridge parapets, make sure it is rounded correctly
+	width2 = (wDrawWidth)round((2.0 * d->dpi) / BASE_DPI);
+	if ((d->options&DC_PRINT) && (d->dpi>2*BASE_DPI)) {
+		width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
+	}
+
+
+	if(color == wDrawColorBlack) {
+		color = normalColor;
+	}
+
+	if(((d->options & DC_PRINT) ? (labelScale * 2 + 1) : labelScale) >= d->scale) {
+		DrawEndElev(d,trk,ep,color);
+	}
+
+	trk1 = GetTrkEndTrk(trk,ep);
+	p = GetTrkEndPos(trk,ep);
+	a = GetTrkEndAngle(trk,ep) + 90.0;
+
+	trackGauge = GetTrkGauge(trk);
+	if(trk1 == NULL) {
+		DrawUnconnectedEndPt(d,p,a,trackGauge,color);
+		return;
+	}
 
 	sepBoundary = FALSE;
-	if ((d->options&DC_PRINT)==0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
-		DIST_T len;
-		len = trackGauge*2.0;
-		if (len < 0.10*d->scale)
-			len = 0.10*d->scale;
-		Translate( &p0, p, a+45, len );
-		Translate( &p1, p, a+225, len );
-		DrawLine( &tempD, p0, p1, 0, selectedColor );
-		Translate( &p0, p, a-45, len );
-		Translate( &p1, p, a-225, len );
-		DrawLine( &tempD, p0, p1, 0, selectedColor );
-		sepBoundary = TRUE;
-	} else if ((d->options&DC_PRINT)==0 && importTrack == NULL && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
-		sepBoundary = TRUE;
+	if ( DrawTwoRails(d,1) ) {
+		if(inDrawTracks && (d->options & DC_PRINT) == 0 && importTrack == NULL
+		   && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
+			DIST_T len;
+			len = trackGauge * 2.0;
+			if(len < 0.10 * d->scale) {
+				len = 0.10 * d->scale;
+			}
+			long oldOptions = d->options;
+			d->options &= ~DC_NOTSOLIDLINE;
+			Translate(&p0,p,a + 45,len);
+			Translate(&p1,p,a + 225,len);
+			DrawLine(d,p0,p1,2,selectedColor);
+			Translate(&p0,p,a - 45,len);
+			Translate(&p1,p,a - 225,len);
+			DrawLine(d,p0,p1,2,selectedColor);
+			d->options = oldOptions;
+			sepBoundary = TRUE;
+		} else if((d->options & DC_PRINT) == 0 && importTrack == NULL
+		          && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
+			sepBoundary = TRUE;
+		}
 	}
 
 	// is the endpoint a transition into a tunnel?
-	if (GetTrkVisible(trk) && (!GetTrkVisible(trk1))) {
+	if(GetTrkVisible(trk) && (!GetTrkVisible(trk1))) {
 		// yes, draw tunnel portal
-		Translate( &p0, p, a, trackGauge );
-		Translate( &p1, p, a+180, trackGauge );
-		DrawLine( d, p0, p1, width2, color );
-		Translate( &p2, p0, a+45, trackGauge/2.0 );
-		DrawLine( d, p0, p2, width2, color );
-		Translate( &p2, p1, a+135, trackGauge/2.0 );
-		DrawLine( d, p1, p2, width2, color );
-		if ( d == &mainD ) {
-			width = (wDrawWidth)ceil(trackGauge*d->dpi/2.0/d->scale);
-			if ( width > 1 ) {
-				if ( (GetTrkEndOption(trk,ep)&EPOPT_GAPPED) != 0 ) {
-					Translate( &p0, p, a, trackGauge );
-					DrawLine( d, p0, p, width, color );
+		Translate(&p0,p,a,trackGauge);
+		Translate(&p1,p,a + 180,trackGauge);
+		DrawLine(d,p0,p1,width2,color);
+		Translate(&p2,p0,a + 45,trackGauge / 2.0);
+		DrawLine(d,p0,p2,width2,color);
+		Translate(&p2,p1,a + 135,trackGauge / 2.0);
+		DrawLine(d,p1,p2,width2,color);
+		if(d == &mainD) {
+			width = (wDrawWidth)ceil(trackGauge * d->dpi / 2.0 / d->scale);
+			if(width > 1) {
+				if((GetTrkEndOption(trk,ep) & EPOPT_GAPPED) != 0) {
+					Translate(&p0,p,a,trackGauge);
+					DrawLine(d,p0,p,width,color);
 				}
 				trk1 = GetTrkEndTrk(trk,ep);
-				if ( trk1 ) {
-					ep = GetEndPtConnectedToMe( trk1, trk );
-					if ( (GetTrkEndOption(trk1,ep)&EPOPT_GAPPED) != 0 ) {
-						Translate( &p0, p, a+180.0, trackGauge );
-						DrawLine( d, p0, p, width, color );
+				if(trk1) {
+					ep = GetEndPtConnectedToMe(trk1,trk);
+					if((GetTrkEndOption(trk1,ep) & EPOPT_GAPPED) != 0) {
+						Translate(&p0,p,a + 180.0,trackGauge);
+						DrawLine(d,p0,p,width,color);
 					}
 				}
 			}
+			showBridge = 0;
 		}
-	} else if ((!GetTrkVisible(trk)) && GetTrkVisible(trk1)) {
-		;
-	} else if ( GetLayerVisible( GetTrkLayer( trk ) ) && !GetLayerVisible( GetTrkLayer( trk1 ) ) ) {
+	} else if((!GetTrkVisible(trk)) && GetTrkVisible(trk1)) {
+		showBridge = 0;
+	} else if(GetLayerVisible(GetTrkLayer(trk))
+	          && !GetLayerVisible(GetTrkLayer(trk1))) {
 		a -= 90.0;
-		Translate( &p, p, a, trackGauge/2.0 );
-		Translate( &p0, p, a-135.0, trackGauge*2.0 );
-		DrawLine( d, p0, p, width2, color );
-		Translate( &p0, p, a+135.0, trackGauge*2.0 );
-		DrawLine( d, p0, p, width2, color );
-	} else if ( !GetLayerVisible( GetTrkLayer( trk ) ) && GetLayerVisible( GetTrkLayer( trk1 ) ) ) {
+		Translate(&p,p,a,trackGauge / 2.0);
+		Translate(&p0,p,a - 135.0,trackGauge * 2.0);
+		DrawLine(d,p0,p,width2,color);
+		Translate(&p0,p,a + 135.0,trackGauge * 2.0);
+		DrawLine(d,p0,p,width2,color);
+
+		showBridge = 0;
+	} else if(!GetLayerVisible(GetTrkLayer(trk))
+	          && GetLayerVisible(GetTrkLayer(trk1))) {
+		showBridge = 0;
+	} else if(sepBoundary) {
 		;
-	} else if ( sepBoundary ) {
-		;
-	} else if ( (drawEndPtV == 1 && (QueryTrack(trk,Q_DRAWENDPTV_1) || QueryTrack(trk1,Q_DRAWENDPTV_1)) ) ||
-				(drawEndPtV == 2) ) {
-		Translate( &p0, p, a, trackGauge );
+	} else if((drawEndPtV == 1 && (QueryTrack(trk,Q_DRAWENDPTV_1)
+	                               || QueryTrack(trk1,Q_DRAWENDPTV_1))) || (drawEndPtV == 2)) {
+		Translate(&p0,p,a,trackGauge);
 		width = 0;
-		if ( d != &mapD && d != &tempD && (GetTrkEndOption(trk,ep)&EPOPT_GAPPED) != 0 )
-			width = (wDrawWidth)ceil(trackGauge*d->dpi/2.0/d->scale);
-		DrawLine( d, p0, p, width, color );
+		if(d != &mapD && d != &tempD && (GetTrkEndOption(trk,ep) & EPOPT_GAPPED) != 0) {
+			width = (wDrawWidth)ceil(trackGauge * d->dpi / 2.0 / d->scale);
+		}
+		DrawLine(d,p0,p,width,color);
 	} else {
 		;
+	}
+
+	if(showBridge && GetTrkBridge(trk) && (!GetTrkBridge(trk1))) {
+		Translate(&p0,p,a,trackGauge * 1.5);
+		Translate(&p1,p0,a - 45.0,trackGauge * 1.5);
+		DrawLine(d,p0,p1,width2,color);
+		Translate(&p0,p,a,-trackGauge * 1.5);
+		Translate(&p1,p0,a + 45.0,-trackGauge * 1.5);
+		DrawLine(d,p0,p1,width2,color);
 	}
 }
 
 
 EXPORT void DrawEndPt2(
-		drawCmd_p d,
-		track_p trk,
-		EPINX_T ep,
-		wDrawColor color )
+        drawCmd_p d,
+        track_p trk,
+        EPINX_T ep,
+        wDrawColor color )
 {
 	track_p trk1;
 	EPINX_T ep1;
@@ -2815,8 +3156,9 @@ EXPORT void DrawEndPt2(
 	trk1 = GetTrkEndTrk( trk, ep );
 	if (trk1) {
 		ep1 = GetEndPtConnectedToMe( trk1, trk );
-		if (ep1>=0)
+		if (ep1>=0) {
 			DrawEndPt( d, trk1, ep1, color );
+		}
 	}
 }
 
@@ -2827,56 +3169,53 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 	wIndex_t count = 0;
 	coOrd lo, hi;
 	BOOL_T doSelectRecount = FALSE;
-	
+	unsigned long time0 = wGetTimer();
+
 	inDrawTracks = TRUE;
 	InfoCount( 0 );
 
-	d->options |= DC_TIES;
 	TRK_ITERATE( trk ) {
 		if ( (d->options&DC_PRINT) != 0 &&
-			 wPrintQuit() ) {
+		     wPrintQuit() ) {
 			inDrawTracks = FALSE;
 			return;
 		}
-		if ( GetTrkSelected(trk) && 
-			( (!GetLayerVisible(GetTrkLayer(trk))) ||
-			  (drawTunnel==0 && !GetTrkVisible(trk)) ) ) {
+		if ( GetTrkSelected(trk) &&
+		     ( (!GetLayerVisible(GetTrkLayer(trk))) ||
+		       (drawTunnel==0 && !GetTrkVisible(trk)) ) ) {
 			ClrTrkBits( trk, TB_SELECTED );
 			doSelectRecount = TRUE;
 		}
 		GetBoundingBox( trk, &hi, &lo );
 		if ( OFF_D( orig, size, lo, hi ) ||
-			(d != &mapD && !GetLayerVisible( GetTrkLayer(trk) ) ) ||
-			(d == &mapD && !GetLayerOnMap( GetTrkLayer(trk) ) ) )
+		     (d != &mapD && !GetLayerVisible( GetTrkLayer(trk) ) ) ||
+		     (d == &mapD && !GetLayerOnMap( GetTrkLayer(trk) ) ) ) {
 			continue;
+		}
 		DrawTrack( trk, d, wDrawColorBlack );
 		count++;
-		if (count%10 == 0) 
+		if (count%10 == 0) {
 			InfoCount( count );
+		}
 	}
-	d->options &= ~DC_TIES;
 
 	if (d == &mainD) {
 		for (inx=1; inx<trackCmds_da.cnt; inx++)
-			if (trackCmds(inx)->redraw != NULL)
+			if (trackCmds(inx)->redraw != NULL) {
 				trackCmds(inx)->redraw();
+			}
+		LOG( log_timedrawtracks, 1, ( "DrawTracks time = %lu mS\n",
+		                              wGetTimer()-time0 ) );
 	}
 	InfoCount( trackCount );
 	inDrawTracks = FALSE;
-	if ( doSelectRecount )
+	if ( doSelectRecount ) {
 		SelectRecount();
+	}
 }
 
 
-EXPORT void RedrawLayer( unsigned int l, BOOL_T draw )
-{
-	MainRedraw();
-	MapRedraw();
-
-}
-
-
-EXPORT void DrawSelectedTracks( drawCmd_p d )
+EXPORT void DrawSelectedTracks( drawCmd_p d, BOOL_T all )
 {
 	track_cp trk;
 	wIndex_t count;
@@ -2885,11 +3224,12 @@ EXPORT void DrawSelectedTracks( drawCmd_p d )
 	InfoCount( 0 );
 
 	TRK_ITERATE( trk ) {
-		if ( GetTrkSelected( trk ) ) {
+		if ( (all && GetLayerVisible(GetTrkLayer(trk))) || GetTrkSelected( trk ) ) {
 			DrawTrack( trk, d, wDrawColorBlack );
 			count++;
-			if (count%10 == 0)
+			if (count%10 == 0) {
 				InfoCount( count );
+			}
 		}
 	}
 	InfoCount( trackCount );
@@ -2899,8 +3239,6 @@ EXPORT void DrawSelectedTracks( drawCmd_p d )
 
 EXPORT void HilightElevations( BOOL_T hilight )
 {
-	static long lastRedraw = -1;
-	static BOOL_T lastHilight = FALSE;
 	track_p trk, trk1;
 	EPINX_T ep;
 	int mode;
@@ -2908,54 +3246,48 @@ EXPORT void HilightElevations( BOOL_T hilight )
 	coOrd pos;
 	DIST_T radius;
 
-	if (currRedraw > lastRedraw) {
-		lastRedraw = currRedraw;
-		lastHilight = FALSE;
-	}
-	if (lastHilight == hilight)
-		return;
 	radius = 0.05*mainD.scale;
-	if ( radius < trackGauge/2.0 )
+	if ( radius < trackGauge/2.0 ) {
 		radius = trackGauge/2.0;
+	}
 	TRK_ITERATE( trk ) {
-		for (ep=0;ep<GetTrkEndPtCnt(trk);ep++) {
-			GetTrkEndElev( trk, ep, &mode, &elev );		/* TRACKDEP */
+		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+			GetTrkEndElev( trk, ep, &mode, &elev );
 			if ((mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE) {
 				if ((trk1=GetTrkEndTrk(trk,ep)) != NULL &&
-					GetTrkIndex(trk1) < GetTrkIndex(trk))
+				    GetTrkIndex(trk1) < GetTrkIndex(trk)) {
 					continue;
-				if (drawTunnel == DRAW_TUNNEL_NONE && (!GetTrkVisible(trk)) && (trk1==NULL||!GetTrkVisible(trk1)) )
+				}
+				if (drawTunnel == DRAW_TUNNEL_NONE && (!GetTrkVisible(trk)) && (trk1==NULL
+				                ||!GetTrkVisible(trk1)) ) {
 					continue;
+				}
 				if ((!GetLayerVisible(GetTrkLayer(trk))) &&
-					(trk1==NULL||!GetLayerVisible(GetTrkLayer(trk1))))
+				    (trk1==NULL||!GetLayerVisible(GetTrkLayer(trk1)))) {
 					continue;
+				}
 				pos = GetTrkEndPos(trk,ep);
 				if ( !OFF_MAIND( pos, pos ) ) {
 					DrawFillCircle( &tempD, pos, radius,
-						((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore) );
+					                ((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore) );
 				}
 			}
 		}
 	}
-	lastHilight = hilight;
 }
 
 
 EXPORT void HilightSelectedEndPt( BOOL_T show, track_p trk, EPINX_T ep )
 {
-	static BOOL_T lastShow = FALSE;
-	static long lastRedraw = -1;
 	coOrd pos;
-	if (trk == NULL)
-		return;
-	if (currRedraw > lastRedraw) {
-		lastRedraw = currRedraw;
-		lastShow = FALSE;
-	}
-	if (lastShow != show) {
+	if (!trk || (ep==-1)) { return; }
+	pos = GetTrkEndPos( trk, ep );
+	if ( show == TRUE ) {
 		pos = GetTrkEndPos( trk, ep );
 		DrawFillCircle( &tempD, pos, 0.10*mainD.scale, selectedColor );
-		lastShow = show;
+	} else 	 {
+		pos = GetTrkEndPos( trk, ep );
+		DrawFillCircle( &tempD, pos, 0.10*mainD.scale, wDrawColorWhite );
 	}
 }
 
@@ -2970,15 +3302,17 @@ EXPORT void LabelLengths( drawCmd_p d, track_p trk, wDrawColor color )
 	char * msg;
 	coOrd textsize;
 
-	if ((labelEnable&LABELENABLE_LENGTHS)==0)
+	if ((labelEnable&LABELENABLE_LENGTHS)==0) {
 		return;
+	}
 	fp = wStandardFont( F_HELV, FALSE, FALSE );
 	fs = (float)descriptionFontSize/d->scale;
 	for (i=0; i<GetTrkEndPtCnt(trk); i++) {
 		p0 = GetTrkEndPos( trk, i );
 		dist = GetFlexLength( trk, i, &p1 );
-		if (dist < 0.1) 
+		if (dist < 0.1) {
 			continue;
+		}
 		if (dist < 3.0) {
 			p0.x = (p0.x+p1.x)/2.0;
 			p0.y = (p0.y+p1.y)/2.0;
@@ -2992,3 +3326,62 @@ EXPORT void LabelLengths( drawCmd_p d, track_p trk, wDrawColor color )
 		DrawString( d, p0, 0.0, msg, fp, fs*d->scale, color );
 	}
 }
+
+EXPORT void AddTrkDetails(drawCmd_p d,track_p trk,coOrd pos, DIST_T length,
+                          wDrawColor color)
+{
+#define DESC_LENGTH 6.0;
+	double division;
+	division = length/DESC_LENGTH;
+	division = ceil(division);
+	DIST_T dist = length/division, dist1;
+	traverseTrack_t tt;
+	tt.trk = trk;
+	tt.angle = GetTrkEndAngle(trk,0)+180.0;
+	tt.pos = GetTrkEndPos(trk,0);
+
+	dynArr_t pos_array;
+	DYNARR_INIT( pos_angle_t, pos_array );
+
+	typedef struct {
+		coOrd pos;
+		ANGLE_T angle;
+	} pos_angle_t;
+
+	DYNARR_SET(pos_angle_t,pos_array,(int)division+1);
+	DYNARR_N(pos_angle_t,pos_array,0).pos = GetTrkEndPos(trk,0);
+	DYNARR_N(pos_angle_t,pos_array,0).angle = NormalizeAngle(GetTrkEndAngle(trk,
+	                0)+180.0);
+	for (int i=1; i<pos_array.cnt; i++) {
+		tt.dist = dist;
+		dist1 = dist;
+		TraverseTrack(&tt,&dist1);
+		if (dist1 > 0 || tt.trk != trk
+		    || IsClose(FindDistance(tt.pos,GetTrkEndPos(trk,1)))) {
+			DYNARR_N(pos_angle_t,pos_array,i).pos = GetTrkEndPos(trk,1);
+			DYNARR_N(pos_angle_t,pos_array,i).angle = GetTrkEndAngle(trk,1);
+			// Truncate pos_array
+			DYNARR_SET( pos_angle_t, pos_array, i+1 );
+			break;
+		}
+		DYNARR_N(pos_angle_t,pos_array,i).pos = tt.pos;
+		DYNARR_N(pos_angle_t,pos_array,i).angle = tt.angle;
+	}
+	message[0]='\0';
+	for (int i=0; i<pos_array.cnt; i++) {
+		if (i==pos_array.cnt-1) {
+			sprintf( &message[strlen(message)], _("[%0.2f,%0.2f] A%0.2f"),
+			         PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,
+			                         pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle );
+		} else {
+			sprintf( &message[strlen(message)], _("[%0.2f,%0.2f] A%0.2f\n"),
+			         PutDim(DYNARR_N(pos_angle_t,pos_array,i).pos.x),PutDim(DYNARR_N(pos_angle_t,
+			                         pos_array,i).pos.y),DYNARR_N(pos_angle_t,pos_array,i).angle);
+		}
+	}
+	wFont_p fp = wStandardFont( F_TIMES, FALSE, FALSE );
+	DrawBoxedString(BOX_BOX,d,pos,message,fp,(wFontSize_t)descriptionFontSize,color,
+	                0.0);
+	DYNARR_FREE( pos_angle_t, pos_array );
+}
+

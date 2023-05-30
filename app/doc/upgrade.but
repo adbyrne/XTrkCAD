@@ -10,6 +10,12 @@ This section contains helpful information regarding program changes and the effe
 
 \rule
 
+\H{v5} Version 5.x
+
+Version 5.x.x of XTrackCAD introduced many enhancements an additions including Layout Control Objects, Cornu Tracks and Bezier Tracks and Lines. It is upward compatible from earlier versions but if the new objects are included in layouts, the files will not be readable by earlier versions.
+
+Users should take a backup of thier Layout files if they will want to use the previous level of code before opening them. 
+
 \H{cmdUpdatetitle} Version 2.x
 
 \f{Updated Titles}
@@ -33,39 +39,6 @@ If you are looking at old files without making changes then Click on Cancel to l
 Not updating the titles prevents the customization of the way titles are presented in various lists and on the layout.  Basic operation of \e{XTrackCAD} is not affected.
 
 \rule
-
-
-\H{v4.0.x_revisions} Version 4.0.x
-
-\f{Check-point Files}
-
-Version 4 of \e{XTrkCad} introduces a new way of handling check-point files. This will allow resuming your work after a system crash much easier than before. 
-
-If you start \e{XTrkCad} V.4.0.x the first time after an upgrade from a earlier version, a pop-up with the question: "Program was not terminated properly. Do you want to resume working on the 
-previous track plan?"
-
-Select "Ignore" only if you're sure that the work from your last session has been correctly saved. If uncertain or restarting after an earlier failure select "Resume".
-
-\u000
-
-\f{Help System}
-
-The built in help system has been converted to a much more flexible and widely used HTML format. With many new graphics and extensively rewritten text the help information is now up-to-date with recent development.
-
-\f{Layer Colour Settings}
-
-Your personal layer color settings are now stored in your preferences. This allows you to apply the same settings to other layouts you design.
-
-\f{Parameter Files Updated}
-
-Thanks to Ralph Boyd, Dwayne Ward, Casey Sterbenz and others, many new and updated parameter files were added to this release.
-
-\f{Wheel mouse}
-
-The wheel on a wheel mouse can now be used to zoom in and out on a layout design.
-
-\rule
-
 
 \H{v4.0.3_revisions} Version 4.0.3
 
@@ -164,3 +137,36 @@ With release of this version of \e{XTrackCAD} there's been a subtle change in th
 Why was the name changed? This release gives \e{XTrackCAD} developers an opportunity to included a much sought after feature; Internationalization (Through i18n). On the surface this doesn't sound that big however having the ability to internationalize or localize the product has great advantages for all users. Not only is there great potential for the application to become available to a larger audience, our hope it that the developer pool will expand which should result in more features being added to the application.
 
 \rule
+
+\H{v4.0.x_revisions} Version 4.0.x
+
+\f{Check-point Files}
+
+Version 4 of \e{XTrkCad} introduces a new way of handling check-point files. This will allow resuming your work after a system crash much easier than before. 
+
+If you start \e{XTrkCad} V.4.0.x the first time after an upgrade from a earlier version, a pop-up with the question: "Program was not terminated properly. Do you want to resume working on the 
+previous track plan?"
+
+Select "Ignore" only if you're sure that the work from your last session has been correctly saved. If uncertain or restarting after an earlier failure select "Resume".
+
+\u000
+
+\f{Help System}
+
+The built in help system has been converted to a much more flexible and widely used HTML format. With many new graphics and extensively rewritten text the help information is now up-to-date with recent development.
+
+\f{Layer Colour Settings}
+
+Your personal layer color settings are now stored in your preferences. This allows you to apply the same settings to other layouts you design.
+
+\f{Parameter Files Updated}
+
+Thanks to Ralph Boyd, Dwayne Ward, Casey Sterbenz and others, many new and updated parameter files were added to this release.
+
+\f{Wheel mouse}
+
+The wheel on a wheel mouse can now be used to zoom in and out on a layout design.
+
+\rule
+
+

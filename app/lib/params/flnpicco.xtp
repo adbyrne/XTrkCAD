@@ -183,10 +183,12 @@ TURNOUT N "Fleischmann N Scale	Crossing Left 111mm 15°	9163"
 	L 0 0.000000 2.103522 -0.304228 4.290165 -0.890138
 	L 0 0.000000 0.079914 0.890138 2.266557 0.304228
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip Left 111mm 15°	9184"
+TURNOUT N "Fleischmann N Scale	Double Slip Left 111mm 15°	9184" 512
 	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip Left 111mm 15°" "9184" 4.527559 15.000000 4.370079 0.629921 0.000000 0
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 4.527559 0.000000 90.000000
 	E 0.153194 0.565530 285.000000
@@ -206,10 +208,12 @@ TURNOUT N "Fleischmann N Scale	Double Slip Left 111mm 15°	9184"
 	A 0 0.000000 10.917940 0.784940 -11.232900 0.000000 15.000000
 	A 0 0.000000 10.917940 3.742619 11.232900 180.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip Right 111mm 15°	9185"
+TURNOUT N "Fleischmann N Scale	Double Slip Right 111mm 15°	9185" 512
 	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip Right 111mm 15°" "9185" 4.370079 15.000000 4.527559 0.629921 0.000000 0
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 4.370079 0.000000 90.000000
 	E -0.001604 0.585909 285.000000
@@ -229,10 +233,12 @@ TURNOUT N "Fleischmann N Scale	Double Slip Right 111mm 15°	9185"
 	A 0 0.000000 11.516031 0.627460 -11.830991 0.000000 15.000000
 	A 0 0.000000 11.516031 3.742619 11.830991 180.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Left 111mm 15°	9186"
+TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Left 111mm 15°	9186" 512
 	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip w/Motor Left 111mm 15°" "9186" 4.527559 15.000000 4.370079 0.629921 0.000000 0
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 4.527559 0.000000 90.000000
 	E 0.153194 0.565530 285.000000
@@ -252,10 +258,12 @@ TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Left 111mm 15°	9186"
 	A 0 0.000000 10.917940 0.784940 -11.232900 0.000000 15.000000
 	A 0 0.000000 10.917940 3.742619 11.232900 180.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Right 111mm 15°	9187"
+TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Right 111mm 15°	9187" 512
 	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip w/Motor Right 111mm 15°" "9187" 4.370079 15.000000 4.527559 0.629921 0.000000 0
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 4.370079 0.000000 90.000000
 	E -0.001604 0.585909 285.000000

@@ -1,9 +1,9 @@
-CONTENTS Z-Scale T-Trak Modules
+CONTENTS Z Scale T-Trak Modules
 
 # Based on Z Scale T-Trak Module Standards
 # 195mm and 220mm curves used for all corner, end cap and junction modules
 # Rokuhan Z-Scale Track used for all modules design
-# Junction module requries a modified straight track 
+# Junction module requries a modified straight track
 
 SUBCONTENTS Z-Scale T-Trak Modules - Straight Single Length
 TURNOUT Z "Z-Scale T-Trak	Single 330mm X 286mm deep	ZMS-01"
@@ -107,7 +107,7 @@ TURNOUT Z "Z-Scale T-Trak	End Cap 592mm X 295mm	 ZMEC-01"
 
 SUBCONTENTS Z-Scale T-Trak Modules - Junction
 TURNOUT Z "Z-Scale T-Trak	Tee Junction 415mm X 295mm	 ZMJ-01"
-	P "P0" 1 0 2
+	P "P0" 1 0 2 0 3
 	E 0.000000 0.000000 270.000000
 	E 0.000000 -0.984252 270.000000
 	E 7.677165 7.677165 0.000000
@@ -129,6 +129,3 @@ TURNOUT Z "Z-Scale T-Trak	Tee Junction 415mm X 295mm	 ZMJ-01"
 	L3 0 0.000000 0.039370 7.637795 0 0.039370 -8.622047 0
 	L3 0 0.000000 11.653543 7.637795 0 11.653543 -8.622047 0
 	END
-
-
-

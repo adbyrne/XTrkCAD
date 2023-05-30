@@ -1,4 +1,4 @@
-CONTENTS Arnold-Tracks N-Scale
+CONTENTS Arnold Track N Scale
 # From 'Märklin Complete Program 1994/95 E'
 # Elementos diseñados por MAA - 7.086614
 # Straight Section Design by MAA - 22.200000
@@ -181,9 +181,11 @@ TURNOUT N "Arnold	Crossing Left 15º	1853"
 	S 0 0 0.153193 0.565527 4.374366 -0.565527
 	END
 # Double Slipswitch Design by MAA - 11.100000 15.000000 11.500000
-TURNOUT N "Arnold	Double Slipswitch	1720"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT N "Arnold	Double Slipswitch	1720" 512
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 4.370079 0.000000 90.000000
 	E -0.001605 0.585906 285.000000
@@ -198,9 +200,11 @@ TURNOUT N "Arnold	Double Slipswitch	1720"
 	C 0 0 -11.830772 3.742574 11.830768 180.000076 15.000152
 	END
 # Double Slipswitch Design by MAA - 11.500000 15.000000 11.100000
-TURNOUT N "Arnold	Double Slipswitch Remote	1721"
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+TURNOUT N "Arnold	Double Slipswitch Remote	1721" 512
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 4.527559 0.000000 90.000000
 	E 0.153193 0.565527 285.000000
@@ -220,7 +224,7 @@ TURNOUT N "Arnold	Three Way Turnout	1749"
 	P "Normal" 1 6
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
-	E 4.370079 0.590551 75.000000 
+	E 4.370079 0.590551 75.000000
 	E 4.370079 -0.590551 105.000000
 	E 4.370079 0.000000 90.000000
 	S 0 0 0.000000 0.000000 0.353100 0.000000
@@ -230,4 +234,3 @@ TURNOUT N "Arnold	Three Way Turnout	1749"
 	S 0 0 3.917422 -0.469256 4.370079 -0.590551
 	S 0 0 0.353100 0.000000 4.370079 0.000000
 	END
-

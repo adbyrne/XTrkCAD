@@ -17,38 +17,42 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <ctype.h>
 
 #include "ccurve.h"
 #include "cselect.h"
 #include "custom.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
+#include "common-ui.h"
+#include "ctrain.h"
 
-static paramIntegerRange_t i0_64 = { 0, 64 };
-static paramIntegerRange_t i1_64 = { 1, 64 };
+//static paramIntegerRange_t i1_64 = { 1, 64 };
 static paramIntegerRange_t i1_100 = { 1, 100 };
+static paramIntegerRange_t i0_256 = { 0, 256 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
+static paramIntegerRange_t i1_1024 = { 1, 1024 };
 static paramIntegerRange_t i0_10000 = { 0, 10000 };
+static paramIntegerRange_t i0_99 = { 0, 99};
 static paramIntegerRange_t i1_1000 = { 1, 1000 };
 static paramIntegerRange_t i10_1000 = { 10, 1000 };
 static paramIntegerRange_t i10_100 = { 10, 100 };
 static paramFloatRange_t r0o1_1 = { 0.1, 1 };
 static paramFloatRange_t r1_10 = { 1, 10 };
-static paramFloatRange_t r1_1000 = { 1, 1000 };
+//static paramFloatRange_t r1_1000 = { 1, 1000 };
 static paramFloatRange_t r0_180 = { 0, 180 };
 
 static void UpdatePrefD( void );
 static void UpdateMeasureFmt(void);
+static void UpdateAutoSaveInterval(long);
+static void UpdateChkPtInterval(long);
 
 static wIndex_t distanceFormatInx;
 
 EXPORT long enableBalloonHelp = 1;
+
+EXPORT long showFlexTrack = 1;
 
 long GetChanges( paramGroup_p pg )
 {
@@ -56,42 +60,23 @@ long GetChanges( paramGroup_p pg )
 	long changed;
 	int inx;
 	for ( changed=ParamUpdate(pg),inx=0,changes=0; changed; changed>>=1,inx++ ) {
-		if ( changed&1 )
-			changes |= (long)pg->paramPtr[inx].context;
+		if ( changed&1 ) {
+			changes |= VP2L(pg->paramPtr[inx].context);
+		}
 	}
 	return changes;
 }
 
+static paramGroup_t prefPG;
 
-static void OptionDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
-{
-	int quickMoveOld;
-	if ( inx < 0 ) return;
-	if ( pg->paramPtr[inx].valueP == &enableBalloonHelp ) {
-		wEnableBalloonHelp((wBool_t)*(long*)valueP);
-	} else if ( pg->paramPtr[inx].valueP == &quickMove ) {
-		quickMoveOld = (int)quickMove;
-		quickMove = *(long*)valueP;
-		UpdateQuickMove(NULL);
-		quickMove = quickMoveOld;
-	} else {
-		if (pg->paramPtr[inx].valueP == &units) {
-			UpdatePrefD();
-		}
-		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
-			UpdateMeasureFmt();
-		}
-	}
-}
+
+
+
 
 static void OptionDlgCancel(
-		wWin_p win )
+        wWin_p win )
 {
 	wEnableBalloonHelp( (int)enableBalloonHelp );
-	UpdateQuickMove(NULL);
 	wHide( win );
 }
 
@@ -113,38 +98,42 @@ static char * drawCenterCircle[] = { N_("Off"), N_("On"), NULL };
 static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
 static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
 static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
-static char * colorLayersLabels[] = { N_("Tracks"), N_("Other"), NULL };
+static char * colorTrackLabels[] = { N_("Object"), N_("Layer"), NULL };
+static char * colorDrawLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * liveMapLabels[] = { N_("Live Map"), NULL };
 static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
-static char * zoomCornerLabels[] = {N_("Zoom keeps lower corner in view"), NULL};
+static char * constrainMainLabels[] = {N_("Constrain Drawing Area to Room boundaries"), NULL};
+static char * dontHideLabels[] = {N_("Don't Hide System Cursor when program cursor is active"), NULL};
 
-extern long trainPause;
 
 static paramData_t displayPLs[] = {
-	{ PD_TOGGLE, &colorLayers, "color-layers", PDO_NOPSHUPD|PDO_DRAW, colorLayersLabels, N_("Color Layers"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
-	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
-	{ PD_TOGGLE, &zoomCorner, "zoom-corner", PDO_NOPSHUPD, zoomCornerLabels, "", BC_HORZ },
+	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, colorTrackLabels, N_("Color Track"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &colorDraw, "color-draw", PDO_NOPSHUPD|PDO_DRAW, colorDrawLabels, N_("Color Draw"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, I2VP(CHANGE_MAIN | CHANGE_MAP) },
+	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_256, N_("Two Rail Scale"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_1024, N_("Map Scale"), 0, I2VP(CHANGE_MAP) },
+	{ PD_TOGGLE, &dontHideCursor, "donthidecursor", PDO_NOPSHUPD, dontHideLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
-	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_64, N_("Label Scale"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, (void*)(CHANGE_TOOLBAR) },
-	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, (void*)(CHANGE_PARAMS) },
-/* ATTENTION: update the define below if you add entries above */
-#define I_HOTBARLABELS	(17)
-	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, (void*)250, N_("Car Labels"), 0, (void*)CHANGE_SCALE },
-	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
+#define labelSelect (13)
+	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_256, N_("Label Scale"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, I2VP(CHANGE_TOOLBAR) },
+	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, I2VP(CHANGE_MAIN) },
+	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, I2VP(CHANGE_PARAMS) },
+	/* ATTENTION: update the define below if you add entries above */
+#define I_HOTBARLABELS	(19)
+	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, I2VP(250), N_("Car Labels"), 0, I2VP(CHANGE_SCALE) },
+	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000, N_("Train Update Delay"), 0, 0 },
 	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORZ }
- };
-static paramGroup_t displayPG = { "display", PGO_RECORD|PGO_PREFMISC, displayPLs, sizeof displayPLs/sizeof displayPLs[0] };
+};
+static paramGroup_t displayPG = { "display", PGO_RECORD|PGO_PREFMISC, displayPLs, COUNT( displayPLs ) };
 
 
 static void DisplayOk( void * junk )
@@ -156,28 +145,77 @@ static void DisplayOk( void * junk )
 }
 
 
-#ifdef LATER
-static void DisplayChange( long changes )
+static void OptionDlgUpdate(
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
-	if (changes & (CHANGE_SCALE|CHANGE_UNITS))
-		if (displayW != NULL && wWinIsVisible(displayW) )
-			ParamLoadControls( &displayPG );
-}
-#endif
+	if ( inx < 0 ) { return; }
+	if ( pg->paramPtr[inx].valueP == &enableBalloonHelp ) {
+		wEnableBalloonHelp((wBool_t)*(long*)valueP);
+	} else {
+		if (pg->paramPtr[inx].valueP == &labelEnable) {
+			long new_labels = wRadioGetValue( (wChoice_p)pg->paramPtr[inx].control );
+			labelEnable = new_labels;
+			ParamLoadControl(&displayPG,labelSelect);
+		}
+		if (pg->paramPtr[inx].valueP == &units) {
+			UpdatePrefD();
+		}
+		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
+			UpdateMeasureFmt();
+		}
+		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
+			DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
+		}
+		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
+			checkPtInterval = *(long *)valueP;
+			if (checkPtInterval == 0 ) {
+				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, h*3/4,
+				                    _("Turning off AutoSave") );
+				UpdateAutoSaveInterval(0);
+			} else {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
+			}
+		}
+		if (pg->paramPtr[inx].valueP == &autosaveChkPoints) {
+			autosaveChkPoints = *(long *)valueP;
+			if (checkPtInterval == 0 && autosaveChkPoints>0 ) {
+				wWinPix_t h = wControlGetHeight(pg->paramPtr[inx].control);
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -h*3/4,
+				                    _("Turning on CheckPointing") );
+				UpdateChkPtInterval(10);
+			} else {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, 0, NULL );
+			}
 
+		}
+
+	}
+}
 
 static void DoDisplay( void * junk )
 {
 	if (displayW == NULL) {
-		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")), _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL, (void*)0x0002 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"), NULL, (void*)0x0012 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Part Number"), NULL, (void*)0x0312 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Partno/Item"), NULL, (void*)0x4312 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"), NULL, (void*)0x0021 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Part Number"), NULL, (void*)0x0321 );
-		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Partno/Item"), NULL, (void*)0x4321 );
+		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")),
+		                              _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL,
+		               I2VP(0x0002) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"),
+		               NULL, I2VP(0x0012) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Proto/Manuf/Part Number"), NULL, I2VP(0x0312) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Proto/Manuf/Partno/Item"), NULL, I2VP(0x4312) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto"),
+		               NULL, I2VP(0x0021) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Manuf/Proto/Part Number"), NULL, I2VP(0x0321) );
+		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control,
+		               _("Manuf/Proto/Partno/Item"), NULL, I2VP(0x4321) );
 	}
+
 	ParamLoadControls( &displayPG );
 	wShow( displayW );
 #ifdef LATER
@@ -204,30 +242,25 @@ EXPORT addButtonCallBack_t DisplayInit( void )
 
 static wWin_p cmdoptW;
 
-static char * moveQlabels[] = {
-		N_("Normal"),
-		N_("Simple"),
-		N_("End-Points"),
-		NULL };
-		
 static char * preSelectLabels[] = { N_("Properties"), N_("Select"), NULL };
+static char * selectLabels[] = { N_("Single item selected, +Ctrl Add to selection"), N_("Add to selection, +Ctrl Single item selected"), NULL };
+static char * selectZeroLabels[] = { N_("Deselect all on select nothing"), NULL };
 
 #ifdef HIDESELECTIONWINDOW
 static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };
 #endif
 static char * rightClickLabels[] = {N_("Normal: Command List, Shift: Command Options"), N_("Normal: Command Options, Shift: Command List"), NULL };
 
-EXPORT paramData_t cmdoptPLs[] = {
-	{ PD_RADIO, &quickMove, "move-quick", PDO_NOPSHUPD, moveQlabels, N_("Draw Moving Tracks"), BC_HORZ },
+static paramData_t cmdoptPLs[] = {
 	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, preSelectLabels, N_("Default Command"), BC_HORZ },
 #ifdef HIDESELECTIONWINDOW
 	{ PD_TOGGLE, &hideSelectionWindow, PDO_NOPSHUPD, hideSelectionWindowLabels, N_("Hide Selection Window"), BC_HORZ },
 #endif
-	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 }
-	};
-static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD|PGO_PREFMISC, cmdoptPLs, sizeof cmdoptPLs/sizeof cmdoptPLs[0] };
-
-EXPORT paramData_p moveQuickPD = &cmdoptPLs[0];
+	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 },
+	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, selectLabels, N_("Select Mode"), 0},
+	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, selectZeroLabels, "", 0 }
+};
+static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD|PGO_PREFMISC, cmdoptPLs, COUNT( cmdoptPLs ) };
 
 static void CmdoptOk( void * junk )
 {
@@ -241,15 +274,17 @@ static void CmdoptOk( void * junk )
 static void CmdoptChange( long changes )
 {
 	if (changes & CHANGE_CMDOPT)
-		if (cmdoptW != NULL && wWinIsVisible(cmdoptW) )
+		if (cmdoptW != NULL && wWinIsVisible(cmdoptW) ) {
 			ParamLoadControls( &cmdoptPG );
+		}
 }
 
 
 static void DoCmdopt( void * junk )
 {
 	if (cmdoptW == NULL) {
-		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")), _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")),
+		                             _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
 	}
 	ParamLoadControls( &cmdoptPG );
 	wShow( cmdoptW );
@@ -272,92 +307,117 @@ EXPORT addButtonCallBack_t CmdoptInit( void )
 static wWin_p prefW;
 static long displayUnits;
 
+static char * iconSizeLabels[] = { N_("16 px"), N_("24 px"), N_("32 px"), NULL };
 static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
 static char * enableBalloonHelpLabels[] = { N_("Balloon Help"), NULL };
+static char * enableFlexTrackLabels[] = { N_("Show FlexTrack in HotBar"), NULL };
 static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
 static paramData_t prefPLs[] = {
+	{ PD_RADIO, &iconSize, "iconsize", PDO_NOPSHUPD, iconSizeLabels, N_("Icon Size"), BC_HORZ, I2VP(CHANGE_ICONSIZE) },
 	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
-	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
-#define I_DSTFMT		(2)
-	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
+	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
+#define I_DSTFMT		(3)
+	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, I2VP(150), N_("Length Format"), 0, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
 	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORZ},
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point") },
+#define I_CHKPT		(14)
+	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point Frequency") },
+#define I_AUTOSAVE		(15)
+	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD|PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
 	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
-	};
-static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, sizeof prefPLs/sizeof prefPLs[0] };
+};
+static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, COUNT( prefPLs ) };
 
 
 typedef struct {
-		char * name;
-		long fmt;
-	} dstFmts_t;
+	char * name;
+	long fmt;
+} dstFmts_t;
 static dstFmts_t englishDstFmts[] = {
-		{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
-		{ N_("999.99999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|5 },
-		{ N_("999.9999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|4 },
-		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
-		{ N_("999 7/8"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|3 },
-		{ N_("999 63/64"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|6 },
-		{ N_("999' 11.999\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|3 },
-		{ N_("999' 11.99\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|2 },
-		{ N_("999' 11.9\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|1 },
-		{ N_("999' 11 7/8\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|3 },
-		{ N_("999' 11 63/64\""),	DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|6 },
-		{ N_("999ft 11.999in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|3 },
-		{ N_("999ft 11.99in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|2 },
-		{ N_("999ft 11.9in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
-		{ N_("999ft 11 7/8in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|3 },
-		{ N_("999ft 11 63/64in"),	DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|6 },
-		{ NULL, 0 } };
+	{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
+	{ N_("999.99999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|5 },
+	{ N_("999.9999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|4 },
+	{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
+	{ N_("999 7/8"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|3 },
+	{ N_("999 63/64"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|6 },
+	{ N_("999' 11.999\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|3 },
+	{ N_("999' 11.99\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|2 },
+	{ N_("999' 11.9\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|1 },
+	{ N_("999' 11 7/8\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|3 },
+	{ N_("999' 11 63/64\""),	DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|6 },
+	{ N_("999ft 11.999in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|3 },
+	{ N_("999ft 11.99in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|2 },
+	{ N_("999ft 11.9in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
+	{ N_("999ft 11 7/8in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|3 },
+	{ N_("999ft 11 63/64in"),	DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|6 },
+	{ NULL, 0 }
+};
 static dstFmts_t metricDstFmts[] = {
-		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9m"),				DISTFMT_FMT_M|DISTFMT_FRACT_NUM|1 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 },
-		{ NULL, 0 } };
+	{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
+	{ N_("999.999mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|1 },
+	{ N_("999.999cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|1 },
+	{ N_("999.999m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|3 },
+	{ N_("999.99m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|2 },
+	{ N_("999.9m"),				DISTFMT_FMT_M|DISTFMT_FRACT_NUM|1 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 }
+};
 static dstFmts_t *dstFmts[] = { englishDstFmts, metricDstFmts };
+
+void UpdateAutoSaveInterval(long value)
+{
+	autosaveChkPoints = value;
+	ParamLoadControl(&prefPG, I_AUTOSAVE);
+	ParamLoadControl(&prefPG, I_CHKPT);
+}
+
+void UpdateChkPtInterval(long value)
+{
+	checkPtInterval = value;
+	ParamLoadControl(&prefPG, I_AUTOSAVE);
+	ParamLoadControl(&prefPG, I_CHKPT);
+}
 
 /**
  * Load the selection list for number formats with the appropriate list of variants.
- */		
-		
+ */
+
 static void LoadDstFmtList( void )
 {
 	int inx;
 	wListClear( (wList_p)prefPLs[I_DSTFMT].control );
-	for ( inx=0; dstFmts[units][inx].name; inx++ )
-		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name), NULL, (void*)dstFmts[units][inx].fmt );
+	for ( inx=0; dstFmts[units][inx].name; inx++ ) {
+		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name),
+		               NULL, I2VP(dstFmts[units][inx].fmt) );
+	}
 }
 
 /**
-* Handle changing of measurement system. The list of number formats is loaded 
-* and the first entry is selected as default value. 
+* Handle changing of measurement system. The list of number formats is loaded
+* and the first entry is selected as default value.
 */
 
 static void UpdatePrefD( void )
@@ -365,8 +425,9 @@ static void UpdatePrefD( void )
 	long newUnits, oldUnits;
 	int inx;
 
-	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[1].control==NULL )
+	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[1].control==NULL ) {
 		return;
+	}
 	newUnits = wRadioGetValue( (wChoice_p)prefPLs[1].control );
 	if (newUnits != displayUnits) {
 		oldUnits = units;
@@ -374,7 +435,7 @@ static void UpdatePrefD( void )
 		LoadDstFmtList();
 		distanceFormatInx = 0;
 
-		for (inx = 0; inx < sizeof prefPLs / sizeof prefPLs[0]; inx++) {
+		for (inx = 0; inx < COUNT( prefPLs ); inx++) {
 			if ((prefPLs[inx].option&PDO_DIM)) {
 				ParamLoadControl(&prefPG, inx);
 			}
@@ -392,12 +453,12 @@ static void UpdatePrefD( void )
 
 static void UpdateMeasureFmt()
 {
-	int inx; 
+	int inx;
 
 	distanceFormatInx = wListGetIndex((wList_p)prefPLs[I_DSTFMT].control);
 	units = wRadioGetValue((wChoice_p)prefPLs[1].control);
 
-	for (inx = 0; inx < sizeof prefPLs / sizeof prefPLs[0]; inx++) {
+	for (inx = 0; inx < COUNT( prefPLs ); inx++) {
 		if ((prefPLs[inx].option&PDO_DIM)) {
 			ParamLoadControl(&prefPG, inx);
 		}
@@ -437,6 +498,9 @@ static void PrefOk( void * junk )
 		NoticeMessage2( 0, MSG_CONN_PARAMS_TOO_BIG, _("Ok"), NULL ) ;
 	}
 
+	if(changes & CHANGE_ICONSIZE) {
+		NoticeMessage( MSG_ICON_SIZE_RESTART, _("Ok"), NULL ) ;
+	}
 
 	wHide( prefW );
 	DoChangeNotification(changes);
@@ -447,7 +511,8 @@ static void PrefOk( void * junk )
 static void DoPref( void * junk )
 {
 	if (prefW == NULL) {
-		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"), PrefOk, wHide, TRUE, NULL, 0, OptionDlgUpdate );
+		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"),
+		                           PrefOk, wHide, TRUE, NULL, 0, OptionDlgUpdate );
 		LoadDstFmtList();
 	}
 	ParamLoadControls( &prefPG );
@@ -459,21 +524,25 @@ static void DoPref( void * junk )
 EXPORT addButtonCallBack_t PrefInit( void )
 {
 	ParamRegister( &prefPG );
-	if (connectAngle < 1.0)
+	if (connectAngle < 1.0) {
 		connectAngle = 1.0;
-	if (connectDistance < 0.1)
+	}
+	if (connectDistance < 0.1) {
 		connectDistance = 0.1;
-	if (minLength < 0.1)
+	}
+	if (minLength < 0.1) {
 		minLength = 0.1;
+	}
 	return &DoPref;
 }
 
 
 EXPORT long GetDistanceFormat( void )
 {
-	 while ( dstFmts[units][distanceFormatInx].name == NULL )
+	while ( dstFmts[units][distanceFormatInx].name == NULL ) {
 		distanceFormatInx--;
-	 return dstFmts[units][distanceFormatInx].fmt;
+	}
+	return dstFmts[units][distanceFormatInx].fmt;
 }
 
 /*****************************************************************************
@@ -485,17 +554,20 @@ EXPORT long GetDistanceFormat( void )
 static wWin_p colorW;
 
 static paramData_t colorPLs[] = {
-	{ PD_COLORLIST, &snapGridColor, "snapgrid", PDO_NOPSHUPD, NULL, N_("Snap Grid"), 0, (void*)(CHANGE_GRID) },
-	{ PD_COLORLIST, &markerColor, "marker", PDO_NOPSHUPD, NULL, N_("Marker"), 0, (void*)(CHANGE_GRID) },
-	{ PD_COLORLIST, &borderColor, "border", PDO_NOPSHUPD, NULL, N_("Border"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_COLORLIST, &snapGridColor, "snapgrid", PDO_NOPSHUPD, NULL, N_("Snap Grid"), 0, I2VP(CHANGE_GRID) },
+	{ PD_COLORLIST, &markerColor, "marker", PDO_NOPSHUPD, NULL, N_("Marker"), 0, I2VP(CHANGE_GRID) },
+	{ PD_COLORLIST, &borderColor, "border", PDO_NOPSHUPD, NULL, N_("Border"), 0, I2VP(CHANGE_MAIN) },
 	{ PD_COLORLIST, &crossMajorColor, "crossmajor", PDO_NOPSHUPD, NULL, N_("Primary Axis"), 0, 0 },
 	{ PD_COLORLIST, &crossMinorColor, "crossminor", PDO_NOPSHUPD, NULL, N_("Secondary Axis"), 0, 0 },
-	{ PD_COLORLIST, &normalColor, "normal", PDO_NOPSHUPD, NULL, N_("Normal Track"), 0, (void*)(CHANGE_MAIN|CHANGE_PARAMS) },
-	{ PD_COLORLIST, &selectedColor, "selected", PDO_NOPSHUPD, NULL, N_("Selected Track"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, N_("Profile Path"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, N_("Exception Track"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, N_("Track Ties"), 0, (void*)(CHANGE_MAIN) } };
-static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP, colorPLs, sizeof colorPLs/sizeof colorPLs[0] };
+	{ PD_COLORLIST, &normalColor, "normal", PDO_NOPSHUPD, NULL, N_("Normal Track"), 0, I2VP(CHANGE_MAIN|CHANGE_PARAMS) },
+	{ PD_COLORLIST, &selectedColor, "selected", PDO_NOPSHUPD, NULL, N_("Selected Track"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, N_("Profile Path"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, N_("Exception Track"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, N_("Track Ties"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &bridgeColor, "bridge", PDO_NOPSHUPD, NULL, N_("Bridge Base"), 0, I2VP(CHANGE_MAIN) },
+	{ PD_COLORLIST, &roadbedColor, "roadbed", PDO_NOPSHUPD, NULL, N_("Track Roadbed"), 0, I2VP(CHANGE_MAIN) }
+};
+static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP, colorPLs, COUNT( colorPLs ) };
 
 
 
@@ -504,16 +576,19 @@ static void ColorOk( void * junk )
 	long changes;
 	changes = GetChanges( &colorPG );
 	wHide( colorW );
-	if ( (changes&CHANGE_GRID) && GridIsVisible() )
+	if ( (changes&CHANGE_GRID) && GridIsVisible() ) {
 		changes |= CHANGE_MAIN;
+	}
 	DoChangeNotification( changes );
 }
 
 
 static void DoColor( void * junk )
 {
-	if (colorW == NULL)
-		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"), ColorOk, wHide, TRUE, NULL, 0, NULL );
+	if (colorW == NULL) {
+		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"),
+		                            ColorOk, wHide, TRUE, NULL, 0, NULL );
+	}
 	ParamLoadControls( &colorPG );
 	wShow( colorW );
 }

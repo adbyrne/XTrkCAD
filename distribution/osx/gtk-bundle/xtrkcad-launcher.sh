@@ -36,7 +36,7 @@ if type -p "X" & > /dev/null; then
 fi 
 
 #XTRKCAD_BUNDLE="`echo "$0" | sed -e 's/\/Contents\/MacOS\/XTrackCAD//'`"
-XTRKCAD_BUNDLE="$bundle"
+XTRKCAD_BUNDLE="`echo "$bundle" | sed -e 's_/Contents/MacOS/XTrackCAD_/_'`"
 XTRKCAD_RESOURCES="$XTRKCAD_BUNDLE/Contents/Resources"
 XTRKCAD_TEMP="/tmp/xtrkcad/$UID"
 XTRKCAD_ETC="$XTRKCAD_TEMP/etc"
@@ -52,7 +52,7 @@ export GTK_DATA_PREFIX="$bundle_res"
 export GTK_EXE_PREFIX="$bundle_res"
 export GTK_PATH="$bundle_res"
 
-export GTK2_RC_FILES="$bundle_etc/gtk-2.0/gtkrc"
+# export GTK2_RC_FILES="$bundle_etc/gtk-2.0/gtkrc"
 XTRKCAD_PANGO_RC_FILE="$XTRKCAD_RESOURCES/etc/pango/pangorc"
 
 I18NDIR="$bundle_data/locale"

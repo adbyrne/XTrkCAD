@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -28,8 +28,12 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+//#include "misc.h"
+extern const char * GetCurCommandName();
+
 #include "gtkint.h"
 #include "i18n.h"
+
 
 /**
  * Handle the commands issued from the Help drop-down. Currently, we only have a table
@@ -42,18 +46,32 @@
 static void
 DoHelpMenu(void *data)
 {
-    int func = (intptr_t)data;
+	int func = (intptr_t)data;
 
-    switch (func) {
-    case 1:
-        wHelp("index");
-        break;
+	const char * topic;
 
-    default:
-        break;
-    }
+	switch (func) {
+	case 1:
+		wHelp("contents");
+		break;
 
-    return;
+	case 3:
+		topic = GetCurCommandName();
+		if (topic && topic[0]) {
+			wHelp(topic);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	return;
+}
+
+void wDoAccelHelp(wAccelKey_e key, void * context)
+{
+	DoHelpMenu(context);
 }
 
 /**
@@ -65,5 +83,6 @@ DoHelpMenu(void *data)
 
 void wMenuAddHelp(wMenu_p m)
 {
-    wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1);
+	wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1);
+	wMenuPushCreate(m, NULL, _("Co&mmand Context help"), 0, DoHelpMenu, (void*)3);
 }

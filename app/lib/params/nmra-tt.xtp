@@ -1,4 +1,4 @@
-CONTENTS NMRA RP12-33 Feb 2015 TT Scale Turnouts
+CONTENTS NMRA RP-12.33 Feb 2015 TT Scale Turnouts
 SUBCONTENTS NMRA TT Scale Regular Turnouts
 TURNOUT TT "NMRA TT	#4 Left	4L"
 	U "Regular Turnout" "" "NMRA TT" "#4 Left" "4L" "#4 Right" "4R" 4.921375 14.250033 0.650000 5.002625 0.000000 0.000000 0
@@ -619,10 +619,12 @@ TURNOUT TT "NMRA TT	#8 Single Slip	8SS"
 	END
 
 SUBCONTENTS NMRA TT Scale Double Slip Turnouts
-TURNOUT TT "NMRA TT	#6 Double Slip	6DS"
+TURNOUT TT "NMRA TT	#6 Double Slip	6DS" 512
 	U "Double Slipswitch" "" "NMRA TT" "#6 Double Slip" "6DS" 11.750000 9.527283 11.750000 0.000000 0.000000 0
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 11.750000 0.000000 90.000000
 	E 0.081033 0.972405 279.527283

@@ -170,6 +170,7 @@ TURNOUT O "Atlas O 2 Rail	45 Degree Crossing	At-7081"
 
 SUBCONTENTS Atlas O 2 Rail - Misc Track
 TURNOUT O "Atlas O 2 Rail	40"" Single Track Pratt Truss Bridge	AT-7920"
+	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 40.000000 0.000000 90.000000
 	S 0 0.000000 0.000000 0.000000 40.000000 0.000000
@@ -186,6 +187,7 @@ TURNOUT O "Atlas O 2 Rail	40"" Single Track Pratt Truss Bridge	AT-7920"
 	L 0 0.100000 27.000000 -1.500000 34.000000 1.500000
 	END
 TURNOUT O "Atlas O 2 Rail	40"" Double Track Pratt Truss Bridge	AT-7921"
+	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 40.000000 0.000000 90.000000
 	E 0.000000 3.250000 270.000000
@@ -205,6 +207,7 @@ TURNOUT O "Atlas O 2 Rail	40"" Double Track Pratt Truss Bridge	AT-7921"
 	L 0 0.100000 27.000000 -1.500000 34.000000 4.750000
 	END
 TURNOUT O "Atlas O 2 Rail	20"" Single Track Deck Girder Bridge	AT-7923"
+	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 20.000000 0.000000 90.000000
 	S 0 0.000000 0.000000 0.000000 20.000000 0.000000
@@ -232,7 +235,7 @@ TURNOUT O "Atlas O 2 Rail	18"" Single Track Plate Girder Bridge	AT-7918"
 	L 0 0.100000 13.500000 1.250000 13.500000 2.000000
 	L 0 0.100000 16.500000 1.250000 16.500000 2.000000
 	END	
-TURNOUT O "Atlas O 2 Rail	24"" Turntable	AT-6910"
+TURNOUT O "Atlas O 2 Rail	24"" Turntable	AT-6910" 512
 	P "1" 1
 	P "2" 2
 	P "3" 3
@@ -245,18 +248,18 @@ TURNOUT O "Atlas O 2 Rail	24"" Turntable	AT-6910"
 	P "10" 10
 	P "11" 11
 	P "12" 12
-	P "13" -1
-	P "14" -2
-	P "15" -3
-	P "16" -4
-	P "17" -5
-	P "18" -6
-	P "19" -7
-	P "20" -8
-	P "21" -9
-	P "22" -10
-	P "23" -11
-	P "24" -12
+#	P "13" -1
+#	P "14" -2
+#	P "15" -3
+#	P "16" -4
+#	P "17" -5
+#	P "18" -6
+#	P "19" -7
+#	P "20" -8
+#	P "21" -9
+#	P "22" -10
+#	P "23" -11
+#	P "24" -12
 	E 0.000000 12.000000 0.000000
 	E -0.000000 -12.000000 180.000000
 	E 3.105829 11.591110 15.000000

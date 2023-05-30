@@ -1,40 +1,56 @@
-FILE(GLOB HEADERS *.h)
+#
+# build the Win32 variant of the wlib
+#
 
-SET(SOURCES
-#	checksum.c
-	getopt.c
-	mswbox.c
-	mswbutt.c
-	mswbitmap.c
-	mswchksm.c
-	mswchoic.c
-	mswcolor.c
-	mswdraw.c
-	mswedit.c
-	mswlines.c
-	mswlist.c
-	mswmenu.c
-	mswmisc.c
-	mswmsg.c
-	mswpref.c
-	mswprint.c
-	mswsplash.c
-	mswstatus.c 
-	mswtext.c
-	gwin32.c
-	simple-gettext.c
+
+
+if(XTRKCAD_USE_GETTEXT)
+	if(WIN32)
+		add_definitions(-DUSE_SIMPLE_GETTEXT )
+	endif(WIN32)
+endif(XTRKCAD_USE_GETTEXT)
+
+target_sources(xtrkcad-wlib
+	PRIVATE 
+		backgnd.c
+		getopt.c
+		mswbox.c
+		mswbutt.c
+		mswbitmap.c
+		mswchoic.c
+		mswcolor.c
+		mswdraw.c
+		mswedit.c
+		mswlines.c
+		mswlist.c
+		mswmenu.c
+		mswmisc.c
+		mswmsg.c
+		mswpref.c
+		mswprint.c
+		mswsplash.c
+		mswstatus.c
+		mswtext.c
+		gwin32.c
+		simple-gettext.c
+		utf8conv.c	
+		mswint.h
+		dynarr.h
 	)
 
-INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
-# INCLUDE_DIRECTORIES(${XTRKCAD_BINARY_DIR})
+target_link_libraries(xtrkcad-wlib 
+	PRIVATE
+	Htmlhelp 
+	msimg32 
+	shlwapi
+	FreeImage::FreeImage
+)
 
-IF(XTRKCAD_USE_GETTEXT)
-	IF(WIN32)
-		ADD_DEFINITIONS(-DUSE_SIMPLE_GETTEXT )
-	ENDIF(WIN32)
-ENDIF(XTRKCAD_USE_GETTEXT)
+install(FILES
+	${FREEIMAGE_SHAREDLIB}
+	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+)
 
-ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
-
-TARGET_LINK_LIBRARIES(xtrkcad-wlib Htmlhelp msimg32 shlwapi)
-
+if(XTRKCAD_TESTING AND CMOCKA_FOUND)
+	add_subdirectory( unittest )
+endif()

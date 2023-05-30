@@ -316,70 +316,70 @@ static paper_conf paper_configure(paragraph *source, font_list *fontlist) {
 		ret.bullet = uadv(p->keyword);
 	    } else if (!ustricmp(p->keyword, L"paper-page-width")) {
 		ret.paper_width =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-page-height")) {
 		ret.paper_height =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-left-margin")) {
 		ret.left_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-top-margin")) {
 		ret.top_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-right-margin")) {
 		ret.right_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-bottom-margin")) {
 		ret.bottom_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-list-indent")) {
 		ret.indent_list_bullet =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-listitem-indent")) {
 		ret.indent_list =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-quote-indent")) {
 		ret.indent_quote =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-base-leading")) {
 		ret.base_leading =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-base-para-spacing")) {
 		ret.base_para_spacing =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-chapter-top-space")) {
 		ret.chapter_top_space =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-sect-num-left-space")) {
 		ret.sect_num_left_space =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-chapter-underline-depth")) {
 		ret.chapter_underline_depth =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-chapter-underline-thickness")) {
 		ret.chapter_underline_thickness =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-rule-thickness")) {
 		ret.rule_thickness =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-contents-indent-step")) {
 		ret.contents_indent_step =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-contents-margin")) {
 		ret.contents_margin =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-leader-separation")) {
 		ret.leader_separation =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-index-gutter")) {
 		ret.index_gutter =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-index-minsep")) {
 		ret.index_minsep =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-footer-distance")) {
 		ret.footer_distance =
-		    (int) 0.5 + FUNITS_PER_PT * utof(uadv(p->keyword));
+		    (int) (0.5 + FUNITS_PER_PT * utof(uadv(p->keyword)));
 	    } else if (!ustricmp(p->keyword, L"paper-base-font-size")) {
 		ret.fbase.font_size = utoi(uadv(p->keyword));
 	    } else if (!ustricmp(p->keyword, L"paper-index-columns")) {
@@ -514,7 +514,7 @@ void *paper_pre_backend(paragraph *sourceform, keywordlist *keywords,
     int has_index;
     int pagenum;
     paragraph index_placeholder_para;
-    page_data *first_index_page;
+    page_data *first_index_page = NULL;
 
     init_std_fonts();
     fontlist = snew(font_list);
@@ -1707,7 +1707,7 @@ static void wrap_paragraph(para_data *pdata, word *words,
 
     for (p = wrapping; p; p = p->next) {
 	line_data *ldata;
-	word *wd;
+//	word *wd;
 	int len, wid, spaces;
 
 	ldata = snew(line_data);
@@ -1732,7 +1732,7 @@ static void wrap_paragraph(para_data *pdata, word *words,
 	spaces = 0;
 	len = paper_width_list(&ctx, ldata->first, ldata->end, &spaces);
 	wid = (p == wrapping ? w - i1 : w - i2);
-	wd = ldata->first;
+//	wd = ldata->first;
 
 	ldata->hshortfall = wid - len;
 	ldata->nspaces = spaces;
@@ -1846,8 +1846,8 @@ static page_data *page_breaks(line_data *first, line_data *last,
 		     */
 		    if (m != last && m->next && !m->next->page_break)
 		    {
-			int x = (this_height - minheight) / FUNITS_PER_PT *
-			    4096.0;
+			int x = (int)((this_height - minheight) / FUNITS_PER_PT *
+			    4096.0);
 			int xf;
 
 			xf = x & 0xFF;
@@ -1938,8 +1938,8 @@ static page_data *page_breaks(line_data *first, line_data *last,
 	    l->page = page;
 	    l->ypos = text + space + head;
 	    if (page->first_line->space[n]) {
-		l->ypos += space * (float)page->first_line->vshortfall[n] /
-		    page->first_line->space[n];
+		l->ypos += (int)(space * (float)page->first_line->vshortfall[n] /
+		    page->first_line->space[n]);
 	    }
 
 	    if (l == page->last_line)
@@ -2296,7 +2296,7 @@ static int render_line(line_data *ldata, int left_x, int top_y,
 	    xr = NULL;
 
 	{
-	    int extra_indent, shortfall, spaces;
+	    int extra_indent = 0, shortfall = 0, spaces = 0;
 	    int just = ldata->pdata->justification;
 
 	    /*
@@ -2344,7 +2344,7 @@ static void render_para(para_data *pdata, paper_conf *conf,
 			keywordlist *keywords, indexdata *idx,
 			paragraph *index_placeholder, page_data *index_page)
 {
-    int last_x;
+    int last_x = 0;
     xref *cxref;
     page_data *cxref_page;
     xref_dest dest;
@@ -2530,7 +2530,8 @@ static para_data *code_paragraph(int indent, word *words, paper_conf *conf)
 	    w->alt = NULL;
 	    w->type = (prev == 0 ? word_WeakCode :
 		      prev == 1 ? word_Emph : word_Normal);
-	    w->text = snewn(t-start+1, wchar_t);
+	    w->text = snewn((int)(t-start+1),
+			wchar_t);
 	    memcpy(w->text, start, (t-start) * sizeof(wchar_t));
 	    w->text[t-start] = '\0';
 	    w->breaks = FALSE;
@@ -2740,7 +2741,7 @@ static word *fake_end_ref(void)
 static word *prepare_contents_title(word *first, wchar_t *separator,
 				    word *second)
 {
-    word *ret;
+    word *ret = NULL;
     word **wptr, *w;
 
     wptr = &ret;

@@ -17,26 +17,14 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#ifndef WINDOWS
-#include <time.h>
-#else
-#include <time.h>
-#include <sys/timeb.h>
-#endif
 
 #include "custom.h"
 #include "fileio.h"
-#include "messages.h"
 #include "paths.h"
 #include "track.h"
+#include "common-ui.h"
 
 
 /****************************************************************************
@@ -58,8 +46,9 @@ static void LogInit( void )
 {
 	int inx=0;
 
-	if ( logTable_da.cnt != 0 )
+	if ( logTable_da.cnt != 0 ) {
 		return;
+	}
 	DYNARR_APPEND( logTable_t, logTable_da,10);
 	logTable(inx).name = "";
 	logTable(inx).level = 0;
@@ -86,14 +75,17 @@ static void LogDoOpen( void )
 	if ( logFileName ) {
 		logFile = fopen( logFileName, "a" );
 		if ( logFile == NULL ) {
-			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Log", logFileName, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Log", logFileName,
+			               strerror(errno) );
 			perror( logFileName );
 			return;
 		}
 	}
-	fprintf( logFile, "# %s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&logClock) );
-	if ( recordF )
+	fprintf( logFile, "# %s Version: %s, Date: %s\n", sProdName, sVersion,
+	         ctime(&logClock) );
+	if ( recordF ) {
 		fprintf( recordF, "# LOG CLOCK %s\n", ctime(&logClock) );
+	}
 }
 
 EXPORT void LogClose( void )
@@ -102,10 +94,11 @@ EXPORT void LogClose( void )
 	if ( logFile ) {
 		time(&clock);
 		fprintf( logFile, "LOG END %s\n", ctime(&clock) );
-		if ( logFile != stdout )
+		if ( logFile != stdout ) {
 			fclose( logFile );
-	 }
-	 logFile = NULL;
+		}
+	}
+	logFile = NULL;
 }
 
 EXPORT void LogSet( char * name, int level )
@@ -117,26 +110,28 @@ EXPORT void LogSet( char * name, int level )
 }
 
 
-EXPORT int LogFindIndex( char * name )
+EXPORT int LogFindIndex( const char * name )
 {
 	int inx;
 	for ( inx=0; inx<logTable_da.cnt; inx++ )
-		if ( strcasecmp( logTable(inx).name, name ) == 0 )
+		if ( strcasecmp( logTable(inx).name, name ) == 0 ) {
 			return inx;
+		}
 	return 0;
 }
 
 EXPORT void LogPrintf(
-		char * format,
-		... )
+        const char * format,
+        ... )
 {
 	va_list ap;
 	if (!logInitted) {
 		LogDoOpen();
 		logInitted = TRUE;
 	}
-	if ( logFile == NULL )
+	if ( logFile == NULL ) {
 		return;
+	}
 	logLineNumber++;
 	if ( logLineNumber % 100 == 0 ) {
 		if ( recordF ) {

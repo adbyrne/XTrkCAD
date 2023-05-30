@@ -17,52 +17,59 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <math.h>
-#include <string.h>
-
 #include "ccurve.h"
- 
+
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "cundo.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
+#include "cselect.h"
 
-#include "messages.h"
-#include "param.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
-#include "wlib.h"
 #include "cbezier.h"
+#include "ccornu.h"
+#include "layout.h"
+#include "common-ui.h"
 
 /*
  * STATE INFO
  */
 
+typedef enum createState_e {NOCURVE,FIRSTEND_DEF,SECONDEND_DEF,CENTER_DEF} createState_e;
+
 static struct {
-		STATE_T state;
-		coOrd pos0;
-		coOrd pos1;
-		curveData_t curveData;
-		track_p trk;
-		EPINX_T ep;
-		BOOL_T down;
-		} Da;
+	STATE_T state;
+	createState_e create_state;
+	coOrd pos0;
+	coOrd pos1;
+	curveData_t curveData;
+	track_p trk;
+	EPINX_T ep;
+	BOOL_T down;
+	BOOL_T lock0;
+	coOrd middle;
+	coOrd end0;
+	coOrd end1;
+} Da;
 
 static long curveMode;
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+#define array_anchor(N) DYNARR_N(trkSeg_t,*anchor_array,N)
 
-EXPORT void DrawArrowHeads(
-		trkSeg_p sp,
-		coOrd pos,
-		ANGLE_T angle,
-		BOOL_T bidirectional,
-		wDrawColor color )
+
+EXPORT int DrawArrowHeads(
+        trkSeg_p sp,
+        coOrd pos,
+        ANGLE_T angle,
+        BOOL_T bidirectional,
+        wDrawColor color )
 {
 	coOrd p0, p1;
 	DIST_T d, w;
@@ -71,7 +78,7 @@ EXPORT void DrawArrowHeads(
 	w = mainD.scale/mainD.dpi*2;
 	for ( inx=0; inx<5; inx++ ) {
 		sp[inx].type = SEG_STRLIN;
-		sp[inx].width = w;
+		sp[inx].lineWidth = w;
 		sp[inx].color = color;
 	}
 	Translate( &p0, pos, angle, d );
@@ -87,46 +94,88 @@ EXPORT void DrawArrowHeads(
 		Translate( &sp[3].u.l.pos[1], p1, angle-45, d/2.0 );
 		sp[4].u.l.pos[0] = p1;
 		Translate( &sp[4].u.l.pos[1], p1, angle+45, d/2.0 );
+	} else {
+		sp[3].u.l.pos[0] = p1;
+		sp[3].u.l.pos[1] = p1;
+		sp[4].u.l.pos[0] = p1;
+		sp[4].u.l.pos[1] = p1;
 	}
+	return 5;
+}
+
+EXPORT int DrawArrowHeadsArray(
+        dynArr_t *anchor_array,
+        coOrd pos,
+        ANGLE_T angle,
+        BOOL_T bidirectional,
+        wDrawColor color )
+{
+	int i = (*anchor_array).cnt;
+	DYNARR_SET(trkSeg_t,*anchor_array,i+5)
+	return DrawArrowHeads(&DYNARR_N(trkSeg_t,*anchor_array,i),pos,angle,
+	                      bidirectional,color);
+
+}
+
+static void CreateEndAnchor(coOrd p, dynArr_t * anchor_array, wBool_t lock)
+{
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,*anchor_array,1);
+	int i = (*anchor_array).cnt-1;
+	array_anchor(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	array_anchor(i).color = wDrawColorBlue;
+	array_anchor(i).u.c.center = p;
+	array_anchor(i).u.c.radius = d/2;
+	array_anchor(i).u.c.a0 = 0.0;
+	array_anchor(i).u.c.a1 = 360.0;
+	array_anchor(i).lineWidth = 0;
 }
 
 
 
-
 EXPORT STATUS_T CreateCurve(
-		wAction_t action,
-		coOrd pos,
-		BOOL_T track,
-		wDrawColor color,
-		DIST_T width,
-		long mode,
-		curveMessageProc message )
+        wAction_t action,
+        coOrd pos,
+        BOOL_T track,
+        wDrawColor color,
+        LWIDTH_T width,
+        long mode,
+        dynArr_t * anchor_array,
+        curveMessageProc message )
 {
 	track_p t;
 	DIST_T d;
 	ANGLE_T a, angle1, angle2;
-	static coOrd pos0, p;
+	static coOrd p;
+//	static coOrd pos0;
 	int inx;
 
 	switch ( action ) {
 	case C_START:
-		DYNARR_SET( trkSeg_t, tempSegs_da, 8 );
+		DYNARR_RESET(trkSeg_t,*anchor_array);
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		Da.create_state = NOCURVE;
 		Da.down = FALSE;  						//Not got a valid start yet
+		Da.pos0 = zero;
+		Da.pos1 = zero;
 		switch ( curveMode ) {
 		case crvCmdFromEP1:
-			if (track) 
-				message(_("Drag from End-Point in direction of curve - Shift locks to track open end-point") );
-			else 	
-				message (_("Drag from End-Point in direction of curve") );
+			if (track) {
+				message(_("Drag from endpoint in direction of curve - lock to track open endpoint") );
+			} else {
+				message (_("Drag from endpoint in direction of curve") );
+			}
 			break;
 		case crvCmdFromTangent:
-			if (track)
-				message(_("Drag from End-Point to Center - Shift locks to track open end-point") );
-			else
-				message(_("Drag from End-Point to Center") );
+			if (track) {
+				message(_("Drag from endpoint to center - lock to track open endpoint") );
+			} else {
+				message(_("Drag from endpoint to center") );
+			}
 			break;
 		case crvCmdFromCenter:
-			message(_("Drag from Center to End-Point") );
+			message(_("Drag from center to endpoint") );
 			break;
 		case crvCmdFromChord:
 			message(_("Drag from one to other end of chord") );
@@ -134,159 +183,238 @@ EXPORT STATUS_T CreateCurve(
 		}
 		return C_CONTINUE;
 	case C_DOWN:
-			for ( inx=0; inx<8; inx++ ) {
-				 tempSegs(inx).color = wDrawColorBlack;
-				 tempSegs(inx).width = 0;
-			}
-			tempSegs_da.cnt = 0;
-			p = pos;
-		    BOOL_T found = FALSE;
-		    Da.trk = NULL;	    
-			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent) && track && (MyGetKeyState() & WKEY_SHIFT) != 0) {
+		DYNARR_RESET(trkSeg_t, *anchor_array);
+		DYNARR_SET( trkSeg_t, tempSegs_da, 8 );
+		for ( inx=0; inx<8; inx++ ) {
+			tempSegs(inx).color = wDrawColorBlack;
+			tempSegs(inx).lineWidth = width;
+		}
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		p = pos;
+		BOOL_T found = FALSE;
+		Da.trk = NULL;
+		if (track) {
+			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent
+			     || (mode == crvCmdFromChord))  &&
+			    ((MyGetKeyState() & WKEY_ALT) == 0 ) == magneticSnap) {
 				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
-			   		EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
-			   		if (ep != -1) {
-			   			Da.trk = t;
-			   			Da.ep = ep;
-			   			pos = GetTrkEndPos(t, ep);
-			   			found = TRUE;
-			   		} else {
-			   			Da.pos0=pos;
-						message(_("No unconnected end-point on track - Try again or release Shift and click"));
-						return C_CONTINUE;
-			   		}
-				}  else {
-					Da.pos0=pos;
-					message(_("Not on a track - Try again or release Shift and click"));
-					return C_CONTINUE;
+					EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
+					if (ep != -1) {
+						if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+							wBeep();
+							InfoMessage(_("Track is different gauge"));
+							return C_CONTINUE;
+						}
+						Da.trk = t;
+						Da.ep = ep;
+						pos = GetTrkEndPos(t, ep);
+						found = TRUE;
+					}
 				}
-				Da.down = TRUE;
 			}
-			Da.down = TRUE;
-			if (!found) SnapPos( &pos );
-			pos0 = pos;
+		} else {
+			if (((t = OnTrack(&p, FALSE, FALSE)) != NULL) && IsClose(FindDistance(p,pos))) {
+				if (!IsTrack(t)) {
+					pos = p;
+					found = TRUE;
+				}
+			}
+		}
+		Da.down = TRUE;
+		if (!found && !track) { SnapPos( &pos ); }
+		if (mode == crvCmdFromCenter) { SnapPos( &pos ); }
+		Da.lock0 = found;
+
+		if (Da.create_state == NOCURVE) {
 			Da.pos0 = pos;
-			switch (mode) {
-			case crvCmdFromEP1:
-				tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
-				tempSegs(0).color = color;
-				tempSegs(0).width = width;
-				if (Da.trk) message(_("End Locked: Drag out curve start"));
-				else message(_("Drag along curve start") );
-				break;
-			case crvCmdFromTangent:
-			case crvCmdFromCenter:
-				tempSegs(0).type = SEG_STRLIN;
-				tempSegs(1).type = SEG_CRVLIN;
-				tempSegs(1).u.c.radius = mainD.scale*0.05;
-				tempSegs(1).u.c.a0 = 0;
-				tempSegs(1).u.c.a1 = 360;
-				tempSegs(2).type = SEG_STRLIN;
-				if (Da.trk && mode==crvCmdFromTangent) message(_("End Locked: Drag out to center"));
-				else	
-					message( mode==crvCmdFromTangent?_("Drag from End-Point to Center"):_("Drag from Center to End-Point") );
-				break;
-			case crvCmdFromChord:
-				tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
-				tempSegs(0).color = color;
-				tempSegs(0).width = width; 
+		} else {
+			Da.pos1 = pos;
+		}
+
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		switch (mode) {
+		case crvCmdFromEP1:
+			tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
+			tempSegs(0).color = color;
+			tempSegs(0).lineWidth = width;
+			Da.create_state = FIRSTEND_DEF;
+			Da.end0 = pos;
+			CreateEndAnchor(pos,anchor_array,found);
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) { message(_("End locked: Drag out curve start")); }
+			else if (Da.trk) { message(_("End Position locked: Drag out curve start with Shift")); }
+			else { message(_("Drag along curve start") ); }
+			break;
+		case crvCmdFromTangent:
+			Da.create_state = FIRSTEND_DEF;
+			tempSegs(0).type = SEG_STRLIN;
+			tempSegs(0).color = color;
+			Da.create_state = CENTER_DEF;
+			CreateEndAnchor(pos,anchor_array,found);
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) { message(_("End locked: Drag out curve center")); }
+			else if (Da.trk) { message(_("End Position locked: Drag out curve start with Shift")); }
+			else { message(_("Drag out curve center") ); }
+			break;
+		case crvCmdFromCenter:
+			tempSegs(0).type = SEG_STRLIN;
+			tempSegs(0).color = color;
+			Da.create_state = CENTER_DEF;
+			CreateEndAnchor(pos,anchor_array,FALSE);
+			message(_("Drag out from center to endpoint"));
+			break;
+		case crvCmdFromChord:
+			tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
+			tempSegs(0).color = color;
+			tempSegs(0).lineWidth = width;
+			CreateEndAnchor(pos,anchor_array,FALSE);
+			Da.create_state = FIRSTEND_DEF;
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
+				message( _("End locked: Drag to other end of chord") );
+			} else if (Da.trk) { message(_("End Position locked: Drag out curve start with Shift")); }
+			else {
 				message( _("Drag to other end of chord") );
-				break;
 			}
-			tempSegs(0).u.l.pos[0] = pos;
+			break;
+		}
+		tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 		return C_CONTINUE;
 
 	case C_MOVE:
-		if (!Da.down) return C_CONTINUE;
-		if (Da.trk) {
+		DYNARR_RESET(trkSeg_t,*anchor_array);
+		DYNARR_APPEND(trkSeg_t,*anchor_array,1);
+		if (!Da.down) { return C_CONTINUE; }
+		if (Da.trk && track
+		    && !(MyGetKeyState() & WKEY_SHIFT)) {  //Shift inhibits direction lock
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
-			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
-			if (mode ==crvCmdFromEP1) {
-				if (angle2 > 90.0 && angle2 < 270.0)
-					Translate( &pos, pos0, angle1, -FindDistance( pos0, pos )*cos(D2R(angle2)) );
-				else pos = pos0;
-			} else {
-				DIST_T dp = -FindDistance(pos0, pos)*sin(D2R(angle2));
-				if (angle2 > 180.0)
-					Translate( &pos, pos0, angle1+90.0, dp );
-				else
-					Translate( &pos, pos0, angle1-90.0, dp ); 
+			angle2 = NormalizeAngle(FindAngle(pos, Da.pos0)-angle1);
+			if (mode ==crvCmdFromEP1 ) {
+				if (angle2 > 90.0 && angle2 < 270.0) {
+					Translate( &pos, Da.pos0, angle1, -FindDistance( Da.pos0,
+					                pos )*cos(D2R(angle2)) );
+				} else { pos = Da.pos0; }
+			} else if ( mode == crvCmdFromChord ) {
+				DIST_T dp = -FindDistance(Da.pos0, pos)*sin(D2R(angle2));
+				if (DifferenceBetweenAngles(FindAngle(Da.pos0,pos),angle1)>0) {
+					Translate( &pos, Da.pos0, angle1+90, dp );
+				} else {
+					Translate( &pos, Da.pos0, angle1-90, -dp );
+				}
+			} else if (mode == crvCmdFromCenter) {
+				DIST_T dp = -FindDistance(Da.pos0, pos)*sin(D2R(angle2));
+				if (angle2 > 90 && angle2 < 270.0) {
+					Translate( &pos, Da.pos0, angle1+90.0, dp );
+				} else {
+					Translate( &pos, Da.pos0, angle1-90.0, dp );
+				}
+			} else if (mode == crvCmdFromTangent) {
+				DIST_T dp = FindDistance(Da.pos0, pos)*sin(D2R(angle2));
+				Translate( &pos, Da.pos0, angle1-90.0, dp );
 			}
-		} else SnapPos(&pos);
-		tempSegs(0).u.l.pos[1] = pos;
-		d = FindDistance( pos0, pos );
-		a = FindAngle( pos0, pos );
+		} else if (track) { SnapPos(&pos); }
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		if (Da.trk && mode == crvCmdFromChord) {
+			tempSegs(0).type = SEG_CRVTRK;
+			tempSegs(0).u.c.center.x = (pos.x+Da.pos0.x)/2.0;
+			tempSegs(0).u.c.center.y = (pos.y+Da.pos0.y)/2.0;
+			tempSegs(0).u.c.radius = FindDistance(pos,Da.pos0)/2;
+			ANGLE_T a0 = FindAngle(tempSegs(0).u.c.center,Da.pos0);
+			if ( NormalizeAngle( GetTrkEndAngle(Da.trk,Da.ep) - a0 ) > 180.0 ) {
+				a0 = NormalizeAngle( a0 + 180.0 );
+			}
+			tempSegs(0).u.c.a0 = a0;
+			tempSegs(0).u.c.a1 = 180.0;
+		} else { tempSegs(0).u.l.pos[1] = pos; }
+		Da.pos1 = pos;
+
+		d = FindDistance( Da.pos0, Da.pos1 );
+		a = FindAngle( Da.pos0, Da.pos1 );
 		switch ( mode ) {
 		case crvCmdFromEP1:
-			if (Da.trk) message( _("Start Locked: Drag out curve start - Angle=%0.3f"), PutAngle(a));
-			else message( _("Drag out curve start - Angle=%0.3f"), PutAngle(a) );
-			tempSegs_da.cnt = 1;
+			if (Da.trk) { message( _("Start Locked: Drag out curve start - Angle=%0.3f"), PutAngle(a)); }
+			else { message( _("Drag out curve start - Angle=%0.3f"), PutAngle(a) ); }
+			CreateEndAnchor(Da.pos0,anchor_array,Da.lock0);
+			DrawArrowHeadsArray( anchor_array, pos, FindAngle(Da.pos0,Da.pos1)+90, TRUE,
+			                     wDrawColorBlue );
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			break;
 		case crvCmdFromTangent:
-			if (Da.trk) message( _("Tangent Locked: Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
-			else message( _("Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
-			tempSegs(1).u.c.center = pos;
-			DrawArrowHeads( &tempSegs(2), pos0, FindAngle(pos0,pos)+90, TRUE, wDrawColorBlack );
-			tempSegs_da.cnt = 7;
+			if (Da.trk) { message( _("Tangent locked: Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) ); }
+			else { message( _("Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) ); }
+			CreateEndAnchor(Da.pos1,anchor_array,TRUE);
+			DrawArrowHeadsArray( anchor_array, Da.pos0, FindAngle(Da.pos0,Da.pos1)+90, TRUE,
+			                     wDrawColorBlue );
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			break;
 		case crvCmdFromCenter:
-			message( _("Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
-			tempSegs(1).u.c.center = pos0;
-			DrawArrowHeads( &tempSegs(2), pos, FindAngle(pos,pos0)+90, TRUE, wDrawColorBlack );
-			tempSegs_da.cnt = 7;
+			message( _("Drag to Edge: Radius=%s Angle=%0.3f"), FormatDistance(d),
+			         PutAngle(a) );
+			CreateEndAnchor(Da.pos0,anchor_array,Da.lock0);
+			DrawArrowHeadsArray( anchor_array, Da.pos1, FindAngle(Da.pos1,Da.pos0)+90, TRUE,
+			                     wDrawColorBlue );
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			break;
 		case crvCmdFromChord:
-			message( _("Length=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
-			if ( d > mainD.scale*0.25 ) {
-				pos.x = (pos.x+pos0.x)/2.0;
-				pos.y = (pos.y+pos0.y)/2.0;
-				DrawArrowHeads( &tempSegs(1), pos, FindAngle(pos,pos0)+90, TRUE, wDrawColorBlack );
-				tempSegs_da.cnt = 6;
-			} else {
-				tempSegs_da.cnt = 1;
+			if (Da.trk) { message( _("Start locked: Drag out chord length=%s angle=%0.3f"), FormatDistance(d), PutAngle(a) ); }
+			else { message( _("Drag out chord length=%s angle=%0.3f"), FormatDistance(d), PutAngle(a) ); }
+			Da.middle.x = (Da.pos1.x+Da.pos0.x)/2.0;
+			Da.middle.y = (Da.pos1.y+Da.pos0.y)/2.0;
+			if (track && Da.trk) {
+				ANGLE_T ea = GetTrkEndAngle(Da.trk,Da.ep);
+				Translate(&Da.middle,Da.middle,ea,FindDistance(Da.middle,Da.pos0));
+			}
+			CreateEndAnchor(Da.pos0,anchor_array,TRUE);
+			CreateEndAnchor(Da.pos1,anchor_array,FALSE);
+			if (!track || !Da.trk) {
+				DrawArrowHeadsArray( anchor_array, Da.middle, FindAngle(Da.pos0,Da.pos1)+90,
+				                     TRUE, wDrawColorBlue );
 			}
 			break;
 		}
 		return C_CONTINUE;
 	case C_UP:
-		if (!Da.down) return C_CONTINUE;
+		/* Note - no anchor reset - assumes run after Down/Move */
+		if (!Da.down) { return C_CONTINUE; }
 		if (Da.trk) {
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
-			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
+			angle2 = NormalizeAngle(FindAngle(pos, Da.pos0)-angle1);
 			if (mode == crvCmdFromEP1) {
-				if (angle2 > 90.0 && angle2 < 270.0) {			
-					Translate( &pos, pos0, angle1, -FindDistance( pos0, pos )*cos(D2R(angle2)) );
+				if (angle2 > 90.0 && angle2 < 270.0) {
+					Translate( &pos, Da.pos0, angle1, -FindDistance( Da.pos0,
+					                pos )*cos(D2R(angle2)) );
 					Da.pos1 = pos;
 				} else {
 					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(0.0) );
 					return C_TERMINATE;
 				}
-			} else {
-				DIST_T dp = -FindDistance(pos0, pos)*sin(D2R(angle2));
-				if (angle2 > 180.0)
-					Translate( &pos, pos0, angle1+90.0, dp );
-				else
-					Translate( &pos, pos0, angle1-90.0, dp );
+			} else  if (mode == crvCmdFromTangent) {
+				DIST_T dp = FindDistance(Da.pos0, pos)*sin(D2R(angle2));
+				Translate( &pos, Da.pos0, angle1-90.0, dp );
 				Da.pos1 = pos;
+			} else {
+				DIST_T dp = -FindDistance(Da.pos0, pos)*sin(D2R(angle2));
+				if (angle2 > 180.0) {
+					Translate( &pos, Da.pos0, angle1+90.0, dp );
+				} else {
+					Translate( &pos, Da.pos0, angle1-90.0, dp );
+				}
+				Da.pos1 = pos;
+			}
+			if (FindDistance(Da.pos0,Da.pos1)<minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(FindDistance(Da.pos0,
+				                Da.pos1)) );
+				return C_TERMINATE;
 			}
 		}
 		switch (mode) {
-		case crvCmdFromEP1:			
-				DrawArrowHeads( &tempSegs(1), pos, FindAngle(pos,pos0)+90, TRUE, drawColorRed );
-				tempSegs_da.cnt = 6;
-				break;
-		case crvCmdFromChord:
-				tempSegs(1).color = drawColorRed;
+		case crvCmdFromEP1:
 		case crvCmdFromTangent:
 		case crvCmdFromCenter:
-				tempSegs(2).color = drawColorRed;
-				tempSegs(3).color = drawColorRed;
-				tempSegs(4).color = drawColorRed;
-				tempSegs(5).color = drawColorRed;
-				tempSegs(6).color = drawColorRed;
-				break;
+		case crvCmdFromChord:
+			for (int i=0; i<(*anchor_array).cnt; i++) {
+				DYNARR_N(trkSeg_t,*anchor_array,i).color = drawColorRed;
+			}
+			break;
 		}
-		message( _("Drag on Red arrows to adjust curve") );
+		//message( _("Drag on Red arrows to adjust curve") );
 		return C_CONTINUE;
 
 	default:
@@ -295,6 +423,16 @@ EXPORT STATUS_T CreateCurve(
 	}
 }
 
+static DIST_T desired_radius = 0.0;
+static BOOL_T infoSubst = FALSE;
+
+static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
+static paramData_t curvePLs[] = {
+#define curveRadPD (curvePLs[0])
+#define curveRadI 0
+	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
+};
+static paramGroup_t curvePG = { "curvefixed", 0, curvePLs, COUNT( curvePLs ) };
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -302,153 +440,250 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
+	wControl_p controls[2];
+	char * labels[1];
+	static BOOL_T lock;
+	static coOrd movePos;
+
 
 	switch (action) {
 
 	case C_START:
-		curveMode = (long)commandContext;
+		lock = FALSE;
+		curveMode = VP2L(commandContext);
 		Da.state = -1;
 		Da.pos0 = pos;
-		tempSegs_da.cnt = 0;
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		segCnt = 0;
 		STATUS_T rcode;
-		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
-		
-	case C_TEXT:
-		if ( Da.state == 0 )
-			return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
-		else
-			return C_CONTINUE;
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (curvePLs[0].control==NULL) {
+			ParamCreateControls(&curvePG, NULL);
+		}
+		SetAllTrackSelect(FALSE);
+		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
+		                    &anchors_da, InfoMessage );
 
 	case C_DOWN:
-		if ( Da.state == -1 ) {
-			//SnapPos( &pos );
-			Da.pos0 = pos;
+		if (Da.state == -1) {
+			if (lock) { pos = movePos; }
+			Da.pos0 = Da.pos1 = pos;
 			Da.state = 0;
-			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
-			if (!Da.down) Da.state = -1;
+			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
+			                     &anchors_da, InfoMessage );
+			segCnt = tempSegs_da.cnt ;
+			if (!Da.down) { Da.state = -1; }
 			return rcode;
 			//Da.pos0 = pos;
-		} else {
-			tempSegs_da.cnt = segCnt;
-			return C_CONTINUE;
 		}
+		if (infoSubst) {
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefSetFloat("misc", message, desired_radius);
+			InfoSubstituteControls(NULL, NULL);
+		}
+		infoSubst = FALSE;
+		//This is where the user could adjust - if we allow that?
+		DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
+		return C_CONTINUE;
+
+
+	case wActionMove:
+		lock = FALSE;
+		if ((Da.state<0) && (curveMode != crvCmdFromCenter)) {
+			DYNARR_RESET(trkSeg_t,anchors_da);
+			if (((MyGetKeyState() & WKEY_ALT)==0) == magneticSnap) {
+				if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
+					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
+						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+						if (ep != -1) {
+							pos = GetTrkEndPos(t, ep);
+							CreateEndAnchor(pos,&anchors_da,FALSE);
+							lock = TRUE;
+							movePos = pos;
+						}
+					}
+				}
+			}
+			if (!lock && SnapPos(&pos)) {
+				CreateEndAnchor(pos,&anchors_da,FALSE);
+				lock = TRUE;
+				movePos = pos;
+			}
+		}
+		return C_CONTINUE;
 
 	case C_MOVE:
-		if (Da.state<0) return C_CONTINUE;
-		mainD.funcs->options = wDrawOptTemp;
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		if (Da.state<0) { return C_CONTINUE; }
 		if ( Da.state == 0 ) {
-		    Da.pos1 = pos;
-			rc = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
+			Da.pos1 = pos;
+			rc = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da,
+			                  InfoMessage );
+			segCnt = tempSegs_da.cnt ;
 		} else {
+			DYNARR_RESET(trkSeg_t,anchors_da);
 			// SnapPos( &pos );
-			if (Da.trk) PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, FALSE );
-			else PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, TRUE );
+			DYNARR_SET( trkSeg_t, tempSegs_da, segCnt );
+			if (Da.trk) { PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, FALSE, desired_radius ); }
+			else { PlotCurve( curveMode, Da.pos0, Da.pos1, pos, &Da.curveData, TRUE, desired_radius ); }
 			if (Da.curveData.type == curveTypeStraight) {
+				DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 				tempSegs(0).type = SEG_STRTRK;
 				tempSegs(0).u.l.pos[0] = Da.pos0;
 				tempSegs(0).u.l.pos[1] = Da.curveData.pos1;
-				tempSegs_da.cnt = 1;
+				segCnt = 1;
 				InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
-						FormatDistance(FindDistance( Da.pos0, Da.curveData.pos1 )),
-						PutAngle(FindAngle( Da.pos0, Da.curveData.pos1 )) );
+				             FormatDistance(FindDistance( Da.pos0, Da.curveData.pos1 )),
+				             PutAngle(FindAngle( Da.pos0, Da.curveData.pos1 )) );
+				DrawArrowHeadsArray(&anchors_da,Da.curveData.pos1,FindAngle(Da.pos0,
+				                    Da.curveData.pos1)+90,TRUE,wDrawColorRed);
 			} else if (Da.curveData.type == curveTypeNone) {
-				tempSegs_da.cnt = 0;
+				DYNARR_RESET( trkSeg_t, tempSegs_da );
+				segCnt = 0;
 				InfoMessage( _("Back") );
 			} else if (Da.curveData.type == curveTypeCurve) {
+				DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 				tempSegs(0).type = SEG_CRVTRK;
 				tempSegs(0).u.c.center = Da.curveData.curvePos;
 				tempSegs(0).u.c.radius = Da.curveData.curveRadius;
 				tempSegs(0).u.c.a0 = Da.curveData.a0;
 				tempSegs(0).u.c.a1 = Da.curveData.a1;
-				tempSegs_da.cnt = 1;
+				segCnt = 1;
+
 				d = D2R(Da.curveData.a1);
-				if (d < 0.0)
+
+				if (d < 0.0) {
 					d = 2*M_PI+d;
+				}
 				if ( d*Da.curveData.curveRadius > mapD.size.x+mapD.size.y ) {
 					ErrorMessage( MSG_CURVE_TOO_LARGE );
-					tempSegs_da.cnt = 0;
+					DYNARR_RESET( trkSeg_t, tempSegs_da );
 					Da.curveData.type = curveTypeNone;
-					mainD.funcs->options = 0;
 					return C_CONTINUE;
 				}
 				InfoMessage( _("Curved Track: Radius=%s Angle=%0.3f Length=%s"),
-						FormatDistance(Da.curveData.curveRadius), Da.curveData.a1,
-						FormatDistance(Da.curveData.curveRadius*d) );
+				             FormatDistance(Da.curveData.curveRadius), Da.curveData.a1,
+				             FormatDistance(Da.curveData.curveRadius*d) );
+				coOrd pos1;
+				Translate(&pos1,Da.curveData.curvePos,Da.curveData.a0+Da.curveData.a1,
+				          Da.curveData.curveRadius);
+				if (curveMode == crvCmdFromEP1 || curveMode == crvCmdFromChord) {
+					DrawArrowHeadsArray(&anchors_da,pos,FindAngle(Da.curveData.curvePos,pos),TRUE,
+					                    wDrawColorRed);
+				} else if (curveMode == crvCmdFromTangent || curveMode == crvCmdFromCenter) {
+					if (Da.curveData.curveRadius == desired_radius) {
+						CreateEndAnchor(Da.curveData.pos2,&anchors_da,TRUE);
+					} else {
+						CreateEndAnchor(Da.curveData.pos2,&anchors_da,FALSE);
+					}
+					DrawArrowHeadsArray(&anchors_da,Da.curveData.pos2,
+					                    FindAngle(Da.curveData.curvePos,Da.curveData.pos2)+90,TRUE,wDrawColorRed);
+				}
+				if (Da.curveData.curveRadius == desired_radius) {
+					CreateEndAnchor(Da.curveData.curvePos,&anchors_da,TRUE);
+				} else {
+					CreateEndAnchor(Da.curveData.curvePos,&anchors_da,FALSE);
+				}
 			}
 		}
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-		mainD.funcs->options = 0;
 		return rc;
-
-
-	case C_UP:
-		if (Da.state<0) return C_CONTINUE;
-		mainD.funcs->options = wDrawOptTemp;
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-		if (Da.state == 0) {
-			SnapPos( &pos );
-			Da.pos1 = pos;
-			Da.state = 1;
-			CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
-			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-			mainD.funcs->options = 0;
-			segCnt = tempSegs_da.cnt;
-			InfoMessage( _("Drag on Red arrows to adjust curve") );
-			return C_CONTINUE;
-		} else {
-			mainD.funcs->options = 0;
-			tempSegs_da.cnt = 0;
-			Da.state = -1;
-			if (Da.curveData.type == curveTypeStraight) {
-				if ((d=FindDistance( Da.pos0, Da.curveData.pos1 )) <= minLength) {
-					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
-					return C_TERMINATE;
-				}
-				UndoStart( _("Create Straight Track"), "newCurve - straight" );
-				t = NewStraightTrack( Da.pos0, Da.curveData.pos1 );
-				if (Da.trk) {
-					EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
-					if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
-				}
-				UndoEnd();
-			} else if (Da.curveData.type == curveTypeCurve) {
-				if ((d= Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) <= minLength) {
-					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
-					return C_TERMINATE;
-				}
-				UndoStart( _("Create Curved Track"), "newCurve - curve" );
-				t = NewCurvedTrack( Da.curveData.curvePos, Da.curveData.curveRadius,
-						Da.curveData.a0, Da.curveData.a1, 0 );
-				if (Da.trk) {
-					EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
-					if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
-				}
-				UndoEnd();
-			} else {
-				return C_ERROR;
-			}
-			DrawNewTrack( t );
-			return C_TERMINATE;
+	case C_TEXT:
+		if ( Da.state == 0 ) {
+			return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode,
+			                    &anchors_da, InfoMessage );
 		}
+	/*no break*/
+	case C_UP:
+		if (Da.state<0) { return C_CONTINUE; }
+		if (Da.state == 0 && ((curveMode != crvCmdFromChord)
+		                      || (curveMode == crvCmdFromChord && !Da.trk))) {
+			//SnapPos( &pos );
+			//Da.pos1 = pos;
+			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
+			Da.state = 1;
+			CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da,
+			             InfoMessage );
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+			segCnt = tempSegs_da.cnt;
+
+			sprintf(message, "desired_radius-%s", curScaleName);
+			wPrefGetFloat("misc", message, &desired_radius, desired_radius);
+			controls[0] = curveRadPD.control;
+			controls[1] = NULL;
+			labels[0] = N_("Desired Radius");
+			InfoSubstituteControls(controls, labels);
+			infoSubst = TRUE;
+			curveRadPD.option |= PDO_NORECORD;
+			ParamLoadControls(&curvePG);
+			ParamGroupRecord(&curvePG);
+			//InfoMessage( _("Drag on Red arrows to adjust curve") );
+
+			return C_CONTINUE;
+		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
+			pos = Da.middle;
+			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
+			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE,
+			           desired_radius );
+		}
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		segCnt = 0;
+		Da.state = -1;
+		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one
+		if (Da.curveData.type == curveTypeStraight) {
+			if ((d = FindDistance( Da.pos0, Da.curveData.pos1 )) < minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
+			UndoStart( _("Create Straight Track"), "newCurve - straight" );
+			t = NewStraightTrack( Da.pos0, Da.curveData.pos1 );
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
+				EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
+				if (ep != -1) { ConnectTracks(Da.trk, Da.ep, t, ep); }
+			}
+			UndoEnd();
+		} else if (Da.curveData.type == curveTypeCurve) {
+			if ((d = Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) <
+			    minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
+
+			UndoStart( _("Create Curved Track"), "newCurve - curve" );
+			t = NewCurvedTrack( Da.curveData.curvePos, Da.curveData.curveRadius,
+			                    Da.curveData.a0, Da.curveData.a1, 0 );
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
+				EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
+				if (ep != -1) { ConnectTracks(Da.trk, Da.ep, t, ep); }
+			}
+			UndoEnd();
+		} else {
+			return C_ERROR;
+		}
+		DrawNewTrack( t );
+		return C_TERMINATE;
 
 	case C_REDRAW:
 		if ( Da.state >= 0 ) {
-			mainD.funcs->options = wDrawOptTemp;
-			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-			mainD.funcs->options = 0;
+			DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+			            0 );
 		}
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &anchors_da, trackGauge, wDrawColorBlack,
+		            0 );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		if (Da.state == 1) {
-			mainD.funcs->options = wDrawOptTemp;
-			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-			mainD.funcs->options = 0;
-			tempSegs_da.cnt = 0;
 			Da.trk = NULL;
 		}
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		DYNARR_RESET(trkSeg_t,tempSegs_da);
 		Da.state = -1;
+		segCnt = 0;
 		return C_CONTINUE;
 
 	}
@@ -495,24 +730,27 @@ static paramData_t helixPLs[] = {
 	{ PD_FLOAT, &helixGrade, "grade", 0, &r0_100, N_("Grade") },
 	{ PD_FLOAT, &helixVertSep, "vertSep", PDO_DIM, &r0_1000000, N_("Vertical Separation") },
 #define I_HELIXMSG		(6)
-	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, (void*)200 } };
-static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, sizeof helixPLs/sizeof helixPLs[0] };
+	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, I2VP(200) }
+};
+static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, COUNT( helixPLs ) };
 
 static paramData_t circleRadiusPLs[] = {
-	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 } };
-static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, sizeof circleRadiusPLs/sizeof circleRadiusPLs[0] };
+	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 }
+};
+static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, COUNT( circleRadiusPLs ) };
 
 
 static void ComputeHelix(
-		paramGroup_p pg,
-		int h_inx,
-		void * data )
+        paramGroup_p pg,
+        int h_inx,
+        void * data )
 {
 	DIST_T totTurns;
 	DIST_T length;
 	long updates = 0;
-	if ( h_inx < 0 || h_inx >= sizeof h_orders/sizeof h_orders[0] )
+	if ( h_inx < 0 || h_inx >= COUNT( h_orders ) ) {
 		return;
+	}
 	ParamLoadData( &helixPG );
 	totTurns = helixTurns + helixAngSep/360.0;
 	length = totTurns * helixRadius * (2 * M_PI);
@@ -520,7 +758,7 @@ static void ComputeHelix(
 	switch ( h_inx ) {
 	case H_ELEV:
 		if (h_orders[H_TURNS]<h_orders[H_VERTSEP] &&
-			origVertSep > 0.0) {
+		    origVertSep > 0.0) {
 			helixTurns = (int)floor(helixElev/origVertSep - helixAngSep/360.0);
 			totTurns = helixTurns + helixAngSep/360.0;
 			updates |= (1<<H_TURNS);
@@ -553,7 +791,7 @@ static void ComputeHelix(
 	}
 	if ( totTurns > 0.0 ) {
 		if ( h_orders[H_RADIUS]>=h_orders[H_GRADE] ||
-			 (helixGrade==0.0 && totTurns>0 && helixRadius>0) ) {
+		     (helixGrade==0.0 && totTurns>0 && helixRadius>0) ) {
 			if ( helixRadius > 0.0 ) {
 				helixGrade = helixElev/(totTurns*helixRadius*(2*M_PI))*100.0;
 				updates |= (1<<H_GRADE);
@@ -567,13 +805,15 @@ static void ComputeHelix(
 	}
 	length = totTurns * helixRadius * (2 * M_PI);
 	for ( h_inx=0; updates; h_inx++,updates>>=1 ) {
-		if ( (updates&1) )
+		if ( (updates&1) ) {
 			ParamLoadControl( &helixPG, h_inx );
+		}
 	}
-	if (length > 0.0)
+	if (length > 0.0) {
 		sprintf( message, _("Total Length  %s"), FormatDistance(length) );
-	else
+	} else {
 		strcpy( message, "                           " );
+	}
 	ParamLoadMessage( &helixPG, I_HELIXMSG, message );
 }
 
@@ -581,15 +821,14 @@ static void ComputeHelix(
 static void HelixCancel( wWin_p win )
 {
 	wHide( helixW );
-	Reset();
 }
 
 
 static void ChangeHelixW( long changes )
 {
 	if ( (changes & CHANGE_UNITS) &&
-		 helixW != NULL &&
-		 wWinIsVisible(helixW) ) {
+	     helixW != NULL &&
+	     wWinIsVisible(helixW) ) {
 		ParamLoadControls( &helixPG );
 		ComputeHelix( NULL, 6, NULL );
 	}
@@ -609,149 +848,151 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 
 	case C_START:
 		if (helix) {
-			if (helixW == NULL)
-				helixW = ParamCreateDialog( &helixPG, MakeWindowTitle(_("Helix")), NULL, NULL, HelixCancel, TRUE, NULL, 0, ComputeHelix );
-			ParamLoadControls( &helixPG );
-			ParamGroupRecord( &helixPG );
-			ComputeHelix( NULL, 6, NULL );
-			wShow( helixW );
-			memset( h_orders, 0, sizeof h_orders );
+			if (helixW == NULL) {
+				helixW = ParamCreateDialog(&helixPG, MakeWindowTitle(_("Helix")), NULL, NULL,
+				                           HelixCancel, TRUE, NULL, 0, ComputeHelix);
+			}
+			ParamLoadControls(&helixPG);
+			ParamGroupRecord(&helixPG);
+			ComputeHelix(NULL, 6, NULL);
+			wShow(helixW);
+			memset(h_orders, 0, sizeof h_orders);
 			h_clock = 0;
 		} else {
-			ParamLoadControls( &circleRadiusPG );
-			ParamGroupRecord( &circleRadiusPG );
-			switch ( circleMode ) {
+			ParamLoadControls(&circleRadiusPG);
+			ParamGroupRecord(&circleRadiusPG);
+			switch (circleMode) {
 			case circleCmdFixedRadius:
 				controls[0] = circleRadiusPLs[0].control;
 				controls[1] = NULL;
 				labels[0] = N_("Circle Radius");
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(controls, labels);
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Click on Circle Edge") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Click on Circle Edge"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Click on Circle Center") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Click on Circle Center"));
 				break;
 			}
 		}
-		tempSegs_da.cnt = 0;
+		SetAllTrackSelect( FALSE );
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_CONTINUE;
 
 	case C_DOWN:
-		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
-		tempSegs_da.cnt = 0;
 		if (helix) {
 			if (helixRadius <= 0.0) {
-				ErrorMessage( MSG_RADIUS_GTR_0 );
+				ErrorMessage(MSG_RADIUS_GTR_0);
 				return C_ERROR;
 			}
 			if (helixTurns <= 0) {
-				ErrorMessage( MSG_HELIX_TURNS_GTR_0 );
+				ErrorMessage(MSG_HELIX_TURNS_GTR_0);
 				return C_ERROR;
 			}
-			ParamLoadData( &helixPG );
+			ParamLoadData(&helixPG);
 		} else {
-			ParamLoadData( &circleRadiusPG );
-			switch( circleMode ) {
+			ParamLoadData(&circleRadiusPG);
+			switch (circleMode) {
 			case circleCmdFixedRadius:
 				if (circleRadius <= 0.0) {
-					ErrorMessage( MSG_RADIUS_GTR_0 );
+					ErrorMessage(MSG_RADIUS_GTR_0);
 					return C_ERROR;
 				}
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Drag to Center") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Drag to Center"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Drag to Edge") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Drag to Edge"));
 				break;
 			}
 		}
-		SnapPos( &pos );
-		tempSegs(0).u.c.center = pos0 = pos;
-		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
+		SnapPos(&pos);
+		DYNARR_RESET(trkSeg_t, tempSegs_da);
+		pos0 = pos;
 		return C_CONTINUE;
 
 	case C_MOVE:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-		SnapPos( &pos );
+		SnapPos(&pos);
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		tempSegs(0).type = SEG_CRVTRK;
 		tempSegs(0).u.c.center = pos;
-		if ( !helix ) {
-			switch ( circleMode ) {
+		if (!helix) {
+			switch (circleMode) {
 			case circleCmdFixedRadius:
 				break;
 			case circleCmdFromCenter:
 				tempSegs(0).u.c.center = pos0;
-				circleRadius = FindDistance( tempSegs(0).u.c.center, pos );
-				InfoMessage( _("Radius=%s"), FormatDistance(circleRadius) );
+				circleRadius = FindDistance(tempSegs(0).u.c.center, pos);
+				InfoMessage(_("Radius=%s"), FormatDistance(circleRadius));
 				break;
 			case circleCmdFromTangent:
-				circleRadius = FindDistance( tempSegs(0).u.c.center, pos0 );
-				InfoMessage( _("Radius=%s"), FormatDistance(circleRadius) );
+				circleRadius = FindDistance(tempSegs(0).u.c.center, pos0);
+				InfoMessage(_("Radius=%s"), FormatDistance(circleRadius));
 				break;
 			}
 		}
-		tempSegs(0).type = SEG_CRVTRK;
-		tempSegs(0).u.c.radius = helix?helixRadius:circleRadius;
+		tempSegs(0).color = wDrawColorBlack;
+		tempSegs(0).lineWidth = 0;
+		tempSegs(0).u.c.radius = helix ? helixRadius : circleRadius;
 		tempSegs(0).u.c.a0 = 0.0;
 		tempSegs(0).u.c.a1 = 360.0;
-		tempSegs_da.cnt = 1;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-		if (helixRadius > mapD.size.x && helixRadius > mapD.size.y) {
-			ErrorMessage( MSG_RADIUS_TOO_BIG );
-			return C_ERROR;
-		}
-		if (circleRadius > mapD.size.x && circleRadius > mapD.size.y) {
-			ErrorMessage( MSG_RADIUS_TOO_BIG );
-			return C_ERROR;
-		}
-		if ( helix ) {
-			if (helixRadius > 10000) {
-				ErrorMessage( MSG_RADIUS_GTR_10000 );
+		if (helix) {
+			if (helixRadius > mapD.size.x || helixRadius > mapD.size.y) {
+				ErrorMessage(MSG_RADIUS_TOO_BIG);
 				return C_ERROR;
 			}
-			UndoStart( _("Create Helix Track"), "newHelix" );
-			t = NewCurvedTrack( tempSegs(0).u.c.center, helixRadius, 0.0, 0.0, helixTurns );
+			if (helixRadius > 10000) {
+				ErrorMessage(MSG_RADIUS_GTR_10000);
+				return C_ERROR;
+			}
+			UndoStart(_("Create Helix Track"), "newHelix");
+			t = NewCurvedTrack(tempSegs(0).u.c.center, helixRadius, 0.0, 0.0, helixTurns);
 		} else {
-			if ( circleRadius <= 0 ) {
-				ErrorMessage( MSG_RADIUS_GTR_0 );
+			if (circleRadius > mapD.size.x || circleRadius > mapD.size.y) {
+				ErrorMessage(MSG_RADIUS_TOO_BIG);
+				return C_ERROR;
+			}
+			if (circleRadius <= 0) {
+				ErrorMessage(MSG_RADIUS_GTR_0);
 				return C_ERROR;
 			}
 			if ((circleRadius > 100000) || (helixRadius > 10000)) {
-				ErrorMessage( MSG_RADIUS_GTR_10000 );
+				ErrorMessage(MSG_RADIUS_GTR_10000);
 				return C_ERROR;
 			}
-			UndoStart( _("Create Circle Track"), "newCircle" );
-			t = NewCurvedTrack( tempSegs(0).u.c.center, circleRadius, 0.0, 0.0, 0 );
+			UndoStart(_("Create Circle Track"), "newCircle");
+			t = NewCurvedTrack(tempSegs(0).u.c.center, circleRadius, 0.0, 0.0, 0);
 		}
 		UndoEnd();
 		DrawNewTrack(t);
-		if (helix)
+		if (helix) {
 			wHide( helixW );
-		else
+		} else {
 			InfoSubstituteControls( NULL, NULL );
-		tempSegs_da.cnt = 0;
+		}
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegsDA( &tempD, NULL, zero, 0.0, &tempSegs_da, trackGauge, wDrawColorBlack,
+		            0 );
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		if (helix)
+		if (helix) {
 			wHide( helixW );
-		else
+		} else {
 			InfoSubstituteControls( NULL, NULL );
+		}
 		return C_CONTINUE;
 
 	default:
@@ -763,7 +1004,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 static STATUS_T CmdCircle( wAction_t action, coOrd pos )
 {
 	if ( action == C_START ) {
-		circleMode = (long)commandContext;
+		circleMode = VP2L(commandContext);
 	}
 	return CmdCircleCommon( action, pos, FALSE );
 }
@@ -774,30 +1015,50 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 	return CmdCircleCommon( action, pos, TRUE );
 }
 
-#include "bitmaps/curve1.xpm"
-#include "bitmaps/curve2.xpm"
-#include "bitmaps/curve3.xpm"
-#include "bitmaps/curve4.xpm"
-#include "bitmaps/bezier.xpm"
-#include "bitmaps/circle1.xpm"
-#include "bitmaps/circle2.xpm"
-#include "bitmaps/circle3.xpm"
+#include "bitmaps/curved-end.xpm3"
+#include "bitmaps/curved-tangent.xpm3"
+#include "bitmaps/curved-middle.xpm3"
+#include "bitmaps/curved-chord.xpm3"
+#include "bitmaps/bezier-track.xpm3"
+#include "bitmaps/cornu.xpm3"
+#include "bitmaps/circle.xpm3"
+#include "bitmaps/circle-tangent.xpm3"
+#include "bitmaps/circle-center.xpm3"
+// #include "bitmaps/helix.xpm"
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
-
-	ButtonGroupBegin( _("Curve Track"), "cmdCircleSetCmd", _("Curve Tracks") );
-	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE1, (void*)0 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE2, (void*)1 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE3, (void*)2 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE4, (void*)3 );
-	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_BEZIER, (void*)bezCmdCreateTrack );
+	ButtonGroupBegin( _("Curve Track"), "cmdCurveSetCmd", _("Curve Tracks") );
+	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"),
+	               wIconCreatePixMap( curved_end_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, I2VP(0) );
+	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"),
+	               wIconCreatePixMap( curved_tangent_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, I2VP(1) );
+	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"),
+	               wIconCreatePixMap( curved_middle_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, I2VP(2) );
+	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"),
+	               wIconCreatePixMap( curved_chord_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, I2VP(3) );
+	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"),
+	               wIconCreatePixMap( bezier_track_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, I2VP(bezCmdCreateTrack) );
+	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"),
+	               wIconCreatePixMap( cornu_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, I2VP(cornuCmdCreateTrack));
 	ButtonGroupEnd();
 
-	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );
-	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius", _("Fixed Radius Circle"), wIconCreatePixMap( circle1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, (void*)0 );
-	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"), wIconCreatePixMap( circle2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, (void*)1 );
-	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"), wIconCreatePixMap( circle3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, (void*)2 );
+	ButtonGroupBegin( _("Circle Track"), "cmdCircleSetCmd", _("Circle Tracks") );
+	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius",
+	               _("Fixed Radius Circle"), wIconCreatePixMap( circle_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, I2VP(0) );
+	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", _("Circle from Tangent"),
+	               wIconCreatePixMap( circle_tangent_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, I2VP(1) );
+	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", _("Circle from Center"),
+	               wIconCreatePixMap( circle_center_xpm3[iconSize] ), LEVEL0_50,
+	               IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, I2VP(2) );
 	ButtonGroupEnd();
 
 	ParamRegister( &circleRadiusPG );
@@ -815,8 +1076,8 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 
 void InitCmdHelix(wMenu_p menu)
 {
-    AddMenuButton(menu, CmdHelix, "cmdHelix", _("Helix"), NULL, LEVEL0_50,
-                  IC_STICKY|IC_POPUP2, ACCL_HELIX, NULL);
-    ParamRegister(&helixPG);
-    RegisterChangeNotification(ChangeHelixW);
+	AddMenuButton(menu, CmdHelix, "cmdHelix", _("Helix"), NULL, LEVEL0_50,
+	              IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HELIX, NULL);
+	ParamRegister(&helixPG);
+	RegisterChangeNotification(ChangeHelixW);
 }

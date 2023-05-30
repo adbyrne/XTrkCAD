@@ -13,31 +13,31 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "xtrkcad-config.h"
 
 #ifdef XTRKCAD_USE_GETTEXT
 /* Use gettext */
-	#ifndef USE_SIMPLE_GETTEXT
-		#include <libintl.h>
-	#endif
+#ifndef USE_SIMPLE_GETTEXT
+#include <libintl.h>
+#endif
 
-	#include <string.h>
+#include <string.h>
 
-	#define _(String)             ((String && strlen(String) > 0) \
+#define _(String)             ((String && strlen(String) > 0) \
 		                          ? gettext(String) : String)
-	#define p_(Context, String)   ((Context && strlen(Context) > 0) \
+#define p_(Context, String)   ((Context && strlen(Context) > 0) \
 								  ? pgettext(Context, String) : _(String))
-	#define gettext_noop(String)  String
-	#define N_(String)            gettext_noop(String)
+#define gettext_noop(String)  String
+#define N_(String)            gettext_noop(String)
 
 #else
-	/* Don't use gettext */
-	#define _(String)             String
-	#define gettext_noop(String)  String
-	#define N_(String)            String
+/* Don't use gettext */
+#define _(String)             String
+#define gettext_noop(String)  String
+#define N_(String)            String
 #endif /* XTRKCAD_USE_GETTEXT */
 
 void InitGettext( void );

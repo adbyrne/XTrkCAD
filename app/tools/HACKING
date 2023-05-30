@@ -1,10 +1,8 @@
 /** \file filename.c
  * This file shows the conventions used for inline documentation.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/HACKING,v 1.3 2007-11-13 19:31:12 m_fischer Exp $
  */
 
-/*  XTrkCad - Model Railroad CAD
+/*  XTrackCAD - Model Railroad CAD
  *  Copyright (C) 
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 int global; 	/**< this is a global variable */

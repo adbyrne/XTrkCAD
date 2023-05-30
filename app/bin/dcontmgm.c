@@ -4,36 +4,36 @@
 
 /* -*- C -*- ****************************************************************
  *
- *  System        : 
- *  Module        : 
+ *  System        :
+ *  Module        :
  *  Created By    : Robert Heller
  *  Created       : Thu Jan 5 10:52:12 2017
  *  Last Modified : <170411.1447>
  *
  *  Description
- * 
- *     Control Element Mangment.  Control Elements are elements related to 
+ *
+ *     Control Element Mangment.  Control Elements are elements related to
  *     layout control: Blocks (occupency detection), Switchmotors (actuators
  *     to "throw" turnouts), and (eventually) signals.  These elements don't
  *     relate to "physical" items on the layout, but instead refer to the
  *     elements used by the layout control software.  These elements contain
  *     "scripts", which are really just textual items that provide information
- *     for the layout control software and provide a bridge between physical 
- *     layout elements (like tracks or turnouts) and the layout control 
+ *     for the layout control software and provide a bridge between physical
+ *     layout elements (like tracks or turnouts) and the layout control
  *     software.  These textual items could be actual software code or could
- *     be LCC Events (for I/O device elements on a LCC network) or DCC 
+ *     be LCC Events (for I/O device elements on a LCC network) or DCC
  *     addresses for stationary decoders, etc.  XTrkCAD does not impose any
  *     sort of syntax or format -- that is left up to other software that might
  *     load and parse the XTrkCAD layout file.  All the XTrkCAD does is provide
  *     a unified place for this information to be stored and to provide a
  *     mapping (association) between this control information and the layout
  *     itself.
- * 
+ *
  *
  *  Notes
  *
  *  History
- *	
+ *
  ****************************************************************************
  *
  *    Copyright (C) 2017  Robert Heller D/B/A Deepwoods Software
@@ -52,30 +52,18 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
- * 
+ *
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#) : $Id$";
-
-#include <errno.h>
-#include <math.h>
-
-#ifdef WINDOWS
-#include <io.h>
-#define F_OK	(0)
-#define W_OK	(2)
-#define access	_access
-#endif
+//static const char rcsid[] = "@(#) : $Id$";
 
 #include "cundo.h"
 #include "custom.h"
-#include "i18n.h"
 #include "param.h"
 #include "track.h"
-#include "wlib.h"
 
 
 /*****************************************************************************
@@ -87,56 +75,57 @@ static const char rcsid[] = "@(#) : $Id$";
 static void ControlEdit( void * action );
 static void ControlDelete( void * action );
 static void ControlDone( void * action );
-static wPos_t controlListWidths[] = { 18, 100, 150 };
+static wWinPix_t controlListWidths[] = { 18, 100, 150 };
 static const char * controlListTitles[] = { "", N_("Name"),
-	N_("Tracks") };
+                                            N_("Tracks")
+                                          };
 static paramListData_t controlListData = { 10, 400, 3, controlListWidths, controlListTitles };
 static paramData_t controlPLs[] = {
 #define I_CONTROLLIST	(0)
 #define controlSelL		((wList_p)controlPLs[I_CONTROLLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &controlListData, NULL, BL_MANY },
 #define I_CONTROLEDIT	(1)
-	{	PD_BUTTON, (void*)ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CONTROLDEL		(2)
-    {	PD_BUTTON, (void*)ControlDelete, "delete", 0, NULL, N_("Delete") },
-  } ;
-static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
+	{	PD_BUTTON, ControlDelete, "delete", 0, NULL, N_("Delete") },
+} ;
+static paramGroup_t controlPG = { "contmgm", 0, controlPLs, COUNT( controlPLs ) };
 
 
 typedef struct {
-		contMgmCallBack_p proc;
-		void * data;
-		wIcon_p icon;
-		} contMgmContext_t, *contMgmContext_p;
+	contMgmCallBack_p proc;
+	void * data;
+	wIcon_p icon;
+} contMgmContext_t, *contMgmContext_p;
 
 static BOOL_T AnyHILIGHT = FALSE;
 
 static void ControlDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void *valueP )
+        paramGroup_p pg,
+        int inx,
+        void *valueP )
 {
-    contMgmContext_p context = NULL;
-    wIndex_t selcnt = wListGetSelectedCount( (wList_p)controlPLs[0].control );
-    wIndex_t linx, lcnt;
+	contMgmContext_p context = NULL;
+	wIndex_t selcnt = wListGetSelectedCount( (wList_p)controlPLs[0].control );
+	wIndex_t linx, lcnt;
 
-    if ( inx != I_CONTROLLIST ) return;
-    lcnt = wListGetCount( (wList_p)controlPLs[0].control );
-    AnyHILIGHT = FALSE;
-    for (linx=0;
-         linx < lcnt;
-         linx++ ) {
-        if (wListGetItemSelected( (wList_p)controlPLs[0].control, linx ) == TRUE) {
-            context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
-            context->proc( CONTMGM_DO_HILIGHT, context->data );
-            AnyHILIGHT = TRUE;
-        } else {
-            context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
-            context->proc( CONTMGM_UN_HILIGHT, context->data );
-        }
-    }
-    ParamControlActive( &controlPG, I_CONTROLEDIT, selcnt>0 );
-    ParamControlActive( &controlPG, I_CONTROLDEL, selcnt>0 );
+	if ( inx != I_CONTROLLIST ) { return; }
+	lcnt = wListGetCount( (wList_p)controlPLs[0].control );
+	AnyHILIGHT = FALSE;
+	for (linx=0;
+	     linx < lcnt;
+	     linx++ ) {
+		if (wListGetItemSelected( (wList_p)controlPLs[0].control, linx ) == TRUE) {
+			context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
+			context->proc( CONTMGM_DO_HILIGHT, context->data );
+			AnyHILIGHT = TRUE;
+		} else {
+			context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
+			context->proc( CONTMGM_UN_HILIGHT, context->data );
+		}
+	}
+	ParamControlActive( &controlPG, I_CONTROLEDIT, selcnt>0 );
+	ParamControlActive( &controlPG, I_CONTROLDEL, selcnt>0 );
 }
 
 static void ControlEdit( void * action )
@@ -145,17 +134,20 @@ static void ControlEdit( void * action )
 	wIndex_t selcnt = wListGetSelectedCount( (wList_p)controlPLs[0].control );
 	wIndex_t inx, cnt;
 
-	if ( selcnt != 1 )
+	if ( selcnt != 1 ) {
 		return;
+	}
 	cnt = wListGetCount( (wList_p)controlPLs[0].control );
 	for ( inx=0;
-		  inx<cnt && wListGetItemSelected( (wList_p)controlPLs[0].control, inx ) != TRUE;
-		  inx++ );
-	if ( inx >= cnt )
+	      inx<cnt && wListGetItemSelected( (wList_p)controlPLs[0].control, inx ) != TRUE;
+	      inx++ );
+	if ( inx >= cnt ) {
 		return;
+	}
 	context = (contMgmContext_p)wListGetItemContext( controlSelL, inx );
-	if ( context == NULL )
+	if ( context == NULL ) {
 		return;
+	}
 	context->proc( CONTMGM_DO_EDIT, context->data );
 	context->proc( CONTMGM_GET_TITLE, context->data );
 	wListSetValues( controlSelL, inx, message, context->icon, context );
@@ -168,15 +160,20 @@ static void ControlDelete( void * action )
 	wIndex_t inx, cnt;
 	contMgmContext_p context = NULL;
 
-	if ( selcnt <= 0 )
+	if ( selcnt <= 0 ) {
 		return;
-	if ( (!NoticeMessage2( 1, _("Are you sure you want to delete the %d control element(s)"), _("Yes"), _("No"), selcnt ) ) )
+	}
+	if ( (!NoticeMessage2( 1,
+	                       _("Are you sure you want to delete the %d control element(s)"), _("Yes"),
+	                       _("No"), selcnt ) ) ) {
 		return;
-        cnt = wListGetCount( (wList_p)controlPLs[0].control );
-        UndoStart( _("Control Elements"), "delete" );
+	}
+	cnt = wListGetCount( (wList_p)controlPLs[0].control );
+	UndoStart( _("Control Elements"), "delete" );
 	for ( inx=0; inx<cnt; inx++ ) {
-		if ( !wListGetItemSelected( (wList_p)controlPLs[0].control, inx ) )
+		if ( !wListGetItemSelected( (wList_p)controlPLs[0].control, inx ) ) {
 			continue;
+		}
 		context = (contMgmContext_p)wListGetItemContext( controlSelL, inx );
 		context->proc( CONTMGM_DO_DELETE, context->data );
 		MyFree( context );
@@ -184,32 +181,32 @@ static void ControlDelete( void * action )
 		inx--;
 		cnt--;
 	}
-        UndoEnd();
+	UndoEnd();
 	DoChangeNotification( CHANGE_PARAMS );
 }
 
 static void ControlDone( void * action )
 {
-    contMgmContext_p context = NULL;
-    wIndex_t linx, lcnt;
-    
-    if (AnyHILIGHT) {
-        lcnt = wListGetCount( (wList_p)controlPLs[0].control );
-        for (linx=0;
-             linx < lcnt;
-             linx++ ) {
-            context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
-            context->proc( CONTMGM_UN_HILIGHT, context->data );
-        }
-    }
-    wHide( controlPG.win );
+	contMgmContext_p context = NULL;
+	wIndex_t linx, lcnt;
+
+	if (AnyHILIGHT) {
+		lcnt = wListGetCount( (wList_p)controlPLs[0].control );
+		for (linx=0;
+		     linx < lcnt;
+		     linx++ ) {
+			context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
+			context->proc( CONTMGM_UN_HILIGHT, context->data );
+		}
+	}
+	wHide( controlPG.win );
 }
 
 
 EXPORT void ContMgmLoad(
-		wIcon_p icon,
-		contMgmCallBack_p proc,
-		void * data )
+        wIcon_p icon,
+        contMgmCallBack_p proc,
+        void * data )
 {
 	contMgmContext_p context;
 	context = MyMalloc( sizeof *context );
@@ -226,32 +223,40 @@ static void LoadControlMgmList( void )
 	wIndex_t curInx, cnt=0;
 	long tempL;
 	contMgmContext_p context;
+#ifdef LATER
 	contMgmContext_t curContext;
+#endif
 
 	curInx = wListGetIndex( controlSelL );
+#ifdef LATER
 	curContext.proc = NULL;
 	curContext.data = NULL;
 	curContext.icon = NULL;
+#endif
 	if ( curInx >= 0 ) {
 		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
-		if ( context != NULL )
+#ifdef LATER
+		if ( context != NULL ) {
 			curContext = *context;
+		}
+#endif
 	}
 	cnt = wListGetCount( controlSelL );
 	for ( curInx=0; curInx<cnt; curInx++ ) {
 		context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
-		if ( context )
+		if ( context ) {
 			MyFree( context );
+		}
 	}
 	curInx = wListGetIndex( controlSelL );
 	wControlShow( (wControl_p)controlSelL, FALSE );
 	wListClear( controlSelL );
 
 	BlockMgmLoad();
-        SwitchmotorMgmLoad();
-        SignalMgmLoad();
-        ControlMgmLoad();
-        SensorMgmLoad();
+	SwitchmotorMgmLoad();
+	SignalMgmLoad();
+	ControlMgmLoad();
+	SensorMgmLoad();
 
 #ifdef LATER
 	curInx = 0;
@@ -260,13 +265,15 @@ static void LoadControlMgmList( void )
 		for ( curInx=0; curInx<cnt; curInx++ ) {
 			context = (contMgmContext_p)wListGetItemContext( controlSelL, curInx );
 			if ( context &&
-				 context->proc == curContext.proc &&
-				 context->data == curContext.data )
+			     context->proc == curContext.proc &&
+			     context->data == curContext.data ) {
 				break;
+			}
 		}
 	}
-	if ( curInx >= cnt )
+	if ( curInx >= cnt ) {
 		curInx = (cnt>0?0:-1);
+	}
 
 	wListSetIndex( controlSelL, curInx );
 	tempL = curInx;
@@ -281,13 +288,13 @@ static void ContMgmChange( long changes )
 {
 	if (changes) {
 		if (changed) {
-			changed = 1;
-			checkPtMark = 1;
+			changed = checkPtMark = 1;
 		}
 	}
 	if ((changes&CHANGE_PARAMS) == 0 ||
-		controlPG.win == NULL || !wWinIsVisible(controlPG.win) )
+	    controlPG.win == NULL || !wWinIsVisible(controlPG.win) ) {
 		return;
+	}
 
 	LoadControlMgmList();
 }
@@ -296,22 +303,24 @@ static void ContMgmChange( long changes )
 
 static void DoControlMgr( void * junk )
 {
-    if (controlPG.win == NULL) {
-        ParamCreateDialog( &controlPG, MakeWindowTitle(_("Manage Layout Control Elements")), _("Done"), ControlDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, ControlDlgUpdate );
-    } else {
-        wListClear( controlSelL );
-    }
-    /*ParamLoadControls( &controlPG );*/
-    /*ParamGroupRecord( &controlPG );*/
-    LoadControlMgmList();
-    wShow( controlPG.win );
+	if (controlPG.win == NULL) {
+		ParamCreateDialog( &controlPG,
+		                   MakeWindowTitle(_("Manage Layout Control Elements")), _("Done"), ControlDone,
+		                   wHide, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, ControlDlgUpdate );
+	} else {
+		wListClear( controlSelL );
+	}
+	/*ParamLoadControls( &controlPG );*/
+	/*ParamGroupRecord( &controlPG );*/
+	LoadControlMgmList();
+	wShow( controlPG.win );
 }
 
 
 EXPORT addButtonCallBack_t ControlMgrInit( void )
 {
-    ParamRegister( &controlPG );
-    /*ParamRegister( &contMgmContentsPG );*/
-    RegisterChangeNotification( ContMgmChange );
-    return &DoControlMgr;
+	ParamRegister( &controlPG );
+	/*ParamRegister( &contMgmContentsPG );*/
+	RegisterChangeNotification( ContMgmChange );
+	return &DoControlMgr;
 }

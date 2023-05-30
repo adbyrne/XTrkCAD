@@ -39,10 +39,10 @@
 #include "gtkint.h"
 
 struct wStatus_t {
-    WOBJ_COMMON
-    GtkWidget * labelWidget;
-    const char * message;
-    wPos_t labelWidth;
+	WOBJ_COMMON
+	GtkWidget * labelWidget;
+	const char * message;
+	wWinPix_t labelWidth;
 };
 
 /**
@@ -54,19 +54,20 @@ struct wStatus_t {
  */
 
 void wStatusSetValue(
-    wStatus_p b,
-    const char * arg)
+        wStatus_p b,
+        const char * arg)
 {
-    if (b->widget == 0) {
-        abort();
-    }
+	if (b->widget == 0) {
+		abort();
+	}
 
-    if (gtk_entry_get_max_length(GTK_ENTRY(b->labelWidget))<strlen(arg)) {
-        gtk_entry_set_max_length(GTK_ENTRY(b->labelWidget), strlen(arg));
-        gtk_entry_set_width_chars(GTK_ENTRY(b->labelWidget), strlen(arg));
-    }
+	if (gtk_entry_get_max_length(GTK_ENTRY(b->labelWidget))<strlen(arg)) {
+		gtk_entry_set_max_length(GTK_ENTRY(b->labelWidget), strlen(arg));
+		gtk_entry_set_width_chars(GTK_ENTRY(b->labelWidget), strlen(arg));
+	}
 
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
+	gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
+	gtk_widget_queue_draw (GTK_WIDGET(b->labelWidget));
 }
 /**
  * Create a window for a simple text.
@@ -82,35 +83,37 @@ void wStatusSetValue(
  */
 
 wStatus_p wStatusCreate(
-    wWin_p	parent,
-    wPos_t	x,
-    wPos_t	y,
-    const char 	* labelStr,
-    wPos_t	width,
-    const char	*message)
+        wWin_p	parent,
+        wWinPix_t	x,
+        wWinPix_t	y,
+        const char 	* labelStr,
+        wWinPix_t	width,
+        const char	*message)
 {
-    wStatus_p b;
-    GtkRequisition requisition;
-    b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
-    wlibComputePos((wControl_p)b);
-    b->message = message;
-    b->labelWidth = width;
-    b->labelWidget = gtk_entry_new();
-    gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
-    gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
-    gtk_widget_set_can_focus(b->labelWidget, FALSE);
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
-                       message?wlibConvertInput(message):"");
+	wStatus_p b;
+	b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
+	wlibComputePos((wControl_p)b);
+	b->message = message;
+	b->labelWidth = width;
+	b->labelWidget = gtk_entry_new();
+	gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
+	gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
+	gtk_widget_set_can_focus(b->labelWidget, FALSE);
+	gtk_widget_set_sensitive(b->labelWidget, FALSE);
+	GdkColor black = {0, 0x0000, 0x0000, 0x0000};
+	gtk_widget_modify_text(b->labelWidget,GTK_STATE_INSENSITIVE,&black);
+	gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
+	                   message?wlibConvertInput(message):"");
 
-    b->widget = gtk_fixed_new();
-    gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
-    wlibControlGetSize((wControl_p)b);
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-    gtk_widget_show(b->widget);
-    gtk_widget_show(b->labelWidget);
-    wlibAddButton((wControl_p)b);
+	b->widget = gtk_fixed_new();
+	gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
+	wlibControlGetSize((wControl_p)b);
+	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+	gtk_widget_show(b->widget);
+	gtk_widget_show(b->labelWidget);
+	wlibAddButton((wControl_p)b);
 
-    return b;
+	return b;
 }
 
 /**
@@ -120,25 +123,25 @@ wStatus_p wStatusCreate(
  * \return expected width of message box
  */
 
-wPos_t
+wWinPix_t
 wStatusGetWidth(const char *testString)
 {
-    GtkWidget *entry;
-    GtkRequisition requisition;
+	GtkWidget *entry;
+	GtkRequisition requisition;
 
-    entry = gtk_entry_new();
-    g_object_ref_sink(entry);
+	entry = gtk_entry_new();
+	g_object_ref_sink(entry);
 
-    gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
-    gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
-    gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
+	gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
+	gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
+	gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
 
-    gtk_widget_size_request(entry, &requisition);
+	gtk_widget_size_request(entry, &requisition);
 
-    gtk_widget_destroy(entry);
-    g_object_unref(entry);
+	gtk_widget_destroy(entry);
+	g_object_unref(entry);
 
-    return (requisition.width+8);
+	return (requisition.width);
 }
 
 /**
@@ -148,50 +151,50 @@ wStatusGetWidth(const char *testString)
  * \return text height
  */
 
-wPos_t wStatusGetHeight(
-    long flags)
+wWinPix_t wStatusGetHeight(
+        long flags)
 {
-    GtkWidget * temp;
+	GtkWidget * temp;
 
-    if (!(flags&COMBOBOX)) {
+	if (!(flags&COMBOBOX)) {
 		temp = gtk_entry_new();	 //To get size of text itself
-        gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
-    } else {
-        temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
-    }
-    g_object_ref_sink(temp);
+		gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
+	} else {
+		temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
+	}
+	g_object_ref_sink(temp);
 
-    if (wMessageSetFont(flags))	{
-        GtkStyle *style;
-        PangoFontDescription *fontDesc;
-        int fontSize;
-        /* get the current font descriptor */
-        style = gtk_widget_get_style(temp);
-        fontDesc = style->font_desc;
-        /* get the current font size */
-        fontSize = PANGO_PIXELS(pango_font_description_get_size(fontDesc));
+	if (wMessageSetFont(flags))	{
+		GtkStyle *style;
+		PangoFontDescription *fontDesc;
+		int fontSize;
+		/* get the current font descriptor */
+		style = gtk_widget_get_style(temp);
+		fontDesc = style->font_desc;
+		/* get the current font size */
+		fontSize = PANGO_PIXELS(pango_font_description_get_size(fontDesc));
 
-        /* calculate the new font size */
-        if (flags & BM_LARGE) {
-            pango_font_description_set_size(fontDesc, fontSize * 1.4 * PANGO_SCALE);
-        } else {
-            pango_font_description_set_size(fontDesc, fontSize * 0.7 * PANGO_SCALE);
-        }
+		/* calculate the new font size */
+		if (flags & BM_LARGE) {
+			pango_font_description_set_size(fontDesc, fontSize * 1.4 * PANGO_SCALE);
+		} else {
+			pango_font_description_set_size(fontDesc, fontSize * 0.7 * PANGO_SCALE);
+		}
 
-        /* set the new font size */
-        gtk_widget_modify_font(temp, fontDesc);
-    }
+		/* set the new font size */
+		gtk_widget_modify_font(temp, fontDesc);
+	}
 
-    if (flags&1L) {
-        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
-    }
+	if (flags&1L) {
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
+	}
 
-    GtkRequisition temp_requisition;
-    gtk_widget_size_request(temp,&temp_requisition);
-    //g_object_ref_sink(temp);
-    //g_object_unref(temp);
-    gtk_widget_destroy(temp);
-    return temp_requisition.height;
+	GtkRequisition temp_requisition;
+	gtk_widget_size_request(temp,&temp_requisition);
+	//g_object_ref_sink(temp);
+	//g_object_unref(temp);
+	gtk_widget_destroy(temp);
+	return temp_requisition.height;
 }
 
 /**
@@ -203,9 +206,9 @@ wPos_t wStatusGetHeight(
  */
 
 void wStatusSetWidth(
-    wStatus_p b,
-    wPos_t width)
+        wStatus_p b,
+        wWinPix_t width)
 {
-    b->labelWidth = width;
-    gtk_widget_set_size_request(b->widget, width, -1);
+	b->labelWidth = width;
+	gtk_widget_set_size_request(b->widget, width, -1);
 }

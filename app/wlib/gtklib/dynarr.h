@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 
@@ -22,10 +22,10 @@
 #define DYNARR_H_SEEN
 
 typedef struct {
-		int cnt;
-		int max;
-		void * ptr;
-		} dynArr_t;
+	int cnt;
+	int max;
+	void * ptr;
+} dynArr_t;
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \

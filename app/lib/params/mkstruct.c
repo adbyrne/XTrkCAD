@@ -19,7 +19,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -43,13 +43,11 @@ int main ( int argc, char * argv [] )
 	long color = 0xFF00FF;
 	double x;
 	double y;
-	int cm = 0;
 	FILE *fIn, *fOut;
 	int count = 0;
 	char *buffer = malloc( BUFSIZE );
 	char *desc;
 	char *p1;
-	char *p2 = malloc( BUFSIZE );
 	char *scale;
 	char *ptr;
 	int err;

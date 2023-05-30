@@ -17,30 +17,27 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <math.h>
-#include <string.h>
 
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "cselect.h"
+#include "common-ui.h"
 
 static TRKTYP_T T_TURNTABLE = -1;
 
 
-struct extraData {
-		coOrd pos;
-		DIST_T radius;
-		EPINX_T currEp;
-		BOOL_T reverse;
-		};
+typedef struct extraDataTurntable_t {
+	extraDataBase_t base;
+	coOrd pos;
+	DIST_T radius;
+	EPINX_T currEp;
+	BOOL_T reverse;
+} extraDataTurntable_t;
 
 static DIST_T turntableDiameter = 1.0;
 
@@ -49,18 +46,21 @@ EXPORT ANGLE_T turntableAngle = 0.0;
 static paramFloatRange_t r1_100 = { 1.0, 100.0, 100 };
 static paramData_t turntablePLs[] = {
 #define turntableDiameterPD		(turntablePLs[0])
-	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") } };
-static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, sizeof turntablePLs/sizeof turntablePLs[0] };
+	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") }
+};
+static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, COUNT( turntablePLs ) };
 
 
 static BOOL_T ValidateTurntablePosition(
-		track_p trk )
+        track_p trk )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
 	EPINX_T ep, epCnt = GetTrkEndPtCnt(trk);
-	
-	if ( epCnt <= 0 )
+
+	if ( epCnt <= 0 ) {
 		return FALSE;
+	}
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                   extraDataTurntable_t);
 	ep = xx->currEp;
 	do {
 		if ( GetTrkEndTrk(trk,ep) ) {
@@ -68,8 +68,9 @@ static BOOL_T ValidateTurntablePosition(
 			return TRUE;
 		}
 		ep++;
-		if ( ep >= epCnt )
+		if ( ep >= epCnt ) {
 			ep = 0;
+		}
 	} while ( ep != xx->currEp );
 	return FALSE;
 }
@@ -77,8 +78,9 @@ static BOOL_T ValidateTurntablePosition(
 
 static void ComputeTurntableBoundingBox( track_p trk )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd hi, lo;
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	hi.x = xx->pos.x+xx->radius;
 	lo.x = xx->pos.x-xx->radius;
 	hi.y = xx->pos.y+xx->radius;
@@ -89,9 +91,9 @@ static void ComputeTurntableBoundingBox( track_p trk )
 static track_p NewTurntable( coOrd p, DIST_T r )
 {
 	track_p t;
-	struct extraData *xx;
+	struct extraDataTurntable_t *xx;
 	t = NewTrack( 0, T_TURNTABLE, 0, sizeof *xx );
-	xx = GetTrkExtraData(t);
+	xx = GET_EXTRA_DATA(t, T_TURNTABLE, extraDataTurntable_t);
 	xx->pos = p;
 	xx->radius = r;
 	xx->currEp = 0;
@@ -102,57 +104,70 @@ static track_p NewTurntable( coOrd p, DIST_T r )
 
 #ifdef LATER
 -static void PruneTurntable( track_p trk )
--{
--	 EPINX_T inx0;
--	 EPINX_T inx1;
--	 for (inx0=inx1=0; inx0<trk->endCnt; inx0++) {
--		if (GetTrkEndTrk(trk,inx0) == NULL) {
--			continue;
--		} else {
--			if (inx0 != inx1) {
--				trk->endPt[inx1] = GetTrkEndTrk(trk,inx0);
--			}
--			inx1++;
--		}
--	 }
--	 trk->endPt = Realloc( trk->endPt, inx1*sizeof trk->endPt[0] );
--	 trk->endCnt = inx1;
--}
+        -
+{
+	-	 EPINX_T inx0;
+	-	 EPINX_T inx1;
+	-	 for (inx0=inx1=0; inx0<trk->endCnt; inx0++) {
+		-		if (GetTrkEndTrk(trk,inx0) == NULL) {
+			-			continue;
+			-
+		        } else {
+			-			if (inx0 != inx1) {
+				-				trk->endPt[inx1] = GetTrkEndTrk(trk,inx0);
+				-
+			        }
+			-			inx1++;
+			-
+		        }
+		-
+	}
+	-	 trk->endPt = Realloc( trk->endPt, inx1*sizeof trk->endPt[0] );
+	-	 trk->endCnt = inx1;
+	-
+        }
 #endif
 
 static ANGLE_T ConstrainTurntableAngle( track_p trk, coOrd pos )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	ANGLE_T a, al, ah, aa, aaa;
 	EPINX_T inx, cnt;
 
 	a = FindAngle( xx->pos, pos );
 	cnt = GetTrkEndPtCnt(trk);
-	if ( cnt == 0 || turntableAngle == 0.0 )
+	if ( cnt == 0 || turntableAngle == 0.0 ) {
 		return a;
+	}
 	ah = 360.0;
 	al = 360.0;
 	for ( inx = 0; inx<cnt; inx++ ) {
-		if (GetTrkEndTrk(trk,inx) == NULL)
+		if (GetTrkEndTrk(trk,inx) == NULL) {
 			continue;
+		}
 		aa = NormalizeAngle( GetTrkEndAngle(trk,inx) - a );
-		if (aa < al)
+		if (aa < al) {
 			al = aa;
+		}
 		aa = 360 - aa;
-		if (aa < ah)
+		if (aa < ah) {
 			ah = aa;
+		}
 	}
-	if (al+ah>361)
+	if (al+ah>361) {
 		return a;
+	}
 	if ( (al+ah) < turntableAngle*2.0 ) {
 		ErrorMessage( MSG_NO_ROOM_BTW_TRKS );
 		aaa = -1;
-	} else if ( al <= turntableAngle)
+	} else if ( al <= turntableAngle) {
 		aaa = NormalizeAngle( a - ( turntableAngle - al ) );
-	else if ( ah <= turntableAngle)
+	} else if ( ah <= turntableAngle) {
 		aaa = NormalizeAngle( a + ( turntableAngle - ah ) );
-	else
+	} else {
 		aaa = a;
+	}
 #ifdef VERBOSE
 	Lprintf( "CTA( %0.3f ) [ %0.3f .. %0.3f ] = %0.3f\n", a, ah, al, aaa );
 #endif
@@ -161,10 +176,21 @@ static ANGLE_T ConstrainTurntableAngle( track_p trk, coOrd pos )
 
 static EPINX_T NewTurntableEndPt( track_p trk, ANGLE_T angle )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
-	EPINX_T ep = GetTrkEndPtCnt(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
+	EPINX_T ep = -1;
+	/* Reuse an old empty ep if it exists */
+	for (int i =0; i< GetTrkEndPtCnt(trk)-1; i++) {
+		if (GetTrkEndTrk(trk,i) == NULL) {
+			ep = i;
+			break;
+		}
+	}
+	if (ep == -1) {
+		ep = GetTrkEndPtCnt(trk);
+		SetTrkEndPtCnt( trk, ep+1 );
+	}
 	coOrd pos;
-	SetTrkEndPtCnt( trk, ep+1 );
 	PointOnCircle( &pos, xx->pos, xx->radius, angle );
 	SetTrkEndPoint( trk, ep, pos, angle );
 	return ep;
@@ -172,17 +198,20 @@ static EPINX_T NewTurntableEndPt( track_p trk, ANGLE_T angle )
 
 static void TurntableGetCenter( track_p trk, coOrd * center, DIST_T * radius)
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	*center = xx->pos;
 	*radius = xx->radius;
 }
 
 static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(t, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	coOrd p0, p1;
 	EPINX_T ep;
-	long widthOptions = DTS_TIES;
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
+
 
 	if ( !ValidateTurntablePosition(t) ) {
 		p0.y = p1.y = xx->pos.y;
@@ -192,41 +221,41 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 		p0 = GetTrkEndPos( t, xx->currEp );
 		Translate( &p1, xx->pos, GetTrkEndAngle(t,xx->currEp)+180.0, xx->radius );
 	}
-	if (color == wDrawColorBlack)
+	if (color == wDrawColorBlack) {
 		color = normalColor;
-	DrawArc( d, xx->pos, xx->radius, 0.0, 360.0, 0, 0, color );
-	if ( programMode != MODE_DESIGN )
-		return;
-	if ( (d->options&DC_QUICK) == 0 ) {
-		DrawStraightTrack( d, p0, p1, FindAngle(p0,p1), t, GetTrkGauge(t), color, widthOptions );
-		for ( ep=0; ep<GetTrkEndPtCnt(t); ep++ ) {
-			if (GetTrkEndTrk(t,ep) != NULL )
-				DrawEndPt( d, t, ep, color );
+	}
+	DrawArc( d, xx->pos, xx->radius, 0.0, 360.0, 0,
+	         (color == wDrawColorPreviewSelected
+	          || color == wDrawColorPreviewUnselected)?3:0, color );
+	DrawStraightTrack( d, p0, p1, FindAngle(p0,p1), t, color, widthOptions );
+	for ( ep=0; ep<GetTrkEndPtCnt(t); ep++ ) {
+		if (GetTrkEndTrk(t,ep) != NULL ) {
+			DrawEndPt( d, t, ep, color );
 		}
 	}
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
-		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
-		 labelScale >= d->scale ) {
+	if ( ((d->options&DC_SIMPLE)==0) &&
+	     (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+	     labelScale >= d->scale ) {
 		LabelLengths( d, t, color );
 	}
 }
 
 static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	DIST_T d;
 	ANGLE_T a;
 	coOrd pos0, pos1;
 
-	d = FindDistance( xx->pos, *p ) - xx->radius;
-	if (d < 0.0)
-		d = 0.0;
+	d = FindDistance( xx->pos, *p ) - xx->radius;    //OK to be negative
 	if ( programMode == MODE_DESIGN ) {
 		a = FindAngle( xx->pos, *p );
 		Translate( p, xx->pos, a, d+xx->radius );
 	} else {
-		if ( !ValidateTurntablePosition(trk) )
-			return 100000.0;
+		if ( !ValidateTurntablePosition(trk) ) {
+			return DIST_INF;
+		}
 		pos0 = GetTrkEndPos(trk,xx->currEp);
 		Translate( &pos1, xx->pos, GetTrkEndAngle(trk,xx->currEp)+180.0, xx->radius );
 		LineDistance( p, pos0, pos1 );
@@ -235,34 +264,39 @@ static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 }
 
 static struct {
-		coOrd orig;
-		DIST_T diameter;
-		long epCnt;
-		unsigned int layerNumber;
-		} trntblData;
+	coOrd orig;
+	DIST_T diameter;
+	long epCnt;
+	unsigned int layerNumber;
+} trntblData;
 typedef enum { OR, RA, EC, LY } trntblDesc_e;
 static descData_t trntblDesc[] = {
-/*OR*/	{ DESC_POS, N_("Origin: X"), &trntblData.orig },
-/*RA*/	{ DESC_DIM, N_("Diameter"), &trntblData.diameter },
-/*EC*/	{ DESC_LONG, N_("# EndPt"), &trntblData.epCnt },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &trntblData.layerNumber },
-		{ DESC_NULL } };
+	/*OR*/	{ DESC_POS, N_("Origin: X"), &trntblData.orig },
+	/*RA*/	{ DESC_DIM, N_("Diameter"), &trntblData.diameter },
+	/*EC*/	{ DESC_LONG, N_("# EndPt"), &trntblData.epCnt },
+	/*LY*/	{ DESC_LAYER, N_("Layer"), &trntblData.layerNumber },
+	{ DESC_NULL }
+};
 
 
-static void UpdateTurntable( track_p trk, int inx, descData_p descUpd, BOOL_T final )
+static void UpdateTurntable( track_p trk, int inx, descData_p descUpd,
+                             BOOL_T final )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 
-	if ( inx == -1 )
+	if ( inx == -1 ) {
 		return;
+	}
 	UndrawNewTrack( trk );
 	switch ( inx ) {
 	case OR:
 		xx->pos = trntblData.orig;
 		break;
 	case RA:
-		if ( trntblData.diameter > 2.0 )
+		if ( trntblData.diameter > 2.0 ) {
 			xx->radius = trntblData.diameter/2.0;
+		}
 		break;
 	case LY:
 		SetTrkLayer( trk, trntblData.layerNumber );
@@ -277,20 +311,25 @@ static void UpdateTurntable( track_p trk, int inx, descData_p descUpd, BOOL_T fi
 
 static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	sprintf( str, _("Turntable(%d): Layer=%d Center=[%s %s] Diameter=%s #EP=%d"),
-				GetTrkIndex(trk), GetTrkLayer(trk)+1,
-				FormatDistance(xx->pos.x), FormatDistance(xx->pos.y),
-				FormatDistance(xx->radius * 2.0), GetTrkEndPtCnt(trk) );
+	         GetTrkIndex(trk), GetTrkLayer(trk)+1,
+	         FormatDistance(xx->pos.x), FormatDistance(xx->pos.y),
+	         FormatDistance(xx->radius * 2.0), GetTrkEndPtCnt(trk) );
 
 	trntblData.orig = xx->pos;
 	trntblData.diameter = xx->radius*2.0;
-	trntblData.epCnt = GetTrkEndPtCnt(trk);
+	int j=0;
+	for (int i=0; i<GetTrkEndPtCnt(trk); i++) {
+		if (GetTrkEndTrk(trk,i)) { j++; }			//Only count if track
+	}
+	trntblData.epCnt = j;
 	trntblData.layerNumber = GetTrkLayer(trk);
 
 	trntblDesc[OR].mode =
-	trntblDesc[RA].mode =
-		trntblData.epCnt>0?DESC_RO:0;
+	        trntblDesc[RA].mode =
+	                trntblData.epCnt>0?DESC_RO:0;
 	trntblDesc[EC].mode = DESC_RO;
 	trntblDesc[LY].mode = DESC_NOREDRAW;
 	DoDescribe( _("Turntable"), trk, trntblDesc, UpdateTurntable );
@@ -302,22 +341,29 @@ static void DeleteTurntable( track_p t )
 
 static BOOL_T WriteTurntable( track_p t, FILE * f )
 {
-	struct extraData *xx = GetTrkExtraData(t);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(t, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	EPINX_T ep;
 	BOOL_T rc = TRUE;
+	int j = -1, k = 0;
+	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {
+		if (GetTrkEndTrk(t,ep)) { j++; }
+		if (ep == xx->currEp) { k=j; }     //Write out the curr->Ep reset to real endPts
+	}
 	rc &= fprintf(f, "TURNTABLE %d %d 0 0 0 %s %d %0.6f %0.6f 0 %0.6f %d\n",
-		GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), GetTrkVisible(t),
-				xx->pos.x, xx->pos.y, xx->radius, xx->currEp )>0;
-	for (ep=0; ep<GetTrkEndPtCnt(t); ep++)
-		rc &= WriteEndPt( f, t, ep );
-	rc &= fprintf(f, "\tEND\n")>0;
+	              GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), GetTrkVisible(t),
+	              xx->pos.x, xx->pos.y, xx->radius, k )>0;
+	for (ep=0; ep<GetTrkEndPtCnt(t); ep++) {
+		if (GetTrkEndTrk(t,ep))	{ rc &= WriteEndPt( f, t, ep ); }   //Only write if there is a track
+	}
+	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
 
-static void ReadTurntable( char * line )
+static BOOL_T ReadTurntable( char * line )
 {
 	track_p trk;
-	struct extraData *xx;
+	struct extraDataTurntable_t *xx;
 	TRKINX_T index;
 	BOOL_T visible;
 	DIST_T r;
@@ -328,29 +374,39 @@ static void ReadTurntable( char * line )
 	int currEp;
 
 	if ( !GetArgs( line+10,
-				paramVersion<3?"dXsdpYfX":
-				paramVersion<9?"dL000sdpYfX":
-				paramVersion<10?"dL000sdpffX":
-				"dL000sdpffd",
-		&index, &layer, scale, &visible, &p, &elev, &r, &currEp ))
-		return;
+	               paramVersion<3?"dXsdpYfX":
+	               paramVersion<9?"dL000sdpYfX":
+	               paramVersion<10?"dL000sdpffX":
+	               "dL000sdpffd",
+	               &index, &layer, scale, &visible, &p, &elev, &r, &currEp )) {
+		return FALSE;
+	}
+	if ( !ReadSegs() ) {
+		return FALSE;
+	}
 	trk = NewTrack( index, T_TURNTABLE, 0, sizeof *xx );
-	ReadSegs();
 	SetEndPts( trk, 0 );
-	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible);
+	xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+	} else {
+		SetTrkVisible(trk, visible&2);
+	}
 	SetTrkScale(trk, LookupScale( scale ) );
 	SetTrkLayer(trk, layer);
 	xx->pos = p;
 	xx->radius = r;
 	xx->currEp = currEp;
+	if (xx->currEp > GetTrkEndPtCnt(trk)) { xx->currEp = 0; }
 	xx->reverse = 0;
 	ComputeTurntableBoundingBox( trk );
+	return TRUE;
 }
 
 static void MoveTurntable( track_p trk, coOrd orig )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	xx->pos.x += orig.x;
 	xx->pos.y += orig.y;
 	ComputeTurntableBoundingBox( trk );
@@ -358,56 +414,65 @@ static void MoveTurntable( track_p trk, coOrd orig )
 
 static void RotateTurntable( track_p trk, coOrd orig, ANGLE_T angle )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	Rotate( &xx->pos, orig, angle );
 	ComputeTurntableBoundingBox( trk );
 }
 
 static void RescaleTurntable( track_p trk, FLOAT_T ratio )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	xx->pos.x *= ratio;
 	xx->pos.y *= ratio;
 }
 
-static ANGLE_T GetAngleTurntable( track_p trk, coOrd pos, EPINX_T * ep0, EPINX_T * ep1 )
+static ANGLE_T GetAngleTurntable( track_p trk, coOrd pos, EPINX_T * ep0,
+                                  EPINX_T * ep1 )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t *xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                  extraDataTurntable_t);
 	if ( programMode == MODE_DESIGN ) {
 		return FindAngle( xx->pos, pos );
 	} else {
-		if ( !ValidateTurntablePosition( trk ) )
+		if ( !ValidateTurntablePosition( trk ) ) {
 			return 90.0;
-		else
+		} else {
 			return GetTrkEndAngle( trk, xx->currEp );
+		}
 	}
 }
 
 
-static BOOL_T SplitTurntable( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, EPINX_T *ep0, EPINX_T *ep1 )
+static BOOL_T SplitTurntable( track_p trk, coOrd pos, EPINX_T ep,
+                              track_p *leftover, EPINX_T *ep0, EPINX_T *ep1 )
 {
-	if (leftover)
+	if (leftover) {
 		*leftover = NULL;
+	}
 	ErrorMessage( MSG_CANT_SPLIT_TRK, "Turntable" );
 	return FALSE;
 }
 
 
 static BOOL_T FindTurntableEndPt(
-		track_p trk,
-		ANGLE_T *angleR,
-		EPINX_T *epR,
-		BOOL_T *reverseR )
+        track_p trk,
+        ANGLE_T *angleR,
+        EPINX_T *epR,
+        BOOL_T *reverseR )
 {
-	EPINX_T ep, ep0, epCnt=GetTrkEndPtCnt(trk);
+	EPINX_T ep, /*ep0,*/ epCnt=GetTrkEndPtCnt(trk);
 	ANGLE_T angle=*angleR, angle0, angle1;
-	for (ep=0,ep0=-1,epCnt=GetTrkEndPtCnt(trk),angle0=370.0; ep<epCnt; ep++) {
-		if ( (GetTrkEndTrk(trk,ep)) == NULL )
+	for (ep=0,/*ep0=-1,*/epCnt=GetTrkEndPtCnt(trk),angle0=370.0; ep<epCnt; ep++) {
+		if ( (GetTrkEndTrk(trk,ep)) == NULL ) {
 			continue;
+		}
 		angle1 = GetTrkEndAngle(trk,ep);
 		angle1 = NormalizeAngle(angle1-angle);
-		if ( angle1 > 180.0 )
-			 angle1 = 360.0-angle1;
+		if ( angle1 > 180.0 ) {
+			angle1 = 360.0-angle1;
+		}
 		if ( angle1 < angle0 ) {
 			*epR = ep;
 			*reverseR = FALSE;
@@ -433,38 +498,82 @@ static BOOL_T FindTurntableEndPt(
 }
 
 
+static EPINX_T FindTurntableNextEndPt(
+        track_p trk,
+        coOrd pos)
+{
+
+	EPINX_T ep,epfound=-1,epCnt;
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                   extraDataTurntable_t);
+	ANGLE_T a = FindAngle(xx->pos,pos);
+	ANGLE_T foundangle = 370.0;
+	ANGLE_T diff = DifferenceBetweenAngles(GetTrkEndAngle(trk,xx->currEp),a);
+	BOOL_T forward = TRUE;
+	if (diff>90) {
+		forward = FALSE;
+	}
+	if (diff<0 && diff>-90) {
+		forward = FALSE;
+	}
+	ANGLE_T currdiff, angle1;
+	for (ep=0,epCnt=GetTrkEndPtCnt(trk); ep<epCnt; ep++) {
+		if ( (GetTrkEndTrk(trk,ep)) == NULL ) {
+			continue;
+		}
+		angle1 = GetTrkEndAngle(trk,ep);
+		if (forward) {
+			currdiff = NormalizeAngle(angle1-a);
+		} else {
+			currdiff = NormalizeAngle(a-angle1);
+		}
+		if (currdiff<foundangle) {
+			foundangle = currdiff;
+			epfound = ep;
+		}
+	}
+	return epfound;
+}
+
+
 
 static BOOL_T CheckTraverseTurntable(
-		track_p trk,
-		coOrd pos )
+        track_p trk,
+        coOrd pos )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                   extraDataTurntable_t);
 	ANGLE_T angle;
 
-	if ( !ValidateTurntablePosition( trk ) )
+	if ( !ValidateTurntablePosition( trk ) ) {
 		return FALSE;
-	angle = FindAngle( xx->pos, pos ) - GetTrkEndAngle( trk, xx->currEp )+connectAngle/2.0;
-	if ( angle <= connectAngle	|| 
-		 ( angle >= 180.0 && angle <= 180+connectAngle ) )
+	}
+	angle = FindAngle( xx->pos, pos ) - GetTrkEndAngle( trk,
+	                xx->currEp )+connectAngle/2.0;
+	if ( angle <= connectAngle	||
+	     ( angle >= 180.0 && angle <= 180+connectAngle ) ) {
 		return TRUE;
+	}
 	return FALSE;
 }
 
 
 static BOOL_T TraverseTurntable(
-		traverseTrack_p trvTrk,
-		DIST_T * distR )
+        traverseTrack_p trvTrk,
+        DIST_T * distR )
 {
 	track_p trk = trvTrk->trk;
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                   extraDataTurntable_t);
 	coOrd pos0;
 	DIST_T dist, dist1;
 	ANGLE_T angle, angle1;
-	EPINX_T ep;
+	EPINX_T ep = 0;
 	BOOL_T reverse;
 
-	if ( !ValidateTurntablePosition( trk ) )
+	if ( !ValidateTurntablePosition( trk ) ) {
 		return FALSE;
+	}
 	dist = FindDistance( xx->pos, trvTrk->pos );
 	pos0 = GetTrkEndPos( trk, xx->currEp );
 	angle = FindAngle( pos0, xx->pos );
@@ -476,8 +585,9 @@ static BOOL_T TraverseTurntable(
 	if ( dist > xx->radius*0.9 ) {
 		angle = NormalizeAngle( angle-trvTrk->angle );
 		if ( ( angle < 90.0 && angle > connectAngle ) ||
-			 ( angle > 270.0 && angle < 360.0-connectAngle ) )
+		     ( angle > 270.0 && angle < 360.0-connectAngle ) ) {
 			return FALSE;
+		}
 	}
 	trvTrk->angle = angle1;
 	angle = FindAngle( trvTrk->pos, xx->pos );
@@ -499,7 +609,8 @@ static BOOL_T TraverseTurntable(
 	}
 	Translate( &trvTrk->pos, xx->pos, angle1, xx->radius );
 	*distR -= dist1;
-	if ( FindTurntableEndPt( trk, &angle1, &ep, &reverse ) && angle1 < connectAngle ) {
+	if ( FindTurntableEndPt( trk, &angle1, &ep, &reverse )
+	     && angle1 < connectAngle ) {
 		trk = GetTrkEndTrk(trk,ep);
 	} else {
 		trk = NULL;
@@ -511,27 +622,32 @@ static BOOL_T TraverseTurntable(
 
 static BOOL_T EnumerateTurntable( track_p trk )
 {
-	struct extraData *xx;
+	struct extraDataTurntable_t *xx;
 	static dynArr_t turntables_da;
 #define turntables(N) DYNARR_N( FLOAT_T, turntables_da, N )
-	int inx;
+	size_t inx;
 	char tmp[40];
+	BOOL_T content = FALSE;
 	if ( trk != NULL ) {
-		xx = GetTrkExtraData(trk);
+		content = TRUE;
+		xx = GET_EXTRA_DATA(trk, T_TURNTABLE, extraDataTurntable_t);
 		DYNARR_APPEND( FLOAT_T, turntables_da, 10 );
 		turntables(turntables_da.cnt-1) = xx->radius*2.0;
-		sprintf( tmp, "Turntable, diameter %s", FormatDistance(turntables(turntables_da.cnt-1)) );
+		sprintf( tmp, "Turntable, diameter %s",
+		         FormatDistance(turntables(turntables_da.cnt-1)) );
 		inx = strlen( tmp );
-		if ( inx > (int)enumerateMaxDescLen )
-			enumerateMaxDescLen = inx;
+		if ( inx > enumerateMaxDescLen ) {
+			enumerateMaxDescLen = (int)inx;
+		}
 	} else {
 		for (inx=0; inx<turntables_da.cnt; inx++) {
+			content = TRUE;
 			sprintf( tmp, "Turntable, diameter %s", FormatDistance(turntables(inx)) );
-			EnumerateList( 1, 0.0, tmp );
+			EnumerateList( 1, 0.0, tmp, NULL );
 		}
 		DYNARR_RESET( FLOAT_T, turntables_da );
 	}
-	return TRUE;   
+	return content;
 }
 
 
@@ -550,7 +666,7 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 	case C_DOWN:
 		TurntableGetCenter( trk, &ttCenter, &ttRadius );
 		tempSegs(0).type = SEG_STRTRK;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		InfoMessage( _("Drag to create stall track") );
 
 	case C_MOVE:
@@ -560,22 +676,25 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 		} else if ((r=FindDistance( ttCenter, pos )) < ttRadius) {
 			ErrorMessage( MSG_POINT_INSIDE_TURNTABLE );
 		} else if ( (r-ttRadius) <= minLength ) {
-			if (action == C_MOVE)
-				ErrorMessage( MSG_TRK_TOO_SHORT, "Stall ", PutDim(fabs(minLength-(r-ttRadius))) );
+			if (action == C_MOVE) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Stall ",
+				              PutDim(fabs(minLength-(r-ttRadius))) );
+			}
 		} else {
 			Translate( &tempSegs(0).u.l.pos[0], ttCenter, angle, ttRadius );
 			Translate( &tempSegs(0).u.l.pos[1], ttCenter, angle, r );
 			if (action == C_MOVE)
 				InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
-						FormatDistance( r-ttRadius ), PutAngle( angle ) );
-			tempSegs_da.cnt = 1;
+				             FormatDistance( r-ttRadius ), PutAngle( angle ) );
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 			valid = TRUE;
 		}
 		return C_CONTINUE;
 
 	case C_UP:
-		if (!valid)
+		if (!valid) {
 			return C_TERMINATE;
+		}
 		ep = NewTurntableEndPt( trk, angle );
 		trk1 = NewStraightTrack( tempSegs(0).u.l.pos[0], tempSegs(0).u.l.pos[1] );
 		CopyAttributes( trk, trk1 );
@@ -590,27 +709,41 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 }
 
 EXPORT BOOL_T ConnectTurntableTracks(
-		track_p trk1,
-		EPINX_T ep1,
-		track_p trk2,
-		EPINX_T ep2 ) {
+        track_p trk1,   /*The turntable */
+        EPINX_T ep1,	/*Ignored */
+        track_p trk2,
+        EPINX_T ep2 )
+{
 	coOrd center, pos;
 	DIST_T radius;
+	DIST_T dist;
+	if (!QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS)) { return FALSE; }
 	TurntableGetCenter( trk1, &center, &radius );
 	pos = GetTrkEndPos(trk2,ep2);
 	ANGLE_T angle = FindAngle(center, GetTrkEndPos(trk2,ep2));
-	if (NormalizeAngle(GetTrkEndAngle(trk2,ep2) + 180 - angle) < connectAngle) {
-		if (FindDistance(center,pos)-radius < connectDistance) {
+	if (fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk2,ep2),
+	                                 angle+180)) <= connectAngle) {
+		dist = FindDistance(center,pos)-radius;
+		if (dist < connectDistance) {
+			UndoStart( _("Connect Turntable Tracks"),
+			           "TurnTracks(T%d[%d] T%d[%d] D%0.3f A%0.3F )",
+			           GetTrkIndex(trk1), ep1, GetTrkIndex(trk2), ep2, dist, angle );
+			UndoModify(trk1);
 			EPINX_T ep = NewTurntableEndPt(trk1,angle);
-			ConnectTracks( trk1, ep, trk2, ep2 );
+			if (ConnectTracks( trk1, ep, trk2, ep2 )) {
+				UndoUndo(NULL);
+				return FALSE;
+			}
 			return TRUE;
 		}
 	}
+	ErrorMessage( MSG_TOO_FAR_APART_DIVERGE );
 	return FALSE;
 }
 
 
-static BOOL_T GetParamsTurntable( int inx, track_p trk, coOrd pos, trackParams_t * params )
+static BOOL_T GetParamsTurntable( int inx, track_p trk, coOrd pos,
+                                  trackParams_t * params )
 {
 	coOrd center;
 	DIST_T radius;
@@ -622,8 +755,9 @@ static BOOL_T GetParamsTurntable( int inx, track_p trk, coOrd pos, trackParams_t
 	params->type = curveTypeStraight;
 	params->ep = -1;
 	params->angle = ConstrainTurntableAngle( trk, pos );
-	if (params->angle < 0.0)
-		 return FALSE;
+	if (params->angle < 0.0) {
+		return FALSE;
+	}
 	TurntableGetCenter( trk, &center, &radius );
 	PointOnCircle( &params->lineOrig, center, radius, params->angle );
 	params->lineEnd = params->lineOrig;
@@ -635,7 +769,8 @@ static BOOL_T GetParamsTurntable( int inx, track_p trk, coOrd pos, trackParams_t
 }
 
 
-static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
+static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos,
+                                  DIST_T d0 )
 {
 	coOrd posCen;
 	DIST_T r;
@@ -659,14 +794,16 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d
 	//Look for empty slot
 	BOOL_T found = FALSE;
 	for (*ep=0; *ep<GetTrkEndPtCnt(*trk); *ep=*ep+1) {
-		if ( (GetTrkEndTrk(*trk,*ep)) == NULL )
+		if ( (GetTrkEndTrk(*trk,*ep)) == NULL ) {
 			found = TRUE;
-			break;
+		}
+		break;
 	}
-	if (!found)
+	if (!found) {
 		*ep = NewTurntableEndPt(*trk,angle0);
-	else {
-		struct extraData *xx = GetTrkExtraData(*trk);
+	} else {
+		struct extraDataTurntable_t *xx = GET_EXTRA_DATA(*trk, T_TURNTABLE,
+		                                  extraDataTurntable_t);
 		coOrd pos1;
 		PointOnCircle( &pos1, xx->pos, xx->radius, angle0 );
 		SetTrkEndPoint(*trk, *ep, pos1, angle0);   //Reuse
@@ -688,13 +825,12 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 	switch ( query ) {
 	case Q_REFRESH_JOIN_PARAMS_ON_MOVE:
 	case Q_CANNOT_PLACE_TURNOUT:
-	case Q_DONT_DRAW_ENDPOINT:
+	case Q_NODRAWENDPT:
 	case Q_CAN_NEXT_POSITION:
 	case Q_ISTRACK:
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
-	case Q_CAN_ADD_ENDPOINTS:	
-	case Q_CAN_EXTEND:
+	case Q_CAN_ADD_ENDPOINTS:
 		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CORNU_CAN_MODIFY:
@@ -706,109 +842,183 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 
 
 static void FlipTurntable(
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle )
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                   extraDataTurntable_t);
 	FlipPoint( &xx->pos, orig, angle );
 	ComputeBoundingBox( trk );
 }
 
+BOOL_T debug = 0;
 
 static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                   extraDataTurntable_t);
 	coOrd pos0, pos1;
 	ANGLE_T angle;
-	
-	if ( !ValidateTurntablePosition(trk) )
+
+	if ( !ValidateTurntablePosition(trk) ) {
 		return;
+	}
 	pos0 = GetTrkEndPos(trk,xx->currEp);
 	angle = FindAngle( xx->pos, pos0 );
 	PointOnCircle( &pos1, xx->pos, xx->radius, angle+180.0 );
-	DrawLine( &mainD, pos0, pos1, 3, color );
+	DrawLine( &tempD, pos0, pos1, 3, color );
+	if (debug) {
+		if (xx->reverse) {
+
+			Rotate(&pos1,xx->pos, 15);
+			DrawFillCircle( &tempD, pos1, 0.5, color);
+		} else {
+			Rotate(&pos0,xx->pos, 10);
+			DrawFillCircle( &tempD, pos0, 0.5, color);
+		}
+	}
+}
+
+static wBool_t CompareTurntable( track_cp trk1, track_cp trk2 )
+{
+	struct extraDataTurntable_t *xx1 = GET_EXTRA_DATA( trk1, T_TURNTABLE,
+	                                   extraDataTurntable_t );
+	struct extraDataTurntable_t *xx2 = GET_EXTRA_DATA( trk2, T_TURNTABLE,
+	                                   extraDataTurntable_t );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
+	REGRESS_CHECK_DIST( "Radius", xx1, xx2, radius )
+	REGRESS_CHECK_INT( "CurrEp", xx1, xx2, currEp )
+	REGRESS_CHECK_INT( "Reverse", xx1, xx2, reverse )
+	return TRUE;
 }
 
 static void AdvanceTurntablePositionIndicator(
-		track_p trk,
-		coOrd pos,
-		coOrd * posR,
-		ANGLE_T * angleR )
+        track_p trk,
+        coOrd pos,
+        coOrd * posR,
+        ANGLE_T * angleR )
 {
-	struct extraData * xx = GetTrkExtraData(trk);
+
+	struct extraDataTurntable_t * xx = GET_EXTRA_DATA(trk, T_TURNTABLE,
+	                                   extraDataTurntable_t);
 	EPINX_T ep;
 	ANGLE_T angle0, angle1;
-	BOOL_T reverse;
-
-	angle1 = FindAngle( xx->pos, pos );
-	if ( !FindTurntableEndPt( trk, &angle1, &ep, &reverse ) )
-		return;
-	DrawTurntablePositionIndicator( trk, wDrawColorWhite );
+	BOOL_T reverse=FALSE, train_reversed = FALSE;
+	EPINX_T epCnt=GetTrkEndPtCnt(trk);
+	EPINX_T epbest = -1, epfound = -1;
+	coOrd inpos = *posR;
+	ANGLE_T inangle = *angleR;
 	angle0 = GetTrkEndAngle(trk,xx->currEp);
-	if ( ep == xx->currEp ) {
-		Rotate( posR, xx->pos, 180.0 );
-		if ( xx->reverse ) {
-			angle1 = angle0;
-			xx->reverse = FALSE;
-		} else {
-			angle1 = NormalizeAngle( angle0+180.0 );
-			xx->reverse = TRUE;
+	if (fabs(DifferenceBetweenAngles(angle0,*angleR))>90) { train_reversed = TRUE; }
+	DIST_T dd = DIST_INF;
+	// If on ep, use that
+	for (ep=0; ep<epCnt; ep++) {
+		if ( (GetTrkEndTrk(trk,ep)) == NULL ) {
+			continue;
 		}
-	} else {
-		angle1 = GetTrkEndAngle(trk,ep);
-		Rotate( posR, xx->pos, angle1-angle0 );
-		xx->reverse = FALSE;
+		coOrd end = GetTrkEndPos(trk,ep);
+		DIST_T d = FindDistance(end,pos);
+		if (d<dd) {
+			dd = d;
+			epbest = ep;
+		}
 	}
-	*angleR = angle1;
-	xx->currEp = ep;
-	DrawTurntablePositionIndicator( trk, selectedColor );
+	if (epbest>=0 && IsClose(dd)) {
+		epfound = epbest;
+	}
+	// Else find next track in given direction beyond current
+	if (epfound<0) {
+		epfound = FindTurntableNextEndPt( trk, pos );
+	}
+	if (epfound>=0) {
+		if (xx->currEp == epfound ) {
+			reverse = TRUE;
+			xx->reverse = !xx->reverse;
+			train_reversed = !train_reversed;
+		} else {
+			//If back end moving, flip result
+			if (fabs(DifferenceBetweenAngles(FindAngle(xx->pos,pos),GetTrkEndAngle(trk,
+			                                 xx->currEp)))>90) {
+				if (epfound>=0 && epfound != xx->currEp) {
+					reverse = TRUE;
+					xx->reverse = !xx->reverse;
+					train_reversed = !train_reversed;
+				}
+			}
+		}
+		xx->currEp = epfound;
+		angle1 = GetTrkEndAngle(trk,xx->currEp);
+		if (!reverse) {
+			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
+			Translate( posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
+		} else {
+			*angleR = NormalizeAngle(angle1+(train_reversed?180:0));
+			Translate(posR, xx->pos, *angleR, FindDistance(*posR,xx->pos) );
+		}
+		coOrd outpos = *posR;
+		if (debug) {
+			InfoMessage("AO:%0.3f PO:(%0.3f,%0.3f) AI:%0.3f PI:(%0.3f,%0.3f)",*angleR,
+			            outpos.x,outpos.y,inangle,inpos.x,inpos.y);
+		}
+	}
 }
 
 
 static trackCmd_t turntableCmds = {
-		"TURNTABLE",
-		DrawTurntable,
-		DistanceTurntable,
-		DescribeTurntable,
-		DeleteTurntable,
-		WriteTurntable,
-		ReadTurntable,
-		MoveTurntable,
-		RotateTurntable,
-		RescaleTurntable,
-		NULL,	/* audit */
-		GetAngleTurntable,
-		SplitTurntable, /* split */
-		TraverseTurntable,
-		EnumerateTurntable,
-		NULL,	/* redraw */
-		NULL,	/* trim */
-		NULL,	/* merge */
-		ModifyTurntable,
-		NULL,	/* getLength */
-		GetParamsTurntable,
-		MoveEndPtTurntable,
-		QueryTurntable,
-		NULL,	/* ungroup */
-		FlipTurntable,
-		DrawTurntablePositionIndicator,
-		AdvanceTurntablePositionIndicator,
-		CheckTraverseTurntable };
+	"TURNTABLE",
+	DrawTurntable,
+	DistanceTurntable,
+	DescribeTurntable,
+	DeleteTurntable,
+	WriteTurntable,
+	ReadTurntable,
+	MoveTurntable,
+	RotateTurntable,
+	RescaleTurntable,
+	NULL,	/* audit */
+	GetAngleTurntable,
+	SplitTurntable, /* split */
+	TraverseTurntable,
+	EnumerateTurntable,
+	NULL,	/* redraw */
+	NULL,	/* trim */
+	NULL,	/* merge */
+	ModifyTurntable,
+	NULL,	/* getLength */
+	GetParamsTurntable,
+	MoveEndPtTurntable,
+	QueryTurntable,
+	NULL,	/* ungroup */
+	FlipTurntable,
+	DrawTurntablePositionIndicator,
+	AdvanceTurntablePositionIndicator,
+	CheckTraverseTurntable,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	CompareTurntable
+};
 
 
 static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 {
 	track_p t;
 	static coOrd pos0;
+	static int state = 0;
 	wControl_p controls[2];
 	char * labels[1];
 
 	switch (action) {
 
 	case C_START:
-		if (turntableDiameterPD.control==NULL)
+		if (turntableDiameterPD.control==NULL) {
 			ParamCreateControls( &turntablePG, NULL );
+		}
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		turntableDiameter = ceil(80.0*12.0/curScaleRatio);
 		wPrefGetFloat( "misc", message, &turntableDiameter, turntableDiameter );
@@ -818,7 +1028,9 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
 		InfoSubstituteControls( controls, labels );
+		SetAllTrackSelect( FALSE );
 		/*InfoMessage( "Place Turntable");*/
+		state = 0;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -833,18 +1045,15 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		state = 1;
 		return C_CONTINUE;
 
 	case C_MOVE:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		pos0 = pos;
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		UndoStart( _("Create Turntable"), "NewTurntable" );
 		t = NewTurntable( pos, turntableDiameter/2.0 );
@@ -853,10 +1062,14 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( NULL, NULL );
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
+		state = 0;
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		if ( state > 0 ) {
+			DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0,
+			         wDrawColorBlack );
+		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -869,12 +1082,14 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/turntbl.xpm"
+#include "bitmaps/turntable.xpm3"
 
 
 EXPORT void InitCmdTurntable( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Turntable"), wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY, ACCL_TURNTABLE, NULL );
+	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Custom Turntable"),
+	               wIconCreatePixMap(turntable_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
 }
 
 

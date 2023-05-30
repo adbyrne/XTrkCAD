@@ -1,4 +1,4 @@
-CONTENTS Märklin C-Gleis HO-Scale
+CONTENTS Märklin C-Gleis HO Scale
 SUBCONTENTS Märklin C-Gleis Gleisgerade
 TURNOUT HO "Märklin C-Gleis	Gerade 64.3mm	24064"
 	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gerade 64.3mm" "24064" 2.531496
@@ -54,23 +54,23 @@ TURNOUT HO "Märklin C-Gleis	Gerade 188.3mm	24188"
 	L 8421376 0.030000 0.000000 0.787400 7.413386 0.787400
 	L 8421376 0.030000 0.000000 -0.787400 7.413386 -0.787400
 	END
-TURNOUT HO "Märklin C-Gleis	Gerade 229.0mm	24229"
-	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gerade 229.0mm" "24229" 9.015748
+TURNOUT HO "Märklin C-Gleis	Gerade 229.3mm	24229"
+	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gerade 229.3mm" "24229" 9.027559
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
-	E 9.015748 0.000000 90.000000
-	S 0 0.000000 0.000000 0.000000 9.015748 0.000000
-	L 8421376 0.030000 0.000000 0.787400 9.015748 0.787400
-	L 8421376 0.030000 0.000000 -0.787400 9.015748 -0.787400
+	E 9.027559 0.000000 90.000000
+	S 0 0.000000 0.000000 0.000000 9.027559 0.000000
+	L 8421376 0.030000 0.000000 0.787400 9.027559 0.787400
+	L 8421376 0.030000 0.000000 -0.787400 9.027559 -0.787400
 	END
-TURNOUT HO "Märklin C-Gleis	Gerade 236.0mm	24236"
-	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gerade 236.0mm" "24236" 9.291338
+TURNOUT HO "Märklin C-Gleis	Gerade 236.1mm	24236"
+	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gerade 236.1mm" "24236" 9.295276
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
-	E 9.291338 0.000000 90.000000
-	S 0 0.000000 0.000000 0.000000 9.291338 0.000000
-	L 8421376 0.030000 0.000000 0.787400 9.291338 0.787400
-	L 8421376 0.030000 0.000000 -0.787400 9.291338 -0.787400
+	E 9.295276 0.000000 90.000000
+	S 0 0.000000 0.000000 0.000000 9.295276 0.000000
+	L 8421376 0.030000 0.000000 0.787400 9.295276 0.787400
+	L 8421376 0.030000 0.000000 -0.787400 9.295276 -0.787400
 	END
 TURNOUT HO "Märklin C-Gleis	Gerade 360.0mm	24360"
 	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gerade 360.0mm" "24360" 14.173228
@@ -280,10 +280,12 @@ TURNOUT HO "Märklin C-Gleis	Dreiwegweiche 188.3mm R2=437.5mm 24.3°	24630"
 	A 8421376 0.030000 -16.437009 0.000000 17.224409 155.700000 24.300000
 	A 8421376 0.030000 16.437009 0.000000 -17.224409 0.00000000 24.300000
 	END
-TURNOUT HO "Märklin C-Gleis	Doppelkreuzungsweiche 188.3mm R2=437.5mm 24.3°	24624"
+TURNOUT HO "Märklin C-Gleis	Doppelkreuzungsweiche 188.3mm R2=437.5mm 24.3°	24624" 512
 	U "Doppelkreuzungsweiche" "XtrkCad" "Märklin C-Gleis" "Doppelkreuzungsweiche" "24624" 7.413386 24.300000 7.413386
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 7.413386 0.000000 90.000000
 	E 0.328401 1.525357 294.300000
@@ -371,7 +373,7 @@ TURNOUT HO "Märklin C-Gleis	Schlanke Kreuzung 236.1mm 12.1°	24740"
 
 SUBCONTENTS Märklin C-Gleis Verschiedene Gleise
 TURNOUT HO "Märklin C-Gleis	Gleisende mit Prellbock 77.5mm	24977"
-	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gleisende mit Prellbock" "24977" 3.051181 
+	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gleisende mit Prellbock" "24977" 3.051181
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	S 0 0.000000 0.000000 0.000000 3.051181 0.000000

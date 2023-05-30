@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "bezctx.h"
 #include "bezctx_xtrkcad.h"
 #include "track.h"
+#include "draw.h"
 #include "tbezier.h"
 #include "i18n.h"
 #include "math.h"
@@ -41,6 +42,7 @@ typedef struct {
     BOOL_T is_open;
     BOOL_T has_NAN;
     BOOL_T draw_spots;
+    DIST_T spot_size;
     coOrd last_pos;						// For moveTo
     int ends[2];						//Start and End knot number
 
@@ -70,19 +72,16 @@ bezctx_xtrkcad_lineto(bezctx *z, double x, double y) {
 		return;
 	}
     DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
-    trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
+    trkSeg_p seg = &DYNARR_LAST( trkSeg_t, *bc->segsArray);
     seg->u.l.pos[0].x = bc->last_pos.x;
     seg->u.l.pos[0].y = bc->last_pos.y;
     seg->u.l.pos[1].x = x;
     seg->u.l.pos[1].y = y;
     seg->u.l.option = 0;
-    seg->width = 0.0;
+    seg->lineWidth = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_STRTRK;
-    if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
-    seg->bezSegs.max =0;
-    seg->bezSegs.cnt = 0;
-    seg->bezSegs.ptr = NULL;
+    DYNARR_FREE( trkSeg_t, seg->bezSegs );
     seg->u.l.angle = FindAngle(seg->u.l.pos[0],seg->u.l.pos[1]);
     bc->last_pos.x = x;
     bc->last_pos.y = y;
@@ -104,7 +103,7 @@ bezctx_xtrkcad_quadto(bezctx *z, double x1, double y1, double x2, double y2)
     	return;
     }
     DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
-    trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
+    trkSeg_p seg = &DYNARR_LAST( trkSeg_t, *bc->segsArray);
     seg->u.b.pos[0] = bc->last_pos;
     seg->u.b.pos[1].x = x1;
     seg->u.b.pos[1].y = y1;
@@ -112,13 +111,10 @@ bezctx_xtrkcad_quadto(bezctx *z, double x1, double y1, double x2, double y2)
     seg->u.b.pos[2].y = y1;
     seg->u.b.pos[3].x = x2;
     seg->u.b.pos[3].y = y2;
-    seg->width = 0.0;
+    seg->lineWidth = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_BEZTRK;
-    if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
-    seg->bezSegs.max =0;
-    seg->bezSegs.cnt = 0;
-    seg->bezSegs.ptr = NULL;
+    DYNARR_FREE( trkSeg_t, seg->bezSegs );
     bc->last_pos.x = x2;
     bc->last_pos.y = y2;
 
@@ -141,7 +137,7 @@ static void
 		return;
 	}
 	DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
-	trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
+	trkSeg_p seg = &DYNARR_LAST(trkSeg_t, *bc->segsArray);
 		seg->u.b.pos[0].x = bc->last_pos.x;
 		seg->u.b.pos[0].y = bc->last_pos.y;
 	    seg->u.b.pos[1].x = x1;
@@ -150,13 +146,10 @@ static void
 	    seg->u.b.pos[2].y = y2;
 	    seg->u.b.pos[3].x = x3;
 	    seg->u.b.pos[3].y = y3;
-	    seg->width = 0.0;
+	    seg->lineWidth = 0.0;
 	    seg->color = wDrawColorBlack;
 	    seg->type = SEG_BEZTRK;
-	    if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
-	    seg->bezSegs.max = 0;
-	    seg->bezSegs.cnt = 0;
-	    seg->bezSegs.ptr = NULL;
+	    DYNARR_FREE( trkSegs_t, seg->bezSegs );
 	    bc->last_pos.x = x3;
 	    bc->last_pos.y = y3;
 
@@ -164,13 +157,13 @@ static void
 
 	 if (bc->draw_spots) {
 		 DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
-		 seg = &trkSeg(bc->segsArray->cnt-1);
+		 seg = &DYNARR_LAST( trkSeg_t, *bc->segsArray );
 	 	 seg->type=SEG_FILCRCL;
 	 	 seg->u.c.center.x = bc->last_pos.x;
 	 	 seg->u.c.center.y = bc->last_pos.y;
-	 	 seg->u.c.radius = 0.25;
-	 	 seg->width = 0.0;
-	 	 seg->color = wDrawColorBlack;
+	 	 seg->u.c.radius = bc->spot_size;
+	 	 seg->lineWidth = 0.0;
+	 	 seg->color = wDrawColorGrey40;
 	 }
 
 }
@@ -187,7 +180,7 @@ bezctx_xtrkcad_mark_knot(bezctx *z, int knot_idx) {
 
 
 bezctx *
-new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots) {
+new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots, DIST_T spot_size) {
 
     bezctx_xtrkcad *result = znew(bezctx_xtrkcad, 1);
 
@@ -203,7 +196,11 @@ new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots) {
     result->is_open = FALSE;
     result->has_NAN = FALSE;
     result->draw_spots = spots;
+    result->spot_size = spot_size;
     result->track = TRUE;
+
+    DYNARR_INIT( trkSeg_t, *result->segsArray );
+
 
     return &result->base;
 }

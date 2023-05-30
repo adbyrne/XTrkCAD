@@ -1,0 +1,106 @@
+diff -ru orig/xtrkcad-source-5.2.2GA/app/bin/CMakeLists.txt xtrkcad-source-5.2.2GA/app/bin/CMakeLists.txt
+--- orig/xtrkcad-source-5.2.2GA/app/bin/CMakeLists.txt	2021-12-18 12:12:02.000000000 -0500
++++ xtrkcad-source-5.2.2GA/app/bin/CMakeLists.txt	2022-02-21 15:22:10.656926058 -0500
+@@ -169,7 +169,6 @@
+ 	utility.c
+ 	utility.h
+ 	validator.c
+-	cJSON.c
+ 	archive.h
+ 	directory.h
+ 	manifest.h
+@@ -237,10 +236,7 @@
+ # This ensures that messages.h has been generated before we build xtrkcad-lib
+ ADD_DEPENDENCIES(xtrkcad-lib Help)
+ 
+-TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
+-TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
+-TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
+-TARGET_LINK_LIBRARIES(xtrkcad dynstring)
++TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib xtrkcad-wlib xtrkcad-cornu dynstring cjson)
+ if(XTRKCAD_CREATE_SVG)
+ IF(UNIX)
+ 	if (NOT APPLE)
+diff -ru orig/xtrkcad-source-5.2.2GA/app/bin/fileio.c xtrkcad-source-5.2.2GA/app/bin/fileio.c
+--- orig/xtrkcad-source-5.2.2GA/app/bin/fileio.c	2021-12-18 10:31:35.000000000 -0500
++++ xtrkcad-source-5.2.2GA/app/bin/fileio.c	2022-02-20 10:51:17.258176965 -0500
+@@ -20,7 +20,7 @@
+  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+  */
+ 
+-#include <cJSON.h>
++#include <cjson/cJSON.h>
+ 
+ #include "archive.h"
+ #include "common.h"
+Only in orig/xtrkcad-source-5.2.2GA/app/bin/include: dirent.h
+Only in xtrkcad-source-5.2.2GA/app/bin/include: dirent.h.phil
+diff -ru orig/xtrkcad-source-5.2.2GA/app/bin/manifest.c xtrkcad-source-5.2.2GA/app/bin/manifest.c
+--- orig/xtrkcad-source-5.2.2GA/app/bin/manifest.c	2021-12-18 10:31:34.000000000 -0500
++++ xtrkcad-source-5.2.2GA/app/bin/manifest.c	2022-02-20 10:51:14.426213927 -0500
+@@ -21,7 +21,7 @@
+   
+ #include <string.h>
+ 
+-#include "cJSON.h"
++#include <cjson/cJSON.h>
+ #include "fileio.h"
+ #include "layout.h"
+ #include "misc2.h"
+diff -ru orig/xtrkcad-source-5.2.2GA/app/help/CMakeLists.txt xtrkcad-source-5.2.2GA/app/help/CMakeLists.txt
+--- orig/xtrkcad-source-5.2.2GA/app/help/CMakeLists.txt	2021-12-18 10:27:44.000000000 -0500
++++ xtrkcad-source-5.2.2GA/app/help/CMakeLists.txt	2022-02-21 15:24:51.868816364 -0500
+@@ -1,6 +1,6 @@
+ PROJECT(help)
+ 
+-ADD_EXECUTABLE(genhelp genhelp.c cJSON.c cJSON.h)
++ADD_EXECUTABLE(genhelp genhelp.c)
+ 
+ ADD_EXECUTABLE(genmessages genmessages.c)
+ 
+@@ -10,6 +10,8 @@
+ 	SET(GENMESSAGES_OPTS "")
+ ENDIF(XTRKCAD_USE_GETTEXT)
+ 
++TARGET_LINK_LIBRARIES(genhelp PUBLIC cjson)
++
+ ADD_CUSTOM_COMMAND(
+ 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/messages.but
+ 	DEPENDS genmessages ${CMAKE_CURRENT_SOURCE_DIR}/messages.in
+diff -ru orig/xtrkcad-source-5.2.2GA/app/help/genhelp.c xtrkcad-source-5.2.2GA/app/help/genhelp.c
+--- orig/xtrkcad-source-5.2.2GA/app/help/genhelp.c	2021-12-18 10:27:44.000000000 -0500
++++ xtrkcad-source-5.2.2GA/app/help/genhelp.c	2022-02-20 10:28:37.155745877 -0500
+@@ -20,7 +20,7 @@
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+-#include "cJSON.h"
++#include <cjson/cJSON.h>
+ 
+ #define I18NHEADERFILE "i18n.h"
+ 
+diff -ru orig/xtrkcad-source-5.2.2GA/app/lib/CMakeLists.txt xtrkcad-source-5.2.2GA/app/lib/CMakeLists.txt
+--- orig/xtrkcad-source-5.2.2GA/app/lib/CMakeLists.txt	2021-12-18 12:12:02.000000000 -0500
++++ xtrkcad-source-5.2.2GA/app/lib/CMakeLists.txt	2022-02-21 15:25:06.717622045 -0500
+@@ -42,10 +42,6 @@
+ endif()
+ 	
+ if(UNIX AND NOT APPLE)
+-    install(PROGRAMS
+-        xdg-open xtrkcad-setup
+-        DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+-        )
+ 	install(FILES
+ 		xtrkcad.desktop xtrkcad.xml
+ 		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
+diff -ru orig/xtrkcad-source-5.2.2GA/CMakeLists.txt xtrkcad-source-5.2.2GA/CMakeLists.txt
+--- orig/xtrkcad-source-5.2.2GA/CMakeLists.txt	2021-12-18 13:10:04.000000000 -0500
++++ xtrkcad-source-5.2.2GA/CMakeLists.txt	2022-02-21 15:30:10.711643816 -0500
+@@ -1,6 +1,6 @@
+ PROJECT(XTrkCAD)
+ enable_testing()
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.22)
+ set(CMAKE_MACOSX_RPATH 0)
+ 
+ # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked

@@ -1,5 +1,5 @@
 /** \file elev.c
- * 
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -17,21 +17,21 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-#include <math.h>
 
 #include "ccurve.h"
+#include "tbezier.h"
+#include "tcornu.h"
 #include "cundo.h"
-#include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
 #include "track.h"
-#include "utility.h"
-#include "string.h"
+#include "common-ui.h"
 
-EXPORT long oldElevationEvaluation = 0;
+/** @logcmd @showrefby fillElev=n elev.c */
 static int log_fillElev = 0;
+/** @logcmd @showrefby dumpElev=n elev.c */
 static int log_dumpElev = 0;
 static BOOL_T log_fillElev_initted;
 static int checkTrk = 0;
@@ -40,10 +40,10 @@ static char * elevPrefix;
 static void SetTrkOnElevPath( track_p trk, int mode, DIST_T elev );
 
 typedef struct {
-		track_p trk;
-		EPINX_T ep;
-		DIST_T len;
-		} elist_t;
+	track_p trk;
+	EPINX_T ep;
+	DIST_T len;
+} elist_t;
 static dynArr_t elist_da;
 #define elist(N) DYNARR_N( elist_t, elist_da, N )
 #define elistAppend( T, E, L ) \
@@ -52,33 +52,35 @@ static dynArr_t elist_da;
 
 EPINX_T GetNextTrkOnPath( track_p trk, EPINX_T ep )
 {
-/* Get next track on Path:
-   1 - there is only 1 connected (not counting ep)
-   2 - there are >1 but only 1 on Path
-   3 - one of them is PST:PSE or PET:PEE
-*/
+	/* Get next track on Path:
+	   1 - there is only 1 connected (not counting ep)
+	   2 - there are >1 but only 1 on Path
+	   3 - one of them is PST:PSE or PET:PEE
+	*/
 	EPINX_T ep2;
 	track_p trkN;
 	int epCnt = GetTrkEndPtCnt(trk);
 
 	for ( ep2=0; ep2<epCnt; ep2++) {
-		if ( ep2 == ep )
+		if ( ep2 == ep ) {
 			continue;
+		}
 		trkN = GetTrkEndTrk(trk,ep2);
-		if (trkN && (GetTrkBits(trkN)&TB_PROFILEPATH))
+		if (trkN && (GetTrkBits(trkN)&TB_PROFILEPATH)) {
 			return ep2;
+		}
 	}
 	return -1;
 }
 
 
 EXPORT int FindDefinedElev(
-		track_p trk,
-		EPINX_T ep,
-		int dir,
-		BOOL_T onpath,
-		DIST_T * Relev,
-		DIST_T *Rdist )
+        track_p trk,
+        EPINX_T ep,
+        int dir,
+        BOOL_T onpath,
+        DIST_T * Relev,
+        DIST_T *Rdist )
 {
 	track_p trk0, trk1;
 	EPINX_T ep0, ep1, ep2;
@@ -86,8 +88,9 @@ EXPORT int FindDefinedElev(
 
 	if (dir) {
 		trk1 = GetTrkEndTrk( trk, ep );
-		if (trk1 == NULL)
+		if (trk1 == NULL) {
 			return FDE_END;
+		}
 		ep = GetEndPtConnectedToMe( trk1, trk );
 		trk = trk1;
 	}
@@ -96,7 +99,7 @@ EXPORT int FindDefinedElev(
 	while (1) {
 		for (ep2=0; ep2<GetTrkEndPtCnt(trk); ep2++) {
 			if ((trk!=trk0||ep2!=ep0)&&
-				EndPtIsDefinedElev(trk,ep2) ) {
+			    EndPtIsDefinedElev(trk,ep2) ) {
 				dist += GetTrkLength( trk, ep, ep2 );
 				*Relev = GetTrkEndElevHeight(trk,ep2);
 				*Rdist = dist;
@@ -126,87 +129,69 @@ EXPORT int FindDefinedElev(
 		dist += GetTrkLength( trk, ep, ep2 );
 		trk = trk1;
 		ep = ep1;
-		if (trk == trk0)
+		if (trk == trk0) {
 			return FDE_UDF;
+		}
 	}
 }
 
 
 BOOL_T ComputeElev(
-		track_p trk,
-		EPINX_T ep,
-		BOOL_T onpath,
-		DIST_T *elevR,
-		DIST_T *gradeR )
+        track_p trk,
+        EPINX_T ep,
+        BOOL_T onpath,
+        DIST_T *elevR,
+        DIST_T *gradeR,
+        BOOL_T force )
 {
-	DIST_T grade;
-	DIST_T elev0, elev1, dist0, dist1;
+	DIST_T grade = 0.0;
+	DIST_T elev0;
 	BOOL_T rc = FALSE;
-if (oldElevationEvaluation) {
-	int rc0, rc1;
-	if (GetTrkEndElevMode(trk,ep) == ELEV_DEF) {
-		if (elevR)
-			*elevR = GetTrkEndElevHeight(trk,ep);
-		if (gradeR)
-			*gradeR = 0.0;
-		return TRUE;
-	}
-	rc0 = FindDefinedElev( trk, ep, 0, onpath, &elev0, &dist0 );
-	rc1 = FindDefinedElev( trk, ep, 1, onpath, &elev1, &dist1 );
-	if ( rc0 == FDE_DEF && rc1 == FDE_DEF ) {
-		if (dist0+dist1 > 0.1)
-			grade = (elev1-elev0)/(dist0+dist1);
-		else
-			grade = 0.0;
-		elev0 += grade*dist0;
-		rc = TRUE;
-	} else if ( rc0 == FDE_DEF && rc1 == FDE_END ) {
-		grade = 0.0;
-		rc = TRUE;
-	} else if ( rc1 == FDE_DEF && rc0 == FDE_END ) {
-		grade = 0.0;
-		elev0 = elev1;
-		rc = TRUE;
-	} else if ( rc0 == FDE_END && rc1 == FDE_END ) {
-		grade = 0.0;
-		elev0 = 0.0;
-		rc = TRUE;
-	} else {
-		grade = 0.0;
-		elev0 = 0.0;
-	}
-} else {
+
 	track_p trk1;
 	EPINX_T ep1;
-	grade = -1;
 	rc = TRUE;
 	if ( EndPtIsDefinedElev(trk,ep) ) {
 		elev0 = GetTrkEndElevHeight(trk,ep);
 		rc = FALSE;
-	} else {
-		elev0 = GetElevation( trk );
-		dist0 = GetTrkLength( trk, ep, -1 );
+	} else if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&grade))) {
 		trk1 = GetTrkEndTrk( trk, ep );
 		if (trk1!=NULL) {
+			// Compute weighted average of the 2 track elevation
 			ep1 = GetEndPtConnectedToMe(trk1,trk);
-			elev1 = GetElevation( trk1 );
-			dist1 = GetTrkLength( trk1, ep1, -1 );
-			if (dist0+dist1>0.1) {
-				grade = (elev1-elev0)/(dist0+dist1);
-				elev0 += grade*dist0;
+			if (force || (!GetTrkEndElevCachedHeight(trk1,ep1,&elev0,&grade))) {
+				// Not cached, need to compute
+				DIST_T elev1, dist0, dist1;
+				elev0 = GetElevation( trk );
+				dist0 = GetTrkLength( trk, ep, -1 );
+				elev1 = GetElevation( trk1 );
+				dist1 = GetTrkLength( trk1, ep1, -1 );
+				if (dist0+dist1>0.1) {
+					grade = (elev1-elev0)/(dist0+dist1);
+					elev0 += grade*dist0;
+				} else {
+					elev0 = (elev0+elev1)/2.0;
+					rc = FALSE;
+				}
+				SetTrkEndElevCachedHeight(trk,ep,elev0,grade);
+				SetTrkEndElevCachedHeight(trk1,ep1,elev0,-grade);
 			} else {
-				elev0 = (elev0+elev1)/2.0;
-				rc = FALSE;
+				// flip grade from connected EP
+				grade = - grade;
 			}
 		} else {
-			grade = 0.0;
+			// Not connected - use track elevation
+			elev0 = GetElevation( trk );
+			SetTrkEndElevCachedHeight(trk,ep,elev0,0.0);
 		}
 	}
-}
-	if ( elevR )
+
+	if ( elevR ) {
 		*elevR = elev0;
-	if ( gradeR )
+	}
+	if ( gradeR ) {
 		*gradeR = grade;
+	}
 	return rc;
 }
 
@@ -219,10 +204,10 @@ if (oldElevationEvaluation) {
  */
 
 typedef struct {
-		track_p trk;
-		EPINX_T ep;
-		DIST_T elev;
-		} defelev_t;
+	track_p trk;
+	EPINX_T ep;
+	DIST_T elev;
+} defelev_t;
 static dynArr_t defelev_da;
 #define defelev(N) DYNARR_N( defelev_t, defelev_da, N )
 
@@ -238,8 +223,9 @@ static void FindDefElev( void )
 	while ( TrackIterate( &trk ) ) {
 		cnt = GetTrkEndPtCnt( trk );
 		for ( ep = 0; ep < cnt; ep++ ) {
-			if ( !EndPtIsDefinedElev( trk, ep ) )
+			if ( !EndPtIsDefinedElev( trk, ep ) ) {
 				continue;
+			}
 			DYNARR_APPEND( defelev_t, defelev_da, 10 );
 			dep = &defelev( defelev_da.cnt-1 );
 			dep->trk = trk;
@@ -247,7 +233,8 @@ static void FindDefElev( void )
 			dep->elev = GetTrkEndElevHeight(trk,ep);
 		}
 	}
-LOG( log_fillElev, 1, ( "%s: findDefElev [%d] (%ld)\n", elevPrefix, defelev_da.cnt, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: findDefElev [%d] (%ld)\n", elevPrefix,
+	                        defelev_da.cnt, wGetTimer()-time0 ) )
 }
 
 
@@ -271,15 +258,17 @@ static void FindAttachedDefElev( track_p trk, BOOL_T remove )
 	DYNARR_RESET( elist_t, elist_da );
 	elistAppend( trk, 0, 0 );
 	SetTrkBits( trk, TB_PROCESSED );
-	if (remove)
+	if (remove) {
 		ClrTrkBits( trk, TB_ELEVPATH );
+	}
 	for ( i1=0; i1<elist_da.cnt; i1++ ) {
 		trk = elist(i1).trk;
-		if (!IsTrack(trk))
+		if (!IsTrack(trk)) {
 			continue;
+		}
 		cnt = GetTrkEndPtCnt(trk);
 		for ( ep=0; ep<cnt; ep++ ) {
-			 if ( EndPtIsDefinedElev(trk,ep) ) {
+			if ( EndPtIsDefinedElev(trk,ep) ) {
 				DYNARR_APPEND( defelev_t, defelev_da, 10 );
 				dep = &defelev( defelev_da.cnt-1 );
 				dep->trk = trk;
@@ -307,8 +296,9 @@ static void FindAttachedDefElev( track_p trk, BOOL_T remove )
 					if ( !(GetTrkBits(trk1)&TB_PROCESSED) ) {
 						elistAppend( trk1, 0, 0 );
 						SetTrkBits( trk1, TB_PROCESSED );
-						if (remove)
+						if (remove) {
 							ClrTrkBits( trk1, TB_ELEVPATH );
+						}
 					}
 				}
 			}
@@ -332,7 +322,8 @@ static int FindObsoleteElevs( void )
 			FindAttachedDefElev( trk, TRUE );
 		}
 	}
-LOG( log_fillElev, 1, ( "%s: findObsoleteElevs [%d] (%ld)\n", elevPrefix, cnt, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: findObsoleteElevs [%d] (%ld)\n", elevPrefix, cnt,
+	                        wGetTimer()-time0 ) )
 	return cnt;
 }
 
@@ -346,22 +337,22 @@ LOG( log_fillElev, 1, ( "%s: findObsoleteElevs [%d] (%ld)\n", elevPrefix, cnt, w
  */
 
 typedef struct {
-		track_p trk;
-		EPINX_T ep;
-		EPINX_T ep2;
-		DIST_T dist;
-		DIST_T elev;
-		} fork_t;
+	track_p trk;
+	EPINX_T ep;
+	EPINX_T ep2;
+	DIST_T dist;
+	DIST_T elev;
+} fork_t;
 static dynArr_t fork_da;
 #define fork(N) DYNARR_N( fork_t, fork_da, N )
 
 static int FillElevShortestPathFunc(
-		SPTF_CMD cmd,
-		track_p trk,
-		EPINX_T ep,
-		EPINX_T ep2,
-		DIST_T dist,
-		void * data )
+        SPTF_CMD cmd,
+        track_p trk,
+        EPINX_T ep,
+        EPINX_T ep2,
+        DIST_T dist,
+        void * data )
 {
 	defelev_t * dep = (defelev_t *)data;
 	track_p trk1;
@@ -372,10 +363,11 @@ static int FillElevShortestPathFunc(
 	case SPTC_MATCH:
 		/*if ( (GetTrkBits(trk)&TB_PROCESSED) )
 			epRc = 0;
-		else*/ if ( (dep->trk!=trk || dep->ep!=ep) && EndPtIsDefinedElev(trk,ep))
+		else*/ if ( (dep->trk!=trk || dep->ep!=ep) && EndPtIsDefinedElev(trk,ep)) {
 			epRc = 1;
-		else
+		} else {
 			epRc = 0;
+		}
 		break;
 
 	case SPTC_MATCHANY:
@@ -395,12 +387,18 @@ static int FillElevShortestPathFunc(
 		if (!(GetTrkBits(trk)&TB_PROCESSED)) {
 			SetTrkBits(trk, TB_PROCESSED);
 			if ( EndPtIsDefinedElev( trk, ep ) ) {
-if (log_shortPath<=0||logTable(log_shortPath).level<4) LOG( log_fillElev, 5, ( "    ADD_TRK: T%d:%d D=%0.1f -> DefElev\n", GetTrkIndex(trk), ep, dist ) )
-LOG( log_shortPath, 4, ( "DefElev " ) )
-			} else if ( GetNextTrk( trk, ep, &trk1, &ep1, GNTignoreIgnore ) < 0 && trk1 != NULL ) {
-if (log_shortPath<=0||logTable(log_shortPath).level<4) LOG( log_fillElev, 4, ( "    ADD_TRK: T%d:%d D=%0.3f E=%0.3f -> Fork[%d]\n", GetTrkIndex(trk), ep, dist, dep->elev, fork_da.cnt ) )
-LOG( log_shortPath, 4, ( "E:%0.3f Fork[%d] ",  dep->elev, fork_da.cnt ) )
-				DYNARR_APPEND( fork_t, fork_da, 10 );
+				if (log_shortPath<=0
+				    ||logTable(log_shortPath).level<4) LOG( log_fillElev, 5,
+					                    ( "    ADD_TRK: T%d:%d D=%0.1f -> DefElev\n", GetTrkIndex(trk), ep, dist ) )
+					LOG( log_shortPath, 4, ( "DefElev " ) )
+				} else if ( GetNextTrk( trk, ep, &trk1, &ep1, GNTignoreIgnore ) < 0
+			            && trk1 != NULL ) {
+				if (log_shortPath<=0
+				    ||logTable(log_shortPath).level<4) LOG( log_fillElev, 4,
+					                    ( "    ADD_TRK: T%d:%d D=%0.3f E=%0.3f -> Fork[%d]\n", GetTrkIndex(trk), ep,
+					                      dist, dep->elev, fork_da.cnt ) )
+					LOG( log_shortPath, 4, ( "E:%0.3f Fork[%d] ",  dep->elev, fork_da.cnt ) )
+					DYNARR_APPEND( fork_t, fork_da, 10 );
 				n = &fork(fork_da.cnt-1);
 				n->trk = trk;
 				n->ep = ep;
@@ -412,10 +410,10 @@ LOG( log_shortPath, 4, ( "E:%0.3f Fork[%d] ",  dep->elev, fork_da.cnt ) )
 				n->nep = dep->ep;
 #endif
 			} else {
-LOG( log_shortPath, 4, ( "Normal " ) )
+				LOG( log_shortPath, 4, ( "Normal " ) )
 			}
 		} else {
-LOG( log_shortPath, 4, ( "Processed " ) )
+			LOG( log_shortPath, 4, ( "Processed " ) )
 		}
 		return 0;
 
@@ -425,10 +423,10 @@ LOG( log_shortPath, 4, ( "Processed " ) )
 
 	case SPTC_IGNNXTTRK:
 		if ( EndPtIsIgnoredElev(trk,ep2) ) {
-LOG( log_shortPath, 4, ( "2 Ignore " ) )
+			LOG( log_shortPath, 4, ( "2 Ignore " ) )
 			epRc = 1;
 		} else if ( (!EndPtIsDefinedElev(trk,ep)) && GetTrkEndTrk(trk,ep)==NULL ) {
-LOG( log_shortPath, 4, ( "1 Null && !DefElev " ) )
+			LOG( log_shortPath, 4, ( "1 Null && !DefElev " ) )
 			epRc = 1;
 		} else {
 			epRc = 0;
@@ -457,19 +455,20 @@ static void FindForks( void )
 {
 	int i;
 	defelev_t * dep;
-	int rc;
 	long time0 = wGetTimer();
 
 	DYNARR_RESET( fork_t, fork_da );
 	for ( i=0; i<defelev_da.cnt; i++ ) {
 		dep = &defelev(i);
-			
+
 		ClrAllTrkBits( TB_PROCESSED );
-LOG( log_fillElev, 3, ( "   findForks from T%d:%d\n", GetTrkIndex(dep->trk), dep->ep ) )
-		rc = FindShortestPath( dep->trk, dep->ep, FALSE, FillElevShortestPathFunc, dep );
+		LOG( log_fillElev, 3, ( "   findForks from T%d:%d\n", GetTrkIndex(dep->trk),
+		                        dep->ep ) )
+		FindShortestPath( dep->trk, dep->ep, FALSE, FillElevShortestPathFunc, dep );
 	}
 	ClrAllTrkBits( TB_PROCESSED );
-LOG( log_fillElev, 1, ( "%s: findForks [%d] (%ld)\n", elevPrefix, fork_da.cnt, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: findForks [%d] (%ld)\n", elevPrefix, fork_da.cnt,
+	                        wGetTimer()-time0 ) )
 }
 
 
@@ -483,9 +482,9 @@ LOG( log_fillElev, 1, ( "%s: findForks [%d] (%ld)\n", elevPrefix, fork_da.cnt, w
  */
 
 typedef struct {
-		DIST_T elev;
-		DIST_T dist;
-		} elevdist_t;
+	DIST_T elev;
+	DIST_T dist;
+} elevdist_t;
 static dynArr_t elevdist_da;
 #define elevdist(N) DYNARR_N( elevdist_t, elevdist_da, N );
 
@@ -509,7 +508,8 @@ static DIST_T ComputeWeightedElev( DIST_T totalDist )
 		w = &elevdist(i2);
 		if (w->dist < 0.001) {
 			e = w->elev;
-LOG( log_fillElev, 3, ( "       computeWeightedElev: close! D%0.3f E%0.3f\n", w->dist, e ) )
+			LOG( log_fillElev, 3, ( "       computeWeightedElev: close! D%0.3f E%0.3f\n",
+			                        w->dist, e ) )
 			return e;
 		}
 		d2 += totalDist/w->dist;
@@ -522,13 +522,13 @@ LOG( log_fillElev, 3, ( "       computeWeightedElev: close! D%0.3f E%0.3f\n", w-
 		e += ((totalDist/w->dist)/d2)*w->elev;
 	}
 
-		if (log_fillElev >= 4) {
-			for ( i2=0; i2<elevdist_da.cnt; i2++ ) {
-				w = &elevdist(i2);
-				lprintf( "         E%0.3f D%0.3f\n", w->elev, w->dist );
-			}
+	if (log_fillElev >= 4) {
+		for ( i2=0; i2<elevdist_da.cnt; i2++ ) {
+			w = &elevdist(i2);
+			lprintf( "         E%0.3f D%0.3f\n", w->elev, w->dist );
 		}
-LOG( log_fillElev, 3, ( "       computeWeightedElev: E%0.3f\n", e ) )
+	}
+	LOG( log_fillElev, 3, ( "       computeWeightedElev: E%0.3f\n", e ) )
 	return e;
 }
 
@@ -557,8 +557,9 @@ static void ComputeForkElev( void )
 		n1 = &fork(i1);
 		if ((trk=n1->trk)) {
 			cnt = GetTrkEndPtCnt(n1->trk);
-			if (cnt<=0)
+			if (cnt<=0) {
 				continue;
+			}
 
 			/* collect dist/elev to connected DefElev points */
 			d1 = 0;
@@ -575,21 +576,25 @@ static void ComputeForkElev( void )
 					n2->trk = NULL;
 					d1 += w->dist;
 					if ( ! ( ( n1->ep == n2->ep && n1->ep2 == n2->ep2 ) ||
-							 ( n1->ep == n2->ep2 && n1->ep2 == n2->ep ) ) )
+					         ( n1->ep == n2->ep2 && n1->ep2 == n2->ep ) ) ) {
 						singlePath = FALSE;
+					}
 				}
 			}
 
 			/* Also check my EPs */
 			for (ep=0; ep<cnt; ep++) {
-				if ( (trk1=GetTrkEndTrk(trk,ep)) )
+				if ( (trk1=GetTrkEndTrk(trk,ep)) ) {
 					SetTrkBits( trk1, TB_PROCESSED );
-				if (!EndPtIsDefinedElev(trk,ep))
+				}
+				if (!EndPtIsDefinedElev(trk,ep)) {
 					continue;
+				}
 				for (i2=i1; i2<fork_da.cnt; i2++) {
 					n2 = &fork(i2);
-					if (trk==n2->trk && ep==n2->ep)
+					if (trk==n2->trk && ep==n2->ep) {
 						break;
+					}
 				}
 				if (i2 >= fork_da.cnt) {
 					DYNARR_APPEND( elevdist_t, elevdist_da, 10 );
@@ -612,12 +617,13 @@ static void ComputeForkElev( void )
 				SetTrkOnElevPath( trk, ELEV_FORK, e );
 				/* 3 or more EPs are to DefElevs */
 				n3->ep = -1;
-LOG( log_fillElev, 2, ( "  1  T%d E%0.3f\n", GetTrkIndex(trk), e ) )
+				LOG( log_fillElev, 2, ( "  1  T%d E%0.3f\n", GetTrkIndex(trk), e ) )
 			}
 			forkCnt++;
 		}
 	}
-LOG( log_fillElev, 1, ( "%s: computeForkElev [%d] (%ld)\n", elevPrefix, forkCnt, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: computeForkElev [%d] (%ld)\n", elevPrefix, forkCnt,
+	                        wGetTimer()-time0 ) )
 }
 
 
@@ -639,8 +645,7 @@ static void RedrawCompGradeElev( track_p trk, EPINX_T ep )
 		pos = GetTrkEndPos( trk, ep );
 		if (!OFF_MAIND( pos, pos ) ) {
 			trk1 = GetTrkEndTrk( trk, ep );
-			if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) )
-{
+			if ( (trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk) ) {
 				ep = GetEndPtConnectedToMe( trk1, trk );
 				trk = trk1;
 			}
@@ -652,10 +657,10 @@ static void RedrawCompGradeElev( track_p trk, EPINX_T ep )
 
 
 static void PropogateForkElev(
-		track_p trk1,
-		EPINX_T ep1,
-		DIST_T d1,
-		DIST_T e )
+        track_p trk1,
+        EPINX_T ep1,
+        DIST_T d1,
+        DIST_T e )
 /* Propogate elev from fork connection
  *   The track list starting from trk1:ep1 ends at a DefElev or a Fork
  * Inputs:
@@ -672,74 +677,77 @@ static void PropogateForkElev(
 	fork_t * n1;
 	int i2, i3;
 
-				DYNARR_RESET( elist_t, elist_da );
-				while (trk1) {
-					if ( GetTrkIndex(trk1) == checkTrk )
-						printf( "found btw forks\n" );
-					if ( GetTrkOnElevPath( trk1, &e1 ) ) {
-						d1 += GetTrkLength( trk1, ep1, -1 );
-						goto nextStep;
+	DYNARR_RESET( elist_t, elist_da );
+	while (trk1) {
+		if ( GetTrkIndex(trk1) == checkTrk ) {
+			printf( "found btw forks\n" );
+		}
+		if ( GetTrkOnElevPath( trk1, &e1 ) ) {
+			d1 += GetTrkLength( trk1, ep1, -1 );
+			goto nextStep;
+		}
+		cnt2 = GetTrkEndPtCnt(trk1);
+		for ( ep2=0; ep2<cnt2; ep2++ ) {
+			if ( ep2!=ep1 && EndPtIsDefinedElev(trk1,ep2) ) {
+				e1 = GetTrkEndElevHeight( trk1, ep2 );
+				d2 = GetTrkLength( trk1, ep1, ep2 )/2.0;
+				d1 += d2;
+				elistAppend( trk1, ep1, d1 );
+				d1 += d2;
+				goto nextStep;
+			}
+		}
+		ep2 = GetNextTrk( trk1, ep1, &trkN, &epN, GNTignoreIgnore );
+		if ( ep2<0 ) {
+			/* is this really a fork? */
+			for ( i2=0; i2<forkCnt; i2++ ) {
+				n1 = &fork(i2);
+				if ( trk1 == n1->trk && n1->ep >= 0 ) {
+					/* no: make sure we are on the path */
+					if ( n1->ep == ep1 ) {
+						ep2 = n1->ep2;
+					} else if ( n1->ep2 == ep1 ) {
+						ep2 = n1->ep;
+					} else {
+						return;
 					}
-					cnt2 = GetTrkEndPtCnt(trk1);
-					for ( ep2=0; ep2<cnt2; ep2++ ) {
-						if ( ep2!=ep1 && EndPtIsDefinedElev(trk1,ep2) ) {
-							e1 = GetTrkEndElevHeight( trk1, ep2 );
-							d2 = GetTrkLength( trk1, ep1, ep2 )/2.0;
-							d1 += d2;
-							elistAppend( trk1, ep1, d1 );
-							d1 += d2;
-							goto nextStep;
-						}
-					}
-					ep2 = GetNextTrk( trk1, ep1, &trkN, &epN, GNTignoreIgnore );
-					if ( ep2<0 ) {
-						/* is this really a fork? */
-						for ( i2=0; i2<forkCnt; i2++ ) {
-							n1 = &fork(i2);
-							if ( trk1 == n1->trk && n1->ep >= 0 ) {
-								/* no: make sure we are on the path */
-								if ( n1->ep == ep1 )
-									ep2 = n1->ep2;
-								else if ( n1->ep2 == ep1 )
-									ep2 = n1->ep;
-								else
-									return;
-								trkN = GetTrkEndTrk(trk1,ep2);
-								epN = GetEndPtConnectedToMe( trkN, trk1 );
-								break;
-							}
-						}
-						if ( i2 >= forkCnt )
-							return;
-					}
-					d2 = GetTrkLength( trk1, ep1, ep2 )/2.0;
-					d1 += d2;
-					elistAppend( trk1, ep1, d1 );
-					d1 += d2;
-					trk1 = trkN;
-					ep1 = epN;
+					trkN = GetTrkEndTrk(trk1,ep2);
+					epN = GetEndPtConnectedToMe( trkN, trk1 );
+					break;
 				}
+			}
+			if ( i2 >= forkCnt ) {
+				return;
+			}
+		}
+		d2 = GetTrkLength( trk1, ep1, ep2 )/2.0;
+		d1 += d2;
+		elistAppend( trk1, ep1, d1 );
+		d1 += d2;
+		trk1 = trkN;
+		ep1 = epN;
+	}
 nextStep:
-				ASSERT(d1>0.0);
-				e1 = (e1-e)/d1;
-				trk1 = NULL;
-				i3 = elist_da.cnt;
-				for (i2=0; i2<elist_da.cnt; i2++) {
-					trk1 = elist(i2).trk;
-					ep1 = elist(i2).ep;
-					if ( GetTrkOnElevPath( trk1, &e1 ) ) {
-						i3=i2;
-						break;
-					}
-					d2 = elist(i2).len;
-					SetTrkOnElevPath( trk1, ELEV_BRANCH, e+e1*d2 );
-LOG( log_fillElev, 2, ( "  2  T%d E%0.3f\n", GetTrkIndex(trk1), e+e1*d2 ) )
-				}
-				for (i2=0; i2<i3; i2++) {
-					trk1 = elist(i2).trk;
-					ep1 = elist(i2).ep;
-					RedrawCompGradeElev( trk1, ep1 );
-				}
+	CHECK(d1>0.0);
+	e1 = (e1-e)/d1;
+	trk1 = NULL;
+	i3 = elist_da.cnt;
+	for (i2=0; i2<elist_da.cnt; i2++) {
+		trk1 = elist(i2).trk;
+		ep1 = elist(i2).ep;
+		if ( GetTrkOnElevPath( trk1, &e1 ) ) {
+			i3=i2;
+			break;
+		}
+		d2 = elist(i2).len;
+		SetTrkOnElevPath( trk1, ELEV_BRANCH, e+e1*d2 );
+		LOG( log_fillElev, 2, ( "  2  T%d E%0.3f\n", GetTrkIndex(trk1), e+e1*d2 ) )
+	}
+	for (i2=0; i2<i3; i2++) {
+		trk1 = elist(i2).trk;
+		ep1 = elist(i2).ep;
+		RedrawCompGradeElev( trk1, ep1 );
+	}
 }
 
 static void PropogateForkElevs( void )
@@ -764,8 +772,9 @@ static void PropogateForkElevs( void )
 	/* propogate elevs between forks */
 	for ( i1=0; i1<forkCnt; i1++ ) {
 		n1 = &fork(i1);
-		if ( n1->ep >= 0 )
+		if ( n1->ep >= 0 ) {
 			continue;
+		}
 		trk = n1->trk;
 		GetTrkOnElevPath( trk, &e );
 		cnt = GetTrkEndPtCnt(trk);
@@ -783,7 +792,8 @@ static void PropogateForkElevs( void )
 			}
 		}
 	}
-LOG( log_fillElev, 1, ( "%s: propogateForkElev (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: propogateForkElev (%ld)\n", elevPrefix,
+	                        wGetTimer()-time0 ) )
 }
 
 static void PropogateDefElevs( void )
@@ -804,11 +814,14 @@ static void PropogateDefElevs( void )
 		dep = &defelev(i1);
 		if (GetTrkOnElevPath( dep->trk, &e ))
 			/* propogateForkElevs beat us to it */
+		{
 			continue;
+		}
 		e = GetTrkEndElevHeight( dep->trk, dep->ep );
 		PropogateForkElev( dep->trk, dep->ep, 0, e );
 	}
-LOG( log_fillElev, 1, ( "%s: propogateDefElevs [%d] (%ld)\n", elevPrefix, defelev_da.cnt, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: propogateDefElevs [%d] (%ld)\n", elevPrefix,
+	                        defelev_da.cnt, wGetTimer()-time0 ) )
 }
 
 
@@ -824,16 +837,16 @@ LOG( log_fillElev, 1, ( "%s: propogateDefElevs [%d] (%ld)\n", elevPrefix, defele
  */
 
 typedef struct {
-		track_p trk;
-		coOrd pos;
-		DIST_T elev;
-		} pivot_t;
+	track_p trk;
+	coOrd pos;
+	DIST_T elev;
+} pivot_t;
 static dynArr_t pivot_da;
 #define pivot(N) DYNARR_N(pivot_t, pivot_da, N)
 
 static void SurveyIsland(
-		track_p trk,
-		BOOL_T stopAtElevPath )
+        track_p trk,
+        BOOL_T stopAtElevPath )
 /* Find the tracks in this island and the pivots of this island
  * Outputs:
  *      elist_da        - tracks in the island
@@ -854,8 +867,9 @@ static void SurveyIsland(
 	SetTrkBits( trk, TB_PROCESSED );
 	for ( i1=0; i1 < elist_da.cnt; i1++ ) {
 		trk = elist(i1).trk;
-		if ( GetTrkIndex(trk) == checkTrk )
+		if ( GetTrkIndex(trk) == checkTrk ) {
 			printf( "found in island\n" );
+		}
 		cnt = GetTrkEndPtCnt(trk);
 		for ( ep=0; ep<cnt; ep++ ) {
 			trk1 = GetTrkEndTrk( trk, ep );
@@ -883,7 +897,7 @@ static void SurveyIsland(
 }
 
 static void ComputeIslandElev(
-		track_p trk )
+        track_p trk )
 /* Compute elev of tracks connected to 'trk'
  *   An island is the set of tracks bounded by a DefElev EP or a track already on ElevPath
  * Inputs:
@@ -906,8 +920,9 @@ static void ComputeIslandElev(
 
 	for ( i1=0; i1 < elist_da.cnt; i1++ ) {
 		trk = elist(i1).trk;
-		if ( !IsTrack(trk) )
+		if ( !IsTrack(trk) ) {
 			continue;
+		}
 		mode = ELEV_ISLAND;
 		if (pivot_da.cnt == 0) {
 			elev = 0;
@@ -933,7 +948,7 @@ static void ComputeIslandElev(
 			elev = ComputeWeightedElev( totalDist );
 		}
 		SetTrkOnElevPath( trk, mode, elev );
-LOG( log_fillElev, 1, ( "  3  T%d E%0.3f\n", GetTrkIndex(trk), elev ) )
+		LOG( log_fillElev, 1, ( "  3  T%d E%0.3f\n", GetTrkIndex(trk), elev ) )
 	}
 
 	for ( i1=0; i1<elist_da.cnt; i1++ ) {
@@ -966,17 +981,18 @@ static void FindIslandElevs( void )
 			}
 		}
 	}
-LOG( log_fillElev, 1, ( "%s: findIslandElevs [%d] (%ld)\n", elevPrefix, islandCnt, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: findIslandElevs [%d] (%ld)\n", elevPrefix,
+	                        islandCnt, wGetTimer()-time0 ) )
 }
 
 /*
  * DYNAMIC ELEVATION COMPUTATION
- * 
+ *
  * Drivers
  *
  */
 
-EXPORT void RecomputeElevations( void )
+EXPORT void RecomputeElevations( void * unused )
 {
 	long time0 = wGetTimer();
 	elevPrefix = "RECELV";
@@ -988,30 +1004,30 @@ EXPORT void RecomputeElevations( void )
 	PropogateForkElevs();
 	PropogateDefElevs();
 	FindIslandElevs();
-	MainRedraw();
-LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
+	MainRedraw(); // RecomputeElevations
+	LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
 	if ( log_dumpElev > 0 ) {
 		track_p trk;
 		DIST_T elev;
 		for ( trk=NULL; TrackIterate( &trk ); ) {
 			printf( "T%4.4d = ", GetTrkIndex(trk) );
-			if ( GetTrkOnElevPath( trk, &elev ) )
+			if ( GetTrkOnElevPath( trk, &elev ) ) {
 				printf( "%d:%0.2f\n", GetTrkElevMode(trk), elev );
-			else
+			} else {
 				printf( "noelev\n" );
-#ifdef LATER
-		EPINX_T ep;
-		int mode;
+			}
+			EPINX_T ep;
+			int mode;
 			for ( ep=0; ep<GetTrkEndPtCnt(trk); ep++ ) {
 				mode = GetTrkEndElevMode( trk, ep );
-				ComputeElev( trk, ep, FALSE, &elev, NULL );
+				ComputeElev( trk, ep, FALSE, &elev, NULL, FALSE );
 				printf( "T%4.4d[%2.2d] = %s:%0.3f\n",
-						GetTrkIndex(trk), ep,
-						mode==ELEV_NONE?"None":mode==ELEV_DEF?"Def":mode==ELEV_COMP?"Comp":
-						mode==ELEV_GRADE?"Grade":mode==ELEV_IGNORE?"Ignore":mode==ELEV_STATION?"Station":"???",
-						elev );
+				        GetTrkIndex(trk), ep,
+				        mode==ELEV_NONE?"None":mode==ELEV_DEF?"Def":mode==ELEV_COMP?"Comp":
+				        mode==ELEV_GRADE?"Grade":mode==ELEV_IGNORE?"Ignore":mode==ELEV_STATION
+				        ?"Station":"???",
+				        elev );
 			}
-#endif
 		}
 	}
 }
@@ -1025,18 +1041,20 @@ EXPORT void UpdateAllElevations( void )
 
 	elevPrefix = "UPDELV";
 	if ( !log_fillElev_initted ) { log_fillElev = LogFindIndex( "fillElev" ); log_dumpElev = LogFindIndex( "dumpElev" ); log_fillElev_initted = TRUE; }
-	if (!needElevUpdate)
+	if (!needElevUpdate) {
 		return;
+	}
 	work = FindObsoleteElevs();
-	if (!work)
+	if (!work) {
 		return;
+	}
 	FindForks();
 	ComputeForkElev();
 	PropogateForkElevs();
 	PropogateDefElevs();
 	FindIslandElevs();
 	needElevUpdate = FALSE;
-LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
+	LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
 }
 
 
@@ -1061,13 +1079,15 @@ EXPORT DIST_T GetElevation( track_p trk )
 	ComputeForkElev();
 	PropogateForkElevs();
 	PropogateDefElevs();
-	if ( GetTrkOnElevPath(trk,&elev) )
+	if ( GetTrkOnElevPath(trk,&elev) ) {
 		return elev;
+	}
 
 	ComputeIslandElev( trk );
 
-	if ( GetTrkOnElevPath(trk,&elev) )
+	if ( GetTrkOnElevPath(trk,&elev) ) {
 		return elev;
+	}
 
 	printf( "GetElevation(T%d) failed\n", GetTrkIndex(trk) );
 	return 0;
@@ -1076,7 +1096,7 @@ EXPORT DIST_T GetElevation( track_p trk )
 
 /*
  * DYNAMIC ELEVATION COMPUTATION
- * 
+ *
  * Utilities
  *
  */
@@ -1087,6 +1107,7 @@ EXPORT void ClrTrkElev( track_p trk )
 	needElevUpdate = TRUE;
 	DrawTrackElev( trk, &mainD, FALSE );
 	ClrTrkBits( trk, TB_ELEVPATH );
+
 }
 
 
@@ -1094,8 +1115,9 @@ static void PropogateElevMode( track_p trk, DIST_T elev, int mode )
 {
 	int i1;
 	SurveyIsland( trk, FALSE );
-	for ( i1=0; i1<elist_da.cnt; i1++ )
+	for ( i1=0; i1<elist_da.cnt; i1++ ) {
 		SetTrkOnElevPath( elist(i1).trk, mode, elev );
+	}
 }
 
 
@@ -1103,17 +1125,20 @@ static BOOL_T CheckForElevAlone( track_p trk )
 {
 	int i1;
 	SurveyIsland( trk, FALSE );
-	if ( pivot_da.cnt!=0 )
+	if ( pivot_da.cnt!=0 ) {
 		return FALSE;
-	for ( i1=0; i1<elist_da.cnt; i1++ )
+	}
+	for ( i1=0; i1<elist_da.cnt; i1++ ) {
 		SetTrkOnElevPath( elist(i1).trk, ELEV_ALONE, 0.0 );
+	}
 	return TRUE;
 }
 
 
-EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0, track_p trk1, EPINX_T ep1 )
+EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0,
+                             track_p trk1, EPINX_T ep1 )
 {
-	int mode0, mode1; 
+	int mode0, mode1;
 	DIST_T elev, diff, elev0, elev1;
 	char * station;
 	BOOL_T update = TRUE;
@@ -1124,21 +1149,23 @@ EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0, track_p 
 		update = FALSE;;
 	} else if ( connect ) {
 		if ( mode0 == ELEV_ALONE ) {
-			ComputeElev( trk1, ep1, FALSE, &elev, NULL );
+			ComputeElev( trk1, ep1, FALSE, &elev, NULL, TRUE );
 			PropogateElevMode( trk0, elev, ELEV_ISLAND );
 			update = FALSE;
 		} else if ( mode1 == ELEV_ALONE ) {
-			ComputeElev( trk0, ep0, FALSE, &elev, NULL );
+			ComputeElev( trk0, ep0, FALSE, &elev, NULL, TRUE );
 			PropogateElevMode( trk1, elev, ELEV_ISLAND );
 			update = FALSE;
 		}
 	} else {
 		if ( mode0 == ELEV_ISLAND ) {
-			if (CheckForElevAlone( trk0 ))
+			if (CheckForElevAlone( trk0 )) {
 				update = FALSE;
+			}
 		} else if ( mode1 == ELEV_ISLAND ) {
-			if (CheckForElevAlone( trk1 ))
+			if (CheckForElevAlone( trk1 )) {
 				update = FALSE;
+			}
 		}
 	}
 
@@ -1148,13 +1175,15 @@ EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0, track_p 
 		elev = 0.0;
 		station = NULL;
 		if (mode0 == ELEV_DEF && mode1 == ELEV_DEF) {
-			mode0 = GetTrkEndElevUnmaskedMode( trk0, ep0 ) | GetTrkEndElevUnmaskedMode( trk1, ep1 );
+			mode0 = GetTrkEndElevUnmaskedMode( trk0,
+			                                   ep0 ) | GetTrkEndElevUnmaskedMode( trk1, ep1 );
 			elev0 = GetTrkEndElevHeight( trk0, ep0 );
 			elev1 = GetTrkEndElevHeight( trk1, ep1 );
 			elev = (elev0+elev1)/2.0;
 			diff = fabs( elev0-elev1 );
-			if (diff>0.1)
+			if (diff>0.1) {
 				ErrorMessage( MSG_JOIN_DIFFER_ELEV, PutDim(diff) );
+			}
 		} else if (mode0 == ELEV_DEF) {
 			mode0 = GetTrkEndElevUnmaskedMode( trk0, ep0 );
 			elev = GetTrkEndElevHeight( trk0, ep0 );
@@ -1190,18 +1219,18 @@ EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0, track_p 
 
 
 EXPORT void UpdateTrkEndElev(
-		track_p trk,
-		EPINX_T ep,
-		int newMode,
-		DIST_T newElev,
-		char * newStation )
+        track_p trk,
+        EPINX_T ep,
+        int newMode,
+        DIST_T newElev,
+        char * newStation )
 {
 	int oldMode;
 	DIST_T oldElev;
 	char * oldStation;
 	BOOL_T changed = TRUE;
 	track_p trk1;
-	EPINX_T ep1;
+//	EPINX_T ep1;
 
 	oldMode = GetTrkEndElevUnmaskedMode( trk, ep );
 	if ( (oldMode&ELEV_MASK) == (newMode&ELEV_MASK) ) {
@@ -1209,8 +1238,9 @@ EXPORT void UpdateTrkEndElev(
 		case ELEV_DEF:
 			oldElev = GetTrkEndElevHeight( trk, ep );
 			if ( oldElev == newElev ) {
-				if ( oldMode == newMode )
+				if ( oldMode == newMode ) {
 					return;
+				}
 				changed = FALSE;
 			}
 			break;
@@ -1226,8 +1256,9 @@ EXPORT void UpdateTrkEndElev(
 	} else {
 		changed = TRUE;
 		if ( (newMode&ELEV_MASK)==ELEV_DEF || (oldMode&ELEV_MASK)==ELEV_DEF ||
-			 (newMode&ELEV_MASK)==ELEV_IGNORE || (oldMode&ELEV_MASK)==ELEV_IGNORE )
+		     (newMode&ELEV_MASK)==ELEV_IGNORE || (oldMode&ELEV_MASK)==ELEV_IGNORE ) {
 			changed = TRUE;
+		}
 	}
 	UndoModify( trk );
 	if ( (trk1 = GetTrkEndTrk( trk, ep )) ) {
@@ -1239,7 +1270,7 @@ EXPORT void UpdateTrkEndElev(
 	if ( changed ) {
 		ClrTrkElev( trk );
 		if ( trk1 ) {
-			ep1 = GetEndPtConnectedToMe( trk1, trk );
+//			ep1 = GetEndPtConnectedToMe( trk1, trk );
 			ClrTrkElev( trk1 );
 		}
 		UpdateAllElevations();
@@ -1253,23 +1284,28 @@ static void SetTrkOnElevPath( track_p trk, int mode, DIST_T elev )
 	DIST_T oldElev;
 	coOrd hi, lo;
 
-	if ( !GetTrkOnElevPath( trk, &oldElev ) )
+	if ( !GetTrkOnElevPath( trk, &oldElev ) ) {
 		oldElev = 0.0;
+	}
 	GetBoundingBox( trk, &hi, &lo );
 	if ((labelEnable&LABELENABLE_TRACK_ELEV) &&
-		labelScale >= mainD.scale &&
-		(! OFF_MAIND( lo, hi ) ) &&
-		(GetTrkVisible(trk) || drawTunnel!=0/*DRAW_TUNNEL_NONE*/) &&
-		GetLayerVisible(GetTrkLayer(trk)) )
+	    labelScale >= mainD.scale &&
+	    (! OFF_MAIND( lo, hi ) ) &&
+	    (GetTrkVisible(trk) || drawTunnel!=0/*DRAW_TUNNEL_NONE*/) &&
+	    GetLayerVisible(GetTrkLayer(trk)) ) {
 		redraw = TRUE;
-	
-	if ( (GetTrkBits(trk)&TB_ELEVPATH) && (oldElev == elev && oldMode == mode) )
+	}
+
+	if ( (GetTrkBits(trk)&TB_ELEVPATH) && (oldElev == elev && oldMode == mode) ) {
 		return;
-	if ( redraw && (GetTrkBits(trk)&TB_ELEVPATH))
+	}
+	if ( redraw && (GetTrkBits(trk)&TB_ELEVPATH)) {
 		DrawTrackElev( trk, &mainD, FALSE );
+	}
 	SetTrkElev( trk, mode, elev );
-	if ( redraw )
+	if ( redraw ) {
 		DrawTrackElev( trk, &mainD, TRUE );
+	}
 }
 
 
@@ -1282,41 +1318,45 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 	coOrd lo, hi;
 
 	if ( (!IsTrack(trk)) ||
-		 (!(labelEnable&LABELENABLE_TRACK_ELEV)) ||
-		 (d == &mapD) ||
-		 (labelScale < d->scale) ||
-		 (!GetTrkOnElevPath( trk, &elev )) ||
-		 ((GetTrkBits(trk)&TB_ELEVPATH) == 0) ||
-		 (d->funcs->options & wDrawOptTemp) != 0 ||
-		 (d->options & DC_QUICK) != 0 )
+	     (!(labelEnable&LABELENABLE_TRACK_ELEV)) ||
+	     (d == &mapD) ||
+	     (labelScale < d->scale) ||
+	     (!GetTrkOnElevPath( trk, &elev )) ||
+	     ((GetTrkBits(trk)&TB_ELEVPATH) == 0) ||
+	     (d->options & DC_SIMPLE) != 0 ) {
 		return;
+	}
 
-	if ( !GetCurveMiddle( trk, &pos ) ) {
+	if ( !GetCurveMiddle( trk, &pos ) && !GetCornuMiddle(trk, &pos)
+	     && !GetBezierMiddle(trk, &pos)) {
 		GetBoundingBox( trk, &hi, &lo );
 		pos.x = (hi.x+lo.x)/2.0;
 		pos.y = (hi.y+lo.y)/2.0;
 	}
-	if ( d==&mainD && OFF_MAIND( pos, pos ) )
+	if ( d==&mainD && OFF_MAIND( pos, pos ) ) {
 		return;
+	}
 
 	switch ( GetTrkElevMode(trk) ) {
 	case ELEV_FORK:
-		color = drawColorBlue;
+		color = drawColorDkBlue;
 		break;
 	case ELEV_BRANCH:
 		color = drawColorPurple;
 		break;
 	case ELEV_ISLAND:
-		color = drawColorGold;
+		color = drawColorDkAqua;
 		break;
 	case ELEV_ALONE:
 		return;
 	}
-	if ( !drawIt )
+	if ( !drawIt ) {
 		color = wDrawColorWhite;
+	}
 	sprintf( message, "%s", FormatDistance(elev));
 	fp = wStandardFont( F_HELV, FALSE, FALSE );
-	DrawBoxedString( BOX_INVERT, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0 );
+	DrawBoxedString( BOX_INVERT, d, pos, message, fp,
+	                 (wFontSize_t)descriptionFontSize, color, 0 );
 }
 
 

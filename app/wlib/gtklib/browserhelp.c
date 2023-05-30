@@ -17,16 +17,24 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+#include <limits.h>
+
+//#include "misc.h"
 
 #include "gtkint.h"
 #include "i18n.h"
 
+extern wBool_t CheckHelpTopicExists(const char * topic);
+
 #include "dynstring.h"
+
+#define debug 0
 
 #define DEFAULTBROWSERCOMMAND "xdg-open"
 
@@ -38,7 +46,8 @@
 								"variable.\n Also make sure that the user has sufficient access rights to read these" \
  								"files."
 /**
- * Create a fully qualified url froma topic
+ * Create a fully qualified url from a topic. The library path is converted to
+ * an absolute path first. The url is then created from that path.
  *
  * \param helpUrl OUT pointer to url, free by caller
  * \param topic IN the help topic
@@ -47,51 +56,30 @@
 static void
 TopicToUrl(char **helpUrl, const char *topic)
 {
-    DynString url;
-    DynStringMalloc(&url, 16);
+	DynString url;
+	DynStringMalloc(&url, 16);
+	char *realPath;
 
-    // build up the url line
-    DynStringCatCStrs(&url,
-                      "file://",
-                      wGetAppLibDir(),
-                      "/html/",
-                      topic,
-                      ".html",
-                      NULL);
+	realPath = realpath(wGetAppLibDir(), NULL);
 
-    *helpUrl = strdup(DynStringToCStr(&url));
-    DynStringFree(&url);
+	if(realPath) {
+		// build up the url line
+		DynStringCatCStrs(&url,
+		                  "file://",
+		                  realPath,
+		                  "/html/",
+		                  topic,
+		                  ".html",
+		                  NULL);
+
+		*helpUrl = strdup(DynStringToCStr(&url));
+		DynStringFree(&url);
+		free(realPath);
+	} else {
+		wNoticeEx( NT_ERROR, _("Not enough memory for realpath()"), _("Exit"), NULL);
+		wExit(0);
+	}
 }
-/**
- * Extend the PATH variable inthe environment to include XTrackCAD's
- * script directory.
- *
- * \return pointer to old path
- */
-
-static char *
-ExtendPath(void)
-{
-    char *path = getenv("PATH");
-    DynString newPath;
-    DynStringMalloc(&newPath, 16);
-
-    // append XTrackCAD's directory to the path as a fallback
-    DynStringCatCStrs(&newPath,
-                      path,
-                      ":",
-                      wGetAppLibDir(),
-                      NULL);
-
-    setenv("PATH",
-           DynStringToCStr(&newPath),
-           TRUE);
-
-    DynStringFree(&newPath);
-
-    return (path);
-}
-
 /**
  * Invoke the system's default browser to display help for <topic>. First the
  * system's standard xdg-open command is attempted. If that is not available, the
@@ -102,36 +90,22 @@ ExtendPath(void)
 
 void wHelp(const char * topic)
 {
-    int rc;
-    char *url;
-    DynString commandLine;
-    char *currentPath;
+	int rc;
+	char *url;
+//    char *currentPath;
 
-    assert(topic != NULL);
-    assert(strlen(topic));
+	assert(topic != NULL);
+	assert(strlen(topic));
 
-    currentPath = ExtendPath();
-    TopicToUrl(&url, topic);
+	if (!CheckHelpTopicExists(topic)) { return; }
 
-    DynStringMalloc(&commandLine, 16);
-    DynStringCatCStrs(&commandLine,
-                      DEFAULTBROWSERCOMMAND,
-                      " ",
-                      url,
-                      NULL);
+	TopicToUrl(&url, topic);
+	printf(">%s<\n", url);
+	rc = wOpenFileExternal(url);
 
-    // the command should be found via the PATH
-    rc = system(DynStringToCStr(&commandLine));
+	if (!rc) {
+		wNotice(HELPERRORTEXT, _("Cancel"), NULL);
+	}
 
-    if (rc) {
-        wNotice(HELPERRORTEXT, _("Cancel"), NULL);
-    }
-
-    // restore the PATH
-    setenv("PATH",
-           currentPath,
-           TRUE);
-
-    free(url);
-    DynStringFree(&commandLine);
+	free(url);
 }

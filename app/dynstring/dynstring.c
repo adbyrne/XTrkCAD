@@ -2,9 +2,6 @@
 * Library for dynamic string functions
 */
 
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <stdarg.h>
 #include <memory.h>
 #include <string.h>
@@ -115,6 +112,23 @@ void DynStringClear(DynString *s)
 
 	DynStringRealloc(s);
 }
+
+/**
+* Clear the dynamic string contents without changing memory allocation.
+* 
+* \param s IN the dynamic string
+*/
+
+void DynStringReset(DynString *s)
+{
+	/* Not a string? */
+	if (isnas(s))
+	{
+		return;
+	}
+	s->size = 0;
+}
+
 /**
 * Resize the string for a minimum number of bytes. In order to optimize memory usage the
 * actually allocated block of memory can be larger than the requested size.
@@ -223,7 +237,7 @@ void DynStringFree(DynString *s)
 /* Create a new string as a copy of an old one */
 DynString *DynStringDupStr(DynString *s2, DynString *s)
 {
-    DynString nas = NaS;
+//    DynString nas = NaS;
 
     /* Not a string? */
     if (isnas(s)) {
@@ -428,7 +442,7 @@ void DynStringPrintf(DynString *s, const char *fmt, ...)
 {
     va_list v;
     size_t len;
-    DynString nas = NaS;
+//    DynString nas = NaS;
 
     /* Are we not a string? */
     if (isnas(s)) {

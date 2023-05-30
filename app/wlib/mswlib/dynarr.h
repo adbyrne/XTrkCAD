@@ -1,8 +1,8 @@
 typedef struct {
-		int cnt;
-		int max;
-		void * ptr;
-		} dynArr_t;
+	int cnt;
+	int max;
+	void * ptr;
+} dynArr_t;
 
 #define DYNARR_APPEND(T,DA,INCR) \
 		{ if ((DA).cnt >= (DA).max) { \
@@ -31,10 +31,6 @@ typedef struct {
 
 
 #ifdef WINDOWS
-#ifndef WIN32
-#define FAR _far
-#endif
-#define M_PI 3.14159
 #define strcasecmp _stricmp
 #else
 #endif

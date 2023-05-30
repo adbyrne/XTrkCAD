@@ -17,15 +17,13 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "common.h"
-#include "wlib.h"
-#include "utility.h"
 
 
-dynArr_t tempEndPts_da;
+extern dynArr_t tempEndPts_da;
 #define BezSegs(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
 #define bezCmdNone 			(0)
@@ -34,20 +32,21 @@ dynArr_t tempEndPts_da;
 #define bezCmdCreateTrack   (3)
 #define bezCmdCreateLine	(4)
 
-extern wDrawColor lineColor;
-extern long lineWidth;
-
-typedef void (*bezMessageProc)( char *, ... );
+typedef void (*bezMessageProc)( const char *, ... );
 STATUS_T CmdBezCurve( wAction_t, coOrd);
 STATUS_T CmdBezModify(track_p, wAction_t, coOrd, DIST_T);
 
-STATUS_T CreateBezier( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, bezMessageProc );
-DIST_T BezierDescriptionDistance( coOrd, track_p );
+STATUS_T CreateBezier( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long,
+                       bezMessageProc );
+DIST_T BezierDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T BezierDescriptionMove( track_p, wAction_t, coOrd );
-BOOL_T GetBezierMiddle( track_p, coOrd * );
-BOOL_T ConvertToArcs (coOrd[4], dynArr_t *, BOOL_T, wDrawColor, DIST_T);
-track_p NewBezierTrack(coOrd[4], trkSeg_t *, int);
+
+BOOL_T ConvertToArcs (coOrd[4], dynArr_t *, BOOL_T, wDrawColor, LWIDTH_T);
+track_p NewBezierTrack(coOrd[4], trkSeg_p, int);
 double BezierLength(coOrd[4], dynArr_t);
+double BezierOffsetLength(dynArr_t,double offset);
 double BezierMinRadius(coOrd[4],dynArr_t);
-void UpdateParms(wDrawColor color,long width);
+void UpdateParms(wDrawColor color,LWIDTH_T lineWidth);
+
+void addSegBezier(dynArr_t * array_p, trkSeg_p seg);
 

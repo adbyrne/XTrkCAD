@@ -17,88 +17,84 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef COMPOUND_H
 #define COMPOUND_H
 
 #include "common.h"
-#include "track.h"
+#include "track.h" //- PATHPTR_T drawLineType_e
 
 typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast } TOspecial_e;
 
 typedef struct {
-		char * name;
-		FLOAT_T height;
-		} pierInfo_t;
+	char * name;
+	FLOAT_T height;
+} pierInfo_t;
 typedef union {
-			struct {
-				FLOAT_T minD, maxD;
-			} adjustable;
-			struct {
-				int cnt;
-				pierInfo_t * info;
-			} pierInfo;
-			struct {
-				FLOAT_T height;
-				char * name;
-			} pier;
-		} turnoutInfo_u;
-		
-typedef struct turnoutInfo_t{
-		SCALEINX_T scaleInx;
-		char * title;
-		coOrd orig;
-		coOrd size;
-		wIndex_t segCnt;
-		trkSeg_p segs;
-		wIndex_t endCnt;
-		trkEndPt_t * endPt;
-		wIndex_t pathLen;
-		PATHPTR_T paths;
-		int paramFileIndex;
-		char * customInfo;
-		DIST_T barScale;
-		TOspecial_e special;
-		turnoutInfo_u u;
-		char * contentsLabel;
-		} turnoutInfo_t;
+	struct {
+		FLOAT_T minD, maxD;
+	} adjustable;
+	struct {
+		int cnt;
+		pierInfo_t * info;
+	} pierInfo;
+	struct {
+		FLOAT_T height;
+		char * name;
+	} pier;
+} turnoutInfo_u;
+
+typedef struct turnoutInfo_t {
+	SCALEINX_T scaleInx;
+	char * title;
+	coOrd orig;
+	coOrd size;
+	wIndex_t segCnt;
+	trkSeg_p segs;
+	wIndex_t endCnt;
+	trkEndPt_p endPt;
+	PATHPTR_T paths;
+	int paramFileIndex;
+	char * customInfo;
+	DIST_T barScale;
+	TOspecial_e special;
+	turnoutInfo_u u;
+	wBool_t pathOverRide;
+	wBool_t pathNoCombine;
+	char * contentsLabel;
+} turnoutInfo_t;
 
 
-#define xpaths(X) \
-		(X->paths)
 #define xtitle(X) \
 		(X->title)
 
-#ifndef PRIVATE_EXTRADATA
-struct extraData {
-		coOrd orig;
-		ANGLE_T angle;
-		BOOL_T handlaid;
-		BOOL_T flipped;
-		BOOL_T ungrouped;
-		BOOL_T split;
-		coOrd descriptionOrig;
-		coOrd descriptionOff;
-		coOrd descriptionSize;
-		char * title;
-		char * customInfo;
-		TOspecial_e special;
-		turnoutInfo_u u;
-		PATHPTR_T paths;
-		wIndex_t pathLen;
-		PATHPTR_T pathCurr;
-		wIndex_t segCnt;
-		trkSeg_t * segs;
-		};
-#endif
+typedef struct extraDataCompound_t {
+	extraDataBase_t base;
+	coOrd orig;
+	ANGLE_T angle;
+	BOOL_T handlaid;
+	BOOL_T flipped;
+	BOOL_T ungrouped;
+	BOOL_T split;
+	BOOL_T pathOverRide;
+	BOOL_T pathNoCombine;
+	coOrd descriptionOrig;
+	coOrd descriptionOff;
+	coOrd descriptionSize;
+	char * title;
+	char * customInfo;
+	TOspecial_e special;
+	turnoutInfo_u u;
+	PATHPTR_T paths;
+	PATHPTR_T currPath;
+	long currPathIndex;
+	wIndex_t segCnt;
+	trkSeg_p segs;
+	drawLineType_e lineType;
+} extraDataCompound_t;
 
-extern TRKTYP_T T_TURNOUT;
-extern TRKTYP_T T_STRUCTURE;
-extern TRKTYP_T T_BEZIER;
-extern TRKTYP_T T_BZRLIN;
-extern TRKTYP_T T_CORNU;
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
 extern dynArr_t structureInfo_da;
@@ -111,13 +107,34 @@ extern turnoutInfo_t * curStructure;
 
 #define ADJUSTABLE "adjustable"
 #define PIER "pier"
+#define CURVED "curvedends"
+
+#define COMPOUND_OPTION_HANDLAID	(0x0008)
+#define COMPOUND_OPTION_FLIPPED		(0x0010)
+#define COMPOUND_OPTION_UNGROUPED	(0x0020)
+#define COMPOUND_OPTION_SPLIT		(0x0040)
+#define COMPOUND_OPTION_HIDEDESC	(0x0080)
+#define COMPOUND_OPTION_PATH_OVERRIDE	(0x0100)
+#define COMPOUND_OPTION_PATH_NOCOMBINE	(0x0200)
+
 
 /* compound.c */
+PATHPTR_T GetPaths( track_p trk );
+wIndex_t GetPathsLength( PATHPTR_T paths );
+void SetPaths( track_p trk, PATHPTR_T paths );
+PATHPTR_T GetCurrPath( track_p trk );
+long GetCurrPathIndex( track_p trk );
+void SetCurrPathIndex( track_p trk, long position );
+PATHPTR_T GetParamPaths( turnoutInfo_t * to );
+void SetParamPaths( turnoutInfo_t * to, PATHPTR_T paths );
+
 #define FIND_TURNOUT	(1<<11)
 #define FIND_STRUCT		(1<<12)
-void FormatCompoundTitle( long, char *); 
-BOOL_T WriteCompoundPathsEndPtsSegs( FILE *, PATHPTR_T, wIndex_t, trkSeg_p, EPINX_T, trkEndPt_t *);
-void ParseCompoundTitle( char *, char **, int *, char **, int *, char **, int * );
+void FormatCompoundTitle( long, char *);
+BOOL_T WriteCompoundPathsEndPtsSegs( FILE *, PATHPTR_T, wIndex_t, trkSeg_p,
+                                     EPINX_T, trkEndPt_p);
+void ParseCompoundTitle( char *, char **, int *, char **, int *, char **,
+                         int * );
 void FormatCompoundTitle( long, char *);
 void ComputeCompoundBoundingBox( track_p);
 turnoutInfo_t * FindCompound( long, char *, char * );
@@ -129,50 +146,62 @@ void DrawCompoundDescription( track_p, drawCmd_p, wDrawColor );
 DIST_T DistanceCompound( track_p, coOrd * );
 void DescribeCompound( track_p, char *, CSIZE_T );
 void DeleteCompound( track_p );
-track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_t *, int, char *, wIndex_t, trkSeg_p );
+track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T,
+                     trkEndPt_p, PATHPTR_T, wIndex_t, trkSeg_p );
 BOOL_T WriteCompound( track_p, FILE * );
-void ReadCompound( char *, TRKTYP_T );
+BOOL_T ReadCompound( char *, TRKTYP_T );
 void MoveCompound( track_p, coOrd );
 void RotateCompound( track_p, coOrd, ANGLE_T );
 void RescaleCompound( track_p, FLOAT_T );
 void FlipCompound( track_p, coOrd, ANGLE_T );
 BOOL_T EnumerateCompound( track_p );
+void SetCompoundLineType( track_p trk, int width );
 
 /* cgroup.c */
 void UngroupCompound( track_p );
-void DoUngroup( void );
-void DoGroup( void );
+void DoUngroup( void * unused );
+void DoGroup( void * unused );
 
 /* dcmpnd.c */
 void UpdateTitleMark( char *, SCALEINX_T );
 void DoUpdateTitles( void );
 BOOL_T RefreshCompound( track_p, BOOL_T );
+wIndex_t FindListItemByContext( wList_p, void *);
+
 
 /* cturnout.c */
+extern long curTurnoutEp;
 EPINX_T TurnoutPickEndPt( coOrd p, track_p );
+BOOL_T SplitTurnoutCheck(track_p,coOrd,EPINX_T ep,track_p *,EPINX_T *,EPINX_T *,
+                         BOOL_T check, coOrd *, ANGLE_T *);
 void GetSegInxEP( signed char, int *, EPINX_T * );
-wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
-turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, wIndex_t, PATHPTR_T, EPINX_T, trkEndPt_t *, wBool_t );
+void SetSegInxEP( signed char *, int, EPINX_T) ;
+wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T, char* );
+turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, PATHPTR_T,
+                                  EPINX_T, trkEndPt_p, wBool_t, long );
+void DeleteTurnoutParams(int fileInx);
 turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
 STATUS_T CmdTurnoutAction( wAction_t, coOrd );
-BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T ep2 );
-track_p NewHandLaidTurnout( coOrd, ANGLE_T, coOrd, ANGLE_T, coOrd, ANGLE_T, ANGLE_T );
+BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2,
+                                EPINX_T ep2 );
+track_p NewHandLaidTurnout( coOrd, ANGLE_T, coOrd, ANGLE_T, coOrd, ANGLE_T,
+                            ANGLE_T );
 void NextTurnoutPosition( track_p trk );
-
+enum paramFileState	GetTrackCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
 /* ctodesgn.c */
 void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );
 long ComputeTurnoutRoadbedSide( trkSeg_p, int, int, ANGLE_T, DIST_T );
 
 /* cstruct.c */
-turnoutInfo_t * CreateNewStructure( char *, char *, wIndex_t, trkSeg_p, BOOL_T ); 
-turnoutInfo_t * StructAdd( long, SCALEINX_T, wList_p, coOrd * ); 
+turnoutInfo_t * CreateNewStructure( char *, char *, wIndex_t, trkSeg_p,
+                                    BOOL_T );
+enum paramFileState	GetStructureCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
+turnoutInfo_t * StructAdd( long, SCALEINX_T, wList_p, coOrd * );
 STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
+void DeleteStructures(int fileIndex);
 
-/* cstrdsgn.c */
-void EditCustomStructure( turnoutInfo_t * );
-
-STATUS_T CmdCarDescAction( wAction_t, coOrd );
-BOOL_T CarCustomSave( FILE * );
 
 #endif

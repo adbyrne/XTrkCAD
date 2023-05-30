@@ -21,25 +21,23 @@
 #=============================================================================
 #
 
-
-set (CMOCKA_ROOT_DIR
-	 "C:/Users/Martin/Documents/CMocka")
+set(CMOCKA_ROOT_DIR
+	"$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/cmocka")
 
 find_path(CMOCKA_INCLUDE_DIR
     NAMES
         cmocka.h
     PATHS
         ${CMOCKA_ROOT_DIR}/include
-		"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Andreas Schneider\\cmocka]/include"
 )
 
 find_library(CMOCKA_LIBRARY
     NAMES
-        cmocka
+        cmocka-static
     PATHS
         ${CMOCKA_ROOT_DIR}/lib
-		"[HKEY_LOCAL_MACHINE\\SOFTWARE\\Andreas Schneider\\cmocka]/lib"
 )
+
 
 if (CMOCKA_LIBRARY)
   set(CMOCKA_LIBRARIES

@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
@@ -28,18 +28,31 @@
  */
 typedef enum { MODE_XTR, MODE_XTQ, MODE_TIP } mode_e;
 
+/**
+ * Write translator comments to messagefile
+ *
+ * \param [in,out] file the source file.
+ * \param 		   line the source line.
+ */
+
+void translatorcomment(char *file, unsigned line)
+{
+	printf("// i18n: %s:%d\n", file, line);
+}
 
 /* Process the given input file. */
-void process( mode_e mode, FILE * inFile )
+void process( mode_e mode, FILE * inFile, char *fileName )
 {
 	char line[4096];
 	char * cp;
 	int len;
 	int offset;
 	int i;
+	unsigned lineNo = 0;
 
 	while ( fgets( line, sizeof(line), inFile ) != NULL )
 	{
+		lineNo++;
 		offset = 0;
 
 		switch (mode)
@@ -47,7 +60,9 @@ void process( mode_e mode, FILE * inFile )
 		case MODE_XTR:
 			if (strncmp( line, "MESSAGE", 7 ) == 0)
 			{
+				translatorcomment(fileName, lineNo);
 				while ( ( fgets( line, sizeof(line), inFile ) ) != NULL ) {
+					lineNo++;
 					if ( strncmp(line, "END", 3) == 0)
 						/* End of message block */
 						break;
@@ -110,6 +125,7 @@ void process( mode_e mode, FILE * inFile )
 				line[len] = '\0';
 				if (len == 0)
 					break;
+				translatorcomment(fileName, lineNo);
 				printf("N_(\"%s\");\n", line+offset);
 			}
 			break; // case MODE_XTQ:
@@ -130,16 +146,17 @@ void process( mode_e mode, FILE * inFile )
 
 			cp[1] = '\0';
 
+			translatorcomment(fileName, lineNo);
 			/* if line ended with a continuation sign, get the rest */
 			while (*cp=='\\') {
 				*cp++ = '\\';
 				*cp++ = 'n';
 
 				/* read a line */
-				if (!fgets( cp, (sizeof(line)) - (cp-line), inFile )) {
+				if (!fgets( cp, (int)((sizeof(line)) - (cp-line)), inFile) ) {
 					return;
 				}
-
+				lineNo++;
 				/* lines starting with hash sign are ignored (comments) */
 				if (*cp=='#')
 					continue;
@@ -154,7 +171,7 @@ void process( mode_e mode, FILE * inFile )
 			if (strchr(line, '"'))
 			{
 				printf("N_(\"");
-				len = strlen(line);
+				len = (int)(strlen(line));
 				for (i = 0; i < len; i++)
 				{
 					/* Escape double quotation marks */
@@ -239,7 +256,7 @@ int main ( int argc, char * argv[] )
 		}
 
 		/* Process file */
-		process( mode, inFile );
+		process( mode, inFile, argv[i] );
 
 		/* Close  file */
 		files++;

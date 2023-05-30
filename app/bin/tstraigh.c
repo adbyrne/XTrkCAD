@@ -17,20 +17,16 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include <math.h>
 
 #include "cstraigh.h"
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "utility.h"
+#include "common-ui.h"
 
 /*******************************************************************************
  *
@@ -40,6 +36,14 @@
 
 static TRKTYP_T T_STRAIGHT = -1;
 
+typedef struct extraDataStraight_t {
+	extraDataBase_t base;
+	coOrd descriptionOff;
+} extraDataStraight_t;
+
+
+/** @logcmd @showrefby straight=n tstraigh.c */
+static int log_straight = 0;
 
 /****************************************
  *
@@ -50,15 +54,13 @@ static TRKTYP_T T_STRAIGHT = -1;
 
 void AdjustStraightEndPt( track_p t, EPINX_T inx, coOrd pos )
 {
-	if (GetTrkType(t) != T_STRAIGHT) {
-		AbortProg( "AdjustLIneEndPt( %d, %d ) not on STRAIGHT %d\n",
-				GetTrkIndex(t), inx, GetTrkType(t) );
-		return;
-	}
+	CHECKMSG( GetTrkType(t) == T_STRAIGHT,
+	          ("AdjustLIneEndPt( %d, %d ) not on STRAIGHT %d\n",
+	           GetTrkIndex(t), inx, GetTrkType(t) ) );
 	UndoModify( t );
 #ifdef VERBOSE
-lprintf("adjustStraightEndPt T%d[%d] p=[%0.3f %0.3f]\n",
-		GetTrkIndex(t), inx, pos.x, pos.y );
+	lprintf("adjustStraightEndPt T%d[%d] p=[%0.3f %0.3f]\n",
+	        GetTrkIndex(t), inx, pos.x, pos.y );
 #endif
 	SetTrkEndPoint( t, inx, pos, GetTrkEndAngle(t,inx));
 	ComputeBoundingBox( t );
@@ -72,69 +74,78 @@ lprintf("adjustStraightEndPt T%d[%d] p=[%0.3f %0.3f]\n",
  */
 
 static struct {
-		coOrd endPt[2];
-		DIST_T elev[2];
-		FLOAT_T length;
-		ANGLE_T angle;
-		FLOAT_T grade;
-		descPivot_t pivot;
-		unsigned int layerNumber;
-		} strData;
+	coOrd endPt[2];
+	DIST_T elev[2];
+	FLOAT_T length;
+	ANGLE_T angle;
+	FLOAT_T grade;
+	descPivot_t pivot;
+	unsigned int layerNumber;
+} strData;
 typedef enum { E0, Z0, E1, Z1, LN, AN, GR, PV, LY } strDesc_e;
 static descData_t strDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &strData.endPt[0] },
-/*Z0*/	{ DESC_DIM, N_("Z"), &strData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &strData.endPt[1] },
-/*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1] },
-/*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
-/*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber },
-		{ DESC_NULL } };
+	/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &strData.endPt[0] },
+	/*Z0*/	{ DESC_DIM, N_("Z"), &strData.elev[0] },
+	/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &strData.endPt[1] },
+	/*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1] },
+	/*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
+	/*AN*/	{ DESC_ANGLE, N_("Track Angle"), &strData.angle },
+	/*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
+	/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
+	/*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber },
+	{ DESC_NULL }
+};
 
 
 
 EXPORT BOOL_T UpdateDescStraight(
-		int inx,
-		int e0,
-		int e1,
-		int ln,
-		int an,
-		descData_p desc,
-		long pivot )
+        int inx,
+        int e0,
+        int e1,
+        int ln,
+        int an,
+        descData_p desc,
+        long pivot )
 {
 	coOrd mid;
 	if ( inx == e0 || inx == e1 ) {
-		*(DIST_T*)desc[ln].valueP = FindDistance( *(coOrd*)desc[e0].valueP, *(coOrd*)desc[e1].valueP );
-		*(ANGLE_T*)desc[an].valueP = FindAngle( *(coOrd*)desc[e0].valueP, *(coOrd*)desc[e1].valueP );
-		if ( inx == e0 )
+		*(DIST_T*)desc[ln].valueP = FindDistance( *(coOrd*)desc[e0].valueP,
+		                            *(coOrd*)desc[e1].valueP );
+		*(ANGLE_T*)desc[an].valueP = FindAngle( *(coOrd*)desc[e0].valueP,
+		                                        *(coOrd*)desc[e1].valueP );
+		if ( inx == e0 ) {
 			desc[e1].mode |= DESC_CHANGE;
-		else
+		} else {
 			desc[e0].mode |= DESC_CHANGE;
+		}
 		desc[ln].mode |= DESC_CHANGE;
 		desc[an].mode |= DESC_CHANGE;
 	} else if ( inx == ln || inx == an ) {
 		if ( inx == ln && *(DIST_T*)desc[ln].valueP <= minLength ) {
 			ErrorMessage( MSG_OBJECT_TOO_SHORT );
-			*(DIST_T*)desc[ln].valueP = FindDistance( *(coOrd*)desc[e0].valueP, *(coOrd*)desc[e1].valueP );
+			*(DIST_T*)desc[ln].valueP = FindDistance( *(coOrd*)desc[e0].valueP,
+			                            *(coOrd*)desc[e1].valueP );
 			desc[ln].mode |= DESC_CHANGE;
 			return FALSE;
 		}
 		switch (pivot) {
 		case DESC_PIVOT_FIRST:
-			Translate( (coOrd*)desc[e1].valueP, *(coOrd*)desc[e0].valueP, *(ANGLE_T*)desc[an].valueP, *(DIST_T*)desc[ln].valueP );
+			Translate( (coOrd*)desc[e1].valueP, *(coOrd*)desc[e0].valueP,
+			           *(ANGLE_T*)desc[an].valueP, *(DIST_T*)desc[ln].valueP );
 			desc[e1].mode |= DESC_CHANGE;
 			break;
 		case DESC_PIVOT_SECOND:
-			Translate( (coOrd*)desc[e0].valueP, *(coOrd*)desc[e1].valueP, *(ANGLE_T*)desc[an].valueP+180.0, *(DIST_T*)desc[ln].valueP );
+			Translate( (coOrd*)desc[e0].valueP, *(coOrd*)desc[e1].valueP,
+			           *(ANGLE_T*)desc[an].valueP+180.0, *(DIST_T*)desc[ln].valueP );
 			desc[e0].mode |= DESC_CHANGE;
 			break;
 		case DESC_PIVOT_MID:
 			mid.x = (((coOrd*)desc[e0].valueP)->x+((coOrd*)desc[e1].valueP)->x)/2.0;
 			mid.y = (((coOrd*)desc[e0].valueP)->y+((coOrd*)desc[e1].valueP)->y)/2.0;
-			Translate( (coOrd*)desc[e0].valueP, mid, *(ANGLE_T*)desc[an].valueP+180.0, *(DIST_T*)desc[ln].valueP/2.0 );
-			Translate( (coOrd*)desc[e1].valueP, mid, *(ANGLE_T*)desc[an].valueP, *(DIST_T*)desc[ln].valueP/2.0 );
+			Translate( (coOrd*)desc[e0].valueP, mid, *(ANGLE_T*)desc[an].valueP+180.0,
+			           *(DIST_T*)desc[ln].valueP/2.0 );
+			Translate( (coOrd*)desc[e1].valueP, mid, *(ANGLE_T*)desc[an].valueP,
+			           *(DIST_T*)desc[ln].valueP/2.0 );
 			desc[e0].mode |= DESC_CHANGE;
 			desc[e1].mode |= DESC_CHANGE;
 			break;
@@ -148,7 +159,8 @@ EXPORT BOOL_T UpdateDescStraight(
 }
 
 
-static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T final )
+static void UpdateStraight( track_p trk, int inx, descData_p descUpd,
+                            BOOL_T final )
 {
 	EPINX_T ep;
 	switch ( inx ) {
@@ -156,65 +168,25 @@ static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T fin
 	case E1:
 	case LN:
 	case AN:
-		if ( ! UpdateDescStraight( inx, E0, E1, LN, AN, strDesc, strData.pivot ) )
+		if ( ! UpdateDescStraight( inx, E0, E1, LN, AN, strDesc, strData.pivot ) ) {
 			return;
+		}
 		break;
 	case Z0:
 	case Z1:
 		ep = (inx==Z0?0:1);
-		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), strData.elev[ep], NULL );
-		ComputeElev( trk, 1-ep, FALSE, &strData.elev[1-ep], NULL );
-		if ( strData.length > minLength )
+		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), strData.elev[ep],
+		                  NULL );
+		ComputeElev( trk, 1-ep, FALSE, &strData.elev[1-ep], NULL, TRUE );
+		if ( strData.length > minLength ) {
 			strData.grade = fabs( (strData.elev[0]-strData.elev[1])/strData.length )*100.0;
-		else
+		} else {
 			strData.grade = 0.0;
+		}
 		strDesc[GR].mode |= DESC_CHANGE;
 		strDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
 		/*return;*/
 		break;
-#ifdef LATER
-		update = UpdateDescStraight( 0, &strDesc[E0], &strDesc[E1], &strDesc[LN], &strDesc[AN], strData.pivot );
-		break;
-	case E1:
-		update = UpdateDescStraight( 1, &strDesc[E0], &strDesc[E1], &strDesc[LN], &strDesc[AN], strData.pivot );
-		break;
-	case E1:
-		strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
-		strData.angle = FindAngle( strData.endPt[0], strData.endPt[1] );
-		strDesc[1-inx].mode |= DESC_CHANGE;
-		strDesc[LN].mode |= DESC_CHANGE;
-		strDesc[AN].mode |= DESC_CHANGE;
-		break;
-	case LN:
-		if ( strData.length < minLength ) {
-			ErrorMessage( );
-			strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
-			strDesc[LN].mode |= DESC_CHANGE;
-			break;
-		}
-	case AN:
-		switch (strData.pivot) {
-		case DESC_PIVOT_FIRST:
-			Translate( &strData.endPt[1], strData.endPt[0], strData.angle, strData.length );
-			strDesc[E1].mode |= DESC_CHANGE;
-			break;
-		case DESC_PIVOT_SECOND:
-			Translate( &strData.endPt[0], strData.endPt[1], strData.angle+180.0, strData.length );
-			strDesc[E0].mode |= DESC_CHANGE;
-			break;
-		case DESC_PIVOT_MID:
-			mid.x = (strData.endPt[0].x+strData.endPt[1].x)/2.0;
-			mid.y = (strData.endPt[0].y+strData.endPt[1].y)/2.0;
-			Translate( &strData.endPt[0], mid, strData.angle+180.0, strData.length/2.0 );
-			Translate( &strData.endPt[1], mid, strData.angle, strData.length/2.0 );
-			strDesc[E0].mode |= DESC_CHANGE;
-			strDesc[E1].mode |= DESC_CHANGE;
-			break;
-		default:
-			break;
-		}
-		break;
-#endif
 	case LY:
 		SetTrkLayer( trk, strData.layerNumber);
 		break;
@@ -222,37 +194,43 @@ static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T fin
 		return;
 	}
 	UndrawNewTrack( trk );
-	if ( GetTrkEndTrk(trk,0) == NULL )
-		SetTrkEndPoint( trk, 0, strData.endPt[0], NormalizeAngle(strData.angle+180.0) );
-	if ( GetTrkEndTrk(trk,1) == NULL )
+	if ( GetTrkEndTrk(trk,0) == NULL ) {
+		SetTrkEndPoint( trk, 0, strData.endPt[0],
+		                NormalizeAngle(strData.angle+180.0) );
+	}
+	if ( GetTrkEndTrk(trk,1) == NULL ) {
 		SetTrkEndPoint( trk, 1, strData.endPt[1], strData.angle );
+	}
 	ComputeBoundingBox( trk );
-	DrawNewTrack( trk ); 
+	DrawNewTrack( trk );
 }
 
 static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 {
 	int fix0, fix1;
-	sprintf( str, _("Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"), GetTrkIndex(trk),
-		GetTrkLayer(trk)+1,
-		FormatDistance(FindDistance( GetTrkEndPos(trk,0), GetTrkEndPos(trk,1) )),
-		GetTrkEndPosXY(trk,0), GetTrkEndAngle(trk,0),
-		GetTrkEndPosXY(trk,1), GetTrkEndAngle(trk,1) );
+	sprintf( str,
+	         _("Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
+	         GetTrkIndex(trk),
+	         GetTrkLayer(trk)+1,
+	         FormatDistance(FindDistance( GetTrkEndPos(trk,0), GetTrkEndPos(trk,1) )),
+	         GetTrkEndPosXY(trk,0), GetTrkEndAngle(trk,0),
+	         GetTrkEndPosXY(trk,1), GetTrkEndAngle(trk,1) );
 	fix0 = GetTrkEndTrk(trk,0)!=NULL;
 	fix1 = GetTrkEndTrk(trk,1)!=NULL;
 	strData.endPt[0] = GetTrkEndPos(trk,0);
 	strData.endPt[1] = GetTrkEndPos(trk,1);
-	ComputeElev( trk, 0, FALSE, &strData.elev[0], NULL );
-	ComputeElev( trk, 1, FALSE, &strData.elev[1], NULL );
+	ComputeElev( trk, 0, FALSE, &strData.elev[0], NULL, FALSE );
+	ComputeElev( trk, 1, FALSE, &strData.elev[1], NULL, FALSE );
 	strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
 	strData.layerNumber = GetTrkLayer(trk);
-	if ( strData.length > minLength )
+	if ( strData.length > minLength ) {
 		strData.grade = fabs( (strData.elev[0]-strData.elev[1])/strData.length )*100.0;
-	else
+	} else {
 		strData.grade = 0.0;
+	}
 	strData.angle = FindAngle( strData.endPt[0], strData.endPt[1] );
 	strDesc[E0].mode =
-	strDesc[E1].mode = (fix0|fix1)?DESC_RO:0;
+	        strDesc[E1].mode = (fix0|fix1)?DESC_RO:0;
 	strDesc[Z0].mode = (EndPtIsDefinedElev(trk,0)?0:DESC_RO)|DESC_NOREDRAW;
 	strDesc[Z1].mode = (EndPtIsDefinedElev(trk,1)?0:DESC_RO)|DESC_NOREDRAW;
 	strDesc[GR].mode = DESC_RO;
@@ -261,9 +239,9 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 	strDesc[PV].mode = (fix0|fix1)?DESC_IGNORE:0;
 	strDesc[LY].mode = DESC_NOREDRAW;
 	strData.pivot = (fix0&fix1)?DESC_PIVOT_NONE:
-				  fix0?DESC_PIVOT_FIRST:
-				  fix1?DESC_PIVOT_SECOND:
-				  DESC_PIVOT_MID;
+	                fix0?DESC_PIVOT_FIRST:
+	                fix1?DESC_PIVOT_SECOND:
+	                DESC_PIVOT_MID;
 	DoDescribe( _("Straight Track"), trk, strDesc, UpdateStraight );
 }
 
@@ -272,21 +250,279 @@ static DIST_T DistanceStraight( track_p t, coOrd * p )
 	return LineDistance( p, GetTrkEndPos(t,0), GetTrkEndPos(t,1) );
 }
 
+STATUS_T StraightDescriptionMove(
+        track_p trk,
+        wAction_t action,
+        coOrd pos )
+{
+	extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
+	ANGLE_T ap;
+//	ANGLE_T a;
+	coOrd end0, end1;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+//  a = FindAngle(end0,end1);
+	ap = NormalizeAngle(FindAngle(end0,pos)-FindAngle(end0,end1));
+
+	xx->descriptionOff.y = FindDistance(end0,pos)*sin(D2R(ap))-2*GetTrkGauge(trk);
+	xx->descriptionOff.x = -0.5 + FindDistance(end0,
+	                       pos)*cos(D2R(ap))/FindDistance(end0,end1);
+	if (xx->descriptionOff.x > 0.5) { xx->descriptionOff.x = 0.5; }
+	if (xx->descriptionOff.x < -0.5) { xx->descriptionOff.x = -0.5; }
+
+
+	return C_CONTINUE;
+
+}
+
+DIST_T StraightDescriptionDistance(
+        coOrd pos,
+        track_p trk,
+        coOrd * dpos,
+        BOOL_T show_hidden,
+        BOOL_T * hidden)
+{
+	coOrd p1;
+	if (hidden) { *hidden = FALSE; }
+	if ( GetTrkType( trk ) != T_STRAIGHT
+	     || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden)) {
+		return DIST_INF;
+	}
+
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT,
+	                                 extraDataStraight_t);
+	ANGLE_T a;
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+	Translate(&end1off,end1,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+
+	p1.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+	p1.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y;
+
+	if (hidden) { *hidden = (GetTrkBits( trk ) & TB_HIDEDESC); }
+	*dpos = p1;
+	coOrd tpos  = pos;
+	if (LineDistance(&tpos,end0,end1)<FindDistance( p1, pos )) {
+		return LineDistance(&pos,end0,end1);
+	}
+	return FindDistance( p1, pos );
+}
+
+
+static void DrawStraightDescription(
+        track_p trk,
+        drawCmd_p d,
+        wDrawColor color )
+{
+	ANGLE_T a;
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(trk, T_STRAIGHT,
+	                                 extraDataStraight_t);
+
+	if (layoutLabels == 0) {
+		return;
+	}
+	if ((labelEnable&LABELENABLE_TRKDESC)==0) {
+		return;
+	}
+
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+	DrawLine(d,end0,end0off,0,color);
+	Translate(&end1off,end1,a+90,2*GetTrkGauge(trk)+xx->descriptionOff.y);
+	DrawLine(d,end1,end1off,0,color);
+	sprintf( message, "L%s A%0.3f",
+	         FormatDistance(FindDistance(end0,end1)),FindAngle(end0,end1));
+
+	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize,
+	             xx->descriptionOff.x+0.5, 0, color, 0x00 );
+
+	if ( !(GetTrkBits( trk ) & TB_DETAILDESC) ) { return; }
+
+	if ( GetTrkBits( trk ) & TB_DETAILDESC ) {
+		coOrd details_pos;
+		details_pos.x = (end1off.x - end0off.x)*(xx->descriptionOff.x+0.5) + end0off.x;
+		details_pos.y = (end1off.y - end0off.y)*(xx->descriptionOff.x+0.5) + end0off.y-
+		                (2*descriptionFontSize/mainD.dpi);
+
+		AddTrkDetails(d, trk, details_pos, FindDistance(end0,end1), color);
+	}
+
+}
+
 static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 {
-	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
-	if (GetTrkWidth(t) == 2)
-		widthOptions |= DTS_THICK2;
-	if (GetTrkWidth(t) == 3)
-		widthOptions |= DTS_THICK3;
+	if (((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
+	    (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+	    labelScale >= d->scale &&
+	    ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
+		DrawStraightDescription( t, d, color );
+	}
+	// long bridge = GetTrkBridge( t );
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
-				GetTrkEndAngle(t,0),
-				t, GetTrkGauge(t), color, widthOptions );
-	if ( (d->funcs->options & wDrawOptTemp) == 0 && (d->options & DC_QUICK) == 0 ) {
-		DrawEndPt( d, t, 0, color );
-		DrawEndPt( d, t, 1, color );
+	                   GetTrkEndAngle(t,0),
+	                   t, color, widthOptions );
+	DrawEndPt( d, t, 0, color );
+	DrawEndPt( d, t, 1, color );
+}
+
+EXPORT void DrawStraightTies(
+        drawCmd_p d,
+        tieData_t td,
+        coOrd p0,
+        coOrd p1,
+        wDrawColor color )
+{
+	DIST_T tieOff0=0.0, tieOff1=0.0;
+	DIST_T len, dlen;
+	coOrd pos;
+	int cnt;
+	ANGLE_T angle;
+
+	if ( (d->options&DC_SIMPLE) != 0 ) {
+		return;
+	}
+
+	if ( color == wDrawColorBlack ) {
+		color = tieColor;
+	}
+	len = FindDistance( p0, p1 );
+	len -= tieOff0+tieOff1;
+	angle = FindAngle( p0, p1 );
+	cnt = (int)floor(len / td.spacing+0.5);
+	if ( len - td.spacing*cnt - td.width > (td.spacing - td.width)/2 ) {
+		cnt++;
+	}
+	if ( cnt != 0 ) {
+		dlen = FindDistance( p0, p1 )/cnt;
+//		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
+		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
+			Translate( &pos, p0, angle, len );
+			DrawTie( d, pos, angle, td.length, td.width, color,
+			         tieDrawMode==TIEDRAWMODE_SOLID );
+		}
 	}
 }
+
+
+
+EXPORT void DrawStraightTrack(
+        drawCmd_p d,
+        coOrd p0,
+        coOrd p1,
+        ANGLE_T angle,
+        track_cp trk,
+        wDrawColor color,
+        long options )
+{
+	coOrd pp0, pp1;
+	DIST_T trackGauge = GetTrkGauge(trk);
+	tieData_t td;
+	long bridge = 0, roadbed = 0;
+	if ( trk ) {
+		bridge = GetTrkBridge(trk);
+		roadbed = GetTrkRoadbed(trk);
+	}
+	wDrawWidth width=0;
+	trkSeg_p segPtr;
+
+	if ( (d->options&DC_SEGTRACK) ) {
+		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
+		segPtr = &tempSegs(tempSegs_da.cnt-1);
+		segPtr->type = SEG_STRTRK;
+		segPtr->lineWidth = 0;
+		segPtr->color = wDrawColorBlack;
+		segPtr->u.l.pos[0] = p0;
+		segPtr->u.l.pos[1] = p1;
+		segPtr->u.l.angle = angle;
+		segPtr->u.l.option = 0;
+		return;
+	}
+
+	width = trk ? GetTrkWidth( trk ): 0;
+	if ((d->options&DC_PRINT) && (d->dpi>2*BASE_DPI)) {
+		width = (wDrawWidth)round(width * d->dpi / 2 / BASE_DPI);
+	}
+
+	if ( d->options&DC_THICK ) {
+		width = 3;
+	}
+	if ( color == wDrawColorPreviewSelected
+	     || color == wDrawColorPreviewUnselected ) {
+		width = 3;
+	}
+
+
+	LOG(log_straight,4,("DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
+	                    p0.x, p0.y, p1.x, p1.y ) )
+
+	// Draw solid background
+	if(bridge|roadbed) {
+		wDrawWidth width3 = (wDrawWidth)round(trackGauge * 3 * d->dpi / d->scale);
+		DrawLine(d,p0,p1,width3,bridge?bridgeColor:roadbedColor);
+	}
+
+	if ( DoDrawTies( d, trk ) ) {
+		td = GetTrkTieData( trk );
+		DrawStraightTies( d, td, p0, p1, color );
+	}
+	if (color == wDrawColorBlack) {
+		color = normalColor;
+	}
+	if ( ! DrawTwoRails( d, 1 ) ) {
+		DrawLine( d, p0, p1, width, color );
+	} else {
+		if ( hasTrackCenterline(d)) {
+			long options = d->options;
+			d->options |= DC_DASH;
+			DrawLine( d, p0, p1, 0, color );
+			d->options = options;
+		}
+		Translate( &pp0, p0, angle+90, trackGauge/2.0 );
+		Translate( &pp1, p1, angle+90, trackGauge/2.0 );
+		DrawLine( d, pp0, pp1, width, color );
+
+		Translate( &pp0, p0, angle-90, trackGauge/2.0 );
+		Translate( &pp1, p1, angle-90, trackGauge/2.0 );
+		DrawLine( d, pp0, pp1, width, color );
+
+		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && DrawTwoRails(d,1) ) {
+			wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
+			if ( options&DTS_RIGHT ) {
+				Translate( &pp0, p0, angle+90, roadbedWidth/2.0 );
+				Translate( &pp1, p1, angle+90, roadbedWidth/2.0 );
+				DrawLine( d, pp0, pp1, rbw, color );
+			}
+			if ( options&DTS_LEFT ) {
+				Translate( &pp0, p0, angle-90, roadbedWidth/2.0 );
+				Translate( &pp1, p1, angle-90, roadbedWidth/2.0 );
+				DrawLine( d, pp0, pp1, rbw, color );
+			}
+		}
+	}
+
+	if (bridge) {
+		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/BASE_DPI);
+		if (d->options&DC_PRINT) {
+			width2 = (wDrawWidth)round(d->dpi / BASE_DPI);
+		}
+
+		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
+		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
+		DrawLine( d, pp0, pp1, width2, color );
+
+		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
+		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
+		DrawLine( d, pp0, pp1, width2, color);
+	}
+}
+
 
 static void DeleteStraight( track_p t )
 {
@@ -294,17 +530,30 @@ static void DeleteStraight( track_p t )
 
 static BOOL_T WriteStraight( track_p t, FILE * f )
 {
+	int bits;
+	long options;
+	struct extraDataStraight_t *xx = GET_EXTRA_DATA(t, T_STRAIGHT,
+	                                 extraDataStraight_t);
 	BOOL_T rc = TRUE;
-	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d\n",
-				GetTrkIndex(t), GetTrkLayer(t), (long)GetTrkWidth(t),
-				GetTrkScaleName(t), GetTrkVisible(t) )>0;
+
+	options = GetTrkWidth(t) & 0x0F;
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 )
+		// 0x80 means Show Description
+	{
+		options |= 0x80;
+	}
+	bits = GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0)|
+	       (GetTrkRoadbed(t)?1<<4:0);
+	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d %0.6f %0.6f\n",
+	              GetTrkIndex(t), GetTrkLayer(t), options,
+	              GetTrkScaleName(t), bits, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
-	rc &= fprintf(f, "\tEND\n" )>0;
+	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
 
-static void ReadStraight( char * line )
+static BOOL_T ReadStraight( char * line )
 {
 	track_p trk;
 	wIndex_t index;
@@ -312,17 +561,45 @@ static void ReadStraight( char * line )
 	char scale[10];
 	wIndex_t layer;
 	long options;
+	struct extraDataStraight_t *xx;
+	char * cp = NULL;
+	coOrd descriptionOff = { 0.0, 0.0 };
 
-	if ( !GetArgs( line+8, paramVersion<3?"dXZsd":"dLl00sd", &index, &layer, &options, scale, &visible ) )
-		return;
-	trk = NewTrack( index, T_STRAIGHT, 0, 0 );
+	if ( !GetArgs( line+8, paramVersion<3?"dXZsdc":"dLl00sdc", &index, &layer,
+	               &options, scale, &visible, &cp ) ) {
+		return FALSE;
+	}
+	if (cp) {
+		if (!GetArgs(cp,"p",&descriptionOff)) {
+			return FALSE;
+		}
+	}
+	if ( !ReadSegs() ) {
+		return FALSE;
+	}
+	trk = NewTrack( index, T_STRAIGHT, 0, sizeof *xx );
+	xx = GET_EXTRA_DATA(trk, T_STRAIGHT, extraDataStraight_t);
+	xx->descriptionOff = descriptionOff;
 	SetTrkScale( trk, LookupScale(scale) );
-	SetTrkVisible(trk, visible);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+		SetTrkNoTies(trk, FALSE);
+		SetTrkBridge(trk, FALSE);
+		SetTrkRoadbed(trk, FALSE);
+	} else {
+		SetTrkVisible(trk, visible&2);
+		SetTrkNoTies(trk, visible&4);
+		SetTrkBridge(trk, visible&8);
+		SetTrkRoadbed(trk, visible&16);
+	}
 	SetTrkLayer(trk, layer);
-	SetTrkWidth( trk, (int)(options&3) );
-	ReadSegs();
+	SetTrkWidth( trk, (int)(options & 0x0F) );
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
+	if ( paramVersion < VERSION_DESCRIPTION2 || ( ( options & 0x80 ) == 0 ) ) {
+		SetTrkBits(trk,TB_HIDEDESC);
+	}
+	return TRUE;
 }
 
 static void MoveStraight( track_p trk, coOrd orig )
@@ -350,23 +627,27 @@ static int AuditStraight( track_p trk, char * msg )
 }
 
 
-static ANGLE_T GetAngleStraight( track_p trk, coOrd pos, EPINX_T *ep0, EPINX_T *ep1 )
+static ANGLE_T GetAngleStraight( track_p trk, coOrd pos, EPINX_T *ep0,
+                                 EPINX_T *ep1 )
 {
-	if ( ep0 ) *ep0 = 0;
-	if ( ep1 ) *ep1 = 1;
+	if ( ep0 ) { *ep0 = 0; }
+	if ( ep1 ) { *ep1 = 1; }
 	return GetTrkEndAngle( trk, 0 );
 }
 
 
-static BOOL_T SplitStraight( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, EPINX_T * ep0, EPINX_T * ep1 )
+static BOOL_T SplitStraight( track_p trk, coOrd pos, EPINX_T ep,
+                             track_p *leftover, EPINX_T * ep0, EPINX_T * ep1 )
 {
 	track_p trk1;
 
-	trk1 = NewStraightTrack( 1-ep?GetTrkEndPos(trk,ep):pos, 1-ep?pos:GetTrkEndPos(trk,ep) );
+	trk1 = NewStraightTrack( 1-ep?GetTrkEndPos(trk,ep):pos,
+	                         1-ep?pos:GetTrkEndPos(trk,ep) );
 	DIST_T height;
 	int opt;
 	GetTrkEndElev(trk,ep,&opt,&height);
-	UpdateTrkEndElev( trk1, ep, opt, height, (opt==ELEV_STATION)?GetTrkEndElevStation(trk,ep):NULL );
+	UpdateTrkEndElev( trk1, ep, opt, height,
+	                  (opt==ELEV_STATION)?GetTrkEndElevStation(trk,ep):NULL );
 	AdjustStraightEndPt( trk, ep, pos );
 	UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
 	*leftover = trk1;
@@ -397,7 +678,8 @@ static BOOL_T TraverseStraight( traverseTrack_p trvTrk, DIST_T * distR )
 	}
 	dist = FindDistance( trvTrk->pos, pos[ep] );
 	if ( dist > *distR ) {
-		Translate( &trvTrk->pos, pos[ep], NormalizeAngle(trvTrk->angle+180.0), dist-*distR ); 
+		Translate( &trvTrk->pos, pos[ep], NormalizeAngle(trvTrk->angle+180.0),
+		           dist-*distR );
 		*distR = 0;
 	} else {
 		trvTrk->pos = pos[ep];
@@ -414,11 +696,13 @@ static BOOL_T EnumerateStraight( track_p trk )
 	if (trk != NULL) {
 		d = FindDistance( GetTrkEndPos( trk, 0 ), GetTrkEndPos( trk, 1 ) );
 		ScaleLengthIncrement( GetTrkScale(trk), d );
+		return TRUE;
 	}
-	return TRUE;
+	return FALSE;
 }
 
-static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist )
+static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos,
+                            ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	DIST_T d;
 	ANGLE_T a;
@@ -428,21 +712,23 @@ static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist )
 	p1 = GetTrkEndPos( trk, 1-ep );
 	d = FindDistance( pos, p1 );
 	if (dist < FindDistance( GetTrkEndPos(trk,0), GetTrkEndPos(trk,1) ) &&
-					d > minLength ) {
-					UndrawNewTrack( trk );
-					AdjustStraightEndPt( trk, ep, pos );
-					DrawNewTrack( trk );
-	} else
+	    d > minLength ) {
+		UndrawNewTrack( trk );
+		AdjustStraightEndPt( trk, ep, pos );
+		DrawNewTrack( trk );
+	} else {
+		UndrawNewTrack( trk );
 		DeleteTrack( trk, TRUE );
+	}
 	return TRUE;
 }
 
 
 BOOL_T ExtendStraightToJoin(
-		track_p trk0,
-		EPINX_T ep0,
-		track_p trk1,
-		EPINX_T ep1 )
+        track_p trk0,
+        EPINX_T ep0,
+        track_p trk1,
+        EPINX_T ep1 )
 {
 	coOrd off;
 	ANGLE_T a;
@@ -459,20 +745,23 @@ BOOL_T ExtendStraightToJoin(
 	Rotate( &off, pos0, -a0 );
 	off.x -= pos0.x;
 
-	if ( a >= connectAngle || 
-		 !IsClose( fabs(off.x) ) ||
-		 off.y-pos0.y <= connectDistance ) {
+	if ( a >= connectAngle ||
+	     !IsClose( fabs(off.x) ) ||
+	     off.y-pos0.y <= connectDistance ) {
 		return FALSE;
 	}
 
 	if ( GetTrkType(trk0) != T_STRAIGHT &&
-		 GetTrkType(trk1) != T_STRAIGHT ) {
+	     GetTrkType(trk1) != T_STRAIGHT ) {
 		aa = FindAngle( pos0, pos1 );
 		aa = NormalizeAngle( aa-a0+connectAngle/2.0);
-		if (aa > connectAngle)
+		if (aa > connectAngle) {
 			return FALSE;
+		}
 	}
-	UndoStart( _("Extending Straight Track"), "ExtendStraightToJoin( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
+	UndoStart( _("Extending Straight Track"),
+	           "ExtendStraightToJoin( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0,
+	           GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndoModify( trk1 );
 	trk2 = trk0x = trk1x = NULL;
@@ -498,6 +787,7 @@ BOOL_T ExtendStraightToJoin(
 			DisconnectTracks( trk1, 1-ep1, trk1x, ep1x );
 		}
 		if (trk2) {
+			UndrawNewTrack( trk1 );
 			DeleteTrack( trk1, TRUE );
 		} else {
 			trk2 = trk1;
@@ -537,40 +827,39 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 	switch ( action ) {
 	case C_DOWN:
 		ep = PickUnconnectedEndPoint( pos, trk );
-		if (ep == -1)
+		if (ep == -1) {
 			return C_ERROR;
+		}
 		UndrawNewTrack( trk );
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).type = SEG_STRTRK;
-		tempSegs(0).width = 0;
+		tempSegs(0).lineWidth = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, 1-ep );
-		tempSegs_da.cnt = 1;
 		InfoMessage( _("Drag to change track length") );
 
 	case C_MOVE:
 		d = FindDistance( tempSegs(0).u.l.pos[0], pos );
 		valid = TRUE;
 		if ( d <= minLength ) {
-			if (action == C_MOVE)
+			if (action == C_MOVE) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, _("Straight "), PutDim(fabs(minLength-d)) );
+			}
 			valid = FALSE;
 			return C_CONTINUE;
 		}
-		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk, ep ), d );
-		tempSegs_da.cnt = 1;
+		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk,
+		                ep ), d );
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
-					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
-        MainRedraw();
-        MapRedraw();
+			             FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
 		return C_CONTINUE;
 
 	case C_UP:
-		if (valid)
+		if (valid) {
 			AdjustStraightEndPt( trk, ep, tempSegs(0).u.l.pos[1] );
-		tempSegs_da.cnt = 0;
-        DrawNewTrack( trk );
-        MainRedraw();
-        MapRedraw();
+		}
+		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		DrawNewTrack( trk );
 		return C_TERMINATE;
 
 	default:
@@ -586,36 +875,39 @@ static DIST_T GetLengthStraight( track_p trk )
 }
 
 
-static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t * params )
+static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos,
+                                 trackParams_t * params )
 {
 	params->type = curveTypeStraight;
-	if ( inx == PARAMS_PARALLEL ) {
-		params->ep = 0;
-	} else if (inx == PARAMS_CORNU ){
+	if ( inx == PARAMS_NODES ) { return FALSE; }
+	if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN)
+	    || (inx == PARAMS_2ND_JOIN) ) {
 		params->ep = PickEndPoint( pos, trk);
 		params->arcP = zero;
 		params->arcR = 0.0;
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	}
-    if (params->ep == -1)
-			return FALSE;
+	if (params->ep == -1) {
+		return FALSE;
+	}
 	params->lineOrig = GetTrkEndPos(trk,1-params->ep);
 	params->lineEnd = GetTrkEndPos(trk,params->ep);
 	params->len = FindDistance( params->lineOrig, params->lineEnd );
 	params->track_angle = FindAngle( params->lineOrig, params->lineEnd);
-	params->angle = GetTrkEndAngle(trk,params->ep);
+	params->angle = params->track_angle;
 	params->arcR = 0.0;
 	return TRUE;
 }
 
 
-static BOOL_T MoveEndPtStraight( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 )
+static BOOL_T MoveEndPtStraight( track_p *trk, EPINX_T *ep, coOrd pos,
+                                 DIST_T d0 )
 {
 	if ( NormalizeAngle( FindAngle( GetTrkEndPos(*trk,1-*ep), pos ) -
-							 GetTrkEndAngle(*trk,*ep) + 0.5 ) > 1.0 ) {
-			ErrorMessage( MSG_MOVED_BEYOND_END_TRK );
-			return FALSE;
+	                     GetTrkEndAngle(*trk,*ep) + 0.5 ) > 1.0 ) {
+		ErrorMessage( MSG_MOVED_BEYOND_END_TRK );
+		return FALSE;
 	}
 	Translate( &pos, pos, GetTrkEndAngle(*trk,*ep)+180, d0 );
 	AdjustStraightEndPt( *trk, *ep, pos );
@@ -632,6 +924,8 @@ static BOOL_T QueryStraight( track_p trk, int query )
 	case Q_ISTRACK:
 	case Q_CORNU_CAN_MODIFY:
 	case Q_MODIFY_CAN_SPLIT:
+	case Q_CAN_EXTEND:
+	case Q_HAS_DESC:
 		return TRUE;
 	default:
 		return FALSE;
@@ -640,82 +934,110 @@ static BOOL_T QueryStraight( track_p trk, int query )
 
 
 static void FlipStraight(
-		track_p trk,
-		coOrd orig,
-		ANGLE_T angle )
+        track_p trk,
+        coOrd orig,
+        ANGLE_T angle )
 {
 	ComputeBoundingBox( trk );
 }
 
 
 static BOOL_T MakeParallelStraight(
-		track_p trk,
-		coOrd pos,
-		DIST_T sep,
-		track_p * newTrkR,
-		coOrd * p0R,
-		coOrd * p1R )
+        track_p trk,
+        coOrd pos,
+        DIST_T sep,
+        DIST_T factor,
+        track_p * newTrkR,
+        coOrd * p0R,
+        coOrd * p1R,
+        BOOL_T track)
 {
 	ANGLE_T angle = GetTrkEndAngle(trk,1);
 	coOrd p0, p1;
-	if ( NormalizeAngle( FindAngle( GetTrkEndPos(trk,0), pos ) - GetTrkEndAngle(trk,1) ) < 180.0 )
+	if ( NormalizeAngle( FindAngle( GetTrkEndPos(trk,0), pos ) - GetTrkEndAngle(trk,
+	                     1) ) < 180.0 ) {
 		angle += 90;
-	else
+	} else {
 		angle -= 90;
+	}
 	Translate( &p0, GetTrkEndPos(trk,0), angle, sep );
 	Translate( &p1, GetTrkEndPos(trk,1), angle, sep );
 	if ( newTrkR ) {
-		*newTrkR = NewStraightTrack( p0, p1 );
+		if (track) {
+			*newTrkR = NewStraightTrack( p0, p1 );
+		} else {
+			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+			tempSegs(0).color = wDrawColorBlack;
+			tempSegs(0).lineWidth = 0;
+			tempSegs(0).type = SEG_STRLIN;
+			tempSegs(0).u.l.pos[0] = p0;
+			tempSegs(0).u.l.pos[1] = p1;
+			*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+			SetTrkBits( *newTrkR, TB_HIDEDESC );
+		}
+
 	} else {
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
-		tempSegs(0).width = 0;
-		tempSegs_da.cnt = 1;
-		tempSegs(0).type = SEG_STRTRK;
+		tempSegs(0).lineWidth = 0;
+		tempSegs(0).type = track?SEG_STRTRK:SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = p0;
 		tempSegs(0).u.l.pos[1] = p1;
 	}
-	if ( p0R ) *p0R = p0;
-	if ( p1R ) *p1R = p1;
+	if ( p0R ) { *p0R = p0; }
+	if ( p1R ) { *p1R = p1; }
+	return TRUE;
+}
+
+
+static wBool_t CompareStraight( track_cp trk1, track_cp trk2 )
+{
 	return TRUE;
 }
 
 
 static trackCmd_t straightCmds = {
-		"STRAIGHT",
-		DrawStraight,
-		DistanceStraight,
-		DescribeStraight,
-		DeleteStraight,
-		WriteStraight,
-		ReadStraight,
-		MoveStraight,
-		RotateStraight,
-		RescaleStraight,
-		AuditStraight,
-		GetAngleStraight,
-		SplitStraight,
-		TraverseStraight,
-		EnumerateStraight,
-		NULL,			/* redraw */
-		TrimStraight,
-		ExtendStraightToJoin,
-		ModifyStraight,
-		GetLengthStraight,
-		GetParamsStraight,
-		MoveEndPtStraight,
-		QueryStraight,
-		NULL,			/* ungroup */
-		FlipStraight,
-		NULL,
-		NULL,
-		NULL,
-		MakeParallelStraight };
-
+	"STRAIGHT",
+	DrawStraight,
+	DistanceStraight,
+	DescribeStraight,
+	DeleteStraight,
+	WriteStraight,
+	ReadStraight,
+	MoveStraight,
+	RotateStraight,
+	RescaleStraight,
+	AuditStraight,
+	GetAngleStraight,
+	SplitStraight,
+	TraverseStraight,
+	EnumerateStraight,
+	NULL,			/* redraw */
+	TrimStraight,
+	ExtendStraightToJoin,
+	ModifyStraight,
+	GetLengthStraight,
+	GetParamsStraight,
+	MoveEndPtStraight,
+	QueryStraight,
+	NULL,			/* ungroup */
+	FlipStraight,
+	NULL,
+	NULL,
+	NULL,
+	MakeParallelStraight,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	CompareStraight
+};
 
 EXPORT void StraightSegProc(
-		segProc_e cmd,
-		trkSeg_p segPtr,
-		segProcData_p data )
+        segProc_e cmd,
+        trkSeg_p segPtr,
+        segProcData_p data )
 {
 	ANGLE_T a0, a1, a2;
 	DIST_T d, d0, d1;
@@ -727,7 +1049,8 @@ EXPORT void StraightSegProc(
 		a1 = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
 		a2 = NormalizeAngle( a1-data->traverse1.angle );
 		data->traverse1.backwards = ((a2 < 270) && (a2 > 90));
-		data->traverse1.dist = FindDistance( segPtr->u.l.pos[data->traverse1.backwards?1:0], data->traverse1.pos );
+		data->traverse1.dist = FindDistance( segPtr->u.l.pos[data->traverse1.backwards
+		                                     ?1:0], data->traverse1.pos );
 		data->traverse1.reverse_seg = FALSE;
 		data->traverse1.negative = FALSE;
 		data->traverse1.segs_backwards = FALSE;
@@ -737,13 +1060,17 @@ EXPORT void StraightSegProc(
 	case SEGPROC_TRAVERSE2:
 		d = FindDistance( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
 		if ( d >= data->traverse2.dist ) {
-			a1 = FindAngle( segPtr->u.l.pos[data->traverse2.segDir], segPtr->u.l.pos[1-data->traverse2.segDir] );
-			Translate( &data->traverse2.pos, segPtr->u.l.pos[data->traverse2.segDir], a1, data->traverse2.dist );
+			a1 = FindAngle( segPtr->u.l.pos[data->traverse2.segDir],
+			                segPtr->u.l.pos[1-data->traverse2.segDir] );
+			Translate( &data->traverse2.pos, segPtr->u.l.pos[data->traverse2.segDir], a1,
+			           data->traverse2.dist );
 			data->traverse2.dist = 0;
 			data->traverse2.angle = a1;
 		} else {
-			a1 = FindAngle( segPtr->u.l.pos[data->traverse2.segDir], segPtr->u.l.pos[1-data->traverse2.segDir] );
-			Translate( &data->traverse2.pos, segPtr->u.l.pos[data->traverse2.segDir], a1, d );
+			a1 = FindAngle( segPtr->u.l.pos[data->traverse2.segDir],
+			                segPtr->u.l.pos[1-data->traverse2.segDir] );
+			Translate( &data->traverse2.pos, segPtr->u.l.pos[data->traverse2.segDir], a1,
+			           d );
 			data->traverse2.dist -= d;
 			data->traverse2.angle = a1;
 		}
@@ -754,17 +1081,21 @@ EXPORT void StraightSegProc(
 		a0 = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
 		d1 = d0*data->drawRoadbedSide.first/32.0;
 		Translate( &p0, segPtr->u.l.pos[0], a0, d1 );
-		Translate( &p0, p0, a0+data->drawRoadbedSide.side, data->drawRoadbedSide.roadbedWidth/2.0 );
+		Translate( &p0, p0, a0+data->drawRoadbedSide.side,
+		           data->drawRoadbedSide.roadbedWidth/2.0 );
 		d1 = d0*data->drawRoadbedSide.last/32.0;
 		Translate( &p1, segPtr->u.l.pos[0], a0, d1 );
-		Translate( &p1, p1, a0+data->drawRoadbedSide.side, data->drawRoadbedSide.roadbedWidth/2.0 );
+		Translate( &p1, p1, a0+data->drawRoadbedSide.side,
+		           data->drawRoadbedSide.roadbedWidth/2.0 );
 		REORIGIN1( p0, data->drawRoadbedSide.angle, data->drawRoadbedSide.orig );
 		REORIGIN1( p1, data->drawRoadbedSide.angle, data->drawRoadbedSide.orig );
-		DrawLine( data->drawRoadbedSide.d, p0, p1, data->drawRoadbedSide.rbw, data->drawRoadbedSide.color );
+		DrawLine( data->drawRoadbedSide.d, p0, p1, data->drawRoadbedSide.rbw,
+		          data->drawRoadbedSide.color );
 		break;
 
 	case SEGPROC_DISTANCE:
-		data->distance.dd = LineDistance( &data->distance.pos1, segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
+		data->distance.dd = LineDistance( &data->distance.pos1, segPtr->u.l.pos[0],
+		                                  segPtr->u.l.pos[1] );
 		break;
 
 	case SEGPROC_FLIP:
@@ -792,7 +1123,8 @@ EXPORT void StraightSegProc(
 			data->split.length[0] = d;
 			data->split.length[1] = 0.0;
 		}
-		Translate( &p0, segPtr->u.l.pos[0], FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] ), data->split.length[0] );
+		Translate( &p0, segPtr->u.l.pos[0], FindAngle( segPtr->u.l.pos[0],
+		                segPtr->u.l.pos[1] ), data->split.length[0] );
 		data->split.newSeg[0] = *segPtr;
 		data->split.newSeg[1] = *segPtr;
 		data->split.newSeg[0].u.l.pos[1] = data->split.newSeg[1].u.l.pos[0] = p0;
@@ -815,17 +1147,20 @@ EXPORT void StraightSegProc(
  */
 
 
+
+
 track_p NewStraightTrack( coOrd p0, coOrd p1 )
 {
 	track_p t;
 	ANGLE_T a;
-	t = NewTrack( 0, T_STRAIGHT, 2, 0 );
-	SetTrkScale( t, GetLayoutCurScale() );
+	t = NewTrack( 0, T_STRAIGHT, 2, sizeof (struct extraDataStraight_t) );
+	// *new-layer* SetTrkScale( t, GetLayoutCurScale() );
 	a = FindAngle( p1, p0 );
 	SetTrkEndPoint( t, 0, p0, a );
 	SetTrkEndPoint( t, 1, p1, NormalizeAngle( a+180.0 ) );
 	ComputeBoundingBox( t );
 	CheckTrackLength( t );
+	SetTrkBits( t, TB_HIDEDESC );
 	return t;
 }
 

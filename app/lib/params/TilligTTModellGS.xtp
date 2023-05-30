@@ -435,10 +435,12 @@ TURNOUT TT "Tillig	Kreuzung - K2 - 30°	83170"
 	L3 13279072 0.000000 1.489268 -0.564335 0 2.863744 -1.357886 0
 	L3 13279072 0.000000 0.522081 1.357886 0 1.896557 0.564336 0
 	END
-TURNOUT TT "Tillig	Doppelkreuzungsweiche - DKW 1	83300"
+TURNOUT TT "Tillig	Doppelkreuzungsweiche - DKW 1	83300" 512
 	U "Double Slipswitch" "" "Tillig" "Doppelkreuzungsweiche - DKW 1" "83300" 6.535433 15.000000 6.535433 1.181102 0.000000 13279072
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 6.535433 0.000000 90.000000
 	E 0.111343 0.845742 285.000000
@@ -458,10 +460,12 @@ TURNOUT TT "Tillig	Doppelkreuzungsweiche - DKW 1	83300"
 	A3 13279072 0.000000 17.059506 0.944019 -17.650057 0 0.000076 15.000152
 	A3 13279072 0.000000 17.059506 5.591366 17.650051 0 180.000076 15.000152
 	END
-TURNOUT TT "Tillig	Doppelkreuzungsweiche - DKW II Bauart Baeseler	83391"
+TURNOUT TT "Tillig	Doppelkreuzungsweiche - DKW II Bauart Baeseler	83391" 512
 	U "Double Slipswitch" "" "Tillig" "Doppelkreuzungsweiche - DKW II Bauart Baeseler" "83391" 8.212598 15.000000 8.212598 1.181102 0.000000 13279072
-	P "Normal" 1 2 3 0 4 5 6
-	P "Reverse" 1 7 6 0 4 8 3
+	P "Cross1" 1 2 3
+	P "Cross2" 4 5 6
+	P "Slip1" 1 7 6
+	P "Slip2" 4 8 3
 	E 0.000000 0.000000 270.000000
 	E 8.212598 0.000000 90.000000
 	E 0.139917 1.062782 285.000000

@@ -17,20 +17,19 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "cundo.h"
 #include "fileio.h"
-#include "i18n.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
-#include "wlib.h"
 #include "draw.h"
 #include "misc.h"
+#include "common-ui.h"
 
-track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color );
+track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text,
+                 CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
 
 void LoadFontSizeList( wList_p, long );
 void UpdateFontSizeList( long *, wList_p, wIndex_t );
@@ -44,69 +43,64 @@ static wMenu_p textPopupM;
  */
 
 static struct {
-		STATE_T state;
-		CSIZE_T len;
-		coOrd cursPos0, cursPos1;
-		POS_T cursHeight;
-		POS_T textLen;
-		POS_T lastLineLen;
-		POS_T lastLineOffset;
-		coOrd pos;
-		ANGLE_T angle;
-		long size;
-		wIndex_t fontSizeInx;
-		char text[STR_LONG_SIZE];
-        wDrawColor color;
-		} Dt;
+	STATE_T state;
+	CSIZE_T len;
+	coOrd cursPos0, cursPos1;
+	POS_T cursHeight;
+	POS_T textLen;
+	POS_T lastLineLen;
+	POS_T lastLineOffset;
+	coOrd pos;
+	ANGLE_T angle;
+	long size;
+	wIndex_t fontSizeInx;
+	char text[STR_HUGE_SIZE];
+	wDrawColor color;
+	BOOL_T boxed;
+} Dt;
 
+static char * boxLabels[] = { "", NULL };
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
-		{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
+	{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
 #define colorPD (textPLs[1])
-        { PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") }
-        };
-static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
+	{ PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") },
+#define boxPD (textPLs[2])
+	{ PD_TOGGLE, &Dt.boxed, "boxed", 0, boxLabels, N_("Boxed"), 0 }
+};
+static paramGroup_t textPG = { "text", 0, textPLs, COUNT( textPLs ) };
 
-enum TEXT_POSITION
-{
+enum TEXT_POSITION {
 	POSITION_TEXT = 0,
 	SHOW_TEXT
 };
 
 static void TextDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * context )
+        paramGroup_p pg,
+        int inx,
+        void * context )
 {
 	coOrd size, lastline;
 
 	switch (inx) {
 	case 0:
 	case 1:
-		if ( Dt.state == SHOW_TEXT) {
-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL );
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		}
+	case 2:
 		UpdateFontSizeList( &Dt.size, (wList_p)textPLs[0].control, Dt.fontSizeInx );
-		/*wWinSetBusy( mainW, TRUE );*/
 		if ( Dt.state == SHOW_TEXT) {
 			DrawMultiLineTextSize( &mainD, Dt.text, NULL, Dt.size, TRUE, &size, &lastline);
 			Dt.textLen = size.x;
 			Dt.lastLineLen = lastline.x;
 			Dt.lastLineOffset = lastline.y;
 		}
+		wSetSelectedFontSize((wFontSize_t)Dt.size);   //Update for next time
 		DrawTextSize( &mainD, "Aquilp", NULL, Dt.size, TRUE, &size );
 		Dt.cursHeight = size.y;
-		/*wWinSetBusy( mainW, FALSE );*/
 		if ( Dt.state == SHOW_TEXT) {
 			Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x+Dt.lastLineLen;
 			Dt.cursPos1.y = Dt.pos.y+Dt.cursHeight+Dt.lastLineOffset;
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL );
 		}
-        MainRedraw();
-        MapRedraw();
-        break;
+		break;
 	}
 }
 
@@ -115,13 +109,13 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 {
 	track_p t;
 	unsigned char c;
-	wControl_p controls[3];
-	char * labels[2];
+	wControl_p controls[4];
+	char * labels[3];
 	coOrd size, lastline;
 
 	switch (action & 0xFF) {
 	case C_START:
-        Dt.state = POSITION_TEXT;
+		Dt.state = POSITION_TEXT;
 		Dt.cursPos0 = Dt.cursPos1 = zero;
 		Dt.len = 0;
 		Dt.textLen = 0;
@@ -129,8 +123,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.lastLineLen = 0;
 		Dt.lastLineOffset = 0;
 
-		if (textPD.control == NULL)
-		{
+		if (textPD.control == NULL) {
 			ParamCreateControls(&textPG, TextDlgUpdate);
 			LoadFontSizeList((wList_p)textPD.control, Dt.size);
 			ParamRegister(&textPG);
@@ -141,46 +134,37 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		ParamLoadControls(&textPG);
 		ParamGroupRecord( &textPG );
 
-		if (!inPlayback)
-			wWinSetBusy(mainW, TRUE);
 		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);
 		Dt.cursHeight = size.y;
-		if (!inPlayback)
-			wWinSetBusy(mainW, FALSE);
 
 		controls[0] = textPD.control;
 		controls[1] = colorPD.control;
-        controls[2] = 0;
+		controls[2] = boxPD.control;
+		controls[3] = 0;
 		labels[0] = N_("Font Size");
-        labels[1] = N_("Color");
+		labels[1] = N_("Color");
+		labels[2] = N_("Boxed");
 		InfoSubstituteControls( controls, labels );
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
-		if (Dt.state != 0) {
+		if (Dt.state != POSITION_TEXT) {
 		}
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y + Dt.lastLineOffset;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.lastLineLen;
-		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);  //In case fontsize change
+		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE,
+		             &size);  //In case fontsize change
 		Dt.cursHeight = size.y;
 		Dt.cursPos1.y += Dt.cursHeight;
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
-        Dt.state = SHOW_TEXT;
-        MainRedraw();
-        MapRedraw();
+		Dt.state = SHOW_TEXT;
 		return C_CONTINUE;
 	case C_MOVE:
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y + Dt.lastLineOffset;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.lastLineLen;
 		Dt.cursPos1.y += Dt.cursHeight;
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
-        MainRedraw();
-        MapRedraw();
-        return C_CONTINUE;
+		return C_CONTINUE;
 	case C_UP:
 		return C_CONTINUE;
 	case C_TEXT:
@@ -188,8 +172,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			NoticeMessage( MSG_SEL_POS_FIRST, _("Ok"), NULL );
 			return C_CONTINUE;
 		}
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
+
 		c = (unsigned char)(action >> 8);
 		switch (c) {
 		case '\b':
@@ -209,7 +192,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			break;
 		case '\015':
 			UndoStart( _("Create Text"), "newText - CR" );
-			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
+			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color,
+			             Dt.boxed );
 			UndoEnd();
 			DrawNewTrack(t);
 			Dt.state = POSITION_TEXT;
@@ -221,58 +205,60 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 				Dt.text[Dt.len] = '\000';
 			}
 		}
-        DrawMultiLineTextSize( &mainD, Dt.text, NULL, Dt.size, TRUE, &size, &lastline);
+		if (Dt.len>sizeof(Dt.text)-8) {
+			Dt.len=sizeof(Dt.text)-8;
+			Dt.text[Dt.len] = '\0';
+			InfoMessage("Text too long - truncated");
+			wBeep();
+		}
+		DrawMultiLineTextSize( &mainD, Dt.text, NULL, Dt.size, TRUE, &size, &lastline);
 		Dt.textLen = size.x;
 		Dt.lastLineLen = lastline.x;
 		Dt.lastLineOffset = lastline.y;
 		Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x + Dt.lastLineLen;
 		Dt.cursPos0.y = Dt.cursPos1.y = Dt.pos.y + Dt.lastLineOffset;
-		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);  //In case fontsize change
+		POS_T descent, ascent;
+		DrawTextSize2(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size, &descent,
+		              &ascent);  //In case fontsize change
 		Dt.cursHeight = size.y;
+		Dt.cursPos0.y -=descent;
 		Dt.cursPos1.y +=Dt.cursHeight;
-		MainRedraw();
-		MapRedraw();
-		//DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		return C_CONTINUE;
 	case C_REDRAW:
-		if (Dt.state == 1) {
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
-		}
+		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color,
+		                0.0, NULL, NULL, Dt.boxed );
 		return C_CONTINUE;
 	case C_CANCEL:
 		if (Dt.state != POSITION_TEXT) {
 			Dt.state = POSITION_TEXT;
 		}
 		InfoSubstituteControls( NULL, NULL );
-		MainRedraw();
-		MapRedraw();
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != POSITION_TEXT) {
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			Dt.state = POSITION_TEXT;
 			if (Dt.len) {
 				UndoStart( _("Create Text"), "newText - OK" );
-				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
+				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color,
+				             Dt.boxed );
 				UndoEnd();
 				DrawNewTrack(t);
 			}
 		}
 		InfoSubstituteControls( NULL, NULL );
-        MainRedraw();
-        MapRedraw();
 		return C_TERMINATE;
 
 	case C_FINISH:
-		if (Dt.state != POSITION_TEXT && Dt.len > 0)
-			 CmdText( C_OK, pos );
-		else
+		if (Dt.state != POSITION_TEXT && Dt.len > 0) {
+			CmdText( C_OK, pos );
+		} else {
 			CmdText( C_CANCEL, pos );
+		}
 		return C_TERMINATE;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( textPopupM );
 		return C_CONTINUE;
 	}
@@ -280,15 +266,17 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 }
 
 
-#include "bitmaps/text.xpm"
+#include "bitmaps/text.xpm3"
 
 void InitCmdText( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
+	AddMenuButton( menu, CmdText, "cmdText", _("Text"),
+	               wIconCreatePixMap(text_xpm3[iconSize]), LEVEL0_50,
+	               IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
-	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
+	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
-    Dt.color = wDrawColorBlack;
+	Dt.color = wDrawColorBlack;
 }
 
 void InitTrkText( void )

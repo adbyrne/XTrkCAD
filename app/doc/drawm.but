@@ -16,11 +16,11 @@ There are 4 command buttons on the tool-bar used to draw Straight Objects, Curve
 
 Functions for drawing basic shapes and objects like lines and curves can be accessed from this menu.
 
-\dd \f{Circle Lines} - draw empty or filled circles. (\K{cmdCircleL})
+\dd \f{Circle Lines} - draw empty or filled circles. (\K{cmdDrawCircles})
 
 \u000
 
-\dd \f{Curved Lines} - are created in the same manner as curved tracks. (\K{cmdCurvedL})
+\dd \f{Curved Lines} - are created in the same manner as curved tracks. (\K{cmdDrawCurves})
 
 \u000
 
@@ -32,11 +32,15 @@ Functions for drawing basic shapes and objects like lines and curves can be acce
 
 \u000
 
-\dd \f{Shapes} - draw boxes and poly-lines. (\K{cmdShapes})
+\dd \f{Protractor} - create protractor and set visibility (\K{cmdAngle})
 
 \u000
 
-\dd \f{Straight Objects} - draw straight objects. (\K{cmdStraightL})
+\dd \f{Shapes} - draw boxes, polygons and poly-lines. (\K{cmdDrawShapes})
+
+\u000
+
+\dd \f{Straight Objects} - draw straight objects. (\K{cmdDrawStraight})
 
 \u000
 
@@ -46,80 +50,238 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \rule
 
+\S{cmdDrawCircles} Circles and Filled Circles
 
-\S{cmdCircleL} Circles and Filled Circles
+\G{png.d/mdrawcircles.png}
 
-\G{png.d/mdrawcircles.png} 
+Before a Circle is drawn its line width and color can be set. For Filled Circles, the color can be set.
+The \f{Circle Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
 
 \f{Circles} and \f{Filled Circles} are created by selecting either the center position or a point on the edge of the circle and dragging to specify the radius.
 
-\dd \G{png.d/dcircle2.png} \G{png.d/dflcrcl2.png} Select a point on the edge of the circle and drag to the center.
+\dd \K{cmdDrawCircleTangent}. Draw a Circle from the Edge.
 
 \u000
 
-\dd \G{png.d/dcircle3.png} \G{png.d/dflcrcl3.png} Select the center and drag to set the radius.
+\dd \K{cmdDrawCircleCenter}. Draw a Circle from the Center.
+
+\u000
+
+\dd \K{cmdDrawFilledCircleTangent}. Draw a Filled Circle from the Edge.
+
+\u000
+
+\dd \K{cmdDrawFilledCircleCenter}. Draw a Filled Circle from the Center.
 
 \rule
 
+\S2{cmdDrawCircleTangent} Draw Circle from Tangent
 
-\S{cmdCurvedL} Curved Lines
+\G{png.d/dcircle3.png}
+
+\c{Left-Drag} a point from the edge of the circle to the center to specify the radius.
+
+\rule
+
+\S2{cmdDrawCircleCenter} Draw Circle from Center
+
+\G{png.d/dcircle2.png}
+
+\c{Left-Drag} from the center of the circle to the edge to specify the radius.
+
+\rule
+
+\S2{cmdDrawFilledCircleTangent} Draw Filled Circle from Tangent
+
+\G{png.d/dflcrcl3.png}
+
+\c{Left-Drag} from the edge of the circle to the center to specify the radius.
+
+\rule
+
+\S2{cmdDrawFilledCircleCenter} Draw Filled Circle from Center
+
+\G{png.d/dflcrcl2.png}
+
+\c{Left-Drag} a point from the center to the edge of the circle to specify the radius.
+
+\rule
+
+\S{cmdDrawCurves} Curved Lines
 
 \G{png.d/mdrawcurve.png}
 
+Before a Curved Line is created, its width and color can be set. 
+The \f{Curved Line Width} or \f{Bezier Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
 \f{Curved Lines} are created in the same manner as curved tracks.
 
-\dd \G{png.d/dcurve1.png} Select the start of the curve and drag in the direction of the curve.
-
-If \e{Shift} is held down as the left mouse button is clicked for the first end point of the curve and the cursor is over a line object the position will snap to the nearest end of that line. 
-If \e{Shift} is held down when the button is released for the second end, it will snap to the nearest end of a line object if it is over one. 
+\dd (\K{cmdDrawCurveEndPt}). Drag out the end point and then curve it.
 
 \u000
 
-\dd \G{png.d/dcurve2.png} Select one end of the curve and drag to the center.
-
-To complete the command, drag on the red arrows to adjust the curve.
+\dd (\K{cmdDrawCurveCenter}). Select the center and then an endpoint and drag out the curve.
 
 \u000
 
-\dd \G{png.d/dcurve3.png} Select the center of the curve and drag to one end.
-
-To complete the command, drag on the red arrows to adjust the curve.
- 
-\u000
-
-\dd \G{png.d/dcurve4.png} Drag from one end of the curve to the other to form the chord of the curve.
-
-To complete the command, drag on the red arrows to adjust the curve.
+\dd (\K{cmdDrawCurveTangent}). Select the end and drag out the center. 
 
 \u000
 
-\dd \G{png.d/dbezier.png} \e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
+\dd (\K{cmdDrawCurveChord}). Drag from one end of the curve to the other to form the chord of the curve.
 
-If \e{Shift} is held while the end points are selected, the curve will lock to the ends of nearby line objects.
+\u000
 
-To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point. Hit \e{Enter} to accept, \e{Esc} to reject.
+\dd (\K{cmdDrawBezierCurve} \G{png.d/dbezier.png} \e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
+
+If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, the curve ends will snap to the nearest part of nearby Draw objects unless \e{Alt} is held.
+If Magnetic Snap is disabled, snapping to objects will only occur if \e{Alt} is held. 
+
+If \f{Grid Snap} is on and magnetic snap does not find a draw object, the curve ends will snap to the grid. \e{Alt} suppresses this snap.
+
+If \e{Sticky} is set for curved line objects, after the curve is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the radius and the arc angle. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the new values to the curve. Pressing \c{Space} or \c{Enter} or \c{Tab} on the drawing surface will move to drawing a new curve. 
+Pressing \c{Shift+Tab} with the cursor on the drawing surface will remove the current curve, but allow a new curve to be drawn.
+Even if \c{Esc} is pressed, the curve will already exist, it can be removed with \f{Undo}. 
+
+To adjust the curve with the mouse, \e{Left-Click} and \e{Left-Drag} an end or a the radius. Hit \e{Enter} or \e{Space} to accept, \e{Esc} to reject.
 
 \rule
 
+\S2{cmdDrawCurveEndPt} Draw Curve from End Point
 
-\S{cmdNote} Note
+\G{png.d/dcurve1.png} 
 
-\G{png.d/bnote.png}
+\c{Left-drag} from the start of the curve and drag in the direction of the curve.  
+Then \c{left-drag} to form the curve.
 
-The \f{Notepad} command allows you to attach notes (\G{png.d/iconnote.png}) to selected places on the layout.
+If the cursor is over a Draw object and \f{MagneticSnap} (\K{cmdMagneticSnap}) is on, the first position will snap to the nearest part of that object. If \e{Alt} is held the snap will be suppressed.
+If \f{MagneticSnap} is disabled, the snap will happen if \e{Alt} is held. If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
+suppressed if \f{Alt} is held. The second end will act similarly.
 
-Click and drag on the Main Canvas (\K{mainW}) to place the note.
+\rule
+
+\S2{cmdDrawCurveTangent} Draw Curve from Tangent
+
+\G{png.d/dcurve2.png} 
+
+Select one end of the curve and \c{left-drag} to the center.
+Then \c{left-drag} the curve around the center.
+
+The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSnap} (\K{cmdMagneticSnap}) unless \e{Alt} is held.
+If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
+suppressed if \f{Alt} is held.
+
+To complete the command, drag on the red arrows to adjust the curve from the initial end.
+
+\rule
+
+\S2{cmdDrawCurveCenter} Draw Curve from Center
+
+\G{png.d/dcurve3.png} 
+
+Select the center of the curve and \c{left-drag} to one end. If \f{GridSnap} is enabled, the first position will snap to the Grid. This is 
+suppressed if \f{Alt} is held.
+
+\rule
+
+\S2{cmdDrawCurveChord} Draw Curve from Chord
+
+\G{png.d/dcurve4.png} 
+
+\c{Left-drag} from one end of the curve to the other to form the chord of the curve.
+
+The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSnap} (\K{cmdMagneticSnap}) and \f{SnapGrid} unless \e{Alt} is held.
+
+If the mouse is over a draw object the second position will snap to the nearst part of that object. If \e{Shift} is held the snap will be suppressed.
+
+To complete the command, drag on the red arrows to adjust the curve. 
+
+\rule
+
+\S2{cmdDrawBezierCurve} Draw Bezier Curve
+
+\G{png.d/dbezier.png} 
+
+\e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
+Repeat for the other end and control point.
+
+The first and second ends will act like \K{cmdDrawCurveEndPt} with \f{MagneticSnap} and \f{SnapGrid} unless \e{Alt} is held.
+
+\rule
+
+\S{cmdNote} Note Variants
+
+\G{png.d/mnote.png}
+
+The \f{Note} command allows you to 
+
+\dd Attach \f{plain text notes} (\K{cmdTextNote}),
+
+\u000
+
+\dd Attach \f{weblinks} (\K{cmdLinkNote}) or 
+
+\u000
+
+\dd Attach \f{document references} (\K{cmdFileNote}) to selected places on the layout.
+
+\rule
+
+\S2{cmdTextNote} Plain Text
+
+\G{png.d/bnote.png} \G{png.d/iconnote.png} Click and drag on the Main Canvas (\K{mainW}) to place the note.
 
 When you release, the \e{Note Editor} dialog is displayed.  You can enter the note in the text area.
+Text is limited to about 10 thousand characters. 
 
-When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will display the \e{Property Sheet} to let you read or modify the note.  
+\G{png.d/notetext.png}
+
+When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will display the \e{Property Sheet} to let you read or modify the note.
+
+\rule
+
+\S2{cmdLinkNote} Weblink
+
+\G{png.d/blink.png} \G{png.d/iconlink.png} Similar to text notes you can place a weblink on the layout.
+
+After releasing the mouse button, the \e{Link Editor} dialog is displayed.
+
+\G{png.d/notelink.png}
+
+You can enter the URL
+of the website and a short description. When clicking on the Open button, your default browser is
+used to display the website.
+
+ When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Weblink Note}
+ will display the \e{Property Sheet} to let you read or modify the URL or the
+ description.
+
+Double clicking on a weblink icon opens the website in your default browser.
+
+\rule
+
+\S2{cmdFileNote} Document
+
+\G{png.d/bfile.png} \G{png.d/iconfile.png} Similar to text notes you can place a reference to a file on the layout.
+
+After releasing the mouse button, the \e{Document Editor} dialog is displayed.
+
+\G{png.d/notefile.png}
+
+You can select the file and a enter a short description. When clicking on the Open button the file is opened with the default program for that file type.
+
+When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Document Note} will display the \e{Property Sheet} to let you read or modify the filename or the
+ description.
+
+Double clicking on a document reference icon opens the document  in the default program.
 
 \rule
 
 
 \S{cmdRuler} Ruler
 
-\G{png.d/bruler.png} 
+\G{png.d/bruler.png}
 
 The \f{Ruler} command displays a ruler on the layout.  Click where you want the ruler to begin and drag the cursor to measure distances from the origin.  The measured length is displayed in the \f{Status-bar} (\K{mainW}).
 
@@ -129,44 +291,232 @@ Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
 
 \rule
 
+\S{cmdAngle} Protractor
 
-\S{cmdShapes} Shapes
+\G{png.d/bangle.png}
+
+The \f{Angle} command displays a \e{Protractor} on the layout. Click for the protractor origin and \c{left-drag} the cursor to set the base angle. Adding \c{Ctrl} will snap the angle to a multiple of 90 degrees. 
+
+Then \{Left-Drag the second line. Adding \c{Ctrl} will snap the angle to 90 degree relative to the base line. The angle between the lines is displayed. 
+
+Sunsequent clicks on the \f{Angle} button will hide or display the \e{Protractor}.
+
+The points of the \e{Protractor} can be modified using the \f{Modify} (\K{cmdModify}) command.
+
+\rule
+ 
+
+\S{cmdDrawShapes} Shapes
 
 \G{png.d/mdrawshapes.png}
 
 Shapes are drawn by:
 
-\dd \G{png.d/dbox.png} \G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner. 
+\dd (\K{cmdDrawBox}). Boxes 
 
 \u000
 
-\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \f{Poly Lines} and \f{Polygons} are created by \e{Left+Drag}, and a corner is placed when you release the left mouse button.  The \f{Poly} shape is finished by pressing the \e{Space} key or by selecting another operation.
+\dd (\K{cmdDrawFilledBox}. Filled Boxes
+
+\u000
+
+\dd (\K{cmdDrawPolygon}. Polygons
+
+\u000
+
+\dd (\K{cmdDrawFilledPolygon}. Filled Polygons
+
+\u000
+
+\dd (\K{cmdDrawPolyline}. PolyLines
+
+\u000
+
+
+If \e{Sticky} is set for many draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \c{Space} or \c{Return} or \c{Tab} or by selecting a new operation.
+
+The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \c{Space} or \c{Return} \c{Tab} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
+All Polylines and Polygons must have more than 2 corners to be created successfully.
+
+Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points and to make them curved or rounded points.
 
 \rule
 
+\S2{cmdDrawBox} Draw Box
 
-\S{cmdStraightL} Straight Objects 
+\G{png.d/dbox.png}
+
+Before the box is drawn, the line width and color can be specified. 
+The \f{Box Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
+\f{Boxes} are created by selecting one corner and dragging the opposite corner.
+
+\u000
+
+\rule
+
+\S2{cmdDrawFilledBox} Draw Filled Box
+
+\G{png.d/dfilbox.png}
+
+\f{Filled Boxes} are created by selecting one corner and dragging the opposite corner.
+
+\u000
+
+\rule
+
+\S2{cmdDrawPolygon} Draw Polygon
+
+\G{png.d/dpoly.png}
+
+Before the polygon is started the line width and color can be set. 
+The \f{PolyGon Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
+\f{Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
+When using \c{Left-drag}, the node will be positioned when you release the button.
+
+\dd If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
+
+\dd If it is disabled, the snap will only occur if \e{Alt} is held.
+
+\dd If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side.
+On the first polygon side this will be at a multiple of 90 degrees to the axes. The line from the previous point will be highlighted in Blue.
+
+\dd A special blue square anchor will show when the cursor is in a position such that it is 90 degrees away from both the last point and the first point of the Polygon.
+
+\dd The last polygon segment dimensions can be altered using the text boxes that appear showing the segment length and the relative angle to the previous segment.
+
+\dd A polygon is closed if the next node is place over the start of the polygon
+
+\dd The polygon is ended using \c{Enter} or \c{Space}. The polygon will be auto-closed.
+
+\rule
+
+\S2{cmdDrawFilledPolygon} Draw Filled Polygon
+
+\G{png.d/dfilbox.png}
+
+Before the Polygon is started, the fill color can be set.
+
+\f{Filled Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
+When using \c{Left-drag}, the node will be positioned when you release the button.
+
+\dd The fill color can be adjusted using the color control at the bottom of the window
+
+\dd If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
+
+\dd If it is disabled, the snap will only occur if \e{Alt} is held.
+
+\dd If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side.
+
+On the first polygon side this will be at a multiple of 90 degrees to the axes. The line from the previous point will be highlighted in Blue.
+
+\dd A special blue square anchor will show when the cursor is in a position such that it is 90 degrees away from both the last point and the first point of the Polygon.
+
+\dd The last polygon segment dimensions can be altered using the text boxes that appear showing the segment length and the relative angle to the previous segment.
+
+\dd The polygon is closed if the next node is place over the start of the polygon
+
+\dd The Filled Polygon is ended using \c{Enter} or \c{Space}. The polygon will be auto-closed.
+
+
+\rule
+
+\S2{cmdDrawPolyline} Draw PolyLine
+
+\G{png.d/dpolylin.png} 
+
+Before the polygon is started the line width and color can be set. 
+The \f{Polyline Line Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
+\f{PolyLines} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. 
+When using \c{left-drag}, the node will be positioned when you release the button.
+
+\dd If \f{MagneticSnap} (\K{cmdMagneticSnap}) is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
+
+\dd If it is disabled, the snap will only occur if \e{Alt} is held.
+
+\dd If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side.
+On the first polyline segemnt this will be at a multiple of 90 degrees to the axes. The line from the previous point will be highlighted in Blue.
+
+\dd A special blue square anchor will show when the cursor is in a position such that it is 90 degrees away from both the last point and the first point of the Polyline.
+
+\dd The last drawn polyline segment dimensions can be altered using the text boxes that appear showing the segment length and the relative angle to the previous segment.
+
+\dd The polyline is ended using \c{Enter} or \c{Space}.
+ 
+\dd While drawing the Polyline certain short cuts are available by keystroke and via the Context Menu: 
+
+\dd \c{'p'} - to cover to a Polygon
+
+\dd \c{'s'} - to smooth the last selected point
+
+\dd \c{'r'} - to make the last selected point round
+
+\dd \c{'v'} - to make the last selected point sharp (a vertex)
+
+\dd \c{'o'} - to change to \K{DrawOrigin} mode
+
+\rule
+
+\S{cmdDrawStraights} Straight Objects
 
 \G{png.d/mdrawstraight.png}
 
-Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  If \e{Draw Straight Objects} is Sticky (\K{cmdSticky}), \e{Cntl+Left+Drag} will use the endpoint of the previous line as the starting point.
+Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.
 
-\dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
-If \e{Shift} is held down for the first end point and the cursor is over a line object the new line start position will snap to the nearest end of the line. 
-If \e{Shift} is held down when the button is released at the end of the \e{Left+Drag} the line end position will snap to the nearest end of any line object it is over.  
-
+\dd (\K{cmdDrawLine}). Creates a Straight Line
 
 \u000
 
-\dd \G{png.d/ddimlin.png} Creates a \f{Dimension Line} of various sizes.
+\dd (\K{cmdDrawDimLine}). Creates a \f{Dimension Line} of various sizes.
 
 \u000
 
-\dd \G{png.d/dbench.png} Creates \i\f{Bench-work} using different types and orientation of lumber.
+\dd (\K{cmdDrawBench}). Creates \i\f{Bench-work} using different types and orientation of lumber.
 
 \u000
 
-\dd \G{png.d/dtbledge.png} Creates a \f{Table Edge}
+\dd (\K{cmdDrawTableEdge}). Creates a \f{Table Edge}
+
+\S2{cmdDrawLine} Draw Straight Line
+
+\G{png.d/dline.png} 
+
+Creates a \f{Straight Line} of specified color and width.
+The \f{Straight Line Width} field is a scaled dimension in 75ths of an inch if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
+
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor. If \c{Alt} is held down, the magnetic Snap is reversed. 
+If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is suppressed if \f{Alt} is held.
+
+The \f{Width} field is a scaled dimension in inches if >0. If 0 it is a 1 pixel wide line at all zooms. If the value is negative, it is a scale-independent number of pixels wide.
+
+If \e{Sticky} is set for straight draw, after the line is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the angle and the length. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the value to the line. Pressing \c{Space} or \c{Enter} on the drawing surface will move to drawing a new line. 
+Pressing \c{Shift+Tab} will remove the current object and allow a new one to drawn.
+Even if \c{Esc} is pressed, the line will already exist, it can be removed with \f{Undo}.  
+
+\rule
+
+\S2{cmdDrawDimLine} Draw Dimension Line
+
+\G{png.d/ddimlin.png} 
+
+Creates a \f{Dimension Line} of various sizes.
+
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Alt} is held down.
+If it is disabled, it will only snap if \e{Alt} is held.  If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
+suppressed if \f{Alt} is held.
+
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
+
+\S2{cmdDrawBench} Draw Benchwork.
+
+\G{png.d/dbench.png} 
+
+Creates \i\f{Bench-work} using different types and orientation of lumber.
 
 \i{Bench-work Notes}
 
@@ -180,24 +530,81 @@ If \e{Shift} is held down when the button is released at the end of the \e{Left+
 
 \dd When using metric units (\K{cmdPref}), a 1" x 2" is labeled 50mm x 25mm
 
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Alt} is held down.
+If it is disabled, it will only snap if \e{Alt} is held. If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
+suppressed if \f{Alt} is held.
+
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of the new side to a multiple of 90 degrees.
+
+If \e{Sticky} is set for straight draw, after the benchwork is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the angle and the length. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the value to the benchwork. Pressing \c{Space} or \c{Enter} or \c{Tab} on the drawing surface will move to drawing a new benchwork line. 
+Pressing \c{Shift+Tab} on the drawing surface will remove the current object and allow a new one to be drawn.
+Even if \c{Esc} is pressed, the benchwork will already exist, it can be removed with \f{Undo}.  
+
+\S2{cmdDrawTableEdge} Draw Table Edge
+
+\G{png.d/dtbledge.png} 
+
+Creates a \f{Table Edge}
+
+With \f{MagneticSnap} (\K{cmdMagneticSnap}) enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Alt} is held down.
+If it is disabled, it will only snap if \e{Alt} is held. If \f{GridSnap} is enabled and MagneticSnap does not find a postion, the first position will snap to the Grid. This is 
+suppressed if \f{Alt} is held.
+
+If \c{Ctrl} is held down during \c{Left+Drag} the edge will to a end point of another table edge or to a multiple of 90 degrees if that isn't available.
+
+If \e{Sticky} is set for straight draw, after the edge is drawn there will be two text fields on the bottom rail, to allow fine-tuning of the angle and the length. 
+Pressing \c{Enter} or \c{Tab} with the cursor in these boxes will apply the value to the edge. Pressing \c{Space} or \c{Enter} or \c{Tab} on the drawing surface will move to drawing a new edge. 
+Pressing \c{Shift+Tab} on the drawing surface will remove the current object and allow a new one to be drawn.
+Even if \c{Esc} is pressed, the edge will already exist, it can be removed with \f{Undo}. 
+
 \rule
+
+\S{DrawOrigin} Draw Objects Origin
+
+Some objects will a natural rotation point within them. By setting the object origin to this point, subsequent rotation will be about that point and not the layout origin. 
+This is referred to as a \e{Relative} origin and will be present if the origin is non-zero.
+When an object with a Relative is moved or rotated, the origin and angle are adjusted but the relative draw point values remain the same.
+If an object has a zero origin, it is called Absolute. If it is moved or rotated, the origin and angle remain zero, but all the obect point(s) are adjusted.  
+
+You can choose to set the origin to make it Relative or put it back to Absolute (origin zero) during \K{cmdDrawShapes} or \K{cmdModify} or by using the \K{cmdDescribe} settings.  
+
+As a practical matter, the object will appear identical until a subsequent rotation value is entered in the \K{cmdDescribe} window in both cases.
+
+In Origin Mode (entered using \c{'o'} or the Context Menu, there are certain shortcuts available -
+
+\dd \c{'p'} Go to Points Mode
+
+\dd \c{'0'} Move to Absolute (Origin to 0,0)
+
+\dd \c{'1-4'} Move the Relative Origin to the shape point 1 to 4
+
+\dd \c{'l'} Move the Relative Origin to the last selected point
+
+\dd \c{'m'} Move the Relative Origin to the middle of the shape (centeroid). 
 
 
 \S{cmdText} Text
 
-\G{png.d/btext.png} 
+\G{png.d/btext.png}
 
-The \f{Text} command lets you enter text on the layout at the selected position. You can use the Tab key to format the text to fixed tab positions and CTRL+Enter to enter a newLine character.
+The \f{Text} command lets you enter a Text Draw object on the layout at the selected position. You can use the Tab key to format the text to fixed tab positions and CTRL+Enter to enter a newLine character.
 
-\G{png.d/statustext.png} 
+\G{png.d/statustext.png}
 
-The font size can be changed by the Font Size drop list on the \f{Status-bar} (\K{mainW}).  The font size is scaled along with everything else on the layout so text is always the same relative size as other layout objects.
+The font size can be changed by the Font Size drop list on the \f{Status-bar} (\K{mainW}). The font size is scaled along with everything else on the layout so text is always the same relative size as other layout objects.
 
-The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \e{Shift+Right-Click} (\K{cmdAcclKeys}).
+The color used can be selected by the Color icon on the \f{Status-bar} (\K{mainW}). 
 
-The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired postion on the layout.
+The new text object can be "boxed" by having a line drawn around it using the Boxed tick-mark  on the \f{Status-bar} (\K{mainW}).
 
-The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects.
+The position where text is to be placed on the layout is selected prior to text entry by \c{Left-Click}ing on the layout at the point where the text is to appear. Desired text is input after the position is selected. If necessary, the location can be changed once text entry begins by \c{Left-Click+Drag}ing the text to any desired postion on the layout.
+
+The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents, color and fontsize of existing \f{Text} objects and to set the boxes property.
+
+The new Text object is committed when another command is entered (or \e{Enter} is used if the Text command is Sticky).
+
+The font used for all Text objects can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \c{Shift+Right-Click} (\K{cmdAcclKeys}).
 
 Note: loading fonts (or changing sizes) can take a noticeable amount of time.
 

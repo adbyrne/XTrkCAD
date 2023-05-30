@@ -17,18 +17,21 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <math.h>
-
+#include "common.h"
 #include "ccurve.h"
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "custom.h"
-#include "i18n.h"
+#include "fileio.h"
 #include "param.h"
 #include "track.h"
+
+EXPORT DIST_T easementVal = 0.0;
+EXPORT DIST_T easeR = 0.0;
+EXPORT DIST_T easeL = 0.0;
 
 static wButton_p easementB;
 
@@ -65,22 +68,24 @@ static void EasementCancel( void );
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
 static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
+static paramFloatRange_t r0_200 = { 0.0, 200.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
 	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0n1_100, N_("Value") },
-	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_100, N_("R"), BO_READONLY },
+	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_200, N_("R"), BO_READONLY },
 	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
-	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE } };
-static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, sizeof easementPLs/sizeof easementPLs[0] };
+	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE }
+};
+static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, COUNT( easementPLs ) };
 
 
 static void SetEasement(
-		DIST_T val,
-		void * update )
+        DIST_T val,
+        void * update )
 /*
  * Set transition-curve parameters (R and L).
  */
@@ -101,14 +106,15 @@ static void SetEasement(
 			val = 0;
 			bm = enone_bm;
 		} else if (val <= 1.0) {
-			if (val < 0.21) val = 0.21;   //Eliminate values that give negative radii
+			if (val < 0.21) { val = 0.21; }   //Eliminate values that give negative radii
 			z = 1.0/val - 1.0;
 			easeR = Rvalues[1] - z * (Rvalues[1] - Rvalues[0]);
 			easeL = Lvalues[1] - z * (Lvalues[1] - Lvalues[0]);
-			if (easeR != 0.0)
+			if (easeR != 0.0) {
 				easeX = easeL*easeL/(24*easeR);
-			else
+			} else {
 				easeX = 0.0;
+			}
 			if (val == 1.0) {
 				selVal = 2;
 				bm = enormal_bm;
@@ -126,10 +132,11 @@ static void SetEasement(
 			z = val - 1.0;
 			easeR = Rvalues[1] + z * (Rvalues[2] - Rvalues[1]);
 			easeL = Lvalues[1] + z * (Lvalues[2] - Lvalues[1]);
-			if (easeR != 0.0)
+			if (easeR != 0.0) {
 				easeX = easeL*easeL/(24*easeR);
-			else
+			} else {
 				easeX = 0.0;
+			}
 			if (val == 2.0) {
 				selVal = 3;
 				bm = ebroad_bm;
@@ -154,28 +161,29 @@ static void SetEasement(
 	}
 	/*ParamChange( &easeValPD );*/
 
-	if (easementB)
+	if (easementB) {
 		wButtonSetLabel( easementB, (char*)bm );
+	}
 }
 
 
 static void EasementOk( void )
 {
 	ParamLoadData( &easementPG );
-	SetEasement( easementVal, (void*)FALSE );
+	SetEasement( easementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
 
 
 static void EasementCancel( void )
 {
-	SetEasement( easementVal = oldEasementVal, (void*)FALSE );
+	SetEasement( easementVal = oldEasementVal, I2VP(FALSE) );
 	wHide( easementW );
 }
 
 
 static void EasementSel(
-		long arg )
+        long arg )
 /*
  * Handle transition-curve parameter selection.
  */
@@ -198,22 +206,22 @@ static void EasementSel(
 		val = -1.0;
 		break;
 	default:
-		AbortProg( "easementSel: bad value %ld", arg);
+		CHECKMSG( FALSE, ( "easementSel: bad value %ld", arg) );
 		val = 0.0;
 		break;
 	}
-	SetEasement( val, (void*)FALSE );
+	SetEasement( val, I2VP(FALSE) );
 }
 
 
 static void EasementDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
 	switch (inx) {
 	case I_EASEVAL:
-		SetEasement( *(FLOAT_T*)valueP, (void*)1 );
+		SetEasement( *(FLOAT_T*)valueP, I2VP(1) );
 		break;
 	case I_EASESEL:
 		EasementSel( *(long*)valueP );
@@ -223,26 +231,30 @@ static void EasementDlgUpdate(
 
 
 static void LayoutEasementW(
-		paramData_t * pd,
-		int inx,
-		wPos_t colX,
-		wPos_t * x,
-		wPos_t * y )
+        paramData_t * pd,
+        int inx,
+        wWinPix_t colX,
+        wWinPix_t * x,
+        wWinPix_t * y )
 {
-	if ( inx == 2 )
-		wControlSetPos( easementPLs[0].control, *x, wControlGetPosY(easementPLs[0].control) );
+	if ( inx == 2 ) {
+		wControlSetPos( easementPLs[0].control, *x,
+		                wControlGetPosY(easementPLs[0].control) );
+	}
 }
 
 
-static void DoEasement( void * junk )
+static void DoEasement( void * unused )
 {
 	if (easementW == NULL) {
-		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
-		SetEasement( easementVal, (void*)TRUE );
+		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")),
+		                               _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel,
+		                               TRUE, LayoutEasementW, 0, EasementDlgUpdate );
+		SetEasement( easementVal, I2VP(TRUE) );
 	}
 	oldEasementVal = easementVal;
 	wShow( easementW );
-	SetEasement( easementVal, (void*)TRUE );
+	SetEasement( easementVal, I2VP(TRUE) );
 }
 
 
@@ -253,36 +265,37 @@ static void EasementChange( long changes )
 {
 	if (changes&(CHANGE_SCALE|CHANGE_UNITS)) {
 		GetScaleEasementValues( Rvalues, Lvalues );
-		SetEasement( easementVal, (void*)TRUE );
+		SetEasement( easementVal, I2VP(TRUE) );
 	}
 }
 
 
-#include "bitmaps/enone.xpm"
-#include "bitmaps/esharp.xpm"
-#include "bitmaps/egtsharp.xpm"
-#include "bitmaps/eltsharp.xpm"
-#include "bitmaps/enormal.xpm"
-#include "bitmaps/eltbroad.xpm"
-#include "bitmaps/ebroad.xpm"
-#include "bitmaps/egtbroad.xpm"
-#include "bitmaps/ecornu.xpm"
+#include "bitmaps/ease-none.xpm3"
+#include "bitmaps/ease-sharp.xpm3"
+#include "bitmaps/ease-gt-sharp.xpm3"
+#include "bitmaps/ease-lt-sharp.xpm3"
+#include "bitmaps/ease-normal.xpm3"
+#include "bitmaps/ease-broad.xpm3"
+#include "bitmaps/ease-gt-broad.xpm3"
+#include "bitmaps/ease-lt-broad.xpm3"
+#include "bitmaps/ease-cornu.xpm3"
 
 
 EXPORT addButtonCallBack_t EasementInit( void )
 {
 	ParamRegister( &easementPG );
 
-	enone_bm = wIconCreatePixMap( enone_xpm );
-	eltsharp_bm = wIconCreatePixMap( eltsharp_xpm );
-	esharp_bm = wIconCreatePixMap( esharp_xpm );
-	egtsharp_bm = wIconCreatePixMap( egtsharp_xpm );
-	enormal_bm = wIconCreatePixMap( enormal_xpm );
-	eltbroad_bm = wIconCreatePixMap( eltbroad_xpm );
-	ebroad_bm = wIconCreatePixMap( ebroad_xpm );
-	egtbroad_bm = wIconCreatePixMap( egtbroad_xpm );
-	ecornu_bm = wIconCreatePixMap( ecornu_xpm );
-	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, (addButtonCallBack_t)DoEasementRedir, NULL );
+	enone_bm = wIconCreatePixMap( ease_none_xpm3[iconSize] );
+	eltsharp_bm = wIconCreatePixMap( ease_lt_sharp_xpm3[iconSize] );
+	esharp_bm = wIconCreatePixMap( ease_sharp_xpm3[iconSize] );
+	egtsharp_bm = wIconCreatePixMap( ease_gt_sharp_xpm3[iconSize] );
+	enormal_bm = wIconCreatePixMap( ease_normal_xpm3[iconSize] );
+	eltbroad_bm = wIconCreatePixMap( ease_lt_broad_xpm3[iconSize] );
+	ebroad_bm = wIconCreatePixMap( ease_broad_xpm3[iconSize] );
+	egtbroad_bm = wIconCreatePixMap( ease_gt_broad_xpm3[iconSize] );
+	ecornu_bm = wIconCreatePixMap( ease_cornu_xpm3[iconSize] );
+	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, DoEasementRedir,
+	                              NULL );
 
 	RegisterChangeNotification( EasementChange );
 	return &DoEasement;

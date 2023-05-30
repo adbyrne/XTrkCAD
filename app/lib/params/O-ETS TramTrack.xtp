@@ -43,7 +43,7 @@ TURNOUT O "Electric Train System O Scale TramTrack	120mm Connecting Track	14"
 	L 11579568 0.053333 0.000000 -1.377953 4.724409 -1.377953
 	END
 TURNOUT O "Electric Train System O Scale TramTrack	120mm 90° Crosss	27"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.724409 0.000000 90.000000
 	E 2.362205 2.362205 0.000000

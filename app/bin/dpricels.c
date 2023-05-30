@@ -17,15 +17,12 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-#include <string.h>
 
 #include "compound.h"
 #include "custom.h"
-#include "i18n.h"
 #include "layout.h"
-#include "messages.h"
 #include "param.h"
 #include "track.h"
 
@@ -41,7 +38,7 @@ DIST_T priceListFlexLengthV;
 DIST_T priceListFlexCostV;
 
 static paramFloatRange_t priceListCostData = { 0.0, 9999.99, 80 };
-static wPos_t priceListColumnWidths[] = { -60, 200 };
+static wWinPix_t priceListColumnWidths[] = { -60, 200 };
 static const char * priceListColumnTitles[] = { N_("Price"), N_("Item") };
 static paramListData_t priceListListData = { 10, 400, 2, priceListColumnWidths, priceListColumnTitles };
 static paramFloatRange_t priceListFlexData = { 0.0, 999.99, 80 };
@@ -51,32 +48,38 @@ static paramData_t priceListPLs[] = {
 	{	PD_FLOAT, &priceListCostV, "cost", PDO_NOPREF|PDO_NOPSHUPD, &priceListCostData },
 #define I_PRICELSENTRY			(1)
 #define priceListEntryS			((wString_p)priceListPLs[I_PRICELSENTRY].control)
-	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, (void*)(400-80-3), NULL, BO_READONLY },
+	{	PD_STRING, &priceListEntryV, "entry", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, I2VP(400-80-3), NULL, BO_READONLY, NULL, sizeof priceListEntryV },
 #define I_PRICELSLIST			(2)
 #define priceListSelL			((wList_p)priceListPLs[I_PRICELSLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
+	{	PD_LIST, NULL, "inx", PDO_DLGRESIZE|PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
 #define I_PRICELSFLEXLEN		(3)
 	{	PD_FLOAT, &priceListFlexLengthV, "flexlen", PDO_NOPREF|PDO_NOPSHUPD|PDO_DIM|PDO_DLGRESETMARGIN, &priceListFlexData, N_("Flex Track") },
 	{	PD_MESSAGE, N_("costs"), NULL, PDO_DLGHORZ },
 #define I_PRICELSFLEXCOST		(6)
-	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData } };
-static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, sizeof priceListPLs/sizeof priceListPLs[0] };
+	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData }
+};
+static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, COUNT( priceListPLs ) };
 
 
 static void PriceListUpdate()
 {
 	DIST_T oldPrice;
 	ParamLoadData( &priceListPG );
-	if (priceListCurrent == NULL)
+	if (priceListCurrent == NULL) {
 		return;
-	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, priceListCurrent->title );
+	}
+	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO,
+	                     priceListCurrent->title );
 	wPrefGetFloat( "price list", message, &oldPrice, 0.0 );
-	if (oldPrice == priceListCostV)
+	if (oldPrice == priceListCostV) {
 		return;
+	}
 	wPrefSetFloat( "price list", message, priceListCostV );
 	FormatCompoundTitle( listLabels|LABEL_COST, priceListCurrent->title );
-	if (message[0] != '\0')
-		wListSetValues( priceListSelL, wListGetIndex(priceListSelL), message, NULL, priceListCurrent );
+	if (message[0] != '\0') {
+		wListSetValues( priceListSelL, wListGetIndex(priceListSelL), message, NULL,
+		                priceListCurrent );
+	}
 }
 
 
@@ -91,14 +94,16 @@ static void PriceListOk( void * action )
 
 
 static void PriceListSel(
-		turnoutInfo_t * to )
+        turnoutInfo_t * to )
 {
 	FLOAT_T price;
 	PriceListUpdate();
 	priceListCurrent = to;
-	if (priceListCurrent == NULL)
+	if (priceListCurrent == NULL) {
 		return;
-	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO, priceListCurrent->title );
+	}
+	FormatCompoundTitle( LABEL_MANUF|LABEL_DESCR|LABEL_PARTNO,
+	                     priceListCurrent->title );
 	wPrefGetFloat( "price list", message, &price, 0.00 );
 	priceListCostV = price;
 	strcpy( priceListEntryV, message );
@@ -111,18 +116,24 @@ static void PriceListChange( long changes )
 {
 	turnoutInfo_t * to1, * to2;
 	if ((changes & (CHANGE_SCALE|CHANGE_PARAMS)) == 0 ||
-		priceListW == NULL || !wWinIsVisible( priceListW ) ) 
+	    priceListW == NULL || !wWinIsVisible( priceListW ) ) {
 		return;
+	}
 	wListClear( priceListSelL );
-	to1 = TurnoutAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL, -1 );
-	to2 = StructAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL );
-	if (to1 == NULL)
+	to1 = TurnoutAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL,
+	                  NULL, -1 );
+	to2 = StructAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL,
+	                 NULL );
+	if (to1 == NULL) {
 		to1 = to2;
+	}
 	priceListCurrent = NULL;
-	if (to1)
+	if (to1) {
 		PriceListSel( to1 );
-	if ((changes & CHANGE_SCALE) == 0)
+	}
+	if ((changes & CHANGE_SCALE) == 0) {
 		return;
+	}
 	sprintf( message, "price list %s", curScaleName );
 	wPrefGetFloat( message, "flex length", &priceListFlexLengthV, 0.0 );
 	wPrefGetFloat( message, "flex cost", &priceListFlexCostV, 0.0 );
@@ -131,9 +142,9 @@ static void PriceListChange( long changes )
 
 
 static void PriceListDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
+        paramGroup_p pg,
+        int inx,
+        void * valueP )
 {
 	turnoutInfo_t * to;
 	switch( inx ) {
@@ -141,7 +152,8 @@ static void PriceListDlgUpdate(
 		PriceListUpdate();
 		break;
 	case I_PRICELSLIST:
-		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, (wIndex_t)*(long*)valueP );
+		to = (turnoutInfo_t*)wListGetItemContext( (wList_p)pg->paramPtr[inx].control,
+		                (wIndex_t)*(long*)valueP );
 		PriceListSel( to );
 		break;
 	}
@@ -150,8 +162,10 @@ static void PriceListDlgUpdate(
 
 static void DoPriceList( void * junk )
 {
-	if (priceListW == NULL)
-		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle(_("Price List")), _("Done"), PriceListOk, NULL, TRUE, NULL, 0, PriceListDlgUpdate );
+	if (priceListW == NULL) {
+		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle(_("Price List")),
+		                                _("Done"), PriceListOk, wHide, TRUE, NULL, F_RESIZE, PriceListDlgUpdate );
+	}
 	wShow( priceListW );
 	PriceListChange( CHANGE_SCALE|CHANGE_PARAMS );
 }

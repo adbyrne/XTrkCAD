@@ -1,8 +1,7 @@
-style=1tbs
-break-blocks
-unpad-paren
-pad-header
-max-code-length=80
-break-after-logical
-mode=c
-
+--style=1tbs
+--indent=tab=8
+--max-code-length=80
+--mode=c
+--keep-one-line-blocks
+--keep-one-line-statements
+--min-conditional-indent=0

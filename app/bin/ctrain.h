@@ -17,34 +17,40 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef HAVE_CTRAIN_H
 #define HAVE_CTRAIN_H
 
 #include "common.h"
-#include "track.h"
+#include "track.h" //- traverseTrack
+
+extern wIndex_t trainCmdInx;
+
+extern long trainPause;
 
 struct carItem_t;
 typedef struct carItem_t carItem_t;
 typedef carItem_t * carItem_p;
 typedef struct {
-		coOrd pos;
-		ANGLE_T angle;
-		} vector_t;
+	coOrd pos;
+	ANGLE_T angle;
+} vector_t;
 
-carItem_p currCarItemPtr;
-wControl_p newCarControls[2];
-void DoCarDlg( void );
+extern carItem_p currCarItemPtr;
+extern wControl_p newCarControls[2];
+void DoCarDlg( void * unused );
 BOOL_T CarItemRead( char * );
+void CarItemShelve( carItem_p );
 track_p NewCar( wIndex_t, carItem_p, coOrd, ANGLE_T );
+void UncoupleCars( track_p, int );
 void CarGetPos( track_p, coOrd *, ANGLE_T * );
 void CarSetVisible( track_p );
 void CarItemUpdate( carItem_p );
 void CarItemLoadList( void * );
 char * CarItemDescribe( carItem_p, long, long * );
-coOrd CarItemFindCouplerMountPoint( carItem_p, traverseTrack_t, int );
+void CarItemFindCouplerMountPoint( carItem_p, traverseTrack_t, coOrd[2] );
 void CarItemSize( carItem_p, coOrd * );
 char * CarItemNumber( carItem_p );
 DIST_T CarItemCoupledLength( carItem_p );
@@ -53,9 +59,28 @@ BOOL_T CarItemIsLocoMaster( carItem_p );
 void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
-void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t * );
+void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *,
+                  BOOL_T, track_p );
+
+BOOL_T WriteCars( FILE * );
+void ClearCars( void );
+void CarDlgAddProto( void );
+void CarDlgAddDesc( void );
+void AttachTrains( void );
+
+BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
+BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
+enum paramFileState	GetCarPartCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
+enum paramFileState	GetCarProtoCompatibility(int paramFileIndex,
+                SCALEINX_T scaleIndex);
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
+void CheckCarTraverse( track_p trk);
+
+void DeleteCarProto(int fileIndex);
+void DeleteCarPart(int fileIndex);
+void LocoListChangeEntry( track_p, track_p );
 
 #endif // !HAVE_CTRAIN_H

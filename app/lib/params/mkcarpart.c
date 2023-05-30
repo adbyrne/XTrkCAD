@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -55,7 +55,7 @@ void readMap(
 {
 	FILE * mapF;
 	char line[256];
-	int len;
+	size_t len;
 	mapF = fopen( mapFile, "r" );
 	if ( mapF == NULL ) {
 		perror( mapFile );
@@ -110,7 +110,7 @@ void readRoadnameMap(
 		exit(1);
 	}
 	while ( fgets( line, sizeof line, mapF ) != NULL ) {
-		int len = strlen( line );
+		size_t len = strlen( line );
 		if ( line[len-1] == '\n' )
 			line[--len] = '\0';
 		if ( line[0] == '\0' || line[0] == '\n' || line[0] == '#' )
@@ -272,26 +272,26 @@ void processFile(
 	char desc[256];
 	long color;
 	char scale[256];
-	double length;
-	double width;
-	double couplerLength;
-	double truckCenter;
+	double length = 0.0;
+	double width = 0.0;
+	double couplerLength = 0.0;
+	double truckCenter = 0.0;
 	double ratio = 0.0;
 	int option = 0;
 	int type = 30100;
 	int lineNumber = 0;
 	char roadnameS[256];
 	char repmarkS[256];
-	int len;
+	size_t len;
 	int inx;
 	char * cp, *cq;
 	char * tab[20];
 	char blanks[10];
-	int partX = 1;
-	int descX = 2;
-	int roadX = 3;
-	int numbX = 4;
-	int colorX = 5;
+	size_t partX = 1;
+	size_t descX = 2;
+	size_t roadX = 3;
+	size_t numbX = 4;
+	size_t colorX = 5;
 
 	inF = fopen( inFile, "r" );
 	if ( inF == NULL ) {
@@ -309,18 +309,28 @@ void processFile(
 		if ( line[0] == '\n' || line[0] == '#' )
 			continue;
 		len = strlen(line);
-		if ( line[len-1] == '\n' )
+		if ( len >= 1 && line[len-1] == '\n' )
 			line[len-1] = '\0';
+		if ( len >= 2 && line[len-2] == '\r' )
+			line[len-2] = '\0';
 		if ( strnicmp( line, "scale=", 6 ) == 0 ) {
 			strcpy( scale, line+6 );
 			if ( stricmp( scale, "N" ) == 0 )
 				ratio = 160.0;
-			else if ( stricmp( scale, "HO" ) == 0 )
+			else if ( stricmp( scale, "HO" ) == 0 || stricmp(scale, "HOn3") == 0 )
 				ratio = 87.1;
-			else if ( stricmp( scale, "O" ) == 0 )
-				ratio = 48.0;
-			else if ( stricmp( scale, "S" ) == 0 )
+			else if ( stricmp( scale, "S" ) == 0 || stricmp(scale, "Sn3") == 0 )
 				ratio = 64.0;
+			else if ( stricmp(scale, "O") == 0 || stricmp(scale, "On3") == 0 || stricmp(scale, "On30") == 0 )
+				ratio = 48.0;
+			else if ( stricmp(scale, "1") == 0 )
+				ratio = 32.0;
+			else if ( stricmp(scale, "A") == 0 )
+				ratio = 29.0;
+			else if ( stricmp(scale, "G") == 0 )
+				ratio = 22.5;
+			else if ( stricmp(scale, "F") == 0 || stricmp(scale, "Fn2") == 0 || stricmp(scale, "Fn3") == 0 )
+				ratio = 20.32;
 			else {
 				fprintf( stderr, "%d: Unknown scale %s\n", lineNumber, scale );
 				ratio = 87.1;
@@ -426,8 +436,6 @@ void processFile(
 
 int main ( int argc, char * argv[] )
 {
-	char *exename = argv[ 0 ];
-
 	argv++;
 	argc--;
 	

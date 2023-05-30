@@ -16,20 +16,19 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <locale.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "i18n.h"
 #include "wlib.h"
 
 /**
- * Initialize gettext environment. By default, the language files are installed 
- * in <install_dir>\share\locale\<language> 
- * The install dir is derived from the library directory by removing the last 
+ * Initialize gettext environment. By default, the language files are installed
+ * in <install_dir>\share\locale\<language>
+ * The install dir is derived from the library directory by removing the last
  * directory in the path (xtrkcad)
  * Directory layout on Windows is:
  * <install_dir>\bin\
@@ -40,23 +39,15 @@ void InitGettext( void )
 {
 #ifdef XTRKCAD_USE_GETTEXT
 	char directory[2048];
-	
+
 	setlocale(LC_ALL, "");
-	
-#ifdef WINDOWS
+
 	// build the correct directory path
 	strcpy(directory, wGetAppLibDir());
 	strcat( directory, "/../locale" );
+#ifdef WINDOWS
 	_fullpath( directory, directory, 2048 );
-#else
-	#ifdef XTRKCAD_CMAKE_BUILD
-		strcpy(directory, XTRKCAD_INSTALL_PREFIX);
-		strcat(directory, "/share");
-	#else
-		strcpy(directory, wGetAppLibDir());
-	#endif
-		strcat(directory, "/locale");
-#endif	
+#endif
 	// initialize gettext
 	bindtextdomain(XTRKCAD_PACKAGE, directory);
 	bind_textdomain_codeset(XTRKCAD_PACKAGE, "UTF-8");
@@ -64,7 +55,7 @@ void InitGettext( void )
 
 #ifdef VERBOSE
 	printf(_("Gettext initialized (PACKAGE=%s, LOCALEDIR=%s, LC_ALL=%s).\n"),
-			XTRKCAD_PACKAGE, directory, setlocale(LC_ALL, NULL));
+	       XTRKCAD_PACKAGE, directory, setlocale(LC_ALL, NULL));
 #endif
 
 #endif /* XTRKCAD_USE_GETTEXT */
