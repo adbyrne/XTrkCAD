@@ -1247,7 +1247,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
 		DoSetScale( DEFAULT_SCALE );
 	}
-			
+
 	/* see whether last layout should be reopened on startup */
 	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);
 

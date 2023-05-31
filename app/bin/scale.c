@@ -112,7 +112,7 @@ static int log_scale = 0;
 /**
  * Get the scale info for index
  *
- * This is over-engineered but we somehow end up with 
+ * This is over-engineered but we somehow end up with
  * out of range inx
  */
 // Substitute layout scale if scaleInx is invalid
@@ -132,7 +132,7 @@ static scaleInfo_p GetScaleInfo( SCALEINX_T scaleInx )
 	// Bad index
 	altScaleInx = GetLayoutCurScale();
 	int rc = NoticeMessage( MSG_BAD_SCALE_INDEX, curScaleName, "Unknown",
-			        scaleInx, curScaleName );
+	                        scaleInx, curScaleName );
 	if ( rc == 1 ) {
 		// User ok with using layout scale
 		LOG( log_scale, 3, ( "      GetScaleInfo-3(%d)\n", scaleInx ) );
@@ -303,7 +303,7 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 	}
 	// Bad name - create a dummy scale
 	NoticeMessage( MSG_BAD_SCALE_NAME, _("Ok"), NULL,
-		       name, curScaleName );
+	               name, curScaleName );
 	// Clone existing layout scale for dummy
 	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 1 );
 	scaleInfo_p scaleInfoP = &DYNARR_LAST( scaleInfo_t, scaleInfo_da );
