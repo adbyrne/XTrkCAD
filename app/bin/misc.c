@@ -1192,8 +1192,6 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 		return NULL;
 	}
 
-	/* initialize the layers */
-	DefaultLayerProperties();
 	LOG1(log_init, ( "loadFileList\n" ))
 	LoadFileList();
 	//CreateDebugW();
@@ -1225,6 +1223,11 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	if (!ParamFileListInit()) {
 		return NULL;
 	}
+
+	/* initialize the layers */
+	LOG1(log_init, ("DefaultLayerProperties"));
+	DefaultLayerProperties();
+
 	// LOG1(log_init, ("!ParamFileListInit()\n"))
 
 	CommandInit();
@@ -1240,14 +1243,11 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 
 	// get the preferred scale from the configuration file
 	pref = wPrefGetString("misc", "scale");
-	if (!pref)
+	if ( pref == NULL || DoSetScale( pref ) == FALSE ) {
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
-	{
-		pref = DEFAULT_SCALE;
+		DoSetScale( DEFAULT_SCALE );
 	}
-	strcpy(buffer, pref);
-	DoSetScale(buffer);
-
+			
 	/* see whether last layout should be reopened on startup */
 	wPrefGetInteger("DialogItem", "pref-onstartup", &onStartup, 0);
 

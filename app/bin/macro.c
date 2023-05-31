@@ -745,8 +745,8 @@ static void PlaybackQuit( void )
 	ClearTracks();
 	checkPtMark = changed = 0;
 	RestoreTrackState();
-	inPlaybackQuit = FALSE;
 	DoSetScale( oldScaleName );
+	inPlaybackQuit = FALSE;
 	DoChangeNotification( CHANGE_ALL );
 	CloseDemoWindows();
 	curDemo = -1;

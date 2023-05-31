@@ -70,7 +70,7 @@ struct sDataLayout {
 };
 
 static struct sDataLayout thisLayout = {
-	{ "", "", -1, 0, 0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
+	{ "", "", 0, 0, 0, 0.0, 0.0, {0.0, 0.0}, "", {0.0, 0.0}, 0.0, 0, 0.0},
 	NaS,
 	NaS,
 	NULL,

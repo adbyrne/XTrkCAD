@@ -762,7 +762,7 @@ static BOOL_T ReadTrackFile(
 				}
 			}
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
-			if ( !DoSetScale( paramLine+5 ) ) {
+			if ( !DoSetScale( paramLine+6 ) ) {
 				if( !(ret = InputError( "SCALE: bad value", TRUE ))) {
 					break;
 				}

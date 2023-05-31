@@ -1562,15 +1562,54 @@ END
 
 # misc2.c
 MESSAGE MSG_BAD_SCALE_INDEX
-Scale index (%d) is not valid
-#NOHELP
+Scale index (%d) is not valid.
+Do you want use the current layout scale (%s)?
+Or create an "Unknown" scale?
+See 'Help|Recent Messages' for details.
+ALT
+Scale index (NNN) is not valid.
+Do you want use the current layout scale (SCALE)?
+Or create an "Unknown" scale?
+See 'Help|Recent Messages' for details.
+HELP
+Internal error: an invalid scale index has been generated.
+You can substitute the layout's current scale (recommended).
+
+If you do not want to use the currrent scale:
+
+\b Choose "Unknown".
+
+\b Save your file
+
+\b Choose the correct scale from 'Options|Layout'
+
+\b Reload your file
+
+\b You will see a notice that "Scale Unknown is invalid"
+
+\b Choose the layout scale
+
+You can also correct this by selecting the affected tracks, and using the 'Change|Change Scale' \k{cmdRescale} command.
+
+Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # misc2.c
 MESSAGE MSG_BAD_SCALE_NAME
-Scale %s is not valid
-Please check your %s.xtq file
-#NOHELP
+Scale "%s" is not valid.  We will substitute a dummy scale based on "%s".
+See 'Help|Recent Messages' for details.
+ALT
+Scale "SCALE1" is not valid.  We will substitute a dummy scale based on "SCALE2".
+See 'Help|Recent Messages' for details.
+HELP
+SCALE1 is not one of known scales defined in "xtrkcad.xtq".
+We will substitute the layout scale info from SCALE2.
+
+If the current scale is not correct, then select it on 'Options|Layout' and reload your layout.
+
+You can also correct this by selecting the affected tracks, and using the 'Change|Change Scale' \k{cmdRescale} command.
+
+Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 

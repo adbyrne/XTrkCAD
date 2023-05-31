@@ -40,7 +40,7 @@ SCALEINX_T LookupScale( const char * );
 BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx,
                       GAUGEINX_T *gaugeInx);
 void SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
-BOOL_T DoSetScale( char * );
+BOOL_T DoSetScale( const char * );
 
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void ScaleLengthEnd( void );
