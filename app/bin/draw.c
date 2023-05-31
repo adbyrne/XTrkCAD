@@ -1430,11 +1430,11 @@ static void ChangeMapScale( BOOL_T reset )
 EXPORT BOOL_T SetRoomSize( coOrd size )
 {
 	SetLayoutRoomSize(size);
-	if (size.x < 12.0) {
-		size.x = 12.0;
+	if (size.x < 1.0) {
+		size.x = 1.0;
 	}
-	if (size.y < 12.0) {
-		size.y = 12.0;
+	if (size.y < 1.0) {
+		size.y = 1.0;
 	}
 	if ( mapD.size.x == size.x &&
 	     mapD.size.y == size.y ) {
