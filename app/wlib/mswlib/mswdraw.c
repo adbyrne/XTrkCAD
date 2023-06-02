@@ -1693,6 +1693,8 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
 	case WM_LBUTTONDBLCLK:
+	case WM_MBUTTONUP:
+	case WM_MBUTTONDOWN:
 		if (message == WM_LBUTTONDOWN) {
 			action = wActionLDown;
 		} else if (message == WM_RBUTTONDOWN) {
@@ -1701,6 +1703,10 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 			action = wActionLUp;
 		} else if (message == WM_RBUTTONUP) {
 			action = wActionRUp;
+		} else if (message == WM_MBUTTONUP) {
+			action = wActionMUp;
+		} else if (message == WM_MBUTTONDOWN) {
+			action = wActionMDown;
 		} else if (message == WM_LBUTTONDBLCLK) {
 			action = wActionLDownDouble;
 		} else {
@@ -1708,6 +1714,8 @@ LRESULT FAR PASCAL XEXPORT mswDrawPush(
 				action = wActionLDrag;
 			} else if ( (wParam & MK_RBUTTON) != 0) {
 				action = wActionRDrag;
+			} else if ( (wParam & MK_MBUTTON) != 0) {
+				action = wActionMDrag;
 			} else {
 				action = wActionMove;
 			}

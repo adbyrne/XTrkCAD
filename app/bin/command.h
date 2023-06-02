@@ -64,6 +64,9 @@
 #define C_SCROLLDOWN    wActionScrollDown
 #define C_SCROLLLEFT	wActionScrollLeft
 #define C_SCROLLRIGHT   wActionScrollRight
+#define C_MDOWN 		wActionMDown
+#define C_MMOVE		 	wActionMDrag
+#define C_MUP			wActionMUp
 #define C_INIT			(wActionLast+1)
 #define C_START			(wActionLast+2)
 #define C_REDRAW		(wActionLast+3)

@@ -158,7 +158,7 @@ EXPORT long dragTimeout = 500;
 EXPORT long autoPan = 0;
 EXPORT BOOL_T inError = FALSE;
 
-typedef enum { mouseNone, mouseLeft, mouseRight, mouseLeftPending } mouseState_e;
+typedef enum { mouseNone, mouseLeft, mouseRight, mouseLeftPending, mouseScroll } mouseState_e;
 static mouseState_e mouseState;
 static wDrawPix_t mousePositionx,
        mousePositiony;	/**< position of mouse pointer */
@@ -2423,6 +2423,15 @@ static void DoZoom( void * pScaleVP )
 	}
 }
 
+void ScalePix2CoOrd(
+        drawCmd_p d,
+        wDrawPix_t x,
+        wDrawPix_t y,
+        coOrd * pos )
+{
+	pos->x = (((DIST_T)x)/d->dpi)*d->scale;
+	pos->y = (((DIST_T)y)/d->dpi)*d->scale;
+}
 
 EXPORT void Pix2CoOrd(
         drawCmd_p d,
@@ -2430,8 +2439,9 @@ EXPORT void Pix2CoOrd(
         wDrawPix_t y,
         coOrd * pos )
 {
-	pos->x = (((DIST_T)x)/d->dpi)*d->scale+d->orig.x;
-	pos->y = (((DIST_T)y)/d->dpi)*d->scale+d->orig.y;
+	ScalePix2CoOrd(d, x, y, pos);
+	pos->x = pos->x + d->orig.x;
+	pos->y = pos->y + d->orig.y;
 }
 
 EXPORT void CoOrd2Pix(
@@ -2743,6 +2753,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 	BOOL_T rc;
 	wDrawPix_t x, y;
 	static BOOL_T ignoreCommands;
+	static wDrawPix_t dragStartx, dragStarty, panStartx, panStarty;
 
 	LOG( log_mouse, 2, ( "DoMouse( %d, %0.3f, %0.3f )\n", action, pos.x, pos.y ) )
 
@@ -2765,6 +2776,16 @@ static void DoMouse( wAction_t action, coOrd pos )
 		break;
 	case C_RUP:
 		if (mouseState != mouseRight) {
+			return;
+		}
+		if (ignoreCommands) {
+			ignoreCommands = FALSE;
+			return;
+		}
+		mouseState = mouseNone;
+		break;
+	case C_MUP:
+		if (mouseState != mouseScroll) {
 			return;
 		}
 		if (ignoreCommands) {
@@ -2799,6 +2820,13 @@ static void DoMouse( wAction_t action, coOrd pos )
 	case C_RDOWN:
 		mouseState = mouseRight;
 		break;
+	case C_MDOWN:
+		mouseState = mouseScroll;
+		dragStartx = mousePositionx;
+		dragStarty = mousePositiony;
+		panStartx = panCenter.x;
+		panStarty = panCenter.y;
+		break;
 	}
 
 	inError = FALSE;
@@ -2815,6 +2843,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 	switch ( action&0xFF ) {
 	case C_DOWN:
 	case C_RDOWN:
+	case C_MDOWN:
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		break;
 	case wActionMove:
@@ -2854,6 +2883,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 	case C_RMOVE:
 	case C_RUP:
 	case C_LDOUBLE:
+	case C_MUP:
 		InfoPos( pos );
 		/*DrawTempTrack();*/
 		break;
@@ -2887,6 +2917,16 @@ static void DoMouse( wAction_t action, coOrd pos )
 		                   panCenter.y ) );
 		PanHere(I2VP(1));
 		break;
+	case C_MMOVE: {
+		if (mouseState != mouseScroll)
+			break;
+		coOrd offset;
+		ScalePix2CoOrd(&mainD, dragStartx - mousePositionx, dragStarty - mousePositiony, &offset);
+		panCenter.x = panStartx + offset.x;
+		panCenter.y = panStarty + offset.y;
+		PanHere(I2VP(1));
+		break;
+	}
 	default:
 		NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );
 		break;
@@ -2928,7 +2968,7 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wDrawPix_t x,
 	DIST_T minDist;
 	wDrawGetSize( mainD.d, &w, &h );
 	if ( autoPan && !inPlayback ) {
-		if ( action == wActionLDown || action == wActionRDown ||
+		if ( action == wActionLDown || action == wActionRDown || action == wActionScrollDown ||
 		     (action == wActionLDrag && mouseState == mouseLeftPending ) /*||
 			 (action == wActionRDrag && mouseState == mouseRightPending ) */ ) {
 			lastX = x;
@@ -2995,6 +3035,7 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wDrawPix_t x,
 	case wActionRDrag:
 	case wActionRUp:
 	case wActionLDownDouble:
+	case wActionMDrag:
 		mousePositionx = x;
 		mousePositiony = y;
 		break;
