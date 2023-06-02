@@ -2918,10 +2918,12 @@ static void DoMouse( wAction_t action, coOrd pos )
 		PanHere(I2VP(1));
 		break;
 	case C_MMOVE: {
-		if (mouseState != mouseScroll)
+		if (mouseState != mouseScroll) {
 			break;
+		}
 		coOrd offset;
-		ScalePix2CoOrd(&mainD, dragStartx - mousePositionx, dragStarty - mousePositiony, &offset);
+		ScalePix2CoOrd(&mainD, dragStartx - mousePositionx, dragStarty - mousePositiony,
+		               &offset);
 		panCenter.x = panStartx + offset.x;
 		panCenter.y = panStarty + offset.y;
 		PanHere(I2VP(1));
@@ -2968,7 +2970,8 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wDrawPix_t x,
 	DIST_T minDist;
 	wDrawGetSize( mainD.d, &w, &h );
 	if ( autoPan && !inPlayback ) {
-		if ( action == wActionLDown || action == wActionRDown || action == wActionScrollDown ||
+		if ( action == wActionLDown || action == wActionRDown
+		     || action == wActionScrollDown ||
 		     (action == wActionLDrag && mouseState == mouseLeftPending ) /*||
 			 (action == wActionRDrag && mouseState == mouseRightPending ) */ ) {
 			lastX = x;
