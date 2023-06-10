@@ -558,7 +558,7 @@ typedef int wAction_t;
 #define wActionMDown (18)
 #define wActionMDrag (19)
 #define wActionMUp (20)
-#define wActionLast		wActionScrollUp
+#define wActionLast		wActionMUp
 
 
 #define wRGB(R,G,B)\
