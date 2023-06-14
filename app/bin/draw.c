@@ -2744,8 +2744,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 	wDrawPix_t x, y;
 	static BOOL_T ignoreCommands;
 	// Middle button pan state
-	static BOOL_T panActive = TRUE;
-	static coOrd panOrig, panStart;
+	static BOOL_T panActive = FALSE;
+	static coOrd panOrigin, panStart;
 
 	LOG( log_mouse, (action == wActionMove)?2:1,
 	     ( "DoMouse( %d, %0.3f, %0.3f )\n", action, pos.x, pos.y ) )
@@ -2815,8 +2815,9 @@ static void DoMouse( wAction_t action, coOrd pos )
 	case C_MDOWN:
 		// Set up state for Middle button pan
 		panActive = TRUE;
-		panOrig = panCenter;
-		panStart = pos;
+		panOrigin = panCenter;
+		panStart.x = pos.x-mainD.orig.x;
+		panStart.y = pos.y-mainD.orig.y;
 		break;
 	}
 
@@ -2909,16 +2910,21 @@ static void DoMouse( wAction_t action, coOrd pos )
 		                   panCenter.y ) );
 		PanHere(I2VP(1));
 		break;
-	case C_MMOVE: {
+	case C_MMOVE:
 		// Middle button pan
 		if ( !panActive ) {
 			break;
 		}
-		panCenter.x = panOrig.x + pos.x - panStart.x;
-		panCenter.y = panOrig.y + pos.y - panStart.y;
+		panCenter.x = panOrigin.x + (panStart.x - ( pos.x - mainD.orig.x ) );
+		panCenter.y = panOrigin.y + (panStart.y - ( pos.y - mainD.orig.y ) );
+		if ( panCenter.x < 0 ) { panCenter.x = 0; }
+		if ( panCenter.x > mapD.size.x ) { panCenter.x = mapD.size.x; }
+		if ( panCenter.y < 0 ) { panCenter.y = 0; }
+		if ( panCenter.y > mapD.size.y ) { panCenter.y = mapD.size.y; }
+		LOG( log_pan, 1, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__,
+		                   panCenter.x, panCenter.y ) );
 		PanHere(I2VP(1));
 		break;
-	}
 	default:
 		NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );
 		break;

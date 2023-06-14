@@ -138,12 +138,13 @@ Eg. in Germany, where the comma is used,  the correct value would be\c{LargeIcon
 
 \b "@" key in \f{Select}, \f{Modify} and \f{Pan/Zoom}.
 
-\b Mouse Wheel - adding \e{Shift} key or the \e{Mouse Middle Button} will Pan the screen. adding \e{Ctrl} as well makes up Pan left and down Pan right.
+\b Mouse Wheel - adding \e{Shift} key will Pan the screen up and down. Adding \e{Ctrl} as well Pans left and right.
 
-\b Horizontal Mouse Wheel - adding \e{Shift} or the \e{Mouse Middle Button} will Pan the screen left and Right (if available)
+\b Horizontal Mouse Wheel - adding \e{Shift} key will Pan the screen left and Right (if available)
 
 \b Scroll Left and Right - if the scroll left and right guestures are mapped to the trackpad by the operating system, with \e{Shift} depressed the screen will Pan.
 
+\b On mice and systems that support Three Button Mice, holding the \e{Middle Mouse Button} while dragging, will Pan the canvas.
 }
 
 \dd The \f{Main Canvas} can be panned so that the area beyond the room boundaries is shown (the \f{grey} area).  The \f{Constrain Drawing Area to Room Boundaries} option on the \f{Display} (\K{cmdDisplay}) dialog under the \f{Options} (\K{optionM}) menu forces the \f{Main Canvas} stop panning once the room boundary is reached.
@@ -755,6 +756,8 @@ Note Dialog
 
 }
 }
+
+\dd On some systems support Three Button Mice, holding down the \e{Middle Mouse Button} and dragging will pan the Canvas.  Note: not all system support this operation, even with a Three Button Mouse.
 
 \rule
 
