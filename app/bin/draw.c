@@ -2743,8 +2743,12 @@ static void DoMouse( wAction_t action, coOrd pos )
 	BOOL_T rc;
 	wDrawPix_t x, y;
 	static BOOL_T ignoreCommands;
+	// Middle button pan state
+	static BOOL_T panActive = FALSE;
+	static coOrd panOrigin, panStart;
 
-	LOG( log_mouse, 2, ( "DoMouse( %d, %0.3f, %0.3f )\n", action, pos.x, pos.y ) )
+	LOG( log_mouse, (action == wActionMove)?2:1,
+	     ( "DoMouse( %d, %0.3f, %0.3f )\n", action, pos.x, pos.y ) )
 
 	if (recordF) {
 		RecordMouse( "MOUSE", action, pos.x, pos.y );
@@ -2773,6 +2777,15 @@ static void DoMouse( wAction_t action, coOrd pos )
 		}
 		mouseState = mouseNone;
 		break;
+	case C_MUP:
+		if ( !panActive ) {
+			return;
+		}
+		if (ignoreCommands) {
+			ignoreCommands = FALSE;
+			return;
+		}
+		break;
 	case C_MOVE:
 		if (mouseState == mouseLeftPending ) {
 			action = C_DOWN;
@@ -2799,6 +2812,13 @@ static void DoMouse( wAction_t action, coOrd pos )
 	case C_RDOWN:
 		mouseState = mouseRight;
 		break;
+	case C_MDOWN:
+		// Set up state for Middle button pan
+		panActive = TRUE;
+		panOrigin = panCenter;
+		panStart.x = pos.x-mainD.orig.x;
+		panStart.y = pos.y-mainD.orig.y;
+		break;
 	}
 
 	inError = FALSE;
@@ -2816,6 +2836,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 	case C_DOWN:
 	case C_RDOWN:
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
+		break;
+	case C_MDOWN:
 		break;
 	case wActionMove:
 		InfoPos( pos );
@@ -2854,6 +2876,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 	case C_RMOVE:
 	case C_RUP:
 	case C_LDOUBLE:
+	case C_MUP:
 		InfoPos( pos );
 		/*DrawTempTrack();*/
 		break;
@@ -2885,6 +2908,21 @@ static void DoMouse( wAction_t action, coOrd pos )
 		panCenter.x = panCenter.x + ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
 		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x,
 		                   panCenter.y ) );
+		PanHere(I2VP(1));
+		break;
+	case C_MMOVE:
+		// Middle button pan
+		if ( !panActive ) {
+			break;
+		}
+		panCenter.x = panOrigin.x + (panStart.x - ( pos.x - mainD.orig.x ) );
+		panCenter.y = panOrigin.y + (panStart.y - ( pos.y - mainD.orig.y ) );
+		if ( panCenter.x < 0 ) { panCenter.x = 0; }
+		if ( panCenter.x > mapD.size.x ) { panCenter.x = mapD.size.x; }
+		if ( panCenter.y < 0 ) { panCenter.y = 0; }
+		if ( panCenter.y > mapD.size.y ) { panCenter.y = mapD.size.y; }
+		LOG( log_pan, 1, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__,
+		                   panCenter.x, panCenter.y ) );
 		PanHere(I2VP(1));
 		break;
 	default:
@@ -2928,7 +2966,8 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wDrawPix_t x,
 	DIST_T minDist;
 	wDrawGetSize( mainD.d, &w, &h );
 	if ( autoPan && !inPlayback ) {
-		if ( action == wActionLDown || action == wActionRDown ||
+		if ( action == wActionLDown || action == wActionRDown
+		     || action == wActionScrollDown ||
 		     (action == wActionLDrag && mouseState == mouseLeftPending ) /*||
 			 (action == wActionRDrag && mouseState == mouseRightPending ) */ ) {
 			lastX = x;
@@ -2995,6 +3034,7 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wDrawPix_t x,
 	case wActionRDrag:
 	case wActionRUp:
 	case wActionLDownDouble:
+	case wActionMDrag:
 		mousePositionx = x;
 		mousePositiony = y;
 		break;

@@ -1056,7 +1056,7 @@ static gint draw_configure_event(
 	return TRUE;
 }
 
-static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "RDown", "RDrag", "RUp", "Text", "ExtKey", "WUp", "WDown", "DblL", "ModK", "ScrU", "ScrD", "ScrL", "ScrR" };
+static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "RDown", "RDrag", "RUp", "Text", "ExtKey", "WUp", "WDown", "DblL", "ModK", "ScrU", "ScrD", "ScrL", "ScrR", "MDown", "MDrag", "MUp" };
 
 /**
  * Handler for scroll events, ie mouse wheel activity
@@ -1211,9 +1211,11 @@ static gint draw_button_event(
 
 	switch ( event->button ) {
 	case 1: /* left mouse button */
-	case 2: /* middle mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp;
 		if (event->type==GDK_2BUTTON_PRESS) { action = wActionLDownDouble; }
+		break;
+	case 2: /* middle mouse button */
+		action = event->type==GDK_BUTTON_PRESS?wActionMDown:wActionMUp;
 		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp, (wDrawPix_t)bd->lastX, (wDrawPix_t)bd->lastY );*/
 		break;
 	case 3: /* right mouse button */
@@ -1259,7 +1261,7 @@ static gint draw_motion_event(
 	if (state & GDK_BUTTON1_MASK) {
 		action = wActionLDrag;
 	} else if (state & GDK_BUTTON2_MASK) {
-		action = wActionLDrag;
+		action = wActionMDrag;
 	} else if (state & GDK_BUTTON3_MASK) {
 		action = wActionRDrag;
 	} else {

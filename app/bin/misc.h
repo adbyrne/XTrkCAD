@@ -280,7 +280,7 @@ void LogSet( char *, int );
 int LogFindIndex( const char * );
 void LogPrintf( const char *, ... );
 #define LOG( DBINX, DBLVL, DBMSG ) \
-		if ( DBINX > 0 && logTable( DBINX ).level >= DBLVL ) { \
+		if ( (DBINX) > 0 && logTable( (DBINX) ).level >= (DBLVL) ) { \
 				LogPrintf DBMSG ; \
 		}
 #define LOG1( DBINX, DBMSG ) LOG( DBINX, 1, DBMSG )
