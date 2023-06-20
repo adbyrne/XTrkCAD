@@ -66,6 +66,14 @@ wlibGetApp()
 	return(app);
 }
 
+static void 
+startup(GtkApplication *app)
+{	
+	wWindow_p window;
+	window = wMain(argc, argv );
+	
+	g_strfreev(argv);
+}
 
 /**
  * Activate the application by calling the main program after registering
@@ -78,12 +86,7 @@ wlibGetApp()
 static void
 activate(GtkApplication* app, gpointer user_data)
 {
-	wWin_p window;
-
     g_resources_register( wlib_get_resource());
-	window = wMain(argc, argv );
-
-	g_strfreev(argv);
 }
 
 /**
@@ -104,7 +107,6 @@ command_line( GApplication* self, GApplicationCommandLine* cmdLine,
 	               cmdLine,
 	               &argc);
 
-	g_application_activate( self );
 	return( 0 );
 }
 
@@ -118,7 +120,6 @@ command_line( GApplication* self, GApplicationCommandLine* cmdLine,
 
 int main( int argc, char *argv[] )
 {
-
 	int status;
 
 	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 ) {
@@ -128,6 +129,7 @@ int main( int argc, char *argv[] )
 	app = gtk_application_new("org.xtrackcad.wlib",
 	                           G_APPLICATION_HANDLES_COMMAND_LINE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 	g_signal_connect(app, "command-line", G_CALLBACK(command_line), NULL );
 
 	status = g_application_run(G_APPLICATION (app), argc, argv);

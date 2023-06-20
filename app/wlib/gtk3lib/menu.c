@@ -59,8 +59,12 @@ typedef struct {
 
 
 struct wMenuItem_t {
-	WOBJ_COMMON
-	MOBJ_COMMON m;
+	struct wObjCommon oc;
+	wWinCallback_p winProc;
+	mtype_e mtype;			/**< menu entry type */
+	mmtype_e mmtype;
+	GtkWidget *menu_item;
+	wMenu_p parentMenu;
 };
 
 typedef struct wMenuItem_t * wMenuItem_p;
@@ -74,7 +78,8 @@ typedef struct wMenuItem_t * wMenuItem_p;
 
 
 struct wMenu_t {
-	WOBJ_COMMON
+	struct wObjCommon oc;
+
 	MOBJ_COMMON m;
 	mmtype_e mmtype;
 	wMenuItem_p first, last;
@@ -994,20 +999,20 @@ wMenu_p wMenuBarAdd(
 	wMenu_p m;
 	GtkWidget * menuItem;
 
-	m = wlibAlloc( w, B_MENU, 0, 0, labelStr, sizeof( struct wMenu_t ), NULL );
+	m = g_malloc(sizeof(wWindow_t));
+	m->oc.helpTopic = g_strdup(helpStr);
+	m->oc.name = g_strdup(nameStr);
+	m->winProc = winProc;
 	m->mmtype = MM_BAR;
-	m->realX = 0;
-	m->realY = 0;
 
 	menuItem = gtk_menu_item_new_with_mnemonic( wlibConvertInput(m->labelStr) );
-	m->menu = gtk_menu_new();
-	gtk_widget_set_name(m->menu, "commands");
-	gtk_menu_item_set_submenu( GTK_MENU_ITEM(menuItem), m->menu );
 	gtk_menu_shell_append( GTK_MENU_SHELL(w->menubar), menuItem );
-	gtk_widget_show( menuItem );
 
-	m->w = 0;
-	m->h = 0;
+	m->menu = gtk_menu_new();
+//	gtk_widget_set_name(m->menu, "commands");
+	gtk_menu_item_set_submenu( GTK_MENU_ITEM(menuItem), m->menu );
+
+	gtk_widget_show( menuItem );
 
 	/* TODO: why is help not supported here? */
 	/*gtkAddHelpString( m->panel_item, helpStr );*/

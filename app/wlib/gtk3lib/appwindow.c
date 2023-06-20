@@ -38,7 +38,7 @@
 
 #include "xtrkcad-config.h"
 
-static wWindow_t *appMainWindow;
+static struct wWindow_t *appMainWindow;
 
 /**
  * Initialize the application's main window. This function does the necessary
@@ -56,52 +56,72 @@ static wWindow_t *appMainWindow;
  * \return    window handle or NULL on error
  */
 
-wWin_p wWinMainCreate(
-        const char * name,		    /* Application name */
-        wWinPix_t x,				/* Initial window width */
-        wWinPix_t y,				/* Initial window height */
-        const char * helpStr,	    /* Help topic string */
-        const char * labelStr,	    /* Window title */
-        const char * nameStr,	    /* Window name */
-        long option,			    /* Options */
-        wWinCallBack_p winProc,	    /* Call back function */
-        void * data)			    /* User context */
-{
-	char *pos;
-	long isMaximized;
-	GtkBuilder *mainBuilder;
+ wWindow_p wWinMainCreate(
+	 const char *name,		 /* Application name */
+	 wWinPix_t x,			 /* Initial window width */
+	 wWinPix_t y,			 /* Initial window height */
+	 const char *helpStr,	 /* Help topic string */
+	 const char *labelStr,	 /* Window title */
+	 const char *nameStr,	 /* Window name */
+	 long option,			 /* Options */
+	 wWinCallBack_p winProc, /* Call back function */
+	 void *data)			 /* User context */
+ {
+	 char *pos;
+	 long isMaximized;
+	 GtkBuilder *mainBuilder;
 
-	pos = strchr(name, ';');
+	 pos = strchr(name, ';');
 
-	if (pos) {
-		/* if found, split application name and configuration name */
-		strcpy(wConfigName, pos + 1);
-	} else {
-		/* if not found, application name and configuration name are same */
-		strcpy(wConfigName, name);
-	}
+	 if (pos)
+	 {
+		 /* if found, split application name and configuration name */
+		 strcpy(wConfigName, pos + 1);
+	 }
+	 else
+	 {
+		 /* if not found, application name and configuration name are same */
+		 strcpy(wConfigName, name);
+	 }
 
-	wDrawColorWhite = wDrawFindColor(0xFFFFFF);
-	wDrawColorBlack = wDrawFindColor(0x000000);
+	 wDrawColorWhite = wDrawFindColor(0xFFFFFF);
+	 wDrawColorBlack = wDrawFindColor(0x000000);
 
-	appMainWindow = g_malloc(sizeof(wWindow_t));
-	appMainWindow->oc.helpTopic = g_strdup(helpStr);
-	appMainWindow->oc.name = g_strdup(nameStr);
-	appMainWindow->winProc = winProc;
+	 appMainWindow = g_malloc(sizeof(struct wWindow_t));
+	 appMainWindow->oc.helpTopic = g_strdup(helpStr);
+	 appMainWindow->oc.name = g_strdup(nameStr);
+	 appMainWindow->winProc = winProc;
 
-	mainBuilder = gtk_builder_new_from_resource(
-	                      XTRKCAD_RESOURCE_PATH 
-                          "appwindow.ui");
+	 mainBuilder = gtk_builder_new_from_resource(
+		 XTRKCAD_RESOURCE_PATH
+		 "appwindow.ui");
 
-	appMainWindow->oc.widget = GTK_WIDGET(
-	                                   gtk_builder_get_object( mainBuilder,
-	                                                   "main" ));
-	gtk_window_set_title(GTK_WINDOW(appMainWindow->oc.widget), labelStr );
+	 appMainWindow->oc.widget = GTK_WIDGET(gtk_builder_get_object(mainBuilder,
+																  "main"));
 
-	gtk_widget_show_all(appMainWindow->oc.widget);
+	 // this is the main application window
+	 gtk_application_add_window(wlibGetApp(),
+								GTK_WINDOW(appMainWindow->oc.widget));
 
-//	wlibCreateCustomStyle();
+	 gtk_window_set_title(GTK_WINDOW(appMainWindow->oc.widget), labelStr);
 
-	return appMainWindow;
-}
+	 if (option & F_MENUBAR)
+	 {
+		 appMainWindow->menubar = GTK_WIDGET(gtk_builder_get_object(mainBuilder,
+																	"menubar"));
+	 }
 
+	 GtkContainer *toolbarContainer;
+	 toolbarContainer = GTK_CONTAINER(gtk_builder_get_object(mainBuilder,
+															 "toolbar"));
+	 if (toolbarContainer)
+	 {
+		 //        appMainWindow->toolbar =  createToolbar(toolbarContainer);
+	 }
+
+	 gtk_widget_show_all(appMainWindow->oc.widget);
+
+	 //	wlibCreateCustomStyle();
+
+	 return appMainWindow;
+ }

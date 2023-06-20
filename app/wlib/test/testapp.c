@@ -42,17 +42,21 @@ void doFile( void * cmd )
 {
    switch ((int)cmd) {
 		case 1:
-			break;
+			break;				/* push test */
+		case 2:
+			break;				/* toggle test */
+		case 3: 		
+			break;				/* Radio test */
    	case 0:					/* 'Quit ' */
 			wExit( 0 );			/* terminate application */
     }
 }
 
 
-wWin_p wMain( int argc, char * argv[] )
+wWindow_p wMain( int argc, char * argv[] )
 {
 
-	wWin_p mainW;
+	wWindow_p mainW;
 	wMenu_p menu1;
 	wMenu_p menu2;
 	int i;
@@ -88,50 +92,105 @@ wWin_p wMain( int argc, char * argv[] )
 
 	// wWinShow( mainW, FALSE );
 
-	// /* add a submenu */ 	
-    // menu1 = wMenuBarAdd( mainW, 			/* parent window */
-	// 							NULL, 			/* help topic */
-	// 							"File" 			/* submenu title */
-	// 						 );	
+	/* add a submenu */ 	
+    menu1 = wMenuBarAdd( mainW, 		/* parent window */
+						NULL, 			/* help topic */
+						"File" 			/* submenu title */
+						);	
 
-	// /* create a menuitem in submenu */
-	// wMenuPushCreate( 	menu1, 				/* parent menu */
-	// 						NULL, 				/* help topic */
-	// 						"Test", 				/* submenu title */
-	// 						0, 					/* accelerator key */
-	// 						doFile, 				/* callback funtion */
-	// 						(void*)1 			/* pointer to user data */
-	// 					 );									
+	/* create a menuitem in submenu */
+	wMenuPushCreate( 	menu1, 				/* parent menu */
+							NULL, 				/* help topic */
+							"Test", 				/* submenu title */
+							0, 					/* accelerator key */
+							doFile, 				/* callback funtion */
+							(void*)1 			/* pointer to user data */
+						 );									
 	
 
-	// /* create a separator before 'Quit' */	
-	// wMenuSeparatorCreate( menu1 );
+	/* create a separator before 'Quit' */	
+	wMenuSeparatorCreate( menu1 );
 	
-	// /* create a menuitem in submenu */
-	// wMenuPushCreate( 	menu1, 				/* parent menu */
-	// 						NULL, 				/* help topic */
-	// 						"Quit", 				/* submenu title */
-	// 						0, 					/* accelerator key */
-	// 						doFile, 				/* callback funtion */
-	// 						(void*)0 			/* pointer to user data */
-	// 					 );									
-	
-	// /* create a second submenu */
-    // menu2 = wMenuBarAdd( mainW, 			/* parent window */
-	// 							NULL, 			/* help topic */
-	// 							"Help" 			/* submenu title */
-	// 						 );	
+	/* create a menuitem in submenu */
+	wMenuPushCreate( 	menu1, 				/* parent menu */
+							NULL, 				/* help topic */
+							"Quit", 				/* submenu title */
+							0, 					/* accelerator key */
+							doFile, 				/* callback funtion */
+							(void*)0 			/* pointer to user data */
+						 );									
 
+	/* create a second submenu */
+    menu2 = wMenuBarAdd( mainW, 		/* parent window */
+						 NULL, 			/* help topic */
+						"Help" 			/* submenu title */
+					    );	
+
+	wMenuToggleCreate(menu2,
+				NULL,
+				"Active",
+				0,
+				1, 
+				doFile,
+				(void *)2
+				);
+
+	wMenuToggleCreate(menu2,
+				NULL,
+				"Inactive",
+				0,
+				0, 
+				doFile,
+				(void *)2
+				);
+
+	wMenuToggle_p mt = wMenuToggleCreate(menu2,
+				NULL,
+				"Disabled",
+				0,
+				0, 
+				doFile,
+				(void *)2
+				);
+
+	wMenuToggleEnable( mt, FALSE );
+
+	wMenuSeparatorCreate( menu2 );
+	
+	wMenuRadioCreate(menu2,
+				NULL,
+				"Radio 1",
+				0,
+				doFile,
+				(void *)3
+				);
+
+	wMenuRadioCreate(menu2,
+				NULL,
+				"Radio 2",
+				0,
+				doFile,
+				(void *)3
+				);
+
+	wMenuRadioCreate(menu2,
+				NULL,
+				"Radio 3",
+				0,
+				doFile,
+				(void *)3
+				);
+	
+	
 	for( i = 2; i > 0; i-- ) {
 		sprintf(buffer, "Countdown %d", i );
 		wSetSplashInfo( buffer );
 		wPause( 1000L );
 	}
  
-//	wWinShow( mainW, TRUE );
+	//wWinShow( mainW, TRUE );
 
 	wDestroySplash();							/* remove the splash window again */
-	wPause ( 2000L );
-		
+
 	return mainW;
 }

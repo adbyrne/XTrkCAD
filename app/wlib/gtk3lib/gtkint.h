@@ -83,14 +83,17 @@ struct wObjCommon {
 	GtkWidget * widget;		/**< GTK widget */
 	gchar *helpTopic;
 	gchar *name;
+	gchar *labelStr;
 };
 
-typedef struct  {
+struct  wWindow_t {
 	struct wObjCommon oc;
 	wWinCallBack_p winProc;        /**< window procedure */
-} wWindow_t;
+	GtkWidget *menubar;
+	GtkWidget *toolbar;
+};
 
-typedef wWindow_t * wWindow_p;
+//typedef struct wWindow_t * wWindow_p;
 
 #define WOBJ_COMMON \
 		wType_e type; \

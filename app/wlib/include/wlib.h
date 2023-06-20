@@ -48,6 +48,7 @@ typedef int wIndex_t;
  * Opaque Pointers
  */
 typedef struct wWin_t       * wWin_p;
+typedef struct wWindow_t    * wWindow_p;
 typedef struct wControl_t   * wControl_p;
 typedef struct wButton_t    * wButton_p;
 typedef struct wString_t    * wString_p;
@@ -271,14 +272,24 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void * );
 #define F_RESTRICT  (1L<<15)
 #define F_NOTTRANSIENT (1L<<16)
 
-wWin_p wWinMainCreate(	        const char *, wWinPix_t, wWinPix_t, const char *,
-                                const char *, const char *,
-                                long, wWinCallBack_p, void * );
+//Application main window
+
+wWindow_p wWinMainCreate(
+        const char * name,	    /* Application name */
+        wWinPix_t x,		    /* Initial window width */
+        wWinPix_t y,		    /* Initial window height */
+        const char * helpStr,	    /* Help topic string */
+        const char * labelStr,	    /* Window title */
+        const char * nameStr,	    /* Window name */
+        long option,		    /* Options */
+        wWinCallBack_p winProc,	    /* Call back function */
+        void * data);
+
 wWin_p wWinPopupCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *,
                                 const char *, const char *,
                                 long, wWinCallBack_p, void * );
 
-wWin_p wMain(			int, char *[] );
+wWindow_p wMain(			int, char *[] );
 void wWinSetBigIcon(		wWin_p, wIcon_p );
 void wWinSetSmallIcon(		wWin_p, wIcon_p );
 void wWinShow(			wWin_p, wBool_t );
@@ -748,7 +759,7 @@ typedef void (*wMenuTraceCallBack_p)( wMenu_p, const char *, void * );
 
 wMenu_p wMenuCreate(		wWin_p, wWinPix_t, wWinPix_t, const char *, const char *,
                                 long );
-wMenu_p wMenuBarAdd(		wWin_p, const char *, const char * );
+wMenu_p wMenuBarAdd( wWindow_p w, const char * helpStr, const char * labelStr );
 
 wMenuPush_p wMenuPushCreate(	wMenu_p, const char *, const char *, long,
                                 wMenuCallBack_p, void * );

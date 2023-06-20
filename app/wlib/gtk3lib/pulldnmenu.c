@@ -48,7 +48,7 @@
  */
 
 typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE, M_RADIO } mtype_e;
-typedef enum { MM_BUTT, MM_MENU, MM_BAR, MM_POPUP } mmtype_e;
+typedef enum { MM_BUTT, MM_MENU, MM_SUBMENU } mmtype_e;
 
 typedef struct{	mtype_e mtype;			/**< menu entry type */
 				GtkWidget *menu_item;
@@ -56,25 +56,55 @@ typedef struct{	mtype_e mtype;			/**< menu entry type */
 				int recursion; 			/**< recursion counter */
 		} MOBJ_COMMON; 					/**< menu item specific data */
 							
-	
-struct wMenuItem_t {
-	WOBJ_COMMON
-	MOBJ_COMMON m;
-	};
+struct menuObjCommon {
+	mtype_e mtype;			/**< menu entry type */
+	mmtype_e mmtype;
+	GtkWidget *menu_item;
+	wMenu_p parentMenu;
+};
 
+// common data for all menu items
+struct wMenuItem_t {
+	struct wObjCommon oc;
+	struct menuObjCommon mc;
+};
 typedef struct wMenuItem_t * wMenuItem_p;
+
+// extend common data for push button item
+struct wMenuPush_t {
+	struct wObjCommon oc;
+	struct menuObjCommon mc;
+	wMenuCallBack_p action;
+	void *data;
+};
+
+// extend common data for toggle button item
+struct wMenuToggle_t {
+	struct wObjCommon oc;
+	struct menuObjCommon mc;
+	wMenuCallBack_p action;
+	void *data;
+};
+
+//extend common data for radio button item
+struct wMenuRadio_t {
+	struct wObjCommon oc;
+	struct menuObjCommon mc;
+	wMenuCallBack_p action;
+	void *data;
+};
 
 // a few macros to make access to members easier	
 //#define PTR2M( ptr ) ((ptr)->m)	
-#define MMENUITEM( ptr ) 	(((ptr)->m).menu_item)	
-#define MPARENT( ptr ) 	(((ptr)->m).parentMenu)
-#define MITEMTYPE( ptr )	(((ptr)->m).mtype)
-#define MRECURSION( ptr ) (((ptr)->m).recursion)	
+#define MMENUITEM( ptr ) 	((ptr)->mc.menu_item)	
+#define MPARENT( ptr ) 	((ptr)->mc.parentMenu)
+#define MITEMTYPE( ptr )	((ptr)->mc.mtype)
+//#define MRECURSION( ptr ) ((ptr)->m).recursion)	
 	
 	
 struct wMenu_t {
-	WOBJ_COMMON
-	MOBJ_COMMON m;
+	struct wObjCommon oc;
+
 	mmtype_e mmtype;
 	wMenuItem_p first, last;
 	GtkWidget * menu;
@@ -85,19 +115,6 @@ struct wMenu_t {
 	GtkWidget * imageG;
 	};
 
-struct wMenuPush_t {
-	WOBJ_COMMON
-	MOBJ_COMMON m;
-	wMenuCallBack_p action;
-	wBool_t enabled;
-	};
-
-struct wMenuRadio_t {
-	WOBJ_COMMON
-	MOBJ_COMMON m;
-	wMenuCallBack_p action;
-	wBool_t enabled;
-	};
 
 struct wMenuList_t {
 	WOBJ_COMMON
@@ -114,15 +131,8 @@ struct wMenuListItem_t {
 	};
 
 typedef struct wMenuListItem_t * wMenuListItem_p;
-	
-struct wMenuToggle_t {
-	WOBJ_COMMON
-	MOBJ_COMMON m;
-	wMenuCallBack_p action;
-	wBool_t enabled;
-	wBool_t set;
-	};
 
+extern  struct wWindow_t *appMainWindow;	
 
 /*-----------------------------------------------------------------*/
 	
@@ -141,8 +151,8 @@ static void pushMenuItem(
 	wMenuItem_p m = (wMenuItem_p)value;
 	wMenuToggle_p mt;
 
-	if (MRECURSION( m ))
-		return;
+	// if (MRECURSION( m ))
+	// 	return;
 
 	switch MITEMTYPE( m ) {
 	case M_PUSH:
@@ -150,7 +160,6 @@ static void pushMenuItem(
 		break;
 	case M_TOGGLE:
 		mt = (wMenuToggle_p)m;
-		wMenuToggleSet( mt, !mt->set );
 		mt->action( mt->data );
 		break;
 	case M_RADIO:
@@ -164,78 +173,69 @@ static void pushMenuItem(
 		/*fprintf(stderr," Oops menu\n");*/
 		return;
 	}
-	if( MPARENT(m)->traceFunc ) {
-		MPARENT(m)->traceFunc( MPARENT( m ), m->labelStr,  MPARENT(m)->traceData );
-	}
+	// if( MPARENT(m)->traceFunc ) {
+	// 	MPARENT(m)->traceFunc( MPARENT( m ), m->oc.labelStr,  MPARENT(m)->traceData );
+	//}
 } 
 
 /**
  * Create a new menu element, add to the parent menu and to help
  *
  * \param m 		IN parent menu
+ * \param mi		IN menu item properties
  * \param mtype 	IN type of new entry
  * \param helpStr 	IN help topic 
  * \param labelStr 	IN display label
- * \param size 		IN size of additional data?
- * \return    the newly created menu element
  */
 
-static wMenuItem_p createMenuItem(
+static void CreateMenuItem(
 	wMenu_p m,
+	wMenuItem_p mi,
 	mtype_e mtype,
 	const char * helpStr,
-	const char * labelStr,
-	int size )
+	const char * labelStr )
 {
-	wMenuItem_p mi;
-	mi = (wMenuItem_p)wlibAlloc( NULL, B_MENUITEM, 0, 0, labelStr, size, NULL );
+	mi->oc.helpTopic = g_strdup(helpStr);
+	mi->oc.labelStr = g_strdup(labelStr);
+//	m->oc.name = g_strdup(nameStr);
+//	m->winProc = winProc;
+//	mi = (wMenuItem_p)wlibAlloc( NULL, B_MENUITEM, 0, 0, labelStr, size, NULL );
 	MITEMTYPE( mi )= mtype;
 	
 	switch ( mtype ) {
 	case M_LIST:
-		MMENUITEM( mi ) = gtk_menu_item_new_with_mnemonic(wlibConvertInput(mi->labelStr)); // NULL;  //PTR2M(m).menu_item
+		MMENUITEM( mi ) = gtk_menu_item_new_with_mnemonic(wlibConvertInput(mi->oc.labelStr)); // NULL;  //PTR2M(m).menu_item
 		break;
 	case M_SEPARATOR:
 		MMENUITEM( mi ) = gtk_separator_menu_item_new();
 		break;
 	case M_TOGGLE:
-		MMENUITEM( mi ) = gtk_check_menu_item_new_with_mnemonic(wlibConvertInput(mi->labelStr));
+		MMENUITEM( mi ) = gtk_check_menu_item_new_with_mnemonic(wlibConvertInput(mi->oc.labelStr));
 		break;
 	case M_RADIO:
-		MMENUITEM( mi ) = gtk_radio_menu_item_new_with_mnemonic(m->radioGroup, wlibConvertInput(mi->labelStr));
+		MMENUITEM( mi ) = gtk_radio_menu_item_new_with_mnemonic(m->radioGroup, 
+						   wlibConvertInput(mi->oc.labelStr));
 		m->radioGroup = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (MMENUITEM( mi )));
 		break;			
-	default:
-		MMENUITEM( mi ) = gtk_menu_item_new_with_mnemonic(wlibConvertInput(mi->labelStr));
+	case M_PUSH:
+		// MM_PUSH 
+		MMENUITEM( mi ) = gtk_menu_item_new_with_mnemonic(wlibConvertInput(mi->oc.labelStr)); 
 		break;
+	default:
+		g_abort();
+		break;		
 	}
-	if (MMENUITEM( mi )) {
-		if (m)
-			gtk_menu_shell_append( (GtkMenuShell *)(m->menu), MMENUITEM( mi ) );
 
-		g_signal_connect( G_OBJECT(MMENUITEM( mi )), "activate",
-				G_CALLBACK(pushMenuItem), mi );
- 		gtk_widget_show(MMENUITEM( mi ));
+	if (MMENUITEM( mi )) {
+		gtk_menu_shell_append(GTK_MENU_SHELL(m->menu), MMENUITEM( mi ));
+		gtk_widget_show(GTK_WIDGET(MMENUITEM(mi)));
 	}
-	
-	// this is  a link list of all menu items belonging to a specific menu
-	// is used in automatic processing (macro)??
-	if (m) {
-		if (m->first == NULL) {
-			m->first = mi;
-		} else {
-			m->last->next = (wControl_p)mi;
-		}
-		m->last = mi;
-	}
-	mi->next = NULL;
-	
 	
 	if (helpStr != NULL) {
-		wlibAddHelpString( MMENUITEM( mi ), helpStr );
+//		wlibAddHelpString( MMENUITEM( mi ), helpStr );
 	}
 	MPARENT( mi ) = m;
-	return mi;
+	return;
 }
 
 /**
@@ -332,15 +332,14 @@ wMenuRadio_p wMenuRadioCreate(
 	wMenuCallBack_p action,
 	void 	*data )
 {
-	wMenuRadio_p mi;
+	wMenuRadio_p mi = g_malloc(sizeof(struct wMenuRadio_t));
 
-	mi = (wMenuRadio_p)createMenuItem( m, M_RADIO, helpStr, labelStr, sizeof *mi );
-	//~ if (m->mmtype == MM_POPUP && !testMenuPopup)
-		//~ return mi;
-	setAcclKey( m->parent, m->menu, MMENUITEM( mi ), acclKey );
+	CreateMenuItem( m, (wMenuItem_p)mi, M_RADIO, helpStr, labelStr );
+	// //~ if (m->mmtype == MM_POPUP && !testMenuPopup)
+	// 	//~ return mi;
+	// setAcclKey( m->parent, m->menu, MMENUITEM( mi ), acclKey );
 	mi->action = action;
 	mi->data = data;
-	mi->enabled = TRUE;
 	return mi;
 }
 
@@ -357,7 +356,9 @@ void wMenuRadioSetActive(
 	gtk_check_menu_item_set_active( (GtkCheckMenuItem *)MMENUITEM(mi), TRUE ); 
 }	 		
 
-/*-----------------------------------------------------------------*/
+/*
+ * push buttons in menu
+ */
 
 /**
  * Create a menu entry 
@@ -379,15 +380,14 @@ wMenuPush_p wMenuPushCreate(
 	wMenuCallBack_p action,
 	void 	*data )
 {
-	wMenuPush_p mi;
+	wMenuPush_p mi = g_malloc(sizeof(struct wMenuPush_t));
 
-	mi = (wMenuPush_p)createMenuItem( m, M_PUSH, helpStr, labelStr, sizeof( struct wMenuPush_t ));
-
-	setAcclKey( m->parent, m->menu, MMENUITEM( mi ), acclKey );
-
+	CreateMenuItem( m, (wMenuItem_p)mi, M_PUSH, helpStr, labelStr);
 	mi->action = action;
 	mi->data = data;
-	mi->enabled = TRUE;
+
+	// setAcclKey( m->parent, m->menu, MMENUITEM( mi ), acclKey );
+
 	return mi;
 }
 
@@ -403,7 +403,6 @@ void wMenuPushEnable(
 	wMenuPush_p mi,
 	wBool_t enable )
 {
-	mi->enabled = enable;
 	gtk_widget_set_sensitive( GTK_WIDGET(MMENUITEM( mi )), enable );
 }
 
@@ -423,13 +422,13 @@ wMenu_p wMenuMenuCreate(
 	const char * helpStr,
 	const char * labelStr )
 {
-	wMenu_p mi;
-	mi = (wMenu_p)createMenuItem( m, M_MENU, helpStr, labelStr, sizeof( struct wMenu_t ));
-	mi->mmtype = MM_MENU;
-	mi->menu = gtk_menu_new();
+	// wMenu_p mi;
+	// mi = (wMenu_p)createMenuItem( m, M_MENU, helpStr, labelStr, sizeof( struct wMenu_t ));
+	// mi->mmtype = MM_MENU;
+	// mi->menu = gtk_menu_new();
 
-	gtk_menu_item_set_submenu( GTK_MENU_ITEM(MMENUITEM( mi )), mi->menu );
-	return mi;
+	// gtk_menu_item_set_submenu( GTK_MENU_ITEM(MMENUITEM( mi )), mi->menu );
+	// return mi;
 }
 
 
@@ -444,7 +443,9 @@ wMenu_p wMenuMenuCreate(
 void wMenuSeparatorCreate(
 	wMenu_p m ) 
 {
-	createMenuItem( m, M_SEPARATOR, NULL, "", sizeof( struct wMenuItem_t ));
+	wMenuItem_p mi = g_malloc(sizeof(struct wMenuItem_t ));
+
+	CreateMenuItem( m, mi, M_SEPARATOR, NULL, "");
 }
 
 
@@ -460,29 +461,29 @@ void wMenuSeparatorCreate(
 
 int getMlistOrigin( wMenuList_p ml, GList **pChildren )
 {
-	GtkWidget *mi;
-	int count = 0;
-	int found = -1;
-	GtkWidget *mitem = MMENUITEM( ml );
+	// GtkWidget *mi;
+	// int count = 0;
+	// int found = -1;
+	// GtkWidget *mitem = MMENUITEM( ml );
 	
-	*pChildren = gtk_container_get_children( GTK_CONTAINER( MPARENT( ml )->menu ));
-	if( !*pChildren )
-		return( -1 );
+	// *pChildren = gtk_container_get_children( GTK_CONTAINER( MPARENT( ml )->menu ));
+	// if( !*pChildren )
+	// 	return( -1 );
 	
-	while( (mi = g_list_nth_data( *pChildren, count ))) {
-		if( mi == mitem ) {
-			found = TRUE;
-			break;
-		}	
-		else {
-			count++;
-		}	
-	}
+	// while( (mi = g_list_nth_data( *pChildren, count ))) {
+	// 	if( mi == mitem ) {
+	// 		found = TRUE;
+	// 		break;
+	// 	}	
+	// 	else {
+	// 		count++;
+	// 	}	
+	// }
 	
-	if( found )
-		return( count );
-	else 
-		return( -1 );
+	// if( found )
+	// 	return( count );
+	// else 
+	// 	return( -1 );
 }
 
 /**
@@ -498,27 +499,27 @@ static void pushMenuList(
 	GtkWidget * widget,
 	gpointer value )
 {
-	// pointer to the list item
-	wMenuListItem_p ml = (wMenuListItem_p)value;
+	// // pointer to the list item
+	// wMenuListItem_p ml = (wMenuListItem_p)value;
 
-	if (MRECURSION( ml ))
-		return;
+	// if (MRECURSION( ml ))
+	// 	return;
 	
-	if (ml->mlist->count <= 0) {
-		// this should never happen
-		fprintf( stderr, "pushMenuItem: empty list\n" );
-		return;
-	}
-	// this is the applications callback routine
-	if (ml->mlist->action) {
-		const char * itemLabel;
+	// if (ml->mlist->count <= 0) {
+	// 	// this should never happen
+	// 	fprintf( stderr, "pushMenuItem: empty list\n" );
+	// 	return;
+	// }
+	// // this is the applications callback routine
+	// if (ml->mlist->action) {
+	// 	const char * itemLabel;
 
-		itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( widget ));
+	// 	itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( widget ));
 		
-		ml->mlist->action( 0, itemLabel, ml->data );	
-		return;
-	}
-	fprintf( stderr, "pushMenuItem: item (%lx) not found\n", (long)widget );
+	// 	ml->mlist->action( 0, itemLabel, ml->data );	
+	// 	return;
+	// }
+	// fprintf( stderr, "pushMenuItem: item (%lx) not found\n", (long)widget );
 }
 
 /**
@@ -537,15 +538,15 @@ wMenuList_p wMenuListCreate(
 	int max,
 	wMenuListCallBack_p action )
 {
-	wMenuList_p mi;
-	mi = (wMenuList_p)createMenuItem( m, M_LIST, NULL, _("<Empty List>"), sizeof( struct wMenuList_t ));
-	gtk_widget_set_sensitive( GTK_WIDGET(MMENUITEM( mi )), FALSE );
-	mi->next = NULL;
-	mi->count = 0;
-	mi->max = max;
-	MPARENT( mi ) = m;
-	mi->action = action;
-	return (wMenuList_p)mi;
+	// wMenuList_p mi;
+	// mi = (wMenuList_p)createMenuItem( m, M_LIST, NULL, _("<Empty List>"), sizeof( struct wMenuList_t ));
+	// gtk_widget_set_sensitive( GTK_WIDGET(MMENUITEM( mi )), FALSE );
+	// mi->next = NULL;
+	// mi->count = 0;
+	// mi->max = max;
+	// MPARENT( mi ) = m;
+	// mi->action = action;
+	// return (wMenuList_p)mi;
 }
 
 
@@ -567,62 +568,62 @@ void wMenuListAdd(
 	const char * labelStr,
 	const void * data )
 {
-	int i = 0;
-	GList * children;
+	// int i = 0;
+	// GList * children;
 
-	i = getMlistOrigin( ml, &children );
+	// i = getMlistOrigin( ml, &children );
 	
-	if( i > -1 ) {
-		wMenuListItem_p mi;
+	// if( i > -1 ) {
+	// 	wMenuListItem_p mi;
 
-		// we're adding an item, so hide the default placeholder
-		gtk_widget_hide( MMENUITEM( ml ));
+	// 	// we're adding an item, so hide the default placeholder
+	// 	gtk_widget_hide( MMENUITEM( ml ));
 		
-		// delete an earlier entry with the same label
-		wMenuListDelete( ml, labelStr );		
+	// 	// delete an earlier entry with the same label
+	// 	wMenuListDelete( ml, labelStr );		
 
-		// a new item
-		ml->count ++;
+	// 	// a new item
+	// 	ml->count ++;
 		
-		// is there a maximum number of items set and reached with the new item?
-		if(( ml->max != -1 ) && ( ml->count > ml-> max )) {
-			wMenuListItem_p mold;
-			GtkWidget * item;
+	// 	// is there a maximum number of items set and reached with the new item?
+	// 	if(( ml->max != -1 ) && ( ml->count > ml-> max )) {
+	// 		wMenuListItem_p mold;
+	// 		GtkWidget * item;
 	
-			// get the last item in the list
-			item = g_list_nth_data( children, i + ml->max );
-			// get the pointer to the data structure
-			mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
-			// kill the menu entry
-			gtk_widget_destroy( item );
-			// free the data 
-			free( (void *)mold->labelStr );
-			free( (void *)mold );
+	// 		// get the last item in the list
+	// 		item = g_list_nth_data( children, i + ml->max );
+	// 		// get the pointer to the data structure
+	// 		mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
+	// 		// kill the menu entry
+	// 		gtk_widget_destroy( item );
+	// 		// free the data 
+	// 		free( (void *)mold->labelStr );
+	// 		free( (void *)mold );
 
-			ml->count--;
-		}	
+	// 		ml->count--;
+	// 	}	
 		
-		// create the new menu item and initialize the data fields
-		mi = (wMenuListItem_p)wlibAlloc( NULL, B_MENUITEM, 0, 0, labelStr, sizeof( struct wMenuListItem_t ), NULL );
-		MITEMTYPE( mi ) = M_LISTITEM;
-		MMENUITEM( mi ) = gtk_menu_item_new_with_label(wlibConvertInput(mi->labelStr));
-		mi->data = (void *)data;
-		mi->mlist = ml;
-		g_object_set_data( G_OBJECT(MMENUITEM( mi )), WLISTITEM,  mi );
+	// 	// create the new menu item and initialize the data fields
+	// 	mi = (wMenuListItem_p)wlibAlloc( NULL, B_MENUITEM, 0, 0, labelStr, sizeof( struct wMenuListItem_t ), NULL );
+	// 	MITEMTYPE( mi ) = M_LISTITEM;
+	// 	MMENUITEM( mi ) = gtk_menu_item_new_with_label(wlibConvertInput(mi->labelStr));
+	// 	mi->data = (void *)data;
+	// 	mi->mlist = ml;
+	// 	g_object_set_data( G_OBJECT(MMENUITEM( mi )), WLISTITEM,  mi );
 		
-		// add the item to the menu
-		if ( index < 0 )
-			index = 0;
-		if ( index >= ml->count )
-			index = ml->count - 1;
-		gtk_menu_shell_insert((GtkMenuShell *)(MPARENT( ml )->menu), MMENUITEM( mi ), i + index + 1 );
-		g_signal_connect( G_OBJECT(MMENUITEM( mi )), "activate", G_CALLBACK(pushMenuList), mi );
+	// 	// add the item to the menu
+	// 	if ( index < 0 )
+	// 		index = 0;
+	// 	if ( index >= ml->count )
+	// 		index = ml->count - 1;
+	// 	gtk_menu_shell_insert((GtkMenuShell *)(MPARENT( ml )->menu), MMENUITEM( mi ), i + index + 1 );
+	// 	g_signal_connect( G_OBJECT(MMENUITEM( mi )), "activate", G_CALLBACK(pushMenuList), mi );
 	
-		gtk_widget_show(MMENUITEM( mi ));
-	}
+	// 	gtk_widget_show(MMENUITEM( mi ));
+	// }
 	
-	if( children )
-		g_list_free( children );
+	// if( children )
+	// 	g_list_free( children );
 }
 
 /**
@@ -636,53 +637,53 @@ void wMenuListDelete(
 	wMenuList_p ml,
 	const char * labelStr )
 {
-	int i;
-	int found = FALSE;
-	GList * children;
+	// int i;
+	// int found = FALSE;
+	// GList * children;
 
-	// find the placeholder for the list in the menu
-	i = getMlistOrigin( ml, &children );
+	// // find the placeholder for the list in the menu
+	// i = getMlistOrigin( ml, &children );
 	
-	if( i > -1 ) {
-		int origin;
-		GtkWidget * item;			
-		char * labelStrConverted;
+	// if( i > -1 ) {
+	// 	int origin;
+	// 	GtkWidget * item;			
+	// 	char * labelStrConverted;
 		
-		// starting from the placeholder, find the menu item with the correct text
-		found = FALSE;
-		labelStrConverted = wlibConvertInput( labelStr );
-		origin = i;
+	// 	// starting from the placeholder, find the menu item with the correct text
+	// 	found = FALSE;
+	// 	labelStrConverted = wlibConvertInput( labelStr );
+	// 	origin = i;
 		
-		// get menu item
-		// get label of item
-		// compare items
-		//    if identical, leave loop
-		while( i <= origin + ml->count && !found ) {
-			const char * itemLabel;
+	// 	// get menu item
+	// 	// get label of item
+	// 	// compare items
+	// 	//    if identical, leave loop
+	// 	while( i <= origin + ml->count && !found ) {
+	// 		const char * itemLabel;
 			
-			item = g_list_nth_data( children, i );
-			itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( item ));
-			if( !g_utf8_collate (itemLabel, labelStrConverted ))
-				found = TRUE;
-			else
-				i++;
-		}
-		if( found ) {
-			wMenuListItem_p mold;
+	// 		item = g_list_nth_data( children, i );
+	// 		itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( item ));
+	// 		if( !g_utf8_collate (itemLabel, labelStrConverted ))
+	// 			found = TRUE;
+	// 		else
+	// 			i++;
+	// 	}
+	// 	if( found ) {
+	// 		wMenuListItem_p mold;
 
-			mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
-			// kill the menu entry
-			gtk_widget_destroy( item );
-			// free the data 
-			free( (void *)mold->labelStr );
-			free( (void *)mold );
+	// 		mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
+	// 		// kill the menu entry
+	// 		gtk_widget_destroy( item );
+	// 		// free the data 
+	// 		free( (void *)mold->labelStr );
+	// 		free( (void *)mold );
 
-			ml->count--;	
-		}
-	}	
+	// 		ml->count--;	
+	// 	}
+	// }	
 	
-	if( children )
-		g_list_free( children );
+	// if( children )
+	// 	g_list_free( children );
 }
 
 /**
@@ -737,40 +738,42 @@ wMenuListGet( wMenuList_p ml, int index, void ** data )
 void wMenuListClear(
 	wMenuList_p ml )
 {
-	int origin;
-	GList * children;
+	// int origin;
+	// GList * children;
 
-	if (ml->count == 0)
-		return;
+	// if (ml->count == 0)
+	// 	return;
 
-	origin = getMlistOrigin( ml, &children );
+	// origin = getMlistOrigin( ml, &children );
 		
-	if( origin > -1 ) {
-		int i;
+	// if( origin > -1 ) {
+	// 	int i;
 
-		i = origin;
-		while( i < origin + ml->count ) {
-			wMenuListItem_p mold;
-			GtkWidget * item;
+	// 	i = origin;
+	// 	while( i < origin + ml->count ) {
+	// 		wMenuListItem_p mold;
+	// 		GtkWidget * item;
 			
-			item = g_list_nth_data( children, i + 1 );
-			mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
-			// kill the menu entry
-			gtk_widget_destroy( item );
-			// free the data 
-			free( (void *)mold->labelStr );
-			free( (void *)mold );
-			i++;
-		}	
-	}	
+	// 		item = g_list_nth_data( children, i + 1 );
+	// 		mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
+	// 		// kill the menu entry
+	// 		gtk_widget_destroy( item );
+	// 		// free the data 
+	// 		free( (void *)mold->labelStr );
+	// 		free( (void *)mold );
+	// 		i++;
+	// 	}	
+	// }	
 
-	ml->count = 0;
-	gtk_widget_show( MMENUITEM( ml ));
+	// ml->count = 0;
+	// gtk_widget_show( MMENUITEM( ml ));
 	
-	if( children )
-		g_list_free( children );
+	// if( children )
+	// 	g_list_free( children );
 }
-/*-----------------------------------------------------------------*/
+/*
+ * Toggle buttons in menu
+ */
 /**
  * Create a check box as part of a menu
  *
@@ -793,14 +796,13 @@ wMenuToggle_p wMenuToggleCreate(
 	wMenuCallBack_p action,
 	void * data )
 {
-	wMenuToggle_p mt;
+	wMenuToggle_p mt = g_malloc(sizeof(struct wMenuToggle_t));
 
-	mt = (wMenuToggle_p)createMenuItem( m, M_TOGGLE, helpStr, labelStr, sizeof( struct wMenuToggle_t ));
-	setAcclKey( m->parent, m->menu, MMENUITEM( mt ), acclKey );
+	CreateMenuItem(m, (wMenuItem_p)mt, M_TOGGLE, helpStr, labelStr );
+
+	// setAcclKey( m->parent, m->menu, MMENUITEM( mt ), acclKey );
 	mt->action = action;
 	mt->data = data;
-	mt->enabled = TRUE;
-	MPARENT( mt ) = m;
 	wMenuToggleSet( mt, set );
 	
 	return mt;
@@ -816,7 +818,7 @@ wMenuToggle_p wMenuToggleCreate(
 wBool_t wMenuToggleGet(
 	wMenuToggle_p mt )
 {
-	return mt->set;
+	return gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(MMENUITEM( mt )));
 }
 
 /**
@@ -831,14 +833,13 @@ wBool_t wMenuToggleSet(
 	wMenuToggle_p mt,
 	wBool_t set )
 {
-	wBool_t rc;
+	wBool_t oldState;
 	if (mt==NULL) return 0;
-	MRECURSION( mt )++;
+
+	oldState = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(MMENUITEM( mt )));
 	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(MMENUITEM( mt )), set );
-	MRECURSION( mt )--;
-	rc = mt->set;
-	mt->set = set;
-	return rc;
+
+	return oldState;
 }
 
 /**
@@ -853,7 +854,7 @@ void wMenuToggleEnable(
 	wMenuToggle_p mt,
 	wBool_t enable )
 {
-	mt->enabled = enable;
+	gtk_widget_set_sensitive ( GTK_WIDGET(MMENUITEM( mt )), enable ); 
 }
 
 
@@ -868,7 +869,7 @@ void wMenuToggleEnable(
  */
 
 void wMenuSetLabel( wMenu_p m, const char * labelStr) {
-	 wlibSetLabel( m->widget, m->option, labelStr, &m->labelG, &m->imageG );
+//	 wlibSetLabel( m->oc.widget, m->option, labelStr, &m->labelG, &m->imageG );
 }
 
 /**
@@ -910,72 +911,71 @@ wMenu_p wMenuCreate(
 	const char	* labelStr,
 	long	option )
 {
-	wMenu_p m;
-	m = wlibAlloc( parent, B_MENU, x, y, labelStr, sizeof( struct wMenu_t ), NULL );
-	m->mmtype = MM_BUTT;
-	m->option = option;
-	m->traceFunc = NULL;
-	m->traceData = NULL;
-	wlibComputePos( (wControl_p)m );
+	// wMenu_p m;
+	// m = wlibAlloc( parent, B_MENU, x, y, labelStr, sizeof( struct wMenu_t ), NULL );
+	// m->mmtype = MM_BUTT;
+	// m->option = option;
+	// m->traceFunc = NULL;
+	// m->traceData = NULL;
+	// wlibComputePos( (wControl_p)m );
 
-	m->widget = gtk_button_new();
+	// m->widget = gtk_button_new();
 
-	g_signal_connect (m->widget, "clicked",
-			G_CALLBACK(pushMenu), m );
+	// g_signal_connect (m->widget, "clicked",
+	// 		G_CALLBACK(pushMenu), m );
 
-	m->menu = gtk_menu_new();
+	// m->menu = gtk_menu_new();
 
-		wMenuSetLabel( m, labelStr );
-		gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
-		wlibControlGetSize( (wControl_p)m );
-		if ( m->w < 80 && (m->option&BO_ICON)==0) {
-			m->w = 80;
-			gtk_widget_set_size_request( m->widget, m->w, m->h );
-		}
-	gtk_widget_show( m->widget );
-	wlibAddButton( (wControl_p)m );
-	wlibAddHelpString( m->widget, helpStr );
-	return m;
+	// 	wMenuSetLabel( m, labelStr );
+	// 	gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
+	// 	wlibControlGetSize( (wControl_p)m );
+	// 	if ( m->w < 80 && (m->option&BO_ICON)==0) {
+	// 		m->w = 80;
+	// 		gtk_widget_set_size_request( m->widget, m->w, m->h );
+	// 	}
+	// gtk_widget_show( m->widget );
+	// wlibAddButton( (wControl_p)m );
+	// wlibAddHelpString( m->widget, helpStr );
+	// return m;
 }
 
 /**
- * Add a drop-down menu to the menu bar. 
+ * Add a drop-down menu to the menu bar.
  *
- * \param w 		IN main window handle 
+ * \param w 		IN main window handle
  * \param helpStr 	IN unused (should be help topic )
- * \param labelStr 	IN label for the drop-down menu 
+ * \param labelStr 	IN label for the drop-down menu
  * \return    pointer to the created drop-down menu
  */
 
 wMenu_p wMenuBarAdd(
-	wWin_p w,
-	const char * helpStr,
-	const char * labelStr )
+        wWindow_p w,
+        const char * helpStr,
+        const char * labelStr )
 {
 	wMenu_p m;
-	GtkWidget * menuItem;
-	
-	m = wlibAlloc( w, B_MENU, 0, 0, labelStr, sizeof( struct wMenu_t ), NULL );
-	m->mmtype = MM_BAR;
-	m->realX = 0;
-	m->realY = 0;
-	
-	menuItem = gtk_menu_item_new_with_mnemonic( wlibConvertInput(m->labelStr) );
-	m->menu = gtk_menu_new();
-	gtk_widget_set_name(m->menu, "commands");
-	gtk_menu_item_set_submenu( GTK_MENU_ITEM(menuItem), m->menu );
-	gtk_menu_shell_append( GTK_MENU_SHELL(w->menubar), menuItem );
-	gtk_widget_show( menuItem );
+	GtkWidget *menuItem;
 
-	m->w = 0;
-	m->h = 0;
-	
+	m = g_malloc(sizeof(struct wMenu_t));
+	m->oc.helpTopic = g_strdup(helpStr);
+	m->oc.labelStr = g_strdup(labelStr);
+	m->mmtype = MM_SUBMENU;
+	m->radioGroup = NULL;
+
+	menuItem = gtk_menu_item_new_with_label(labelStr);
+
+	m->menu = gtk_menu_new();
+
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuItem), m->menu );
+	gtk_menu_shell_append(GTK_MENU_SHELL(w->menubar), menuItem);
+
+	gtk_widget_show(menuItem);
+
 	/* TODO: why is help not supported here? */
 	/*gtkAddHelpString( m->panel_item, helpStr );*/
-	
+
 	return m;
 }
-
 
 /*-----------------------------------------------------------------*/
 
@@ -991,20 +991,20 @@ wMenu_p wMenuPopupCreate(
 	wWin_p w,
 	const char * labelStr )
 {
-	wMenu_p b;
-	b = wlibAlloc( w, B_MENU, 0, 0, labelStr, sizeof *b, NULL );
-	b->mmtype = MM_POPUP;
-	b->option = 0;
+	// wMenu_p b;
+	// b = wlibAlloc( w, B_MENU, 0, 0, labelStr, sizeof *b, NULL );
+	// b->mmtype = MM_POPUP;
+	// b->option = 0;
 
-	b->menu = gtk_menu_new();
-	b->w = 0;
-	b->h = 0;
-	g_signal_connect( G_OBJECT (b->menu), "key_press_event",
-			G_CALLBACK(catch_shift_ctrl_alt_keys), b);
-	g_signal_connect( G_OBJECT (b->menu), "key_release_event",
-			G_CALLBACK (catch_shift_ctrl_alt_keys), b);
-	gtk_widget_set_events ( GTK_WIDGET(b->menu), GDK_EXPOSURE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK );
-	return b;
+	// b->menu = gtk_menu_new();
+	// b->w = 0;
+	// b->h = 0;
+	// g_signal_connect( G_OBJECT (b->menu), "key_press_event",
+	// 		G_CALLBACK(catch_shift_ctrl_alt_keys), b);
+	// g_signal_connect( G_OBJECT (b->menu), "key_release_event",
+	// 		G_CALLBACK (catch_shift_ctrl_alt_keys), b);
+	// gtk_widget_set_events ( GTK_WIDGET(b->menu), GDK_EXPOSURE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK );
+	// return b;
 }
 
 /**
@@ -1049,38 +1049,38 @@ wBool_t wMenuAction(
 	wMenu_p m,
 	const char * label )
 {
-	wMenuItem_p mi;
-	wMenuToggle_p mt;
-	for ( mi = m->first; mi != NULL; mi = (wMenuItem_p)mi->next ) {
-		if ( strcmp( mi->labelStr, label ) == 0 ) {
-			switch( MITEMTYPE( mi )) {
-			case M_SEPARATOR:
-				break;
-			case M_PUSH:
-				if ( ((wMenuPush_p)mi)->enabled == FALSE )
-					wBeep();
-				else
-					((wMenuPush_p)mi)->action( ((wMenuPush_p)mi)->data );
-				break;
-			case M_TOGGLE:
-				mt = (wMenuToggle_p)mi;
-				if ( mt->enabled == FALSE ) {
-					wBeep();
-				} else {
-					wMenuToggleSet( mt, !mt->set );
-					mt->action( mt->data );
-				}
-				break;
-			case M_MENU:
-				break;
-			case M_LIST:
-				break;
-			default:
-				/*fprintf(stderr, "Oops: wMenuAction\n");*/
-			break;
-			}
-			return TRUE;
-		}
-	}
-	return FALSE;
+	// wMenuItem_p mi;
+	// wMenuToggle_p mt;
+	// for ( mi = m->first; mi != NULL; mi = (wMenuItem_p)mi->next ) {
+	// 	if ( strcmp( mi->oc.parent, label ) == 0 ) {
+	// 		switch( MITEMTYPE( mi )) {
+	// 		case M_SEPARATOR:
+	// 			break;
+	// 		case M_PUSH:
+	// 			if ( ((wMenuPush_p)mi)->enabled == FALSE )
+	// 				wBeep();
+	// 			else
+	// 				((wMenuPush_p)mi)->action( ((wMenuPush_p)mi)->data );
+	// 			break;
+	// 		case M_TOGGLE:
+	// 			mt = (wMenuToggle_p)mi;
+	// 			if ( mt->enabled == FALSE ) {
+	// 				wBeep();
+	// 			} else {
+	// 				wMenuToggleSet( mt, !mt->set );
+	// 				mt->action( mt->data );
+	// 			}
+	// 			break;
+	// 		case M_MENU:
+	// 			break;
+	// 		case M_LIST:
+	// 			break;
+	// 		default:
+	// 			/*fprintf(stderr, "Oops: wMenuAction\n");*/
+	// 		break;
+	// 		}
+	// 		return TRUE;
+	// 	}
+	// }
+	// return FALSE;
 }
