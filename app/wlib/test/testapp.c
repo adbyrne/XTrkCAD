@@ -29,7 +29,11 @@
 #define APPNAME "testapp"
 #define WINDOWTITLE "Test Application"
 
-#define TRUE	(1)
+// #define TEST_ARGV
+// #define TEST_SPLASH
+#define TEST_PULLDOWNMENU
+
+#define TRUE  (1)
 #define FALSE (0)
 
 long dontHideCursor = 0;
@@ -52,45 +56,10 @@ void doFile( void * cmd )
     }
 }
 
-
-wWindow_p wMain( int argc, char * argv[] )
+void TestMenu( wWindow_p mainW)
 {
-
-	wWindow_p mainW;
 	wMenu_p menu1;
 	wMenu_p menu2;
-	int i;
-	char buffer[ 80 ];
-
-	printf("testapp: argc: %d\n", argc);
-
-	for(int i = 0; i< argc; i++)
-		printf("%s\n", argv[i]);
-
-	wInitAppName(APPNAME);
-
-	printf("%s\n", wGetUserHomeDir());
-
-	/* add a splash window */
-	wCreateSplash( WINDOWTITLE,			/* name of application to show */
-						"1.0"						/* application version information */
-					 );	
-
-	wFlush();									/* make sure splash window is shown */
-
-	/* create main window */	
-    mainW = wWinMainCreate( APPNAME, 	/* application name  */
-	 								800, 			/* position x */
-									600, 			/* position y */
-									"Help", 		/* help topic */
-									WINDOWTITLE, /* window title */
-									APPNAME, 	/* window name */	
-									F_RESIZE|F_MENUBAR, /* options */
-									NULL, 		/* window callback function */
-									NULL 			/* pointer to user data */
-									);
-
-	// wWinShow( mainW, FALSE );
 
 	/* add a submenu */ 	
     menu1 = wMenuBarAdd( mainW, 		/* parent window */
@@ -180,17 +149,63 @@ wWindow_p wMain( int argc, char * argv[] )
 				doFile,
 				(void *)3
 				);
+
+}
+
+wWindow_p wMain( int argc, char * argv[] )
+{
+
+	wWindow_p mainW;
+#ifdef TEST_ARGV
+	printf("testapp: argc: %d\n", argc);
+
+	for(int i = 0; i< argc; i++)
+		printf("%s\n", argv[i]);
+#endif
+
+	wInitAppName(APPNAME);
+
+	printf("%s\n", wGetUserHomeDir());
+
+#ifdef TEST_SPLASH
+	/* add a splash window */
+	wCreateSplash( WINDOWTITLE,			/* name of application to show */
+						"1.0"						/* application version information */
+					 );	
+
+	wFlush();									/* make sure splash window is shown */
+#endif
+
+	/* create main window */	
+    mainW = wWinMainCreate( APPNAME, 	/* application name  */
+	 								800, 			/* position x */
+									600, 			/* position y */
+									"Help", 		/* help topic */
+									WINDOWTITLE, /* window title */
+									APPNAME, 	/* window name */	
+									F_RESIZE|F_MENUBAR, /* options */
+									NULL, 		/* window callback function */
+									NULL 			/* pointer to user data */
+									);
+
+	// wWinShow( mainW, FALSE );
+
+#ifdef TEST_PULLDOWNMENU
+	TestMenu(mainW);
+#endif
+
 	
-	
-	for( i = 2; i > 0; i-- ) {
+#ifdef TEST_SPLASH	
+	char buffer[ 80 ];
+
+	for( int i = 2; i > 0; i-- ) {
 		sprintf(buffer, "Countdown %d", i );
 		wSetSplashInfo( buffer );
 		wPause( 1000L );
 	}
  
-	//wWinShow( mainW, TRUE );
-
 	wDestroySplash();							/* remove the splash window again */
+#endif	
 
 	return mainW;
 }
