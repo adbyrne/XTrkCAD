@@ -819,34 +819,34 @@ EXPORT DIST_T DistanceSegs(
 			/*GetTextBounds( segPtr->u.t.pos, angle+segPtr->u.t.angle, segPtr->u.t.string, segPtr->u.t.fontSize, &lo, &hi );*/
 			GetTextBounds( zero, 0, segPtr->u.t.string, segPtr->u.t.fontSize, &lo,
 			               &hi ); //lo and hi are relative to seg origin
-			p0.x -= segPtr->u.t.pos.x;
-			p0.y -= segPtr->u.t.pos.y;
-			Rotate( &p0, zero, -segPtr->u.t.angle );
-			if (p0.x > lo.x && p0.x < hi.x && p0.y >lo.y
-			    && p0.y < hi.y) {  //Within rectangle - therefore small dist
+			p1.x -= segPtr->u.t.pos.x;
+			p1.y -= segPtr->u.t.pos.y;
+			Rotate( &p1, zero, -segPtr->u.t.angle );
+			if (p1.x > lo.x && p1.x < hi.x && p1.y >lo.y
+			    && p1.y < hi.y) {  //Within rectangle - therefore small dist
 				hi.x /= 2.0;
 				hi.y /= 2.0;
-				dd = 0.1*FindDistance(hi, p0)/FindDistance(lo,
+				dd = 0.1*FindDistance(hi, p1)/FindDistance(lo,
 				                hi);  // Proportion to mean that the closer we to the center or the smaller the target in overlapping cases, the more likely we pick it
 				break;
 			}
 			hi.x /= 2.0;   // rough center of rectangle
 			hi.y /= 2.0;
-			if (fabs((p0.x-hi.x)/hi.x)<fabs((p0.y
+			if (fabs((p1.x-hi.x)/hi.x)<fabs((p1.y
 			                                 -hi.y)/hi.y)) {  	// Proportionally closer to x
-				if (p0.x > hi.x) { dd = (p0.x - hi.x); }
-				else { dd = fabs(p0.x-hi.x); }
+				if (p1.x > hi.x) { dd = (p1.x - hi.x); }
+				else { dd = fabs(p1.x-hi.x); }
 			} else {												// Closer to y
-				if (p0.y > hi.y) { dd = (p0.y - hi.y); }
-				else { dd = fabs(p0.y-hi.y); }
+				if (p1.y > hi.y) { dd = (p1.y - hi.y); }
+				else { dd = fabs(p1.y-hi.y); }
 			}
 			/*printf( "dx=%0.4f dy=%0.4f dd=%0.3f\n", dx, dy, dd );*/
 			/*
-						if ( p0.x >= lo.x && p0.x <= hi.x &&
-							 p0.y >= lo.y && p0.y <= hi.y ) {
+						if ( p1.x >= lo.x && p1.x <= hi.x &&
+							 p1.y >= lo.y && p1.y <= hi.y ) {
 							p1.x = (lo.x+hi.x)/2.0;
 							p1.y = (lo.y+hi.y)/2.0;
-							dd = FindDistance( p0, p1 );
+							dd = FindDistance( p1, p1 );
 						}
 			*/
 			break;

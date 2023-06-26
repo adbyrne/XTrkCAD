@@ -2353,7 +2353,10 @@ void AttachTrains(void)
 			trk = NULL;
 		}
 		if (trk==NULL || GetTrkDistance(trk,&pos)>trackGauge*2.0) {
+			// Suppress moving pos to turnout endPt
+			onTrackInSplit = TRUE;
 			trk = OnTrack2(&pos, FALSE, TRUE, FALSE, NULL);
+			onTrackInSplit = FALSE;
 		}
 
 		if (trk!=NULL) {
