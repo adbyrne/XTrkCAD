@@ -128,7 +128,8 @@ else()
 	# Create the sources for the Help Workshop using halibut
 	# Build the chm file
 	# Add the chm file to the installation 
-	add_custom_target(help-chm ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
+
+	add_custom_target(help-chm ALL DEPENDS ${halibut_sources})
 	set_target_properties(
    		help-chm
    		PROPERTIES FOLDER HelpDocs

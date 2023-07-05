@@ -1,6 +1,8 @@
-project(XTrkCAD)
+# Main CMake file for XTrackCAD
 
 cmake_minimum_required(VERSION 3.20.0)
+project(XTrkCAD)
+
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
