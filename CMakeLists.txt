@@ -50,11 +50,6 @@ find_package(Pandoc)
 
 # For handling and creation of bitmaps the FreeImage library is required
 find_package(FreeImage REQUIRED)
-# make sure that the DLL can be found during build
-if(WIN32)
-	cmake_path(GET FREEIMAGE_SHAREDLIB PARENT_PATH parentpath )
-	set(ENV{path} "${parentpath};$ENV{PATH}")
-endif()
 
 # check for GTK+ 2.0
 if(UNIX)
