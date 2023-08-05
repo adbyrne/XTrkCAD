@@ -135,7 +135,6 @@ extern long drawCount;
 extern BOOL_T drawEnable;
 extern long currRedraw;
 extern long constrainMain;
-extern long mapScale;
 extern long liveMap;
 extern long descriptionFontSize;
 
@@ -256,7 +255,6 @@ void TranslateBackground(drawCmd_p drawP, POS_T origX, POS_T origY,
                          wWinPix_t* posX,
                          wWinPix_t* posY, wWinPix_t* pWidth);
 BOOL_T SetRoomSize(coOrd);
-void GetRoomSize(coOrd *);
 void DoRedraw(void);
 void SetMainSize(void);
 void MainRedraw(void);
