@@ -1429,16 +1429,17 @@ static void ChangeMapScale()
 	w = (wWinPix_t)fw;
 	h = (wWinPix_t)fh;
 	LOG( log_mapsize, 2, ( "  ChangeMapScale mapD.scale=%0.3f w=%ld h=%ld\n",
-				mapD.scale, w, h ) );
+	                       mapD.scale, w, h ) );
 	wWinSetSize( mapW, w+mapBorderW, h+mapBorderH );
-	// This should be done by wWinSetSize 
+	// This should be done by wWinSetSize
 	wDrawSetSize( mapD.d, w, h, NULL );
 }
 
 
 EXPORT BOOL_T SetRoomSize( coOrd size )
 {
-	LOG( log_mapsize, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x, size.y, mapD.size.x, mapD.size.y ) );
+	LOG( log_mapsize, 2, ( "SetRoomSize NEW:%0.3fx%0.3f OLD:%0.3fx%0.3f\n", size.x,
+	                       size.y, mapD.size.x, mapD.size.y ) );
 	SetLayoutRoomSize(size);
 	if (size.x < 1.0) {
 		size.x = 1.0;
@@ -1522,8 +1523,9 @@ static void MapRedraw(
 		if (scale < MIN_MAIN_MACRO) { scale = MIN_MAIN_MACRO; }
 
 		scale = ceil( scale );	// Round up
-		LOG( log_mapsize, 2, ( "      %ldx%ld mapD.scale=%0.3f, scaleX=%0.3f scaleY=%0.3f scale=%0.3f\n",
-			px, py, mapD.scale, scaleX, scaleY, scale ) );
+		LOG( log_mapsize, 2,
+		     ( "      %ldx%ld mapD.scale=%0.3f, scaleX=%0.3f scaleY=%0.3f scale=%0.3f\n",
+		       px, py, mapD.scale, scaleX, scaleY, scale ) );
 		mapD.scale = scale;
 	} else {
 		LOG( log_mapsize, 2, ( "  0x0 mapD.scale=%0.3f\n", mapD.scale ) );
