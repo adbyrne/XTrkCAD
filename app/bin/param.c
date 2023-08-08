@@ -2972,14 +2972,11 @@ static void ParamDlgProc(
 		}
 		break;
 	case wResize_e:
-		if (win == mapW) {
-			if ( !bInReadTracks ) {
-				pg->changeProc(pg, wResize_e, NULL);
-			}
-		} else {
-			LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
-			LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		if (win == mapW && bInReadTracks ) {
+			break;
 		}
+		LOG( log_paramLayout, 1, ( "ParamDlgProc %d/n", iResizeCnt++ ) );
+		LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		break;
 	default:
 		break;

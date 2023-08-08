@@ -770,7 +770,7 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "MAPSCALE ", 9 ) == 0) {
 			scale = atol( paramLine+9 );
 			if (scale > 1) {
-				mapD.scale = mapScale = scale;
+				mapD.scale = scale;
 			}
 		} else if (strncmp( paramLine, "LAYERS ", 7 ) == 0) {
 			ReadLayers( paramLine+7 );
