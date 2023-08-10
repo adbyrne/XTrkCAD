@@ -314,7 +314,12 @@ static void DescOk(void * junk)
 	}
 
 	descNeedDrawHilite = FALSE;
-	Reset(); // DescOk
+	if (programMode == MODE_DESIGN) {
+		Reset(); // DescOk
+	} else {
+		descNeedDrawHilite = FALSE;
+		wSetCursor(mainD.d,defaultCursor);
+	}
 }
 
 

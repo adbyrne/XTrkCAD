@@ -91,7 +91,7 @@ static wButton_p newcarB;
 static void ControllerDialogSyncAll(void);
 static STATUS_T CmdTrain(wAction_t, coOrd);
 static wMenu_p trainPopupM;
-static wMenuPush_p trainPopupMI[10];
+static wMenuPush_p trainPopupMI[11];
 static track_p followTrain;
 static coOrd followCenter;
 static BOOL_T trainsTimeoutPending;
@@ -99,13 +99,15 @@ static enum { TRAINS_STOP, TRAINS_RUN, TRAINS_IDLE, TRAINS_PAUSE } trainsState;
 static wIcon_p stopI, goI;
 static wIcon_p stopB, goB;
 static void RestartTrains(void);
-static void DrawAllCars(void);
+static void DrawAllCars(track_p);
 //static void UncoupleCars(track_p, track_p);
 static void TrainTimeEndPause(void);
 static void TrainTimeStartPause(void);
 
 static int log_trainMove;
 static int log_trainPlayback;
+
+static track_p trainHighlighted;
 
 static void PlaceCar(track_p);
 
@@ -180,7 +182,7 @@ static descData_t carDesc[] = {
 	/*LN*/	{ DESC_DIM, N_("Length"), &carData.length },
 	/*WD*/	{ DESC_DIM, N_("Width"), &carData.width },
 	/*DE*/	{ DESC_STRING, N_("Description"), &carData.desc, sizeof(carData.desc)  },
-	/*NM*/	{ DESC_STRING, N_("Rep Marks"), &carData.number, sizeof(carData.number) },
+	/*NM*/	{ DESC_STRING, N_("Report Marks"), &carData.number, sizeof(carData.number) },
 	{ DESC_NULL }
 };
 
@@ -190,22 +192,25 @@ static void UpdateCar(
         descData_p descUpd,
         BOOL_T needUndoStart)
 {
+	unsigned int max_str;
+	struct extraDataCar_t *xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
 	if (inx == -1) {
-		BOOL_T titleChanged;
+		BOOL_T numberChanged;
 		const char * cp;
-		titleChanged = FALSE;
+		numberChanged = FALSE;
+
 		cp = wStringGetValue((wString_p)carDesc[NM].control0);
-		unsigned int max_str = sizeof(carData.number);
+		max_str = sizeof(carData.number);
 		if (max_str && strlen(cp)>max_str) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
 		}
-		if (cp && strcmp(carData.number, cp) != 0) {
-			titleChanged = TRUE;
+		if (cp && strcmp(CarItemNumber(xx->item), cp) != 0) {
+			numberChanged = TRUE;
 			carData.number[0] = '\0';
 			strncat(carData.number, cp, max_str - 1);
 		}
 
-		if (!titleChanged) {
+		if (!numberChanged) {
 			return;
 		}
 
@@ -214,6 +219,7 @@ static void UpdateCar(
 		}
 
 		UndoModify(trk);
+		CarItemSetNumber(xx->item, carData.number);
 		UndrawNewTrack(trk);
 		DrawNewTrack(trk);
 		return;
@@ -262,8 +268,8 @@ static void DescribeCar(
 	                carDesc[AN].mode =
 	                        carDesc[LN].mode =
 	                                carDesc[WD].mode = DESC_RO;
-	carDesc[DE].mode =
-	        carDesc[NM].mode = DESC_RO;
+	carDesc[DE].mode = DESC_RO;
+	        carDesc[NM].mode = 0;
 	DoDescribe(_("Car"), trk, carDesc, UpdateCar);
 }
 
@@ -381,38 +387,102 @@ static void DrawCar(
 
 
 static DIST_T DistanceCar(
-        track_p trk,
-        coOrd * pos)
+    track_p trk,
+    coOrd * pos)
 {
 	struct extraDataCar_t * xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
-	DIST_T dist;
-	coOrd pos1;
-	coOrd size;
+    DIST_T dist;
+    coOrd ends[4];
+    coOrd size;
 
-	if (IsIgnored(xx)) {
-		return DIST_INF;
-	}
+    if (IsIgnored(xx)) {
+        return 10000.0;
+    }
 
-	CarItemSize(xx->item,
-	            &size);   /* TODO assumes xx->trvTrk.pos is the car center */
-	dist = FindDistance(*pos, xx->trvTrk.pos);
+    if (hideTrainsInTunnels &&
+                ((((xx->state&CAR_STATE_ONHIDENTRACK)!=0) && drawTunnel==0) ||
+                 (xx->trkLayer!=NOTALAYER && !GetLayerVisible(xx->trkLayer)))) {
+        return 10000.0;
+    }
 
-	if (dist < size.x/2.0) {
-		pos1 = *pos;
-		Rotate(&pos1, xx->trvTrk.pos, -xx->trvTrk.angle);
-		pos1.x += -xx->trvTrk.pos.x + size.y/2.0; /* TODO: why not size.x? */
-		pos1.y += -xx->trvTrk.pos.y + size.x/2.0;
+    CarItemSize(xx->item,
+                &size);
 
-		if (pos1.x >= 0 && pos1.x <= size.y &&
-		    pos1.y >= 0 && pos1.y <= size.x) {
-			dist = 0;
-		}
-	}
+    size.x = CarItemCoupledLength(xx->item);  /* Coupling included */
 
-	*pos = xx->trvTrk.pos;
-	return dist;
+    coOrd carPos;
+    CarItemPos(xx->item,
+    		&carPos);
+
+    dist = FindDistance(*pos, carPos);        /* Basic distance to center */
+
+    if (dist < size.x/2.0+size.y/2.0) {       /* Crude circle to evaluate if "close" */
+
+    	coOrd point = *pos;
+    	point.x += -carPos.x;
+    	point.y += -carPos.y;
+    	Rotate(&point,zero,-(xx->trvTrk.angle+90.0));  /* Convert to simple coOrds */
+
+    	for (int i=0;i<4;i++) {
+    		ends[i].x = 0.0;
+    		ends[i].y = 0.0;
+    	}
+        ends[0].x =  size.x/2.0;
+        ends[0].y =  size.y/2.0;
+        ends[1].x = - size.x/2.0;
+        ends[1].y =   size.y/2.0;
+        ends[2].x =  - size.x/2.0;
+        ends[2].y =  - size.y/2.0;
+        ends[3].x =  size.x/2.0;
+        ends[3].y =  - size.y/2.0;
+
+
+/*
+ *      A |         B              | C
+ *      --1------------------------0---
+ *      D |         0.0            | E
+ *      --2------------------------3---
+ *      F |         G              | H
+ */
+
+        if ((point.x >= ends[2].x) && (point.x <= ends[0].x) && (point.y >= ends[2].y) && (point.y <= ends[0].y)) {
+        	dist = 0.0; /* center */
+        	*pos = carPos;
+        } else {
+        	if (point.x > ends[2].x && point.x < ends[0].x ) {
+        		if (point.y > ends[0].y) {
+        			dist = fabs(point.y - ends[0].y); /* B */
+        			point.y = ends[0].y;
+        		} else {
+        			dist = fabs(point.y - ends[2].y); /* G */
+        			point.y = ends[2].y;
+        		}
+        	} else if (point.y > ends[2].y && point.y < ends[0].y) {
+        		if (point.x > ends[0].x) {
+        			dist = fabs(point.x - ends[0].x);  /* E */
+        			point.x = ends[0].x;
+        		} else {
+        			dist = fabs(point.x - ends[2].x);  /* D */
+        			point.x = ends[2].x;
+        		}
+        	} else {   /* A,C,F,G */
+				for (int i=0;i<4;i++) {
+					if (dist>FindDistance(point,ends[i])) {
+						dist = FindDistance(point,ends[i]);
+						point = ends[i];
+					}
+				}
+        	}
+        	Rotate(&point,zero,(xx->trvTrk.angle+90.0));
+        	point.x +=carPos.x;
+        	point.y +=carPos.y;
+        	*pos = point;
+        }
+
+    }
+
+    return dist;
 }
-
 
 static void SetCarBoundingBox(
         track_p car)
@@ -1199,6 +1269,8 @@ static void ControllerDialogUpdate(
 			return;
 		}
 
+
+
 		TrainTimeEndPause();
 		xx = GET_EXTRA_DATA(dlg->train, T_CAR, extraDataCar_t);
 		followTrain = NULL;
@@ -1206,6 +1278,7 @@ static void ControllerDialogUpdate(
 		ParamLoadControl(curTrainDlg->trainPGp, I_FOLLOW);
 		CarSetVisible(dlg->train);
 		MoveMainWindow(xx->trvTrk.pos, xx->trvTrk.angle);
+		trainHighlighted = dlg->train;
 		TrainTimeStartPause();
 		break;
 
@@ -1321,7 +1394,7 @@ static struct {
 
 long trainPause = 200;
 static track_p followTrain = NULL;
-static void DrawAllCars(void)
+static void DrawAllCars(track_p trk)
 {
 	track_p car;
 	struct extraDataCar_t * xx;
@@ -1344,6 +1417,9 @@ static void DrawAllCars(void)
 
 			if (!OFF_MAIND(lo, hi)) {
 				DrawCar(car, &tempD, wDrawColorBlack);
+				if (car == trk) {
+					DrawCar(trk,&tempD,wDrawColorPreviewSelected);
+				}
 			}
 		}
 	}
@@ -1433,6 +1509,18 @@ static track_p FindCar(
 			}
 
 			pos0 = *pos;
+
+			coOrd hi,lo;
+
+			GetBoundingBox(trk,&hi,&lo);
+
+			if (hi.x < pos0.x ||
+		        lo.x > pos0.x ||
+			    hi.y < pos0.y ||
+			    lo.y > pos0.y ) {
+					continue;
+			}
+
 			dist = DistanceCar(trk, &pos0);
 
 			if (dist < dist1) {
@@ -1443,7 +1531,7 @@ static track_p FindCar(
 		}
 	}
 
-	if (dist1 < 10) {
+	if (dist1 < trackGauge*2.0) {
 		*pos = pos1;
 		return trk1;
 	} else {
@@ -2485,13 +2573,15 @@ static BOOL_T TrainOnMovableTrack(
 #define DO_STOP			(7)
 #define DO_PENCILS_ON   (8)
 #define DO_PENCILS_OFF  (9)
+#define DO_DESCRIBE     (10)
 static track_p trainFuncCar;
 static coOrd trainFuncPos;
 static wButton_p trainPauseB;
 
+
 static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 {
-	track_p trk0, trk1;
+	static track_p trk0, trk1;
 	static track_p currCar;
 	coOrd pos0, pos1;
 	static coOrd delta;
@@ -2527,6 +2617,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		wListClear((wList_p)curTrainDlg->trainPGp->paramPtr[I_LIST].control);
 		Dtrain.state = 0;
 		trk0 = NULL;
+		trainHighlighted = NULL;
 		DYNARR_SET(trkSeg_t, tempSegs_da, 8);
 		RestartTrains();
 		wButtonSetLabel(trainPauseB, (char*)goB);
@@ -2543,12 +2634,16 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		TempRedraw(); // CmdTrain C_START
 		return C_CONTINUE;
 
+	case wActionMove:
+
+		trainHighlighted = FindCar(&pos);
+
+		return C_CONTINUE;
+		break;
+
+
 	case C_TEXT:
-		if (Dtrain.state == 0) {
-			return C_CONTINUE;
-		} else {
-			return C_CONTINUE;
-		}
+		return C_CONTINUE;
 
 	case C_DOWN:
 		/*trainEnable = FALSE;*/
@@ -2627,6 +2722,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			return C_CONTINUE;
 		}
 
+		trainHighlighted = currCar;
+
 		trk0 = FindMasterLoco(currCar, NULL);
 
 		if (trk0) {
@@ -2687,6 +2784,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		InfoSubstituteControls(NULL, NULL);
 		currCar = trk0 = NULL;
 		currCarItemPtr = NULL;
+		trainHighlighted = NULL;
 
 		/*trainEnable = TRUE;*/
 		if (trainsState == TRAINS_PAUSE) {
@@ -2730,6 +2828,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			if (trk0 == NULL) {
 				return C_CONTINUE;
 			}
+
+			trainHighlighted = trk0;
 
 			trk0 = FindMasterLoco(trk0, NULL);
 
@@ -2775,6 +2875,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		wMenuPushEnable(trainPopupMI[DO_CHANGEDIR], trk0!=NULL);
 		wMenuPushEnable(trainPopupMI[DO_STOP], trk0!=NULL && xx->speed>0);
 		/*trainEnable = FALSE;*/
+		trainHighlighted = trk0;
 		trk0 = FindMasterLoco(trainFuncCar, NULL);
 
 		if (trk0) {
@@ -2789,7 +2890,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 
 	case C_REDRAW:
 		wDrawSaveImage(mainD.d);
-		DrawAllCars();
+		DrawAllCars(trainHighlighted);
+
 		wWinGetSize(mainW, &w, &h);
 		w -= wControlGetPosX(newCarControls[0]) + 4;
 
@@ -2797,6 +2899,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 			wListSetSize((wList_p)newCarControls[0], w,
 			             wControlGetHeight(newCarControls[0]));
 		}
+
+
 
 		return C_CONTINUE;
 
@@ -2821,6 +2925,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		if ( curTrainDlg ) {
 			curTrainDlg->train = NULL;
 		}
+		trk0 = NULL;
+		trainHighlighted = NULL;
 		return C_CONTINUE;
 
 	case C_CONFIRM:
@@ -2836,6 +2942,8 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		currCarItemPtr = NULL;
 		HotBarCancel();
 		InfoSubstituteControls(NULL, NULL);
+		trk0 = NULL;
+		trainHighlighted = NULL;
 		return C_TERMINATE;
 	}
 
@@ -2918,6 +3026,7 @@ static void TrainFunc(
 	coOrd pos0, pos1;
 	ANGLE_T angle0, angle1;
 	EPINX_T ep0, ep1;
+	char describe_str[STR_SIZE];
 
 	if (trainFuncCar == NULL) {
 		fprintf(stderr, "trainFunc: trainFuncCar==NULL\n");
@@ -2976,6 +3085,13 @@ static void TrainFunc(
 	case DO_FLIPTRAIN:
 		FlipTrain(trainFuncCar);
 		/*PlaceTrain( trainFuncCar, xx->trk, xx->trvTrk.pos, xx->trvTrk.angle );*/
+		break;
+
+	case DO_DESCRIBE:
+		pos0 = xx->trvTrk.pos;
+		CmdDescribe(C_START, pos0);
+		CmdDescribe(C_DOWN, pos0);
+		CmdDescribe(C_UP, pos0);
 		break;
 
 	case DO_DELCAR:
@@ -3079,7 +3195,7 @@ void InitCmdTrain(wMenu_p menu)
 	ParamRegister(&trainPG);
 	trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Run Trains"),
 	                            wIconCreatePixMap(train_xpm3[iconSize]), LEVEL0_50,
-	                            IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
+	                            IC_POPUP3|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, 0,
 	                            NULL);
 	stopI = wIconCreatePixMap(reddot);
 	goI = wIconCreatePixMap(greendot);
@@ -3108,6 +3224,8 @@ void InitCmdTrain(wMenu_p menu)
 	                                  TrainFunc, I2VP(DO_PENCILS_OFF));
 	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
 	                              0, TrainFunc, I2VP(DO_FLIPTRAIN));
+	trainPopupMI[DO_DESCRIBE] = wMenuPushCreate(trainPopupM, "", _("Describe"),
+								  0, TrainFunc, I2VP(DO_DESCRIBE));
 	trainPopupMI[DO_MUMASTER]   = wMenuPushCreate(trainPopupM, "", _("MU Master"),
 	                              0, TrainFunc, I2VP(DO_MUMASTER));
 	trainPopupMI[DO_CHANGEDIR]  = wMenuPushCreate(trainPopupM, "",

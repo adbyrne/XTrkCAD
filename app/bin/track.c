@@ -192,6 +192,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track,
 				continue;
 			}
 		}
+
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
 		if (fabs(distance) <= fabs(

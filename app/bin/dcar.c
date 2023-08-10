@@ -1975,6 +1975,15 @@ EXPORT void CarItemFindCouplerMountPoint(
 #endif
 }
 
+EXPORT void CarItemPos(
+		carItem_p item,
+		coOrd * pos	)
+{
+	pos->x = item->pos.x;
+	pos->y = item->pos.y;
+}
+
+
 
 EXPORT void CarItemSize(
         carItem_p item,
@@ -1984,12 +1993,23 @@ EXPORT void CarItemSize(
 	size->y = item->dim.carWidth;
 }
 
+EXPORT void CarItemSetNumber(carItem_p item, char * number) {
+	if (item->data.number && number[0]) {
+		MyFree(item->data.number);
+	}
+	if (number[0]) {
+		item->data.number = MyStrdup(number);
+	}
+}
+
 
 EXPORT char * CarItemNumber(
         carItem_p item )
 {
 	return item->data.number;
 }
+
+
 
 
 static DIST_T CarItemTruckCenter(

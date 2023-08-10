@@ -580,6 +580,12 @@ The Hot Bar becomes the \f{Shelf}.
 
 \u000
 
+\dt \e{Change Reporting number of Car on Layout}
+
+\dd To change the reporting number, Right-Click over the Car and then select \e{Describe} and update the field. This value will be shown in the car if Labels are shown and in the \e{Train Control} Window.
+
+\u000
+
 \dt \e{Trains}
 
 \dd A Train consists of one or more Locomotives coupled to other Cars.  One Locomotive will be the \e{MU Master} for the Train.  The \e{MU Master} can be changed by Right-Clicking on a Locomotive and selecting \e{MU Master} from the pop-up menu.  The \e{MU Master} is drawn with a solid Yellow head light indicating the direction is moving.  If a Train is split by uncoupling between Locomotives, then two Trains will be created, each with their own \e{MU Master}.
@@ -592,7 +598,7 @@ The Hot Bar becomes the \f{Shelf}.
 
 \u000
 
-\dd The \e{Train Control} dialog is used to set the speed and direction of Trains.  The dialog contains a list of Trains (listed by their \e{MU Master} Locomotive).  Before each Train on the list is either a Red circle (indicating the Train is stopped) or a Green circle (indicating the Train is moving).
+\dd The \e{Train Control} dialog is used to set the speed and direction of Trains.  The dialog contains a list of Trains (listed by their \e{MU Master} Locomotive reporting number).  Before each Train on the list is either a Red circle (indicating the Train is stopped) or a Green circle (indicating the Train is moving).
 
 \u000
 
