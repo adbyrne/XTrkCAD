@@ -1878,8 +1878,8 @@ BOOL_T ReadLayers(char * line)
 	layers[inx].inherit = inherit;
 	GetScaleGauge(sclInx, &layers[inx].scaleDescInx, &layers[inx].gaugeInx);
 
-	colorTrack = ColorFlags & 1; //Make sure globals are set
-	colorDraw = ColorFlags & 2;
+	colorTrack = ( ColorFlags & 1 ) ? 1 : 0; //Make sure globals are set
+	colorDraw = ( ColorFlags & 2 ) ? 1 : 0;
 
 	if (inx < NUM_BUTTONS && !layers[inx].button_off) {
 		if (strlen(name) > 0) {
