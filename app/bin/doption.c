@@ -317,6 +317,7 @@ static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"),
 static paramData_t prefPLs[] = {
 	{ PD_RADIO, &iconSize, "iconsize", PDO_NOPSHUPD, iconSizeLabels, N_("Icon Size"), BC_HORZ, I2VP(CHANGE_ICONSIZE) },
 	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
+#define I_UNITS			(2)
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
 #define I_DSTFMT		(3)
 	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, I2VP(150), N_("Length Format"), 0, I2VP(CHANGE_MAIN|CHANGE_UNITS) },
@@ -425,10 +426,10 @@ static void UpdatePrefD( void )
 	long newUnits, oldUnits;
 	int inx;
 
-	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[1].control==NULL ) {
+	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[I_UNITS].control==NULL ) {
 		return;
 	}
-	newUnits = wRadioGetValue( (wChoice_p)prefPLs[1].control );
+	newUnits = wRadioGetValue( (wChoice_p)prefPLs[I_UNITS].control );
 	if (newUnits != displayUnits) {
 		oldUnits = units;
 		units = newUnits;
@@ -456,7 +457,7 @@ static void UpdateMeasureFmt()
 	int inx;
 
 	distanceFormatInx = wListGetIndex((wList_p)prefPLs[I_DSTFMT].control);
-	units = wRadioGetValue((wChoice_p)prefPLs[1].control);
+	units = wRadioGetValue((wChoice_p)prefPLs[I_UNITS].control);
 
 	for (inx = 0; inx < COUNT( prefPLs ); inx++) {
 		if ((prefPLs[inx].option&PDO_DIM)) {
