@@ -15,18 +15,15 @@
 if(WIN32)
   set(LIBZIPBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/libzip" )
   find_path( LIBZIP_INCLUDE_DIR_ZIP zip.h
-      PATHS ${LIBZIPBASEDIR}
+      PATHS ${LIBZIPBASEDIR} "${LIBZIPBASEDIR}/include" 
       DOC "The directory where zip.h resides")
   find_path( LIBZIP_INCLUDE_DIR_ZIPCONF zipconf.h
-      PATHS ${LIBZIPBASEDIR}
+      PATHS ${LIBZIPBASEDIR} "${LIBZIPBASEDIR}/include"
       DOC "The directory where zip.h resides")
   find_library( LIBZIP_LIBRARY
-      NAMES zip Zip
-      PATHS ${LIBZIPBASEDIR}
+      NAMES zip Zip 
+      PATHS ${LIBZIPBASEDIR} "${LIBZIPBASEDIR}/lib"
       DOC "The libzip library")
-  find_file( LIBZIP_SHAREDLIB
-      NAMES zip.dll Zip.dll
-      PATHS ${LIBZIPBASEDIR})
 else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_LIBZIP QUIET libzip)
@@ -60,7 +57,6 @@ if(Libzip_FOUND)
     LIBZIP_LIBRARY 
     LIBZIP_INCLUDE_DIR_ZIP 
     LIBZIP_INCLUDE_DIR_ZIPCONF 
-    LIBZIP_SHAREDLIB
   ) 
 endif()  
 
