@@ -1325,6 +1325,7 @@ static gint draw_char_event(
 	switch (key) {
 	case GDK_KEY_Escape:	key = 0x1B; break;
 	case GDK_KEY_Return:
+	case GDK_KP_Enter:
 		modifiers = gtk_accelerator_get_default_mod_mask();
 		if (((event->state & modifiers)==GDK_CONTROL_MASK)
 		    || ((event->state & modifiers)==GDK_MOD1_MASK)) {
