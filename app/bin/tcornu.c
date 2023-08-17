@@ -1250,6 +1250,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_CANNOT_PLACE_TURNOUT:
 		return FALSE;
 		break;
+	case Q_CORNU_CAN_MODIFY:
 	case Q_IGNORE_EASEMENT_ON_EXTEND:
 		return TRUE;
 		break;
