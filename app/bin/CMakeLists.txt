@@ -288,15 +288,6 @@ if(XTRKCAD_CREATE_SVG)
             PRIVATE 
             MiniXML::mxml
         )
-		# copy the MiniXML DLL to the build directory for easier debugging		
-	    add_custom_command(
-			TARGET xtrkcad POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy ${MINIXML_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
-	    )
-        # add dll to install package
-	    install(FILES ${MINIXML_SHAREDLIB}
-        	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-	    )
 	endif()
 	if(UNIX)
 		if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
