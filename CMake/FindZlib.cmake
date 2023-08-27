@@ -1,9 +1,8 @@
 # Finds zlib.
 #
 # This module defines:
-# zlib_INCLUDE_DIR_ZIP
-# zlib_INCLUDE_DIR_ZIPCONF
-# zlib_LIBRARY
+# ZLIB_INCLUDE_DIR
+# ZLIB_LIBRARY
 #
 # There is no default installation for zlib on Windows so a
 # XTrackCAD specific directory tree is assumed
@@ -12,15 +11,12 @@
 if(WIN32)
     set(ZLIBBASEDIR "$ENV{XTCEXTERNALROOT}/${XTRKCAD_ARCH_SUBDIR}/zlib" )
     find_path( ZLIB_INCLUDE_DIR zlib.h
-      PATHS ${ZLIBBASEDIR}
+      PATHS ${ZLIBBASEDIR} "${ZLIBBASEDIR}/include"
       DOC "The directory where zlib.h resides")
     find_library( ZLIB_LIBRARY
-      NAMES zlib Zlib
-      PATHS ${ZLIBBASEDIR}
+      NAMES zlibstatic
+      PATHS ${ZLIBBASEDIR} "${ZLIBBASEDIR}/lib"
       DOC "The zlib library")
-    find_file( ZLIB_SHAREDLIB
-      NAMES zlib.dll Zlib.dll
-      PATHS ${ZLIBBASEDIR})
 else()
   find_package(PkgConfig)
   pkg_check_modules(PC_ZLIB QUIET zlib)
@@ -46,7 +42,6 @@ if(Zlib_FOUND)
   mark_as_advanced(
     ZLIB_LIBRARY 
     ZLIB_INCLUDE_DIR 
-    ZLIB_SHAREDLIB 
   ) 
 endif() 
 

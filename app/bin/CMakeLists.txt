@@ -265,7 +265,8 @@ else()
     target_link_libraries(xtrkcad-lib 
         PRIVATE 
         Libzip::Libzip 
-        FreeImage::FreeImage)
+        FreeImage::FreeImage 
+        Zlib::Zlib)
 endif()
 
 #
@@ -287,15 +288,6 @@ if(XTRKCAD_CREATE_SVG)
             PRIVATE 
             MiniXML::mxml
         )
-		# copy the MiniXML DLL to the build directory for easier debugging		
-	    add_custom_command(
-			TARGET xtrkcad POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy ${MINIXML_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
-	    )
-        # add dll to install package
-	    install(FILES ${MINIXML_SHAREDLIB}
-        	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
-	    )
 	endif()
 	if(UNIX)
 		if (APPLE OR NOT ${MINIXML_STATIC_LIBRARY})
@@ -379,8 +371,8 @@ if(NOT WIN32)
 else()
 	# copy dlls into the build dir for easier debugging
     COPYDLLTOBUILD(${FREEIMAGE_SHAREDLIB})
-    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
-    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
+#    COPYDLLTOBUILD(${LIBZIP_SHAREDLIB})
+#    COPYDLLTOBUILD(${ZLIB_SHAREDLIB})
     set(ENV{path} "${CMAKE_CURRENT_BINARY_DIR};$ENV{PATH}")
 	# add dll to install package
 	install(

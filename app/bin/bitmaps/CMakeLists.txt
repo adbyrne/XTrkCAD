@@ -35,7 +35,6 @@ else()
 		train trim tunnel turnout-design turnout turntable undo
 		zoom-choose zoom-extent zoom-in zoom-out
 	)
-
 	set( PIXS 16 24 32 )
 
 	foreach(xpm ${XPMS})
@@ -77,6 +76,21 @@ else()
 		DEPENDS ${XPM_RESULTS}
 		DEPENDS ${PNG_RESULTS}
 	)
+	
+	if(WIN32)
+		# Temporarily the FreeImage dll is copied to the build directory
+		add_custom_command(
+			TARGET genbitmaps PRE_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy ${FREEIMAGE_SHAREDLIB} ${CMAKE_CURRENT_BINARY_DIR}
+		)
+		cmake_path(GET FREEIMAGE_SHAREDLIB FILENAME filename)
+		add_custom_command(
+			TARGET genbitmaps POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/${filename}
+		)
+#
+
+	endif()
 endif()
 
 #MESSAGE (STATUS "SVG Converter: ${SVG_CONVERTER}")
