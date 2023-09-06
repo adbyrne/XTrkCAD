@@ -994,7 +994,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if(drawData.filled) {
 			if (segPtr->type == SEG_POLY) {
 				segPtr->type = SEG_FILPOLY;
-				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_RO|DESC_CHANGE;
 			}
@@ -1006,7 +1005,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		} else {
 			if (segPtr->type == SEG_FILPOLY) {
 				segPtr->type = SEG_POLY;
-				segPtr->u.p.polyType = FREEFORM;
 				drawData.open = FALSE;
 				drawDesc[OP].mode = DESC_CHANGE;
 			}
@@ -1764,20 +1762,22 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		wMenuPushEnable( drawModPhantom, TRUE);
 		if (!drawModCmdContext.rotate_state && (drawModCmdContext.type == SEG_POLY
 		                                        || drawModCmdContext.type == SEG_FILPOLY)) {
-			wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
-			if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
-			    ((drawModCmdContext.prev_inx>0)
-			     && (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {
-				wMenuPushEnable( drawModRound,TRUE);
-				wMenuPushEnable( drawModVertex, TRUE);
-				wMenuPushEnable( drawModSmooth, TRUE);
-			}
 			wMenuPushEnable( drawModFill, (!drawModCmdContext.open)
-			                 && (!drawModCmdContext.filled));
+						                 && (!drawModCmdContext.filled));
 			wMenuPushEnable( drawModEmpty, (!drawModCmdContext.open)
-			                 && (drawModCmdContext.filled));
-			wMenuPushEnable( drawModClose, drawModCmdContext.open);
-			wMenuPushEnable( drawModOpen, !drawModCmdContext.open);
+						                 && (drawModCmdContext.filled));
+			if (drawModCmdContext.subtype != RECTANGLE) {
+				wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
+				if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
+					((drawModCmdContext.prev_inx>0)
+					&& (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {
+					wMenuPushEnable( drawModRound,TRUE);
+					wMenuPushEnable( drawModVertex, TRUE);
+					wMenuPushEnable( drawModSmooth, TRUE);
+					wMenuPushEnable( drawModClose, drawModCmdContext.open);
+					wMenuPushEnable( drawModOpen, !drawModCmdContext.open);
+				}
+			}
 		}
 		wMenuPushEnable( drawModOrigin,drawModCmdContext.rotate_state);
 		wMenuPushEnable( drawModLast,drawModCmdContext.rotate_state
