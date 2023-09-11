@@ -2042,7 +2042,7 @@ EXPORT void DrawRuler(
 					} else {
 						skip = 50;
 					}
-					if ( (number == TRUE && d->scale <= 40) || (digit % skip == 0)) {
+					if ( number == TRUE && ((d->scale <= 40) || (digit % skip == 0.0)) ) {
 						if (inch % 12 == 0 || d->scale <= 2) {
 							Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
 							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
