@@ -3088,7 +3088,7 @@ static void TrainFunc(
 		break;
 
 	case DO_DESCRIBE:
-		pos0 = xx->trvTrk.pos;
+		pos0 = trainFuncPos;
 		CmdDescribe(C_START, pos0);
 		CmdDescribe(C_DOWN, pos0);
 		CmdDescribe(C_UP, pos0);
