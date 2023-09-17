@@ -2853,11 +2853,11 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 
 		xx = GET_EXTRA_DATA(trainFuncCar, T_CAR, extraDataCar_t);
 		if (xx->pencils) {
-			wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], TRUE);
-			wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], FALSE);
+//			wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], TRUE);
+//			wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], FALSE);
 		} else {
-			wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], FALSE);
-			wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], TRUE);
+//			wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], FALSE);
+//			wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], TRUE);
 		}
 
 		trk0 = FindMasterLoco(trainFuncCar,NULL);
