@@ -185,7 +185,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 	textNoteData.layer = GetTrkLayer( trk );
 	textNoteData.trk = trk;
 
-	CreateEditTextNote(_("Update comment"), xx->noteData.text );
+	CreateEditTextNote(_("Update Text Node"), xx->noteData.text );
 }
 
 /**
