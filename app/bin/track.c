@@ -2142,7 +2142,7 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	pos0 = GetEndPtPos( epp );
 	if (((splitCmd = trackCmds(trk->type)->split) == NULL)) {
 		if (!(FindDistance( pos0, pos) <= minLength)) {
-			ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
+			ErrorMessage(MSG_SPLITTED_OBJECT_TOO_SHORT, PutDim(fabs(minLength)));
 			return FALSE;
 		}
 	}

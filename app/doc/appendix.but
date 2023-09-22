@@ -166,7 +166,9 @@ curves were variously called easements, Talbot or Euler spirals.
 
 \f{Error Message} - an error message displayed in the Status Bar (\K{mainW}) accompanied by a beep.
 
-\f{Flex-track} -  Prefabricated flexible sections of track used on a layout. It usually comes in straight, three-foot-long sections which can be bent or shaped as needed. This term is also used for hand-laid track.
+\f{Fixed track} -  objects that can't be modified eg by splitting \f{Split} it. This includes turnouts, sectional tracks or grouped objects \f{Group}.
+
+\f{Flextrack} -  Prefabricated flexible sections of track used on a layout. It usually comes in straight, three-foot-long sections which can be bent or shaped as needed. This term is also used for hand-laid track.
 
 \f{Frog} - the place on a turnout track where one rail crosses the other.
 

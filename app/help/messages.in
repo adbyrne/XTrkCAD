@@ -296,11 +296,11 @@ END
 
 # track.c
 MESSAGE MSG_CANT_SPLIT_TRK
-Cannot split %s track
+Cannot split track of type %s
 ALT
 Cannot split TYPE track
 HELP
-This type of track cannot be \f{Split}. Only Straight, Curved, Circle and Easement tracks can be \f{Split}. To \f{Split} a Turnout, hold down the Shift key then \e{Left-Click} on the position where the track should be \f{Split}.
+This fixed track like turnouts or or other sectional track cannot be \f{Split}. Only flexible, Cornu, straight and curved tracks can be \f{Split}. To \f{Split} a Turnout, hold down the Shift key then \e{Left-Click} on the position where the track should be \f{Split}.
 
 Refer to \k{cmdSplitTrack} for detail.
 END
@@ -996,6 +996,12 @@ HELP
 The current command operates on the unconnected \e{endpoint} of a track, but the \e{endpoints} of the chosen track are all connected to other tracks. Use the \f{Split} command to disconnect the desired \e{endpoint} of this track or choose another track.
 
 Refer to \k{cmdSplitTrack} for detail.
+END
+
+MESSAGE MSG_SPLITTED_OBJECT_TOO_SHORT
+The resulting length of one track piece is shorter than the minimum length of %d.
+HELP
+After the split one of the track segments will be shorter than the minimum length. Select a different position for splitting.
 END
 
 # cpull.c

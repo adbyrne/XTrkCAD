@@ -451,7 +451,7 @@ static BOOL_T SplitTurntable( track_p trk, coOrd pos, EPINX_T ep,
 	if (leftover) {
 		*leftover = NULL;
 	}
-	ErrorMessage( MSG_CANT_SPLIT_TRK, "Turntable" );
+	ErrorMessage( MSG_CANT_SPLIT_TRK, _("Turntable") );
 	return FALSE;
 }
 
