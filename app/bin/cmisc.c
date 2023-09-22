@@ -494,8 +494,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
 		label = _(ddp->label);
 		ddp->posy = describeW_posy;
-		ddp->control0 = AssignParamToDescribeDialog(ddp, ddp->valueP, label,
-		                (ddp->type == DESC_POS?3:3));
+		ddp->control0 = AssignParamToDescribeDialog(ddp, ddp->valueP, label, 3);
 		if (ddp->type != DESC_LAYER) {
 			wControlActive(ddp->control0, (!(ddp->mode&DESC_RO)));
 		}
