@@ -124,9 +124,9 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \lcont{
 
-\b 0x0001 - Locomotive
+\b 0x0001 - Body Mounted Couplers
 
-\b 0x0002 - Body Mounted Couplers
+\b 0x0002 - Locomotive
 
 \b Other bits can be ignored
 

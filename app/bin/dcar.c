@@ -4168,7 +4168,7 @@ static void CarDlgUpdate(
 
 	if ( checkTruckCenter && carDlgDim.carLength > 0 ) {
 		if ( carDlgTruckOffsetL > 0 || carDlgTruckOffsetR > 0 ) {
-			carDlgDim.truckCenter = carDlgTruckOffsetL + carDlgTruckOffsetR;
+			carDlgDim.truckCenter = carDlgDim.carLength - ( carDlgTruckOffsetL + carDlgTruckOffsetR );
 			carDlgDim.truckCenterOffset = (carDlgTruckOffsetR - carDlgTruckOffsetL)/2;
 		} else {
 			carDlgDim.truckCenter = carDlgDim.carLength * 0.75;
