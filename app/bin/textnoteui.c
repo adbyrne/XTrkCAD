@@ -36,7 +36,7 @@ struct {
 
 static paramTextData_t noteTextData = { 300, 150 };
 static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
-static paramData_t textEditPLs[] = {
+static paramData_t textNotePLs[] = {
 #define I_ORIGX (0)
 	/*0*/ { PD_FLOAT, &textNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
 #define I_ORIGY (1)
@@ -47,10 +47,10 @@ static paramData_t textEditPLs[] = {
 	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
 
-static paramGroup_t textEditPG = { "textEdit", 0, textEditPLs, COUNT( textEditPLs ) };
-static wWin_p textEditW;
+static paramGroup_t textNotePG = { "textNote", 0, textNotePLs, COUNT( textNotePLs ) };
+static wWin_p textNoteW;
 
-#define textEntry	((wText_p)textEditPLs[I_TEXT].control)
+#define textEntry	((wText_p)textNotePLs[I_TEXT].control)
 
 
 /**
@@ -84,7 +84,7 @@ static void
 TextEditCancel( wWin_p junk )
 {
 	ResetIfNotSticky();
-	wHide(textEditW);
+	wHide(textNoteW);
 }
 
 /**
@@ -113,7 +113,7 @@ TextEditOK(void *junk)
 
 	SetBoundingBox( trk, xx->pos, xx->pos );
 	DrawNewTrack( trk );
-	wHide(textEditW);
+	wHide(textNoteW);
 	ResetIfNotSticky();
 	SetFileChanged();
 }
@@ -130,9 +130,9 @@ static void
 CreateEditTextNote(char *title, char * textData )
 {
 	// create the dialog if necessary
-	if (!textEditW) {
-		ParamRegister(&textEditPG);
-		textEditW = ParamCreateDialog(&textEditPG,
+	if (!textNoteW) {
+		ParamRegister(&textNotePG);
+		textNoteW = ParamCreateDialog(&textNotePG,
 		                              "",
 		                              _("Done"), TextEditOK,
 		                              TextEditCancel, TRUE, NULL,
@@ -140,16 +140,16 @@ CreateEditTextNote(char *title, char * textData )
 		                              TextDlgUpdate);
 	}
 
-	wWinSetTitle(textEditPG.win, MakeWindowTitle(title));
+	wWinSetTitle(textNotePG.win, MakeWindowTitle(title));
 
 	wTextClear(textEntry);
 	wTextAppend(textEntry, textData );
 	wTextSetReadonly(textEntry, FALSE);
-	FillLayerList((wList_p)textEditPLs[I_LAYER].control);
-	ParamLoadControls(&textEditPG);
+	FillLayerList((wList_p)textNotePLs[I_LAYER].control);
+	ParamLoadControls(&textNotePG);
 
 	// and show the dialog
-	wShow(textEditW);
+	wShow(textNoteW);
 }
 
 /**
@@ -172,7 +172,8 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 	DynStringMalloc(&statusLine, 100);
 
 	DynStringPrintf(&statusLine,
-	                _("Note: Layer=%d %-.80s"),
+	                _("Text Note(%d) Layer=%d %-.80s"),
+			GetTrkIndex(trk),
 	                GetTrkLayer(trk)+1,
 	                noteText );
 	strcpy(str, DynStringToCStr(&statusLine));
@@ -185,7 +186,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 	textNoteData.layer = GetTrkLayer( trk );
 	textNoteData.trk = trk;
 
-	CreateEditTextNote(_("Update Text Node"), xx->noteData.text );
+	CreateEditTextNote(_("Update Text Note"), xx->noteData.text );
 }
 
 /**

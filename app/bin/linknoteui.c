@@ -43,7 +43,7 @@ static void NoteLinkBrowse(void *junk);
 static void NoteLinkOpen(char *url );
 
 static paramFloatRange_t noRangeCheck = { 0.0, 0.0, 80, PDO_NORANGECHECK_HIGH | PDO_NORANGECHECK_LOW };
-static paramData_t linkEditPLs[] = {
+static paramData_t linkNotePLs[] = {
 #define I_ORIGX (0)
 	/*0*/ { PD_FLOAT, &linkNoteData.pos.x, "origx", PDO_DIM|PDO_NOPREF, &noRangeCheck, N_("Position X") },
 #define I_ORIGY (1)
@@ -58,8 +58,8 @@ static paramData_t linkEditPLs[] = {
 	/*5*/{ PD_BUTTON, NoteLinkBrowse, "openlink", PDO_DLGHORZ, NULL, N_("Open...") },
 };
 
-static paramGroup_t linkEditPG = { "linkEdit", 0, linkEditPLs, COUNT( linkEditPLs ) };
-static wWin_p linkEditW;
+static paramGroup_t linkNotePG = { "linkNote", 0, linkNotePLs, COUNT( linkNotePLs ) };
+static wWin_p linkNoteW;
 
 BOOL_T
 IsLinkNote(track_p trk)
@@ -100,7 +100,7 @@ LinkDlgUpdate(
 	case I_URL:
 		if ( ! IsValidURL( linkNoteData.url ) ) {
 			printf( "URL %s is invalid\n", linkNoteData.url );
-			paramData_p p = &linkEditPLs[I_URL];
+			paramData_p p = &linkNotePLs[I_URL];
 			p->bInvalid = TRUE;
 			wWinPix_t h = wControlGetHeight(p->control);
 			wControlSetBalloon( p->control, 0, -h*3/4, "URL is invalid" );
@@ -124,7 +124,7 @@ static void
 LinkEditCancel( wWin_p junk)
 {
 	ResetIfNotSticky();
-	wHide(linkEditW);
+	wHide(linkNoteW);
 }
 
 /**
@@ -151,7 +151,7 @@ LinkEditOK(void *junk)
 	xx->noteData.linkData.url = MyStrdup( linkNoteData.url );
 	SetBoundingBox( trk, xx->pos, xx->pos );
 	DrawNewTrack( trk );
-	wHide(linkEditW);
+	wHide(linkNoteW);
 	ResetIfNotSticky();
 	SetFileChanged();
 }
@@ -162,9 +162,9 @@ CreateEditLinkDialog(char *title)
 {
 
 	// create the dialog if necessary
-	if (!linkEditW) {
-		ParamRegister(&linkEditPG);
-		linkEditW = ParamCreateDialog(&linkEditPG,
+	if (!linkNoteW) {
+		ParamRegister(&linkNotePG);
+		linkNoteW = ParamCreateDialog(&linkNotePG,
 		                              "",
 		                              _("Done"), LinkEditOK,
 		                              LinkEditCancel, TRUE, NULL,
@@ -172,13 +172,13 @@ CreateEditLinkDialog(char *title)
 		                              LinkDlgUpdate);
 	}
 
-	wWinSetTitle(linkEditPG.win, MakeWindowTitle(title));
+	wWinSetTitle(linkNotePG.win, MakeWindowTitle(title));
 
-	FillLayerList((wList_p)linkEditPLs[I_LAYER].control);
-	ParamLoadControls(&linkEditPG);
+	FillLayerList((wList_p)linkNotePLs[I_LAYER].control);
+	ParamLoadControls(&linkNotePG);
 
 	// and show the dialog
-	wShow(linkEditW);
+	wShow(linkNoteW);
 }
 
 /**
@@ -208,7 +208,8 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 
 	DynStringMalloc(&statusLine, 80);
 	DynStringPrintf(&statusLine,
-	                "Link: Layer=%d %-.80s (%s)",
+	                "Weblink (%d) Layer=%d %-.80s (%s)",
+			GetTrkIndex(trk),
 	                GetTrkLayer(trk)+1,
 	                xx->noteData.linkData.title,
 	                xx->noteData.linkData.url);
@@ -226,7 +227,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 	strscpy( linkNoteData.title, xx->noteData.linkData.title,
 	         sizeof linkNoteData.title );
 
-	CreateEditLinkDialog(_("Update link"));
+	CreateEditLinkDialog(_("Update Webink"));
 }
 
 /**
@@ -244,5 +245,5 @@ void NewLinkNoteUI( coOrd pos )
 	strscpy( linkNoteData.url, DEFAULTLINKURL, sizeof( linkNoteData.url ) );
 	strscpy( linkNoteData.title, DEFAULTLINKTITLE, sizeof( linkNoteData.title ) );
 
-	CreateEditLinkDialog(_("Create link"));
+	CreateEditLinkDialog(_("Create Weblink"));
 }
