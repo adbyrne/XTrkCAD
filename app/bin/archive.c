@@ -31,6 +31,7 @@
 #include "paths.h"
 #include "include/utf8convert.h"
 #include "common-ui.h"
+#include "fileio.h"
 
 int log_zip = 0;
 
@@ -287,11 +288,15 @@ BOOL_T CreateArchive(
 
 	unlink(fileName); 							//Delete Old
 	if (rename(archive_path, fileName) == -1) {	//Move zip into place
-		NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8, fileName,
-		              strerror(errno));
-		free(archive_path);
-		MyFree(archiveUtf8);
-		return FALSE;
+		if ( Copyfile( archive_path, fileName ) == -1 ) {
+			NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8,
+				      fileName, strerror(errno));
+			free(archive_path);
+			MyFree(archiveUtf8);
+			return FALSE;
+		} else {
+			unlink( archive_path );
+		}
 	}
 	free(archive_path);
 	MyFree(archiveUtf8);

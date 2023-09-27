@@ -150,6 +150,7 @@ void FileInit( void );
 
 BOOL_T MacroInit( void );
 
+int Copyfile( const char * fn1, const char * fn2);
 void SetCLocale();
 void SetUserLocale();
 

@@ -66,8 +66,9 @@ EXPORT wBool_t bInReadTracks = FALSE;
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
+#endif
 
-static int Copyfile( char * fn1, char * fn2 )
+EXPORT int Copyfile( const char * fn1, const char * fn2 )
 {
 	FILE *f1, *f2;
 	size_t size;
@@ -87,7 +88,6 @@ static int Copyfile( char * fn1, char * fn2 )
 	fclose( f2 );
 	return 0;
 }
-#endif
 
 //
 // Locale handling
