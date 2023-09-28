@@ -112,7 +112,7 @@ Be sure to visit the project web page for latest news and updates: \W{http://www
 
  \e{XTrackCAD} was designed to operate in a similar way to pencil and paper: You can draw tracks by dragging the mouse, you select and place turnout "templates" anywhere on existing tracks, and you can use fixed radii for initial design.
 
-But extra capabilities have been added that give more power by using FlexTracks (Cornu) you have tracks that automatically redraw as you drag turnouts around, creating smooth curves, you can zoom in and out, and of course, undo and deleting tracks are easier!
+But extra capabilities have been added that give more power by using Flex-tracks (Cornu) you have tracks that automatically redraw as you drag turnouts around, creating smooth curves, you can zoom in and out, and of course, undo and deleting tracks are easier!
 
 You don't have to be an expert CAD user to make the most of \e{XTrackCAD} but the program will ensure that dimensions, radii and angles are accurate.
 
@@ -160,7 +160,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd The Cornu flextrack features create dynamically variable tracks that optimise the curvature of tracks to ensure a protypical appearance. They alter as the other tracks are moved just as flextrack will in the 12 inches to the foot world!
+\dd The Cornu flex-track features create dynamically variable tracks that optimise the curvature of tracks to ensure a protypical appearance. They alter as the other tracks are moved just as flex-track will in the 12 inches to the foot world!
 
 \u000
 

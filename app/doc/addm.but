@@ -39,7 +39,7 @@ create parallel track or line to existing flex-track, straight or curved track. 
 
 \u000
 
-\dd \i\f{Predefined Track} \I{Track, Predefined} \c{Ctrl+T} - select a turnout or a piece of fixed track and place on layout.
+\dd \i\f{Predefined Track} \I{Track, Predefined} \c{Ctrl+T} - select a turnout or a piece of fixed-track and place on layout.
 
 \u000
 
@@ -438,7 +438,7 @@ If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained
 
 \G{png.d/bstruct.png}
 
-The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.  The operation is similar to the Turnout (\K{cmdTurnout}) command.
+The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.  The operation is similar to the Turnout (\K{cmdNewFixedTrack}) command.
 
 \G{png.d/strsel.png}
 
@@ -453,7 +453,7 @@ See the Hot Bar (\K{cmdHotBar}) command for details on placing Structures on the
 \rule
 
 
-\S{cmdTurnout} Turnouts
+\S{cmdNewFixedTrack} Turnouts
 
 \G{png.d/bturnout.png}
 
@@ -463,7 +463,7 @@ You can use the Parameter File Dialog (\K{cmdPrmfile}) to control what turnouts 
 
 \G{png.d/turnsel.png}
 
-Select a turnout from the scrolling list by \c{Left-Click}ing on it. Move to the Layout and \c{Left-Click} where the turnout should be placed. The Turnout will snap to nearby flextracks or open endpoints. By \c{Left-Drag}ing you can move the turnout around. Additional \c{Left-Click}s change the way the turnout is placed.
+Select a turnout from the scrolling list by \c{Left-Click}ing on it. Move to the Layout and \c{Left-Click} where the turnout should be placed. The Turnout will snap to nearby flex-tracks or open endpoints. By \c{Left-Drag}ing you can move the turnout around. Additional \c{Left-Click}s change the way the turnout is placed.
 
 The \f{New} button invokes the Turnout Designer (\K{cmdTurnoutNew}) dialog.  This button displays a pop-up-menu list of various types of turnouts and sectional track.
 

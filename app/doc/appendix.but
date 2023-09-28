@@ -107,8 +107,6 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \f{Edit Box} - an area where you can enter a String, Integer or Floating Point value.
 
-\f{FlexTrack} - an automatic object on the ToolBar that creates a Cornu Track element
-
 \f{Highlighted} - an area on the Canvas which is in inverse-video.
 
 \f{Left-Click} - same as \e{Click}, used in contexts where \e{Right-Click} is also used.
@@ -166,9 +164,21 @@ curves were variously called easements, Talbot or Euler spirals.
 
 \f{Error Message} - an error message displayed in the Status Bar (\K{mainW}) accompanied by a beep.
 
-\f{Fixed track} -  objects that can't be modified eg by splitting \f{Split} it. This includes turnouts, sectional tracks or grouped objects \f{Group}.
+\#{TODO}
 
-\f{Flextrack} -  Prefabricated flexible sections of track used on a layout. It usually comes in straight, three-foot-long sections which can be bent or shaped as needed. This term is also used for hand-laid track.
+\I{Fixed-track}\f{Fixed-track} -
+These include Turnouts, Sectional tracks and Grouped objects.
+They are defined in Parameter Files (\K{cmdPrmfile}), or created using the \f{Turnout Designer} (\K{cmdTurnoutNew}) or the \f{Group} (\K{cmdGroup}) command.
+They are selected for placement on the layout using the \f{Hot Bar} (\K{cmdHotBar}) or the \f{Fixed-Track} (\K{cmdNewFixedTrack}) dialog.
+They can not be directly altered, but can be decomposed with the \f{Ungroup} (\K{cmdUngroup}) command and some cases trimed (\K{splitDivide}).
+
+\I{Flex-track}\f{Flex-track} -
+Flexible sections of track used on a layout.
+It usually comes in straight, three-foot-long sections which can be bent or shaped as needed.
+These include Straight, Curved, Easements, Cornu and Bezier tracks.
+This term is also used for hand-laid track.
+They are created by invoking the corresponding command and dragging on the layout.
+\f{Easements} (\K{cmdEasement}) are created automatically when joining tracks.
 
 \f{Frog} - the place on a turnout track where one rail crosses the other.
 

@@ -95,7 +95,7 @@ The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \dd \G{png.d/mconvert.png}
 
-\dd \i\f{Convert} - chnages fixed tracks (Straight, Curve, Joint, Bezier) into a Smooth Cornu or vice versa. (\K{cmdConvert}).
+\dd \i\f{Convert} - changes flex-tracks (Straight, Curve, Joint, Bezier) into a Smooth Cornu or vice versa. (\K{cmdConvert}).
 
 \rule
 
@@ -170,11 +170,11 @@ Dependent upon previous selection, the Convert Track button will look like \G{pn
 
 \rule
 
-\S2{cmdConvertTo} Convert Fixed Track(s) to Cornu(s)
+\S2{cmdConvertTo} Convert flex-track(s) to Cornu(s)
 
 \G{png.d/convertto.png}
 
-This command will take a pre-selected set of fixed track elements (Straights, Curves, Joint or Bezier) and convert them into a set of Cornu Tracks.
+This command will take a pre-selected set of flex-track elements (Straights, Curves, Joint or Bezier) and convert them into a set of Cornu Tracks.
 If there are no selected Tracks, the user can click on a single track.
 
 The Cornu(s) will smoothly pass through all the end points of the selected tracks and smoothly join to the end-points (if any).
@@ -185,7 +185,7 @@ This command is intended to help conversion of track designs that were made befo
 
 \rule
 
-\S2{cmdConvertFrom} Convert Cornu(s) and Bezier(s) to Fixed Track(s)
+\S2{cmdConvertFrom} Convert Cornu(s) and Bezier(s) to flex-track(s)
 
 \G{png.d/convertfrom.png}
 
@@ -1956,7 +1956,7 @@ For detail about;
 
 \u000
 
-\dd Dividing a section of flex track into two connected pieces or trimming a turnout see \K{splitDivide}.
+\dd Dividing a section of flex-track into two connected pieces or trimming a turnout see \K{splitDivide}.
 
 \u000
 
@@ -2008,7 +2008,7 @@ For detail about;
 
 \S3{splitDivide} Divide Track
 
-Dividing a section of flex track into two connected pieces;
+Dividing a section of flex-track into two connected pieces;
 
 \n Click the \f{Split Track} button (\G{png.d/bsplit.png}) to activate the \f{Split Track} command.
 

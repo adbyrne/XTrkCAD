@@ -355,7 +355,7 @@ The \f{Group} command combines the selected (\K{cmdSelect}) Lines and Shapes (\K
 
 The title will be pre-populated with the title of the last \f{Structure} you \f{ungrouped} (\K{manageM}).
 
-You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks in the selected objects which allows you to add cosmetic details to a \f{Turnout} definitions, or create a new \f{Turnout} definition. This can also be used to if there are fixed track locations on a structure, like on an engine shed.
+You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks in the selected objects which allows you to add cosmetic details to a \f{Turnout} definitions, or create a new \f{Turnout} definition. This can also be used to if there are fixed-track locations on a structure, like on an engine shed.
 
 \f{Group} is intended to operate on simple groups of track segments.  If you intend to group a large number of track segments, you should consider using \f{Import Module} (see \K{cmdLayer}),
 
@@ -495,7 +495,7 @@ The \f{Price List} dialog allows entry of prices for Turnouts, Sectional Track a
 
 The price of a selected object can be changed in the \e{Cost} edit box that's located above the "Price" column.
 
-The price of a length of \e{Flex Track} for the current Scale (\K{cmdLayout}) is listed at the bottom of the dialog.  You can specify the \e{Length} in \e{Inches} or \e{Centimeters}.  To specify the price for other \e{Scales} change Scale (\K{cmdLayout}) on the Layout (\K{cmdLayout}) window.
+The price of a length of \e{Flex-Track} for the current Scale (\K{cmdLayout}) is listed at the bottom of the dialog.  You can specify the \e{Length} in \e{Inches} or \e{Centimeters}.  To specify the price for other \e{Scales} change Scale (\K{cmdLayout}) on the Layout (\K{cmdLayout}) window.
 
 The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{Prices} check box on the dialog window is selected.
 
@@ -678,7 +678,7 @@ The \f{Turnout Designer} allows you to define new turnouts and sectional track p
 
 \G{png.d/mmanageturnoutdesign.png}
 
-The Turnout Designer sub-menu is pictured above. As demonstrated by the sub-menu a number of different dialogs are available for creation of custom turnout and sectional track components. New turnouts and sectional track is added to Custom Management (\K{cmdCustmgm}) and Turnout Manager (\K{cmdTurnout}) using the \f{Turnout Designer}.
+The Turnout Designer sub-menu is pictured above. As demonstrated by the sub-menu a number of different dialogs are available for creation of custom turnout and sectional track components. New turnouts and sectional track is added to Custom Management (\K{cmdCustmgm}) and Turnout Manager (\K{cmdNewFixedTrack}) using the \f{Turnout Designer}.
 
 The follow dialog is for a regular turnout.
 
@@ -726,7 +726,7 @@ The rail height (\e{Code}) can be added to the \f{Manufacturer}, e.g., Peco-55, 
 
 The scale is the current scale from the \f{Scale Drop Down List} on the \f{Layout} dialog (\K{cmdLayout}).  
 
-\f{Manufacturer}, \f{Description} and \f{Part Number (#)} comprise the title of the turnout.  These values are used in the \f{Turnout Selection dialog} (\K{cmdTurnout}) and the \f{Parts List} (\K{cmdEnum}).  For regular and curved turnouts there are separate \f{Descriptions} and \f{Part Numbers} for the right and left hand turnouts.
+\f{Manufacturer}, \f{Description} and \f{Part Number (#)} comprise the title of the turnout.  These values are used in the \f{Turnout Selection dialog} (\K{cmdNewFixedTrack}) and the \f{Parts List} (\K{cmdEnum}).  For regular and curved turnouts there are separate \f{Descriptions} and \f{Part Numbers} for the right and left hand turnouts.
 
 The \f{Print} button prints a full size diagram of the turnout.  You can use this to check your dimensions and make any required changes.  You should expect to make several printouts as you refine your dimensions.
 

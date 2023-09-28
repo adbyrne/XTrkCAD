@@ -421,7 +421,7 @@ Several Shortcut key commands are used in conjunction with the mouse. These comm
 
 \u000
 
-\dd Split flex track - \e{Ctrl+Shift+S}
+\dd Split flex-track - \e{Ctrl+Shift+S}
 
 \u000
 
@@ -1239,7 +1239,7 @@ The Shortcut key for each command is listed after the command name.
 \u000
 
 
-\dt Turnout Command (\K{cmdTurnout}) - \e{Ctrl+T}
+\dt Turnout Command (\K{cmdNewFixedTrack}) - \e{Ctrl+T}
 
 \dd Choose next Active endpoint when placing Turnouts - \e{Shift+Left-Click}
 
