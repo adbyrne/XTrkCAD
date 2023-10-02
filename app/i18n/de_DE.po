@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-22 10:19+0200\n"
-"PO-Revision-Date: 2023-09-29 13:44+0200\n"
+"PO-Revision-Date: 2023-10-02 18:00+0200\n"
 "Last-Translator: Martin Fischer <m_fischer@users.sourceforge.net>, 2021\n"
 "Language-Team: German (Germany) (https://www.transifex.com/xtrackcad/"
 "teams/112853/de_DE/)\n"
@@ -1832,7 +1832,7 @@ msgstr "ausgewählt"
 
 #: ../bin/cjoin.c:499
 msgid "Left click - Select first draw object end"
-msgstr "Links-klick - Ende des ersten Zeichenobjektes auswählen"
+msgstr "Linksklicken - Ende des ersten Zeichenobjektes auswählen"
 
 #: ../bin/cjoin.c:539 ../bin/cjoin.c:576
 msgid "Not a line - Try again"
@@ -1840,7 +1840,7 @@ msgstr "Keine Linie - Versuchen Sie es erneut"
 
 #: ../bin/cjoin.c:572
 msgid "Left click - Select second object end"
-msgstr "Links-klick - Ende des zweite Objektes auswählen"
+msgstr "Linksklicken - Ende des zweite Objektes auswählen"
 
 #: ../bin/cjoin.c:584
 msgid "Same draw object and same endpoint - Try again"
@@ -2484,8 +2484,8 @@ msgstr ""
 #: ../bin/cselect.c:1978
 msgid "Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu"
 msgstr ""
-"Ziehen um die ausgewählten Gleise zu rotieren, Umschalt-Taste und Rechts-"
-"Klick das Schnellauswahlmenu öffnen"
+"Ziehen um die ausgewählten Gleise zu rotieren, Umschalt-Taste und "
+"Rechtsklicken um das Schnellauswahlmenu öffnen"
 
 #: ../bin/cselect.c:1994 ../bin/cselect.c:2370
 msgid "Rotate Tracks"
@@ -4517,7 +4517,7 @@ msgstr "Modul"
 
 #: ../bin/dlayer.c:557
 msgid "No Button"
-msgstr "Kein Knopf"
+msgstr "Keine Schaltfläche"
 
 #: ../bin/dlayer.c:559
 msgid "Inherit"
@@ -4565,7 +4565,7 @@ msgstr "Standardwerte"
 
 #: ../bin/dlayer.c:582
 msgid "Number of Layer Buttons"
-msgstr "Anzahl der Ebenenknöpfe"
+msgstr "Anzahl der Schaltflächen für Ebenen"
 
 #: ../bin/dlayer.c:584
 msgid "Linked Layers"
@@ -4808,7 +4808,7 @@ msgstr "Auswahl erweitern,  +Strg Nur aktuelles Element"
 
 #: ../bin/doption.c:247
 msgid "Deselect all on select nothing"
-msgstr "Auswahl durch Klick auf leere Fläche rücksetzen"
+msgstr "Auswahl durch Klicken auf einen leeren Bereich rücksetzen"
 
 #: ../bin/doption.c:252
 msgid "Normal: Command List, Shift: Command Options"
@@ -5219,8 +5219,8 @@ msgstr "In diese Richtung können Sie nicht weiter gehen"
 #: ../bin/draw.c:3358
 msgid "Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"
 msgstr ""
-"Links-Klick zum Verschieben, Rechts-Klick zum Zoomen, 'o' für Ursprung, 'e' "
-"für Anpassen an Fenstergröße"
+"Linksklicken zum Verschieben, Rechtsklicken zum Zoomen, 'o' für Ursprung, "
+"'e' für Anpassen an Fenstergröße"
 
 #: ../bin/draw.c:3397
 msgid ""
@@ -5673,11 +5673,11 @@ msgstr "Kann die PARAMETER Wiedergabeprozedur nicht finden"
 
 #: ../bin/menu.c:130
 msgid "File Buttons"
-msgstr "Dateischaltflächen"
+msgstr "Aktionen für Dateien"
 
 #: ../bin/menu.c:130
 msgid "Print Buttons"
-msgstr "Drucken Knöpfe"
+msgstr "Aktionen für Druck"
 
 #: ../bin/menu.c:130
 msgid "Import/Export Buttons"
@@ -5685,27 +5685,27 @@ msgstr "Import/Export Aktionen"
 
 #: ../bin/menu.c:131
 msgid "Zoom Buttons"
-msgstr "Lupenknöpfe"
+msgstr "Aktionen für Zoom"
 
 #: ../bin/menu.c:131
 msgid "Undo Buttons"
-msgstr "Rückgängig/Wiederholen"
+msgstr "Aktionen für Rückgängig/Wiederholen"
 
 #: ../bin/menu.c:131
 msgid "Easement Button"
-msgstr "Übergangsbogen"
+msgstr "Aktionen für Übergangsbogen"
 
 #: ../bin/menu.c:131
 msgid "SnapGrid Buttons"
-msgstr "Fangraster"
+msgstr "Aktionen für Fangraster"
 
 #: ../bin/menu.c:132
 msgid "Create Track Buttons"
-msgstr "Erstelle Gleise"
+msgstr "Aktionen um Gleise zu erstellen"
 
 #: ../bin/menu.c:132
 msgid "Layout Control Elements"
-msgstr "Elemente zur Anlagensteuerung"
+msgstr "Aktionen zur Anlagensteuerung"
 
 #: ../bin/menu.c:133
 msgid "Modify Track Buttons"
@@ -5717,23 +5717,23 @@ msgstr "Eigenschaften/Auswählen"
 
 #: ../bin/menu.c:134
 msgid "Track Group Buttons"
-msgstr "Objekt Werkzeuge"
+msgstr "Aktionen um Objekte zusammzufassen und zu organisieren"
 
 #: ../bin/menu.c:134
 msgid "Train Group Buttons"
-msgstr "Zugbetrieb"
+msgstr "Zugbetrieb starten oder beenden"
 
 #: ../bin/menu.c:135
 msgid "Create Misc Buttons"
-msgstr "Zeichnen/Schrift  Werkzeuge"
+msgstr "Werkzeuge zum Zeichnen/Schrift"
 
 #: ../bin/menu.c:135
 msgid "Ruler Button"
-msgstr "Linealschaltfläche"
+msgstr "Lineal anzeigen "
 
 #: ../bin/menu.c:136
 msgid "Layer Buttons"
-msgstr "Ebenenknöpfe"
+msgstr "Schaltflächen für Ebenen "
 
 #: ../bin/menu.c:136
 msgid "Hot Bar"
@@ -8594,9 +8594,9 @@ msgstr ""
 "  mit einem festgelegten Radius\n"
 "  durch ziehen aus der Mitte zur Kante\n"
 "  durch ziehen von der Kante zur Mitte\n"
-"Die verschiedenen Methoden zur Gleiskreiserstellung können ausgewählt werden "
-"durch anklicken des Knopfes rechts neben dem Gleisknopf in der "
-"Werkzeugleiste."
+"Die verschiedenen Methoden zur Gleiskreiserstellung können durch Klicken auf "
+"die Schaltfläche rechts neben dem Schaltfläche für Gleis in der "
+"Werkzeugleiste ausgewählt werden."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:45
 #: ../../../../build/work/app/i18n/custmsg.h:34
@@ -8770,8 +8770,8 @@ msgid ""
 msgstr ""
 "Die Werkzeugleiste kann über den Dialog \"Anzeige|Werkzeugleiste anpassen\" "
 "verändert werden um mehr Platz im Hauptfenster zur Verfügung zu stellen. Die "
-"Anzahl der Ebenenknöpfe wird über den Dialog \"Verwalten|Ebenen\" "
-"eingestellt."
+"Anzahl der Schaltflächen für Ebenen wird über den Dialog \"Verwalten|"
+"Ebenen\" eingestellt."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:81
 #: ../../../../build/work/app/i18n/custmsg.h:60
@@ -8811,8 +8811,8 @@ msgid ""
 "alternative to pressing the buttons on the tool bar or using the menu "
 "accelerator keys."
 msgstr ""
-"Alternativ zur Werkzeugleiste oder den Menütasten kann durch Rechts-Klick im "
-"Hauptfenster ein weiteres Befehlsmenü benutzt werden."
+"Alternativ zur Werkzeugleiste oder den Menütasten kann durch Rechtsklicken "
+"im Hauptfenster ein weiteres Befehlsmenü benutzt werden."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:87
 #: ../../../../build/work/app/i18n/custmsg.h:66
@@ -8831,10 +8831,10 @@ msgid ""
 "Pressing a numeric key (1-9 and 0) moves the Hot Bar to corresponding "
 "position (1 is the start, 5 is half way, 0 is the end)."
 msgstr ""
-"Rechts Klick in der Schnellauswahl öffnet ein Menü mit verschiedenen "
+"Rechtsklicken in der Schnellauswahl öffnet ein Menü mit verschiedenen "
 "Objektgruppen, diese können benutzt werden um schnell zu dieser Art von "
 "Gleisen zu springen.\n"
-"Durch drücken von Zahlen in der Schnellauswahl (1-9 und 0) kann auch die "
+"Durch Drücken von Zahlen in der Schnellauswahl (1-9 und 0) kann auch die "
 "entsprechende Position der Gleisauswahl geändert werden, hierbei "
 "kennzeichnet 1 die erste Gleisauswahl, 5 gibt die Mitte der Auswahl an und 0 "
 "das Ende."
@@ -8900,9 +8900,10 @@ msgid ""
 msgstr ""
 "Auf langsamen Computern oder bei hoher Anzahl von Gleisen, kann die Art und "
 "Weise wie Gleise neu gezeichnet werden verändert werden.\n"
-"Nachdem Gleise markiert wurden, kann durch festhalten der Umschalt-Taste und "
-"einem rechts Klick mit der Maus in einem Options Menü ausgewählt werden wie "
-"die Gleise dargestellt werden sollen: Normal, Einfach oder nur als Endpunkte."
+"Nachdem Gleise markiert wurden, kann durch Festhalten der Umschalt-Taste und "
+"Klicken mit der rechten Maustaste in einem Options Menü ausgewählt werden, "
+"wie die Gleise dargestellt werden sollen: Normal, Einfach oder nur als "
+"Endpunkte."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:106
 #: ../../../../build/work/app/i18n/custmsg.h:82
@@ -8928,7 +8929,7 @@ msgstr ""
 "Üblicherweise werden Objekte in Ihren voreingestellten Farben gezeichnet. "
 "Gleise werden in schwarz dargestellt. Objekte können in den Farben ihrer "
 "jeweiligen Ebenen dargestellt werden. Die Farbe einer Ebene wird auf ihrem "
-"zugehörigen Ebenenknopf angezeigt.\n"
+"zugehörigen Schaltfläche für diese Ebene angezeigt.\n"
 "Die Auswahl \"Ebenenfarben\" im Dialog \"Optionen|Anzeige\" besitzt jeweils "
 "für Gleise und Sonstige eine getrennte Möglichkeit zur Aktivierung von "
 "Farben."
@@ -8949,9 +8950,9 @@ msgid ""
 "first 20 layers.\n"
 "This buttons allow to Show or Hide the layers."
 msgstr ""
-"Ebenenknöpfe können für die ersten 20 Ebenen in der Werkzeugleiste "
-"dargestellt werden, diese Nummernknöpfe können dazu benutzt werden um Ebenen "
-"zu verbergen oder anzuzeigen."
+"Schaltflächen für Ebenen können für die ersten 20 Ebenen in der "
+"Werkzeugleiste dargestellt werden, diese können dazu benutzt werden um "
+"Ebenen zu verbergen oder anzuzeigen."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:115
 #: ../../../../build/work/app/i18n/custmsg.h:90
@@ -9016,9 +9017,9 @@ msgid ""
 "specific angle."
 msgstr ""
 "Bei Benutzung der Kommandos \"Rotieren\" oder \"Auswählen\" kann durch "
-"gedrückt halten der Umschalt-Taste und rechts Klick mit der Maustaste in "
-"einem auftauchenden Optionsmenü der Winkel zum rotieren eines Objekts "
-"ausgewählt werden."
+"Drücken der Umschalt-Taste und gleichzeitiges Klicken mit der rechten "
+"Maustaste in dem erscheinenden Optionsmenü der Winkel zum Rotieren eines "
+"Objekts ausgewählt werden."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:129
 #: ../../../../build/work/app/i18n/custmsg.h:102
@@ -9132,9 +9133,9 @@ msgid ""
 "You can place cars on the layout using the Train Simulation command to check "
 "clearance points, track to track separation and coupling."
 msgstr ""
-"Lokomotiven können im Gleisplan über den Zugbetrieb Knopf platziert werden "
-"um Weichenübergänge, Gleis zu Gleis Verbindungen oder ankuppeln simulieren "
-"zu können."
+"Lokomotiven können im Gleisplan über die Funktion des  Zugbetrieb platziert "
+"werden um Weichenübergänge, Gleis zu Gleis Verbindungen oder Ankuppeln "
+"simulieren zu können."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:152
 #: ../../../../build/work/app/i18n/custmsg.h:122
@@ -9142,9 +9143,9 @@ msgid ""
 "Use the MoveTo button on the Custom Management dialog to move your custom "
 "Turnout, Structure and Car definitions to a .XTP parameter file."
 msgstr ""
-"Benutzen Sie den \"Verschieben nach\" Knopf im \"Verwalten|Anpassungs "
-"Verwaltung\" Menü um selbst erstellte Weichen, Strukturen oder Wagen "
-"Definitionen in eine .XTP Parameter Datei zu verschieben."
+"Benutzen Sie die Schaltfläche  \"Verschieben nach\"  im \"Verwalten|"
+"Anpassungs Verwaltung\" Menü um selbst erstellte Weichen, Strukturen oder "
+"Wagen Definitionen in eine .XTP Parameter Datei zu verschieben."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:154
 #: ../../../../build/work/app/i18n/custmsg.h:124
@@ -9206,11 +9207,11 @@ msgid ""
 "Holding down the Shift and Control keys when clicking a Zoom button will set "
 "it's program Zoom to the current Drawing Scale."
 msgstr ""
-"Wenn Sie die Lupenknöpfe klicken während die Umschalt Taste gedrückt ist,  "
-"setzt das Programm auf vorher festgelegten Maßstab.  \n"
+"Wenn Sie die Schaltflächen für die Lupen klicken während die Umschalt Taste "
+"gedrückt ist,  setzt das Programm auf vorher festgelegten Maßstab.  \n"
 "Durch gleichzeitiges Festhalten der Strg + Umschalt Tasten kann durch "
-"Anklicken der jeweiligen Lupenknöpfe die Einstellung der Vergrößerung oder "
-"Verkleinerung festgelegt werden."
+"Anklicken der jeweiligen Schaltflächen für Lupen die Einstellung der "
+"Vergrößerung oder Verkleinerung festgelegt werden."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:168
 #: ../../../../build/work/app/i18n/custmsg.h:136
@@ -9268,8 +9269,8 @@ msgid ""
 "Left-Click on the track."
 msgstr ""
 "Der Mittelpunkt von Kurven oder Kreisen kann auch angezeigt werden.  \n"
-"Diese Option kann ein/ausgeschaltet werden durch festhalten der Umschalt "
-"Taste bei gleichzeitigem links Klick der Maus."
+"Diese Option kann durch Festhalten der Umschalt Taste bei gleichzeitigem "
+"Klicken mit der linken Maustaste ein/ausgeschaltet werden."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:182
 #: ../../../../build/work/app/i18n/custmsg.h:146
@@ -9306,7 +9307,7 @@ msgid ""
 "This can reversed by using the Right Click toggle button on the Command "
 "Options dialog."
 msgstr ""
-"Normalerweise wird durch einen Rechts-Klick im Gleisplan ein Befehlsmenü "
+"Normalerweise wird durch Rechtsklicken im Gleisplan ein Befehlsmenü "
 "angezeigt,. Bei Festhalten der Umschalt-Taste und einem vorher ausgewählten "
 "Kommando wird ein optionales Menü für das jeweilige Kommando angezeigt.\n"
 "Dieses Verhalten kann durch den Befehlsoptionen-Dialog vertauscht werden."
@@ -9555,7 +9556,7 @@ msgid ""
 "its length. A blue anchor shows that the length can be extended.\n"
 msgstr ""
 "Der Endpunkt eines geraden Gleises wird ausgewählt und die Länge wird durch "
-"Ziehen mit dem linken Maus-Knopf geändert.\n"
+"Ziehen mit dem linken Mausknopf geändert.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:48
 #: ../../../../build/work/app/i18n/custmsg.h:196
@@ -9734,7 +9735,7 @@ msgstr "Jetzt sind beide Schmalseiten auf der Innenseite der beiden Träger.\n"
 msgid ""
 "Pushing the <Describe> button will cancel any other command in progress.\n"
 msgstr ""
-"Durch Drücken des <Beschreiben> Knopfes wird jeder begonnene Befehl "
+"Durch Drücken der Schaltfläche  <Beschreiben> wird jeder begonnene Befehl "
 "abgebrochen.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:239
@@ -9750,7 +9751,7 @@ msgid ""
 "When we clicked on the <Describe> button, the current command was "
 "cancelled.\n"
 msgstr ""
-"Durch Drücken auf den <Beschreiben> Knopf wurde der begonnene Befehl "
+"Durch Drücken auf der Schaltfläche <Beschreiben> wurde der begonnene Befehl "
 "abgebrochen.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:242
@@ -9907,8 +9908,8 @@ msgid ""
 "command.\n"
 msgstr ""
 "Sie können diese kleinen Versätze durch Zusammenziehen der Gleise entfernen. "
-"Beginnen Sie an einem nicht verbundenen Endpunkt durch Drücken der Umschalte-"
-"Taste beim Drücken des <Zusammenfügen> Knopfes.\n"
+"Beginnen Sie an einem nicht verbundenen Endpunkt durch gleichzeitiges "
+"Drücken der Umschalt-Taste beim Drücken der Schaltfläche <Zusammenfügen>.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:281
 msgid "First use the <Split> command to disconnect the tracks.\n"
@@ -9969,8 +9970,8 @@ msgid ""
 "<Curve> command button if the current Curve command is not the one you "
 "want.\n"
 msgstr ""
-"Sie können zwischen diesen wählen, in dem Sie auf den kleinen Knopf neben "
-"dem <Bogen> Knopf drücken.\n"
+"Sie können zwischen diesen wählen, in dem Sie auf die kleine Schaltfläche "
+"neben der <Bogen> Schaltfläche drücken.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:298
 msgid ""
@@ -9990,7 +9991,7 @@ msgstr ""
 #: ../../../../build/work/app/i18n/custmsg.h:301
 msgid "Click and drag on one of the Red arrows to complete the Curve.\n"
 msgstr ""
-"Klicken und ziehen Sie eine der roten Spitzem um den Bogen zu "
+"Klicken und ziehen Sie eine der roten Spitzen um den Bogen zu "
 "vervollständigen.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:39
@@ -10169,8 +10170,8 @@ msgid ""
 "effect.\n"
 msgstr ""
 "Wir rotieren die Signale durch Drücken  und Festhalten der Umschalttaste bei "
-"gleichzeitigem Klick mit der rechten Maustaste. Aus dem Menu wählen wir 90° "
-"im UZS aus. Im Demo-Mode kann das  Menu nicht angezeigt werden, aber wir "
+"gleichzeitigem Klicken mit der rechten Maustaste. Aus dem Menu wählen wir "
+"90° im UZS aus. Im Demo-Mode kann das  Menu nicht angezeigt werden, aber wir "
 "simulieren den Effekt.\n"
 
 #. i18n:
@@ -10486,8 +10487,8 @@ msgstr ""
 #: ../../../../build/work/app/i18n/custmsg.h:421
 msgid "Notice the label on the Easement button has changed to 'Sharp'.\n"
 msgstr ""
-"Beachten Sie, dass die Beschriftung des Knopfes <Übergangsbogen> auf 'Sharp' "
-"geändert wurde.\n"
+"Beachten Sie, dass die Beschriftung der Schaltfläche <Übergangsbogen> auf "
+"'Sharp' geändert wurde.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmease.xtr:157
 #: ../../../../build/work/app/i18n/custmsg.h:423
@@ -10644,8 +10645,8 @@ msgid ""
 "Use Shift-Left-Click to Split the track and create an endpoint we can use "
 "for an elevation,\n"
 msgstr ""
-"Durch Klicken mit der Maus bei gedrückter Umschalttaste wird das Gleis "
-"getrennt und ein Endpunkt, den wir für die Festlegung der Höhe nutzen "
+"Durch Klicken mit der linken Maustaste bei gedrückter Umschalttaste wird das "
+"Gleis getrennt und ein Endpunkt, den wir für die Festlegung der Höhe nutzen "
 "können, eingefügt.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmelev.xtr:287
@@ -11454,8 +11455,8 @@ msgstr "Das ist ein zweistufiger Prozess.\n"
 #: ../../../../build/work/app/i18n/custmsg.h:666
 msgid "1 - click on the frog and drag away to set the frog angle\n"
 msgstr ""
-"1. klicken Sie auf das Herzstück und setzen Sie durch ziehen mit gedrücktem "
-"Mausknopf den richtigen Winkel.\n"
+"1. klicken Sie auf das Herzstück und setzen Sie durch Ziehen mit gedrücktem "
+"linken Mausknopf den richtigen Winkel.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhndld.xtr:29
 #: ../../../../build/work/app/i18n/custmsg.h:668
@@ -11564,10 +11565,10 @@ msgid ""
 "to view the next part of the demo.\n"
 msgstr ""
 "Die verschiedenen Steuerelement sind deaktiviert, während diese nicht "
-"nutzbar sind. Während die Demo läuft, ist der Einzelschritt-Knopf "
-"deaktiviert. Wenn die Demo angehalten ist, wird der Einzelschritt-Knopf "
-"aktiviert. Sie können darauf klicken, wenn Sie für den nächsten Schritt der "
-"Demo bereit sind.\n"
+"nutzbar sind. Während die Demo läuft, ist die Einzelschritt-Schaltfläche "
+"deaktiviert. Wenn die Demo angehalten ist, wird die Einzelschritt-"
+"Schaltfläche aktiviert. Sie können darauf klicken, wenn Sie für den nächsten "
+"Schritt der Demo bereit sind.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:696
 msgid "You can click on Quit to return to XTrackCAD at any time.\n"
@@ -11577,8 +11578,8 @@ msgstr ""
 #: ../../../../build/work/app/i18n/custmsg.h:697
 msgid "You can adjust the speed of the demonstration with the Speed control.\n"
 msgstr ""
-"Die Geschwindigkeit der Demo können Sie mit dem Geschwindigkeitsknopf "
-"anpassen.\n"
+"Die Geschwindigkeit der Demo können Sie mit der Schaltfläche für die "
+"Geschwindigkeit anpassen.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmintro.xtr:60
 #: ../../../../build/work/app/i18n/custmsg.h:699
@@ -12124,7 +12125,7 @@ msgstr "Rechte Maustaste loslassen\n"
 msgid "Sometimes the Shift key is held down while using the mouse \n"
 msgstr ""
 "Manchmal wird während des Bewegen der Maus auch die Umschalttaste gedrückt "
-"gehalten. Dies wird mit Umschalt-Klick und Umschalt-Ziehen bezeichnet.\n"
+"gehalten. Dies wird mit Umschalt-Klicken und Umschalt-Ziehen bezeichnet.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:839
 msgid ""
@@ -12147,7 +12148,7 @@ msgstr ""
 msgid "Sometimes the Control key is held down while using the mouse. \n"
 msgstr ""
 "Manchmal wird während des Bewegen der Maus auch die Strg-Taste gedrückt "
-"gehalten. Dies wird mit Strg-Klick und Strg-Ziehen bezeichnet.\n"
+"gehalten. Dies wird mit Strg-Klicken und Strg-Ziehen bezeichnet.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:844
 msgid ""
@@ -12501,7 +12502,7 @@ msgid ""
 "In this case remove the last part of the Path by clicking on current end of "
 "the Path and reselect the End-Point.\n"
 msgstr ""
-"In diesem Fall entfernen Sie den letzten Teil des Pfads indem Sie auf das "
+"In diesem Fall entfernen Sie den letzten Teil des Pfads, indem Sie auf das "
 "das gegenwärtige Ende des Pfades klicken und den Endpunkt erneut festlegen.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmprof.xtr:198
@@ -12559,8 +12560,8 @@ msgid ""
 "We do this by Shift Right Click to display the Profile Options popup menu "
 "and selecting Define.\n"
 msgstr ""
-"Dies geschieht durch durch Umschalt-Rechts-Klick um das Optionsmenu für "
-"Höhenprofile zu erhalten uns auswählen von Festlegen.\n"
+"Dies geschieht durch mschalt-Rechtsklicken, um das Optionsmenu für "
+"Höhenprofile zu erhalten und Aswählen von Festlegen.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmprof.xtr:237
 #: ../../../../build/work/app/i18n/custmsg.h:941
@@ -12594,7 +12595,7 @@ msgid ""
 "Again we use Shift-Right-Click to display the Profile Options menu and "
 "select ignore.\n"
 msgstr ""
-"Wieder benutzen wir Umschalt-Rechts-Klick um das Optionsmenu für das "
+"Wieder benutzen wir Umschalt-Rechtskicken um das Optionsmenü für das "
 "Höhenprofil anzuzeigen und wählen ignorieren.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmprof.xtr:258
@@ -12639,7 +12640,7 @@ msgid ""
 "Gold dot and a new line is added to the Profile dialog.\n"
 msgstr ""
 "Markieren Sie zuerst den unteren Endpunkt als festgelegt. Dies geschieht "
-"durch Umschalt-Rechts-Klick und das Optionsmenu für das Höhenprofil. Sie "
+"durch Umschalt-Rechts-Klicken und das Optionsmenu für das Höhenprofil. Sie "
 "werden sehen, dass der Endpunkt jetzt mit einem goldenen Punkt markiert ist. "
 "Dem Höhenprofil wurde eine neue Linie zugefügt.\n"
 
@@ -12759,7 +12760,7 @@ msgid ""
 "There are Rotate options that you can access by Shift-Right-Click command "
 "menu and choosing 'Rotate...'.\n"
 msgstr ""
-"Es gibt Rotationsoptionen, auf die Sie über das Umschalt-Rechts-Klick-"
+"Es gibt Rotationsoptionen, auf die Sie über das Umschalt-Rechtsklicken-"
 "Befehlsmenü zugreifen können, indem Sie 'Rotieren...' wählen.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:987
@@ -12898,7 +12899,7 @@ msgstr ""
 
 #: ../../../../build/work/app/i18n/custmsg.h:1016
 msgid "A Ctrl-Left-Click adds tracks to the selection\n"
-msgstr "Mit einem Strg-Links-Klick werden Gleise zur Auswahl hinzugefügt.\n"
+msgstr "Mit einem Strg-Linksklick werden Gleise zur Auswahl hinzugefügt.\n"
 
 #. i18n:
 #. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:235
@@ -12934,9 +12935,9 @@ msgid ""
 "Shift-Left-Click on a track will select all unselected tracks connected to "
 "the track.  Selection stops at a previously selected track.\n"
 msgstr ""
-"Umschalt-Links-Klick auf ein Gleis wählt alle Gleise aus, die mit diesem "
-"verbunden sind. Der Vorgang bricht ab, sobald ein Gleis bereits ausgewählt "
-"ist.\n"
+"Umschalt-Linksklicken auf ein Gleis wählt alle Gleise aus, die mit diesem "
+"verbunden sind. Der Vorgang bricht ab, sobald ein verbundenes Gleis bereits "
+"ausgewählt ist.\n"
 
 #. i18n:
 #. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:284
@@ -13025,7 +13026,7 @@ msgid ""
 "You can use Shift-Left-Click to select an open endpoint of a selected track "
 "to join with an unselected track. \n"
 msgstr ""
-"Mit Umschalt-Links-Klick können Sie einen offenen Endpunkt eines "
+"Mit Umschalt-Linksklicken können Sie einen offenen Endpunkt eines "
 "ausgewählten Gleises auswählen, um es mit einem nicht ausgewählten Gleis zu "
 "verbinden.\n"
 
@@ -13246,7 +13247,7 @@ msgstr "Wir verschieben die Weiche durch Ziehen am aktiven Endpunkt.\n"
 #: ../../../../build/work/app/i18n/custmsg.h:1100
 msgid "We can change the 'Active End Point' by a Shift-Left-Click\n"
 msgstr ""
-"Wir können den aktiven Endpunkt durch Links-Klick bei gedrückter "
+"Wir können den aktiven Endpunkt durch Linksklicken bei gedrückter "
 "Umschalttaste wechseln.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:75
@@ -13260,7 +13261,7 @@ msgid ""
 "If we continue to Shift-Left-Click 2 more times, we will return to the "
 "original position.\n"
 msgstr ""
-"Wenn wir noch zwei Mal bei gedrückter Umschalttaste links klicken sind wir "
+"Wenn wir noch zwei Mal bei gedrückter Umschalttaste linksklicken sind wir "
 "wieder an der Ausgangsposition.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:123
@@ -13274,8 +13275,8 @@ msgid ""
 "You can also use Shift-Right-Click to display a popup menu that lets you "
 "rotate the Turnout by specific angles.\n"
 msgstr ""
-"Sie können mit Umschalten-Rechts-Klick ein Fenster öffnen, das das Drehen um "
-"feste Winkel ermöglicht.\n"
+"Sie können mit Umschalten-Rechtsklicken ein Fenster öffnen, das das Drehen "
+"um feste Winkel ermöglicht.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:174
 #: ../../../../build/work/app/i18n/custmsg.h:1109
@@ -14643,7 +14644,7 @@ msgstr "Weichen und Gebäude Auswahlleiste"
 
 #: ../../../../build/work/app/help/bllnhlp.c:231
 msgid "Active layer list and layer buttons"
-msgstr "Liste der aktiven Ebene und Ebenen-Knöpfe"
+msgstr "Liste der aktiven Ebene und Schaltflächen für Ebenen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:232
 msgid "Map window"
@@ -14845,7 +14846,7 @@ msgstr "Standardbefehl ist Eigenschaften oder Auswählen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:289
 msgid "Action to invoke on Right-Click"
-msgstr "Festlegen welche Aktion beim Rechts-Klick erfolgen soll"
+msgstr "Festlegen welche Aktion beim Rechtsklicken erfolgen soll"
 
 #: ../../../../build/work/app/help/bllnhlp.c:290
 msgid ""
@@ -15214,7 +15215,7 @@ msgstr "Name der Ebene"
 
 #: ../../../../build/work/app/help/bllnhlp.c:424
 msgid "Hide Layer Button on MenuBar"
-msgstr "Ebenenknopf in der Menuleiste verbergen"
+msgstr "Schaltfläche für die Ebenen in der Menuleiste verbergen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:425
 msgid "Color of layer"
@@ -15300,7 +15301,7 @@ msgstr "Ebene auf Standardeinstellungen des Gleisplan zurück setzen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:443
 msgid "Number of layer buttons to show"
-msgstr "Anzahl der Ebenenknöpfe"
+msgstr "Anzahl der sichtbaren Schaltflächen für Ebenen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:444
 msgid "Number of objects in this layer"
@@ -15524,7 +15525,7 @@ msgstr "Wie weit kann die Maus bewegt werden, bevor abreißen angenommen wird"
 #: ../../../../build/work/app/help/bllnhlp.c:495
 msgid "How long you can hold a mouse button down before its considered a drag"
 msgstr ""
-"Wie lange kann ein Mausknopf gedrückt bleiben, bevor abreißen angenommen wird"
+"Wie lange kann ein Mausknopf gedrückt bleiben, bevor Ziehen angenommen wird"
 
 #: ../../../../build/work/app/help/bllnhlp.c:496
 msgid "Minimum distance (in pixels) between grid lines/ticks"
@@ -15849,11 +15850,11 @@ msgstr "Laden Sie den Inhalt der Systembibliothek zum Suchen neu"
 
 #: ../../../../build/work/app/help/bllnhlp.c:582
 msgid "Choose commands to be sticky"
-msgstr "Wiederholte Befehle auswählen"
+msgstr "Mehrfach aktive Funktionen auswählen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:583
 msgid "Make the commands sticky"
-msgstr "Mache die Befehle wiederholbar"
+msgstr "Mehrfach aktive Funktionen festlegen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:584
 msgid "List of available structure"
@@ -15921,7 +15922,7 @@ msgstr "Gehe zum vorherigen Tipp des Tages"
 
 #: ../../../../build/work/app/help/bllnhlp.c:602
 msgid "Controls which Command Buttons are displayed"
-msgstr "Ein- oder Ausblenden von Befehls-Knöpfen in der Werkzeugleiste"
+msgstr "Ein- oder Ausblenden von Schaltflächen in der Werkzeugleiste"
 
 #: ../../../../build/work/app/help/bllnhlp.c:603
 msgid "List of Cars"
@@ -16122,7 +16123,7 @@ msgstr "Nicht druckbare Ränder"
 
 #: ../../../../build/work/app/help/bllnhlp.c:664
 msgid "Updates and closes this dialog"
-msgstr "Dialogfenster aktualisieren und Schließen"
+msgstr "Dialogfenster aktualisieren und schließen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:665
 msgid "Choose paper size"
