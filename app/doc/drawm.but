@@ -473,7 +473,7 @@ Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.
 
 \u000
 
-\dd (\K{cmdDrawBench}). Creates \i\f{Bench-work} using different types and orientation of lumber.
+\dd (\K{cmdDrawBench}). Creates \i{Bench-work} using different types and orientation of lumber.
 
 \u000
 
@@ -516,7 +516,7 @@ If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the angle of th
 
 \G{png.d/dbench.png} 
 
-Creates \i\f{Bench-work} using different types and orientation of lumber.
+Creates \i{Bench-work} using different types and orientation of lumber.
 
 \i{Bench-work Notes}
 

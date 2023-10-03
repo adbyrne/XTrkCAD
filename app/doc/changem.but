@@ -12,31 +12,31 @@
 
 The \f{Change Menu} has all functions related to modifying objects that exist on the layout drawing.
 
-\dd \i\f{Properties} - sets \e{XTrackCAD} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation. (\K{cmdDescribe}).
+\dd \i{Properties} - sets \e{XTrackCAD} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation. (\K{cmdDescribe}).
 
 \u000
 
-\dd \i\f{Select} - sets \e{XTrackCAD} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{mouseBcmd}). (\K{cmdSelect}).
+\dd \i{Select} - sets \e{XTrackCAD} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{mouseBcmd}). (\K{cmdSelect}).
 
 \rule
 
-\dd \i\f{Move} - move selected object(s). (\K{cmdMove}).
+\dd \i{Move} - move selected object(s). (\K{cmdMove}).
 
 \u000
 
-\dd \i\f{Rotate} - rotate selected object(s). (\K{cmdRotate}).
+\dd \i{Rotate} - rotate selected object(s). (\K{cmdRotate}).
 
 \u000
 
-\dd \i\f{Flip} - turn selected object(s) over or around. (\K{cmdFlip}).
+\dd \i{Flip} - turn selected object(s) over or around. (\K{cmdFlip}).
 
 \u000
 
-\dd \i\f{Loosen Tracks} \I{Track, Loosen} - this command reverses the effect of Connect Two Tracks as applied to sectional track.
+\dd \i{Loosen Tracks} \I{Track, Loosen} - this command reverses the effect of Connect Two Tracks as applied to sectional track.
 
 \u000
 
-\dd \i\f{Modify} - modify an existing track, or lines. (\K{cmdModify}).
+\dd \i{Modify} - modify an existing track, or lines. (\K{cmdModify}).
 
 \u000
 
@@ -46,13 +46,13 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \i\f{Connect Two Tracks} \I{Track, Connect} - creates a connection between track pieces with an option to slightly move the select piece(s) and the pieces they connect to. (\K{cmdConnect}).
+\dd \i{Connect Two Tracks} \I{Track, Connect} - creates a connection between track pieces with an option to slightly move the select piece(s) and the pieces they connect to. (\K{cmdConnect}).
 
 \u000
 
 \dd \G{png.d/msplit.png}
 
-\dd \i\f{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or split draw objects (\K{cmdSplitDraw}) or use a second Object to Trim (\K{cmdTrimDraw}).
+\dd \i{Split} - the \f{Split} commands are used to divide up tracks (\K{cmdSplitTrack}) or split draw objects (\K{cmdSplitDraw}) or use a second Object to Trim (\K{cmdTrimDraw}).
 The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \lcont{
@@ -65,37 +65,37 @@ The (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 }
 
-\dd \i\f{Move Description} - move the endpoint description of a track piece to another location. (\K{cmdMoveLabel}).
+\dd \i{Move Description} - move the endpoint description of a track piece to another location. (\K{cmdMoveLabel}).
 
 \rule
 
-\dd \i\f{Raise/Lower Elevations} - raise or lower elevation of selected tracks. (\K{cmdRaiseElev}).
+\dd \i{Raise/Lower Elevations} - raise or lower elevation of selected tracks. (\K{cmdRaiseElev}).
 
 \u000
 
-\dd \i\f{Elevation} - define an elevation at specified track location (\K{cmdElevation}).
+\dd \i{Elevation} - define an elevation at specified track location (\K{cmdElevation}).
 
 \u000
 
-\dd \i\f{Profile} - display the elevation profile of a definable stretch of track (\K{cmdProfile}).
+\dd \i{Profile} - display the elevation profile of a definable stretch of track (\K{cmdProfile}).
 
 \u000
 
-\dd \i\f{Clear Elevations} - remove elevation parameters from selected track(s).
+\dd \i{Clear Elevations} - remove elevation parameters from selected track(s).
 
 \u000
 
-\dd \i\f{Recompute Elevations} - performs a global re-computation of dynamic elevations. It should not be necessary to issue this command as elevations are recomputed as required.
+\dd \i{Recompute Elevations} - performs a global re-computation of dynamic elevations. It should not be necessary to issue this command as elevations are recomputed as required.
 
 \rule
 
-\dd \i\f{Change Scale} - change model scale and/or gauge of layout design. (\K{cmdRescale})
+\dd \i{Change Scale} - change model scale and/or gauge of layout design. (\K{cmdRescale})
 
 \rule
 
 \dd \G{png.d/mconvert.png}
 
-\dd \i\f{Convert} - changes flex-tracks (Straight, Curve, Joint, Bezier) into a Smooth Cornu or vice versa. (\K{cmdConvert}).
+\dd \i{Convert} - changes flex-tracks (Straight, Curve, Joint, Bezier) into a Smooth Cornu or vice versa. (\K{cmdConvert}).
 
 \rule
 

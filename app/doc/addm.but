@@ -16,70 +16,70 @@
 
 The \f{Add Menu} has all the actions related to adding track pieces to the layout.
 
-\dd \i\f{Straight Track} \c{Ctrl+G} - lay straight track pieces of arbitrary lengths
+\dd \i{Straight Track} \c{Ctrl+G} - lay straight track pieces of arbitrary lengths
 
 \u000
 
-\dd \i\f{Curve Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}).
+\dd \i{Curve Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}).
 
 \dd \G{png.d/maddcurve.png}
 
 \u000
 
-\dd \i\f{Circle Track} \I{Track, Circle} - place a circle of track by selecting radius, tangent and or center (\K{cmdCircle}).
+\dd \i{Circle Track} \I{Track, Circle} - place a circle of track by selecting radius, tangent and or center (\K{cmdCircle}).
 
 \dd \G{png.d/maddcircle.png}
 
 \u000
 
-\dd \i\f{Parallel} - \I{Parallel Track} \I{Track, Parallel} \I{Parallel Line} \I{Line, Parallel}
+\dd \i{Parallel} - \I{Parallel Track} \I{Track, Parallel} \I{Parallel Line} \I{Line, Parallel}
 create parallel track or line to existing flex-track, straight or curved track. (\K{cmdParallel})
 
 \dd \G{png.d/maddparallel.png}
 
 \u000
 
-\dd \i\f{Predefined Track} \I{Track, Predefined} \c{Ctrl+T} - select a turnout or a piece of fixed-track and place on layout.
+\dd \i{Fixed-track} \I{Track, Fixed} \c{Ctrl+T} - select a piece of \i{fixed-track} and place on layout.
 
 \u000
 
-\dd \i\f{Hand-laid Turnout} \I{Turnout, Hand-laid} \c{Ctrl+Shift+I} - lay a turnout in place on the layout. (\K{cmdHandLaidTurnout})
+\dd \i{Hand-laid Turnout} \I{Turnout, Hand-laid} \c{Ctrl+Shift+I} - lay a turnout in place on the layout. (\K{cmdHandLaidTurnout})
 
 \u000
 
-\dd \i\f{Structure} \c{Ctrl+Shift+C} - Add a predefined structure to the layout.
+\dd \i{Structure} \c{Ctrl+Shift+C} - Add a predefined structure to the layout.
 
 \u000
 
-\dd \i\f{Helix} \c{Ctrl+Shift+H} - Add a helix. (\K{cmdHelix})
+\dd \i{Helix} \c{Ctrl+Shift+H} - Add a helix. (\K{cmdHelix})
 
 \u000
 
-\dd \i\f{Custom Turntable} \I{Turntable, Custom} \c{Ctrl+Shift+N} - Place a turntable. (\K{cmdTurntable})
+\dd \i{Custom Turntable} \I{Turntable, Custom} \c{Ctrl+Shift+N} - Place a turntable. (\K{cmdTurntable})
 
 \u000
 
-\dd \i\f{Control Element} - Create a control element.
+\dd \i{Control Element} - Create a control element.
 
 \u000
 
-\dd \i\f{Block} \I{Control Element, Block} - Create a block. (\K{cmdBlock})
+\dd \i{Block} \I{Control Element, Block} - Create a block. (\K{cmdBlock})
 
 \u000
 
-\dd \i\f{Switchmotor} \I{Control Element, Switchmotor} - Create a switchmotor. (\K{cmdSwitchmotor})
+\dd \i{Switchmotor} \I{Control Element, Switchmotor} - Create a switchmotor. (\K{cmdSwitchmotor})
 
 \u000
 
-\dd \i\f{Signal} \I{Control Element, Signal} - Create a signal. (\K{cmdSignal})
+\dd \i{Signal} \I{Control Element, Signal} - Create a signal. (\K{cmdSignal})
 
 \u000
 
-\dd \i\f{Control} \I{Control Element, Control} - Create a control. (\K{cmdControl})
+\dd \i{Control} \I{Control Element, Control} - Create a control. (\K{cmdControl})
 
 \u000
 
-\dd \i\f{Sensor} \I{Control Element, Sensor} - Create a sensor. (\K{cmdSensor})
+\dd \i{Sensor} \I{Control Element, Sensor} - Create a sensor. (\K{cmdSensor})
 
 \rule
 
