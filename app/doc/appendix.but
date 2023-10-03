@@ -208,6 +208,8 @@ They are created by invoking the corresponding command and dragging on the layou
 
 \f{Turnout} - A piece of track that allows a train to go from one track to another. Called a switch on a real railroad. Referred to by number. For example, a no. 6 turnout spreads one unit for each six units of travel measured from the frog (the point at which two rails join to form a V).
 
+Turnouts are a type of 'Fixed-track' which includes Sectional Tracks and Grouped Objects.
+
 \b In \e{XTrackCAD}, \e{Turnouts} also include sectional Tracks, crossings and forms of prefabricated (non-flex) track.
 
 \f{Turnout Frog} - the place on the turnout track where one rail crosses the other.

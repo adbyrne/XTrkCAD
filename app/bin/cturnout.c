@@ -2954,8 +2954,8 @@ static STATUS_T CmdTurnout(
 
 	case C_START:
 		if (turnoutW == NULL) {
-			/*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Turnout"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
-			turnoutW = ParamCreateDialog(&turnoutPG, MakeWindowTitle(_("Turnout")),
+			/*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Fixed-Track"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
+			turnoutW = ParamCreateDialog(&turnoutPG, MakeWindowTitle(_("Add Fixed-Track")),
 			                             _("Close"), (paramActionOkProc)TurnoutOk, wHide, TRUE, NULL,
 			                             F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
 			InitNewTurn(turnoutNewM);
@@ -3183,7 +3183,7 @@ static STATUS_T CmdTurnoutHotBar(
 
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
-	AddMenuButton(menu, CmdTurnout, "cmdTurnout", _("Predefined Track"),
+	AddMenuButton(menu, CmdTurnout, "cmdTurnout", _("Fixed-Track"),
 	              wIconCreatePixMap(turnout_xpm3[iconSize]), LEVEL0_50,
 	              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
 	              NULL);

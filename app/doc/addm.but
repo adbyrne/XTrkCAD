@@ -438,7 +438,7 @@ If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained
 
 \G{png.d/bstruct.png}
 
-The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.  The operation is similar to the Turnout (\K{cmdNewFixedTrack}) command.
+The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.  The operation is similar to the Fixed-track (\K{cmdNewFixedTrack}) command.
 
 \G{png.d/strsel.png}
 
@@ -448,16 +448,16 @@ The \f{Structure Selection} dialog will disappear while dragging on the layout i
 
 See the Hot Bar (\K{cmdHotBar}) command for details on placing Structures on the layout.
 
-\f{Structures} are placed on the layout in same way as \f{turnouts} except that there is no \e{Active endpoint} and structures do not align with existing tracks.
+\f{Structures} are placed on the layout in same way as \f{Fixed-tracks} except that there is no \e{Active endpoint} and structures do not align with existing tracks.
 
 \rule
 
 
-\S{cmdNewFixedTrack} Turnouts
+\S{cmdNewFixedTrack} \i{Fixed-track}
 
 \G{png.d/bturnout.png}
 
-Turnouts (and sectional track) are created by the \f{Turnout} command \I{Created by Turnout Command}.  When you select the turnout command, the \f{Turnout Selection} dialog is displayed which contains a list of available turnouts and sectional track for the current scale (\K{cmdLayout}) and a diagram of the selected turnout.
+Fixed-track objects (Turnouts, Sectional Tracks and Grouped Object) are created by the \f{Fixed-track} command, and the \f{Selection} dialog is displayed which contains a list of available turnouts, sectional tracks and grouped objects for the current scale (\K{cmdLayout}) and a diagram of the selected turnout.
 
 You can use the Parameter File Dialog (\K{cmdPrmfile}) to control what turnouts are available.
 
@@ -469,7 +469,7 @@ The \f{New} button invokes the Turnout Designer (\K{cmdTurnoutNew}) dialog.  Thi
 
 The \f{Turnout Selection} window will disappear while dragging on the layout if the \f{Hide} Check Box on the dialog is set.  This is useful if you have a small screen.
 
-See the Hot Bar (\K{cmdHotBar}) command for details on placing Turnouts on the layout.
+See the Hot Bar (\K{cmdHotBar}) command for details on placing Fixed-tracks on the layout.
 
 \rule
 
