@@ -232,6 +232,9 @@ DeleteTurnoutParams(int fileIndex)
 		if (to->paramFileIndex == fileIndex) {
 			DeleteTurnout(to);
 			cnt++;
+			if ( to == curTurnout ) {
+				curTurnout = NULL;
+			}
 		}
 	}
 
@@ -2156,6 +2159,7 @@ static void SelTurnoutEndPt(
         coOrd pos)
 {
 	if (action != C_DOWN) { return; }
+	if ( curTurnout == NULL ) { return; }
 
 	curTurnoutEp = TOpickEndPoint(pos, curTurnout);
 	HilightEndPt();
