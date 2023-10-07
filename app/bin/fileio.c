@@ -1103,34 +1103,43 @@ static BOOL_T CopyDependency(char * name, char * target_dir)
 
 static doSaveCallBack_p doAfterSave;
 
-
+/**
+ * Save the layout to file. This function handles either cases, classic xtc
+ * files as well as xtce zip archives.
+ *
+ * \param	cnt	Number of files, must be 1
+ * \param	fileName name of destination file including extension (xtc or xtce)
+ * \param	data unused
+ *
+ * \returns TRUE for success
+ */
 
 static int SaveTracks(
-        int cnt,
-        char **fileName,
-        void * data )
+	int cnt,
+	char** fileName,
+	void* data)
 {
+	BOOL_T success = FALSE;
 
-	CHECK( fileName != NULL );
-	CHECK( cnt == 1 );
+	CHECK(fileName != NULL);
+	CHECK(cnt == 1);
 
-	char *nameOfFile = FindFilename(fileName[0]);
+	char* nameOfFile = FindFilename(fileName[0]);
 
 	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 
 	//Support Archive zipped files
 
-	char * extOfFile = FindFileExtension( fileName[0]);
+	char* extOfFile = FindFileExtension(fileName[0]);
 
+	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION) == 0)) {
 
-	if (extOfFile && (strcmp(extOfFile,ZIPFILETYPEEXTENSION)==0)) {
-
-		char * ArchiveName;
+		char* ArchiveName;
 
 		//Set filename to point to be the same as the included .xtc file.
 		//This is also in the manifest - in case a user renames the archive file.
 
-		char * zip_output = GetZipDirectoryName(ARCHIVE_WRITE);
+		char* zip_output = GetZipDirectoryName(ARCHIVE_WRITE);
 
 		DeleteDirectory(zip_output);
 		SafeCreateDir(zip_output);
@@ -1140,68 +1149,75 @@ static int SaveTracks(
 		nameOfFile = FindFilename(ArchiveName);
 		extOfFile = FindFileExtension(ArchiveName);
 
-		if (extOfFile && strcmp(extOfFile, ZIPFILETYPEEXTENSION)==0) {
+		if (extOfFile && strcmp(extOfFile, ZIPFILETYPEEXTENSION) == 0) {
 			// Get rid of the 'e'
 			extOfFile[3] = '\0';
 		}
 
-		char * DependencyDir;
+		char* DependencyDir;
 
 		//The included files are placed (for now) into an includes directory - TODO an array of includes with directories by type
 		MakeFullpath(&DependencyDir, zip_output, "includes", NULL);
 
 		SafeCreateDir(DependencyDir);
 
-		char * background = GetLayoutBackGroundFullPath();
+		char* background = GetLayoutBackGroundFullPath();
 
 		if (background && background[0]) {
-			CopyDependency(background,DependencyDir);
+			success = CopyDependency(background, DependencyDir);
 		}
 
-		//The details are stored into the manifest - TODO use arrays for files, locations
-		SetCLocale();
-		char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
-		char * manifest_file;
+		if (success) {
+			//The details are stored into the manifest - TODO use arrays for files, locations
+			SetCLocale();
+			char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
+			char* manifest_file;
 
-		MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
+			MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
 
-		FILE *fp = fopen(manifest_file, "wb");
-		if (fp != NULL) {
-			fputs(json_Manifest, fp);
-			fclose(fp);
-		} else {
-			NoticeMessage( MSG_MANIFEST_FAIL, _("Continue"), NULL, manifest_file );
+			FILE* fp = fopen(manifest_file, "wb");
+			if (fp != NULL) {
+				fputs(json_Manifest, fp);
+				fclose(fp);
+			}
+			else {
+				NoticeMessage(MSG_MANIFEST_FAIL, _("Continue"), NULL, manifest_file);
+				success = FALSE;
+			}
+			SetUserLocale();
+
+			free(manifest_file);
+			free(json_Manifest);
 		}
-		SetUserLocale();
 
-		free(manifest_file);
-		free(json_Manifest);
+		success &= DoSaveTracks(ArchiveName);
 
-		DoSaveTracks( ArchiveName );
-
-		if (CreateArchive(	zip_output,	fileName[0]) != TRUE) {
-			NoticeMessage( MSG_ARCHIVE_FAIL, _("Continue"), NULL, fileName[0], zip_output );
+		if (success) {
+			if (CreateArchive(zip_output, fileName[0]) != TRUE) {
+				NoticeMessage(MSG_ARCHIVE_FAIL, _("Continue"), NULL, fileName[0], zip_output);
+			}
 		}
+
 		free(zip_output);
 		free(ArchiveName);
 
-	} else
-
-	{
-		DoSaveTracks( fileName[ 0 ] );
+	}
+	else {
+		success = DoSaveTracks(fileName[0]);
 	}
 
-	nameOfFile = FindFilename( fileName[ 0 ] );
-	wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[ 0 ]) );
-	checkPtMark = changed = 0;
+	if (success) {
+		nameOfFile = FindFilename(fileName[0]);
+		wMenuListAdd(fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]));
+		checkPtMark = changed = 0;
 
-	SetLayoutFullPath(fileName[0]);
+		SetLayoutFullPath(fileName[0]);
+	}
 
 	if (doAfterSave) {
 		doAfterSave();
 	}
-	doAfterSave = NULL;
-	return TRUE;
+	return success;
 }
 
 /**
@@ -1239,7 +1255,6 @@ EXPORT void SaveState(void)
 	}
 	wPrefFlush("");
 }
-
 static void SetAutoSave()
 {
 	if (saveFile_fs == NULL)
