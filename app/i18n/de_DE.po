@@ -11,8 +11,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-22 10:19+0200\n"
-"PO-Revision-Date: 2023-10-02 18:00+0200\n"
-"Last-Translator: Martin Fischer <m_fischer@users.sourceforge.net>, 2021\n"
+"PO-Revision-Date: 2023-10-07 10:10+0200\n"
+"Last-Translator: Martin Fischer <m_fischer@users.sf.net>\n"
 "Language-Team: German (Germany) (https://www.transifex.com/xtrackcad/"
 "teams/112853/de_DE/)\n"
 "Language: de_DE\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Generated-By: Babel 2.9.1\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4\n"
 
 #: ../bin/archive.c:153 ../bin/archive.c:160 ../bin/archive.c:189
 #: ../bin/archive.c:214 ../bin/archive.c:269 ../bin/archive.c:282
@@ -2485,7 +2485,7 @@ msgstr ""
 msgid "Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu"
 msgstr ""
 "Ziehen um die ausgewählten Gleise zu rotieren, Umschalt-Taste und "
-"Rechtsklicken um das Schnellauswahlmenu öffnen"
+"Rechtsklicken um das Schnellauswahlmenü öffnen"
 
 #: ../bin/cselect.c:1994 ../bin/cselect.c:2370
 msgid "Rotate Tracks"
@@ -5335,7 +5335,7 @@ msgstr "An den roten Pfeilen ziehen, um die Kurve anzupassen"
 
 #: ../bin/drawgeom.c:1298
 msgid "Select points or use context menu"
-msgstr "Punkt auswählen oder Kontextmenu benutzen"
+msgstr "Punkt auswählen oder Kontextmenü benutzen"
 
 #: ../bin/drawgeom.c:1567
 #, c-format, python-format
@@ -7761,7 +7761,7 @@ msgid ""
 msgstr ""
 "MSG_STRUCT_NO_STRUCTS\tIn der Liste der Gebäude gibt es keine...\tIn der "
 "Liste der Gebäude gibt es keine Gebäude,\n"
-"die ausgewählt werden können.  Bitte Maßstab prüfen, im Menupunkt <Datei|"
+"die ausgewählt werden können.  Bitte Maßstab prüfen, im Menüpunkt <Datei|"
 "Parameter Dateien> eine Parameter-Datei wählen\n"
 "oder ein neues Gebäude mit dem Gruppieren-Befehl erstellen."
 
@@ -7777,7 +7777,7 @@ msgstr ""
 "MSG_TURNOUT_NO_TURNOUT\tIn der Weichenauswahl gibt es keine Weichen, die "
 "ausgewählt werden können...\tIn der Weichenauswahl gibt es keine Weichen, "
 "die ausgewählt werden können.\n"
-"Bitte den Maßstab prüfen, über den Menupunkt <Hinzufügen | Weichendesigner> "
+"Bitte den Maßstab prüfen, über den Menüpunkt <Hinzufügen | Weichendesigner> "
 "eine Weiche anlegen oder\n"
 "eine Parameter-Datei unter <Datei|Parameter Dateien> laden"
 
@@ -10169,9 +10169,9 @@ msgid ""
 "menu.  We can not show the popup menu in demo mode, but will simulate the "
 "effect.\n"
 msgstr ""
-"Wir rotieren die Signale durch Drücken  und Festhalten der Umschalttaste bei "
-"gleichzeitigem Klicken mit der rechten Maustaste. Aus dem Menu wählen wir "
-"90° im UZS aus. Im Demo-Mode kann das  Menu nicht angezeigt werden, aber wir "
+"Wir rotieren die Signale durch Drücken und Festhalten der Umschalttaste bei "
+"gleichzeitigem Klicken mit der rechten Maustaste. Aus dem Menü wählen wir "
+"90° im UZS aus. Im Demo-Mode kann das  Menü nicht angezeigt werden, aber wir "
 "simulieren den Effekt.\n"
 
 #. i18n:
@@ -10753,7 +10753,7 @@ msgid ""
 "You can change the Exception color on the Colors dialog from the Options "
 "menu.\n"
 msgstr ""
-"Die Ausnahmefarbe kann im Farbdialogfenster des Optionen-Menus geändert "
+"Die Ausnahmefarbe kann im Farbdialogfenster des Optionen-Menüs geändert "
 "werden.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:85
@@ -12552,7 +12552,7 @@ msgid ""
 "popup menu.  These points are added to the Profile if they are on the Path.\n"
 msgstr ""
 "Sie können weitere Punkte mit festgelegter Höhe zufügen, indem Sie das "
-"Optionsmenu für Höhenprofile benutzen. Diese Punkte werden zu dem "
+"Optionsmenü für Höhenprofile benutzen. Diese Punkte werden zu dem "
 "Höhenprofil zugefügt, wenn Sie auf dem Pfad liegen.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:939
@@ -12560,8 +12560,8 @@ msgid ""
 "We do this by Shift Right Click to display the Profile Options popup menu "
 "and selecting Define.\n"
 msgstr ""
-"Dies geschieht durch mschalt-Rechtsklicken, um das Optionsmenu für "
-"Höhenprofile zu erhalten und Aswählen von Festlegen.\n"
+"Dies geschieht durch Umschalt-Rechtsklicken, um das Optionsmenü für "
+"Höhenprofile zu erhalten und das Auswählen von Festlegen.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmprof.xtr:237
 #: ../../../../build/work/app/i18n/custmsg.h:941
@@ -12640,7 +12640,7 @@ msgid ""
 "Gold dot and a new line is added to the Profile dialog.\n"
 msgstr ""
 "Markieren Sie zuerst den unteren Endpunkt als festgelegt. Dies geschieht "
-"durch Umschalt-Rechts-Klicken und das Optionsmenu für das Höhenprofil. Sie "
+"durch Umschalt-Rechts-Klicken und das Optionsmenü für das Höhenprofil. Sie "
 "werden sehen, dass der Endpunkt jetzt mit einem goldenen Punkt markiert ist. "
 "Dem Höhenprofil wurde eine neue Linie zugefügt.\n"
 
@@ -13501,7 +13501,7 @@ msgstr "Zuerst wählen wir die Gleise der Hauptstrecke aus...\n"
 #. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:128
 #: ../../../../build/work/app/i18n/custmsg.h:1167
 msgid "And then select Medium Tracks from the Edit menu.\n"
-msgstr "Und wählen dann mittlere Stärke aus dem Bearbeiten Menu aus.\n"
+msgstr "Und wählen dann mittlere Stärke aus dem Bearbeiten-Menü aus.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:1168
 msgid "We can't show the Edit menu, but we can show the effect.\n"
@@ -14506,7 +14506,7 @@ msgstr "Drehzentrum Y"
 
 #: ../../../../build/work/app/help/bllnhlp.c:193
 msgid "File Menu"
-msgstr "Dateimenu"
+msgstr "Dateimenü"
 
 #: ../../../../build/work/app/help/bllnhlp.c:194
 msgid "Save layout"
@@ -15215,7 +15215,7 @@ msgstr "Name der Ebene"
 
 #: ../../../../build/work/app/help/bllnhlp.c:424
 msgid "Hide Layer Button on MenuBar"
-msgstr "Schaltfläche für die Ebenen in der Menuleiste verbergen"
+msgstr "Schaltfläche für die Ebenen in der Menüleiste verbergen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:425
 msgid "Color of layer"
@@ -15436,7 +15436,7 @@ msgid ""
 "Menu"
 msgstr ""
 "Dies ist der Notiztext. Um diesen zu ändern, wählen Sie bitte 'Ändern' aus "
-"dem 'Datei'-Menu"
+"dem Datei-Menü"
 
 #: ../../../../build/work/app/help/bllnhlp.c:476
 msgid "Specifies number of pixels per inch (or centimeter)"
