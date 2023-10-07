@@ -36,7 +36,6 @@ extern int log_zip;
  * - The dependencies object is an arraylist of included elements
  *
  * Each element has a name, a filename and an arch-path (where in the archive it is located)
- * It may have other values - a common one the copy-path is where it was copied from the originators machine (info only)
  *
  * There is one reserved name - "background" which is for the image file that is used as a layout background
  *
@@ -74,13 +73,7 @@ char* CreateManifest(char* nameOfLayout, char* background,
 			cJSON_AddStringToObject(b_object, "filename", backg);
 			MyFree(backg);
 			backg = MyStrdup(background);
-#ifdef UTFCONVERT
-			backg = Convert2UTF8(backg);
-			ConvertPathForward(backg);
-#endif // UTFCONVERT			
-			cJSON_AddStringToObject(b_object, "copy-path", backg);
 			cJSON_AddStringToObject(b_object, "arch-path", dependencyDir);
-			MyFree(backg);
 			cJSON_AddNumberToObject(b_object, "size", GetLayoutBackGroundSize());
 			cJSON_AddNumberToObject(b_object, "pos-x", GetLayoutBackGroundPos().x);
 			cJSON_AddNumberToObject(b_object, "pos-y", GetLayoutBackGroundPos().y);
