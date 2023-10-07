@@ -1248,7 +1248,7 @@ static void SetAutoSave()
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	checkPtMark = 1;
 	SetWindowTitle();
-	CleanupFiles();  //Remove old checkpoint
+	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 
 }
@@ -1267,7 +1267,7 @@ EXPORT void DoSave( void * doAfterSaveVP )
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
-	CleanupFiles();  //Remove old checkpoint
+	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1280,7 +1280,7 @@ EXPORT void DoSaveAs( void * doAfterSaveVP )
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	checkPtMark = 1;
 	SetWindowTitle();
-	CleanupFiles();  //Remove old checkpoint
+	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1293,7 +1293,7 @@ EXPORT void DoLoad( void )
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	paste_offset = zero;
 	cursor_offset = zero;
-	CleanupFiles();  //Remove old checkpoint
+	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1301,14 +1301,13 @@ EXPORT void DoLoad( void )
 EXPORT void DoExamples( void )
 {
 	if (examplesFile_fs == NULL) {
-//		static wBool_t bExample = TRUE;
 		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
 		                                 sSourceFilePattern, LoadTracks, NULL );
 	}
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
 	wFilSelect( examplesFile_fs, message );
-	CleanupFiles();  //Remove old checkpoint
+	CleanupCheckpointFiles();  //Remove old checkpoint
 	SaveState();
 }
 
@@ -1396,10 +1395,8 @@ EXPORT void TryCheckPoint()
  *
  */
 
-EXPORT void CleanupFiles( void )
+EXPORT void CleanupCheckpointFiles( void )
 {
-	char *tempDir;
-
 	if( checkPtFileName1 ) {
 		if (checkPtFileNameBackup) {
 			remove( checkPtFileNameBackup );
@@ -1407,6 +1404,22 @@ EXPORT void CleanupFiles( void )
 		}
 		remove( checkPtFileName1 );
 	}
+
+}
+
+/**
+ * Remove all temporary files used for archive handling. When the program terminates
+ * normally through the exit choice, files and directories that were created
+ * temporarily are removed: zip_in.<pid> and zip_out.<pid>
+ *
+ * \param none
+ * \return none
+ *
+ */
+
+EXPORT void CleanupTempArchive(void)
+{
+	char* tempDir;
 
 	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
 		tempDir = GetZipDirectoryName(i);
