@@ -81,11 +81,11 @@ The newly pasted parts are in \f{Selected} state and can easily be moved into pl
 
 \u000
 
-\dd \i{Move to Front} - Moves selected object to foreground.
+\dd \i{Move To Front} - Moves selected object to foreground.
 
 \u000
 
-\dd \i{Move to Back} - Moves selected object to background.
+\dd \i{Move To Back} - Moves selected object to background.
 
 \u000
 
@@ -100,7 +100,7 @@ For more information on working with selected objects, see the Select (\K{cmdSel
 
 \rule
 
-\S{cmdSelectIndex} Select By Index
+\S{cmdSelectIndex} \i{Select By Index}
 
 An input window allows one or more index numbers to be entered. Multiple indexes are seperated by commas.
 
@@ -112,7 +112,7 @@ If the object is a tunnel object, and the Display Tunnel option is None, it will
 
 When an individual object is selected, its index number is displayed in the Info Message area, another source is the List Parts (\K{cmdEnum}) command with the \f{List Indexes} option.
 
-\S{cmdAboveBelow} "Move To Front" and "Move to Back"
+\S{cmdAboveBelow} "Move To Front" and "Move to Back" \I{Move To Front} \I{Move To Back}
 
 \G{png.d/btop_bottom.png}
 
@@ -154,7 +154,7 @@ Additional Shortcut keys perform the following:
 \rule
 
 
-\S{cmdDelete} Delete
+\S{cmdDelete} \i{Delete}
 
 \G{png.d/bdelete.png}
 
@@ -167,7 +167,7 @@ The \e{Delete} key invokes the Delete command.
 \rule
 
 
-\S{cmdTunnel} Tunnel (Hide Tracks)
+\S{cmdTunnel} \i{Tunnel (Hide Tracks)}
 
 \G{png.d/btunnel.png}
 
@@ -182,7 +182,7 @@ The \f{Draw Tunnels} Radio button group on the \f{Options>Display} dialog (\K{cm
 
 \rule
 
-\S{cmdTies} Ties (Draw or Hide Ties)
+\S{cmdTies} \i{Ties (Draw or Hide Ties)}
 
 \G{png.d/bties.png}
 
@@ -193,7 +193,7 @@ Select the tracks you want to hide or show ties for.
 
 \rule
 
-\S{cmdBridge} Bridge (Draw or Hide Abutments)
+\S{cmdBridge} \i{Bridge (Draw or Hide Abutments)}
 
 \G{png.d/bbridge.png}
 
@@ -206,7 +206,7 @@ If you perform this action on an existing bridge (or use Tunnel) the bridge is r
 
 \rule
 
-\S{cmdRoadbed} Roadbed (Draw or Hide Base)
+\S{cmdRoadbed} \i{Roadbed (Draw or Hide Base)}
 
 \G{png.d/broadbed.png}
 
@@ -219,7 +219,7 @@ If you perform this action on existing roadbed (or use Tunnel) the roadbed is re
 
 \rule
 
-\S{cmdUndo} Undo and Redo
+\S{cmdUndo} Undo and Redo \I{Undo} \I{Redo}
 
 \G{png.d/bgundo.png}
 

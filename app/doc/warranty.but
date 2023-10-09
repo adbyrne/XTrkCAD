@@ -10,7 +10,7 @@ covered by the Creative Commons Attribution-ShareAlike 2.5 License Agreement.
 
 \rule
 
-\H{warranty} Warranty
+\H{warranty} \i{Warranty}
 
 
 \e{XTrackCAD} is provided "as is" without warranty of any kind, either express or implied, including, but not limited to warranties of merchantability or fitness for a particular purpose.  In no event will Sillub Technology be liable for any damages, including incidental or consequential damages, arising out of the use of the program, even if advised of the possibility of such damages.
@@ -31,7 +31,7 @@ You should have received a copy of the GNU General Public License along with thi
 \rule
 
 
-\H{GNUGPLicense} \ii{GNU General Public License}
+\H{GNUGPLicense} \ii{GNU General Public License} \i{License}
 
 \dd GNU GENERAL PUBLIC LICENSE
 

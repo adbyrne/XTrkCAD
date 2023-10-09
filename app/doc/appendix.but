@@ -194,11 +194,10 @@ They are created by invoking the corresponding command and dragging on the layou
 
 \f{Points} - the part of the Turnout that moves to select a path.
 
-\f{Reverse Curve} - a piece of track which curves in one direction then changes direction without any appreciable length of straight track between the two curves.
-
-\f{S-Curve} - a curve which bends in one direction and then the other, forming an S-like shape.
+\f{S-Curve} - (aka \f{Reverse Curve}) a curve which bends in one direction and then the other, forming an S-like shape, without any appreciable length of straight track between the two curves
 
 \f{Sectional Track} - prefabricated track which cannot be bent, split or changed.
+A type of \f{Fixed-Track}.
 
 \f{Selected Endpoint} - when selecting track for various reasons the selected endpoint is the one closest to the selection point.
 
@@ -279,7 +278,7 @@ or virtual track circuit in a Tower-LCC or similar device.
 
 \u000
 
-\dd \e{Notices} and \e{Error messages} that might be encounter are listed here with a explanation. The \f{Recent Messages} menu item on the \f{Help} (\K{helpM}) menu contains a list of the most recent messages.  Selecting one of the entries presents information on the particular message.
+\dd \e{Notices} and \e{Error messages} that might be encountered are listed here with a explanation. The \f{Recent Messages} menu item on the \f{Help} (\K{helpM}) menu contains a list of the most recent messages.  Selecting one of the entries presents information on the particular message.
 
 \u000
 

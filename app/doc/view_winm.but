@@ -26,15 +26,15 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
-\dd \f{Show Snap-Grid} - Toggles display of the \f{Snap Grid} on and off.
+\dd \f{Show Snap-Grid} - \I{Snap Grid} Toggles display of the \f{Snap Grid} on and off.
 
 \u000
 
-\dd \f{Magnetic Snap On/Off} - Toggles Magnets (\K{cmdMagneticSnap}) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
+\dd \f{Magnetic Snap On/Off} - Toggles \i{Magnetic Snap} (\K{cmdMagneticSnap}) for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
 
 \u000
 
-\dd \G{png.d/bmap.png} \f{ Show/Hide Map} - Toggles display of the \f{Map Window} on and off.
+\dd \G{png.d/bmap.png} \f{ Show/Hide Map} - Toggles display of the \f{Map Window} \I{Map Window} on and off.
 
 \u000
 
@@ -84,7 +84,7 @@ This enables snapping to be inhibited for a single part of an operation (or conv
 
 \rule
 
-\S{cmdGrid} Grid Dialog
+\S{cmdGrid} \i{Grid Dialog}
 
 The \f{Grid} dialog, displayed by \f{Change Grid} on the View (\K{viewM}) menu, specifies the origin, angle and other parameters of the Snap Grid.  
 The Snap Grid can sbe used to snap the position of the cursor during the \f{Curve} (\K{cmdCurve}), \f{Circle} (\K{cmdCircle}), \f{Cornu} (\K{cmdCornu}), \f{Modify} (\K{cmdModify}), \f{Straight} (\K{cmdStraight}), \f{Draw} (\K{cmdDraw}) and \f{Turntable} (\K{cmdTurntable}) commands.
@@ -125,7 +125,7 @@ Whether the Snap Grid is drawn is controlled by the \f{Show} check-box.  Also, i
 
 \rule
 
-\S{toolbarM}Tool-bar Configuration
+\S{toolbarM} \I{Tool-bar Configuration}
 
 \G{png.d/mtoolbar.png}
 

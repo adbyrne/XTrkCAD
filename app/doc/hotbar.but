@@ -22,7 +22,7 @@ For \e{Turnouts}, see below for additional details on the \e{Active EndPoint}.
 
 \rule
 
-\S{Flex-track} Flex-Track
+\S{Flex-track} \i{Flex-track}
 
 A Flex-track unit can be placed for convienience on the left-hand side of the HotBar. 
 This is can be hidden by an option in \K{cmdPref}. It can be recognised because it is the only diagonally facing track element and has a label "FLEX". 
@@ -39,7 +39,7 @@ It will be a smooth monotonic curve if the ends are not in a line and the end an
 
 \rule
 
-\S{hbStructures} Structures
+\S{hbStructures} \i{Structures}
 
 \e{Structures} are placed on the layout in the same way as turnouts (\K{hbTurnouts}) except no Active EndPoint exists and they do not align with existing track.
 
@@ -48,7 +48,7 @@ Refer to \K{cmdStructure} for information pertaining to use of the \e{Structure}
 \rule
 
 
-\S{hbTurnouts} Turnouts
+\S{hbTurnouts} \i{Turnouts}
 
 \e{Turnouts} have an \e{Active EndPoint} (\K{generalTerms}) which is the handle used to position the \e{Turnout}. You can change the \e{Active EndPoint} by a \c{Shift+Left-Click} which causes the next endpoint to become Active. 
 

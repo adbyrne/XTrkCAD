@@ -36,7 +36,7 @@ The \f{Examples} command displays the list of included example programs which yo
  
 \rule
 
-\S{cmdDemo} Demo Mode
+\S{cmdDemo} \i{Demo Mode}
 
 The \f{Demos} menu item, under the \f{Help} (\K{helpM}) menu, shows a cascading menu 
 of choices to demonstrate various features and commands.
