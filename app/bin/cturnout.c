@@ -99,7 +99,7 @@ static paramData_t turnoutPLs[] = {
 #define turnoutHideT    ((wChoice_p)turnoutPLs[I_HIDE].control)
 	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER }
 };
-static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) };
+static paramGroup_t turnoutPG = { "newFixedTrack", 0, turnoutPLs, COUNT( turnoutPLs ) };
 #endif
 
 
@@ -3187,7 +3187,7 @@ static STATUS_T CmdTurnoutHotBar(
 
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
-	AddMenuButton(menu, CmdTurnout, "cmdTurnout", _("Fixed-Track"),
+	AddMenuButton(menu, CmdTurnout, "cmdNewFixedTrack", _("Fixed-Track"),
 	              wIconCreatePixMap(turnout_xpm3[iconSize]), LEVEL0_50,
 	              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
 	              NULL);
