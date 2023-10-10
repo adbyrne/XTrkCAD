@@ -749,53 +749,65 @@ EXPORT void DrawMultiString(
 	free(line);
 }
 
+/**
+ * Draw some text inside a  box. The layout of the box can be defined using the style 
+ * parameter. Possibilities are complete frame, underline only, omit background or 
+ * draw inversed. 
+ * The background is drawn in white if not disabled 
+ * 
+ * \param style	style of box framed, underlined, no background, inverse 
+ * \param d		drawing command
+ * \param pos	position
+ * \param text	text to draw
+ * \param fp	font
+ * \param fs	font size
+ * \param color	text color
+ * \param a		angle
+ */
 
 EXPORT void DrawBoxedString(
-        int style,
-        drawCmd_p d,
-        coOrd pos,
-        char * text,
-        wFont_p fp, wFontSize_t fs,
-        wDrawColor color,
-        ANGLE_T a )
+	int style,
+	drawCmd_p d,
+	coOrd pos,
+	char* text,
+	wFont_p fp, wFontSize_t fs,
+	wDrawColor color,
+	ANGLE_T a)
 {
-	coOrd size, p[4], p0=pos, p1, p2;
-	static int bw=2, bh=2, br=1, bb=1;
+	coOrd size, p[4], p0 = pos, p1, p2;
+	static int bw = 2, bh = 2, br = 1, bb = 1;
 	static double arrowScale = 0.5;
-	unsigned long options = d->options;
 	POS_T descent, ascent;
-	/*DrawMultiString( d, pos, text, fp, fs, color, a, &lo, &hi );*/
-	if ( fs < 2*d->scale ) {
+	if (fs < 2 * d->scale) {
 		return;
 	}
 #ifndef WINDOWS
-	if ( ( d->options & DC_PRINT) != 0 ) {
-		double scale = ((FLOAT_T)fs)/((FLOAT_T)drawMaxTextFontSize)/mainD.dpi;
+	if ((d->options & DC_PRINT) != 0) {
+		double scale = ((FLOAT_T)fs) / ((FLOAT_T)drawMaxTextFontSize) / mainD.dpi;
 		wDrawPix_t w, h, d, a;
-		wDrawGetTextSize( &w, &h, &d, &a, mainD.d, text, fp, drawMaxTextFontSize );
-		size.x = w*scale;
-		size.y = h*scale;
-		descent = d*scale;
-		ascent = a*scale;
-	} else
+		wDrawGetTextSize(&w, &h, &d, &a, mainD.d, text, fp, drawMaxTextFontSize);
+		size.x = w * scale;
+		size.y = h * scale;
+		descent = d * scale;
+		ascent = a * scale;
+	}
+	else
 #endif
-		DrawTextSize2( &mainD, text, fp, fs, TRUE, &size, &descent, &ascent );
-#ifdef WINDOWS
-	/*h -= 15;*/
-#endif
-	p0.x -= size.x/2.0;
-	p0.y -= size.y/2.0;
+	DrawTextSize2(&mainD, text, fp, fs, TRUE, &size, &descent, &ascent);
+
+	p0.x -= size.x / 2.0;
+	p0.y -= size.y / 2.0;
 	if (style == BOX_NONE || d == &mapD) {
-		DrawString( d, p0, 0.0, text, fp, fs, color );
+		DrawString(d, p0, 0.0, text, fp, fs, color);
 		return;
 	}
-	size.x += bw*d->scale/d->dpi;
-	size.y += bh*d->scale/d->dpi;
+	size.x += bw * d->scale / d->dpi;
+	size.y += bh * d->scale / d->dpi;
 	p[0] = p0;
-	p[0].x -= br*d->scale/d->dpi;          	//Top of box
-	p[0].y += (bb*d->scale/d->dpi+ascent);
+	p[0].x -= br * d->scale / d->dpi;          	//Top of box
+	p[0].y += (bb * d->scale / d->dpi + ascent);
 	p[1].y = p[0].y;
-	p[2].y = p[3].y = p[0].y-size.y-descent;  //Bottom of box
+	p[2].y = p[3].y = p[0].y - size.y - descent;  //Bottom of box
 	p[1].x = p[2].x = p[0].x + size.x;
 	p[3].x = p[0].x;
 	d->options &= ~DC_DASH;
@@ -803,47 +815,46 @@ EXPORT void DrawBoxedString(
 	case BOX_ARROW:
 	case BOX_ARROW_BACKGROUND:
 		// Reset size to actual size of the box
-		size.x = p[2].x-p[0].x;
-		size.y = p[0].y-p[2].y;
+		size.x = p[2].x - p[0].x;
+		size.y = p[0].y - p[2].y;
 		// Pick a point (p1) outside of Box in arrow direction
-		Translate( &p1, pos, a, size.x+size.y );
+		Translate(&p1, pos, a, size.x + size.y);
 		// Find point on edge of Box (p1)
-		ClipLine( &pos, &p1, p[3], 0.0, size );
+		ClipLine(&pos, &p1, p[3], 0.0, size);
 		// Draw line from edge (p1) to Arrow head (p2)
-		Translate( &p2, p1, a, size.y*arrowScale );
-		DrawLine( d, p1, p2, 0, color );
+		Translate(&p2, p1, a, size.y * arrowScale);
+		DrawLine(d, p1, p2, 0, color);
 		// Draw Arrow edges
-		Translate( &p1, p2, a+150, size.y*0.7*arrowScale );
-		DrawLine( d, p1, p2, 0, color );
-		Translate( &p1, p2, a-150, size.y*0.7*arrowScale );
-		DrawLine( d, p1, p2, 0, color );
-	/* no break */
+		Translate(&p1, p2, a + 150, size.y * 0.7 * arrowScale);
+		DrawLine(d, p1, p2, 0, color);
+		Translate(&p1, p2, a - 150, size.y * 0.7 * arrowScale);
+		DrawLine(d, p1, p2, 0, color);
+		/* no break */
 	case BOX_BOX:
 	case BOX_BOX_BACKGROUND:
 		if (style == BOX_ARROW_BACKGROUND || style == BOX_BOX_BACKGROUND) {
-			DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0,
-			          DRAW_FILL );        //Clear background for box and box-arrow
+			DrawPoly(d, 4, p, NULL, wDrawColorWhite, 0,
+				DRAW_FILL);        //Clear background for box and box-arrow
 		}
-		DrawLine( d, p[1], p[2], 0, color );
-		DrawLine( d, p[2], p[3], 0, color );
-		DrawLine( d, p[3], p[0], 0, color );
-	/* no break */
+		DrawLine(d, p[1], p[2], 0, color);
+		DrawLine(d, p[2], p[3], 0, color);
+		DrawLine(d, p[3], p[0], 0, color);
+		/* no break */
 	case BOX_UNDERLINE:
-		DrawLine( d, p[0], p[1], 0, color );
-		DrawString( d, p0, 0.0, text, fp, fs, color );
+		DrawLine(d, p[0], p[1], 0, color);
+		DrawString(d, p0, 0.0, text, fp, fs, color);
 		break;
 	case BOX_INVERT:
-		DrawPoly( d, 4, p, NULL, color, 0, DRAW_FILL );
-		if ( color != wDrawColorWhite ) {
-			DrawString( d, p0, 0.0, text, fp, fs, wDrawColorGray( 94 ) );
+		DrawPoly(d, 4, p, NULL, color, 0, DRAW_FILL);
+		if (color != wDrawColorWhite) {
+			DrawString(d, p0, 0.0, text, fp, fs, wDrawColorGray(94));
 		}
 		break;
 	case BOX_BACKGROUND:
-		DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, DRAW_FILL );
-		DrawString( d, p0, 0.0, text, fp, fs, color );
+		DrawPoly(d, 4, p, NULL, wDrawColorWhite, 0, DRAW_FILL);
+		DrawString(d, p0, 0.0, text, fp, fs, color);
 		break;
 	}
-	d->options = options;
 }
 
 

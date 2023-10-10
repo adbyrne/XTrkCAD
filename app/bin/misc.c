@@ -685,7 +685,8 @@ EXPORT bool Confirm(char * label2, doSaveCallBack_p after)
 static void DoQuitAfter(void)
 {
 	changed = 0;
-	CleanupFiles();  //Get rid of checkpoint if we quit.
+	CleanupCheckpointFiles();  //Get rid of checkpoint if we quit.
+	CleanupTempArchive();		// removefiels used for archive handling
 	SaveState();
 }
 /**
