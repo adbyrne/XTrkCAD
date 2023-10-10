@@ -27,7 +27,7 @@ This is a note about something important
 but I can't remember what.
     END
 DRAW 5 0 0 0 0 4.125000 5.750000 0 0.000000
-	Z 0 0.000000 0.000000 0.000000 0 140.000000 "This is some text"
+	Z 0 0.000000 0.000000 0.000000 0 140.000000 "Hello"
 	END
 REDRAW
 RESET
@@ -79,8 +79,8 @@ STEP
 PARAMETER describe S2 Medium Left
 PARAMETER describe S3 SL-E396F2
 STEP
-MOUSE 2 11.500 6.625
-MOUSE 4 11.500 6.625
+MOUSE 2 6.000 6.625
+MOUSE 4 6.000 6.625
 MESSAGE
 _________________________________________
 
@@ -95,7 +95,7 @@ and its size.
 END
 STEP
 #DESCRIBE Font Size	19
-PARAMETER describe LE1 -1 19
+PARAMETER describe LE1 -1 60
 STEP
 MESSAGE
 _________________________________________
@@ -140,7 +140,7 @@ but I can't remember what.
  
     END
 DRAW 5 0 0 0 0 4.125000 5.750000 0 0.000000
-	Z 0 0.000000 0.000000 0.000000 0 19.000000 "This is some text"
+	Z 0 0.000000 0.000000 0.000000 0 60.000000 "Goodbye"
 	END
 REGRESSION END
 CLEAR

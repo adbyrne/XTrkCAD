@@ -38,7 +38,7 @@ static descUpdate_t descUpdateFunc;
 static coOrd descOrig, descSize;
 static POS_T descBorder;
 static wDrawColor descColor = 0;
-static BOOL_T descUndoStarted;
+EXPORT BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 static wWinPix_t describeW_posy;
 static wWinPix_t describeCmdButtonEnd;
