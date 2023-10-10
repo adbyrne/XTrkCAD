@@ -421,7 +421,7 @@ Several Shortcut key commands are used in conjunction with the mouse. These comm
 
 \u000
 
-\dd Split flex track - \e{Ctrl+Shift+S}
+\dd Split flex-track - \e{Ctrl+Shift+S}
 
 \u000
 
@@ -941,7 +941,7 @@ Some other commands use the \c{Shift} or \c{Ctrl} key to modify the meaning of b
 
 \rule
 
-\S{mouseBcmd} Context Sensitive Menus
+\S{mouseBcmd} \i{Context Sensitive Menus}
 
 For all commands listed below, a \e{Right-Click} will display a context sensitive pop-up command list menu.  For some commands (noted below), a \e{Shift+Right-Click} will display a context sensitive pop-up command options menu.  The operation of \e{Right-Click} and \e{Shift+Right-Click} can be reversed by an item on the Command Options (\K{cmdCmdopt}) dialog.
 
@@ -1239,7 +1239,7 @@ The Shortcut key for each command is listed after the command name.
 \u000
 
 
-\dt Turnout Command (\K{cmdTurnout}) - \e{Ctrl+T}
+\dt Turnout Command (\K{cmdNewFixedTrack}) - \e{Ctrl+T}
 
 \dd Choose next Active endpoint when placing Turnouts - \e{Shift+Left-Click}
 

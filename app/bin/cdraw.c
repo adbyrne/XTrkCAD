@@ -30,6 +30,7 @@
 #include "tbezier.h"
 #include "misc.h"
 #include "cselect.h"
+#include "cundo.h"
 #include "common-ui.h"
 
 static wMenu_p drawModDelMI;
@@ -1041,9 +1042,16 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		segPtr->u.t.boxed = drawData.boxed;
 		break;
 	case TX:
-		if ( wTextGetModified((wText_p)drawDesc[TX].control0 )) {
+		if ( wTextGetModified((wText_p)drawDesc[TX].control0 ) ||
+		     inPlayback ) {
 			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
-			MyFree( segPtr->u.t.string );
+			// TODO - minor memory leak, but this allows Undo on text object.  See BUG-527
+			// MyFree( segPtr->u.t.string );
+			if ( !descUndoStarted ) {
+				UndoStart( _("Change Track"), "Change Track");
+				descUndoStarted = TRUE;
+			}
+			UndoModify( trk );
 			if (len>STR_HUGE_SIZE-8) {                   //Truncate string to max
 				len = STR_HUGE_SIZE-8;
 				ErrorMessage( MSG_TEXT_TOO_LONG );

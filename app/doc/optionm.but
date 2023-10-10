@@ -44,7 +44,7 @@ The \f{Options Menu} shows commands to change configuration options.
 \rule
 
 
-\S{cmdRgbcolor} Colors Dialog
+\S{cmdRgbcolor} \i{Colors Dialog}
 
 The \f{Colors} dialog is invoked from the Options (\K{optionM}) menu
 
@@ -101,7 +101,7 @@ The \f{Colors} dialog controls the color that various objects are drawn.
 \rule
 
 
-\S{cmdCmdopt} Command Option Dialog
+\S{cmdCmdopt} \i{Command Option Dialog}
 
 The \f{Command Option} dialog is invoked from the Options (\K{optionM}) menu
 
@@ -126,7 +126,7 @@ The \f{Command Option} dialog contains items which control the behavior of some 
 \rule
 
 
-\S{cmdDisplay} Display Dialog
+\S{cmdDisplay} \i{Display Dialog}
 
 The \f{Display} dialog is invoked from the Options (\K{optionM}) menu
 
@@ -333,7 +333,7 @@ Easements require the possibility of creating track with arbitrary radii. Theref
 \rule
 
 
-\S{fontSelW} Font Selection
+\S{fontSelW} \i{Font Selection}
 
 The font selection dialog allows selection of the font used by the text (\K{cmdText}) command.  This command is valid only on UNIX based systems.
 
@@ -342,7 +342,7 @@ The font selection dialog allows selection of the font used by the text (\K{cmdT
 \rule
 
 
-\S{cmdLayout} Layout Dialog
+\S{cmdLayout} \i{Layout Dialog}
 
 The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) or the File (\K{fileM} menu, contains items controlling the current layout.
 
@@ -403,7 +403,7 @@ It can be changed to a new local file and the next \f{Save} will rebuild the pac
 
 \rule
 
-\S{cmdPref} Preferences Dialog
+\S{cmdPref} \i{Preferences Dialog}
 
 This dialog controls some parameters which likely will not be changed frequently.
 
@@ -423,7 +423,7 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
-\dd \f{Show FlexTrack} - disables the display or \f{FlexTrack} (\K{generalTerms}) which is shown on the left of the Toolbar.
+\dd \f{Show Flex-track} - disables the display or \f{Flex-track} (\K{generalTerms}) which is shown on the left of the Toolbar.
 
 \u000
 
@@ -484,7 +484,7 @@ This dialog controls some parameters which likely will not be changed frequently
 \rule
 
 
-\S{cmdSticky} Sticky Dialog
+\S{cmdSticky} \i{Sticky Dialog}
 
 By default, when commands complete, the defined \f{Default Command} (\K{cmdCmdopt}) becomes active.  If a command is \f{sticky}, the defined \f{Default Command} is ignored and the current command remains active after completion.
 

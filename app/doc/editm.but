@@ -10,86 +10,86 @@
 
 The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
-\dd \i\f{Undo} - Reverses the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the \f{Undo} item is disabled.  The \f{Undo} command can also be invoked by the \f{Undo} button (\K{cmdUndo}).
+\dd \i{Undo} - Reverses the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the \f{Undo} item is disabled.  The \f{Undo} command can also be invoked by the \f{Undo} button (\K{cmdUndo}).
 
 \u000
 
-\dd \i\f{Redo} - Undoes the last Undo command.  The \f{Redo} command can also be invoked by the \f{Redo} button (\K{cmdUndo}).
+\dd \i{Redo} - Undoes the last Undo command.  The \f{Redo} command can also be invoked by the \f{Redo} button (\K{cmdUndo}).
 
 \u000
 
-\dd \i\f{Cut} - Moves the selected objects to the clipboard.
+\dd \i{Cut} - Moves the selected objects to the clipboard.
 
 \u000
 
-\dd \i\f{Copy} - Copies the selected objects to the clipboard.
+\dd \i{Copy} - Copies the selected objects to the clipboard.
 
 \u000
 
-\dd \i\f{Paste} - Copies the contents of the clipboard to the layout. Using the paste Menu command it will be placed at the center of the screen.
+\dd \i{Paste} - Copies the contents of the clipboard to the layout. Using the paste Menu command it will be placed at the center of the screen.
 If the context menu paste is used or the short-cuts \e{Ctrl+v} or \e{Shift+Insert}, the parts will be placed at the cursor position.
 Repeated Pastes without moving the cursor result in overlaid copies.
 The newly pasted parts are in \f{Selected} state and can easily be moved into place. Any previously selected objects are unselected.
 
 \u000
 
-\dd \i\f{Delete} - Deletes the selected objects.
+\dd \i{Delete} - Deletes the selected objects.
 
 \u000
 
-\dd \i\f{Move To Current Layer} - move all selected objects to the current Layer (\K{cmdLayer}).
+\dd \i{Move To Current Layer} - move all selected objects to the current Layer (\K{cmdLayer}).
 
 \u000
 
-\dd \i\f{Select All} - Selects all objects on the layout.
+\dd \i{Select All} - Selects all objects on the layout.
 
 \u000
 
-\dd \i\f{Select Current Layer} - selects all objects in the current Layer (\K{cmdLayer}).
+\dd \i{Select Current Layer} - selects all objects in the current Layer (\K{cmdLayer}).
 
 \u000
 
-\dd \i\f{Select By Index} - selects object by index number (\K{cmdSelectIndex}).
+\dd \i{Select By Index} - selects object by index number (\K{cmdSelectIndex}).
 
 \u000
 
-\dd \i\f{Deselect All} - unselects all objects on the layout. The same action can be achieved by pressing the ESC key.
+\dd \i{Deselect All} - unselects all objects on the layout. The same action can be achieved by pressing the ESC key.
 
 \u000
 
-\dd \i\f{Invert Selection} - selects all unselected objects and unselects all previously selected objects.
+\dd \i{Invert Selection} - selects all unselected objects and unselects all previously selected objects.
 
 \u000
 
-\dd \i\f{Select Stranded Track} - selects all track pieces that are not connected to any other objects. This helps cleaning up a drawing after many changes have been made.
+\dd \i{Select Stranded Track} - selects all track pieces that are not connected to any other objects. This helps cleaning up a drawing after many changes have been made.
 
 \u000
 
-\dd \i\f{Tunnel}\I{Track, Tunnel} - Hides or reveals selected tracks and adds a tunnel portal symbol where the track passes from one to the other.
+\dd \i{Tunnel}\I{Track, Tunnel} - Hides or reveals selected tracks and adds a tunnel portal symbol where the track passes from one to the other.
 
 \u000
 
-\dd \i\f{Bridge}\I{Track, Bridge} - Adds or removes parapet symbols and a solid base to the track. The color is selectable (\K{cmdRgbcolor}).
+\dd \i{Bridge}\I{Track, Bridge} - Adds or removes parapet symbols and a solid base to the track. The color is selectable (\K{cmdRgbcolor}).
 
 \u000
 
-\dd \i\f{Roadbed}\I{Track, Roadbed} - Adds or removes solid roadbed under the track. The color is selectable (\K{cmdRgbcolor}).
+\dd \i{Roadbed}\I{Track, Roadbed} - Adds or removes solid roadbed under the track. The color is selectable (\K{cmdRgbcolor}).
 
 \u000
 
-\dd \i\f{Ties/No Ties}\I{Track Ties}\I{Track No Ties} - Hides or reveals the ties on selected tracks.
+\dd \i{Ties/No Ties}\I{Track Ties}\I{Track No Ties} - Hides or reveals the ties on selected tracks.
 
 \u000
 
-\dd \i\f{Move to Front} - Moves selected object to foreground.
+\dd \i{Move To Front} - Moves selected object to foreground.
 
 \u000
 
-\dd \i\f{Move to Back} - Moves selected object to background.
+\dd \i{Move To Back} - Moves selected object to background.
 
 \u000
 
-\dd \i\f{Thin, Medium and Thick Tracks} \I{Thin Tracks}\I{Medium Tracks}
+\dd \i{Thin, Medium and Thick Tracks} \I{Thin Tracks}\I{Medium Tracks}
 	\I{Thick Tracks}\I{Tracks, Thin}\I{Tracks, Medium}\I{Tracks, Thick}
 	\I{Track Width}
 	- set displayed rail width of selected tracks.
@@ -100,7 +100,7 @@ For more information on working with selected objects, see the Select (\K{cmdSel
 
 \rule
 
-\S{cmdSelectIndex} Select By Index
+\S{cmdSelectIndex} \i{Select By Index}
 
 An input window allows one or more index numbers to be entered. Multiple indexes are seperated by commas.
 
@@ -112,7 +112,7 @@ If the object is a tunnel object, and the Display Tunnel option is None, it will
 
 When an individual object is selected, its index number is displayed in the Info Message area, another source is the List Parts (\K{cmdEnum}) command with the \f{List Indexes} option.
 
-\S{cmdAboveBelow} "Move To Front" and "Move to Back"
+\S{cmdAboveBelow} "Move To Front" and "Move to Back" \I{Move To Front} \I{Move To Back}
 
 \G{png.d/btop_bottom.png}
 
@@ -154,7 +154,7 @@ Additional Shortcut keys perform the following:
 \rule
 
 
-\S{cmdDelete} Delete
+\S{cmdDelete} \i{Delete}
 
 \G{png.d/bdelete.png}
 
@@ -167,7 +167,7 @@ The \e{Delete} key invokes the Delete command.
 \rule
 
 
-\S{cmdTunnel} Tunnel (Hide Tracks)
+\S{cmdTunnel} \i{Tunnel (Hide Tracks)}
 
 \G{png.d/btunnel.png}
 
@@ -182,7 +182,7 @@ The \f{Draw Tunnels} Radio button group on the \f{Options>Display} dialog (\K{cm
 
 \rule
 
-\S{cmdTies} Ties (Draw or Hide Ties)
+\S{cmdTies} \i{Ties (Draw or Hide Ties)}
 
 \G{png.d/bties.png}
 
@@ -193,7 +193,7 @@ Select the tracks you want to hide or show ties for.
 
 \rule
 
-\S{cmdBridge} Bridge (Draw or Hide Abutments)
+\S{cmdBridge} \i{Bridge (Draw or Hide Abutments)}
 
 \G{png.d/bbridge.png}
 
@@ -206,7 +206,7 @@ If you perform this action on an existing bridge (or use Tunnel) the bridge is r
 
 \rule
 
-\S{cmdRoadbed} Roadbed (Draw or Hide Base)
+\S{cmdRoadbed} \i{Roadbed (Draw or Hide Base)}
 
 \G{png.d/broadbed.png}
 
@@ -219,7 +219,7 @@ If you perform this action on existing roadbed (or use Tunnel) the roadbed is re
 
 \rule
 
-\S{cmdUndo} Undo and Redo
+\S{cmdUndo} Undo and Redo \I{Undo} \I{Redo}
 
 \G{png.d/bgundo.png}
 

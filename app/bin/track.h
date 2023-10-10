@@ -503,6 +503,7 @@ STATUS_T JointDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 /* cmisc.c */
 extern wIndex_t describeCmdInx;
 extern BOOL_T inDescribeCmd;
+extern BOOL_T descUndoStarted;
 typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)

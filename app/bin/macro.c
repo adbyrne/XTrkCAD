@@ -1512,7 +1512,7 @@ static char * demoInitParams[] = {
 	"GROUP misc",
 	"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
 	"GROUP sticky",
-	"turnout hide 0",
+	"newFixedTrack hide 0",
 	"layer button-count 10",
 	"cmdopt selectmode 0",
 	"cmdopt selectzero 1",

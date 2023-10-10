@@ -99,7 +99,7 @@ static paramData_t turnoutPLs[] = {
 #define turnoutHideT    ((wChoice_p)turnoutPLs[I_HIDE].control)
 	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, hideLabels, NULL, BC_NOBORDER }
 };
-static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, COUNT( turnoutPLs ) };
+static paramGroup_t turnoutPG = { "newFixedTrack", 0, turnoutPLs, COUNT( turnoutPLs ) };
 #endif
 
 
@@ -232,6 +232,9 @@ DeleteTurnoutParams(int fileIndex)
 		if (to->paramFileIndex == fileIndex) {
 			DeleteTurnout(to);
 			cnt++;
+			if ( to == curTurnout ) {
+				curTurnout = NULL;
+			}
 		}
 	}
 
@@ -2156,6 +2159,7 @@ static void SelTurnoutEndPt(
         coOrd pos)
 {
 	if (action != C_DOWN) { return; }
+	if ( curTurnout == NULL ) { return; }
 
 	curTurnoutEp = TOpickEndPoint(pos, curTurnout);
 	HilightEndPt();
@@ -2954,8 +2958,8 @@ static STATUS_T CmdTurnout(
 
 	case C_START:
 		if (turnoutW == NULL) {
-			/*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Turnout"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
-			turnoutW = ParamCreateDialog(&turnoutPG, MakeWindowTitle(_("Turnout")),
+			/*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Fixed-Track"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
+			turnoutW = ParamCreateDialog(&turnoutPG, MakeWindowTitle(_("Add Fixed-Track")),
 			                             _("Close"), (paramActionOkProc)TurnoutOk, wHide, TRUE, NULL,
 			                             F_RESIZE | F_RECALLSIZE | PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate);
 			InitNewTurn(turnoutNewM);
@@ -3183,7 +3187,7 @@ static STATUS_T CmdTurnoutHotBar(
 
 EXPORT void InitCmdTurnout(wMenu_p menu)
 {
-	AddMenuButton(menu, CmdTurnout, "cmdTurnout", _("Predefined Track"),
+	AddMenuButton(menu, CmdTurnout, "cmdNewFixedTrack", _("Fixed-Track"),
 	              wIconCreatePixMap(turnout_xpm3[iconSize]), LEVEL0_50,
 	              IC_WANT_MOVE | IC_STICKY | IC_LCLICK | IC_CMDMENU | IC_POPUP2, ACCL_TURNOUT,
 	              NULL);
