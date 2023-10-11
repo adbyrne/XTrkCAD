@@ -1115,9 +1115,9 @@ static doSaveCallBack_p doAfterSave;
  */
 
 static int SaveTracks(
-	int cnt,
-	char** fileName,
-	void* data)
+        int cnt,
+        char** fileName,
+        void* data)
 {
 	BOOL_T success = FALSE;
 
@@ -1179,8 +1179,7 @@ static int SaveTracks(
 			if (fp != NULL) {
 				fputs(json_Manifest, fp);
 				fclose(fp);
-			}
-			else {
+			} else {
 				NoticeMessage(MSG_MANIFEST_FAIL, _("Continue"), NULL, manifest_file);
 				success = FALSE;
 			}
@@ -1201,8 +1200,7 @@ static int SaveTracks(
 		free(zip_output);
 		free(ArchiveName);
 
-	}
-	else {
+	} else {
 		success = DoSaveTracks(fileName[0]);
 	}
 

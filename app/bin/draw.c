@@ -750,12 +750,12 @@ EXPORT void DrawMultiString(
 }
 
 /**
- * Draw some text inside a  box. The layout of the box can be defined using the style 
- * parameter. Possibilities are complete frame, underline only, omit background or 
- * draw inversed. 
- * The background is drawn in white if not disabled 
- * 
- * \param style	style of box framed, underlined, no background, inverse 
+ * Draw some text inside a  box. The layout of the box can be defined using the style
+ * parameter. Possibilities are complete frame, underline only, omit background or
+ * draw inversed.
+ * The background is drawn in white if not disabled
+ *
+ * \param style	style of box framed, underlined, no background, inverse
  * \param d		drawing command
  * \param pos	position
  * \param text	text to draw
@@ -766,13 +766,13 @@ EXPORT void DrawMultiString(
  */
 
 EXPORT void DrawBoxedString(
-	int style,
-	drawCmd_p d,
-	coOrd pos,
-	char* text,
-	wFont_p fp, wFontSize_t fs,
-	wDrawColor color,
-	ANGLE_T a)
+        int style,
+        drawCmd_p d,
+        coOrd pos,
+        char* text,
+        wFont_p fp, wFontSize_t fs,
+        wDrawColor color,
+        ANGLE_T a)
 {
 	coOrd size, p[4], p0 = pos, p1, p2;
 	static int bw = 2, bh = 2, br = 1, bb = 1;
@@ -790,10 +790,9 @@ EXPORT void DrawBoxedString(
 		size.y = h * scale;
 		descent = d * scale;
 		ascent = a * scale;
-	}
-	else
+	} else
 #endif
-	DrawTextSize2(&mainD, text, fp, fs, TRUE, &size, &descent, &ascent);
+		DrawTextSize2(&mainD, text, fp, fs, TRUE, &size, &descent, &ascent);
 
 	p0.x -= size.x / 2.0;
 	p0.y -= size.y / 2.0;
@@ -829,17 +828,17 @@ EXPORT void DrawBoxedString(
 		DrawLine(d, p1, p2, 0, color);
 		Translate(&p1, p2, a - 150, size.y * 0.7 * arrowScale);
 		DrawLine(d, p1, p2, 0, color);
-		/* no break */
+	/* no break */
 	case BOX_BOX:
 	case BOX_BOX_BACKGROUND:
 		if (style == BOX_ARROW_BACKGROUND || style == BOX_BOX_BACKGROUND) {
 			DrawPoly(d, 4, p, NULL, wDrawColorWhite, 0,
-				DRAW_FILL);        //Clear background for box and box-arrow
+			         DRAW_FILL);        //Clear background for box and box-arrow
 		}
 		DrawLine(d, p[1], p[2], 0, color);
 		DrawLine(d, p[2], p[3], 0, color);
 		DrawLine(d, p[3], p[0], 0, color);
-		/* no break */
+	/* no break */
 	case BOX_UNDERLINE:
 		DrawLine(d, p[0], p[1], 0, color);
 		DrawString(d, p0, 0.0, text, fp, fs, color);

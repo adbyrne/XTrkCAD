@@ -1976,8 +1976,8 @@ EXPORT void CarItemFindCouplerMountPoint(
 }
 
 EXPORT void CarItemPos(
-		carItem_p item,
-		coOrd * pos	)
+        carItem_p item,
+        coOrd * pos	)
 {
 	pos->x = item->pos.x;
 	pos->y = item->pos.y;
@@ -1993,7 +1993,8 @@ EXPORT void CarItemSize(
 	size->y = item->dim.carWidth;
 }
 
-EXPORT void CarItemSetNumber(carItem_p item, char * number) {
+EXPORT void CarItemSetNumber(carItem_p item, char * number)
+{
 	if (item->data.number && number[0]) {
 		MyFree(item->data.number);
 	}
@@ -4168,7 +4169,8 @@ static void CarDlgUpdate(
 
 	if ( checkTruckCenter && carDlgDim.carLength > 0 ) {
 		if ( carDlgTruckOffsetL > 0 || carDlgTruckOffsetR > 0 ) {
-			carDlgDim.truckCenter = carDlgDim.carLength - ( carDlgTruckOffsetL + carDlgTruckOffsetR );
+			carDlgDim.truckCenter = carDlgDim.carLength - ( carDlgTruckOffsetL +
+			                        carDlgTruckOffsetR );
 			carDlgDim.truckCenterOffset = (carDlgTruckOffsetR - carDlgTruckOffsetL)/2;
 		} else {
 			carDlgDim.truckCenter = carDlgDim.carLength * 0.75;

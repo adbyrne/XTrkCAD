@@ -290,7 +290,7 @@ BOOL_T CreateArchive(
 	if (rename(archive_path, fileName) == -1) {	//Move zip into place
 		if ( Copyfile( archive_path, fileName ) == -1 ) {
 			NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8,
-				      fileName, strerror(errno));
+			              fileName, strerror(errno));
 			free(archive_path);
 			MyFree(archiveUtf8);
 			return FALSE;

@@ -209,7 +209,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 	DynStringMalloc(&statusLine, 80);
 	DynStringPrintf(&statusLine,
 	                "Weblink (%d) Layer=%d %-.80s (%s)",
-			GetTrkIndex(trk),
+	                GetTrkIndex(trk),
 	                GetTrkLayer(trk)+1,
 	                xx->noteData.linkData.title,
 	                xx->noteData.linkData.url);

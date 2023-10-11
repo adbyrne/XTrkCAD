@@ -1771,14 +1771,14 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		if (!drawModCmdContext.rotate_state && (drawModCmdContext.type == SEG_POLY
 		                                        || drawModCmdContext.type == SEG_FILPOLY)) {
 			wMenuPushEnable( drawModFill, (!drawModCmdContext.open)
-						                 && (!drawModCmdContext.filled));
+			                 && (!drawModCmdContext.filled));
 			wMenuPushEnable( drawModEmpty, (!drawModCmdContext.open)
-						                 && (drawModCmdContext.filled));
+			                 && (drawModCmdContext.filled));
 			if (drawModCmdContext.subtype != RECTANGLE) {
 				wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
 				if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
-					((drawModCmdContext.prev_inx>0)
-					&& (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {
+				    ((drawModCmdContext.prev_inx>0)
+				     && (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {
 					wMenuPushEnable( drawModRound,TRUE);
 					wMenuPushEnable( drawModVertex, TRUE);
 					wMenuPushEnable( drawModSmooth, TRUE);
