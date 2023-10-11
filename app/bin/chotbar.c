@@ -302,6 +302,17 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action,
 		return;
 	}
 #endif
+
+	if ( ( action & 0xff ) == wActionText ) {
+		int key = (int)(action >> 8);
+		if ( key >= '0' && key <= '9') {
+			DoHotBarJump( key );
+		} else if ( key == 0x1B ) {
+			ConfirmReset( FALSE );
+		}
+		return;
+	}
+
 	if ( (action&0xFF) ==  wActionRUp ) {
 		wMenuPopupShow( hotbarPopupM );
 		return;
@@ -370,25 +381,6 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action,
 		case wAccelKey_Down:
 			break;
 		default:
-			break;
-		}
-		break;
-	case wActionText:
-		switch (action >> 8) {
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-			DoHotBarJump( action >> 8 );
-			break;
-		case 0x1B:
-			ConfirmReset(FALSE);
 			break;
 		}
 		break;
@@ -593,7 +585,7 @@ EXPORT void LayoutHotBar( void * redraw )
 		bm_p = wIconCreateBitMap( 16, 16, turnbarr_bits, wDrawColorBlack );
 		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p,
 		                              BO_ICON|BO_REPEAT, 0, DoHotBarRight, NULL );
-		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, BD_NOCAPTURE|BD_NOFOCUS, 100,
+		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, 0, 100,
 		                         hbHeight, NULL, RedrawHotBar, SelectHotBar );
 		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
 		hotBarD.scale = 1.0;
