@@ -112,6 +112,8 @@ EXPORT void UpdateFontSizeList(
         wIndex_t listInx )
 {
 	long fontSize;
+	long largeFontSize;
+	wPrefGetInteger( "misc", "large-font-size", &largeFontSize, 500 );
 
 	if ( listInx >= 0 ) {
 		*fontSizeR = VP2L( wListGetItemContext( list, listInx ));
@@ -124,9 +126,13 @@ EXPORT void UpdateFontSizeList(
 				sprintf( message, "%ld", *fontSizeR );
 				wListSetValue( list, message );
 			} else {
-				if ( fontSize <= 500
+				if ( fontSize <= largeFontSize
 				     || NoticeMessage( MSG_LARGE_FONT, _("Yes"), _("No") ) > 0 ) {
 
+					if ( fontSize > largeFontSize ) {
+						largeFontSize = fontSize;
+						wPrefSetInteger( "misc", "large-font-size", largeFontSize );
+					}
 					*fontSizeR = fontSize;
 					/* inform gtkfont dialog from change */
 					wSetSelectedFontSize((wFontSize_t)fontSize);
