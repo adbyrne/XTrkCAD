@@ -426,7 +426,8 @@ static void UpdatePrefD( void )
 	long newUnits, oldUnits;
 	int inx;
 
-	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[I_UNITS].control==NULL ) {
+	if ( prefW==NULL || (!wWinIsVisible(prefW))
+	     || prefPLs[I_UNITS].control==NULL ) {
 		return;
 	}
 	newUnits = wRadioGetValue( (wChoice_p)prefPLs[I_UNITS].control );

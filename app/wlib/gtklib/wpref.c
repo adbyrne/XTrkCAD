@@ -256,6 +256,7 @@ static void readPrefs( char * name, wBool_t update )
 	}
 	prefFile = fopen( tmp, "r" );
 	if (prefFile == NULL) {
+		// First run, no .rc file yet
 		return;
 	}
 	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
@@ -500,6 +501,11 @@ void wPrefFlush(
 	}
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL) {
+		// Can not write pref file
+		size_t n = BUFSIZ+32-1-strlen(tmp);
+		strncat( tmp, ": ", n );
+		strncat( tmp, strerror(errno), n-2 );
+		wNoticeEx( NT_ERROR, tmp, "Ok", NULL );
 		return;
 	}
 

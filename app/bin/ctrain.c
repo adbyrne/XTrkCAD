@@ -269,7 +269,7 @@ static void DescribeCar(
 	                        carDesc[LN].mode =
 	                                carDesc[WD].mode = DESC_RO;
 	carDesc[DE].mode = DESC_RO;
-	        carDesc[NM].mode = 0;
+	carDesc[NM].mode = 0;
 	DoDescribe(_("Car"), trk, carDesc, UpdateCar);
 }
 
@@ -387,101 +387,103 @@ static void DrawCar(
 
 
 static DIST_T DistanceCar(
-    track_p trk,
-    coOrd * pos)
+        track_p trk,
+        coOrd * pos)
 {
 	struct extraDataCar_t * xx = GET_EXTRA_DATA(trk, T_CAR, extraDataCar_t);
-    DIST_T dist;
-    coOrd ends[4];
-    coOrd size;
+	DIST_T dist;
+	coOrd ends[4];
+	coOrd size;
 
-    if (IsIgnored(xx)) {
-        return 10000.0;
-    }
+	if (IsIgnored(xx)) {
+		return 10000.0;
+	}
 
-    if (hideTrainsInTunnels &&
-                ((((xx->state&CAR_STATE_ONHIDENTRACK)!=0) && drawTunnel==0) ||
-                 (xx->trkLayer!=NOTALAYER && !GetLayerVisible(xx->trkLayer)))) {
-        return 10000.0;
-    }
+	if (hideTrainsInTunnels &&
+	    ((((xx->state&CAR_STATE_ONHIDENTRACK)!=0) && drawTunnel==0) ||
+	     (xx->trkLayer!=NOTALAYER && !GetLayerVisible(xx->trkLayer)))) {
+		return 10000.0;
+	}
 
-    CarItemSize(xx->item,
-                &size);
+	CarItemSize(xx->item,
+	            &size);
 
-    size.x = CarItemCoupledLength(xx->item);  /* Coupling included */
+	size.x = CarItemCoupledLength(xx->item);  /* Coupling included */
 
-    coOrd carPos;
-    CarItemPos(xx->item,
-    		&carPos);
+	coOrd carPos;
+	CarItemPos(xx->item,
+	           &carPos);
 
-    dist = FindDistance(*pos, carPos);        /* Basic distance to center */
+	dist = FindDistance(*pos, carPos);        /* Basic distance to center */
 
-    if (dist < size.x/2.0+size.y/2.0) {       /* Crude circle to evaluate if "close" */
+	if (dist < size.x/2.0
+	    +size.y/2.0) {       /* Crude circle to evaluate if "close" */
 
-    	coOrd point = *pos;
-    	point.x += -carPos.x;
-    	point.y += -carPos.y;
-    	Rotate(&point,zero,-(xx->trvTrk.angle+90.0));  /* Convert to simple coOrds */
+		coOrd point = *pos;
+		point.x += -carPos.x;
+		point.y += -carPos.y;
+		Rotate(&point,zero,-(xx->trvTrk.angle+90.0));  /* Convert to simple coOrds */
 
-    	for (int i=0;i<4;i++) {
-    		ends[i].x = 0.0;
-    		ends[i].y = 0.0;
-    	}
-        ends[0].x =  size.x/2.0;
-        ends[0].y =  size.y/2.0;
-        ends[1].x = - size.x/2.0;
-        ends[1].y =   size.y/2.0;
-        ends[2].x =  - size.x/2.0;
-        ends[2].y =  - size.y/2.0;
-        ends[3].x =  size.x/2.0;
-        ends[3].y =  - size.y/2.0;
+		for (int i=0; i<4; i++) {
+			ends[i].x = 0.0;
+			ends[i].y = 0.0;
+		}
+		ends[0].x =  size.x/2.0;
+		ends[0].y =  size.y/2.0;
+		ends[1].x = - size.x/2.0;
+		ends[1].y =   size.y/2.0;
+		ends[2].x =  - size.x/2.0;
+		ends[2].y =  - size.y/2.0;
+		ends[3].x =  size.x/2.0;
+		ends[3].y =  - size.y/2.0;
 
 
-/*
- *      A |         B              | C
- *      --1------------------------0---
- *      D |         0.0            | E
- *      --2------------------------3---
- *      F |         G              | H
- */
+		/*
+		 *      A |         B              | C
+		 *      --1------------------------0---
+		 *      D |         0.0            | E
+		 *      --2------------------------3---
+		 *      F |         G              | H
+		 */
 
-        if ((point.x >= ends[2].x) && (point.x <= ends[0].x) && (point.y >= ends[2].y) && (point.y <= ends[0].y)) {
-        	dist = 0.0; /* center */
-        	*pos = carPos;
-        } else {
-        	if (point.x > ends[2].x && point.x < ends[0].x ) {
-        		if (point.y > ends[0].y) {
-        			dist = fabs(point.y - ends[0].y); /* B */
-        			point.y = ends[0].y;
-        		} else {
-        			dist = fabs(point.y - ends[2].y); /* G */
-        			point.y = ends[2].y;
-        		}
-        	} else if (point.y > ends[2].y && point.y < ends[0].y) {
-        		if (point.x > ends[0].x) {
-        			dist = fabs(point.x - ends[0].x);  /* E */
-        			point.x = ends[0].x;
-        		} else {
-        			dist = fabs(point.x - ends[2].x);  /* D */
-        			point.x = ends[2].x;
-        		}
-        	} else {   /* A,C,F,G */
-				for (int i=0;i<4;i++) {
+		if ((point.x >= ends[2].x) && (point.x <= ends[0].x) && (point.y >= ends[2].y)
+		    && (point.y <= ends[0].y)) {
+			dist = 0.0; /* center */
+			*pos = carPos;
+		} else {
+			if (point.x > ends[2].x && point.x < ends[0].x ) {
+				if (point.y > ends[0].y) {
+					dist = fabs(point.y - ends[0].y); /* B */
+					point.y = ends[0].y;
+				} else {
+					dist = fabs(point.y - ends[2].y); /* G */
+					point.y = ends[2].y;
+				}
+			} else if (point.y > ends[2].y && point.y < ends[0].y) {
+				if (point.x > ends[0].x) {
+					dist = fabs(point.x - ends[0].x);  /* E */
+					point.x = ends[0].x;
+				} else {
+					dist = fabs(point.x - ends[2].x);  /* D */
+					point.x = ends[2].x;
+				}
+			} else {   /* A,C,F,G */
+				for (int i=0; i<4; i++) {
 					if (dist>FindDistance(point,ends[i])) {
 						dist = FindDistance(point,ends[i]);
 						point = ends[i];
 					}
 				}
-        	}
-        	Rotate(&point,zero,(xx->trvTrk.angle+90.0));
-        	point.x +=carPos.x;
-        	point.y +=carPos.y;
-        	*pos = point;
-        }
+			}
+			Rotate(&point,zero,(xx->trvTrk.angle+90.0));
+			point.x +=carPos.x;
+			point.y +=carPos.y;
+			*pos = point;
+		}
 
-    }
+	}
 
-    return dist;
+	return dist;
 }
 
 static void SetCarBoundingBox(
@@ -1515,10 +1517,10 @@ static track_p FindCar(
 			GetBoundingBox(trk,&hi,&lo);
 
 			if (hi.x < pos0.x ||
-		        lo.x > pos0.x ||
+			    lo.x > pos0.x ||
 			    hi.y < pos0.y ||
 			    lo.y > pos0.y ) {
-					continue;
+				continue;
 			}
 
 			dist = DistanceCar(trk, &pos0);
@@ -3225,7 +3227,7 @@ void InitCmdTrain(wMenu_p menu)
 	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
 	                              0, TrainFunc, I2VP(DO_FLIPTRAIN));
 	trainPopupMI[DO_DESCRIBE] = wMenuPushCreate(trainPopupM, "", _("Describe"),
-								  0, TrainFunc, I2VP(DO_DESCRIBE));
+	                            0, TrainFunc, I2VP(DO_DESCRIBE));
 	trainPopupMI[DO_MUMASTER]   = wMenuPushCreate(trainPopupM, "", _("MU Master"),
 	                              0, TrainFunc, I2VP(DO_MUMASTER));
 	trainPopupMI[DO_CHANGEDIR]  = wMenuPushCreate(trainPopupM, "",

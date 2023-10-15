@@ -173,7 +173,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 
 	DynStringPrintf(&statusLine,
 	                _("Text Note(%d) Layer=%d %-.80s"),
-			GetTrkIndex(trk),
+	                GetTrkIndex(trk),
 	                GetTrkLayer(trk)+1,
 	                noteText );
 	strcpy(str, DynStringToCStr(&statusLine));
