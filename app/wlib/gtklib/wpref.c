@@ -256,6 +256,10 @@ static void readPrefs( char * name, wBool_t update )
 	}
 	prefFile = fopen( tmp, "r" );
 	if (prefFile == NULL) {
+		size_t n = BUFSIZ+32-1-strlen(tmp);
+		strncat( tmp, ": ", n );
+		strncat( tmp, strerror(errno), n-2 );
+		wNoticeEx( NT_ERROR, tmp, "Ok", NULL );
 		return;
 	}
 	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
@@ -500,6 +504,10 @@ void wPrefFlush(
 	}
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL) {
+		size_t n = BUFSIZ+32-1-strlen(tmp);
+		strncat( tmp, ": ", n );
+		strncat( tmp, strerror(errno), n-2 );
+		wNoticeEx( NT_ERROR, tmp, "Ok", NULL );
 		return;
 	}
 
