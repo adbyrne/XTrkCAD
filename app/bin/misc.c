@@ -33,6 +33,7 @@
 #include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
+#include "include/toolbar.h"
 #include "track.h"
 #include "common-ui.h"
 

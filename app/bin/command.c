@@ -39,17 +39,6 @@
  */
 
 #define COMMAND_MAX (250)
-#define BUTTON_MAX (250)
-
-static struct {
-	wControl_p control;
-	wBool_t enabled;
-	wWinPix_t x, y;
-	long options;
-	int group;
-	wIndex_t cmdInx;
-} buttonList[BUTTON_MAX];
-EXPORT int buttonCnt = 0; // TODO-misc-refactor
 
 static struct {
 	procCommand_t cmdProc;
@@ -75,10 +64,7 @@ EXPORT int cmdGroup;
 
 static int log_command;
 
-#define TOOLBARSET_INIT				(0xFFFF)
-EXPORT long toolbarSet = TOOLBARSET_INIT;
-EXPORT wWinPix_t toolbarHeight = 0;
-static wWinPix_t toolbarWidth = 0;
+
 EXPORT long preSelect = 0;	/**< default command 0 = Describe 1 = Select */
 EXPORT long rightClickMode = 0;
 EXPORT void * commandContext;
@@ -114,8 +100,7 @@ EXPORT void EnableCommands(void)
 			}
 			if (commandList[inx].enabled != enable) {
 				if (commandList[inx].buttInx >= 0)
-					wControlActive(buttonList[commandList[inx].buttInx].control,
-					               enable);
+					ToolbarButtonEnable(commandList[inx].buttInx, enable );
 				for (minx = 0; minx < NUM_CMDMENUS; minx++)
 					if (commandList[inx].menu[minx]) {
 						wMenuPushEnable(commandList[inx].menu[minx], enable);
@@ -127,12 +112,7 @@ EXPORT void EnableCommands(void)
 
 	EnableMenus();
 
-	for (inx = 0; inx < buttonCnt; inx++) {
-		if (buttonList[inx].cmdInx < 0
-		    && (buttonList[inx].options & IC_SELECTED)) {
-			wControlActive(buttonList[inx].control, selectedTrackCount > 0);
-		}
-	}
+	ToolbarButtonEnableIfSelect(selectedTrackCount > 0);
 }
 
 EXPORT wIndex_t GetCurrentCommand()
@@ -150,16 +130,13 @@ EXPORT void Reset(void)
 	    ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_CANCEL, zero);
 	if (commandList[curCommand].buttInx >= 0)
-		wButtonSetBusy(
-		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
-		        FALSE);
+		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
 	curCommand = (preSelect ? selectCmdInx : describeCmdInx);
 	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
 	commandContext = commandList[curCommand].context;
 	if (commandList[curCommand].buttInx >= 0)
-		wButtonSetBusy(
-		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
-		        TRUE);
+		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
+
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 
 	TryCheckPoint();
@@ -473,9 +450,7 @@ EXPORT void DoCommandB(void * data)
 		rc = commandList[curCommand].cmdProc( C_FINISH, zero);
 	}
 	if (commandList[curCommand].buttInx >= 0)
-		wButtonSetBusy(
-		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
-		        FALSE);
+		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
 
 	if (recordF) {
 		fprintf(recordF, "COMMAND %s\n", commandList[inx].helpKey + 3);
@@ -484,22 +459,17 @@ EXPORT void DoCommandB(void * data)
 
 	curCommand = inx;
 	commandContext = commandList[curCommand].context;
-	if ((buttInx = commandList[curCommand].buttInx) >= 0) {
-		if (buttonList[buttInx].cmdInx != curCommand) {
-			wButtonSetLabel((wButton_p) buttonList[buttInx].control,
-			                (char*) commandList[curCommand].icon);
-			wControlSetHelp(buttonList[buttInx].control,
-			                GetBalloonHelpStr(commandList[curCommand].helpKey));
-			wControlSetContext(buttonList[buttInx].control,
-			                   I2VP(curCommand));
-			buttonList[buttInx].cmdInx = curCommand;
-		}
-		wButtonSetBusy(
-		        (wButton_p) buttonList[commandList[curCommand].buttInx].control,
-		        TRUE);
+	// update the toolbar icon when a sub-command is selected (eg. circle
+	// vs. filled circle)
+	if (commandList[curCommand].buttInx >= 0) {
+		ToolbarUpdateButton(commandList[curCommand].buttInx, 
+			curCommand, commandList[curCommand].icon,
+			commandList[curCommand].helpKey, I2VP(curCommand));
 	}
+	ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
+	
 	LOG(log_command, 1,
-	    ( "COMMAND START %s\n", commandList[curCommand].helpKey ))
+		("COMMAND START %s\n", commandList[curCommand].helpKey));
 	wSetCursor(mainD.d,defaultCursor);
 	rc = commandList[curCommand].cmdProc( C_START, pos);
 	LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
@@ -524,107 +494,6 @@ EXPORT void DoCommandB(void * data)
 	inDoCommandB = FALSE;
 }
 
-static void LayoutSetPos(wIndex_t inx)
-{
-	wWinPix_t w, h, offset;
-	static wWinPix_t toolbarRowHeight = 0;
-	static wWinPix_t width;
-	static int lastGroup;
-	static wWinPix_t gap;
-	static int layerButtCnt;
-	static int layerButtNumber;
-	int currGroup;
-
-	if (inx == 0) {
-		lastGroup = 0;
-		wWinGetSize(mainW, &width, &h);
-		gap = 5;
-		toolbarWidth = width - 20 + 5;
-		layerButtCnt = 0;
-		layerButtNumber = 0;
-		toolbarHeight = 0;
-	}
-
-	if (buttonList[inx].control) {
-		if (toolbarRowHeight <= 0) {
-			toolbarRowHeight = wControlGetHeight(buttonList[inx].control);
-		}
-
-		currGroup = buttonList[inx].group & ~BG_BIGGAP;
-		if (currGroup != lastGroup && (buttonList[inx].group & BG_BIGGAP)) {
-			gap = 15;
-		}
-		if ((toolbarSet & (1 << currGroup))
-		    && (programMode != MODE_TRAIN
-		        || (buttonList[inx].options
-		            & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
-		    && (programMode == MODE_TRAIN
-		        || (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
-		    && ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-		        || layerButtCnt < layerCount)) {
-			if (currGroup != lastGroup) {
-				toolbarWidth += gap;
-				lastGroup = currGroup;
-				gap = 5;
-			}
-			w = wControlGetWidth(buttonList[inx].control);
-			h = wControlGetHeight(buttonList[inx].control);
-			if (h<toolbarRowHeight) {
-				offset = (h-toolbarRowHeight)/2;
-				h = toolbarRowHeight;  //Uniform
-			} else { offset = 0; }
-			if (inx < buttonCnt - 1 && (buttonList[inx + 1].options & IC_ABUT)) {
-				w += wControlGetWidth(buttonList[inx + 1].control);
-			}
-			if (toolbarWidth + w > width - 20) {
-				toolbarWidth = 0;
-				toolbarHeight += h + 5;
-			}
-			if ((currGroup == BG_LAYER) && layerButtNumber>1
-			    && GetLayerHidden(layerButtNumber-2) ) {
-				wControlShow(buttonList[inx].control, FALSE);
-				layerButtNumber++;
-			} else {
-				if (currGroup == BG_LAYER ) {
-					if (layerButtNumber>1) { layerButtCnt++; } // Ignore List and Background
-					layerButtNumber++;
-				}
-				wControlSetPos(buttonList[inx].control, toolbarWidth,
-				               toolbarHeight - (h + 5 +offset));
-				buttonList[inx].x = toolbarWidth;
-				buttonList[inx].y = toolbarHeight - (h + 5 + offset);
-				toolbarWidth += wControlGetWidth(buttonList[inx].control);
-				wControlShow(buttonList[inx].control, TRUE);
-			}
-		} else {
-			wControlShow(buttonList[inx].control, FALSE);
-		}
-	}
-}
-
-EXPORT void LayoutToolBar( void * data )
-{
-	int inx;
-
-	for (inx = 0; inx < buttonCnt; inx++) {
-		LayoutSetPos(inx);
-	}
-	if (toolbarSet&(1<<BG_HOTBAR)) {
-		LayoutHotBar(data);
-	} else {
-		HideHotBar();
-	}
-}
-
-static void ToolbarChange(long changes)
-{
-	if ((changes & CHANGE_TOOLBAR)) {
-		/*if ( !(changes&CHANGE_MAIN) )*/
-		MainProc( mainW, wResize_e, NULL, NULL );
-		/*else
-		 LayoutToolBar();*/
-	}
-}
 
 /***************************************************************************
  *
@@ -659,56 +528,14 @@ EXPORT wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
 	commandList[commandCnt].menu[1] = cmdMenus[1];
 	commandList[commandCnt].menu[2] = cmdMenus[2];
 	commandList[commandCnt].menu[3] = cmdMenus[3];
-	if ( buttInx >= 0 && buttonList[buttInx].cmdInx == -1 ) {
-		// set button back-link
-		buttonList[buttInx].cmdInx = commandCnt;
-	}
+
+	ToolbarButtonCommandLink(buttInx, commandCnt);
+
 	commandCnt++;
 	return commandCnt - 1;
 }
 
-EXPORT void AddToolbarControl(wControl_p control, long options)
-{
-	CHECK( buttonCnt < COMMAND_MAX - 1 );
-	buttonList[buttonCnt].enabled = TRUE;
-	buttonList[buttonCnt].options = options;
-	buttonList[buttonCnt].group = cmdGroup;
-	buttonList[buttonCnt].x = 0;
-	buttonList[buttonCnt].y = 0;
-	buttonList[buttonCnt].control = control;
-	buttonList[buttonCnt].cmdInx = -1;
-	LayoutSetPos(buttonCnt);
-	buttonCnt++;
-}
 
-
-/*--------------------------------------------------------------------*/
-
-EXPORT void PlaybackButtonMouse(wIndex_t buttInx)
-{
-	wWinPix_t cmdX, cmdY;
-	coOrd pos;
-
-	if (buttInx < 0 || buttInx >= buttonCnt) {
-		return;
-	}
-	if (buttonList[buttInx].control == NULL) {
-		return;
-	}
-	cmdX = buttonList[buttInx].x + 17;
-	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-	       + (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
-
-	mainD.Pix2CoOrd( &mainD, cmdX, cmdY, &pos );
-	MovePlaybackCursor(&mainD, pos, TRUE, buttonList[buttInx].control);
-	if (playbackTimer == 0) {
-		wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
-		wFlush();
-		wPause(500);
-		wButtonSetBusy((wButton_p) buttonList[buttInx].control, FALSE);
-		wFlush();
-	}
-}
 
 
 EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
@@ -728,39 +555,34 @@ EXPORT void PlaybackCommand(const char * line, wIndex_t lineNum)
 		fprintf(stderr, "Unknown playback COMMAND command %d : %s\n", lineNum,
 		        line);
 	} else {
-		wWinPix_t cmdX, cmdY;
-		coOrd pos;
-		if ((buttInx = commandList[inx].buttInx) >= 0) {
-			cmdX = buttonList[buttInx].x + 17;
-			cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
-			       + (wWinPix_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
-			mainD.Pix2CoOrd( &mainD, cmdX, cmdY, &pos );
-			MovePlaybackCursor(&mainD, pos,TRUE,buttonList[buttInx].control);
+		buttInx = commandList[inx].buttInx;
+		if ((commandList[inx].buttInx) >= 0) {
+			ToolbarButtonPlayback(commandList[inx].buttInx);
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
 			if (buttInx > 0 && playbackTimer == 0) {
-				wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
+				ToolbarButtonBusy(buttInx, TRUE);
 				wFlush();
 				wPause(500);
-				wButtonSetBusy((wButton_p) buttonList[buttInx].control, FALSE);
+				ToolbarButtonBusy(buttInx, FALSE);
 				wFlush();
 			}
 			UndoUndo(NULL);
 		} else if (strcmp(line + 8, "Redo") == 0) {
 			if (buttInx >= 0 && playbackTimer == 0) {
-				wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
+				ToolbarButtonBusy(buttInx, TRUE);
 				wFlush();
 				wPause(500);
-				wButtonSetBusy((wButton_p) buttonList[buttInx].control, FALSE);
+				ToolbarButtonBusy(buttInx, FALSE);
 				wFlush();
 			}
 			UndoRedo(NULL);
 		} else {
 			if (buttInx >= 0 && playbackTimer == 0) {
-				wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
+				ToolbarButtonBusy(buttInx, TRUE);
 				wFlush();
 				wPause(500);
-				wButtonSetBusy((wButton_p) buttonList[buttInx].control, FALSE);
+				ToolbarButtonBusy(buttInx, FALSE);
 				wFlush();
 			}
 			DoCommandB(I2VP(inx));
@@ -795,6 +617,5 @@ EXPORT void CommandInit( void )
 	curCommand = describeCmdInx;
 	commandContext = commandList[curCommand].context;
 	log_command = LogFindIndex( "command" );
-	RegisterChangeNotification(ToolbarChange);
 }
 

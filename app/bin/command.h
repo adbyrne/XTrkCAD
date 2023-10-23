@@ -92,29 +92,6 @@
 #define LEVEL1			(2)
 #define LEVEL2			(3)
 
-/*
- * Command groups
- */
-#define BG_SELECT		(0)
-#define BG_ZOOM			(1)
-#define BG_UNDO			(2)
-#define BG_EASE			(3)
-#define BG_TRKCRT		(4)
-#define BG_TRKMOD		(5)
-#define BG_TRKGRP		(6)
-#define BG_MISCCRT		(7)
-#define BG_RULER		(8)
-#define BG_LAYER		(9)
-#define BG_HOTBAR		(10)
-#define BG_SNAP			(11)
-#define BG_TRAIN		(12)
-#define BG_COUNT		(13)
-#define BG_FILE			(14)
-#define BG_CONTROL		(15)
-#define BG_EXPORTIMPORT (16)
-#define BG_PRINT		(17)
-#define BG_BIGGAP		(1<<8)
-extern int cmdGroup;
 
 
 extern int buttonCnt;
@@ -137,13 +114,6 @@ void DoCommandB( void * );
 void LayoutToolBar( void * );
 BOOL_T CommandEnabled( wIndex_t );
 #define NUM_CMDMENUS (4)
-wIndex_t AddCommand(procCommand_t cmdProc, const char * helpKey,
-                    const char * nameStr, wIcon_p icon, int reqLevel, long options, long acclKey,
-                    wIndex_t buttInx, long stickyMask, wMenuPush_p cmdMenus[NUM_CMDMENUS],
-                    void * context);
-void AddToolbarControl( wControl_p, long );
-void PlaybackButtonMouse( wIndex_t );
-void PlaybackCommand( const char *, wIndex_t );
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
 void CommandInit( void );

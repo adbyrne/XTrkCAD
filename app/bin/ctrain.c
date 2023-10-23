@@ -31,6 +31,8 @@
 #include "track.h"
 #include "common-ui.h"
 
+#include "include/toolbar.h"
+
 long programMode;
 long maxCouplingSpeed = 100;
 long hideTrainsInTunnels;
