@@ -165,6 +165,11 @@ const char * wGetAppWorkDir(
 		wExit(0);
 	}
 	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
+#ifndef __APPLE__
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		strcat( appWorkDir, "-beta" );
+	}
+#endif
 	if ( (dirp = opendir(appWorkDir)) != NULL ) {
 		closedir(dirp);
 	} else {
