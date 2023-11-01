@@ -1,5 +1,5 @@
 CONTENTS Kato Unitrack N-Scale Unitram
-
+CONTENTS Kato Unitrack N Scale Unitram
 ##########################################################################
 ##########################################################################
 SUBCONTENTS Kato Unitram N-Scale - Straight Track
@@ -110,6 +110,7 @@ TURNOUT N  "Kato Unitram	Left Curve 180mm	40-102"
 	END$SEGS
 SUBCONTENTS Kato Unitram N-Scale - Turnouts
 TURNOUT N  "Kato Unitram	Right turnout 180mm	40-211" 256
+#UseOldPaths - turnouts work in tandem: either both Normal or both Reverse
 	P "Normal" 1 2 0 4 5
 	P "Reverse" 1 3 0 4 6
 	E 0.000000 0.492126 270.000000
@@ -133,6 +134,7 @@ TURNOUT N  "Kato Unitram	Right turnout 180mm	40-211" 256
 	A 11579568 0.053333 5.826772 1.457289 -7.047244 0.000000 45.000000
 	END$SEGS
 TURNOUT N  "Kato Unitram	Left Turnout 180mm	40-210" 256
+#UseOldPaths - turnouts work in tandem: either both Normal or both Reverse
 	P "Normal" 1 2 0 4 5
 	P "Reverse" 1 3 0 4 6
 	E 0.000000 0.492126 270.000000

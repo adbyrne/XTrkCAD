@@ -83,22 +83,22 @@ struct appDefault xtcDefaults[] = {
 	{ "DialogItem.rgbcolor-exception", 0, INTEGERCONSTANT, { .intValue = 15923462 }},		/**< rich yellow as exception color */
 	{ "Parameter File Map.British stock", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "br.xtp" },
 	{ "Parameter File Map.European stock", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "eu.xtp" },
-	{ "Parameter File Map.NMRA RP12-25 Feb 2015 O scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-o.xtp" },
-	{ "Parameter File Map.NMRA RP12-27 Feb 2015 S Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-s.xtp"  },
-	{ "Parameter File Map.NMRA RP12-31 Feb 2015 HO Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-ho.xtp" },
-	{ "Parameter File Map.NMRA RP12-33 Feb 2015 TT Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-tt.xtp" },
-	{ "Parameter File Map.NMRA RP12-35 Feb 2015 N Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-n.xtp" },
-	{ "Parameter File Map.NMRA RP12-37 Feb 2015 Z scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-z.xtp" },
+	{ "Parameter File Map.NMRA RP-12.25 Feb 2015 O scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-o.xtp" },
+	{ "Parameter File Map.NMRA RP-12.27 Feb 2015 S Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-s.xtp"  },
+	{ "Parameter File Map.NMRA RP-12.31 Feb 2015 HO Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-ho.xtp" },
+	{ "Parameter File Map.NMRA RP-12.33 Feb 2015 TT Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-tt.xtp" },
+	{ "Parameter File Map.NMRA RP-12.35 Feb 2015 N Scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-n.xtp" },
+	{ "Parameter File Map.NMRA RP-12.37 Feb 2015 Z scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-z.xtp" },
 	{ "Parameter File Map.North American Prototypes", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "protoam.xtp" },
 	{ "Parameter File Map.Trees", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "trees.xtp" },
 	{ "Parameter File Names.File1", 0, STRINGFUNCTION,{ .stringFunction = GetParamPrototype }},
 	{ "Parameter File Names.File2", 0, STRINGCONSTANT,{ .stringValue = "Trees" } },
-	{ "Parameter File Names.File3", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-37 Feb 2015 Z scale Turnouts" } },
-	{ "Parameter File Names.File4", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-35 Feb 2015 N Scale Turnouts" } },
-	{ "Parameter File Names.File5", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-33 Feb 2015 TT Scale Turnouts" } },
-	{ "Parameter File Names.File6", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-31 Feb 2015 HO Scale Turnouts" } },
-	{ "Parameter File Names.File7", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-27 Feb 2015 S Scale Turnouts" } },
-	{ "Parameter File Names.File8", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-25 Feb 2015 O scale Turnouts" } },
+	{ "Parameter File Names.File3", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP-12.37 Feb 2015 Z scale Turnouts" } },
+	{ "Parameter File Names.File4", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP-12.35 Feb 2015 N Scale Turnouts" } },
+	{ "Parameter File Names.File5", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP-12.33 Feb 2015 TT Scale Turnouts" } },
+	{ "Parameter File Names.File6", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP-12.31 Feb 2015 HO Scale Turnouts" } },
+	{ "Parameter File Names.File7", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP-12.27 Feb 2015 S Scale Turnouts" } },
+	{ "Parameter File Names.File8", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP-12.25 Feb 2015 O scale Turnouts" } },
 	{ "draw.roomsizeX", 0, FLOATFUNCTION, {.floatFunction = GetLocalRoomSize }},				/**< layout width */
 	{ "draw.roomsizeY", 0, FLOATFUNCTION,{ .floatFunction = GetLocalRoomSize } },				/**< layout depth */
 	{ "misc.scale", 0, STRINGFUNCTION, { .stringFunction = GetLocalPopularScale}},				/**< the (probably) most popular scale for a region */
@@ -404,22 +404,23 @@ wPrefGetStringExt(const char *section, const char *name)
 
 	thisDefault = FindDefault(xtcDefaults, section, name);
 
-	if (thisDefault) {
-		char *prefString;
-		char *defaultValue;
-
-		if (thisDefault->valueType == STRINGCONSTANT) {
-			defaultValue = thisDefault->defaultValue.stringValue;
-		} else {
-			defaultValue = (thisDefault->defaultValue.stringFunction)(thisDefault,
-			                thisDefault->additionalData);
-		}
-
-		prefString = (char *)wPrefGetStringBasic(section, name);
-		return (prefString ? prefString : defaultValue);
-	} else {
+	if ( thisDefault == NULL ) {
+		// Either we don't have a default value or we've already fetched it
 		return ((char *)wPrefGetStringBasic(section, name));
 	}
+
+	char *prefString;
+	char *defaultValue;
+
+	if (thisDefault->valueType == STRINGCONSTANT) {
+		defaultValue = thisDefault->defaultValue.stringValue;
+	} else {
+		defaultValue = (thisDefault->defaultValue.stringFunction)(thisDefault,
+		                thisDefault->additionalData);
+	}
+	// Next call will get value from Prefs
+	wPrefSetString( section, name, defaultValue );
+	return (defaultValue);
 }
 
 /**
