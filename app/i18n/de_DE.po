@@ -11,11 +11,11 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-22 10:19+0200\n"
-"PO-Revision-Date: 2023-10-07 10:10+0200\n"
+"PO-Revision-Date: 2023-11-05 10:25+0100\n"
 "Last-Translator: Martin Fischer <m_fischer@users.sf.net>\n"
 "Language-Team: German (Germany) (https://www.transifex.com/xtrackcad/"
 "teams/112853/de_DE/)\n"
-"Language: de_DE\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -107,7 +107,8 @@ msgstr "Anschließen nicht möglich, da kein offener Endpunkt existiert"
 #: ../bin/cbezier.c:772
 msgid "Bezier curve invalid has identical end points Change End Point"
 msgstr ""
-"Die Endpunkte der Bezierkurve sind identisch. Bitte einen Endpunkt ändern"
+"Die beiden Endpunkte der Bezierkurve sind identisch. Bitte einen der "
+"Endpunkte ändern"
 
 #: ../bin/cbezier.c:776
 #, c-format, python-format
@@ -125,7 +126,7 @@ msgstr "Bezier Kurve ist eine gerade Linie"
 
 #: ../bin/cbezier.c:799 ../bin/cbezier.c:813
 msgid "Invalid Bezier Track - end points are identical"
-msgstr "Die Bezier-Kurve ist ungültig, da sie identische Endpunkte hat"
+msgstr "Die Bezier-Kurve ist ungültig, da die beiden Endpunkte identisch sind"
 
 #: ../bin/cbezier.c:806
 #, c-format, python-format
@@ -4740,7 +4741,7 @@ msgstr "Größe für Beschriftungen"
 
 #: ../bin/doption.c:127
 msgid "Hot Bar Labels"
-msgstr "Teilekatalog Beschriftungen"
+msgstr "Schnellauswahl Beschriftungen"
 
 #: ../bin/doption.c:128
 msgid "Layout Labels"
@@ -5729,15 +5730,15 @@ msgstr "Werkzeuge zum Zeichnen/Schrift"
 
 #: ../bin/menu.c:135
 msgid "Ruler Button"
-msgstr "Lineal anzeigen "
+msgstr "Lineal"
 
 #: ../bin/menu.c:136
 msgid "Layer Buttons"
-msgstr "Schaltflächen für Ebenen "
+msgstr "Ebenen"
 
 #: ../bin/menu.c:136
 msgid "Hot Bar"
-msgstr "Teilekatalog"
+msgstr "Schnellauswahl"
 
 #: ../../../../build/work/app/help/bllnhlp.c:82 ../bin/menu.c:225
 msgid "Change Elevations"
@@ -5980,7 +5981,7 @@ msgstr "Umsch+Kontextbefehle"
 
 #: ../bin/menu.c:945 ../bin/menu.c:947
 msgid "Zoom Extents"
-msgstr "Zoom Gesamt"
+msgstr "Zoom Anpassen"
 
 #: ../bin/menu.c:950 ../bin/menu.c:1185
 msgid "Enable SnapGrid"
@@ -7445,8 +7446,7 @@ msgstr "MSG_PRINT_NO_PAGES\tKeine Seiten zum Drucken ausgewählt."
 #: ../../../../build/work/app/help/messages.h:72
 msgid "MSG_NO_PATH_TO_EP\tNo path between Profile and selected endpoint."
 msgstr ""
-"MSG_NO_PATH_TO_EP\tEs existiert keine Verbindung zwischen dem Högenprofil "
-"und dem auswählten Endpunkt."
+"MSG_NO_PATH_TO_EP\tEs existiert keine Verbindung zu dem auswählten Endpunkt."
 
 #: ../../../../build/work/app/help/messages.h:73
 #, c-format, python-format
@@ -8797,12 +8797,13 @@ msgid ""
 "dialog.  This removes unused Turnout and Structure definitions from the Hot "
 "Bar and makes the program start faster."
 msgstr ""
-"Damit Gleise in der Schnellauswahl auftauchen ist es nötig eine Gleis "
-"Parameterdatei für Ihren Gleisplan zu laden, im Dialog \"Datei|"
-"Parameterdateien\" können Sie die für Ihr Gleis nötige Parameterdatei laden. "
-"Nicht mehr benötigte Parameterdateien können über den gleichen Dialog "
-"entladen werden. Hierdurch werden nicht mehr benötigte Weichen/Gleise von "
-"der Schnellauswahl gelöscht was das Programm schneller starten lässt."
+"Damit Gleise in der Schnellauswahl auftauchen ist es nötig mindestens eine "
+"Parameterdatei für Ihren Gleisplan zu laden. Im Dialog \"Datei|"
+"Parameterdateien\" können Sie gewünschten Parameterdateien für ihr "
+"Gleissystem laden. Nicht mehr benötigte Parameterdateien können über den "
+"gleichen Dialog entladen werden. Hierdurch werden nicht mehr benötigte "
+"Weichen/Gleise von der Schnellauswahl gelöscht, was das Programm schneller "
+"starten lässt."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:86
 #: ../../../../build/work/app/i18n/custmsg.h:64
@@ -8832,7 +8833,7 @@ msgid ""
 "position (1 is the start, 5 is half way, 0 is the end)."
 msgstr ""
 "Rechtsklicken in der Schnellauswahl öffnet ein Menü mit verschiedenen "
-"Objektgruppen, diese können benutzt werden um schnell zu dieser Art von "
+"Objektgruppen. Dieses Menü kann benutzt werden, um schnell zu einem Typ von "
 "Gleisen zu springen.\n"
 "Durch Drücken von Zahlen in der Schnellauswahl (1-9 und 0) kann auch die "
 "entsprechende Position der Gleisauswahl geändert werden, hierbei "
@@ -12801,7 +12802,7 @@ msgstr ""
 #: ../../../../build/work/app/i18n/custmsg.h:994
 msgid "If you press the <Ruler> command again the Ruler is removed.\n"
 msgstr ""
-"Wenn Sie den Befehl <Lineal> nochmals Anklicken, wird das Lineal wieder "
+"Wenn Sie den Befehl <Lineal> nochmals anklicken, wird das Lineal wieder "
 "entfernt.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmruler.xtr:32
@@ -14640,7 +14641,7 @@ msgstr "Tile, Filename and Window Manager buttons"
 
 #: ../../../../build/work/app/help/bllnhlp.c:230
 msgid "Turnout and Structure Hot Bar"
-msgstr "Weichen und Gebäude Auswahlleiste"
+msgstr "Schnellauswahl für Festgleis und Gebäude"
 
 #: ../../../../build/work/app/help/bllnhlp.c:231
 msgid "Active layer list and layer buttons"
@@ -14981,7 +14982,7 @@ msgstr "Zeichengröße für Beschriftungen im Gleisplan"
 
 #: ../../../../build/work/app/help/bllnhlp.c:358
 msgid "Label elements on the Hot Bar"
-msgstr "Beschriftungselemente des Teilekatalogs"
+msgstr "Beschriftungselemente in der Schnellauswahl"
 
 #: ../../../../build/work/app/help/bllnhlp.c:359
 msgid "Label elements on layout"
@@ -14993,7 +14994,7 @@ msgstr "Beschriftungselemente in den Listen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:361
 msgid "How to group cars on the Train Hot Bar"
-msgstr "Gruppierung der Wagen im Teilekatalog"
+msgstr "Gruppierung der Wagen in der Schnellauswahl"
 
 #: ../../../../build/work/app/help/bllnhlp.c:362
 msgid "Delay (in mS) between updating train movements"
@@ -15194,7 +15195,7 @@ msgstr "Steigung in der Wendel"
 #: ../../../../build/work/app/help/bllnhlp.c:419
 msgid "Separation between helix layers including baseboard, track, etc"
 msgstr ""
-"Trennung zwischen den Ebenen der Gleiswendel einschließlich Gleisbett, Gleis "
+"Abstand zwischen den Ebenen der Gleiswendel, einschließlich Gleisbett, Gleis "
 "usw."
 
 #: ../../../../build/work/app/help/bllnhlp.c:420
@@ -15618,7 +15619,8 @@ msgstr "Fangraster drucken?"
 
 #: ../../../../build/work/app/help/bllnhlp.c:519
 msgid "Print Rulers at the layout edge only, or on all page edges, or nowhere?"
-msgstr "Lineal nur am Rand, auf allen Seitenrändern oder nirgends drucken?"
+msgstr ""
+"Lineal nur am Anlagenrand, auf allen Seitenrändern oder nirgends drucken?"
 
 #: ../../../../build/work/app/help/bllnhlp.c:520
 msgid "Print Roadbed Outline?"
@@ -15732,7 +15734,9 @@ msgstr "Bestellnummer des Objektes"
 
 #: ../../../../build/work/app/help/bllnhlp.c:552
 msgid "Rescale by Scale Conversion or by Ratio"
-msgstr "Durch Auswahl eines Maßstab oder eines Multiplikators skalieren"
+msgstr ""
+"Durch Auswahl eines neuen Maßstab oder durch Eingabe eines Multiplikators "
+"skalieren"
 
 #: ../../../../build/work/app/help/bllnhlp.c:553
 msgid "Original Scale of the selected objects"
@@ -15788,7 +15792,7 @@ msgstr "Ausgewählte Gleise"
 
 #: ../../../../build/work/app/help/bllnhlp.c:567
 msgid "Color of tracks on the Profile path"
-msgstr "Farbe für Gleise auf Höhenverlauf"
+msgstr "Farbe für Gleise auf dem Höhenverlauf"
 
 #: ../../../../build/work/app/help/bllnhlp.c:568
 msgid "Color of Exceptional tracks"
@@ -15850,11 +15854,11 @@ msgstr "Laden Sie den Inhalt der Systembibliothek zum Suchen neu"
 
 #: ../../../../build/work/app/help/bllnhlp.c:582
 msgid "Choose commands to be sticky"
-msgstr "Mehrfach aktive Funktionen auswählen"
+msgstr "Wiederholbare Funktionen auswählen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:583
 msgid "Make the commands sticky"
-msgstr "Mehrfach aktive Funktionen festlegen"
+msgstr "Wiederholbare Funktionen festlegen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:584
 msgid "List of available structure"
@@ -15870,7 +15874,7 @@ msgstr "Verberge Auswahlfenster bis das Gebäude plaziert ist"
 
 #: ../../../../build/work/app/help/bllnhlp.c:587
 msgid "Drawing scale and size"
-msgstr "Zeichnungsmaßstab und Größe"
+msgstr "Zeichnungsmaßstab und -größe"
 
 #: ../../../../build/work/app/help/bllnhlp.c:588
 msgid "Complete structure placement"
@@ -15902,7 +15906,7 @@ msgstr "Wählt die Farbe des eingegebenen Textes"
 
 #: ../../../../build/work/app/help/bllnhlp.c:596
 msgid "If the text is boxed"
-msgstr "Ob der Text umrahmt ist"
+msgstr "Rahmen um den Text zeichnen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:597
 msgid "Useful information about the program"
@@ -15938,7 +15942,7 @@ msgstr "Entfernungsmesser"
 
 #: ../../../../build/work/app/help/bllnhlp.c:607
 msgid "Reset odometer to 0"
-msgstr "Kilometerzähler auf 0 zurücksetzen"
+msgstr "Entfernungsmesser auf 0 zurücksetzen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:608
 msgid "Find train on layout"
@@ -15946,11 +15950,11 @@ msgstr "Finde einen Zug auf der Anlage"
 
 #: ../../../../build/work/app/help/bllnhlp.c:609
 msgid "Follow train around layout"
-msgstr "Zum Zug über die Anlage folgen"
+msgstr "Dem Zug über die Anlage folgen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:610
 msgid "Flip direction at End Of Track"
-msgstr "Am Ende des Gleis die Fahrtrichtung umkehren"
+msgstr "Am Ende des Gleises die Fahrtrichtung umkehren"
 
 #: ../../../../build/work/app/help/bllnhlp.c:611
 msgid "Change direction of train"
@@ -15962,15 +15966,15 @@ msgstr "Anhalten des Zuges"
 
 #: ../../../../build/work/app/help/bllnhlp.c:613
 msgid "List of available turnouts for the current scale"
-msgstr "Liste der im aktuellen Maßstab verfügbaren Weichen"
+msgstr "Liste der im aktuellen Maßstab verfügbaren Gleise"
 
 #: ../../../../build/work/app/help/bllnhlp.c:614
 msgid ""
 "Diagram of the currently selected turnout.  Click on a End-Point to select "
 "the Active End-Point"
 msgstr ""
-"Zeichnung der ausgewählten Weiche. Der aktive Endpunkt kann durch Klicken "
-"auf einen Endpunkt gesetzt werden"
+"Zeichnung des ausgewählten Gleises. Der aktive Endpunkt kann durch Klicken "
+"auf diesen Endpunkt gesetzt werden"
 
 #: ../../../../build/work/app/help/bllnhlp.c:615
 msgid ""
@@ -15981,7 +15985,7 @@ msgstr ""
 
 #: ../../../../build/work/app/help/bllnhlp.c:616
 msgid "Hide Selection window when placing Turnout"
-msgstr "Auswahlfenster während des Verlegen verbergen"
+msgstr "Verberge das Auswahlfenster während des Verlegen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:617
 msgid "The selected Active End-Point"
@@ -15989,7 +15993,7 @@ msgstr "Der ausgewählte, aktive Endpunkt"
 
 #: ../../../../build/work/app/help/bllnhlp.c:618
 msgid "Current selected turnout, (displayed in the diagram window)"
-msgstr "Momentan ausgewählte Weiche, (sichtbar im Diagramm-Fenster)"
+msgstr "Momentan ausgewähltes Gleis, (sichtbar im Diagramm-Fenster)"
 
 #: ../../../../build/work/app/help/bllnhlp.c:619
 msgid "One the End-Points that can be selected"
@@ -15998,11 +16002,11 @@ msgstr "Einer der Endpunkte, der ausgewählt werden kann"
 #: ../../../../build/work/app/help/bllnhlp.c:621
 #: ../../../../build/work/app/help/bllnhlp.c:622
 msgid "Angle of the specified track to the center line of the turnout"
-msgstr "Winkel zwischen dem ausgewählten Gleise und der Mittellinie der Weiche"
+msgstr "Winkel zwischen dem ausgewählten Gleis und der Mittellinie der Weiche"
 
 #: ../../../../build/work/app/help/bllnhlp.c:623
 msgid "Specifies if angles are entered as Frog Numbers or in degrees"
-msgstr "Soll der Winkel als Steigung oder in Grad angegeben werden"
+msgstr "Angabe des Abzweigwinkel als Steigung oder in Grad"
 
 #: ../../../../build/work/app/help/bllnhlp.c:624
 #: ../../../../build/work/app/help/bllnhlp.c:625
@@ -16017,7 +16021,7 @@ msgstr "Beschreibung der Weiche (Hersteller, Winkel, Teilenummer, etc.)"
 #: ../../../../build/work/app/help/bllnhlp.c:628
 #: ../../../../build/work/app/help/bllnhlp.c:629
 msgid "Length from the base to the end of the specified track"
-msgstr "Länge von der Grundlinie zum Ende des ausgewählten Gleis"
+msgstr "Länge von der Grundlinie zum Ende des ausgewählten Gleises"
 
 #: ../../../../build/work/app/help/bllnhlp.c:631
 #: ../../../../build/work/app/help/bllnhlp.c:632
@@ -16027,19 +16031,19 @@ msgstr "Abstand des Endpunktes von der Mittellinie der Weiche"
 #: ../../../../build/work/app/help/bllnhlp.c:635
 #: ../../../../build/work/app/help/bllnhlp.c:636
 msgid "Prints a full size diagram of the turnout for checking"
-msgstr "Erstellt einen Probeausdruck der Weiche"
+msgstr "Erstellt einen Probeausdruck der Weiche in voller Größe"
 
 #: ../../../../build/work/app/help/bllnhlp.c:637
 msgid "Color of Roadbed lines"
-msgstr "Farbe der Gleisbettlinien"
+msgstr "Farbe der Linien zur Gleisbettbegrenzung"
 
 #: ../../../../build/work/app/help/bllnhlp.c:638
 msgid "Width of Roadbed lines"
-msgstr "Abstand des Gleisbettmarkierungen"
+msgstr "Abstand des Gleisbettbegrenzungen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:639
 msgid "Width of Roadbed"
-msgstr "Breite des Gleisbett"
+msgstr "Breite des Gleisbetts"
 
 #: ../../../../build/work/app/help/bllnhlp.c:641
 msgid "Closes the window and returns to the Turnout Selection window"
@@ -16051,7 +16055,7 @@ msgstr "Legt den Durchmesser der Drehscheibe fest"
 
 #: ../../../../build/work/app/help/bllnhlp.c:643
 msgid "Old Turnout title"
-msgstr "Alte Bezeichnung der Weiche"
+msgstr "Alte Bezeichnung des Gleises"
 
 #: ../../../../build/work/app/help/bllnhlp.c:644
 msgid "List of available titles"
@@ -16059,11 +16063,11 @@ msgstr "Liste der verfügbaren Titel"
 
 #: ../../../../build/work/app/help/bllnhlp.c:645
 msgid "Leave the Turnouts' title unchanged"
-msgstr "Titel der Weiche unverändert lassen"
+msgstr "Titel des Gleises unverändert lassen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:646
 msgid "Invoke the Parameter Files dialog"
-msgstr "Auswahl der Parameterdateien"
+msgstr "Parameterdateien auswählen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:647
 msgid "List of available turnouts"
@@ -16071,7 +16075,7 @@ msgstr "Liste der verfügbaren Weichen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:648
 msgid "Update the Turnouts' title"
-msgstr "Aktualisiere den Titel des Gleis"
+msgstr "Aktualisiere den Titel des Gleises"
 
 #: ../../../../build/work/app/help/bllnhlp.c:652
 msgid "Sample"
@@ -16106,12 +16110,12 @@ msgid ""
 "Displays the Print Setup window to change printers, orientation, paper size, "
 "etc."
 msgstr ""
-"Ruft das Drucker Dialog Fenster auf, um Drucker und oder Papier "
+"Ruft den Konfigurationsdialog für Drucker auf, um Drucker oder Papier "
 "Einstellungen vornehmen zu können."
 
 #: ../../../../build/work/app/help/bllnhlp.c:661
 msgid "Closes this dialog"
-msgstr "Dialogfenster Schließen"
+msgstr "Dialogfenster schließen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:662
 msgid "Page orientation"
@@ -16135,7 +16139,7 @@ msgstr "Drucker auswählen"
 
 #: ../../../../build/work/app/help/bllnhlp.c:667
 msgid "Print test page"
-msgstr "Drucke Testseite"
+msgstr "Testseite drucken"
 
 #~ msgid "Plain Text"
 #~ msgstr "Einfacher Text"
