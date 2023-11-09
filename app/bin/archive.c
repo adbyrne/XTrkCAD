@@ -249,7 +249,7 @@ BOOL_T CreateArchive(
 {
 	struct zip *za;
 	int err;
-	char buf[100];
+	zip_error_t error;
 
 	char * archive = MyStrdup(fileName);  	// Because of const char
 	char * archive_name = FindFilename(archive);
@@ -266,8 +266,9 @@ BOOL_T CreateArchive(
 	MyFree(archive);
 
 	if ((za = zip_open(archiveUtf8, ZIP_CREATE, &err)) == NULL) {
-		zip_error_to_str(buf, sizeof(buf), err, errno);
-		NoticeMessage(MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archiveUtf8, buf);
+		zip_error_init_with_code(&error, err);
+		NoticeMessage(MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archiveUtf8, zip_error_strerror(&error));
+		zip_error_fini(&error);
 		MyFree(archiveUtf8);
 		return FALSE;
 	}
@@ -279,8 +280,9 @@ BOOL_T CreateArchive(
 	AddDirectoryToArchive(za, dir_path, "");
 
 	if (zip_close(za) == -1) {
-		zip_error_to_str(buf, sizeof(buf), err, errno);
-		NoticeMessage(MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, archiveUtf8, buf);
+		zip_error_init_with_code(&error, err);
+		NoticeMessage(MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, archiveUtf8, zip_error_strerror(&error));
+		zip_error_fini(&error);
 		free(archive_path);
 		MyFree(archiveUtf8);
 		return FALSE;
@@ -328,6 +330,7 @@ BOOL_T UnpackArchiveFor(
 	struct zip_file *zf;
 	struct zip_stat sb;
 	char buf[100];
+	zip_error_t error;
 	int err;
 	int i;
 	int64_t len;
@@ -341,10 +344,11 @@ BOOL_T UnpackArchiveFor(
 
 
 	if ((za = zip_open(destBuffer, 0, &err)) == NULL) {
-		zip_error_to_str(buf, sizeof(buf), err, errno);
-		NoticeMessage(MSG_ZIP_OPEN_FAIL, _("Continue"), NULL, pathName, buf);
+		zip_error_init_with_code(&error, err);
+		NoticeMessage(MSG_ZIP_OPEN_FAIL, _("Continue"), NULL, pathName, zip_error_strerror(&error));
 		fprintf(stderr, "xtrkcad: can't open xtrkcad zip archive `%s': %s \n",
-		        pathName, buf);
+		        pathName, zip_error_strerror(&error));
+		zip_error_fini(&error);
 
 		MyFree(destBuffer);
 		return FALSE;
