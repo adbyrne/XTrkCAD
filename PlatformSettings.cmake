@@ -23,7 +23,7 @@ if(UNIX)
    endif()
 
     # glib 2.0 deprecated GTypeDebugFlags and GTimeVal, gtk2 has not been updated
-    set(CMAKE_C_FLAGS "-Wno-deprecated-declarations" CACHE STRING "Suppress GTK2 warnings" FORCE)
+    add_compile_options("-Wno-deprecated-declarations")
 endif()
 
 # Set Win64 flag when a 64 bit build is selected
