@@ -21,6 +21,9 @@ if(UNIX)
         set(XTRKCAD_USE_GETTEXT_DEFAULT ON)
         set(XTRKCAD_USE_BROWSER_DEFAULT ON)
    endif()
+
+    # glib 2.0 deprecated GTypeDebugFlags and GTimeVal, gtk2 has not been updated
+    add_compile_options("-Wno-deprecated-declarations")
 endif()
 
 # Set Win64 flag when a 64 bit build is selected
