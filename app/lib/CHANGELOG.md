@@ -14,6 +14,70 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Add > Structure dialog caused weird artifact when closed
 + Cornu Turnout Designer misplaces points or fails
 + Add check for max connect angle to Bezier Segment
++ Remember largest font size used so we don't nag the user
++ BUG FIX: saving to xtce without background
++ Add context help text to note ui
++ all wNotice() if pref file can't be opened
++ Re-enable HotBar jumps on numeric keys to match docs
++ FIX #527 No change detection or undo when text changed in Change Object Properties
++ BUG #526 Labels indicating grades and elevations display inconsistently. 
++ Cancel Save to file if any step fails so only valid files are created
++ do not store info about user's directory structure in archive file
++ BUG FIX: If deleting all files from Parameter Files dialog list when 'Add Fixed-Track' dialog had been invoked: causes *curTurnout to be overwritten.BUG #525 Save As for xtce fails 
++ BUG 515: Error when trying to save as *.xtce file Due to trying to do rename() across devices`
++ BUG 522 Truck Offset is invalid for New Cars
++ BUG #521 Change "Cannot split Turnout track" message to explain Split
++ Removed range checks for comment icons on trackplan …
++ In Train mode, Describe Car, not track it is on.
++ Correctly Suppress ruler numbers for RHS and top of window and all sides of layout in English measurements
++ Fix "Fill/Unfill" in Dsscribe alters a Rectangle into a Polygon.
++ Fix #518.Map Mac KeyPad Enter (and Fn+Return on non-keypad keyboards) to Return.
++ ix #520 - Fix error message when selecting end point in Join for Cornu
++ Changing Units doesn't repopulate the Length Format list
++ BUg 516 Fix Color Draw reverts back to By Object after any change in Display Options
++ Fix #514 Train Mode issues
++ Fix #511 Lost properties window
++ Fix MapW resizing
++ FIX: Trains on the layout jump when layout is loaded
++ Simplify middle button pan (MBP) code
++ #509 Bug: Lower Limit on room size
++ BUG 504, 505 - Scale Unknown
++ Layer Links are accesses by 0-based indices
++ Fix bit-rot in demos.  Update some MESSAGEs.  Add info about old/new Select behavior.
++ Do not change filled rectangle to filled polygon when reading from file
++ CURRENT LAYER in .xtc files was 1-based, should be 0-based
++ Enable local language in demos
++ Auto connect EPs after move/rotate
++ BUG #501 - Unable to delete car from inventory 
++ Restore Ctl-Alt-N for text note
++ Fix BUG #496 Sticky options not saved
++ Fix BUG #343 Error when grouping objects
++ Fix BUG #454 XTrack cursor and System cursor conflict
++ Temp drawing of Curve from Chord when tied to an existing EP is somethings flipped
++ FIX #493 Extending a sectional track with a curved endpt doesn't allow straight
++ Fix #494 Reducing Main window size is jerky
++ FIX #492 Turntable path not Shown in Train Run Mode
++ Fix #479 Problem with N gauge Tomix 1248 and 1249 turnouts.
++ Linux: beta release improvements
++ Improve 'segment not on path' handling
++ BUG #449 Note behavior when canceled 
++ FIX #464 Can't group multiline text objects
++ Deleting a CAR in design mode causes GetTrackExtraData() complaints about deleted track
++ BUG 457 Missing main window icon
++ BUG #477 Disregarding print margins
++ Bug Fix #477 Disregarding print margins
++ Fix #480 bad performance with a 'fine' grid
++ Fix Bug #467 Regression failuresm with high DPI
++ Track down source of 'intersectBox bogus' message
++ Fix #463 Layout scale not set correctly when gauge is the same
++  BUG 485-TrackScaleGauge 
++ Fix Bug #451 Two-rail scale
++ Partial Fix #343 Error when grouping objects
++ Fix car csv import/export doc for Options and Color
++ Fix #478 Modifying straight line objects
++ Fix BUG 484 train control: map moving bug
++ Dialog sizing: non-resizable dlg are not resizble, enforce minimum size on resizabl dlg
++ Fix HotBar highlighting in Playback mode
 
 ## Added
 
@@ -44,6 +108,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + HOn30_Minitrains update
 + G Lionel Ready-To-Play Track
 + S Jakks PowerTrains Track (2012)
++ Jouef Points & Track Sections
++ Walthers HO DCC Code 70 Turnouts
++ Design Preservation Models Modular Custom Structures
++ Minitrix N-Scale Code 60 Concrete Tie Track
++ Modellbahn Union N Scale Track
++ Hornby OO Scale Points & Track Sections
++ Hornby PlayTrains Track Components
++ Peco O Scale Bullhead Turnouts
++ Peco O Scale Code 124 Setrack
++ Peco O Scale Code 143 Flatbottom Track
++ Modellbahn Union TT Scale Track
++ Roco TT Track System
++ Micro Trains Z Scale Micro-Track Components
 
 ## Examples
 
