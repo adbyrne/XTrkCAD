@@ -627,7 +627,7 @@ EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
 	}
 	bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
 	                   BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
-	AddToolbarControl((wControl_p) bb, options);
+	ToolbarControlAdd((wControl_p) bb, options);
 	return bb;
 }
 
@@ -802,7 +802,7 @@ static addButtonCallBack_t paramFilesCallback;
 
 EXPORT void CreateMenus(void)
 {
-	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM,
+	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, 
 	        manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
 
@@ -1140,8 +1140,9 @@ EXPORT void CreateMenus(void)
 
 	wMenuSeparatorCreate(viewM);
 
-	toolbarM = wMenuMenuCreate(viewM, "toolbarM", _("&Tool Bar"));
-	CreateToolbarM(toolbarM);
+	InitToolbar();
+	MiscMenuItemCreate(viewM, NULL, "cmdToolbarOpt", _("&Toolbar Options..."),
+		0L, DoToolbar, IC_MODETRAIN_TOO, NULL);
 
 	cmdGroup = BG_EASE;
 	InitCmdEasement();
@@ -1163,7 +1164,7 @@ EXPORT void CreateMenus(void)
 	 * ADD MENU
 	 */
 
-	cmdGroup = BG_TRKCRT | BG_BIGGAP;
+	cmdGroup = BG_TRKCRT;
 	InitCmdStraight(addM);
 	InitCmdCurve(addM);
 	InitCmdParallel(addM);
@@ -1320,7 +1321,7 @@ EXPORT void CreateMenus(void)
 	 * MANAGE MENU
 	 */
 
-	cmdGroup = BG_TRAIN | BG_BIGGAP;
+	cmdGroup = BG_TRAIN;
 	InitCmdTrain(manageM);
 	wMenuSeparatorCreate(manageM);
 
@@ -1359,7 +1360,7 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(manageM, NULL, "cmdPricelist", _("Price List..."),
 	                   ACCL_PRICELIST, PriceListInit(), 0, NULL);
 
-	cmdGroup = BG_LAYER | BG_BIGGAP;
+	cmdGroup = BG_LAYER;
 
 	InitCmdSelect2(changeM);
 	InitCmdDescribe2(changeM);

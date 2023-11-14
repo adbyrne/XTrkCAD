@@ -1775,7 +1775,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 		wWinGetSize( mainW, &width, &height );
 		LOG( log_redraw, 1, ( "MainProc/Resize: %d %s %ld %ld\n", cMP++,
 		                      refresh==NULL?"RDW":"---", width, height ) );
-		LayoutToolBar(refresh);
+		ToolbarLayout(refresh);
 		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
 		if (height >= 0) {
 			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE );
@@ -3241,7 +3241,7 @@ EXPORT void DrawInit( int initialZoom )
 
 //	InitColor();
 	wWinGetSize( mainW, &w, &h );
-	/*LayoutToolBar();*/
+	
 	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
 	if ( w <= 0 ) { w = 1; }
 	if ( h <= 0 ) { h = 1; }

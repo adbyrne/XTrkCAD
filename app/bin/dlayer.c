@@ -2325,7 +2325,7 @@ void InitLayers(void)
 	setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
 	                            SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
-	AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
+	ToolbarControlAdd((wControl_p)setLayerL, IC_MODETRAIN_TOO);
 
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
 	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,

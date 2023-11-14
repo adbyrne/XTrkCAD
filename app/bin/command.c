@@ -76,6 +76,31 @@ EXPORT const char* GetCurCommandName()
 	return commandList[curCommand].helpKey;
 }
 
+/** 
+ * Decide whether command is available in the current application mode.
+ * Basically track modifications are not available in Train Mode, file 
+ * operations are always available and train control ops are available in
+ * train mode only. 
+ * The specific logic was developed with the help of Wolfram Alpha:
+ * CNF | ((NOT m) OR o OR t) AND(m OR (NOT o) OR t)
+ * 
+ * \param mode		application mode
+ * \param options	availability options
+ * \return			true for enabled, false if disabled	
+ */
+
+EXPORT bool IsCommandEnabled(long mode, long options)
+{
+	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
+		(options & IC_MODETRAIN_TOO)) &&
+		((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
+		(options & IC_MODETRAIN_TOO)) {
+		return true;
+	}
+
+	return false;
+}
+
 EXPORT void EnableCommands(void)
 {
 	int inx, minx;
@@ -88,15 +113,10 @@ EXPORT void EnableCommands(void)
 			if ((commandList[inx].options & IC_SELECTED)
 			    && selectedTrackCount <= 0) {
 				enable = FALSE;
-			} else if ((programMode == MODE_TRAIN
-			            && (commandList[inx].options
-			                & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)) == 0)
-			           || (programMode != MODE_TRAIN
-			               && (commandList[inx].options & IC_MODETRAIN_ONLY)
-			               != 0)) {
-				enable = FALSE;
-			} else {
+			} else if (IsCommandEnabled(programMode, commandList[inx].options )) {
 				enable = TRUE;
+			} else {
+				enable = FALSE;
 			}
 			if (commandList[inx].enabled != enable) {
 				if (commandList[inx].buttInx >= 0)

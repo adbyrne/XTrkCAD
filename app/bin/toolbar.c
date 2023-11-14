@@ -22,17 +22,52 @@
  */
 
 #include "common.h"
+#include "custom.h"
 #include "fileio.h"
 #include "param.h"
 #include "include/toolbar.h"
 
-#define TOOLBARSET_INIT				(0xFFFF)
-EXPORT long toolbarSet = TOOLBARSET_INIT;
+
+EXPORT void ToolbarLayout(void* unused);
+
+// local function prototypes
+static void InitializeToolbarDialog(void);
+static void ToolbarChange(long changes);
+static void ToolbarOk(void* unused);
+static void ToolbarButtonPlace(wIndex_t inx);
+static void SaveToolbarConfig(void);
+static void LoadToolbarConfig(void);
+
+// toolbar properties
+EXPORT long toolbarSet;
 EXPORT wWinPix_t toolbarHeight = 0;
 static wWinPix_t toolbarWidth = 0;
 
-#define BUTTON_MAX (250)
+#define TOOLBARSET_INIT				(0xFFFF)
+#define TOOLBAR_SECTION "misc"
+#define TOOLBAR_VARIABLE "toolbarset"
 
+#define GROUP_DISTANCE (5)     // default distance between button groups
+#define GROUP_BIG_DISTANCE (GROUP_DISTANCE * 3) // big gap
+#define TOOLBAR_MARGIN (20)     // left and right margins of toolbar
+
+/*
+* Bit handling macros
+* these macros do not change the passed values but return the result.
+* so if you want to change the value it has to be assigned eg.
+* bits = SETBIT(bits, 2);
+* in order to set bit 2 of the variable "bits"
+* 
+*/ 
+#define GETBIT(value, bitpos )     ((value) & (1UL << (bitpos)))
+#define ISBITSET(value, bitpos )   (((value)&(1UL <<bitpos))!=0)
+#define CLEARBIT(value, bitpos )   ((value) & ~(1UL <<(bitpos)))
+#define SETBIT(value, bitpos)      ((value) | (1UL <<(bitpos)))
+
+#define ISGROUPVISIBLE(group)   ISBITSET(toolbarSet, group)
+
+// toolbar button list
+#define BUTTON_MAX (250)
 static struct {
     wControl_p control;
     wBool_t enabled;
@@ -43,90 +78,201 @@ static struct {
 } buttonList[BUTTON_MAX];
 EXPORT int buttonCnt = 0; // TODO-misc-refactor
 
-/*
- * These array control the choices available in the Toolbar setup.
- * For each choice, the text is given and the respective mask is
- * specified in the following array.
- * Note: text and choices must be given in the same order.
+
+// control the order of the button groups inside the toolbar
+
+struct buttonGroups {
+    char*   label;          // display label
+    int     group;          // id of group
+    bool    biggap;         // control distance to previous group
+};
+
+static struct buttonGroups allToolbarGroups[] = {
+    {N_("File Buttons"),            BG_FILE, false},
+    {N_("Print Buttons"),           BG_PRINT, false},
+    {N_("Import/Export Buttons"),   BG_EXPORTIMPORT, false},
+    {N_("Zoom Buttons"),            BG_ZOOM, false},
+    {N_("Undo Buttons"),            BG_UNDO, false},
+    {N_("Easement Button"),         BG_EASE, false},
+    {N_("SnapGrid Buttons"),        BG_SNAP, false},
+    {N_("Create Track Buttons"),    BG_TRKCRT, true},
+    {N_("Layout Control Elements"), BG_CONTROL, true},
+    {N_("Modify Track Buttons"),    BG_TRKMOD, false},
+    {N_("Properties/Select"),       BG_SELECT, false},
+    {N_("Track Group Buttons"),     BG_TRKGRP, false},
+    {N_("Train Group Buttons"),     BG_TRAIN, true},
+    {N_("Create Misc Buttons"),     BG_MISCCRT, false},
+    {N_("Ruler Button"),            BG_RULER, false},
+    {N_("Layer Buttons"),           BG_LAYER, true},
+    {N_("Hot Bar"),                 BG_HOTBAR},
+    {NULL, 0L}
+};
+
+#define COUNTTOOLBARGROUPS (COUNT(allToolbarGroups)-1)
+
+// toolbar options dialog
+static wWin_p toolbarW;
+unsigned long toggleSet;
+
+// callbacks for button presses
+static void SelectAllGroups(void* unused);
+static void InvertSelection(void* unused);
+
+static paramData_t toolbarPLs[] = {
+    { PD_TOGGLE, &toggleSet, "toolbarset", 0, NULL},
+#define I_SELECTALL     (1)
+    { PD_BUTTON, SelectAllGroups, "selectall", PDO_DLGBOXEND, NULL, N_("Select All") },
+#define I_INVERT        (2)
+    { PD_BUTTON, InvertSelection, "invert", PDO_DLGHORZ, NULL, N_("Invert Selection")}
+};
+
+static paramGroup_t toolbarPG = { "toolbar", PGO_RECORD, toolbarPLs,
+    COUNT(toolbarPLs)};
+
+/**
+ * Initialize the list of available options. The list of labels is created 
+ * from the allToolbarGroups array. Memory allocated here
+ * is never freed as it might be used when opening the dialog
+ * 
+ * \param unused
  */
 
-static char* AllToolbarLabels[] = { N_("File Buttons"), N_("Print Buttons"), N_("Import/Export Buttons"),
-                                    N_("Zoom Buttons"), N_("Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"),
-                                    N_("Create Track Buttons"), N_("Layout Control Elements"),
-                                    N_("Modify Track Buttons"), N_("Properties/Select"),
-                                    N_("Track Group Buttons"), N_("Train Group Buttons"),
-                                    N_("Create Misc Buttons"), N_("Ruler Button"),
-                                    N_("Layer Buttons"), N_("Hot Bar"),
-                                    NULL
-                                  };
-static long AllToolbarMasks[] = { 1 << BG_FILE, 1 << BG_PRINT, 1 << BG_EXPORTIMPORT,
-                                  1 << BG_ZOOM, 1 << BG_UNDO, 1 << BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT,
-                                  1 << BG_CONTROL, 1 << BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN,
-                                  1 << BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR
-                                };
-
-static wMenuToggle_p AllToolbarMI[COUNT(AllToolbarMasks)];
-
-static void ToolbarAction(void* data)
+static void
+InitializeToolbarDialog(void)
 {
-    int inx = (int)VP2L(data);
-    CHECK(inx >= 0 && inx < COUNT(AllToolbarMasks));
-    wBool_t set = wMenuToggleGet(AllToolbarMI[inx]);
-    long mask = AllToolbarMasks[inx];
-    if (set) {
-        toolbarSet |= mask;
+	char** labels = MyMalloc((COUNT(allToolbarGroups)) * sizeof(char*));
+
+    for (int i = 0; i < COUNT(allToolbarGroups); i++) {
+		labels[i] = allToolbarGroups[i].label;
+	}
+	toolbarPLs[0].winData = labels;
+
+    ParamRegister(&toolbarPG);
+}
+
+static void ToolbarChange(long changes)
+{
+    if ((changes & CHANGE_TOOLBAR)) {
+        MainProc(mainW, wResize_e, NULL, NULL);
     }
-    else {
-        toolbarSet &= ~mask;
-    }
-    wPrefSetInteger("misc", "toolbarset", toolbarSet);
-    MainProc(mainW, wResize_e, NULL, NULL);
-    if (recordF)
-        fprintf(recordF, "PARAMETER %s %s %ld", "misc", "toolbarset",
-                toolbarSet);
 }
 
 /**
- * Create the Toolbar configuration submenu. Based on two arrays of 
- * descriptions and masks, the toolbar submenu is created dynamically.
- *
- * \param toolbarM IN menu to which the toogles will be added
+ * Handle button press to select all groups. Set all bits to 1, unused bits 
+ * will be ignored
+ * 
+ * \param unused
  */
-
-EXPORT void CreateToolbarM(wMenu_p toolbarM)
+static void SelectAllGroups(void* unused)
 {
-    int inx, cnt;
-    long* masks;
-    char** labels;
-    wBool_t set;
+    toggleSet = ~(0UL);
 
-    cnt = COUNT(AllToolbarMasks);
-    masks = AllToolbarMasks;
-    labels = AllToolbarLabels;
-    for (inx = 0; inx < cnt; inx++, masks++, labels++) {
-        set = (toolbarSet & *masks) != 0;
-        AllToolbarMI[inx] = wMenuToggleCreate(toolbarM, 
-            "toolbarM", _(*labels), 0, set, ToolbarAction, I2VP(inx));
-    }
+    ParamLoadControls(&toolbarPG);
 }
 
+/**
+ * Handle button press to invert the current selection. Invert all bits by, 
+ * XOR with 1s, unused bits will be ignored
+ *
+ * \param unused
+ */
+static void InvertSelection(void* unused)
+{
+    toggleSet ^= ~(0UL);
 
-static void LayoutSetPos(wIndex_t inx)
+    ParamLoadControls(&toolbarPG);
+}
+
+/**
+ * Handle the ok press. The bit pattern set up from the dialog is converted 
+ * to the pattern used by the toolbar. Then the toolbar is refreshed.
+ * 
+ * \param unused
+ */
+
+static void ToolbarOk(void* unused)
+{
+    toolbarSet = 0;
+
+    for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
+        if (toggleSet & (1UL << i)) {
+            toolbarSet = SETBIT(toolbarSet, allToolbarGroups[i].group);
+        }
+    }
+    SaveToolbarConfig();
+    ToolbarLayout(unused);
+    MainProc(mainW, wResize_e, NULL, NULL);
+    wHide(toolbarW);
+}
+
+/**
+ * When selected from the menu the toolbar config dialog is opened. First lazy
+ * initialization is done on first call. Then the toggle states are set from
+ * the toolbar configuration bit pattern and the dialog is shown.
+ * 
+ * \param unused
+ */
+
+EXPORT void DoToolbar(void* unused)
+{
+    if (!toolbarW) {
+        InitializeToolbarDialog();
+        toolbarW = ParamCreateDialog(&toolbarPG,
+            MakeWindowTitle(_("Toolbar Options")), _("OK"), ToolbarOk, wHide,
+            TRUE, NULL, 0, NULL);
+    }
+
+    toggleSet = 0;
+    for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
+        if (ISBITSET(toolbarSet, allToolbarGroups[i].group)) {
+            toggleSet = SETBIT(toggleSet, i);
+        }
+    }
+    ParamLoadControls(&toolbarPG);
+    wShow(toolbarW);
+}
+
+/**
+ * Buttons are visible when the command is enabled or when additional
+ * layer buttons need to be shown.
+ * 
+ * \param inx
+ */
+
+bool
+IsButtonVisible(int group, long mode, long options, long layerButtons)
+{
+    if (group == BG_LAYER) {
+        if (layerButtons < layerCount)
+            return true;
+        else
+            return false;
+    }
+    return(IsCommandEnabled(mode, options));
+}
+
+/**
+ * Calculate the position and visibility of a button and display it.
+ * 
+ * \param inx   index into button list
+ */
+
+static void ToolbarButtonPlace(wIndex_t inx)
 {
     wWinPix_t w, h, offset;
     static wWinPix_t toolbarRowHeight = 0;
     static wWinPix_t width;
-    static int lastGroup;
+    static int previousGroup;
     static wWinPix_t gap;
     static int layerButtCnt;
     static int layerButtNumber;
-    int currGroup;
+    int currentGroup = buttonList[inx].group;
 
     if (inx == 0) {
-        lastGroup = 0;
+        previousGroup = 0;
         wWinGetSize(mainW, &width, &h);
-        gap = 5;
-        toolbarWidth = width - 20 + 5;
+        gap = GROUP_DISTANCE;
+        toolbarWidth = width - TOOLBAR_MARGIN + GROUP_DISTANCE;
         layerButtCnt = 0;
         layerButtNumber = 0;
         toolbarHeight = 0;
@@ -137,22 +283,23 @@ static void LayoutSetPos(wIndex_t inx)
             toolbarRowHeight = wControlGetHeight(buttonList[inx].control);
         }
 
-        currGroup = buttonList[inx].group & ~BG_BIGGAP;
-        if (currGroup != lastGroup && (buttonList[inx].group & BG_BIGGAP)) {
-            gap = 15;
+        if (currentGroup != previousGroup) {
+            for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
+                if (allToolbarGroups[i].group == currentGroup && 
+                    allToolbarGroups[i].biggap) {
+                    gap = GROUP_BIG_DISTANCE;
+                }
+            }
         }
-        if ((toolbarSet & (1 << currGroup))
-                && (programMode != MODE_TRAIN
-                    || (buttonList[inx].options
-                        & (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
-                && (programMode == MODE_TRAIN
-                    || (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
-                && ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-                    || layerButtCnt < layerCount)) {
-            if (currGroup != lastGroup) {
+
+        if ((ISGROUPVISIBLE(currentGroup)) &&
+            IsButtonVisible(currentGroup, programMode, 
+                buttonList[inx].options, layerButtCnt ))
+        {
+            if (currentGroup != previousGroup) {
                 toolbarWidth += gap;
-                lastGroup = currGroup;
-                gap = 5;
+                previousGroup = currentGroup;
+                gap = GROUP_DISTANCE;
             }
             w = wControlGetWidth(buttonList[inx].control);
             h = wControlGetHeight(buttonList[inx].control);
@@ -167,17 +314,17 @@ static void LayoutSetPos(wIndex_t inx)
                 (buttonList[inx + 1].options & IC_ABUT)) {
                     w += wControlGetWidth(buttonList[inx + 1].control);
             }
-            if (toolbarWidth + w > width - 20) {
+            if (toolbarWidth + w > width - TOOLBAR_MARGIN) {
                 toolbarWidth = 0;
                 toolbarHeight += h + 5;
             }
-            if ((currGroup == BG_LAYER) && layerButtNumber > 1
+            if ((currentGroup == BG_LAYER) && layerButtNumber > 1
                     && GetLayerHidden(layerButtNumber - 2)) {
                 wControlShow(buttonList[inx].control, FALSE);
                 layerButtNumber++;
             }
             else {
-                if (currGroup == BG_LAYER) {
+                if (currentGroup == BG_LAYER) {
                     if (layerButtNumber > 1) {
                         layerButtCnt++;    // Ignore List and Background
                     }
@@ -197,34 +344,25 @@ static void LayoutSetPos(wIndex_t inx)
     }
 }
 
-EXPORT void LayoutToolBar(void* data)
+EXPORT void ToolbarLayout(void* data)
 {
-    int inx;
+	int inx;
 
-    for (inx = 0; inx < buttonCnt; inx++) {
-        LayoutSetPos(inx);
-    }
-    if (toolbarSet & (1 << BG_HOTBAR)) {
-        LayoutHotBar(data);
-    }
-    else {
-        HideHotBar();
-    }
-}
+	for (inx = 0; inx < buttonCnt; inx++) {
+		ToolbarButtonPlace(inx);
+	}
 
-static void ToolbarChange(long changes)
-{
-    if ((changes & CHANGE_TOOLBAR)) {
-        /*if ( !(changes&CHANGE_MAIN) )*/
-        MainProc(mainW, wResize_e, NULL, NULL);
-        /*else
-         LayoutToolBar();*/
-    }
+	if (toolbarSet & (1 << BG_HOTBAR)) {
+		LayoutHotBar(data);
+	}
+	else {
+		HideHotBar();
+	}
 }
 
 /**
  *  Set the 'pressed' state of a toolbar button.
- * 
+ *
  * \param button    index into button list
  * \param busy      desired button state
  */
@@ -232,7 +370,7 @@ static void ToolbarChange(long changes)
 EXPORT void ToolbarButtonBusy(wIndex_t button, wBool_t busy)
 {
     wButtonSetBusy((wButton_p)buttonList[button].control,
-                   busy);
+        busy);
 }
 
 /**
@@ -264,10 +402,18 @@ EXPORT void ToolbarButtonEnableIfSelect(bool selected)
     }
 }
 
+/**
+ * Place a control onto the toolbar. The control is added to the toolbar
+ * control list and initially hidden. Placement and visibility is controlled
+ * by ToolbarButtonPlace()
+ * 
+ * \param control   the control to add
+ * \param options   control options
+ */
 
-EXPORT void AddToolbarControl(wControl_p control, long options)
+EXPORT void ToolbarControlAdd(wControl_p control, long options)
 {
-//	CHECK(buttonCnt < COMMAND_MAX - 1);
+	CHECK(buttonCnt < BUTTON_MAX - 1);
     buttonList[buttonCnt].enabled = TRUE;
     buttonList[buttonCnt].options = options;
     buttonList[buttonCnt].group = cmdGroup;
@@ -275,7 +421,8 @@ EXPORT void AddToolbarControl(wControl_p control, long options)
     buttonList[buttonCnt].y = 0;
     buttonList[buttonCnt].control = control;
     buttonList[buttonCnt].cmdInx = -1;
-    LayoutSetPos(buttonCnt);
+    wControlShow(control, FALSE);
+    ToolbarButtonPlace(buttonCnt);
     buttonCnt++;
 }
 
@@ -373,6 +520,37 @@ EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx)
 }
 
 /**
+ * Save the toolbar setting to the configuration file.
+ * 
+ */
+
+static void
+SaveToolbarConfig(void)
+{
+    wPrefSetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, toolbarSet);
+    if (recordF)
+        fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION, 
+            TOOLBAR_VARIABLE, toolbarSet);
+
+}
+
+/**
+ * Get the preferences for the toolbar from the configuration file 
+ * and initialize data structure.
+ * 
+ */
+
+static void
+LoadToolbarConfig(void)
+{
+    wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, &toolbarSet, 
+        TOOLBARSET_INIT);
+    if (recordF)
+        fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION,
+            TOOLBAR_VARIABLE, toolbarSet);
+}
+
+/**
  * Initialize toolbar functions.
  * 
  */
@@ -380,4 +558,6 @@ EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx)
 EXPORT void InitToolbar(void)
 {
     RegisterChangeNotification(ToolbarChange);
+
+    LoadToolbarConfig();
 }
