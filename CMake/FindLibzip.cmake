@@ -38,7 +38,16 @@ else(WIN32)
 
   if(UNIX AND NOT APPLE)
     find_library(LIBZIP_LIBRARY
-      NAMES libzip.a zip)
+      NAMES libzip.a zip
+      PATHS
+		/usr/lib64
+		/usr/lib
+		/usr/local/lib64
+		/usr/local/lib
+		/sw/lib
+		/opt/local/lib
+		${CMAKE_CURRENT_SOURCE_DIR}/app/tools/lib/linux
+	)
   else()
     find_library(LIBZIP_LIBRARY
       NAMES zip)
