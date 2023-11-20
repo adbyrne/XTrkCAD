@@ -2633,7 +2633,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
 		LocoListInit();
 		ControllerDialogSync(curTrainDlg);
 		wShow(curTrainDlg->win);
-		wControlShow((wControl_p)newcarB, (toolbarSet&(1<<BG_TRAIN)));
+		wControlShow((wControl_p)newcarB, ToolbarIsGroupVisible(BG_TRAIN));
 		currCarItemPtr = NULL;
 		TempRedraw(); // CmdTrain C_START
 		return C_CONTINUE;

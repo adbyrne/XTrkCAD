@@ -60,8 +60,6 @@ EXPORT int commandCnt = 0;
 
 static wIndex_t curCommand = 0;
 
-EXPORT int cmdGroup;
-
 static int log_command;
 
 
@@ -155,7 +153,7 @@ EXPORT void Reset(void)
 	wSetCursor(mainD.d, preSelect ? defaultCursor : wCursorQuestion);
 	commandContext = commandList[curCommand].context;
 	if (commandList[curCommand].buttInx >= 0)
-		ToolbarButtonBusy(commandList[curCommand].buttInx, FALSE);
+		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 
@@ -481,13 +479,14 @@ EXPORT void DoCommandB(void * data)
 	commandContext = commandList[curCommand].context;
 	// update the toolbar icon when a sub-command is selected (eg. circle
 	// vs. filled circle)
+
 	if (commandList[curCommand].buttInx >= 0) {
-		ToolbarUpdateButton(commandList[curCommand].buttInx, 
-			curCommand, commandList[curCommand].icon,
-			commandList[curCommand].helpKey, I2VP(curCommand));
+			ToolbarUpdateButton(commandList[curCommand].buttInx,
+				curCommand, commandList[curCommand].icon,
+				commandList[curCommand].helpKey, I2VP(curCommand));
+		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
 	}
-	ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
-	
+		
 	LOG(log_command, 1,
 		("COMMAND START %s\n", commandList[curCommand].helpKey));
 	wSetCursor(mainD.d,defaultCursor);

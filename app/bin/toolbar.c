@@ -27,21 +27,26 @@
 #include "param.h"
 #include "include/toolbar.h"
 
-
 EXPORT void ToolbarLayout(void* unused);
+
+struct sToolbarState {
+    int previousGroup;          // control variable for change control ops
+    int layerButton;            // number of layer controls shown
+    wWinPix_t nextX;            // drawing position for next control
+    wWinPix_t rowHeight;        // height of row
+};
 
 // local function prototypes
 static void InitializeToolbarDialog(void);
 static void ToolbarChange(long changes);
 static void ToolbarOk(void* unused);
-static void ToolbarButtonPlace(wIndex_t inx);
+static void ToolbarButtonPlace(struct sToolbarState* tbState, wIndex_t inx);
 static void SaveToolbarConfig(void);
-static void LoadToolbarConfig(void);
 
 // toolbar properties
-EXPORT long toolbarSet;
-EXPORT wWinPix_t toolbarHeight = 0;
-static wWinPix_t toolbarWidth = 0;
+static long toolbarSet;
+static wWinPix_t toolbarHeight = 0;
+EXPORT int cmdGroup;
 
 #define TOOLBARSET_INIT				(0xFFFF)
 #define TOOLBAR_SECTION "misc"
@@ -50,6 +55,8 @@ static wWinPix_t toolbarWidth = 0;
 #define GROUP_DISTANCE (5)     // default distance between button groups
 #define GROUP_BIG_DISTANCE (GROUP_DISTANCE * 3) // big gap
 #define TOOLBAR_MARGIN (20)     // left and right margins of toolbar
+#define FIXEDLAYERCONTROLS (2)  // the layer groups has two controls that are
+                                // always visible (list and background)
 
 /*
 * Bit handling macros
@@ -112,7 +119,7 @@ static struct buttonGroups allToolbarGroups[] = {
 
 // toolbar options dialog
 static wWin_p toolbarW;
-unsigned long toggleSet;
+static unsigned long toggleSet;
 
 // callbacks for button presses
 static void SelectAllGroups(void* unused);
@@ -233,6 +240,44 @@ EXPORT void DoToolbar(void* unused)
 }
 
 /**
+ * Check whether button group is configured to be visible.
+ * 
+ * \param   group   single group to check
+ * \return  true if visible
+ */
+
+EXPORT bool
+ToolbarIsGroupVisible(int group)
+{
+    CHECK(group > 0);
+    CHECK(group <= COUNTTOOLBARGROUPS);
+
+    return(ISGROUPVISIBLE(group));
+}
+
+/**
+ * Get the current height of the toolbar.
+ * 
+ * \return 
+ */
+
+EXPORT wWinPix_t
+ToolbarGetHeight(void)
+{
+    return(toolbarHeight);
+}
+
+/**
+ * .
+ */
+
+EXPORT void 
+ToolbarSetHeight(wWinPix_t newHeight)
+{
+    toolbarHeight = newHeight;
+}
+
+/**
  * Buttons are visible when the command is enabled or when additional
  * layer buttons need to be shown.
  * 
@@ -243,7 +288,7 @@ bool
 IsButtonVisible(int group, long mode, long options, long layerButtons)
 {
     if (group == BG_LAYER) {
-        if (layerButtons < layerCount)
+        if (layerButtons < layerCount+FIXEDLAYERCONTROLS)
             return true;
         else
             return false;
@@ -257,33 +302,22 @@ IsButtonVisible(int group, long mode, long options, long layerButtons)
  * \param inx   index into button list
  */
 
-static void ToolbarButtonPlace(wIndex_t inx)
+static void ToolbarButtonPlace(struct sToolbarState *tbState, wIndex_t inx)
 {
     wWinPix_t w, h, offset;
-    static wWinPix_t toolbarRowHeight = 0;
-    static wWinPix_t width;
-    static int previousGroup;
-    static wWinPix_t gap;
-    static int layerButtCnt;
-    static int layerButtNumber;
+    wWinPix_t width;
+    wWinPix_t gap = GROUP_DISTANCE;
     int currentGroup = buttonList[inx].group;
 
-    if (inx == 0) {
-        previousGroup = 0;
-        wWinGetSize(mainW, &width, &h);
-        gap = GROUP_DISTANCE;
-        toolbarWidth = width - TOOLBAR_MARGIN + GROUP_DISTANCE;
-        layerButtCnt = 0;
-        layerButtNumber = 0;
-        toolbarHeight = 0;
-    }
+    wWinGetSize(mainW, &width, &h);
 
     if (buttonList[inx].control) {
-        if (toolbarRowHeight <= 0) {
-            toolbarRowHeight = wControlGetHeight(buttonList[inx].control);
+        if (tbState->rowHeight <= 0) {
+            tbState->rowHeight = wControlGetHeight(buttonList[inx].control);
+            toolbarHeight = tbState->rowHeight + 5;
         }
 
-        if (currentGroup != previousGroup) {
+        if (currentGroup != tbState->previousGroup) {
             for (int i = 0; i < COUNTTOOLBARGROUPS; i++) {
                 if (allToolbarGroups[i].group == currentGroup && 
                     allToolbarGroups[i].biggap) {
@@ -294,18 +328,17 @@ static void ToolbarButtonPlace(wIndex_t inx)
 
         if ((ISGROUPVISIBLE(currentGroup)) &&
             IsButtonVisible(currentGroup, programMode, 
-                buttonList[inx].options, layerButtCnt ))
+                buttonList[inx].options, tbState->layerButton ))
         {
-            if (currentGroup != previousGroup) {
-                toolbarWidth += gap;
-                previousGroup = currentGroup;
-                gap = GROUP_DISTANCE;
+            if (currentGroup != tbState->previousGroup) {
+                tbState->nextX += gap;
+                tbState->previousGroup = currentGroup;
             }
             w = wControlGetWidth(buttonList[inx].control);
             h = wControlGetHeight(buttonList[inx].control);
-            if (h < toolbarRowHeight) {
-                offset = (h - toolbarRowHeight) / 2;
-                h = toolbarRowHeight;  //Uniform
+            if (h < tbState->rowHeight) {
+                offset = (h - tbState->rowHeight) / 2;
+                h = tbState->rowHeight;  //Uniform
             }
             else {
                 offset = 0;
@@ -314,27 +347,33 @@ static void ToolbarButtonPlace(wIndex_t inx)
                 (buttonList[inx + 1].options & IC_ABUT)) {
                     w += wControlGetWidth(buttonList[inx + 1].control);
             }
-            if (toolbarWidth + w > width - TOOLBAR_MARGIN) {
-                toolbarWidth = 0;
+            if (tbState->nextX + w > width - TOOLBAR_MARGIN) {
+                tbState->nextX = 5;
                 toolbarHeight += h + 5;
             }
-            if ((currentGroup == BG_LAYER) && layerButtNumber > 1
-                    && GetLayerHidden(layerButtNumber - 2)) {
+            if ((currentGroup == BG_LAYER) && 
+                    tbState->layerButton >= FIXEDLAYERCONTROLS && 
+                    GetLayerHidden(tbState->layerButton - FIXEDLAYERCONTROLS)) {
                 wControlShow(buttonList[inx].control, FALSE);
-                layerButtNumber++;
+                tbState->layerButton++;
             }
             else {
+                wWinPix_t newX = tbState->nextX;
+                wWinPix_t newY = toolbarHeight - (h + 5 + offset);
+
+                // count number of shown layer buttons
                 if (currentGroup == BG_LAYER) {
-                    if (layerButtNumber > 1) {
-                        layerButtCnt++;    // Ignore List and Background
-                    }
-                    layerButtNumber++;
+                    tbState->layerButton++;
                 }
-                wControlSetPos(buttonList[inx].control, toolbarWidth,
-                               toolbarHeight - (h + 5 + offset));
-                buttonList[inx].x = toolbarWidth;
-                buttonList[inx].y = toolbarHeight - (h + 5 + offset);
-                toolbarWidth += wControlGetWidth(buttonList[inx].control);
+                if ((newX != buttonList[inx].x) || (newY != buttonList[inx].y)) {
+                    wControlShow(buttonList[inx].control, FALSE);
+
+                    wControlSetPos(buttonList[inx].control, newX,
+                        newY);
+                }
+                buttonList[inx].x = newX;
+                buttonList[inx].y = newY;
+                tbState->nextX += wControlGetWidth(buttonList[inx].control);
                 wControlShow(buttonList[inx].control, TRUE);
             }
         }
@@ -347,12 +386,18 @@ static void ToolbarButtonPlace(wIndex_t inx)
 EXPORT void ToolbarLayout(void* data)
 {
 	int inx;
+    struct sToolbarState state = {
+        .previousGroup = 0,
+        .nextX = 0,
+        .layerButton = 0,
+        .rowHeight = 0,
+    };
 
 	for (inx = 0; inx < buttonCnt; inx++) {
-		ToolbarButtonPlace(inx);
+		ToolbarButtonPlace(&state, inx);
 	}
 
-	if (toolbarSet & (1 << BG_HOTBAR)) {
+	if (ISBITSET(toolbarSet, BG_HOTBAR)) {
 		LayoutHotBar(data);
 	}
 	else {
@@ -422,7 +467,6 @@ EXPORT void ToolbarControlAdd(wControl_p control, long options)
     buttonList[buttonCnt].control = control;
     buttonList[buttonCnt].cmdInx = -1;
     wControlShow(control, FALSE);
-    ToolbarButtonPlace(buttonCnt);
     buttonCnt++;
 }
 
@@ -535,19 +579,28 @@ SaveToolbarConfig(void)
 }
 
 /**
- * Get the preferences for the toolbar from the configuration file 
- * and initialize data structure.
+ * Get the preferences for the toolbar from the configuration file. 
+ * Bits unused are cleared just to be sure;
  * 
  */
 
-static void
-LoadToolbarConfig(void)
+EXPORT void
+ToolbarLoadConfig(void)
 {
-    wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, &toolbarSet, 
+    unsigned long maxToolbarSet = (1 << COUNTTOOLBARGROUPS) - 1;
+    unsigned long toolbarSetIni;
+
+    wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, &toolbarSetIni, 
         TOOLBARSET_INIT);
+
+    toolbarSet = toolbarSetIni & maxToolbarSet;
+
+    // unused but saved to stay compatible
+    wPrefSetInteger(TOOLBAR_SECTION, "max-toolbarset", maxToolbarSet);
+
     if (recordF)
-        fprintf(recordF, "PARAMETER %s %s %ld", TOOLBAR_SECTION,
-            TOOLBAR_VARIABLE, toolbarSet);
+        fprintf(recordF, "PARAMETER %s %s %lX -> %lX", TOOLBAR_SECTION,
+            TOOLBAR_VARIABLE, toolbarSetIni, toolbarSet);
 }
 
 /**
@@ -559,5 +612,5 @@ EXPORT void InitToolbar(void)
 {
     RegisterChangeNotification(ToolbarChange);
 
-    LoadToolbarConfig();
+    ToolbarLoadConfig();
 }

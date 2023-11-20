@@ -37,11 +37,10 @@
 
 #include "include/toolbar.h"
 
-static paramData_t menuPLs[101] = { { PD_LONG, &toolbarSet, "toolbarset" }, {
-		PD_LONG, &curTurnoutEp, "cur-turnout-ep"
-	}
+static paramData_t menuPLs[101] = { /*{PD_LONG, &toolbarSet NULL, "toolbarset"},*/ 
+	{PD_LONG, &curTurnoutEp, "cur-turnout-ep"} 
 };
-static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
+static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 0 };
 
 static void InitCmdExport( void );
 

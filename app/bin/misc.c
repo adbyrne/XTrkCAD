@@ -1137,12 +1137,13 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	             displayHeight, -1, -1, -1);
 	InitAppDefaults();
 
-	newToolbarMax = (1 << BG_COUNT) - 1;
+	ToolbarLoadConfig();
+/*	newToolbarMax = (1 << BG_COUNT) - 1;
 	wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
 	wPrefGetInteger("misc", "max-toolbarset", &oldToolbarMax, 0);
 	toolbarSet |= newToolbarMax & ~oldToolbarMax;
 	wPrefSetInteger("misc", "max-toolbarset", newToolbarMax);
-	wPrefSetInteger("misc", "toolbarset", toolbarSet);
+	wPrefSetInteger("misc", "toolbarset", toolbarSet); */
 
 	LOG1(log_init, ( "fontInit\n"))
 
@@ -1202,7 +1203,7 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	 * TIDY UP
 	 */
 	InitColor();
-	if (toolbarSet&(1<<BG_HOTBAR)) {
+	if (ToolbarIsGroupVisible(BG_HOTBAR)) {
 		LayoutHotBar( NULL );
 	} else {
 		LayoutHotBar( NULL );   /* Must run once to set it up */

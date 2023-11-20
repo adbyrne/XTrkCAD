@@ -1776,14 +1776,14 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 		LOG( log_redraw, 1, ( "MainProc/Resize: %d %s %ld %ld\n", cMP++,
 		                      refresh==NULL?"RDW":"---", width, height ) );
 		ToolbarLayout(refresh);
-		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
+		height -= (ToolbarGetHeight() +max(infoHeight,textHeight)+10);
 		if (height >= 0) {
 			wBool_t bTemp = wDrawSetTempMode(mainD.d, FALSE );
 			if ( bTemp ) {
 				printf( "MainProc TempMode\n" );
 			}
 			wDrawSetSize( mainD.d, width-20, height, refresh );
-			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
+			wControlSetPos( (wControl_p)mainD.d, 0, ToolbarGetHeight());
 			SetMainSize();
 			SetInfoBar();
 			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
@@ -3242,10 +3242,10 @@ EXPORT void DrawInit( int initialZoom )
 //	InitColor();
 	wWinGetSize( mainW, &w, &h );
 	
-	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
+	h = h - (ToolbarGetHeight() +max(textHeight,infoHeight)+10);
 	if ( w <= 0 ) { w = 1; }
 	if ( h <= 0 ) { h = 1; }
-	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "",
+	tempD.d = mainD.d = wDrawCreate( mainW, 0, ToolbarGetHeight(), "",
 	                                 BD_TICKS|BD_MODKEYS,
 	                                 w, h, &mainD,
 	                                 MainLayoutCB, DoMousew );

@@ -96,9 +96,6 @@
 
 extern int buttonCnt;
 extern int commandCnt;
-extern int cmdGroup;
-extern long toolbarSet;
-extern wWinPix_t toolbarHeight;
 extern long preSelect;
 extern long rightClickMode;
 extern void * commandContext;

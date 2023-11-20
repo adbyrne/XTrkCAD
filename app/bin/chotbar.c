@@ -87,7 +87,7 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 	}
 	orig.y = 0;
 	size.x = hotBarMap(inx).w - 2.0/hotBarD.dpi;
-	size.y = toolbarHeight;
+	size.y = ToolbarGetHeight();
 #ifdef LATER
 	printf( "HotBarHilite fixed_x:%0.3f X0:%d/%0.3f X:%d/%0.3f+%0.3f X=%0.3f\n",
 	        fixed_x,
@@ -595,11 +595,11 @@ EXPORT void LayoutHotBar( void * redraw )
 	buttonWidth = wControlGetWidth((wControl_p)hotBarLeftB);
 	buttonHeight = wControlGetHeight((wControl_p)hotBarLeftB);
 	wControlSetPos( (wControl_p)hotBarLeftB, HOTBAR_LEFT,
-	                toolbarHeight+(hbHeight-buttonHeight)/2 );
+		ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
 	wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth+HOTBAR_LEFT+1,
-	                toolbarHeight+(hbHeight-buttonHeight)/2 );
+		ToolbarGetHeight() +(hbHeight-buttonHeight)/2 );
 	wControlSetPos( (wControl_p)hotBarD.d, buttonWidth+HOTBAR_LEFT+1,
-	                toolbarHeight );
+		ToolbarGetHeight());
 	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hbHeight+2, redraw );
 	hotBarD.size.x = ((double)(winWidth-20
 	                           -buttonWidth*2))/hotBarD.dpi*hotBarD.scale;
@@ -613,7 +613,7 @@ EXPORT void LayoutHotBar( void * redraw )
 	} else if (!redraw) {
 		RedrawHotBar( NULL, NULL, 0, 0 );
 	}
-	toolbarHeight += hbHeight+3;
+	ToolbarSetHeight( ToolbarGetHeight() + hbHeight+3 );
 }
 
 void HideHotBar( void )
