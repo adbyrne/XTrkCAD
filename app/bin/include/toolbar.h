@@ -27,8 +27,6 @@
 #define BG_EXPORTIMPORT (16)
 #define BG_PRINT		(17)
 
-extern int cmdGroup;
-
 static void SaveToolbarConfig(void);
 EXPORT void ToolbarLayout(void* data);
 EXPORT void DoToolbar(void* unused);
@@ -44,6 +42,7 @@ EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
     char* icon, const char* helpKey, void* context);
 EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx);
 EXPORT void ToolbarLoadConfig(void);
+EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
 
 
 wIndex_t AddCommand(procCommand_t cmdProc, const char* helpKey,

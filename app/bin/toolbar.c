@@ -46,7 +46,6 @@ static void SaveToolbarConfig(void);
 // toolbar properties
 static long toolbarSet;
 static wWinPix_t toolbarHeight = 0;
-EXPORT int cmdGroup;
 
 #define TOOLBARSET_INIT				(0xFFFF)
 #define TOOLBAR_SECTION "misc"
@@ -456,7 +455,7 @@ EXPORT void ToolbarButtonEnableIfSelect(bool selected)
  * \param options   control options
  */
 
-EXPORT void ToolbarControlAdd(wControl_p control, long options)
+EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup)
 {
 	CHECK(buttonCnt < BUTTON_MAX - 1);
     buttonList[buttonCnt].enabled = TRUE;

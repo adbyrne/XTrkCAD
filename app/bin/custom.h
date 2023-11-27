@@ -126,7 +126,7 @@ void InitCmdEasement( void );
 char * MakeWindowTitle( char * );
 addButtonCallBack_t EasementInit( void );
 
-void InitLayers( void );
+void InitLayers( int cmdGroup );
 void InitHotBar( void );
 void InitCarDlg( void );
 BOOL_T Initialize( void );

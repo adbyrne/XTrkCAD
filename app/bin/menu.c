@@ -62,6 +62,7 @@ EXPORT wMenuList_p fileList_ml;
 EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
 
+static int cmdGroup;
 
 /*--------------------------------------------------------------------*/
 typedef struct {
@@ -626,7 +627,7 @@ EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
 	}
 	bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
 	                   BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
-	ToolbarControlAdd((wControl_p) bb, options);
+	ToolbarControlAdd((wControl_p) bb, options, cmdGroup);
 	return bb;
 }
 
@@ -1365,7 +1366,7 @@ EXPORT void CreateMenus(void)
 	InitCmdDescribe2(changeM);
 	InitCmdPan2(changeM);
 
-	InitLayers();
+	InitLayers(BG_LAYER);
 
 	cmdGroup = BG_HOTBAR;
 	InitHotBar();
