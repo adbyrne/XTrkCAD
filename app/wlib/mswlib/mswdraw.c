@@ -32,6 +32,7 @@
 
 #include "mswint.h"
 #include <FreeImage.h>
+#include <wingdi.h>
 
 wBool_t wDrawDoTempDraw = TRUE;
 /*
@@ -48,10 +49,8 @@ static wBool_t initted = FALSE;
 
 static FARPROC oldDrawProc;
 
-
-static long tmpOp = 0x990066;
-static long setOp = 0x8800c6;
-static long clrOp = 0xbb0226;
+static long setOp = SRCCOPY; 
+static long clrOp = MERGEPAINT;
 
 #define CENTERMARK_LENGTH 4
 
@@ -1533,7 +1532,7 @@ void wDrawBitMap(
 			DeleteObject( bm->bm );
 		}
 		bm->bm = mswCreateBitMap( mswGetColor(d->hasPalette,
-		                                      dc) /*colorPalette.palPalEntry[dc]*/, RGB( 255, 255, 255 ),
+		                                      dc) /*colorPalette.palPalEntry[dc]*/, RGB(255, 255, 255),
 		                          RGB( 255, 255, 255 ), (wWinPix_t)bm->w, (wWinPix_t)bm->h, bm->bmx );
 		bm->color = dc;
 	}

@@ -213,6 +213,13 @@ void CreateDescribeAnchor(coOrd pos)
 	wSetCursor(mainD.d,wCursorNone);
 }
 
+/**
+ * Draw anchor for activable objects ie. objects that can be double clicked 
+ * upon. Usually these are notes.
+ * 
+ * \param pos position of object
+ */
+
 void CreateActivateAnchor(coOrd pos)
 {
 	DIST_T d = tempD.scale*0.15;
@@ -220,23 +227,22 @@ void CreateActivateAnchor(coOrd pos)
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).lineWidth = 0;
-	c.x -= d*3/4;
+	anchors(i).lineWidth = 0.1;
+	 c.x += d*1/4;
+	 c.y += d * 1 / 4;
 	anchors(i).u.c.center = c;
-	anchors(i).u.c.a0 = 0.0;
-	anchors(i).u.c.a1 = 360.0;
-	anchors(i).u.c.radius = d;
+	anchors(i).u.c.a0 = 70.0;
+	anchors(i).u.c.a1 = 320.0;
+	anchors(i).u.c.radius = d*0.75;
 	anchors(i).color = wDrawColorPowderedBlue;
+
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	i = anchors_da.cnt-1;
-	c.x += d*1.5;
-	anchors(i).type = SEG_CRVLIN;
-	anchors(i).lineWidth = 0;
-	anchors(i).u.c.center = pos;
-	anchors(i).u.c.a0 = 0.0;
-	anchors(i).u.c.a1 = 360.0;
-	anchors(i).u.c.radius = d;
-	anchors(i).color = wDrawColorPowderedBlue;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).lineWidth = 0.15;
+	anchors(i).u.l.pos[0] = c;
+	Translate(&anchors(i).u.l.pos[1], anchors(i).u.l.pos[0], NormalizeAngle(45), d*1.25);
+	anchors(i).color = wDrawColorBlue;
 	wSetCursor(mainD.d,wCursorNone);
 }
 
@@ -2304,7 +2310,7 @@ static track_p SelectTrackByIndex(TRKINX_T ti, char * message )
 		if (!GetLayerFrozen( GetTrkLayer( trk ) ) ) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
-				snprintf(message, STR_LONG_SIZE, "%s %d",_("In module layer:"),
+				snprintf(message, STR_LONG_SIZE, "%s %u",_("In module layer:"),
 				         GetTrkLayer(trk)+1);
 			} else {
 				if (!GetLayerVisible(GetTrkLayer(trk))) { FlipLayer(I2VP(GetTrkLayer(trk))); }
@@ -2312,7 +2318,7 @@ static track_p SelectTrackByIndex(TRKINX_T ti, char * message )
 				SelectOneTrack(trk,TRUE);
 			}
 		} else {
-			snprintf(message, STR_LONG_SIZE, "%s %d",_("Frozen Layer:"),GetTrkLayer(trk)+1);
+			snprintf(message, STR_LONG_SIZE, "%s %u",_("Frozen Layer:"),GetTrkLayer(trk)+1);
 			trk = NULL;
 		}
 	} else {
