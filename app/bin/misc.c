@@ -1165,6 +1165,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	/*
 	 * INITIALIZE
 	 */
+	LOG1(log_init, ( "initColor\n" ))
+	InitColor();
 	LOG1(log_init, ( "initInfoBar\n" ))
 	InitInfoBar();
 	wSetSplashInfo("Scale Init...");
@@ -1200,7 +1202,6 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	/*
 	 * TIDY UP
 	 */
-	InitColor();
 	if (toolbarSet&(1<<BG_HOTBAR)) {
 		LayoutHotBar( NULL );
 	} else {
