@@ -1,8 +1,8 @@
-# XTrackCAD Version 5.2.2 GA Release Notes
+# XTrackCAD Version 5.3.0 Beta2 Release Notes
 
-Welcome to the XtrackCAD V5.2.2 GA release!
+Welcome to the XtrackCAD V5.3.0 Beta2 Release!
 
-V5.2.2 GA contains many bug fixes, new and updated parameter files, new features and enhancements.
+V5.3.0 Beta2 contains many bug fixes, new and updated parameter files, new features and enhancements.
 
 Enjoy!
 
@@ -18,7 +18,7 @@ To report bugs, please use the SourceForge bugs reporting page https://sourcefor
 
 To discuss the Release, please use the user forum https://xtrackcad.groups.io/g/main/topics
 
-# V5.2.2 GA Notes
+# V5.3.0 Beta2 Notes
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
@@ -67,12 +67,14 @@ you can find in the file COPYING.
 
 Please see http://xtrkcad-fork.sourceforge.net/Wikka/DownloadInstall.
 
+**Note:** The Linux version has intrduced changes to make co-existance of Beta and GA releases easier.  Please see https://xtrkcad-fork.sourceforge.net/Wikka/LinuxInstall for details.
+
 
 <a name='Upgrading' />
 
 ## Upgrade Information ##
 
-**Note:** The 5.2 version of XTrackCAD comes with the several new features
+**Note:** The 5.2 version of XTrackCAD came with the several new features
 like background images or extensions to notes. In order to support
 this feature, an additional file format for layout files (.xtce) was added.
 The old .xtc format is still supported for reading and writing. So
