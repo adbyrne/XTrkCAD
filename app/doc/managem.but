@@ -453,7 +453,7 @@ The \f{Layer Buttons} on the Tool-bar (\K{mainW}) control which layer is the \f{
 
 The current layer is selected by picking a value from the drop down layer list.  If the Layer you've selected was not visible, it will be shown.
 
-You can hide (or show if not visible) the different layers by pushing one of the \f{Layer Buttons} on the Tool-bar (if you have configured the tool-bar (\K{toolbarM}) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
+You can hide (or show if not visible) the different layers by pushing one of the \f{Layer Buttons} on the Toolbar (if you have configured the toolbar (\K{toolbarOpts}) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
 
 The color of each layer button shows the color that will be used to draw tracks or draw objects in that layer, if you have selected the \f{Color Layers} (\K{cmdDisplay}) on the \f{Display} dialog. The \f{Use Color} button allows this layer to opt in or out - which can be usefu if you want to color other layers but a layer contains pre-colored objects (like Structures or Scenery).
  

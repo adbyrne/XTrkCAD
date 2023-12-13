@@ -38,7 +38,7 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
-\dd \f{Tool-bar} - Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}).
+\dd \f{Toolbar Options} - Command button groups displayed on the \f{Toolbar} are selected using the Toolbar Options Dialog (\K{toolbarOpts}).
 
 \u000
 
@@ -125,11 +125,12 @@ Whether the Snap Grid is drawn is controlled by the \f{Show} check-box.  Also, i
 
 \rule
 
-\S{toolbarM} \I{Tool-bar Configuration}
+\S{toolbarOpts} \i{Toolbar Options}
 
-\G{png.d/mtoolbar.png}
+\G{png.d/toolbopt.png}
 
-Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}). If none of the command button groups are selected, the \f{Tool-bar} is not shown.
+Command button groups displayed on the \f{Toolbar} are selected using the Toolbar Options Dialog (\K{toolbarOpts}). If none of the command button groups are selected, the \f{Toolbar} is not shown.
+\f{Select All} quickly selects all button groups for display. \f{Invert} inverts the current selection eg. displayed groups will be switched off and vice versa.
 
 \rule
 

@@ -35,11 +35,12 @@
 #include "common-ui.h"
 #include "ctrain.h"
 
-static paramData_t menuPLs[101] = { { PD_LONG, &toolbarSet, "toolbarset" }, {
-		PD_LONG, &curTurnoutEp, "cur-turnout-ep"
-	}
+#include "include/toolbar.h"
+
+static paramData_t menuPLs[101] = { /*{PD_LONG, &toolbarSet NULL, "toolbarset"},*/ 
+	{PD_LONG, &curTurnoutEp, "cur-turnout-ep"} 
 };
-static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
+static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 0 };
 
 static void InitCmdExport( void );
 
@@ -61,6 +62,7 @@ EXPORT wMenuList_p fileList_ml;
 EXPORT wMenuToggle_p snapGridEnableMI;
 EXPORT wMenuToggle_p snapGridShowMI;
 
+static int cmdGroup;
 
 /*--------------------------------------------------------------------*/
 typedef struct {
@@ -113,78 +115,6 @@ static void MenuPlayback(char * line)
 	CHECKMSG( FALSE, ("menuPlayback: %s not found", menuName) );
 }
 
-
-/*****************************************************************************
- *
- * TOOLBAR
- *
- */
-
-
-/*
- * These array control the choices available in the Toolbar setup.
- * For each choice, the text is given and the respective mask is
- * specified in the following array.
- * Note: text and choices must be given in the same order.
- */
-static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Print Buttons"), N_("Import/Export Buttons"),
-                                    N_("Zoom Buttons"), N_("Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"),
-                                    N_("Create Track Buttons"), N_("Layout Control Elements"),
-                                    N_("Modify Track Buttons"), N_("Properties/Select"),
-                                    N_("Track Group Buttons"), N_("Train Group Buttons"),
-                                    N_("Create Misc Buttons"), N_("Ruler Button"),
-                                    N_("Layer Buttons"), N_("Hot Bar"),
-                                    NULL
-                                  };
-static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_PRINT, 1<< BG_EXPORTIMPORT,
-                                  1<< BG_ZOOM, 1<< BG_UNDO, 1<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT,
-                                  1<< BG_CONTROL, 1<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN,
-                                  1<< BG_MISCCRT, 1<< BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR
-                                };
-
-static wMenuToggle_p AllToolbarMI[ COUNT( AllToolbarMasks ) ];
-
-static void ToolbarAction(void * data)
-{
-	int inx = (int)VP2L(data);
-	CHECK( inx >=0 && inx < COUNT( AllToolbarMasks ) );
-	wBool_t set = wMenuToggleGet( AllToolbarMI[inx] );
-	long mask = AllToolbarMasks[inx];
-	if (set) {
-		toolbarSet |= mask;
-	} else {
-		toolbarSet &= ~mask;
-	}
-	wPrefSetInteger( "misc", "toolbarset", toolbarSet );
-	MainProc( mainW, wResize_e, NULL, NULL );
-	if (recordF)
-		fprintf(recordF, "PARAMETER %s %s %ld", "misc", "toolbarset",
-		        toolbarSet);
-}
-
-/**
- * Create the Toolbar configuration submenu. Based on two arrays of descriptions and
- * masks, the toolbar submenu is created dynamically.
- *
- * \param toolbarM IN menu to which the toogles will be added
- */
-
-static void CreateToolbarM(wMenu_p toolbarM)
-{
-	int inx, cnt;
-	long *masks;
-	char **labels;
-	wBool_t set;
-
-	cnt = COUNT(AllToolbarMasks);
-	masks = AllToolbarMasks;
-	labels = AllToolbarLabels;
-	for (inx = 0; inx < cnt; inx++, masks++, labels++) {
-		set = (toolbarSet & *masks) != 0;
-		AllToolbarMI[inx] = wMenuToggleCreate(toolbarM, "toolbarM", _(*labels), 0, set,
-		                                      ToolbarAction, I2VP(inx));
-	}
-}
 
 
 /*****************************************************************************
@@ -697,7 +627,7 @@ EXPORT wButton_p AddToolbarButton(const char * helpStr, wIcon_p icon,
 	}
 	bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
 	                   BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
-	AddToolbarControl((wControl_p) bb, options);
+	ToolbarControlAdd((wControl_p) bb, options, cmdGroup);
 	return bb;
 }
 
@@ -872,7 +802,7 @@ static addButtonCallBack_t paramFilesCallback;
 
 EXPORT void CreateMenus(void)
 {
-	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM,
+	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, 
 	        manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
 
@@ -1210,8 +1140,9 @@ EXPORT void CreateMenus(void)
 
 	wMenuSeparatorCreate(viewM);
 
-	toolbarM = wMenuMenuCreate(viewM, "toolbarM", _("&Tool Bar"));
-	CreateToolbarM(toolbarM);
+	InitToolbar();
+	MiscMenuItemCreate(viewM, NULL, "cmdToolbarOpt", _("&Toolbar Options..."),
+		0L, DoToolbar, IC_MODETRAIN_TOO, NULL);
 
 	cmdGroup = BG_EASE;
 	InitCmdEasement();
@@ -1233,7 +1164,7 @@ EXPORT void CreateMenus(void)
 	 * ADD MENU
 	 */
 
-	cmdGroup = BG_TRKCRT | BG_BIGGAP;
+	cmdGroup = BG_TRKCRT;
 	InitCmdStraight(addM);
 	InitCmdCurve(addM);
 	InitCmdParallel(addM);
@@ -1390,7 +1321,7 @@ EXPORT void CreateMenus(void)
 	 * MANAGE MENU
 	 */
 
-	cmdGroup = BG_TRAIN | BG_BIGGAP;
+	cmdGroup = BG_TRAIN;
 	InitCmdTrain(manageM);
 	wMenuSeparatorCreate(manageM);
 
@@ -1429,13 +1360,13 @@ EXPORT void CreateMenus(void)
 	MiscMenuItemCreate(manageM, NULL, "cmdPricelist", _("Price List..."),
 	                   ACCL_PRICELIST, PriceListInit(), 0, NULL);
 
-	cmdGroup = BG_LAYER | BG_BIGGAP;
+	cmdGroup = BG_LAYER;
 
 	InitCmdSelect2(changeM);
 	InitCmdDescribe2(changeM);
 	InitCmdPan2(changeM);
 
-	InitLayers();
+	InitLayers(BG_LAYER);
 
 	cmdGroup = BG_HOTBAR;
 	InitHotBar();

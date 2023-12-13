@@ -211,6 +211,7 @@ target_sources(xtrkcad-lib
 	trkseg.h
     trkseg.c
     tstraigh.c
+    toolbar.c
     turnout.c
     uthash.h
     utility.c

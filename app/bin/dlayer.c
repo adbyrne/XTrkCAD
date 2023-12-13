@@ -2122,7 +2122,7 @@ static char** show_layer_digits[3][10] = {
  */
 #define ONE_PIXEL v *= 2; if (v > 128) { show_layer_bits[xx + yy] = b; xx += 1; v = 1; b = 0; }
 
-void InitLayers(void)
+void InitLayers(int cmdGroup)
 {
 	unsigned int i;
 	wPrefGetInteger(PREFSECT, "layer-button-count", &layerCount, layerCount);
@@ -2325,7 +2325,7 @@ void InitLayers(void)
 	setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
 	                            SetCurrLayer, NULL);
 	wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
-	AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
+	ToolbarControlAdd((wControl_p)setLayerL, IC_MODETRAIN_TOO, cmdGroup );
 
 	backgroundB = AddToolbarButton("cmdBackgroundShow",
 	                               wIconCreatePixMap(background_xpm3[iconSize]), 0,
