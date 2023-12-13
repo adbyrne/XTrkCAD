@@ -83,7 +83,12 @@ const char * wGetAppLibDir( void )
 	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
 	}
-	strcpy( ep, "LIB" );
+#ifndef __APPLE__
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		strcat( ep, "BETA" );
+	}
+#endif
+	strcat( ep, "LIB" );
 	ep = getenv( envvar );
 	if (ep != NULL) {
 		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
