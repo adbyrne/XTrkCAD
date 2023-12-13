@@ -1,12 +1,22 @@
 # Update Param Files
 # First non-comment line must be numeric date: YYYYMMDD
 # If this is less or equal to 'file.updatetime' in xtrkcad.rc/ini then this file is ignored
-20211112
+20231023
 # Files listed here are
 # - File Renames: Same CONTENTS, different files (old files should be deleted)
 # - Modified CONTENTS: multiple CONTENTS lines. 1st is active contents, subsequent lines are old
 #
+# Updated files from V5.3.0B1
+1-mrkln.xtp
+HO-Jouef(Hornby)HO.xtp
+O-Peco-Bullhead.xtp
+Z-Micro-Trains.xtp
+Sn3-Fast Tracks.xtp
+G-Lionel Ready-To-Play Track.xtp
+G-Playmobil RC Track.xtp
+O-Atlas2Rail.xtp
 # Updated files from V5.2.2b2
+#20211112
 N-Atlas Code 80 Track.xtp
 G-Piko.xtp
 HO-Piko-A.xtp

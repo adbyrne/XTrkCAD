@@ -2079,7 +2079,11 @@ EXPORT void CleanSegs(dynArr_t * seg_p)
 		}
 	}
 
-	DYNARR_FREE( trkSeg_t, *seg_p );
+	if ( seg_p == &tempSegs_da ) {
+		DYNARR_RESET( trkSeg_t, *seg_p );
+	} else {
+		DYNARR_FREE( trkSeg_t, *seg_p );
+	}
 }
 
 

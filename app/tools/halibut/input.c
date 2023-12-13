@@ -831,7 +831,7 @@ static void read_file(paragraph ***ret, input *in, indexdata *idx,
 	 */
 	par.type = para_Normal;
 	if (t.type == tok_cmd) {
-	    int needkw;
+	    int needkw = -1;
 	    int is_macro = FALSE;
 
 	    par.fpos = t.pos;

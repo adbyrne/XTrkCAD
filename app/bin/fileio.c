@@ -1156,7 +1156,7 @@ static int SaveTracks(
 
 		char* DependencyDir;
 
-		// The included files are placed (for now) into an includes directory - 
+		// The included files are placed (for now) into an includes directory -
 		// TODO an array of includes with directories by type
 		MakeFullpath(&DependencyDir, zip_output, "includes", NULL);
 
@@ -1164,12 +1164,11 @@ static int SaveTracks(
 
 		char* background = GetLayoutBackGroundFullPath();
 
-		// if used, get the background file 
+		// if used, get the background file
 		// else ignore this step
 		if (background && background[0]) {
 			success = CopyDependency(background, DependencyDir);
-		}
-		else {
+		} else {
 			background = NULL;
 			success = TRUE;
 		}

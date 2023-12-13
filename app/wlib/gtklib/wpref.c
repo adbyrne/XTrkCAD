@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -82,7 +83,12 @@ const char * wGetAppLibDir( void )
 	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++) {
 		*ep = toupper(*cp);
 	}
-	strcpy( ep, "LIB" );
+#ifndef __APPLE__
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		strcat( ep, "BETA" );
+	}
+#endif
+	strcat( ep, "LIB" );
 	ep = getenv( envvar );
 	if (ep != NULL) {
 		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
@@ -165,6 +171,11 @@ const char * wGetAppWorkDir(
 		wExit(0);
 	}
 	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
+#ifndef __APPLE__
+	if ( strstr( XTRKCAD_VERSION, "Beta" ) != NULL ) {
+		strcat( appWorkDir, "-beta" );
+	}
+#endif
 	if ( (dirp = opendir(appWorkDir)) != NULL ) {
 		closedir(dirp);
 	} else {
