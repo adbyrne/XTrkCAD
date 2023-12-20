@@ -31,6 +31,7 @@
 #include "track.h"
 #include "include/partcatalog.h"
 #include "include/stringxtc.h"
+#include "include/toolbar.h"
 #include "common-ui.h"
 
 /*****************************************************************************

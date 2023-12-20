@@ -28,6 +28,7 @@
 #include "param.h"
 #include "track.h"
 #include "common-ui.h"
+#include "include/toolbar.h"
 
 /* Bogus reg vars */
 EXPORT int paramLevel = 1;

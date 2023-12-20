@@ -33,6 +33,7 @@
 #include "track.h"
 #include "version.h"
 #include "common-ui.h"
+#include "include/toolbar.h"
 
 #ifdef UTFCONVERT
 #include "include/utf8convert.h"

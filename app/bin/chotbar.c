@@ -25,6 +25,7 @@
 #include "ccornu.h"
 #include "track.h"
 #include "draw.h"
+#include "include/toolbar.h"
 
 EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;

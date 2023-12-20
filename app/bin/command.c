@@ -31,6 +31,7 @@
 #include "track.h"
 #include "common-ui.h"
 #include "menu.h"
+#include "include/toolbar.h"
 
 /*****************************************************************************
  *
@@ -482,7 +483,7 @@ EXPORT void DoCommandB(void * data)
 
 	if (commandList[curCommand].buttInx >= 0) {
 			ToolbarUpdateButton(commandList[curCommand].buttInx,
-				curCommand, commandList[curCommand].icon,
+				curCommand, (char *)commandList[curCommand].icon,
 				commandList[curCommand].helpKey, I2VP(curCommand));
 		ToolbarButtonBusy(commandList[curCommand].buttInx, TRUE);
 	}
