@@ -37,33 +37,33 @@ enum defaultTypes {
 };
 
 struct appDefault {
-	char *defaultKey;						/**< the key used to access the value */
+	const char *defaultKey;						/**< the key used to access the value */
 	bool wasUsed;							/**< value has already been used on this run */
 	enum defaultTypes
 	valueType;			/**< type of default, constant or pointer to a function */
 	union {
 		int 	intValue;
 		double  floatValue;
-		char    *stringValue;
-		int		(*intFunction)(struct appDefault *, void *);
-		double	(*floatFunction)(struct appDefault *, void *);
-		char	*(*stringFunction)(struct appDefault *, void *);
+		const char *stringValue;
+		int	(*intFunction)(struct appDefault *, const void *);
+		double	(*floatFunction)(struct appDefault *, const void *);
+		const char *(*stringFunction)(struct appDefault *, const void *);
 	} defaultValue;
-	void *additionalData;
+	const void *additionalData;
 };
 
 static int GetLocalMeasureSystem(struct appDefault *ptrDefault,
-                                 void *additionalData);
+                                 const void *additionalData);
 static int GetLocalDistanceFormat(struct appDefault *ptrDefault,
-                                  void *additionalData);
-static char *GetLocalPopularScale(struct appDefault *ptrDefault,
-                                  void *additionalData);
+                                  const void *additionalData);
+static const char *GetLocalPopularScale(struct appDefault *ptrDefault,
+                                  const void *additionalData);
 static double GetLocalRoomSize(struct appDefault *ptrDefault,
-                               void *additionalData);
-static char *GetParamFullPath(struct appDefault *ptrDefault,
-                              void *additionalData);
-static char *GetParamPrototype(struct appDefault *ptrDefault,
-                               void *additionalData);
+                               const void *additionalData);
+static const char *GetParamFullPath(struct appDefault *ptrDefault,
+                              const void *additionalData);
+static const char *GetParamPrototype(struct appDefault *ptrDefault,
+                               const void *additionalData);
 
 /**
  * List of application default settings. As this is searched by binary search, the list has to be kept sorted
@@ -238,7 +238,7 @@ static bool UseMetric()
  */
 
 static double
-GetLocalRoomSize(struct appDefault *ptrDefault, void *data)
+GetLocalRoomSize(struct appDefault *ptrDefault, const void *data)
 {
 	if (!strcmp(ptrDefault->defaultKey, "draw.roomsizeY")) {
 		return (UseMetric() ? 125.0/2.54 : 48);
@@ -255,8 +255,8 @@ GetLocalRoomSize(struct appDefault *ptrDefault, void *data)
  * The most popular scale is supposed to be HO except for UK where OO is assumed.
  */
 
-static char *
-GetLocalPopularScale(struct appDefault *ptrDefault, void *data)
+static const char *
+GetLocalPopularScale(struct appDefault *ptrDefault, const void *data)
 {
 	return (strcmp(regionCode, "GB") ? "HO" : "OO");
 }
@@ -265,7 +265,7 @@ GetLocalPopularScale(struct appDefault *ptrDefault, void *data)
  *	The measurement system is english for the US and Canada and metric elsewhere
  */
 static int
-GetLocalMeasureSystem(struct appDefault *ptrDefault, void *data)
+GetLocalMeasureSystem(struct appDefault *ptrDefault, const void *data)
 {
 	return (UseMetric() ? 1 : 0);
 }
@@ -274,7 +274,7 @@ GetLocalMeasureSystem(struct appDefault *ptrDefault, void *data)
 *	The distance format is 999.9 cm for metric and 999.99 for english
 */
 static int
-GetLocalDistanceFormat(struct appDefault *ptrDefault, void *data)
+GetLocalDistanceFormat(struct appDefault *ptrDefault, const void *data)
 {
 	return (UseMetric() ? 8 : 4);
 }
@@ -284,8 +284,8 @@ GetLocalDistanceFormat(struct appDefault *ptrDefault, void *data)
 * is assumed to be the default.
 */
 
-static char*
-GetParamPrototype(struct appDefault *ptrDefault, void *additionalData)
+static const char*
+GetParamPrototype(struct appDefault *ptrDefault, const void *additionalData)
 {
 	return (strcmp(regionCode,
 	               "GB") ? "North American Prototypes" : "British stock");
@@ -294,8 +294,8 @@ GetParamPrototype(struct appDefault *ptrDefault, void *additionalData)
 /**
  * The full path to the applications parameter directory
  */
-static char *
-GetParamFullPath(struct appDefault *ptrDefault, void *additionalData)
+static const char *
+GetParamFullPath(struct appDefault *ptrDefault, const void *additionalData)
 {
 	char *str;
 	MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, I2VP(0));
@@ -410,7 +410,7 @@ wPrefGetStringExt(const char *section, const char *name)
 	}
 
 	char *prefString;
-	char *defaultValue;
+	const char *defaultValue;
 
 	if (thisDefault->valueType == STRINGCONSTANT) {
 		defaultValue = thisDefault->defaultValue.stringValue;
@@ -420,7 +420,7 @@ wPrefGetStringExt(const char *section, const char *name)
 	}
 	// Next call will get value from Prefs
 	wPrefSetString( section, name, defaultValue );
-	return (defaultValue);
+	return CAST_AWAY_CONST(defaultValue);
 }
 
 /**

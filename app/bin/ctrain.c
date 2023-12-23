@@ -94,7 +94,7 @@ static void ControllerDialogSyncAll(void);
 static STATUS_T CmdTrain(wAction_t, coOrd);
 static wMenu_p trainPopupM;
 static wMenuPush_p trainPopupMI[11];
-static track_p followTrain;
+static track_p followTrain = NULL;
 static coOrd followCenter;
 static BOOL_T trainsTimeoutPending;
 static enum { TRAINS_STOP, TRAINS_RUN, TRAINS_IDLE, TRAINS_PAUSE } trainsState;
@@ -1397,7 +1397,6 @@ static struct {
 
 
 long trainPause = 200;
-static track_p followTrain = NULL;
 static void DrawAllCars(track_p trk)
 {
 	track_p car;

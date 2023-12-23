@@ -98,7 +98,6 @@ static wMenu_p selectPopup2TYM;
 static wMenuPush_p menuPushModify;
 static wMenuPush_p rotateAlignMI;
 static wMenuPush_p descriptionMI;
-static wMenuPush_p tiesMI;
 static wMenuPush_p hideMI;
 static wMenuPush_p bridgeMI;
 static wMenuPush_p roadbedMI;
@@ -3540,9 +3539,9 @@ static STATUS_T CmdSelect(
                         0 );
             return C_CONTINUE;
         }
-        BOOL_T AreaSelect = FALSE;
         // Draw the selected area, no-op if none selected
         if (mode==AREA) {
+            BOOL_T AreaSelect = FALSE;
             AreaSelect = SelectArea( action, pos );
             if (AreaSelect) {
                 return C_CONTINUE;

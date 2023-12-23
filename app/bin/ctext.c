@@ -28,14 +28,6 @@
 #include "misc.h"
 #include "common-ui.h"
 
-track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text,
-                 CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
-
-void LoadFontSizeList( wList_p, long );
-void UpdateFontSizeList( long *, wList_p, wIndex_t );
-long GetFontSize(wIndex_t);
-long GetFontSizeIndex(long size);
-
 static wMenu_p textPopupM;
 
 /*****************************************************************************

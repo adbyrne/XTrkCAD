@@ -388,7 +388,7 @@ static void FormatFraction(
         int digits,
         BOOL_T rational,
         FLOAT_T valF,
-        char * unitFmt )
+        const char * unitFmt )
 {
 	char * cp = *cpp;
 	long integ;

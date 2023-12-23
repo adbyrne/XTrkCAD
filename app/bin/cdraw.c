@@ -3224,8 +3224,6 @@ typedef struct {
 	wIndex_t cmdInx;
 	int curr;
 } drawStuff_t;
-static drawStuff_t drawStuff[4];
-
 
 static drawStuff_t drawStuff[4] = {
 	{ "cmdDrawLineSetCmd", N_("Straight Objects"), N_("Draw Straight Objects"), 4, dlineCmds },

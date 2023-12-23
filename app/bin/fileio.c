@@ -49,8 +49,6 @@
 #include "include/utf8convert.h"
 #endif // UTFCONVERT
 
-EXPORT dynArr_t paramProc_da;
-
 #define COPYBLOCKSIZE	1024
 
 EXPORT const char * workingDir;
@@ -151,7 +149,7 @@ EXPORT char * curSubContents;
 
 #define PARAM_DEMO (-1)
 
-dynArr_t paramProc_da;
+EXPORT dynArr_t paramProc_da;
 
 EXPORT void Stripcr( char * line )
 {
@@ -274,7 +272,7 @@ EXPORT void SyntaxError(
 
 EXPORT BOOL_T GetArgs(
         char * line,
-        char * format,
+        const char * format,
         ... )
 {
 	char * cp, * cq;

@@ -2798,7 +2798,7 @@ coOrd minIncrementSizes()
 static void DoMouse( wAction_t action, coOrd pos )
 {
 
-	BOOL_T rc;
+	int rc;
 	wDrawPix_t x, y;
 	static BOOL_T ignoreCommands;
 	// Middle button pan state
@@ -2917,7 +2917,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			action = C_TEXT+((int)(0x0A<<8));
 			break;
 		}
-		int rc = DoPanKeyAction(action);
+		rc = DoPanKeyAction(action);
 		if (rc!=1) { return; }
 		break;
 	case C_TEXT:

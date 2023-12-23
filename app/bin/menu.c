@@ -37,10 +37,11 @@
 
 #include "include/toolbar.h"
 
-static paramData_t menuPLs[101] = { /*{PD_LONG, &toolbarSet NULL, "toolbarset"},*/ 
+static paramData_t menuPLs[101] = {
+	{PD_LONG, NULL, "toolbarset", PDO_NOPREF}, 
 	{PD_LONG, &curTurnoutEp, "cur-turnout-ep"} 
 };
-static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 0 };
+static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
 
 static void InitCmdExport( void );
 
@@ -770,6 +771,7 @@ static void MiscMenuItemCreate(wMenu_p m1, wMenu_p m2, const char * name,
 		GetBalloonHelpStr(name);
 	}
 	menuPG.paramCnt++;
+	CHECK( menuPG.paramCnt < COUNT(menuPLs) );
 }
 
 
