@@ -32,7 +32,6 @@
 static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i0_256 = { 0, 256 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
-static paramIntegerRange_t i1_1024 = { 1, 1024 };
 static paramIntegerRange_t i0_10000 = { 0, 10000 };
 static paramIntegerRange_t i0_99 = { 0, 99};
 static paramIntegerRange_t i1_1000 = { 1, 1000 };

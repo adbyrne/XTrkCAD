@@ -3316,7 +3316,7 @@ static STATUS_T CmdSelect(
 
 	STATUS_T rc=C_CONTINUE;
 	static track_p trk = NULL;
-	typedef enum {NOSHOW,SHOWMOVE,SHOWROTATE,SHOWMODIFY,SHOWACTIVATE} showType;
+//	typedef enum {NOSHOW,SHOWMOVE,SHOWROTATE,SHOWMODIFY,SHOWACTIVATE} showType;
 //	static showType showMode;
 
 	mode = AREA;

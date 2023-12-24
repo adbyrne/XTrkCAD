@@ -90,10 +90,21 @@ EXPORT const char* GetCurCommandName()
 
 EXPORT bool IsCommandEnabled(long mode, long options)
 {
-	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
-	     (options & IC_MODETRAIN_TOO)) &&
-	    ((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
-	    (options & IC_MODETRAIN_TOO)) {
+	/*
+	       	if (((mode == MODE_DESIGN) || (options & IC_MODETRAIN_ONLY) ||
+		     (options & IC_MODETRAIN_TOO)) &&
+		    ((mode == MODE_TRAIN) || !(options & IC_MODETRAIN_ONLY)) ||
+		    (options & IC_MODETRAIN_TOO)) {
+	*/
+	if (
+	        ((mode == MODE_DESIGN) ||
+	         (options & IC_MODETRAIN_ONLY) ||
+	         (options & IC_MODETRAIN_TOO))
+	        &&
+	        ((mode == MODE_TRAIN) ||
+	         !(options & IC_MODETRAIN_ONLY) ||
+	         (options & IC_MODETRAIN_TOO))
+	) {
 		return true;
 	}
 
@@ -423,7 +434,6 @@ EXPORT void DoCommandB(void * data)
 	STATUS_T rc;
 	static coOrd pos = { 0, 0 };
 	static int inDoCommandB = FALSE;
-	wIndex_t buttInx;
 
 	if (inDoCommandB) {
 		return;

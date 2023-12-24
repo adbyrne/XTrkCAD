@@ -1021,8 +1021,8 @@ EXPORT wWin_p wMain(int argc, char * argv[])
 	char * initialFile = NULL;
 	const char * pref;
 	coOrd roomSize;
-	long oldToolbarMax;
-	long newToolbarMax;
+	/*	long oldToolbarMax;
+		long newToolbarMax; */
 	char *cp;
 	char buffer[STR_SIZE];
 	unsigned int i;

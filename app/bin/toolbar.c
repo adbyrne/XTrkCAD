@@ -585,12 +585,12 @@ EXPORT void
 ToolbarLoadConfig(void)
 {
 	unsigned long maxToolbarSet = (1 << COUNTTOOLBARGROUPS) - 1;
-	unsigned long toolbarSetIni;
+	long toolbarSetIni;
 
 	wPrefGetInteger(TOOLBAR_SECTION, TOOLBAR_VARIABLE, &toolbarSetIni,
 	                TOOLBARSET_INIT);
 
-	toolbarSet = toolbarSetIni & maxToolbarSet;
+	toolbarSet = (unsigned long)toolbarSetIni & maxToolbarSet;
 
 	// unused but saved to stay compatible
 	wPrefSetInteger(TOOLBAR_SECTION, "max-toolbarset", maxToolbarSet);

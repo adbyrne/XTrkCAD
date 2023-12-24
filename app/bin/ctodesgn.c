@@ -35,7 +35,9 @@
 #include "misc.h"
 #include "common-ui.h"
 
+#ifndef MKTURNOUT
 static int log_cornuturnoutdesigner;
+#endif
 
 dynArr_t tempSegs_da;
 char tempCustom[4096];

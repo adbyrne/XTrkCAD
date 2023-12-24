@@ -409,7 +409,6 @@ wPrefGetStringExt(const char *section, const char *name)
 		return ((char *)wPrefGetStringBasic(section, name));
 	}
 
-	char *prefString;
 	const char *defaultValue;
 
 	if (thisDefault->valueType == STRINGCONSTANT) {
