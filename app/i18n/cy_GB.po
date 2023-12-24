@@ -1,7 +1,7 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Welsh translations for xtrkcad package.
+# Copyright (C) Adam J M Richards 2021
+# This file is distributed under the same license as the xtrkcad package.
+# Adam J M Richards <adamjmrichards@gmail.com>, 2021
 # 
 # Translators:
 # Adam J M Richards <adamjmrichards@gmail.com>, 2021
@@ -9,7 +9,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: xtrkcad 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-02 11:20-0400\n"
 "PO-Revision-Date: 2020-08-27 16:39+0000\n"
