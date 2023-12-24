@@ -29,6 +29,7 @@
 #include "track.h"
 #include "fileio.h"
 #include "cselect.h"
+#include "include/toolbar.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 #define MAXTRACKGRADEPREFS "maxTrackGrade"

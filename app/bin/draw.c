@@ -29,6 +29,7 @@
 #include "track.h"
 #include "layout.h"
 #include "common-ui.h"
+#include "include/toolbar.h"
 
 
 EXPORT wIndex_t panCmdInx;

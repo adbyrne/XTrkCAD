@@ -25,6 +25,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "param.h"
+#include "track.h"
 #include "include/toolbar.h"
 
 EXPORT void ToolbarLayout(void* unused);

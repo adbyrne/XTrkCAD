@@ -28,21 +28,22 @@
 #define BG_PRINT		(17)
 
 static void SaveToolbarConfig(void);
-EXPORT void ToolbarLayout(void* data);
-EXPORT void DoToolbar(void* unused);
-EXPORT bool ToolbarIsGroupVisible(int group);
-EXPORT wWinPix_t ToolbarGetHeight(void);
-EXPORT void ToolbarSetHeight(wWinPix_t newHeight);
+extern void ToolbarLayout(void* data);
+extern void DoToolbar(void* unused);
+extern bool ToolbarIsGroupVisible(int group);
+extern wWinPix_t ToolbarGetHeight(void);
+extern void ToolbarSetHeight(wWinPix_t newHeight);
 
-EXPORT void ToolbarButtonBusy(wIndex_t button, wBool_t busy);
-EXPORT void ToolbarButtonEnable(wIndex_t button, wBool_t enable);
-EXPORT void ToolbarButtonEnableIfSelect(bool selected);
-EXPORT void ToolbarButtonCommandLink(wIndex_t button, int command);
-EXPORT void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
+extern void InitToolbar(void);
+extern void ToolbarButtonBusy(wIndex_t button, wBool_t busy);
+extern void ToolbarButtonEnable(wIndex_t button, wBool_t enable);
+extern void ToolbarButtonEnableIfSelect(bool selected);
+extern void ToolbarButtonCommandLink(wIndex_t button, int command);
+extern void ToolbarUpdateButton(wIndex_t button, wIndex_t command,
     char* icon, const char* helpKey, void* context);
-EXPORT void ToolbarButtonPlayback(wIndex_t buttonInx);
-EXPORT void ToolbarLoadConfig(void);
-EXPORT void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
+extern void ToolbarButtonPlayback(wIndex_t buttonInx);
+extern void ToolbarLoadConfig(void);
+extern void ToolbarControlAdd(wControl_p control, long options, int cmdGroup);
 
 
 wIndex_t AddCommand(procCommand_t cmdProc, const char* helpKey,

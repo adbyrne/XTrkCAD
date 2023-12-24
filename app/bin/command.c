@@ -31,6 +31,7 @@
 #include "track.h"
 #include "common-ui.h"
 #include "menu.h"
+#include "include/toolbar.h"
 
 /*****************************************************************************
  *
